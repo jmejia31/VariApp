@@ -1,0 +1,88 @@
+<div class="header-row">
+  <a routerLink="/productos" mat-icon-button><mat-icon>arrow_back</mat-icon></a>
+  <h1 class="page-title">{{ isEdit() ? 'Editar producto' : 'Nuevo producto' }}</h1>
+</div>
+
+@if (loading()) {
+  <div class="loading"><mat-spinner></mat-spinner></div>
+} @else {
+  <form class="card form" [formGroup]="form" (ngSubmit)="submit()">
+    <div class="image-section">
+      <div class="image-preview">
+        @if (previewUrl()) {
+          <img [src]="previewUrl()" alt="Vista previa">
+        } @else {
+          <mat-icon>image</mat-icon>
+        }
+      </div>
+      <div class="image-actions">
+        <label class="upload-btn">
+          <mat-icon>upload</mat-icon> Subir imagen
+          <input type="file" accept="image/*" hidden (change)="onFileSelected($event)">
+        </label>
+        @if (previewUrl()) {
+          <button mat-button type="button" color="warn" (click)="quitarImagen()">
+            <mat-icon>delete</mat-icon> Quitar
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="fields-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Nombre</mat-label>
+        <input matInput formControlName="nombre">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Marca</mat-label>
+        <input matInput formControlName="marca">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Modelo</mat-label>
+        <input matInput formControlName="modelo">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Descripción (opcional)</mat-label>
+        <textarea matInput formControlName="descripcion" rows="2"></textarea>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Cantidad en stock</mat-label>
+        <input matInput type="number" formControlName="cantidad">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Umbral de stock bajo</mat-label>
+        <input matInput type="number" formControlName="umbralStockBajo">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Costo (L.)</mat-label>
+        <input matInput type="number" step="0.01" formControlName="costo">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Precio de venta (L.)</mat-label>
+        <input matInput type="number" step="0.01" formControlName="precio">
+      </mat-form-field>
+    </div>
+
+    @if (errorMessage()) {
+      <p class="error">{{ errorMessage() }}</p>
+    }
+
+    <div class="form-actions">
+      <a routerLink="/productos" mat-button type="button">Cancelar</a>
+      <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving()">
+        @if (saving()) {
+          <mat-spinner diameter="20"></mat-spinner>
+        } @else {
+          Guardar
+        }
+      </button>
+    </div>
+  </form>
+}

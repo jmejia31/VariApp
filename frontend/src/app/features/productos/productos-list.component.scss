@@ -1,0 +1,40 @@
+.header-row {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 20px;
+
+  a[mat-flat-button] { text-decoration: none; }
+}
+
+.page-title { margin: 0; font-size: 22px; }
+
+.search-field { width: 100%; max-width: 420px; margin-bottom: 12px; }
+
+.loading { display: flex; justify-content: center; padding: 40px 0; }
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+
+  th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--color-border); }
+  th.sortable { cursor: pointer; color: var(--color-text-muted); user-select: none; }
+  th.sortable:hover { color: var(--color-text); }
+}
+
+.thumb {
+  width: 40px; height: 40px; border-radius: 8px; object-fit: cover;
+  &.placeholder {
+    display: flex; align-items: center; justify-content: center;
+    background: var(--color-bg); color: var(--color-text-muted);
+  }
+}
+
+.badge {
+  font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 20px;
+  &.success { background: #ecfdf5; color: var(--color-success); }
+  &.danger { background: #fef2f2; color: var(--color-danger); }
+}
+
+.actions { white-space: nowrap; }
+
+.empty { text-align: center; color: var(--color-text-muted); padding: 30px 0; }

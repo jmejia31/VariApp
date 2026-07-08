@@ -1,0 +1,15 @@
+.dotnet_cli_home/
+.mysql-data/
+.agents/
+.codex/
+
+# Local environment and secrets
+.env
+.env.*
+*.local
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

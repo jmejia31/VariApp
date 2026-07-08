@@ -1,0 +1,72 @@
+@if (loading()) {
+  <div class="loading"><mat-spinner></mat-spinner></div>
+} @else if (resumen(); as r) {
+  <h1 class="page-title">Dashboard</h1>
+
+  <div class="stats-grid">
+    <div class="card stat">
+      <mat-icon class="icon primary">inventory_2</mat-icon>
+      <div>
+        <p class="label">Total de productos</p>
+        <p class="value">{{ r.totalProductos }}</p>
+      </div>
+    </div>
+    <div class="card stat">
+      <mat-icon class="icon success">layers</mat-icon>
+      <div>
+        <p class="label">Unidades en inventario</p>
+        <p class="value">{{ r.totalUnidades }}</p>
+      </div>
+    </div>
+    <div class="card stat">
+      <mat-icon class="icon warning">payments</mat-icon>
+      <div>
+        <p class="label">Valor del inventario (costo)</p>
+        <p class="value">L. {{ r.valorTotalInventario | number:'1.2-2' }}</p>
+      </div>
+    </div>
+    <div class="card stat">
+      <mat-icon class="icon primary">trending_up</mat-icon>
+      <div>
+        <p class="label">Valor potencial de venta</p>
+        <p class="value">L. {{ r.valorPotencialVenta | number:'1.2-2' }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="panels">
+    <div class="card panel">
+      <h2>Productos con poco stock</h2>
+      @if (r.productosStockBajo.length === 0) {
+        <p class="empty">No hay productos con stock bajo.</p>
+      } @else {
+        <ul class="list">
+          @for (p of r.productosStockBajo; track p.id) {
+            <li>
+              <span>{{ p.nombre }} — {{ p.marca }} {{ p.modelo }}</span>
+              <span class="badge danger">{{ p.cantidad }} und.</span>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+
+    <div class="card panel">
+      <h2>Últimos productos agregados</h2>
+      @if (r.ultimosAgregados.length === 0) {
+        <p class="empty">Aún no hay productos registrados.</p>
+      } @else {
+        <ul class="list">
+          @for (p of r.ultimosAgregados; track p.id) {
+            <li>
+              <span>{{ p.nombre }} — {{ p.marca }} {{ p.modelo }}</span>
+              <span class="badge">{{ p.cantidad }} und.</span>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  </div>
+
+  <a routerLink="/productos" class="link-all">Ver todos los productos →</a>
+}

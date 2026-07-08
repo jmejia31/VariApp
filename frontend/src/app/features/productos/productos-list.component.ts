@@ -1,0 +1,100 @@
+import { Component, OnInit, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { debounceTime, Subject } from 'rxjs';
+import { ProductoService } from '../../services/producto.service';
+import { Producto } from '../../core/models/producto.model';
+import { ConfirmDialogComponent } from '../../shared/confirm-dialog.component';
+
+@Component({
+  selector: 'app-productos-list',
+  standalone: true,
+  imports: [
+    CommonModule, RouterLink, FormsModule, MatIconModule, MatButtonModule,
+    MatFormFieldModule, MatInputModule, MatPaginatorModule, MatProgressSpinnerModule, MatDialogModule
+  ],
+  templateUrl: './productos-list.component.html',
+  styleUrl: './productos-list.component.scss'
+})
+export class ProductosListComponent implements OnInit {
+  readonly productos = signal<Producto[]>([]);
+  readonly loading = signal(true);
+  readonly totalCount = signal(0);
+
+  page = 1;
+  pageSize = 10;
+  search = '';
+  sortBy = 'Nombre';
+  sortDirection: 'asc' | 'desc' = 'asc';
+
+  private searchSubject = new Subject<string>();
+
+  constructor(private productoService: ProductoService, private dialog: MatDialog) {
+    this.searchSubject.pipe(debounceTime(350)).subscribe(() => {
+      this.page = 1;
+      this.cargar();
+    });
+  }
+
+  ngOnInit(): void {
+    this.cargar();
+  }
+
+  onSearchChange(value: string): void {
+    this.search = value;
+    this.searchSubject.next(value);
+  }
+
+  cargar(): void {
+    this.loading.set(true);
+    this.productoService.getPaged({
+      page: this.page,
+      pageSize: this.pageSize,
+      search: this.search,
+      sortBy: this.sortBy,
+      sortDirection: this.sortDirection
+    }).subscribe({
+      next: (res) => {
+        this.productos.set(res.data.items);
+        this.totalCount.set(res.data.totalCount);
+        this.loading.set(false);
+      },
+      error: () => this.loading.set(false)
+    });
+  }
+
+  onPageChange(event: PageEvent): void {
+    this.page = event.pageIndex + 1;
+    this.pageSize = event.pageSize;
+    this.cargar();
+  }
+
+  ordenarPor(campo: string): void {
+    if (this.sortBy === campo) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortBy = campo;
+      this.sortDirection = 'asc';
+    }
+    this.cargar();
+  }
+
+  eliminar(producto: Producto): void {
+    const ref = this.dialog.open(ConfirmDialogComponent, {
+      data: { title: 'Eliminar producto', message: `¿Deseas eliminar "${producto.nombre}"? Esta acción no se puede deshacer.` }
+    });
+
+    ref.afterClosed().subscribe((confirmado) => {
+      if (!confirmado) return;
+      this.productoService.delete(producto.id).subscribe(() => this.cargar());
+    });
+  }
+}

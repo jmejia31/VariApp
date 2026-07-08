@@ -1,0 +1,13 @@
+using InventoryApp.Application.Common;
+using InventoryApp.Application.DTOs;
+
+namespace InventoryApp.Application.Interfaces;
+
+public interface IProductoService
+{
+    Task<ProductoDto?> GetByIdAsync(int id);
+    Task<PagedResult<ProductoDto>> GetPagedAsync(PagedRequest request);
+    Task<ProductoDto> CreateAsync(CreateProductoDto dto);
+    Task<ProductoDto?> UpdateAsync(int id, UpdateProductoDto dto);
+    Task<bool> DeleteAsync(int id);
+}

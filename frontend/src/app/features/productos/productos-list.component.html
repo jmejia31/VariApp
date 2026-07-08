@@ -1,0 +1,78 @@
+<div class="header-row">
+  <h1 class="page-title">Productos</h1>
+  <a routerLink="/productos/nuevo" mat-flat-button color="primary">
+    <mat-icon>add</mat-icon> Nuevo producto
+  </a>
+</div>
+
+<div class="card">
+  <mat-form-field appearance="outline" class="search-field">
+    <mat-label>Buscar por nombre, marca o modelo</mat-label>
+    <input matInput [ngModel]="search" (ngModelChange)="onSearchChange($event)">
+    <mat-icon matSuffix>search</mat-icon>
+  </mat-form-field>
+
+  @if (loading()) {
+    <div class="loading"><mat-spinner></mat-spinner></div>
+  } @else {
+    <table class="table">
+      <thead>
+        <tr>
+          <th></th>
+          <th (click)="ordenarPor('Nombre')" class="sortable">Nombre</th>
+          <th (click)="ordenarPor('Marca')" class="sortable">Marca</th>
+          <th (click)="ordenarPor('Modelo')" class="sortable">Modelo</th>
+          <th (click)="ordenarPor('Cantidad')" class="sortable">Stock</th>
+          <th (click)="ordenarPor('Costo')" class="sortable">Costo</th>
+          <th (click)="ordenarPor('Precio')" class="sortable">Precio</th>
+          <th>Estado</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (p of productos(); track p.id) {
+          <tr>
+            <td>
+              @if (p.imagenUrl) {
+                <img [src]="p.imagenUrl" class="thumb" [alt]="p.nombre">
+              } @else {
+                <div class="thumb placeholder"><mat-icon>image</mat-icon></div>
+              }
+            </td>
+            <td>{{ p.nombre }}</td>
+            <td>{{ p.marca }}</td>
+            <td>{{ p.modelo }}</td>
+            <td>{{ p.cantidad }}</td>
+            <td>L. {{ p.costo | number:'1.2-2' }}</td>
+            <td>L. {{ p.precio | number:'1.2-2' }}</td>
+            <td>
+              @if (p.tieneStockBajo) {
+                <span class="badge danger">Stock bajo</span>
+              } @else {
+                <span class="badge success">Disponible</span>
+              }
+            </td>
+            <td class="actions">
+              <a [routerLink]="['/productos', p.id, 'editar']" mat-icon-button title="Editar">
+                <mat-icon>edit</mat-icon>
+              </a>
+              <button mat-icon-button title="Eliminar" (click)="eliminar(p)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </tr>
+        } @empty {
+          <tr><td colspan="9" class="empty">No se encontraron productos.</td></tr>
+        }
+      </tbody>
+    </table>
+
+    <mat-paginator
+      [length]="totalCount()"
+      [pageSize]="pageSize"
+      [pageIndex]="page - 1"
+      [pageSizeOptions]="[10, 25, 50]"
+      (page)="onPageChange($event)">
+    </mat-paginator>
+  }
+</div>
