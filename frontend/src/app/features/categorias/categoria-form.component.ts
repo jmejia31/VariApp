@@ -16,10 +16,10 @@ import { CategoriaService } from '../../services/categoria.service';
   styleUrl: './categoria-form.component.scss'
 })
 export class CategoriaFormComponent implements OnInit {
+  private readonly fb = inject(FormBuilder);
   readonly isEdit = signal(false);
   readonly saving = signal(false);
   readonly errorMessage = signal<string | null>(null);
-  private readonly fb = inject(FormBuilder);
   private categoriaId: number | null = null;
 
   form = this.fb.group({

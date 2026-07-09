@@ -1,0 +1,75 @@
+<div class="header-row">
+  <a routerLink="/compras" mat-icon-button><mat-icon>arrow_back</mat-icon></a>
+  <h1 class="page-title">{{ compra()?.numeroCompra }}</h1>
+  @if (compra(); as c) {
+    <span class="badge" [class.borrador]="c.estado === 'Borrador'" [class.confirmada]="c.estado === 'Confirmada'" [class.anulada]="c.estado === 'Anulada'">
+      {{ c.estado }}
+    </span>
+  }
+</div>
+
+@if (loading()) {
+  <div class="loading"><mat-spinner></mat-spinner></div>
+} @else if (compra(); as c) {
+
+  @if (c.estado === 'Anulada') {
+    <div class="alert alert-danger">
+      <strong>ANULADA</strong> — Motivo: {{ c.motivoAnulacion }}
+      <br>Por {{ c.anuladoPorNombreUsuario }} el {{ c.fechaAnulacion | date:'dd/MM/yyyy HH:mm' }}
+    </div>
+  }
+
+  <div class="card">
+    <div class="info-grid">
+      <div><span class="label">Proveedor</span><span>{{ c.proveedorNombre }}</span></div>
+      <div><span class="label">Teléfono</span><span>{{ c.proveedorTelefono || '—' }}</span></div>
+      <div><span class="label">Documento</span><span>{{ c.proveedorDocumento || '—' }}</span></div>
+      <div><span class="label">Referencia</span><span>{{ c.documentoReferencia || '—' }}</span></div>
+      <div><span class="label">Método de pago</span><span>{{ c.metodoPago }}</span></div>
+      <div><span class="label">Estado de pago</span><span>{{ c.estadoPago }}</span></div>
+    </div>
+
+    <table class="table">
+      <thead>
+        <tr><th>Producto</th><th>Marca</th><th>Modelo</th><th>Cantidad</th><th>Costo unit.</th><th>Subtotal</th></tr>
+      </thead>
+      <tbody>
+        @for (d of c.detalles; track d.id) {
+          <tr>
+            <td>{{ d.productoNombre }}</td>
+            <td>{{ d.productoMarca }}</td>
+            <td>{{ d.productoModelo }}</td>
+            <td>{{ d.cantidad }}</td>
+            <td>L. {{ d.costoUnitario | number:'1.2-2' }}</td>
+            <td>L. {{ d.subtotal | number:'1.2-2' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <div class="totales">
+      <div><span>Subtotal</span><span>L. {{ c.subtotal | number:'1.2-2' }}</span></div>
+      <div><span>Descuento</span><span>- L. {{ c.descuento | number:'1.2-2' }}</span></div>
+      <div><span>Impuesto</span><span>+ L. {{ c.impuesto | number:'1.2-2' }}</span></div>
+      <div class="total"><span>Total</span><span>L. {{ c.total | number:'1.2-2' }}</span></div>
+    </div>
+
+    <div class="auditoria">
+      <p>Creada por <strong>{{ c.creadoPorNombreUsuario || '—' }}</strong> el {{ c.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</p>
+      @if (c.confirmadoPorNombreUsuario) {
+        <p>Confirmada por <strong>{{ c.confirmadoPorNombreUsuario }}</strong> el {{ c.fechaConfirmacion | date:'dd/MM/yyyy HH:mm' }}</p>
+      }
+    </div>
+
+    <div class="actions">
+      @if (c.estado === 'Borrador') {
+        <a [routerLink]="['/compras', c.id, 'editar']" mat-button>Editar</a>
+        <button mat-button color="warn" (click)="eliminarBorrador()">Eliminar borrador</button>
+        <button mat-flat-button color="primary" [disabled]="procesando()" (click)="confirmar()">Confirmar compra</button>
+      }
+      @if (c.estado === 'Confirmada') {
+        <button mat-flat-button color="warn" [disabled]="procesando()" (click)="anular()">Anular compra</button>
+      }
+    </div>
+  </div>
+}

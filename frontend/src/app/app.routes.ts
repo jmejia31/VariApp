@@ -48,5 +48,25 @@ export const routes: Routes = [
     canActivate: [authGuard, adminGuard],
     loadComponent: () => import('./features/usuarios/usuarios.component').then(m => m.UsuariosComponent)
   },
+  {
+    path: 'compras',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/compras/compras-list.component').then(m => m.ComprasListComponent)
+  },
+  {
+    path: 'compras/nueva',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/compras/compra-form.component').then(m => m.CompraFormComponent)
+  },
+  {
+    path: 'compras/:id',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/compras/compra-detail.component').then(m => m.CompraDetailComponent)
+  },
+  {
+    path: 'compras/:id/editar',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/compras/compra-form.component').then(m => m.CompraFormComponent)
+  },
   { path: '**', redirectTo: 'dashboard' }
 ];

@@ -1,6 +1,6 @@
 # InventoryApp - Sistema de Gestion de Inventario
 
-Aplicacion web ligera para administrar productos, categorias, usuarios, stock, valores de inventario y fotos de productos. No es un ERP; esta enfocada en inventario simple con acceso protegido por login.
+Aplicacion web ligera para administrar productos, categorias, usuarios, compras, stock, valores de inventario y fotos de productos. No es un ERP; esta enfocada en inventario simple con acceso protegido por login.
 
 ## Stack
 
@@ -9,23 +9,14 @@ Aplicacion web ligera para administrar productos, categorias, usuarios, stock, v
 - Arquitectura backend: Clean Architecture por capas `Domain`, `Application`, `Infrastructure`, `API`
 - Base de datos: MySQL + Entity Framework Core + migraciones
 - Autenticacion: JWT + BCrypt
-- Imagenes: Cloudinary, hasta 5 fotos por producto
-
-## Funcionalidades principales
-
-- Login con JWT y roles de usuario.
-- Dashboard de resumen de inventario.
-- CRUD de productos con categoria, auditoria y multiples imagenes.
-- CRUD de categorias.
-- Administracion de usuarios para rol administrador.
-- Migraciones EF Core para MySQL local y cloud.
+- Imagenes: Cloudinary
 
 ## Estado local actual
 
 El proyecto ya fue restaurado, compilado y probado localmente.
 
 - Backend build: OK
-- Backend tests: OK, 29 pruebas
+- Backend tests: OK, 35 pruebas
 - Frontend build: OK
 - MySQL local de desarrollo: `127.0.0.1:3307`
 - API local: `http://localhost:5005`
@@ -166,6 +157,6 @@ backend/
 frontend/
   src/app/
     core/            auth, guards, interceptors, models
-    features/        login, dashboard, productos, categorias, usuarios
+    features/        login, dashboard, productos, categorias, compras, usuarios
     services/        clientes HTTP hacia API
 ```

@@ -1,0 +1,28 @@
+.header-row { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; .page-title { margin: 0; font-size: 22px; } }
+.loading { display: flex; justify-content: center; padding: 40px 0; }
+.form { max-width: 900px; }
+.section-title { font-size: 14px; font-weight: 600; margin: 20px 0 10px; &:first-of-type { margin-top: 0; } }
+
+.fields-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 16px; .full-width { grid-column: 1 / -1; } mat-form-field { width: 100%; } }
+
+.detalles { display: flex; flex-direction: column; gap: 4px; }
+.detalle-row {
+  display: grid;
+  grid-template-columns: 3fr 1fr 1fr auto auto;
+  gap: 8px;
+  align-items: center;
+
+  .col-producto, .col-cantidad, .col-costo { width: 100%; }
+  .col-subtotal { font-size: 13px; font-weight: 600; text-align: right; padding-right: 4px; }
+}
+
+.totales {
+  max-width: 300px; margin-left: auto; margin-top: 12px;
+  display: flex; flex-direction: column; gap: 6px; font-size: 13px;
+
+  div { display: flex; justify-content: space-between; }
+  .total { font-weight: 700; font-size: 15px; border-top: 1px solid var(--color-border); padding-top: 6px; margin-top: 4px; }
+}
+
+.error { color: var(--color-danger); font-size: 13px; }
+.form-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; a[mat-button] { text-decoration: none; } }

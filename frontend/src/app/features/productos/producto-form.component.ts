@@ -33,6 +33,7 @@ const MAX_IMAGENES = 5;
   styleUrl: './producto-form.component.scss'
 })
 export class ProductoFormComponent implements OnInit {
+  private readonly fb = inject(FormBuilder);
   readonly loading = signal(false);
   readonly saving = signal(false);
   readonly errorMessage = signal<string | null>(null);
@@ -42,7 +43,6 @@ export class ProductoFormComponent implements OnInit {
   readonly maxImagenes = MAX_IMAGENES;
   readonly auditoria = signal<{ creadoPor?: string; actualizadoPor?: string } | null>(null);
 
-  private readonly fb = inject(FormBuilder);
   private productoId: number | null = null;
   private imagenesAEliminarIds: number[] = [];
 

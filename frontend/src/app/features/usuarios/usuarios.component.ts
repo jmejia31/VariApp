@@ -22,12 +22,12 @@ import { Usuario } from '../../core/models/usuario.model';
   styleUrl: './usuarios.component.scss'
 })
 export class UsuariosComponent implements OnInit {
+  private readonly fb = inject(FormBuilder);
   readonly usuarios = signal<Usuario[]>([]);
   readonly loading = signal(true);
   readonly saving = signal(false);
   readonly errorMessage = signal<string | null>(null);
   readonly mostrarFormulario = signal(false);
-  private readonly fb = inject(FormBuilder);
 
   form = this.fb.group({
     nombreUsuario: ['', Validators.required],

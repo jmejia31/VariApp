@@ -11,6 +11,10 @@ public class AppDbContext : DbContext
     public DbSet<ProductoImagen> ProductoImagenes => Set<ProductoImagen>();
     public DbSet<Categoria> Categorias => Set<Categoria>();
     public DbSet<Usuario> Usuarios => Set<Usuario>();
+    public DbSet<Compra> Compras => Set<Compra>();
+    public DbSet<CompraDetalle> CompraDetalles => Set<CompraDetalle>();
+    public DbSet<MovimientoInventario> MovimientosInventario => Set<MovimientoInventario>();
+    public DbSet<MovimientoFinanciero> MovimientosFinancieros => Set<MovimientoFinanciero>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
