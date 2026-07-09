@@ -5,15 +5,23 @@ using InventoryApp.API.Middleware;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Application.Services;
 using InventoryApp.Application.Validators;
+using InventoryApp.Domain.Entities;
 using InventoryApp.Infrastructure.Persistence;
 using InventoryApp.Infrastructure.Repositories;
 using InventoryApp.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var port = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrWhiteSpace(port))
+{
+    builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+}
 
 // ===== Controllers + FluentValidation =====
 builder.Services.AddControllers();
@@ -106,6 +114,15 @@ builder.Services.AddSwaggerGen(options =>
 var app = builder.Build();
 
 // ===== Middleware pipeline =====
+var forwardedHeadersOptions = new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+};
+forwardedHeadersOptions.KnownNetworks.Clear();
+forwardedHeadersOptions.KnownProxies.Clear();
+
+app.UseForwardedHeaders(forwardedHeadersOptions);
+
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
@@ -120,4 +137,35 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-app.Run();
+if (app.Configuration.GetValue<bool>("Database:ApplyMigrationsOnStartup"))
+{
+    await using var scope = app.Services.CreateAsyncScope();
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await db.Database.MigrateAsync();
+
+    var adminUsername = app.Configuration["SeedAdmin:Username"];
+    var adminPassword = app.Configuration["SeedAdmin:Password"];
+
+    if (!string.IsNullOrWhiteSpace(adminUsername) && !string.IsNullOrWhiteSpace(adminPassword))
+    {
+        var admin = await db.Usuarios.SingleOrDefaultAsync(u => u.NombreUsuario == adminUsername);
+        var passwordHash = BCrypt.Net.BCrypt.HashPassword(adminPassword);
+
+        if (admin is null)
+        {
+            db.Usuarios.Add(new Usuario
+            {
+                NombreUsuario = adminUsername,
+                PasswordHash = passwordHash
+            });
+        }
+        else
+        {
+            admin.PasswordHash = passwordHash;
+        }
+
+        await db.SaveChangesAsync();
+    }
+}
+
+await app.RunAsync();

@@ -1,0 +1,12 @@
+.git
+.agents
+.codex
+.dotnet_cli_home
+.mysql-data
+frontend/node_modules
+frontend/dist
+backend/**/bin
+backend/**/obj
+*.local
+.env
+.env.*
