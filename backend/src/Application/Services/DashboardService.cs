@@ -1,6 +1,6 @@
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Interfaces;
-using InventoryApp.Domain.Entities;
+using InventoryApp.Application.Mappings;
 
 namespace InventoryApp.Application.Services;
 
@@ -28,25 +28,8 @@ public class DashboardService : IDashboardService
             TotalUnidades = totalUnidades,
             ValorTotalInventario = valorCosto,
             ValorPotencialVenta = valorPrecio,
-            ProductosStockBajo = stockBajo.Select(ToDto).ToList(),
-            UltimosAgregados = ultimos.Select(ToDto).ToList()
+            ProductosStockBajo = stockBajo.Select(ProductoMapper.ToDto).ToList(),
+            UltimosAgregados = ultimos.Select(ProductoMapper.ToDto).ToList()
         };
     }
-
-    private static ProductoDto ToDto(Producto producto) => new()
-    {
-        Id = producto.Id,
-        Nombre = producto.Nombre,
-        Marca = producto.Marca,
-        Modelo = producto.Modelo,
-        Descripcion = producto.Descripcion,
-        Cantidad = producto.Cantidad,
-        Costo = producto.Costo,
-        Precio = producto.Precio,
-        ImagenUrl = producto.ImagenUrl,
-        UmbralStockBajo = producto.UmbralStockBajo,
-        TieneStockBajo = producto.TieneStockBajo,
-        FechaCreacion = producto.FechaCreacion,
-        FechaActualizacion = producto.FechaActualizacion
-    };
 }

@@ -32,7 +32,11 @@ public class JwtService : IJwtService
         {
             new Claim(JwtRegisteredClaimNames.Sub, usuario.NombreUsuario),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim("id", usuario.Id.ToString())
+            new Claim("id", usuario.Id.ToString()),
+            new Claim("nombreUsuario", usuario.NombreUsuario),
+            new Claim("nombreCompleto", usuario.NombreCompleto),
+            new Claim("rol", usuario.Rol.ToString()),
+            new Claim(ClaimTypes.Role, usuario.Rol.ToString())
         };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));

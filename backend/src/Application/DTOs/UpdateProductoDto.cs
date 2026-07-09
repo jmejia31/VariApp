@@ -12,6 +12,14 @@ public class UpdateProductoDto
     public decimal Costo { get; set; }
     public decimal Precio { get; set; }
     public int UmbralStockBajo { get; set; }
-    public IFormFile? Imagen { get; set; }       // si viene, reemplaza la actual
-    public bool EliminarImagen { get; set; }     // si es true y no viene Imagen, borra la actual
+    public int? CategoriaId { get; set; }
+
+    /// Nuevas imágenes a agregar (respetando el máximo de 5 en total).
+    public List<IFormFile>? ImagenesNuevas { get; set; }
+
+    /// Ids de ProductoImagen existentes a eliminar.
+    public List<int>? ImagenesAEliminarIds { get; set; }
+
+    /// Id de una imagen existente a marcar como principal.
+    public int? ImagenPrincipalId { get; set; }
 }

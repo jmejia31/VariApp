@@ -12,5 +12,8 @@ public class CreateProductoDto
     public decimal Costo { get; set; }
     public decimal Precio { get; set; }
     public int UmbralStockBajo { get; set; } = 5;
-    public IFormFile? Imagen { get; set; }
+    public int? CategoriaId { get; set; }
+
+    /// Máximo 5 imágenes. La primera se marca como principal.
+    public List<IFormFile>? Imagenes { get; set; }
 }

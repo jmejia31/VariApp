@@ -1,0 +1,71 @@
+<div class="header-row">
+  <h1 class="page-title">Usuarios</h1>
+  <button mat-flat-button color="primary" (click)="mostrarFormulario.set(!mostrarFormulario())">
+    <mat-icon>{{ mostrarFormulario() ? 'close' : 'add' }}</mat-icon>
+    {{ mostrarFormulario() ? 'Cancelar' : 'Nuevo usuario' }}
+  </button>
+</div>
+
+@if (mostrarFormulario()) {
+  <form class="card form" [formGroup]="form" (ngSubmit)="crear()">
+    <div class="fields-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Nombre de usuario (login)</mat-label>
+        <input matInput formControlName="nombreUsuario">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Nombre completo</mat-label>
+        <input matInput formControlName="nombreCompleto">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Contraseña temporal</mat-label>
+        <input matInput type="password" formControlName="password">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Rol</mat-label>
+        <mat-select formControlName="rol">
+          <mat-option value="Vendedor">Vendedor</mat-option>
+          <mat-option value="Administrador">Administrador</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    @if (errorMessage()) {
+      <p class="error">{{ errorMessage() }}</p>
+    }
+
+    <div class="form-actions">
+      <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving()">Crear usuario</button>
+    </div>
+  </form>
+}
+
+<div class="card">
+  @if (loading()) {
+    <div class="loading"><mat-spinner></mat-spinner></div>
+  } @else {
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Usuario</th>
+          <th>Nombre completo</th>
+          <th>Rol</th>
+          <th>Activo</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (u of usuarios(); track u.id) {
+          <tr>
+            <td>{{ u.nombreUsuario }}</td>
+            <td>{{ u.nombreCompleto }}</td>
+            <td>{{ u.rol }}</td>
+            <td><mat-slide-toggle [checked]="u.activo" (change)="toggleEstado(u)"></mat-slide-toggle></td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

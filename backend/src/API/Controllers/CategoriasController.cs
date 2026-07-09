@@ -1,0 +1,72 @@
+using InventoryApp.Application.Common;
+using InventoryApp.Application.DTOs;
+using InventoryApp.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace InventoryApp.API.Controllers;
+
+[ApiController]
+[Authorize]
+[Route("categorias")]
+public class CategoriasController : ControllerBase
+{
+    private readonly ICategoriaService _categoriaService;
+
+    public CategoriasController(ICategoriaService categoriaService)
+    {
+        _categoriaService = categoriaService;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        var categorias = await _categoriaService.GetAllAsync();
+        return Ok(ApiResponse<List<CategoriaDto>>.Ok(categorias));
+    }
+
+    [HttpGet("activas")]
+    public async Task<IActionResult> GetActivas()
+    {
+        var categorias = await _categoriaService.GetActivasAsync();
+        return Ok(ApiResponse<List<CategoriaDto>>.Ok(categorias));
+    }
+
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> GetById(int id)
+    {
+        var categoria = await _categoriaService.GetByIdAsync(id);
+        if (categoria is null)
+            return NotFound(ApiResponse<object>.Fail("Categoría no encontrada."));
+
+        return Ok(ApiResponse<CategoriaDto>.Ok(categoria));
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] CreateCategoriaDto dto)
+    {
+        var creada = await _categoriaService.CreateAsync(dto);
+        return CreatedAtAction(nameof(GetById), new { id = creada.Id },
+            ApiResponse<CategoriaDto>.Ok(creada, "Categoría creada correctamente."));
+    }
+
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> Update(int id, [FromBody] UpdateCategoriaDto dto)
+    {
+        var actualizada = await _categoriaService.UpdateAsync(id, dto);
+        if (actualizada is null)
+            return NotFound(ApiResponse<object>.Fail("Categoría no encontrada."));
+
+        return Ok(ApiResponse<CategoriaDto>.Ok(actualizada, "Categoría actualizada correctamente."));
+    }
+
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var eliminada = await _categoriaService.DeleteAsync(id);
+        if (!eliminada)
+            return NotFound(ApiResponse<object>.Fail("Categoría no encontrada."));
+
+        return Ok(ApiResponse<object>.Ok(new { }, "Categoría eliminada correctamente."));
+    }
+}

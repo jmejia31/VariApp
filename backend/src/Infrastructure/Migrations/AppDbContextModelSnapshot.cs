@@ -22,6 +22,52 @@ namespace InventoryApp.Infrastructure.Migrations
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
+            modelBuilder.Entity("InventoryApp.Domain.Entities.Categoria", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Activa")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("ActualizadoPorNombreUsuario")
+                        .HasColumnType("longtext");
+
+                    b.Property<int?>("ActualizadoPorUsuarioId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CreadoPorNombreUsuario")
+                        .HasColumnType("longtext");
+
+                    b.Property<int?>("CreadoPorUsuarioId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Descripcion")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<DateTime>("FechaActualizacion")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Nombre")
+                        .IsUnique();
+
+                    b.ToTable("Categorias", (string)null);
+                });
+
             modelBuilder.Entity("InventoryApp.Domain.Entities.Producto", b =>
                 {
                     b.Property<int>("Id")
@@ -30,11 +76,26 @@ namespace InventoryApp.Infrastructure.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("ActualizadoPorNombreUsuario")
+                        .HasColumnType("longtext");
+
+                    b.Property<int?>("ActualizadoPorUsuarioId")
+                        .HasColumnType("int");
+
                     b.Property<int>("Cantidad")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("CategoriaId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("Costo")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("CreadoPorNombreUsuario")
+                        .HasColumnType("longtext");
+
+                    b.Property<int?>("CreadoPorUsuarioId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Descripcion")
                         .HasMaxLength(1000)
@@ -45,14 +106,6 @@ namespace InventoryApp.Infrastructure.Migrations
 
                     b.Property<DateTime>("FechaCreacion")
                         .HasColumnType("datetime(6)");
-
-                    b.Property<string>("ImagenPublicId")
-                        .HasMaxLength(300)
-                        .HasColumnType("varchar(300)");
-
-                    b.Property<string>("ImagenUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)");
 
                     b.Property<string>("Marca")
                         .IsRequired()
@@ -77,6 +130,8 @@ namespace InventoryApp.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CategoriaId");
+
                     b.HasIndex("Marca")
                         .HasDatabaseName("IX_Productos_Marca");
 
@@ -89,6 +144,49 @@ namespace InventoryApp.Infrastructure.Migrations
                     b.ToTable("Productos", (string)null);
                 });
 
+            modelBuilder.Entity("InventoryApp.Domain.Entities.ProductoImagen", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CreadoPorNombreUsuario")
+                        .HasColumnType("longtext");
+
+                    b.Property<int?>("CreadoPorUsuarioId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("EsPrincipal")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("Orden")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductoId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PublicId")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("varchar(300)");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductoId");
+
+                    b.ToTable("ProductoImagenes", (string)null);
+                });
+
             modelBuilder.Entity("InventoryApp.Domain.Entities.Usuario", b =>
                 {
                     b.Property<int>("Id")
@@ -96,6 +194,17 @@ namespace InventoryApp.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Activo")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("NombreCompleto")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)");
 
                     b.Property<string>("NombreUsuario")
                         .IsRequired()
@@ -106,6 +215,11 @@ namespace InventoryApp.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(300)
                         .HasColumnType("varchar(300)");
+
+                    b.Property<string>("Rol")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("varchar(30)");
 
                     b.HasKey("Id");
 
@@ -118,9 +232,44 @@ namespace InventoryApp.Infrastructure.Migrations
                         new
                         {
                             Id = 1,
+                            Activo = true,
+                            FechaCreacion = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            NombreCompleto = "Administrador",
                             NombreUsuario = "admin",
-                            PasswordHash = "$2b$11$unl.Q/ZCV7KaW8i7BbocyemHNX9hdpAOqatkmKk2.b3PLzDjKAMuy"
+                            PasswordHash = "$2b$11$unl.Q/ZCV7KaW8i7BbocyemHNX9hdpAOqatkmKk2.b3PLzDjKAMuy",
+                            Rol = "Administrador"
                         });
+                });
+
+            modelBuilder.Entity("InventoryApp.Domain.Entities.Producto", b =>
+                {
+                    b.HasOne("InventoryApp.Domain.Entities.Categoria", "Categoria")
+                        .WithMany("Productos")
+                        .HasForeignKey("CategoriaId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Categoria");
+                });
+
+            modelBuilder.Entity("InventoryApp.Domain.Entities.ProductoImagen", b =>
+                {
+                    b.HasOne("InventoryApp.Domain.Entities.Producto", "Producto")
+                        .WithMany("Imagenes")
+                        .HasForeignKey("ProductoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Producto");
+                });
+
+            modelBuilder.Entity("InventoryApp.Domain.Entities.Categoria", b =>
+                {
+                    b.Navigation("Productos");
+                });
+
+            modelBuilder.Entity("InventoryApp.Domain.Entities.Producto", b =>
+                {
+                    b.Navigation("Imagenes");
                 });
 #pragma warning restore 612, 618
         }

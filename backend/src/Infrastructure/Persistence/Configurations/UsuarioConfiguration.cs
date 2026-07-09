@@ -1,4 +1,5 @@
 using InventoryApp.Domain.Entities;
+using InventoryApp.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -11,7 +12,9 @@ public class UsuarioConfiguration : IEntityTypeConfiguration<Usuario>
         builder.ToTable("Usuarios");
         builder.Property(u => u.NombreUsuario).IsRequired().HasMaxLength(100);
         builder.HasIndex(u => u.NombreUsuario).IsUnique();
+        builder.Property(u => u.NombreCompleto).IsRequired().HasMaxLength(150);
         builder.Property(u => u.PasswordHash).IsRequired().HasMaxLength(300);
+        builder.Property(u => u.Rol).HasConversion<string>().HasMaxLength(30);
 
         // Seed: usuario admin con password "Admin123!" (SOLO PARA DESARROLLO)
         // IMPORTANTE: cambia esta contraseña antes de subir a producción (ver README - seccion seguridad).
@@ -19,7 +22,11 @@ public class UsuarioConfiguration : IEntityTypeConfiguration<Usuario>
         {
             Id = 1,
             NombreUsuario = "admin",
-            PasswordHash = "$2b$11$unl.Q/ZCV7KaW8i7BbocyemHNX9hdpAOqatkmKk2.b3PLzDjKAMuy" // hash real de "Admin123!"
+            NombreCompleto = "Administrador",
+            PasswordHash = "$2b$11$unl.Q/ZCV7KaW8i7BbocyemHNX9hdpAOqatkmKk2.b3PLzDjKAMuy", // hash real de "Admin123!"
+            Rol = RolUsuario.Administrador,
+            Activo = true,
+            FechaCreacion = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
         });
     }
 }

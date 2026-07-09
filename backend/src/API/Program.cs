@@ -6,6 +6,7 @@ using InventoryApp.Application.Interfaces;
 using InventoryApp.Application.Services;
 using InventoryApp.Application.Validators;
 using InventoryApp.Domain.Entities;
+using InventoryApp.Domain.Enums;
 using InventoryApp.Infrastructure.Persistence;
 using InventoryApp.Infrastructure.Repositories;
 using InventoryApp.Infrastructure.Services;
@@ -37,9 +38,14 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connectionString, new MySqlServerVersion(mysqlServerVersion)));
 
 // ===== Repositorios y Servicios =====
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<IProductoRepository, ProductoRepository>();
+builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IProductoService, ProductoService>();
+builder.Services.AddScoped<ICategoriaService, CategoriaService>();
+builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
@@ -122,7 +128,6 @@ forwardedHeadersOptions.KnownNetworks.Clear();
 forwardedHeadersOptions.KnownProxies.Clear();
 
 app.UseForwardedHeaders(forwardedHeadersOptions);
-
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
@@ -156,12 +161,21 @@ if (app.Configuration.GetValue<bool>("Database:ApplyMigrationsOnStartup"))
             db.Usuarios.Add(new Usuario
             {
                 NombreUsuario = adminUsername,
-                PasswordHash = passwordHash
+                NombreCompleto = "Administrador",
+                PasswordHash = passwordHash,
+                Rol = RolUsuario.Administrador,
+                Activo = true,
+                FechaCreacion = DateTime.UtcNow
             });
         }
         else
         {
+            admin.NombreCompleto = string.IsNullOrWhiteSpace(admin.NombreCompleto)
+                ? "Administrador"
+                : admin.NombreCompleto;
             admin.PasswordHash = passwordHash;
+            admin.Rol = RolUsuario.Administrador;
+            admin.Activo = true;
         }
 
         await db.SaveChangesAsync();

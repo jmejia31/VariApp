@@ -18,7 +18,7 @@ public class AuthService : IAuthService
     public async Task<LoginResponseDto?> LoginAsync(LoginRequestDto dto)
     {
         var usuario = await _usuarioRepository.GetByNombreUsuarioAsync(dto.NombreUsuario);
-        if (usuario is null) return null;
+        if (usuario is null || !usuario.Activo) return null;
 
         var passwordValida = BCrypt.Net.BCrypt.Verify(dto.Password, usuario.PasswordHash);
         if (!passwordValida) return null;
@@ -29,6 +29,8 @@ public class AuthService : IAuthService
         {
             Token = token,
             NombreUsuario = usuario.NombreUsuario,
+            NombreCompleto = usuario.NombreCompleto,
+            Rol = usuario.Rol.ToString(),
             ExpiraEn = expiraEn
         };
     }

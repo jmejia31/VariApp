@@ -14,5 +14,9 @@ public class UpdateProductoValidator : AbstractValidator<UpdateProductoDto>
         RuleFor(x => x.Costo).GreaterThan(0).WithMessage("El costo debe ser mayor a 0.");
         RuleFor(x => x.Precio).GreaterThan(0).WithMessage("El precio debe ser mayor a 0.");
         RuleFor(x => x.UmbralStockBajo).GreaterThanOrEqualTo(0).WithMessage("El umbral de stock bajo no puede ser negativo.");
+
+        RuleForEach(x => x.ImagenesNuevas)
+            .Must(ImagenValidationHelper.EsImagenValida)
+            .WithMessage("Cada imagen debe ser JPG, PNG o WEBP y pesar máximo 5 MB.");
     }
 }

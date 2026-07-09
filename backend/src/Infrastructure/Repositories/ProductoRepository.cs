@@ -15,12 +15,15 @@ public class ProductoRepository : IProductoRepository
         _context = context;
     }
 
+    private IQueryable<Producto> ConIncludes() =>
+        _context.Productos.Include(p => p.Imagenes).Include(p => p.Categoria);
+
     public async Task<Producto?> GetByIdAsync(int id) =>
-        await _context.Productos.FindAsync(id);
+        await ConIncludes().FirstOrDefaultAsync(p => p.Id == id);
 
     public async Task<(List<Producto> Items, int TotalCount)> GetPagedAsync(PagedRequest request)
     {
-        var query = _context.Productos.AsQueryable();
+        var query = ConIncludes().AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(request.Search))
         {
@@ -53,13 +56,13 @@ public class ProductoRepository : IProductoRepository
     }
 
     public async Task<List<Producto>> GetStockBajoAsync() =>
-        await _context.Productos
+        await ConIncludes()
             .Where(p => p.Cantidad < p.UmbralStockBajo)
             .OrderBy(p => p.Cantidad)
             .ToListAsync();
 
     public async Task<List<Producto>> GetUltimosAgregadosAsync(int cantidad = 5) =>
-        await _context.Productos
+        await ConIncludes()
             .OrderByDescending(p => p.FechaCreacion)
             .Take(cantidad)
             .ToListAsync();

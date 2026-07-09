@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { adminGuard } from './core/guards/admin.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
@@ -26,6 +27,26 @@ export const routes: Routes = [
     path: 'productos/:id/editar',
     canActivate: [authGuard],
     loadComponent: () => import('./features/productos/producto-form.component').then(m => m.ProductoFormComponent)
+  },
+  {
+    path: 'categorias',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/categorias/categorias-list.component').then(m => m.CategoriasListComponent)
+  },
+  {
+    path: 'categorias/nueva',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/categorias/categoria-form.component').then(m => m.CategoriaFormComponent)
+  },
+  {
+    path: 'categorias/:id/editar',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/categorias/categoria-form.component').then(m => m.CategoriaFormComponent)
+  },
+  {
+    path: 'usuarios',
+    canActivate: [authGuard, adminGuard],
+    loadComponent: () => import('./features/usuarios/usuarios.component').then(m => m.UsuariosComponent)
   },
   { path: '**', redirectTo: 'dashboard' }
 ];

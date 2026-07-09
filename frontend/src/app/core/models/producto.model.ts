@@ -1,3 +1,10 @@
+export interface ProductoImagen {
+  id: number;
+  url: string;
+  orden: number;
+  esPrincipal: boolean;
+}
+
 export interface Producto {
   id: number;
   nombre: string;
@@ -7,9 +14,15 @@ export interface Producto {
   cantidad: number;
   costo: number;
   precio: number;
-  imagenUrl?: string;
   umbralStockBajo: number;
   tieneStockBajo: boolean;
+  categoriaId?: number;
+  categoriaNombre?: string;
+  imagenPrincipalUrl?: string;
+  imagenes: ProductoImagen[];
+  totalImagenes: number;
+  creadoPorNombreUsuario?: string;
+  actualizadoPorNombreUsuario?: string;
   fechaCreacion: string;
   fechaActualizacion: string;
 }
@@ -23,6 +36,8 @@ export interface ProductoFormValue {
   costo: number;
   precio: number;
   umbralStockBajo: number;
-  imagen?: File | null;
-  eliminarImagen?: boolean;
+  categoriaId?: number | null;
+  imagenesNuevas?: File[];
+  imagenesAEliminarIds?: number[];
+  imagenPrincipalId?: number | null;
 }

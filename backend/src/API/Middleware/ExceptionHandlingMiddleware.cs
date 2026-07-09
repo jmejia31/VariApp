@@ -2,6 +2,7 @@ using System.Net;
 using System.Text.Json;
 using FluentValidation;
 using InventoryApp.Application.Common;
+using InventoryApp.Application.Exceptions;
 
 namespace InventoryApp.API.Middleware;
 
@@ -31,6 +32,15 @@ public class ExceptionHandlingMiddleware
             var errores = ex.Errors.Select(e => e.ErrorMessage).ToList();
             var response = ApiResponse<object>.Fail("Error de validación.", errores);
 
+            await context.Response.WriteAsync(JsonSerializer.Serialize(response));
+        }
+        catch (BusinessRuleException ex)
+        {
+            _logger.LogWarning(ex, "Regla de negocio violada");
+            context.Response.ContentType = "application/json";
+            context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+
+            var response = ApiResponse<object>.Fail(ex.Message);
             await context.Response.WriteAsync(JsonSerializer.Serialize(response));
         }
         catch (Exception ex)

@@ -1,0 +1,6 @@
+.header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; a[mat-flat-button] { text-decoration: none; } }
+.page-title { margin: 0; font-size: 22px; }
+.loading { display: flex; justify-content: center; padding: 40px 0; }
+.table { width: 100%; border-collapse: collapse; font-size: 13px; th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--color-border); } }
+.actions { white-space: nowrap; }
+.empty { text-align: center; color: var(--color-text-muted); padding: 30px 0; }

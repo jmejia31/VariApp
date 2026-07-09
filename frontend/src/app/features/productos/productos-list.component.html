@@ -22,6 +22,7 @@
           <th (click)="ordenarPor('Nombre')" class="sortable">Nombre</th>
           <th (click)="ordenarPor('Marca')" class="sortable">Marca</th>
           <th (click)="ordenarPor('Modelo')" class="sortable">Modelo</th>
+          <th>Categoría</th>
           <th (click)="ordenarPor('Cantidad')" class="sortable">Stock</th>
           <th (click)="ordenarPor('Costo')" class="sortable">Costo</th>
           <th (click)="ordenarPor('Precio')" class="sortable">Precio</th>
@@ -33,8 +34,11 @@
         @for (p of productos(); track p.id) {
           <tr>
             <td>
-              @if (p.imagenUrl) {
-                <img [src]="p.imagenUrl" class="thumb" [alt]="p.nombre">
+              @if (p.imagenPrincipalUrl) {
+                <img [src]="p.imagenPrincipalUrl" class="thumb" [alt]="p.nombre">
+                @if (p.totalImagenes > 1) {
+                  <span class="img-count">+{{ p.totalImagenes - 1 }}</span>
+                }
               } @else {
                 <div class="thumb placeholder"><mat-icon>image</mat-icon></div>
               }
@@ -42,6 +46,7 @@
             <td>{{ p.nombre }}</td>
             <td>{{ p.marca }}</td>
             <td>{{ p.modelo }}</td>
+            <td>{{ p.categoriaNombre || '—' }}</td>
             <td>{{ p.cantidad }}</td>
             <td>L. {{ p.costo | number:'1.2-2' }}</td>
             <td>L. {{ p.precio | number:'1.2-2' }}</td>
@@ -62,7 +67,7 @@
             </td>
           </tr>
         } @empty {
-          <tr><td colspan="9" class="empty">No se encontraron productos.</td></tr>
+          <tr><td colspan="10" class="empty">No se encontraron productos.</td></tr>
         }
       </tbody>
     </table>

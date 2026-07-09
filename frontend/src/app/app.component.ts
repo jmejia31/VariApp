@@ -20,13 +20,18 @@ import { AuthService } from './core/auth/auth.service';
           <nav>
             <a routerLink="/dashboard" routerLinkActive="active"><mat-icon>dashboard</mat-icon> Dashboard</a>
             <a routerLink="/productos" routerLinkActive="active"><mat-icon>widgets</mat-icon> Productos</a>
+            <a routerLink="/categorias" routerLinkActive="active"><mat-icon>category</mat-icon> Categorías</a>
+            @if (auth.esAdministrador()) {
+              <a routerLink="/usuarios" routerLinkActive="active"><mat-icon>manage_accounts</mat-icon> Usuarios</a>
+            }
           </nav>
         </aside>
         <div class="main">
           <header class="topbar">
             <span></span>
             <div class="user">
-              <span>{{ auth.nombreUsuario() }}</span>
+              <span class="user-name">{{ auth.nombreCompleto() }}</span>
+              <span class="user-role">{{ auth.rol() }}</span>
               <button mat-icon-button (click)="logout()" title="Cerrar sesión">
                 <mat-icon>logout</mat-icon>
               </button>

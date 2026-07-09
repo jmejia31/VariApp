@@ -38,3 +38,11 @@
 .actions { white-space: nowrap; }
 
 .empty { text-align: center; color: var(--color-text-muted); padding: 30px 0; }
+
+.thumb { position: relative; }
+.img-count {
+  position: absolute; bottom: -2px; right: -2px;
+  background: var(--color-primary); color: white;
+  font-size: 9px; font-weight: 700; padding: 1px 4px; border-radius: 8px;
+}
+td:first-child { position: relative; }

@@ -28,29 +28,38 @@ export class ProductoService {
   }
 
   create(value: ProductoFormValue): Observable<ApiResponse<Producto>> {
-    return this.http.post<ApiResponse<Producto>>(this.apiUrl, this.toFormData(value));
+    const formData = new FormData();
+    this.appendCamposBase(formData, value);
+
+    (value.imagenesNuevas ?? []).forEach((file) => formData.append('Imagenes', file));
+
+    return this.http.post<ApiResponse<Producto>>(this.apiUrl, formData);
   }
 
   update(id: number, value: ProductoFormValue): Observable<ApiResponse<Producto>> {
-    return this.http.put<ApiResponse<Producto>>(`${this.apiUrl}/${id}`, this.toFormData(value));
+    const formData = new FormData();
+    this.appendCamposBase(formData, value);
+
+    (value.imagenesNuevas ?? []).forEach((file) => formData.append('ImagenesNuevas', file));
+    (value.imagenesAEliminarIds ?? []).forEach((id) => formData.append('ImagenesAEliminarIds', String(id)));
+    if (value.imagenPrincipalId != null) formData.append('ImagenPrincipalId', String(value.imagenPrincipalId));
+
+    return this.http.put<ApiResponse<Producto>>(`${this.apiUrl}/${id}`, formData);
   }
 
   delete(id: number): Observable<ApiResponse<object>> {
     return this.http.delete<ApiResponse<object>>(`${this.apiUrl}/${id}`);
   }
 
-  private toFormData(value: ProductoFormValue): FormData {
-    const formData = new FormData();
-    formData.append('nombre', value.nombre);
-    formData.append('marca', value.marca);
-    formData.append('modelo', value.modelo);
-    if (value.descripcion) formData.append('descripcion', value.descripcion);
-    formData.append('cantidad', String(value.cantidad));
-    formData.append('costo', String(value.costo));
-    formData.append('precio', String(value.precio));
-    formData.append('umbralStockBajo', String(value.umbralStockBajo));
-    if (value.imagen) formData.append('imagen', value.imagen);
-    if (value.eliminarImagen) formData.append('eliminarImagen', 'true');
-    return formData;
+  private appendCamposBase(formData: FormData, value: ProductoFormValue): void {
+    formData.append('Nombre', value.nombre);
+    formData.append('Marca', value.marca);
+    formData.append('Modelo', value.modelo);
+    if (value.descripcion) formData.append('Descripcion', value.descripcion);
+    formData.append('Cantidad', String(value.cantidad));
+    formData.append('Costo', String(value.costo));
+    formData.append('Precio', String(value.precio));
+    formData.append('UmbralStockBajo', String(value.umbralStockBajo));
+    if (value.categoriaId != null) formData.append('CategoriaId', String(value.categoriaId));
   }
 }

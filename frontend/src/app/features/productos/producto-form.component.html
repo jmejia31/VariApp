@@ -3,27 +3,49 @@
   <h1 class="page-title">{{ isEdit() ? 'Editar producto' : 'Nuevo producto' }}</h1>
 </div>
 
+@if (isEdit() && auditoria(); as a) {
+  <p class="audit-info">
+    Registrado por <strong>{{ a.creadoPor || '—' }}</strong>
+    @if (a.actualizadoPor) { · Última actualización por <strong>{{ a.actualizadoPor }}</strong> }
+  </p>
+}
+
 @if (loading()) {
   <div class="loading"><mat-spinner></mat-spinner></div>
 } @else {
   <form class="card form" [formGroup]="form" (ngSubmit)="submit()">
-    <div class="image-section">
-      <div class="image-preview">
-        @if (previewUrl()) {
-          <img [src]="previewUrl()" alt="Vista previa">
-        } @else {
-          <mat-icon>image</mat-icon>
-        }
+    <div class="gallery-section">
+      <div class="gallery-header">
+        <span>Fotos del producto</span>
+        <span class="counter">{{ imagenes().length }}/{{ maxImagenes }} fotos</span>
       </div>
-      <div class="image-actions">
-        <label class="upload-btn">
-          <mat-icon>upload</mat-icon> Subir imagen
-          <input type="file" accept="image/*" hidden (change)="onFileSelected($event)">
-        </label>
-        @if (previewUrl()) {
-          <button mat-button type="button" color="warn" (click)="quitarImagen()">
-            <mat-icon>delete</mat-icon> Quitar
-          </button>
+
+      <div class="gallery-grid">
+        @for (img of imagenes(); track img.url; let i = $index) {
+          <div class="gallery-item" [class.principal]="img.esPrincipal">
+            <img [src]="img.url" alt="Foto del producto">
+            @if (img.esPrincipal) {
+              <span class="badge-principal">Principal</span>
+            }
+            <div class="gallery-actions">
+              @if (!img.esPrincipal) {
+                <button mat-icon-button type="button" title="Marcar como principal" (click)="marcarComoPrincipal(i)">
+                  <mat-icon>star</mat-icon>
+                </button>
+              }
+              <button mat-icon-button type="button" title="Quitar" (click)="quitarImagen(i)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+        }
+
+        @if (espaciosDisponibles > 0) {
+          <label class="gallery-upload">
+            <mat-icon>add_photo_alternate</mat-icon>
+            <span>Agregar foto</span>
+            <input type="file" accept="image/jpeg,image/png,image/webp" multiple hidden (change)="onFilesSelected($event)">
+          </label>
         }
       </div>
     </div>
@@ -42,6 +64,16 @@
       <mat-form-field appearance="outline">
         <mat-label>Modelo</mat-label>
         <input matInput formControlName="modelo">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Categoría (opcional)</mat-label>
+        <mat-select formControlName="categoriaId">
+          <mat-option [value]="null">Sin categoría</mat-option>
+          @for (c of categorias(); track c.id) {
+            <mat-option [value]="c.id">{{ c.nombre }}</mat-option>
+          }
+        </mat-select>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">

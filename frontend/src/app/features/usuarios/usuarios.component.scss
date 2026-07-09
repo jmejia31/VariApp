@@ -1,0 +1,8 @@
+.header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.page-title { margin: 0; font-size: 22px; }
+.form { margin-bottom: 20px; }
+.fields-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 16px; mat-form-field { width: 100%; } }
+.error { color: var(--color-danger); font-size: 13px; }
+.form-actions { display: flex; justify-content: flex-end; margin-top: 8px; }
+.loading { display: flex; justify-content: center; padding: 40px 0; }
+.table { width: 100%; border-collapse: collapse; font-size: 13px; th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--color-border); } }
