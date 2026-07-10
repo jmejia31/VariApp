@@ -1,5 +1,6 @@
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
+using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
@@ -24,7 +25,7 @@ public class CloudinaryImageStorageService : IImageStorageService
             apiKey == "CHANGE_ME" ||
             apiSecret == "CHANGE_ME")
         {
-            throw new InvalidOperationException(
+            throw new BusinessRuleException(
                 "Cloudinary no esta configurado. Revisa Cloudinary:CloudName, Cloudinary:ApiKey y Cloudinary:ApiSecret.");
         }
 
@@ -35,21 +36,35 @@ public class CloudinaryImageStorageService : IImageStorageService
 
     public async Task<(string Url, string PublicId)> UploadAsync(IFormFile file)
     {
-        await using var stream = file.OpenReadStream();
-
-        var uploadParams = new ImageUploadParams
+        try
         {
-            File = new FileDescription(file.FileName, stream),
-            Folder = Folder,
-            Transformation = new Transformation().Width(800).Height(800).Crop("limit").Quality("auto")
-        };
+            await using var stream = file.OpenReadStream();
 
-        var result = await _cloudinary.UploadAsync(uploadParams);
+            var uploadParams = new ImageUploadParams
+            {
+                File = new FileDescription(file.FileName, stream),
+                Folder = Folder,
+                Transformation = new Transformation().Width(800).Height(800).Crop("limit").Quality("auto")
+            };
 
-        if (result.Error is not null)
-            throw new InvalidOperationException($"Error subiendo imagen a Cloudinary: {result.Error.Message}");
+            var result = await _cloudinary.UploadAsync(uploadParams);
 
-        return (result.SecureUrl.ToString(), result.PublicId);
+            if (result.Error is not null)
+            {
+                throw new BusinessRuleException($"No se pudo subir la imagen a Cloudinary: {result.Error.Message}");
+            }
+
+            return (result.SecureUrl.ToString(), result.PublicId);
+        }
+        catch (BusinessRuleException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            throw new BusinessRuleException(
+                $"No se pudo subir la imagen a Cloudinary. Verifica las credenciales y permisos de Cloudinary. Detalle: {ex.Message}");
+        }
     }
 
     public async Task DeleteAsync(string publicId)

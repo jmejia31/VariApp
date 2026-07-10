@@ -8,6 +8,11 @@ namespace InventoryApp.API.Middleware;
 
 public class ExceptionHandlingMiddleware
 {
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    };
+
     private readonly RequestDelegate _next;
     private readonly ILogger<ExceptionHandlingMiddleware> _logger;
 
@@ -32,7 +37,7 @@ public class ExceptionHandlingMiddleware
             var errores = ex.Errors.Select(e => e.ErrorMessage).ToList();
             var response = ApiResponse<object>.Fail("Error de validación.", errores);
 
-            await context.Response.WriteAsync(JsonSerializer.Serialize(response));
+            await context.Response.WriteAsync(JsonSerializer.Serialize(response, JsonOptions));
         }
         catch (BusinessRuleException ex)
         {
@@ -41,7 +46,7 @@ public class ExceptionHandlingMiddleware
             context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
 
             var response = ApiResponse<object>.Fail(ex.Message);
-            await context.Response.WriteAsync(JsonSerializer.Serialize(response));
+            await context.Response.WriteAsync(JsonSerializer.Serialize(response, JsonOptions));
         }
         catch (Exception ex)
         {
@@ -50,7 +55,7 @@ public class ExceptionHandlingMiddleware
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
             var response = ApiResponse<object>.Fail("Ocurrió un error interno. Intenta nuevamente más tarde.");
-            await context.Response.WriteAsync(JsonSerializer.Serialize(response));
+            await context.Response.WriteAsync(JsonSerializer.Serialize(response, JsonOptions));
         }
     }
 }
