@@ -1,0 +1,113 @@
+<h1 class="page-title">Finanzas</h1>
+
+@if (loading()) {
+  <div class="loading"><mat-spinner></mat-spinner></div>
+} @else if (resumen(); as r) {
+
+  <div class="stats-grid">
+    <div class="card stat"><p class="label">Ingresos totales</p><p class="value positive">L. {{ r.ingresosTotales | number:'1.2-2' }}</p></div>
+    <div class="card stat"><p class="label">Egresos totales</p><p class="value negative">L. {{ r.egresosTotales | number:'1.2-2' }}</p></div>
+    <div class="card stat"><p class="label">Utilidad bruta</p><p class="value">L. {{ r.utilidadBruta | number:'1.2-2' }}</p></div>
+    <div class="card stat"><p class="label">Utilidad neta</p><p class="value">L. {{ r.utilidadNeta | number:'1.2-2' }}</p></div>
+    <div class="card stat"><p class="label">Balance operativo</p><p class="value" [class.negative]="r.balanceOperativo < 0">L. {{ r.balanceOperativo | number:'1.2-2' }}</p></div>
+    <div class="card stat"><p class="label">Cuentas por cobrar</p><p class="value">L. {{ r.cuentasPorCobrar | number:'1.2-2' }}</p></div>
+    <div class="card stat"><p class="label">Cuentas por pagar</p><p class="value">L. {{ r.cuentasPorPagar | number:'1.2-2' }}</p></div>
+    <div class="card stat"><p class="label">Valor inventario (costo)</p><p class="value">L. {{ r.valorInventarioCosto | number:'1.2-2' }}</p></div>
+  </div>
+
+  <div class="card revision-card">
+    <div class="revision-header">
+      <h2>Revisión financiera</h2>
+      <button mat-button (click)="mostrarFormRevision.set(!mostrarFormRevision())">
+        {{ mostrarFormRevision() ? 'Cancelar' : 'Marcar período como revisado' }}
+      </button>
+    </div>
+
+    @if (r.ultimaRevision; as ur) {
+      <p class="ultima-revision">
+        Última revisión: <strong>{{ ur.estadoRevision }}</strong> por <strong>{{ ur.revisadoPorNombreUsuario }}</strong>
+        el {{ ur.fechaRevision | date:'dd/MM/yyyy' }}
+        (período {{ ur.fechaDesde | date:'dd/MM/yyyy' }} – {{ ur.fechaHasta | date:'dd/MM/yyyy' }})
+        @if (ur.observaciones) { — {{ ur.observaciones }} }
+      </p>
+    } @else {
+      <p class="ultima-revision empty">Aún no se ha registrado ninguna revisión financiera.</p>
+    }
+
+    @if (mostrarFormRevision()) {
+      <form [formGroup]="revisionForm" (ngSubmit)="registrarRevision()" class="revision-form">
+        <mat-form-field appearance="outline"><mat-label>Desde</mat-label><input matInput type="date" formControlName="fechaDesde"></mat-form-field>
+        <mat-form-field appearance="outline"><mat-label>Hasta</mat-label><input matInput type="date" formControlName="fechaHasta"></mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Resultado</mat-label>
+          <mat-select formControlName="estadoRevision">
+            <mat-option value="Revisado">Revisado</mat-option>
+            <mat-option value="ConObservaciones">Con observaciones</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width"><mat-label>Comentario (opcional)</mat-label><textarea matInput formControlName="observaciones" rows="2"></textarea></mat-form-field>
+        <button mat-flat-button color="primary" type="submit" [disabled]="revisionForm.invalid">Guardar revisión</button>
+      </form>
+    }
+  </div>
+
+  <div class="card">
+    <div class="revision-header">
+      <h2>Movimientos financieros</h2>
+      <button mat-button (click)="mostrarFormMovimiento.set(!mostrarFormMovimiento())">
+        {{ mostrarFormMovimiento() ? 'Cancelar' : 'Nuevo movimiento manual' }}
+      </button>
+    </div>
+
+    @if (mostrarFormMovimiento()) {
+      <form [formGroup]="movimientoForm" (ngSubmit)="registrarMovimiento()" class="movimiento-form">
+        <mat-form-field appearance="outline">
+          <mat-label>Tipo</mat-label>
+          <mat-select formControlName="tipo">
+            <mat-option value="Egreso">Egreso</mat-option>
+            <mat-option value="Ingreso">Ingreso</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Categoría</mat-label>
+          <mat-select formControlName="categoria">
+            <mat-option value="GastoOperativo">Gasto operativo</mat-option>
+            <mat-option value="Ajuste">Ajuste</mat-option>
+            <mat-option value="Otro">Otro</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline"><mat-label>Concepto</mat-label><input matInput formControlName="concepto"></mat-form-field>
+        <mat-form-field appearance="outline"><mat-label>Monto (L.)</mat-label><input matInput type="number" step="0.01" formControlName="monto"></mat-form-field>
+        <mat-form-field appearance="outline" class="full-width"><mat-label>Descripción (opcional)</mat-label><input matInput formControlName="descripcion"></mat-form-field>
+        <button mat-flat-button color="primary" type="submit" [disabled]="movimientoForm.invalid">Registrar</button>
+      </form>
+    }
+
+    <table class="table">
+      <thead>
+        <tr><th>Fecha</th><th>Concepto</th><th>Categoría</th><th>Tipo</th><th>Monto</th><th>Origen</th><th>Registrado por</th><th>Estado</th><th></th></tr>
+      </thead>
+      <tbody>
+        @for (m of movimientos(); track m.id) {
+          <tr [class.anulado]="m.estado === 'Anulado'">
+            <td>{{ m.fecha | date:'dd/MM/yyyy' }}</td>
+            <td>{{ m.concepto }}</td>
+            <td>{{ m.categoria }}</td>
+            <td [class.ingreso]="m.tipo === 'Ingreso'" [class.egreso]="m.tipo === 'Egreso'">{{ m.tipo }}</td>
+            <td>L. {{ m.monto | number:'1.2-2' }}</td>
+            <td>{{ m.esAutomatico ? m.moduloOrigen : 'Manual' }}</td>
+            <td>{{ m.creadoPorNombreUsuario || '—' }}</td>
+            <td>{{ m.estado }}</td>
+            <td>
+              @if (!m.esAutomatico && m.estado !== 'Anulado') {
+                <button mat-icon-button title="Anular" (click)="anularMovimiento(m)"><mat-icon>close</mat-icon></button>
+              }
+            </td>
+          </tr>
+        } @empty {
+          <tr><td colspan="9" class="empty">No hay movimientos registrados.</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

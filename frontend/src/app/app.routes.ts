@@ -68,5 +68,40 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./features/compras/compra-form.component').then(m => m.CompraFormComponent)
   },
+  {
+    path: 'ventas',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/ventas/ventas-list.component').then(m => m.VentasListComponent)
+  },
+  {
+    path: 'ventas/nueva',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/ventas/venta-form.component').then(m => m.VentaFormComponent)
+  },
+  {
+    path: 'ventas/:id',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/ventas/venta-detail.component').then(m => m.VentaDetailComponent)
+  },
+  {
+    path: 'ventas/:id/editar',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/ventas/venta-form.component').then(m => m.VentaFormComponent)
+  },
+  {
+    path: 'facturas/:id',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/facturas/factura-view.component').then(m => m.FacturaViewComponent)
+  },
+  {
+    path: 'finanzas',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/finanzas/finanzas.component').then(m => m.FinanzasComponent)
+  },
+  {
+    path: 'inventario/movimientos',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/inventario/movimientos-list.component').then(m => m.MovimientosListComponent)
+  },
   { path: '**', redirectTo: 'dashboard' }
 ];

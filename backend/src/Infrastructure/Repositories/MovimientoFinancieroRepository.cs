@@ -17,6 +17,12 @@ public class MovimientoFinancieroRepository : IMovimientoFinancieroRepository
     public async Task AddAsync(MovimientoFinanciero movimiento) =>
         await _context.MovimientosFinancieros.AddAsync(movimiento);
 
+    public async Task<MovimientoFinanciero?> GetByIdAsync(int id) =>
+        await _context.MovimientosFinancieros.FindAsync(id);
+
+    public void Update(MovimientoFinanciero movimiento) =>
+        _context.MovimientosFinancieros.Update(movimiento);
+
     public async Task<MovimientoFinanciero?> GetByCompraIdAsync(int compraId) =>
         await _context.MovimientosFinancieros.FirstOrDefaultAsync(m => m.CompraId == compraId && m.EsAutomatico);
 

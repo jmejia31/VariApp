@@ -227,6 +227,211 @@ namespace InventoryApp.Infrastructure.Migrations
                     b.ToTable("CompraDetalles", (string)null);
                 });
 
+            modelBuilder.Entity("InventoryApp.Domain.Entities.EmpresaConfiguracion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Activa")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Correo")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Direccion")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Eslogan")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
+
+                    b.Property<string>("LogoUrl")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("NombreComercial")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
+
+                    b.Property<string>("RTN")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Telefono")
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("EmpresaConfiguraciones", (string)null);
+                });
+
+            modelBuilder.Entity("InventoryApp.Domain.Entities.Factura", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AnuladaPorNombreUsuario")
+                        .HasColumnType("longtext");
+
+                    b.Property<int?>("AnuladaPorUsuarioId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ClienteCorreo")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ClienteDireccion")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ClienteIdentidadORTN")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ClienteNombre")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
+
+                    b.Property<string>("ClienteTelefono")
+                        .HasColumnType("longtext");
+
+                    b.Property<decimal>("Descuento")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("EmpresaCorreo")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("EmpresaDireccion")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("EmpresaNombre")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
+
+                    b.Property<string>("EmpresaRTN")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("EmpresaTelefono")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<DateTime?>("FechaAnulacion")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("FechaEmision")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("GeneradaPorNombreUsuario")
+                        .HasColumnType("longtext");
+
+                    b.Property<int?>("GeneradaPorUsuarioId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Impuesto")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("MotivoAnulacion")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<string>("NumeroFactura")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<string>("Observaciones")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<decimal>("Subtotal")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("Total")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("VendedorNombreUsuario")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)");
+
+                    b.Property<int>("VendedorUsuarioId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("VentaId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NumeroFactura")
+                        .IsUnique();
+
+                    b.HasIndex("VentaId")
+                        .IsUnique();
+
+                    b.ToTable("Facturas", (string)null);
+                });
+
+            modelBuilder.Entity("InventoryApp.Domain.Entities.FacturaDetalle", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Cantidad")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Descuento")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("FacturaId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("PrecioUnitario")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("ProductoCodigo")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<int>("ProductoId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ProductoMarca")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<string>("ProductoModelo")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<string>("ProductoNombre")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)");
+
+                    b.Property<decimal>("Subtotal")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FacturaId");
+
+                    b.ToTable("FacturaDetalles", (string)null);
+                });
+
             modelBuilder.Entity("InventoryApp.Domain.Entities.MovimientoFinanciero", b =>
                 {
                     b.Property<int>("Id")
@@ -493,6 +698,45 @@ namespace InventoryApp.Infrastructure.Migrations
                     b.ToTable("ProductoImagenes", (string)null);
                 });
 
+            modelBuilder.Entity("InventoryApp.Domain.Entities.RevisionFinanciera", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("EstadoRevision")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("varchar(30)");
+
+                    b.Property<DateTime>("FechaDesde")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("FechaHasta")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("FechaRevision")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Observaciones")
+                        .HasMaxLength(1000)
+                        .HasColumnType("varchar(1000)");
+
+                    b.Property<string>("RevisadoPorNombreUsuario")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)");
+
+                    b.Property<int>("RevisadoPorUsuarioId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("RevisionesFinancieras", (string)null);
+                });
+
             modelBuilder.Entity("InventoryApp.Domain.Entities.Usuario", b =>
                 {
                     b.Property<int>("Id")
@@ -547,6 +791,181 @@ namespace InventoryApp.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("InventoryApp.Domain.Entities.Venta", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ActualizadoPorNombreUsuario")
+                        .HasColumnType("longtext");
+
+                    b.Property<int?>("ActualizadoPorUsuarioId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("AnuladoPorNombreUsuario")
+                        .HasColumnType("longtext");
+
+                    b.Property<int?>("AnuladoPorUsuarioId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ClienteCorreo")
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)");
+
+                    b.Property<string>("ClienteDireccion")
+                        .HasMaxLength(300)
+                        .HasColumnType("varchar(300)");
+
+                    b.Property<string>("ClienteIdentidadORTN")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("ClienteNombre")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
+
+                    b.Property<string>("ClienteTelefono")
+                        .HasMaxLength(30)
+                        .HasColumnType("varchar(30)");
+
+                    b.Property<string>("ConfirmadoPorNombreUsuario")
+                        .HasColumnType("longtext");
+
+                    b.Property<int?>("ConfirmadoPorUsuarioId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("CostoTotal")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("CreadoPorNombreUsuario")
+                        .HasColumnType("longtext");
+
+                    b.Property<int?>("CreadoPorUsuarioId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Descuento")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<string>("EstadoPago")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<DateTime>("Fecha")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("FechaActualizacion")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("FechaAnulacion")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("FechaConfirmacion")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<decimal>("Impuesto")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("MetodoPago")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<string>("MotivoAnulacion")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<string>("Notas")
+                        .HasMaxLength(1000)
+                        .HasColumnType("varchar(1000)");
+
+                    b.Property<string>("NumeroVenta")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<decimal>("Subtotal")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("Total")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("UtilidadBruta")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NumeroVenta")
+                        .IsUnique();
+
+                    b.ToTable("Ventas", (string)null);
+                });
+
+            modelBuilder.Entity("InventoryApp.Domain.Entities.VentaDetalle", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Cantidad")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("CostoUnitarioSnapshot")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("PrecioUnitario")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("ProductoId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ProductoMarcaSnapshot")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<string>("ProductoModeloSnapshot")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<string>("ProductoNombreSnapshot")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)");
+
+                    b.Property<decimal>("Subtotal")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("UtilidadBruta")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("VentaId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductoId");
+
+                    b.HasIndex("VentaId");
+
+                    b.ToTable("VentaDetalles", (string)null);
+                });
+
             modelBuilder.Entity("InventoryApp.Domain.Entities.CompraDetalle", b =>
                 {
                     b.HasOne("InventoryApp.Domain.Entities.Compra", "Compra")
@@ -564,6 +983,28 @@ namespace InventoryApp.Infrastructure.Migrations
                     b.Navigation("Compra");
 
                     b.Navigation("Producto");
+                });
+
+            modelBuilder.Entity("InventoryApp.Domain.Entities.Factura", b =>
+                {
+                    b.HasOne("InventoryApp.Domain.Entities.Venta", "Venta")
+                        .WithOne("Factura")
+                        .HasForeignKey("InventoryApp.Domain.Entities.Factura", "VentaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Venta");
+                });
+
+            modelBuilder.Entity("InventoryApp.Domain.Entities.FacturaDetalle", b =>
+                {
+                    b.HasOne("InventoryApp.Domain.Entities.Factura", "Factura")
+                        .WithMany("Detalles")
+                        .HasForeignKey("FacturaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Factura");
                 });
 
             modelBuilder.Entity("InventoryApp.Domain.Entities.MovimientoInventario", b =>
@@ -598,6 +1039,25 @@ namespace InventoryApp.Infrastructure.Migrations
                     b.Navigation("Producto");
                 });
 
+            modelBuilder.Entity("InventoryApp.Domain.Entities.VentaDetalle", b =>
+                {
+                    b.HasOne("InventoryApp.Domain.Entities.Producto", "Producto")
+                        .WithMany()
+                        .HasForeignKey("ProductoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("InventoryApp.Domain.Entities.Venta", "Venta")
+                        .WithMany("Detalles")
+                        .HasForeignKey("VentaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Producto");
+
+                    b.Navigation("Venta");
+                });
+
             modelBuilder.Entity("InventoryApp.Domain.Entities.Categoria", b =>
                 {
                     b.Navigation("Productos");
@@ -608,9 +1068,21 @@ namespace InventoryApp.Infrastructure.Migrations
                     b.Navigation("Detalles");
                 });
 
+            modelBuilder.Entity("InventoryApp.Domain.Entities.Factura", b =>
+                {
+                    b.Navigation("Detalles");
+                });
+
             modelBuilder.Entity("InventoryApp.Domain.Entities.Producto", b =>
                 {
                     b.Navigation("Imagenes");
+                });
+
+            modelBuilder.Entity("InventoryApp.Domain.Entities.Venta", b =>
+                {
+                    b.Navigation("Detalles");
+
+                    b.Navigation("Factura");
                 });
 #pragma warning restore 612, 618
         }

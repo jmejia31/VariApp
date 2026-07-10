@@ -3,6 +3,7 @@ using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Application.Mappings;
+using InventoryApp.Application.Validators;
 using InventoryApp.Domain.Entities;
 
 namespace InventoryApp.Application.Services;
@@ -51,6 +52,7 @@ public class ProductoService : IProductoService
         var imagenes = dto.Imagenes ?? new List<Microsoft.AspNetCore.Http.IFormFile>();
         if (imagenes.Count > MaxImagenes)
             throw new BusinessRuleException($"Un producto puede tener máximo {MaxImagenes} fotos.");
+        ValidarImagenes(imagenes);
 
         if (dto.CategoriaId.HasValue)
         {
@@ -137,6 +139,7 @@ public class ProductoService : IProductoService
         if (producto.Imagenes.Count + nuevas.Count > MaxImagenes)
             throw new BusinessRuleException(
                 $"Un producto puede tener máximo {MaxImagenes} fotos ({producto.Imagenes.Count} existentes + {nuevas.Count} nuevas excede el límite).");
+        ValidarImagenes(nuevas);
 
         // 3) Agregar nuevas imágenes
         var siguienteOrden = producto.Imagenes.Count == 0 ? 0 : producto.Imagenes.Max(i => i.Orden) + 1;
@@ -189,6 +192,14 @@ public class ProductoService : IProductoService
 
         _repository.Remove(producto);
         return await _repository.SaveChangesAsync();
+    }
+
+    private static void ValidarImagenes(IEnumerable<Microsoft.AspNetCore.Http.IFormFile> imagenes)
+    {
+        if (imagenes.Any(imagen => !ImagenValidationHelper.EsImagenValida(imagen)))
+        {
+            throw new BusinessRuleException("Solo se permiten imagenes JPG, PNG o WebP de hasta 5 MB.");
+        }
     }
 
 }

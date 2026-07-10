@@ -1,0 +1,46 @@
+using InventoryApp.Application.Common;
+using InventoryApp.Application.DTOs;
+using InventoryApp.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace InventoryApp.API.Controllers;
+
+/// La factura se genera y anula automáticamente junto con su venta origen
+/// (ver VentasController: /ventas/{id}/confirmar y /ventas/{id}/anular).
+/// Este controlador es solo de consulta.
+[ApiController]
+[Authorize]
+[Route("facturas")]
+public class FacturasController : ControllerBase
+{
+    private readonly IFacturaService _facturaService;
+
+    public FacturasController(IFacturaService facturaService)
+    {
+        _facturaService = facturaService;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        var facturas = await _facturaService.GetAllAsync();
+        return Ok(ApiResponse<List<FacturaDto>>.Ok(facturas));
+    }
+
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> GetById(int id)
+    {
+        var factura = await _facturaService.GetByIdAsync(id);
+        if (factura is null) return NotFound(ApiResponse<object>.Fail("Factura no encontrada."));
+        return Ok(ApiResponse<FacturaDto>.Ok(factura));
+    }
+
+    [HttpGet("venta/{ventaId:int}")]
+    public async Task<IActionResult> GetByVenta(int ventaId)
+    {
+        var factura = await _facturaService.GetByVentaIdAsync(ventaId);
+        if (factura is null) return NotFound(ApiResponse<object>.Fail("Esta venta no tiene factura generada."));
+        return Ok(ApiResponse<FacturaDto>.Ok(factura));
+    }
+}

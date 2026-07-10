@@ -29,6 +29,8 @@ public class CurrentUserService : ICurrentUserService
 
     public string? NombreUsuario => User?.FindFirstValue("nombreUsuario");
 
+    public string? NombreCompleto => User?.FindFirstValue("nombreCompleto");
+
     public RolUsuario? Rol
     {
         get

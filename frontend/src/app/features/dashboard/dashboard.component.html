@@ -68,5 +68,53 @@
     </div>
   </div>
 
+  <h2 class="section-title">Operación y finanzas</h2>
+  <div class="stats-grid">
+    <div class="card stat"><p class="label">Compras del mes</p><p class="value">{{ r.comprasDelMes }}</p></div>
+    <div class="card stat"><p class="label">Ventas del mes</p><p class="value">{{ r.ventasDelMes }}</p></div>
+    <div class="card stat"><p class="label">Ingresos del mes</p><p class="value">L. {{ r.ingresosDelMes | number:'1.2-2' }}</p></div>
+    <div class="card stat"><p class="label">Utilidad bruta</p><p class="value">L. {{ r.utilidadBruta | number:'1.2-2' }}</p></div>
+    <div class="card stat"><p class="label">Balance operativo</p><p class="value" [class.negative]="r.balanceOperativo < 0">L. {{ r.balanceOperativo | number:'1.2-2' }}</p></div>
+    <div class="card stat"><p class="label">Cuentas por cobrar</p><p class="value">L. {{ r.cuentasPorCobrar | number:'1.2-2' }}</p></div>
+    <div class="card stat"><p class="label">Cuentas por pagar</p><p class="value">L. {{ r.cuentasPorPagar | number:'1.2-2' }}</p></div>
+  </div>
+
+  <div class="panels">
+    <div class="card panel">
+      <h2>Últimas compras</h2>
+      @if (r.ultimasCompras.length === 0) {
+        <p class="empty">Aún no hay compras registradas.</p>
+      } @else {
+        <ul class="list">
+          @for (c of r.ultimasCompras; track c.numeroCompra) {
+            <li><span>{{ c.numeroCompra }} — {{ c.proveedorNombre }}</span><span class="badge">L. {{ c.total | number:'1.2-2' }}</span></li>
+          }
+        </ul>
+      }
+    </div>
+    <div class="card panel">
+      <h2>Últimas ventas</h2>
+      @if (r.ultimasVentas.length === 0) {
+        <p class="empty">Aún no hay ventas registradas.</p>
+      } @else {
+        <ul class="list">
+          @for (v of r.ultimasVentas; track v.numeroVenta) {
+            <li><span>{{ v.numeroVenta }} — {{ v.clienteNombre }}</span><span class="badge">L. {{ v.total | number:'1.2-2' }}</span></li>
+          }
+        </ul>
+      }
+    </div>
+  </div>
+
+  <div class="card auditoria-panel">
+    <h2>Auditoría — última actividad</h2>
+    <div class="auditoria-grid">
+      <div><span class="label">Última venta por</span><span>{{ r.ultimaVentaPor || '—' }}</span></div>
+      <div><span class="label">Última compra por</span><span>{{ r.ultimaCompraPor || '—' }}</span></div>
+      <div><span class="label">Última revisión financiera por</span><span>{{ r.ultimaRevisionFinancieraPor || '—' }}</span></div>
+      <div><span class="label">Último producto registrado por</span><span>{{ r.ultimoProductoRegistradoPor || '—' }}</span></div>
+    </div>
+  </div>
+
   <a routerLink="/productos" class="link-all">Ver todos los productos →</a>
 }

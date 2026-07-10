@@ -1,0 +1,83 @@
+<div class="header-row">
+  <a routerLink="/ventas" mat-icon-button><mat-icon>arrow_back</mat-icon></a>
+  <h1 class="page-title">{{ venta()?.numeroVenta }}</h1>
+  @if (venta(); as v) {
+    <span class="badge" [class.borrador]="v.estado === 'Borrador'" [class.confirmada]="v.estado === 'Confirmada'" [class.anulada]="v.estado === 'Anulada'">
+      {{ v.estado }}
+    </span>
+  }
+</div>
+
+@if (loading()) {
+  <div class="loading"><mat-spinner></mat-spinner></div>
+} @else if (venta(); as v) {
+
+  @if (v.estado === 'Anulada') {
+    <div class="alert alert-danger">
+      <strong>ANULADA</strong> — Motivo: {{ v.motivoAnulacion }}
+      <br>Por {{ v.anuladoPorNombreUsuario }} el {{ v.fechaAnulacion | date:'dd/MM/yyyy HH:mm' }}
+    </div>
+  }
+
+  <div class="card">
+    <div class="info-grid">
+      <div><span class="label">Cliente</span><span>{{ v.clienteNombre }}</span></div>
+      <div><span class="label">Teléfono</span><span>{{ v.clienteTelefono || '—' }}</span></div>
+      <div><span class="label">Identidad/RTN</span><span>{{ v.clienteIdentidadORTN || '—' }}</span></div>
+      <div><span class="label">Método de pago</span><span>{{ v.metodoPago }}</span></div>
+      <div><span class="label">Estado de pago</span><span>{{ v.estadoPago }}</span></div>
+      <div><span class="label">Factura</span><span>{{ v.numeroFactura || '—' }}</span></div>
+    </div>
+
+    <table class="table">
+      <thead>
+        <tr><th>Producto</th><th>Marca</th><th>Modelo</th><th>Cantidad</th><th>Precio unit.</th><th>Subtotal</th></tr>
+      </thead>
+      <tbody>
+        @for (d of v.detalles; track d.id) {
+          <tr>
+            <td>{{ d.productoNombre }}</td>
+            <td>{{ d.productoMarca }}</td>
+            <td>{{ d.productoModelo }}</td>
+            <td>{{ d.cantidad }}</td>
+            <td>L. {{ d.precioUnitario | number:'1.2-2' }}</td>
+            <td>L. {{ d.subtotal | number:'1.2-2' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <div class="totales">
+      <div><span>Subtotal</span><span>L. {{ v.subtotal | number:'1.2-2' }}</span></div>
+      <div><span>Descuento</span><span>- L. {{ v.descuento | number:'1.2-2' }}</span></div>
+      <div><span>Impuesto</span><span>+ L. {{ v.impuesto | number:'1.2-2' }}</span></div>
+      <div class="total"><span>Total</span><span>L. {{ v.total | number:'1.2-2' }}</span></div>
+      @if (v.estado === 'Confirmada') {
+        <div class="utilidad"><span>Utilidad bruta</span><span>L. {{ v.utilidadBruta | number:'1.2-2' }}</span></div>
+      }
+    </div>
+
+    <div class="auditoria">
+      <p>Registrada por <strong>{{ v.creadoPorNombreUsuario || '—' }}</strong> el {{ v.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</p>
+      @if (v.confirmadoPorNombreUsuario) {
+        <p>Vendida/confirmada por <strong>{{ v.confirmadoPorNombreUsuario }}</strong> el {{ v.fechaConfirmacion | date:'dd/MM/yyyy HH:mm' }}</p>
+      }
+    </div>
+
+    <div class="actions">
+      @if (v.estado === 'Borrador') {
+        <a [routerLink]="['/ventas', v.id, 'editar']" mat-button>Editar</a>
+        <button mat-button color="warn" (click)="eliminarBorrador()">Eliminar borrador</button>
+        <button mat-flat-button color="primary" [disabled]="procesando()" (click)="confirmar()">Confirmar venta</button>
+      }
+      @if (v.estado === 'Confirmada') {
+        @if (v.facturaId) {
+          <a [routerLink]="['/facturas', v.facturaId]" mat-button>
+            <mat-icon>receipt_long</mat-icon> Ver factura
+          </a>
+        }
+        <button mat-flat-button color="warn" [disabled]="procesando()" (click)="anular()">Anular venta</button>
+      }
+    </div>
+  </div>
+}

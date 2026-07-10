@@ -15,6 +15,12 @@ public class AppDbContext : DbContext
     public DbSet<CompraDetalle> CompraDetalles => Set<CompraDetalle>();
     public DbSet<MovimientoInventario> MovimientosInventario => Set<MovimientoInventario>();
     public DbSet<MovimientoFinanciero> MovimientosFinancieros => Set<MovimientoFinanciero>();
+    public DbSet<Venta> Ventas => Set<Venta>();
+    public DbSet<VentaDetalle> VentaDetalles => Set<VentaDetalle>();
+    public DbSet<Factura> Facturas => Set<Factura>();
+    public DbSet<FacturaDetalle> FacturaDetalles => Set<FacturaDetalle>();
+    public DbSet<EmpresaConfiguracion> EmpresaConfiguraciones => Set<EmpresaConfiguracion>();
+    public DbSet<RevisionFinanciera> RevisionesFinancieras => Set<RevisionFinanciera>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

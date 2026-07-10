@@ -62,3 +62,17 @@
   display: inline-block; margin-top: 20px;
   color: var(--color-primary); text-decoration: none; font-size: 14px; font-weight: 500;
 }
+
+.section-title { font-size: 15px; font-weight: 600; margin: 28px 0 12px; }
+.stat .value.negative { color: var(--color-danger); }
+
+.auditoria-panel {
+  margin-top: 16px;
+  h2 { margin: 0 0 12px; font-size: 15px; }
+}
+.auditoria-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px;
+  div { display: flex; flex-direction: column; gap: 2px; }
+  .label { font-size: 11px; color: var(--color-text-muted); }
+  span:last-child { font-size: 13px; font-weight: 600; }
+}

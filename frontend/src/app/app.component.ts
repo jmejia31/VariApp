@@ -22,6 +22,9 @@ import { AuthService } from './core/auth/auth.service';
             <a routerLink="/productos" routerLinkActive="active"><mat-icon>widgets</mat-icon> Productos</a>
             <a routerLink="/categorias" routerLinkActive="active"><mat-icon>category</mat-icon> Categorías</a>
             <a routerLink="/compras" routerLinkActive="active"><mat-icon>shopping_cart</mat-icon> Compras</a>
+            <a routerLink="/ventas" routerLinkActive="active"><mat-icon>point_of_sale</mat-icon> Ventas</a>
+            <a routerLink="/finanzas" routerLinkActive="active"><mat-icon>account_balance_wallet</mat-icon> Finanzas</a>
+            <a routerLink="/inventario/movimientos" routerLinkActive="active"><mat-icon>sync_alt</mat-icon> Movimientos</a>
             @if (auth.esAdministrador()) {
               <a routerLink="/usuarios" routerLinkActive="active"><mat-icon>manage_accounts</mat-icon> Usuarios</a>
             }

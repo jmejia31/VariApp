@@ -53,6 +53,11 @@ public class CompraRepository : ICompraRepository
         return await _context.Compras.CountAsync(c => c.Fecha >= inicioMes && c.Estado == Domain.Enums.EstadoDocumento.Confirmada);
     }
 
+    public async Task<decimal> GetCuentasPorPagarAsync() =>
+        await _context.Compras
+            .Where(c => c.Estado == Domain.Enums.EstadoDocumento.Confirmada && c.EstadoPago != Domain.Enums.EstadoPago.Pagado)
+            .SumAsync(c => (decimal?)c.Total) ?? 0m;
+
     public async Task<List<Compra>> GetUltimasAsync(int cantidad = 5) =>
         await ConIncludes().OrderByDescending(c => c.Fecha).Take(cantidad).ToListAsync();
 

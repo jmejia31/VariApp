@@ -11,6 +11,7 @@ using InventoryApp.Infrastructure.Persistence;
 using InventoryApp.Infrastructure.Repositories;
 using InventoryApp.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -26,6 +27,10 @@ if (!string.IsNullOrWhiteSpace(port))
 
 // ===== Controllers + FluentValidation =====
 builder.Services.AddControllers();
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 30 * 1024 * 1024;
+});
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateProductoValidator>();
 
@@ -55,6 +60,15 @@ builder.Services.AddScoped<ICompraRepository, CompraRepository>();
 builder.Services.AddScoped<IMovimientoInventarioRepository, MovimientoInventarioRepository>();
 builder.Services.AddScoped<IMovimientoFinancieroRepository, MovimientoFinancieroRepository>();
 builder.Services.AddScoped<ICompraService, CompraService>();
+builder.Services.AddScoped<IVentaRepository, VentaRepository>();
+builder.Services.AddScoped<IFacturaRepository, FacturaRepository>();
+builder.Services.AddScoped<IEmpresaConfiguracionRepository, EmpresaConfiguracionRepository>();
+builder.Services.AddScoped<IRevisionFinancieraRepository, RevisionFinancieraRepository>();
+builder.Services.AddScoped<IVentaService, VentaService>();
+builder.Services.AddScoped<IFacturaService, FacturaService>();
+builder.Services.AddScoped<IEmpresaConfiguracionService, EmpresaConfiguracionService>();
+builder.Services.AddScoped<IFinanzasService, FinanzasService>();
+builder.Services.AddScoped<IMovimientoInventarioService, MovimientoInventarioService>();
 
 // ===== JWT Authentication =====
 var jwtSecret = builder.Configuration["Jwt:Secret"]

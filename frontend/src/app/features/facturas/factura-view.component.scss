@@ -1,0 +1,77 @@
+.toolbar {
+  display: flex; align-items: center; margin-bottom: 16px;
+  .spacer { flex: 1; }
+}
+
+.loading { display: flex; justify-content: center; padding: 60px 0; }
+
+.factura-sheet {
+  background: white;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 40px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  position: relative;
+  font-size: 13px;
+  color: #1f2333;
+}
+
+.sello-anulada {
+  position: absolute; top: 40px; right: 40px;
+  border: 3px solid var(--color-danger); color: var(--color-danger);
+  font-size: 20px; font-weight: 800; padding: 6px 16px; border-radius: 8px;
+  transform: rotate(8deg); opacity: 0.85; letter-spacing: 2px;
+}
+
+.factura-header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  border-bottom: 2px solid var(--color-primary); padding-bottom: 16px; margin-bottom: 20px;
+
+  .empresa {
+    h1 { margin: 0 0 2px; font-size: 20px; color: var(--color-primary); }
+    .eslogan { font-style: italic; color: var(--color-text-muted); margin: 0 0 6px; }
+    p { margin: 1px 0; font-size: 12px; color: var(--color-text-muted); }
+  }
+
+  .factura-meta {
+    text-align: right;
+    h2 { margin: 0; font-size: 16px; letter-spacing: 1px; }
+    .numero { font-size: 18px; font-weight: 700; color: var(--color-primary); margin: 2px 0; }
+    p { margin: 1px 0; font-size: 12px; color: var(--color-text-muted); }
+    .estado { font-weight: 700; color: var(--color-success); &.anulada { color: var(--color-danger); } }
+  }
+}
+
+.datos-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;
+  h3 { margin: 0 0 4px; font-size: 11px; text-transform: uppercase; color: var(--color-text-muted); }
+  p { margin: 1px 0; }
+}
+
+.tabla-productos {
+  width: 100%; border-collapse: collapse; margin-bottom: 16px;
+  th { text-align: left; font-size: 11px; text-transform: uppercase; color: var(--color-text-muted); padding: 6px; border-bottom: 2px solid var(--color-border); }
+  td { padding: 6px; border-bottom: 1px solid var(--color-border); }
+}
+
+.resumen {
+  max-width: 260px; margin-left: auto; display: flex; flex-direction: column; gap: 4px; margin-bottom: 16px;
+  div { display: flex; justify-content: space-between; }
+  .total { font-weight: 800; font-size: 16px; border-top: 2px solid var(--color-primary); padding-top: 6px; margin-top: 4px; }
+}
+
+.observaciones { font-size: 12px; color: var(--color-text-muted); font-style: italic; margin-bottom: 12px; }
+.motivo-anulacion { font-size: 12px; color: var(--color-danger); font-weight: 600; margin-bottom: 12px; }
+
+.factura-footer {
+  text-align: center; border-top: 1px solid var(--color-border); padding-top: 14px; margin-top: 20px;
+  p { margin: 2px 0; color: var(--color-text-muted); font-size: 12px; }
+  .marca { font-weight: 600; color: var(--color-primary); }
+}
+
+@media print {
+  .no-print { display: none !important; }
+  .factura-sheet { box-shadow: none; max-width: 100%; padding: 0; }
+  body { background: white; }
+}

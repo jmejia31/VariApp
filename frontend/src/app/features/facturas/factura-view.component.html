@@ -1,0 +1,91 @@
+<div class="toolbar no-print">
+  <a routerLink="/ventas" mat-icon-button><mat-icon>arrow_back</mat-icon></a>
+  <span class="spacer"></span>
+  <button mat-flat-button color="primary" (click)="imprimir()">
+    <mat-icon>print</mat-icon> Imprimir
+  </button>
+</div>
+
+@if (loading()) {
+  <div class="loading no-print"><mat-spinner></mat-spinner></div>
+} @else if (factura(); as f) {
+  <div class="factura-sheet">
+
+    @if (f.estado === 'Anulada') {
+      <div class="sello-anulada">ANULADA</div>
+    }
+
+    <header class="factura-header">
+      <div class="empresa">
+        <h1>{{ f.empresaNombre }}</h1>
+        <p class="eslogan">VariStorehn - Eleva tu mundo digital</p>
+        @if (f.empresaRTN) { <p>RTN: {{ f.empresaRTN }}</p> }
+        @if (f.empresaTelefono) { <p>Tel: {{ f.empresaTelefono }}</p> }
+        @if (f.empresaDireccion) { <p>{{ f.empresaDireccion }}</p> }
+      </div>
+      <div class="factura-meta">
+        <h2>FACTURA</h2>
+        <p class="numero">{{ f.numeroFactura }}</p>
+        <p>Fecha: {{ f.fechaEmision | date:'dd/MM/yyyy HH:mm' }}</p>
+        <p>Venta origen: {{ f.numeroVentaOrigen }}</p>
+        <p class="estado" [class.anulada]="f.estado === 'Anulada'">{{ f.estado }}</p>
+      </div>
+    </header>
+
+    <section class="datos-grid">
+      <div>
+        <h3>Cliente</h3>
+        <p>{{ f.clienteNombre }}</p>
+        @if (f.clienteIdentidadORTN) { <p>Identidad/RTN: {{ f.clienteIdentidadORTN }}</p> }
+        @if (f.clienteTelefono) { <p>Tel: {{ f.clienteTelefono }}</p> }
+        @if (f.clienteDireccion) { <p>{{ f.clienteDireccion }}</p> }
+      </div>
+      <div>
+        <h3>Vendedor</h3>
+        <p>{{ f.vendedorNombreUsuario }}</p>
+        <h3>Pago</h3>
+        <p>{{ f.metodoPago }} — {{ f.estadoPago }}</p>
+      </div>
+    </section>
+
+    <table class="tabla-productos">
+      <thead>
+        <tr>
+          <th>Cant.</th><th>Producto</th><th>Marca</th><th>Modelo</th><th>Precio unit.</th><th>Subtotal</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (d of f.detalles; track $index) {
+          <tr>
+            <td>{{ d.cantidad }}</td>
+            <td>{{ d.productoNombre }}</td>
+            <td>{{ d.productoMarca }}</td>
+            <td>{{ d.productoModelo }}</td>
+            <td>L. {{ d.precioUnitario | number:'1.2-2' }}</td>
+            <td>L. {{ d.subtotal | number:'1.2-2' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <section class="resumen">
+      <div><span>Subtotal</span><span>L. {{ f.subtotal | number:'1.2-2' }}</span></div>
+      <div><span>Descuento</span><span>- L. {{ f.descuento | number:'1.2-2' }}</span></div>
+      <div><span>Impuesto</span><span>+ L. {{ f.impuesto | number:'1.2-2' }}</span></div>
+      <div class="total"><span>TOTAL</span><span>L. {{ f.total | number:'1.2-2' }}</span></div>
+    </section>
+
+    @if (f.observaciones) {
+      <p class="observaciones">{{ f.observaciones }}</p>
+    }
+
+    @if (f.estado === 'Anulada') {
+      <p class="motivo-anulacion">Anulada por {{ f.anuladaPorNombreUsuario }} el {{ f.fechaAnulacion | date:'dd/MM/yyyy HH:mm' }} — Motivo: {{ f.motivoAnulacion }}</p>
+    }
+
+    <footer class="factura-footer">
+      <p>Gracias por su compra.</p>
+      <p class="marca">VariStorehn - Eleva tu mundo digital</p>
+    </footer>
+  </div>
+}

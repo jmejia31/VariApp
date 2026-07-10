@@ -17,8 +17,20 @@ public class CloudinaryImageStorageService : IImageStorageService
         var apiKey = configuration["Cloudinary:ApiKey"];
         var apiSecret = configuration["Cloudinary:ApiSecret"];
 
+        if (string.IsNullOrWhiteSpace(cloudName) ||
+            string.IsNullOrWhiteSpace(apiKey) ||
+            string.IsNullOrWhiteSpace(apiSecret) ||
+            cloudName == "CHANGE_ME" ||
+            apiKey == "CHANGE_ME" ||
+            apiSecret == "CHANGE_ME")
+        {
+            throw new InvalidOperationException(
+                "Cloudinary no esta configurado. Revisa Cloudinary:CloudName, Cloudinary:ApiKey y Cloudinary:ApiSecret.");
+        }
+
         var account = new Account(cloudName, apiKey, apiSecret);
         _cloudinary = new Cloudinary(account);
+        _cloudinary.Api.Secure = true;
     }
 
     public async Task<(string Url, string PublicId)> UploadAsync(IFormFile file)
