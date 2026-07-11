@@ -10,6 +10,7 @@ namespace InventoryApp.Application.Services;
 public class VentaService : IVentaService
 {
     private readonly IVentaRepository _ventaRepository;
+    private readonly IClienteRepository _clienteRepository;
     private readonly IProductoRepository _productoRepository;
     private readonly IFacturaRepository _facturaRepository;
     private readonly IMovimientoInventarioRepository _movimientoInventarioRepository;
@@ -17,18 +18,22 @@ public class VentaService : IVentaService
     private readonly IEmpresaConfiguracionService _empresaConfiguracionService;
     private readonly ICurrentUserService _currentUser;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IAuditoriaService _auditoria;
 
     public VentaService(
         IVentaRepository ventaRepository,
+        IClienteRepository clienteRepository,
         IProductoRepository productoRepository,
         IFacturaRepository facturaRepository,
         IMovimientoInventarioRepository movimientoInventarioRepository,
         IMovimientoFinancieroRepository movimientoFinancieroRepository,
         IEmpresaConfiguracionService empresaConfiguracionService,
         ICurrentUserService currentUser,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        IAuditoriaService auditoria)
     {
         _ventaRepository = ventaRepository;
+        _clienteRepository = clienteRepository;
         _productoRepository = productoRepository;
         _facturaRepository = facturaRepository;
         _movimientoInventarioRepository = movimientoInventarioRepository;
@@ -36,6 +41,7 @@ public class VentaService : IVentaService
         _empresaConfiguracionService = empresaConfiguracionService;
         _currentUser = currentUser;
         _unitOfWork = unitOfWork;
+        _auditoria = auditoria;
     }
 
     public async Task<VentaDto?> GetByIdAsync(int id)
@@ -75,11 +81,13 @@ public class VentaService : IVentaService
             CreadoPorNombreUsuario = _currentUser.NombreUsuario
         };
 
+        await VincularClienteAsync(venta, dto);
         await ArmarDetallesAsync(venta, dto.Detalles, validarStock: false);
         CalcularTotales(venta, dto.Impuesto);
 
         await _ventaRepository.AddAsync(venta);
         await _ventaRepository.SaveChangesAsync();
+        await _auditoria.RegistrarAsync(ModuloSistema.Ventas, AccionPermiso.Crear, $"Venta creada: {venta.NumeroVenta}", venta.Id);
 
         return ToDto(venta);
     }
@@ -105,12 +113,14 @@ public class VentaService : IVentaService
         venta.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
         venta.FechaActualizacion = DateTime.UtcNow;
 
+        await VincularClienteAsync(venta, dto);
         venta.Detalles.Clear();
         await ArmarDetallesAsync(venta, dto.Detalles, validarStock: false);
         CalcularTotales(venta, dto.Impuesto);
 
         _ventaRepository.Update(venta);
         await _ventaRepository.SaveChangesAsync();
+        await _auditoria.RegistrarAsync(ModuloSistema.Ventas, AccionPermiso.Editar, $"Venta actualizada: {venta.NumeroVenta}", venta.Id);
 
         return ToDto(venta);
     }
@@ -231,6 +241,7 @@ public class VentaService : IVentaService
         });
 
         var actualizada = await _ventaRepository.GetByIdAsync(id);
+        await _auditoria.RegistrarAsync(ModuloSistema.Ventas, AccionPermiso.Confirmar, $"Venta confirmada: {venta.NumeroVenta}", venta.Id);
         return ToDto(actualizada!);
     }
 
@@ -308,6 +319,7 @@ public class VentaService : IVentaService
         });
 
         var actualizada = await _ventaRepository.GetByIdAsync(id);
+        await _auditoria.RegistrarAsync(ModuloSistema.Ventas, AccionPermiso.Anular, $"Venta anulada: {venta.NumeroVenta}. Motivo: {motivo}", venta.Id);
         return ToDto(actualizada!);
     }
 
@@ -321,7 +333,73 @@ public class VentaService : IVentaService
 
         venta.Detalles.Clear();
         _ventaRepository.Update(venta);
-        return await _ventaRepository.SaveChangesAsync();
+        var eliminado = await _ventaRepository.SaveChangesAsync();
+        if (eliminado)
+            await _auditoria.RegistrarAsync(ModuloSistema.Ventas, AccionPermiso.Eliminar, $"Borrador de venta eliminado: {venta.NumeroVenta}", venta.Id);
+        return eliminado;
+    }
+
+    private async Task VincularClienteAsync(Venta venta, CreateVentaDto dto)
+    {
+        Cliente? cliente = null;
+
+        if (dto.ClienteId.HasValue)
+        {
+            cliente = await _clienteRepository.GetByIdAsync(dto.ClienteId.Value)
+                ?? throw new BusinessRuleException("El cliente seleccionado no existe.");
+
+            if (!cliente.Activo)
+                throw new BusinessRuleException("El cliente seleccionado está inactivo.");
+        }
+        else if (DebeGestionarCliente(dto.ClienteNombre, dto.ClienteIdentidadORTN, dto.ClienteCorreo, dto.ClienteTelefono))
+        {
+            cliente = await _clienteRepository.BuscarCoincidenciaActivaAsync(
+                dto.ClienteIdentidadORTN,
+                dto.ClienteCorreo,
+                dto.ClienteTelefono,
+                dto.ClienteNombre);
+
+            if (cliente is null)
+            {
+                cliente = new Cliente
+                {
+                    Nombre = dto.ClienteNombre.Trim(),
+                    Telefono = dto.ClienteTelefono,
+                    IdentidadORTN = dto.ClienteIdentidadORTN,
+                    Correo = dto.ClienteCorreo,
+                    Direccion = dto.ClienteDireccion,
+                    Activo = true,
+                    CreadoPorUsuarioId = _currentUser.UsuarioId,
+                    CreadoPorNombreUsuario = _currentUser.NombreUsuario
+                };
+                await _clienteRepository.AddAsync(cliente);
+            }
+        }
+
+        if (cliente is null)
+        {
+            venta.ClienteId = null;
+            venta.Cliente = null;
+            venta.ClienteNombre = string.IsNullOrWhiteSpace(dto.ClienteNombre) ? "Cliente final" : dto.ClienteNombre.Trim();
+            return;
+        }
+
+        venta.Cliente = cliente;
+        venta.ClienteId = cliente.Id == 0 ? null : cliente.Id;
+        venta.ClienteNombre = cliente.Nombre;
+        venta.ClienteTelefono = cliente.Telefono;
+        venta.ClienteIdentidadORTN = cliente.IdentidadORTN;
+        venta.ClienteCorreo = cliente.Correo;
+        venta.ClienteDireccion = cliente.Direccion;
+    }
+
+    private static bool DebeGestionarCliente(string? nombre, string? identidad, string? correo, string? telefono)
+    {
+        var nombreNormalizado = nombre?.Trim().ToLower() ?? string.Empty;
+        return !string.IsNullOrWhiteSpace(identidad)
+            || !string.IsNullOrWhiteSpace(correo)
+            || !string.IsNullOrWhiteSpace(telefono)
+            || (!string.IsNullOrWhiteSpace(nombreNormalizado) && nombreNormalizado != "cliente final");
     }
 
     private async Task ArmarDetallesAsync(Venta venta, List<VentaDetalleInputDto> detallesInput, bool validarStock)
@@ -363,7 +441,15 @@ public class VentaService : IVentaService
 
     private static void CalcularTotales(Venta venta, decimal impuesto)
     {
+        if (venta.Descuento < 0)
+            throw new BusinessRuleException("El descuento de la venta no puede ser negativo.");
+        if (impuesto < 0)
+            throw new BusinessRuleException("El impuesto de la venta no puede ser negativo.");
+
         venta.Subtotal = venta.Detalles.Sum(d => d.Subtotal);
+        if (venta.Descuento > venta.Subtotal)
+            throw new BusinessRuleException("El descuento de la venta no puede ser mayor que el subtotal.");
+
         venta.Impuesto = impuesto;
         venta.Total = venta.Subtotal - venta.Descuento + venta.Impuesto;
         venta.CostoTotal = venta.Detalles.Sum(d => d.CostoUnitarioSnapshot * d.Cantidad);
@@ -393,6 +479,7 @@ public class VentaService : IVentaService
         Id = v.Id,
         NumeroVenta = v.NumeroVenta,
         Fecha = v.Fecha,
+        ClienteId = v.ClienteId,
         ClienteNombre = v.ClienteNombre,
         ClienteTelefono = v.ClienteTelefono,
         ClienteIdentidadORTN = v.ClienteIdentidadORTN,

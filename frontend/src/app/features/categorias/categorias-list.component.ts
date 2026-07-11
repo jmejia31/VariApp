@@ -7,6 +7,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { CategoriaService } from '../../services/categoria.service';
 import { Categoria } from '../../core/models/categoria.model';
+import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
 
 @Component({
   selector: 'app-categorias-list',
@@ -18,10 +19,14 @@ import { Categoria } from '../../core/models/categoria.model';
 export class CategoriasListComponent implements OnInit {
   readonly categorias = signal<Categoria[]>([]);
   readonly loading = signal(true);
+  readonly puedeCrear = signal(false);
+  readonly puedeEditar = signal(false);
 
-  constructor(private categoriaService: CategoriaService) {}
+  constructor(private categoriaService: CategoriaService, private permisosRuntime: PermisosRuntimeService) {}
 
   ngOnInit(): void {
+    this.puedeCrear.set(this.permisosRuntime.puede('Categorias', 'Crear'));
+    this.puedeEditar.set(this.permisosRuntime.puede('Categorias', 'Editar'));
     this.cargar();
   }
 

@@ -1,6 +1,8 @@
+using InventoryApp.API.Filters;
 using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Interfaces;
+using InventoryApp.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,6 +21,7 @@ public class ClientesController : ControllerBase
     }
 
     [HttpGet]
+    [RequierePermiso(ModuloSistema.Clientes, AccionPermiso.Ver)]
     public async Task<IActionResult> GetAll()
     {
         var clientes = await _service.GetAllAsync();
@@ -26,13 +29,23 @@ public class ClientesController : ControllerBase
     }
 
     [HttpGet("activos")]
+    [RequierePermiso(ModuloSistema.Clientes, AccionPermiso.Ver)]
     public async Task<IActionResult> GetActivos()
     {
         var clientes = await _service.GetActivosAsync();
         return Ok(ApiResponse<List<ClienteDto>>.Ok(clientes));
     }
 
+    [HttpGet("buscar")]
+    [RequierePermiso(ModuloSistema.Clientes, AccionPermiso.Ver)]
+    public async Task<IActionResult> Buscar([FromQuery] string termino)
+    {
+        var clientes = await _service.BuscarActivosAsync(termino);
+        return Ok(ApiResponse<List<ClienteDto>>.Ok(clientes));
+    }
+
     [HttpGet("{id:int}")]
+    [RequierePermiso(ModuloSistema.Clientes, AccionPermiso.Ver)]
     public async Task<IActionResult> GetById(int id)
     {
         var cliente = await _service.GetByIdAsync(id);
@@ -41,6 +54,7 @@ public class ClientesController : ControllerBase
     }
 
     [HttpPost]
+    [RequierePermiso(ModuloSistema.Clientes, AccionPermiso.Crear)]
     public async Task<IActionResult> Create([FromBody] CreateClienteDto dto)
     {
         var creado = await _service.CreateAsync(dto);
@@ -49,6 +63,7 @@ public class ClientesController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [RequierePermiso(ModuloSistema.Clientes, AccionPermiso.Editar)]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateClienteDto dto)
     {
         var actualizado = await _service.UpdateAsync(id, dto);
@@ -57,6 +72,7 @@ public class ClientesController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
+    [RequierePermiso(ModuloSistema.Clientes, AccionPermiso.Eliminar)]
     public async Task<IActionResult> Delete(int id)
     {
         var eliminado = await _service.DeleteAsync(id);

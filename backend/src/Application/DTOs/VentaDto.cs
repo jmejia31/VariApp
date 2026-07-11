@@ -18,6 +18,7 @@ public class VentaDto
     public int Id { get; set; }
     public string NumeroVenta { get; set; } = string.Empty;
     public DateTime Fecha { get; set; }
+    public int? ClienteId { get; set; }
     public string ClienteNombre { get; set; } = string.Empty;
     public string? ClienteTelefono { get; set; }
     public string? ClienteIdentidadORTN { get; set; }
@@ -56,6 +57,7 @@ public class VentaDetalleInputDto
 
 public class CreateVentaDto
 {
+    public int? ClienteId { get; set; }
     public string ClienteNombre { get; set; } = "Cliente final";
     public string? ClienteTelefono { get; set; }
     public string? ClienteIdentidadORTN { get; set; }

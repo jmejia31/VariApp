@@ -8,6 +8,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { FormsModule } from '@angular/forms';
 import { ProveedorService } from '../../services/proveedor.service';
 import { Proveedor } from '../../core/models/proveedor.model';
+import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
 
 @Component({
   selector: 'app-proveedores-list',
@@ -19,10 +20,16 @@ import { Proveedor } from '../../core/models/proveedor.model';
 export class ProveedoresListComponent implements OnInit {
   readonly proveedores = signal<Proveedor[]>([]);
   readonly loading = signal(true);
+  readonly puedeCrear = signal(false);
+  readonly puedeEditar = signal(false);
 
-  constructor(private proveedorService: ProveedorService) {}
+  constructor(private proveedorService: ProveedorService, private permisosRuntime: PermisosRuntimeService) {}
 
-  ngOnInit(): void { this.cargar(); }
+  ngOnInit(): void {
+    this.puedeCrear.set(this.permisosRuntime.puede('Proveedores', 'Crear'));
+    this.puedeEditar.set(this.permisosRuntime.puede('Proveedores', 'Editar'));
+    this.cargar();
+  }
 
   cargar(): void {
     this.loading.set(true);

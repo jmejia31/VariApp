@@ -44,6 +44,26 @@ public class UsuarioService : IUsuarioService
         return ToDto(usuario);
     }
 
+    public async Task<UsuarioDto?> UpdateAsync(int id, UpdateUsuarioDto dto)
+    {
+        var usuario = await _repository.GetByIdAsync(id);
+        if (usuario is null) return null;
+
+        if (!Enum.TryParse<RolUsuario>(dto.Rol, out var rol))
+            rol = usuario.Rol;
+
+        usuario.NombreCompleto = dto.NombreCompleto.Trim();
+        usuario.Rol = rol;
+
+        if (!string.IsNullOrWhiteSpace(dto.NuevaPassword))
+            usuario.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.NuevaPassword);
+
+        _repository.Update(usuario);
+        await _repository.SaveChangesAsync();
+
+        return ToDto(usuario);
+    }
+
     public async Task<UsuarioDto?> UpdateEstadoAsync(int id, bool activo)
     {
         var usuario = await _repository.GetByIdAsync(id);

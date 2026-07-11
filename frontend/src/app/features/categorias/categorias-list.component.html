@@ -1,8 +1,10 @@
 <div class="header-row">
   <h1 class="page-title">Categorías</h1>
-  <a routerLink="/categorias/nueva" mat-flat-button color="primary">
-    <mat-icon>add</mat-icon> Nueva categoría
-  </a>
+  @if (puedeCrear()) {
+    <a routerLink="/categorias/nueva" mat-flat-button color="primary">
+      <mat-icon>add</mat-icon> Nueva categoría
+    </a>
+  }
 </div>
 
 <div class="card">
@@ -29,9 +31,11 @@
             <td>{{ c.creadoPorNombreUsuario || '—' }}</td>
             <td><mat-slide-toggle [checked]="c.activa" (change)="toggleActiva(c)"></mat-slide-toggle></td>
             <td class="actions">
-              <a [routerLink]="['/categorias', c.id, 'editar']" mat-icon-button title="Editar">
-                <mat-icon>edit</mat-icon>
-              </a>
+              @if (puedeEditar()) {
+                <a [routerLink]="['/categorias', c.id, 'editar']" mat-icon-button title="Editar">
+                  <mat-icon>edit</mat-icon>
+                </a>
+              }
             </td>
           </tr>
         } @empty {

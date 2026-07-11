@@ -11,6 +11,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { debounceTime, Subject } from 'rxjs';
 import { VentaService } from '../../services/venta.service';
 import { Venta } from '../../core/models/venta.model';
+import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
 
 @Component({
   selector: 'app-ventas-list',
@@ -23,17 +24,21 @@ export class VentasListComponent implements OnInit {
   readonly ventas = signal<Venta[]>([]);
   readonly loading = signal(true);
   readonly totalCount = signal(0);
+  readonly puedeCrear = signal(false);
 
   page = 1;
   pageSize = 10;
   search = '';
   private searchSubject = new Subject<string>();
 
-  constructor(private ventaService: VentaService) {
+  constructor(private ventaService: VentaService, private permisosRuntime: PermisosRuntimeService) {
     this.searchSubject.pipe(debounceTime(350)).subscribe(() => { this.page = 1; this.cargar(); });
   }
 
-  ngOnInit(): void { this.cargar(); }
+  ngOnInit(): void {
+    this.puedeCrear.set(this.permisosRuntime.puede('Ventas', 'Crear'));
+    this.cargar();
+  }
 
   onSearchChange(value: string): void { this.search = value; this.searchSubject.next(value); }
 

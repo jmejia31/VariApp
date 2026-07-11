@@ -1,10 +1,12 @@
 <div class="clientes-container">
   <div class="header">
     <h1>Clientes</h1>
-    <a routerLink="/clientes/nuevo" mat-raised-button color="primary">
-      <mat-icon>add</mat-icon>
-      Nuevo Cliente
-    </a>
+    @if (puedeCrear()) {
+      <a routerLink="/clientes/nuevo" mat-raised-button color="primary">
+        <mat-icon>add</mat-icon>
+        Nuevo Cliente
+      </a>
+    }
   </div>
 
   <div class="table-container" *ngIf="!loading() else loadingTemplate">
@@ -33,9 +35,11 @@
             <mat-slide-toggle [(ngModel)]="c.activo" (change)="toggleActivo(c)"></mat-slide-toggle>
           </td>
           <td>
-            <a [routerLink]="['/clientes', c.id, 'editar']" mat-icon-button color="primary">
-              <mat-icon>edit</mat-icon>
-            </a>
+            @if (puedeEditar()) {
+              <a [routerLink]="['/clientes', c.id, 'editar']" mat-icon-button color="primary">
+                <mat-icon>edit</mat-icon>
+              </a>
+            }
           </td>
         </tr>
       </tbody>

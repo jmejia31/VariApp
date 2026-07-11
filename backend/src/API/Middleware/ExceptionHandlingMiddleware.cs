@@ -48,6 +48,15 @@ public class ExceptionHandlingMiddleware
             var response = ApiResponse<object>.Fail(ex.Message);
             await context.Response.WriteAsync(JsonSerializer.Serialize(response, JsonOptions));
         }
+        catch (ForbiddenAccessException ex)
+        {
+            _logger.LogWarning(ex, "Acceso denegado por permisos");
+            context.Response.ContentType = "application/json";
+            context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+
+            var response = ApiResponse<object>.Fail(ex.Message);
+            await context.Response.WriteAsync(JsonSerializer.Serialize(response, JsonOptions));
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error no controlado");

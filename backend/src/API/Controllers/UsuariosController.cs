@@ -40,6 +40,16 @@ public class UsuariosController : ControllerBase
         }
     }
 
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> Update(int id, [FromBody] UpdateUsuarioDto dto)
+    {
+        var actualizado = await _usuarioService.UpdateAsync(id, dto);
+        if (actualizado is null)
+            return NotFound(ApiResponse<object>.Fail("Usuario no encontrado."));
+
+        return Ok(ApiResponse<UsuarioDto>.Ok(actualizado, "Usuario actualizado correctamente."));
+    }
+
     [HttpPut("{id:int}/estado")]
     public async Task<IActionResult> UpdateEstado(int id, [FromBody] UpdateUsuarioEstadoDto dto)
     {

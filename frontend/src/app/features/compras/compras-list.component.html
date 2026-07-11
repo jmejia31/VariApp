@@ -1,8 +1,10 @@
 <div class="header-row">
   <h1 class="page-title">Compras</h1>
-  <a routerLink="/compras/nueva" mat-flat-button color="primary">
-    <mat-icon>add</mat-icon> Nueva compra
-  </a>
+  @if (puedeCrear()) {
+    <a routerLink="/compras/nueva" mat-flat-button color="primary">
+      <mat-icon>add</mat-icon> Nueva compra
+    </a>
+  }
 </div>
 
 <div class="card">

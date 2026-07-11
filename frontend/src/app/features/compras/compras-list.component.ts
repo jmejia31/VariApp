@@ -11,6 +11,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { debounceTime, Subject } from 'rxjs';
 import { CompraService } from '../../services/compra.service';
 import { Compra } from '../../core/models/compra.model';
+import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
 
 @Component({
   selector: 'app-compras-list',
@@ -23,17 +24,21 @@ export class ComprasListComponent implements OnInit {
   readonly compras = signal<Compra[]>([]);
   readonly loading = signal(true);
   readonly totalCount = signal(0);
+  readonly puedeCrear = signal(false);
 
   page = 1;
   pageSize = 10;
   search = '';
   private searchSubject = new Subject<string>();
 
-  constructor(private compraService: CompraService) {
+  constructor(private compraService: CompraService, private permisosRuntime: PermisosRuntimeService) {
     this.searchSubject.pipe(debounceTime(350)).subscribe(() => { this.page = 1; this.cargar(); });
   }
 
-  ngOnInit(): void { this.cargar(); }
+  ngOnInit(): void {
+    this.puedeCrear.set(this.permisosRuntime.puede('Compras', 'Crear'));
+    this.cargar();
+  }
 
   onSearchChange(value: string): void { this.search = value; this.searchSubject.next(value); }
 

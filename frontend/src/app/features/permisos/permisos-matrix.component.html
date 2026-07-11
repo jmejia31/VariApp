@@ -1,0 +1,33 @@
+<h1 class="page-title">Permisos por rol</h1>
+<p class="subtitle">
+  El rol <strong>Administrador</strong> siempre tiene acceso total. Esta matriz define qué puede hacer el rol <strong>Vendedor</strong> en cada módulo.
+</p>
+
+@if (loading()) {
+  <div class="loading"><mat-spinner></mat-spinner></div>
+} @else {
+  <div class="card">
+    <table class="table">
+      <tbody>
+        @for (modulo of modulos(); track modulo) {
+          <tr class="modulo-row">
+            <td class="modulo-nombre">{{ modulo }}</td>
+            <td class="acciones-cell">
+              @for (item of accionesDelModulo(modulo); track item.accion) {
+                <mat-checkbox [checked]="item.permitido" (change)="toggle(item)">
+                  {{ item.accion }}
+                </mat-checkbox>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <div class="form-actions">
+      <button mat-flat-button color="primary" [disabled]="saving()" (click)="guardar()">
+        @if (saving()) { <mat-spinner diameter="20"></mat-spinner> } @else { Guardar cambios }
+      </button>
+    </div>
+  </div>
+}

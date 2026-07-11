@@ -819,6 +819,52 @@ namespace InventoryApp.Infrastructure.Migrations
                     b.ToTable("Proveedores", (string)null);
                 });
 
+            modelBuilder.Entity("InventoryApp.Domain.Entities.RegistroAuditoria", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Accion")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("varchar(30)");
+
+                    b.Property<string>("Descripcion")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<DateTime>("Fecha")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Modulo")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("varchar(30)");
+
+                    b.Property<string>("NombreUsuario")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)");
+
+                    b.Property<int?>("ReferenciaId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UsuarioId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Fecha");
+
+                    b.HasIndex("Modulo", "ReferenciaId");
+
+                    b.ToTable("RegistrosAuditoria", (string)null);
+                });
+
             modelBuilder.Entity("InventoryApp.Domain.Entities.RevisionFinanciera", b =>
                 {
                     b.Property<int>("Id")
@@ -856,6 +902,34 @@ namespace InventoryApp.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("RevisionesFinancieras", (string)null);
+                });
+
+            modelBuilder.Entity("InventoryApp.Domain.Entities.RolPermiso", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Accion")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Modulo")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Permitido")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<int>("Rol")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Rol", "Modulo", "Accion")
+                        .IsUnique();
+
+                    b.ToTable("RolPermisos", (string)null);
                 });
 
             modelBuilder.Entity("InventoryApp.Domain.Entities.Usuario", b =>

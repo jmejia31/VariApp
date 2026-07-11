@@ -22,3 +22,12 @@ public class UpdateUsuarioEstadoDto
 {
     public bool Activo { get; set; }
 }
+
+public class UpdateUsuarioDto
+{
+    public string NombreCompleto { get; set; } = string.Empty;
+    public string Rol { get; set; } = "Vendedor";
+
+    /// Si se informa, se resetea la contraseña del usuario. Si es null/vacío, se conserva la actual.
+    public string? NuevaPassword { get; set; }
+}

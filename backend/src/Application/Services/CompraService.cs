@@ -10,26 +10,32 @@ namespace InventoryApp.Application.Services;
 public class CompraService : ICompraService
 {
     private readonly ICompraRepository _compraRepository;
+    private readonly IProveedorRepository _proveedorRepository;
     private readonly IProductoRepository _productoRepository;
     private readonly IMovimientoInventarioRepository _movimientoInventarioRepository;
     private readonly IMovimientoFinancieroRepository _movimientoFinancieroRepository;
     private readonly ICurrentUserService _currentUser;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IAuditoriaService _auditoria;
 
     public CompraService(
         ICompraRepository compraRepository,
+        IProveedorRepository proveedorRepository,
         IProductoRepository productoRepository,
         IMovimientoInventarioRepository movimientoInventarioRepository,
         IMovimientoFinancieroRepository movimientoFinancieroRepository,
         ICurrentUserService currentUser,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        IAuditoriaService auditoria)
     {
         _compraRepository = compraRepository;
+        _proveedorRepository = proveedorRepository;
         _productoRepository = productoRepository;
         _movimientoInventarioRepository = movimientoInventarioRepository;
         _movimientoFinancieroRepository = movimientoFinancieroRepository;
         _currentUser = currentUser;
         _unitOfWork = unitOfWork;
+        _auditoria = auditoria;
     }
 
     public async Task<CompraDto?> GetByIdAsync(int id)
@@ -68,11 +74,13 @@ public class CompraService : ICompraService
             CreadoPorNombreUsuario = _currentUser.NombreUsuario
         };
 
+        await VincularProveedorAsync(compra, dto);
         await ArmarDetallesAsync(compra, dto.Detalles);
         CalcularTotales(compra, dto.Impuesto);
 
         await _compraRepository.AddAsync(compra);
         await _compraRepository.SaveChangesAsync();
+        await _auditoria.RegistrarAsync(ModuloSistema.Compras, AccionPermiso.Crear, $"Compra creada: {compra.NumeroCompra}", compra.Id);
 
         return ToDto(compra);
     }
@@ -97,12 +105,14 @@ public class CompraService : ICompraService
         compra.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
         compra.FechaActualizacion = DateTime.UtcNow;
 
+        await VincularProveedorAsync(compra, dto);
         compra.Detalles.Clear();
         await ArmarDetallesAsync(compra, dto.Detalles);
         CalcularTotales(compra, dto.Impuesto);
 
         _compraRepository.Update(compra);
         await _compraRepository.SaveChangesAsync();
+        await _auditoria.RegistrarAsync(ModuloSistema.Compras, AccionPermiso.Editar, $"Compra actualizada: {compra.NumeroCompra}", compra.Id);
 
         return ToDto(compra);
     }
@@ -171,6 +181,7 @@ public class CompraService : ICompraService
             await _compraRepository.SaveChangesAsync();
         });
 
+        await _auditoria.RegistrarAsync(ModuloSistema.Compras, AccionPermiso.Confirmar, $"Compra confirmada: {compra.NumeroCompra}", compra.Id);
         return ToDto(compra);
     }
 
@@ -240,6 +251,7 @@ public class CompraService : ICompraService
             await _compraRepository.SaveChangesAsync();
         });
 
+        await _auditoria.RegistrarAsync(ModuloSistema.Compras, AccionPermiso.Anular, $"Compra anulada: {compra.NumeroCompra}. Motivo: {motivo}", compra.Id);
         return ToDto(compra);
     }
 
@@ -254,8 +266,65 @@ public class CompraService : ICompraService
         // Nota: se permite eliminación física únicamente en Borrador (no afecta stock/finanzas).
         compra.Detalles.Clear();
         _compraRepository.Update(compra);
-        return await _compraRepository.SaveChangesAsync();
+        var eliminado = await _compraRepository.SaveChangesAsync();
+        if (eliminado)
+            await _auditoria.RegistrarAsync(ModuloSistema.Compras, AccionPermiso.Eliminar, $"Borrador de compra eliminado: {compra.NumeroCompra}", compra.Id);
+        return eliminado;
     }
+
+    private async Task VincularProveedorAsync(Compra compra, CreateCompraDto dto)
+    {
+        Proveedor? proveedor = null;
+
+        if (dto.ProveedorId.HasValue)
+        {
+            proveedor = await _proveedorRepository.GetByIdAsync(dto.ProveedorId.Value)
+                ?? throw new BusinessRuleException("El proveedor seleccionado no existe.");
+
+            if (!proveedor.Activo)
+                throw new BusinessRuleException("El proveedor seleccionado está inactivo.");
+        }
+        else if (DebeGestionarProveedor(dto.ProveedorNombre, dto.ProveedorDocumento, dto.ProveedorTelefono))
+        {
+            proveedor = await _proveedorRepository.BuscarCoincidenciaActivaAsync(
+                dto.ProveedorDocumento,
+                null,
+                dto.ProveedorTelefono,
+                dto.ProveedorNombre);
+
+            if (proveedor is null)
+            {
+                proveedor = new Proveedor
+                {
+                    Nombre = dto.ProveedorNombre.Trim(),
+                    Telefono = dto.ProveedorTelefono,
+                    Documento = dto.ProveedorDocumento,
+                    Activo = true,
+                    CreadoPorUsuarioId = _currentUser.UsuarioId,
+                    CreadoPorNombreUsuario = _currentUser.NombreUsuario
+                };
+                await _proveedorRepository.AddAsync(proveedor);
+            }
+        }
+
+        if (proveedor is null)
+        {
+            compra.ProveedorId = null;
+            compra.Proveedor = null;
+            return;
+        }
+
+        compra.Proveedor = proveedor;
+        compra.ProveedorId = proveedor.Id == 0 ? null : proveedor.Id;
+        compra.ProveedorNombre = proveedor.Nombre;
+        compra.ProveedorTelefono = proveedor.Telefono;
+        compra.ProveedorDocumento = proveedor.Documento;
+    }
+
+    private static bool DebeGestionarProveedor(string? nombre, string? documento, string? telefono) =>
+        !string.IsNullOrWhiteSpace(documento)
+        || !string.IsNullOrWhiteSpace(telefono)
+        || !string.IsNullOrWhiteSpace(nombre);
 
     private async Task ArmarDetallesAsync(Compra compra, List<CompraDetalleInputDto> detallesInput)
     {
@@ -287,7 +356,15 @@ public class CompraService : ICompraService
 
     private static void CalcularTotales(Compra compra, decimal impuesto)
     {
+        if (compra.Descuento < 0)
+            throw new BusinessRuleException("El descuento de la compra no puede ser negativo.");
+        if (impuesto < 0)
+            throw new BusinessRuleException("El impuesto de la compra no puede ser negativo.");
+
         compra.Subtotal = compra.Detalles.Sum(d => d.Subtotal);
+        if (compra.Descuento > compra.Subtotal)
+            throw new BusinessRuleException("El descuento de la compra no puede ser mayor que el subtotal.");
+
         compra.Impuesto = impuesto;
         compra.Total = compra.Subtotal - compra.Descuento + compra.Impuesto;
 
@@ -309,6 +386,7 @@ public class CompraService : ICompraService
         Id = c.Id,
         NumeroCompra = c.NumeroCompra,
         Fecha = c.Fecha,
+        ProveedorId = c.ProveedorId,
         ProveedorNombre = c.ProveedorNombre,
         ProveedorTelefono = c.ProveedorTelefono,
         ProveedorDocumento = c.ProveedorDocumento,

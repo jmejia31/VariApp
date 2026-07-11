@@ -26,6 +26,39 @@ public class ProveedorRepository : IProveedorRepository
     public async Task<List<Proveedor>> GetActivosAsync() =>
         await _context.Proveedores.Where(p => p.Activo).OrderBy(p => p.Nombre).ToListAsync();
 
+    public async Task<List<Proveedor>> BuscarActivosAsync(string termino, int limite = 10)
+    {
+        var normalizado = termino.Trim().ToLower();
+        if (string.IsNullOrWhiteSpace(normalizado)) return new List<Proveedor>();
+
+        return await _context.Proveedores
+            .Where(p => p.Activo && (
+                p.Nombre.ToLower().Contains(normalizado) ||
+                (p.Documento != null && p.Documento.ToLower().Contains(normalizado)) ||
+                (p.Correo != null && p.Correo.ToLower().Contains(normalizado)) ||
+                (p.Telefono != null && p.Telefono.ToLower().Contains(normalizado))))
+            .OrderBy(p => p.Nombre)
+            .Take(limite)
+            .ToListAsync();
+    }
+
+    public async Task<Proveedor?> BuscarCoincidenciaActivaAsync(string? documento, string? correo, string? telefono, string? nombre)
+    {
+        var doc = NormalizarDocumento(documento);
+        var email = NormalizarTexto(correo);
+        var tel = NormalizarDocumento(telefono);
+        var nom = NormalizarTexto(nombre);
+
+        return await _context.Proveedores
+            .Where(p => p.Activo)
+            .OrderBy(p => p.Nombre)
+            .FirstOrDefaultAsync(p =>
+                (!string.IsNullOrEmpty(doc) && p.Documento != null && p.Documento.Replace("-", "").Replace(" ", "").ToLower() == doc) ||
+                (!string.IsNullOrEmpty(email) && p.Correo != null && p.Correo.ToLower() == email) ||
+                (!string.IsNullOrEmpty(tel) && p.Telefono != null && p.Telefono.Replace("-", "").Replace(" ", "").ToLower() == tel) ||
+                (!string.IsNullOrEmpty(nom) && p.Nombre.ToLower() == nom));
+    }
+
     public async Task<bool> ExisteNombreAsync(string nombre, int? excluirId = null) =>
         await _context.Proveedores.AnyAsync(p =>
             p.Nombre.ToLower() == nombre.ToLower() && (excluirId == null || p.Id != excluirId));
@@ -41,4 +74,9 @@ public class ProveedorRepository : IProveedorRepository
 
     public async Task<bool> SaveChangesAsync() =>
         await _context.SaveChangesAsync() > 0;
+
+    private static string NormalizarTexto(string? value) => value?.Trim().ToLower() ?? string.Empty;
+
+    private static string NormalizarDocumento(string? value) =>
+        value?.Replace("-", "").Replace(" ", "").Trim().ToLower() ?? string.Empty;
 }

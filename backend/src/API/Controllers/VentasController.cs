@@ -1,6 +1,8 @@
+using InventoryApp.API.Filters;
 using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Interfaces;
+using InventoryApp.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,6 +21,7 @@ public class VentasController : ControllerBase
     }
 
     [HttpGet]
+    [RequierePermiso(ModuloSistema.Ventas, AccionPermiso.Ver)]
     public async Task<IActionResult> GetPaged([FromQuery] PagedRequest request)
     {
         var resultado = await _ventaService.GetPagedAsync(request);
@@ -26,6 +29,7 @@ public class VentasController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
+    [RequierePermiso(ModuloSistema.Ventas, AccionPermiso.Ver)]
     public async Task<IActionResult> GetById(int id)
     {
         var venta = await _ventaService.GetByIdAsync(id);
@@ -34,6 +38,7 @@ public class VentasController : ControllerBase
     }
 
     [HttpPost]
+    [RequierePermiso(ModuloSistema.Ventas, AccionPermiso.Crear)]
     public async Task<IActionResult> Create([FromBody] CreateVentaDto dto)
     {
         var creada = await _ventaService.CreateAsync(dto);
@@ -42,6 +47,7 @@ public class VentasController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [RequierePermiso(ModuloSistema.Ventas, AccionPermiso.Editar)]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateVentaDto dto)
     {
         var actualizada = await _ventaService.UpdateAsync(id, dto);
@@ -50,6 +56,7 @@ public class VentasController : ControllerBase
     }
 
     [HttpPost("{id:int}/confirmar")]
+    [RequierePermiso(ModuloSistema.Ventas, AccionPermiso.Confirmar)]
     public async Task<IActionResult> Confirmar(int id)
     {
         var confirmada = await _ventaService.ConfirmarAsync(id);
@@ -58,6 +65,7 @@ public class VentasController : ControllerBase
     }
 
     [HttpPost("{id:int}/anular")]
+    [RequierePermiso(ModuloSistema.Ventas, AccionPermiso.Anular)]
     public async Task<IActionResult> Anular(int id, [FromBody] AnularDocumentoDto dto)
     {
         var anulada = await _ventaService.AnularAsync(id, dto.MotivoAnulacion);
@@ -66,6 +74,7 @@ public class VentasController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
+    [RequierePermiso(ModuloSistema.Ventas, AccionPermiso.Eliminar)]
     public async Task<IActionResult> DeleteBorrador(int id)
     {
         var eliminada = await _ventaService.DeleteBorradorAsync(id);

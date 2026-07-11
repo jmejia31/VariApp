@@ -1,6 +1,8 @@
+using InventoryApp.API.Filters;
 using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Interfaces;
+using InventoryApp.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,6 +21,7 @@ public class FinanzasController : ControllerBase
     }
 
     [HttpGet("resumen")]
+    [RequierePermiso(ModuloSistema.Finanzas, AccionPermiso.Ver)]
     public async Task<IActionResult> GetResumen()
     {
         var resumen = await _finanzasService.GetResumenAsync();
@@ -26,6 +29,7 @@ public class FinanzasController : ControllerBase
     }
 
     [HttpGet("movimientos")]
+    [RequierePermiso(ModuloSistema.Finanzas, AccionPermiso.Ver)]
     public async Task<IActionResult> GetMovimientos([FromQuery] DateTime? desde, [FromQuery] DateTime? hasta)
     {
         var movimientos = await _finanzasService.GetMovimientosAsync(desde, hasta);
@@ -33,6 +37,7 @@ public class FinanzasController : ControllerBase
     }
 
     [HttpPost("movimientos/manual")]
+    [RequierePermiso(ModuloSistema.Finanzas, AccionPermiso.Crear)]
     public async Task<IActionResult> RegistrarManual([FromBody] CreateMovimientoManualDto dto)
     {
         var creado = await _finanzasService.RegistrarMovimientoManualAsync(dto);
@@ -40,6 +45,7 @@ public class FinanzasController : ControllerBase
     }
 
     [HttpPost("movimientos/{id:int}/anular")]
+    [RequierePermiso(ModuloSistema.Finanzas, AccionPermiso.Anular)]
     public async Task<IActionResult> AnularMovimiento(int id, [FromBody] AnularDocumentoDto dto)
     {
         var anulado = await _finanzasService.AnularMovimientoAsync(id, dto.MotivoAnulacion);
@@ -48,6 +54,7 @@ public class FinanzasController : ControllerBase
     }
 
     [HttpGet("revisiones")]
+    [RequierePermiso(ModuloSistema.Finanzas, AccionPermiso.Ver)]
     public async Task<IActionResult> GetRevisiones()
     {
         var revisiones = await _finanzasService.GetRevisionesAsync();
@@ -55,6 +62,7 @@ public class FinanzasController : ControllerBase
     }
 
     [HttpPost("revisiones")]
+    [RequierePermiso(ModuloSistema.Finanzas, AccionPermiso.Crear)]
     public async Task<IActionResult> RegistrarRevision([FromBody] CreateRevisionFinancieraDto dto)
     {
         var creada = await _finanzasService.RegistrarRevisionAsync(dto);

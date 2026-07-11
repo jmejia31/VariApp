@@ -1,0 +1,10 @@
+.page-title { margin: 0 0 4px; font-size: 22px; }
+.subtitle { margin: 0 0 20px; font-size: 13px; color: var(--color-text-muted); }
+.loading { display: flex; justify-content: center; padding: 40px 0; }
+
+.table { width: 100%; border-collapse: collapse; }
+.modulo-row td { padding: 12px 8px; border-bottom: 1px solid var(--color-border); vertical-align: middle; }
+.modulo-nombre { font-weight: 600; font-size: 13px; width: 160px; }
+.acciones-cell { display: flex; flex-wrap: wrap; gap: 16px; }
+
+.form-actions { display: flex; justify-content: flex-end; margin-top: 20px; }

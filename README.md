@@ -31,6 +31,18 @@ Cambia esta contrasena antes de produccion.
 
 ## Arranque local
 
+### Arranque rápido desde VS Code
+
+Se añadió una tarea para levantar backend y frontend con un solo comando desde VS Code:
+
+1. Abre la Paleta de comandos.
+2. Ejecuta "Tasks: Run Task".
+3. Selecciona "start:variapp".
+
+La tarea inicia:
+- Backend en http://localhost:5005
+- Frontend en http://localhost:4200
+
 ### 1. MySQL local
 
 El proyecto usa el MySQL de Laragon en puerto `3307`, separado del servicio Windows `MySQL80`.
@@ -79,6 +91,14 @@ La app queda disponible en:
 ```text
 http://localhost:4200
 ```
+
+## Permisos y acceso real
+
+El sistema ya aplica permisos de forma real en los controladores y en la UI:
+
+- Backend: los endpoints sensibles verifican permisos antes de ejecutar acciones clave.
+- Frontend: las rutas de creación/edición y los botones de acciones se ocultan o bloquean según el permiso del usuario.
+- Administrador: conserva acceso completo.
 
 ## Comandos de verificacion
 

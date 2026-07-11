@@ -10,11 +10,13 @@ public class ClienteService : IClienteService
 {
     private readonly IClienteRepository _repository;
     private readonly ICurrentUserService _currentUser;
+    private readonly IAuditoriaService _auditoria;
 
-    public ClienteService(IClienteRepository repository, ICurrentUserService currentUser)
+    public ClienteService(IClienteRepository repository, ICurrentUserService currentUser, IAuditoriaService auditoria)
     {
         _repository = repository;
         _currentUser = currentUser;
+        _auditoria = auditoria;
     }
 
     public async Task<List<ClienteDto>> GetAllAsync()
@@ -26,6 +28,12 @@ public class ClienteService : IClienteService
     public async Task<List<ClienteDto>> GetActivosAsync()
     {
         var clientes = await _repository.GetActivosAsync();
+        return clientes.Select(c => ToDto(c, incluirVentas: false)).ToList();
+    }
+
+    public async Task<List<ClienteDto>> BuscarActivosAsync(string termino)
+    {
+        var clientes = await _repository.BuscarActivosAsync(termino);
         return clientes.Select(c => ToDto(c, incluirVentas: false)).ToList();
     }
 
@@ -55,6 +63,7 @@ public class ClienteService : IClienteService
 
         await _repository.AddAsync(cliente);
         await _repository.SaveChangesAsync();
+        await _auditoria.RegistrarAsync(ModuloSistema.Clientes, AccionPermiso.Crear, $"Cliente creado: {cliente.Nombre}", cliente.Id);
 
         return ToDto(cliente);
     }
@@ -80,6 +89,7 @@ public class ClienteService : IClienteService
 
         _repository.Update(cliente);
         await _repository.SaveChangesAsync();
+        await _auditoria.RegistrarAsync(ModuloSistema.Clientes, AccionPermiso.Editar, $"Cliente actualizado: {cliente.Nombre}", cliente.Id);
 
         return ToDto(cliente);
     }
@@ -97,13 +107,17 @@ public class ClienteService : IClienteService
             cliente.FechaActualizacion = DateTime.UtcNow;
             _repository.Update(cliente);
             await _repository.SaveChangesAsync();
+            await _auditoria.RegistrarAsync(ModuloSistema.Clientes, AccionPermiso.Eliminar, $"Cliente desactivado por historial: {cliente.Nombre}", cliente.Id);
 
             throw new BusinessRuleException(
                 $"El cliente tiene {cliente.Ventas.Count} venta(s) registrada(s); no se puede eliminar. Se desactivó en su lugar.");
         }
 
         _repository.Remove(cliente);
-        return await _repository.SaveChangesAsync();
+        var eliminado = await _repository.SaveChangesAsync();
+        if (eliminado)
+            await _auditoria.RegistrarAsync(ModuloSistema.Clientes, AccionPermiso.Eliminar, $"Cliente eliminado: {cliente.Nombre}", id);
+        return eliminado;
     }
 
     private static ClienteDto ToDto(Cliente c, bool incluirVentas = true) => new()

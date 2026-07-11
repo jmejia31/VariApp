@@ -13,13 +13,14 @@ public class ClienteServiceTests
 {
     private readonly Mock<IClienteRepository> _repoMock = new();
     private readonly Mock<ICurrentUserService> _currentUserMock = new();
+    private readonly Mock<IAuditoriaService> _auditoriaMock = new();
     private readonly ClienteService _service;
 
     public ClienteServiceTests()
     {
         _currentUserMock.Setup(c => c.UsuarioId).Returns(1);
         _currentUserMock.Setup(c => c.NombreUsuario).Returns("admin");
-        _service = new ClienteService(_repoMock.Object, _currentUserMock.Object);
+        _service = new ClienteService(_repoMock.Object, _currentUserMock.Object, _auditoriaMock.Object);
     }
 
     [Fact]

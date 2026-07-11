@@ -1,0 +1,61 @@
+<h1 class="page-title">Auditoría</h1>
+<p class="subtitle">Bitácora centralizada de todas las acciones del sistema.</p>
+
+<div class="card filters">
+  <mat-form-field appearance="outline">
+    <mat-label>Módulo</mat-label>
+    <mat-select [(ngModel)]="filtroModulo" (selectionChange)="aplicarFiltros()">
+      <mat-option value="">Todos</mat-option>
+      @for (m of modulos; track m) { <mat-option [value]="m">{{ m }}</mat-option> }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Acción</mat-label>
+    <mat-select [(ngModel)]="filtroAccion" (selectionChange)="aplicarFiltros()">
+      <mat-option value="">Todas</mat-option>
+      @for (a of acciones; track a) { <mat-option [value]="a">{{ a }}</mat-option> }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Desde</mat-label>
+    <input matInput type="date" [(ngModel)]="filtroDesde" (change)="aplicarFiltros()">
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Hasta</mat-label>
+    <input matInput type="date" [(ngModel)]="filtroHasta" (change)="aplicarFiltros()">
+  </mat-form-field>
+</div>
+
+<div class="card">
+  @if (loading()) {
+    <div class="loading"><mat-spinner></mat-spinner></div>
+  } @else {
+    <table class="table">
+      <thead>
+        <tr><th>Fecha</th><th>Usuario</th><th>Módulo</th><th>Acción</th><th>Detalle</th></tr>
+      </thead>
+      <tbody>
+        @for (r of registros(); track r.id) {
+          <tr>
+            <td>{{ r.fecha | date:'dd/MM/yyyy HH:mm' }}</td>
+            <td>{{ r.nombreUsuario }}</td>
+            <td>{{ r.modulo }}</td>
+            <td>
+              <span class="badge" [class.confirmar]="r.accion === 'Confirmar'" [class.anular]="r.accion === 'Anular'" [class.eliminar]="r.accion === 'Eliminar'">
+                {{ r.accion }}
+              </span>
+            </td>
+            <td>{{ r.descripcion }}</td>
+          </tr>
+        } @empty {
+          <tr><td colspan="5" class="empty">No hay registros de auditoría con estos filtros.</td></tr>
+        }
+      </tbody>
+    </table>
+
+    <mat-paginator [length]="totalCount()" [pageSize]="pageSize" [pageIndex]="page - 1" [pageSizeOptions]="[25, 50, 100]" (page)="onPageChange($event)"></mat-paginator>
+  }
+</div>

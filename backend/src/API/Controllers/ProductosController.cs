@@ -1,6 +1,8 @@
+using InventoryApp.API.Filters;
 using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Interfaces;
+using InventoryApp.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,6 +21,7 @@ public class ProductosController : ControllerBase
     }
 
     [HttpGet]
+    [RequierePermiso(ModuloSistema.Productos, AccionPermiso.Ver)]
     public async Task<IActionResult> GetPaged([FromQuery] PagedRequest request)
     {
         var resultado = await _productoService.GetPagedAsync(request);
@@ -26,6 +29,7 @@ public class ProductosController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
+    [RequierePermiso(ModuloSistema.Productos, AccionPermiso.Ver)]
     public async Task<IActionResult> GetById(int id)
     {
         var producto = await _productoService.GetByIdAsync(id);
@@ -36,6 +40,7 @@ public class ProductosController : ControllerBase
     }
 
     [HttpPost]
+    [RequierePermiso(ModuloSistema.Productos, AccionPermiso.Crear)]
     public async Task<IActionResult> Create([FromForm] CreateProductoDto dto)
     {
         var creado = await _productoService.CreateAsync(dto);
@@ -44,6 +49,7 @@ public class ProductosController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [RequierePermiso(ModuloSistema.Productos, AccionPermiso.Editar)]
     public async Task<IActionResult> Update(int id, [FromForm] UpdateProductoDto dto)
     {
         var actualizado = await _productoService.UpdateAsync(id, dto);
@@ -54,6 +60,7 @@ public class ProductosController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
+    [RequierePermiso(ModuloSistema.Productos, AccionPermiso.Eliminar)]
     public async Task<IActionResult> Delete(int id)
     {
         var eliminado = await _productoService.DeleteAsync(id);

@@ -13,13 +13,14 @@ public class ProveedorServiceTests
 {
     private readonly Mock<IProveedorRepository> _repoMock = new();
     private readonly Mock<ICurrentUserService> _currentUserMock = new();
+    private readonly Mock<IAuditoriaService> _auditoriaMock = new();
     private readonly ProveedorService _service;
 
     public ProveedorServiceTests()
     {
         _currentUserMock.Setup(c => c.UsuarioId).Returns(1);
         _currentUserMock.Setup(c => c.NombreUsuario).Returns("admin");
-        _service = new ProveedorService(_repoMock.Object, _currentUserMock.Object);
+        _service = new ProveedorService(_repoMock.Object, _currentUserMock.Object, _auditoriaMock.Object);
     }
 
     [Fact]

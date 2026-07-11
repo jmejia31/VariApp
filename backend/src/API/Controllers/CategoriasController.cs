@@ -1,6 +1,8 @@
+using InventoryApp.API.Filters;
 using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Interfaces;
+using InventoryApp.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,6 +21,7 @@ public class CategoriasController : ControllerBase
     }
 
     [HttpGet]
+    [RequierePermiso(ModuloSistema.Categorias, AccionPermiso.Ver)]
     public async Task<IActionResult> GetAll()
     {
         var categorias = await _categoriaService.GetAllAsync();
@@ -26,6 +29,7 @@ public class CategoriasController : ControllerBase
     }
 
     [HttpGet("activas")]
+    [RequierePermiso(ModuloSistema.Categorias, AccionPermiso.Ver)]
     public async Task<IActionResult> GetActivas()
     {
         var categorias = await _categoriaService.GetActivasAsync();
@@ -33,6 +37,7 @@ public class CategoriasController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
+    [RequierePermiso(ModuloSistema.Categorias, AccionPermiso.Ver)]
     public async Task<IActionResult> GetById(int id)
     {
         var categoria = await _categoriaService.GetByIdAsync(id);
@@ -43,6 +48,7 @@ public class CategoriasController : ControllerBase
     }
 
     [HttpPost]
+    [RequierePermiso(ModuloSistema.Categorias, AccionPermiso.Crear)]
     public async Task<IActionResult> Create([FromBody] CreateCategoriaDto dto)
     {
         var creada = await _categoriaService.CreateAsync(dto);
@@ -51,6 +57,7 @@ public class CategoriasController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [RequierePermiso(ModuloSistema.Categorias, AccionPermiso.Editar)]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateCategoriaDto dto)
     {
         var actualizada = await _categoriaService.UpdateAsync(id, dto);
@@ -61,6 +68,7 @@ public class CategoriasController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
+    [RequierePermiso(ModuloSistema.Categorias, AccionPermiso.Eliminar)]
     public async Task<IActionResult> Delete(int id)
     {
         var eliminada = await _categoriaService.DeleteAsync(id);

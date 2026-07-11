@@ -1,6 +1,8 @@
+using InventoryApp.API.Filters;
 using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Interfaces;
+using InventoryApp.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,6 +21,7 @@ public class ComprasController : ControllerBase
     }
 
     [HttpGet]
+    [RequierePermiso(ModuloSistema.Compras, AccionPermiso.Ver)]
     public async Task<IActionResult> GetPaged([FromQuery] PagedRequest request)
     {
         var resultado = await _compraService.GetPagedAsync(request);
@@ -26,6 +29,7 @@ public class ComprasController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
+    [RequierePermiso(ModuloSistema.Compras, AccionPermiso.Ver)]
     public async Task<IActionResult> GetById(int id)
     {
         var compra = await _compraService.GetByIdAsync(id);
@@ -34,6 +38,7 @@ public class ComprasController : ControllerBase
     }
 
     [HttpPost]
+    [RequierePermiso(ModuloSistema.Compras, AccionPermiso.Crear)]
     public async Task<IActionResult> Create([FromBody] CreateCompraDto dto)
     {
         var creada = await _compraService.CreateAsync(dto);
@@ -42,6 +47,7 @@ public class ComprasController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [RequierePermiso(ModuloSistema.Compras, AccionPermiso.Editar)]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateCompraDto dto)
     {
         var actualizada = await _compraService.UpdateAsync(id, dto);
@@ -50,6 +56,7 @@ public class ComprasController : ControllerBase
     }
 
     [HttpPost("{id:int}/confirmar")]
+    [RequierePermiso(ModuloSistema.Compras, AccionPermiso.Confirmar)]
     public async Task<IActionResult> Confirmar(int id)
     {
         var confirmada = await _compraService.ConfirmarAsync(id);
@@ -58,6 +65,7 @@ public class ComprasController : ControllerBase
     }
 
     [HttpPost("{id:int}/anular")]
+    [RequierePermiso(ModuloSistema.Compras, AccionPermiso.Anular)]
     public async Task<IActionResult> Anular(int id, [FromBody] AnularDocumentoDto dto)
     {
         var anulada = await _compraService.AnularAsync(id, dto.MotivoAnulacion);
@@ -66,6 +74,7 @@ public class ComprasController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
+    [RequierePermiso(ModuloSistema.Compras, AccionPermiso.Eliminar)]
     public async Task<IActionResult> DeleteBorrador(int id)
     {
         var eliminada = await _compraService.DeleteBorradorAsync(id);

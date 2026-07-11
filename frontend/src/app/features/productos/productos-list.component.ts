@@ -13,6 +13,7 @@ import { debounceTime, Subject } from 'rxjs';
 import { ProductoService } from '../../services/producto.service';
 import { Producto } from '../../core/models/producto.model';
 import { ConfirmDialogComponent } from '../../shared/confirm-dialog.component';
+import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
 
 @Component({
   selector: 'app-productos-list',
@@ -28,6 +29,9 @@ export class ProductosListComponent implements OnInit {
   readonly productos = signal<Producto[]>([]);
   readonly loading = signal(true);
   readonly totalCount = signal(0);
+  readonly puedeCrear = signal(false);
+  readonly puedeEditar = signal(false);
+  readonly puedeEliminar = signal(false);
 
   page = 1;
   pageSize = 10;
@@ -37,7 +41,7 @@ export class ProductosListComponent implements OnInit {
 
   private searchSubject = new Subject<string>();
 
-  constructor(private productoService: ProductoService, private dialog: MatDialog) {
+  constructor(private productoService: ProductoService, private dialog: MatDialog, private permisosRuntime: PermisosRuntimeService) {
     this.searchSubject.pipe(debounceTime(350)).subscribe(() => {
       this.page = 1;
       this.cargar();
@@ -45,6 +49,9 @@ export class ProductosListComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.puedeCrear.set(this.permisosRuntime.puede('Productos', 'Crear'));
+    this.puedeEditar.set(this.permisosRuntime.puede('Productos', 'Editar'));
+    this.puedeEliminar.set(this.permisosRuntime.puede('Productos', 'Eliminar'));
     this.cargar();
   }
 

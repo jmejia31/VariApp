@@ -13,10 +13,12 @@ namespace InventoryApp.Tests;
 public class CompraServiceTests
 {
     private readonly Mock<ICompraRepository> _compraRepoMock = new();
+    private readonly Mock<IProveedorRepository> _proveedorRepoMock = new();
     private readonly Mock<IProductoRepository> _productoRepoMock = new();
     private readonly Mock<IMovimientoInventarioRepository> _movInvRepoMock = new();
     private readonly Mock<IMovimientoFinancieroRepository> _movFinRepoMock = new();
     private readonly Mock<ICurrentUserService> _currentUserMock = new();
+    private readonly Mock<IAuditoriaService> _auditoriaMock = new();
     private readonly CompraService _service;
 
     public CompraServiceTests()
@@ -27,11 +29,13 @@ public class CompraServiceTests
 
         _service = new CompraService(
             _compraRepoMock.Object,
+            _proveedorRepoMock.Object,
             _productoRepoMock.Object,
             _movInvRepoMock.Object,
             _movFinRepoMock.Object,
             _currentUserMock.Object,
-            new FakeUnitOfWork());
+            new FakeUnitOfWork(),
+            _auditoriaMock.Object);
     }
 
     private static Producto ProductoDePrueba(int id = 1, int cantidad = 10) =>

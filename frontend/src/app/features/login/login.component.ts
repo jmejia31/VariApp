@@ -8,6 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../core/auth/auth.service';
+import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
 
 @Component({
   selector: 'app-login',
@@ -22,6 +23,7 @@ import { AuthService } from '../../core/auth/auth.service';
 export class LoginComponent {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
+  private readonly permisosRuntime = inject(PermisosRuntimeService);
   private readonly router = inject(Router);
 
   readonly loading = signal(false);
@@ -45,6 +47,7 @@ export class LoginComponent {
     }).subscribe({
       next: () => {
         this.loading.set(false);
+        this.permisosRuntime.cargar().subscribe();
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {

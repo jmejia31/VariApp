@@ -1,6 +1,8 @@
+using InventoryApp.API.Filters;
 using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Interfaces;
+using InventoryApp.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,6 +21,7 @@ public class ProveedoresController : ControllerBase
     }
 
     [HttpGet]
+    [RequierePermiso(ModuloSistema.Proveedores, AccionPermiso.Ver)]
     public async Task<IActionResult> GetAll()
     {
         var proveedores = await _service.GetAllAsync();
@@ -26,13 +29,23 @@ public class ProveedoresController : ControllerBase
     }
 
     [HttpGet("activos")]
+    [RequierePermiso(ModuloSistema.Proveedores, AccionPermiso.Ver)]
     public async Task<IActionResult> GetActivos()
     {
         var proveedores = await _service.GetActivosAsync();
         return Ok(ApiResponse<List<ProveedorDto>>.Ok(proveedores));
     }
 
+    [HttpGet("buscar")]
+    [RequierePermiso(ModuloSistema.Proveedores, AccionPermiso.Ver)]
+    public async Task<IActionResult> Buscar([FromQuery] string termino)
+    {
+        var proveedores = await _service.BuscarActivosAsync(termino);
+        return Ok(ApiResponse<List<ProveedorDto>>.Ok(proveedores));
+    }
+
     [HttpGet("{id:int}")]
+    [RequierePermiso(ModuloSistema.Proveedores, AccionPermiso.Ver)]
     public async Task<IActionResult> GetById(int id)
     {
         var proveedor = await _service.GetByIdAsync(id);
@@ -41,6 +54,7 @@ public class ProveedoresController : ControllerBase
     }
 
     [HttpPost]
+    [RequierePermiso(ModuloSistema.Proveedores, AccionPermiso.Crear)]
     public async Task<IActionResult> Create([FromBody] CreateProveedorDto dto)
     {
         var creado = await _service.CreateAsync(dto);
@@ -49,6 +63,7 @@ public class ProveedoresController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [RequierePermiso(ModuloSistema.Proveedores, AccionPermiso.Editar)]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateProveedorDto dto)
     {
         var actualizado = await _service.UpdateAsync(id, dto);
@@ -57,6 +72,7 @@ public class ProveedoresController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
+    [RequierePermiso(ModuloSistema.Proveedores, AccionPermiso.Eliminar)]
     public async Task<IActionResult> Delete(int id)
     {
         var eliminado = await _service.DeleteAsync(id);

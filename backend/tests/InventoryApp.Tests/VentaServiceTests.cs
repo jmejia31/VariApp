@@ -12,12 +12,14 @@ namespace InventoryApp.Tests;
 public class VentaServiceTests
 {
     private readonly Mock<IVentaRepository> _ventaRepoMock = new();
+    private readonly Mock<IClienteRepository> _clienteRepoMock = new();
     private readonly Mock<IProductoRepository> _productoRepoMock = new();
     private readonly Mock<IFacturaRepository> _facturaRepoMock = new();
     private readonly Mock<IMovimientoInventarioRepository> _movInvRepoMock = new();
     private readonly Mock<IMovimientoFinancieroRepository> _movFinRepoMock = new();
     private readonly Mock<IEmpresaConfiguracionService> _empresaMock = new();
     private readonly Mock<ICurrentUserService> _currentUserMock = new();
+    private readonly Mock<IAuditoriaService> _auditoriaMock = new();
     private readonly VentaService _service;
 
     public VentaServiceTests()
@@ -30,13 +32,15 @@ public class VentaServiceTests
 
         _service = new VentaService(
             _ventaRepoMock.Object,
+            _clienteRepoMock.Object,
             _productoRepoMock.Object,
             _facturaRepoMock.Object,
             _movInvRepoMock.Object,
             _movFinRepoMock.Object,
             _empresaMock.Object,
             _currentUserMock.Object,
-            new FakeUnitOfWork());
+            new FakeUnitOfWork(),
+            _auditoriaMock.Object);
     }
 
     private static Producto ProductoDePrueba(int id = 1, int cantidad = 10) =>

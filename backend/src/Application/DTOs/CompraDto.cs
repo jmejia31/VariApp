@@ -17,6 +17,7 @@ public class CompraDto
     public int Id { get; set; }
     public string NumeroCompra { get; set; } = string.Empty;
     public DateTime Fecha { get; set; }
+    public int? ProveedorId { get; set; }
     public string ProveedorNombre { get; set; } = string.Empty;
     public string? ProveedorTelefono { get; set; }
     public string? ProveedorDocumento { get; set; }
@@ -49,6 +50,7 @@ public class CompraDetalleInputDto
 
 public class CreateCompraDto
 {
+    public int? ProveedorId { get; set; }
     public string ProveedorNombre { get; set; } = string.Empty;
     public string? ProveedorTelefono { get; set; }
     public string? ProveedorDocumento { get; set; }

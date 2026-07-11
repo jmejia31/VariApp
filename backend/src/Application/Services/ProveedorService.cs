@@ -10,11 +10,13 @@ public class ProveedorService : IProveedorService
 {
     private readonly IProveedorRepository _repository;
     private readonly ICurrentUserService _currentUser;
+    private readonly IAuditoriaService _auditoria;
 
-    public ProveedorService(IProveedorRepository repository, ICurrentUserService currentUser)
+    public ProveedorService(IProveedorRepository repository, ICurrentUserService currentUser, IAuditoriaService auditoria)
     {
         _repository = repository;
         _currentUser = currentUser;
+        _auditoria = auditoria;
     }
 
     public async Task<List<ProveedorDto>> GetAllAsync()
@@ -26,6 +28,12 @@ public class ProveedorService : IProveedorService
     public async Task<List<ProveedorDto>> GetActivosAsync()
     {
         var proveedores = await _repository.GetActivosAsync();
+        return proveedores.Select(p => ToDto(p, incluirCompras: false)).ToList();
+    }
+
+    public async Task<List<ProveedorDto>> BuscarActivosAsync(string termino)
+    {
+        var proveedores = await _repository.BuscarActivosAsync(termino);
         return proveedores.Select(p => ToDto(p, incluirCompras: false)).ToList();
     }
 
@@ -55,6 +63,7 @@ public class ProveedorService : IProveedorService
 
         await _repository.AddAsync(proveedor);
         await _repository.SaveChangesAsync();
+        await _auditoria.RegistrarAsync(ModuloSistema.Proveedores, AccionPermiso.Crear, $"Proveedor creado: {proveedor.Nombre}", proveedor.Id);
 
         return ToDto(proveedor);
     }
@@ -80,6 +89,7 @@ public class ProveedorService : IProveedorService
 
         _repository.Update(proveedor);
         await _repository.SaveChangesAsync();
+        await _auditoria.RegistrarAsync(ModuloSistema.Proveedores, AccionPermiso.Editar, $"Proveedor actualizado: {proveedor.Nombre}", proveedor.Id);
 
         return ToDto(proveedor);
     }
@@ -98,13 +108,17 @@ public class ProveedorService : IProveedorService
             proveedor.FechaActualizacion = DateTime.UtcNow;
             _repository.Update(proveedor);
             await _repository.SaveChangesAsync();
+            await _auditoria.RegistrarAsync(ModuloSistema.Proveedores, AccionPermiso.Eliminar, $"Proveedor desactivado por historial: {proveedor.Nombre}", proveedor.Id);
 
             throw new BusinessRuleException(
                 $"El proveedor tiene {proveedor.Compras.Count} compra(s) registrada(s); no se puede eliminar. Se desactivó en su lugar.");
         }
 
         _repository.Remove(proveedor);
-        return await _repository.SaveChangesAsync();
+        var eliminado = await _repository.SaveChangesAsync();
+        if (eliminado)
+            await _auditoria.RegistrarAsync(ModuloSistema.Proveedores, AccionPermiso.Eliminar, $"Proveedor eliminado: {proveedor.Nombre}", id);
+        return eliminado;
     }
 
     private static ProveedorDto ToDto(Proveedor p, bool incluirCompras = true) => new()

@@ -13,3 +13,9 @@ export interface CreateUsuarioValue {
   password: string;
   rol: 'Administrador' | 'Vendedor';
 }
+
+export interface UpdateUsuarioValue {
+  nombreCompleto: string;
+  rol: 'Administrador' | 'Vendedor';
+  nuevaPassword?: string;
+}

@@ -8,6 +8,8 @@ public interface IClienteRepository
     Task<Cliente?> GetByIdConVentasAsync(int id);
     Task<List<Cliente>> GetAllAsync();
     Task<List<Cliente>> GetActivosAsync();
+    Task<List<Cliente>> BuscarActivosAsync(string termino, int limite = 10);
+    Task<Cliente?> BuscarCoincidenciaActivaAsync(string? identidadORTN, string? correo, string? telefono, string? nombre);
     Task<bool> ExisteNombreAsync(string nombre, int? excluirId = null);
     Task AddAsync(Cliente cliente);
     void Update(Cliente cliente);

@@ -1,8 +1,10 @@
 <div class="header-row">
   <h1 class="page-title">Productos</h1>
-  <a routerLink="/productos/nuevo" mat-flat-button color="primary">
-    <mat-icon>add</mat-icon> Nuevo producto
-  </a>
+  @if (puedeCrear()) {
+    <a routerLink="/productos/nuevo" mat-flat-button color="primary">
+      <mat-icon>add</mat-icon> Nuevo producto
+    </a>
+  }
 </div>
 
 <div class="card">
@@ -58,12 +60,16 @@
               }
             </td>
             <td class="actions">
-              <a [routerLink]="['/productos', p.id, 'editar']" mat-icon-button title="Editar">
-                <mat-icon>edit</mat-icon>
-              </a>
-              <button mat-icon-button title="Eliminar" (click)="eliminar(p)">
-                <mat-icon>delete</mat-icon>
-              </button>
+              @if (puedeEditar()) {
+                <a [routerLink]="['/productos', p.id, 'editar']" mat-icon-button title="Editar">
+                  <mat-icon>edit</mat-icon>
+                </a>
+              }
+              @if (puedeEliminar()) {
+                <button mat-icon-button title="Eliminar" (click)="eliminar(p)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              }
             </td>
           </tr>
         } @empty {

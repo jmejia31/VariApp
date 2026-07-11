@@ -1,19 +1,57 @@
-<div class="header-row">
-  <a routerLink="/clientes" mat-icon-button><mat-icon>arrow_back</mat-icon></a>
-  <h1 class="page-title">{{ isEdit() ? 'Editar cliente' : 'Nuevo cliente' }}</h1>
-</div>
-
-<form class="card form" [formGroup]="form" (ngSubmit)="submit()">
-  <mat-form-field appearance="outline"><mat-label>Nombre</mat-label><input matInput formControlName="nombre"></mat-form-field>
-  <mat-form-field appearance="outline"><mat-label>Teléfono (opcional)</mat-label><input matInput formControlName="telefono"></mat-form-field>
-  <mat-form-field appearance="outline"><mat-label>Identidad/RTN (opcional)</mat-label><input matInput formControlName="identidadORTN"></mat-form-field>
-  <mat-form-field appearance="outline"><mat-label>Correo (opcional)</mat-label><input matInput formControlName="correo"></mat-form-field>
-  <mat-form-field appearance="outline"><mat-label>Dirección (opcional)</mat-label><input matInput formControlName="direccion"></mat-form-field>
-
-  @if (errorMessage()) { <p class="error">{{ errorMessage() }}</p> }
-
-  <div class="form-actions">
-    <a routerLink="/clientes" mat-button type="button">Cancelar</a>
-    <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving()">Guardar</button>
+<div class="cliente-form-container">
+  <div class="header">
+    <h1>{{ isEdit() ? 'Editar Cliente' : 'Nuevo Cliente' }}</h1>
+    <a routerLink="/clientes" mat-button>
+      <mat-icon>arrow_back</mat-icon>
+      Volver
+    </a>
   </div>
-</form>
+
+  <div class="form-container" *ngIf="!saving() else loadingTemplate">
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <mat-form-field appearance="outline">
+        <mat-label>Nombre *</mat-label>
+        <input matInput formControlName="nombre" required>
+        <mat-error>El nombre es obligatorio</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Teléfono</mat-label>
+        <input matInput formControlName="telefono">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Identidad/RTN</mat-label>
+        <input matInput formControlName="identidadORTN">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Correo</mat-label>
+        <input matInput formControlName="correo" type="email">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Dirección</mat-label>
+        <input matInput formControlName="direccion">
+      </mat-form-field>
+
+      <div class="error-message" *ngIf="errorMessage()">
+        {{ errorMessage() }}
+      </div>
+
+      <div class="actions">
+        <button type="submit" mat-raised-button color="primary" [disabled]="form.invalid">
+          {{ isEdit() ? 'Actualizar' : 'Crear' }}
+        </button>
+        <a routerLink="/clientes" mat-button>Cancelar</a>
+      </div>
+    </form>
+  </div>
+
+  <ng-template #loadingTemplate>
+    <div class="loading-container">
+      <mat-spinner></mat-spinner>
+      <p>Guardando...</p>
+    </div>
+  </ng-template>
+</div>

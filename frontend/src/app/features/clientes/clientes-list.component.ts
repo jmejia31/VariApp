@@ -8,6 +8,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { FormsModule } from '@angular/forms';
 import { ClienteService } from '../../services/cliente.service';
 import { Cliente } from '../../core/models/cliente.model';
+import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
 
 @Component({
   selector: 'app-clientes-list',
@@ -19,10 +20,16 @@ import { Cliente } from '../../core/models/cliente.model';
 export class ClientesListComponent implements OnInit {
   readonly clientes = signal<Cliente[]>([]);
   readonly loading = signal(true);
+  readonly puedeCrear = signal(false);
+  readonly puedeEditar = signal(false);
 
-  constructor(private clienteService: ClienteService) {}
+  constructor(private clienteService: ClienteService, private permisosRuntime: PermisosRuntimeService) {}
 
-  ngOnInit(): void { this.cargar(); }
+  ngOnInit(): void {
+    this.puedeCrear.set(this.permisosRuntime.puede('Clientes', 'Crear'));
+    this.puedeEditar.set(this.permisosRuntime.puede('Clientes', 'Editar'));
+    this.cargar();
+  }
 
   cargar(): void {
     this.loading.set(true);
