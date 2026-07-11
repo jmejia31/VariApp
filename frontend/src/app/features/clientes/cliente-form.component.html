@@ -1,0 +1,19 @@
+<div class="header-row">
+  <a routerLink="/clientes" mat-icon-button><mat-icon>arrow_back</mat-icon></a>
+  <h1 class="page-title">{{ isEdit() ? 'Editar cliente' : 'Nuevo cliente' }}</h1>
+</div>
+
+<form class="card form" [formGroup]="form" (ngSubmit)="submit()">
+  <mat-form-field appearance="outline"><mat-label>Nombre</mat-label><input matInput formControlName="nombre"></mat-form-field>
+  <mat-form-field appearance="outline"><mat-label>Teléfono (opcional)</mat-label><input matInput formControlName="telefono"></mat-form-field>
+  <mat-form-field appearance="outline"><mat-label>Identidad/RTN (opcional)</mat-label><input matInput formControlName="identidadORTN"></mat-form-field>
+  <mat-form-field appearance="outline"><mat-label>Correo (opcional)</mat-label><input matInput formControlName="correo"></mat-form-field>
+  <mat-form-field appearance="outline"><mat-label>Dirección (opcional)</mat-label><input matInput formControlName="direccion"></mat-form-field>
+
+  @if (errorMessage()) { <p class="error">{{ errorMessage() }}</p> }
+
+  <div class="form-actions">
+    <a routerLink="/clientes" mat-button type="button">Cancelar</a>
+    <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving()">Guardar</button>
+  </div>
+</form>

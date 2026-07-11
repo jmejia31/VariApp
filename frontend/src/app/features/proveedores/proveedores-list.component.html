@@ -1,0 +1,50 @@
+<div class="proveedores-container">
+  <div class="header">
+    <h1>Proveedores</h1>
+    <a routerLink="/proveedores/nuevo" mat-raised-button color="primary">
+      <mat-icon>add</mat-icon>
+      Nuevo Proveedor
+    </a>
+  </div>
+
+  <div class="table-container" *ngIf="!loading() else loadingTemplate">
+    <table class="proveedores-table">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Teléfono</th>
+          <th>Documento</th>
+          <th>Correo</th>
+          <th>Compras</th>
+          <th>Total Comprado</th>
+          <th>Activo</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of proveedores()">
+          <td>{{ p.nombre }}</td>
+          <td>{{ p.telefono || '-' }}</td>
+          <td>{{ p.documento || '-' }}</td>
+          <td>{{ p.correo || '-' }}</td>
+          <td>{{ p.totalCompras }}</td>
+          <td>{{ p.totalComprado | currency }}</td>
+          <td>
+            <mat-slide-toggle [(ngModel)]="p.activo" (change)="toggleActivo(p)"></mat-slide-toggle>
+          </td>
+          <td>
+            <a [routerLink]="['/proveedores', p.id, 'editar']" mat-icon-button color="primary">
+              <mat-icon>edit</mat-icon>
+            </a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <ng-template #loadingTemplate>
+    <div class="loading-container">
+      <mat-spinner></mat-spinner>
+    </div>
+  </ng-template>
+</div>

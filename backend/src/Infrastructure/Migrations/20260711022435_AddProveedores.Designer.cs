@@ -4,6 +4,7 @@ using InventoryApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace InventoryApp.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260711022435_AddProveedores")]
+    partial class AddProveedores
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -66,64 +69,6 @@ namespace InventoryApp.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("Categorias", (string)null);
-                });
-
-            modelBuilder.Entity("InventoryApp.Domain.Entities.Cliente", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("Activo")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<string>("ActualizadoPorNombreUsuario")
-                        .HasColumnType("longtext");
-
-                    b.Property<int?>("ActualizadoPorUsuarioId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Correo")
-                        .HasMaxLength(150)
-                        .HasColumnType("varchar(150)");
-
-                    b.Property<string>("CreadoPorNombreUsuario")
-                        .HasColumnType("longtext");
-
-                    b.Property<int?>("CreadoPorUsuarioId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Direccion")
-                        .HasMaxLength(300)
-                        .HasColumnType("varchar(300)");
-
-                    b.Property<DateTime>("FechaActualizacion")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime>("FechaCreacion")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("IdentidadORTN")
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
-
-                    b.Property<string>("Nombre")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("varchar(200)");
-
-                    b.Property<string>("Telefono")
-                        .HasMaxLength(30)
-                        .HasColumnType("varchar(30)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Nombre")
-                        .IsUnique();
-
-                    b.ToTable("Clientes", (string)null);
                 });
 
             modelBuilder.Entity("InventoryApp.Domain.Entities.Compra", b =>
@@ -940,9 +885,6 @@ namespace InventoryApp.Infrastructure.Migrations
                         .HasMaxLength(300)
                         .HasColumnType("varchar(300)");
 
-                    b.Property<int?>("ClienteId")
-                        .HasColumnType("int");
-
                     b.Property<string>("ClienteIdentidadORTN")
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50)");
@@ -1030,8 +972,6 @@ namespace InventoryApp.Infrastructure.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ClienteId");
 
                     b.HasIndex("NumeroVenta")
                         .IsUnique();
@@ -1175,16 +1115,6 @@ namespace InventoryApp.Infrastructure.Migrations
                     b.Navigation("Producto");
                 });
 
-            modelBuilder.Entity("InventoryApp.Domain.Entities.Venta", b =>
-                {
-                    b.HasOne("InventoryApp.Domain.Entities.Cliente", "Cliente")
-                        .WithMany("Ventas")
-                        .HasForeignKey("ClienteId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Cliente");
-                });
-
             modelBuilder.Entity("InventoryApp.Domain.Entities.VentaDetalle", b =>
                 {
                     b.HasOne("InventoryApp.Domain.Entities.Producto", "Producto")
@@ -1207,11 +1137,6 @@ namespace InventoryApp.Infrastructure.Migrations
             modelBuilder.Entity("InventoryApp.Domain.Entities.Categoria", b =>
                 {
                     b.Navigation("Productos");
-                });
-
-            modelBuilder.Entity("InventoryApp.Domain.Entities.Cliente", b =>
-                {
-                    b.Navigation("Ventas");
                 });
 
             modelBuilder.Entity("InventoryApp.Domain.Entities.Compra", b =>

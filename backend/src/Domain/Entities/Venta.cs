@@ -8,6 +8,12 @@ public class Venta : ConfirmableEntity
     public string NumeroVenta { get; set; } = string.Empty;
     public DateTime Fecha { get; set; } = DateTime.UtcNow;
 
+    /// Referencia al cliente registrado (opcional: permite ventas rápidas sin
+    /// crear un cliente formal). Los campos de abajo son snapshot del cliente
+    /// al momento de la venta, para no alterar el historial si el cliente cambia después.
+    public int? ClienteId { get; set; }
+    public Cliente? Cliente { get; set; }
+
     public string ClienteNombre { get; set; } = "Cliente final";
     public string? ClienteTelefono { get; set; }
     public string? ClienteIdentidadORTN { get; set; }

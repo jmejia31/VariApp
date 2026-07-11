@@ -44,6 +44,36 @@ export const routes: Routes = [
     loadComponent: () => import('./features/categorias/categoria-form.component').then(m => m.CategoriaFormComponent)
   },
   {
+    path: 'proveedores',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/proveedores/proveedores-list.component').then(m => m.ProveedoresListComponent)
+  },
+  {
+    path: 'proveedores/nuevo',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/proveedores/proveedor-form.component').then(m => m.ProveedorFormComponent)
+  },
+  {
+    path: 'proveedores/:id/editar',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/proveedores/proveedor-form.component').then(m => m.ProveedorFormComponent)
+  },
+  {
+    path: 'clientes',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/clientes/clientes-list.component').then(m => m.ClientesListComponent)
+  },
+  {
+    path: 'clientes/nuevo',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/clientes/cliente-form.component').then(m => m.ClienteFormComponent)
+  },
+  {
+    path: 'clientes/:id/editar',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/clientes/cliente-form.component').then(m => m.ClienteFormComponent)
+  },
+  {
     path: 'usuarios',
     canActivate: [authGuard, adminGuard],
     loadComponent: () => import('./features/usuarios/usuarios.component').then(m => m.UsuariosComponent)
