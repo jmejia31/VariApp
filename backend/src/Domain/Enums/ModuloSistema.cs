@@ -14,5 +14,10 @@ public enum ModuloSistema
     Clientes = 10,
     Usuarios = 11,
     Auditoria = 12,
-    Configuracion = 13
+    Configuracion = 13,
+    Roles = 14,
+    Permisos = 15,
+    Descuentos = 16,
+    Impuestos = 17,
+    MovimientosInventario = 18
 }
