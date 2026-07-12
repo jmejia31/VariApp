@@ -1,6 +1,8 @@
+using InventoryApp.API.Filters;
 using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Interfaces;
+using InventoryApp.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,6 +21,7 @@ public class DashboardController : ControllerBase
     }
 
     [HttpGet("resumen")]
+    [RequierePermiso(ModuloSistema.Dashboard, AccionPermiso.Ver)]
     public async Task<IActionResult> GetResumen()
     {
         var resumen = await _dashboardService.GetResumenAsync();

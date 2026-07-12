@@ -1,6 +1,8 @@
+using InventoryApp.API.Filters;
 using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Interfaces;
+using InventoryApp.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,6 +24,7 @@ public class FacturasController : ControllerBase
     }
 
     [HttpGet]
+    [RequierePermiso(ModuloSistema.Facturacion, AccionPermiso.Ver)]
     public async Task<IActionResult> GetAll()
     {
         var facturas = await _facturaService.GetAllAsync();
@@ -29,6 +32,7 @@ public class FacturasController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
+    [RequierePermiso(ModuloSistema.Facturacion, AccionPermiso.Ver)]
     public async Task<IActionResult> GetById(int id)
     {
         var factura = await _facturaService.GetByIdAsync(id);
@@ -37,6 +41,7 @@ public class FacturasController : ControllerBase
     }
 
     [HttpGet("venta/{ventaId:int}")]
+    [RequierePermiso(ModuloSistema.Facturacion, AccionPermiso.Ver)]
     public async Task<IActionResult> GetByVenta(int ventaId)
     {
         var factura = await _facturaService.GetByVentaIdAsync(ventaId);

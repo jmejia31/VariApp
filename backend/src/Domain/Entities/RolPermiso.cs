@@ -13,6 +13,11 @@ public class RolPermiso
     /// se vuelve la fuente de verdad una vez migrados los datos existentes.
     public int? RolId { get; set; }
 
+    /// FK al catálogo dinámico de permisos (Domain.Entities.Permiso). Nullable
+    /// mientras conviven ambos modelos; Modulo/Accion se conservan para no
+    /// romper filas existentes ni el filtro RequierePermiso actual.
+    public int? PermisoId { get; set; }
+
     public ModuloSistema Modulo { get; set; }
     public AccionPermiso Accion { get; set; }
     public bool Permitido { get; set; }

@@ -39,4 +39,24 @@ public class CurrentUserService : ICurrentUserService
             return Enum.TryParse<RolUsuario>(value, out var rol) ? rol : null;
         }
     }
+
+    public int? RolId
+    {
+        get
+        {
+            var value = User?.FindFirstValue("rolId");
+            return int.TryParse(value, out var id) ? id : null;
+        }
+    }
+
+    public bool EsAdministrador
+    {
+        get
+        {
+            var value = User?.FindFirstValue("esAdministrador");
+            if (bool.TryParse(value, out var esAdmin)) return esAdmin;
+            // Fallback para JWTs emitidos antes de esta fase (sin el claim nuevo).
+            return Rol == RolUsuario.Administrador;
+        }
+    }
 }

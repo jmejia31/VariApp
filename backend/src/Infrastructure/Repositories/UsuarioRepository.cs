@@ -15,7 +15,7 @@ public class UsuarioRepository : IUsuarioRepository
     }
 
     public async Task<Usuario?> GetByNombreUsuarioAsync(string nombreUsuario) =>
-        await _context.Usuarios.FirstOrDefaultAsync(u => u.NombreUsuario == nombreUsuario);
+        await _context.Usuarios.Include(u => u.RolEntidad).FirstOrDefaultAsync(u => u.NombreUsuario == nombreUsuario);
 
     public async Task<Usuario?> GetByIdAsync(int id) =>
         await _context.Usuarios.FindAsync(id);

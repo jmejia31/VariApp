@@ -26,6 +26,7 @@ public class AppDbContext : DbContext
     public DbSet<RevisionFinanciera> RevisionesFinancieras => Set<RevisionFinanciera>();
     public DbSet<RegistroAuditoria> RegistrosAuditoria => Set<RegistroAuditoria>();
     public DbSet<Rol> Roles => Set<Rol>();
+    public DbSet<Permiso> Permisos => Set<Permiso>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

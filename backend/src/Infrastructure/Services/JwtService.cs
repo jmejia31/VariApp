@@ -28,7 +28,9 @@ public class JwtService : IJwtService
 
         var expiraEn = DateTime.UtcNow.AddMinutes(expiraMinutos);
 
-        var claims = new[]
+        var esAdministrador = usuario.RolEntidad?.EsAdministrador ?? (usuario.Rol == Domain.Enums.RolUsuario.Administrador);
+
+        var claims = new List<Claim>
         {
             new Claim(JwtRegisteredClaimNames.Sub, usuario.NombreUsuario),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
@@ -36,8 +38,12 @@ public class JwtService : IJwtService
             new Claim("nombreUsuario", usuario.NombreUsuario),
             new Claim("nombreCompleto", usuario.NombreCompleto),
             new Claim("rol", usuario.Rol.ToString()),
+            new Claim("esAdministrador", esAdministrador.ToString()),
             new Claim(ClaimTypes.Role, usuario.Rol.ToString())
         };
+
+        if (usuario.RolId.HasValue)
+            claims.Add(new Claim("rolId", usuario.RolId.Value.ToString()));
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

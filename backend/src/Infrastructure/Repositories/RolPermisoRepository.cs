@@ -38,4 +38,40 @@ public class RolPermisoRepository : IRolPermisoRepository
         await _context.RolPermisos.AddRangeAsync(nuevaMatriz.Where(p => p.Rol == RolUsuario.Vendedor));
         await _context.SaveChangesAsync();
     }
+
+    public async Task<List<RolPermiso>> GetByRolIdAsync(int rolId) =>
+        await _context.RolPermisos.Where(p => p.RolId == rolId).ToListAsync();
+
+    public async Task<bool> TieneMatrizDefinidaAsync(int rolId) =>
+        await _context.RolPermisos.AnyAsync(p => p.RolId == rolId);
+
+    public async Task<bool> TienePermisoPorRolIdAsync(int rolId, ModuloSistema modulo, AccionPermiso accion)
+    {
+        var permiso = await _context.RolPermisos
+            .FirstOrDefaultAsync(p => p.RolId == rolId && p.Modulo == modulo && p.Accion == accion);
+        return permiso?.Permitido ?? false;
+    }
+
+    public async Task ReemplazarMatrizPorRolIdAsync(int rolId, List<RolPermiso> nuevaMatriz)
+    {
+        var actuales = await _context.RolPermisos.Where(p => p.RolId == rolId).ToListAsync();
+        _context.RolPermisos.RemoveRange(actuales);
+        await _context.RolPermisos.AddRangeAsync(nuevaMatriz.Where(p => p.RolId == rolId));
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task AgregarSiFaltaAsync(List<RolPermiso> filas)
+    {
+        // Idempotente: solo agrega filas para combinaciones RolId+Modulo+Accion que
+        // aún no existan. Nunca sobrescribe una fila ya presente (respeta cambios
+        // manuales del administrador, sección 8/9).
+        foreach (var fila in filas)
+        {
+            var existe = await _context.RolPermisos.AnyAsync(p =>
+                p.RolId == fila.RolId && p.Modulo == fila.Modulo && p.Accion == fila.Accion);
+            if (!existe)
+                await _context.RolPermisos.AddAsync(fila);
+        }
+        await _context.SaveChangesAsync();
+    }
 }

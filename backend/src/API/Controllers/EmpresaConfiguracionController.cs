@@ -1,6 +1,8 @@
+using InventoryApp.API.Filters;
 using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Interfaces;
+using InventoryApp.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,6 +21,7 @@ public class EmpresaConfiguracionController : ControllerBase
     }
 
     [HttpGet]
+    [RequierePermiso(ModuloSistema.Configuracion, AccionPermiso.Ver)]
     public async Task<IActionResult> Get()
     {
         var config = await _service.GetActivaAsync();
@@ -26,7 +29,7 @@ public class EmpresaConfiguracionController : ControllerBase
     }
 
     [HttpPut]
-    [Authorize(Roles = "Administrador")]
+    [RequierePermiso(ModuloSistema.Configuracion, AccionPermiso.Editar)]
     public async Task<IActionResult> Update([FromBody] UpdateEmpresaConfiguracionDto dto)
     {
         var actualizada = await _service.UpdateAsync(dto);

@@ -15,18 +15,31 @@ public class PermisoRepository : IPermisoRepository
         _context = context;
     }
 
-    public async Task<List<RolPermiso>> GetAllAsync() =>
-        await _context.RolPermisos.ToListAsync();
+    public async Task<Permiso?> GetByIdAsync(int id) =>
+        await _context.Permisos.FirstOrDefaultAsync(p => p.Id == id && !p.Eliminado);
 
-    public async Task<RolPermiso?> GetAsync(RolUsuario rol, string modulo) =>
-        await _context.RolPermisos.FirstOrDefaultAsync(p => p.Rol == rol && p.Modulo.ToString() == modulo);
+    public async Task<List<Permiso>> GetAllAsync(bool incluirEliminados = false) =>
+        await _context.Permisos
+            .Where(p => incluirEliminados || !p.Eliminado)
+            .OrderBy(p => p.Modulo).ThenBy(p => p.Accion)
+            .ToListAsync();
 
-    public async Task AddAsync(RolPermiso permiso) =>
-        await _context.RolPermisos.AddAsync(permiso);
+    public async Task<bool> ExisteCodigoAsync(string codigo, int? excluirId = null) =>
+        await _context.Permisos.AnyAsync(p =>
+            !p.Eliminado && p.Codigo == codigo && (excluirId == null || p.Id != excluirId));
 
-    public void Update(RolPermiso permiso) =>
-        _context.RolPermisos.Update(permiso);
+    public async Task<bool> ExisteModuloAccionAsync(ModuloSistema modulo, AccionPermiso accion, int? excluirId = null) =>
+        await _context.Permisos.AnyAsync(p =>
+            !p.Eliminado && p.Modulo == modulo && p.Accion == accion && (excluirId == null || p.Id != excluirId));
 
-    public async Task<bool> SaveChangesAsync() =>
-        await _context.SaveChangesAsync() > 0;
+    public async Task<int> ContarAsignacionesAsync(int permisoId) =>
+        await _context.RolPermisos.CountAsync(rp => rp.PermisoId == permisoId && rp.Permitido);
+
+    public async Task AddAsync(Permiso permiso) => await _context.Permisos.AddAsync(permiso);
+
+    public void Update(Permiso permiso) => _context.Permisos.Update(permiso);
+
+    public void Remove(Permiso permiso) => _context.Permisos.Remove(permiso);
+
+    public async Task SaveChangesAsync() => await _context.SaveChangesAsync();
 }
