@@ -34,5 +34,7 @@ public class Venta : ConfirmableEntity
     public string? Notas { get; set; }
 
     public ICollection<VentaDetalle> Detalles { get; set; } = new List<VentaDetalle>();
+    public ICollection<VentaDescuento> DescuentosAplicados { get; set; } = new List<VentaDescuento>();
+    public ICollection<VentaImpuesto> ImpuestosAplicados { get; set; } = new List<VentaImpuesto>();
     public Factura? Factura { get; set; }
 }

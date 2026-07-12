@@ -16,6 +16,7 @@ public class VentaService : IVentaService
     private readonly IMovimientoInventarioRepository _movimientoInventarioRepository;
     private readonly IMovimientoFinancieroRepository _movimientoFinancieroRepository;
     private readonly IEmpresaConfiguracionService _empresaConfiguracionService;
+    private readonly ICalculoService _calculoService;
     private readonly ICurrentUserService _currentUser;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IAuditoriaService _auditoria;
@@ -28,6 +29,7 @@ public class VentaService : IVentaService
         IMovimientoInventarioRepository movimientoInventarioRepository,
         IMovimientoFinancieroRepository movimientoFinancieroRepository,
         IEmpresaConfiguracionService empresaConfiguracionService,
+        ICalculoService calculoService,
         ICurrentUserService currentUser,
         IUnitOfWork unitOfWork,
         IAuditoriaService auditoria)
@@ -39,6 +41,7 @@ public class VentaService : IVentaService
         _movimientoInventarioRepository = movimientoInventarioRepository;
         _movimientoFinancieroRepository = movimientoFinancieroRepository;
         _empresaConfiguracionService = empresaConfiguracionService;
+        _calculoService = calculoService;
         _currentUser = currentUser;
         _unitOfWork = unitOfWork;
         _auditoria = auditoria;
@@ -75,7 +78,7 @@ public class VentaService : IVentaService
             MetodoPago = ParseEnum(dto.MetodoPago, MetodoPago.Efectivo),
             EstadoPago = ParseEnum(dto.EstadoPago, EstadoPago.Pendiente),
             Estado = EstadoDocumento.Borrador,
-            Descuento = dto.Descuento,
+            // Descuento/Impuesto NO se toman de dto: se recalculan abajo (sección 13).
             Notas = dto.Notas,
             CreadoPorUsuarioId = _currentUser.UsuarioId,
             CreadoPorNombreUsuario = _currentUser.NombreUsuario
@@ -83,7 +86,7 @@ public class VentaService : IVentaService
 
         await VincularClienteAsync(venta, dto);
         await ArmarDetallesAsync(venta, dto.Detalles, validarStock: false);
-        CalcularTotales(venta, dto.Impuesto);
+        await CalcularTotalesAsync(venta, dto.CodigoPromocional);
 
         await _ventaRepository.AddAsync(venta);
         await _ventaRepository.SaveChangesAsync();
@@ -107,7 +110,6 @@ public class VentaService : IVentaService
         venta.ClienteDireccion = dto.ClienteDireccion;
         venta.MetodoPago = ParseEnum(dto.MetodoPago, MetodoPago.Efectivo);
         venta.EstadoPago = ParseEnum(dto.EstadoPago, EstadoPago.Pendiente);
-        venta.Descuento = dto.Descuento;
         venta.Notas = dto.Notas;
         venta.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
         venta.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
@@ -115,8 +117,10 @@ public class VentaService : IVentaService
 
         await VincularClienteAsync(venta, dto);
         venta.Detalles.Clear();
+        venta.DescuentosAplicados.Clear();
+        venta.ImpuestosAplicados.Clear();
         await ArmarDetallesAsync(venta, dto.Detalles, validarStock: false);
-        CalcularTotales(venta, dto.Impuesto);
+        await CalcularTotalesAsync(venta, dto.CodigoPromocional);
 
         _ventaRepository.Update(venta);
         await _ventaRepository.SaveChangesAsync();
@@ -237,6 +241,15 @@ public class VentaService : IVentaService
             };
 
             await _facturaRepository.AddAsync(factura);
+
+            // Registrar el uso histórico (incrementa UsosRealizados de cada
+            // descuento, guarda HistorialAplicacionImpuesto) SOLO al confirmar,
+            // nunca al crear/editar un borrador que podría nunca confirmarse.
+            await _calculoService.RegistrarUsoVentaAsync(
+                venta.Id, venta.ClienteId,
+                venta.DescuentosAplicados.ToList(),
+                venta.ImpuestosAplicados.ToList());
+
             await _ventaRepository.SaveChangesAsync();
         });
 
@@ -439,24 +452,55 @@ public class VentaService : IVentaService
         }
     }
 
-    private static void CalcularTotales(Venta venta, decimal impuesto)
+    private async Task CalcularTotalesAsync(Venta venta, string? codigoPromocional)
     {
-        if (venta.Descuento < 0)
-            throw new BusinessRuleException("El descuento de la venta no puede ser negativo.");
-        if (impuesto < 0)
-            throw new BusinessRuleException("El impuesto de la venta no puede ser negativo.");
+        var entradas = venta.Detalles.Select(d => new DetalleCalculoInput
+        {
+            ProductoId = d.ProductoId,
+            CategoriaId = null, // se resuelve dentro del motor si se necesita por categoría
+            Cantidad = d.Cantidad,
+            PrecioUnitario = d.PrecioUnitario
+        }).ToList();
 
-        venta.Subtotal = venta.Detalles.Sum(d => d.Subtotal);
-        if (venta.Descuento > venta.Subtotal)
-            throw new BusinessRuleException("El descuento de la venta no puede ser mayor que el subtotal.");
+        // Resolver CategoriaId real de cada producto para que el motor pueda
+        // evaluar descuentos/impuestos con alcance por categoría.
+        foreach (var entrada in entradas)
+        {
+            var producto = await _productoRepository.GetByIdAsync(entrada.ProductoId);
+            entrada.CategoriaId = producto?.CategoriaId;
+        }
 
-        venta.Impuesto = impuesto;
-        venta.Total = venta.Subtotal - venta.Descuento + venta.Impuesto;
+        var resultado = await _calculoService.CalcularVentaAsync(
+            entradas, venta.ClienteId, _currentUser.RolId, codigoPromocional);
+
+        venta.Subtotal = resultado.Subtotal;
+        venta.Descuento = resultado.TotalDescuento;
+        venta.Impuesto = resultado.TotalImpuesto;
+        venta.Total = resultado.Total;
         venta.CostoTotal = venta.Detalles.Sum(d => d.CostoUnitarioSnapshot * d.Cantidad);
         venta.UtilidadBruta = venta.Detalles.Sum(d => d.UtilidadBruta) - venta.Descuento;
 
+        venta.DescuentosAplicados = resultado.DescuentosAplicados.Select(d => new VentaDescuento
+        {
+            DescuentoId = d.DescuentoId,
+            DescuentoNombreSnapshot = d.Nombre,
+            DescuentoCodigoSnapshot = d.Codigo ?? string.Empty,
+            TipoSnapshot = Enum.Parse<TipoDescuento>(d.Tipo),
+            ValorSnapshot = d.Valor,
+            MontoAplicado = d.Monto
+        }).ToList();
+
+        venta.ImpuestosAplicados = resultado.ImpuestosAplicados.Select(i => new VentaImpuesto
+        {
+            ImpuestoId = i.ImpuestoId,
+            ImpuestoNombreSnapshot = i.Nombre,
+            TasaSnapshot = i.Tasa,
+            BaseImponible = i.BaseImponible,
+            MontoAplicado = i.Monto
+        }).ToList();
+
         if (venta.Total < 0)
-            throw new BusinessRuleException("El total de la venta no puede ser negativo (revisa el descuento).");
+            throw new BusinessRuleException("El total de la venta no puede ser negativo.");
     }
 
     private async Task<string> GenerarNumeroVentaAsync()
@@ -506,6 +550,23 @@ public class VentaService : IVentaService
             PrecioUnitario = d.PrecioUnitario,
             Subtotal = d.Subtotal,
             UtilidadBruta = d.UtilidadBruta
+        }).ToList(),
+        DescuentosAplicados = v.DescuentosAplicados.Select(d => new DescuentoAplicadoDto
+        {
+            DescuentoId = d.DescuentoId,
+            Nombre = d.DescuentoNombreSnapshot,
+            Codigo = d.DescuentoCodigoSnapshot,
+            Tipo = d.TipoSnapshot.ToString(),
+            Valor = d.ValorSnapshot,
+            Monto = d.MontoAplicado
+        }).ToList(),
+        ImpuestosAplicados = v.ImpuestosAplicados.Select(i => new ImpuestoAplicadoDto
+        {
+            ImpuestoId = i.ImpuestoId,
+            Nombre = i.ImpuestoNombreSnapshot,
+            Tasa = i.TasaSnapshot,
+            BaseImponible = i.BaseImponible,
+            Monto = i.MontoAplicado
         }).ToList(),
         FacturaId = v.Factura?.Id,
         NumeroFactura = v.Factura?.NumeroFactura,

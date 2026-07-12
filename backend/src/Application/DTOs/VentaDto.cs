@@ -35,6 +35,8 @@ public class VentaDto
     public decimal UtilidadBruta { get; set; }
     public string? Notas { get; set; }
     public List<VentaDetalleDto> Detalles { get; set; } = new();
+    public List<DescuentoAplicadoDto> DescuentosAplicados { get; set; } = new();
+    public List<ImpuestoAplicadoDto> ImpuestosAplicados { get; set; } = new();
 
     public int? FacturaId { get; set; }
     public string? NumeroFactura { get; set; }
@@ -65,8 +67,18 @@ public class CreateVentaDto
     public string? ClienteDireccion { get; set; }
     public string MetodoPago { get; set; } = "Efectivo";
     public string EstadoPago { get; set; } = "Pendiente";
+
+    /// OBSOLETO / IGNORADO POR EL BACKEND (sección 13: "no confíes en descuento/
+    /// impuesto enviado por Angular"). Se conservan en el DTO solo para no
+    /// romper clientes viejos que aún los envíen; el backend siempre recalcula
+    /// Descuento e Impuesto desde el catálogo real vía ICalculoService.
     public decimal Descuento { get; set; }
     public decimal Impuesto { get; set; }
+
+    /// Código promocional opcional (sección 11/13). El backend valida su
+    /// vigencia y alcance contra el catálogo de Descuentos.
+    public string? CodigoPromocional { get; set; }
+
     public string? Notas { get; set; }
     public List<VentaDetalleInputDto> Detalles { get; set; } = new();
 }

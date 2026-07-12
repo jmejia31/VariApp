@@ -35,6 +35,16 @@ public class VentaConfiguration : IEntityTypeConfiguration<Venta>
             .HasForeignKey(d => d.VentaId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        builder.HasMany(v => v.DescuentosAplicados)
+            .WithOne()
+            .HasForeignKey(d => d.VentaId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(v => v.ImpuestosAplicados)
+            .WithOne()
+            .HasForeignKey(i => i.VentaId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         builder.HasOne(v => v.Factura)
             .WithOne(f => f.Venta)
             .HasForeignKey<Factura>(f => f.VentaId)

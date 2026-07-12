@@ -17,7 +17,10 @@ public class VentaRepository : IVentaRepository
     }
 
     private IQueryable<Venta> ConIncludes() =>
-        _context.Ventas.Include(v => v.Detalles).ThenInclude(d => d.Producto).Include(v => v.Factura);
+        _context.Ventas.Include(v => v.Detalles).ThenInclude(d => d.Producto)
+            .Include(v => v.Factura)
+            .Include(v => v.DescuentosAplicados)
+            .Include(v => v.ImpuestosAplicados);
 
     public async Task<Venta?> GetByIdAsync(int id) =>
         await ConIncludes().FirstOrDefaultAsync(v => v.Id == id);

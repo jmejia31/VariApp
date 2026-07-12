@@ -28,6 +28,24 @@ public class AppDbContext : DbContext
     public DbSet<Rol> Roles => Set<Rol>();
     public DbSet<Permiso> Permisos => Set<Permiso>();
 
+    public DbSet<Descuento> Descuentos => Set<Descuento>();
+    public DbSet<DescuentoProducto> DescuentoProductos => Set<DescuentoProducto>();
+    public DbSet<DescuentoCategoria> DescuentoCategorias => Set<DescuentoCategoria>();
+    public DbSet<DescuentoCliente> DescuentoClientes => Set<DescuentoCliente>();
+    public DbSet<DescuentoRol> DescuentoRoles => Set<DescuentoRol>();
+    public DbSet<HistorialUsoDescuento> HistorialUsoDescuentos => Set<HistorialUsoDescuento>();
+    public DbSet<VentaDescuento> VentaDescuentos => Set<VentaDescuento>();
+
+    public DbSet<Impuesto> Impuestos => Set<Impuesto>();
+    public DbSet<ImpuestoProducto> ImpuestoProductos => Set<ImpuestoProducto>();
+    public DbSet<ImpuestoCategoria> ImpuestoCategorias => Set<ImpuestoCategoria>();
+    public DbSet<ImpuestoOperacion> ImpuestoOperaciones => Set<ImpuestoOperacion>();
+    public DbSet<ImpuestoCliente> ImpuestoClientes => Set<ImpuestoCliente>();
+    public DbSet<ImpuestoProveedor> ImpuestoProveedores => Set<ImpuestoProveedor>();
+    public DbSet<HistorialAplicacionImpuesto> HistorialAplicacionImpuestos => Set<HistorialAplicacionImpuesto>();
+    public DbSet<VentaImpuesto> VentaImpuestos => Set<VentaImpuesto>();
+    public DbSet<CompraImpuesto> CompraImpuestos => Set<CompraImpuesto>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
