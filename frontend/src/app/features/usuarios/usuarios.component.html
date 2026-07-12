@@ -26,9 +26,10 @@
 
       <mat-form-field appearance="outline">
         <mat-label>Rol</mat-label>
-        <mat-select formControlName="rol">
-          <mat-option value="Vendedor">Vendedor</mat-option>
-          <mat-option value="Administrador">Administrador</mat-option>
+        <mat-select formControlName="rolId">
+          @for (rol of roles(); track rol.id) {
+            <mat-option [value]="rol.id">{{ rol.nombre }}</mat-option>
+          }
         </mat-select>
       </mat-form-field>
     </div>

@@ -1,33 +1,59 @@
 <h1 class="page-title">Permisos por rol</h1>
 <p class="subtitle">
-  El rol <strong>Administrador</strong> siempre tiene acceso total. Esta matriz define qué puede hacer el rol <strong>Vendedor</strong> en cada módulo.
+  El rol <strong>Administrador</strong> siempre tiene acceso total y no aparece aquí. Selecciona un rol para definir qué puede hacer en cada módulo.
 </p>
 
-@if (loading()) {
+@if (loadingRoles()) {
   <div class="loading"><mat-spinner></mat-spinner></div>
+} @else if (roles().length === 0) {
+  <p class="empty">No hay roles no-administradores. Crea uno primero en la sección Roles.</p>
 } @else {
-  <div class="card">
-    <table class="table">
-      <tbody>
-        @for (modulo of modulos(); track modulo) {
-          <tr class="modulo-row">
-            <td class="modulo-nombre">{{ modulo }}</td>
-            <td class="acciones-cell">
-              @for (item of accionesDelModulo(modulo); track item.accion) {
-                <mat-checkbox [checked]="item.permitido" (change)="toggle(item)">
-                  {{ item.accion }}
-                </mat-checkbox>
-              }
-            </td>
-          </tr>
+  <div class="selector-row">
+    <mat-form-field appearance="outline" class="selector-rol">
+      <mat-label>Rol</mat-label>
+      <mat-select [value]="rolSeleccionadoId()" (selectionChange)="seleccionarRol($event.value)">
+        @for (rol of roles(); track rol.id) {
+          <mat-option [value]="rol.id">{{ rol.nombre }}</mat-option>
         }
-      </tbody>
-    </table>
+      </mat-select>
+    </mat-form-field>
 
-    <div class="form-actions">
-      <button mat-flat-button color="primary" [disabled]="saving()" (click)="guardar()">
-        @if (saving()) { <mat-spinner diameter="20"></mat-spinner> } @else { Guardar cambios }
-      </button>
-    </div>
+    <mat-form-field appearance="outline" class="selector-filtro">
+      <mat-label>Filtrar módulo</mat-label>
+      <input matInput [ngModel]="filtroModulo()" (ngModelChange)="filtroModulo.set($event)" placeholder="Ej. Ventas" />
+    </mat-form-field>
   </div>
+
+  @if (rolSeleccionado()?.esSistema) {
+    <p class="hint">Este es un rol de sistema. Sus permisos por defecto se restauran solo si no tiene ninguna fila guardada todavía; los cambios manuales nunca se sobrescriben automáticamente.</p>
+  }
+
+  @if (loadingMatriz()) {
+    <div class="loading"><mat-spinner></mat-spinner></div>
+  } @else {
+    <div class="card">
+      <table class="table">
+        <tbody>
+          @for (modulo of modulosFiltrados(); track modulo) {
+            <tr class="modulo-row">
+              <td class="modulo-nombre">{{ modulo }}</td>
+              <td class="acciones-cell">
+                @for (item of accionesDelModulo(modulo); track item.accion) {
+                  <mat-checkbox [checked]="item.permitido" (change)="toggle(item)">
+                    {{ item.accion }}
+                  </mat-checkbox>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      <div class="form-actions">
+        <button mat-flat-button color="primary" [disabled]="saving()" (click)="guardar()">
+          @if (saving()) { <mat-spinner diameter="20"></mat-spinner> } @else { Guardar cambios }
+        </button>
+      </div>
+    </div>
+  }
 }

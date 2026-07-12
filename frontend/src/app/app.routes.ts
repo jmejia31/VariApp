@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
-import { adminGuard } from './core/guards/admin.guard';
 import { permisoGuard } from './core/guards/permiso.guard';
 
 export const routes: Routes = [
@@ -89,12 +88,32 @@ export const routes: Routes = [
   },
   {
     path: 'usuarios',
-    canActivate: [authGuard, adminGuard],
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Usuarios', accion: 'Ver' },
     loadComponent: () => import('./features/usuarios/usuarios.component').then(m => m.UsuariosComponent)
   },
   {
+    path: 'roles',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Roles', accion: 'Ver' },
+    loadComponent: () => import('./features/roles/roles-list.component').then(m => m.RolesListComponent)
+  },
+  {
+    path: 'roles/nuevo',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Roles', accion: 'Crear' },
+    loadComponent: () => import('./features/roles/rol-form.component').then(m => m.RolFormComponent)
+  },
+  {
+    path: 'roles/:id/editar',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Roles', accion: 'Editar' },
+    loadComponent: () => import('./features/roles/rol-form.component').then(m => m.RolFormComponent)
+  },
+  {
     path: 'permisos',
-    canActivate: [authGuard, adminGuard],
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Permisos', accion: 'Administrar' },
     loadComponent: () => import('./features/permisos/permisos-matrix.component').then(m => m.PermisosMatrixComponent)
   },
   {

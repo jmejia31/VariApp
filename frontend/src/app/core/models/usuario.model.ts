@@ -3,6 +3,7 @@ export interface Usuario {
   nombreUsuario: string;
   nombreCompleto: string;
   rol: 'Administrador' | 'Vendedor';
+  rolId?: number;
   activo: boolean;
   fechaCreacion: string;
 }
@@ -12,10 +13,12 @@ export interface CreateUsuarioValue {
   nombreCompleto: string;
   password: string;
   rol: 'Administrador' | 'Vendedor';
+  rolId?: number;
 }
 
 export interface UpdateUsuarioValue {
   nombreCompleto: string;
   rol: 'Administrador' | 'Vendedor';
+  rolId?: number;
   nuevaPassword?: string;
 }

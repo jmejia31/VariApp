@@ -9,7 +9,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { UsuarioService } from '../../services/usuario.service';
+import { RolService } from '../../services/rol.service';
 import { Usuario } from '../../core/models/usuario.model';
+import { Rol } from '../../core/models/rol.model';
 
 @Component({
   selector: 'app-usuarios',
@@ -24,6 +26,7 @@ import { Usuario } from '../../core/models/usuario.model';
 export class UsuariosComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   readonly usuarios = signal<Usuario[]>([]);
+  readonly roles = signal<Rol[]>([]);
   readonly loading = signal(true);
   readonly saving = signal(false);
   readonly errorMessage = signal<string | null>(null);
@@ -33,13 +36,15 @@ export class UsuariosComponent implements OnInit {
     nombreUsuario: ['', Validators.required],
     nombreCompleto: ['', Validators.required],
     password: ['', [Validators.required, Validators.minLength(8)]],
-    rol: ['Vendedor' as 'Administrador' | 'Vendedor', Validators.required]
+    rolId: [null as number | null, Validators.required]
   });
 
-  constructor(private usuarioService: UsuarioService) {}
+  constructor(private usuarioService: UsuarioService, private rolService: RolService) {}
 
   ngOnInit(): void {
     this.cargar();
+    // Solo roles activos pueden asignarse a un usuario nuevo.
+    this.rolService.getAll().subscribe((res) => this.roles.set(res.data.filter((r) => r.activo)));
   }
 
   cargar(): void {
@@ -59,11 +64,18 @@ export class UsuariosComponent implements OnInit {
     this.saving.set(true);
     this.errorMessage.set(null);
 
-    this.usuarioService.create(this.form.getRawValue() as any).subscribe({
+    const valor = this.form.getRawValue();
+    this.usuarioService.create({
+      nombreUsuario: valor.nombreUsuario!,
+      nombreCompleto: valor.nombreCompleto!,
+      password: valor.password!,
+      rol: 'Vendedor', // fallback legado; el backend prioriza rolId cuando se envía
+      rolId: valor.rolId!
+    }).subscribe({
       next: () => {
         this.saving.set(false);
         this.mostrarFormulario.set(false);
-        this.form.reset({ rol: 'Vendedor' });
+        this.form.reset();
         this.cargar();
       },
       error: (err) => {
