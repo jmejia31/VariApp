@@ -1,3 +1,5 @@
+import { ImpuestoAplicado, ResultadoCalculo } from './venta.model';
+
 export interface CompraDetalle {
   id: number;
   productoId: number;
@@ -26,6 +28,7 @@ export interface Compra {
   total: number;
   notas?: string;
   detalles: CompraDetalle[];
+  impuestosAplicados: ImpuestoAplicado[];
   creadoPorNombreUsuario?: string;
   fechaCreacion: string;
   confirmadoPorNombreUsuario?: string;
@@ -48,8 +51,11 @@ export interface CompraFormValue {
   documentoReferencia?: string;
   metodoPago: string;
   estadoPago: string;
+  /** Se envían en 0 por compatibilidad; el backend los ignora y recalcula. */
   descuento: number;
   impuesto: number;
   notas?: string;
   detalles: CompraDetalleInput[];
 }
+
+export type { ResultadoCalculo };

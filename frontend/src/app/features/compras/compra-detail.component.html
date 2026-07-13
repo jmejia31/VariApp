@@ -49,8 +49,9 @@
 
     <div class="totales">
       <div><span>Subtotal</span><span>L. {{ c.subtotal | number:'1.2-2' }}</span></div>
-      <div><span>Descuento</span><span>- L. {{ c.descuento | number:'1.2-2' }}</span></div>
-      <div><span>Impuesto</span><span>+ L. {{ c.impuesto | number:'1.2-2' }}</span></div>
+      @for (i of c.impuestosAplicados; track i.impuestoId) {
+        <div class="linea-impuesto"><span>{{ i.nombre }} ({{ i.tasa }}%)</span><span>+ L. {{ i.monto | number:'1.2-2' }}</span></div>
+      }
       <div class="total"><span>Total</span><span>L. {{ c.total | number:'1.2-2' }}</span></div>
     </div>
 

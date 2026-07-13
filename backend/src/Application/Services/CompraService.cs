@@ -359,6 +359,24 @@ public class CompraService : ICompraService
         }
     }
 
+    public async Task<ResultadoCalculoDto> CalcularVistaPreviaAsync(CalcularCompraRequest request)
+    {
+        var entradas = new List<DetalleCalculoInput>();
+        foreach (var d in request.Detalles)
+        {
+            var producto = await _productoRepository.GetByIdAsync(d.ProductoId);
+            entradas.Add(new DetalleCalculoInput
+            {
+                ProductoId = d.ProductoId,
+                CategoriaId = producto?.CategoriaId,
+                Cantidad = d.Cantidad,
+                PrecioUnitario = d.PrecioUnitario
+            });
+        }
+
+        return await _calculoService.CalcularCompraAsync(entradas, request.ProveedorId);
+    }
+
     /// LIMITACIÓN DOCUMENTADA: a diferencia de Ventas, aquí solo se aplican
     /// Impuestos reales vía el motor (CalculoService.CalcularCompraAsync). El
     /// modelo de Descuento está diseñado con alcance Cliente/Rol (pensado para

@@ -12,4 +12,5 @@ public interface ICompraService
     Task<CompraDto?> ConfirmarAsync(int id);
     Task<CompraDto?> AnularAsync(int id, string motivo);
     Task<bool> DeleteBorradorAsync(int id);
+    Task<ResultadoCalculoDto> CalcularVistaPreviaAsync(CalcularCompraRequest request);
 }

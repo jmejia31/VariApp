@@ -46,6 +46,16 @@ public class ComprasController : ControllerBase
             ApiResponse<CompraDto>.Ok(creada, "Compra creada en estado Borrador."));
     }
 
+    /// Vista previa: calcula impuestos reales (desde el catálogo, vía
+    /// ICalculoService) SIN persistir nada.
+    [HttpPost("calcular")]
+    [RequierePermiso(ModuloSistema.Compras, AccionPermiso.Crear)]
+    public async Task<IActionResult> Calcular([FromBody] CalcularCompraRequest request)
+    {
+        var resultado = await _compraService.CalcularVistaPreviaAsync(request);
+        return Ok(ApiResponse<ResultadoCalculoDto>.Ok(resultado));
+    }
+
     [HttpPut("{id:int}")]
     [RequierePermiso(ModuloSistema.Compras, AccionPermiso.Editar)]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateCompraDto dto)

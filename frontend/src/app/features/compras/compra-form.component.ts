@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, AbstractControl, FormBuilder, FormArray, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -11,6 +12,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CompraService } from '../../services/compra.service';
 import { ProductoService } from '../../services/producto.service';
 import { Producto } from '../../core/models/producto.model';
+import { ResultadoCalculo } from '../../core/models/compra.model';
 
 @Component({
   selector: 'app-compra-form',
@@ -26,9 +28,11 @@ export class CompraFormComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   readonly loading = signal(false);
   readonly saving = signal(false);
+  readonly calculando = signal(false);
   readonly errorMessage = signal<string | null>(null);
   readonly isEdit = signal(false);
   readonly productos = signal<Producto[]>([]);
+  readonly resultado = signal<ResultadoCalculo | null>(null);
   private compraId: number | null = null;
 
   form = this.fb.group({
@@ -38,8 +42,6 @@ export class CompraFormComponent implements OnInit {
     documentoReferencia: [''],
     metodoPago: ['Efectivo', Validators.required],
     estadoPago: ['Pendiente', Validators.required],
-    descuento: [0, [Validators.min(0)]],
-    impuesto: [0, [Validators.min(0)]],
     notas: [''],
     detalles: this.fb.array([])
   });
@@ -66,6 +68,11 @@ export class CompraFormComponent implements OnInit {
     } else {
       this.agregarDetalle();
     }
+
+    this.form.valueChanges.pipe(
+      debounceTime(500),
+      distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b))
+    ).subscribe(() => this.recalcular());
   }
 
   private cargarCompra(id: number): void {
@@ -80,11 +87,17 @@ export class CompraFormComponent implements OnInit {
           documentoReferencia: c.documentoReferencia,
           metodoPago: c.metodoPago,
           estadoPago: c.estadoPago,
-          descuento: c.descuento,
-          impuesto: c.impuesto,
           notas: c.notas
         });
         c.detalles.forEach((d) => this.agregarDetalle(d.productoId, d.cantidad, d.costoUnitario));
+        this.resultado.set({
+          subtotal: c.subtotal,
+          descuentosAplicados: [],
+          totalDescuento: c.descuento,
+          impuestosAplicados: c.impuestosAplicados,
+          totalImpuesto: c.impuesto,
+          total: c.total
+        });
         this.loading.set(false);
       },
       error: () => this.loading.set(false)
@@ -101,6 +114,7 @@ export class CompraFormComponent implements OnInit {
 
   quitarDetalle(index: number): void {
     this.detalles.removeAt(index);
+    this.recalcular();
   }
 
   subtotalDetalle(group: AbstractControl): number {
@@ -109,14 +123,23 @@ export class CompraFormComponent implements OnInit {
     return cantidad * costo;
   }
 
-  get subtotalGeneral(): number {
-    return this.detalles.controls.reduce((acc, g) => acc + this.subtotalDetalle(g), 0);
-  }
+  /** Llama al backend para obtener el desglose REAL de impuestos. */
+  recalcular(): void {
+    const detallesValidos = this.detalles.controls
+      .map((g) => g.value)
+      .filter((d) => d.productoId && d.cantidad > 0 && d.costoUnitario >= 0)
+      .map((d) => ({ productoId: d.productoId, cantidad: d.cantidad, precioUnitario: d.costoUnitario }));
 
-  get totalGeneral(): number {
-    const descuento = this.form.value.descuento || 0;
-    const impuesto = this.form.value.impuesto || 0;
-    return this.subtotalGeneral - descuento + impuesto;
+    if (detallesValidos.length === 0) {
+      this.resultado.set(null);
+      return;
+    }
+
+    this.calculando.set(true);
+    this.compraService.calcular(null, detallesValidos).subscribe({
+      next: (res) => { this.resultado.set(res.data); this.calculando.set(false); },
+      error: () => { this.calculando.set(false); }
+    });
   }
 
   submit(): void {
@@ -125,7 +148,7 @@ export class CompraFormComponent implements OnInit {
     this.saving.set(true);
     this.errorMessage.set(null);
 
-    const value = this.form.getRawValue() as any;
+    const value = { ...this.form.getRawValue(), descuento: 0, impuesto: 0 } as any;
 
     const request$ = this.isEdit()
       ? this.compraService.update(this.compraId!, value)

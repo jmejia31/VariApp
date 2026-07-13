@@ -3,7 +3,13 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { ApiResponse, PagedRequest, PagedResult } from '../core/models/api-response.model';
-import { Compra, CompraFormValue } from '../core/models/compra.model';
+import { Compra, CompraFormValue, ResultadoCalculo } from '../core/models/compra.model';
+
+interface DetalleCalculoInput {
+  productoId: number;
+  cantidad: number;
+  precioUnitario: number;
+}
 
 @Injectable({ providedIn: 'root' })
 export class CompraService {
@@ -41,5 +47,10 @@ export class CompraService {
 
   deleteBorrador(id: number): Observable<ApiResponse<object>> {
     return this.http.delete<ApiResponse<object>>(`${this.apiUrl}/${id}`);
+  }
+
+  /** Vista previa: calcula impuestos reales sin guardar nada. */
+  calcular(proveedorId: number | null, detalles: DetalleCalculoInput[]): Observable<ApiResponse<ResultadoCalculo>> {
+    return this.http.post<ApiResponse<ResultadoCalculo>>(`${this.apiUrl}/calcular`, { proveedorId, detalles });
   }
 }

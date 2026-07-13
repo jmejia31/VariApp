@@ -44,3 +44,9 @@ public class CalcularVentaRequest
     public string? CodigoPromocional { get; set; }
     public List<VentaDetalleInputDto> Detalles { get; set; } = new();
 }
+
+public class CalcularCompraRequest
+{
+    public int? ProveedorId { get; set; }
+    public List<VentaDetalleInputDto> Detalles { get; set; } = new();
+}
