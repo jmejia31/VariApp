@@ -14,6 +14,7 @@ public class CompraService : ICompraService
     private readonly IProductoRepository _productoRepository;
     private readonly IMovimientoInventarioRepository _movimientoInventarioRepository;
     private readonly IMovimientoFinancieroRepository _movimientoFinancieroRepository;
+    private readonly ICalculoService _calculoService;
     private readonly ICurrentUserService _currentUser;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IAuditoriaService _auditoria;
@@ -24,6 +25,7 @@ public class CompraService : ICompraService
         IProductoRepository productoRepository,
         IMovimientoInventarioRepository movimientoInventarioRepository,
         IMovimientoFinancieroRepository movimientoFinancieroRepository,
+        ICalculoService calculoService,
         ICurrentUserService currentUser,
         IUnitOfWork unitOfWork,
         IAuditoriaService auditoria)
@@ -33,6 +35,7 @@ public class CompraService : ICompraService
         _productoRepository = productoRepository;
         _movimientoInventarioRepository = movimientoInventarioRepository;
         _movimientoFinancieroRepository = movimientoFinancieroRepository;
+        _calculoService = calculoService;
         _currentUser = currentUser;
         _unitOfWork = unitOfWork;
         _auditoria = auditoria;
@@ -68,7 +71,7 @@ public class CompraService : ICompraService
             MetodoPago = ParseEnum(dto.MetodoPago, MetodoPago.Efectivo),
             EstadoPago = ParseEnum(dto.EstadoPago, EstadoPago.Pendiente),
             Estado = EstadoDocumento.Borrador,
-            Descuento = dto.Descuento,
+            // Descuento/Impuesto NO se toman de dto: se recalculan abajo (sección 13).
             Notas = dto.Notas,
             CreadoPorUsuarioId = _currentUser.UsuarioId,
             CreadoPorNombreUsuario = _currentUser.NombreUsuario
@@ -76,7 +79,7 @@ public class CompraService : ICompraService
 
         await VincularProveedorAsync(compra, dto);
         await ArmarDetallesAsync(compra, dto.Detalles);
-        CalcularTotales(compra, dto.Impuesto);
+        await CalcularTotalesAsync(compra);
 
         await _compraRepository.AddAsync(compra);
         await _compraRepository.SaveChangesAsync();
@@ -99,7 +102,6 @@ public class CompraService : ICompraService
         compra.DocumentoReferencia = dto.DocumentoReferencia;
         compra.MetodoPago = ParseEnum(dto.MetodoPago, MetodoPago.Efectivo);
         compra.EstadoPago = ParseEnum(dto.EstadoPago, EstadoPago.Pendiente);
-        compra.Descuento = dto.Descuento;
         compra.Notas = dto.Notas;
         compra.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
         compra.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
@@ -107,8 +109,9 @@ public class CompraService : ICompraService
 
         await VincularProveedorAsync(compra, dto);
         compra.Detalles.Clear();
+        compra.ImpuestosAplicados.Clear();
         await ArmarDetallesAsync(compra, dto.Detalles);
-        CalcularTotales(compra, dto.Impuesto);
+        await CalcularTotalesAsync(compra);
 
         _compraRepository.Update(compra);
         await _compraRepository.SaveChangesAsync();
@@ -177,6 +180,8 @@ public class CompraService : ICompraService
             compra.ConfirmadoPorNombreUsuario = _currentUser.NombreUsuario;
             compra.FechaConfirmacion = DateTime.UtcNow;
             _compraRepository.Update(compra);
+
+            await _calculoService.RegistrarUsoCompraAsync(compra.Id, compra.ImpuestosAplicados.ToList());
 
             await _compraRepository.SaveChangesAsync();
         });
@@ -354,22 +359,45 @@ public class CompraService : ICompraService
         }
     }
 
-    private static void CalcularTotales(Compra compra, decimal impuesto)
+    /// LIMITACIÓN DOCUMENTADA: a diferencia de Ventas, aquí solo se aplican
+    /// Impuestos reales vía el motor (CalculoService.CalcularCompraAsync). El
+    /// modelo de Descuento está diseñado con alcance Cliente/Rol (pensado para
+    /// ventas); Compra.Descuento queda en 0 por ahora — extender Descuento con
+    /// alcance Proveedor es la vía natural para habilitarlo aquí, no se hizo
+    /// por límite de tiempo de esta fase.
+    private async Task CalcularTotalesAsync(Compra compra)
     {
-        if (compra.Descuento < 0)
-            throw new BusinessRuleException("El descuento de la compra no puede ser negativo.");
-        if (impuesto < 0)
-            throw new BusinessRuleException("El impuesto de la compra no puede ser negativo.");
+        var entradas = compra.Detalles.Select(d => new DetalleCalculoInput
+        {
+            ProductoId = d.ProductoId,
+            Cantidad = d.Cantidad,
+            PrecioUnitario = d.CostoUnitario
+        }).ToList();
 
-        compra.Subtotal = compra.Detalles.Sum(d => d.Subtotal);
-        if (compra.Descuento > compra.Subtotal)
-            throw new BusinessRuleException("El descuento de la compra no puede ser mayor que el subtotal.");
+        foreach (var entrada in entradas)
+        {
+            var producto = await _productoRepository.GetByIdAsync(entrada.ProductoId);
+            entrada.CategoriaId = producto?.CategoriaId;
+        }
 
-        compra.Impuesto = impuesto;
-        compra.Total = compra.Subtotal - compra.Descuento + compra.Impuesto;
+        var resultado = await _calculoService.CalcularCompraAsync(entradas, compra.ProveedorId);
+
+        compra.Subtotal = resultado.Subtotal;
+        compra.Descuento = 0; // ver limitación documentada arriba
+        compra.Impuesto = resultado.TotalImpuesto;
+        compra.Total = resultado.Total;
+
+        compra.ImpuestosAplicados = resultado.ImpuestosAplicados.Select(i => new CompraImpuesto
+        {
+            ImpuestoId = i.ImpuestoId,
+            ImpuestoNombreSnapshot = i.Nombre,
+            TasaSnapshot = i.Tasa,
+            BaseImponible = i.BaseImponible,
+            MontoAplicado = i.Monto
+        }).ToList();
 
         if (compra.Total < 0)
-            throw new BusinessRuleException("El total de la compra no puede ser negativo (revisa el descuento).");
+            throw new BusinessRuleException("El total de la compra no puede ser negativo.");
     }
 
     private async Task<string> GenerarNumeroAsync()
@@ -409,6 +437,14 @@ public class CompraService : ICompraService
             Cantidad = d.Cantidad,
             CostoUnitario = d.CostoUnitario,
             Subtotal = d.Subtotal
+        }).ToList(),
+        ImpuestosAplicados = c.ImpuestosAplicados.Select(i => new ImpuestoAplicadoDto
+        {
+            ImpuestoId = i.ImpuestoId,
+            Nombre = i.ImpuestoNombreSnapshot,
+            Tasa = i.TasaSnapshot,
+            BaseImponible = i.BaseImponible,
+            Monto = i.MontoAplicado
         }).ToList(),
         CreadoPorNombreUsuario = c.CreadoPorNombreUsuario,
         FechaCreacion = c.FechaCreacion,

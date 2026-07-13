@@ -52,6 +52,12 @@ import { PermisosRuntimeService } from './core/auth/permisos-runtime.service';
             @if (permisosRuntime.puede('Roles', 'Ver') || auth.esAdministrador()) {
               <a routerLink="/roles" routerLinkActive="active"><mat-icon>admin_panel_settings</mat-icon> Roles</a>
             }
+            @if (permisosRuntime.puede('Descuentos', 'Ver') || auth.esAdministrador()) {
+              <a routerLink="/descuentos" routerLinkActive="active"><mat-icon>sell</mat-icon> Descuentos</a>
+            }
+            @if (permisosRuntime.puede('Impuestos', 'Ver') || auth.esAdministrador()) {
+              <a routerLink="/impuestos" routerLinkActive="active"><mat-icon>request_quote</mat-icon> Impuestos</a>
+            }
             @if (permisosRuntime.puede('Permisos', 'Administrar') || auth.esAdministrador()) {
               <a routerLink="/permisos" routerLinkActive="active"><mat-icon>lock_outline</mat-icon> Permisos</a>
             }

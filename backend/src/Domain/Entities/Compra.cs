@@ -31,4 +31,5 @@ public class Compra : ConfirmableEntity
     public string? Notas { get; set; }
 
     public ICollection<CompraDetalle> Detalles { get; set; } = new List<CompraDetalle>();
+    public ICollection<CompraImpuesto> ImpuestosAplicados { get; set; } = new List<CompraImpuesto>();
 }

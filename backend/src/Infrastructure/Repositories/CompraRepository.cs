@@ -16,7 +16,8 @@ public class CompraRepository : ICompraRepository
     }
 
     private IQueryable<Compra> ConIncludes() =>
-        _context.Compras.Include(c => c.Detalles).ThenInclude(d => d.Producto);
+        _context.Compras.Include(c => c.Detalles).ThenInclude(d => d.Producto)
+            .Include(c => c.ImpuestosAplicados);
 
     public async Task<Compra?> GetByIdAsync(int id) =>
         await ConIncludes().FirstOrDefaultAsync(c => c.Id == id);

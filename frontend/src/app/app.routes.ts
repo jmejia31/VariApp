@@ -117,6 +117,42 @@ export const routes: Routes = [
     loadComponent: () => import('./features/permisos/permisos-matrix.component').then(m => m.PermisosMatrixComponent)
   },
   {
+    path: 'descuentos',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Descuentos', accion: 'Ver' },
+    loadComponent: () => import('./features/descuentos/descuentos-list.component').then(m => m.DescuentosListComponent)
+  },
+  {
+    path: 'descuentos/nuevo',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Descuentos', accion: 'Crear' },
+    loadComponent: () => import('./features/descuentos/descuento-form.component').then(m => m.DescuentoFormComponent)
+  },
+  {
+    path: 'descuentos/:id/editar',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Descuentos', accion: 'Editar' },
+    loadComponent: () => import('./features/descuentos/descuento-form.component').then(m => m.DescuentoFormComponent)
+  },
+  {
+    path: 'impuestos',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Impuestos', accion: 'Ver' },
+    loadComponent: () => import('./features/impuestos/impuestos-list.component').then(m => m.ImpuestosListComponent)
+  },
+  {
+    path: 'impuestos/nuevo',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Impuestos', accion: 'Crear' },
+    loadComponent: () => import('./features/impuestos/impuesto-form.component').then(m => m.ImpuestoFormComponent)
+  },
+  {
+    path: 'impuestos/:id/editar',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Impuestos', accion: 'Editar' },
+    loadComponent: () => import('./features/impuestos/impuesto-form.component').then(m => m.ImpuestoFormComponent)
+  },
+  {
     path: 'auditoria',
     canActivate: [authGuard, permisoGuard],
     data: { modulo: 'Auditoria', accion: 'Ver' },

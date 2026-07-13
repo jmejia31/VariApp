@@ -31,5 +31,10 @@ public class CompraConfiguration : IEntityTypeConfiguration<Compra>
             .WithOne(d => d.Compra)
             .HasForeignKey(d => d.CompraId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(c => c.ImpuestosAplicados)
+            .WithOne()
+            .HasForeignKey(i => i.CompraId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

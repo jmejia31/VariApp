@@ -31,6 +31,7 @@ public class CompraDto
     public decimal Total { get; set; }
     public string? Notas { get; set; }
     public List<CompraDetalleDto> Detalles { get; set; } = new();
+    public List<ImpuestoAplicadoDto> ImpuestosAplicados { get; set; } = new();
 
     public string? CreadoPorNombreUsuario { get; set; }
     public DateTime FechaCreacion { get; set; }
@@ -57,6 +58,12 @@ public class CreateCompraDto
     public string? DocumentoReferencia { get; set; }
     public string MetodoPago { get; set; } = "Efectivo";
     public string EstadoPago { get; set; } = "Pendiente";
+
+    /// OBSOLETO / IGNORADO POR EL BACKEND (sección 13). Se conserva en el DTO
+    /// solo para no romper clientes viejos; el backend siempre recalcula
+    /// Impuesto desde el catálogo real vía ICalculoService. Descuento en
+    /// compras no está implementado todavía (ver limitación documentada en
+    /// CompraService.CalcularTotalesAsync).
     public decimal Descuento { get; set; }
     public decimal Impuesto { get; set; }
     public string? Notas { get; set; }
