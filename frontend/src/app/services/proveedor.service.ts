@@ -23,6 +23,12 @@ export class ProveedorService {
     return this.http.get<ApiResponse<Proveedor>>(`${this.apiUrl}/${id}`);
   }
 
+  /** Autocompletado remoto (sección 17): el backend limita a ~10 resultados,
+   * nunca se cargan todos los proveedores en memoria. */
+  buscar(termino: string): Observable<ApiResponse<Proveedor[]>> {
+    return this.http.get<ApiResponse<Proveedor[]>>(`${this.apiUrl}/buscar`, { params: { termino } });
+  }
+
   create(value: ProveedorFormValue): Observable<ApiResponse<Proveedor>> {
     return this.http.post<ApiResponse<Proveedor>>(this.apiUrl, value);
   }

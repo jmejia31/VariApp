@@ -1,17 +1,21 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, AbstractControl, FormBuilder, FormArray, Validators } from '@angular/forms';
+import { ReactiveFormsModule, AbstractControl, FormBuilder, FormArray, FormControl, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { of } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap, catchError } from 'rxjs/operators';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CompraService } from '../../services/compra.service';
 import { ProductoService } from '../../services/producto.service';
+import { ProveedorService } from '../../services/proveedor.service';
 import { Producto } from '../../core/models/producto.model';
+import { Proveedor } from '../../core/models/proveedor.model';
 import { ResultadoCalculo } from '../../core/models/compra.model';
 
 @Component({
@@ -19,7 +23,7 @@ import { ResultadoCalculo } from '../../core/models/compra.model';
   standalone: true,
   imports: [
     CommonModule, ReactiveFormsModule, RouterLink, MatFormFieldModule, MatInputModule,
-    MatSelectModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule
+    MatSelectModule, MatAutocompleteModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule
   ],
   templateUrl: './compra-form.component.html',
   styleUrl: './compra-form.component.scss'
@@ -35,6 +39,14 @@ export class CompraFormComponent implements OnInit {
   readonly resultado = signal<ResultadoCalculo | null>(null);
   private compraId: number | null = null;
 
+  // --- Autocompletado remoto de proveedores (sección 17) ---
+  readonly buscadorProveedor = new FormControl('');
+  readonly opcionesProveedor = signal<Proveedor[]>([]);
+  readonly buscandoProveedor = signal(false);
+  readonly proveedorSeleccionado = signal<Proveedor | null>(null);
+  readonly errorBusquedaProveedor = signal<string | null>(null);
+  private proveedorId: number | null = null;
+
   form = this.fb.group({
     proveedorNombre: ['', Validators.required],
     proveedorTelefono: [''],
@@ -49,6 +61,7 @@ export class CompraFormComponent implements OnInit {
   constructor(
     private compraService: CompraService,
     private productoService: ProductoService,
+    private proveedorService: ProveedorService,
     private route: ActivatedRoute,
     private router: Router
   ) {}
@@ -69,10 +82,59 @@ export class CompraFormComponent implements OnInit {
       this.agregarDetalle();
     }
 
+    this.buscadorProveedor.valueChanges.pipe(
+      debounceTime(350),
+      distinctUntilChanged(),
+      switchMap((termino) => {
+        if (this.proveedorSeleccionado() && termino !== this.proveedorSeleccionado()!.nombre) {
+          this.proveedorSeleccionado.set(null);
+          this.proveedorId = null;
+        }
+        if (!termino || termino.trim().length < 2) {
+          this.opcionesProveedor.set([]);
+          return of(null);
+        }
+        this.buscandoProveedor.set(true);
+        this.errorBusquedaProveedor.set(null);
+        return this.proveedorService.buscar(termino).pipe(
+          catchError(() => {
+            this.errorBusquedaProveedor.set('No se pudo buscar proveedores. Intenta de nuevo.');
+            return of(null);
+          })
+        );
+      })
+    ).subscribe((res) => {
+      this.buscandoProveedor.set(false);
+      if (res) this.opcionesProveedor.set(res.data);
+    });
+
     this.form.valueChanges.pipe(
       debounceTime(500),
       distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b))
     ).subscribe(() => this.recalcular());
+  }
+
+  onProveedorSeleccionado(event: MatAutocompleteSelectedEvent): void {
+    const proveedor: Proveedor = event.option.value;
+    this.proveedorSeleccionado.set(proveedor);
+    this.proveedorId = proveedor.id;
+    this.buscadorProveedor.setValue(proveedor.nombre, { emitEvent: false });
+    this.form.patchValue({
+      proveedorNombre: proveedor.nombre,
+      proveedorTelefono: proveedor.telefono,
+      proveedorDocumento: proveedor.documento
+    });
+  }
+
+  limpiarProveedorSeleccionado(): void {
+    this.proveedorSeleccionado.set(null);
+    this.proveedorId = null;
+    this.buscadorProveedor.setValue('');
+    this.form.patchValue({ proveedorNombre: '', proveedorTelefono: '', proveedorDocumento: '' });
+  }
+
+  displayProveedor(proveedor: Proveedor): string {
+    return proveedor?.nombre ?? '';
   }
 
   private cargarCompra(id: number): void {
@@ -80,6 +142,7 @@ export class CompraFormComponent implements OnInit {
     this.compraService.getById(id).subscribe({
       next: (res) => {
         const c = res.data;
+        this.buscadorProveedor.setValue(c.proveedorNombre, { emitEvent: false });
         this.form.patchValue({
           proveedorNombre: c.proveedorNombre,
           proveedorTelefono: c.proveedorTelefono,
@@ -136,7 +199,7 @@ export class CompraFormComponent implements OnInit {
     }
 
     this.calculando.set(true);
-    this.compraService.calcular(null, detallesValidos).subscribe({
+    this.compraService.calcular(this.proveedorId, detallesValidos).subscribe({
       next: (res) => { this.resultado.set(res.data); this.calculando.set(false); },
       error: () => { this.calculando.set(false); }
     });

@@ -130,6 +130,8 @@ public class DescuentoService : IDescuentoService
 
         // No se recalculan ventas históricas: editar el descuento solo afecta
         // aplicaciones futuras (sección 11: "no recalcular ventas históricas").
+        var anterior = new { descuento.Nombre, descuento.Valor, descuento.Tipo, descuento.Activo };
+
         descuento.Nombre = dto.Nombre.Trim();
         descuento.Descripcion = dto.Descripcion;
         descuento.CodigoPromocional = string.IsNullOrWhiteSpace(dto.CodigoPromocional) ? null : dto.CodigoPromocional.Trim();
@@ -158,7 +160,9 @@ public class DescuentoService : IDescuentoService
         _repository.Update(descuento);
         await _repository.SaveChangesAsync();
 
-        await _auditoria.RegistrarAsync(ModuloSistema.Descuentos, AccionPermiso.Editar, $"Editó el descuento '{descuento.Nombre}'.", descuento.Id);
+        await _auditoria.RegistrarAsync(ModuloSistema.Descuentos, AccionPermiso.Editar, $"Editó el descuento '{descuento.Nombre}'.", descuento.Id,
+            entidad: "Descuento", valoresAnteriores: anterior,
+            valoresNuevos: new { descuento.Nombre, descuento.Valor, descuento.Tipo, descuento.Activo });
 
         var conRelaciones = await _repository.GetByIdConRelacionesAsync(id);
         return ToDto(conRelaciones!);

@@ -23,6 +23,12 @@ export class ClienteService {
     return this.http.get<ApiResponse<Cliente>>(`${this.apiUrl}/${id}`);
   }
 
+  /** Autocompletado remoto (sección 16): el backend limita a ~10 resultados,
+   * nunca se cargan todos los clientes en memoria. */
+  buscar(termino: string): Observable<ApiResponse<Cliente[]>> {
+    return this.http.get<ApiResponse<Cliente[]>>(`${this.apiUrl}/buscar`, { params: { termino } });
+  }
+
   create(value: ClienteFormValue): Observable<ApiResponse<Cliente>> {
     return this.http.post<ApiResponse<Cliente>>(this.apiUrl, value);
   }

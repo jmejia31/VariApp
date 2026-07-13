@@ -332,7 +332,8 @@ public class VentaService : IVentaService
         });
 
         var actualizada = await _ventaRepository.GetByIdAsync(id);
-        await _auditoria.RegistrarAsync(ModuloSistema.Ventas, AccionPermiso.Anular, $"Venta anulada: {venta.NumeroVenta}. Motivo: {motivo}", venta.Id);
+        await _auditoria.RegistrarAsync(ModuloSistema.Ventas, AccionPermiso.Anular,
+            $"Venta anulada: {venta.NumeroVenta}.", venta.Id, entidad: "Venta", motivo: motivo);
         return ToDto(actualizada!);
     }
 

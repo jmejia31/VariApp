@@ -4,6 +4,13 @@
 .section-title { font-size: 14px; font-weight: 600; margin: 20px 0 10px; &:first-of-type { margin-top: 0; } }
 
 .fields-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 16px; .full-width { grid-column: 1 / -1; } mat-form-field { width: 100%; } }
+.proveedor-modo {
+  display: flex; align-items: center; gap: 6px; font-size: 12px; margin: -4px 0 6px;
+  mat-icon { font-size: 16px; width: 16px; height: 16px; }
+}
+.proveedor-existente { color: var(--color-success); }
+.proveedor-nuevo { color: var(--color-text-muted); }
+.opcion-detalle { margin-left: 8px; font-size: 11px; color: var(--color-text-muted); }
 
 .detalles { display: flex; flex-direction: column; gap: 4px; }
 .detalle-row {

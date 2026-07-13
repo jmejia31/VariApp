@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuditoriaService } from '../../services/auditoria.service';
@@ -12,7 +14,10 @@ import { RegistroAuditoria } from '../../core/models/auditoria.model';
 @Component({
   selector: 'app-auditoria-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatFormFieldModule, MatSelectModule, MatInputModule, MatPaginatorModule, MatProgressSpinnerModule],
+  imports: [
+    CommonModule, FormsModule, MatFormFieldModule, MatSelectModule, MatInputModule,
+    MatIconModule, MatButtonModule, MatPaginatorModule, MatProgressSpinnerModule
+  ],
   templateUrl: './auditoria-list.component.html',
   styleUrl: './auditoria-list.component.scss'
 })
@@ -20,16 +25,28 @@ export class AuditoriaListComponent implements OnInit {
   readonly registros = signal<RegistroAuditoria[]>([]);
   readonly loading = signal(true);
   readonly totalCount = signal(0);
+  readonly expandidoId = signal<number | null>(null);
 
   page = 1;
   pageSize = 25;
   filtroModulo = '';
   filtroAccion = '';
+  filtroResultado = '';
+  filtroTexto = '';
   filtroDesde = '';
   filtroHasta = '';
 
-  readonly modulos = ['Dashboard', 'Productos', 'Categorias', 'Compras', 'Ventas', 'Facturacion', 'Finanzas', 'Inventario', 'Proveedores', 'Clientes', 'Usuarios', 'Auditoria', 'Configuracion'];
-  readonly acciones = ['Ver', 'Crear', 'Editar', 'Eliminar', 'Confirmar', 'Anular'];
+  readonly modulos = [
+    'Dashboard', 'Productos', 'Categorias', 'Compras', 'Ventas', 'Facturacion', 'Finanzas',
+    'Inventario', 'MovimientosInventario', 'Proveedores', 'Clientes', 'Usuarios', 'Roles',
+    'Permisos', 'Auditoria', 'Configuracion', 'Descuentos', 'Impuestos'
+  ];
+  readonly acciones = [
+    'Ver', 'Crear', 'Editar', 'Actualizar', 'Activar', 'Desactivar', 'EliminarLogico',
+    'EliminarPermanente', 'Confirmar', 'Anular', 'Aprobar', 'Rechazar', 'Exportar', 'Imprimir',
+    'Administrar', 'AsignarRol', 'RestablecerContrasena', 'CambiarEstado', 'ConsultarHistorial',
+    'Aplicar', 'Duplicar'
+  ];
 
   constructor(private auditoriaService: AuditoriaService) {}
 
@@ -44,6 +61,8 @@ export class AuditoriaListComponent implements OnInit {
       pageSize: this.pageSize,
       modulo: this.filtroModulo || undefined,
       accion: this.filtroAccion || undefined,
+      resultado: this.filtroResultado || undefined,
+      texto: this.filtroTexto || undefined,
       desde: this.filtroDesde || undefined,
       hasta: this.filtroHasta || undefined
     }).subscribe({
@@ -65,5 +84,18 @@ export class AuditoriaListComponent implements OnInit {
     this.page = event.pageIndex + 1;
     this.pageSize = event.pageSize;
     this.cargar();
+  }
+
+  toggleDetalle(id: number): void {
+    this.expandidoId.set(this.expandidoId() === id ? null : id);
+  }
+
+  formatearJson(json: string | null | undefined): string {
+    if (!json) return '—';
+    try {
+      return JSON.stringify(JSON.parse(json), null, 2);
+    } catch {
+      return json;
+    }
   }
 }

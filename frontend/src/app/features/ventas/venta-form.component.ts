@@ -1,17 +1,21 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, AbstractControl, FormBuilder, FormArray, Validators } from '@angular/forms';
+import { ReactiveFormsModule, AbstractControl, FormBuilder, FormArray, FormControl, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { of } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap, catchError } from 'rxjs/operators';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { VentaService } from '../../services/venta.service';
 import { ProductoService } from '../../services/producto.service';
+import { ClienteService } from '../../services/cliente.service';
 import { Producto } from '../../core/models/producto.model';
+import { Cliente } from '../../core/models/cliente.model';
 import { ResultadoCalculo } from '../../core/models/venta.model';
 
 @Component({
@@ -19,7 +23,7 @@ import { ResultadoCalculo } from '../../core/models/venta.model';
   standalone: true,
   imports: [
     CommonModule, ReactiveFormsModule, RouterLink, MatFormFieldModule, MatInputModule,
-    MatSelectModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule
+    MatSelectModule, MatAutocompleteModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule
   ],
   templateUrl: './venta-form.component.html',
   styleUrl: './venta-form.component.scss'
@@ -34,6 +38,14 @@ export class VentaFormComponent implements OnInit {
   readonly productos = signal<Producto[]>([]);
   readonly resultado = signal<ResultadoCalculo | null>(null);
   private ventaId: number | null = null;
+
+  // --- Autocompletado remoto de clientes (sección 16) ---
+  readonly buscadorCliente = new FormControl('');
+  readonly opcionesCliente = signal<Cliente[]>([]);
+  readonly buscandoCliente = signal(false);
+  readonly clienteSeleccionado = signal<Cliente | null>(null);
+  readonly errorBusquedaCliente = signal<string | null>(null);
+  private clienteId: number | null = null;
 
   form = this.fb.group({
     clienteNombre: ['Cliente final', Validators.required],
@@ -51,6 +63,7 @@ export class VentaFormComponent implements OnInit {
   constructor(
     private ventaService: VentaService,
     private productoService: ProductoService,
+    private clienteService: ClienteService,
     private route: ActivatedRoute,
     private router: Router
   ) {}
@@ -71,6 +84,37 @@ export class VentaFormComponent implements OnInit {
       this.agregarDetalle();
     }
 
+    // Búsqueda remota de clientes: debounce + cancelación de la solicitud
+    // anterior (switchMap) cada vez que el usuario escribe. No se carga
+    // nunca la lista completa de clientes en memoria.
+    this.buscadorCliente.valueChanges.pipe(
+      debounceTime(350),
+      distinctUntilChanged(),
+      switchMap((termino) => {
+        // Si el usuario edita el texto después de haber seleccionado un
+        // cliente, se vuelve a modo "cliente nuevo" (limpieza de selección).
+        if (this.clienteSeleccionado() && termino !== this.clienteSeleccionado()!.nombre) {
+          this.clienteSeleccionado.set(null);
+          this.clienteId = null;
+        }
+        if (!termino || termino.trim().length < 2) {
+          this.opcionesCliente.set([]);
+          return of(null);
+        }
+        this.buscandoCliente.set(true);
+        this.errorBusquedaCliente.set(null);
+        return this.clienteService.buscar(termino).pipe(
+          catchError(() => {
+            this.errorBusquedaCliente.set('No se pudo buscar clientes. Intenta de nuevo.');
+            return of(null);
+          })
+        );
+      })
+    ).subscribe((res) => {
+      this.buscandoCliente.set(false);
+      if (res) this.opcionesCliente.set(res.data);
+    });
+
     // Recalcula el desglose real (backend) cada vez que cambian los productos,
     // cantidades, precios o el código promocional — con debounce para no
     // saturar la API mientras el usuario escribe.
@@ -78,6 +122,34 @@ export class VentaFormComponent implements OnInit {
       debounceTime(500),
       distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b))
     ).subscribe(() => this.recalcular());
+  }
+
+  onClienteSeleccionado(event: MatAutocompleteSelectedEvent): void {
+    const cliente: Cliente = event.option.value;
+    this.clienteSeleccionado.set(cliente);
+    this.clienteId = cliente.id;
+    this.buscadorCliente.setValue(cliente.nombre, { emitEvent: false });
+    this.form.patchValue({
+      clienteNombre: cliente.nombre,
+      clienteTelefono: cliente.telefono,
+      clienteIdentidadORTN: cliente.identidadORTN,
+      clienteCorreo: cliente.correo,
+      clienteDireccion: cliente.direccion
+    });
+  }
+
+  limpiarClienteSeleccionado(): void {
+    this.clienteSeleccionado.set(null);
+    this.clienteId = null;
+    this.buscadorCliente.setValue('');
+    this.form.patchValue({
+      clienteNombre: 'Cliente final', clienteTelefono: '', clienteIdentidadORTN: '',
+      clienteCorreo: '', clienteDireccion: ''
+    });
+  }
+
+  displayCliente(cliente: Cliente): string {
+    return cliente?.nombre ?? '';
   }
 
   private cargarVenta(id: number): void {
@@ -95,6 +167,7 @@ export class VentaFormComponent implements OnInit {
           estadoPago: v.estadoPago,
           notas: v.notas
         });
+        this.buscadorCliente.setValue(v.clienteNombre, { emitEvent: false });
         v.detalles.forEach((d) => this.agregarDetalle(d.productoId, d.cantidad, d.precioUnitario));
         this.resultado.set({
           subtotal: v.subtotal,
@@ -151,7 +224,7 @@ export class VentaFormComponent implements OnInit {
 
     this.calculando.set(true);
     const codigo = this.form.value.codigoPromocional || null;
-    this.ventaService.calcular(null, codigo, detallesValidos).subscribe({
+    this.ventaService.calcular(this.clienteId, codigo, detallesValidos).subscribe({
       next: (res) => { this.resultado.set(res.data); this.calculando.set(false); },
       error: () => { this.calculando.set(false); }
     });

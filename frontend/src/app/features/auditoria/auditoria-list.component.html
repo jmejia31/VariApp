@@ -19,6 +19,15 @@
   </mat-form-field>
 
   <mat-form-field appearance="outline">
+    <mat-label>Resultado</mat-label>
+    <mat-select [(ngModel)]="filtroResultado" (selectionChange)="aplicarFiltros()">
+      <mat-option value="">Todos</mat-option>
+      <mat-option value="Exito">Éxito</mat-option>
+      <mat-option value="Error">Error</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
     <mat-label>Desde</mat-label>
     <input matInput type="date" [(ngModel)]="filtroDesde" (change)="aplicarFiltros()">
   </mat-form-field>
@@ -27,34 +36,101 @@
     <mat-label>Hasta</mat-label>
     <input matInput type="date" [(ngModel)]="filtroHasta" (change)="aplicarFiltros()">
   </mat-form-field>
+
+  <mat-form-field appearance="outline" class="filtro-texto">
+    <mat-label>Buscar (usuario, descripción, motivo)</mat-label>
+    <input matInput [(ngModel)]="filtroTexto" (keyup.enter)="aplicarFiltros()" placeholder="Texto libre...">
+    <button matSuffix mat-icon-button (click)="aplicarFiltros()"><mat-icon>search</mat-icon></button>
+  </mat-form-field>
 </div>
 
 <div class="card">
   @if (loading()) {
     <div class="loading"><mat-spinner></mat-spinner></div>
   } @else {
-    <table class="table">
+    <table class="table table-desktop">
       <thead>
-        <tr><th>Fecha</th><th>Usuario</th><th>Módulo</th><th>Acción</th><th>Detalle</th></tr>
+        <tr><th>Fecha</th><th>Usuario</th><th>Módulo</th><th>Acción</th><th>Detalle</th><th>Resultado</th><th></th></tr>
       </thead>
       <tbody>
         @for (r of registros(); track r.id) {
-          <tr>
+          <tr [class.error-row]="r.resultado === 'Error'">
             <td>{{ r.fecha | date:'dd/MM/yyyy HH:mm' }}</td>
             <td>{{ r.nombreUsuario }}</td>
             <td>{{ r.modulo }}</td>
             <td>
-              <span class="badge" [class.confirmar]="r.accion === 'Confirmar'" [class.anular]="r.accion === 'Anular'" [class.eliminar]="r.accion === 'Eliminar'">
+              <span class="badge" [class.confirmar]="r.accion === 'Confirmar'" [class.anular]="r.accion === 'Anular'" [class.eliminar]="r.accion.startsWith('Eliminar')">
                 {{ r.accion }}
               </span>
             </td>
             <td>{{ r.descripcion }}</td>
+            <td><span class="badge" [class.error-badge]="r.resultado === 'Error'">{{ r.resultado }}</span></td>
+            <td>
+              <button mat-icon-button (click)="toggleDetalle(r.id)" title="Ver detalle">
+                <mat-icon>{{ expandidoId() === r.id ? 'expand_less' : 'expand_more' }}</mat-icon>
+              </button>
+            </td>
           </tr>
+          @if (expandidoId() === r.id) {
+            <tr class="detalle-row">
+              <td colspan="7">
+                <div class="detalle-panel">
+                  <div class="detalle-meta">
+                    <span><strong>IP:</strong> {{ r.ip || '—' }}</span>
+                    <span><strong>Motivo:</strong> {{ r.motivo || '—' }}</span>
+                    <span><strong>Correlación:</strong> {{ r.correlationId || '—' }}</span>
+                    @if (r.error) { <span class="error-text"><strong>Error:</strong> {{ r.error }}</span> }
+                  </div>
+                  @if (r.valoresAnteriores || r.valoresNuevos) {
+                    <div class="comparacion">
+                      <div>
+                        <h4>Antes</h4>
+                        <pre>{{ formatearJson(r.valoresAnteriores) }}</pre>
+                      </div>
+                      <div>
+                        <h4>Después</h4>
+                        <pre>{{ formatearJson(r.valoresNuevos) }}</pre>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
         } @empty {
-          <tr><td colspan="5" class="empty">No hay registros de auditoría con estos filtros.</td></tr>
+          <tr><td colspan="7" class="empty">No hay registros de auditoría con estos filtros.</td></tr>
         }
       </tbody>
     </table>
+
+    <div class="cards-mobile">
+      @for (r of registros(); track r.id) {
+        <div class="audit-card" [class.error-row]="r.resultado === 'Error'" (click)="toggleDetalle(r.id)">
+          <div class="audit-card-header">
+            <span class="badge" [class.error-badge]="r.resultado === 'Error'">{{ r.accion }}</span>
+            <span class="fecha">{{ r.fecha | date:'dd/MM HH:mm' }}</span>
+          </div>
+          <p class="audit-card-desc">{{ r.descripcion }}</p>
+          <div class="audit-card-meta"><span>{{ r.nombreUsuario }}</span><span>{{ r.modulo }}</span></div>
+          @if (expandidoId() === r.id) {
+            <div class="detalle-panel">
+              <div class="detalle-meta">
+                <span><strong>IP:</strong> {{ r.ip || '—' }}</span>
+                <span><strong>Motivo:</strong> {{ r.motivo || '—' }}</span>
+              </div>
+              @if (r.valoresAnteriores || r.valoresNuevos) {
+                <div class="comparacion">
+                  <div><h4>Antes</h4><pre>{{ formatearJson(r.valoresAnteriores) }}</pre></div>
+                  <div><h4>Después</h4><pre>{{ formatearJson(r.valoresNuevos) }}</pre></div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      } @empty {
+        <p class="empty">No hay registros de auditoría con estos filtros.</p>
+      }
+    </div>
 
     <mat-paginator [length]="totalCount()" [pageSize]="pageSize" [pageIndex]="page - 1" [pageSizeOptions]="[25, 50, 100]" (page)="onPageChange($event)"></mat-paginator>
   }

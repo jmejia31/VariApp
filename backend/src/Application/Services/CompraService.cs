@@ -256,7 +256,8 @@ public class CompraService : ICompraService
             await _compraRepository.SaveChangesAsync();
         });
 
-        await _auditoria.RegistrarAsync(ModuloSistema.Compras, AccionPermiso.Anular, $"Compra anulada: {compra.NumeroCompra}. Motivo: {motivo}", compra.Id);
+        await _auditoria.RegistrarAsync(ModuloSistema.Compras, AccionPermiso.Anular,
+            $"Compra anulada: {compra.NumeroCompra}.", compra.Id, entidad: "Compra", motivo: motivo);
         return ToDto(compra);
     }
 

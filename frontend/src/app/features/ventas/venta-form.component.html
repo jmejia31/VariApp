@@ -9,6 +9,42 @@
   <form class="card form" [formGroup]="form" (ngSubmit)="submit()">
     <h2 class="section-title">Datos del cliente</h2>
     <div class="fields-grid">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Buscar cliente existente (nombre, identidad/RTN, teléfono o correo)</mat-label>
+        <input matInput [formControl]="buscadorCliente" [matAutocomplete]="autoCliente" placeholder="Escribe al menos 2 caracteres...">
+        @if (buscandoCliente()) {
+          <mat-spinner matSuffix diameter="18" style="margin-right: 8px;"></mat-spinner>
+        } @else if (clienteSeleccionado()) {
+          <button matSuffix mat-icon-button type="button" title="Quitar selección" (click)="limpiarClienteSeleccionado()">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+        <mat-autocomplete #autoCliente="matAutocomplete" [displayWith]="displayCliente" (optionSelected)="onClienteSeleccionado($event)">
+          @for (c of opcionesCliente(); track c.id) {
+            <mat-option [value]="c">
+              <strong>{{ c.nombre }}</strong>
+              <span class="opcion-detalle">{{ c.identidadORTN || c.telefono || c.correo || '' }}</span>
+            </mat-option>
+          }
+          @if (opcionesCliente().length === 0 && buscadorCliente.value && buscadorCliente.value.length >= 2 && !buscandoCliente()) {
+            <mat-option disabled>Sin resultados — se creará un cliente nuevo con los datos de abajo.</mat-option>
+          }
+        </mat-autocomplete>
+        @if (errorBusquedaCliente()) {
+          <mat-error>{{ errorBusquedaCliente() }}</mat-error>
+        }
+      </mat-form-field>
+
+      @if (clienteSeleccionado()) {
+        <p class="cliente-modo cliente-existente full-width">
+          <mat-icon>check_circle</mat-icon> Cliente existente seleccionado: <strong>{{ clienteSeleccionado()!.nombre }}</strong>
+        </p>
+      } @else {
+        <p class="cliente-modo cliente-nuevo full-width">
+          <mat-icon>person_add</mat-icon> Se registrará como cliente nuevo con los datos que completes abajo.
+        </p>
+      }
+
       <mat-form-field appearance="outline">
         <mat-label>Nombre del cliente</mat-label>
         <input matInput formControlName="clienteNombre">

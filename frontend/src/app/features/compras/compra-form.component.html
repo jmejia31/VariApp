@@ -9,6 +9,42 @@
   <form class="card form" [formGroup]="form" (ngSubmit)="submit()">
     <h2 class="section-title">Datos del proveedor</h2>
     <div class="fields-grid">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Buscar proveedor existente (nombre, documento/RTN o teléfono)</mat-label>
+        <input matInput [formControl]="buscadorProveedor" [matAutocomplete]="autoProveedor" placeholder="Escribe al menos 2 caracteres...">
+        @if (buscandoProveedor()) {
+          <mat-spinner matSuffix diameter="18" style="margin-right: 8px;"></mat-spinner>
+        } @else if (proveedorSeleccionado()) {
+          <button matSuffix mat-icon-button type="button" title="Quitar selección" (click)="limpiarProveedorSeleccionado()">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+        <mat-autocomplete #autoProveedor="matAutocomplete" [displayWith]="displayProveedor" (optionSelected)="onProveedorSeleccionado($event)">
+          @for (p of opcionesProveedor(); track p.id) {
+            <mat-option [value]="p">
+              <strong>{{ p.nombre }}</strong>
+              <span class="opcion-detalle">{{ p.documento || p.telefono || '' }}</span>
+            </mat-option>
+          }
+          @if (opcionesProveedor().length === 0 && buscadorProveedor.value && buscadorProveedor.value.length >= 2 && !buscandoProveedor()) {
+            <mat-option disabled>Sin resultados — se creará un proveedor nuevo con los datos de abajo.</mat-option>
+          }
+        </mat-autocomplete>
+        @if (errorBusquedaProveedor()) {
+          <mat-error>{{ errorBusquedaProveedor() }}</mat-error>
+        }
+      </mat-form-field>
+
+      @if (proveedorSeleccionado()) {
+        <p class="proveedor-modo proveedor-existente full-width">
+          <mat-icon>check_circle</mat-icon> Proveedor existente seleccionado: <strong>{{ proveedorSeleccionado()!.nombre }}</strong>
+        </p>
+      } @else {
+        <p class="proveedor-modo proveedor-nuevo full-width">
+          <mat-icon>person_add</mat-icon> Se registrará como proveedor nuevo con los datos que completes abajo.
+        </p>
+      }
+
       <mat-form-field appearance="outline">
         <mat-label>Nombre del proveedor</mat-label>
         <input matInput formControlName="proveedorNombre">

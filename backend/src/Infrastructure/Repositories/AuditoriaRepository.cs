@@ -1,3 +1,4 @@
+using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities;
 using InventoryApp.Infrastructure.Persistence;
@@ -17,22 +18,33 @@ public class AuditoriaRepository : IAuditoriaRepository
     public async Task AddAsync(RegistroAuditoria registro) =>
         await _context.RegistrosAuditoria.AddAsync(registro);
 
-    public async Task<(List<RegistroAuditoria> Items, int TotalCount)> GetFilteredAsync(
-        int? usuarioId, string? modulo, string? accion, DateTime? desde, DateTime? hasta, int page, int pageSize)
+    public async Task<(List<RegistroAuditoria> Items, int TotalCount)> GetFilteredAsync(AuditoriaFiltroDto filtro)
     {
         var query = _context.RegistrosAuditoria.AsQueryable();
 
-        if (usuarioId.HasValue) query = query.Where(r => r.UsuarioId == usuarioId.Value);
-        if (!string.IsNullOrWhiteSpace(modulo)) query = query.Where(r => r.Modulo.ToString() == modulo);
-        if (!string.IsNullOrWhiteSpace(accion)) query = query.Where(r => r.Accion.ToString() == accion);
-        if (desde.HasValue) query = query.Where(r => r.Fecha >= desde.Value);
-        if (hasta.HasValue) query = query.Where(r => r.Fecha <= hasta.Value);
+        if (filtro.UsuarioId.HasValue) query = query.Where(r => r.UsuarioId == filtro.UsuarioId.Value);
+        if (!string.IsNullOrWhiteSpace(filtro.Modulo)) query = query.Where(r => r.Modulo.ToString() == filtro.Modulo);
+        if (!string.IsNullOrWhiteSpace(filtro.Accion)) query = query.Where(r => r.Accion.ToString() == filtro.Accion);
+        if (!string.IsNullOrWhiteSpace(filtro.Entidad)) query = query.Where(r => r.Entidad == filtro.Entidad);
+        if (filtro.ReferenciaId.HasValue) query = query.Where(r => r.ReferenciaId == filtro.ReferenciaId.Value);
+        if (!string.IsNullOrWhiteSpace(filtro.Resultado)) query = query.Where(r => r.Resultado == filtro.Resultado);
+        if (filtro.Desde.HasValue) query = query.Where(r => r.Fecha >= filtro.Desde.Value);
+        if (filtro.Hasta.HasValue) query = query.Where(r => r.Fecha <= filtro.Hasta.Value);
+
+        if (!string.IsNullOrWhiteSpace(filtro.Texto))
+        {
+            var texto = filtro.Texto.Trim();
+            query = query.Where(r =>
+                r.Descripcion.Contains(texto) ||
+                r.NombreUsuario.Contains(texto) ||
+                (r.Motivo != null && r.Motivo.Contains(texto)));
+        }
 
         var total = await query.CountAsync();
         var items = await query
             .OrderByDescending(r => r.Fecha)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
+            .Skip((filtro.Page - 1) * filtro.PageSize)
+            .Take(filtro.PageSize)
             .ToListAsync();
 
         return (items, total);

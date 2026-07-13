@@ -98,7 +98,7 @@ public class RolService : IRolService
         if (rol.EsSistema && normalizado != rol.NombreNormalizado)
             throw new BusinessRuleException("No se puede renombrar un rol de sistema.");
 
-        var anterior = $"{rol.Nombre} / {rol.Descripcion}";
+        var anterior = new { rol.Nombre, rol.Descripcion };
 
         rol.Nombre = nombre;
         rol.NombreNormalizado = normalizado;
@@ -110,7 +110,8 @@ public class RolService : IRolService
         await _repository.SaveChangesAsync();
 
         await _auditoria.RegistrarAsync(ModuloSistema.Roles, AccionPermiso.Editar,
-            $"Editó el rol '{rol.Nombre}'. Antes: {anterior}. Después: {rol.Nombre} / {rol.Descripcion}.", rol.Id);
+            $"Editó el rol '{rol.Nombre}'.", rol.Id,
+            entidad: "Rol", valoresAnteriores: anterior, valoresNuevos: new { rol.Nombre, rol.Descripcion });
 
         return await MapAsync(rol);
     }
