@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { ApiResponse, PagedRequest, PagedResult } from '../core/models/api-response.model';
-import { Venta, VentaFormValue } from '../core/models/venta.model';
+import { ResultadoCalculo, Venta, VentaDetalleInput, VentaFormValue } from '../core/models/venta.model';
 
 @Injectable({ providedIn: 'root' })
 export class VentaService {
@@ -41,5 +41,12 @@ export class VentaService {
 
   deleteBorrador(id: number): Observable<ApiResponse<object>> {
     return this.http.delete<ApiResponse<object>>(`${this.apiUrl}/${id}`);
+  }
+
+  /** Vista previa: calcula descuentos/impuestos reales sin guardar nada. */
+  calcular(clienteId: number | null, codigoPromocional: string | null, detalles: VentaDetalleInput[]): Observable<ApiResponse<ResultadoCalculo>> {
+    return this.http.post<ApiResponse<ResultadoCalculo>>(`${this.apiUrl}/calcular`, {
+      clienteId, codigoPromocional, detalles
+    });
   }
 }

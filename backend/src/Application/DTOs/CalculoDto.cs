@@ -37,3 +37,10 @@ public class ResultadoCalculoDto
     public decimal TotalImpuesto { get; set; }
     public decimal Total { get; set; }
 }
+
+public class CalcularVentaRequest
+{
+    public int? ClienteId { get; set; }
+    public string? CodigoPromocional { get; set; }
+    public List<VentaDetalleInputDto> Detalles { get; set; } = new();
+}

@@ -452,6 +452,24 @@ public class VentaService : IVentaService
         }
     }
 
+    public async Task<ResultadoCalculoDto> CalcularVistaPreviaAsync(CalcularVentaRequest request)
+    {
+        var entradas = new List<DetalleCalculoInput>();
+        foreach (var d in request.Detalles)
+        {
+            var producto = await _productoRepository.GetByIdAsync(d.ProductoId);
+            entradas.Add(new DetalleCalculoInput
+            {
+                ProductoId = d.ProductoId,
+                CategoriaId = producto?.CategoriaId,
+                Cantidad = d.Cantidad,
+                PrecioUnitario = d.PrecioUnitario
+            });
+        }
+
+        return await _calculoService.CalcularVentaAsync(entradas, request.ClienteId, _currentUser.RolId, request.CodigoPromocional);
+    }
+
     private async Task CalcularTotalesAsync(Venta venta, string? codigoPromocional)
     {
         var entradas = venta.Detalles.Select(d => new DetalleCalculoInput

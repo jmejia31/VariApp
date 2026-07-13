@@ -12,4 +12,5 @@ public interface IVentaService
     Task<VentaDto?> ConfirmarAsync(int id);
     Task<VentaDto?> AnularAsync(int id, string motivo);
     Task<bool> DeleteBorradorAsync(int id);
+    Task<ResultadoCalculoDto> CalcularVistaPreviaAsync(CalcularVentaRequest request);
 }

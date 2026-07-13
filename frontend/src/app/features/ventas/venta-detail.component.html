@@ -49,8 +49,12 @@
 
     <div class="totales">
       <div><span>Subtotal</span><span>L. {{ v.subtotal | number:'1.2-2' }}</span></div>
-      <div><span>Descuento</span><span>- L. {{ v.descuento | number:'1.2-2' }}</span></div>
-      <div><span>Impuesto</span><span>+ L. {{ v.impuesto | number:'1.2-2' }}</span></div>
+      @for (d of v.descuentosAplicados; track d.descuentoId) {
+        <div class="linea-descuento"><span>Descuento: {{ d.nombre }}{{ d.codigo ? ' (' + d.codigo + ')' : '' }}</span><span>- L. {{ d.monto | number:'1.2-2' }}</span></div>
+      }
+      @for (i of v.impuestosAplicados; track i.impuestoId) {
+        <div class="linea-impuesto"><span>{{ i.nombre }} ({{ i.tasa }}%)</span><span>+ L. {{ i.monto | number:'1.2-2' }}</span></div>
+      }
       <div class="total"><span>Total</span><span>L. {{ v.total | number:'1.2-2' }}</span></div>
       @if (v.estado === 'Confirmada') {
         <div class="utilidad"><span>Utilidad bruta</span><span>L. {{ v.utilidadBruta | number:'1.2-2' }}</span></div>

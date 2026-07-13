@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, AbstractControl, FormBuilder, FormArray, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -11,6 +12,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { VentaService } from '../../services/venta.service';
 import { ProductoService } from '../../services/producto.service';
 import { Producto } from '../../core/models/producto.model';
+import { ResultadoCalculo } from '../../core/models/venta.model';
 
 @Component({
   selector: 'app-venta-form',
@@ -26,9 +28,11 @@ export class VentaFormComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   readonly loading = signal(false);
   readonly saving = signal(false);
+  readonly calculando = signal(false);
   readonly errorMessage = signal<string | null>(null);
   readonly isEdit = signal(false);
   readonly productos = signal<Producto[]>([]);
+  readonly resultado = signal<ResultadoCalculo | null>(null);
   private ventaId: number | null = null;
 
   form = this.fb.group({
@@ -39,8 +43,7 @@ export class VentaFormComponent implements OnInit {
     clienteDireccion: [''],
     metodoPago: ['Efectivo', Validators.required],
     estadoPago: ['Pendiente', Validators.required],
-    descuento: [0, [Validators.min(0)]],
-    impuesto: [0, [Validators.min(0)]],
+    codigoPromocional: [''],
     notas: [''],
     detalles: this.fb.array([])
   });
@@ -67,6 +70,14 @@ export class VentaFormComponent implements OnInit {
     } else {
       this.agregarDetalle();
     }
+
+    // Recalcula el desglose real (backend) cada vez que cambian los productos,
+    // cantidades, precios o el código promocional — con debounce para no
+    // saturar la API mientras el usuario escribe.
+    this.form.valueChanges.pipe(
+      debounceTime(500),
+      distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b))
+    ).subscribe(() => this.recalcular());
   }
 
   private cargarVenta(id: number): void {
@@ -82,11 +93,17 @@ export class VentaFormComponent implements OnInit {
           clienteDireccion: v.clienteDireccion,
           metodoPago: v.metodoPago,
           estadoPago: v.estadoPago,
-          descuento: v.descuento,
-          impuesto: v.impuesto,
           notas: v.notas
         });
         v.detalles.forEach((d) => this.agregarDetalle(d.productoId, d.cantidad, d.precioUnitario));
+        this.resultado.set({
+          subtotal: v.subtotal,
+          descuentosAplicados: v.descuentosAplicados,
+          totalDescuento: v.descuento,
+          impuestosAplicados: v.impuestosAplicados,
+          totalImpuesto: v.impuesto,
+          total: v.total
+        });
         this.loading.set(false);
       },
       error: () => this.loading.set(false)
@@ -111,6 +128,7 @@ export class VentaFormComponent implements OnInit {
 
   quitarDetalle(index: number): void {
     this.detalles.removeAt(index);
+    this.recalcular();
   }
 
   subtotalDetalle(group: AbstractControl): number {
@@ -119,14 +137,24 @@ export class VentaFormComponent implements OnInit {
     return cantidad * precio;
   }
 
-  get subtotalGeneral(): number {
-    return this.detalles.controls.reduce((acc, g) => acc + this.subtotalDetalle(g), 0);
-  }
+  /** Llama al backend para obtener el desglose REAL (descuentos/impuestos
+   * desde el catálogo). Nunca se calcula en el cliente. */
+  recalcular(): void {
+    const detallesValidos = this.detalles.controls
+      .map((g) => g.value)
+      .filter((d) => d.productoId && d.cantidad > 0 && d.precioUnitario >= 0);
 
-  get totalGeneral(): number {
-    const descuento = this.form.value.descuento || 0;
-    const impuesto = this.form.value.impuesto || 0;
-    return this.subtotalGeneral - descuento + impuesto;
+    if (detallesValidos.length === 0) {
+      this.resultado.set(null);
+      return;
+    }
+
+    this.calculando.set(true);
+    const codigo = this.form.value.codigoPromocional || null;
+    this.ventaService.calcular(null, codigo, detallesValidos).subscribe({
+      next: (res) => { this.resultado.set(res.data); this.calculando.set(false); },
+      error: () => { this.calculando.set(false); }
+    });
   }
 
   submit(): void {
@@ -135,7 +163,15 @@ export class VentaFormComponent implements OnInit {
     this.saving.set(true);
     this.errorMessage.set(null);
 
-    const value = this.form.getRawValue() as any;
+    const raw = this.form.getRawValue();
+    const value = {
+      ...raw,
+      // Descuento/Impuesto ya no se editan manualmente: el backend siempre
+      // recalcula desde el catálogo real (sección 13). Se envían en 0 solo
+      // por compatibilidad del contrato del DTO.
+      descuento: 0,
+      impuesto: 0
+    } as any;
 
     const request$ = this.isEdit()
       ? this.ventaService.update(this.ventaId!, value)

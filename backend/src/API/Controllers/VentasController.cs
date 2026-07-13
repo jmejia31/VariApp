@@ -46,6 +46,17 @@ public class VentasController : ControllerBase
             ApiResponse<VentaDto>.Ok(creada, "Venta creada en estado Borrador."));
     }
 
+    /// Vista previa: calcula descuentos e impuestos reales (desde el catálogo,
+    /// vía ICalculoService) SIN persistir nada. Permite al frontend mostrar el
+    /// desglose real antes de guardar la venta.
+    [HttpPost("calcular")]
+    [RequierePermiso(ModuloSistema.Ventas, AccionPermiso.Crear)]
+    public async Task<IActionResult> Calcular([FromBody] CalcularVentaRequest request)
+    {
+        var resultado = await _ventaService.CalcularVistaPreviaAsync(request);
+        return Ok(ApiResponse<ResultadoCalculoDto>.Ok(resultado));
+    }
+
     [HttpPut("{id:int}")]
     [RequierePermiso(ModuloSistema.Ventas, AccionPermiso.Editar)]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateVentaDto dto)

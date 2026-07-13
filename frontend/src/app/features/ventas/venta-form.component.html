@@ -80,12 +80,8 @@
         </mat-select>
       </mat-form-field>
       <mat-form-field appearance="outline">
-        <mat-label>Descuento (L.)</mat-label>
-        <input matInput type="number" step="0.01" formControlName="descuento">
-      </mat-form-field>
-      <mat-form-field appearance="outline">
-        <mat-label>Impuesto (L.)</mat-label>
-        <input matInput type="number" step="0.01" formControlName="impuesto">
+        <mat-label>Código promocional (opcional)</mat-label>
+        <input matInput formControlName="codigoPromocional" placeholder="Ej. VERANO10">
       </mat-form-field>
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Notas (opcional)</mat-label>
@@ -94,10 +90,21 @@
     </div>
 
     <div class="totales">
-      <div><span>Subtotal</span><span>L. {{ subtotalGeneral | number:'1.2-2' }}</span></div>
-      <div><span>Descuento</span><span>- L. {{ form.value.descuento | number:'1.2-2' }}</span></div>
-      <div><span>Impuesto</span><span>+ L. {{ form.value.impuesto | number:'1.2-2' }}</span></div>
-      <div class="total"><span>Total</span><span>L. {{ totalGeneral | number:'1.2-2' }}</span></div>
+      @if (calculando()) {
+        <p class="calculando"><mat-spinner diameter="16"></mat-spinner> Calculando descuentos e impuestos...</p>
+      }
+      @if (resultado(); as r) {
+        <div><span>Subtotal</span><span>L. {{ r.subtotal | number:'1.2-2' }}</span></div>
+        @for (d of r.descuentosAplicados; track d.descuentoId) {
+          <div class="linea-descuento"><span>Descuento: {{ d.nombre }}</span><span>- L. {{ d.monto | number:'1.2-2' }}</span></div>
+        }
+        @for (i of r.impuestosAplicados; track i.impuestoId) {
+          <div class="linea-impuesto"><span>{{ i.nombre }} ({{ i.tasa }}%)</span><span>+ L. {{ i.monto | number:'1.2-2' }}</span></div>
+        }
+        <div class="total"><span>Total</span><span>L. {{ r.total | number:'1.2-2' }}</span></div>
+      } @else {
+        <p class="hint">Agrega productos para ver el desglose real de descuentos e impuestos.</p>
+      }
     </div>
 
     @if (errorMessage()) {
