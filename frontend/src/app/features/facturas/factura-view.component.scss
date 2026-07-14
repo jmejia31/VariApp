@@ -17,6 +17,8 @@
   color: #1f2333;
 }
 
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
 .sello-anulada {
   position: absolute; top: 40px; right: 40px;
   border: 3px solid var(--color-danger); color: var(--color-danger);
@@ -68,6 +70,15 @@
   text-align: center; border-top: 1px solid var(--color-border); padding-top: 14px; margin-top: 20px;
   p { margin: 2px 0; color: var(--color-text-muted); font-size: 12px; }
   .marca { font-weight: 600; color: var(--color-primary); }
+}
+
+@media (max-width: 700px) {
+  .factura-sheet { padding: 20px; font-size: 12px; }
+  .factura-header { flex-direction: column; gap: 12px; }
+  .factura-header .factura-meta { text-align: left; }
+  .datos-grid { grid-template-columns: 1fr; gap: 10px; }
+  .tabla-productos { min-width: 520px; }
+  .sello-anulada { top: 16px; right: 16px; font-size: 14px; padding: 4px 10px; }
 }
 
 @media print {

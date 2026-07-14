@@ -3,3 +3,8 @@
 mat-form-field { width: 100%; }
 .error { color: var(--color-danger); font-size: 13px; }
 .form-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px; a[mat-button] { text-decoration: none; } }
+
+@media (max-width: 480px) {
+  .form { padding: 16px; }
+  .form-actions { flex-direction: column; align-items: stretch; }
+}

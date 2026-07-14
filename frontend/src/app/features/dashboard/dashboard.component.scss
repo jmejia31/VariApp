@@ -76,3 +76,12 @@
   .label { font-size: 11px; color: var(--color-text-muted); }
   span:last-child { font-size: 13px; font-weight: 600; }
 }
+
+@media (max-width: 480px) {
+  .page-title { font-size: 18px; }
+  .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stat { gap: 8px; }
+  .stat .icon { width: 34px; height: 34px; font-size: 34px; }
+  .stat .value { font-size: 16px; }
+  .panels { grid-template-columns: 1fr; }
+}

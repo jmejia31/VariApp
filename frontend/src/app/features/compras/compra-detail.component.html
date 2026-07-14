@@ -29,23 +29,25 @@
       <div><span class="label">Estado de pago</span><span>{{ c.estadoPago }}</span></div>
     </div>
 
-    <table class="table">
-      <thead>
-        <tr><th>Producto</th><th>Marca</th><th>Modelo</th><th>Cantidad</th><th>Costo unit.</th><th>Subtotal</th></tr>
-      </thead>
-      <tbody>
-        @for (d of c.detalles; track d.id) {
-          <tr>
-            <td>{{ d.productoNombre }}</td>
-            <td>{{ d.productoMarca }}</td>
-            <td>{{ d.productoModelo }}</td>
-            <td>{{ d.cantidad }}</td>
-            <td>L. {{ d.costoUnitario | number:'1.2-2' }}</td>
-            <td>L. {{ d.subtotal | number:'1.2-2' }}</td>
-          </tr>
-        }
-      </tbody>
-    </table>
+    <div class="table-scroll">
+      <table class="table">
+        <thead>
+          <tr><th>Producto</th><th>Marca</th><th>Modelo</th><th>Cantidad</th><th>Costo unit.</th><th>Subtotal</th></tr>
+        </thead>
+        <tbody>
+          @for (d of c.detalles; track d.id) {
+            <tr>
+              <td>{{ d.productoNombre }}</td>
+              <td>{{ d.productoMarca }}</td>
+              <td>{{ d.productoModelo }}</td>
+              <td>{{ d.cantidad }}</td>
+              <td>L. {{ d.costoUnitario | number:'1.2-2' }}</td>
+              <td>L. {{ d.subtotal | number:'1.2-2' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
 
     <div class="totales">
       <div><span>Subtotal</span><span>L. {{ c.subtotal | number:'1.2-2' }}</span></div>

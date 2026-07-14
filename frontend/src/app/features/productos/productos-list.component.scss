@@ -1,6 +1,6 @@
 .header-row {
   display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
 
   a[mat-flat-button] { text-decoration: none; }
 }
@@ -46,3 +46,25 @@
   font-size: 9px; font-weight: 700; padding: 1px 4px; border-radius: 8px;
 }
 td:first-child { position: relative; }
+
+/* Tarjetas de producto en móvil (con imagen) */
+.cards-mobile { display: none; }
+
+@media (max-width: 768px) {
+  .table-desktop { display: none; }
+  .cards-mobile { display: flex; flex-direction: column; gap: 12px; }
+
+  .item-card { border: 1px solid var(--color-border); border-radius: 8px; padding: 12px 14px; }
+  .producto-card-top { display: flex; gap: 12px; margin-bottom: 8px; }
+  .producto-card-top .thumb { width: 56px; height: 56px; flex-shrink: 0; }
+  .producto-card-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .producto-card-info strong { font-size: 14px; }
+  .producto-card-sub { font-size: 12px; color: var(--color-text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .item-card-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 12px; color: var(--color-text-muted); margin-bottom: 8px; }
+  .item-card-actions { display: flex; flex-wrap: wrap; gap: 4px; border-top: 1px solid var(--color-border); padding-top: 8px; }
+}
+
+@media (max-width: 420px) {
+  .header-row { flex-direction: column; align-items: stretch; }
+  .search-field { max-width: 100%; }
+}

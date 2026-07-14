@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
+import { Component, HostListener } from '@angular/core';
+import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -13,12 +13,18 @@ import { PermisosRuntimeService } from './core/auth/permisos-runtime.service';
   template: `
     @if (auth.isAuthenticated()) {
       <div class="layout">
-        <aside class="sidebar">
+        @if (sidebarAbierto) {
+          <div class="overlay" (click)="cerrarSidebar()"></div>
+        }
+        <aside class="sidebar" [class.abierto]="sidebarAbierto">
           <div class="brand">
             <mat-icon>inventory_2</mat-icon>
             <span>InventoryApp</span>
+            <button mat-icon-button class="cerrar-sidebar" (click)="cerrarSidebar()" title="Cerrar menú">
+              <mat-icon>close</mat-icon>
+            </button>
           </div>
-          <nav>
+          <nav (click)="cerrarSidebarEnMovil()">
             @if (permisosRuntime.puede('Dashboard', 'Ver') || auth.esAdministrador()) {
               <a routerLink="/dashboard" routerLinkActive="active"><mat-icon>dashboard</mat-icon> Dashboard</a>
             }
@@ -68,6 +74,9 @@ import { PermisosRuntimeService } from './core/auth/permisos-runtime.service';
         </aside>
         <div class="main">
           <header class="topbar">
+            <button mat-icon-button class="menu-toggle" (click)="toggleSidebar()" title="Abrir menú">
+              <mat-icon>menu</mat-icon>
+            </button>
             <span></span>
             <div class="user">
               <span class="user-name">{{ auth.nombreCompleto() }}</span>
@@ -89,10 +98,34 @@ import { PermisosRuntimeService } from './core/auth/permisos-runtime.service';
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
+  sidebarAbierto = false;
+
   constructor(public auth: AuthService, public permisosRuntime: PermisosRuntimeService, private router: Router) {
     if (this.auth.isAuthenticated()) {
       this.permisosRuntime.cargar().subscribe();
     }
+    // Cierra el menú móvil automáticamente al cambiar de ruta (evita que
+    // quede abierto tapando la pantalla después de navegar).
+    this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) this.sidebarAbierto = false;
+    });
+  }
+
+  toggleSidebar(): void {
+    this.sidebarAbierto = !this.sidebarAbierto;
+  }
+
+  cerrarSidebar(): void {
+    this.sidebarAbierto = false;
+  }
+
+  cerrarSidebarEnMovil(): void {
+    if (window.innerWidth <= 900) this.sidebarAbierto = false;
+  }
+
+  @HostListener('window:keydown.escape')
+  onEscape(): void {
+    this.sidebarAbierto = false;
   }
 
   logout(): void {

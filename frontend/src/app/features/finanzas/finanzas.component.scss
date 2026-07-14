@@ -26,3 +26,15 @@
   .egreso { color: var(--color-danger); font-weight: 600; }
 }
 .empty { text-align: center; color: var(--color-text-muted); padding: 20px 0; }
+
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+@media (max-width: 700px) {
+  .table { min-width: 680px; }
+  .revision-form, .movimiento-form { grid-template-columns: 1fr; }
+  .revision-header { flex-wrap: wrap; gap: 8px; }
+}
+
+@media (max-width: 480px) {
+  .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+}

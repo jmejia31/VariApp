@@ -17,7 +17,7 @@
   @if (loading()) {
     <div class="loading"><mat-spinner></mat-spinner></div>
   } @else {
-    <table class="table">
+    <table class="table table-desktop">
       <thead>
         <tr>
           <th>Número</th>
@@ -55,6 +55,26 @@
         }
       </tbody>
     </table>
+
+    <div class="cards-mobile">
+      @for (v of ventas(); track v.id) {
+        <a [routerLink]="['/ventas', v.id]" class="item-card venta-card">
+          <div class="item-card-header">
+            <strong>{{ v.numeroVenta }}</strong>
+            <span class="badge" [class.borrador]="v.estado === 'Borrador'" [class.confirmada]="v.estado === 'Confirmada'" [class.anulada]="v.estado === 'Anulada'">
+              {{ v.estado }}
+            </span>
+          </div>
+          <p class="item-card-desc">{{ v.clienteNombre }} · {{ v.fecha | date:'dd/MM/yyyy' }}</p>
+          <div class="item-card-meta">
+            <span>L. {{ v.total | number:'1.2-2' }}</span>
+            <span>{{ v.confirmadoPorNombreUsuario || v.creadoPorNombreUsuario || '—' }}</span>
+          </div>
+        </a>
+      } @empty {
+        <p class="empty">No hay ventas registradas.</p>
+      }
+    </div>
 
     <mat-paginator [length]="totalCount()" [pageSize]="pageSize" [pageIndex]="page - 1" [pageSizeOptions]="[10, 25, 50]" (page)="onPageChange($event)"></mat-paginator>
   }

@@ -1,54 +1,66 @@
-<div class="clientes-container">
-  <div class="header">
-    <h1>Clientes</h1>
-    @if (puedeCrear()) {
-      <a routerLink="/clientes/nuevo" mat-raised-button color="primary">
-        <mat-icon>add</mat-icon>
-        Nuevo Cliente
-      </a>
-    }
-  </div>
+<div class="header-row">
+  <h1 class="page-title">Clientes</h1>
+  @if (puedeCrear()) {
+    <a routerLink="/clientes/nuevo" mat-flat-button color="primary">
+      <mat-icon>add</mat-icon> Nuevo cliente
+    </a>
+  }
+</div>
 
-  <div class="table-container" *ngIf="!loading() else loadingTemplate">
-    <table class="clientes-table">
+<div class="card">
+  @if (loading()) {
+    <div class="loading"><mat-spinner></mat-spinner></div>
+  } @else {
+    <table class="table table-desktop">
       <thead>
         <tr>
-          <th>Nombre</th>
-          <th>Teléfono</th>
-          <th>Identidad/RTN</th>
-          <th>Correo</th>
-          <th>Ventas</th>
-          <th>Total Vendido</th>
-          <th>Activo</th>
-          <th>Acciones</th>
+          <th>Nombre</th><th>Teléfono</th><th>Identidad/RTN</th><th>Correo</th>
+          <th>Ventas</th><th>Total vendido</th><th>Activo</th><th></th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let c of clientes()">
-          <td>{{ c.nombre }}</td>
-          <td>{{ c.telefono || '-' }}</td>
-          <td>{{ c.identidadORTN || '-' }}</td>
-          <td>{{ c.correo || '-' }}</td>
-          <td>{{ c.totalVentas }}</td>
-          <td>{{ c.totalVendido | currency }}</td>
-          <td>
-            <mat-slide-toggle [(ngModel)]="c.activo" (change)="toggleActivo(c)"></mat-slide-toggle>
-          </td>
-          <td>
-            @if (puedeEditar()) {
-              <a [routerLink]="['/clientes', c.id, 'editar']" mat-icon-button color="primary">
-                <mat-icon>edit</mat-icon>
-              </a>
-            }
-          </td>
-        </tr>
+        @for (c of clientes(); track c.id) {
+          <tr>
+            <td>{{ c.nombre }}</td>
+            <td>{{ c.telefono || '—' }}</td>
+            <td>{{ c.identidadORTN || '—' }}</td>
+            <td>{{ c.correo || '—' }}</td>
+            <td>{{ c.totalVentas }}</td>
+            <td>{{ c.totalVendido | currency:'HNL':'symbol':'1.2-2' }}</td>
+            <td><mat-slide-toggle [checked]="c.activo" (change)="toggleActivo(c)"></mat-slide-toggle></td>
+            <td class="actions">
+              @if (puedeEditar()) {
+                <a [routerLink]="['/clientes', c.id, 'editar']" mat-icon-button title="Editar"><mat-icon>edit</mat-icon></a>
+              }
+            </td>
+          </tr>
+        } @empty {
+          <tr><td colspan="8" class="empty">No hay clientes registrados.</td></tr>
+        }
       </tbody>
     </table>
-  </div>
 
-  <ng-template #loadingTemplate>
-    <div class="loading-container">
-      <mat-spinner></mat-spinner>
+    <div class="cards-mobile">
+      @for (c of clientes(); track c.id) {
+        <div class="item-card">
+          <div class="item-card-header">
+            <strong>{{ c.nombre }}</strong>
+            <mat-slide-toggle [checked]="c.activo" (change)="toggleActivo(c)"></mat-slide-toggle>
+          </div>
+          <p class="item-card-desc">{{ c.telefono || c.correo || 'Sin contacto registrado' }}</p>
+          <div class="item-card-meta">
+            <span>{{ c.totalVentas }} ventas</span>
+            <span>{{ c.totalVendido | currency:'HNL':'symbol':'1.2-2' }}</span>
+          </div>
+          @if (puedeEditar()) {
+            <div class="item-card-actions">
+              <a [routerLink]="['/clientes', c.id, 'editar']" mat-button><mat-icon>edit</mat-icon> Editar</a>
+            </div>
+          }
+        </div>
+      } @empty {
+        <p class="empty">No hay clientes registrados.</p>
+      }
     </div>
-  </ng-template>
+  }
 </div>

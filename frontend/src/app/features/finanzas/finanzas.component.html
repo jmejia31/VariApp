@@ -83,31 +83,33 @@
       </form>
     }
 
-    <table class="table">
-      <thead>
-        <tr><th>Fecha</th><th>Concepto</th><th>Categoría</th><th>Tipo</th><th>Monto</th><th>Origen</th><th>Registrado por</th><th>Estado</th><th></th></tr>
-      </thead>
-      <tbody>
-        @for (m of movimientos(); track m.id) {
-          <tr [class.anulado]="m.estado === 'Anulado'">
-            <td>{{ m.fecha | date:'dd/MM/yyyy' }}</td>
-            <td>{{ m.concepto }}</td>
-            <td>{{ m.categoria }}</td>
-            <td [class.ingreso]="m.tipo === 'Ingreso'" [class.egreso]="m.tipo === 'Egreso'">{{ m.tipo }}</td>
-            <td>L. {{ m.monto | number:'1.2-2' }}</td>
-            <td>{{ m.esAutomatico ? m.moduloOrigen : 'Manual' }}</td>
-            <td>{{ m.creadoPorNombreUsuario || '—' }}</td>
-            <td>{{ m.estado }}</td>
-            <td>
-              @if (!m.esAutomatico && m.estado !== 'Anulado') {
-                <button mat-icon-button title="Anular" (click)="anularMovimiento(m)"><mat-icon>close</mat-icon></button>
-              }
-            </td>
-          </tr>
-        } @empty {
-          <tr><td colspan="9" class="empty">No hay movimientos registrados.</td></tr>
-        }
-      </tbody>
-    </table>
+    <div class="table-scroll">
+      <table class="table">
+        <thead>
+          <tr><th>Fecha</th><th>Concepto</th><th>Categoría</th><th>Tipo</th><th>Monto</th><th>Origen</th><th>Registrado por</th><th>Estado</th><th></th></tr>
+        </thead>
+        <tbody>
+          @for (m of movimientos(); track m.id) {
+            <tr [class.anulado]="m.estado === 'Anulado'">
+              <td>{{ m.fecha | date:'dd/MM/yyyy' }}</td>
+              <td>{{ m.concepto }}</td>
+              <td>{{ m.categoria }}</td>
+              <td [class.ingreso]="m.tipo === 'Ingreso'" [class.egreso]="m.tipo === 'Egreso'">{{ m.tipo }}</td>
+              <td>L. {{ m.monto | number:'1.2-2' }}</td>
+              <td>{{ m.esAutomatico ? m.moduloOrigen : 'Manual' }}</td>
+              <td>{{ m.creadoPorNombreUsuario || '—' }}</td>
+              <td>{{ m.estado }}</td>
+              <td>
+                @if (!m.esAutomatico && m.estado !== 'Anulado') {
+                  <button mat-icon-button title="Anular" (click)="anularMovimiento(m)"><mat-icon>close</mat-icon></button>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="9" class="empty">No hay movimientos registrados.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
   </div>
 }

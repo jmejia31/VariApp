@@ -48,25 +48,27 @@
       </div>
     </section>
 
-    <table class="tabla-productos">
-      <thead>
-        <tr>
-          <th>Cant.</th><th>Producto</th><th>Marca</th><th>Modelo</th><th>Precio unit.</th><th>Subtotal</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (d of f.detalles; track $index) {
+    <div class="table-scroll">
+      <table class="tabla-productos">
+        <thead>
           <tr>
-            <td>{{ d.cantidad }}</td>
-            <td>{{ d.productoNombre }}</td>
-            <td>{{ d.productoMarca }}</td>
-            <td>{{ d.productoModelo }}</td>
-            <td>L. {{ d.precioUnitario | number:'1.2-2' }}</td>
-            <td>L. {{ d.subtotal | number:'1.2-2' }}</td>
+            <th>Cant.</th><th>Producto</th><th>Marca</th><th>Modelo</th><th>Precio unit.</th><th>Subtotal</th>
           </tr>
-        }
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          @for (d of f.detalles; track $index) {
+            <tr>
+              <td>{{ d.cantidad }}</td>
+              <td>{{ d.productoNombre }}</td>
+              <td>{{ d.productoMarca }}</td>
+              <td>{{ d.productoModelo }}</td>
+              <td>L. {{ d.precioUnitario | number:'1.2-2' }}</td>
+              <td>L. {{ d.subtotal | number:'1.2-2' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
 
     <section class="resumen">
       <div><span>Subtotal</span><span>L. {{ f.subtotal | number:'1.2-2' }}</span></div>

@@ -17,26 +17,28 @@
   @if (loading()) {
     <div class="loading"><mat-spinner></mat-spinner></div>
   } @else {
-    <table class="table">
-      <thead>
-        <tr><th>Fecha</th><th>Producto</th><th>Tipo</th><th>Cantidad</th><th>Stock antes</th><th>Stock después</th><th>Referencia</th><th>Responsable</th></tr>
-      </thead>
-      <tbody>
-        @for (m of movimientos(); track m.id) {
-          <tr>
-            <td>{{ m.fecha | date:'dd/MM/yyyy HH:mm' }}</td>
-            <td>{{ m.productoNombre }}</td>
-            <td [class.entrada]="m.tipo === 'Entrada'" [class.salida]="m.tipo === 'Salida'" [class.reversion]="m.tipo === 'Reversion'">{{ m.tipo }}</td>
-            <td>{{ m.cantidad }}</td>
-            <td>{{ m.stockAnterior }}</td>
-            <td>{{ m.stockNuevo }}</td>
-            <td>{{ m.referenciaTipo }} #{{ m.referenciaId }}</td>
-            <td>{{ m.creadoPorNombreUsuario || '—' }}</td>
-          </tr>
-        } @empty {
-          <tr><td colspan="8" class="empty">No hay movimientos registrados.</td></tr>
-        }
-      </tbody>
-    </table>
+    <div class="table-scroll">
+      <table class="table">
+        <thead>
+          <tr><th>Fecha</th><th>Producto</th><th>Tipo</th><th>Cantidad</th><th>Stock antes</th><th>Stock después</th><th>Referencia</th><th>Responsable</th></tr>
+        </thead>
+        <tbody>
+          @for (m of movimientos(); track m.id) {
+            <tr>
+              <td>{{ m.fecha | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td>{{ m.productoNombre }}</td>
+              <td [class.entrada]="m.tipo === 'Entrada'" [class.salida]="m.tipo === 'Salida'" [class.reversion]="m.tipo === 'Reversion'">{{ m.tipo }}</td>
+              <td>{{ m.cantidad }}</td>
+              <td>{{ m.stockAnterior }}</td>
+              <td>{{ m.stockNuevo }}</td>
+              <td>{{ m.referenciaTipo }} #{{ m.referenciaId }}</td>
+              <td>{{ m.creadoPorNombreUsuario || '—' }}</td>
+            </tr>
+          } @empty {
+            <tr><td colspan="8" class="empty">No hay movimientos registrados.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
   }
 </div>

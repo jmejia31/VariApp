@@ -71,3 +71,8 @@
     }
   }
 }
+
+@media (max-width: 480px) {
+  .form-container { padding: 16px; }
+  .actions { flex-direction: column; }
+}

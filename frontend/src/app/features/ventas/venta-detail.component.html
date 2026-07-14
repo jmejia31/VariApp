@@ -29,23 +29,25 @@
       <div><span class="label">Factura</span><span>{{ v.numeroFactura || '—' }}</span></div>
     </div>
 
-    <table class="table">
-      <thead>
-        <tr><th>Producto</th><th>Marca</th><th>Modelo</th><th>Cantidad</th><th>Precio unit.</th><th>Subtotal</th></tr>
-      </thead>
-      <tbody>
-        @for (d of v.detalles; track d.id) {
-          <tr>
-            <td>{{ d.productoNombre }}</td>
-            <td>{{ d.productoMarca }}</td>
-            <td>{{ d.productoModelo }}</td>
-            <td>{{ d.cantidad }}</td>
-            <td>L. {{ d.precioUnitario | number:'1.2-2' }}</td>
-            <td>L. {{ d.subtotal | number:'1.2-2' }}</td>
-          </tr>
-        }
-      </tbody>
-    </table>
+    <div class="table-scroll">
+      <table class="table">
+        <thead>
+          <tr><th>Producto</th><th>Marca</th><th>Modelo</th><th>Cantidad</th><th>Precio unit.</th><th>Subtotal</th></tr>
+        </thead>
+        <tbody>
+          @for (d of v.detalles; track d.id) {
+            <tr>
+              <td>{{ d.productoNombre }}</td>
+              <td>{{ d.productoMarca }}</td>
+              <td>{{ d.productoModelo }}</td>
+              <td>{{ d.cantidad }}</td>
+              <td>L. {{ d.precioUnitario | number:'1.2-2' }}</td>
+              <td>L. {{ d.subtotal | number:'1.2-2' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
 
     <div class="totales">
       <div><span>Subtotal</span><span>L. {{ v.subtotal | number:'1.2-2' }}</span></div>

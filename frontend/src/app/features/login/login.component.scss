@@ -4,10 +4,12 @@
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, #4f46e5 0%, #1f2333 100%);
+  padding: 16px;
 }
 
 .login-card {
-  width: 360px;
+  width: 100%;
+  max-width: 360px;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -26,4 +28,8 @@
   .error { color: var(--color-danger); font-size: 13px; margin: -8px 0 0; }
 
   button[type="submit"] { height: 44px; }
+}
+
+@media (max-width: 380px) {
+  .login-card { padding: 20px 16px; }
 }

@@ -83,3 +83,8 @@
   font-size: 12px; color: var(--color-text-muted); margin: -12px 0 16px;
   strong { color: var(--color-text); font-weight: 600; }
 }
+
+@media (max-width: 600px) {
+  .fields-grid { grid-template-columns: 1fr; }
+  .form { padding: 16px; }
+}

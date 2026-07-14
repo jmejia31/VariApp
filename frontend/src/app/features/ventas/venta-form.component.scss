@@ -23,6 +23,21 @@
   .col-subtotal { font-size: 13px; font-weight: 600; text-align: right; padding-right: 4px; }
 }
 
+@media (max-width: 640px) {
+  .detalle-row {
+    grid-template-columns: 1fr 1fr auto;
+    grid-template-areas:
+      "producto producto producto"
+      "cantidad costo eliminar";
+    row-gap: 2px;
+  }
+  .col-producto { grid-area: producto; }
+  .col-cantidad { grid-area: cantidad; }
+  .col-costo { grid-area: costo; }
+  .col-eliminar { grid-area: eliminar; justify-self: end; }
+  .col-subtotal { display: none; } /* el total ya se ve reflejado en el resumen de abajo */
+}
+
 .totales {
   max-width: 320px; margin-left: auto; margin-top: 12px;
   display: flex; flex-direction: column; gap: 6px; font-size: 13px;

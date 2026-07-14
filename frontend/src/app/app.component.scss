@@ -3,6 +3,10 @@
   min-height: 100vh;
 }
 
+.overlay {
+  display: none;
+}
+
 .sidebar {
   width: 240px;
   background: #1f2333;
@@ -19,12 +23,15 @@
     padding: 0 24px 24px;
     font-weight: 700;
     font-size: 18px;
+
+    .cerrar-sidebar { display: none; margin-left: auto; color: white; }
   }
 
   nav {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    overflow-y: auto;
 
     a {
       display: flex;
@@ -56,7 +63,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
+  padding: 0 12px 0 8px;
+  gap: 8px;
+
+  .menu-toggle { display: none; }
 
   .user {
     display: flex;
@@ -78,4 +88,39 @@
   padding: 24px;
   flex: 1;
   overflow-y: auto;
+}
+
+/* Sección 21: el menú lateral se convierte en menú colapsable/overlay en
+   pantallas medianas y pequeñas (tablet vertical y móvil). */
+@media (max-width: 900px) {
+  .menu-toggle { display: inline-flex !important; }
+
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    z-index: 1000;
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+    width: min(280px, 82vw);
+
+    &.abierto { transform: translateX(0); box-shadow: 4px 0 24px rgba(0, 0, 0, 0.25); }
+    .brand .cerrar-sidebar { display: inline-flex; }
+  }
+
+  .overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 999;
+  }
+
+  .topbar { padding: 0 12px; }
+  .user .user-name { display: none; } /* ahorra espacio horizontal en móvil */
+}
+
+@media (max-width: 480px) {
+  .content { padding: 14px; }
+  .topbar { height: 56px; }
+  .user .user-role { display: none; }
 }

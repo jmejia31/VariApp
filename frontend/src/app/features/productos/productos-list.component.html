@@ -17,7 +17,7 @@
   @if (loading()) {
     <div class="loading"><mat-spinner></mat-spinner></div>
   } @else {
-    <table class="table">
+    <table class="table table-desktop">
       <thead>
         <tr>
           <th></th>
@@ -77,6 +77,44 @@
         }
       </tbody>
     </table>
+
+    <div class="cards-mobile">
+      @for (p of productos(); track p.id) {
+        <div class="item-card producto-card">
+          <div class="producto-card-top">
+            @if (p.imagenPrincipalUrl) {
+              <img [src]="p.imagenPrincipalUrl" class="thumb" [alt]="p.nombre">
+            } @else {
+              <div class="thumb placeholder"><mat-icon>image</mat-icon></div>
+            }
+            <div class="producto-card-info">
+              <strong>{{ p.nombre }}</strong>
+              <span class="producto-card-sub">{{ p.marca }} · {{ p.modelo }}</span>
+              <span class="producto-card-sub">{{ p.categoriaNombre || 'Sin categoría' }}</span>
+            </div>
+          </div>
+          <div class="item-card-meta">
+            <span>Stock: {{ p.cantidad }}</span>
+            <span>L. {{ p.precio | number:'1.2-2' }}</span>
+            @if (p.tieneStockBajo) {
+              <span class="badge danger">Stock bajo</span>
+            } @else {
+              <span class="badge success">Disponible</span>
+            }
+          </div>
+          <div class="item-card-actions">
+            @if (puedeEditar()) {
+              <a [routerLink]="['/productos', p.id, 'editar']" mat-button><mat-icon>edit</mat-icon> Editar</a>
+            }
+            @if (puedeEliminar()) {
+              <button mat-button (click)="eliminar(p)"><mat-icon>delete</mat-icon> Eliminar</button>
+            }
+          </div>
+        </div>
+      } @empty {
+        <p class="empty">No se encontraron productos.</p>
+      }
+    </div>
 
     <mat-paginator
       [length]="totalCount()"
