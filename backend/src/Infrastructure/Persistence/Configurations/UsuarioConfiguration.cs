@@ -15,6 +15,8 @@ public class UsuarioConfiguration : IEntityTypeConfiguration<Usuario>
         builder.Property(u => u.NombreCompleto).IsRequired().HasMaxLength(150);
         builder.Property(u => u.PasswordHash).IsRequired().HasMaxLength(300);
         builder.Property(u => u.Rol).HasConversion<string>().HasMaxLength(30);
+        builder.Property(u => u.MotivoBloqueo).HasMaxLength(300);
+        builder.HasIndex(u => u.Eliminado);
 
         // Seed: usuario admin con password "Admin123!" (SOLO PARA DESARROLLO)
         // IMPORTANTE: cambia esta contraseña antes de subir a producción (ver README - seccion seguridad).

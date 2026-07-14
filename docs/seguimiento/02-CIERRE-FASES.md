@@ -1,0 +1,152 @@
+# Cierre de fases — Prompt de 6 partes
+
+## Fase 1 — Usuarios al estándar de Roles
+
+**Estado: parcialmente terminada.**
+
+### Objetivo alcanzado
+Usuarios ahora expone las mismas operaciones estructurales que Roles:
+detalle real, búsqueda, bloqueo/desbloqueo, eliminación lógica protegida.
+
+### Funcionalidades completadas
+- `GET /usuarios/{id}` — vista de detalle real, separada del formulario de
+  edición (antes no existía; se reutilizaba implícitamente la fila de tabla).
+- `GET /usuarios/paginado` — búsqueda + paginación (antes solo `GetAll` sin
+  filtros).
+- `PUT /usuarios/{id}/bloquear` y `/desbloquear` — nuevo concepto, distinto
+  de Activar/Desactivar, con motivo obligatorio y auditoría.
+- `DELETE /usuarios/{id}` — eliminación lógica (antes no existía ninguna
+  eliminación).
+- Protecciones de seguridad (sección 7 del prompt, verificadas con código
+  real, no supuestas):
+  - No puedes bloquearte ni eliminarte a ti mismo.
+  - No se puede bloquear/desactivar/eliminar al último administrador activo.
+  - Un admin no puede quitarse a sí mismo el rol de administrador si es el
+    único activo.
+  - Login rechaza explícitamente usuarios bloqueados/eliminados/inactivos
+    con mensajes distintos (a diferencia de credenciales inválidas, que
+    sigue siendo mensaje genérico por seguridad).
+- Frontend: listado con buscador, columna de estado (bloqueado/activo/
+  inactivo), acciones por fila (ver, bloquear/desbloquear, eliminar) con
+  confirmación, vista de detalle real (`UsuarioDetailComponent`), oculta
+  las acciones de auto-bloqueo/auto-eliminación sobre el propio usuario.
+
+### Funcionalidades corregidas
+- `AuthService.LoginAsync` antes solo comprobaba `Activo`; ahora también
+  `Bloqueado` y `Eliminado`, con mensajes diferenciados.
+
+### Funcionalidades pendientes (de la Fase 1 misma)
+- **Formulario de edición de usuario separado** (actualmente Update existe
+  en backend y en el servicio Angular, pero el frontend solo tiene el
+  formulario de creación inline — editar nombre/rol de un usuario existente
+  no tiene UI todavía). Pendiente real, no oculto.
+- Asignación de **varios roles simultáneos** (la Parte 2 del prompt lo
+  menciona como opcional "si la arquitectura lo permite") — la arquitectura
+  actual es un rol único por usuario (`Usuario.RolId`), cambiar esto sería
+  una reestructuración de base de datos mayor, no se hizo.
+- Consulta de "permisos efectivos" del usuario desde su propia vista de
+  detalle (el dato existe vía `/permisos/mis-permisos` pero no está
+  enlazado visualmente en `UsuarioDetailComponent`).
+
+### Elementos que todavía necesitan revisión
+- No se auditó si Clientes/Proveedores/Productos ya cumplen la "regla CRUD
+  global" (sección 9 del prompt) — eso es la Fase 2+ pendiente.
+
+### Elementos que todavía necesitan pruebas
+- Todo lo de esta fase: sin pruebas automatizadas (ninguna fase de todo el
+  proyecto las tiene todavía).
+- No se pudo ejecutar `dotnet build` (bloqueo de red a nuget.org, igual que
+  en toda la sesión anterior). Frontend sí verificado: `npx ng build
+  --configuration=development` → 0 errores.
+
+### Archivos creados
+- `backend/src/Application/DTOs/PerfilDto.cs` *(nota: este archivo es de
+  trabajo previo a este prompt, no de la Fase 1 — ver commits anteriores)*
+- `frontend/src/app/features/usuarios/usuario-detail.component.{ts,html,scss}`
+- `docs/migraciones/004_fase1_usuarios_bloqueo_eliminacion.sql`
+- `docs/seguimiento/00-INICIO.md`, `01-PLAN-FASES.md`, `02-CIERRE-FASES.md` (este archivo)
+
+### Archivos modificados
+- `backend/src/Domain/Entities/Usuario.cs` — campos de bloqueo/eliminación/trazabilidad.
+- `backend/src/Infrastructure/Persistence/Configurations/UsuarioConfiguration.cs`
+- `backend/src/Application/Services/AuthService.cs` — validación de bloqueo/eliminación en login.
+- `backend/src/Application/Interfaces/IUsuarioRepository.cs` + `Infrastructure/Repositories/UsuarioRepository.cs`
+- `backend/src/Application/Interfaces/IUsuarioService.cs` + `Application/Services/UsuarioService.cs`
+- `backend/src/Application/DTOs/UsuarioDto.cs` — `UsuarioDetalleDto`, `BloquearUsuarioDto`.
+- `backend/src/API/Controllers/UsuariosController.cs` — 4 endpoints nuevos.
+- `backend/src/Application/Common/CatalogoPermisosBase.cs` — acciones `CambiarEstado`/`EliminarLogico` en Usuarios.
+- `frontend/src/app/core/models/usuario.model.ts`, `services/usuario.service.ts`
+- `frontend/src/app/features/usuarios/usuarios.component.{ts,html,scss}`
+- `frontend/src/app/app.routes.ts` — ruta `/usuarios/:id`.
+
+### Archivos eliminados
+Ninguno.
+
+### Endpoints creados
+`GET /usuarios/paginado`, `GET /usuarios/{id}`, `PUT /usuarios/{id}/bloquear`,
+`PUT /usuarios/{id}/desbloquear`, `DELETE /usuarios/{id}`.
+
+### Endpoints modificados
+Ninguno con cambio de contrato — todo aditivo.
+
+### Cambios en base de datos
+10 columnas nuevas en `Usuarios` (ver script `004_...sql`). Aditivo, sin
+pérdida de datos, todas con default seguro.
+
+### Migraciones o scripts generados
+`docs/migraciones/004_fase1_usuarios_bloqueo_eliminacion.sql` — SQL manual,
+**no** es una migración EF real (sigue bloqueado `dotnet ef` por falta de
+acceso a NuGet).
+
+### Dependencias agregadas
+Ninguna.
+
+### Variables de entorno requeridas
+Ninguna nueva en esta fase.
+
+### Decisiones técnicas tomadas
+- Bloqueo y Desactivación se modelan como conceptos distintos (campo
+  `Bloqueado` separado de `Activo`) porque tienen semántica distinta: uno es
+  administrativo reversible normal, el otro es una restricción de seguridad
+  con motivo obligatorio — así lo pide explícitamente la sección 4.
+- Se reutilizó `AccionPermiso.CambiarEstado` para bloqueo/desbloqueo (en vez
+  de crear un nuevo valor de enum) para no ampliar más el catálogo de
+  acciones sin necesidad real.
+
+### Riesgos detectados
+- Un admin bloqueado por otro admin pierde acceso inmediato en su próximo
+  login, pero su token JWT ya emitido sigue siendo válido hasta que expire
+  (no hay invalidación activa de tokens — limitación arquitectónica
+  preexistente del proyecto, no introducida en esta fase).
+
+### Riesgos resueltos
+- Ya no es posible eliminar/bloquear/desactivar accidentalmente al último
+  administrador del sistema (antes esta protección solo existía para Roles,
+  no para Usuarios individuales).
+
+### Riesgos abiertos
+- Ver "Funcionalidades pendientes" arriba: falta el formulario de edición
+  de usuario en el frontend.
+
+### Comandos que debo ejecutar
+Ver `03-COMANDOS-INTEGRACION.md`.
+
+---
+
+## Estado general del plan (8 fases totales)
+
+| Fase | Nombre | Estado |
+|---|---|---|
+| 1 | Usuarios al estándar de Roles | Parcialmente terminada |
+| 2 | Auditoría de seguridad Roles/Permisos | No iniciada |
+| 3 | Descarga de imágenes de producto | No iniciada |
+| 4 | PDF real de facturas | No iniciada |
+| 5 | WhatsApp | No iniciada |
+| 6 | Correo | No iniciada |
+| 7 | Configuración visual / colores | No iniciada |
+| 8 | Pruebas formales finales | No iniciada |
+
+**Siguiente fase:** Fase 2 (verificación de seguridad de Roles/Permisos ya
+construidos en la sesión anterior) — es la más rápida de las que faltan
+porque es auditoría, no construcción desde cero, y valida que lo que ya
+existe cumple realmente las reglas de la sección 7 de este prompt.

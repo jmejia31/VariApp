@@ -74,7 +74,8 @@ public static class CatalogoPermisosBase
         {
             AccionPermiso.Ver, AccionPermiso.Crear, AccionPermiso.Editar,
             AccionPermiso.Activar, AccionPermiso.Desactivar, AccionPermiso.AsignarRol,
-            AccionPermiso.RestablecerContrasena
+            AccionPermiso.RestablecerContrasena, AccionPermiso.CambiarEstado,
+            AccionPermiso.EliminarLogico
         }),
 
         (ModuloSistema.Roles, new[]

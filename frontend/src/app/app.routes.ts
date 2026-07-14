@@ -93,6 +93,12 @@ export const routes: Routes = [
     loadComponent: () => import('./features/usuarios/usuarios.component').then(m => m.UsuariosComponent)
   },
   {
+    path: 'usuarios/:id',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Usuarios', accion: 'Ver' },
+    loadComponent: () => import('./features/usuarios/usuario-detail.component').then(m => m.UsuarioDetailComponent)
+  },
+  {
     path: 'roles',
     canActivate: [authGuard, permisoGuard],
     data: { modulo: 'Roles', accion: 'Ver' },

@@ -8,7 +8,33 @@ public class UsuarioDto
     public string Rol { get; set; } = string.Empty;
     public int? RolId { get; set; }
     public bool Activo { get; set; }
+    public bool Bloqueado { get; set; }
     public DateTime FechaCreacion { get; set; }
+}
+
+/// Vista de detalle real (sección 4 del prompt: "no reutilices incorrectamente
+/// el formulario de edición como vista de consulta"). Incluye lo que el
+/// formulario de edición no necesita mostrar: motivo de bloqueo, trazabilidad
+/// completa, nombre del rol dinámico legible.
+public class UsuarioDetalleDto
+{
+    public int Id { get; set; }
+    public string NombreUsuario { get; set; } = string.Empty;
+    public string NombreCompleto { get; set; } = string.Empty;
+    public string Rol { get; set; } = string.Empty;
+    public int? RolId { get; set; }
+    public string? RolNombre { get; set; }
+    public bool Activo { get; set; }
+    public bool Bloqueado { get; set; }
+    public string? MotivoBloqueo { get; set; }
+    public DateTime? FechaBloqueo { get; set; }
+    public DateTime FechaCreacion { get; set; }
+    public DateTime? FechaActualizacion { get; set; }
+}
+
+public class BloquearUsuarioDto
+{
+    public string Motivo { get; set; } = string.Empty;
 }
 
 public class CreateUsuarioDto

@@ -30,6 +30,30 @@ public class UsuariosController : ControllerBase
         return Ok(ApiResponse<List<UsuarioDto>>.Ok(usuarios));
     }
 
+    /// Listado paginado con búsqueda (sección 4: "buscar, filtrar, ordenar,
+    /// paginar"). GetAll se conserva para no romper consumidores existentes
+    /// (ej. el selector de usuarios en otros formularios).
+    [HttpGet("paginado")]
+    [RequierePermiso(ModuloSistema.Usuarios, AccionPermiso.Ver)]
+    public async Task<IActionResult> GetPaged([FromQuery] PagedRequest request)
+    {
+        var resultado = await _usuarioService.GetPagedAsync(request);
+        return Ok(ApiResponse<PagedResult<UsuarioDto>>.Ok(resultado));
+    }
+
+    /// Vista de detalle real, separada del formulario de edición (sección 4:
+    /// "no reutilices incorrectamente el formulario de edición como vista de consulta").
+    [HttpGet("{id:int}")]
+    [RequierePermiso(ModuloSistema.Usuarios, AccionPermiso.Ver)]
+    public async Task<IActionResult> GetById(int id)
+    {
+        var usuario = await _usuarioService.GetByIdAsync(id);
+        if (usuario is null)
+            return NotFound(ApiResponse<object>.Fail("Usuario no encontrado."));
+
+        return Ok(ApiResponse<UsuarioDetalleDto>.Ok(usuario));
+    }
+
     [HttpPost]
     [RequierePermiso(ModuloSistema.Usuarios, AccionPermiso.Crear)]
     public async Task<IActionResult> Create([FromBody] CreateUsuarioDto dto)
@@ -66,5 +90,32 @@ public class UsuariosController : ControllerBase
 
         var accion = dto.Activo ? "activado" : "desactivado";
         return Ok(ApiResponse<UsuarioDto>.Ok(actualizado, $"Usuario {accion} correctamente."));
+    }
+
+    /// Bloqueo: distinto de desactivar (sección 4). Requiere motivo explícito.
+    [HttpPut("{id:int}/bloquear")]
+    [RequierePermiso(ModuloSistema.Usuarios, AccionPermiso.CambiarEstado)]
+    public async Task<IActionResult> Bloquear(int id, [FromBody] BloquearUsuarioDto dto)
+    {
+        var actualizado = await _usuarioService.BloquearAsync(id, dto.Motivo);
+        return Ok(ApiResponse<UsuarioDto>.Ok(actualizado, "Usuario bloqueado correctamente."));
+    }
+
+    [HttpPut("{id:int}/desbloquear")]
+    [RequierePermiso(ModuloSistema.Usuarios, AccionPermiso.CambiarEstado)]
+    public async Task<IActionResult> Desbloquear(int id)
+    {
+        var actualizado = await _usuarioService.DesbloquearAsync(id);
+        return Ok(ApiResponse<UsuarioDto>.Ok(actualizado, "Usuario desbloqueado correctamente."));
+    }
+
+    /// Eliminación lógica (sección 9/14): nunca física, un usuario puede tener
+    /// ventas/compras/auditoría asociados por FK.
+    [HttpDelete("{id:int}")]
+    [RequierePermiso(ModuloSistema.Usuarios, AccionPermiso.EliminarLogico)]
+    public async Task<IActionResult> Eliminar(int id)
+    {
+        await _usuarioService.EliminarAsync(id);
+        return Ok(ApiResponse<object>.Ok(new { }, "Usuario eliminado correctamente."));
     }
 }
