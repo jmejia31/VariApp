@@ -224,5 +224,18 @@ export const routes: Routes = [
     data: { modulo: 'Inventario', accion: 'Ver' },
     loadComponent: () => import('./features/inventario/movimientos-list.component').then(m => m.MovimientosListComponent)
   },
+  {
+    path: 'configuracion',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Configuracion', accion: 'Ver' },
+    loadComponent: () => import('./features/configuracion/configuracion.component').then(m => m.ConfiguracionComponent)
+  },
+  {
+    // Autogestión: cualquier usuario autenticado administra su propia cuenta,
+    // sin importar su rol o permisos de módulo.
+    path: 'perfil',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/perfil/perfil.component').then(m => m.PerfilComponent)
+  },
   { path: '**', redirectTo: 'dashboard' }
 ];

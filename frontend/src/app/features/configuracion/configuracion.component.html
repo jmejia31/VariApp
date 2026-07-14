@@ -1,0 +1,64 @@
+<h1 class="page-title">Configuración de la empresa</h1>
+<p class="subtitle">Estos datos aparecen en las facturas y documentos generados por el sistema.</p>
+
+@if (loading()) {
+  <div class="loading"><mat-spinner></mat-spinner></div>
+} @else {
+  @if (!puedeEditar()) {
+    <p class="hint readonly-hint">
+      <mat-icon>info</mat-icon> Solo puedes ver esta configuración. Necesitas el permiso "Configuración: Editar" para modificarla.
+    </p>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="guardar()" class="card form-card">
+    <div class="logo-row">
+      @if (logoUrl()) {
+        <img [src]="logoUrl()" class="logo-preview" alt="Logo de la empresa">
+      } @else {
+        <div class="logo-preview placeholder"><mat-icon>store</mat-icon></div>
+      }
+      <p class="hint">El logo se administra desde Cloudinary; esta pantalla muestra el actual pero no permite subir uno nuevo todavía.</p>
+    </div>
+
+    <div class="fields-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Nombre comercial</mat-label>
+        <input matInput formControlName="nombreComercial">
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Eslogan</mat-label>
+        <input matInput formControlName="eslogan">
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>RTN (opcional)</mat-label>
+        <input matInput formControlName="rtn">
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Teléfono (opcional)</mat-label>
+        <input matInput formControlName="telefono">
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Correo (opcional)</mat-label>
+        <input matInput formControlName="correo">
+        @if (form.get('correo')?.hasError('email')) {
+          <mat-error>Correo no válido.</mat-error>
+        }
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Dirección (opcional)</mat-label>
+        <textarea matInput formControlName="direccion" rows="2"></textarea>
+      </mat-form-field>
+    </div>
+
+    @if (successMessage()) { <p class="success">{{ successMessage() }}</p> }
+    @if (errorMessage()) { <p class="error">{{ errorMessage() }}</p> }
+
+    @if (puedeEditar()) {
+      <div class="form-actions">
+        <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving()">
+          {{ saving() ? 'Guardando...' : 'Guardar cambios' }}
+        </button>
+      </div>
+    }
+  </form>
+}

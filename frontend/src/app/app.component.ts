@@ -70,6 +70,9 @@ import { PermisosRuntimeService } from './core/auth/permisos-runtime.service';
             @if (permisosRuntime.puede('Auditoria', 'Ver') || auth.esAdministrador()) {
               <a routerLink="/auditoria" routerLinkActive="active"><mat-icon>manage_search</mat-icon> Auditoría</a>
             }
+            @if (permisosRuntime.puede('Configuracion', 'Ver') || auth.esAdministrador()) {
+              <a routerLink="/configuracion" routerLinkActive="active"><mat-icon>settings</mat-icon> Configuración</a>
+            }
           </nav>
         </aside>
         <div class="main">
@@ -81,6 +84,9 @@ import { PermisosRuntimeService } from './core/auth/permisos-runtime.service';
             <div class="user">
               <span class="user-name">{{ auth.nombreCompleto() }}</span>
               <span class="user-role">{{ auth.rol() }}</span>
+              <button mat-icon-button routerLink="/perfil" title="Mi perfil">
+                <mat-icon>account_circle</mat-icon>
+              </button>
               <button mat-icon-button (click)="logout()" title="Cerrar sesión">
                 <mat-icon>logout</mat-icon>
               </button>
