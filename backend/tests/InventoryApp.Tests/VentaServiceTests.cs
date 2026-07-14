@@ -18,6 +18,7 @@ public class VentaServiceTests
     private readonly Mock<IMovimientoInventarioRepository> _movInvRepoMock = new();
     private readonly Mock<IMovimientoFinancieroRepository> _movFinRepoMock = new();
     private readonly Mock<IEmpresaConfiguracionService> _empresaMock = new();
+    private readonly Mock<ICalculoService> _calculoMock = new();
     private readonly Mock<ICurrentUserService> _currentUserMock = new();
     private readonly Mock<IAuditoriaService> _auditoriaMock = new();
     private readonly VentaService _service;
@@ -38,6 +39,7 @@ public class VentaServiceTests
             _movInvRepoMock.Object,
             _movFinRepoMock.Object,
             _empresaMock.Object,
+            _calculoMock.Object,
             _currentUserMock.Object,
             new FakeUnitOfWork(),
             _auditoriaMock.Object);

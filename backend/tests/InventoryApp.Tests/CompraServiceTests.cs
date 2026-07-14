@@ -17,6 +17,7 @@ public class CompraServiceTests
     private readonly Mock<IProductoRepository> _productoRepoMock = new();
     private readonly Mock<IMovimientoInventarioRepository> _movInvRepoMock = new();
     private readonly Mock<IMovimientoFinancieroRepository> _movFinRepoMock = new();
+    private readonly Mock<ICalculoService> _calculoMock = new();
     private readonly Mock<ICurrentUserService> _currentUserMock = new();
     private readonly Mock<IAuditoriaService> _auditoriaMock = new();
     private readonly CompraService _service;
@@ -33,6 +34,7 @@ public class CompraServiceTests
             _productoRepoMock.Object,
             _movInvRepoMock.Object,
             _movFinRepoMock.Object,
+            _calculoMock.Object,
             _currentUserMock.Object,
             new FakeUnitOfWork(),
             _auditoriaMock.Object);
@@ -125,11 +127,20 @@ public class CompraServiceTests
     }
 
     [Fact]
-    public async Task CreateAsync_Calcula_Totales_Correctamente()
+    public async Task CreateAsync_Recalcula_Totales_Con_Motor_De_Calculo()
     {
         var producto = ProductoDePrueba();
         _productoRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(producto);
         _compraRepoMock.Setup(r => r.ContarTodasAsync()).ReturnsAsync(0);
+        _calculoMock
+            .Setup(c => c.CalcularCompraAsync(It.IsAny<List<DetalleCalculoInput>>(), It.IsAny<int?>()))
+            .ReturnsAsync(new ResultadoCalculoDto
+            {
+                Subtotal = 20,
+                TotalDescuento = 0,
+                TotalImpuesto = 3,
+                Total = 23
+            });
 
         Compra? creada = null;
         _compraRepoMock.Setup(r => r.AddAsync(It.IsAny<Compra>()))
@@ -148,7 +159,9 @@ public class CompraServiceTests
 
         Assert.NotNull(creada);
         Assert.Equal(20, creada!.Subtotal);   // 2 * 10
-        Assert.Equal(18, creada.Total);       // 20 - 5 + 3
+        Assert.Equal(0, creada.Descuento);    // compras no aplica descuentos manuales
+        Assert.Equal(3, creada.Impuesto);
+        Assert.Equal(23, creada.Total);       // 20 + 3
         Assert.Equal("COM-000001", creada.NumeroCompra);
         Assert.Equal(EstadoDocumento.Borrador, creada.Estado);
     }
