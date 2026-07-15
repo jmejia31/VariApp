@@ -43,6 +43,11 @@ public class RolRepository : IRolRepository
                 u.RolEntidad.EsAdministrador &&
                 (excluirRolId == null || u.RolId != excluirRolId));
 
+    public async Task<int> ContarRolesAdministradorAsync(int? excluirRolId = null) =>
+        await _context.Roles.CountAsync(r =>
+            r.Activo && !r.Eliminado && r.EsAdministrador &&
+            (excluirRolId == null || r.Id != excluirRolId));
+
     public async Task AddAsync(Rol rol) => await _context.Roles.AddAsync(rol);
 
     public void Update(Rol rol) => _context.Roles.Update(rol);

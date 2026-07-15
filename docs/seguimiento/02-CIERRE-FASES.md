@@ -138,7 +138,7 @@ Ver `03-COMANDOS-INTEGRACION.md`.
 | Fase | Nombre | Estado |
 |---|---|---|
 | 1 | Usuarios al estándar de Roles | Parcialmente terminada |
-| 2 | Auditoría de seguridad Roles/Permisos | No iniciada |
+| 2 | Auditoría de seguridad Roles/Permisos | Terminada |
 | 3 | Descarga de imágenes de producto | No iniciada |
 | 4 | PDF real de facturas | No iniciada |
 | 5 | WhatsApp | No iniciada |
@@ -146,7 +146,74 @@ Ver `03-COMANDOS-INTEGRACION.md`.
 | 7 | Configuración visual / colores | No iniciada |
 | 8 | Pruebas formales finales | No iniciada |
 
-**Siguiente fase:** Fase 2 (verificación de seguridad de Roles/Permisos ya
-construidos en la sesión anterior) — es la más rápida de las que faltan
-porque es auditoría, no construcción desde cero, y valida que lo que ya
-existe cumple realmente las reglas de la sección 7 de este prompt.
+---
+
+## Fase 2 — Auditoría de seguridad de Roles/Permisos
+
+**Estado: terminada.**
+
+### Objetivo alcanzado
+Se verificó contra el código real (no supuesto) cada protección de la
+sección 7 del prompt sobre lo ya construido en la sesión anterior de este
+proyecto, y se corrigió el único hueco real encontrado.
+
+### Hallazgo y corrección
+- **Hueco real cerrado:** `RolService.EliminarPermanenteAsync` validaba rol
+  de sistema, usuarios asociados y permisos asociados, pero **no** validaba
+  que no fuera el último rol de tipo administrador — a diferencia de
+  `DesactivarAsync` y `EliminarLogicoAsync`, que sí lo hacían. Si un rol
+  `EsAdministrador=true` no tenía usuarios asignados en ese momento (por
+  ejemplo, tras migrar usuarios a otro rol admin), podía eliminarse
+  permanentemente aunque fuera el único rol capaz de tener administradores,
+  dejando al sistema sin ninguna vía de crear un nuevo administrador sin
+  tocar la base de datos directamente. Se agregó `ContarRolesAdministradorAsync`
+  (cuenta roles, no usuarios) y el mismo chequeo que ya tenían las otras dos
+  operaciones destructivas.
+
+### Verificado y confirmado correcto (sin cambios necesarios)
+- `EsAdministrador` es inmutable tras la creación de un rol — `UpdateAsync`
+  nunca lo toca, solo `CreateAsync`. Cierra por completo cualquier vector de
+  "un admin se autodegrada accidentalmente editando su propio rol".
+- Roles de sistema protegidos contra renombrar (`UpdateAsync`), eliminar
+  lógico y eliminar permanente.
+- Último administrador protegido en Desactivar, EliminarLógico y (ahora)
+  EliminarPermanente — a nivel de rol.
+- Último administrador protegido a nivel de usuario individual (fase 1):
+  no puedes bloquear/desactivar/eliminar al último usuario admin activo, ni
+  quitarte a ti mismo el rol de admin si eres el único.
+- Cada endpoint sensible (Roles, Permisos, Usuarios) exige `[RequierePermiso]`
+  con la acción exacta — no hay ninguno protegido solo con `[Authorize]`
+  genérico en estos tres controladores.
+- **Los cambios de permisos a un rol existente se reflejan inmediatamente**,
+  sin necesidad de que el usuario vuelva a iniciar sesión: `PermisoService.
+  TienePermisoAsync` consulta la tabla `RolPermisos` en cada request, no
+  cachea ni depende del JWT para los permisos en sí.
+
+### Riesgo real confirmado, no resuelto en esta fase
+- **Cambiar el ROL asignado a un usuario sí requiere que ese usuario vuelva
+  a iniciar sesión** para que su JWT refleje el nuevo `RolId` — el token ya
+  emitido sigue siendo válido con el rol anterior hasta que expira o hasta
+  el próximo login. No existe invalidación activa de tokens (blacklist) en
+  este proyecto; implementarla es una funcionalidad nueva de infraestructura
+  (requeriría almacén de tokens revocados, ej. Redis o tabla dedicada), no
+  una corrección de bug — se documenta como riesgo abierto, no se construye
+  en esta fase de verificación.
+
+### Elementos que necesitan pruebas
+- El caso específico del hueco corregido (intentar eliminar permanentemente
+  el último rol administrador sin usuarios asignados) — sin pruebas
+  automatizadas, como el resto del proyecto.
+
+### Archivos modificados
+- `backend/src/Application/Services/RolService.cs`
+- `backend/src/Application/Interfaces/IRolRepository.cs`
+- `backend/src/Infrastructure/Repositories/RolRepository.cs`
+
+### Cambios en base de datos
+Ninguno (no se agregaron columnas, solo una consulta nueva).
+
+### Riesgos abiertos
+Invalidación de tokens JWT al cambiar rol/bloquear (ver arriba) — es una
+limitación arquitectónica preexistente en todo el proyecto, no introducida
+ni corregida en esta fase.
+
