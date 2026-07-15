@@ -60,6 +60,9 @@
               }
             </td>
             <td class="actions">
+              <a [routerLink]="['/productos', p.id]" mat-icon-button title="Ver detalle">
+                <mat-icon>visibility</mat-icon>
+              </a>
               @if (puedeEditar()) {
                 <a [routerLink]="['/productos', p.id, 'editar']" mat-icon-button title="Editar">
                   <mat-icon>edit</mat-icon>
@@ -103,6 +106,7 @@
             }
           </div>
           <div class="item-card-actions">
+            <a [routerLink]="['/productos', p.id]" mat-button><mat-icon>visibility</mat-icon> Ver</a>
             @if (puedeEditar()) {
               <a [routerLink]="['/productos', p.id, 'editar']" mat-button><mat-icon>edit</mat-icon> Editar</a>
             }

@@ -51,6 +51,15 @@ export class ProductoService {
     return this.http.delete<ApiResponse<object>>(`${this.apiUrl}/${id}`);
   }
 
+  /** Descarga real vía backend (sección 11): no enlaza directo a Cloudinary. */
+  descargarImagen(productoId: number, imagenId: number): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/${productoId}/imagenes/${imagenId}/descargar`, { responseType: 'blob' });
+  }
+
+  descargarTodasLasImagenes(productoId: number): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/${productoId}/imagenes/descargar-todas`, { responseType: 'blob' });
+  }
+
   private appendCamposBase(formData: FormData, value: ProductoFormValue): void {
     formData.append('Nombre', value.nombre);
     formData.append('Marca', value.marca);

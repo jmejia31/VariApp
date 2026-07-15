@@ -1,0 +1,75 @@
+<div class="header-row">
+  <a routerLink="/productos" mat-icon-button title="Volver"><mat-icon>arrow_back</mat-icon></a>
+  <h1 class="page-title">Detalle de producto</h1>
+</div>
+
+@if (loading()) {
+  <div class="loading"><mat-spinner></mat-spinner></div>
+} @else if (notFound()) {
+  <p class="empty">El producto no existe o fue eliminado.</p>
+} @else if (producto(); as p) {
+  <div class="card detail-card">
+    <div class="detail-header">
+      <div>
+        <h2>{{ p.nombre }}</h2>
+        <p class="subtitle">{{ p.marca }} · {{ p.modelo }}</p>
+      </div>
+      @if (puedeEditar()) {
+        <a [routerLink]="['/productos', p.id, 'editar']" mat-button><mat-icon>edit</mat-icon> Editar</a>
+      }
+    </div>
+
+    <div class="detail-grid">
+      <div><span class="label">Existencias</span><span>{{ p.cantidad }}</span></div>
+      <div><span class="label">Precio</span><span>L. {{ p.precio | number:'1.2-2' }}</span></div>
+      <div><span class="label">Costo</span><span>L. {{ p.costo | number:'1.2-2' }}</span></div>
+      <div><span class="label">Categoría</span><span>{{ p.categoriaNombre || 'Sin categoría' }}</span></div>
+      @if (p.descripcion) {
+        <div class="full-width"><span class="label">Descripción</span><span>{{ p.descripcion }}</span></div>
+      }
+    </div>
+
+    <h3 class="section-title">
+      Imágenes ({{ p.totalImagenes }})
+      @if (puedeExportar() && p.totalImagenes > 0) {
+        <button mat-button (click)="descargarTodas()" [disabled]="descargando() === -1">
+          @if (descargando() === -1) {
+            <mat-spinner diameter="16"></mat-spinner>
+          } @else {
+            <mat-icon>archive</mat-icon>
+          }
+          Descargar todas
+        </button>
+      }
+    </h3>
+
+    @if (p.imagenes.length === 0) {
+      <p class="empty-imagenes"><mat-icon>image_not_supported</mat-icon> Este producto no tiene imágenes cargadas.</p>
+    } @else {
+      <div class="galeria">
+        @for (img of p.imagenes; track img.id) {
+          <div class="galeria-item">
+            <img [src]="img.url" [alt]="p.nombre" (click)="ampliar(img)">
+            @if (img.esPrincipal) { <span class="badge principal">Principal</span> }
+            @if (puedeExportar()) {
+              <button mat-icon-button class="btn-descargar" title="Descargar" [disabled]="descargando() === img.id" (click)="descargarImagen(img)">
+                @if (descargando() === img.id) {
+                  <mat-spinner diameter="18"></mat-spinner>
+                } @else {
+                  <mat-icon>download</mat-icon>
+                }
+              </button>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  @if (imagenAmpliada(); as img) {
+    <div class="lightbox" (click)="cerrarAmpliada()">
+      <img [src]="img.url" [alt]="p.nombre">
+      <button mat-icon-button class="cerrar" (click)="cerrarAmpliada()"><mat-icon>close</mat-icon></button>
+    </div>
+  }
+}

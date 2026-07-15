@@ -5,6 +5,7 @@ using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.IO.Compression;
 
 namespace InventoryApp.API.Controllers;
 
@@ -14,10 +15,12 @@ namespace InventoryApp.API.Controllers;
 public class ProductosController : ControllerBase
 {
     private readonly IProductoService _productoService;
+    private readonly IImageStorageService _imageStorageService;
 
-    public ProductosController(IProductoService productoService)
+    public ProductosController(IProductoService productoService, IImageStorageService imageStorageService)
     {
         _productoService = productoService;
+        _imageStorageService = imageStorageService;
     }
 
     [HttpGet]
@@ -68,5 +71,70 @@ public class ProductosController : ControllerBase
             return NotFound(ApiResponse<object>.Fail("Producto no encontrado."));
 
         return Ok(ApiResponse<object>.Ok(new { }, "Producto eliminado correctamente."));
+    }
+
+    /// Descarga de una imagen individual (sección 11). El backend hace de
+    /// intermediario: no redirige a Cloudinary directamente, controla la
+    /// autorización real y nombra el archivo de forma amigable.
+    [HttpGet("{id:int}/imagenes/{imagenId:int}/descargar")]
+    [RequierePermiso(ModuloSistema.Productos, AccionPermiso.Exportar)]
+    public async Task<IActionResult> DescargarImagen(int id, int imagenId)
+    {
+        var producto = await _productoService.GetByIdAsync(id);
+        if (producto is null)
+            return NotFound(ApiResponse<object>.Fail("Producto no encontrado."));
+
+        // Control de acceso horizontal: la imagen debe pertenecer a ESTE
+        // producto, no basta con que el imagenId exista en la base.
+        var imagen = producto.Imagenes.FirstOrDefault(i => i.Id == imagenId);
+        if (imagen is null)
+            return NotFound(ApiResponse<object>.Fail("La imagen no existe o no pertenece a este producto."));
+
+        var descarga = await _imageStorageService.DownloadAsync(imagen.Url);
+        if (descarga is null)
+            return NotFound(ApiResponse<object>.Fail("El archivo de la imagen ya no está disponible."));
+
+        var (contenido, contentType) = descarga.Value;
+        var extension = contentType.Contains("png") ? "png" : contentType.Contains("webp") ? "webp" : "jpg";
+        var nombreArchivo = $"{producto.Nombre}-{imagen.Orden + 1}.{extension}".Replace(" ", "_");
+
+        return File(contenido, contentType, nombreArchivo);
+    }
+
+    /// Descarga todas las imágenes de un producto en un único ZIP (sección
+    /// 11: "botón para descargar todas las imágenes, cuando sea técnicamente
+    /// viable" — sí lo es, se arma en memoria sin dependencias nuevas).
+    [HttpGet("{id:int}/imagenes/descargar-todas")]
+    [RequierePermiso(ModuloSistema.Productos, AccionPermiso.Exportar)]
+    public async Task<IActionResult> DescargarTodasLasImagenes(int id)
+    {
+        var producto = await _productoService.GetByIdAsync(id);
+        if (producto is null)
+            return NotFound(ApiResponse<object>.Fail("Producto no encontrado."));
+
+        if (producto.Imagenes.Count == 0)
+            return NotFound(ApiResponse<object>.Fail("Este producto no tiene imágenes."));
+
+        using var memoryStream = new MemoryStream();
+        using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, leaveOpen: true))
+        {
+            var contador = 1;
+            foreach (var imagen in producto.Imagenes.OrderBy(i => i.Orden))
+            {
+                var descarga = await _imageStorageService.DownloadAsync(imagen.Url);
+                if (descarga is null) continue; // se omite silenciosamente una imagen faltante, no se aborta el ZIP completo
+
+                var (contenido, contentType) = descarga.Value;
+                var extension = contentType.Contains("png") ? "png" : contentType.Contains("webp") ? "webp" : "jpg";
+                var entry = archive.CreateEntry($"{contador}.{extension}", CompressionLevel.Fastest);
+                await using var entryStream = entry.Open();
+                await contenido.CopyToAsync(entryStream);
+                contador++;
+            }
+        }
+
+        memoryStream.Position = 0;
+        var nombreZip = $"{producto.Nombre}-imagenes.zip".Replace(" ", "_");
+        return File(memoryStream.ToArray(), "application/zip", nombreZip);
     }
 }

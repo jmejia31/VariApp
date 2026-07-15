@@ -139,7 +139,7 @@ Ver `03-COMANDOS-INTEGRACION.md`.
 |---|---|---|
 | 1 | Usuarios al estándar de Roles | Parcialmente terminada |
 | 2 | Auditoría de seguridad Roles/Permisos | Terminada |
-| 3 | Descarga de imágenes de producto | No iniciada |
+| 3 | Descarga de imágenes de producto | Terminada |
 | 4 | PDF real de facturas | No iniciada |
 | 5 | WhatsApp | No iniciada |
 | 6 | Correo | No iniciada |
@@ -217,3 +217,64 @@ Invalidación de tokens JWT al cambiar rol/bloquear (ver arriba) — es una
 limitación arquitectónica preexistente en todo el proyecto, no introducida
 ni corregida en esta fase.
 
+---
+
+## Fase 3 — Descarga de imágenes de producto
+
+**Estado: terminada.**
+
+### Objetivo alcanzado
+Cada producto ahora tiene una vista de detalle real (que no existía) con
+galería de imágenes, vista ampliada (lightbox) y descarga individual/masiva
+real desde archivos almacenados en Cloudinary — nunca simulada.
+
+### Funcionalidades completadas
+- `IImageStorageService.DownloadAsync`: streaming server-side desde la URL
+  de Cloudinary en vez de redirigir al cliente directamente — la
+  autorización real la controla el backend (`Productos:Exportar`), no la
+  "confidencialidad" de una URL pública.
+- `GET /productos/{id}/imagenes/{imagenId}/descargar` — descarga individual
+  con `Content-Disposition` y nombre de archivo amigable.
+- `GET /productos/{id}/imagenes/descargar-todas` — ZIP en memoria
+  (`System.IO.Compression`, sin dependencias nuevas); omite en silencio una
+  imagen puntual no disponible en vez de abortar la descarga completa.
+- Control de acceso horizontal real: la imagen se busca dentro de las
+  imágenes del producto indicado — un `imagenId` de otro producto da 404.
+- Manejo de archivo inexistente: `DownloadAsync` devuelve `null` si
+  Cloudinary no responde 200; el controlador lo traduce a 404 claro.
+- Frontend: `ProductoDetailComponent` nuevo (galería, lightbox, descarga
+  con estado de carga por imagen), botón "Ver" agregado al listado (antes
+  solo existían Editar/Eliminar).
+
+### Limitación real, no oculta
+El nombre de archivo sugerido por el navegador en la descarga individual
+usa `.jpg` por defecto en el cliente; el backend sí detecta la extensión
+real del `Content-Type`, pero el navegador puede priorizar el atributo
+`download` del enlace. Detalle cosmético del nombre, no afecta el
+contenido descargado.
+
+### Elementos que necesitan pruebas
+- Descarga con imagen cuyo `PublicId` ya no existe en Cloudinary (confirmar
+  404 en vez de error genérico).
+- ZIP con productos de 10+ imágenes (tiempo de respuesta real).
+
+### Archivos creados
+`frontend/src/app/features/productos/producto-detail.component.{ts,html,scss}`
+
+### Archivos modificados
+`backend/src/Application/Interfaces/IImageStorageService.cs`,
+`backend/src/Infrastructure/Services/CloudinaryImageStorageService.cs`,
+`backend/src/API/Controllers/ProductosController.cs`,
+`frontend/src/app/services/producto.service.ts`, `app.routes.ts`,
+`frontend/src/app/features/productos/productos-list.component.html`.
+
+### Endpoints creados
+`GET /productos/{id}/imagenes/{imagenId}/descargar`,
+`GET /productos/{id}/imagenes/descargar-todas`.
+
+### Cambios en base de datos
+Ninguno. Dependencias agregadas: ninguna.
+
+### Build real
+`npx ng build --configuration=development` → OK, 0 errores. Backend: no
+verificable (nuget.org bloqueado).

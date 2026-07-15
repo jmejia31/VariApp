@@ -33,6 +33,12 @@ export const routes: Routes = [
     loadComponent: () => import('./features/productos/producto-form.component').then(m => m.ProductoFormComponent)
   },
   {
+    path: 'productos/:id',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Productos', accion: 'Ver' },
+    loadComponent: () => import('./features/productos/producto-detail.component').then(m => m.ProductoDetailComponent)
+  },
+  {
     path: 'categorias',
     canActivate: [authGuard, permisoGuard],
     data: { modulo: 'Categorias', accion: 'Ver' },
