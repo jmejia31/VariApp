@@ -7,28 +7,41 @@ namespace InventoryApp.Application.Services;
 public class FacturaService : IFacturaService
 {
     private readonly IFacturaRepository _repository;
+    private readonly IEmpresaConfiguracionService _empresaConfiguracionService;
 
-    public FacturaService(IFacturaRepository repository)
+    public FacturaService(IFacturaRepository repository, IEmpresaConfiguracionService empresaConfiguracionService)
     {
         _repository = repository;
+        _empresaConfiguracionService = empresaConfiguracionService;
     }
 
     public async Task<FacturaDto?> GetByIdAsync(int id)
     {
         var factura = await _repository.GetByIdAsync(id);
-        return factura is null ? null : ToDto(factura);
+        return factura is null ? null : await ToDtoAsync(factura);
     }
 
     public async Task<FacturaDto?> GetByVentaIdAsync(int ventaId)
     {
         var factura = await _repository.GetByVentaIdAsync(ventaId);
-        return factura is null ? null : ToDto(factura);
+        return factura is null ? null : await ToDtoAsync(factura);
     }
 
     public async Task<List<FacturaDto>> GetAllAsync()
     {
         var facturas = await _repository.GetAllAsync();
-        return facturas.Select(ToDto).ToList();
+        var resultado = new List<FacturaDto>();
+        foreach (var f in facturas)
+            resultado.Add(await ToDtoAsync(f));
+        return resultado;
+    }
+
+    private async Task<FacturaDto> ToDtoAsync(Factura f)
+    {
+        var empresa = await _empresaConfiguracionService.GetActivaAsync();
+        var dto = ToDto(f);
+        dto.EmpresaLogoUrl = empresa?.LogoUrl;
+        return dto;
     }
 
     private static FacturaDto ToDto(Factura f) => new()

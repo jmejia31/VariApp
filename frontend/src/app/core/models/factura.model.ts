@@ -20,6 +20,7 @@ export interface Factura {
   empresaTelefono?: string;
   empresaCorreo?: string;
   empresaDireccion?: string;
+  empresaLogoUrl?: string;
   clienteNombre: string;
   clienteTelefono?: string;
   clienteIdentidadORTN?: string;

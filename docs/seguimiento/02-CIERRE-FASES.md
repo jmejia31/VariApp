@@ -140,7 +140,7 @@ Ver `03-COMANDOS-INTEGRACION.md`.
 | 1 | Usuarios al estándar de Roles | Parcialmente terminada |
 | 2 | Auditoría de seguridad Roles/Permisos | Terminada |
 | 3 | Descarga de imágenes de producto | Terminada |
-| 4 | PDF real de facturas | No iniciada |
+| 4 | PDF real de facturas | Parcialmente terminada (sin verificar build) |
 | 5 | WhatsApp | No iniciada |
 | 6 | Correo | No iniciada |
 | 7 | Configuración visual / colores | No iniciada |
@@ -278,3 +278,80 @@ Ninguno. Dependencias agregadas: ninguna.
 ### Build real
 `npx ng build --configuration=development` → OK, 0 errores. Backend: no
 verificable (nuget.org bloqueado).
+---
+
+## Fase 4 — Generación real de PDF de facturas
+
+**Estado: parcialmente terminada** (implementada completa, pero sin poder
+verificar la compilación del backend — ver más abajo).
+
+### Objetivo alcanzado
+El PDF de factura ya no es una vista HTML con `@media print` como
+sustituto final: se genera un archivo PDF real en el backend con QuestPDF
+(licencia Community), descargable desde un endpoint dedicado.
+
+### Funcionalidades completadas
+- `IFacturaPdfService`/`QuestPdfFacturaService`: documento con encabezado
+  (logo si existe, datos de empresa, número de factura, fecha), datos de
+  cliente, datos de la operación (método/estado de pago, vendedor, quién
+  generó la factura), tabla de detalle (producto/marca/modelo/cantidad/
+  precio/subtotal), totales (subtotal/descuento/impuesto/total),
+  observaciones, y un bloque distintivo en rojo si la factura está
+  anulada (motivo, fecha, quién la anuló). Pie de página con numeración.
+- `FacturaDto.EmpresaLogoUrl`: se resuelve en vivo desde la configuración
+  de empresa (decisión documentada en el código: el logo es identidad
+  visual vigente, no un dato legal que deba quedar congelado como snapshot
+  histórico, a diferencia de nombre/RTN/teléfono que sí son snapshot).
+- `GET /facturas/{id}/pdf` — protegido con `Facturacion:Exportar`.
+- Si el logo no se puede descargar, la factura se genera igual sin él en
+  vez de fallar por completo (sección 12: "define qué ocurre si el
+  registro existe pero el archivo no").
+- Frontend: botón "Descargar PDF" real (antes solo existía "Imprimir" vía
+  `window.print()`, que se conserva como opción secundaria).
+
+### LIMITACIÓN CRÍTICA, no oculta: no se pudo verificar la compilación
+QuestPDF es una dependencia nueva. La agregué al `.csproj` de
+Infrastructure, pero **no pude ejecutar `dotnet restore`/`dotnet build`**
+en este sandbox (bloqueo de red a nuget.org, la misma limitación de toda
+la sesión). Esto es más riesgoso que fases anteriores porque:
+- Es la primera vez que se agrega una librería externa nueva sin poder
+  compilar contra ella ni una sola vez.
+- Encontré y corregí un error real durante la propia escritura (no un
+  build): `.Bold(bool)` no existe en la API de QuestPDF — es un método
+  sin parámetros. Lo reescribí con `TextStyle` condicional. Si cometí
+  algún otro error de la API (nombres de métodos, orden de extensiones),
+  **no lo sabré hasta que compiles tú**.
+- Recomendación explícita: ejecuta `dotnet build` en tu máquina antes de
+  desplegar esta fase. Si falla, pégame el log completo y lo corrijo
+  sobre el error real, no sobre otra suposición.
+
+### Elementos que necesitan pruebas
+- Compilación real del backend (ver arriba, es lo primero a hacer).
+- PDF de una factura con logo configurado vs. sin logo.
+- PDF de una factura anulada (verificar el bloque rojo).
+- PDF con muchos productos (verificar paginación automática de la tabla).
+
+### Archivos creados
+`backend/src/Application/Interfaces/IFacturaPdfService.cs`,
+`backend/src/Infrastructure/Services/QuestPdfFacturaService.cs`.
+
+### Archivos modificados
+`backend/src/Infrastructure/InventoryApp.Infrastructure.csproj` (+QuestPDF),
+`backend/src/Application/DTOs/FacturaDto.cs`,
+`backend/src/Application/Services/FacturaService.cs`,
+`backend/src/API/Controllers/FacturasController.cs`, `API/Program.cs`,
+`frontend/src/app/core/models/factura.model.ts`,
+`frontend/src/app/services/factura.service.ts`,
+`frontend/src/app/features/facturas/factura-view.component.{ts,html}`.
+
+### Dependencias agregadas
+`QuestPDF` 2024.3.6 (NuGet) — licencia Community, gratuita para
+organizaciones pequeñas según sus términos (revisar
+https://questpdf.com/license antes de producción si la empresa crece).
+
+### Endpoints creados
+`GET /facturas/{id}/pdf`.
+
+### Build real
+Frontend: `npx ng build --configuration=development` → OK, 0 errores.
+Backend: **no verificable** — ver limitación crítica arriba.

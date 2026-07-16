@@ -1,7 +1,15 @@
 <div class="toolbar no-print">
   <a routerLink="/ventas" mat-icon-button><mat-icon>arrow_back</mat-icon></a>
   <span class="spacer"></span>
-  <button mat-flat-button color="primary" (click)="imprimir()">
+  <button mat-flat-button color="primary" (click)="descargarPdf()" [disabled]="descargandoPdf()">
+    @if (descargandoPdf()) {
+      <mat-spinner diameter="18"></mat-spinner>
+    } @else {
+      <mat-icon>picture_as_pdf</mat-icon>
+    }
+    Descargar PDF
+  </button>
+  <button mat-button (click)="imprimir()">
     <mat-icon>print</mat-icon> Imprimir
   </button>
 </div>

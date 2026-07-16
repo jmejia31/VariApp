@@ -22,4 +22,9 @@ export class FacturaService {
   getByVenta(ventaId: number): Observable<ApiResponse<Factura>> {
     return this.http.get<ApiResponse<Factura>>(`${this.apiUrl}/venta/${ventaId}`);
   }
+
+  /** PDF real generado en backend (sección 13/14), no la vista HTML imprimible. */
+  descargarPdf(id: number): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/${id}/pdf`, { responseType: 'blob' });
+  }
 }

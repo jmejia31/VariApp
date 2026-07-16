@@ -17,10 +17,12 @@ namespace InventoryApp.API.Controllers;
 public class FacturasController : ControllerBase
 {
     private readonly IFacturaService _facturaService;
+    private readonly IFacturaPdfService _facturaPdfService;
 
-    public FacturasController(IFacturaService facturaService)
+    public FacturasController(IFacturaService facturaService, IFacturaPdfService facturaPdfService)
     {
         _facturaService = facturaService;
+        _facturaPdfService = facturaPdfService;
     }
 
     [HttpGet]
@@ -47,5 +49,19 @@ public class FacturasController : ControllerBase
         var factura = await _facturaService.GetByVentaIdAsync(ventaId);
         if (factura is null) return NotFound(ApiResponse<object>.Fail("Esta venta no tiene factura generada."));
         return Ok(ApiResponse<FacturaDto>.Ok(factura));
+    }
+
+    /// PDF real generado en backend (sección 13/14: nunca la vista HTML
+    /// imprimible como sustituto final). Protegido con Exportar según el
+    /// mapeo acción->permiso de la sección 10 ("Descargar factura").
+    [HttpGet("{id:int}/pdf")]
+    [RequierePermiso(ModuloSistema.Facturacion, AccionPermiso.Exportar)]
+    public async Task<IActionResult> DescargarPdf(int id)
+    {
+        var factura = await _facturaService.GetByIdAsync(id);
+        if (factura is null) return NotFound(ApiResponse<object>.Fail("Factura no encontrada."));
+
+        var pdfBytes = await _facturaPdfService.GenerarPdfAsync(factura);
+        return File(pdfBytes, "application/pdf", $"{factura.NumeroFactura}.pdf");
     }
 }
