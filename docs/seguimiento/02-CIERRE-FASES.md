@@ -141,7 +141,7 @@ Ver `03-COMANDOS-INTEGRACION.md`.
 | 2 | Auditoría de seguridad Roles/Permisos | Terminada |
 | 3 | Descarga de imágenes de producto | Terminada |
 | 4 | PDF real de facturas | Parcialmente terminada (sin verificar build) |
-| 5 | WhatsApp | No iniciada |
+| 5 | WhatsApp | Terminada (build de backend sin verificar) |
 | 6 | Correo | No iniciada |
 | 7 | Configuración visual / colores | No iniciada |
 | 8 | Pruebas formales finales | No iniciada |
@@ -355,3 +355,104 @@ https://questpdf.com/license antes de producción si la empresa crece).
 ### Build real
 Frontend: `npx ng build --configuration=development` → OK, 0 errores.
 Backend: **no verificable** — ver limitación crítica arriba.
+---
+
+## Fase 5 — WhatsApp (envío manual asistido, sin API oficial)
+
+**Estado: terminada** (con la misma limitación de compilación de backend
+que arrastra todo el proyecto — ver abajo).
+
+### Objetivo alcanzado
+WhatsApp es ahora la opción PRINCIPAL de envío desde la vista de factura
+(sección 14, punto explícito del prompt), con el flujo realista que el
+propio documento permite cuando no hay integración oficial: enlace público
+temporal al PDF + mensaje prellenado + apertura de wa.me.
+
+### Decisión técnica clave: enlace público temporal, no simulación
+El PDF vive detrás de autenticación JWT normalmente. WhatsApp/el
+destinatario no tiene sesión en el sistema, así que no puede abrir
+`GET /facturas/{id}/pdf` directo. Se creó `EnlacePublicoFactura`: un token
+aleatorio (GUID), con expiración configurable (7 días por defecto), servido
+por un endpoint deliberadamente público (`GET /facturas/publico/{token}/pdf`,
+`[AllowAnonymous]`) — la seguridad no depende de `[Authorize]` sino de que
+el token sea impredecible y expire. Esto es distinto de "no hay seguridad":
+queda auditado (quién lo generó, cuántas veces se accedió, cuándo) y
+expira solo, sin exponer el resto del sistema.
+
+### Funcionalidades completadas
+- `POST /facturas/{id}/compartir/whatsapp` — genera o reutiliza el enlace
+  vigente, arma el mensaje con la **plantilla exacta** pedida en la sección
+  14, y sugiere el teléfono del cliente normalizado a formato internacional
+  (código de país 504 de Honduras si el número registrado es local de 8
+  dígitos).
+- Frontend: panel editable (número de teléfono y mensaje, ambos con el
+  valor sugerido pero modificables — sección 14, puntos 2 y 6), validación
+  básica de formato antes de habilitar el botón, botón "Compartir por
+  WhatsApp" resaltado en verde como opción principal (antes de "Descargar
+  PDF" e "Imprimir" en el orden visual).
+- Bloqueo real: no se puede compartir una factura anulada (sección 14,
+  punto 17: "validar que la factura exista y esté autorizada").
+- `HistorialEnvioFactura` + `POST /facturas/{id}/compartir/registrar` +
+  `GET /facturas/{id}/historial-envios`: registro y consulta de cada
+  intento (canal, destinatario, resultado, quién, cuándo). Panel de
+  historial visible desde la misma vista de factura.
+- Nueva acción de permiso `Compartir` (pedida explícitamente en la parte 2
+  del prompt, sección 6, lista de acciones) agregada al enum
+  `AccionPermiso` y al catálogo de Facturación.
+
+### Limitación real documentada, no simulada
+No existe forma de confirmar que el mensaje de WhatsApp **llegó** al
+destinatario sin una integración oficial (WhatsApp Business API/Meta Cloud
+API), que este proyecto no tiene contratada. Lo que se registra es "el
+usuario abrió el flujo de envío" (`Resultado: Iniciado`), no una entrega
+confirmada — está explícito en comentarios del código y no se pretende lo
+contrario en ningún mensaje de la interfaz.
+
+### Elementos que necesitan pruebas
+- Compilación real del backend (sigue pendiente desde la fase 4 — QuestPDF
+  y ahora este código nuevo tampoco se compilaron ni una vez).
+- Abrir el enlace público desde un dispositivo sin sesión iniciada
+  (confirmar que realmente no requiere login).
+- Enlace expirado (confirmar el mensaje de error, no una excepción cruda).
+- Normalización de teléfono con números que ya traen código de país.
+
+### Archivos creados
+`backend/src/Domain/Entities/{EnlacePublicoFactura,HistorialEnvioFactura}.cs`,
+`backend/src/Infrastructure/Persistence/Configurations/EnlacePublicoFacturaConfiguration.cs`,
+`backend/src/Application/Interfaces/{IFacturaCompartirRepository,IFacturaCompartirService}.cs`,
+`backend/src/Infrastructure/Repositories/FacturaCompartirRepository.cs`,
+`backend/src/Application/Services/FacturaCompartirService.cs`,
+`backend/src/Application/DTOs/CompartirFacturaDto.cs`,
+`docs/migraciones/005_fase5_whatsapp_compartir_facturas.sql`.
+
+### Archivos modificados
+`backend/src/Domain/Enums/AccionPermiso.cs` (+Compartir),
+`backend/src/Application/Common/CatalogoPermisosBase.cs`,
+`backend/src/Infrastructure/Persistence/AppDbContext.cs`,
+`backend/src/API/Controllers/FacturasController.cs`, `API/Program.cs`,
+`backend/src/API/appsettings.json` (+AppSettings:BackendPublicUrl,
+EnlacePublicoFacturaDiasValidez),
+`frontend/src/app/core/models/factura.model.ts`,
+`frontend/src/app/services/factura.service.ts`,
+`frontend/src/app/features/facturas/factura-view.component.{ts,html,scss}`.
+
+### Endpoints creados
+`POST /facturas/{id}/compartir/whatsapp`,
+`POST /facturas/{id}/compartir/registrar`,
+`GET /facturas/{id}/historial-envios`,
+`GET /facturas/publico/{token}/pdf` (público, sin autenticación).
+
+### Variables de entorno / configuración requeridas
+`AppSettings:BackendPublicUrl` — **debe configurarse con la URL pública
+real del backend en Render antes de desplegar** (actualmente
+`http://localhost:5000` en `appsettings.json`, solo válido en desarrollo).
+Sin esto, el enlace que se manda por WhatsApp apuntaría a localhost y no
+funcionaría para el cliente real.
+
+### Cambios en base de datos
+2 tablas nuevas + 1 permiso nuevo en el catálogo (ver script SQL).
+
+### Build real
+Frontend: OK, 0 errores (factura-view-component confirmado en los lazy
+chunks). Backend: no verificable, arrastra la misma limitación desde la
+fase 4 (QuestPDF sin compilar) más este código nuevo.

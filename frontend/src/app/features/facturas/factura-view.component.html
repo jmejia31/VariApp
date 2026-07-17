@@ -1,7 +1,19 @@
 <div class="toolbar no-print">
   <a routerLink="/ventas" mat-icon-button><mat-icon>arrow_back</mat-icon></a>
   <span class="spacer"></span>
-  <button mat-flat-button color="primary" (click)="descargarPdf()" [disabled]="descargandoPdf()">
+  @if (factura(); as f) {
+    @if (f.estado !== 'Anulada') {
+      <button mat-flat-button color="primary" class="btn-whatsapp" (click)="toggleWhatsApp()" [disabled]="preparandoWhatsApp()">
+        @if (preparandoWhatsApp()) {
+          <mat-spinner diameter="18"></mat-spinner>
+        } @else {
+          <mat-icon>chat</mat-icon>
+        }
+        Compartir por WhatsApp
+      </button>
+    }
+  }
+  <button mat-button (click)="descargarPdf()" [disabled]="descargandoPdf()">
     @if (descargandoPdf()) {
       <mat-spinner diameter="18"></mat-spinner>
     } @else {
@@ -12,7 +24,58 @@
   <button mat-button (click)="imprimir()">
     <mat-icon>print</mat-icon> Imprimir
   </button>
+  <button mat-button (click)="toggleHistorial()">
+    <mat-icon>history</mat-icon> Historial de envíos
+  </button>
 </div>
+
+@if (mostrarPanelWhatsApp() && enlaceCompartir(); as e) {
+  <div class="card panel-whatsapp no-print">
+    <h3><mat-icon>chat</mat-icon> Compartir por WhatsApp</h3>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Número de teléfono (con código de país)</mat-label>
+      <input matInput [(ngModel)]="telefonoEditable" placeholder="Ej. 50499999999">
+      @if (!telefonoValido()) {
+        <mat-hint class="hint-error">Ingresa un número válido con código de país (mínimo 10 dígitos).</mat-hint>
+      }
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Mensaje</mat-label>
+      <textarea matInput [(ngModel)]="mensajeEditable" rows="4"></textarea>
+    </mat-form-field>
+    <p class="hint">El enlace de descarga incluido en el mensaje vence el {{ e.fechaExpiracion | date:'dd/MM/yyyy' }}.</p>
+    <div class="panel-actions">
+      <button mat-flat-button color="primary" [disabled]="!telefonoValido()" (click)="abrirWhatsApp()">
+        <mat-icon>open_in_new</mat-icon> Abrir WhatsApp
+      </button>
+      <button mat-button (click)="toggleWhatsApp()">Cancelar</button>
+    </div>
+  </div>
+}
+
+@if (mostrarHistorial()) {
+  <div class="card panel-historial no-print">
+    <h3><mat-icon>history</mat-icon> Historial de envíos</h3>
+    @if (historial().length === 0) {
+      <p class="empty">Esta factura no se ha compartido todavía.</p>
+    } @else {
+      <table class="table">
+        <thead><tr><th>Fecha</th><th>Canal</th><th>Destinatario</th><th>Resultado</th><th>Usuario</th></tr></thead>
+        <tbody>
+          @for (h of historial(); track h.id) {
+            <tr>
+              <td>{{ h.fecha | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td>{{ h.canal }}</td>
+              <td>{{ h.destinatario }}</td>
+              <td [class.error-text]="h.resultado === 'Error'">{{ h.resultado }}</td>
+              <td>{{ h.usuarioNombre || '—' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+}
 
 @if (loading()) {
   <div class="loading no-print"><mat-spinner></mat-spinner></div>

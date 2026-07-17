@@ -40,3 +40,20 @@ export interface Factura {
   anuladaPorNombreUsuario?: string;
   motivoAnulacion?: string;
 }
+
+export interface EnlaceCompartir {
+  urlPdfPublica: string;
+  fechaExpiracion: string;
+  mensajeWhatsApp: string;
+  telefonoSugerido: string;
+}
+
+export interface HistorialEnvio {
+  id: number;
+  canal: 'WhatsApp' | 'Correo';
+  destinatario: string;
+  resultado: string;
+  error?: string;
+  usuarioNombre?: string;
+  fecha: string;
+}

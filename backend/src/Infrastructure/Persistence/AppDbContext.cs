@@ -46,6 +46,9 @@ public class AppDbContext : DbContext
     public DbSet<VentaImpuesto> VentaImpuestos => Set<VentaImpuesto>();
     public DbSet<CompraImpuesto> CompraImpuestos => Set<CompraImpuesto>();
 
+    public DbSet<EnlacePublicoFactura> EnlacesPublicosFactura => Set<EnlacePublicoFactura>();
+    public DbSet<HistorialEnvioFactura> HistorialEnviosFactura => Set<HistorialEnvioFactura>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);

@@ -1,9 +1,23 @@
 .toolbar {
-  display: flex; align-items: center; margin-bottom: 16px;
+  display: flex; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 6px;
   .spacer { flex: 1; }
+  .btn-whatsapp { background: #25d366; color: white; }
 }
 
 .loading { display: flex; justify-content: center; padding: 60px 0; }
+
+.panel-whatsapp, .panel-historial {
+  max-width: 800px; margin: 0 auto 16px; padding: 20px;
+  h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 14px; font-size: 15px; }
+}
+.panel-historial { overflow-x: auto; }
+.full-width { width: 100%; }
+.hint { font-size: 12px; color: var(--color-text-muted); margin: -8px 0 12px; }
+.hint-error { color: var(--color-danger); }
+.panel-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.error-text { color: var(--color-danger); }
+.table { width: 100%; border-collapse: collapse; font-size: 13px; th, td { text-align: left; padding: 8px; border-bottom: 1px solid var(--color-border); } }
+.empty { text-align: center; color: var(--color-text-muted); padding: 20px 0; }
 
 .factura-sheet {
   background: white;
@@ -79,6 +93,10 @@
   .datos-grid { grid-template-columns: 1fr; gap: 10px; }
   .tabla-productos { min-width: 520px; }
   .sello-anulada { top: 16px; right: 16px; font-size: 14px; padding: 4px 10px; }
+  .panel-whatsapp, .panel-historial { padding: 14px; }
+  .panel-actions { flex-direction: column; }
+  .panel-actions button { width: 100%; }
+  .table { min-width: 480px; }
 }
 
 @media print {
