@@ -97,6 +97,20 @@ public class FacturasController : ControllerBase
         return Ok(ApiResponse<List<HistorialEnvioDto>>.Ok(historial));
     }
 
+    /// Correo como opción SECUNDARIA de envío (sección 15). Envía el PDF
+    /// como adjunto real vía SMTP configurado — nunca coloca credenciales
+    /// en el código, se leen de configuración/variables de entorno.
+    [HttpPost("{id:int}/compartir/correo")]
+    [RequierePermiso(ModuloSistema.Facturacion, AccionPermiso.Compartir)]
+    public async Task<IActionResult> EnviarPorCorreo(int id, [FromBody] EnviarCorreoFacturaDto dto)
+    {
+        var (exito, mensaje) = await _facturaCompartirService.EnviarPorCorreoAsync(id, dto.Destinatario);
+        if (!exito)
+            return BadRequest(ApiResponse<object>.Fail(mensaje));
+
+        return Ok(ApiResponse<object>.Ok(new { }, mensaje));
+    }
+
     /// Endpoint PÚBLICO deliberado (sin JWT): es la URL que se abre desde
     /// WhatsApp o un cliente de correo externo, que no tiene sesión en el
     /// sistema. Su seguridad no depende de [Authorize] sino de que el token

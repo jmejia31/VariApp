@@ -44,7 +44,25 @@ dotnet ef database update --project ../Infrastructure --startup-project .
 ```
 
 ## Configuración
-Ninguna variable de entorno nueva.
+Ninguna variable de entorno nueva en la Fase 1.
+
+**Desde la Fase 5/6 (WhatsApp/Correo), variables requeridas en producción:**
+```
+AppSettings__BackendPublicUrl=https://tu-backend-real.up.railway.app
+AppSettings__EnlacePublicoFacturaDiasValidez=7
+Smtp__Host=smtp.tu-proveedor.com
+Smtp__Port=587
+Smtp__UsuarioSmtp=tu-correo@dominio.com
+Smtp__PasswordSmtp=<contraseña o contraseña de aplicación, nunca en el repo>
+Smtp__UsarSsl=true
+Smtp__CorreoRemitente=tu-correo@dominio.com
+Smtp__NombreRemitente=VariApp
+```
+Configúralas en Railway como variables de entorno del servicio backend
+(no las pongas en `appsettings.json`, que sí está commiteado con
+placeholders `CHANGE_ME`). El doble guion bajo `__` es la convención de
+ASP.NET Core para mapear a configuración anidada (`Smtp:Host`, etc.) desde
+variables de entorno planas.
 
 ## Ejecución
 ```

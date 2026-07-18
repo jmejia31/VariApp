@@ -39,4 +39,8 @@ export class FacturaService {
   getHistorialEnvios(id: number): Observable<ApiResponse<HistorialEnvio[]>> {
     return this.http.get<ApiResponse<HistorialEnvio[]>>(`${this.apiUrl}/${id}/historial-envios`);
   }
+
+  enviarPorCorreo(id: number, destinatario: string): Observable<ApiResponse<object>> {
+    return this.http.post<ApiResponse<object>>(`${this.apiUrl}/${id}/compartir/correo`, { destinatario });
+  }
 }

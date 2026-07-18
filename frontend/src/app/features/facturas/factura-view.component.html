@@ -21,6 +21,13 @@
     }
     Descargar PDF
   </button>
+  @if (factura(); as f) {
+    @if (f.estado !== 'Anulada') {
+      <button mat-button (click)="toggleCorreo()">
+        <mat-icon>email</mat-icon> Enviar por correo
+      </button>
+    }
+  }
   <button mat-button (click)="imprimir()">
     <mat-icon>print</mat-icon> Imprimir
   </button>
@@ -28,6 +35,31 @@
     <mat-icon>history</mat-icon> Historial de envíos
   </button>
 </div>
+
+@if (mostrarPanelCorreo()) {
+  <div class="card panel-correo no-print">
+    <h3><mat-icon>email</mat-icon> Enviar por correo</h3>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Correo del destinatario</mat-label>
+      <input matInput [(ngModel)]="correoEditable" placeholder="cliente@correo.com">
+      @if (!correoValido() && correoEditable) {
+        <mat-hint class="hint-error">El correo no tiene un formato válido.</mat-hint>
+      }
+    </mat-form-field>
+    <p class="hint">Se adjuntará el PDF de la factura al correo.</p>
+    <div class="panel-actions">
+      <button mat-flat-button color="primary" [disabled]="!correoValido() || enviandoCorreo()" (click)="enviarCorreo()">
+        @if (enviandoCorreo()) {
+          <mat-spinner diameter="18"></mat-spinner>
+        } @else {
+          <mat-icon>send</mat-icon>
+        }
+        Enviar
+      </button>
+      <button mat-button (click)="toggleCorreo()">Cancelar</button>
+    </div>
+  </div>
+}
 
 @if (mostrarPanelWhatsApp() && enlaceCompartir(); as e) {
   <div class="card panel-whatsapp no-print">

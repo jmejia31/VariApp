@@ -35,6 +35,10 @@ export class FacturaViewComponent implements OnInit {
   readonly historial = signal<HistorialEnvio[]>([]);
   readonly mostrarHistorial = signal(false);
 
+  readonly mostrarPanelCorreo = signal(false);
+  readonly enviandoCorreo = signal(false);
+  correoEditable = '';
+
   constructor(private facturaService: FacturaService, private route: ActivatedRoute, private snackBar: MatSnackBar) {}
 
   ngOnInit(): void {
@@ -140,6 +144,42 @@ export class FacturaViewComponent implements OnInit {
         this.mostrarHistorial.set(true);
       },
       error: () => this.snackBar.open('No se pudo cargar el historial de envíos.', 'Cerrar', { duration: 5000 })
+    });
+  }
+
+  /** Correo: opción SECUNDARIA de envío (sección 15). */
+  toggleCorreo(): void {
+    if (this.mostrarPanelCorreo()) {
+      this.mostrarPanelCorreo.set(false);
+      return;
+    }
+
+    const f = this.factura();
+    if (!f) return;
+
+    this.correoEditable = f.clienteCorreo || '';
+    this.mostrarPanelCorreo.set(true);
+  }
+
+  correoValido(): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.correoEditable.trim());
+  }
+
+  enviarCorreo(): void {
+    const f = this.factura();
+    if (!f || !this.correoValido()) return;
+
+    this.enviandoCorreo.set(true);
+    this.facturaService.enviarPorCorreo(f.id, this.correoEditable.trim()).subscribe({
+      next: (res) => {
+        this.enviandoCorreo.set(false);
+        this.mostrarPanelCorreo.set(false);
+        this.snackBar.open(res.message || 'Correo enviado correctamente.', 'Cerrar', { duration: 4000 });
+      },
+      error: (err) => {
+        this.enviandoCorreo.set(false);
+        this.snackBar.open(err.error?.message ?? 'No se pudo enviar el correo.', 'Cerrar', { duration: 6000 });
+      }
     });
   }
 }

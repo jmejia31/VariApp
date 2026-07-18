@@ -12,17 +12,19 @@ public class FacturaCompartirService : IFacturaCompartirService
     private readonly IFacturaCompartirRepository _repository;
     private readonly IFacturaService _facturaService;
     private readonly IFacturaPdfService _facturaPdfService;
+    private readonly IEmailService _emailService;
     private readonly IAuditoriaService _auditoria;
     private readonly ICurrentUserService _currentUser;
     private readonly IConfiguration _configuration;
 
     public FacturaCompartirService(
         IFacturaCompartirRepository repository, IFacturaService facturaService, IFacturaPdfService facturaPdfService,
-        IAuditoriaService auditoria, ICurrentUserService currentUser, IConfiguration configuration)
+        IEmailService emailService, IAuditoriaService auditoria, ICurrentUserService currentUser, IConfiguration configuration)
     {
         _repository = repository;
         _facturaService = facturaService;
         _facturaPdfService = facturaPdfService;
+        _emailService = emailService;
         _auditoria = auditoria;
         _currentUser = currentUser;
         _configuration = configuration;
@@ -134,5 +136,59 @@ public class FacturaCompartirService : IFacturaCompartirService
 
         var pdf = await _facturaPdfService.GenerarPdfAsync(factura);
         return (pdf, $"{factura.NumeroFactura}.pdf");
+    }
+
+    public async Task<(bool Exito, string Mensaje)> EnviarPorCorreoAsync(int facturaId, string destinatario)
+    {
+        if (!EsCorreoValido(destinatario))
+            return (false, "El correo indicado no tiene un formato válido.");
+
+        var factura = await _facturaService.GetByIdAsync(facturaId)
+            ?? throw new BusinessRuleException("La factura no existe.");
+
+        if (factura.Estado == "Anulada")
+            throw new BusinessRuleException("No se puede compartir una factura anulada.");
+
+        var pdf = await _facturaPdfService.GenerarPdfAsync(factura);
+
+        var asunto = $"Factura {factura.NumeroFactura} - {factura.EmpresaNombre}";
+        var cuerpo = $"""
+            <p>Estimado/a {factura.ClienteNombre},</p>
+            <p>Le compartimos la factura correspondiente a su compra realizada en <strong>{factura.EmpresaNombre}</strong>.</p>
+            <p><strong>Número de factura:</strong> {factura.NumeroFactura}<br>
+            <strong>Fecha:</strong> {factura.FechaEmision:dd/MM/yyyy}<br>
+            <strong>Total:</strong> L. {factura.Total:N2}</p>
+            <p>Encontrará el detalle completo en el archivo PDF adjunto.</p>
+            <p>Gracias por su preferencia.</p>
+            """;
+
+        var (exito, error) = await _emailService.EnviarAsync(destinatario, asunto, cuerpo, new List<AdjuntoCorreo>
+        {
+            new() { NombreArchivo = $"{factura.NumeroFactura}.pdf", Contenido = pdf, ContentType = "application/pdf" }
+        });
+
+        await RegistrarIntentoAsync(facturaId, new RegistrarEnvioDto
+        {
+            Canal = "Correo",
+            Destinatario = destinatario,
+            Resultado = exito ? "Enviado" : "Error",
+            Error = error
+        });
+
+        return (exito, exito ? "Correo enviado correctamente." : (error ?? "No se pudo enviar el correo."));
+    }
+
+    private static bool EsCorreoValido(string correo)
+    {
+        if (string.IsNullOrWhiteSpace(correo)) return false;
+        try
+        {
+            var direccion = new System.Net.Mail.MailAddress(correo);
+            return direccion.Address == correo.Trim();
+        }
+        catch
+        {
+            return false;
+        }
     }
 }

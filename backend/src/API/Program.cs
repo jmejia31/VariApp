@@ -87,6 +87,7 @@ builder.Services.AddScoped<IFacturaService, FacturaService>();
 builder.Services.AddScoped<IFacturaPdfService, QuestPdfFacturaService>();
 builder.Services.AddScoped<IFacturaCompartirRepository, FacturaCompartirRepository>();
 builder.Services.AddScoped<IFacturaCompartirService, FacturaCompartirService>();
+builder.Services.AddScoped<IEmailService, SmtpEmailService>();
 builder.Services.AddScoped<IEmpresaConfiguracionService, EmpresaConfiguracionService>();
 builder.Services.AddScoped<IFinanzasService, FinanzasService>();
 builder.Services.AddScoped<IMovimientoInventarioService, MovimientoInventarioService>();

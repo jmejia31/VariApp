@@ -6,7 +6,7 @@
 
 .loading { display: flex; justify-content: center; padding: 60px 0; }
 
-.panel-whatsapp, .panel-historial {
+.panel-whatsapp, .panel-historial, .panel-correo {
   max-width: 800px; margin: 0 auto 16px; padding: 20px;
   h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 14px; font-size: 15px; }
 }
@@ -93,7 +93,7 @@
   .datos-grid { grid-template-columns: 1fr; gap: 10px; }
   .tabla-productos { min-width: 520px; }
   .sello-anulada { top: 16px; right: 16px; font-size: 14px; padding: 4px 10px; }
-  .panel-whatsapp, .panel-historial { padding: 14px; }
+  .panel-whatsapp, .panel-historial, .panel-correo { padding: 14px; }
   .panel-actions { flex-direction: column; }
   .panel-actions button { width: 100%; }
   .table { min-width: 480px; }

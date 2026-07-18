@@ -142,7 +142,7 @@ Ver `03-COMANDOS-INTEGRACION.md`.
 | 3 | Descarga de imágenes de producto | Terminada |
 | 4 | PDF real de facturas | Parcialmente terminada (sin verificar build) |
 | 5 | WhatsApp | Terminada (build de backend sin verificar) |
-| 6 | Correo | No iniciada |
+| 6 | Correo | Terminada (build de backend sin verificar) |
 | 7 | Configuración visual / colores | No iniciada |
 | 8 | Pruebas formales finales | No iniciada |
 
@@ -456,3 +456,89 @@ funcionaría para el cliente real.
 Frontend: OK, 0 errores (factura-view-component confirmado en los lazy
 chunks). Backend: no verificable, arrastra la misma limitación desde la
 fase 4 (QuestPDF sin compilar) más este código nuevo.
+---
+
+## Fase 6 — Correo (SMTP configurable)
+
+**Estado: terminada** (misma limitación de compilación de backend de las
+fases 4-5).
+
+### Objetivo alcanzado
+Correo como opción SECUNDARIA de envío (sección 15), con el PDF adjunto
+real (no un enlace, a diferencia de WhatsApp — con SMTP normal adjuntar es
+viable y es lo que el prompt prefiere: "adjuntar el PDF o proporcionar un
+enlace seguro").
+
+### Decisión técnica: System.Net.Mail, no MailKit
+Se usó `System.Net.Mail.SmtpClient` (parte del framework base de .NET) en
+vez de MailKit. Es una decisión deliberada de gestión de riesgo: QuestPDF
+(fase 4) ya quedó como dependencia nueva sin verificar compilando; sumar
+una segunda dependencia externa (MailKit) en la misma sesión sin poder
+compilar ninguna de las dos habría sido más riesgoso. `SmtpClient` cubre el
+caso de uso (SMTP básico con usuario/contraseña) sin necesitar NuGet.
+
+### Funcionalidades completadas
+- `IEmailService`/`SmtpEmailService`: valida que la configuración SMTP no
+  sean los placeholders `CHANGE_ME` antes de intentar conectar (error claro
+  en vez de excepción de red confusa). Nunca expone el detalle técnico del
+  error al usuario final (sección 17); el detalle real queda en logs
+  (`ILogger`).
+- Configuración en `appsettings.json` bajo `Smtp:*`, con placeholders
+  `CHANGE_ME` — **nunca credenciales reales commiteadas**. En producción se
+  sobrescriben con variables de entorno (`Smtp__Host`, `Smtp__UsuarioSmtp`,
+  `Smtp__PasswordSmtp`, etc., doble guion bajo = convención de ASP.NET Core
+  para configuración anidada vía entorno).
+- `FacturaCompartirService.EnviarPorCorreoAsync`: valida formato de correo,
+  bloquea facturas anuladas, genera el PDF, arma asunto formal y cuerpo
+  HTML profesional, envía con adjunto, registra el intento CON el resultado
+  real (`Enviado` o `Error`, a diferencia de WhatsApp donde solo se puede
+  registrar `Iniciado` por la limitación ya documentada en la fase 5).
+- `POST /facturas/{id}/compartir/correo` — protegido con
+  `Facturacion:Compartir` (mismo permiso que WhatsApp, reutilizado, no
+  duplicado).
+- Frontend: botón "Enviar por correo" (opción secundaria, después de
+  WhatsApp en el orden visual), panel con correo prellenado desde el
+  cliente pero editable, validación de formato en vivo, mismo panel de
+  historial de envíos ya construido en la fase 5 (reutilizado, sin
+  duplicar).
+
+### Limitación real, no oculta
+El SMTP de este proyecto **no está configurado con credenciales reales**
+(sigue con `CHANGE_ME` en `appsettings.json`). El endpoint devolverá un
+error claro y controlado ("El envío de correo no está configurado
+todavía...") hasta que se configuren las variables de entorno reales en
+Railway/producción — documentado explícitamente en comandos de
+integración.
+
+### Elementos que necesitan pruebas
+- Compilación real del backend (arrastra la limitación de las fases 4-5).
+- Envío real una vez configuradas credenciales SMTP verdaderas (Gmail con
+  contraseña de aplicación, SendGrid, u otro proveedor).
+- Adjunto de PDF grande (verificar límites del proveedor SMTP elegido).
+
+### Archivos creados
+`backend/src/Application/Interfaces/IEmailService.cs`,
+`backend/src/Infrastructure/Services/SmtpEmailService.cs`.
+
+### Archivos modificados
+`backend/src/Application/Interfaces/IFacturaCompartirService.cs`,
+`backend/src/Application/Services/FacturaCompartirService.cs`,
+`backend/src/API/Controllers/FacturasController.cs`, `API/Program.cs`,
+`backend/src/API/appsettings.json` (+sección Smtp con placeholders),
+`frontend/src/app/services/factura.service.ts`,
+`frontend/src/app/features/facturas/factura-view.component.{ts,html,scss}`.
+
+### Endpoints creados
+`POST /facturas/{id}/compartir/correo`.
+
+### Dependencias agregadas
+Ninguna (`System.Net.Mail` es parte del framework .NET).
+
+### Variables de entorno requeridas (producción)
+`Smtp__Host`, `Smtp__Port`, `Smtp__UsuarioSmtp`, `Smtp__PasswordSmtp`,
+`Smtp__UsarSsl`, `Smtp__CorreoRemitente`, `Smtp__NombreRemitente` — ver
+`03-COMANDOS-INTEGRACION.md` para el detalle exacto.
+
+### Build real
+Frontend: OK, 0 errores (`factura-view-component` 60.16 kB, confirma el
+código nuevo). Backend: no verificable, misma limitación de las fases 4-5.
