@@ -48,6 +48,7 @@ public class AppDbContext : DbContext
 
     public DbSet<EnlacePublicoFactura> EnlacesPublicosFactura => Set<EnlacePublicoFactura>();
     public DbSet<HistorialEnvioFactura> HistorialEnviosFactura => Set<HistorialEnvioFactura>();
+    public DbSet<TemaVisual> TemasVisuales => Set<TemaVisual>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

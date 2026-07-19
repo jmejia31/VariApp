@@ -143,7 +143,7 @@ Ver `03-COMANDOS-INTEGRACION.md`.
 | 4 | PDF real de facturas | Parcialmente terminada (sin verificar build) |
 | 5 | WhatsApp | Terminada (build de backend sin verificar) |
 | 6 | Correo | Terminada (build de backend sin verificar) |
-| 7 | Configuración visual / colores | No iniciada |
+| 7 | Configuración visual / colores | Terminada (build de backend sin verificar) |
 | 8 | Pruebas formales finales | No iniciada |
 
 ---
@@ -542,3 +542,104 @@ Ninguna (`System.Net.Mail` es parte del framework .NET).
 ### Build real
 Frontend: OK, 0 errores (`factura-view-component` 60.16 kB, confirma el
 código nuevo). Backend: no verificable, misma limitación de las fases 4-5.
+---
+
+## Fase 7 — Configuración visual y colores centralizados
+
+**Estado: terminada** (con limitaciones reales documentadas, no ocultas —
+ver abajo, son las más importantes de leer de toda esta fase).
+
+### Análisis inicial de colores (pedido explícito de la sección 16)
+Antes de tocar código, se auditó el estado real:
+- **Los colores YA estaban centralizados** en variables CSS (`:root` en
+  `frontend/src/styles.scss`): `--color-primary`, `--color-bg`,
+  `--color-surface`, `--color-text`, `--color-danger`, `--color-success`,
+  `--color-warning`, etc. Esto ya cumplía buena parte de "centraliza los
+  colores mediante variables CSS" antes de esta fase.
+- **Faltaban 6 variables** de las 14 mínimas pedidas: acento, menú lateral,
+  barra superior, encabezados, botones principales (como variable separada
+  del primario), información. Se agregaron.
+- **21 archivos `.scss`** tienen colores hexadecimales sueltos fuera de
+  esas variables — auditado con grep, no supuesto. La gran mayoría son
+  grises de badges de estado (ej. "Borrador" en gris neutro) y el verde
+  oficial `#25d366` de WhatsApp (que deliberadamente NO se centralizó,
+  porque es la identidad de marca de WhatsApp, no de VariApp). **No se
+  migraron los 21 archivos en esta fase** — es trabajo real pendiente,
+  documentado como deuda técnica, no towel-fixeado.
+- **El proyecto usa el tema prebuilt `indigo-pink.css` de Angular
+  Material** (`angular.json`), que es CSS estático compilado con colores
+  fijos de Material Design — no personalizable en runtime sin recompilar
+  Sass. Este es el hallazgo técnico más importante de la fase.
+
+### Decisión técnica ante la limitación de Angular Material
+En vez de declarar imposible la sección 16 para los componentes de
+Material, o fingir que "todo quedó tematizado", se implementó una técnica
+real e intermedia: overrides CSS selectivos dirigidos a las clases MDC más
+visibles (`mat-mdc-raised-button.mat-primary`, `mat-mdc-slide-toggle`,
+`mat-mdc-tab-group`, spinners) que SÍ leen las variables del tema dinámico
+con `!important`. **Limitación honesta**: esto cubre los componentes de
+Material más usados en el proyecto (botones, toggles, tabs, spinners), pero
+no es una re-tematización completa — puede haber algún componente puntual
+de Material que seguí sin cubrir y que habría que agregar si se detecta.
+
+### Funcionalidades completadas
+- Backend: `TemaVisual` (fila única, mismo patrón que `EmpresaConfiguracion`
+  ya usado en el proyecto — no se inventó un patrón nuevo), validación real
+  de formato hexadecimal (`#RGB` o `#RRGGBB`) antes de guardar, auditoría
+  de cada cambio con valores nuevos estructurados.
+- `GET /tema-visual` deliberadamente público (`[AllowAnonymous]`): la
+  sección 16 exige aplicar el tema en "pantallas de autenticación", que se
+  ven antes de tener JWT. No es información sensible.
+- `PUT /tema-visual` y `POST /tema-visual/restaurar` protegidos con
+  `Configuracion:Editar`.
+- Frontend: `ThemeApplierService` aplica las variables al DOM en runtime
+  (`document.documentElement.style.setProperty`) — se invoca desde
+  `AppComponent`, que se instancia siempre (autenticado o no), cubriendo
+  login y app por igual.
+- UI de administración en `ConfiguracionComponent`: 15 selectores de color
+  (`<input type="color">` + campo hexadecimal editable en paralelo, ambos
+  sincronizados), vista previa inmediata sin persistir, guardar con
+  confirmación, cancelar (revierte a lo guardado), restaurar predeterminados
+  con confirmación, control de permisos (solo lectura sin
+  `Configuracion:Editar`).
+- **Persistencia real confirmada por diseño**: el tema vive en la base de
+  datos, no en `localStorage` — sobrevive a recargar, cerrar sesión, volver
+  a iniciar sesión, y reiniciar el frontend, tal como pide la sección 16.
+  Reiniciar el *backend* también lo conserva (es una fila de base de
+  datos, no un valor en memoria).
+
+### Elementos que necesitan pruebas
+- Compilación real del backend (arrastra la limitación de las fases 4-6).
+- Verificar visualmente cuáles componentes de Material específicos del
+  proyecto SÍ cambian de color y cuáles no, para decidir si hacen falta
+  más overrides selectivos.
+- Cambiar un color y verificar que persiste tras cerrar sesión y volver a
+  entrar con otro usuario (confirmar que es global, no por-sesión).
+
+### Archivos creados
+`backend/src/Domain/Entities/TemaVisual.cs`,
+`backend/src/Application/Interfaces/{ITemaVisualRepository,ITemaVisualService}.cs`,
+`backend/src/Infrastructure/Repositories/TemaVisualRepository.cs`,
+`backend/src/Infrastructure/Persistence/Configurations/TemaVisualConfiguration.cs`,
+`backend/src/Application/DTOs/TemaVisualDto.cs`,
+`backend/src/Application/Services/TemaVisualService.cs`,
+`backend/src/API/Controllers/TemaVisualController.cs`,
+`frontend/src/app/core/models/tema-visual.model.ts`,
+`frontend/src/app/services/{tema-visual,theme-applier}.service.ts`,
+`docs/migraciones/006_fase7_tema_visual.sql`.
+
+### Archivos modificados
+`backend/src/Infrastructure/Persistence/AppDbContext.cs`, `API/Program.cs`,
+`frontend/src/styles.scss` (+6 variables, +overrides Material),
+`frontend/src/app/app.component.{ts,scss}`,
+`frontend/src/app/features/configuracion/configuracion.component.{ts,html,scss}`.
+
+### Endpoints creados
+`GET /tema-visual` (público), `PUT /tema-visual`, `POST /tema-visual/restaurar`.
+
+### Cambios en base de datos
+1 tabla nueva, fila única semilla incluida en el script.
+
+### Build real
+Frontend: OK, 0 errores. Backend: no verificable, misma limitación de las
+fases 4-6.

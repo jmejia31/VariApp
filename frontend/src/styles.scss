@@ -3,16 +3,50 @@
 :root {
   --color-primary: #4f46e5;
   --color-primary-dark: #4338ca;
+  --color-accent: #6366f1;
   --color-bg: #f5f6fb;
   --color-surface: #ffffff;
+  --color-sidebar: #1f2333;
+  --color-topbar: #ffffff;
+  --color-heading: #1f2333;
+  --color-button: #4f46e5;
   --color-text: #1f2333;
   --color-text-muted: #6b7280;
   --color-border: #e5e7eb;
   --color-danger: #ef4444;
   --color-success: #10b981;
   --color-warning: #f59e0b;
+  --color-info: #3b82f6;
   --radius: 14px;
   --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+/* Sección 16 del prompt: el tema debe aplicarse también a componentes de
+ * Angular Material, que aquí usan el tema prebuilt "indigo-pink" (CSS
+ * estático compilado, no personalizable en runtime sin recompilar Sass).
+ * LIMITACIÓN DOCUMENTADA: en vez de recompilar el tema completo de
+ * Material (no viable en runtime desde un panel de administración), se
+ * sobreescriben selectivamente las clases MDC más visibles (botones,
+ * toggles, spinners, tabs) para que sí respondan a las variables del tema
+ * dinámico. Puede haber componentes de Material puntuales no cubiertos
+ * por esta lista que sigan usando la paleta índigo original. */
+.mat-mdc-raised-button.mat-primary, .mat-mdc-unelevated-button.mat-primary,
+.mat-mdc-fab.mat-primary, .mat-mdc-mini-fab.mat-primary {
+  --mdc-protected-button-container-color: var(--color-button);
+  --mdc-filled-button-container-color: var(--color-button);
+  background-color: var(--color-button) !important;
+}
+.mat-mdc-button.mat-primary, .mat-mdc-icon-button.mat-primary, .mat-mdc-outlined-button.mat-primary {
+  color: var(--color-primary) !important;
+}
+.mat-mdc-progress-spinner.mat-primary circle,
+.mat-mdc-slide-toggle.mat-primary .mdc-switch--selected .mdc-switch__track {
+  --mdc-circular-progress-active-indicator-color: var(--color-primary);
+  stroke: var(--color-primary);
+}
+.mat-mdc-tab-group.mat-primary .mdc-tab-indicator__content--underline,
+.mat-mdc-tab-nav-bar.mat-primary .mdc-tab-indicator__content--underline {
+  border-color: var(--color-primary) !important;
 }
 
 html, body {
@@ -28,4 +62,11 @@ html, body {
   border-radius: var(--radius);
   box-shadow: var(--shadow-card);
   padding: 20px;
+}
+
+/* Centraliza el color de encabezados (sección 16) sin tocar cada
+ * componente individualmente — todos los .page-title ya existentes en
+ * el proyecto heredan esta regla automáticamente. */
+h1, h2, h3, .page-title {
+  color: var(--color-heading);
 }
