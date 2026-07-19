@@ -19,8 +19,8 @@ import { ThemeApplierService } from './services/theme-applier.service';
         }
         <aside class="sidebar" [class.abierto]="sidebarAbierto">
           <div class="brand">
-            <mat-icon>inventory_2</mat-icon>
-            <span>InventoryApp</span>
+            <img class="brand-logo" src="assets/varistorehn-logo.png" alt="VariStorehn">
+            <span>VariStorehn</span>
             <button mat-icon-button class="cerrar-sidebar" (click)="cerrarSidebar()" title="Cerrar menú">
               <mat-icon>close</mat-icon>
             </button>

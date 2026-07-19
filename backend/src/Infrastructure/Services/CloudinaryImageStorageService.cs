@@ -26,7 +26,7 @@ public class CloudinaryImageStorageService : IImageStorageService
             apiSecret == "CHANGE_ME")
         {
             throw new BusinessRuleException(
-                "Cloudinary no esta configurado. Revisa Cloudinary:CloudName, Cloudinary:ApiKey y Cloudinary:ApiSecret.");
+                "Cloudinary no está configurado. Revisa Cloudinary:CloudName, Cloudinary:ApiKey y Cloudinary:ApiSecret.");
         }
 
         var account = new Account(cloudName, apiKey, apiSecret);

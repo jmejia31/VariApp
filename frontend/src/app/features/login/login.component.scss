@@ -3,7 +3,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #4f46e5 0%, #1f2333 100%);
+  background:
+    radial-gradient(circle at 28% 20%, rgba(0, 212, 255, 0.28), transparent 28%),
+    radial-gradient(circle at 78% 24%, rgba(255, 112, 0, 0.26), transparent 30%),
+    linear-gradient(135deg, #041721 0%, #0a1020 52%, #1f0900 100%);
   padding: 16px;
 }
 
@@ -18,7 +21,14 @@
     text-align: center;
     margin-bottom: 8px;
 
-    .logo { font-size: 40px; width: 40px; height: 40px; color: var(--color-primary); }
+    .brand-logo {
+      width: 84px;
+      height: 84px;
+      object-fit: contain;
+      border-radius: 50%;
+      background: #020617;
+      box-shadow: 0 12px 28px rgba(0, 212, 255, 0.18), 0 10px 24px rgba(255, 112, 0, 0.14);
+    }
     h1 { margin: 8px 0 4px; font-size: 22px; }
     p { margin: 0; color: var(--color-text-muted); font-size: 13px; }
   }

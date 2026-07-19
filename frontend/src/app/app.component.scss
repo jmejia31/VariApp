@@ -24,6 +24,16 @@
     font-weight: 700;
     font-size: 18px;
 
+    .brand-logo {
+      width: 34px;
+      height: 34px;
+      object-fit: contain;
+      border-radius: 50%;
+      background: #020617;
+      box-shadow: 0 0 0 1px rgba(0, 212, 255, 0.35), 0 0 12px rgba(255, 112, 0, 0.18);
+      flex: 0 0 34px;
+    }
+
     .cerrar-sidebar { display: none; margin-left: auto; color: white; }
   }
 
@@ -44,7 +54,10 @@
       transition: background 0.15s;
 
       &:hover { background: rgba(255, 255, 255, 0.06); }
-      &.active { background: var(--color-primary); color: white; }
+      &.active {
+        background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+        color: white;
+      }
     }
   }
 }

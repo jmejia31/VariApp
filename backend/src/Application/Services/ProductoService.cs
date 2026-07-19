@@ -198,7 +198,7 @@ public class ProductoService : IProductoService
     {
         if (imagenes.Any(imagen => !ImagenValidationHelper.EsImagenValida(imagen)))
         {
-            throw new BusinessRuleException("Solo se permiten imagenes JPG, PNG o WebP de hasta 5 MB.");
+            throw new BusinessRuleException("Solo se permiten imágenes JPG, PNG o WebP de hasta 5 MB.");
         }
     }
 
