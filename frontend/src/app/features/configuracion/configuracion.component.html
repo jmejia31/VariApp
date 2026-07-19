@@ -61,4 +61,46 @@
       </div>
     }
   </form>
+
+  <div class="card tema-card">
+    <h2 class="section-title">Colores del sistema</h2>
+    <p class="subtitle">
+      Estos colores se aplican a todo el sistema para todos los usuarios: menú, botones, encabezados y estados.
+      Los cambios se guardan de forma centralizada — no son una preferencia personal.
+    </p>
+
+    @if (loadingTema()) {
+      <div class="loading"><mat-spinner></mat-spinner></div>
+    } @else if (!puedeEditar()) {
+      <p class="hint readonly-hint">
+        <mat-icon>info</mat-icon> Necesitas el permiso "Configuración: Editar" para modificar los colores.
+      </p>
+    } @else {
+      <div class="colores-grid">
+        @for (campo of campos; track campo.clave) {
+          <div class="color-field">
+            <label [for]="campo.clave">{{ campo.etiqueta }}</label>
+            <div class="color-input-row">
+              <input type="color" [id]="campo.clave" [(ngModel)]="tema[campo.clave]" (change)="previsualizar()">
+              <input type="text" [(ngModel)]="tema[campo.clave]" (change)="previsualizar()" maxlength="7" class="hex-input" placeholder="#000000">
+            </div>
+          </div>
+        }
+      </div>
+
+      @if (errorTema()) { <p class="error">{{ errorTema() }}</p> }
+
+      <div class="form-actions">
+        <button mat-flat-button color="primary" [disabled]="guardandoTema()" (click)="guardarTema()">
+          @if (guardandoTema()) { <mat-spinner diameter="18"></mat-spinner> } @else { <mat-icon>save</mat-icon> }
+          Guardar colores
+        </button>
+        <button mat-button (click)="cancelarTema()">Cancelar</button>
+        <button mat-button [disabled]="restaurandoTema()" (click)="restaurarTema()">
+          @if (restaurandoTema()) { <mat-spinner diameter="18"></mat-spinner> } @else { <mat-icon>restart_alt</mat-icon> }
+          Restaurar predeterminados
+        </button>
+      </div>
+    }
+  </div>
 }

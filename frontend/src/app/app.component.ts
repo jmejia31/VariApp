@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from './core/auth/auth.service';
 import { PermisosRuntimeService } from './core/auth/permisos-runtime.service';
+import { ThemeApplierService } from './services/theme-applier.service';
 
 @Component({
   selector: 'app-root',
@@ -106,7 +107,13 @@ import { PermisosRuntimeService } from './core/auth/permisos-runtime.service';
 export class AppComponent {
   sidebarAbierto = false;
 
-  constructor(public auth: AuthService, public permisosRuntime: PermisosRuntimeService, private router: Router) {
+  constructor(
+    public auth: AuthService,
+    public permisosRuntime: PermisosRuntimeService,
+    private router: Router,
+    private themeApplier: ThemeApplierService
+  ) {
+    this.themeApplier.aplicarTemaGuardado();
     if (this.auth.isAuthenticated()) {
       this.permisosRuntime.cargar().subscribe();
     }

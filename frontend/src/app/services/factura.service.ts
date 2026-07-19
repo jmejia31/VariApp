@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { ApiResponse } from '../core/models/api-response.model';
-import { Factura } from '../core/models/factura.model';
+import { EnlaceCompartir, Factura, HistorialEnvio } from '../core/models/factura.model';
 
 @Injectable({ providedIn: 'root' })
 export class FacturaService {
@@ -21,5 +21,26 @@ export class FacturaService {
 
   getByVenta(ventaId: number): Observable<ApiResponse<Factura>> {
     return this.http.get<ApiResponse<Factura>>(`${this.apiUrl}/venta/${ventaId}`);
+  }
+
+  /** PDF real generado en backend (sección 13/14), no la vista HTML imprimible. */
+  descargarPdf(id: number): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/${id}/pdf`, { responseType: 'blob' });
+  }
+
+  prepararWhatsApp(id: number): Observable<ApiResponse<EnlaceCompartir>> {
+    return this.http.post<ApiResponse<EnlaceCompartir>>(`${this.apiUrl}/${id}/compartir/whatsapp`, {});
+  }
+
+  registrarIntentoEnvio(id: number, canal: 'WhatsApp' | 'Correo', destinatario: string, resultado = 'Iniciado', error?: string): Observable<ApiResponse<object>> {
+    return this.http.post<ApiResponse<object>>(`${this.apiUrl}/${id}/compartir/registrar`, { canal, destinatario, resultado, error });
+  }
+
+  getHistorialEnvios(id: number): Observable<ApiResponse<HistorialEnvio[]>> {
+    return this.http.get<ApiResponse<HistorialEnvio[]>>(`${this.apiUrl}/${id}/historial-envios`);
+  }
+
+  enviarPorCorreo(id: number, destinatario: string): Observable<ApiResponse<object>> {
+    return this.http.post<ApiResponse<object>>(`${this.apiUrl}/${id}/compartir/correo`, { destinatario });
   }
 }

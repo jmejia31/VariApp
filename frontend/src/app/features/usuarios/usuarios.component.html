@@ -1,10 +1,18 @@
 <div class="header-row">
   <h1 class="page-title">Usuarios</h1>
-  <button mat-flat-button color="primary" (click)="mostrarFormulario.set(!mostrarFormulario())">
-    <mat-icon>{{ mostrarFormulario() ? 'close' : 'add' }}</mat-icon>
-    {{ mostrarFormulario() ? 'Cancelar' : 'Nuevo usuario' }}
-  </button>
+  @if (puedeCrear()) {
+    <button mat-flat-button color="primary" (click)="mostrarFormulario.set(!mostrarFormulario())">
+      <mat-icon>{{ mostrarFormulario() ? 'close' : 'add' }}</mat-icon>
+      {{ mostrarFormulario() ? 'Cancelar' : 'Nuevo usuario' }}
+    </button>
+  }
 </div>
+
+<mat-form-field appearance="outline" class="search-field">
+  <mat-label>Buscar por usuario o nombre</mat-label>
+  <input matInput [formControl]="buscador" placeholder="Escribe para buscar...">
+  <mat-icon matSuffix>search</mat-icon>
+</mat-form-field>
 
 @if (mostrarFormulario()) {
   <form class="card form" [formGroup]="form" (ngSubmit)="crear()">
@@ -54,7 +62,8 @@
           <th>Usuario</th>
           <th>Nombre completo</th>
           <th>Rol</th>
-          <th>Activo</th>
+          <th>Estado</th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
@@ -63,10 +72,29 @@
             <td>{{ u.nombreUsuario }}</td>
             <td>{{ u.nombreCompleto }}</td>
             <td>{{ u.rol }}</td>
-            <td><mat-slide-toggle [checked]="u.activo" (change)="toggleEstado(u)"></mat-slide-toggle></td>
+            <td>
+              @if (u.bloqueado) {
+                <span class="badge danger">Bloqueado</span>
+              } @else {
+                <mat-slide-toggle [checked]="u.activo" [disabled]="!puedeEditar()" (change)="toggleEstado(u)"></mat-slide-toggle>
+              }
+            </td>
+            <td class="actions">
+              <a [routerLink]="['/usuarios', u.id]" mat-icon-button title="Ver detalle"><mat-icon>visibility</mat-icon></a>
+              @if (puedeBloquear() && !esUsuarioActual(u)) {
+                @if (u.bloqueado) {
+                  <button mat-icon-button title="Desbloquear" (click)="desbloquear(u)"><mat-icon>lock_open</mat-icon></button>
+                } @else {
+                  <button mat-icon-button title="Bloquear" (click)="bloquear(u)"><mat-icon>lock</mat-icon></button>
+                }
+              }
+              @if (puedeEliminar() && !esUsuarioActual(u)) {
+                <button mat-icon-button title="Eliminar" (click)="eliminar(u)"><mat-icon>delete_outline</mat-icon></button>
+              }
+            </td>
           </tr>
         } @empty {
-          <tr><td colspan="4" class="empty">No hay usuarios registrados.</td></tr>
+          <tr><td colspan="5" class="empty">No hay usuarios registrados.</td></tr>
         }
       </tbody>
     </table>
@@ -76,10 +104,27 @@
         <div class="item-card">
           <div class="item-card-header">
             <strong>{{ u.nombreCompleto }}</strong>
-            <mat-slide-toggle [checked]="u.activo" (change)="toggleEstado(u)"></mat-slide-toggle>
+            @if (u.bloqueado) {
+              <span class="badge danger">Bloqueado</span>
+            } @else {
+              <mat-slide-toggle [checked]="u.activo" [disabled]="!puedeEditar()" (change)="toggleEstado(u)"></mat-slide-toggle>
+            }
           </div>
           <p class="item-card-desc">&#64;{{ u.nombreUsuario }}</p>
           <div class="item-card-meta"><span>{{ u.rol }}</span></div>
+          <div class="item-card-actions">
+            <a [routerLink]="['/usuarios', u.id]" mat-button><mat-icon>visibility</mat-icon> Ver</a>
+            @if (puedeBloquear() && !esUsuarioActual(u)) {
+              @if (u.bloqueado) {
+                <button mat-button (click)="desbloquear(u)"><mat-icon>lock_open</mat-icon> Desbloquear</button>
+              } @else {
+                <button mat-button (click)="bloquear(u)"><mat-icon>lock</mat-icon> Bloquear</button>
+              }
+            }
+            @if (puedeEliminar() && !esUsuarioActual(u)) {
+              <button mat-button (click)="eliminar(u)"><mat-icon>delete_outline</mat-icon> Eliminar</button>
+            }
+          </div>
         </div>
       } @empty {
         <p class="empty">No hay usuarios registrados.</p>

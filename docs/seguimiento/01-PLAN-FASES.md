@@ -1,0 +1,79 @@
+# Plan de fases — Prompt de 6 partes (Usuarios/Roles/Permisos, Productos+imágenes, Facturas+WhatsApp+Correo, Colores, Auditoría)
+
+Fecha de creación: 14/07/2026. Ver `00-INICIO.md` para la nota de honestidad
+sobre continuidad de sesiones.
+
+## Aclaración de numeración #14 / #15 / #18
+
+El prompt pide localizar "las secciones #14, #15 y #18" pero no existe un
+documento de planificación previo con numeración propia. Hay dos
+numeraciones candidatas y se cubren ambas:
+
+- **Del prompt original de esta conversación (26 secciones):**
+  §14 Eliminación lógica y física · §15 Auditoría avanzada · §18 Transacciones.
+- **De este documento nuevo (6 partes):**
+  §14 Envío por WhatsApp · §15 Envío por correo · §18 Integración backend.
+
+## Estado real verificado (no supuesto) al iniciar
+
+| Módulo | Estado real |
+|---|---|
+| Usuarios | CRUD parcial: falta GetById, búsqueda/filtro/paginación, bloqueo/desbloqueo, eliminación |
+| Roles | CRUD completo (ya es el estándar construido en fases anteriores) |
+| Permisos | Catálogo + matriz completos |
+| Productos | CRUD completo, carga de imágenes a Cloudinary, **sin endpoint de descarga** |
+| Facturas | Vista HTML imprimible (`@media print`), **sin PDF real generado en backend** |
+| WhatsApp | No implementado (verificado con grep, cero resultados) |
+| Correo | No implementado (verificado con grep, cero resultados) |
+| Colores/tema | Variables CSS fijas en `styles.scss`, **sin panel de administración ni persistencia** |
+| Auditoría | Estructura avanzada ya existe (fase 8 de este mismo proyecto) |
+
+## Fases
+
+### Fase 1 — Usuarios al estándar de Roles (referencia obligatoria del prompt)
+Backend: `GetByIdAsync`/endpoint detalle, búsqueda+filtro+paginación,
+bloqueo/desbloqueo (distinto de activar/desactivar), eliminación lógica con
+las mismas protecciones que Roles (no eliminar el último admin activo).
+Frontend: vista de detalle real separada del formulario, confirmaciones,
+acciones por fila. Responsive desde el inicio.
+Criterio de cierre: Usuarios expone las mismas operaciones que Roles.
+
+### Fase 2 — Roles/Permisos: auditoría de seguridad crítica
+Verificar en código (no suponer): protección de roles de sistema, bloqueo
+de último administrador, invalidación de permisos efectivos al cambiar rol.
+Esto ya se implementó en fases previas — esta fase es **verificación y
+corrección**, no reconstrucción.
+
+### Fase 3 — Descarga de imágenes de producto
+Backend: endpoint de descarga individual y por lote desde Cloudinary,
+autorizado, con manejo de imagen inexistente. Frontend: vista de detalle
+de producto con galería, descarga, estado vacío.
+
+### Fase 4 — Generación real de PDF de facturas
+Backend: generación de PDF real (no solo HTML imprimible) con librería
+compatible con .NET, usando los datos reales de la venta/compra.
+Frontend: botón de descarga de PDF real.
+
+### Fase 5 — WhatsApp (envío manual asistido, sin API oficial)
+Dado que el proyecto no tiene integración con WhatsApp Business API,
+se implementa el flujo realista que el propio prompt permite: generar
+enlace `wa.me` con mensaje prellenado y el PDF accesible por URL segura,
+sin fingir envío automático de adjuntos.
+
+### Fase 6 — Correo (SMTP configurable)
+Backend: servicio de correo vía variables de entorno (sin credenciales en
+código), adjuntando o enlazando el PDF. Registro de intentos/resultados.
+
+### Fase 7 — Configuración visual y colores centralizados
+Backend: entidad de tema (colores), endpoint get/put, persistencia real.
+Frontend: panel de administración de colores + servicio de tema que
+aplique variables CSS en tiempo de ejecución, con persistencia tras
+recargar/cerrar sesión.
+
+### Fase 8 — Pruebas formales (única al final, según la Parte 6 del prompt)
+Compilación real de frontend y backend (dentro de las limitaciones de
+sandbox ya documentadas), revisión de consola, pruebas manuales guiadas
+para el usuario de lo que no se puede automatizar aquí.
+
+## Progreso
+Todas las fases: **no iniciadas** hasta este documento. Comenzando Fase 1.

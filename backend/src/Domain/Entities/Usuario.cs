@@ -17,5 +17,22 @@ public class Usuario
     public Rol? RolEntidad { get; set; }
 
     public bool Activo { get; set; } = true;
+
+    /// Bloqueo: distinto de Activo/Desactivar. Desactivar es una decisión
+    /// administrativa reversible normal; Bloquear implica una restricción de
+    /// seguridad (ej. sospecha de acceso indebido) con motivo obligatorio.
+    public bool Bloqueado { get; set; }
+    public string? MotivoBloqueo { get; set; }
+    public DateTime? FechaBloqueo { get; set; }
+    public int? BloqueadoPorUsuarioId { get; set; }
+
+    public bool Eliminado { get; set; }
+    public DateTime? FechaEliminacion { get; set; }
+    public int? EliminadoPorUsuarioId { get; set; }
+
+    public int? CreadoPorUsuarioId { get; set; }
+    public int? ActualizadoPorUsuarioId { get; set; }
+    public DateTime? FechaActualizacion { get; set; }
+
     public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;
 }

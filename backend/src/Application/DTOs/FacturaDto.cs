@@ -25,6 +25,12 @@ public class FacturaDto
     public string? EmpresaTelefono { get; set; }
     public string? EmpresaCorreo { get; set; }
     public string? EmpresaDireccion { get; set; }
+    /// Logo ACTUAL de la empresa (no snapshot histórico como el resto de
+    /// datos de empresa): se resuelve en vivo al generar el PDF, a
+    /// diferencia del nombre/RTN/teléfono que sí quedan fijos al emitir la
+    /// factura. Decisión documentada: el logo es identidad visual vigente,
+    /// no un dato legal que deba congelarse en el tiempo.
+    public string? EmpresaLogoUrl { get; set; }
 
     public string ClienteNombre { get; set; } = string.Empty;
     public string? ClienteTelefono { get; set; }

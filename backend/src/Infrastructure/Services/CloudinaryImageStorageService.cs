@@ -72,4 +72,26 @@ public class CloudinaryImageStorageService : IImageStorageService
         var deleteParams = new DeletionParams(publicId);
         await _cloudinary.DestroyAsync(deleteParams);
     }
+
+    public async Task<(Stream Contenido, string ContentType)?> DownloadAsync(string url)
+    {
+        // Streaming server-side en vez de redirigir a la URL de Cloudinary
+        // directamente (sección 11/12): el backend controla la autorización
+        // real de la descarga y puede nombrar el archivo de forma amigable,
+        // en vez de confiar en que la URL sea "secreta" por sí sola.
+        using var httpClient = new HttpClient();
+        try
+        {
+            var response = await httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+            if (!response.IsSuccessStatusCode) return null;
+
+            var contentType = response.Content.Headers.ContentType?.MediaType ?? "application/octet-stream";
+            var stream = await response.Content.ReadAsStreamAsync();
+            return (stream, contentType);
+        }
+        catch
+        {
+            return null;
+        }
+    }
 }

@@ -204,6 +204,20 @@ public class RolService : IRolService
         if (permisos > 0)
             throw new BusinessRuleException("No se puede eliminar permanentemente un rol con permisos asignados.");
 
+        // Hueco cerrado (sección 7 del prompt: "no debe eliminarse el último
+        // rol con administración completa"): esta validación ya existía en
+        // Desactivar y EliminarLogico pero faltaba aquí. Un rol EsAdministrador
+        // sin usuarios asignados actualmente igual puede ser el ÚNICO rol
+        // capaz de tener administradores en el sistema — eliminarlo
+        // permanentemente dejaría al sistema sin ninguna vía de crear un
+        // nuevo administrador sin intervención directa en base de datos.
+        if (rol.EsAdministrador)
+        {
+            var otrosAdminsRoles = await _repository.ContarRolesAdministradorAsync(excluirRolId: rol.Id);
+            if (otrosAdminsRoles == 0)
+                throw new BusinessRuleException("No se puede eliminar permanentemente el último rol de tipo administrador del sistema.");
+        }
+
         var nombre = rol.Nombre;
         _repository.Remove(rol);
         await _repository.SaveChangesAsync();

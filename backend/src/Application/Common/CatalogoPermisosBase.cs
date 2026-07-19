@@ -57,7 +57,7 @@ public static class CatalogoPermisosBase
 
         (ModuloSistema.Facturacion, new[]
         {
-            AccionPermiso.Ver, AccionPermiso.Exportar, AccionPermiso.Imprimir
+            AccionPermiso.Ver, AccionPermiso.Exportar, AccionPermiso.Imprimir, AccionPermiso.Compartir
         }),
 
         (ModuloSistema.Finanzas, new[]
@@ -74,7 +74,8 @@ public static class CatalogoPermisosBase
         {
             AccionPermiso.Ver, AccionPermiso.Crear, AccionPermiso.Editar,
             AccionPermiso.Activar, AccionPermiso.Desactivar, AccionPermiso.AsignarRol,
-            AccionPermiso.RestablecerContrasena
+            AccionPermiso.RestablecerContrasena, AccionPermiso.CambiarEstado,
+            AccionPermiso.EliminarLogico
         }),
 
         (ModuloSistema.Roles, new[]

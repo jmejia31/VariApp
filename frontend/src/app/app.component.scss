@@ -9,7 +9,7 @@
 
 .sidebar {
   width: 240px;
-  background: #1f2333;
+  background: var(--color-sidebar);
   color: white;
   display: flex;
   flex-direction: column;
@@ -58,7 +58,7 @@
 
 .topbar {
   height: 64px;
-  background: var(--color-surface);
+  background: var(--color-topbar);
   border-bottom: 1px solid var(--color-border);
   display: flex;
   align-items: center;

@@ -25,5 +25,6 @@ public enum AccionPermiso
     CambiarEstado = 19,
     ConsultarHistorial = 20,
     Aplicar = 21,
-    Duplicar = 22
+    Duplicar = 22,
+    Compartir = 23
 }
