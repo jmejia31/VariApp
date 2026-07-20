@@ -22,6 +22,7 @@ public class ImpuestoAplicadoDto
 {
     public int ImpuestoId { get; set; }
     public string Nombre { get; set; } = string.Empty;
+    public string Codigo { get; set; } = string.Empty;
     public decimal Tasa { get; set; }
     public decimal BaseImponible { get; set; }
     public decimal Monto { get; set; }

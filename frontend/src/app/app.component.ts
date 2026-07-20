@@ -6,6 +6,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from './core/auth/auth.service';
 import { PermisosRuntimeService } from './core/auth/permisos-runtime.service';
 import { ThemeApplierService } from './services/theme-applier.service';
+import { EmpresaIdentidadService } from './services/empresa-identidad.service';
+import { SessionActivityService } from './core/auth/session-activity.service';
 
 @Component({
   selector: 'app-root',
@@ -19,8 +21,8 @@ import { ThemeApplierService } from './services/theme-applier.service';
         }
         <aside class="sidebar" [class.abierto]="sidebarAbierto">
           <div class="brand">
-            <img class="brand-logo" src="assets/varistorehn-logo.png" alt="VariStorehn">
-            <span>VariStorehn</span>
+            <img class="brand-logo" [src]="identidad.logoUrl()" [alt]="identidad.nombreSistema()">
+            <span>{{ identidad.nombreSistema() }}</span>
             <button mat-icon-button class="cerrar-sidebar" (click)="cerrarSidebar()" title="Cerrar menú">
               <mat-icon>close</mat-icon>
             </button>
@@ -81,7 +83,11 @@ import { ThemeApplierService } from './services/theme-applier.service';
             <button mat-icon-button class="menu-toggle" (click)="toggleSidebar()" title="Abrir menú">
               <mat-icon>menu</mat-icon>
             </button>
-            <span></span>
+            <span class="header-text">
+              @if (identidad.config().encabezadoActivo) {
+                {{ identidad.config().encabezadoTexto || identidad.config().descripcionSistema }}
+              }
+            </span>
             <div class="user">
               <span class="user-name">{{ auth.nombreCompleto() }}</span>
               <span class="user-role">{{ auth.rol() }}</span>
@@ -96,6 +102,16 @@ import { ThemeApplierService } from './services/theme-applier.service';
           <main class="content">
             <router-outlet></router-outlet>
           </main>
+          @if (identidad.config().piePaginaActivo || identidad.mostrarCopyright()) {
+            <footer class="app-footer">
+              @if (identidad.config().piePaginaActivo && identidad.config().piePaginaTexto) {
+                <span>{{ identidad.config().piePaginaTexto }}</span>
+              }
+              @if (identidad.mostrarCopyright()) {
+                <span>{{ identidad.copyright() }}</span>
+              }
+            </footer>
+          }
         </div>
       </div>
     } @else {
@@ -110,12 +126,16 @@ export class AppComponent {
   constructor(
     public auth: AuthService,
     public permisosRuntime: PermisosRuntimeService,
+    public identidad: EmpresaIdentidadService,
+    private sessionActivity: SessionActivityService,
     private router: Router,
     private themeApplier: ThemeApplierService
   ) {
     this.themeApplier.aplicarTemaGuardado();
+    this.identidad.cargar().subscribe();
     if (this.auth.isAuthenticated()) {
       this.permisosRuntime.cargar().subscribe();
+      this.sessionActivity.iniciar();
     }
     // Cierra el menú móvil automáticamente al cambiar de ruta (evita que
     // quede abierto tapando la pantalla después de navegar).
@@ -142,7 +162,6 @@ export class AppComponent {
   }
 
   logout(): void {
-    this.auth.logout();
-    this.router.navigate(['/login']);
+    this.sessionActivity.cerrarManual();
   }
 }

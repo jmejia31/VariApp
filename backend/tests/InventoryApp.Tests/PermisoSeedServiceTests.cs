@@ -44,5 +44,40 @@ public class PermisoSeedServiceTests
 
         var vendedorProductosVer = permisos.Count(p => p.Rol == RolUsuario.Vendedor && p.Modulo == ModuloSistema.Productos && p.Accion == AccionPermiso.Ver);
         Assert.Equal(1, vendedorProductosVer);
+
+        Assert.Contains(await context.Permisos.ToListAsync(), p =>
+            p.Modulo == ModuloSistema.Configuracion &&
+            p.Accion == AccionPermiso.Editar &&
+            p.Activo &&
+            p.EsSistema);
+    }
+
+    [Fact]
+    public async Task SeedDefaults_NoReactivaPermisosDesactivadosManualmente()
+    {
+        var options = new DbContextOptionsBuilder<AppDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .Options;
+
+        await using var context = new AppDbContext(options);
+
+        context.RolPermisos.Add(new RolPermiso
+        {
+            Rol = RolUsuario.Vendedor,
+            Modulo = ModuloSistema.Ventas,
+            Accion = AccionPermiso.Crear,
+            Permitido = false
+        });
+        await context.SaveChangesAsync();
+
+        var seedService = new SeedPermisoService(context);
+        await seedService.SeedDefaultsAsync();
+
+        var permiso = await context.RolPermisos.SingleAsync(p =>
+            p.Rol == RolUsuario.Vendedor &&
+            p.Modulo == ModuloSistema.Ventas &&
+            p.Accion == AccionPermiso.Crear);
+
+        Assert.False(permiso.Permitido);
     }
 }

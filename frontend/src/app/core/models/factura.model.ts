@@ -1,3 +1,5 @@
+import { DescuentoAplicado, ImpuestoAplicado } from './venta.model';
+
 export interface FacturaDetalle {
   productoNombre: string;
   productoMarca: string;
@@ -20,6 +22,10 @@ export interface Factura {
   empresaTelefono?: string;
   empresaCorreo?: string;
   empresaDireccion?: string;
+  empresaEslogan?: string;
+  empresaTextoFactura?: string;
+  empresaTextoLegal?: string;
+  empresaCopyright?: string;
   empresaLogoUrl?: string;
   clienteNombre: string;
   clienteTelefono?: string;
@@ -36,6 +42,8 @@ export interface Factura {
   estadoPago: string;
   observaciones?: string;
   detalles: FacturaDetalle[];
+  descuentosAplicados: DescuentoAplicado[];
+  impuestosAplicados: ImpuestoAplicado[];
   fechaAnulacion?: string;
   anuladaPorNombreUsuario?: string;
   motivoAnulacion?: string;

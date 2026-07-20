@@ -1,9 +1,9 @@
 <div class="login-page">
   <form class="card login-card" [formGroup]="form" (ngSubmit)="submit()">
     <div class="header">
-      <img class="brand-logo" src="assets/varistorehn-logo.png" alt="VariStorehn">
-      <h1>VariStorehn</h1>
-      <p>Inicia sesión para administrar VariStorehn</p>
+      <img class="brand-logo" [src]="identidad.logoUrl()" [alt]="identidad.nombreSistema()">
+      <h1>{{ identidad.nombreSistema() }}</h1>
+      <p>{{ identidad.mensajeLogin() }}</p>
     </div>
 
     <mat-form-field appearance="outline">
@@ -30,5 +30,9 @@
         Entrar
       }
     </button>
+
+    @if (identidad.mostrarCopyright()) {
+      <p class="copyright">{{ identidad.copyright() }}</p>
+    }
   </form>
 </div>

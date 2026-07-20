@@ -72,6 +72,7 @@ public class VentaImpuesto
     public int VentaId { get; set; }
     public int ImpuestoId { get; set; }
     public string ImpuestoNombreSnapshot { get; set; } = string.Empty;
+    public string ImpuestoCodigoSnapshot { get; set; } = string.Empty;
     public decimal TasaSnapshot { get; set; }
     public decimal BaseImponible { get; set; }
     public decimal MontoAplicado { get; set; }
@@ -83,6 +84,7 @@ public class CompraImpuesto
     public int CompraId { get; set; }
     public int ImpuestoId { get; set; }
     public string ImpuestoNombreSnapshot { get; set; } = string.Empty;
+    public string ImpuestoCodigoSnapshot { get; set; } = string.Empty;
     public decimal TasaSnapshot { get; set; }
     public decimal BaseImponible { get; set; }
     public decimal MontoAplicado { get; set; }

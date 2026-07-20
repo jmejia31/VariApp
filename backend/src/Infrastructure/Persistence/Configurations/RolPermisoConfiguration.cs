@@ -16,6 +16,18 @@ public class RolPermisoConfiguration : IEntityTypeConfiguration<RolPermiso>
         builder.Property(p => p.Accion).IsRequired();
         builder.Property(p => p.Permitido).IsRequired();
 
-        builder.HasIndex(p => new { p.Rol, p.Modulo, p.Accion }).IsUnique();
+        builder.HasOne<Rol>()
+            .WithMany(r => r.Permisos)
+            .HasForeignKey(p => p.RolId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne<Permiso>()
+            .WithMany(p => p.Asignaciones)
+            .HasForeignKey(rp => rp.PermisoId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasIndex(p => new { p.Rol, p.Modulo, p.Accion });
+        builder.HasIndex(p => new { p.RolId, p.Modulo, p.Accion }).IsUnique();
+        builder.HasIndex(p => new { p.RolId, p.PermisoId }).IsUnique();
     }
 }

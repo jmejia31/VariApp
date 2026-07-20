@@ -102,3 +102,28 @@ Hallazgo de producción: `GET /health` responde correctamente, pero
 incluye `TemaVisualController`, por lo que el hallazgo apunta a un despliegue
 de Render no alineado con `main` o a una imagen anterior. Se fuerza una nueva
 actualización con estos cambios.
+# Seguimiento actualizado 20/07/2026
+
+## Fase correctiva integral
+
+Objetivo: cerrar los pendientes del prompt operativo más reciente sin reconstruir
+la arquitectura ni borrar datos existentes.
+
+Alcance aplicado:
+
+1. Seguridad de sesión: JWT máximo de 30 minutos, sin tolerancia por clock skew,
+   cierre por inactividad en frontend y limpieza de token/permisos.
+2. Auditoría sensible: login exitoso, login fallido y token expirado en backend.
+3. Roles/permisos: asignación transaccional por rol activo y permiso activo del
+   catálogo; el seed no reactiva permisos deshabilitados manualmente.
+4. Cálculos: ISV/ISC y descuentos/promociones integrados en compras/ventas y
+   snapshots de impuestos.
+5. Configuración empresarial: identidad, logo Cloudinary, textos de documentos,
+   cabecera, pie, moneda, zona horaria y copyright administrables.
+6. Frontend: identidad dinámica en login/layout/facturas, logo institucional,
+   cierre por inactividad y vista de factura con descuentos/impuestos.
+7. Migración no destructiva: solo agrega columnas e índices necesarios; no recorta
+   columnas existentes ni borra datos de producción.
+
+Estado: implementado y validado localmente. Siguiente paso: desplegar desde
+`main` y aplicar la migración en producción.

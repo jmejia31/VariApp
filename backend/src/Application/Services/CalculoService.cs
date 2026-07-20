@@ -6,16 +6,6 @@ using InventoryApp.Domain.Enums;
 
 namespace InventoryApp.Application.Services;
 
-/// Implementación real del cálculo de descuentos e impuestos (sección 13).
-/// LIMITACIÓN CONOCIDA Y DOCUMENTADA (no oculta): los alcances Producto/
-/// Categoría se evalúan a nivel de "¿algún ítem de la venta califica?" y el
-/// descuento/impuesto se aplica sobre el subtotal completo de la venta, no
-/// descompuesto línea por línea. Igualmente, el campo `Acumulativo` de
-/// Impuesto se persiste pero todos los impuestos vigentes/aplicables se suman
-/// (no se implementó la exclusión mutua entre impuestos no acumulables). Una
-/// implementación línea-por-línea y con exclusión mutua completa es la
-/// extensión natural de este motor y no se hizo por límite de tiempo de esta
-/// fase — no se declara terminada, se dejó explícita esta limitación.
 public class CalculoService : ICalculoService
 {
     private readonly IDescuentoRepository _descuentoRepository;
@@ -28,152 +18,99 @@ public class CalculoService : ICalculoService
     }
 
     public async Task<ResultadoCalculoDto> CalcularVentaAsync(
-        List<DetalleCalculoInput> detalles, int? clienteId, int? rolIdUsuario, string? codigoPromocional)
+        List<DetalleCalculoInput> detalles,
+        int? clienteId,
+        int? rolIdUsuario,
+        string? codigoPromocional)
     {
         var subtotal = detalles.Sum(d => d.Cantidad * d.PrecioUnitario);
         var cantidadTotal = detalles.Sum(d => d.Cantidad);
-        var productoIds = detalles.Select(d => d.ProductoId).ToHashSet();
-        var categoriaIds = detalles.Where(d => d.CategoriaId.HasValue).Select(d => d.CategoriaId!.Value).ToHashSet();
-
         var ahora = DateTime.UtcNow;
-        var candidatos = await _descuentoRepository.GetVigentesConRelacionesAsync(ahora);
+        var descuentos = await _descuentoRepository.GetVigentesConRelacionesAsync(ahora);
+        var codigoNormalizado = string.IsNullOrWhiteSpace(codigoPromocional)
+            ? null
+            : codigoPromocional.Trim().ToUpperInvariant();
 
-        string? codigoNormalizado = string.IsNullOrWhiteSpace(codigoPromocional)
-            ? null : codigoPromocional.Trim().ToUpperInvariant();
+        if (codigoNormalizado is not null && descuentos.All(d => d.CodigoPromocionalNormalizado != codigoNormalizado))
+            throw new BusinessRuleException("El codigo promocional no existe o no esta vigente.");
 
-        if (codigoNormalizado is not null)
+        var descuentosAplicados = new List<DescuentoAplicadoDto>();
+        decimal totalDescuento = 0;
+
+        foreach (var descuento in descuentos.OrderBy(d => d.Prioridad))
         {
-            var existeCodigo = candidatos.Any(d =>
-                !string.IsNullOrEmpty(d.CodigoPromocionalNormalizado) &&
-                d.CodigoPromocionalNormalizado == codigoNormalizado);
-            if (!existeCodigo)
-                throw new BusinessRuleException("El código promocional no existe o no está vigente.");
-        }
-
-        var aplicables = new List<Descuento>();
-        foreach (var d in candidatos)
-        {
-            // Si se pidió un código específico, solo ese código puede aplicar
-            // (los demás descuentos automáticos por alcance no se evalúan a la vez).
             if (codigoNormalizado is not null)
             {
-                if (d.CodigoPromocionalNormalizado != codigoNormalizado) continue;
+                if (descuento.CodigoPromocionalNormalizado != codigoNormalizado) continue;
             }
-            else if (!string.IsNullOrEmpty(d.CodigoPromocionalNormalizado))
+            else if (!string.IsNullOrWhiteSpace(descuento.CodigoPromocionalNormalizado))
             {
-                continue; // los descuentos con código no se aplican automáticamente
+                continue;
             }
 
             if (subtotal <= 0) continue;
-            if (d.MontoMinimo.HasValue && subtotal < d.MontoMinimo.Value) continue;
-            if (d.CantidadMinima.HasValue && cantidadTotal < d.CantidadMinima.Value) continue;
+            if (descuento.MontoMinimo.HasValue && subtotal < descuento.MontoMinimo.Value) continue;
+            if (descuento.CantidadMinima.HasValue && cantidadTotal < descuento.CantidadMinima.Value) continue;
+            if (descuento.Clientes.Any() && (!clienteId.HasValue || descuento.Clientes.All(c => c.ClienteId != clienteId.Value))) continue;
+            if (descuento.Roles.Any() && (!rolIdUsuario.HasValue || descuento.Roles.All(r => r.RolId != rolIdUsuario.Value))) continue;
 
-            var calificaPorAlcance =
-                (!d.Productos.Any() && !d.Categorias.Any() && !d.Clientes.Any() && !d.Roles.Any()) // Global (sin restricciones)
-                || d.Productos.Any(p => productoIds.Contains(p.ProductoId))
-                || d.Categorias.Any(c => categoriaIds.Contains(c.CategoriaId))
-                || (clienteId.HasValue && d.Clientes.Any(c => c.ClienteId == clienteId.Value))
-                || (rolIdUsuario.HasValue && d.Roles.Any(r => r.RolId == rolIdUsuario.Value));
+            var baseElegible = CalcularBaseElegible(
+                detalles,
+                descuento.Productos.Select(p => p.ProductoId),
+                descuento.Categorias.Select(c => c.CategoriaId));
+            if (baseElegible <= 0) continue;
 
-            if (!calificaPorAlcance) continue;
+            if (descuento.LimiteTotalUsos.HasValue &&
+                await _descuentoRepository.ContarUsosAsync(descuento.Id) >= descuento.LimiteTotalUsos.Value)
+                continue;
 
-            if (d.LimiteTotalUsos.HasValue)
-            {
-                var usos = await _descuentoRepository.ContarUsosAsync(d.Id);
-                if (usos >= d.LimiteTotalUsos.Value) continue;
-            }
+            if (descuento.LimiteUsosPorCliente.HasValue && clienteId.HasValue &&
+                await _descuentoRepository.ContarUsosPorClienteAsync(descuento.Id, clienteId.Value) >= descuento.LimiteUsosPorCliente.Value)
+                continue;
 
-            if (d.LimiteUsosPorCliente.HasValue && clienteId.HasValue)
-            {
-                var usosCliente = await _descuentoRepository.ContarUsosPorClienteAsync(d.Id, clienteId.Value);
-                if (usosCliente >= d.LimiteUsosPorCliente.Value) continue;
-            }
+            var monto = descuento.Tipo == TipoDescuento.Porcentaje
+                ? Math.Round(baseElegible * descuento.Valor / 100m, 2)
+                : descuento.Valor;
 
-            aplicables.Add(d);
-        }
+            if (descuento.MontoMaximoDescuento.HasValue && monto > descuento.MontoMaximoDescuento.Value)
+                monto = descuento.MontoMaximoDescuento.Value;
 
-        var aplicados = new List<DescuentoAplicadoDto>();
-        decimal totalDescuento = 0;
-
-        foreach (var d in aplicables.OrderBy(d => d.Prioridad))
-        {
-            var monto = d.Tipo == TipoDescuento.Porcentaje
-                ? Math.Round(subtotal * d.Valor / 100m, 2)
-                : d.Valor;
-
-            if (d.MontoMaximoDescuento.HasValue && monto > d.MontoMaximoDescuento.Value)
-                monto = d.MontoMaximoDescuento.Value;
-
-            if (monto > subtotal - totalDescuento)
-                monto = subtotal - totalDescuento;
-
+            var disponible = Math.Max(0, subtotal - totalDescuento);
+            if (monto > disponible) monto = disponible;
             if (monto <= 0) continue;
 
-            aplicados.Add(new DescuentoAplicadoDto
+            descuentosAplicados.Add(new DescuentoAplicadoDto
             {
-                DescuentoId = d.Id,
-                Nombre = d.Nombre,
-                Codigo = d.CodigoPromocional,
-                Tipo = d.Tipo.ToString(),
-                Valor = d.Valor,
+                DescuentoId = descuento.Id,
+                Nombre = descuento.Nombre,
+                Codigo = descuento.CodigoPromocional,
+                Tipo = descuento.Tipo.ToString(),
+                Valor = descuento.Valor,
                 Monto = monto
             });
             totalDescuento += monto;
 
-            if (!d.Acumulable) break;
+            if (!descuento.Acumulable) break;
         }
 
-        // Impuestos
-        var candidatosImpuesto = await _impuestoRepository.GetVigentesConRelacionesAsync(ahora, OperacionImpuesto.Venta);
-        var impuestosAplicados = new List<ImpuestoAplicadoDto>();
-        decimal totalImpuesto = 0;
+        var impuestosAplicados = await CalcularImpuestosAsync(
+            detalles,
+            OperacionImpuesto.Venta,
+            subtotal,
+            totalDescuento,
+            clienteId,
+            proveedorId: null);
 
-        foreach (var imp in candidatosImpuesto.OrderBy(i => i.Prioridad))
-        {
-            var calificaPorAlcance =
-                (!imp.Productos.Any() && !imp.Categorias.Any()) // Global
-                || imp.Productos.Any(p => productoIds.Contains(p.ProductoId))
-                || imp.Categorias.Any(c => categoriaIds.Contains(c.CategoriaId));
-
-            if (!calificaPorAlcance) continue;
-
-            if (clienteId.HasValue && imp.ClientesExentos.Any(c => c.ClienteId == clienteId.Value))
-                continue; // cliente exento de este impuesto
-
-            var baseImponible = imp.SeCalculaAntesDescuento ? subtotal : (subtotal - totalDescuento);
-            if (baseImponible < 0) baseImponible = 0;
-
-            var monto = imp.Tipo == TipoImpuesto.Porcentaje
-                ? Math.Round(baseImponible * imp.Tasa / 100m, 2)
-                : (imp.MontoFijo ?? 0);
-
-            if (monto <= 0) continue;
-
-            impuestosAplicados.Add(new ImpuestoAplicadoDto
-            {
-                ImpuestoId = imp.Id,
-                Nombre = imp.Nombre,
-                Tasa = imp.Tasa,
-                BaseImponible = baseImponible,
-                Monto = monto,
-                IncluidoEnPrecio = imp.IncluidoEnPrecio
-            });
-            totalImpuesto += monto;
-        }
-
-        // Los impuestos "incluidos en precio" ya están dentro del subtotal (no se suman al total final).
-        var totalImpuestoASumar = impuestosAplicados.Where(i => !i.IncluidoEnPrecio).Sum(i => i.Monto);
-
-        var total = subtotal - totalDescuento + totalImpuestoASumar;
-        if (total < 0) total = 0;
+        var totalImpuesto = impuestosAplicados.Where(i => !i.IncluidoEnPrecio).Sum(i => i.Monto);
+        var total = Math.Max(0, subtotal - totalDescuento + totalImpuesto);
 
         return new ResultadoCalculoDto
         {
             Subtotal = subtotal,
-            DescuentosAplicados = aplicados,
+            DescuentosAplicados = descuentosAplicados,
             TotalDescuento = totalDescuento,
             ImpuestosAplicados = impuestosAplicados,
-            TotalImpuesto = totalImpuestoASumar,
+            TotalImpuesto = totalImpuesto,
             Total = total
         };
     }
@@ -181,42 +118,13 @@ public class CalculoService : ICalculoService
     public async Task<ResultadoCalculoDto> CalcularCompraAsync(List<DetalleCalculoInput> detalles, int? proveedorId)
     {
         var subtotal = detalles.Sum(d => d.Cantidad * d.PrecioUnitario);
-        var productoIds = detalles.Select(d => d.ProductoId).ToHashSet();
-        var categoriaIds = detalles.Where(d => d.CategoriaId.HasValue).Select(d => d.CategoriaId!.Value).ToHashSet();
-        var ahora = DateTime.UtcNow;
-
-        var candidatosImpuesto = await _impuestoRepository.GetVigentesConRelacionesAsync(ahora, OperacionImpuesto.Compra);
-        var impuestosAplicados = new List<ImpuestoAplicadoDto>();
-
-        foreach (var imp in candidatosImpuesto.OrderBy(i => i.Prioridad))
-        {
-            var calificaPorAlcance =
-                (!imp.Productos.Any() && !imp.Categorias.Any())
-                || imp.Productos.Any(p => productoIds.Contains(p.ProductoId))
-                || imp.Categorias.Any(c => categoriaIds.Contains(c.CategoriaId));
-
-            if (!calificaPorAlcance) continue;
-
-            if (proveedorId.HasValue && imp.ProveedoresExentos.Any(p => p.ProveedorId == proveedorId.Value))
-                continue;
-
-            var baseImponible = subtotal;
-            var monto = imp.Tipo == TipoImpuesto.Porcentaje
-                ? Math.Round(baseImponible * imp.Tasa / 100m, 2)
-                : (imp.MontoFijo ?? 0);
-
-            if (monto <= 0) continue;
-
-            impuestosAplicados.Add(new ImpuestoAplicadoDto
-            {
-                ImpuestoId = imp.Id,
-                Nombre = imp.Nombre,
-                Tasa = imp.Tasa,
-                BaseImponible = baseImponible,
-                Monto = monto,
-                IncluidoEnPrecio = imp.IncluidoEnPrecio
-            });
-        }
+        var impuestosAplicados = await CalcularImpuestosAsync(
+            detalles,
+            OperacionImpuesto.Compra,
+            subtotal,
+            totalDescuento: 0,
+            clienteId: null,
+            proveedorId);
 
         var totalImpuesto = impuestosAplicados.Where(i => !i.IncluidoEnPrecio).Sum(i => i.Monto);
 
@@ -284,5 +192,76 @@ public class CalculoService : ICalculoService
         }
 
         await _impuestoRepository.SaveChangesAsync();
+    }
+
+    private async Task<List<ImpuestoAplicadoDto>> CalcularImpuestosAsync(
+        List<DetalleCalculoInput> detalles,
+        OperacionImpuesto operacion,
+        decimal subtotal,
+        decimal totalDescuento,
+        int? clienteId,
+        int? proveedorId)
+    {
+        var candidatos = await _impuestoRepository.GetVigentesConRelacionesAsync(DateTime.UtcNow, operacion);
+        var impuestosAplicados = new List<ImpuestoAplicadoDto>();
+
+        foreach (var impuesto in candidatos.OrderBy(i => i.Prioridad))
+        {
+            if (operacion == OperacionImpuesto.Venta &&
+                clienteId.HasValue &&
+                impuesto.ClientesExentos.Any(c => c.ClienteId == clienteId.Value))
+                continue;
+
+            if (operacion == OperacionImpuesto.Compra &&
+                proveedorId.HasValue &&
+                impuesto.ProveedoresExentos.Any(p => p.ProveedorId == proveedorId.Value))
+                continue;
+
+            var baseElegible = CalcularBaseElegible(
+                detalles,
+                impuesto.Productos.Select(p => p.ProductoId),
+                impuesto.Categorias.Select(c => c.CategoriaId));
+            if (baseElegible <= 0) continue;
+
+            var descuentoProrrateado = subtotal <= 0 ? 0 : Math.Round(totalDescuento * (baseElegible / subtotal), 2);
+            var baseImponible = impuesto.SeCalculaAntesDescuento ? baseElegible : Math.Max(0, baseElegible - descuentoProrrateado);
+            var monto = impuesto.Tipo == TipoImpuesto.Porcentaje
+                ? Math.Round(baseImponible * impuesto.Tasa / 100m, 2)
+                : impuesto.MontoFijo ?? 0;
+
+            if (monto <= 0) continue;
+
+            impuestosAplicados.Add(new ImpuestoAplicadoDto
+            {
+                ImpuestoId = impuesto.Id,
+                Nombre = impuesto.Nombre,
+                Codigo = impuesto.Codigo,
+                Tasa = impuesto.Tasa,
+                BaseImponible = baseImponible,
+                Monto = monto,
+                IncluidoEnPrecio = impuesto.IncluidoEnPrecio
+            });
+
+            if (!impuesto.Acumulativo) break;
+        }
+
+        return impuestosAplicados;
+    }
+
+    private static decimal CalcularBaseElegible(
+        List<DetalleCalculoInput> detalles,
+        IEnumerable<int> productoIds,
+        IEnumerable<int> categoriaIds)
+    {
+        var productos = productoIds.ToHashSet();
+        var categorias = categoriaIds.ToHashSet();
+
+        if (productos.Count == 0 && categorias.Count == 0)
+            return detalles.Sum(d => d.Cantidad * d.PrecioUnitario);
+
+        return detalles
+            .Where(d => productos.Contains(d.ProductoId) ||
+                (d.CategoriaId.HasValue && categorias.Contains(d.CategoriaId.Value)))
+            .Sum(d => d.Cantidad * d.PrecioUnitario);
     }
 }

@@ -54,10 +54,19 @@ public class RolPermisoRepository : IRolPermisoRepository
 
     public async Task ReemplazarMatrizPorRolIdAsync(int rolId, List<RolPermiso> nuevaMatriz)
     {
+        await using var transaction = await _context.Database.BeginTransactionAsync();
         var actuales = await _context.RolPermisos.Where(p => p.RolId == rolId).ToListAsync();
         _context.RolPermisos.RemoveRange(actuales);
-        await _context.RolPermisos.AddRangeAsync(nuevaMatriz.Where(p => p.RolId == rolId));
+
+        var filas = nuevaMatriz
+            .Where(p => p.RolId == rolId)
+            .GroupBy(p => new { p.RolId, p.Modulo, p.Accion })
+            .Select(g => g.First())
+            .ToList();
+
+        await _context.RolPermisos.AddRangeAsync(filas);
         await _context.SaveChangesAsync();
+        await transaction.CommitAsync();
     }
 
     public async Task AgregarSiFaltaAsync(List<RolPermiso> filas)

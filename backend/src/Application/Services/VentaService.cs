@@ -513,6 +513,7 @@ public class VentaService : IVentaService
         {
             ImpuestoId = i.ImpuestoId,
             ImpuestoNombreSnapshot = i.Nombre,
+            ImpuestoCodigoSnapshot = i.Codigo,
             TasaSnapshot = i.Tasa,
             BaseImponible = i.BaseImponible,
             MontoAplicado = i.Monto
@@ -583,6 +584,7 @@ public class VentaService : IVentaService
         {
             ImpuestoId = i.ImpuestoId,
             Nombre = i.ImpuestoNombreSnapshot,
+            Codigo = i.ImpuestoCodigoSnapshot,
             Tasa = i.TasaSnapshot,
             BaseImponible = i.BaseImponible,
             Monto = i.MontoAplicado

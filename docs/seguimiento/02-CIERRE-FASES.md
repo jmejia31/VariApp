@@ -677,3 +677,44 @@ que no requerían cambios destructivos ni limpieza de datos.
 - Las operaciones de eliminación física de productos se mantienen bajo las
   restricciones de base de datos existentes; no se aplicó una migración
   destructiva ni se eliminaron registros.
+# Cierre actualizado 20/07/2026 — fase correctiva integral
+
+Estado: terminada localmente.
+
+Objetivo alcanzado:
+
+- Sesión reforzada: token JWT con máximo de 30 minutos, expiración estricta en
+  backend y cierre por inactividad en frontend con limpieza de permisos.
+- Auditoría ampliada para login exitoso, login fallido y token expirado.
+- Roles/permisos corregidos para asignar únicamente permisos activos del catálogo
+  a roles activos, con reemplazo transaccional y auditoría.
+- Seed de permisos ajustado para no reactivar permisos deshabilitados manualmente.
+- Cálculos de ventas/compras centralizados con descuentos/promociones e impuestos
+  ISV/ISC aplicados desde backend.
+- Facturas enriquecidas con configuración empresarial, logo, textos legales,
+  descuentos e impuestos aplicados.
+- Configuración empresarial ampliada y administrable: identidad visible, logo,
+  contacto, encabezado, pie, copyright, moneda, zona horaria y textos fiscales.
+- Frontend actualizado para consumir identidad pública en login, layout y facturas.
+- Migración EF Core nueva no destructiva:
+  `20260720101639_Fases18SesionConfigPermisosCalculos`.
+
+Archivos creados:
+
+- `frontend/src/app/core/auth/session-activity.service.ts`
+- `frontend/src/app/services/empresa-identidad.service.ts`
+- `backend/src/Infrastructure/Migrations/20260720101639_Fases18SesionConfigPermisosCalculos.cs`
+- `backend/src/Infrastructure/Migrations/20260720101639_Fases18SesionConfigPermisosCalculos.Designer.cs`
+
+Pruebas realizadas:
+
+- `dotnet build backend\InventoryApp.sln --no-restore`: OK, 0 errores.
+- `dotnet test backend\InventoryApp.sln --no-build`: OK, 52/52 pruebas.
+- `npm.cmd run build` en `frontend`: OK, 0 errores y sin warnings finales.
+
+Pendientes reales:
+
+- Aplicar la migración en Aiven/producción después del despliegue.
+- Confirmar en producción carga real de logo Cloudinary y generación/descarga de
+  factura con una venta real.
+- Configurar SMTP real para declarar correo como operativo end-to-end.

@@ -15,7 +15,12 @@ public class FacturaRepository : IFacturaRepository
     }
 
     private IQueryable<Factura> ConIncludes() =>
-        _context.Facturas.Include(f => f.Detalles).Include(f => f.Venta);
+        _context.Facturas
+            .Include(f => f.Detalles)
+            .Include(f => f.Venta)
+                .ThenInclude(v => v!.DescuentosAplicados)
+            .Include(f => f.Venta)
+                .ThenInclude(v => v!.ImpuestosAplicados);
 
     public async Task<Factura?> GetByIdAsync(int id) =>
         await ConIncludes().FirstOrDefaultAsync(f => f.Id == id);

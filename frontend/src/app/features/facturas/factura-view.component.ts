@@ -53,8 +53,6 @@ export class FacturaViewComponent implements OnInit {
     window.print();
   }
 
-  /** Descarga el PDF real generado en backend (sección 13/14), no una
-   * captura de la vista HTML. */
   descargarPdf(): void {
     const f = this.factura();
     if (!f) return;
@@ -77,8 +75,6 @@ export class FacturaViewComponent implements OnInit {
     });
   }
 
-  /** Abre (o cierra) el panel de WhatsApp — la opción PRINCIPAL de envío
-   * (sección 14: "WhatsApp debe ser la opción principal de envío"). */
   toggleWhatsApp(): void {
     if (this.mostrarPanelWhatsApp()) {
       this.mostrarPanelWhatsApp.set(false);
@@ -104,12 +100,9 @@ export class FacturaViewComponent implements OnInit {
     });
   }
 
-  /** Sección 14, puntos 3-4: valida formato básico con código de país antes
-   * de habilitar el envío. No pretende validar exhaustivamente todos los
-   * formatos internacionales, solo descarta números claramente incompletos. */
   telefonoValido(): boolean {
     const soloDigitos = this.telefonoEditable.replace(/\D/g, '');
-    return soloDigitos.length >= 10; // código de país (1-3 dígitos) + número local
+    return soloDigitos.length >= 10;
   }
 
   abrirWhatsApp(): void {
@@ -119,10 +112,6 @@ export class FacturaViewComponent implements OnInit {
     const numero = this.telefonoEditable.replace(/\D/g, '');
     const url = `https://wa.me/${numero}?text=${encodeURIComponent(this.mensajeEditable)}`;
 
-    // Se registra el intento ANTES de abrir la pestaña (sección 14/18:
-    // "registrar el intento"). No hay forma de confirmar que el mensaje
-    // llegó realmente sin una API oficial de WhatsApp — se registra la
-    // apertura del flujo, no una "entrega confirmada" que sería simulada.
     this.facturaService.registrarIntentoEnvio(f.id, 'WhatsApp', this.telefonoEditable, 'Iniciado').subscribe();
 
     window.open(url, '_blank');
@@ -147,7 +136,6 @@ export class FacturaViewComponent implements OnInit {
     });
   }
 
-  /** Correo: opción SECUNDARIA de envío (sección 15). */
   toggleCorreo(): void {
     if (this.mostrarPanelCorreo()) {
       this.mostrarPanelCorreo.set(false);

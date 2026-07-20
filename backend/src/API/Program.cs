@@ -113,7 +113,28 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
         ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
+        ClockSkew = TimeSpan.Zero
+    };
+    options.Events = new JwtBearerEvents
+    {
+        OnAuthenticationFailed = async context =>
+        {
+            if (context.Exception is SecurityTokenExpiredException)
+            {
+                var auditoria = context.HttpContext.RequestServices.GetService<IAuditoriaService>();
+                if (auditoria is not null)
+                {
+                    await auditoria.RegistrarAsync(
+                        ModuloSistema.Usuarios,
+                        AccionPermiso.ConsultarHistorial,
+                        "Intento de uso de token expirado.",
+                        entidad: "Sesion",
+                        resultado: "Rechazado",
+                        error: "Token expirado");
+                }
+            }
+        }
     };
 });
 

@@ -25,6 +25,10 @@ public class FacturaDto
     public string? EmpresaTelefono { get; set; }
     public string? EmpresaCorreo { get; set; }
     public string? EmpresaDireccion { get; set; }
+    public string? EmpresaEslogan { get; set; }
+    public string? EmpresaTextoFactura { get; set; }
+    public string? EmpresaTextoLegal { get; set; }
+    public string? EmpresaCopyright { get; set; }
     /// Logo ACTUAL de la empresa (no snapshot histórico como el resto de
     /// datos de empresa): se resuelve en vivo al generar el PDF, a
     /// diferencia del nombre/RTN/teléfono que sí quedan fijos al emitir la
@@ -50,6 +54,8 @@ public class FacturaDto
 
     public string? Observaciones { get; set; }
     public List<FacturaDetalleDto> Detalles { get; set; } = new();
+    public List<DescuentoAplicadoDto> DescuentosAplicados { get; set; } = new();
+    public List<ImpuestoAplicadoDto> ImpuestosAplicados { get; set; } = new();
 
     public DateTime? FechaAnulacion { get; set; }
     public string? AnuladaPorNombreUsuario { get; set; }

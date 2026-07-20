@@ -18,6 +18,10 @@ public class PermisoRepository : IPermisoRepository
     public async Task<Permiso?> GetByIdAsync(int id) =>
         await _context.Permisos.FirstOrDefaultAsync(p => p.Id == id && !p.Eliminado);
 
+    public async Task<Permiso?> GetByModuloAccionAsync(ModuloSistema modulo, AccionPermiso accion) =>
+        await _context.Permisos.FirstOrDefaultAsync(p =>
+            p.Modulo == modulo && p.Accion == accion && p.Activo && !p.Eliminado);
+
     public async Task<List<Permiso>> GetAllAsync(bool incluirEliminados = false) =>
         await _context.Permisos
             .Where(p => incluirEliminados || !p.Eliminado)

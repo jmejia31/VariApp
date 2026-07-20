@@ -32,6 +32,8 @@ public class VentaImpuestoConfiguration : IEntityTypeConfiguration<VentaImpuesto
     {
         builder.ToTable("VentaImpuestos");
         builder.HasKey(x => x.Id);
+        builder.Property(x => x.ImpuestoNombreSnapshot).IsRequired();
+        builder.Property(x => x.ImpuestoCodigoSnapshot).IsRequired().HasMaxLength(50);
         builder.Property(x => x.MontoAplicado).HasPrecision(18, 4);
         builder.Property(x => x.BaseImponible).HasPrecision(18, 4);
         builder.Property(x => x.TasaSnapshot).HasPrecision(9, 4);
@@ -44,6 +46,8 @@ public class CompraImpuestoConfiguration : IEntityTypeConfiguration<CompraImpues
     {
         builder.ToTable("CompraImpuestos");
         builder.HasKey(x => x.Id);
+        builder.Property(x => x.ImpuestoNombreSnapshot).IsRequired();
+        builder.Property(x => x.ImpuestoCodigoSnapshot).IsRequired().HasMaxLength(50);
         builder.Property(x => x.MontoAplicado).HasPrecision(18, 4);
         builder.Property(x => x.BaseImponible).HasPrecision(18, 4);
         builder.Property(x => x.TasaSnapshot).HasPrecision(9, 4);

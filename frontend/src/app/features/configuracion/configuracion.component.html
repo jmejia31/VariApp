@@ -1,5 +1,5 @@
 <h1 class="page-title">Configuración de la empresa</h1>
-<p class="subtitle">Estos datos aparecen en las facturas y documentos generados por el sistema.</p>
+<p class="subtitle">Administra la identidad, documentos, logo y colores globales de VariStorehn.</p>
 
 @if (loading()) {
   <div class="loading"><mat-spinner></mat-spinner></div>
@@ -11,44 +11,158 @@
   }
 
   <form [formGroup]="form" (ngSubmit)="guardar()" class="card form-card">
-    <div class="logo-row">
-      @if (logoUrl()) {
-        <img [src]="logoUrl()" class="logo-preview" alt="Logo de la empresa">
-      } @else {
-        <div class="logo-preview placeholder"><mat-icon>store</mat-icon></div>
-      }
-      <p class="hint">El logo se administra desde Cloudinary; esta pantalla muestra el actual pero no permite subir uno nuevo todavía.</p>
-    </div>
+    <section class="settings-section">
+      <h2>Información general</h2>
+      <div class="fields-grid">
+        <mat-form-field appearance="outline">
+          <mat-label>Nombre comercial</mat-label>
+          <input matInput formControlName="nombreComercial">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Razón social</mat-label>
+          <input matInput formControlName="razonSocial">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Eslogan</mat-label>
+          <input matInput formControlName="eslogan">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Nombre visible del sistema</mat-label>
+          <input matInput formControlName="nombreVisibleSistema">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Descripción del sistema</mat-label>
+          <textarea matInput formControlName="descripcionSistema" rows="2"></textarea>
+        </mat-form-field>
+      </div>
+    </section>
 
-    <div class="fields-grid">
-      <mat-form-field appearance="outline">
-        <mat-label>Nombre comercial</mat-label>
-        <input matInput formControlName="nombreComercial">
-      </mat-form-field>
-      <mat-form-field appearance="outline">
-        <mat-label>Eslogan</mat-label>
-        <input matInput formControlName="eslogan">
-      </mat-form-field>
-      <mat-form-field appearance="outline">
-        <mat-label>RTN (opcional)</mat-label>
-        <input matInput formControlName="rtn">
-      </mat-form-field>
-      <mat-form-field appearance="outline">
-        <mat-label>Teléfono (opcional)</mat-label>
-        <input matInput formControlName="telefono">
-      </mat-form-field>
-      <mat-form-field appearance="outline">
-        <mat-label>Correo (opcional)</mat-label>
-        <input matInput formControlName="correo">
-        @if (form.get('correo')?.hasError('email')) {
-          <mat-error>Correo no válido.</mat-error>
+    <section class="settings-section">
+      <h2>Logo e identidad visual</h2>
+      <div class="logo-row">
+        @if (logoPreview() || logoUrl()) {
+          <img [src]="logoPreview() || logoUrl()" class="logo-preview" alt="Logo de la empresa">
+        } @else {
+          <div class="logo-preview placeholder"><mat-icon>store</mat-icon></div>
         }
-      </mat-form-field>
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Dirección (opcional)</mat-label>
-        <textarea matInput formControlName="direccion" rows="2"></textarea>
-      </mat-form-field>
-    </div>
+        <div class="logo-actions">
+          <input #logoInput type="file" accept="image/png,image/jpeg,image/webp" (change)="seleccionarLogo($event)" [disabled]="!puedeEditar()">
+          <p class="hint">Formatos permitidos: PNG, JPG o WEBP. Tamaño máximo: 5 MB.</p>
+          @if (puedeEditar()) {
+            <div class="inline-actions">
+              <button mat-stroked-button type="button" [disabled]="!logoPreview() || uploadingLogo()" (click)="subirLogo()">
+                @if (uploadingLogo()) { <mat-spinner diameter="18"></mat-spinner> } @else { <mat-icon>cloud_upload</mat-icon> }
+                Guardar logo
+              </button>
+              <button mat-button type="button" [disabled]="uploadingLogo()" (click)="restaurarLogo()">
+                <mat-icon>restart_alt</mat-icon> Restaurar logo
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    </section>
+
+    <section class="settings-section">
+      <h2>Datos de contacto y redes</h2>
+      <div class="fields-grid">
+        <mat-form-field appearance="outline">
+          <mat-label>RTN</mat-label>
+          <input matInput formControlName="rtn">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Teléfono</mat-label>
+          <input matInput formControlName="telefono">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>WhatsApp</mat-label>
+          <input matInput formControlName="whatsApp">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Correo</mat-label>
+          <input matInput formControlName="correo">
+          @if (form.get('correo')?.hasError('email')) {
+            <mat-error>Correo no válido.</mat-error>
+          }
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Sitio web</mat-label>
+          <input matInput formControlName="sitioWeb">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Facebook</mat-label>
+          <input matInput formControlName="facebook">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Instagram</mat-label>
+          <input matInput formControlName="instagram">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Dirección</mat-label>
+          <textarea matInput formControlName="direccion" rows="2"></textarea>
+        </mat-form-field>
+      </div>
+    </section>
+
+    <section class="settings-section">
+      <h2>Encabezado, pie y copyright</h2>
+      <div class="fields-grid">
+        <label class="check-row"><input type="checkbox" formControlName="encabezadoActivo"> Mostrar encabezado</label>
+        <label class="check-row"><input type="checkbox" formControlName="piePaginaActivo"> Mostrar pie de página</label>
+        <label class="check-row"><input type="checkbox" formControlName="mostrarCopyright"> Mostrar copyright</label>
+        <label class="check-row"><input type="checkbox" formControlName="usarAnioAutomaticoCopyright"> Usar año automático</label>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Texto del encabezado</mat-label>
+          <textarea matInput formControlName="encabezadoTexto" rows="2"></textarea>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Texto del pie de página</mat-label>
+          <textarea matInput formControlName="piePaginaTexto" rows="2"></textarea>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Copyright</mat-label>
+          <textarea matInput formControlName="copyright" rows="2"></textarea>
+        </mat-form-field>
+      </div>
+    </section>
+
+    <section class="settings-section">
+      <h2>Facturación y textos del sistema</h2>
+      <div class="fields-grid">
+        <mat-form-field appearance="outline">
+          <mat-label>Moneda</mat-label>
+          <input matInput formControlName="moneda">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Zona horaria</mat-label>
+          <input matInput formControlName="zonaHoraria">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Formato de fecha</mat-label>
+          <input matInput formControlName="formatoFecha">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Mensaje del login</mat-label>
+          <textarea matInput formControlName="mensajeLogin" rows="2"></textarea>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Información fiscal</mat-label>
+          <textarea matInput formControlName="informacionFiscal" rows="2"></textarea>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Texto legal</mat-label>
+          <textarea matInput formControlName="textoLegal" rows="2"></textarea>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Texto para facturas</mat-label>
+          <textarea matInput formControlName="textoFactura" rows="2"></textarea>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Texto para reportes</mat-label>
+          <textarea matInput formControlName="textoReportes" rows="2"></textarea>
+        </mat-form-field>
+      </div>
+    </section>
 
     @if (successMessage()) { <p class="success">{{ successMessage() }}</p> }
     @if (errorMessage()) { <p class="error">{{ errorMessage() }}</p> }
@@ -56,7 +170,7 @@
     @if (puedeEditar()) {
       <div class="form-actions">
         <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving()">
-          {{ saving() ? 'Guardando...' : 'Guardar cambios' }}
+          {{ saving() ? 'Guardando...' : 'Guardar configuración' }}
         </button>
       </div>
     }
@@ -66,7 +180,7 @@
     <h2 class="section-title">Colores del sistema</h2>
     <p class="subtitle">
       Estos colores se aplican a todo el sistema para todos los usuarios: menú, botones, encabezados y estados.
-      Los cambios se guardan de forma centralizada — no son una preferencia personal.
+      Los cambios se guardan de forma centralizada.
     </p>
 
     @if (loadingTema()) {

@@ -9,6 +9,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../core/auth/auth.service';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
+import { SessionActivityService } from '../../core/auth/session-activity.service';
+import { EmpresaIdentidadService } from '../../services/empresa-identidad.service';
 
 @Component({
   selector: 'app-login',
@@ -24,11 +26,19 @@ export class LoginComponent {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly permisosRuntime = inject(PermisosRuntimeService);
+  private readonly sessionActivity = inject(SessionActivityService);
+  readonly identidad = inject(EmpresaIdentidadService);
   private readonly router = inject(Router);
 
   readonly loading = signal(false);
   readonly errorMessage = signal<string | null>(null);
   readonly hidePassword = signal(true);
+
+  constructor() {
+    this.identidad.cargar().subscribe();
+    const mensaje = this.sessionActivity.tomarMensajePendiente();
+    if (mensaje) this.errorMessage.set(mensaje);
+  }
 
   form = this.fb.group({
     nombreUsuario: ['', Validators.required],
@@ -48,6 +58,7 @@ export class LoginComponent {
       next: () => {
         this.loading.set(false);
         this.permisosRuntime.cargar().subscribe();
+        this.sessionActivity.iniciar();
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {

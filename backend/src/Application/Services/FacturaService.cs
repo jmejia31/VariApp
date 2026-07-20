@@ -41,6 +41,10 @@ public class FacturaService : IFacturaService
         var empresa = await _empresaConfiguracionService.GetActivaAsync();
         var dto = ToDto(f);
         dto.EmpresaLogoUrl = empresa?.LogoUrl;
+        dto.EmpresaEslogan = empresa?.Eslogan;
+        dto.EmpresaTextoFactura = empresa?.TextoFactura;
+        dto.EmpresaTextoLegal = empresa?.TextoLegal;
+        dto.EmpresaCopyright = empresa?.MostrarCopyright == true ? empresa.Copyright : null;
         return dto;
     }
 
@@ -81,6 +85,24 @@ public class FacturaService : IFacturaService
             Descuento = d.Descuento,
             Subtotal = d.Subtotal
         }).ToList(),
+        DescuentosAplicados = f.Venta?.DescuentosAplicados.Select(d => new DescuentoAplicadoDto
+        {
+            DescuentoId = d.DescuentoId,
+            Nombre = d.DescuentoNombreSnapshot,
+            Codigo = d.DescuentoCodigoSnapshot,
+            Tipo = d.TipoSnapshot.ToString(),
+            Valor = d.ValorSnapshot,
+            Monto = d.MontoAplicado
+        }).ToList() ?? new List<DescuentoAplicadoDto>(),
+        ImpuestosAplicados = f.Venta?.ImpuestosAplicados.Select(i => new ImpuestoAplicadoDto
+        {
+            ImpuestoId = i.ImpuestoId,
+            Nombre = i.ImpuestoNombreSnapshot,
+            Codigo = i.ImpuestoCodigoSnapshot,
+            Tasa = i.TasaSnapshot,
+            BaseImponible = i.BaseImponible,
+            Monto = i.MontoAplicado
+        }).ToList() ?? new List<ImpuestoAplicadoDto>(),
         FechaAnulacion = f.FechaAnulacion,
         AnuladaPorNombreUsuario = f.AnuladaPorNombreUsuario,
         MotivoAnulacion = f.MotivoAnulacion

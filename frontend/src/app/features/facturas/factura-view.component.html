@@ -100,7 +100,7 @@
               <td>{{ h.canal }}</td>
               <td>{{ h.destinatario }}</td>
               <td [class.error-text]="h.resultado === 'Error'">{{ h.resultado }}</td>
-              <td>{{ h.usuarioNombre || '—' }}</td>
+              <td>{{ h.usuarioNombre || '-' }}</td>
             </tr>
           }
         </tbody>
@@ -120,8 +120,11 @@
 
     <header class="factura-header">
       <div class="empresa">
+        @if (f.empresaLogoUrl) {
+          <img class="empresa-logo" [src]="f.empresaLogoUrl" alt="Logo de {{ f.empresaNombre }}">
+        }
         <h1>{{ f.empresaNombre }}</h1>
-        <p class="eslogan">VariStorehn - Eleva tu mundo digital</p>
+        @if (f.empresaEslogan) { <p class="eslogan">{{ f.empresaEslogan }}</p> }
         @if (f.empresaRTN) { <p>RTN: {{ f.empresaRTN }}</p> }
         @if (f.empresaTelefono) { <p>Tel: {{ f.empresaTelefono }}</p> }
         @if (f.empresaDireccion) { <p>{{ f.empresaDireccion }}</p> }
@@ -147,7 +150,7 @@
         <h3>Vendedor</h3>
         <p>{{ f.vendedorNombreUsuario }}</p>
         <h3>Pago</h3>
-        <p>{{ f.metodoPago }} — {{ f.estadoPago }}</p>
+        <p>{{ f.metodoPago }} - {{ f.estadoPago }}</p>
       </div>
     </section>
 
@@ -180,17 +183,39 @@
       <div class="total"><span>TOTAL</span><span>L. {{ f.total | number:'1.2-2' }}</span></div>
     </section>
 
+    @if (f.descuentosAplicados.length || f.impuestosAplicados.length) {
+      <section class="aplicaciones">
+        @if (f.descuentosAplicados.length) {
+          <div>
+            <h3>Descuentos aplicados</h3>
+            @for (d of f.descuentosAplicados; track d.descuentoId) {
+              <p>{{ d.nombre }}: - L. {{ d.monto | number:'1.2-2' }}</p>
+            }
+          </div>
+        }
+        @if (f.impuestosAplicados.length) {
+          <div>
+            <h3>Impuestos aplicados</h3>
+            @for (i of f.impuestosAplicados; track i.impuestoId) {
+              <p>{{ i.nombre }}: + L. {{ i.monto | number:'1.2-2' }}</p>
+            }
+          </div>
+        }
+      </section>
+    }
+
     @if (f.observaciones) {
       <p class="observaciones">{{ f.observaciones }}</p>
     }
 
     @if (f.estado === 'Anulada') {
-      <p class="motivo-anulacion">Anulada por {{ f.anuladaPorNombreUsuario }} el {{ f.fechaAnulacion | date:'dd/MM/yyyy HH:mm' }} — Motivo: {{ f.motivoAnulacion }}</p>
+      <p class="motivo-anulacion">Anulada por {{ f.anuladaPorNombreUsuario }} el {{ f.fechaAnulacion | date:'dd/MM/yyyy HH:mm' }} - Motivo: {{ f.motivoAnulacion }}</p>
     }
 
     <footer class="factura-footer">
-      <p>Gracias por su compra.</p>
-      <p class="marca">VariStorehn - Eleva tu mundo digital</p>
+      <p>{{ f.empresaTextoFactura || 'Gracias por su compra.' }}</p>
+      @if (f.empresaTextoLegal) { <p>{{ f.empresaTextoLegal }}</p> }
+      @if (f.empresaCopyright) { <p class="marca">{{ f.empresaCopyright }}</p> }
     </footer>
   </div>
 }

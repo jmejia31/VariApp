@@ -24,7 +24,8 @@ public class JwtService : IJwtService
             ?? throw new InvalidOperationException("Jwt:Secret no está configurado.");
         var issuer = jwtSettings["Issuer"];
         var audience = jwtSettings["Audience"];
-        var expiraMinutos = int.TryParse(jwtSettings["ExpiraMinutos"], out var m) ? m : 480;
+        var expiraMinutos = int.TryParse(jwtSettings["ExpiraMinutos"], out var m) ? m : 30;
+        expiraMinutos = Math.Clamp(expiraMinutos, 1, 30);
 
         var expiraEn = DateTime.UtcNow.AddMinutes(expiraMinutos);
 

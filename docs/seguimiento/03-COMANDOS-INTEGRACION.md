@@ -91,3 +91,68 @@ npm start
 6. Desplegar frontend.
 7. Verificar login con un usuario normal y uno bloqueado (crear uno de prueba).
 8. Verificar que no se puede bloquear/eliminar al único administrador.
+# Comandos de integración — actualización 20/07/2026
+
+## Backend
+
+Desde `C:\VariApp`:
+
+```powershell
+$env:DOTNET_CLI_HOME='C:\VariApp\.dotnet_cli_home'
+$env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE='1'
+dotnet build backend\InventoryApp.sln --no-restore
+dotnet test backend\InventoryApp.sln --no-build
+```
+
+No modifica base de datos.
+
+## Frontend
+
+Desde `C:\VariApp\frontend`:
+
+```powershell
+npm.cmd run build
+```
+
+No modifica base de datos.
+
+## Migración local o producción
+
+Desde `C:\VariApp`, con las variables de entorno apuntando a la base correcta
+(local o Aiven):
+
+```powershell
+$env:DOTNET_CLI_HOME='C:\VariApp\.dotnet_cli_home'
+$env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE='1'
+dotnet ef database update -p backend\src\Infrastructure -s backend\src\API
+```
+
+Sí modifica base de datos. No elimina registros; aplica la migración EF Core
+pendiente y agrega columnas/índices requeridos.
+
+## Variables de entorno a confirmar en Render
+
+```text
+Jwt__ExpirationMinutes=30
+Swagger__Enabled=true
+Cors__AllowedOrigins__0=http://localhost:4200
+Cors__AllowedOrigins__1=https://varistorehn.vercel.app
+AppSettings__BackendPublicUrl=https://variapp-api.onrender.com
+Smtp__Host=<smtp-real>
+Smtp__Port=587
+Smtp__UsuarioSmtp=<usuario-smtp>
+Smtp__PasswordSmtp=<password-smtp>
+Smtp__UsarSsl=true
+Smtp__CorreoRemitente=<correo-remitente>
+Smtp__NombreRemitente=VariStorehn
+```
+
+## Orden exacto de integración
+
+1. Crear backup de Aiven.
+2. Desplegar backend desde `main`.
+3. Aplicar migración EF Core contra Aiven.
+4. Verificar `/health` y login.
+5. Desplegar frontend desde `main`.
+6. Probar login, inactividad, venta con descuento/impuesto, factura PDF,
+   WhatsApp, logo/configuración y correo si SMTP ya está configurado.

@@ -18,9 +18,6 @@ public class PermisoConfiguration : IEntityTypeConfiguration<Permiso>
         builder.HasIndex(p => p.Codigo).IsUnique();
         builder.HasIndex(p => new { p.Modulo, p.Accion }).IsUnique();
 
-        builder.HasMany(p => p.Asignaciones)
-            .WithOne()
-            .HasForeignKey(rp => rp.PermisoId)
-            .OnDelete(DeleteBehavior.Restrict);
+        builder.Navigation(p => p.Asignaciones).AutoInclude(false);
     }
 }

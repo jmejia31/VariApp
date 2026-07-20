@@ -1,5 +1,6 @@
 using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Enums;
+using InventoryApp.Application.Common;
 using InventoryApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,6 +17,8 @@ public class SeedPermisoService
 
     public async Task SeedDefaultsAsync()
     {
+        await SeedCatalogoPermisosAsync();
+
         var defaults = new Dictionary<RolUsuario, List<(ModuloSistema Modulo, AccionPermiso Accion, bool Permitido)>>()
         {
             [RolUsuario.Vendedor] = new()
@@ -93,13 +96,35 @@ public class SeedPermisoService
                         Permitido = permitido
                     });
                 }
-                else if (permitido && !existing.Permitido)
-                {
-                    existing.Permitido = true;
-                }
             }
         }
 
         await _context.SaveChangesAsync();
+    }
+
+    private async Task SeedCatalogoPermisosAsync()
+    {
+        foreach (var (modulo, acciones) in CatalogoPermisosBase.Definicion)
+        {
+            foreach (var accion in acciones)
+            {
+                var exists = await _context.Permisos
+                    .AnyAsync(p => p.Modulo == modulo && p.Accion == accion);
+
+                if (exists) continue;
+
+                _context.Permisos.Add(new Permiso
+                {
+                    Codigo = $"{modulo}.{accion}".ToUpperInvariant(),
+                    Nombre = $"{modulo} - {accion}",
+                    Descripcion = $"Permite {accion} en {modulo}.",
+                    Modulo = modulo,
+                    Accion = accion,
+                    EsSistema = true,
+                    Activo = true,
+                    Eliminado = false
+                });
+            }
+        }
     }
 }

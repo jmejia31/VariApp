@@ -49,6 +49,8 @@ public class QuestPdfFacturaService : IFacturaPdfService
                         row.RelativeItem().Column(empresa =>
                         {
                             empresa.Item().Text(factura.EmpresaNombre).FontSize(16).Bold();
+                            if (!string.IsNullOrWhiteSpace(factura.EmpresaEslogan))
+                                empresa.Item().Text(factura.EmpresaEslogan).FontSize(8).Italic();
                             if (!string.IsNullOrWhiteSpace(factura.EmpresaRTN))
                                 empresa.Item().Text($"RTN: {factura.EmpresaRTN}").FontSize(8);
                             if (!string.IsNullOrWhiteSpace(factura.EmpresaTelefono))
@@ -145,6 +147,35 @@ public class QuestPdfFacturaService : IFacturaPdfService
                         FilaTotal(totales, "Total", factura.Total, true);
                     });
 
+                    if (factura.DescuentosAplicados.Any() || factura.ImpuestosAplicados.Any())
+                    {
+                        content.Item().PaddingTop(16).Row(row =>
+                        {
+                            row.RelativeItem().Column(descuentos =>
+                            {
+                                descuentos.Item().Text("Descuentos aplicados").FontSize(9).Bold().FontColor(Colors.Grey.Darken1);
+                                if (!factura.DescuentosAplicados.Any())
+                                    descuentos.Item().Text("Sin descuentos aplicados.").FontSize(8);
+
+                                foreach (var d in factura.DescuentosAplicados)
+                                {
+                                    var codigo = string.IsNullOrWhiteSpace(d.Codigo) ? string.Empty : $" ({d.Codigo})";
+                                    descuentos.Item().Text($"{d.Nombre}{codigo}: L. {d.Monto:N2}").FontSize(8);
+                                }
+                            });
+
+                            row.RelativeItem().Column(impuestos =>
+                            {
+                                impuestos.Item().Text("Impuestos aplicados").FontSize(9).Bold().FontColor(Colors.Grey.Darken1);
+                                if (!factura.ImpuestosAplicados.Any())
+                                    impuestos.Item().Text("Sin impuestos aplicados.").FontSize(8);
+
+                                foreach (var i in factura.ImpuestosAplicados)
+                                    impuestos.Item().Text($"{i.Nombre} {i.Codigo} {i.Tasa:N2}% | Base L. {i.BaseImponible:N2} | Monto L. {i.Monto:N2}").FontSize(8);
+                            });
+                        });
+                    }
+
                     if (!string.IsNullOrWhiteSpace(factura.Observaciones))
                     {
                         content.Item().PaddingTop(16).Column(obs =>
@@ -167,12 +198,26 @@ public class QuestPdfFacturaService : IFacturaPdfService
                                 anulada.Item().Text($"Por: {factura.AnuladaPorNombreUsuario}").FontSize(8);
                         });
                     }
+
+                    if (!string.IsNullOrWhiteSpace(factura.EmpresaTextoFactura) || !string.IsNullOrWhiteSpace(factura.EmpresaTextoLegal))
+                    {
+                        content.Item().PaddingTop(16).Column(textos =>
+                        {
+                            if (!string.IsNullOrWhiteSpace(factura.EmpresaTextoFactura))
+                                textos.Item().Text(factura.EmpresaTextoFactura).FontSize(8);
+                            if (!string.IsNullOrWhiteSpace(factura.EmpresaTextoLegal))
+                                textos.Item().Text(factura.EmpresaTextoLegal).FontSize(7).FontColor(Colors.Grey.Darken1);
+                        });
+                    }
                 });
 
                 page.Footer().AlignCenter().Text(text =>
                 {
-                    text.Span("Gracias por su preferencia. ").FontSize(8);
-                    text.Span("Página ").FontSize(8);
+                    if (!string.IsNullOrWhiteSpace(factura.EmpresaCopyright))
+                        text.Span($"{factura.EmpresaCopyright} ").FontSize(8);
+                    else
+                        text.Span("Gracias por su preferencia. ").FontSize(8);
+                    text.Span("Pagina ").FontSize(8);
                     text.CurrentPageNumber().FontSize(8);
                     text.Span(" de ").FontSize(8);
                     text.TotalPages().FontSize(8);

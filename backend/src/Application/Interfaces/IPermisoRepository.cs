@@ -9,6 +9,7 @@ namespace InventoryApp.Application.Interfaces;
 public interface IPermisoRepository
 {
     Task<Permiso?> GetByIdAsync(int id);
+    Task<Permiso?> GetByModuloAccionAsync(InventoryApp.Domain.Enums.ModuloSistema modulo, InventoryApp.Domain.Enums.AccionPermiso accion);
     Task<List<Permiso>> GetAllAsync(bool incluirEliminados = false);
     Task<bool> ExisteCodigoAsync(string codigo, int? excluirId = null);
     Task<bool> ExisteModuloAccionAsync(InventoryApp.Domain.Enums.ModuloSistema modulo, InventoryApp.Domain.Enums.AccionPermiso accion, int? excluirId = null);

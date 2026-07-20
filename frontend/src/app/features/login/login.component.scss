@@ -38,6 +38,13 @@
   .error { color: var(--color-danger); font-size: 13px; margin: -8px 0 0; }
 
   button[type="submit"] { height: 44px; }
+
+  .copyright {
+    margin: 2px 0 0;
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: 11px;
+  }
 }
 
 @media (max-width: 380px) {
