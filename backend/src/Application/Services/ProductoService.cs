@@ -5,6 +5,7 @@ using InventoryApp.Application.Interfaces;
 using InventoryApp.Application.Mappings;
 using InventoryApp.Application.Validators;
 using InventoryApp.Domain.Entities;
+using InventoryApp.Domain.Enums;
 
 namespace InventoryApp.Application.Services;
 
@@ -16,17 +17,20 @@ public class ProductoService : IProductoService
     private readonly ICategoriaRepository _categoriaRepository;
     private readonly IImageStorageService _imageStorage;
     private readonly ICurrentUserService _currentUser;
+    private readonly IAuditoriaService _auditoria;
 
     public ProductoService(
         IProductoRepository repository,
         ICategoriaRepository categoriaRepository,
         IImageStorageService imageStorage,
-        ICurrentUserService currentUser)
+        ICurrentUserService currentUser,
+        IAuditoriaService auditoria)
     {
         _repository = repository;
         _categoriaRepository = categoriaRepository;
         _imageStorage = imageStorage;
         _currentUser = currentUser;
+        _auditoria = auditoria;
     }
 
     public async Task<ProductoDto?> GetByIdAsync(int id)
@@ -95,6 +99,10 @@ public class ProductoService : IProductoService
         await _repository.AddAsync(producto);
         await _repository.SaveChangesAsync();
 
+        await _auditoria.RegistrarAsync(ModuloSistema.Productos, AccionPermiso.Crear,
+            $"Producto creado: {producto.Nombre}.", producto.Id, entidad: "Producto",
+            valoresNuevos: new { producto.Nombre, producto.Marca, producto.Modelo, producto.Cantidad, producto.Costo, producto.Precio, Imagenes = producto.Imagenes.Count });
+
         return ProductoMapper.ToDto(producto);
     }
 
@@ -102,6 +110,21 @@ public class ProductoService : IProductoService
     {
         var producto = await _repository.GetByIdAsync(id);
         if (producto is null) return null;
+
+        var valoresAnteriores = new
+        {
+            producto.Nombre,
+            producto.Marca,
+            producto.Modelo,
+            producto.Descripcion,
+            producto.Cantidad,
+            producto.Costo,
+            producto.Precio,
+            producto.UmbralStockBajo,
+            producto.CategoriaId,
+            Imagenes = producto.Imagenes.Count,
+            ImagenPrincipalId = producto.ImagenPrincipal?.Id
+        };
 
         if (dto.CategoriaId.HasValue)
         {
@@ -179,6 +202,24 @@ public class ProductoService : IProductoService
         _repository.Update(producto);
         await _repository.SaveChangesAsync();
 
+        await _auditoria.RegistrarAsync(ModuloSistema.Productos, AccionPermiso.Editar,
+            $"Producto actualizado: {producto.Nombre}.", producto.Id, entidad: "Producto",
+            valoresAnteriores: valoresAnteriores,
+            valoresNuevos: new
+            {
+                producto.Nombre,
+                producto.Marca,
+                producto.Modelo,
+                producto.Descripcion,
+                producto.Cantidad,
+                producto.Costo,
+                producto.Precio,
+                producto.UmbralStockBajo,
+                producto.CategoriaId,
+                Imagenes = producto.Imagenes.Count,
+                ImagenPrincipalId = producto.ImagenPrincipal?.Id
+            });
+
         return ProductoMapper.ToDto(producto);
     }
 
@@ -190,8 +231,17 @@ public class ProductoService : IProductoService
         foreach (var imagen in producto.Imagenes)
             await _imageStorage.DeleteAsync(imagen.PublicId);
 
+        var valoresAnteriores = new { producto.Nombre, producto.Marca, producto.Modelo, Imagenes = producto.Imagenes.Count };
         _repository.Remove(producto);
-        return await _repository.SaveChangesAsync();
+        var guardado = await _repository.SaveChangesAsync();
+        if (guardado)
+        {
+            await _auditoria.RegistrarAsync(ModuloSistema.Productos, AccionPermiso.Eliminar,
+                $"Producto eliminado: {producto.Nombre}.", id, entidad: "Producto",
+                valoresAnteriores: valoresAnteriores);
+        }
+
+        return guardado;
     }
 
     private static void ValidarImagenes(IEnumerable<Microsoft.AspNetCore.Http.IFormFile> imagenes)

@@ -3,6 +3,7 @@ using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Enums;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 
 namespace InventoryApp.Application.Services;
@@ -16,10 +17,12 @@ public class FacturaCompartirService : IFacturaCompartirService
     private readonly IAuditoriaService _auditoria;
     private readonly ICurrentUserService _currentUser;
     private readonly IConfiguration _configuration;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public FacturaCompartirService(
         IFacturaCompartirRepository repository, IFacturaService facturaService, IFacturaPdfService facturaPdfService,
-        IEmailService emailService, IAuditoriaService auditoria, ICurrentUserService currentUser, IConfiguration configuration)
+        IEmailService emailService, IAuditoriaService auditoria, ICurrentUserService currentUser,
+        IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
     {
         _repository = repository;
         _facturaService = facturaService;
@@ -28,6 +31,7 @@ public class FacturaCompartirService : IFacturaCompartirService
         _auditoria = auditoria;
         _currentUser = currentUser;
         _configuration = configuration;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<EnlaceCompartirDto> PrepararCompartirAsync(int facturaId)
@@ -56,7 +60,7 @@ public class FacturaCompartirService : IFacturaCompartirService
             await _repository.SaveChangesAsync();
         }
 
-        var backendUrl = _configuration["AppSettings:BackendPublicUrl"]?.TrimEnd('/') ?? "";
+        var backendUrl = ResolverBackendPublicUrl();
         var urlPublica = $"{backendUrl}/facturas/publico/{enlace.Token}/pdf";
 
         // Plantilla EXACTA pedida en la sección 14 del prompt.
@@ -85,6 +89,25 @@ public class FacturaCompartirService : IFacturaCompartirService
         var soloDigitos = new string(telefono.Where(char.IsDigit).ToArray());
         if (soloDigitos.Length == 8) return "504" + soloDigitos; // número local hondureño
         return soloDigitos; // ya trae código de país u otro formato; se deja para que el usuario lo revise
+    }
+
+    private string ResolverBackendPublicUrl()
+    {
+        var configurada = _configuration["AppSettings:BackendPublicUrl"]?.Trim().TrimEnd('/');
+        if (!string.IsNullOrWhiteSpace(configurada) &&
+            !configurada.Contains("localhost", StringComparison.OrdinalIgnoreCase) &&
+            !configurada.Contains("127.0.0.1", StringComparison.OrdinalIgnoreCase))
+        {
+            return configurada;
+        }
+
+        var request = _httpContextAccessor.HttpContext?.Request;
+        if (request is not null && request.Host.HasValue)
+        {
+            return $"{request.Scheme}://{request.Host}".TrimEnd('/');
+        }
+
+        return configurada ?? "";
     }
 
     public async Task RegistrarIntentoAsync(int facturaId, RegistrarEnvioDto dto)

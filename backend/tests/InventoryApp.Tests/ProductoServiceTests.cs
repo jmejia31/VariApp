@@ -15,6 +15,7 @@ public class ProductoServiceTests
     private readonly Mock<ICategoriaRepository> _categoriaRepoMock = new();
     private readonly Mock<IImageStorageService> _imageStorageMock = new();
     private readonly Mock<ICurrentUserService> _currentUserMock = new();
+    private readonly Mock<IAuditoriaService> _auditoriaMock = new();
     private readonly ProductoService _service;
 
     public ProductoServiceTests()
@@ -26,7 +27,8 @@ public class ProductoServiceTests
             _productoRepoMock.Object,
             _categoriaRepoMock.Object,
             _imageStorageMock.Object,
-            _currentUserMock.Object);
+            _currentUserMock.Object,
+            _auditoriaMock.Object);
     }
 
     [Fact]

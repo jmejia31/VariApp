@@ -48,7 +48,7 @@ Ninguna variable de entorno nueva en la Fase 1.
 
 **Desde la Fase 5/6 (WhatsApp/Correo), variables requeridas en producción:**
 ```
-AppSettings__BackendPublicUrl=https://tu-backend-real.up.railway.app
+AppSettings__BackendPublicUrl=https://variapp-api.onrender.com
 AppSettings__EnlacePublicoFacturaDiasValidez=7
 Smtp__Host=smtp.tu-proveedor.com
 Smtp__Port=587
@@ -56,13 +56,21 @@ Smtp__UsuarioSmtp=tu-correo@dominio.com
 Smtp__PasswordSmtp=<contraseña o contraseña de aplicación, nunca en el repo>
 Smtp__UsarSsl=true
 Smtp__CorreoRemitente=tu-correo@dominio.com
-Smtp__NombreRemitente=VariApp
+Smtp__NombreRemitente=VariStorehn
+Cors__AllowedOrigins__0=http://localhost:4200
+Cors__AllowedOrigins__1=https://varistorehn.vercel.app
+Swagger__Enabled=true
 ```
-Configúralas en Railway como variables de entorno del servicio backend
+Configúralas en Render como variables de entorno del servicio backend
 (no las pongas en `appsettings.json`, que sí está commiteado con
 placeholders `CHANGE_ME`). El doble guion bajo `__` es la convención de
 ASP.NET Core para mapear a configuración anidada (`Smtp:Host`, etc.) desde
 variables de entorno planas.
+
+Nota de robustez agregada el 19/07/2026: si `AppSettings__BackendPublicUrl`
+falta o apunta a `localhost`, el backend ahora genera enlaces públicos de
+factura usando el host real de la petición. Aun así, se recomienda mantener
+la variable explícita con `https://variapp-api.onrender.com`.
 
 ## Ejecución
 ```

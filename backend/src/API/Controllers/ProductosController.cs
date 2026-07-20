@@ -16,11 +16,13 @@ public class ProductosController : ControllerBase
 {
     private readonly IProductoService _productoService;
     private readonly IImageStorageService _imageStorageService;
+    private readonly IAuditoriaService _auditoria;
 
-    public ProductosController(IProductoService productoService, IImageStorageService imageStorageService)
+    public ProductosController(IProductoService productoService, IImageStorageService imageStorageService, IAuditoriaService auditoria)
     {
         _productoService = productoService;
         _imageStorageService = imageStorageService;
+        _auditoria = auditoria;
     }
 
     [HttpGet]
@@ -98,6 +100,10 @@ public class ProductosController : ControllerBase
         var extension = contentType.Contains("png") ? "png" : contentType.Contains("webp") ? "webp" : "jpg";
         var nombreArchivo = $"{producto.Nombre}-{imagen.Orden + 1}.{extension}".Replace(" ", "_");
 
+        await _auditoria.RegistrarAsync(ModuloSistema.Productos, AccionPermiso.Exportar,
+            $"Imagen descargada del producto: {producto.Nombre}.", imagenId, entidad: "ProductoImagen",
+            valoresNuevos: new { productoId = id, imagenId, nombreArchivo });
+
         return File(contenido, contentType, nombreArchivo);
     }
 
@@ -135,6 +141,10 @@ public class ProductosController : ControllerBase
 
         memoryStream.Position = 0;
         var nombreZip = $"{producto.Nombre}-imagenes.zip".Replace(" ", "_");
+        await _auditoria.RegistrarAsync(ModuloSistema.Productos, AccionPermiso.Exportar,
+            $"Galería descargada del producto: {producto.Nombre}.", id, entidad: "Producto",
+            valoresNuevos: new { productoId = id, imagenes = producto.Imagenes.Count, nombreArchivo = nombreZip });
+
         return File(memoryStream.ToArray(), "application/zip", nombreZip);
     }
 }

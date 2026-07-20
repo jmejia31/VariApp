@@ -77,3 +77,28 @@ para el usuario de lo que no se puede automatizar aquí.
 
 ## Progreso
 Todas las fases: **no iniciadas** hasta este documento. Comenzando Fase 1.
+
+## Revisión de producción — 19/07/2026
+
+La URL pública final del frontend es `https://varistorehn.vercel.app/login`.
+Se verificó que responde 200 y que el HTML visible ya usa `VariStorehn`.
+
+Estado actualizado de las secciones solicitadas:
+
+- **#14 WhatsApp:** implementado en código con enlace público temporal,
+  mensaje formal y registro de intento. Se reforzó el backend para resolver
+  automáticamente la URL pública real desde la petición cuando
+  `AppSettings:BackendPublicUrl` falte, sea `localhost` o esté mal configurada.
+- **#15 Correo:** implementado en código como envío secundario por SMTP con
+  PDF adjunto y registro de resultado. Sigue dependiendo de credenciales SMTP
+  reales en variables de entorno; sin esas credenciales no debe declararse
+  envío real operativo.
+- **#18 Auditoría/Bitácora:** auditoría disponible y protegida. Se amplió la
+  cobertura para creación/edición/eliminación de productos, descarga de
+  imágenes, descarga de galería ZIP y descarga de PDFs de factura.
+
+Hallazgo de producción: `GET /health` responde correctamente, pero
+`GET /tema-visual` devolvió 404 durante la verificación. El código local sí
+incluye `TemaVisualController`, por lo que el hallazgo apunta a un despliegue
+de Render no alineado con `main` o a una imagen anterior. Se fuerza una nueva
+actualización con estos cambios.

@@ -19,12 +19,15 @@ public class FacturasController : ControllerBase
     private readonly IFacturaService _facturaService;
     private readonly IFacturaPdfService _facturaPdfService;
     private readonly IFacturaCompartirService _facturaCompartirService;
+    private readonly IAuditoriaService _auditoria;
 
-    public FacturasController(IFacturaService facturaService, IFacturaPdfService facturaPdfService, IFacturaCompartirService facturaCompartirService)
+    public FacturasController(IFacturaService facturaService, IFacturaPdfService facturaPdfService,
+        IFacturaCompartirService facturaCompartirService, IAuditoriaService auditoria)
     {
         _facturaService = facturaService;
         _facturaPdfService = facturaPdfService;
         _facturaCompartirService = facturaCompartirService;
+        _auditoria = auditoria;
     }
 
     [HttpGet]
@@ -64,6 +67,10 @@ public class FacturasController : ControllerBase
         if (factura is null) return NotFound(ApiResponse<object>.Fail("Factura no encontrada."));
 
         var pdfBytes = await _facturaPdfService.GenerarPdfAsync(factura);
+        await _auditoria.RegistrarAsync(ModuloSistema.Facturacion, AccionPermiso.Exportar,
+            $"PDF descargado de factura: {factura.NumeroFactura}.", id, entidad: "Factura",
+            valoresNuevos: new { factura.NumeroFactura, factura.Total });
+
         return File(pdfBytes, "application/pdf", $"{factura.NumeroFactura}.pdf");
     }
 
@@ -122,6 +129,10 @@ public class FacturasController : ControllerBase
         var resultado = await _facturaCompartirService.ObtenerPdfPorTokenAsync(token);
         if (resultado is null)
             return NotFound(ApiResponse<object>.Fail("Este enlace no es válido o ya expiró. Solicita uno nuevo."));
+
+        await _auditoria.RegistrarAsync(ModuloSistema.Facturacion, AccionPermiso.Exportar,
+            $"PDF público descargado mediante enlace temporal: {resultado.Value.NombreArchivo}.",
+            entidad: "EnlacePublicoFactura", valoresNuevos: new { token, resultado.Value.NombreArchivo });
 
         return File(resultado.Value.Pdf, "application/pdf", resultado.Value.NombreArchivo);
     }

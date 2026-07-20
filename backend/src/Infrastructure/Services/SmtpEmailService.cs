@@ -32,7 +32,7 @@ public class SmtpEmailService : IEmailService
         var password = _configuration["Smtp:PasswordSmtp"];
         var usarSsl = _configuration.GetValue<bool?>("Smtp:UsarSsl") ?? true;
         var correoRemitente = _configuration["Smtp:CorreoRemitente"];
-        var nombreRemitente = _configuration["Smtp:NombreRemitente"] ?? "VariApp";
+        var nombreRemitente = _configuration["Smtp:NombreRemitente"] ?? "VariStorehn";
 
         // No se intenta conectar con placeholders sin configurar: error
         // claro en vez de una excepción de red confusa (sección 18:

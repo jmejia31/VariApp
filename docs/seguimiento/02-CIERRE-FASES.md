@@ -643,3 +643,37 @@ de Material que seguí sin cubrir y que habría que agregar si se detecta.
 ### Build real
 Frontend: OK, 0 errores. Backend: no verificable, misma limitación de las
 fases 4-6.
+
+## Revisión correctiva de producción — 19/07/2026
+
+### Estado
+Parcialmente terminada: se corrigieron pendientes de configuración y auditoría
+que no requerían cambios destructivos ni limpieza de datos.
+
+### Objetivo alcanzado
+- Se validó la URL final `https://varistorehn.vercel.app/login`: responde 200
+  y usa la identidad visible `VariStorehn`.
+- Se agregó fallback en `FacturaCompartirService` para que los enlaces públicos
+  de factura usen el host real de la petición si `AppSettings:BackendPublicUrl`
+  falta, está vacío o apunta a `localhost`.
+- Se agregó `https://varistorehn.vercel.app` a CORS en `appsettings.json`.
+- Se actualizó el remitente por defecto SMTP a `VariStorehn`.
+- Se amplió auditoría para productos, descargas de imágenes, descarga de ZIP de
+  galería y descarga de PDFs de factura.
+
+### Pendientes reales
+- Render debe desplegar el último commit para que `GET /tema-visual` esté
+  disponible en producción; durante la verificación respondió 404 aunque existe
+  en código.
+- El correo real requiere configurar `Smtp__Host`, `Smtp__Port`,
+  `Smtp__UsuarioSmtp`, `Smtp__PasswordSmtp`, `Smtp__UsarSsl`,
+  `Smtp__CorreoRemitente` y `Smtp__NombreRemitente` en Render.
+- La prueba end-to-end de correo no debe hacerse hasta tener SMTP real para no
+  registrar intentos fallidos innecesarios.
+
+### Riesgos abiertos
+- Si Render no auto-despliega desde `main`, producción puede seguir ejecutando
+  una imagen vieja aunque GitHub esté actualizado.
+- Las operaciones de eliminación física de productos se mantienen bajo las
+  restricciones de base de datos existentes; no se aplicó una migración
+  destructiva ni se eliminaron registros.
