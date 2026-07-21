@@ -100,9 +100,6 @@ public class ClienteService : IClienteService
         if (cliente is null) return false;
 
         cliente.Activo = false;
-        cliente.Eliminado = true;
-        cliente.FechaEliminacion = DateTime.UtcNow;
-        cliente.EliminadoPorUsuarioId = _currentUser.UsuarioId;
         cliente.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
         cliente.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
         cliente.FechaActualizacion = DateTime.UtcNow;
@@ -110,7 +107,7 @@ public class ClienteService : IClienteService
         _repository.Update(cliente);
         var eliminado = await _repository.SaveChangesAsync();
         if (eliminado)
-            await _auditoria.RegistrarAsync(ModuloSistema.Clientes, AccionPermiso.EliminarLogico, $"Cliente eliminado logicamente: {cliente.Nombre}", id);
+            await _auditoria.RegistrarAsync(ModuloSistema.Clientes, AccionPermiso.EliminarLogico, $"Cliente desactivado como eliminación lógica: {cliente.Nombre}", id);
         return eliminado;
     }
 

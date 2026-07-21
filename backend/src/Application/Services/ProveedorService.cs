@@ -100,9 +100,6 @@ public class ProveedorService : IProveedorService
         if (proveedor is null) return false;
 
         proveedor.Activo = false;
-        proveedor.Eliminado = true;
-        proveedor.FechaEliminacion = DateTime.UtcNow;
-        proveedor.EliminadoPorUsuarioId = _currentUser.UsuarioId;
         proveedor.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
         proveedor.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
         proveedor.FechaActualizacion = DateTime.UtcNow;
@@ -110,7 +107,7 @@ public class ProveedorService : IProveedorService
         _repository.Update(proveedor);
         var eliminado = await _repository.SaveChangesAsync();
         if (eliminado)
-            await _auditoria.RegistrarAsync(ModuloSistema.Proveedores, AccionPermiso.EliminarLogico, $"Proveedor eliminado logicamente: {proveedor.Nombre}", id);
+            await _auditoria.RegistrarAsync(ModuloSistema.Proveedores, AccionPermiso.EliminarLogico, $"Proveedor desactivado como eliminación lógica: {proveedor.Nombre}", id);
         return eliminado;
     }
 

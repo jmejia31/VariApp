@@ -62,8 +62,6 @@ public class CategoriaServiceTests
         await _service.DeleteAsync(1);
 
         Assert.False(categoria.Activa);
-        Assert.True(categoria.Eliminado);
-        Assert.Equal(1, categoria.EliminadoPorUsuarioId);
         _repoMock.Verify(r => r.Remove(It.IsAny<Categoria>()), Times.Never);
     }
 }

@@ -45,8 +45,6 @@ public class ClienteServiceTests
 
         Assert.True(resultado);
         Assert.False(cliente.Activo);
-        Assert.True(cliente.Eliminado);
-        Assert.Equal(1, cliente.EliminadoPorUsuarioId);
         _repoMock.Verify(r => r.Remove(It.IsAny<Cliente>()), Times.Never);
     }
 

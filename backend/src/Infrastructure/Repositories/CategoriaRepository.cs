@@ -15,27 +15,26 @@ public class CategoriaRepository : ICategoriaRepository
     }
 
     public async Task<Categoria?> GetByIdAsync(int id) =>
-        await _context.Categorias.FirstOrDefaultAsync(c => c.Id == id && !c.Eliminado);
+        await _context.Categorias.FirstOrDefaultAsync(c => c.Id == id);
 
     public async Task<Categoria?> GetByIdConProductosAsync(int id) =>
-        await _context.Categorias.Include(c => c.Productos).FirstOrDefaultAsync(c => c.Id == id && !c.Eliminado);
+        await _context.Categorias.Include(c => c.Productos).FirstOrDefaultAsync(c => c.Id == id);
 
     public async Task<List<Categoria>> GetAllAsync() =>
         await _context.Categorias
-            .Where(c => !c.Eliminado)
             .Include(c => c.Productos)
             .OrderBy(c => c.Nombre)
             .ToListAsync();
 
     public async Task<List<Categoria>> GetActivasAsync() =>
         await _context.Categorias
-            .Where(c => c.Activa && !c.Eliminado)
+            .Where(c => c.Activa)
             .OrderBy(c => c.Nombre)
             .ToListAsync();
 
     public async Task<bool> ExisteNombreAsync(string nombre, int? excluirId = null) =>
         await _context.Categorias.AnyAsync(c =>
-            !c.Eliminado && c.Nombre.ToLower() == nombre.ToLower() && (excluirId == null || c.Id != excluirId));
+            c.Nombre.ToLower() == nombre.ToLower() && (excluirId == null || c.Id != excluirId));
 
     public async Task AddAsync(Categoria categoria) =>
         await _context.Categorias.AddAsync(categoria);

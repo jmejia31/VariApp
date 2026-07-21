@@ -45,8 +45,6 @@ public class ProveedorServiceTests
 
         Assert.True(resultado);
         Assert.False(proveedor.Activo);
-        Assert.True(proveedor.Eliminado);
-        Assert.Equal(1, proveedor.EliminadoPorUsuarioId);
         _repoMock.Verify(r => r.Remove(It.IsAny<Proveedor>()), Times.Never);
     }
 
@@ -61,8 +59,6 @@ public class ProveedorServiceTests
 
         Assert.True(resultado);
         Assert.False(proveedor.Activo);
-        Assert.True(proveedor.Eliminado);
-        Assert.Equal(1, proveedor.EliminadoPorUsuarioId);
         _repoMock.Verify(r => r.Remove(It.IsAny<Proveedor>()), Times.Never);
     }
 }

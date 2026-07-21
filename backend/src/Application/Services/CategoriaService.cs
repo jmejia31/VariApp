@@ -86,9 +86,6 @@ public class CategoriaService : ICategoriaService
         if (categoria is null) return false;
 
         categoria.Activa = false;
-        categoria.Eliminado = true;
-        categoria.FechaEliminacion = DateTime.UtcNow;
-        categoria.EliminadoPorUsuarioId = _currentUser.UsuarioId;
         categoria.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
         categoria.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
         categoria.FechaActualizacion = DateTime.UtcNow;
@@ -96,7 +93,7 @@ public class CategoriaService : ICategoriaService
         _repository.Update(categoria);
         var eliminado = await _repository.SaveChangesAsync();
         if (eliminado)
-            await _auditoria.RegistrarAsync(ModuloSistema.Categorias, AccionPermiso.EliminarLogico, $"Categoria eliminada logicamente: {categoria.Nombre}", categoria.Id);
+            await _auditoria.RegistrarAsync(ModuloSistema.Categorias, AccionPermiso.EliminarLogico, $"Categoría desactivada como eliminación lógica: {categoria.Nombre}", categoria.Id);
         return eliminado;
     }
 
