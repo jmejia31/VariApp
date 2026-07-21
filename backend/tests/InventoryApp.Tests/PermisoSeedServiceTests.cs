@@ -10,7 +10,7 @@ namespace InventoryApp.Tests;
 public class PermisoSeedServiceTests
 {
     [Fact]
-    public async Task SeedDefaults_CreaPermisosParaRolesBasicos_YNoDuplicaExistentes()
+    public async Task SeedDefaults_CreaPermisosDeAdministrador_YRespetaAsignacionesExplicitas()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
@@ -39,7 +39,7 @@ public class PermisoSeedServiceTests
             .ToListAsync();
 
         Assert.Contains(permisos, p => p.Rol == RolUsuario.Vendedor && p.Modulo == ModuloSistema.Productos && p.Accion == AccionPermiso.Ver && p.Permitido);
-        Assert.Contains(permisos, p => p.Rol == RolUsuario.Vendedor && p.Modulo == ModuloSistema.Compras && p.Accion == AccionPermiso.Crear && p.Permitido);
+        Assert.DoesNotContain(permisos, p => p.Rol == RolUsuario.Vendedor && p.Modulo == ModuloSistema.Compras && p.Accion == AccionPermiso.Crear);
         Assert.Contains(permisos, p => p.Rol == RolUsuario.Administrador && p.Modulo == ModuloSistema.Productos && p.Accion == AccionPermiso.Crear && p.Permitido);
 
         var vendedorProductosVer = permisos.Count(p => p.Rol == RolUsuario.Vendedor && p.Modulo == ModuloSistema.Productos && p.Accion == AccionPermiso.Ver);

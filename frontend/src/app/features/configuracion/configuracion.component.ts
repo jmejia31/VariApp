@@ -14,6 +14,7 @@ import { EmpresaIdentidadService } from '../../services/empresa-identidad.servic
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
 import { CAMPOS_TEMA, TemaVisual } from '../../core/models/tema-visual.model';
 import { EmpresaConfiguracion } from '../../core/models/empresa-configuracion.model';
+import { AppAlertService } from '../../shared/alerts/app-alert.service';
 
 @Component({
   selector: 'app-configuracion',
@@ -82,6 +83,7 @@ export class ConfiguracionComponent implements OnInit {
     private themeApplier: ThemeApplierService,
     private identidadService: EmpresaIdentidadService,
     private permisosRuntime: PermisosRuntimeService,
+    private alerts: AppAlertService,
     private snackBar: MatSnackBar
   ) {}
 
@@ -239,8 +241,13 @@ export class ConfiguracionComponent implements OnInit {
     });
   }
 
-  restaurarLogo(): void {
-    if (!confirm('¿Restaurar el logo predeterminado del sistema?')) return;
+  async restaurarLogo(): Promise<void> {
+    if (!await this.alerts.confirmar({
+      titulo: 'Restaurar logo',
+      mensaje: 'Se reemplazará el logo actual por el logo predeterminado de VariStorehn.',
+      tipo: 'advertencia',
+      confirmarTexto: 'Restaurar logo'
+    })) return;
     this.uploadingLogo.set(true);
     this.empresaService.restaurarLogo().subscribe({
       next: (res) => {
@@ -260,8 +267,13 @@ export class ConfiguracionComponent implements OnInit {
     this.themeApplier.aplicar(this.tema);
   }
 
-  guardarTema(): void {
-    if (!confirm('¿Aplicar estos colores a todo el sistema para todos los usuarios?')) return;
+  async guardarTema(): Promise<void> {
+    if (!await this.alerts.confirmar({
+      titulo: 'Aplicar tema visual',
+      mensaje: 'Los nuevos colores se aplicarán a todo el sistema y a todos los usuarios.',
+      tipo: 'advertencia',
+      confirmarTexto: 'Aplicar colores'
+    })) return;
 
     this.guardandoTema.set(true);
     this.errorTema.set(null);
@@ -285,8 +297,13 @@ export class ConfiguracionComponent implements OnInit {
     this.themeApplier.aplicar(this.tema);
   }
 
-  restaurarTema(): void {
-    if (!confirm('¿Restaurar los colores predeterminados de fábrica para todo el sistema?')) return;
+  async restaurarTema(): Promise<void> {
+    if (!await this.alerts.confirmar({
+      titulo: 'Restaurar tema',
+      mensaje: 'Se restaurarán los colores predeterminados del sistema para todos los usuarios.',
+      tipo: 'advertencia',
+      confirmarTexto: 'Restaurar colores'
+    })) return;
 
     this.restaurandoTema.set(true);
     this.temaVisualService.restaurar().subscribe({

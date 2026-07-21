@@ -21,26 +21,6 @@ public class SeedPermisoService
 
         var defaults = new Dictionary<RolUsuario, List<(ModuloSistema Modulo, AccionPermiso Accion, bool Permitido)>>()
         {
-            [RolUsuario.Vendedor] = new()
-            {
-                (ModuloSistema.Dashboard, AccionPermiso.Ver, true),
-                (ModuloSistema.Productos, AccionPermiso.Ver, true),
-                (ModuloSistema.Categorias, AccionPermiso.Ver, true),
-                (ModuloSistema.Compras, AccionPermiso.Ver, true),
-                (ModuloSistema.Compras, AccionPermiso.Crear, true),
-                (ModuloSistema.Ventas, AccionPermiso.Ver, true),
-                (ModuloSistema.Ventas, AccionPermiso.Crear, true),
-                (ModuloSistema.Ventas, AccionPermiso.Editar, true),
-                (ModuloSistema.Ventas, AccionPermiso.Confirmar, true),
-                (ModuloSistema.Facturacion, AccionPermiso.Ver, true),
-                (ModuloSistema.Finanzas, AccionPermiso.Ver, true),
-                (ModuloSistema.Inventario, AccionPermiso.Ver, true),
-                (ModuloSistema.Proveedores, AccionPermiso.Ver, true),
-                (ModuloSistema.Clientes, AccionPermiso.Ver, true),
-                (ModuloSistema.Clientes, AccionPermiso.Crear, true),
-                (ModuloSistema.Clientes, AccionPermiso.Editar, true),
-                (ModuloSistema.Auditoria, AccionPermiso.Ver, true)
-            },
             [RolUsuario.Administrador] = new()
             {
                 (ModuloSistema.Dashboard, AccionPermiso.Ver, true),

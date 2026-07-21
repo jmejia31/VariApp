@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -21,7 +21,7 @@ import { RegistroAuditoria } from '../../core/models/auditoria.model';
   templateUrl: './auditoria-list.component.html',
   styleUrl: './auditoria-list.component.scss'
 })
-export class AuditoriaListComponent implements OnInit {
+export class AuditoriaListComponent implements OnInit, OnDestroy {
   readonly registros = signal<RegistroAuditoria[]>([]);
   readonly loading = signal(true);
   readonly totalCount = signal(0);
@@ -35,6 +35,7 @@ export class AuditoriaListComponent implements OnInit {
   filtroTexto = '';
   filtroDesde = '';
   filtroHasta = '';
+  private filtroTimer?: ReturnType<typeof setTimeout>;
 
   readonly modulos = [
     'Dashboard', 'Productos', 'Categorias', 'Compras', 'Ventas', 'Facturacion', 'Finanzas',
@@ -52,6 +53,10 @@ export class AuditoriaListComponent implements OnInit {
 
   ngOnInit(): void {
     this.cargar();
+  }
+
+  ngOnDestroy(): void {
+    if (this.filtroTimer) clearTimeout(this.filtroTimer);
   }
 
   cargar(): void {
@@ -78,6 +83,11 @@ export class AuditoriaListComponent implements OnInit {
   aplicarFiltros(): void {
     this.page = 1;
     this.cargar();
+  }
+
+  programarFiltro(): void {
+    if (this.filtroTimer) clearTimeout(this.filtroTimer);
+    this.filtroTimer = setTimeout(() => this.aplicarFiltros(), 300);
   }
 
   onPageChange(event: PageEvent): void {

@@ -28,52 +28,52 @@ import { SessionActivityService } from './core/auth/session-activity.service';
             </button>
           </div>
           <nav (click)="cerrarSidebarEnMovil()">
-            @if (permisosRuntime.puede('Dashboard', 'Ver') || auth.esAdministrador()) {
+            @if (permisosRuntime.puede('Dashboard', 'Ver')) {
               <a routerLink="/dashboard" routerLinkActive="active"><mat-icon>dashboard</mat-icon> Dashboard</a>
             }
-            @if (permisosRuntime.puede('Productos', 'Ver') || auth.esAdministrador()) {
+            @if (permisosRuntime.puede('Productos', 'Ver')) {
               <a routerLink="/productos" routerLinkActive="active"><mat-icon>widgets</mat-icon> Productos</a>
             }
-            @if (permisosRuntime.puede('Categorias', 'Ver') || auth.esAdministrador()) {
+            @if (permisosRuntime.puede('Categorias', 'Ver')) {
               <a routerLink="/categorias" routerLinkActive="active"><mat-icon>category</mat-icon> Categorías</a>
             }
-            @if (permisosRuntime.puede('Compras', 'Ver') || auth.esAdministrador()) {
+            @if (permisosRuntime.puede('Compras', 'Ver')) {
               <a routerLink="/compras" routerLinkActive="active"><mat-icon>shopping_cart</mat-icon> Compras</a>
             }
-            @if (permisosRuntime.puede('Proveedores', 'Ver') || auth.esAdministrador()) {
+            @if (permisosRuntime.puede('Proveedores', 'Ver')) {
               <a routerLink="/proveedores" routerLinkActive="active"><mat-icon>local_shipping</mat-icon> Proveedores</a>
             }
-            @if (permisosRuntime.puede('Ventas', 'Ver') || auth.esAdministrador()) {
+            @if (permisosRuntime.puede('Ventas', 'Ver')) {
               <a routerLink="/ventas" routerLinkActive="active"><mat-icon>point_of_sale</mat-icon> Ventas</a>
             }
-            @if (permisosRuntime.puede('Clientes', 'Ver') || auth.esAdministrador()) {
+            @if (permisosRuntime.puede('Clientes', 'Ver')) {
               <a routerLink="/clientes" routerLinkActive="active"><mat-icon>groups</mat-icon> Clientes</a>
             }
-            @if (permisosRuntime.puede('Finanzas', 'Ver') || auth.esAdministrador()) {
+            @if (permisosRuntime.puede('Finanzas', 'Ver')) {
               <a routerLink="/finanzas" routerLinkActive="active"><mat-icon>account_balance_wallet</mat-icon> Finanzas</a>
             }
-            @if (permisosRuntime.puede('Inventario', 'Ver') || auth.esAdministrador()) {
+            @if (permisosRuntime.puede('Inventario', 'Ver')) {
               <a routerLink="/inventario/movimientos" routerLinkActive="active"><mat-icon>sync_alt</mat-icon> Movimientos</a>
             }
-            @if (permisosRuntime.puede('Usuarios', 'Ver') || auth.esAdministrador()) {
+            @if (permisosRuntime.puede('Usuarios', 'Ver')) {
               <a routerLink="/usuarios" routerLinkActive="active"><mat-icon>manage_accounts</mat-icon> Usuarios</a>
             }
-            @if (permisosRuntime.puede('Roles', 'Ver') || auth.esAdministrador()) {
+            @if (permisosRuntime.puede('Roles', 'Ver')) {
               <a routerLink="/roles" routerLinkActive="active"><mat-icon>admin_panel_settings</mat-icon> Roles</a>
             }
-            @if (permisosRuntime.puede('Descuentos', 'Ver') || auth.esAdministrador()) {
+            @if (permisosRuntime.puede('Descuentos', 'Ver')) {
               <a routerLink="/descuentos" routerLinkActive="active"><mat-icon>sell</mat-icon> Descuentos</a>
             }
-            @if (permisosRuntime.puede('Impuestos', 'Ver') || auth.esAdministrador()) {
+            @if (permisosRuntime.puede('Impuestos', 'Ver')) {
               <a routerLink="/impuestos" routerLinkActive="active"><mat-icon>request_quote</mat-icon> Impuestos</a>
             }
-            @if (permisosRuntime.puede('Permisos', 'Administrar') || auth.esAdministrador()) {
+            @if (permisosRuntime.puede('Permisos', 'Administrar')) {
               <a routerLink="/permisos" routerLinkActive="active"><mat-icon>lock_outline</mat-icon> Permisos</a>
             }
-            @if (permisosRuntime.puede('Auditoria', 'Ver') || auth.esAdministrador()) {
+            @if (permisosRuntime.puede('Auditoria', 'Ver')) {
               <a routerLink="/auditoria" routerLinkActive="active"><mat-icon>manage_search</mat-icon> Auditoría</a>
             }
-            @if (permisosRuntime.puede('Configuracion', 'Ver') || auth.esAdministrador()) {
+            @if (permisosRuntime.puede('Configuracion', 'Ver')) {
               <a routerLink="/configuracion" routerLinkActive="active"><mat-icon>settings</mat-icon> Configuración</a>
             }
           </nav>

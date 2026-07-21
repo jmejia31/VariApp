@@ -9,6 +9,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { RolService } from '../../services/rol.service';
 import { Rol } from '../../core/models/rol.model';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
+import { AppAlertService } from '../../shared/alerts/app-alert.service';
 
 @Component({
   selector: 'app-roles-list',
@@ -25,7 +26,7 @@ export class RolesListComponent implements OnInit {
   readonly puedeEliminar = signal(false);
   readonly puedeDuplicar = signal(false);
 
-  constructor(private rolService: RolService, private permisosRuntime: PermisosRuntimeService, private snackBar: MatSnackBar) {}
+  constructor(private rolService: RolService, private permisosRuntime: PermisosRuntimeService, private snackBar: MatSnackBar, private alerts: AppAlertService) {}
 
   ngOnInit(): void {
     this.puedeCrear.set(this.permisosRuntime.puede('Roles', 'Crear'));
@@ -54,8 +55,9 @@ export class RolesListComponent implements OnInit {
     });
   }
 
-  eliminar(rol: Rol): void {
-    if (!confirm(`¿Eliminar el rol "${rol.nombre}"? Esta acción se puede revertir solo por un administrador desde la base de datos.`)) return;
+  async eliminar(rol: Rol): Promise<void> {
+    const confirmado = await this.alerts.confirmar({ titulo: 'Eliminar rol', mensaje: `Se eliminará el rol "${rol.nombre}".`, detalle: 'El rol quedará inactivo y la operación se registrará en auditoría.', tipo: 'peligro', confirmarTexto: 'Eliminar rol' });
+    if (!confirmado) return;
 
     this.rolService.eliminarLogico(rol.id).subscribe({
       next: () => this.cargar(),
@@ -63,8 +65,8 @@ export class RolesListComponent implements OnInit {
     });
   }
 
-  duplicar(rol: Rol): void {
-    const nuevoNombre = prompt(`Nombre para la copia de "${rol.nombre}":`, `${rol.nombre} (copia)`);
+  async duplicar(rol: Rol): Promise<void> {
+    const nuevoNombre = await this.alerts.solicitarTexto({ titulo: 'Duplicar rol', mensaje: `Define el nombre de la copia de "${rol.nombre}".`, confirmarTexto: 'Crear copia', entrada: { etiqueta: 'Nombre del nuevo rol', valor: `${rol.nombre} (copia)`, requerida: true } });
     if (!nuevoNombre) return;
 
     this.rolService.duplicar(rol.id, nuevoNombre).subscribe({

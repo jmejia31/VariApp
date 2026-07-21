@@ -9,6 +9,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { CategoriaService } from '../../services/categoria.service';
 import { Categoria } from '../../core/models/categoria.model';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
+import { AppAlertService } from '../../shared/alerts/app-alert.service';
 
 @Component({
   selector: 'app-categorias-list',
@@ -27,7 +28,8 @@ export class CategoriasListComponent implements OnInit {
   constructor(
     private categoriaService: CategoriaService,
     private permisosRuntime: PermisosRuntimeService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private alerts: AppAlertService
   ) {}
 
   ngOnInit(): void {
@@ -56,8 +58,9 @@ export class CategoriasListComponent implements OnInit {
     }).subscribe(() => this.cargar());
   }
 
-  eliminar(categoria: Categoria): void {
-    if (!confirm(`Eliminar la categoria "${categoria.nombre}"? Se ocultara del sistema sin borrar el historial relacionado.`)) return;
+  async eliminar(categoria: Categoria): Promise<void> {
+    const confirmado = await this.alerts.confirmar({ titulo: 'Eliminar categoría', mensaje: `Se ocultará "${categoria.nombre}" sin borrar el historial relacionado.`, tipo: 'peligro', confirmarTexto: 'Eliminar' });
+    if (!confirmado) return;
 
     this.categoriaService.delete(categoria.id).subscribe({
       next: () => {

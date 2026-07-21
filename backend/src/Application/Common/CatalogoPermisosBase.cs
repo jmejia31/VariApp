@@ -113,21 +113,6 @@ public static class CatalogoPermisosBase
         }),
     };
 
-    /// Permisos por defecto para un rol "Vendedor" recién creado/migrado
-    /// (sección 9). Se aplican solo cuando el rol no tiene matriz definida.
-    public static readonly (ModuloSistema Modulo, AccionPermiso Accion)[] DefaultVendedor =
-    {
-        (ModuloSistema.Dashboard, AccionPermiso.Ver),
-        (ModuloSistema.Productos, AccionPermiso.Ver),
-        (ModuloSistema.Categorias, AccionPermiso.Ver),
-        (ModuloSistema.Ventas, AccionPermiso.Ver),
-        (ModuloSistema.Ventas, AccionPermiso.Crear),
-        (ModuloSistema.Ventas, AccionPermiso.Editar),
-        (ModuloSistema.Ventas, AccionPermiso.Confirmar),
-        (ModuloSistema.Clientes, AccionPermiso.Ver),
-        (ModuloSistema.Clientes, AccionPermiso.Crear),
-        (ModuloSistema.Clientes, AccionPermiso.Editar),
-        (ModuloSistema.Facturacion, AccionPermiso.Ver),
-        (ModuloSistema.Inventario, AccionPermiso.Ver),
-    };
+    /// Los roles no administrativos dependen exclusivamente de su matriz persistida.
+    public static readonly (ModuloSistema Modulo, AccionPermiso Accion)[] DefaultVendedor = { };
 }

@@ -10,6 +10,7 @@ import { FormsModule } from '@angular/forms';
 import { ProveedorService } from '../../services/proveedor.service';
 import { Proveedor } from '../../core/models/proveedor.model';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
+import { AppAlertService } from '../../shared/alerts/app-alert.service';
 
 @Component({
   selector: 'app-proveedores-list',
@@ -28,7 +29,8 @@ export class ProveedoresListComponent implements OnInit {
   constructor(
     private proveedorService: ProveedorService,
     private permisosRuntime: PermisosRuntimeService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private alerts: AppAlertService
   ) {}
 
   ngOnInit(): void {
@@ -53,8 +55,9 @@ export class ProveedoresListComponent implements OnInit {
     }).subscribe(() => this.cargar());
   }
 
-  eliminar(p: Proveedor): void {
-    if (!confirm(`Eliminar el proveedor "${p.nombre}"? Se ocultara sin borrar sus compras historicas.`)) return;
+  async eliminar(p: Proveedor): Promise<void> {
+    const confirmado = await this.alerts.confirmar({ titulo: 'Eliminar proveedor', mensaje: `Se ocultará a "${p.nombre}" sin borrar sus compras históricas.`, tipo: 'peligro', confirmarTexto: 'Eliminar' });
+    if (!confirmado) return;
 
     this.proveedorService.delete(p.id).subscribe({
       next: () => {

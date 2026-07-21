@@ -39,7 +39,7 @@
 
   <mat-form-field appearance="outline" class="filtro-texto">
     <mat-label>Buscar (usuario, descripción, motivo)</mat-label>
-    <input matInput [(ngModel)]="filtroTexto" (keyup.enter)="aplicarFiltros()" placeholder="Texto libre...">
+    <input matInput [(ngModel)]="filtroTexto" (ngModelChange)="programarFiltro()" placeholder="Texto libre...">
     <button matSuffix mat-icon-button (click)="aplicarFiltros()"><mat-icon>search</mat-icon></button>
   </mat-form-field>
 </div>

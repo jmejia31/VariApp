@@ -18,6 +18,7 @@ import { Rol } from '../../core/models/rol.model';
 import { PagedResult } from '../../core/models/api-response.model';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
 import { AuthService } from '../../core/auth/auth.service';
+import { AppAlertService } from '../../shared/alerts/app-alert.service';
 
 @Component({
   selector: 'app-usuarios',
@@ -56,7 +57,8 @@ export class UsuariosComponent implements OnInit {
     private rolService: RolService,
     private permisosRuntime: PermisosRuntimeService,
     private auth: AuthService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private alerts: AppAlertService
   ) {}
 
   ngOnInit(): void {
@@ -152,9 +154,10 @@ export class UsuariosComponent implements OnInit {
     });
   }
 
-  toggleEstado(usuario: Usuario): void {
-    const accion = usuario.activo ? 'desactivar' : 'activar';
-    if (!confirm(`¿Seguro que deseas ${accion} a "${usuario.nombreCompleto}"?`)) return;
+  async toggleEstado(usuario: Usuario): Promise<void> {
+    const activar = !usuario.activo;
+    const confirmado = await this.alerts.confirmar({ titulo: activar ? 'Activar usuario' : 'Desactivar usuario', mensaje: `Se ${activar ? 'habilitará' : 'deshabilitará'} el acceso de "${usuario.nombreCompleto}".`, detalle: activar ? 'Podrá ingresar según los permisos de su rol.' : 'No podrá iniciar nuevas sesiones.', tipo: activar ? 'info' : 'advertencia', confirmarTexto: activar ? 'Activar' : 'Desactivar' });
+    if (!confirmado) return;
 
     this.usuarioService.updateEstado(usuario.id, !usuario.activo).subscribe({
       next: () => this.cargar(),
@@ -162,8 +165,8 @@ export class UsuariosComponent implements OnInit {
     });
   }
 
-  bloquear(usuario: Usuario): void {
-    const motivo = prompt(`Motivo del bloqueo de "${usuario.nombreCompleto}" (obligatorio):`);
+  async bloquear(usuario: Usuario): Promise<void> {
+    const motivo = await this.alerts.solicitarTexto({ titulo: 'Bloquear usuario', mensaje: `Indica por qué se bloqueará a "${usuario.nombreCompleto}".`, tipo: 'advertencia', confirmarTexto: 'Bloquear', entrada: { etiqueta: 'Motivo del bloqueo', requerida: true } });
     if (!motivo) return;
 
     this.usuarioService.bloquear(usuario.id, motivo).subscribe({
@@ -172,8 +175,9 @@ export class UsuariosComponent implements OnInit {
     });
   }
 
-  desbloquear(usuario: Usuario): void {
-    if (!confirm(`¿Desbloquear a "${usuario.nombreCompleto}"?`)) return;
+  async desbloquear(usuario: Usuario): Promise<void> {
+    const confirmado = await this.alerts.confirmar({ titulo: 'Desbloquear usuario', mensaje: `Se restablecerá el acceso de "${usuario.nombreCompleto}".`, confirmarTexto: 'Desbloquear' });
+    if (!confirmado) return;
 
     this.usuarioService.desbloquear(usuario.id).subscribe({
       next: () => this.cargar(),
@@ -181,8 +185,9 @@ export class UsuariosComponent implements OnInit {
     });
   }
 
-  eliminar(usuario: Usuario): void {
-    if (!confirm(`¿Eliminar a "${usuario.nombreCompleto}"? Esta acción es reversible solo por un administrador desde la base de datos.`)) return;
+  async eliminar(usuario: Usuario): Promise<void> {
+    const confirmado = await this.alerts.confirmar({ titulo: 'Eliminar usuario', mensaje: `Se eliminará lógicamente a "${usuario.nombreCompleto}".`, detalle: 'Sus registros históricos se conservarán.', tipo: 'peligro', confirmarTexto: 'Eliminar usuario' });
+    if (!confirmado) return;
 
     this.usuarioService.eliminar(usuario.id).subscribe({
       next: () => this.cargar(),

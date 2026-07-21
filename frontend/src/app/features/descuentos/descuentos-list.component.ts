@@ -9,6 +9,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { DescuentoService } from '../../services/descuento.service';
 import { Descuento } from '../../core/models/descuento.model';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
+import { AppAlertService } from '../../shared/alerts/app-alert.service';
 
 @Component({
   selector: 'app-descuentos-list',
@@ -25,7 +26,7 @@ export class DescuentosListComponent implements OnInit {
   readonly puedeEliminar = signal(false);
   readonly puedeDuplicar = signal(false);
 
-  constructor(private service: DescuentoService, private permisosRuntime: PermisosRuntimeService, private snackBar: MatSnackBar) {}
+  constructor(private service: DescuentoService, private permisosRuntime: PermisosRuntimeService, private snackBar: MatSnackBar, private alerts: AppAlertService) {}
 
   ngOnInit(): void {
     this.puedeCrear.set(this.permisosRuntime.puede('Descuentos', 'Crear'));
@@ -51,16 +52,17 @@ export class DescuentosListComponent implements OnInit {
     });
   }
 
-  eliminar(d: Descuento): void {
-    if (!confirm(`¿Eliminar el descuento "${d.nombre}"?`)) return;
+  async eliminar(d: Descuento): Promise<void> {
+    const confirmado = await this.alerts.confirmar({ titulo: 'Eliminar descuento', mensaje: `Se eliminará el descuento "${d.nombre}".`, detalle: 'Dejará de estar disponible para nuevas operaciones.', tipo: 'peligro', confirmarTexto: 'Eliminar descuento' });
+    if (!confirmado) return;
     this.service.eliminarLogico(d.id).subscribe({
       next: () => this.cargar(),
       error: (err) => this.snackBar.open(err.error?.message ?? 'No se pudo eliminar.', 'Cerrar', { duration: 5000 })
     });
   }
 
-  duplicar(d: Descuento): void {
-    const nuevoNombre = prompt(`Nombre para la copia de "${d.nombre}":`, `${d.nombre} (copia)`);
+  async duplicar(d: Descuento): Promise<void> {
+    const nuevoNombre = await this.alerts.solicitarTexto({ titulo: 'Duplicar descuento', mensaje: `Define el nombre de la copia de "${d.nombre}".`, confirmarTexto: 'Crear copia', entrada: { etiqueta: 'Nombre del descuento', valor: `${d.nombre} (copia)`, requerida: true } });
     if (!nuevoNombre) return;
     this.service.duplicar(d.id, nuevoNombre).subscribe({
       next: () => this.cargar(),

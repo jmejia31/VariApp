@@ -10,6 +10,7 @@ import { FormsModule } from '@angular/forms';
 import { ClienteService } from '../../services/cliente.service';
 import { Cliente } from '../../core/models/cliente.model';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
+import { AppAlertService } from '../../shared/alerts/app-alert.service';
 
 @Component({
   selector: 'app-clientes-list',
@@ -28,7 +29,8 @@ export class ClientesListComponent implements OnInit {
   constructor(
     private clienteService: ClienteService,
     private permisosRuntime: PermisosRuntimeService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private alerts: AppAlertService
   ) {}
 
   ngOnInit(): void {
@@ -53,8 +55,9 @@ export class ClientesListComponent implements OnInit {
     }).subscribe(() => this.cargar());
   }
 
-  eliminar(c: Cliente): void {
-    if (!confirm(`Eliminar el cliente "${c.nombre}"? Se ocultara sin borrar sus ventas historicas.`)) return;
+  async eliminar(c: Cliente): Promise<void> {
+    const confirmado = await this.alerts.confirmar({ titulo: 'Eliminar cliente', mensaje: `Se ocultará a "${c.nombre}" sin borrar sus ventas históricas.`, tipo: 'peligro', confirmarTexto: 'Eliminar' });
+    if (!confirmado) return;
 
     this.clienteService.delete(c.id).subscribe({
       next: () => {
