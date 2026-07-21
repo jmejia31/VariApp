@@ -15,6 +15,7 @@ import { UsuarioService } from '../../services/usuario.service';
 import { RolService } from '../../services/rol.service';
 import { Usuario } from '../../core/models/usuario.model';
 import { Rol } from '../../core/models/rol.model';
+import { PagedResult } from '../../core/models/api-response.model';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
 import { AuthService } from '../../core/auth/auth.service';
 
@@ -81,25 +82,47 @@ export class UsuariosComponent implements OnInit {
     this.errorMessage.set(null);
     this.usuarioService.getPaged({ page: 1, pageSize: 100, search: this.buscador.value || undefined }).subscribe({
       next: (res) => {
-        this.usuarios.set(res.data.items);
-        this.loading.set(false);
+        const usuarios = this.extraerUsuarios(res.data);
+        if (usuarios.length > 0 || this.buscador.value) {
+          this.usuarios.set(usuarios);
+          this.loading.set(false);
+          return;
+        }
+
+        this.cargarListadoLegado();
       },
       error: () => {
         // Si el endpoint paginado falla por una configuracion vieja de permisos, se usa el listado legado.
-        this.usuarioService.getAll().subscribe({
-          next: (res) => {
-            this.usuarios.set(res.data);
-            this.loading.set(false);
-          },
-          error: (err) => {
-            this.usuarios.set([]);
-            this.loading.set(false);
-            this.errorMessage.set(err.error?.message ?? 'No se pudo cargar la lista de usuarios.');
-            this.snackBar.open(this.errorMessage()!, 'Cerrar', { duration: 6000 });
-          }
-        });
+        this.cargarListadoLegado();
       }
     });
+  }
+
+  private cargarListadoLegado(): void {
+    this.usuarioService.getAll().subscribe({
+      next: (res) => {
+        const termino = (this.buscador.value || '').trim().toLowerCase();
+        const usuarios = this.extraerUsuarios(res.data).filter((u) => {
+          if (!termino) return true;
+          return u.nombreUsuario.toLowerCase().includes(termino) || u.nombreCompleto.toLowerCase().includes(termino);
+        });
+
+        this.usuarios.set(usuarios);
+        this.loading.set(false);
+      },
+      error: (err) => {
+        this.usuarios.set([]);
+        this.loading.set(false);
+        this.errorMessage.set(err.error?.message ?? 'No se pudo cargar la lista de usuarios.');
+        this.snackBar.open(this.errorMessage()!, 'Cerrar', { duration: 6000 });
+      }
+    });
+  }
+
+  private extraerUsuarios(data: PagedResult<Usuario> | Usuario[] | null | undefined): Usuario[] {
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data?.items)) return data.items;
+    return [];
   }
 
   crear(): void {

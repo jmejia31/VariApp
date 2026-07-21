@@ -69,7 +69,7 @@ public class EmpresaConfiguracionService : IEmpresaConfiguracionService
         config.WhatsApp = Limpiar(dto.WhatsApp);
         config.NombreVisibleSistema = dto.NombreVisibleSistema.Trim();
         config.DescripcionSistema = string.IsNullOrWhiteSpace(dto.DescripcionSistema)
-            ? "Gestión de Inventario"
+            ? "Administrativo"
             : dto.DescripcionSistema.Trim();
         config.MensajeLogin = string.IsNullOrWhiteSpace(dto.MensajeLogin)
             ? $"Inicia sesión para administrar {config.NombreVisibleSistema}"

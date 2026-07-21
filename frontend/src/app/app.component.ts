@@ -85,7 +85,7 @@ import { SessionActivityService } from './core/auth/session-activity.service';
             </button>
             <span class="header-text">
               @if (identidad.config().encabezadoActivo) {
-                {{ identidad.config().encabezadoTexto || identidad.config().descripcionSistema }}
+                {{ identidad.descripcionSistema() }}
               }
             </span>
             <div class="user">

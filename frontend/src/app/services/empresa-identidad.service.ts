@@ -8,7 +8,7 @@ const DEFAULT_CONFIG: EmpresaConfiguracion = {
   nombreComercial: 'VariStorehn',
   eslogan: 'Eleva tu mundo digital',
   nombreVisibleSistema: 'VariStorehn',
-  descripcionSistema: 'Gestión de Inventario',
+  descripcionSistema: 'Administrativo',
   mensajeLogin: 'Inicia sesión para administrar VariStorehn',
   copyright: '© 2026 VariStorehn. Todos los derechos reservados.',
   mostrarCopyright: true,
@@ -27,6 +27,7 @@ export class EmpresaIdentidadService {
 
   readonly config = this._config.asReadonly();
   readonly nombreSistema = computed(() => this._config().nombreVisibleSistema || this._config().nombreComercial || 'VariStorehn');
+  readonly descripcionSistema = computed(() => this.normalizarDescripcion(this._config().encabezadoTexto || this._config().descripcionSistema));
   readonly logoUrl = computed(() => this._config().logoUrl || 'assets/varistorehn-logo.png');
   readonly mensajeLogin = computed(() => this._config().mensajeLogin || `Inicia sesión para administrar ${this.nombreSistema()}`);
   readonly mostrarCopyright = computed(() => this._config().mostrarCopyright);
@@ -55,5 +56,14 @@ export class EmpresaIdentidadService {
   refrescarDespuesDeGuardar(config: EmpresaConfiguracion): void {
     this._config.set({ ...DEFAULT_CONFIG, ...config });
     this.cargada = true;
+  }
+
+  private normalizarDescripcion(value?: string | null): string {
+    const texto = value?.trim();
+    if (!texto || texto === 'Gestión de Inventario' || texto === 'Gestion de Inventario') {
+      return 'Administrativo';
+    }
+
+    return texto;
   }
 }

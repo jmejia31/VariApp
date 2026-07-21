@@ -17,7 +17,7 @@ public class EmpresaConfiguracion
     public string? LogoUrl { get; set; }
     public string? LogoPublicId { get; set; }
     public string NombreVisibleSistema { get; set; } = "VariStorehn";
-    public string DescripcionSistema { get; set; } = "Gestión de Inventario";
+    public string DescripcionSistema { get; set; } = "Administrativo";
     public string MensajeLogin { get; set; } = "Inicia sesión para administrar VariStorehn";
     public string Copyright { get; set; } = "© 2026 VariStorehn. Todos los derechos reservados.";
     public bool MostrarCopyright { get; set; } = true;
