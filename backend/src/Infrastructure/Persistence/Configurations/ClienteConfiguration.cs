@@ -15,6 +15,8 @@ public class ClienteConfiguration : IEntityTypeConfiguration<Cliente>
         builder.Property(c => c.IdentidadORTN).HasMaxLength(50);
         builder.Property(c => c.Correo).HasMaxLength(150);
         builder.Property(c => c.Direccion).HasMaxLength(300);
+        builder.Property(c => c.Eliminado).HasDefaultValue(false);
+        builder.HasIndex(c => c.Eliminado);
 
         builder.HasMany(c => c.Ventas)
             .WithOne(v => v.Cliente)

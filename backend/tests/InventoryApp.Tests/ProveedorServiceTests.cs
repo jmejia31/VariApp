@@ -33,7 +33,7 @@ public class ProveedorServiceTests
     }
 
     [Fact]
-    public async Task DeleteAsync_Con_Compras_Asociadas_Desactiva_En_Vez_De_Eliminar()
+    public async Task DeleteAsync_Con_Compras_Asociadas_Aplica_Eliminacion_Logica()
     {
         var proveedor = new Proveedor { Id = 1, Nombre = "Tech Import SA", Activo = true };
         proveedor.Compras.Add(new Compra { NumeroCompra = "COM-000001", Estado = EstadoDocumento.Confirmada, Total = 100 });
@@ -41,14 +41,17 @@ public class ProveedorServiceTests
         _repoMock.Setup(r => r.GetByIdConComprasAsync(1)).ReturnsAsync(proveedor);
         _repoMock.Setup(r => r.SaveChangesAsync()).ReturnsAsync(true);
 
-        await Assert.ThrowsAsync<BusinessRuleException>(() => _service.DeleteAsync(1));
+        var resultado = await _service.DeleteAsync(1);
 
+        Assert.True(resultado);
         Assert.False(proveedor.Activo);
+        Assert.True(proveedor.Eliminado);
+        Assert.Equal(1, proveedor.EliminadoPorUsuarioId);
         _repoMock.Verify(r => r.Remove(It.IsAny<Proveedor>()), Times.Never);
     }
 
     [Fact]
-    public async Task DeleteAsync_Sin_Compras_Elimina_Fisicamente()
+    public async Task DeleteAsync_Sin_Compras_Aplica_Eliminacion_Logica()
     {
         var proveedor = new Proveedor { Id = 1, Nombre = "Nuevo Proveedor", Activo = true };
         _repoMock.Setup(r => r.GetByIdConComprasAsync(1)).ReturnsAsync(proveedor);
@@ -57,6 +60,9 @@ public class ProveedorServiceTests
         var resultado = await _service.DeleteAsync(1);
 
         Assert.True(resultado);
-        _repoMock.Verify(r => r.Remove(proveedor), Times.Once);
+        Assert.False(proveedor.Activo);
+        Assert.True(proveedor.Eliminado);
+        Assert.Equal(1, proveedor.EliminadoPorUsuarioId);
+        _repoMock.Verify(r => r.Remove(It.IsAny<Proveedor>()), Times.Never);
     }
 }

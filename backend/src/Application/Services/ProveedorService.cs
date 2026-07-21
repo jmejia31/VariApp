@@ -99,25 +99,18 @@ public class ProveedorService : IProveedorService
         var proveedor = await _repository.GetByIdConComprasAsync(id);
         if (proveedor is null) return false;
 
-        if (proveedor.Compras.Any())
-        {
-            // Mismo patrón que Categorías: si tiene historial, se desactiva en vez de borrar.
-            proveedor.Activo = false;
-            proveedor.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
-            proveedor.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
-            proveedor.FechaActualizacion = DateTime.UtcNow;
-            _repository.Update(proveedor);
-            await _repository.SaveChangesAsync();
-            await _auditoria.RegistrarAsync(ModuloSistema.Proveedores, AccionPermiso.Eliminar, $"Proveedor desactivado por historial: {proveedor.Nombre}", proveedor.Id);
+        proveedor.Activo = false;
+        proveedor.Eliminado = true;
+        proveedor.FechaEliminacion = DateTime.UtcNow;
+        proveedor.EliminadoPorUsuarioId = _currentUser.UsuarioId;
+        proveedor.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
+        proveedor.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
+        proveedor.FechaActualizacion = DateTime.UtcNow;
 
-            throw new BusinessRuleException(
-                $"El proveedor tiene {proveedor.Compras.Count} compra(s) registrada(s); no se puede eliminar. Se desactivó en su lugar.");
-        }
-
-        _repository.Remove(proveedor);
+        _repository.Update(proveedor);
         var eliminado = await _repository.SaveChangesAsync();
         if (eliminado)
-            await _auditoria.RegistrarAsync(ModuloSistema.Proveedores, AccionPermiso.Eliminar, $"Proveedor eliminado: {proveedor.Nombre}", id);
+            await _auditoria.RegistrarAsync(ModuloSistema.Proveedores, AccionPermiso.EliminarLogico, $"Proveedor eliminado logicamente: {proveedor.Nombre}", id);
         return eliminado;
     }
 

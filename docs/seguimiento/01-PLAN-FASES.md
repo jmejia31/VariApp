@@ -127,3 +127,31 @@ Alcance aplicado:
 
 Estado: implementado y validado localmente. Siguiente paso: desplegar desde
 `main` y aplicar la migración en producción.
+# Seguimiento actualizado 20/07/2026 - correccion operativa post-produccion
+
+## Fase correctiva de operacion
+
+Objetivo: resolver los hallazgos reportados en produccion sin borrar registros:
+usuarios ocultos, asignacion de permisos por rol, desbordes visuales,
+eliminacion logica de catalogos y un dashboard principal profesional alimentado
+desde la base de datos.
+
+Alcance aplicado:
+
+1. Usuarios: fallback de carga en frontend y reparacion no destructiva de
+   usuarios marcados accidentalmente como eliminados sin metadatos de
+   eliminacion.
+2. Roles/permisos: el catalogo de permisos se normaliza al iniciar la API para
+   reactivar permisos del sistema requeridos y permitir asignarlos a roles.
+3. Categorias, clientes y proveedores: eliminacion logica, con auditoria y sin
+   borrado fisico.
+4. Impuestos/descuentos: seed idempotente para ISV 15%, ISC 5% y promocion
+   VariStorehn 10%; los calculos siguen realizandose desde backend.
+5. Facturas: fallback de logo institucional para que la factura siempre lleve
+   membrete cuando no venga logo de configuracion empresarial.
+6. Frontend: correccion de desbordes en permisos y configuracion visual.
+7. Dashboard: rediseno ejecutivo con tarjetas, graficas, actividad reciente,
+   stock critico y auditoria, usando exclusivamente el endpoint de resumen.
+
+Estado: implementado y validado localmente. No se genero migracion nueva porque
+los campos de eliminacion logica utilizados ya existen en el modelo vigente.

@@ -72,7 +72,7 @@ public class ClientesController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
-    [RequierePermiso(ModuloSistema.Clientes, AccionPermiso.Eliminar)]
+    [RequierePermiso(ModuloSistema.Clientes, AccionPermiso.EliminarLogico)]
     public async Task<IActionResult> Delete(int id)
     {
         var eliminado = await _service.DeleteAsync(id);

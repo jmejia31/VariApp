@@ -718,3 +718,52 @@ Pendientes reales:
 - Confirmar en producción carga real de logo Cloudinary y generación/descarga de
   factura con una venta real.
 - Configurar SMTP real para declarar correo como operativo end-to-end.
+# Cierre actualizado 20/07/2026 - correccion operativa post-produccion
+
+Estado: terminada localmente.
+
+Objetivo alcanzado:
+
+- Usuarios: se agrego fallback de carga en frontend y una reparacion controlada
+  en startup para restaurar unicamente usuarios con `Eliminado = true` sin
+  metadatos de eliminacion. Esto evita recuperar usuarios eliminados de forma
+  legitima.
+- Roles/permisos: el seed del catalogo de permisos ahora actualiza y reactiva
+  permisos del sistema requeridos, corrigiendo casos donde la matriz no permitia
+  asignar permisos existentes.
+- Categorias: opcion de eliminar agregada en frontend y eliminacion logica en
+  backend, con permiso `Categorias/EliminarLogico`.
+- Clientes y proveedores: eliminacion logica uniforme, sin borrado fisico aun
+  cuando no tengan movimientos asociados.
+- Impuestos/descuentos: seed idempotente para `ISV15`, `ISC5` y `VARISTORE10`.
+- Facturas: logo institucional como fallback para membrete si la empresa no
+  tiene logo configurado.
+- UI: permisos por rol y configuracion de colores corregidos para evitar
+  desbordes horizontales.
+- Dashboard: rediseno profesional alimentado por `DashboardResumen`, sin datos
+  duros en la pantalla.
+
+Archivos creados:
+
+- `backend/src/Infrastructure/Services/ProductionDataRepairService.cs`
+- `backend/src/Infrastructure/Services/SeedFiscalService.cs`
+
+Pruebas realizadas:
+
+- `dotnet build backend\InventoryApp.sln`: OK, 0 errores.
+- `dotnet test backend\InventoryApp.sln --no-build`: OK, 52/52 pruebas.
+- `npm.cmd run build` en `frontend`: OK, 0 errores.
+
+Cambios en base de datos:
+
+- No se genero migracion nueva.
+- En produccion se ejecutaran seeds idempotentes al iniciar la API.
+- No se eliminan registros. La reparacion de usuarios solo limpia marcas de
+  eliminado accidental sin fecha ni usuario eliminador.
+
+Pendientes reales:
+
+- Verificar en produccion, despues del despliegue, que Render aplico el nuevo
+  arranque y que Aiven refleja los seeds fiscales.
+- Probar desde la UI real: usuarios, permisos por rol, eliminacion logica,
+  venta con impuesto/descuento y factura con logo.

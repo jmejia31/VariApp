@@ -68,7 +68,7 @@ public class CategoriasController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
-    [RequierePermiso(ModuloSistema.Categorias, AccionPermiso.Eliminar)]
+    [RequierePermiso(ModuloSistema.Categorias, AccionPermiso.EliminarLogico)]
     public async Task<IActionResult> Delete(int id)
     {
         var eliminada = await _categoriaService.DeleteAsync(id);

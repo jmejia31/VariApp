@@ -156,3 +156,50 @@ Smtp__NombreRemitente=VariStorehn
 5. Desplegar frontend desde `main`.
 6. Probar login, inactividad, venta con descuento/impuesto, factura PDF,
    WhatsApp, logo/configuración y correo si SMTP ya está configurado.
+# Comandos de integracion - correccion operativa post-produccion 20/07/2026
+
+## Backend
+
+Desde `C:\VariApp`:
+
+```powershell
+$env:DOTNET_CLI_HOME='C:\VariApp\.dotnet_cli_home'
+$env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE='1'
+dotnet build backend\InventoryApp.sln
+dotnet test backend\InventoryApp.sln --no-build
+```
+
+No modifica base de datos.
+
+## Frontend
+
+Desde `C:\VariApp\frontend`:
+
+```powershell
+npm.cmd run build
+```
+
+No modifica base de datos.
+
+## Despliegue
+
+Al subir a `main`, Render debe reconstruir el backend. En el arranque de la API
+se ejecutan de forma idempotente:
+
+- Reparacion segura de usuarios ocultos accidentalmente.
+- Seed/normalizacion de permisos del sistema.
+- Seed de ISV, ISC y descuento.
+
+No hay migracion nueva para esta correccion.
+
+## Verificacion en produccion
+
+1. Entrar a `https://varistorehn.vercel.app/login`.
+2. Iniciar sesion como administrador.
+3. Verificar que Usuarios muestre los registros existentes.
+4. Ir a Roles y asignar permisos a un rol no administrador.
+5. Verificar que Permisos no tenga desbordes.
+6. Eliminar logicamente una categoria, cliente y proveedor de prueba.
+7. Crear una venta aplicando impuesto/descuento disponible.
+8. Abrir la factura y confirmar logo, subtotal, descuento, impuesto y total.
+9. Revisar Dashboard y confirmar que las metricas cambian segun datos reales.

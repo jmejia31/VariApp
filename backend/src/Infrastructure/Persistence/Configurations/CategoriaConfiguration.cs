@@ -11,7 +11,9 @@ public class CategoriaConfiguration : IEntityTypeConfiguration<Categoria>
         builder.ToTable("Categorias");
         builder.Property(c => c.Nombre).IsRequired().HasMaxLength(100);
         builder.Property(c => c.Descripcion).HasMaxLength(500);
+        builder.Property(c => c.Eliminado).HasDefaultValue(false);
         builder.HasIndex(c => c.Nombre).IsUnique();
+        builder.HasIndex(c => c.Eliminado);
 
         builder.HasMany(c => c.Productos)
             .WithOne(p => p.Categoria)

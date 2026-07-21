@@ -108,22 +108,34 @@ public class SeedPermisoService
         {
             foreach (var accion in acciones)
             {
-                var exists = await _context.Permisos
-                    .AnyAsync(p => p.Modulo == modulo && p.Accion == accion);
+                var permiso = await _context.Permisos
+                    .FirstOrDefaultAsync(p => p.Modulo == modulo && p.Accion == accion);
 
-                if (exists) continue;
-
-                _context.Permisos.Add(new Permiso
+                if (permiso is null)
                 {
-                    Codigo = $"{modulo}.{accion}".ToUpperInvariant(),
-                    Nombre = $"{modulo} - {accion}",
-                    Descripcion = $"Permite {accion} en {modulo}.",
-                    Modulo = modulo,
-                    Accion = accion,
-                    EsSistema = true,
-                    Activo = true,
-                    Eliminado = false
-                });
+                    _context.Permisos.Add(new Permiso
+                    {
+                        Codigo = $"{modulo}.{accion}".ToUpperInvariant(),
+                        Nombre = $"{modulo} - {accion}",
+                        Descripcion = $"Permite {accion} en {modulo}.",
+                        Modulo = modulo,
+                        Accion = accion,
+                        EsSistema = true,
+                        Activo = true,
+                        Eliminado = false
+                    });
+                    continue;
+                }
+
+                permiso.Codigo = $"{modulo}.{accion}".ToUpperInvariant();
+                permiso.Nombre = $"{modulo} - {accion}";
+                permiso.Descripcion = $"Permite {accion} en {modulo}.";
+                permiso.EsSistema = true;
+                permiso.Activo = true;
+                permiso.Eliminado = false;
+                permiso.FechaEliminacion = null;
+                permiso.EliminadoPorUsuarioId = null;
+                permiso.FechaActualizacion = DateTime.UtcNow;
             }
         }
     }

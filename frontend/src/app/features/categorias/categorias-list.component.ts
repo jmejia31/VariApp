@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { CategoriaService } from '../../services/categoria.service';
 import { Categoria } from '../../core/models/categoria.model';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
@@ -21,12 +22,18 @@ export class CategoriasListComponent implements OnInit {
   readonly loading = signal(true);
   readonly puedeCrear = signal(false);
   readonly puedeEditar = signal(false);
+  readonly puedeEliminar = signal(false);
 
-  constructor(private categoriaService: CategoriaService, private permisosRuntime: PermisosRuntimeService) {}
+  constructor(
+    private categoriaService: CategoriaService,
+    private permisosRuntime: PermisosRuntimeService,
+    private snackBar: MatSnackBar
+  ) {}
 
   ngOnInit(): void {
     this.puedeCrear.set(this.permisosRuntime.puede('Categorias', 'Crear'));
     this.puedeEditar.set(this.permisosRuntime.puede('Categorias', 'Editar'));
+    this.puedeEliminar.set(this.permisosRuntime.puede('Categorias', 'EliminarLogico'));
     this.cargar();
   }
 
@@ -47,5 +54,17 @@ export class CategoriasListComponent implements OnInit {
       descripcion: categoria.descripcion,
       activa: !categoria.activa
     }).subscribe(() => this.cargar());
+  }
+
+  eliminar(categoria: Categoria): void {
+    if (!confirm(`Eliminar la categoria "${categoria.nombre}"? Se ocultara del sistema sin borrar el historial relacionado.`)) return;
+
+    this.categoriaService.delete(categoria.id).subscribe({
+      next: () => {
+        this.snackBar.open('Categoria eliminada correctamente.', 'Cerrar', { duration: 3500 });
+        this.cargar();
+      },
+      error: (err) => this.snackBar.open(err.error?.message ?? 'No se pudo eliminar la categoria.', 'Cerrar', { duration: 5000 })
+    });
   }
 }

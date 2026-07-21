@@ -33,7 +33,7 @@ public class ClienteServiceTests
     }
 
     [Fact]
-    public async Task DeleteAsync_Con_Ventas_Asociadas_Desactiva_En_Vez_De_Eliminar()
+    public async Task DeleteAsync_Con_Ventas_Asociadas_Aplica_Eliminacion_Logica()
     {
         var cliente = new Cliente { Id = 1, Nombre = "Juan Pérez", Activo = true };
         cliente.Ventas.Add(new Venta { NumeroVenta = "VEN-000001", Estado = EstadoDocumento.Confirmada, Total = 100 });
@@ -41,9 +41,12 @@ public class ClienteServiceTests
         _repoMock.Setup(r => r.GetByIdConVentasAsync(1)).ReturnsAsync(cliente);
         _repoMock.Setup(r => r.SaveChangesAsync()).ReturnsAsync(true);
 
-        await Assert.ThrowsAsync<BusinessRuleException>(() => _service.DeleteAsync(1));
+        var resultado = await _service.DeleteAsync(1);
 
+        Assert.True(resultado);
         Assert.False(cliente.Activo);
+        Assert.True(cliente.Eliminado);
+        Assert.Equal(1, cliente.EliminadoPorUsuarioId);
         _repoMock.Verify(r => r.Remove(It.IsAny<Cliente>()), Times.Never);
     }
 

@@ -31,23 +31,21 @@
   @if (loadingMatriz()) {
     <div class="loading"><mat-spinner></mat-spinner></div>
   } @else {
-    <div class="card">
-      <table class="table">
-        <tbody>
-          @for (modulo of modulosFiltrados(); track modulo) {
-            <tr class="modulo-row">
-              <td class="modulo-nombre">{{ modulo }}</td>
-              <td class="acciones-cell">
-                @for (item of accionesDelModulo(modulo); track item.accion) {
-                  <mat-checkbox [checked]="item.permitido" (change)="toggle(item)">
-                    {{ item.accion }}
-                  </mat-checkbox>
-                }
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
+    <div class="card permisos-card">
+      <div class="modulos-grid">
+        @for (modulo of modulosFiltrados(); track modulo) {
+          <section class="modulo-card">
+            <h2>{{ modulo }}</h2>
+            <div class="acciones-cell">
+              @for (item of accionesDelModulo(modulo); track item.accion) {
+                <mat-checkbox [checked]="item.permitido" (change)="toggle(item)">
+                  {{ item.accion }}
+                </mat-checkbox>
+              }
+            </div>
+          </section>
+        }
+      </div>
 
       <div class="form-actions">
         <button mat-flat-button color="primary" [disabled]="saving()" (click)="guardar()">

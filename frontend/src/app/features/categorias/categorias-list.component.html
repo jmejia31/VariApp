@@ -36,6 +36,11 @@
                   <mat-icon>edit</mat-icon>
                 </a>
               }
+              @if (puedeEliminar()) {
+                <button mat-icon-button title="Eliminar" (click)="eliminar(c)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              }
             </td>
           </tr>
         } @empty {
@@ -53,9 +58,14 @@
           </div>
           <p class="item-card-desc">{{ c.descripcion || 'Sin descripción' }}</p>
           <div class="item-card-meta"><span>{{ c.totalProductos }} productos</span></div>
-          @if (puedeEditar()) {
+          @if (puedeEditar() || puedeEliminar()) {
             <div class="item-card-actions">
-              <a [routerLink]="['/categorias', c.id, 'editar']" mat-button><mat-icon>edit</mat-icon> Editar</a>
+              @if (puedeEditar()) {
+                <a [routerLink]="['/categorias', c.id, 'editar']" mat-button><mat-icon>edit</mat-icon> Editar</a>
+              }
+              @if (puedeEliminar()) {
+                <button mat-button type="button" (click)="eliminar(c)"><mat-icon>delete</mat-icon> Eliminar</button>
+              }
             </div>
           }
         </div>

@@ -15,6 +15,8 @@ public class ProveedorConfiguration : IEntityTypeConfiguration<Proveedor>
         builder.Property(p => p.Documento).HasMaxLength(50);
         builder.Property(p => p.Correo).HasMaxLength(150);
         builder.Property(p => p.Direccion).HasMaxLength(300);
+        builder.Property(p => p.Eliminado).HasDefaultValue(false);
+        builder.HasIndex(p => p.Eliminado);
 
         builder.HasMany(p => p.Compras)
             .WithOne(c => c.Proveedor)

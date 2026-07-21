@@ -99,24 +99,18 @@ public class ClienteService : IClienteService
         var cliente = await _repository.GetByIdConVentasAsync(id);
         if (cliente is null) return false;
 
-        if (cliente.Ventas.Any())
-        {
-            cliente.Activo = false;
-            cliente.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
-            cliente.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
-            cliente.FechaActualizacion = DateTime.UtcNow;
-            _repository.Update(cliente);
-            await _repository.SaveChangesAsync();
-            await _auditoria.RegistrarAsync(ModuloSistema.Clientes, AccionPermiso.Eliminar, $"Cliente desactivado por historial: {cliente.Nombre}", cliente.Id);
+        cliente.Activo = false;
+        cliente.Eliminado = true;
+        cliente.FechaEliminacion = DateTime.UtcNow;
+        cliente.EliminadoPorUsuarioId = _currentUser.UsuarioId;
+        cliente.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
+        cliente.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
+        cliente.FechaActualizacion = DateTime.UtcNow;
 
-            throw new BusinessRuleException(
-                $"El cliente tiene {cliente.Ventas.Count} venta(s) registrada(s); no se puede eliminar. Se desactivó en su lugar.");
-        }
-
-        _repository.Remove(cliente);
+        _repository.Update(cliente);
         var eliminado = await _repository.SaveChangesAsync();
         if (eliminado)
-            await _auditoria.RegistrarAsync(ModuloSistema.Clientes, AccionPermiso.Eliminar, $"Cliente eliminado: {cliente.Nombre}", id);
+            await _auditoria.RegistrarAsync(ModuloSistema.Clientes, AccionPermiso.EliminarLogico, $"Cliente eliminado logicamente: {cliente.Nombre}", id);
         return eliminado;
     }
 

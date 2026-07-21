@@ -22,6 +22,7 @@ import { EnlaceCompartir, Factura, HistorialEnvio } from '../../core/models/fact
   styleUrl: './factura-view.component.scss'
 })
 export class FacturaViewComponent implements OnInit {
+  readonly defaultLogoUrl = 'assets/varistorehn-logo.png';
   readonly factura = signal<Factura | null>(null);
   readonly loading = signal(true);
   readonly descargandoPdf = signal(false);

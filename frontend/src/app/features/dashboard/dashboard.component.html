@@ -1,120 +1,164 @@
 @if (loading()) {
   <div class="loading"><mat-spinner></mat-spinner></div>
 } @else if (resumen(); as r) {
-  <h1 class="page-title">Dashboard</h1>
-
-  <div class="stats-grid">
-    <div class="card stat">
-      <mat-icon class="icon primary">inventory_2</mat-icon>
+  <section class="dashboard-shell">
+    <div class="dashboard-title">
       <div>
-        <p class="label">Total de productos</p>
-        <p class="value">{{ r.totalProductos }}</p>
+        <p class="eyebrow">Panel principal</p>
+        <h1>Dashboard</h1>
       </div>
+      <a routerLink="/ventas" class="quick-link">Ver ventas</a>
     </div>
-    <div class="card stat">
-      <mat-icon class="icon success">layers</mat-icon>
-      <div>
-        <p class="label">Unidades en inventario</p>
-        <p class="value">{{ r.totalUnidades }}</p>
-      </div>
-    </div>
-    <div class="card stat">
-      <mat-icon class="icon warning">payments</mat-icon>
-      <div>
-        <p class="label">Valor del inventario (costo)</p>
-        <p class="value">L. {{ r.valorTotalInventario | number:'1.2-2' }}</p>
-      </div>
-    </div>
-    <div class="card stat">
-      <mat-icon class="icon primary">trending_up</mat-icon>
-      <div>
-        <p class="label">Valor potencial de venta</p>
-        <p class="value">L. {{ r.valorPotencialVenta | number:'1.2-2' }}</p>
-      </div>
-    </div>
-  </div>
 
-  <div class="panels">
-    <div class="card panel">
-      <h2>Productos con poco stock</h2>
-      @if (r.productosStockBajo.length === 0) {
-        <p class="empty">No hay productos con stock bajo.</p>
-      } @else {
-        <ul class="list">
-          @for (p of r.productosStockBajo; track p.id) {
-            <li>
-              <span>{{ p.nombre }} — {{ p.marca }} {{ p.modelo }}</span>
-              <span class="badge danger">{{ p.cantidad }} und.</span>
-            </li>
+    <div class="metric-grid">
+      <article class="metric-card accent-orange">
+        <div>
+          <span>L. {{ r.ingresosDelMes | number:'1.2-2' }}</span>
+          <p>Ingresos del mes</p>
+        </div>
+        <mat-icon>bar_chart</mat-icon>
+        <footer>Ventas registradas: {{ r.ventasDelMes }}</footer>
+      </article>
+
+      <article class="metric-card accent-green">
+        <div>
+          <span>{{ r.totalUnidades | number }}</span>
+          <p>Unidades en inventario</p>
+        </div>
+        <mat-icon>inventory_2</mat-icon>
+        <footer>Productos activos: {{ r.totalProductos }}</footer>
+      </article>
+
+      <article class="metric-card accent-red">
+        <div>
+          <span>{{ r.productosStockBajo.length }}</span>
+          <p>Alertas de stock bajo</p>
+        </div>
+        <mat-icon>event_busy</mat-icon>
+        <footer>Revisar reposición</footer>
+      </article>
+
+      <article class="metric-card accent-cyan">
+        <div>
+          <span>L. {{ r.utilidadBruta | number:'1.2-2' }}</span>
+          <p>Utilidad bruta</p>
+        </div>
+        <mat-icon>download</mat-icon>
+        <footer>Balance: L. {{ r.balanceOperativo | number:'1.2-2' }}</footer>
+      </article>
+    </div>
+
+    <div class="dashboard-grid">
+      <article class="card analytics-card">
+        <div class="panel-heading">
+          <div>
+            <h2>Actividad comercial</h2>
+            <p>Ventas y compras recientes tomadas de la base de datos.</p>
+          </div>
+          <div class="panel-tools">
+            <mat-icon>open_in_full</mat-icon>
+            <mat-icon>remove</mat-icon>
+          </div>
+        </div>
+
+        <div class="chart-legend">
+          <span><i class="venta"></i> Ventas</span>
+          <span><i class="compra"></i> Compras</span>
+        </div>
+
+        <div class="combo-chart">
+          @for (v of ventasRecientes(r); track v.numeroVenta) {
+            <div class="chart-column">
+              <div class="bars">
+                <span class="bar venta" [style.height.%]="barraPorcentaje(v.total, r)"></span>
+              </div>
+              <small>{{ v.fecha | date:'dd/MM' }}</small>
+            </div>
           }
-        </ul>
-      }
-    </div>
-
-    <div class="card panel">
-      <h2>Últimos productos agregados</h2>
-      @if (r.ultimosAgregados.length === 0) {
-        <p class="empty">Aún no hay productos registrados.</p>
-      } @else {
-        <ul class="list">
-          @for (p of r.ultimosAgregados; track p.id) {
-            <li>
-              <span>{{ p.nombre }} — {{ p.marca }} {{ p.modelo }}</span>
-              <span class="badge">{{ p.cantidad }} und.</span>
-            </li>
+          @for (c of comprasRecientes(r); track c.numeroCompra) {
+            <div class="chart-column">
+              <div class="bars">
+                <span class="bar compra" [style.height.%]="barraPorcentaje(c.total, r)"></span>
+              </div>
+              <small>{{ c.fecha | date:'dd/MM' }}</small>
+            </div>
           }
-        </ul>
-      }
-    </div>
-  </div>
+        </div>
+      </article>
 
-  <h2 class="section-title">Operación y finanzas</h2>
-  <div class="stats-grid">
-    <div class="card stat"><p class="label">Compras del mes</p><p class="value">{{ r.comprasDelMes }}</p></div>
-    <div class="card stat"><p class="label">Ventas del mes</p><p class="value">{{ r.ventasDelMes }}</p></div>
-    <div class="card stat"><p class="label">Ingresos del mes</p><p class="value">L. {{ r.ingresosDelMes | number:'1.2-2' }}</p></div>
-    <div class="card stat"><p class="label">Utilidad bruta</p><p class="value">L. {{ r.utilidadBruta | number:'1.2-2' }}</p></div>
-    <div class="card stat"><p class="label">Balance operativo</p><p class="value" [class.negative]="r.balanceOperativo < 0">L. {{ r.balanceOperativo | number:'1.2-2' }}</p></div>
-    <div class="card stat"><p class="label">Cuentas por cobrar</p><p class="value">L. {{ r.cuentasPorCobrar | number:'1.2-2' }}</p></div>
-    <div class="card stat"><p class="label">Cuentas por pagar</p><p class="value">L. {{ r.cuentasPorPagar | number:'1.2-2' }}</p></div>
-  </div>
-
-  <div class="panels">
-    <div class="card panel">
-      <h2>Últimas compras</h2>
-      @if (r.ultimasCompras.length === 0) {
-        <p class="empty">Aún no hay compras registradas.</p>
-      } @else {
-        <ul class="list">
-          @for (c of r.ultimasCompras; track c.numeroCompra) {
-            <li><span>{{ c.numeroCompra }} — {{ c.proveedorNombre }}</span><span class="badge">L. {{ c.total | number:'1.2-2' }}</span></li>
+      <aside class="performance-card">
+        <div class="mini-bars">
+          @for (p of r.productosStockBajo.slice(0, 5); track p.id) {
+            <span [style.height.%]="porcentaje(p.cantidad, p.umbralStockBajo || 1)"></span>
           }
-        </ul>
-      }
-    </div>
-    <div class="card panel">
-      <h2>Últimas ventas</h2>
-      @if (r.ultimasVentas.length === 0) {
-        <p class="empty">Aún no hay ventas registradas.</p>
-      } @else {
-        <ul class="list">
-          @for (v of r.ultimasVentas; track v.numeroVenta) {
-            <li><span>{{ v.numeroVenta }} — {{ v.clienteNombre }}</span><span class="badge">L. {{ v.total | number:'1.2-2' }}</span></li>
-          }
-        </ul>
-      }
-    </div>
-  </div>
+        </div>
+        <p>Stock bajo</p>
+        <strong>{{ r.productosStockBajo.length }}</strong>
+        <span>productos requieren atención</span>
+      </aside>
 
-  <div class="card auditoria-panel">
-    <h2>Auditoría — última actividad</h2>
-    <div class="auditoria-grid">
-      <div><span class="label">Última venta por</span><span>{{ r.ultimaVentaPor || '—' }}</span></div>
-      <div><span class="label">Última compra por</span><span>{{ r.ultimaCompraPor || '—' }}</span></div>
-      <div><span class="label">Última revisión financiera por</span><span>{{ r.ultimaRevisionFinancieraPor || '—' }}</span></div>
-      <div><span class="label">Último producto registrado por</span><span>{{ r.ultimoProductoRegistradoPor || '—' }}</span></div>
-    </div>
-  </div>
+      <article class="card table-card">
+        <div class="panel-heading">
+          <h2>Últimas ventas</h2>
+          <a routerLink="/ventas">Ver todas</a>
+        </div>
+        @if (r.ultimasVentas.length === 0) {
+          <p class="empty">Aún no hay ventas registradas.</p>
+        } @else {
+          <table>
+            <thead><tr><th>#</th><th>Cliente</th><th>Total</th><th>Estado</th></tr></thead>
+            <tbody>
+              @for (v of r.ultimasVentas; track v.numeroVenta) {
+                <tr>
+                  <td>{{ v.numeroVenta }}</td>
+                  <td>{{ v.clienteNombre }}</td>
+                  <td>L. {{ v.total | number:'1.2-2' }}</td>
+                  <td>{{ v.estado }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </article>
 
-  <a routerLink="/productos" class="link-all">Ver todos los productos →</a>
+      <article class="card donut-card">
+        <div class="panel-heading">
+          <h2>Operación del mes</h2>
+        </div>
+        <div class="donut" [style.background]="donutBackground(r)"></div>
+        <div class="donut-stats">
+          <div><strong>{{ porcentaje(r.ventasDelMes, totalOperativo(r)) }}%</strong><span>Ventas</span></div>
+          <div><strong>{{ porcentaje(r.comprasDelMes, totalOperativo(r)) }}%</strong><span>Compras</span></div>
+          <div><strong>{{ porcentaje(r.productosStockBajo.length, totalOperativo(r)) }}%</strong><span>Alertas</span></div>
+        </div>
+      </article>
+
+      <article class="card list-card">
+        <div class="panel-heading">
+          <h2>Productos críticos</h2>
+          <a routerLink="/productos">Inventario</a>
+        </div>
+        @if (r.productosStockBajo.length === 0) {
+          <p class="empty">No hay productos con stock bajo.</p>
+        } @else {
+          <ul>
+            @for (p of r.productosStockBajo; track p.id) {
+              <li>
+                <span>{{ p.nombre }} · {{ p.marca }} {{ p.modelo }}</span>
+                <strong>{{ p.cantidad }} und.</strong>
+              </li>
+            }
+          </ul>
+        }
+      </article>
+
+      <article class="card audit-card">
+        <h2>Auditoría reciente</h2>
+        <div><span>Última venta</span><strong>{{ r.ultimaVentaPor || 'Sin registro' }}</strong></div>
+        <div><span>Última compra</span><strong>{{ r.ultimaCompraPor || 'Sin registro' }}</strong></div>
+        <div><span>Última revisión financiera</span><strong>{{ r.ultimaRevisionFinancieraPor || 'Sin registro' }}</strong></div>
+        <div><span>Último producto</span><strong>{{ r.ultimoProductoRegistradoPor || 'Sin registro' }}</strong></div>
+      </article>
+    </div>
+  </section>
 }

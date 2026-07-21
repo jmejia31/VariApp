@@ -13,10 +13,31 @@
 .selector-rol { min-width: 220px; }
 .selector-filtro { min-width: 200px; flex: 1; max-width: 300px; }
 
-.table { width: 100%; border-collapse: collapse; }
-.modulo-row td { padding: 12px 8px; border-bottom: 1px solid var(--color-border); vertical-align: middle; }
-.modulo-nombre { font-weight: 600; font-size: 13px; width: 160px; }
-.acciones-cell { display: flex; flex-wrap: wrap; gap: 16px; }
+.permisos-card { overflow: hidden; }
+.modulos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+}
+.modulo-card {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 14px;
+  background: var(--color-surface);
+  min-width: 0;
+
+  h2 {
+    margin: 0 0 12px;
+    font-size: 14px;
+    color: var(--color-text);
+  }
+}
+.acciones-cell {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(142px, 1fr));
+  gap: 8px 12px;
+  align-items: start;
+}
 
 .form-actions { display: flex; justify-content: flex-end; margin-top: 20px; }
 
@@ -26,14 +47,8 @@
   .selector-row { flex-direction: column; }
   .selector-rol, .selector-filtro { max-width: 100%; width: 100%; }
 
-  .table, .table tbody, .modulo-row { display: block; width: 100%; }
-  .modulo-row {
-    border-bottom: 1px solid var(--color-border);
-    padding: 10px 0;
-  }
-  .modulo-row td { display: block; padding: 4px 0; border-bottom: none; width: 100%; }
-  .modulo-nombre { width: 100%; margin-bottom: 4px; }
-  .acciones-cell { flex-direction: column; gap: 8px; }
+  .modulos-grid { grid-template-columns: 1fr; }
+  .acciones-cell { grid-template-columns: 1fr; }
 
   .form-actions { justify-content: stretch; }
   .form-actions button { width: 100%; }

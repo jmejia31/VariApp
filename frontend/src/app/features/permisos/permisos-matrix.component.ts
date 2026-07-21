@@ -5,6 +5,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { PermisoService } from '../../services/permiso.service';
@@ -17,7 +18,7 @@ import { Rol } from '../../core/models/rol.model';
   standalone: true,
   imports: [
     CommonModule, FormsModule, MatCheckboxModule, MatButtonModule,
-    MatProgressSpinnerModule, MatFormFieldModule, MatSelectModule
+    MatProgressSpinnerModule, MatFormFieldModule, MatInputModule, MatSelectModule
   ],
   templateUrl: './permisos-matrix.component.html',
   styleUrl: './permisos-matrix.component.scss'

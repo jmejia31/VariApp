@@ -220,8 +220,14 @@ if (app.Configuration.GetValue<bool>("Database:ApplyMigrationsOnStartup"))
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     await db.Database.MigrateAsync();
 
+    var repairService = new ProductionDataRepairService(db);
+    await repairService.RepairAsync();
+
     var seedPermisoService = new SeedPermisoService(db);
     await seedPermisoService.SeedDefaultsAsync();
+
+    var seedFiscalService = new SeedFiscalService(db);
+    await seedFiscalService.SeedDefaultsAsync();
 
     var adminUsername = app.Configuration["SeedAdmin:Username"];
     var adminPassword = app.Configuration["SeedAdmin:Password"];

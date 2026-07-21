@@ -15,16 +15,16 @@ public class ProveedorRepository : IProveedorRepository
     }
 
     public async Task<Proveedor?> GetByIdAsync(int id) =>
-        await _context.Proveedores.FindAsync(id);
+        await _context.Proveedores.FirstOrDefaultAsync(p => p.Id == id && !p.Eliminado);
 
     public async Task<Proveedor?> GetByIdConComprasAsync(int id) =>
-        await _context.Proveedores.Include(p => p.Compras).FirstOrDefaultAsync(p => p.Id == id);
+        await _context.Proveedores.Include(p => p.Compras).FirstOrDefaultAsync(p => p.Id == id && !p.Eliminado);
 
     public async Task<List<Proveedor>> GetAllAsync() =>
-        await _context.Proveedores.Include(p => p.Compras).OrderBy(p => p.Nombre).ToListAsync();
+        await _context.Proveedores.Where(p => !p.Eliminado).Include(p => p.Compras).OrderBy(p => p.Nombre).ToListAsync();
 
     public async Task<List<Proveedor>> GetActivosAsync() =>
-        await _context.Proveedores.Where(p => p.Activo).OrderBy(p => p.Nombre).ToListAsync();
+        await _context.Proveedores.Where(p => p.Activo && !p.Eliminado).OrderBy(p => p.Nombre).ToListAsync();
 
     public async Task<List<Proveedor>> BuscarActivosAsync(string termino, int limite = 10)
     {
@@ -32,7 +32,7 @@ public class ProveedorRepository : IProveedorRepository
         if (string.IsNullOrWhiteSpace(normalizado)) return new List<Proveedor>();
 
         return await _context.Proveedores
-            .Where(p => p.Activo && (
+            .Where(p => p.Activo && !p.Eliminado && (
                 p.Nombre.ToLower().Contains(normalizado) ||
                 (p.Documento != null && p.Documento.ToLower().Contains(normalizado)) ||
                 (p.Correo != null && p.Correo.ToLower().Contains(normalizado)) ||
@@ -50,7 +50,7 @@ public class ProveedorRepository : IProveedorRepository
         var nom = NormalizarTexto(nombre);
 
         return await _context.Proveedores
-            .Where(p => p.Activo)
+            .Where(p => p.Activo && !p.Eliminado)
             .OrderBy(p => p.Nombre)
             .FirstOrDefaultAsync(p =>
                 (!string.IsNullOrEmpty(doc) && p.Documento != null && p.Documento.Replace("-", "").Replace(" ", "").ToLower() == doc) ||
@@ -61,7 +61,7 @@ public class ProveedorRepository : IProveedorRepository
 
     public async Task<bool> ExisteNombreAsync(string nombre, int? excluirId = null) =>
         await _context.Proveedores.AnyAsync(p =>
-            p.Nombre.ToLower() == nombre.ToLower() && (excluirId == null || p.Id != excluirId));
+            !p.Eliminado && p.Nombre.ToLower() == nombre.ToLower() && (excluirId == null || p.Id != excluirId));
 
     public async Task AddAsync(Proveedor proveedor) =>
         await _context.Proveedores.AddAsync(proveedor);

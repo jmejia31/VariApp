@@ -2,6 +2,7 @@ using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities;
+using InventoryApp.Domain.Enums;
 
 namespace InventoryApp.Application.Services;
 
@@ -9,11 +10,13 @@ public class CategoriaService : ICategoriaService
 {
     private readonly ICategoriaRepository _repository;
     private readonly ICurrentUserService _currentUser;
+    private readonly IAuditoriaService _auditoria;
 
-    public CategoriaService(ICategoriaRepository repository, ICurrentUserService currentUser)
+    public CategoriaService(ICategoriaRepository repository, ICurrentUserService currentUser, IAuditoriaService auditoria)
     {
         _repository = repository;
         _currentUser = currentUser;
+        _auditoria = auditoria;
     }
 
     public async Task<List<CategoriaDto>> GetAllAsync()
@@ -50,6 +53,7 @@ public class CategoriaService : ICategoriaService
 
         await _repository.AddAsync(categoria);
         await _repository.SaveChangesAsync();
+        await _auditoria.RegistrarAsync(ModuloSistema.Categorias, AccionPermiso.Crear, $"Categoria creada: {categoria.Nombre}", categoria.Id);
 
         return ToDto(categoria);
     }
@@ -71,6 +75,7 @@ public class CategoriaService : ICategoriaService
 
         _repository.Update(categoria);
         await _repository.SaveChangesAsync();
+        await _auditoria.RegistrarAsync(ModuloSistema.Categorias, AccionPermiso.Editar, $"Categoria actualizada: {categoria.Nombre}", categoria.Id);
 
         return ToDto(categoria);
     }
@@ -80,22 +85,19 @@ public class CategoriaService : ICategoriaService
         var categoria = await _repository.GetByIdConProductosAsync(id);
         if (categoria is null) return false;
 
-        if (categoria.Productos.Any())
-        {
-            // Regla: si tiene productos asociados, no se elimina físicamente; se desactiva.
-            categoria.Activa = false;
-            categoria.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
-            categoria.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
-            categoria.FechaActualizacion = DateTime.UtcNow;
-            _repository.Update(categoria);
-            await _repository.SaveChangesAsync();
+        categoria.Activa = false;
+        categoria.Eliminado = true;
+        categoria.FechaEliminacion = DateTime.UtcNow;
+        categoria.EliminadoPorUsuarioId = _currentUser.UsuarioId;
+        categoria.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
+        categoria.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
+        categoria.FechaActualizacion = DateTime.UtcNow;
 
-            throw new BusinessRuleException(
-                $"La categoría tiene {categoria.Productos.Count} producto(s) asociado(s); no se puede eliminar. Se desactivó en su lugar.");
-        }
-
-        _repository.Remove(categoria);
-        return await _repository.SaveChangesAsync();
+        _repository.Update(categoria);
+        var eliminado = await _repository.SaveChangesAsync();
+        if (eliminado)
+            await _auditoria.RegistrarAsync(ModuloSistema.Categorias, AccionPermiso.EliminarLogico, $"Categoria eliminada logicamente: {categoria.Nombre}", categoria.Id);
+        return eliminado;
     }
 
     private static CategoriaDto ToDto(Categoria c, bool incluirConteo = true) => new()

@@ -8,7 +8,7 @@
   mat-icon { font-size: 18px; width: 18px; height: 18px; }
 }
 
-.form-card { max-width: 980px; padding: 24px; }
+.form-card { width: min(100%, 980px); box-sizing: border-box; overflow: hidden; padding: 24px; }
 
 .settings-section {
   border-bottom: 1px solid var(--color-border);
@@ -55,18 +55,18 @@
 .error { color: var(--color-danger); font-size: 13px; margin: 8px 0; }
 .form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
 
-.tema-card { max-width: 900px; padding: 24px; margin-top: 20px; }
+.tema-card { width: min(100%, 900px); box-sizing: border-box; overflow: hidden; padding: 24px; margin-top: 20px; }
 .section-title { margin: 0 0 4px; font-size: 17px; }
 
 .colores-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px 20px; margin: 16px 0;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 16px 20px; margin: 16px 0;
 }
 .color-field {
   display: flex; flex-direction: column; gap: 6px;
   label { font-size: 12px; color: var(--color-text-muted); font-weight: 500; }
 }
 .color-input-row {
-  display: flex; align-items: center; gap: 8px;
+  display: flex; align-items: center; gap: 8px; min-width: 0;
   input[type="color"] {
     width: 40px; height: 36px; padding: 2px; border: 1px solid var(--color-border);
     border-radius: 6px; cursor: pointer; flex-shrink: 0;
@@ -86,7 +86,7 @@
   .inline-actions button { width: 100%; }
   .form-actions button { width: 100%; }
   .tema-card { padding: 16px; }
-  .colores-grid { grid-template-columns: 1fr 1fr; }
+  .colores-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 380px) {

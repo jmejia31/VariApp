@@ -12,13 +12,14 @@ public class CategoriaServiceTests
 {
     private readonly Mock<ICategoriaRepository> _repoMock = new();
     private readonly Mock<ICurrentUserService> _currentUserMock = new();
+    private readonly Mock<IAuditoriaService> _auditoriaMock = new();
     private readonly CategoriaService _service;
 
     public CategoriaServiceTests()
     {
         _currentUserMock.Setup(c => c.UsuarioId).Returns(1);
         _currentUserMock.Setup(c => c.NombreUsuario).Returns("admin");
-        _service = new CategoriaService(_repoMock.Object, _currentUserMock.Object);
+        _service = new CategoriaService(_repoMock.Object, _currentUserMock.Object, _auditoriaMock.Object);
     }
 
     [Fact]
@@ -50,7 +51,7 @@ public class CategoriaServiceTests
     }
 
     [Fact]
-    public async Task DeleteAsync_Con_Productos_Asociados_No_Elimina_Fisicamente()
+    public async Task DeleteAsync_Con_Productos_Asociados_Aplica_Eliminacion_Logica()
     {
         var categoria = new Categoria { Id = 1, Nombre = "Accesorios", Activa = true };
         categoria.Productos.Add(new Producto { Nombre = "Mouse", Marca = "X", Modelo = "Y" });
@@ -58,9 +59,11 @@ public class CategoriaServiceTests
         _repoMock.Setup(r => r.GetByIdConProductosAsync(1)).ReturnsAsync(categoria);
         _repoMock.Setup(r => r.SaveChangesAsync()).ReturnsAsync(true);
 
-        await Assert.ThrowsAsync<BusinessRuleException>(() => _service.DeleteAsync(1));
+        await _service.DeleteAsync(1);
 
         Assert.False(categoria.Activa);
+        Assert.True(categoria.Eliminado);
+        Assert.Equal(1, categoria.EliminadoPorUsuarioId);
         _repoMock.Verify(r => r.Remove(It.IsAny<Categoria>()), Times.Never);
     }
 }

@@ -78,12 +78,27 @@ export class UsuariosComponent implements OnInit {
 
   cargar(): void {
     this.loading.set(true);
+    this.errorMessage.set(null);
     this.usuarioService.getPaged({ page: 1, pageSize: 100, search: this.buscador.value || undefined }).subscribe({
       next: (res) => {
         this.usuarios.set(res.data.items);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false)
+      error: () => {
+        // Si el endpoint paginado falla por una configuracion vieja de permisos, se usa el listado legado.
+        this.usuarioService.getAll().subscribe({
+          next: (res) => {
+            this.usuarios.set(res.data);
+            this.loading.set(false);
+          },
+          error: (err) => {
+            this.usuarios.set([]);
+            this.loading.set(false);
+            this.errorMessage.set(err.error?.message ?? 'No se pudo cargar la lista de usuarios.');
+            this.snackBar.open(this.errorMessage()!, 'Cerrar', { duration: 6000 });
+          }
+        });
+      }
     });
   }
 
