@@ -29,7 +29,7 @@
           <th (click)="ordenarPor('Costo')" class="sortable">Costo</th>
           <th (click)="ordenarPor('Precio')" class="sortable">Precio</th>
           <th>Estado</th>
-          <th></th>
+          <th>Acciones</th>
         </tr>
       </thead>
       <tbody>
@@ -53,10 +53,15 @@
             <td>L. {{ p.costo | number:'1.2-2' }}</td>
             <td>L. {{ p.precio | number:'1.2-2' }}</td>
             <td>
-              @if (p.tieneStockBajo) {
-                <span class="badge danger">Stock bajo</span>
+              @if (puedeCambiarEstado(p)) {
+                <mat-slide-toggle [checked]="p.activo" (change)="cambiarEstado(p)"></mat-slide-toggle>
               } @else {
-                <span class="badge success">Disponible</span>
+                <span class="badge" [class.success]="p.activo" [class.muted]="!p.activo">
+                  {{ p.activo ? 'Activo' : 'Inactivo' }}
+                </span>
+              }
+              @if (p.activo && p.tieneStockBajo) {
+                <span class="badge danger">Stock bajo</span>
               }
             </td>
             <td class="actions">
@@ -69,7 +74,7 @@
                 </a>
               }
               @if (puedeEliminar()) {
-                <button mat-icon-button title="Eliminar" (click)="eliminar(p)">
+                <button mat-icon-button title="Eliminar lógicamente" (click)="eliminar(p)">
                   <mat-icon>delete</mat-icon>
                 </button>
               }
@@ -95,14 +100,18 @@
               <span class="producto-card-sub">{{ p.marca }} · {{ p.modelo }}</span>
               <span class="producto-card-sub">{{ p.categoriaNombre || 'Sin categoría' }}</span>
             </div>
+            @if (puedeCambiarEstado(p)) {
+              <mat-slide-toggle [checked]="p.activo" (change)="cambiarEstado(p)"></mat-slide-toggle>
+            }
           </div>
           <div class="item-card-meta">
             <span>Stock: {{ p.cantidad }}</span>
             <span>L. {{ p.precio | number:'1.2-2' }}</span>
-            @if (p.tieneStockBajo) {
+            <span class="badge" [class.success]="p.activo" [class.muted]="!p.activo">
+              {{ p.activo ? 'Activo' : 'Inactivo' }}
+            </span>
+            @if (p.activo && p.tieneStockBajo) {
               <span class="badge danger">Stock bajo</span>
-            } @else {
-              <span class="badge success">Disponible</span>
             }
           </div>
           <div class="item-card-actions">
