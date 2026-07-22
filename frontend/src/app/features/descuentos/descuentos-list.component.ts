@@ -23,14 +23,23 @@ export class DescuentosListComponent implements OnInit {
   readonly loading = signal(true);
   readonly puedeCrear = signal(false);
   readonly puedeEditar = signal(false);
+  readonly puedeActivar = signal(false);
+  readonly puedeDesactivar = signal(false);
   readonly puedeEliminar = signal(false);
   readonly puedeDuplicar = signal(false);
 
-  constructor(private service: DescuentoService, private permisosRuntime: PermisosRuntimeService, private snackBar: MatSnackBar, private alerts: AppAlertService) {}
+  constructor(
+    private service: DescuentoService,
+    private permisosRuntime: PermisosRuntimeService,
+    private snackBar: MatSnackBar,
+    private alerts: AppAlertService
+  ) {}
 
   ngOnInit(): void {
     this.puedeCrear.set(this.permisosRuntime.puede('Descuentos', 'Crear'));
     this.puedeEditar.set(this.permisosRuntime.puede('Descuentos', 'Editar'));
+    this.puedeActivar.set(this.permisosRuntime.puede('Descuentos', 'Activar'));
+    this.puedeDesactivar.set(this.permisosRuntime.puede('Descuentos', 'Desactivar'));
     this.puedeEliminar.set(this.permisosRuntime.puede('Descuentos', 'EliminarLogico'));
     this.puedeDuplicar.set(this.permisosRuntime.puede('Descuentos', 'Duplicar'));
     this.cargar();
@@ -44,27 +53,53 @@ export class DescuentosListComponent implements OnInit {
     });
   }
 
-  toggleActivo(d: Descuento): void {
-    const accion$ = d.activo ? this.service.desactivar(d.id) : this.service.activar(d.id);
+  puedeCambiarEstado(descuento: Descuento): boolean {
+    return descuento.activo ? this.puedeDesactivar() : this.puedeActivar();
+  }
+
+  toggleActivo(descuento: Descuento): void {
+    if (!this.puedeCambiarEstado(descuento)) return;
+
+    const accion$ = descuento.activo
+      ? this.service.desactivar(descuento.id)
+      : this.service.activar(descuento.id);
+
     accion$.subscribe({
       next: () => this.cargar(),
       error: (err) => this.snackBar.open(err.error?.message ?? 'No se pudo cambiar el estado.', 'Cerrar', { duration: 5000 })
     });
   }
 
-  async eliminar(d: Descuento): Promise<void> {
-    const confirmado = await this.alerts.confirmar({ titulo: 'Eliminar descuento', mensaje: `Se eliminará el descuento "${d.nombre}".`, detalle: 'Dejará de estar disponible para nuevas operaciones.', tipo: 'peligro', confirmarTexto: 'Eliminar descuento' });
+  async eliminar(descuento: Descuento): Promise<void> {
+    if (!this.puedeEliminar()) return;
+
+    const confirmado = await this.alerts.confirmar({
+      titulo: 'Eliminar descuento',
+      mensaje: `Se eliminará el descuento "${descuento.nombre}".`,
+      detalle: 'Dejará de estar disponible para nuevas operaciones.',
+      tipo: 'peligro',
+      confirmarTexto: 'Eliminar descuento'
+    });
     if (!confirmado) return;
-    this.service.eliminarLogico(d.id).subscribe({
+
+    this.service.eliminarLogico(descuento.id).subscribe({
       next: () => this.cargar(),
       error: (err) => this.snackBar.open(err.error?.message ?? 'No se pudo eliminar.', 'Cerrar', { duration: 5000 })
     });
   }
 
-  async duplicar(d: Descuento): Promise<void> {
-    const nuevoNombre = await this.alerts.solicitarTexto({ titulo: 'Duplicar descuento', mensaje: `Define el nombre de la copia de "${d.nombre}".`, confirmarTexto: 'Crear copia', entrada: { etiqueta: 'Nombre del descuento', valor: `${d.nombre} (copia)`, requerida: true } });
+  async duplicar(descuento: Descuento): Promise<void> {
+    if (!this.puedeDuplicar()) return;
+
+    const nuevoNombre = await this.alerts.solicitarTexto({
+      titulo: 'Duplicar descuento',
+      mensaje: `Define el nombre de la copia de "${descuento.nombre}".`,
+      confirmarTexto: 'Crear copia',
+      entrada: { etiqueta: 'Nombre del descuento', valor: `${descuento.nombre} (copia)`, requerida: true }
+    });
     if (!nuevoNombre) return;
-    this.service.duplicar(d.id, nuevoNombre).subscribe({
+
+    this.service.duplicar(descuento.id, nuevoNombre).subscribe({
       next: () => this.cargar(),
       error: (err) => this.snackBar.open(err.error?.message ?? 'No se pudo duplicar.', 'Cerrar', { duration: 5000 })
     });
