@@ -8,18 +8,18 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace InventoryApp.API.Controllers;
 
-/// Gestión de usuarios del sistema. Cada endpoint valida la acción exacta contra
-/// la matriz de permisos (sección 10) — nunca solo [Authorize] genérico.
 [ApiController]
 [Authorize]
 [Route("usuarios")]
 public class UsuariosController : ControllerBase
 {
     private readonly IUsuarioService _usuarioService;
+    private readonly IPermisoService _permisoService;
 
-    public UsuariosController(IUsuarioService usuarioService)
+    public UsuariosController(IUsuarioService usuarioService, IPermisoService permisoService)
     {
         _usuarioService = usuarioService;
+        _permisoService = permisoService;
     }
 
     [HttpGet]
@@ -30,9 +30,6 @@ public class UsuariosController : ControllerBase
         return Ok(ApiResponse<List<UsuarioDto>>.Ok(usuarios));
     }
 
-    /// Listado paginado con búsqueda (sección 4: "buscar, filtrar, ordenar,
-    /// paginar"). GetAll se conserva para no romper consumidores existentes
-    /// (ej. el selector de usuarios en otros formularios).
     [HttpGet("paginado")]
     [RequierePermiso(ModuloSistema.Usuarios, AccionPermiso.Ver)]
     public async Task<IActionResult> GetPaged([FromQuery] PagedRequest request)
@@ -41,8 +38,6 @@ public class UsuariosController : ControllerBase
         return Ok(ApiResponse<PagedResult<UsuarioDto>>.Ok(resultado));
     }
 
-    /// Vista de detalle real, separada del formulario de edición (sección 4:
-    /// "no reutilices incorrectamente el formulario de edición como vista de consulta").
     [HttpGet("{id:int}")]
     [RequierePermiso(ModuloSistema.Usuarios, AccionPermiso.Ver)]
     public async Task<IActionResult> GetById(int id)
@@ -58,6 +53,10 @@ public class UsuariosController : ControllerBase
     [RequierePermiso(ModuloSistema.Usuarios, AccionPermiso.Crear)]
     public async Task<IActionResult> Create([FromBody] CreateUsuarioDto dto)
     {
+        // Crear una cuenta implica asignarle un rol inicial. La acción Crear no
+        // concede implícitamente el privilegio de AsignarRol.
+        await _permisoService.VerificarPermisoAsync(ModuloSistema.Usuarios, AccionPermiso.AsignarRol);
+
         try
         {
             var creado = await _usuarioService.CreateAsync(dto);
@@ -73,6 +72,21 @@ public class UsuariosController : ControllerBase
     [RequierePermiso(ModuloSistema.Usuarios, AccionPermiso.Editar)]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateUsuarioDto dto)
     {
+        var actual = await _usuarioService.GetByIdAsync(id);
+        if (actual is null)
+            return NotFound(ApiResponse<object>.Fail("Usuario no encontrado."));
+
+        var cambiaRol = dto.RolId.HasValue
+            ? actual.RolId != dto.RolId
+            : !string.IsNullOrWhiteSpace(dto.Rol) &&
+              !string.Equals(actual.Rol, dto.Rol, StringComparison.OrdinalIgnoreCase);
+
+        if (cambiaRol)
+            await _permisoService.VerificarPermisoAsync(ModuloSistema.Usuarios, AccionPermiso.AsignarRol);
+
+        if (!string.IsNullOrWhiteSpace(dto.NuevaPassword))
+            await _permisoService.VerificarPermisoAsync(ModuloSistema.Usuarios, AccionPermiso.RestablecerContrasena);
+
         var actualizado = await _usuarioService.UpdateAsync(id, dto);
         if (actualizado is null)
             return NotFound(ApiResponse<object>.Fail("Usuario no encontrado."));
@@ -81,9 +95,12 @@ public class UsuariosController : ControllerBase
     }
 
     [HttpPut("{id:int}/estado")]
-    [RequierePermiso(ModuloSistema.Usuarios, AccionPermiso.CambiarEstado)]
     public async Task<IActionResult> UpdateEstado(int id, [FromBody] UpdateUsuarioEstadoDto dto)
     {
+        await _permisoService.VerificarPermisoAsync(
+            ModuloSistema.Usuarios,
+            dto.Activo ? AccionPermiso.Activar : AccionPermiso.Desactivar);
+
         var actualizado = await _usuarioService.UpdateEstadoAsync(id, dto.Activo);
         if (actualizado is null)
             return NotFound(ApiResponse<object>.Fail("Usuario no encontrado."));
@@ -92,25 +109,22 @@ public class UsuariosController : ControllerBase
         return Ok(ApiResponse<UsuarioDto>.Ok(actualizado, $"Usuario {accion} correctamente."));
     }
 
-    /// Bloqueo: distinto de desactivar (sección 4). Requiere motivo explícito.
     [HttpPut("{id:int}/bloquear")]
-    [RequierePermiso(ModuloSistema.Usuarios, AccionPermiso.CambiarEstado)]
     public async Task<IActionResult> Bloquear(int id, [FromBody] BloquearUsuarioDto dto)
     {
+        await _permisoService.VerificarPermisoAsync(ModuloSistema.Usuarios, AccionPermiso.Desactivar);
         var actualizado = await _usuarioService.BloquearAsync(id, dto.Motivo);
         return Ok(ApiResponse<UsuarioDto>.Ok(actualizado, "Usuario bloqueado correctamente."));
     }
 
     [HttpPut("{id:int}/desbloquear")]
-    [RequierePermiso(ModuloSistema.Usuarios, AccionPermiso.CambiarEstado)]
     public async Task<IActionResult> Desbloquear(int id)
     {
+        await _permisoService.VerificarPermisoAsync(ModuloSistema.Usuarios, AccionPermiso.Activar);
         var actualizado = await _usuarioService.DesbloquearAsync(id);
         return Ok(ApiResponse<UsuarioDto>.Ok(actualizado, "Usuario desbloqueado correctamente."));
     }
 
-    /// Eliminación lógica (sección 9/14): nunca física, un usuario puede tener
-    /// ventas/compras/auditoría asociados por FK.
     [HttpDelete("{id:int}")]
     [RequierePermiso(ModuloSistema.Usuarios, AccionPermiso.EliminarLogico)]
     public async Task<IActionResult> Eliminar(int id)
