@@ -229,37 +229,28 @@ if (app.Configuration.GetValue<bool>("Database:ApplyMigrationsOnStartup"))
     var seedFiscalService = new SeedFiscalService(db);
     await seedFiscalService.SeedDefaultsAsync();
 
-    var adminUsername = app.Configuration["SeedAdmin:Username"];
+    var adminUsername = app.Configuration["SeedAdmin:Username"]?.Trim();
     var adminPassword = app.Configuration["SeedAdmin:Password"];
 
+    // SeedAdmin es exclusivamente de creación inicial. Una cuenta ya existente
+    // nunca vuelve a recibir contraseña, rol ni estado desde variables de entorno.
+    // Esto evita restablecimientos silenciosos en cada despliegue de Render.
     if (!string.IsNullOrWhiteSpace(adminUsername) && !string.IsNullOrWhiteSpace(adminPassword))
     {
-        var admin = await db.Usuarios.SingleOrDefaultAsync(u => u.NombreUsuario == adminUsername);
-        var passwordHash = BCrypt.Net.BCrypt.HashPassword(adminPassword);
-
-        if (admin is null)
+        var adminExiste = await db.Usuarios.AnyAsync(u => u.NombreUsuario == adminUsername);
+        if (!adminExiste)
         {
             db.Usuarios.Add(new Usuario
             {
                 NombreUsuario = adminUsername,
                 NombreCompleto = "Administrador",
-                PasswordHash = passwordHash,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(adminPassword),
                 Rol = RolUsuario.Administrador,
                 Activo = true,
                 FechaCreacion = DateTime.UtcNow
             });
+            await db.SaveChangesAsync();
         }
-        else
-        {
-            admin.NombreCompleto = string.IsNullOrWhiteSpace(admin.NombreCompleto)
-                ? "Administrador"
-                : admin.NombreCompleto;
-            admin.PasswordHash = passwordHash;
-            admin.Rol = RolUsuario.Administrador;
-            admin.Activo = true;
-        }
-
-        await db.SaveChangesAsync();
     }
 }
 
