@@ -96,12 +96,21 @@ public class CompraRepository : ICompraRepository
 
     public async Task<bool> SaveChangesAsync()
     {
-        foreach (var entry in _context.ChangeTracker.Entries<Compra>()
-                     .Where(e => e.State == EntityState.Modified &&
-                                 e.Entity.Estado == EstadoDocumento.Borrador &&
-                                 e.Entity.Detalles.Count == 0 &&
-                                 !e.Entity.Eliminado))
+        var borradoresEliminados = _context.ChangeTracker.Entries<Compra>()
+            .Where(e => e.State == EntityState.Modified &&
+                        e.Entity.Estado == EstadoDocumento.Borrador &&
+                        e.Entity.Detalles.Count == 0 &&
+                        !e.Entity.Eliminado)
+            .ToList();
+
+        foreach (var entry in borradoresEliminados)
         {
+            foreach (var detalleEntry in _context.ChangeTracker.Entries<CompraDetalle>()
+                         .Where(d => d.State == EntityState.Deleted && d.Entity.CompraId == entry.Entity.Id))
+            {
+                detalleEntry.State = EntityState.Unchanged;
+            }
+
             entry.Entity.Eliminado = true;
             entry.Entity.FechaEliminacion = DateTime.UtcNow;
             entry.Entity.EliminadoPorUsuarioId = _currentUser.UsuarioId;
