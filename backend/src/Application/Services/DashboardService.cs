@@ -1,6 +1,7 @@
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Application.Mappings;
+using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Enums;
 
 namespace InventoryApp.Application.Services;
@@ -42,10 +43,9 @@ public class DashboardService : IDashboardService
         // no expone datos financieros ni auditoría corporativa fuera del rol admin.
         var ultimasCompras = esAdministrador
             ? await _compraRepository.GetUltimasAsync()
-            : new List<Domain.Entities.Compra>();
+            : new List<Compra>();
 
         decimal balanceOperativo = 0;
-        IRevisionFinancieraRepository? _ = null;
         var ultimaRevision = esAdministrador ? await _revisionRepository.GetUltimaAsync() : null;
         if (esAdministrador)
         {
