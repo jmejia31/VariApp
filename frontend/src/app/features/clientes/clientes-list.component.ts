@@ -58,10 +58,11 @@ export class ClientesListComponent implements OnInit {
 
   toggleActivo(c: Cliente): void {
     if (!this.puedeCambiarEstado(c)) return;
-    this.clienteService.update(c.id, {
-      nombre: c.nombre, telefono: c.telefono, identidadORTN: c.identidadORTN,
-      correo: c.correo, direccion: c.direccion, activo: !c.activo
-    }).subscribe({
+    const operacion = c.activo
+      ? this.clienteService.desactivar(c.id)
+      : this.clienteService.activar(c.id);
+
+    operacion.subscribe({
       next: () => this.cargar(),
       error: (err) => this.snackBar.open(err.error?.message ?? 'No se pudo cambiar el estado del cliente.', 'Cerrar', { duration: 5000 })
     });
