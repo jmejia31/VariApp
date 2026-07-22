@@ -33,29 +33,47 @@ public class FinanzasService : IFinanzasService
 
     public async Task<FinanzasResumenDto> GetResumenAsync()
     {
+        var esAdministrador = _currentUser.EsAdministrador;
         var movimientos = await _movimientoRepository.GetFilteredAsync(null, null);
         var noAnulados = movimientos.Where(m => m.Estado != EstadoMovimientoFinanciero.Anulado).ToList();
 
+        // MovimientoFinancieroRepository limita por UsuarioId a cualquier usuario
+        // no administrador. Por ello los totales siguientes nunca mezclan vendedores.
         var ingresosTotales = noAnulados.Where(m => m.Tipo == TipoMovimientoFinanciero.Ingreso).Sum(m => m.Monto);
         var egresosTotales = noAnulados.Where(m => m.Tipo == TipoMovimientoFinanciero.Egreso).Sum(m => m.Monto);
 
-        var utilidadBruta = await _ventaRepository.GetUtilidadBrutaTotalAsync();
+        // Utilidad, costos de inventario, cuentas por pagar y revisiones financieras
+        // son datos corporativos y solo se entregan al administrador.
+        var utilidadBruta = esAdministrador
+            ? await _ventaRepository.GetUtilidadBrutaTotalAsync()
+            : 0m;
 
-        // Egresos operativos manuales (gastos que no vienen de compras automáticas) reducen la utilidad neta.
-        var gastosOperativosManuales = noAnulados
-            .Where(m => !m.EsAutomatico && m.Tipo == TipoMovimientoFinanciero.Egreso)
-            .Sum(m => m.Monto);
-        var utilidadNeta = utilidadBruta - gastosOperativosManuales;
+        var gastosOperativosManuales = esAdministrador
+            ? noAnulados.Where(m => !m.EsAutomatico && m.Tipo == TipoMovimientoFinanciero.Egreso).Sum(m => m.Monto)
+            : 0m;
+        var utilidadNeta = esAdministrador ? utilidadBruta - gastosOperativosManuales : 0m;
 
-        var valorInventarioCosto = await _productoRepository.GetValorTotalCostoAsync();
-        var valorPotencialVenta = await _productoRepository.GetValorTotalPrecioAsync();
+        var valorInventarioCosto = esAdministrador
+            ? await _productoRepository.GetValorTotalCostoAsync()
+            : 0m;
+        var valorPotencialVenta = esAdministrador
+            ? await _productoRepository.GetValorTotalPrecioAsync()
+            : 0m;
+
+        // VentaRepository aplica alcance por UsuarioId para usuarios no administradores.
         var cuentasPorCobrar = await _ventaRepository.GetCuentasPorCobrarAsync();
-        var cuentasPorPagar = await _compraRepository.GetCuentasPorPagarAsync();
         var ventasDelMes = await _ventaRepository.GetTotalDelMesAsync();
-        var comprasDelMes = await _compraRepository.GetTotalDelMesAsync();
         var ingresosDelMes = await _ventaRepository.GetIngresosDelMesAsync();
 
-        var ultimaRevision = await _revisionRepository.GetUltimaAsync();
+        var cuentasPorPagar = esAdministrador
+            ? await _compraRepository.GetCuentasPorPagarAsync()
+            : 0m;
+        var comprasDelMes = esAdministrador
+            ? await _compraRepository.GetTotalDelMesAsync()
+            : 0;
+        var ultimaRevision = esAdministrador
+            ? await _revisionRepository.GetUltimaAsync()
+            : null;
 
         return new FinanzasResumenDto
         {
@@ -145,12 +163,18 @@ public class FinanzasService : IFinanzasService
 
     public async Task<List<RevisionFinancieraDto>> GetRevisionesAsync()
     {
+        if (!_currentUser.EsAdministrador)
+            return new List<RevisionFinancieraDto>();
+
         var revisiones = await _revisionRepository.GetAllAsync();
         return revisiones.Select(ToDto).ToList();
     }
 
     public async Task<RevisionFinancieraDto> RegistrarRevisionAsync(CreateRevisionFinancieraDto dto)
     {
+        if (!_currentUser.EsAdministrador)
+            throw new BusinessRuleException("Solo un administrador puede registrar revisiones financieras.");
+
         if (dto.FechaHasta < dto.FechaDesde)
             throw new BusinessRuleException("La fecha 'hasta' no puede ser anterior a la fecha 'desde'.");
 
