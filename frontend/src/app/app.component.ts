@@ -52,7 +52,7 @@ import { SessionActivityService } from './core/auth/session-activity.service';
             @if (permisosRuntime.puede('Finanzas', 'Ver')) {
               <a routerLink="/finanzas" routerLinkActive="active"><mat-icon>account_balance_wallet</mat-icon> Finanzas</a>
             }
-            @if (permisosRuntime.puede('Inventario', 'Ver')) {
+            @if (permisosRuntime.puede('MovimientosInventario', 'Ver')) {
               <a routerLink="/inventario/movimientos" routerLinkActive="active"><mat-icon>sync_alt</mat-icon> Movimientos</a>
             }
             @if (permisosRuntime.puede('Usuarios', 'Ver')) {
@@ -70,7 +70,7 @@ import { SessionActivityService } from './core/auth/session-activity.service';
             @if (permisosRuntime.puede('Permisos', 'Administrar')) {
               <a routerLink="/permisos" routerLinkActive="active"><mat-icon>lock_outline</mat-icon> Permisos</a>
             }
-            @if (permisosRuntime.puede('Auditoria', 'Ver')) {
+            @if (permisosRuntime.esAdministrador() && permisosRuntime.puede('Auditoria', 'Ver')) {
               <a routerLink="/auditoria" routerLinkActive="active"><mat-icon>manage_search</mat-icon> Auditoría</a>
             }
             @if (permisosRuntime.puede('Configuracion', 'Ver')) {
@@ -137,8 +137,6 @@ export class AppComponent {
       this.permisosRuntime.cargar().subscribe();
       this.sessionActivity.iniciar();
     }
-    // Cierra el menú móvil automáticamente al cambiar de ruta (evita que
-    // quede abierto tapando la pantalla después de navegar).
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) this.sidebarAbierto = false;
     });
