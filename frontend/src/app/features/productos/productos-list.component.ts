@@ -9,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { debounceTime, Subject } from 'rxjs';
 import { ProductoService } from '../../services/producto.service';
 import { Producto } from '../../core/models/producto.model';
@@ -20,7 +21,8 @@ import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service
   standalone: true,
   imports: [
     CommonModule, RouterLink, FormsModule, MatIconModule, MatButtonModule,
-    MatFormFieldModule, MatInputModule, MatPaginatorModule, MatProgressSpinnerModule, MatDialogModule
+    MatFormFieldModule, MatInputModule, MatPaginatorModule, MatProgressSpinnerModule,
+    MatDialogModule, MatSlideToggleModule
   ],
   templateUrl: './productos-list.component.html',
   styleUrl: './productos-list.component.scss'
@@ -31,6 +33,8 @@ export class ProductosListComponent implements OnInit {
   readonly totalCount = signal(0);
   readonly puedeCrear = signal(false);
   readonly puedeEditar = signal(false);
+  readonly puedeActivar = signal(false);
+  readonly puedeDesactivar = signal(false);
   readonly puedeEliminar = signal(false);
 
   page = 1;
@@ -55,6 +59,8 @@ export class ProductosListComponent implements OnInit {
   ngOnInit(): void {
     this.puedeCrear.set(this.permisosRuntime.puede('Productos', 'Crear'));
     this.puedeEditar.set(this.permisosRuntime.puede('Productos', 'Editar'));
+    this.puedeActivar.set(this.permisosRuntime.puede('Productos', 'Activar'));
+    this.puedeDesactivar.set(this.permisosRuntime.puede('Productos', 'Desactivar'));
     this.puedeEliminar.set(this.permisosRuntime.puede('Productos', 'EliminarLogico'));
     this.cargar();
   }
@@ -79,6 +85,23 @@ export class ProductosListComponent implements OnInit {
         this.loading.set(false);
       },
       error: () => this.loading.set(false)
+    });
+  }
+
+  puedeCambiarEstado(producto: Producto): boolean {
+    return producto.activo ? this.puedeDesactivar() : this.puedeActivar();
+  }
+
+  cambiarEstado(producto: Producto): void {
+    if (!this.puedeCambiarEstado(producto)) return;
+
+    const operacion = producto.activo
+      ? this.productoService.desactivar(producto.id)
+      : this.productoService.activar(producto.id);
+
+    operacion.subscribe({
+      next: () => this.cargar(),
+      error: () => this.cargar()
     });
   }
 
