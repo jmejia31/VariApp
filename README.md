@@ -14,6 +14,7 @@ La factura generada actualmente se considera **comprobante comercial interno**. 
 - Archivos e imágenes: Cloudinary.
 - PDF: QuestPDF.
 - Correo: SMTP autenticado.
+- Pruebas E2E: Playwright con Chromium.
 - Producción: Vercel, Render, Aiven y Cloudinary.
 
 ## Funcionalidades principales
@@ -28,6 +29,7 @@ La factura generada actualmente se considera **comprobante comercial interno**. 
 - Enlaces públicos de factura con token aleatorio, hash SHA-256, expiración, revocación y límite de accesos.
 - Dashboard, finanzas y movimientos aislados por usuario para perfiles no administrativos.
 - Usuarios, roles y permisos por acción.
+- Roles dinámicos de sistema creados incrementalmente sin sobrescribir matrices administradas.
 - Perfil propio con cambio de nombre, usuario, contraseña y fotografía.
 - Auditoría transversal reservada al administrador.
 - Interfaz adaptativa para escritorio, tablet y teléfono.
@@ -116,7 +118,7 @@ SeedAdmin__Password
 Database__ApplyMigrationsOnStartup
 ```
 
-`SeedAdmin` se utiliza únicamente para crear la cuenta inicial cuando todavía no existe. Un despliegue posterior no debe restablecer su contraseña, rol o estado.
+`SeedAdmin` se utiliza únicamente para crear la cuenta inicial cuando todavía no existe. Un despliegue posterior no restablece su contraseña, rol o estado. En una instalación limpia, el administrador se crea antes del seeding de roles y queda vinculado al rol dinámico `Administrador`.
 
 ## Base de datos y migraciones
 
@@ -148,7 +150,7 @@ dotnet ef database update `
   --context AppDbContext
 ```
 
-El script forward revisable de la Fase 6 se genera en:
+El script forward revisable de la Fase 6 se encuentra en:
 
 ```text
 docs/migraciones/004_fase6_seguridad_facturacion_perfil.sql
@@ -174,6 +176,13 @@ npm ci
 npm run build:prod
 ```
 
+Pruebas E2E locales, después de iniciar API, MySQL y Angular:
+
+```powershell
+cd frontend
+npx playwright test --config=playwright.config.ts
+```
+
 El workflow `.github/workflows/ci.yml` certifica de forma controlada:
 
 - generación o detección de la migración EF;
@@ -181,8 +190,15 @@ El workflow `.github/workflows/ci.yml` certifica de forma controlada:
 - alineación del modelo y el snapshot;
 - generación y revisión básica del SQL forward;
 - build Release del backend;
-- pruebas backend;
-- build de producción de Angular.
+- **69 pruebas backend**;
+- build de producción de Angular;
+- MySQL 8.4 temporal;
+- aplicación completa de migraciones en la base temporal;
+- API y Angular efímeros;
+- **9 pruebas end-to-end con Chromium**;
+- autorización Administrador, Vendedor y rol personalizado;
+- PDF privado/público, encabezados y revocación;
+- login responsivo en seis resoluciones.
 
 El workflow no aplica migraciones a Aiven ni despliega Render o Vercel.
 
@@ -199,23 +215,27 @@ backend/
     InventoryApp.Tests/
 
 frontend/
+  e2e/               pruebas Playwright
   src/app/
-    core/            autenticación, guards, interceptores y modelos
-    features/        módulos funcionales
-    services/        clientes HTTP
+    core/             autenticación, guards, interceptores y modelos
+    features/         módulos funcionales
+    services/         clientes HTTP
 
 docs/
-  migraciones/       scripts SQL revisables
+  migraciones/                        scripts SQL revisables
   PLAN_CIERRE_VARIAPP.md
   VALIDACION_PRODUCCION.md
+  FASE6_CERTIFICACION.md
+  FASE7_CERTIFICACION_AISLADA.md
 ```
 
 ## Flujo de publicación
 
 1. Trabajar en una rama distinta de `main`.
-2. Mantener el Pull Request en borrador mientras haya fases pendientes.
+2. Mantener el Pull Request en borrador mientras haya validaciones externas pendientes.
 3. Ejecutar CI controlado.
 4. Revisar migraciones y pruebas.
 5. Crear un Preview autorizado.
-6. Validar perfiles, cálculos, PDF, correo, WhatsApp y Cloudinary.
-7. Fusionar a `main` únicamente con autorización expresa del propietario.
+6. Validar perfiles, cálculos, PDF, correo, WhatsApp y Cloudinary con servicios reales.
+7. Aplicar la migración productiva mediante una sola estrategia autorizada.
+8. Fusionar a `main` únicamente con autorización expresa del propietario.
