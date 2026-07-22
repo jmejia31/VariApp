@@ -2,7 +2,7 @@ export interface Usuario {
   id: number;
   nombreUsuario: string;
   nombreCompleto: string;
-  rol: 'Administrador' | 'Vendedor';
+  rol: string;
   rolId?: number;
   activo: boolean;
   bloqueado: boolean;
@@ -13,7 +13,7 @@ export interface UsuarioDetalle {
   id: number;
   nombreUsuario: string;
   nombreCompleto: string;
-  rol: 'Administrador' | 'Vendedor';
+  rol: string;
   rolId?: number;
   rolNombre?: string;
   activo: boolean;
@@ -28,13 +28,13 @@ export interface CreateUsuarioValue {
   nombreUsuario: string;
   nombreCompleto: string;
   password: string;
-  rol: 'Administrador' | 'Vendedor';
+  rol: string;
   rolId?: number;
 }
 
 export interface UpdateUsuarioValue {
   nombreCompleto: string;
-  rol: 'Administrador' | 'Vendedor';
+  rol: string;
   rolId?: number;
   nuevaPassword?: string;
 }
