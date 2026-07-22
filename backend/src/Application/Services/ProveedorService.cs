@@ -82,7 +82,7 @@ public class ProveedorService : IProveedorService
         proveedor.Documento = dto.Documento;
         proveedor.Correo = dto.Correo;
         proveedor.Direccion = dto.Direccion;
-        proveedor.Activo = dto.Activo;
+        // El estado se administra únicamente mediante Activar/Desactivar.
         proveedor.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
         proveedor.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
         proveedor.FechaActualizacion = DateTime.UtcNow;
@@ -92,6 +92,28 @@ public class ProveedorService : IProveedorService
         await _auditoria.RegistrarAsync(ModuloSistema.Proveedores, AccionPermiso.Editar, $"Proveedor actualizado: {proveedor.Nombre}", proveedor.Id);
 
         return ToDto(proveedor);
+    }
+
+    public async Task<ProveedorDto?> CambiarEstadoAsync(int id, bool activo)
+    {
+        var proveedor = await _repository.GetByIdAsync(id);
+        if (proveedor is null) return null;
+        if (proveedor.Activo == activo) return ToDto(proveedor, incluirCompras: false);
+
+        proveedor.Activo = activo;
+        proveedor.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
+        proveedor.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
+        proveedor.FechaActualizacion = DateTime.UtcNow;
+
+        _repository.Update(proveedor);
+        await _repository.SaveChangesAsync();
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Proveedores,
+            activo ? AccionPermiso.Activar : AccionPermiso.Desactivar,
+            $"Proveedor {(activo ? "activado" : "desactivado")}: {proveedor.Nombre}",
+            proveedor.Id);
+
+        return ToDto(proveedor, incluirCompras: false);
     }
 
     public async Task<bool> DeleteAsync(int id)
