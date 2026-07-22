@@ -39,11 +39,15 @@ public class QuestPdfFacturaService : IFacturaPdfService
         var colorAcento = Colors.Orange.Darken1;
         var grisFondo = Colors.Grey.Lighten4;
 
-        var importeBruto = factura.Subtotal;
-        var despuesDescuento = Math.Max(0, importeBruto - factura.Descuento);
-        var impuestoAdicional = Math.Max(0, factura.Total - despuesDescuento);
-        var impuestoIncluido = Math.Max(0, factura.Impuesto - impuestoAdicional);
-        var subtotalNeto = Math.Max(0, factura.Total - factura.Impuesto);
+        // Estas cifras provienen del snapshot fiscal de la venta. El PDF no
+        // vuelve a calcular impuestos ni descuentos y, por tanto, coincide con
+        // la pantalla, WhatsApp y el adjunto enviado por correo.
+        var importeBruto = factura.ImporteBruto > 0
+            ? factura.ImporteBruto
+            : factura.Detalles.Sum(d => d.Subtotal);
+        var subtotalNeto = Math.Max(0, factura.Subtotal);
+        var impuestoIncluido = Math.Max(0, factura.ImpuestoIncluido);
+        var impuestoAdicional = Math.Max(0, factura.ImpuestoAdicional);
 
         var documento = Document.Create(container =>
         {
@@ -181,9 +185,8 @@ public class QuestPdfFacturaService : IFacturaPdfService
                                 detalleFiscal.Item().PaddingTop(6).Text("IMPUESTOS APLICADOS").FontSize(8).Bold().FontColor(colorPrimario);
                                 foreach (var i in factura.ImpuestosAplicados)
                                 {
-                                    var incluido = i.IncluidoEnPrecio || impuestoAdicional == 0;
                                     detalleFiscal.Item().Text(
-                                        $"• {i.Nombre} ({i.Tasa:N2}%): L. {i.Monto:N2} {(incluido ? "incluido" : "adicional")}")
+                                        $"• {i.Nombre} ({i.Tasa:N2}%): L. {i.Monto:N2} {(i.IncluidoEnPrecio ? "incluido" : "adicional")}")
                                         .FontSize(8);
                                 }
                             }
@@ -265,8 +268,6 @@ public class QuestPdfFacturaService : IFacturaPdfService
             return;
         }
 
-        // Respaldo visual para que nunca se emita una factura sin identidad,
-        // incluso si Cloudinary/Vercel está temporalmente inaccesible.
         contenedor.Background(colorPrimario).Border(3).BorderColor(colorAcento)
             .AlignCenter().AlignMiddle().Text("VS").FontSize(24).Bold().FontColor(Colors.White);
     }
@@ -335,28 +336,45 @@ public class QuestPdfFacturaService : IFacturaPdfService
 
     private async Task<byte[]?> IntentarDescargarLogoAsync(string url)
     {
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) ||
+            uri.Scheme != Uri.UriSchemeHttps ||
+            uri.IsLoopback ||
+            uri.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase))
+        {
+            _logger.LogWarning("URL de logo rechazada por seguridad: {Url}", url);
+            return null;
+        }
+
         try
         {
             using var httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(12) };
-            using var respuesta = await httpClient.GetAsync(url);
+            using var respuesta = await httpClient.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead);
             if (!respuesta.IsSuccessStatusCode)
             {
-                _logger.LogWarning("Logo no disponible en {Url}. HTTP {StatusCode}", url, (int)respuesta.StatusCode);
+                _logger.LogWarning("Logo no disponible en {Url}. HTTP {StatusCode}", uri, (int)respuesta.StatusCode);
                 return null;
             }
 
             var contentType = respuesta.Content.Headers.ContentType?.MediaType;
-            if (contentType is not null && !contentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+            if (contentType is null || !contentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
             {
-                _logger.LogWarning("La URL de logo {Url} respondió con tipo {ContentType}.", url, contentType);
+                _logger.LogWarning("La URL de logo {Url} respondió con tipo {ContentType}.", uri, contentType);
                 return null;
             }
 
-            return await respuesta.Content.ReadAsByteArrayAsync();
+            var longitud = respuesta.Content.Headers.ContentLength;
+            if (longitud.HasValue && longitud.Value > 5 * 1024 * 1024)
+            {
+                _logger.LogWarning("El logo en {Url} supera el límite de 5 MB.", uri);
+                return null;
+            }
+
+            var bytes = await respuesta.Content.ReadAsByteArrayAsync();
+            return bytes.Length <= 5 * 1024 * 1024 ? bytes : null;
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "No se pudo descargar el logo desde {Url}.", url);
+            _logger.LogWarning(ex, "No se pudo descargar el logo desde {Url}.", uri);
             return null;
         }
     }
