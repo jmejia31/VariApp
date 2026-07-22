@@ -26,6 +26,9 @@ public class CompraConfiguration : IEntityTypeConfiguration<Compra>
         builder.Property(c => c.Estado).HasConversion<string>().HasMaxLength(20);
         builder.Property(c => c.EstadoPago).HasConversion<string>().HasMaxLength(20);
         builder.Property(c => c.MetodoPago).HasConversion<string>().HasMaxLength(20);
+        builder.Property(c => c.Eliminado).HasDefaultValue(false);
+        builder.HasIndex(c => c.Eliminado);
+        builder.HasQueryFilter(c => !c.Eliminado);
 
         builder.HasMany(c => c.Detalles)
             .WithOne(d => d.Compra)
