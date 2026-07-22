@@ -23,6 +23,7 @@ public class FinanzasServiceTests
         _currentUserMock.Setup(c => c.UsuarioId).Returns(1);
         _currentUserMock.Setup(c => c.NombreUsuario).Returns("admin");
         _currentUserMock.Setup(c => c.NombreCompleto).Returns("Administrador");
+        _currentUserMock.Setup(c => c.EsAdministrador).Returns(true);
         _movRepoMock.Setup(r => r.SaveChangesAsync()).ReturnsAsync(true);
         _revisionRepoMock.Setup(r => r.SaveChangesAsync()).ReturnsAsync(true);
 
@@ -72,7 +73,7 @@ public class FinanzasServiceTests
     }
 
     [Fact]
-    public async Task RegistrarRevisionAsync_Guarda_Usuario_Revisor()
+    public async Task RegistrarRevisionAsync_Guarda_Usuario_Revisor_Administrador()
     {
         var resultado = await _service.RegistrarRevisionAsync(new CreateRevisionFinancieraDto
         {
@@ -84,6 +85,21 @@ public class FinanzasServiceTests
 
         Assert.Equal("Administrador", resultado.RevisadoPorNombreUsuario);
         Assert.Equal("Revisado", resultado.EstadoRevision);
+    }
+
+    [Fact]
+    public async Task RegistrarRevisionAsync_Usuario_No_Administrador_Es_Rechazado()
+    {
+        _currentUserMock.Setup(c => c.EsAdministrador).Returns(false);
+
+        await Assert.ThrowsAsync<BusinessRuleException>(() => _service.RegistrarRevisionAsync(new CreateRevisionFinancieraDto
+        {
+            FechaDesde = DateTime.UtcNow.AddDays(-30),
+            FechaHasta = DateTime.UtcNow,
+            EstadoRevision = "Revisado"
+        }));
+
+        _revisionRepoMock.Verify(r => r.AddAsync(It.IsAny<RevisionFinanciera>()), Times.Never);
     }
 
     [Fact]
