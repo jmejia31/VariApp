@@ -18,7 +18,7 @@
   <p class="error">{{ errorMessage() }}</p>
 }
 
-@if (mostrarFormulario()) {
+@if (mostrarFormulario() && puedeCrear()) {
   <form class="card form" [formGroup]="form" (ngSubmit)="crear()">
     <div class="fields-grid">
       <mat-form-field appearance="outline">
@@ -79,7 +79,7 @@
             <td>
               @if (u.bloqueado) {
                 <span class="badge danger">Bloqueado</span>
-              } @else if (puedeEditar()) {
+              } @else if (puedeCambiarEstado(u)) {
                 <mat-slide-toggle [checked]="u.activo" (change)="toggleEstado(u)"></mat-slide-toggle>
               } @else {
                 <span class="badge" [class.success]="u.activo" [class.muted]="!u.activo">{{ u.activo ? 'Activo' : 'Inactivo' }}</span>
@@ -90,7 +90,7 @@
               @if (puedeEditar()) {
                 <a [routerLink]="['/usuarios', u.id, 'editar']" mat-icon-button title="Editar usuario"><mat-icon>edit</mat-icon></a>
               }
-              @if (puedeBloquear() && !esUsuarioActual(u)) {
+              @if (puedeBloquearUsuario(u)) {
                 @if (u.bloqueado) {
                   <button mat-icon-button title="Desbloquear" (click)="desbloquear(u)"><mat-icon>lock_open</mat-icon></button>
                 } @else {
@@ -115,7 +115,7 @@
             <strong>{{ u.nombreCompleto }}</strong>
             @if (u.bloqueado) {
               <span class="badge danger">Bloqueado</span>
-            } @else if (puedeEditar()) {
+            } @else if (puedeCambiarEstado(u)) {
               <mat-slide-toggle [checked]="u.activo" (change)="toggleEstado(u)"></mat-slide-toggle>
             } @else {
               <span class="badge" [class.success]="u.activo" [class.muted]="!u.activo">{{ u.activo ? 'Activo' : 'Inactivo' }}</span>
@@ -128,7 +128,7 @@
             @if (puedeEditar()) {
               <a [routerLink]="['/usuarios', u.id, 'editar']" mat-button><mat-icon>edit</mat-icon> Editar</a>
             }
-            @if (puedeBloquear() && !esUsuarioActual(u)) {
+            @if (puedeBloquearUsuario(u)) {
               @if (u.bloqueado) {
                 <button mat-button (click)="desbloquear(u)"><mat-icon>lock_open</mat-icon> Desbloquear</button>
               } @else {
