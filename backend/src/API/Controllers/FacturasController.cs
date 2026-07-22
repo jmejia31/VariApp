@@ -145,17 +145,17 @@ public class FacturasController : ControllerBase
 
     private void AplicarEncabezadosDocumentoPrivado()
     {
-        Response.Headers.CacheControl = "private, no-store, no-cache, max-age=0";
-        Response.Headers.Pragma = "no-cache";
-        Response.Headers.Expires = "0";
+        Response.Headers["Cache-Control"] = "private, no-store, no-cache, max-age=0";
+        Response.Headers["Pragma"] = "no-cache";
+        Response.Headers["Expires"] = "0";
         Response.Headers["X-Content-Type-Options"] = "nosniff";
     }
 
     private void AplicarEncabezadosDocumentoPublico()
     {
-        Response.Headers.CacheControl = "no-store, no-cache, max-age=0, must-revalidate";
-        Response.Headers.Pragma = "no-cache";
-        Response.Headers.Expires = "0";
+        Response.Headers["Cache-Control"] = "no-store, no-cache, max-age=0, must-revalidate";
+        Response.Headers["Pragma"] = "no-cache";
+        Response.Headers["Expires"] = "0";
         Response.Headers["Referrer-Policy"] = "no-referrer";
         Response.Headers["X-Content-Type-Options"] = "nosniff";
         Response.Headers["X-Frame-Options"] = "DENY";
