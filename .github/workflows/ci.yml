@@ -1,10 +1,15 @@
 name: VariApp CI
 
-# Durante el desarrollo activo de la rama agent/mejoras-variapp, la validación
-# se ejecuta manualmente para evitar correos repetitivos por cada commit
-# intermedio. Antes de fusionar a main se restaurará la ejecución automática.
+# Durante el desarrollo activo, el CI solo se ejecuta mediante solicitud manual
+# o cuando se actualiza explícitamente un marcador de checkpoint. Los commits
+# ordinarios no generan ejecuciones ni correos repetitivos.
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - agent/mejoras-variapp
+    paths:
+      - .github/checkpoints/**
 
 permissions:
   contents: read
