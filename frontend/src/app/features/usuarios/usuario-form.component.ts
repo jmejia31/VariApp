@@ -14,6 +14,9 @@ import { RolService } from '../../services/rol.service';
 import { Rol } from '../../core/models/rol.model';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
 
+const USUARIO_VALIDO = /^[a-zA-Z0-9._-]{3,50}$/;
+const PASSWORD_SEGURA = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{10,128}$/;
+
 @Component({
   selector: 'app-usuario-form',
   standalone: true,
@@ -33,7 +36,7 @@ export class UsuarioFormComponent implements OnInit {
   readonly saving = signal(false);
   readonly errorMessage = signal<string | null>(null);
   readonly roles = signal<Rol[]>([]);
-  readonly nombreUsuario = signal('');
+  readonly usuarioOriginal = signal('');
   readonly rolActualNombre = signal('—');
   readonly puedeAsignarRol = signal(false);
   readonly puedeRestablecerPassword = signal(false);
@@ -43,9 +46,10 @@ export class UsuarioFormComponent implements OnInit {
   private rolLegadoOriginal = 'Vendedor';
 
   readonly form = this.fb.group({
-    nombreCompleto: ['', [Validators.required, Validators.maxLength(150)]],
+    nombreUsuario: ['', [Validators.required, Validators.pattern(USUARIO_VALIDO)]],
+    nombreCompleto: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(150)]],
     rolId: [null as number | null, Validators.required],
-    nuevaPassword: ['', [Validators.minLength(8), Validators.maxLength(128)]]
+    nuevaPassword: ['', Validators.pattern(PASSWORD_SEGURA)]
   });
 
   constructor(
@@ -74,21 +78,19 @@ export class UsuarioFormComponent implements OnInit {
     this.usuarioService.getById(this.usuarioId).subscribe({
       next: (usuario) => {
         const u = usuario.data;
-        this.nombreUsuario.set(u.nombreUsuario);
+        this.usuarioOriginal.set(u.nombreUsuario);
         this.rolIdOriginal = u.rolId;
         this.rolLegadoOriginal = u.rol;
         this.rolActualNombre.set(u.rolNombre || u.rol);
         this.form.patchValue({
+          nombreUsuario: u.nombreUsuario,
           nombreCompleto: u.nombreCompleto,
           rolId: u.rolId ?? null,
           nuevaPassword: ''
         });
 
-        if (this.puedeAsignarRol()) {
-          this.cargarRoles(u.rolId);
-        } else {
-          this.loading.set(false);
-        }
+        if (this.puedeAsignarRol()) this.cargarRoles(u.rolId);
+        else this.loading.set(false);
       },
       error: (err) => {
         this.loading.set(false);
@@ -100,22 +102,21 @@ export class UsuarioFormComponent implements OnInit {
   private cargarRoles(rolActualId?: number): void {
     this.rolService.getAll(false).subscribe({
       next: (roles) => {
-        this.roles.set(
-          roles.data.filter((rol) => rol.activo || rol.id === rolActualId)
-        );
+        this.roles.set(roles.data.filter((rol) => rol.activo || rol.id === rolActualId));
         this.loading.set(false);
       },
       error: (err) => {
         this.loading.set(false);
-        this.errorMessage.set(
-          err.error?.message ?? 'No se pudieron cargar los roles asignables.'
-        );
+        this.errorMessage.set(err.error?.message ?? 'No se pudieron cargar los roles asignables.');
       }
     });
   }
 
   guardar(): void {
-    if (this.form.invalid || this.saving()) return;
+    if (this.form.invalid || this.saving()) {
+      this.form.markAllAsTouched();
+      return;
+    }
 
     const valor = this.form.getRawValue();
     let rolId = this.rolIdOriginal;
@@ -134,6 +135,7 @@ export class UsuarioFormComponent implements OnInit {
     this.saving.set(true);
     this.errorMessage.set(null);
     this.usuarioService.update(this.usuarioId, {
+      nombreUsuario: valor.nombreUsuario!.trim(),
       nombreCompleto: valor.nombreCompleto!.trim(),
       rol: rolLegado,
       rolId,
