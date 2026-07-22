@@ -78,6 +78,8 @@ public class ProductoService : IProductoService
             Precio = dto.Precio,
             UmbralStockBajo = dto.UmbralStockBajo,
             CategoriaId = dto.CategoriaId,
+            Activo = true,
+            Eliminado = false,
             CreadoPorUsuarioId = _currentUser.UsuarioId,
             CreadoPorNombreUsuario = _currentUser.NombreUsuario
         };
@@ -146,7 +148,6 @@ public class ProductoService : IProductoService
         producto.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
         producto.FechaActualizacion = DateTime.UtcNow;
 
-        // 1) Eliminar imágenes marcadas
         if (dto.ImagenesAEliminarIds is { Count: > 0 })
         {
             var aEliminar = producto.Imagenes.Where(i => dto.ImagenesAEliminarIds.Contains(i.Id)).ToList();
@@ -157,14 +158,12 @@ public class ProductoService : IProductoService
             }
         }
 
-        // 2) Validar límite antes de agregar nuevas
         var nuevas = dto.ImagenesNuevas ?? new List<Microsoft.AspNetCore.Http.IFormFile>();
         if (producto.Imagenes.Count + nuevas.Count > MaxImagenes)
             throw new BusinessRuleException(
                 $"Un producto puede tener máximo {MaxImagenes} fotos ({producto.Imagenes.Count} existentes + {nuevas.Count} nuevas excede el límite).");
         ValidarImagenes(nuevas);
 
-        // 3) Agregar nuevas imágenes
         var siguienteOrden = producto.Imagenes.Count == 0 ? 0 : producto.Imagenes.Max(i => i.Orden) + 1;
         var yaTienePrincipal = producto.Imagenes.Any(i => i.EsPrincipal);
 
@@ -183,7 +182,6 @@ public class ProductoService : IProductoService
             yaTienePrincipal = true;
         }
 
-        // 4) Cambiar imagen principal si se solicitó
         if (dto.ImagenPrincipalId.HasValue)
         {
             var nuevaPrincipal = producto.Imagenes.FirstOrDefault(i => i.Id == dto.ImagenPrincipalId.Value);
@@ -195,7 +193,6 @@ public class ProductoService : IProductoService
         }
         else if (producto.Imagenes.Count > 0 && !producto.Imagenes.Any(i => i.EsPrincipal))
         {
-            // Garantizar que siempre haya una principal si quedan imágenes
             producto.Imagenes.OrderBy(i => i.Orden).First().EsPrincipal = true;
         }
 
@@ -228,17 +225,34 @@ public class ProductoService : IProductoService
         var producto = await _repository.GetByIdAsync(id);
         if (producto is null) return false;
 
-        foreach (var imagen in producto.Imagenes)
-            await _imageStorage.DeleteAsync(imagen.PublicId);
+        // Eliminación lógica: conserva imágenes, relaciones y snapshots. Cloudinary
+        // solo se limpia en una futura acción administrativa de eliminación permanente.
+        var valoresAnteriores = new
+        {
+            producto.Nombre,
+            producto.Marca,
+            producto.Modelo,
+            producto.Activo,
+            producto.Eliminado,
+            Imagenes = producto.Imagenes.Count
+        };
 
-        var valoresAnteriores = new { producto.Nombre, producto.Marca, producto.Modelo, Imagenes = producto.Imagenes.Count };
-        _repository.Remove(producto);
+        producto.Activo = false;
+        producto.Eliminado = true;
+        producto.FechaEliminacion = DateTime.UtcNow;
+        producto.EliminadoPorUsuarioId = _currentUser.UsuarioId;
+        producto.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
+        producto.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
+        producto.FechaActualizacion = DateTime.UtcNow;
+
+        _repository.Update(producto);
         var guardado = await _repository.SaveChangesAsync();
         if (guardado)
         {
-            await _auditoria.RegistrarAsync(ModuloSistema.Productos, AccionPermiso.Eliminar,
-                $"Producto eliminado: {producto.Nombre}.", id, entidad: "Producto",
-                valoresAnteriores: valoresAnteriores);
+            await _auditoria.RegistrarAsync(ModuloSistema.Productos, AccionPermiso.EliminarLogico,
+                $"Producto eliminado lógicamente: {producto.Nombre}.", id, entidad: "Producto",
+                valoresAnteriores: valoresAnteriores,
+                valoresNuevos: new { producto.Activo, producto.Eliminado, producto.FechaEliminacion });
         }
 
         return guardado;
@@ -247,9 +261,6 @@ public class ProductoService : IProductoService
     private static void ValidarImagenes(IEnumerable<Microsoft.AspNetCore.Http.IFormFile> imagenes)
     {
         if (imagenes.Any(imagen => !ImagenValidationHelper.EsImagenValida(imagen)))
-        {
             throw new BusinessRuleException("Solo se permiten imágenes JPG, PNG o WebP de hasta 5 MB.");
-        }
     }
-
 }
