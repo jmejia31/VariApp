@@ -84,7 +84,7 @@ public class ProductoService : IProductoService
             CreadoPorNombreUsuario = _currentUser.NombreUsuario
         };
 
-        for (int i = 0; i < imagenes.Count; i++)
+        for (var i = 0; i < imagenes.Count; i++)
         {
             var (url, publicId) = await _imageStorage.UploadAsync(imagenes[i]);
             producto.Imagenes.Add(new ProductoImagen
@@ -101,9 +101,22 @@ public class ProductoService : IProductoService
         await _repository.AddAsync(producto);
         await _repository.SaveChangesAsync();
 
-        await _auditoria.RegistrarAsync(ModuloSistema.Productos, AccionPermiso.Crear,
-            $"Producto creado: {producto.Nombre}.", producto.Id, entidad: "Producto",
-            valoresNuevos: new { producto.Nombre, producto.Marca, producto.Modelo, producto.Cantidad, producto.Costo, producto.Precio, Imagenes = producto.Imagenes.Count });
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Productos,
+            AccionPermiso.Crear,
+            $"Producto creado: {producto.Nombre}.",
+            producto.Id,
+            entidad: "Producto",
+            valoresNuevos: new
+            {
+                producto.Nombre,
+                producto.Marca,
+                producto.Modelo,
+                producto.Cantidad,
+                producto.Costo,
+                producto.Precio,
+                Imagenes = producto.Imagenes.Count
+            });
 
         return ProductoMapper.ToDto(producto);
     }
@@ -150,11 +163,13 @@ public class ProductoService : IProductoService
 
         if (dto.ImagenesAEliminarIds is { Count: > 0 })
         {
-            var aEliminar = producto.Imagenes.Where(i => dto.ImagenesAEliminarIds.Contains(i.Id)).ToList();
-            foreach (var img in aEliminar)
+            var aEliminar = producto.Imagenes
+                .Where(i => dto.ImagenesAEliminarIds.Contains(i.Id))
+                .ToList();
+            foreach (var imagen in aEliminar)
             {
-                await _imageStorage.DeleteAsync(img.PublicId);
-                producto.Imagenes.Remove(img);
+                await _imageStorage.DeleteAsync(imagen.PublicId);
+                producto.Imagenes.Remove(imagen);
             }
         }
 
@@ -164,7 +179,9 @@ public class ProductoService : IProductoService
                 $"Un producto puede tener máximo {MaxImagenes} fotos ({producto.Imagenes.Count} existentes + {nuevas.Count} nuevas excede el límite).");
         ValidarImagenes(nuevas);
 
-        var siguienteOrden = producto.Imagenes.Count == 0 ? 0 : producto.Imagenes.Max(i => i.Orden) + 1;
+        var siguienteOrden = producto.Imagenes.Count == 0
+            ? 0
+            : producto.Imagenes.Max(i => i.Orden) + 1;
         var yaTienePrincipal = producto.Imagenes.Any(i => i.EsPrincipal);
 
         foreach (var archivo in nuevas)
@@ -184,11 +201,13 @@ public class ProductoService : IProductoService
 
         if (dto.ImagenPrincipalId.HasValue)
         {
-            var nuevaPrincipal = producto.Imagenes.FirstOrDefault(i => i.Id == dto.ImagenPrincipalId.Value);
+            var nuevaPrincipal = producto.Imagenes
+                .FirstOrDefault(i => i.Id == dto.ImagenPrincipalId.Value);
             if (nuevaPrincipal is null)
                 throw new BusinessRuleException("La imagen indicada como principal no pertenece a este producto.");
 
-            foreach (var img in producto.Imagenes) img.EsPrincipal = false;
+            foreach (var imagen in producto.Imagenes)
+                imagen.EsPrincipal = false;
             nuevaPrincipal.EsPrincipal = true;
         }
         else if (producto.Imagenes.Count > 0 && !producto.Imagenes.Any(i => i.EsPrincipal))
@@ -199,8 +218,12 @@ public class ProductoService : IProductoService
         _repository.Update(producto);
         await _repository.SaveChangesAsync();
 
-        await _auditoria.RegistrarAsync(ModuloSistema.Productos, AccionPermiso.Editar,
-            $"Producto actualizado: {producto.Nombre}.", producto.Id, entidad: "Producto",
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Productos,
+            AccionPermiso.Editar,
+            $"Producto actualizado: {producto.Nombre}.",
+            producto.Id,
+            entidad: "Producto",
             valoresAnteriores: valoresAnteriores,
             valoresNuevos: new
             {
@@ -220,13 +243,38 @@ public class ProductoService : IProductoService
         return ProductoMapper.ToDto(producto);
     }
 
+    public async Task<ProductoDto?> CambiarEstadoAsync(int id, bool activo)
+    {
+        var producto = await _repository.GetByIdAsync(id);
+        if (producto is null) return null;
+        if (producto.Activo == activo) return ProductoMapper.ToDto(producto);
+
+        var estadoAnterior = producto.Activo;
+        producto.Activo = activo;
+        producto.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
+        producto.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
+        producto.FechaActualizacion = DateTime.UtcNow;
+
+        _repository.Update(producto);
+        await _repository.SaveChangesAsync();
+
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Productos,
+            activo ? AccionPermiso.Activar : AccionPermiso.Desactivar,
+            $"Producto {(activo ? "activado" : "desactivado")}: {producto.Nombre}.",
+            producto.Id,
+            entidad: "Producto",
+            valoresAnteriores: new { Activo = estadoAnterior },
+            valoresNuevos: new { producto.Activo });
+
+        return ProductoMapper.ToDto(producto);
+    }
+
     public async Task<bool> DeleteAsync(int id)
     {
         var producto = await _repository.GetByIdAsync(id);
         if (producto is null) return false;
 
-        // Eliminación lógica: conserva imágenes, relaciones y snapshots. Cloudinary
-        // solo se limpia en una futura acción administrativa de eliminación permanente.
         var valoresAnteriores = new
         {
             producto.Nombre,
@@ -249,10 +297,19 @@ public class ProductoService : IProductoService
         var guardado = await _repository.SaveChangesAsync();
         if (guardado)
         {
-            await _auditoria.RegistrarAsync(ModuloSistema.Productos, AccionPermiso.EliminarLogico,
-                $"Producto eliminado lógicamente: {producto.Nombre}.", id, entidad: "Producto",
+            await _auditoria.RegistrarAsync(
+                ModuloSistema.Productos,
+                AccionPermiso.EliminarLogico,
+                $"Producto eliminado lógicamente: {producto.Nombre}.",
+                id,
+                entidad: "Producto",
                 valoresAnteriores: valoresAnteriores,
-                valoresNuevos: new { producto.Activo, producto.Eliminado, producto.FechaEliminacion });
+                valoresNuevos: new
+                {
+                    producto.Activo,
+                    producto.Eliminado,
+                    producto.FechaEliminacion
+                });
         }
 
         return guardado;
