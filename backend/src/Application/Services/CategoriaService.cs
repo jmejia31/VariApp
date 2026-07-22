@@ -53,7 +53,7 @@ public class CategoriaService : ICategoriaService
 
         await _repository.AddAsync(categoria);
         await _repository.SaveChangesAsync();
-        await _auditoria.RegistrarAsync(ModuloSistema.Categorias, AccionPermiso.Crear, $"Categoria creada: {categoria.Nombre}", categoria.Id);
+        await _auditoria.RegistrarAsync(ModuloSistema.Categorias, AccionPermiso.Crear, $"Categoría creada: {categoria.Nombre}", categoria.Id);
 
         return ToDto(categoria);
     }
@@ -68,14 +68,37 @@ public class CategoriaService : ICategoriaService
 
         categoria.Nombre = dto.Nombre.Trim();
         categoria.Descripcion = dto.Descripcion;
-        categoria.Activa = dto.Activa;
+        // El estado se modifica únicamente mediante Activar/Desactivar, nunca
+        // como efecto lateral del permiso Editar.
         categoria.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
         categoria.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
         categoria.FechaActualizacion = DateTime.UtcNow;
 
         _repository.Update(categoria);
         await _repository.SaveChangesAsync();
-        await _auditoria.RegistrarAsync(ModuloSistema.Categorias, AccionPermiso.Editar, $"Categoria actualizada: {categoria.Nombre}", categoria.Id);
+        await _auditoria.RegistrarAsync(ModuloSistema.Categorias, AccionPermiso.Editar, $"Categoría actualizada: {categoria.Nombre}", categoria.Id);
+
+        return ToDto(categoria);
+    }
+
+    public async Task<CategoriaDto?> CambiarEstadoAsync(int id, bool activa)
+    {
+        var categoria = await _repository.GetByIdAsync(id);
+        if (categoria is null) return null;
+        if (categoria.Activa == activa) return ToDto(categoria);
+
+        categoria.Activa = activa;
+        categoria.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
+        categoria.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
+        categoria.FechaActualizacion = DateTime.UtcNow;
+
+        _repository.Update(categoria);
+        await _repository.SaveChangesAsync();
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Categorias,
+            activa ? AccionPermiso.Activar : AccionPermiso.Desactivar,
+            $"Categoría {(activa ? "activada" : "desactivada")}: {categoria.Nombre}",
+            categoria.Id);
 
         return ToDto(categoria);
     }
