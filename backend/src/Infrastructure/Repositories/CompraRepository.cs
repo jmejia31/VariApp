@@ -119,6 +119,26 @@ public class CompraRepository : ICompraRepository
             entry.Entity.FechaActualizacion = DateTime.UtcNow;
         }
 
+        await CompletarSnapshotImpuestosAsync();
         return await _context.SaveChangesAsync() > 0;
+    }
+
+    private async Task CompletarSnapshotImpuestosAsync()
+    {
+        var nuevos = _context.ChangeTracker.Entries<CompraImpuesto>()
+            .Where(e => e.State == EntityState.Added)
+            .ToList();
+        if (nuevos.Count == 0) return;
+
+        var ids = nuevos.Select(e => e.Entity.ImpuestoId).Distinct().ToList();
+        var configuracion = await _context.Impuestos.AsNoTracking()
+            .Where(i => ids.Contains(i.Id))
+            .ToDictionaryAsync(i => i.Id, i => i.IncluidoEnPrecio);
+
+        foreach (var entry in nuevos)
+        {
+            entry.Entity.IncluidoEnPrecioSnapshot =
+                configuracion.TryGetValue(entry.Entity.ImpuestoId, out var incluido) && incluido;
+        }
     }
 }
