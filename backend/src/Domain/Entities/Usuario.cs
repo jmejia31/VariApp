@@ -11,16 +11,13 @@ public class Usuario
     /// Enum legado, se conserva por compatibilidad durante la migración a roles dinámicos.
     public RolUsuario Rol { get; set; } = RolUsuario.Vendedor;
 
-    /// FK al catálogo dinámico de roles (Domain.Entities.Rol). Nullable mientras
-    /// conviven ambos modelos; los datos existentes se backfillean en la migración.
     public int? RolId { get; set; }
     public Rol? RolEntidad { get; set; }
 
-    public bool Activo { get; set; } = true;
+    public string? FotoPerfilUrl { get; set; }
+    public string? FotoPerfilPublicId { get; set; }
 
-    /// Bloqueo: distinto de Activo/Desactivar. Desactivar es una decisión
-    /// administrativa reversible normal; Bloquear implica una restricción de
-    /// seguridad (ej. sospecha de acceso indebido) con motivo obligatorio.
+    public bool Activo { get; set; } = true;
     public bool Bloqueado { get; set; }
     public string? MotivoBloqueo { get; set; }
     public DateTime? FechaBloqueo { get; set; }
