@@ -62,17 +62,34 @@ jobs:
               --output-dir Migrations
           fi
 
-      - name: Reject destructive migration operations
+      - name: Inspect migration safety
+        id: migration_safety
         shell: bash
         run: |
           set -euo pipefail
           migration_file="$(find src/Infrastructure/Migrations -maxdepth 1 -name '*_Fase6SeguridadFacturacionPerfil.cs' ! -name '*.Designer.cs' | head -n 1)"
           test -n "$migration_file"
           echo "Revisando $migration_file"
-          if grep -En 'migrationBuilder\.(DropColumn|DropTable|DeleteData|DropIndex|DropForeignKey|RenameColumn|RenameTable|AlterColumn)' "$migration_file"; then
-            echo 'La migración contiene una operación no aditiva y fue bloqueada.' >&2
+          grep -En 'migrationBuilder\.(DropColumn|DropTable|DeleteData|DropIndex|DropForeignKey|RenameColumn|RenameTable|AlterColumn)' "$migration_file" > phase6-migration-risk.txt || true
+          if test -s phase6-migration-risk.txt; then
+            cat phase6-migration-risk.txt
+            echo 'La migración contiene operaciones no aditivas y fue bloqueada.' >&2
             exit 1
           fi
+          echo 'No se detectaron operaciones destructivas.' > phase6-migration-risk.txt
+
+      - name: Upload generated migration diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase6-generated-migration
+          path: |
+            backend/src/Infrastructure/Migrations/*_Fase6SeguridadFacturacionPerfil.cs
+            backend/src/Infrastructure/Migrations/*_Fase6SeguridadFacturacionPerfil.Designer.cs
+            backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs
+            backend/phase6-migration-risk.txt
+          if-no-files-found: warn
+          retention-days: 7
 
       - name: Verify model and migration alignment
         run: |
@@ -134,5 +151,28 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build production
-        run: npm run build:prod
+      - name: Build production with compact diagnostics
+        shell: bash
+        run: |
+          set +e
+          npm run build:prod 2>&1 | tee phase6-frontend-build.log
+          status=${PIPESTATUS[0]}
+          {
+            echo '=== Errores TypeScript/Angular y presupuestos ==='
+            grep -E -i -A 5 -B 3 '(error|TS[0-9]{4}|budget|maximum exceeded|failed|✘)' phase6-frontend-build.log | tail -n 220 || true
+            echo '=== Últimas líneas del build ==='
+            tail -n 100 phase6-frontend-build.log
+          } > phase6-frontend-summary.log
+          cat phase6-frontend-summary.log
+          exit "$status"
+
+      - name: Upload frontend diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase6-frontend-diagnostics
+          path: |
+            frontend/phase6-frontend-build.log
+            frontend/phase6-frontend-summary.log
+          if-no-files-found: warn
+          retention-days: 7
