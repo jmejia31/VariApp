@@ -62,21 +62,26 @@ jobs:
               --output-dir Migrations
           fi
 
-      - name: Inspect migration safety
+      - name: Inspect forward migration safety
         id: migration_safety
         shell: bash
         run: |
           set -euo pipefail
           migration_file="$(find src/Infrastructure/Migrations -maxdepth 1 -name '*_Fase6SeguridadFacturacionPerfil.cs' ! -name '*.Designer.cs' | head -n 1)"
           test -n "$migration_file"
-          echo "Revisando $migration_file"
-          grep -En 'migrationBuilder\.(DropColumn|DropTable|DeleteData|DropIndex|DropForeignKey|RenameColumn|RenameTable|AlterColumn)' "$migration_file" > phase6-migration-risk.txt || true
+          echo "Revisando únicamente Up() en $migration_file"
+          awk '
+            /protected override void Up\(MigrationBuilder migrationBuilder\)/ { capture=1 }
+            /protected override void Down\(MigrationBuilder migrationBuilder\)/ { capture=0 }
+            capture { print }
+          ' "$migration_file" > phase6-migration-up.txt
+          grep -En 'migrationBuilder\.(DropColumn|DropTable|DeleteData|DropIndex|DropForeignKey|RenameColumn|RenameTable|AlterColumn)' phase6-migration-up.txt > phase6-migration-risk.txt || true
           if test -s phase6-migration-risk.txt; then
             cat phase6-migration-risk.txt
-            echo 'La migración contiene operaciones no aditivas y fue bloqueada.' >&2
+            echo 'Up() contiene operaciones no aditivas y fue bloqueado.' >&2
             exit 1
           fi
-          echo 'No se detectaron operaciones destructivas.' > phase6-migration-risk.txt
+          echo 'Up() contiene únicamente operaciones aditivas permitidas.' > phase6-migration-risk.txt
 
       - name: Upload generated migration diagnostics
         if: always()
@@ -87,6 +92,7 @@ jobs:
             backend/src/Infrastructure/Migrations/*_Fase6SeguridadFacturacionPerfil.cs
             backend/src/Infrastructure/Migrations/*_Fase6SeguridadFacturacionPerfil.Designer.cs
             backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs
+            backend/phase6-migration-up.txt
             backend/phase6-migration-risk.txt
           if-no-files-found: warn
           retention-days: 7
