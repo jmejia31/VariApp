@@ -13,8 +13,8 @@
     <div class="info-banner">
       <mat-icon>security</mat-icon>
       <div>
-        <strong>Edición protegida por permiso</strong>
-        <span>Solo los usuarios con <code>Usuarios:Editar</code> pueden abrir y guardar este formulario.</span>
+        <strong>Edición protegida por acción</strong>
+        <span>Los datos generales, el rol y la contraseña se autorizan de manera independiente.</span>
       </div>
     </div>
 
@@ -33,24 +33,34 @@
         }
       </mat-form-field>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Rol</mat-label>
-        <mat-select formControlName="rolId">
-          @for (rol of roles(); track rol.id) {
-            <mat-option [value]="rol.id">{{ rol.nombre }}</mat-option>
-          }
-        </mat-select>
-        <mat-hint>Los permisos efectivos dependen del rol seleccionado.</mat-hint>
-      </mat-form-field>
+      @if (puedeAsignarRol()) {
+        <mat-form-field appearance="outline">
+          <mat-label>Rol</mat-label>
+          <mat-select formControlName="rolId">
+            @for (rol of roles(); track rol.id) {
+              <mat-option [value]="rol.id">{{ rol.nombre }}</mat-option>
+            }
+          </mat-select>
+          <mat-hint>Requiere el permiso <code>Usuarios:AsignarRol</code>.</mat-hint>
+        </mat-form-field>
+      } @else {
+        <mat-form-field appearance="outline">
+          <mat-label>Rol actual</mat-label>
+          <input matInput [value]="rolActualNombre()" disabled>
+          <mat-hint>No tienes permiso para cambiar roles.</mat-hint>
+        </mat-form-field>
+      }
 
-      <mat-form-field appearance="outline">
-        <mat-label>Nueva contraseña (opcional)</mat-label>
-        <input matInput type="password" formControlName="nuevaPassword" autocomplete="new-password">
-        <mat-hint>Déjala vacía para conservar la contraseña actual.</mat-hint>
-        @if (form.controls.nuevaPassword.hasError('minlength')) {
-          <mat-error>Debe contener al menos 8 caracteres.</mat-error>
-        }
-      </mat-form-field>
+      @if (puedeRestablecerPassword()) {
+        <mat-form-field appearance="outline">
+          <mat-label>Nueva contraseña (opcional)</mat-label>
+          <input matInput type="password" formControlName="nuevaPassword" autocomplete="new-password">
+          <mat-hint>Déjala vacía para conservar la contraseña actual.</mat-hint>
+          @if (form.controls.nuevaPassword.hasError('minlength')) {
+            <mat-error>Debe contener al menos 8 caracteres.</mat-error>
+          }
+        </mat-form-field>
+      }
     </div>
 
     @if (errorMessage()) {
