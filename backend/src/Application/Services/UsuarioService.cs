@@ -172,7 +172,9 @@ public class UsuarioService : IUsuarioService
         _repository.Update(usuario);
         await _repository.SaveChangesAsync();
 
-        var rolNuevo = usuario.RolEntidad?.Nombre ?? rolDinamico?.Nombre ?? usuario.Rol.ToString();
+        // Se prioriza el rol recién resuelto. La navegación cargada en la entidad
+        // puede continuar apuntando al rol anterior hasta que el contexto se recargue.
+        var rolNuevo = rolDinamico?.Nombre ?? usuario.RolEntidad?.Nombre ?? usuario.Rol.ToString();
         if (!string.Equals(datosAnteriores.Rol, rolNuevo, StringComparison.Ordinal))
         {
             await _auditoria.RegistrarAsync(
