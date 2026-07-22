@@ -65,19 +65,16 @@ public class ProductosController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
-    [RequierePermiso(ModuloSistema.Productos, AccionPermiso.Eliminar)]
+    [RequierePermiso(ModuloSistema.Productos, AccionPermiso.EliminarLogico)]
     public async Task<IActionResult> Delete(int id)
     {
         var eliminado = await _productoService.DeleteAsync(id);
         if (!eliminado)
             return NotFound(ApiResponse<object>.Fail("Producto no encontrado."));
 
-        return Ok(ApiResponse<object>.Ok(new { }, "Producto eliminado correctamente."));
+        return Ok(ApiResponse<object>.Ok(new { }, "Producto eliminado lógicamente. Su historial permanece protegido."));
     }
 
-    /// Descarga de una imagen individual (sección 11). El backend hace de
-    /// intermediario: no redirige a Cloudinary directamente, controla la
-    /// autorización real y nombra el archivo de forma amigable.
     [HttpGet("{id:int}/imagenes/{imagenId:int}/descargar")]
     [RequierePermiso(ModuloSistema.Productos, AccionPermiso.Exportar)]
     public async Task<IActionResult> DescargarImagen(int id, int imagenId)
@@ -86,8 +83,6 @@ public class ProductosController : ControllerBase
         if (producto is null)
             return NotFound(ApiResponse<object>.Fail("Producto no encontrado."));
 
-        // Control de acceso horizontal: la imagen debe pertenecer a ESTE
-        // producto, no basta con que el imagenId exista en la base.
         var imagen = producto.Imagenes.FirstOrDefault(i => i.Id == imagenId);
         if (imagen is null)
             return NotFound(ApiResponse<object>.Fail("La imagen no existe o no pertenece a este producto."));
@@ -107,9 +102,6 @@ public class ProductosController : ControllerBase
         return File(contenido, contentType, nombreArchivo);
     }
 
-    /// Descarga todas las imágenes de un producto en un único ZIP (sección
-    /// 11: "botón para descargar todas las imágenes, cuando sea técnicamente
-    /// viable" — sí lo es, se arma en memoria sin dependencias nuevas).
     [HttpGet("{id:int}/imagenes/descargar-todas")]
     [RequierePermiso(ModuloSistema.Productos, AccionPermiso.Exportar)]
     public async Task<IActionResult> DescargarTodasLasImagenes(int id)
@@ -128,7 +120,7 @@ public class ProductosController : ControllerBase
             foreach (var imagen in producto.Imagenes.OrderBy(i => i.Orden))
             {
                 var descarga = await _imageStorageService.DownloadAsync(imagen.Url);
-                if (descarga is null) continue; // se omite silenciosamente una imagen faltante, no se aborta el ZIP completo
+                if (descarga is null) continue;
 
                 var (contenido, contentType) = descarga.Value;
                 var extension = contentType.Contains("png") ? "png" : contentType.Contains("webp") ? "webp" : "jpg";
