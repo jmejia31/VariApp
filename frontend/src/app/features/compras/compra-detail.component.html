@@ -52,7 +52,7 @@
     <div class="totales">
       <div><span>Subtotal</span><span>L. {{ c.subtotal | number:'1.2-2' }}</span></div>
       @for (i of c.impuestosAplicados; track i.impuestoId) {
-        <div class="linea-impuesto"><span>{{ i.nombre }} ({{ i.tasa }}%)</span><span>+ L. {{ i.monto | number:'1.2-2' }}</span></div>
+        <div class="linea-impuesto"><span>{{ i.nombre }} ({{ i.tasa }}%)</span><span>{{ i.incluidoEnPrecio ? '' : '+' }} L. {{ i.monto | number:'1.2-2' }}</span></div>
       }
       <div class="total"><span>Total</span><span>L. {{ c.total | number:'1.2-2' }}</span></div>
     </div>
@@ -66,11 +66,17 @@
 
     <div class="actions">
       @if (c.estado === 'Borrador') {
-        <a [routerLink]="['/compras', c.id, 'editar']" mat-button>Editar</a>
-        <button mat-button color="warn" (click)="eliminarBorrador()">Eliminar borrador</button>
-        <button mat-flat-button color="primary" [disabled]="procesando()" (click)="confirmar()">Confirmar compra</button>
+        @if (puedeEditar()) {
+          <a [routerLink]="['/compras', c.id, 'editar']" mat-button>Editar</a>
+        }
+        @if (puedeEliminar()) {
+          <button mat-button color="warn" [disabled]="procesando()" (click)="eliminarBorrador()">Eliminar borrador</button>
+        }
+        @if (puedeConfirmar()) {
+          <button mat-flat-button color="primary" [disabled]="procesando()" (click)="confirmar()">Confirmar compra</button>
+        }
       }
-      @if (c.estado === 'Confirmada') {
+      @if (c.estado === 'Confirmada' && puedeAnular()) {
         <button mat-flat-button color="warn" [disabled]="procesando()" (click)="anular()">Anular compra</button>
       }
     </div>
