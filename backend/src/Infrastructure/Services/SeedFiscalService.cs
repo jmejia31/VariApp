@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace InventoryApp.Infrastructure.Services;
 
+/// Crea configuraciones fiscales iniciales solo cuando no existen. Nunca
+/// reactiva, modifica tasas ni revierte decisiones realizadas desde la interfaz.
 public class SeedFiscalService
 {
     private readonly AppDbContext _context;
@@ -16,109 +18,98 @@ public class SeedFiscalService
 
     public async Task SeedDefaultsAsync()
     {
-        await EnsureImpuestoAsync(
+        await CrearImpuestoSiNoExisteAsync(
             codigo: "ISV15",
             nombre: "ISV 15%",
-            descripcion: "Impuesto sobre ventas general de Honduras.",
+            descripcion: "Impuesto sobre ventas general, incluido en el precio de venta cuando corresponda.",
             tasa: 15m,
             prioridad: 10,
-            operaciones: new[] { OperacionImpuesto.Venta, OperacionImpuesto.Compra });
+            incluidoEnPrecio: true,
+            activo: true,
+            operaciones: new[] { OperacionImpuesto.Venta });
 
-        await EnsureImpuestoAsync(
+        await CrearImpuestoSiNoExisteAsync(
             codigo: "ISC5",
             nombre: "ISC 5%",
-            descripcion: "Impuesto selectivo al consumo para compras cuando aplique.",
+            descripcion: "Impuesto selectivo al consumo disponible para compras cuando corresponda.",
             tasa: 5m,
             prioridad: 20,
+            incluidoEnPrecio: true,
+            activo: false,
             operaciones: new[] { OperacionImpuesto.Compra });
 
-        await EnsureDescuentoAsync(
+        await CrearDescuentoSiNoExisteAsync(
             codigo: "VARISTORE10",
-            nombre: "Promocion VariStorehn 10%",
-            descripcion: "Descuento promocional global para ventas usando el codigo VARISTORE10.",
+            nombre: "Promoción VariStorehn 10%",
+            descripcion: "Descuento promocional global para ventas usando el código VARISTORE10.",
             valor: 10m);
 
         await _context.SaveChangesAsync();
     }
 
-    private async Task EnsureImpuestoAsync(
+    private async Task CrearImpuestoSiNoExisteAsync(
         string codigo,
         string nombre,
         string descripcion,
         decimal tasa,
         int prioridad,
+        bool incluidoEnPrecio,
+        bool activo,
         OperacionImpuesto[] operaciones)
     {
-        var impuesto = await _context.Impuestos
-            .Include(i => i.Operaciones)
-            .FirstOrDefaultAsync(i => i.Codigo == codigo);
+        var existe = await _context.Impuestos.AnyAsync(i => i.Codigo == codigo);
+        if (existe) return;
 
-        if (impuesto is null)
+        var impuesto = new Impuesto
         {
-            impuesto = new Impuesto
-            {
-                Codigo = codigo,
-                FechaCreacion = DateTime.UtcNow
-            };
-            _context.Impuestos.Add(impuesto);
-        }
+            Codigo = codigo,
+            Nombre = nombre,
+            Descripcion = descripcion,
+            Tipo = TipoImpuesto.Porcentaje,
+            Tasa = tasa,
+            MontoFijo = null,
+            IncluidoEnPrecio = incluidoEnPrecio,
+            SeCalculaAntesDescuento = false,
+            Acumulativo = true,
+            Prioridad = prioridad,
+            RequiereRetencion = false,
+            Activo = activo,
+            Eliminado = false,
+            FechaCreacion = DateTime.UtcNow,
+            Operaciones = operaciones
+                .Distinct()
+                .Select(o => new ImpuestoOperacion { Operacion = o })
+                .ToList()
+        };
 
-        impuesto.Nombre = nombre;
-        impuesto.Descripcion = descripcion;
-        impuesto.Tipo = TipoImpuesto.Porcentaje;
-        impuesto.Tasa = tasa;
-        impuesto.MontoFijo = null;
-        impuesto.IncluidoEnPrecio = false;
-        impuesto.SeCalculaAntesDescuento = false;
-        impuesto.Acumulativo = true;
-        impuesto.Prioridad = prioridad;
-        impuesto.RequiereRetencion = false;
-        impuesto.Activo = true;
-        impuesto.Eliminado = false;
-        impuesto.FechaEliminacion = null;
-        impuesto.FechaActualizacion = DateTime.UtcNow;
-
-        foreach (var operacion in operaciones)
-        {
-            if (!impuesto.Operaciones.Any(o => o.Operacion == operacion))
-            {
-                impuesto.Operaciones.Add(new ImpuestoOperacion { Operacion = operacion });
-            }
-        }
+        _context.Impuestos.Add(impuesto);
     }
 
-    private async Task EnsureDescuentoAsync(string codigo, string nombre, string descripcion, decimal valor)
+    private async Task CrearDescuentoSiNoExisteAsync(
+        string codigo,
+        string nombre,
+        string descripcion,
+        decimal valor)
     {
         var normalizado = codigo.Trim().ToUpperInvariant();
-        var descuento = await _context.Descuentos
-            .FirstOrDefaultAsync(d => d.CodigoPromocionalNormalizado == normalizado);
+        var existe = await _context.Descuentos
+            .AnyAsync(d => d.CodigoPromocionalNormalizado == normalizado);
+        if (existe) return;
 
-        if (descuento is null)
+        _context.Descuentos.Add(new Descuento
         {
-            descuento = new Descuento
-            {
-                CodigoPromocional = codigo,
-                CodigoPromocionalNormalizado = normalizado,
-                FechaCreacion = DateTime.UtcNow
-            };
-            _context.Descuentos.Add(descuento);
-        }
-
-        descuento.Nombre = nombre;
-        descuento.Descripcion = descripcion;
-        descuento.Tipo = TipoDescuento.Porcentaje;
-        descuento.Valor = valor;
-        descuento.MontoMinimo = null;
-        descuento.MontoMaximoDescuento = null;
-        descuento.CantidadMinima = null;
-        descuento.RequiereAprobacion = false;
-        descuento.Acumulable = true;
-        descuento.Prioridad = 10;
-        descuento.LimiteTotalUsos = null;
-        descuento.LimiteUsosPorCliente = null;
-        descuento.Activo = true;
-        descuento.Eliminado = false;
-        descuento.FechaEliminacion = null;
-        descuento.FechaActualizacion = DateTime.UtcNow;
+            CodigoPromocional = codigo,
+            CodigoPromocionalNormalizado = normalizado,
+            Nombre = nombre,
+            Descripcion = descripcion,
+            Tipo = TipoDescuento.Porcentaje,
+            Valor = valor,
+            RequiereAprobacion = false,
+            Acumulable = true,
+            Prioridad = 10,
+            Activo = true,
+            Eliminado = false,
+            FechaCreacion = DateTime.UtcNow
+        });
     }
 }
