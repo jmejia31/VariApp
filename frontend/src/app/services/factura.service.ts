@@ -23,7 +23,7 @@ export class FacturaService {
     return this.http.get<ApiResponse<Factura>>(`${this.apiUrl}/venta/${ventaId}`);
   }
 
-  /** PDF real generado en backend (sección 13/14), no la vista HTML imprimible. */
+  /** Único PDF oficial utilizado por descarga e impresión. */
   descargarPdf(id: number): Observable<Blob> {
     return this.http.get(`${this.apiUrl}/${id}/pdf`, { responseType: 'blob' });
   }
@@ -32,8 +32,23 @@ export class FacturaService {
     return this.http.post<ApiResponse<EnlaceCompartir>>(`${this.apiUrl}/${id}/compartir/whatsapp`, {});
   }
 
-  registrarIntentoEnvio(id: number, canal: 'WhatsApp' | 'Correo', destinatario: string, resultado = 'Iniciado', error?: string): Observable<ApiResponse<object>> {
-    return this.http.post<ApiResponse<object>>(`${this.apiUrl}/${id}/compartir/registrar`, { canal, destinatario, resultado, error });
+  revocarEnlaces(id: number): Observable<ApiResponse<{ enlacesRevocados: number }>> {
+    return this.http.post<ApiResponse<{ enlacesRevocados: number }>>(`${this.apiUrl}/${id}/compartir/revocar`, {});
+  }
+
+  registrarIntentoEnvio(
+    id: number,
+    canal: 'WhatsApp' | 'Correo',
+    destinatario: string,
+    resultado = 'Iniciado',
+    error?: string
+  ): Observable<ApiResponse<object>> {
+    return this.http.post<ApiResponse<object>>(`${this.apiUrl}/${id}/compartir/registrar`, {
+      canal,
+      destinatario,
+      resultado,
+      error
+    });
   }
 
   getHistorialEnvios(id: number): Observable<ApiResponse<HistorialEnvio[]>> {
