@@ -9,7 +9,7 @@ let limitedRoleId = 0;
 let limitedUserId = 0;
 let limitedUsername = 'e2e_limitado';
 let limitedPassword = 'E2E.Limitado#2026!';
-let sellerUsername = 'e2e_vendedor';
+const sellerUsername = 'e2e_vendedor';
 const sellerPassword = 'E2E.Vendedor#2026!';
 
 function authHeaders(token: string): Record<string, string> {
@@ -51,23 +51,95 @@ async function expectNoHorizontalOverflow(page: Page, tolerance = 2): Promise<vo
   expect(overflow).toBeLessThanOrEqual(tolerance);
 }
 
+async function getRoles(request: APIRequestContext): Promise<Array<Record<string, any>>> {
+  const response = await request.get(`${API_URL}/roles`, {
+    headers: authHeaders(adminToken)
+  });
+  expect(response.status(), await response.text()).toBe(200);
+  return await dataOf(response) as Array<Record<string, any>>;
+}
+
+async function ensureRole(
+  request: APIRequestContext,
+  name: string,
+  description: string
+): Promise<Record<string, any>> {
+  const existing = (await getRoles(request))
+    .find((role) => String(role.nombre).toLowerCase() === name.toLowerCase());
+  if (existing) return existing;
+
+  const response = await request.post(`${API_URL}/roles`, {
+    headers: authHeaders(adminToken),
+    data: {
+      nombre: name,
+      descripcion: description,
+      esAdministrador: false
+    }
+  });
+  expect(response.status(), await response.text()).toBe(201);
+  return await dataOf(response);
+}
+
+async function ensureUser(
+  request: APIRequestContext,
+  input: {
+    nombreUsuario: string;
+    nombreCompleto: string;
+    password: string;
+    rol: string;
+    rolId: number;
+  }
+): Promise<Record<string, any>> {
+  const listResponse = await request.get(`${API_URL}/usuarios`, {
+    headers: authHeaders(adminToken)
+  });
+  expect(listResponse.status(), await listResponse.text()).toBe(200);
+  const users = await dataOf(listResponse) as Array<Record<string, any>>;
+  const existing = users.find((user) =>
+    String(user.nombreUsuario).toLowerCase() === input.nombreUsuario.toLowerCase());
+
+  if (!existing) {
+    const createResponse = await request.post(`${API_URL}/usuarios`, {
+      headers: authHeaders(adminToken),
+      data: input
+    });
+    expect(createResponse.status(), await createResponse.text()).toBe(200);
+    return await dataOf(createResponse);
+  }
+
+  const updateResponse = await request.put(`${API_URL}/usuarios/${existing.id}`, {
+    headers: authHeaders(adminToken),
+    data: {
+      nombreUsuario: input.nombreUsuario,
+      nombreCompleto: input.nombreCompleto,
+      rol: input.rol,
+      rolId: input.rolId,
+      nuevaPassword: input.password
+    }
+  });
+  expect(updateResponse.status(), await updateResponse.text()).toBe(200);
+  return await dataOf(updateResponse);
+}
+
 test.describe('Fase 7 — aceptación end-to-end aislada', () => {
-  test.describe.configure({ mode: 'serial' });
+  // La suite modifica usuario y contraseña deliberadamente. Reintentarla sobre
+  // la misma base produciría un estado diferente; cada workflow ya parte de una
+  // base MySQL nueva y descartable.
+  test.describe.configure({ mode: 'serial', retries: 0 });
 
   test.beforeAll(async ({ request }) => {
     adminToken = await loginApi(request, ADMIN_USERNAME, ADMIN_PASSWORD);
 
-    const roleResponse = await request.post(`${API_URL}/roles`, {
-      headers: authHeaders(adminToken),
-      data: {
-        nombre: 'E2E Limitado',
-        descripcion: 'Rol temporal para certificación automatizada de Fase 7',
-        esAdministrador: false
-      }
-    });
-    expect(roleResponse.status(), await roleResponse.text()).toBe(201);
-    const createdRole = await dataOf(roleResponse);
-    limitedRoleId = createdRole.id;
+    const sellerRole = (await getRoles(request))
+      .find((role) => String(role.nombre).toLowerCase() === 'vendedor');
+    expect(sellerRole, 'El rol de sistema Vendedor debe existir después del seeding.').toBeTruthy();
+
+    const limitedRole = await ensureRole(
+      request,
+      'E2E Limitado',
+      'Rol temporal para certificación automatizada de Fase 7'
+    );
+    limitedRoleId = limitedRole.id;
 
     const matrixResponse = await request.get(`${API_URL}/permisos/matriz/${limitedRoleId}`, {
       headers: authHeaders(adminToken)
@@ -88,38 +160,22 @@ test.describe('Fase 7 — aceptación end-to-end aislada', () => {
     });
     expect(updateMatrixResponse.status(), await updateMatrixResponse.text()).toBe(200);
 
-    const limitedUserResponse = await request.post(`${API_URL}/usuarios`, {
-      headers: authHeaders(adminToken),
-      data: {
-        nombreUsuario: limitedUsername,
-        nombreCompleto: 'Usuario Limitado E2E',
-        password: limitedPassword,
-        rol: 'Vendedor',
-        rolId: limitedRoleId
-      }
+    const limitedUser = await ensureUser(request, {
+      nombreUsuario: limitedUsername,
+      nombreCompleto: 'Usuario Limitado E2E',
+      password: limitedPassword,
+      rol: 'Vendedor',
+      rolId: limitedRoleId
     });
-    expect(limitedUserResponse.status(), await limitedUserResponse.text()).toBe(200);
-    limitedUserId = (await dataOf(limitedUserResponse)).id;
+    limitedUserId = limitedUser.id;
 
-    const rolesResponse = await request.get(`${API_URL}/roles`, {
-      headers: authHeaders(adminToken)
+    await ensureUser(request, {
+      nombreUsuario: sellerUsername,
+      nombreCompleto: 'Vendedor E2E',
+      password: sellerPassword,
+      rol: 'Vendedor',
+      rolId: sellerRole!.id
     });
-    expect(rolesResponse.status()).toBe(200);
-    const roles = await dataOf(rolesResponse) as Array<Record<string, any>>;
-    const sellerRole = roles.find((role) => String(role.nombre).toLowerCase() === 'vendedor');
-    expect(sellerRole, 'El rol de sistema Vendedor debe existir después del seeding.').toBeTruthy();
-
-    const sellerUserResponse = await request.post(`${API_URL}/usuarios`, {
-      headers: authHeaders(adminToken),
-      data: {
-        nombreUsuario: sellerUsername,
-        nombreCompleto: 'Vendedor E2E',
-        password: sellerPassword,
-        rol: 'Vendedor',
-        rolId: sellerRole.id
-      }
-    });
-    expect(sellerUserResponse.status(), await sellerUserResponse.text()).toBe(200);
   });
 
   test('Administrador conserva acceso a módulos corporativos', async ({ request }) => {
