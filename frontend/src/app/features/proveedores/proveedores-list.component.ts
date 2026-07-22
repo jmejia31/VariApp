@@ -24,6 +24,8 @@ export class ProveedoresListComponent implements OnInit {
   readonly loading = signal(true);
   readonly puedeCrear = signal(false);
   readonly puedeEditar = signal(false);
+  readonly puedeActivar = signal(false);
+  readonly puedeDesactivar = signal(false);
   readonly puedeEliminar = signal(false);
 
   constructor(
@@ -36,6 +38,8 @@ export class ProveedoresListComponent implements OnInit {
   ngOnInit(): void {
     this.puedeCrear.set(this.permisosRuntime.puede('Proveedores', 'Crear'));
     this.puedeEditar.set(this.permisosRuntime.puede('Proveedores', 'Editar'));
+    this.puedeActivar.set(this.permisosRuntime.puede('Proveedores', 'Activar'));
+    this.puedeDesactivar.set(this.permisosRuntime.puede('Proveedores', 'Desactivar'));
     this.puedeEliminar.set(this.permisosRuntime.puede('Proveedores', 'EliminarLogico'));
     this.cargar();
   }
@@ -48,11 +52,19 @@ export class ProveedoresListComponent implements OnInit {
     });
   }
 
+  puedeCambiarEstado(proveedor: Proveedor): boolean {
+    return proveedor.activo ? this.puedeDesactivar() : this.puedeActivar();
+  }
+
   toggleActivo(p: Proveedor): void {
+    if (!this.puedeCambiarEstado(p)) return;
     this.proveedorService.update(p.id, {
       nombre: p.nombre, telefono: p.telefono, documento: p.documento,
       correo: p.correo, direccion: p.direccion, activo: !p.activo
-    }).subscribe(() => this.cargar());
+    }).subscribe({
+      next: () => this.cargar(),
+      error: (err) => this.snackBar.open(err.error?.message ?? 'No se pudo cambiar el estado del proveedor.', 'Cerrar', { duration: 5000 })
+    });
   }
 
   async eliminar(p: Proveedor): Promise<void> {
