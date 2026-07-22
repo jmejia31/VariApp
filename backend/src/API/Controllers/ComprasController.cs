@@ -46,8 +46,6 @@ public class ComprasController : ControllerBase
             ApiResponse<CompraDto>.Ok(creada, "Compra creada en estado Borrador."));
     }
 
-    /// Vista previa: calcula impuestos reales (desde el catálogo, vía
-    /// ICalculoService) SIN persistir nada.
     [HttpPost("calcular")]
     [RequierePermiso(ModuloSistema.Compras, AccionPermiso.Crear)]
     public async Task<IActionResult> Calcular([FromBody] CalcularCompraRequest request)
@@ -84,11 +82,11 @@ public class ComprasController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
-    [RequierePermiso(ModuloSistema.Compras, AccionPermiso.Eliminar)]
+    [RequierePermiso(ModuloSistema.Compras, AccionPermiso.EliminarLogico)]
     public async Task<IActionResult> DeleteBorrador(int id)
     {
         var eliminada = await _compraService.DeleteBorradorAsync(id);
         if (!eliminada) return NotFound(ApiResponse<object>.Fail("Compra no encontrada."));
-        return Ok(ApiResponse<object>.Ok(new { }, "Compra (borrador) eliminada."));
+        return Ok(ApiResponse<object>.Ok(new { }, "Borrador de compra eliminado correctamente."));
     }
 }
