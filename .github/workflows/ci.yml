@@ -1,33 +1,39 @@
 name: VariApp CI
 
-# Durante el desarrollo activo, el CI solo se ejecuta mediante solicitud manual
-# o cuando se actualiza explícitamente un marcador de checkpoint. Los commits
-# ordinarios no generan ejecuciones ni correos repetitivos.
+# La certificación de la Fase 6 se ejecuta únicamente cuando cambia su
+# checkpoint o mediante una solicitud manual. No se despliega a Render/Vercel
+# y nunca ejecuta `database update` contra Aiven.
 on:
   workflow_dispatch:
-  push:
+  pull_request:
     branches:
-      - agent/mejoras-variapp
+      - main
     paths:
-      - .github/checkpoints/**
+      - .github/checkpoints/phase-6
 
 permissions:
-  contents: read
+  contents: write
+  pull-requests: read
+  actions: read
 
 concurrency:
-  group: variapp-ci-${{ github.ref }}
+  group: variapp-phase6-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
   backend:
-    name: Backend build and tests
+    name: Backend migration, build and tests
     runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.head_ref == 'agent/mejoras-variapp'
     defaults:
       run:
         working-directory: backend
     steps:
-      - name: Checkout
+      - name: Checkout working branch
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+          fetch-depth: 0
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -39,21 +45,84 @@ jobs:
       - name: Restore
         run: dotnet restore InventoryApp.sln
 
-      - name: Build
+      - name: Install EF Core CLI
+        run: dotnet tool install --global dotnet-ef --version 8.0.2
+
+      - name: Generate additive Phase 6 migration
+        shell: bash
+        run: |
+          set -euo pipefail
+          if find src/Infrastructure/Migrations -maxdepth 1 -name '*_Fase6SeguridadFacturacionPerfil.cs' | grep -q .; then
+            echo 'La migración de Fase 6 ya existe; se verificará sin regenerarla.'
+          else
+            dotnet ef migrations add Fase6SeguridadFacturacionPerfil \
+              --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+              --startup-project src/API/InventoryApp.API.csproj \
+              --context AppDbContext \
+              --output-dir Migrations
+          fi
+
+      - name: Reject destructive migration operations
+        shell: bash
+        run: |
+          set -euo pipefail
+          migration_file="$(find src/Infrastructure/Migrations -maxdepth 1 -name '*_Fase6SeguridadFacturacionPerfil.cs' ! -name '*.Designer.cs' | head -n 1)"
+          test -n "$migration_file"
+          echo "Revisando $migration_file"
+          if grep -En 'migrationBuilder\.(DropColumn|DropTable|DeleteData|DropIndex|DropForeignKey|RenameColumn|RenameTable|AlterColumn)' "$migration_file"; then
+            echo 'La migración contiene una operación no aditiva y fue bloqueada.' >&2
+            exit 1
+          fi
+
+      - name: Verify model and migration alignment
+        run: |
+          dotnet ef migrations has-pending-model-changes \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext
+
+      - name: Build backend
         run: dotnet build InventoryApp.sln --configuration Release --no-restore
 
-      - name: Test
+      - name: Run backend tests
         run: dotnet test InventoryApp.sln --configuration Release --no-build --logger "trx;LogFileName=tests.trx"
+
+      - name: Commit generated migration to working branch
+        if: github.event_name == 'pull_request' && github.head_ref == 'agent/mejoras-variapp'
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git status --porcelain -- src/Infrastructure/Migrations | grep -q .; then
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add src/Infrastructure/Migrations
+            git commit -m 'Add additive migration for phase 6'
+            git push origin HEAD:agent/mejoras-variapp
+          else
+            echo 'No hay archivos de migración nuevos para confirmar.'
+          fi
+
+      - name: Upload backend test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-results
+          path: backend/**/TestResults/*.trx
+          if-no-files-found: ignore
+          retention-days: 7
 
   frontend:
     name: Frontend production build
     runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.head_ref == 'agent/mejoras-variapp'
     defaults:
       run:
         working-directory: frontend
     steps:
-      - name: Checkout
+      - name: Checkout working branch
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
 
       - name: Setup Node
         uses: actions/setup-node@v4
