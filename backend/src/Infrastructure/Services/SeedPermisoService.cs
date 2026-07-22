@@ -26,14 +26,19 @@ public class SeedPermisoService
         var roles = await SeedRolesSistemaAsync();
         await VincularUsuariosLegacyAsync(roles.Administrador, roles.Vendedor);
         await VincularPermisosLegacyAsync(roles.Administrador, roles.Vendedor);
+        await _context.SaveChangesAsync();
 
         // Los valores predeterminados solo se insertan cuando el rol fue creado
-        // en este mismo arranque. Una matriz existente, incluso vacía por decisión
-        // administrativa, nunca se reconstruye ni sobrescribe automáticamente.
-        if (roles.AdministradorCreado)
+        // en este mismo arranque y no existe una matriz heredada. Una matriz ya
+        // persistida, incluso vacía por decisión administrativa, nunca se reemplaza.
+        var administradorTieneMatriz = await _context.RolPermisos
+            .AnyAsync(p => p.RolId == roles.Administrador.Id);
+        if (roles.AdministradorCreado && !administradorTieneMatriz)
             await SeedAdministradorInicialAsync(roles.Administrador);
 
-        if (roles.VendedorCreado)
+        var vendedorTieneMatriz = await _context.RolPermisos
+            .AnyAsync(p => p.RolId == roles.Vendedor.Id);
+        if (roles.VendedorCreado && !vendedorTieneMatriz)
             await SeedVendedorInicialAsync(roles.Vendedor);
 
         await _context.SaveChangesAsync();
