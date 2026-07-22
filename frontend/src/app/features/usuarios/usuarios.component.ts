@@ -20,6 +20,9 @@ import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service
 import { AuthService } from '../../core/auth/auth.service';
 import { AppAlertService } from '../../shared/alerts/app-alert.service';
 
+const USUARIO_VALIDO = /^[a-zA-Z0-9._-]{3,50}$/;
+const PASSWORD_SEGURA = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{10,128}$/;
+
 @Component({
   selector: 'app-usuarios',
   standalone: true,
@@ -49,9 +52,9 @@ export class UsuariosComponent implements OnInit {
   readonly puedeEliminar = signal(false);
 
   readonly form = this.fb.group({
-    nombreUsuario: ['', Validators.required],
-    nombreCompleto: ['', Validators.required],
-    password: ['', [Validators.required, Validators.minLength(8)]],
+    nombreUsuario: ['', [Validators.required, Validators.pattern(USUARIO_VALIDO)]],
+    nombreCompleto: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(150)]],
+    password: ['', [Validators.required, Validators.pattern(PASSWORD_SEGURA)]],
     rolId: [null as number | null, Validators.required]
   });
 
@@ -89,7 +92,7 @@ export class UsuariosComponent implements OnInit {
   }
 
   esUsuarioActual(u: Usuario): boolean {
-    return this.auth.nombreUsuario() === u.nombreUsuario;
+    return this.auth.nombreUsuario()?.toLowerCase() === u.nombreUsuario.toLowerCase();
   }
 
   puedeCambiarEstado(usuario: Usuario): boolean {
@@ -113,7 +116,6 @@ export class UsuariosComponent implements OnInit {
           this.loading.set(false);
           return;
         }
-
         this.cargarListadoLegado();
       },
       error: () => this.cargarListadoLegado()
@@ -148,15 +150,18 @@ export class UsuariosComponent implements OnInit {
   }
 
   crear(): void {
-    if (!this.puedeCrear() || this.form.invalid) return;
+    if (!this.puedeCrear() || this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
 
     this.saving.set(true);
     this.errorMessage.set(null);
 
     const valor = this.form.getRawValue();
     this.usuarioService.create({
-      nombreUsuario: valor.nombreUsuario!,
-      nombreCompleto: valor.nombreCompleto!,
+      nombreUsuario: valor.nombreUsuario!.trim(),
+      nombreCompleto: valor.nombreCompleto!.trim(),
       password: valor.password!,
       rol: 'Vendedor',
       rolId: valor.rolId!
