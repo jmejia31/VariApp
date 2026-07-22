@@ -1,16 +1,17 @@
 name: VariApp CI
 
+# Durante el desarrollo activo de la rama agent/mejoras-variapp, la validación
+# se ejecuta manualmente para evitar correos repetitivos por cada commit
+# intermedio. Antes de fusionar a main se restaurará la ejecución automática.
 on:
-  push:
-    branches:
-      - main
-      - agent/**
-  pull_request:
-    branches:
-      - main
+  workflow_dispatch:
 
 permissions:
   contents: read
+
+concurrency:
+  group: variapp-ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   backend:
