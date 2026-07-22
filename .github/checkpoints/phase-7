@@ -1,19 +1,20 @@
-Checkpoint controlado de la Fase 7.
+Checkpoint final controlado de la Fase 7 automatizada.
 Fecha: 2026-07-22
-Revisión: 2
+Revisión: 3
 
 Incluye:
 - MySQL 8.4 temporal y descartable.
 - Aplicación completa de migraciones EF Core fuera de Aiven.
 - API ASP.NET Core y Angular locales en GitHub Actions.
 - Creación incremental de roles dinámicos Administrador y Vendedor.
+- Vinculación inmediata del administrador inicial con el rol dinámico Administrador.
 - Conservación de matrices de permisos administradas entre reinicios.
 - Matriz Administrador, Vendedor y rol personalizado.
 - Autorización backend 200/403 y guardas frontend.
 - Perfil propio y política de contraseña.
 - Venta, factura, PDF privado, enlace público y revocación.
 - Login responsivo a 320, 375, 390, 430, 768 y 1440 px.
-- Suite E2E determinista, serial y sobre una base descartable nueva.
+- Suite E2E determinista sobre una base descartable nueva.
 
 Prohibido durante este checkpoint:
 - usar Aiven, Render, Vercel, Gmail o Cloudinary productivos;
