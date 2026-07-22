@@ -3,7 +3,7 @@ using InventoryApp.Domain.Enums;
 namespace InventoryApp.Domain.Entities;
 
 /// Módulo real y administrable de impuestos. La configuración se gestiona
-/// desde la interfaz y el motor conserva un snapshot de cada aplicación.
+/// desde la interfaz y el motor conserva un snapshot monetario de cada aplicación.
 public class Impuesto
 {
     public int Id { get; set; }
@@ -74,7 +74,6 @@ public class VentaImpuesto
     public decimal TasaSnapshot { get; set; }
     public decimal BaseImponible { get; set; }
     public decimal MontoAplicado { get; set; }
-    public bool IncluidoEnPrecioSnapshot { get; set; }
 }
 
 public class CompraImpuesto
@@ -87,5 +86,4 @@ public class CompraImpuesto
     public decimal TasaSnapshot { get; set; }
     public decimal BaseImponible { get; set; }
     public decimal MontoAplicado { get; set; }
-    public bool IncluidoEnPrecioSnapshot { get; set; }
 }
