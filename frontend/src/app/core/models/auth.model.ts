@@ -7,6 +7,7 @@ export interface LoginResponse {
   token: string;
   nombreUsuario: string;
   nombreCompleto: string;
-  rol: 'Administrador' | 'Vendedor';
+  rol: string;
+  fotoPerfilUrl?: string;
   expiraEn: string;
 }
