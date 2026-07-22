@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -8,6 +8,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { VentaService } from '../../services/venta.service';
 import { Venta } from '../../core/models/venta.model';
 import { AnularDialogComponent } from '../../shared/anular-dialog.component';
+import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
 
 @Component({
   selector: 'app-venta-detail',
@@ -17,9 +18,17 @@ import { AnularDialogComponent } from '../../shared/anular-dialog.component';
   styleUrl: './venta-detail.component.scss'
 })
 export class VentaDetailComponent implements OnInit {
+  private readonly permisosRuntime = inject(PermisosRuntimeService);
+
   readonly venta = signal<Venta | null>(null);
   readonly loading = signal(true);
   readonly procesando = signal(false);
+  readonly puedeEditar = signal(false);
+  readonly puedeConfirmar = signal(false);
+  readonly puedeAnular = signal(false);
+  readonly puedeEliminar = signal(false);
+  readonly puedeVerFactura = signal(false);
+  readonly puedeVerUtilidad = signal(false);
   private ventaId!: number;
 
   constructor(
@@ -30,6 +39,16 @@ export class VentaDetailComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.puedeEditar.set(this.permisosRuntime.puede('Ventas', 'Editar'));
+    this.puedeConfirmar.set(this.permisosRuntime.puede('Ventas', 'Confirmar'));
+    this.puedeAnular.set(this.permisosRuntime.puede('Ventas', 'Anular'));
+    this.puedeEliminar.set(this.permisosRuntime.puede('Ventas', 'EliminarLogico'));
+    this.puedeVerFactura.set(this.permisosRuntime.puede('Facturacion', 'Ver'));
+    this.puedeVerUtilidad.set(
+      this.permisosRuntime.esAdministrador() ||
+      this.permisosRuntime.puede('Finanzas', 'Administrar')
+    );
+
     this.ventaId = Number(this.route.snapshot.paramMap.get('id'));
     this.cargar();
   }
@@ -43,18 +62,24 @@ export class VentaDetailComponent implements OnInit {
   }
 
   confirmar(): void {
+    if (!this.puedeConfirmar() || this.procesando()) return;
+
     this.procesando.set(true);
     this.ventaService.confirmar(this.ventaId).subscribe({
       next: (res) => {
         this.venta.set(res.data);
         this.procesando.set(false);
-        if (res.data.facturaId) this.router.navigate(['/facturas', res.data.facturaId]);
+        if (res.data.facturaId && this.puedeVerFactura()) {
+          this.router.navigate(['/facturas', res.data.facturaId]);
+        }
       },
       error: () => this.procesando.set(false)
     });
   }
 
   anular(): void {
+    if (!this.puedeAnular() || this.procesando()) return;
+
     const ref = this.dialog.open(AnularDialogComponent, {
       data: { title: 'Anular venta', message: 'Esta acción revertirá el stock y anulará la factura. Escribe el motivo:' }
     });
@@ -70,6 +95,12 @@ export class VentaDetailComponent implements OnInit {
   }
 
   eliminarBorrador(): void {
-    this.ventaService.deleteBorrador(this.ventaId).subscribe(() => this.router.navigate(['/ventas']));
+    if (!this.puedeEliminar() || this.procesando()) return;
+
+    this.procesando.set(true);
+    this.ventaService.deleteBorrador(this.ventaId).subscribe({
+      next: () => this.router.navigate(['/ventas']),
+      error: () => this.procesando.set(false)
+    });
   }
 }
