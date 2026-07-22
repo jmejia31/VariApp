@@ -99,6 +99,12 @@ export const routes: Routes = [
     loadComponent: () => import('./features/usuarios/usuarios.component').then(m => m.UsuariosComponent)
   },
   {
+    path: 'usuarios/:id/editar',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Usuarios', accion: 'Editar' },
+    loadComponent: () => import('./features/usuarios/usuario-form.component').then(m => m.UsuarioFormComponent)
+  },
+  {
     path: 'usuarios/:id',
     canActivate: [authGuard, permisoGuard],
     data: { modulo: 'Usuarios', accion: 'Ver' },
@@ -183,16 +189,16 @@ export const routes: Routes = [
     loadComponent: () => import('./features/compras/compra-form.component').then(m => m.CompraFormComponent)
   },
   {
-    path: 'compras/:id',
-    canActivate: [authGuard, permisoGuard],
-    data: { modulo: 'Compras', accion: 'Ver' },
-    loadComponent: () => import('./features/compras/compra-detail.component').then(m => m.CompraDetailComponent)
-  },
-  {
     path: 'compras/:id/editar',
     canActivate: [authGuard, permisoGuard],
     data: { modulo: 'Compras', accion: 'Editar' },
     loadComponent: () => import('./features/compras/compra-form.component').then(m => m.CompraFormComponent)
+  },
+  {
+    path: 'compras/:id',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Compras', accion: 'Ver' },
+    loadComponent: () => import('./features/compras/compra-detail.component').then(m => m.CompraDetailComponent)
   },
   {
     path: 'ventas',
@@ -207,16 +213,16 @@ export const routes: Routes = [
     loadComponent: () => import('./features/ventas/venta-form.component').then(m => m.VentaFormComponent)
   },
   {
-    path: 'ventas/:id',
-    canActivate: [authGuard, permisoGuard],
-    data: { modulo: 'Ventas', accion: 'Ver' },
-    loadComponent: () => import('./features/ventas/venta-detail.component').then(m => m.VentaDetailComponent)
-  },
-  {
     path: 'ventas/:id/editar',
     canActivate: [authGuard, permisoGuard],
     data: { modulo: 'Ventas', accion: 'Editar' },
     loadComponent: () => import('./features/ventas/venta-form.component').then(m => m.VentaFormComponent)
+  },
+  {
+    path: 'ventas/:id',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Ventas', accion: 'Ver' },
+    loadComponent: () => import('./features/ventas/venta-detail.component').then(m => m.VentaDetailComponent)
   },
   {
     path: 'facturas/:id',
@@ -233,7 +239,7 @@ export const routes: Routes = [
   {
     path: 'inventario/movimientos',
     canActivate: [authGuard, permisoGuard],
-    data: { modulo: 'Inventario', accion: 'Ver' },
+    data: { modulo: 'MovimientosInventario', accion: 'Ver' },
     loadComponent: () => import('./features/inventario/movimientos-list.component').then(m => m.MovimientosListComponent)
   },
   {
@@ -243,8 +249,6 @@ export const routes: Routes = [
     loadComponent: () => import('./features/configuracion/configuracion.component').then(m => m.ConfiguracionComponent)
   },
   {
-    // Autogestión: cualquier usuario autenticado administra su propia cuenta,
-    // sin importar su rol o permisos de módulo.
     path: 'perfil',
     canActivate: [authGuard],
     loadComponent: () => import('./features/perfil/perfil.component').then(m => m.PerfilComponent)
