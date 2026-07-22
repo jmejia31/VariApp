@@ -115,15 +115,23 @@ public class VentaRepository : IVentaRepository
 
     public async Task<bool> SaveChangesAsync()
     {
-        // Compatibilidad segura con el flujo histórico DeleteBorradorAsync:
-        // cuando un borrador queda sin detalles, se marca como eliminado en vez
-        // de borrarlo físicamente. Las ventas confirmadas/anuladas nunca entran aquí.
-        foreach (var entry in _context.ChangeTracker.Entries<Venta>()
-                     .Where(e => e.State == EntityState.Modified &&
-                                 e.Entity.Estado == EstadoDocumento.Borrador &&
-                                 e.Entity.Detalles.Count == 0 &&
-                                 !e.Entity.Eliminado))
+        var borradoresEliminados = _context.ChangeTracker.Entries<Venta>()
+            .Where(e => e.State == EntityState.Modified &&
+                        e.Entity.Estado == EstadoDocumento.Borrador &&
+                        e.Entity.Detalles.Count == 0 &&
+                        !e.Entity.Eliminado)
+            .ToList();
+
+        foreach (var entry in borradoresEliminados)
         {
+            // DeleteBorradorAsync del flujo legado limpia la colección. Se cancelan
+            // las eliminaciones de sus líneas para conservar el documento completo.
+            foreach (var detalleEntry in _context.ChangeTracker.Entries<VentaDetalle>()
+                         .Where(d => d.State == EntityState.Deleted && d.Entity.VentaId == entry.Entity.Id))
+            {
+                detalleEntry.State = EntityState.Unchanged;
+            }
+
             entry.Entity.Eliminado = true;
             entry.Entity.FechaEliminacion = DateTime.UtcNow;
             entry.Entity.EliminadoPorUsuarioId = _currentUser.UsuarioId;
