@@ -16,6 +16,7 @@ export interface Producto {
   precio: number;
   umbralStockBajo: number;
   tieneStockBajo: boolean;
+  activo: boolean;
   categoriaId?: number;
   categoriaNombre?: string;
   imagenPrincipalUrl?: string;
