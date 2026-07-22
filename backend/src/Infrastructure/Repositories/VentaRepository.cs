@@ -59,7 +59,10 @@ public class VentaRepository : IVentaRepository
             _ => sortDirDesc ? query.OrderByDescending(v => v.Fecha) : query.OrderBy(v => v.Fecha),
         };
 
-        var items = await query.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToListAsync();
+        var items = await query
+            .Skip((request.Page - 1) * request.PageSize)
+            .Take(request.PageSize)
+            .ToListAsync();
         return (items, totalCount);
     }
 
@@ -102,7 +105,7 @@ public class VentaRepository : IVentaRepository
             .ToListAsync();
 
     public async Task<int> ContarTodasAsync() =>
-        await _context.Ventas.CountAsync();
+        await _context.Ventas.IgnoreQueryFilters().CountAsync();
 
     public async Task AddAsync(Venta venta) =>
         await _context.Ventas.AddAsync(venta);
@@ -110,6 +113,25 @@ public class VentaRepository : IVentaRepository
     public void Update(Venta venta) =>
         _context.Ventas.Update(venta);
 
-    public async Task<bool> SaveChangesAsync() =>
-        await _context.SaveChangesAsync() > 0;
+    public async Task<bool> SaveChangesAsync()
+    {
+        // Compatibilidad segura con el flujo histórico DeleteBorradorAsync:
+        // cuando un borrador queda sin detalles, se marca como eliminado en vez
+        // de borrarlo físicamente. Las ventas confirmadas/anuladas nunca entran aquí.
+        foreach (var entry in _context.ChangeTracker.Entries<Venta>()
+                     .Where(e => e.State == EntityState.Modified &&
+                                 e.Entity.Estado == EstadoDocumento.Borrador &&
+                                 e.Entity.Detalles.Count == 0 &&
+                                 !e.Entity.Eliminado))
+        {
+            entry.Entity.Eliminado = true;
+            entry.Entity.FechaEliminacion = DateTime.UtcNow;
+            entry.Entity.EliminadoPorUsuarioId = _currentUser.UsuarioId;
+            entry.Entity.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
+            entry.Entity.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
+            entry.Entity.FechaActualizacion = DateTime.UtcNow;
+        }
+
+        return await _context.SaveChangesAsync() > 0;
+    }
 }
