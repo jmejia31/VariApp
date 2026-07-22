@@ -1,0 +1,3 @@
+Checkpoint de validación controlada de la Fase 1.
+Fecha: 2026-07-22
+Objetivo: compilar backend, ejecutar pruebas y compilar frontend sin activar CI en commits ordinarios.
