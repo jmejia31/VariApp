@@ -34,13 +34,14 @@ public class DashboardService : IDashboardService
     public async Task<DashboardResumenDto> GetResumenAsync()
     {
         var esAdministrador = _currentUser.EsAdministrador;
-        var stockBajo = await _productoRepository.GetStockBajoAsync();
-        var ultimosProductos = await _productoRepository.GetUltimosAgregadosAsync();
-        var ultimasVentas = await _ventaRepository.GetUltimasAsync();
 
-        // Los repositorios de ventas, compras y movimientos aplican alcance por
-        // UsuarioId para cualquier usuario no administrador. Además, el dashboard
-        // no expone datos financieros ni auditoría corporativa fuera del rol admin.
+        // El inventario físico y las alertas de stock son información operativa
+        // compartida. Los costos, utilidades, compras y auditoría son corporativos.
+        var stockBajo = await _productoRepository.GetStockBajoAsync();
+        var ultimasVentas = await _ventaRepository.GetUltimasAsync();
+        var ultimosProductos = esAdministrador
+            ? await _productoRepository.GetUltimosAgregadosAsync()
+            : new List<Producto>();
         var ultimasCompras = esAdministrador
             ? await _compraRepository.GetUltimasAsync()
             : new List<Compra>();
@@ -63,9 +64,11 @@ public class DashboardService : IDashboardService
             ValorTotalInventario = esAdministrador ? await _productoRepository.GetValorTotalCostoAsync() : 0,
             ValorPotencialVenta = esAdministrador ? await _productoRepository.GetValorTotalPrecioAsync() : 0,
             ProductosStockBajo = stockBajo.Select(ProductoMapper.ToDto).ToList(),
-            UltimosAgregados = esAdministrador ? ultimosProductos.Select(ProductoMapper.ToDto).ToList() : new(),
+            UltimosAgregados = ultimosProductos.Select(ProductoMapper.ToDto).ToList(),
 
             ComprasDelMes = esAdministrador ? await _compraRepository.GetTotalDelMesAsync() : 0,
+            // VentaRepository aplica automáticamente el UsuarioId del usuario
+            // autenticado cuando no es administrador.
             VentasDelMes = await _ventaRepository.GetTotalDelMesAsync(),
             UltimasCompras = ultimasCompras.Select(c => new CompraResumenDto
             {
@@ -84,14 +87,20 @@ public class DashboardService : IDashboardService
                 Fecha = v.Fecha
             }).ToList(),
 
-            IngresosDelMes = esAdministrador ? await _ventaRepository.GetIngresosDelMesAsync() : 0,
+            // Para usuarios no administradores estos importes corresponden
+            // exclusivamente a sus propios documentos por el filtro del repositorio.
+            IngresosDelMes = await _ventaRepository.GetIngresosDelMesAsync(),
             UtilidadBruta = esAdministrador ? await _ventaRepository.GetUtilidadBrutaTotalAsync() : 0,
-            CuentasPorCobrar = esAdministrador ? await _ventaRepository.GetCuentasPorCobrarAsync() : 0,
+            CuentasPorCobrar = await _ventaRepository.GetCuentasPorCobrarAsync(),
             CuentasPorPagar = esAdministrador ? await _compraRepository.GetCuentasPorPagarAsync() : 0,
             BalanceOperativo = balanceOperativo,
 
-            UltimaVentaPor = esAdministrador ? ultimasVentas.FirstOrDefault()?.ConfirmadoPorNombreUsuario ?? ultimasVentas.FirstOrDefault()?.CreadoPorNombreUsuario : null,
-            UltimaCompraPor = esAdministrador ? ultimasCompras.FirstOrDefault()?.ConfirmadoPorNombreUsuario ?? ultimasCompras.FirstOrDefault()?.CreadoPorNombreUsuario : null,
+            UltimaVentaPor = esAdministrador
+                ? ultimasVentas.FirstOrDefault()?.ConfirmadoPorNombreUsuario ?? ultimasVentas.FirstOrDefault()?.CreadoPorNombreUsuario
+                : null,
+            UltimaCompraPor = esAdministrador
+                ? ultimasCompras.FirstOrDefault()?.ConfirmadoPorNombreUsuario ?? ultimasCompras.FirstOrDefault()?.CreadoPorNombreUsuario
+                : null,
             UltimaRevisionFinancieraPor = esAdministrador ? ultimaRevision?.RevisadoPorNombreUsuario : null,
             UltimoProductoRegistradoPor = esAdministrador ? ultimosProductos.FirstOrDefault()?.CreadoPorNombreUsuario : null
         };
