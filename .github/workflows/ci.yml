@@ -96,7 +96,7 @@ jobs:
           set -euo pipefail
           mkdir -p ../docs/migraciones
           dotnet ef migrations script \
-            20260714120952_Fases1_10RolesDescuentosImpuestos \
+            20260720101639_Fases18SesionConfigPermisosCalculos \
             20260722142118_Fase6SeguridadFacturacionPerfil \
             --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
             --startup-project src/API/InventoryApp.API.csproj \
