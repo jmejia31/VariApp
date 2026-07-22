@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -26,6 +26,8 @@ import { Rol } from '../../core/models/rol.model';
   styleUrl: './usuario-form.component.scss'
 })
 export class UsuarioFormComponent implements OnInit {
+  private readonly fb = inject(FormBuilder);
+
   readonly loading = signal(true);
   readonly saving = signal(false);
   readonly errorMessage = signal<string | null>(null);
@@ -40,7 +42,6 @@ export class UsuarioFormComponent implements OnInit {
   });
 
   constructor(
-    private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
     private usuarioService: UsuarioService,
