@@ -18,7 +18,10 @@ public class ProductosController : ControllerBase
     private readonly IImageStorageService _imageStorageService;
     private readonly IAuditoriaService _auditoria;
 
-    public ProductosController(IProductoService productoService, IImageStorageService imageStorageService, IAuditoriaService auditoria)
+    public ProductosController(
+        IProductoService productoService,
+        IImageStorageService imageStorageService,
+        IAuditoriaService auditoria)
     {
         _productoService = productoService;
         _imageStorageService = imageStorageService;
@@ -64,6 +67,28 @@ public class ProductosController : ControllerBase
         return Ok(ApiResponse<ProductoDto>.Ok(actualizado, "Producto actualizado correctamente."));
     }
 
+    [HttpPatch("{id:int}/activar")]
+    [RequierePermiso(ModuloSistema.Productos, AccionPermiso.Activar)]
+    public async Task<IActionResult> Activar(int id)
+    {
+        var producto = await _productoService.CambiarEstadoAsync(id, true);
+        if (producto is null)
+            return NotFound(ApiResponse<object>.Fail("Producto no encontrado."));
+
+        return Ok(ApiResponse<ProductoDto>.Ok(producto, "Producto activado correctamente."));
+    }
+
+    [HttpPatch("{id:int}/desactivar")]
+    [RequierePermiso(ModuloSistema.Productos, AccionPermiso.Desactivar)]
+    public async Task<IActionResult> Desactivar(int id)
+    {
+        var producto = await _productoService.CambiarEstadoAsync(id, false);
+        if (producto is null)
+            return NotFound(ApiResponse<object>.Fail("Producto no encontrado."));
+
+        return Ok(ApiResponse<ProductoDto>.Ok(producto, "Producto desactivado correctamente."));
+    }
+
     [HttpDelete("{id:int}")]
     [RequierePermiso(ModuloSistema.Productos, AccionPermiso.EliminarLogico)]
     public async Task<IActionResult> Delete(int id)
@@ -95,8 +120,12 @@ public class ProductosController : ControllerBase
         var extension = contentType.Contains("png") ? "png" : contentType.Contains("webp") ? "webp" : "jpg";
         var nombreArchivo = $"{producto.Nombre}-{imagen.Orden + 1}.{extension}".Replace(" ", "_");
 
-        await _auditoria.RegistrarAsync(ModuloSistema.Productos, AccionPermiso.Exportar,
-            $"Imagen descargada del producto: {producto.Nombre}.", imagenId, entidad: "ProductoImagen",
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Productos,
+            AccionPermiso.Exportar,
+            $"Imagen descargada del producto: {producto.Nombre}.",
+            imagenId,
+            entidad: "ProductoImagen",
             valoresNuevos: new { productoId = id, imagenId, nombreArchivo });
 
         return File(contenido, contentType, nombreArchivo);
@@ -133,9 +162,18 @@ public class ProductosController : ControllerBase
 
         memoryStream.Position = 0;
         var nombreZip = $"{producto.Nombre}-imagenes.zip".Replace(" ", "_");
-        await _auditoria.RegistrarAsync(ModuloSistema.Productos, AccionPermiso.Exportar,
-            $"Galería descargada del producto: {producto.Nombre}.", id, entidad: "Producto",
-            valoresNuevos: new { productoId = id, imagenes = producto.Imagenes.Count, nombreArchivo = nombreZip });
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Productos,
+            AccionPermiso.Exportar,
+            $"Galería descargada del producto: {producto.Nombre}.",
+            id,
+            entidad: "Producto",
+            valoresNuevos: new
+            {
+                productoId = id,
+                imagenes = producto.Imagenes.Count,
+                nombreArchivo = nombreZip
+            });
 
         return File(memoryStream.ToArray(), "application/zip", nombreZip);
     }
