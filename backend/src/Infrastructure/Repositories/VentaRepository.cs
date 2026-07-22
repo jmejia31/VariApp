@@ -10,10 +10,12 @@ namespace InventoryApp.Infrastructure.Repositories;
 public class VentaRepository : IVentaRepository
 {
     private readonly AppDbContext _context;
+    private readonly ICurrentUserService _currentUser;
 
-    public VentaRepository(AppDbContext context)
+    public VentaRepository(AppDbContext context, ICurrentUserService currentUser)
     {
         _context = context;
+        _currentUser = currentUser;
     }
 
     private IQueryable<Venta> ConIncludes() =>
@@ -22,15 +24,22 @@ public class VentaRepository : IVentaRepository
             .Include(v => v.DescuentosAplicados)
             .Include(v => v.ImpuestosAplicados);
 
+    private int? UsuarioAlcanceActual =>
+        _currentUser.EstaAutenticado && !_currentUser.EsAdministrador
+            ? _currentUser.UsuarioId
+            : null;
+
     private static IQueryable<Venta> AplicarAlcance(IQueryable<Venta> query, int? usuarioId) =>
         usuarioId.HasValue ? query.Where(v => v.CreadoPorUsuarioId == usuarioId.Value) : query;
 
     public async Task<Venta?> GetByIdAsync(int id) =>
-        await ConIncludes().FirstOrDefaultAsync(v => v.Id == id);
+        await AplicarAlcance(ConIncludes(), UsuarioAlcanceActual)
+            .FirstOrDefaultAsync(v => v.Id == id);
 
     public async Task<(List<Venta> Items, int TotalCount)> GetPagedAsync(PagedRequest request)
     {
-        var query = AplicarAlcance(ConIncludes().AsQueryable(), request.UsuarioIdScope);
+        var scope = request.UsuarioIdScope ?? UsuarioAlcanceActual;
+        var query = AplicarAlcance(ConIncludes().AsQueryable(), scope);
 
         if (!string.IsNullOrWhiteSpace(request.Search))
         {
@@ -57,14 +66,14 @@ public class VentaRepository : IVentaRepository
     public async Task<int> GetTotalDelMesAsync(int? usuarioId = null)
     {
         var inicioMes = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1, 0, 0, 0, DateTimeKind.Utc);
-        var query = AplicarAlcance(_context.Ventas.AsQueryable(), usuarioId);
+        var query = AplicarAlcance(_context.Ventas.AsQueryable(), usuarioId ?? UsuarioAlcanceActual);
         return await query.CountAsync(v => v.Fecha >= inicioMes && v.Estado == EstadoDocumento.Confirmada);
     }
 
     public async Task<decimal> GetIngresosDelMesAsync(int? usuarioId = null)
     {
         var inicioMes = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1, 0, 0, 0, DateTimeKind.Utc);
-        var query = AplicarAlcance(_context.Ventas.AsQueryable(), usuarioId);
+        var query = AplicarAlcance(_context.Ventas.AsQueryable(), usuarioId ?? UsuarioAlcanceActual);
         return await query
             .Where(v => v.Fecha >= inicioMes && v.Estado == EstadoDocumento.Confirmada)
             .SumAsync(v => (decimal?)v.Total) ?? 0m;
@@ -72,7 +81,7 @@ public class VentaRepository : IVentaRepository
 
     public async Task<decimal> GetCuentasPorCobrarAsync(int? usuarioId = null)
     {
-        var query = AplicarAlcance(_context.Ventas.AsQueryable(), usuarioId);
+        var query = AplicarAlcance(_context.Ventas.AsQueryable(), usuarioId ?? UsuarioAlcanceActual);
         return await query
             .Where(v => v.Estado == EstadoDocumento.Confirmada && v.EstadoPago != EstadoPago.Pagado)
             .SumAsync(v => (decimal?)v.Total) ?? 0m;
@@ -80,14 +89,14 @@ public class VentaRepository : IVentaRepository
 
     public async Task<decimal> GetUtilidadBrutaTotalAsync(int? usuarioId = null)
     {
-        var query = AplicarAlcance(_context.Ventas.AsQueryable(), usuarioId);
+        var query = AplicarAlcance(_context.Ventas.AsQueryable(), usuarioId ?? UsuarioAlcanceActual);
         return await query
             .Where(v => v.Estado == EstadoDocumento.Confirmada)
             .SumAsync(v => (decimal?)v.UtilidadBruta) ?? 0m;
     }
 
     public async Task<List<Venta>> GetUltimasAsync(int cantidad = 5, int? usuarioId = null) =>
-        await AplicarAlcance(ConIncludes(), usuarioId)
+        await AplicarAlcance(ConIncludes(), usuarioId ?? UsuarioAlcanceActual)
             .OrderByDescending(v => v.Fecha)
             .Take(cantidad)
             .ToListAsync();
