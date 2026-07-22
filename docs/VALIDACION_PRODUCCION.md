@@ -18,9 +18,11 @@ Este documento separa la certificación automatizada de la validación manual qu
 - [x] Modelo EF y snapshot sin cambios pendientes.
 - [x] Backend compilado en configuración Release.
 - [x] Frontend compilado con configuración de producción.
-- [x] Suite backend aprobada antes de ampliar la cobertura final.
+- [x] **66 pruebas backend ejecutadas y 66 aprobadas**.
 - [x] Migración guardada en `agent/mejoras-variapp`.
-- [ ] Suite ampliada y SQL forward final aprobados en el checkpoint definitivo de la Fase 6.
+- [x] SQL forward generado desde la migración inmediatamente anterior.
+- [x] SQL forward sin `DROP`, `TRUNCATE` ni `DELETE FROM`.
+- [x] Evidencia registrada en `docs/FASE6_CERTIFICACION.md`.
 
 ## Validación de migración antes de Aiven
 
