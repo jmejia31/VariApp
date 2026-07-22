@@ -89,10 +89,16 @@ import { SessionActivityService } from './core/auth/session-activity.service';
               }
             </span>
             <div class="user">
-              <span class="user-name">{{ auth.nombreCompleto() }}</span>
-              <span class="user-role">{{ auth.rol() }}</span>
-              <button mat-icon-button routerLink="/perfil" title="Mi perfil">
-                <mat-icon>account_circle</mat-icon>
+              <div class="user-copy">
+                <span class="user-name">{{ auth.nombreCompleto() }}</span>
+                <span class="user-role">{{ auth.rol() }}</span>
+              </div>
+              <button mat-icon-button class="profile-button" routerLink="/perfil" title="Mi perfil">
+                @if (auth.fotoPerfilUrl(); as foto) {
+                  <img class="user-avatar" [src]="foto" [alt]="'Perfil de ' + (auth.nombreCompleto() || auth.nombreUsuario() || 'usuario')">
+                } @else {
+                  <span class="user-initials">{{ inicialesUsuario() }}</span>
+                }
               </button>
               <button mat-icon-button (click)="logout()" title="Cerrar sesión">
                 <mat-icon>logout</mat-icon>
@@ -152,6 +158,11 @@ export class AppComponent {
 
   cerrarSidebarEnMovil(): void {
     if (window.innerWidth <= 900) this.sidebarAbierto = false;
+  }
+
+  inicialesUsuario(): string {
+    const nombre = this.auth.nombreCompleto()?.trim() || this.auth.nombreUsuario()?.trim() || 'Usuario';
+    return nombre.split(/\s+/).slice(0, 2).map(parte => parte.charAt(0).toUpperCase()).join('');
   }
 
   @HostListener('window:keydown.escape')
