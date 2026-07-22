@@ -84,7 +84,8 @@ public static class CatalogoPermisosBase
         {
             AccionPermiso.Ver, AccionPermiso.Crear, AccionPermiso.Editar,
             AccionPermiso.Activar, AccionPermiso.Desactivar, AccionPermiso.EliminarLogico,
-            AccionPermiso.EliminarPermanente, AccionPermiso.Administrar, AccionPermiso.ConsultarHistorial
+            AccionPermiso.EliminarPermanente, AccionPermiso.Duplicar,
+            AccionPermiso.Administrar, AccionPermiso.ConsultarHistorial
         }),
 
         (ModuloSistema.Auditoria, new[] { AccionPermiso.Ver, AccionPermiso.Exportar }),
