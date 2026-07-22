@@ -41,7 +41,7 @@ export class LoginComponent {
 
   constructor() {
     if (this.authService.isAuthenticated()) {
-      this.router.navigateByUrl('/dashboard', { replaceUrl: true });
+      this.redirigirSegunPermisos();
       return;
     }
 
@@ -65,23 +65,27 @@ export class LoginComponent {
       password: valor.password!
     }).subscribe({
       next: () => {
-        this.permisosRuntime.cargar().subscribe({
-          next: () => {
-            this.loading.set(false);
-            this.sessionActivity.iniciar();
-            const ruta = this.permisosRuntime.rutaInicialPermitida() ?? '/perfil';
-            this.router.navigateByUrl(ruta, { replaceUrl: true });
-          },
-          error: () => {
-            this.loading.set(false);
-            this.sessionActivity.iniciar();
-            this.router.navigateByUrl('/perfil', { replaceUrl: true });
-          }
-        });
+        this.sessionActivity.iniciar();
+        this.redirigirSegunPermisos();
       },
       error: (err) => {
         this.loading.set(false);
         this.errorMessage.set(err.error?.message ?? 'No se pudo iniciar sesión. Verifica tus credenciales e intenta nuevamente.');
+      }
+    });
+  }
+
+  private redirigirSegunPermisos(): void {
+    this.loading.set(true);
+    this.permisosRuntime.cargar().subscribe({
+      next: () => {
+        this.loading.set(false);
+        const ruta = this.permisosRuntime.rutaInicialPermitida() ?? '/perfil';
+        this.router.navigateByUrl(ruta, { replaceUrl: true });
+      },
+      error: () => {
+        this.loading.set(false);
+        this.router.navigateByUrl('/perfil', { replaceUrl: true });
       }
     });
   }
