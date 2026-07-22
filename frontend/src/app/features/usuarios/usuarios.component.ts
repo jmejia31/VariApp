@@ -32,6 +32,7 @@ import { AppAlertService } from '../../shared/alerts/app-alert.service';
 })
 export class UsuariosComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
+
   readonly usuarios = signal<Usuario[]>([]);
   readonly roles = signal<Rol[]>([]);
   readonly loading = signal(true);
@@ -42,10 +43,12 @@ export class UsuariosComponent implements OnInit {
 
   readonly puedeCrear = signal(false);
   readonly puedeEditar = signal(false);
-  readonly puedeBloquear = signal(false);
+  readonly puedeAsignarRol = signal(false);
+  readonly puedeActivar = signal(false);
+  readonly puedeDesactivar = signal(false);
   readonly puedeEliminar = signal(false);
 
-  form = this.fb.group({
+  readonly form = this.fb.group({
     nombreUsuario: ['', Validators.required],
     nombreCompleto: ['', Validators.required],
     password: ['', [Validators.required, Validators.minLength(8)]],
@@ -62,21 +65,41 @@ export class UsuariosComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.puedeCrear.set(this.permisosRuntime.puede('Usuarios', 'Crear'));
+    this.puedeAsignarRol.set(this.permisosRuntime.puede('Usuarios', 'AsignarRol'));
+    this.puedeCrear.set(
+      this.permisosRuntime.puede('Usuarios', 'Crear') && this.puedeAsignarRol()
+    );
     this.puedeEditar.set(this.permisosRuntime.puede('Usuarios', 'Editar'));
-    this.puedeBloquear.set(this.permisosRuntime.puede('Usuarios', 'CambiarEstado'));
+    this.puedeActivar.set(this.permisosRuntime.puede('Usuarios', 'Activar'));
+    this.puedeDesactivar.set(this.permisosRuntime.puede('Usuarios', 'Desactivar'));
     this.puedeEliminar.set(this.permisosRuntime.puede('Usuarios', 'EliminarLogico'));
 
     this.cargar();
-    // Solo roles activos pueden asignarse a un usuario nuevo.
-    this.rolService.getAll().subscribe((res) => this.roles.set(res.data.filter((r) => r.activo)));
 
-    // Búsqueda con debounce (sección 4: "buscar usuarios").
-    this.buscador.valueChanges.pipe(debounceTime(350), distinctUntilChanged()).subscribe(() => this.cargar());
+    if (this.puedeCrear()) {
+      this.rolService.getAll().subscribe({
+        next: (res) => this.roles.set(res.data.filter((r) => r.activo)),
+        error: () => this.roles.set([])
+      });
+    }
+
+    this.buscador.valueChanges
+      .pipe(debounceTime(350), distinctUntilChanged())
+      .subscribe(() => this.cargar());
   }
 
   esUsuarioActual(u: Usuario): boolean {
     return this.auth.nombreUsuario() === u.nombreUsuario;
+  }
+
+  puedeCambiarEstado(usuario: Usuario): boolean {
+    if (this.esUsuarioActual(usuario)) return false;
+    return usuario.activo ? this.puedeDesactivar() : this.puedeActivar();
+  }
+
+  puedeBloquearUsuario(usuario: Usuario): boolean {
+    if (this.esUsuarioActual(usuario)) return false;
+    return usuario.bloqueado ? this.puedeActivar() : this.puedeDesactivar();
   }
 
   cargar(): void {
@@ -93,10 +116,7 @@ export class UsuariosComponent implements OnInit {
 
         this.cargarListadoLegado();
       },
-      error: () => {
-        // Si el endpoint paginado falla por una configuracion vieja de permisos, se usa el listado legado.
-        this.cargarListadoLegado();
-      }
+      error: () => this.cargarListadoLegado()
     });
   }
 
@@ -128,7 +148,7 @@ export class UsuariosComponent implements OnInit {
   }
 
   crear(): void {
-    if (this.form.invalid) return;
+    if (!this.puedeCrear() || this.form.invalid) return;
 
     this.saving.set(true);
     this.errorMessage.set(null);
@@ -138,7 +158,7 @@ export class UsuariosComponent implements OnInit {
       nombreUsuario: valor.nombreUsuario!,
       nombreCompleto: valor.nombreCompleto!,
       password: valor.password!,
-      rol: 'Vendedor', // fallback legado; el backend prioriza rolId cuando se envía
+      rol: 'Vendedor',
       rolId: valor.rolId!
     }).subscribe({
       next: () => {
@@ -155,18 +175,34 @@ export class UsuariosComponent implements OnInit {
   }
 
   async toggleEstado(usuario: Usuario): Promise<void> {
+    if (!this.puedeCambiarEstado(usuario)) return;
+
     const activar = !usuario.activo;
-    const confirmado = await this.alerts.confirmar({ titulo: activar ? 'Activar usuario' : 'Desactivar usuario', mensaje: `Se ${activar ? 'habilitará' : 'deshabilitará'} el acceso de "${usuario.nombreCompleto}".`, detalle: activar ? 'Podrá ingresar según los permisos de su rol.' : 'No podrá iniciar nuevas sesiones.', tipo: activar ? 'info' : 'advertencia', confirmarTexto: activar ? 'Activar' : 'Desactivar' });
+    const confirmado = await this.alerts.confirmar({
+      titulo: activar ? 'Activar usuario' : 'Desactivar usuario',
+      mensaje: `Se ${activar ? 'habilitará' : 'deshabilitará'} el acceso de "${usuario.nombreCompleto}".`,
+      detalle: activar ? 'Podrá ingresar según los permisos de su rol.' : 'No podrá iniciar nuevas sesiones.',
+      tipo: activar ? 'info' : 'advertencia',
+      confirmarTexto: activar ? 'Activar' : 'Desactivar'
+    });
     if (!confirmado) return;
 
-    this.usuarioService.updateEstado(usuario.id, !usuario.activo).subscribe({
+    this.usuarioService.updateEstado(usuario.id, activar).subscribe({
       next: () => this.cargar(),
       error: (err) => this.snackBar.open(err.error?.message ?? 'No se pudo cambiar el estado.', 'Cerrar', { duration: 5000 })
     });
   }
 
   async bloquear(usuario: Usuario): Promise<void> {
-    const motivo = await this.alerts.solicitarTexto({ titulo: 'Bloquear usuario', mensaje: `Indica por qué se bloqueará a "${usuario.nombreCompleto}".`, tipo: 'advertencia', confirmarTexto: 'Bloquear', entrada: { etiqueta: 'Motivo del bloqueo', requerida: true } });
+    if (!this.puedeBloquearUsuario(usuario) || usuario.bloqueado) return;
+
+    const motivo = await this.alerts.solicitarTexto({
+      titulo: 'Bloquear usuario',
+      mensaje: `Indica por qué se bloqueará a "${usuario.nombreCompleto}".`,
+      tipo: 'advertencia',
+      confirmarTexto: 'Bloquear',
+      entrada: { etiqueta: 'Motivo del bloqueo', requerida: true }
+    });
     if (!motivo) return;
 
     this.usuarioService.bloquear(usuario.id, motivo).subscribe({
@@ -176,7 +212,13 @@ export class UsuariosComponent implements OnInit {
   }
 
   async desbloquear(usuario: Usuario): Promise<void> {
-    const confirmado = await this.alerts.confirmar({ titulo: 'Desbloquear usuario', mensaje: `Se restablecerá el acceso de "${usuario.nombreCompleto}".`, confirmarTexto: 'Desbloquear' });
+    if (!this.puedeBloquearUsuario(usuario) || !usuario.bloqueado) return;
+
+    const confirmado = await this.alerts.confirmar({
+      titulo: 'Desbloquear usuario',
+      mensaje: `Se restablecerá el acceso de "${usuario.nombreCompleto}".`,
+      confirmarTexto: 'Desbloquear'
+    });
     if (!confirmado) return;
 
     this.usuarioService.desbloquear(usuario.id).subscribe({
@@ -186,7 +228,15 @@ export class UsuariosComponent implements OnInit {
   }
 
   async eliminar(usuario: Usuario): Promise<void> {
-    const confirmado = await this.alerts.confirmar({ titulo: 'Eliminar usuario', mensaje: `Se eliminará lógicamente a "${usuario.nombreCompleto}".`, detalle: 'Sus registros históricos se conservarán.', tipo: 'peligro', confirmarTexto: 'Eliminar usuario' });
+    if (!this.puedeEliminar() || this.esUsuarioActual(usuario)) return;
+
+    const confirmado = await this.alerts.confirmar({
+      titulo: 'Eliminar usuario',
+      mensaje: `Se eliminará lógicamente a "${usuario.nombreCompleto}".`,
+      detalle: 'Sus registros históricos se conservarán.',
+      tipo: 'peligro',
+      confirmarTexto: 'Eliminar usuario'
+    });
     if (!confirmado) return;
 
     this.usuarioService.eliminar(usuario.id).subscribe({
