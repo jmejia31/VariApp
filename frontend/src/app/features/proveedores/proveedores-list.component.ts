@@ -58,10 +58,11 @@ export class ProveedoresListComponent implements OnInit {
 
   toggleActivo(p: Proveedor): void {
     if (!this.puedeCambiarEstado(p)) return;
-    this.proveedorService.update(p.id, {
-      nombre: p.nombre, telefono: p.telefono, documento: p.documento,
-      correo: p.correo, direccion: p.direccion, activo: !p.activo
-    }).subscribe({
+    const operacion = p.activo
+      ? this.proveedorService.desactivar(p.id)
+      : this.proveedorService.activar(p.id);
+
+    operacion.subscribe({
       next: () => this.cargar(),
       error: (err) => this.snackBar.open(err.error?.message ?? 'No se pudo cambiar el estado del proveedor.', 'Cerrar', { duration: 5000 })
     });
