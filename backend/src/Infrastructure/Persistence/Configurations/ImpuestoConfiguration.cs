@@ -37,6 +37,7 @@ public class VentaImpuestoConfiguration : IEntityTypeConfiguration<VentaImpuesto
         builder.Property(x => x.MontoAplicado).HasPrecision(18, 4);
         builder.Property(x => x.BaseImponible).HasPrecision(18, 4);
         builder.Property(x => x.TasaSnapshot).HasPrecision(9, 4);
+        builder.Property(x => x.IncluidoEnPrecioSnapshot).HasDefaultValue(false);
     }
 }
 
@@ -51,5 +52,6 @@ public class CompraImpuestoConfiguration : IEntityTypeConfiguration<CompraImpues
         builder.Property(x => x.MontoAplicado).HasPrecision(18, 4);
         builder.Property(x => x.BaseImponible).HasPrecision(18, 4);
         builder.Property(x => x.TasaSnapshot).HasPrecision(9, 4);
+        builder.Property(x => x.IncluidoEnPrecioSnapshot).HasDefaultValue(false);
     }
 }
