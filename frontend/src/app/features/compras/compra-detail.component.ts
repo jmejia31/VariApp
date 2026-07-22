@@ -8,6 +8,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CompraService } from '../../services/compra.service';
 import { Compra, CompraDocumento } from '../../core/models/compra.model';
+import { ImpuestoAplicado } from '../../core/models/venta.model';
 import { AnularDialogComponent } from '../../shared/anular-dialog.component';
 import { ConfirmDialogComponent } from '../../shared/confirm-dialog.component';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
@@ -76,6 +77,33 @@ export class CompraDetailComponent implements OnInit {
         this.loadingDocumentos.set(false);
       }
     });
+  }
+
+  importeBruto(compra: Compra): number {
+    return compra.detalles.reduce((total, detalle) => total + detalle.subtotal, 0);
+  }
+
+  impuestoEsIncluido(compra: Compra, impuesto: ImpuestoAplicado): boolean {
+    if (impuesto.incluidoEnPrecio) return true;
+    const despuesDescuento = Math.max(0, this.importeBruto(compra) - compra.descuento);
+    return Math.abs(compra.total - despuesDescuento) <= 0.01;
+  }
+
+  impuestoIncluido(compra: Compra): number {
+    return compra.impuestosAplicados
+      .filter((impuesto) => this.impuestoEsIncluido(compra, impuesto))
+      .reduce((total, impuesto) => total + impuesto.monto, 0);
+  }
+
+  impuestoAdicional(compra: Compra): number {
+    return compra.impuestosAplicados
+      .filter((impuesto) => !this.impuestoEsIncluido(compra, impuesto))
+      .reduce((total, impuesto) => total + impuesto.monto, 0);
+  }
+
+  subtotalSinImpuesto(compra: Compra): number {
+    const calculado = compra.total - this.impuestoIncluido(compra) - this.impuestoAdicional(compra);
+    return Math.max(0, calculado);
   }
 
   seleccionarDocumento(event: Event): void {
