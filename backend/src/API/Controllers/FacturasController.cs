@@ -8,9 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace InventoryApp.API.Controllers;
 
-/// La factura se genera y anula automáticamente junto con su venta origen
-/// (ver VentasController: /ventas/{id}/confirmar y /ventas/{id}/anular).
-/// Este controlador es solo de consulta.
+/// La factura se genera y anula automáticamente junto con su venta origen.
+/// Descargar, imprimir, WhatsApp y correo consumen el mismo PDF oficial.
 [ApiController]
 [Authorize]
 [Route("facturas")]
@@ -21,8 +20,11 @@ public class FacturasController : ControllerBase
     private readonly IFacturaCompartirService _facturaCompartirService;
     private readonly IAuditoriaService _auditoria;
 
-    public FacturasController(IFacturaService facturaService, IFacturaPdfService facturaPdfService,
-        IFacturaCompartirService facturaCompartirService, IAuditoriaService auditoria)
+    public FacturasController(
+        IFacturaService facturaService,
+        IFacturaPdfService facturaPdfService,
+        IFacturaCompartirService facturaCompartirService,
+        IAuditoriaService auditoria)
     {
         _facturaService = facturaService;
         _facturaPdfService = facturaPdfService;
@@ -56,9 +58,6 @@ public class FacturasController : ControllerBase
         return Ok(ApiResponse<FacturaDto>.Ok(factura));
     }
 
-    /// PDF real generado en backend (sección 13/14: nunca la vista HTML
-    /// imprimible como sustituto final). Protegido con Exportar según el
-    /// mapeo acción->permiso de la sección 10 ("Descargar factura").
     [HttpGet("{id:int}/pdf")]
     [RequierePermiso(ModuloSistema.Facturacion, AccionPermiso.Exportar)]
     public async Task<IActionResult> DescargarPdf(int id)
@@ -66,28 +65,41 @@ public class FacturasController : ControllerBase
         var factura = await _facturaService.GetByIdAsync(id);
         if (factura is null) return NotFound(ApiResponse<object>.Fail("Factura no encontrada."));
 
+        AplicarEncabezadosDocumentoPrivado();
         var pdfBytes = await _facturaPdfService.GenerarPdfAsync(factura);
-        await _auditoria.RegistrarAsync(ModuloSistema.Facturacion, AccionPermiso.Exportar,
-            $"PDF descargado de factura: {factura.NumeroFactura}.", id, entidad: "Factura",
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Facturacion,
+            AccionPermiso.Exportar,
+            $"PDF descargado de factura: {factura.NumeroFactura}.",
+            id,
+            entidad: "Factura",
             valoresNuevos: new { factura.NumeroFactura, factura.Total });
 
         return File(pdfBytes, "application/pdf", $"{factura.NumeroFactura}.pdf");
     }
 
-    /// Genera (o reutiliza) el enlace público temporal + mensaje de WhatsApp
-    /// listo para usar (sección 14).
     [HttpPost("{id:int}/compartir/whatsapp")]
     [RequierePermiso(ModuloSistema.Facturacion, AccionPermiso.Compartir)]
     public async Task<IActionResult> PrepararWhatsApp(int id)
     {
         var enlace = await _facturaCompartirService.PrepararCompartirAsync(id);
-        return Ok(ApiResponse<EnlaceCompartirDto>.Ok(enlace));
+        return Ok(ApiResponse<EnlaceCompartirDto>.Ok(
+            enlace,
+            "Enlace temporal creado. Cualquier enlace anterior de esta factura fue revocado."));
     }
 
-    /// Registra el intento de envío (sección 14/18: el frontend llama esto
-    /// justo antes/después de abrir wa.me, ya que no hay forma de confirmar
-    /// la entrega real sin una API oficial de WhatsApp — limitación real,
-    /// no simulada).
+    [HttpPost("{id:int}/compartir/revocar")]
+    [RequierePermiso(ModuloSistema.Facturacion, AccionPermiso.Compartir)]
+    public async Task<IActionResult> RevocarEnlaces(int id)
+    {
+        var revocados = await _facturaCompartirService.RevocarEnlacesAsync(id);
+        return Ok(ApiResponse<object>.Ok(
+            new { enlacesRevocados = revocados },
+            revocados > 0
+                ? "Los enlaces públicos vigentes fueron revocados."
+                : "La factura no tenía enlaces públicos vigentes."));
+    }
+
     [HttpPost("{id:int}/compartir/registrar")]
     [RequierePermiso(ModuloSistema.Facturacion, AccionPermiso.Compartir)]
     public async Task<IActionResult> RegistrarIntento(int id, [FromBody] RegistrarEnvioDto dto)
@@ -104,9 +116,6 @@ public class FacturasController : ControllerBase
         return Ok(ApiResponse<List<HistorialEnvioDto>>.Ok(historial));
     }
 
-    /// Correo como opción SECUNDARIA de envío (sección 15). Envía el PDF
-    /// como adjunto real vía SMTP configurado — nunca coloca credenciales
-    /// en el código, se leen de configuración/variables de entorno.
     [HttpPost("{id:int}/compartir/correo")]
     [RequierePermiso(ModuloSistema.Facturacion, AccionPermiso.Compartir)]
     public async Task<IActionResult> EnviarPorCorreo(int id, [FromBody] EnviarCorreoFacturaDto dto)
@@ -118,22 +127,38 @@ public class FacturasController : ControllerBase
         return Ok(ApiResponse<object>.Ok(new { }, mensaje));
     }
 
-    /// Endpoint PÚBLICO deliberado (sin JWT): es la URL que se abre desde
-    /// WhatsApp o un cliente de correo externo, que no tiene sesión en el
-    /// sistema. Su seguridad no depende de [Authorize] sino de que el token
-    /// sea impredecible (GUID) y expire (ver EnlacePublicoFactura).
+    /// Descarga pública deliberada para destinatarios externos. La seguridad
+    /// depende de un token aleatorio cuyo hash está persistido, expiración,
+    /// revocación y límite de accesos. El token nunca se registra en auditoría.
     [HttpGet("publico/{token}/pdf")]
     [AllowAnonymous]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public async Task<IActionResult> DescargarPdfPublico(string token)
     {
+        AplicarEncabezadosDocumentoPublico();
         var resultado = await _facturaCompartirService.ObtenerPdfPorTokenAsync(token);
         if (resultado is null)
-            return NotFound(ApiResponse<object>.Fail("Este enlace no es válido o ya expiró. Solicita uno nuevo."));
-
-        await _auditoria.RegistrarAsync(ModuloSistema.Facturacion, AccionPermiso.Exportar,
-            $"PDF público descargado mediante enlace temporal: {resultado.Value.NombreArchivo}.",
-            entidad: "EnlacePublicoFactura", valoresNuevos: new { token, resultado.Value.NombreArchivo });
+            return NotFound(ApiResponse<object>.Fail("Este enlace no es válido, fue revocado, alcanzó su límite o ya expiró."));
 
         return File(resultado.Value.Pdf, "application/pdf", resultado.Value.NombreArchivo);
+    }
+
+    private void AplicarEncabezadosDocumentoPrivado()
+    {
+        Response.Headers.CacheControl = "private, no-store, no-cache, max-age=0";
+        Response.Headers.Pragma = "no-cache";
+        Response.Headers.Expires = "0";
+        Response.Headers["X-Content-Type-Options"] = "nosniff";
+    }
+
+    private void AplicarEncabezadosDocumentoPublico()
+    {
+        Response.Headers.CacheControl = "no-store, no-cache, max-age=0, must-revalidate";
+        Response.Headers.Pragma = "no-cache";
+        Response.Headers.Expires = "0";
+        Response.Headers["Referrer-Policy"] = "no-referrer";
+        Response.Headers["X-Content-Type-Options"] = "nosniff";
+        Response.Headers["X-Frame-Options"] = "DENY";
+        Response.Headers["Content-Security-Policy"] = "default-src 'none'; frame-ancestors 'none'; sandbox";
     }
 }
