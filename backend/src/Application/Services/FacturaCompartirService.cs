@@ -1,3 +1,7 @@
+using System.Net;
+using System.Net.Mail;
+using System.Security.Cryptography;
+using System.Text;
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
@@ -10,6 +14,9 @@ namespace InventoryApp.Application.Services;
 
 public class FacturaCompartirService : IFacturaCompartirService
 {
+    private const int HorasValidezPredeterminadas = 72;
+    private const int MaximoAccesosPredeterminado = 25;
+
     private readonly IFacturaCompartirRepository _repository;
     private readonly IFacturaService _facturaService;
     private readonly IFacturaPdfService _facturaPdfService;
@@ -20,9 +27,14 @@ public class FacturaCompartirService : IFacturaCompartirService
     private readonly IHttpContextAccessor _httpContextAccessor;
 
     public FacturaCompartirService(
-        IFacturaCompartirRepository repository, IFacturaService facturaService, IFacturaPdfService facturaPdfService,
-        IEmailService emailService, IAuditoriaService auditoria, ICurrentUserService currentUser,
-        IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
+        IFacturaCompartirRepository repository,
+        IFacturaService facturaService,
+        IFacturaPdfService facturaPdfService,
+        IEmailService emailService,
+        IAuditoriaService auditoria,
+        ICurrentUserService currentUser,
+        IConfiguration configuration,
+        IHttpContextAccessor httpContextAccessor)
     {
         _repository = repository;
         _facturaService = facturaService;
@@ -36,38 +48,51 @@ public class FacturaCompartirService : IFacturaCompartirService
 
     public async Task<EnlaceCompartirDto> PrepararCompartirAsync(int facturaId)
     {
-        var factura = await _facturaService.GetByIdAsync(facturaId)
-            ?? throw new BusinessRuleException("La factura no existe.");
-
-        // Sección 14, punto 17: "validar que la factura exista y esté
-        // autorizada antes de compartirla". Una factura anulada no debería
-        // compartirse como si fuera válida para el cliente.
-        if (factura.Estado == "Anulada")
-            throw new BusinessRuleException("No se puede compartir una factura anulada.");
-
-        var enlace = await _repository.GetEnlaceVigenteAsync(facturaId);
-        if (enlace is null)
-        {
-            var diasValidez = _configuration.GetValue<int?>("AppSettings:EnlacePublicoFacturaDiasValidez") ?? 7;
-            enlace = new EnlacePublicoFactura
-            {
-                Token = Guid.NewGuid().ToString("N"),
-                FacturaId = facturaId,
-                FechaExpiracion = DateTime.UtcNow.AddDays(diasValidez),
-                CreadoPorUsuarioId = _currentUser.UsuarioId
-            };
-            await _repository.AddEnlaceAsync(enlace);
-            await _repository.SaveChangesAsync();
-        }
-
+        var factura = await ObtenerFacturaCompartibleAsync(facturaId);
         var backendUrl = ResolverBackendPublicUrl();
-        var urlPublica = $"{backendUrl}/facturas/publico/{enlace.Token}/pdf";
+        var ahora = DateTime.UtcNow;
+        var horasValidez = Math.Clamp(
+            _configuration.GetValue<int?>("AppSettings:EnlacePublicoFacturaHorasValidez")
+                ?? ((_configuration.GetValue<int?>("AppSettings:EnlacePublicoFacturaDiasValidez") ?? 3) * 24),
+            1,
+            168);
 
-        // Plantilla EXACTA pedida en la sección 14 del prompt.
+        // Un enlace nuevo invalida los anteriores. Como solo se persiste el hash,
+        // el token secreto no puede recuperarse ni reutilizarse posteriormente.
+        var enlacesRevocados = await _repository.ExpirarVigentesAsync(facturaId, ahora);
+        var tokenPublico = GenerarTokenSeguro();
+        var enlace = new EnlacePublicoFactura
+        {
+            Token = CalcularHashToken(tokenPublico),
+            FacturaId = facturaId,
+            FechaCreacion = ahora,
+            FechaExpiracion = ahora.AddHours(horasValidez),
+            CreadoPorUsuarioId = _currentUser.UsuarioId
+        };
+
+        await _repository.AddEnlaceAsync(enlace);
+        await _repository.SaveChangesAsync();
+
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Facturacion,
+            AccionPermiso.Compartir,
+            $"Enlace temporal generado para la factura {factura.NumeroFactura}.",
+            facturaId,
+            entidad: "Factura",
+            valoresNuevos: new
+            {
+                EnlaceId = enlace.Id,
+                enlace.FechaExpiracion,
+                EnlacesAnterioresRevocados = enlacesRevocados
+            });
+
+        var urlPublica = $"{backendUrl}/facturas/publico/{tokenPublico}/pdf";
         var mensaje =
             $"Estimado/a {factura.ClienteNombre}, le compartimos la factura correspondiente a su compra " +
             $"realizada en {factura.EmpresaNombre}. Número de factura: {factura.NumeroFactura}. " +
-            $"Total: L. {factura.Total:N2}. Puede descargarla aquí: {urlPublica} Gracias por su preferencia.";
+            $"Total: L. {factura.Total:N2}. Puede descargarla aquí: {urlPublica} " +
+            $"El enlace estará disponible hasta el {enlace.FechaExpiracion.ToLocalTime():dd/MM/yyyy HH:mm}. " +
+            "Gracias por su preferencia.";
 
         return new EnlaceCompartirDto
         {
@@ -78,59 +103,54 @@ public class FacturaCompartirService : IFacturaCompartirService
         };
     }
 
-    /// Normaliza a formato internacional con código de país de Honduras
-    /// (504) cuando el número no lo trae ya. Sección 14, puntos 2-4:
-    /// "utilizar el número registrado", "permitir modificarlo",
-    /// "utilizar código de país".
-    private static string NormalizarTelefonoHonduras(string? telefono)
-    {
-        if (string.IsNullOrWhiteSpace(telefono)) return "";
-
-        var soloDigitos = new string(telefono.Where(char.IsDigit).ToArray());
-        if (soloDigitos.Length == 8) return "504" + soloDigitos; // número local hondureño
-        return soloDigitos; // ya trae código de país u otro formato; se deja para que el usuario lo revise
-    }
-
-    private string ResolverBackendPublicUrl()
-    {
-        var configurada = _configuration["AppSettings:BackendPublicUrl"]?.Trim().TrimEnd('/');
-        if (!string.IsNullOrWhiteSpace(configurada) &&
-            !configurada.Contains("localhost", StringComparison.OrdinalIgnoreCase) &&
-            !configurada.Contains("127.0.0.1", StringComparison.OrdinalIgnoreCase))
-        {
-            return configurada;
-        }
-
-        var request = _httpContextAccessor.HttpContext?.Request;
-        if (request is not null && request.Host.HasValue)
-        {
-            return $"{request.Scheme}://{request.Host}".TrimEnd('/');
-        }
-
-        return configurada ?? "";
-    }
-
     public async Task RegistrarIntentoAsync(int facturaId, RegistrarEnvioDto dto)
     {
+        var factura = await _facturaService.GetByIdAsync(facturaId)
+            ?? throw new BusinessRuleException("La factura no existe o no está disponible para el usuario actual.");
+
+        var canal = dto.Canal?.Trim();
+        if (!string.Equals(canal, "WhatsApp", StringComparison.OrdinalIgnoreCase) &&
+            !string.Equals(canal, "Correo", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new BusinessRuleException("El canal de envío debe ser WhatsApp o Correo.");
+        }
+
+        var destinatario = Truncar(dto.Destinatario?.Trim(), 200);
+        if (string.IsNullOrWhiteSpace(destinatario))
+            throw new BusinessRuleException("El destinatario del envío es obligatorio.");
+
+        var resultado = string.IsNullOrWhiteSpace(dto.Resultado) ? "Iniciado" : Truncar(dto.Resultado.Trim(), 50)!;
+        var error = Truncar(dto.Error?.Trim(), 500);
+
         await _repository.AddHistorialAsync(new HistorialEnvioFactura
         {
             FacturaId = facturaId,
-            Canal = dto.Canal,
-            Destinatario = dto.Destinatario,
-            Resultado = dto.Resultado,
-            Error = dto.Error,
+            Canal = string.Equals(canal, "Correo", StringComparison.OrdinalIgnoreCase) ? "Correo" : "WhatsApp",
+            Destinatario = destinatario,
+            Resultado = resultado,
+            Error = error,
             UsuarioId = _currentUser.UsuarioId,
             UsuarioNombre = _currentUser.NombreUsuario
         });
         await _repository.SaveChangesAsync();
 
-        await _auditoria.RegistrarAsync(ModuloSistema.Facturacion, AccionPermiso.Compartir,
-            $"Intento de envío de factura por {dto.Canal} a '{dto.Destinatario}': {dto.Resultado}.",
-            facturaId, entidad: "Factura", resultado: dto.Resultado == "Error" ? "Error" : "Exito", error: dto.Error);
+        var esError = string.Equals(resultado, "Error", StringComparison.OrdinalIgnoreCase);
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Facturacion,
+            AccionPermiso.Compartir,
+            $"Intento de envío de la factura {factura.NumeroFactura} por {canal}: {resultado}.",
+            facturaId,
+            entidad: "Factura",
+            resultado: esError ? "Error" : "Exito",
+            error: error,
+            valoresNuevos: new { Canal = canal, Destinatario = destinatario, Resultado = resultado });
     }
 
     public async Task<List<HistorialEnvioDto>> GetHistorialAsync(int facturaId)
     {
+        _ = await _facturaService.GetByIdAsync(facturaId)
+            ?? throw new BusinessRuleException("La factura no existe o no está disponible para el usuario actual.");
+
         var historial = await _repository.GetHistorialAsync(facturaId);
         return historial.Select(h => new HistorialEnvioDto
         {
@@ -144,13 +164,48 @@ public class FacturaCompartirService : IFacturaCompartirService
         }).ToList();
     }
 
+    public async Task<int> RevocarEnlacesAsync(int facturaId)
+    {
+        var factura = await _facturaService.GetByIdAsync(facturaId)
+            ?? throw new BusinessRuleException("La factura no existe o no está disponible para el usuario actual.");
+
+        var ahora = DateTime.UtcNow;
+        var revocados = await _repository.ExpirarVigentesAsync(facturaId, ahora);
+        if (revocados > 0)
+            await _repository.SaveChangesAsync();
+
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Facturacion,
+            AccionPermiso.Compartir,
+            $"Se revocaron {revocados} enlace(s) público(s) de la factura {factura.NumeroFactura}.",
+            facturaId,
+            entidad: "Factura",
+            valoresNuevos: new { EnlacesRevocados = revocados, FechaRevocacion = ahora });
+
+        return revocados;
+    }
+
     public async Task<(byte[] Pdf, string NombreArchivo)?> ObtenerPdfPorTokenAsync(string token)
     {
-        var enlace = await _repository.GetPorTokenAsync(token);
-        if (enlace is null || enlace.FechaExpiracion < DateTime.UtcNow) return null;
+        if (string.IsNullOrWhiteSpace(token) || token.Length < 32 || token.Length > 160)
+            return null;
+
+        var enlace = await _repository.GetPorTokenHashAsync(CalcularHashToken(token));
+        if (enlace is null || enlace.FechaExpiracion <= DateTime.UtcNow)
+            return null;
+
+        var maximoAccesos = Math.Clamp(
+            _configuration.GetValue<int?>("AppSettings:EnlacePublicoFacturaMaximoAccesos")
+                ?? MaximoAccesosPredeterminado,
+            1,
+            500);
+
+        if (enlace.VecesAccedido >= maximoAccesos)
+            return null;
 
         var factura = await _facturaService.GetByIdAsync(enlace.FacturaId);
-        if (factura is null) return null;
+        if (factura is null || string.Equals(factura.Estado, "Anulada", StringComparison.OrdinalIgnoreCase))
+            return null;
 
         enlace.VecesAccedido += 1;
         enlace.UltimoAcceso = DateTime.UtcNow;
@@ -158,37 +213,82 @@ public class FacturaCompartirService : IFacturaCompartirService
         await _repository.SaveChangesAsync();
 
         var pdf = await _facturaPdfService.GenerarPdfAsync(factura);
+
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Facturacion,
+            AccionPermiso.Exportar,
+            $"PDF público descargado mediante enlace temporal para la factura {factura.NumeroFactura}.",
+            enlace.Id,
+            entidad: "EnlacePublicoFactura",
+            valoresNuevos: new
+            {
+                enlace.FacturaId,
+                enlace.VecesAccedido,
+                enlace.UltimoAcceso
+            });
+
         return (pdf, $"{factura.NumeroFactura}.pdf");
     }
 
     public async Task<(bool Exito, string Mensaje)> EnviarPorCorreoAsync(int facturaId, string destinatario)
     {
+        destinatario = destinatario?.Trim() ?? string.Empty;
         if (!EsCorreoValido(destinatario))
             return (false, "El correo indicado no tiene un formato válido.");
 
-        var factura = await _facturaService.GetByIdAsync(facturaId)
-            ?? throw new BusinessRuleException("La factura no existe.");
+        var factura = await ObtenerFacturaCompartibleAsync(facturaId);
 
-        if (factura.Estado == "Anulada")
-            throw new BusinessRuleException("No se puede compartir una factura anulada.");
+        byte[] pdf;
+        try
+        {
+            pdf = await _facturaPdfService.GenerarPdfAsync(factura);
+        }
+        catch
+        {
+            await RegistrarIntentoAsync(facturaId, new RegistrarEnvioDto
+            {
+                Canal = "Correo",
+                Destinatario = destinatario,
+                Resultado = "Error",
+                Error = "No fue posible generar el PDF oficial de la factura."
+            });
+            return (false, "No se pudo generar el PDF de la factura para enviarlo por correo.");
+        }
 
-        var pdf = await _facturaPdfService.GenerarPdfAsync(factura);
-
+        var cliente = WebUtility.HtmlEncode(factura.ClienteNombre);
+        var empresa = WebUtility.HtmlEncode(factura.EmpresaNombre);
+        var numeroFactura = WebUtility.HtmlEncode(factura.NumeroFactura);
         var asunto = $"Factura {factura.NumeroFactura} - {factura.EmpresaNombre}";
         var cuerpo = $"""
-            <p>Estimado/a {factura.ClienteNombre},</p>
-            <p>Le compartimos la factura correspondiente a su compra realizada en <strong>{factura.EmpresaNombre}</strong>.</p>
-            <p><strong>Número de factura:</strong> {factura.NumeroFactura}<br>
-            <strong>Fecha:</strong> {factura.FechaEmision:dd/MM/yyyy}<br>
-            <strong>Total:</strong> L. {factura.Total:N2}</p>
-            <p>Encontrará el detalle completo en el archivo PDF adjunto.</p>
-            <p>Gracias por su preferencia.</p>
+            <!doctype html>
+            <html lang="es">
+            <body style="font-family:Arial,sans-serif;color:#263238;line-height:1.5">
+              <p>Estimado/a {cliente},</p>
+              <p>Le compartimos la factura correspondiente a su compra realizada en <strong>{empresa}</strong>.</p>
+              <p>
+                <strong>Número de factura:</strong> {numeroFactura}<br>
+                <strong>Fecha:</strong> {factura.FechaEmision:dd/MM/yyyy}<br>
+                <strong>Total:</strong> L. {factura.Total:N2}
+              </p>
+              <p>El detalle completo se encuentra en el archivo PDF adjunto.</p>
+              <p>Gracias por su preferencia.</p>
+            </body>
+            </html>
             """;
 
-        var (exito, error) = await _emailService.EnviarAsync(destinatario, asunto, cuerpo, new List<AdjuntoCorreo>
-        {
-            new() { NombreArchivo = $"{factura.NumeroFactura}.pdf", Contenido = pdf, ContentType = "application/pdf" }
-        });
+        var (exito, error) = await _emailService.EnviarAsync(
+            destinatario,
+            asunto,
+            cuerpo,
+            new List<AdjuntoCorreo>
+            {
+                new()
+                {
+                    NombreArchivo = $"{factura.NumeroFactura}.pdf",
+                    Contenido = pdf,
+                    ContentType = "application/pdf"
+                }
+            });
 
         await RegistrarIntentoAsync(facturaId, new RegistrarEnvioDto
         {
@@ -201,17 +301,83 @@ public class FacturaCompartirService : IFacturaCompartirService
         return (exito, exito ? "Correo enviado correctamente." : (error ?? "No se pudo enviar el correo."));
     }
 
-    private static bool EsCorreoValido(string correo)
+    private async Task<FacturaDto> ObtenerFacturaCompartibleAsync(int facturaId)
     {
-        if (string.IsNullOrWhiteSpace(correo)) return false;
-        try
+        var factura = await _facturaService.GetByIdAsync(facturaId)
+            ?? throw new BusinessRuleException("La factura no existe o no está disponible para el usuario actual.");
+
+        if (string.Equals(factura.Estado, "Anulada", StringComparison.OrdinalIgnoreCase))
+            throw new BusinessRuleException("No se puede compartir una factura anulada.");
+
+        return factura;
+    }
+
+    private string ResolverBackendPublicUrl()
+    {
+        var configurada = _configuration["AppSettings:BackendPublicUrl"]?.Trim().TrimEnd('/');
+        if (EsUrlPublicaValida(configurada))
+            return configurada!;
+
+        var request = _httpContextAccessor.HttpContext?.Request;
+        if (request is not null && request.Host.HasValue)
         {
-            var direccion = new System.Net.Mail.MailAddress(correo);
-            return direccion.Address == correo.Trim();
+            var inferida = $"{request.Scheme}://{request.Host}".TrimEnd('/');
+            if (EsUrlPublicaValida(inferida))
+                return inferida;
         }
-        catch
-        {
+
+        throw new BusinessRuleException(
+            "No se ha configurado una URL pública válida para el backend. Revisa AppSettings:BackendPublicUrl.");
+    }
+
+    private static bool EsUrlPublicaValida(string? valor)
+    {
+        if (string.IsNullOrWhiteSpace(valor) || !Uri.TryCreate(valor, UriKind.Absolute, out var uri))
             return false;
-        }
+
+        if (uri.Scheme != Uri.UriSchemeHttps && uri.Scheme != Uri.UriSchemeHttp)
+            return false;
+
+        return !uri.IsLoopback &&
+               !uri.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase) &&
+               !uri.Host.Equals("127.0.0.1", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string NormalizarTelefonoHonduras(string? telefono)
+    {
+        if (string.IsNullOrWhiteSpace(telefono)) return string.Empty;
+
+        var soloDigitos = new string(telefono.Where(char.IsDigit).ToArray());
+        if (soloDigitos.StartsWith("00", StringComparison.Ordinal))
+            soloDigitos = soloDigitos[2..];
+        if (soloDigitos.Length == 8)
+            return "504" + soloDigitos;
+
+        return soloDigitos;
+    }
+
+    private static string GenerarTokenSeguro()
+    {
+        var bytes = RandomNumberGenerator.GetBytes(32);
+        return Convert.ToBase64String(bytes)
+            .TrimEnd('=')
+            .Replace('+', '-')
+            .Replace('/', '_');
+    }
+
+    private static string CalcularHashToken(string token)
+    {
+        var bytes = Encoding.UTF8.GetBytes(token);
+        return Convert.ToHexString(SHA256.HashData(bytes));
+    }
+
+    private static bool EsCorreoValido(string correo) =>
+        MailAddress.TryCreate(correo, out var direccion) &&
+        string.Equals(direccion.Address, correo, StringComparison.OrdinalIgnoreCase);
+
+    private static string? Truncar(string? valor, int longitudMaxima)
+    {
+        if (string.IsNullOrEmpty(valor)) return valor;
+        return valor.Length <= longitudMaxima ? valor : valor[..longitudMaxima];
     }
 }
