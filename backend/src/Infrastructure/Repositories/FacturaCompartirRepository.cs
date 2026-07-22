@@ -14,14 +14,21 @@ public class FacturaCompartirRepository : IFacturaCompartirRepository
         _context = context;
     }
 
-    public async Task<EnlacePublicoFactura?> GetEnlaceVigenteAsync(int facturaId) =>
+    public async Task<EnlacePublicoFactura?> GetPorTokenHashAsync(string tokenHash) =>
         await _context.EnlacesPublicosFactura
-            .Where(e => e.FacturaId == facturaId && e.FechaExpiracion > DateTime.UtcNow)
-            .OrderByDescending(e => e.FechaCreacion)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(e => e.Token == tokenHash);
 
-    public async Task<EnlacePublicoFactura?> GetPorTokenAsync(string token) =>
-        await _context.EnlacesPublicosFactura.FirstOrDefaultAsync(e => e.Token == token);
+    public async Task<int> ExpirarVigentesAsync(int facturaId, DateTime fechaExpiracion)
+    {
+        var enlaces = await _context.EnlacesPublicosFactura
+            .Where(e => e.FacturaId == facturaId && e.FechaExpiracion > fechaExpiracion)
+            .ToListAsync();
+
+        foreach (var enlace in enlaces)
+            enlace.FechaExpiracion = fechaExpiracion;
+
+        return enlaces.Count;
+    }
 
     public async Task AddEnlaceAsync(EnlacePublicoFactura enlace) =>
         await _context.EnlacesPublicosFactura.AddAsync(enlace);
