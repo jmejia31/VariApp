@@ -2,11 +2,7 @@ using InventoryApp.Domain.Enums;
 
 namespace InventoryApp.Application.Common;
 
-/// Única fuente de verdad de qué combinaciones Módulo/Acción son válidas en el
-/// sistema (sección 7 del prompt). Se usa para: sembrar el catálogo de Permiso,
-/// precargar la matriz por defecto de un rol nuevo, y validar la UI de matriz.
-/// No todos los módulos tienen todas las acciones — cada módulo declara
-/// solamente las que tienen sentido para él.
+/// Única fuente de verdad de las combinaciones Módulo/Acción válidas.
 public static class CatalogoPermisosBase
 {
     public static readonly (ModuloSistema Modulo, AccionPermiso[] Acciones)[] Definicion =
@@ -44,15 +40,15 @@ public static class CatalogoPermisosBase
         (ModuloSistema.Compras, new[]
         {
             AccionPermiso.Ver, AccionPermiso.Crear, AccionPermiso.Editar,
-            AccionPermiso.Confirmar, AccionPermiso.Anular, AccionPermiso.Exportar,
-            AccionPermiso.Imprimir, AccionPermiso.ConsultarHistorial
+            AccionPermiso.Confirmar, AccionPermiso.Anular, AccionPermiso.EliminarLogico,
+            AccionPermiso.Exportar, AccionPermiso.Imprimir, AccionPermiso.ConsultarHistorial
         }),
 
         (ModuloSistema.Ventas, new[]
         {
             AccionPermiso.Ver, AccionPermiso.Crear, AccionPermiso.Editar,
-            AccionPermiso.Confirmar, AccionPermiso.Anular, AccionPermiso.Exportar,
-            AccionPermiso.Imprimir, AccionPermiso.ConsultarHistorial
+            AccionPermiso.Confirmar, AccionPermiso.Anular, AccionPermiso.EliminarLogico,
+            AccionPermiso.Exportar, AccionPermiso.Imprimir, AccionPermiso.ConsultarHistorial
         }),
 
         (ModuloSistema.Facturacion, new[]
@@ -67,7 +63,6 @@ public static class CatalogoPermisosBase
         }),
 
         (ModuloSistema.Inventario, new[] { AccionPermiso.Ver, AccionPermiso.Exportar }),
-
         (ModuloSistema.MovimientosInventario, new[] { AccionPermiso.Ver, AccionPermiso.Exportar }),
 
         (ModuloSistema.Usuarios, new[]
@@ -93,7 +88,6 @@ public static class CatalogoPermisosBase
         }),
 
         (ModuloSistema.Auditoria, new[] { AccionPermiso.Ver, AccionPermiso.Exportar }),
-
         (ModuloSistema.Configuracion, new[] { AccionPermiso.Ver, AccionPermiso.Editar, AccionPermiso.Administrar }),
 
         (ModuloSistema.Descuentos, new[]
