@@ -4,20 +4,22 @@
   <section class="dashboard-shell">
     <div class="dashboard-title">
       <div>
-        <p class="eyebrow">Panel principal</p>
-        <h1>Dashboard</h1>
+        <p class="eyebrow">{{ esAdministrador() ? 'Panel principal' : 'Resumen personal' }}</p>
+        <h1>{{ esAdministrador() ? 'Dashboard administrativo' : 'Mi actividad' }}</h1>
       </div>
-      <a routerLink="/ventas" class="quick-link">Ver ventas</a>
+      @if (puedeVerVentas()) {
+        <a routerLink="/ventas" class="quick-link">Ver ventas</a>
+      }
     </div>
 
     <div class="metric-grid">
       <article class="metric-card accent-orange">
         <div>
           <span>L. {{ r.ingresosDelMes | number:'1.2-2' }}</span>
-          <p>Ingresos del mes</p>
+          <p>{{ esAdministrador() ? 'Ingresos del mes' : 'Mis ingresos del mes' }}</p>
         </div>
         <mat-icon>bar_chart</mat-icon>
-        <footer>Ventas registradas: {{ r.ventasDelMes }}</footer>
+        <footer>{{ esAdministrador() ? 'Ventas registradas' : 'Mis ventas registradas' }}: {{ r.ventasDelMes }}</footer>
       </article>
 
       <article class="metric-card accent-green">
@@ -38,22 +40,28 @@
         <footer>Revisar reposición</footer>
       </article>
 
-      <article class="metric-card accent-cyan">
-        <div>
-          <span>L. {{ r.utilidadBruta | number:'1.2-2' }}</span>
-          <p>Utilidad bruta</p>
-        </div>
-        <mat-icon>download</mat-icon>
-        <footer>Balance: L. {{ r.balanceOperativo | number:'1.2-2' }}</footer>
-      </article>
+      @if (esAdministrador()) {
+        <article class="metric-card accent-cyan">
+          <div>
+            <span>L. {{ r.utilidadBruta | number:'1.2-2' }}</span>
+            <p>Utilidad bruta</p>
+          </div>
+          <mat-icon>download</mat-icon>
+          <footer>Balance: L. {{ r.balanceOperativo | number:'1.2-2' }}</footer>
+        </article>
+      }
     </div>
 
     <div class="dashboard-grid">
       <article class="card analytics-card">
         <div class="panel-heading">
           <div>
-            <h2>Actividad comercial</h2>
-            <p>Ventas y compras recientes tomadas de la base de datos.</p>
+            <h2>{{ esAdministrador() ? 'Actividad comercial' : 'Mi actividad comercial' }}</h2>
+            <p>
+              {{ esAdministrador()
+                ? 'Ventas y compras recientes tomadas de la base de datos.'
+                : 'Únicamente las ventas registradas por tu usuario.' }}
+            </p>
           </div>
           <div class="panel-tools">
             <mat-icon>open_in_full</mat-icon>
@@ -63,7 +71,9 @@
 
         <div class="chart-legend">
           <span><i class="venta"></i> Ventas</span>
-          <span><i class="compra"></i> Compras</span>
+          @if (esAdministrador()) {
+            <span><i class="compra"></i> Compras</span>
+          }
         </div>
 
         <div class="combo-chart">
@@ -99,8 +109,10 @@
 
       <article class="card table-card">
         <div class="panel-heading">
-          <h2>Últimas ventas</h2>
-          <a routerLink="/ventas">Ver todas</a>
+          <h2>{{ esAdministrador() ? 'Últimas ventas' : 'Mis últimas ventas' }}</h2>
+          @if (puedeVerVentas()) {
+            <a routerLink="/ventas">Ver todas</a>
+          }
         </div>
         @if (r.ultimasVentas.length === 0) {
           <p class="empty">Aún no hay ventas registradas.</p>
@@ -123,12 +135,14 @@
 
       <article class="card donut-card">
         <div class="panel-heading">
-          <h2>Operación del mes</h2>
+          <h2>{{ esAdministrador() ? 'Operación del mes' : 'Mi operación del mes' }}</h2>
         </div>
         <div class="donut" [style.background]="donutBackground(r)"></div>
         <div class="donut-stats">
           <div><strong>{{ porcentaje(r.ventasDelMes, totalOperativo(r)) }}%</strong><span>Ventas</span></div>
-          <div><strong>{{ porcentaje(r.comprasDelMes, totalOperativo(r)) }}%</strong><span>Compras</span></div>
+          @if (esAdministrador()) {
+            <div><strong>{{ porcentaje(r.comprasDelMes, totalOperativo(r)) }}%</strong><span>Compras</span></div>
+          }
           <div><strong>{{ porcentaje(r.productosStockBajo.length, totalOperativo(r)) }}%</strong><span>Alertas</span></div>
         </div>
       </article>
@@ -136,7 +150,9 @@
       <article class="card list-card">
         <div class="panel-heading">
           <h2>Productos críticos</h2>
-          <a routerLink="/productos">Inventario</a>
+          @if (puedeVerProductos()) {
+            <a routerLink="/productos">Inventario</a>
+          }
         </div>
         @if (r.productosStockBajo.length === 0) {
           <p class="empty">No hay productos con stock bajo.</p>
@@ -152,13 +168,15 @@
         }
       </article>
 
-      <article class="card audit-card">
-        <h2>Auditoría reciente</h2>
-        <div><span>Última venta</span><strong>{{ r.ultimaVentaPor || 'Sin registro' }}</strong></div>
-        <div><span>Última compra</span><strong>{{ r.ultimaCompraPor || 'Sin registro' }}</strong></div>
-        <div><span>Última revisión financiera</span><strong>{{ r.ultimaRevisionFinancieraPor || 'Sin registro' }}</strong></div>
-        <div><span>Último producto</span><strong>{{ r.ultimoProductoRegistradoPor || 'Sin registro' }}</strong></div>
-      </article>
+      @if (esAdministrador()) {
+        <article class="card audit-card">
+          <h2>Auditoría reciente</h2>
+          <div><span>Última venta</span><strong>{{ r.ultimaVentaPor || 'Sin registro' }}</strong></div>
+          <div><span>Última compra</span><strong>{{ r.ultimaCompraPor || 'Sin registro' }}</strong></div>
+          <div><span>Última revisión financiera</span><strong>{{ r.ultimaRevisionFinancieraPor || 'Sin registro' }}</strong></div>
+          <div><span>Último producto</span><strong>{{ r.ultimoProductoRegistradoPor || 'Sin registro' }}</strong></div>
+        </article>
+      }
     </div>
   </section>
 }
