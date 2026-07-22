@@ -1,72 +1,92 @@
 # Plan de cierre técnico de VariApp / VariStorehn
 
-Rama de trabajo: `agent/mejoras-variapp`
+Rama de trabajo: `agent/mejoras-variapp`  
+Pull Request: `#1` hacia `main`
 
-## Fase 0 — Protección operativa y línea base
+## Fase 0 — Protección operativa y línea base — COMPLETA
+
 - Respaldo de Aiven confirmado.
 - Variables productivas verificadas.
 - `main` protegida y Pull Request en borrador.
 - CI limitado a checkpoints controlados.
 
-## Fase 1 — Seguridad, permisos y alcance por usuario
-- Aislar ventas, compras, facturas, finanzas y movimientos por `UsuarioId` para usuarios no administradores.
-- Mantener acceso global exclusivamente para administradores.
-- Ocultar acciones sin permiso exacto.
-- Restringir auditoría a administradores.
-- Unificar el permiso y la ruta de movimientos de inventario.
-- Estado: implementada; certificación integral pendiente en Fase 6.
+## Fase 1 — Seguridad, permisos y alcance por usuario — IMPLEMENTADA Y CERTIFICADA AUTOMÁTICAMENTE
 
-## Fase 2 — Cálculos, impuestos y compras
-- Corregir impuestos incluidos y adicionales.
-- Reconciliar importe bruto, descuento, subtotal neto, impuesto y total.
-- Permitir impuestos de compra administrables desde la interfaz.
-- Agregar documentos de respaldo de compras sin alterar datos históricos.
-- Estado: implementada; migraciones y pruebas monetarias pendientes en Fase 6.
+- Ventas, compras, facturas, finanzas y movimientos aislados por `UsuarioId` para usuarios no administradores.
+- Acceso global reservado al administrador.
+- Acciones protegidas por permiso exacto en frontend y backend.
+- Auditoría restringida al administrador.
+- Ruta y permiso de movimientos de inventario unificados.
+- Eliminación lógica y productos inactivos protegidos.
+- Pendiente: aceptación funcional con perfiles reales en Fase 7.
 
-## Fase 3 — Facturación y comunicaciones
-- Unificar el PDF usado por descarga, impresión, WhatsApp y correo.
-- Garantizar identidad visual y logo.
-- Fortalecer SMTP y diagnóstico de errores.
-- Proteger enlaces públicos de factura mediante hash, expiración, revocación y límite de accesos.
-- Estado: implementada; prueba real Gmail/WhatsApp pendiente en Fase 7.
+## Fase 2 — Cálculos, impuestos y compras — IMPLEMENTADA Y CERTIFICADA AUTOMÁTICAMENTE
 
-## Fase 4 — Usuarios y perfil
-- Editar usuarios con permisos independientes para datos, roles y contraseñas.
-- Permitir autogestión de nombre completo y nombre de usuario.
-- Validar nombres de usuario únicos sin distinguir mayúsculas y minúsculas.
-- Aplicar contraseñas seguras y excluir secretos de auditoría.
-- Cargar, reemplazar y eliminar fotos de perfil mediante Cloudinary en carpeta dedicada.
-- Sincronizar nombre, usuario y fotografía con la sesión y la barra superior.
-- Mantener diseño responsivo para teléfono, tablet y escritorio.
-- Estado: implementada; columnas de fotografía y pruebas automatizadas pendientes en Fase 6.
+- Impuestos incluidos y adicionales separados.
+- Importe bruto, descuento, subtotal neto, impuesto y total reconciliados.
+- Impuestos de compra administrables desde la interfaz.
+- Documentos de respaldo asociados a compras.
+- Snapshots fiscales históricos.
+- Pruebas aprobadas para impuesto incluido, adicional, descuento antes del impuesto y compra con impuesto incluido.
+- Pendiente: validación productiva con operaciones controladas en Fase 7.
 
-## Fase 5 — Responsividad, experiencia y ortografía
-- Rediseñar el inicio de sesión para escritorio, tablet y teléfono, eliminando el ancho excesivamente reducido.
-- Redirigir después del acceso al primer módulo realmente autorizado o al perfil del usuario.
-- Incorporar una capa global contra desbordamientos horizontales, con foco visible, objetivos táctiles adecuados y soporte para reducción de movimiento.
-- Convertir el menú lateral en un panel móvil accesible, con bloqueo de desplazamiento, cierre mediante Escape y navegación por teclado.
-- Adaptar formularios de ventas y compras, filas de productos, totales y acciones para pantallas pequeñas.
-- Mejorar la matriz de permisos con filtros claros, estados vacíos y barra de guardado persistente.
-- Adaptar la vista de factura y los paneles de WhatsApp, correo e historial sin modificar el PDF oficial.
-- Optimizar Dashboard, finanzas, auditoría y movimientos de inventario para móvil y tablet.
-- Homogeneizar diálogos de confirmación, mensajes, colores del tema y terminología.
-- Incorporar semántica accesible en tablas, gráficos, menús, formularios y controles expandibles.
-- Corregir textos y términos visibles, incluyendo acentos, capitalización y abreviaturas ambiguas.
-- Estado: implementada; compilación y certificación visual automatizada pendientes en Fase 6.
+## Fase 3 — Facturación y comunicaciones — IMPLEMENTADA Y COMPILADA
 
-## Fase 6 — Migraciones, compilación, pruebas y documentación
-- Crear migraciones únicamente aditivas.
-- Compilar backend y frontend.
-- Ejecutar pruebas unitarias, integración, autorización horizontal, cálculos fiscales, enlaces, SMTP y PDF.
-- Ejecutar pruebas de interfaz y responsividad en resoluciones representativas.
-- Actualizar README y documentación operativa.
+- PDF único para descarga, impresión, WhatsApp y correo.
+- Identidad visual y logo incorporados al generador.
+- SMTP reforzado y errores sanitizados.
+- Enlaces públicos con hash, expiración, revocación y límite de accesos.
+- Pruebas aprobadas para hash, vencimiento, límite y revocación.
+- Pendiente: entrega real Gmail, WhatsApp y comprobación visual del PDF en Fase 7.
 
-## Fase 7 — Validación productiva y cierre
-- Ejecutar CI final controlado.
-- Desplegar Preview autorizado.
+## Fase 4 — Usuarios y perfil — IMPLEMENTADA Y CERTIFICADA AUTOMÁTICAMENTE
+
+- Edición administrativa con permisos separados para datos, rol y contraseña.
+- Autogestión de nombre completo y nombre de usuario.
+- Nombres de usuario únicos sin distinguir mayúsculas y minúsculas.
+- Contraseñas seguras sin secretos en auditoría.
+- Fotografías de perfil mediante Cloudinary.
+- Identidad sincronizada con la sesión y barra superior.
+- Pruebas aprobadas para alcance por usuario, unicidad, normalización y contraseña.
+- Pendiente: validación real de carga de foto en Fase 7.
+
+## Fase 5 — Responsividad, experiencia y ortografía — IMPLEMENTADA Y COMPILADA
+
+- Inicio de sesión adaptado a escritorio, tablet y teléfono.
+- Redirección al primer módulo autorizado.
+- Protección contra desbordamientos horizontales.
+- Menú lateral móvil accesible.
+- Formularios, tablas, factura, permisos, Dashboard, finanzas, auditoría y movimientos adaptados.
+- Diálogos, mensajes, accesibilidad y terminología unificados.
+- Build de producción Angular aprobado.
+- Pendiente: certificación visual en dispositivos representativos durante la Fase 7.
+
+## Fase 6 — Migraciones, compilación, pruebas y documentación — COMPLETA Y CERTIFICADA
+
+- Migración EF Core aditiva creada y guardada.
+- Método `Up()` sin operaciones destructivas.
+- Modelo EF y snapshot alineados.
+- SQL forward generado desde la migración inmediatamente anterior.
+- SQL sin `DROP`, `TRUNCATE` ni `DELETE FROM`.
+- Backend compilado en Release.
+- Frontend compilado en producción.
+- **66 pruebas ejecutadas y 66 aprobadas**.
+- README, validación productiva y evidencia técnica actualizados.
+- Evidencia detallada: `docs/FASE6_CERTIFICACION.md`.
+- No se aplicó ninguna migración a Aiven.
+
+## Fase 7 — Validación productiva y cierre — SIGUIENTE
+
+- Preparar Preview autorizado sin afectar producción.
 - Validar Administrador, Vendedor y rol personalizado.
-- Validar Gmail, WhatsApp, PDF, Cloudinary y CRUD completo.
-- Presentar el Pull Request para aprobación y fusionar solamente con autorización del propietario.
+- Validar Gmail, WhatsApp, PDF y enlaces públicos.
+- Validar Cloudinary para perfiles y documentos de compra.
+- Revisar responsividad en resoluciones representativas.
+- Aplicar la migración en Aiven mediante una única estrategia autorizada.
+- Verificar Render, Vercel y datos existentes.
+- Presentar el Pull Request para aprobación.
+- Fusionar a `main` únicamente con autorización expresa del propietario.
 
 ## Regla de datos
-Todos los cambios de base de datos serán aditivos y revisables. No se eliminarán registros productivos ni se ejecutarán migraciones destructivas.
+
+Todos los cambios de base de datos son aditivos y revisables. No se eliminarán registros productivos ni se ejecutarán migraciones destructivas.
