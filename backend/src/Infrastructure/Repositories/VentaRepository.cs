@@ -124,8 +124,6 @@ public class VentaRepository : IVentaRepository
 
         foreach (var entry in borradoresEliminados)
         {
-            // DeleteBorradorAsync del flujo legado limpia la colección. Se cancelan
-            // las eliminaciones de sus líneas para conservar el documento completo.
             foreach (var detalleEntry in _context.ChangeTracker.Entries<VentaDetalle>()
                          .Where(d => d.State == EntityState.Deleted && d.Entity.VentaId == entry.Entity.Id))
             {
@@ -140,6 +138,26 @@ public class VentaRepository : IVentaRepository
             entry.Entity.FechaActualizacion = DateTime.UtcNow;
         }
 
+        await CompletarSnapshotImpuestosAsync();
         return await _context.SaveChangesAsync() > 0;
+    }
+
+    private async Task CompletarSnapshotImpuestosAsync()
+    {
+        var nuevos = _context.ChangeTracker.Entries<VentaImpuesto>()
+            .Where(e => e.State == EntityState.Added)
+            .ToList();
+        if (nuevos.Count == 0) return;
+
+        var ids = nuevos.Select(e => e.Entity.ImpuestoId).Distinct().ToList();
+        var configuracion = await _context.Impuestos.AsNoTracking()
+            .Where(i => ids.Contains(i.Id))
+            .ToDictionaryAsync(i => i.Id, i => i.IncluidoEnPrecio);
+
+        foreach (var entry in nuevos)
+        {
+            entry.Entity.IncluidoEnPrecioSnapshot =
+                configuracion.TryGetValue(entry.Entity.ImpuestoId, out var incluido) && incluido;
+        }
     }
 }
