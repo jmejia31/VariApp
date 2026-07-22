@@ -227,18 +227,13 @@ if (app.Configuration.GetValue<bool>("Database:ApplyMigrationsOnStartup"))
     var repairService = new ProductionDataRepairService(db);
     await repairService.RepairAsync();
 
-    var seedPermisoService = new SeedPermisoService(db);
-    await seedPermisoService.SeedDefaultsAsync();
-
-    var seedFiscalService = new SeedFiscalService(db);
-    await seedFiscalService.SeedDefaultsAsync();
-
     var adminUsername = app.Configuration["SeedAdmin:Username"]?.Trim();
     var adminPassword = app.Configuration["SeedAdmin:Password"];
 
-    // SeedAdmin es exclusivamente de creación inicial. Una cuenta ya existente
-    // nunca vuelve a recibir contraseña, rol ni estado desde variables de entorno.
-    // Esto evita restablecimientos silenciosos en cada despliegue de Render.
+    // SeedAdmin es exclusivamente de creación inicial. Se ejecuta antes del
+    // seeding de roles para que una cuenta nueva quede vinculada inmediatamente
+    // al rol dinámico Administrador. Una cuenta existente nunca recibe de nuevo
+    // contraseña, rol ni estado desde variables de entorno.
     if (!string.IsNullOrWhiteSpace(adminUsername) && !string.IsNullOrWhiteSpace(adminPassword))
     {
         var adminExiste = await db.Usuarios.AnyAsync(u => u.NombreUsuario == adminUsername);
@@ -256,6 +251,12 @@ if (app.Configuration.GetValue<bool>("Database:ApplyMigrationsOnStartup"))
             await db.SaveChangesAsync();
         }
     }
+
+    var seedPermisoService = new SeedPermisoService(db);
+    await seedPermisoService.SeedDefaultsAsync();
+
+    var seedFiscalService = new SeedFiscalService(db);
+    await seedFiscalService.SeedDefaultsAsync();
 }
 
 await app.RunAsync();
