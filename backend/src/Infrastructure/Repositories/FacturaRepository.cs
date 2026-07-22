@@ -8,10 +8,12 @@ namespace InventoryApp.Infrastructure.Repositories;
 public class FacturaRepository : IFacturaRepository
 {
     private readonly AppDbContext _context;
+    private readonly ICurrentUserService _currentUser;
 
-    public FacturaRepository(AppDbContext context)
+    public FacturaRepository(AppDbContext context, ICurrentUserService currentUser)
     {
         _context = context;
+        _currentUser = currentUser;
     }
 
     private IQueryable<Factura> ConIncludes() =>
@@ -22,14 +24,25 @@ public class FacturaRepository : IFacturaRepository
             .Include(f => f.Venta)
                 .ThenInclude(v => v!.ImpuestosAplicados);
 
+    private IQueryable<Factura> AplicarAlcanceActual(IQueryable<Factura> query)
+    {
+        if (!_currentUser.EstaAutenticado || _currentUser.EsAdministrador)
+            return query;
+
+        var usuarioId = _currentUser.UsuarioId;
+        return usuarioId.HasValue
+            ? query.Where(f => f.VendedorUsuarioId == usuarioId.Value || f.GeneradaPorUsuarioId == usuarioId.Value)
+            : query.Where(_ => false);
+    }
+
     public async Task<Factura?> GetByIdAsync(int id) =>
-        await ConIncludes().FirstOrDefaultAsync(f => f.Id == id);
+        await AplicarAlcanceActual(ConIncludes()).FirstOrDefaultAsync(f => f.Id == id);
 
     public async Task<Factura?> GetByVentaIdAsync(int ventaId) =>
-        await ConIncludes().FirstOrDefaultAsync(f => f.VentaId == ventaId);
+        await AplicarAlcanceActual(ConIncludes()).FirstOrDefaultAsync(f => f.VentaId == ventaId);
 
     public async Task<List<Factura>> GetAllAsync() =>
-        await ConIncludes().OrderByDescending(f => f.FechaEmision).ToListAsync();
+        await AplicarAlcanceActual(ConIncludes()).OrderByDescending(f => f.FechaEmision).ToListAsync();
 
     public async Task<int> ContarTodasAsync() =>
         await _context.Facturas.CountAsync();
