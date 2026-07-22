@@ -31,15 +31,27 @@ public class ImpuestoAplicadoDto
 
 public class ResultadoCalculoDto
 {
+    private decimal _subtotalNeto;
+
     /// Importe bruto de las líneas antes de descuentos.
     public decimal ImporteBruto { get; set; }
 
-    /// Alias compatible con los contratos existentes: conserva el importe
-    /// bruto de las líneas. La base real sin impuestos está en SubtotalNeto.
-    public decimal Subtotal { get; set; }
+    /// Contrato histórico usado por VentaService/CompraService. El getter
+    /// devuelve el importe bruto para que los documentos existentes conserven
+    /// la semántica de Subtotal. El setter recibe la base neta del motor nuevo
+    /// y la guarda en SubtotalNeto para presentarla en la interfaz.
+    public decimal Subtotal
+    {
+        get => ImporteBruto;
+        set => _subtotalNeto = value;
+    }
 
     /// Base neta sin impuestos incluidos, después de descuentos.
-    public decimal SubtotalNeto { get; set; }
+    public decimal SubtotalNeto
+    {
+        get => _subtotalNeto;
+        set => _subtotalNeto = value;
+    }
 
     public List<DescuentoAplicadoDto> DescuentosAplicados { get; set; } = new();
     public decimal TotalDescuento { get; set; }
