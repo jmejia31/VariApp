@@ -33,6 +33,7 @@ export interface CreateUsuarioValue {
 }
 
 export interface UpdateUsuarioValue {
+  nombreUsuario: string;
   nombreCompleto: string;
   rol: string;
   rolId?: number;
