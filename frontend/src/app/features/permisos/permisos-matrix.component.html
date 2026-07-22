@@ -80,11 +80,10 @@
         <button mat-flat-button color="primary" [disabled]="saving()" (click)="guardar()">
           @if (saving()) {
             <mat-spinner diameter="20"></mat-spinner>
-            Guardando...
           } @else {
             <mat-icon>save</mat-icon>
-            Guardar cambios
           }
+          <span>{{ saving() ? 'Guardando...' : 'Guardar cambios' }}</span>
         </button>
       </div>
     </div>
