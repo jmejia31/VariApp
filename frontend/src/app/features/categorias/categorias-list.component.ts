@@ -60,11 +60,11 @@ export class CategoriasListComponent implements OnInit {
 
   toggleActiva(categoria: Categoria): void {
     if (!this.puedeCambiarEstado(categoria)) return;
-    this.categoriaService.update(categoria.id, {
-      nombre: categoria.nombre,
-      descripcion: categoria.descripcion,
-      activa: !categoria.activa
-    }).subscribe({
+    const operacion = categoria.activa
+      ? this.categoriaService.desactivar(categoria.id)
+      : this.categoriaService.activar(categoria.id);
+
+    operacion.subscribe({
       next: () => this.cargar(),
       error: (err) => this.snackBar.open(err.error?.message ?? 'No se pudo cambiar el estado de la categoría.', 'Cerrar', { duration: 5000 })
     });
