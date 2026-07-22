@@ -1,5 +1,5 @@
 Checkpoint de certificación controlada de la Fase 6.
 Fecha: 2026-07-22
-Revisión: 3
-Incluye validación exclusiva de Up() para la migración aditiva, corrección de imports Angular, validación de modelo, compilación backend, pruebas existentes y build de producción Angular con diagnóstico compacto.
+Revisión: 4
+Incluye migración EF exclusivamente aditiva, validación de modelo, build Release backend, pruebas actualizadas para seguridad financiera y eliminación lógica, y build de producción Angular.
 Prohibido: aplicar migraciones a Aiven, desplegar producción o fusionar a main durante este checkpoint.
