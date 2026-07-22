@@ -34,36 +34,54 @@ export class LoginComponent {
   readonly errorMessage = signal<string | null>(null);
   readonly hidePassword = signal(true);
 
+  readonly form = this.fb.group({
+    nombreUsuario: ['', [Validators.required, Validators.maxLength(50)]],
+    password: ['', [Validators.required, Validators.maxLength(128)]]
+  });
+
   constructor() {
+    if (this.authService.isAuthenticated()) {
+      this.router.navigateByUrl('/dashboard', { replaceUrl: true });
+      return;
+    }
+
     this.identidad.cargar().subscribe();
     const mensaje = this.sessionActivity.tomarMensajePendiente();
     if (mensaje) this.errorMessage.set(mensaje);
   }
 
-  form = this.fb.group({
-    nombreUsuario: ['', Validators.required],
-    password: ['', Validators.required]
-  });
-
   submit(): void {
-    if (this.form.invalid) return;
+    if (this.form.invalid || this.loading()) {
+      this.form.markAllAsTouched();
+      return;
+    }
 
     this.loading.set(true);
     this.errorMessage.set(null);
 
+    const valor = this.form.getRawValue();
     this.authService.login({
-      nombreUsuario: this.form.value.nombreUsuario!,
-      password: this.form.value.password!
+      nombreUsuario: valor.nombreUsuario!.trim(),
+      password: valor.password!
     }).subscribe({
       next: () => {
-        this.loading.set(false);
-        this.permisosRuntime.cargar().subscribe();
-        this.sessionActivity.iniciar();
-        this.router.navigate(['/dashboard']);
+        this.permisosRuntime.cargar().subscribe({
+          next: () => {
+            this.loading.set(false);
+            this.sessionActivity.iniciar();
+            const ruta = this.permisosRuntime.rutaInicialPermitida() ?? '/perfil';
+            this.router.navigateByUrl(ruta, { replaceUrl: true });
+          },
+          error: () => {
+            this.loading.set(false);
+            this.sessionActivity.iniciar();
+            this.router.navigateByUrl('/perfil', { replaceUrl: true });
+          }
+        });
       },
       error: (err) => {
         this.loading.set(false);
-        this.errorMessage.set(err.error?.message ?? 'No se pudo iniciar sesión.');
+        this.errorMessage.set(err.error?.message ?? 'No se pudo iniciar sesión. Verifica tus credenciales e intenta nuevamente.');
       }
     });
   }
