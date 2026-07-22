@@ -32,7 +32,7 @@
     <div class="table-scroll">
       <table class="table">
         <thead>
-          <tr><th>Producto</th><th>Marca</th><th>Modelo</th><th>Cantidad</th><th>Costo unit.</th><th>Subtotal</th></tr>
+          <tr><th>Producto</th><th>Marca</th><th>Modelo</th><th>Cantidad</th><th>Costo unit.</th><th>Importe</th></tr>
         </thead>
         <tbody>
           @for (d of c.detalles; track d.id) {
@@ -50,12 +50,80 @@
     </div>
 
     <div class="totales">
-      <div><span>Subtotal</span><span>L. {{ c.subtotal | number:'1.2-2' }}</span></div>
-      @for (i of c.impuestosAplicados; track i.impuestoId) {
-        <div class="linea-impuesto"><span>{{ i.nombre }} ({{ i.tasa }}%)</span><span>{{ i.incluidoEnPrecio ? '' : '+' }} L. {{ i.monto | number:'1.2-2' }}</span></div>
+      <div><span>Importe bruto</span><span>L. {{ importeBruto(c) | number:'1.2-2' }}</span></div>
+      @if (c.descuento > 0) {
+        <div class="linea-descuento"><span>Descuento</span><span>- L. {{ c.descuento | number:'1.2-2' }}</span></div>
       }
-      <div class="total"><span>Total</span><span>L. {{ c.total | number:'1.2-2' }}</span></div>
+      <div><span>Subtotal sin impuesto</span><span>L. {{ subtotalSinImpuesto(c) | number:'1.2-2' }}</span></div>
+      @for (i of c.impuestosAplicados; track i.impuestoId) {
+        <div class="linea-impuesto">
+          <span>{{ i.nombre }} ({{ i.tasa }}%) — {{ impuestoEsIncluido(c, i) ? 'incluido' : 'adicional' }}</span>
+          <span>{{ impuestoEsIncluido(c, i) ? '' : '+' }} L. {{ i.monto | number:'1.2-2' }}</span>
+        </div>
+      }
+      @if (impuestoIncluido(c) > 0) {
+        <div><span>Impuestos incluidos</span><span>L. {{ impuestoIncluido(c) | number:'1.2-2' }}</span></div>
+      }
+      @if (impuestoAdicional(c) > 0) {
+        <div><span>Impuestos adicionales</span><span>+ L. {{ impuestoAdicional(c) | number:'1.2-2' }}</span></div>
+      }
+      <div class="total"><span>Total facturado por el proveedor</span><span>L. {{ c.total | number:'1.2-2' }}</span></div>
     </div>
+
+    <section class="documentos-compra">
+      <div class="documentos-header">
+        <div>
+          <h2>Comprobantes del proveedor</h2>
+          <p>Facturas, recibos o respaldos en JPG, PNG, WebP o PDF. Máximo 10 MB por archivo.</p>
+        </div>
+        @if (puedeEditar()) {
+          <input #archivoCompra type="file" hidden accept="image/jpeg,image/png,image/webp,application/pdf" (change)="seleccionarDocumento($event)">
+          <button mat-flat-button color="primary" type="button" [disabled]="subiendoDocumento()" (click)="archivoCompra.click()">
+            @if (subiendoDocumento()) {
+              <mat-spinner diameter="18"></mat-spinner>
+            } @else {
+              <mat-icon>attach_file</mat-icon>
+            }
+            Adjuntar comprobante
+          </button>
+        }
+      </div>
+
+      @if (loadingDocumentos()) {
+        <div class="loading-documentos"><mat-spinner diameter="28"></mat-spinner></div>
+      } @else if (documentos().length === 0) {
+        <p class="empty">Esta compra todavía no tiene comprobantes adjuntos.</p>
+      } @else {
+        <div class="documentos-grid">
+          @for (documento of documentos(); track documento.id) {
+            <article class="documento-card">
+              <mat-icon class="documento-icon">{{ iconoDocumento(documento) }}</mat-icon>
+              <div class="documento-info">
+                <strong>{{ documento.nombreOriginal }}</strong>
+                <span>{{ tamanoLegible(documento.sizeBytes) }} · {{ documento.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</span>
+                <span>Adjuntado por {{ documento.creadoPorNombreUsuario || '—' }}</span>
+              </div>
+              <div class="documento-actions">
+                @if (puedeExportar()) {
+                  <button mat-icon-button type="button" title="Descargar" [disabled]="descargandoDocumentoId() !== null" (click)="descargarDocumento(documento)">
+                    @if (descargandoDocumentoId() === documento.id) {
+                      <mat-spinner diameter="20"></mat-spinner>
+                    } @else {
+                      <mat-icon>download</mat-icon>
+                    }
+                  </button>
+                }
+                @if (puedeEditar()) {
+                  <button mat-icon-button type="button" title="Retirar comprobante" (click)="eliminarDocumento(documento)">
+                    <mat-icon>delete_outline</mat-icon>
+                  </button>
+                }
+              </div>
+            </article>
+          }
+        </div>
+      }
+    </section>
 
     <div class="auditoria">
       <p>Creada por <strong>{{ c.creadoPorNombreUsuario || '—' }}</strong> el {{ c.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</p>
