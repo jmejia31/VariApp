@@ -16,13 +16,19 @@ public class ProductoConfiguration : IEntityTypeConfiguration<Producto>
         builder.Property(p => p.Descripcion).HasMaxLength(1000);
         builder.Property(p => p.Costo).HasColumnType("decimal(18,2)");
         builder.Property(p => p.Precio).HasColumnType("decimal(18,2)");
+        builder.Property(p => p.Activo).HasDefaultValue(true);
+        builder.Property(p => p.Eliminado).HasDefaultValue(false);
 
-        // Ignorar propiedad calculada (no mapear a columna)
+        // Toda consulta ordinaria excluye registros eliminados. El historial de
+        // ventas/compras conserva sus snapshots y relaciones existentes.
+        builder.HasQueryFilter(p => !p.Eliminado);
+
         builder.Ignore(p => p.ImagenPrincipal);
+        builder.Ignore(p => p.TieneStockBajo);
 
-        // Indices para busqueda instantanea (Nombre, Marca, Modelo)
         builder.HasIndex(p => p.Nombre).HasDatabaseName("IX_Productos_Nombre");
         builder.HasIndex(p => p.Marca).HasDatabaseName("IX_Productos_Marca");
         builder.HasIndex(p => p.Modelo).HasDatabaseName("IX_Productos_Modelo");
+        builder.HasIndex(p => new { p.Eliminado, p.Activo }).HasDatabaseName("IX_Productos_Estado");
     }
 }
