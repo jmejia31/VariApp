@@ -11,6 +11,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { FinanzasService } from '../../services/finanzas.service';
 import { FinanzasResumen, MovimientoFinanciero, RevisionFinanciera } from '../../core/models/finanzas.model';
 import { AnularDialogComponent } from '../../shared/anular-dialog.component';
+import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
 
 @Component({
   selector: 'app-finanzas',
@@ -24,14 +25,19 @@ import { AnularDialogComponent } from '../../shared/anular-dialog.component';
 })
 export class FinanzasComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
+  private readonly permisosRuntime = inject(PermisosRuntimeService);
+
   readonly resumen = signal<FinanzasResumen | null>(null);
   readonly movimientos = signal<MovimientoFinanciero[]>([]);
   readonly revisiones = signal<RevisionFinanciera[]>([]);
   readonly loading = signal(true);
   readonly mostrarFormMovimiento = signal(false);
   readonly mostrarFormRevision = signal(false);
+  readonly esAdministrador = this.permisosRuntime.esAdministrador;
+  readonly puedeCrearMovimiento = signal(false);
+  readonly puedeAnularMovimiento = signal(false);
 
-  movimientoForm = this.fb.group({
+  readonly movimientoForm = this.fb.group({
     tipo: ['Egreso', Validators.required],
     categoria: ['GastoOperativo', Validators.required],
     concepto: ['', Validators.required],
@@ -40,7 +46,7 @@ export class FinanzasComponent implements OnInit {
     metodoPago: ['Efectivo']
   });
 
-  revisionForm = this.fb.group({
+  readonly revisionForm = this.fb.group({
     fechaDesde: ['', Validators.required],
     fechaHasta: ['', Validators.required],
     estadoRevision: ['Revisado', Validators.required],
@@ -50,18 +56,41 @@ export class FinanzasComponent implements OnInit {
   constructor(private finanzasService: FinanzasService, private dialog: MatDialog) {}
 
   ngOnInit(): void {
+    this.puedeCrearMovimiento.set(this.permisosRuntime.puede('Finanzas', 'Crear'));
+    this.puedeAnularMovimiento.set(this.permisosRuntime.puede('Finanzas', 'Anular'));
     this.cargarTodo();
   }
 
   cargarTodo(): void {
     this.loading.set(true);
-    this.finanzasService.getResumen().subscribe((res) => { this.resumen.set(res.data); this.loading.set(false); });
-    this.finanzasService.getMovimientos().subscribe((res) => this.movimientos.set(res.data));
-    this.finanzasService.getRevisiones().subscribe((res) => this.revisiones.set(res.data));
+
+    this.finanzasService.getResumen().subscribe({
+      next: (res) => {
+        this.resumen.set(res.data);
+        this.loading.set(false);
+      },
+      error: () => this.loading.set(false)
+    });
+
+    this.finanzasService.getMovimientos().subscribe({
+      next: (res) => this.movimientos.set(res.data),
+      error: () => this.movimientos.set([])
+    });
+
+    if (this.esAdministrador()) {
+      this.finanzasService.getRevisiones().subscribe({
+        next: (res) => this.revisiones.set(res.data),
+        error: () => this.revisiones.set([])
+      });
+    } else {
+      this.revisiones.set([]);
+      this.mostrarFormRevision.set(false);
+    }
   }
 
   registrarMovimiento(): void {
-    if (this.movimientoForm.invalid) return;
+    if (!this.puedeCrearMovimiento() || this.movimientoForm.invalid) return;
+
     this.finanzasService.registrarManual(this.movimientoForm.getRawValue() as any).subscribe(() => {
       this.movimientoForm.reset({ tipo: 'Egreso', categoria: 'GastoOperativo', metodoPago: 'Efectivo' });
       this.mostrarFormMovimiento.set(false);
@@ -70,6 +99,8 @@ export class FinanzasComponent implements OnInit {
   }
 
   anularMovimiento(m: MovimientoFinanciero): void {
+    if (!this.puedeAnularMovimiento()) return;
+
     const ref = this.dialog.open(AnularDialogComponent, {
       data: { title: 'Anular movimiento', message: `¿Anular "${m.concepto}"?` }
     });
@@ -80,7 +111,8 @@ export class FinanzasComponent implements OnInit {
   }
 
   registrarRevision(): void {
-    if (this.revisionForm.invalid) return;
+    if (!this.esAdministrador() || !this.puedeCrearMovimiento() || this.revisionForm.invalid) return;
+
     this.finanzasService.registrarRevision(this.revisionForm.getRawValue() as any).subscribe(() => {
       this.revisionForm.reset({ estadoRevision: 'Revisado' });
       this.mostrarFormRevision.set(false);
