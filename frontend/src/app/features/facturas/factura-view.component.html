@@ -1,8 +1,9 @@
 <div class="toolbar no-print">
   <a routerLink="/ventas" mat-icon-button><mat-icon>arrow_back</mat-icon></a>
   <span class="spacer"></span>
+
   @if (factura(); as f) {
-    @if (f.estado !== 'Anulada') {
+    @if (f.estado !== 'Anulada' && puedeCompartir()) {
       <button mat-flat-button color="primary" class="btn-whatsapp" (click)="toggleWhatsApp()" [disabled]="preparandoWhatsApp()">
         @if (preparandoWhatsApp()) {
           <mat-spinner diameter="18"></mat-spinner>
@@ -13,30 +14,40 @@
       </button>
     }
   }
-  <button mat-button (click)="descargarPdf()" [disabled]="descargandoPdf()">
-    @if (descargandoPdf()) {
-      <mat-spinner diameter="18"></mat-spinner>
-    } @else {
-      <mat-icon>picture_as_pdf</mat-icon>
-    }
-    Descargar PDF
-  </button>
+
+  @if (puedeExportar()) {
+    <button mat-button (click)="descargarPdf()" [disabled]="descargandoPdf()">
+      @if (descargandoPdf()) {
+        <mat-spinner diameter="18"></mat-spinner>
+      } @else {
+        <mat-icon>picture_as_pdf</mat-icon>
+      }
+      Descargar PDF
+    </button>
+  }
+
   @if (factura(); as f) {
-    @if (f.estado !== 'Anulada') {
+    @if (f.estado !== 'Anulada' && puedeCompartir()) {
       <button mat-button (click)="toggleCorreo()">
         <mat-icon>email</mat-icon> Enviar por correo
       </button>
     }
   }
-  <button mat-button (click)="imprimir()">
-    <mat-icon>print</mat-icon> Imprimir
-  </button>
-  <button mat-button (click)="toggleHistorial()">
-    <mat-icon>history</mat-icon> Historial de envíos
-  </button>
+
+  @if (puedeImprimir()) {
+    <button mat-button (click)="imprimir()">
+      <mat-icon>print</mat-icon> Imprimir
+    </button>
+  }
+
+  @if (puedeCompartir()) {
+    <button mat-button (click)="toggleHistorial()">
+      <mat-icon>history</mat-icon> Historial de envíos
+    </button>
+  }
 </div>
 
-@if (mostrarPanelCorreo()) {
+@if (mostrarPanelCorreo() && puedeCompartir()) {
   <div class="card panel-correo no-print">
     <h3><mat-icon>email</mat-icon> Enviar por correo</h3>
     <mat-form-field appearance="outline" class="full-width">
@@ -61,7 +72,7 @@
   </div>
 }
 
-@if (mostrarPanelWhatsApp() && enlaceCompartir(); as e) {
+@if (mostrarPanelWhatsApp() && puedeCompartir() && enlaceCompartir(); as e) {
   <div class="card panel-whatsapp no-print">
     <h3><mat-icon>chat</mat-icon> Compartir por WhatsApp</h3>
     <mat-form-field appearance="outline" class="full-width">
@@ -85,7 +96,7 @@
   </div>
 }
 
-@if (mostrarHistorial()) {
+@if (mostrarHistorial() && puedeCompartir()) {
   <div class="card panel-historial no-print">
     <h3><mat-icon>history</mat-icon> Historial de envíos</h3>
     @if (historial().length === 0) {
@@ -120,9 +131,7 @@
 
     <header class="factura-header">
       <div class="empresa">
-        @if (f.empresaLogoUrl || defaultLogoUrl) {
-          <img class="empresa-logo" [src]="f.empresaLogoUrl || defaultLogoUrl" alt="Logo de {{ f.empresaNombre }}">
-        }
+        <img class="empresa-logo" [src]="f.empresaLogoUrl || defaultLogoUrl" alt="Logo de {{ f.empresaNombre }}">
         <h1>{{ f.empresaNombre }}</h1>
         @if (f.empresaEslogan) { <p class="eslogan">{{ f.empresaEslogan }}</p> }
         @if (f.empresaRTN) { <p>RTN: {{ f.empresaRTN }}</p> }
@@ -179,7 +188,7 @@
     <section class="resumen">
       <div><span>Subtotal</span><span>L. {{ f.subtotal | number:'1.2-2' }}</span></div>
       <div><span>Descuento</span><span>- L. {{ f.descuento | number:'1.2-2' }}</span></div>
-      <div><span>Impuesto</span><span>+ L. {{ f.impuesto | number:'1.2-2' }}</span></div>
+      <div><span>Impuesto</span><span>L. {{ f.impuesto | number:'1.2-2' }}</span></div>
       <div class="total"><span>TOTAL</span><span>L. {{ f.total | number:'1.2-2' }}</span></div>
     </section>
 
@@ -197,7 +206,7 @@
           <div>
             <h3>Impuestos aplicados</h3>
             @for (i of f.impuestosAplicados; track i.impuestoId) {
-              <p>{{ i.nombre }}: + L. {{ i.monto | number:'1.2-2' }}</p>
+              <p>{{ i.nombre }}: L. {{ i.monto | number:'1.2-2' }}</p>
             }
           </div>
         }
