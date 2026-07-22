@@ -15,11 +15,16 @@ public class UsuariosController : ControllerBase
 {
     private readonly IUsuarioService _usuarioService;
     private readonly IPermisoService _permisoService;
+    private readonly ICurrentUserService _currentUser;
 
-    public UsuariosController(IUsuarioService usuarioService, IPermisoService permisoService)
+    public UsuariosController(
+        IUsuarioService usuarioService,
+        IPermisoService permisoService,
+        ICurrentUserService currentUser)
     {
         _usuarioService = usuarioService;
         _permisoService = permisoService;
+        _currentUser = currentUser;
     }
 
     [HttpGet]
@@ -53,8 +58,6 @@ public class UsuariosController : ControllerBase
     [RequierePermiso(ModuloSistema.Usuarios, AccionPermiso.Crear)]
     public async Task<IActionResult> Create([FromBody] CreateUsuarioDto dto)
     {
-        // Crear una cuenta implica asignarle un rol inicial. La acción Crear no
-        // concede implícitamente el privilegio de AsignarRol.
         await _permisoService.VerificarPermisoAsync(ModuloSistema.Usuarios, AccionPermiso.AsignarRol);
 
         try
@@ -97,6 +100,9 @@ public class UsuariosController : ControllerBase
     [HttpPut("{id:int}/estado")]
     public async Task<IActionResult> UpdateEstado(int id, [FromBody] UpdateUsuarioEstadoDto dto)
     {
+        if (!dto.Activo && _currentUser.UsuarioId == id)
+            return BadRequest(ApiResponse<object>.Fail("No puedes desactivar tu propia cuenta."));
+
         await _permisoService.VerificarPermisoAsync(
             ModuloSistema.Usuarios,
             dto.Activo ? AccionPermiso.Activar : AccionPermiso.Desactivar);
