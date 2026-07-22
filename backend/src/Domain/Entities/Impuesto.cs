@@ -18,8 +18,6 @@ public class Impuesto
     public DateTime? FechaInicio { get; set; }
     public DateTime? FechaFin { get; set; }
 
-    /// Si es true, el importe capturado ya contiene el impuesto y debe
-    /// extraerse con la fórmula monto - monto/(1+tasa), no sumarse otra vez.
     public bool IncluidoEnPrecio { get; set; }
     public bool SeCalculaAntesDescuento { get; set; }
     public bool Acumulativo { get; set; } = true;
@@ -74,6 +72,7 @@ public class VentaImpuesto
     public decimal TasaSnapshot { get; set; }
     public decimal BaseImponible { get; set; }
     public decimal MontoAplicado { get; set; }
+    public bool IncluidoEnPrecioSnapshot { get; set; }
 }
 
 public class CompraImpuesto
@@ -86,4 +85,5 @@ public class CompraImpuesto
     public decimal TasaSnapshot { get; set; }
     public decimal BaseImponible { get; set; }
     public decimal MontoAplicado { get; set; }
+    public bool IncluidoEnPrecioSnapshot { get; set; }
 }
