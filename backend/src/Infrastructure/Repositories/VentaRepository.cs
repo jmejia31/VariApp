@@ -22,12 +22,15 @@ public class VentaRepository : IVentaRepository
             .Include(v => v.DescuentosAplicados)
             .Include(v => v.ImpuestosAplicados);
 
+    private static IQueryable<Venta> AplicarAlcance(IQueryable<Venta> query, int? usuarioId) =>
+        usuarioId.HasValue ? query.Where(v => v.CreadoPorUsuarioId == usuarioId.Value) : query;
+
     public async Task<Venta?> GetByIdAsync(int id) =>
         await ConIncludes().FirstOrDefaultAsync(v => v.Id == id);
 
     public async Task<(List<Venta> Items, int TotalCount)> GetPagedAsync(PagedRequest request)
     {
-        var query = ConIncludes().AsQueryable();
+        var query = AplicarAlcance(ConIncludes().AsQueryable(), request.UsuarioIdScope);
 
         if (!string.IsNullOrWhiteSpace(request.Search))
         {
@@ -51,32 +54,43 @@ public class VentaRepository : IVentaRepository
         return (items, totalCount);
     }
 
-    public async Task<int> GetTotalDelMesAsync()
+    public async Task<int> GetTotalDelMesAsync(int? usuarioId = null)
     {
         var inicioMes = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1, 0, 0, 0, DateTimeKind.Utc);
-        return await _context.Ventas.CountAsync(v => v.Fecha >= inicioMes && v.Estado == EstadoDocumento.Confirmada);
+        var query = AplicarAlcance(_context.Ventas.AsQueryable(), usuarioId);
+        return await query.CountAsync(v => v.Fecha >= inicioMes && v.Estado == EstadoDocumento.Confirmada);
     }
 
-    public async Task<decimal> GetIngresosDelMesAsync()
+    public async Task<decimal> GetIngresosDelMesAsync(int? usuarioId = null)
     {
         var inicioMes = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1, 0, 0, 0, DateTimeKind.Utc);
-        return await _context.Ventas
+        var query = AplicarAlcance(_context.Ventas.AsQueryable(), usuarioId);
+        return await query
             .Where(v => v.Fecha >= inicioMes && v.Estado == EstadoDocumento.Confirmada)
             .SumAsync(v => (decimal?)v.Total) ?? 0m;
     }
 
-    public async Task<decimal> GetCuentasPorCobrarAsync() =>
-        await _context.Ventas
+    public async Task<decimal> GetCuentasPorCobrarAsync(int? usuarioId = null)
+    {
+        var query = AplicarAlcance(_context.Ventas.AsQueryable(), usuarioId);
+        return await query
             .Where(v => v.Estado == EstadoDocumento.Confirmada && v.EstadoPago != EstadoPago.Pagado)
             .SumAsync(v => (decimal?)v.Total) ?? 0m;
+    }
 
-    public async Task<decimal> GetUtilidadBrutaTotalAsync() =>
-        await _context.Ventas
+    public async Task<decimal> GetUtilidadBrutaTotalAsync(int? usuarioId = null)
+    {
+        var query = AplicarAlcance(_context.Ventas.AsQueryable(), usuarioId);
+        return await query
             .Where(v => v.Estado == EstadoDocumento.Confirmada)
             .SumAsync(v => (decimal?)v.UtilidadBruta) ?? 0m;
+    }
 
-    public async Task<List<Venta>> GetUltimasAsync(int cantidad = 5) =>
-        await ConIncludes().OrderByDescending(v => v.Fecha).Take(cantidad).ToListAsync();
+    public async Task<List<Venta>> GetUltimasAsync(int cantidad = 5, int? usuarioId = null) =>
+        await AplicarAlcance(ConIncludes(), usuarioId)
+            .OrderByDescending(v => v.Fecha)
+            .Take(cantidad)
+            .ToListAsync();
 
     public async Task<int> ContarTodasAsync() =>
         await _context.Ventas.CountAsync();
