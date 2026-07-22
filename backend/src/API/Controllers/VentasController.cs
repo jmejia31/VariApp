@@ -46,9 +46,6 @@ public class VentasController : ControllerBase
             ApiResponse<VentaDto>.Ok(creada, "Venta creada en estado Borrador."));
     }
 
-    /// Vista previa: calcula descuentos e impuestos reales (desde el catálogo,
-    /// vía ICalculoService) SIN persistir nada. Permite al frontend mostrar el
-    /// desglose real antes de guardar la venta.
     [HttpPost("calcular")]
     [RequierePermiso(ModuloSistema.Ventas, AccionPermiso.Crear)]
     public async Task<IActionResult> Calcular([FromBody] CalcularVentaRequest request)
@@ -85,11 +82,11 @@ public class VentasController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
-    [RequierePermiso(ModuloSistema.Ventas, AccionPermiso.Eliminar)]
+    [RequierePermiso(ModuloSistema.Ventas, AccionPermiso.EliminarLogico)]
     public async Task<IActionResult> DeleteBorrador(int id)
     {
         var eliminada = await _ventaService.DeleteBorradorAsync(id);
         if (!eliminada) return NotFound(ApiResponse<object>.Fail("Venta no encontrada."));
-        return Ok(ApiResponse<object>.Ok(new { }, "Venta (borrador) eliminada."));
+        return Ok(ApiResponse<object>.Ok(new { }, "Borrador de venta eliminado correctamente."));
     }
 }
