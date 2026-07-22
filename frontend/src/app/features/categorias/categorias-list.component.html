@@ -18,7 +18,7 @@
           <th>Descripción</th>
           <th>Productos</th>
           <th>Registrada por</th>
-          <th>Activa</th>
+          <th>Estado</th>
           <th></th>
         </tr>
       </thead>
@@ -29,7 +29,13 @@
             <td>{{ c.descripcion || '—' }}</td>
             <td>{{ c.totalProductos }}</td>
             <td>{{ c.creadoPorNombreUsuario || '—' }}</td>
-            <td><mat-slide-toggle [checked]="c.activa" (change)="toggleActiva(c)"></mat-slide-toggle></td>
+            <td>
+              @if (puedeCambiarEstado(c)) {
+                <mat-slide-toggle [checked]="c.activa" (change)="toggleActiva(c)"></mat-slide-toggle>
+              } @else {
+                <span class="badge" [class.success]="c.activa" [class.muted]="!c.activa">{{ c.activa ? 'Activa' : 'Inactiva' }}</span>
+              }
+            </td>
             <td class="actions">
               @if (puedeEditar()) {
                 <a [routerLink]="['/categorias', c.id, 'editar']" mat-icon-button title="Editar">
@@ -54,7 +60,11 @@
         <div class="item-card">
           <div class="item-card-header">
             <strong>{{ c.nombre }}</strong>
-            <mat-slide-toggle [checked]="c.activa" (change)="toggleActiva(c)"></mat-slide-toggle>
+            @if (puedeCambiarEstado(c)) {
+              <mat-slide-toggle [checked]="c.activa" (change)="toggleActiva(c)"></mat-slide-toggle>
+            } @else {
+              <span class="badge" [class.success]="c.activa" [class.muted]="!c.activa">{{ c.activa ? 'Activa' : 'Inactiva' }}</span>
+            }
           </div>
           <p class="item-card-desc">{{ c.descripcion || 'Sin descripción' }}</p>
           <div class="item-card-meta"><span>{{ c.totalProductos }} productos</span></div>
