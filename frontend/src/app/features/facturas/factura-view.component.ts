@@ -29,6 +29,8 @@ export class FacturaViewComponent implements OnInit {
   readonly factura = signal<Factura | null>(null);
   readonly loading = signal(true);
   readonly descargandoPdf = signal(false);
+  readonly imprimiendoPdf = signal(false);
+  readonly revocandoEnlaces = signal(false);
   readonly puedeExportar = signal(false);
   readonly puedeImprimir = signal(false);
   readonly puedeCompartir = signal(false);
@@ -64,13 +66,41 @@ export class FacturaViewComponent implements OnInit {
     });
   }
 
+  /** Abre el mismo PDF oficial del backend para que el navegador lo imprima. */
   imprimir(): void {
-    if (!this.puedeImprimir()) return;
-    window.print();
+    if (!this.puedeImprimir() || this.imprimiendoPdf()) return;
+
+    const factura = this.factura();
+    if (!factura) return;
+
+    const ventanaPdf = window.open('', '_blank');
+    if (!ventanaPdf) {
+      this.snackBar.open('El navegador bloqueó la ventana de impresión. Habilita las ventanas emergentes.', 'Cerrar', { duration: 6000 });
+      return;
+    }
+
+    ventanaPdf.opener = null;
+    ventanaPdf.document.title = `Preparando ${factura.numeroFactura}`;
+    ventanaPdf.document.body.textContent = 'Preparando el PDF oficial para impresión...';
+    this.imprimiendoPdf.set(true);
+
+    this.facturaService.descargarPdf(factura.id).subscribe({
+      next: (blob) => {
+        this.imprimiendoPdf.set(false);
+        const url = window.URL.createObjectURL(blob);
+        ventanaPdf.location.href = url;
+        window.setTimeout(() => window.URL.revokeObjectURL(url), 60_000);
+      },
+      error: () => {
+        this.imprimiendoPdf.set(false);
+        ventanaPdf.close();
+        this.snackBar.open('No se pudo abrir el PDF de la factura para imprimir.', 'Cerrar', { duration: 5000 });
+      }
+    });
   }
 
   descargarPdf(): void {
-    if (!this.puedeExportar()) return;
+    if (!this.puedeExportar() || this.descargandoPdf()) return;
 
     const factura = this.factura();
     if (!factura) return;
@@ -83,8 +113,9 @@ export class FacturaViewComponent implements OnInit {
         const enlace = document.createElement('a');
         enlace.href = url;
         enlace.download = `${factura.numeroFactura}.pdf`;
+        enlace.rel = 'noopener';
         enlace.click();
-        window.URL.revokeObjectURL(url);
+        window.setTimeout(() => window.URL.revokeObjectURL(url), 1000);
       },
       error: () => {
         this.descargandoPdf.set(false);
@@ -104,6 +135,12 @@ export class FacturaViewComponent implements OnInit {
     const factura = this.factura();
     if (!factura) return;
 
+    const enlaceActual = this.enlaceCompartir();
+    if (enlaceActual && new Date(enlaceActual.fechaExpiracion).getTime() > Date.now()) {
+      this.mostrarPanelWhatsApp.set(true);
+      return;
+    }
+
     this.preparandoWhatsApp.set(true);
     this.facturaService.prepararWhatsApp(factura.id).subscribe({
       next: (res) => {
@@ -112,6 +149,7 @@ export class FacturaViewComponent implements OnInit {
         this.telefonoEditable = res.data.telefonoSugerido;
         this.mensajeEditable = res.data.mensajeWhatsApp;
         this.mostrarPanelWhatsApp.set(true);
+        this.snackBar.open('Enlace temporal creado. Los enlaces anteriores fueron revocados.', 'Cerrar', { duration: 4500 });
       },
       error: (err) => {
         this.preparandoWhatsApp.set(false);
@@ -120,25 +158,51 @@ export class FacturaViewComponent implements OnInit {
     });
   }
 
+  revocarEnlaces(): void {
+    if (!this.puedeCompartir() || this.revocandoEnlaces()) return;
+
+    const factura = this.factura();
+    if (!factura) return;
+
+    this.revocandoEnlaces.set(true);
+    this.facturaService.revocarEnlaces(factura.id).subscribe({
+      next: (res) => {
+        this.revocandoEnlaces.set(false);
+        this.enlaceCompartir.set(null);
+        this.mostrarPanelWhatsApp.set(false);
+        const cantidad = res.data.enlacesRevocados;
+        this.snackBar.open(
+          cantidad > 0 ? 'Los enlaces públicos fueron revocados.' : 'No había enlaces públicos vigentes.',
+          'Cerrar',
+          { duration: 4500 }
+        );
+      },
+      error: (err) => {
+        this.revocandoEnlaces.set(false);
+        this.snackBar.open(err.error?.message ?? 'No se pudieron revocar los enlaces.', 'Cerrar', { duration: 5000 });
+      }
+    });
+  }
+
   telefonoValido(): boolean {
     const soloDigitos = this.telefonoEditable.replace(/\D/g, '');
-    return soloDigitos.length >= 10;
+    return soloDigitos.length >= 10 && soloDigitos.length <= 15;
   }
 
   abrirWhatsApp(): void {
     if (!this.puedeCompartir()) return;
 
     const factura = this.factura();
-    if (!factura || !this.telefonoValido()) return;
+    if (!factura || !this.telefonoValido() || !this.mensajeEditable.trim()) return;
 
     const numero = this.telefonoEditable.replace(/\D/g, '');
-    const url = `https://wa.me/${numero}?text=${encodeURIComponent(this.mensajeEditable)}`;
+    const url = `https://wa.me/${numero}?text=${encodeURIComponent(this.mensajeEditable.trim())}`;
 
     this.facturaService
-      .registrarIntentoEnvio(factura.id, 'WhatsApp', this.telefonoEditable, 'Iniciado')
+      .registrarIntentoEnvio(factura.id, 'WhatsApp', numero, 'Iniciado')
       .subscribe();
 
-    window.open(url, '_blank');
+    window.open(url, '_blank', 'noopener,noreferrer');
     this.mostrarPanelWhatsApp.set(false);
   }
 
