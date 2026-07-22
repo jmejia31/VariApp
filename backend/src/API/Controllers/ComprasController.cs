@@ -16,11 +16,16 @@ public class ComprasController : ControllerBase
 {
     private readonly ICompraService _compraService;
     private readonly IProductoService _productoService;
+    private readonly ICompraDocumentoService _documentoService;
 
-    public ComprasController(ICompraService compraService, IProductoService productoService)
+    public ComprasController(
+        ICompraService compraService,
+        IProductoService productoService,
+        ICompraDocumentoService documentoService)
     {
         _compraService = compraService;
         _productoService = productoService;
+        _documentoService = documentoService;
     }
 
     [HttpGet]
@@ -98,6 +103,45 @@ public class ComprasController : ControllerBase
         var eliminada = await _compraService.DeleteBorradorAsync(id);
         if (!eliminada) return NotFound(ApiResponse<object>.Fail("Compra no encontrada."));
         return Ok(ApiResponse<object>.Ok(new { }, "Borrador de compra eliminado lógicamente."));
+    }
+
+    [HttpGet("{id:int}/documentos")]
+    [RequierePermiso(ModuloSistema.Compras, AccionPermiso.Ver)]
+    public async Task<IActionResult> GetDocumentos(int id)
+    {
+        var documentos = await _documentoService.GetByCompraAsync(id);
+        return Ok(ApiResponse<List<CompraDocumentoDto>>.Ok(documentos));
+    }
+
+    [HttpPost("{id:int}/documentos")]
+    [RequierePermiso(ModuloSistema.Compras, AccionPermiso.Editar)]
+    [RequestSizeLimit(10 * 1024 * 1024)]
+    public async Task<IActionResult> UploadDocumento(int id, [FromForm] IFormFile archivo)
+    {
+        var documento = await _documentoService.UploadAsync(id, archivo);
+        return Ok(ApiResponse<CompraDocumentoDto>.Ok(documento, "Comprobante adjuntado correctamente."));
+    }
+
+    [HttpGet("{id:int}/documentos/{documentoId:int}/descargar")]
+    [RequierePermiso(ModuloSistema.Compras, AccionPermiso.Exportar)]
+    public async Task<IActionResult> DownloadDocumento(int id, int documentoId)
+    {
+        var descarga = await _documentoService.DownloadAsync(id, documentoId);
+        if (descarga is null)
+            return NotFound(ApiResponse<object>.Fail("El comprobante no existe o el archivo ya no está disponible."));
+
+        return File(descarga.Value.Contenido, descarga.Value.ContentType, descarga.Value.NombreArchivo);
+    }
+
+    [HttpDelete("{id:int}/documentos/{documentoId:int}")]
+    [RequierePermiso(ModuloSistema.Compras, AccionPermiso.Editar)]
+    public async Task<IActionResult> DeleteDocumento(int id, int documentoId)
+    {
+        var eliminado = await _documentoService.DeleteAsync(id, documentoId);
+        if (!eliminado)
+            return NotFound(ApiResponse<object>.Fail("Comprobante no encontrado."));
+
+        return Ok(ApiResponse<object>.Ok(new { }, "Comprobante retirado correctamente."));
     }
 
     private async Task ValidarProductosActivosAsync(IEnumerable<int> productoIds)
