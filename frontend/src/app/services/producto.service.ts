@@ -30,9 +30,7 @@ export class ProductoService {
   create(value: ProductoFormValue): Observable<ApiResponse<Producto>> {
     const formData = new FormData();
     this.appendCamposBase(formData, value);
-
     (value.imagenesNuevas ?? []).forEach((file) => formData.append('Imagenes', file));
-
     return this.http.post<ApiResponse<Producto>>(this.apiUrl, formData);
   }
 
@@ -41,23 +39,40 @@ export class ProductoService {
     this.appendCamposBase(formData, value);
 
     (value.imagenesNuevas ?? []).forEach((file) => formData.append('ImagenesNuevas', file));
-    (value.imagenesAEliminarIds ?? []).forEach((id) => formData.append('ImagenesAEliminarIds', String(id)));
-    if (value.imagenPrincipalId != null) formData.append('ImagenPrincipalId', String(value.imagenPrincipalId));
+    (value.imagenesAEliminarIds ?? []).forEach((imagenId) =>
+      formData.append('ImagenesAEliminarIds', String(imagenId))
+    );
+    if (value.imagenPrincipalId != null) {
+      formData.append('ImagenPrincipalId', String(value.imagenPrincipalId));
+    }
 
     return this.http.put<ApiResponse<Producto>>(`${this.apiUrl}/${id}`, formData);
+  }
+
+  activar(id: number): Observable<ApiResponse<Producto>> {
+    return this.http.patch<ApiResponse<Producto>>(`${this.apiUrl}/${id}/activar`, {});
+  }
+
+  desactivar(id: number): Observable<ApiResponse<Producto>> {
+    return this.http.patch<ApiResponse<Producto>>(`${this.apiUrl}/${id}/desactivar`, {});
   }
 
   delete(id: number): Observable<ApiResponse<object>> {
     return this.http.delete<ApiResponse<object>>(`${this.apiUrl}/${id}`);
   }
 
-  /** Descarga real vía backend (sección 11): no enlaza directo a Cloudinary. */
   descargarImagen(productoId: number, imagenId: number): Observable<Blob> {
-    return this.http.get(`${this.apiUrl}/${productoId}/imagenes/${imagenId}/descargar`, { responseType: 'blob' });
+    return this.http.get(
+      `${this.apiUrl}/${productoId}/imagenes/${imagenId}/descargar`,
+      { responseType: 'blob' }
+    );
   }
 
   descargarTodasLasImagenes(productoId: number): Observable<Blob> {
-    return this.http.get(`${this.apiUrl}/${productoId}/imagenes/descargar-todas`, { responseType: 'blob' });
+    return this.http.get(
+      `${this.apiUrl}/${productoId}/imagenes/descargar-todas`,
+      { responseType: 'blob' }
+    );
   }
 
   private appendCamposBase(formData: FormData, value: ProductoFormValue): void {
