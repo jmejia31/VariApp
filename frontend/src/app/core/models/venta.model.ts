@@ -30,15 +30,15 @@ export interface ImpuestoAplicado {
 }
 
 export interface ResultadoCalculo {
-  importeBruto: number;
+  importeBruto?: number;
   subtotal: number;
-  subtotalNeto: number;
+  subtotalNeto?: number;
   descuentosAplicados: DescuentoAplicado[];
   totalDescuento: number;
   impuestosAplicados: ImpuestoAplicado[];
   totalImpuesto: number;
-  impuestoIncluido: number;
-  impuestoAdicional: number;
+  impuestoIncluido?: number;
+  impuestoAdicional?: number;
   total: number;
 }
 
