@@ -29,6 +29,9 @@ public class VentaConfiguration : IEntityTypeConfiguration<Venta>
         builder.Property(v => v.Estado).HasConversion<string>().HasMaxLength(20);
         builder.Property(v => v.EstadoPago).HasConversion<string>().HasMaxLength(20);
         builder.Property(v => v.MetodoPago).HasConversion<string>().HasMaxLength(20);
+        builder.Property(v => v.Eliminado).HasDefaultValue(false);
+        builder.HasIndex(v => v.Eliminado);
+        builder.HasQueryFilter(v => !v.Eliminado);
 
         builder.HasMany(v => v.Detalles)
             .WithOne(d => d.Venta)
