@@ -23,7 +23,7 @@ public class CalculoService : ICalculoService
         int? rolIdUsuario,
         string? codigoPromocional)
     {
-        var subtotal = detalles.Sum(d => d.Cantidad * d.PrecioUnitario);
+        var importeBruto = detalles.Sum(d => d.Cantidad * d.PrecioUnitario);
         var cantidadTotal = detalles.Sum(d => d.Cantidad);
         var ahora = DateTime.UtcNow;
         var descuentos = await _descuentoRepository.GetVigentesConRelacionesAsync(ahora);
@@ -32,7 +32,7 @@ public class CalculoService : ICalculoService
             : codigoPromocional.Trim().ToUpperInvariant();
 
         if (codigoNormalizado is not null && descuentos.All(d => d.CodigoPromocionalNormalizado != codigoNormalizado))
-            throw new BusinessRuleException("El codigo promocional no existe o no esta vigente.");
+            throw new BusinessRuleException("El código promocional no existe o no está vigente.");
 
         var descuentosAplicados = new List<DescuentoAplicadoDto>();
         decimal totalDescuento = 0;
@@ -48,8 +48,8 @@ public class CalculoService : ICalculoService
                 continue;
             }
 
-            if (subtotal <= 0) continue;
-            if (descuento.MontoMinimo.HasValue && subtotal < descuento.MontoMinimo.Value) continue;
+            if (importeBruto <= 0) continue;
+            if (descuento.MontoMinimo.HasValue && importeBruto < descuento.MontoMinimo.Value) continue;
             if (descuento.CantidadMinima.HasValue && cantidadTotal < descuento.CantidadMinima.Value) continue;
             if (descuento.Clientes.Any() && (!clienteId.HasValue || descuento.Clientes.All(c => c.ClienteId != clienteId.Value))) continue;
             if (descuento.Roles.Any() && (!rolIdUsuario.HasValue || descuento.Roles.All(r => r.RolId != rolIdUsuario.Value))) continue;
@@ -69,13 +69,13 @@ public class CalculoService : ICalculoService
                 continue;
 
             var monto = descuento.Tipo == TipoDescuento.Porcentaje
-                ? Math.Round(baseElegible * descuento.Valor / 100m, 2)
+                ? Math.Round(baseElegible * descuento.Valor / 100m, 2, MidpointRounding.AwayFromZero)
                 : descuento.Valor;
 
             if (descuento.MontoMaximoDescuento.HasValue && monto > descuento.MontoMaximoDescuento.Value)
                 monto = descuento.MontoMaximoDescuento.Value;
 
-            var disponible = Math.Max(0, subtotal - totalDescuento);
+            var disponible = Math.Max(0, importeBruto - totalDescuento);
             if (monto > disponible) monto = disponible;
             if (monto <= 0) continue;
 
@@ -96,46 +96,54 @@ public class CalculoService : ICalculoService
         var impuestosAplicados = await CalcularImpuestosAsync(
             detalles,
             OperacionImpuesto.Venta,
-            subtotal,
+            importeBruto,
             totalDescuento,
             clienteId,
             proveedorId: null);
 
-        var totalImpuesto = impuestosAplicados.Where(i => !i.IncluidoEnPrecio).Sum(i => i.Monto);
-        var total = Math.Max(0, subtotal - totalDescuento + totalImpuesto);
-
-        return new ResultadoCalculoDto
-        {
-            Subtotal = subtotal,
-            DescuentosAplicados = descuentosAplicados,
-            TotalDescuento = totalDescuento,
-            ImpuestosAplicados = impuestosAplicados,
-            TotalImpuesto = totalImpuesto,
-            Total = total
-        };
+        return ConstruirResultado(importeBruto, totalDescuento, descuentosAplicados, impuestosAplicados);
     }
 
     public async Task<ResultadoCalculoDto> CalcularCompraAsync(List<DetalleCalculoInput> detalles, int? proveedorId)
     {
-        var subtotal = detalles.Sum(d => d.Cantidad * d.PrecioUnitario);
+        var importeBruto = detalles.Sum(d => d.Cantidad * d.PrecioUnitario);
         var impuestosAplicados = await CalcularImpuestosAsync(
             detalles,
             OperacionImpuesto.Compra,
-            subtotal,
+            importeBruto,
             totalDescuento: 0,
             clienteId: null,
             proveedorId);
 
-        var totalImpuesto = impuestosAplicados.Where(i => !i.IncluidoEnPrecio).Sum(i => i.Monto);
+        return ConstruirResultado(
+            importeBruto,
+            totalDescuento: 0,
+            descuentosAplicados: new List<DescuentoAplicadoDto>(),
+            impuestosAplicados);
+    }
+
+    private static ResultadoCalculoDto ConstruirResultado(
+        decimal importeBruto,
+        decimal totalDescuento,
+        List<DescuentoAplicadoDto> descuentosAplicados,
+        List<ImpuestoAplicadoDto> impuestosAplicados)
+    {
+        var impuestoIncluido = impuestosAplicados.Where(i => i.IncluidoEnPrecio).Sum(i => i.Monto);
+        var impuestoAdicional = impuestosAplicados.Where(i => !i.IncluidoEnPrecio).Sum(i => i.Monto);
+        var subtotalNeto = Math.Max(0, importeBruto - totalDescuento - impuestoIncluido);
+        var total = Math.Max(0, subtotalNeto + impuestoIncluido + impuestoAdicional);
 
         return new ResultadoCalculoDto
         {
-            Subtotal = subtotal,
-            DescuentosAplicados = new List<DescuentoAplicadoDto>(),
-            TotalDescuento = 0,
+            ImporteBruto = importeBruto,
+            Subtotal = subtotalNeto,
+            DescuentosAplicados = descuentosAplicados,
+            TotalDescuento = totalDescuento,
             ImpuestosAplicados = impuestosAplicados,
-            TotalImpuesto = totalImpuesto,
-            Total = subtotal + totalImpuesto
+            TotalImpuesto = impuestoIncluido + impuestoAdicional,
+            ImpuestoIncluido = impuestoIncluido,
+            ImpuestoAdicional = impuestoAdicional,
+            Total = total
         };
     }
 
@@ -197,7 +205,7 @@ public class CalculoService : ICalculoService
     private async Task<List<ImpuestoAplicadoDto>> CalcularImpuestosAsync(
         List<DetalleCalculoInput> detalles,
         OperacionImpuesto operacion,
-        decimal subtotal,
+        decimal importeBruto,
         decimal totalDescuento,
         int? clienteId,
         int? proveedorId)
@@ -217,17 +225,47 @@ public class CalculoService : ICalculoService
                 impuesto.ProveedoresExentos.Any(p => p.ProveedorId == proveedorId.Value))
                 continue;
 
-            var baseElegible = CalcularBaseElegible(
+            var baseElegibleBruta = CalcularBaseElegible(
                 detalles,
                 impuesto.Productos.Select(p => p.ProductoId),
                 impuesto.Categorias.Select(c => c.CategoriaId));
-            if (baseElegible <= 0) continue;
+            if (baseElegibleBruta <= 0) continue;
 
-            var descuentoProrrateado = subtotal <= 0 ? 0 : Math.Round(totalDescuento * (baseElegible / subtotal), 2);
-            var baseImponible = impuesto.SeCalculaAntesDescuento ? baseElegible : Math.Max(0, baseElegible - descuentoProrrateado);
-            var monto = impuesto.Tipo == TipoImpuesto.Porcentaje
-                ? Math.Round(baseImponible * impuesto.Tasa / 100m, 2)
-                : impuesto.MontoFijo ?? 0;
+            var descuentoProrrateado = importeBruto <= 0
+                ? 0
+                : Math.Round(totalDescuento * (baseElegibleBruta / importeBruto), 2, MidpointRounding.AwayFromZero);
+
+            var importeSujeto = impuesto.SeCalculaAntesDescuento
+                ? baseElegibleBruta
+                : Math.Max(0, baseElegibleBruta - descuentoProrrateado);
+
+            decimal baseImponible;
+            decimal monto;
+
+            if (impuesto.IncluidoEnPrecio)
+            {
+                if (impuesto.Tipo == TipoImpuesto.Porcentaje)
+                {
+                    if (impuesto.Tasa <= 0) continue;
+                    baseImponible = Math.Round(
+                        importeSujeto / (1m + impuesto.Tasa / 100m),
+                        2,
+                        MidpointRounding.AwayFromZero);
+                    monto = Math.Round(importeSujeto - baseImponible, 2, MidpointRounding.AwayFromZero);
+                }
+                else
+                {
+                    monto = Math.Min(impuesto.MontoFijo ?? 0, importeSujeto);
+                    baseImponible = Math.Max(0, importeSujeto - monto);
+                }
+            }
+            else
+            {
+                baseImponible = importeSujeto;
+                monto = impuesto.Tipo == TipoImpuesto.Porcentaje
+                    ? Math.Round(baseImponible * impuesto.Tasa / 100m, 2, MidpointRounding.AwayFromZero)
+                    : impuesto.MontoFijo ?? 0;
+            }
 
             if (monto <= 0) continue;
 
