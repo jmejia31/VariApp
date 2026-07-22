@@ -16,6 +16,7 @@ public class AppDbContext : DbContext
     public DbSet<RolPermiso> RolPermisos => Set<RolPermiso>();
     public DbSet<Compra> Compras => Set<Compra>();
     public DbSet<CompraDetalle> CompraDetalles => Set<CompraDetalle>();
+    public DbSet<CompraDocumento> CompraDocumentos => Set<CompraDocumento>();
     public DbSet<MovimientoInventario> MovimientosInventario => Set<MovimientoInventario>();
     public DbSet<MovimientoFinanciero> MovimientosFinancieros => Set<MovimientoFinanciero>();
     public DbSet<Venta> Ventas => Set<Venta>();
