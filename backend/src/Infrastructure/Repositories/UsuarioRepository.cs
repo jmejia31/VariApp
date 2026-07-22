@@ -15,9 +15,15 @@ public class UsuarioRepository : IUsuarioRepository
         _context = context;
     }
 
-    public async Task<Usuario?> GetByNombreUsuarioAsync(string nombreUsuario) =>
-        await _context.Usuarios.Include(u => u.RolEntidad)
-            .FirstOrDefaultAsync(u => u.NombreUsuario == nombreUsuario && !u.Eliminado);
+    public async Task<Usuario?> GetByNombreUsuarioAsync(string nombreUsuario)
+    {
+        var normalizado = nombreUsuario.Trim().ToLower();
+        return await _context.Usuarios
+            .Include(u => u.RolEntidad)
+            .FirstOrDefaultAsync(u =>
+                u.NombreUsuario.ToLower() == normalizado &&
+                !u.Eliminado);
+    }
 
     public async Task<Usuario?> GetByIdAsync(int id) =>
         await _context.Usuarios.Include(u => u.RolEntidad)
