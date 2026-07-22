@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -10,6 +10,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { FacturaService } from '../../services/factura.service';
 import { EnlaceCompartir, Factura, HistorialEnvio } from '../../core/models/factura.model';
+import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
 
 @Component({
   selector: 'app-factura-view',
@@ -22,10 +23,15 @@ import { EnlaceCompartir, Factura, HistorialEnvio } from '../../core/models/fact
   styleUrl: './factura-view.component.scss'
 })
 export class FacturaViewComponent implements OnInit {
+  private readonly permisosRuntime = inject(PermisosRuntimeService);
+
   readonly defaultLogoUrl = 'assets/varistorehn-logo.png';
   readonly factura = signal<Factura | null>(null);
   readonly loading = signal(true);
   readonly descargandoPdf = signal(false);
+  readonly puedeExportar = signal(false);
+  readonly puedeImprimir = signal(false);
+  readonly puedeCompartir = signal(false);
 
   readonly mostrarPanelWhatsApp = signal(false);
   readonly preparandoWhatsApp = signal(false);
@@ -40,9 +46,17 @@ export class FacturaViewComponent implements OnInit {
   readonly enviandoCorreo = signal(false);
   correoEditable = '';
 
-  constructor(private facturaService: FacturaService, private route: ActivatedRoute, private snackBar: MatSnackBar) {}
+  constructor(
+    private facturaService: FacturaService,
+    private route: ActivatedRoute,
+    private snackBar: MatSnackBar
+  ) {}
 
   ngOnInit(): void {
+    this.puedeExportar.set(this.permisosRuntime.puede('Facturacion', 'Exportar'));
+    this.puedeImprimir.set(this.permisosRuntime.puede('Facturacion', 'Imprimir'));
+    this.puedeCompartir.set(this.permisosRuntime.puede('Facturacion', 'Compartir'));
+
     const id = Number(this.route.snapshot.paramMap.get('id'));
     this.facturaService.getById(id).subscribe({
       next: (res) => { this.factura.set(res.data); this.loading.set(false); },
@@ -51,21 +65,24 @@ export class FacturaViewComponent implements OnInit {
   }
 
   imprimir(): void {
+    if (!this.puedeImprimir()) return;
     window.print();
   }
 
   descargarPdf(): void {
-    const f = this.factura();
-    if (!f) return;
+    if (!this.puedeExportar()) return;
+
+    const factura = this.factura();
+    if (!factura) return;
 
     this.descargandoPdf.set(true);
-    this.facturaService.descargarPdf(f.id).subscribe({
+    this.facturaService.descargarPdf(factura.id).subscribe({
       next: (blob) => {
         this.descargandoPdf.set(false);
         const url = window.URL.createObjectURL(blob);
         const enlace = document.createElement('a');
         enlace.href = url;
-        enlace.download = `${f.numeroFactura}.pdf`;
+        enlace.download = `${factura.numeroFactura}.pdf`;
         enlace.click();
         window.URL.revokeObjectURL(url);
       },
@@ -77,16 +94,18 @@ export class FacturaViewComponent implements OnInit {
   }
 
   toggleWhatsApp(): void {
+    if (!this.puedeCompartir()) return;
+
     if (this.mostrarPanelWhatsApp()) {
       this.mostrarPanelWhatsApp.set(false);
       return;
     }
 
-    const f = this.factura();
-    if (!f) return;
+    const factura = this.factura();
+    if (!factura) return;
 
     this.preparandoWhatsApp.set(true);
-    this.facturaService.prepararWhatsApp(f.id).subscribe({
+    this.facturaService.prepararWhatsApp(factura.id).subscribe({
       next: (res) => {
         this.preparandoWhatsApp.set(false);
         this.enlaceCompartir.set(res.data);
@@ -107,28 +126,34 @@ export class FacturaViewComponent implements OnInit {
   }
 
   abrirWhatsApp(): void {
-    const f = this.factura();
-    if (!f || !this.telefonoValido()) return;
+    if (!this.puedeCompartir()) return;
+
+    const factura = this.factura();
+    if (!factura || !this.telefonoValido()) return;
 
     const numero = this.telefonoEditable.replace(/\D/g, '');
     const url = `https://wa.me/${numero}?text=${encodeURIComponent(this.mensajeEditable)}`;
 
-    this.facturaService.registrarIntentoEnvio(f.id, 'WhatsApp', this.telefonoEditable, 'Iniciado').subscribe();
+    this.facturaService
+      .registrarIntentoEnvio(factura.id, 'WhatsApp', this.telefonoEditable, 'Iniciado')
+      .subscribe();
 
     window.open(url, '_blank');
     this.mostrarPanelWhatsApp.set(false);
   }
 
   toggleHistorial(): void {
+    if (!this.puedeCompartir()) return;
+
     if (this.mostrarHistorial()) {
       this.mostrarHistorial.set(false);
       return;
     }
 
-    const f = this.factura();
-    if (!f) return;
+    const factura = this.factura();
+    if (!factura) return;
 
-    this.facturaService.getHistorialEnvios(f.id).subscribe({
+    this.facturaService.getHistorialEnvios(factura.id).subscribe({
       next: (res) => {
         this.historial.set(res.data);
         this.mostrarHistorial.set(true);
@@ -138,15 +163,17 @@ export class FacturaViewComponent implements OnInit {
   }
 
   toggleCorreo(): void {
+    if (!this.puedeCompartir()) return;
+
     if (this.mostrarPanelCorreo()) {
       this.mostrarPanelCorreo.set(false);
       return;
     }
 
-    const f = this.factura();
-    if (!f) return;
+    const factura = this.factura();
+    if (!factura) return;
 
-    this.correoEditable = f.clienteCorreo || '';
+    this.correoEditable = factura.clienteCorreo || '';
     this.mostrarPanelCorreo.set(true);
   }
 
@@ -155,11 +182,13 @@ export class FacturaViewComponent implements OnInit {
   }
 
   enviarCorreo(): void {
-    const f = this.factura();
-    if (!f || !this.correoValido()) return;
+    if (!this.puedeCompartir()) return;
+
+    const factura = this.factura();
+    if (!factura || !this.correoValido()) return;
 
     this.enviandoCorreo.set(true);
-    this.facturaService.enviarPorCorreo(f.id, this.correoEditable.trim()).subscribe({
+    this.facturaService.enviarPorCorreo(factura.id, this.correoEditable.trim()).subscribe({
       next: (res) => {
         this.enviandoCorreo.set(false);
         this.mostrarPanelCorreo.set(false);
