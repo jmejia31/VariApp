@@ -31,11 +31,21 @@ public class ImpuestoAplicadoDto
 
 public class ResultadoCalculoDto
 {
+    /// Importe bruto de las líneas antes de descuentos y antes de separar
+    /// los impuestos que ya vienen incluidos en el precio.
+    public decimal ImporteBruto { get; set; }
+
+    /// Base neta sin impuestos incluidos, después de aplicar descuentos.
     public decimal Subtotal { get; set; }
+
     public List<DescuentoAplicadoDto> DescuentosAplicados { get; set; } = new();
     public decimal TotalDescuento { get; set; }
     public List<ImpuestoAplicadoDto> ImpuestosAplicados { get; set; } = new();
+
+    /// Suma de todos los impuestos, tanto incluidos como adicionales.
     public decimal TotalImpuesto { get; set; }
+    public decimal ImpuestoIncluido { get; set; }
+    public decimal ImpuestoAdicional { get; set; }
     public decimal Total { get; set; }
 }
 
