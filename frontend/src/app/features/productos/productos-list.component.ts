@@ -41,7 +41,11 @@ export class ProductosListComponent implements OnInit {
 
   private searchSubject = new Subject<string>();
 
-  constructor(private productoService: ProductoService, private dialog: MatDialog, private permisosRuntime: PermisosRuntimeService) {
+  constructor(
+    private productoService: ProductoService,
+    private dialog: MatDialog,
+    private permisosRuntime: PermisosRuntimeService
+  ) {
     this.searchSubject.pipe(debounceTime(350)).subscribe(() => {
       this.page = 1;
       this.cargar();
@@ -51,7 +55,7 @@ export class ProductosListComponent implements OnInit {
   ngOnInit(): void {
     this.puedeCrear.set(this.permisosRuntime.puede('Productos', 'Crear'));
     this.puedeEditar.set(this.permisosRuntime.puede('Productos', 'Editar'));
-    this.puedeEliminar.set(this.permisosRuntime.puede('Productos', 'Eliminar'));
+    this.puedeEliminar.set(this.permisosRuntime.puede('Productos', 'EliminarLogico'));
     this.cargar();
   }
 
@@ -95,8 +99,13 @@ export class ProductosListComponent implements OnInit {
   }
 
   eliminar(producto: Producto): void {
+    if (!this.puedeEliminar()) return;
+
     const ref = this.dialog.open(ConfirmDialogComponent, {
-      data: { title: 'Eliminar producto', message: `¿Deseas eliminar "${producto.nombre}"? Esta acción no se puede deshacer.` }
+      data: {
+        title: 'Eliminar producto',
+        message: `¿Deseas eliminar lógicamente "${producto.nombre}"? Su historial e imágenes se conservarán.`
+      }
     });
 
     ref.afterClosed().subscribe((confirmado) => {
