@@ -23,17 +23,28 @@
     <div class="fields-grid">
       <mat-form-field appearance="outline">
         <mat-label>Nombre de usuario (login)</mat-label>
-        <input matInput formControlName="nombreUsuario">
+        <input matInput formControlName="nombreUsuario" autocomplete="username">
+        <mat-hint>3 a 50 caracteres: letras, números, punto, guion o guion bajo.</mat-hint>
+        @if (form.controls.nombreUsuario.hasError('pattern')) {
+          <mat-error>El nombre de usuario no tiene un formato válido.</mat-error>
+        }
       </mat-form-field>
 
       <mat-form-field appearance="outline">
         <mat-label>Nombre completo</mat-label>
-        <input matInput formControlName="nombreCompleto">
+        <input matInput formControlName="nombreCompleto" autocomplete="name">
+        @if (form.controls.nombreCompleto.hasError('minlength')) {
+          <mat-error>Debe contener al menos 3 caracteres.</mat-error>
+        }
       </mat-form-field>
 
       <mat-form-field appearance="outline">
         <mat-label>Contraseña temporal</mat-label>
-        <input matInput type="password" formControlName="password">
+        <input matInput type="password" formControlName="password" autocomplete="new-password">
+        <mat-hint>10 caracteres o más, con mayúscula, minúscula, número y símbolo.</mat-hint>
+        @if (form.controls.password.hasError('pattern')) {
+          <mat-error>La contraseña no cumple los requisitos de seguridad.</mat-error>
+        }
       </mat-form-field>
 
       <mat-form-field appearance="outline">
@@ -51,7 +62,10 @@
     }
 
     <div class="form-actions">
-      <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving()">Crear usuario</button>
+      <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving()">
+        @if (saving()) { <mat-spinner diameter="18"></mat-spinner> }
+        Crear usuario
+      </button>
     </div>
   </form>
 }
