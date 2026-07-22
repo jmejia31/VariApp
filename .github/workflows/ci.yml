@@ -83,6 +83,33 @@ jobs:
           fi
           echo 'Up() contiene únicamente operaciones aditivas permitidas.' > phase6-migration-risk.txt
 
+      - name: Verify model and migration alignment
+        run: |
+          dotnet ef migrations has-pending-model-changes \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext
+
+      - name: Generate reviewable forward SQL
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ../docs/migraciones
+          dotnet ef migrations script \
+            20260714120952_Fases1_10RolesDescuentosImpuestos \
+            20260722142118_Fase6SeguridadFacturacionPerfil \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext \
+            --output ../docs/migraciones/004_fase6_seguridad_facturacion_perfil.sql
+
+          sql_file='../docs/migraciones/004_fase6_seguridad_facturacion_perfil.sql'
+          test -s "$sql_file"
+          if grep -Ein '(^|[[:space:];])(DROP|TRUNCATE)[[:space:]]|DELETE[[:space:]]+FROM' "$sql_file"; then
+            echo 'El SQL forward contiene una instrucción destructiva y fue bloqueado.' >&2
+            exit 1
+          fi
+
       - name: Upload generated migration diagnostics
         if: always()
         uses: actions/upload-artifact@v4
@@ -94,15 +121,9 @@ jobs:
             backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs
             backend/phase6-migration-up.txt
             backend/phase6-migration-risk.txt
+            docs/migraciones/004_fase6_seguridad_facturacion_perfil.sql
           if-no-files-found: warn
           retention-days: 7
-
-      - name: Verify model and migration alignment
-        run: |
-          dotnet ef migrations has-pending-model-changes \
-            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
-            --startup-project src/API/InventoryApp.API.csproj \
-            --context AppDbContext
 
       - name: Build backend
         run: dotnet build InventoryApp.sln --configuration Release --no-restore
@@ -110,19 +131,19 @@ jobs:
       - name: Run backend tests
         run: dotnet test InventoryApp.sln --configuration Release --no-build --logger "trx;LogFileName=tests.trx"
 
-      - name: Commit generated migration to working branch
+      - name: Commit generated migration and SQL to working branch
         if: github.event_name == 'pull_request' && github.head_ref == 'agent/mejoras-variapp'
         shell: bash
         run: |
           set -euo pipefail
-          if git status --porcelain -- src/Infrastructure/Migrations | grep -q .; then
+          if git status --porcelain -- src/Infrastructure/Migrations ../docs/migraciones | grep -q .; then
             git config user.name 'github-actions[bot]'
             git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-            git add src/Infrastructure/Migrations
-            git commit -m 'Add additive migration for phase 6'
+            git add src/Infrastructure/Migrations ../docs/migraciones/004_fase6_seguridad_facturacion_perfil.sql
+            git commit -m 'Add reviewed phase 6 migration artifacts'
             git push origin HEAD:agent/mejoras-variapp
           else
-            echo 'No hay archivos de migración nuevos para confirmar.'
+            echo 'No hay artefactos de migración nuevos para confirmar.'
           fi
 
       - name: Upload backend test results
