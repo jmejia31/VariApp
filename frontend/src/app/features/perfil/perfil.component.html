@@ -1,61 +1,149 @@
-<h1 class="page-title">Mi perfil</h1>
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Mi perfil</h1>
+    <p class="page-subtitle">Administra tu identidad, fotografía y contraseña de acceso.</p>
+  </div>
+</div>
 
 @if (loading()) {
   <div class="loading"><mat-spinner></mat-spinner></div>
 } @else if (perfil(); as p) {
-  <div class="perfil-grid">
-    <form [formGroup]="formPerfil" (ngSubmit)="guardarPerfil()" class="card form-card">
-      <h2 class="section-title">Datos generales</h2>
-
-      <div class="perfil-meta">
-        <span><strong>Usuario:</strong> &#64;{{ p.nombreUsuario }}</span>
-        <span><strong>Rol:</strong> {{ p.rol }}</span>
-        <span><strong>Miembro desde:</strong> {{ p.fechaCreacion | date:'dd/MM/yyyy' }}</span>
-      </div>
-
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Nombre completo</mat-label>
-        <input matInput formControlName="nombreCompleto">
-      </mat-form-field>
-
-      @if (successMessage()) { <p class="success">{{ successMessage() }}</p> }
-      @if (errorMessage()) { <p class="error">{{ errorMessage() }}</p> }
-
-      <div class="form-actions">
-        <button mat-flat-button color="primary" type="submit" [disabled]="formPerfil.invalid || saving()">
-          {{ saving() ? 'Guardando...' : 'Guardar cambios' }}
-        </button>
-      </div>
-    </form>
-
-    <form [formGroup]="formPassword" (ngSubmit)="cambiarPassword()" class="card form-card">
-      <h2 class="section-title">Cambiar contraseña</h2>
-
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Contraseña actual</mat-label>
-        <input matInput type="password" formControlName="passwordActual">
-      </mat-form-field>
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Nueva contraseña</mat-label>
-        <input matInput type="password" formControlName="passwordNueva">
-        <mat-hint>Mínimo 8 caracteres.</mat-hint>
-      </mat-form-field>
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Confirmar nueva contraseña</mat-label>
-        <input matInput type="password" formControlName="passwordConfirmacion">
-        @if (formPassword.hasError('noCoincide')) {
-          <mat-error>Las contraseñas no coinciden.</mat-error>
+  <div class="perfil-layout">
+    <section class="card foto-card">
+      <div class="avatar-grande" [class.con-foto]="fotoVisible()">
+        @if (fotoVisible(); as foto) {
+          <img [src]="foto" alt="Fotografía de perfil de {{ p.nombreCompleto }}">
+        } @else {
+          <span>{{ iniciales() }}</span>
         }
-      </mat-form-field>
-
-      @if (successPassword()) { <p class="success">{{ successPassword() }}</p> }
-      @if (errorPassword()) { <p class="error">{{ errorPassword() }}</p> }
-
-      <div class="form-actions">
-        <button mat-flat-button color="primary" type="submit" [disabled]="formPassword.invalid || cambiandoPassword()">
-          {{ cambiandoPassword() ? 'Actualizando...' : 'Cambiar contraseña' }}
-        </button>
       </div>
-    </form>
+
+      <div class="identidad-resumen">
+        <h2>{{ p.nombreCompleto }}</h2>
+        <p>&#64;{{ p.nombreUsuario }}</p>
+        <span class="rol-badge">{{ p.rol }}</span>
+      </div>
+
+      <input
+        #fotoInput
+        class="file-input"
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        (change)="seleccionarFoto($event)">
+
+      <div class="foto-actions">
+        <button mat-stroked-button type="button" (click)="fotoInput.click()" [disabled]="subiendoFoto() || eliminandoFoto()">
+          <mat-icon>photo_camera</mat-icon>
+          Seleccionar foto
+        </button>
+
+        @if (fotoSeleccionada()) {
+          <button mat-flat-button color="primary" type="button" (click)="subirFoto()" [disabled]="subiendoFoto()">
+            @if (subiendoFoto()) { <mat-spinner diameter="18"></mat-spinner> }
+            @else { <mat-icon>cloud_upload</mat-icon> }
+            Guardar foto
+          </button>
+        }
+
+        @if (p.fotoPerfilUrl) {
+          <button mat-button class="danger-button" type="button" (click)="eliminarFoto()" [disabled]="eliminandoFoto() || subiendoFoto()">
+            @if (eliminandoFoto()) { <mat-spinner diameter="18"></mat-spinner> }
+            @else { <mat-icon>delete_outline</mat-icon> }
+            Eliminar foto
+          </button>
+        }
+      </div>
+
+      <p class="file-help">JPG, PNG o WebP. Tamaño máximo: 5 MB.</p>
+      @if (errorFoto()) { <p class="message error">{{ errorFoto() }}</p> }
+    </section>
+
+    <div class="formularios-grid">
+      <form [formGroup]="formPerfil" (ngSubmit)="guardarPerfil()" class="card form-card">
+        <div class="section-heading">
+          <mat-icon>badge</mat-icon>
+          <div>
+            <h2>Datos de la cuenta</h2>
+            <p>Estos datos identifican tu usuario dentro del sistema.</p>
+          </div>
+        </div>
+
+        <div class="perfil-meta">
+          <span><strong>Rol:</strong> {{ p.rol }}</span>
+          <span><strong>Miembro desde:</strong> {{ p.fechaCreacion | date:'dd/MM/yyyy' }}</span>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nombre de usuario</mat-label>
+          <input matInput formControlName="nombreUsuario" autocomplete="username">
+          <mat-hint>3 a 50 caracteres: letras, números, punto, guion o guion bajo.</mat-hint>
+          @if (formPerfil.controls.nombreUsuario.hasError('pattern')) {
+            <mat-error>El nombre de usuario no tiene un formato válido.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nombre completo</mat-label>
+          <input matInput formControlName="nombreCompleto" autocomplete="name">
+          @if (formPerfil.controls.nombreCompleto.hasError('minlength')) {
+            <mat-error>Ingresa al menos 3 caracteres.</mat-error>
+          }
+        </mat-form-field>
+
+        @if (successMessage()) { <p class="message success">{{ successMessage() }}</p> }
+        @if (errorMessage()) { <p class="message error">{{ errorMessage() }}</p> }
+
+        <div class="form-actions">
+          <button mat-flat-button color="primary" type="submit" [disabled]="formPerfil.invalid || saving()">
+            @if (saving()) { <mat-spinner diameter="18"></mat-spinner> }
+            @else { <mat-icon>save</mat-icon> }
+            {{ saving() ? 'Guardando...' : 'Guardar cambios' }}
+          </button>
+        </div>
+      </form>
+
+      <form [formGroup]="formPassword" (ngSubmit)="cambiarPassword()" class="card form-card">
+        <div class="section-heading">
+          <mat-icon>password</mat-icon>
+          <div>
+            <h2>Cambiar contraseña</h2>
+            <p>La contraseña actual es obligatoria para autorizar el cambio.</p>
+          </div>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Contraseña actual</mat-label>
+          <input matInput type="password" formControlName="passwordActual" autocomplete="current-password">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nueva contraseña</mat-label>
+          <input matInput type="password" formControlName="passwordNueva" autocomplete="new-password">
+          <mat-hint>Mínimo 10 caracteres, con mayúscula, minúscula, número y símbolo.</mat-hint>
+          @if (formPassword.controls.passwordNueva.hasError('pattern')) {
+            <mat-error>La contraseña no cumple los requisitos de seguridad.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Confirmar nueva contraseña</mat-label>
+          <input matInput type="password" formControlName="passwordConfirmacion" autocomplete="new-password">
+          @if (formPassword.hasError('noCoincide')) {
+            <mat-error>Las contraseñas no coinciden.</mat-error>
+          }
+        </mat-form-field>
+
+        @if (successPassword()) { <p class="message success">{{ successPassword() }}</p> }
+        @if (errorPassword()) { <p class="message error">{{ errorPassword() }}</p> }
+
+        <div class="form-actions">
+          <button mat-flat-button color="primary" type="submit" [disabled]="formPassword.invalid || cambiandoPassword()">
+            @if (cambiandoPassword()) { <mat-spinner diameter="18"></mat-spinner> }
+            @else { <mat-icon>lock_reset</mat-icon> }
+            {{ cambiandoPassword() ? 'Actualizando...' : 'Cambiar contraseña' }}
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
 }
