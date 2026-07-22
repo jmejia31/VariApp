@@ -1,0 +1,4 @@
+Checkpoint de validación controlada de la Fase 3.
+Fecha: 2026-07-22
+Incluye PDF único, enlaces públicos con hash, expiración/revocación, impresión del PDF y SMTP reforzado.
+Objetivo: compilar backend, ejecutar pruebas existentes y compilar frontend sin desplegar producción.
