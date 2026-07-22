@@ -21,11 +21,13 @@ export class DashboardComponent implements OnInit {
   readonly loading = signal(true);
   readonly esAdministrador = this.permisosRuntime.esAdministrador;
   readonly puedeVerVentas = signal(false);
+  readonly puedeVerProductos = signal(false);
 
   constructor(private dashboardService: DashboardService) {}
 
   ngOnInit(): void {
     this.puedeVerVentas.set(this.permisosRuntime.puede('Ventas', 'Ver'));
+    this.puedeVerProductos.set(this.permisosRuntime.puede('Productos', 'Ver'));
 
     this.dashboardService.getResumen().subscribe({
       next: (res) => {
