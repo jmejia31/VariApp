@@ -70,11 +70,10 @@
       <button mat-flat-button color="primary" class="submit-button" type="submit" [disabled]="form.invalid || loading()">
         @if (loading()) {
           <mat-spinner diameter="20"></mat-spinner>
-          <span>Validando acceso...</span>
         } @else {
           <mat-icon>login</mat-icon>
-          <span>Ingresar al sistema</span>
         }
+        <span>{{ loading() ? 'Validando acceso...' : 'Ingresar al sistema' }}</span>
       </button>
 
       <p class="security-note"><mat-icon>lock</mat-icon> Tus credenciales se transmiten mediante una conexión segura.</p>
