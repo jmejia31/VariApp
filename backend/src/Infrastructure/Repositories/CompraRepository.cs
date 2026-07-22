@@ -9,22 +9,34 @@ namespace InventoryApp.Infrastructure.Repositories;
 public class CompraRepository : ICompraRepository
 {
     private readonly AppDbContext _context;
+    private readonly ICurrentUserService _currentUser;
 
-    public CompraRepository(AppDbContext context)
+    public CompraRepository(AppDbContext context, ICurrentUserService currentUser)
     {
         _context = context;
+        _currentUser = currentUser;
     }
 
     private IQueryable<Compra> ConIncludes() =>
         _context.Compras.Include(c => c.Detalles).ThenInclude(d => d.Producto)
             .Include(c => c.ImpuestosAplicados);
 
+    private int? UsuarioAlcanceActual =>
+        _currentUser.EstaAutenticado && !_currentUser.EsAdministrador
+            ? _currentUser.UsuarioId
+            : null;
+
+    private static IQueryable<Compra> AplicarAlcance(IQueryable<Compra> query, int? usuarioId) =>
+        usuarioId.HasValue ? query.Where(c => c.CreadoPorUsuarioId == usuarioId.Value) : query;
+
     public async Task<Compra?> GetByIdAsync(int id) =>
-        await ConIncludes().FirstOrDefaultAsync(c => c.Id == id);
+        await AplicarAlcance(ConIncludes(), UsuarioAlcanceActual)
+            .FirstOrDefaultAsync(c => c.Id == id);
 
     public async Task<(List<Compra> Items, int TotalCount)> GetPagedAsync(PagedRequest request)
     {
-        var query = ConIncludes().AsQueryable();
+        var scope = request.UsuarioIdScope ?? UsuarioAlcanceActual;
+        var query = AplicarAlcance(ConIncludes().AsQueryable(), scope);
 
         if (!string.IsNullOrWhiteSpace(request.Search))
         {
@@ -48,19 +60,26 @@ public class CompraRepository : ICompraRepository
         return (items, totalCount);
     }
 
-    public async Task<int> GetTotalDelMesAsync()
+    public async Task<int> GetTotalDelMesAsync(int? usuarioId = null)
     {
         var inicioMes = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1, 0, 0, 0, DateTimeKind.Utc);
-        return await _context.Compras.CountAsync(c => c.Fecha >= inicioMes && c.Estado == Domain.Enums.EstadoDocumento.Confirmada);
+        var query = AplicarAlcance(_context.Compras.AsQueryable(), usuarioId ?? UsuarioAlcanceActual);
+        return await query.CountAsync(c => c.Fecha >= inicioMes && c.Estado == Domain.Enums.EstadoDocumento.Confirmada);
     }
 
-    public async Task<decimal> GetCuentasPorPagarAsync() =>
-        await _context.Compras
+    public async Task<decimal> GetCuentasPorPagarAsync(int? usuarioId = null)
+    {
+        var query = AplicarAlcance(_context.Compras.AsQueryable(), usuarioId ?? UsuarioAlcanceActual);
+        return await query
             .Where(c => c.Estado == Domain.Enums.EstadoDocumento.Confirmada && c.EstadoPago != Domain.Enums.EstadoPago.Pagado)
             .SumAsync(c => (decimal?)c.Total) ?? 0m;
+    }
 
-    public async Task<List<Compra>> GetUltimasAsync(int cantidad = 5) =>
-        await ConIncludes().OrderByDescending(c => c.Fecha).Take(cantidad).ToListAsync();
+    public async Task<List<Compra>> GetUltimasAsync(int cantidad = 5, int? usuarioId = null) =>
+        await AplicarAlcance(ConIncludes(), usuarioId ?? UsuarioAlcanceActual)
+            .OrderByDescending(c => c.Fecha)
+            .Take(cantidad)
+            .ToListAsync();
 
     public async Task<int> ContarTodasAsync() =>
         await _context.Compras.CountAsync();
