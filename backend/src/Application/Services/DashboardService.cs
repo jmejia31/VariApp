@@ -1,4 +1,5 @@
 using InventoryApp.Application.DTOs;
+using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Application.Mappings;
 using InventoryApp.Domain.Entities;
@@ -13,7 +14,7 @@ public class DashboardService : IDashboardService
     private readonly IVentaRepository _ventaRepository;
     private readonly IRevisionFinancieraRepository _revisionRepository;
     private readonly IMovimientoFinancieroRepository _movimientoFinancieroRepository;
-    private readonly ICurrentUserService _currentUser;
+    private readonly IUsuarioScopeService _usuarioScope;
 
     public DashboardService(
         IProductoRepository productoRepository,
@@ -21,19 +22,21 @@ public class DashboardService : IDashboardService
         IVentaRepository ventaRepository,
         IRevisionFinancieraRepository revisionRepository,
         IMovimientoFinancieroRepository movimientoFinancieroRepository,
-        ICurrentUserService currentUser)
+        IUsuarioScopeService usuarioScope)
     {
         _productoRepository = productoRepository;
         _compraRepository = compraRepository;
         _ventaRepository = ventaRepository;
         _revisionRepository = revisionRepository;
         _movimientoFinancieroRepository = movimientoFinancieroRepository;
-        _currentUser = currentUser;
+        _usuarioScope = usuarioScope;
     }
 
     public async Task<DashboardResumenDto> GetResumenAsync()
     {
-        var esAdministrador = _currentUser.EsAdministrador;
+        var alcance = await _usuarioScope.ObtenerActualAsync()
+            ?? throw new ForbiddenAccessException("No fue posible resolver el usuario autenticado y su rol vigente.");
+        var esAdministrador = alcance.EsAdministrador;
 
         // El inventario físico y las alertas de stock son información operativa
         // compartida. Los costos, utilidades, compras y auditoría son corporativos.
@@ -67,8 +70,6 @@ public class DashboardService : IDashboardService
             UltimosAgregados = ultimosProductos.Select(ProductoMapper.ToDto).ToList(),
 
             ComprasDelMes = esAdministrador ? await _compraRepository.GetTotalDelMesAsync() : 0,
-            // VentaRepository aplica automáticamente el UsuarioId del usuario
-            // autenticado cuando no es administrador.
             VentasDelMes = await _ventaRepository.GetTotalDelMesAsync(),
             UltimasCompras = ultimasCompras.Select(c => new CompraResumenDto
             {
@@ -87,8 +88,6 @@ public class DashboardService : IDashboardService
                 Fecha = v.Fecha
             }).ToList(),
 
-            // Para usuarios no administradores estos importes corresponden
-            // exclusivamente a sus propios documentos por el filtro del repositorio.
             IngresosDelMes = await _ventaRepository.GetIngresosDelMesAsync(),
             UtilidadBruta = esAdministrador ? await _ventaRepository.GetUtilidadBrutaTotalAsync() : 0,
             CuentasPorCobrar = await _ventaRepository.GetCuentasPorCobrarAsync(),
