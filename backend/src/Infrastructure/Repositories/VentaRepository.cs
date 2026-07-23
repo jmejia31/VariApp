@@ -10,10 +10,17 @@ namespace InventoryApp.Infrastructure.Repositories;
 public class VentaRepository : IVentaRepository
 {
     private readonly AppDbContext _context;
+    private readonly ICurrentUserService _currentUser;
+    private readonly IUsuarioScopeService _usuarioScope;
 
-    public VentaRepository(AppDbContext context)
+    public VentaRepository(
+        AppDbContext context,
+        ICurrentUserService currentUser,
+        IUsuarioScopeService usuarioScope)
     {
         _context = context;
+        _currentUser = currentUser;
+        _usuarioScope = usuarioScope;
     }
 
     private IQueryable<Venta> ConIncludes() =>
@@ -22,12 +29,38 @@ public class VentaRepository : IVentaRepository
             .Include(v => v.DescuentosAplicados)
             .Include(v => v.ImpuestosAplicados);
 
-    public async Task<Venta?> GetByIdAsync(int id) =>
-        await ConIncludes().FirstOrDefaultAsync(v => v.Id == id);
+    private static IQueryable<Venta> AplicarAlcance(
+        IQueryable<Venta> query,
+        UsuarioScopeActual? alcance,
+        int? usuarioSolicitadoPorAdministrador = null)
+    {
+        if (alcance is null)
+            return query.Where(_ => false);
+
+        if (alcance.EsAdministrador)
+        {
+            return usuarioSolicitadoPorAdministrador.HasValue
+                ? query.Where(v => v.CreadoPorUsuarioId == usuarioSolicitadoPorAdministrador.Value)
+                : query;
+        }
+
+        // Para cualquier rol no administrador, el único alcance válido es el
+        // Usuario.Id autenticado. Se ignora cualquier parámetro enviado por HTTP.
+        return query.Where(v => v.CreadoPorUsuarioId == alcance.UsuarioId);
+    }
+
+    public async Task<Venta?> GetByIdAsync(int id)
+    {
+        var alcance = await _usuarioScope.ObtenerActualAsync();
+        return await AplicarAlcance(ConIncludes(), alcance)
+            .FirstOrDefaultAsync(v => v.Id == id);
+    }
 
     public async Task<(List<Venta> Items, int TotalCount)> GetPagedAsync(PagedRequest request)
     {
-        var query = ConIncludes().AsQueryable();
+        var alcance = await _usuarioScope.ObtenerActualAsync();
+        var usuarioSolicitado = alcance?.EsAdministrador == true ? request.UsuarioIdScope : null;
+        var query = AplicarAlcance(ConIncludes().AsQueryable(), alcance, usuarioSolicitado);
 
         if (!string.IsNullOrWhiteSpace(request.Search))
         {
@@ -47,39 +80,65 @@ public class VentaRepository : IVentaRepository
             _ => sortDirDesc ? query.OrderByDescending(v => v.Fecha) : query.OrderBy(v => v.Fecha),
         };
 
-        var items = await query.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToListAsync();
+        var items = await query
+            .Skip((request.Page - 1) * request.PageSize)
+            .Take(request.PageSize)
+            .ToListAsync();
         return (items, totalCount);
     }
 
-    public async Task<int> GetTotalDelMesAsync()
+    public async Task<int> GetTotalDelMesAsync(int? usuarioId = null)
     {
+        var alcance = await _usuarioScope.ObtenerActualAsync();
+        var usuarioSolicitado = alcance?.EsAdministrador == true ? usuarioId : null;
         var inicioMes = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1, 0, 0, 0, DateTimeKind.Utc);
-        return await _context.Ventas.CountAsync(v => v.Fecha >= inicioMes && v.Estado == EstadoDocumento.Confirmada);
+        var query = AplicarAlcance(_context.Ventas.AsQueryable(), alcance, usuarioSolicitado);
+        return await query.CountAsync(v => v.Fecha >= inicioMes && v.Estado == EstadoDocumento.Confirmada);
     }
 
-    public async Task<decimal> GetIngresosDelMesAsync()
+    public async Task<decimal> GetIngresosDelMesAsync(int? usuarioId = null)
     {
+        var alcance = await _usuarioScope.ObtenerActualAsync();
+        var usuarioSolicitado = alcance?.EsAdministrador == true ? usuarioId : null;
         var inicioMes = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1, 0, 0, 0, DateTimeKind.Utc);
-        return await _context.Ventas
+        var query = AplicarAlcance(_context.Ventas.AsQueryable(), alcance, usuarioSolicitado);
+        return await query
             .Where(v => v.Fecha >= inicioMes && v.Estado == EstadoDocumento.Confirmada)
             .SumAsync(v => (decimal?)v.Total) ?? 0m;
     }
 
-    public async Task<decimal> GetCuentasPorCobrarAsync() =>
-        await _context.Ventas
+    public async Task<decimal> GetCuentasPorCobrarAsync(int? usuarioId = null)
+    {
+        var alcance = await _usuarioScope.ObtenerActualAsync();
+        var usuarioSolicitado = alcance?.EsAdministrador == true ? usuarioId : null;
+        var query = AplicarAlcance(_context.Ventas.AsQueryable(), alcance, usuarioSolicitado);
+        return await query
             .Where(v => v.Estado == EstadoDocumento.Confirmada && v.EstadoPago != EstadoPago.Pagado)
             .SumAsync(v => (decimal?)v.Total) ?? 0m;
+    }
 
-    public async Task<decimal> GetUtilidadBrutaTotalAsync() =>
-        await _context.Ventas
+    public async Task<decimal> GetUtilidadBrutaTotalAsync(int? usuarioId = null)
+    {
+        var alcance = await _usuarioScope.ObtenerActualAsync();
+        var usuarioSolicitado = alcance?.EsAdministrador == true ? usuarioId : null;
+        var query = AplicarAlcance(_context.Ventas.AsQueryable(), alcance, usuarioSolicitado);
+        return await query
             .Where(v => v.Estado == EstadoDocumento.Confirmada)
             .SumAsync(v => (decimal?)v.UtilidadBruta) ?? 0m;
+    }
 
-    public async Task<List<Venta>> GetUltimasAsync(int cantidad = 5) =>
-        await ConIncludes().OrderByDescending(v => v.Fecha).Take(cantidad).ToListAsync();
+    public async Task<List<Venta>> GetUltimasAsync(int cantidad = 5, int? usuarioId = null)
+    {
+        var alcance = await _usuarioScope.ObtenerActualAsync();
+        var usuarioSolicitado = alcance?.EsAdministrador == true ? usuarioId : null;
+        return await AplicarAlcance(ConIncludes(), alcance, usuarioSolicitado)
+            .OrderByDescending(v => v.Fecha)
+            .Take(cantidad)
+            .ToListAsync();
+    }
 
     public async Task<int> ContarTodasAsync() =>
-        await _context.Ventas.CountAsync();
+        await _context.Ventas.IgnoreQueryFilters().CountAsync();
 
     public async Task AddAsync(Venta venta) =>
         await _context.Ventas.AddAsync(venta);
@@ -87,6 +146,51 @@ public class VentaRepository : IVentaRepository
     public void Update(Venta venta) =>
         _context.Ventas.Update(venta);
 
-    public async Task<bool> SaveChangesAsync() =>
-        await _context.SaveChangesAsync() > 0;
+    public async Task<bool> SaveChangesAsync()
+    {
+        var borradoresEliminados = _context.ChangeTracker.Entries<Venta>()
+            .Where(e => e.State == EntityState.Modified &&
+                        e.Entity.Estado == EstadoDocumento.Borrador &&
+                        e.Entity.Detalles.Count == 0 &&
+                        !e.Entity.Eliminado)
+            .ToList();
+
+        foreach (var entry in borradoresEliminados)
+        {
+            foreach (var detalleEntry in _context.ChangeTracker.Entries<VentaDetalle>()
+                         .Where(d => d.State == EntityState.Deleted && d.Entity.VentaId == entry.Entity.Id))
+            {
+                detalleEntry.State = EntityState.Unchanged;
+            }
+
+            entry.Entity.Eliminado = true;
+            entry.Entity.FechaEliminacion = DateTime.UtcNow;
+            entry.Entity.EliminadoPorUsuarioId = _currentUser.UsuarioId;
+            entry.Entity.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
+            entry.Entity.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
+            entry.Entity.FechaActualizacion = DateTime.UtcNow;
+        }
+
+        await CompletarSnapshotImpuestosAsync();
+        return await _context.SaveChangesAsync() > 0;
+    }
+
+    private async Task CompletarSnapshotImpuestosAsync()
+    {
+        var nuevos = _context.ChangeTracker.Entries<VentaImpuesto>()
+            .Where(e => e.State == EntityState.Added)
+            .ToList();
+        if (nuevos.Count == 0) return;
+
+        var ids = nuevos.Select(e => e.Entity.ImpuestoId).Distinct().ToList();
+        var configuracion = await _context.Impuestos.AsNoTracking()
+            .Where(i => ids.Contains(i.Id))
+            .ToDictionaryAsync(i => i.Id, i => i.IncluidoEnPrecio);
+
+        foreach (var entry in nuevos)
+        {
+            entry.Entity.IncluidoEnPrecioSnapshot =
+                configuracion.TryGetValue(entry.Entity.ImpuestoId, out var incluido) && incluido;
+        }
+    }
 }

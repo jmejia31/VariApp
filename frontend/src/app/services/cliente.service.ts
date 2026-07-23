@@ -23,8 +23,7 @@ export class ClienteService {
     return this.http.get<ApiResponse<Cliente>>(`${this.apiUrl}/${id}`);
   }
 
-  /** Autocompletado remoto (sección 16): el backend limita a ~10 resultados,
-   * nunca se cargan todos los clientes en memoria. */
+  /** Autocompletado remoto: el backend limita resultados y no carga todo el catálogo. */
   buscar(termino: string): Observable<ApiResponse<Cliente[]>> {
     return this.http.get<ApiResponse<Cliente[]>>(`${this.apiUrl}/buscar`, { params: { termino } });
   }
@@ -35,6 +34,14 @@ export class ClienteService {
 
   update(id: number, value: ClienteFormValue): Observable<ApiResponse<Cliente>> {
     return this.http.put<ApiResponse<Cliente>>(`${this.apiUrl}/${id}`, value);
+  }
+
+  activar(id: number): Observable<ApiResponse<Cliente>> {
+    return this.http.patch<ApiResponse<Cliente>>(`${this.apiUrl}/${id}/activar`, {});
+  }
+
+  desactivar(id: number): Observable<ApiResponse<Cliente>> {
+    return this.http.patch<ApiResponse<Cliente>>(`${this.apiUrl}/${id}/desactivar`, {});
   }
 
   delete(id: number): Observable<ApiResponse<object>> {

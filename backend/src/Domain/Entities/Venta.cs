@@ -8,9 +8,6 @@ public class Venta : ConfirmableEntity
     public string NumeroVenta { get; set; } = string.Empty;
     public DateTime Fecha { get; set; } = DateTime.UtcNow;
 
-    /// Referencia al cliente registrado (opcional: permite ventas rápidas sin
-    /// crear un cliente formal). Los campos de abajo son snapshot del cliente
-    /// al momento de la venta, para no alterar el historial si el cliente cambia después.
     public int? ClienteId { get; set; }
     public Cliente? Cliente { get; set; }
 
@@ -30,6 +27,10 @@ public class Venta : ConfirmableEntity
     public decimal Total { get; set; }
     public decimal CostoTotal { get; set; }
     public decimal UtilidadBruta { get; set; }
+
+    public bool Eliminado { get; set; }
+    public DateTime? FechaEliminacion { get; set; }
+    public int? EliminadoPorUsuarioId { get; set; }
 
     public string? Notas { get; set; }
 

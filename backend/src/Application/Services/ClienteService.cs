@@ -82,7 +82,7 @@ public class ClienteService : IClienteService
         cliente.IdentidadORTN = dto.IdentidadORTN;
         cliente.Correo = dto.Correo;
         cliente.Direccion = dto.Direccion;
-        cliente.Activo = dto.Activo;
+        // El estado se administra exclusivamente mediante Activar/Desactivar.
         cliente.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
         cliente.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
         cliente.FechaActualizacion = DateTime.UtcNow;
@@ -92,6 +92,28 @@ public class ClienteService : IClienteService
         await _auditoria.RegistrarAsync(ModuloSistema.Clientes, AccionPermiso.Editar, $"Cliente actualizado: {cliente.Nombre}", cliente.Id);
 
         return ToDto(cliente);
+    }
+
+    public async Task<ClienteDto?> CambiarEstadoAsync(int id, bool activo)
+    {
+        var cliente = await _repository.GetByIdAsync(id);
+        if (cliente is null) return null;
+        if (cliente.Activo == activo) return ToDto(cliente, incluirVentas: false);
+
+        cliente.Activo = activo;
+        cliente.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
+        cliente.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
+        cliente.FechaActualizacion = DateTime.UtcNow;
+
+        _repository.Update(cliente);
+        await _repository.SaveChangesAsync();
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Clientes,
+            activo ? AccionPermiso.Activar : AccionPermiso.Desactivar,
+            $"Cliente {(activo ? "activado" : "desactivado")}: {cliente.Nombre}",
+            cliente.Id);
+
+        return ToDto(cliente, incluirVentas: false);
     }
 
     public async Task<bool> DeleteAsync(int id)

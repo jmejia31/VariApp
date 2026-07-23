@@ -18,22 +18,33 @@
   <p class="error">{{ errorMessage() }}</p>
 }
 
-@if (mostrarFormulario()) {
+@if (mostrarFormulario() && puedeCrear()) {
   <form class="card form" [formGroup]="form" (ngSubmit)="crear()">
     <div class="fields-grid">
       <mat-form-field appearance="outline">
         <mat-label>Nombre de usuario (login)</mat-label>
-        <input matInput formControlName="nombreUsuario">
+        <input matInput formControlName="nombreUsuario" autocomplete="username">
+        <mat-hint>3 a 50 caracteres: letras, números, punto, guion o guion bajo.</mat-hint>
+        @if (form.controls.nombreUsuario.hasError('pattern')) {
+          <mat-error>El nombre de usuario no tiene un formato válido.</mat-error>
+        }
       </mat-form-field>
 
       <mat-form-field appearance="outline">
         <mat-label>Nombre completo</mat-label>
-        <input matInput formControlName="nombreCompleto">
+        <input matInput formControlName="nombreCompleto" autocomplete="name">
+        @if (form.controls.nombreCompleto.hasError('minlength')) {
+          <mat-error>Debe contener al menos 3 caracteres.</mat-error>
+        }
       </mat-form-field>
 
       <mat-form-field appearance="outline">
         <mat-label>Contraseña temporal</mat-label>
-        <input matInput type="password" formControlName="password">
+        <input matInput type="password" formControlName="password" autocomplete="new-password">
+        <mat-hint>10 caracteres o más, con mayúscula, minúscula, número y símbolo.</mat-hint>
+        @if (form.controls.password.hasError('pattern')) {
+          <mat-error>La contraseña no cumple los requisitos de seguridad.</mat-error>
+        }
       </mat-form-field>
 
       <mat-form-field appearance="outline">
@@ -51,7 +62,10 @@
     }
 
     <div class="form-actions">
-      <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving()">Crear usuario</button>
+      <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving()">
+        @if (saving()) { <mat-spinner diameter="18"></mat-spinner> }
+        Crear usuario
+      </button>
     </div>
   </form>
 }
@@ -67,7 +81,7 @@
           <th>Nombre completo</th>
           <th>Rol</th>
           <th>Estado</th>
-          <th></th>
+          <th>Acciones</th>
         </tr>
       </thead>
       <tbody>
@@ -79,13 +93,18 @@
             <td>
               @if (u.bloqueado) {
                 <span class="badge danger">Bloqueado</span>
+              } @else if (puedeCambiarEstado(u)) {
+                <mat-slide-toggle [checked]="u.activo" (change)="toggleEstado(u)"></mat-slide-toggle>
               } @else {
-                <mat-slide-toggle [checked]="u.activo" [disabled]="!puedeEditar()" (change)="toggleEstado(u)"></mat-slide-toggle>
+                <span class="badge" [class.success]="u.activo" [class.muted]="!u.activo">{{ u.activo ? 'Activo' : 'Inactivo' }}</span>
               }
             </td>
             <td class="actions">
               <a [routerLink]="['/usuarios', u.id]" mat-icon-button title="Ver detalle"><mat-icon>visibility</mat-icon></a>
-              @if (puedeBloquear() && !esUsuarioActual(u)) {
+              @if (puedeEditar()) {
+                <a [routerLink]="['/usuarios', u.id, 'editar']" mat-icon-button title="Editar usuario"><mat-icon>edit</mat-icon></a>
+              }
+              @if (puedeBloquearUsuario(u)) {
                 @if (u.bloqueado) {
                   <button mat-icon-button title="Desbloquear" (click)="desbloquear(u)"><mat-icon>lock_open</mat-icon></button>
                 } @else {
@@ -110,15 +129,20 @@
             <strong>{{ u.nombreCompleto }}</strong>
             @if (u.bloqueado) {
               <span class="badge danger">Bloqueado</span>
+            } @else if (puedeCambiarEstado(u)) {
+              <mat-slide-toggle [checked]="u.activo" (change)="toggleEstado(u)"></mat-slide-toggle>
             } @else {
-              <mat-slide-toggle [checked]="u.activo" [disabled]="!puedeEditar()" (change)="toggleEstado(u)"></mat-slide-toggle>
+              <span class="badge" [class.success]="u.activo" [class.muted]="!u.activo">{{ u.activo ? 'Activo' : 'Inactivo' }}</span>
             }
           </div>
           <p class="item-card-desc">&#64;{{ u.nombreUsuario }}</p>
           <div class="item-card-meta"><span>{{ u.rol }}</span></div>
           <div class="item-card-actions">
             <a [routerLink]="['/usuarios', u.id]" mat-button><mat-icon>visibility</mat-icon> Ver</a>
-            @if (puedeBloquear() && !esUsuarioActual(u)) {
+            @if (puedeEditar()) {
+              <a [routerLink]="['/usuarios', u.id, 'editar']" mat-button><mat-icon>edit</mat-icon> Editar</a>
+            }
+            @if (puedeBloquearUsuario(u)) {
               @if (u.bloqueado) {
                 <button mat-button (click)="desbloquear(u)"><mat-icon>lock_open</mat-icon> Desbloquear</button>
               } @else {

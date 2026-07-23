@@ -31,11 +31,28 @@ public class ImpuestoAplicadoDto
 
 public class ResultadoCalculoDto
 {
+    /// Suma de cantidad por precio unitario antes de descuentos e impuestos.
+    public decimal ImporteBruto { get; set; }
+
+    /// Base neta sin impuestos incluidos, después de aplicar descuentos.
+    /// Este es el subtotal contable que debe persistirse en ventas, compras y facturas.
     public decimal Subtotal { get; set; }
+
+    /// Alias explícito para las interfaces nuevas.
+    public decimal SubtotalNeto
+    {
+        get => Subtotal;
+        set => Subtotal = value;
+    }
+
     public List<DescuentoAplicadoDto> DescuentosAplicados { get; set; } = new();
     public decimal TotalDescuento { get; set; }
     public List<ImpuestoAplicadoDto> ImpuestosAplicados { get; set; } = new();
     public decimal TotalImpuesto { get; set; }
+    public decimal ImpuestoIncluido { get; set; }
+    public decimal ImpuestoAdicional { get; set; }
+
+    /// Total final: subtotal neto + impuesto incluido + impuesto adicional.
     public decimal Total { get; set; }
 }
 

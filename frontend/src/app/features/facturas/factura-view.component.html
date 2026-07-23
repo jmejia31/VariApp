@@ -1,8 +1,9 @@
 <div class="toolbar no-print">
   <a routerLink="/ventas" mat-icon-button><mat-icon>arrow_back</mat-icon></a>
   <span class="spacer"></span>
+
   @if (factura(); as f) {
-    @if (f.estado !== 'Anulada') {
+    @if (f.estado !== 'Anulada' && puedeCompartir()) {
       <button mat-flat-button color="primary" class="btn-whatsapp" (click)="toggleWhatsApp()" [disabled]="preparandoWhatsApp()">
         @if (preparandoWhatsApp()) {
           <mat-spinner diameter="18"></mat-spinner>
@@ -13,30 +14,53 @@
       </button>
     }
   }
-  <button mat-button (click)="descargarPdf()" [disabled]="descargandoPdf()">
-    @if (descargandoPdf()) {
-      <mat-spinner diameter="18"></mat-spinner>
-    } @else {
-      <mat-icon>picture_as_pdf</mat-icon>
-    }
-    Descargar PDF
-  </button>
+
+  @if (puedeExportar()) {
+    <button mat-button (click)="descargarPdf()" [disabled]="descargandoPdf()">
+      @if (descargandoPdf()) {
+        <mat-spinner diameter="18"></mat-spinner>
+      } @else {
+        <mat-icon>picture_as_pdf</mat-icon>
+      }
+      Descargar PDF
+    </button>
+  }
+
   @if (factura(); as f) {
-    @if (f.estado !== 'Anulada') {
+    @if (f.estado !== 'Anulada' && puedeCompartir()) {
       <button mat-button (click)="toggleCorreo()">
         <mat-icon>email</mat-icon> Enviar por correo
       </button>
+      <button mat-button color="warn" (click)="revocarEnlaces()" [disabled]="revocandoEnlaces()">
+        @if (revocandoEnlaces()) {
+          <mat-spinner diameter="18"></mat-spinner>
+        } @else {
+          <mat-icon>link_off</mat-icon>
+        }
+        Revocar enlaces
+      </button>
     }
   }
-  <button mat-button (click)="imprimir()">
-    <mat-icon>print</mat-icon> Imprimir
-  </button>
-  <button mat-button (click)="toggleHistorial()">
-    <mat-icon>history</mat-icon> Historial de envíos
-  </button>
+
+  @if (puedeImprimir()) {
+    <button mat-button (click)="imprimir()" [disabled]="imprimiendoPdf()">
+      @if (imprimiendoPdf()) {
+        <mat-spinner diameter="18"></mat-spinner>
+      } @else {
+        <mat-icon>print</mat-icon>
+      }
+      Imprimir PDF
+    </button>
+  }
+
+  @if (puedeCompartir()) {
+    <button mat-button (click)="toggleHistorial()">
+      <mat-icon>history</mat-icon> Historial de envíos
+    </button>
+  }
 </div>
 
-@if (mostrarPanelCorreo()) {
+@if (mostrarPanelCorreo() && puedeCompartir()) {
   <div class="card panel-correo no-print">
     <h3><mat-icon>email</mat-icon> Enviar por correo</h3>
     <mat-form-field appearance="outline" class="full-width">
@@ -46,7 +70,7 @@
         <mat-hint class="hint-error">El correo no tiene un formato válido.</mat-hint>
       }
     </mat-form-field>
-    <p class="hint">Se adjuntará el PDF de la factura al correo.</p>
+    <p class="hint">Se adjuntará exactamente el mismo PDF oficial disponible para descarga e impresión.</p>
     <div class="panel-actions">
       <button mat-flat-button color="primary" [disabled]="!correoValido() || enviandoCorreo()" (click)="enviarCorreo()">
         @if (enviandoCorreo()) {
@@ -61,50 +85,58 @@
   </div>
 }
 
-@if (mostrarPanelWhatsApp() && enlaceCompartir(); as e) {
+@if (mostrarPanelWhatsApp() && puedeCompartir() && enlaceCompartir(); as e) {
   <div class="card panel-whatsapp no-print">
     <h3><mat-icon>chat</mat-icon> Compartir por WhatsApp</h3>
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Número de teléfono (con código de país)</mat-label>
       <input matInput [(ngModel)]="telefonoEditable" placeholder="Ej. 50499999999">
       @if (!telefonoValido()) {
-        <mat-hint class="hint-error">Ingresa un número válido con código de país (mínimo 10 dígitos).</mat-hint>
+        <mat-hint class="hint-error">Ingresa un número internacional válido de 10 a 15 dígitos.</mat-hint>
       }
     </mat-form-field>
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Mensaje</mat-label>
-      <textarea matInput [(ngModel)]="mensajeEditable" rows="4"></textarea>
+      <textarea matInput [(ngModel)]="mensajeEditable" rows="5"></textarea>
     </mat-form-field>
-    <p class="hint">El enlace de descarga incluido en el mensaje vence el {{ e.fechaExpiracion | date:'dd/MM/yyyy' }}.</p>
+    <p class="hint">
+      El enlace contiene el mismo PDF oficial y vence el {{ e.fechaExpiracion | date:'dd/MM/yyyy HH:mm' }}.
+      Generar otro enlace revoca automáticamente el anterior.
+    </p>
     <div class="panel-actions">
-      <button mat-flat-button color="primary" [disabled]="!telefonoValido()" (click)="abrirWhatsApp()">
+      <button mat-flat-button color="primary" [disabled]="!telefonoValido() || !mensajeEditable.trim()" (click)="abrirWhatsApp()">
         <mat-icon>open_in_new</mat-icon> Abrir WhatsApp
       </button>
-      <button mat-button (click)="toggleWhatsApp()">Cancelar</button>
+      <button mat-button color="warn" [disabled]="revocandoEnlaces()" (click)="revocarEnlaces()">
+        <mat-icon>link_off</mat-icon> Revocar enlace
+      </button>
+      <button mat-button (click)="toggleWhatsApp()">Cerrar</button>
     </div>
   </div>
 }
 
-@if (mostrarHistorial()) {
+@if (mostrarHistorial() && puedeCompartir()) {
   <div class="card panel-historial no-print">
     <h3><mat-icon>history</mat-icon> Historial de envíos</h3>
     @if (historial().length === 0) {
       <p class="empty">Esta factura no se ha compartido todavía.</p>
     } @else {
-      <table class="table">
-        <thead><tr><th>Fecha</th><th>Canal</th><th>Destinatario</th><th>Resultado</th><th>Usuario</th></tr></thead>
-        <tbody>
-          @for (h of historial(); track h.id) {
-            <tr>
-              <td>{{ h.fecha | date:'dd/MM/yyyy HH:mm' }}</td>
-              <td>{{ h.canal }}</td>
-              <td>{{ h.destinatario }}</td>
-              <td [class.error-text]="h.resultado === 'Error'">{{ h.resultado }}</td>
-              <td>{{ h.usuarioNombre || '-' }}</td>
-            </tr>
-          }
-        </tbody>
-      </table>
+      <div class="table-scroll">
+        <table class="table">
+          <thead><tr><th>Fecha</th><th>Canal</th><th>Destinatario</th><th>Resultado</th><th>Usuario</th></tr></thead>
+          <tbody>
+            @for (h of historial(); track h.id) {
+              <tr>
+                <td>{{ h.fecha | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td>{{ h.canal }}</td>
+                <td>{{ h.destinatario }}</td>
+                <td [class.error-text]="h.resultado === 'Error'">{{ h.resultado }}</td>
+                <td>{{ h.usuarioNombre || '-' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
     }
   </div>
 }
@@ -113,19 +145,16 @@
   <div class="loading no-print"><mat-spinner></mat-spinner></div>
 } @else if (factura(); as f) {
   <div class="factura-sheet">
-
     @if (f.estado === 'Anulada') {
       <div class="sello-anulada">ANULADA</div>
     }
 
     <header class="factura-header">
       <div class="empresa">
-        @if (f.empresaLogoUrl || defaultLogoUrl) {
-          <img class="empresa-logo" [src]="f.empresaLogoUrl || defaultLogoUrl" alt="Logo de {{ f.empresaNombre }}">
-        }
+        <img class="empresa-logo" [src]="f.empresaLogoUrl || defaultLogoUrl" alt="Logo de {{ f.empresaNombre }}">
         <h1>{{ f.empresaNombre }}</h1>
         @if (f.empresaEslogan) { <p class="eslogan">{{ f.empresaEslogan }}</p> }
-        @if (f.empresaRTN) { <p>RTN: {{ f.empresaRTN }}</p> }
+        <p><strong>Comprobante comercial interno</strong></p>
         @if (f.empresaTelefono) { <p>Tel: {{ f.empresaTelefono }}</p> }
         @if (f.empresaDireccion) { <p>{{ f.empresaDireccion }}</p> }
       </div>
@@ -158,7 +187,7 @@
       <table class="tabla-productos">
         <thead>
           <tr>
-            <th>Cant.</th><th>Producto</th><th>Marca</th><th>Modelo</th><th>Precio unit.</th><th>Subtotal</th>
+            <th>Cant.</th><th>Producto</th><th>Marca</th><th>Modelo</th><th>Precio unit.</th><th>Importe</th>
           </tr>
         </thead>
         <tbody>
@@ -177,9 +206,17 @@
     </div>
 
     <section class="resumen">
-      <div><span>Subtotal</span><span>L. {{ f.subtotal | number:'1.2-2' }}</span></div>
-      <div><span>Descuento</span><span>- L. {{ f.descuento | number:'1.2-2' }}</span></div>
-      <div><span>Impuesto</span><span>+ L. {{ f.impuesto | number:'1.2-2' }}</span></div>
+      <div><span>Importe bruto</span><span>L. {{ f.importeBruto | number:'1.2-2' }}</span></div>
+      @if (f.descuento > 0) {
+        <div><span>Descuento</span><span>- L. {{ f.descuento | number:'1.2-2' }}</span></div>
+      }
+      <div><span>Subtotal sin impuesto</span><span>L. {{ f.subtotal | number:'1.2-2' }}</span></div>
+      @if (f.impuestoIncluido > 0) {
+        <div><span>Impuesto incluido</span><span>L. {{ f.impuestoIncluido | number:'1.2-2' }}</span></div>
+      }
+      @if (f.impuestoAdicional > 0) {
+        <div><span>Impuesto adicional</span><span>+ L. {{ f.impuestoAdicional | number:'1.2-2' }}</span></div>
+      }
       <div class="total"><span>TOTAL</span><span>L. {{ f.total | number:'1.2-2' }}</span></div>
     </section>
 
@@ -197,7 +234,7 @@
           <div>
             <h3>Impuestos aplicados</h3>
             @for (i of f.impuestosAplicados; track i.impuestoId) {
-              <p>{{ i.nombre }}: + L. {{ i.monto | number:'1.2-2' }}</p>
+              <p>{{ i.nombre }}: L. {{ i.monto | number:'1.2-2' }} ({{ i.incluidoEnPrecio ? 'incluido' : 'adicional' }})</p>
             }
           </div>
         }
@@ -214,6 +251,7 @@
 
     <footer class="factura-footer">
       <p>{{ f.empresaTextoFactura || 'Gracias por su compra.' }}</p>
+      <p>Documento comercial interno. No constituye comprobante fiscal autorizado por el SAR.</p>
       @if (f.empresaTextoLegal) { <p>{{ f.empresaTextoLegal }}</p> }
       @if (f.empresaCopyright) { <p class="marca">{{ f.empresaCopyright }}</p> }
     </footer>

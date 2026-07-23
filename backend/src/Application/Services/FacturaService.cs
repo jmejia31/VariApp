@@ -36,6 +36,12 @@ public class FacturaService : IFacturaService
         return resultado;
     }
 
+    public async Task<FacturaDto?> GetByIdParaEnlacePublicoValidadoAsync(int id)
+    {
+        var factura = await _repository.GetByIdParaEnlacePublicoValidadoAsync(id);
+        return factura is null ? null : await ToDtoAsync(factura);
+    }
+
     private async Task<FacturaDto> ToDtoAsync(Factura f)
     {
         var empresa = await _empresaConfiguracionService.GetActivaAsync();
@@ -48,34 +54,9 @@ public class FacturaService : IFacturaService
         return dto;
     }
 
-    private static FacturaDto ToDto(Factura f) => new()
+    private static FacturaDto ToDto(Factura f)
     {
-        Id = f.Id,
-        VentaId = f.VentaId,
-        NumeroVentaOrigen = f.Venta?.NumeroVenta ?? string.Empty,
-        NumeroFactura = f.NumeroFactura,
-        FechaEmision = f.FechaEmision,
-        Estado = f.Estado.ToString(),
-        EmpresaNombre = f.EmpresaNombre,
-        EmpresaRTN = f.EmpresaRTN,
-        EmpresaTelefono = f.EmpresaTelefono,
-        EmpresaCorreo = f.EmpresaCorreo,
-        EmpresaDireccion = f.EmpresaDireccion,
-        ClienteNombre = f.ClienteNombre,
-        ClienteTelefono = f.ClienteTelefono,
-        ClienteIdentidadORTN = f.ClienteIdentidadORTN,
-        ClienteCorreo = f.ClienteCorreo,
-        ClienteDireccion = f.ClienteDireccion,
-        VendedorNombreUsuario = f.VendedorNombreUsuario,
-        GeneradaPorNombreUsuario = f.GeneradaPorNombreUsuario,
-        Subtotal = f.Subtotal,
-        Descuento = f.Descuento,
-        Impuesto = f.Impuesto,
-        Total = f.Total,
-        MetodoPago = f.Venta?.MetodoPago.ToString() ?? string.Empty,
-        EstadoPago = f.Venta?.EstadoPago.ToString() ?? string.Empty,
-        Observaciones = f.Observaciones,
-        Detalles = f.Detalles.Select(d => new FacturaDetalleDto
+        var detalles = f.Detalles.Select(d => new FacturaDetalleDto
         {
             ProductoNombre = d.ProductoNombre,
             ProductoMarca = d.ProductoMarca,
@@ -84,27 +65,79 @@ public class FacturaService : IFacturaService
             PrecioUnitario = d.PrecioUnitario,
             Descuento = d.Descuento,
             Subtotal = d.Subtotal
-        }).ToList(),
-        DescuentosAplicados = f.Venta?.DescuentosAplicados.Select(d => new DescuentoAplicadoDto
-        {
-            DescuentoId = d.DescuentoId,
-            Nombre = d.DescuentoNombreSnapshot,
-            Codigo = d.DescuentoCodigoSnapshot,
-            Tipo = d.TipoSnapshot.ToString(),
-            Valor = d.ValorSnapshot,
-            Monto = d.MontoAplicado
-        }).ToList() ?? new List<DescuentoAplicadoDto>(),
-        ImpuestosAplicados = f.Venta?.ImpuestosAplicados.Select(i => new ImpuestoAplicadoDto
+        }).ToList();
+
+        var importeBruto = detalles.Sum(d => d.Subtotal);
+        var impuestos = f.Venta?.ImpuestosAplicados.Select(i => new ImpuestoAplicadoDto
         {
             ImpuestoId = i.ImpuestoId,
             Nombre = i.ImpuestoNombreSnapshot,
             Codigo = i.ImpuestoCodigoSnapshot,
             Tasa = i.TasaSnapshot,
             BaseImponible = i.BaseImponible,
-            Monto = i.MontoAplicado
-        }).ToList() ?? new List<ImpuestoAplicadoDto>(),
-        FechaAnulacion = f.FechaAnulacion,
-        AnuladaPorNombreUsuario = f.AnuladaPorNombreUsuario,
-        MotivoAnulacion = f.MotivoAnulacion
-    };
+            Monto = i.MontoAplicado,
+            IncluidoEnPrecio = i.IncluidoEnPrecioSnapshot
+        }).ToList() ?? new List<ImpuestoAplicadoDto>();
+
+        // Compatibilidad con documentos históricos creados antes de almacenar el
+        // snapshot: si el total ya coincide con el importe después del descuento,
+        // los impuestos existentes se consideran incluidos en el precio.
+        var totalDespuesDescuento = Math.Max(0, importeBruto - f.Descuento);
+        if (impuestos.Count > 0 &&
+            impuestos.All(i => !i.IncluidoEnPrecio) &&
+            Math.Abs(f.Total - totalDespuesDescuento) <= 0.01m)
+        {
+            foreach (var impuesto in impuestos)
+                impuesto.IncluidoEnPrecio = true;
+        }
+
+        var impuestoIncluido = impuestos.Where(i => i.IncluidoEnPrecio).Sum(i => i.Monto);
+        var impuestoAdicional = impuestos.Where(i => !i.IncluidoEnPrecio).Sum(i => i.Monto);
+
+        return new FacturaDto
+        {
+            Id = f.Id,
+            VentaId = f.VentaId,
+            NumeroVentaOrigen = f.Venta?.NumeroVenta ?? string.Empty,
+            NumeroFactura = f.NumeroFactura,
+            FechaEmision = f.FechaEmision,
+            Estado = f.Estado.ToString(),
+            EmpresaNombre = f.EmpresaNombre,
+            EmpresaRTN = f.EmpresaRTN,
+            EmpresaTelefono = f.EmpresaTelefono,
+            EmpresaCorreo = f.EmpresaCorreo,
+            EmpresaDireccion = f.EmpresaDireccion,
+            ClienteNombre = f.ClienteNombre,
+            ClienteTelefono = f.ClienteTelefono,
+            ClienteIdentidadORTN = f.ClienteIdentidadORTN,
+            ClienteCorreo = f.ClienteCorreo,
+            ClienteDireccion = f.ClienteDireccion,
+            VendedorNombreUsuario = f.VendedorNombreUsuario,
+            GeneradaPorNombreUsuario = f.GeneradaPorNombreUsuario,
+            ImporteBruto = importeBruto,
+            Subtotal = f.Subtotal,
+            Descuento = f.Descuento,
+            Impuesto = f.Impuesto,
+            ImpuestoIncluido = impuestoIncluido,
+            ImpuestoAdicional = impuestoAdicional,
+            Total = f.Total,
+            MetodoPago = f.Venta?.MetodoPago.ToString() ?? string.Empty,
+            EstadoPago = f.Venta?.EstadoPago.ToString() ?? string.Empty,
+            Observaciones = f.Observaciones,
+            Detalles = detalles,
+            DescuentosAplicados = f.Venta?.DescuentosAplicados.Select(d => new DescuentoAplicadoDto
+            {
+                DescuentoId = d.DescuentoId,
+                Nombre = d.DescuentoNombreSnapshot,
+                Codigo = d.DescuentoCodigoSnapshot,
+                Tipo = d.TipoSnapshot.ToString(),
+                Valor = d.ValorSnapshot,
+                Monto = d.MontoAplicado
+            }).ToList() ?? new List<DescuentoAplicadoDto>(),
+            ImpuestosAplicados = impuestos,
+            FechaAnulacion = f.FechaAnulacion,
+            AnuladaPorNombreUsuario = f.AnuladaPorNombreUsuario,
+            MotivoAnulacion = f.MotivoAnulacion
+        };
+    }
 }

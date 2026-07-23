@@ -1,38 +1,86 @@
-<div class="login-page">
-  <form class="card login-card" [formGroup]="form" (ngSubmit)="submit()">
-    <div class="header">
-      <img class="brand-logo" [src]="identidad.logoUrl()" [alt]="identidad.nombreSistema()">
-      <h1>{{ identidad.nombreSistema() }}</h1>
-      <p>{{ identidad.mensajeLogin() }}</p>
-    </div>
+<main class="login-page">
+  <section class="login-shell" aria-label="Acceso a {{ identidad.nombreSistema() }}">
+    <aside class="login-intro">
+      <div class="intro-brand">
+        <img class="intro-logo" [src]="identidad.logoUrl()" [alt]="identidad.nombreSistema()">
+        <span>{{ identidad.nombreSistema() }}</span>
+      </div>
 
-    <mat-form-field appearance="outline">
-      <mat-label>Usuario</mat-label>
-      <input matInput formControlName="nombreUsuario" autocomplete="username">
-    </mat-form-field>
+      <div class="intro-copy">
+        <span class="eyebrow">Gestión empresarial</span>
+        <h1>Controla tu operación desde un solo lugar.</h1>
+        <p>{{ identidad.descripcionSistema() }}</p>
+      </div>
 
-    <mat-form-field appearance="outline">
-      <mat-label>Contraseña</mat-label>
-      <input matInput [type]="hidePassword() ? 'password' : 'text'" formControlName="password" autocomplete="current-password">
-      <button mat-icon-button matSuffix type="button" (click)="hidePassword.set(!hidePassword())">
-        <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
-      </button>
-    </mat-form-field>
+      <div class="intro-features" aria-label="Características del acceso">
+        <span><mat-icon>verified_user</mat-icon> Acceso protegido</span>
+        <span><mat-icon>manage_accounts</mat-icon> Permisos por rol</span>
+        <span><mat-icon>history</mat-icon> Operaciones auditadas</span>
+      </div>
+    </aside>
 
-    @if (errorMessage()) {
-      <p class="error">{{ errorMessage() }}</p>
-    }
+    <form class="card login-card" [formGroup]="form" (ngSubmit)="submit()" aria-labelledby="login-title" novalidate>
+      <div class="mobile-brand">
+        <img class="brand-logo" [src]="identidad.logoUrl()" [alt]="identidad.nombreSistema()">
+      </div>
 
-    <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || loading()">
-      @if (loading()) {
-        <mat-spinner diameter="20"></mat-spinner>
-      } @else {
-        Entrar
+      <header class="header">
+        <span class="eyebrow">Bienvenido</span>
+        <h2 id="login-title">Iniciar sesión</h2>
+        <p>{{ identidad.mensajeLogin() }}</p>
+      </header>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Nombre de usuario</mat-label>
+        <mat-icon matPrefix>person</mat-icon>
+        <input matInput formControlName="nombreUsuario" autocomplete="username" autocapitalize="none" spellcheck="false">
+        @if (form.controls.nombreUsuario.hasError('required')) {
+          <mat-error>Ingresa tu nombre de usuario.</mat-error>
+        }
+        @if (form.controls.nombreUsuario.hasError('maxlength')) {
+          <mat-error>El nombre de usuario no puede superar 50 caracteres.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Contraseña</mat-label>
+        <mat-icon matPrefix>lock</mat-icon>
+        <input matInput [type]="hidePassword() ? 'password' : 'text'" formControlName="password" autocomplete="current-password">
+        <button
+          mat-icon-button
+          matSuffix
+          type="button"
+          [attr.aria-label]="hidePassword() ? 'Mostrar contraseña' : 'Ocultar contraseña'"
+          [attr.aria-pressed]="!hidePassword()"
+          (click)="hidePassword.set(!hidePassword())">
+          <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        @if (form.controls.password.hasError('required')) {
+          <mat-error>Ingresa tu contraseña.</mat-error>
+        }
+      </mat-form-field>
+
+      @if (errorMessage()) {
+        <div class="error-banner" role="alert" aria-live="assertive">
+          <mat-icon>error_outline</mat-icon>
+          <span>{{ errorMessage() }}</span>
+        </div>
       }
-    </button>
 
-    @if (identidad.mostrarCopyright()) {
-      <p class="copyright">{{ identidad.copyright() }}</p>
-    }
-  </form>
-</div>
+      <button mat-flat-button color="primary" class="submit-button" type="submit" [disabled]="form.invalid || loading()">
+        @if (loading()) {
+          <mat-spinner diameter="20"></mat-spinner>
+        } @else {
+          <mat-icon>login</mat-icon>
+        }
+        <span>{{ loading() ? 'Validando acceso...' : 'Ingresar al sistema' }}</span>
+      </button>
+
+      <p class="security-note"><mat-icon>lock</mat-icon> Tus credenciales se transmiten mediante una conexión segura.</p>
+
+      @if (identidad.mostrarCopyright()) {
+        <p class="copyright">{{ identidad.copyright() }}</p>
+      }
+    </form>
+  </section>
+</main>

@@ -11,6 +11,17 @@ export interface CompraDetalle {
   subtotal: number;
 }
 
+export interface CompraDocumento {
+  id: number;
+  compraId: number;
+  nombreOriginal: string;
+  contentType: string;
+  sizeBytes: number;
+  esImagen: boolean;
+  fechaCreacion: string;
+  creadoPorNombreUsuario?: string;
+}
+
 export interface Compra {
   id: number;
   numeroCompra: string;

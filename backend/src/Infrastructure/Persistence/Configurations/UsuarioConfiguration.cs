@@ -16,16 +16,18 @@ public class UsuarioConfiguration : IEntityTypeConfiguration<Usuario>
         builder.Property(u => u.PasswordHash).IsRequired().HasMaxLength(300);
         builder.Property(u => u.Rol).HasConversion<string>().HasMaxLength(30);
         builder.Property(u => u.MotivoBloqueo).HasMaxLength(300);
+        builder.Property(u => u.FotoPerfilUrl).HasMaxLength(500);
+        builder.Property(u => u.FotoPerfilPublicId).HasMaxLength(255);
         builder.HasIndex(u => u.Eliminado);
 
-        // Seed: usuario admin con password "Admin123!" (SOLO PARA DESARROLLO)
-        // IMPORTANTE: cambia esta contraseña antes de subir a producción (ver README - seccion seguridad).
+        // Registro de desarrollo histórico. La contraseña productiva nunca se
+        // restablece desde este mapping ni desde SeedAdmin después de creada.
         builder.HasData(new Usuario
         {
             Id = 1,
             NombreUsuario = "admin",
             NombreCompleto = "Administrador",
-            PasswordHash = "$2b$11$unl.Q/ZCV7KaW8i7BbocyemHNX9hdpAOqatkmKk2.b3PLzDjKAMuy", // hash real de "Admin123!"
+            PasswordHash = "$2b$11$unl.Q/ZCV7KaW8i7BbocyemHNX9hdpAOqatkmKk2.b3PLzDjKAMuy",
             Rol = RolUsuario.Administrador,
             Activo = true,
             FechaCreacion = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)

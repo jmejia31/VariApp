@@ -13,7 +13,7 @@
   } @else {
     <table class="table table-desktop">
       <thead>
-        <tr><th>Nombre</th><th>Código</th><th>Tipo</th><th>Tasa/Monto</th><th>Operaciones</th><th>Activo</th><th></th></tr>
+        <tr><th>Nombre</th><th>Código</th><th>Tipo</th><th>Tasa/Monto</th><th>Operaciones</th><th>Estado</th><th>Acciones</th></tr>
       </thead>
       <tbody>
         @for (i of impuestos(); track i.id) {
@@ -23,7 +23,15 @@
             <td>{{ i.tipo }}</td>
             <td>{{ i.tipo === 'Porcentaje' ? i.tasa + '%' : ('L. ' + i.montoFijo) }}</td>
             <td>{{ i.operaciones.join(', ') }}</td>
-            <td><mat-slide-toggle [checked]="i.activo" [disabled]="!puedeEditar()" (change)="toggleActivo(i)"></mat-slide-toggle></td>
+            <td>
+              @if (puedeCambiarEstado(i)) {
+                <mat-slide-toggle [checked]="i.activo" (change)="toggleActivo(i)"></mat-slide-toggle>
+              } @else {
+                <span class="badge" [class.success]="i.activo" [class.muted]="!i.activo">
+                  {{ i.activo ? 'Activo' : 'Inactivo' }}
+                </span>
+              }
+            </td>
             <td class="actions">
               @if (puedeEditar()) { <a [routerLink]="['/impuestos', i.id, 'editar']" mat-icon-button title="Editar"><mat-icon>edit</mat-icon></a> }
               @if (puedeDuplicar()) { <button mat-icon-button title="Duplicar" (click)="duplicar(i)"><mat-icon>content_copy</mat-icon></button> }
@@ -41,7 +49,13 @@
         <div class="item-card">
           <div class="item-card-header">
             <strong>{{ i.nombre }}</strong>
-            <mat-slide-toggle [checked]="i.activo" [disabled]="!puedeEditar()" (change)="toggleActivo(i)"></mat-slide-toggle>
+            @if (puedeCambiarEstado(i)) {
+              <mat-slide-toggle [checked]="i.activo" (change)="toggleActivo(i)"></mat-slide-toggle>
+            } @else {
+              <span class="badge" [class.success]="i.activo" [class.muted]="!i.activo">
+                {{ i.activo ? 'Activo' : 'Inactivo' }}
+              </span>
+            }
           </div>
           <p class="item-card-desc">{{ i.codigo }} · {{ i.tipo === 'Porcentaje' ? i.tasa + '%' : ('L. ' + i.montoFijo) }}</p>
           <div class="item-card-meta"><span>{{ i.operaciones.join(', ') }}</span></div>

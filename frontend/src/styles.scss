@@ -1,4 +1,6 @@
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
 :root {
   --color-primary: #0284c7;
@@ -6,6 +8,7 @@
   --color-accent: #f97316;
   --color-bg: #f3f7fb;
   --color-surface: #ffffff;
+  --color-card: var(--color-surface);
   --color-sidebar: #08131f;
   --color-topbar: #ffffff;
   --color-heading: #0f172a;
@@ -19,54 +22,221 @@
   --color-info: #3b82f6;
   --radius: 14px;
   --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --focus-ring: 0 0 0 3px color-mix(in srgb, var(--color-primary) 28%, transparent);
 }
 
-/* Sección 16 del prompt: el tema debe aplicarse también a componentes de
- * Angular Material, que aquí usan el tema prebuilt "indigo-pink" (CSS
- * estático compilado, no personalizable en runtime sin recompilar Sass).
- * LIMITACIÓN DOCUMENTADA: en vez de recompilar el tema completo de
- * Material (no viable en runtime desde un panel de administración), se
- * sobreescriben selectivamente las clases MDC más visibles (botones,
- * toggles, spinners, tabs) para que sí respondan a las variables del tema
- * dinámico. Puede haber componentes de Material puntuales no cubiertos
- * por esta lista que sigan usando la paleta índigo original. */
-.mat-mdc-raised-button.mat-primary, .mat-mdc-unelevated-button.mat-primary,
-.mat-mdc-fab.mat-primary, .mat-mdc-mini-fab.mat-primary {
+html {
+  min-width: 320px;
+  height: 100%;
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100%;
+  margin: 0;
+  overflow-x: hidden;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+}
+
+button,
+a,
+input,
+textarea,
+select,
+[tabindex] {
+  &:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    box-shadow: var(--focus-ring);
+  }
+}
+
+::selection {
+  background: color-mix(in srgb, var(--color-primary) 22%, transparent);
+}
+
+/* Angular Material usa el tema precompilado. Estas reglas conectan los
+   componentes visibles con el tema administrable de VariApp. */
+.mat-mdc-raised-button.mat-primary,
+.mat-mdc-unelevated-button.mat-primary,
+.mat-mdc-fab.mat-primary,
+.mat-mdc-mini-fab.mat-primary {
   --mdc-protected-button-container-color: var(--color-button);
   --mdc-filled-button-container-color: var(--color-button);
   background-color: var(--color-button) !important;
 }
-.mat-mdc-button.mat-primary, .mat-mdc-icon-button.mat-primary, .mat-mdc-outlined-button.mat-primary {
+
+.mat-mdc-button.mat-primary,
+.mat-mdc-icon-button.mat-primary,
+.mat-mdc-outlined-button.mat-primary {
   color: var(--color-primary) !important;
 }
+
 .mat-mdc-progress-spinner.mat-primary circle,
 .mat-mdc-slide-toggle.mat-primary .mdc-switch--selected .mdc-switch__track {
   --mdc-circular-progress-active-indicator-color: var(--color-primary);
   stroke: var(--color-primary);
 }
+
 .mat-mdc-tab-group.mat-primary .mdc-tab-indicator__content--underline,
 .mat-mdc-tab-nav-bar.mat-primary .mdc-tab-indicator__content--underline {
   border-color: var(--color-primary) !important;
 }
 
-html, body {
-  height: 100%;
-  margin: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  background: var(--color-bg);
-  color: var(--color-text);
+.mat-mdc-form-field {
+  min-width: 0;
+}
+
+.mat-mdc-form-field-subscript-wrapper {
+  line-height: 1.25;
+}
+
+.mat-mdc-button-base {
+  min-height: 40px;
+}
+
+.mat-mdc-icon-button.mat-mdc-button-base {
+  min-width: 40px;
+}
+
+.mat-mdc-dialog-container .mdc-dialog__surface {
+  max-width: min(94vw, 720px);
+  max-height: min(90dvh, 900px);
+  overflow: auto;
+  border-radius: var(--radius);
+}
+
+.mat-mdc-snack-bar-container {
+  --mdc-snackbar-container-shape: 10px;
+  margin: 12px !important;
 }
 
 .card {
+  min-width: 0;
   background: var(--color-surface);
+  border: 1px solid color-mix(in srgb, var(--color-border) 78%, transparent);
   border-radius: var(--radius);
   box-shadow: var(--shadow-card);
   padding: 20px;
 }
 
-/* Centraliza el color de encabezados (sección 16) sin tocar cada
- * componente individualmente — todos los .page-title ya existentes en
- * el proyecto heredan esta regla automáticamente. */
-h1, h2, h3, .page-title {
+h1,
+h2,
+h3,
+.page-title {
   color: var(--color-heading);
+  overflow-wrap: anywhere;
+}
+
+.page-title {
+  line-height: 1.2;
+}
+
+.page-subtitle,
+.subtitle,
+.hint,
+.empty,
+.error,
+.success {
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.error {
+  color: var(--color-danger);
+}
+
+.success {
+  color: var(--color-success);
+}
+
+.table-scroll,
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table th {
+  white-space: nowrap;
+}
+
+.table td,
+.table th {
+  vertical-align: middle;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+@media (max-width: 768px) {
+  .card {
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .mat-mdc-snack-bar-container {
+    width: calc(100vw - 20px) !important;
+    max-width: calc(100vw - 20px) !important;
+    margin: 10px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    padding: 14px;
+  }
+
+  .page-title {
+    font-size: clamp(20px, 6vw, 24px) !important;
+  }
+
+  .mat-mdc-dialog-container .mdc-dialog__surface {
+    max-width: calc(100vw - 20px);
+    max-height: calc(100dvh - 20px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media print {
+  body {
+    background: #fff;
+  }
 }

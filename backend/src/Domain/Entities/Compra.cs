@@ -8,9 +8,6 @@ public class Compra : ConfirmableEntity
     public string NumeroCompra { get; set; } = string.Empty;
     public DateTime Fecha { get; set; } = DateTime.UtcNow;
 
-    /// Referencia al proveedor registrado (opcional: permite compras rápidas sin
-    /// crear un proveedor formal). Los campos de abajo son snapshot del proveedor
-    /// al momento de la compra, para no alterar el historial si el proveedor cambia después.
     public int? ProveedorId { get; set; }
     public Proveedor? Proveedor { get; set; }
 
@@ -27,6 +24,10 @@ public class Compra : ConfirmableEntity
     public decimal Descuento { get; set; }
     public decimal Impuesto { get; set; }
     public decimal Total { get; set; }
+
+    public bool Eliminado { get; set; }
+    public DateTime? FechaEliminacion { get; set; }
+    public int? EliminadoPorUsuarioId { get; set; }
 
     public string? Notas { get; set; }
 

@@ -14,7 +14,7 @@
     <table class="table table-desktop">
       <thead>
         <tr>
-          <th>Nombre</th><th>Código</th><th>Tipo</th><th>Valor</th><th>Vigencia</th><th>Usos</th><th>Activo</th><th></th>
+          <th>Nombre</th><th>Código</th><th>Tipo</th><th>Valor</th><th>Vigencia</th><th>Usos</th><th>Estado</th><th>Acciones</th>
         </tr>
       </thead>
       <tbody>
@@ -30,7 +30,15 @@
               } @else { Sin límite }
             </td>
             <td>{{ d.usosRealizados }}{{ d.limiteTotalUsos ? ' / ' + d.limiteTotalUsos : '' }}</td>
-            <td><mat-slide-toggle [checked]="d.activo" [disabled]="!puedeEditar()" (change)="toggleActivo(d)"></mat-slide-toggle></td>
+            <td>
+              @if (puedeCambiarEstado(d)) {
+                <mat-slide-toggle [checked]="d.activo" (change)="toggleActivo(d)"></mat-slide-toggle>
+              } @else {
+                <span class="badge" [class.success]="d.activo" [class.muted]="!d.activo">
+                  {{ d.activo ? 'Activo' : 'Inactivo' }}
+                </span>
+              }
+            </td>
             <td class="actions">
               @if (puedeEditar()) {
                 <a [routerLink]="['/descuentos', d.id, 'editar']" mat-icon-button title="Editar"><mat-icon>edit</mat-icon></a>
@@ -54,7 +62,13 @@
         <div class="item-card">
           <div class="item-card-header">
             <strong>{{ d.nombre }}</strong>
-            <mat-slide-toggle [checked]="d.activo" [disabled]="!puedeEditar()" (change)="toggleActivo(d)"></mat-slide-toggle>
+            @if (puedeCambiarEstado(d)) {
+              <mat-slide-toggle [checked]="d.activo" (change)="toggleActivo(d)"></mat-slide-toggle>
+            } @else {
+              <span class="badge" [class.success]="d.activo" [class.muted]="!d.activo">
+                {{ d.activo ? 'Activo' : 'Inactivo' }}
+              </span>
+            }
           </div>
           <p class="item-card-desc">{{ d.tipo === 'Porcentaje' ? d.valor + '%' : ('L. ' + d.valor) }} @if (d.codigoPromocional) { · Código: {{ d.codigoPromocional }} }</p>
           <div class="item-card-meta">

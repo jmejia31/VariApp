@@ -1,6 +1,8 @@
+using InventoryApp.Application.Common;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities;
 using InventoryApp.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace InventoryApp.Infrastructure.Repositories;
@@ -8,20 +10,41 @@ namespace InventoryApp.Infrastructure.Repositories;
 public class FacturaCompartirRepository : IFacturaCompartirRepository
 {
     private readonly AppDbContext _context;
+    private readonly IHttpContextAccessor? _httpContextAccessor;
 
-    public FacturaCompartirRepository(AppDbContext context)
+    public FacturaCompartirRepository(
+        AppDbContext context,
+        IHttpContextAccessor? httpContextAccessor = null)
     {
         _context = context;
+        _httpContextAccessor = httpContextAccessor;
     }
 
-    public async Task<EnlacePublicoFactura?> GetEnlaceVigenteAsync(int facturaId) =>
-        await _context.EnlacesPublicosFactura
-            .Where(e => e.FacturaId == facturaId && e.FechaExpiracion > DateTime.UtcNow)
-            .OrderByDescending(e => e.FechaCreacion)
-            .FirstOrDefaultAsync();
+    public async Task<EnlacePublicoFactura?> GetPorTokenHashAsync(string tokenHash)
+    {
+        var enlace = await _context.EnlacesPublicosFactura
+            .FirstOrDefaultAsync(e => e.Token == tokenHash);
 
-    public async Task<EnlacePublicoFactura?> GetPorTokenAsync(string token) =>
-        await _context.EnlacesPublicosFactura.FirstOrDefaultAsync(e => e.Token == token);
+        // La marca vive exclusivamente durante esta solicitud. El servicio aún
+        // valida expiración, revocación y límite de accesos antes de solicitar el
+        // PDF; nunca se almacena el token completo.
+        if (enlace is not null && _httpContextAccessor?.HttpContext is { } httpContext)
+            httpContext.Items[PublicInvoiceAccessContext.FacturaIdKey] = enlace.FacturaId;
+
+        return enlace;
+    }
+
+    public async Task<int> ExpirarVigentesAsync(int facturaId, DateTime fechaExpiracion)
+    {
+        var enlaces = await _context.EnlacesPublicosFactura
+            .Where(e => e.FacturaId == facturaId && e.FechaExpiracion > fechaExpiracion)
+            .ToListAsync();
+
+        foreach (var enlace in enlaces)
+            enlace.FechaExpiracion = fechaExpiracion;
+
+        return enlaces.Count;
+    }
 
     public async Task AddEnlaceAsync(EnlacePublicoFactura enlace) =>
         await _context.EnlacesPublicosFactura.AddAsync(enlace);

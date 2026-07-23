@@ -1,5 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -34,36 +35,84 @@ export class LoginComponent {
   readonly errorMessage = signal<string | null>(null);
   readonly hidePassword = signal(true);
 
+  readonly form = this.fb.group({
+    nombreUsuario: ['', [Validators.required, Validators.maxLength(50)]],
+    password: ['', [Validators.required, Validators.maxLength(128)]]
+  });
+
   constructor() {
+    if (this.authService.isAuthenticated()) {
+      this.redirigirSegunPermisos();
+      return;
+    }
+
     this.identidad.cargar().subscribe();
     const mensaje = this.sessionActivity.tomarMensajePendiente();
     if (mensaje) this.errorMessage.set(mensaje);
   }
 
-  form = this.fb.group({
-    nombreUsuario: ['', Validators.required],
-    password: ['', Validators.required]
-  });
-
   submit(): void {
-    if (this.form.invalid) return;
+    if (this.form.invalid || this.loading()) {
+      this.form.markAllAsTouched();
+      return;
+    }
 
     this.loading.set(true);
     this.errorMessage.set(null);
 
+    const valor = this.form.getRawValue();
     this.authService.login({
-      nombreUsuario: this.form.value.nombreUsuario!,
-      password: this.form.value.password!
+      nombreUsuario: valor.nombreUsuario!.trim(),
+      password: valor.password!
     }).subscribe({
       next: () => {
-        this.loading.set(false);
-        this.permisosRuntime.cargar().subscribe();
         this.sessionActivity.iniciar();
-        this.router.navigate(['/dashboard']);
+        this.redirigirSegunPermisos();
       },
-      error: (err) => {
+      error: (err: HttpErrorResponse) => {
         this.loading.set(false);
-        this.errorMessage.set(err.error?.message ?? 'No se pudo iniciar sesión.');
+        this.errorMessage.set(this.obtenerMensajeLogin(err));
+      }
+    });
+  }
+
+  private obtenerMensajeLogin(err: HttpErrorResponse): string {
+    const mensajeBackend = typeof err.error?.message === 'string'
+      ? err.error.message.trim()
+      : '';
+
+    if (mensajeBackend) return mensajeBackend;
+
+    if (err.status === 0) {
+      return 'No fue posible conectar con el servidor. Verifica tu conexión e intenta nuevamente.';
+    }
+
+    if (err.status === 401) {
+      return 'El nombre de usuario o la contraseña son incorrectos.';
+    }
+
+    if (err.status === 403) {
+      return 'La cuenta no tiene autorización para ingresar al sistema.';
+    }
+
+    if (err.status >= 500) {
+      return 'El servidor no pudo procesar el inicio de sesión. Intenta nuevamente en unos minutos.';
+    }
+
+    return 'No se pudo iniciar sesión. Revisa los datos ingresados e intenta nuevamente.';
+  }
+
+  private redirigirSegunPermisos(): void {
+    this.loading.set(true);
+    this.permisosRuntime.cargar().subscribe({
+      next: () => {
+        this.loading.set(false);
+        const ruta = this.permisosRuntime.rutaInicialPermitida() ?? '/perfil';
+        this.router.navigateByUrl(ruta, { replaceUrl: true });
+      },
+      error: () => {
+        this.loading.set(false);
+        this.router.navigateByUrl('/perfil', { replaceUrl: true });
       }
     });
   }

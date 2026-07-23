@@ -23,6 +23,8 @@ export class CategoriasListComponent implements OnInit {
   readonly loading = signal(true);
   readonly puedeCrear = signal(false);
   readonly puedeEditar = signal(false);
+  readonly puedeActivar = signal(false);
+  readonly puedeDesactivar = signal(false);
   readonly puedeEliminar = signal(false);
 
   constructor(
@@ -35,6 +37,8 @@ export class CategoriasListComponent implements OnInit {
   ngOnInit(): void {
     this.puedeCrear.set(this.permisosRuntime.puede('Categorias', 'Crear'));
     this.puedeEditar.set(this.permisosRuntime.puede('Categorias', 'Editar'));
+    this.puedeActivar.set(this.permisosRuntime.puede('Categorias', 'Activar'));
+    this.puedeDesactivar.set(this.permisosRuntime.puede('Categorias', 'Desactivar'));
     this.puedeEliminar.set(this.permisosRuntime.puede('Categorias', 'EliminarLogico'));
     this.cargar();
   }
@@ -50,12 +54,20 @@ export class CategoriasListComponent implements OnInit {
     });
   }
 
+  puedeCambiarEstado(categoria: Categoria): boolean {
+    return categoria.activa ? this.puedeDesactivar() : this.puedeActivar();
+  }
+
   toggleActiva(categoria: Categoria): void {
-    this.categoriaService.update(categoria.id, {
-      nombre: categoria.nombre,
-      descripcion: categoria.descripcion,
-      activa: !categoria.activa
-    }).subscribe(() => this.cargar());
+    if (!this.puedeCambiarEstado(categoria)) return;
+    const operacion = categoria.activa
+      ? this.categoriaService.desactivar(categoria.id)
+      : this.categoriaService.activar(categoria.id);
+
+    operacion.subscribe({
+      next: () => this.cargar(),
+      error: (err) => this.snackBar.open(err.error?.message ?? 'No se pudo cambiar el estado de la categoría.', 'Cerrar', { duration: 5000 })
+    });
   }
 
   async eliminar(categoria: Categoria): Promise<void> {
@@ -64,10 +76,10 @@ export class CategoriasListComponent implements OnInit {
 
     this.categoriaService.delete(categoria.id).subscribe({
       next: () => {
-        this.snackBar.open('Categoria eliminada correctamente.', 'Cerrar', { duration: 3500 });
+        this.snackBar.open('Categoría eliminada correctamente.', 'Cerrar', { duration: 3500 });
         this.cargar();
       },
-      error: (err) => this.snackBar.open(err.error?.message ?? 'No se pudo eliminar la categoria.', 'Cerrar', { duration: 5000 })
+      error: (err) => this.snackBar.open(err.error?.message ?? 'No se pudo eliminar la categoría.', 'Cerrar', { duration: 5000 })
     });
   }
 }

@@ -130,14 +130,18 @@
         <p class="calculando"><mat-spinner diameter="16"></mat-spinner> Calculando descuentos e impuestos...</p>
       }
       @if (resultado(); as r) {
-        <div><span>Subtotal</span><span>L. {{ r.subtotal | number:'1.2-2' }}</span></div>
+        <div><span>Importe bruto</span><span>L. {{ (r.importeBruto ?? r.subtotal) | number:'1.2-2' }}</span></div>
         @for (d of r.descuentosAplicados; track d.descuentoId) {
           <div class="linea-descuento"><span>Descuento: {{ d.nombre }}</span><span>- L. {{ d.monto | number:'1.2-2' }}</span></div>
         }
+        <div><span>Subtotal sin impuesto</span><span>L. {{ (r.subtotalNeto ?? (r.total - r.totalImpuesto)) | number:'1.2-2' }}</span></div>
         @for (i of r.impuestosAplicados; track i.impuestoId) {
-          <div class="linea-impuesto"><span>{{ i.nombre }} ({{ i.tasa }}%)</span><span>+ L. {{ i.monto | number:'1.2-2' }}</span></div>
+          <div class="linea-impuesto">
+            <span>{{ i.nombre }} ({{ i.tasa }}%) {{ i.incluidoEnPrecio ? 'incluido' : 'adicional' }}</span>
+            <span>{{ i.incluidoEnPrecio ? '' : '+' }} L. {{ i.monto | number:'1.2-2' }}</span>
+          </div>
         }
-        <div class="total"><span>Total</span><span>L. {{ r.total | number:'1.2-2' }}</span></div>
+        <div class="total"><span>Total a cobrar</span><span>L. {{ r.total | number:'1.2-2' }}</span></div>
       } @else {
         <p class="hint">Agrega productos para ver el desglose real de descuentos e impuestos.</p>
       }

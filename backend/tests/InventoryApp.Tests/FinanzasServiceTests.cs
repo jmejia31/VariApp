@@ -16,6 +16,7 @@ public class FinanzasServiceTests
     private readonly Mock<ICompraRepository> _compraRepoMock = new();
     private readonly Mock<IProductoRepository> _productoRepoMock = new();
     private readonly Mock<ICurrentUserService> _currentUserMock = new();
+    private readonly Mock<IUsuarioScopeService> _usuarioScopeMock = new();
     private readonly FinanzasService _service;
 
     public FinanzasServiceTests()
@@ -23,12 +24,19 @@ public class FinanzasServiceTests
         _currentUserMock.Setup(c => c.UsuarioId).Returns(1);
         _currentUserMock.Setup(c => c.NombreUsuario).Returns("admin");
         _currentUserMock.Setup(c => c.NombreCompleto).Returns("Administrador");
+        _usuarioScopeMock.Setup(s => s.ObtenerActualAsync())
+            .ReturnsAsync(new UsuarioScopeActual(1, 1, "Administrador", true));
         _movRepoMock.Setup(r => r.SaveChangesAsync()).ReturnsAsync(true);
         _revisionRepoMock.Setup(r => r.SaveChangesAsync()).ReturnsAsync(true);
 
         _service = new FinanzasService(
-            _movRepoMock.Object, _revisionRepoMock.Object, _ventaRepoMock.Object,
-            _compraRepoMock.Object, _productoRepoMock.Object, _currentUserMock.Object);
+            _movRepoMock.Object,
+            _revisionRepoMock.Object,
+            _ventaRepoMock.Object,
+            _compraRepoMock.Object,
+            _productoRepoMock.Object,
+            _currentUserMock.Object,
+            _usuarioScopeMock.Object);
     }
 
     [Fact]
@@ -72,7 +80,7 @@ public class FinanzasServiceTests
     }
 
     [Fact]
-    public async Task RegistrarRevisionAsync_Guarda_Usuario_Revisor()
+    public async Task RegistrarRevisionAsync_Guarda_Usuario_Revisor_Administrador()
     {
         var resultado = await _service.RegistrarRevisionAsync(new CreateRevisionFinancieraDto
         {
@@ -87,6 +95,22 @@ public class FinanzasServiceTests
     }
 
     [Fact]
+    public async Task RegistrarRevisionAsync_Usuario_No_Administrador_Es_Rechazado()
+    {
+        _usuarioScopeMock.Setup(s => s.ObtenerActualAsync())
+            .ReturnsAsync(new UsuarioScopeActual(2, 2, "Vendedor", false));
+
+        await Assert.ThrowsAsync<BusinessRuleException>(() => _service.RegistrarRevisionAsync(new CreateRevisionFinancieraDto
+        {
+            FechaDesde = DateTime.UtcNow.AddDays(-30),
+            FechaHasta = DateTime.UtcNow,
+            EstadoRevision = "Revisado"
+        }));
+
+        _revisionRepoMock.Verify(r => r.AddAsync(It.IsAny<RevisionFinanciera>()), Times.Never);
+    }
+
+    [Fact]
     public async Task RegistrarRevisionAsync_Fecha_Hasta_Menor_A_Desde_Lanza_Excepcion()
     {
         await Assert.ThrowsAsync<BusinessRuleException>(() => _service.RegistrarRevisionAsync(new CreateRevisionFinancieraDto
@@ -94,5 +118,15 @@ public class FinanzasServiceTests
             FechaDesde = DateTime.UtcNow,
             FechaHasta = DateTime.UtcNow.AddDays(-10)
         }));
+    }
+
+    [Fact]
+    public async Task GetResumenAsync_Sesion_Sin_Usuario_Dinamico_Falla_Cerrada()
+    {
+        _usuarioScopeMock.Setup(s => s.ObtenerActualAsync())
+            .ReturnsAsync((UsuarioScopeActual?)null);
+
+        await Assert.ThrowsAsync<ForbiddenAccessException>(() => _service.GetResumenAsync());
+        _movRepoMock.Verify(r => r.GetFilteredAsync(It.IsAny<DateTime?>(), It.IsAny<DateTime?>()), Times.Never);
     }
 }

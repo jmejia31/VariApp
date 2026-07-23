@@ -39,7 +39,6 @@ export class CompraFormComponent implements OnInit {
   readonly resultado = signal<ResultadoCalculo | null>(null);
   private compraId: number | null = null;
 
-  // --- Autocompletado remoto de proveedores (sección 17) ---
   readonly buscadorProveedor = new FormControl('');
   readonly opcionesProveedor = signal<Proveedor[]>([]);
   readonly buscandoProveedor = signal(false);
@@ -71,7 +70,9 @@ export class CompraFormComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.productoService.getPaged({ page: 1, pageSize: 200, sortBy: 'Nombre' }).subscribe((res) => this.productos.set(res.data.items));
+    this.productoService.getPaged({ page: 1, pageSize: 200, sortBy: 'Nombre' }).subscribe((res) =>
+      this.productos.set(res.data.items.filter((producto) => producto.activo))
+    );
 
     const idParam = this.route.snapshot.paramMap.get('id');
     if (idParam) {
@@ -153,12 +154,31 @@ export class CompraFormComponent implements OnInit {
           notas: c.notas
         });
         c.detalles.forEach((d) => this.agregarDetalle(d.productoId, d.cantidad, d.costoUnitario));
+
+        const importeBruto = c.detalles.reduce((total, detalle) => total + detalle.subtotal, 0);
+        const totalDespuesDescuento = Math.max(0, importeBruto - c.descuento);
+        const asumirIncluidos = Math.abs(c.total - totalDespuesDescuento) <= 0.01;
+        const impuestos = c.impuestosAplicados.map((impuesto) => ({
+          ...impuesto,
+          incluidoEnPrecio: impuesto.incluidoEnPrecio || asumirIncluidos
+        }));
+        const impuestoIncluido = impuestos
+          .filter((impuesto) => impuesto.incluidoEnPrecio)
+          .reduce((total, impuesto) => total + impuesto.monto, 0);
+        const impuestoAdicional = impuestos
+          .filter((impuesto) => !impuesto.incluidoEnPrecio)
+          .reduce((total, impuesto) => total + impuesto.monto, 0);
+
         this.resultado.set({
+          importeBruto,
           subtotal: c.subtotal,
+          subtotalNeto: c.subtotal,
           descuentosAplicados: [],
           totalDescuento: c.descuento,
-          impuestosAplicados: c.impuestosAplicados,
+          impuestosAplicados: impuestos,
           totalImpuesto: c.impuesto,
+          impuestoIncluido,
+          impuestoAdicional,
           total: c.total
         });
         this.loading.set(false);
@@ -186,7 +206,6 @@ export class CompraFormComponent implements OnInit {
     return cantidad * costo;
   }
 
-  /** Llama al backend para obtener el desglose REAL de impuestos. */
   recalcular(): void {
     const detallesValidos = this.detalles.controls
       .map((g) => g.value)
@@ -201,12 +220,15 @@ export class CompraFormComponent implements OnInit {
     this.calculando.set(true);
     this.compraService.calcular(this.proveedorId, detallesValidos).subscribe({
       next: (res) => { this.resultado.set(res.data); this.calculando.set(false); },
-      error: () => { this.calculando.set(false); }
+      error: (err) => {
+        this.calculando.set(false);
+        this.errorMessage.set(err.error?.message ?? 'No se pudo calcular la compra.');
+      }
     });
   }
 
   submit(): void {
-    if (this.form.invalid || this.detalles.length === 0) return;
+    if (this.form.invalid || this.detalles.length === 0 || this.saving()) return;
 
     this.saving.set(true);
     this.errorMessage.set(null);

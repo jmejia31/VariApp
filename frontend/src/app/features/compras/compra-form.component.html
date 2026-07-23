@@ -58,7 +58,7 @@
         <input matInput formControlName="proveedorDocumento">
       </mat-form-field>
       <mat-form-field appearance="outline">
-        <mat-label>Documento de referencia (opcional)</mat-label>
+        <mat-label>Número de factura o referencia (opcional)</mat-label>
         <input matInput formControlName="documentoReferencia">
       </mat-form-field>
     </div>
@@ -68,7 +68,7 @@
       @for (grupo of detalles.controls; track $index; let i = $index) {
         <div class="detalle-row" [formGroupName]="i">
           <mat-form-field appearance="outline" class="col-producto">
-            <mat-label>Producto</mat-label>
+            <mat-label>Producto activo</mat-label>
             <mat-select formControlName="productoId">
               @for (p of productos(); track p.id) {
                 <mat-option [value]="p.id">{{ p.nombre }} — {{ p.marca }} {{ p.modelo }}</mat-option>
@@ -124,11 +124,21 @@
         <p class="calculando"><mat-spinner diameter="16"></mat-spinner> Calculando impuestos...</p>
       }
       @if (resultado(); as r) {
-        <div><span>Subtotal</span><span>L. {{ r.subtotal | number:'1.2-2' }}</span></div>
+        <div><span>Importe bruto de la compra</span><span>L. {{ (r.importeBruto ?? 0) | number:'1.2-2' }}</span></div>
+        <div><span>Subtotal sin impuesto</span><span>L. {{ (r.subtotalNeto ?? r.subtotal) | number:'1.2-2' }}</span></div>
         @for (i of r.impuestosAplicados; track i.impuestoId) {
-          <div class="linea-impuesto"><span>{{ i.nombre }} ({{ i.tasa }}%)</span><span>+ L. {{ i.monto | number:'1.2-2' }}</span></div>
+          <div class="linea-impuesto">
+            <span>{{ i.nombre }} ({{ i.tasa }}%) — {{ i.incluidoEnPrecio ? 'incluido en el total del proveedor' : 'adicional' }}</span>
+            <span>{{ i.incluidoEnPrecio ? '' : '+' }} L. {{ i.monto | number:'1.2-2' }}</span>
+          </div>
         }
-        <div class="total"><span>Total</span><span>L. {{ r.total | number:'1.2-2' }}</span></div>
+        @if ((r.impuestoIncluido ?? 0) > 0) {
+          <div><span>Total de impuestos incluidos</span><span>L. {{ (r.impuestoIncluido ?? 0) | number:'1.2-2' }}</span></div>
+        }
+        @if ((r.impuestoAdicional ?? 0) > 0) {
+          <div><span>Total de impuestos adicionales</span><span>+ L. {{ (r.impuestoAdicional ?? 0) | number:'1.2-2' }}</span></div>
+        }
+        <div class="total"><span>Total facturado por el proveedor</span><span>L. {{ r.total | number:'1.2-2' }}</span></div>
       } @else {
         <p class="hint">Agrega productos para ver el desglose real de impuestos.</p>
       }

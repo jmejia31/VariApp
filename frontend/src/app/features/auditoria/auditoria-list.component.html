@@ -1,7 +1,7 @@
 <h1 class="page-title">Auditoría</h1>
-<p class="subtitle">Bitácora centralizada de todas las acciones del sistema.</p>
+<p class="subtitle">Bitácora centralizada de las acciones realizadas en el sistema.</p>
 
-<div class="card filters">
+<div class="card filters" aria-label="Filtros de auditoría">
   <mat-form-field appearance="outline">
     <mat-label>Módulo</mat-label>
     <mat-select [(ngModel)]="filtroModulo" (selectionChange)="aplicarFiltros()">
@@ -38,19 +38,20 @@
   </mat-form-field>
 
   <mat-form-field appearance="outline" class="filtro-texto">
-    <mat-label>Buscar (usuario, descripción, motivo)</mat-label>
-    <input matInput [(ngModel)]="filtroTexto" (ngModelChange)="programarFiltro()" placeholder="Texto libre...">
-    <button matSuffix mat-icon-button (click)="aplicarFiltros()"><mat-icon>search</mat-icon></button>
+    <mat-label>Buscar por usuario, descripción o motivo</mat-label>
+    <input matInput [(ngModel)]="filtroTexto" (ngModelChange)="programarFiltro()" placeholder="Texto libre..." autocomplete="off">
+    <button matSuffix mat-icon-button type="button" (click)="aplicarFiltros()" aria-label="Aplicar búsqueda"><mat-icon>search</mat-icon></button>
   </mat-form-field>
 </div>
 
 <div class="card">
   @if (loading()) {
-    <div class="loading"><mat-spinner></mat-spinner></div>
+    <div class="loading" aria-live="polite"><mat-spinner></mat-spinner><span class="sr-only">Cargando registros de auditoría...</span></div>
   } @else {
     <table class="table table-desktop">
+      <caption class="sr-only">Registros de auditoría del sistema</caption>
       <thead>
-        <tr><th>Fecha</th><th>Usuario</th><th>Módulo</th><th>Acción</th><th>Detalle</th><th>Resultado</th><th></th></tr>
+        <tr><th scope="col">Fecha</th><th scope="col">Usuario</th><th scope="col">Módulo</th><th scope="col">Acción</th><th scope="col">Detalle</th><th scope="col">Resultado</th><th scope="col">Acciones</th></tr>
       </thead>
       <tbody>
         @for (r of registros(); track r.id) {
@@ -66,7 +67,12 @@
             <td>{{ r.descripcion }}</td>
             <td><span class="badge" [class.error-badge]="r.resultado === 'Error'">{{ r.resultado }}</span></td>
             <td>
-              <button mat-icon-button (click)="toggleDetalle(r.id)" title="Ver detalle">
+              <button
+                mat-icon-button
+                type="button"
+                (click)="toggleDetalle(r.id)"
+                [attr.aria-expanded]="expandidoId() === r.id"
+                [attr.aria-label]="(expandidoId() === r.id ? 'Ocultar' : 'Mostrar') + ' detalle del registro'">
                 <mat-icon>{{ expandidoId() === r.id ? 'expand_less' : 'expand_more' }}</mat-icon>
               </button>
             </td>
@@ -105,7 +111,15 @@
 
     <div class="cards-mobile">
       @for (r of registros(); track r.id) {
-        <div class="audit-card" [class.error-row]="r.resultado === 'Error'" (click)="toggleDetalle(r.id)">
+        <div
+          class="audit-card"
+          [class.error-row]="r.resultado === 'Error'"
+          role="button"
+          tabindex="0"
+          [attr.aria-expanded]="expandidoId() === r.id"
+          (click)="toggleDetalle(r.id)"
+          (keydown.enter)="toggleDetalle(r.id)"
+          (keydown.space)="$event.preventDefault(); toggleDetalle(r.id)">
           <div class="audit-card-header">
             <span class="badge" [class.error-badge]="r.resultado === 'Error'">{{ r.accion }}</span>
             <span class="fecha">{{ r.fecha | date:'dd/MM HH:mm' }}</span>

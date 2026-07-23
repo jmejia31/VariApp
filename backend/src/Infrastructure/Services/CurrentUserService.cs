@@ -53,10 +53,11 @@ public class CurrentUserService : ICurrentUserService
     {
         get
         {
+            // Los privilegios administrativos solo se aceptan cuando el JWT contiene
+            // el claim explícito emitido desde el rol dinámico vigente. Los tokens
+            // antiguos que únicamente dicen "Administrador" fallan cerrados.
             var value = User?.FindFirstValue("esAdministrador");
-            if (bool.TryParse(value, out var esAdmin)) return esAdmin;
-            // Fallback para JWTs emitidos antes de esta fase (sin el claim nuevo).
-            return Rol == RolUsuario.Administrador;
+            return bool.TryParse(value, out var esAdmin) && esAdmin;
         }
     }
 }

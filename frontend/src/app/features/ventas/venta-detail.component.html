@@ -55,10 +55,10 @@
         <div class="linea-descuento"><span>Descuento: {{ d.nombre }}{{ d.codigo ? ' (' + d.codigo + ')' : '' }}</span><span>- L. {{ d.monto | number:'1.2-2' }}</span></div>
       }
       @for (i of v.impuestosAplicados; track i.impuestoId) {
-        <div class="linea-impuesto"><span>{{ i.nombre }} ({{ i.tasa }}%)</span><span>+ L. {{ i.monto | number:'1.2-2' }}</span></div>
+        <div class="linea-impuesto"><span>{{ i.nombre }} ({{ i.tasa }}%)</span><span>{{ i.incluidoEnPrecio ? '' : '+' }} L. {{ i.monto | number:'1.2-2' }}</span></div>
       }
       <div class="total"><span>Total</span><span>L. {{ v.total | number:'1.2-2' }}</span></div>
-      @if (v.estado === 'Confirmada') {
+      @if (v.estado === 'Confirmada' && puedeVerUtilidad()) {
         <div class="utilidad"><span>Utilidad bruta</span><span>L. {{ v.utilidadBruta | number:'1.2-2' }}</span></div>
       }
     </div>
@@ -72,17 +72,25 @@
 
     <div class="actions">
       @if (v.estado === 'Borrador') {
-        <a [routerLink]="['/ventas', v.id, 'editar']" mat-button>Editar</a>
-        <button mat-button color="warn" (click)="eliminarBorrador()">Eliminar borrador</button>
-        <button mat-flat-button color="primary" [disabled]="procesando()" (click)="confirmar()">Confirmar venta</button>
+        @if (puedeEditar()) {
+          <a [routerLink]="['/ventas', v.id, 'editar']" mat-button>Editar</a>
+        }
+        @if (puedeEliminar()) {
+          <button mat-button color="warn" [disabled]="procesando()" (click)="eliminarBorrador()">Eliminar borrador</button>
+        }
+        @if (puedeConfirmar()) {
+          <button mat-flat-button color="primary" [disabled]="procesando()" (click)="confirmar()">Confirmar venta</button>
+        }
       }
       @if (v.estado === 'Confirmada') {
-        @if (v.facturaId) {
+        @if (v.facturaId && puedeVerFactura()) {
           <a [routerLink]="['/facturas', v.facturaId]" mat-button>
             <mat-icon>receipt_long</mat-icon> Ver factura
           </a>
         }
-        <button mat-flat-button color="warn" [disabled]="procesando()" (click)="anular()">Anular venta</button>
+        @if (puedeAnular()) {
+          <button mat-flat-button color="warn" [disabled]="procesando()" (click)="anular()">Anular venta</button>
+        }
       }
     </div>
   </div>

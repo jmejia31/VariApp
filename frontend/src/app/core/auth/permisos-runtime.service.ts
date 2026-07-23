@@ -11,13 +11,13 @@ const RUTAS_PROTEGIDAS = [
   { ruta: '/ventas', modulo: 'Ventas', accion: 'Ver' },
   { ruta: '/clientes', modulo: 'Clientes', accion: 'Ver' },
   { ruta: '/finanzas', modulo: 'Finanzas', accion: 'Ver' },
-  { ruta: '/movimientos', modulo: 'MovimientosInventario', accion: 'Ver' },
+  { ruta: '/inventario/movimientos', modulo: 'MovimientosInventario', accion: 'Ver' },
   { ruta: '/usuarios', modulo: 'Usuarios', accion: 'Ver' },
   { ruta: '/roles', modulo: 'Roles', accion: 'Ver' },
   { ruta: '/descuentos', modulo: 'Descuentos', accion: 'Ver' },
   { ruta: '/impuestos', modulo: 'Impuestos', accion: 'Ver' },
   { ruta: '/permisos', modulo: 'Permisos', accion: 'Administrar' },
-  { ruta: '/auditoria', modulo: 'Auditoria', accion: 'Ver' },
+  { ruta: '/auditoria', modulo: 'Auditoria', accion: 'Ver', soloAdministrador: true },
   { ruta: '/configuracion', modulo: 'Configuracion', accion: 'Ver' }
 ] as const;
 
@@ -62,6 +62,8 @@ export class PermisosRuntimeService {
 
   rutaInicialPermitida(): string | null {
     if (this._esAdministrador()) return '/dashboard';
-    return RUTAS_PROTEGIDAS.find(item => this.puede(item.modulo, item.accion))?.ruta ?? null;
+    return RUTAS_PROTEGIDAS.find(item =>
+      !('soloAdministrador' in item) && this.puede(item.modulo, item.accion)
+    )?.ruta ?? null;
   }
 }

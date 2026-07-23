@@ -10,16 +10,11 @@ export const permisoGuard: CanActivateFn = (route) => {
   const modulo = route.data?.['modulo'] as string | undefined;
   const accion = route.data?.['accion'] as string | undefined;
 
-  if (!modulo || !accion) {
-    return true;
-  }
+  if (!modulo || !accion) return true;
 
-  if (permisosRuntime.cargado()) {
-    return permisosRuntime.puede(modulo, accion)
-      ? true
-      : router.createUrlTree([permisosRuntime.rutaInicialPermitida() ?? '/login']);
-  }
-
+  // Se consulta nuevamente la matriz antes de cada navegación protegida. Así,
+  // cuando un administrador concede o revoca permisos, la sesión del usuario
+  // deja de mostrar y permitir módulos obsoletos sin requerir cerrar sesión.
   return permisosRuntime.cargar().pipe(
     map((ok) => ok && permisosRuntime.puede(modulo, accion)
       ? true

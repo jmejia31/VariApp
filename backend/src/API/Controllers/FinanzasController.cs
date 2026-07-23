@@ -14,10 +14,12 @@ namespace InventoryApp.API.Controllers;
 public class FinanzasController : ControllerBase
 {
     private readonly IFinanzasService _finanzasService;
+    private readonly ICurrentUserService _currentUser;
 
-    public FinanzasController(IFinanzasService finanzasService)
+    public FinanzasController(IFinanzasService finanzasService, ICurrentUserService currentUser)
     {
         _finanzasService = finanzasService;
+        _currentUser = currentUser;
     }
 
     [HttpGet("resumen")]
@@ -57,6 +59,9 @@ public class FinanzasController : ControllerBase
     [RequierePermiso(ModuloSistema.Finanzas, AccionPermiso.Ver)]
     public async Task<IActionResult> GetRevisiones()
     {
+        if (!_currentUser.EsAdministrador)
+            return Forbid();
+
         var revisiones = await _finanzasService.GetRevisionesAsync();
         return Ok(ApiResponse<List<RevisionFinancieraDto>>.Ok(revisiones));
     }
@@ -65,6 +70,9 @@ public class FinanzasController : ControllerBase
     [RequierePermiso(ModuloSistema.Finanzas, AccionPermiso.Crear)]
     public async Task<IActionResult> RegistrarRevision([FromBody] CreateRevisionFinancieraDto dto)
     {
+        if (!_currentUser.EsAdministrador)
+            return Forbid();
+
         var creada = await _finanzasService.RegistrarRevisionAsync(dto);
         return Ok(ApiResponse<RevisionFinancieraDto>.Ok(creada, "Revisión financiera registrada correctamente."));
     }

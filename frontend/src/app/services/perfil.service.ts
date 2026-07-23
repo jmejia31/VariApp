@@ -19,6 +19,16 @@ export class PerfilService {
     return this.http.put<ApiResponse<Perfil>>(this.apiUrl, valor);
   }
 
+  actualizarFoto(foto: File): Observable<ApiResponse<Perfil>> {
+    const formData = new FormData();
+    formData.append('foto', foto, foto.name);
+    return this.http.put<ApiResponse<Perfil>>(`${this.apiUrl}/foto`, formData);
+  }
+
+  eliminarFoto(): Observable<ApiResponse<Perfil>> {
+    return this.http.delete<ApiResponse<Perfil>>(`${this.apiUrl}/foto`);
+  }
+
   cambiarPassword(valor: CambiarPasswordValue): Observable<ApiResponse<object>> {
     return this.http.put<ApiResponse<object>>(`${this.apiUrl}/password`, valor);
   }

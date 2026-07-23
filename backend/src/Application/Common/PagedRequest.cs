@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace InventoryApp.Application.Common;
 
 public class PagedRequest
@@ -20,4 +22,12 @@ public class PagedRequest
     public string? Search { get; set; }
     public string? SortBy { get; set; } = "Nombre";
     public string? SortDirection { get; set; } = "asc"; // asc | desc
+
+    /// <summary>
+    /// Alcance interno aplicado por los servicios para usuarios no administradores.
+    /// Nunca se acepta desde la petición HTTP: el servicio lo sobrescribe usando
+    /// ICurrentUserService.UsuarioId antes de consultar el repositorio.
+    /// </summary>
+    [JsonIgnore]
+    public int? UsuarioIdScope { get; set; }
 }

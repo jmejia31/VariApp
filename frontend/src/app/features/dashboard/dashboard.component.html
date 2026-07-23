@@ -1,23 +1,25 @@
 @if (loading()) {
-  <div class="loading"><mat-spinner></mat-spinner></div>
+  <div class="loading" aria-live="polite"><mat-spinner></mat-spinner><span class="sr-only">Cargando Dashboard...</span></div>
 } @else if (resumen(); as r) {
-  <section class="dashboard-shell">
-    <div class="dashboard-title">
+  <section class="dashboard-shell" aria-labelledby="dashboard-title">
+    <header class="dashboard-title">
       <div>
-        <p class="eyebrow">Panel principal</p>
-        <h1>Dashboard</h1>
+        <p class="eyebrow">{{ esAdministrador() ? 'Panel principal' : 'Resumen personal' }}</p>
+        <h1 id="dashboard-title">{{ esAdministrador() ? 'Dashboard administrativo' : 'Mi actividad' }}</h1>
       </div>
-      <a routerLink="/ventas" class="quick-link">Ver ventas</a>
-    </div>
+      @if (puedeVerVentas()) {
+        <a routerLink="/ventas" class="quick-link">Ver ventas <mat-icon>arrow_forward</mat-icon></a>
+      }
+    </header>
 
-    <div class="metric-grid">
+    <div class="metric-grid" aria-label="Indicadores principales">
       <article class="metric-card accent-orange">
         <div>
           <span>L. {{ r.ingresosDelMes | number:'1.2-2' }}</span>
-          <p>Ingresos del mes</p>
+          <p>{{ esAdministrador() ? 'Ingresos del mes' : 'Mis ingresos del mes' }}</p>
         </div>
-        <mat-icon>bar_chart</mat-icon>
-        <footer>Ventas registradas: {{ r.ventasDelMes }}</footer>
+        <mat-icon aria-hidden="true">bar_chart</mat-icon>
+        <footer>{{ esAdministrador() ? 'Ventas registradas' : 'Mis ventas registradas' }}: {{ r.ventasDelMes }}</footer>
       </article>
 
       <article class="metric-card accent-green">
@@ -25,7 +27,7 @@
           <span>{{ r.totalUnidades | number }}</span>
           <p>Unidades en inventario</p>
         </div>
-        <mat-icon>inventory_2</mat-icon>
+        <mat-icon aria-hidden="true">inventory_2</mat-icon>
         <footer>Productos activos: {{ r.totalProductos }}</footer>
       </article>
 
@@ -34,50 +36,54 @@
           <span>{{ r.productosStockBajo.length }}</span>
           <p>Alertas de stock bajo</p>
         </div>
-        <mat-icon>event_busy</mat-icon>
-        <footer>Revisar reposición</footer>
+        <mat-icon aria-hidden="true">event_busy</mat-icon>
+        <footer>Productos que requieren reposición</footer>
       </article>
 
-      <article class="metric-card accent-cyan">
-        <div>
-          <span>L. {{ r.utilidadBruta | number:'1.2-2' }}</span>
-          <p>Utilidad bruta</p>
-        </div>
-        <mat-icon>download</mat-icon>
-        <footer>Balance: L. {{ r.balanceOperativo | number:'1.2-2' }}</footer>
-      </article>
+      @if (esAdministrador()) {
+        <article class="metric-card accent-cyan">
+          <div>
+            <span>L. {{ r.utilidadBruta | number:'1.2-2' }}</span>
+            <p>Utilidad bruta</p>
+          </div>
+          <mat-icon aria-hidden="true">trending_up</mat-icon>
+          <footer>Balance operativo: L. {{ r.balanceOperativo | number:'1.2-2' }}</footer>
+        </article>
+      }
     </div>
 
     <div class="dashboard-grid">
       <article class="card analytics-card">
         <div class="panel-heading">
           <div>
-            <h2>Actividad comercial</h2>
-            <p>Ventas y compras recientes tomadas de la base de datos.</p>
-          </div>
-          <div class="panel-tools">
-            <mat-icon>open_in_full</mat-icon>
-            <mat-icon>remove</mat-icon>
+            <h2>{{ esAdministrador() ? 'Actividad comercial' : 'Mi actividad comercial' }}</h2>
+            <p>
+              {{ esAdministrador()
+                ? 'Ventas y compras recientes obtenidas de la base de datos.'
+                : 'Únicamente las ventas registradas por tu usuario.' }}
+            </p>
           </div>
         </div>
 
-        <div class="chart-legend">
+        <div class="chart-legend" aria-hidden="true">
           <span><i class="venta"></i> Ventas</span>
-          <span><i class="compra"></i> Compras</span>
+          @if (esAdministrador()) {
+            <span><i class="compra"></i> Compras</span>
+          }
         </div>
 
-        <div class="combo-chart">
+        <div class="combo-chart" role="img" [attr.aria-label]="esAdministrador() ? 'Gráfico de ventas y compras recientes' : 'Gráfico de mis ventas recientes'">
           @for (v of ventasRecientes(r); track v.numeroVenta) {
-            <div class="chart-column">
-              <div class="bars">
+            <div class="chart-column" [title]="'Venta ' + v.numeroVenta + ': L. ' + v.total">
+              <div class="bars" aria-hidden="true">
                 <span class="bar venta" [style.height.%]="barraPorcentaje(v.total, r)"></span>
               </div>
               <small>{{ v.fecha | date:'dd/MM' }}</small>
             </div>
           }
           @for (c of comprasRecientes(r); track c.numeroCompra) {
-            <div class="chart-column">
-              <div class="bars">
+            <div class="chart-column" [title]="'Compra ' + c.numeroCompra + ': L. ' + c.total">
+              <div class="bars" aria-hidden="true">
                 <span class="bar compra" [style.height.%]="barraPorcentaje(c.total, r)"></span>
               </div>
               <small>{{ c.fecha | date:'dd/MM' }}</small>
@@ -86,8 +92,8 @@
         </div>
       </article>
 
-      <aside class="performance-card">
-        <div class="mini-bars">
+      <aside class="performance-card" aria-label="Resumen de productos con stock bajo">
+        <div class="mini-bars" aria-hidden="true">
           @for (p of r.productosStockBajo.slice(0, 5); track p.id) {
             <span [style.height.%]="porcentaje(p.cantidad, p.umbralStockBajo || 1)"></span>
           }
@@ -99,14 +105,17 @@
 
       <article class="card table-card">
         <div class="panel-heading">
-          <h2>Últimas ventas</h2>
-          <a routerLink="/ventas">Ver todas</a>
+          <h2>{{ esAdministrador() ? 'Últimas ventas' : 'Mis últimas ventas' }}</h2>
+          @if (puedeVerVentas()) {
+            <a routerLink="/ventas">Ver todas</a>
+          }
         </div>
         @if (r.ultimasVentas.length === 0) {
           <p class="empty">Aún no hay ventas registradas.</p>
         } @else {
           <table>
-            <thead><tr><th>#</th><th>Cliente</th><th>Total</th><th>Estado</th></tr></thead>
+            <caption class="sr-only">Últimas ventas registradas</caption>
+            <thead><tr><th scope="col">Número</th><th scope="col">Cliente</th><th scope="col">Total</th><th scope="col">Estado</th></tr></thead>
             <tbody>
               @for (v of r.ultimasVentas; track v.numeroVenta) {
                 <tr>
@@ -123,12 +132,18 @@
 
       <article class="card donut-card">
         <div class="panel-heading">
-          <h2>Operación del mes</h2>
+          <h2>{{ esAdministrador() ? 'Operación del mes' : 'Mi operación del mes' }}</h2>
         </div>
-        <div class="donut" [style.background]="donutBackground(r)"></div>
+        <div
+          class="donut"
+          role="img"
+          [attr.aria-label]="'Ventas ' + porcentaje(r.ventasDelMes, totalOperativo(r)) + ' por ciento; alertas ' + porcentaje(r.productosStockBajo.length, totalOperativo(r)) + ' por ciento'"
+          [style.background]="donutBackground(r)"></div>
         <div class="donut-stats">
           <div><strong>{{ porcentaje(r.ventasDelMes, totalOperativo(r)) }}%</strong><span>Ventas</span></div>
-          <div><strong>{{ porcentaje(r.comprasDelMes, totalOperativo(r)) }}%</strong><span>Compras</span></div>
+          @if (esAdministrador()) {
+            <div><strong>{{ porcentaje(r.comprasDelMes, totalOperativo(r)) }}%</strong><span>Compras</span></div>
+          }
           <div><strong>{{ porcentaje(r.productosStockBajo.length, totalOperativo(r)) }}%</strong><span>Alertas</span></div>
         </div>
       </article>
@@ -136,7 +151,9 @@
       <article class="card list-card">
         <div class="panel-heading">
           <h2>Productos críticos</h2>
-          <a routerLink="/productos">Inventario</a>
+          @if (puedeVerProductos()) {
+            <a routerLink="/productos">Inventario</a>
+          }
         </div>
         @if (r.productosStockBajo.length === 0) {
           <p class="empty">No hay productos con stock bajo.</p>
@@ -145,20 +162,22 @@
             @for (p of r.productosStockBajo; track p.id) {
               <li>
                 <span>{{ p.nombre }} · {{ p.marca }} {{ p.modelo }}</span>
-                <strong>{{ p.cantidad }} und.</strong>
+                <strong>{{ p.cantidad }} unid.</strong>
               </li>
             }
           </ul>
         }
       </article>
 
-      <article class="card audit-card">
-        <h2>Auditoría reciente</h2>
-        <div><span>Última venta</span><strong>{{ r.ultimaVentaPor || 'Sin registro' }}</strong></div>
-        <div><span>Última compra</span><strong>{{ r.ultimaCompraPor || 'Sin registro' }}</strong></div>
-        <div><span>Última revisión financiera</span><strong>{{ r.ultimaRevisionFinancieraPor || 'Sin registro' }}</strong></div>
-        <div><span>Último producto</span><strong>{{ r.ultimoProductoRegistradoPor || 'Sin registro' }}</strong></div>
-      </article>
+      @if (esAdministrador()) {
+        <article class="card audit-card">
+          <h2>Auditoría reciente</h2>
+          <div><span>Última venta</span><strong>{{ r.ultimaVentaPor || 'Sin registro' }}</strong></div>
+          <div><span>Última compra</span><strong>{{ r.ultimaCompraPor || 'Sin registro' }}</strong></div>
+          <div><span>Última revisión financiera</span><strong>{{ r.ultimaRevisionFinancieraPor || 'Sin registro' }}</strong></div>
+          <div><span>Último producto</span><strong>{{ r.ultimoProductoRegistradoPor || 'Sin registro' }}</strong></div>
+        </article>
+      }
     </div>
   </section>
 }

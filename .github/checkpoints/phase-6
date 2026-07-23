@@ -1,0 +1,5 @@
+Checkpoint final de certificación controlada de la Fase 6.
+Fecha: 2026-07-22
+Revisión: 6
+Incluye migración EF exclusivamente aditiva, SQL forward generado desde la migración inmediatamente anterior, validación de modelo, build Release backend, pruebas de permisos, finanzas, eliminación lógica, cálculos fiscales, enlaces públicos y perfil, y build de producción Angular.
+Prohibido: aplicar migraciones a Aiven, desplegar producción o fusionar a main durante este checkpoint.

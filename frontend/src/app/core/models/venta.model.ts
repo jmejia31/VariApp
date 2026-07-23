@@ -22,6 +22,7 @@ export interface DescuentoAplicado {
 export interface ImpuestoAplicado {
   impuestoId: number;
   nombre: string;
+  codigo?: string;
   tasa: number;
   baseImponible: number;
   monto: number;
@@ -29,11 +30,15 @@ export interface ImpuestoAplicado {
 }
 
 export interface ResultadoCalculo {
+  importeBruto?: number;
   subtotal: number;
+  subtotalNeto?: number;
   descuentosAplicados: DescuentoAplicado[];
   totalDescuento: number;
   impuestosAplicados: ImpuestoAplicado[];
   totalImpuesto: number;
+  impuestoIncluido?: number;
+  impuestoAdicional?: number;
   total: number;
 }
 

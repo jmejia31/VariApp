@@ -165,6 +165,14 @@ namespace InventoryApp.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
+                    b.Property<bool>("Eliminado")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false);
+
+                    b.Property<int?>("EliminadoPorUsuarioId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Estado")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -188,6 +196,9 @@ namespace InventoryApp.Infrastructure.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("FechaEliminacion")
                         .HasColumnType("datetime(6)");
 
                     b.Property<decimal>("Impuesto")
@@ -234,6 +245,8 @@ namespace InventoryApp.Infrastructure.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Eliminado");
 
                     b.HasIndex("NumeroCompra")
                         .IsUnique();
@@ -290,6 +303,72 @@ namespace InventoryApp.Infrastructure.Migrations
                     b.ToTable("CompraDetalles", (string)null);
                 });
 
+            modelBuilder.Entity("InventoryApp.Domain.Entities.CompraDocumento", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CompraId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<string>("CreadoPorNombreUsuario")
+                        .HasColumnType("longtext");
+
+                    b.Property<int?>("CreadoPorUsuarioId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Eliminado")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false);
+
+                    b.Property<int?>("EliminadoPorUsuarioId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("FechaEliminacion")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("NombreOriginal")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("PublicId")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<string>("ResourceType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<long>("SizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("varchar(1000)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompraId", "Eliminado");
+
+                    b.ToTable("CompraDocumentos", (string)null);
+                });
+
             modelBuilder.Entity("InventoryApp.Domain.Entities.CompraImpuesto", b =>
                 {
                     b.Property<int>("Id")
@@ -316,6 +395,11 @@ namespace InventoryApp.Infrastructure.Migrations
                     b.Property<string>("ImpuestoNombreSnapshot")
                         .IsRequired()
                         .HasColumnType("longtext");
+
+                    b.Property<bool>("IncluidoEnPrecioSnapshot")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false);
 
                     b.Property<decimal>("MontoAplicado")
                         .HasPrecision(18, 4)
@@ -1388,6 +1472,11 @@ namespace InventoryApp.Infrastructure.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("Activo")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(true);
+
                     b.Property<string>("ActualizadoPorNombreUsuario")
                         .HasColumnType("longtext");
 
@@ -1413,10 +1502,21 @@ namespace InventoryApp.Infrastructure.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("varchar(1000)");
 
+                    b.Property<bool>("Eliminado")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false);
+
+                    b.Property<int?>("EliminadoPorUsuarioId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("FechaActualizacion")
                         .HasColumnType("datetime(6)");
 
                     b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("FechaEliminacion")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("Marca")
@@ -1452,6 +1552,9 @@ namespace InventoryApp.Infrastructure.Migrations
 
                     b.HasIndex("Nombre")
                         .HasDatabaseName("IX_Productos_Nombre");
+
+                    b.HasIndex("Eliminado", "Activo")
+                        .HasDatabaseName("IX_Productos_Estado");
 
                     b.ToTable("Productos", (string)null);
                 });
@@ -1940,6 +2043,14 @@ namespace InventoryApp.Infrastructure.Migrations
                     b.Property<DateTime?>("FechaEliminacion")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<string>("FotoPerfilPublicId")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("FotoPerfilUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
                     b.Property<string>("MotivoBloqueo")
                         .HasMaxLength(300)
                         .HasColumnType("varchar(300)");
@@ -2055,6 +2166,14 @@ namespace InventoryApp.Infrastructure.Migrations
                     b.Property<decimal>("Descuento")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<bool>("Eliminado")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false);
+
+                    b.Property<int?>("EliminadoPorUsuarioId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Estado")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -2078,6 +2197,9 @@ namespace InventoryApp.Infrastructure.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("FechaEliminacion")
                         .HasColumnType("datetime(6)");
 
                     b.Property<decimal>("Impuesto")
@@ -2113,6 +2235,8 @@ namespace InventoryApp.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ClienteId");
+
+                    b.HasIndex("Eliminado");
 
                     b.HasIndex("NumeroVenta")
                         .IsUnique();
@@ -2237,6 +2361,11 @@ namespace InventoryApp.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<bool>("IncluidoEnPrecioSnapshot")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false);
+
                     b.Property<decimal>("MontoAplicado")
                         .HasPrecision(18, 4)
                         .HasColumnType("decimal(18,4)");
@@ -2282,6 +2411,17 @@ namespace InventoryApp.Infrastructure.Migrations
                     b.Navigation("Compra");
 
                     b.Navigation("Producto");
+                });
+
+            modelBuilder.Entity("InventoryApp.Domain.Entities.CompraDocumento", b =>
+                {
+                    b.HasOne("InventoryApp.Domain.Entities.Compra", "Compra")
+                        .WithMany()
+                        .HasForeignKey("CompraId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Compra");
                 });
 
             modelBuilder.Entity("InventoryApp.Domain.Entities.CompraImpuesto", b =>

@@ -13,12 +13,17 @@ public class Producto : AuditableEntity
     public decimal Precio { get; set; }
     public int UmbralStockBajo { get; set; } = 5;
 
+    public bool Activo { get; set; } = true;
+    public bool Eliminado { get; set; }
+    public DateTime? FechaEliminacion { get; set; }
+    public int? EliminadoPorUsuarioId { get; set; }
+
     public int? CategoriaId { get; set; }
     public Categoria? Categoria { get; set; }
 
     public ICollection<ProductoImagen> Imagenes { get; set; } = new List<ProductoImagen>();
 
-    public bool TieneStockBajo => Cantidad < UmbralStockBajo;
+    public bool TieneStockBajo => Activo && !Eliminado && Cantidad < UmbralStockBajo;
 
     // Compatibilidad: imagen principal calculada a partir de la colección.
     public ProductoImagen? ImagenPrincipal =>

@@ -24,6 +24,8 @@ export class ClientesListComponent implements OnInit {
   readonly loading = signal(true);
   readonly puedeCrear = signal(false);
   readonly puedeEditar = signal(false);
+  readonly puedeActivar = signal(false);
+  readonly puedeDesactivar = signal(false);
   readonly puedeEliminar = signal(false);
 
   constructor(
@@ -36,6 +38,8 @@ export class ClientesListComponent implements OnInit {
   ngOnInit(): void {
     this.puedeCrear.set(this.permisosRuntime.puede('Clientes', 'Crear'));
     this.puedeEditar.set(this.permisosRuntime.puede('Clientes', 'Editar'));
+    this.puedeActivar.set(this.permisosRuntime.puede('Clientes', 'Activar'));
+    this.puedeDesactivar.set(this.permisosRuntime.puede('Clientes', 'Desactivar'));
     this.puedeEliminar.set(this.permisosRuntime.puede('Clientes', 'EliminarLogico'));
     this.cargar();
   }
@@ -48,11 +52,20 @@ export class ClientesListComponent implements OnInit {
     });
   }
 
+  puedeCambiarEstado(cliente: Cliente): boolean {
+    return cliente.activo ? this.puedeDesactivar() : this.puedeActivar();
+  }
+
   toggleActivo(c: Cliente): void {
-    this.clienteService.update(c.id, {
-      nombre: c.nombre, telefono: c.telefono, identidadORTN: c.identidadORTN,
-      correo: c.correo, direccion: c.direccion, activo: !c.activo
-    }).subscribe(() => this.cargar());
+    if (!this.puedeCambiarEstado(c)) return;
+    const operacion = c.activo
+      ? this.clienteService.desactivar(c.id)
+      : this.clienteService.activar(c.id);
+
+    operacion.subscribe({
+      next: () => this.cargar(),
+      error: (err) => this.snackBar.open(err.error?.message ?? 'No se pudo cambiar el estado del cliente.', 'Cerrar', { duration: 5000 })
+    });
   }
 
   async eliminar(c: Cliente): Promise<void> {

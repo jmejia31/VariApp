@@ -81,9 +81,6 @@ public class ProductoServiceTests
 
         _productoRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(producto);
 
-        var nuevasImagenes = new List<IFormFile> { Mock.Of<IFormFile>(f => f.Length == 100 && f.ContentType == "image/jpeg") };
-        // 4 existentes + 2 nuevas = 6 > 5
-
         var dto = new UpdateProductoDto
         {
             Nombre = "Mouse",
@@ -103,18 +100,31 @@ public class ProductoServiceTests
     }
 
     [Fact]
-    public async Task DeleteAsync_Elimina_Todas_Las_Imagenes_De_Cloudinary()
+    public async Task DeleteAsync_Marca_Eliminacion_Logica_Y_Conserva_Imagenes()
     {
-        var producto = new Producto { Id = 1, Nombre = "Mouse", Marca = "X", Modelo = "Y" };
+        var producto = new Producto
+        {
+            Id = 1,
+            Nombre = "Mouse",
+            Marca = "X",
+            Modelo = "Y",
+            Activo = true
+        };
         producto.Imagenes.Add(new ProductoImagen { Id = 1, Url = "u1", PublicId = "pid1" });
         producto.Imagenes.Add(new ProductoImagen { Id = 2, Url = "u2", PublicId = "pid2" });
 
         _productoRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(producto);
         _productoRepoMock.Setup(r => r.SaveChangesAsync()).ReturnsAsync(true);
 
-        await _service.DeleteAsync(1);
+        var eliminado = await _service.DeleteAsync(1);
 
-        _imageStorageMock.Verify(s => s.DeleteAsync("pid1"), Times.Once);
-        _imageStorageMock.Verify(s => s.DeleteAsync("pid2"), Times.Once);
+        Assert.True(eliminado);
+        Assert.True(producto.Eliminado);
+        Assert.False(producto.Activo);
+        Assert.Equal(2, producto.EliminadoPorUsuarioId);
+        Assert.NotNull(producto.FechaEliminacion);
+        Assert.Equal(2, producto.Imagenes.Count);
+        _productoRepoMock.Verify(r => r.Update(producto), Times.Once);
+        _imageStorageMock.Verify(s => s.DeleteAsync(It.IsAny<string>()), Times.Never);
     }
 }

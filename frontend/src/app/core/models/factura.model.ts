@@ -34,9 +34,12 @@ export interface Factura {
   clienteDireccion?: string;
   vendedorNombreUsuario: string;
   generadaPorNombreUsuario?: string;
+  importeBruto: number;
   subtotal: number;
   descuento: number;
   impuesto: number;
+  impuestoIncluido: number;
+  impuestoAdicional: number;
   total: number;
   metodoPago: string;
   estadoPago: string;
