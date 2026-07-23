@@ -58,11 +58,11 @@
       <div class="modulos-grid">
         @for (modulo of modulosFiltrados(); track modulo) {
           <section class="modulo-card">
-            <h3>{{ modulo }}</h3>
+            <h3>{{ nombreModulo(modulo) }}</h3>
             <div class="acciones-cell">
               @for (item of accionesDelModulo(modulo); track item.accion) {
                 <mat-checkbox [checked]="item.permitido" (change)="toggle(item)">
-                  {{ item.accion }}
+                  {{ nombreAccion(item.accion) }}
                 </mat-checkbox>
               }
             </div>
@@ -76,7 +76,7 @@
       </div>
 
       <div class="form-actions">
-        <span class="save-hint">Los cambios se aplicarán a las siguientes solicitudes del usuario.</span>
+        <span class="save-hint">Los cambios se aplicarán desde la siguiente solicitud realizada por cada usuario.</span>
         <button mat-flat-button color="primary" [disabled]="saving()" (click)="guardar()">
           @if (saving()) {
             <mat-spinner diameter="20"></mat-spinner>
