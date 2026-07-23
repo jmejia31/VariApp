@@ -1,6 +1,8 @@
+using InventoryApp.Application.Common;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities;
 using InventoryApp.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace InventoryApp.Infrastructure.Repositories;
@@ -9,11 +11,16 @@ public class FacturaRepository : IFacturaRepository
 {
     private readonly AppDbContext _context;
     private readonly IUsuarioScopeService _usuarioScope;
+    private readonly IHttpContextAccessor? _httpContextAccessor;
 
-    public FacturaRepository(AppDbContext context, IUsuarioScopeService usuarioScope)
+    public FacturaRepository(
+        AppDbContext context,
+        IUsuarioScopeService usuarioScope,
+        IHttpContextAccessor? httpContextAccessor = null)
     {
         _context = context;
         _usuarioScope = usuarioScope;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     private IQueryable<Factura> ConIncludes() =>
@@ -42,6 +49,9 @@ public class FacturaRepository : IFacturaRepository
     public async Task<Factura?> GetByIdAsync(int id)
     {
         var alcance = await _usuarioScope.ObtenerActualAsync();
+        if (alcance is null && TieneAccesoPublicoValidado(id))
+            return await GetByIdParaEnlacePublicoValidadoAsync(id);
+
         return await AplicarAlcance(ConIncludes(), alcance)
             .FirstOrDefaultAsync(f => f.Id == id);
     }
@@ -62,7 +72,9 @@ public class FacturaRepository : IFacturaRepository
     }
 
     public async Task<Factura?> GetByIdParaEnlacePublicoValidadoAsync(int id) =>
-        await ConIncludes().FirstOrDefaultAsync(f => f.Id == id);
+        TieneAccesoPublicoValidado(id)
+            ? await ConIncludes().FirstOrDefaultAsync(f => f.Id == id)
+            : null;
 
     public async Task<int> ContarTodasAsync() =>
         await _context.Facturas.CountAsync();
@@ -75,4 +87,13 @@ public class FacturaRepository : IFacturaRepository
 
     public async Task<bool> SaveChangesAsync() =>
         await _context.SaveChangesAsync() > 0;
+
+    private bool TieneAccesoPublicoValidado(int facturaId)
+    {
+        var items = _httpContextAccessor?.HttpContext?.Items;
+        return items is not null &&
+               items.TryGetValue(PublicInvoiceAccessContext.FacturaIdKey, out var value) &&
+               value is int autorizado &&
+               autorizado == facturaId;
+    }
 }
