@@ -1,23 +1,23 @@
 Checkpoint final controlado de la Fase 7 automatizada.
 Fecha: 2026-07-23
-Revisión: 5
+Revisión: 6
 
 Incluye:
 - MySQL 8.4 temporal y descartable.
 - Aplicación completa de migraciones EF Core fuera de Aiven.
 - API ASP.NET Core y Angular locales en GitHub Actions.
-- Creación incremental de roles dinámicos Administrador y Vendedor.
-- Vinculación inmediata del administrador inicial con el rol dinámico Administrador.
-- Conservación de matrices de permisos administradas entre reinicios.
-- Matriz Administrador, Vendedor y rol personalizado.
-- Autorización backend 200/403 y guardas frontend.
-- Perfil propio y política de contraseña.
-- Venta, factura, PDF privado, enlace público y revocación.
-- Login responsivo a 320, 375, 390, 430, 768 y 1440 px.
-- Suite E2E determinista sobre una base descartable nueva.
+- Permisos resueltos desde Usuario.Id y Rol.Id dinámico vigente.
+- Eliminación del fallback de autorización por enum legacy Vendedor.
+- Vinculación segura de usuarios legacy con su rol dinámico antes de emitir JWT.
+- Alcance estricto por UsuarioId para ventas, compras, facturas, finanzas y movimientos.
+- Parámetros UsuarioIdScope ignorados para usuarios no administradores.
+- Matriz exacta sin Compras ni Proveedores para el rol vendedor de prueba.
+- Dos vendedores con ventas, finanzas y movimientos separados y verificados.
+- Respuestas 403 para módulos sin permiso y 404 para documentos de otro usuario.
+- Menú y guardas frontend sin módulos no concedidos.
+- Perfil reorganizado con jerarquía, separación y ayudas visuales legibles.
+- Etiquetas de permisos humanizadas en español.
 - Frontend productivo usando proxy same-origin /api de Vercel hacia Render.
-- Rewrites de SPA y API validados por build de producción.
-- Mensajes diferenciados para credenciales inválidas, conexión, autorización y errores del servidor.
 
 Prohibido durante este checkpoint:
 - usar Aiven, Render, Gmail o Cloudinary productivos;
