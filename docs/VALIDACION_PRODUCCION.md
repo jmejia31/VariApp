@@ -37,8 +37,11 @@ Este documento separa la certificación automatizada ya aprobada de las validaci
 
 - [x] Build local de producción Angular aprobado.
 - [x] Backend Release aprobado.
-- [ ] Preview de Vercel disponible.
-  - Bloqueo actual: GitHub reportó `build-rate-limit` en Vercel.
+- [x] Preview de Vercel disponible.
+  - Commit: `5ad458c176ed4ec58c711dd23fd3f36a2b23155d`.
+  - Estado: `Listo`.
+  - URL: `https://varistorehn-git-agent-mejoras-variapp-vari-app.vercel.app`.
+  - Se corrigió `frontend/vercel.json`, cuya regla anterior cancelaba todos los deployments de Preview.
 - [ ] Preview de Render disponible para la rama.
 - [ ] Base Preview separada de Aiven productivo.
 
@@ -110,7 +113,7 @@ Este documento separa la certificación automatizada ya aprobada de las validaci
 
 El Pull Request solo podrá salir de borrador cuando:
 
-1. Vercel permita generar el Preview o se utilice un entorno equivalente autorizado.
+1. El Preview de Vercel supere la validación funcional y visual.
 2. Exista un backend Preview separado de producción.
 3. Gmail, WhatsApp, PDF y Cloudinary superen las pruebas reales.
 4. La migración sea revisada y aplicada mediante una sola estrategia autorizada.
