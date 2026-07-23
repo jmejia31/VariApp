@@ -14,6 +14,7 @@ public class FinanzasService : IFinanzasService
     private readonly ICompraRepository _compraRepository;
     private readonly IProductoRepository _productoRepository;
     private readonly ICurrentUserService _currentUser;
+    private readonly IUsuarioScopeService _usuarioScope;
 
     public FinanzasService(
         IMovimientoFinancieroRepository movimientoRepository,
@@ -21,7 +22,8 @@ public class FinanzasService : IFinanzasService
         IVentaRepository ventaRepository,
         ICompraRepository compraRepository,
         IProductoRepository productoRepository,
-        ICurrentUserService currentUser)
+        ICurrentUserService currentUser,
+        IUsuarioScopeService usuarioScope)
     {
         _movimientoRepository = movimientoRepository;
         _revisionRepository = revisionRepository;
@@ -29,21 +31,19 @@ public class FinanzasService : IFinanzasService
         _compraRepository = compraRepository;
         _productoRepository = productoRepository;
         _currentUser = currentUser;
+        _usuarioScope = usuarioScope;
     }
 
     public async Task<FinanzasResumenDto> GetResumenAsync()
     {
-        var esAdministrador = _currentUser.EsAdministrador;
+        var alcance = await ObtenerAlcanceObligatorioAsync();
+        var esAdministrador = alcance.EsAdministrador;
         var movimientos = await _movimientoRepository.GetFilteredAsync(null, null);
         var noAnulados = movimientos.Where(m => m.Estado != EstadoMovimientoFinanciero.Anulado).ToList();
 
-        // MovimientoFinancieroRepository limita por UsuarioId a cualquier usuario
-        // no administrador. Por ello los totales siguientes nunca mezclan vendedores.
         var ingresosTotales = noAnulados.Where(m => m.Tipo == TipoMovimientoFinanciero.Ingreso).Sum(m => m.Monto);
         var egresosTotales = noAnulados.Where(m => m.Tipo == TipoMovimientoFinanciero.Egreso).Sum(m => m.Monto);
 
-        // Utilidad, costos de inventario, cuentas por pagar y revisiones financieras
-        // son datos corporativos y solo se entregan al administrador.
         var utilidadBruta = esAdministrador
             ? await _ventaRepository.GetUtilidadBrutaTotalAsync()
             : 0m;
@@ -60,7 +60,6 @@ public class FinanzasService : IFinanzasService
             ? await _productoRepository.GetValorTotalPrecioAsync()
             : 0m;
 
-        // VentaRepository aplica alcance por UsuarioId para usuarios no administradores.
         var cuentasPorCobrar = await _ventaRepository.GetCuentasPorCobrarAsync();
         var ventasDelMes = await _ventaRepository.GetTotalDelMesAsync();
         var ingresosDelMes = await _ventaRepository.GetIngresosDelMesAsync();
@@ -95,12 +94,15 @@ public class FinanzasService : IFinanzasService
 
     public async Task<List<MovimientoFinancieroDto>> GetMovimientosAsync(DateTime? desde, DateTime? hasta)
     {
+        await ObtenerAlcanceObligatorioAsync();
         var movimientos = await _movimientoRepository.GetFilteredAsync(desde, hasta);
         return movimientos.Select(ToDto).ToList();
     }
 
     public async Task<MovimientoFinancieroDto> RegistrarMovimientoManualAsync(CreateMovimientoManualDto dto)
     {
+        await ObtenerAlcanceObligatorioAsync();
+
         if (dto.Monto <= 0)
             throw new BusinessRuleException("El monto debe ser mayor a 0.");
         if (string.IsNullOrWhiteSpace(dto.Concepto))
@@ -138,6 +140,7 @@ public class FinanzasService : IFinanzasService
 
     public async Task<MovimientoFinancieroDto?> AnularMovimientoAsync(int id, string motivo)
     {
+        await ObtenerAlcanceObligatorioAsync();
         var movimiento = await _movimientoRepository.GetByIdAsync(id);
         if (movimiento is null) return null;
 
@@ -163,7 +166,8 @@ public class FinanzasService : IFinanzasService
 
     public async Task<List<RevisionFinancieraDto>> GetRevisionesAsync()
     {
-        if (!_currentUser.EsAdministrador)
+        var alcance = await ObtenerAlcanceObligatorioAsync();
+        if (!alcance.EsAdministrador)
             return new List<RevisionFinancieraDto>();
 
         var revisiones = await _revisionRepository.GetAllAsync();
@@ -172,7 +176,8 @@ public class FinanzasService : IFinanzasService
 
     public async Task<RevisionFinancieraDto> RegistrarRevisionAsync(CreateRevisionFinancieraDto dto)
     {
-        if (!_currentUser.EsAdministrador)
+        var alcance = await ObtenerAlcanceObligatorioAsync();
+        if (!alcance.EsAdministrador)
             throw new BusinessRuleException("Solo un administrador puede registrar revisiones financieras.");
 
         if (dto.FechaHasta < dto.FechaDesde)
@@ -187,7 +192,7 @@ public class FinanzasService : IFinanzasService
             FechaHasta = dto.FechaHasta,
             EstadoRevision = estado,
             Observaciones = dto.Observaciones,
-            RevisadoPorUsuarioId = _currentUser.UsuarioId ?? 0,
+            RevisadoPorUsuarioId = alcance.UsuarioId,
             RevisadoPorNombreUsuario = _currentUser.NombreCompleto ?? _currentUser.NombreUsuario ?? "—",
             FechaRevision = DateTime.UtcNow
         };
@@ -197,6 +202,10 @@ public class FinanzasService : IFinanzasService
 
         return ToDto(revision);
     }
+
+    private async Task<UsuarioScopeActual> ObtenerAlcanceObligatorioAsync() =>
+        await _usuarioScope.ObtenerActualAsync()
+        ?? throw new ForbiddenAccessException("No fue posible resolver el usuario autenticado y su rol vigente.");
 
     private static MovimientoFinancieroDto ToDto(MovimientoFinanciero m) => new()
     {
