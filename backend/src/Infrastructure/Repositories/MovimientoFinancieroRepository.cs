@@ -8,45 +8,57 @@ namespace InventoryApp.Infrastructure.Repositories;
 public class MovimientoFinancieroRepository : IMovimientoFinancieroRepository
 {
     private readonly AppDbContext _context;
-    private readonly ICurrentUserService _currentUser;
+    private readonly IUsuarioScopeService _usuarioScope;
 
-    public MovimientoFinancieroRepository(AppDbContext context, ICurrentUserService currentUser)
+    public MovimientoFinancieroRepository(AppDbContext context, IUsuarioScopeService usuarioScope)
     {
         _context = context;
-        _currentUser = currentUser;
+        _usuarioScope = usuarioScope;
     }
 
-    private IQueryable<MovimientoFinanciero> AplicarAlcanceActual(IQueryable<MovimientoFinanciero> query)
+    private static IQueryable<MovimientoFinanciero> AplicarAlcance(
+        IQueryable<MovimientoFinanciero> query,
+        UsuarioScopeActual? alcance)
     {
-        if (!_currentUser.EstaAutenticado || _currentUser.EsAdministrador)
-            return query;
+        if (alcance is null)
+            return query.Where(_ => false);
 
-        var usuarioId = _currentUser.UsuarioId;
-        return usuarioId.HasValue
-            ? query.Where(m => m.CreadoPorUsuarioId == usuarioId.Value)
-            : query.Where(_ => false);
+        return alcance.EsAdministrador
+            ? query
+            : query.Where(m => m.CreadoPorUsuarioId == alcance.UsuarioId);
     }
 
     public async Task AddAsync(MovimientoFinanciero movimiento) =>
         await _context.MovimientosFinancieros.AddAsync(movimiento);
 
-    public async Task<MovimientoFinanciero?> GetByIdAsync(int id) =>
-        await AplicarAlcanceActual(_context.MovimientosFinancieros).FirstOrDefaultAsync(m => m.Id == id);
+    public async Task<MovimientoFinanciero?> GetByIdAsync(int id)
+    {
+        var alcance = await _usuarioScope.ObtenerActualAsync();
+        return await AplicarAlcance(_context.MovimientosFinancieros, alcance)
+            .FirstOrDefaultAsync(m => m.Id == id);
+    }
 
     public void Update(MovimientoFinanciero movimiento) =>
         _context.MovimientosFinancieros.Update(movimiento);
 
-    public async Task<MovimientoFinanciero?> GetByCompraIdAsync(int compraId) =>
-        await AplicarAlcanceActual(_context.MovimientosFinancieros)
+    public async Task<MovimientoFinanciero?> GetByCompraIdAsync(int compraId)
+    {
+        var alcance = await _usuarioScope.ObtenerActualAsync();
+        return await AplicarAlcance(_context.MovimientosFinancieros, alcance)
             .FirstOrDefaultAsync(m => m.CompraId == compraId && m.EsAutomatico);
+    }
 
-    public async Task<MovimientoFinanciero?> GetByVentaIdAsync(int ventaId) =>
-        await AplicarAlcanceActual(_context.MovimientosFinancieros)
+    public async Task<MovimientoFinanciero?> GetByVentaIdAsync(int ventaId)
+    {
+        var alcance = await _usuarioScope.ObtenerActualAsync();
+        return await AplicarAlcance(_context.MovimientosFinancieros, alcance)
             .FirstOrDefaultAsync(m => m.VentaId == ventaId && m.EsAutomatico);
+    }
 
     public async Task<List<MovimientoFinanciero>> GetFilteredAsync(DateTime? desde, DateTime? hasta)
     {
-        var query = AplicarAlcanceActual(_context.MovimientosFinancieros.AsQueryable());
+        var alcance = await _usuarioScope.ObtenerActualAsync();
+        var query = AplicarAlcance(_context.MovimientosFinancieros.AsQueryable(), alcance);
         if (desde.HasValue) query = query.Where(m => m.Fecha >= desde.Value);
         if (hasta.HasValue) query = query.Where(m => m.Fecha <= hasta.Value);
         return await query.OrderByDescending(m => m.Fecha).ToListAsync();
