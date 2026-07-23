@@ -45,6 +45,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // ===== Repositorios y Servicios =====
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+builder.Services.AddScoped<IUsuarioScopeService, UsuarioScopeService>();
 builder.Services.AddScoped<IProductoRepository, ProductoRepository>();
 builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
 builder.Services.AddScoped<IProveedorRepository, ProveedorRepository>();
