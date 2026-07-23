@@ -1,6 +1,6 @@
 Checkpoint final controlado de la Fase 7 automatizada.
 Fecha: 2026-07-23
-Revisión: 6
+Revisión: 7
 
 Incluye:
 - MySQL 8.4 temporal y descartable.
@@ -15,6 +15,8 @@ Incluye:
 - Dos vendedores con ventas, finanzas y movimientos separados y verificados.
 - Respuestas 403 para módulos sin permiso y 404 para documentos de otro usuario.
 - Menú y guardas frontend sin módulos no concedidos.
+- PDF público autorizado únicamente por hash y FacturaId dentro de la solicitud actual.
+- Acceso público directo por ID bloqueado.
 - Perfil reorganizado con jerarquía, separación y ayudas visuales legibles.
 - Etiquetas de permisos humanizadas en español.
 - Frontend productivo usando proxy same-origin /api de Vercel hacia Render.
