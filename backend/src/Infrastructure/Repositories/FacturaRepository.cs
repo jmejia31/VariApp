@@ -61,6 +61,9 @@ public class FacturaRepository : IFacturaRepository
             .ToListAsync();
     }
 
+    public async Task<Factura?> GetByIdParaEnlacePublicoValidadoAsync(int id) =>
+        await ConIncludes().FirstOrDefaultAsync(f => f.Id == id);
+
     public async Task<int> ContarTodasAsync() =>
         await _context.Facturas.CountAsync();
 
