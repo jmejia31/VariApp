@@ -89,16 +89,23 @@ El workflow:
 
 ## Estado del Preview externo
 
-GitHub registró un estado de Vercel fallido para el commit certificado. El destino del estado indica `upgradeToPro=build-rate-limit`, por lo que el Preview no fue generado debido al límite de compilaciones del plan de Vercel, no por un error detectado en el build de Angular.
+El Preview de Vercel quedó disponible después de corregir `frontend/vercel.json`, cuya regla anterior cancelaba deliberadamente todos los deployments de Preview.
 
-No se registró un Preview de Render para esta rama.
+- Commit del Preview: `5ad458c176ed4ec58c711dd23fd3f36a2b23155d`.
+- Estado: **Listo**.
+- Duración del build: 25 segundos.
+- URL de rama: `https://varistorehn-git-agent-mejoras-variapp-vari-app.vercel.app`.
+
+La corrección cambió `ignoreCommand` a `exit 1`, permitiendo builds tanto de Preview como de producción. Los deployments anteriores marcados como `Cancelado` no representaban errores de compilación de Angular; eran consecuencia directa de la regla de exclusión.
+
+No se registró todavía un Preview de Render para esta rama.
 
 ## Pendiente externo y productivo
 
-La certificación aislada no reemplaza estas comprobaciones reales:
+La certificación aislada y el Preview de frontend no reemplazan estas comprobaciones reales:
 
-- obtener un Preview de Vercel cuando el límite de builds lo permita;
 - desplegar un backend Preview de Render conectado a una base no productiva;
+- validar login, Dashboard, usuarios, roles, permisos y navegación sobre el Preview;
 - enviar una factura real mediante Gmail SMTP;
 - comprobar el PDF recibido por correo;
 - abrir el enlace de WhatsApp desde un teléfono real;
