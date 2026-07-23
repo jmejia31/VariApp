@@ -11,33 +11,52 @@ public class CompraRepository : ICompraRepository
 {
     private readonly AppDbContext _context;
     private readonly ICurrentUserService _currentUser;
+    private readonly IUsuarioScopeService _usuarioScope;
 
-    public CompraRepository(AppDbContext context, ICurrentUserService currentUser)
+    public CompraRepository(
+        AppDbContext context,
+        ICurrentUserService currentUser,
+        IUsuarioScopeService usuarioScope)
     {
         _context = context;
         _currentUser = currentUser;
+        _usuarioScope = usuarioScope;
     }
 
     private IQueryable<Compra> ConIncludes() =>
         _context.Compras.Include(c => c.Detalles).ThenInclude(d => d.Producto)
             .Include(c => c.ImpuestosAplicados);
 
-    private int? UsuarioAlcanceActual =>
-        _currentUser.EstaAutenticado && !_currentUser.EsAdministrador
-            ? _currentUser.UsuarioId
-            : null;
+    private static IQueryable<Compra> AplicarAlcance(
+        IQueryable<Compra> query,
+        UsuarioScopeActual? alcance,
+        int? usuarioSolicitadoPorAdministrador = null)
+    {
+        if (alcance is null)
+            return query.Where(_ => false);
 
-    private static IQueryable<Compra> AplicarAlcance(IQueryable<Compra> query, int? usuarioId) =>
-        usuarioId.HasValue ? query.Where(c => c.CreadoPorUsuarioId == usuarioId.Value) : query;
+        if (alcance.EsAdministrador)
+        {
+            return usuarioSolicitadoPorAdministrador.HasValue
+                ? query.Where(c => c.CreadoPorUsuarioId == usuarioSolicitadoPorAdministrador.Value)
+                : query;
+        }
 
-    public async Task<Compra?> GetByIdAsync(int id) =>
-        await AplicarAlcance(ConIncludes(), UsuarioAlcanceActual)
+        return query.Where(c => c.CreadoPorUsuarioId == alcance.UsuarioId);
+    }
+
+    public async Task<Compra?> GetByIdAsync(int id)
+    {
+        var alcance = await _usuarioScope.ObtenerActualAsync();
+        return await AplicarAlcance(ConIncludes(), alcance)
             .FirstOrDefaultAsync(c => c.Id == id);
+    }
 
     public async Task<(List<Compra> Items, int TotalCount)> GetPagedAsync(PagedRequest request)
     {
-        var scope = request.UsuarioIdScope ?? UsuarioAlcanceActual;
-        var query = AplicarAlcance(ConIncludes().AsQueryable(), scope);
+        var alcance = await _usuarioScope.ObtenerActualAsync();
+        var usuarioSolicitado = alcance?.EsAdministrador == true ? request.UsuarioIdScope : null;
+        var query = AplicarAlcance(ConIncludes().AsQueryable(), alcance, usuarioSolicitado);
 
         if (!string.IsNullOrWhiteSpace(request.Search))
         {
@@ -66,24 +85,32 @@ public class CompraRepository : ICompraRepository
 
     public async Task<int> GetTotalDelMesAsync(int? usuarioId = null)
     {
+        var alcance = await _usuarioScope.ObtenerActualAsync();
+        var usuarioSolicitado = alcance?.EsAdministrador == true ? usuarioId : null;
         var inicioMes = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1, 0, 0, 0, DateTimeKind.Utc);
-        var query = AplicarAlcance(_context.Compras.AsQueryable(), usuarioId ?? UsuarioAlcanceActual);
+        var query = AplicarAlcance(_context.Compras.AsQueryable(), alcance, usuarioSolicitado);
         return await query.CountAsync(c => c.Fecha >= inicioMes && c.Estado == EstadoDocumento.Confirmada);
     }
 
     public async Task<decimal> GetCuentasPorPagarAsync(int? usuarioId = null)
     {
-        var query = AplicarAlcance(_context.Compras.AsQueryable(), usuarioId ?? UsuarioAlcanceActual);
+        var alcance = await _usuarioScope.ObtenerActualAsync();
+        var usuarioSolicitado = alcance?.EsAdministrador == true ? usuarioId : null;
+        var query = AplicarAlcance(_context.Compras.AsQueryable(), alcance, usuarioSolicitado);
         return await query
             .Where(c => c.Estado == EstadoDocumento.Confirmada && c.EstadoPago != EstadoPago.Pagado)
             .SumAsync(c => (decimal?)c.Total) ?? 0m;
     }
 
-    public async Task<List<Compra>> GetUltimasAsync(int cantidad = 5, int? usuarioId = null) =>
-        await AplicarAlcance(ConIncludes(), usuarioId ?? UsuarioAlcanceActual)
+    public async Task<List<Compra>> GetUltimasAsync(int cantidad = 5, int? usuarioId = null)
+    {
+        var alcance = await _usuarioScope.ObtenerActualAsync();
+        var usuarioSolicitado = alcance?.EsAdministrador == true ? usuarioId : null;
+        return await AplicarAlcance(ConIncludes(), alcance, usuarioSolicitado)
             .OrderByDescending(c => c.Fecha)
             .Take(cantidad)
             .ToListAsync();
+    }
 
     public async Task<int> ContarTodasAsync() =>
         await _context.Compras.IgnoreQueryFilters().CountAsync();
