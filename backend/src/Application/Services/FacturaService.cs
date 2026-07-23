@@ -36,6 +36,12 @@ public class FacturaService : IFacturaService
         return resultado;
     }
 
+    public async Task<FacturaDto?> GetByIdParaEnlacePublicoValidadoAsync(int id)
+    {
+        var factura = await _repository.GetByIdParaEnlacePublicoValidadoAsync(id);
+        return factura is null ? null : await ToDtoAsync(factura);
+    }
+
     private async Task<FacturaDto> ToDtoAsync(Factura f)
     {
         var empresa = await _empresaConfiguracionService.GetActivaAsync();
