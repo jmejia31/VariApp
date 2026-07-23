@@ -1,6 +1,6 @@
 Checkpoint final controlado de la Fase 7 automatizada.
-Fecha: 2026-07-22
-Revisión: 3
+Fecha: 2026-07-23
+Revisión: 4
 
 Incluye:
 - MySQL 8.4 temporal y descartable.
@@ -15,8 +15,10 @@ Incluye:
 - Venta, factura, PDF privado, enlace público y revocación.
 - Login responsivo a 320, 375, 390, 430, 768 y 1440 px.
 - Suite E2E determinista sobre una base descartable nueva.
+- Frontend productivo usando proxy same-origin /api de Vercel hacia Render.
+- Rewrites de SPA y API validados por build de producción.
 
 Prohibido durante este checkpoint:
-- usar Aiven, Render, Vercel, Gmail o Cloudinary productivos;
+- usar Aiven, Render, Gmail o Cloudinary productivos;
 - fusionar a main;
 - aplicar migraciones productivas.
