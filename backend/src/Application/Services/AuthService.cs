@@ -29,6 +29,14 @@ public class AuthService : IAuthService
         if (!usuario.Activo)
             throw new BusinessRuleException("Esta cuenta está desactivada. Contacta a un administrador.");
 
+        // Rol.Id es la fuente de verdad. Nunca se emite una sesión apoyada solo
+        // en el enum legado, porque eso puede cargar una matriz distinta a la
+        // administrada y mostrar módulos no autorizados.
+        if (!usuario.RolId.HasValue || usuario.RolEntidad is null)
+            throw new BusinessRuleException("La cuenta no tiene un rol válido asignado. Contacta a un administrador.");
+        if (usuario.RolEntidad.Eliminado || !usuario.RolEntidad.Activo)
+            throw new BusinessRuleException("El rol asignado a esta cuenta está inactivo. Contacta a un administrador.");
+
         var (token, expiraEn) = _jwtService.GenerarToken(usuario);
 
         return new LoginResponseDto
@@ -36,7 +44,7 @@ public class AuthService : IAuthService
             Token = token,
             NombreUsuario = usuario.NombreUsuario,
             NombreCompleto = usuario.NombreCompleto,
-            Rol = usuario.RolEntidad?.Nombre ?? usuario.Rol.ToString(),
+            Rol = usuario.RolEntidad.Nombre,
             FotoPerfilUrl = usuario.FotoPerfilUrl,
             ExpiraEn = expiraEn
         };
