@@ -8,12 +8,12 @@ namespace InventoryApp.Infrastructure.Repositories;
 public class FacturaRepository : IFacturaRepository
 {
     private readonly AppDbContext _context;
-    private readonly ICurrentUserService _currentUser;
+    private readonly IUsuarioScopeService _usuarioScope;
 
-    public FacturaRepository(AppDbContext context, ICurrentUserService currentUser)
+    public FacturaRepository(AppDbContext context, IUsuarioScopeService usuarioScope)
     {
         _context = context;
-        _currentUser = currentUser;
+        _usuarioScope = usuarioScope;
     }
 
     private IQueryable<Factura> ConIncludes() =>
@@ -24,25 +24,42 @@ public class FacturaRepository : IFacturaRepository
             .Include(f => f.Venta)
                 .ThenInclude(v => v!.ImpuestosAplicados);
 
-    private IQueryable<Factura> AplicarAlcanceActual(IQueryable<Factura> query)
+    private static IQueryable<Factura> AplicarAlcance(
+        IQueryable<Factura> query,
+        UsuarioScopeActual? alcance)
     {
-        if (!_currentUser.EstaAutenticado || _currentUser.EsAdministrador)
-            return query;
+        if (alcance is null)
+            return query.Where(_ => false);
 
-        var usuarioId = _currentUser.UsuarioId;
-        return usuarioId.HasValue
-            ? query.Where(f => f.VendedorUsuarioId == usuarioId.Value || f.GeneradaPorUsuarioId == usuarioId.Value)
-            : query.Where(_ => false);
+        return alcance.EsAdministrador
+            ? query
+            : query.Where(f =>
+                f.VendedorUsuarioId == alcance.UsuarioId ||
+                f.GeneradaPorUsuarioId == alcance.UsuarioId ||
+                (f.Venta != null && f.Venta.CreadoPorUsuarioId == alcance.UsuarioId));
     }
 
-    public async Task<Factura?> GetByIdAsync(int id) =>
-        await AplicarAlcanceActual(ConIncludes()).FirstOrDefaultAsync(f => f.Id == id);
+    public async Task<Factura?> GetByIdAsync(int id)
+    {
+        var alcance = await _usuarioScope.ObtenerActualAsync();
+        return await AplicarAlcance(ConIncludes(), alcance)
+            .FirstOrDefaultAsync(f => f.Id == id);
+    }
 
-    public async Task<Factura?> GetByVentaIdAsync(int ventaId) =>
-        await AplicarAlcanceActual(ConIncludes()).FirstOrDefaultAsync(f => f.VentaId == ventaId);
+    public async Task<Factura?> GetByVentaIdAsync(int ventaId)
+    {
+        var alcance = await _usuarioScope.ObtenerActualAsync();
+        return await AplicarAlcance(ConIncludes(), alcance)
+            .FirstOrDefaultAsync(f => f.VentaId == ventaId);
+    }
 
-    public async Task<List<Factura>> GetAllAsync() =>
-        await AplicarAlcanceActual(ConIncludes()).OrderByDescending(f => f.FechaEmision).ToListAsync();
+    public async Task<List<Factura>> GetAllAsync()
+    {
+        var alcance = await _usuarioScope.ObtenerActualAsync();
+        return await AplicarAlcance(ConIncludes(), alcance)
+            .OrderByDescending(f => f.FechaEmision)
+            .ToListAsync();
+    }
 
     public async Task<int> ContarTodasAsync() =>
         await _context.Facturas.CountAsync();
