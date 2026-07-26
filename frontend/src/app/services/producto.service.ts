@@ -5,13 +5,23 @@ import { environment } from '../../environments/environment';
 import { ApiResponse, PagedRequest, PagedResult } from '../core/models/api-response.model';
 import { Producto, ProductoFormValue } from '../core/models/producto.model';
 
+export interface ProductoPagedRequest extends PagedRequest {
+  categoriaId?: number;
+  colorId?: number;
+  tallaId?: number;
+  marcaId?: number;
+  modeloId?: number;
+  activo?: boolean;
+  agotado?: boolean;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ProductoService {
   private readonly apiUrl = `${environment.apiUrl}/productos`;
 
   constructor(private http: HttpClient) {}
 
-  getPaged(request: PagedRequest): Observable<ApiResponse<PagedResult<Producto>>> {
+  getPaged(request: ProductoPagedRequest): Observable<ApiResponse<PagedResult<Producto>>> {
     let params = new HttpParams()
       .set('page', request.page)
       .set('pageSize', request.pageSize);
@@ -19,6 +29,13 @@ export class ProductoService {
     if (request.search) params = params.set('search', request.search);
     if (request.sortBy) params = params.set('sortBy', request.sortBy);
     if (request.sortDirection) params = params.set('sortDirection', request.sortDirection);
+    if (request.categoriaId != null) params = params.set('categoriaId', request.categoriaId);
+    if (request.colorId != null) params = params.set('colorId', request.colorId);
+    if (request.tallaId != null) params = params.set('tallaId', request.tallaId);
+    if (request.marcaId != null) params = params.set('marcaId', request.marcaId);
+    if (request.modeloId != null) params = params.set('modeloId', request.modeloId);
+    if (request.activo != null) params = params.set('activo', request.activo);
+    if (request.agotado != null) params = params.set('agotado', request.agotado);
 
     return this.http.get<ApiResponse<PagedResult<Producto>>>(this.apiUrl, { params });
   }
