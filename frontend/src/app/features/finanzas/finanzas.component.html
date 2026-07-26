@@ -23,10 +23,35 @@
     </div>
 
     @if (esAdministrador()) {
-      <div class="card stat"><p class="label">Utilidad bruta</p><p class="value">L. {{ r.utilidadBruta | number:'1.2-2' }}</p></div>
-      <div class="card stat"><p class="label">Utilidad neta</p><p class="value">L. {{ r.utilidadNeta | number:'1.2-2' }}</p></div>
-      <div class="card stat"><p class="label">Cuentas por pagar</p><p class="value">L. {{ r.cuentasPorPagar | number:'1.2-2' }}</p></div>
-      <div class="card stat"><p class="label">Valor inventario (costo)</p><p class="value">L. {{ r.valorInventarioCosto | number:'1.2-2' }}</p></div>
+      <div class="card stat">
+        <p class="label">Utilidad bruta realizada</p>
+        <p class="value positive">L. {{ r.utilidadBruta | number:'1.2-2' }}</p>
+        <p class="stat-note">Margen bruto: {{ r.margenUtilidadBruta | number:'1.2-2' }}%</p>
+      </div>
+      <div class="card stat">
+        <p class="label">Utilidad neta estimada</p>
+        <p class="value" [class.negative]="r.utilidadNeta < 0">L. {{ r.utilidadNeta | number:'1.2-2' }}</p>
+        <p class="stat-note">Utilidad bruta menos gastos manuales registrados.</p>
+      </div>
+      <div class="card stat">
+        <p class="label">Valor inventario en costo</p>
+        <p class="value">L. {{ r.valorInventarioCosto | number:'1.2-2' }}</p>
+        <p class="stat-note">Costo acumulado de las unidades disponibles.</p>
+      </div>
+      <div class="card stat">
+        <p class="label">Valor inventario a precio de venta</p>
+        <p class="value">L. {{ r.valorPotencialVenta | number:'1.2-2' }}</p>
+        <p class="stat-note">Ingreso potencial si se vende el inventario actual.</p>
+      </div>
+      <div class="card stat">
+        <p class="label">Utilidad potencial del inventario</p>
+        <p class="value positive">L. {{ r.utilidadInventarioPotencial | number:'1.2-2' }}</p>
+        <p class="stat-note">Margen potencial: {{ r.margenInventarioPotencial | number:'1.2-2' }}%</p>
+      </div>
+      <div class="card stat">
+        <p class="label">Cuentas por pagar</p>
+        <p class="value">L. {{ r.cuentasPorPagar | number:'1.2-2' }}</p>
+      </div>
     }
   </div>
 
@@ -122,7 +147,7 @@
               <td>{{ m.estado }}</td>
               <td>
                 @if (puedeAnularMovimiento() && !m.esAutomatico && m.estado !== 'Anulado') {
-                  <button mat-icon-button title="Anular" (click)="anularMovimiento(m)"><mat-icon>close</mat-icon></button>
+                  <button class="action-danger" mat-icon-button title="Anular" aria-label="Anular movimiento" (click)="anularMovimiento(m)"><mat-icon>close</mat-icon></button>
                 }
               </td>
             </tr>
