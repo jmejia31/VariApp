@@ -34,10 +34,10 @@
       <article class="metric-card accent-red">
         <div>
           <span>{{ r.productosStockBajo.length }}</span>
-          <p>Alertas de stock bajo</p>
+          <p>Productos agotados</p>
         </div>
-        <mat-icon aria-hidden="true">event_busy</mat-icon>
-        <footer>Productos que requieren reposición</footer>
+        <mat-icon aria-hidden="true">production_quantity_limits</mat-icon>
+        <footer>Productos con existencia igual a cero</footer>
       </article>
 
       @if (esAdministrador()) {
@@ -92,15 +92,15 @@
         </div>
       </article>
 
-      <aside class="performance-card" aria-label="Resumen de productos con stock bajo">
+      <aside class="performance-card" aria-label="Resumen de productos agotados">
         <div class="mini-bars" aria-hidden="true">
           @for (p of r.productosStockBajo.slice(0, 5); track p.id) {
-            <span [style.height.%]="porcentaje(p.cantidad, p.umbralStockBajo || 1)"></span>
+            <span class="agotado-bar"></span>
           }
         </div>
-        <p>Stock bajo</p>
+        <p>Agotados</p>
         <strong>{{ r.productosStockBajo.length }}</strong>
-        <span>productos requieren atención</span>
+        <span>productos requieren reposición</span>
       </aside>
 
       <article class="card table-card">
@@ -137,32 +137,32 @@
         <div
           class="donut"
           role="img"
-          [attr.aria-label]="'Ventas ' + porcentaje(r.ventasDelMes, totalOperativo(r)) + ' por ciento; alertas ' + porcentaje(r.productosStockBajo.length, totalOperativo(r)) + ' por ciento'"
+          [attr.aria-label]="'Ventas ' + porcentaje(r.ventasDelMes, totalOperativo(r)) + ' por ciento; agotados ' + porcentaje(r.productosStockBajo.length, totalOperativo(r)) + ' por ciento'"
           [style.background]="donutBackground(r)"></div>
         <div class="donut-stats">
           <div><strong>{{ porcentaje(r.ventasDelMes, totalOperativo(r)) }}%</strong><span>Ventas</span></div>
           @if (esAdministrador()) {
             <div><strong>{{ porcentaje(r.comprasDelMes, totalOperativo(r)) }}%</strong><span>Compras</span></div>
           }
-          <div><strong>{{ porcentaje(r.productosStockBajo.length, totalOperativo(r)) }}%</strong><span>Alertas</span></div>
+          <div><strong>{{ porcentaje(r.productosStockBajo.length, totalOperativo(r)) }}%</strong><span>Agotados</span></div>
         </div>
       </article>
 
       <article class="card list-card">
         <div class="panel-heading">
-          <h2>Productos críticos</h2>
+          <h2>Productos agotados</h2>
           @if (puedeVerProductos()) {
             <a routerLink="/productos">Inventario</a>
           }
         </div>
         @if (r.productosStockBajo.length === 0) {
-          <p class="empty">No hay productos con stock bajo.</p>
+          <p class="empty">No hay productos agotados.</p>
         } @else {
           <ul>
             @for (p of r.productosStockBajo; track p.id) {
               <li>
                 <span>{{ p.nombre }} · {{ p.marca }} {{ p.modelo }}</span>
-                <strong>{{ p.cantidad }} unid.</strong>
+                <strong>Agotado</strong>
               </li>
             }
           </ul>
