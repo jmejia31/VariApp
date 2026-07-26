@@ -36,21 +36,15 @@ export class AuthService {
   login(request: LoginRequest): Observable<ApiResponse<LoginResponse>> {
     return this.http.post<ApiResponse<LoginResponse>>(`${this.apiUrl}/login`, request).pipe(
       tap((res) => {
-        if (!res.success) return;
+        if (res.success) this.aplicarSesion(res.data);
+      })
+    );
+  }
 
-        this._token.set(res.data.token);
-        this._nombreUsuario.set(res.data.nombreUsuario);
-        this._nombreCompleto.set(res.data.nombreCompleto);
-        this._rol.set(res.data.rol);
-        this._fotoPerfilUrl.set(res.data.fotoPerfilUrl || null);
-        this._expiraEn.set(res.data.expiraEn);
-
-        localStorage.setItem(TOKEN_KEY, res.data.token);
-        localStorage.setItem(USER_KEY, res.data.nombreUsuario);
-        localStorage.setItem(NOMBRE_COMPLETO_KEY, res.data.nombreCompleto);
-        localStorage.setItem(ROL_KEY, res.data.rol);
-        localStorage.setItem(EXPIRA_KEY, res.data.expiraEn);
-        this.persistirFoto(res.data.fotoPerfilUrl || null);
+  renovarSesion(): Observable<ApiResponse<LoginResponse>> {
+    return this.http.post<ApiResponse<LoginResponse>>(`${this.apiUrl}/renovar`, {}).pipe(
+      tap((res) => {
+        if (res.success) this.aplicarSesion(res.data);
       })
     );
   }
@@ -94,6 +88,22 @@ export class AuthService {
     if (!expiraEn) return false;
     const expira = Date.parse(expiraEn);
     return Number.isFinite(expira) && Date.now() >= expira;
+  }
+
+  private aplicarSesion(data: LoginResponse): void {
+    this._token.set(data.token);
+    this._nombreUsuario.set(data.nombreUsuario);
+    this._nombreCompleto.set(data.nombreCompleto);
+    this._rol.set(data.rol);
+    this._fotoPerfilUrl.set(data.fotoPerfilUrl || null);
+    this._expiraEn.set(data.expiraEn);
+
+    localStorage.setItem(TOKEN_KEY, data.token);
+    localStorage.setItem(USER_KEY, data.nombreUsuario);
+    localStorage.setItem(NOMBRE_COMPLETO_KEY, data.nombreCompleto);
+    localStorage.setItem(ROL_KEY, data.rol);
+    localStorage.setItem(EXPIRA_KEY, data.expiraEn);
+    this.persistirFoto(data.fotoPerfilUrl || null);
   }
 
   private persistirFoto(url: string | null): void {
