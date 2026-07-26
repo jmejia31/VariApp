@@ -66,6 +66,7 @@ export class LoginComponent {
       password: valor.password!
     }).subscribe({
       next: () => {
+        this.sessionActivity.limpiarMensajePendiente();
         this.sessionActivity.iniciar();
         this.redirigirSegunPermisos();
       },
