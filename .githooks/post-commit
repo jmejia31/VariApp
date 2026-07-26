@@ -1,0 +1,19 @@
+#!/usr/bin/env sh
+
+branch="$(git branch --show-current 2>/dev/null)"
+
+if [ "$branch" != "Desarrollo" ]; then
+  echo "[VariApp] Commit local creado en '$branch'. No se realizó push automático."
+  echo "[VariApp] La rama colaborativa oficial es 'Desarrollo'."
+  exit 0
+fi
+
+echo "[VariApp] Publicando el commit en origin/Desarrollo..."
+
+if git push origin Desarrollo; then
+  echo "[VariApp] GitHub quedó actualizado correctamente."
+else
+  echo "[VariApp] No fue posible publicar el commit automáticamente." >&2
+  echo "[VariApp] El commit permanece seguro en local. Reintenta con: git push origin Desarrollo" >&2
+  exit 0
+fi
