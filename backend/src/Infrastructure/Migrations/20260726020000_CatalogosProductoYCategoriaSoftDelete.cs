@@ -1,5 +1,6 @@
 using InventoryApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -50,7 +51,7 @@ public partial class CatalogosProductoYCategoriaSoftDelete : Migration
             columns: table => new
             {
                 Id = table.Column<int>(type: "int", nullable: false)
-                    .Annotation("MySql:ValueGenerationStrategy", MySql.EntityFrameworkCore.Metadata.MySQLValueGenerationStrategy.IdentityColumn),
+                    .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                 Tipo = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false),
                 Nombre = table.Column<string>(type: "varchar(120)", maxLength: 120, nullable: false),
                 Descripcion = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: true),
