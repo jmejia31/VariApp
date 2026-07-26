@@ -11,6 +11,7 @@ public class CloudinaryImageStorageService : IImageStorageService
 {
     private readonly Cloudinary _cloudinary;
     private readonly string _folder;
+    private readonly string? _environmentPrefix;
     private const string BaseFolder = "inventoryapp/productos";
 
     public CloudinaryImageStorageService(IConfiguration configuration)
@@ -34,6 +35,7 @@ public class CloudinaryImageStorageService : IImageStorageService
         _cloudinary = new Cloudinary(account);
         _cloudinary.Api.Secure = true;
         _folder = CloudinaryFolderResolver.Resolve(configuration, BaseFolder);
+        _environmentPrefix = CloudinaryFolderResolver.GetEnvironmentPrefix(configuration);
     }
 
     public async Task<(string Url, string PublicId)> UploadAsync(IFormFile file)
@@ -71,6 +73,12 @@ public class CloudinaryImageStorageService : IImageStorageService
 
     public async Task DeleteAsync(string publicId)
     {
+        if (!CloudinaryFolderResolver.CanDelete(_environmentPrefix, publicId))
+        {
+            throw new BusinessRuleException(
+                "El entorno de Desarrollo no puede eliminar una imagen que pertenece a Producción.");
+        }
+
         var deleteParams = new DeletionParams(publicId);
         await _cloudinary.DestroyAsync(deleteParams);
     }
