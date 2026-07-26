@@ -25,10 +25,15 @@ public class ProductoConfiguration : IEntityTypeConfiguration<Producto>
 
         builder.Ignore(p => p.ImagenPrincipal);
         builder.Ignore(p => p.TieneStockBajo);
+        builder.Ignore(p => p.EstaAgotado);
 
         builder.HasIndex(p => p.Nombre).HasDatabaseName("IX_Productos_Nombre");
         builder.HasIndex(p => p.Marca).HasDatabaseName("IX_Productos_Marca");
         builder.HasIndex(p => p.Modelo).HasDatabaseName("IX_Productos_Modelo");
+        builder.HasIndex(p => p.ColorId).HasDatabaseName("IX_Productos_ColorId");
+        builder.HasIndex(p => p.TallaId).HasDatabaseName("IX_Productos_TallaId");
+        builder.HasIndex(p => p.MarcaId).HasDatabaseName("IX_Productos_MarcaId");
+        builder.HasIndex(p => p.ModeloId).HasDatabaseName("IX_Productos_ModeloId");
         builder.HasIndex(p => new { p.Eliminado, p.Activo }).HasDatabaseName("IX_Productos_Estado");
     }
 }
