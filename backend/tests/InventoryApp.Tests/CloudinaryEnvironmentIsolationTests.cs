@@ -1,6 +1,7 @@
 using InventoryApp.Application.Exceptions;
 using InventoryApp.Infrastructure.Services;
 using Microsoft.Extensions.Configuration;
+using Xunit;
 
 namespace InventoryApp.Tests;
 
