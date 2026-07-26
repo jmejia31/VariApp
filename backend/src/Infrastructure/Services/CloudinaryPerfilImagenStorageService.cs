@@ -26,6 +26,7 @@ public class CloudinaryPerfilImagenStorageService : IPerfilImagenStorageService
     private readonly Cloudinary _cloudinary;
     private readonly ILogger<CloudinaryPerfilImagenStorageService> _logger;
     private readonly string _folder;
+    private readonly string? _environmentPrefix;
 
     public CloudinaryPerfilImagenStorageService(
         IConfiguration configuration,
@@ -47,6 +48,7 @@ public class CloudinaryPerfilImagenStorageService : IPerfilImagenStorageService
         _cloudinary.Api.Secure = true;
         _logger = logger;
         _folder = CloudinaryFolderResolver.Resolve(configuration, BaseFolder);
+        _environmentPrefix = CloudinaryFolderResolver.GetEnvironmentPrefix(configuration);
     }
 
     public async Task<(string Url, string PublicId)> UploadAsync(IFormFile foto)
@@ -95,6 +97,15 @@ public class CloudinaryPerfilImagenStorageService : IPerfilImagenStorageService
     public async Task DeleteAsync(string publicId)
     {
         if (string.IsNullOrWhiteSpace(publicId)) return;
+
+        if (!CloudinaryFolderResolver.CanDelete(_environmentPrefix, publicId))
+        {
+            _logger.LogWarning(
+                "El entorno con prefijo {EnvironmentPrefix} bloqueó la eliminación del activo externo {PublicId}.",
+                _environmentPrefix,
+                publicId);
+            return;
+        }
 
         try
         {
