@@ -1,5 +1,5 @@
 <div class="header-row">
-  <a routerLink="/compras" mat-icon-button><mat-icon>arrow_back</mat-icon></a>
+  <a routerLink="/compras" mat-icon-button aria-label="Volver a compras"><mat-icon>arrow_back</mat-icon></a>
   <h1 class="page-title">{{ isEdit() ? 'Editar compra (Borrador)' : 'Nueva compra' }}</h1>
 </div>
 
@@ -15,7 +15,7 @@
         @if (buscandoProveedor()) {
           <mat-spinner matSuffix diameter="18" style="margin-right: 8px;"></mat-spinner>
         } @else if (proveedorSeleccionado()) {
-          <button matSuffix mat-icon-button type="button" title="Quitar selección" (click)="limpiarProveedorSeleccionado()">
+          <button matSuffix mat-icon-button type="button" title="Quitar selección" aria-label="Quitar proveedor seleccionado" (click)="limpiarProveedorSeleccionado()">
             <mat-icon>close</mat-icon>
           </button>
         }
@@ -71,7 +71,12 @@
             <mat-label>Producto activo</mat-label>
             <mat-select formControlName="productoId">
               @for (p of productos(); track p.id) {
-                <mat-option [value]="p.id">{{ p.nombre }} — {{ p.marca }} {{ p.modelo }}</mat-option>
+                <mat-option [value]="p.id">
+                  {{ p.nombre }} — {{ p.marca }} {{ p.modelo }}
+                  @if (p.colorNombre || p.tallaNombre) {
+                    · {{ p.colorNombre || 'Sin color' }} / {{ p.tallaNombre || 'Sin talla' }}
+                  }
+                </mat-option>
               }
             </mat-select>
           </mat-form-field>
@@ -84,7 +89,7 @@
             <input matInput type="number" step="0.01" formControlName="costoUnitario">
           </mat-form-field>
           <span class="col-subtotal">L. {{ subtotalDetalle(grupo) | number:'1.2-2' }}</span>
-          <button mat-icon-button type="button" class="col-eliminar" (click)="quitarDetalle(i)" title="Quitar">
+          <button class="action-danger col-eliminar" mat-icon-button type="button" (click)="quitarDetalle(i)" title="Quitar" aria-label="Quitar producto de la compra">
             <mat-icon>close</mat-icon>
           </button>
         </div>
@@ -145,7 +150,7 @@
     </div>
 
     @if (errorMessage()) {
-      <p class="error">{{ errorMessage() }}</p>
+      <p class="error" role="alert">{{ errorMessage() }}</p>
     }
 
     <div class="form-actions">
