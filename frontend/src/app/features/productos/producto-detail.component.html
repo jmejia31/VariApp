@@ -1,5 +1,5 @@
 <div class="header-row">
-  <a routerLink="/productos" mat-icon-button title="Volver"><mat-icon>arrow_back</mat-icon></a>
+  <a routerLink="/productos" mat-icon-button title="Volver" aria-label="Volver a productos"><mat-icon>arrow_back</mat-icon></a>
   <h1 class="page-title">Detalle de producto</h1>
 </div>
 
@@ -13,9 +13,10 @@
       <div>
         <h2>{{ p.nombre }}</h2>
         <p class="subtitle">{{ p.marca }} · {{ p.modelo }}</p>
+        @if (p.estaAgotado) { <span class="badge danger">Agotado</span> }
       </div>
       @if (puedeEditar()) {
-        <a [routerLink]="['/productos', p.id, 'editar']" mat-button><mat-icon>edit</mat-icon> Editar</a>
+        <a class="action-edit" [routerLink]="['/productos', p.id, 'editar']" mat-button><mat-icon>edit</mat-icon> Editar</a>
       }
     </div>
 
@@ -24,6 +25,17 @@
       <div><span class="label">Precio</span><span>L. {{ p.precio | number:'1.2-2' }}</span></div>
       <div><span class="label">Costo</span><span>L. {{ p.costo | number:'1.2-2' }}</span></div>
       <div><span class="label">Categoría</span><span>{{ p.categoriaNombre || 'Sin categoría' }}</span></div>
+      <div>
+        <span class="label">Color</span>
+        <span>
+          @if (p.colorNombre) {
+            <i class="select-swatch" [style.background]="p.colorCodigoVisual || '#64748B'"></i>{{ p.colorNombre }}
+          } @else { Sin color }
+        </span>
+      </div>
+      <div><span class="label">Talla o tamaño</span><span>{{ p.tallaNombre || 'Sin talla' }}</span></div>
+      <div><span class="label">Marca administrada</span><span>{{ p.marcaNombre || p.marca }}</span></div>
+      <div><span class="label">Modelo administrado</span><span>{{ p.modeloNombre || p.modelo }}</span></div>
       @if (p.descripcion) {
         <div class="full-width"><span class="label">Descripción</span><span>{{ p.descripcion }}</span></div>
       }
@@ -52,7 +64,7 @@
             <img [src]="img.url" [alt]="p.nombre" (click)="ampliar(img)">
             @if (img.esPrincipal) { <span class="badge principal">Principal</span> }
             @if (puedeExportar()) {
-              <button mat-icon-button class="btn-descargar" title="Descargar" [disabled]="descargando() === img.id" (click)="descargarImagen(img)">
+              <button mat-icon-button class="btn-descargar action-view" title="Descargar" aria-label="Descargar imagen" [disabled]="descargando() === img.id" (click)="descargarImagen(img)">
                 @if (descargando() === img.id) {
                   <mat-spinner diameter="18"></mat-spinner>
                 } @else {
@@ -69,7 +81,7 @@
   @if (imagenAmpliada(); as img) {
     <div class="lightbox" (click)="cerrarAmpliada()">
       <img [src]="img.url" [alt]="p.nombre">
-      <button mat-icon-button class="cerrar" (click)="cerrarAmpliada()"><mat-icon>close</mat-icon></button>
+      <button mat-icon-button class="cerrar" aria-label="Cerrar imagen ampliada" (click)="cerrarAmpliada()"><mat-icon>close</mat-icon></button>
     </div>
   }
 }
