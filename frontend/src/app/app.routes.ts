@@ -57,6 +57,30 @@ export const routes: Routes = [
     loadComponent: () => import('./features/categorias/categoria-form.component').then(m => m.CategoriaFormComponent)
   },
   {
+    path: 'colores',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Colores', accion: 'Ver', tipo: 'Color', titulo: 'Colores', singular: 'Color', icono: 'palette' },
+    loadComponent: () => import('./features/catalogos-producto/catalogo-producto-list.component').then(m => m.CatalogoProductoListComponent)
+  },
+  {
+    path: 'tallas',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Tallas', accion: 'Ver', tipo: 'Talla', titulo: 'Tallas', singular: 'Talla', icono: 'straighten' },
+    loadComponent: () => import('./features/catalogos-producto/catalogo-producto-list.component').then(m => m.CatalogoProductoListComponent)
+  },
+  {
+    path: 'marcas',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Marcas', accion: 'Ver', tipo: 'Marca', titulo: 'Marcas', singular: 'Marca', icono: 'branding_watermark' },
+    loadComponent: () => import('./features/catalogos-producto/catalogo-producto-list.component').then(m => m.CatalogoProductoListComponent)
+  },
+  {
+    path: 'modelos',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Modelos', accion: 'Ver', tipo: 'Modelo', titulo: 'Modelos', singular: 'Modelo', icono: 'devices' },
+    loadComponent: () => import('./features/catalogos-producto/catalogo-producto-list.component').then(m => m.CatalogoProductoListComponent)
+  },
+  {
     path: 'proveedores',
     canActivate: [authGuard, permisoGuard],
     data: { modulo: 'Proveedores', accion: 'Ver' },
