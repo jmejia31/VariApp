@@ -1,0 +1,64 @@
+name: Generar migración de catálogos
+
+on:
+  push:
+    branches:
+      - Desarrollo
+    paths:
+      - .github/workflows/generar-migracion-catalogos.yml
+
+permissions:
+  contents: write
+
+jobs:
+  generar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout completo
+        uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+
+      - name: Configurar .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restaurar
+        working-directory: backend
+        run: dotnet restore InventoryApp.sln
+
+      - name: Instalar EF Core CLI
+        run: dotnet tool install --global dotnet-ef --version 8.0.2
+
+      - name: Generar migración y snapshot
+        working-directory: backend
+        env:
+          ConnectionStrings__DefaultConnection: Server=127.0.0.1;Port=3306;Database=inventoryapp_design;User=root;Password=design-only;
+          Database__ServerVersion: 8.4.3
+          Jwt__Secret: Design-Time-Only-Secret-With-More-Than-32-Characters
+        run: |
+          set -euo pipefail
+          if find src/Infrastructure/Migrations -maxdepth 1 -name '*_CatalogosProductoYCategoriaSoftDelete.cs' ! -name '*.Designer.cs' | grep -q .; then
+            echo 'La migración ya existe.'
+            exit 0
+          fi
+          dotnet ef migrations add CatalogosProductoYCategoriaSoftDelete \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext \
+            --output-dir Migrations
+
+      - name: Confirmar artefactos generados
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add backend/src/Infrastructure/Migrations
+          if git diff --cached --quiet; then
+            echo 'No hay cambios para confirmar.'
+          else
+            git commit -m 'feat(database): generar migración de catálogos y snapshot [GitHub Actions]'
+            git push origin HEAD:Desarrollo
+          fi
