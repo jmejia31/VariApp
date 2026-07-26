@@ -1,6 +1,7 @@
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
+using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Enums;
 
 namespace InventoryApp.Application.Services;
@@ -30,30 +31,54 @@ public class AuthService : IAuthService
         var passwordValida = BCrypt.Net.BCrypt.Verify(dto.Password, usuario.PasswordHash);
         if (!passwordValida) return null;
 
-        if (usuario.Bloqueado)
-            throw new BusinessRuleException($"Esta cuenta está bloqueada. Motivo: {usuario.MotivoBloqueo ?? "no especificado"}. Contacta a un administrador.");
-        if (!usuario.Activo)
-            throw new BusinessRuleException("Esta cuenta está desactivada. Contacta a un administrador.");
-
+        ValidarEstadoCuenta(usuario);
         await AsegurarRolDinamicoAsync(usuario);
+        ValidarRol(usuario);
 
-        if (usuario.RolEntidad!.Eliminado || !usuario.RolEntidad.Activo)
-            throw new BusinessRuleException("El rol asignado a esta cuenta está inactivo. Contacta a un administrador.");
+        return CrearRespuesta(usuario);
+    }
 
+    public async Task<LoginResponseDto?> RenovarAsync(int usuarioId)
+    {
+        var usuario = await _usuarioRepository.GetByIdAsync(usuarioId);
+        if (usuario is null || usuario.Eliminado) return null;
+
+        ValidarEstadoCuenta(usuario);
+        await AsegurarRolDinamicoAsync(usuario);
+        ValidarRol(usuario);
+
+        return CrearRespuesta(usuario);
+    }
+
+    private LoginResponseDto CrearRespuesta(Usuario usuario)
+    {
         var (token, expiraEn) = _jwtService.GenerarToken(usuario);
-
         return new LoginResponseDto
         {
             Token = token,
             NombreUsuario = usuario.NombreUsuario,
             NombreCompleto = usuario.NombreCompleto,
-            Rol = usuario.RolEntidad.Nombre,
+            Rol = usuario.RolEntidad!.Nombre,
             FotoPerfilUrl = usuario.FotoPerfilUrl,
             ExpiraEn = expiraEn
         };
     }
 
-    private async Task AsegurarRolDinamicoAsync(InventoryApp.Domain.Entities.Usuario usuario)
+    private static void ValidarEstadoCuenta(Usuario usuario)
+    {
+        if (usuario.Bloqueado)
+            throw new BusinessRuleException($"Esta cuenta está bloqueada. Motivo: {usuario.MotivoBloqueo ?? "no especificado"}. Contacta a un administrador.");
+        if (!usuario.Activo)
+            throw new BusinessRuleException("Esta cuenta está desactivada. Contacta a un administrador.");
+    }
+
+    private static void ValidarRol(Usuario usuario)
+    {
+        if (usuario.RolEntidad is null || usuario.RolEntidad.Eliminado || !usuario.RolEntidad.Activo)
+            throw new BusinessRuleException("El rol asignado a esta cuenta está inactivo. Contacta a un administrador.");
+    }
+
+    private async Task AsegurarRolDinamicoAsync(Usuario usuario)
     {
         if (usuario.RolId.HasValue && usuario.RolEntidad is not null)
             return;
