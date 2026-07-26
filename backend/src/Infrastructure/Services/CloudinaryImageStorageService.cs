@@ -10,7 +10,8 @@ namespace InventoryApp.Infrastructure.Services;
 public class CloudinaryImageStorageService : IImageStorageService
 {
     private readonly Cloudinary _cloudinary;
-    private const string Folder = "inventoryapp/productos";
+    private readonly string _folder;
+    private const string BaseFolder = "inventoryapp/productos";
 
     public CloudinaryImageStorageService(IConfiguration configuration)
     {
@@ -32,6 +33,7 @@ public class CloudinaryImageStorageService : IImageStorageService
         var account = new Account(cloudName, apiKey, apiSecret);
         _cloudinary = new Cloudinary(account);
         _cloudinary.Api.Secure = true;
+        _folder = CloudinaryFolderResolver.Resolve(configuration, BaseFolder);
     }
 
     public async Task<(string Url, string PublicId)> UploadAsync(IFormFile file)
@@ -43,7 +45,7 @@ public class CloudinaryImageStorageService : IImageStorageService
             var uploadParams = new ImageUploadParams
             {
                 File = new FileDescription(file.FileName, stream),
-                Folder = Folder,
+                Folder = _folder,
                 Transformation = new Transformation().Width(800).Height(800).Crop("limit").Quality("auto")
             };
 
