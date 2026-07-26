@@ -13,6 +13,10 @@ public class UpdateProductoDto
     public decimal Precio { get; set; }
     public int UmbralStockBajo { get; set; }
     public int? CategoriaId { get; set; }
+    public int? ColorId { get; set; }
+    public int? TallaId { get; set; }
+    public int? MarcaId { get; set; }
+    public int? ModeloId { get; set; }
 
     /// Nuevas imágenes a agregar (respetando el máximo de 5 en total).
     public List<IFormFile>? ImagenesNuevas { get; set; }
