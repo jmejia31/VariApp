@@ -10,7 +10,7 @@ namespace InventoryApp.Infrastructure.Services;
 
 public class CloudinaryPerfilImagenStorageService : IPerfilImagenStorageService
 {
-    private const string Folder = "variapp/perfiles";
+    private const string BaseFolder = "variapp/perfiles";
     private const long MaximoBytes = 5 * 1024 * 1024;
 
     private static readonly HashSet<string> TiposPermitidos = new(StringComparer.OrdinalIgnoreCase)
@@ -25,6 +25,7 @@ public class CloudinaryPerfilImagenStorageService : IPerfilImagenStorageService
 
     private readonly Cloudinary _cloudinary;
     private readonly ILogger<CloudinaryPerfilImagenStorageService> _logger;
+    private readonly string _folder;
 
     public CloudinaryPerfilImagenStorageService(
         IConfiguration configuration,
@@ -45,6 +46,7 @@ public class CloudinaryPerfilImagenStorageService : IPerfilImagenStorageService
         _cloudinary = new Cloudinary(new Account(cloudName, apiKey, apiSecret));
         _cloudinary.Api.Secure = true;
         _logger = logger;
+        _folder = CloudinaryFolderResolver.Resolve(configuration, BaseFolder);
     }
 
     public async Task<(string Url, string PublicId)> UploadAsync(IFormFile foto)
@@ -58,7 +60,7 @@ public class CloudinaryPerfilImagenStorageService : IPerfilImagenStorageService
             var parametros = new ImageUploadParams
             {
                 File = new FileDescription(nombreSeguro, stream),
-                Folder = Folder,
+                Folder = _folder,
                 UseFilename = false,
                 UniqueFilename = true,
                 Overwrite = false,
