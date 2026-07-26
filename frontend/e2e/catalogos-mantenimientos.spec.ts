@@ -207,12 +207,12 @@ test.describe('Mantenimientos reutilizables y correcciones críticas', () => {
     await expect(page.locator('mat-select[formcontrolname="tallaId"]')).toBeVisible();
 
     await page.goto('/productos');
-    const buscador = page.locator('input').filter({ has: page.locator('xpath=..') });
-    const inputBusqueda = page.locator('input').first();
+    const inputBusqueda = page.locator('mat-form-field.search-field input');
+    await expect(inputBusqueda).toBeVisible();
     await inputBusqueda.fill(nombres.producto);
-    await expect(page.locator('tr', { hasText: nombres.producto }).first()).toBeVisible();
-    await expect(page.locator('tr', { hasText: nombres.producto }).first().getByText('Agotado')).toBeVisible();
-    void buscador;
+    const filaProducto = page.locator('table.table-desktop tbody tr', { hasText: nombres.producto });
+    await expect(filaProducto).toBeVisible();
+    await expect(filaProducto.getByText('Agotado')).toBeVisible();
 
     await page.goto('/categorias');
     const filaCategoria = page.locator('table.table-desktop tbody tr', { hasText: nombres.categoria });
