@@ -50,7 +50,10 @@ export class CategoriasListComponent implements OnInit {
         this.categorias.set(res.data);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false)
+      error: () => {
+        this.loading.set(false);
+        this.snackBar.open('No se pudieron cargar las categorías.', 'Cerrar', { duration: 5000 });
+      }
     });
   }
 
@@ -65,19 +68,29 @@ export class CategoriasListComponent implements OnInit {
       : this.categoriaService.activar(categoria.id);
 
     operacion.subscribe({
-      next: () => this.cargar(),
+      next: (res) => {
+        this.categorias.update(items => items.map(item => item.id === categoria.id ? res.data : item));
+      },
       error: (err) => this.snackBar.open(err.error?.message ?? 'No se pudo cambiar el estado de la categoría.', 'Cerrar', { duration: 5000 })
     });
   }
 
   async eliminar(categoria: Categoria): Promise<void> {
-    const confirmado = await this.alerts.confirmar({ titulo: 'Eliminar categoría', mensaje: `Se ocultará "${categoria.nombre}" sin borrar el historial relacionado.`, tipo: 'peligro', confirmarTexto: 'Eliminar' });
+    const confirmado = await this.alerts.confirmar({
+      titulo: 'Eliminar categoría',
+      mensaje: `Se ocultará “${categoria.nombre}” sin borrar el historial relacionado.`,
+      tipo: 'peligro',
+      confirmarTexto: 'Eliminar',
+      cancelarTexto: 'Cancelar'
+    });
     if (!confirmado) return;
 
     this.categoriaService.delete(categoria.id).subscribe({
       next: () => {
+        // La lista se actualiza en memoria en el mismo instante. Una recarga
+        // posterior obtiene el mismo resultado gracias al filtro soft-delete.
+        this.categorias.update(items => items.filter(item => item.id !== categoria.id));
         this.snackBar.open('Categoría eliminada correctamente.', 'Cerrar', { duration: 3500 });
-        this.cargar();
       },
       error: (err) => this.snackBar.open(err.error?.message ?? 'No se pudo eliminar la categoría.', 'Cerrar', { duration: 5000 })
     });
