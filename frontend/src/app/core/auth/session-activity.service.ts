@@ -1,18 +1,34 @@
 import { Injectable, NgZone } from '@angular/core';
-import { Router } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { AuthService } from './auth.service';
 import { PermisosRuntimeService } from './permisos-runtime.service';
 
 const INACTIVITY_LIMIT_MS = 30 * 60 * 1000;
+const TOKEN_RENEW_INTERVAL_MS = 5 * 60 * 1000;
+const ACTIVITY_WRITE_THROTTLE_MS = 1_000;
 const SESSION_MESSAGE_KEY = 'inventoryapp_session_message';
 const LAST_ACTIVITY_KEY = 'inventoryapp_last_activity';
+const LAST_RENEW_KEY = 'inventoryapp_last_renew';
 
 @Injectable({ providedIn: 'root' })
 export class SessionActivityService {
   private iniciado = false;
   private cerrando = false;
+  private renovando = false;
   private intervalId?: number;
-  private readonly eventos = ['click', 'keydown', 'pointerdown', 'touchstart', 'scroll'];
+  private routerSubscription?: Subscription;
+  private ultimaEscrituraActividad = 0;
+  private readonly eventos = [
+    'mousemove',
+    'pointerdown',
+    'click',
+    'keydown',
+    'input',
+    'change',
+    'touchstart',
+    'scroll'
+  ];
 
   constructor(
     private authService: AuthService,
@@ -22,9 +38,16 @@ export class SessionActivityService {
   ) {}
 
   iniciar(): void {
-    if (this.iniciado) return;
+    if (this.iniciado || !this.authService.getToken()) return;
     this.iniciado = true;
-    this.marcarActividad();
+    this.marcarActividad(true);
+    localStorage.setItem(LAST_RENEW_KEY, String(Date.now()));
+
+    this.routerSubscription = this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd && this.authService.getToken()) {
+        this.marcarActividad(true);
+      }
+    });
 
     this.zone.runOutsideAngular(() => {
       this.eventos.forEach((evento) => window.addEventListener(evento, this.onActividad, { passive: true }));
@@ -38,10 +61,12 @@ export class SessionActivityService {
     this.eventos.forEach((evento) => window.removeEventListener(evento, this.onActividad));
     if (this.intervalId) window.clearInterval(this.intervalId);
     this.intervalId = undefined;
+    this.routerSubscription?.unsubscribe();
+    this.routerSubscription = undefined;
   }
 
   cerrarPor401(): void {
-    this.cerrarSesion('Tu sesion expiro. Inicia sesion nuevamente.');
+    this.cerrarSesion('Tu sesión expiró. Inicia sesión nuevamente.');
   }
 
   cerrarManual(): void {
@@ -55,33 +80,67 @@ export class SessionActivityService {
   }
 
   private readonly onActividad = () => {
-    if (this.authService.isAuthenticated()) this.marcarActividad();
+    if (this.authService.getToken()) this.marcarActividad(false);
   };
 
-  private marcarActividad(): void {
-    localStorage.setItem(LAST_ACTIVITY_KEY, String(Date.now()));
+  private marcarActividad(forzar: boolean): void {
+    const ahora = Date.now();
+    if (!forzar && ahora - this.ultimaEscrituraActividad < ACTIVITY_WRITE_THROTTLE_MS) return;
+    this.ultimaEscrituraActividad = ahora;
+    localStorage.setItem(LAST_ACTIVITY_KEY, String(ahora));
   }
 
   private verificar(): void {
     if (!this.authService.getToken()) return;
-    if (this.authService.isTokenExpired()) {
-      this.zone.run(() => this.cerrarSesion('Tu sesion expiro. Inicia sesion nuevamente.'));
+
+    const ahora = Date.now();
+    const ultimaActividad = Number(localStorage.getItem(LAST_ACTIVITY_KEY) || ahora);
+    const inactividad = ahora - ultimaActividad;
+
+    if (inactividad >= INACTIVITY_LIMIT_MS) {
+      this.zone.run(() => this.cerrarSesion('Tu sesión expiró por 30 minutos de inactividad.'));
       return;
     }
 
-    const lastActivity = Number(localStorage.getItem(LAST_ACTIVITY_KEY) || Date.now());
-    if (Date.now() - lastActivity >= INACTIVITY_LIMIT_MS) {
-      this.zone.run(() => this.cerrarSesion('Tu sesion expiro por inactividad.'));
+    if (this.authService.isTokenExpired()) {
+      this.zone.run(() => this.cerrarSesion('Tu sesión expiró. Inicia sesión nuevamente.'));
+      return;
     }
+
+    const ultimaRenovacion = Number(localStorage.getItem(LAST_RENEW_KEY) || 0);
+    const huboActividadReciente = inactividad < TOKEN_RENEW_INTERVAL_MS;
+    if (huboActividadReciente && ahora - ultimaRenovacion >= TOKEN_RENEW_INTERVAL_MS) {
+      this.renovar();
+    }
+  }
+
+  private renovar(): void {
+    if (this.renovando || !this.authService.getToken()) return;
+    this.renovando = true;
+
+    this.zone.run(() => {
+      this.authService.renovarSesion().subscribe({
+        next: () => {
+          localStorage.setItem(LAST_RENEW_KEY, String(Date.now()));
+          this.renovando = false;
+        },
+        error: (error) => {
+          this.renovando = false;
+          if (error?.status === 401) this.cerrarPor401();
+        }
+      });
+    });
   }
 
   private cerrarSesion(mensaje?: string): void {
     if (this.cerrando) return;
     this.cerrando = true;
+    this.detener();
     if (mensaje) sessionStorage.setItem(SESSION_MESSAGE_KEY, mensaje);
     this.authService.logout();
     this.permisosRuntime.limpiar();
     localStorage.removeItem(LAST_ACTIVITY_KEY);
+    localStorage.removeItem(LAST_RENEW_KEY);
     this.router.navigate(['/login']).finally(() => {
       this.cerrando = false;
     });
