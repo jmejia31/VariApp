@@ -80,13 +80,20 @@ export class SessionActivityService {
   }
 
   cerrarManual(): void {
+    this.limpiarMensajePendiente();
     this.cerrarSesion(undefined);
   }
 
   tomarMensajePendiente(): string | null {
-    const mensaje = sessionStorage.getItem(SESSION_MESSAGE_KEY);
+    // No se elimina al leerlo: durante el cambio reactivo de layout Angular puede
+    // construir una instancia transitoria de Login antes de completar la
+    // navegación. El mensaje se limpia únicamente al iniciar sesión con éxito o
+    // al cerrar manualmente.
+    return sessionStorage.getItem(SESSION_MESSAGE_KEY);
+  }
+
+  limpiarMensajePendiente(): void {
     sessionStorage.removeItem(SESSION_MESSAGE_KEY);
-    return mensaje;
   }
 
   private readonly onActividad = () => {
