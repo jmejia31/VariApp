@@ -30,7 +30,7 @@ public class ProductosController : ControllerBase
 
     [HttpGet]
     [RequierePermiso(ModuloSistema.Productos, AccionPermiso.Ver)]
-    public async Task<IActionResult> GetPaged([FromQuery] PagedRequest request)
+    public async Task<IActionResult> GetPaged([FromQuery] ProductoPagedRequest request)
     {
         var resultado = await _productoService.GetPagedAsync(request);
         return Ok(ApiResponse<PagedResult<ProductoDto>>.Ok(resultado));
@@ -127,7 +127,6 @@ public class ProductosController : ControllerBase
             imagenId,
             entidad: "ProductoImagen",
             valoresNuevos: new { productoId = id, imagenId, nombreArchivo });
-
         return File(contenido, contentType, nombreArchivo);
     }
 
