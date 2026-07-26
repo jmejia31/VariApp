@@ -109,6 +109,54 @@ namespace InventoryApp.Infrastructure.Migrations
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
+            // Conserva los datos anteriores: cada texto de Marca/Modelo se
+            // convierte en un catálogo administrable y el producto queda
+            // relacionado sin perder sus snapshots históricos.
+            migrationBuilder.Sql(@"
+INSERT INTO CatalogosProducto
+    (Tipo, Nombre, Descripcion, CodigoVisual, Orden, Activo, Eliminado,
+     FechaEliminacion, EliminadoPorUsuarioId, CatalogoPadreId,
+     FechaCreacion, FechaActualizacion, CreadoPorUsuarioId,
+     CreadoPorNombreUsuario, ActualizadoPorUsuarioId, ActualizadoPorNombreUsuario)
+SELECT 'Marca', TRIM(p.Marca), NULL, NULL, 0, 1, 0,
+       NULL, NULL, NULL, UTC_TIMESTAMP(6), UTC_TIMESTAMP(6),
+       NULL, 'Migración', NULL, NULL
+FROM Productos p
+WHERE p.Marca IS NOT NULL AND TRIM(p.Marca) <> ''
+GROUP BY TRIM(p.Marca);
+
+INSERT INTO CatalogosProducto
+    (Tipo, Nombre, Descripcion, CodigoVisual, Orden, Activo, Eliminado,
+     FechaEliminacion, EliminadoPorUsuarioId, CatalogoPadreId,
+     FechaCreacion, FechaActualizacion, CreadoPorUsuarioId,
+     CreadoPorNombreUsuario, ActualizadoPorUsuarioId, ActualizadoPorNombreUsuario)
+SELECT 'Modelo', TRIM(p.Modelo), NULL, NULL, 0, 1, 0,
+       NULL, NULL, marca.Id, UTC_TIMESTAMP(6), UTC_TIMESTAMP(6),
+       NULL, 'Migración', NULL, NULL
+FROM Productos p
+INNER JOIN CatalogosProducto marca
+    ON marca.Tipo = 'Marca'
+   AND LOWER(marca.Nombre) = LOWER(TRIM(p.Marca))
+WHERE p.Modelo IS NOT NULL AND TRIM(p.Modelo) <> ''
+GROUP BY TRIM(p.Modelo), marca.Id;
+
+UPDATE Productos p
+INNER JOIN CatalogosProducto marca
+    ON marca.Tipo = 'Marca'
+   AND LOWER(marca.Nombre) = LOWER(TRIM(p.Marca))
+SET p.MarcaId = marca.Id
+WHERE p.Marca IS NOT NULL AND TRIM(p.Marca) <> '';
+
+UPDATE Productos p
+INNER JOIN CatalogosProducto marca
+    ON marca.Id = p.MarcaId AND marca.Tipo = 'Marca'
+INNER JOIN CatalogosProducto modelo
+    ON modelo.Tipo = 'Modelo'
+   AND modelo.CatalogoPadreId = marca.Id
+   AND LOWER(modelo.Nombre) = LOWER(TRIM(p.Modelo))
+SET p.ModeloId = modelo.Id
+WHERE p.Modelo IS NOT NULL AND TRIM(p.Modelo) <> '';");
+
             migrationBuilder.CreateIndex(
                 name: "IX_Productos_ColorId",
                 table: "Productos",
