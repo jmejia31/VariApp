@@ -1,7 +1,9 @@
+using System.Security.Claims;
 using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Enums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InventoryApp.API.Controllers;
@@ -45,5 +47,20 @@ public class AuthController : ControllerBase
             resultado: "Exito");
 
         return Ok(ApiResponse<LoginResponseDto>.Ok(resultado, "Login exitoso."));
+    }
+
+    [Authorize]
+    [HttpPost("renovar")]
+    public async Task<IActionResult> Renovar()
+    {
+        var idClaim = User.FindFirstValue("id");
+        if (!int.TryParse(idClaim, out var usuarioId))
+            return Unauthorized(ApiResponse<object>.Fail("No fue posible identificar la sesión."));
+
+        var resultado = await _authService.RenovarAsync(usuarioId);
+        if (resultado is null)
+            return Unauthorized(ApiResponse<object>.Fail("La sesión ya no es válida."));
+
+        return Ok(ApiResponse<LoginResponseDto>.Ok(resultado, "Sesión renovada correctamente."));
     }
 }
