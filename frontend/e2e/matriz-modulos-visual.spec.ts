@@ -76,8 +76,26 @@ async function applyPalette(page: Page, palette: Record<string, string>): Promis
 async function contrastAudit(page: Page): Promise<Array<{ name: string; ratio: number }>> {
   return page.evaluate(() => {
     function rgb(value: string): [number, number, number] {
-      const values = value.match(/[\d.]+/g)?.slice(0, 3).map(Number) ?? [0, 0, 0];
-      return [values[0] ?? 0, values[1] ?? 0, values[2] ?? 0];
+      const srgb = value.match(/color\(srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)/i);
+      if (srgb) {
+        return [Number(srgb[1]) * 255, Number(srgb[2]) * 255, Number(srgb[3]) * 255];
+      }
+
+      const rgbFunction = value.match(/rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)/i);
+      if (rgbFunction) {
+        return [Number(rgbFunction[1]), Number(rgbFunction[2]), Number(rgbFunction[3])];
+      }
+
+      const hex = value.trim().match(/^#([0-9a-f]{6})$/i);
+      if (hex) {
+        return [
+          Number.parseInt(hex[1].slice(0, 2), 16),
+          Number.parseInt(hex[1].slice(2, 4), 16),
+          Number.parseInt(hex[1].slice(4, 6), 16)
+        ];
+      }
+
+      return [0, 0, 0];
     }
 
     function luminance(value: string): number {
@@ -96,13 +114,17 @@ async function contrastAudit(page: Page): Promise<Array<{ name: string; ratio: n
       return (Math.max(first, second) + 0.05) / (Math.min(first, second) + 0.05);
     }
 
+    function isTransparent(background: string): boolean {
+      return background === 'transparent'
+        || background === 'rgba(0, 0, 0, 0)'
+        || /\/\s*0\s*\)$/.test(background);
+    }
+
     function opaqueBackground(element: Element | null): string {
       let current: Element | null = element;
       while (current) {
         const background = getComputedStyle(current).backgroundColor;
-        if (!background.endsWith(', 0)') && background !== 'transparent' && background !== 'rgba(0, 0, 0, 0)') {
-          return background;
-        }
+        if (!isTransparent(background)) return background;
         current = current.parentElement;
       }
       return getComputedStyle(document.body).backgroundColor;
@@ -111,7 +133,8 @@ async function contrastAudit(page: Page): Promise<Array<{ name: string; ratio: n
     const candidates: Array<{ name: string; selector: string; minimum: number }> = [
       { name: 'título principal', selector: '.page-title, #dashboard-title', minimum: 4.5 },
       { name: 'enlace del menú', selector: '.sidebar nav a', minimum: 3 },
-      { name: 'icono de perfil', selector: '.profile-button, .topbar-icon-button', minimum: 3 },
+      { name: 'perfil', selector: '.profile-button', minimum: 3 },
+      { name: 'icono cerrar sesión', selector: '.topbar-icon-button mat-icon', minimum: 3 },
       { name: 'botón principal', selector: '.mat-mdc-unelevated-button', minimum: 3 }
     ];
 
@@ -207,7 +230,7 @@ test.describe('Matriz de módulos, consola, responsive y contraste', () => {
       await assertVisibleIcons(page);
 
       const results = await contrastAudit(page);
-      expect(results.length).toBeGreaterThanOrEqual(3);
+      expect(results.length).toBeGreaterThanOrEqual(4);
       for (const result of results) {
         const [label, minimumText] = result.name.split('|');
         expect(result.ratio, `Contraste insuficiente en ${label} para tema ${name}`).toBeGreaterThanOrEqual(Number(minimumText));
