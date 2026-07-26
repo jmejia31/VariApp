@@ -219,7 +219,9 @@ test.describe('Mantenimientos reutilizables y correcciones críticas', () => {
     await expect(filaCategoria).toBeVisible();
     await filaCategoria.getByTitle('Eliminar').click();
 
-    const confirmar = page.getByRole('button', { name: 'Eliminar', exact: true });
+    const dialogo = page.getByRole('dialog');
+    await expect(dialogo).toBeVisible();
+    const confirmar = dialogo.getByRole('button', { name: 'Eliminar', exact: true });
     await expect(confirmar).toBeVisible();
     const estilos = await confirmar.evaluate((elemento) => {
       const style = getComputedStyle(elemento);
