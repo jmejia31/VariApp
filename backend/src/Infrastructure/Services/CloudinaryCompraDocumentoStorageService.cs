@@ -9,8 +9,9 @@ namespace InventoryApp.Infrastructure.Services;
 
 public class CloudinaryCompraDocumentoStorageService : ICompraDocumentoStorageService
 {
-    private const string Folder = "inventoryapp/compras";
+    private const string BaseFolder = "inventoryapp/compras";
     private readonly Cloudinary _cloudinary;
+    private readonly string _folder;
 
     public CloudinaryCompraDocumentoStorageService(IConfiguration configuration)
     {
@@ -31,6 +32,7 @@ public class CloudinaryCompraDocumentoStorageService : ICompraDocumentoStorageSe
 
         _cloudinary = new Cloudinary(new Account(cloudName, apiKey, apiSecret));
         _cloudinary.Api.Secure = true;
+        _folder = CloudinaryFolderResolver.Resolve(configuration, BaseFolder);
     }
 
     public async Task<DocumentoAlmacenado> UploadAsync(IFormFile archivo)
@@ -45,7 +47,7 @@ public class CloudinaryCompraDocumentoStorageService : ICompraDocumentoStorageSe
                 var parametros = new RawUploadParams
                 {
                     File = new FileDescription(archivo.FileName, stream),
-                    Folder = Folder,
+                    Folder = _folder,
                     UseFilename = true,
                     UniqueFilename = true
                 };
@@ -65,7 +67,7 @@ public class CloudinaryCompraDocumentoStorageService : ICompraDocumentoStorageSe
             var parametrosImagen = new ImageUploadParams
             {
                 File = new FileDescription(archivo.FileName, stream),
-                Folder = Folder,
+                Folder = _folder,
                 UseFilename = true,
                 UniqueFilename = true
             };
