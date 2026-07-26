@@ -38,6 +38,18 @@ import { SessionActivityService } from './core/auth/session-activity.service';
             @if (permisosRuntime.puede('Categorias', 'Ver')) {
               <a routerLink="/categorias" routerLinkActive="active" ariaCurrentWhenActive="page"><mat-icon>category</mat-icon> Categorías</a>
             }
+            @if (permisosRuntime.puede('Colores', 'Ver')) {
+              <a routerLink="/colores" routerLinkActive="active" ariaCurrentWhenActive="page"><mat-icon>palette</mat-icon> Colores</a>
+            }
+            @if (permisosRuntime.puede('Tallas', 'Ver')) {
+              <a routerLink="/tallas" routerLinkActive="active" ariaCurrentWhenActive="page"><mat-icon>straighten</mat-icon> Tallas</a>
+            }
+            @if (permisosRuntime.puede('Marcas', 'Ver')) {
+              <a routerLink="/marcas" routerLinkActive="active" ariaCurrentWhenActive="page"><mat-icon>branding_watermark</mat-icon> Marcas</a>
+            }
+            @if (permisosRuntime.puede('Modelos', 'Ver')) {
+              <a routerLink="/modelos" routerLinkActive="active" ariaCurrentWhenActive="page"><mat-icon>devices</mat-icon> Modelos</a>
+            }
             @if (permisosRuntime.puede('Compras', 'Ver')) {
               <a routerLink="/compras" routerLinkActive="active" ariaCurrentWhenActive="page"><mat-icon>shopping_cart</mat-icon> Compras</a>
             }
@@ -107,7 +119,7 @@ import { SessionActivityService } from './core/auth/session-activity.service';
                   <span class="user-initials" aria-hidden="true">{{ inicialesUsuario() }}</span>
                 }
               </button>
-              <button mat-icon-button (click)="logout()" aria-label="Cerrar sesión" title="Cerrar sesión">
+              <button mat-icon-button class="topbar-icon-button" (click)="logout()" aria-label="Cerrar sesión" title="Cerrar sesión">
                 <mat-icon>logout</mat-icon>
               </button>
             </div>
@@ -157,6 +169,7 @@ export class AppComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.sessionActivity.detener();
     this.document.body.style.removeProperty('overflow');
   }
 
