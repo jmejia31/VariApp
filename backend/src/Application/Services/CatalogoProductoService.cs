@@ -27,7 +27,9 @@ public class CatalogoProductoService : ICatalogoProductoService
         string? buscar = null,
         int? catalogoPadreId = null)
     {
-        ValidarPadrePorTipo(tipo, catalogoPadreId);
+        if (tipo != TipoCatalogoProducto.Modelo && catalogoPadreId.HasValue)
+            throw new BusinessRuleException("Solo los modelos pueden filtrarse por marca.");
+
         var elementos = await _repository.GetAllAsync(tipo, buscar, catalogoPadreId);
         return elementos.Select(ToDto).ToList();
     }
