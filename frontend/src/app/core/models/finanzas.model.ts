@@ -46,9 +46,12 @@ export interface FinanzasResumen {
   ingresosTotales: number;
   egresosTotales: number;
   utilidadBruta: number;
+  margenUtilidadBruta: number;
   utilidadNeta: number;
   valorInventarioCosto: number;
   valorPotencialVenta: number;
+  utilidadInventarioPotencial: number;
+  margenInventarioPotencial: number;
   cuentasPorCobrar: number;
   cuentasPorPagar: number;
   balanceOperativo: number;
