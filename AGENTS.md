@@ -24,7 +24,7 @@ Si existen cambios locales ajenos, el agente debe preservarlos y explicar el con
 
 ## Flujo obligatorio por cambio
 
-1. Leer `AGENTS.md`, `CONTRIBUTING.md` y `docs/COLABORACION_IA.md`.
+1. Leer `AGENTS.md`, `CONTRIBUTING.md`, `docs/COLABORACION_IA.md` y `docs/ENTORNOS_DESARROLLO_PRODUCCION.md`.
 2. Confirmar que la rama actual sea `Desarrollo`.
 3. Revisar el estado y los últimos commits antes de editar.
 4. Hacer cambios pequeños, coherentes y trazables.
@@ -77,6 +77,9 @@ Las pruebas E2E se ejecutan cuando el cambio afecta autenticación, permisos, na
 - Nunca guardar contraseñas, tokens, cadenas productivas, claves SMTP o credenciales de Cloudinary.
 - Nunca aplicar migraciones en Aiven ni desplegar a producción sin autorización expresa.
 - Nunca eliminar datos productivos.
+- Desarrollo nunca puede usar la cadena de Aiven productiva.
+- Desarrollo nunca puede publicar activos sin separación de Cloudinary por product environment, cuenta o prefijo `desarrollo`.
+- Un Preview de Vercel nunca puede apuntar al backend o base de datos productivos.
 - No versionar `node_modules`, `bin`, `obj`, `dist`, `.angular`, reportes de pruebas, registros, temporales ni respaldos.
 - No modificar archivos no relacionados con la tarea.
 - No dejar código comentado, pruebas deshabilitadas, marcadores temporales ni archivos sin uso.
