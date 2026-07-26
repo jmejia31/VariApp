@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: desarrollo-ci-${{ github.workflow }}-${{ github.ref }}
@@ -55,8 +55,11 @@ jobs:
       run:
         working-directory: backend
     steps:
-      - name: Checkout
+      - name: Checkout rama de trabajo
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+          fetch-depth: 0
 
       - name: Configurar .NET
         uses: actions/setup-dotnet@v4
@@ -67,6 +70,31 @@ jobs:
 
       - name: Restaurar
         run: dotnet restore InventoryApp.sln
+
+      - name: Generar migración y snapshot de catálogos
+        if: github.event_name == 'push' && github.ref_name == 'Desarrollo'
+        env:
+          ConnectionStrings__DefaultConnection: Server=127.0.0.1;Port=3306;Database=inventoryapp_design;User=root;Password=design-only;
+          Database__ServerVersion: 8.4.3
+          Jwt__Secret: Design-Time-Only-Secret-With-More-Than-32-Characters
+        run: |
+          set -euo pipefail
+          if find src/Infrastructure/Migrations -maxdepth 1 -name '*_CatalogosProductoYCategoriaSoftDelete.cs' ! -name '*.Designer.cs' | grep -q .; then
+            echo 'La migración y el snapshot ya existen.'
+          else
+            dotnet tool install --global dotnet-ef --version 8.0.2
+            dotnet ef migrations add CatalogosProductoYCategoriaSoftDelete \
+              --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+              --startup-project src/API/InventoryApp.API.csproj \
+              --context AppDbContext \
+              --output-dir Migrations
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add src/Infrastructure/Migrations
+            git commit -m 'feat(database): generar migración de catálogos y snapshot [GitHub Actions]'
+            git pull --rebase origin Desarrollo
+            git push origin HEAD:Desarrollo
+          fi
 
       - name: Compilar Release
         run: dotnet build InventoryApp.sln --configuration Release --no-restore
