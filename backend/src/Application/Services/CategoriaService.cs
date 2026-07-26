@@ -45,8 +45,9 @@ public class CategoriaService : ICategoriaService
         var categoria = new Categoria
         {
             Nombre = dto.Nombre.Trim(),
-            Descripcion = dto.Descripcion,
+            Descripcion = string.IsNullOrWhiteSpace(dto.Descripcion) ? null : dto.Descripcion.Trim(),
             Activa = true,
+            Eliminada = false,
             CreadoPorUsuarioId = _currentUser.UsuarioId,
             CreadoPorNombreUsuario = _currentUser.NombreUsuario
         };
@@ -67,7 +68,7 @@ public class CategoriaService : ICategoriaService
             throw new BusinessRuleException($"Ya existe una categoría con el nombre '{dto.Nombre}'.");
 
         categoria.Nombre = dto.Nombre.Trim();
-        categoria.Descripcion = dto.Descripcion;
+        categoria.Descripcion = string.IsNullOrWhiteSpace(dto.Descripcion) ? null : dto.Descripcion.Trim();
         // El estado se modifica únicamente mediante Activar/Desactivar, nunca
         // como efecto lateral del permiso Editar.
         categoria.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
@@ -109,6 +110,9 @@ public class CategoriaService : ICategoriaService
         if (categoria is null) return false;
 
         categoria.Activa = false;
+        categoria.Eliminada = true;
+        categoria.FechaEliminacion = DateTime.UtcNow;
+        categoria.EliminadaPorUsuarioId = _currentUser.UsuarioId;
         categoria.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
         categoria.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
         categoria.FechaActualizacion = DateTime.UtcNow;
@@ -116,7 +120,7 @@ public class CategoriaService : ICategoriaService
         _repository.Update(categoria);
         var eliminado = await _repository.SaveChangesAsync();
         if (eliminado)
-            await _auditoria.RegistrarAsync(ModuloSistema.Categorias, AccionPermiso.EliminarLogico, $"Categoría desactivada como eliminación lógica: {categoria.Nombre}", categoria.Id);
+            await _auditoria.RegistrarAsync(ModuloSistema.Categorias, AccionPermiso.EliminarLogico, $"Categoría eliminada lógicamente: {categoria.Nombre}", categoria.Id);
         return eliminado;
     }
 
