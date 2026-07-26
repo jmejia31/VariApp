@@ -60,5 +60,6 @@ jobs:
             echo 'No hay cambios para confirmar.'
           else
             git commit -m 'feat(database): generar migración de catálogos y snapshot [GitHub Actions]'
+            git pull --rebase origin Desarrollo
             git push origin HEAD:Desarrollo
           fi
