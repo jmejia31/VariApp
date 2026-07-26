@@ -47,6 +47,9 @@ public class FinanzasService : IFinanzasService
         var utilidadBruta = esAdministrador
             ? await _ventaRepository.GetUtilidadBrutaTotalAsync()
             : 0m;
+        var margenUtilidadBruta = esAdministrador && ingresosTotales > 0
+            ? decimal.Round(utilidadBruta / ingresosTotales * 100m, 2)
+            : 0m;
 
         var gastosOperativosManuales = esAdministrador
             ? noAnulados.Where(m => !m.EsAutomatico && m.Tipo == TipoMovimientoFinanciero.Egreso).Sum(m => m.Monto)
@@ -58,6 +61,12 @@ public class FinanzasService : IFinanzasService
             : 0m;
         var valorPotencialVenta = esAdministrador
             ? await _productoRepository.GetValorTotalPrecioAsync()
+            : 0m;
+        var utilidadInventarioPotencial = esAdministrador
+            ? valorPotencialVenta - valorInventarioCosto
+            : 0m;
+        var margenInventarioPotencial = esAdministrador && valorPotencialVenta > 0
+            ? decimal.Round(utilidadInventarioPotencial / valorPotencialVenta * 100m, 2)
             : 0m;
 
         var cuentasPorCobrar = await _ventaRepository.GetCuentasPorCobrarAsync();
@@ -79,9 +88,12 @@ public class FinanzasService : IFinanzasService
             IngresosTotales = ingresosTotales,
             EgresosTotales = egresosTotales,
             UtilidadBruta = utilidadBruta,
+            MargenUtilidadBruta = margenUtilidadBruta,
             UtilidadNeta = utilidadNeta,
             ValorInventarioCosto = valorInventarioCosto,
             ValorPotencialVenta = valorPotencialVenta,
+            UtilidadInventarioPotencial = utilidadInventarioPotencial,
+            MargenInventarioPotencial = margenInventarioPotencial,
             CuentasPorCobrar = cuentasPorCobrar,
             CuentasPorPagar = cuentasPorPagar,
             BalanceOperativo = ingresosTotales - egresosTotales,
