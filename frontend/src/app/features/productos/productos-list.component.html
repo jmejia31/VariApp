@@ -8,11 +8,83 @@
 </div>
 
 <div class="card">
-  <mat-form-field appearance="outline" class="search-field">
-    <mat-label>Buscar por nombre, marca, modelo, color o talla</mat-label>
-    <input matInput [ngModel]="search" (ngModelChange)="onSearchChange($event)">
-    <mat-icon matSuffix>search</mat-icon>
-  </mat-form-field>
+  <div class="product-toolbar" aria-label="Búsqueda y filtros de inventario">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar por nombre, marca, modelo, color o talla</mat-label>
+      <input matInput [ngModel]="search" (ngModelChange)="onSearchChange($event)">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+
+    <div class="filters-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Marca</mat-label>
+        <mat-select [ngModel]="marcaId" (ngModelChange)="onMarcaFilterChange($event)" [disabled]="loadingFilters()">
+          <mat-option [value]="null">Todas</mat-option>
+          @for (marca of marcas(); track marca.id) {
+            <mat-option [value]="marca.id">{{ marca.nombre }}{{ marca.activo ? '' : ' (inactiva)' }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Modelo</mat-label>
+        <mat-select [(ngModel)]="modeloId" (selectionChange)="aplicarFiltros()" [disabled]="!marcaId">
+          <mat-option [value]="null">Todos</mat-option>
+          @for (modelo of modelos(); track modelo.id) {
+            <mat-option [value]="modelo.id">{{ modelo.nombre }}{{ modelo.activo ? '' : ' (inactivo)' }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Color</mat-label>
+        <mat-select [(ngModel)]="colorId" (selectionChange)="aplicarFiltros()" [disabled]="loadingFilters()">
+          <mat-option [value]="null">Todos</mat-option>
+          @for (color of colores(); track color.id) {
+            <mat-option [value]="color.id">
+              <span class="select-swatch" [style.background]="color.codigoVisual || '#64748B'"></span>
+              {{ color.nombre }}{{ color.activo ? '' : ' (inactivo)' }}
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Talla o tamaño</mat-label>
+        <mat-select [(ngModel)]="tallaId" (selectionChange)="aplicarFiltros()" [disabled]="loadingFilters()">
+          <mat-option [value]="null">Todas</mat-option>
+          @for (talla of tallas(); track talla.id) {
+            <mat-option [value]="talla.id">{{ talla.nombre }}{{ talla.activo ? '' : ' (inactiva)' }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Categoría</mat-label>
+        <mat-select [(ngModel)]="categoriaId" (selectionChange)="aplicarFiltros()" [disabled]="loadingFilters()">
+          <mat-option [value]="null">Todas</mat-option>
+          @for (categoria of categorias(); track categoria.id) {
+            <mat-option [value]="categoria.id">{{ categoria.nombre }}{{ categoria.activa ? '' : ' (inactiva)' }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Estado</mat-label>
+        <mat-select [(ngModel)]="estado" (selectionChange)="aplicarFiltros()">
+          <mat-option value="todos">Todos</mat-option>
+          <mat-option value="activos">Activos</mat-option>
+          <mat-option value="inactivos">Inactivos</mat-option>
+          <mat-option value="agotados">Agotados</mat-option>
+          <mat-option value="disponibles">Con existencia</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <button mat-stroked-button type="button" class="clear-filters" (click)="limpiarFiltros()">
+      <mat-icon>filter_alt_off</mat-icon> Limpiar filtros
+    </button>
+  </div>
 
   @if (loading()) {
     <div class="loading"><mat-spinner></mat-spinner></div>
@@ -90,7 +162,7 @@
               </td>
             </tr>
           } @empty {
-            <tr><td colspan="10" class="empty">No se encontraron productos.</td></tr>
+            <tr><td colspan="10" class="empty">No se encontraron productos con los filtros seleccionados.</td></tr>
           }
         </tbody>
       </table>
@@ -138,7 +210,7 @@
           </div>
         </div>
       } @empty {
-        <p class="empty">No se encontraron productos.</p>
+        <p class="empty">No se encontraron productos con los filtros seleccionados.</p>
       }
     </div>
 
