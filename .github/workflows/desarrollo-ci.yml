@@ -72,7 +72,7 @@ jobs:
         run: dotnet restore InventoryApp.sln
 
       - name: Generar migración y snapshot de catálogos
-        if: github.event_name == 'push' && github.ref_name == 'Desarrollo'
+        if: (github.event_name == 'push' && github.ref_name == 'Desarrollo') || (github.event_name == 'pull_request' && github.head_ref == 'Desarrollo')
         env:
           ConnectionStrings__DefaultConnection: Server=127.0.0.1;Port=3306;Database=inventoryapp_design;User=root;Password=design-only;
           Database__ServerVersion: 8.4.3
