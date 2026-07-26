@@ -24,8 +24,13 @@ public class JwtService : IJwtService
             ?? throw new InvalidOperationException("Jwt:Secret no está configurado.");
         var issuer = jwtSettings["Issuer"];
         var audience = jwtSettings["Audience"];
-        var expiraMinutos = int.TryParse(jwtSettings["ExpiraMinutos"], out var m) ? m : 30;
-        expiraMinutos = Math.Clamp(expiraMinutos, 1, 30);
+
+        // El token ya no representa una expiración fija de la sesión. El frontend
+        // lo renueva mientras detecta actividad y cierra la sesión tras 30 minutos
+        // continuos de inactividad. Se deja un margen mínimo para completar la
+        // renovación sin cerrar al usuario en medio de una operación.
+        var expiraMinutos = int.TryParse(jwtSettings["ExpiraMinutos"], out var m) ? m : 35;
+        expiraMinutos = Math.Clamp(expiraMinutos, 35, 720);
 
         var expiraEn = DateTime.UtcNow.AddMinutes(expiraMinutos);
 
