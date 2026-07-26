@@ -123,5 +123,6 @@ test('Productos filtra por relaciones normalizadas y estado de inventario', asyn
   await expect(row.getByText('Agotado', { exact: true })).toBeVisible();
 
   await page.getByRole('button', { name: 'Limpiar filtros' }).click();
-  await expect(brandSelect).toContainText('Todas');
+  await expect(brandSelect).toHaveClass(/mat-mdc-select-empty/);
+  await expect(modelSelect).toBeDisabled();
 });
