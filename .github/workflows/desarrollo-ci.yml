@@ -105,3 +105,25 @@ jobs:
 
       - name: Compilar producción
         run: npm run build:prod
+
+  deployment-config:
+    name: Docker y aislamiento de entornos
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validar archivos de configuración
+        shell: bash
+        run: |
+          set -euo pipefail
+          ruby -e "require 'yaml'; YAML.safe_load(File.read('render.yaml'), permitted_classes: [], aliases: true)"
+          node -e "JSON.parse(require('fs').readFileSync('frontend/vercel.json', 'utf8'))"
+          grep -q 'branch: Desarrollo' render.yaml
+          grep -q 'name: variapp-api-desarrollo' render.yaml
+          grep -A1 'Database__ApplyMigrationsOnStartup' render.yaml | grep -q '"false"'
+          grep -q 'variapp-api.onrender.com' frontend/vercel.json
+          grep -q 'variapp-api-desarrollo.onrender.com' frontend/vercel.json
+
+      - name: Construir imagen Docker de la API
+        run: docker build --file backend/Dockerfile --tag variapp-api:desarrollo-ci .
