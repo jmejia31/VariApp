@@ -1,4 +1,4 @@
-name: Catálogos y correcciones - aceptación aislada
+name: Desarrollo - aceptación funcional integral
 
 on:
   push:
@@ -6,7 +6,9 @@ on:
       - Desarrollo
     paths:
       - .github/workflows/catalogos-aceptacion.yml
-      - frontend/e2e/catalogos-mantenimientos.spec.ts
+      - frontend/e2e/**
+      - frontend/scripts/**
+      - frontend/package.json
       - frontend/src/**
       - backend/src/**
       - backend/tests/**
@@ -15,7 +17,9 @@ on:
       - main
     paths:
       - .github/workflows/catalogos-aceptacion.yml
-      - frontend/e2e/catalogos-mantenimientos.spec.ts
+      - frontend/e2e/**
+      - frontend/scripts/**
+      - frontend/package.json
       - frontend/src/**
       - backend/src/**
       - backend/tests/**
@@ -25,14 +29,14 @@ permissions:
   contents: read
 
 concurrency:
-  group: catalogos-aceptacion-${{ github.workflow }}-${{ github.ref }}
+  group: desarrollo-aceptacion-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   acceptance:
-    name: CRUD, variantes, categorías y accesibilidad
+    name: Módulos, sesión, catálogos, permisos y accesibilidad
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
 
     services:
       mysql:
@@ -140,6 +144,10 @@ jobs:
           npm install --no-save --package-lock=false @playwright/test@latest
           npx playwright install --with-deps chromium
 
+      - name: Validar tipado y calidad estática
+        working-directory: frontend
+        run: npm run lint
+
       - name: Iniciar Angular
         working-directory: frontend
         shell: bash
@@ -163,15 +171,23 @@ jobs:
           cat catalogos-frontend.log >&2 || true
           exit 1
 
-      - name: Ejecutar aceptación Playwright
+      - name: Ejecutar aceptación Playwright integral
         working-directory: frontend
-        run: npx playwright test e2e/catalogos-mantenimientos.spec.ts --config=playwright.config.ts
+        run: |
+          npx playwright test \
+            e2e/catalogos-mantenimientos.spec.ts \
+            e2e/sesion-inactividad.spec.ts \
+            e2e/matriz-modulos-visual.spec.ts \
+            e2e/phase7-admin-role.spec.ts \
+            e2e/phase7-user-isolation.spec.ts \
+            e2e/phase7.spec.ts \
+            --config=playwright.config.ts
 
       - name: Publicar evidencia
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: catalogos-e2e-evidence
+          name: desarrollo-aceptacion-integral
           path: |
             backend/catalogos-api.log
             frontend/catalogos-frontend.log
