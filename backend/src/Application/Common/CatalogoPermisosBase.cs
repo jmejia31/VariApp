@@ -5,6 +5,16 @@ namespace InventoryApp.Application.Common;
 /// Única fuente de verdad de las combinaciones Módulo/Acción válidas.
 public static class CatalogoPermisosBase
 {
+    private static readonly AccionPermiso[] AccionesMantenimiento =
+    {
+        AccionPermiso.Ver,
+        AccionPermiso.Crear,
+        AccionPermiso.Editar,
+        AccionPermiso.Activar,
+        AccionPermiso.Desactivar,
+        AccionPermiso.EliminarLogico
+    };
+
     public static readonly (ModuloSistema Modulo, AccionPermiso[] Acciones)[] Definicion =
     {
         (ModuloSistema.Dashboard, new[] { AccionPermiso.Ver }),
@@ -22,6 +32,11 @@ public static class CatalogoPermisosBase
             AccionPermiso.Activar, AccionPermiso.Desactivar, AccionPermiso.EliminarLogico,
             AccionPermiso.EliminarPermanente
         }),
+
+        (ModuloSistema.Colores, AccionesMantenimiento),
+        (ModuloSistema.Tallas, AccionesMantenimiento),
+        (ModuloSistema.Marcas, AccionesMantenimiento),
+        (ModuloSistema.Modelos, AccionesMantenimiento),
 
         (ModuloSistema.Clientes, new[]
         {
