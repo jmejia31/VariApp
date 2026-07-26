@@ -95,7 +95,16 @@ export class SessionActivityService {
 
   private marcarActividad(forzar: boolean): void {
     const ahora = Date.now();
-    if (!forzar && ahora - this.ultimaEscrituraActividad < ACTIVITY_WRITE_THROTTLE_MS) return;
+    const guardada = Number(localStorage.getItem(LAST_ACTIVITY_KEY) || 0);
+    const escrituraLocalReciente = ahora - this.ultimaEscrituraActividad < ACTIVITY_WRITE_THROTTLE_MS;
+    const almacenamientoReciente = guardada > 0 && ahora - guardada < ACTIVITY_WRITE_THROTTLE_MS;
+
+    // El throttle solo puede omitir una escritura cuando tanto esta pestaña como
+    // el almacenamiento compartido ya reflejan actividad reciente. Si otra
+    // pestaña, una suspensión del navegador o una restauración dejó un valor
+    // vencido, la primera interacción real siempre prevalece y reinicia el reloj.
+    if (!forzar && escrituraLocalReciente && almacenamientoReciente) return;
+
     this.ultimaEscrituraActividad = ahora;
     localStorage.setItem(LAST_ACTIVITY_KEY, String(ahora));
   }
