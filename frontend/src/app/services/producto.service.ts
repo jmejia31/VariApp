@@ -85,5 +85,9 @@ export class ProductoService {
     formData.append('Precio', String(value.precio));
     formData.append('UmbralStockBajo', String(value.umbralStockBajo));
     if (value.categoriaId != null) formData.append('CategoriaId', String(value.categoriaId));
+    if (value.colorId != null) formData.append('ColorId', String(value.colorId));
+    if (value.tallaId != null) formData.append('TallaId', String(value.tallaId));
+    if (value.marcaId != null) formData.append('MarcaId', String(value.marcaId));
+    if (value.modeloId != null) formData.append('ModeloId', String(value.modeloId));
   }
 }
