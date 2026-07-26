@@ -39,9 +39,19 @@ export class SessionActivityService {
 
   iniciar(): void {
     if (this.iniciado || !this.authService.getToken()) return;
+
+    const ahora = Date.now();
+    const actividadGuardada = Number(localStorage.getItem(LAST_ACTIVITY_KEY) || 0);
+    if (actividadGuardada > 0 && ahora - actividadGuardada >= INACTIVITY_LIMIT_MS) {
+      this.cerrarSesion('Tu sesión expiró por 30 minutos de inactividad.');
+      return;
+    }
+
     this.iniciado = true;
     this.marcarActividad(true);
-    localStorage.setItem(LAST_RENEW_KEY, String(Date.now()));
+    if (!localStorage.getItem(LAST_RENEW_KEY)) {
+      localStorage.setItem(LAST_RENEW_KEY, String(ahora));
+    }
 
     this.routerSubscription = this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd && this.authService.getToken()) {
