@@ -16,7 +16,13 @@ public class ProductoRepository : IProductoRepository
     }
 
     private IQueryable<Producto> ConIncludes() =>
-        _context.Productos.Include(p => p.Imagenes).Include(p => p.Categoria);
+        _context.Productos
+            .Include(p => p.Imagenes)
+            .Include(p => p.Categoria)
+            .Include(p => p.Color)
+            .Include(p => p.Talla)
+            .Include(p => p.MarcaCatalogo)
+            .Include(p => p.ModeloCatalogo);
 
     public async Task<Producto?> GetByIdAsync(int id) =>
         await ConIncludes().FirstOrDefaultAsync(p => p.Id == id);
@@ -31,7 +37,11 @@ public class ProductoRepository : IProductoRepository
             query = query.Where(p =>
                 p.Nombre.ToLower().Contains(search) ||
                 p.Marca.ToLower().Contains(search) ||
-                p.Modelo.ToLower().Contains(search));
+                p.Modelo.ToLower().Contains(search) ||
+                (p.MarcaCatalogo != null && p.MarcaCatalogo.Nombre.ToLower().Contains(search)) ||
+                (p.ModeloCatalogo != null && p.ModeloCatalogo.Nombre.ToLower().Contains(search)) ||
+                (p.Color != null && p.Color.Nombre.ToLower().Contains(search)) ||
+                (p.Talla != null && p.Talla.Nombre.ToLower().Contains(search)));
         }
 
         var totalCount = await query.CountAsync();
@@ -39,8 +49,12 @@ public class ProductoRepository : IProductoRepository
         var sortDirDesc = string.Equals(request.SortDirection, "desc", StringComparison.OrdinalIgnoreCase);
         query = request.SortBy?.ToLower() switch
         {
-            "marca" => sortDirDesc ? query.OrderByDescending(p => p.Marca) : query.OrderBy(p => p.Marca),
-            "modelo" => sortDirDesc ? query.OrderByDescending(p => p.Modelo) : query.OrderBy(p => p.Modelo),
+            "marca" => sortDirDesc
+                ? query.OrderByDescending(p => p.MarcaCatalogo != null ? p.MarcaCatalogo.Nombre : p.Marca)
+                : query.OrderBy(p => p.MarcaCatalogo != null ? p.MarcaCatalogo.Nombre : p.Marca),
+            "modelo" => sortDirDesc
+                ? query.OrderByDescending(p => p.ModeloCatalogo != null ? p.ModeloCatalogo.Nombre : p.Modelo)
+                : query.OrderBy(p => p.ModeloCatalogo != null ? p.ModeloCatalogo.Nombre : p.Modelo),
             "cantidad" => sortDirDesc ? query.OrderByDescending(p => p.Cantidad) : query.OrderBy(p => p.Cantidad),
             "costo" => sortDirDesc ? query.OrderByDescending(p => p.Costo) : query.OrderBy(p => p.Costo),
             "precio" => sortDirDesc ? query.OrderByDescending(p => p.Precio) : query.OrderBy(p => p.Precio),
@@ -55,10 +69,12 @@ public class ProductoRepository : IProductoRepository
         return (items, totalCount);
     }
 
+    // Se conserva el nombre contractual para compatibilidad, pero el indicador
+    // administrativo solicitado corresponde ahora a productos agotados.
     public async Task<List<Producto>> GetStockBajoAsync() =>
         await ConIncludes()
-            .Where(p => p.Cantidad < p.UmbralStockBajo)
-            .OrderBy(p => p.Cantidad)
+            .Where(p => p.Cantidad <= 0)
+            .OrderBy(p => p.Nombre)
             .ToListAsync();
 
     public async Task<List<Producto>> GetUltimosAgregadosAsync(int cantidad = 5) =>
