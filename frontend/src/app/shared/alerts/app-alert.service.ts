@@ -50,10 +50,13 @@ export interface AppAlertData {
       }
 
       <footer>
-        <button mat-button type="button" (click)="ref.close(null)">{{ data.cancelarTexto || 'Cancelar' }}</button>
+        <button class="app-alert__cancel" mat-button type="button" (click)="ref.close(null)">
+          {{ data.cancelarTexto || 'Cancelar' }}
+        </button>
         <button
+          class="app-alert__confirm"
+          [class.app-alert__confirm--danger]="data.tipo === 'peligro'"
           mat-flat-button
-          color="primary"
           type="button"
           [disabled]="!!data.entrada?.requerida && !valor.trim()"
           (click)="confirmar()">
@@ -63,9 +66,16 @@ export interface AppAlertData {
     </section>
   `,
   styles: [`
+    :host {
+      display: block;
+      background: var(--color-surface);
+      color: var(--color-text);
+    }
+
     .app-alert {
       width: min(100%, 520px);
       padding: clamp(18px, 4vw, 26px);
+      background: var(--color-surface);
       color: var(--color-text);
     }
 
@@ -82,22 +92,27 @@ export interface AppAlertData {
       display: grid;
       place-items: center;
       border-radius: 50%;
-      background: color-mix(in srgb, var(--color-info) 12%, var(--color-surface));
+      background: color-mix(in srgb, var(--color-info) 14%, var(--color-surface));
       color: var(--color-info);
     }
 
+    .app-alert__icon mat-icon {
+      color: currentColor !important;
+    }
+
     .app-alert--advertencia .app-alert__icon {
-      background: color-mix(in srgb, var(--color-warning) 13%, var(--color-surface));
-      color: var(--color-warning);
+      background: color-mix(in srgb, var(--color-warning) 16%, var(--color-surface));
+      color: color-mix(in srgb, var(--color-warning) 78%, var(--color-text));
     }
 
     .app-alert--peligro .app-alert__icon {
-      background: color-mix(in srgb, var(--color-danger) 11%, var(--color-surface));
+      background: color-mix(in srgb, var(--color-danger) 14%, var(--color-surface));
       color: var(--color-danger);
     }
 
     .app-alert h2 {
       margin: 0 0 6px;
+      color: var(--color-text);
       font-size: 20px;
       line-height: 1.2;
     }
@@ -115,7 +130,7 @@ export interface AppAlertData {
       border: 1px solid var(--color-border);
       border-radius: 9px;
       background: var(--color-bg);
-      color: var(--color-text-muted);
+      color: var(--color-text);
       line-height: 1.5;
       overflow-wrap: anywhere;
     }
@@ -129,8 +144,39 @@ export interface AppAlertData {
     footer {
       display: flex;
       justify-content: flex-end;
-      gap: 8px;
+      gap: 10px;
       margin-top: 22px;
+    }
+
+    footer button {
+      min-width: 104px;
+      min-height: 42px;
+      font-weight: 700;
+    }
+
+    .app-alert__cancel {
+      --mdc-text-button-label-text-color: var(--color-text);
+      color: var(--color-text) !important;
+      border: 1px solid var(--color-border);
+      background: var(--color-surface) !important;
+    }
+
+    .app-alert__confirm {
+      --mdc-filled-button-container-color: var(--color-primary);
+      --mdc-filled-button-label-text-color: var(--color-on-primary, #ffffff);
+      background: var(--color-primary) !important;
+      color: var(--color-on-primary, #ffffff) !important;
+    }
+
+    .app-alert__confirm--danger {
+      --mdc-filled-button-container-color: var(--color-danger);
+      --mdc-filled-button-label-text-color: var(--color-on-danger, #ffffff);
+      background: var(--color-danger) !important;
+      color: var(--color-on-danger, #ffffff) !important;
+    }
+
+    .app-alert__confirm:disabled {
+      opacity: 0.62;
     }
 
     @media (max-width: 480px) {
@@ -190,6 +236,7 @@ export class AppAlertService {
       data,
       width: 'min(94vw, 540px)',
       maxWidth: '94vw',
+      panelClass: 'app-alert-dialog-panel',
       autoFocus: false,
       restoreFocus: true
     }).afterClosed());
@@ -201,6 +248,7 @@ export class AppAlertService {
       data,
       width: 'min(94vw, 540px)',
       maxWidth: '94vw',
+      panelClass: 'app-alert-dialog-panel',
       autoFocus: false,
       restoreFocus: true
     }).afterClosed());
