@@ -18,19 +18,22 @@ public class ProductoService : IProductoService
     private readonly IImageStorageService _imageStorage;
     private readonly ICurrentUserService _currentUser;
     private readonly IAuditoriaService _auditoria;
+    private readonly ICatalogoProductoService? _catalogoService;
 
     public ProductoService(
         IProductoRepository repository,
         ICategoriaRepository categoriaRepository,
         IImageStorageService imageStorage,
         ICurrentUserService currentUser,
-        IAuditoriaService auditoria)
+        IAuditoriaService auditoria,
+        ICatalogoProductoService? catalogoService = null)
     {
         _repository = repository;
         _categoriaRepository = categoriaRepository;
         _imageStorage = imageStorage;
         _currentUser = currentUser;
         _auditoria = auditoria;
+        _catalogoService = catalogoService;
     }
 
     public async Task<ProductoDto?> GetByIdAsync(int id)
@@ -58,26 +61,29 @@ public class ProductoService : IProductoService
             throw new BusinessRuleException($"Un producto puede tener máximo {MaxImagenes} fotos.");
         ValidarImagenes(imagenes);
 
-        if (dto.CategoriaId.HasValue)
-        {
-            var categoria = await _categoriaRepository.GetByIdAsync(dto.CategoriaId.Value);
-            if (categoria is null)
-                throw new BusinessRuleException("La categoría seleccionada no existe.");
-            if (!categoria.Activa)
-                throw new BusinessRuleException("La categoría seleccionada está inactiva.");
-        }
+        await ValidarCategoriaAsync(dto.CategoriaId, exigirActiva: true);
+        await ValidarCatalogosAsync(dto.ColorId, dto.TallaId, dto.MarcaId, dto.ModeloId);
+        var (marcaNombre, modeloNombre) = await ResolverMarcaModeloAsync(
+            dto.MarcaId,
+            dto.ModeloId,
+            dto.Marca,
+            dto.Modelo);
 
         var producto = new Producto
         {
-            Nombre = dto.Nombre,
-            Marca = dto.Marca,
-            Modelo = dto.Modelo,
-            Descripcion = dto.Descripcion,
+            Nombre = dto.Nombre.Trim(),
+            Marca = marcaNombre,
+            Modelo = modeloNombre,
+            Descripcion = string.IsNullOrWhiteSpace(dto.Descripcion) ? null : dto.Descripcion.Trim(),
             Cantidad = dto.Cantidad,
             Costo = dto.Costo,
             Precio = dto.Precio,
             UmbralStockBajo = dto.UmbralStockBajo,
             CategoriaId = dto.CategoriaId,
+            ColorId = dto.ColorId,
+            TallaId = dto.TallaId,
+            MarcaId = dto.MarcaId,
+            ModeloId = dto.ModeloId,
             Activo = true,
             Eliminado = false,
             CreadoPorUsuarioId = _currentUser.UsuarioId,
@@ -110,15 +116,17 @@ public class ProductoService : IProductoService
             valoresNuevos: new
             {
                 producto.Nombre,
-                producto.Marca,
-                producto.Modelo,
+                producto.MarcaId,
+                producto.ModeloId,
+                producto.ColorId,
+                producto.TallaId,
                 producto.Cantidad,
                 producto.Costo,
                 producto.Precio,
                 Imagenes = producto.Imagenes.Count
             });
 
-        return ProductoMapper.ToDto(producto);
+        return await GetByIdAsync(producto.Id) ?? ProductoMapper.ToDto(producto);
     }
 
     public async Task<ProductoDto?> UpdateAsync(int id, UpdateProductoDto dto)
@@ -131,6 +139,10 @@ public class ProductoService : IProductoService
             producto.Nombre,
             producto.Marca,
             producto.Modelo,
+            producto.ColorId,
+            producto.TallaId,
+            producto.MarcaId,
+            producto.ModeloId,
             producto.Descripcion,
             producto.Cantidad,
             producto.Costo,
@@ -141,22 +153,27 @@ public class ProductoService : IProductoService
             ImagenPrincipalId = producto.ImagenPrincipal?.Id
         };
 
-        if (dto.CategoriaId.HasValue)
-        {
-            var categoria = await _categoriaRepository.GetByIdAsync(dto.CategoriaId.Value);
-            if (categoria is null)
-                throw new BusinessRuleException("La categoría seleccionada no existe.");
-        }
+        await ValidarCategoriaAsync(dto.CategoriaId, exigirActiva: false);
+        await ValidarCatalogosAsync(dto.ColorId, dto.TallaId, dto.MarcaId, dto.ModeloId);
+        var (marcaNombre, modeloNombre) = await ResolverMarcaModeloAsync(
+            dto.MarcaId,
+            dto.ModeloId,
+            dto.Marca,
+            dto.Modelo);
 
-        producto.Nombre = dto.Nombre;
-        producto.Marca = dto.Marca;
-        producto.Modelo = dto.Modelo;
-        producto.Descripcion = dto.Descripcion;
+        producto.Nombre = dto.Nombre.Trim();
+        producto.Marca = marcaNombre;
+        producto.Modelo = modeloNombre;
+        producto.Descripcion = string.IsNullOrWhiteSpace(dto.Descripcion) ? null : dto.Descripcion.Trim();
         producto.Cantidad = dto.Cantidad;
         producto.Costo = dto.Costo;
         producto.Precio = dto.Precio;
         producto.UmbralStockBajo = dto.UmbralStockBajo;
         producto.CategoriaId = dto.CategoriaId;
+        producto.ColorId = dto.ColorId;
+        producto.TallaId = dto.TallaId;
+        producto.MarcaId = dto.MarcaId;
+        producto.ModeloId = dto.ModeloId;
         producto.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
         producto.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
         producto.FechaActualizacion = DateTime.UtcNow;
@@ -228,8 +245,10 @@ public class ProductoService : IProductoService
             valoresNuevos: new
             {
                 producto.Nombre,
-                producto.Marca,
-                producto.Modelo,
+                producto.MarcaId,
+                producto.ModeloId,
+                producto.ColorId,
+                producto.TallaId,
                 producto.Descripcion,
                 producto.Cantidad,
                 producto.Costo,
@@ -240,7 +259,7 @@ public class ProductoService : IProductoService
                 ImagenPrincipalId = producto.ImagenPrincipal?.Id
             });
 
-        return ProductoMapper.ToDto(producto);
+        return await GetByIdAsync(producto.Id) ?? ProductoMapper.ToDto(producto);
     }
 
     public async Task<ProductoDto?> CambiarEstadoAsync(int id, bool activo)
@@ -313,6 +332,46 @@ public class ProductoService : IProductoService
         }
 
         return guardado;
+    }
+
+    private async Task ValidarCategoriaAsync(int? categoriaId, bool exigirActiva)
+    {
+        if (!categoriaId.HasValue) return;
+        var categoria = await _categoriaRepository.GetByIdAsync(categoriaId.Value);
+        if (categoria is null)
+            throw new BusinessRuleException("La categoría seleccionada no existe.");
+        if (exigirActiva && !categoria.Activa)
+            throw new BusinessRuleException("La categoría seleccionada está inactiva.");
+    }
+
+    private async Task ValidarCatalogosAsync(int? colorId, int? tallaId, int? marcaId, int? modeloId)
+    {
+        if (_catalogoService is not null)
+            await _catalogoService.ValidarSeleccionProductoAsync(colorId, tallaId, marcaId, modeloId);
+    }
+
+    private async Task<(string Marca, string Modelo)> ResolverMarcaModeloAsync(
+        int? marcaId,
+        int? modeloId,
+        string? marcaLegada,
+        string? modeloLegado)
+    {
+        var marca = marcaLegada?.Trim() ?? string.Empty;
+        var modelo = modeloLegado?.Trim() ?? string.Empty;
+
+        if (_catalogoService is not null && marcaId.HasValue)
+        {
+            var catalogoMarca = await _catalogoService.GetByIdAsync(TipoCatalogoProducto.Marca, marcaId.Value);
+            if (catalogoMarca is not null) marca = catalogoMarca.Nombre;
+        }
+
+        if (_catalogoService is not null && modeloId.HasValue)
+        {
+            var catalogoModelo = await _catalogoService.GetByIdAsync(TipoCatalogoProducto.Modelo, modeloId.Value);
+            if (catalogoModelo is not null) modelo = catalogoModelo.Nombre;
+        }
+
+        return (marca, modelo);
     }
 
     private static void ValidarImagenes(IEnumerable<Microsoft.AspNetCore.Http.IFormFile> imagenes)
