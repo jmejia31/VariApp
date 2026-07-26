@@ -31,6 +31,26 @@ public class ProductoRepository : IProductoRepository
     {
         var query = ConIncludes().AsQueryable();
 
+        if (request is ProductoPagedRequest filters)
+        {
+            if (filters.CategoriaId.HasValue)
+                query = query.Where(p => p.CategoriaId == filters.CategoriaId.Value);
+            if (filters.ColorId.HasValue)
+                query = query.Where(p => p.ColorId == filters.ColorId.Value);
+            if (filters.TallaId.HasValue)
+                query = query.Where(p => p.TallaId == filters.TallaId.Value);
+            if (filters.MarcaId.HasValue)
+                query = query.Where(p => p.MarcaId == filters.MarcaId.Value);
+            if (filters.ModeloId.HasValue)
+                query = query.Where(p => p.ModeloId == filters.ModeloId.Value);
+            if (filters.Activo.HasValue)
+                query = query.Where(p => p.Activo == filters.Activo.Value);
+            if (filters.Agotado.HasValue)
+                query = filters.Agotado.Value
+                    ? query.Where(p => p.Cantidad <= 0)
+                    : query.Where(p => p.Cantidad > 0);
+        }
+
         if (!string.IsNullOrWhiteSpace(request.Search))
         {
             var search = request.Search.Trim().ToLower();
@@ -55,6 +75,12 @@ public class ProductoRepository : IProductoRepository
             "modelo" => sortDirDesc
                 ? query.OrderByDescending(p => p.ModeloCatalogo != null ? p.ModeloCatalogo.Nombre : p.Modelo)
                 : query.OrderBy(p => p.ModeloCatalogo != null ? p.ModeloCatalogo.Nombre : p.Modelo),
+            "color" => sortDirDesc
+                ? query.OrderByDescending(p => p.Color != null ? p.Color.Nombre : string.Empty)
+                : query.OrderBy(p => p.Color != null ? p.Color.Nombre : string.Empty),
+            "talla" => sortDirDesc
+                ? query.OrderByDescending(p => p.Talla != null ? p.Talla.Nombre : string.Empty)
+                : query.OrderBy(p => p.Talla != null ? p.Talla.Nombre : string.Empty),
             "cantidad" => sortDirDesc ? query.OrderByDescending(p => p.Cantidad) : query.OrderBy(p => p.Cantidad),
             "costo" => sortDirDesc ? query.OrderByDescending(p => p.Costo) : query.OrderBy(p => p.Costo),
             "precio" => sortDirDesc ? query.OrderByDescending(p => p.Precio) : query.OrderBy(p => p.Precio),
