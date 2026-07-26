@@ -193,6 +193,22 @@
   }
 }
 
+.profile-button,
+.topbar-icon-button {
+  color: var(--color-heading) !important;
+  background: color-mix(in srgb, var(--color-surface) 88%, var(--color-primary) 12%) !important;
+  border: 1px solid color-mix(in srgb, var(--color-heading) 28%, transparent);
+
+  &:hover {
+    background: color-mix(in srgb, var(--color-surface) 76%, var(--color-primary) 24%) !important;
+  }
+
+  &:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--color-primary) 45%, transparent);
+    outline-offset: 2px;
+  }
+}
+
 .profile-button {
   width: 40px;
   height: 40px;
