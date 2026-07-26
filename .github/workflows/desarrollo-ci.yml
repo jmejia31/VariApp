@@ -221,6 +221,9 @@ jobs:
       - name: Instalar dependencias exactas
         run: npm ci
 
+      - name: Validar tipado y calidad estática
+        run: npm run lint
+
       - name: Compilar producción
         run: npm run build:prod
 
