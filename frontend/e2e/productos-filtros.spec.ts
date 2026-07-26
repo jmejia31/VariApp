@@ -120,7 +120,7 @@ test('Productos filtra por relaciones normalizadas y estado de inventario', asyn
 
   const row = page.locator('table.table-desktop tbody tr', { hasText: productName });
   await expect(row).toBeVisible();
-  await expect(row.getByText('Agotado')).toBeVisible();
+  await expect(row.getByText('Agotado', { exact: true })).toBeVisible();
 
   await page.getByRole('button', { name: 'Limpiar filtros' }).click();
   await expect(brandSelect).toContainText('Todas');
