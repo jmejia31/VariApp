@@ -12,6 +12,7 @@ public class CloudinaryCompraDocumentoStorageService : ICompraDocumentoStorageSe
     private const string BaseFolder = "inventoryapp/compras";
     private readonly Cloudinary _cloudinary;
     private readonly string _folder;
+    private readonly string? _environmentPrefix;
 
     public CloudinaryCompraDocumentoStorageService(IConfiguration configuration)
     {
@@ -33,6 +34,7 @@ public class CloudinaryCompraDocumentoStorageService : ICompraDocumentoStorageSe
         _cloudinary = new Cloudinary(new Account(cloudName, apiKey, apiSecret));
         _cloudinary.Api.Secure = true;
         _folder = CloudinaryFolderResolver.Resolve(configuration, BaseFolder);
+        _environmentPrefix = CloudinaryFolderResolver.GetEnvironmentPrefix(configuration);
     }
 
     public async Task<DocumentoAlmacenado> UploadAsync(IFormFile archivo)
@@ -96,6 +98,12 @@ public class CloudinaryCompraDocumentoStorageService : ICompraDocumentoStorageSe
 
     public async Task DeleteAsync(string publicId, string resourceType)
     {
+        if (!CloudinaryFolderResolver.CanDelete(_environmentPrefix, publicId))
+        {
+            throw new BusinessRuleException(
+                "El entorno de Desarrollo no puede eliminar un comprobante que pertenece a Producción.");
+        }
+
         var parametros = new DeletionParams(publicId)
         {
             ResourceType = string.Equals(resourceType, "raw", StringComparison.OrdinalIgnoreCase)
