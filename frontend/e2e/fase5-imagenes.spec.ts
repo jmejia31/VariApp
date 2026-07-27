@@ -131,25 +131,48 @@ async function installFixtures(page: Page): Promise<void> {
   }));
   await page.route(brokenImage, (route) => route.abort('failed'));
 
-  await page.route(/\/api\/productos(?:\?.*)?$/, (route) => json(route, { items: [product, productWithoutImage], totalCount: 2, page: 1, pageSize: 200, totalPages: 1 }));
-  await page.route('**/api/productos/501', (route) => json(route, product));
+  await page.route(/\/(?:api\/)?productos(?:\?.*)?$/, (route) => json(route, {
+    items: [product, productWithoutImage],
+    totalCount: 2,
+    page: 1,
+    pageSize: 200,
+    totalPages: 1
+  }));
+  await page.route(/\/(?:api\/)?productos\/501$/, (route) => json(route, product));
 
-  await page.route(/\/api\/compras(?:\?.*)?$/, (route) => {
+  await page.route(/\/(?:api\/)?compras(?:\?.*)?$/, (route) => {
     if (route.request().method() === 'POST') return json(route, purchase);
     return json(route, { items: [purchase], totalCount: 1, page: 1, pageSize: 10, totalPages: 1 });
   });
-  await page.route('**/api/compras/calcular', (route) => json(route, { importeBruto: 100, subtotal: 100, subtotalNeto: 100, impuestosAplicados: [], impuestoIncluido: 0, impuestoAdicional: 0, total: 100 }));
-  await page.route('**/api/compras/601', (route) => json(route, purchase));
-  await page.route('**/api/compras/601/documentos', (route) => json(route, []));
+  await page.route(/\/(?:api\/)?compras\/calcular$/, (route) => json(route, {
+    importeBruto: 100,
+    subtotal: 100,
+    subtotalNeto: 100,
+    impuestosAplicados: [],
+    impuestoIncluido: 0,
+    impuestoAdicional: 0,
+    total: 100
+  }));
+  await page.route(/\/(?:api\/)?compras\/601$/, (route) => json(route, purchase));
+  await page.route(/\/(?:api\/)?compras\/601\/documentos$/, (route) => json(route, []));
 
-  await page.route(/\/api\/ventas(?:\?.*)?$/, (route) => {
+  await page.route(/\/(?:api\/)?ventas(?:\?.*)?$/, (route) => {
     if (route.request().method() === 'POST') return json(route, sale);
     return json(route, { items: [sale], totalCount: 1, page: 1, pageSize: 10, totalPages: 1 });
   });
-  await page.route('**/api/ventas/calcular', (route) => json(route, { importeBruto: 180, subtotal: 180, subtotalNeto: 180, descuentosAplicados: [], totalDescuento: 0, impuestosAplicados: [], totalImpuesto: 0, total: 180 }));
-  await page.route('**/api/ventas/701', (route) => json(route, sale));
+  await page.route(/\/(?:api\/)?ventas\/calcular$/, (route) => json(route, {
+    importeBruto: 180,
+    subtotal: 180,
+    subtotalNeto: 180,
+    descuentosAplicados: [],
+    totalDescuento: 0,
+    impuestosAplicados: [],
+    totalImpuesto: 0,
+    total: 180
+  }));
+  await page.route(/\/(?:api\/)?ventas\/701$/, (route) => json(route, sale));
 
-  await page.route(/\/api\/inventario\/movimientos(?:\?.*)?$/, (route) => json(route, [{
+  await page.route(/\/(?:api\/)?inventario\/movimientos(?:\?.*)?$/, (route) => json(route, [{
     id: 801,
     productoId: product.id,
     productoNombre: product.nombre,
@@ -182,7 +205,7 @@ test.describe('Fase 5 - tratamiento integral de imágenes', () => {
 
   test('Productos usa carga diferida, fallback accesible e imagen principal', async ({ page }) => {
     await page.goto('/productos');
-    const valid = page.getByRole('img', { name: `Imagen principal de ${product.nombre}` });
+    const valid = page.getByRole('img', { name: `Imagen principal de ${product.nombre}` }).first();
     await expect(valid).toBeVisible();
     await expect(valid).toHaveAttribute('loading', 'lazy');
     await expect(page.getByRole('img', { name: `${productWithoutImage.nombre} no tiene imagen disponible` }).first()).toBeVisible();
