@@ -5,6 +5,7 @@ using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace InventoryApp.API.Controllers;
 
@@ -22,6 +23,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
+    [EnableRateLimiting("AuthLogin")]
     public async Task<IActionResult> Login([FromBody] LoginRequestDto dto)
     {
         var resultado = await _authService.LoginAsync(dto);
