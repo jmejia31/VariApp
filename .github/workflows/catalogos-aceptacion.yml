@@ -62,12 +62,13 @@ jobs:
       Jwt__Issuer: 'InventoryApp.API'
       Jwt__Audience: 'InventoryApp.Frontend'
       Jwt__ExpiraMinutos: '120'
+      Security__LoginRateLimitPerMinute: '300'
       SeedAdmin__Username: 'e2e_admin'
       SeedAdmin__Password: 'E2E.Admin#2026!'
       Cors__AllowedOrigins__0: 'http://127.0.0.1:4200'
       Cors__AllowedOrigins__1: 'http://localhost:4200'
       AppSettings__BackendPublicUrl: 'https://preview.variapp.invalid'
-      AppSettings__LogoPublicUrl: 'https://varistorehn.vercel.app/assets/varistorehn-logo.png'
+      AppSettings__LogoPublicUrl: 'https://variapp-desarrollo.vercel.app/assets/varistorehn-logo.png'
       AppSettings__EnlacePublicoFacturaHorasValidez: '1'
       AppSettings__EnlacePublicoFacturaMaximoAccesos: '5'
       Cloudinary__CloudName: 'e2e-not-used'
@@ -115,14 +116,15 @@ jobs:
             > catalogos-api.log 2>&1 &
           echo $! > catalogos-api.pid
 
-      - name: Esperar API y migraciones
+      - name: Esperar API, migraciones y disponibilidad de base
         working-directory: backend
         shell: bash
         run: |
           set -euo pipefail
           for attempt in $(seq 1 60); do
-            if curl --fail --silent http://127.0.0.1:5005/health > /dev/null; then
-              echo 'API lista y migraciones aplicadas.'
+            if curl --fail --silent http://127.0.0.1:5005/health > /dev/null && \
+               curl --fail --silent http://127.0.0.1:5005/health/ready > /dev/null; then
+              echo 'API lista, base disponible y migraciones aplicadas.'
               exit 0
             fi
             sleep 2
