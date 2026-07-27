@@ -57,37 +57,8 @@ Se estandarizaron los dos entornos oficiales sin modificar Producción:
 - No se identificó en la evidencia un tercer entorno permanente que pudiera eliminarse de forma segura.
 - `Cloudinary__EnvironmentPrefix=varistorehn_desarrollo` está versionado y protegido por CI.
 - Las migraciones automáticas permanecen deshabilitadas.
-- Los workflows de compilación y aceptación terminaron correctamente para la estandarización inicial.
-
-### Decisión sobre nombres técnicos
-
-No se renombra Producción. Los nombres técnicos existentes, como dominios o nombres de servicio, se mantienen para evitar interrupciones. En documentación, gobierno y nuevas configuraciones se utilizan los nombres lógicos oficiales `varistorehn_producción` y `varistorehn_desarrollo`.
-
-### Cierre
-
-La Fase 1 queda cerrada con la confirmación del propietario de que:
-
-- Producción y Desarrollo deben conservar sus variables actuales;
-- los recursos productivos indicados no se eliminan;
-- únicamente pueden retirarse duplicados ajenos a ambos entornos y previamente verificados;
-- todo trabajo continúa exclusivamente en `Desarrollo`.
 
 ## FASE 2 — Auditoría general — COMPLETA Y CERTIFICADA
-
-### Alcance ejecutado
-
-Se auditaron:
-
-- configuración de backend, frontend, Docker, Render y Vercel;
-- variables declarativas y ausencia de secretos versionados;
-- conexión MySQL, estrategia de migraciones y readiness;
-- autenticación JWT, renovación, permisos y alcance por usuario;
-- CORS, host filtering, proxy inverso y encabezados HTTP;
-- almacenamiento Cloudinary;
-- SMTP y manejo de errores;
-- dependencias .NET y npm;
-- colas, tareas programadas y servicios en segundo plano;
-- logs, auditoría, dominios, TLS y observabilidad.
 
 ### Correcciones cerradas
 
@@ -99,10 +70,8 @@ Se auditaron:
 - Contenedor Docker ejecutado como usuario no privilegiado.
 - `AllowedHosts` restringido al host de Render Desarrollo.
 - Logo de Desarrollo servido desde Vercel Desarrollo, sin dependencia productiva.
-- Eliminación de la referencia obsoleta `Microsoft.AspNetCore.Http.Abstractions 2.2.0`.
 - Resolución de la vulnerabilidad crítica transitiva `System.Text.Encodings.Web 4.5.0`.
 - Auditoría npm productiva sin vulnerabilidades altas o críticas.
-- Workflow permanente `.github/workflows/fase2-auditoria.yml`.
 
 ### Certificación
 
@@ -122,20 +91,7 @@ El detalle completo está en `docs/FASE2_AUDITORIA_GENERAL.md`.
 - No existe observabilidad centralizada externa; queda como recomendación futura.
 - El proyecto Vercel productivo puede generar Preview de `Desarrollo`; desactivarlo exigiría modificar Producción y no se realizó.
 
-La auditoría no modificó Producción y no autoriza merge ni despliegue.
-
 ## FASE 3 — Corrección de interfaz — COMPLETA Y CERTIFICADA
-
-### Alcance ejecutado
-
-Se corrigieron y certificaron:
-
-- formulario administrativo de Usuario;
-- Perfil;
-- formulario y galería de Producto;
-- búsqueda, filtros, tabla y tarjetas de Productos;
-- cabecera, nombre, rol y menú lateral;
-- ayudas, validaciones, errores y acciones.
 
 ### Correcciones cerradas
 
@@ -144,27 +100,19 @@ Se corrigieron y certificaron:
 - Cuadrículas con `min-width: 0` y separación vertical suficiente.
 - Jerarquía clara en Usuario y Producto.
 - Galería accesible con teclado y dispositivos táctiles.
-- Tabla con semántica nativa, desplazamiento propio y celdas estables.
+- Tabla de Productos con semántica nativa y desplazamiento propio.
 - Tarjetas móviles con nombres, clasificación y acciones completas.
 - Cabecera y rol adaptables a anchos reducidos.
-- Prueba visual específica con datos deliberadamente extensos.
-- Capturas completas de Usuario, Perfil, Producto y Productos en escritorio y teléfono.
 
 ### Certificación
 
 Commit funcional final: `0bbc73f00bb8024e72a5837310456311d23f8740`.
 
-Commit documental final: `2b4f81b659341a2a8dbfa2c0f30e0ce32858cfe7`.
-
 - `Desarrollo - Compilación y pruebas`, run `30270049875`: **success**.
 - `Desarrollo - aceptación funcional integral`, run `30270049661`: **success**.
 - `Fase 2 - Auditoría de configuración y dependencias`, run `30270049562`: **success**.
 
-La aceptación integral ejecutó 27 pruebas sin fallos ni errores. La prueba de Fase 3 certificó automáticamente ausencia de desbordamiento horizontal, textos recortados y campos superpuestos en 1440 × 1000 y 390 × 844.
-
-El detalle completo está en `docs/FASE3_CERTIFICACION_INTERFAZ.md`.
-
-La Fase 3 no modificó Producción y no autoriza merge ni despliegue.
+La aceptación integral ejecutó 27 pruebas sin fallos ni errores. El detalle está en `docs/FASE3_CERTIFICACION_INTERFAZ.md`.
 
 ## FASE 4 — Responsive — COMPLETA Y CERTIFICADA
 
@@ -183,20 +131,9 @@ Se certificaron ocho resoluciones:
 
 Cada resolución navegó 30 rutas de módulos y formularios, para un total de 240 navegaciones responsive específicas.
 
-### Comprobaciones cerradas
-
-- Sin desbordamiento horizontal del documento.
-- Títulos, subtítulos, formularios, acciones, paginadores y pie dentro del viewport.
-- Textos críticos sin recortes destructivos.
-- Menú móvil verificable en teléfonos y tablet vertical.
-- Menú permanente estable desde tablet horizontal.
-- Controles públicos con dimensiones utilizables.
-- Sin errores de consola o ejecución durante la navegación.
-- 32 capturas representativas de Dashboard, Productos, Producto y Venta.
-
 ### Defecto corregido
 
-La tabla de Auditoría desbordaba 63 px en 1024 × 768. Se añadió un contenedor de desplazamiento horizontal accesible que conserva la semántica de tabla y limita el desplazamiento al área de resultados.
+La tabla de Auditoría desbordaba 63 px en 1024 × 768. Se añadió un contenedor de desplazamiento horizontal accesible que conserva la semántica de tabla.
 
 ### Certificación
 
@@ -206,24 +143,73 @@ Commit funcional final: `898ada1d9e4c5c22353ba0fbed5589c52a0366de`.
 - `Desarrollo - aceptación funcional integral`, run `30276203714`: **success**.
 - `Fase 2 - Auditoría de configuración y dependencias`, run `30276203753`: **success**.
 
-La aceptación integral ejecutó 43 pruebas: 0 fallos, 0 errores y 0 omitidas.
+La aceptación integral ejecutó 43 pruebas sin fallos. El detalle está en `docs/FASE4_CERTIFICACION_RESPONSIVE.md`.
 
-El detalle completo está en `docs/FASE4_CERTIFICACION_RESPONSIVE.md`.
+## FASE 5 — Imágenes — COMPLETA Y CERTIFICADA
 
-La Fase 4 no modificó Producción y no autoriza merge ni despliegue.
+### Alcance ejecutado
 
-## FASE 5 — Imágenes — SIGUIENTE, NO INICIADA
+Se estandarizó la imagen principal y su fallback en:
 
-Mostrar la imagen principal cuando exista, con fallback accesible y carga eficiente, especialmente en:
+- listado, tarjetas, formulario, detalle, galería y lightbox de Productos;
+- listados, formularios y detalles de Compras;
+- listados, formularios y detalles de Ventas;
+- historial de Movimientos de inventario.
 
-- lista y detalle de Productos;
-- Compras;
-- Ventas;
-- detalles e historial.
+### Correcciones cerradas
 
-Se revisarán dimensiones, relación de aspecto, carga diferida, textos alternativos, fallbacks, miniaturas, galerías y consistencia entre escritorio y móvil.
+- Componente reutilizable `app-producto-imagen`.
+- Fallback visible y accesible para imagen ausente o URL rota.
+- Texto alternativo contextual.
+- Dimensiones intrínsecas y relación de aspecto estable.
+- Carga diferida para listas e historial.
+- Carga prioritaria para la imagen principal del detalle.
+- Galería y lightbox operables con teclado.
+- Imagen principal propagada por los DTO de Compra, Venta y Movimiento.
+- Miniaturas integradas sin alterar reglas de inventario, compra o venta.
+- Vistas de escritorio y móvil adaptadas.
 
-## FASE 6 — Facturación e impresión — BLOQUEADA
+No se requirió migración de base de datos.
+
+### Certificación
+
+Commit funcional final:
+
+```text
+90eb4ff4c9b7b4a8ed66561fa092f7521ebe7630
+```
+
+- `Desarrollo - Compilación y pruebas`, run `30289511599`: **success**.
+- `Desarrollo - aceptación funcional integral`, run `30289510773`: **success**.
+- `Fase 2 - Auditoría de configuración y dependencias`, run `30289511930`: **success**.
+
+Resultado Playwright:
+
+```text
+47 pruebas totales
+47 aprobadas
+0 inesperadas
+0 inestables
+0 omitidas
+```
+
+Artefacto visual:
+
+```text
+desarrollo-aceptacion-integral
+artifact id: 8662414676
+10 capturas específicas de Fase 5
+```
+
+El detalle completo está en `docs/FASE5_CERTIFICACION_IMAGENES.md`.
+
+### Validaciones externas pendientes
+
+La prueba aislada no utiliza credenciales reales de Cloudinary. La carga, sustitución y eliminación real de activos, el bloqueo frente a recursos productivos y las pruebas con cámara o conexión móvil lenta se realizarán únicamente en `varistorehn_desarrollo` durante la validación externa autorizada.
+
+La Fase 5 no modificó Producción y no autoriza merge ni despliegue.
+
+## FASE 6 — Facturación e impresión — SIGUIENTE, NO INICIADA
 
 Certificar PDF e impresión para:
 
