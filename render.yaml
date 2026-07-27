@@ -33,7 +33,7 @@ services:
       - key: Cloudinary__ApiSecret
         sync: false
       - key: Cloudinary__EnvironmentPrefix
-        value: desarrollo
+        value: varistorehn_desarrollo
       - key: Cors__AllowedOrigins__0
         value: https://variapp-desarrollo.vercel.app
       - key: AppSettings__BackendPublicUrl
