@@ -96,9 +96,21 @@ export interface EstadoConfiguracionSmtp {
   host: string;
   puerto: number;
   usaTls: boolean;
+  modoSeguridad: string;
   requiereAutenticacion: boolean;
   remitenteEnmascarado: string;
   maximoIntentos: number;
   timeoutSegundos: number;
   mensaje: string;
+}
+
+export interface ResultadoDiagnosticoSmtp {
+  exito: boolean;
+  codigo: string;
+  mensaje: string;
+  host: string;
+  puerto: number;
+  modoSeguridad: string;
+  autenticado: boolean;
+  duracionMilisegundos: number;
 }
