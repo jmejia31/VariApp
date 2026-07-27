@@ -39,11 +39,12 @@
 .detalles { display: flex; flex-direction: column; gap: 4px; }
 .detalle-row {
   display: grid;
-  grid-template-columns: minmax(220px, 3fr) minmax(90px, 1fr) minmax(110px, 1fr) minmax(90px, auto) auto;
+  grid-template-columns: 52px minmax(220px, 3fr) minmax(90px, 1fr) minmax(110px, 1fr) minmax(90px, auto) auto;
   gap: 8px;
   align-items: center;
   min-width: 0;
 
+  .col-imagen { align-self: start; padding-top: 2px; }
   .col-producto, .col-cantidad, .col-costo { width: 100%; min-width: 0; }
   .col-subtotal { font-size: 13px; font-weight: 700; text-align: right; padding-right: 4px; white-space: nowrap; }
 }
@@ -77,13 +78,14 @@
   .fields-grid .full-width { grid-column: auto; }
 
   .detalle-row {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+    grid-template-columns: 52px minmax(0, 1fr) minmax(0, 1fr) auto;
     grid-template-areas:
-      "producto producto producto"
-      "cantidad costo eliminar";
+      "imagen producto producto producto"
+      "imagen cantidad costo eliminar";
     row-gap: 2px;
   }
 
+  .col-imagen { grid-area: imagen; }
   .col-producto { grid-area: producto; }
   .col-cantidad { grid-area: cantidad; }
   .col-costo { grid-area: costo; }
@@ -108,10 +110,10 @@
 
 @media (max-width: 380px) {
   .detalle-row {
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 52px minmax(0, 1fr) auto;
     grid-template-areas:
-      "producto producto"
-      "cantidad eliminar"
-      "costo costo";
+      "imagen producto producto"
+      "imagen cantidad eliminar"
+      ". costo costo";
   }
 }
