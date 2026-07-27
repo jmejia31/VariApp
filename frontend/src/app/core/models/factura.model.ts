@@ -1,5 +1,17 @@
 import { DescuentoAplicado, ImpuestoAplicado } from './venta.model';
 
+export type FacturaFormatoCodigo = 'a4' | 'carta' | 'legal' | 'oficio' | 'a5' | 'pos58' | 'pos80';
+
+export interface FacturaFormatoPdf {
+  codigo: FacturaFormatoCodigo;
+  nombre: string;
+  descripcion: string;
+  anchoMm: number;
+  altoMm?: number;
+  esContinuo: boolean;
+  usoRecomendado: string;
+}
+
 export interface FacturaDetalle {
   productoNombre: string;
   productoMarca: string;
