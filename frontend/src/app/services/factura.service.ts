@@ -1,14 +1,16 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { ApiResponse } from '../core/models/api-response.model';
 import {
   EnlaceCompartir,
+  EstadoConfiguracionSmtp,
   Factura,
   FacturaFormatoCodigo,
   FacturaFormatoPdf,
-  HistorialEnvio
+  HistorialEnvio,
+  ResultadoEnvioCorreo
 } from '../core/models/factura.model';
 
 @Injectable({ providedIn: 'root' })
@@ -31,6 +33,10 @@ export class FacturaService {
 
   getFormatosPdf(): Observable<ApiResponse<FacturaFormatoPdf[]>> {
     return this.http.get<ApiResponse<FacturaFormatoPdf[]>>(`${this.apiUrl}/formatos-pdf`);
+  }
+
+  getEstadoCorreo(): Observable<ApiResponse<EstadoConfiguracionSmtp>> {
+    return this.http.get<ApiResponse<EstadoConfiguracionSmtp>>(`${this.apiUrl}/correo/estado`);
   }
 
   /**
@@ -69,7 +75,16 @@ export class FacturaService {
     return this.http.get<ApiResponse<HistorialEnvio[]>>(`${this.apiUrl}/${id}/historial-envios`);
   }
 
-  enviarPorCorreo(id: number, destinatario: string): Observable<ApiResponse<object>> {
-    return this.http.post<ApiResponse<object>>(`${this.apiUrl}/${id}/compartir/correo`, { destinatario });
+  enviarPorCorreo(
+    id: number,
+    destinatario: string,
+    idempotencyKey: string
+  ): Observable<ApiResponse<ResultadoEnvioCorreo>> {
+    const headers = new HttpHeaders().set('Idempotency-Key', idempotencyKey);
+    return this.http.post<ApiResponse<ResultadoEnvioCorreo>>(
+      `${this.apiUrl}/${id}/compartir/correo`,
+      { destinatario },
+      { headers }
+    );
   }
 }
