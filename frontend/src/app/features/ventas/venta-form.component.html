@@ -15,151 +15,87 @@
         @if (buscandoCliente()) {
           <mat-spinner matSuffix diameter="18" style="margin-right: 8px;"></mat-spinner>
         } @else if (clienteSeleccionado()) {
-          <button matSuffix mat-icon-button type="button" title="Quitar selección" aria-label="Quitar cliente seleccionado" (click)="limpiarClienteSeleccionado()">
-            <mat-icon>close</mat-icon>
-          </button>
+          <button matSuffix mat-icon-button type="button" title="Quitar selección" aria-label="Quitar cliente seleccionado" (click)="limpiarClienteSeleccionado()"><mat-icon>close</mat-icon></button>
         }
         <mat-autocomplete #autoCliente="matAutocomplete" [displayWith]="displayCliente" (optionSelected)="onClienteSeleccionado($event)">
           @for (c of opcionesCliente(); track c.id) {
-            <mat-option [value]="c">
-              <strong>{{ c.nombre }}</strong>
-              <span class="opcion-detalle">{{ c.identidadORTN || c.telefono || c.correo || '' }}</span>
-            </mat-option>
+            <mat-option [value]="c"><strong>{{ c.nombre }}</strong><span class="opcion-detalle">{{ c.identidadORTN || c.telefono || c.correo || '' }}</span></mat-option>
           }
           @if (opcionesCliente().length === 0 && buscadorCliente.value && buscadorCliente.value.length >= 2 && !buscandoCliente()) {
             <mat-option disabled>Sin resultados — se creará un cliente nuevo con los datos de abajo.</mat-option>
           }
         </mat-autocomplete>
-        @if (errorBusquedaCliente()) {
-          <mat-error>{{ errorBusquedaCliente() }}</mat-error>
-        }
+        @if (errorBusquedaCliente()) { <mat-error>{{ errorBusquedaCliente() }}</mat-error> }
       </mat-form-field>
 
       @if (clienteSeleccionado()) {
-        <p class="cliente-modo cliente-existente full-width">
-          <mat-icon>check_circle</mat-icon> Cliente existente seleccionado: <strong>{{ clienteSeleccionado()!.nombre }}</strong>
-        </p>
+        <p class="cliente-modo cliente-existente full-width"><mat-icon>check_circle</mat-icon> Cliente existente seleccionado: <strong>{{ clienteSeleccionado()!.nombre }}</strong></p>
       } @else {
-        <p class="cliente-modo cliente-nuevo full-width">
-          <mat-icon>person_add</mat-icon> Se registrará como cliente nuevo con los datos que completes abajo.
-        </p>
+        <p class="cliente-modo cliente-nuevo full-width"><mat-icon>person_add</mat-icon> Se registrará como cliente nuevo con los datos que completes abajo.</p>
       }
 
-      <mat-form-field appearance="outline">
-        <mat-label>Nombre del cliente</mat-label>
-        <input matInput formControlName="clienteNombre">
-      </mat-form-field>
-      <mat-form-field appearance="outline">
-        <mat-label>Teléfono (opcional)</mat-label>
-        <input matInput formControlName="clienteTelefono">
-      </mat-form-field>
-      <mat-form-field appearance="outline">
-        <mat-label>Identidad/RTN (opcional)</mat-label>
-        <input matInput formControlName="clienteIdentidadORTN">
-      </mat-form-field>
-      <mat-form-field appearance="outline">
-        <mat-label>Correo (opcional)</mat-label>
-        <input matInput formControlName="clienteCorreo">
-      </mat-form-field>
+      <mat-form-field appearance="outline"><mat-label>Nombre del cliente</mat-label><input matInput formControlName="clienteNombre"></mat-form-field>
+      <mat-form-field appearance="outline"><mat-label>Teléfono (opcional)</mat-label><input matInput formControlName="clienteTelefono"></mat-form-field>
+      <mat-form-field appearance="outline"><mat-label>Identidad/RTN (opcional)</mat-label><input matInput formControlName="clienteIdentidadORTN"></mat-form-field>
+      <mat-form-field appearance="outline"><mat-label>Correo (opcional)</mat-label><input matInput formControlName="clienteCorreo"></mat-form-field>
     </div>
 
     <h2 class="section-title">Productos</h2>
     <div class="detalles" formArrayName="detalles">
       @for (grupo of detalles.controls; track $index; let i = $index) {
         <div class="detalle-row" [formGroupName]="i">
+          <div class="col-imagen">
+            @if (productoSeleccionado(grupo); as producto) {
+              <app-producto-imagen variant="line" [src]="producto.imagenPrincipalUrl" [alt]="'Imagen de ' + producto.nombre" [fallbackLabel]="producto.nombre + ' no tiene imagen disponible'" loading="lazy"></app-producto-imagen>
+            } @else {
+              <app-producto-imagen variant="line" [src]="null" fallbackLabel="Selecciona un producto para mostrar su imagen" fallbackText="Selecciona"></app-producto-imagen>
+            }
+          </div>
           <mat-form-field appearance="outline" class="col-producto">
             <mat-label>Producto</mat-label>
             <mat-select formControlName="productoId" (selectionChange)="onProductoSeleccionado(i, $event.value)">
               @for (p of productos(); track p.id) {
                 <mat-option [value]="p.id" [disabled]="p.estaAgotado || p.cantidad === 0">
                   {{ p.nombre }} — {{ p.marca }} {{ p.modelo }}
-                  @if (p.colorNombre || p.tallaNombre) {
-                    · {{ p.colorNombre || 'Sin color' }} / {{ p.tallaNombre || 'Sin talla' }}
-                  }
+                  @if (p.colorNombre || p.tallaNombre) { · {{ p.colorNombre || 'Sin color' }} / {{ p.tallaNombre || 'Sin talla' }} }
                   ({{ p.estaAgotado ? 'Agotado' : 'stock: ' + p.cantidad }})
                 </mat-option>
               }
             </mat-select>
           </mat-form-field>
-          <mat-form-field appearance="outline" class="col-cantidad">
-            <mat-label>Cantidad</mat-label>
-            <input matInput type="number" min="1" formControlName="cantidad">
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="col-costo">
-            <mat-label>Precio unitario</mat-label>
-            <input matInput type="number" min="0.01" step="0.01" formControlName="precioUnitario">
-          </mat-form-field>
+          <mat-form-field appearance="outline" class="col-cantidad"><mat-label>Cantidad</mat-label><input matInput type="number" min="1" formControlName="cantidad"></mat-form-field>
+          <mat-form-field appearance="outline" class="col-costo"><mat-label>Precio unitario</mat-label><input matInput type="number" min="0.01" step="0.01" formControlName="precioUnitario"></mat-form-field>
           <span class="col-subtotal">L. {{ subtotalDetalle(grupo) | number:'1.2-2' }}</span>
-          <button class="action-danger col-eliminar" mat-icon-button type="button" (click)="quitarDetalle(i)" title="Quitar" aria-label="Quitar producto de la venta">
-            <mat-icon>close</mat-icon>
-          </button>
+          <button class="action-danger col-eliminar" mat-icon-button type="button" (click)="quitarDetalle(i)" title="Quitar" aria-label="Quitar producto de la venta"><mat-icon>close</mat-icon></button>
         </div>
       }
     </div>
-    <button mat-button type="button" (click)="agregarDetalle()">
-      <mat-icon>add</mat-icon> Agregar producto
-    </button>
+    <button mat-button type="button" (click)="agregarDetalle()"><mat-icon>add</mat-icon> Agregar producto</button>
 
     <h2 class="section-title">Pago y totales</h2>
     <div class="fields-grid">
-      <mat-form-field appearance="outline">
-        <mat-label>Método de pago</mat-label>
-        <mat-select formControlName="metodoPago">
-          <mat-option value="Efectivo">Efectivo</mat-option>
-          <mat-option value="Transferencia">Transferencia</mat-option>
-          <mat-option value="Tarjeta">Tarjeta</mat-option>
-          <mat-option value="Otro">Otro</mat-option>
-        </mat-select>
-      </mat-form-field>
-      <mat-form-field appearance="outline">
-        <mat-label>Estado de pago</mat-label>
-        <mat-select formControlName="estadoPago">
-          <mat-option value="Pendiente">Pendiente</mat-option>
-          <mat-option value="Pagado">Pagado</mat-option>
-          <mat-option value="Parcial">Parcial</mat-option>
-        </mat-select>
-      </mat-form-field>
-      <mat-form-field appearance="outline">
-        <mat-label>Código promocional (opcional)</mat-label>
-        <input matInput formControlName="codigoPromocional" placeholder="Ej. VERANO10">
-      </mat-form-field>
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Notas (opcional)</mat-label>
-        <textarea matInput formControlName="notas" rows="2"></textarea>
-      </mat-form-field>
+      <mat-form-field appearance="outline"><mat-label>Método de pago</mat-label><mat-select formControlName="metodoPago"><mat-option value="Efectivo">Efectivo</mat-option><mat-option value="Transferencia">Transferencia</mat-option><mat-option value="Tarjeta">Tarjeta</mat-option><mat-option value="Otro">Otro</mat-option></mat-select></mat-form-field>
+      <mat-form-field appearance="outline"><mat-label>Estado de pago</mat-label><mat-select formControlName="estadoPago"><mat-option value="Pendiente">Pendiente</mat-option><mat-option value="Pagado">Pagado</mat-option><mat-option value="Parcial">Parcial</mat-option></mat-select></mat-form-field>
+      <mat-form-field appearance="outline"><mat-label>Código promocional (opcional)</mat-label><input matInput formControlName="codigoPromocional" placeholder="Ej. VERANO10"></mat-form-field>
+      <mat-form-field appearance="outline" class="full-width"><mat-label>Notas (opcional)</mat-label><textarea matInput formControlName="notas" rows="2"></textarea></mat-form-field>
     </div>
 
     <div class="totales">
-      @if (calculando()) {
-        <p class="calculando"><mat-spinner diameter="16"></mat-spinner> Calculando descuentos e impuestos...</p>
-      }
+      @if (calculando()) { <p class="calculando"><mat-spinner diameter="16"></mat-spinner> Calculando descuentos e impuestos...</p> }
       @if (resultado(); as r) {
         <div><span>Importe bruto</span><span>L. {{ (r.importeBruto ?? r.subtotal) | number:'1.2-2' }}</span></div>
-        @for (d of r.descuentosAplicados; track d.descuentoId) {
-          <div class="linea-descuento"><span>Descuento: {{ d.nombre }}</span><span>- L. {{ d.monto | number:'1.2-2' }}</span></div>
-        }
+        @for (d of r.descuentosAplicados; track d.descuentoId) { <div class="linea-descuento"><span>Descuento: {{ d.nombre }}</span><span>- L. {{ d.monto | number:'1.2-2' }}</span></div> }
         <div><span>Subtotal sin impuesto</span><span>L. {{ (r.subtotalNeto ?? (r.total - r.totalImpuesto)) | number:'1.2-2' }}</span></div>
-        @for (i of r.impuestosAplicados; track i.impuestoId) {
-          <div class="linea-impuesto">
-            <span>{{ i.nombre }} ({{ i.tasa }}%) {{ i.incluidoEnPrecio ? 'incluido' : 'adicional' }}</span>
-            <span>{{ i.incluidoEnPrecio ? '' : '+' }} L. {{ i.monto | number:'1.2-2' }}</span>
-          </div>
-        }
+        @for (i of r.impuestosAplicados; track i.impuestoId) { <div class="linea-impuesto"><span>{{ i.nombre }} ({{ i.tasa }}%) {{ i.incluidoEnPrecio ? 'incluido' : 'adicional' }}</span><span>{{ i.incluidoEnPrecio ? '' : '+' }} L. {{ i.monto | number:'1.2-2' }}</span></div> }
         <div class="total"><span>Total a cobrar</span><span>L. {{ r.total | number:'1.2-2' }}</span></div>
-      } @else {
-        <p class="hint">Agrega productos para ver el desglose real de descuentos e impuestos.</p>
-      }
+      } @else { <p class="hint">Agrega productos para ver el desglose real de descuentos e impuestos.</p> }
     </div>
 
-    @if (errorMessage()) {
-      <p class="error" role="alert">{{ errorMessage() }}</p>
-    }
+    @if (errorMessage()) { <p class="error" role="alert">{{ errorMessage() }}</p> }
 
     <div class="form-actions">
       <a routerLink="/ventas" mat-button type="button">Cancelar</a>
-      <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || detalles.length === 0 || saving()">
-        Guardar borrador
-      </button>
+      <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || detalles.length === 0 || saving()">Guardar borrador</button>
     </div>
   </form>
 }
