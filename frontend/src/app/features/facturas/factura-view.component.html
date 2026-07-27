@@ -1,5 +1,43 @@
+@if (factura(); as f) {
+  <section class="card print-profile no-print" aria-labelledby="perfil-impresion-titulo">
+    <div class="profile-copy">
+      <h2 id="perfil-impresion-titulo"><mat-icon>print</mat-icon> Perfil de impresión</h2>
+      <p>Selecciona el papel que corresponde a la impresora. La descarga y la impresión usan exactamente este perfil.</p>
+    </div>
+
+    <mat-form-field appearance="outline" class="formato-field">
+      <mat-label>Formato del PDF</mat-label>
+      <mat-select
+        [(ngModel)]="formatoSeleccionado"
+        (selectionChange)="onFormatoChange($event.value)"
+        aria-label="Formato de papel para la factura">
+        @for (formato of formatosPdf(); track formato.codigo) {
+          <mat-option [value]="formato.codigo">
+            {{ formato.nombre }} — {{ formato.descripcion }}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <div class="profile-summary" aria-live="polite">
+      <strong>{{ formatoActual().nombre }}</strong>
+      <span>{{ formatoActual().descripcion }}</span>
+      <span>{{ formatoActual().usoRecomendado }}</span>
+      @if (formatoActual().esContinuo) {
+        <span class="profile-badge">Rollo continuo</span>
+      } @else {
+        <span class="profile-badge">Página fija</span>
+      }
+    </div>
+
+    <p class="profile-note">
+      Correo, WhatsApp y enlaces públicos conservan A4 como documento oficial compartido.
+    </p>
+  </section>
+}
+
 <div class="toolbar no-print">
-  <a routerLink="/ventas" mat-icon-button><mat-icon>arrow_back</mat-icon></a>
+  <a routerLink="/ventas" mat-icon-button aria-label="Volver a ventas"><mat-icon>arrow_back</mat-icon></a>
   <span class="spacer"></span>
 
   @if (factura(); as f) {
@@ -22,7 +60,7 @@
       } @else {
         <mat-icon>picture_as_pdf</mat-icon>
       }
-      Descargar PDF
+      Descargar {{ formatoActual().nombre }}
     </button>
   }
 
@@ -49,7 +87,7 @@
       } @else {
         <mat-icon>print</mat-icon>
       }
-      Imprimir PDF
+      Abrir {{ formatoActual().nombre }} para imprimir
     </button>
   }
 
@@ -70,7 +108,7 @@
         <mat-hint class="hint-error">El correo no tiene un formato válido.</mat-hint>
       }
     </mat-form-field>
-    <p class="hint">Se adjuntará exactamente el mismo PDF oficial disponible para descarga e impresión.</p>
+    <p class="hint">Se adjuntará el PDF oficial A4, independientemente del perfil de impresión seleccionado.</p>
     <div class="panel-actions">
       <button mat-flat-button color="primary" [disabled]="!correoValido() || enviandoCorreo()" (click)="enviarCorreo()">
         @if (enviandoCorreo()) {
@@ -100,7 +138,7 @@
       <textarea matInput [(ngModel)]="mensajeEditable" rows="5"></textarea>
     </mat-form-field>
     <p class="hint">
-      El enlace contiene el mismo PDF oficial y vence el {{ e.fechaExpiracion | date:'dd/MM/yyyy HH:mm' }}.
+      El enlace contiene el PDF oficial A4 y vence el {{ e.fechaExpiracion | date:'dd/MM/yyyy HH:mm' }}.
       Generar otro enlace revoca automáticamente el anterior.
     </p>
     <div class="panel-actions">
@@ -144,116 +182,133 @@
 @if (loading()) {
   <div class="loading no-print"><mat-spinner></mat-spinner></div>
 } @else if (factura(); as f) {
-  <div class="factura-sheet">
-    @if (f.estado === 'Anulada') {
-      <div class="sello-anulada">ANULADA</div>
-    }
-
-    <header class="factura-header">
-      <div class="empresa">
-        <img class="empresa-logo" [src]="f.empresaLogoUrl || defaultLogoUrl" alt="Logo de {{ f.empresaNombre }}">
-        <h1>{{ f.empresaNombre }}</h1>
-        @if (f.empresaEslogan) { <p class="eslogan">{{ f.empresaEslogan }}</p> }
-        <p><strong>Comprobante comercial interno</strong></p>
-        @if (f.empresaTelefono) { <p>Tel: {{ f.empresaTelefono }}</p> }
-        @if (f.empresaDireccion) { <p>{{ f.empresaDireccion }}</p> }
-      </div>
-      <div class="factura-meta">
-        <h2>FACTURA</h2>
-        <p class="numero">{{ f.numeroFactura }}</p>
-        <p>Fecha: {{ f.fechaEmision | date:'dd/MM/yyyy HH:mm' }}</p>
-        <p>Venta origen: {{ f.numeroVentaOrigen }}</p>
-        <p class="estado" [class.anulada]="f.estado === 'Anulada'">{{ f.estado }}</p>
-      </div>
-    </header>
-
-    <section class="datos-grid">
-      <div>
-        <h3>Cliente</h3>
-        <p>{{ f.clienteNombre }}</p>
-        @if (f.clienteIdentidadORTN) { <p>Identidad/RTN: {{ f.clienteIdentidadORTN }}</p> }
-        @if (f.clienteTelefono) { <p>Tel: {{ f.clienteTelefono }}</p> }
-        @if (f.clienteDireccion) { <p>{{ f.clienteDireccion }}</p> }
-      </div>
-      <div>
-        <h3>Vendedor</h3>
-        <p>{{ f.vendedorNombreUsuario }}</p>
-        <h3>Pago</h3>
-        <p>{{ f.metodoPago }} - {{ f.estadoPago }}</p>
-      </div>
-    </section>
-
-    <div class="table-scroll">
-      <table class="tabla-productos">
-        <thead>
-          <tr>
-            <th>Cant.</th><th>Producto</th><th>Marca</th><th>Modelo</th><th>Precio unit.</th><th>Importe</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (d of f.detalles; track $index) {
-            <tr>
-              <td>{{ d.cantidad }}</td>
-              <td>{{ d.productoNombre }}</td>
-              <td>{{ d.productoMarca }}</td>
-              <td>{{ d.productoModelo }}</td>
-              <td>L. {{ d.precioUnitario | number:'1.2-2' }}</td>
-              <td>L. {{ d.subtotal | number:'1.2-2' }}</td>
-            </tr>
-          }
-        </tbody>
-      </table>
+  <div class="preview-shell" [attr.data-formato]="formatoSeleccionado">
+    <div class="preview-label no-print">
+      Vista previa proporcional · {{ formatoActual().nombre }} · {{ formatoActual().descripcion }}
     </div>
 
-    <section class="resumen">
-      <div><span>Importe bruto</span><span>L. {{ f.importeBruto | number:'1.2-2' }}</span></div>
-      @if (f.descuento > 0) {
-        <div><span>Descuento</span><span>- L. {{ f.descuento | number:'1.2-2' }}</span></div>
+    <div class="factura-sheet" [attr.data-formato]="formatoSeleccionado">
+      @if (f.estado === 'Anulada') {
+        <div class="sello-anulada">ANULADA</div>
       }
-      <div><span>Subtotal sin impuesto</span><span>L. {{ f.subtotal | number:'1.2-2' }}</span></div>
-      @if (f.impuestoIncluido > 0) {
-        <div><span>Impuesto incluido</span><span>L. {{ f.impuestoIncluido | number:'1.2-2' }}</span></div>
-      }
-      @if (f.impuestoAdicional > 0) {
-        <div><span>Impuesto adicional</span><span>+ L. {{ f.impuestoAdicional | number:'1.2-2' }}</span></div>
-      }
-      <div class="total"><span>TOTAL</span><span>L. {{ f.total | number:'1.2-2' }}</span></div>
-    </section>
 
-    @if (f.descuentosAplicados.length || f.impuestosAplicados.length) {
-      <section class="aplicaciones">
-        @if (f.descuentosAplicados.length) {
-          <div>
-            <h3>Descuentos aplicados</h3>
-            @for (d of f.descuentosAplicados; track d.descuentoId) {
-              <p>{{ d.nombre }}: - L. {{ d.monto | number:'1.2-2' }}</p>
-            }
-          </div>
-        }
-        @if (f.impuestosAplicados.length) {
-          <div>
-            <h3>Impuestos aplicados</h3>
-            @for (i of f.impuestosAplicados; track i.impuestoId) {
-              <p>{{ i.nombre }}: L. {{ i.monto | number:'1.2-2' }} ({{ i.incluidoEnPrecio ? 'incluido' : 'adicional' }})</p>
-            }
-          </div>
-        }
+      <header class="factura-header">
+        <div class="empresa">
+          <img class="empresa-logo" [src]="f.empresaLogoUrl || defaultLogoUrl" alt="Logo de {{ f.empresaNombre }}">
+          <h1>{{ f.empresaNombre }}</h1>
+          @if (f.empresaEslogan) { <p class="eslogan">{{ f.empresaEslogan }}</p> }
+          <p><strong>Comprobante comercial interno</strong></p>
+          @if (f.empresaRTN) { <p>RTN: {{ f.empresaRTN }}</p> }
+          @if (f.empresaTelefono) { <p>Tel: {{ f.empresaTelefono }}</p> }
+          @if (f.empresaCorreo) { <p>{{ f.empresaCorreo }}</p> }
+          @if (f.empresaDireccion) { <p>{{ f.empresaDireccion }}</p> }
+        </div>
+        <div class="factura-meta">
+          <h2>FACTURA</h2>
+          <p class="numero">{{ f.numeroFactura }}</p>
+          <p>Fecha: {{ f.fechaEmision | date:'dd/MM/yyyy HH:mm' }}</p>
+          <p>Venta origen: {{ f.numeroVentaOrigen }}</p>
+          <p class="estado" [class.anulada]="f.estado === 'Anulada'">{{ f.estado }}</p>
+        </div>
+      </header>
+
+      <section class="datos-grid">
+        <div>
+          <h3>Cliente</h3>
+          <p>{{ f.clienteNombre }}</p>
+          @if (f.clienteIdentidadORTN) { <p>Identidad/RTN: {{ f.clienteIdentidadORTN }}</p> }
+          @if (f.clienteTelefono) { <p>Tel: {{ f.clienteTelefono }}</p> }
+          @if (f.clienteCorreo) { <p>{{ f.clienteCorreo }}</p> }
+          @if (f.clienteDireccion) { <p>{{ f.clienteDireccion }}</p> }
+        </div>
+        <div>
+          <h3>Vendedor</h3>
+          <p>{{ f.vendedorNombreUsuario }}</p>
+          <h3>Pago</h3>
+          <p>{{ f.metodoPago }} - {{ f.estadoPago }}</p>
+        </div>
       </section>
-    }
 
-    @if (f.observaciones) {
-      <p class="observaciones">{{ f.observaciones }}</p>
-    }
+      <div class="table-scroll productos-scroll">
+        <table class="tabla-productos">
+          <thead>
+            <tr>
+              <th class="col-cantidad">Cant.</th>
+              <th class="col-producto">Producto</th>
+              <th class="col-marca">Marca</th>
+              <th class="col-modelo">Modelo</th>
+              <th class="col-precio">Precio unit.</th>
+              <th class="col-importe">Importe</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (d of f.detalles; track $index) {
+              <tr>
+                <td class="col-cantidad">{{ d.cantidad }}</td>
+                <td class="col-producto">
+                  {{ d.productoNombre }}
+                  <span class="clasificacion-termica">{{ d.productoMarca }} {{ d.productoModelo }}</span>
+                </td>
+                <td class="col-marca">{{ d.productoMarca }}</td>
+                <td class="col-modelo">{{ d.productoModelo }}</td>
+                <td class="col-precio">L. {{ d.precioUnitario | number:'1.2-2' }}</td>
+                <td class="col-importe">L. {{ d.subtotal | number:'1.2-2' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
 
-    @if (f.estado === 'Anulada') {
-      <p class="motivo-anulacion">Anulada por {{ f.anuladaPorNombreUsuario }} el {{ f.fechaAnulacion | date:'dd/MM/yyyy HH:mm' }} - Motivo: {{ f.motivoAnulacion }}</p>
-    }
+      <section class="resumen">
+        <div><span>Importe bruto</span><span>L. {{ f.importeBruto | number:'1.2-2' }}</span></div>
+        @if (f.descuento > 0) {
+          <div><span>Descuento</span><span>- L. {{ f.descuento | number:'1.2-2' }}</span></div>
+        }
+        <div><span>Subtotal sin impuesto</span><span>L. {{ f.subtotal | number:'1.2-2' }}</span></div>
+        @if (f.impuestoIncluido > 0) {
+          <div><span>Impuesto incluido</span><span>L. {{ f.impuestoIncluido | number:'1.2-2' }}</span></div>
+        }
+        @if (f.impuestoAdicional > 0) {
+          <div><span>Impuesto adicional</span><span>+ L. {{ f.impuestoAdicional | number:'1.2-2' }}</span></div>
+        }
+        <div class="total"><span>TOTAL</span><span>L. {{ f.total | number:'1.2-2' }}</span></div>
+      </section>
 
-    <footer class="factura-footer">
-      <p>{{ f.empresaTextoFactura || 'Gracias por su compra.' }}</p>
-      <p>Documento comercial interno. No constituye comprobante fiscal autorizado por el SAR.</p>
-      @if (f.empresaTextoLegal) { <p>{{ f.empresaTextoLegal }}</p> }
-      @if (f.empresaCopyright) { <p class="marca">{{ f.empresaCopyright }}</p> }
-    </footer>
+      @if (f.descuentosAplicados.length || f.impuestosAplicados.length) {
+        <section class="aplicaciones">
+          @if (f.descuentosAplicados.length) {
+            <div>
+              <h3>Descuentos aplicados</h3>
+              @for (d of f.descuentosAplicados; track d.descuentoId) {
+                <p>{{ d.nombre }}: - L. {{ d.monto | number:'1.2-2' }}</p>
+              }
+            </div>
+          }
+          @if (f.impuestosAplicados.length) {
+            <div>
+              <h3>Impuestos aplicados</h3>
+              @for (i of f.impuestosAplicados; track i.impuestoId) {
+                <p>{{ i.nombre }}: L. {{ i.monto | number:'1.2-2' }} ({{ i.incluidoEnPrecio ? 'incluido' : 'adicional' }})</p>
+              }
+            </div>
+          }
+        </section>
+      }
+
+      @if (f.observaciones) {
+        <p class="observaciones">{{ f.observaciones }}</p>
+      }
+
+      @if (f.estado === 'Anulada') {
+        <p class="motivo-anulacion">Anulada por {{ f.anuladaPorNombreUsuario }} el {{ f.fechaAnulacion | date:'dd/MM/yyyy HH:mm' }} - Motivo: {{ f.motivoAnulacion }}</p>
+      }
+
+      <footer class="factura-footer">
+        <p>{{ f.empresaTextoFactura || 'Gracias por su compra.' }}</p>
+        <p>Documento comercial interno. No constituye comprobante fiscal autorizado por el SAR.</p>
+        @if (f.empresaTextoLegal) { <p>{{ f.empresaTextoLegal }}</p> }
+        @if (f.empresaCopyright) { <p class="marca">{{ f.empresaCopyright }}</p> }
+      </footer>
+    </div>
   </div>
 }
