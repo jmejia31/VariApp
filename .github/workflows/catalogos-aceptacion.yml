@@ -50,23 +50,26 @@ jobs:
           from pathlib import Path
           path = Path('scripts/fase5_aplicar_interfaz.py')
           text = path.read_text(encoding='utf-8')
-          old = """    '''            e2e/fase4-responsive.spec.ts \\
-             e2e/phase7-admin-role.spec.ts''',
+          start_marker = '# Integrar la prueba en la aceptación permanente.\n'
+          end_marker = '# Actualizar checkpoint de la fase actual.\n'
+          start = text.index(start_marker)
+          end = text.index(end_marker, start)
+          replacement = """# Integrar la prueba en la aceptación permanente.
+          replace_once(
+              '.github/workflows/catalogos-aceptacion.yml',
               '''            e2e/fase4-responsive.spec.ts \\
-             e2e/fase5-imagenes.spec.ts \\
-             e2e/phase7-admin-role.spec.ts'''"""
-          new = """    '''            e2e/fase4-responsive.spec.ts \\
-             e2e/sesion-inactividad.spec.ts \\
-             e2e/matriz-modulos-visual.spec.ts \\
-             e2e/phase7-admin-role.spec.ts''',
+              e2e/sesion-inactividad.spec.ts \\
+              e2e/matriz-modulos-visual.spec.ts \\
+              e2e/phase7-admin-role.spec.ts''',
               '''            e2e/fase4-responsive.spec.ts \\
-             e2e/fase5-imagenes.spec.ts \\
-             e2e/sesion-inactividad.spec.ts \\
-             e2e/matriz-modulos-visual.spec.ts \\
-             e2e/phase7-admin-role.spec.ts'''"""
-          if old not in text:
-              raise SystemExit('No se encontró el bloque final esperado para corregir.')
-          path.write_text(text.replace(old, new, 1), encoding='utf-8')
+              e2e/fase5-imagenes.spec.ts \\
+              e2e/sesion-inactividad.spec.ts \\
+              e2e/matriz-modulos-visual.spec.ts \\
+              e2e/phase7-admin-role.spec.ts'''
+          )
+
+          """
+          path.write_text(text[:start] + replacement + text[end:], encoding='utf-8')
           PY
 
       - name: Aplicar cambios deterministas
