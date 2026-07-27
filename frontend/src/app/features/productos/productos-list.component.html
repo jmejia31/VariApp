@@ -1,18 +1,23 @@
 <div class="header-row">
-  <h1 class="page-title">Productos</h1>
+  <div class="header-copy">
+    <h1 class="page-title">Productos</h1>
+    <p class="page-subtitle">Consulta existencias, clasificación, precios y estado del inventario.</p>
+  </div>
   @if (puedeCrear()) {
     <a routerLink="/productos/nuevo" mat-flat-button color="primary">
-      <mat-icon>add</mat-icon> Nuevo producto
+      <mat-icon>add</mat-icon>
+      <span>Nuevo producto</span>
     </a>
   }
 </div>
 
-<div class="card">
+<div class="card products-card">
   <div class="product-toolbar" aria-label="Búsqueda y filtros de inventario">
-    <mat-form-field appearance="outline" class="search-field">
-      <mat-label>Buscar por nombre, marca, modelo, color o talla</mat-label>
-      <input matInput [ngModel]="search" (ngModelChange)="onSearchChange($event)">
+    <mat-form-field appearance="outline" class="search-field" subscriptSizing="dynamic">
+      <mat-label>Buscar productos</mat-label>
+      <input matInput [ngModel]="search" (ngModelChange)="onSearchChange($event)" autocomplete="off">
       <mat-icon matSuffix>search</mat-icon>
+      <mat-hint>Nombre, marca, modelo, color o talla.</mat-hint>
     </mat-form-field>
 
     <div class="filters-grid">
@@ -82,60 +87,66 @@
     </div>
 
     <button mat-stroked-button type="button" class="clear-filters" (click)="limpiarFiltros()">
-      <mat-icon>filter_alt_off</mat-icon> Limpiar filtros
+      <mat-icon>filter_alt_off</mat-icon>
+      <span>Limpiar filtros</span>
     </button>
   </div>
 
   @if (loading()) {
-    <div class="loading"><mat-spinner></mat-spinner></div>
+    <div class="loading" aria-live="polite"><mat-spinner></mat-spinner></div>
   } @else {
     <div class="table-scroll">
       <table class="table table-desktop">
         <thead>
           <tr>
-            <th></th>
-            <th (click)="ordenarPor('Nombre')" class="sortable">Nombre</th>
-            <th (click)="ordenarPor('Marca')" class="sortable">Marca / modelo</th>
-            <th>Color / talla</th>
-            <th>Categoría</th>
-            <th (click)="ordenarPor('Cantidad')" class="sortable">Stock</th>
-            <th (click)="ordenarPor('Costo')" class="sortable">Costo</th>
-            <th (click)="ordenarPor('Precio')" class="sortable">Precio</th>
-            <th>Estado</th>
-            <th>Acciones</th>
+            <th scope="col" class="image-column"><span class="visually-hidden">Imagen</span></th>
+            <th scope="col" (click)="ordenarPor('Nombre')" class="sortable">Nombre</th>
+            <th scope="col" (click)="ordenarPor('Marca')" class="sortable">Marca / modelo</th>
+            <th scope="col">Color / talla</th>
+            <th scope="col">Categoría</th>
+            <th scope="col" (click)="ordenarPor('Cantidad')" class="sortable">Stock</th>
+            <th scope="col" (click)="ordenarPor('Costo')" class="sortable">Costo</th>
+            <th scope="col" (click)="ordenarPor('Precio')" class="sortable">Precio</th>
+            <th scope="col">Estado</th>
+            <th scope="col" class="actions-column">Acciones</th>
           </tr>
         </thead>
         <tbody>
           @for (p of productos(); track p.id) {
             <tr>
-              <td>
-                @if (p.imagenPrincipalUrl) {
-                  <img [src]="p.imagenPrincipalUrl" class="thumb" [alt]="p.nombre">
-                  @if (p.totalImagenes > 1) {
-                    <span class="img-count">+{{ p.totalImagenes - 1 }}</span>
+              <td class="image-cell">
+                <div class="thumb-wrapper">
+                  @if (p.imagenPrincipalUrl) {
+                    <img [src]="p.imagenPrincipalUrl" class="thumb" [alt]="p.nombre">
+                    @if (p.totalImagenes > 1) {
+                      <span class="img-count" [attr.aria-label]="(p.totalImagenes - 1) + ' imágenes adicionales'">+{{ p.totalImagenes - 1 }}</span>
+                    }
+                  } @else {
+                    <div class="thumb placeholder" aria-label="Producto sin imagen"><mat-icon>image</mat-icon></div>
                   }
-                } @else {
-                  <div class="thumb placeholder"><mat-icon>image</mat-icon></div>
-                }
+                </div>
               </td>
-              <td><strong>{{ p.nombre }}</strong></td>
+              <td class="product-name-cell"><strong class="product-name">{{ p.nombre }}</strong></td>
               <td>
-                <div>{{ p.marca }}</div>
+                <div class="cell-primary">{{ p.marca }}</div>
                 <small>{{ p.modelo }}</small>
               </td>
               <td>
                 @if (p.colorNombre) {
-                  <span class="select-swatch" [style.background]="p.colorCodigoVisual || '#64748B'"></span>{{ p.colorNombre }}
+                  <div class="color-value">
+                    <span class="select-swatch" [style.background]="p.colorCodigoVisual || '#64748B'"></span>
+                    <span>{{ p.colorNombre }}</span>
+                  </div>
                 } @else { — }
                 @if (p.tallaNombre) { <div><small>Talla: {{ p.tallaNombre }}</small></div> }
               </td>
               <td>{{ p.categoriaNombre || '—' }}</td>
-              <td>{{ p.cantidad }}</td>
-              <td>L. {{ p.costo | number:'1.2-2' }}</td>
-              <td>L. {{ p.precio | number:'1.2-2' }}</td>
-              <td>
+              <td class="number-cell">{{ p.cantidad }}</td>
+              <td class="money-cell">L. {{ p.costo | number:'1.2-2' }}</td>
+              <td class="money-cell">L. {{ p.precio | number:'1.2-2' }}</td>
+              <td class="status-cell">
                 @if (puedeCambiarEstado(p)) {
-                  <mat-slide-toggle [checked]="p.activo" (change)="cambiarEstado(p)" [attr.aria-label]="(p.activo ? 'Desactivar ' : 'Activar ') + p.nombre"></mat-slide-toggle>
+                  <mat-slide-toggle class="status-toggle" [checked]="p.activo" (change)="cambiarEstado(p)" [attr.aria-label]="(p.activo ? 'Desactivar ' : 'Activar ') + p.nombre"></mat-slide-toggle>
                 } @else {
                   <span class="badge" [class.success]="p.activo" [class.muted]="!p.activo">
                     {{ p.activo ? 'Activo' : 'Inactivo' }}
@@ -146,19 +157,21 @@
                 }
               </td>
               <td class="actions">
-                <a class="action-view" [routerLink]="['/productos', p.id]" mat-icon-button title="Ver detalle" [attr.aria-label]="'Ver ' + p.nombre">
-                  <mat-icon>visibility</mat-icon>
-                </a>
-                @if (puedeEditar()) {
-                  <a class="action-edit" [routerLink]="['/productos', p.id, 'editar']" mat-icon-button title="Editar" [attr.aria-label]="'Editar ' + p.nombre">
-                    <mat-icon>edit</mat-icon>
+                <div class="actions-group">
+                  <a class="action-view" [routerLink]="['/productos', p.id]" mat-icon-button title="Ver detalle" [attr.aria-label]="'Ver ' + p.nombre">
+                    <mat-icon>visibility</mat-icon>
                   </a>
-                }
-                @if (puedeEliminar()) {
-                  <button class="action-delete" mat-icon-button title="Eliminar lógicamente" [attr.aria-label]="'Eliminar ' + p.nombre" (click)="eliminar(p)">
-                    <mat-icon>delete</mat-icon>
-                  </button>
-                }
+                  @if (puedeEditar()) {
+                    <a class="action-edit" [routerLink]="['/productos', p.id, 'editar']" mat-icon-button title="Editar" [attr.aria-label]="'Editar ' + p.nombre">
+                      <mat-icon>edit</mat-icon>
+                    </a>
+                  }
+                  @if (puedeEliminar()) {
+                    <button class="action-delete" mat-icon-button title="Eliminar lógicamente" [attr.aria-label]="'Eliminar ' + p.nombre" (click)="eliminar(p)">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  }
+                </div>
               </td>
             </tr>
           } @empty {
@@ -170,28 +183,31 @@
 
     <div class="cards-mobile">
       @for (p of productos(); track p.id) {
-        <div class="item-card producto-card">
+        <article class="item-card producto-card">
           <div class="producto-card-top">
-            @if (p.imagenPrincipalUrl) {
-              <img [src]="p.imagenPrincipalUrl" class="thumb" [alt]="p.nombre">
-            } @else {
-              <div class="thumb placeholder"><mat-icon>image</mat-icon></div>
-            }
+            <div class="thumb-wrapper">
+              @if (p.imagenPrincipalUrl) {
+                <img [src]="p.imagenPrincipalUrl" class="thumb" [alt]="p.nombre">
+                @if (p.totalImagenes > 1) {
+                  <span class="img-count">+{{ p.totalImagenes - 1 }}</span>
+                }
+              } @else {
+                <div class="thumb placeholder" aria-label="Producto sin imagen"><mat-icon>image</mat-icon></div>
+              }
+            </div>
             <div class="producto-card-info">
               <strong>{{ p.nombre }}</strong>
               <span class="producto-card-sub">{{ p.marca }} · {{ p.modelo }}</span>
-              <span class="producto-card-sub">
-                {{ p.colorNombre || 'Sin color' }} · {{ p.tallaNombre || 'Sin talla' }}
-              </span>
+              <span class="producto-card-sub">{{ p.colorNombre || 'Sin color' }} · {{ p.tallaNombre || 'Sin talla' }}</span>
               <span class="producto-card-sub">{{ p.categoriaNombre || 'Sin categoría' }}</span>
             </div>
             @if (puedeCambiarEstado(p)) {
-              <mat-slide-toggle [checked]="p.activo" (change)="cambiarEstado(p)" [attr.aria-label]="(p.activo ? 'Desactivar ' : 'Activar ') + p.nombre"></mat-slide-toggle>
+              <mat-slide-toggle class="status-toggle" [checked]="p.activo" (change)="cambiarEstado(p)" [attr.aria-label]="(p.activo ? 'Desactivar ' : 'Activar ') + p.nombre"></mat-slide-toggle>
             }
           </div>
           <div class="item-card-meta">
-            <span>Stock: {{ p.cantidad }}</span>
-            <span>L. {{ p.precio | number:'1.2-2' }}</span>
+            <span>Stock: <strong>{{ p.cantidad }}</strong></span>
+            <span>Precio: <strong>L. {{ p.precio | number:'1.2-2' }}</strong></span>
             <span class="badge" [class.success]="p.activo" [class.muted]="!p.activo">
               {{ p.activo ? 'Activo' : 'Inactivo' }}
             </span>
@@ -200,15 +216,15 @@
             }
           </div>
           <div class="item-card-actions">
-            <a [routerLink]="['/productos', p.id]" mat-button><mat-icon>visibility</mat-icon> Ver</a>
+            <a [routerLink]="['/productos', p.id]" mat-button><mat-icon>visibility</mat-icon><span>Ver</span></a>
             @if (puedeEditar()) {
-              <a [routerLink]="['/productos', p.id, 'editar']" mat-button><mat-icon>edit</mat-icon> Editar</a>
+              <a [routerLink]="['/productos', p.id, 'editar']" mat-button><mat-icon>edit</mat-icon><span>Editar</span></a>
             }
             @if (puedeEliminar()) {
-              <button class="action-delete" mat-button (click)="eliminar(p)"><mat-icon>delete</mat-icon> Eliminar</button>
+              <button class="action-delete" mat-button (click)="eliminar(p)"><mat-icon>delete</mat-icon><span>Eliminar</span></button>
             }
           </div>
-        </div>
+        </article>
       } @empty {
         <p class="empty">No se encontraron productos con los filtros seleccionados.</p>
       }
