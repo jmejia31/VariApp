@@ -249,7 +249,7 @@ test.describe('Fase 6 — facturación e impresión', () => {
     ]);
     expect(printResponse.status()).toBe(200);
     await expect(popup.getByRole('heading', { name: 'Ticket térmico listo' })).toBeVisible();
-    await expect(popup.getByText(/80\.0 × [0-9.]+ mm/)).toBeVisible();
+    await expect(popup.locator('.medida')).toHaveText(/80\.0 × [0-9.]+ mm/);
     await expect(popup.getByText(/si el diálogo de impresión muestra 80 × 297 mm/i)).toBeVisible();
     await expect(popup.getByRole('button', { name: 'Abrir PDF e imprimir' })).toBeVisible();
     await popup.screenshot({ path: join(EVIDENCE_DIR, 'preparacion-pos80-driver.png'), fullPage: true });
