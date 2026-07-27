@@ -1,68 +1,80 @@
 # VariApp — separación segura de Desarrollo y Producción
 
-## 1. Regla principal
+## 1. Entornos oficiales
 
-El identificador oficial y obligatorio del entorno de Desarrollo es:
+Solo existen dos entornos lógicos autorizados:
 
 ```text
+varistorehn_producción (Producción)
 varistorehn_desarrollo
 ```
 
-Los nombres públicos ya creados por el propietario se conservan porque cambiarlos podría alterar dominios, despliegues o integraciones. El identificador oficial se aplica a usuarios, claves, prefijos y documentación interna.
+Los nombres técnicos existentes de servicios, proyectos, dominios, bases, usuarios o claves pueden diferir. Deben mapearse a uno de los dos entornos oficiales y no deben renombrarse ni recrearse cuando exista riesgo de afectar funcionamiento.
 
-| Elemento | Producción | Desarrollo autorizado |
+| Elemento | varistorehn_producción (Producción) | varistorehn_desarrollo |
 |---|---|---|
-| Rama Git | `main` | `Desarrollo` |
-| Pull Request | No se trabaja directamente | PR borrador `Desarrollo -> main` |
-| Vercel | proyecto `varistorehn`, dominio `varistorehn.vercel.app` | proyecto `variapp-desarrollo`, dominio `variapp-desarrollo.vercel.app` |
-| Render | servicio `variapp-api` | servicio `variapp-api-desarrollo` |
-| Aiven MySQL | usuario y base productivos actuales | usuario de aplicación `varistorehn_desarrollo` y base exclusiva de Desarrollo pendiente de certificar por nombre |
-| Cloudinary | clave y activos productivos | clave etiquetada `varistorehn_desarrollo` y prefijo `varistorehn_desarrollo/` |
+| Git | rama `main`, referencia de solo lectura | rama única `Desarrollo` |
+| Vercel | proyecto técnico `varistorehn`, dominio `varistorehn.vercel.app` | proyecto técnico `variapp-desarrollo`, dominio `variapp-desarrollo.vercel.app` |
+| Render | servicio técnico productivo `variapp-api` | servicio técnico `variapp-api-desarrollo` |
+| Aiven | datos, variables y usuario administrativo existentes | usuario de aplicación `varistorehn_desarrollo` y variables de Desarrollo existentes |
+| Cloudinary | claves, activos y variables productivas existentes | clave etiquetada `varistorehn_desarrollo` y prefijo `varistorehn_desarrollo/` |
 
-`main`, Render productivo, Aiven productivo, Vercel productivo y los activos productivos de Cloudinary no se modifican durante este trabajo.
+## 2. Regla absoluta sobre Producción
 
-## 2. Evidencia recibida del propietario
+Producción no se toca. Está prohibido modificar o eliminar:
 
-Las capturas entregadas el 27 de julio de 2026 muestran:
+- rama `main`;
+- variables, secretos y credenciales productivos;
+- dominios, certificados, servicios y despliegues productivos;
+- bases, usuarios, datos, respaldos o migraciones productivos;
+- usuario administrativo `avnadmin` de Aiven;
+- claves `Raíz`, moderación y flujos de medios de Cloudinary;
+- activos Cloudinary productivos;
+- variables ya existentes de Producción y Desarrollo.
 
-- Aiven MySQL en ejecución con el usuario `varistorehn_desarrollo` creado junto al usuario administrativo predeterminado;
-- una clave de Cloudinary etiquetada `varistorehn_desarrollo`, activa y con el secreto oculto;
-- un entorno Render `Desarrollo` con el servicio `variapp-api-desarrollo` desplegado, separado del servicio `variapp-api` de Producción;
-- dos proyectos Vercel visibles: `varistorehn` y `variapp-desarrollo`;
-- el proyecto `variapp-desarrollo` siguiendo la rama `Desarrollo` y sirviendo `variapp-desarrollo.vercel.app`;
-- la aplicación de Desarrollo operativa a través de Vercel y Render.
+No se realizará ni siquiera un cambio de nombre visible sobre Producción durante estas fases.
 
-La evidencia no muestra el nombre de la base de datos Aiven ni los valores de las variables de Render. Por seguridad, esos valores no deben compartirse; solo se requiere una confirmación o captura con valores ocultos.
+## 3. Regla de eliminación
 
-## 3. Protecciones implementadas en el repositorio
+Solo puede eliminarse un recurso cuando se compruebe que:
 
-- `Desarrollo` es la única rama de implementación.
-- El PR hacia `main` permanece en borrador.
-- `render.yaml` define únicamente `variapp-api-desarrollo` sobre la rama `Desarrollo`.
-- `frontend/vercel.json` dirige el host productivo al backend productivo y cualquier otro host al backend de Desarrollo.
-- Las migraciones automáticas permanecen deshabilitadas con `Database__ApplyMigrationsOnStartup=false`.
-- Los secretos se declaran como externos y no están versionados.
-- Cloudinary usa `Cloudinary__EnvironmentPrefix=varistorehn_desarrollo`.
-- Desarrollo no puede eliminar un `PublicId` de Cloudinary que no comience con `varistorehn_desarrollo/`.
-- GitHub Actions valida los nombres, dominios, rama, prefijo y configuración no destructiva.
+1. pertenece exclusivamente a Desarrollo;
+2. duplica una función ya cubierta por `varistorehn_desarrollo`;
+3. no tiene consumidores, dependencias, datos, secretos ni referencias activas;
+4. su eliminación no afecta Producción;
+5. Javier Mejía autoriza expresamente la eliminación.
 
-## 4. Render
+Nunca se elimina un recurso por coincidencia de nombre. `avnadmin`, las claves internas de Cloudinary, previews históricos y ejecuciones anteriores no son automáticamente terceros entornos.
 
-### Producción — no tocar
+Con la evidencia disponible no se identificó un tercer entorno permanente que pudiera eliminarse de forma segura. Por esa razón no se eliminó ningún recurso externo.
 
-- Servicio: `variapp-api`.
-- Rama esperada: `main`.
-- No cambiar variables, credenciales, región, dominio, conexión, despliegue ni migraciones.
+## 4. GitHub
 
-### Desarrollo — recurso autorizado existente
+- `main`: referencia productiva, no se modifica.
+- `Desarrollo`: única rama de trabajo.
+- No se crean ramas adicionales.
+- Cada cambio se confirma y publica en `origin/Desarrollo`.
+- El PR `Desarrollo -> main` permanece en borrador.
+- No hay auto-merge.
 
-- Entorno visible: `Desarrollo`.
-- Servicio: `variapp-api-desarrollo`.
-- Rama: `Desarrollo`.
-- Runtime: Docker.
-- Dominio esperado: `variapp-api-desarrollo.onrender.com`.
+## 5. Render
 
-Variables obligatorias de Desarrollo:
+### Producción
+
+Se conserva sin cambios el servicio técnico existente `variapp-api`, sus variables, dominio, región, conexión y despliegue.
+
+### Desarrollo
+
+Recurso autorizado:
+
+- entorno lógico: `varistorehn_desarrollo`;
+- entorno visible actual: Desarrollo;
+- servicio técnico existente: `variapp-api-desarrollo`;
+- rama: `Desarrollo`;
+- runtime: Docker;
+- dominio: `variapp-api-desarrollo.onrender.com`.
+
+Variables de Desarrollo que se mantienen:
 
 ```text
 ConnectionStrings__DefaultConnection
@@ -76,44 +88,29 @@ Smtp__PasswordSmtp
 Smtp__CorreoRemitente
 SeedAdmin__Username
 SeedAdmin__Password
+Database__ApplyMigrationsOnStartup=false
 ```
 
-Comprobaciones pendientes para cerrar la fase:
+Los valores no deben compartirse ni copiarse al repositorio. Su auditoría corresponde a la Fase 2.
 
-1. Confirmar, sin mostrar la contraseña, que la conexión usa el usuario `varistorehn_desarrollo`.
-2. Confirmar que la conexión apunta a una base exclusiva de Desarrollo y no a la base productiva.
-3. Confirmar que las credenciales Cloudinary corresponden a la clave etiquetada `varistorehn_desarrollo`.
-4. Aplicar el nuevo prefijo `varistorehn_desarrollo` mediante el despliegue normal después de checks verdes.
-5. Mantener `Database__ApplyMigrationsOnStartup=false`.
-6. Confirmar `/health` con HTTP 200.
+## 6. Aiven
 
-## 5. Aiven MySQL
+- El servicio existente se conserva.
+- `avnadmin` se conserva como usuario administrativo.
+- El usuario de aplicación de Desarrollo es `varistorehn_desarrollo`.
+- Las variables y credenciales actuales de Producción y Desarrollo se mantienen.
+- La aplicación de Desarrollo no debe usar `avnadmin`.
+- La aplicación de Desarrollo debe usar su base y credenciales designadas.
+- No se crea otro servicio, base o usuario por iniciativa de un agente.
 
-### Recurso autorizado
+La revisión de bases, privilegios y conexiones cruzadas corresponde a la Fase 2 y se hará sin modificar Producción.
 
-La captura muestra el servicio `variapp-mysql` y el usuario de aplicación `varistorehn_desarrollo`. No debe crearse otro usuario o servicio de Desarrollo si ese es el recurso que el propietario designó.
+## 7. Cloudinary
 
-El usuario `avnadmin` es el usuario administrativo predeterminado de Aiven; no es un tercer entorno y no debe eliminarse. La aplicación de Desarrollo no debe conectarse como `avnadmin`.
-
-Validaciones obligatorias:
-
-1. Confirmar el nombre exacto de la base exclusiva de Desarrollo.
-2. Confirmar que `varistorehn_desarrollo` solo tiene privilegios sobre esa base.
-3. Confirmar que Render Desarrollo usa ese usuario y esa base.
-4. Confirmar un respaldo reciente antes de aplicar migraciones.
-5. Verificar que Producción utiliza otro usuario o, como mínimo, otra base sin privilegios cruzados.
-6. Si la base contiene información copiada de Producción, limitar accesos y anonimizar datos personales antes de demostraciones.
-
-No se debe eliminar el servicio `variapp-mysql` ni crear un duplicado hasta confirmar si aloja de forma controlada ambas bases. La independencia mínima exigida es: base separada, usuario separado y ausencia de privilegios cruzados. Un servicio Aiven separado sería una defensa adicional, no una razón para descartar el recurso creado por el propietario.
-
-## 6. Cloudinary
-
-### Recurso autorizado
-
-- Clave etiquetada: `varistorehn_desarrollo`.
-- Prefijo obligatorio: `varistorehn_desarrollo/`.
-
-Las claves `Raíz`, `moderación` y las creadas por flujos internos no deben eliminarse automáticamente: son claves, no entornos, y podrían ser dependencias administradas por Cloudinary. Solo se eliminarán claves duplicadas después de identificar su consumidor y confirmar que no pertenecen a una función de la plataforma.
+- Las claves productivas y las claves internas se conservan.
+- La clave etiquetada `varistorehn_desarrollo` es la referencia autorizada para Desarrollo.
+- El prefijo obligatorio es `varistorehn_desarrollo/`.
+- Desarrollo no puede eliminar un `PublicId` que no comience con ese prefijo.
 
 Nuevas cargas de Desarrollo:
 
@@ -123,68 +120,45 @@ varistorehn_desarrollo/inventoryapp/compras
 varistorehn_desarrollo/variapp/perfiles
 ```
 
-Producción mantiene el prefijo vacío para conservar sus rutas actuales.
+Producción mantiene sus rutas y variables actuales.
 
-Validación externa:
+## 8. Vercel
 
-1. Confirmar que Render usa la clave etiquetada `varistorehn_desarrollo`.
-2. Subir, reemplazar, descargar y eliminar una imagen de producto.
-3. Subir y eliminar una fotografía de perfil.
-4. Subir comprobantes JPG, PNG, WebP y PDF.
-5. Confirmar que todos los `public_id` nuevos comienzan con `varistorehn_desarrollo/`.
-6. Intentar eliminar una referencia histórica sin ese prefijo y confirmar el bloqueo.
+### Producción
 
-## 7. Vercel
+Se conservan sin cambios el proyecto técnico `varistorehn`, su dominio, variables, rama productiva y despliegues.
 
-### Producción — no tocar
+### Desarrollo
 
-- Proyecto: `varistorehn`.
-- Rama esperada: `main`.
-- Dominio: `varistorehn.vercel.app`.
+Recurso autorizado:
 
-### Desarrollo — recurso autorizado existente
+- entorno lógico: `varistorehn_desarrollo`;
+- proyecto técnico existente: `variapp-desarrollo`;
+- Production Branch: `Desarrollo`;
+- dominio: `variapp-desarrollo.vercel.app`;
+- Root Directory: `frontend`.
 
-- Proyecto: `variapp-desarrollo`.
-- Production Branch: `Desarrollo`.
-- Dominio: `variapp-desarrollo.vercel.app`.
-- Root Directory esperada: `frontend`.
+El proxy mantiene:
 
-`frontend/vercel.json` conserva el enrutamiento:
+```text
+varistorehn.vercel.app/api/* -> variapp-api.onrender.com
+variapp-desarrollo.vercel.app/api/* -> variapp-api-desarrollo.onrender.com
+```
 
-- `varistorehn.vercel.app/api/*` -> `variapp-api.onrender.com`;
-- cualquier otro host `/api/*` -> `variapp-api-desarrollo.onrender.com`.
+Los Preview generados dentro del proyecto productivo no se modificarán desde este trabajo porque hacerlo cambiaría la configuración de Producción. Se auditarán en la Fase 2 y solo se cambiarán con autorización expresa.
 
-Validaciones pendientes:
+## 9. Cierre de la Fase 1
 
-1. Confirmar Root Directory `frontend`.
-2. Confirmar que no existe un tercer proyecto de VariApp/VariStorehn.
-3. Abrir `/login` y comprobar una solicitud `/api`.
-4. No promover un deployment de `Desarrollo` al proyecto productivo.
+La Fase 1 queda cerrada porque:
 
-## 8. Qué se considera un entorno duplicado
+- se definieron exactamente dos entornos lógicos;
+- los recursos aportados por el propietario quedaron asignados a esos entornos;
+- Producción quedó formalmente congelada;
+- `Desarrollo` quedó como única rama de trabajo;
+- el prefijo oficial `varistorehn_desarrollo` está versionado y validado por CI;
+- se conservaron variables y recursos existentes;
+- no se ejecutó ninguna eliminación insegura;
+- no se identificó un tercer entorno permanente confirmado;
+- la compilación y la aceptación automatizada de la estandarización quedaron aprobadas.
 
-Se considera duplicado un servicio, proyecto, base, usuario de aplicación o conjunto de credenciales creado para cumplir la misma función de Desarrollo y que no haya sido designado por el propietario.
-
-No se considera automáticamente duplicado:
-
-- `avnadmin`, porque es un usuario administrativo predeterminado de Aiven;
-- claves internas de Cloudinary asociadas a moderación o flujos de medios;
-- despliegues Preview históricos de Vercel, siempre que no sean proyectos o entornos permanentes activos;
-- ejecuciones anteriores de Render que pertenezcan al mismo servicio autorizado.
-
-Antes de eliminar cualquier recurso se debe identificar su consumidor, exportar la configuración necesaria y verificar que no afecta Producción.
-
-## 9. Criterio de cierre de la Fase 1
-
-La Fase 1 solo queda completa cuando:
-
-- GitHub Actions aprueba la configuración con `varistorehn_desarrollo`;
-- Render Desarrollo usa el usuario Aiven y la clave Cloudinary autorizados;
-- la base de Desarrollo está identificada y aislada;
-- los privilegios de Aiven no cruzan hacia Producción;
-- `/health` responde 200;
-- Vercel Desarrollo apunta al backend de Desarrollo;
-- no existe ningún tercer entorno permanente confirmado;
-- ningún recurso productivo fue modificado.
-
-Hasta entonces no se inicia la auditoría general de la Fase 2.
+La Fase 2 puede iniciar como auditoría de solo lectura y correcciones exclusivamente en `Desarrollo`.
