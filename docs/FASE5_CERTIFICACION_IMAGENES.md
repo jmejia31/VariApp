@@ -44,11 +44,7 @@ El componente `app-producto-imagen` centraliza:
 
 ## 3. Backend y contratos
 
-Se incorporó `ProductoImagenPrincipalUrl` a los contratos de:
-
-- detalles de Compra;
-- detalles de Venta;
-- Movimientos de inventario.
+Se incorporó `ProductoImagenPrincipalUrl` a los contratos de detalles de Compra, detalles de Venta y Movimientos de inventario.
 
 Los repositorios y servicios proyectan la imagen marcada como principal y, cuando no existe, el primer recurso ordenado disponible. Los endpoints históricos continúan siendo compatibles: el campo puede ser nulo sin romper registros anteriores.
 
@@ -81,17 +77,7 @@ Se añadieron o ampliaron pruebas backend para comprobar la propagación de la i
 
 ## 5. Compras y Ventas
 
-### Formularios
-
-Cada línea muestra la imagen del Producto seleccionado. Antes de seleccionar un artículo se presenta un fallback explícito. La cuadrícula se adapta a escritorio, tablet y teléfono sin comprimir cantidades, costo o precio.
-
-### Listados
-
-Se muestra la imagen principal del primer Producto de la operación, junto con el nombre y un indicador cuando existen más líneas. Las vistas móviles utilizan tarjetas con miniatura y texto completo.
-
-### Detalles
-
-Las tablas de detalle incluyen una columna de imagen accesible. El historial sigue mostrando marca, modelo, cantidades, importes y totales sin modificar las reglas de negocio.
+Cada línea de los formularios muestra la imagen del Producto seleccionado. Los listados muestran la imagen principal del primer Producto de la operación. Las tablas de detalle incluyen una columna de imagen accesible sin alterar cantidades, importes, impuestos ni reglas de negocio.
 
 ## 6. Movimientos de inventario
 
@@ -99,39 +85,17 @@ El historial muestra la imagen principal junto al nombre del Producto. La tabla 
 
 ## 7. Resiliencia y accesibilidad
 
-Se certificaron tres estados:
-
-1. imagen válida;
-2. Producto sin imagen;
-3. URL de imagen rota o inaccesible.
-
-En todos los casos existe una representación visible y una descripción accesible. Las imágenes relevantes incluyen `alt`; los encabezados visuales de imagen en tablas poseen texto oculto para lectores de pantalla.
+Se certificaron imagen válida, Producto sin imagen y URL rota o inaccesible. En todos los casos existe una representación visible y una descripción accesible.
 
 ## 8. Certificación automatizada
 
-Se añadió:
+Se añadió `frontend/e2e/fase5-imagenes.spec.ts` y se integró en `.github/workflows/catalogos-aceptacion.yml`.
 
-```text
-frontend/e2e/fase5-imagenes.spec.ts
-```
-
-La prueba utiliza una imagen SVG controlada y una URL deliberadamente rota. Comprueba:
-
-- carga diferida en listado;
-- fallback accesible cuando no existe imagen;
-- fallback ante error de red;
-- prioridad de la imagen principal;
-- galería operable con teclado;
-- apertura y cierre del lightbox;
-- imágenes en Compras y Ventas: listas, formularios y detalles;
-- miniatura en Movimientos;
-- ausencia de desbordamiento horizontal.
-
-La prueba quedó integrada en `.github/workflows/catalogos-aceptacion.yml`.
+Comprueba carga diferida, fallback accesible, error de red, prioridad del hero, galería por teclado, lightbox, imágenes en Compras y Ventas, miniatura en Movimientos y ausencia de desbordamiento horizontal.
 
 ## 9. Evidencia visual
 
-El artefacto final es:
+Artefacto:
 
 ```text
 desarrollo-aceptacion-integral
@@ -161,7 +125,13 @@ Commit funcional certificado:
 90eb4ff4c9b7b4a8ed66561fa092f7521ebe7630
 ```
 
-Ejecuciones:
+Commit documental de cierre:
+
+```text
+4ec034ba0fc6c7b6486b9c5fe2a8a70818e4841e
+```
+
+Ejecuciones sobre el commit funcional:
 
 - `Desarrollo - Compilación y pruebas`, run `30289511599`: **success**.
 - `Desarrollo - aceptación funcional integral`, run `30289510773`: **success**.
@@ -181,15 +151,13 @@ La prueba específica de Fase 5 ejecutó cuatro casos y los cuatro terminaron co
 
 ## 11. Riesgos y validaciones externas pendientes
 
-La certificación aislada no utiliza credenciales reales de Cloudinary y no modifica activos externos. Continúan pendientes para la Fase 8 o para una validación manual autorizada en `varistorehn_desarrollo`:
+La certificación aislada no utiliza credenciales reales de Cloudinary y no modifica activos externos. Continúan pendientes para la Fase 8 o una validación manual autorizada en `varistorehn_desarrollo`:
 
 - cargar una imagen real desde cámara y galería;
 - reemplazar y eliminar un activo real con prefijo `varistorehn_desarrollo/`;
 - confirmar que Desarrollo no puede eliminar un activo productivo;
-- revisar consumo, huérfanos y duplicados en Cloudinary;
-- comprobar comportamiento con conexión móvil lenta y archivos cercanos al límite permitido.
-
-Estas pruebas requieren acceso al entorno externo y deben realizarse exclusivamente con recursos de Desarrollo.
+- revisar consumo, huérfanos y duplicados;
+- probar conexión móvil lenta y archivos cercanos al límite.
 
 ## 12. Criterio de cierre
 
