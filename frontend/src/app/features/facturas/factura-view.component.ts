@@ -16,7 +16,8 @@ import {
   Factura,
   FacturaFormatoCodigo,
   FacturaFormatoPdf,
-  HistorialEnvio
+  HistorialEnvio,
+  ResultadoDiagnosticoSmtp
 } from '../../core/models/factura.model';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
 
@@ -30,6 +31,11 @@ const FORMATOS_FALLBACK: FacturaFormatoPdf[] = [
   { codigo: 'pos58', nombre: 'POS 58 mm', descripcion: 'Rollo continuo de 58 mm', anchoMm: 58, esContinuo: true, usoRecomendado: 'Impresoras térmicas móviles y handheld' },
   { codigo: 'pos80', nombre: 'POS 80 mm', descripcion: 'Rollo continuo de 80 mm', anchoMm: 80, esContinuo: true, usoRecomendado: 'Impresoras térmicas POS e industriales' }
 ];
+
+interface DimensionesPdf {
+  anchoMm: number;
+  altoMm: number;
+}
 
 @Component({
   selector: 'app-factura-view',
@@ -56,6 +62,7 @@ export class FacturaViewComponent implements OnInit {
   readonly puedeExportar = signal(false);
   readonly puedeImprimir = signal(false);
   readonly puedeCompartir = signal(false);
+  readonly alturaTermicaMm = signal<number | null>(null);
 
   readonly mostrarPanelWhatsApp = signal(false);
   readonly preparandoWhatsApp = signal(false);
@@ -69,7 +76,9 @@ export class FacturaViewComponent implements OnInit {
   readonly mostrarPanelCorreo = signal(false);
   readonly enviandoCorreo = signal(false);
   readonly cargandoEstadoSmtp = signal(false);
+  readonly diagnosticandoSmtp = signal(false);
   readonly estadoSmtp = signal<EstadoConfiguracionSmtp | null>(null);
+  readonly diagnosticoSmtp = signal<ResultadoDiagnosticoSmtp | null>(null);
   readonly correoUltimoError = signal('');
   correoEditable = '';
   private correoIdempotencyKey = '';
@@ -115,6 +124,7 @@ export class FacturaViewComponent implements OnInit {
 
   onFormatoChange(codigo: FacturaFormatoCodigo): void {
     this.formatoSeleccionado = codigo;
+    this.alturaTermicaMm.set(null);
     try {
       window.localStorage.setItem(FORMATO_STORAGE_KEY, codigo);
     } catch {
@@ -141,9 +151,19 @@ export class FacturaViewComponent implements OnInit {
     this.imprimiendoPdf.set(true);
 
     this.facturaService.descargarPdf(factura.id, formato.codigo).subscribe({
-      next: (blob) => {
+      next: async (blob) => {
         this.imprimiendoPdf.set(false);
         const url = window.URL.createObjectURL(blob);
+
+        if (formato.esContinuo) {
+          const dimensiones = await this.leerDimensionesPdf(blob);
+          if (dimensiones) {
+            this.alturaTermicaMm.set(dimensiones.altoMm);
+            this.mostrarPreparacionTermica(ventanaPdf, url, factura, formato, dimensiones);
+            return;
+          }
+        }
+
         ventanaPdf.location.href = url;
         window.setTimeout(() => window.URL.revokeObjectURL(url), 120_000);
       },
@@ -164,8 +184,12 @@ export class FacturaViewComponent implements OnInit {
     const formato = this.formatoActual();
     this.descargandoPdf.set(true);
     this.facturaService.descargarPdf(factura.id, formato.codigo).subscribe({
-      next: (blob) => {
+      next: async (blob) => {
         this.descargandoPdf.set(false);
+        if (formato.esContinuo) {
+          const dimensiones = await this.leerDimensionesPdf(blob);
+          if (dimensiones) this.alturaTermicaMm.set(dimensiones.altoMm);
+        }
         const url = window.URL.createObjectURL(blob);
         const enlace = document.createElement('a');
         enlace.href = url;
@@ -290,6 +314,7 @@ export class FacturaViewComponent implements OnInit {
     this.correoEditable = factura.clienteCorreo || '';
     this.correoUltimoError.set('');
     this.correoIdempotencyKey = '';
+    this.diagnosticoSmtp.set(null);
     this.mostrarPanelCorreo.set(true);
     this.cargarEstadoCorreo();
   }
@@ -307,8 +332,40 @@ export class FacturaViewComponent implements OnInit {
   puedeEnviarCorreo(): boolean {
     return this.correoValido() &&
       this.estadoSmtp()?.configurado === true &&
+      this.diagnosticoSmtp()?.exito === true &&
       !this.cargandoEstadoSmtp() &&
+      !this.diagnosticandoSmtp() &&
       !this.enviandoCorreo();
+  }
+
+  probarConexionCorreo(): void {
+    if (this.diagnosticandoSmtp() || this.estadoSmtp()?.configurado !== true) return;
+
+    this.diagnosticandoSmtp.set(true);
+    this.diagnosticoSmtp.set(null);
+    this.correoUltimoError.set('');
+    this.facturaService.probarConexionCorreo().subscribe({
+      next: (res) => {
+        this.diagnosticandoSmtp.set(false);
+        this.diagnosticoSmtp.set(res.data);
+        if (!res.data.exito) this.correoUltimoError.set(res.data.mensaje);
+      },
+      error: (err) => {
+        this.diagnosticandoSmtp.set(false);
+        const mensaje = err.error?.message ?? 'No se pudo ejecutar el diagnóstico SMTP.';
+        this.correoUltimoError.set(mensaje);
+        this.diagnosticoSmtp.set({
+          exito: false,
+          codigo: 'SMTP_DIAGNOSTICO_ERROR',
+          mensaje,
+          host: this.estadoSmtp()?.host ?? 'No disponible',
+          puerto: this.estadoSmtp()?.puerto ?? 0,
+          modoSeguridad: this.estadoSmtp()?.modoSeguridad ?? '',
+          autenticado: false,
+          duracionMilisegundos: 0
+        });
+      }
+    });
   }
 
   enviarCorreo(): void {
@@ -344,10 +401,17 @@ export class FacturaViewComponent implements OnInit {
 
   private cargarEstadoCorreo(): void {
     this.cargandoEstadoSmtp.set(true);
+    this.estadoSmtp.set(null);
+    this.diagnosticoSmtp.set(null);
     this.facturaService.getEstadoCorreo().subscribe({
       next: (res) => {
         this.cargandoEstadoSmtp.set(false);
         this.estadoSmtp.set(res.data);
+        if (res.data.configurado) {
+          this.probarConexionCorreo();
+        } else {
+          this.correoUltimoError.set(res.data.mensaje);
+        }
       },
       error: (err) => {
         this.cargandoEstadoSmtp.set(false);
@@ -368,6 +432,84 @@ export class FacturaViewComponent implements OnInit {
       },
       error: () => this.snackBar.open('No se pudo cargar el historial de envíos.', 'Cerrar', { duration: 5000 })
     });
+  }
+
+  private async leerDimensionesPdf(blob: Blob): Promise<DimensionesPdf | null> {
+    try {
+      const contenido = new TextDecoder('latin1').decode(await blob.arrayBuffer());
+      const match = contenido.match(/\/MediaBox\s*\[\s*0(?:\.0+)?\s+0(?:\.0+)?\s+([0-9]+(?:\.[0-9]+)?)\s+([0-9]+(?:\.[0-9]+)?)\s*\]/);
+      if (!match) return null;
+
+      const puntosAMilimetros = 25.4 / 72;
+      return {
+        anchoMm: Number(match[1]) * puntosAMilimetros,
+        altoMm: Number(match[2]) * puntosAMilimetros
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  private mostrarPreparacionTermica(
+    ventana: Window,
+    url: string,
+    factura: Factura,
+    formato: FacturaFormatoPdf,
+    dimensiones: DimensionesPdf
+  ): void {
+    const ancho = dimensiones.anchoMm.toFixed(1);
+    const alto = dimensiones.altoMm.toFixed(1);
+    const altoDriver = Math.ceil(dimensiones.altoMm + 5);
+    const numero = this.escaparHtml(factura.numeroFactura);
+    const nombreFormato = this.escaparHtml(formato.nombre);
+
+    ventana.document.open();
+    ventana.document.write(`<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>${numero} — ${nombreFormato}</title>
+  <style>
+    body{margin:0;background:#eef1f4;color:#17212b;font:16px/1.5 Arial,sans-serif;display:grid;min-height:100vh;place-items:center;padding:24px;box-sizing:border-box}
+    main{width:min(680px,100%);background:white;border:1px solid #cbd5e1;border-radius:14px;padding:24px;box-shadow:0 16px 45px rgba(15,23,42,.16)}
+    h1{font-size:22px;margin:0 0 10px} .medida{font-size:20px;font-weight:700;color:#075985}
+    .aviso{background:#fff7ed;border-left:4px solid #ea580c;padding:12px 14px;margin:16px 0}
+    ol{padding-left:22px} button{border:0;border-radius:9px;background:#075985;color:white;padding:12px 18px;font-weight:700;cursor:pointer;font-size:15px}
+    small{display:block;color:#475569;margin-top:14px}
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Ticket térmico listo</h1>
+    <p>VariApp generó <strong>${numero}</strong> con tamaño real:</p>
+    <p class="medida">${ancho} × ${alto} mm</p>
+    <div class="aviso"><strong>Importante:</strong> si el diálogo de impresión muestra 80 × 297 mm, ese largo lo está imponiendo el controlador de la impresora, no el PDF de VariApp.</div>
+    <ol>
+      <li>Abre el PDF con el botón inferior.</li>
+      <li>En el diálogo usa papel <strong>Receipt / Rollo / Continuous</strong>, escala 100 % y márgenes desactivados.</li>
+      <li>Si el controlador exige un alto fijo, crea un tamaño personalizado de aproximadamente <strong>${ancho} × ${altoDriver} mm</strong>.</li>
+      <li>Si Chrome no muestra esas opciones, usa “Imprimir mediante el sistema de diálogo” (Ctrl+Shift+P).</li>
+    </ol>
+    <button id="abrir-pdf" type="button">Abrir PDF e imprimir</button>
+    <small>La aplicación no puede modificar desde el navegador la configuración del controlador POS instalado en Windows.</small>
+  </main>
+</body>
+</html>`);
+    ventana.document.close();
+    ventana.document.getElementById('abrir-pdf')?.addEventListener('click', () => {
+      ventana.location.href = url;
+      window.setTimeout(() => window.URL.revokeObjectURL(url), 120_000);
+    });
+  }
+
+  private escaparHtml(valor: string): string {
+    return valor
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#039;');
   }
 
   private crearClaveIdempotencia(): string {
