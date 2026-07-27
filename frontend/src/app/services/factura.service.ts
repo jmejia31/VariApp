@@ -1,9 +1,15 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { ApiResponse } from '../core/models/api-response.model';
-import { EnlaceCompartir, Factura, HistorialEnvio } from '../core/models/factura.model';
+import {
+  EnlaceCompartir,
+  Factura,
+  FacturaFormatoCodigo,
+  FacturaFormatoPdf,
+  HistorialEnvio
+} from '../core/models/factura.model';
 
 @Injectable({ providedIn: 'root' })
 export class FacturaService {
@@ -23,9 +29,17 @@ export class FacturaService {
     return this.http.get<ApiResponse<Factura>>(`${this.apiUrl}/venta/${ventaId}`);
   }
 
-  /** Único PDF oficial utilizado por descarga e impresión. */
-  descargarPdf(id: number): Observable<Blob> {
-    return this.http.get(`${this.apiUrl}/${id}/pdf`, { responseType: 'blob' });
+  getFormatosPdf(): Observable<ApiResponse<FacturaFormatoPdf[]>> {
+    return this.http.get<ApiResponse<FacturaFormatoPdf[]>>(`${this.apiUrl}/formatos-pdf`);
+  }
+
+  /**
+   * Genera el PDF oficial con un perfil explícito. A4 permanece como valor
+   * predeterminado para mantener compatibilidad con enlaces y correo.
+   */
+  descargarPdf(id: number, formato: FacturaFormatoCodigo = 'a4'): Observable<Blob> {
+    const params = new HttpParams().set('formato', formato);
+    return this.http.get(`${this.apiUrl}/${id}/pdf`, { params, responseType: 'blob' });
   }
 
   prepararWhatsApp(id: number): Observable<ApiResponse<EnlaceCompartir>> {
