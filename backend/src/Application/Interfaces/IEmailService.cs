@@ -23,11 +23,24 @@ public sealed class EstadoConfiguracionSmtp
     public string Host { get; init; } = string.Empty;
     public int Puerto { get; init; }
     public bool UsaTls { get; init; }
+    public string ModoSeguridad { get; init; } = string.Empty;
     public bool RequiereAutenticacion { get; init; }
     public string RemitenteEnmascarado { get; init; } = string.Empty;
     public int MaximoIntentos { get; init; }
     public int TimeoutSegundos { get; init; }
     public string Mensaje { get; init; } = string.Empty;
+}
+
+public sealed class ResultadoDiagnosticoSmtp
+{
+    public bool Exito { get; init; }
+    public string Codigo { get; init; } = string.Empty;
+    public string Mensaje { get; init; } = string.Empty;
+    public string Host { get; init; } = string.Empty;
+    public int Puerto { get; init; }
+    public string ModoSeguridad { get; init; } = string.Empty;
+    public bool Autenticado { get; init; }
+    public int DuracionMilisegundos { get; init; }
 }
 
 /// Envío transaccional de correo vía SMTP configurable. Las credenciales se
@@ -42,4 +55,8 @@ public interface IEmailService
         CancellationToken cancellationToken = default);
 
     EstadoConfiguracionSmtp ObtenerEstadoConfiguracion();
+
+    /// Comprueba conexión, negociación TLS y autenticación sin enviar correo ni
+    /// exponer secretos. Está pensado para diagnosticar exclusivamente Desarrollo.
+    Task<ResultadoDiagnosticoSmtp> ProbarConexionAsync(CancellationToken cancellationToken = default);
 }
