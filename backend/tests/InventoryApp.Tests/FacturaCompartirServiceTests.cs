@@ -29,13 +29,15 @@ public class FacturaCompartirServiceTests
             {
                 ["AppSettings:BackendPublicUrl"] = "https://api.varistorehn.test",
                 ["AppSettings:EnlacePublicoFacturaHorasValidez"] = "24",
-                ["AppSettings:EnlacePublicoFacturaMaximoAccesos"] = "3"
+                ["AppSettings:EnlacePublicoFacturaMaximoAccesos"] = "3",
+                ["AppSettings:CorreoFacturaIdempotenciaMinutos"] = "15"
             })
             .Build();
 
         _currentUser.Setup(c => c.UsuarioId).Returns(7);
         _currentUser.Setup(c => c.NombreUsuario).Returns("admin");
         _repository.Setup(r => r.SaveChangesAsync()).Returns(Task.CompletedTask);
+        _repository.Setup(r => r.AddHistorialAsync(It.IsAny<HistorialEnvioFactura>())).Returns(Task.CompletedTask);
 
         _service = new FacturaCompartirService(
             _repository.Object,
@@ -133,6 +135,110 @@ public class FacturaCompartirServiceTests
         _repository.Verify(r => r.AddEnlaceAsync(It.IsAny<EnlacePublicoFactura>()), Times.Never);
     }
 
+    [Fact]
+    public async Task EnviarPorCorreoAsync_Adjunta_Pdf_Y_Registra_Intentos()
+    {
+        var factura = CrearFactura();
+        var pdf = Encoding.UTF8.GetBytes("%PDF-prueba-fase7");
+        _facturaService.Setup(s => s.GetByIdAsync(factura.Id)).ReturnsAsync(factura);
+        _pdfService.Setup(s => s.GenerarPdfAsync(factura)).ReturnsAsync(pdf);
+        _emailService.Setup(s => s.EnviarAsync(
+                "cliente@example.com",
+                It.Is<string>(x => x.Contains(factura.NumeroFactura)),
+                It.Is<string>(x => x.Contains("PDF oficial A4")),
+                It.Is<List<AdjuntoCorreo>>(x =>
+                    x.Count == 1 &&
+                    x[0].NombreArchivo == $"{factura.NumeroFactura}.pdf" &&
+                    x[0].ContentType == "application/pdf" &&
+                    x[0].Contenido.SequenceEqual(pdf)),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ResultadoEntregaEmail
+            {
+                Exito = true,
+                Codigo = "ENVIADO",
+                Intentos = 2,
+                MessageId = "variapp-test"
+            });
+
+        var resultado = await _service.EnviarPorCorreoAsync(
+            factura.Id,
+            "cliente@example.com",
+            $"test-{Guid.NewGuid():N}");
+
+        Assert.True(resultado.Exito);
+        Assert.Equal(2, resultado.Intentos);
+        Assert.Equal("variapp-test", resultado.MessageId);
+        Assert.Contains("2 intentos", resultado.Mensaje);
+        _repository.Verify(r => r.AddHistorialAsync(It.Is<HistorialEnvioFactura>(h =>
+            h.FacturaId == factura.Id &&
+            h.Canal == "Correo" &&
+            h.Resultado == "Enviado (2 intentos)" &&
+            h.Error == null)), Times.Once);
+    }
+
+    [Fact]
+    public async Task EnviarPorCorreoAsync_Misma_Clave_No_Duplica_Envio()
+    {
+        var factura = CrearFactura();
+        var clave = $"idem-{Guid.NewGuid():N}";
+        _facturaService.Setup(s => s.GetByIdAsync(factura.Id)).ReturnsAsync(factura);
+        _pdfService.Setup(s => s.GenerarPdfAsync(factura)).ReturnsAsync(Encoding.UTF8.GetBytes("%PDF-idempotente"));
+        _emailService.Setup(s => s.EnviarAsync(
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<List<AdjuntoCorreo>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ResultadoEntregaEmail
+            {
+                Exito = true,
+                Codigo = "ENVIADO",
+                Intentos = 1,
+                MessageId = "variapp-idem"
+            });
+
+        var primero = await _service.EnviarPorCorreoAsync(factura.Id, "cliente@example.com", clave);
+        var segundo = await _service.EnviarPorCorreoAsync(factura.Id, "cliente@example.com", clave);
+
+        Assert.True(primero.Exito);
+        Assert.True(segundo.Exito);
+        Assert.True(segundo.YaProcesado);
+        _emailService.Verify(s => s.EnviarAsync(
+            It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(),
+            It.IsAny<List<AdjuntoCorreo>>(), It.IsAny<CancellationToken>()), Times.Once);
+        _repository.Verify(r => r.AddHistorialAsync(It.IsAny<HistorialEnvioFactura>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task EnviarPorCorreoAsync_Propaga_Error_Transitorio_Seguro()
+    {
+        var factura = CrearFactura();
+        _facturaService.Setup(s => s.GetByIdAsync(factura.Id)).ReturnsAsync(factura);
+        _pdfService.Setup(s => s.GenerarPdfAsync(factura)).ReturnsAsync(Encoding.UTF8.GetBytes("%PDF-error"));
+        _emailService.Setup(s => s.EnviarAsync(
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<List<AdjuntoCorreo>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ResultadoEntregaEmail
+            {
+                Exito = false,
+                Codigo = "SMTP_TEMPORAL",
+                Error = "El servidor de correo presentó un problema temporal.",
+                EsTransitorio = true,
+                Intentos = 3,
+                MessageId = "variapp-error"
+            });
+
+        var resultado = await _service.EnviarPorCorreoAsync(
+            factura.Id,
+            "cliente@example.com",
+            $"error-{Guid.NewGuid():N}");
+
+        Assert.False(resultado.Exito);
+        Assert.True(resultado.EsTransitorio);
+        Assert.Equal("SMTP_TEMPORAL", resultado.Codigo);
+        Assert.Equal(3, resultado.Intentos);
+        _repository.Verify(r => r.AddHistorialAsync(It.Is<HistorialEnvioFactura>(h =>
+            h.Resultado == "Error SMTP_TEMPORAL" &&
+            h.Error == "El servidor de correo presentó un problema temporal.")), Times.Once);
+    }
+
     private static FacturaDto CrearFactura() => new()
     {
         Id = 15,
@@ -140,6 +246,7 @@ public class FacturaCompartirServiceTests
         Estado = "Emitida",
         ClienteNombre = "Cliente prueba",
         ClienteTelefono = "99999999",
+        ClienteCorreo = "cliente@example.com",
         EmpresaNombre = "VariStorehn",
         Total = 500m,
         FechaEmision = DateTime.UtcNow
