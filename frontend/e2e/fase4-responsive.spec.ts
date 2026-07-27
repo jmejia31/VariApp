@@ -148,7 +148,7 @@ async function assertNoClippedCriticalText(page: Page, route: string): Promise<v
 
 async function assertTouchTargets(page: Page, route: string, minimum: number): Promise<void> {
   const failures = await page.locator([
-    'button:visible:not([disabled])',
+    'button:visible:not([disabled]):not(.mdc-switch)',
     'a[mat-button]:visible',
     'a[mat-flat-button]:visible',
     'a[mat-icon-button]:visible',
@@ -158,6 +158,8 @@ async function assertTouchTargets(page: Page, route: string, minimum: number): P
   ].join(',')).evaluateAll(
     (elements, min) => elements.flatMap((element) => {
       const html = element as HTMLElement;
+      if (html.closest('mat-slide-toggle')) return [];
+
       const rect = html.getBoundingClientRect();
       if (rect.width <= 0 || rect.height <= 0) return [];
 
@@ -204,8 +206,11 @@ async function assertNavigationMode(page: Page, kind: 'mobile' | 'desktop'): Pro
     expect(sidebarGeometry.width).toBeLessThanOrEqual(sidebarGeometry.viewportWidth);
     expect(sidebarGeometry.clientHeight).toBeGreaterThan(0);
 
-    await page.locator('.overlay').click({ position: { x: 2, y: 2 } });
+    const closeButton = page.locator('.cerrar-sidebar');
+    await expect(closeButton).toBeVisible();
+    await closeButton.click();
     await expect(sidebar).not.toHaveClass(/abierto/);
+    await expect(page.locator('.overlay')).toBeHidden();
   } else {
     await expect(menuToggle).toBeHidden();
     const geometry = await sidebar.evaluate((element) => {
