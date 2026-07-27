@@ -1,139 +1,216 @@
-# Plan de cierre técnico de VariApp / VariStorehn
+# Plan obligatorio de trabajo por fases — VariApp / VariStorehn
 
-Rama de trabajo: `Desarrollo`
+Rama exclusiva de trabajo: `Desarrollo`.
 
-PR colaborativo: `Desarrollo -> main`, permanentemente en borrador hasta autorización expresa de Javier Mejía.
+Pull Request: `Desarrollo -> main`, en borrador hasta autorización expresa de Javier Mejía.
 
-## Fase 0 — Protección operativa y línea base — COMPLETA
+Identificador oficial del entorno de Desarrollo:
 
-- `main` permanece como rama productiva estable.
-- `Desarrollo` es la única rama de cambios y validación.
-- El PR hacia `main` está en borrador y no tiene auto-merge.
-- Producción no se modifica durante la certificación.
-- CI, Docker y configuraciones de entornos están versionados.
+```text
+varistorehn_desarrollo
+```
 
-## Fase 1 — Seguridad, permisos y alcance por usuario — IMPLEMENTADA Y CERTIFICADA EN AISLAMIENTO
+## Reglas generales
 
-- Ventas, compras, facturas, finanzas y movimientos aislados por `UsuarioId` para usuarios no administradores.
-- Acceso global reservado al administrador.
-- Acciones ocultas y endpoints protegidos por permiso exacto.
-- Auditoría restringida al administrador.
-- Productos inactivos y eliminaciones lógicas protegidos.
-- Aceptación de Administrador, Vendedor y rol personalizado incorporada al workflow integral.
+Antes de iniciar cada fase se debe:
 
-## Fase 2 — Cálculos, impuestos y compras — IMPLEMENTADA Y CERTIFICADA EN AISLAMIENTO
+1. analizar el alcance completo;
+2. identificar riesgos;
+3. verificar dependencias;
+4. confirmar que ningún cambio afecta Producción;
+5. definir pruebas y evidencia de cierre.
 
-- Impuestos incluidos y adicionales corregidos.
-- Importe bruto, descuento, subtotal neto, impuesto y total reconciliados.
-- Impuestos de compra administrables.
-- Documentos de respaldo de compras incorporados.
-- Pruebas monetarias y migraciones aditivas incluidas en CI.
+Al finalizar cada fase se ejecutará una revisión completa. No se inicia la fase siguiente mientras exista un requisito, una validación o una evidencia pendiente de la fase actual.
 
-## Fase 3 — Facturación y comunicaciones — IMPLEMENTADA; VALIDACIÓN EXTERNA PENDIENTE
+Producción no se modifica bajo ninguna circunstancia durante estas fases. Un cambio de nombre visible solo se evaluará si es puramente estético, reversible y demostrablemente ajeno a dominios, variables, conexiones y despliegues; por defecto no se realizará.
 
-- PDF único para descarga, impresión, WhatsApp y correo.
-- Identidad visual y logo con respaldo local.
-- SMTP reforzado y errores sanitizados.
-- Enlaces públicos con hash, expiración, revocación y límite de accesos.
-- PDF privado, PDF público, encabezados de seguridad y revocación cubiertos por E2E aislado.
-- Pendiente externo: Gmail real, WhatsApp real y revisión visual del PDF en Preview.
+## FASE 1 — Entornos y recursos — EN CURSO
 
-## Fase 4 — Usuarios y perfil — IMPLEMENTADA Y CERTIFICADA EN AISLAMIENTO
+### Objetivo
 
-- Edición administrativa con permisos independientes.
-- Autogestión de nombre, usuario, contraseña y fotografía.
-- Nombres de usuario únicos y contraseñas seguras.
-- Fotografías de perfil mediante Cloudinary.
-- Roles dinámicos de sistema creados incrementalmente.
-- Administrador inicial vinculado al rol dinámico.
-- Matrices administradas preservadas entre reinicios.
+Estandarizar Desarrollo usando únicamente los recursos creados y designados por Javier Mejía, sin modificar Producción.
 
-## Fase 5 — Responsividad, experiencia, colores e iconos — IMPLEMENTADA; VALIDACIÓN FÍSICA PENDIENTE
+### Recursos autorizados observados
 
-- Login, layout, menú, formularios, tablas, Dashboard, finanzas, auditoría, factura y permisos adaptados.
-- Navegación y guardas verificadas.
-- Paletas clara y oscura incluidas en auditoría automatizada representativa.
-- Contraste de diálogos, acciones destructivas, perfil e iconos reforzado.
-- Matriz automatizada de navegación, consola y desbordamiento horizontal incorporada.
-- Pendiente externo: revisión visual en teléfonos y tabletas físicos.
+- Git: rama `Desarrollo`.
+- Aiven: usuario de aplicación `varistorehn_desarrollo` dentro del servicio mostrado por el propietario.
+- Cloudinary: clave de API etiquetada `varistorehn_desarrollo`.
+- Render: entorno `Desarrollo`, servicio `variapp-api-desarrollo`.
+- Vercel: proyecto `variapp-desarrollo`, Production Branch `Desarrollo`, dominio `variapp-desarrollo.vercel.app`.
 
-## Fase 6 — Migraciones, compilación, pruebas y calidad — IMPLEMENTADA
+### Trabajo realizado en el repositorio
 
-- Migración EF Core para catálogos y eliminación lógica.
-- Modelo, Designer y snapshot alineados.
-- SQL forward revisable sin eliminación de datos.
-- Backend Release y frontend producción incluidos en CI.
-- Lint reproducible, verificación TypeScript y control de trazas temporales incorporados.
-- MySQL 8.4 descartable valida migración y conversión de Marca/Modelo legados.
+- `render.yaml` usa el prefijo Cloudinary `varistorehn_desarrollo`.
+- Las pruebas de aislamiento Cloudinary usan el identificador oficial.
+- GitHub Actions rechaza el prefijo genérico anterior `desarrollo`.
+- Se documentaron los recursos designados por el propietario y se retiraron instrucciones que pedían crear duplicados.
+- Se mantiene el proxy de Vercel separado por host.
+- Se mantienen las migraciones automáticas deshabilitadas.
+- No se modificó `main` ni ninguna configuración productiva.
 
-## Fase 7 — Colores, Tallas, Marcas y Modelos — IMPLEMENTADA
+### Riesgos identificados
 
-- Catálogos dinámicos almacenados en base de datos.
-- CRUD, búsqueda, activación, desactivación y eliminación lógica.
-- Marca relacionada de forma normalizada con Modelo.
-- Permisos y auditoría independientes.
-- Componente y servicio frontend reutilizables.
-- Productos vinculados a Marca, Modelo, Color y Talla.
-- Compras y Ventas muestran las variantes del Producto seleccionado.
-- Catálogos inactivos conservan el historial y no se ofrecen para nuevas selecciones.
+- La captura de Aiven no muestra el nombre de la base ni los privilegios del usuario; no se puede certificar todavía el aislamiento de datos.
+- La captura de Render no muestra, ni debe mostrar, valores de secretos; falta confirmar que utiliza el usuario Aiven y la clave Cloudinary autorizados.
+- Cloudinary comparte el mismo product environment; la separación depende de la clave autorizada, el prefijo y el bloqueo de eliminación.
+- El cambio de prefijo requiere un nuevo despliegue de Desarrollo antes de validar cargas reales.
+- El correo SMTP falla en Desarrollo, pero se tratará exclusivamente en la Fase 7.
 
-## Fase 8 — Productos, Categorías, sesión y Finanzas — IMPLEMENTADA
+### Evidencia pendiente para cerrar la fase
 
-- Productos muestran `Agotado` cuando la existencia es cero.
-- Dashboard usa el mismo criterio de agotado.
-- Productos permiten filtrar por Marca, Modelo, Color, Talla, Categoría, estado y existencia.
-- Categorías usan eliminación lógica real y dejan de aparecer después de eliminar y recargar.
-- La sesión se cierra únicamente por 30 minutos continuos de inactividad.
-- Actividad de mouse, teclado, clic, entrada, scroll, navegación y otras pestañas reinicia el contador.
-- El token se renueva mientras existe actividad sin perder formularios en curso.
-- Finanzas muestra costo, valor de venta, utilidad bruta, margen, utilidad potencial y utilidad neta estimada.
+1. Nombre exacto de la base Aiven de Desarrollo.
+2. Confirmación de que `varistorehn_desarrollo` solo tiene privilegios sobre esa base.
+3. Confirmación con valores ocultos de que Render Desarrollo usa:
+   - el usuario Aiven `varistorehn_desarrollo`;
+   - la base exclusiva de Desarrollo;
+   - la clave Cloudinary etiquetada `varistorehn_desarrollo`;
+   - `Cloudinary__EnvironmentPrefix=varistorehn_desarrollo`.
+4. Respuesta HTTP 200 de `/health` después del despliegue.
+5. Confirmación de que Vercel Desarrollo sigue enviando `/api` a Render Desarrollo.
+6. Confirmación de que no existe un tercer servicio, proyecto, base o usuario de aplicación permanente para Desarrollo.
+7. GitHub Actions en verde para el commit final de la fase.
 
-## Fase 9A — Aceptación integral aislada — EN CERTIFICACIÓN CONTINUA
+### Criterio de cierre
 
-El workflow `Desarrollo - aceptación funcional integral` ejecuta en MySQL 8.4 descartable:
+Fase 1 se marca completa únicamente cuando todas las evidencias anteriores están verificadas. Hasta entonces Fase 2 permanece bloqueada.
 
-- catálogos y relación Marca–Modelo;
-- filtros normalizados de Productos;
-- eliminación de Categorías;
-- sesión activa, inactiva, varias pestañas, renovación y pérdida temporal de red;
-- navegación administrativa y errores de consola;
-- responsive de pantallas principales;
-- temas claro y oscuro representativos;
-- Administrador, Vendedor y rol personalizado;
-- permisos y aislamiento por usuario;
-- perfil, venta, factura, PDF y enlace público.
+## FASE 2 — Auditoría general — BLOQUEADA POR FASE 1
 
-Un commit solo se considera certificado cuando tanto `Desarrollo - Compilación y pruebas` como `Desarrollo - aceptación funcional integral` terminan en verde.
+### Alcance
 
-## Fase 9B — Validación externa de Desarrollo — PENDIENTE
+Revisar de extremo a extremo:
 
-- Crear Aiven Desarrollo independiente.
-- Configurar Cloudinary Desarrollo.
-- Crear Render Desarrollo con secretos no productivos.
-- Aplicar migraciones únicamente en Aiven Desarrollo.
-- Crear Vercel Desarrollo.
-- Validar Gmail SMTP real.
-- Validar WhatsApp desde teléfono real.
-- Validar Cloudinary real para productos, perfil y comprobantes.
-- Revisar visualmente PDF, teléfono, tablet y escritorio.
-- Confirmar `__EFMigrationsHistory`, conteos y conservación de datos.
+- configuraciones;
+- servicios y despliegues;
+- variables y secretos;
+- conexiones e integraciones;
+- bases de datos y almacenamiento;
+- autenticación y APIs;
+- colas y tareas programadas;
+- permisos y certificados;
+- dominios, DNS y CORS;
+- logs, alertas y observabilidad.
 
-El procedimiento y responsables están en:
+### Criterio
 
-- `docs/ENTORNOS_DESARROLLO_PRODUCCION.md`
-- `docs/RESPONSABILIDADES_CIERRE_DESARROLLO.md`
-- `docs/CLOUDINARY_AISLAMIENTO.md`
+Producción y Desarrollo deben ser consistentes en arquitectura, pero completamente independientes en datos, credenciales y recursos.
 
-## Fase 10 — Preparación productiva — BLOQUEADA
+## FASE 3 — Corrección de interfaz — BLOQUEADA
 
-No comienza hasta completar Fase 9B.
+### Alcance
 
-- revisar respaldo productivo verificable;
-- aprobar SQL forward y estrategia única de migración;
-- definir ventana, responsables y rollback;
-- obtener autorización expresa de Javier Mejía;
-- fusionar y desplegar únicamente bajo ese plan.
+Corregir todos los textos cortados, superpuestos, fuera del contenedor o desalineados. Prioridades observadas en la evidencia:
 
-## Regla de datos
+- formulario administrativo de usuario;
+- perfil del usuario;
+- formulario de Producto;
+- lista y tabla de Productos;
+- cabecera, rol y acciones;
+- ayudas y errores de formularios.
 
-No se eliminarán registros ni activos productivos. El PR permanecerá en borrador y ninguna migración se aplicará en Aiven productivo hasta completar las validaciones externas y recibir autorización expresa del propietario.
+### Criterio
+
+Ningún texto puede montarse, cortarse o desbordarse en los viewports certificados.
+
+## FASE 4 — Responsive — BLOQUEADA
+
+### Alcance
+
+Certificar todo el sistema en:
+
+- teléfonos pequeños y grandes;
+- tablets;
+- laptops;
+- Full HD;
+- 2K;
+- 4K.
+
+Se revisarán tipografía fluida, grids, tablas, paneles, diálogos, navegación, formularios, acciones y áreas táctiles.
+
+## FASE 5 — Imágenes — BLOQUEADA
+
+### Alcance
+
+Mostrar la imagen correspondiente cuando exista, especialmente en:
+
+- lista y detalle de Productos;
+- Compras;
+- Ventas;
+- detalles e historial.
+
+Se utilizará imagen principal, fallback accesible y carga eficiente.
+
+## FASE 6 — Facturación e impresión — BLOQUEADA
+
+### Alcance mínimo
+
+Certificar PDF, impresión convencional y térmica para:
+
+- Carta;
+- Legal;
+- Oficio;
+- A4;
+- A5;
+- POS 58 mm;
+- POS 80 mm;
+- impresoras móviles, handheld, industriales y convencionales.
+
+La factura ajustará tipografía, márgenes, logo, tablas, códigos, datos fiscales y totales sin pérdida de información.
+
+No se prometerá adaptación automática a un medio que el navegador no pueda detectar. Se implementarán perfiles de impresión explícitos y CSS/PDF determinista por formato.
+
+## FASE 7 — Envío de correo — BLOQUEADA
+
+### Problema confirmado
+
+La evidencia muestra intentos reales con resultado `Error` y el mensaje `No se pudo enviar el correo`.
+
+### Alcance
+
+Revisar:
+
+- SMTP y variables de Render Desarrollo;
+- autenticación, TLS y certificados;
+- remitente y credenciales;
+- timeout, logs y errores sanitizados;
+- plantillas y adjunto PDF;
+- reintentos seguros e idempotencia;
+- historial y observabilidad.
+
+La fase solo se cerrará con entrega real a una cuenta externa y verificación de bandeja de entrada y spam.
+
+## FASE 8 — Validación completa — BLOQUEADA
+
+Se repetirá la auditoría de:
+
+- interfaz;
+- responsive;
+- impresión;
+- imágenes;
+- correo;
+- configuración;
+- rendimiento;
+- consola, logs y advertencias;
+- seguridad y accesibilidad.
+
+No debe quedar ningún defecto crítico o alto conocido.
+
+## FASE 9 — Informe final — BLOQUEADA
+
+El informe final contendrá:
+
+1. cambios realizados;
+2. problemas encontrados y solución aplicada;
+3. riesgos identificados;
+4. mejoras recomendadas no implementadas sin autorización.
+
+## Regla de publicación
+
+Completar estas fases no autoriza automáticamente el merge ni el despliegue productivo. Antes de cualquier operación sobre Producción se exige:
+
+- respaldo verificable;
+- estrategia de migración única;
+- ventana de mantenimiento;
+- responsables;
+- procedimiento de rollback;
+- autorización expresa de Javier Mejía.
