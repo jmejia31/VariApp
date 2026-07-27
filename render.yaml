@@ -71,7 +71,7 @@ services:
       - key: Smtp__NombreRemitente
         value: VariStorehn Desarrollo
       - key: Smtp__TimeoutSeconds
-        value: "30"
+        value: "60"
       - key: Smtp__MaxAttempts
         value: "3"
       - key: Smtp__RetryBaseDelayMilliseconds
