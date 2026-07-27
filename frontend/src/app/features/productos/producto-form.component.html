@@ -31,7 +31,13 @@
       <div class="gallery-grid">
         @for (img of imagenes(); track img.url; let i = $index) {
           <div class="gallery-item" [class.principal]="img.esPrincipal">
-            <img [src]="img.url" [alt]="img.esPrincipal ? 'Foto principal del producto' : 'Foto adicional del producto'">
+            <app-producto-imagen
+              variant="gallery"
+              [src]="img.url"
+              [alt]="(img.esPrincipal ? 'Foto principal' : 'Foto adicional ' + (i + 1)) + ' de ' + (form.controls.nombre.value || 'producto')"
+              [fallbackLabel]="'No se pudo mostrar la fotografía ' + (i + 1)"
+              loading="lazy">
+            </app-producto-imagen>
             @if (img.esPrincipal) {
               <span class="badge-principal">Principal</span>
             }
@@ -69,48 +75,33 @@
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>Nombre</mat-label>
           <input matInput formControlName="nombre" autocomplete="off">
-          @if (form.controls.nombre.hasError('required')) {
-            <mat-error>El nombre es obligatorio.</mat-error>
-          }
+          @if (form.controls.nombre.hasError('required')) { <mat-error>El nombre es obligatorio.</mat-error> }
         </mat-form-field>
 
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>Marca</mat-label>
           <mat-select formControlName="marcaId">
-            @for (marca of marcas(); track marca.id) {
-              <mat-option [value]="marca.id">{{ marca.nombre }}</mat-option>
-            }
+            @for (marca of marcas(); track marca.id) { <mat-option [value]="marca.id">{{ marca.nombre }}</mat-option> }
           </mat-select>
           <mat-hint>Se administra desde el mantenimiento de Marcas.</mat-hint>
-          @if (form.controls.marcaId.hasError('required')) {
-            <mat-error>Selecciona una marca.</mat-error>
-          }
+          @if (form.controls.marcaId.hasError('required')) { <mat-error>Selecciona una marca.</mat-error> }
         </mat-form-field>
 
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>Modelo</mat-label>
           <mat-select formControlName="modeloId" [disabled]="!form.controls.marcaId.value || cargandoModelos()">
-            @for (modelo of modelos(); track modelo.id) {
-              <mat-option [value]="modelo.id">{{ modelo.nombre }}</mat-option>
-            }
+            @for (modelo of modelos(); track modelo.id) { <mat-option [value]="modelo.id">{{ modelo.nombre }}</mat-option> }
           </mat-select>
-          @if (!form.controls.marcaId.value) {
-            <mat-hint>Selecciona primero una marca.</mat-hint>
-          } @else if (cargandoModelos()) {
-            <mat-hint>Cargando modelos disponibles...</mat-hint>
-          }
-          @if (form.controls.modeloId.hasError('required')) {
-            <mat-error>Selecciona un modelo.</mat-error>
-          }
+          @if (!form.controls.marcaId.value) { <mat-hint>Selecciona primero una marca.</mat-hint> }
+          @else if (cargandoModelos()) { <mat-hint>Cargando modelos disponibles...</mat-hint> }
+          @if (form.controls.modeloId.hasError('required')) { <mat-error>Selecciona un modelo.</mat-error> }
         </mat-form-field>
 
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>Categoría (opcional)</mat-label>
           <mat-select formControlName="categoriaId">
             <mat-option [value]="null">Sin categoría</mat-option>
-            @for (c of categorias(); track c.id) {
-              <mat-option [value]="c.id">{{ c.nombre }}</mat-option>
-            }
+            @for (c of categorias(); track c.id) { <mat-option [value]="c.id">{{ c.nombre }}</mat-option> }
           </mat-select>
         </mat-form-field>
 
@@ -119,10 +110,7 @@
           <mat-select formControlName="colorId">
             <mat-option [value]="null">Sin color</mat-option>
             @for (color of colores(); track color.id) {
-              <mat-option [value]="color.id">
-                <span class="select-swatch" [style.background]="color.codigoVisual || '#64748B'"></span>
-                {{ color.nombre }}
-              </mat-option>
+              <mat-option [value]="color.id"><span class="select-swatch" [style.background]="color.codigoVisual || '#64748B'"></span>{{ color.nombre }}</mat-option>
             }
           </mat-select>
         </mat-form-field>
@@ -131,9 +119,7 @@
           <mat-label>Talla o tamaño (opcional)</mat-label>
           <mat-select formControlName="tallaId">
             <mat-option [value]="null">Sin talla</mat-option>
-            @for (talla of tallas(); track talla.id) {
-              <mat-option [value]="talla.id">{{ talla.nombre }}</mat-option>
-            }
+            @for (talla of tallas(); track talla.id) { <mat-option [value]="talla.id">{{ talla.nombre }}</mat-option> }
           </mat-select>
         </mat-form-field>
 
@@ -169,20 +155,13 @@
       </div>
     </section>
 
-    @if (errorMessage()) {
-      <p class="message error" role="alert">{{ errorMessage() }}</p>
-    }
+    @if (errorMessage()) { <p class="message error" role="alert">{{ errorMessage() }}</p> }
 
     <div class="form-actions">
       <a routerLink="/productos" mat-button type="button">Cancelar</a>
       <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving()">
-        @if (saving()) {
-          <mat-spinner diameter="20"></mat-spinner>
-          <span>Guardando...</span>
-        } @else {
-          <mat-icon>save</mat-icon>
-          <span>Guardar producto</span>
-        }
+        @if (saving()) { <mat-spinner diameter="20"></mat-spinner><span>Guardando...</span> }
+        @else { <mat-icon>save</mat-icon><span>Guardar producto</span> }
       </button>
     </div>
   </form>
