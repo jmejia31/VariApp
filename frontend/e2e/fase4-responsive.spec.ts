@@ -187,6 +187,7 @@ async function assertNavigationMode(page: Page, kind: 'mobile' | 'desktop'): Pro
     await menuToggle.click();
     await expect(sidebar).toHaveClass(/abierto/);
     await expect(page.locator('.overlay')).toBeVisible();
+    await expect.poll(async () => (await sidebar.boundingBox())?.x ?? -999).toBeGreaterThanOrEqual(-1);
 
     const sidebarGeometry = await sidebar.evaluate((element) => {
       const rect = element.getBoundingClientRect();
@@ -235,7 +236,7 @@ async function certifyRoute(
 }
 
 test.describe('Fase 4 - matriz responsive exhaustiva', () => {
-  test.describe.configure({ mode: 'serial', retries: 0 });
+  test.describe.configure({ retries: 0 });
 
   for (const viewport of viewports) {
     test(`${viewport.name} ${viewport.width}x${viewport.height} mantiene todos los módulos utilizables`, async ({ page }) => {
