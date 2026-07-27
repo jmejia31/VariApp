@@ -227,7 +227,13 @@ Commit funcional certificado:
 14bf32069f9d87f731e59f230b9e9f5f16ade14e
 ```
 
-Ejecuciones:
+Commit documental de cierre:
+
+```text
+693559785c05172a1d354e51866445c420603366
+```
+
+Ejecuciones sobre el commit funcional:
 
 - `Desarrollo - Compilación y pruebas`, run `30295557180`: **success**.
 - `Desarrollo - aceptación funcional integral`, run `30295557155`: **success**.
