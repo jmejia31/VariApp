@@ -131,20 +131,20 @@ async function installFixtures(page: Page): Promise<void> {
   }));
   await page.route(brokenImage, (route) => route.abort('failed'));
 
-  await page.route(/\/(?:api\/)?productos(?:\?.*)?$/, (route) => json(route, {
+  await page.route(/^https?:\/\/(?:localhost|127\.0\.0\.1):5005\/(?:api\/)?productos(?:\?.*)?$/, (route) => json(route, {
     items: [product, productWithoutImage],
     totalCount: 2,
     page: 1,
     pageSize: 200,
     totalPages: 1
   }));
-  await page.route(/\/(?:api\/)?productos\/501$/, (route) => json(route, product));
+  await page.route(/^https?:\/\/(?:localhost|127\.0\.0\.1):5005\/(?:api\/)?productos\/501$/, (route) => json(route, product));
 
-  await page.route(/\/(?:api\/)?compras(?:\?.*)?$/, (route) => {
+  await page.route(/^https?:\/\/(?:localhost|127\.0\.0\.1):5005\/(?:api\/)?compras(?:\?.*)?$/, (route) => {
     if (route.request().method() === 'POST') return json(route, purchase);
     return json(route, { items: [purchase], totalCount: 1, page: 1, pageSize: 10, totalPages: 1 });
   });
-  await page.route(/\/(?:api\/)?compras\/calcular$/, (route) => json(route, {
+  await page.route(/^https?:\/\/(?:localhost|127\.0\.0\.1):5005\/(?:api\/)?compras\/calcular$/, (route) => json(route, {
     importeBruto: 100,
     subtotal: 100,
     subtotalNeto: 100,
@@ -153,14 +153,14 @@ async function installFixtures(page: Page): Promise<void> {
     impuestoAdicional: 0,
     total: 100
   }));
-  await page.route(/\/(?:api\/)?compras\/601$/, (route) => json(route, purchase));
-  await page.route(/\/(?:api\/)?compras\/601\/documentos$/, (route) => json(route, []));
+  await page.route(/^https?:\/\/(?:localhost|127\.0\.0\.1):5005\/(?:api\/)?compras\/601$/, (route) => json(route, purchase));
+  await page.route(/^https?:\/\/(?:localhost|127\.0\.0\.1):5005\/(?:api\/)?compras\/601\/documentos$/, (route) => json(route, []));
 
-  await page.route(/\/(?:api\/)?ventas(?:\?.*)?$/, (route) => {
+  await page.route(/^https?:\/\/(?:localhost|127\.0\.0\.1):5005\/(?:api\/)?ventas(?:\?.*)?$/, (route) => {
     if (route.request().method() === 'POST') return json(route, sale);
     return json(route, { items: [sale], totalCount: 1, page: 1, pageSize: 10, totalPages: 1 });
   });
-  await page.route(/\/(?:api\/)?ventas\/calcular$/, (route) => json(route, {
+  await page.route(/^https?:\/\/(?:localhost|127\.0\.0\.1):5005\/(?:api\/)?ventas\/calcular$/, (route) => json(route, {
     importeBruto: 180,
     subtotal: 180,
     subtotalNeto: 180,
@@ -170,9 +170,9 @@ async function installFixtures(page: Page): Promise<void> {
     totalImpuesto: 0,
     total: 180
   }));
-  await page.route(/\/(?:api\/)?ventas\/701$/, (route) => json(route, sale));
+  await page.route(/^https?:\/\/(?:localhost|127\.0\.0\.1):5005\/(?:api\/)?ventas\/701$/, (route) => json(route, sale));
 
-  await page.route(/\/(?:api\/)?inventario\/movimientos(?:\?.*)?$/, (route) => json(route, [{
+  await page.route(/^https?:\/\/(?:localhost|127\.0\.0\.1):5005\/(?:api\/)?inventario\/movimientos(?:\?.*)?$/, (route) => json(route, [{
     id: 801,
     productoId: product.id,
     productoNombre: product.nombre,
