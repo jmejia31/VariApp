@@ -10,6 +10,7 @@ import {
   FacturaFormatoCodigo,
   FacturaFormatoPdf,
   HistorialEnvio,
+  ResultadoDiagnosticoSmtp,
   ResultadoEnvioCorreo
 } from '../core/models/factura.model';
 
@@ -37,6 +38,10 @@ export class FacturaService {
 
   getEstadoCorreo(): Observable<ApiResponse<EstadoConfiguracionSmtp>> {
     return this.http.get<ApiResponse<EstadoConfiguracionSmtp>>(`${this.apiUrl}/correo/estado`);
+  }
+
+  probarConexionCorreo(): Observable<ApiResponse<ResultadoDiagnosticoSmtp>> {
+    return this.http.post<ApiResponse<ResultadoDiagnosticoSmtp>>(`${this.apiUrl}/correo/probar`, {});
   }
 
   /**
