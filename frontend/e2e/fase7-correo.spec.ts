@@ -84,7 +84,7 @@ async function expectNoOverflow(page: Page): Promise<void> {
 test.describe('Fase 7 - correo SMTP aislado', () => {
   test.describe.configure({ mode: 'serial', retries: 0 });
 
-  test('envía el PDF A4, reintenta un fallo temporal y evita duplicados', async ({ request, page }) => {
+  test('diagnostica SMTP, envía PDF A4, reintenta y evita duplicados', async ({ request, page }) => {
     const token = await loginApi(request);
 
     const statusResponse = await request.get(`${API_URL}/facturas/correo/estado`, {
@@ -95,9 +95,20 @@ test.describe('Fase 7 - correo SMTP aislado', () => {
     expect(smtpStatus.configurado).toBe(true);
     expect(smtpStatus.puerto).toBe(1025);
     expect(smtpStatus.usaTls).toBe(false);
+    expect(smtpStatus.modoSeguridad).toBe('Sin TLS');
     expect(smtpStatus.requiereAutenticacion).toBe(true);
     expect(smtpStatus.maximoIntentos).toBe(3);
     expect(String(smtpStatus.remitenteEnmascarado)).not.toContain('smtp-pass');
+
+    const diagnosticResponse = await request.post(`${API_URL}/facturas/correo/probar`, {
+      headers: authHeaders(token)
+    });
+    expect(diagnosticResponse.status(), await diagnosticResponse.text()).toBe(200);
+    const diagnostic = await dataOf(diagnosticResponse);
+    expect(diagnostic.exito).toBe(true);
+    expect(diagnostic.codigo).toBe('SMTP_OK');
+    expect(diagnostic.autenticado).toBe(true);
+    expect(diagnostic.modoSeguridad).toBe('Sin TLS');
 
     const invoice = await createInvoice(request, token);
     const idempotencyKey = `fase7-${suffix}`;
@@ -145,11 +156,14 @@ test.describe('Fase 7 - correo SMTP aislado', () => {
     await loginUi(page);
     await page.goto(`/facturas/${invoice.id}`);
     await page.getByRole('button', { name: 'Enviar por correo' }).click();
-    const correoInput = page.locator('.panel-correo input');
-    await expect(page.locator('.panel-correo')).toBeVisible();
+    const panel = page.locator('.panel-correo');
+    const correoInput = panel.locator('input');
+    await expect(panel).toBeVisible();
+    await expect(panel.getByText('SMTP verificado')).toBeVisible({ timeout: 15_000 });
+    await expect(panel.getByText(/Conexión, TLS y autenticación SMTP comprobados correctamente/)).toBeVisible();
     await correoInput.fill('fase7@example.com');
     await expect(correoInput).toHaveValue('fase7@example.com');
-    await expect(page.locator('.panel-correo').getByRole('button', { name: 'Enviar' })).toBeEnabled();
+    await expect(panel.getByRole('button', { name: 'Enviar' })).toBeEnabled();
     await expectNoOverflow(page);
     await page.screenshot({ path: 'test-results/fase7/correo-panel-mobile.png', fullPage: true });
   });
