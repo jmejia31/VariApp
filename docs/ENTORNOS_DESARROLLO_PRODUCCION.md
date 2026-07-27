@@ -1,65 +1,66 @@
-# VariApp — Separación segura de Desarrollo y Producción
+# VariApp — separación segura de Desarrollo y Producción
 
 ## 1. Regla principal
 
-| Elemento | Producción | Desarrollo |
+El identificador oficial y obligatorio del entorno de Desarrollo es:
+
+```text
+varistorehn_desarrollo
+```
+
+Los nombres públicos ya creados por el propietario se conservan porque cambiarlos podría alterar dominios, despliegues o integraciones. El identificador oficial se aplica a usuarios, claves, prefijos y documentación interna.
+
+| Elemento | Producción | Desarrollo autorizado |
 |---|---|---|
 | Rama Git | `main` | `Desarrollo` |
 | Pull Request | No se trabaja directamente | PR borrador `Desarrollo -> main` |
-| Vercel | `varistorehn.vercel.app` | `variapp-desarrollo.vercel.app` |
-| Render | `variapp-api.onrender.com` | `variapp-api-desarrollo.onrender.com` |
-| Aiven MySQL | Servicio y base productivos actuales | Servicio independiente o fork de desarrollo |
-| Cloudinary | Credenciales y activos productivos | Product environment/cuenta separada o prefijo `desarrollo/` |
+| Vercel | proyecto `varistorehn`, dominio `varistorehn.vercel.app` | proyecto `variapp-desarrollo`, dominio `variapp-desarrollo.vercel.app` |
+| Render | servicio `variapp-api` | servicio `variapp-api-desarrollo` |
+| Aiven MySQL | usuario y base productivos actuales | usuario de aplicación `varistorehn_desarrollo` y base exclusiva de Desarrollo pendiente de certificar por nombre |
+| Cloudinary | clave y activos productivos | clave etiquetada `varistorehn_desarrollo` y prefijo `varistorehn_desarrollo/` |
 
-`main`, Render productivo, Aiven productivo y Cloudinary productivo no se modifican hasta completar todas las validaciones en Desarrollo y recibir autorización expresa de Javier Mejía.
+`main`, Render productivo, Aiven productivo, Vercel productivo y los activos productivos de Cloudinary no se modifican durante este trabajo.
 
-## 2. Protecciones ya implementadas en el repositorio
+## 2. Evidencia recibida del propietario
 
-- La rama oficial de trabajo es `Desarrollo`.
+Las capturas entregadas el 27 de julio de 2026 muestran:
+
+- Aiven MySQL en ejecución con el usuario `varistorehn_desarrollo` creado junto al usuario administrativo predeterminado;
+- una clave de Cloudinary etiquetada `varistorehn_desarrollo`, activa y con el secreto oculto;
+- un entorno Render `Desarrollo` con el servicio `variapp-api-desarrollo` desplegado, separado del servicio `variapp-api` de Producción;
+- dos proyectos Vercel visibles: `varistorehn` y `variapp-desarrollo`;
+- el proyecto `variapp-desarrollo` siguiendo la rama `Desarrollo` y sirviendo `variapp-desarrollo.vercel.app`;
+- la aplicación de Desarrollo operativa a través de Vercel y Render.
+
+La evidencia no muestra el nombre de la base de datos Aiven ni los valores de las variables de Render. Por seguridad, esos valores no deben compartirse; solo se requiere una confirmación o captura con valores ocultos.
+
+## 3. Protecciones implementadas en el repositorio
+
+- `Desarrollo` es la única rama de implementación.
 - El PR hacia `main` permanece en borrador.
-- El CI compila backend, ejecuta pruebas, compila frontend y revisa temporales.
-- `backend/Dockerfile` permite construir la API de forma reproducible en Render.
-- `render.yaml` define únicamente el servicio de desarrollo `variapp-api-desarrollo`.
-- `frontend/vercel.json` dirige:
-  - el host productivo `varistorehn.vercel.app` a `variapp-api.onrender.com`;
-  - cualquier Preview u otro host a `variapp-api-desarrollo.onrender.com`.
-- Las migraciones están deshabilitadas por defecto con `Database__ApplyMigrationsOnStartup=false`.
-- Cloudinary admite `Cloudinary__EnvironmentPrefix`:
-  - producción: vacío, conserva las rutas actuales;
-  - desarrollo: `desarrollo`, crea activos bajo `desarrollo/...`.
-- Los secretos no están versionados.
+- `render.yaml` define únicamente `variapp-api-desarrollo` sobre la rama `Desarrollo`.
+- `frontend/vercel.json` dirige el host productivo al backend productivo y cualquier otro host al backend de Desarrollo.
+- Las migraciones automáticas permanecen deshabilitadas con `Database__ApplyMigrationsOnStartup=false`.
+- Los secretos se declaran como externos y no están versionados.
+- Cloudinary usa `Cloudinary__EnvironmentPrefix=varistorehn_desarrollo`.
+- Desarrollo no puede eliminar un `PublicId` de Cloudinary que no comience con `varistorehn_desarrollo/`.
+- GitHub Actions valida los nombres, dominios, rama, prefijo y configuración no destructiva.
 
-## 3. Render
+## 4. Render
 
-### Producción — conservar sin cambios
+### Producción — no tocar
 
-Servicio actual:
+- Servicio: `variapp-api`.
+- Rama esperada: `main`.
+- No cambiar variables, credenciales, región, dominio, conexión, despliegue ni migraciones.
 
-```text
-variapp-api.onrender.com
-```
+### Desarrollo — recurso autorizado existente
 
-Debe continuar vinculado a `main`. No debe cambiar de rama, base de datos, secretos ni estrategia de migración durante las pruebas de Desarrollo.
-
-### Desarrollo — pendiente de crear en la cuenta
-
-El archivo `render.yaml` está preparado para crear:
-
-```text
-variapp-api-desarrollo.onrender.com
-```
-
-Pasos en Render:
-
-1. Crear un Blueprint desde el repositorio `jmejia31/VariApp`.
-2. Seleccionar el archivo `render.yaml` de la rama `Desarrollo`.
-3. Confirmar que el servicio se llame `variapp-api-desarrollo` y use la rama `Desarrollo`.
-4. Completar únicamente los secretos marcados como `sync: false`.
-5. Usar exclusivamente la conexión de Aiven Desarrollo.
-6. Mantener `Database__ApplyMigrationsOnStartup=false` en el primer despliegue.
-7. Confirmar que `/health` responde `200`.
-8. Aplicar las migraciones una sola vez contra la base de Desarrollo.
-9. Volver a confirmar que las migraciones automáticas queden deshabilitadas.
+- Entorno visible: `Desarrollo`.
+- Servicio: `variapp-api-desarrollo`.
+- Rama: `Desarrollo`.
+- Runtime: Docker.
+- Dominio esperado: `variapp-api-desarrollo.onrender.com`.
 
 Variables obligatorias de Desarrollo:
 
@@ -68,6 +69,7 @@ ConnectionStrings__DefaultConnection
 Cloudinary__CloudName
 Cloudinary__ApiKey
 Cloudinary__ApiSecret
+Cloudinary__EnvironmentPrefix=varistorehn_desarrollo
 Smtp__Host
 Smtp__UsuarioSmtp
 Smtp__PasswordSmtp
@@ -76,141 +78,113 @@ SeedAdmin__Username
 SeedAdmin__Password
 ```
 
-No copiar la cadena de conexión productiva en el servicio de Desarrollo.
+Comprobaciones pendientes para cerrar la fase:
 
-## 4. Aiven MySQL
+1. Confirmar, sin mostrar la contraseña, que la conexión usa el usuario `varistorehn_desarrollo`.
+2. Confirmar que la conexión apunta a una base exclusiva de Desarrollo y no a la base productiva.
+3. Confirmar que las credenciales Cloudinary corresponden a la clave etiquetada `varistorehn_desarrollo`.
+4. Aplicar el nuevo prefijo `varistorehn_desarrollo` mediante el despliegue normal después de checks verdes.
+5. Mantener `Database__ApplyMigrationsOnStartup=false`.
+6. Confirmar `/health` con HTTP 200.
 
-### Opción recomendada
+## 5. Aiven MySQL
 
-Crear un fork independiente del servicio productivo desde un respaldo reciente. El fork es independiente y permite probar migraciones sin cargar ni modificar el servicio original.
+### Recurso autorizado
 
-Nombre sugerido:
+La captura muestra el servicio `variapp-mysql` y el usuario de aplicación `varistorehn_desarrollo`. No debe crearse otro usuario o servicio de Desarrollo si ese es el recurso que el propietario designó.
 
-```text
-variapp-mysql-desarrollo
-```
+El usuario `avnadmin` es el usuario administrativo predeterminado de Aiven; no es un tercer entorno y no debe eliminarse. La aplicación de Desarrollo no debe conectarse como `avnadmin`.
 
-Configuración mínima:
+Validaciones obligatorias:
 
-1. Crear el fork o un servicio MySQL independiente.
-2. Crear una base llamada `inventoryapp_desarrollo`.
-3. Crear un usuario exclusivo, por ejemplo `variapp_desarrollo`.
-4. No utilizar `avnadmin` en la aplicación salvo durante una operación administrativa controlada.
-5. Configurar reglas de acceso únicamente para los orígenes necesarios.
-6. Guardar la cadena de conexión solo en Render Desarrollo.
-7. Verificar que exista al menos un respaldo antes de probar migraciones.
-8. Aplicar todas las migraciones en orden.
-9. Verificar `__EFMigrationsHistory`.
-10. Ejecutar pruebas funcionales y comparar conteos críticos.
+1. Confirmar el nombre exacto de la base exclusiva de Desarrollo.
+2. Confirmar que `varistorehn_desarrollo` solo tiene privilegios sobre esa base.
+3. Confirmar que Render Desarrollo usa ese usuario y esa base.
+4. Confirmar un respaldo reciente antes de aplicar migraciones.
+5. Verificar que Producción utiliza otro usuario o, como mínimo, otra base sin privilegios cruzados.
+6. Si la base contiene información copiada de Producción, limitar accesos y anonimizar datos personales antes de demostraciones.
 
-Si el fork contiene información real, limitar su acceso y anonimizar datos personales antes de compartirlo con colaboradores o usarlo para demostraciones.
+No se debe eliminar el servicio `variapp-mysql` ni crear un duplicado hasta confirmar si aloja de forma controlada ambas bases. La independencia mínima exigida es: base separada, usuario separado y ausencia de privilegios cruzados. Un servicio Aiven separado sería una defensa adicional, no una razón para descartar el recurso creado por el propietario.
 
-## 5. Cloudinary
+## 6. Cloudinary
 
-### Alternativa más segura
+### Recurso autorizado
 
-Usar un product environment independiente para Desarrollo. En planes que no permiten varios product environments, utilizar una segunda cuenta gratuita exclusivamente para Desarrollo.
+- Clave etiquetada: `varistorehn_desarrollo`.
+- Prefijo obligatorio: `varistorehn_desarrollo/`.
 
-### Alternativa temporal ya soportada por el código
+Las claves `Raíz`, `moderación` y las creadas por flujos internos no deben eliminarse automáticamente: son claves, no entornos, y podrían ser dependencias administradas por Cloudinary. Solo se eliminarán claves duplicadas después de identificar su consumidor y confirmar que no pertenecen a una función de la plataforma.
 
-Usar las mismas credenciales con:
-
-```text
-Cloudinary__EnvironmentPrefix=desarrollo
-```
-
-Esto almacena las nuevas cargas de Desarrollo en carpetas separadas, por ejemplo:
+Nuevas cargas de Desarrollo:
 
 ```text
-desarrollo/inventoryapp/productos
-desarrollo/inventoryapp/compras
-desarrollo/variapp/perfiles
+varistorehn_desarrollo/inventoryapp/productos
+varistorehn_desarrollo/inventoryapp/compras
+varistorehn_desarrollo/variapp/perfiles
 ```
 
-Producción debe mantener el prefijo vacío para conservar sus URLs y public IDs actuales.
+Producción mantiene el prefijo vacío para conservar sus rutas actuales.
+
+Validación externa:
+
+1. Confirmar que Render usa la clave etiquetada `varistorehn_desarrollo`.
+2. Subir, reemplazar, descargar y eliminar una imagen de producto.
+3. Subir y eliminar una fotografía de perfil.
+4. Subir comprobantes JPG, PNG, WebP y PDF.
+5. Confirmar que todos los `public_id` nuevos comienzan con `varistorehn_desarrollo/`.
+6. Intentar eliminar una referencia histórica sin ese prefijo y confirmar el bloqueo.
+
+## 7. Vercel
+
+### Producción — no tocar
+
+- Proyecto: `varistorehn`.
+- Rama esperada: `main`.
+- Dominio: `varistorehn.vercel.app`.
+
+### Desarrollo — recurso autorizado existente
+
+- Proyecto: `variapp-desarrollo`.
+- Production Branch: `Desarrollo`.
+- Dominio: `variapp-desarrollo.vercel.app`.
+- Root Directory esperada: `frontend`.
+
+`frontend/vercel.json` conserva el enrutamiento:
+
+- `varistorehn.vercel.app/api/*` -> `variapp-api.onrender.com`;
+- cualquier otro host `/api/*` -> `variapp-api-desarrollo.onrender.com`.
 
 Validaciones pendientes:
 
-- cargar, reemplazar, descargar y eliminar una imagen de producto;
-- cargar y eliminar una fotografía de perfil;
-- cargar comprobantes JPG, PNG, WebP y PDF;
-- confirmar que Desarrollo no elimina activos productivos;
-- revisar activos huérfanos y duplicados;
-- confirmar límites de almacenamiento, transformación y ancho de banda.
+1. Confirmar Root Directory `frontend`.
+2. Confirmar que no existe un tercer proyecto de VariApp/VariStorehn.
+3. Abrir `/login` y comprobar una solicitud `/api`.
+4. No promover un deployment de `Desarrollo` al proyecto productivo.
 
-## 6. Vercel
+## 8. Qué se considera un entorno duplicado
 
-### Proyecto productivo
+Se considera duplicado un servicio, proyecto, base, usuario de aplicación o conjunto de credenciales creado para cumplir la misma función de Desarrollo y que no haya sido designado por el propietario.
 
-- Proyecto actual: VariStorehn/VariApp productivo.
-- Production Branch: `main`.
-- Dominio: `varistorehn.vercel.app`.
-- No cambiar el dominio ni la rama productiva.
+No se considera automáticamente duplicado:
 
-### Proyecto de desarrollo
+- `avnadmin`, porque es un usuario administrativo predeterminado de Aiven;
+- claves internas de Cloudinary asociadas a moderación o flujos de medios;
+- despliegues Preview históricos de Vercel, siempre que no sean proyectos o entornos permanentes activos;
+- ejecuciones anteriores de Render que pertenezcan al mismo servicio autorizado.
 
-Crear un segundo proyecto con estos valores:
+Antes de eliminar cualquier recurso se debe identificar su consumidor, exportar la configuración necesaria y verificar que no afecta Producción.
 
-```text
-Nombre: variapp-desarrollo
-Repositorio: jmejia31/VariApp
-Root Directory: frontend
-Production Branch: Desarrollo
-Dominio sugerido: variapp-desarrollo.vercel.app
-```
+## 9. Criterio de cierre de la Fase 1
 
-El `vercel.json` ya garantiza que el dominio productivo utilice el backend productivo y que los demás hosts utilicen el backend de Desarrollo.
+La Fase 1 solo queda completa cuando:
 
-Después de crear el proyecto:
+- GitHub Actions aprueba la configuración con `varistorehn_desarrollo`;
+- Render Desarrollo usa el usuario Aiven y la clave Cloudinary autorizados;
+- la base de Desarrollo está identificada y aislada;
+- los privilegios de Aiven no cruzan hacia Producción;
+- `/health` responde 200;
+- Vercel Desarrollo apunta al backend de Desarrollo;
+- no existe ningún tercer entorno permanente confirmado;
+- ningún recurso productivo fue modificado.
 
-1. Confirmar build de Angular.
-2. Abrir `/login`.
-3. Confirmar que `/api` responde desde `variapp-api-desarrollo.onrender.com`.
-4. Confirmar que el frontend productivo sigue respondiendo desde `variapp-api.onrender.com`.
-5. No promover un deployment de `Desarrollo` al proyecto productivo.
-
-Si se agrega un dominio productivo nuevo, debe añadirse como condición productiva en `frontend/vercel.json` antes de utilizarlo.
-
-## 7. Orden correcto de activación
-
-1. Crear Aiven Desarrollo.
-2. Crear credenciales o separación de Cloudinary Desarrollo.
-3. Crear Render Desarrollo y cargar secretos.
-4. Aplicar migraciones únicamente en Aiven Desarrollo.
-5. Crear Vercel Desarrollo.
-6. Ejecutar pruebas automáticas y manuales.
-7. Corregir defectos en `Desarrollo`.
-8. Repetir pruebas hasta obtener aprobación completa.
-9. Revisar el script de migración productiva y respaldo.
-10. Solo con autorización expresa, planificar el merge y despliegue productivo.
-
-## 8. Validación obligatoria antes de producción
-
-- Administrador, Vendedor y rol personalizado.
-- Aislamiento de ventas, facturas, finanzas y movimientos por usuario.
-- CRUD y eliminación lógica.
-- Productos, categorías, clientes y proveedores.
-- Compras y comprobantes.
-- Ventas, impuestos, descuentos y cálculos.
-- PDF visual, descarga e impresión.
-- WhatsApp desde teléfono físico.
-- Entrega real por Gmail/SMTP.
-- Cloudinary real.
-- Teléfono, tablet y escritorio.
-- Auditoría y ausencia de secretos/tokens completos.
-- Migración, conteos y `__EFMigrationsHistory`.
-
-## 9. Responsabilidad compartida
-
-ChatGPT, Codex, Antigravity y Javier deben trabajar desde `Desarrollo`, actualizar GitHub después de cada commit intencional y documentar resultados en el PR o en el issue de coordinación.
-
-Ningún agente puede:
-
-- hacer merge a `main`;
-- cambiar servicios productivos;
-- aplicar migraciones en Aiven productivo;
-- reutilizar una base productiva para Desarrollo;
-- borrar activos productivos;
-- desplegar a producción;
-
-sin autorización expresa de Javier Mejía.
+Hasta entonces no se inicia la auditoría general de la Fase 2.
