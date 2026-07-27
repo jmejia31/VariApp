@@ -108,8 +108,6 @@ Commit funcional certificado:
 14bf32069f9d87f731e59f230b9e9f5f16ade14e
 ```
 
-La documentación de cierre se encuentra en este archivo y en `docs/PLAN_CIERRE_VARIAPP.md`.
-
 Ejecuciones sobre el commit funcional:
 
 - `Desarrollo - Compilación y pruebas`, run `30295557180`: **success**.
