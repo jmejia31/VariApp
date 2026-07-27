@@ -80,3 +80,25 @@ export interface HistorialEnvio {
   usuarioNombre?: string;
   fecha: string;
 }
+
+export interface ResultadoEnvioCorreo {
+  exito: boolean;
+  mensaje: string;
+  codigo: string;
+  esTransitorio: boolean;
+  yaProcesado: boolean;
+  intentos: number;
+  messageId?: string;
+}
+
+export interface EstadoConfiguracionSmtp {
+  configurado: boolean;
+  host: string;
+  puerto: number;
+  usaTls: boolean;
+  requiereAutenticacion: boolean;
+  remitenteEnmascarado: string;
+  maximoIntentos: number;
+  timeoutSegundos: number;
+  mensaje: string;
+}
