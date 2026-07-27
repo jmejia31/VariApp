@@ -72,45 +72,11 @@ artifact id: 8664760725
 SHA-256: f7e2ca67e311f43f9e13fedcce57fc43cb9b93da314827587226de922694b640
 ```
 
-Incluye siete PDFs:
-
-```text
-FAC-000001-a4.pdf
-FAC-000001-carta.pdf
-FAC-000001-legal.pdf
-FAC-000001-oficio.pdf
-FAC-000001-a5.pdf
-FAC-000001-pos58.pdf
-FAC-000001-pos80.pdf
-```
-
-Y ocho capturas:
-
-```text
-preview-a4.png
-preview-carta.png
-preview-legal.png
-preview-oficio.png
-preview-a5.png
-preview-pos58.png
-preview-pos80.png
-preview-pos58-mobile.png
-```
-
-Los PDFs fueron renderizados e inspeccionados sin recortes, superposiciones, glifos rotos ni pérdida visible de datos.
+Incluye siete PDFs y ocho capturas de interfaz. Los PDFs fueron renderizados e inspeccionados sin recortes, superposiciones, glifos rotos ni pérdida visible de datos.
 
 ## Validaciones físicas pendientes
 
-La automatización no certifica mecánica, drivers o calibración de equipos específicos. Deben probarse exclusivamente en `varistorehn_desarrollo`:
-
-- impresoras de oficina con A4, Carta, Legal, Oficio y A5;
-- impresoras térmicas de 58 y 80 mm;
-- USB, red y Bluetooth;
-- navegadores y dispositivos disponibles;
-- márgenes no imprimibles;
-- densidad, velocidad, corte y avance;
-- escalado 100 % para POS;
-- ancho imprimible real.
+La automatización no certifica mecánica, drivers o calibración de equipos específicos. Deben probarse exclusivamente en `varistorehn_desarrollo`: impresoras de oficina y térmicas, USB/red/Bluetooth, navegadores disponibles, márgenes, densidad, corte, avance, escalado 100 % y ancho imprimible real.
 
 ## Cierre
 
