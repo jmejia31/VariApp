@@ -54,7 +54,6 @@ Se estandarizaron los dos entornos oficiales sin modificar Producción:
 - Las claves `Raíz`, moderación y flujos de medios de Cloudinary se mantienen.
 - No se elimina ningún recurso por su nombre.
 - Solo se elimina un duplicado de Desarrollo después de demostrar que está sin uso, sin dependencias y con autorización expresa.
-- No se identificó en la evidencia un tercer entorno permanente que pudiera eliminarse de forma segura.
 - `Cloudinary__EnvironmentPrefix=varistorehn_desarrollo` está versionado y protegido por CI.
 - Las migraciones automáticas permanecen deshabilitadas.
 
@@ -118,16 +117,7 @@ La aceptación integral ejecutó 27 pruebas sin fallos ni errores. El detalle es
 
 ### Matriz ejecutada
 
-Se certificaron ocho resoluciones:
-
-- 320 × 568;
-- 430 × 932;
-- 768 × 1024;
-- 1024 × 768;
-- 1366 × 768;
-- 1920 × 1080;
-- 2560 × 1440;
-- 3840 × 2160.
+Se certificaron 320 × 568, 430 × 932, 768 × 1024, 1024 × 768, 1366 × 768, 1920 × 1080, 2560 × 1440 y 3840 × 2160.
 
 Cada resolución navegó 30 rutas de módulos y formularios, para un total de 240 navegaciones responsive específicas.
 
@@ -149,12 +139,7 @@ La aceptación integral ejecutó 43 pruebas sin fallos. El detalle está en `doc
 
 ### Alcance ejecutado
 
-Se estandarizó la imagen principal y su fallback en:
-
-- listado, tarjetas, formulario, detalle, galería y lightbox de Productos;
-- listados, formularios y detalles de Compras;
-- listados, formularios y detalles de Ventas;
-- historial de Movimientos de inventario.
+Se estandarizó la imagen principal y su fallback en Productos, Compras, Ventas y Movimientos de inventario.
 
 ### Correcciones cerradas
 
@@ -173,17 +158,11 @@ No se requirió migración de base de datos.
 
 ### Certificación
 
-Commit funcional final:
-
-```text
-90eb4ff4c9b7b4a8ed66561fa092f7521ebe7630
-```
+Commit funcional final: `90eb4ff4c9b7b4a8ed66561fa092f7521ebe7630`.
 
 - `Desarrollo - Compilación y pruebas`, run `30289511599`: **success**.
 - `Desarrollo - aceptación funcional integral`, run `30289510773`: **success**.
 - `Fase 2 - Auditoría de configuración y dependencias`, run `30289511930`: **success**.
-
-Resultado Playwright:
 
 ```text
 47 pruebas totales
@@ -193,38 +172,81 @@ Resultado Playwright:
 0 omitidas
 ```
 
-Artefacto visual:
-
-```text
-desarrollo-aceptacion-integral
-artifact id: 8662414676
-10 capturas específicas de Fase 5
-```
+Artefacto `desarrollo-aceptacion-integral`, id `8662414676`, con diez capturas específicas.
 
 El detalle completo está en `docs/FASE5_CERTIFICACION_IMAGENES.md`.
 
 ### Validaciones externas pendientes
 
-La prueba aislada no utiliza credenciales reales de Cloudinary. La carga, sustitución y eliminación real de activos, el bloqueo frente a recursos productivos y las pruebas con cámara o conexión móvil lenta se realizarán únicamente en `varistorehn_desarrollo` durante la validación externa autorizada.
+La carga, sustitución y eliminación real de activos, el bloqueo frente a recursos productivos y las pruebas con cámara o conexión móvil lenta se realizarán únicamente en `varistorehn_desarrollo` durante la validación externa autorizada.
 
-La Fase 5 no modificó Producción y no autoriza merge ni despliegue.
+## FASE 6 — Facturación e impresión — COMPLETA Y CERTIFICADA
 
-## FASE 6 — Facturación e impresión — SIGUIENTE, NO INICIADA
+### Perfiles implementados
 
-Certificar PDF e impresión para:
+- A4 — 210 × 297 mm.
+- Carta — 215.9 × 279.4 mm.
+- Legal — 215.9 × 355.6 mm.
+- Oficio — 215.9 × 330.2 mm.
+- A5 — 148 × 210 mm.
+- POS 58 mm — rollo continuo.
+- POS 80 mm — rollo continuo.
 
-- Carta;
-- Legal;
-- Oficio;
-- A4;
-- A5;
-- POS 58 mm;
-- POS 80 mm;
-- impresoras móviles, handheld, industriales y convencionales.
+### Correcciones cerradas
 
-La factura debe conservar información, alineación, logo, tablas, códigos, datos fiscales y totales. Se implementarán perfiles explícitos cuando el navegador no pueda detectar automáticamente el medio físico.
+- Catálogo backend de perfiles y alias controlados.
+- Generador QuestPDF específico para página fija y rollo térmico.
+- A4 preservado como documento oficial para correo, WhatsApp y enlaces públicos.
+- Endpoint `GET /facturas/formatos-pdf`.
+- Descarga `GET /facturas/{id}/pdf?formato=...` con validación, nombre y auditoría.
+- Selector de papel, dimensiones y uso recomendado en la interfaz.
+- Preferencia local del formato seleccionado.
+- Descarga e impresión del perfil elegido.
+- Vista previa proporcional para A5, POS 58 y POS 80.
+- Desplazamiento interno para papeles grandes en teléfono.
+- Sin recalcular ni modificar el snapshot fiscal.
+- Sin migración de base de datos.
 
-## FASE 7 — Envío de correo — BLOQUEADA
+### Certificación
+
+Commit funcional final:
+
+```text
+14bf32069f9d87f731e59f230b9e9f5f16ade14e
+```
+
+- `Desarrollo - Compilación y pruebas`, run `30295557180`: **success**.
+- `Desarrollo - aceptación funcional integral`, run `30295557155`: **success**.
+- `Fase 2 - Auditoría de configuración y dependencias`, run `30295557157`: **success**.
+
+```text
+51 pruebas totales
+51 aprobadas
+0 fallos
+0 errores
+0 omitidas
+```
+
+Artefacto final:
+
+```text
+desarrollo-aceptacion-integral
+artifact id: 8664760725
+7 PDFs físicos
+8 capturas de interfaz
+```
+
+Los PDFs certifican firma, encabezados y `MediaBox` físico. Los siete fueron renderizados e inspeccionados sin recortes, superposiciones o pérdida visible de datos.
+
+El detalle completo está en `docs/FASE6_CERTIFICACION_FACTURACION_IMPRESION.md`.
+
+### Validaciones físicas pendientes
+
+Solo sobre Desarrollo: impresoras reales de oficina y térmicas, drivers, USB/red/Bluetooth, márgenes no imprimibles, densidad, corte, avance y diálogos de impresión por navegador/dispositivo.
+
+La Fase 6 no modificó Producción y no autoriza merge ni despliegue.
+
+## FASE 7 — Envío de correo — SIGUIENTE, NO INICIADA
 
 Problema confirmado en Desarrollo: intentos con resultado `Error` y mensaje `No se pudo enviar el correo`.
 
@@ -234,17 +256,7 @@ La fase solo se cierra con entrega real y verificación de bandeja de entrada y 
 
 ## FASE 8 — Validación completa — BLOQUEADA
 
-Se repetirá la auditoría de:
-
-- interfaz;
-- responsive;
-- impresión;
-- imágenes;
-- correo;
-- configuración;
-- rendimiento;
-- consola, logs y advertencias;
-- seguridad y accesibilidad.
+Se repetirá la auditoría de interfaz, responsive, impresión, imágenes, correo, configuración, rendimiento, consola, logs, advertencias, seguridad y accesibilidad.
 
 No debe quedar ningún defecto crítico o alto conocido.
 
