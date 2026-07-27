@@ -184,6 +184,8 @@ test.describe('Fase 6 — facturación e impresión', () => {
       expect(Math.abs(mediaBox.ancho - formato.ancho)).toBeLessThanOrEqual(2.5);
       if (formato.continuo) {
         expect(mediaBox.alto).toBeGreaterThan(mediaBox.ancho);
+        expect(mediaBox.alto, `${formato.codigo} no debe convertirse en una hoja de 297 mm`).toBeLessThan(800);
+        expect(Math.abs(mediaBox.alto - 841.89)).toBeGreaterThan(30);
       } else {
         expect(Math.abs(mediaBox.alto - formato.alto)).toBeLessThanOrEqual(2.5);
       }
@@ -197,7 +199,7 @@ test.describe('Fase 6 — facturación e impresión', () => {
     expect(invalido.status()).toBe(400);
   });
 
-  test('La interfaz cambia la vista previa y conserva todos los perfiles sin desbordar', async ({ page }) => {
+  test('La interfaz cambia la vista previa, advierte el control del driver y no desborda', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 1000 });
     await loginUi(page);
     await page.goto(`/facturas/${facturaId}`);
@@ -207,6 +209,9 @@ test.describe('Fase 6 — facturación e impresión', () => {
     for (const formato of formatos) {
       await seleccionarFormato(page, formato.codigo);
       await expect(page.locator('.profile-summary strong')).toHaveText(nombreVisible(formato.codigo));
+      if (formato.continuo) {
+        await expect(page.getByText(/El PDF térmico usa altura automática/)).toBeVisible();
+      }
       await page.screenshot({ path: join(EVIDENCE_DIR, `preview-${formato.codigo}.png`), fullPage: true });
       await expectNoDocumentOverflow(page);
     }
@@ -222,7 +227,7 @@ test.describe('Fase 6 — facturación e impresión', () => {
     await expectNoDocumentOverflow(page, 3);
   });
 
-  test('Descarga e impresión solicitan el perfil seleccionado', async ({ page }) => {
+  test('Descarga solicita POS80 y la impresión muestra el tamaño real antes del driver', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await loginUi(page);
     await page.goto(`/facturas/${facturaId}`);
@@ -235,13 +240,19 @@ test.describe('Fase 6 — facturación e impresión', () => {
     ]);
     expect(downloadResponse.status()).toBe(200);
     expect(download.suggestedFilename()).toContain('pos80.pdf');
+    await expect(page.getByText(/Altura real del PDF:/)).toBeVisible();
 
     const [popup, printResponse] = await Promise.all([
       page.waitForEvent('popup'),
       page.waitForResponse((response) => response.url().includes(`/facturas/${facturaId}/pdf?formato=pos80`)),
-      page.getByRole('button', { name: /Abrir POS 80 mm para imprimir/i }).click()
+      page.getByRole('button', { name: /Preparar POS 80 mm para imprimir/i }).click()
     ]);
     expect(printResponse.status()).toBe(200);
+    await expect(popup.getByRole('heading', { name: 'Ticket térmico listo' })).toBeVisible();
+    await expect(popup.getByText(/80\.0 × [0-9.]+ mm/)).toBeVisible();
+    await expect(popup.getByText(/si el diálogo de impresión muestra 80 × 297 mm/i)).toBeVisible();
+    await expect(popup.getByRole('button', { name: 'Abrir PDF e imprimir' })).toBeVisible();
+    await popup.screenshot({ path: join(EVIDENCE_DIR, 'preparacion-pos80-driver.png'), fullPage: true });
     await popup.close();
   });
 });
