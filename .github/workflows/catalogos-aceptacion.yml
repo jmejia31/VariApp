@@ -34,9 +34,9 @@ concurrency:
 
 jobs:
   acceptance:
-    name: Módulos, sesión, catálogos, permisos y accesibilidad
+    name: Módulos, sesión, catálogos, permisos, accesibilidad y responsive
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
 
     services:
       mysql:
@@ -180,6 +180,7 @@ jobs:
             e2e/catalogos-mantenimientos.spec.ts \
             e2e/productos-filtros.spec.ts \
             e2e/fase3-interfaz.spec.ts \
+            e2e/fase4-responsive.spec.ts \
             e2e/sesion-inactividad.spec.ts \
             e2e/matriz-modulos-visual.spec.ts \
             e2e/phase7-admin-role.spec.ts \
