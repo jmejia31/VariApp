@@ -1,19 +1,23 @@
+using System.Diagnostics;
 using System.Net;
-using System.Net.Mail;
-using System.Net.Mime;
 using System.Net.Sockets;
-using System.Text;
 using System.Text.RegularExpressions;
 using InventoryApp.Application.Interfaces;
+using MailKit;
+using MailKit.Net.Smtp;
+using MailKit.Security;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using MimeKit;
+using MimeKit.Utils;
+using MailKitSmtpClient = MailKit.Net.Smtp.SmtpClient;
 
 namespace InventoryApp.Infrastructure.Services;
 
-/// Envío SMTP transaccional para facturas. Mantiene los secretos fuera del
-/// código, utiliza validación TLS del sistema operativo y aplica reintentos
-/// acotados únicamente ante errores transitorios.
-public class SmtpEmailService : IEmailService
+/// Envío SMTP transaccional para facturas. Usa MailKit para negociar STARTTLS
+/// de forma explícita en el puerto 587, SSL directo en 465 y errores SMTP más
+/// precisos. Los certificados se validan con el almacén de confianza del sistema.
+public sealed class SmtpEmailService : IEmailService
 {
     private const int MaximoAdjuntos = 5;
     private const int MaximoTotalAdjuntosBytes = 20 * 1024 * 1024;
@@ -38,12 +42,90 @@ public class SmtpEmailService : IEmailService
             Host = EnmascararHost(configuracion.Host),
             Puerto = configuracion.Puerto,
             UsaTls = configuracion.UsarSsl,
+            ModoSeguridad = ObtenerNombreSeguridad(configuracion),
             RequiereAutenticacion = configuracion.RequiereAutenticacion,
             RemitenteEnmascarado = EnmascararCorreo(configuracion.CorreoRemitente),
             MaximoIntentos = configuracion.MaximoIntentos,
             TimeoutSegundos = configuracion.TimeoutSegundos,
-            Mensaje = validacion.Error ?? "SMTP configurado. Los certificados TLS se validan con el almacén de confianza del sistema operativo."
+            Mensaje = validacion.Error ??
+                "Configuración válida. Falta comprobar conexión, negociación TLS y autenticación con el servidor SMTP."
         };
+    }
+
+    public async Task<ResultadoDiagnosticoSmtp> ProbarConexionAsync(
+        CancellationToken cancellationToken = default)
+    {
+        var configuracion = LeerConfiguracion();
+        var validacion = ValidarConfiguracion(configuracion);
+        var cronometro = Stopwatch.StartNew();
+
+        if (validacion.Error is not null)
+        {
+            return CrearDiagnostico(
+                false,
+                "SMTP_NO_CONFIGURADO",
+                validacion.Error,
+                configuracion,
+                false,
+                cronometro.ElapsedMilliseconds);
+        }
+
+        try
+        {
+            using var cliente = CrearCliente(configuracion);
+            await EjecutarConTimeoutAsync(
+                async token =>
+                {
+                    await ConectarYAutenticarAsync(cliente, configuracion, token);
+                    await cliente.NoOpAsync(token);
+                    await cliente.DisconnectAsync(true, token);
+                },
+                configuracion.TimeoutSegundos,
+                cancellationToken);
+
+            cronometro.Stop();
+            _logger.LogInformation(
+                "Diagnóstico SMTP aprobado para {Host}:{Puerto}; Seguridad={Seguridad}; Autenticacion={Autenticacion}; DuracionMs={DuracionMs}.",
+                configuracion.Host,
+                configuracion.Puerto,
+                ObtenerNombreSeguridad(configuracion),
+                configuracion.RequiereAutenticacion,
+                cronometro.ElapsedMilliseconds);
+
+            return CrearDiagnostico(
+                true,
+                "SMTP_OK",
+                "Conexión, TLS y autenticación SMTP comprobados correctamente.",
+                configuracion,
+                configuracion.RequiereAutenticacion,
+                cronometro.ElapsedMilliseconds);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            cronometro.Stop();
+            var (codigo, mensaje, _) = MapearError(ex, configuracion);
+
+            _logger.LogError(
+                ex,
+                "Diagnóstico SMTP fallido. Codigo={Codigo}; Host={Host}; Puerto={Puerto}; Seguridad={Seguridad}; DuracionMs={DuracionMs}.",
+                codigo,
+                configuracion.Host,
+                configuracion.Puerto,
+                ObtenerNombreSeguridad(configuracion),
+                cronometro.ElapsedMilliseconds);
+
+            return CrearDiagnostico(
+                false,
+                codigo,
+                mensaje,
+                configuracion,
+                false,
+                cronometro.ElapsedMilliseconds);
+        }
     }
 
     public async Task<ResultadoEntregaEmail> EnviarAsync(
@@ -61,7 +143,7 @@ public class SmtpEmailService : IEmailService
             return Fallo("SMTP_NO_CONFIGURADO", validacion.Error, false, 0);
         }
 
-        if (!MailAddress.TryCreate(destinatario?.Trim(), out var direccionDestino))
+        if (!MailboxAddress.TryParse(destinatario?.Trim(), out var direccionDestino))
             return Fallo("DESTINATARIO_INVALIDO", "La dirección de correo del destinatario no es válida.", false, 0);
 
         asunto = LimpiarEncabezado(asunto);
@@ -90,21 +172,27 @@ public class SmtpEmailService : IEmailService
                     cuerpoHtml,
                     adjuntos,
                     messageId);
-
                 using var cliente = CrearCliente(configuracion);
+
                 _logger.LogInformation(
-                    "Intento SMTP {Intento}/{MaximoIntentos} para {DestinatarioEnmascarado} mediante {Host}:{Puerto}; TLS={Tls}; MessageId={MessageId}.",
+                    "Intento SMTP {Intento}/{MaximoIntentos} para {DestinatarioEnmascarado} mediante {Host}:{Puerto}; Seguridad={Seguridad}; MessageId={MessageId}.",
                     intento,
                     configuracion.MaximoIntentos,
                     EnmascararCorreo(direccionDestino.Address),
                     configuracion.Host,
                     configuracion.Puerto,
-                    configuracion.UsarSsl,
+                    ObtenerNombreSeguridad(configuracion),
                     messageId);
 
-                await cliente
-                    .SendMailAsync(mensaje, cancellationToken)
-                    .WaitAsync(TimeSpan.FromSeconds(configuracion.TimeoutSegundos), cancellationToken);
+                await EjecutarConTimeoutAsync(
+                    async token =>
+                    {
+                        await ConectarYAutenticarAsync(cliente, configuracion, token);
+                        await cliente.SendAsync(mensaje, token);
+                        await cliente.DisconnectAsync(true, token);
+                    },
+                    configuracion.TimeoutSegundos,
+                    cancellationToken);
 
                 _logger.LogInformation(
                     "Correo enviado a {DestinatarioEnmascarado} en {Intentos} intento(s). MessageId={MessageId}.",
@@ -134,7 +222,7 @@ public class SmtpEmailService : IEmailService
                 var demora = CalcularDemora(configuracion.RetryBaseDelayMilliseconds, intento);
                 _logger.LogWarning(
                     ex,
-                    "Fallo SMTP transitorio en intento {Intento}/{MaximoIntentos}; se reintentará en {DemoraMs} ms. Destinatario={DestinatarioEnmascarado}; MessageId={MessageId}.",
+                    "Fallo SMTP transitorio en intento {Intento}/{MaximoIntentos}; reintento en {DemoraMs} ms. Destinatario={DestinatarioEnmascarado}; MessageId={MessageId}.",
                     intento,
                     configuracion.MaximoIntentos,
                     demora.TotalMilliseconds,
@@ -173,12 +261,12 @@ public class SmtpEmailService : IEmailService
             CorreoRemitente: remitente ?? string.Empty,
             NombreRemitente: LimpiarEncabezado(_configuration["Smtp:NombreRemitente"] ?? "VariStorehn"),
             CorreoRespuesta: _configuration["Smtp:CorreoRespuesta"]?.Trim(),
-            TimeoutSegundos: Math.Clamp(_configuration.GetValue<int?>("Smtp:TimeoutSeconds") ?? 30, 5, 120),
+            TimeoutSegundos: Math.Clamp(_configuration.GetValue<int?>("Smtp:TimeoutSeconds") ?? 60, 10, 300),
             MaximoIntentos: Math.Clamp(_configuration.GetValue<int?>("Smtp:MaxAttempts") ?? 3, 1, 5),
             RetryBaseDelayMilliseconds: Math.Clamp(_configuration.GetValue<int?>("Smtp:RetryBaseDelayMilliseconds") ?? 500, 50, 10_000));
     }
 
-    private static (string? Error, MailAddress? Remitente) ValidarConfiguracion(ConfiguracionSmtp configuracion)
+    private static (string? Error, MailboxAddress? Remitente) ValidarConfiguracion(ConfiguracionSmtp configuracion)
     {
         if (string.IsNullOrWhiteSpace(configuracion.Host) || EsPlaceholder(configuracion.Host))
             return ("El host SMTP de Desarrollo no está configurado.", null);
@@ -193,13 +281,19 @@ public class SmtpEmailService : IEmailService
             return ("Las credenciales SMTP de Desarrollo no están configuradas completamente.", null);
         }
 
-        if (!MailAddress.TryCreate(configuracion.CorreoRemitente, out var remitente))
+        if (!MailboxAddress.TryParse(configuracion.CorreoRemitente, out var remitente))
             return ("El correo remitente SMTP configurado no es válido.", null);
 
         if (!string.IsNullOrWhiteSpace(configuracion.CorreoRespuesta) &&
-            !MailAddress.TryCreate(configuracion.CorreoRespuesta, out _))
+            !MailboxAddress.TryParse(configuracion.CorreoRespuesta, out _))
         {
             return ("El correo de respuesta SMTP configurado no es válido.", null);
+        }
+
+        if (configuracion.Host.Equals("smtp.gmail.com", StringComparison.OrdinalIgnoreCase) &&
+            configuracion.Puerto is not 465 and not 587)
+        {
+            return ("Para Gmail usa el puerto 587 con STARTTLS o el 465 con SSL directo.", null);
         }
 
         return (null, remitente);
@@ -220,9 +314,9 @@ public class SmtpEmailService : IEmailService
         return null;
     }
 
-    private static MailMessage CrearMensaje(
+    private static MimeMessage CrearMensaje(
         ConfiguracionSmtp configuracion,
-        MailAddress destino,
+        MailboxAddress destino,
         string asunto,
         string cuerpoHtml,
         List<AdjuntoCorreo> adjuntos,
@@ -232,64 +326,106 @@ public class SmtpEmailService : IEmailService
         var remitente = validacion.Remitente
             ?? throw new InvalidOperationException(validacion.Error ?? "Configuración SMTP inválida.");
 
-        var mensaje = new MailMessage
+        var mensaje = new MimeMessage
         {
-            From = new MailAddress(remitente.Address, configuracion.NombreRemitente, Encoding.UTF8),
             Subject = asunto,
-            Body = cuerpoHtml,
-            IsBodyHtml = true,
-            BodyEncoding = Encoding.UTF8,
-            SubjectEncoding = Encoding.UTF8,
-            HeadersEncoding = Encoding.UTF8
+            MessageId = MimeUtils.GenerateMessageId("varistorehn.local")
         };
 
-        mensaje.Headers["X-VariApp-Message-Id"] = messageId;
-        mensaje.Headers["X-Auto-Response-Suppress"] = "All";
+        mensaje.From.Add(new MailboxAddress(configuracion.NombreRemitente, remitente.Address));
         mensaje.To.Add(destino);
 
         var respuesta = string.IsNullOrWhiteSpace(configuracion.CorreoRespuesta)
             ? remitente.Address
             : configuracion.CorreoRespuesta;
-        mensaje.ReplyToList.Add(new MailAddress(respuesta!, configuracion.NombreRemitente, Encoding.UTF8));
+        mensaje.ReplyTo.Add(new MailboxAddress(configuracion.NombreRemitente, respuesta));
+        mensaje.Headers.Add("X-VariApp-Message-Id", messageId);
+        mensaje.Headers.Add("X-Auto-Response-Suppress", "All");
 
-        var cuerpoTexto = ConvertirHtmlATexto(cuerpoHtml);
-        mensaje.AlternateViews.Add(AlternateView.CreateAlternateViewFromString(
-            cuerpoTexto,
-            Encoding.UTF8,
-            MediaTypeNames.Text.Plain));
-        mensaje.AlternateViews.Add(AlternateView.CreateAlternateViewFromString(
-            cuerpoHtml,
-            Encoding.UTF8,
-            MediaTypeNames.Text.Html));
+        var bodyBuilder = new BodyBuilder
+        {
+            HtmlBody = cuerpoHtml,
+            TextBody = ConvertirHtmlATexto(cuerpoHtml)
+        };
 
         foreach (var adjunto in adjuntos)
         {
             var nombreArchivo = LimpiarNombreArchivo(adjunto.NombreArchivo);
-            var contentType = string.IsNullOrWhiteSpace(adjunto.ContentType)
-                ? MediaTypeNames.Application.Octet
-                : adjunto.ContentType.Trim();
-            var stream = new MemoryStream(adjunto.Contenido, writable: false);
-            mensaje.Attachments.Add(new Attachment(stream, nombreArchivo, contentType));
+            var contentType = CrearContentType(adjunto.ContentType);
+            bodyBuilder.Attachments.Add(nombreArchivo, adjunto.Contenido, contentType);
         }
 
+        mensaje.Body = bodyBuilder.ToMessageBody();
         return mensaje;
     }
 
-    private static SmtpClient CrearCliente(ConfiguracionSmtp configuracion)
+    private static ContentType CrearContentType(string? valor)
     {
-        var cliente = new SmtpClient(configuracion.Host, configuracion.Puerto)
+        var partes = (valor ?? string.Empty).Trim().Split('/', 2, StringSplitOptions.TrimEntries);
+        return partes.Length == 2 && partes.All(p => !string.IsNullOrWhiteSpace(p))
+            ? new ContentType(partes[0], partes[1])
+            : new ContentType("application", "octet-stream");
+    }
+
+    private static MailKitSmtpClient CrearCliente(ConfiguracionSmtp configuracion) => new()
+    {
+        Timeout = configuracion.TimeoutSegundos * 1000,
+        CheckCertificateRevocation = true
+    };
+
+    private static async Task ConectarYAutenticarAsync(
+        MailKitSmtpClient cliente,
+        ConfiguracionSmtp configuracion,
+        CancellationToken cancellationToken)
+    {
+        await cliente.ConnectAsync(
+            configuracion.Host,
+            configuracion.Puerto,
+            ResolverSeguridad(configuracion),
+            cancellationToken);
+
+        if (!configuracion.RequiereAutenticacion)
+            return;
+
+        cliente.AuthenticationMechanisms.Remove("XOAUTH2");
+        cliente.AuthenticationMechanisms.Remove("OAUTHBEARER");
+        await cliente.AuthenticateAsync(configuracion.Usuario, configuracion.Password, cancellationToken);
+    }
+
+    private static SecureSocketOptions ResolverSeguridad(ConfiguracionSmtp configuracion)
+    {
+        if (!configuracion.UsarSsl)
+            return SecureSocketOptions.None;
+
+        return configuracion.Puerto == 465
+            ? SecureSocketOptions.SslOnConnect
+            : SecureSocketOptions.StartTls;
+    }
+
+    private static string ObtenerNombreSeguridad(ConfiguracionSmtp configuracion) =>
+        ResolverSeguridad(configuracion) switch
         {
-            UseDefaultCredentials = false,
-            EnableSsl = configuracion.UsarSsl,
-            DeliveryMethod = SmtpDeliveryMethod.Network,
-            Timeout = configuracion.TimeoutSegundos * 1000
+            SecureSocketOptions.SslOnConnect => "SSL/TLS directo",
+            SecureSocketOptions.StartTls => "STARTTLS obligatorio",
+            _ => "Sin TLS"
         };
 
-        cliente.Credentials = configuracion.RequiereAutenticacion
-            ? new NetworkCredential(configuracion.Usuario, configuracion.Password)
-            : CredentialCache.DefaultNetworkCredentials;
+    private static async Task EjecutarConTimeoutAsync(
+        Func<CancellationToken, Task> accion,
+        int timeoutSegundos,
+        CancellationToken cancellationToken)
+    {
+        using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        timeoutCts.CancelAfter(TimeSpan.FromSeconds(timeoutSegundos));
 
-        return cliente;
+        try
+        {
+            await accion(timeoutCts.Token);
+        }
+        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+        {
+            throw new TimeoutException("El servidor SMTP no respondió dentro del tiempo configurado.");
+        }
     }
 
     private ResultadoEntregaEmail CrearFalloTecnico(
@@ -299,65 +435,75 @@ public class SmtpEmailService : IEmailService
         int intentos,
         string messageId)
     {
-        var transitorio = EsErrorTransitorio(ex);
-        var (codigo, mensaje) = MapearError(ex, transitorio);
+        var (codigo, mensaje, transitorio) = MapearError(ex, configuracion);
 
         _logger.LogError(
             ex,
-            "Fallo SMTP definitivo. Codigo={Codigo}; Intentos={Intentos}; Destinatario={DestinatarioEnmascarado}; Host={Host}; Puerto={Puerto}; TLS={Tls}; MessageId={MessageId}.",
+            "Fallo SMTP definitivo. Codigo={Codigo}; Intentos={Intentos}; Destinatario={DestinatarioEnmascarado}; Host={Host}; Puerto={Puerto}; Seguridad={Seguridad}; MessageId={MessageId}.",
             codigo,
             intentos,
             EnmascararCorreo(destinatario),
             configuracion.Host,
             configuracion.Puerto,
-            configuracion.UsarSsl,
+            ObtenerNombreSeguridad(configuracion),
             messageId);
 
         return Fallo(codigo, mensaje, transitorio, intentos, messageId);
     }
 
-    private static (string Codigo, string Mensaje) MapearError(Exception ex, bool transitorio)
+    private static (string Codigo, string Mensaje, bool Transitorio) MapearError(
+        Exception ex,
+        ConfiguracionSmtp configuracion)
     {
         if (ex is TimeoutException)
-            return ("SMTP_TIMEOUT", "El servidor de correo no respondió dentro del tiempo permitido. Intenta nuevamente.");
+            return ("SMTP_TIMEOUT", "El servidor de correo no respondió dentro del tiempo permitido.", true);
 
-        if (ex is SmtpException smtp)
+        if (ex is MailKit.Security.AuthenticationException or ServiceNotAuthenticatedException)
         {
-            if (smtp.StatusCode is SmtpStatusCode.ClientNotPermitted or SmtpStatusCode.MustIssueStartTlsFirst)
-            {
-                return ("SMTP_AUTENTICACION", "El servidor SMTP rechazó la autenticación o la conexión segura. Revisa la contraseña de aplicación y TLS en Desarrollo.");
-            }
-
-            if (smtp.StatusCode is SmtpStatusCode.MailboxUnavailable)
-                return ("SMTP_DESTINATARIO_RECHAZADO", "El servidor rechazó el buzón del destinatario. Verifica la dirección de correo.");
-
-            if (transitorio)
-                return ("SMTP_TEMPORAL", "El servidor de correo presentó un problema temporal después de varios intentos. Intenta nuevamente más tarde.");
-
-            return ("SMTP_RECHAZADO", "El servidor de correo rechazó el envío. Revisa los registros del backend de Desarrollo.");
+            var mensaje = EsGmail(configuracion.Host)
+                ? "Gmail rechazó las credenciales. Activa la verificación en dos pasos y usa una contraseña de aplicación nueva de 16 caracteres; no uses la contraseña normal de la cuenta."
+                : "El servidor SMTP rechazó las credenciales de Desarrollo.";
+            return ("SMTP_AUTENTICACION", mensaje, false);
         }
 
-        if (transitorio)
-            return ("SMTP_TEMPORAL", "No fue posible establecer una conexión estable con el servidor de correo. Intenta nuevamente.");
+        if (ex is SslHandshakeException or NotSupportedException)
+            return ("SMTP_TLS", "No se pudo establecer la conexión TLS. Para Gmail usa puerto 587 con STARTTLS o 465 con SSL directo.", false);
 
-        return ("SMTP_ERROR", "No se pudo enviar el correo. Revisa los registros del backend de Desarrollo.");
+        if (ex is SmtpCommandException smtp)
+        {
+            var status = (int)smtp.StatusCode;
+            if (status is 534 or 535)
+            {
+                var mensaje = EsGmail(configuracion.Host)
+                    ? "Gmail exige una contraseña de aplicación válida. Genera una nueva con la verificación en dos pasos activa y reemplaza Smtp__PasswordSmtp en Render Desarrollo."
+                    : "El servidor SMTP rechazó la autenticación.";
+                return ("SMTP_AUTENTICACION", mensaje, false);
+            }
+
+            if (status is >= 400 and <= 499)
+                return ("SMTP_TEMPORAL", "El servidor de correo presentó un problema temporal. Intenta nuevamente más tarde.", true);
+
+            if (status is 550 or 551 or 552 or 553 or 554)
+                return ("SMTP_DESTINATARIO_RECHAZADO", "El servidor rechazó el remitente, el destinatario o el contenido del mensaje. Revisa los logs de Desarrollo.", false);
+
+            return ("SMTP_RECHAZADO", "El servidor SMTP rechazó la operación. Revisa el diagnóstico y los logs de Desarrollo.", false);
+        }
+
+        if (ex is SocketException or IOException or SmtpProtocolException or ServiceNotConnectedException)
+            return ("SMTP_CONEXION", "No fue posible establecer una conexión estable con el servidor SMTP.", true);
+
+        return ("SMTP_ERROR", "No se pudo enviar el correo. Revisa el diagnóstico SMTP y los logs del backend de Desarrollo.", false);
     }
 
     private static bool EsErrorTransitorio(Exception ex)
     {
-        if (ex is TimeoutException or IOException or SocketException)
+        if (ex is TimeoutException or IOException or SocketException or SmtpProtocolException or ServiceNotConnectedException)
             return true;
 
         if (ex.InnerException is IOException or SocketException or TimeoutException)
             return true;
 
-        return ex is SmtpException smtp && smtp.StatusCode is
-            SmtpStatusCode.ServiceNotAvailable or
-            SmtpStatusCode.MailboxBusy or
-            SmtpStatusCode.InsufficientStorage or
-            SmtpStatusCode.LocalErrorInProcessing or
-            SmtpStatusCode.TransactionFailed or
-            SmtpStatusCode.GeneralFailure;
+        return ex is SmtpCommandException smtp && (int)smtp.StatusCode is >= 400 and <= 499;
     }
 
     private static TimeSpan CalcularDemora(int baseMilliseconds, int intento)
@@ -381,10 +527,32 @@ public class SmtpEmailService : IEmailService
             MessageId = messageId
         };
 
+    private static ResultadoDiagnosticoSmtp CrearDiagnostico(
+        bool exito,
+        string codigo,
+        string mensaje,
+        ConfiguracionSmtp configuracion,
+        bool autenticado,
+        long duracionMilisegundos) => new()
+        {
+            Exito = exito,
+            Codigo = codigo,
+            Mensaje = mensaje,
+            Host = EnmascararHost(configuracion.Host),
+            Puerto = configuracion.Puerto,
+            ModoSeguridad = ObtenerNombreSeguridad(configuracion),
+            Autenticado = autenticado,
+            DuracionMilisegundos = (int)Math.Clamp(duracionMilisegundos, 0, int.MaxValue)
+        };
+
     private static bool EsPlaceholder(string valor) =>
         valor.Equals("CHANGE_ME", StringComparison.OrdinalIgnoreCase) ||
         valor.Equals("REPLACE_ME", StringComparison.OrdinalIgnoreCase) ||
         valor.Contains("not-used", StringComparison.OrdinalIgnoreCase);
+
+    private static bool EsGmail(string host) =>
+        host.Equals("smtp.gmail.com", StringComparison.OrdinalIgnoreCase) ||
+        host.EndsWith(".gmail.com", StringComparison.OrdinalIgnoreCase);
 
     private static string? NormalizarPassword(string? password)
     {
