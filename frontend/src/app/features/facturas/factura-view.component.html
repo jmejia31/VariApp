@@ -25,6 +25,9 @@
       <span>{{ formatoActual().usoRecomendado }}</span>
       @if (formatoActual().esContinuo) {
         <span class="profile-badge">Rollo continuo</span>
+        @if (alturaTermicaMm(); as altura) {
+          <span class="profile-measure">Altura real del PDF: {{ altura | number:'1.0-1' }} mm</span>
+        }
       } @else {
         <span class="profile-badge">Página fija</span>
       }
@@ -33,6 +36,17 @@
     <p class="profile-note">
       Correo, WhatsApp y enlaces públicos conservan A4 como documento oficial compartido.
     </p>
+
+    @if (formatoActual().esContinuo) {
+      <div class="thermal-driver-warning" role="note">
+        <mat-icon>info</mat-icon>
+        <span>
+          El PDF térmico usa altura automática. Si el diálogo muestra {{ formatoActual().anchoMm }} × 297 mm,
+          el controlador de la impresora está imponiendo ese largo. VariApp mostrará el tamaño real y los pasos
+          para configurar papel Receipt, Rollo o Continuous antes de abrir el PDF.
+        </span>
+      </div>
+    }
   </section>
 }
 
@@ -87,7 +101,7 @@
       } @else {
         <mat-icon>print</mat-icon>
       }
-      Abrir {{ formatoActual().nombre }} para imprimir
+      {{ formatoActual().esContinuo ? 'Preparar' : 'Abrir' }} {{ formatoActual().nombre }} para imprimir
     </button>
   }
 
@@ -101,16 +115,74 @@
 @if (mostrarPanelCorreo() && puedeCompartir()) {
   <div class="card panel-correo no-print">
     <h3><mat-icon>email</mat-icon> Enviar por correo</h3>
-    <mat-form-field appearance="outline" class="full-width">
+
+    @if (cargandoEstadoSmtp()) {
+      <div class="smtp-status smtp-loading" aria-live="polite">
+        <mat-spinner diameter="20"></mat-spinner>
+        <span>Revisando la configuración SMTP de Desarrollo…</span>
+      </div>
+    } @else if (estadoSmtp(); as estado) {
+      <div class="smtp-summary" [class.smtp-error]="!estado.configurado">
+        <div><span>Servidor</span><strong>{{ estado.host }}:{{ estado.puerto }}</strong></div>
+        <div><span>Seguridad</span><strong>{{ estado.modoSeguridad }}</strong></div>
+        <div><span>Remitente</span><strong>{{ estado.remitenteEnmascarado }}</strong></div>
+        <div><span>Timeout</span><strong>{{ estado.timeoutSegundos }} s</strong></div>
+      </div>
+
+      @if (!estado.configurado) {
+        <div class="smtp-status smtp-error" role="alert">
+          <mat-icon>error</mat-icon>
+          <span>{{ estado.mensaje }}</span>
+        </div>
+      }
+    }
+
+    @if (diagnosticandoSmtp()) {
+      <div class="smtp-status smtp-loading" aria-live="polite">
+        <mat-spinner diameter="20"></mat-spinner>
+        <span>Comprobando conexión, STARTTLS y autenticación con el proveedor…</span>
+      </div>
+    } @else if (diagnosticoSmtp(); as diagnostico) {
+      <div class="smtp-status" [class.smtp-ok]="diagnostico.exito" [class.smtp-error]="!diagnostico.exito" aria-live="polite">
+        <mat-icon>{{ diagnostico.exito ? 'check_circle' : 'error' }}</mat-icon>
+        <div>
+          <strong>{{ diagnostico.exito ? 'SMTP verificado' : 'SMTP rechazado' }}</strong>
+          <p>{{ diagnostico.mensaje }}</p>
+          <small>{{ diagnostico.codigo }} · {{ diagnostico.modoSeguridad }} · {{ diagnostico.duracionMilisegundos }} ms</small>
+        </div>
+      </div>
+    }
+
+    @if (estadoSmtp()?.configurado && !diagnosticandoSmtp() && diagnosticoSmtp()?.exito !== true) {
+      <button mat-stroked-button type="button" (click)="probarConexionCorreo()">
+        <mat-icon>sync</mat-icon> Probar conexión nuevamente
+      </button>
+    }
+
+    <mat-form-field appearance="outline" class="full-width correo-field">
       <mat-label>Correo del destinatario</mat-label>
-      <input matInput [(ngModel)]="correoEditable" placeholder="cliente@correo.com">
+      <input
+        matInput
+        [ngModel]="correoEditable"
+        (ngModelChange)="onCorreoChange($event)"
+        autocomplete="email"
+        placeholder="cliente@correo.com">
       @if (!correoValido() && correoEditable) {
         <mat-hint class="hint-error">El correo no tiene un formato válido.</mat-hint>
       }
     </mat-form-field>
+
     <p class="hint">Se adjuntará el PDF oficial A4, independientemente del perfil de impresión seleccionado.</p>
+
+    @if (correoUltimoError()) {
+      <div class="smtp-status smtp-error" role="alert">
+        <mat-icon>report_problem</mat-icon>
+        <span>{{ correoUltimoError() }}</span>
+      </div>
+    }
+
     <div class="panel-actions">
-      <button mat-flat-button color="primary" [disabled]="!correoValido() || enviandoCorreo()" (click)="enviarCorreo()">
+      <button mat-flat-button color="primary" [disabled]="!puedeEnviarCorreo()" (click)="enviarCorreo()">
         @if (enviandoCorreo()) {
           <mat-spinner diameter="18"></mat-spinner>
         } @else {
