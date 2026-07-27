@@ -4,11 +4,16 @@ Rama exclusiva de trabajo: `Desarrollo`.
 
 Pull Request: `Desarrollo -> main`, en borrador hasta autorización expresa de Javier Mejía.
 
-Identificador oficial del entorno de Desarrollo:
+## Entornos oficiales
+
+Solo existen dos entornos lógicos autorizados:
 
 ```text
+varistorehn_producción (Producción)
 varistorehn_desarrollo
 ```
+
+Los nombres técnicos actuales de proyectos, servicios, dominios, usuarios y claves se conservan cuando renombrarlos o recrearlos pueda afectar funcionamiento. Cada recurso debe estar asignado documentalmente a uno de los dos entornos; un nombre técnico diferente no constituye un tercer entorno por sí solo.
 
 ## Reglas generales
 
@@ -20,61 +25,56 @@ Antes de iniciar cada fase se debe:
 4. confirmar que ningún cambio afecta Producción;
 5. definir pruebas y evidencia de cierre.
 
-Al finalizar cada fase se ejecutará una revisión completa. No se inicia la fase siguiente mientras exista un requisito, una validación o una evidencia pendiente de la fase actual.
+No se avanza a la fase siguiente mientras la fase actual conserve un requisito pendiente.
 
-Producción no se modifica bajo ninguna circunstancia durante estas fases. Un cambio de nombre visible solo se evaluará si es puramente estético, reversible y demostrablemente ajeno a dominios, variables, conexiones y despliegues; por defecto no se realizará.
+Producción queda congelada durante todo el plan. No se modifican `main`, variables, credenciales, dominios, servicios, despliegues, bases, activos, claves, usuarios administrativos ni migraciones productivas.
 
-## FASE 1 — Entornos y recursos — EN CURSO
+## FASE 1 — Entornos y recursos — COMPLETA
 
-### Objetivo
+### Resultado
 
-Estandarizar Desarrollo usando únicamente los recursos creados y designados por Javier Mejía, sin modificar Producción.
+Se estandarizaron los dos entornos oficiales sin modificar Producción:
 
-### Recursos autorizados observados
+| Plataforma | varistorehn_producción (Producción) | varistorehn_desarrollo |
+|---|---|---|
+| GitHub | rama `main`, solo lectura | rama única `Desarrollo` |
+| Aiven | recursos productivos existentes; `avnadmin` se conserva | usuario de aplicación `varistorehn_desarrollo` y variables de Desarrollo existentes |
+| Cloudinary | claves, activos y variables productivas existentes | clave etiquetada `varistorehn_desarrollo` y prefijo `varistorehn_desarrollo/` |
+| Render | entorno y servicio productivos existentes, sin cambios | entorno Desarrollo y servicio técnico existente `variapp-api-desarrollo` |
+| Vercel | proyecto y dominio productivos existentes, sin cambios | proyecto técnico existente `variapp-desarrollo`, rama `Desarrollo` |
 
-- Git: rama `Desarrollo`.
-- Aiven: usuario de aplicación `varistorehn_desarrollo` dentro del servicio mostrado por el propietario.
-- Cloudinary: clave de API etiquetada `varistorehn_desarrollo`.
-- Render: entorno `Desarrollo`, servicio `variapp-api-desarrollo`.
-- Vercel: proyecto `variapp-desarrollo`, Production Branch `Desarrollo`, dominio `variapp-desarrollo.vercel.app`.
+### Protecciones cerradas
 
-### Trabajo realizado en el repositorio
+- `Desarrollo` es la única rama de cambios.
+- No se crean ramas adicionales.
+- Todo commit se publica en `origin/Desarrollo`.
+- `main` no se modifica ni se utiliza como rama de trabajo.
+- Las variables de Producción y Desarrollo se mantienen.
+- `avnadmin` se mantiene.
+- Las claves `Raíz`, moderación y flujos de medios de Cloudinary se mantienen.
+- No se elimina ningún recurso por su nombre.
+- Solo se elimina un duplicado de Desarrollo después de demostrar que está sin uso, sin dependencias y con autorización expresa.
+- No se identificó en la evidencia un tercer entorno permanente que pudiera eliminarse de forma segura.
+- `Cloudinary__EnvironmentPrefix=varistorehn_desarrollo` está versionado y protegido por CI.
+- Las migraciones automáticas permanecen deshabilitadas.
+- Los workflows de compilación y aceptación terminaron correctamente para la estandarización inicial.
 
-- `render.yaml` usa el prefijo Cloudinary `varistorehn_desarrollo`.
-- Las pruebas de aislamiento Cloudinary usan el identificador oficial.
-- GitHub Actions rechaza el prefijo genérico anterior `desarrollo`.
-- Se documentaron los recursos designados por el propietario y se retiraron instrucciones que pedían crear duplicados.
-- Se mantiene el proxy de Vercel separado por host.
-- Se mantienen las migraciones automáticas deshabilitadas.
-- No se modificó `main` ni ninguna configuración productiva.
+### Decisión sobre nombres técnicos
 
-### Riesgos identificados
+No se renombra Producción. Los nombres técnicos existentes, como dominios o nombres de servicio, se mantienen para evitar interrupciones. En documentación, gobierno y nuevas configuraciones se utilizan los nombres lógicos oficiales `varistorehn_producción` y `varistorehn_desarrollo`.
 
-- La captura de Aiven no muestra el nombre de la base ni los privilegios del usuario; no se puede certificar todavía el aislamiento de datos.
-- La captura de Render no muestra, ni debe mostrar, valores de secretos; falta confirmar que utiliza el usuario Aiven y la clave Cloudinary autorizados.
-- Cloudinary comparte el mismo product environment; la separación depende de la clave autorizada, el prefijo y el bloqueo de eliminación.
-- El cambio de prefijo requiere un nuevo despliegue de Desarrollo antes de validar cargas reales.
-- El correo SMTP falla en Desarrollo, pero se tratará exclusivamente en la Fase 7.
+### Cierre
 
-### Evidencia pendiente para cerrar la fase
+La Fase 1 queda cerrada con la confirmación del propietario de que:
 
-1. Nombre exacto de la base Aiven de Desarrollo.
-2. Confirmación de que `varistorehn_desarrollo` solo tiene privilegios sobre esa base.
-3. Confirmación con valores ocultos de que Render Desarrollo usa:
-   - el usuario Aiven `varistorehn_desarrollo`;
-   - la base exclusiva de Desarrollo;
-   - la clave Cloudinary etiquetada `varistorehn_desarrollo`;
-   - `Cloudinary__EnvironmentPrefix=varistorehn_desarrollo`.
-4. Respuesta HTTP 200 de `/health` después del despliegue.
-5. Confirmación de que Vercel Desarrollo sigue enviando `/api` a Render Desarrollo.
-6. Confirmación de que no existe un tercer servicio, proyecto, base o usuario de aplicación permanente para Desarrollo.
-7. GitHub Actions en verde para el commit final de la fase.
+- Producción y Desarrollo deben conservar sus variables actuales;
+- los recursos productivos indicados no se eliminan;
+- únicamente pueden retirarse duplicados ajenos a ambos entornos y previamente verificados;
+- todo trabajo continúa exclusivamente en `Desarrollo`.
 
-### Criterio de cierre
+Las comprobaciones profundas de conexiones, permisos, variables, certificados y dependencias pasan a la Fase 2.
 
-Fase 1 se marca completa únicamente cuando todas las evidencias anteriores están verificadas. Hasta entonces Fase 2 permanece bloqueada.
-
-## FASE 2 — Auditoría general — BLOQUEADA POR FASE 1
+## FASE 2 — Auditoría general — SIGUIENTE, NO INICIADA
 
 ### Alcance
 
@@ -82,7 +82,7 @@ Revisar de extremo a extremo:
 
 - configuraciones;
 - servicios y despliegues;
-- variables y secretos;
+- variables y secretos sin revelar sus valores;
 - conexiones e integraciones;
 - bases de datos y almacenamiento;
 - autenticación y APIs;
@@ -93,30 +93,24 @@ Revisar de extremo a extremo:
 
 ### Criterio
 
-Producción y Desarrollo deben ser consistentes en arquitectura, pero completamente independientes en datos, credenciales y recursos.
+Producción y Desarrollo deben ser consistentes en arquitectura, pero independientes en datos, credenciales y ejecución. La auditoría no autoriza ningún cambio productivo.
 
 ## FASE 3 — Corrección de interfaz — BLOQUEADA
 
-### Alcance
+Corregir textos cortados, superpuestos, fuera del contenedor o desalineados. Prioridades observadas:
 
-Corregir todos los textos cortados, superpuestos, fuera del contenedor o desalineados. Prioridades observadas en la evidencia:
-
-- formulario administrativo de usuario;
-- perfil del usuario;
+- formulario administrativo de Usuario;
+- Perfil;
 - formulario de Producto;
 - lista y tabla de Productos;
 - cabecera, rol y acciones;
 - ayudas y errores de formularios.
 
-### Criterio
-
-Ningún texto puede montarse, cortarse o desbordarse en los viewports certificados.
+Criterio: ningún texto puede montarse, cortarse o desbordarse en los viewports certificados.
 
 ## FASE 4 — Responsive — BLOQUEADA
 
-### Alcance
-
-Certificar todo el sistema en:
+Certificar el sistema en:
 
 - teléfonos pequeños y grandes;
 - tablets;
@@ -129,22 +123,16 @@ Se revisarán tipografía fluida, grids, tablas, paneles, diálogos, navegación
 
 ## FASE 5 — Imágenes — BLOQUEADA
 
-### Alcance
-
-Mostrar la imagen correspondiente cuando exista, especialmente en:
+Mostrar la imagen principal cuando exista, con fallback accesible y carga eficiente, especialmente en:
 
 - lista y detalle de Productos;
 - Compras;
 - Ventas;
 - detalles e historial.
 
-Se utilizará imagen principal, fallback accesible y carga eficiente.
-
 ## FASE 6 — Facturación e impresión — BLOQUEADA
 
-### Alcance mínimo
-
-Certificar PDF, impresión convencional y térmica para:
+Certificar PDF e impresión para:
 
 - Carta;
 - Legal;
@@ -155,29 +143,15 @@ Certificar PDF, impresión convencional y térmica para:
 - POS 80 mm;
 - impresoras móviles, handheld, industriales y convencionales.
 
-La factura ajustará tipografía, márgenes, logo, tablas, códigos, datos fiscales y totales sin pérdida de información.
-
-No se prometerá adaptación automática a un medio que el navegador no pueda detectar. Se implementarán perfiles de impresión explícitos y CSS/PDF determinista por formato.
+La factura debe conservar información, alineación, logo, tablas, códigos, datos fiscales y totales. Se implementarán perfiles explícitos cuando el navegador no pueda detectar automáticamente el medio físico.
 
 ## FASE 7 — Envío de correo — BLOQUEADA
 
-### Problema confirmado
+Problema confirmado en Desarrollo: intentos con resultado `Error` y mensaje `No se pudo enviar el correo`.
 
-La evidencia muestra intentos reales con resultado `Error` y el mensaje `No se pudo enviar el correo`.
+Se revisarán SMTP, variables de Render Desarrollo, autenticación, TLS, certificados, remitente, timeout, logs, errores sanitizados, plantillas, PDF adjunto, reintentos e idempotencia.
 
-### Alcance
-
-Revisar:
-
-- SMTP y variables de Render Desarrollo;
-- autenticación, TLS y certificados;
-- remitente y credenciales;
-- timeout, logs y errores sanitizados;
-- plantillas y adjunto PDF;
-- reintentos seguros e idempotencia;
-- historial y observabilidad.
-
-La fase solo se cerrará con entrega real a una cuenta externa y verificación de bandeja de entrada y spam.
+La fase solo se cierra con entrega real y verificación de bandeja de entrada y spam.
 
 ## FASE 8 — Validación completa — BLOQUEADA
 
@@ -206,11 +180,4 @@ El informe final contendrá:
 
 ## Regla de publicación
 
-Completar estas fases no autoriza automáticamente el merge ni el despliegue productivo. Antes de cualquier operación sobre Producción se exige:
-
-- respaldo verificable;
-- estrategia de migración única;
-- ventana de mantenimiento;
-- responsables;
-- procedimiento de rollback;
-- autorización expresa de Javier Mejía.
+Completar estas fases no autoriza automáticamente el merge ni el despliegue productivo. Antes de cualquier operación sobre Producción se exige respaldo verificable, estrategia de migración única, ventana de mantenimiento, responsables, rollback y autorización expresa de Javier Mejía.
