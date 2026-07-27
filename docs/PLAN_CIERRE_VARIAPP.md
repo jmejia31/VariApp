@@ -109,36 +109,13 @@ Commit: `90eb4ff4c9b7b4a8ed66561fa092f7521ebe7630`.
 
 ### Certificación
 
-Commit funcional:
-
-```text
-14bf32069f9d87f731e59f230b9e9f5f16ade14e
-```
+Commit funcional: `14bf32069f9d87f731e59f230b9e9f5f16ade14e`.
 
 - `Desarrollo - Compilación y pruebas`, run `30295557180`: **success**.
 - `Desarrollo - aceptación funcional integral`, run `30295557155`: **success**.
 - `Fase 2 - Auditoría de configuración y dependencias`, run `30295557157`: **success**.
 
-```text
-51 pruebas totales
-51 aprobadas
-0 fallos
-0 errores
-0 omitidas
-```
-
-Artefacto final:
-
-```text
-desarrollo-aceptacion-integral
-artifact id: 8664760725
-7 PDFs
-8 capturas
-```
-
-Los PDFs certifican firma, encabezados y dimensiones físicas mediante `MediaBox`; fueron renderizados e inspeccionados sin recortes ni superposiciones.
-
-Detalle: `docs/FASE6_CERTIFICACION_FACTURACION_IMPRESION.md`.
+51 pruebas aprobadas. Artefacto `8664760725`. Detalle: `docs/FASE6_CERTIFICACION_FACTURACION_IMPRESION.md`.
 
 ### Validaciones físicas pendientes
 
@@ -146,17 +123,73 @@ Solo en Desarrollo: impresoras reales de oficina y térmicas, drivers, USB/red/B
 
 La Fase 6 no modificó Producción y no autoriza merge ni despliegue.
 
-## FASE 7 — Envío de correo — SIGUIENTE, NO INICIADA
+## FASE 7 — Envío de correo — IMPLEMENTACIÓN COMPLETA; ACEPTACIÓN EXTERNA PENDIENTE
 
-Problema confirmado en Desarrollo: intentos con resultado `Error` y mensaje `No se pudo enviar el correo`.
+### Implementación cerrada
 
-Se revisarán SMTP, variables de Render Desarrollo, autenticación, TLS, certificados, remitente, timeout, logs, errores sanitizados, plantillas, PDF adjunto, reintentos e idempotencia.
+- Validación completa de configuración SMTP.
+- Autenticación configurable y TLS sin bypass de certificados.
+- Timeout y máximo de intentos configurables.
+- Reintentos acotados ante errores transitorios.
+- Códigos de error seguros y respuestas HTTP diferenciadas.
+- Logs con host, remitente y destinatario enmascarados.
+- Plantilla HTML responsive y alternativa de texto plano.
+- PDF oficial A4 adjunto.
+- `X-VariApp-Message-Id` para trazabilidad.
+- Idempotencia ante doble clic y repetición HTTP.
+- Historial con resultado y cantidad de intentos.
+- Endpoint `GET /facturas/correo/estado`.
+- Variables declarativas únicamente para Render Desarrollo.
+- Pruebas unitarias con servidor SMTP real en proceso.
+- Prueba E2E con SMTP efímero, fallo temporal intencional, reintento y captura `.eml`.
 
-La fase solo se cierra con entrega real y verificación de bandeja de entrada y spam.
+### Certificación aislada
+
+Commit funcional: `53db49dff838779a707c360bc3b0294939407387`.
+
+- `Desarrollo - Compilación y pruebas`, run `30302605498`: **success**.
+- `Desarrollo - aceptación funcional integral`, run `30302605307`: **success**.
+- `Fase 2 - Auditoría de configuración y dependencias`, run `30302605671`: **success**.
+
+```text
+52 pruebas totales
+52 aprobadas
+0 fallos
+0 errores
+0 omitidas
+```
+
+Artefacto:
+
+```text
+desarrollo-aceptacion-integral
+artifact id: 8667374072
+SHA-256: a1b022885921276b765c16020f1aea39606a0f597e44b5ae5abc26a7ad522a16
+```
+
+La evidencia certifica dos intentos SMTP, un fallo temporal, un único mensaje guardado y un PDF A4 válido de 126302 bytes.
+
+Detalle: `docs/FASE7_CERTIFICACION_CORREO.md`.
+
+### Límite y pendiente obligatorio
+
+La idempotencia actual es local al proceso; una versión distribuida persistente queda como mejora futura.
+
+Para cerrar la Fase 7 en sentido estricto falta configurar credenciales SMTP reales exclusivamente en `variapp-api-desarrollo`, enviar a un buzón controlado y comprobar:
+
+- recepción en bandeja de entrada;
+- comportamiento en spam;
+- remitente y Reply-To;
+- HTML y texto plano;
+- PDF adjunto correcto;
+- un solo correo ante doble clic;
+- historial y logs de Render Desarrollo.
+
+Producción no debe usarse ni modificarse para esta validación.
 
 ## FASE 8 — Validación completa — BLOQUEADA
 
-Se repetirá la auditoría de interfaz, responsive, impresión, imágenes, correo, configuración, rendimiento, consola, logs, advertencias, seguridad y accesibilidad. No debe quedar ningún defecto crítico o alto conocido.
+Permanece bloqueada hasta cerrar la aceptación externa de correo o registrar una excepción formal aprobada. Después se repetirá la auditoría de interfaz, responsive, impresión, imágenes, correo, configuración, rendimiento, consola, logs, advertencias, seguridad y accesibilidad.
 
 ## FASE 9 — Informe final — BLOQUEADA
 
