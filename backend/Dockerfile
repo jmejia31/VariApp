@@ -16,5 +16,7 @@ ENV DOTNET_EnableDiagnostics=0
 
 COPY --from=build /app/publish .
 
+USER $APP_UID
+
 EXPOSE 10000
 ENTRYPOINT ["dotnet", "InventoryApp.API.dll"]
