@@ -124,20 +124,47 @@ El detalle completo está en `docs/FASE2_AUDITORIA_GENERAL.md`.
 
 La auditoría no modificó Producción y no autoriza merge ni despliegue.
 
-## FASE 3 — Corrección de interfaz — SIGUIENTE, NO INICIADA
+## FASE 3 — Corrección de interfaz — COMPLETA Y CERTIFICADA
 
-Corregir textos cortados, superpuestos, fuera del contenedor o desalineados. Prioridades observadas:
+### Alcance ejecutado
+
+Se corrigieron y certificaron:
 
 - formulario administrativo de Usuario;
 - Perfil;
-- formulario de Producto;
-- lista y tabla de Productos;
-- cabecera, rol y acciones;
-- ayudas y errores de formularios.
+- formulario y galería de Producto;
+- búsqueda, filtros, tabla y tarjetas de Productos;
+- cabecera, nombre, rol y menú lateral;
+- ayudas, validaciones, errores y acciones.
 
-Criterio: ningún texto puede montarse, cortarse o desbordarse en los viewports certificados.
+### Correcciones cerradas
 
-## FASE 4 — Responsive — BLOQUEADA
+- Altura dinámica para ayudas y errores de Angular Material.
+- Textos multilínea sin superposición ni elipsis destructiva.
+- Cuadrículas con `min-width: 0` y separación vertical suficiente.
+- Jerarquía clara en Usuario y Producto.
+- Galería accesible con teclado y dispositivos táctiles.
+- Tabla con semántica nativa, desplazamiento propio y celdas estables.
+- Tarjetas móviles con nombres, clasificación y acciones completas.
+- Cabecera y rol adaptables a anchos reducidos.
+- Prueba visual específica con datos deliberadamente extensos.
+- Capturas completas de Usuario, Perfil, Producto y Productos en escritorio y teléfono.
+
+### Certificación
+
+Commit funcional final: `0bbc73f00bb8024e72a5837310456311d23f8740`.
+
+- `Desarrollo - Compilación y pruebas`, run `30268149664`: **success**.
+- `Desarrollo - aceptación funcional integral`, run `30268149490`: **success**.
+- `Fase 2 - Auditoría de configuración y dependencias`, run `30268149847`: **success**.
+
+La aceptación integral ejecutó 27 pruebas sin fallos ni errores. La prueba de Fase 3 certificó automáticamente ausencia de desbordamiento horizontal, textos recortados y campos superpuestos en 1440 × 1000 y 390 × 844.
+
+El detalle completo está en `docs/FASE3_CERTIFICACION_INTERFAZ.md`.
+
+La Fase 3 no modificó Producción y no autoriza merge ni despliegue.
+
+## FASE 4 — Responsive — SIGUIENTE, NO INICIADA
 
 Certificar el sistema en:
 
