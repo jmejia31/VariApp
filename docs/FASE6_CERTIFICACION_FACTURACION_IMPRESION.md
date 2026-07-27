@@ -108,15 +108,7 @@ Commit funcional certificado:
 14bf32069f9d87f731e59f230b9e9f5f16ade14e
 ```
 
-Commits documentales de cierre:
-
-```text
-0f46a5ba12978a539bd37d801624e845174766b1
-693559785c05172a1d354e51866445c420603366
-33424f6ceb7950d540df91fbb23caa5c95e91342
-3768c1fabf6dd764301420272ba2e8fa4fc8edbf
-1d0045d759a4e8447806c9b75bdb38c5ed6f4cd1
-```
+La documentación de cierre quedó versionada inmediatamente después del commit funcional.
 
 Ejecuciones sobre el commit funcional:
 
