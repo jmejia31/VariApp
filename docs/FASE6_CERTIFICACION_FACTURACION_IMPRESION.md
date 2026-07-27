@@ -63,18 +63,7 @@ Los botones indican el perfil que se descargará o abrirá para imprimir. La imp
 
 ## 8. Aceptación end-to-end
 
-`frontend/e2e/fase6-facturacion-impresion.spec.ts` crea productos y una venta en MySQL descartable, confirma la venta y certifica:
-
-1. catálogo completo;
-2. siete PDFs reales;
-3. firma y encabezados HTTP;
-4. dimensiones físicas mediante `MediaBox`;
-5. error 400 para formato inválido;
-6. selector y siete vistas previas;
-7. ausencia de desbordamiento;
-8. POS 58 en teléfono;
-9. descarga del perfil seleccionado;
-10. apertura del perfil seleccionado para impresión.
+`frontend/e2e/fase6-facturacion-impresion.spec.ts` crea productos y una venta en MySQL descartable, confirma la venta y certifica catálogo, siete PDFs, firma, encabezados, dimensiones físicas, error 400, selector, vistas previas, responsive, descarga e impresión.
 
 ## 9. Evidencia
 
@@ -119,12 +108,10 @@ Commit funcional certificado:
 14bf32069f9d87f731e59f230b9e9f5f16ade14e
 ```
 
-Commits documentales de cierre:
+Head documental de cierre:
 
 ```text
-0f46a5ba12978a539bd37d801624e845174766b1
-693559785c05172a1d354e51866445c420603366
-33424f6ceb7950d540df91fbb23caa5c95e91342
+3768c1fabf6dd764301420272ba2e8fa4fc8edbf
 ```
 
 Ejecuciones sobre el commit funcional:
