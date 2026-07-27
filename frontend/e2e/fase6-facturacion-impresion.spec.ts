@@ -98,10 +98,14 @@ async function seleccionarFormato(page: Page, codigo: FormatoCodigo): Promise<vo
   }
 
   await page.locator('.formato-field mat-select').click();
+  const listbox = page.getByRole('listbox', { name: 'Formato de papel para la factura' });
+  await expect(listbox).toBeVisible();
   await page.getByRole('option', {
     name: new RegExp(`^${escaparRegExp(nombreVisible(codigo))}`)
   }).click();
+  await expect(listbox).toBeHidden();
   await expect(preview).toHaveAttribute('data-formato', codigo);
+  await page.waitForTimeout(180);
 }
 
 async function expectNoDocumentOverflow(page: Page, tolerancia = 2): Promise<void> {
