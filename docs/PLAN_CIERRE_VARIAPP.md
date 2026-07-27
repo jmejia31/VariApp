@@ -38,7 +38,7 @@ Se estandarizaron los dos entornos oficiales sin modificar Producción:
 | Plataforma | varistorehn_producción (Producción) | varistorehn_desarrollo |
 |---|---|---|
 | GitHub | rama `main`, solo lectura | rama única `Desarrollo` |
-| Aiven | recursos productivos existentes; `avnadmin` se conserva | usuario de aplicación `varistorehn_desarrollo` y variables de Desarrollo existentes |
+| Aiven | recursos productivos existentes; `avnadmin` se conserva | usuario de aplicación y base `varistorehn_desarrollo` |
 | Cloudinary | claves, activos y variables productivas existentes | clave etiquetada `varistorehn_desarrollo` y prefijo `varistorehn_desarrollo/` |
 | Render | entorno y servicio productivos existentes, sin cambios | entorno Desarrollo y servicio técnico existente `variapp-api-desarrollo` |
 | Vercel | proyecto y dominio productivos existentes, sin cambios | proyecto técnico existente `variapp-desarrollo`, rama `Desarrollo` |
@@ -72,30 +72,59 @@ La Fase 1 queda cerrada con la confirmación del propietario de que:
 - únicamente pueden retirarse duplicados ajenos a ambos entornos y previamente verificados;
 - todo trabajo continúa exclusivamente en `Desarrollo`.
 
-Las comprobaciones profundas de conexiones, permisos, variables, certificados y dependencias pasan a la Fase 2.
+## FASE 2 — Auditoría general — COMPLETA Y CERTIFICADA
 
-## FASE 2 — Auditoría general — SIGUIENTE, NO INICIADA
+### Alcance ejecutado
 
-### Alcance
+Se auditaron:
 
-Revisar de extremo a extremo:
+- configuración de backend, frontend, Docker, Render y Vercel;
+- variables declarativas y ausencia de secretos versionados;
+- conexión MySQL, estrategia de migraciones y readiness;
+- autenticación JWT, renovación, permisos y alcance por usuario;
+- CORS, host filtering, proxy inverso y encabezados HTTP;
+- almacenamiento Cloudinary;
+- SMTP y manejo de errores;
+- dependencias .NET y npm;
+- colas, tareas programadas y servicios en segundo plano;
+- logs, auditoría, dominios, TLS y observabilidad.
 
-- configuraciones;
-- servicios y despliegues;
-- variables y secretos sin revelar sus valores;
-- conexiones e integraciones;
-- bases de datos y almacenamiento;
-- autenticación y APIs;
-- colas y tareas programadas;
-- permisos y certificados;
-- dominios, DNS y CORS;
-- logs, alertas y observabilidad.
+### Correcciones cerradas
 
-### Criterio
+- Rate limiting por IP para `POST /auth/login`.
+- Validación temprana de secreto, issuer y audience JWT.
+- `ForwardLimit=1` para encabezados del proxy.
+- HSTS y encabezados defensivos para la API.
+- Endpoints separados `/health` y `/health/ready`.
+- Contenedor Docker ejecutado como usuario no privilegiado.
+- `AllowedHosts` restringido al host de Render Desarrollo.
+- Logo de Desarrollo servido desde Vercel Desarrollo, sin dependencia productiva.
+- Eliminación de la referencia obsoleta `Microsoft.AspNetCore.Http.Abstractions 2.2.0`.
+- Resolución de la vulnerabilidad crítica transitiva `System.Text.Encodings.Web 4.5.0`.
+- Auditoría npm productiva sin vulnerabilidades altas o críticas.
+- Workflow permanente `.github/workflows/fase2-auditoria.yml`.
 
-Producción y Desarrollo deben ser consistentes en arquitectura, pero independientes en datos, credenciales y ejecución. La auditoría no autoriza ningún cambio productivo.
+### Certificación
 
-## FASE 3 — Corrección de interfaz — BLOQUEADA
+Commit funcional auditado: `20e5bbc917c02946433948355c5c20697b0fe259`.
+
+- `Desarrollo - Compilación y pruebas`, run `30263028300`: **success**.
+- `Desarrollo - aceptación funcional integral`, run `30263028360`: **success**.
+- `Fase 2 - Auditoría de configuración y dependencias`, run `30263028335`: **success**.
+
+El detalle completo está en `docs/FASE2_AUDITORIA_GENERAL.md`.
+
+### Riesgos residuales documentados
+
+- JWT almacenado en `localStorage`; migrarlo a cookies HttpOnly requiere una fase de arquitectura y CSRF.
+- Cloudinary puede compartir product environment; el aislamiento actual usa clave, prefijo y bloqueo de borrado.
+- SMTP no tiene cola persistente ni reintento; se resolverá en Fase 7.
+- No existe observabilidad centralizada externa; queda como recomendación futura.
+- El proyecto Vercel productivo puede generar Preview de `Desarrollo`; desactivarlo exigiría modificar Producción y no se realizó.
+
+La auditoría no modificó Producción y no autoriza merge ni despliegue.
+
+## FASE 3 — Corrección de interfaz — SIGUIENTE, NO INICIADA
 
 Corregir textos cortados, superpuestos, fuera del contenedor o desalineados. Prioridades observadas:
 
