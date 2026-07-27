@@ -12,7 +12,7 @@ namespace InventoryApp.Tests;
 public class SmtpEmailServiceTests
 {
     [Fact]
-    public void ObtenerEstadoConfiguracion_No_Expone_Secretos()
+    public void ObtenerEstadoConfiguracion_No_Expone_Secretos_Y_Declara_Seguridad()
     {
         var service = CrearServicio(new Dictionary<string, string?>
         {
@@ -31,7 +31,25 @@ public class SmtpEmailServiceTests
         Assert.Equal("***.example.com", estado.Host);
         Assert.Equal("fa***@desarrollo.example.com", estado.RemitenteEnmascarado);
         Assert.DoesNotContain("secreto", estado.Mensaje, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("STARTTLS obligatorio", estado.ModoSeguridad);
         Assert.Equal(3, estado.MaximoIntentos);
+    }
+
+    [Fact]
+    public async Task ProbarConexionAsync_Comprueba_Conexion_Y_Autenticacion_Sin_Enviar_Mensaje()
+    {
+        await using var servidor = new FakeSmtpServer(fallosTransitorios: 0);
+        await servidor.StartAsync();
+        var service = CrearServicio(ConfiguracionServidor(servidor.Port));
+
+        var resultado = await service.ProbarConexionAsync();
+
+        Assert.True(resultado.Exito, resultado.Mensaje);
+        Assert.Equal("SMTP_OK", resultado.Codigo);
+        Assert.True(resultado.Autenticado);
+        Assert.Equal("Sin TLS", resultado.ModoSeguridad);
+        Assert.Equal(0, servidor.IntentosData);
+        Assert.Empty(servidor.Mensajes);
     }
 
     [Fact]
@@ -40,21 +58,7 @@ public class SmtpEmailServiceTests
         await using var servidor = new FakeSmtpServer(fallosTransitorios: 1);
         await servidor.StartAsync();
 
-        var service = CrearServicio(new Dictionary<string, string?>
-        {
-            ["Smtp:Host"] = "127.0.0.1",
-            ["Smtp:Port"] = servidor.Port.ToString(),
-            ["Smtp:UsuarioSmtp"] = "smtp-user",
-            ["Smtp:PasswordSmtp"] = "smtp-pass",
-            ["Smtp:UsarSsl"] = "false",
-            ["Smtp:RequiereAutenticacion"] = "true",
-            ["Smtp:CorreoRemitente"] = "facturas@desarrollo.test",
-            ["Smtp:NombreRemitente"] = "VariStorehn Desarrollo",
-            ["Smtp:TimeoutSeconds"] = "10",
-            ["Smtp:MaxAttempts"] = "3",
-            ["Smtp:RetryBaseDelayMilliseconds"] = "50"
-        });
-
+        var service = CrearServicio(ConfiguracionServidor(servidor.Port));
         var pdf = Encoding.UTF8.GetBytes("%PDF-1.7 factura fase 7");
         var resultado = await service.EnviarAsync(
             "cliente@example.com",
@@ -87,7 +91,7 @@ public class SmtpEmailServiceTests
     }
 
     [Fact]
-    public async Task EnviarAsync_Rechaza_Destinatario_Invalido_Sin_Conectar()
+    public async Task EnviarAsync_Rechaza_Destinatario_Mal_Formado_Sin_Conectar()
     {
         var service = CrearServicio(new Dictionary<string, string?>
         {
@@ -99,12 +103,27 @@ public class SmtpEmailServiceTests
             ["Smtp:CorreoRemitente"] = "facturas@desarrollo.test"
         });
 
-        var resultado = await service.EnviarAsync("correo-invalido", "Factura", "<p>Prueba</p>");
+        var resultado = await service.EnviarAsync("correo invalido", "Factura", "<p>Prueba</p>");
 
         Assert.False(resultado.Exito);
         Assert.Equal("DESTINATARIO_INVALIDO", resultado.Codigo);
         Assert.Equal(0, resultado.Intentos);
     }
+
+    private static Dictionary<string, string?> ConfiguracionServidor(int puerto) => new()
+    {
+        ["Smtp:Host"] = "127.0.0.1",
+        ["Smtp:Port"] = puerto.ToString(),
+        ["Smtp:UsuarioSmtp"] = "smtp-user",
+        ["Smtp:PasswordSmtp"] = "smtp-pass",
+        ["Smtp:UsarSsl"] = "false",
+        ["Smtp:RequiereAutenticacion"] = "true",
+        ["Smtp:CorreoRemitente"] = "facturas@desarrollo.test",
+        ["Smtp:NombreRemitente"] = "VariStorehn Desarrollo",
+        ["Smtp:TimeoutSeconds"] = "10",
+        ["Smtp:MaxAttempts"] = "3",
+        ["Smtp:RetryBaseDelayMilliseconds"] = "50"
+    };
 
     private static SmtpEmailService CrearServicio(Dictionary<string, string?> values)
     {
