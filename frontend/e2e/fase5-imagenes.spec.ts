@@ -2,6 +2,7 @@ import { test, expect, Page, Route } from '@playwright/test';
 
 const ADMIN_USERNAME = process.env['PHASE7_ADMIN_USERNAME'] ?? 'e2e_admin';
 const ADMIN_PASSWORD = process.env['PHASE7_ADMIN_PASSWORD'] ?? 'E2E.Admin#2026!';
+const evidenceDirectory = 'test-results/fase5';
 
 const okImage = 'https://fase5.invalid/producto-ok.svg';
 const brokenImage = 'https://fase5.invalid/producto-roto.webp';
@@ -119,45 +120,25 @@ async function login(page: Page): Promise<void> {
 }
 
 async function json(route: Route, data: unknown): Promise<void> {
-  await route.fulfill({
-    status: 200,
-    contentType: 'application/json',
-    body: JSON.stringify({ success: true, data })
-  });
+  await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true, data }) });
 }
 
 async function installFixtures(page: Page): Promise<void> {
-  await page.route(okImage, async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: 'image/svg+xml',
-      body: '<svg xmlns="http://www.w3.org/2000/svg" width="320" height="320"><rect width="320" height="320" fill="#2563eb"/><circle cx="160" cy="135" r="72" fill="#fff"/><text x="160" y="255" text-anchor="middle" fill="#fff" font-size="32">Fase 5</text></svg>'
-    });
-  });
+  await page.route(okImage, (route) => route.fulfill({
+    status: 200,
+    contentType: 'image/svg+xml',
+    body: '<svg xmlns="http://www.w3.org/2000/svg" width="320" height="320"><rect width="320" height="320" fill="#2563eb"/><circle cx="160" cy="135" r="72" fill="#fff"/><text x="160" y="255" text-anchor="middle" fill="#fff" font-size="32">Fase 5</text></svg>'
+  }));
   await page.route(brokenImage, (route) => route.abort('failed'));
 
-  await page.route(/\/api\/productos(?:\?.*)?$/, (route) => json(route, {
-    items: [product, productWithoutImage],
-    totalCount: 2,
-    page: 1,
-    pageSize: 200,
-    totalPages: 1
-  }));
+  await page.route(/\/api\/productos(?:\?.*)?$/, (route) => json(route, { items: [product, productWithoutImage], totalCount: 2, page: 1, pageSize: 200, totalPages: 1 }));
   await page.route('**/api/productos/501', (route) => json(route, product));
 
   await page.route(/\/api\/compras(?:\?.*)?$/, (route) => {
     if (route.request().method() === 'POST') return json(route, purchase);
     return json(route, { items: [purchase], totalCount: 1, page: 1, pageSize: 10, totalPages: 1 });
   });
-  await page.route('**/api/compras/calcular', (route) => json(route, {
-    importeBruto: 100,
-    subtotal: 100,
-    subtotalNeto: 100,
-    impuestosAplicados: [],
-    impuestoIncluido: 0,
-    impuestoAdicional: 0,
-    total: 100
-  }));
+  await page.route('**/api/compras/calcular', (route) => json(route, { importeBruto: 100, subtotal: 100, subtotalNeto: 100, impuestosAplicados: [], impuestoIncluido: 0, impuestoAdicional: 0, total: 100 }));
   await page.route('**/api/compras/601', (route) => json(route, purchase));
   await page.route('**/api/compras/601/documentos', (route) => json(route, []));
 
@@ -165,16 +146,7 @@ async function installFixtures(page: Page): Promise<void> {
     if (route.request().method() === 'POST') return json(route, sale);
     return json(route, { items: [sale], totalCount: 1, page: 1, pageSize: 10, totalPages: 1 });
   });
-  await page.route('**/api/ventas/calcular', (route) => json(route, {
-    importeBruto: 180,
-    subtotal: 180,
-    subtotalNeto: 180,
-    descuentosAplicados: [],
-    totalDescuento: 0,
-    impuestosAplicados: [],
-    totalImpuesto: 0,
-    total: 180
-  }));
+  await page.route('**/api/ventas/calcular', (route) => json(route, { importeBruto: 180, subtotal: 180, subtotalNeto: 180, descuentosAplicados: [], totalDescuento: 0, impuestosAplicados: [], totalImpuesto: 0, total: 180 }));
   await page.route('**/api/ventas/701', (route) => json(route, sale));
 
   await page.route(/\/api\/inventario\/movimientos(?:\?.*)?$/, (route) => json(route, [{
@@ -198,6 +170,10 @@ async function expectNoOverflow(page: Page): Promise<void> {
   expect(overflow).toBeLessThanOrEqual(2);
 }
 
+async function capture(page: Page, name: string): Promise<void> {
+  await page.screenshot({ path: `${evidenceDirectory}/${name}.png`, fullPage: true });
+}
+
 test.describe('Fase 5 - tratamiento integral de imágenes', () => {
   test.beforeEach(async ({ page }) => {
     await login(page);
@@ -211,6 +187,7 @@ test.describe('Fase 5 - tratamiento integral de imágenes', () => {
     await expect(valid).toHaveAttribute('loading', 'lazy');
     await expect(page.getByRole('img', { name: `${productWithoutImage.nombre} no tiene imagen disponible` }).first()).toBeVisible();
     await expectNoOverflow(page);
+    await capture(page, 'productos-listado-fallback');
   });
 
   test('Detalle prioriza la imagen principal y la galería es operable con teclado', async ({ page }) => {
@@ -219,12 +196,14 @@ test.describe('Fase 5 - tratamiento integral de imágenes', () => {
     await expect(hero).toBeVisible();
     await expect(hero).toHaveAttribute('loading', 'eager');
     await expect(hero).toHaveAttribute('fetchpriority', 'high');
+    await capture(page, 'producto-detalle-galeria');
 
     const secondTrigger = page.getByRole('button', { name: /Ampliar imagen 2/ });
     await secondTrigger.focus();
     await page.keyboard.press('Enter');
     await expect(page.getByRole('dialog', { name: /Imagen ampliada/ })).toBeVisible();
     await expect(page.getByRole('img', { name: /No se pudo cargar la imagen ampliada/ })).toBeVisible();
+    await capture(page, 'producto-lightbox-fallback');
     await page.keyboard.press('Escape');
     await expect(page.getByRole('dialog')).toBeHidden();
     await expectNoOverflow(page);
@@ -233,23 +212,31 @@ test.describe('Fase 5 - tratamiento integral de imágenes', () => {
   test('Compras y Ventas muestran imágenes o fallback en listas, formularios y detalles', async ({ page }) => {
     await page.goto('/compras');
     await expect(page.locator('app-producto-imagen img').first()).toBeVisible();
+    await capture(page, 'compras-listado');
+
     await page.goto('/compras/601');
     await expect(page.locator('.producto-imagen-cell app-producto-imagen img')).toBeVisible();
+    await capture(page, 'compra-detalle');
 
     await page.goto('/compras/nueva');
     await page.locator('.col-producto mat-select').first().click();
     await page.getByRole('option', { name: /Producto visual Fase 5/ }).click();
     await expect(page.locator('.col-imagen app-producto-imagen img')).toBeVisible();
+    await capture(page, 'compra-formulario');
 
     await page.goto('/ventas');
     await expect(page.locator('app-producto-imagen img').first()).toBeVisible();
+    await capture(page, 'ventas-listado');
+
     await page.goto('/ventas/701');
     await expect(page.locator('.producto-imagen-cell app-producto-imagen img')).toBeVisible();
+    await capture(page, 'venta-detalle');
 
     await page.goto('/ventas/nueva');
     await page.locator('.col-producto mat-select').first().click();
     await page.getByRole('option', { name: /Producto visual Fase 5/ }).click();
     await expect(page.locator('.col-imagen app-producto-imagen img')).toBeVisible();
+    await capture(page, 'venta-formulario');
     await expectNoOverflow(page);
   });
 
@@ -259,5 +246,6 @@ test.describe('Fase 5 - tratamiento integral de imágenes', () => {
     await expect(image).toBeVisible();
     await expect(image).toHaveAttribute('alt', /Imagen de Producto visual Fase 5/);
     await expectNoOverflow(page);
+    await capture(page, 'movimientos-inventario');
   });
 });
