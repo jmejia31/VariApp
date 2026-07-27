@@ -3,4 +3,4 @@ Traceback (most recent call last):
     replace_once(
   File "/home/runner/work/VariApp/VariApp/scripts/fase5_aplicar_interfaz.py", line 15, in replace_once
     raise RuntimeError(f'No se encontró el bloque esperado en {path}: {old[:120]!r}')
-RuntimeError: No se encontró el bloque esperado en .github/workflows/catalogos-aceptacion.yml: '            e2e/fase4-responsive.spec.ts \\\n            e2e/phase7-admin-role.spec.ts'
+RuntimeError: No se encontró el bloque esperado en .github/workflows/catalogos-aceptacion.yml: '            e2e/fase4-responsive.spec.ts     e2e/sesion-inactividad.spec.ts     e2e/matriz-modulos-visual.spec.ts     e2'
