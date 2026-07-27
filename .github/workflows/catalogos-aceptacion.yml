@@ -43,6 +43,32 @@ jobs:
           ref: Desarrollo
           fetch-depth: 0
 
+      - name: Corregir referencia final de la transformación
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('scripts/fase5_aplicar_interfaz.py')
+          text = path.read_text(encoding='utf-8')
+          old = """    '''            e2e/fase4-responsive.spec.ts \\
+             e2e/phase7-admin-role.spec.ts''',
+              '''            e2e/fase4-responsive.spec.ts \\
+             e2e/fase5-imagenes.spec.ts \\
+             e2e/phase7-admin-role.spec.ts'''"""
+          new = """    '''            e2e/fase4-responsive.spec.ts \\
+             e2e/sesion-inactividad.spec.ts \\
+             e2e/matriz-modulos-visual.spec.ts \\
+             e2e/phase7-admin-role.spec.ts''',
+              '''            e2e/fase4-responsive.spec.ts \\
+             e2e/fase5-imagenes.spec.ts \\
+             e2e/sesion-inactividad.spec.ts \\
+             e2e/matriz-modulos-visual.spec.ts \\
+             e2e/phase7-admin-role.spec.ts'''"""
+          if old not in text:
+              raise SystemExit('No se encontró el bloque final esperado para corregir.')
+          path.write_text(text.replace(old, new, 1), encoding='utf-8')
+          PY
+
       - name: Aplicar cambios deterministas
         run: python scripts/fase5_aplicar_interfaz.py
 
@@ -53,7 +79,10 @@ jobs:
         run: |
           rm scripts/fase5_aplicar_interfaz.py
           rm scripts/fase5_restaurar_workflow.py
+          rm -f scripts/pathlib.py scripts/sitecustomize.py
           rm -f .github/workflows/fase5-aplicar-interfaz.yml
+          rm -f .github/checkpoints/fase5-transform-error.txt
+          rm -f frontend/src/app/shared/producto-imagen/fase5-trigger.ts
 
       - name: Publicar directamente en Desarrollo
         run: |
