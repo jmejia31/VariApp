@@ -145,8 +145,10 @@ test.describe('Fase 7 - correo SMTP aislado', () => {
     await loginUi(page);
     await page.goto(`/facturas/${invoice.id}`);
     await page.getByRole('button', { name: 'Enviar por correo' }).click();
+    const correoInput = page.locator('.panel-correo input');
     await expect(page.locator('.panel-correo')).toBeVisible();
-    await expect(page.locator('.panel-correo input')).toHaveValue('fase7@example.com');
+    await correoInput.fill('fase7@example.com');
+    await expect(correoInput).toHaveValue('fase7@example.com');
     await expect(page.locator('.panel-correo').getByRole('button', { name: 'Enviar' })).toBeEnabled();
     await expectNoOverflow(page);
     await page.screenshot({ path: 'test-results/fase7/correo-panel-mobile.png', fullPage: true });
