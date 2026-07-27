@@ -61,7 +61,25 @@ jobs:
         run: python scripts/fase5_aplicar_interfaz.py
 
       - name: Restaurar workflow permanente
-        run: python scripts/fase5_restaurar_workflow.py
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('.github/workflows/catalogos-aceptacion.yml')
+          text = path.read_text(encoding='utf-8')
+          text = text.replace('permissions:\n  contents: write\n', 'permissions:\n  contents: read\n', 1)
+          start = text.index('  aplicar_fase5:\n')
+          end = text.index('  acceptance:\n', start)
+          text = text[:start] + text[end:]
+          text = text.replace('  acceptance:\n    if: ${{ false }}\n', '  acceptance:\n', 1)
+          fase4 = '            e2e/fase4-responsive.spec.ts \\\n'
+          fase5 = '            e2e/fase5-imagenes.spec.ts \\\n'
+          if fase5 not in text:
+              if fase4 not in text:
+                  raise SystemExit('No se encontró la prueba de Fase 4 en el workflow permanente.')
+              text = text.replace(fase4, fase4 + fase5, 1)
+          path.write_text(text, encoding='utf-8')
+          PY
 
       - name: Retirar utilidades temporales
         run: |
