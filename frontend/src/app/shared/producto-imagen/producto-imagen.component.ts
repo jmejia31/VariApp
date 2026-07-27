@@ -38,7 +38,7 @@ export type ProductoImagenVariant = 'option' | 'thumbnail' | 'line' | 'card' | '
     :host([data-variant='option']) { width: 34px; height: 34px; }
     :host([data-variant='thumbnail']) { width: 44px; height: 44px; }
     :host([data-variant='line']) { width: 52px; height: 52px; }
-    :host([data-variant='card']) { width: 64px; height: 64px; }
+    :host([data-variant='card']) { width: 100%; max-width: 64px; aspect-ratio: 1; }
     :host([data-variant='hero']) { width: min(100%, 360px); aspect-ratio: 1; }
     :host([data-variant='gallery']) { width: 100%; height: 100%; }
     :host([data-variant='lightbox']) { width: min(92vw, 1100px); height: min(86dvh, 900px); }
@@ -55,6 +55,7 @@ export type ProductoImagenVariant = 'option' | 'thumbnail' | 'line' | 'card' | '
       color: var(--color-text-muted);
     }
 
+    :host([data-variant='card']) .frame,
     :host([data-variant='hero']) .frame,
     :host([data-variant='gallery']) .frame {
       aspect-ratio: 1;
@@ -177,5 +178,3 @@ export class ProductoImagenComponent implements OnChanges {
     this.loaded.set(false);
   }
 }
-
-// Fase 5: el componente se certifica mediante la matriz E2E de imágenes.
