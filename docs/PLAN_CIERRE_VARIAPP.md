@@ -166,20 +166,53 @@ El detalle completo está en `docs/FASE3_CERTIFICACION_INTERFAZ.md`.
 
 La Fase 3 no modificó Producción y no autoriza merge ni despliegue.
 
-## FASE 4 — Responsive — SIGUIENTE, NO INICIADA
+## FASE 4 — Responsive — COMPLETA Y CERTIFICADA
 
-Certificar el sistema en:
+### Matriz ejecutada
 
-- teléfonos pequeños y grandes;
-- tablets;
-- laptops;
-- Full HD;
-- 2K;
-- 4K.
+Se certificaron ocho resoluciones:
 
-Se revisarán tipografía fluida, grids, tablas, paneles, diálogos, navegación, formularios, acciones y áreas táctiles.
+- 320 × 568;
+- 430 × 932;
+- 768 × 1024;
+- 1024 × 768;
+- 1366 × 768;
+- 1920 × 1080;
+- 2560 × 1440;
+- 3840 × 2160.
 
-## FASE 5 — Imágenes — BLOQUEADA
+Cada resolución navegó 30 rutas de módulos y formularios, para un total de 240 navegaciones responsive específicas.
+
+### Comprobaciones cerradas
+
+- Sin desbordamiento horizontal del documento.
+- Títulos, subtítulos, formularios, acciones, paginadores y pie dentro del viewport.
+- Textos críticos sin recortes destructivos.
+- Menú móvil verificable en teléfonos y tablet vertical.
+- Menú permanente estable desde tablet horizontal.
+- Controles públicos con dimensiones utilizables.
+- Sin errores de consola o ejecución durante la navegación.
+- 32 capturas representativas de Dashboard, Productos, Producto y Venta.
+
+### Defecto corregido
+
+La tabla de Auditoría desbordaba 63 px en 1024 × 768. Se añadió un contenedor de desplazamiento horizontal accesible que conserva la semántica de tabla y limita el desplazamiento al área de resultados.
+
+### Certificación
+
+Commit funcional final: `898ada1d9e4c5c22353ba0fbed5589c52a0366de`.
+
+- `Desarrollo - Compilación y pruebas`, run `30276203737`: **success**.
+- `Desarrollo - aceptación funcional integral`, run `30276203714`: **success**.
+- `Fase 2 - Auditoría de configuración y dependencias`, run `30276203753`: **success**.
+
+La aceptación integral ejecutó 43 pruebas: 0 fallos, 0 errores y 0 omitidas.
+
+El detalle completo está en `docs/FASE4_CERTIFICACION_RESPONSIVE.md`.
+
+La Fase 4 no modificó Producción y no autoriza merge ni despliegue.
+
+## FASE 5 — Imágenes — SIGUIENTE, NO INICIADA
 
 Mostrar la imagen principal cuando exista, con fallback accesible y carga eficiente, especialmente en:
 
@@ -187,6 +220,8 @@ Mostrar la imagen principal cuando exista, con fallback accesible y carga eficie
 - Compras;
 - Ventas;
 - detalles e historial.
+
+Se revisarán dimensiones, relación de aspecto, carga diferida, textos alternativos, fallbacks, miniaturas, galerías y consistencia entre escritorio y móvil.
 
 ## FASE 6 — Facturación e impresión — BLOQUEADA
 
