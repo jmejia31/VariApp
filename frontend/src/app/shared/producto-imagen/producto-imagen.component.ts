@@ -177,3 +177,5 @@ export class ProductoImagenComponent implements OnChanges {
     this.loaded.set(false);
   }
 }
+
+// Fase 5: el componente se certifica mediante la matriz E2E de imágenes.
