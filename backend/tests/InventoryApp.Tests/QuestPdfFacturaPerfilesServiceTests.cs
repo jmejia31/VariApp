@@ -46,7 +46,7 @@ public class QuestPdfFacturaPerfilesServiceTests
     [Theory]
     [InlineData(FacturaFormatoPdf.Pos58, 164.41)]
     [InlineData(FacturaFormatoPdf.Pos80, 226.77)]
-    public async Task GenerarPdfAsync_Respeta_Ancho_Termico_Y_Altura_Continua(
+    public async Task GenerarPdfAsync_Respeta_Ancho_Termico_Y_No_Impone_A4_O_297Mm(
         FacturaFormatoPdf formato,
         double anchoEsperado)
     {
@@ -56,6 +56,42 @@ public class QuestPdfFacturaPerfilesServiceTests
         var (ancho, alto) = LeerMediaBox(pdf);
         Assert.InRange(ancho, anchoEsperado - 2.5, anchoEsperado + 2.5);
         Assert.True(alto > ancho, $"El rollo continuo debe crecer verticalmente. MediaBox: {ancho} × {alto}.");
+        Assert.True(alto < 800, $"El ticket corto no debe convertirse en una hoja A4/297 mm. MediaBox: {ancho} × {alto}.");
+        Assert.NotInRange(alto, 839, 845);
+    }
+
+    [Theory]
+    [InlineData(FacturaFormatoPdf.Pos58)]
+    [InlineData(FacturaFormatoPdf.Pos80)]
+    public async Task GenerarPdfAsync_Altura_Termica_Crece_Con_El_Contenido(FacturaFormatoPdf formato)
+    {
+        var corta = CrearFactura();
+        corta.Detalles = [corta.Detalles[0]];
+        corta.DescuentosAplicados = [];
+        corta.ImpuestosAplicados = [];
+        corta.Observaciones = null;
+
+        var larga = CrearFactura();
+        larga.Detalles = Enumerable.Range(1, 18)
+            .Select(indice => new FacturaDetalleDto
+            {
+                ProductoNombre = $"Producto térmico número {indice} con descripción extensa para validar crecimiento",
+                ProductoMarca = "VariStore",
+                ProductoModelo = $"POS-{indice:00}",
+                Cantidad = indice % 3 + 1,
+                PrecioUnitario = 125.50m,
+                Subtotal = 251m
+            })
+            .ToList();
+
+        var pdfCorto = await _service.GenerarPdfAsync(corta, formato);
+        var pdfLargo = await _service.GenerarPdfAsync(larga, formato);
+        var (_, altoCorto) = LeerMediaBox(pdfCorto);
+        var (_, altoLargo) = LeerMediaBox(pdfLargo);
+
+        Assert.True(
+            altoLargo > altoCorto + 100,
+            $"La altura continua debe responder al contenido. Corto={altoCorto}; largo={altoLargo}.");
     }
 
     [Fact]
