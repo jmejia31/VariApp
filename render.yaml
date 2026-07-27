@@ -12,6 +12,8 @@ services:
     envVars:
       - key: ASPNETCORE_ENVIRONMENT
         value: Staging
+      - key: AllowedHosts
+        value: variapp-api-desarrollo.onrender.com
       - key: Database__ServerVersion
         value: 8.4.3
       - key: Database__ApplyMigrationsOnStartup
@@ -26,6 +28,8 @@ services:
         value: VariApp.Desarrollo.Frontend
       - key: Jwt__ExpiraMinutos
         value: "120"
+      - key: Security__LoginRateLimitPerMinute
+        value: "20"
       - key: Cloudinary__CloudName
         sync: false
       - key: Cloudinary__ApiKey
@@ -39,7 +43,7 @@ services:
       - key: AppSettings__BackendPublicUrl
         value: https://variapp-api-desarrollo.onrender.com
       - key: AppSettings__LogoPublicUrl
-        value: https://varistorehn.vercel.app/assets/varistorehn-logo.png
+        value: https://variapp-desarrollo.vercel.app/assets/varistorehn-logo.png
       - key: AppSettings__EnlacePublicoFacturaHorasValidez
         value: "24"
       - key: AppSettings__EnlacePublicoFacturaMaximoAccesos
