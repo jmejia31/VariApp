@@ -158,7 +158,13 @@ Commit funcional certificado:
 898ada1d9e4c5c22353ba0fbed5589c52a0366de
 ```
 
-Resultados de GitHub Actions:
+Commit documental de cierre:
+
+```text
+4425c0fdc21a798079d728acfc0022d13f8a716f
+```
+
+Resultados de GitHub Actions sobre el commit funcional:
 
 - `Desarrollo - Compilación y pruebas`, run `30276203737`: **success**.
 - `Desarrollo - aceptación funcional integral`, run `30276203714`: **success**.
