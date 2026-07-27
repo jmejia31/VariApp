@@ -44,6 +44,10 @@ async function createCatalog(
   return await dataOf(response);
 }
 
+async function waitForSelectToClose(page: Page): Promise<void> {
+  await expect(page.locator('.cdk-overlay-backdrop')).toHaveCount(0, { timeout: 10_000 });
+}
+
 test('Productos filtra por relaciones normalizadas y estado de inventario', async ({ request, page }) => {
   const token = await loginApi(request);
   const brand = await createCatalog(request, token, 'marcas', { nombre: `Filtro Marca ${suffix}`, orden: 1 });
@@ -100,23 +104,36 @@ test('Productos filtra por relaciones normalizadas y estado de inventario', asyn
   await expect(brandSelect).toBeEnabled();
   await brandSelect.click();
   await page.getByRole('option', { name: brand.nombre, exact: true }).click();
+  await expect(brandSelect).toContainText(brand.nombre);
+  await waitForSelectToClose(page);
 
   const modelSelect = page.getByRole('combobox', { name: 'Modelo' });
   await expect(modelSelect).toBeEnabled();
   await modelSelect.click();
   await page.getByRole('option', { name: model.nombre, exact: true }).click();
+  await expect(modelSelect).toContainText(model.nombre);
+  await waitForSelectToClose(page);
 
   const colorSelect = page.getByRole('combobox', { name: 'Color' });
+  await expect(colorSelect).toBeEnabled();
   await colorSelect.click();
   await page.getByRole('option', { name: color.nombre, exact: true }).click();
+  await expect(colorSelect).toContainText(color.nombre);
+  await waitForSelectToClose(page);
 
   const sizeSelect = page.getByRole('combobox', { name: 'Talla o tamaño' });
+  await expect(sizeSelect).toBeEnabled();
   await sizeSelect.click();
   await page.getByRole('option', { name: size.nombre, exact: true }).click();
+  await expect(sizeSelect).toContainText(size.nombre);
+  await waitForSelectToClose(page);
 
   const statusSelect = page.getByRole('combobox', { name: 'Estado' });
+  await expect(statusSelect).toBeEnabled();
   await statusSelect.click();
   await page.getByRole('option', { name: 'Agotados', exact: true }).click();
+  await expect(statusSelect).toContainText('Agotados');
+  await waitForSelectToClose(page);
 
   const row = page.locator('table.table-desktop tbody tr', { hasText: productName });
   await expect(row).toBeVisible();
