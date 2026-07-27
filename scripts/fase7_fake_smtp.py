@@ -129,7 +129,10 @@ async def handle_client(reader: asyncio.StreamReader, writer: asyncio.StreamWrit
         print(f"SMTP client disconnected: {exc}", flush=True)
     finally:
         writer.close()
-        await writer.wait_closed()
+        try:
+            await writer.wait_closed()
+        except (ConnectionError, BrokenPipeError):
+            pass
 
 
 async def main() -> None:
