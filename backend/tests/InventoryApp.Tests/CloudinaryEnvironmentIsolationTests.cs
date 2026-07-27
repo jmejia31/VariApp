@@ -14,7 +14,7 @@ public class CloudinaryEnvironmentIsolationTests
             ["Cloudinary:CloudName"] = "variapp-test",
             ["Cloudinary:ApiKey"] = "test-key",
             ["Cloudinary:ApiSecret"] = "test-secret",
-            ["Cloudinary:EnvironmentPrefix"] = "desarrollo"
+            ["Cloudinary:EnvironmentPrefix"] = "varistorehn_desarrollo"
         };
 
         return new ConfigurationBuilder()
