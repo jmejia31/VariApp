@@ -24,24 +24,17 @@
     <div class="table-scroll" tabindex="0" aria-label="Tabla desplazable de movimientos de inventario">
       <table class="table">
         <caption class="sr-only">Historial de movimientos de inventario</caption>
-        <thead>
-          <tr><th scope="col">Fecha</th><th scope="col">Producto</th><th scope="col">Tipo</th><th scope="col">Cantidad</th><th scope="col">Stock anterior</th><th scope="col">Stock posterior</th><th scope="col">Referencia</th><th scope="col">Responsable</th></tr>
-        </thead>
+        <thead><tr><th scope="col"><span class="sr-only">Imagen</span></th><th scope="col">Fecha</th><th scope="col">Producto</th><th scope="col">Tipo</th><th scope="col">Cantidad</th><th scope="col">Stock anterior</th><th scope="col">Stock posterior</th><th scope="col">Referencia</th><th scope="col">Responsable</th></tr></thead>
         <tbody>
           @for (m of movimientos(); track m.id) {
             <tr>
+              <td class="producto-imagen-cell"><app-producto-imagen variant="thumbnail" [src]="m.productoImagenPrincipalUrl" [alt]="'Imagen de ' + m.productoNombre" [fallbackLabel]="m.productoNombre + ' no tiene imagen disponible'" loading="lazy"></app-producto-imagen></td>
               <td>{{ m.fecha | date:'dd/MM/yyyy HH:mm' }}</td>
               <td>{{ m.productoNombre }}</td>
               <td><span class="tipo" [class.entrada]="m.tipo === 'Entrada'" [class.salida]="m.tipo === 'Salida'" [class.reversion]="m.tipo === 'Reversion'">{{ m.tipo === 'Reversion' ? 'Reversión' : m.tipo }}</span></td>
-              <td>{{ m.cantidad }}</td>
-              <td>{{ m.stockAnterior }}</td>
-              <td>{{ m.stockNuevo }}</td>
-              <td>{{ m.referenciaTipo }} #{{ m.referenciaId }}</td>
-              <td>{{ m.creadoPorNombreUsuario || '—' }}</td>
+              <td>{{ m.cantidad }}</td><td>{{ m.stockAnterior }}</td><td>{{ m.stockNuevo }}</td><td>{{ m.referenciaTipo }} #{{ m.referenciaId }}</td><td>{{ m.creadoPorNombreUsuario || '—' }}</td>
             </tr>
-          } @empty {
-            <tr><td colspan="8" class="empty">No hay movimientos registrados con el filtro seleccionado.</td></tr>
-          }
+          } @empty { <tr><td colspan="9" class="empty">No hay movimientos registrados con el filtro seleccionado.</td></tr> }
         </tbody>
       </table>
     </div>
