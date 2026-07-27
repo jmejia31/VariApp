@@ -5,11 +5,42 @@ Este archivo es obligatorio para Javier Mejía, ChatGPT, Codex, Antigravity y cu
 ## Fuente única de verdad
 
 - GitHub es la fuente única de verdad del proyecto.
-- La rama estable y productiva es `main`.
-- La rama única de trabajo compartido es `Desarrollo`.
-- Está prohibido desarrollar directamente sobre `main`.
-- Está prohibido fusionar a `main` sin autorización expresa de Javier Mejía.
-- Todo Pull Request hacia `main` debe permanecer en borrador mientras existan validaciones pendientes.
+- `main` es una referencia productiva de solo lectura: no se desarrolla, no se reescribe, no se fusiona, no se publica y no se modifica desde este flujo.
+- `Desarrollo` es la única rama de trabajo compartido.
+- Está prohibido crear ramas adicionales sin autorización expresa de Javier Mejía.
+- Todo cambio intencional debe confirmarse y publicarse en `origin/Desarrollo`.
+- El Pull Request `Desarrollo -> main` debe permanecer en borrador mientras existan validaciones pendientes.
+
+## Entornos oficiales
+
+Solo existen dos entornos lógicos autorizados:
+
+```text
+varistorehn_producción (Producción)
+varistorehn_desarrollo
+```
+
+Los nombres técnicos ya existentes de servicios, proyectos, dominios, bases o claves pueden diferir. No deben renombrarse ni recrearse cuando el cambio pueda afectar Producción. Un nombre técnico distinto no constituye por sí solo un tercer entorno si está documentado como parte de uno de los dos entornos oficiales.
+
+## Producción congelada
+
+Durante todo el trabajo en `Desarrollo` queda prohibido modificar o eliminar:
+
+- variables, secretos, credenciales, dominios, certificados, conexiones, bases, servicios y despliegues productivos;
+- el usuario administrativo `avnadmin` de Aiven;
+- claves `Raíz`, moderación o flujos de medios de Cloudinary;
+- variables ya existentes de Producción o Desarrollo;
+- activos, registros, respaldos o migraciones productivas.
+
+Solo puede eliminarse un recurso cuando se demuestre simultáneamente que:
+
+1. pertenece exclusivamente a Desarrollo;
+2. duplica una función ya cubierta por `varistorehn_desarrollo`;
+3. no tiene consumidores, dependencias, datos ni secretos necesarios;
+4. su eliminación no afecta Producción;
+5. Javier Mejía autoriza expresamente la eliminación.
+
+Nunca se elimina un recurso únicamente por su nombre.
 
 ## Inicio obligatorio de cada sesión
 
@@ -27,12 +58,13 @@ Si existen cambios locales ajenos, el agente debe preservarlos y explicar el con
 1. Leer `AGENTS.md`, `CONTRIBUTING.md`, `docs/COLABORACION_IA.md` y `docs/ENTORNOS_DESARROLLO_PRODUCCION.md`.
 2. Confirmar que la rama actual sea `Desarrollo`.
 3. Revisar el estado y los últimos commits antes de editar.
-4. Hacer cambios pequeños, coherentes y trazables.
-5. Ejecutar las verificaciones afectadas.
-6. Actualizar la documentación cuando cambie comportamiento, configuración o arquitectura.
-7. Crear un commit descriptivo indicando el agente.
-8. Subir inmediatamente el commit a `origin/Desarrollo`.
-9. Registrar el resultado en el Pull Request colaborativo o en el issue de coordinación.
+4. Analizar alcance, dependencias y riesgos.
+5. Hacer cambios pequeños, coherentes y trazables.
+6. Ejecutar las verificaciones afectadas.
+7. Actualizar la documentación cuando cambie comportamiento, configuración o arquitectura.
+8. Crear un commit descriptivo indicando el agente.
+9. Subir inmediatamente el commit a `origin/Desarrollo`.
+10. Registrar el resultado en el Pull Request colaborativo o en el issue de coordinación.
 
 ## Formato de commits
 
@@ -67,6 +99,7 @@ Frontend:
 ```bash
 cd frontend
 npm ci
+npm run lint
 npm run build:prod
 ```
 
@@ -75,11 +108,12 @@ Las pruebas E2E se ejecutan cuando el cambio afecta autenticación, permisos, na
 ## Reglas de seguridad y limpieza
 
 - Nunca guardar contraseñas, tokens, cadenas productivas, claves SMTP o credenciales de Cloudinary.
-- Nunca aplicar migraciones en Aiven ni desplegar a producción sin autorización expresa.
+- Nunca aplicar migraciones en Aiven ni desplegar a Producción sin autorización expresa.
 - Nunca eliminar datos productivos.
-- Desarrollo nunca puede usar la cadena de Aiven productiva.
-- Desarrollo nunca puede publicar activos sin separación de Cloudinary por product environment, cuenta o prefijo `desarrollo`.
-- Un Preview de Vercel nunca puede apuntar al backend o base de datos productivos.
+- Desarrollo nunca puede usar la cadena o la base productiva.
+- Desarrollo debe usar `Cloudinary__EnvironmentPrefix=varistorehn_desarrollo`.
+- Desarrollo no puede eliminar un activo Cloudinary cuyo `PublicId` no comience con `varistorehn_desarrollo/`.
+- Un Preview de Desarrollo nunca puede apuntar al backend o base de datos productivos.
 - No versionar `node_modules`, `bin`, `obj`, `dist`, `.angular`, reportes de pruebas, registros, temporales ni respaldos.
 - No modificar archivos no relacionados con la tarea.
 - No dejar código comentado, pruebas deshabilitadas, marcadores temporales ni archivos sin uso.
