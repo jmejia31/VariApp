@@ -1,7 +1,9 @@
 using System.Text;
+using System.Threading.RateLimiting;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using InventoryApp.API.Middleware;
+using InventoryApp.Application.Common;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Application.Services;
 using InventoryApp.Application.Validators;
@@ -13,6 +15,7 @@ using InventoryApp.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -104,6 +107,19 @@ builder.Services.AddScoped<IMovimientoInventarioService, MovimientoInventarioSer
 // ===== JWT Authentication =====
 var jwtSecret = builder.Configuration["Jwt:Secret"]
     ?? throw new InvalidOperationException("Jwt:Secret no configurado.");
+var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+var jwtAudience = builder.Configuration["Jwt:Audience"];
+
+if (jwtSecret.Contains("CHANGE_ME", StringComparison.OrdinalIgnoreCase) ||
+    Encoding.UTF8.GetByteCount(jwtSecret) < 32)
+{
+    throw new InvalidOperationException("Jwt:Secret debe ser un secreto real de al menos 32 bytes.");
+}
+
+if (string.IsNullOrWhiteSpace(jwtIssuer) || string.IsNullOrWhiteSpace(jwtAudience))
+{
+    throw new InvalidOperationException("Jwt:Issuer y Jwt:Audience son obligatorios.");
+}
 
 builder.Services.AddAuthentication(options =>
 {
@@ -118,8 +134,8 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Audience"],
+        ValidIssuer = jwtIssuer,
+        ValidAudience = jwtAudience,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
         ClockSkew = TimeSpan.Zero
     };
@@ -147,8 +163,41 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
+// ===== Protección de intentos de acceso =====
+var loginRateLimitPerMinute = Math.Clamp(
+    builder.Configuration.GetValue<int?>("Security:LoginRateLimitPerMinute") ?? 60,
+    5,
+    300);
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.OnRejected = async (context, cancellationToken) =>
+    {
+        context.HttpContext.Response.ContentType = "application/json";
+        await context.HttpContext.Response.WriteAsJsonAsync(
+            ApiResponse<object>.Fail("Demasiados intentos de acceso. Espera un minuto e intenta nuevamente."),
+            cancellationToken);
+    };
+
+    options.AddPolicy("AuthLogin", httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "ip-desconocida",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                AutoReplenishment = true,
+                PermitLimit = loginRateLimitPerMinute,
+                QueueLimit = 0,
+                Window = TimeSpan.FromMinutes(1)
+            }));
+});
+
 // ===== CORS =====
 var corsOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
+if (corsOrigins.Length == 0 || corsOrigins.Any(string.IsNullOrWhiteSpace))
+{
+    throw new InvalidOperationException("Cors:AllowedOrigins debe contener al menos un origen válido.");
+}
 
 builder.Services.AddCors(options =>
 {
@@ -193,13 +242,28 @@ var app = builder.Build();
 // ===== Middleware pipeline =====
 var forwardedHeadersOptions = new ForwardedHeadersOptions
 {
-    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
+    ForwardLimit = 1
 };
 forwardedHeadersOptions.KnownNetworks.Clear();
 forwardedHeadersOptions.KnownProxies.Clear();
 
 app.UseForwardedHeaders(forwardedHeadersOptions);
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHsts();
+}
+
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.TryAdd("X-Content-Type-Options", "nosniff");
+    context.Response.Headers.TryAdd("X-Frame-Options", "DENY");
+    context.Response.Headers.TryAdd("Referrer-Policy", "no-referrer");
+    context.Response.Headers.TryAdd("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+    await next();
+});
 
 var swaggerEnabled = app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Swagger:Enabled");
 if (swaggerEnabled)
@@ -210,15 +274,35 @@ if (swaggerEnabled)
 
 app.UseHttpsRedirection();
 app.UseCors("FrontendPolicy");
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapGet("/health", () => Results.Ok(new
 {
     status = "ok",
-    service = "InventoryApp API",
-    environment = app.Environment.EnvironmentName,
-    timestamp = DateTime.UtcNow
-}));
+    service = "InventoryApp API"
+})).ExcludeFromDescription();
+
+app.MapGet("/health/ready", async (AppDbContext db, CancellationToken cancellationToken) =>
+{
+    var databaseReady = false;
+    try
+    {
+        databaseReady = await db.Database.CanConnectAsync(cancellationToken);
+    }
+    catch
+    {
+        databaseReady = false;
+    }
+
+    return databaseReady
+        ? Results.Ok(new { status = "ready", database = "connected" })
+        : Results.Json(
+            new { status = "not_ready", database = "unavailable" },
+            statusCode: StatusCodes.Status503ServiceUnavailable);
+}).ExcludeFromDescription();
+
 app.MapControllers();
 
 if (app.Configuration.GetValue<bool>("Database:ApplyMigrationsOnStartup"))
