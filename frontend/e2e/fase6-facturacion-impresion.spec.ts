@@ -74,12 +74,6 @@ function leerMediaBox(pdf: Buffer): { ancho: number; alto: number } {
   return { ancho: Number(match![1]), alto: Number(match![2]) };
 }
 
-async function seleccionarFormato(page: Page, codigo: FormatoCodigo): Promise<void> {
-  await page.locator('.formato-field mat-select').click();
-  await page.getByRole('option').filter({ hasText: new RegExp(`^${nombreVisible(codigo)}`) }).click();
-  await expect(page.locator('.preview-shell')).toHaveAttribute('data-formato', codigo);
-}
-
 function nombreVisible(codigo: FormatoCodigo): string {
   return ({
     a4: 'A4',
@@ -90,6 +84,24 @@ function nombreVisible(codigo: FormatoCodigo): string {
     pos58: 'POS 58 mm',
     pos80: 'POS 80 mm'
   } as const)[codigo];
+}
+
+function escaparRegExp(valor: string): string {
+  return valor.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+async function seleccionarFormato(page: Page, codigo: FormatoCodigo): Promise<void> {
+  const preview = page.locator('.preview-shell');
+  if (await preview.getAttribute('data-formato') === codigo) {
+    await expect(preview).toHaveAttribute('data-formato', codigo);
+    return;
+  }
+
+  await page.locator('.formato-field mat-select').click();
+  await page.getByRole('option', {
+    name: new RegExp(`^${escaparRegExp(nombreVisible(codigo))}`)
+  }).click();
+  await expect(preview).toHaveAttribute('data-formato', codigo);
 }
 
 async function expectNoDocumentOverflow(page: Page, tolerancia = 2): Promise<void> {
