@@ -20,6 +20,11 @@ public interface IFacturaCompartirService
     /// compara contra la base de datos.
     Task<(byte[] Pdf, string NombreArchivo)?> ObtenerPdfPorTokenAsync(string token);
 
-    /// Envía exactamente el mismo PDF oficial como adjunto de correo.
-    Task<(bool Exito, string Mensaje)> EnviarPorCorreoAsync(int facturaId, string destinatario);
+    /// Envía el PDF oficial A4 como adjunto. Una clave de idempotencia evita
+    /// duplicados causados por doble clic o reintentos del transporte HTTP.
+    Task<ResultadoEnvioCorreoDto> EnviarPorCorreoAsync(
+        int facturaId,
+        string destinatario,
+        string? claveIdempotencia = null,
+        CancellationToken cancellationToken = default);
 }
