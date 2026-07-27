@@ -209,7 +209,9 @@ test.describe('Fase 3 - corrección integral de interfaz', () => {
     await certifyRoute(page, '/productos/nuevo', 'desktop-producto-form');
     await certifyRoute(page, '/productos', 'desktop-productos');
 
-    await expect(page.getByText(productName, { exact: true })).toBeVisible();
+    const desktopProductName = page.locator('.table-desktop .product-name', { hasText: productName });
+    await expect(desktopProductName).toHaveCount(1);
+    await expect(desktopProductName).toBeVisible();
   });
 
   test('las pantallas prioritarias mantienen texto y acciones completos en teléfono', async ({ page }) => {
@@ -222,6 +224,7 @@ test.describe('Fase 3 - corrección integral de interfaz', () => {
     await certifyRoute(page, '/productos', 'mobile-productos');
 
     const productCard = page.locator('.producto-card', { hasText: productName });
+    await expect(productCard).toHaveCount(1);
     await expect(productCard).toBeVisible();
     await expect(productCard.getByRole('link', { name: 'Ver' })).toBeVisible();
     await expect(productCard.getByRole('link', { name: 'Editar' })).toBeVisible();
