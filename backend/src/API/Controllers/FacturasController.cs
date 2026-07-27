@@ -9,7 +9,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace InventoryApp.API.Controllers;
 
 /// La factura se genera y anula automáticamente junto con su venta origen.
-/// Descargar, imprimir, WhatsApp y correo consumen el mismo PDF oficial.
+/// Correo, WhatsApp y enlaces públicos conservan A4 como PDF oficial; descarga
+/// e impresión pueden solicitar un perfil de papel explícito.
 [ApiController]
 [Authorize]
 [Route("facturas")]
@@ -40,6 +41,14 @@ public class FacturasController : ControllerBase
         return Ok(ApiResponse<List<FacturaDto>>.Ok(facturas));
     }
 
+    [HttpGet("formatos-pdf")]
+    [RequierePermiso(ModuloSistema.Facturacion, AccionPermiso.Ver)]
+    public IActionResult GetFormatosPdf()
+    {
+        return Ok(ApiResponse<IReadOnlyList<FacturaFormatoPdfDto>>.Ok(
+            FacturaFormatoPdfCatalogo.ObtenerTodos()));
+    }
+
     [HttpGet("{id:int}")]
     [RequierePermiso(ModuloSistema.Facturacion, AccionPermiso.Ver)]
     public async Task<IActionResult> GetById(int id)
@@ -60,22 +69,34 @@ public class FacturasController : ControllerBase
 
     [HttpGet("{id:int}/pdf")]
     [RequierePermiso(ModuloSistema.Facturacion, AccionPermiso.Exportar)]
-    public async Task<IActionResult> DescargarPdf(int id)
+    public async Task<IActionResult> DescargarPdf(int id, [FromQuery] string? formato = null)
     {
+        if (!FacturaFormatoPdfCatalogo.TryParse(formato, out var perfil))
+        {
+            var permitidos = string.Join(", ", FacturaFormatoPdfCatalogo.ObtenerTodos().Select(x => x.Codigo));
+            return BadRequest(ApiResponse<object>.Fail($"Formato de PDF no válido. Valores permitidos: {permitidos}."));
+        }
+
         var factura = await _facturaService.GetByIdAsync(id);
         if (factura is null) return NotFound(ApiResponse<object>.Fail("Factura no encontrada."));
 
         AplicarEncabezadosDocumentoPrivado();
-        var pdfBytes = await _facturaPdfService.GenerarPdfAsync(factura);
+        var codigo = FacturaFormatoPdfCatalogo.ObtenerCodigo(perfil);
+        Response.Headers["X-Factura-Formato"] = codigo;
+
+        var pdfBytes = await _facturaPdfService.GenerarPdfAsync(factura, perfil);
         await _auditoria.RegistrarAsync(
             ModuloSistema.Facturacion,
             AccionPermiso.Exportar,
-            $"PDF descargado de factura: {factura.NumeroFactura}.",
+            $"PDF {codigo} descargado de factura: {factura.NumeroFactura}.",
             id,
             entidad: "Factura",
-            valoresNuevos: new { factura.NumeroFactura, factura.Total });
+            valoresNuevos: new { factura.NumeroFactura, factura.Total, FormatoPdf = codigo });
 
-        return File(pdfBytes, "application/pdf", $"{factura.NumeroFactura}.pdf");
+        var nombreArchivo = string.IsNullOrWhiteSpace(formato)
+            ? $"{factura.NumeroFactura}.pdf"
+            : $"{factura.NumeroFactura}-{codigo}.pdf";
+        return File(pdfBytes, "application/pdf", nombreArchivo);
     }
 
     [HttpPost("{id:int}/compartir/whatsapp")]
