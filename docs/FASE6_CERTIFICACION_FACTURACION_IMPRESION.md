@@ -1,12 +1,10 @@
 # FASE 6 — Certificación de facturación e impresión
 
-Fecha de cierre técnico: 27 de julio de 2026.
-Rama certificada: `Desarrollo`.
-Producción permaneció congelada.
+Fecha: 27 de julio de 2026. Rama: `Desarrollo`. Producción permaneció congelada.
 
 ## Resultado
 
-Se implementaron perfiles explícitos para A4, Carta, Legal, Oficio, A5, POS 58 mm y POS 80 mm. Cambiar el papel no modifica ni recalcula la factura; todos los perfiles consumen el mismo snapshot fiscal. A4 permanece como documento oficial para correo, WhatsApp y enlaces públicos.
+Se implementaron A4, Carta, Legal, Oficio, A5, POS 58 mm y POS 80 mm. El formato no modifica ni recalcula la factura; todos consumen el mismo snapshot fiscal. A4 permanece como documento oficial para correo, WhatsApp y enlaces públicos.
 
 | Código | Dimensión | Tipo |
 |---|---:|---|
@@ -20,27 +18,14 @@ Se implementaron perfiles explícitos para A4, Carta, Legal, Oficio, A5, POS 58 
 
 ## Implementación
 
-- Catálogo backend y alias controlados.
-- Generador QuestPDF para página fija y rollo térmico.
-- Endpoint de catálogo y descarga por perfil.
-- Encabezado, nombre de archivo y auditoría del formato.
-- Selector de papel, dimensiones, uso recomendado y preferencia local.
-- Descarga e impresión del perfil seleccionado.
-- Vista previa proporcional y responsive.
-- Sin migración de base de datos.
-
-Todos los formatos conservan empresa, cliente, operación, productos, clasificación, pago, descuentos, impuestos, totales, observaciones, anulación y textos legales.
+Catálogo backend, generador QuestPDF, endpoint de formatos, descarga auditada por perfil, selector de papel, preferencia local, impresión del PDF real, vista previa responsive y compatibilidad con integraciones A4 existentes. No se requirió migración.
 
 ## Certificación
 
-Commit funcional:
+Commit funcional: `14bf32069f9d87f731e59f230b9e9f5f16ade14e`.
 
-```text
-14bf32069f9d87f731e59f230b9e9f5f16ade14e
-```
-
-- Compilación y pruebas `30295557180`: **success**.
-- Aceptación integral `30295557155`: **success**.
+- Compilación `30295557180`: **success**.
+- Aceptación `30295557155`: **success**.
 - Auditoría `30295557157`: **success**.
 
 ```text
@@ -51,22 +36,14 @@ Commit funcional:
 0 omitidas
 ```
 
-Artefacto:
-
-```text
-desarrollo-aceptacion-integral
-id: 8664760725
-SHA-256: f7e2ca67e311f43f9e13fedcce57fc43cb9b93da314827587226de922694b640
-```
+Artefacto `desarrollo-aceptacion-integral`, id `8664760725`, SHA-256 `f7e2ca67e311f43f9e13fedcce57fc43cb9b93da314827587226de922694b640`.
 
 Incluye siete PDFs y ocho capturas. Los PDFs fueron renderizados e inspeccionados sin recortes, superposiciones, glifos rotos ni pérdida visible de datos.
 
 ## Pendiente físico
 
-Solo en `varistorehn_desarrollo`: impresoras reales de oficina y térmicas, drivers, USB/red/Bluetooth, márgenes, densidad, corte, avance, escalado 100 % y ancho imprimible real.
+Solo en `varistorehn_desarrollo`: impresoras reales, drivers, conectividad, márgenes, densidad, corte, avance, escalado y ancho imprimible.
 
 ## Cierre
 
-La Fase 6 queda completa y certificada. La siguiente etapa es la Fase 7 — Envío de correo.
-
-No autoriza merge, despliegue ni modificación de Producción.
+La Fase 6 queda completa y certificada. La siguiente etapa es la Fase 7 — Envío de correo. No autoriza merge, despliegue ni modificación de Producción.
