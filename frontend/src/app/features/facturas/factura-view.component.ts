@@ -12,6 +12,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { FacturaService } from '../../services/factura.service';
 import {
   EnlaceCompartir,
+  EstadoConfiguracionSmtp,
   Factura,
   FacturaFormatoCodigo,
   FacturaFormatoPdf,
@@ -67,7 +68,11 @@ export class FacturaViewComponent implements OnInit {
 
   readonly mostrarPanelCorreo = signal(false);
   readonly enviandoCorreo = signal(false);
+  readonly cargandoEstadoSmtp = signal(false);
+  readonly estadoSmtp = signal<EstadoConfiguracionSmtp | null>(null);
+  readonly correoUltimoError = signal('');
   correoEditable = '';
+  private correoIdempotencyKey = '';
 
   constructor(
     private facturaService: FacturaService,
@@ -117,7 +122,6 @@ export class FacturaViewComponent implements OnInit {
     }
   }
 
-  /** Abre el PDF seleccionado; el visor del navegador ofrece el diálogo de impresión. */
   imprimir(): void {
     if (!this.puedeImprimir() || this.imprimiendoPdf()) return;
 
@@ -267,16 +271,7 @@ export class FacturaViewComponent implements OnInit {
       return;
     }
 
-    const factura = this.factura();
-    if (!factura) return;
-
-    this.facturaService.getHistorialEnvios(factura.id).subscribe({
-      next: (res) => {
-        this.historial.set(res.data);
-        this.mostrarHistorial.set(true);
-      },
-      error: () => this.snackBar.open('No se pudo cargar el historial de envíos.', 'Cerrar', { duration: 5000 })
-    });
+    this.cargarHistorial(true);
   }
 
   toggleCorreo(): void {
@@ -284,6 +279,8 @@ export class FacturaViewComponent implements OnInit {
 
     if (this.mostrarPanelCorreo()) {
       this.mostrarPanelCorreo.set(false);
+      this.correoUltimoError.set('');
+      this.correoIdempotencyKey = '';
       return;
     }
 
@@ -291,31 +288,94 @@ export class FacturaViewComponent implements OnInit {
     if (!factura) return;
 
     this.correoEditable = factura.clienteCorreo || '';
+    this.correoUltimoError.set('');
+    this.correoIdempotencyKey = '';
     this.mostrarPanelCorreo.set(true);
+    this.cargarEstadoCorreo();
+  }
+
+  onCorreoChange(value: string): void {
+    this.correoEditable = value;
+    this.correoUltimoError.set('');
+    this.correoIdempotencyKey = '';
   }
 
   correoValido(): boolean {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.correoEditable.trim());
   }
 
+  puedeEnviarCorreo(): boolean {
+    return this.correoValido() &&
+      this.estadoSmtp()?.configurado === true &&
+      !this.cargandoEstadoSmtp() &&
+      !this.enviandoCorreo();
+  }
+
   enviarCorreo(): void {
-    if (!this.puedeCompartir()) return;
+    if (!this.puedeCompartir() || !this.puedeEnviarCorreo()) return;
 
     const factura = this.factura();
-    if (!factura || !this.correoValido()) return;
+    if (!factura) return;
 
+    if (!this.correoIdempotencyKey) {
+      this.correoIdempotencyKey = this.crearClaveIdempotencia();
+    }
+
+    this.correoUltimoError.set('');
     this.enviandoCorreo.set(true);
-    this.facturaService.enviarPorCorreo(factura.id, this.correoEditable.trim()).subscribe({
+    this.facturaService
+      .enviarPorCorreo(factura.id, this.correoEditable.trim(), this.correoIdempotencyKey)
+      .subscribe({
+        next: (res) => {
+          this.enviandoCorreo.set(false);
+          this.mostrarPanelCorreo.set(false);
+          this.correoIdempotencyKey = '';
+          this.snackBar.open(res.message || res.data.mensaje || 'Correo enviado correctamente.', 'Cerrar', { duration: 5000 });
+          if (this.mostrarHistorial()) this.cargarHistorial(false);
+        },
+        error: (err) => {
+          this.enviandoCorreo.set(false);
+          const mensaje = err.error?.message ?? 'No se pudo enviar el correo.';
+          this.correoUltimoError.set(mensaje);
+          this.snackBar.open(mensaje, 'Cerrar', { duration: 7000 });
+        }
+      });
+  }
+
+  private cargarEstadoCorreo(): void {
+    this.cargandoEstadoSmtp.set(true);
+    this.facturaService.getEstadoCorreo().subscribe({
       next: (res) => {
-        this.enviandoCorreo.set(false);
-        this.mostrarPanelCorreo.set(false);
-        this.snackBar.open(res.message || 'Correo enviado correctamente.', 'Cerrar', { duration: 4000 });
+        this.cargandoEstadoSmtp.set(false);
+        this.estadoSmtp.set(res.data);
       },
       error: (err) => {
-        this.enviandoCorreo.set(false);
-        this.snackBar.open(err.error?.message ?? 'No se pudo enviar el correo.', 'Cerrar', { duration: 6000 });
+        this.cargandoEstadoSmtp.set(false);
+        this.estadoSmtp.set(null);
+        this.correoUltimoError.set(err.error?.message ?? 'No se pudo verificar la configuración de correo.');
       }
     });
+  }
+
+  private cargarHistorial(mostrar: boolean): void {
+    const factura = this.factura();
+    if (!factura) return;
+
+    this.facturaService.getHistorialEnvios(factura.id).subscribe({
+      next: (res) => {
+        this.historial.set(res.data);
+        if (mostrar) this.mostrarHistorial.set(true);
+      },
+      error: () => this.snackBar.open('No se pudo cargar el historial de envíos.', 'Cerrar', { duration: 5000 })
+    });
+  }
+
+  private crearClaveIdempotencia(): string {
+    try {
+      return crypto.randomUUID();
+    } catch {
+      return `${Date.now()}-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`;
+    }
   }
 
   private restaurarFormatoPreferido(): void {
