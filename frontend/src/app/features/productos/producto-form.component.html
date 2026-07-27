@@ -1,39 +1,47 @@
 <div class="header-row">
-  <a routerLink="/productos" mat-icon-button aria-label="Volver a productos"><mat-icon>arrow_back</mat-icon></a>
-  <h1 class="page-title">{{ isEdit() ? 'Editar producto' : 'Nuevo producto' }}</h1>
+  <a routerLink="/productos" mat-icon-button aria-label="Volver a productos" title="Volver a productos">
+    <mat-icon>arrow_back</mat-icon>
+  </a>
+  <div class="header-copy">
+    <h1 id="producto-form-title" class="page-title">{{ isEdit() ? 'Editar producto' : 'Nuevo producto' }}</h1>
+    <p class="page-subtitle">Completa la identificación, clasificación, inventario y precios del producto.</p>
+  </div>
 </div>
 
 @if (isEdit() && auditoria(); as a) {
   <p class="audit-info">
     Registrado por <strong>{{ a.creadoPor || '—' }}</strong>
-    @if (a.actualizadoPor) { · Última actualización por <strong>{{ a.actualizadoPor }}</strong> }
+    @if (a.actualizadoPor) { <span>· Última actualización por <strong>{{ a.actualizadoPor }}</strong></span> }
   </p>
 }
 
 @if (loading()) {
-  <div class="loading"><mat-spinner></mat-spinner></div>
+  <div class="loading" aria-live="polite"><mat-spinner></mat-spinner></div>
 } @else {
-  <form class="card form" [formGroup]="form" (ngSubmit)="submit()">
-    <div class="gallery-section">
+  <form class="card form" [formGroup]="form" (ngSubmit)="submit()" aria-labelledby="producto-form-title">
+    <section class="gallery-section" aria-labelledby="producto-fotos-title">
       <div class="gallery-header">
-        <span>Fotos del producto</span>
+        <div>
+          <h2 id="producto-fotos-title">Fotos del producto</h2>
+          <p>La imagen principal se utiliza en listados y detalles. Puedes cargar hasta {{ maxImagenes }} fotografías.</p>
+        </div>
         <span class="counter">{{ imagenes().length }}/{{ maxImagenes }} fotos</span>
       </div>
 
       <div class="gallery-grid">
         @for (img of imagenes(); track img.url; let i = $index) {
           <div class="gallery-item" [class.principal]="img.esPrincipal">
-            <img [src]="img.url" alt="Foto del producto">
+            <img [src]="img.url" [alt]="img.esPrincipal ? 'Foto principal del producto' : 'Foto adicional del producto'">
             @if (img.esPrincipal) {
               <span class="badge-principal">Principal</span>
             }
-            <div class="gallery-actions">
+            <div class="gallery-actions" aria-label="Acciones de fotografía">
               @if (!img.esPrincipal) {
                 <button class="action-edit" mat-icon-button type="button" title="Marcar como principal" aria-label="Marcar imagen como principal" (click)="marcarComoPrincipal(i)">
                   <mat-icon>star</mat-icon>
                 </button>
               }
-              <button class="action-delete" mat-icon-button type="button" title="Quitar" aria-label="Quitar imagen" (click)="quitarImagen(i)">
+              <button class="action-delete" mat-icon-button type="button" title="Quitar fotografía" aria-label="Quitar imagen" (click)="quitarImagen(i)">
                 <mat-icon>delete</mat-icon>
               </button>
             </div>
@@ -41,107 +49,128 @@
         }
 
         @if (espaciosDisponibles > 0) {
-          <label class="gallery-upload">
-            <mat-icon>add_photo_alternate</mat-icon>
-            <span>Agregar foto</span>
-            <input type="file" accept="image/jpeg,image/png,image/webp" multiple hidden (change)="onFilesSelected($event)">
+          <label class="gallery-upload" tabindex="0" (keydown.enter)="$event.preventDefault(); fileInput.click()" (keydown.space)="$event.preventDefault(); fileInput.click()">
+            <mat-icon aria-hidden="true">add_photo_alternate</mat-icon>
+            <strong>Agregar foto</strong>
+            <span>JPG, PNG o WebP</span>
+            <input #fileInput type="file" accept="image/jpeg,image/png,image/webp" multiple hidden (change)="onFilesSelected($event)">
           </label>
         }
       </div>
-    </div>
+    </section>
 
-    <div class="fields-grid">
-      <mat-form-field appearance="outline">
-        <mat-label>Nombre</mat-label>
-        <input matInput formControlName="nombre" autocomplete="off">
-        <mat-error>El nombre es obligatorio.</mat-error>
-      </mat-form-field>
+    <section class="data-section" aria-labelledby="producto-datos-title">
+      <div class="section-heading">
+        <h2 id="producto-datos-title">Información del producto</h2>
+        <p>Los campos obligatorios identifican el artículo y permiten controlar sus existencias y precios.</p>
+      </div>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Marca</mat-label>
-        <mat-select formControlName="marcaId">
-          @for (marca of marcas(); track marca.id) {
-            <mat-option [value]="marca.id">{{ marca.nombre }}</mat-option>
+      <div class="fields-grid">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Nombre</mat-label>
+          <input matInput formControlName="nombre" autocomplete="off">
+          @if (form.controls.nombre.hasError('required')) {
+            <mat-error>El nombre es obligatorio.</mat-error>
           }
-        </mat-select>
-        <mat-hint>Se administra desde el mantenimiento de Marcas.</mat-hint>
-        <mat-error>Selecciona una marca.</mat-error>
-      </mat-form-field>
+        </mat-form-field>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Modelo</mat-label>
-        <mat-select formControlName="modeloId" [disabled]="!form.controls.marcaId.value || cargandoModelos()">
-          @for (modelo of modelos(); track modelo.id) {
-            <mat-option [value]="modelo.id">{{ modelo.nombre }}</mat-option>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Marca</mat-label>
+          <mat-select formControlName="marcaId">
+            @for (marca of marcas(); track marca.id) {
+              <mat-option [value]="marca.id">{{ marca.nombre }}</mat-option>
+            }
+          </mat-select>
+          <mat-hint>Se administra desde el mantenimiento de Marcas.</mat-hint>
+          @if (form.controls.marcaId.hasError('required')) {
+            <mat-error>Selecciona una marca.</mat-error>
           }
-        </mat-select>
-        @if (!form.controls.marcaId.value) { <mat-hint>Selecciona primero una marca.</mat-hint> }
-        <mat-error>Selecciona un modelo.</mat-error>
-      </mat-form-field>
+        </mat-form-field>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Categoría (opcional)</mat-label>
-        <mat-select formControlName="categoriaId">
-          <mat-option [value]="null">Sin categoría</mat-option>
-          @for (c of categorias(); track c.id) {
-            <mat-option [value]="c.id">{{ c.nombre }}</mat-option>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Modelo</mat-label>
+          <mat-select formControlName="modeloId" [disabled]="!form.controls.marcaId.value || cargandoModelos()">
+            @for (modelo of modelos(); track modelo.id) {
+              <mat-option [value]="modelo.id">{{ modelo.nombre }}</mat-option>
+            }
+          </mat-select>
+          @if (!form.controls.marcaId.value) {
+            <mat-hint>Selecciona primero una marca.</mat-hint>
+          } @else if (cargandoModelos()) {
+            <mat-hint>Cargando modelos disponibles...</mat-hint>
           }
-        </mat-select>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Color (opcional)</mat-label>
-        <mat-select formControlName="colorId">
-          <mat-option [value]="null">Sin color</mat-option>
-          @for (color of colores(); track color.id) {
-            <mat-option [value]="color.id">
-              <span class="select-swatch" [style.background]="color.codigoVisual || '#64748B'"></span>
-              {{ color.nombre }}
-            </mat-option>
+          @if (form.controls.modeloId.hasError('required')) {
+            <mat-error>Selecciona un modelo.</mat-error>
           }
-        </mat-select>
-      </mat-form-field>
+        </mat-form-field>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Talla o tamaño (opcional)</mat-label>
-        <mat-select formControlName="tallaId">
-          <mat-option [value]="null">Sin talla</mat-option>
-          @for (talla of tallas(); track talla.id) {
-            <mat-option [value]="talla.id">{{ talla.nombre }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Categoría (opcional)</mat-label>
+          <mat-select formControlName="categoriaId">
+            <mat-option [value]="null">Sin categoría</mat-option>
+            @for (c of categorias(); track c.id) {
+              <mat-option [value]="c.id">{{ c.nombre }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Descripción (opcional)</mat-label>
-        <textarea matInput formControlName="descripcion" rows="2"></textarea>
-      </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Color (opcional)</mat-label>
+          <mat-select formControlName="colorId">
+            <mat-option [value]="null">Sin color</mat-option>
+            @for (color of colores(); track color.id) {
+              <mat-option [value]="color.id">
+                <span class="select-swatch" [style.background]="color.codigoVisual || '#64748B'"></span>
+                {{ color.nombre }}
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Cantidad en stock</mat-label>
-        <input matInput type="number" min="0" formControlName="cantidad">
-        <mat-hint>Con cantidad 0 se mostrará como Agotado.</mat-hint>
-      </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Talla o tamaño (opcional)</mat-label>
+          <mat-select formControlName="tallaId">
+            <mat-option [value]="null">Sin talla</mat-option>
+            @for (talla of tallas(); track talla.id) {
+              <mat-option [value]="talla.id">{{ talla.nombre }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Umbral informativo</mat-label>
-        <input matInput type="number" min="0" formControlName="umbralStockBajo">
-        <mat-hint>Se conserva para reportes internos; el estado visible será Agotado solo con stock 0.</mat-hint>
-      </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+          <mat-label>Descripción (opcional)</mat-label>
+          <textarea matInput formControlName="descripcion" rows="3"></textarea>
+          <mat-hint>Incluye características útiles para distinguir el producto.</mat-hint>
+        </mat-form-field>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Costo (L.)</mat-label>
-        <input matInput type="number" min="0.01" step="0.01" formControlName="costo">
-      </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Cantidad en stock</mat-label>
+          <input matInput type="number" min="0" formControlName="cantidad" inputmode="numeric">
+          <mat-hint>Con cantidad 0 se mostrará como Agotado.</mat-hint>
+        </mat-form-field>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Precio de venta (L.)</mat-label>
-        <input matInput type="number" min="0.01" step="0.01" formControlName="precio">
-      </mat-form-field>
-    </div>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Umbral informativo</mat-label>
+          <input matInput type="number" min="0" formControlName="umbralStockBajo" inputmode="numeric">
+          <mat-hint>Se conserva para reportes internos; el estado visible será Agotado únicamente con stock 0.</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Costo (L.)</mat-label>
+          <input matInput type="number" min="0.01" step="0.01" formControlName="costo" inputmode="decimal">
+          <mat-hint>Valor de adquisición por unidad.</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Precio de venta (L.)</mat-label>
+          <input matInput type="number" min="0.01" step="0.01" formControlName="precio" inputmode="decimal">
+          <mat-hint>Precio final de venta por unidad.</mat-hint>
+        </mat-form-field>
+      </div>
+    </section>
 
     @if (errorMessage()) {
-      <p class="error" role="alert">{{ errorMessage() }}</p>
+      <p class="message error" role="alert">{{ errorMessage() }}</p>
     }
 
     <div class="form-actions">
@@ -149,8 +178,10 @@
       <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving()">
         @if (saving()) {
           <mat-spinner diameter="20"></mat-spinner>
+          <span>Guardando...</span>
         } @else {
-          Guardar
+          <mat-icon>save</mat-icon>
+          <span>Guardar producto</span>
         }
       </button>
     </div>
