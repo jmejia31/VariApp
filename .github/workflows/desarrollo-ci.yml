@@ -243,8 +243,14 @@ jobs:
           grep -q 'branch: Desarrollo' render.yaml
           grep -q 'name: variapp-api-desarrollo' render.yaml
           grep -A1 'Database__ApplyMigrationsOnStartup' render.yaml | grep -q '"false"'
+          grep -A1 'Cloudinary__EnvironmentPrefix' render.yaml | grep -q 'varistorehn_desarrollo'
+          grep -q 'https://variapp-desarrollo.vercel.app' render.yaml
           grep -q 'variapp-api.onrender.com' frontend/vercel.json
           grep -q 'variapp-api-desarrollo.onrender.com' frontend/vercel.json
+          if grep -RIn -E 'Cloudinary__EnvironmentPrefix=desarrollo|value:[[:space:]]*desarrollo$' render.yaml docs backend/tests; then
+            echo 'Se encontró el identificador genérico antiguo de Desarrollo.' >&2
+            exit 1
+          fi
 
       - name: Construir imagen Docker de la API
         run: docker build --file backend/Dockerfile --tag variapp-api:desarrollo-ci .
