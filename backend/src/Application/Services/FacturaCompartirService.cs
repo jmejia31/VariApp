@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Mail;
 using System.Security.Cryptography;
@@ -16,6 +17,8 @@ public class FacturaCompartirService : IFacturaCompartirService
 {
     private const int HorasValidezPredeterminadas = 72;
     private const int MaximoAccesosPredeterminado = 25;
+    private static readonly ConcurrentDictionary<string, SemaphoreSlim> CorreoLocks = new();
+    private static readonly ConcurrentDictionary<string, CacheCorreo> CorreosProcesados = new();
 
     private readonly IFacturaCompartirRepository _repository;
     private readonly IFacturaService _facturaService;
@@ -57,8 +60,6 @@ public class FacturaCompartirService : IFacturaCompartirService
             1,
             168);
 
-        // Un enlace nuevo invalida los anteriores. Como solo se persiste el hash,
-        // el token secreto no puede recuperarse ni reutilizarse posteriormente.
         var enlacesRevocados = await _repository.ExpirarVigentesAsync(facturaId, ahora);
         var tokenPublico = GenerarTokenSeguro();
         var enlace = new EnlacePublicoFactura
@@ -134,7 +135,8 @@ public class FacturaCompartirService : IFacturaCompartirService
         });
         await _repository.SaveChangesAsync();
 
-        var esError = string.Equals(resultado, "Error", StringComparison.OrdinalIgnoreCase);
+        var esError = string.Equals(resultado, "Error", StringComparison.OrdinalIgnoreCase) ||
+                      resultado.StartsWith("Error ", StringComparison.OrdinalIgnoreCase);
         await _auditoria.RegistrarAsync(
             ModuloSistema.Facturacion,
             AccionPermiso.Compartir,
@@ -230,12 +232,65 @@ public class FacturaCompartirService : IFacturaCompartirService
         return (pdf, $"{factura.NumeroFactura}.pdf");
     }
 
-    public async Task<(bool Exito, string Mensaje)> EnviarPorCorreoAsync(int facturaId, string destinatario)
+    public async Task<ResultadoEnvioCorreoDto> EnviarPorCorreoAsync(
+        int facturaId,
+        string destinatario,
+        string? claveIdempotencia = null,
+        CancellationToken cancellationToken = default)
     {
         destinatario = destinatario?.Trim() ?? string.Empty;
         if (!EsCorreoValido(destinatario))
-            return (false, "El correo indicado no tiene un formato válido.");
+        {
+            return new ResultadoEnvioCorreoDto
+            {
+                Exito = false,
+                Codigo = "DESTINATARIO_INVALIDO",
+                Mensaje = "El correo indicado no tiene un formato válido."
+            };
+        }
 
+        var claveCache = ConstruirClaveCorreo(facturaId, destinatario, claveIdempotencia);
+        if (claveCache is null)
+            return await EnviarCorreoCoreAsync(facturaId, destinatario, cancellationToken);
+
+        if (TryObtenerCorreoProcesado(claveCache, out var procesado))
+            return ClonarComoProcesado(procesado!);
+
+        var bloqueo = CorreoLocks.GetOrAdd(claveCache, _ => new SemaphoreSlim(1, 1));
+        await bloqueo.WaitAsync(cancellationToken);
+        try
+        {
+            if (TryObtenerCorreoProcesado(claveCache, out procesado))
+                return ClonarComoProcesado(procesado!);
+
+            var resultado = await EnviarCorreoCoreAsync(facturaId, destinatario, cancellationToken);
+            if (resultado.Exito)
+            {
+                var minutos = Math.Clamp(
+                    _configuration.GetValue<int?>("AppSettings:CorreoFacturaIdempotenciaMinutos") ?? 15,
+                    1,
+                    60);
+                CorreosProcesados[claveCache] = new CacheCorreo(
+                    DateTime.UtcNow.AddMinutes(minutos),
+                    resultado);
+            }
+
+            LimpiarCacheCorreoExpirado();
+            return resultado;
+        }
+        finally
+        {
+            bloqueo.Release();
+            if (bloqueo.CurrentCount == 1)
+                CorreoLocks.TryRemove(claveCache, out _);
+        }
+    }
+
+    private async Task<ResultadoEnvioCorreoDto> EnviarCorreoCoreAsync(
+        int facturaId,
+        string destinatario,
+        CancellationToken cancellationToken)
+    {
         var factura = await ObtenerFacturaCompartibleAsync(facturaId);
 
         byte[] pdf;
@@ -249,10 +304,15 @@ public class FacturaCompartirService : IFacturaCompartirService
             {
                 Canal = "Correo",
                 Destinatario = destinatario,
-                Resultado = "Error",
-                Error = "No fue posible generar el PDF oficial de la factura."
+                Resultado = "Error PDF",
+                Error = "No fue posible generar el PDF oficial A4 de la factura."
             });
-            return (false, "No se pudo generar el PDF de la factura para enviarlo por correo.");
+            return new ResultadoEnvioCorreoDto
+            {
+                Exito = false,
+                Codigo = "PDF_ERROR",
+                Mensaje = "No se pudo generar el PDF de la factura para enviarlo por correo."
+            };
         }
 
         var cliente = WebUtility.HtmlEncode(factura.ClienteNombre);
@@ -262,21 +322,32 @@ public class FacturaCompartirService : IFacturaCompartirService
         var cuerpo = $"""
             <!doctype html>
             <html lang="es">
-            <body style="font-family:Arial,sans-serif;color:#263238;line-height:1.5">
-              <p>Estimado/a {cliente},</p>
-              <p>Le compartimos la factura correspondiente a su compra realizada en <strong>{empresa}</strong>.</p>
-              <p>
-                <strong>Número de factura:</strong> {numeroFactura}<br>
-                <strong>Fecha:</strong> {factura.FechaEmision:dd/MM/yyyy}<br>
-                <strong>Total:</strong> L. {factura.Total:N2}
-              </p>
-              <p>El detalle completo se encuentra en el archivo PDF adjunto.</p>
-              <p>Gracias por su preferencia.</p>
+            <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+            <body style="margin:0;background:#f4f7fb;font-family:Arial,sans-serif;color:#263238;line-height:1.5">
+              <div style="display:none;max-height:0;overflow:hidden">Factura {numeroFactura} de {empresa}.</div>
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f4f7fb;padding:24px 12px">
+                <tr><td align="center">
+                  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:620px;background:#ffffff;border:1px solid #dbe3ec;border-radius:12px;overflow:hidden">
+                    <tr><td style="background:#0b7db7;color:#ffffff;padding:20px 24px"><strong style="font-size:20px">{empresa}</strong></td></tr>
+                    <tr><td style="padding:24px">
+                      <p>Estimado/a {cliente},</p>
+                      <p>Le compartimos la factura correspondiente a su compra.</p>
+                      <table role="presentation" width="100%" cellspacing="0" cellpadding="8" style="background:#f8fafc;border-radius:8px">
+                        <tr><td><strong>Número de factura</strong></td><td align="right">{numeroFactura}</td></tr>
+                        <tr><td><strong>Fecha</strong></td><td align="right">{factura.FechaEmision:dd/MM/yyyy}</td></tr>
+                        <tr><td><strong>Total</strong></td><td align="right"><strong>L. {factura.Total:N2}</strong></td></tr>
+                      </table>
+                      <p>El detalle completo se encuentra en el PDF oficial A4 adjunto.</p>
+                      <p style="margin-bottom:0">Gracias por su preferencia.</p>
+                    </td></tr>
+                  </table>
+                </td></tr>
+              </table>
             </body>
             </html>
             """;
 
-        var (exito, error) = await _emailService.EnviarAsync(
+        var entrega = await _emailService.EnviarAsync(
             destinatario,
             asunto,
             cuerpo,
@@ -288,17 +359,34 @@ public class FacturaCompartirService : IFacturaCompartirService
                     Contenido = pdf,
                     ContentType = "application/pdf"
                 }
-            });
+            },
+            cancellationToken);
+
+        var resultadoHistorial = entrega.Exito
+            ? entrega.Intentos > 1 ? $"Enviado ({entrega.Intentos} intentos)" : "Enviado"
+            : $"Error {entrega.Codigo}";
 
         await RegistrarIntentoAsync(facturaId, new RegistrarEnvioDto
         {
             Canal = "Correo",
             Destinatario = destinatario,
-            Resultado = exito ? "Enviado" : "Error",
-            Error = error
+            Resultado = resultadoHistorial,
+            Error = entrega.Exito ? null : entrega.Error
         });
 
-        return (exito, exito ? "Correo enviado correctamente." : (error ?? "No se pudo enviar el correo."));
+        return new ResultadoEnvioCorreoDto
+        {
+            Exito = entrega.Exito,
+            Codigo = entrega.Codigo,
+            Mensaje = entrega.Exito
+                ? entrega.Intentos > 1
+                    ? $"Correo enviado correctamente después de {entrega.Intentos} intentos."
+                    : "Correo enviado correctamente."
+                : entrega.Error ?? "No se pudo enviar el correo.",
+            EsTransitorio = entrega.EsTransitorio,
+            Intentos = entrega.Intentos,
+            MessageId = entrega.MessageId
+        };
     }
 
     private async Task<FacturaDto> ObtenerFacturaCompartibleAsync(int facturaId)
@@ -371,6 +459,49 @@ public class FacturaCompartirService : IFacturaCompartirService
         return Convert.ToHexString(SHA256.HashData(bytes));
     }
 
+    private string? ConstruirClaveCorreo(int facturaId, string destinatario, string? claveIdempotencia)
+    {
+        claveIdempotencia = claveIdempotencia?.Trim();
+        if (string.IsNullOrWhiteSpace(claveIdempotencia)) return null;
+
+        var usuario = _currentUser.UsuarioId?.ToString() ?? _currentUser.NombreUsuario ?? "anonimo";
+        var valor = $"{facturaId}|{destinatario.ToLowerInvariant()}|{usuario}|{claveIdempotencia}";
+        return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(valor)));
+    }
+
+    private static bool TryObtenerCorreoProcesado(string clave, out ResultadoEnvioCorreoDto? resultado)
+    {
+        resultado = null;
+        if (!CorreosProcesados.TryGetValue(clave, out var cache)) return false;
+        if (cache.ExpiraUtc <= DateTime.UtcNow)
+        {
+            CorreosProcesados.TryRemove(clave, out _);
+            return false;
+        }
+
+        resultado = cache.Resultado;
+        return true;
+    }
+
+    private static ResultadoEnvioCorreoDto ClonarComoProcesado(ResultadoEnvioCorreoDto resultado) => new()
+    {
+        Exito = resultado.Exito,
+        Codigo = resultado.Codigo,
+        Mensaje = "Esta solicitud ya había sido procesada; no se envió un correo duplicado.",
+        EsTransitorio = resultado.EsTransitorio,
+        YaProcesado = true,
+        Intentos = resultado.Intentos,
+        MessageId = resultado.MessageId
+    };
+
+    private static void LimpiarCacheCorreoExpirado()
+    {
+        if (CorreosProcesados.Count < 100) return;
+        var ahora = DateTime.UtcNow;
+        foreach (var item in CorreosProcesados.Where(x => x.Value.ExpiraUtc <= ahora).Take(100))
+            CorreosProcesados.TryRemove(item.Key, out _);
+    }
+
     private static bool EsCorreoValido(string correo) =>
         MailAddress.TryCreate(correo, out var direccion) &&
         string.Equals(direccion.Address, correo, StringComparison.OrdinalIgnoreCase);
@@ -380,4 +511,6 @@ public class FacturaCompartirService : IFacturaCompartirService
         if (string.IsNullOrEmpty(valor)) return valor;
         return valor.Length <= longitudMaxima ? valor : valor[..longitudMaxima];
     }
+
+    private sealed record CacheCorreo(DateTime ExpiraUtc, ResultadoEnvioCorreoDto Resultado);
 }
