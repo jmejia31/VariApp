@@ -123,7 +123,8 @@ test('Productos filtra por relaciones normalizadas y estado de inventario', asyn
 
   const sizeSelect = page.getByRole('combobox', { name: 'Talla o tamaño' });
   await expect(sizeSelect).toBeEnabled();
-  await sizeSelect.click();
+  await sizeSelect.focus();
+  await sizeSelect.press('Enter');
   await page.getByRole('option', { name: size.nombre, exact: true }).click();
   await expect(sizeSelect).toContainText(size.nombre);
   await waitForSelectToClose(page);
