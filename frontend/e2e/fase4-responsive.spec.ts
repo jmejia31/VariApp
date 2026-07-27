@@ -155,21 +155,24 @@ async function assertTouchTargets(page: Page, route: string, minimum: number): P
     'button[mat-icon-button]:visible',
     '.menu-toggle:visible',
     '.profile-button:visible'
-  ].join(',')).evaluateAll((elements, min) => elements.flatMap((element) => {
-    const html = element as HTMLElement;
-    const rect = html.getBoundingClientRect();
-    if (rect.width <= 0 || rect.height <= 0) return [];
+  ].join(',')).evaluateAll(
+    (elements, min) => elements.flatMap((element) => {
+      const html = element as HTMLElement;
+      const rect = html.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) return [];
 
-    const tooSmall = rect.width < min || rect.height < min;
-    return tooSmall ? [{
-      tag: html.tagName,
-      className: html.className,
-      ariaLabel: html.getAttribute('aria-label'),
-      text: (html.textContent ?? '').trim().slice(0, 60),
-      width: rect.width,
-      height: rect.height
-    }] : [];
-  }, minimum);
+      const tooSmall = rect.width < min || rect.height < min;
+      return tooSmall ? [{
+        tag: html.tagName,
+        className: html.className,
+        ariaLabel: html.getAttribute('aria-label'),
+        text: (html.textContent ?? '').trim().slice(0, 60),
+        width: rect.width,
+        height: rect.height
+      }] : [];
+    }),
+    minimum
+  );
 
   expect(failures, `Controles menores de ${minimum}px en ${route}: ${JSON.stringify(failures)}`).toEqual([]);
 }
@@ -192,7 +195,6 @@ async function assertNavigationMode(page: Page, kind: 'mobile' | 'desktop'): Pro
         right: rect.right,
         width: rect.width,
         viewportWidth: document.documentElement.clientWidth,
-        scrollHeight: element.scrollHeight,
         clientHeight: element.clientHeight
       };
     });
@@ -267,7 +269,8 @@ test.describe('Fase 4 - matriz responsive exhaustiva', () => {
         await expect(page.locator('main#main-content h1').first()).toBeVisible();
         await page.screenshot({
           path: `test-results/fase4/${viewport.name}/${representative.name}.png`,
-          fullPage: true
+          fullPage: viewport.width <= 1024,
+          animations: 'disabled'
         });
       }
     });
