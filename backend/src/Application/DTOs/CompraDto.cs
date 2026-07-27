@@ -7,6 +7,7 @@ public class CompraDetalleDto
     public string ProductoNombre { get; set; } = string.Empty;
     public string ProductoMarca { get; set; } = string.Empty;
     public string ProductoModelo { get; set; } = string.Empty;
+    public string? ProductoImagenPrincipalUrl { get; set; }
     public int Cantidad { get; set; }
     public decimal CostoUnitario { get; set; }
     public decimal Subtotal { get; set; }

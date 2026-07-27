@@ -12,11 +12,12 @@ import { debounceTime, Subject } from 'rxjs';
 import { VentaService } from '../../services/venta.service';
 import { Venta } from '../../core/models/venta.model';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
+import { ProductoImagenComponent } from '../../shared/producto-imagen/producto-imagen.component';
 
 @Component({
   selector: 'app-ventas-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, MatIconModule, MatButtonModule, MatFormFieldModule, MatInputModule, MatPaginatorModule, MatProgressSpinnerModule],
+  imports: [CommonModule, RouterLink, FormsModule, MatIconModule, MatButtonModule, MatFormFieldModule, MatInputModule, MatPaginatorModule, MatProgressSpinnerModule, ProductoImagenComponent],
   templateUrl: './ventas-list.component.html',
   styleUrl: './ventas-list.component.scss'
 })

@@ -137,4 +137,26 @@ public class VentaServiceTests
         Assert.Equal(EstadoFactura.Anulada, factura.Estado);
         Assert.Equal("Cliente se arrepintió", factura.MotivoAnulacion);
     }
+
+    [Fact]
+    public async Task GetByIdAsync_Incluye_Imagen_Principal_Del_Producto()
+    {
+        var producto = ProductoDePrueba();
+        producto.Imagenes.Add(new ProductoImagen
+        {
+            Id = 11,
+            Url = "https://res.cloudinary.com/demo/image/upload/producto-venta.webp",
+            EsPrincipal = true,
+            Orden = 0
+        });
+        var venta = VentaDePrueba(cantidadDetalle: 1);
+        venta.Detalles.Single().Producto = producto;
+        _ventaRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(venta);
+
+        var resultado = await _service.GetByIdAsync(1);
+
+        Assert.Equal(
+            "https://res.cloudinary.com/demo/image/upload/producto-venta.webp",
+            resultado!.Detalles.Single().ProductoImagenPrincipalUrl);
+    }
 }

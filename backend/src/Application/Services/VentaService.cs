@@ -566,6 +566,7 @@ public class VentaService : IVentaService
             ProductoNombre = d.ProductoNombreSnapshot,
             ProductoMarca = d.ProductoMarcaSnapshot,
             ProductoModelo = d.ProductoModeloSnapshot,
+            ProductoImagenPrincipalUrl = d.Producto?.ImagenPrincipal?.Url,
             Cantidad = d.Cantidad,
             PrecioUnitario = d.PrecioUnitario,
             Subtotal = d.Subtotal,

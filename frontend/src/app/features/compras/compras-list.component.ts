@@ -12,11 +12,12 @@ import { debounceTime, Subject } from 'rxjs';
 import { CompraService } from '../../services/compra.service';
 import { Compra } from '../../core/models/compra.model';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
+import { ProductoImagenComponent } from '../../shared/producto-imagen/producto-imagen.component';
 
 @Component({
   selector: 'app-compras-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, MatIconModule, MatButtonModule, MatFormFieldModule, MatInputModule, MatPaginatorModule, MatProgressSpinnerModule],
+  imports: [CommonModule, RouterLink, FormsModule, MatIconModule, MatButtonModule, MatFormFieldModule, MatInputModule, MatPaginatorModule, MatProgressSpinnerModule, ProductoImagenComponent],
   templateUrl: './compras-list.component.html',
   styleUrl: './compras-list.component.scss'
 })

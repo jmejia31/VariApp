@@ -17,13 +17,14 @@ import { ClienteService } from '../../services/cliente.service';
 import { Producto } from '../../core/models/producto.model';
 import { Cliente } from '../../core/models/cliente.model';
 import { ResultadoCalculo } from '../../core/models/venta.model';
+import { ProductoImagenComponent } from '../../shared/producto-imagen/producto-imagen.component';
 
 @Component({
   selector: 'app-venta-form',
   standalone: true,
   imports: [
     CommonModule, ReactiveFormsModule, RouterLink, MatFormFieldModule, MatInputModule,
-    MatSelectModule, MatAutocompleteModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule
+    MatSelectModule, MatAutocompleteModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule, ProductoImagenComponent
   ],
   templateUrl: './venta-form.component.html',
   styleUrl: './venta-form.component.scss'
@@ -197,6 +198,11 @@ export class VentaFormComponent implements OnInit {
     if (producto) {
       this.detalles.at(index).patchValue({ precioUnitario: producto.precio });
     }
+  }
+
+  productoSeleccionado(group: AbstractControl): Producto | undefined {
+    const productoId = Number(group.value.productoId);
+    return this.productos().find((producto) => producto.id === productoId);
   }
 
   quitarDetalle(index: number): void {

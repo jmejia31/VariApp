@@ -15,6 +15,7 @@ import { CatalogoProductoService } from '../../services/catalogo-producto.servic
 import { Categoria } from '../../core/models/categoria.model';
 import { CatalogoProducto } from '../../core/models/catalogo-producto.model';
 import { ProductoImagen } from '../../core/models/producto.model';
+import { ProductoImagenComponent } from '../../shared/producto-imagen/producto-imagen.component';
 
 interface ImagenPreview {
   id?: number;
@@ -30,7 +31,7 @@ const MAX_IMAGENES = 5;
   standalone: true,
   imports: [
     CommonModule, ReactiveFormsModule, RouterLink, MatFormFieldModule,
-    MatInputModule, MatSelectModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule
+    MatInputModule, MatSelectModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule, ProductoImagenComponent
   ],
   templateUrl: './producto-form.component.html',
   styleUrl: './producto-form.component.scss'

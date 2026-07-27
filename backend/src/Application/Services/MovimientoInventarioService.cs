@@ -24,6 +24,7 @@ public class MovimientoInventarioService : IMovimientoInventarioService
         Id = m.Id,
         ProductoId = m.ProductoId,
         ProductoNombre = m.Producto?.Nombre ?? "(producto eliminado)",
+        ProductoImagenPrincipalUrl = m.Producto?.ImagenPrincipal?.Url,
         Tipo = m.Tipo.ToString(),
         Cantidad = m.Cantidad,
         StockAnterior = m.StockAnterior,

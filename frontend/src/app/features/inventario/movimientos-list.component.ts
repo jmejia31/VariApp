@@ -7,13 +7,14 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MovimientoInventarioService } from '../../services/movimiento-inventario.service';
 import { MovimientoInventario } from '../../core/models/movimiento-inventario.model';
+import { ProductoImagenComponent } from '../../shared/producto-imagen/producto-imagen.component';
 
 @Component({
   selector: 'app-movimientos-list',
   standalone: true,
   imports: [
     CommonModule, FormsModule, MatFormFieldModule, MatSelectModule,
-    MatProgressSpinnerModule, MatIconModule
+    MatProgressSpinnerModule, MatIconModule, ProductoImagenComponent
   ],
   templateUrl: './movimientos-list.component.html',
   styleUrl: './movimientos-list.component.scss'

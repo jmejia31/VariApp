@@ -48,7 +48,10 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
     {
         var alcance = await _usuarioScope.ObtenerActualAsync();
         var query = AplicarAlcance(
-            _context.MovimientosInventario.Include(m => m.Producto).AsQueryable(),
+            _context.MovimientosInventario
+                .Include(m => m.Producto)
+                    .ThenInclude(p => p!.Imagenes)
+                .AsSplitQuery(),
             alcance);
 
         if (productoId.HasValue) query = query.Where(m => m.ProductoId == productoId.Value);

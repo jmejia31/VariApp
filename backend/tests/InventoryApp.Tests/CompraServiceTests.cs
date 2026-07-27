@@ -165,4 +165,37 @@ public class CompraServiceTests
         Assert.Equal("COM-000001", creada.NumeroCompra);
         Assert.Equal(EstadoDocumento.Borrador, creada.Estado);
     }
+
+    [Fact]
+    public async Task GetByIdAsync_Incluye_Imagen_Principal_Del_Producto()
+    {
+        var producto = ProductoDePrueba();
+        producto.Imagenes.Add(new ProductoImagen
+        {
+            Id = 10,
+            Url = "https://res.cloudinary.com/demo/image/upload/producto-principal.webp",
+            EsPrincipal = true,
+            Orden = 0
+        });
+        var compra = new Compra { Id = 7, NumeroCompra = "COM-000007", ProveedorNombre = "Proveedor X" };
+        compra.Detalles.Add(new CompraDetalle
+        {
+            Id = 4,
+            ProductoId = producto.Id,
+            Producto = producto,
+            ProductoNombreSnapshot = producto.Nombre,
+            ProductoMarcaSnapshot = producto.Marca,
+            ProductoModeloSnapshot = producto.Modelo,
+            Cantidad = 1,
+            CostoUnitario = 5,
+            Subtotal = 5
+        });
+        _compraRepoMock.Setup(r => r.GetByIdAsync(7)).ReturnsAsync(compra);
+
+        var resultado = await _service.GetByIdAsync(7);
+
+        Assert.Equal(
+            "https://res.cloudinary.com/demo/image/upload/producto-principal.webp",
+            resultado!.Detalles.Single().ProductoImagenPrincipalUrl);
+    }
 }

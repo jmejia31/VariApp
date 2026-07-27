@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, HostListener, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
@@ -8,11 +8,12 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ProductoService } from '../../services/producto.service';
 import { Producto, ProductoImagen } from '../../core/models/producto.model';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
+import { ProductoImagenComponent } from '../../shared/producto-imagen/producto-imagen.component';
 
 @Component({
   selector: 'app-producto-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink, MatIconModule, MatButtonModule, MatProgressSpinnerModule],
+  imports: [CommonModule, RouterLink, MatIconModule, MatButtonModule, MatProgressSpinnerModule, ProductoImagenComponent],
   templateUrl: './producto-detail.component.html',
   styleUrl: './producto-detail.component.scss'
 })
@@ -47,6 +48,7 @@ export class ProductoDetailComponent implements OnInit {
     this.imagenAmpliada.set(imagen);
   }
 
+  @HostListener('document:keydown.escape')
   cerrarAmpliada(): void {
     this.imagenAmpliada.set(null);
   }

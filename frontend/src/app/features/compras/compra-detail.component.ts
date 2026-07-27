@@ -12,11 +12,12 @@ import { ImpuestoAplicado } from '../../core/models/venta.model';
 import { AnularDialogComponent } from '../../shared/anular-dialog.component';
 import { ConfirmDialogComponent } from '../../shared/confirm-dialog.component';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
+import { ProductoImagenComponent } from '../../shared/producto-imagen/producto-imagen.component';
 
 @Component({
   selector: 'app-compra-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink, MatButtonModule, MatIconModule, MatProgressSpinnerModule, MatDialogModule],
+  imports: [CommonModule, RouterLink, MatButtonModule, MatIconModule, MatProgressSpinnerModule, MatDialogModule, ProductoImagenComponent],
   templateUrl: './compra-detail.component.html',
   styleUrl: './compra-detail.component.scss'
 })

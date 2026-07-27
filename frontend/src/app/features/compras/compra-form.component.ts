@@ -17,13 +17,14 @@ import { ProveedorService } from '../../services/proveedor.service';
 import { Producto } from '../../core/models/producto.model';
 import { Proveedor } from '../../core/models/proveedor.model';
 import { ResultadoCalculo } from '../../core/models/compra.model';
+import { ProductoImagenComponent } from '../../shared/producto-imagen/producto-imagen.component';
 
 @Component({
   selector: 'app-compra-form',
   standalone: true,
   imports: [
     CommonModule, ReactiveFormsModule, RouterLink, MatFormFieldModule, MatInputModule,
-    MatSelectModule, MatAutocompleteModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule
+    MatSelectModule, MatAutocompleteModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule, ProductoImagenComponent
   ],
   templateUrl: './compra-form.component.html',
   styleUrl: './compra-form.component.scss'
@@ -193,6 +194,11 @@ export class CompraFormComponent implements OnInit {
       cantidad: [cantidad, [Validators.required, Validators.min(1)]],
       costoUnitario: [costoUnitario, [Validators.required, Validators.min(0.01)]]
     }));
+  }
+
+  productoSeleccionado(group: AbstractControl): Producto | undefined {
+    const productoId = Number(group.value.productoId);
+    return this.productos().find((producto) => producto.id === productoId);
   }
 
   quitarDetalle(index: number): void {

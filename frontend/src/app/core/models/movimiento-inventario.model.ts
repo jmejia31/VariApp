@@ -2,6 +2,7 @@ export interface MovimientoInventario {
   id: number;
   productoId: number;
   productoNombre: string;
+  productoImagenPrincipalUrl?: string;
   tipo: 'Entrada' | 'Salida' | 'Ajuste' | 'Reversion';
   cantidad: number;
   stockAnterior: number;

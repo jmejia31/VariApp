@@ -535,6 +535,7 @@ public class CompraService : ICompraService
             ProductoNombre = detalle.ProductoNombreSnapshot,
             ProductoMarca = detalle.ProductoMarcaSnapshot,
             ProductoModelo = detalle.ProductoModeloSnapshot,
+            ProductoImagenPrincipalUrl = detalle.Producto?.ImagenPrincipal?.Url,
             Cantidad = detalle.Cantidad,
             CostoUnitario = detalle.CostoUnitario,
             Subtotal = detalle.Subtotal

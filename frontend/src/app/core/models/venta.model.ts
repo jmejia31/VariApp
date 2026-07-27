@@ -4,6 +4,7 @@ export interface VentaDetalle {
   productoNombre: string;
   productoMarca: string;
   productoModelo: string;
+  productoImagenPrincipalUrl?: string;
   cantidad: number;
   precioUnitario: number;
   subtotal: number;

@@ -9,11 +9,12 @@ import { VentaService } from '../../services/venta.service';
 import { Venta } from '../../core/models/venta.model';
 import { AnularDialogComponent } from '../../shared/anular-dialog.component';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
+import { ProductoImagenComponent } from '../../shared/producto-imagen/producto-imagen.component';
 
 @Component({
   selector: 'app-venta-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink, MatButtonModule, MatIconModule, MatProgressSpinnerModule, MatDialogModule],
+  imports: [CommonModule, RouterLink, MatButtonModule, MatIconModule, MatProgressSpinnerModule, MatDialogModule, ProductoImagenComponent],
   templateUrl: './venta-detail.component.html',
   styleUrl: './venta-detail.component.scss'
 })

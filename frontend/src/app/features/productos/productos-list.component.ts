@@ -20,6 +20,7 @@ import { Categoria } from '../../core/models/categoria.model';
 import { CatalogoProducto } from '../../core/models/catalogo-producto.model';
 import { ConfirmDialogComponent } from '../../shared/confirm-dialog.component';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
+import { ProductoImagenComponent } from '../../shared/producto-imagen/producto-imagen.component';
 
 type EstadoProductoFiltro = 'todos' | 'activos' | 'inactivos' | 'agotados' | 'disponibles';
 
@@ -29,7 +30,7 @@ type EstadoProductoFiltro = 'todos' | 'activos' | 'inactivos' | 'agotados' | 'di
   imports: [
     CommonModule, RouterLink, FormsModule, MatIconModule, MatButtonModule,
     MatFormFieldModule, MatInputModule, MatSelectModule, MatPaginatorModule,
-    MatProgressSpinnerModule, MatDialogModule, MatSlideToggleModule
+    MatProgressSpinnerModule, MatDialogModule, MatSlideToggleModule, ProductoImagenComponent
   ],
   templateUrl: './productos-list.component.html',
   styleUrl: './productos-list.component.scss'

@@ -24,8 +24,12 @@ public class CompraRepository : ICompraRepository
     }
 
     private IQueryable<Compra> ConIncludes() =>
-        _context.Compras.Include(c => c.Detalles).ThenInclude(d => d.Producto)
-            .Include(c => c.ImpuestosAplicados);
+        _context.Compras
+            .Include(c => c.Detalles)
+                .ThenInclude(d => d.Producto)
+                    .ThenInclude(p => p!.Imagenes)
+            .Include(c => c.ImpuestosAplicados)
+            .AsSplitQuery();
 
     private static IQueryable<Compra> AplicarAlcance(
         IQueryable<Compra> query,

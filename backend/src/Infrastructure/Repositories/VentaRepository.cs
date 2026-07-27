@@ -24,10 +24,14 @@ public class VentaRepository : IVentaRepository
     }
 
     private IQueryable<Venta> ConIncludes() =>
-        _context.Ventas.Include(v => v.Detalles).ThenInclude(d => d.Producto)
+        _context.Ventas
+            .Include(v => v.Detalles)
+                .ThenInclude(d => d.Producto)
+                    .ThenInclude(p => p!.Imagenes)
             .Include(v => v.Factura)
             .Include(v => v.DescuentosAplicados)
-            .Include(v => v.ImpuestosAplicados);
+            .Include(v => v.ImpuestosAplicados)
+            .AsSplitQuery();
 
     private static IQueryable<Venta> AplicarAlcance(
         IQueryable<Venta> query,
