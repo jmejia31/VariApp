@@ -19,17 +19,20 @@ public class FacturasController : ControllerBase
     private readonly IFacturaService _facturaService;
     private readonly IFacturaPdfService _facturaPdfService;
     private readonly IFacturaCompartirService _facturaCompartirService;
+    private readonly IEmailService _emailService;
     private readonly IAuditoriaService _auditoria;
 
     public FacturasController(
         IFacturaService facturaService,
         IFacturaPdfService facturaPdfService,
         IFacturaCompartirService facturaCompartirService,
+        IEmailService emailService,
         IAuditoriaService auditoria)
     {
         _facturaService = facturaService;
         _facturaPdfService = facturaPdfService;
         _facturaCompartirService = facturaCompartirService;
+        _emailService = emailService;
         _auditoria = auditoria;
     }
 
@@ -47,6 +50,16 @@ public class FacturasController : ControllerBase
     {
         return Ok(ApiResponse<IReadOnlyList<FacturaFormatoPdfDto>>.Ok(
             FacturaFormatoPdfCatalogo.ObtenerTodos()));
+    }
+
+    [HttpGet("correo/estado")]
+    [RequierePermiso(ModuloSistema.Facturacion, AccionPermiso.Compartir)]
+    public IActionResult GetEstadoCorreo()
+    {
+        var estado = _emailService.ObtenerEstadoConfiguracion();
+        return Ok(ApiResponse<EstadoConfiguracionSmtp>.Ok(
+            estado,
+            estado.Configurado ? "SMTP disponible." : "SMTP requiere configuración en Desarrollo."));
     }
 
     [HttpGet("{id:int}")]
@@ -141,16 +154,34 @@ public class FacturasController : ControllerBase
     [RequierePermiso(ModuloSistema.Facturacion, AccionPermiso.Compartir)]
     public async Task<IActionResult> EnviarPorCorreo(int id, [FromBody] EnviarCorreoFacturaDto dto)
     {
-        var (exito, mensaje) = await _facturaCompartirService.EnviarPorCorreoAsync(id, dto.Destinatario);
-        if (!exito)
-            return BadRequest(ApiResponse<object>.Fail(mensaje));
+        var claveIdempotencia = Request.Headers["Idempotency-Key"].FirstOrDefault()?.Trim();
+        if (!string.IsNullOrEmpty(claveIdempotencia) && claveIdempotencia.Length > 128)
+            return BadRequest(ApiResponse<object>.Fail("La clave de idempotencia no puede superar 128 caracteres."));
 
-        return Ok(ApiResponse<object>.Ok(new { }, mensaje));
+        var resultado = await _facturaCompartirService.EnviarPorCorreoAsync(
+            id,
+            dto.Destinatario,
+            claveIdempotencia,
+            HttpContext.RequestAborted);
+
+        if (resultado.Exito)
+            return Ok(ApiResponse<ResultadoEnvioCorreoDto>.Ok(resultado, resultado.Mensaje));
+
+        if (resultado.Codigo is "DESTINATARIO_INVALIDO" or "PDF_ERROR")
+            return BadRequest(ApiResponse<object>.Fail(resultado.Mensaje));
+
+        if (resultado.EsTransitorio)
+        {
+            Response.Headers.RetryAfter = "30";
+            return StatusCode(StatusCodes.Status503ServiceUnavailable, ApiResponse<object>.Fail(resultado.Mensaje));
+        }
+
+        var status = resultado.Codigo == "SMTP_NO_CONFIGURADO"
+            ? StatusCodes.Status503ServiceUnavailable
+            : StatusCodes.Status502BadGateway;
+        return StatusCode(status, ApiResponse<object>.Fail(resultado.Mensaje));
     }
 
-    /// Descarga pública deliberada para destinatarios externos. La seguridad
-    /// depende de un token aleatorio cuyo hash está persistido, expiración,
-    /// revocación y límite de accesos. El token nunca se registra en auditoría.
     [HttpGet("publico/{token}/pdf")]
     [AllowAnonymous]
     [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
