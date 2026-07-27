@@ -34,7 +34,7 @@ concurrency:
 
 jobs:
   acceptance:
-    name: Módulos, sesión, catálogos, permisos, accesibilidad, responsive e imágenes
+    name: Módulos, sesión, catálogos, permisos, accesibilidad, responsive, imágenes y facturación
     runs-on: ubuntu-latest
     timeout-minutes: 90
 
@@ -182,6 +182,7 @@ jobs:
             e2e/fase3-interfaz.spec.ts \
             e2e/fase4-responsive.spec.ts \
             e2e/fase5-imagenes.spec.ts \
+            e2e/fase6-facturacion-impresion.spec.ts \
             e2e/sesion-inactividad.spec.ts \
             e2e/matriz-modulos-visual.spec.ts \
             e2e/phase7-admin-role.spec.ts \
