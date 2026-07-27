@@ -156,9 +156,9 @@ Commit funcional final: `0bbc73f00bb8024e72a5837310456311d23f8740`.
 
 Commit documental final: `2b4f81b659341a2a8dbfa2c0f30e0ce32858cfe7`.
 
-- `Desarrollo - Compilación y pruebas`, run `30268805953`: **success**.
-- `Desarrollo - aceptación funcional integral`, run `30268805560`: **success**.
-- `Fase 2 - Auditoría de configuración y dependencias`, run `30268805384`: **success**.
+- `Desarrollo - Compilación y pruebas`, run `30269506949`: **success**.
+- `Desarrollo - aceptación funcional integral`, run `30269506971`: **success**.
+- `Fase 2 - Auditoría de configuración y dependencias`, run `30269506792`: **success**.
 
 La aceptación integral ejecutó 27 pruebas sin fallos ni errores. La prueba de Fase 3 certificó automáticamente ausencia de desbordamiento horizontal, textos recortados y campos superpuestos en 1440 × 1000 y 390 × 844.
 
