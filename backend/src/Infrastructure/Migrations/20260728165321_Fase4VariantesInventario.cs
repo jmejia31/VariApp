@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -75,6 +75,43 @@ namespace InventoryApp.Infrastructure.Migrations
                 table: "CompraDetalles",
                 type: "int",
                 nullable: true);
+
+            migrationBuilder.Sql(
+                """
+                INSERT INTO ProductoVariantes
+                    (ProductoId, ColorId, Sku, CodigoBarras, Cantidad, UmbralStockBajo,
+                     Costo, Precio, Activo, Eliminado, FechaEliminacion, EliminadoPorUsuarioId,
+                     FechaCreacion, FechaActualizacion, CreadoPorUsuarioId, CreadoPorNombreUsuario,
+                     ActualizadoPorUsuarioId, ActualizadoPorNombreUsuario)
+                SELECT
+                    p.Id,
+                    p.ColorId,
+                    CONCAT('LEGACY-', LPAD(p.Id, 8, '0')),
+                    NULL,
+                    p.Cantidad,
+                    p.UmbralStockBajo,
+                    p.Costo,
+                    p.Precio,
+                    p.Activo,
+                    0,
+                    NULL,
+                    NULL,
+                    UTC_TIMESTAMP(6),
+                    UTC_TIMESTAMP(6),
+                    NULL,
+                    'Migración Fase 4',
+                    NULL,
+                    NULL
+                FROM Productos p
+                WHERE p.ColorId IS NOT NULL
+                  AND p.Eliminado = 0
+                  AND NOT EXISTS (
+                      SELECT 1
+                      FROM ProductoVariantes pv
+                      WHERE pv.ProductoId = p.Id
+                        AND pv.Eliminado = 0
+                  );
+                """);
 
             migrationBuilder.CreateIndex(
                 name: "IX_VentaDetalles_ProductoVarianteId",
