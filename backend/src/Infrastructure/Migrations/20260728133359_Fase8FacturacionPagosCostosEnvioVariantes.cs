@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
@@ -270,6 +270,11 @@ namespace InventoryApp.Infrastructure.Migrations
                         onDelete: ReferentialAction.Restrict);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.InsertData(
+                table: "CostosEnvio",
+                columns: new[] { "Id", "Nombre", "Descripcion", "Monto", "Prioridad", "EsPredeterminado", "Activo", "Eliminado", "FechaCreacion", "FechaActualizacion" },
+                values: new object[] { 1, "Envío estándar", "Costo de envío predeterminado de VariStorehn", 80.00m, 1, true, true, false, new DateTime(2026, 7, 28, 0, 0, 0, DateTimeKind.Utc), new DateTime(2026, 7, 28, 0, 0, 0, DateTimeKind.Utc) });
 
             migrationBuilder.CreateIndex(
                 name: "IX_CostosEnvio_Activo_EsPredeterminado",

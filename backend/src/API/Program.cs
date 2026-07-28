@@ -64,6 +64,8 @@ builder.Services.AddScoped<IDescuentoRepository, DescuentoRepository>();
 builder.Services.AddScoped<IDescuentoService, DescuentoService>();
 builder.Services.AddScoped<IImpuestoRepository, ImpuestoRepository>();
 builder.Services.AddScoped<IImpuestoService, ImpuestoService>();
+builder.Services.AddScoped<ICostoEnvioRepository, CostoEnvioRepository>();
+builder.Services.AddScoped<ICostoEnvioService, CostoEnvioService>();
 builder.Services.AddScoped<ICalculoService, CalculoService>();
 builder.Services.AddScoped<IPerfilService, PerfilService>();
 builder.Services.AddScoped<IPerfilImagenStorageService, CloudinaryPerfilImagenStorageService>();

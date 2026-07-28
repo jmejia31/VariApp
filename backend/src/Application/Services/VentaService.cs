@@ -86,7 +86,7 @@ public class VentaService : IVentaService
 
         await VincularClienteAsync(venta, dto);
         await ArmarDetallesAsync(venta, dto.Detalles, validarStock: false);
-        await CalcularTotalesAsync(venta, dto.CodigoPromocional);
+        await CalcularTotalesAsync(venta, dto.CodigoPromocional, dto.CostoEnvioId, dto.EnvioExonerado, dto.MotivoExoneracionEnvio);
 
         await _ventaRepository.AddAsync(venta);
         await _ventaRepository.SaveChangesAsync();
@@ -120,7 +120,7 @@ public class VentaService : IVentaService
         venta.DescuentosAplicados.Clear();
         venta.ImpuestosAplicados.Clear();
         await ArmarDetallesAsync(venta, dto.Detalles, validarStock: false);
-        await CalcularTotalesAsync(venta, dto.CodigoPromocional);
+        await CalcularTotalesAsync(venta, dto.CodigoPromocional, dto.CostoEnvioId, dto.EnvioExonerado, dto.MotivoExoneracionEnvio);
 
         _ventaRepository.Update(venta);
         await _ventaRepository.SaveChangesAsync();
@@ -224,10 +224,18 @@ public class VentaService : IVentaService
                 VendedorNombreUsuario = _currentUser.NombreCompleto ?? _currentUser.NombreUsuario ?? "—",
                 GeneradaPorUsuarioId = _currentUser.UsuarioId,
                 GeneradaPorNombreUsuario = _currentUser.NombreCompleto ?? _currentUser.NombreUsuario,
+                ImporteBruto = venta.ImporteBruto,
                 Subtotal = venta.Subtotal,
                 Descuento = venta.Descuento,
                 Impuesto = venta.Impuesto,
+                CostoEnvioId = venta.CostoEnvioId,
+                CostoEnvioNombreSnapshot = venta.CostoEnvioNombreSnapshot,
+                CostoEnvioMontoSnapshot = venta.CostoEnvioMontoSnapshot,
+                CostoEnvio = venta.CostoEnvio,
+                EnvioExonerado = venta.EnvioExonerado,
+                MotivoExoneracionEnvio = venta.MotivoExoneracionEnvio,
                 Total = venta.Total,
+                SaldoPendiente = venta.Total,
                 Detalles = venta.Detalles.Select(d => new FacturaDetalle
                 {
                     ProductoId = d.ProductoId,
@@ -468,10 +476,10 @@ public class VentaService : IVentaService
             });
         }
 
-        return await _calculoService.CalcularVentaAsync(entradas, request.ClienteId, _currentUser.RolId, request.CodigoPromocional);
+        return await _calculoService.CalcularVentaAsync(entradas, request.ClienteId, _currentUser.RolId, request.CodigoPromocional, request.CostoEnvioId, request.EnvioExonerado, request.MotivoExoneracionEnvio);
     }
 
-    private async Task CalcularTotalesAsync(Venta venta, string? codigoPromocional)
+    private async Task CalcularTotalesAsync(Venta venta, string? codigoPromocional, int? costoEnvioId, bool envioExonerado, string? motivoExoneracionEnvio)
     {
         var entradas = venta.Detalles.Select(d => new DetalleCalculoInput
         {
@@ -490,11 +498,19 @@ public class VentaService : IVentaService
         }
 
         var resultado = await _calculoService.CalcularVentaAsync(
-            entradas, venta.ClienteId, _currentUser.RolId, codigoPromocional);
+            entradas, venta.ClienteId, _currentUser.RolId, codigoPromocional, costoEnvioId, envioExonerado, motivoExoneracionEnvio);
 
+        venta.ImporteBruto = resultado.ImporteBruto;
+        venta.ImporteProductos = resultado.ImporteProductos;
         venta.Subtotal = resultado.Subtotal;
         venta.Descuento = resultado.TotalDescuento;
         venta.Impuesto = resultado.TotalImpuesto;
+        venta.CostoEnvioId = resultado.CostoEnvioId;
+        venta.CostoEnvioNombreSnapshot = resultado.CostoEnvioNombre;
+        venta.CostoEnvioMontoSnapshot = resultado.CostoEnvio;
+        venta.CostoEnvio = resultado.CostoEnvio;
+        venta.EnvioExonerado = resultado.EnvioExonerado;
+        venta.MotivoExoneracionEnvio = resultado.MotivoExoneracionEnvio;
         venta.Total = resultado.Total;
         venta.CostoTotal = venta.Detalles.Sum(d => d.CostoUnitarioSnapshot * d.Cantidad);
         venta.UtilidadBruta = venta.Detalles.Sum(d => d.UtilidadBruta) - venta.Descuento;
@@ -552,9 +568,16 @@ public class VentaService : IVentaService
         Estado = v.Estado.ToString(),
         EstadoPago = v.EstadoPago.ToString(),
         MetodoPago = v.MetodoPago.ToString(),
+        ImporteBruto = v.ImporteBruto,
+        ImporteProductos = v.ImporteProductos,
         Subtotal = v.Subtotal,
         Descuento = v.Descuento,
         Impuesto = v.Impuesto,
+        CostoEnvio = v.CostoEnvio,
+        CostoEnvioId = v.CostoEnvioId,
+        CostoEnvioNombre = v.CostoEnvioNombreSnapshot,
+        EnvioExonerado = v.EnvioExonerado,
+        MotivoExoneracionEnvio = v.MotivoExoneracionEnvio,
         Total = v.Total,
         CostoTotal = v.CostoTotal,
         UtilidadBruta = v.UtilidadBruta,
