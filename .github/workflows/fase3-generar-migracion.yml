@@ -1,8 +1,9 @@
 name: Fase 3 - generar migración de envío en ventas
 
 on:
-  push:
-    branches: [Desarrollo]
+  pull_request:
+    branches: [main]
+    types: [synchronize]
     paths:
       - .github/checkpoints/fase3-generar-migracion
 
@@ -11,6 +12,7 @@ permissions:
 
 jobs:
   generar:
+    if: github.event.pull_request.head.ref == 'Desarrollo'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
