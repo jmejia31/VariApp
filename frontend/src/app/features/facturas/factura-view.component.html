@@ -349,6 +349,10 @@
         @if (f.impuestoAdicional > 0) {
           <div><span>Impuesto adicional</span><span>+ L. {{ f.impuestoAdicional | number:'1.2-2' }}</span></div>
         }
+        <div><span>{{ f.envioExonerado ? 'Envío exonerado' : (f.costoEnvioNombre || 'Costo de envío') }}</span><span>{{ f.envioExonerado ? 'L. 0.00' : ('L. ' + (f.costoEnvio | number:'1.2-2')) }}</span></div>
+        @if (f.envioExonerado && f.motivoExoneracionEnvio) {
+          <div><span>Motivo de exoneración</span><span>{{ f.motivoExoneracionEnvio }}</span></div>
+        }
         <div class="total"><span>TOTAL</span><span>L. {{ f.total | number:'1.2-2' }}</span></div>
       </section>
 

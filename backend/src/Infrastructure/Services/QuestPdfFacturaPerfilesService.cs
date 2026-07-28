@@ -218,6 +218,7 @@ public sealed class QuestPdfFacturaPerfilesService : IFacturaPdfService
                                 FilaTotal(totales, "Impuesto incluido", factura.ImpuestoIncluido, false, compacto);
                             if (factura.ImpuestoAdicional > 0)
                                 FilaTotal(totales, "Impuesto adicional", factura.ImpuestoAdicional, false, compacto);
+                            FilaTotal(totales, factura.EnvioExonerado ? "Envío exonerado" : (factura.CostoEnvioNombre ?? "Costo de envío"), factura.EnvioExonerado ? 0 : factura.CostoEnvio, false, compacto);
                             FilaTotal(totales, "TOTAL A PAGAR", factura.Total, true, compacto, colorPrimario);
                         });
                     });
@@ -317,6 +318,9 @@ public sealed class QuestPdfFacturaPerfilesService : IFacturaPdfService
                         FilaTermica(content, "Impuesto incluido", factura.ImpuestoIncluido, compacto);
                     if (factura.ImpuestoAdicional > 0)
                         FilaTermica(content, "Impuesto adicional", factura.ImpuestoAdicional, compacto);
+                    FilaTermica(content, factura.EnvioExonerado ? "Envío exonerado" : (factura.CostoEnvioNombre ?? "Costo de envío"), factura.EnvioExonerado ? 0 : factura.CostoEnvio, compacto);
+                    if (factura.EnvioExonerado && !string.IsNullOrWhiteSpace(factura.MotivoExoneracionEnvio))
+                        content.Item().Text($"Motivo envío: {factura.MotivoExoneracionEnvio}").FontSize(compacto ? 5.5f : 6.5f);
                     content.Item().PaddingTop(2).BorderTop(1).PaddingTop(3).Row(row =>
                     {
                         row.RelativeItem().Text("TOTAL").FontSize(compacto ? 9 : 11).Bold();
@@ -385,6 +389,12 @@ public sealed class QuestPdfFacturaPerfilesService : IFacturaPdfService
             foreach (var descuento in factura.DescuentosAplicados)
                 columna.Item().Text($"• {descuento.Nombre}: - L. {descuento.Monto:N2}").FontSize(compacto ? 6 : 8);
         }
+
+        columna.Item().PaddingTop(4).Text("ENVÍO").FontSize(compacto ? 6 : 8).Bold().FontColor(color);
+        columna.Item().Text(factura.EnvioExonerado
+                ? $"• Exonerado: {factura.MotivoExoneracionEnvio ?? "Sin motivo"}"
+                : $"• {factura.CostoEnvioNombre ?? "Costo de envío"}: L. {factura.CostoEnvio:N2}")
+            .FontSize(compacto ? 6 : 8);
 
         if (factura.ImpuestosAplicados.Any())
         {

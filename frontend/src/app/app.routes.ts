@@ -195,6 +195,12 @@ export const routes: Routes = [
     loadComponent: () => import('./features/impuestos/impuesto-form.component').then(m => m.ImpuestoFormComponent)
   },
   {
+    path: 'costos-envio',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Facturacion', accion: 'Administrar' },
+    loadComponent: () => import('./features/costos-envio/costos-envio.component').then(m => m.CostosEnvioComponent)
+  },
+  {
     path: 'auditoria',
     canActivate: [authGuard, permisoGuard],
     data: { modulo: 'Auditoria', accion: 'Ver' },
