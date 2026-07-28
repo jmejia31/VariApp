@@ -267,8 +267,8 @@ public class VentaService : IVentaService
                     ProductoNombre = d.ProductoNombreSnapshot,
                     ProductoMarca = d.ProductoMarcaSnapshot,
                     ProductoModelo = d.ProductoModeloSnapshot,
-                    ProductoColor = d.ProductoColorSnapshot,
-                    ProductoSku = d.ProductoSkuSnapshot,
+                    VarianteColor = d.ProductoColorSnapshot,
+                    VarianteSku = d.ProductoSkuSnapshot,
                     Cantidad = d.Cantidad,
                     PrecioUnitario = d.PrecioUnitario,
                     Subtotal = d.Subtotal
