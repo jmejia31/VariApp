@@ -14,6 +14,7 @@ public class VentaServiceTests
     private readonly Mock<IVentaRepository> _ventaRepoMock = new();
     private readonly Mock<IClienteRepository> _clienteRepoMock = new();
     private readonly Mock<IProductoRepository> _productoRepoMock = new();
+    private readonly Mock<IProductoVarianteRepository> _varianteRepoMock = new();
     private readonly Mock<IFacturaRepository> _facturaRepoMock = new();
     private readonly Mock<IMovimientoInventarioRepository> _movInvRepoMock = new();
     private readonly Mock<IMovimientoFinancieroRepository> _movFinRepoMock = new();
@@ -35,6 +36,7 @@ public class VentaServiceTests
             _ventaRepoMock.Object,
             _clienteRepoMock.Object,
             _productoRepoMock.Object,
+            _varianteRepoMock.Object,
             _facturaRepoMock.Object,
             _movInvRepoMock.Object,
             _movFinRepoMock.Object,
@@ -48,14 +50,23 @@ public class VentaServiceTests
     private static Producto ProductoDePrueba(int id = 1, int cantidad = 10) =>
         new() { Id = id, Nombre = "Mouse", Marca = "Logitech", Modelo = "M185", Cantidad = cantidad, Costo = 5, Precio = 10 };
 
-    private static Venta VentaDePrueba(int cantidadDetalle = 3, decimal precio = 10)
+    private static Venta VentaDePrueba(int cantidadDetalle = 3, decimal precio = 10, int? varianteId = null)
     {
         var venta = new Venta { Id = 1, NumeroVenta = "VEN-000001", ClienteNombre = "Cliente final", Estado = EstadoDocumento.Borrador };
         venta.Detalles.Add(new VentaDetalle
         {
-            ProductoId = 1, Cantidad = cantidadDetalle, PrecioUnitario = precio, CostoUnitarioSnapshot = 5,
-            Subtotal = cantidadDetalle * precio, UtilidadBruta = cantidadDetalle * (precio - 5),
-            ProductoNombreSnapshot = "Mouse", ProductoMarcaSnapshot = "Logitech", ProductoModeloSnapshot = "M185"
+            ProductoId = 1,
+            ProductoVarianteId = varianteId,
+            Cantidad = cantidadDetalle,
+            PrecioUnitario = precio,
+            CostoUnitarioSnapshot = 5,
+            Subtotal = cantidadDetalle * precio,
+            UtilidadBruta = cantidadDetalle * (precio - 5),
+            ProductoNombreSnapshot = "Mouse",
+            ProductoMarcaSnapshot = "Logitech",
+            ProductoModeloSnapshot = "M185",
+            ProductoColorSnapshot = varianteId.HasValue ? "Negro" : null,
+            ProductoSkuSnapshot = varianteId.HasValue ? "M185-BLK" : null
         });
         venta.Total = cantidadDetalle * precio;
         return venta;
@@ -66,31 +77,63 @@ public class VentaServiceTests
     {
         var producto = ProductoDePrueba(cantidad: 10);
         var venta = VentaDePrueba(cantidadDetalle: 3);
-
         _ventaRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(venta);
         _productoRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(producto);
 
         var resultado = await _service.ConfirmarAsync(1);
 
-        Assert.Equal(7, producto.Cantidad); // 10 - 3
+        Assert.Equal(7, producto.Cantidad);
         Assert.Equal("Confirmada", resultado!.Estado);
         Assert.Equal(4, venta.ConfirmadoPorUsuarioId);
         Assert.Equal("vendedor1", venta.ConfirmadoPorNombreUsuario);
     }
 
     [Fact]
+    public async Task ConfirmarAsync_Variante_Reduce_Stock_Exacto_Y_Consolidado()
+    {
+        var producto = ProductoDePrueba(cantidad: 10);
+        var variante = new ProductoVariante { Id = 8, ProductoId = 1, Sku = "M185-BLK", Cantidad = 6, Activo = true };
+        var venta = VentaDePrueba(cantidadDetalle: 2, varianteId: variante.Id);
+        _ventaRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(venta);
+        _productoRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(producto);
+        _varianteRepoMock.Setup(r => r.GetByIdAsync(8)).ReturnsAsync(variante);
+
+        var resultado = await _service.ConfirmarAsync(1);
+
+        Assert.Equal(4, variante.Cantidad);
+        Assert.Equal(8, producto.Cantidad);
+        Assert.Equal("M185-BLK", resultado!.Detalles.Single().ProductoSku);
+        _movInvRepoMock.Verify(r => r.AddAsync(It.Is<MovimientoInventario>(m =>
+            m.ProductoVarianteId == 8 && m.StockAnterior == 6 && m.StockNuevo == 4)), Times.Once);
+    }
+
+    [Fact]
+    public async Task ConfirmarAsync_Variante_Sin_Stock_No_Confirma()
+    {
+        var producto = ProductoDePrueba(cantidad: 10);
+        var variante = new ProductoVariante { Id = 8, ProductoId = 1, Sku = "M185-BLK", Cantidad = 1, Activo = true };
+        var venta = VentaDePrueba(cantidadDetalle: 2, varianteId: variante.Id);
+        _ventaRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(venta);
+        _productoRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(producto);
+        _varianteRepoMock.Setup(r => r.GetByIdAsync(8)).ReturnsAsync(variante);
+
+        await Assert.ThrowsAsync<BusinessRuleException>(() => _service.ConfirmarAsync(1));
+        Assert.Equal(1, variante.Cantidad);
+        Assert.Equal(10, producto.Cantidad);
+    }
+
+    [Fact]
     public async Task ConfirmarAsync_Sin_Stock_Suficiente_No_Confirma()
     {
-        var producto = ProductoDePrueba(cantidad: 2); // solo 2 disponibles
-        var venta = VentaDePrueba(cantidadDetalle: 5); // se piden 5
-
+        var producto = ProductoDePrueba(cantidad: 2);
+        var venta = VentaDePrueba(cantidadDetalle: 5);
         _ventaRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(venta);
         _productoRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(producto);
 
         await Assert.ThrowsAsync<BusinessRuleException>(() => _service.ConfirmarAsync(1));
 
-        Assert.Equal(2, producto.Cantidad); // no debe haber cambiado
-        Assert.Equal(EstadoDocumento.Borrador, venta.Estado); // no debe haberse confirmado
+        Assert.Equal(2, producto.Cantidad);
+        Assert.Equal(EstadoDocumento.Borrador, venta.Estado);
         _movInvRepoMock.Verify(r => r.AddAsync(It.IsAny<MovimientoInventario>()), Times.Never);
     }
 
@@ -99,15 +142,11 @@ public class VentaServiceTests
     {
         var producto = ProductoDePrueba(cantidad: 10);
         var venta = VentaDePrueba(cantidadDetalle: 2);
-
         _ventaRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(venta);
         _productoRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(producto);
         _facturaRepoMock.Setup(r => r.ContarTodasAsync()).ReturnsAsync(0);
-
         Factura? facturaCreada = null;
-        _facturaRepoMock.Setup(r => r.AddAsync(It.IsAny<Factura>()))
-            .Callback<Factura>(f => facturaCreada = f)
-            .Returns(Task.CompletedTask);
+        _facturaRepoMock.Setup(r => r.AddAsync(It.IsAny<Factura>())).Callback<Factura>(f => facturaCreada = f).Returns(Task.CompletedTask);
 
         await _service.ConfirmarAsync(1);
 
@@ -120,43 +159,50 @@ public class VentaServiceTests
     [Fact]
     public async Task AnularAsync_Revierte_Stock_Y_Anula_Factura()
     {
-        var producto = ProductoDePrueba(cantidad: 7); // después de vender 3 de 10
+        var producto = ProductoDePrueba(cantidad: 7);
         var venta = VentaDePrueba(cantidadDetalle: 3);
         venta.Estado = EstadoDocumento.Confirmada;
-
         var factura = new Factura { Id = 1, VentaId = 1, NumeroFactura = "FAC-000001", Estado = EstadoFactura.Emitida };
-
         _ventaRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(venta);
         _productoRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(producto);
         _facturaRepoMock.Setup(r => r.GetByVentaIdAsync(1)).ReturnsAsync(factura);
 
         var resultado = await _service.AnularAsync(1, "Cliente se arrepintió");
 
-        Assert.Equal(10, producto.Cantidad); // 7 + 3
+        Assert.Equal(10, producto.Cantidad);
         Assert.Equal("Anulada", resultado!.Estado);
         Assert.Equal(EstadoFactura.Anulada, factura.Estado);
         Assert.Equal("Cliente se arrepintió", factura.MotivoAnulacion);
     }
 
     [Fact]
+    public async Task AnularAsync_Variante_Restaura_Stock_Exacto()
+    {
+        var producto = ProductoDePrueba(cantidad: 8);
+        var variante = new ProductoVariante { Id = 8, ProductoId = 1, Sku = "M185-BLK", Cantidad = 4, Activo = false };
+        var venta = VentaDePrueba(cantidadDetalle: 2, varianteId: 8);
+        venta.Estado = EstadoDocumento.Confirmada;
+        _ventaRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(venta);
+        _productoRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(producto);
+        _varianteRepoMock.Setup(r => r.GetByIdAsync(8)).ReturnsAsync(variante);
+
+        await _service.AnularAsync(1, "Anulación controlada");
+
+        Assert.Equal(6, variante.Cantidad);
+        Assert.Equal(10, producto.Cantidad);
+    }
+
+    [Fact]
     public async Task GetByIdAsync_Incluye_Imagen_Principal_Del_Producto()
     {
         var producto = ProductoDePrueba();
-        producto.Imagenes.Add(new ProductoImagen
-        {
-            Id = 11,
-            Url = "https://res.cloudinary.com/demo/image/upload/producto-venta.webp",
-            EsPrincipal = true,
-            Orden = 0
-        });
+        producto.Imagenes.Add(new ProductoImagen { Id = 11, Url = "https://res.cloudinary.com/demo/image/upload/producto-venta.webp", EsPrincipal = true, Orden = 0 });
         var venta = VentaDePrueba(cantidadDetalle: 1);
         venta.Detalles.Single().Producto = producto;
         _ventaRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(venta);
 
         var resultado = await _service.GetByIdAsync(1);
 
-        Assert.Equal(
-            "https://res.cloudinary.com/demo/image/upload/producto-venta.webp",
-            resultado!.Detalles.Single().ProductoImagenPrincipalUrl);
+        Assert.Equal("https://res.cloudinary.com/demo/image/upload/producto-venta.webp", resultado!.Detalles.Single().ProductoImagenPrincipalUrl);
     }
 }
