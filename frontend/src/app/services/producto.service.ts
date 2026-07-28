@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { ApiResponse, PagedRequest, PagedResult } from '../core/models/api-response.model';
-import { Producto, ProductoFormValue } from '../core/models/producto.model';
+import { Producto, ProductoFormValue, ProductoVariante, ProductoVarianteFormValue } from '../core/models/producto.model';
 
 export interface ProductoPagedRequest extends PagedRequest {
   categoriaId?: number;
@@ -22,10 +22,7 @@ export class ProductoService {
   constructor(private http: HttpClient) {}
 
   getPaged(request: ProductoPagedRequest): Observable<ApiResponse<PagedResult<Producto>>> {
-    let params = new HttpParams()
-      .set('page', request.page)
-      .set('pageSize', request.pageSize);
-
+    let params = new HttpParams().set('page', request.page).set('pageSize', request.pageSize);
     if (request.search) params = params.set('search', request.search);
     if (request.sortBy) params = params.set('sortBy', request.sortBy);
     if (request.sortDirection) params = params.set('sortDirection', request.sortDirection);
@@ -36,7 +33,6 @@ export class ProductoService {
     if (request.modeloId != null) params = params.set('modeloId', request.modeloId);
     if (request.activo != null) params = params.set('activo', request.activo);
     if (request.agotado != null) params = params.set('agotado', request.agotado);
-
     return this.http.get<ApiResponse<PagedResult<Producto>>>(this.apiUrl, { params });
   }
 
@@ -54,16 +50,31 @@ export class ProductoService {
   update(id: number, value: ProductoFormValue): Observable<ApiResponse<Producto>> {
     const formData = new FormData();
     this.appendCamposBase(formData, value);
-
     (value.imagenesNuevas ?? []).forEach((file) => formData.append('ImagenesNuevas', file));
-    (value.imagenesAEliminarIds ?? []).forEach((imagenId) =>
-      formData.append('ImagenesAEliminarIds', String(imagenId))
-    );
-    if (value.imagenPrincipalId != null) {
-      formData.append('ImagenPrincipalId', String(value.imagenPrincipalId));
-    }
-
+    (value.imagenesAEliminarIds ?? []).forEach((imagenId) => formData.append('ImagenesAEliminarIds', String(imagenId)));
+    if (value.imagenPrincipalId != null) formData.append('ImagenPrincipalId', String(value.imagenPrincipalId));
     return this.http.put<ApiResponse<Producto>>(`${this.apiUrl}/${id}`, formData);
+  }
+
+  getVariantes(productoId: number, incluirInactivas = true): Observable<ApiResponse<ProductoVariante[]>> {
+    const params = new HttpParams().set('incluirInactivas', incluirInactivas);
+    return this.http.get<ApiResponse<ProductoVariante[]>>(`${this.apiUrl}/${productoId}/variantes`, { params });
+  }
+
+  crearVariante(productoId: number, value: ProductoVarianteFormValue): Observable<ApiResponse<ProductoVariante>> {
+    return this.http.post<ApiResponse<ProductoVariante>>(`${this.apiUrl}/${productoId}/variantes`, value);
+  }
+
+  actualizarVariante(productoId: number, varianteId: number, value: ProductoVarianteFormValue): Observable<ApiResponse<ProductoVariante>> {
+    return this.http.put<ApiResponse<ProductoVariante>>(`${this.apiUrl}/${productoId}/variantes/${varianteId}`, value);
+  }
+
+  cambiarEstadoVariante(productoId: number, varianteId: number, activo: boolean): Observable<ApiResponse<ProductoVariante>> {
+    return this.http.patch<ApiResponse<ProductoVariante>>(`${this.apiUrl}/${productoId}/variantes/${varianteId}/estado`, { activo });
+  }
+
+  eliminarVariante(productoId: number, varianteId: number): Observable<ApiResponse<object>> {
+    return this.http.delete<ApiResponse<object>>(`${this.apiUrl}/${productoId}/variantes/${varianteId}`);
   }
 
   activar(id: number): Observable<ApiResponse<Producto>> {
@@ -79,17 +90,11 @@ export class ProductoService {
   }
 
   descargarImagen(productoId: number, imagenId: number): Observable<Blob> {
-    return this.http.get(
-      `${this.apiUrl}/${productoId}/imagenes/${imagenId}/descargar`,
-      { responseType: 'blob' }
-    );
+    return this.http.get(`${this.apiUrl}/${productoId}/imagenes/${imagenId}/descargar`, { responseType: 'blob' });
   }
 
   descargarTodasLasImagenes(productoId: number): Observable<Blob> {
-    return this.http.get(
-      `${this.apiUrl}/${productoId}/imagenes/descargar-todas`,
-      { responseType: 'blob' }
-    );
+    return this.http.get(`${this.apiUrl}/${productoId}/imagenes/descargar-todas`, { responseType: 'blob' });
   }
 
   private appendCamposBase(formData: FormData, value: ProductoFormValue): void {
