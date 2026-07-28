@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormArray, FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -14,7 +14,7 @@ import { CategoriaService } from '../../services/categoria.service';
 import { CatalogoProductoService } from '../../services/catalogo-producto.service';
 import { Categoria } from '../../core/models/categoria.model';
 import { CatalogoProducto } from '../../core/models/catalogo-producto.model';
-import { ProductoImagen } from '../../core/models/producto.model';
+import { ProductoImagen, ProductoVariante, ProductoVarianteFormValue } from '../../core/models/producto.model';
 import { ProductoImagenComponent } from '../../shared/producto-imagen/producto-imagen.component';
 
 interface ImagenPreview {
@@ -31,7 +31,8 @@ const MAX_IMAGENES = 5;
   standalone: true,
   imports: [
     CommonModule, ReactiveFormsModule, RouterLink, MatFormFieldModule,
-    MatInputModule, MatSelectModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule, ProductoImagenComponent
+    MatInputModule, MatSelectModule, MatButtonModule, MatIconModule,
+    MatProgressSpinnerModule, ProductoImagenComponent
   ],
   templateUrl: './producto-form.component.html',
   styleUrl: './producto-form.component.scss'
@@ -59,14 +60,10 @@ export class ProductoFormComponent implements OnInit {
     nombre: ['', Validators.required],
     marcaId: [null as number | null, Validators.required],
     modeloId: [null as number | null, Validators.required],
-    colorId: [null as number | null],
     tallaId: [null as number | null],
     descripcion: [''],
-    cantidad: [0, [Validators.required, Validators.min(0)]],
-    costo: [0, [Validators.required, Validators.min(0.01)]],
-    precio: [0, [Validators.required, Validators.min(0.01)]],
-    umbralStockBajo: [5, [Validators.required, Validators.min(0)]],
-    categoriaId: [null as number | null]
+    categoriaId: [null as number | null],
+    variantes: this.fb.array([])
   });
 
   constructor(
@@ -76,6 +73,18 @@ export class ProductoFormComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router
   ) {}
+
+  get variantes(): FormArray {
+    return this.form.controls.variantes;
+  }
+
+  get stockTotal(): number {
+    return this.variantes.getRawValue().reduce((total, variante) => total + Number(variante.cantidad ?? 0), 0);
+  }
+
+  get umbralTotal(): number {
+    return this.variantes.getRawValue().reduce((total, variante) => total + Number(variante.umbralStockBajo ?? 0), 0);
+  }
 
   ngOnInit(): void {
     this.loading.set(true);
@@ -97,6 +106,7 @@ export class ProductoFormComponent implements OnInit {
           this.productoId = Number(idParam);
           this.cargarProducto(this.productoId);
         } else {
+          this.agregarVariante();
           this.loading.set(false);
         }
       },
@@ -112,6 +122,54 @@ export class ProductoFormComponent implements OnInit {
     });
   }
 
+  private crearVarianteGroup(variante?: Partial<ProductoVarianteFormValue>) {
+    return this.fb.group({
+      id: [variante?.id ?? null as number | null],
+      colorId: [variante?.colorId ?? null as number | null, Validators.required],
+      sku: [variante?.sku ?? '', Validators.maxLength(80)],
+      codigoBarras: [variante?.codigoBarras ?? '', Validators.maxLength(120)],
+      cantidad: [variante?.cantidad ?? 0, [Validators.required, Validators.min(0)]],
+      umbralStockBajo: [variante?.umbralStockBajo ?? 5, [Validators.required, Validators.min(0)]],
+      costo: [variante?.costo ?? 0, [Validators.required, Validators.min(0.01)]],
+      precio: [variante?.precio ?? 0, [Validators.required, Validators.min(0.01)]],
+      activo: [variante?.activo ?? true]
+    });
+  }
+
+  agregarVariante(): void {
+    const primera = this.variantes.length > 0 ? this.variantes.at(0).getRawValue() : null;
+    this.variantes.push(this.crearVarianteGroup({
+      cantidad: 0,
+      umbralStockBajo: primera?.umbralStockBajo ?? 5,
+      costo: primera?.costo ?? 0,
+      precio: primera?.precio ?? 0,
+      activo: true
+    }));
+    this.errorMessage.set(null);
+  }
+
+  quitarVariante(index: number): void {
+    if (this.variantes.length === 1) {
+      this.errorMessage.set('El producto debe conservar al menos un color con su cantidad disponible.');
+      return;
+    }
+
+    const variante = this.variantes.at(index).getRawValue();
+    if (variante.id && Number(variante.cantidad) > 0) {
+      this.errorMessage.set('No puedes quitar un color existente mientras tenga unidades. Déjalo con cantidad 0 y vuelve a guardar antes de retirarlo.');
+      return;
+    }
+
+    this.variantes.removeAt(index);
+    this.errorMessage.set(null);
+  }
+
+  colorYaSeleccionado(colorId: number, indiceActual: number): boolean {
+    return this.variantes.controls.some((control, index) =>
+      index !== indiceActual && Number(control.get('colorId')?.value) === colorId
+    );
+  }
+
   private cargarProducto(id: number): void {
     this.productoService.getById(id).subscribe({
       next: (res) => {
@@ -121,15 +179,34 @@ export class ProductoFormComponent implements OnInit {
         this.form.patchValue({
           nombre: p.nombre,
           marcaId,
-          colorId: p.colorId ?? null,
           tallaId: p.tallaId ?? null,
           descripcion: p.descripcion,
-          cantidad: p.cantidad,
-          costo: p.costo,
-          precio: p.precio,
-          umbralStockBajo: p.umbralStockBajo,
           categoriaId: p.categoriaId ?? null
         }, { emitEvent: false });
+
+        this.variantes.clear();
+        if ((p.variantes ?? []).length > 0) {
+          p.variantes.forEach((variante: ProductoVariante) => this.variantes.push(this.crearVarianteGroup({
+            id: variante.id,
+            colorId: variante.colorId,
+            sku: variante.sku,
+            codigoBarras: variante.codigoBarras,
+            cantidad: variante.cantidad,
+            umbralStockBajo: variante.umbralStockBajo,
+            costo: variante.costo,
+            precio: variante.precio,
+            activo: variante.activo
+          })));
+        } else {
+          this.variantes.push(this.crearVarianteGroup({
+            colorId: p.colorId,
+            cantidad: p.cantidad,
+            umbralStockBajo: p.umbralStockBajo,
+            costo: p.costo,
+            precio: p.precio,
+            activo: true
+          }));
+        }
 
         this.cargarModelos(marcaId, () => {
           const modeloId = p.modeloId ?? this.modelos().find(m => m.nombre.toLowerCase() === p.modelo.toLowerCase())?.id ?? null;
@@ -216,23 +293,47 @@ export class ProductoFormComponent implements OnInit {
   }
 
   submit(): void {
-    if (this.form.invalid) {
+    if (this.form.invalid || this.variantes.length === 0) {
       this.form.markAllAsTouched();
+      this.errorMessage.set('Completa los datos obligatorios y agrega al menos un color con su cantidad.');
       return;
     }
 
-    this.saving.set(true);
-    this.errorMessage.set(null);
+    const variantes = this.variantes.getRawValue().map((variante) => ({
+      id: variante.id ?? undefined,
+      colorId: Number(variante.colorId),
+      sku: variante.sku?.trim() || undefined,
+      codigoBarras: variante.codigoBarras?.trim() || undefined,
+      cantidad: Number(variante.cantidad),
+      umbralStockBajo: Number(variante.umbralStockBajo),
+      costo: Number(variante.costo),
+      precio: Number(variante.precio),
+      activo: variante.activo !== false
+    }));
 
-    const imagenPrincipal = this.imagenes().find((img) => img.esPrincipal);
+    const colores = variantes.map((variante) => variante.colorId);
+    if (new Set(colores).size !== colores.length) {
+      this.errorMessage.set('No puedes registrar el mismo color más de una vez para el producto.');
+      return;
+    }
+
     const marca = this.marcas().find(item => item.id === this.form.value.marcaId);
     const modelo = this.modelos().find(item => item.id === this.form.value.modeloId);
-
     if (!marca || !modelo) {
-      this.saving.set(false);
       this.errorMessage.set('Selecciona una marca y un modelo válidos.');
       return;
     }
+
+    const total = variantes.reduce((suma, variante) => suma + variante.cantidad, 0);
+    const costo = total > 0
+      ? variantes.reduce((suma, variante) => suma + variante.costo * variante.cantidad, 0) / total
+      : variantes[0].costo;
+    const preciosActivos = variantes.filter((variante) => variante.activo).map((variante) => variante.precio);
+    const precio = preciosActivos.length > 0 ? Math.min(...preciosActivos) : variantes[0].precio;
+    const imagenPrincipal = this.imagenes().find((img) => img.esPrincipal);
+
+    this.saving.set(true);
+    this.errorMessage.set(null);
 
     const value = {
       nombre: this.form.value.nombre!,
@@ -240,14 +341,15 @@ export class ProductoFormComponent implements OnInit {
       modelo: modelo.nombre,
       marcaId: marca.id,
       modeloId: modelo.id,
-      colorId: this.form.value.colorId,
+      colorId: variantes.length === 1 ? variantes[0].colorId : null,
       tallaId: this.form.value.tallaId,
       descripcion: this.form.value.descripcion || undefined,
-      cantidad: this.form.value.cantidad!,
-      costo: this.form.value.costo!,
-      precio: this.form.value.precio!,
-      umbralStockBajo: this.form.value.umbralStockBajo!,
+      cantidad: total,
+      costo: Math.round(costo * 100) / 100,
+      precio,
+      umbralStockBajo: variantes.reduce((suma, variante) => suma + variante.umbralStockBajo, 0),
       categoriaId: this.form.value.categoriaId,
+      variantes,
       imagenesNuevas: this.imagenes().filter((img) => img.archivo).map((img) => img.archivo!),
       imagenesAEliminarIds: this.imagenesAEliminarIds,
       imagenPrincipalId: imagenPrincipal?.id ?? null
@@ -264,7 +366,7 @@ export class ProductoFormComponent implements OnInit {
       },
       error: (err) => {
         this.saving.set(false);
-        this.errorMessage.set(err.error?.message ?? 'No se pudo guardar el producto.');
+        this.errorMessage.set(err.error?.message ?? 'No se pudo guardar el producto y sus colores.');
       }
     });
   }
