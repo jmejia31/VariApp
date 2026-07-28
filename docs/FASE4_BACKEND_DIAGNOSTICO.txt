@@ -1,9 +1,9 @@
   Determining projects to restore...
-  Restored /home/runner/work/VariApp/VariApp/backend/src/Domain/InventoryApp.Domain.csproj (in 155 ms).
-  Restored /home/runner/work/VariApp/VariApp/backend/src/Application/InventoryApp.Application.csproj (in 1.83 sec).
-  Restored /home/runner/work/VariApp/VariApp/backend/tests/InventoryApp.Tests/InventoryApp.Tests.csproj (in 4.41 sec).
-  Restored /home/runner/work/VariApp/VariApp/backend/src/API/InventoryApp.API.csproj (in 4.18 sec).
-  Restored /home/runner/work/VariApp/VariApp/backend/src/Infrastructure/InventoryApp.Infrastructure.csproj (in 4.41 sec).
+  Restored /home/runner/work/VariApp/VariApp/backend/src/Domain/InventoryApp.Domain.csproj (in 140 ms).
+  Restored /home/runner/work/VariApp/VariApp/backend/src/Application/InventoryApp.Application.csproj (in 1.46 sec).
+  Restored /home/runner/work/VariApp/VariApp/backend/src/Infrastructure/InventoryApp.Infrastructure.csproj (in 4.36 sec).
+  Restored /home/runner/work/VariApp/VariApp/backend/src/API/InventoryApp.API.csproj (in 4.17 sec).
+  Restored /home/runner/work/VariApp/VariApp/backend/tests/InventoryApp.Tests/InventoryApp.Tests.csproj (in 4.37 sec).
   InventoryApp.Domain -> /home/runner/work/VariApp/VariApp/backend/src/Domain/bin/Release/net8.0/InventoryApp.Domain.dll
 /home/runner/work/VariApp/VariApp/backend/src/Application/Services/VentaService.cs(270,21): error CS0117: 'FacturaDetalle' does not contain a definition for 'ProductoColor' [/home/runner/work/VariApp/VariApp/backend/src/Application/InventoryApp.Application.csproj]
 /home/runner/work/VariApp/VariApp/backend/src/Application/Services/VentaService.cs(271,21): error CS0117: 'FacturaDetalle' does not contain a definition for 'ProductoSku' [/home/runner/work/VariApp/VariApp/backend/src/Application/InventoryApp.Application.csproj]
@@ -15,5 +15,5 @@ Build FAILED.
     0 Warning(s)
     2 Error(s)
 
-Time Elapsed 00:00:09.94
+Time Elapsed 00:00:09.73
 EXIT_CODE=1
