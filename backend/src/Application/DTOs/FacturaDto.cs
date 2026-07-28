@@ -2,13 +2,31 @@ namespace InventoryApp.Application.DTOs;
 
 public class FacturaDetalleDto
 {
+    public int ProductoId { get; set; }
+    public int? ProductoVarianteId { get; set; }
     public string ProductoNombre { get; set; } = string.Empty;
     public string ProductoMarca { get; set; } = string.Empty;
     public string ProductoModelo { get; set; } = string.Empty;
+    public string? VarianteColor { get; set; }
+    public string? VarianteSku { get; set; }
     public int Cantidad { get; set; }
     public decimal PrecioUnitario { get; set; }
     public decimal Descuento { get; set; }
+    public decimal Impuesto { get; set; }
     public decimal Subtotal { get; set; }
+    public decimal TotalLinea { get; set; }
+    public string? Observaciones { get; set; }
+}
+
+public class FacturaPagoDto
+{
+    public int Id { get; set; }
+    public DateTime FechaPago { get; set; }
+    public decimal Monto { get; set; }
+    public string MetodoPago { get; set; } = string.Empty;
+    public string? Referencia { get; set; }
+    public string? Observaciones { get; set; }
+    public bool Anulado { get; set; }
 }
 
 public class FacturaDto
@@ -17,8 +35,13 @@ public class FacturaDto
     public int VentaId { get; set; }
     public string NumeroVentaOrigen { get; set; } = string.Empty;
     public string NumeroFactura { get; set; } = string.Empty;
+    public string? CodigoInterno { get; set; }
     public DateTime FechaEmision { get; set; }
+    public DateTime? FechaVencimiento { get; set; }
     public string Estado { get; set; } = string.Empty;
+    public string Moneda { get; set; } = "HNL";
+    public string? CondicionPago { get; set; }
+    public string? Referencia { get; set; }
 
     public string EmpresaNombre { get; set; } = string.Empty;
     public string? EmpresaRTN { get; set; }
@@ -46,12 +69,20 @@ public class FacturaDto
     public decimal Impuesto { get; set; }
     public decimal ImpuestoIncluido { get; set; }
     public decimal ImpuestoAdicional { get; set; }
+    public decimal CostoEnvio { get; set; }
+    public int? CostoEnvioId { get; set; }
+    public string? CostoEnvioNombre { get; set; }
+    public bool EnvioExonerado { get; set; }
+    public string? MotivoExoneracionEnvio { get; set; }
     public decimal Total { get; set; }
+    public decimal TotalPagado { get; set; }
+    public decimal SaldoPendiente { get; set; }
     public string MetodoPago { get; set; } = string.Empty;
     public string EstadoPago { get; set; } = string.Empty;
 
     public string? Observaciones { get; set; }
     public List<FacturaDetalleDto> Detalles { get; set; } = new();
+    public List<FacturaPagoDto> Pagos { get; set; } = new();
     public List<DescuentoAplicadoDto> DescuentosAplicados { get; set; } = new();
     public List<ImpuestoAplicadoDto> ImpuestosAplicados { get; set; } = new();
 
