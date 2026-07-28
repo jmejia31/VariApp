@@ -32,7 +32,7 @@ export interface ImpuestoAplicado {
 
 export interface ResultadoCalculo {
   importeBruto: number;
-  importeProductos: number;
+  importeProductos?: number;
   subtotal: number;
   subtotalNeto?: number;
   descuentosAplicados: DescuentoAplicado[];
@@ -43,8 +43,8 @@ export interface ResultadoCalculo {
   impuestoAdicional: number;
   costoEnvioId?: number;
   costoEnvioNombre?: string;
-  costoEnvio: number;
-  envioExonerado: boolean;
+  costoEnvio?: number;
+  envioExonerado?: boolean;
   motivoExoneracionEnvio?: string;
   total: number;
 }
