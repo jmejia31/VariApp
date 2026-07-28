@@ -1,2 +1,3 @@
 Integrar variantes únicamente en la rama Desarrollo.
 No modificar main ni recursos productivos.
+Corregir color y SKU del detalle de factura y validar backend.
