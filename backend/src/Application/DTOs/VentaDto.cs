@@ -4,9 +4,12 @@ public class VentaDetalleDto
 {
     public int Id { get; set; }
     public int ProductoId { get; set; }
+    public int? ProductoVarianteId { get; set; }
     public string ProductoNombre { get; set; } = string.Empty;
     public string ProductoMarca { get; set; } = string.Empty;
     public string ProductoModelo { get; set; } = string.Empty;
+    public string? ProductoColor { get; set; }
+    public string? ProductoSku { get; set; }
     public string? ProductoImagenPrincipalUrl { get; set; }
     public int Cantidad { get; set; }
     public decimal PrecioUnitario { get; set; }
@@ -61,6 +64,7 @@ public class VentaDto
 public class VentaDetalleInputDto
 {
     public int ProductoId { get; set; }
+    public int? ProductoVarianteId { get; set; }
     public int Cantidad { get; set; }
     public decimal PrecioUnitario { get; set; }
 }
