@@ -12,6 +12,7 @@ public class VentaService : IVentaService
     private readonly IVentaRepository _ventaRepository;
     private readonly IClienteRepository _clienteRepository;
     private readonly IProductoRepository _productoRepository;
+    private readonly IProductoVarianteRepository _productoVarianteRepository;
     private readonly IFacturaRepository _facturaRepository;
     private readonly IMovimientoInventarioRepository _movimientoInventarioRepository;
     private readonly IMovimientoFinancieroRepository _movimientoFinancieroRepository;
@@ -25,6 +26,7 @@ public class VentaService : IVentaService
         IVentaRepository ventaRepository,
         IClienteRepository clienteRepository,
         IProductoRepository productoRepository,
+        IProductoVarianteRepository productoVarianteRepository,
         IFacturaRepository facturaRepository,
         IMovimientoInventarioRepository movimientoInventarioRepository,
         IMovimientoFinancieroRepository movimientoFinancieroRepository,
@@ -37,6 +39,7 @@ public class VentaService : IVentaService
         _ventaRepository = ventaRepository;
         _clienteRepository = clienteRepository;
         _productoRepository = productoRepository;
+        _productoVarianteRepository = productoVarianteRepository;
         _facturaRepository = facturaRepository;
         _movimientoInventarioRepository = movimientoInventarioRepository;
         _movimientoFinancieroRepository = movimientoFinancieroRepository;
@@ -145,9 +148,18 @@ public class VentaService : IVentaService
             var producto = await _productoRepository.GetByIdAsync(detalle.ProductoId)
                 ?? throw new BusinessRuleException($"El producto '{detalle.ProductoNombreSnapshot}' ya no existe.");
 
-            if (producto.Cantidad < detalle.Cantidad)
+            if (detalle.ProductoVarianteId.HasValue)
+            {
+                var variante = await ObtenerVarianteAsync(detalle.ProductoVarianteId.Value, producto.Id, exigirActiva: true);
+                if (variante.Cantidad < detalle.Cantidad)
+                    throw new BusinessRuleException(
+                        $"Stock insuficiente para la variante '{variante.Sku}': disponible {variante.Cantidad}, solicitado {detalle.Cantidad}.");
+            }
+            else if (producto.Cantidad < detalle.Cantidad)
+            {
                 throw new BusinessRuleException(
                     $"Stock insuficiente para '{producto.Nombre}': disponible {producto.Cantidad}, solicitado {detalle.Cantidad}.");
+            }
         }
 
         var empresa = await _empresaConfiguracionService.GetActivaEntidadAsync();
@@ -159,17 +171,29 @@ public class VentaService : IVentaService
                 var producto = await _productoRepository.GetByIdAsync(detalle.ProductoId)
                     ?? throw new BusinessRuleException($"El producto '{detalle.ProductoNombreSnapshot}' ya no existe.");
 
-                var stockAnterior = producto.Cantidad;
+                var stockAnteriorMovimiento = producto.Cantidad;
+                var stockNuevoMovimiento = producto.Cantidad - detalle.Cantidad;
+                if (detalle.ProductoVarianteId.HasValue)
+                {
+                    var variante = await ObtenerVarianteAsync(detalle.ProductoVarianteId.Value, producto.Id, exigirActiva: true);
+                    stockAnteriorMovimiento = variante.Cantidad;
+                    variante.Cantidad -= detalle.Cantidad;
+                    stockNuevoMovimiento = variante.Cantidad;
+                    _productoVarianteRepository.Update(variante);
+                }
                 producto.Cantidad -= detalle.Cantidad;
                 _productoRepository.Update(producto);
 
                 await _movimientoInventarioRepository.AddAsync(new MovimientoInventario
                 {
                     ProductoId = producto.Id,
+                    ProductoVarianteId = detalle.ProductoVarianteId,
+                    ProductoColorSnapshot = detalle.ProductoColorSnapshot,
+                    ProductoSkuSnapshot = detalle.ProductoSkuSnapshot,
                     Tipo = TipoMovimientoInventario.Salida,
                     Cantidad = detalle.Cantidad,
-                    StockAnterior = stockAnterior,
-                    StockNuevo = producto.Cantidad,
+                    StockAnterior = stockAnteriorMovimiento,
+                    StockNuevo = stockNuevoMovimiento,
                     PrecioUnitario = detalle.PrecioUnitario,
                     CostoUnitario = detalle.CostoUnitarioSnapshot,
                     ReferenciaTipo = "Venta",
@@ -239,9 +263,12 @@ public class VentaService : IVentaService
                 Detalles = venta.Detalles.Select(d => new FacturaDetalle
                 {
                     ProductoId = d.ProductoId,
+                    ProductoVarianteId = d.ProductoVarianteId,
                     ProductoNombre = d.ProductoNombreSnapshot,
                     ProductoMarca = d.ProductoMarcaSnapshot,
                     ProductoModelo = d.ProductoModeloSnapshot,
+                    ProductoColor = d.ProductoColorSnapshot,
+                    ProductoSku = d.ProductoSkuSnapshot,
                     Cantidad = d.Cantidad,
                     PrecioUnitario = d.PrecioUnitario,
                     Subtotal = d.Subtotal
@@ -283,17 +310,29 @@ public class VentaService : IVentaService
                 var producto = await _productoRepository.GetByIdAsync(detalle.ProductoId)
                     ?? throw new BusinessRuleException($"El producto '{detalle.ProductoNombreSnapshot}' ya no existe.");
 
-                var stockAnterior = producto.Cantidad;
+                var stockAnteriorMovimiento = producto.Cantidad;
+                var stockNuevoMovimiento = producto.Cantidad + detalle.Cantidad;
+                if (detalle.ProductoVarianteId.HasValue)
+                {
+                    var variante = await ObtenerVarianteAsync(detalle.ProductoVarianteId.Value, producto.Id, exigirActiva: false);
+                    stockAnteriorMovimiento = variante.Cantidad;
+                    variante.Cantidad += detalle.Cantidad;
+                    stockNuevoMovimiento = variante.Cantidad;
+                    _productoVarianteRepository.Update(variante);
+                }
                 producto.Cantidad += detalle.Cantidad;
                 _productoRepository.Update(producto);
 
                 await _movimientoInventarioRepository.AddAsync(new MovimientoInventario
                 {
                     ProductoId = producto.Id,
+                    ProductoVarianteId = detalle.ProductoVarianteId,
+                    ProductoColorSnapshot = detalle.ProductoColorSnapshot,
+                    ProductoSkuSnapshot = detalle.ProductoSkuSnapshot,
                     Tipo = TipoMovimientoInventario.Reversion,
                     Cantidad = detalle.Cantidad,
-                    StockAnterior = stockAnterior,
-                    StockNuevo = producto.Cantidad,
+                    StockAnterior = stockAnteriorMovimiento,
+                    StockNuevo = stockNuevoMovimiento,
                     PrecioUnitario = detalle.PrecioUnitario,
                     ReferenciaTipo = "Venta",
                     ReferenciaId = venta.Id,
@@ -443,22 +482,47 @@ public class VentaService : IVentaService
                 throw new BusinessRuleException(
                     $"Stock insuficiente para '{producto.Nombre}': disponible {producto.Cantidad}, solicitado {input.Cantidad}.");
 
+            ProductoVariante? variante = null;
+            if (input.ProductoVarianteId.HasValue)
+            {
+                variante = await ObtenerVarianteAsync(input.ProductoVarianteId.Value, producto.Id, exigirActiva: true);
+            }
+            else if (producto.Variantes.Any(v => v.Activo && !v.Eliminado))
+            {
+                throw new BusinessRuleException($"Debes seleccionar una variante para el producto '{producto.Nombre}'.");
+            }
+
+            var costoUnitario = variante?.Costo ?? producto.Costo;
             var subtotal = input.Cantidad * input.PrecioUnitario;
-            var costoTotal = input.Cantidad * producto.Costo;
+            var costoTotal = input.Cantidad * costoUnitario;
 
             venta.Detalles.Add(new VentaDetalle
             {
                 ProductoId = producto.Id,
+                ProductoVarianteId = variante?.Id,
                 Cantidad = input.Cantidad,
                 PrecioUnitario = input.PrecioUnitario,
-                CostoUnitarioSnapshot = producto.Costo,
+                CostoUnitarioSnapshot = costoUnitario,
                 Subtotal = subtotal,
                 UtilidadBruta = subtotal - costoTotal,
                 ProductoNombreSnapshot = producto.Nombre,
                 ProductoMarcaSnapshot = producto.Marca,
-                ProductoModeloSnapshot = producto.Modelo
+                ProductoModeloSnapshot = producto.Modelo,
+                ProductoColorSnapshot = variante?.Color?.Nombre,
+                ProductoSkuSnapshot = variante?.Sku
             });
         }
+    }
+
+    private async Task<ProductoVariante> ObtenerVarianteAsync(int varianteId, int productoId, bool exigirActiva)
+    {
+        var variante = await _productoVarianteRepository.GetByIdAsync(varianteId)
+            ?? throw new BusinessRuleException("La variante seleccionada no existe.");
+        if (variante.ProductoId != productoId)
+            throw new BusinessRuleException("La variante seleccionada no pertenece al producto indicado.");
+        if (exigirActiva && !variante.Activo)
+            throw new BusinessRuleException($"La variante '{variante.Sku}' está inactiva.");
+        return variante;
     }
 
     public async Task<ResultadoCalculoDto> CalcularVistaPreviaAsync(CalcularVentaRequest request)
@@ -586,9 +650,12 @@ public class VentaService : IVentaService
         {
             Id = d.Id,
             ProductoId = d.ProductoId,
+            ProductoVarianteId = d.ProductoVarianteId,
             ProductoNombre = d.ProductoNombreSnapshot,
             ProductoMarca = d.ProductoMarcaSnapshot,
             ProductoModelo = d.ProductoModeloSnapshot,
+            ProductoColor = d.ProductoColorSnapshot,
+            ProductoSku = d.ProductoSkuSnapshot,
             ProductoImagenPrincipalUrl = d.Producto?.ImagenPrincipal?.Url,
             Cantidad = d.Cantidad,
             PrecioUnitario = d.PrecioUnitario,

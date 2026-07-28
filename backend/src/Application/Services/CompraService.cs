@@ -12,6 +12,7 @@ public class CompraService : ICompraService
     private readonly ICompraRepository _compraRepository;
     private readonly IProveedorRepository _proveedorRepository;
     private readonly IProductoRepository _productoRepository;
+    private readonly IProductoVarianteRepository _productoVarianteRepository;
     private readonly IMovimientoInventarioRepository _movimientoInventarioRepository;
     private readonly IMovimientoFinancieroRepository _movimientoFinancieroRepository;
     private readonly ICalculoService _calculoService;
@@ -23,6 +24,7 @@ public class CompraService : ICompraService
         ICompraRepository compraRepository,
         IProveedorRepository proveedorRepository,
         IProductoRepository productoRepository,
+        IProductoVarianteRepository productoVarianteRepository,
         IMovimientoInventarioRepository movimientoInventarioRepository,
         IMovimientoFinancieroRepository movimientoFinancieroRepository,
         ICalculoService calculoService,
@@ -33,6 +35,7 @@ public class CompraService : ICompraService
         _compraRepository = compraRepository;
         _proveedorRepository = proveedorRepository;
         _productoRepository = productoRepository;
+        _productoVarianteRepository = productoVarianteRepository;
         _movimientoInventarioRepository = movimientoInventarioRepository;
         _movimientoFinancieroRepository = movimientoFinancieroRepository;
         _calculoService = calculoService;
@@ -177,17 +180,39 @@ public class CompraService : ICompraService
             foreach (var detalle in compra.Detalles)
             {
                 var producto = await ObtenerProductoActivoAsync(detalle.ProductoId);
-                var stockAnterior = producto.Cantidad;
+                var stockProductoAnterior = producto.Cantidad;
+                var stockAnteriorMovimiento = stockProductoAnterior;
+                var stockNuevoMovimiento = stockProductoAnterior + detalle.Cantidad;
+
+                if (detalle.ProductoVarianteId.HasValue)
+                {
+                    var variante = await ObtenerVarianteAsync(detalle.ProductoVarianteId.Value, producto.Id, exigirActiva: true);
+                    stockAnteriorMovimiento = variante.Cantidad;
+                    variante.Cantidad += detalle.Cantidad;
+                    variante.Costo = detalle.CostoUnitario;
+                    variante.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
+                    variante.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
+                    variante.FechaActualizacion = DateTime.UtcNow;
+                    stockNuevoMovimiento = variante.Cantidad;
+                    _productoVarianteRepository.Update(variante);
+                }
+
                 producto.Cantidad += detalle.Cantidad;
+                producto.Costo = producto.Cantidad > 0
+                    ? Math.Round(((producto.Costo * stockProductoAnterior) + (detalle.CostoUnitario * detalle.Cantidad)) / producto.Cantidad, 2, MidpointRounding.AwayFromZero)
+                    : detalle.CostoUnitario;
                 _productoRepository.Update(producto);
 
                 await _movimientoInventarioRepository.AddAsync(new MovimientoInventario
                 {
                     ProductoId = producto.Id,
+                    ProductoVarianteId = detalle.ProductoVarianteId,
+                    ProductoColorSnapshot = detalle.ProductoColorSnapshot,
+                    ProductoSkuSnapshot = detalle.ProductoSkuSnapshot,
                     Tipo = TipoMovimientoInventario.Entrada,
                     Cantidad = detalle.Cantidad,
-                    StockAnterior = stockAnterior,
-                    StockNuevo = producto.Cantidad,
+                    StockAnterior = stockAnteriorMovimiento,
+                    StockNuevo = stockNuevoMovimiento,
                     CostoUnitario = detalle.CostoUnitario,
                     ReferenciaTipo = "Compra",
                     ReferenciaId = compra.Id,
@@ -252,21 +277,38 @@ public class CompraService : ICompraService
                 var producto = await _productoRepository.GetByIdAsync(detalle.ProductoId)
                     ?? throw new BusinessRuleException($"El producto '{detalle.ProductoNombreSnapshot}' ya no existe.");
 
-                if (producto.Cantidad < detalle.Cantidad)
+                var stockAnteriorMovimiento = producto.Cantidad;
+                var stockNuevoMovimiento = producto.Cantidad - detalle.Cantidad;
+
+                if (detalle.ProductoVarianteId.HasValue)
+                {
+                    var variante = await ObtenerVarianteAsync(detalle.ProductoVarianteId.Value, producto.Id, exigirActiva: false);
+                    if (variante.Cantidad < detalle.Cantidad)
+                        throw new BusinessRuleException($"No se puede anular: la variante '{variante.Sku}' no tiene suficientes unidades.");
+                    stockAnteriorMovimiento = variante.Cantidad;
+                    variante.Cantidad -= detalle.Cantidad;
+                    stockNuevoMovimiento = variante.Cantidad;
+                    _productoVarianteRepository.Update(variante);
+                }
+                else if (producto.Cantidad < detalle.Cantidad)
+                {
                     throw new BusinessRuleException(
                         $"No se puede anular: el producto '{producto.Nombre}' ya no tiene suficientes unidades para revertir la compra.");
+                }
 
-                var stockAnterior = producto.Cantidad;
                 producto.Cantidad -= detalle.Cantidad;
                 _productoRepository.Update(producto);
 
                 await _movimientoInventarioRepository.AddAsync(new MovimientoInventario
                 {
                     ProductoId = producto.Id,
+                    ProductoVarianteId = detalle.ProductoVarianteId,
+                    ProductoColorSnapshot = detalle.ProductoColorSnapshot,
+                    ProductoSkuSnapshot = detalle.ProductoSkuSnapshot,
                     Tipo = TipoMovimientoInventario.Reversion,
                     Cantidad = detalle.Cantidad,
-                    StockAnterior = stockAnterior,
-                    StockNuevo = producto.Cantidad,
+                    StockAnterior = stockAnteriorMovimiento,
+                    StockNuevo = stockNuevoMovimiento,
                     CostoUnitario = detalle.CostoUnitario,
                     ReferenciaTipo = "Compra",
                     ReferenciaId = compra.Id,
@@ -443,15 +485,28 @@ public class CompraService : ICompraService
                 throw new BusinessRuleException("El costo unitario de cada producto debe ser mayor a 0.");
 
             var producto = await ObtenerProductoActivoAsync(input.ProductoId);
+            ProductoVariante? variante = null;
+            if (input.ProductoVarianteId.HasValue)
+            {
+                variante = await ObtenerVarianteAsync(input.ProductoVarianteId.Value, producto.Id, exigirActiva: true);
+            }
+            else if (producto.Variantes.Any(v => v.Activo && !v.Eliminado))
+            {
+                throw new BusinessRuleException($"Debes seleccionar una variante para el producto '{producto.Nombre}'.");
+            }
+
             compra.Detalles.Add(new CompraDetalle
             {
                 ProductoId = producto.Id,
+                ProductoVarianteId = variante?.Id,
                 Cantidad = input.Cantidad,
                 CostoUnitario = input.CostoUnitario,
                 Subtotal = input.Cantidad * input.CostoUnitario,
                 ProductoNombreSnapshot = producto.Nombre,
                 ProductoMarcaSnapshot = producto.Marca,
-                ProductoModeloSnapshot = producto.Modelo
+                ProductoModeloSnapshot = producto.Modelo,
+                ProductoColorSnapshot = variante?.Color?.Nombre,
+                ProductoSkuSnapshot = variante?.Sku
             });
         }
     }
@@ -489,6 +544,17 @@ public class CompraService : ICompraService
 
         if (compra.Total < 0)
             throw new BusinessRuleException("El total de la compra no puede ser negativo.");
+    }
+
+    private async Task<ProductoVariante> ObtenerVarianteAsync(int varianteId, int productoId, bool exigirActiva)
+    {
+        var variante = await _productoVarianteRepository.GetByIdAsync(varianteId)
+            ?? throw new BusinessRuleException("La variante seleccionada no existe.");
+        if (variante.ProductoId != productoId)
+            throw new BusinessRuleException("La variante seleccionada no pertenece al producto indicado.");
+        if (exigirActiva && !variante.Activo)
+            throw new BusinessRuleException($"La variante '{variante.Sku}' está inactiva.");
+        return variante;
     }
 
     private async Task<Producto> ObtenerProductoActivoAsync(int productoId)
@@ -532,9 +598,12 @@ public class CompraService : ICompraService
         {
             Id = detalle.Id,
             ProductoId = detalle.ProductoId,
+            ProductoVarianteId = detalle.ProductoVarianteId,
             ProductoNombre = detalle.ProductoNombreSnapshot,
             ProductoMarca = detalle.ProductoMarcaSnapshot,
             ProductoModelo = detalle.ProductoModeloSnapshot,
+            ProductoColor = detalle.ProductoColorSnapshot,
+            ProductoSku = detalle.ProductoSkuSnapshot,
             ProductoImagenPrincipalUrl = detalle.Producto?.ImagenPrincipal?.Url,
             Cantidad = detalle.Cantidad,
             CostoUnitario = detalle.CostoUnitario,

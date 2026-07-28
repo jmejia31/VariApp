@@ -28,6 +28,9 @@ public class CompraRepository : ICompraRepository
             .Include(c => c.Detalles)
                 .ThenInclude(d => d.Producto)
                     .ThenInclude(p => p!.Imagenes)
+            .Include(c => c.Detalles)
+                .ThenInclude(d => d.ProductoVariante)
+                    .ThenInclude(v => v!.Color)
             .Include(c => c.ImpuestosAplicados)
             .AsSplitQuery();
 
