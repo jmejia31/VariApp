@@ -16,17 +16,19 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
         _usuarioScope = usuarioScope;
     }
 
-    private static IQueryable<MovimientoInventario> AplicarAlcance(
-        IQueryable<MovimientoInventario> query,
-        UsuarioScopeActual? alcance)
+    private static IQueryable<MovimientoInventario> AplicarAlcance(IQueryable<MovimientoInventario> query, UsuarioScopeActual? alcance)
     {
-        if (alcance is null)
-            return query.Where(_ => false);
-
-        return alcance.EsAdministrador
-            ? query
-            : query.Where(m => m.CreadoPorUsuarioId == alcance.UsuarioId);
+        if (alcance is null) return query.Where(_ => false);
+        return alcance.EsAdministrador ? query : query.Where(m => m.CreadoPorUsuarioId == alcance.UsuarioId);
     }
+
+    private IQueryable<MovimientoInventario> ConIncludes() =>
+        _context.MovimientosInventario
+            .Include(m => m.Producto)
+                .ThenInclude(p => p!.Imagenes)
+            .Include(m => m.ProductoVariante)
+                .ThenInclude(v => v!.Color)
+            .AsSplitQuery();
 
     public async Task AddAsync(MovimientoInventario movimiento) =>
         await _context.MovimientosInventario.AddAsync(movimiento);
@@ -34,31 +36,20 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
     public async Task<List<MovimientoInventario>> GetByProductoAsync(int productoId)
     {
         var alcance = await _usuarioScope.ObtenerActualAsync();
-        return await AplicarAlcance(_context.MovimientosInventario, alcance)
+        return await AplicarAlcance(ConIncludes(), alcance)
             .Where(m => m.ProductoId == productoId)
             .OrderByDescending(m => m.Fecha)
             .ToListAsync();
     }
 
-    public async Task<List<MovimientoInventario>> GetFilteredAsync(
-        int? productoId,
-        string? tipo,
-        DateTime? desde,
-        DateTime? hasta)
+    public async Task<List<MovimientoInventario>> GetFilteredAsync(int? productoId, string? tipo, DateTime? desde, DateTime? hasta)
     {
         var alcance = await _usuarioScope.ObtenerActualAsync();
-        var query = AplicarAlcance(
-            _context.MovimientosInventario
-                .Include(m => m.Producto)
-                    .ThenInclude(p => p!.Imagenes)
-                .AsSplitQuery(),
-            alcance);
-
+        var query = AplicarAlcance(ConIncludes(), alcance);
         if (productoId.HasValue) query = query.Where(m => m.ProductoId == productoId.Value);
         if (!string.IsNullOrWhiteSpace(tipo)) query = query.Where(m => m.Tipo.ToString() == tipo);
         if (desde.HasValue) query = query.Where(m => m.Fecha >= desde.Value);
         if (hasta.HasValue) query = query.Where(m => m.Fecha <= hasta.Value);
-
         return await query.OrderByDescending(m => m.Fecha).Take(200).ToListAsync();
     }
 }
