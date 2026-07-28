@@ -1,3 +1,0 @@
-Diagnosticar compilación únicamente en Desarrollo. No tocar main ni Producción.
-Publicar únicamente un artefacto temporal de GitHub Actions.
-Ejecución posterior a correcciones de pruebas y plantillas.
