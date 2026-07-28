@@ -22,7 +22,10 @@ public class ProductoRepository : IProductoRepository
             .Include(p => p.Color)
             .Include(p => p.Talla)
             .Include(p => p.MarcaCatalogo)
-            .Include(p => p.ModeloCatalogo);
+            .Include(p => p.ModeloCatalogo)
+            .Include(p => p.Variantes.Where(v => !v.Eliminado))
+                .ThenInclude(v => v.Color)
+            .AsSplitQuery();
 
     public async Task<Producto?> GetByIdAsync(int id) =>
         await ConIncludes().FirstOrDefaultAsync(p => p.Id == id);
@@ -36,7 +39,8 @@ public class ProductoRepository : IProductoRepository
             if (filters.CategoriaId.HasValue)
                 query = query.Where(p => p.CategoriaId == filters.CategoriaId.Value);
             if (filters.ColorId.HasValue)
-                query = query.Where(p => p.ColorId == filters.ColorId.Value);
+                query = query.Where(p => p.ColorId == filters.ColorId.Value ||
+                    p.Variantes.Any(v => !v.Eliminado && v.ColorId == filters.ColorId.Value));
             if (filters.TallaId.HasValue)
                 query = query.Where(p => p.TallaId == filters.TallaId.Value);
             if (filters.MarcaId.HasValue)
@@ -61,7 +65,11 @@ public class ProductoRepository : IProductoRepository
                 (p.MarcaCatalogo != null && p.MarcaCatalogo.Nombre.ToLower().Contains(search)) ||
                 (p.ModeloCatalogo != null && p.ModeloCatalogo.Nombre.ToLower().Contains(search)) ||
                 (p.Color != null && p.Color.Nombre.ToLower().Contains(search)) ||
-                (p.Talla != null && p.Talla.Nombre.ToLower().Contains(search)));
+                (p.Talla != null && p.Talla.Nombre.ToLower().Contains(search)) ||
+                p.Variantes.Any(v => !v.Eliminado &&
+                    ((v.Sku != null && v.Sku.ToLower().Contains(search)) ||
+                     (v.CodigoBarras != null && v.CodigoBarras.ToLower().Contains(search)) ||
+                     (v.Color != null && v.Color.Nombre.ToLower().Contains(search)))));
         }
 
         var totalCount = await query.CountAsync();
@@ -95,8 +103,6 @@ public class ProductoRepository : IProductoRepository
         return (items, totalCount);
     }
 
-    // Se conserva el nombre contractual para compatibilidad, pero el indicador
-    // administrativo solicitado corresponde ahora a productos agotados.
     public async Task<List<Producto>> GetStockBajoAsync() =>
         await ConIncludes()
             .Where(p => p.Cantidad <= 0)
