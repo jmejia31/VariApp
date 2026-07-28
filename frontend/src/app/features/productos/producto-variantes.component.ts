@@ -40,7 +40,7 @@ export class ProductoVariantesComponent implements OnInit {
   readonly errorMessage = signal<string | null>(null);
   readonly editandoId = signal<number | null>(null);
   readonly displayedColumns = ['color', 'sku', 'codigoBarras', 'stock', 'costo', 'precio', 'estado', 'acciones'];
-  private productoId = 0;
+  productoId = 0;
 
   readonly form = this.fb.nonNullable.group({
     colorId: [0, [Validators.required, Validators.min(1)]],
