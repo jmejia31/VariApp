@@ -46,7 +46,7 @@
     </div>
 
     <div class="section-heading variants-heading">
-      <div><h3>Inventario por color y SKU</h3><p>El total general se calcula con las variantes activas.</p></div>
+      <div><h3>Inventario por color y SKU</h3><p>El total general representa la suma física de todas las variantes no eliminadas. Las variantes inactivas conservan su stock, pero no pueden usarse en nuevas operaciones.</p></div>
       @if (puedeEditar()) { <a [routerLink]="['/productos', p.id, 'variantes']" mat-button><mat-icon>settings</mat-icon> Administrar</a> }
     </div>
     @if (p.variantes.length === 0) {
