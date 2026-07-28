@@ -1,0 +1,72 @@
+name: Fase 3 - regenerar migración financiera
+
+on:
+  pull_request:
+    branches: [main]
+    types: [synchronize]
+    paths:
+      - .github/checkpoints/fase3-regenerar-migracion
+
+permissions:
+  contents: write
+
+jobs:
+  regenerar:
+    if: github.event.pull_request.head.ref == 'Desarrollo'
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: inventoryapp_migration_design
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=12
+    env:
+      ConnectionStrings__DefaultConnection: Server=127.0.0.1;Port=3306;Database=inventoryapp_migration_design;User=root;Password=root;SslMode=None;AllowPublicKeyRetrieval=True;
+      Database__ServerVersion: 8.4.0
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Regenerar migración con tipos financieros controlados
+        working-directory: backend
+        run: |
+          dotnet restore
+          dotnet tool install --global dotnet-ef --version 8.0.8
+          export PATH="$PATH:$HOME/.dotnet/tools"
+          dotnet ef migrations remove --force \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext
+          dotnet ef migrations add Fase3CostoEnvioEnVentas \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext
+      - name: Validar migración aditiva
+        run: |
+          if git diff -- backend/src/Infrastructure/Migrations | grep -E '^\+.*Drop(Table|Column|ForeignKey)' ; then
+            echo 'La migración contiene una operación destructiva no autorizada.' >&2
+            exit 1
+          fi
+          grep -R 'decimal(18,2)' backend/src/Infrastructure/Migrations/*Fase3CostoEnvioEnVentas.cs
+          if grep -R 'decimal(65,30)' backend/src/Infrastructure/Migrations/*Fase3CostoEnvioEnVentas.cs; then
+            echo 'La migración conserva una precisión financiera no autorizada.' >&2
+            exit 1
+          fi
+      - name: Publicar migración regenerada
+        run: |
+          git config user.name 'VariApp Automation'
+          git config user.email 'actions@users.noreply.github.com'
+          git add backend/src/Infrastructure/Migrations
+          git commit -m 'fix: regenerar migración financiera de costo de envío'
+          git push origin HEAD:Desarrollo
