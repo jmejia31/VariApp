@@ -32,9 +32,11 @@ Completada y certificada exclusivamente en la rama `Desarrollo`.
 
 `20260728165321_Fase4VariantesInventario`
 
-## Commit certificado
+## Commit funcional certificado
 
 `5f57219b597d9ec47cf34bbb53cbbb77882c056f`
+
+Los commits posteriores a este SHA modifican únicamente esta documentación de cierre.
 
 ## Evidencia de CI
 
