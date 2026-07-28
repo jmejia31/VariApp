@@ -21,18 +21,12 @@ jobs:
           fetch-depth: 0
       - name: Restaurar archivo e insertar ruta
         run: |
-          git show d9269226739aad4c1f24fcfcd7e7c91eeccd4911^:frontend/src/app/app.routes.ts > frontend/src/app/app.routes.ts
+          git show 03c6e202f48339e190c3088bb2ac21e4ae6fef1d:frontend/src/app/app.routes.ts > frontend/src/app/app.routes.ts
           python3 - <<'PY'
           from pathlib import Path
           p = Path('frontend/src/app/app.routes.ts')
           text = p.read_text(encoding='utf-8')
-          anchor = """  {
-            path: 'productos/:id',
-            canActivate: [authGuard, permisoGuard],
-            data: { modulo: 'Productos', accion: 'Ver' },
-            loadComponent: () => import('./features/productos/producto-detail.component').then(m => m.ProductoDetailComponent)
-          },
-          """
+          marker = "  {\n    path: 'productos/:id',"
           route = """  {
             path: 'productos/:id/variantes',
             canActivate: [authGuard, permisoGuard],
@@ -40,10 +34,13 @@ jobs:
             loadComponent: () => import('./features/productos/producto-variantes.component').then(m => m.ProductoVariantesComponent)
           },
           """
-          if anchor not in text:
-              raise SystemExit('No se encontró ruta de detalle de producto')
-          p.write_text(text.replace(anchor, route + anchor, 1), encoding='utf-8')
+          if marker not in text:
+              raise SystemExit('No se encontró el inicio de la ruta de detalle de producto')
+          p.write_text(text.replace(marker, route + marker, 1), encoding='utf-8')
           PY
+          grep -q "path: 'productos/:id/variantes'" frontend/src/app/app.routes.ts
+          grep -q "path: 'inventario/movimientos'" frontend/src/app/app.routes.ts
+          grep -q "path: '\*\*'" frontend/src/app/app.routes.ts
       - name: Publicar corrección
         run: |
           git config user.name 'VariApp Automation'
