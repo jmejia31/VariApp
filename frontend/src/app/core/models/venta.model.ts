@@ -1,9 +1,12 @@
 export interface VentaDetalle {
   id: number;
   productoId: number;
+  productoVarianteId?: number;
   productoNombre: string;
   productoMarca: string;
   productoModelo: string;
+  productoColor?: string;
+  productoSku?: string;
   productoImagenPrincipalUrl?: string;
   cantidad: number;
   precioUnitario: number;
@@ -91,6 +94,7 @@ export interface Venta {
 
 export interface VentaDetalleInput {
   productoId: number;
+  productoVarianteId?: number | null;
   cantidad: number;
   precioUnitario: number;
 }
