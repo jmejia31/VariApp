@@ -1,0 +1,13 @@
+  Determining projects to restore...
+  Restored /home/runner/work/VariApp/VariApp/backend/src/Domain/InventoryApp.Domain.csproj (in 102 ms).
+  Restored /home/runner/work/VariApp/VariApp/backend/src/Application/InventoryApp.Application.csproj (in 892 ms).
+  Restored /home/runner/work/VariApp/VariApp/backend/src/Infrastructure/InventoryApp.Infrastructure.csproj (in 3.42 sec).
+  Restored /home/runner/work/VariApp/VariApp/backend/src/API/InventoryApp.API.csproj (in 3.42 sec).
+  Restored /home/runner/work/VariApp/VariApp/backend/tests/InventoryApp.Tests/InventoryApp.Tests.csproj (in 3.42 sec).
+You can invoke the tool using the following command: dotnet-ef
+Tool 'dotnet-ef' (version '8.0.8') was successfully installed.
+Build started...
+Build succeeded.
+An error occurred while accessing the Microsoft.Extensions.Hosting services. Continuing without the application service provider. Error: Jwt:Secret debe ser un secreto real de al menos 32 bytes.
+Unable to create a 'DbContext' of type 'AppDbContext'. The exception 'Unable to resolve service for type 'Microsoft.EntityFrameworkCore.DbContextOptions`1[InventoryApp.Infrastructure.Persistence.AppDbContext]' while attempting to activate 'InventoryApp.Infrastructure.Persistence.AppDbContext'.' was thrown while attempting to create an instance. For the different patterns supported at design time, see https://go.microsoft.com/fwlink/?linkid=851728
+EXIT_CODE=1
