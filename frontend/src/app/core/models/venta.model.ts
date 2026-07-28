@@ -31,15 +31,21 @@ export interface ImpuestoAplicado {
 }
 
 export interface ResultadoCalculo {
-  importeBruto?: number;
+  importeBruto: number;
+  importeProductos: number;
   subtotal: number;
   subtotalNeto?: number;
   descuentosAplicados: DescuentoAplicado[];
   totalDescuento: number;
   impuestosAplicados: ImpuestoAplicado[];
   totalImpuesto: number;
-  impuestoIncluido?: number;
-  impuestoAdicional?: number;
+  impuestoIncluido: number;
+  impuestoAdicional: number;
+  costoEnvioId?: number;
+  costoEnvioNombre?: string;
+  costoEnvio: number;
+  envioExonerado: boolean;
+  motivoExoneracionEnvio?: string;
   total: number;
 }
 
@@ -55,9 +61,16 @@ export interface Venta {
   estado: 'Borrador' | 'Confirmada' | 'Anulada';
   estadoPago: 'Pendiente' | 'Pagado' | 'Parcial';
   metodoPago: 'Efectivo' | 'Transferencia' | 'Tarjeta' | 'Otro';
+  importeBruto: number;
+  importeProductos: number;
   subtotal: number;
   descuento: number;
   impuesto: number;
+  costoEnvio: number;
+  costoEnvioId?: number;
+  costoEnvioNombre?: string;
+  envioExonerado: boolean;
+  motivoExoneracionEnvio?: string;
   total: number;
   costoTotal: number;
   utilidadBruta: number;
@@ -90,10 +103,12 @@ export interface VentaFormValue {
   clienteDireccion?: string;
   metodoPago: string;
   estadoPago: string;
-  /** Se envían en 0 por compatibilidad; el backend los ignora y recalcula. */
   descuento: number;
   impuesto: number;
   codigoPromocional?: string;
+  costoEnvioId?: number;
+  envioExonerado: boolean;
+  motivoExoneracionEnvio?: string;
   notas?: string;
   detalles: VentaDetalleInput[];
 }
