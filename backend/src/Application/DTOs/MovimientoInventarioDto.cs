@@ -4,7 +4,10 @@ public class MovimientoInventarioDto
 {
     public int Id { get; set; }
     public int ProductoId { get; set; }
+    public int? ProductoVarianteId { get; set; }
     public string ProductoNombre { get; set; } = string.Empty;
+    public string? ProductoColor { get; set; }
+    public string? ProductoSku { get; set; }
     public string? ProductoImagenPrincipalUrl { get; set; }
     public string Tipo { get; set; } = string.Empty;
     public int Cantidad { get; set; }
