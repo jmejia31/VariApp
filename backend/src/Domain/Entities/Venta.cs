@@ -21,9 +21,17 @@ public class Venta : ConfirmableEntity
     public EstadoPago EstadoPago { get; set; } = EstadoPago.Pendiente;
     public MetodoPago MetodoPago { get; set; } = MetodoPago.Efectivo;
 
+    public decimal ImporteBruto { get; set; }
+    public decimal ImporteProductos { get; set; }
     public decimal Subtotal { get; set; }
     public decimal Descuento { get; set; }
     public decimal Impuesto { get; set; }
+    public decimal CostoEnvio { get; set; }
+    public int? CostoEnvioId { get; set; }
+    public string? CostoEnvioNombreSnapshot { get; set; }
+    public decimal? CostoEnvioMontoSnapshot { get; set; }
+    public bool EnvioExonerado { get; set; }
+    public string? MotivoExoneracionEnvio { get; set; }
     public decimal Total { get; set; }
     public decimal CostoTotal { get; set; }
     public decimal UtilidadBruta { get; set; }
