@@ -23,7 +23,10 @@ public class MovimientoInventarioService : IMovimientoInventarioService
     {
         Id = m.Id,
         ProductoId = m.ProductoId,
+        ProductoVarianteId = m.ProductoVarianteId,
         ProductoNombre = m.Producto?.Nombre ?? "(producto eliminado)",
+        ProductoColor = m.ProductoColorSnapshot ?? m.ProductoVariante?.Color?.Nombre,
+        ProductoSku = m.ProductoSkuSnapshot ?? m.ProductoVariante?.Sku,
         ProductoImagenPrincipalUrl = m.Producto?.ImagenPrincipal?.Url,
         Tipo = m.Tipo.ToString(),
         Cantidad = m.Cantidad,
