@@ -43,10 +43,21 @@ export class VentaService {
     return this.http.delete<ApiResponse<object>>(`${this.apiUrl}/${id}`);
   }
 
-  /** Vista previa: calcula descuentos/impuestos reales sin guardar nada. */
-  calcular(clienteId: number | null, codigoPromocional: string | null, detalles: VentaDetalleInput[]): Observable<ApiResponse<ResultadoCalculo>> {
+  calcular(
+    clienteId: number | null,
+    codigoPromocional: string | null,
+    detalles: VentaDetalleInput[],
+    costoEnvioId?: number | null,
+    envioExonerado = false,
+    motivoExoneracionEnvio?: string | null
+  ): Observable<ApiResponse<ResultadoCalculo>> {
     return this.http.post<ApiResponse<ResultadoCalculo>>(`${this.apiUrl}/calcular`, {
-      clienteId, codigoPromocional, detalles
+      clienteId,
+      codigoPromocional,
+      costoEnvioId,
+      envioExonerado,
+      motivoExoneracionEnvio,
+      detalles
     });
   }
 }
