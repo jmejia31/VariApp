@@ -29,7 +29,7 @@ public class ProductoVarianteServiceTests
         _productoRepository.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(_producto);
         _productoRepository.Setup(r => r.SaveChangesAsync()).ReturnsAsync(true);
         _repository.Setup(r => r.SaveChangesAsync()).ReturnsAsync(true);
-        _repository.Setup(r => r.GetByProductoIdAsync(1, false)).ReturnsAsync(new List<ProductoVariante>());
+        _repository.Setup(r => r.GetByProductoIdAsync(1, true)).ReturnsAsync(new List<ProductoVariante>());
         _catalogoService.Setup(s => s.GetByIdAsync(TipoCatalogoProducto.Color, 9)).ReturnsAsync(_color);
 
         _service = new ProductoVarianteService(
@@ -53,7 +53,7 @@ public class ProductoVarianteServiceTests
             capturada.Color = new CatalogoProducto { Id = 9, Nombre = "Negro", CodigoVisual = "#111111" };
             return capturada;
         });
-        _repository.Setup(r => r.GetByProductoIdAsync(1, false)).ReturnsAsync(() => capturada is null ? new() : new() { capturada });
+        _repository.Setup(r => r.GetByProductoIdAsync(1, true)).ReturnsAsync(() => capturada is null ? new() : new() { capturada });
 
         var resultado = await _service.CreateAsync(1, new CreateProductoVarianteDto
         {
@@ -118,17 +118,18 @@ public class ProductoVarianteServiceTests
     }
 
     [Fact]
-    public async Task CambiarEstadoAsync_Recalcula_Stock_Con_Variantes_Activas()
+    public async Task CambiarEstadoAsync_Conserva_Stock_Fisico_Y_Usa_Precio_Activo()
     {
         var negra = new ProductoVariante { Id = 5, ProductoId = 1, Sku = "BLACK", Cantidad = 3, Costo = 90, Precio = 210, Activo = true };
         var azul = new ProductoVariante { Id = 6, ProductoId = 1, Sku = "BLUE", Cantidad = 2, Costo = 110, Precio = 230, Activo = true };
         _repository.Setup(r => r.GetByIdAsync(5)).ReturnsAsync(negra);
-        _repository.Setup(r => r.GetByProductoIdAsync(1, false)).ReturnsAsync(new List<ProductoVariante> { azul });
+        _repository.Setup(r => r.GetByProductoIdAsync(1, true)).ReturnsAsync(new List<ProductoVariante> { negra, azul });
 
         await _service.CambiarEstadoAsync(1, 5, false);
 
         Assert.False(negra.Activo);
-        Assert.Equal(2, _producto.Cantidad);
+        Assert.Equal(5, _producto.Cantidad);
+        Assert.Equal(98, _producto.Costo);
         Assert.Equal(230, _producto.Precio);
     }
 }
