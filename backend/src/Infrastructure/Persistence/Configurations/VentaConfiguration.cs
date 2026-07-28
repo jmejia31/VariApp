@@ -18,10 +18,16 @@ public class VentaConfiguration : IEntityTypeConfiguration<Venta>
         builder.Property(v => v.ClienteDireccion).HasMaxLength(300);
         builder.Property(v => v.Notas).HasMaxLength(1000);
         builder.Property(v => v.MotivoAnulacion).HasMaxLength(500);
+        builder.Property(v => v.CostoEnvioNombreSnapshot).HasMaxLength(150);
+        builder.Property(v => v.MotivoExoneracionEnvio).HasMaxLength(500);
 
+        builder.Property(v => v.ImporteBruto).HasColumnType("decimal(18,2)");
+        builder.Property(v => v.ImporteProductos).HasColumnType("decimal(18,2)");
         builder.Property(v => v.Subtotal).HasColumnType("decimal(18,2)");
         builder.Property(v => v.Descuento).HasColumnType("decimal(18,2)");
         builder.Property(v => v.Impuesto).HasColumnType("decimal(18,2)");
+        builder.Property(v => v.CostoEnvio).HasColumnType("decimal(18,2)");
+        builder.Property(v => v.CostoEnvioMontoSnapshot).HasColumnType("decimal(18,2)");
         builder.Property(v => v.Total).HasColumnType("decimal(18,2)");
         builder.Property(v => v.CostoTotal).HasColumnType("decimal(18,2)");
         builder.Property(v => v.UtilidadBruta).HasColumnType("decimal(18,2)");
