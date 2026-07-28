@@ -6,7 +6,7 @@ services:
     region: oregon
     branch: Desarrollo
     autoDeployTrigger: checksPass
-    healthCheckPath: /health
+    healthCheckPath: /health/ready
     dockerfilePath: ./backend/Dockerfile
     dockerContext: .
     envVars:
@@ -17,7 +17,7 @@ services:
       - key: Database__ServerVersion
         value: 8.4.3
       - key: Database__ApplyMigrationsOnStartup
-        value: "false"
+        value: "true"
       - key: ConnectionStrings__DefaultConnection
         sync: false
       - key: Jwt__Secret
