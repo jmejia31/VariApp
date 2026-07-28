@@ -1,8 +1,9 @@
-name: Fase 4 - integrar variantes en operaciones
+name: Fase 4 - corregir mapeo de variante en factura
 
 on:
-  push:
-    branches: [Desarrollo]
+  pull_request:
+    branches: [main]
+    types: [synchronize]
     paths:
       - .github/checkpoints/fase4-integrar-operaciones-variantes
 
@@ -10,127 +11,42 @@ permissions:
   contents: write
 
 jobs:
-  integrar:
+  corregir:
+    if: github.event.pull_request.head.ref == 'Desarrollo'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: Desarrollo
           fetch-depth: 0
-      - name: Integrar variantes en DI, compras, ventas y repositorios
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Corregir propiedades de FacturaDetalle
         run: |
           python3 - <<'PY'
           from pathlib import Path
-
-          def replace(path, old, new, count=1):
-              p = Path(path)
-              text = p.read_text(encoding='utf-8-sig')
-              if old not in text:
-                  raise SystemExit(f'Patrón no encontrado en {path}: {old[:160]}')
-              p.write_text(text.replace(old, new, count), encoding='utf-8')
-
-          program = 'backend/src/API/Program.cs'
-          replace(program,
-              'builder.Services.AddScoped<IProductoRepository, ProductoRepository>();',
-              'builder.Services.AddScoped<IProductoRepository, ProductoRepository>();\nbuilder.Services.AddScoped<IProductoVarianteRepository, ProductoVarianteRepository>();')
-          replace(program,
-              'builder.Services.AddScoped<IProductoService, ProductoService>();',
-              'builder.Services.AddScoped<IProductoService, ProductoService>();\nbuilder.Services.AddScoped<IProductoVarianteService, ProductoVarianteService>();')
-
-          venta_repo = 'backend/src/Infrastructure/Repositories/VentaRepository.cs'
-          replace(venta_repo,
-              '''            .Include(v => v.Detalles)\n                .ThenInclude(d => d.Producto)\n                    .ThenInclude(p => p!.Imagenes)\n            .Include(v => v.Factura)''',
-              '''            .Include(v => v.Detalles)\n                .ThenInclude(d => d.Producto)\n                    .ThenInclude(p => p!.Imagenes)\n            .Include(v => v.Detalles)\n                .ThenInclude(d => d.ProductoVariante)\n                    .ThenInclude(v => v!.Color)\n            .Include(v => v.Factura)''')
-
-          compra_repo = 'backend/src/Infrastructure/Repositories/CompraRepository.cs'
-          replace(compra_repo,
-              '''            .Include(c => c.Detalles)\n                .ThenInclude(d => d.Producto)\n                    .ThenInclude(p => p!.Imagenes)\n            .Include(c => c.ImpuestosAplicados)''',
-              '''            .Include(c => c.Detalles)\n                .ThenInclude(d => d.Producto)\n                    .ThenInclude(p => p!.Imagenes)\n            .Include(c => c.Detalles)\n                .ThenInclude(d => d.ProductoVariante)\n                    .ThenInclude(v => v!.Color)\n            .Include(c => c.ImpuestosAplicados)''')
-
-          compra = 'backend/src/Application/Services/CompraService.cs'
-          replace(compra,
-              '    private readonly IProductoRepository _productoRepository;\n',
-              '    private readonly IProductoRepository _productoRepository;\n    private readonly IProductoVarianteRepository _productoVarianteRepository;\n')
-          replace(compra,
-              '        IProductoRepository productoRepository,\n        IMovimientoInventarioRepository movimientoInventarioRepository,',
-              '        IProductoRepository productoRepository,\n        IProductoVarianteRepository productoVarianteRepository,\n        IMovimientoInventarioRepository movimientoInventarioRepository,')
-          replace(compra,
-              '        _productoRepository = productoRepository;\n        _movimientoInventarioRepository = movimientoInventarioRepository;',
-              '        _productoRepository = productoRepository;\n        _productoVarianteRepository = productoVarianteRepository;\n        _movimientoInventarioRepository = movimientoInventarioRepository;')
-
-          replace(compra,
-              '''                var producto = await ObtenerProductoActivoAsync(detalle.ProductoId);\n                var stockAnterior = producto.Cantidad;\n                producto.Cantidad += detalle.Cantidad;\n                _productoRepository.Update(producto);\n\n                await _movimientoInventarioRepository.AddAsync(new MovimientoInventario\n                {\n                    ProductoId = producto.Id,\n                    Tipo = TipoMovimientoInventario.Entrada,\n                    Cantidad = detalle.Cantidad,\n                    StockAnterior = stockAnterior,\n                    StockNuevo = producto.Cantidad,\n                    CostoUnitario = detalle.CostoUnitario,\n                    ReferenciaTipo = "Compra",\n                    ReferenciaId = compra.Id,\n                    Descripcion = $"Entrada por compra {compra.NumeroCompra}",\n                    CreadoPorUsuarioId = _currentUser.UsuarioId,\n                    CreadoPorNombreUsuario = _currentUser.NombreUsuario\n                });''',
-              '''                var producto = await ObtenerProductoActivoAsync(detalle.ProductoId);\n                var stockProductoAnterior = producto.Cantidad;\n                var stockAnteriorMovimiento = stockProductoAnterior;\n                var stockNuevoMovimiento = stockProductoAnterior + detalle.Cantidad;\n\n                if (detalle.ProductoVarianteId.HasValue)\n                {\n                    var variante = await ObtenerVarianteAsync(detalle.ProductoVarianteId.Value, producto.Id, exigirActiva: true);\n                    stockAnteriorMovimiento = variante.Cantidad;\n                    variante.Cantidad += detalle.Cantidad;\n                    variante.Costo = detalle.CostoUnitario;\n                    variante.ActualizadoPorUsuarioId = _currentUser.UsuarioId;\n                    variante.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;\n                    variante.FechaActualizacion = DateTime.UtcNow;\n                    stockNuevoMovimiento = variante.Cantidad;\n                    _productoVarianteRepository.Update(variante);\n                }\n\n                producto.Cantidad += detalle.Cantidad;\n                producto.Costo = producto.Cantidad > 0\n                    ? Math.Round(((producto.Costo * stockProductoAnterior) + (detalle.CostoUnitario * detalle.Cantidad)) / producto.Cantidad, 2, MidpointRounding.AwayFromZero)\n                    : detalle.CostoUnitario;\n                _productoRepository.Update(producto);\n\n                await _movimientoInventarioRepository.AddAsync(new MovimientoInventario\n                {\n                    ProductoId = producto.Id,\n                    ProductoVarianteId = detalle.ProductoVarianteId,\n                    ProductoColorSnapshot = detalle.ProductoColorSnapshot,\n                    ProductoSkuSnapshot = detalle.ProductoSkuSnapshot,\n                    Tipo = TipoMovimientoInventario.Entrada,\n                    Cantidad = detalle.Cantidad,\n                    StockAnterior = stockAnteriorMovimiento,\n                    StockNuevo = stockNuevoMovimiento,\n                    CostoUnitario = detalle.CostoUnitario,\n                    ReferenciaTipo = "Compra",\n                    ReferenciaId = compra.Id,\n                    Descripcion = $"Entrada por compra {compra.NumeroCompra}",\n                    CreadoPorUsuarioId = _currentUser.UsuarioId,\n                    CreadoPorNombreUsuario = _currentUser.NombreUsuario\n                });''')
-
-          replace(compra,
-              '''                if (producto.Cantidad < detalle.Cantidad)\n                    throw new BusinessRuleException(\n                        $"No se puede anular: el producto '{producto.Nombre}' ya no tiene suficientes unidades para revertir la compra.");\n\n                var stockAnterior = producto.Cantidad;\n                producto.Cantidad -= detalle.Cantidad;\n                _productoRepository.Update(producto);\n\n                await _movimientoInventarioRepository.AddAsync(new MovimientoInventario\n                {\n                    ProductoId = producto.Id,\n                    Tipo = TipoMovimientoInventario.Reversion,\n                    Cantidad = detalle.Cantidad,\n                    StockAnterior = stockAnterior,\n                    StockNuevo = producto.Cantidad,\n                    CostoUnitario = detalle.CostoUnitario,\n                    ReferenciaTipo = "Compra",\n                    ReferenciaId = compra.Id,\n                    Descripcion = $"Reversión por anulación de compra {compra.NumeroCompra}",\n                    CreadoPorUsuarioId = _currentUser.UsuarioId,\n                    CreadoPorNombreUsuario = _currentUser.NombreUsuario\n                });''',
-              '''                var stockAnteriorMovimiento = producto.Cantidad;\n                var stockNuevoMovimiento = producto.Cantidad - detalle.Cantidad;\n\n                if (detalle.ProductoVarianteId.HasValue)\n                {\n                    var variante = await ObtenerVarianteAsync(detalle.ProductoVarianteId.Value, producto.Id, exigirActiva: false);\n                    if (variante.Cantidad < detalle.Cantidad)\n                        throw new BusinessRuleException($"No se puede anular: la variante '{variante.Sku}' no tiene suficientes unidades.");\n                    stockAnteriorMovimiento = variante.Cantidad;\n                    variante.Cantidad -= detalle.Cantidad;\n                    stockNuevoMovimiento = variante.Cantidad;\n                    _productoVarianteRepository.Update(variante);\n                }\n                else if (producto.Cantidad < detalle.Cantidad)\n                {\n                    throw new BusinessRuleException(\n                        $"No se puede anular: el producto '{producto.Nombre}' ya no tiene suficientes unidades para revertir la compra.");\n                }\n\n                producto.Cantidad -= detalle.Cantidad;\n                _productoRepository.Update(producto);\n\n                await _movimientoInventarioRepository.AddAsync(new MovimientoInventario\n                {\n                    ProductoId = producto.Id,\n                    ProductoVarianteId = detalle.ProductoVarianteId,\n                    ProductoColorSnapshot = detalle.ProductoColorSnapshot,\n                    ProductoSkuSnapshot = detalle.ProductoSkuSnapshot,\n                    Tipo = TipoMovimientoInventario.Reversion,\n                    Cantidad = detalle.Cantidad,\n                    StockAnterior = stockAnteriorMovimiento,\n                    StockNuevo = stockNuevoMovimiento,\n                    CostoUnitario = detalle.CostoUnitario,\n                    ReferenciaTipo = "Compra",\n                    ReferenciaId = compra.Id,\n                    Descripcion = $"Reversión por anulación de compra {compra.NumeroCompra}",\n                    CreadoPorUsuarioId = _currentUser.UsuarioId,\n                    CreadoPorNombreUsuario = _currentUser.NombreUsuario\n                });''')
-
-          replace(compra,
-              '''            var producto = await ObtenerProductoActivoAsync(input.ProductoId);\n            compra.Detalles.Add(new CompraDetalle\n            {\n                ProductoId = producto.Id,\n                Cantidad = input.Cantidad,\n                CostoUnitario = input.CostoUnitario,\n                Subtotal = input.Cantidad * input.CostoUnitario,\n                ProductoNombreSnapshot = producto.Nombre,\n                ProductoMarcaSnapshot = producto.Marca,\n                ProductoModeloSnapshot = producto.Modelo\n            });''',
-              '''            var producto = await ObtenerProductoActivoAsync(input.ProductoId);\n            ProductoVariante? variante = null;\n            if (input.ProductoVarianteId.HasValue)\n            {\n                variante = await ObtenerVarianteAsync(input.ProductoVarianteId.Value, producto.Id, exigirActiva: true);\n            }\n            else if (producto.Variantes.Any(v => v.Activo && !v.Eliminado))\n            {\n                throw new BusinessRuleException($"Debes seleccionar una variante para el producto '{producto.Nombre}'.");\n            }\n\n            compra.Detalles.Add(new CompraDetalle\n            {\n                ProductoId = producto.Id,\n                ProductoVarianteId = variante?.Id,\n                Cantidad = input.Cantidad,\n                CostoUnitario = input.CostoUnitario,\n                Subtotal = input.Cantidad * input.CostoUnitario,\n                ProductoNombreSnapshot = producto.Nombre,\n                ProductoMarcaSnapshot = producto.Marca,\n                ProductoModeloSnapshot = producto.Modelo,\n                ProductoColorSnapshot = variante?.Color?.Nombre,\n                ProductoSkuSnapshot = variante?.Sku\n            });''')
-
-          replace(compra,
-              '''    private async Task<Producto> ObtenerProductoActivoAsync(int productoId)\n    {''',
-              '''    private async Task<ProductoVariante> ObtenerVarianteAsync(int varianteId, int productoId, bool exigirActiva)\n    {\n        var variante = await _productoVarianteRepository.GetByIdAsync(varianteId)\n            ?? throw new BusinessRuleException("La variante seleccionada no existe.");\n        if (variante.ProductoId != productoId)\n            throw new BusinessRuleException("La variante seleccionada no pertenece al producto indicado.");\n        if (exigirActiva && !variante.Activo)\n            throw new BusinessRuleException($"La variante '{variante.Sku}' está inactiva.");\n        return variante;\n    }\n\n    private async Task<Producto> ObtenerProductoActivoAsync(int productoId)\n    {''')
-
-          replace(compra,
-              '''            ProductoId = detalle.ProductoId,\n            ProductoNombre = detalle.ProductoNombreSnapshot,''',
-              '''            ProductoId = detalle.ProductoId,\n            ProductoVarianteId = detalle.ProductoVarianteId,\n            ProductoNombre = detalle.ProductoNombreSnapshot,''')
-          replace(compra,
-              '''            ProductoModelo = detalle.ProductoModeloSnapshot,\n            ProductoImagenPrincipalUrl = detalle.Producto?.ImagenPrincipal?.Url,''',
-              '''            ProductoModelo = detalle.ProductoModeloSnapshot,\n            ProductoColor = detalle.ProductoColorSnapshot,\n            ProductoSku = detalle.ProductoSkuSnapshot,\n            ProductoImagenPrincipalUrl = detalle.Producto?.ImagenPrincipal?.Url,''')
-
-          venta = 'backend/src/Application/Services/VentaService.cs'
-          replace(venta,
-              '    private readonly IProductoRepository _productoRepository;\n',
-              '    private readonly IProductoRepository _productoRepository;\n    private readonly IProductoVarianteRepository _productoVarianteRepository;\n')
-          replace(venta,
-              '        IProductoRepository productoRepository,\n        IFacturaRepository facturaRepository,',
-              '        IProductoRepository productoRepository,\n        IProductoVarianteRepository productoVarianteRepository,\n        IFacturaRepository facturaRepository,')
-          replace(venta,
-              '        _productoRepository = productoRepository;\n        _facturaRepository = facturaRepository;',
-              '        _productoRepository = productoRepository;\n        _productoVarianteRepository = productoVarianteRepository;\n        _facturaRepository = facturaRepository;')
-
-          replace(venta,
-              '''            if (producto.Cantidad < detalle.Cantidad)\n                throw new BusinessRuleException(\n                    $"Stock insuficiente para '{producto.Nombre}': disponible {producto.Cantidad}, solicitado {detalle.Cantidad}.");''',
-              '''            if (detalle.ProductoVarianteId.HasValue)\n            {\n                var variante = await ObtenerVarianteAsync(detalle.ProductoVarianteId.Value, producto.Id, exigirActiva: true);\n                if (variante.Cantidad < detalle.Cantidad)\n                    throw new BusinessRuleException(\n                        $"Stock insuficiente para la variante '{variante.Sku}': disponible {variante.Cantidad}, solicitado {detalle.Cantidad}.");\n            }\n            else if (producto.Cantidad < detalle.Cantidad)\n            {\n                throw new BusinessRuleException(\n                    $"Stock insuficiente para '{producto.Nombre}': disponible {producto.Cantidad}, solicitado {detalle.Cantidad}.");\n            }''')
-
-          replace(venta,
-              '''                var stockAnterior = producto.Cantidad;\n                producto.Cantidad -= detalle.Cantidad;\n                _productoRepository.Update(producto);\n\n                await _movimientoInventarioRepository.AddAsync(new MovimientoInventario\n                {\n                    ProductoId = producto.Id,\n                    Tipo = TipoMovimientoInventario.Salida,\n                    Cantidad = detalle.Cantidad,\n                    StockAnterior = stockAnterior,\n                    StockNuevo = producto.Cantidad,''',
-              '''                var stockAnteriorMovimiento = producto.Cantidad;\n                var stockNuevoMovimiento = producto.Cantidad - detalle.Cantidad;\n                if (detalle.ProductoVarianteId.HasValue)\n                {\n                    var variante = await ObtenerVarianteAsync(detalle.ProductoVarianteId.Value, producto.Id, exigirActiva: true);\n                    stockAnteriorMovimiento = variante.Cantidad;\n                    variante.Cantidad -= detalle.Cantidad;\n                    stockNuevoMovimiento = variante.Cantidad;\n                    _productoVarianteRepository.Update(variante);\n                }\n                producto.Cantidad -= detalle.Cantidad;\n                _productoRepository.Update(producto);\n\n                await _movimientoInventarioRepository.AddAsync(new MovimientoInventario\n                {\n                    ProductoId = producto.Id,\n                    ProductoVarianteId = detalle.ProductoVarianteId,\n                    ProductoColorSnapshot = detalle.ProductoColorSnapshot,\n                    ProductoSkuSnapshot = detalle.ProductoSkuSnapshot,\n                    Tipo = TipoMovimientoInventario.Salida,\n                    Cantidad = detalle.Cantidad,\n                    StockAnterior = stockAnteriorMovimiento,\n                    StockNuevo = stockNuevoMovimiento,''')
-
-          replace(venta,
-              '''                    ProductoId = d.ProductoId,\n                    ProductoNombre = d.ProductoNombreSnapshot,''',
-              '''                    ProductoId = d.ProductoId,\n                    ProductoVarianteId = d.ProductoVarianteId,\n                    ProductoNombre = d.ProductoNombreSnapshot,''')
-          replace(venta,
-              '''                    ProductoModelo = d.ProductoModeloSnapshot,\n                    Cantidad = d.Cantidad,''',
-              '''                    ProductoModelo = d.ProductoModeloSnapshot,\n                    ProductoColor = d.ProductoColorSnapshot,\n                    ProductoSku = d.ProductoSkuSnapshot,\n                    Cantidad = d.Cantidad,''')
-
-          replace(venta,
-              '''                var stockAnterior = producto.Cantidad;\n                producto.Cantidad += detalle.Cantidad;\n                _productoRepository.Update(producto);\n\n                await _movimientoInventarioRepository.AddAsync(new MovimientoInventario\n                {\n                    ProductoId = producto.Id,\n                    Tipo = TipoMovimientoInventario.Reversion,\n                    Cantidad = detalle.Cantidad,\n                    StockAnterior = stockAnterior,\n                    StockNuevo = producto.Cantidad,''',
-              '''                var stockAnteriorMovimiento = producto.Cantidad;\n                var stockNuevoMovimiento = producto.Cantidad + detalle.Cantidad;\n                if (detalle.ProductoVarianteId.HasValue)\n                {\n                    var variante = await ObtenerVarianteAsync(detalle.ProductoVarianteId.Value, producto.Id, exigirActiva: false);\n                    stockAnteriorMovimiento = variante.Cantidad;\n                    variante.Cantidad += detalle.Cantidad;\n                    stockNuevoMovimiento = variante.Cantidad;\n                    _productoVarianteRepository.Update(variante);\n                }\n                producto.Cantidad += detalle.Cantidad;\n                _productoRepository.Update(producto);\n\n                await _movimientoInventarioRepository.AddAsync(new MovimientoInventario\n                {\n                    ProductoId = producto.Id,\n                    ProductoVarianteId = detalle.ProductoVarianteId,\n                    ProductoColorSnapshot = detalle.ProductoColorSnapshot,\n                    ProductoSkuSnapshot = detalle.ProductoSkuSnapshot,\n                    Tipo = TipoMovimientoInventario.Reversion,\n                    Cantidad = detalle.Cantidad,\n                    StockAnterior = stockAnteriorMovimiento,\n                    StockNuevo = stockNuevoMovimiento,''')
-
-          replace(venta,
-              '''            var subtotal = input.Cantidad * input.PrecioUnitario;\n            var costoTotal = input.Cantidad * producto.Costo;\n\n            venta.Detalles.Add(new VentaDetalle\n            {\n                ProductoId = producto.Id,\n                Cantidad = input.Cantidad,\n                PrecioUnitario = input.PrecioUnitario,\n                CostoUnitarioSnapshot = producto.Costo,\n                Subtotal = subtotal,\n                UtilidadBruta = subtotal - costoTotal,\n                ProductoNombreSnapshot = producto.Nombre,\n                ProductoMarcaSnapshot = producto.Marca,\n                ProductoModeloSnapshot = producto.Modelo\n            });''',
-              '''            ProductoVariante? variante = null;\n            if (input.ProductoVarianteId.HasValue)\n            {\n                variante = await ObtenerVarianteAsync(input.ProductoVarianteId.Value, producto.Id, exigirActiva: true);\n            }\n            else if (producto.Variantes.Any(v => v.Activo && !v.Eliminado))\n            {\n                throw new BusinessRuleException($"Debes seleccionar una variante para el producto '{producto.Nombre}'.");\n            }\n\n            var costoUnitario = variante?.Costo ?? producto.Costo;\n            var subtotal = input.Cantidad * input.PrecioUnitario;\n            var costoTotal = input.Cantidad * costoUnitario;\n\n            venta.Detalles.Add(new VentaDetalle\n            {\n                ProductoId = producto.Id,\n                ProductoVarianteId = variante?.Id,\n                Cantidad = input.Cantidad,\n                PrecioUnitario = input.PrecioUnitario,\n                CostoUnitarioSnapshot = costoUnitario,\n                Subtotal = subtotal,\n                UtilidadBruta = subtotal - costoTotal,\n                ProductoNombreSnapshot = producto.Nombre,\n                ProductoMarcaSnapshot = producto.Marca,\n                ProductoModeloSnapshot = producto.Modelo,\n                ProductoColorSnapshot = variante?.Color?.Nombre,\n                ProductoSkuSnapshot = variante?.Sku\n            });''')
-
-          replace(venta,
-              '''    public async Task<ResultadoCalculoDto> CalcularVistaPreviaAsync(CalcularVentaRequest request)''',
-              '''    private async Task<ProductoVariante> ObtenerVarianteAsync(int varianteId, int productoId, bool exigirActiva)\n    {\n        var variante = await _productoVarianteRepository.GetByIdAsync(varianteId)\n            ?? throw new BusinessRuleException("La variante seleccionada no existe.");\n        if (variante.ProductoId != productoId)\n            throw new BusinessRuleException("La variante seleccionada no pertenece al producto indicado.");\n        if (exigirActiva && !variante.Activo)\n            throw new BusinessRuleException($"La variante '{variante.Sku}' está inactiva.");\n        return variante;\n    }\n\n    public async Task<ResultadoCalculoDto> CalcularVistaPreviaAsync(CalcularVentaRequest request)''')
-
-          replace(venta,
-              '''            ProductoId = d.ProductoId,\n            ProductoNombre = d.ProductoNombreSnapshot,''',
-              '''            ProductoId = d.ProductoId,\n            ProductoVarianteId = d.ProductoVarianteId,\n            ProductoNombre = d.ProductoNombreSnapshot,''')
-          replace(venta,
-              '''            ProductoModelo = d.ProductoModeloSnapshot,\n            ProductoImagenPrincipalUrl = d.Producto?.ImagenPrincipal?.Url,''',
-              '''            ProductoModelo = d.ProductoModeloSnapshot,\n            ProductoColor = d.ProductoColorSnapshot,\n            ProductoSku = d.ProductoSkuSnapshot,\n            ProductoImagenPrincipalUrl = d.Producto?.ImagenPrincipal?.Url,''')
+          p = Path('backend/src/Application/Services/VentaService.cs')
+          text = p.read_text(encoding='utf-8-sig')
+          old = '''                    ProductoColor = d.ProductoColorSnapshot,
+                    ProductoSku = d.ProductoSkuSnapshot,'''
+          new = '''                    VarianteColor = d.ProductoColorSnapshot,
+                    VarianteSku = d.ProductoSkuSnapshot,'''
+          if old not in text:
+              raise SystemExit('No se encontró el mapeo incorrecto de FacturaDetalle.')
+          p.write_text(text.replace(old, new, 1), encoding='utf-8')
           PY
-
-      - name: Publicar integración operativa
+      - name: Validar backend
+        working-directory: backend
+        run: |
+          dotnet restore InventoryApp.sln
+          dotnet build InventoryApp.sln --configuration Release --no-restore
+          dotnet test InventoryApp.sln --configuration Release --no-build
+      - name: Publicar corrección
         run: |
           git config user.name 'VariApp Automation'
           git config user.email 'actions@users.noreply.github.com'
-          git add backend/src
-          git commit -m 'feat: integrar variantes en compras ventas inventario y facturas'
+          git add backend/src/Application/Services/VentaService.cs
+          git commit -m 'fix: conservar color y SKU en detalle de factura'
+          git pull --rebase origin Desarrollo
           git push origin HEAD:Desarrollo
