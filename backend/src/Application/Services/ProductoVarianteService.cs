@@ -210,7 +210,8 @@ public class ProductoVarianteService : IProductoVarianteService
 
     private async Task RecalcularProductoAsync(Producto producto)
     {
-        var variantes = await _repository.GetByProductoIdAsync(producto.Id, incluirInactivas: false);
+        var variantes = await _repository.GetByProductoIdAsync(producto.Id, incluirInactivas: true);
+        var activas = variantes.Where(v => v.Activo).ToList();
         var total = variantes.Sum(v => v.Cantidad);
         producto.Cantidad = total;
         if (variantes.Count > 0)
@@ -218,7 +219,8 @@ public class ProductoVarianteService : IProductoVarianteService
             producto.Costo = total > 0
                 ? Math.Round(variantes.Sum(v => (v.Costo ?? 0m) * v.Cantidad) / total, 2, MidpointRounding.AwayFromZero)
                 : variantes.Average(v => v.Costo ?? 0m);
-            producto.Precio = variantes.Min(v => v.Precio ?? producto.Precio);
+            var variantesPrecio = activas.Count > 0 ? activas : variantes;
+            producto.Precio = variantesPrecio.Min(v => v.Precio ?? producto.Precio);
             producto.ColorId = variantes.Count == 1 ? variantes[0].ColorId : null;
         }
         producto.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
