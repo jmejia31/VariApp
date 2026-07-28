@@ -1,6 +1,8 @@
 using InventoryApp.Application.DTOs;
+using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities;
+using InventoryApp.Domain.Enums;
 
 namespace InventoryApp.Application.Services;
 
@@ -36,10 +38,158 @@ public class FacturaService : IFacturaService
         return resultado;
     }
 
+    public async Task<FacturaDto> RegistrarPagoAsync(
+        int facturaId,
+        RegistrarFacturaPagoDto dto,
+        int? usuarioId,
+        string? nombreUsuario)
+    {
+        var factura = await ObtenerOperableAsync(facturaId);
+        if (dto.Monto <= 0)
+            throw new BusinessRuleException("El monto del pago debe ser mayor que cero.");
+
+        if (!Enum.TryParse<MetodoPago>(dto.MetodoPago?.Trim(), true, out var metodoPago))
+            throw new BusinessRuleException("El método de pago no es válido.");
+
+        RecalcularPago(factura);
+        if (factura.SaldoPendiente <= 0)
+            throw new BusinessRuleException("La factura ya se encuentra pagada.");
+        if (dto.Monto > factura.SaldoPendiente)
+            throw new BusinessRuleException("El pago no puede superar el saldo pendiente de la factura.");
+
+        factura.Pagos.Add(new FacturaPago
+        {
+            FechaPago = dto.FechaPago?.ToUniversalTime() ?? DateTime.UtcNow,
+            Monto = Math.Round(dto.Monto, 2, MidpointRounding.AwayFromZero),
+            MetodoPago = metodoPago,
+            Referencia = Normalizar(dto.Referencia, 120),
+            Observaciones = Normalizar(dto.Observaciones, 500),
+            CreadoPorUsuarioId = usuarioId,
+            CreadoPorNombreUsuario = Normalizar(nombreUsuario, 150)
+        });
+
+        RecalcularPago(factura);
+        _repository.Update(factura);
+        await _repository.SaveChangesAsync();
+        return await ToDtoAsync(factura);
+    }
+
+    public async Task<FacturaDto> AnularPagoAsync(
+        int facturaId,
+        int pagoId,
+        AnularFacturaPagoDto dto,
+        int? usuarioId,
+        string? nombreUsuario)
+    {
+        var factura = await ObtenerOperableAsync(facturaId);
+        var motivo = Normalizar(dto.Motivo, 500);
+        if (string.IsNullOrWhiteSpace(motivo))
+            throw new BusinessRuleException("Debe indicar el motivo de anulación del pago.");
+
+        var pago = factura.Pagos.FirstOrDefault(p => p.Id == pagoId);
+        if (pago is null)
+            throw new BusinessRuleException("El pago indicado no pertenece a la factura.");
+        if (pago.Anulado)
+            throw new BusinessRuleException("El pago ya se encuentra anulado.");
+
+        pago.Anulado = true;
+        pago.FechaAnulacion = DateTime.UtcNow;
+        pago.AnuladoPorUsuarioId = usuarioId;
+        pago.AnuladoPorNombreUsuario = Normalizar(nombreUsuario, 150);
+        pago.MotivoAnulacion = motivo;
+        pago.FechaActualizacion = DateTime.UtcNow;
+
+        RecalcularPago(factura);
+        _repository.Update(factura);
+        await _repository.SaveChangesAsync();
+        return await ToDtoAsync(factura);
+    }
+
+    public async Task<FacturaDto> CambiarEstadoAsync(
+        int facturaId,
+        CambiarEstadoFacturaDto dto,
+        int? usuarioId,
+        string? nombreUsuario)
+    {
+        var factura = await _repository.GetByIdAsync(facturaId)
+            ?? throw new BusinessRuleException("Factura no encontrada.");
+
+        if (!Enum.TryParse<EstadoFactura>(dto.Estado?.Trim(), true, out var nuevoEstado))
+            throw new BusinessRuleException("El estado de factura no es válido.");
+        if (nuevoEstado is EstadoFactura.Pagada or EstadoFactura.ParcialmentePagada)
+            throw new BusinessRuleException("Los estados de pago se calculan automáticamente al registrar pagos.");
+        if (nuevoEstado == EstadoFactura.Anulada)
+            throw new BusinessRuleException("La anulación debe ejecutarse desde el flujo transaccional de la venta para revertir inventario.");
+        if (!TransicionPermitida(factura.Estado, nuevoEstado))
+            throw new BusinessRuleException($"No se permite cambiar una factura de {factura.Estado} a {nuevoEstado}.");
+
+        factura.Estado = nuevoEstado;
+        if (nuevoEstado == EstadoFactura.Cancelada)
+        {
+            var motivo = Normalizar(dto.Motivo, 500);
+            if (string.IsNullOrWhiteSpace(motivo))
+                throw new BusinessRuleException("Debe indicar el motivo de cancelación.");
+            factura.FechaAnulacion = DateTime.UtcNow;
+            factura.AnuladaPorUsuarioId = usuarioId;
+            factura.AnuladaPorNombreUsuario = Normalizar(nombreUsuario, 150);
+            factura.MotivoAnulacion = motivo;
+        }
+
+        _repository.Update(factura);
+        await _repository.SaveChangesAsync();
+        return await ToDtoAsync(factura);
+    }
+
     public async Task<FacturaDto?> GetByIdParaEnlacePublicoValidadoAsync(int id)
     {
         var factura = await _repository.GetByIdParaEnlacePublicoValidadoAsync(id);
         return factura is null ? null : await ToDtoAsync(factura);
+    }
+
+    private async Task<Factura> ObtenerOperableAsync(int id)
+    {
+        var factura = await _repository.GetByIdAsync(id)
+            ?? throw new BusinessRuleException("Factura no encontrada.");
+        if (factura.Estado is EstadoFactura.Anulada or EstadoFactura.Cancelada)
+            throw new BusinessRuleException("No se pueden registrar operaciones sobre una factura anulada o cancelada.");
+        return factura;
+    }
+
+    private static void RecalcularPago(Factura factura)
+    {
+        factura.TotalPagado = Math.Round(
+            factura.Pagos.Where(p => !p.Anulado).Sum(p => p.Monto),
+            2,
+            MidpointRounding.AwayFromZero);
+        factura.SaldoPendiente = Math.Max(0, Math.Round(factura.Total - factura.TotalPagado, 2, MidpointRounding.AwayFromZero));
+
+        if (factura.TotalPagado <= 0)
+            factura.Estado = factura.FechaVencimiento.HasValue && factura.FechaVencimiento.Value < DateTime.UtcNow
+                ? EstadoFactura.Vencida
+                : EstadoFactura.Emitida;
+        else if (factura.SaldoPendiente <= 0)
+            factura.Estado = EstadoFactura.Pagada;
+        else
+            factura.Estado = EstadoFactura.ParcialmentePagada;
+
+        if (factura.Venta is not null)
+            factura.Venta.EstadoPago = factura.TotalPagado <= 0
+                ? EstadoPago.Pendiente
+                : factura.SaldoPendiente <= 0
+                    ? EstadoPago.Pagado
+                    : EstadoPago.Parcial;
+    }
+
+    private static bool TransicionPermitida(EstadoFactura actual, EstadoFactura siguiente) =>
+        actual == siguiente ||
+        (actual == EstadoFactura.Borrador && siguiente is EstadoFactura.Emitida or EstadoFactura.Cancelada) ||
+        (actual == EstadoFactura.Emitida && siguiente is EstadoFactura.Vencida or EstadoFactura.Cancelada) ||
+        (actual == EstadoFactura.Vencida && siguiente is EstadoFactura.Emitida or EstadoFactura.Cancelada);
+
+    private static string? Normalizar(string? valor, int maximo)
+    {
+        var limpio = string.IsNullOrWhiteSpace(valor) ? null : valor.Trim();
+        return limpio is not null && limpio.Length > maximo ? limpio[..maximo] : limpio;
     }
 
     private async Task<FacturaDto> ToDtoAsync(Factura f)
@@ -74,9 +224,7 @@ public class FacturaService : IFacturaService
             Observaciones = d.Observaciones
         }).ToList();
 
-        var importeBruto = f.ImporteBruto > 0
-            ? f.ImporteBruto
-            : detalles.Sum(d => d.Cantidad * d.PrecioUnitario);
+        var importeBruto = f.ImporteBruto > 0 ? f.ImporteBruto : detalles.Sum(d => d.Cantidad * d.PrecioUnitario);
         var impuestos = f.Venta?.ImpuestosAplicados.Select(i => new ImpuestoAplicadoDto
         {
             ImpuestoId = i.ImpuestoId,
@@ -89,34 +237,25 @@ public class FacturaService : IFacturaService
         }).ToList() ?? new List<ImpuestoAplicadoDto>();
 
         var totalDespuesDescuento = Math.Max(0, importeBruto - f.Descuento);
-        if (impuestos.Count > 0 &&
-            impuestos.All(i => !i.IncluidoEnPrecio) &&
-            Math.Abs(f.Total - totalDespuesDescuento) <= 0.01m)
-        {
-            foreach (var impuesto in impuestos)
-                impuesto.IncluidoEnPrecio = true;
-        }
+        if (impuestos.Count > 0 && impuestos.All(i => !i.IncluidoEnPrecio) && Math.Abs(f.Total - totalDespuesDescuento) <= 0.01m)
+            foreach (var impuesto in impuestos) impuesto.IncluidoEnPrecio = true;
 
         var impuestoIncluido = impuestos.Where(i => i.IncluidoEnPrecio).Sum(i => i.Monto);
         var impuestoAdicional = impuestos.Where(i => !i.IncluidoEnPrecio).Sum(i => i.Monto);
-        var pagos = f.Pagos
-            .OrderByDescending(p => p.FechaPago)
-            .Select(p => new FacturaPagoDto
-            {
-                Id = p.Id,
-                FechaPago = p.FechaPago,
-                Monto = p.Monto,
-                MetodoPago = p.MetodoPago.ToString(),
-                Referencia = p.Referencia,
-                Observaciones = p.Observaciones,
-                Anulado = p.Anulado
-            }).ToList();
-        var totalPagado = f.TotalPagado > 0
-            ? f.TotalPagado
-            : pagos.Where(p => !p.Anulado).Sum(p => p.Monto);
-        var saldoPendiente = f.SaldoPendiente > 0 || f.Total <= totalPagado
-            ? f.SaldoPendiente
-            : Math.Max(0, f.Total - totalPagado);
+        var pagos = f.Pagos.OrderByDescending(p => p.FechaPago).Select(p => new FacturaPagoDto
+        {
+            Id = p.Id,
+            FechaPago = p.FechaPago,
+            Monto = p.Monto,
+            MetodoPago = p.MetodoPago.ToString(),
+            Referencia = p.Referencia,
+            Observaciones = p.Observaciones,
+            Anulado = p.Anulado,
+            FechaAnulacion = p.FechaAnulacion,
+            MotivoAnulacion = p.MotivoAnulacion
+        }).ToList();
+        var totalPagado = pagos.Where(p => !p.Anulado).Sum(p => p.Monto);
+        var saldoPendiente = Math.Max(0, f.Total - totalPagado);
 
         return new FacturaDto
         {
