@@ -1,0 +1,2 @@
+Preservar stock físico de variantes inactivas y exigir una variante activa en operaciones.
+Ejecutar únicamente en Desarrollo. No modificar main ni Producción.
