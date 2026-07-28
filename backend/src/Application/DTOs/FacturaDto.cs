@@ -27,6 +27,28 @@ public class FacturaPagoDto
     public string? Referencia { get; set; }
     public string? Observaciones { get; set; }
     public bool Anulado { get; set; }
+    public DateTime? FechaAnulacion { get; set; }
+    public string? MotivoAnulacion { get; set; }
+}
+
+public class RegistrarFacturaPagoDto
+{
+    public decimal Monto { get; set; }
+    public string MetodoPago { get; set; } = "Efectivo";
+    public string? Referencia { get; set; }
+    public string? Observaciones { get; set; }
+    public DateTime? FechaPago { get; set; }
+}
+
+public class AnularFacturaPagoDto
+{
+    public string Motivo { get; set; } = string.Empty;
+}
+
+public class CambiarEstadoFacturaDto
+{
+    public string Estado { get; set; } = string.Empty;
+    public string? Motivo { get; set; }
 }
 
 public class FacturaDto
