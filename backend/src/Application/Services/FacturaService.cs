@@ -58,16 +58,25 @@ public class FacturaService : IFacturaService
     {
         var detalles = f.Detalles.Select(d => new FacturaDetalleDto
         {
+            ProductoId = d.ProductoId,
+            ProductoVarianteId = d.ProductoVarianteId,
             ProductoNombre = d.ProductoNombre,
             ProductoMarca = d.ProductoMarca,
             ProductoModelo = d.ProductoModelo,
+            VarianteColor = d.VarianteColor,
+            VarianteSku = d.VarianteSku,
             Cantidad = d.Cantidad,
             PrecioUnitario = d.PrecioUnitario,
             Descuento = d.Descuento,
-            Subtotal = d.Subtotal
+            Impuesto = d.Impuesto,
+            Subtotal = d.Subtotal,
+            TotalLinea = d.TotalLinea == 0 ? d.Subtotal : d.TotalLinea,
+            Observaciones = d.Observaciones
         }).ToList();
 
-        var importeBruto = detalles.Sum(d => d.Subtotal);
+        var importeBruto = f.ImporteBruto > 0
+            ? f.ImporteBruto
+            : detalles.Sum(d => d.Cantidad * d.PrecioUnitario);
         var impuestos = f.Venta?.ImpuestosAplicados.Select(i => new ImpuestoAplicadoDto
         {
             ImpuestoId = i.ImpuestoId,
@@ -79,9 +88,6 @@ public class FacturaService : IFacturaService
             IncluidoEnPrecio = i.IncluidoEnPrecioSnapshot
         }).ToList() ?? new List<ImpuestoAplicadoDto>();
 
-        // Compatibilidad con documentos históricos creados antes de almacenar el
-        // snapshot: si el total ya coincide con el importe después del descuento,
-        // los impuestos existentes se consideran incluidos en el precio.
         var totalDespuesDescuento = Math.Max(0, importeBruto - f.Descuento);
         if (impuestos.Count > 0 &&
             impuestos.All(i => !i.IncluidoEnPrecio) &&
@@ -93,6 +99,24 @@ public class FacturaService : IFacturaService
 
         var impuestoIncluido = impuestos.Where(i => i.IncluidoEnPrecio).Sum(i => i.Monto);
         var impuestoAdicional = impuestos.Where(i => !i.IncluidoEnPrecio).Sum(i => i.Monto);
+        var pagos = f.Pagos
+            .OrderByDescending(p => p.FechaPago)
+            .Select(p => new FacturaPagoDto
+            {
+                Id = p.Id,
+                FechaPago = p.FechaPago,
+                Monto = p.Monto,
+                MetodoPago = p.MetodoPago.ToString(),
+                Referencia = p.Referencia,
+                Observaciones = p.Observaciones,
+                Anulado = p.Anulado
+            }).ToList();
+        var totalPagado = f.TotalPagado > 0
+            ? f.TotalPagado
+            : pagos.Where(p => !p.Anulado).Sum(p => p.Monto);
+        var saldoPendiente = f.SaldoPendiente > 0 || f.Total <= totalPagado
+            ? f.SaldoPendiente
+            : Math.Max(0, f.Total - totalPagado);
 
         return new FacturaDto
         {
@@ -100,8 +124,13 @@ public class FacturaService : IFacturaService
             VentaId = f.VentaId,
             NumeroVentaOrigen = f.Venta?.NumeroVenta ?? string.Empty,
             NumeroFactura = f.NumeroFactura,
+            CodigoInterno = f.CodigoInterno,
             FechaEmision = f.FechaEmision,
+            FechaVencimiento = f.FechaVencimiento,
             Estado = f.Estado.ToString(),
+            Moneda = f.Moneda,
+            CondicionPago = f.CondicionPago,
+            Referencia = f.Referencia,
             EmpresaNombre = f.EmpresaNombre,
             EmpresaRTN = f.EmpresaRTN,
             EmpresaTelefono = f.EmpresaTelefono,
@@ -120,11 +149,19 @@ public class FacturaService : IFacturaService
             Impuesto = f.Impuesto,
             ImpuestoIncluido = impuestoIncluido,
             ImpuestoAdicional = impuestoAdicional,
+            CostoEnvio = f.CostoEnvio,
+            CostoEnvioId = f.CostoEnvioId,
+            CostoEnvioNombre = f.CostoEnvioNombreSnapshot,
+            EnvioExonerado = f.EnvioExonerado,
+            MotivoExoneracionEnvio = f.MotivoExoneracionEnvio,
             Total = f.Total,
+            TotalPagado = totalPagado,
+            SaldoPendiente = saldoPendiente,
             MetodoPago = f.Venta?.MetodoPago.ToString() ?? string.Empty,
             EstadoPago = f.Venta?.EstadoPago.ToString() ?? string.Empty,
             Observaciones = f.Observaciones,
             Detalles = detalles,
+            Pagos = pagos,
             DescuentosAplicados = f.Venta?.DescuentosAplicados.Select(d => new DescuentoAplicadoDto
             {
                 DescuentoId = d.DescuentoId,
