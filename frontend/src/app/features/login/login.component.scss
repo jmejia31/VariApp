@@ -27,7 +27,6 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   padding: clamp(32px, 5vw, 58px);
   color: #fff;
   background:
@@ -55,6 +54,8 @@
 
 .intro-copy {
   max-width: 520px;
+  margin: auto 0;
+  padding: clamp(32px, 6vh, 72px) 0;
 
   h1 {
     margin: 8px 0 16px;
@@ -84,31 +85,6 @@
 
 .login-intro .eyebrow {
   color: #67e8f9;
-}
-
-.intro-features {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-
-  span {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 10px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.06);
-    color: rgba(255, 255, 255, 0.82);
-    font-size: 11px;
-  }
-
-  mat-icon {
-    width: 16px;
-    height: 16px;
-    font-size: 16px;
-    color: #67e8f9;
-  }
 }
 
 .login-card {
@@ -194,23 +170,6 @@
   font-weight: 700;
 }
 
-.security-note {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  margin: 2px 0 0;
-  color: var(--color-text-muted);
-  font-size: 11px;
-  text-align: center;
-
-  mat-icon {
-    width: 14px;
-    height: 14px;
-    font-size: 14px;
-  }
-}
-
 .copyright {
   margin: 4px 0 0;
   text-align: center;
@@ -264,9 +223,5 @@
   .brand-logo {
     width: 68px;
     height: 68px;
-  }
-
-  .security-note {
-    align-items: flex-start;
   }
 }
