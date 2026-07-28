@@ -36,13 +36,14 @@ jobs:
         run: |
           migration="$(ls backend/src/Infrastructure/Migrations/*_Fase4VariantesInventario.cs)"
           test -n "$migration"
-          if grep -E 'migrationBuilder\.(DropTable|DropColumn|DropForeignKey)' "$migration"; then
+          awk '/protected override void Up/{inside=1} /protected override void Down/{inside=0} inside' "$migration" > /tmp/fase4-up.txt
+          if grep -E 'migrationBuilder\.(DropTable|DropColumn|DropForeignKey)' /tmp/fase4-up.txt; then
             echo 'La operación Up contiene una acción destructiva no autorizada.' >&2
             exit 1
           fi
-          grep -q 'ProductoVarianteId' "$migration"
-          grep -q 'ProductoColorSnapshot' "$migration"
-          grep -q 'ProductoSkuSnapshot' "$migration"
+          grep -q 'ProductoVarianteId' /tmp/fase4-up.txt
+          grep -q 'ProductoColorSnapshot' /tmp/fase4-up.txt
+          grep -q 'ProductoSkuSnapshot' /tmp/fase4-up.txt
       - name: Publicar migración en Desarrollo
         run: |
           git config user.name 'VariApp Automation'
