@@ -4,7 +4,7 @@
   </a>
   <div class="header-copy">
     <h1 id="producto-form-title" class="page-title">{{ isEdit() ? 'Editar producto' : 'Nuevo producto' }}</h1>
-    <p class="page-subtitle">Completa la identificación, clasificación, inventario y precios del producto.</p>
+    <p class="page-subtitle">Registra cada color con su existencia. El stock total se calcula automáticamente.</p>
   </div>
 </div>
 
@@ -38,9 +38,7 @@
               [fallbackLabel]="'No se pudo mostrar la fotografía ' + (i + 1)"
               loading="lazy">
             </app-producto-imagen>
-            @if (img.esPrincipal) {
-              <span class="badge-principal">Principal</span>
-            }
+            @if (img.esPrincipal) { <span class="badge-principal">Principal</span> }
             <div class="gallery-actions" aria-label="Acciones de fotografía">
               @if (!img.esPrincipal) {
                 <button class="action-edit" mat-icon-button type="button" title="Marcar como principal" aria-label="Marcar imagen como principal" (click)="marcarComoPrincipal(i)">
@@ -68,7 +66,7 @@
     <section class="data-section" aria-labelledby="producto-datos-title">
       <div class="section-heading">
         <h2 id="producto-datos-title">Información del producto</h2>
-        <p>Los campos obligatorios identifican el artículo y permiten controlar sus existencias y precios.</p>
+        <p>Los datos generales identifican el artículo. Las existencias se administran por color en la siguiente sección.</p>
       </div>
 
       <div class="fields-grid">
@@ -106,16 +104,6 @@
         </mat-form-field>
 
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Color (opcional)</mat-label>
-          <mat-select formControlName="colorId">
-            <mat-option [value]="null">Sin color</mat-option>
-            @for (color of colores(); track color.id) {
-              <mat-option [value]="color.id"><span class="select-swatch" [style.background]="color.codigoVisual || '#64748B'"></span>{{ color.nombre }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>Talla o tamaño (opcional)</mat-label>
           <mat-select formControlName="tallaId">
             <mat-option [value]="null">Sin talla</mat-option>
@@ -128,39 +116,115 @@
           <textarea matInput formControlName="descripcion" rows="3"></textarea>
           <mat-hint>Incluye características útiles para distinguir el producto.</mat-hint>
         </mat-form-field>
-
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Cantidad en stock</mat-label>
-          <input matInput type="number" min="0" formControlName="cantidad" inputmode="numeric">
-          <mat-hint>Con cantidad 0 se mostrará como Agotado.</mat-hint>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Umbral informativo</mat-label>
-          <input matInput type="number" min="0" formControlName="umbralStockBajo" inputmode="numeric">
-          <mat-hint>Se conserva para reportes internos; el estado visible será Agotado únicamente con stock 0.</mat-hint>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Costo (L.)</mat-label>
-          <input matInput type="number" min="0.01" step="0.01" formControlName="costo" inputmode="decimal">
-          <mat-hint>Valor de adquisición por unidad.</mat-hint>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Precio de venta (L.)</mat-label>
-          <input matInput type="number" min="0.01" step="0.01" formControlName="precio" inputmode="decimal">
-          <mat-hint>Precio final de venta por unidad.</mat-hint>
-        </mat-form-field>
       </div>
+    </section>
+
+    <section class="variants-section" aria-labelledby="producto-variantes-title">
+      <div class="variants-heading">
+        <div>
+          <h2 id="producto-variantes-title">Colores y existencias</h2>
+          <p>Agrega una fila por cada color disponible. La cantidad de cada fila alimenta el inventario de esa variante.</p>
+        </div>
+        <button mat-stroked-button color="primary" type="button" (click)="agregarVariante()">
+          <mat-icon>add</mat-icon>
+          Agregar otro color
+        </button>
+      </div>
+
+      <div class="stock-summary" aria-live="polite">
+        <div>
+          <span>Colores registrados</span>
+          <strong>{{ variantes.length }}</strong>
+        </div>
+        <div>
+          <span>Stock total calculado</span>
+          <strong>{{ stockTotal }} unidades</strong>
+        </div>
+        <div>
+          <span>Umbral total</span>
+          <strong>{{ umbralTotal }} unidades</strong>
+        </div>
+      </div>
+
+      <div formArrayName="variantes" class="variants-list">
+        @for (variante of variantes.controls; track variante; let i = $index) {
+          <article class="variant-card" [formGroupName]="i">
+            <div class="variant-card-header">
+              <div>
+                <span class="variant-number">Color {{ i + 1 }}</span>
+                <strong>{{ variante.get('colorId')?.value ? 'Variante configurada' : 'Selecciona el color' }}</strong>
+              </div>
+              <button mat-icon-button type="button" color="warn" [attr.aria-label]="'Quitar color ' + (i + 1)" title="Quitar color" (click)="quitarVariante(i)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+
+            <div class="variant-grid">
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Color</mat-label>
+                <mat-select formControlName="colorId">
+                  @for (color of colores(); track color.id) {
+                    <mat-option [value]="color.id" [disabled]="colorYaSeleccionado(color.id, i)">
+                      <span class="select-swatch" [style.background]="color.codigoVisual || '#64748B'"></span>
+                      {{ color.nombre }}
+                    </mat-option>
+                  }
+                </mat-select>
+                @if (variante.get('colorId')?.hasError('required')) { <mat-error>Selecciona un color.</mat-error> }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Cantidad disponible</mat-label>
+                <input matInput type="number" min="0" formControlName="cantidad" inputmode="numeric">
+                <mat-hint>Unidades disponibles únicamente en este color.</mat-hint>
+                @if (variante.get('cantidad')?.hasError('min')) { <mat-error>La cantidad no puede ser negativa.</mat-error> }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>SKU (opcional)</mat-label>
+                <input matInput formControlName="sku" maxlength="80" autocomplete="off">
+                <mat-hint>Si lo dejas vacío, el sistema generará uno único.</mat-hint>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Código de barras (opcional)</mat-label>
+                <input matInput formControlName="codigoBarras" maxlength="120" autocomplete="off">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Costo unitario (L.)</mat-label>
+                <input matInput type="number" min="0.01" step="0.01" formControlName="costo" inputmode="decimal">
+                @if (variante.get('costo')?.hasError('min')) { <mat-error>Ingresa un costo mayor que cero.</mat-error> }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Precio de venta (L.)</mat-label>
+                <input matInput type="number" min="0.01" step="0.01" formControlName="precio" inputmode="decimal">
+                @if (variante.get('precio')?.hasError('min')) { <mat-error>Ingresa un precio mayor que cero.</mat-error> }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Umbral de stock bajo</mat-label>
+                <input matInput type="number" min="0" formControlName="umbralStockBajo" inputmode="numeric">
+                <mat-hint>Alerta específica para este color.</mat-hint>
+              </mat-form-field>
+            </div>
+          </article>
+        }
+      </div>
+
+      <button class="add-color-bottom" mat-stroked-button color="primary" type="button" (click)="agregarVariante()">
+        <mat-icon>add_circle</mat-icon>
+        Agregar otro color
+      </button>
     </section>
 
     @if (errorMessage()) { <p class="message error" role="alert">{{ errorMessage() }}</p> }
 
     <div class="form-actions">
       <a routerLink="/productos" mat-button type="button">Cancelar</a>
-      <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving()">
-        @if (saving()) { <mat-spinner diameter="20"></mat-spinner><span>Guardando...</span> }
+      <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving() || variantes.length === 0">
+        @if (saving()) { <mat-spinner diameter="20"></mat-spinner><span>Guardando producto y colores...</span> }
         @else { <mat-icon>save</mat-icon><span>Guardar producto</span> }
       </button>
     </div>
