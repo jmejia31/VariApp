@@ -111,5 +111,17 @@ export class ProductoService {
     if (value.tallaId != null) formData.append('TallaId', String(value.tallaId));
     if (value.marcaId != null) formData.append('MarcaId', String(value.marcaId));
     if (value.modeloId != null) formData.append('ModeloId', String(value.modeloId));
+
+    value.variantes.forEach((variante, index) => {
+      if (variante.id != null) formData.append(`Variantes[${index}].Id`, String(variante.id));
+      formData.append(`Variantes[${index}].ColorId`, String(variante.colorId));
+      if (variante.sku?.trim()) formData.append(`Variantes[${index}].Sku`, variante.sku.trim());
+      if (variante.codigoBarras?.trim()) formData.append(`Variantes[${index}].CodigoBarras`, variante.codigoBarras.trim());
+      formData.append(`Variantes[${index}].Cantidad`, String(variante.cantidad));
+      formData.append(`Variantes[${index}].UmbralStockBajo`, String(variante.umbralStockBajo));
+      formData.append(`Variantes[${index}].Costo`, String(variante.costo));
+      formData.append(`Variantes[${index}].Precio`, String(variante.precio));
+      formData.append(`Variantes[${index}].Activo`, String(variante.activo ?? true));
+    });
   }
 }
