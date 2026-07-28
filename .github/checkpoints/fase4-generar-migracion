@@ -1,0 +1,2 @@
+Generar migración EF Core únicamente en Desarrollo.
+No aplicar contra Producción ni modificar main.
