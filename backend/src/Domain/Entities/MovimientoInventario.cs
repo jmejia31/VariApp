@@ -7,6 +7,10 @@ public class MovimientoInventario
     public int Id { get; set; }
     public int ProductoId { get; set; }
     public Producto? Producto { get; set; }
+    public int? ProductoVarianteId { get; set; }
+    public ProductoVariante? ProductoVariante { get; set; }
+    public string? ProductoColorSnapshot { get; set; }
+    public string? ProductoSkuSnapshot { get; set; }
 
     public TipoMovimientoInventario Tipo { get; set; }
     public int Cantidad { get; set; }
@@ -15,10 +19,8 @@ public class MovimientoInventario
     public decimal? CostoUnitario { get; set; }
     public decimal? PrecioUnitario { get; set; }
 
-    /// "Compra" | "Venta"
     public string ReferenciaTipo { get; set; } = string.Empty;
     public int ReferenciaId { get; set; }
-
     public string? Descripcion { get; set; }
 
     public int? CreadoPorUsuarioId { get; set; }
