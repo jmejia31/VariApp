@@ -14,8 +14,9 @@ public class Producto : AuditableEntity
     public string? Descripcion { get; set; }
 
     // Compatibilidad durante la migración hacia inventario por variantes.
-    // Cuando existan variantes, la cantidad consolidada deberá mantenerse como
-    // la suma de las variantes activas y no editarse de forma independiente.
+    // Cuando existan variantes, la cantidad consolidada se mantiene como la
+    // suma física de todas las variantes no eliminadas, incluso si alguna está
+    // temporalmente inactiva para nuevas operaciones.
     public int Cantidad { get; set; }
 
     public decimal Costo { get; set; }
