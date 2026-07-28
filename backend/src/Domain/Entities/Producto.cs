@@ -12,7 +12,12 @@ public class Producto : AuditableEntity
     public string Modelo { get; set; } = string.Empty;
 
     public string? Descripcion { get; set; }
+
+    // Compatibilidad durante la migración hacia inventario por variantes.
+    // Cuando existan variantes, la cantidad consolidada deberá mantenerse como
+    // la suma de las variantes activas y no editarse de forma independiente.
     public int Cantidad { get; set; }
+
     public decimal Costo { get; set; }
     public decimal Precio { get; set; }
     public int UmbralStockBajo { get; set; } = 5;
@@ -25,6 +30,8 @@ public class Producto : AuditableEntity
     public int? CategoriaId { get; set; }
     public Categoria? Categoria { get; set; }
 
+    // Color heredado: se conserva para retrocompatibilidad y para crear la
+    // variante inicial de productos existentes. La fuente futura será Variantes.
     public int? ColorId { get; set; }
     public CatalogoProducto? Color { get; set; }
     public int? TallaId { get; set; }
@@ -35,6 +42,11 @@ public class Producto : AuditableEntity
     public CatalogoProducto? ModeloCatalogo { get; set; }
 
     public ICollection<ProductoImagen> Imagenes { get; set; } = new List<ProductoImagen>();
+    public ICollection<ProductoVariante> Variantes { get; set; } = new List<ProductoVariante>();
+
+    public int CantidadVariantesActivas => Variantes
+        .Where(v => v.Activo && !v.Eliminado)
+        .Sum(v => v.Cantidad);
 
     public bool TieneStockBajo => Activo && !Eliminado && Cantidad > 0 && Cantidad < UmbralStockBajo;
     public bool EstaAgotado => Activo && !Eliminado && Cantidad <= 0;
