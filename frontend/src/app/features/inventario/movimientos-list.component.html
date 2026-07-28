@@ -1,40 +1,24 @@
-<header class="header-row">
-  <div>
-    <h1 class="page-title">Movimientos de inventario</h1>
-    <p class="subtitle">Consulta las entradas, salidas, reversiones y ajustes que modificaron las existencias.</p>
-  </div>
-</header>
-
+<header class="header-row"><div><h1 class="page-title">Movimientos de inventario</h1><p class="subtitle">Consulta entradas, salidas, reversiones y ajustes por producto, color y SKU.</p></div></header>
 <div class="card">
-  <mat-form-field appearance="outline" class="filter-field">
-    <mat-label>Filtrar por tipo</mat-label>
-    <mat-select [(ngModel)]="filtroTipo" (selectionChange)="cargar()">
-      <mat-option value="">Todos</mat-option>
-      <mat-option value="Entrada">Entrada</mat-option>
-      <mat-option value="Salida">Salida</mat-option>
-      <mat-option value="Reversion">Reversión</mat-option>
-      <mat-option value="Ajuste">Ajuste</mat-option>
-    </mat-select>
-  </mat-form-field>
-
-  @if (loading()) {
-    <div class="loading" aria-live="polite"><mat-spinner></mat-spinner><span class="sr-only">Cargando movimientos...</span></div>
-  } @else {
-    <p class="scroll-hint"><mat-icon>swipe</mat-icon> En pantallas pequeñas, desliza la tabla horizontalmente para consultar todas las columnas.</p>
+  <mat-form-field appearance="outline" class="filter-field"><mat-label>Filtrar por tipo</mat-label><mat-select [(ngModel)]="filtroTipo" (selectionChange)="cargar()"><mat-option value="">Todos</mat-option><mat-option value="Entrada">Entrada</mat-option><mat-option value="Salida">Salida</mat-option><mat-option value="Reversion">Reversión</mat-option><mat-option value="Ajuste">Ajuste</mat-option></mat-select></mat-form-field>
+  @if (loading()) { <div class="loading" aria-live="polite"><mat-spinner></mat-spinner><span class="sr-only">Cargando movimientos...</span></div> }
+  @else {
+    <p class="scroll-hint"><mat-icon>swipe</mat-icon> En pantallas pequeñas, desliza la tabla horizontalmente.</p>
     <div class="table-scroll" tabindex="0" aria-label="Tabla desplazable de movimientos de inventario">
       <table class="table">
         <caption class="sr-only">Historial de movimientos de inventario</caption>
-        <thead><tr><th scope="col"><span class="sr-only">Imagen</span></th><th scope="col">Fecha</th><th scope="col">Producto</th><th scope="col">Tipo</th><th scope="col">Cantidad</th><th scope="col">Stock anterior</th><th scope="col">Stock posterior</th><th scope="col">Referencia</th><th scope="col">Responsable</th></tr></thead>
+        <thead><tr><th><span class="sr-only">Imagen</span></th><th>Fecha</th><th>Producto</th><th>Variante</th><th>Tipo</th><th>Cantidad</th><th>Stock anterior</th><th>Stock posterior</th><th>Referencia</th><th>Responsable</th></tr></thead>
         <tbody>
           @for (m of movimientos(); track m.id) {
             <tr>
               <td class="producto-imagen-cell"><app-producto-imagen variant="thumbnail" [src]="m.productoImagenPrincipalUrl" [alt]="'Imagen de ' + m.productoNombre" [fallbackLabel]="m.productoNombre + ' no tiene imagen disponible'" loading="lazy"></app-producto-imagen></td>
               <td>{{ m.fecha | date:'dd/MM/yyyy HH:mm' }}</td>
               <td>{{ m.productoNombre }}</td>
+              <td>@if (m.productoSku || m.productoColor) { <strong>{{ m.productoColor || 'Sin color' }}</strong><br><small>{{ m.productoSku || 'Sin SKU' }}</small> } @else { <span>Stock general</span> }</td>
               <td><span class="tipo" [class.entrada]="m.tipo === 'Entrada'" [class.salida]="m.tipo === 'Salida'" [class.reversion]="m.tipo === 'Reversion'">{{ m.tipo === 'Reversion' ? 'Reversión' : m.tipo }}</span></td>
               <td>{{ m.cantidad }}</td><td>{{ m.stockAnterior }}</td><td>{{ m.stockNuevo }}</td><td>{{ m.referenciaTipo }} #{{ m.referenciaId }}</td><td>{{ m.creadoPorNombreUsuario || '—' }}</td>
             </tr>
-          } @empty { <tr><td colspan="9" class="empty">No hay movimientos registrados con el filtro seleccionado.</td></tr> }
+          } @empty { <tr><td colspan="10" class="empty">No hay movimientos registrados con el filtro seleccionado.</td></tr> }
         </tbody>
       </table>
     </div>
