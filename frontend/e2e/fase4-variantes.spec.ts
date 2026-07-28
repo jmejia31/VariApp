@@ -8,6 +8,10 @@ const suffix = `${Date.now()}`;
 let token = '';
 let productoId = 0;
 let varianteId = 0;
+let marcaId = 0;
+let modeloId = 0;
+let colorId = 0;
+let color2Id = 0;
 
 const nombres = {
   marca: `Marca Variantes ${suffix}`,
@@ -15,6 +19,7 @@ const nombres = {
   color: `Negro Variantes ${suffix}`,
   color2: `Azul Variantes ${suffix}`,
   producto: `Producto Variantes ${suffix}`,
+  productoUi: `Producto UI Variantes ${suffix}`,
   sku: `VAR-BLK-${suffix}`,
   sku2: `VAR-BLU-${suffix}`
 };
@@ -63,30 +68,46 @@ test.describe('Fase 4 — variantes por color, SKU e inventario', () => {
     token = await loginApi(request);
   });
 
+  test('El acceso no muestra controles internos de seguridad', async ({ page }) => {
+    await page.goto('/login');
+    await expect(page.getByRole('heading', { name: 'Iniciar sesión' })).toBeVisible();
+    await expect(page.getByText('Acceso protegido')).toHaveCount(0);
+    await expect(page.getByText('Permisos por rol')).toHaveCount(0);
+    await expect(page.getByText('Operaciones auditadas')).toHaveCount(0);
+    await expect(page.getByText(/credenciales se transmiten/i)).toHaveCount(0);
+  });
+
   test('API crea múltiples colores, suma stock y conserva la variante en documentos', async ({ request }) => {
     const marca = await crearCatalogo(request, 'marcas', {
       nombre: nombres.marca,
       descripcion: 'Marca temporal para variantes',
       orden: 20
     });
+    marcaId = marca.id;
+
     const modelo = await crearCatalogo(request, 'modelos', {
       nombre: nombres.modelo,
       descripcion: 'Modelo temporal para variantes',
       catalogoPadreId: marca.id,
       orden: 20
     });
+    modeloId = modelo.id;
+
     const color = await crearCatalogo(request, 'colores', {
       nombre: nombres.color,
       descripcion: 'Primer color temporal para variantes',
       codigoVisual: '#111827',
       orden: 20
     });
+    colorId = color.id;
+
     const color2 = await crearCatalogo(request, 'colores', {
       nombre: nombres.color2,
       descripcion: 'Segundo color temporal para variantes',
       codigoVisual: '#2563EB',
       orden: 21
     });
+    color2Id = color2.id;
 
     const productoResponse = await request.post(`${API_URL}/productos`, {
       headers: headers(),
@@ -230,6 +251,57 @@ test.describe('Fase 4 — variantes por color, SKU e inventario', () => {
     productoActual = await dataOf(await request.get(`${API_URL}/productos/${productoId}`, { headers: headers() }));
     expect(productoActual.cantidad).toBe(10);
     expect(productoActual.variantes.find((v: any) => v.id === varianteId)?.cantidad).toBe(6);
+  });
+
+  test('Formulario guarda dos colores con SKU automático y stock consolidado', async ({ page }) => {
+    await loginUi(page);
+    await page.goto('/productos/nuevo');
+
+    await page.locator('input[formcontrolname="nombre"]').fill(nombres.productoUi);
+
+    await page.locator('mat-select[formcontrolname="marcaId"]').click();
+    await page.getByRole('option', { name: nombres.marca, exact: true }).click();
+
+    await page.locator('mat-select[formcontrolname="modeloId"]').click();
+    await page.getByRole('option', { name: nombres.modelo, exact: true }).click();
+
+    const colores = page.locator('mat-select[formcontrolname="colorId"]');
+    await colores.nth(0).click();
+    await page.getByRole('option', { name: nombres.color, exact: true }).click();
+
+    await page.locator('input[formcontrolname="cantidad"]').nth(0).fill('2');
+    await page.locator('input[formcontrolname="costo"]').nth(0).fill('100');
+    await page.locator('input[formcontrolname="precio"]').nth(0).fill('300');
+    await page.locator('input[formcontrolname="umbralStockBajo"]').nth(0).fill('0');
+
+    await page.getByRole('button', { name: 'Agregar otro color' }).first().click();
+    await expect(page.locator('.variant-card')).toHaveCount(2);
+
+    await colores.nth(1).click();
+    await page.getByRole('option', { name: nombres.color2, exact: true }).click();
+    await page.locator('input[formcontrolname="cantidad"]').nth(1).fill('3');
+    await page.locator('input[formcontrolname="costo"]').nth(1).fill('100');
+    await page.locator('input[formcontrolname="precio"]').nth(1).fill('300');
+    await page.locator('input[formcontrolname="umbralStockBajo"]').nth(1).fill('0');
+
+    await expect(page.locator('.stock-summary').getByText('5 unidades', { exact: true })).toBeVisible();
+
+    const guardarResponse = page.waitForResponse((response) =>
+      response.url().endsWith('/productos') && response.request().method() === 'POST'
+    );
+    await page.getByRole('button', { name: 'Guardar producto' }).click();
+    const respuesta = await guardarResponse;
+    expect(respuesta.status(), await respuesta.text()).toBe(201);
+
+    const creado = await dataOf(respuesta);
+    expect(creado.cantidad).toBe(5);
+    expect(creado.variantes).toHaveLength(2);
+    expect(creado.variantes.map((v: any) => v.cantidad).sort()).toEqual([2, 3]);
+    expect(creado.variantes.every((v: any) => typeof v.sku === 'string' && v.sku.length > 0)).toBeTruthy();
+    expect(new Set(creado.variantes.map((v: any) => v.sku)).size).toBe(2);
+    expect(creado.variantes.map((v: any) => v.colorId).sort()).toEqual([colorId, color2Id].sort());
+
+    await page.waitForURL((url) => url.pathname === '/productos', { timeout: 20_000 });
   });
 
   test('Formulario principal permite agregar colores y muestra la suma del stock', async ({ page }) => {
