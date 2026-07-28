@@ -26,6 +26,7 @@ public class FacturaRepository : IFacturaRepository
     private IQueryable<Factura> ConIncludes() =>
         _context.Facturas
             .Include(f => f.Detalles)
+            .Include(f => f.Pagos)
             .Include(f => f.Venta)
                 .ThenInclude(v => v!.DescuentosAplicados)
             .Include(f => f.Venta)
