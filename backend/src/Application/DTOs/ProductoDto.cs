@@ -10,6 +10,8 @@ public class ProductoDto
     public int Cantidad { get; set; }
     public decimal Costo { get; set; }
     public decimal Precio { get; set; }
+    public decimal PrecioMinimo { get; set; }
+    public decimal PrecioMaximo { get; set; }
     public int UmbralStockBajo { get; set; }
     public bool TieneStockBajo { get; set; }
     public bool EstaAgotado { get; set; }
@@ -32,6 +34,10 @@ public class ProductoDto
     public string? ImagenPrincipalUrl { get; set; }
     public List<ProductoImagenDto> Imagenes { get; set; } = new();
     public int TotalImagenes { get; set; }
+
+    public List<ProductoVarianteDto> Variantes { get; set; } = new();
+    public int TotalVariantes { get; set; }
+    public bool UsaVariantes => TotalVariantes > 0;
 
     public int? CreadoPorUsuarioId { get; set; }
     public string? CreadoPorNombreUsuario { get; set; }
