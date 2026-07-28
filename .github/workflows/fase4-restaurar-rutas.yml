@@ -1,0 +1,51 @@
+name: Fase 4 - restaurar rutas y agregar variantes
+
+on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - .github/checkpoints/fase4-restaurar-rutas
+
+permissions:
+  contents: write
+
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+      - name: Restaurar archivo e insertar ruta
+        run: |
+          git show d9269226739aad4c1f24fcfcd7e7c91eeccd4911^:frontend/src/app/app.routes.ts > frontend/src/app/app.routes.ts
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('frontend/src/app/app.routes.ts')
+          text = p.read_text(encoding='utf-8')
+          anchor = """  {
+            path: 'productos/:id',
+            canActivate: [authGuard, permisoGuard],
+            data: { modulo: 'Productos', accion: 'Ver' },
+            loadComponent: () => import('./features/productos/producto-detail.component').then(m => m.ProductoDetailComponent)
+          },
+          """
+          route = """  {
+            path: 'productos/:id/variantes',
+            canActivate: [authGuard, permisoGuard],
+            data: { modulo: 'Productos', accion: 'Editar' },
+            loadComponent: () => import('./features/productos/producto-variantes.component').then(m => m.ProductoVariantesComponent)
+          },
+          """
+          if anchor not in text:
+              raise SystemExit('No se encontró ruta de detalle de producto')
+          p.write_text(text.replace(anchor, route + anchor, 1), encoding='utf-8')
+          PY
+      - name: Publicar corrección
+        run: |
+          git config user.name 'VariApp Automation'
+          git config user.email 'actions@users.noreply.github.com'
+          git add frontend/src/app/app.routes.ts
+          git commit -m 'fix: restaurar rutas y agregar mantenimiento de variantes'
+          git push origin HEAD:Desarrollo
