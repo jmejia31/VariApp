@@ -47,4 +47,5 @@ jobs:
           git config user.email 'actions@users.noreply.github.com'
           git add docs/FASE4_BACKEND_DIAGNOSTICO.txt docs/FASE4_FRONTEND_DIAGNOSTICO.txt
           git commit -m 'chore: registrar diagnóstico de compilación fase 4'
+          git pull --rebase origin Desarrollo
           git push origin HEAD:Desarrollo
