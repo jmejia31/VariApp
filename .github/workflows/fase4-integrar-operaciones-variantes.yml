@@ -28,13 +28,15 @@ jobs:
           from pathlib import Path
           p = Path('backend/src/Application/Services/VentaService.cs')
           text = p.read_text(encoding='utf-8-sig')
-          old = '''                    ProductoColor = d.ProductoColorSnapshot,
-                    ProductoSku = d.ProductoSkuSnapshot,'''
-          new = '''                    VarianteColor = d.ProductoColorSnapshot,
-                    VarianteSku = d.ProductoSkuSnapshot,'''
-          if old not in text:
-              raise SystemExit('No se encontró el mapeo incorrecto de FacturaDetalle.')
-          p.write_text(text.replace(old, new, 1), encoding='utf-8')
+          cambios = {
+              'ProductoColor = d.ProductoColorSnapshot': 'VarianteColor = d.ProductoColorSnapshot',
+              'ProductoSku = d.ProductoSkuSnapshot': 'VarianteSku = d.ProductoSkuSnapshot'
+          }
+          for old, new in cambios.items():
+              if old not in text:
+                  raise SystemExit(f'No se encontró: {old}')
+              text = text.replace(old, new, 1)
+          p.write_text(text, encoding='utf-8')
           PY
       - name: Validar backend
         working-directory: backend
