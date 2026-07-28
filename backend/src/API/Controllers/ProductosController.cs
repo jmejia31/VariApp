@@ -1,6 +1,7 @@
 using InventoryApp.API.Filters;
 using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs;
+using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
@@ -15,15 +16,21 @@ namespace InventoryApp.API.Controllers;
 public class ProductosController : ControllerBase
 {
     private readonly IProductoService _productoService;
+    private readonly IProductoVarianteService _varianteService;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly IImageStorageService _imageStorageService;
     private readonly IAuditoriaService _auditoria;
 
     public ProductosController(
         IProductoService productoService,
+        IProductoVarianteService varianteService,
+        IUnitOfWork unitOfWork,
         IImageStorageService imageStorageService,
         IAuditoriaService auditoria)
     {
         _productoService = productoService;
+        _varianteService = varianteService;
+        _unitOfWork = unitOfWork;
         _imageStorageService = imageStorageService;
         _auditoria = auditoria;
     }
@@ -51,20 +58,38 @@ public class ProductosController : ControllerBase
     [RequierePermiso(ModuloSistema.Productos, AccionPermiso.Crear)]
     public async Task<IActionResult> Create([FromForm] CreateProductoDto dto)
     {
-        var creado = await _productoService.CreateAsync(dto);
-        return CreatedAtAction(nameof(GetById), new { id = creado.Id },
-            ApiResponse<ProductoDto>.Ok(creado, "Producto creado correctamente."));
+        ProductoDto? creado = null;
+
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            creado = await _productoService.CreateAsync(dto);
+            await SincronizarVariantesAsync(creado.Id, dto.Variantes, Array.Empty<ProductoVarianteDto>());
+        });
+
+        var resultado = await _productoService.GetByIdAsync(creado!.Id) ?? creado;
+        return CreatedAtAction(nameof(GetById), new { id = resultado.Id },
+            ApiResponse<ProductoDto>.Ok(resultado, "Producto y existencias por color creados correctamente."));
     }
 
     [HttpPut("{id:int}")]
     [RequierePermiso(ModuloSistema.Productos, AccionPermiso.Editar)]
     public async Task<IActionResult> Update(int id, [FromForm] UpdateProductoDto dto)
     {
-        var actualizado = await _productoService.UpdateAsync(id, dto);
+        ProductoDto? actualizado = null;
+
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            var existentes = await _varianteService.GetByProductoIdAsync(id, incluirInactivas: true);
+            actualizado = await _productoService.UpdateAsync(id, dto);
+            if (actualizado is not null)
+                await SincronizarVariantesAsync(id, dto.Variantes, existentes);
+        });
+
         if (actualizado is null)
             return NotFound(ApiResponse<object>.Fail("Producto no encontrado."));
 
-        return Ok(ApiResponse<ProductoDto>.Ok(actualizado, "Producto actualizado correctamente."));
+        var resultado = await _productoService.GetByIdAsync(id) ?? actualizado;
+        return Ok(ApiResponse<ProductoDto>.Ok(resultado, "Producto, colores y existencias actualizados correctamente."));
     }
 
     [HttpPatch("{id:int}/activar")]
@@ -176,4 +201,87 @@ public class ProductosController : ControllerBase
 
         return File(memoryStream.ToArray(), "application/zip", nombreZip);
     }
+
+    private async Task SincronizarVariantesAsync(
+        int productoId,
+        IReadOnlyCollection<ProductoVarianteFormularioDto> solicitadas,
+        IReadOnlyCollection<ProductoVarianteDto> existentes)
+    {
+        if (solicitadas.Count == 0)
+            return;
+
+        if (solicitadas.Any(v => v.ColorId <= 0))
+            throw new BusinessRuleException("Cada fila de existencias debe tener un color válido.");
+        if (solicitadas.Any(v => v.Cantidad < 0))
+            throw new BusinessRuleException("La cantidad por color no puede ser negativa.");
+        if (solicitadas.Any(v => v.Costo <= 0 || v.Precio <= 0))
+            throw new BusinessRuleException("Cada color debe tener costo y precio mayores que cero.");
+        if (solicitadas.GroupBy(v => v.ColorId).Any(grupo => grupo.Count() > 1))
+            throw new BusinessRuleException("No puedes registrar el mismo color más de una vez para el producto.");
+
+        var skus = solicitadas
+            .Where(v => !string.IsNullOrWhiteSpace(v.Sku))
+            .Select(v => v.Sku!.Trim().ToUpperInvariant())
+            .ToList();
+        if (skus.Distinct(StringComparer.OrdinalIgnoreCase).Count() != skus.Count)
+            throw new BusinessRuleException("No puedes repetir un SKU dentro del mismo producto.");
+
+        var codigos = solicitadas
+            .Where(v => !string.IsNullOrWhiteSpace(v.CodigoBarras))
+            .Select(v => v.CodigoBarras!.Trim())
+            .ToList();
+        if (codigos.Distinct(StringComparer.OrdinalIgnoreCase).Count() != codigos.Count)
+            throw new BusinessRuleException("No puedes repetir un código de barras dentro del mismo producto.");
+
+        var idsSolicitados = solicitadas.Where(v => v.Id.HasValue).Select(v => v.Id!.Value).ToHashSet();
+        foreach (var existente in existentes.Where(v => !idsSolicitados.Contains(v.Id)))
+        {
+            if (existente.Cantidad > 0)
+                throw new BusinessRuleException($"No puedes retirar el color '{existente.ColorNombre}' porque todavía tiene {existente.Cantidad} unidades.");
+
+            await _varianteService.DeleteAsync(productoId, existente.Id);
+        }
+
+        foreach (var solicitada in solicitadas)
+        {
+            var existente = solicitada.Id.HasValue
+                ? existentes.FirstOrDefault(v => v.Id == solicitada.Id.Value)
+                : null;
+
+            if (solicitada.Id.HasValue && existente is null)
+                throw new BusinessRuleException("Una de las variantes indicadas no pertenece al producto.");
+
+            var sku = !string.IsNullOrWhiteSpace(solicitada.Sku)
+                ? solicitada.Sku.Trim().ToUpperInvariant()
+                : existente?.Sku ?? GenerarSku(productoId, solicitada.ColorId);
+
+            var dto = new UpdateProductoVarianteDto
+            {
+                ColorId = solicitada.ColorId,
+                Sku = sku,
+                CodigoBarras = string.IsNullOrWhiteSpace(solicitada.CodigoBarras) ? null : solicitada.CodigoBarras.Trim(),
+                Cantidad = solicitada.Cantidad,
+                UmbralStockBajo = solicitada.UmbralStockBajo,
+                Costo = solicitada.Costo,
+                Precio = solicitada.Precio
+            };
+
+            if (existente is null)
+            {
+                var creada = await _varianteService.CreateAsync(productoId, dto);
+                if (!solicitada.Activo)
+                    await _varianteService.CambiarEstadoAsync(productoId, creada.Id, false);
+            }
+            else
+            {
+                var actualizada = await _varianteService.UpdateAsync(productoId, existente.Id, dto)
+                    ?? throw new BusinessRuleException("No se pudo actualizar una de las variantes del producto.");
+                if (actualizada.Activo != solicitada.Activo)
+                    await _varianteService.CambiarEstadoAsync(productoId, existente.Id, solicitada.Activo);
+            }
+        }
+    }
+
+    private static string GenerarSku(int productoId, int colorId) =>
+        $"VAR-{productoId:D6}-{colorId:D4}-{Guid.NewGuid():N}"[..31].ToUpperInvariant();
 }
