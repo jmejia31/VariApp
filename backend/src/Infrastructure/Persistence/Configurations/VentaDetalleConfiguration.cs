@@ -16,10 +16,18 @@ public class VentaDetalleConfiguration : IEntityTypeConfiguration<VentaDetalle>
         builder.Property(d => d.ProductoNombreSnapshot).IsRequired().HasMaxLength(150);
         builder.Property(d => d.ProductoMarcaSnapshot).IsRequired().HasMaxLength(100);
         builder.Property(d => d.ProductoModeloSnapshot).IsRequired().HasMaxLength(100);
+        builder.Property(d => d.ProductoColorSnapshot).HasMaxLength(100);
+        builder.Property(d => d.ProductoSkuSnapshot).HasMaxLength(80);
 
         builder.HasOne(d => d.Producto)
             .WithMany()
             .HasForeignKey(d => d.ProductoId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasIndex(d => d.ProductoVarianteId);
+        builder.HasOne(d => d.ProductoVariante)
+            .WithMany()
+            .HasForeignKey(d => d.ProductoVarianteId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }
