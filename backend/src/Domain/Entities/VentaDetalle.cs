@@ -8,6 +8,8 @@ public class VentaDetalle
 
     public int ProductoId { get; set; }
     public Producto? Producto { get; set; }
+    public int? ProductoVarianteId { get; set; }
+    public ProductoVariante? ProductoVariante { get; set; }
 
     public int Cantidad { get; set; }
     public decimal PrecioUnitario { get; set; }
@@ -18,4 +20,6 @@ public class VentaDetalle
     public string ProductoNombreSnapshot { get; set; } = string.Empty;
     public string ProductoMarcaSnapshot { get; set; } = string.Empty;
     public string ProductoModeloSnapshot { get; set; } = string.Empty;
+    public string? ProductoColorSnapshot { get; set; }
+    public string? ProductoSkuSnapshot { get; set; }
 }
