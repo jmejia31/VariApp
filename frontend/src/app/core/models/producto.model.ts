@@ -5,6 +5,37 @@ export interface ProductoImagen {
   esPrincipal: boolean;
 }
 
+export interface ProductoVariante {
+  id: number;
+  productoId: number;
+  productoNombre: string;
+  colorId: number;
+  colorNombre: string;
+  colorCodigoVisual?: string;
+  sku: string;
+  codigoBarras?: string;
+  cantidad: number;
+  umbralStockBajo: number;
+  costo: number;
+  precio: number;
+  activo: boolean;
+  tieneStockBajo: boolean;
+  estaAgotada: boolean;
+  estadoInventario: string;
+  fechaCreacion: string;
+  fechaActualizacion: string;
+}
+
+export interface ProductoVarianteFormValue {
+  colorId: number;
+  sku: string;
+  codigoBarras?: string;
+  cantidad: number;
+  umbralStockBajo: number;
+  costo: number;
+  precio: number;
+}
+
 export interface Producto {
   id: number;
   nombre: string;
@@ -14,6 +45,8 @@ export interface Producto {
   cantidad: number;
   costo: number;
   precio: number;
+  precioMinimo: number;
+  precioMaximo: number;
   umbralStockBajo: number;
   tieneStockBajo: boolean;
   estaAgotado: boolean;
@@ -33,6 +66,9 @@ export interface Producto {
   imagenPrincipalUrl?: string;
   imagenes: ProductoImagen[];
   totalImagenes: number;
+  variantes: ProductoVariante[];
+  totalVariantes: number;
+  usaVariantes: boolean;
   creadoPorNombreUsuario?: string;
   actualizadoPorNombreUsuario?: string;
   fechaCreacion: string;
