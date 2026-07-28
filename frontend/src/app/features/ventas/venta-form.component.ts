@@ -180,15 +180,26 @@ export class VentaFormComponent implements OnInit {
     const activas = (producto.variantes ?? []).filter((v) => v.activo);
     if (activas.length === 1) {
       this.detalles.at(index).patchValue({ productoVarianteId: activas[0].id, precioUnitario: activas[0].precio });
+      this.errorMessage.set(null);
     } else {
       this.detalles.at(index).patchValue({ productoVarianteId: null, precioUnitario: producto.precio });
+      if (producto.usaVariantes && activas.length === 0) {
+        this.errorMessage.set(`El producto '${producto.nombre}' no tiene variantes activas disponibles.`);
+      }
     }
   }
 
   onVarianteSeleccionada(index: number, varianteId: number): void {
     const grupo = this.detalles.at(index);
     const variante = this.variantesDisponibles(grupo).find((v) => v.id === varianteId);
-    if (variante) grupo.patchValue({ precioUnitario: variante.precio });
+    if (variante) {
+      grupo.patchValue({ precioUnitario: variante.precio });
+      this.errorMessage.set(null);
+    }
+  }
+
+  requiereVariante(group: AbstractControl): boolean {
+    return (this.productoSeleccionado(group)?.variantes ?? []).length > 0;
   }
 
   variantesDisponibles(group: AbstractControl): ProductoVariante[] {
@@ -207,7 +218,7 @@ export class VentaFormComponent implements OnInit {
     const detallesValidos = this.detalles.controls.map((g) => g.value)
       .filter((d) => d.productoId && d.cantidad > 0 && d.precioUnitario >= 0);
     if (detallesValidos.length === 0) { this.resultado.set(null); return; }
-    if (this.detalles.controls.some((g) => this.variantesDisponibles(g).length > 0 && !g.value.productoVarianteId)) {
+    if (this.detalles.controls.some((g) => this.requiereVariante(g) && !g.value.productoVarianteId)) {
       this.resultado.set(null); return;
     }
 
