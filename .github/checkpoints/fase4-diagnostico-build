@@ -1,3 +1,3 @@
 Diagnosticar compilación únicamente en Desarrollo. No tocar main ni Producción.
-Reintento con publicación rebasada sobre el head actual.
+Publicar únicamente un artefacto temporal de GitHub Actions.
 Ejecución posterior a correcciones de pruebas y plantillas.
