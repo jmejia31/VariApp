@@ -35,7 +35,7 @@ const MAX_IMAGENES = 5;
     MatProgressSpinnerModule, ProductoImagenComponent
   ],
   templateUrl: './producto-form.component.html',
-  styleUrl: './producto-form.component.scss'
+  styleUrls: ['./producto-form.component.scss', './producto-form-variants.component.scss']
 })
 export class ProductoFormComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
@@ -63,7 +63,7 @@ export class ProductoFormComponent implements OnInit {
     tallaId: [null as number | null],
     descripcion: [''],
     categoriaId: [null as number | null],
-    variantes: this.fb.array([])
+    variantes: this.fb.array<any>([])
   });
 
   constructor(
