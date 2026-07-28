@@ -1,4 +1,0 @@
-Preservar stock físico de variantes inactivas y exigir una variante activa en operaciones.
-Ejecutar únicamente en Desarrollo. No modificar main ni Producción.
-Disparador push controlado.
-Aplicación atómica sin validación temporal duplicada.
