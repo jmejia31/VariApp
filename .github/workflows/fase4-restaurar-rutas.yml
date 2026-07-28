@@ -1,8 +1,9 @@
 name: Fase 4 - restaurar rutas y agregar variantes
 
 on:
-  push:
-    branches: [Desarrollo]
+  pull_request:
+    branches: [main]
+    types: [synchronize]
     paths:
       - .github/checkpoints/fase4-restaurar-rutas
 
@@ -11,6 +12,7 @@ permissions:
 
 jobs:
   restore:
+    if: github.event.pull_request.head.ref == 'Desarrollo'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
