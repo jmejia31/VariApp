@@ -1,0 +1,90 @@
+name: Fase 8 - integrar interfaz de pagos
+
+on:
+  push:
+    branches:
+      - Desarrollo
+    paths:
+      - .github/checkpoints/fase8-integrar-ui-pagos
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+
+      - name: Integrar ruta y botón de pagos
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          routes = Path('frontend/src/app/app.routes.ts')
+          text = routes.read_text(encoding='utf-8')
+          anchor = """  {
+              path: 'facturas/:id',
+              canActivate: [authGuard, permisoGuard],
+              data: { modulo: 'Facturacion', accion: 'Ver' },
+              loadComponent: () => import('./features/facturas/factura-view.component').then(m => m.FacturaViewComponent)
+            },
+          """
+          replacement = """  {
+              path: 'facturas/:id/pagos',
+              canActivate: [authGuard, permisoGuard],
+              data: { modulo: 'Facturacion', accion: 'Aplicar' },
+              loadComponent: () => import('./features/facturas/factura-pagos.component').then(m => m.FacturaPagosComponent)
+            },
+            {
+              path: 'facturas/:id',
+              canActivate: [authGuard, permisoGuard],
+              data: { modulo: 'Facturacion', accion: 'Ver' },
+              loadComponent: () => import('./features/facturas/factura-view.component').then(m => m.FacturaViewComponent)
+            },
+          """
+          if "path: 'facturas/:id/pagos'" not in text:
+              if anchor not in text:
+                  raise SystemExit('No se encontró el bloque de ruta de facturas.')
+              routes.write_text(text.replace(anchor, replacement), encoding='utf-8')
+
+          view = Path('frontend/src/app/features/facturas/factura-view.component.html')
+          html = view.read_text(encoding='utf-8')
+          toolbar_anchor = """  @if (factura(); as f) {
+              @if (f.estado !== 'Anulada' && puedeCompartir()) {
+          """
+          payment_button = """  @if (factura(); as f) {
+              <a mat-button [routerLink]="['/facturas', f.id, 'pagos']">
+                <mat-icon>payments</mat-icon> Pagos y saldo
+              </a>
+            }
+
+            @if (factura(); as f) {
+              @if (f.estado !== 'Anulada' && puedeCompartir()) {
+          """
+          if "Pagos y saldo" not in html:
+              if toolbar_anchor not in html:
+                  raise SystemExit('No se encontró el ancla del toolbar de factura.')
+              view.write_text(html.replace(toolbar_anchor, payment_button, 1), encoding='utf-8')
+          PY
+
+      - name: Validar frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build:prod
+
+      - name: Publicar cambios
+        run: |
+          if git diff --quiet -- frontend/src/app/app.routes.ts frontend/src/app/features/facturas/factura-view.component.html; then
+            echo 'No hay cambios pendientes.'
+            exit 0
+          fi
+          git config user.name 'VariApp Automation'
+          git config user.email 'actions@users.noreply.github.com'
+          git add frontend/src/app/app.routes.ts frontend/src/app/features/facturas/factura-view.component.html
+          git commit -m 'feat: integrar acceso a pagos desde facturación'
+          git push origin HEAD:Desarrollo
