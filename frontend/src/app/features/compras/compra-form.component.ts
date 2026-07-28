@@ -14,7 +14,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CompraService } from '../../services/compra.service';
 import { ProductoService } from '../../services/producto.service';
 import { ProveedorService } from '../../services/proveedor.service';
-import { Producto } from '../../core/models/producto.model';
+import { Producto, ProductoVariante } from '../../core/models/producto.model';
 import { Proveedor } from '../../core/models/proveedor.model';
 import { ResultadoCalculo } from '../../core/models/compra.model';
 import { ProductoImagenComponent } from '../../shared/producto-imagen/producto-imagen.component';
@@ -24,7 +24,8 @@ import { ProductoImagenComponent } from '../../shared/producto-imagen/producto-i
   standalone: true,
   imports: [
     CommonModule, ReactiveFormsModule, RouterLink, MatFormFieldModule, MatInputModule,
-    MatSelectModule, MatAutocompleteModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule, ProductoImagenComponent
+    MatSelectModule, MatAutocompleteModule, MatButtonModule, MatIconModule,
+    MatProgressSpinnerModule, ProductoImagenComponent
   ],
   templateUrl: './compra-form.component.html',
   styleUrl: './compra-form.component.scss'
@@ -48,14 +49,9 @@ export class CompraFormComponent implements OnInit {
   private proveedorId: number | null = null;
 
   form = this.fb.group({
-    proveedorNombre: ['', Validators.required],
-    proveedorTelefono: [''],
-    proveedorDocumento: [''],
-    documentoReferencia: [''],
-    metodoPago: ['Efectivo', Validators.required],
-    estadoPago: ['Pendiente', Validators.required],
-    notas: [''],
-    detalles: this.fb.array([])
+    proveedorNombre: ['', Validators.required], proveedorTelefono: [''], proveedorDocumento: [''],
+    documentoReferencia: [''], metodoPago: ['Efectivo', Validators.required],
+    estadoPago: ['Pendiente', Validators.required], notas: [''], detalles: this.fb.array([])
   });
 
   constructor(
@@ -66,9 +62,7 @@ export class CompraFormComponent implements OnInit {
     private router: Router
   ) {}
 
-  get detalles(): FormArray {
-    return this.form.get('detalles') as FormArray;
-  }
+  get detalles(): FormArray { return this.form.get('detalles') as FormArray; }
 
   ngOnInit(): void {
     this.productoService.getPaged({ page: 1, pageSize: 200, sortBy: 'Nombre' }).subscribe((res) =>
@@ -76,68 +70,41 @@ export class CompraFormComponent implements OnInit {
     );
 
     const idParam = this.route.snapshot.paramMap.get('id');
-    if (idParam) {
-      this.isEdit.set(true);
-      this.compraId = Number(idParam);
-      this.cargarCompra(this.compraId);
-    } else {
-      this.agregarDetalle();
-    }
+    if (idParam) { this.isEdit.set(true); this.compraId = Number(idParam); this.cargarCompra(this.compraId); }
+    else this.agregarDetalle();
 
     this.buscadorProveedor.valueChanges.pipe(
-      debounceTime(350),
-      distinctUntilChanged(),
+      debounceTime(350), distinctUntilChanged(),
       switchMap((termino) => {
         if (this.proveedorSeleccionado() && termino !== this.proveedorSeleccionado()!.nombre) {
-          this.proveedorSeleccionado.set(null);
-          this.proveedorId = null;
+          this.proveedorSeleccionado.set(null); this.proveedorId = null;
         }
-        if (!termino || termino.trim().length < 2) {
-          this.opcionesProveedor.set([]);
-          return of(null);
-        }
-        this.buscandoProveedor.set(true);
-        this.errorBusquedaProveedor.set(null);
-        return this.proveedorService.buscar(termino).pipe(
-          catchError(() => {
-            this.errorBusquedaProveedor.set('No se pudo buscar proveedores. Intenta de nuevo.');
-            return of(null);
-          })
-        );
+        if (!termino || termino.trim().length < 2) { this.opcionesProveedor.set([]); return of(null); }
+        this.buscandoProveedor.set(true); this.errorBusquedaProveedor.set(null);
+        return this.proveedorService.buscar(termino).pipe(catchError(() => {
+          this.errorBusquedaProveedor.set('No se pudo buscar proveedores. Intenta de nuevo.'); return of(null);
+        }));
       })
-    ).subscribe((res) => {
-      this.buscandoProveedor.set(false);
-      if (res) this.opcionesProveedor.set(res.data);
-    });
+    ).subscribe((res) => { this.buscandoProveedor.set(false); if (res) this.opcionesProveedor.set(res.data); });
 
     this.form.valueChanges.pipe(
-      debounceTime(500),
-      distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b))
+      debounceTime(500), distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b))
     ).subscribe(() => this.recalcular());
   }
 
   onProveedorSeleccionado(event: MatAutocompleteSelectedEvent): void {
     const proveedor: Proveedor = event.option.value;
-    this.proveedorSeleccionado.set(proveedor);
-    this.proveedorId = proveedor.id;
+    this.proveedorSeleccionado.set(proveedor); this.proveedorId = proveedor.id;
     this.buscadorProveedor.setValue(proveedor.nombre, { emitEvent: false });
-    this.form.patchValue({
-      proveedorNombre: proveedor.nombre,
-      proveedorTelefono: proveedor.telefono,
-      proveedorDocumento: proveedor.documento
-    });
+    this.form.patchValue({ proveedorNombre: proveedor.nombre, proveedorTelefono: proveedor.telefono, proveedorDocumento: proveedor.documento });
   }
 
   limpiarProveedorSeleccionado(): void {
-    this.proveedorSeleccionado.set(null);
-    this.proveedorId = null;
-    this.buscadorProveedor.setValue('');
+    this.proveedorSeleccionado.set(null); this.proveedorId = null; this.buscadorProveedor.setValue('');
     this.form.patchValue({ proveedorNombre: '', proveedorTelefono: '', proveedorDocumento: '' });
   }
 
-  displayProveedor(proveedor: Proveedor): string {
-    return proveedor?.nombre ?? '';
-  }
+  displayProveedor(proveedor: Proveedor): string { return proveedor?.nombre ?? ''; }
 
   private cargarCompra(id: number): void {
     this.loading.set(true);
@@ -146,41 +113,22 @@ export class CompraFormComponent implements OnInit {
         const c = res.data;
         this.buscadorProveedor.setValue(c.proveedorNombre, { emitEvent: false });
         this.form.patchValue({
-          proveedorNombre: c.proveedorNombre,
-          proveedorTelefono: c.proveedorTelefono,
-          proveedorDocumento: c.proveedorDocumento,
-          documentoReferencia: c.documentoReferencia,
-          metodoPago: c.metodoPago,
-          estadoPago: c.estadoPago,
-          notas: c.notas
+          proveedorNombre: c.proveedorNombre, proveedorTelefono: c.proveedorTelefono,
+          proveedorDocumento: c.proveedorDocumento, documentoReferencia: c.documentoReferencia,
+          metodoPago: c.metodoPago, estadoPago: c.estadoPago, notas: c.notas
         });
-        c.detalles.forEach((d) => this.agregarDetalle(d.productoId, d.cantidad, d.costoUnitario));
+        c.detalles.forEach((d) => this.agregarDetalle(d.productoId, d.productoVarianteId ?? null, d.cantidad, d.costoUnitario));
 
         const importeBruto = c.detalles.reduce((total, detalle) => total + detalle.subtotal, 0);
         const totalDespuesDescuento = Math.max(0, importeBruto - c.descuento);
         const asumirIncluidos = Math.abs(c.total - totalDespuesDescuento) <= 0.01;
-        const impuestos = c.impuestosAplicados.map((impuesto) => ({
-          ...impuesto,
-          incluidoEnPrecio: impuesto.incluidoEnPrecio || asumirIncluidos
-        }));
-        const impuestoIncluido = impuestos
-          .filter((impuesto) => impuesto.incluidoEnPrecio)
-          .reduce((total, impuesto) => total + impuesto.monto, 0);
-        const impuestoAdicional = impuestos
-          .filter((impuesto) => !impuesto.incluidoEnPrecio)
-          .reduce((total, impuesto) => total + impuesto.monto, 0);
-
+        const impuestos = c.impuestosAplicados.map((impuesto) => ({ ...impuesto, incluidoEnPrecio: impuesto.incluidoEnPrecio || asumirIncluidos }));
+        const impuestoIncluido = impuestos.filter((i) => i.incluidoEnPrecio).reduce((total, i) => total + i.monto, 0);
+        const impuestoAdicional = impuestos.filter((i) => !i.incluidoEnPrecio).reduce((total, i) => total + i.monto, 0);
         this.resultado.set({
-          importeBruto,
-          subtotal: c.subtotal,
-          subtotalNeto: c.subtotal,
-          descuentosAplicados: [],
-          totalDescuento: c.descuento,
-          impuestosAplicados: impuestos,
-          totalImpuesto: c.impuesto,
-          impuestoIncluido,
-          impuestoAdicional,
-          total: c.total
+          importeBruto, subtotal: c.subtotal, subtotalNeto: c.subtotal, descuentosAplicados: [],
+          totalDescuento: c.descuento, impuestosAplicados: impuestos, totalImpuesto: c.impuesto,
+          impuestoIncluido, impuestoAdicional, total: c.total
         });
         this.loading.set(false);
       },
@@ -188,72 +136,72 @@ export class CompraFormComponent implements OnInit {
     });
   }
 
-  agregarDetalle(productoId: number | null = null, cantidad = 1, costoUnitario = 0): void {
+  agregarDetalle(productoId: number | null = null, productoVarianteId: number | null = null, cantidad = 1, costoUnitario = 0): void {
     this.detalles.push(this.fb.group({
       productoId: [productoId, Validators.required],
+      productoVarianteId: [productoVarianteId],
       cantidad: [cantidad, [Validators.required, Validators.min(1)]],
       costoUnitario: [costoUnitario, [Validators.required, Validators.min(0.01)]]
     }));
   }
 
+  onProductoSeleccionado(index: number, productoId: number): void {
+    const producto = this.productos().find((p) => p.id === productoId);
+    if (!producto) return;
+    const activas = (producto.variantes ?? []).filter((v) => v.activo);
+    if (activas.length === 1) {
+      this.detalles.at(index).patchValue({ productoVarianteId: activas[0].id, costoUnitario: activas[0].costo });
+    } else {
+      this.detalles.at(index).patchValue({ productoVarianteId: null, costoUnitario: producto.costo });
+    }
+  }
+
+  onVarianteSeleccionada(index: number, varianteId: number): void {
+    const grupo = this.detalles.at(index);
+    const variante = this.variantesDisponibles(grupo).find((v) => v.id === varianteId);
+    if (variante) grupo.patchValue({ costoUnitario: variante.costo });
+  }
+
+  variantesDisponibles(group: AbstractControl): ProductoVariante[] {
+    return (this.productoSeleccionado(group)?.variantes ?? []).filter((v) => v.activo);
+  }
+
   productoSeleccionado(group: AbstractControl): Producto | undefined {
-    const productoId = Number(group.value.productoId);
-    return this.productos().find((producto) => producto.id === productoId);
+    return this.productos().find((producto) => producto.id === Number(group.value.productoId));
   }
 
-  quitarDetalle(index: number): void {
-    this.detalles.removeAt(index);
-    this.recalcular();
-  }
-
-  subtotalDetalle(group: AbstractControl): number {
-    const cantidad = group.value.cantidad || 0;
-    const costo = group.value.costoUnitario || 0;
-    return cantidad * costo;
-  }
+  quitarDetalle(index: number): void { this.detalles.removeAt(index); this.recalcular(); }
+  subtotalDetalle(group: AbstractControl): number { return (group.value.cantidad || 0) * (group.value.costoUnitario || 0); }
 
   recalcular(): void {
-    const detallesValidos = this.detalles.controls
-      .map((g) => g.value)
+    const detallesValidos = this.detalles.controls.map((g) => g.value)
       .filter((d) => d.productoId && d.cantidad > 0 && d.costoUnitario >= 0)
-      .map((d) => ({ productoId: d.productoId, cantidad: d.cantidad, precioUnitario: d.costoUnitario }));
+      .map((d) => ({
+        productoId: d.productoId,
+        productoVarianteId: d.productoVarianteId,
+        cantidad: d.cantidad,
+        precioUnitario: d.costoUnitario
+      }));
 
-    if (detallesValidos.length === 0) {
-      this.resultado.set(null);
-      return;
+    if (detallesValidos.length === 0 || this.detalles.controls.some((g) => this.variantesDisponibles(g).length > 0 && !g.value.productoVarianteId)) {
+      this.resultado.set(null); return;
     }
 
     this.calculando.set(true);
     this.compraService.calcular(this.proveedorId, detallesValidos).subscribe({
-      next: (res) => { this.resultado.set(res.data); this.calculando.set(false); },
-      error: (err) => {
-        this.calculando.set(false);
-        this.errorMessage.set(err.error?.message ?? 'No se pudo calcular la compra.');
-      }
+      next: (res) => { this.resultado.set(res.data); this.calculando.set(false); this.errorMessage.set(null); },
+      error: (err) => { this.calculando.set(false); this.resultado.set(null); this.errorMessage.set(err.error?.message ?? 'No se pudo calcular la compra.'); }
     });
   }
 
   submit(): void {
-    if (this.form.invalid || this.detalles.length === 0 || this.saving()) return;
-
-    this.saving.set(true);
-    this.errorMessage.set(null);
-
+    if (this.form.invalid || this.detalles.length === 0 || !this.resultado() || this.saving()) return;
+    this.saving.set(true); this.errorMessage.set(null);
     const value = { ...this.form.getRawValue(), descuento: 0, impuesto: 0 } as any;
-
-    const request$ = this.isEdit()
-      ? this.compraService.update(this.compraId!, value)
-      : this.compraService.create(value);
-
+    const request$ = this.isEdit() ? this.compraService.update(this.compraId!, value) : this.compraService.create(value);
     request$.subscribe({
-      next: (res) => {
-        this.saving.set(false);
-        this.router.navigate(['/compras', res.data.id]);
-      },
-      error: (err) => {
-        this.saving.set(false);
-        this.errorMessage.set(err.error?.message ?? 'No se pudo guardar la compra.');
-      }
+      next: (res) => { this.saving.set(false); this.router.navigate(['/compras', res.data.id]); },
+      error: (err) => { this.saving.set(false); this.errorMessage.set(err.error?.message ?? 'No se pudo guardar la compra.'); }
     });
   }
 }
