@@ -1,0 +1,41 @@
+name: Fase 8 - diagnóstico temporal de build
+
+on:
+  push:
+    branches:
+      - Desarrollo
+    paths:
+      - .github/checkpoints/fase8-diagnostico-build
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Capturar diagnóstico
+        working-directory: backend
+        run: |
+          dotnet restore
+          set +e
+          dotnet build --configuration Release --no-restore > ../docs/FASE8_BUILD_DIAGNOSTICO.txt 2>&1
+          code=$?
+          echo "EXIT_CODE=$code" >> ../docs/FASE8_BUILD_DIAGNOSTICO.txt
+          tail -n 220 ../docs/FASE8_BUILD_DIAGNOSTICO.txt > ../docs/FASE8_BUILD_DIAGNOSTICO.tail
+          mv ../docs/FASE8_BUILD_DIAGNOSTICO.tail ../docs/FASE8_BUILD_DIAGNOSTICO.txt
+          exit 0
+      - name: Publicar diagnóstico
+        run: |
+          git config user.name 'VariApp Automation'
+          git config user.email 'actions@users.noreply.github.com'
+          git add docs/FASE8_BUILD_DIAGNOSTICO.txt
+          git commit -m 'chore: registrar diagnóstico temporal de build fase 2'
+          git push origin HEAD:Desarrollo
