@@ -1,3 +1,4 @@
 Generar migración EF aditiva únicamente en Desarrollo.
 Reintento posterior a integración financiera, pruebas y corrección frontend.
 Ejecución mediante pull_request synchronize para actualizar el snapshot de EF Core.
+Capturar diagnóstico técnico seguro de la generación.
