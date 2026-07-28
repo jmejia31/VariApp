@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using InventoryApp.API.Filters;
 using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs;
@@ -46,11 +47,8 @@ public class FacturasController : ControllerBase
 
     [HttpGet("formatos-pdf")]
     [RequierePermiso(ModuloSistema.Facturacion, AccionPermiso.Ver)]
-    public IActionResult GetFormatosPdf()
-    {
-        return Ok(ApiResponse<IReadOnlyList<FacturaFormatoPdfDto>>.Ok(
-            FacturaFormatoPdfCatalogo.ObtenerTodos()));
-    }
+    public IActionResult GetFormatosPdf() =>
+        Ok(ApiResponse<IReadOnlyList<FacturaFormatoPdfDto>>.Ok(FacturaFormatoPdfCatalogo.ObtenerTodos()));
 
     [HttpGet("correo/estado")]
     [RequierePermiso(ModuloSistema.Facturacion, AccionPermiso.Compartir)]
@@ -78,6 +76,51 @@ public class FacturasController : ControllerBase
         var factura = await _facturaService.GetByVentaIdAsync(ventaId);
         if (factura is null) return NotFound(ApiResponse<object>.Fail("Esta venta no tiene factura generada."));
         return Ok(ApiResponse<FacturaDto>.Ok(factura));
+    }
+
+    [HttpPost("{id:int}/pagos")]
+    [RequierePermiso(ModuloSistema.Facturacion, AccionPermiso.Aplicar)]
+    public async Task<IActionResult> RegistrarPago(int id, [FromBody] RegistrarFacturaPagoDto dto)
+    {
+        var factura = await _facturaService.RegistrarPagoAsync(id, dto, ObtenerUsuarioId(), ObtenerNombreUsuario());
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Facturacion,
+            AccionPermiso.Aplicar,
+            $"Pago registrado en factura {factura.NumeroFactura}.",
+            id,
+            entidad: "FacturaPago",
+            valoresNuevos: new { dto.Monto, dto.MetodoPago, dto.Referencia, factura.TotalPagado, factura.SaldoPendiente });
+        return Ok(ApiResponse<FacturaDto>.Ok(factura, "Pago registrado correctamente."));
+    }
+
+    [HttpPost("{id:int}/pagos/{pagoId:int}/anular")]
+    [RequierePermiso(ModuloSistema.Facturacion, AccionPermiso.Anular)]
+    public async Task<IActionResult> AnularPago(int id, int pagoId, [FromBody] AnularFacturaPagoDto dto)
+    {
+        var factura = await _facturaService.AnularPagoAsync(id, pagoId, dto, ObtenerUsuarioId(), ObtenerNombreUsuario());
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Facturacion,
+            AccionPermiso.Anular,
+            $"Pago {pagoId} anulado en factura {factura.NumeroFactura}.",
+            pagoId,
+            entidad: "FacturaPago",
+            valoresNuevos: new { dto.Motivo, factura.TotalPagado, factura.SaldoPendiente });
+        return Ok(ApiResponse<FacturaDto>.Ok(factura, "Pago anulado correctamente."));
+    }
+
+    [HttpPost("{id:int}/estado")]
+    [RequierePermiso(ModuloSistema.Facturacion, AccionPermiso.CambiarEstado)]
+    public async Task<IActionResult> CambiarEstado(int id, [FromBody] CambiarEstadoFacturaDto dto)
+    {
+        var factura = await _facturaService.CambiarEstadoAsync(id, dto, ObtenerUsuarioId(), ObtenerNombreUsuario());
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Facturacion,
+            AccionPermiso.CambiarEstado,
+            $"Estado de factura {factura.NumeroFactura} actualizado a {factura.Estado}.",
+            id,
+            entidad: "Factura",
+            valoresNuevos: new { factura.Estado, dto.Motivo });
+        return Ok(ApiResponse<FacturaDto>.Ok(factura, "Estado actualizado correctamente."));
     }
 
     [HttpGet("{id:int}/pdf")]
@@ -166,10 +209,8 @@ public class FacturasController : ControllerBase
 
         if (resultado.Exito)
             return Ok(ApiResponse<ResultadoEnvioCorreoDto>.Ok(resultado, resultado.Mensaje));
-
         if (resultado.Codigo is "DESTINATARIO_INVALIDO" or "PDF_ERROR")
             return BadRequest(ApiResponse<object>.Fail(resultado.Mensaje));
-
         if (resultado.EsTransitorio)
         {
             Response.Headers.RetryAfter = "30";
@@ -191,9 +232,17 @@ public class FacturasController : ControllerBase
         var resultado = await _facturaCompartirService.ObtenerPdfPorTokenAsync(token);
         if (resultado is null)
             return NotFound(ApiResponse<object>.Fail("Este enlace no es válido, fue revocado, alcanzó su límite o ya expiró."));
-
         return File(resultado.Value.Pdf, "application/pdf", resultado.Value.NombreArchivo);
     }
+
+    private int? ObtenerUsuarioId()
+    {
+        var valor = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+        return int.TryParse(valor, out var id) ? id : null;
+    }
+
+    private string? ObtenerNombreUsuario() =>
+        User.FindFirstValue(ClaimTypes.Name) ?? User.Identity?.Name;
 
     private void AplicarEncabezadosDocumentoPrivado()
     {
