@@ -13,8 +13,10 @@ const nombres = {
   marca: `Marca Variantes ${suffix}`,
   modelo: `Modelo Variantes ${suffix}`,
   color: `Negro Variantes ${suffix}`,
+  color2: `Azul Variantes ${suffix}`,
   producto: `Producto Variantes ${suffix}`,
-  sku: `VAR-${suffix}`
+  sku: `VAR-BLK-${suffix}`,
+  sku2: `VAR-BLU-${suffix}`
 };
 
 function headers(): Record<string, string> {
@@ -61,7 +63,7 @@ test.describe('Fase 4 — variantes por color, SKU e inventario', () => {
     token = await loginApi(request);
   });
 
-  test('API conserva stock exacto de variante en compra, venta, factura y reversiones', async ({ request }) => {
+  test('API crea múltiples colores, suma stock y conserva la variante en documentos', async ({ request }) => {
     const marca = await crearCatalogo(request, 'marcas', {
       nombre: nombres.marca,
       descripcion: 'Marca temporal para variantes',
@@ -75,41 +77,57 @@ test.describe('Fase 4 — variantes por color, SKU e inventario', () => {
     });
     const color = await crearCatalogo(request, 'colores', {
       nombre: nombres.color,
-      descripcion: 'Color temporal para variantes',
+      descripcion: 'Primer color temporal para variantes',
       codigoVisual: '#111827',
       orden: 20
+    });
+    const color2 = await crearCatalogo(request, 'colores', {
+      nombre: nombres.color2,
+      descripcion: 'Segundo color temporal para variantes',
+      codigoVisual: '#2563EB',
+      orden: 21
     });
 
     const productoResponse = await request.post(`${API_URL}/productos`, {
       headers: headers(),
       multipart: {
         Nombre: nombres.producto,
+        Marca: nombres.marca,
+        Modelo: nombres.modelo,
         MarcaId: String(marca.id),
         ModeloId: String(modelo.id),
-        Cantidad: '0',
-        Costo: '100',
+        Cantidad: '10',
+        Costo: '104',
         Precio: '220',
-        UmbralStockBajo: '2'
+        UmbralStockBajo: '4',
+        'Variantes[0].ColorId': String(color.id),
+        'Variantes[0].Sku': nombres.sku.toLowerCase(),
+        'Variantes[0].CodigoBarras': `7501${suffix.slice(-8)}`,
+        'Variantes[0].Cantidad': '6',
+        'Variantes[0].UmbralStockBajo': '2',
+        'Variantes[0].Costo': '100',
+        'Variantes[0].Precio': '220',
+        'Variantes[0].Activo': 'true',
+        'Variantes[1].ColorId': String(color2.id),
+        'Variantes[1].Sku': nombres.sku2.toLowerCase(),
+        'Variantes[1].CodigoBarras': `7502${suffix.slice(-8)}`,
+        'Variantes[1].Cantidad': '4',
+        'Variantes[1].UmbralStockBajo': '2',
+        'Variantes[1].Costo': '110',
+        'Variantes[1].Precio': '230',
+        'Variantes[1].Activo': 'true'
       }
     });
     expect(productoResponse.status(), await productoResponse.text()).toBe(201);
     const producto = await dataOf(productoResponse);
     productoId = producto.id;
+    expect(producto.cantidad).toBe(10);
+    expect(producto.totalVariantes).toBe(2);
+    expect(producto.variantes).toHaveLength(2);
+    expect(producto.variantes.map((v: any) => v.cantidad).reduce((a: number, b: number) => a + b, 0)).toBe(10);
 
-    const varianteResponse = await request.post(`${API_URL}/productos/${productoId}/variantes`, {
-      headers: headers(),
-      data: {
-        colorId: color.id,
-        sku: nombres.sku.toLowerCase(),
-        codigoBarras: `750${suffix.slice(-9)}`,
-        cantidad: 6,
-        umbralStockBajo: 2,
-        costo: 100,
-        precio: 220
-      }
-    });
-    expect(varianteResponse.status(), await varianteResponse.text()).toBe(201);
-    const variante = await dataOf(varianteResponse);
+    const variante = producto.variantes.find((v: any) => v.colorId === color.id);
+    expect(variante).toBeTruthy();
     varianteId = variante.id;
     expect(variante.sku).toBe(nombres.sku.toUpperCase());
     expect(variante.cantidad).toBe(6);
@@ -149,7 +167,7 @@ test.describe('Fase 4 — variantes por color, SKU e inventario', () => {
     expect(confirmarCompra.status(), await confirmarCompra.text()).toBe(200);
 
     let productoActual = await dataOf(await request.get(`${API_URL}/productos/${productoId}`, { headers: headers() }));
-    expect(productoActual.cantidad).toBe(10);
+    expect(productoActual.cantidad).toBe(14);
     expect(productoActual.variantes.find((v: any) => v.id === varianteId)?.cantidad).toBe(10);
 
     const envioResponse = await request.get(`${API_URL}/costos-envio/predeterminado`, { headers: headers() });
@@ -181,7 +199,7 @@ test.describe('Fase 4 — variantes por color, SKU e inventario', () => {
     expect(ventaConfirmada.facturaId).toBeTruthy();
 
     productoActual = await dataOf(await request.get(`${API_URL}/productos/${productoId}`, { headers: headers() }));
-    expect(productoActual.cantidad).toBe(7);
+    expect(productoActual.cantidad).toBe(11);
     expect(productoActual.variantes.find((v: any) => v.id === varianteId)?.cantidad).toBe(7);
 
     const facturaResponse = await request.get(`${API_URL}/facturas/${ventaConfirmada.facturaId}`, {
@@ -190,8 +208,8 @@ test.describe('Fase 4 — variantes por color, SKU e inventario', () => {
     expect(facturaResponse.status(), await facturaResponse.text()).toBe(200);
     const factura = await dataOf(facturaResponse);
     expect(factura.detalles[0].productoVarianteId).toBe(varianteId);
-    expect(factura.detalles[0].productoSku).toBe(nombres.sku.toUpperCase());
-    expect(factura.detalles[0].productoColor).toBe(nombres.color);
+    expect(factura.detalles[0].varianteSku).toBe(nombres.sku.toUpperCase());
+    expect(factura.detalles[0].varianteColor).toBe(nombres.color);
 
     const anularVenta = await request.post(`${API_URL}/ventas/${venta.id}/anular`, {
       headers: headers(),
@@ -200,7 +218,7 @@ test.describe('Fase 4 — variantes por color, SKU e inventario', () => {
     expect(anularVenta.status(), await anularVenta.text()).toBe(200);
 
     productoActual = await dataOf(await request.get(`${API_URL}/productos/${productoId}`, { headers: headers() }));
-    expect(productoActual.cantidad).toBe(10);
+    expect(productoActual.cantidad).toBe(14);
     expect(productoActual.variantes.find((v: any) => v.id === varianteId)?.cantidad).toBe(10);
 
     const anularCompra = await request.post(`${API_URL}/compras/${compra.id}/anular`, {
@@ -210,11 +228,26 @@ test.describe('Fase 4 — variantes por color, SKU e inventario', () => {
     expect(anularCompra.status(), await anularCompra.text()).toBe(200);
 
     productoActual = await dataOf(await request.get(`${API_URL}/productos/${productoId}`, { headers: headers() }));
-    expect(productoActual.cantidad).toBe(6);
+    expect(productoActual.cantidad).toBe(10);
     expect(productoActual.variantes.find((v: any) => v.id === varianteId)?.cantidad).toBe(6);
   });
 
-  test('Angular administra la variante y exige color/SKU en compra y venta', async ({ page }) => {
+  test('Formulario principal permite agregar colores y muestra la suma del stock', async ({ page }) => {
+    await loginUi(page);
+
+    await page.goto(`/productos/${productoId}/editar`);
+    await expect(page.getByRole('heading', { name: 'Colores y existencias' })).toBeVisible();
+    await expect(page.getByText('Stock total calculado')).toBeVisible();
+    await expect(page.locator('.variant-card')).toHaveCount(2);
+    await expect(page.locator('.stock-summary').getByText('10 unidades', { exact: true })).toBeVisible();
+
+    await page.getByRole('button', { name: 'Agregar otro color' }).first().click();
+    await expect(page.locator('.variant-card')).toHaveCount(3);
+    await expect(page.locator('mat-select[formcontrolname="colorId"]')).toHaveCount(3);
+    await expect(page.locator('input[formcontrolname="cantidad"]')).toHaveCount(3);
+  });
+
+  test('Angular exige la variante exacta en compra y venta', async ({ page }) => {
     await loginUi(page);
 
     await page.goto(`/productos/${productoId}/variantes`);
