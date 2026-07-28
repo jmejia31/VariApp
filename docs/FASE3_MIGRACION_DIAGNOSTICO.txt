@@ -1,13 +1,19 @@
   Determining projects to restore...
-  Restored /home/runner/work/VariApp/VariApp/backend/src/Domain/InventoryApp.Domain.csproj (in 102 ms).
-  Restored /home/runner/work/VariApp/VariApp/backend/src/Application/InventoryApp.Application.csproj (in 892 ms).
-  Restored /home/runner/work/VariApp/VariApp/backend/src/Infrastructure/InventoryApp.Infrastructure.csproj (in 3.42 sec).
-  Restored /home/runner/work/VariApp/VariApp/backend/src/API/InventoryApp.API.csproj (in 3.42 sec).
-  Restored /home/runner/work/VariApp/VariApp/backend/tests/InventoryApp.Tests/InventoryApp.Tests.csproj (in 3.42 sec).
+  Restored /home/runner/work/VariApp/VariApp/backend/src/Application/InventoryApp.Application.csproj (in 1.5 sec).
+  Restored /home/runner/work/VariApp/VariApp/backend/src/Domain/InventoryApp.Domain.csproj (in 2 ms).
+  Restored /home/runner/work/VariApp/VariApp/backend/src/Infrastructure/InventoryApp.Infrastructure.csproj (in 4.41 sec).
+  Restored /home/runner/work/VariApp/VariApp/backend/src/API/InventoryApp.API.csproj (in 4.41 sec).
+  Restored /home/runner/work/VariApp/VariApp/backend/tests/InventoryApp.Tests/InventoryApp.Tests.csproj (in 4.41 sec).
 You can invoke the tool using the following command: dotnet-ef
 Tool 'dotnet-ef' (version '8.0.8') was successfully installed.
 Build started...
 Build succeeded.
 An error occurred while accessing the Microsoft.Extensions.Hosting services. Continuing without the application service provider. Error: Jwt:Secret debe ser un secreto real de al menos 32 bytes.
-Unable to create a 'DbContext' of type 'AppDbContext'. The exception 'Unable to resolve service for type 'Microsoft.EntityFrameworkCore.DbContextOptions`1[InventoryApp.Infrastructure.Persistence.AppDbContext]' while attempting to activate 'InventoryApp.Infrastructure.Persistence.AppDbContext'.' was thrown while attempting to create an instance. For the different patterns supported at design time, see https://go.microsoft.com/fwlink/?linkid=851728
-EXIT_CODE=1
+Entity 'Compra' has a global query filter defined and is the required end of a relationship with the entity 'CompraDetalle'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+Entity 'Venta' has a global query filter defined and is the required end of a relationship with the entity 'Factura'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+Entity 'Producto' has a global query filter defined and is the required end of a relationship with the entity 'MovimientoInventario'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+Entity 'Producto' has a global query filter defined and is the required end of a relationship with the entity 'ProductoImagen'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+Entity 'Producto' has a global query filter defined and is the required end of a relationship with the entity 'ProductoVariante'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+Entity 'Producto' has a global query filter defined and is the required end of a relationship with the entity 'VentaDetalle'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+Done. To undo this action, use 'ef migrations remove'
+EXIT_CODE=0
