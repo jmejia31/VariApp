@@ -1,6 +1,14 @@
 import { DescuentoAplicado, ImpuestoAplicado } from './venta.model';
 
 export type FacturaFormatoCodigo = 'a4' | 'carta' | 'legal' | 'oficio' | 'a5' | 'pos58' | 'pos80';
+export type EstadoFactura =
+  | 'Borrador'
+  | 'Emitida'
+  | 'Pagada'
+  | 'ParcialmentePagada'
+  | 'Vencida'
+  | 'Anulada'
+  | 'Cancelada';
 
 export interface FacturaFormatoPdf {
   codigo: FacturaFormatoCodigo;
@@ -13,13 +21,40 @@ export interface FacturaFormatoPdf {
 }
 
 export interface FacturaDetalle {
+  productoId: number;
+  productoVarianteId?: number;
   productoNombre: string;
   productoMarca: string;
   productoModelo: string;
+  varianteColor?: string;
+  varianteSku?: string;
   cantidad: number;
   precioUnitario: number;
   descuento: number;
+  impuesto: number;
   subtotal: number;
+  totalLinea: number;
+  observaciones?: string;
+}
+
+export interface FacturaPago {
+  id: number;
+  fechaPago: string;
+  monto: number;
+  metodoPago: string;
+  referencia?: string;
+  observaciones?: string;
+  anulado: boolean;
+  fechaAnulacion?: string;
+  motivoAnulacion?: string;
+}
+
+export interface RegistrarFacturaPago {
+  fechaPago?: string;
+  monto: number;
+  metodoPago: string;
+  referencia?: string;
+  observaciones?: string;
 }
 
 export interface Factura {
@@ -27,8 +62,13 @@ export interface Factura {
   ventaId: number;
   numeroVentaOrigen: string;
   numeroFactura: string;
+  codigoInterno?: string;
   fechaEmision: string;
-  estado: 'Emitida' | 'Anulada';
+  fechaVencimiento?: string;
+  estado: EstadoFactura;
+  moneda: string;
+  condicionPago?: string;
+  referencia?: string;
   empresaNombre: string;
   empresaRTN?: string;
   empresaTelefono?: string;
@@ -52,11 +92,19 @@ export interface Factura {
   impuesto: number;
   impuestoIncluido: number;
   impuestoAdicional: number;
+  costoEnvio: number;
+  costoEnvioId?: number;
+  costoEnvioNombre?: string;
+  envioExonerado: boolean;
+  motivoExoneracionEnvio?: string;
   total: number;
+  totalPagado: number;
+  saldoPendiente: number;
   metodoPago: string;
   estadoPago: string;
   observaciones?: string;
   detalles: FacturaDetalle[];
+  pagos: FacturaPago[];
   descuentosAplicados: DescuentoAplicado[];
   impuestosAplicados: ImpuestoAplicado[];
   fechaAnulacion?: string;
