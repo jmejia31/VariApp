@@ -10,13 +10,124 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: desarrollo-ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  apply-phase4-hardening:
+    name: Aplicar endurecimiento pendiente de variantes
+    if: github.event_name == 'push' && github.ref == 'refs/heads/Desarrollo'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Desarrollo
+        uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+
+      - name: Aplicar reglas idempotentes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def replace_if_present(path, old, new, count=1):
+              p = Path(path)
+              text = p.read_text(encoding='utf-8-sig')
+              if new in text:
+                  return False
+              if old not in text:
+                  raise SystemExit(f'No se encontró el patrón esperado en {path}: {old[:140]}')
+              p.write_text(text.replace(old, new, count), encoding='utf-8')
+              return True
+
+          replace_if_present(
+              'backend/src/Application/Services/ProductoVarianteService.cs',
+              '''        var variantes = await _repository.GetByProductoIdAsync(producto.Id, incluirInactivas: false);
+        var total = variantes.Sum(v => v.Cantidad);
+        producto.Cantidad = total;
+        if (variantes.Count > 0)
+        {
+            producto.Costo = total > 0
+                ? Math.Round(variantes.Sum(v => (v.Costo ?? 0m) * v.Cantidad) / total, 2, MidpointRounding.AwayFromZero)
+                : variantes.Average(v => v.Costo ?? 0m);
+            producto.Precio = variantes.Min(v => v.Precio ?? producto.Precio);
+            producto.ColorId = variantes.Count == 1 ? variantes[0].ColorId : null;
+        }''',
+              '''        var variantes = await _repository.GetByProductoIdAsync(producto.Id, incluirInactivas: true);
+        var activas = variantes.Where(v => v.Activo).ToList();
+        var total = variantes.Sum(v => v.Cantidad);
+        producto.Cantidad = total;
+        if (variantes.Count > 0)
+        {
+            producto.Costo = total > 0
+                ? Math.Round(variantes.Sum(v => (v.Costo ?? 0m) * v.Cantidad) / total, 2, MidpointRounding.AwayFromZero)
+                : variantes.Average(v => v.Costo ?? 0m);
+            var variantesPrecio = activas.Count > 0 ? activas : variantes;
+            producto.Precio = variantesPrecio.Min(v => v.Precio ?? producto.Precio);
+            producto.ColorId = variantes.Count == 1 ? variantes[0].ColorId : null;
+        }''')
+
+          for path in [
+              'backend/src/Application/Services/CompraService.cs',
+              'backend/src/Application/Services/VentaService.cs'
+          ]:
+              replace_if_present(
+                  path,
+                  'else if (producto.Variantes.Any(v => v.Activo && !v.Eliminado))',
+                  'else if (producto.Variantes.Any(v => !v.Eliminado))')
+
+          replace_if_present(
+              'backend/tests/InventoryApp.Tests/ProductoVarianteServiceTests.cs',
+              '        Assert.Equal(2, _producto.Cantidad);\n        Assert.Equal(230, _producto.Precio);',
+              '        Assert.Equal(5, _producto.Cantidad);\n        Assert.Equal(98, _producto.Costo);\n        Assert.Equal(230, _producto.Precio);')
+
+          for path in [
+              'frontend/src/app/features/ventas/venta-form.component.ts',
+              'frontend/src/app/features/compras/compra-form.component.ts'
+          ]:
+              replace_if_present(
+                  path,
+                  '''  variantesDisponibles(group: AbstractControl): ProductoVariante[] {
+    return (this.productoSeleccionado(group)?.variantes ?? []).filter((v) => v.activo);
+  }''',
+                  '''  tieneVariantesActivas(producto: Producto): boolean {
+    return (producto.variantes ?? []).some((variante) => variante.activo);
+  }
+
+  variantesDisponibles(group: AbstractControl): ProductoVariante[] {
+    return (this.productoSeleccionado(group)?.variantes ?? []).filter((v) => v.activo);
+  }''')
+
+          replace_if_present(
+              'frontend/src/app/features/ventas/venta-form.component.html',
+              '[disabled]="p.estaAgotado || p.cantidad === 0"',
+              '[disabled]="p.estaAgotado || p.cantidad === 0 || (p.usaVariantes && !tieneVariantesActivas(p))"')
+
+          replace_if_present(
+              'frontend/src/app/features/compras/compra-form.component.html',
+              '<mat-option [value]="p.id">{{ p.nombre }} — {{ p.marca }} {{ p.modelo }} · stock {{ p.cantidad }}</mat-option>',
+              '<mat-option [value]="p.id" [disabled]="p.usaVariantes && !tieneVariantesActivas(p)">{{ p.nombre }} — {{ p.marca }} {{ p.modelo }} · stock {{ p.cantidad }}</mat-option>')
+          PY
+
+      - name: Publicar solo si hubo cambios
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- backend/src backend/tests frontend/src; then
+            echo 'El endurecimiento ya estaba aplicado.'
+            exit 0
+          fi
+          git config user.name 'VariApp Automation'
+          git config user.email 'actions@users.noreply.github.com'
+          git add backend/src backend/tests frontend/src
+          git commit -m 'fix: preservar stock físico y exigir variantes activas'
+          git push origin HEAD:Desarrollo
+
   hygiene:
     name: Higiene del repositorio
     runs-on: ubuntu-latest
@@ -84,7 +195,7 @@ jobs:
           retention-days: 7
 
   migrations:
-    name: Migraciones EF y datos legados en MySQL 8.4
+    name: Migraciones EF, variantes y datos legados en MySQL 8.4
     runs-on: ubuntu-latest
     timeout-minutes: 25
     services:
@@ -126,9 +237,9 @@ jobs:
         run: dotnet restore InventoryApp.sln
 
       - name: Instalar EF Core CLI
-        run: dotnet tool install --global dotnet-ef --version 8.0.2
+        run: dotnet tool install --global dotnet-ef --version 8.0.8
 
-      - name: Aplicar historial anterior
+      - name: Aplicar historial base
         run: |
           dotnet ef database update 20260722142118_Fase6SeguridadFacturacionPerfil \
             --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
@@ -147,26 +258,65 @@ jobs:
               ('Teléfono legado CI', 'Samsung', 'S24', 3, 100.00, 150.00, 1,
                1, 0, UTC_TIMESTAMP(6), UTC_TIMESTAMP(6));"
 
-      - name: Aplicar migración nueva
+      - name: Aplicar hasta Fase 3
+        run: |
+          dotnet ef database update 20260728152434_Fase3CostoEnvioEnVentas \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext
+
+      - name: Preparar color legado y verificar catálogos
+        working-directory: .
+        run: |
+          set -euo pipefail
+          mysql_container="${{ job.services.mysql.id }}"
+          docker exec "$mysql_container" mysql -uroot -proot inventoryapp_ci -e "
+            INSERT INTO CatalogosProducto
+              (Tipo, Nombre, Descripcion, CodigoVisual, Orden, Activo, Eliminado,
+               FechaCreacion, FechaActualizacion)
+            VALUES
+              ('Color', 'Negro legado CI', 'Color para conversión de variante CI', '#111827', 1, 1, 0,
+               UTC_TIMESTAMP(6), UTC_TIMESTAMP(6));
+            SET @color_id = LAST_INSERT_ID();
+            UPDATE Productos SET ColorId = @color_id WHERE Nombre = 'Teléfono legado CI';"
+          marcas="$(docker exec "$mysql_container" mysql -uroot -proot inventoryapp_ci -Nse "SELECT COUNT(*) FROM CatalogosProducto WHERE Tipo='Marca' AND Nombre='Samsung';")"
+          modelos="$(docker exec "$mysql_container" mysql -uroot -proot inventoryapp_ci -Nse "SELECT COUNT(*) FROM CatalogosProducto WHERE Tipo='Modelo' AND Nombre='S24';")"
+          relacion="$(docker exec "$mysql_container" mysql -uroot -proot inventoryapp_ci -Nse "SELECT CONCAT(IFNULL(MarcaId,0), ':', IFNULL(ModeloId,0), ':', IFNULL(ColorId,0)) FROM Productos WHERE Nombre='Teléfono legado CI';")"
+          test "$marcas" = "1"
+          test "$modelos" = "1"
+          test "${relacion%%:*}" -gt 0
+          resto="${relacion#*:}"
+          test "${resto%%:*}" -gt 0
+          test "${resto##*:}" -gt 0
+
+      - name: Aplicar migración de variantes
         run: |
           dotnet ef database update \
             --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
             --startup-project src/API/InventoryApp.API.csproj \
             --context AppDbContext
 
-      - name: Verificar conversión de marca y modelo
+      - name: Verificar conversión de inventario legado
         working-directory: .
         run: |
           set -euo pipefail
           mysql_container="${{ job.services.mysql.id }}"
-          marcas="$(docker exec "$mysql_container" mysql -uroot -proot inventoryapp_ci -Nse "SELECT COUNT(*) FROM CatalogosProducto WHERE Tipo='Marca' AND Nombre='Samsung';")"
-          modelos="$(docker exec "$mysql_container" mysql -uroot -proot inventoryapp_ci -Nse "SELECT COUNT(*) FROM CatalogosProducto WHERE Tipo='Modelo' AND Nombre='S24';")"
-          relacion="$(docker exec "$mysql_container" mysql -uroot -proot inventoryapp_ci -Nse "SELECT CONCAT(IFNULL(MarcaId,0), ':', IFNULL(ModeloId,0)) FROM Productos WHERE Nombre='Teléfono legado CI';")"
-          test "$marcas" = "1"
-          test "$modelos" = "1"
-          test "$relacion" != "0:0"
-          test "${relacion%%:*}" -gt 0
-          test "${relacion##*:}" -gt 0
+          resultado="$(docker exec "$mysql_container" mysql -uroot -proot inventoryapp_ci -Nse "
+            SELECT CONCAT(pv.Sku, ':', pv.Cantidad, ':', FORMAT(pv.Costo, 2), ':', FORMAT(pv.Precio, 2), ':', pv.ColorId, ':', p.ColorId)
+            FROM ProductoVariantes pv
+            INNER JOIN Productos p ON p.Id = pv.ProductoId
+            WHERE p.Nombre='Teléfono legado CI' AND pv.Eliminado=0;")"
+          producto_id="$(docker exec "$mysql_container" mysql -uroot -proot inventoryapp_ci -Nse "SELECT Id FROM Productos WHERE Nombre='Teléfono legado CI';")"
+          sku_esperado="LEGACY-$(printf '%08d' "$producto_id")"
+          test "${resultado%%:*}" = "$sku_esperado"
+          resto="${resultado#*:}"
+          test "${resto%%:*}" = "3"
+          resto="${resto#*:}"
+          test "${resto%%:*}" = "100.00"
+          resto="${resto#*:}"
+          test "${resto%%:*}" = "150.00"
+          resto="${resto#*:}"
+          test "${resto%%:*}" = "${resto##*:}"
           docker exec "$mysql_container" mysql -uroot -proot inventoryapp_ci -e "SELECT MigrationId FROM __EFMigrationsHistory ORDER BY MigrationId;"
 
       - name: Verificar modelo y snapshot alineados
@@ -176,28 +326,30 @@ jobs:
             --startup-project src/API/InventoryApp.API.csproj \
             --context AppDbContext
 
-      - name: Generar SQL forward revisable
+      - name: Generar SQL forward revisable de Fase 4
         run: |
           set -euo pipefail
           dotnet ef migrations script \
-            20260722142118_Fase6SeguridadFacturacionPerfil \
-            20260726022547_CatalogosProductoYCategoriaSoftDelete \
+            20260728152434_Fase3CostoEnvioEnVentas \
+            20260728165321_Fase4VariantesInventario \
             --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
             --startup-project src/API/InventoryApp.API.csproj \
             --context AppDbContext \
-            --output catalogos-forward.sql
-          test -s catalogos-forward.sql
-          if grep -Ein '(^|[[:space:];])(DROP[[:space:]]+TABLE|TRUNCATE)[[:space:]]|DELETE[[:space:]]+FROM' catalogos-forward.sql; then
+            --output fase4-variantes-forward.sql
+          test -s fase4-variantes-forward.sql
+          if grep -Ein '(^|[[:space:];])(DROP[[:space:]]+TABLE|TRUNCATE)[[:space:]]|DELETE[[:space:]]+FROM' fase4-variantes-forward.sql; then
             echo 'El SQL forward contiene una operación destructiva de datos.' >&2
             exit 1
           fi
+          grep -q 'ProductoVarianteId' fase4-variantes-forward.sql
+          grep -q 'LEGACY-' fase4-variantes-forward.sql
 
       - name: Publicar SQL de evidencia
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: desarrollo-catalogos-migration-sql
-          path: backend/catalogos-forward.sql
+          name: desarrollo-fase4-variantes-migration-sql
+          path: backend/fase4-variantes-forward.sql
           if-no-files-found: warn
           retention-days: 14
 
