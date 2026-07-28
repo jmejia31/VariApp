@@ -27,13 +27,15 @@ export interface ProductoVariante {
 }
 
 export interface ProductoVarianteFormValue {
+  id?: number;
   colorId: number;
-  sku: string;
+  sku?: string;
   codigoBarras?: string;
   cantidad: number;
   umbralStockBajo: number;
   costo: number;
   precio: number;
+  activo?: boolean;
 }
 
 export interface Producto {
@@ -89,6 +91,7 @@ export interface ProductoFormValue {
   tallaId?: number | null;
   marcaId?: number | null;
   modeloId?: number | null;
+  variantes: ProductoVarianteFormValue[];
   imagenesNuevas?: File[];
   imagenesAEliminarIds?: number[];
   imagenPrincipalId?: number | null;
