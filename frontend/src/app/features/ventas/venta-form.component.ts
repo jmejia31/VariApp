@@ -16,7 +16,7 @@ import { VentaService } from '../../services/venta.service';
 import { ProductoService } from '../../services/producto.service';
 import { ClienteService } from '../../services/cliente.service';
 import { CostoEnvioService } from '../../services/costo-envio.service';
-import { Producto } from '../../core/models/producto.model';
+import { Producto, ProductoVariante } from '../../core/models/producto.model';
 import { Cliente } from '../../core/models/cliente.model';
 import { CostoEnvio } from '../../core/models/costo-envio.model';
 import { ResultadoCalculo } from '../../core/models/venta.model';
@@ -54,18 +54,10 @@ export class VentaFormComponent implements OnInit {
 
   form = this.fb.group({
     clienteNombre: ['Cliente final', Validators.required],
-    clienteTelefono: [''],
-    clienteIdentidadORTN: [''],
-    clienteCorreo: [''],
-    clienteDireccion: [''],
-    metodoPago: ['Efectivo', Validators.required],
-    estadoPago: ['Pendiente', Validators.required],
-    codigoPromocional: [''],
-    costoEnvioId: [null as number | null],
-    envioExonerado: [false],
-    motivoExoneracionEnvio: [''],
-    notas: [''],
-    detalles: this.fb.array([])
+    clienteTelefono: [''], clienteIdentidadORTN: [''], clienteCorreo: [''], clienteDireccion: [''],
+    metodoPago: ['Efectivo', Validators.required], estadoPago: ['Pendiente', Validators.required],
+    codigoPromocional: [''], costoEnvioId: [null as number | null], envioExonerado: [false],
+    motivoExoneracionEnvio: [''], notas: [''], detalles: this.fb.array([])
   });
 
   constructor(
@@ -77,9 +69,7 @@ export class VentaFormComponent implements OnInit {
     private router: Router
   ) {}
 
-  get detalles(): FormArray {
-    return this.form.get('detalles') as FormArray;
-  }
+  get detalles(): FormArray { return this.form.get('detalles') as FormArray; }
 
   ngOnInit(): void {
     this.productoService.getPaged({ page: 1, pageSize: 200, sortBy: 'Nombre' })
@@ -99,83 +89,52 @@ export class VentaFormComponent implements OnInit {
 
     const idParam = this.route.snapshot.paramMap.get('id');
     if (idParam) {
-      this.isEdit.set(true);
-      this.ventaId = Number(idParam);
-      this.cargarVenta(this.ventaId);
-    } else {
-      this.agregarDetalle();
-    }
+      this.isEdit.set(true); this.ventaId = Number(idParam); this.cargarVenta(this.ventaId);
+    } else this.agregarDetalle();
 
     this.buscadorCliente.valueChanges.pipe(
-      debounceTime(350),
-      distinctUntilChanged(),
+      debounceTime(350), distinctUntilChanged(),
       switchMap((termino) => {
         if (this.clienteSeleccionado() && termino !== this.clienteSeleccionado()!.nombre) {
-          this.clienteSeleccionado.set(null);
-          this.clienteId = null;
+          this.clienteSeleccionado.set(null); this.clienteId = null;
         }
-        if (!termino || termino.trim().length < 2) {
-          this.opcionesCliente.set([]);
-          return of(null);
-        }
-        this.buscandoCliente.set(true);
-        this.errorBusquedaCliente.set(null);
-        return this.clienteService.buscar(termino).pipe(
-          catchError(() => {
-            this.errorBusquedaCliente.set('No se pudo buscar clientes. Intenta de nuevo.');
-            return of(null);
-          })
-        );
+        if (!termino || termino.trim().length < 2) { this.opcionesCliente.set([]); return of(null); }
+        this.buscandoCliente.set(true); this.errorBusquedaCliente.set(null);
+        return this.clienteService.buscar(termino).pipe(catchError(() => {
+          this.errorBusquedaCliente.set('No se pudo buscar clientes. Intenta de nuevo.'); return of(null);
+        }));
       })
-    ).subscribe((res) => {
-      this.buscandoCliente.set(false);
-      if (res) this.opcionesCliente.set(res.data);
-    });
+    ).subscribe((res) => { this.buscandoCliente.set(false); if (res) this.opcionesCliente.set(res.data); });
 
     this.form.get('envioExonerado')!.valueChanges.subscribe((exonerado) => {
       const motivo = this.form.get('motivoExoneracionEnvio')!;
-      if (exonerado) {
-        motivo.addValidators([Validators.required, Validators.maxLength(500)]);
-      } else {
-        motivo.clearValidators();
-        motivo.setValue('', { emitEvent: false });
-      }
+      if (exonerado) motivo.addValidators([Validators.required, Validators.maxLength(500)]);
+      else { motivo.clearValidators(); motivo.setValue('', { emitEvent: false }); }
       motivo.updateValueAndValidity({ emitEvent: false });
     });
 
     this.form.valueChanges.pipe(
-      debounceTime(500),
-      distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b))
+      debounceTime(500), distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b))
     ).subscribe(() => this.recalcular());
   }
 
   onClienteSeleccionado(event: MatAutocompleteSelectedEvent): void {
     const cliente: Cliente = event.option.value;
-    this.clienteSeleccionado.set(cliente);
-    this.clienteId = cliente.id;
+    this.clienteSeleccionado.set(cliente); this.clienteId = cliente.id;
     this.buscadorCliente.setValue(cliente.nombre, { emitEvent: false });
     this.form.patchValue({
-      clienteNombre: cliente.nombre,
-      clienteTelefono: cliente.telefono,
-      clienteIdentidadORTN: cliente.identidadORTN,
-      clienteCorreo: cliente.correo,
+      clienteNombre: cliente.nombre, clienteTelefono: cliente.telefono,
+      clienteIdentidadORTN: cliente.identidadORTN, clienteCorreo: cliente.correo,
       clienteDireccion: cliente.direccion
     });
   }
 
   limpiarClienteSeleccionado(): void {
-    this.clienteSeleccionado.set(null);
-    this.clienteId = null;
-    this.buscadorCliente.setValue('');
-    this.form.patchValue({
-      clienteNombre: 'Cliente final', clienteTelefono: '', clienteIdentidadORTN: '',
-      clienteCorreo: '', clienteDireccion: ''
-    });
+    this.clienteSeleccionado.set(null); this.clienteId = null; this.buscadorCliente.setValue('');
+    this.form.patchValue({ clienteNombre: 'Cliente final', clienteTelefono: '', clienteIdentidadORTN: '', clienteCorreo: '', clienteDireccion: '' });
   }
 
-  displayCliente(cliente: Cliente): string {
-    return cliente?.nombre ?? '';
-  }
+  displayCliente(cliente: Cliente): string { return cliente?.nombre ?? ''; }
 
   private cargarVenta(id: number): void {
     this.loading.set(true);
@@ -183,36 +142,22 @@ export class VentaFormComponent implements OnInit {
       next: (res) => {
         const v = res.data;
         this.form.patchValue({
-          clienteNombre: v.clienteNombre,
-          clienteTelefono: v.clienteTelefono,
-          clienteIdentidadORTN: v.clienteIdentidadORTN,
-          clienteCorreo: v.clienteCorreo,
-          clienteDireccion: v.clienteDireccion,
-          metodoPago: v.metodoPago,
-          estadoPago: v.estadoPago,
-          costoEnvioId: v.costoEnvioId ?? null,
-          envioExonerado: v.envioExonerado,
-          motivoExoneracionEnvio: v.motivoExoneracionEnvio ?? '',
-          notas: v.notas
+          clienteNombre: v.clienteNombre, clienteTelefono: v.clienteTelefono,
+          clienteIdentidadORTN: v.clienteIdentidadORTN, clienteCorreo: v.clienteCorreo,
+          clienteDireccion: v.clienteDireccion, metodoPago: v.metodoPago, estadoPago: v.estadoPago,
+          costoEnvioId: v.costoEnvioId ?? null, envioExonerado: v.envioExonerado,
+          motivoExoneracionEnvio: v.motivoExoneracionEnvio ?? '', notas: v.notas
         });
         this.buscadorCliente.setValue(v.clienteNombre, { emitEvent: false });
-        v.detalles.forEach((d) => this.agregarDetalle(d.productoId, d.cantidad, d.precioUnitario));
+        v.detalles.forEach((d) => this.agregarDetalle(d.productoId, d.productoVarianteId ?? null, d.cantidad, d.precioUnitario));
         this.resultado.set({
-          importeBruto: v.importeBruto,
-          importeProductos: v.importeProductos,
-          subtotal: v.subtotal,
-          descuentosAplicados: v.descuentosAplicados,
-          totalDescuento: v.descuento,
-          impuestosAplicados: v.impuestosAplicados,
-          totalImpuesto: v.impuesto,
+          importeBruto: v.importeBruto, importeProductos: v.importeProductos, subtotal: v.subtotal,
+          descuentosAplicados: v.descuentosAplicados, totalDescuento: v.descuento,
+          impuestosAplicados: v.impuestosAplicados, totalImpuesto: v.impuesto,
           impuestoIncluido: v.impuestosAplicados.filter((i) => i.incluidoEnPrecio).reduce((a, i) => a + i.monto, 0),
           impuestoAdicional: v.impuestosAplicados.filter((i) => !i.incluidoEnPrecio).reduce((a, i) => a + i.monto, 0),
-          costoEnvioId: v.costoEnvioId,
-          costoEnvioNombre: v.costoEnvioNombre,
-          costoEnvio: v.costoEnvio,
-          envioExonerado: v.envioExonerado,
-          motivoExoneracionEnvio: v.motivoExoneracionEnvio,
-          total: v.total
+          costoEnvioId: v.costoEnvioId, costoEnvioNombre: v.costoEnvioNombre, costoEnvio: v.costoEnvio,
+          envioExonerado: v.envioExonerado, motivoExoneracionEnvio: v.motivoExoneracionEnvio, total: v.total
         });
         this.loading.set(false);
       },
@@ -220,9 +165,10 @@ export class VentaFormComponent implements OnInit {
     });
   }
 
-  agregarDetalle(productoId: number | null = null, cantidad = 1, precioUnitario = 0): void {
+  agregarDetalle(productoId: number | null = null, productoVarianteId: number | null = null, cantidad = 1, precioUnitario = 0): void {
     this.detalles.push(this.fb.group({
       productoId: [productoId, Validators.required],
+      productoVarianteId: [productoVarianteId],
       cantidad: [cantidad, [Validators.required, Validators.min(1)]],
       precioUnitario: [precioUnitario, [Validators.required, Validators.min(0.01)]]
     }));
@@ -230,7 +176,23 @@ export class VentaFormComponent implements OnInit {
 
   onProductoSeleccionado(index: number, productoId: number): void {
     const producto = this.productos().find((p) => p.id === productoId);
-    if (producto) this.detalles.at(index).patchValue({ precioUnitario: producto.precio });
+    if (!producto) return;
+    const activas = (producto.variantes ?? []).filter((v) => v.activo);
+    if (activas.length === 1) {
+      this.detalles.at(index).patchValue({ productoVarianteId: activas[0].id, precioUnitario: activas[0].precio });
+    } else {
+      this.detalles.at(index).patchValue({ productoVarianteId: null, precioUnitario: producto.precio });
+    }
+  }
+
+  onVarianteSeleccionada(index: number, varianteId: number): void {
+    const grupo = this.detalles.at(index);
+    const variante = this.variantesDisponibles(grupo).find((v) => v.id === varianteId);
+    if (variante) grupo.patchValue({ precioUnitario: variante.precio });
+  }
+
+  variantesDisponibles(group: AbstractControl): ProductoVariante[] {
+    return (this.productoSeleccionado(group)?.variantes ?? []).filter((v) => v.activo);
   }
 
   productoSeleccionado(group: AbstractControl): Producto | undefined {
@@ -238,74 +200,40 @@ export class VentaFormComponent implements OnInit {
     return this.productos().find((producto) => producto.id === productoId);
   }
 
-  quitarDetalle(index: number): void {
-    this.detalles.removeAt(index);
-    this.recalcular();
-  }
-
-  subtotalDetalle(group: AbstractControl): number {
-    const cantidad = group.value.cantidad || 0;
-    const precio = group.value.precioUnitario || 0;
-    return cantidad * precio;
-  }
+  quitarDetalle(index: number): void { this.detalles.removeAt(index); this.recalcular(); }
+  subtotalDetalle(group: AbstractControl): number { return (group.value.cantidad || 0) * (group.value.precioUnitario || 0); }
 
   recalcular(): void {
-    const detallesValidos = this.detalles.controls
-      .map((g) => g.value)
+    const detallesValidos = this.detalles.controls.map((g) => g.value)
       .filter((d) => d.productoId && d.cantidad > 0 && d.precioUnitario >= 0);
-
-    if (detallesValidos.length === 0) {
-      this.resultado.set(null);
-      return;
+    if (detallesValidos.length === 0) { this.resultado.set(null); return; }
+    if (this.detalles.controls.some((g) => this.variantesDisponibles(g).length > 0 && !g.value.productoVarianteId)) {
+      this.resultado.set(null); return;
     }
 
     const exonerado = this.form.value.envioExonerado === true;
     const motivo = this.form.value.motivoExoneracionEnvio || null;
-    if (exonerado && !motivo?.trim()) {
-      this.resultado.set(null);
-      return;
-    }
+    if (exonerado && !motivo?.trim()) { this.resultado.set(null); return; }
 
     this.calculando.set(true);
-    const codigo = this.form.value.codigoPromocional || null;
     this.ventaService.calcular(
-      this.clienteId,
-      codigo,
-      detallesValidos,
-      this.form.value.costoEnvioId,
-      exonerado,
-      motivo
+      this.clienteId, this.form.value.codigoPromocional || null, detallesValidos,
+      this.form.value.costoEnvioId, exonerado, motivo
     ).subscribe({
       next: (res) => { this.resultado.set(res.data); this.calculando.set(false); this.errorMessage.set(null); },
-      error: (err) => {
-        this.calculando.set(false);
-        this.resultado.set(null);
-        this.errorMessage.set(err.error?.message ?? 'No se pudo calcular el total de la venta.');
-      }
+      error: (err) => { this.calculando.set(false); this.resultado.set(null); this.errorMessage.set(err.error?.message ?? 'No se pudo calcular el total de la venta.'); }
     });
   }
 
   submit(): void {
     if (this.form.invalid || this.detalles.length === 0 || !this.resultado()) return;
-
-    this.saving.set(true);
-    this.errorMessage.set(null);
-
+    this.saving.set(true); this.errorMessage.set(null);
     const raw = this.form.getRawValue();
     const value = { ...raw, descuento: 0, impuesto: 0 } as any;
-    const request$ = this.isEdit()
-      ? this.ventaService.update(this.ventaId!, value)
-      : this.ventaService.create(value);
-
+    const request$ = this.isEdit() ? this.ventaService.update(this.ventaId!, value) : this.ventaService.create(value);
     request$.subscribe({
-      next: (res) => {
-        this.saving.set(false);
-        this.router.navigate(['/ventas', res.data.id]);
-      },
-      error: (err) => {
-        this.saving.set(false);
-        this.errorMessage.set(err.error?.message ?? 'No se pudo guardar la venta.');
-      }
+      next: (res) => { this.saving.set(false); this.router.navigate(['/ventas', res.data.id]); },
+      error: (err) => { this.saving.set(false); this.errorMessage.set(err.error?.message ?? 'No se pudo guardar la venta.'); }
     });
   }
 }
