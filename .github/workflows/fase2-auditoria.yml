@@ -47,8 +47,9 @@ jobs:
 
           grep -q 'branch: Desarrollo' render.yaml
           grep -q 'name: variapp-api-desarrollo' render.yaml
+          grep -q 'healthCheckPath: /health/ready' render.yaml
           grep -A1 'AllowedHosts' render.yaml | grep -q 'variapp-api-desarrollo.onrender.com'
-          grep -A1 'Database__ApplyMigrationsOnStartup' render.yaml | grep -q '"false"'
+          grep -A1 'Database__ApplyMigrationsOnStartup' render.yaml | grep -q '"true"'
           grep -A1 'Security__LoginRateLimitPerMinute' render.yaml | grep -q '"20"'
           grep -A1 'Cloudinary__EnvironmentPrefix' render.yaml | grep -q 'varistorehn_desarrollo'
           grep -A1 'AppSettings__LogoPublicUrl' render.yaml | grep -q 'variapp-desarrollo.vercel.app'
