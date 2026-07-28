@@ -36,8 +36,6 @@ Completada y certificada exclusivamente en la rama `Desarrollo`.
 
 `5f57219b597d9ec47cf34bbb53cbbb77882c056f`
 
-Los commits posteriores a este SHA modifican únicamente esta documentación de cierre.
-
 ## Evidencia de CI
 
 - Compilación y pruebas: ejecución `30403337110` — success.
