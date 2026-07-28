@@ -11,11 +11,14 @@ import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/ma
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { VentaService } from '../../services/venta.service';
 import { ProductoService } from '../../services/producto.service';
 import { ClienteService } from '../../services/cliente.service';
+import { CostoEnvioService } from '../../services/costo-envio.service';
 import { Producto } from '../../core/models/producto.model';
 import { Cliente } from '../../core/models/cliente.model';
+import { CostoEnvio } from '../../core/models/costo-envio.model';
 import { ResultadoCalculo } from '../../core/models/venta.model';
 import { ProductoImagenComponent } from '../../shared/producto-imagen/producto-imagen.component';
 
@@ -24,7 +27,8 @@ import { ProductoImagenComponent } from '../../shared/producto-imagen/producto-i
   standalone: true,
   imports: [
     CommonModule, ReactiveFormsModule, RouterLink, MatFormFieldModule, MatInputModule,
-    MatSelectModule, MatAutocompleteModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule, ProductoImagenComponent
+    MatSelectModule, MatAutocompleteModule, MatButtonModule, MatIconModule,
+    MatProgressSpinnerModule, MatCheckboxModule, ProductoImagenComponent
   ],
   templateUrl: './venta-form.component.html',
   styleUrl: './venta-form.component.scss'
@@ -37,10 +41,10 @@ export class VentaFormComponent implements OnInit {
   readonly errorMessage = signal<string | null>(null);
   readonly isEdit = signal(false);
   readonly productos = signal<Producto[]>([]);
+  readonly costosEnvio = signal<CostoEnvio[]>([]);
   readonly resultado = signal<ResultadoCalculo | null>(null);
   private ventaId: number | null = null;
 
-  // --- Autocompletado remoto de clientes (sección 16) ---
   readonly buscadorCliente = new FormControl('');
   readonly opcionesCliente = signal<Cliente[]>([]);
   readonly buscandoCliente = signal(false);
@@ -57,6 +61,9 @@ export class VentaFormComponent implements OnInit {
     metodoPago: ['Efectivo', Validators.required],
     estadoPago: ['Pendiente', Validators.required],
     codigoPromocional: [''],
+    costoEnvioId: [null as number | null],
+    envioExonerado: [false],
+    motivoExoneracionEnvio: [''],
     notas: [''],
     detalles: this.fb.array([])
   });
@@ -65,6 +72,7 @@ export class VentaFormComponent implements OnInit {
     private ventaService: VentaService,
     private productoService: ProductoService,
     private clienteService: ClienteService,
+    private costoEnvioService: CostoEnvioService,
     private route: ActivatedRoute,
     private router: Router
   ) {}
@@ -74,7 +82,20 @@ export class VentaFormComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.productoService.getPaged({ page: 1, pageSize: 200, sortBy: 'Nombre' }).subscribe((res) => this.productos.set(res.data.items));
+    this.productoService.getPaged({ page: 1, pageSize: 200, sortBy: 'Nombre' })
+      .subscribe((res) => this.productos.set(res.data.items));
+
+    this.costoEnvioService.getAll().subscribe({
+      next: (res) => {
+        const activos = res.data.filter((x) => x.activo);
+        this.costosEnvio.set(activos);
+        if (!this.form.value.costoEnvioId) {
+          const predeterminado = activos.find((x) => x.esPredeterminado);
+          if (predeterminado) this.form.patchValue({ costoEnvioId: predeterminado.id });
+        }
+      },
+      error: () => this.errorMessage.set('No se pudieron cargar los costos de envío vigentes.')
+    });
 
     const idParam = this.route.snapshot.paramMap.get('id');
     if (idParam) {
@@ -85,15 +106,10 @@ export class VentaFormComponent implements OnInit {
       this.agregarDetalle();
     }
 
-    // Búsqueda remota de clientes: debounce + cancelación de la solicitud
-    // anterior (switchMap) cada vez que el usuario escribe. No se carga
-    // nunca la lista completa de clientes en memoria.
     this.buscadorCliente.valueChanges.pipe(
       debounceTime(350),
       distinctUntilChanged(),
       switchMap((termino) => {
-        // Si el usuario edita el texto después de haber seleccionado un
-        // cliente, se vuelve a modo "cliente nuevo" (limpieza de selección).
         if (this.clienteSeleccionado() && termino !== this.clienteSeleccionado()!.nombre) {
           this.clienteSeleccionado.set(null);
           this.clienteId = null;
@@ -116,9 +132,17 @@ export class VentaFormComponent implements OnInit {
       if (res) this.opcionesCliente.set(res.data);
     });
 
-    // Recalcula el desglose real (backend) cada vez que cambian los productos,
-    // cantidades, precios o el código promocional — con debounce para no
-    // saturar la API mientras el usuario escribe.
+    this.form.get('envioExonerado')!.valueChanges.subscribe((exonerado) => {
+      const motivo = this.form.get('motivoExoneracionEnvio')!;
+      if (exonerado) {
+        motivo.addValidators([Validators.required, Validators.maxLength(500)]);
+      } else {
+        motivo.clearValidators();
+        motivo.setValue('', { emitEvent: false });
+      }
+      motivo.updateValueAndValidity({ emitEvent: false });
+    });
+
     this.form.valueChanges.pipe(
       debounceTime(500),
       distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b))
@@ -166,16 +190,28 @@ export class VentaFormComponent implements OnInit {
           clienteDireccion: v.clienteDireccion,
           metodoPago: v.metodoPago,
           estadoPago: v.estadoPago,
+          costoEnvioId: v.costoEnvioId ?? null,
+          envioExonerado: v.envioExonerado,
+          motivoExoneracionEnvio: v.motivoExoneracionEnvio ?? '',
           notas: v.notas
         });
         this.buscadorCliente.setValue(v.clienteNombre, { emitEvent: false });
         v.detalles.forEach((d) => this.agregarDetalle(d.productoId, d.cantidad, d.precioUnitario));
         this.resultado.set({
+          importeBruto: v.importeBruto,
+          importeProductos: v.importeProductos,
           subtotal: v.subtotal,
           descuentosAplicados: v.descuentosAplicados,
           totalDescuento: v.descuento,
           impuestosAplicados: v.impuestosAplicados,
           totalImpuesto: v.impuesto,
+          impuestoIncluido: v.impuestosAplicados.filter((i) => i.incluidoEnPrecio).reduce((a, i) => a + i.monto, 0),
+          impuestoAdicional: v.impuestosAplicados.filter((i) => !i.incluidoEnPrecio).reduce((a, i) => a + i.monto, 0),
+          costoEnvioId: v.costoEnvioId,
+          costoEnvioNombre: v.costoEnvioNombre,
+          costoEnvio: v.costoEnvio,
+          envioExonerado: v.envioExonerado,
+          motivoExoneracionEnvio: v.motivoExoneracionEnvio,
           total: v.total
         });
         this.loading.set(false);
@@ -193,11 +229,8 @@ export class VentaFormComponent implements OnInit {
   }
 
   onProductoSeleccionado(index: number, productoId: number): void {
-    // Autocompletar precio sugerido con el precio de venta del producto
     const producto = this.productos().find((p) => p.id === productoId);
-    if (producto) {
-      this.detalles.at(index).patchValue({ precioUnitario: producto.precio });
-    }
+    if (producto) this.detalles.at(index).patchValue({ precioUnitario: producto.precio });
   }
 
   productoSeleccionado(group: AbstractControl): Producto | undefined {
@@ -216,8 +249,6 @@ export class VentaFormComponent implements OnInit {
     return cantidad * precio;
   }
 
-  /** Llama al backend para obtener el desglose REAL (descuentos/impuestos
-   * desde el catálogo). Nunca se calcula en el cliente. */
   recalcular(): void {
     const detallesValidos = this.detalles.controls
       .map((g) => g.value)
@@ -228,30 +259,40 @@ export class VentaFormComponent implements OnInit {
       return;
     }
 
+    const exonerado = this.form.value.envioExonerado === true;
+    const motivo = this.form.value.motivoExoneracionEnvio || null;
+    if (exonerado && !motivo?.trim()) {
+      this.resultado.set(null);
+      return;
+    }
+
     this.calculando.set(true);
     const codigo = this.form.value.codigoPromocional || null;
-    this.ventaService.calcular(this.clienteId, codigo, detallesValidos).subscribe({
-      next: (res) => { this.resultado.set(res.data); this.calculando.set(false); },
-      error: () => { this.calculando.set(false); }
+    this.ventaService.calcular(
+      this.clienteId,
+      codigo,
+      detallesValidos,
+      this.form.value.costoEnvioId,
+      exonerado,
+      motivo
+    ).subscribe({
+      next: (res) => { this.resultado.set(res.data); this.calculando.set(false); this.errorMessage.set(null); },
+      error: (err) => {
+        this.calculando.set(false);
+        this.resultado.set(null);
+        this.errorMessage.set(err.error?.message ?? 'No se pudo calcular el total de la venta.');
+      }
     });
   }
 
   submit(): void {
-    if (this.form.invalid || this.detalles.length === 0) return;
+    if (this.form.invalid || this.detalles.length === 0 || !this.resultado()) return;
 
     this.saving.set(true);
     this.errorMessage.set(null);
 
     const raw = this.form.getRawValue();
-    const value = {
-      ...raw,
-      // Descuento/Impuesto ya no se editan manualmente: el backend siempre
-      // recalcula desde el catálogo real (sección 13). Se envían en 0 solo
-      // por compatibilidad del contrato del DTO.
-      descuento: 0,
-      impuesto: 0
-    } as any;
-
+    const value = { ...raw, descuento: 0, impuesto: 0 } as any;
     const request$ = this.isEdit()
       ? this.ventaService.update(this.ventaId!, value)
       : this.ventaService.create(value);
