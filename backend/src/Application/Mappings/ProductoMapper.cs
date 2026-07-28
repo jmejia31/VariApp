@@ -22,7 +22,7 @@ public static class ProductoMapper
             Marca = p.MarcaCatalogo?.Nombre ?? p.Marca,
             Modelo = p.ModeloCatalogo?.Nombre ?? p.Modelo,
             Descripcion = p.Descripcion,
-            Cantidad = activas.Count > 0 ? activas.Sum(v => v.Cantidad) : p.Cantidad,
+            Cantidad = variantes.Count > 0 ? variantes.Sum(v => v.Cantidad) : p.Cantidad,
             Costo = p.Costo,
             Precio = p.Precio,
             PrecioMinimo = precios.Count > 0 ? precios.Min() : p.Precio,
