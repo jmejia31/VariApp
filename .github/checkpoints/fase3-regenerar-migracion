@@ -1,0 +1,2 @@
+Regenerar la migración financiera de la Fase 3 únicamente en la rama Desarrollo.
+No aplicar ni conectar contra Producción.
