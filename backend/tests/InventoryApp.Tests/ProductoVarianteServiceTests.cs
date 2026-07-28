@@ -75,10 +75,12 @@ public class ProductoVarianteServiceTests
             AccionPermiso.Crear,
             It.IsAny<string>(),
             31,
-            It.IsAny<int?>(),
             "ProductoVariante",
             It.IsAny<object?>(),
-            It.IsAny<object?>()), Times.Once);
+            It.IsAny<object?>(),
+            It.IsAny<string?>(),
+            It.IsAny<string>(),
+            It.IsAny<string?>()), Times.Once);
     }
 
     [Fact]
