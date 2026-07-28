@@ -18,6 +18,12 @@ public class UpdateProductoDto
     public int? MarcaId { get; set; }
     public int? ModeloId { get; set; }
 
+    /// <summary>
+    /// Lista completa de variantes visibles en el formulario. Las variantes
+    /// existentes se actualizan y las nuevas se crean dentro de una transacción.
+    /// </summary>
+    public List<ProductoVarianteFormularioDto> Variantes { get; set; } = new();
+
     /// Nuevas imágenes a agregar (respetando el máximo de 5 en total).
     public List<IFormFile>? ImagenesNuevas { get; set; }
 
