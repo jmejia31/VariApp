@@ -13,7 +13,7 @@ namespace InventoryApp.Infrastructure.Migrations
             migrationBuilder.AddColumn<decimal>(
                 name: "CostoEnvio",
                 table: "Ventas",
-                type: "decimal(65,30)",
+                type: "decimal(18,2)",
                 nullable: false,
                 defaultValue: 0m);
 
@@ -26,13 +26,14 @@ namespace InventoryApp.Infrastructure.Migrations
             migrationBuilder.AddColumn<decimal>(
                 name: "CostoEnvioMontoSnapshot",
                 table: "Ventas",
-                type: "decimal(65,30)",
+                type: "decimal(18,2)",
                 nullable: true);
 
             migrationBuilder.AddColumn<string>(
                 name: "CostoEnvioNombreSnapshot",
                 table: "Ventas",
-                type: "longtext",
+                type: "varchar(150)",
+                maxLength: 150,
                 nullable: true)
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -46,21 +47,22 @@ namespace InventoryApp.Infrastructure.Migrations
             migrationBuilder.AddColumn<decimal>(
                 name: "ImporteBruto",
                 table: "Ventas",
-                type: "decimal(65,30)",
+                type: "decimal(18,2)",
                 nullable: false,
                 defaultValue: 0m);
 
             migrationBuilder.AddColumn<decimal>(
                 name: "ImporteProductos",
                 table: "Ventas",
-                type: "decimal(65,30)",
+                type: "decimal(18,2)",
                 nullable: false,
                 defaultValue: 0m);
 
             migrationBuilder.AddColumn<string>(
                 name: "MotivoExoneracionEnvio",
                 table: "Ventas",
-                type: "longtext",
+                type: "varchar(500)",
+                maxLength: 500,
                 nullable: true)
                 .Annotation("MySql:CharSet", "utf8mb4");
         }

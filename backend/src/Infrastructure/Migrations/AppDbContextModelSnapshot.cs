@@ -2559,16 +2559,17 @@ namespace InventoryApp.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("CostoEnvio")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int?>("CostoEnvioId")
                         .HasColumnType("int");
 
                     b.Property<decimal?>("CostoEnvioMontoSnapshot")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("CostoEnvioNombreSnapshot")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)");
 
                     b.Property<decimal>("CostoTotal")
                         .HasColumnType("decimal(18,2)");
@@ -2622,10 +2623,10 @@ namespace InventoryApp.Infrastructure.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<decimal>("ImporteBruto")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("ImporteProductos")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("Impuesto")
                         .HasColumnType("decimal(18,2)");
@@ -2640,7 +2641,8 @@ namespace InventoryApp.Infrastructure.Migrations
                         .HasColumnType("varchar(500)");
 
                     b.Property<string>("MotivoExoneracionEnvio")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
 
                     b.Property<string>("Notas")
                         .HasMaxLength(1000)
