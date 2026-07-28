@@ -8,6 +8,7 @@ public class AppDbContext : DbContext
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
     public DbSet<Producto> Productos => Set<Producto>();
+    public DbSet<ProductoVariante> ProductoVariantes => Set<ProductoVariante>();
     public DbSet<ProductoImagen> ProductoImagenes => Set<ProductoImagen>();
     public DbSet<Categoria> Categorias => Set<Categoria>();
     public DbSet<CatalogoProducto> CatalogosProducto => Set<CatalogoProducto>();
@@ -47,6 +48,8 @@ public class AppDbContext : DbContext
     public DbSet<HistorialAplicacionImpuesto> HistorialAplicacionImpuestos => Set<HistorialAplicacionImpuesto>();
     public DbSet<VentaImpuesto> VentaImpuestos => Set<VentaImpuesto>();
     public DbSet<CompraImpuesto> CompraImpuestos => Set<CompraImpuesto>();
+
+    public DbSet<CostoEnvio> CostosEnvio => Set<CostoEnvio>();
 
     public DbSet<EnlacePublicoFactura> EnlacesPublicosFactura => Set<EnlacePublicoFactura>();
     public DbSet<HistorialEnvioFactura> HistorialEnviosFactura => Set<HistorialEnvioFactura>();
