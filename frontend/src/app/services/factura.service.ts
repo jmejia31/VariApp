@@ -6,10 +6,12 @@ import { ApiResponse } from '../core/models/api-response.model';
 import {
   EnlaceCompartir,
   EstadoConfiguracionSmtp,
+  EstadoFactura,
   Factura,
   FacturaFormatoCodigo,
   FacturaFormatoPdf,
   HistorialEnvio,
+  RegistrarFacturaPago,
   ResultadoDiagnosticoSmtp,
   ResultadoEnvioCorreo
 } from '../core/models/factura.model';
@@ -32,6 +34,18 @@ export class FacturaService {
     return this.http.get<ApiResponse<Factura>>(`${this.apiUrl}/venta/${ventaId}`);
   }
 
+  registrarPago(id: number, pago: RegistrarFacturaPago): Observable<ApiResponse<Factura>> {
+    return this.http.post<ApiResponse<Factura>>(`${this.apiUrl}/${id}/pagos`, pago);
+  }
+
+  anularPago(id: number, pagoId: number, motivo: string): Observable<ApiResponse<Factura>> {
+    return this.http.post<ApiResponse<Factura>>(`${this.apiUrl}/${id}/pagos/${pagoId}/anular`, { motivo });
+  }
+
+  cambiarEstado(id: number, estado: EstadoFactura, motivo?: string): Observable<ApiResponse<Factura>> {
+    return this.http.post<ApiResponse<Factura>>(`${this.apiUrl}/${id}/estado`, { estado, motivo });
+  }
+
   getFormatosPdf(): Observable<ApiResponse<FacturaFormatoPdf[]>> {
     return this.http.get<ApiResponse<FacturaFormatoPdf[]>>(`${this.apiUrl}/formatos-pdf`);
   }
@@ -44,10 +58,6 @@ export class FacturaService {
     return this.http.post<ApiResponse<ResultadoDiagnosticoSmtp>>(`${this.apiUrl}/correo/probar`, {});
   }
 
-  /**
-   * Genera el PDF oficial con un perfil explícito. A4 permanece como valor
-   * predeterminado para mantener compatibilidad con enlaces y correo.
-   */
   descargarPdf(id: number, formato: FacturaFormatoCodigo = 'a4'): Observable<Blob> {
     const params = new HttpParams().set('formato', formato);
     return this.http.get(`${this.apiUrl}/${id}/pdf`, { params, responseType: 'blob' });
