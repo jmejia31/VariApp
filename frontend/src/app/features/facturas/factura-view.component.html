@@ -55,6 +55,12 @@
   <span class="spacer"></span>
 
   @if (factura(); as f) {
+    <a mat-button [routerLink]="['/facturas', f.id, 'pagos']">
+      <mat-icon>payments</mat-icon> Pagos y saldo
+    </a>
+  }
+
+  @if (factura(); as f) {
     @if (f.estado !== 'Anulada' && puedeCompartir()) {
       <button mat-flat-button color="primary" class="btn-whatsapp" (click)="toggleWhatsApp()" [disabled]="preparandoWhatsApp()">
         @if (preparandoWhatsApp()) {

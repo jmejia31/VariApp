@@ -249,6 +249,12 @@ export const routes: Routes = [
     loadComponent: () => import('./features/ventas/venta-detail.component').then(m => m.VentaDetailComponent)
   },
   {
+    path: 'facturas/:id/pagos',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Facturacion', accion: 'Aplicar' },
+    loadComponent: () => import('./features/facturas/factura-pagos.component').then(m => m.FacturaPagosComponent)
+  },
+  {
     path: 'facturas/:id',
     canActivate: [authGuard, permisoGuard],
     data: { modulo: 'Facturacion', accion: 'Ver' },
