@@ -1,4 +1,5 @@
 using InventoryApp.Application.DTOs;
+using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Application.Services;
 using InventoryApp.Domain.Entities;
@@ -12,6 +13,7 @@ public class CalculoServiceTests
 {
     private readonly Mock<IDescuentoRepository> _descuentoRepository = new();
     private readonly Mock<IImpuestoRepository> _impuestoRepository = new();
+    private readonly Mock<ICostoEnvioRepository> _costoEnvioRepository = new();
     private readonly CalculoService _service;
 
     public CalculoServiceTests()
@@ -24,37 +26,33 @@ public class CalculoServiceTests
             .Setup(r => r.GetVigentesConRelacionesAsync(It.IsAny<DateTime>(), It.IsAny<OperacionImpuesto>()))
             .ReturnsAsync(new List<Impuesto>());
 
-        _service = new CalculoService(_descuentoRepository.Object, _impuestoRepository.Object);
+        _costoEnvioRepository
+            .Setup(r => r.GetPredeterminadoVigenteAsync(It.IsAny<DateTime>()))
+            .ReturnsAsync(new CostoEnvio
+            {
+                Id = 1,
+                Nombre = "Sin costo",
+                Monto = 0m,
+                Activo = true,
+                EsPredeterminado = true
+            });
+
+        _service = new CalculoService(
+            _descuentoRepository.Object,
+            _impuestoRepository.Object,
+            _costoEnvioRepository.Object);
     }
 
     [Fact]
     public async Task CalcularVentaAsync_ImpuestoIncluido_No_Se_Suma_Dos_Veces()
     {
-        _impuestoRepository
-            .Setup(r => r.GetVigentesConRelacionesAsync(It.IsAny<DateTime>(), OperacionImpuesto.Venta))
-            .ReturnsAsync(new List<Impuesto>
-            {
-                new()
-                {
-                    Id = 1,
-                    Nombre = "ISV incluido",
-                    Codigo = "ISV15-I",
-                    Tipo = TipoImpuesto.Porcentaje,
-                    Tasa = 15m,
-                    IncluidoEnPrecio = true,
-                    Acumulativo = true,
-                    Activo = true
-                }
-            });
+        ConfigurarImpuesto(1, "ISV incluido", "ISV15-I", 15m, incluido: true);
 
         var resultado = await _service.CalcularVentaAsync(
             new List<DetalleCalculoInput>
             {
                 new() { ProductoId = 1, Cantidad = 1, PrecioUnitario = 115m }
-            },
-            clienteId: null,
-            rolIdUsuario: null,
-            codigoPromocional: null);
+            }, null, null, null);
 
         Assert.Equal(115m, resultado.ImporteBruto);
         Assert.Equal(100m, resultado.Subtotal);
@@ -66,31 +64,13 @@ public class CalculoServiceTests
     [Fact]
     public async Task CalcularVentaAsync_ImpuestoAdicional_Se_Suma_Al_Total()
     {
-        _impuestoRepository
-            .Setup(r => r.GetVigentesConRelacionesAsync(It.IsAny<DateTime>(), OperacionImpuesto.Venta))
-            .ReturnsAsync(new List<Impuesto>
-            {
-                new()
-                {
-                    Id = 2,
-                    Nombre = "ISV adicional",
-                    Codigo = "ISV15-A",
-                    Tipo = TipoImpuesto.Porcentaje,
-                    Tasa = 15m,
-                    IncluidoEnPrecio = false,
-                    Acumulativo = true,
-                    Activo = true
-                }
-            });
+        ConfigurarImpuesto(2, "ISV adicional", "ISV15-A", 15m, incluido: false);
 
         var resultado = await _service.CalcularVentaAsync(
             new List<DetalleCalculoInput>
             {
                 new() { ProductoId = 1, Cantidad = 1, PrecioUnitario = 100m }
-            },
-            clienteId: null,
-            rolIdUsuario: null,
-            codigoPromocional: null);
+            }, null, null, null);
 
         Assert.Equal(100m, resultado.Subtotal);
         Assert.Equal(0m, resultado.ImpuestoIncluido);
@@ -139,15 +119,95 @@ public class CalculoServiceTests
             new List<DetalleCalculoInput>
             {
                 new() { ProductoId = 1, Cantidad = 1, PrecioUnitario = 100m }
-            },
-            clienteId: null,
-            rolIdUsuario: null,
-            codigoPromocional: null);
+            }, null, null, null);
 
         Assert.Equal(10m, resultado.TotalDescuento);
         Assert.Equal(90m, resultado.Subtotal);
         Assert.Equal(13.50m, resultado.ImpuestoAdicional);
         Assert.Equal(103.50m, resultado.Total);
+    }
+
+    [Fact]
+    public async Task CalcularVentaAsync_Total300_SeparaEnvio80_EImpuestoIncluido15()
+    {
+        _costoEnvioRepository
+            .Setup(r => r.GetPredeterminadoVigenteAsync(It.IsAny<DateTime>()))
+            .ReturnsAsync(new CostoEnvio
+            {
+                Id = 8,
+                Nombre = "Envío estándar",
+                Monto = 80m,
+                Activo = true,
+                EsPredeterminado = true
+            });
+        ConfigurarImpuesto(5, "ISV incluido", "ISV15-I", 15m, incluido: true);
+
+        var resultado = await _service.CalcularVentaAsync(
+            new List<DetalleCalculoInput>
+            {
+                new() { ProductoId = 1, Cantidad = 1, PrecioUnitario = 300m }
+            }, null, null, null);
+
+        Assert.Equal(300m, resultado.ImporteBruto);
+        Assert.Equal(220m, resultado.ImporteProductos);
+        Assert.Equal(191.30m, resultado.Subtotal);
+        Assert.Equal(28.70m, resultado.ImpuestoIncluido);
+        Assert.Equal(80m, resultado.CostoEnvio);
+        Assert.Equal(300m, resultado.Total);
+    }
+
+    [Fact]
+    public async Task CalcularVentaAsync_Descuento20_ReduceTotal300_A280_SinDescontarEnvio()
+    {
+        _costoEnvioRepository
+            .Setup(r => r.GetPredeterminadoVigenteAsync(It.IsAny<DateTime>()))
+            .ReturnsAsync(new CostoEnvio
+            {
+                Id = 8,
+                Nombre = "Envío estándar",
+                Monto = 80m,
+                Activo = true,
+                EsPredeterminado = true
+            });
+        _descuentoRepository
+            .Setup(r => r.GetVigentesConRelacionesAsync(It.IsAny<DateTime>()))
+            .ReturnsAsync(new List<Descuento>
+            {
+                new()
+                {
+                    Id = 9,
+                    Nombre = "Descuento L. 20",
+                    Tipo = TipoDescuento.MontoFijo,
+                    Valor = 20m,
+                    Prioridad = 1,
+                    Acumulable = false,
+                    Activo = true
+                }
+            });
+        ConfigurarImpuesto(5, "ISV incluido", "ISV15-I", 15m, incluido: true);
+
+        var resultado = await _service.CalcularVentaAsync(
+            new List<DetalleCalculoInput>
+            {
+                new() { ProductoId = 1, Cantidad = 1, PrecioUnitario = 300m }
+            }, null, null, null);
+
+        Assert.Equal(20m, resultado.TotalDescuento);
+        Assert.Equal(80m, resultado.CostoEnvio);
+        Assert.Equal(280m, resultado.Total);
+    }
+
+    [Fact]
+    public async Task CalcularVentaAsync_ExoneracionSinMotivo_EsRechazada()
+    {
+        var error = await Assert.ThrowsAsync<BusinessRuleException>(() =>
+            _service.CalcularVentaAsync(
+                new List<DetalleCalculoInput>
+                {
+                    new() { ProductoId = 1, Cantidad = 1, PrecioUnitario = 300m }
+                }, null, null, null, envioExonerado: true));
+
+        Assert.Contains("motivo", error.Message, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -174,12 +234,31 @@ public class CalculoServiceTests
             new List<DetalleCalculoInput>
             {
                 new() { ProductoId = 1, Cantidad = 1, PrecioUnitario = 1000m }
-            },
-            proveedorId: 10);
+            }, proveedorId: 10);
 
         Assert.Equal(1000m, resultado.ImporteBruto);
         Assert.Equal(869.57m, resultado.Subtotal);
         Assert.Equal(130.43m, resultado.ImpuestoIncluido);
         Assert.Equal(1000m, resultado.Total);
+    }
+
+    private void ConfigurarImpuesto(int id, string nombre, string codigo, decimal tasa, bool incluido)
+    {
+        _impuestoRepository
+            .Setup(r => r.GetVigentesConRelacionesAsync(It.IsAny<DateTime>(), OperacionImpuesto.Venta))
+            .ReturnsAsync(new List<Impuesto>
+            {
+                new()
+                {
+                    Id = id,
+                    Nombre = nombre,
+                    Codigo = codigo,
+                    Tipo = TipoImpuesto.Porcentaje,
+                    Tasa = tasa,
+                    IncluidoEnPrecio = incluido,
+                    Acumulativo = true,
+                    Activo = true
+                }
+            });
     }
 }
