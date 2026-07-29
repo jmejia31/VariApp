@@ -13,6 +13,7 @@ on:
       - backend/src/**
       - backend/tests/**
       - scripts/fase7_*
+      - scripts/fase8_*
   pull_request:
     branches:
       - main
@@ -25,6 +26,7 @@ on:
       - backend/src/**
       - backend/tests/**
       - scripts/fase7_*
+      - scripts/fase8_*
   workflow_dispatch:
 
 permissions:
@@ -219,6 +221,7 @@ jobs:
             e2e/fase6-facturacion-impresion.spec.ts \
             e2e/fase6-reportes-administrativos.spec.ts \
             e2e/fase7-validacion-integral.spec.ts \
+            e2e/fase8-validacion-completa.spec.ts \
             e2e/fase7-correo.spec.ts \
             e2e/sesion-inactividad.spec.ts \
             e2e/matriz-modulos-visual.spec.ts \
