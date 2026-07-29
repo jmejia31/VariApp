@@ -29,7 +29,7 @@
             <td>{{ p.totalComprado | currency:'HNL':'symbol':'1.2-2' }}</td>
             <td>
               @if (puedeCambiarEstado(p)) {
-                <mat-slide-toggle [checked]="p.activo" (change)="toggleActivo(p)"></mat-slide-toggle>
+                <mat-slide-toggle [checked]="p.activo" (change)="toggleActivo(p)" [aria-label]="(p.activo ? 'Desactivar ' : 'Activar ') + p.nombre"></mat-slide-toggle>
               } @else {
                 <span class="badge" [class.success]="p.activo" [class.muted]="!p.activo">{{ p.activo ? 'Activo' : 'Inactivo' }}</span>
               }
@@ -55,7 +55,7 @@
           <div class="item-card-header">
             <strong>{{ p.nombre }}</strong>
             @if (puedeCambiarEstado(p)) {
-              <mat-slide-toggle [checked]="p.activo" (change)="toggleActivo(p)"></mat-slide-toggle>
+              <mat-slide-toggle [checked]="p.activo" (change)="toggleActivo(p)" [aria-label]="(p.activo ? 'Desactivar ' : 'Activar ') + p.nombre"></mat-slide-toggle>
             } @else {
               <span class="badge" [class.success]="p.activo" [class.muted]="!p.activo">{{ p.activo ? 'Activo' : 'Inactivo' }}</span>
             }
