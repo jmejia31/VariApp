@@ -195,6 +195,24 @@ Permanece bloqueada hasta cerrar la aceptación externa de correo o registrar un
 
 El informe final contendrá cambios realizados, problemas y soluciones, riesgos y mejoras recomendadas no implementadas sin autorización.
 
+## Ciclo funcional complementario 2026
+
+Este ciclo conserva la numeración funcional solicitada durante la ampliación de VariApp. No sustituye ni reescribe la numeración histórica del plan de cierre anterior.
+
+### FASE 6 administrativa — Permisos, auditoría y reportes — COMPLETA Y CERTIFICADA
+
+Se consolidó el acceso total implícito e inmutable del administrador, el diagnóstico de usuarios y roles, los permisos sensibles, los indicadores administrativos, las alertas, el resumen de auditoría, la bitácora detallada y las exportaciones CSV/XLSX protegidas.
+
+Commit funcional: `4e590f48ce8297318b61717a0da3525224ce3c1e`.
+
+- `Desarrollo - Compilación y pruebas`, run `30445998761`: **success**.
+- `Desarrollo - aceptación funcional integral`, run `30445998912`: **success**.
+- `Fase 2 - Auditoría de configuración y dependencias`, run `30445999042`: **success**.
+
+La aceptación verificó la matriz administrativa, un rol limitado real, respuestas 403, exportaciones sin credenciales, navegación, responsive, consola y contraste. No se requirió migración de base de datos.
+
+Detalle: `docs/FASE6_PERMISOS_AUDITORIA_REPORTES.md`.
+
 ## Regla de publicación
 
 Completar estas fases no autoriza automáticamente el merge ni el despliegue productivo. Antes de cualquier operación sobre Producción se exige respaldo verificable, estrategia de migración única, ventana de mantenimiento, responsables, rollback y autorización expresa de Javier Mejía.
