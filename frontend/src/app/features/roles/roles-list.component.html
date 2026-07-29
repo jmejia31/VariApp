@@ -36,7 +36,7 @@
             </td>
             <td>
               @if (puedeCambiarEstado(r)) {
-                <mat-slide-toggle [checked]="r.activo" (change)="toggleActivo(r)"></mat-slide-toggle>
+                <mat-slide-toggle [checked]="r.activo" (change)="toggleActivo(r)" [aria-label]="(r.activo ? 'Desactivar ' : 'Activar ') + r.nombre"></mat-slide-toggle>
               } @else {
                 <span class="badge" [class.success]="r.activo" [class.muted]="!r.activo">
                   {{ r.activo ? 'Activo' : 'Inactivo' }}
@@ -73,7 +73,7 @@
           <div class="rol-card-header">
             <strong>{{ r.nombre }}</strong>
             @if (puedeCambiarEstado(r)) {
-              <mat-slide-toggle [checked]="r.activo" (change)="toggleActivo(r)"></mat-slide-toggle>
+              <mat-slide-toggle [checked]="r.activo" (change)="toggleActivo(r)" [aria-label]="(r.activo ? 'Desactivar ' : 'Activar ') + r.nombre"></mat-slide-toggle>
             } @else {
               <span class="badge" [class.success]="r.activo" [class.muted]="!r.activo">
                 {{ r.activo ? 'Activo' : 'Inactivo' }}
