@@ -8,52 +8,13 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: desarrollo-ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  patch-phase7-test:
-    name: Ajustar contrato estructurado Fase 7
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref_name == 'Desarrollo'
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: Desarrollo
-          fetch-depth: 0
-      - name: Publicar aserciones estructuradas
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 - <<'PY'
-          from pathlib import Path
-          path = Path('frontend/e2e/fase7-validacion-integral.spec.ts')
-          text = path.read_text(encoding='utf-8')
-          old = """    const mensajes = carga.errores.map((item: any) => `${item.codigo} ${item.mensaje}`).join(' ').toLowerCase();
-    expect(mensajes).toMatch(/no existe|inexistente/);
-    expect(mensajes).toMatch(/negativ|mayor o igual a cero/);"""
-          new = """    const codigos = carga.errores.map((item: any) => String(item.codigo).toUpperCase());
-    expect(codigos).toContain('PRODUCTO_NO_EXISTE');
-    expect(codigos).toContain('ENTERO_INVALIDO');"""
-          if new not in text:
-              if text.count(old) != 1:
-                  raise SystemExit('No se encontró el bloque de aserciones esperado.')
-              path.write_text(text.replace(old, new, 1), encoding='utf-8')
-          PY
-          if git status --porcelain -- frontend/e2e/fase7-validacion-integral.spec.ts | grep -q .; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add frontend/e2e/fase7-validacion-integral.spec.ts
-            git diff --cached --check
-            git commit -m "test: comprobar códigos estructurados de carga masiva"
-            git push origin HEAD:Desarrollo
-          else
-            echo 'La aserción estructurada ya estaba publicada.'
-          fi
-
   hygiene:
     name: Higiene del repositorio
     runs-on: ubuntu-latest
