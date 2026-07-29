@@ -94,7 +94,7 @@
               @if (u.bloqueado) {
                 <span class="badge danger">Bloqueado</span>
               } @else if (puedeCambiarEstado(u)) {
-                <mat-slide-toggle [checked]="u.activo" (change)="toggleEstado(u)"></mat-slide-toggle>
+                <mat-slide-toggle [checked]="u.activo" (change)="toggleEstado(u)" [aria-label]="(u.activo ? 'Desactivar ' : 'Activar ') + u.nombreCompleto"></mat-slide-toggle>
               } @else {
                 <span class="badge" [class.success]="u.activo" [class.muted]="!u.activo">{{ u.activo ? 'Activo' : 'Inactivo' }}</span>
               }
@@ -130,7 +130,7 @@
             @if (u.bloqueado) {
               <span class="badge danger">Bloqueado</span>
             } @else if (puedeCambiarEstado(u)) {
-              <mat-slide-toggle [checked]="u.activo" (change)="toggleEstado(u)"></mat-slide-toggle>
+              <mat-slide-toggle [checked]="u.activo" (change)="toggleEstado(u)" [aria-label]="(u.activo ? 'Desactivar ' : 'Activar ') + u.nombreCompleto"></mat-slide-toggle>
             } @else {
               <span class="badge" [class.success]="u.activo" [class.muted]="!u.activo">{{ u.activo ? 'Activo' : 'Inactivo' }}</span>
             }
