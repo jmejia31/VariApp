@@ -149,7 +149,7 @@
               <td class="status-cell">
                 <div class="status-group">
                   @if (puedeCambiarEstado(p)) {
-                    <mat-slide-toggle class="status-toggle" [checked]="p.activo" (change)="cambiarEstado(p)" [attr.aria-label]="(p.activo ? 'Desactivar ' : 'Activar ') + p.nombre"></mat-slide-toggle>
+                    <mat-slide-toggle class="status-toggle" [checked]="p.activo" (change)="cambiarEstado(p)" [aria-label]="(p.activo ? 'Desactivar ' : 'Activar ') + p.nombre"></mat-slide-toggle>
                   } @else {
                     <span class="badge" [class.success]="p.activo" [class.muted]="!p.activo">{{ p.activo ? 'Activo' : 'Inactivo' }}</span>
                   }
@@ -200,7 +200,7 @@
               <span class="producto-card-sub">{{ p.categoriaNombre || 'Sin categoría' }}</span>
             </div>
             @if (puedeCambiarEstado(p)) {
-              <mat-slide-toggle class="status-toggle" [checked]="p.activo" (change)="cambiarEstado(p)" [attr.aria-label]="(p.activo ? 'Desactivar ' : 'Activar ') + p.nombre"></mat-slide-toggle>
+              <mat-slide-toggle class="status-toggle" [checked]="p.activo" (change)="cambiarEstado(p)" [aria-label]="(p.activo ? 'Desactivar ' : 'Activar ') + p.nombre"></mat-slide-toggle>
             }
           </div>
           <div class="item-card-meta">
