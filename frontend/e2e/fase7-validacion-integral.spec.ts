@@ -535,9 +535,9 @@ test.describe('Fase 7 — pruebas, validación integral y cierre', () => {
     expect(carga.estado).toBe('ConErrores');
     expect(carga.puedeConfirmarse).toBe(false);
     expect(carga.filasConError).toBeGreaterThanOrEqual(2);
-    const mensajes = carga.errores.map((item: any) => `${item.codigo} ${item.mensaje}`).join(' ').toLowerCase();
-    expect(mensajes).toMatch(/no existe|inexistente/);
-    expect(mensajes).toMatch(/negativ|mayor o igual a cero/);
+    const codigos = carga.errores.map((item: any) => String(item.codigo).toUpperCase());
+    expect(codigos).toContain('PRODUCTO_NO_EXISTE');
+    expect(codigos).toContain('ENTERO_INVALIDO');
 
     const reporte = await request.get(`${API_URL}/cargas-masivas/${carga.id}/errores?formato=csv`, {
       headers: headers()
