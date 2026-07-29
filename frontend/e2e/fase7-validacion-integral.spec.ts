@@ -542,9 +542,12 @@ test.describe('Fase 7 — pruebas, validación integral y cierre', () => {
     const reporte = await request.get(`${API_URL}/cargas-masivas/${carga.id}/errores?formato=csv`, {
       headers: headers()
     });
-    expect(reporte.status(), await reporte.text()).toBe(200);
+    expect(reporte.status()).toBe(200);
     expect(reporte.headers()['content-type']).toContain('text/csv');
-    expect((await reporte.body()).toString('utf8')).toContain('F7-NEG');
+    const reporteTexto = (await reporte.body()).toString('utf8');
+    expect(reporteTexto).toContain('PRODUCTO_NO_EXISTE');
+    expect(reporteTexto).toContain('ENTERO_INVALIDO');
+    expect(reporteTexto).toContain('F7-NEG');
 
     const confirmar = await request.post(`${API_URL}/cargas-masivas/${carga.id}/confirmar`, { headers: headers() });
     expect(confirmar.status()).toBe(400);
