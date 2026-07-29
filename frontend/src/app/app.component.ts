@@ -68,6 +68,9 @@ import { SessionActivityService } from './core/auth/session-activity.service';
             @if (permisosRuntime.puede('MovimientosInventario', 'Ver')) {
               <a routerLink="/inventario/movimientos" routerLinkActive="active" ariaCurrentWhenActive="page"><mat-icon>sync_alt</mat-icon> Movimientos</a>
             }
+            @if (permisosRuntime.puede('CargasMasivas', 'Ver')) {
+              <a routerLink="/cargas-masivas" routerLinkActive="active" ariaCurrentWhenActive="page"><mat-icon>upload_file</mat-icon> Cargas masivas</a>
+            }
             @if (permisosRuntime.puede('Usuarios', 'Ver')) {
               <a routerLink="/usuarios" routerLinkActive="active" ariaCurrentWhenActive="page"><mat-icon>manage_accounts</mat-icon> Usuarios</a>
             }
