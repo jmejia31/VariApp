@@ -31,7 +31,7 @@
             <td>{{ c.creadoPorNombreUsuario || '—' }}</td>
             <td>
               @if (puedeCambiarEstado(c)) {
-                <mat-slide-toggle [checked]="c.activa" (change)="toggleActiva(c)"></mat-slide-toggle>
+                <mat-slide-toggle [checked]="c.activa" (change)="toggleActiva(c)" [aria-label]="(c.activa ? 'Desactivar ' : 'Activar ') + c.nombre"></mat-slide-toggle>
               } @else {
                 <span class="badge" [class.success]="c.activa" [class.muted]="!c.activa">{{ c.activa ? 'Activa' : 'Inactiva' }}</span>
               }
@@ -61,7 +61,7 @@
           <div class="item-card-header">
             <strong>{{ c.nombre }}</strong>
             @if (puedeCambiarEstado(c)) {
-              <mat-slide-toggle [checked]="c.activa" (change)="toggleActiva(c)"></mat-slide-toggle>
+              <mat-slide-toggle [checked]="c.activa" (change)="toggleActiva(c)" [aria-label]="(c.activa ? 'Desactivar ' : 'Activar ') + c.nombre"></mat-slide-toggle>
             } @else {
               <span class="badge" [class.success]="c.activa" [class.muted]="!c.activa">{{ c.activa ? 'Activa' : 'Inactiva' }}</span>
             }
