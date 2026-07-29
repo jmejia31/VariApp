@@ -1,6 +1,7 @@
 using System.Data;
 using System.Data.Common;
 using InventoryApp.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 namespace InventoryApp.Infrastructure.Services;
 
