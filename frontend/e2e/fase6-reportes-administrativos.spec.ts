@@ -116,7 +116,9 @@ test.describe('Fase 6 — permisos, auditoría y reportes administrativos', () =
       data: { permisos: attemptedReduction }
     });
     expect(update.status()).toBe(400);
-    expect((await update.text()).toLocaleLowerCase()).toContain('acceso total implícito');
+    const updatePayload = await update.json();
+    const message = String(updatePayload.message ?? updatePayload.Message ?? '').toLocaleLowerCase();
+    expect(message).toContain('acceso total implícito');
   });
 
   test('resumen consolida usuarios, roles, privilegios y auditoría', async ({ request }) => {
