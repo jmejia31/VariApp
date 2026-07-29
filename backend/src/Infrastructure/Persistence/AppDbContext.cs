@@ -56,6 +56,9 @@ public class AppDbContext : DbContext
     public DbSet<HistorialEnvioFactura> HistorialEnviosFactura => Set<HistorialEnvioFactura>();
     public DbSet<TemaVisual> TemasVisuales => Set<TemaVisual>();
 
+    public DbSet<CargaMasiva> CargasMasivas => Set<CargaMasiva>();
+    public DbSet<CargaMasivaError> CargaMasivaErrores => Set<CargaMasivaError>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
