@@ -34,6 +34,8 @@ public class PermisoService : IPermisoService
 
     public async Task<List<PermisoMatrizItemDto>> GetMatrizAsync(int rolId)
     {
+        var rol = await _rolRepository.GetByIdAsync(rolId)
+            ?? throw new BusinessRuleException("El rol seleccionado no existe.");
         var existentes = await _repository.GetByRolIdAsync(rolId);
         var resultado = new List<PermisoMatrizItemDto>();
 
@@ -44,10 +46,13 @@ public class PermisoService : IPermisoService
                 var fila = existentes.FirstOrDefault(p => p.Modulo == modulo && p.Accion == accion);
                 resultado.Add(new PermisoMatrizItemDto
                 {
-                    Rol = rolId.ToString(),
+                    Rol = rol.Nombre,
                     Modulo = modulo.ToString(),
                     Accion = accion.ToString(),
-                    Permitido = fila?.Permitido ?? false
+                    // El administrador obtiene acceso total por diseño. La matriz se
+                    // representa completa aunque una fila nueva todavía no exista en
+                    // instalaciones anteriores, evitando una falsa pérdida de acceso.
+                    Permitido = rol.EsAdministrador || fila?.Permitido == true
                 });
             }
         }
@@ -62,6 +67,8 @@ public class PermisoService : IPermisoService
 
         if (!rol.Activo)
             throw new BusinessRuleException("No se pueden asignar permisos a un rol inactivo.");
+        if (rol.EsAdministrador)
+            throw new BusinessRuleException("El rol Administrador tiene acceso total implícito y su matriz no puede reducirse.");
 
         var matrizAnterior = await GetMatrizAsync(rolId);
         var nuevaMatriz = new List<RolPermiso>();
@@ -86,7 +93,7 @@ public class PermisoService : IPermisoService
 
             nuevaMatriz.Add(new RolPermiso
             {
-                Rol = rol.EsAdministrador ? RolUsuario.Administrador : RolUsuario.Vendedor,
+                Rol = RolUsuario.Vendedor,
                 RolId = rolId,
                 PermisoId = permiso.Id,
                 Modulo = modulo,
