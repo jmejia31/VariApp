@@ -301,7 +301,7 @@ test.describe('Fase 7 — pruebas, validación integral y cierre', () => {
         requiereAprobacion: false,
         acumulable: false,
         prioridad: 1,
-        productoIds: [productoVariantesId],
+        productoIds: [productoSimpleId],
         categoriaIds: [],
         clienteIds: [],
         rolIds: []
@@ -315,7 +315,7 @@ test.describe('Fase 7 — pruebas, validación integral y cierre', () => {
         codigoPromocional: descuentoCodigo,
         costoEnvioId: envioPredeterminado.id,
         envioExonerado: false,
-        detalles: [{ productoId: productoVariantesId, cantidad: 1, precioUnitario: 300 }]
+        detalles: [{ productoId: productoSimpleId, cantidad: 1, precioUnitario: 300 }]
       }
     });
     expect(calcular.status(), await calcular.text()).toBe(200);
@@ -330,7 +330,7 @@ test.describe('Fase 7 — pruebas, validación integral y cierre', () => {
     expect(calculo.subtotal + calculo.impuestoIncluido + calculo.impuestoAdicional + calculo.costoEnvio - calculo.totalDescuento).toBe(280);
 
     const venta = await crearVenta(request,
-      [{ productoId: productoVariantesId, productoVarianteId: varianteNegraId, cantidad: 1, precioUnitario: 300 }],
+      [{ productoId: productoSimpleId, cantidad: 1, precioUnitario: 300 }],
       { codigoPromocional: descuentoCodigo, costoEnvioId: envioPredeterminado.id, envioExonerado: false });
     const confirmada = await confirmarVenta(request, venta.id);
     const factura = await obtenerFactura(request, confirmada.facturaId);
