@@ -217,6 +217,7 @@ jobs:
             e2e/fase5-cargas-masivas.spec.ts \
             e2e/fase5-imagenes.spec.ts \
             e2e/fase6-facturacion-impresion.spec.ts \
+            e2e/fase6-reportes-administrativos.spec.ts \
             e2e/fase7-correo.spec.ts \
             e2e/sesion-inactividad.spec.ts \
             e2e/matriz-modulos-visual.spec.ts \
