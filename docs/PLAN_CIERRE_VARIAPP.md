@@ -187,13 +187,51 @@ Para cerrar la Fase 7 en sentido estricto falta configurar credenciales SMTP rea
 
 Producción no debe usarse ni modificarse para esta validación.
 
-## FASE 8 — Validación completa — BLOQUEADA
+## FASE 8 — Validación completa automatizada — COMPLETA Y CERTIFICADA; EXTERNA PENDIENTE
 
-Permanece bloqueada hasta cerrar la aceptación externa de correo o registrar una excepción formal aprobada. Después se repetirá la auditoría de interfaz, responsive, impresión, imágenes, correo, configuración, rendimiento, consola, logs, advertencias, seguridad y accesibilidad.
+La auditoría transversal automatizada se ejecutó sobre MySQL 8.4 y SMTP temporales y descartables. Incluyó compilación, pruebas unitarias, migraciones, seguridad HTTP, permisos, aislamiento, facturación, variantes, inventario, cargas masivas, PDF, correo aislado, accesibilidad, teclado, responsive extremo, rendimiento controlado, consola y auditoría de logs/secretos.
 
-## FASE 9 — Informe final — BLOQUEADA
+Commit funcional: `688cbd195e720d8f9c1d04d28c287c7c934035f2`.
 
-El informe final contendrá cambios realizados, problemas y soluciones, riesgos y mejoras recomendadas no implementadas sin autorización.
+- `Desarrollo - Compilación y pruebas`, run `30474905738`: **success**.
+- `Desarrollo - aceptación funcional integral`, run `30474905564`: **success**.
+- `Fase 2 - Auditoría de configuración y dependencias`, run `30474905571`: **success**.
+- `Fase 8 - Validación completa automatizada`, run `30474905679`: **success**.
+
+```text
+Playwright integral: 81 aprobadas, 0 fallos
+Suite especializada Fase 8: 7 aprobadas, 0 fallos
+```
+
+Artefacto `8733300881`, digest SHA-256 `b0b5962f4230dc90039c744d767bd6e5ef87f011c3ceb5e54d8e29d537a62aa0`.
+
+Se corrigieron nombres accesibles en controles Angular Material, etiquetas de Configuración y el desbordamiento móvil de Cargas masivas.
+
+Permanecen pendientes las validaciones externas y físicas de correo real, Render, Vercel, Aiven, Cloudinary, WhatsApp, dispositivos e impresoras. Detalle: `docs/FASE8_VALIDACION_COMPLETA_AUTOMATIZADA.md`.
+
+## FASE 9 — Informe final — COMPLETA
+
+Se consolidaron cambios, problemas y soluciones, matriz de cumplimiento, riesgos, responsabilidades del propietario y un plan preparatorio de liberación y rollback.
+
+Entregables:
+
+```text
+docs/FASE9_INFORME_FINAL.md
+docs/FASE9_MATRIZ_CUMPLIMIENTO.md
+docs/FASE9_CHECKLIST_VALIDACIONES_EXTERNAS.md
+docs/FASE9_PLAN_LIBERACION_Y_ROLLBACK.md
+.github/checkpoints/phase-9
+```
+
+Dictamen:
+
+```text
+DESARROLLO Y AUTOMATIZACIÓN: APROBADOS
+VALIDACIONES EXTERNAS: PENDIENTES
+PRODUCCIÓN: NO APTO TODAVÍA / NO AUTORIZADO
+```
+
+La Fase 9 está documentalmente completa. El siguiente paso no es una nueva fase de código: Javier Mejía debe completar el checklist externo o aceptar formalmente excepciones. Solo después podrá reconsiderarse la aptitud para Producción.
 
 ## Ciclo funcional complementario 2026
 
