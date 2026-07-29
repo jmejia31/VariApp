@@ -23,5 +23,6 @@ public enum ModuloSistema
     Colores = 19,
     Tallas = 20,
     Marcas = 21,
-    Modelos = 22
+    Modelos = 22,
+    CargasMasivas = 23
 }
