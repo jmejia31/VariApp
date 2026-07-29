@@ -1,0 +1,214 @@
+name: Fase 7 - integrar validación integral
+
+on:
+  push:
+    branches:
+      - Desarrollo
+    paths:
+      - .github/workflows/fase7-integrar-validacion.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  integrar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Desarrollo
+        uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+
+      - name: Aplicar correcciones comprobadas
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path: str, old: str, new: str) -> None:
+              file = Path(path)
+              text = file.read_text(encoding='utf-8')
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'{path}: se esperaba una coincidencia y se encontraron {count}')
+              file.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+          replace_once(
+              'backend/src/Application/Services/CalculoService.cs',
+              '''            var importeSujeto = impuesto.SeCalculaAntesDescuento
+                ? baseElegibleProductos
+                : Math.Max(0, baseElegibleProductos - descuentoProrrateado);''',
+              '''            // El descuento reduce el total final, pero no reescribe la composición
+            // histórica de un impuesto que ya estaba incluido en el precio comercial.
+            var importeSujeto = impuesto.IncluidoEnPrecio || impuesto.SeCalculaAntesDescuento
+                ? baseElegibleProductos
+                : Math.Max(0, baseElegibleProductos - descuentoProrrateado);''')
+
+          replace_once(
+              'backend/src/Application/Services/CalculoService.cs',
+              '''        var subtotalNeto = Math.Max(0, importeProductos - totalDescuento - impuestoIncluido);
+        var total = Math.Max(0, subtotalNeto + impuestoIncluido + impuestoAdicional + envio.Monto);''',
+              '''        // El subtotal y el impuesto incluido describen el precio comercial antes
+        // del descuento. El descuento se presenta y descuenta como componente separado.
+        var subtotalNeto = Math.Max(0, importeProductos - impuestoIncluido);
+        var total = Math.Max(0,
+            subtotalNeto + impuestoIncluido + impuestoAdicional + envio.Monto - totalDescuento);''')
+
+          replace_once(
+              'backend/tests/InventoryApp.Tests/CalculoServiceTests.cs',
+              '''        Assert.Equal(90m, resultado.Subtotal);
+        Assert.Equal(13.50m, resultado.ImpuestoAdicional);''',
+              '''        Assert.Equal(100m, resultado.Subtotal);
+        Assert.Equal(13.50m, resultado.ImpuestoAdicional);''')
+
+          replace_once(
+              'backend/tests/InventoryApp.Tests/CalculoServiceTests.cs',
+              '''        Assert.Equal(20m, resultado.TotalDescuento);
+        Assert.Equal(80m, resultado.CostoEnvio);
+        Assert.Equal(280m, resultado.Total);''',
+              '''        Assert.Equal(20m, resultado.TotalDescuento);
+        Assert.Equal(191.30m, resultado.Subtotal);
+        Assert.Equal(28.70m, resultado.ImpuestoIncluido);
+        Assert.Equal(80m, resultado.CostoEnvio);
+        Assert.Equal(280m, resultado.Total);''')
+
+          replace_once(
+              'backend/src/Application/Services/VentaService.cs',
+              '''            NumeroVenta = await GenerarNumeroVentaAsync(),''',
+              '''            NumeroVenta = CrearNumeroTemporal("VEN"),''')
+
+          replace_once(
+              'backend/src/Application/Services/VentaService.cs',
+              '''        await _ventaRepository.AddAsync(venta);
+        await _ventaRepository.SaveChangesAsync();
+        await _auditoria.RegistrarAsync(ModuloSistema.Ventas, AccionPermiso.Crear, $"Venta creada: {venta.NumeroVenta}", venta.Id);
+
+        return ToDto(venta);''',
+              '''        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            await _ventaRepository.AddAsync(venta);
+            await _ventaRepository.SaveChangesAsync();
+
+            // El identificador autoincremental es la única fuente de numeración.
+            // El número temporal evita colisiones mientras MySQL asigna el Id.
+            venta.NumeroVenta = $"VEN-{venta.Id:D6}";
+            _ventaRepository.Update(venta);
+            await _ventaRepository.SaveChangesAsync();
+        });
+
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Ventas,
+            AccionPermiso.Crear,
+            $"Venta creada: {venta.NumeroVenta}",
+            venta.Id,
+            entidad: "Venta",
+            valoresNuevos: new
+            {
+                venta.NumeroVenta,
+                venta.ImporteBruto,
+                venta.Subtotal,
+                venta.Impuesto,
+                venta.Descuento,
+                venta.CostoEnvio,
+                venta.EnvioExonerado,
+                venta.MotivoExoneracionEnvio,
+                venta.Total
+            });
+
+        return ToDto(venta);''')
+
+          replace_once(
+              'backend/src/Application/Services/VentaService.cs',
+              '''                NumeroFactura = await GenerarNumeroFacturaAsync(),''',
+              '''                NumeroFactura = CrearNumeroTemporal("FAC"),''')
+
+          replace_once(
+              'backend/src/Application/Services/VentaService.cs',
+              '''            await _facturaRepository.AddAsync(factura);
+
+            // Registrar el uso histórico (incrementa UsosRealizados de cada''',
+              '''            await _facturaRepository.AddAsync(factura);
+            await _facturaRepository.SaveChangesAsync();
+
+            // La numeración definitiva deriva del Id asignado por MySQL y por eso
+            // permanece única incluso cuando varias ventas se confirman a la vez.
+            factura.NumeroFactura = $"FAC-{factura.Id:D6}";
+            _facturaRepository.Update(factura);
+
+            // Registrar el uso histórico (incrementa UsosRealizados de cada''')
+
+          replace_once(
+              'backend/src/Application/Services/VentaService.cs',
+              '''    private async Task<string> GenerarNumeroVentaAsync()
+    {
+        var total = await _ventaRepository.ContarTodasAsync();
+        return $"VEN-{(total + 1):D6}";
+    }
+
+    private async Task<string> GenerarNumeroFacturaAsync()
+    {
+        var total = await _facturaRepository.ContarTodasAsync();
+        return $"FAC-{(total + 1):D6}";
+    }
+''',
+              '''    private static string CrearNumeroTemporal(string prefijo)
+    {
+        var token = Guid.NewGuid().ToString("N")[..12].ToUpperInvariant();
+        return $"{prefijo}-TMP-{token}";
+    }
+''')
+
+          replace_once(
+              'backend/src/Application/Interfaces/IVentaRepository.cs',
+              '''    Task<int> ContarTodasAsync();
+''',
+              '')
+          replace_once(
+              'backend/src/Application/Interfaces/IFacturaRepository.cs',
+              '''    Task<int> ContarTodasAsync();
+''',
+              '')
+          replace_once(
+              'backend/src/Infrastructure/Repositories/VentaRepository.cs',
+              '''    public async Task<int> ContarTodasAsync() =>
+        await _context.Ventas.IgnoreQueryFilters().CountAsync();
+
+''',
+              '')
+          replace_once(
+              'backend/src/Infrastructure/Repositories/FacturaRepository.cs',
+              '''    public async Task<int> ContarTodasAsync() =>
+        await _context.Facturas.CountAsync();
+
+''',
+              '')
+
+          replace_once(
+              '.github/workflows/catalogos-aceptacion.yml',
+              '''            e2e/fase6-reportes-administrativos.spec.ts \\
+            e2e/fase7-correo.spec.ts \\''',
+              '''            e2e/fase6-reportes-administrativos.spec.ts \\
+            e2e/fase7-validacion-integral.spec.ts \\
+            e2e/fase7-correo.spec.ts \\''')
+          PY
+
+      - name: Publicar cambios en Desarrollo
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            backend/src/Application/Services/CalculoService.cs \
+            backend/src/Application/Services/VentaService.cs \
+            backend/src/Application/Interfaces/IVentaRepository.cs \
+            backend/src/Application/Interfaces/IFacturaRepository.cs \
+            backend/src/Infrastructure/Repositories/VentaRepository.cs \
+            backend/src/Infrastructure/Repositories/FacturaRepository.cs \
+            backend/tests/InventoryApp.Tests/CalculoServiceTests.cs \
+            .github/workflows/catalogos-aceptacion.yml
+          git diff --cached --check
+          git commit -m "fix: cerrar cálculos y numeración concurrente de fase 7"
+          git push origin HEAD:Desarrollo
