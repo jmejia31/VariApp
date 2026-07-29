@@ -80,6 +80,15 @@ public static class CatalogoPermisosBase
         (ModuloSistema.Inventario, new[] { AccionPermiso.Ver, AccionPermiso.Exportar }),
         (ModuloSistema.MovimientosInventario, new[] { AccionPermiso.Ver, AccionPermiso.Exportar }),
 
+        (ModuloSistema.CargasMasivas, new[]
+        {
+            AccionPermiso.Ver,
+            AccionPermiso.Crear,
+            AccionPermiso.Confirmar,
+            AccionPermiso.Exportar,
+            AccionPermiso.ConsultarHistorial
+        }),
+
         (ModuloSistema.Usuarios, new[]
         {
             AccionPermiso.Ver, AccionPermiso.Crear, AccionPermiso.Editar,
