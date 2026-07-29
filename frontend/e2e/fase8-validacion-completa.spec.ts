@@ -104,6 +104,21 @@ async function domAudit(page: Page): Promise<{
           if (text) return false;
         }
 
+        // Angular Material genera botones internos para switches, casillas y radios.
+        // El nombre accesible se define en el componente host, no necesariamente
+        // como texto dentro del elemento interno inspeccionado.
+        const materialHost = control.closest<HTMLElement>('mat-slide-toggle, mat-checkbox, mat-radio-button');
+        if (materialHost?.getAttribute('aria-label')?.trim()) return false;
+        const hostLabelledBy = materialHost?.getAttribute('aria-labelledby')?.trim();
+        if (hostLabelledBy) {
+          const hostText = hostLabelledBy
+            .split(/\s+/)
+            .map(id => document.getElementById(id)?.textContent?.trim() ?? '')
+            .join(' ')
+            .trim();
+          if (hostText) return false;
+        }
+
         const id = control.id;
         if (id && document.querySelector(`label[for="${CSS.escape(id)}"]`)?.textContent?.trim()) return false;
         if (control.closest('label')?.textContent?.trim()) return false;
