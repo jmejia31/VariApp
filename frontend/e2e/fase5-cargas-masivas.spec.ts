@@ -91,13 +91,44 @@ test.describe('Fase 5 — cargas masivas controladas', () => {
     token = await loginApi(request);
   });
 
-  test('plantillas, validación de fórmulas e informe de errores son seguros', async ({ request }) => {
+  test('plantillas, XLSX, validación de fórmulas e informe de errores son seguros', async ({ request }) => {
     const plantilla = await request.get(`${API_URL}/cargas-masivas/plantillas/Clientes?formato=xlsx`, {
       headers: headers()
     });
-    expect(plantilla.status(), await plantilla.text()).toBe(200);
+    expect(plantilla.status()).toBe(200);
     expect(plantilla.headers()['content-type']).toContain('spreadsheetml');
-    expect((await plantilla.body()).length).toBeGreaterThan(1000);
+    const plantillaBytes = await plantilla.body();
+    expect(plantillaBytes.length).toBeGreaterThan(1000);
+
+    const validacionXlsx = await request.post(`${API_URL}/cargas-masivas/validar`, {
+      headers: headers(),
+      multipart: {
+        tipo: 'Clientes',
+        archivo: {
+          name: `clientes-plantilla-${suffix}.xlsx`,
+          mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          buffer: plantillaBytes
+        }
+      }
+    });
+    expect(validacionXlsx.status(), await validacionXlsx.text()).toBe(200);
+    const xlsx = await dataOf(validacionXlsx);
+    expect(xlsx.estado).toBe('Validada');
+    expect(xlsx.filasValidas).toBe(1);
+
+    const falsoXlsx = await request.post(`${API_URL}/cargas-masivas/validar`, {
+      headers: headers(),
+      multipart: {
+        tipo: 'Clientes',
+        archivo: {
+          name: `archivo-falso-${suffix}.xlsx`,
+          mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          buffer: Buffer.from('contenido que no es un contenedor xlsx', 'utf8')
+        }
+      }
+    });
+    expect(falsoXlsx.status()).toBe(400);
+    expect(await falsoXlsx.text()).toContain('XLSX');
 
     const contenido = [
       'Nombre,Telefono,IdentidadORTN,Correo,Direccion,Activo',
