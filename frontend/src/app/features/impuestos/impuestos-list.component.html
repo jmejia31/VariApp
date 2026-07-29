@@ -25,7 +25,7 @@
             <td>{{ i.operaciones.join(', ') }}</td>
             <td>
               @if (puedeCambiarEstado(i)) {
-                <mat-slide-toggle [checked]="i.activo" (change)="toggleActivo(i)"></mat-slide-toggle>
+                <mat-slide-toggle [checked]="i.activo" (change)="toggleActivo(i)" [aria-label]="(i.activo ? 'Desactivar ' : 'Activar ') + i.nombre"></mat-slide-toggle>
               } @else {
                 <span class="badge" [class.success]="i.activo" [class.muted]="!i.activo">
                   {{ i.activo ? 'Activo' : 'Inactivo' }}
@@ -50,7 +50,7 @@
           <div class="item-card-header">
             <strong>{{ i.nombre }}</strong>
             @if (puedeCambiarEstado(i)) {
-              <mat-slide-toggle [checked]="i.activo" (change)="toggleActivo(i)"></mat-slide-toggle>
+              <mat-slide-toggle [checked]="i.activo" (change)="toggleActivo(i)" [aria-label]="(i.activo ? 'Desactivar ' : 'Activar ') + i.nombre"></mat-slide-toggle>
             } @else {
               <span class="badge" [class.success]="i.activo" [class.muted]="!i.activo">
                 {{ i.activo ? 'Activo' : 'Inactivo' }}
