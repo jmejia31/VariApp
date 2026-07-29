@@ -108,6 +108,7 @@ builder.Services.AddScoped<IEmpresaConfiguracionService, EmpresaConfiguracionSer
 builder.Services.AddScoped<IFinanzasService, FinanzasService>();
 builder.Services.AddScoped<IMovimientoInventarioService, MovimientoInventarioService>();
 builder.Services.AddScoped<ICargaMasivaService, CargaMasivaService>();
+builder.Services.AddScoped<IReporteAdministrativoService, ReporteAdministrativoService>();
 
 // ===== JWT Authentication =====
 var jwtSecret = builder.Configuration["Jwt:Secret"]
