@@ -28,7 +28,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: desarrollo-aceptacion-${{ github.workflow }}-${{ github.ref }}
@@ -103,40 +103,6 @@ jobs:
     steps:
       - name: Checkout Desarrollo
         uses: actions/checkout@v4
-        with:
-          ref: Desarrollo
-          fetch-depth: 0
-
-      - name: Integrar correcciones comprobadas de Fase 7
-        if: github.event_name == 'push' && github.ref_name == 'Desarrollo'
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 scripts/fase7_apply_integral.py
-          if git status --porcelain -- \
-            backend/src/Application/Services/CalculoService.cs \
-            backend/src/Application/Services/VentaService.cs \
-            backend/src/Application/Interfaces/IVentaRepository.cs \
-            backend/src/Application/Interfaces/IFacturaRepository.cs \
-            backend/src/Infrastructure/Repositories/VentaRepository.cs \
-            backend/src/Infrastructure/Repositories/FacturaRepository.cs \
-            backend/tests/InventoryApp.Tests/CalculoServiceTests.cs | grep -q .; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add \
-              backend/src/Application/Services/CalculoService.cs \
-              backend/src/Application/Services/VentaService.cs \
-              backend/src/Application/Interfaces/IVentaRepository.cs \
-              backend/src/Application/Interfaces/IFacturaRepository.cs \
-              backend/src/Infrastructure/Repositories/VentaRepository.cs \
-              backend/src/Infrastructure/Repositories/FacturaRepository.cs \
-              backend/tests/InventoryApp.Tests/CalculoServiceTests.cs
-            git diff --cached --check
-            git commit -m "fix: cerrar cálculos y numeración concurrente de fase 7"
-            git push origin HEAD:Desarrollo
-          else
-            echo 'Las correcciones de Fase 7 ya estaban integradas.'
-          fi
 
       - name: Configurar .NET
         uses: actions/setup-dotnet@v4
