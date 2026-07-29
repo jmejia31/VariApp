@@ -1,0 +1,2 @@
+Generar mediante EF Core la migración aditiva Fase5CargasMasivas.
+Ejecutar únicamente en Desarrollo. No modificar main ni aplicar en Producción.
