@@ -42,11 +42,13 @@ Crea de forma aditiva:
 
 ## Certificación
 
-Commit certificado: `679df36c5fd22944d41757d2fac05412aca1450b`
+Commit funcional certificado: `679df36c5fd22944d41757d2fac05412aca1450b`
 
 - Desarrollo - Compilación y pruebas: `30422503573` — success.
 - Desarrollo - aceptación funcional integral: `30422503560` — success.
 - Auditoría de configuración y dependencias: `30422503554` — success.
+
+El commit posterior `0440dfac5d888a80778518544d87d7bdacb27d99` agrega únicamente este documento de cierre y no altera código ejecutable.
 
 ## Restricciones preservadas
 
