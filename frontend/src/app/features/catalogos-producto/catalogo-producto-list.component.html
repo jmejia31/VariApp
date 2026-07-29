@@ -124,7 +124,7 @@
                   <mat-slide-toggle
                     [checked]="elemento.activo"
                     (change)="cambiarEstado(elemento)"
-                    [attr.aria-label]="(elemento.activo ? 'Desactivar ' : 'Activar ') + elemento.nombre">
+                    [aria-label]="(elemento.activo ? 'Desactivar ' : 'Activar ') + elemento.nombre">
                   </mat-slide-toggle>
                 } @else {
                   <span class="badge" [class.success]="elemento.activo" [class.muted]="!elemento.activo">
