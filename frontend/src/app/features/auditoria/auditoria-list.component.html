@@ -1,5 +1,8 @@
-<h1 class="page-title">Auditoría</h1>
-<p class="subtitle">Bitácora centralizada de las acciones realizadas en el sistema.</p>
+<app-reportes-administrativos></app-reportes-administrativos>
+
+<section class="bitacora-section" aria-labelledby="bitacora-title">
+<h2 id="bitacora-title" class="page-title">Bitácora detallada</h2>
+<p class="subtitle">Consulta cronológica y filtrable de las acciones realizadas en el sistema.</p>
 
 <div class="card filters" aria-label="Filtros de auditoría">
   <mat-form-field appearance="outline">
@@ -23,6 +26,7 @@
     <mat-select [(ngModel)]="filtroResultado" (selectionChange)="aplicarFiltros()">
       <mat-option value="">Todos</mat-option>
       <mat-option value="Exito">Éxito</mat-option>
+      <mat-option value="Rechazado">Rechazado</mat-option>
       <mat-option value="Error">Error</mat-option>
     </mat-select>
   </mat-form-field>
@@ -56,7 +60,7 @@
         </thead>
         <tbody>
           @for (r of registros(); track r.id) {
-            <tr [class.error-row]="r.resultado === 'Error'">
+            <tr [class.error-row]="r.resultado === 'Error' || r.resultado === 'Rechazado'">
               <td>{{ r.fecha | date:'dd/MM/yyyy HH:mm' }}</td>
               <td>{{ r.nombreUsuario }}</td>
               <td>{{ r.modulo }}</td>
@@ -66,7 +70,7 @@
                 </span>
               </td>
               <td>{{ r.descripcion }}</td>
-              <td><span class="badge" [class.error-badge]="r.resultado === 'Error'">{{ r.resultado }}</span></td>
+              <td><span class="badge" [class.error-badge]="r.resultado === 'Error' || r.resultado === 'Rechazado'">{{ r.resultado }}</span></td>
               <td>
                 <button
                   mat-icon-button
@@ -115,7 +119,7 @@
       @for (r of registros(); track r.id) {
         <div
           class="audit-card"
-          [class.error-row]="r.resultado === 'Error'"
+          [class.error-row]="r.resultado === 'Error' || r.resultado === 'Rechazado'"
           role="button"
           tabindex="0"
           [attr.aria-expanded]="expandidoId() === r.id"
@@ -123,7 +127,7 @@
           (keydown.enter)="toggleDetalle(r.id)"
           (keydown.space)="$event.preventDefault(); toggleDetalle(r.id)">
           <div class="audit-card-header">
-            <span class="badge" [class.error-badge]="r.resultado === 'Error'">{{ r.accion }}</span>
+            <span class="badge" [class.error-badge]="r.resultado === 'Error' || r.resultado === 'Rechazado'">{{ r.accion }}</span>
             <span class="fecha">{{ r.fecha | date:'dd/MM HH:mm' }}</span>
           </div>
           <p class="audit-card-desc">{{ r.descripcion }}</p>
@@ -151,3 +155,4 @@
     <mat-paginator [length]="totalCount()" [pageSize]="pageSize" [pageIndex]="page - 1" [pageSizeOptions]="[25, 50, 100]" (page)="onPageChange($event)"></mat-paginator>
   }
 </div>
+</section>
