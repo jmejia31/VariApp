@@ -32,7 +32,7 @@
             <td>{{ d.usosRealizados }}{{ d.limiteTotalUsos ? ' / ' + d.limiteTotalUsos : '' }}</td>
             <td>
               @if (puedeCambiarEstado(d)) {
-                <mat-slide-toggle [checked]="d.activo" (change)="toggleActivo(d)"></mat-slide-toggle>
+                <mat-slide-toggle [checked]="d.activo" (change)="toggleActivo(d)" [aria-label]="(d.activo ? 'Desactivar ' : 'Activar ') + d.nombre"></mat-slide-toggle>
               } @else {
                 <span class="badge" [class.success]="d.activo" [class.muted]="!d.activo">
                   {{ d.activo ? 'Activo' : 'Inactivo' }}
@@ -63,7 +63,7 @@
           <div class="item-card-header">
             <strong>{{ d.nombre }}</strong>
             @if (puedeCambiarEstado(d)) {
-              <mat-slide-toggle [checked]="d.activo" (change)="toggleActivo(d)"></mat-slide-toggle>
+              <mat-slide-toggle [checked]="d.activo" (change)="toggleActivo(d)" [aria-label]="(d.activo ? 'Desactivar ' : 'Activar ') + d.nombre"></mat-slide-toggle>
             } @else {
               <span class="badge" [class.success]="d.activo" [class.muted]="!d.activo">
                 {{ d.activo ? 'Activo' : 'Inactivo' }}
