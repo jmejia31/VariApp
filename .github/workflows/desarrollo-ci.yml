@@ -73,7 +73,7 @@ jobs:
       - run: npm run build:prod
 
   migrations:
-    name: Migraciones EF y variantes en MySQL 8.4
+    name: Migraciones EF, variantes y cargas masivas en MySQL 8.4
     runs-on: ubuntu-latest
     timeout-minutes: 25
     services:
@@ -144,7 +144,7 @@ jobs:
             --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
             --startup-project src/API/InventoryApp.API.csproj \
             --context AppDbContext
-      - name: Verificar variante legado y snapshot
+      - name: Verificar variante legado, cargas y snapshot
         working-directory: .
         run: |
           set -euo pipefail
@@ -154,25 +154,39 @@ jobs:
             JOIN Productos p ON p.Id=pv.ProductoId
             WHERE p.Nombre='Teléfono legado CI' AND pv.Cantidad=3 AND pv.Costo=100 AND pv.Precio=150;")"
           test "$count" = '1'
+          tables="$(docker exec "$mysql_container" mysql -uroot -proot inventoryapp_ci -Nse "
+            SELECT COUNT(*) FROM information_schema.tables
+            WHERE table_schema='inventoryapp_ci' AND table_name IN ('CargasMasivas','CargaMasivaErrores');")"
+          test "$tables" = '2'
+          unique_index="$(docker exec "$mysql_container" mysql -uroot -proot inventoryapp_ci -Nse "
+            SELECT COUNT(*) FROM information_schema.statistics
+            WHERE table_schema='inventoryapp_ci'
+              AND table_name='CargasMasivas'
+              AND index_name='IX_CargasMasivas_Tipo_HashArchivo'
+              AND non_unique=0;")"
+          test "$unique_index" = '2'
           cd backend
           dotnet ef migrations has-pending-model-changes \
             --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
             --startup-project src/API/InventoryApp.API.csproj \
             --context AppDbContext
-      - name: Generar SQL forward
+      - name: Generar SQL forward de Fase 5
         run: |
-          dotnet ef migrations script 20260728152434_Fase3CostoEnvioEnVentas 20260728165321_Fase4VariantesInventario \
+          dotnet ef migrations script 20260728165321_Fase4VariantesInventario 20260729040900_Fase5CargasMasivas \
             --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
             --startup-project src/API/InventoryApp.API.csproj \
             --context AppDbContext \
-            --output fase4-variantes-forward.sql
-          test -s fase4-variantes-forward.sql
-          ! grep -Ein '(^|[[:space:];])(DROP[[:space:]]+TABLE|TRUNCATE)[[:space:]]|DELETE[[:space:]]+FROM' fase4-variantes-forward.sql
+            --output fase5-cargas-masivas-forward.sql
+          test -s fase5-cargas-masivas-forward.sql
+          ! grep -Ein '(^|[[:space:];])(DROP[[:space:]]+TABLE|TRUNCATE)[[:space:]]|DELETE[[:space:]]+FROM' fase5-cargas-masivas-forward.sql
+          grep -q 'CargasMasivas' fase5-cargas-masivas-forward.sql
+          grep -q 'CargaMasivaErrores' fase5-cargas-masivas-forward.sql
+          grep -q 'IX_CargasMasivas_Tipo_HashArchivo' fase5-cargas-masivas-forward.sql
       - if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: desarrollo-fase4-variantes-migration-sql
-          path: backend/fase4-variantes-forward.sql
+          name: desarrollo-fase5-cargas-masivas-migration-sql
+          path: backend/fase5-cargas-masivas-forward.sql
           if-no-files-found: warn
           retention-days: 14
 
