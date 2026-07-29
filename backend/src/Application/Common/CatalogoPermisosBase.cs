@@ -113,6 +113,7 @@ public static class CatalogoPermisosBase
         }),
 
         (ModuloSistema.Auditoria, new[] { AccionPermiso.Ver, AccionPermiso.Exportar }),
+        (ModuloSistema.ReportesAdministrativos, new[] { AccionPermiso.Ver, AccionPermiso.Exportar }),
         (ModuloSistema.Configuracion, new[] { AccionPermiso.Ver, AccionPermiso.Editar, AccionPermiso.Administrar }),
 
         (ModuloSistema.Descuentos, new[]
