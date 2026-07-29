@@ -48,7 +48,7 @@ Commit funcional certificado: `679df36c5fd22944d41757d2fac05412aca1450b`
 - Desarrollo - aceptación funcional integral: `30422503560` — success.
 - Auditoría de configuración y dependencias: `30422503554` — success.
 
-Los commits posteriores son exclusivamente documentación de cierre y no alteran código ejecutable.
+Los commits posteriores a la certificación funcional agregan únicamente esta documentación de cierre.
 
 ## Restricciones preservadas
 
