@@ -213,6 +213,28 @@ La aceptación verificó la matriz administrativa, un rol limitado real, respues
 
 Detalle: `docs/FASE6_PERMISOS_AUDITORIA_REPORTES.md`.
 
+### FASE 7 complementaria — Validación integral y cierre — COMPLETA Y CERTIFICADA
+
+Se cerraron el desglose fiscal exacto con descuento separado, la numeración de ventas y facturas segura ante concurrencia, la matriz de variantes 4/3/3, el stock consolidado, las ventas, compras y anulaciones por color, el costo de envío, la exoneración auditada, los pagos parciales y totales, el PDF A4, el correo SMTP aislado y los errores estructurados de cargas masivas.
+
+Commit funcional: `183696e3b25904172ca2857e193a9d6fc04961b6`.
+
+- `Desarrollo - Compilación y pruebas`, run `30464538356`: **success**.
+- `Desarrollo - aceptación funcional integral`, run `30464538385`: **success**.
+- `Fase 2 - Auditoría de configuración y dependencias`, run `30464538838`: **success**.
+
+```text
+75 pruebas totales
+75 aprobadas
+0 fallos
+```
+
+Artefacto `8729297367`, digest SHA-256 `67b159329b0f56cf84fbe8e469da59f8ac737e10214c2c06559e79747776e507`.
+
+No se requirió una migración nueva. La validación usó MySQL 8.4 y SMTP temporales y descartables. No se utilizó ni modificó Producción.
+
+Detalle: `docs/FASE7_VALIDACION_INTEGRAL.md`.
+
 ## Regla de publicación
 
 Completar estas fases no autoriza automáticamente el merge ni el despliegue productivo. Antes de cualquier operación sobre Producción se exige respaldo verificable, estrategia de migración única, ventana de mantenimiento, responsables, rollback y autorización expresa de Javier Mejía.
