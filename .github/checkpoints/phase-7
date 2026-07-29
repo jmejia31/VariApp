@@ -25,3 +25,36 @@ Prohibido durante este checkpoint:
 - usar Aiven, Render, Gmail o Cloudinary productivos;
 - fusionar a main;
 - aplicar migraciones productivas.
+
+---
+
+Cierre complementario de validación integral.
+Fecha: 2026-07-29
+Revisión: 8
+
+Commit funcional certificado:
+- 183696e3b25904172ca2857e193a9d6fc04961b6
+
+Evidencia:
+- Compilación y pruebas 30464538356: success.
+- Aceptación funcional integral 30464538385: success.
+- Auditoría de configuración y dependencias 30464538838: success.
+- Playwright: 75 aprobadas, 0 fallos.
+- Artefacto 8729297367.
+- Digest SHA-256: 67b159329b0f56cf84fbe8e469da59f8ac737e10214c2c06559e79747776e507.
+
+Incluye:
+- desglose fiscal exacto con impuesto incluido y descuento separado;
+- numeración de ventas y facturas segura ante concurrencia;
+- producto con variantes 4/3/3 y stock consolidado;
+- ventas, compras, anulaciones y sobreventa por variante;
+- costo de envío predeterminado, edición, exoneración y auditoría;
+- pagos parciales y totales;
+- PDF A4 y correo SMTP aislado;
+- cargas masivas inválidas, informe CSV y códigos estructurados;
+- regresión integral de permisos, aislamiento, interfaz, responsive, imágenes, impresión, sesión y contraste.
+
+Estado:
+- FASE 7 COMPLEMENTARIA COMPLETADA Y CERTIFICADA.
+- PR #2 debe permanecer abierto y en borrador.
+- main y Producción permanecen congeladas.
