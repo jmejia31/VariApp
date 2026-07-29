@@ -1,0 +1,61 @@
+name: Fase 5 - generar migración de cargas masivas
+
+on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - .github/checkpoints/fase5-generar-migracion
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fase5-generar-migracion
+  cancel-in-progress: true
+
+jobs:
+  generar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Generar migración EF Core
+        working-directory: backend
+        run: |
+          dotnet restore InventoryApp.sln
+          dotnet tool install --global dotnet-ef --version 8.0.8
+          export PATH="$PATH:$HOME/.dotnet/tools"
+          dotnet ef migrations add Fase5CargasMasivas \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext
+      - name: Validar operación Up
+        shell: bash
+        run: |
+          set -euo pipefail
+          migration="$(ls backend/src/Infrastructure/Migrations/*_Fase5CargasMasivas.cs)"
+          test -n "$migration"
+          awk '/protected override void Up/{inside=1} /protected override void Down/{inside=0} inside' "$migration" > /tmp/fase5-up.txt
+          if grep -E 'migrationBuilder\.(DropTable|DropColumn|DropForeignKey|RenameTable|RenameColumn)' /tmp/fase5-up.txt; then
+            echo 'La migración contiene una operación destructiva o de renombrado no autorizada.' >&2
+            exit 1
+          fi
+          grep -q 'CargasMasivas' /tmp/fase5-up.txt
+          grep -q 'CargaMasivaErrores' /tmp/fase5-up.txt
+          grep -q 'HashArchivo' /tmp/fase5-up.txt
+          grep -q 'DatosNormalizadosJson' /tmp/fase5-up.txt
+      - name: Publicar migración en Desarrollo
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'VariApp Automation'
+          git config user.email 'actions@users.noreply.github.com'
+          git add backend/src/Infrastructure/Migrations
+          git commit -m 'feat: agregar migración aditiva de cargas masivas'
+          git pull --rebase origin Desarrollo
+          git push origin HEAD:Desarrollo
