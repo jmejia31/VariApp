@@ -71,18 +71,27 @@ public sealed class ReporteAdministrativoService : IReporteAdministrativoService
         CancellationToken cancellationToken = default)
     {
         var totalPermisos = CatalogoPermisosBase.Definicion.Sum(x => x.Acciones.Length);
-        var permisosPorRol = await _db.RolPermisos
+
+        // Pomelo/MySQL no traduce de forma estable COUNT(DISTINCT) sobre un tipo
+        // anónimo compuesto. Se consulta únicamente la proyección mínima y la
+        // consolidación se realiza en memoria; el volumen está acotado por la
+        // matriz de roles y no incluye datos operativos ni de auditoría.
+        var permisosActivos = await _db.RolPermisos
             .AsNoTracking()
             .Where(x => x.RolId.HasValue && x.Permitido)
-            .GroupBy(x => x.RolId!.Value)
-            .Select(g => new
-            {
-                RolId = g.Key,
-                Total = g.Select(x => new { x.Modulo, x.Accion }).Distinct().Count(),
-                Sensibles = g.Where(x => AccionesSensibles.Contains(x.Accion))
-                    .Select(x => new { x.Modulo, x.Accion }).Distinct().Count()
-            })
-            .ToDictionaryAsync(x => x.RolId, cancellationToken);
+            .Select(x => new { RolId = x.RolId!.Value, x.Modulo, x.Accion })
+            .ToListAsync(cancellationToken);
+
+        var permisosPorRol = permisosActivos
+            .GroupBy(x => x.RolId)
+            .ToDictionary(
+                g => g.Key,
+                g => new
+                {
+                    Total = g.Select(x => new { x.Modulo, x.Accion }).Distinct().Count(),
+                    Sensibles = g.Where(x => AccionesSensibles.Contains(x.Accion))
+                        .Select(x => new { x.Modulo, x.Accion }).Distinct().Count()
+                });
 
         var usuarios = await _db.Usuarios
             .AsNoTracking()
