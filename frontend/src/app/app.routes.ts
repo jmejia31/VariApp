@@ -33,11 +33,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/productos/producto-form.component').then(m => m.ProductoFormComponent)
   },
   {
-  path: 'productos/:id/variantes',
-  canActivate: [authGuard, permisoGuard],
-  data: { modulo: 'Productos', accion: 'Editar' },
-  loadComponent: () => import('./features/productos/producto-variantes.component').then(m => m.ProductoVariantesComponent)
-},
+    path: 'productos/:id/variantes',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Productos', accion: 'Editar' },
+    loadComponent: () => import('./features/productos/producto-variantes.component').then(m => m.ProductoVariantesComponent)
+  },
   {
     path: 'productos/:id',
     canActivate: [authGuard, permisoGuard],
@@ -205,6 +205,12 @@ export const routes: Routes = [
     canActivate: [authGuard, permisoGuard],
     data: { modulo: 'Facturacion', accion: 'Administrar' },
     loadComponent: () => import('./features/costos-envio/costos-envio.component').then(m => m.CostosEnvioComponent)
+  },
+  {
+    path: 'cargas-masivas',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'CargasMasivas', accion: 'Ver' },
+    loadComponent: () => import('./features/cargas-masivas/cargas-masivas.component').then(m => m.CargasMasivasComponent)
   },
   {
     path: 'auditoria',
