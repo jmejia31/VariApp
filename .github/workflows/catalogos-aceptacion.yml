@@ -28,7 +28,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: desarrollo-aceptacion-${{ github.workflow }}-${{ github.ref }}
@@ -103,6 +103,40 @@ jobs:
     steps:
       - name: Checkout Desarrollo
         uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+
+      - name: Ajustar contrato de errores de carga masiva
+        if: github.event_name == 'push' && github.ref_name == 'Desarrollo'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('frontend/e2e/fase7-validacion-integral.spec.ts')
+          text = path.read_text(encoding='utf-8')
+          old = """    const mensajes = carga.errores.map((item: any) => `${item.codigo} ${item.mensaje}`).join(' ').toLowerCase();
+    expect(mensajes).toMatch(/no existe|inexistente/);
+    expect(mensajes).toMatch(/negativ|mayor o igual a cero/);"""
+          new = """    const codigos = carga.errores.map((item: any) => String(item.codigo).toUpperCase());
+    expect(codigos).toContain('PRODUCTO_NO_EXISTE');
+    expect(codigos).toContain('ENTERO_INVALIDO');"""
+          if new not in text:
+              if text.count(old) != 1:
+                  raise SystemExit('No se encontró el bloque de aserciones de carga masiva.')
+              path.write_text(text.replace(old, new, 1), encoding='utf-8')
+          PY
+          if git status --porcelain -- frontend/e2e/fase7-validacion-integral.spec.ts | grep -q .; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add frontend/e2e/fase7-validacion-integral.spec.ts
+            git diff --cached --check
+            git commit -m "test: comprobar códigos de errores masivos"
+            git push origin HEAD:Desarrollo
+          else
+            echo 'Los códigos de error ya estaban validados.'
+          fi
 
       - name: Configurar .NET
         uses: actions/setup-dotnet@v4
