@@ -190,8 +190,11 @@ public class CalculoService : ICalculoService
     {
         var impuestoIncluido = impuestosAplicados.Where(i => i.IncluidoEnPrecio).Sum(i => i.Monto);
         var impuestoAdicional = impuestosAplicados.Where(i => !i.IncluidoEnPrecio).Sum(i => i.Monto);
-        var subtotalNeto = Math.Max(0, importeProductos - totalDescuento - impuestoIncluido);
-        var total = Math.Max(0, subtotalNeto + impuestoIncluido + impuestoAdicional + envio.Monto);
+        // El subtotal y el impuesto incluido describen el precio comercial antes
+        // del descuento. El descuento se presenta y descuenta como componente separado.
+        var subtotalNeto = Math.Max(0, importeProductos - impuestoIncluido);
+        var total = Math.Max(0,
+            subtotalNeto + impuestoIncluido + impuestoAdicional + envio.Monto - totalDescuento);
 
         return new ResultadoCalculoDto
         {
@@ -303,7 +306,9 @@ public class CalculoService : ICalculoService
                 ? 0
                 : Math.Round(totalDescuento * (baseElegibleProductos / importeProductos), 2, MidpointRounding.AwayFromZero);
 
-            var importeSujeto = impuesto.SeCalculaAntesDescuento
+            // El descuento reduce el total final, pero no reescribe la composición
+            // histórica de un impuesto que ya estaba incluido en el precio comercial.
+            var importeSujeto = impuesto.IncluidoEnPrecio || impuesto.SeCalculaAntesDescuento
                 ? baseElegibleProductos
                 : Math.Max(0, baseElegibleProductos - descuentoProrrateado);
 

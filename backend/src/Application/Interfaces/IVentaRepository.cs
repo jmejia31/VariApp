@@ -12,7 +12,6 @@ public interface IVentaRepository
     Task<decimal> GetCuentasPorCobrarAsync(int? usuarioId = null);
     Task<decimal> GetUtilidadBrutaTotalAsync(int? usuarioId = null);
     Task<List<Venta>> GetUltimasAsync(int cantidad = 5, int? usuarioId = null);
-    Task<int> ContarTodasAsync();
     Task AddAsync(Venta venta);
     void Update(Venta venta);
     Task<bool> SaveChangesAsync();

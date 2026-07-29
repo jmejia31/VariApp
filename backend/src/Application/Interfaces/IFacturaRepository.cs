@@ -15,7 +15,6 @@ public interface IFacturaRepository
     /// </summary>
     Task<Factura?> GetByIdParaEnlacePublicoValidadoAsync(int id);
 
-    Task<int> ContarTodasAsync();
     Task AddAsync(Factura factura);
     void Update(Factura factura);
     Task<bool> SaveChangesAsync();

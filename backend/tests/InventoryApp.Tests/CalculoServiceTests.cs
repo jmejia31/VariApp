@@ -122,7 +122,7 @@ public class CalculoServiceTests
             }, null, null, null);
 
         Assert.Equal(10m, resultado.TotalDescuento);
-        Assert.Equal(90m, resultado.Subtotal);
+        Assert.Equal(100m, resultado.Subtotal);
         Assert.Equal(13.50m, resultado.ImpuestoAdicional);
         Assert.Equal(103.50m, resultado.Total);
     }
@@ -193,6 +193,8 @@ public class CalculoServiceTests
             }, null, null, null);
 
         Assert.Equal(20m, resultado.TotalDescuento);
+        Assert.Equal(191.30m, resultado.Subtotal);
+        Assert.Equal(28.70m, resultado.ImpuestoIncluido);
         Assert.Equal(80m, resultado.CostoEnvio);
         Assert.Equal(280m, resultado.Total);
     }

@@ -72,7 +72,7 @@ public class VentaService : IVentaService
     {
         var venta = new Venta
         {
-            NumeroVenta = await GenerarNumeroVentaAsync(),
+            NumeroVenta = CrearNumeroTemporal("VEN"),
             ClienteNombre = string.IsNullOrWhiteSpace(dto.ClienteNombre) ? "Cliente final" : dto.ClienteNombre,
             ClienteTelefono = dto.ClienteTelefono,
             ClienteIdentidadORTN = dto.ClienteIdentidadORTN,
@@ -91,9 +91,36 @@ public class VentaService : IVentaService
         await ArmarDetallesAsync(venta, dto.Detalles, validarStock: false);
         await CalcularTotalesAsync(venta, dto.CodigoPromocional, dto.CostoEnvioId, dto.EnvioExonerado, dto.MotivoExoneracionEnvio);
 
-        await _ventaRepository.AddAsync(venta);
-        await _ventaRepository.SaveChangesAsync();
-        await _auditoria.RegistrarAsync(ModuloSistema.Ventas, AccionPermiso.Crear, $"Venta creada: {venta.NumeroVenta}", venta.Id);
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            await _ventaRepository.AddAsync(venta);
+            await _ventaRepository.SaveChangesAsync();
+
+            // El identificador autoincremental es la única fuente de numeración.
+            // El número temporal evita colisiones mientras MySQL asigna el Id.
+            venta.NumeroVenta = $"VEN-{venta.Id:D6}";
+            _ventaRepository.Update(venta);
+            await _ventaRepository.SaveChangesAsync();
+        });
+
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Ventas,
+            AccionPermiso.Crear,
+            $"Venta creada: {venta.NumeroVenta}",
+            venta.Id,
+            entidad: "Venta",
+            valoresNuevos: new
+            {
+                venta.NumeroVenta,
+                venta.ImporteBruto,
+                venta.Subtotal,
+                venta.Impuesto,
+                venta.Descuento,
+                venta.CostoEnvio,
+                venta.EnvioExonerado,
+                venta.MotivoExoneracionEnvio,
+                venta.Total
+            });
 
         return ToDto(venta);
     }
@@ -232,7 +259,7 @@ public class VentaService : IVentaService
             var factura = new Factura
             {
                 VentaId = venta.Id,
-                NumeroFactura = await GenerarNumeroFacturaAsync(),
+                NumeroFactura = CrearNumeroTemporal("FAC"),
                 Estado = EstadoFactura.Emitida,
                 EmpresaNombre = empresa.NombreComercial,
                 EmpresaRTN = empresa.RTN,
@@ -276,6 +303,12 @@ public class VentaService : IVentaService
             };
 
             await _facturaRepository.AddAsync(factura);
+            await _facturaRepository.SaveChangesAsync();
+
+            // La numeración definitiva deriva del Id asignado por MySQL y por eso
+            // permanece única incluso cuando varias ventas se confirman a la vez.
+            factura.NumeroFactura = $"FAC-{factura.Id:D6}";
+            _facturaRepository.Update(factura);
 
             // Registrar el uso histórico (incrementa UsosRealizados de cada
             // descuento, guarda HistorialAplicacionImpuesto) SOLO al confirmar,
@@ -603,16 +636,10 @@ public class VentaService : IVentaService
             throw new BusinessRuleException("El total de la venta no puede ser negativo.");
     }
 
-    private async Task<string> GenerarNumeroVentaAsync()
+    private static string CrearNumeroTemporal(string prefijo)
     {
-        var total = await _ventaRepository.ContarTodasAsync();
-        return $"VEN-{(total + 1):D6}";
-    }
-
-    private async Task<string> GenerarNumeroFacturaAsync()
-    {
-        var total = await _facturaRepository.ContarTodasAsync();
-        return $"FAC-{(total + 1):D6}";
+        var token = Guid.NewGuid().ToString("N")[..12].ToUpperInvariant();
+        return $"{prefijo}-TMP-{token}";
     }
 
     private static TEnum ParseEnum<TEnum>(string value, TEnum valorPorDefecto) where TEnum : struct =>

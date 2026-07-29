@@ -144,9 +144,6 @@ public class VentaRepository : IVentaRepository
             .ToListAsync();
     }
 
-    public async Task<int> ContarTodasAsync() =>
-        await _context.Ventas.IgnoreQueryFilters().CountAsync();
-
     public async Task AddAsync(Venta venta) =>
         await _context.Ventas.AddAsync(venta);
 

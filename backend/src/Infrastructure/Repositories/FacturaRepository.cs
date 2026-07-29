@@ -77,9 +77,6 @@ public class FacturaRepository : IFacturaRepository
             ? await ConIncludes().FirstOrDefaultAsync(f => f.Id == id)
             : null;
 
-    public async Task<int> ContarTodasAsync() =>
-        await _context.Facturas.CountAsync();
-
     public async Task AddAsync(Factura factura) =>
         await _context.Facturas.AddAsync(factura);
 
