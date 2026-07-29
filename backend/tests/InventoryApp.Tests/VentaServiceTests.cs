@@ -144,9 +144,10 @@ public class VentaServiceTests
         var venta = VentaDePrueba(cantidadDetalle: 2);
         _ventaRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(venta);
         _productoRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(producto);
-        _facturaRepoMock.Setup(r => r.ContarTodasAsync()).ReturnsAsync(0);
         Factura? facturaCreada = null;
-        _facturaRepoMock.Setup(r => r.AddAsync(It.IsAny<Factura>())).Callback<Factura>(f => facturaCreada = f).Returns(Task.CompletedTask);
+        _facturaRepoMock.Setup(r => r.AddAsync(It.IsAny<Factura>()))
+            .Callback<Factura>(f => { f.Id = 1; facturaCreada = f; })
+            .Returns(Task.CompletedTask);
 
         await _service.ConfirmarAsync(1);
 
