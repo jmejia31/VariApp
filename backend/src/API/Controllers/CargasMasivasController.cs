@@ -1,8 +1,11 @@
 using InventoryApp.API.Filters;
 using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs;
+using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Enums;
+using InventoryApp.Infrastructure.Persistence;
+using InventoryApp.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,10 +17,12 @@ namespace InventoryApp.API.Controllers;
 public class CargasMasivasController : ControllerBase
 {
     private readonly ICargaMasivaService _service;
+    private readonly AppDbContext _db;
 
-    public CargasMasivasController(ICargaMasivaService service)
+    public CargasMasivasController(ICargaMasivaService service, AppDbContext db)
     {
         _service = service;
+        _db = db;
     }
 
     [HttpGet("configuracion")]
@@ -62,12 +67,20 @@ public class CargasMasivasController : ControllerBase
         if (archivo is null || archivo.Length == 0)
             return BadRequest(ApiResponse<object>.Fail("Debes seleccionar un archivo CSV o XLSX."));
 
-        await using var stream = archivo.OpenReadStream();
+        await using var origen = archivo.OpenReadStream();
+        await using var stream = new MemoryStream(capacity: checked((int)Math.Min(archivo.Length, CargaMasivaArchivoLimites.MaximoRequestBytes)));
+        await origen.CopyToAsync(stream, cancellationToken);
+        stream.Position = 0;
+
+        if (Path.GetExtension(archivo.FileName).Equals(".xlsx", StringComparison.OrdinalIgnoreCase))
+            CargaMasivaArchivoSecurity.ValidarXlsx(stream);
+        stream.Position = 0;
+
         var resultado = await _service.ValidarAsync(
             tipo,
             archivo.FileName,
             archivo.ContentType,
-            archivo.Length,
+            stream.Length,
             stream,
             cancellationToken);
 
@@ -82,6 +95,9 @@ public class CargasMasivasController : ControllerBase
     [RequierePermiso(ModuloSistema.CargasMasivas, AccionPermiso.Confirmar)]
     public async Task<IActionResult> Confirmar(int id, CancellationToken cancellationToken)
     {
+        await using var lease = await CargaMasivaConfirmationLock.TryAcquireAsync(_db, id, cancellationToken)
+            ?? throw new BusinessRuleException("Esta carga ya está siendo confirmada por otra solicitud. Espera a que finalice.");
+
         var resultado = await _service.ConfirmarAsync(id, cancellationToken);
         return Ok(ApiResponse<CargaMasivaDetalleDto>.Ok(resultado, "Carga confirmada mediante una transacción completa."));
     }
