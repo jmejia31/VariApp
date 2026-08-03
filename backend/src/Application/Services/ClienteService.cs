@@ -9,12 +9,18 @@ namespace InventoryApp.Application.Services;
 public class ClienteService : IClienteService
 {
     private readonly IClienteRepository _repository;
+    private readonly ITipoClienteRepository _tipoClienteRepository;
     private readonly ICurrentUserService _currentUser;
     private readonly IAuditoriaService _auditoria;
 
-    public ClienteService(IClienteRepository repository, ICurrentUserService currentUser, IAuditoriaService auditoria)
+    public ClienteService(
+        IClienteRepository repository,
+        ITipoClienteRepository tipoClienteRepository,
+        ICurrentUserService currentUser,
+        IAuditoriaService auditoria)
     {
         _repository = repository;
+        _tipoClienteRepository = tipoClienteRepository;
         _currentUser = currentUser;
         _auditoria = auditoria;
     }
@@ -49,6 +55,35 @@ public class ClienteService : IClienteService
         if (await _repository.ExisteNombreAsync(nombre))
             throw new BusinessRuleException($"Ya existe un cliente con el nombre '{nombre}'.");
 
+        int tipoClienteId;
+        if (dto.TipoClienteId.HasValue && dto.TipoClienteId.Value > 0)
+        {
+            var tipo = await _tipoClienteRepository.GetByIdAsync(dto.TipoClienteId.Value);
+            if (tipo is null || !tipo.Activo)
+                throw new BusinessRuleException($"El tipo de cliente con ID {dto.TipoClienteId.Value} no existe o está inactivo.");
+            tipoClienteId = tipo.Id;
+        }
+        else
+        {
+            var tiposActivos = await _tipoClienteRepository.GetActivosAsync();
+            var predeterminados = tiposActivos.Where(t => t.EsPredeterminado).ToList();
+            if (predeterminados.Count == 1)
+            {
+                tipoClienteId = predeterminados[0].Id;
+            }
+            else if (predeterminados.Count > 1)
+            {
+                throw new BusinessRuleException("Inconsistencia en el sistema: existen múltiples tipos de clientes marcados como predeterminados.");
+            }
+            else
+            {
+                var fallback = await _tipoClienteRepository.GetByCodigoAsync("SIN_CLASIFICAR");
+                if (fallback is null)
+                    throw new BusinessRuleException("Inconsistencia en el sistema: no se encontró el tipo de cliente predeterminado ni el de respaldo 'SIN_CLASIFICAR'.");
+                tipoClienteId = fallback.Id;
+            }
+        }
+
         var cliente = new Cliente
         {
             Nombre = nombre,
@@ -57,6 +92,7 @@ public class ClienteService : IClienteService
             Correo = dto.Correo,
             Direccion = dto.Direccion,
             Activo = true,
+            TipoClienteId = tipoClienteId,
             CreadoPorUsuarioId = _currentUser.UsuarioId,
             CreadoPorNombreUsuario = _currentUser.NombreUsuario
         };
@@ -65,7 +101,8 @@ public class ClienteService : IClienteService
         await _repository.SaveChangesAsync();
         await _auditoria.RegistrarAsync(ModuloSistema.Clientes, AccionPermiso.Crear, $"Cliente creado: {cliente.Nombre}", cliente.Id);
 
-        return ToDto(cliente);
+        var updatedCliente = await _repository.GetByIdAsync(cliente.Id);
+        return ToDto(updatedCliente ?? cliente);
     }
 
     public async Task<ClienteDto?> UpdateAsync(int id, UpdateClienteDto dto)
@@ -76,6 +113,14 @@ public class ClienteService : IClienteService
         var nombre = dto.Nombre.Trim();
         if (await _repository.ExisteNombreAsync(nombre, id))
             throw new BusinessRuleException($"Ya existe un cliente con el nombre '{nombre}'.");
+
+        if (dto.TipoClienteId.HasValue && dto.TipoClienteId.Value > 0)
+        {
+            var tipo = await _tipoClienteRepository.GetByIdAsync(dto.TipoClienteId.Value);
+            if (tipo is null || !tipo.Activo)
+                throw new BusinessRuleException($"El tipo de cliente con ID {dto.TipoClienteId.Value} no existe o está inactivo.");
+            cliente.TipoClienteId = tipo.Id;
+        }
 
         cliente.Nombre = nombre;
         cliente.Telefono = dto.Telefono;
@@ -91,7 +136,8 @@ public class ClienteService : IClienteService
         await _repository.SaveChangesAsync();
         await _auditoria.RegistrarAsync(ModuloSistema.Clientes, AccionPermiso.Editar, $"Cliente actualizado: {cliente.Nombre}", cliente.Id);
 
-        return ToDto(cliente);
+        var updatedCliente = await _repository.GetByIdAsync(cliente.Id);
+        return ToDto(updatedCliente ?? cliente);
     }
 
     public async Task<ClienteDto?> CambiarEstadoAsync(int id, bool activo)
@@ -145,6 +191,9 @@ public class ClienteService : IClienteService
         TotalVentas = incluirVentas ? c.Ventas?.Count(v => v.Estado != EstadoDocumento.Anulada) ?? 0 : 0,
         TotalVendido = incluirVentas ? c.Ventas?.Where(v => v.Estado == EstadoDocumento.Confirmada).Sum(v => v.Total) ?? 0 : 0,
         CreadoPorNombreUsuario = c.CreadoPorNombreUsuario,
-        FechaCreacion = c.FechaCreacion
+        FechaCreacion = c.FechaCreacion,
+        TipoClienteId = c.TipoClienteId,
+        TipoClienteNombre = c.TipoCliente?.Nombre ?? "Sin clasificar",
+        TipoClienteColorHex = c.TipoCliente?.ColorHex ?? "#9E9E9E"
     };
 }

@@ -7,12 +7,15 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
 import { ClienteService } from '../../services/cliente.service';
+import { TipoClienteService } from '../../services/tipo-cliente.service';
+import { TipoCliente } from '../../core/models/tipo-cliente.model';
 
 @Component({
   selector: 'app-cliente-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule, MatSelectModule],
   templateUrl: './cliente-form.component.html',
   styleUrl: './cliente-form.component.scss'
 })
@@ -20,6 +23,7 @@ export class ClienteFormComponent implements OnInit {
   readonly isEdit = signal(false);
   readonly saving = signal(false);
   readonly errorMessage = signal<string | null>(null);
+  readonly tiposClientes = signal<TipoCliente[]>([]);
   private clienteId: number | null = null;
 
   form!: FormGroup;
@@ -27,6 +31,7 @@ export class ClienteFormComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private clienteService: ClienteService,
+    private tipoClienteService: TipoClienteService,
     private route: ActivatedRoute,
     private router: Router
   ) {}
@@ -37,7 +42,14 @@ export class ClienteFormComponent implements OnInit {
       telefono: [''],
       identidadORTN: [''],
       correo: [''],
-      direccion: ['']
+      direccion: [''],
+      tipoClienteId: [null]
+    });
+
+    this.tipoClienteService.getActivos().subscribe({
+      next: (res) => {
+        this.tiposClientes.set(res.data);
+      }
     });
 
     const idParam = this.route.snapshot.paramMap.get('id');

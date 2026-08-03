@@ -12,6 +12,7 @@ namespace InventoryApp.Tests;
 public class ClienteServiceTests
 {
     private readonly Mock<IClienteRepository> _repoMock = new();
+    private readonly Mock<ITipoClienteRepository> _tipoClienteRepoMock = new();
     private readonly Mock<ICurrentUserService> _currentUserMock = new();
     private readonly Mock<IAuditoriaService> _auditoriaMock = new();
     private readonly ClienteService _service;
@@ -20,7 +21,15 @@ public class ClienteServiceTests
     {
         _currentUserMock.Setup(c => c.UsuarioId).Returns(1);
         _currentUserMock.Setup(c => c.NombreUsuario).Returns("admin");
-        _service = new ClienteService(_repoMock.Object, _currentUserMock.Object, _auditoriaMock.Object);
+
+        var fallback = new TipoCliente { Id = 1, Codigo = "SIN_CLASIFICAR", Nombre = "Sin clasificar", ColorHex = "#9E9E9E", Activo = true };
+        _tipoClienteRepoMock.Setup(r => r.GetActivosAsync()).ReturnsAsync(new List<TipoCliente> { fallback });
+        _tipoClienteRepoMock.Setup(r => r.GetByCodigoAsync("SIN_CLASIFICAR")).ReturnsAsync(fallback);
+        _tipoClienteRepoMock.Setup(r => r.GetByIdAsync(It.IsAny<int>())).ReturnsAsync(fallback);
+
+        _repoMock.Setup(r => r.GetByIdAsync(It.IsAny<int>())).ReturnsAsync((int id) => new Cliente { Id = id, Nombre = "Test", TipoClienteId = 1, TipoCliente = fallback });
+
+        _service = new ClienteService(_repoMock.Object, _tipoClienteRepoMock.Object, _currentUserMock.Object, _auditoriaMock.Object);
     }
 
     [Fact]

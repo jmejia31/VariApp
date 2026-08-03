@@ -14,7 +14,7 @@ internal static class CargaMasivaArchivoHelper
 
     private static readonly Dictionary<TipoCargaMasiva, string[]> Columnas = new()
     {
-        [TipoCargaMasiva.Clientes] = ["Nombre", "Telefono", "IdentidadORTN", "Correo", "Direccion", "Activo"],
+        [TipoCargaMasiva.Clientes] = ["Nombre", "Telefono", "IdentidadORTN", "Correo", "Direccion", "TipoCliente", "Activo"],
         [TipoCargaMasiva.Proveedores] = ["Nombre", "Telefono", "Documento", "Correo", "Direccion", "Activo"],
         [TipoCargaMasiva.Colores] = ["Nombre", "CodigoVisual", "Descripcion", "Orden", "Activo"],
         [TipoCargaMasiva.Productos] = ["Nombre", "Marca", "Modelo", "Categoria", "Talla", "Descripcion", "Costo", "Precio", "UmbralStockBajo", "Activo"],
@@ -23,7 +23,7 @@ internal static class CargaMasivaArchivoHelper
 
     private static readonly Dictionary<TipoCargaMasiva, string[]> Ejemplos = new()
     {
-        [TipoCargaMasiva.Clientes] = ["Cliente de ejemplo", "9999-9999", "0801-1990-00001", "cliente@ejemplo.test", "Tegucigalpa", "Si"],
+        [TipoCargaMasiva.Clientes] = ["Cliente de ejemplo", "9999-9999", "0801-1990-00001", "cliente@ejemplo.test", "Tegucigalpa", "Sin clasificar", "Si"],
         [TipoCargaMasiva.Proveedores] = ["Proveedor de ejemplo", "2222-2222", "08019000000000", "proveedor@ejemplo.test", "Tegucigalpa", "Si"],
         [TipoCargaMasiva.Colores] = ["Azul", "#2563EB", "Color azul", "10", "Si"],
         [TipoCargaMasiva.Productos] = ["Cobertor premium", "Samsung", "Galaxy S24 Ultra", "Fundas", "", "Cobertor de protección", "100.00", "220.00", "5", "Si"],

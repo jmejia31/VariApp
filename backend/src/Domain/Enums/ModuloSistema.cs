@@ -25,5 +25,7 @@ public enum ModuloSistema
     Marcas = 21,
     Modelos = 22,
     CargasMasivas = 23,
-    ReportesAdministrativos = 24
+    ReportesAdministrativos = 24,
+    TiposClientes = 25,
+    InsumosAdministrativos = 26
 }

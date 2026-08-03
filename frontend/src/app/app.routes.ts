@@ -123,6 +123,24 @@ export const routes: Routes = [
     loadComponent: () => import('./features/clientes/cliente-form.component').then(m => m.ClienteFormComponent)
   },
   {
+    path: 'tipo-clientes',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'TiposClientes', accion: 'Ver' },
+    loadComponent: () => import('./features/tipo-clientes/tipo-clientes-list.component').then(m => m.TipoClientesListComponent)
+  },
+  {
+    path: 'tipo-clientes/nuevo',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'TiposClientes', accion: 'Crear' },
+    loadComponent: () => import('./features/tipo-clientes/tipo-cliente-form.component').then(m => m.TipoClienteFormComponent)
+  },
+  {
+    path: 'tipo-clientes/:id/editar',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'TiposClientes', accion: 'Editar' },
+    loadComponent: () => import('./features/tipo-clientes/tipo-cliente-form.component').then(m => m.TipoClienteFormComponent)
+  },
+  {
     path: 'usuarios',
     canActivate: [authGuard, permisoGuard],
     data: { modulo: 'Usuarios', accion: 'Ver' },

@@ -35,6 +35,17 @@
         <input matInput formControlName="direccion">
       </mat-form-field>
 
+      <mat-form-field appearance="outline">
+        <mat-label>Clasificación de Cliente</mat-label>
+        <mat-select formControlName="tipoClienteId">
+          <mat-option [value]="null">Sin clasificar (Por defecto)</mat-option>
+          <mat-option *ngFor="let tipo of tiposClientes()" [value]="tipo.id">
+            <span class="tipo-color" [style.background-color]="tipo.colorHex"></span>
+            {{ tipo.nombre }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
       <div class="error-message" *ngIf="errorMessage()">
         {{ errorMessage() }}
       </div>

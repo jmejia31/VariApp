@@ -397,6 +397,7 @@ public sealed class CargaMasivaService : ICargaMasivaService
     private async Task ValidarClientesAsync(List<CargaMasivaFilaDto> filas, List<CargaMasivaErrorDto> errores, CancellationToken ct)
     {
         var existentes = await _db.Clientes.AsNoTracking().ToListAsync(ct);
+        var tiposClientes = await _db.TipoClientes.Where(t => t.Activo && !t.Eliminado).AsNoTracking().ToListAsync(ct);
         var clavesArchivo = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var fila in filas)
@@ -406,8 +407,19 @@ public sealed class CargaMasivaService : ICargaMasivaService
             NormalizarTexto(fila, "IdentidadORTN", 50, false, errores);
             NormalizarTexto(fila, "Correo", 150, false, errores);
             NormalizarTexto(fila, "Direccion", 300, false, errores);
+            NormalizarTexto(fila, "TipoCliente", 100, false, errores);
             NormalizarActivo(fila, errores);
             ValidarCorreo(fila, "Correo", errores);
+
+            var tipoNombre = V(fila, "TipoCliente");
+            if (!string.IsNullOrWhiteSpace(tipoNombre))
+            {
+                var tipoObj = tiposClientes.FirstOrDefault(t => t.Nombre.Equals(tipoNombre.Trim(), StringComparison.OrdinalIgnoreCase));
+                if (tipoObj is null)
+                {
+                    AgregarError(errores, fila.NumeroFila, "TipoCliente", "TIPO_CLIENTE_NO_EXISTE", "El tipo de cliente indicado no existe o está inactivo.", tipoNombre);
+                }
+            }
 
             var clave = ClavePersona(fila.Datos, "IdentidadORTN");
             if (!clavesArchivo.Add(clave))
@@ -589,6 +601,13 @@ public sealed class CargaMasivaService : ICargaMasivaService
     private async Task<(int Creados, int Actualizados)> AplicarClientesAsync(List<CargaMasivaFilaDto> filas, CancellationToken ct)
     {
         var existentes = await _db.Clientes.ToListAsync(ct);
+        var tiposClientes = await _db.TipoClientes.Where(t => t.Activo && !t.Eliminado).ToListAsync(ct);
+        var predeterminado = tiposClientes.FirstOrDefault(t => t.EsPredeterminado)
+            ?? tiposClientes.FirstOrDefault(t => t.Codigo == "SIN_CLASIFICAR");
+        if (predeterminado is null)
+            throw new BusinessRuleException("No se encontró el tipo de cliente predeterminado para asociar a los nuevos clientes.");
+        var defaultTipoClienteId = predeterminado.Id;
+
         var creados = 0;
         var actualizados = 0;
         foreach (var fila in filas)
@@ -596,7 +615,7 @@ public sealed class CargaMasivaService : ICargaMasivaService
             var cliente = BuscarPersona(existentes, fila.Datos, x => x.IdentidadORTN, x => x.Correo, x => x.Telefono, x => x.Nombre, "IdentidadORTN");
             if (cliente is null)
             {
-                cliente = new Cliente { CreadoPorUsuarioId = _currentUser.UsuarioId, CreadoPorNombreUsuario = _currentUser.NombreUsuario };
+                cliente = new Cliente { CreadoPorUsuarioId = _currentUser.UsuarioId, CreadoPorNombreUsuario = _currentUser.NombreUsuario, TipoClienteId = defaultTipoClienteId };
                 _db.Clientes.Add(cliente);
                 existentes.Add(cliente);
                 creados++;
@@ -609,6 +628,17 @@ public sealed class CargaMasivaService : ICargaMasivaService
             cliente.Correo = NuloSiVacio(V(fila, "Correo"));
             cliente.Direccion = NuloSiVacio(V(fila, "Direccion"));
             cliente.Activo = Booleano(fila, "Activo");
+
+            var tipoNombre = V(fila, "TipoCliente");
+            if (!string.IsNullOrWhiteSpace(tipoNombre))
+            {
+                var tipoObj = tiposClientes.FirstOrDefault(t => t.Nombre.Equals(tipoNombre.Trim(), StringComparison.OrdinalIgnoreCase));
+                if (tipoObj is not null)
+                {
+                    cliente.TipoClienteId = tipoObj.Id;
+                }
+            }
+
             MarcarActualizacion(cliente);
         }
         return (creados, actualizados);

@@ -26,5 +26,8 @@ public enum AccionPermiso
     ConsultarHistorial = 20,
     Aplicar = 21,
     Duplicar = 22,
-    Compartir = 23
+    Compartir = 23,
+    AjustarStock = 24,
+    RegistrarConsumo = 25,
+    ExonerarEnvio = 26
 }

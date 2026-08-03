@@ -21,7 +21,12 @@
       <tbody>
         @for (c of clientes(); track c.id) {
           <tr>
-            <td>{{ c.nombre }}</td>
+            <td>
+              <div class="title-container">
+                {{ c.nombre }}
+                <span class="badge-tipo" [style.background-color]="c.tipoClienteColorHex">{{ c.tipoClienteNombre }}</span>
+              </div>
+            </td>
             <td>{{ c.telefono || '—' }}</td>
             <td>{{ c.identidadORTN || '—' }}</td>
             <td>{{ c.correo || '—' }}</td>
@@ -53,7 +58,10 @@
       @for (c of clientes(); track c.id) {
         <div class="item-card">
           <div class="item-card-header">
-            <strong>{{ c.nombre }}</strong>
+            <div class="title-container">
+              <strong>{{ c.nombre }}</strong>
+              <span class="badge-tipo" [style.background-color]="c.tipoClienteColorHex">{{ c.tipoClienteNombre }}</span>
+            </div>
             @if (puedeCambiarEstado(c)) {
               <mat-slide-toggle [checked]="c.activo" (change)="toggleActivo(c)" [aria-label]="(c.activo ? 'Desactivar ' : 'Activar ') + c.nombre"></mat-slide-toggle>
             } @else {

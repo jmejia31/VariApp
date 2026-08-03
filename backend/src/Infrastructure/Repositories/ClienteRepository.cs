@@ -15,16 +15,16 @@ public class ClienteRepository : IClienteRepository
     }
 
     public async Task<Cliente?> GetByIdAsync(int id) =>
-        await _context.Clientes.FirstOrDefaultAsync(c => c.Id == id);
+        await _context.Clientes.Include(c => c.TipoCliente).FirstOrDefaultAsync(c => c.Id == id);
 
     public async Task<Cliente?> GetByIdConVentasAsync(int id) =>
-        await _context.Clientes.Include(c => c.Ventas).FirstOrDefaultAsync(c => c.Id == id);
+        await _context.Clientes.Include(c => c.Ventas).Include(c => c.TipoCliente).FirstOrDefaultAsync(c => c.Id == id);
 
     public async Task<List<Cliente>> GetAllAsync() =>
-        await _context.Clientes.Include(c => c.Ventas).OrderBy(c => c.Nombre).ToListAsync();
+        await _context.Clientes.Include(c => c.Ventas).Include(c => c.TipoCliente).OrderBy(c => c.Nombre).ToListAsync();
 
     public async Task<List<Cliente>> GetActivosAsync() =>
-        await _context.Clientes.Where(c => c.Activo).OrderBy(c => c.Nombre).ToListAsync();
+        await _context.Clientes.Include(c => c.TipoCliente).Where(c => c.Activo).OrderBy(c => c.Nombre).ToListAsync();
 
     public async Task<List<Cliente>> BuscarActivosAsync(string termino, int limite = 10)
     {
@@ -32,6 +32,7 @@ public class ClienteRepository : IClienteRepository
         if (string.IsNullOrWhiteSpace(normalizado)) return new List<Cliente>();
 
         return await _context.Clientes
+            .Include(c => c.TipoCliente)
             .Where(c => c.Activo && (
                 c.Nombre.ToLower().Contains(normalizado) ||
                 (c.IdentidadORTN != null && c.IdentidadORTN.ToLower().Contains(normalizado)) ||
@@ -50,6 +51,7 @@ public class ClienteRepository : IClienteRepository
         var nom = NormalizarTexto(nombre);
 
         return await _context.Clientes
+            .Include(c => c.TipoCliente)
             .Where(c => c.Activo)
             .OrderBy(c => c.Nombre)
             .FirstOrDefaultAsync(c =>

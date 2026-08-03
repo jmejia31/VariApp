@@ -21,3 +21,22 @@
 @media (max-width: 420px) {
   .header-row { flex-direction: column; align-items: stretch; }
 }
+
+.badge-tipo {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 500;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.title-container {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
