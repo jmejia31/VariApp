@@ -5,7 +5,7 @@ on:
     branches:
       - Desarrollo
     paths:
-      - .github/patches/chatgpt_patch.py
+      - .github/patches/**
       - .github/workflows/chatgpt-patch.yml
 
 permissions:
@@ -37,8 +37,10 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
 
-      - name: Aplicar parche controlado
-        run: python3 .github/patches/chatgpt_patch.py
+      - name: Aplicar parches controlados
+        run: |
+          python3 .github/patches/chatgpt_patch.py
+          python3 .github/patches/chatgpt_patch_fix.py
 
       - name: Validar formato del diff
         run: git diff --check
