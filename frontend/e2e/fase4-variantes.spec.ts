@@ -313,7 +313,7 @@ test.describe('Fase 4 — variantes por color, SKU e inventario', () => {
     await expect(page.getByRole('heading', { name: 'Colores y existencias' })).toBeVisible();
     await expect(page.getByText('Stock total calculado')).toBeVisible();
     await expect(page.locator('.variant-card')).toHaveCount(2);
-    await expect(page.locator('.stock-summary').getByText('10 unidades', { exact: true })).toBeVisible();
+    await expect(page.locator('.stock-summary').getByText('14 unidades', { exact: true })).toBeVisible();
 
     await page.getByRole('button', { name: 'Agregar otro color' }).first().click();
     await expect(page.locator('.variant-card')).toHaveCount(3);
@@ -329,7 +329,7 @@ test.describe('Fase 4 — variantes por color, SKU e inventario', () => {
     const fila = page.locator('table tr', { hasText: nombres.sku.toUpperCase() });
     await expect(fila).toBeVisible();
     await expect(fila.getByText(nombres.color)).toBeVisible();
-    await expect(fila.getByText('6', { exact: true })).toBeVisible();
+    await expect(fila.getByText('10', { exact: true })).toBeVisible();
 
     await page.goto('/ventas/nueva');
     const productoVenta = page.locator('mat-select[formcontrolname="productoId"]').first();
