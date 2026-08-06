@@ -1,0 +1,605 @@
+name: Temporal ChatGPT Fase 2C.2 Ciclo de Vida
+
+on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - .github/workflows/chatgpt-fase2c2-lifecycle.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Aplicar ciclo de vida de variante técnica
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path: str, old: str, new: str) -> None:
+              file = Path(path)
+              text = file.read_text(encoding='utf-8')
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'{path}: se esperaba 1 coincidencia y se encontraron {count}')
+              file.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+          # Contrato de repositorio para localizar la variante técnica, incluso eliminada.
+          replace_once(
+              'backend/src/Application/Interfaces/IProductoVarianteRepository.cs',
+              '    Task<List<ProductoVariante>> GetByProductoIdAsync(int productoId, bool incluirInactivas = true);\n',
+              '    Task<List<ProductoVariante>> GetByProductoIdAsync(int productoId, bool incluirInactivas = true);\n'
+              '    Task<ProductoVariante?> GetTecnicaByProductoIdAsync(int productoId, bool incluirEliminada = false);\n')
+
+          replace_once(
+              'backend/src/Infrastructure/Repositories/ProductoVarianteRepository.cs',
+              '''    public Task<ProductoVariante?> GetBySkuAsync(string sku) =>
+        Query().FirstOrDefaultAsync(v => !v.Eliminado && v.Sku == sku);
+''',
+              '''    public Task<ProductoVariante?> GetTecnicaByProductoIdAsync(
+        int productoId,
+        bool incluirEliminada = false)
+    {
+        var query = Query()
+            .IgnoreQueryFilters()
+            .Where(v => v.ProductoId == productoId && v.EsTecnica);
+        if (!incluirEliminada)
+            query = query.Where(v => !v.Eliminado);
+
+        return query
+            .OrderByDescending(v => v.Id)
+            .FirstOrDefaultAsync();
+    }
+
+    public Task<ProductoVariante?> GetBySkuAsync(string sku) =>
+        Query().FirstOrDefaultAsync(v => !v.Eliminado && v.Sku == sku);
+''')
+
+          # DTO explícito para distinguir técnicas y comerciales.
+          replace_once(
+              'backend/src/Application/DTOs/ProductoVarianteDto.cs',
+              '    public bool Activo { get; set; }\n',
+              '    public bool Activo { get; set; }\n    public bool EsTecnica { get; set; }\n')
+
+          # Contrato de ciclo de vida.
+          replace_once(
+              'backend/src/Application/Interfaces/IProductoVarianteService.cs',
+              '    Task<bool> DeleteAsync(int productoId, int id);\n',
+              '    Task<bool> DeleteAsync(int productoId, int id);\n'
+              '    Task<ProductoVarianteDto> AsegurarTecnicaAsync(int productoId);\n'
+              '    Task RetirarTecnicaParaConversionAsync(int productoId);\n'
+              '    Task SincronizarTecnicaConProductoAsync(int productoId);\n'
+              '    Task EliminarTecnicaConProductoAsync(int productoId);\n')
+
+          service = Path('backend/src/Application/Services/ProductoVarianteService.cs')
+          text = service.read_text(encoding='utf-8')
+
+          # Crear variante comercial queda bloqueado mientras exista la técnica.
+          old = '''            producto = await _productoRepository.GetByIdForUpdateAsync(productoId)
+                ?? throw new BusinessRuleException(
+                    "El producto no existe o fue eliminado.");
+
+            var color = await ValidarAsync(productoId, null, dto);'''
+          new = '''            producto = await _productoRepository.GetByIdForUpdateAsync(productoId)
+                ?? throw new BusinessRuleException(
+                    "El producto no existe o fue eliminado.");
+
+            var tecnicaExistente = await _repository.GetTecnicaByProductoIdAsync(productoId);
+            if (tecnicaExistente is not null)
+            {
+                throw new BusinessRuleException(
+                    "El producto es simple. Convierte primero su variante técnica desde el mantenimiento del producto.");
+            }
+
+            var color = await ValidarAsync(productoId, null, dto);'''
+          if text.count(old) != 1:
+              raise SystemExit('No se encontró el bloque de creación comercial.')
+          text = text.replace(old, new, 1)
+
+          # Proteger actualización manual de técnica.
+          old = '''            if (variante is null || variante.ProductoId != productoId)
+            {
+                variante = null;
+                return;
+            }
+
+            anteriores = new'''
+          new = '''            if (variante is null || variante.ProductoId != productoId)
+            {
+                variante = null;
+                return;
+            }
+            if (variante.EsTecnica)
+            {
+                throw new BusinessRuleException(
+                    "La variante técnica no puede editarse manualmente. Actualiza el producto simple.");
+            }
+
+            anteriores = new'''
+          if text.count(old) != 1:
+              raise SystemExit('No se encontró el bloque de actualización.')
+          text = text.replace(old, new, 1)
+
+          # Proteger cambio manual de estado de técnica.
+          old = '''            if (variante is null || variante.ProductoId != productoId)
+            {
+                variante = null;
+                return;
+            }
+
+            if (variante.Activo == activo) return;'''
+          new = '''            if (variante is null || variante.ProductoId != productoId)
+            {
+                variante = null;
+                return;
+            }
+            if (variante.EsTecnica)
+            {
+                throw new BusinessRuleException(
+                    "La variante técnica hereda el estado del producto y no puede activarse o desactivarse manualmente.");
+            }
+
+            if (variante.Activo == activo) return;'''
+          if text.count(old) != 1:
+              raise SystemExit('No se encontró el bloque de cambio de estado.')
+          text = text.replace(old, new, 1)
+
+          # Proteger eliminación manual de técnica.
+          old = '''            if (variante is null || variante.ProductoId != productoId)
+            {
+                variante = null;
+                return;
+            }
+
+            if (variante.Cantidad != 0)'''
+          new = '''            if (variante is null || variante.ProductoId != productoId)
+            {
+                variante = null;
+                return;
+            }
+            if (variante.EsTecnica)
+            {
+                throw new BusinessRuleException(
+                    "La variante técnica no puede eliminarse manualmente.");
+            }
+
+            if (variante.Cantidad != 0)'''
+          if text.count(old) != 1:
+              raise SystemExit('No se encontró el bloque de eliminación.')
+          text = text.replace(old, new, 1)
+
+          lifecycle = r'''
+    public async Task<ProductoVarianteDto> AsegurarTecnicaAsync(int productoId)
+    {
+        ProductoVariante? tecnica = null;
+
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            var producto = await _productoRepository.GetByIdForUpdateAsync(productoId)
+                ?? throw new BusinessRuleException("El producto no existe o fue eliminado.");
+            tecnica = await AsegurarTecnicaBajoLockAsync(producto);
+        });
+
+        return ToDto(tecnica!);
+    }
+
+    public async Task RetirarTecnicaParaConversionAsync(int productoId)
+    {
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            var producto = await _productoRepository.GetByIdForUpdateAsync(productoId)
+                ?? throw new BusinessRuleException("El producto no existe o fue eliminado.");
+            var tecnica = await _repository.GetTecnicaByProductoIdAsync(productoId);
+            if (tecnica is null) return;
+
+            tecnica = await _repository.GetByIdForUpdateAsync(tecnica.Id) ?? tecnica;
+            if (tecnica.Cantidad != 0)
+            {
+                throw new BusinessRuleException(
+                    "No puedes convertir el producto a variantes comerciales mientras la variante técnica tenga existencias. Ajusta primero su stock a cero.");
+            }
+
+            MarcarEliminacionTecnica(tecnica);
+            await _repository.SaveChangesAsync();
+            producto.Cantidad = 0;
+            producto.FechaActualizacion = DateTime.UtcNow;
+            await _productoRepository.SaveChangesAsync();
+        });
+    }
+
+    public async Task SincronizarTecnicaConProductoAsync(int productoId)
+    {
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            var producto = await _productoRepository.GetByIdForUpdateAsync(productoId);
+            if (producto is null) return;
+
+            var vigentes = await _repository.GetByProductoIdAsync(productoId, incluirInactivas: true);
+            var comerciales = vigentes.Where(v => !v.EsTecnica).ToList();
+            var tecnica = vigentes.SingleOrDefault(v => v.EsTecnica);
+
+            if (comerciales.Count > 0)
+            {
+                if (tecnica is not null)
+                {
+                    throw new BusinessRuleException(
+                        "El producto no puede conservar simultáneamente una variante técnica y variantes comerciales.");
+                }
+                return;
+            }
+
+            await AsegurarTecnicaBajoLockAsync(producto);
+        });
+    }
+
+    public async Task EliminarTecnicaConProductoAsync(int productoId)
+    {
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            var producto = await _productoRepository.GetByIdForUpdateAsync(productoId);
+            if (producto is null) return;
+
+            var tecnica = await _repository.GetTecnicaByProductoIdAsync(productoId);
+            if (tecnica is null) return;
+
+            tecnica = await _repository.GetByIdForUpdateAsync(tecnica.Id) ?? tecnica;
+            MarcarEliminacionTecnica(tecnica);
+            await _repository.SaveChangesAsync();
+        });
+    }
+
+    private async Task<ProductoVariante> AsegurarTecnicaBajoLockAsync(Producto producto)
+    {
+        var vigentes = await _repository.GetByProductoIdAsync(
+            producto.Id,
+            incluirInactivas: true);
+        if (vigentes.Any(v => !v.EsTecnica))
+        {
+            throw new BusinessRuleException(
+                "No se puede crear una variante técnica porque el producto tiene variantes comerciales.");
+        }
+
+        var tecnica = await _repository.GetTecnicaByProductoIdAsync(
+            producto.Id,
+            incluirEliminada: true);
+        if (tecnica is null)
+        {
+            tecnica = new ProductoVariante
+            {
+                ProductoId = producto.Id,
+                ColorId = null,
+                Sku = CrearSkuTecnico(producto.Id),
+                CodigoBarras = null,
+                EsTecnica = true,
+                CreadoPorUsuarioId = _currentUser.UsuarioId,
+                CreadoPorNombreUsuario = _currentUser.NombreUsuario
+            };
+            await _repository.AddAsync(tecnica);
+        }
+
+        tecnica.EsTecnica = true;
+        tecnica.ColorId = null;
+        tecnica.Cantidad = producto.Cantidad;
+        tecnica.UmbralStockBajo = producto.UmbralStockBajo;
+        tecnica.Costo = producto.Costo;
+        tecnica.Precio = producto.Precio;
+        tecnica.Activo = producto.Activo;
+        tecnica.Eliminado = false;
+        tecnica.FechaEliminacion = null;
+        tecnica.EliminadoPorUsuarioId = null;
+        MarcarActualizacion(tecnica);
+
+        await _repository.SaveChangesAsync();
+        return tecnica;
+    }
+
+    private void MarcarEliminacionTecnica(ProductoVariante tecnica)
+    {
+        tecnica.Activo = false;
+        tecnica.Eliminado = true;
+        tecnica.FechaEliminacion = DateTime.UtcNow;
+        tecnica.EliminadoPorUsuarioId = _currentUser.UsuarioId;
+        MarcarActualizacion(tecnica);
+    }
+
+    private static string CrearSkuTecnico(int productoId) =>
+        $"TEC-{productoId:D10}";
+
+'''
+          marker = '    private async Task<CatalogoProductoDto> ValidarAsync('
+          if text.count(marker) != 1:
+              raise SystemExit('No se encontró el punto de inserción del ciclo de vida.')
+          text = text.replace(marker, lifecycle + marker, 1)
+
+          # Exponer clasificación en DTO.
+          old = '        Activo = v.Activo,\n        TieneStockBajo = v.TieneStockBajo,'
+          new = '        Activo = v.Activo,\n        EsTecnica = v.EsTecnica,\n        TieneStockBajo = v.TieneStockBajo,'
+          if text.count(old) != 1:
+              raise SystemExit('No se encontró el mapeo ToDto.')
+          text = text.replace(old, new, 1)
+          service.write_text(text, encoding='utf-8')
+
+          # Orquestar conversiones y sincronización en el controlador.
+          controller = Path('backend/src/API/Controllers/ProductosController.cs')
+          text = controller.read_text(encoding='utf-8')
+
+          old = '''        var producto = await _productoService.CambiarEstadoAsync(id, true);
+        if (producto is null)
+            return NotFound(ApiResponse<object>.Fail("Producto no encontrado."));
+
+        return Ok(ApiResponse<ProductoDto>.Ok(producto, "Producto activado correctamente."));'''
+          new = '''        ProductoDto? producto = null;
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            producto = await _productoService.CambiarEstadoAsync(id, true);
+            if (producto is not null)
+                await _varianteService.SincronizarTecnicaConProductoAsync(id);
+        });
+        if (producto is null)
+            return NotFound(ApiResponse<object>.Fail("Producto no encontrado."));
+
+        return Ok(ApiResponse<ProductoDto>.Ok(producto, "Producto activado correctamente."));'''
+          if text.count(old) != 1:
+              raise SystemExit('No se encontró Activar.')
+          text = text.replace(old, new, 1)
+
+          old = '''        var producto = await _productoService.CambiarEstadoAsync(id, false);
+        if (producto is null)
+            return NotFound(ApiResponse<object>.Fail("Producto no encontrado."));
+
+        return Ok(ApiResponse<ProductoDto>.Ok(producto, "Producto desactivado correctamente."));'''
+          new = '''        ProductoDto? producto = null;
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            producto = await _productoService.CambiarEstadoAsync(id, false);
+            if (producto is not null)
+                await _varianteService.SincronizarTecnicaConProductoAsync(id);
+        });
+        if (producto is null)
+            return NotFound(ApiResponse<object>.Fail("Producto no encontrado."));
+
+        return Ok(ApiResponse<ProductoDto>.Ok(producto, "Producto desactivado correctamente."));'''
+          if text.count(old) != 1:
+              raise SystemExit('No se encontró Desactivar.')
+          text = text.replace(old, new, 1)
+
+          old = '''        var eliminado = await _productoService.DeleteAsync(id);
+        if (!eliminado)
+            return NotFound(ApiResponse<object>.Fail("Producto no encontrado."));
+
+        return Ok(ApiResponse<object>.Ok(new { }, "Producto eliminado lógicamente. Su historial permanece protegido."));'''
+          new = '''        var eliminado = false;
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            await _varianteService.EliminarTecnicaConProductoAsync(id);
+            eliminado = await _productoService.DeleteAsync(id);
+        });
+        if (!eliminado)
+            return NotFound(ApiResponse<object>.Fail("Producto no encontrado."));
+
+        return Ok(ApiResponse<object>.Ok(new { }, "Producto eliminado lógicamente. Su historial permanece protegido."));'''
+          if text.count(old) != 1:
+              raise SystemExit('No se encontró Delete.')
+          text = text.replace(old, new, 1)
+
+          old = '''        if (solicitadas.Count == 0)
+            return;
+
+        if (solicitadas.Any(v => v.ColorId <= 0))'''
+          new = '''        var tecnica = existentes.SingleOrDefault(v => v.EsTecnica);
+        var comercialesExistentes = existentes.Where(v => !v.EsTecnica).ToList();
+
+        if (solicitadas.Count == 0)
+        {
+            if (comercialesExistentes.Any(v => v.Cantidad != 0))
+            {
+                throw new BusinessRuleException(
+                    "No puedes convertir el producto en simple mientras alguna variante comercial tenga existencias.");
+            }
+
+            foreach (var comercial in comercialesExistentes)
+                await _varianteService.DeleteAsync(productoId, comercial.Id);
+
+            await _varianteService.AsegurarTecnicaAsync(productoId);
+            return;
+        }
+
+        if (tecnica is not null)
+            await _varianteService.RetirarTecnicaParaConversionAsync(productoId);
+
+        existentes = comercialesExistentes;
+
+        if (solicitadas.Any(v => v.ColorId <= 0))'''
+          if text.count(old) != 1:
+              raise SystemExit('No se encontró el inicio de SincronizarVariantesAsync.')
+          text = text.replace(old, new, 1)
+
+          # Sincronizar metadatos técnicos después de actualizar producto simple.
+          old = '''            actualizado = await _productoService.UpdateAsync(id, dto);
+            if (actualizado is not null)
+                await SincronizarVariantesAsync(id, dto.Variantes, existentes);'''
+          new = '''            actualizado = await _productoService.UpdateAsync(id, dto);
+            if (actualizado is not null)
+            {
+                await SincronizarVariantesAsync(id, dto.Variantes, existentes);
+                await _varianteService.SincronizarTecnicaConProductoAsync(id);
+            }'''
+          if text.count(old) != 1:
+              raise SystemExit('No se encontró la actualización orquestada.')
+          text = text.replace(old, new, 1)
+
+          controller.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Crear pruebas unitarias del ciclo de vida
+        shell: bash
+        run: |
+          cat > backend/tests/InventoryApp.Tests/ProductoVarianteTecnicaLifecycleTests.cs <<'CS'
+          using InventoryApp.Application.DTOs;
+          using InventoryApp.Application.Exceptions;
+          using InventoryApp.Application.Interfaces;
+          using InventoryApp.Application.Services;
+          using InventoryApp.Domain.Entities;
+          using Moq;
+          using Xunit;
+
+          namespace InventoryApp.Tests;
+
+          public sealed class ProductoVarianteTecnicaLifecycleTests
+          {
+              private readonly Mock<IProductoVarianteRepository> _variantes = new();
+              private readonly Mock<IProductoRepository> _productos = new();
+              private readonly Mock<ICatalogoProductoService> _catalogos = new();
+              private readonly Mock<ICurrentUserService> _usuario = new();
+              private readonly Mock<IAuditoriaService> _auditoria = new();
+
+              private ProductoVarianteService CrearServicio()
+              {
+                  _usuario.SetupGet(x => x.UsuarioId).Returns(7);
+                  _usuario.SetupGet(x => x.NombreUsuario).Returns("pruebas");
+                  _variantes.Setup(x => x.SaveChangesAsync()).ReturnsAsync(true);
+                  _productos.Setup(x => x.SaveChangesAsync()).ReturnsAsync(true);
+
+                  return new ProductoVarianteService(
+                      _variantes.Object,
+                      _productos.Object,
+                      _catalogos.Object,
+                      _usuario.Object,
+                      new FakeUnitOfWork(),
+                      _auditoria.Object);
+              }
+
+              [Fact]
+              public async Task AsegurarTecnica_CreaUnaSolaVarianteConDatosDelProducto()
+              {
+                  var producto = new Producto
+                  {
+                      Id = 42,
+                      Nombre = "Producto simple",
+                      Cantidad = 8,
+                      Costo = 50m,
+                      Precio = 90m,
+                      UmbralStockBajo = 2,
+                      Activo = true
+                  };
+                  ProductoVariante? creada = null;
+                  _productos.Setup(x => x.GetByIdForUpdateAsync(42)).ReturnsAsync(producto);
+                  _variantes.Setup(x => x.GetByProductoIdAsync(42, true))
+                      .ReturnsAsync(new List<ProductoVariante>());
+                  _variantes.Setup(x => x.GetTecnicaByProductoIdAsync(42, true))
+                      .ReturnsAsync((ProductoVariante?)null);
+                  _variantes.Setup(x => x.AddAsync(It.IsAny<ProductoVariante>()))
+                      .Callback<ProductoVariante>(v => { v.Id = 100; creada = v; })
+                      .Returns(Task.CompletedTask);
+
+                  var resultado = await CrearServicio().AsegurarTecnicaAsync(42);
+
+                  Assert.NotNull(creada);
+                  Assert.True(creada!.EsTecnica);
+                  Assert.Null(creada.ColorId);
+                  Assert.Equal("TEC-0000000042", creada.Sku);
+                  Assert.Equal(8, creada.Cantidad);
+                  Assert.Equal(50m, creada.Costo);
+                  Assert.Equal(90m, creada.Precio);
+                  Assert.Equal(2, creada.UmbralStockBajo);
+                  Assert.True(resultado.EsTecnica);
+              }
+
+              [Fact]
+              public async Task AsegurarTecnica_RechazaProductoConVariantesComerciales()
+              {
+                  var producto = new Producto { Id = 5, Nombre = "Comercial", Precio = 10m };
+                  _productos.Setup(x => x.GetByIdForUpdateAsync(5)).ReturnsAsync(producto);
+                  _variantes.Setup(x => x.GetByProductoIdAsync(5, true))
+                      .ReturnsAsync(new List<ProductoVariante>
+                      {
+                          new() { Id = 9, ProductoId = 5, ColorId = 2, EsTecnica = false }
+                      });
+
+                  var error = await Assert.ThrowsAsync<BusinessRuleException>(
+                      () => CrearServicio().AsegurarTecnicaAsync(5));
+
+                  Assert.Contains("variantes comerciales", error.Message);
+              }
+
+              [Fact]
+              public async Task RetirarTecnica_RechazaConversionConStock()
+              {
+                  var producto = new Producto { Id = 3, Nombre = "Simple", Precio = 10m };
+                  var tecnica = new ProductoVariante
+                  {
+                      Id = 8,
+                      ProductoId = 3,
+                      EsTecnica = true,
+                      Cantidad = 1
+                  };
+                  _productos.Setup(x => x.GetByIdForUpdateAsync(3)).ReturnsAsync(producto);
+                  _variantes.Setup(x => x.GetTecnicaByProductoIdAsync(3, false)).ReturnsAsync(tecnica);
+                  _variantes.Setup(x => x.GetByIdForUpdateAsync(8)).ReturnsAsync(tecnica);
+
+                  var error = await Assert.ThrowsAsync<BusinessRuleException>(
+                      () => CrearServicio().RetirarTecnicaParaConversionAsync(3));
+
+                  Assert.Contains("stock a cero", error.Message);
+                  Assert.False(tecnica.Eliminado);
+              }
+
+              [Fact]
+              public async Task EliminarManual_RechazaVarianteTecnica()
+              {
+                  var producto = new Producto { Id = 10, Nombre = "Simple", Precio = 10m };
+                  var tecnica = new ProductoVariante
+                  {
+                      Id = 11,
+                      ProductoId = 10,
+                      EsTecnica = true,
+                      Cantidad = 0
+                  };
+                  _productos.Setup(x => x.GetByIdForUpdateAsync(10)).ReturnsAsync(producto);
+                  _variantes.Setup(x => x.GetByIdForUpdateAsync(11)).ReturnsAsync(tecnica);
+
+                  var error = await Assert.ThrowsAsync<BusinessRuleException>(
+                      () => CrearServicio().DeleteAsync(10, 11));
+
+                  Assert.Contains("no puede eliminarse manualmente", error.Message);
+              }
+          }
+          CS
+
+      - name: Validar backend
+        working-directory: backend
+        run: |
+          dotnet restore InventoryApp.sln
+          dotnet build InventoryApp.sln --configuration Release --no-restore
+          dotnet test InventoryApp.sln --configuration Release --no-build --filter "Category!=Integration"
+
+      - name: Publicar fase 2C.2 en Desarrollo
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          git config user.name 'jmejia31'
+          git config user.email '93171442+jmejia31@users.noreply.github.com'
+          git add \
+            backend/src/Application/Interfaces/IProductoVarianteRepository.cs \
+            backend/src/Infrastructure/Repositories/ProductoVarianteRepository.cs \
+            backend/src/Application/DTOs/ProductoVarianteDto.cs \
+            backend/src/Application/Interfaces/IProductoVarianteService.cs \
+            backend/src/Application/Services/ProductoVarianteService.cs \
+            backend/src/API/Controllers/ProductosController.cs \
+            backend/tests/InventoryApp.Tests/ProductoVarianteTecnicaLifecycleTests.cs
+          git commit -m 'feat(inventario): implementar ciclo de vida de variante técnica 2C.2 [ChatGPT]'
+          git push origin HEAD:Desarrollo
