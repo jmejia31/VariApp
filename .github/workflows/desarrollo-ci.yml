@@ -174,17 +174,14 @@ jobs:
 
           trap 'docker exec "$mysql_container" mysql -uroot -proot inventoryapp_ci -e "DELETE FROM TipoClientes WHERE Codigo = '\''TEST_DUP'\'';"' EXIT
 
-          # Escenario 0 predeterminados
           docker exec "$mysql_container" mysql -uroot -proot inventoryapp_ci -e "
             UPDATE TipoClientes SET EsPredeterminado = 0 WHERE EsPredeterminado = 1;"
           ejecutar_preflight
 
-          # Escenario 1 predeterminado
           docker exec "$mysql_container" mysql -uroot -proot inventoryapp_ci -e "
             UPDATE TipoClientes SET EsPredeterminado = 1 WHERE Codigo = 'SIN_CLASIFICAR';"
           ejecutar_preflight
 
-          # Escenario 2 predeterminados (debe fallar la ejecución del preflight)
           docker exec "$mysql_container" mysql -uroot -proot inventoryapp_ci -e "
             INSERT INTO TipoClientes (Codigo, Nombre, NombreNormalizado, EsSistema, EsPredeterminado, Activo, Eliminado, ColorHex, Orden, FechaCreacion, FechaActualizacion)
             VALUES ('TEST_DUP', 'Test Duplicado', 'TEST DUPLICADO', 0, 1, 1, 0, '#FF0000', 99, UTC_TIMESTAMP(6), UTC_TIMESTAMP(6));"
@@ -196,11 +193,8 @@ jobs:
             echo "Escenario 2 predeterminados: Rechazo verificado correctamente mediante el preflight real."
           fi
 
-          # Limpieza explícita del duplicado antes del despegue de la migración
           docker exec "$mysql_container" mysql -uroot -proot inventoryapp_ci -e "
             DELETE FROM TipoClientes WHERE Codigo = 'TEST_DUP';"
-          
-          # Confirmación final de preflight antes de migración única
           ejecutar_preflight
       - name: Aplicar migraciones actuales
         run: |
@@ -274,3 +268,5 @@ jobs:
           grep -A1 'Database__ApplyMigrationsOnStartup' render.yaml | grep -q '"true"'
           grep -A1 'Cloudinary__EnvironmentPrefix' render.yaml | grep -q 'varistorehn_desarrollo'
       - run: docker build --file backend/Dockerfile --tag variapp-api:desarrollo-ci .
+
+# Activación de certificación Bloque 2C.1; no modifica la lógica del workflow.
