@@ -59,6 +59,34 @@ public class CompraRepository : ICompraRepository
             .FirstOrDefaultAsync(c => c.Id == id);
     }
 
+    public async Task<Compra?> GetByIdForUpdateAsync(int id)
+    {
+        if (_context.Database.CurrentTransaction is null)
+            throw new InvalidOperationException("GetByIdForUpdateAsync requiere una transacción activa.");
+
+        var alcance = await _usuarioScope.ObtenerActualAsync();
+
+        // 1. Bloquear pesimistamente la cabecera del documento
+        var cabecera = await _context.Compras
+            .FromSqlInterpolated($"SELECT c.* FROM Compras c WHERE c.Id = {id} AND c.Eliminado = 0 FOR UPDATE")
+            .AsTracking()
+            .FirstOrDefaultAsync();
+
+        if (cabecera is null) return null;
+
+        // 2. Aplicar filtro de alcance de seguridad de usuario
+        var permitida = await AplicarAlcance(_context.Compras.Where(c => c.Id == id), alcance)
+            .AnyAsync();
+
+        if (!permitida) return null;
+
+        // 3. Cargar detalles y colecciones dentro de la misma transacción
+        await _context.Entry(cabecera).Collection(c => c.Detalles).LoadAsync();
+        await _context.Entry(cabecera).Collection(c => c.ImpuestosAplicados).LoadAsync();
+
+        return cabecera;
+    }
+
     public async Task<(List<Compra> Items, int TotalCount)> GetPagedAsync(PagedRequest request)
     {
         var alcance = await _usuarioScope.ObtenerActualAsync();

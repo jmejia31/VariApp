@@ -6,6 +6,7 @@ namespace InventoryApp.Application.Interfaces;
 public interface IVentaRepository
 {
     Task<Venta?> GetByIdAsync(int id);
+    Task<Venta?> GetByIdForUpdateAsync(int id);
     Task<(List<Venta> Items, int TotalCount)> GetPagedAsync(PagedRequest request);
     Task<int> GetTotalDelMesAsync(int? usuarioId = null);
     Task<decimal> GetIngresosDelMesAsync(int? usuarioId = null);

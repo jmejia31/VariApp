@@ -30,6 +30,37 @@ public class ProductoRepository : IProductoRepository
     public async Task<Producto?> GetByIdAsync(int id) =>
         await ConIncludes().FirstOrDefaultAsync(p => p.Id == id);
 
+    public async Task<Producto?> GetByIdForUpdateAsync(int id)
+    {
+        if (_context.Database.CurrentTransaction is null)
+            throw new InvalidOperationException("GetByIdForUpdateAsync requiere una transacción activa.");
+
+        var producto = await _context.Productos
+            .FromSqlInterpolated($"SELECT p.* FROM Productos p WHERE p.Id = {id} AND p.Eliminado = 0 FOR UPDATE")
+            .AsTracking()
+            .FirstOrDefaultAsync();
+
+        if (producto != null)
+        {
+            await _context.Entry(producto).Collection(p => p.Variantes).Query().Where(v => !v.Eliminado).LoadAsync();
+        }
+        return producto;
+    }
+
+    public async Task<List<Producto>> GetByIdsForUpdateAsync(IEnumerable<int> ids)
+    {
+        if (_context.Database.CurrentTransaction is null)
+            throw new InvalidOperationException("GetByIdsForUpdateAsync requiere una transacción activa.");
+
+        var result = new List<Producto>();
+        foreach (var id in ids.Distinct().OrderBy(x => x))
+        {
+            var p = await GetByIdForUpdateAsync(id);
+            if (p != null) result.Add(p);
+        }
+        return result;
+    }
+
     public async Task<(List<Producto> Items, int TotalCount)> GetPagedAsync(PagedRequest request)
     {
         var query = ConIncludes().AsQueryable();

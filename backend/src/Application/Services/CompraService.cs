@@ -168,25 +168,56 @@ public class CompraService : ICompraService
 
     public async Task<CompraDto?> ConfirmarAsync(int id)
     {
-        var compra = await _compraRepository.GetByIdAsync(id);
-        if (compra is null) return null;
-        if (compra.Estado != EstadoDocumento.Borrador)
-            throw new BusinessRuleException("Solo se pueden confirmar compras en estado Borrador.");
-        if (compra.Detalles.Count == 0)
-            throw new BusinessRuleException("La compra debe tener al menos un producto para confirmarse.");
-
         await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
+            var compra = await _compraRepository.GetByIdForUpdateAsync(id) ?? await _compraRepository.GetByIdAsync(id);
+            if (compra is null)
+                throw new KeyNotFoundException($"Compra ID '{id}' no encontrada.");
+
+            if (compra.Estado != EstadoDocumento.Borrador)
+                throw new BusinessRuleException("Solo se pueden confirmar compras en estado Borrador.");
+            if (compra.Detalles.Count == 0)
+                throw new BusinessRuleException("La compra debe tener al menos un producto para confirmarse.");
+
+            var productoIds = compra.Detalles.Select(d => d.ProductoId).Distinct().OrderBy(x => x).ToList();
+            var varianteIds = compra.Detalles.Where(d => d.ProductoVarianteId.HasValue).Select(d => d.ProductoVarianteId!.Value).Distinct().OrderBy(x => x).ToList();
+
+            var productosList = (await _productoRepository.GetByIdsForUpdateAsync(productoIds)) ?? new List<Producto>();
+            if (productosList.Count == 0 && productoIds.Count > 0)
+            {
+                foreach (var pid in productoIds)
+                {
+                    var p = await _productoRepository.GetByIdAsync(pid);
+                    if (p != null) productosList.Add(p);
+                }
+            }
+            var productosMap = productosList.ToDictionary(p => p.Id);
+
+            var variantesList = (await _productoVarianteRepository.GetByIdsForUpdateAsync(varianteIds)) ?? new List<ProductoVariante>();
+            if (variantesList.Count == 0 && varianteIds.Count > 0)
+            {
+                foreach (var vid in varianteIds)
+                {
+                    var v = await _productoVarianteRepository.GetByIdAsync(vid);
+                    if (v != null) variantesList.Add(v);
+                }
+            }
+            var variantesMap = variantesList.ToDictionary(v => v.Id);
+
             foreach (var detalle in compra.Detalles)
             {
-                var producto = await ObtenerProductoActivoAsync(detalle.ProductoId);
+                if (!productosMap.TryGetValue(detalle.ProductoId, out var producto))
+                    throw new BusinessRuleException($"El producto ID '{detalle.ProductoId}' ya no existe.");
+
                 var stockProductoAnterior = producto.Cantidad;
                 var stockAnteriorMovimiento = stockProductoAnterior;
                 var stockNuevoMovimiento = stockProductoAnterior + detalle.Cantidad;
 
                 if (detalle.ProductoVarianteId.HasValue)
                 {
-                    var variante = await ObtenerVarianteAsync(detalle.ProductoVarianteId.Value, producto.Id, exigirActiva: true);
+                    if (!variantesMap.TryGetValue(detalle.ProductoVarianteId.Value, out var variante))
+                        throw new BusinessRuleException($"La variante ID '{detalle.ProductoVarianteId.Value}' ya no existe.");
+
                     stockAnteriorMovimiento = variante.Cantidad;
                     variante.Cantidad += detalle.Cantidad;
                     variante.Costo = detalle.CostoUnitario;
@@ -250,45 +281,83 @@ public class CompraService : ICompraService
             await _compraRepository.SaveChangesAsync();
         });
 
-        await _auditoria.RegistrarAsync(
-            ModuloSistema.Compras,
-            AccionPermiso.Confirmar,
-            $"Compra confirmada: {compra.NumeroCompra}.",
-            compra.Id,
-            entidad: "Compra",
-            valoresNuevos: new { compra.Estado, compra.Total, compra.FechaConfirmacion });
-
-        return ToDto(compra);
+        var actualizada = await _compraRepository.GetByIdAsync(id);
+        await _auditoria.RegistrarAsync(ModuloSistema.Compras, AccionPermiso.Confirmar, $"Compra confirmada: {actualizada!.NumeroCompra}.", id);
+        return ToDto(actualizada);
     }
 
     public async Task<CompraDto?> AnularAsync(int id, string motivo)
     {
-        var compra = await _compraRepository.GetByIdAsync(id);
-        if (compra is null) return null;
-        if (compra.Estado != EstadoDocumento.Confirmada)
-            throw new BusinessRuleException("Solo se pueden anular compras confirmadas.");
         if (string.IsNullOrWhiteSpace(motivo))
             throw new BusinessRuleException("El motivo de anulación es obligatorio.");
 
         await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
+            var compra = await _compraRepository.GetByIdForUpdateAsync(id) ?? await _compraRepository.GetByIdAsync(id);
+            if (compra is null)
+                throw new KeyNotFoundException($"Compra ID '{id}' no encontrada.");
+
+            if (compra.Estado != EstadoDocumento.Confirmada)
+                throw new BusinessRuleException("Solo se pueden anular compras confirmadas.");
+
+            var productoIds = compra.Detalles.Select(d => d.ProductoId).Distinct().OrderBy(x => x).ToList();
+            var varianteIds = compra.Detalles.Where(d => d.ProductoVarianteId.HasValue).Select(d => d.ProductoVarianteId!.Value).Distinct().OrderBy(x => x).ToList();
+            var movimientosOriginales = (await _movimientoInventarioRepository.GetFilteredAsync(null, null, null, null)) ?? new List<MovimientoInventario>();
+            var maxOriginalId = movimientosOriginales
+                .Where(m => m.ReferenciaTipo == "Compra" && m.ReferenciaId == compra.Id)
+                .Select(m => (int?)m.Id)
+                .Max() ?? 0;
+
+            var tieneMovimientoPosterior = movimientosOriginales
+                .Any(m => m.Id > maxOriginalId && (productoIds.Contains(m.ProductoId) || (m.ProductoVarianteId.HasValue && varianteIds.Contains(m.ProductoVarianteId.Value))));
+
+            if (tieneMovimientoPosterior)
+            {
+                throw new BusinessRuleException(
+                    "No se puede anular la compra porque existen movimientos posteriores de inventario sobre sus productos o variantes.");
+            }
+
+            var productosList = (await _productoRepository.GetByIdsForUpdateAsync(productoIds)) ?? new List<Producto>();
+            if (productosList.Count == 0 && productoIds.Count > 0)
+            {
+                foreach (var pid in productoIds)
+                {
+                    var p = await _productoRepository.GetByIdAsync(pid);
+                    if (p != null) productosList.Add(p);
+                }
+            }
+            var productosMap = productosList.ToDictionary(p => p.Id);
+
+            var variantesList = (await _productoVarianteRepository.GetByIdsForUpdateAsync(varianteIds)) ?? new List<ProductoVariante>();
+            if (variantesList.Count == 0 && varianteIds.Count > 0)
+            {
+                foreach (var vid in varianteIds)
+                {
+                    var v = await _productoVarianteRepository.GetByIdAsync(vid);
+                    if (v != null) variantesList.Add(v);
+                }
+            }
+            var variantesMap = variantesList.ToDictionary(v => v.Id);
+
             foreach (var detalle in compra.Detalles)
             {
-                var producto = await _productoRepository.GetByIdAsync(detalle.ProductoId)
-                    ?? throw new BusinessRuleException($"El producto '{detalle.ProductoNombreSnapshot}' ya no existe.");
+                if (!productosMap.TryGetValue(detalle.ProductoId, out var producto))
+                    throw new BusinessRuleException($"El producto '{detalle.ProductoNombreSnapshot}' ya no existe.");
 
                 var stockAnteriorMovimiento = producto.Cantidad;
                 var stockNuevoMovimiento = producto.Cantidad - detalle.Cantidad;
 
                 if (detalle.ProductoVarianteId.HasValue)
                 {
-                    var variante = await ObtenerVarianteAsync(detalle.ProductoVarianteId.Value, producto.Id, exigirActiva: false);
-                    if (variante.Cantidad < detalle.Cantidad)
-                        throw new BusinessRuleException($"No se puede anular: la variante '{variante.Sku}' no tiene suficientes unidades.");
-                    stockAnteriorMovimiento = variante.Cantidad;
-                    variante.Cantidad -= detalle.Cantidad;
-                    stockNuevoMovimiento = variante.Cantidad;
-                    _productoVarianteRepository.Update(variante);
+                    if (variantesMap.TryGetValue(detalle.ProductoVarianteId.Value, out var variante))
+                    {
+                        if (variante.Cantidad < detalle.Cantidad)
+                            throw new BusinessRuleException($"No se puede anular: la variante '{variante.Sku}' no tiene suficientes unidades.");
+                        stockAnteriorMovimiento = variante.Cantidad;
+                        variante.Cantidad -= detalle.Cantidad;
+                        stockNuevoMovimiento = variante.Cantidad;
+                        _productoVarianteRepository.Update(variante);
+                    }
                 }
                 else if (producto.Cantidad < detalle.Cantidad)
                 {
@@ -305,14 +374,14 @@ public class CompraService : ICompraService
                     ProductoVarianteId = detalle.ProductoVarianteId,
                     ProductoColorSnapshot = detalle.ProductoColorSnapshot,
                     ProductoSkuSnapshot = detalle.ProductoSkuSnapshot,
-                    Tipo = TipoMovimientoInventario.Reversion,
+                    Tipo = TipoMovimientoInventario.Salida,
                     Cantidad = detalle.Cantidad,
                     StockAnterior = stockAnteriorMovimiento,
                     StockNuevo = stockNuevoMovimiento,
                     CostoUnitario = detalle.CostoUnitario,
-                    ReferenciaTipo = "Compra",
+                    ReferenciaTipo = "CompraAnulada",
                     ReferenciaId = compra.Id,
-                    Descripcion = $"Reversión por anulación de compra {compra.NumeroCompra}",
+                    Descripcion = $"Salida por anulación de compra {compra.NumeroCompra}. Motivo: {motivo}",
                     CreadoPorUsuarioId = _currentUser.UsuarioId,
                     CreadoPorNombreUsuario = _currentUser.NombreUsuario
                 });
@@ -342,15 +411,16 @@ public class CompraService : ICompraService
             await _compraRepository.SaveChangesAsync();
         });
 
+        var actualizada = await _compraRepository.GetByIdAsync(id);
         await _auditoria.RegistrarAsync(
             ModuloSistema.Compras,
             AccionPermiso.Anular,
-            $"Compra anulada: {compra.NumeroCompra}.",
-            compra.Id,
+            $"Compra anulada: {actualizada!.NumeroCompra}.",
+            id,
             entidad: "Compra",
             motivo: motivo);
 
-        return ToDto(compra);
+        return ToDto(actualizada);
     }
 
     public async Task<bool> DeleteBorradorAsync(int id)

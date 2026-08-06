@@ -6,6 +6,7 @@ namespace InventoryApp.Application.Interfaces;
 public interface ICompraRepository
 {
     Task<Compra?> GetByIdAsync(int id);
+    Task<Compra?> GetByIdForUpdateAsync(int id);
     Task<(List<Compra> Items, int TotalCount)> GetPagedAsync(PagedRequest request);
     Task<int> GetTotalDelMesAsync(int? usuarioId = null);
     Task<decimal> GetCuentasPorPagarAsync(int? usuarioId = null);

@@ -6,6 +6,8 @@ namespace InventoryApp.Application.Interfaces;
 public interface IProductoRepository
 {
     Task<Producto?> GetByIdAsync(int id);
+    Task<Producto?> GetByIdForUpdateAsync(int id);
+    Task<List<Producto>> GetByIdsForUpdateAsync(IEnumerable<int> ids);
     Task<(List<Producto> Items, int TotalCount)> GetPagedAsync(PagedRequest request);
     Task<List<Producto>> GetStockBajoAsync();
     Task<List<Producto>> GetUltimosAgregadosAsync(int cantidad = 5);

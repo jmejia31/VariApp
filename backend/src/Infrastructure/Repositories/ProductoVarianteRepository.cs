@@ -22,6 +22,31 @@ public class ProductoVarianteRepository : IProductoVarianteRepository
     public Task<ProductoVariante?> GetByIdAsync(int id) =>
         Query().FirstOrDefaultAsync(v => v.Id == id && !v.Eliminado);
 
+    public async Task<ProductoVariante?> GetByIdForUpdateAsync(int id)
+    {
+        if (_context.Database.CurrentTransaction is null)
+            throw new InvalidOperationException("GetByIdForUpdateAsync requiere una transacción activa.");
+
+        return await _context.ProductoVariantes
+            .FromSqlInterpolated($"SELECT pv.* FROM ProductoVariantes pv WHERE pv.Id = {id} AND pv.Eliminado = 0 FOR UPDATE")
+            .AsTracking()
+            .FirstOrDefaultAsync();
+    }
+
+    public async Task<List<ProductoVariante>> GetByIdsForUpdateAsync(IEnumerable<int> ids)
+    {
+        if (_context.Database.CurrentTransaction is null)
+            throw new InvalidOperationException("GetByIdsForUpdateAsync requiere una transacción activa.");
+
+        var result = new List<ProductoVariante>();
+        foreach (var id in ids.Distinct().OrderBy(x => x))
+        {
+            var v = await GetByIdForUpdateAsync(id);
+            if (v != null) result.Add(v);
+        }
+        return result;
+    }
+
     public Task<List<ProductoVariante>> GetByProductoIdAsync(int productoId, bool incluirInactivas = true)
     {
         var query = Query().Where(v => v.ProductoId == productoId && !v.Eliminado);

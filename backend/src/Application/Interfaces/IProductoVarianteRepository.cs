@@ -5,6 +5,8 @@ namespace InventoryApp.Application.Interfaces;
 public interface IProductoVarianteRepository
 {
     Task<ProductoVariante?> GetByIdAsync(int id);
+    Task<ProductoVariante?> GetByIdForUpdateAsync(int id);
+    Task<List<ProductoVariante>> GetByIdsForUpdateAsync(IEnumerable<int> ids);
     Task<List<ProductoVariante>> GetByProductoIdAsync(int productoId, bool incluirInactivas = true);
     Task<ProductoVariante?> GetBySkuAsync(string sku);
     Task<ProductoVariante?> GetByCodigoBarrasAsync(string codigoBarras);
