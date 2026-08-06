@@ -20,6 +20,18 @@ public class UnitOfWork : IUnitOfWork
 
     public async Task ExecuteInTransactionAsync(Func<Task> operation)
     {
+        ArgumentNullException.ThrowIfNull(operation);
+
+        // Las operaciones internas de un agregado deben participar en la
+        // transacción ya abierta por el orquestador exterior. El propietario de
+        // esa transacción conserva la responsabilidad de commit, rollback y
+        // reintento completo ante errores transitorios 1205/1213.
+        if (_context.Database.CurrentTransaction is not null)
+        {
+            await operation();
+            return;
+        }
+
         int attempt = 0;
         while (true)
         {
