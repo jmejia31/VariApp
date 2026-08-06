@@ -77,7 +77,7 @@ test.describe('Fase 4 — variantes por color, SKU e inventario', () => {
     await expect(page.getByText(/credenciales se transmiten/i)).toHaveCount(0);
   });
 
-  test('API crea múltiples colores, suma stock y conserva la variante en documentos', async ({ request }) => {
+  test('API crea múltiples colores, conserva la variante y bloquea anulación de compra con movimientos posteriores', async ({ request }) => {
     const marca = await crearCatalogo(request, 'marcas', {
       nombre: nombres.marca,
       descripcion: 'Marca temporal para variantes',
@@ -246,11 +246,13 @@ test.describe('Fase 4 — variantes por color, SKU e inventario', () => {
       headers: headers(),
       data: { motivoAnulacion: 'Reversión E2E de compra por variante' }
     });
-    expect(anularCompra.status(), await anularCompra.text()).toBe(200);
+    const anularCompraTexto = await anularCompra.text();
+    expect(anularCompra.status(), anularCompraTexto).toBe(400);
+    expect(anularCompraTexto.toLowerCase()).toContain('movimientos posteriores');
 
     productoActual = await dataOf(await request.get(`${API_URL}/productos/${productoId}`, { headers: headers() }));
-    expect(productoActual.cantidad).toBe(10);
-    expect(productoActual.variantes.find((v: any) => v.id === varianteId)?.cantidad).toBe(6);
+    expect(productoActual.cantidad).toBe(14);
+    expect(productoActual.variantes.find((v: any) => v.id === varianteId)?.cantidad).toBe(10);
   });
 
   test('Formulario guarda dos colores con SKU automático y stock consolidado', async ({ page }) => {

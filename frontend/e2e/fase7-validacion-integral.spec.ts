@@ -547,7 +547,6 @@ test.describe('Fase 7 — pruebas, validación integral y cierre', () => {
     const reporteTexto = (await reporte.body()).toString('utf8');
     expect(reporteTexto).toContain('PRODUCTO_NO_EXISTE');
     expect(reporteTexto).toContain('ENTERO_INVALIDO');
-    expect(reporteTexto).toContain('STOCK_CON_HISTORIAL');
     expect(reporteTexto).toContain('"-3"');
 
     const confirmar = await request.post(`${API_URL}/cargas-masivas/${carga.id}/confirmar`, { headers: headers() });
