@@ -242,7 +242,7 @@ public class InventoryConcurrencyTests
                 .CountAsync(x => x.ModuloOrigen == "Venta" && x.ReferenciaId.HasValue && ventaIds.Contains(x.ReferenciaId.Value));
             var movimientosInventario = await verifyContext.MovimientosInventario
                 .AsNoTracking()
-                .Where(x => x.ReferenciaTipo == "Venta" && x.ReferenciaId.HasValue && ventaIds.Contains(x.ReferenciaId.Value))
+                .Where(x => x.ReferenciaTipo == "Venta" && ventaIds.Contains(x.ReferenciaId))
                 .ToListAsync();
 
             Assert.Equal(5, ventasConfirmadas);
