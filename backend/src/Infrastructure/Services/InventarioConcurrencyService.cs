@@ -1,7 +1,6 @@
 using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,31 +24,44 @@ public class InventarioConcurrencyService : IInventarioConcurrencyService
         _productoVarianteRepository = productoVarianteRepository;
     }
 
-    public async Task BloquearYValidarInventarioAsync(
-        IEnumerable<(int ProductoId, int? ProductoVarianteId, int Cantidad)> demandMap,
+    public async Task<InventarioLockSet> BloquearYValidarInventarioAsync(
+        IEnumerable<InventarioDemanda> demandMap,
         bool esDeduccion = true)
     {
         if (_context.Database.CurrentTransaction is null)
             throw new InvalidOperationException("BloquearYValidarInventarioAsync requiere una transacción activa.");
 
-        var consolidatedList = demandMap
+        var consolidada = demandMap
+            .Select(x => x ?? throw new ArgumentException("La demanda de inventario contiene un elemento nulo.", nameof(demandMap)))
             .GroupBy(x => (x.ProductoId, x.ProductoVarianteId))
-            .Select(g => (
-                ProductoId: g.Key.ProductoId,
-                ProductoVarianteId: g.Key.ProductoVarianteId,
-                CantidadTotal: g.Sum(x => x.Cantidad)
-            ))
+            .Select(g => new InventarioDemanda(
+                g.Key.ProductoId,
+                g.Key.ProductoVarianteId,
+                g.Sum(x => x.Cantidad)))
+            .OrderBy(x => x.ProductoId)
+            .ThenBy(x => x.ProductoVarianteId)
             .ToList();
 
-        if (consolidatedList.Count == 0) return;
+        if (consolidada.Any(x => x.ProductoId <= 0 || x.Cantidad <= 0))
+            throw new BusinessRuleException("Cada demanda de inventario debe indicar un producto válido y una cantidad mayor a cero.");
 
-        // 1. Bloquear productos ordenados por ProductoId ASC
-        var productoIds = consolidatedList.Select(x => x.ProductoId).Distinct().OrderBy(id => id).ToList();
+        if (consolidada.Count == 0)
+        {
+            return new InventarioLockSet(
+                new Dictionary<int, InventoryApp.Domain.Entities.Producto>(),
+                new Dictionary<int, InventoryApp.Domain.Entities.ProductoVariante>());
+        }
+
+        var productoIds = consolidada
+            .Select(x => x.ProductoId)
+            .Distinct()
+            .OrderBy(id => id)
+            .ToList();
+
         var productosMap = (await _productoRepository.GetByIdsForUpdateAsync(productoIds))
             .ToDictionary(p => p.Id);
 
-        // 2. Bloquear variantes ordenadas por ProductoVarianteId ASC
-        var varianteIds = consolidatedList
+        var varianteIds = consolidada
             .Where(x => x.ProductoVarianteId.HasValue)
             .Select(x => x.ProductoVarianteId!.Value)
             .Distinct()
@@ -59,8 +71,7 @@ public class InventarioConcurrencyService : IInventarioConcurrencyService
         var variantesMap = (await _productoVarianteRepository.GetByIdsForUpdateAsync(varianteIds))
             .ToDictionary(v => v.Id);
 
-        // 3. Validar existencias y mantener la invariante Producto.Cantidad = Sum(Variantes no eliminadas)
-        foreach (var item in consolidatedList)
+        foreach (var item in consolidada)
         {
             if (!productosMap.TryGetValue(item.ProductoId, out var producto))
                 throw new BusinessRuleException($"El producto ID '{item.ProductoId}' no existe o fue eliminado.");
@@ -70,21 +81,23 @@ public class InventarioConcurrencyService : IInventarioConcurrencyService
                 if (!variantesMap.TryGetValue(item.ProductoVarianteId.Value, out var variante))
                     throw new BusinessRuleException($"La variante ID '{item.ProductoVarianteId.Value}' no existe o fue eliminada.");
 
-                if (esDeduccion && variante.Cantidad < item.CantidadTotal)
+                if (variante.ProductoId != producto.Id)
+                    throw new BusinessRuleException($"La variante ID '{variante.Id}' no pertenece al producto ID '{producto.Id}'.");
+
+                if (esDeduccion && variante.Cantidad < item.Cantidad)
                 {
                     throw new BusinessRuleException(
-                        $"Stock insuficiente para la variante '{variante.Sku}': disponible {variante.Cantidad}, solicitado {item.CantidadTotal}.");
+                        $"Stock insuficiente para la variante '{variante.Sku}': disponible {variante.Cantidad}, solicitado {item.Cantidad}.");
                 }
             }
-            else
+            else if (esDeduccion && producto.Cantidad < item.Cantidad)
             {
-                if (esDeduccion && producto.Cantidad < item.CantidadTotal)
-                {
-                    throw new BusinessRuleException(
-                        $"Stock insuficiente para '{producto.Nombre}': disponible {producto.Cantidad}, solicitado {item.CantidadTotal}.");
-                }
+                throw new BusinessRuleException(
+                    $"Stock insuficiente para '{producto.Nombre}': disponible {producto.Cantidad}, solicitado {item.Cantidad}.");
             }
         }
+
+        return new InventarioLockSet(productosMap, variantesMap);
     }
 
     public async Task AjustarStockPesimistaAsync(
@@ -96,6 +109,9 @@ public class InventarioConcurrencyService : IInventarioConcurrencyService
         if (_context.Database.CurrentTransaction is null)
             throw new InvalidOperationException("AjustarStockPesimistaAsync requiere una transacción activa.");
 
+        if (cantidadActualEsperada < 0 || cantidadNueva < 0)
+            throw new BusinessRuleException("Las cantidades de inventario no pueden ser negativas.");
+
         var producto = await _productoRepository.GetByIdForUpdateAsync(productoId)
             ?? throw new BusinessRuleException($"El producto ID '{productoId}' no existe.");
 
@@ -103,6 +119,9 @@ public class InventarioConcurrencyService : IInventarioConcurrencyService
         {
             var variante = await _productoVarianteRepository.GetByIdForUpdateAsync(productoVarianteId.Value)
                 ?? throw new BusinessRuleException($"La variante ID '{productoVarianteId.Value}' no existe.");
+
+            if (variante.ProductoId != productoId)
+                throw new BusinessRuleException("La variante indicada no pertenece al producto solicitado.");
 
             if (variante.Cantidad != cantidadActualEsperada)
             {
@@ -113,7 +132,6 @@ public class InventarioConcurrencyService : IInventarioConcurrencyService
             variante.Cantidad = cantidadNueva;
             _productoVarianteRepository.Update(variante);
 
-            // Re-calcular invariante de producto sumando TODAS las variantes no eliminadas (incluidas inactivas)
             var todasVariantes = await _productoVarianteRepository.GetByProductoIdAsync(productoId, incluirInactivas: true);
             producto.Cantidad = todasVariantes.Sum(v => v.Cantidad);
             _productoRepository.Update(producto);
