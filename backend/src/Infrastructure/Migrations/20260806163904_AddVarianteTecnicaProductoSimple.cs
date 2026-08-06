@@ -10,6 +10,92 @@ namespace InventoryApp.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            // La propia migración vuelve a ejecutar el preflight antes del primer ALTER TABLE.
+            // MySQL confirma DDL de forma implícita; por eso el rechazo debe ocurrir antes de
+            // agregar columnas para no dejar un esquema parcialmente aplicado.
+            migrationBuilder.Sql(
+                """
+                DROP TEMPORARY TABLE IF EXISTS __PreflightVarianteTecnica2C1;
+                """);
+
+            migrationBuilder.Sql(
+                """
+                CREATE TEMPORARY TABLE __PreflightVarianteTecnica2C1
+                (
+                    Violaciones INT NOT NULL,
+                    CONSTRAINT CK_PreflightVarianteTecnica2C1_Cero
+                        CHECK (Violaciones = 0)
+                );
+                """);
+
+            migrationBuilder.Sql(
+                """
+                INSERT INTO __PreflightVarianteTecnica2C1 (Violaciones)
+                SELECT
+                    (SELECT COUNT(*)
+                       FROM Productos p
+                      WHERE p.Eliminado = 0
+                        AND p.Cantidad < 0)
+                  + (SELECT COUNT(*)
+                       FROM ProductoVariantes pv
+                      WHERE pv.Eliminado = 0
+                        AND pv.Cantidad < 0)
+                  + (SELECT COUNT(*)
+                       FROM (
+                            SELECT UPPER(TRIM(pv.Sku)) AS Valor
+                              FROM ProductoVariantes pv
+                             WHERE pv.Eliminado = 0
+                               AND pv.Sku IS NOT NULL
+                               AND TRIM(pv.Sku) <> ''
+                             GROUP BY UPPER(TRIM(pv.Sku))
+                            HAVING COUNT(*) > 1
+                       ) duplicados_sku)
+                  + (SELECT COUNT(*)
+                       FROM (
+                            SELECT TRIM(pv.CodigoBarras) AS Valor
+                              FROM ProductoVariantes pv
+                             WHERE pv.Eliminado = 0
+                               AND pv.CodigoBarras IS NOT NULL
+                               AND TRIM(pv.CodigoBarras) <> ''
+                             GROUP BY TRIM(pv.CodigoBarras)
+                            HAVING COUNT(*) > 1
+                       ) duplicados_codigo)
+                  + (SELECT COUNT(*)
+                       FROM ProductoVariantes pv
+                      WHERE pv.Eliminado = 0
+                        AND pv.ColorId IS NULL)
+                  + (SELECT COUNT(*)
+                       FROM Productos p
+                       JOIN (
+                            SELECT pv.ProductoId, SUM(pv.Cantidad) AS CantidadVariantes
+                              FROM ProductoVariantes pv
+                             WHERE pv.Eliminado = 0
+                             GROUP BY pv.ProductoId
+                       ) inventario ON inventario.ProductoId = p.Id
+                      WHERE p.Eliminado = 0
+                        AND p.Cantidad <> inventario.CantidadVariantes)
+                  + (SELECT COUNT(*)
+                       FROM Productos p
+                      WHERE p.Eliminado = 0
+                        AND NOT EXISTS (
+                            SELECT 1
+                              FROM ProductoVariantes actual
+                             WHERE actual.ProductoId = p.Id
+                               AND actual.Eliminado = 0
+                        )
+                        AND EXISTS (
+                            SELECT 1
+                              FROM ProductoVariantes existente
+                             WHERE UPPER(TRIM(existente.Sku)) =
+                                   UPPER(CONCAT('TEC-', LPAD(p.Id, 10, '0')))
+                        ));
+                """);
+
+            migrationBuilder.Sql(
+                """
+                DROP TEMPORARY TABLE __PreflightVarianteTecnica2C1;
+                """);
+
             migrationBuilder.AddColumn<bool>(
                 name: "EsTecnica",
                 table: "ProductoVariantes",
@@ -62,9 +148,9 @@ namespace InventoryApp.Infrastructure.Migrations
                 WHERE p.Eliminado = 0
                   AND NOT EXISTS (
                       SELECT 1
-                      FROM ProductoVariantes pv
-                      WHERE pv.ProductoId = p.Id
-                        AND pv.Eliminado = 0
+                        FROM ProductoVariantes pv
+                       WHERE pv.ProductoId = p.Id
+                         AND pv.Eliminado = 0
                   );
                 """);
         }
