@@ -45,6 +45,11 @@ public class TipoClienteService : ITipoClienteService
 
     public async Task<TipoClienteDto> CreateAsync(CreateTipoClienteDto dto)
     {
+        if (dto.EsPredeterminado && !dto.Activo)
+        {
+            throw new BusinessRuleException("El tipo de cliente predeterminado debe estar activo.");
+        }
+
         var nombre = dto.Nombre.Trim();
         var normalizado = nombre.ToUpper();
 
@@ -89,9 +94,9 @@ public class TipoClienteService : ITipoClienteService
                 await _auditoria.RegistrarAsync(ModuloSistema.TiposClientes, AccionPermiso.Crear, $"Tipo de cliente creado: {tipo.Nombre} ({tipo.Codigo})", tipo.Id);
             });
         }
-        catch (Exception ex) when (ex.InnerException?.Message.Contains("IX_TipoClientes_EsPredeterminadoUnico") == true)
+        catch (UniqueConstraintViolationException ex) when (ex.ConstraintName == "TipoClientePredeterminadoUnico")
         {
-            throw new BusinessRuleException("Conflicto de concurrencia: Ya existe otro tipo de cliente marcado como predeterminado único. Inténtalo de nuevo.");
+            throw new BusinessRuleException(ex.Message);
         }
 
         return ToDto(tipo);
@@ -99,6 +104,11 @@ public class TipoClienteService : ITipoClienteService
 
     public async Task<TipoClienteDto?> UpdateAsync(int id, UpdateTipoClienteDto dto)
     {
+        if (dto.EsPredeterminado && !dto.Activo)
+        {
+            throw new BusinessRuleException("El tipo de cliente predeterminado debe estar activo.");
+        }
+
         var tipo = await _repository.GetByIdAsync(id);
         if (tipo is null) return null;
 
@@ -157,9 +167,9 @@ public class TipoClienteService : ITipoClienteService
                 await _auditoria.RegistrarAsync(ModuloSistema.TiposClientes, AccionPermiso.Editar, $"Tipo de cliente actualizado: {tipo.Nombre} ({tipo.Codigo})", tipo.Id);
             });
         }
-        catch (Exception ex) when (ex.InnerException?.Message.Contains("IX_TipoClientes_EsPredeterminadoUnico") == true)
+        catch (UniqueConstraintViolationException ex) when (ex.ConstraintName == "TipoClientePredeterminadoUnico")
         {
-            throw new BusinessRuleException("Conflicto de concurrencia: Ya existe otro tipo de cliente marcado como predeterminado único. Inténtalo de nuevo.");
+            throw new BusinessRuleException(ex.Message);
         }
 
         return ToDto(tipo);

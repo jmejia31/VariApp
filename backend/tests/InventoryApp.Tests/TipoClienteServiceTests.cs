@@ -102,4 +102,34 @@ public class TipoClienteServiceTests
         Assert.NotNull(tipo.FechaEliminacion);
         Assert.Equal(1, tipo.EliminadoPorUsuarioId);
     }
+
+    [Fact]
+    public async Task CreateAsync_Predeterminado_Inactivo_Lanza_Excepcion()
+    {
+        var dto = new CreateTipoClienteDto
+        {
+            Nombre = "VIP",
+            ColorHex = "#FF0000",
+            Activo = false,
+            EsPredeterminado = true
+        };
+
+        var ex = await Assert.ThrowsAsync<BusinessRuleException>(() => _service.CreateAsync(dto));
+        Assert.Equal("El tipo de cliente predeterminado debe estar activo.", ex.Message);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_Predeterminado_Inactivo_Lanza_Excepcion()
+    {
+        var dto = new UpdateTipoClienteDto
+        {
+            Nombre = "VIP",
+            ColorHex = "#FF0000",
+            Activo = false,
+            EsPredeterminado = true
+        };
+
+        var ex = await Assert.ThrowsAsync<BusinessRuleException>(() => _service.UpdateAsync(1, dto));
+        Assert.Equal("El tipo de cliente predeterminado debe estar activo.", ex.Message);
+    }
 }

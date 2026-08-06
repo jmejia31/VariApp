@@ -43,7 +43,12 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 var mysqlServerVersion = Version.Parse(builder.Configuration["Database:ServerVersion"] ?? "8.4.3");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySql(connectionString, new MySqlServerVersion(mysqlServerVersion)));
+    options.UseMySql(connectionString, new MySqlServerVersion(mysqlServerVersion),
+        mysqlOptions => mysqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 5,
+            maxRetryDelay: TimeSpan.FromSeconds(5),
+            errorNumbersToAdd: new[] { 1205, 1213 }
+        )));
 
 // ===== Repositorios y Servicios =====
 builder.Services.AddHttpContextAccessor();

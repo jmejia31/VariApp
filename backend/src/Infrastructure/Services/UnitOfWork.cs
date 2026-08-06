@@ -1,5 +1,9 @@
 using InventoryApp.Application.Interfaces;
+using InventoryApp.Application.Exceptions;
 using InventoryApp.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Threading.Tasks;
 
 namespace InventoryApp.Infrastructure.Services;
 
@@ -14,16 +18,40 @@ public class UnitOfWork : IUnitOfWork
 
     public async Task ExecuteInTransactionAsync(Func<Task> operation)
     {
-        await using var transaction = await _context.Database.BeginTransactionAsync();
-        try
+        var strategy = _context.Database.CreateExecutionStrategy();
+        await strategy.ExecuteAsync(async () =>
         {
-            await operation();
-            await transaction.CommitAsync();
-        }
-        catch
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                await operation();
+                await transaction.CommitAsync();
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                throw TranslateException(ex);
+            }
+        });
+    }
+
+    private Exception TranslateException(Exception ex)
+    {
+        if (ex is DbUpdateException dbUpdateEx)
         {
-            await transaction.RollbackAsync();
-            throw;
+            var inner = dbUpdateEx.InnerException;
+            while (inner != null)
+            {
+                if (inner.Message.Contains("IX_TipoClientes_EsPredeterminadoUnico"))
+                {
+                    return new UniqueConstraintViolationException(
+                        "TipoClientePredeterminadoUnico",
+                        "Conflicto de concurrencia: Ya existe otro tipo de cliente marcado como predeterminado único. Inténtalo de nuevo.",
+                        ex);
+                }
+                inner = inner.InnerException;
+            }
         }
+        return ex;
     }
 }

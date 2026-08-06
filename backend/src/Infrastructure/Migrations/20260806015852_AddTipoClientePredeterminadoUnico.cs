@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -10,6 +10,21 @@ namespace InventoryApp.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.Sql(@"
+DROP PROCEDURE IF EXISTS CheckTipoClienteDuplicates;
+CREATE PROCEDURE CheckTipoClienteDuplicates()
+BEGIN
+    DECLARE pred_count INT;
+    SELECT COUNT(*) INTO pred_count FROM TipoClientes WHERE EsPredeterminado = 1 AND Activo = 1 AND Eliminado = 0;
+    IF pred_count > 1 THEN
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'Error de Migración: Existen múltiples TipoCliente predeterminados activos no eliminados. Por favor, corrígelo manualmente.';
+    END IF;
+END;
+");
+            migrationBuilder.Sql("CALL CheckTipoClienteDuplicates();");
+            migrationBuilder.Sql("DROP PROCEDURE IF EXISTS CheckTipoClienteDuplicates;");
+
             migrationBuilder.AddColumn<string>(
                 name: "EsPredeterminadoUnico",
                 table: "TipoClientes",
