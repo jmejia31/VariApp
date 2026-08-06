@@ -6,6 +6,7 @@ on:
       - Desarrollo
     paths:
       - .github/patches/chatgpt_patch.py
+      - .github/workflows/chatgpt-patch.yml
 
 permissions:
   contents: write
@@ -58,7 +59,7 @@ jobs:
 
       - name: Publicar corrección en Desarrollo
         run: |
-          if git diff --quiet; then
+          if [ -z "$(git status --porcelain -- backend frontend)" ]; then
             echo "El parche no produjo cambios."
             exit 1
           fi
