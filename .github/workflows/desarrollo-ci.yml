@@ -269,4 +269,4 @@ jobs:
           grep -A1 'Cloudinary__EnvironmentPrefix' render.yaml | grep -q 'varistorehn_desarrollo'
       - run: docker build --file backend/Dockerfile --tag variapp-api:desarrollo-ci .
 
-# Activación de certificación Bloque 2C.1; no modifica la lógica del workflow.
+# Activación de certificación Bloque 2C.2; no modifica la lógica del workflow.
