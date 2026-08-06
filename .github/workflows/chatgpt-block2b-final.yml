@@ -38,23 +38,26 @@ jobs:
           texto = variantes.read_text(encoding='utf-8')
           titulo_anterior = "test('API crea múltiples colores, suma stock y conserva la variante en documentos', async ({ request }) => {"
           titulo_nuevo = "test('API crea múltiples colores, conserva la variante y bloquea anulación de compra con movimientos posteriores', async ({ request }) => {"
-          bloque_anterior = """    expect(anularCompra.status(), await anularCompra.text()).toBe(200);
-
-    productoActual = await dataOf(await request.get(`${API_URL}/productos/${productoId}`, { headers: headers() }));
-    expect(productoActual.cantidad).toBe(10);
-    expect(productoActual.variantes.find((v: any) => v.id === varianteId)?.cantidad).toBe(6);"""
-          bloque_nuevo = """    const anularCompraTexto = await anularCompra.text();
-    expect(anularCompra.status(), anularCompraTexto).toBe(400);
-    expect(anularCompraTexto.toLowerCase()).toContain('movimientos posteriores');
-
-    productoActual = await dataOf(await request.get(`${API_URL}/productos/${productoId}`, { headers: headers() }));
-    expect(productoActual.cantidad).toBe(14);
-    expect(productoActual.variantes.find((v: any) => v.id === varianteId)?.cantidad).toBe(10);"""
+          bloque_anterior = (
+              "    expect(anularCompra.status(), await anularCompra.text()).toBe(200);\n\n"
+              "    productoActual = await dataOf(await request.get(`${API_URL}/productos/${productoId}`, { headers: headers() }));\n"
+              "    expect(productoActual.cantidad).toBe(10);\n"
+              "    expect(productoActual.variantes.find((v: any) => v.id === varianteId)?.cantidad).toBe(6);"
+          )
+          bloque_nuevo = (
+              "    const anularCompraTexto = await anularCompra.text();\n"
+              "    expect(anularCompra.status(), anularCompraTexto).toBe(400);\n"
+              "    expect(anularCompraTexto.toLowerCase()).toContain('movimientos posteriores');\n\n"
+              "    productoActual = await dataOf(await request.get(`${API_URL}/productos/${productoId}`, { headers: headers() }));\n"
+              "    expect(productoActual.cantidad).toBe(14);\n"
+              "    expect(productoActual.variantes.find((v: any) => v.id === varianteId)?.cantidad).toBe(10);"
+          )
           if texto.count(titulo_anterior) != 1:
               raise SystemExit('No se encontró exactamente una vez el título esperado de variantes.')
           if texto.count(bloque_anterior) != 1:
               raise SystemExit('No se encontró exactamente una vez el bloque esperado de anulación de compra.')
-          texto = texto.replace(titulo_anterior, titulo_nuevo, 1).replace(bloque_anterior, bloque_nuevo, 1)
+          texto = texto.replace(titulo_anterior, titulo_nuevo, 1)
+          texto = texto.replace(bloque_anterior, bloque_nuevo, 1)
           variantes.write_text(texto, encoding='utf-8')
 
           fase7 = Path('frontend/e2e/fase7-validacion-integral.spec.ts')
@@ -85,6 +88,9 @@ jobs:
           git config user.name 'jmejia31'
           git config user.email '93171442+jmejia31@users.noreply.github.com'
           git add frontend/e2e/fase4-variantes.spec.ts frontend/e2e/fase7-validacion-integral.spec.ts
-          git diff --cached --quiet && { echo 'No hay cambios para publicar.'; exit 1; }
+          if git diff --cached --quiet; then
+            echo 'No hay cambios para publicar.'
+            exit 1
+          fi
           git commit -m 'test(e2e): alinear aceptación con reglas conservadoras de inventario [ChatGPT]'
           git push origin HEAD:Desarrollo
