@@ -52,4 +52,22 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
         if (hasta.HasValue) query = query.Where(m => m.Fecha <= hasta.Value);
         return await query.OrderByDescending(m => m.Fecha).Take(200).ToListAsync();
     }
+
+    public async Task<int?> GetUltimoMovimientoOriginalCompraIdAsync(int compraId) =>
+        await _context.MovimientosInventario
+            .AsNoTracking()
+            .Where(m => m.ReferenciaTipo == "Compra" && m.ReferenciaId == compraId)
+            .MaxAsync(m => (int?)m.Id);
+
+    public async Task<bool> ExisteMovimientoPosteriorAsync(
+        int ultimoMovimientoOriginalId,
+        IReadOnlyCollection<int> productoIds)
+    {
+        var ids = productoIds.Distinct().ToArray();
+        if (ids.Length == 0) return false;
+
+        return await _context.MovimientosInventario
+            .AsNoTracking()
+            .AnyAsync(m => m.Id > ultimoMovimientoOriginalId && ids.Contains(m.ProductoId));
+    }
 }

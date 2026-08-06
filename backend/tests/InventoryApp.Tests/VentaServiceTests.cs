@@ -91,7 +91,12 @@ public class VentaServiceTests
             .Setup(c => c.BloquearYValidarInventarioAsync(
                 It.IsAny<IEnumerable<InventarioDemanda>>(),
                 It.IsAny<bool>()))
-            .ReturnsAsync(new InventarioLockSet(productos, variantes));
+            .ReturnsAsync(new InventarioLockSet(
+                productos,
+                variantes,
+                venta.Detalles
+                    .Select(d => new InventarioDemanda(d.ProductoId, d.ProductoVarianteId, d.Cantidad))
+                    .ToList()));
     }
 
     [Fact]

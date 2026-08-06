@@ -184,57 +184,51 @@ public class VentaService : IVentaService
                 .Select(d => new InventarioDemanda(d.ProductoId, d.ProductoVarianteId, d.Cantidad))
                 .ToList();
             var inventario = await _inventarioConcurrency.BloquearYValidarInventarioAsync(demanda, esDeduccion: true);
-            var productosMap = inventario.Productos;
-            var variantesMap = inventario.Variantes;
 
-            foreach (var detalle in venta.Detalles)
+            foreach (var productoGrupo in inventario.Demandas.GroupBy(x => x.ProductoId))
             {
-                if (!productosMap.TryGetValue(detalle.ProductoId, out var producto))
-                    throw new BusinessRuleException($"El producto '{detalle.ProductoNombreSnapshot}' ya no existe.");
+                var producto = inventario.Productos[productoGrupo.Key];
+                producto.Cantidad -= productoGrupo.Sum(x => x.Cantidad);
+                _productoRepository.Update(producto);
+            }
 
-                var stockAnteriorMovimiento = producto.Cantidad;
-                var stockNuevoMovimiento = producto.Cantidad - detalle.Cantidad;
+            foreach (var item in inventario.Demandas)
+            {
+                var producto = inventario.Productos[item.ProductoId];
+                var detallesClave = venta.Detalles
+                    .Where(d => d.ProductoId == item.ProductoId && d.ProductoVarianteId == item.ProductoVarianteId)
+                    .ToList();
+                var detalle = detallesClave[0];
+                var precioUnitarioMovimiento = detallesClave.Sum(d => d.Subtotal) / item.Cantidad;
+                var costoUnitarioMovimiento = detallesClave.Sum(d => d.CostoUnitarioSnapshot * d.Cantidad) / item.Cantidad;
 
-                if (detalle.ProductoVarianteId.HasValue)
+                var stockAnteriorMovimiento = producto.Cantidad + item.Cantidad;
+                var stockNuevoMovimiento = producto.Cantidad;
+
+                if (item.ProductoVarianteId.HasValue)
                 {
-                    if (!variantesMap.TryGetValue(detalle.ProductoVarianteId.Value, out var variante))
-                        throw new BusinessRuleException($"La variante de '{producto.Nombre}' ya no existe.");
-
+                    var variante = inventario.Variantes[item.ProductoVarianteId.Value];
                     if (!variante.Activo)
                         throw new BusinessRuleException($"La variante '{variante.Sku}' está inactiva y no puede venderse.");
 
-                    if (variante.Cantidad < detalle.Cantidad)
-                        throw new BusinessRuleException($"Stock insuficiente para la variante '{variante.Sku}': disponible {variante.Cantidad}, solicitado {detalle.Cantidad}.");
-
                     stockAnteriorMovimiento = variante.Cantidad;
-                    variante.Cantidad -= detalle.Cantidad;
+                    variante.Cantidad -= item.Cantidad;
                     stockNuevoMovimiento = variante.Cantidad;
                     _productoVarianteRepository.Update(variante);
-
-                    producto.Cantidad -= detalle.Cantidad;
-                    _productoRepository.Update(producto);
-                }
-                else
-                {
-                    if (producto.Cantidad < detalle.Cantidad)
-                        throw new BusinessRuleException($"Stock insuficiente para '{producto.Nombre}': disponible {producto.Cantidad}, solicitado {detalle.Cantidad}.");
-
-                    producto.Cantidad -= detalle.Cantidad;
-                    _productoRepository.Update(producto);
                 }
 
                 await _movimientoInventarioRepository.AddAsync(new MovimientoInventario
                 {
                     ProductoId = producto.Id,
-                    ProductoVarianteId = detalle.ProductoVarianteId,
+                    ProductoVarianteId = item.ProductoVarianteId,
                     ProductoColorSnapshot = detalle.ProductoColorSnapshot,
                     ProductoSkuSnapshot = detalle.ProductoSkuSnapshot,
                     Tipo = TipoMovimientoInventario.Salida,
-                    Cantidad = detalle.Cantidad,
+                    Cantidad = item.Cantidad,
                     StockAnterior = stockAnteriorMovimiento,
                     StockNuevo = stockNuevoMovimiento,
-                    PrecioUnitario = detalle.PrecioUnitario,
-                    CostoUnitario = detalle.CostoUnitarioSnapshot,
+                    PrecioUnitario = precioUnitarioMovimiento,
+                    CostoUnitario = costoUnitarioMovimiento,
                     ReferenciaTipo = "Venta",
                     ReferenciaId = venta.Id,
                     Descripcion = $"Salida por venta {venta.NumeroVenta}",
@@ -350,48 +344,48 @@ public class VentaService : IVentaService
                 .Select(d => new InventarioDemanda(d.ProductoId, d.ProductoVarianteId, d.Cantidad))
                 .ToList();
             var inventario = await _inventarioConcurrency.BloquearYValidarInventarioAsync(demanda, esDeduccion: false);
-            var productosMap = inventario.Productos;
-            var variantesMap = inventario.Variantes;
 
-            foreach (var detalle in venta.Detalles)
+            foreach (var productoGrupo in inventario.Demandas.GroupBy(x => x.ProductoId))
             {
-                if (!productosMap.TryGetValue(detalle.ProductoId, out var producto))
-                    throw new BusinessRuleException($"El producto '{detalle.ProductoNombreSnapshot}' ya no existe.");
+                var producto = inventario.Productos[productoGrupo.Key];
+                producto.Cantidad += productoGrupo.Sum(x => x.Cantidad);
+                _productoRepository.Update(producto);
+            }
 
-                var stockAnteriorMovimiento = producto.Cantidad;
-                var stockNuevoMovimiento = producto.Cantidad + detalle.Cantidad;
+            foreach (var item in inventario.Demandas)
+            {
+                var producto = inventario.Productos[item.ProductoId];
+                var detallesClave = venta.Detalles
+                    .Where(d => d.ProductoId == item.ProductoId && d.ProductoVarianteId == item.ProductoVarianteId)
+                    .ToList();
+                var detalle = detallesClave[0];
+                var precioUnitarioMovimiento = detallesClave.Sum(d => d.Subtotal) / item.Cantidad;
+                var costoUnitarioMovimiento = detallesClave.Sum(d => d.CostoUnitarioSnapshot * d.Cantidad) / item.Cantidad;
 
-                if (detalle.ProductoVarianteId.HasValue)
+                var stockAnteriorMovimiento = producto.Cantidad - item.Cantidad;
+                var stockNuevoMovimiento = producto.Cantidad;
+
+                if (item.ProductoVarianteId.HasValue)
                 {
-                    if (!variantesMap.TryGetValue(detalle.ProductoVarianteId.Value, out var variante))
-                        throw new BusinessRuleException($"La variante de '{producto.Nombre}' ya no existe.");
-
+                    var variante = inventario.Variantes[item.ProductoVarianteId.Value];
                     stockAnteriorMovimiento = variante.Cantidad;
-                    variante.Cantidad += detalle.Cantidad;
+                    variante.Cantidad += item.Cantidad;
                     stockNuevoMovimiento = variante.Cantidad;
                     _productoVarianteRepository.Update(variante);
-
-                    producto.Cantidad += detalle.Cantidad;
-                    _productoRepository.Update(producto);
-                }
-                else
-                {
-                    producto.Cantidad += detalle.Cantidad;
-                    _productoRepository.Update(producto);
                 }
 
                 await _movimientoInventarioRepository.AddAsync(new MovimientoInventario
                 {
                     ProductoId = producto.Id,
-                    ProductoVarianteId = detalle.ProductoVarianteId,
+                    ProductoVarianteId = item.ProductoVarianteId,
                     ProductoColorSnapshot = detalle.ProductoColorSnapshot,
                     ProductoSkuSnapshot = detalle.ProductoSkuSnapshot,
                     Tipo = TipoMovimientoInventario.Entrada,
-                    Cantidad = detalle.Cantidad,
+                    Cantidad = item.Cantidad,
                     StockAnterior = stockAnteriorMovimiento,
                     StockNuevo = stockNuevoMovimiento,
-                    PrecioUnitario = detalle.PrecioUnitario,
-                    CostoUnitario = detalle.CostoUnitarioSnapshot,
+                    PrecioUnitario = precioUnitarioMovimiento,
+                    CostoUnitario = costoUnitarioMovimiento,
                     ReferenciaTipo = "VentaAnulada",
                     ReferenciaId = venta.Id,
                     Descripcion = $"Entrada por anulación de venta {venta.NumeroVenta}. Motivo: {motivo}",

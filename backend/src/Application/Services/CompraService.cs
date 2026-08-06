@@ -186,26 +186,33 @@ public class CompraService : ICompraService
                 .Select(d => new InventarioDemanda(d.ProductoId, d.ProductoVarianteId, d.Cantidad))
                 .ToList();
             var inventario = await _inventarioConcurrency.BloquearYValidarInventarioAsync(demanda, esDeduccion: false);
-            var productosMap = inventario.Productos;
-            var variantesMap = inventario.Variantes;
 
-            foreach (var detalle in compra.Detalles)
+            var stocksProductoAnteriores = inventario.Productos.ToDictionary(x => x.Key, x => x.Value.Cantidad);
+            var costosProductoAnteriores = inventario.Productos.ToDictionary(x => x.Key, x => x.Value.Costo);
+
+            foreach (var item in inventario.Demandas)
             {
-                if (!productosMap.TryGetValue(detalle.ProductoId, out var producto))
-                    throw new BusinessRuleException($"El producto ID '{detalle.ProductoId}' ya no existe.");
+                var producto = inventario.Productos[item.ProductoId];
+                var detallesClave = compra.Detalles
+                    .Where(d => d.ProductoId == item.ProductoId && d.ProductoVarianteId == item.ProductoVarianteId)
+                    .ToList();
+                var detalle = detallesClave[0];
+                var valorEntrada = detallesClave.Sum(d => d.CostoUnitario * d.Cantidad);
+                var costoEntradaPonderado = valorEntrada / item.Cantidad;
 
-                var stockProductoAnterior = producto.Cantidad;
-                var stockAnteriorMovimiento = stockProductoAnterior;
-                var stockNuevoMovimiento = stockProductoAnterior + detalle.Cantidad;
+                var stockAnteriorMovimiento = stocksProductoAnteriores[item.ProductoId];
+                var stockNuevoMovimiento = stockAnteriorMovimiento + item.Cantidad;
 
-                if (detalle.ProductoVarianteId.HasValue)
+                if (item.ProductoVarianteId.HasValue)
                 {
-                    if (!variantesMap.TryGetValue(detalle.ProductoVarianteId.Value, out var variante))
-                        throw new BusinessRuleException($"La variante ID '{detalle.ProductoVarianteId.Value}' ya no existe.");
-
+                    var variante = inventario.Variantes[item.ProductoVarianteId.Value];
                     stockAnteriorMovimiento = variante.Cantidad;
-                    variante.Cantidad += detalle.Cantidad;
-                    variante.Costo = detalle.CostoUnitario;
+                    var valorAnteriorVariante = (variante.Costo ?? 0m) * variante.Cantidad;
+                    variante.Cantidad += item.Cantidad;
+                    variante.Costo = Math.Round(
+                        (valorAnteriorVariante + valorEntrada) / variante.Cantidad,
+                        2,
+                        MidpointRounding.AwayFromZero);
                     variante.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
                     variante.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
                     variante.FechaActualizacion = DateTime.UtcNow;
@@ -213,29 +220,44 @@ public class CompraService : ICompraService
                     _productoVarianteRepository.Update(variante);
                 }
 
-                producto.Cantidad += detalle.Cantidad;
-                producto.Costo = producto.Cantidad > 0
-                    ? Math.Round(((producto.Costo * stockProductoAnterior) + (detalle.CostoUnitario * detalle.Cantidad)) / producto.Cantidad, 2, MidpointRounding.AwayFromZero)
-                    : detalle.CostoUnitario;
-                _productoRepository.Update(producto);
-
                 await _movimientoInventarioRepository.AddAsync(new MovimientoInventario
                 {
                     ProductoId = producto.Id,
-                    ProductoVarianteId = detalle.ProductoVarianteId,
+                    ProductoVarianteId = item.ProductoVarianteId,
                     ProductoColorSnapshot = detalle.ProductoColorSnapshot,
                     ProductoSkuSnapshot = detalle.ProductoSkuSnapshot,
                     Tipo = TipoMovimientoInventario.Entrada,
-                    Cantidad = detalle.Cantidad,
+                    Cantidad = item.Cantidad,
                     StockAnterior = stockAnteriorMovimiento,
                     StockNuevo = stockNuevoMovimiento,
-                    CostoUnitario = detalle.CostoUnitario,
+                    CostoUnitario = costoEntradaPonderado,
                     ReferenciaTipo = "Compra",
                     ReferenciaId = compra.Id,
                     Descripcion = $"Entrada por compra {compra.NumeroCompra}",
                     CreadoPorUsuarioId = _currentUser.UsuarioId,
                     CreadoPorNombreUsuario = _currentUser.NombreUsuario
                 });
+            }
+
+            foreach (var productoGrupo in inventario.Demandas.GroupBy(x => x.ProductoId))
+            {
+                var producto = inventario.Productos[productoGrupo.Key];
+                var cantidadEntrada = productoGrupo.Sum(x => x.Cantidad);
+                var valorEntrada = compra.Detalles
+                    .Where(d => d.ProductoId == producto.Id)
+                    .Sum(d => d.CostoUnitario * d.Cantidad);
+                var stockAnterior = stocksProductoAnteriores[producto.Id];
+                var costoAnterior = costosProductoAnteriores[producto.Id];
+                var stockNuevo = stockAnterior + cantidadEntrada;
+
+                producto.Cantidad = stockNuevo;
+                producto.Costo = stockNuevo > 0
+                    ? Math.Round(
+                        ((costoAnterior * stockAnterior) + valorEntrada) / stockNuevo,
+                        2,
+                        MidpointRounding.AwayFromZero)
+                    : 0m;
+                _productoRepository.Update(producto);
             }
 
             await _movimientoFinancieroRepository.AddAsync(new MovimientoFinanciero
@@ -289,72 +311,68 @@ public class CompraService : ICompraService
                 .Select(d => new InventarioDemanda(d.ProductoId, d.ProductoVarianteId, d.Cantidad))
                 .ToList();
             var inventario = await _inventarioConcurrency.BloquearYValidarInventarioAsync(demanda, esDeduccion: true);
-            var productosMap = inventario.Productos;
-            var variantesMap = inventario.Variantes;
 
-            var productoIds = inventario.Productos.Keys.ToList();
-            var varianteIds = inventario.Variantes.Keys.ToList();
-            var movimientosOriginales = (await _movimientoInventarioRepository.GetFilteredAsync(null, null, null, null)) ?? new List<MovimientoInventario>();
-            var maxOriginalId = movimientosOriginales
-                .Where(m => m.ReferenciaTipo == "Compra" && m.ReferenciaId == compra.Id)
-                .Select(m => (int?)m.Id)
-                .Max() ?? 0;
+            var productoIds = inventario.Productos.Keys.OrderBy(x => x).ToArray();
+            var ultimoMovimientoOriginalId = await _movimientoInventarioRepository
+                .GetUltimoMovimientoOriginalCompraIdAsync(compra.Id)
+                ?? throw new BusinessRuleException(
+                    "No se encontraron los movimientos originales de la compra; la anulación no puede ejecutarse de forma segura.");
 
-            var tieneMovimientoPosterior = movimientosOriginales
-                .Any(m => m.Id > maxOriginalId && (productoIds.Contains(m.ProductoId) || (m.ProductoVarianteId.HasValue && varianteIds.Contains(m.ProductoVarianteId.Value))));
-
-            if (tieneMovimientoPosterior)
+            if (await _movimientoInventarioRepository.ExisteMovimientoPosteriorAsync(
+                    ultimoMovimientoOriginalId,
+                    productoIds))
             {
                 throw new BusinessRuleException(
                     "No se puede anular la compra porque existen movimientos posteriores de inventario sobre sus productos o variantes.");
             }
 
-            foreach (var detalle in compra.Detalles)
+            var stocksProductoAnteriores = inventario.Productos.ToDictionary(x => x.Key, x => x.Value.Cantidad);
+
+            foreach (var item in inventario.Demandas)
             {
-                if (!productosMap.TryGetValue(detalle.ProductoId, out var producto))
-                    throw new BusinessRuleException($"El producto '{detalle.ProductoNombreSnapshot}' ya no existe.");
+                var producto = inventario.Productos[item.ProductoId];
+                var detallesClave = compra.Detalles
+                    .Where(d => d.ProductoId == item.ProductoId && d.ProductoVarianteId == item.ProductoVarianteId)
+                    .ToList();
+                var detalle = detallesClave[0];
+                var costoUnitarioMovimiento = detallesClave.Sum(d => d.CostoUnitario * d.Cantidad) / item.Cantidad;
 
-                var stockAnteriorMovimiento = producto.Cantidad;
-                var stockNuevoMovimiento = producto.Cantidad - detalle.Cantidad;
+                var stockAnteriorMovimiento = stocksProductoAnteriores[item.ProductoId];
+                var stockNuevoMovimiento = stockAnteriorMovimiento - item.Cantidad;
 
-                if (detalle.ProductoVarianteId.HasValue)
+                if (item.ProductoVarianteId.HasValue)
                 {
-                    if (!variantesMap.TryGetValue(detalle.ProductoVarianteId.Value, out var variante))
-                        throw new BusinessRuleException($"La variante ID '{detalle.ProductoVarianteId.Value}' ya no existe.");
-
-                    if (variante.Cantidad < detalle.Cantidad)
-                        throw new BusinessRuleException($"No se puede anular: la variante '{variante.Sku}' no tiene suficientes unidades.");
+                    var variante = inventario.Variantes[item.ProductoVarianteId.Value];
                     stockAnteriorMovimiento = variante.Cantidad;
-                    variante.Cantidad -= detalle.Cantidad;
+                    variante.Cantidad -= item.Cantidad;
                     stockNuevoMovimiento = variante.Cantidad;
                     _productoVarianteRepository.Update(variante);
                 }
-                else if (producto.Cantidad < detalle.Cantidad)
-                {
-                    throw new BusinessRuleException(
-                        $"No se puede anular: el producto '{producto.Nombre}' ya no tiene suficientes unidades para revertir la compra.");
-                }
-
-                producto.Cantidad -= detalle.Cantidad;
-                _productoRepository.Update(producto);
 
                 await _movimientoInventarioRepository.AddAsync(new MovimientoInventario
                 {
                     ProductoId = producto.Id,
-                    ProductoVarianteId = detalle.ProductoVarianteId,
+                    ProductoVarianteId = item.ProductoVarianteId,
                     ProductoColorSnapshot = detalle.ProductoColorSnapshot,
                     ProductoSkuSnapshot = detalle.ProductoSkuSnapshot,
                     Tipo = TipoMovimientoInventario.Salida,
-                    Cantidad = detalle.Cantidad,
+                    Cantidad = item.Cantidad,
                     StockAnterior = stockAnteriorMovimiento,
                     StockNuevo = stockNuevoMovimiento,
-                    CostoUnitario = detalle.CostoUnitario,
+                    CostoUnitario = costoUnitarioMovimiento,
                     ReferenciaTipo = "CompraAnulada",
                     ReferenciaId = compra.Id,
                     Descripcion = $"Salida por anulación de compra {compra.NumeroCompra}. Motivo: {motivo}",
                     CreadoPorUsuarioId = _currentUser.UsuarioId,
                     CreadoPorNombreUsuario = _currentUser.NombreUsuario
                 });
+            }
+
+            foreach (var productoGrupo in inventario.Demandas.GroupBy(x => x.ProductoId))
+            {
+                var producto = inventario.Productos[productoGrupo.Key];
+                producto.Cantidad = stocksProductoAnteriores[producto.Id] - productoGrupo.Sum(x => x.Cantidad);
+                _productoRepository.Update(producto);
             }
 
             await _movimientoFinancieroRepository.AddAsync(new MovimientoFinanciero

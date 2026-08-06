@@ -49,7 +49,8 @@ public class InventarioConcurrencyService : IInventarioConcurrencyService
         {
             return new InventarioLockSet(
                 new Dictionary<int, InventoryApp.Domain.Entities.Producto>(),
-                new Dictionary<int, InventoryApp.Domain.Entities.ProductoVariante>());
+                new Dictionary<int, InventoryApp.Domain.Entities.ProductoVariante>(),
+                Array.Empty<InventarioDemanda>());
         }
 
         var productoIds = consolidada
@@ -71,10 +72,22 @@ public class InventarioConcurrencyService : IInventarioConcurrencyService
         var variantesMap = (await _productoVarianteRepository.GetByIdsForUpdateAsync(varianteIds))
             .ToDictionary(v => v.Id);
 
+        foreach (var productoGrupo in consolidada.GroupBy(x => x.ProductoId))
+        {
+            if (!productosMap.TryGetValue(productoGrupo.Key, out var producto))
+                throw new BusinessRuleException($"El producto ID '{productoGrupo.Key}' no existe o fue eliminado.");
+
+            var cantidadTotalProducto = productoGrupo.Sum(x => x.Cantidad);
+            if (esDeduccion && producto.Cantidad < cantidadTotalProducto)
+            {
+                throw new BusinessRuleException(
+                    $"Stock insuficiente para '{producto.Nombre}': disponible {producto.Cantidad}, solicitado {cantidadTotalProducto}.");
+            }
+        }
+
         foreach (var item in consolidada)
         {
-            if (!productosMap.TryGetValue(item.ProductoId, out var producto))
-                throw new BusinessRuleException($"El producto ID '{item.ProductoId}' no existe o fue eliminado.");
+            var producto = productosMap[item.ProductoId];
 
             if (item.ProductoVarianteId.HasValue)
             {
@@ -90,14 +103,9 @@ public class InventarioConcurrencyService : IInventarioConcurrencyService
                         $"Stock insuficiente para la variante '{variante.Sku}': disponible {variante.Cantidad}, solicitado {item.Cantidad}.");
                 }
             }
-            else if (esDeduccion && producto.Cantidad < item.Cantidad)
-            {
-                throw new BusinessRuleException(
-                    $"Stock insuficiente para '{producto.Nombre}': disponible {producto.Cantidad}, solicitado {item.Cantidad}.");
-            }
         }
 
-        return new InventarioLockSet(productosMap, variantesMap);
+        return new InventarioLockSet(productosMap, variantesMap, consolidada);
     }
 
     public async Task AjustarStockPesimistaAsync(

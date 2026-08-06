@@ -80,10 +80,20 @@ public class CompraServiceTests
             .Setup(c => c.BloquearYValidarInventarioAsync(
                 It.IsAny<IEnumerable<InventarioDemanda>>(),
                 It.IsAny<bool>()))
-            .ReturnsAsync(new InventarioLockSet(productos, variantes));
+            .ReturnsAsync(new InventarioLockSet(
+                productos,
+                variantes,
+                compra.Detalles
+                    .Select(d => new InventarioDemanda(d.ProductoId, d.ProductoVarianteId, d.Cantidad))
+                    .ToList()));
         _movInvRepoMock
-            .Setup(r => r.GetFilteredAsync(null, null, null, null))
-            .ReturnsAsync(new List<MovimientoInventario>());
+            .Setup(r => r.GetUltimoMovimientoOriginalCompraIdAsync(compra.Id))
+            .ReturnsAsync(1);
+        _movInvRepoMock
+            .Setup(r => r.ExisteMovimientoPosteriorAsync(
+                It.IsAny<int>(),
+                It.IsAny<IReadOnlyCollection<int>>()))
+            .ReturnsAsync(false);
     }
 
     [Fact]

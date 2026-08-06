@@ -13,14 +13,17 @@ public sealed class InventarioLockSet
 {
     public InventarioLockSet(
         IReadOnlyDictionary<int, Producto> productos,
-        IReadOnlyDictionary<int, ProductoVariante> variantes)
+        IReadOnlyDictionary<int, ProductoVariante> variantes,
+        IReadOnlyList<InventarioDemanda>? demandas = null)
     {
         Productos = productos;
         Variantes = variantes;
+        Demandas = demandas ?? Array.Empty<InventarioDemanda>();
     }
 
     public IReadOnlyDictionary<int, Producto> Productos { get; }
     public IReadOnlyDictionary<int, ProductoVariante> Variantes { get; }
+    public IReadOnlyList<InventarioDemanda> Demandas { get; }
 }
 
 public interface IInventarioConcurrencyService
