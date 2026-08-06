@@ -51,5 +51,5 @@ jobs:
           git config user.name "jmejia31"
           git config user.email "93171442+jmejia31@users.noreply.github.com"
           git add backend
-          git commit -m "feat(inventario): conectar ajustes formales con control de concurrencia [ChatGPT]"
+          git commit -m "feat(cargas): aplicar snapshots fail-closed bajo locks [ChatGPT]"
           git push origin HEAD:Desarrollo
