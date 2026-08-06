@@ -5,7 +5,7 @@ on:
     branches:
       - Desarrollo
     paths:
-      - .github/patches/**
+      - .github/patches/chatgpt_patch_uow.py
       - .github/workflows/chatgpt-patch.yml
 
 permissions:
@@ -37,10 +37,8 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
 
-      - name: Aplicar parches controlados
-        run: |
-          python3 .github/patches/chatgpt_patch.py
-          python3 .github/patches/chatgpt_patch_fix.py
+      - name: Aplicar parche controlado
+        run: python3 .github/patches/chatgpt_patch_uow.py
 
       - name: Validar formato del diff
         run: git diff --check
@@ -68,5 +66,5 @@ jobs:
           git config user.name "jmejia31"
           git config user.email "93171442+jmejia31@users.noreply.github.com"
           git add backend frontend
-          git commit -m "fix(inventario): serializar mantenimiento de variantes [ChatGPT]"
+          git commit -m "fix(cargas): ejecutar confirmacion reintentable y bloquear ajustes nulos [ChatGPT]"
           git push origin HEAD:Desarrollo
