@@ -29,6 +29,13 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
       - name: Aplicar parche controlado
         run: python3 .github/patches/chatgpt_patch.py
 
@@ -42,6 +49,13 @@ jobs:
           dotnet build InventoryApp.sln --configuration Release --no-restore
           dotnet test InventoryApp.sln --configuration Release --no-build --filter "Category!=Integration"
 
+      - name: Validar frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run lint
+          npm run build:prod
+
       - name: Publicar corrección en Desarrollo
         run: |
           if git diff --quiet; then
@@ -50,6 +64,6 @@ jobs:
           fi
           git config user.name "jmejia31"
           git config user.email "93171442+jmejia31@users.noreply.github.com"
-          git add backend
-          git commit -m "feat(cargas): aplicar snapshots fail-closed bajo locks [ChatGPT]"
+          git add backend frontend
+          git commit -m "feat(inventario): conectar ajustes formales en frontend [ChatGPT]"
           git push origin HEAD:Desarrollo
