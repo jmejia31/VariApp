@@ -170,7 +170,7 @@ public class CompraService : ICompraService
     {
         await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
-            var compra = await _compraRepository.GetByIdForUpdateAsync(id) ?? await _compraRepository.GetByIdAsync(id);
+            var compra = await _compraRepository.GetByIdForUpdateAsync(id);
             if (compra is null)
                 throw new KeyNotFoundException($"Compra ID '{id}' no encontrada.");
 
@@ -182,26 +182,10 @@ public class CompraService : ICompraService
             var productoIds = compra.Detalles.Select(d => d.ProductoId).Distinct().OrderBy(x => x).ToList();
             var varianteIds = compra.Detalles.Where(d => d.ProductoVarianteId.HasValue).Select(d => d.ProductoVarianteId!.Value).Distinct().OrderBy(x => x).ToList();
 
-            var productosList = (await _productoRepository.GetByIdsForUpdateAsync(productoIds)) ?? new List<Producto>();
-            if (productosList.Count == 0 && productoIds.Count > 0)
-            {
-                foreach (var pid in productoIds)
-                {
-                    var p = await _productoRepository.GetByIdAsync(pid);
-                    if (p != null) productosList.Add(p);
-                }
-            }
+            var productosList = await _productoRepository.GetByIdsForUpdateAsync(productoIds);
             var productosMap = productosList.ToDictionary(p => p.Id);
 
-            var variantesList = (await _productoVarianteRepository.GetByIdsForUpdateAsync(varianteIds)) ?? new List<ProductoVariante>();
-            if (variantesList.Count == 0 && varianteIds.Count > 0)
-            {
-                foreach (var vid in varianteIds)
-                {
-                    var v = await _productoVarianteRepository.GetByIdAsync(vid);
-                    if (v != null) variantesList.Add(v);
-                }
-            }
+            var variantesList = await _productoVarianteRepository.GetByIdsForUpdateAsync(varianteIds);
             var variantesMap = variantesList.ToDictionary(v => v.Id);
 
             foreach (var detalle in compra.Detalles)
@@ -293,7 +277,7 @@ public class CompraService : ICompraService
 
         await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
-            var compra = await _compraRepository.GetByIdForUpdateAsync(id) ?? await _compraRepository.GetByIdAsync(id);
+            var compra = await _compraRepository.GetByIdForUpdateAsync(id);
             if (compra is null)
                 throw new KeyNotFoundException($"Compra ID '{id}' no encontrada.");
 
@@ -317,26 +301,10 @@ public class CompraService : ICompraService
                     "No se puede anular la compra porque existen movimientos posteriores de inventario sobre sus productos o variantes.");
             }
 
-            var productosList = (await _productoRepository.GetByIdsForUpdateAsync(productoIds)) ?? new List<Producto>();
-            if (productosList.Count == 0 && productoIds.Count > 0)
-            {
-                foreach (var pid in productoIds)
-                {
-                    var p = await _productoRepository.GetByIdAsync(pid);
-                    if (p != null) productosList.Add(p);
-                }
-            }
+            var productosList = await _productoRepository.GetByIdsForUpdateAsync(productoIds);
             var productosMap = productosList.ToDictionary(p => p.Id);
 
-            var variantesList = (await _productoVarianteRepository.GetByIdsForUpdateAsync(varianteIds)) ?? new List<ProductoVariante>();
-            if (variantesList.Count == 0 && varianteIds.Count > 0)
-            {
-                foreach (var vid in varianteIds)
-                {
-                    var v = await _productoVarianteRepository.GetByIdAsync(vid);
-                    if (v != null) variantesList.Add(v);
-                }
-            }
+            var variantesList = await _productoVarianteRepository.GetByIdsForUpdateAsync(varianteIds);
             var variantesMap = variantesList.ToDictionary(v => v.Id);
 
             foreach (var detalle in compra.Detalles)
@@ -349,15 +317,15 @@ public class CompraService : ICompraService
 
                 if (detalle.ProductoVarianteId.HasValue)
                 {
-                    if (variantesMap.TryGetValue(detalle.ProductoVarianteId.Value, out var variante))
-                    {
-                        if (variante.Cantidad < detalle.Cantidad)
-                            throw new BusinessRuleException($"No se puede anular: la variante '{variante.Sku}' no tiene suficientes unidades.");
-                        stockAnteriorMovimiento = variante.Cantidad;
-                        variante.Cantidad -= detalle.Cantidad;
-                        stockNuevoMovimiento = variante.Cantidad;
-                        _productoVarianteRepository.Update(variante);
-                    }
+                    if (!variantesMap.TryGetValue(detalle.ProductoVarianteId.Value, out var variante))
+                        throw new BusinessRuleException($"La variante ID '{detalle.ProductoVarianteId.Value}' ya no existe.");
+
+                    if (variante.Cantidad < detalle.Cantidad)
+                        throw new BusinessRuleException($"No se puede anular: la variante '{variante.Sku}' no tiene suficientes unidades.");
+                    stockAnteriorMovimiento = variante.Cantidad;
+                    variante.Cantidad -= detalle.Cantidad;
+                    stockNuevoMovimiento = variante.Cantidad;
+                    _productoVarianteRepository.Update(variante);
                 }
                 else if (producto.Cantidad < detalle.Cantidad)
                 {

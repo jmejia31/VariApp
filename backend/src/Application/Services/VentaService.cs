@@ -168,8 +168,7 @@ public class VentaService : IVentaService
 
         await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
-            // 1. Bloquear pesimistamente la cabecera de la venta en MySQL (con fallback a GetByIdAsync para pruebas unitarias con Mocks)
-            var venta = await _ventaRepository.GetByIdForUpdateAsync(id) ?? await _ventaRepository.GetByIdAsync(id);
+            var venta = await _ventaRepository.GetByIdForUpdateAsync(id);
             if (venta is null)
                 throw new KeyNotFoundException($"Venta ID '{id}' no encontrada.");
 
@@ -178,34 +177,15 @@ public class VentaService : IVentaService
             if (venta.Detalles.Count == 0)
                 throw new BusinessRuleException("La venta debe tener al menos un producto para confirmarse.");
 
-            // 2. Extraer IDs primitivos para bloqueos secuenciales pesimistas
             var productoIds = venta.Detalles.Select(d => d.ProductoId).Distinct().OrderBy(x => x).ToList();
             var varianteIds = venta.Detalles.Where(d => d.ProductoVarianteId.HasValue).Select(d => d.ProductoVarianteId!.Value).Distinct().OrderBy(x => x).ToList();
 
-            // 3. Bloquear Productos ASC y Variantes ASC en la jerarquía pesimista global
-            var productosList = (await _productoRepository.GetByIdsForUpdateAsync(productoIds)) ?? new List<Producto>();
-            if (productosList.Count == 0 && productoIds.Count > 0)
-            {
-                foreach (var pid in productoIds)
-                {
-                    var p = await _productoRepository.GetByIdAsync(pid);
-                    if (p != null) productosList.Add(p);
-                }
-            }
+            var productosList = await _productoRepository.GetByIdsForUpdateAsync(productoIds);
             var productosMap = productosList.ToDictionary(p => p.Id);
 
-            var variantesList = (await _productoVarianteRepository.GetByIdsForUpdateAsync(varianteIds)) ?? new List<ProductoVariante>();
-            if (variantesList.Count == 0 && varianteIds.Count > 0)
-            {
-                foreach (var vid in varianteIds)
-                {
-                    var v = await _productoVarianteRepository.GetByIdAsync(vid);
-                    if (v != null) variantesList.Add(v);
-                }
-            }
+            var variantesList = await _productoVarianteRepository.GetByIdsForUpdateAsync(varianteIds);
             var variantesMap = variantesList.ToDictionary(v => v.Id);
 
-            // 4. Validar existencias y procesar deducciones
             foreach (var detalle in venta.Detalles)
             {
                 if (!productosMap.TryGetValue(detalle.ProductoId, out var producto))
@@ -286,7 +266,6 @@ public class VentaService : IVentaService
             venta.FechaConfirmacion = DateTime.UtcNow;
             _ventaRepository.Update(venta);
 
-            // Generar factura automáticamente
             var factura = new Factura
             {
                 VentaId = venta.Id,
@@ -336,14 +315,9 @@ public class VentaService : IVentaService
             await _facturaRepository.AddAsync(factura);
             await _facturaRepository.SaveChangesAsync();
 
-            // La numeración definitiva deriva del Id asignado por MySQL y por eso
-            // permanece única incluso cuando varias ventas se confirman a la vez.
             factura.NumeroFactura = $"FAC-{factura.Id:D6}";
             _facturaRepository.Update(factura);
 
-            // Registrar el uso histórico (incrementa UsosRealizados de cada
-            // descuento, guarda HistorialAplicacionImpuesto) SOLO al confirmar,
-            // nunca al crear/editar un borrador que podría nunca confirmarse.
             await _calculoService.RegistrarUsoVentaAsync(
                 venta.Id, venta.ClienteId,
                 venta.DescuentosAplicados.ToList(),
@@ -364,7 +338,7 @@ public class VentaService : IVentaService
 
         await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
-            var venta = await _ventaRepository.GetByIdForUpdateAsync(id) ?? await _ventaRepository.GetByIdAsync(id);
+            var venta = await _ventaRepository.GetByIdForUpdateAsync(id);
             if (venta is null)
                 throw new KeyNotFoundException($"Venta ID '{id}' no encontrada.");
 
@@ -374,26 +348,10 @@ public class VentaService : IVentaService
             var productoIds = venta.Detalles.Select(d => d.ProductoId).Distinct().OrderBy(x => x).ToList();
             var varianteIds = venta.Detalles.Where(d => d.ProductoVarianteId.HasValue).Select(d => d.ProductoVarianteId!.Value).Distinct().OrderBy(x => x).ToList();
 
-            var productosList = (await _productoRepository.GetByIdsForUpdateAsync(productoIds)) ?? new List<Producto>();
-            if (productosList.Count == 0 && productoIds.Count > 0)
-            {
-                foreach (var pid in productoIds)
-                {
-                    var p = await _productoRepository.GetByIdAsync(pid);
-                    if (p != null) productosList.Add(p);
-                }
-            }
+            var productosList = await _productoRepository.GetByIdsForUpdateAsync(productoIds);
             var productosMap = productosList.ToDictionary(p => p.Id);
 
-            var variantesList = (await _productoVarianteRepository.GetByIdsForUpdateAsync(varianteIds)) ?? new List<ProductoVariante>();
-            if (variantesList.Count == 0 && varianteIds.Count > 0)
-            {
-                foreach (var vid in varianteIds)
-                {
-                    var v = await _productoVarianteRepository.GetByIdAsync(vid);
-                    if (v != null) variantesList.Add(v);
-                }
-            }
+            var variantesList = await _productoVarianteRepository.GetByIdsForUpdateAsync(varianteIds);
             var variantesMap = variantesList.ToDictionary(v => v.Id);
 
             foreach (var detalle in venta.Detalles)
@@ -406,16 +364,16 @@ public class VentaService : IVentaService
 
                 if (detalle.ProductoVarianteId.HasValue)
                 {
-                    if (variantesMap.TryGetValue(detalle.ProductoVarianteId.Value, out var variante))
-                    {
-                        stockAnteriorMovimiento = variante.Cantidad;
-                        variante.Cantidad += detalle.Cantidad;
-                        stockNuevoMovimiento = variante.Cantidad;
-                        _productoVarianteRepository.Update(variante);
+                    if (!variantesMap.TryGetValue(detalle.ProductoVarianteId.Value, out var variante))
+                        throw new BusinessRuleException($"La variante de '{producto.Nombre}' ya no existe.");
 
-                        producto.Cantidad += detalle.Cantidad;
-                        _productoRepository.Update(producto);
-                    }
+                    stockAnteriorMovimiento = variante.Cantidad;
+                    variante.Cantidad += detalle.Cantidad;
+                    stockNuevoMovimiento = variante.Cantidad;
+                    _productoVarianteRepository.Update(variante);
+
+                    producto.Cantidad += detalle.Cantidad;
+                    _productoRepository.Update(producto);
                 }
                 else
                 {
@@ -652,13 +610,11 @@ public class VentaService : IVentaService
         var entradas = venta.Detalles.Select(d => new DetalleCalculoInput
         {
             ProductoId = d.ProductoId,
-            CategoriaId = null, // se resuelve dentro del motor si se necesita por categoría
+            CategoriaId = null,
             Cantidad = d.Cantidad,
             PrecioUnitario = d.PrecioUnitario
         }).ToList();
 
-        // Resolver CategoriaId real de cada producto para que el motor pueda
-        // evaluar descuentos/impuestos con alcance por categoría.
         foreach (var entrada in entradas)
         {
             var producto = await _productoRepository.GetByIdAsync(entrada.ProductoId);

@@ -32,7 +32,6 @@ public class VentaServiceTests
         _currentUserMock.Setup(c => c.NombreCompleto).Returns("Vendedor Uno");
         _ventaRepoMock.Setup(r => r.SaveChangesAsync()).ReturnsAsync(true);
         _empresaMock.Setup(e => e.GetActivaEntidadAsync()).ReturnsAsync(new EmpresaConfiguracion());
-        
         _predeterminadoResolverMock.Setup(r => r.ResolverIdPredeterminadoAsync()).ReturnsAsync(1);
 
         _service = new VentaService(
@@ -76,13 +75,24 @@ public class VentaServiceTests
         return venta;
     }
 
+    private void PrepararBloqueos(Venta venta, Producto producto, ProductoVariante? variante = null)
+    {
+        _ventaRepoMock.Setup(r => r.GetByIdForUpdateAsync(venta.Id)).ReturnsAsync(venta);
+        _ventaRepoMock.Setup(r => r.GetByIdAsync(venta.Id)).ReturnsAsync(venta);
+        _productoRepoMock
+            .Setup(r => r.GetByIdsForUpdateAsync(It.IsAny<IEnumerable<int>>()))
+            .ReturnsAsync(new List<Producto> { producto });
+        _varianteRepoMock
+            .Setup(r => r.GetByIdsForUpdateAsync(It.IsAny<IEnumerable<int>>()))
+            .ReturnsAsync(variante is null ? new List<ProductoVariante>() : new List<ProductoVariante> { variante });
+    }
+
     [Fact]
     public async Task ConfirmarAsync_Reduce_Stock_Y_Guarda_Vendedor()
     {
         var producto = ProductoDePrueba(cantidad: 10);
         var venta = VentaDePrueba(cantidadDetalle: 3);
-        _ventaRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(venta);
-        _productoRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(producto);
+        PrepararBloqueos(venta, producto);
 
         var resultado = await _service.ConfirmarAsync(1);
 
@@ -98,9 +108,7 @@ public class VentaServiceTests
         var producto = ProductoDePrueba(cantidad: 10);
         var variante = new ProductoVariante { Id = 8, ProductoId = 1, Sku = "M185-BLK", Cantidad = 6, Activo = true };
         var venta = VentaDePrueba(cantidadDetalle: 2, varianteId: variante.Id);
-        _ventaRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(venta);
-        _productoRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(producto);
-        _varianteRepoMock.Setup(r => r.GetByIdAsync(8)).ReturnsAsync(variante);
+        PrepararBloqueos(venta, producto, variante);
 
         var resultado = await _service.ConfirmarAsync(1);
 
@@ -117,9 +125,7 @@ public class VentaServiceTests
         var producto = ProductoDePrueba(cantidad: 10);
         var variante = new ProductoVariante { Id = 8, ProductoId = 1, Sku = "M185-BLK", Cantidad = 1, Activo = true };
         var venta = VentaDePrueba(cantidadDetalle: 2, varianteId: variante.Id);
-        _ventaRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(venta);
-        _productoRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(producto);
-        _varianteRepoMock.Setup(r => r.GetByIdAsync(8)).ReturnsAsync(variante);
+        PrepararBloqueos(venta, producto, variante);
 
         await Assert.ThrowsAsync<BusinessRuleException>(() => _service.ConfirmarAsync(1));
         Assert.Equal(1, variante.Cantidad);
@@ -131,8 +137,7 @@ public class VentaServiceTests
     {
         var producto = ProductoDePrueba(cantidad: 2);
         var venta = VentaDePrueba(cantidadDetalle: 5);
-        _ventaRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(venta);
-        _productoRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(producto);
+        PrepararBloqueos(venta, producto);
 
         await Assert.ThrowsAsync<BusinessRuleException>(() => _service.ConfirmarAsync(1));
 
@@ -146,8 +151,7 @@ public class VentaServiceTests
     {
         var producto = ProductoDePrueba(cantidad: 10);
         var venta = VentaDePrueba(cantidadDetalle: 2);
-        _ventaRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(venta);
-        _productoRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(producto);
+        PrepararBloqueos(venta, producto);
         Factura? facturaCreada = null;
         _facturaRepoMock.Setup(r => r.AddAsync(It.IsAny<Factura>()))
             .Callback<Factura>(f => { f.Id = 1; facturaCreada = f; })
@@ -168,8 +172,7 @@ public class VentaServiceTests
         var venta = VentaDePrueba(cantidadDetalle: 3);
         venta.Estado = EstadoDocumento.Confirmada;
         var factura = new Factura { Id = 1, VentaId = 1, NumeroFactura = "FAC-000001", Estado = EstadoFactura.Emitida };
-        _ventaRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(venta);
-        _productoRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(producto);
+        PrepararBloqueos(venta, producto);
         _facturaRepoMock.Setup(r => r.GetByVentaIdAsync(1)).ReturnsAsync(factura);
 
         var resultado = await _service.AnularAsync(1, "Cliente se arrepintió");
@@ -187,9 +190,7 @@ public class VentaServiceTests
         var variante = new ProductoVariante { Id = 8, ProductoId = 1, Sku = "M185-BLK", Cantidad = 4, Activo = false };
         var venta = VentaDePrueba(cantidadDetalle: 2, varianteId: 8);
         venta.Estado = EstadoDocumento.Confirmada;
-        _ventaRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(venta);
-        _productoRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(producto);
-        _varianteRepoMock.Setup(r => r.GetByIdAsync(8)).ReturnsAsync(variante);
+        PrepararBloqueos(venta, producto, variante);
 
         await _service.AnularAsync(1, "Anulación controlada");
 

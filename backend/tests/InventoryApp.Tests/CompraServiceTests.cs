@@ -64,13 +64,27 @@ public class CompraServiceTests
         return compra;
     }
 
+    private void PrepararBloqueos(Compra compra, Producto producto, ProductoVariante? variante = null)
+    {
+        _compraRepoMock.Setup(r => r.GetByIdForUpdateAsync(compra.Id)).ReturnsAsync(compra);
+        _compraRepoMock.Setup(r => r.GetByIdAsync(compra.Id)).ReturnsAsync(compra);
+        _productoRepoMock
+            .Setup(r => r.GetByIdsForUpdateAsync(It.IsAny<IEnumerable<int>>()))
+            .ReturnsAsync(new List<Producto> { producto });
+        _varianteRepoMock
+            .Setup(r => r.GetByIdsForUpdateAsync(It.IsAny<IEnumerable<int>>()))
+            .ReturnsAsync(variante is null ? new List<ProductoVariante>() : new List<ProductoVariante> { variante });
+        _movInvRepoMock
+            .Setup(r => r.GetFilteredAsync(null, null, null, null))
+            .ReturnsAsync(new List<MovimientoInventario>());
+    }
+
     [Fact]
     public async Task ConfirmarAsync_Aumenta_Stock_Y_Guarda_Usuario_Responsable()
     {
         var producto = ProductoDePrueba(cantidad: 10);
         var compra = CompraDePrueba();
-        _compraRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(compra);
-        _productoRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(producto);
+        PrepararBloqueos(compra, producto);
 
         var resultado = await _service.ConfirmarAsync(1);
 
@@ -87,9 +101,7 @@ public class CompraServiceTests
         var producto = ProductoDePrueba(cantidad: 10);
         var variante = new ProductoVariante { Id = 8, ProductoId = 1, Sku = "M185-BLK", Cantidad = 3, Costo = 4, Precio = 10, Activo = true };
         var compra = CompraDePrueba(cantidad: 5, varianteId: 8);
-        _compraRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(compra);
-        _productoRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(producto);
-        _varianteRepoMock.Setup(r => r.GetByIdAsync(8)).ReturnsAsync(variante);
+        PrepararBloqueos(compra, producto, variante);
 
         var resultado = await _service.ConfirmarAsync(1);
 
@@ -104,7 +116,7 @@ public class CompraServiceTests
     public async Task ConfirmarAsync_Compra_Ya_Confirmada_Lanza_Excepcion()
     {
         var compra = new Compra { Id = 1, Estado = EstadoDocumento.Confirmada };
-        _compraRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(compra);
+        _compraRepoMock.Setup(r => r.GetByIdForUpdateAsync(1)).ReturnsAsync(compra);
         await Assert.ThrowsAsync<BusinessRuleException>(() => _service.ConfirmarAsync(1));
     }
 
@@ -113,8 +125,7 @@ public class CompraServiceTests
     {
         var producto = ProductoDePrueba(cantidad: 15);
         var compra = CompraDePrueba(estado: EstadoDocumento.Confirmada);
-        _compraRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(compra);
-        _productoRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(producto);
+        PrepararBloqueos(compra, producto);
 
         var resultado = await _service.AnularAsync(1, "Producto dañado devuelto al proveedor");
 
@@ -130,9 +141,7 @@ public class CompraServiceTests
         var producto = ProductoDePrueba(cantidad: 15);
         var variante = new ProductoVariante { Id = 8, ProductoId = 1, Sku = "M185-BLK", Cantidad = 8, Activo = false };
         var compra = CompraDePrueba(cantidad: 5, varianteId: 8, estado: EstadoDocumento.Confirmada);
-        _compraRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(compra);
-        _productoRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(producto);
-        _varianteRepoMock.Setup(r => r.GetByIdAsync(8)).ReturnsAsync(variante);
+        PrepararBloqueos(compra, producto, variante);
 
         await _service.AnularAsync(1, "Reversión controlada");
 
@@ -146,9 +155,7 @@ public class CompraServiceTests
         var producto = ProductoDePrueba(cantidad: 12);
         var variante = new ProductoVariante { Id = 8, ProductoId = 1, Sku = "M185-BLK", Cantidad = 2, Activo = true };
         var compra = CompraDePrueba(cantidad: 5, varianteId: 8, estado: EstadoDocumento.Confirmada);
-        _compraRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(compra);
-        _productoRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(producto);
-        _varianteRepoMock.Setup(r => r.GetByIdAsync(8)).ReturnsAsync(variante);
+        PrepararBloqueos(compra, producto, variante);
 
         await Assert.ThrowsAsync<BusinessRuleException>(() => _service.AnularAsync(1, "motivo"));
         Assert.Equal(2, variante.Cantidad);
@@ -157,8 +164,6 @@ public class CompraServiceTests
     [Fact]
     public async Task AnularAsync_Sin_Motivo_Lanza_Excepcion()
     {
-        var compra = new Compra { Id = 1, Estado = EstadoDocumento.Confirmada };
-        _compraRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(compra);
         await Assert.ThrowsAsync<BusinessRuleException>(() => _service.AnularAsync(1, ""));
     }
 
