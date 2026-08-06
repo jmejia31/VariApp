@@ -25,8 +25,7 @@ public class TipoClienteConcurrencyTests
     private DbContextOptions<AppDbContext> CreateOptions(string dbName)
     {
         return new DbContextOptionsBuilder<AppDbContext>()
-            .UseMySql(GetConnectionString(dbName), new MySqlServerVersion(new Version(8, 4, 3)),
-                mysqlOptions => mysqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(5), new[] { 1205, 1213 }))
+            .UseMySql(GetConnectionString(dbName), new MySqlServerVersion(new Version(8, 4, 3)))
             .Options;
     }
 

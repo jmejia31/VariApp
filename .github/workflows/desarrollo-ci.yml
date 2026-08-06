@@ -46,7 +46,7 @@ jobs:
           cache-dependency-path: backend/**/*.csproj
       - run: dotnet restore InventoryApp.sln
       - run: dotnet build InventoryApp.sln --configuration Release --no-restore
-      - run: dotnet test InventoryApp.sln --configuration Release --no-build --logger "trx;LogFileName=tests.trx"
+      - run: dotnet test InventoryApp.sln --configuration Release --no-build --filter "Category!=Integration" --logger "trx;LogFileName=tests.trx"
       - if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -138,12 +138,28 @@ jobs:
               ('Color', 'Negro legado CI', 'Conversión CI', '#111827', 1, 1, 0, UTC_TIMESTAMP(6), UTC_TIMESTAMP(6));
             SET @color_id = LAST_INSERT_ID();
             UPDATE Productos SET ColorId = @color_id WHERE Nombre = 'Teléfono legado CI';"
+      - name: Preflight comprobación predeterminados activos
+        working-directory: .
+        run: |
+          set -euo pipefail
+          mysql_container="${{ job.services.mysql.id }}"
+          duplicados="$(docker exec "$mysql_container" mysql -uroot -proot inventoryapp_ci -Nse "
+            SELECT COUNT(*) FROM TipoClientes
+            WHERE EsPredeterminado = 1 AND Activo = 1 AND Eliminado = 0;" 2>/dev/null || echo "0")"
+          if [ "$duplicados" -gt 1 ]; then
+            echo "Error Preflight: Existen $duplicados tipos predeterminados activos." >&2
+            exit 1
+          fi
+          echo "Preflight OK: $duplicados predeterminados activos."
       - name: Aplicar migraciones actuales
         run: |
           dotnet ef database update \
             --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
             --startup-project src/API/InventoryApp.API.csproj \
             --context AppDbContext
+      - name: Ejecutar pruebas de integración MySQL
+        run: |
+          dotnet test InventoryApp.sln --configuration Release --filter "Category=Integration"
       - name: Verificar variante legado, cargas y snapshot
         working-directory: .
         run: |

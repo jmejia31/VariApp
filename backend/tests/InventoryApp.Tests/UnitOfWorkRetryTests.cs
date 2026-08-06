@@ -60,4 +60,61 @@ public class UnitOfWorkRetryTests
 
         Assert.Same(originalEx, thrown);
     }
+
+    [Fact]
+    public async Task ExecuteInTransactionAsync_ReintentaErrorTransitorio1205_YSucedeEnSegundoIntento()
+    {
+        await using var context = CreateInMemoryContext();
+        var uow = new UnitOfWork(context);
+
+        int attempts = 0;
+        await uow.ExecuteInTransactionAsync(() =>
+        {
+            attempts++;
+            if (attempts == 1)
+            {
+                throw new Exception("Error 1205: Lock wait timeout exceeded; try restarting transaction");
+            }
+            return Task.CompletedTask;
+        });
+
+        Assert.Equal(2, attempts);
+    }
+
+    [Fact]
+    public async Task ExecuteInTransactionAsync_ReintentaErrorTransitorio1213_YSucedeEnSegundoIntento()
+    {
+        await using var context = CreateInMemoryContext();
+        var uow = new UnitOfWork(context);
+
+        int attempts = 0;
+        await uow.ExecuteInTransactionAsync(() =>
+        {
+            attempts++;
+            if (attempts == 1)
+            {
+                throw new Exception("Error 1213: Deadlock found when trying to get lock; try restarting transaction");
+            }
+            return Task.CompletedTask;
+        });
+
+        Assert.Equal(2, attempts);
+    }
+
+    [Fact]
+    public async Task ExecuteInTransactionAsync_NoReintentaErrorGenericoOMaximoSuperado()
+    {
+        await using var context = CreateInMemoryContext();
+        var uow = new UnitOfWork(context);
+
+        int attempts = 0;
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            uow.ExecuteInTransactionAsync(() =>
+            {
+                attempts++;
+                throw new InvalidOperationException("Standard failure");
+            }));
+
+        Assert.Equal(1, attempts);
+    }
 }
