@@ -15,6 +15,7 @@ public class VentaServiceTests
     private readonly Mock<IClienteRepository> _clienteRepoMock = new();
     private readonly Mock<IProductoRepository> _productoRepoMock = new();
     private readonly Mock<IProductoVarianteRepository> _varianteRepoMock = new();
+    private readonly Mock<IInventarioConcurrencyService> _inventarioConcurrencyMock = new();
     private readonly Mock<IFacturaRepository> _facturaRepoMock = new();
     private readonly Mock<IMovimientoInventarioRepository> _movInvRepoMock = new();
     private readonly Mock<IMovimientoFinancieroRepository> _movFinRepoMock = new();
@@ -39,6 +40,7 @@ public class VentaServiceTests
             _clienteRepoMock.Object,
             _productoRepoMock.Object,
             _varianteRepoMock.Object,
+            _inventarioConcurrencyMock.Object,
             _facturaRepoMock.Object,
             _movInvRepoMock.Object,
             _movFinRepoMock.Object,
@@ -79,12 +81,17 @@ public class VentaServiceTests
     {
         _ventaRepoMock.Setup(r => r.GetByIdForUpdateAsync(venta.Id)).ReturnsAsync(venta);
         _ventaRepoMock.Setup(r => r.GetByIdAsync(venta.Id)).ReturnsAsync(venta);
-        _productoRepoMock
-            .Setup(r => r.GetByIdsForUpdateAsync(It.IsAny<IEnumerable<int>>()))
-            .ReturnsAsync(new List<Producto> { producto });
-        _varianteRepoMock
-            .Setup(r => r.GetByIdsForUpdateAsync(It.IsAny<IEnumerable<int>>()))
-            .ReturnsAsync(variante is null ? new List<ProductoVariante>() : new List<ProductoVariante> { variante });
+
+        var productos = new Dictionary<int, Producto> { [producto.Id] = producto };
+        var variantes = variante is null
+            ? new Dictionary<int, ProductoVariante>()
+            : new Dictionary<int, ProductoVariante> { [variante.Id] = variante };
+
+        _inventarioConcurrencyMock
+            .Setup(c => c.BloquearYValidarInventarioAsync(
+                It.IsAny<IEnumerable<InventarioDemanda>>(),
+                It.IsAny<bool>()))
+            .ReturnsAsync(new InventarioLockSet(productos, variantes));
     }
 
     [Fact]
@@ -126,6 +133,9 @@ public class VentaServiceTests
         var variante = new ProductoVariante { Id = 8, ProductoId = 1, Sku = "M185-BLK", Cantidad = 1, Activo = true };
         var venta = VentaDePrueba(cantidadDetalle: 2, varianteId: variante.Id);
         PrepararBloqueos(venta, producto, variante);
+        _inventarioConcurrencyMock
+            .Setup(c => c.BloquearYValidarInventarioAsync(It.IsAny<IEnumerable<InventarioDemanda>>(), true))
+            .ThrowsAsync(new BusinessRuleException("Stock insuficiente."));
 
         await Assert.ThrowsAsync<BusinessRuleException>(() => _service.ConfirmarAsync(1));
         Assert.Equal(1, variante.Cantidad);
@@ -138,6 +148,9 @@ public class VentaServiceTests
         var producto = ProductoDePrueba(cantidad: 2);
         var venta = VentaDePrueba(cantidadDetalle: 5);
         PrepararBloqueos(venta, producto);
+        _inventarioConcurrencyMock
+            .Setup(c => c.BloquearYValidarInventarioAsync(It.IsAny<IEnumerable<InventarioDemanda>>(), true))
+            .ThrowsAsync(new BusinessRuleException("Stock insuficiente."));
 
         await Assert.ThrowsAsync<BusinessRuleException>(() => _service.ConfirmarAsync(1));
 

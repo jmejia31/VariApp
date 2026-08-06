@@ -13,6 +13,7 @@ public class VentaService : IVentaService
     private readonly IClienteRepository _clienteRepository;
     private readonly IProductoRepository _productoRepository;
     private readonly IProductoVarianteRepository _productoVarianteRepository;
+    private readonly IInventarioConcurrencyService _inventarioConcurrency;
     private readonly IFacturaRepository _facturaRepository;
     private readonly IMovimientoInventarioRepository _movimientoInventarioRepository;
     private readonly IMovimientoFinancieroRepository _movimientoFinancieroRepository;
@@ -28,6 +29,7 @@ public class VentaService : IVentaService
         IClienteRepository clienteRepository,
         IProductoRepository productoRepository,
         IProductoVarianteRepository productoVarianteRepository,
+        IInventarioConcurrencyService inventarioConcurrency,
         IFacturaRepository facturaRepository,
         IMovimientoInventarioRepository movimientoInventarioRepository,
         IMovimientoFinancieroRepository movimientoFinancieroRepository,
@@ -42,6 +44,7 @@ public class VentaService : IVentaService
         _clienteRepository = clienteRepository;
         _productoRepository = productoRepository;
         _productoVarianteRepository = productoVarianteRepository;
+        _inventarioConcurrency = inventarioConcurrency;
         _facturaRepository = facturaRepository;
         _movimientoInventarioRepository = movimientoInventarioRepository;
         _movimientoFinancieroRepository = movimientoFinancieroRepository;
@@ -177,14 +180,12 @@ public class VentaService : IVentaService
             if (venta.Detalles.Count == 0)
                 throw new BusinessRuleException("La venta debe tener al menos un producto para confirmarse.");
 
-            var productoIds = venta.Detalles.Select(d => d.ProductoId).Distinct().OrderBy(x => x).ToList();
-            var varianteIds = venta.Detalles.Where(d => d.ProductoVarianteId.HasValue).Select(d => d.ProductoVarianteId!.Value).Distinct().OrderBy(x => x).ToList();
-
-            var productosList = await _productoRepository.GetByIdsForUpdateAsync(productoIds);
-            var productosMap = productosList.ToDictionary(p => p.Id);
-
-            var variantesList = await _productoVarianteRepository.GetByIdsForUpdateAsync(varianteIds);
-            var variantesMap = variantesList.ToDictionary(v => v.Id);
+            var demanda = venta.Detalles
+                .Select(d => new InventarioDemanda(d.ProductoId, d.ProductoVarianteId, d.Cantidad))
+                .ToList();
+            var inventario = await _inventarioConcurrency.BloquearYValidarInventarioAsync(demanda, esDeduccion: true);
+            var productosMap = inventario.Productos;
+            var variantesMap = inventario.Variantes;
 
             foreach (var detalle in venta.Detalles)
             {
@@ -345,14 +346,12 @@ public class VentaService : IVentaService
             if (venta.Estado != EstadoDocumento.Confirmada)
                 throw new BusinessRuleException("Solo se pueden anular ventas confirmadas.");
 
-            var productoIds = venta.Detalles.Select(d => d.ProductoId).Distinct().OrderBy(x => x).ToList();
-            var varianteIds = venta.Detalles.Where(d => d.ProductoVarianteId.HasValue).Select(d => d.ProductoVarianteId!.Value).Distinct().OrderBy(x => x).ToList();
-
-            var productosList = await _productoRepository.GetByIdsForUpdateAsync(productoIds);
-            var productosMap = productosList.ToDictionary(p => p.Id);
-
-            var variantesList = await _productoVarianteRepository.GetByIdsForUpdateAsync(varianteIds);
-            var variantesMap = variantesList.ToDictionary(v => v.Id);
+            var demanda = venta.Detalles
+                .Select(d => new InventarioDemanda(d.ProductoId, d.ProductoVarianteId, d.Cantidad))
+                .ToList();
+            var inventario = await _inventarioConcurrency.BloquearYValidarInventarioAsync(demanda, esDeduccion: false);
+            var productosMap = inventario.Productos;
+            var variantesMap = inventario.Variantes;
 
             foreach (var detalle in venta.Detalles)
             {

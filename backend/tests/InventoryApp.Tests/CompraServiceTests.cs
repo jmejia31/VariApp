@@ -16,6 +16,7 @@ public class CompraServiceTests
     private readonly Mock<IProveedorRepository> _proveedorRepoMock = new();
     private readonly Mock<IProductoRepository> _productoRepoMock = new();
     private readonly Mock<IProductoVarianteRepository> _varianteRepoMock = new();
+    private readonly Mock<IInventarioConcurrencyService> _inventarioConcurrencyMock = new();
     private readonly Mock<IMovimientoInventarioRepository> _movInvRepoMock = new();
     private readonly Mock<IMovimientoFinancieroRepository> _movFinRepoMock = new();
     private readonly Mock<ICalculoService> _calculoMock = new();
@@ -34,6 +35,7 @@ public class CompraServiceTests
             _proveedorRepoMock.Object,
             _productoRepoMock.Object,
             _varianteRepoMock.Object,
+            _inventarioConcurrencyMock.Object,
             _movInvRepoMock.Object,
             _movFinRepoMock.Object,
             _calculoMock.Object,
@@ -68,12 +70,17 @@ public class CompraServiceTests
     {
         _compraRepoMock.Setup(r => r.GetByIdForUpdateAsync(compra.Id)).ReturnsAsync(compra);
         _compraRepoMock.Setup(r => r.GetByIdAsync(compra.Id)).ReturnsAsync(compra);
-        _productoRepoMock
-            .Setup(r => r.GetByIdsForUpdateAsync(It.IsAny<IEnumerable<int>>()))
-            .ReturnsAsync(new List<Producto> { producto });
-        _varianteRepoMock
-            .Setup(r => r.GetByIdsForUpdateAsync(It.IsAny<IEnumerable<int>>()))
-            .ReturnsAsync(variante is null ? new List<ProductoVariante>() : new List<ProductoVariante> { variante });
+
+        var productos = new Dictionary<int, Producto> { [producto.Id] = producto };
+        var variantes = variante is null
+            ? new Dictionary<int, ProductoVariante>()
+            : new Dictionary<int, ProductoVariante> { [variante.Id] = variante };
+
+        _inventarioConcurrencyMock
+            .Setup(c => c.BloquearYValidarInventarioAsync(
+                It.IsAny<IEnumerable<InventarioDemanda>>(),
+                It.IsAny<bool>()))
+            .ReturnsAsync(new InventarioLockSet(productos, variantes));
         _movInvRepoMock
             .Setup(r => r.GetFilteredAsync(null, null, null, null))
             .ReturnsAsync(new List<MovimientoInventario>());
@@ -156,6 +163,9 @@ public class CompraServiceTests
         var variante = new ProductoVariante { Id = 8, ProductoId = 1, Sku = "M185-BLK", Cantidad = 2, Activo = true };
         var compra = CompraDePrueba(cantidad: 5, varianteId: 8, estado: EstadoDocumento.Confirmada);
         PrepararBloqueos(compra, producto, variante);
+        _inventarioConcurrencyMock
+            .Setup(c => c.BloquearYValidarInventarioAsync(It.IsAny<IEnumerable<InventarioDemanda>>(), true))
+            .ThrowsAsync(new BusinessRuleException("Stock insuficiente."));
 
         await Assert.ThrowsAsync<BusinessRuleException>(() => _service.AnularAsync(1, "motivo"));
         Assert.Equal(2, variante.Cantidad);

@@ -13,6 +13,7 @@ public class CompraService : ICompraService
     private readonly IProveedorRepository _proveedorRepository;
     private readonly IProductoRepository _productoRepository;
     private readonly IProductoVarianteRepository _productoVarianteRepository;
+    private readonly IInventarioConcurrencyService _inventarioConcurrency;
     private readonly IMovimientoInventarioRepository _movimientoInventarioRepository;
     private readonly IMovimientoFinancieroRepository _movimientoFinancieroRepository;
     private readonly ICalculoService _calculoService;
@@ -25,6 +26,7 @@ public class CompraService : ICompraService
         IProveedorRepository proveedorRepository,
         IProductoRepository productoRepository,
         IProductoVarianteRepository productoVarianteRepository,
+        IInventarioConcurrencyService inventarioConcurrency,
         IMovimientoInventarioRepository movimientoInventarioRepository,
         IMovimientoFinancieroRepository movimientoFinancieroRepository,
         ICalculoService calculoService,
@@ -36,6 +38,7 @@ public class CompraService : ICompraService
         _proveedorRepository = proveedorRepository;
         _productoRepository = productoRepository;
         _productoVarianteRepository = productoVarianteRepository;
+        _inventarioConcurrency = inventarioConcurrency;
         _movimientoInventarioRepository = movimientoInventarioRepository;
         _movimientoFinancieroRepository = movimientoFinancieroRepository;
         _calculoService = calculoService;
@@ -179,14 +182,12 @@ public class CompraService : ICompraService
             if (compra.Detalles.Count == 0)
                 throw new BusinessRuleException("La compra debe tener al menos un producto para confirmarse.");
 
-            var productoIds = compra.Detalles.Select(d => d.ProductoId).Distinct().OrderBy(x => x).ToList();
-            var varianteIds = compra.Detalles.Where(d => d.ProductoVarianteId.HasValue).Select(d => d.ProductoVarianteId!.Value).Distinct().OrderBy(x => x).ToList();
-
-            var productosList = await _productoRepository.GetByIdsForUpdateAsync(productoIds);
-            var productosMap = productosList.ToDictionary(p => p.Id);
-
-            var variantesList = await _productoVarianteRepository.GetByIdsForUpdateAsync(varianteIds);
-            var variantesMap = variantesList.ToDictionary(v => v.Id);
+            var demanda = compra.Detalles
+                .Select(d => new InventarioDemanda(d.ProductoId, d.ProductoVarianteId, d.Cantidad))
+                .ToList();
+            var inventario = await _inventarioConcurrency.BloquearYValidarInventarioAsync(demanda, esDeduccion: false);
+            var productosMap = inventario.Productos;
+            var variantesMap = inventario.Variantes;
 
             foreach (var detalle in compra.Detalles)
             {
@@ -284,8 +285,15 @@ public class CompraService : ICompraService
             if (compra.Estado != EstadoDocumento.Confirmada)
                 throw new BusinessRuleException("Solo se pueden anular compras confirmadas.");
 
-            var productoIds = compra.Detalles.Select(d => d.ProductoId).Distinct().OrderBy(x => x).ToList();
-            var varianteIds = compra.Detalles.Where(d => d.ProductoVarianteId.HasValue).Select(d => d.ProductoVarianteId!.Value).Distinct().OrderBy(x => x).ToList();
+            var demanda = compra.Detalles
+                .Select(d => new InventarioDemanda(d.ProductoId, d.ProductoVarianteId, d.Cantidad))
+                .ToList();
+            var inventario = await _inventarioConcurrency.BloquearYValidarInventarioAsync(demanda, esDeduccion: true);
+            var productosMap = inventario.Productos;
+            var variantesMap = inventario.Variantes;
+
+            var productoIds = inventario.Productos.Keys.ToList();
+            var varianteIds = inventario.Variantes.Keys.ToList();
             var movimientosOriginales = (await _movimientoInventarioRepository.GetFilteredAsync(null, null, null, null)) ?? new List<MovimientoInventario>();
             var maxOriginalId = movimientosOriginales
                 .Where(m => m.ReferenciaTipo == "Compra" && m.ReferenciaId == compra.Id)
@@ -300,12 +308,6 @@ public class CompraService : ICompraService
                 throw new BusinessRuleException(
                     "No se puede anular la compra porque existen movimientos posteriores de inventario sobre sus productos o variantes.");
             }
-
-            var productosList = await _productoRepository.GetByIdsForUpdateAsync(productoIds);
-            var productosMap = productosList.ToDictionary(p => p.Id);
-
-            var variantesList = await _productoVarianteRepository.GetByIdsForUpdateAsync(varianteIds);
-            var variantesMap = variantesList.ToDictionary(v => v.Id);
 
             foreach (var detalle in compra.Detalles)
             {

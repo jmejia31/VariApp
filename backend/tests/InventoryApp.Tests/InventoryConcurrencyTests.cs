@@ -40,7 +40,6 @@ public class InventoryConcurrencyTests
         int varianteId = 0;
         var ventaIds = new List<int>();
 
-        // 1. Setup inicial con Migraciones reales y 5 unidades de stock
         await using (var setupContext = new AppDbContext(options))
         {
             await setupContext.Database.MigrateAsync();
@@ -75,7 +74,6 @@ public class InventoryConcurrencyTests
             await setupContext.SaveChangesAsync();
             varianteId = variante.Id;
 
-            // Crear 10 borradores de venta para confirmación concurrente
             for (int i = 1; i <= 10; i++)
             {
                 var venta = new Venta
@@ -104,7 +102,6 @@ public class InventoryConcurrencyTests
             }
         }
 
-        // 2. Ejecutar 10 confirmaciones concurrentes con scopes independientes
         var tasks = ventaIds.Select(async id =>
         {
             await using var context = new AppDbContext(options);
@@ -115,6 +112,7 @@ public class InventoryConcurrencyTests
             var ventaRepo = new VentaRepository(context, Mock.Of<ICurrentUserService>(), scopeMock.Object);
             var prodRepo = new ProductoRepository(context);
             var varRepo = new ProductoVarianteRepository(context);
+            var inventarioConcurrency = new InventarioConcurrencyService(context, prodRepo, varRepo);
             var facturaRepo = new FacturaRepository(context, scopeMock.Object, null);
             var movInvRepo = new MovimientoInventarioRepository(context, scopeMock.Object);
             var movFinRepo = new MovimientoFinancieroRepository(context, scopeMock.Object);
@@ -127,7 +125,7 @@ public class InventoryConcurrencyTests
 
             var service = new VentaService(
                 ventaRepo, Mock.Of<IClienteRepository>(), prodRepo, varRepo,
-                facturaRepo, movInvRepo, movFinRepo, empresaMock.Object,
+                inventarioConcurrency, facturaRepo, movInvRepo, movFinRepo, empresaMock.Object,
                 calculoMock.Object, Mock.Of<ICurrentUserService>(), uow, auditMock.Object,
                 Mock.Of<ITipoClientePredeterminadoResolver>());
 
@@ -150,7 +148,6 @@ public class InventoryConcurrencyTests
         Assert.Equal(5, exitosas);
         Assert.Equal(5, fallidas);
 
-        // 3. Verificación final de existencias en MySQL
         await using (var verifyContext = new AppDbContext(options))
         {
             var pFinal = await verifyContext.Productos.FindAsync(productoId);
