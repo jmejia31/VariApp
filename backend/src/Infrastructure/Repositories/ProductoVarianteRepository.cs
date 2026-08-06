@@ -55,6 +55,21 @@ public class ProductoVarianteRepository : IProductoVarianteRepository
         return query.OrderBy(v => v.Color!.Nombre).ThenBy(v => v.Sku).ToListAsync();
     }
 
+    public Task<ProductoVariante?> GetTecnicaByProductoIdAsync(
+        int productoId,
+        bool incluirEliminada = false)
+    {
+        var query = Query()
+            .IgnoreQueryFilters()
+            .Where(v => v.ProductoId == productoId && v.EsTecnica);
+        if (!incluirEliminada)
+            query = query.Where(v => !v.Eliminado);
+
+        return query
+            .OrderByDescending(v => v.Id)
+            .FirstOrDefaultAsync();
+    }
+
     public Task<ProductoVariante?> GetBySkuAsync(string sku) =>
         Query().FirstOrDefaultAsync(v => !v.Eliminado && v.Sku == sku);
 
