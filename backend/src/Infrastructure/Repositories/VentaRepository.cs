@@ -69,22 +69,28 @@ public class VentaRepository : IVentaRepository
             throw new InvalidOperationException("GetByIdForUpdateAsync requiere una transacción activa.");
 
         var alcance = await _usuarioScope.ObtenerActualAsync();
+        if (alcance is null)
+            return null;
 
-        // 1. Bloquear pesimistamente la cabecera del documento
-        var cabecera = await _context.Ventas
-            .FromSqlInterpolated($"SELECT v.* FROM Ventas v WHERE v.Id = {id} AND v.Eliminado = 0 FOR UPDATE")
-            .AsTracking()
-            .FirstOrDefaultAsync();
+        Venta? cabecera;
+        if (alcance.EsAdministrador)
+        {
+            cabecera = await _context.Ventas
+                .FromSqlInterpolated($"SELECT v.* FROM Ventas v WHERE v.Id = {id} AND v.Eliminado = 0 FOR UPDATE")
+                .AsTracking()
+                .FirstOrDefaultAsync();
+        }
+        else
+        {
+            cabecera = await _context.Ventas
+                .FromSqlInterpolated($"SELECT v.* FROM Ventas v WHERE v.Id = {id} AND v.Eliminado = 0 AND v.CreadoPorUsuarioId = {alcance.UsuarioId} FOR UPDATE")
+                .AsTracking()
+                .FirstOrDefaultAsync();
+        }
 
-        if (cabecera is null) return null;
+        if (cabecera is null)
+            return null;
 
-        // 2. Aplicar filtro de alcance de seguridad de usuario
-        var permitida = await AplicarAlcance(_context.Ventas.Where(v => v.Id == id), alcance)
-            .AnyAsync();
-
-        if (!permitida) return null;
-
-        // 3. Cargar detalles y colecciones dentro de la misma transacción
         await _context.Entry(cabecera).Collection(v => v.Detalles).LoadAsync();
         await _context.Entry(cabecera).Collection(v => v.DescuentosAplicados).LoadAsync();
         await _context.Entry(cabecera).Collection(v => v.ImpuestosAplicados).LoadAsync();
