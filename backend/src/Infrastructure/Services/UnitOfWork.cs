@@ -30,12 +30,17 @@ public class UnitOfWork : IUnitOfWork
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
-                throw TranslateException(ex);
+                var translated = TranslateException(ex);
+                if (translated != null)
+                {
+                    throw translated;
+                }
+                throw;
             }
         });
     }
 
-    private Exception TranslateException(Exception ex)
+    private Exception? TranslateException(Exception ex)
     {
         if (ex is DbUpdateException dbUpdateEx)
         {
@@ -52,6 +57,6 @@ public class UnitOfWork : IUnitOfWork
                 inner = inner.InnerException;
             }
         }
-        return ex;
+        return null;
     }
 }

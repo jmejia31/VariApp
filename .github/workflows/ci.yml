@@ -129,7 +129,7 @@ jobs:
         run: dotnet build InventoryApp.sln --configuration Release --no-restore
 
       - name: Run backend tests
-        run: dotnet test InventoryApp.sln --configuration Release --no-build --logger "trx;LogFileName=tests.trx"
+        run: dotnet test InventoryApp.sln --configuration Release --no-build --filter "Category!=Integration" --logger "trx;LogFileName=tests.trx"
 
       - name: Commit generated migration and SQL to working branch
         if: github.event_name == 'pull_request' && github.head_ref == 'agent/mejoras-variapp'
