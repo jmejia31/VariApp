@@ -1,0 +1,173 @@
+from pathlib import Path
+
+
+def replace_once(path: str, old: str, new: str) -> None:
+    file = Path(path)
+    text = file.read_text(encoding="utf-8")
+    count = text.count(old)
+    if count != 1:
+        raise SystemExit(f"{path}: se esperaba 1 coincidencia y se encontraron {count}")
+    file.write_text(text.replace(old, new, 1), encoding="utf-8")
+
+
+# Fase 6: cada producto simple devuelve también su variante técnica.
+path = "frontend/e2e/fase6-facturacion-impresion.spec.ts"
+replace_once(
+    path,
+    """async function crearProducto(request: APIRequestContext, indice: number): Promise<number> {
+  const response = await request.post(`${API_URL}/productos`, {""",
+    """async function crearProducto(
+  request: APIRequestContext,
+  indice: number
+): Promise<{ id: number; varianteTecnicaId: number }> {
+  const response = await request.post(`${API_URL}/productos`, {""",
+)
+replace_once(
+    path,
+    """  expect(response.status(), await response.text()).toBe(201);
+  return (await dataOf(response)).id;
+}""",
+    """  expect(response.status(), await response.text()).toBe(201);
+  const producto = await dataOf(response);
+  const variantesResponse = await request.get(`${API_URL}/productos/${producto.id}/variantes`, {
+    headers: authHeaders()
+  });
+  expect(variantesResponse.status(), await variantesResponse.text()).toBe(200);
+  const variantes = await dataOf(variantesResponse);
+  const tecnica = variantes.find((item: any) => item.esTecnica === true);
+  expect(tecnica, `El producto ${producto.id} debe tener una variante técnica.`).toBeTruthy();
+  return { id: Number(producto.id), varianteTecnicaId: Number(tecnica.id) };
+}""",
+)
+replace_once(
+    path,
+    """        detalles: productos.map((productoId, index) => ({
+          productoId,
+          cantidad: index + 1,
+          precioUnitario: 170 + (index + 1) * 25
+        }))""",
+    """        detalles: productos.map((producto, index) => ({
+          productoId: producto.id,
+          productoVarianteId: producto.varianteTecnicaId,
+          cantidad: index + 1,
+          precioUnitario: 170 + (index + 1) * 25
+        }))""",
+)
+
+# Fase 7 integral: helper canónico y referencias explícitas.
+path = "frontend/e2e/fase7-validacion-integral.spec.ts"
+replace_once(
+    path,
+    "let productoSimpleId = 0;\n",
+    "let productoSimpleId = 0;\nlet productoSimpleVarianteTecnicaId = 0;\n",
+)
+replace_once(
+    path,
+    """async function crearVenta(
+  request: APIRequestContext,""",
+    """async function obtenerVarianteTecnicaId(
+  request: APIRequestContext,
+  productoId: number
+): Promise<number> {
+  const response = await request.get(`${API_URL}/productos/${productoId}/variantes`, {
+    headers: headers()
+  });
+  expect(response.status(), await response.text()).toBe(200);
+  const variantes = await dataOf(response);
+  const tecnica = variantes.find((item: any) => item.esTecnica === true);
+  expect(tecnica, `El producto ${productoId} debe tener una variante técnica.`).toBeTruthy();
+  return Number(tecnica.id);
+}
+
+async function crearVenta(
+  request: APIRequestContext,""",
+)
+replace_once(
+    path,
+    """    const simple = await crearProductoSimple(request, nombres.productoSimple, 20, 150);
+    productoSimpleId = simple.id;
+""",
+    """    const simple = await crearProductoSimple(request, nombres.productoSimple, 20, 150);
+    productoSimpleId = simple.id;
+    productoSimpleVarianteTecnicaId = await obtenerVarianteTecnicaId(request, productoSimpleId);
+""",
+)
+file = Path(path)
+text = file.read_text(encoding="utf-8")
+old = "{ productoId: productoSimpleId, cantidad:"
+new = "{ productoId: productoSimpleId, productoVarianteId: productoSimpleVarianteTecnicaId, cantidad:"
+if text.count(old) < 4:
+    raise SystemExit(f"{path}: se esperaban al menos 4 detalles simples y se encontraron {text.count(old)}")
+text = text.replace(old, new)
+replace_loop = """      const producto = await crearProductoSimple(request, `Producto concurrencia F7 ${suffix}-${index}`, 2, 120 + index);
+      ventas.push(await crearVenta(request,
+        [{ productoId: producto.id, cantidad: 1, precioUnitario: 120 + index }],
+        { costoEnvioId: envioPredeterminado.id }));"""
+replacement_loop = """      const producto = await crearProductoSimple(request, `Producto concurrencia F7 ${suffix}-${index}`, 2, 120 + index);
+      const varianteTecnicaId = await obtenerVarianteTecnicaId(request, Number(producto.id));
+      ventas.push(await crearVenta(request,
+        [{
+          productoId: producto.id,
+          productoVarianteId: varianteTecnicaId,
+          cantidad: 1,
+          precioUnitario: 120 + index
+        }],
+        { costoEnvioId: envioPredeterminado.id }));"""
+if text.count(replace_loop) != 1:
+    raise SystemExit(f"{path}: no se encontró el bucle concurrente esperado.")
+file.write_text(text.replace(replace_loop, replacement_loop, 1), encoding="utf-8")
+
+# Aislamiento: el helper resuelve la técnica con el mismo token del vendedor.
+path = "frontend/e2e/phase7-user-isolation.spec.ts"
+replace_once(
+    path,
+    """  const createResponse = await request.post(`${API_URL}/ventas`, {
+    headers: authHeaders(token),""",
+    """  const variantsResponse = await request.get(`${API_URL}/productos/${productId}/variantes`, {
+    headers: authHeaders(token)
+  });
+  expect(variantsResponse.status(), await variantsResponse.text()).toBe(200);
+  const variants = await dataOf(variantsResponse);
+  const technicalVariant = variants.find((variant: any) => variant.esTecnica === true);
+  expect(technicalVariant, `El producto ${productId} debe tener una variante técnica.`).toBeTruthy();
+
+  const createResponse = await request.post(`${API_URL}/ventas`, {
+    headers: authHeaders(token),""",
+)
+replace_once(
+    path,
+    "      detalles: [{ productoId: productId, cantidad: 1, precioUnitario: unitPrice }]",
+    """      detalles: [{
+        productoId: productId,
+        productoVarianteId: technicalVariant.id,
+        cantidad: 1,
+        precioUnitario: unitPrice
+      }]""",
+)
+
+# Phase 7 PDF: consultar y enviar técnica.
+path = "frontend/e2e/phase7.spec.ts"
+replace_once(
+    path,
+    """    const product = await dataOf(productResponse);
+
+    const saleResponse = await request.post(`${API_URL}/ventas`, {""",
+    """    const product = await dataOf(productResponse);
+    const variantsResponse = await request.get(`${API_URL}/productos/${product.id}/variantes`, {
+      headers: authHeaders(adminToken)
+    });
+    expect(variantsResponse.status(), await variantsResponse.text()).toBe(200);
+    const variants = await dataOf(variantsResponse);
+    const technicalVariant = variants.find((variant: any) => variant.esTecnica === true);
+    expect(technicalVariant, 'El producto de factura debe tener una variante técnica.').toBeTruthy();
+
+    const saleResponse = await request.post(`${API_URL}/ventas`, {""",
+)
+replace_once(
+    path,
+    """            productoId: product.id,
+            cantidad: 2,""",
+    """            productoId: product.id,
+            productoVarianteId: technicalVariant.id,
+            cantidad: 2,""",
+)
