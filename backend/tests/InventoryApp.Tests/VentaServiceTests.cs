@@ -22,6 +22,7 @@ public class VentaServiceTests
     private readonly Mock<ICalculoService> _calculoMock = new();
     private readonly Mock<ICurrentUserService> _currentUserMock = new();
     private readonly Mock<IAuditoriaService> _auditoriaMock = new();
+    private readonly Mock<ITipoClienteRepository> _tipoClienteRepoMock = new();
     private readonly VentaService _service;
 
     public VentaServiceTests()
@@ -31,6 +32,10 @@ public class VentaServiceTests
         _currentUserMock.Setup(c => c.NombreCompleto).Returns("Vendedor Uno");
         _ventaRepoMock.Setup(r => r.SaveChangesAsync()).ReturnsAsync(true);
         _empresaMock.Setup(e => e.GetActivaEntidadAsync()).ReturnsAsync(new EmpresaConfiguracion());
+        
+        var fallback = new TipoCliente { Id = 1, Codigo = "SIN_CLASIFICAR", Nombre = "Sin clasificar", ColorHex = "#9E9E9E", Activo = true, EsPredeterminado = true };
+        _tipoClienteRepoMock.Setup(r => r.GetActivosAsync()).ReturnsAsync(new List<TipoCliente> { fallback });
+        _tipoClienteRepoMock.Setup(r => r.GetByCodigoAsync("SIN_CLASIFICAR")).ReturnsAsync(fallback);
 
         _service = new VentaService(
             _ventaRepoMock.Object,
@@ -44,7 +49,8 @@ public class VentaServiceTests
             _calculoMock.Object,
             _currentUserMock.Object,
             new FakeUnitOfWork(),
-            _auditoriaMock.Object);
+            _auditoriaMock.Object,
+            _tipoClienteRepoMock.Object);
     }
 
     private static Producto ProductoDePrueba(int id = 1, int cantidad = 10) =>

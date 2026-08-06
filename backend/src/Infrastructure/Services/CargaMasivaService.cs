@@ -353,11 +353,16 @@ public sealed class CargaMasivaService : ICargaMasivaService
             return;
         }
 
+        var columnasOpcionales = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "TipoCliente", "TipoInventario" };
+
         foreach (var duplicada in cabeceras.Where(x => !string.IsNullOrWhiteSpace(x)).GroupBy(x => x, StringComparer.OrdinalIgnoreCase).Where(g => g.Count() > 1))
             AgregarError(errores, 1, duplicada.Key, "COLUMNA_DUPLICADA", "La columna aparece más de una vez.", duplicada.Key);
 
         foreach (var esperada in mapaEsperado)
         {
+            if (columnasOpcionales.Contains(esperada.Key))
+                continue; // Tolerar su ausencia (se asignará el valor por defecto/fallback)
+
             if (!cabeceras.Contains(esperada.Key, StringComparer.OrdinalIgnoreCase))
                 AgregarError(errores, 1, esperada.Value, "COLUMNA_FALTANTE", $"Falta la columna obligatoria '{esperada.Value}'.", null);
         }
