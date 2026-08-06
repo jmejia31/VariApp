@@ -177,7 +177,6 @@ jobs:
         working-directory: frontend
         run: |
           npm ci
-          npm install --no-save --package-lock=false @playwright/test@latest
           npx playwright install --with-deps chromium
 
       - name: Validar tipado y calidad estática

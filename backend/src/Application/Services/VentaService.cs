@@ -21,7 +21,7 @@ public class VentaService : IVentaService
     private readonly ICurrentUserService _currentUser;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IAuditoriaService _auditoria;
-    private readonly ITipoClienteRepository _tipoClienteRepository;
+    private readonly ITipoClientePredeterminadoResolver _predeterminadoResolver;
 
     public VentaService(
         IVentaRepository ventaRepository,
@@ -36,7 +36,7 @@ public class VentaService : IVentaService
         ICurrentUserService currentUser,
         IUnitOfWork unitOfWork,
         IAuditoriaService auditoria,
-        ITipoClienteRepository tipoClienteRepository)
+        ITipoClientePredeterminadoResolver predeterminadoResolver)
     {
         _ventaRepository = ventaRepository;
         _clienteRepository = clienteRepository;
@@ -50,7 +50,7 @@ public class VentaService : IVentaService
         _currentUser = currentUser;
         _unitOfWork = unitOfWork;
         _auditoria = auditoria;
-        _tipoClienteRepository = tipoClienteRepository;
+        _predeterminadoResolver = predeterminadoResolver;
     }
 
     public async Task<VentaDto?> GetByIdAsync(int id)
@@ -458,20 +458,7 @@ public class VentaService : IVentaService
 
             if (cliente is null)
             {
-                int tipoClienteId;
-                var tiposActivos = await _tipoClienteRepository.GetActivosAsync();
-                var predeterminados = tiposActivos.Where(t => t.EsPredeterminado).ToList();
-                if (predeterminados.Count == 1)
-                {
-                    tipoClienteId = predeterminados[0].Id;
-                }
-                else
-                {
-                    var fallback = await _tipoClienteRepository.GetByCodigoAsync("SIN_CLASIFICAR");
-                    if (fallback is null)
-                        throw new BusinessRuleException("Inconsistencia en el sistema: no se encontró el tipo de cliente predeterminado ni el de respaldo 'SIN_CLASIFICAR'.");
-                    tipoClienteId = fallback.Id;
-                }
+                int tipoClienteId = await _predeterminadoResolver.ResolverIdPredeterminadoAsync();
 
                 cliente = new Cliente
                 {

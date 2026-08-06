@@ -15,6 +15,7 @@ public class ClienteServiceTests
     private readonly Mock<ITipoClienteRepository> _tipoClienteRepoMock = new();
     private readonly Mock<ICurrentUserService> _currentUserMock = new();
     private readonly Mock<IAuditoriaService> _auditoriaMock = new();
+    private readonly Mock<ITipoClientePredeterminadoResolver> _predeterminadoResolverMock = new();
     private readonly ClienteService _service;
 
     public ClienteServiceTests()
@@ -26,10 +27,11 @@ public class ClienteServiceTests
         _tipoClienteRepoMock.Setup(r => r.GetActivosAsync()).ReturnsAsync(new List<TipoCliente> { fallback });
         _tipoClienteRepoMock.Setup(r => r.GetByCodigoAsync("SIN_CLASIFICAR")).ReturnsAsync(fallback);
         _tipoClienteRepoMock.Setup(r => r.GetByIdAsync(It.IsAny<int>())).ReturnsAsync(fallback);
+        _predeterminadoResolverMock.Setup(r => r.ResolverIdPredeterminadoAsync()).ReturnsAsync(1);
 
         _repoMock.Setup(r => r.GetByIdAsync(It.IsAny<int>())).ReturnsAsync((int id) => new Cliente { Id = id, Nombre = "Test", TipoClienteId = 1, TipoCliente = fallback });
 
-        _service = new ClienteService(_repoMock.Object, _tipoClienteRepoMock.Object, _currentUserMock.Object, _auditoriaMock.Object);
+        _service = new ClienteService(_repoMock.Object, _tipoClienteRepoMock.Object, _currentUserMock.Object, _auditoriaMock.Object, _predeterminadoResolverMock.Object);
     }
 
     [Fact]

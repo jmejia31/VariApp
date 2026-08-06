@@ -12,17 +12,20 @@ public class ClienteService : IClienteService
     private readonly ITipoClienteRepository _tipoClienteRepository;
     private readonly ICurrentUserService _currentUser;
     private readonly IAuditoriaService _auditoria;
+    private readonly ITipoClientePredeterminadoResolver _predeterminadoResolver;
 
     public ClienteService(
         IClienteRepository repository,
         ITipoClienteRepository tipoClienteRepository,
         ICurrentUserService currentUser,
-        IAuditoriaService auditoria)
+        IAuditoriaService auditoria,
+        ITipoClientePredeterminadoResolver predeterminadoResolver)
     {
         _repository = repository;
         _tipoClienteRepository = tipoClienteRepository;
         _currentUser = currentUser;
         _auditoria = auditoria;
+        _predeterminadoResolver = predeterminadoResolver;
     }
 
     public async Task<List<ClienteDto>> GetAllAsync()
@@ -65,23 +68,7 @@ public class ClienteService : IClienteService
         }
         else
         {
-            var tiposActivos = await _tipoClienteRepository.GetActivosAsync();
-            var predeterminados = tiposActivos.Where(t => t.EsPredeterminado).ToList();
-            if (predeterminados.Count == 1)
-            {
-                tipoClienteId = predeterminados[0].Id;
-            }
-            else if (predeterminados.Count > 1)
-            {
-                throw new BusinessRuleException("Inconsistencia en el sistema: existen múltiples tipos de clientes marcados como predeterminados.");
-            }
-            else
-            {
-                var fallback = await _tipoClienteRepository.GetByCodigoAsync("SIN_CLASIFICAR");
-                if (fallback is null)
-                    throw new BusinessRuleException("Inconsistencia en el sistema: no se encontró el tipo de cliente predeterminado ni el de respaldo 'SIN_CLASIFICAR'.");
-                tipoClienteId = fallback.Id;
-            }
+            tipoClienteId = await _predeterminadoResolver.ResolverIdPredeterminadoAsync();
         }
 
         var cliente = new Cliente

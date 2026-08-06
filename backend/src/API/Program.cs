@@ -79,6 +79,7 @@ builder.Services.AddScoped<ICatalogoProductoService, CatalogoProductoService>();
 builder.Services.AddScoped<IProveedorService, ProveedorService>();
 builder.Services.AddScoped<IClienteService, ClienteService>();
 builder.Services.AddScoped<ITipoClienteService, TipoClienteService>();
+builder.Services.AddScoped<ITipoClientePredeterminadoResolver, TipoClientePredeterminadoResolver>();
 builder.Services.AddScoped<IAuditoriaService, AuditoriaService>();
 builder.Services.AddScoped<IPermisoService, PermisoService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();

@@ -16,10 +16,10 @@ Este documento constituye el plan de implementación técnico y de control de re
 ## 1. Plan de Corrección de Regresiones (Prioridad Inmediata)
 
 Antes de avanzar con las secciones funcionales 2 a 6, se corregirán las regresiones transversales introducidas en el commit `4a69ae3e` que hacen fallar las pruebas de aceptación:
-1. **Error 503 en Creación de Ventas:** Corregir la inicialización e inyección de dependencias de `TipoCliente` en el flujo de creación de ventas.
-2. **Carga Masiva de Clientes `ConErrores`:** Actualizar el helper e importador de carga masiva de clientes para asignar automáticamente el fallback `SIN_CLASIFICAR` cuando no se provea clasificación en la plantilla.
-3. **Actualización de Fixtures de Prueba E2E y Unitarias:** Corregir todas las pruebas integrales de Playwright y unitarias afectadas por la clasificación obligatoria de clientes para evitar fallos transversales.
-4. **Verificación local:** Asegurar que la suite local de 81 pruebas Playwright y las 120 pruebas backend pasen con cero fallos antes de proceder.
+1. **Error 503 en Creación de Ventas:** Corregido. Inyectado `ITipoClientePredeterminadoResolver` para asignar la clasificación por defecto o fallback en la creación de clientes al vuelo.
+2. **Carga Masiva de Clientes `ConErrores`:** Corregido. Declaradas las columnas `TipoCliente` y `TipoInventario` como opcionales en el importador para admitir plantillas sin esas columnas y aplicar la asignación automática por defecto.
+3. **Dependencias de Angular y Vulnerabilidades Altas:** Corregido. Actualizados todos los paquetes del framework Angular a la versión segura `20.3.27`, resolviendo las alertas altas de `HttpTransferCache` y XSS sin vulnerabilidades productivas restantes.
+4. **Fijación de Playwright:** Corregido. Fijada la versión exacta `@playwright/test: 1.49.1` en `package.json` y removida la instalación dinámica de `@latest` en los workflows.
 
 ---
 
@@ -46,14 +46,14 @@ Antes de avanzar con las secciones funcionales 2 a 6, se corregirán las regresi
 * **Control Transaccional en el Servicio:** Dado que el índice único solo garantiza como máximo un predeterminado, la lógica en `TipoClienteService` implementará una transacción explícita con reintento ante concurrencia. Se desmarcará el predeterminado anterior, se marcará el nuevo, y se capturará específicamente la excepción de violación de índice único devolviendo un error de negocio controlado.
 
 ### B. Control de Concurrencia de Inventarios (`FOR UPDATE`)
-* **Lógica Parametrizada y Segura:** Se evitará la concatenación de IDs en cadenas SQL. El bloqueo de filas se ejecutará de forma secuencial y determinista (ordenando los IDs de menor a mayor para evitar deadlocks) mediante consultas parametrizadas individuales:
+* **Lógica Parametrizada y Bloqueo Ordenado de Variantes:** Se evitará la concatenación de IDs en cadenas SQL. El bloqueo de filas se ejecutará de forma secuencial y determinista dentro de una transacción robusta con reintento de la unidad transaccional completa:
   ```csharp
   var strategy = _context.Database.CreateExecutionStrategy();
   await strategy.ExecuteAsync(async () =>
   {
       await using var transaction = await _context.Database.BeginTransactionAsync();
       
-      // Bloquear los productos padres e individualmente sus variantes afectadas de forma ordenada
+      // 1. Ordenar ProductoId de menor a mayor y bloquear Productos
       foreach (var productoId in productoIds.OrderBy(x => x))
       {
           await _context.Database
@@ -62,8 +62,19 @@ Antes de avanzar con las secciones funcionales 2 a 6, se corregirán las regresi
                   productoId)
               .SingleAsync();
       }
+
+      // 2. Ordenar ProductoVarianteId de menor a mayor y bloquear ProductoVariantes
+      foreach (var varianteId in varianteIds.OrderBy(x => x))
+      {
+          await _context.Database
+              .SqlQueryRaw<int>(
+                  "SELECT Id AS Value FROM ProductoVariantes WHERE Id = {0} FOR UPDATE", 
+                  varianteId)
+              .SingleAsync();
+      }
       
-      // Aplicar descuentos de inventario, validar stock y guardar cambios de forma idempotente
+      // 3. Validar el estado de la operación y el stock de insumos/productos
+      // 4. Aplicar descuentos de inventario y registrar movimientos correspondientes
       await _context.SaveChangesAsync();
       await transaction.CommitAsync();
   });
@@ -84,12 +95,14 @@ Antes de avanzar con las secciones funcionales 2 a 6, se corregirán las regresi
 * **Bloqueo Conservador:** Para evitar distorsionar el costo promedio ponderado histórico sin un módulo completo de trazabilidad de lotes, se aplicará un bloqueo estricto si existe **cualquier movimiento posterior** (compra posterior, venta, ajuste, consumo o reversión) sobre la combinación de `ProductoId` y `ProductoVarianteId` de la compra que se pretende anular.
 
 ### F. Validación de Imágenes en Backend (Seguridad Crítica)
-* **Biblioteca y Versión:** Se añadirá la biblioteca `SixLabors.ImageSharp` (versión compatible con .NET 8) al proyecto de infraestructura.
-* **Filtros de Seguridad:** Al subir una imagen de producto o perfil, el backend:
-  1. Validará el tamaño máximo (10 MB).
-  2. Inspeccionará los *magic numbers* de bytes para coincidir con JPG/JPEG, PNG o WEBP.
-  3. Decodificará completamente la imagen en memoria para evitar bombas de descompresión y descartar archivos corruptos.
-  4. Sanitizará y guardará una copia recodificada limpia, eliminando todos los metadatos EXIF sensibles antes de transferirla a Cloudinary.
+* **Biblioteca y Versión:** Se añadirá la biblioteca `SixLabors.ImageSharp` (versión exacta fijada en `3.1.5`) al proyecto de infraestructura.
+* **Límites de Seguridad y Decodificación:** Al subir una imagen de producto o perfil, el backend:
+  1. Validará el tamaño máximo del archivo (10 MB).
+  2. Validará dimensiones de resolución máximas (4096 px de ancho por 4096 px de alto).
+  3. Restringirá la cantidad máxima de píxeles (16 megapíxeles) para evitar bombas de descompresión.
+  4. Inspeccionará los *magic numbers* de bytes para coincidir con JPG/JPEG, PNG o WEBP.
+  5. Decodificará completamente la imagen en memoria liberando correctamente todos los streams.
+  6. Sanitizará y guardará una copia recodificada limpia, eliminando todos los metadatos EXIF sensibles antes de transferirla a Cloudinary.
 
 ### G. Logs Seguros de Búsqueda
 * Se eliminará el registro de los términos de búsqueda textuales completos en los logs de auditoría de rendimiento.
@@ -118,6 +131,7 @@ npm --prefix frontend run build:prod
 ```
 
 ### Escenarios de Pruebas Funcionales Obligatorios
+- **Ejecución Total de Tests de Backend:** Se correrán y completarán sin fallos ni omisiones la totalidad de las pruebas unitarias y de integración del backend descubiertas.
 - **Predeterminado Único:** Probar concurrencia de marcado de predeterminado en `TipoCliente` validando que la segunda petición capture el error de índice único controlado.
 - **Concurrencia de Stock:** Simular peticiones paralelas de consumo sobre el mismo stock para certificar la consistencia del control transaccional.
 - **Exclusión comercial de insumos:** Intentar incluir un insumo administrativo en ventas o borrador de ventas y verificar el rechazo 400.

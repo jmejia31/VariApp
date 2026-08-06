@@ -322,7 +322,6 @@ jobs:
       - name: Install Playwright for the checkpoint
         working-directory: frontend
         run: |
-          npm install --no-save --package-lock=false @playwright/test@latest
           npx playwright install --with-deps chromium
 
       - name: Start Angular development server

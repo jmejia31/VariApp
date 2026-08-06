@@ -27,17 +27,20 @@ public sealed class CargaMasivaService : ICargaMasivaService
     private readonly ICurrentUserService _currentUser;
     private readonly IAuditoriaService _auditoria;
     private readonly ILogger<CargaMasivaService> _logger;
+    private readonly ITipoClientePredeterminadoResolver _predeterminadoResolver;
 
     public CargaMasivaService(
         AppDbContext db,
         ICurrentUserService currentUser,
         IAuditoriaService auditoria,
-        ILogger<CargaMasivaService> logger)
+        ILogger<CargaMasivaService> logger,
+        ITipoClientePredeterminadoResolver predeterminadoResolver)
     {
         _db = db;
         _currentUser = currentUser;
         _auditoria = auditoria;
         _logger = logger;
+        _predeterminadoResolver = predeterminadoResolver;
     }
 
     public CargaMasivaConfiguracionDto ObtenerConfiguracion() => new()
@@ -607,11 +610,7 @@ public sealed class CargaMasivaService : ICargaMasivaService
     {
         var existentes = await _db.Clientes.ToListAsync(ct);
         var tiposClientes = await _db.TipoClientes.Where(t => t.Activo && !t.Eliminado).ToListAsync(ct);
-        var predeterminado = tiposClientes.FirstOrDefault(t => t.EsPredeterminado)
-            ?? tiposClientes.FirstOrDefault(t => t.Codigo == "SIN_CLASIFICAR");
-        if (predeterminado is null)
-            throw new BusinessRuleException("No se encontró el tipo de cliente predeterminado para asociar a los nuevos clientes.");
-        var defaultTipoClienteId = predeterminado.Id;
+        var defaultTipoClienteId = await _predeterminadoResolver.ResolverIdPredeterminadoAsync();
 
         var creados = 0;
         var actualizados = 0;
