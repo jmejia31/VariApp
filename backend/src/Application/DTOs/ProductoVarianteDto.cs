@@ -15,6 +15,7 @@ public class ProductoVarianteDto
     public decimal Costo { get; set; }
     public decimal Precio { get; set; }
     public bool Activo { get; set; }
+    public bool EsTecnica { get; set; }
     public bool TieneStockBajo { get; set; }
     public bool EstaAgotada { get; set; }
     public string EstadoInventario { get; set; } = string.Empty;
