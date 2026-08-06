@@ -8,6 +8,7 @@ public interface IProductoVarianteRepository
     Task<ProductoVariante?> GetByIdForUpdateAsync(int id);
     Task<List<ProductoVariante>> GetByIdsForUpdateAsync(IEnumerable<int> ids);
     Task<List<ProductoVariante>> GetByProductoIdAsync(int productoId, bool incluirInactivas = true);
+    Task<ProductoVariante?> GetTecnicaByProductoIdAsync(int productoId, bool incluirEliminada = false);
     Task<ProductoVariante?> GetBySkuAsync(string sku);
     Task<ProductoVariante?> GetByCodigoBarrasAsync(string codigoBarras);
     Task<ProductoVariante?> GetByProductoColorAsync(int productoId, int colorId);
