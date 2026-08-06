@@ -1,0 +1,56 @@
+name: Temporal ChatGPT Final Fix
+
+on:
+  push:
+    branches:
+      - Desarrollo
+    paths:
+      - .github/patches/chatgpt_final_fix.py
+      - .github/workflows/chatgpt-final-fix.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: chatgpt-final-fix-desarrollo
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Desarrollo
+        uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+
+      - name: Configurar .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Aplicar corrección mínima
+        run: python3 .github/patches/chatgpt_final_fix.py
+
+      - name: Validar diff
+        run: git diff --check
+
+      - name: Restaurar, compilar y probar backend unitario
+        working-directory: backend
+        run: |
+          dotnet restore InventoryApp.sln
+          dotnet build InventoryApp.sln --configuration Release --no-restore
+          dotnet test InventoryApp.sln --configuration Release --no-build --filter "Category!=Integration"
+
+      - name: Publicar corrección en Desarrollo
+        run: |
+          if [ -z "$(git status --porcelain -- backend)" ]; then
+            echo "La corrección no produjo cambios."
+            exit 1
+          fi
+          git config user.name "jmejia31"
+          git config user.email "93171442+jmejia31@users.noreply.github.com"
+          git add backend
+          git commit -m "fix(cargas): persistir cabecera confirmada dentro de transaccion [ChatGPT]"
+          git push origin HEAD:Desarrollo
