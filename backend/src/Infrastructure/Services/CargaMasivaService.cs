@@ -352,6 +352,7 @@ public sealed class CargaMasivaService : ICargaMasivaService
                 carga.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
                 carga.FechaActualizacion = DateTime.UtcNow;
                 carga.ErrorGeneral = null;
+                await _db.SaveChangesAsync(cancellationToken);
                 confirmadaAhora = true;
             });
         }
