@@ -82,7 +82,10 @@ public class ProductosController : ControllerBase
             var existentes = await _varianteService.GetByProductoIdAsync(id, incluirInactivas: true);
             actualizado = await _productoService.UpdateAsync(id, dto);
             if (actualizado is not null)
+            {
                 await SincronizarVariantesAsync(id, dto.Variantes, existentes);
+                await _varianteService.SincronizarTecnicaConProductoAsync(id);
+            }
         });
 
         if (actualizado is null)
@@ -96,7 +99,13 @@ public class ProductosController : ControllerBase
     [RequierePermiso(ModuloSistema.Productos, AccionPermiso.Activar)]
     public async Task<IActionResult> Activar(int id)
     {
-        var producto = await _productoService.CambiarEstadoAsync(id, true);
+        ProductoDto? producto = null;
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            producto = await _productoService.CambiarEstadoAsync(id, true);
+            if (producto is not null)
+                await _varianteService.SincronizarTecnicaConProductoAsync(id);
+        });
         if (producto is null)
             return NotFound(ApiResponse<object>.Fail("Producto no encontrado."));
 
@@ -107,7 +116,13 @@ public class ProductosController : ControllerBase
     [RequierePermiso(ModuloSistema.Productos, AccionPermiso.Desactivar)]
     public async Task<IActionResult> Desactivar(int id)
     {
-        var producto = await _productoService.CambiarEstadoAsync(id, false);
+        ProductoDto? producto = null;
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            producto = await _productoService.CambiarEstadoAsync(id, false);
+            if (producto is not null)
+                await _varianteService.SincronizarTecnicaConProductoAsync(id);
+        });
         if (producto is null)
             return NotFound(ApiResponse<object>.Fail("Producto no encontrado."));
 
@@ -118,7 +133,12 @@ public class ProductosController : ControllerBase
     [RequierePermiso(ModuloSistema.Productos, AccionPermiso.EliminarLogico)]
     public async Task<IActionResult> Delete(int id)
     {
-        var eliminado = await _productoService.DeleteAsync(id);
+        var eliminado = false;
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            await _varianteService.EliminarTecnicaConProductoAsync(id);
+            eliminado = await _productoService.DeleteAsync(id);
+        });
         if (!eliminado)
             return NotFound(ApiResponse<object>.Fail("Producto no encontrado."));
 
@@ -207,8 +227,28 @@ public class ProductosController : ControllerBase
         IReadOnlyCollection<ProductoVarianteFormularioDto> solicitadas,
         IReadOnlyCollection<ProductoVarianteDto> existentes)
     {
+        var tecnica = existentes.SingleOrDefault(v => v.EsTecnica);
+        var comercialesExistentes = existentes.Where(v => !v.EsTecnica).ToList();
+
         if (solicitadas.Count == 0)
+        {
+            if (comercialesExistentes.Any(v => v.Cantidad != 0))
+            {
+                throw new BusinessRuleException(
+                    "No puedes convertir el producto en simple mientras alguna variante comercial tenga existencias.");
+            }
+
+            foreach (var comercial in comercialesExistentes)
+                await _varianteService.DeleteAsync(productoId, comercial.Id);
+
+            await _varianteService.AsegurarTecnicaAsync(productoId);
             return;
+        }
+
+        if (tecnica is not null)
+            await _varianteService.RetirarTecnicaParaConversionAsync(productoId);
+
+        existentes = comercialesExistentes;
 
         if (solicitadas.Any(v => v.ColorId <= 0))
             throw new BusinessRuleException("Cada fila de existencias debe tener un color válido.");
