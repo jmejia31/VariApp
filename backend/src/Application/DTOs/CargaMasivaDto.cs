@@ -39,6 +39,13 @@ public class CargaMasivaFilaDto
     public bool EsValida { get; set; }
     public Dictionary<string, string?> Datos { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     public List<string> Mensajes { get; set; } = new();
+
+    // Snapshot interno utilizado para impedir que una confirmación sobrescriba
+    // cambios de inventario realizados después de validar el archivo.
+    public int? ProductoIdSnapshot { get; set; }
+    public int? ProductoVarianteIdSnapshot { get; set; }
+    public int? CantidadActualSnapshot { get; set; }
+    public DateTime? FechaValidacionSnapshot { get; set; }
 }
 
 public class CargaMasivaErrorDto
