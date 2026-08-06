@@ -36,42 +36,34 @@ jobs:
 
           path = Path('frontend/e2e/fase4-variantes.spec.ts')
           text = path.read_text(encoding='utf-8')
-          old = '''  test('Formulario principal permite agregar colores y muestra la suma del stock', async ({ page }) => {
-    await loginUi(page);
-
-    await page.goto(`/productos/${productoId}/editar`);
-    await expect(page.getByRole('heading', { name: 'Colores y existencias' })).toBeVisible();
-    await expect(page.getByText('Stock total calculado')).toBeVisible();
-    await expect(page.locator('.variant-card')).toHaveCount(2);
-    await expect(page.locator('.stock-summary').getByText('14 unidades', { exact: true })).toBeVisible();
-
-    await page.getByRole('button', { name: 'Agregar otro color' }).first().click();
-    await expect(page.locator('.variant-card')).toHaveCount(3);
-    await expect(page.locator('mat-select[formcontrolname="colorId"]')).toHaveCount(3);
-    await expect(page.locator('input[formcontrolname="cantidad"]')).toHaveCount(3);
-  });'''
-          new = '''  test('Formulario principal separa metadatos de la administración de variantes', async ({ page }) => {
-    await loginUi(page);
-
-    await page.goto(`/productos/${productoId}/editar`);
-    await expect(page.getByRole('heading', { name: 'Colores y existencias' })).toBeVisible();
-    await expect(page.getByText('Stock total calculado')).toBeVisible();
-    await expect(page.locator('.variant-card')).toHaveCount(2);
-    await expect(page.locator('.stock-summary').getByText('14 unidades', { exact: true })).toBeVisible();
-
-    await expect(page.getByRole('button', { name: 'Agregar otro color' })).toHaveCount(0);
-    const cantidades = page.locator('input[formcontrolname="cantidad"]');
-    await expect(cantidades).toHaveCount(2);
-    await expect(cantidades.nth(0)).toBeDisabled();
-    await expect(cantidades.nth(1)).toBeDisabled();
-
-    const administrarVariantes = page.getByRole('link', { name: 'Administrar variantes' });
-    await expect(administrarVariantes).toBeVisible();
-    await expect(administrarVariantes).toHaveAttribute('href', `/productos/${productoId}/variantes`);
-  });'''
-          if text.count(old) != 1:
+          marker_start = "  test('Formulario principal permite agregar colores y muestra la suma del stock'"
+          marker_end = "\n\n  test('Angular exige la variante exacta en compra y venta'"
+          if text.count(marker_start) != 1:
               raise SystemExit('No se encontró exactamente una vez el escenario obsoleto esperado.')
-          path.write_text(text.replace(old, new, 1), encoding='utf-8')
+          start = text.index(marker_start)
+          end = text.index(marker_end, start)
+          replacement = "\n".join([
+              "  test('Formulario principal separa metadatos de la administración de variantes', async ({ page }) => {",
+              "    await loginUi(page);",
+              "",
+              "    await page.goto(`/productos/${productoId}/editar`);",
+              "    await expect(page.getByRole('heading', { name: 'Colores y existencias' })).toBeVisible();",
+              "    await expect(page.getByText('Stock total calculado')).toBeVisible();",
+              "    await expect(page.locator('.variant-card')).toHaveCount(2);",
+              "    await expect(page.locator('.stock-summary').getByText('14 unidades', { exact: true })).toBeVisible();",
+              "",
+              "    await expect(page.getByRole('button', { name: 'Agregar otro color' })).toHaveCount(0);",
+              "    const cantidades = page.locator('input[formcontrolname=\"cantidad\"]');",
+              "    await expect(cantidades).toHaveCount(2);",
+              "    await expect(cantidades.nth(0)).toBeDisabled();",
+              "    await expect(cantidades.nth(1)).toBeDisabled();",
+              "",
+              "    const administrarVariantes = page.getByRole('link', { name: 'Administrar variantes' });",
+              "    await expect(administrarVariantes).toBeVisible();",
+              "    await expect(administrarVariantes).toHaveAttribute('href', `/productos/${productoId}/variantes`);",
+              "  });"
+          ])
+          path.write_text(text[:start] + replacement + text[end:], encoding='utf-8')
           PY
 
       - name: Validar frontend
