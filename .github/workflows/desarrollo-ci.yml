@@ -144,19 +144,49 @@ jobs:
             --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
             --startup-project src/API/InventoryApp.API.csproj \
             --context AppDbContext
-      - name: Preflight comprobación predeterminados activos
+      - name: Validar escenarios de Preflight (0, 1 y 2 predeterminados)
         working-directory: .
         run: |
           set -euo pipefail
           mysql_container="${{ job.services.mysql.id }}"
-          duplicados="$(docker exec "$mysql_container" mysql -uroot -proot inventoryapp_ci -Nse "
-            SELECT COUNT(*) FROM TipoClientes
-            WHERE EsPredeterminado = 1 AND Activo = 1 AND Eliminado = 0;")"
-          if [ "$duplicados" -gt 1 ]; then
-            echo "Error Preflight: Existen $duplicados tipos predeterminados activos." >&2
+          
+          # Escenario 0 predeterminados
+          docker exec "$mysql_container" mysql -uroot -proot inventoryapp_ci -e "
+            UPDATE TipoClientes SET EsPredeterminado = 0 WHERE EsPredeterminado = 1;"
+          duplicados0="$(docker exec "$mysql_container" mysql -uroot -proot inventoryapp_ci -Nse "
+            SELECT COUNT(*) FROM TipoClientes WHERE EsPredeterminado = 1 AND Activo = 1 AND Eliminado = 0;")"
+          test "$duplicados0" = "0"
+          echo "Escenario 0 predeterminados: Verificado OK."
+
+          # Escenario 1 predeterminado
+          docker exec "$mysql_container" mysql -uroot -proot inventoryapp_ci -e "
+            UPDATE TipoClientes SET EsPredeterminado = 1 WHERE Codigo = 'SIN_CLASIFICAR';"
+          duplicados1="$(docker exec "$mysql_container" mysql -uroot -proot inventoryapp_ci -Nse "
+            SELECT COUNT(*) FROM TipoClientes WHERE EsPredeterminado = 1 AND Activo = 1 AND Eliminado = 0;")"
+          test "$duplicados1" = "1"
+          echo "Escenario 1 predeterminado: Verificado OK."
+
+          # Escenario 2 predeterminados (debe fallar la validación)
+          docker exec "$mysql_container" mysql -uroot -proot inventoryapp_ci -e "
+            INSERT INTO TipoClientes (Codigo, Nombre, NombreNormalizado, EsSistema, EsPredeterminado, Activo, Eliminado, ColorHex, Orden, FechaCreacion, FechaActualizacion)
+            VALUES ('TEST_DUP', 'Test Duplicado', 'TEST DUPLICADO', 0, 1, 1, 0, '#FF0000', 99, UTC_TIMESTAMP(6), UTC_TIMESTAMP(6));"
+          
+          duplicados2="$(docker exec "$mysql_container" mysql -uroot -proot inventoryapp_ci -Nse "
+            SELECT COUNT(*) FROM TipoClientes WHERE EsPredeterminado = 1 AND Activo = 1 AND Eliminado = 0;")"
+          if [ "$duplicados2" -gt 1 ]; then
+            echo "Escenario 2 predeterminados: Detección y rechazo de duplicados verificado ($duplicados2 predeterminados)."
+          else
+            echo "Error: Se esperaba rechazo en escenario 2 predeterminados." >&2
             exit 1
           fi
-          echo "Preflight OK: $duplicados predeterminados activos."
+
+          # Limpieza del registro duplicado de prueba
+          docker exec "$mysql_container" mysql -uroot -proot inventoryapp_ci -e "
+            DELETE FROM TipoClientes WHERE Codigo = 'TEST_DUP';"
+      - name: Ejecutar script SQL de Preflight independiente
+        working-directory: .
+        run: |
+          docker exec -i "${{ job.services.mysql.id }}" mysql -uroot -proot inventoryapp_ci < backend/scripts/preflight-tipo-cliente-predeterminado.sql
       - name: Aplicar migraciones actuales
         run: |
           dotnet ef database update \

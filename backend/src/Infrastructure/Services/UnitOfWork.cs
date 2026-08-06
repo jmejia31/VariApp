@@ -2,6 +2,7 @@ using InventoryApp.Application.Interfaces;
 using InventoryApp.Application.Exceptions;
 using InventoryApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using MySqlConnector;
 using System;
 using System.Threading.Tasks;
 
@@ -51,52 +52,38 @@ public class UnitOfWork : IUnitOfWork
         }
     }
 
-    private static bool IsTransientError(Exception ex)
+    private static bool IsTransientError(Exception exception)
     {
-        var current = ex;
-        while (current != null)
+        for (Exception? current = exception; current is not null; current = current.InnerException)
         {
-            // Direct or reflection inspection of MySqlException.Number property for 1205 / 1213
-            var numberProp = current.GetType().GetProperty("Number");
-            if (numberProp != null && numberProp.PropertyType == typeof(int))
+            if (current is MySqlException mysqlException && (mysqlException.Number == 1205 || mysqlException.Number == 1213))
             {
-                int number = (int)numberProp.GetValue(current)!;
-                if (number == 1205 || number == 1213)
-                {
-                    return true;
-                }
+                return true;
             }
-
-            // Support test exception class or MySqlException name with explicit error codes
-            if (current.GetType().Name == "MySqlException" || current.GetType().Name == "TestMySqlException")
-            {
-                var msg = current.Message;
-                if (msg.Contains("1205") || msg.Contains("1213"))
-                {
-                    return true;
-                }
-            }
-
-            current = current.InnerException;
         }
         return false;
     }
 
-    private Exception? TranslateException(Exception ex)
+    private Exception? TranslateException(Exception exception)
     {
-        if (ex is DbUpdateException dbUpdateEx)
+        for (Exception? current = exception; current is not null; current = current.InnerException)
         {
-            var inner = dbUpdateEx.InnerException;
-            while (inner != null)
+            if (current is MySqlException mysqlException)
             {
-                if (inner.Message.Contains("IX_TipoClientes_EsPredeterminadoUnico"))
+                if (mysqlException.Number == 1062 || mysqlException.Message.Contains("IX_TipoClientes_EsPredeterminadoUnico"))
                 {
                     return new UniqueConstraintViolationException(
                         "TipoClientePredeterminadoUnico",
                         "Conflicto de concurrencia: Ya existe otro tipo de cliente marcado como predeterminado único. Inténtalo de nuevo.",
-                        ex);
+                        exception);
                 }
-                inner = inner.InnerException;
+            }
+            else if (current.Message.Contains("IX_TipoClientes_EsPredeterminadoUnico"))
+            {
+                return new UniqueConstraintViolationException(
+                    "TipoClientePredeterminadoUnico",
+                    "Conflicto de concurrencia: Ya existe otro tipo de cliente marcado como predeterminado único. Inténtalo de nuevo.",
+                    exception);
             }
         }
         return null;

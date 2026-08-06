@@ -1,20 +1,19 @@
 using System;
+using System.Reflection;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using InventoryApp.Application.Exceptions;
 using InventoryApp.Infrastructure.Persistence;
 using InventoryApp.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
+using MySqlConnector;
 using Xunit;
 
 namespace InventoryApp.Tests;
 
-public class TestMySqlException : Exception
+public class FakeNonMySqlExceptionWithNumberProperty : Exception
 {
-    public int Number { get; }
-    public TestMySqlException(int number, string message) : base(message)
-    {
-        Number = number;
-    }
+    public int Number => 1213;
 }
 
 public class UnitOfWorkRetryTests
@@ -26,6 +25,15 @@ public class UnitOfWorkRetryTests
             .ConfigureWarnings(x => x.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.InMemoryEventId.TransactionIgnoredWarning))
             .Options;
         return new AppDbContext(options);
+    }
+
+    private static MySqlException CreateRealMySqlException(int number, string message)
+    {
+        var ex = (MySqlException)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(typeof(MySqlException));
+        var field = typeof(MySqlException).GetField("_number", BindingFlags.NonPublic | BindingFlags.Instance)
+                    ?? typeof(MySqlException).GetField("<Number>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance);
+        field?.SetValue(ex, number);
+        return ex;
     }
 
     [Fact]
@@ -71,7 +79,7 @@ public class UnitOfWorkRetryTests
     }
 
     [Fact]
-    public async Task ExecuteInTransactionAsync_ReintentaErrorTransitorio1205_YSucedeEnSegundoIntento()
+    public async Task ExecuteInTransactionAsync_ReintentaMySqlException1205_YSucedeEnSegundoIntento()
     {
         await using var context = CreateInMemoryContext();
         var uow = new UnitOfWork(context);
@@ -82,7 +90,7 @@ public class UnitOfWorkRetryTests
             attempts++;
             if (attempts == 1)
             {
-                throw new TestMySqlException(1205, "Lock wait timeout exceeded");
+                throw CreateRealMySqlException(1205, "Lock wait timeout exceeded");
             }
             return Task.CompletedTask;
         });
@@ -91,7 +99,7 @@ public class UnitOfWorkRetryTests
     }
 
     [Fact]
-    public async Task ExecuteInTransactionAsync_ReintentaErrorTransitorio1213_YSucedeEnSegundoIntento()
+    public async Task ExecuteInTransactionAsync_ReintentaMySqlException1213_YSucedeEnSegundoIntento()
     {
         await using var context = CreateInMemoryContext();
         var uow = new UnitOfWork(context);
@@ -102,7 +110,7 @@ public class UnitOfWorkRetryTests
             attempts++;
             if (attempts == 1)
             {
-                throw new TestMySqlException(1213, "Deadlock found when trying to get lock");
+                throw CreateRealMySqlException(1213, "Deadlock found");
             }
             return Task.CompletedTask;
         });
@@ -111,31 +119,31 @@ public class UnitOfWorkRetryTests
     }
 
     [Fact]
-    public async Task ExecuteInTransactionAsync_SuperaMaximoTresIntentosYPropagaExcepcion()
+    public async Task ExecuteInTransactionAsync_SuperaMaximoTresIntentosYPropagaMySqlException()
     {
         await using var context = CreateInMemoryContext();
         var uow = new UnitOfWork(context);
 
         int attempts = 0;
-        await Assert.ThrowsAsync<TestMySqlException>(() =>
+        await Assert.ThrowsAsync<MySqlException>(() =>
             uow.ExecuteInTransactionAsync(() =>
             {
                 attempts++;
-                throw new TestMySqlException(1213, "Deadlock persistent failure");
+                throw CreateRealMySqlException(1213, "Persistent deadlock");
             }));
 
         Assert.Equal(3, attempts);
     }
 
     [Fact]
-    public async Task ExecuteInTransactionAsync_NoReintentaViolacionDeUnicidad1062()
+    public async Task ExecuteInTransactionAsync_NoReintentaViolacionDeUnicidad1062_YTraduceExcepcion()
     {
         await using var context = CreateInMemoryContext();
         var uow = new UnitOfWork(context);
 
         int attempts = 0;
-        var innerEx = new Exception("IX_TipoClientes_EsPredeterminadoUnico duplicate key 1062");
-        var dbEx = new DbUpdateException("DbUpdateException", innerEx);
+        var mysqlEx = CreateRealMySqlException(1062, "Duplicate entry for key IX_TipoClientes_EsPredeterminadoUnico");
+        var dbEx = new DbUpdateException("DbUpdateException", mysqlEx);
 
         var thrown = await Assert.ThrowsAsync<UniqueConstraintViolationException>(() =>
             uow.ExecuteInTransactionAsync(() =>
@@ -149,17 +157,17 @@ public class UnitOfWorkRetryTests
     }
 
     [Fact]
-    public async Task ExecuteInTransactionAsync_NoReintentaExcepcionGenericaNoMySql()
+    public async Task ExecuteInTransactionAsync_NoReintentaExcepcionNoMySqlAunqueTengaPropiedadNumber()
     {
         await using var context = CreateInMemoryContext();
         var uow = new UnitOfWork(context);
 
         int attempts = 0;
-        await Assert.ThrowsAsync<Exception>(() =>
+        await Assert.ThrowsAsync<FakeNonMySqlExceptionWithNumberProperty>(() =>
             uow.ExecuteInTransactionAsync(() =>
             {
                 attempts++;
-                throw new Exception("Deadlock word in generic exception");
+                throw new FakeNonMySqlExceptionWithNumberProperty();
             }));
 
         Assert.Equal(1, attempts);
