@@ -1,0 +1,90 @@
+name: Temporal ChatGPT Block 2B Final
+
+on:
+  push:
+    branches:
+      - Desarrollo
+    paths:
+      - .github/workflows/chatgpt-block2b-final.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Desarrollo
+        uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Actualizar expectativas conservadoras
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          variantes = Path('frontend/e2e/fase4-variantes.spec.ts')
+          texto = variantes.read_text(encoding='utf-8')
+          titulo_anterior = "test('API crea múltiples colores, suma stock y conserva la variante en documentos', async ({ request }) => {"
+          titulo_nuevo = "test('API crea múltiples colores, conserva la variante y bloquea anulación de compra con movimientos posteriores', async ({ request }) => {"
+          bloque_anterior = """    expect(anularCompra.status(), await anularCompra.text()).toBe(200);
+
+    productoActual = await dataOf(await request.get(`${API_URL}/productos/${productoId}`, { headers: headers() }));
+    expect(productoActual.cantidad).toBe(10);
+    expect(productoActual.variantes.find((v: any) => v.id === varianteId)?.cantidad).toBe(6);"""
+          bloque_nuevo = """    const anularCompraTexto = await anularCompra.text();
+    expect(anularCompra.status(), anularCompraTexto).toBe(400);
+    expect(anularCompraTexto.toLowerCase()).toContain('movimientos posteriores');
+
+    productoActual = await dataOf(await request.get(`${API_URL}/productos/${productoId}`, { headers: headers() }));
+    expect(productoActual.cantidad).toBe(14);
+    expect(productoActual.variantes.find((v: any) => v.id === varianteId)?.cantidad).toBe(10);"""
+          if texto.count(titulo_anterior) != 1:
+              raise SystemExit('No se encontró exactamente una vez el título esperado de variantes.')
+          if texto.count(bloque_anterior) != 1:
+              raise SystemExit('No se encontró exactamente una vez el bloque esperado de anulación de compra.')
+          texto = texto.replace(titulo_anterior, titulo_nuevo, 1).replace(bloque_anterior, bloque_nuevo, 1)
+          variantes.write_text(texto, encoding='utf-8')
+
+          fase7 = Path('frontend/e2e/fase7-validacion-integral.spec.ts')
+          texto = fase7.read_text(encoding='utf-8')
+          linea = "    expect(reporteTexto).toContain('STOCK_CON_HISTORIAL');\n"
+          if texto.count(linea) != 1:
+              raise SystemExit('No se encontró exactamente una vez la expectativa STOCK_CON_HISTORIAL.')
+          fase7.write_text(texto.replace(linea, '', 1), encoding='utf-8')
+          PY
+
+      - name: Validar diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          git diff -- frontend/e2e/fase4-variantes.spec.ts frontend/e2e/fase7-validacion-integral.spec.ts
+
+      - name: Validar frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run lint
+
+      - name: Publicar corrección en Desarrollo
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'jmejia31'
+          git config user.email '93171442+jmejia31@users.noreply.github.com'
+          git add frontend/e2e/fase4-variantes.spec.ts frontend/e2e/fase7-validacion-integral.spec.ts
+          git diff --cached --quiet && { echo 'No hay cambios para publicar.'; exit 1; }
+          git commit -m 'test(e2e): alinear aceptación con reglas conservadoras de inventario [ChatGPT]'
+          git push origin HEAD:Desarrollo
