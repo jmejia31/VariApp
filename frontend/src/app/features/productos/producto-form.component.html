@@ -225,7 +225,12 @@
       <a routerLink="/productos" mat-button type="button">Cancelar</a>
       <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving() || variantes.length === 0">
         @if (saving()) { <mat-spinner diameter="20"></mat-spinner><span>Guardando producto y colores...</span> }
-        @else { <mat-icon>save</mat-icon><span>Guardar producto</span> }
+        @else {
+          <ng-container>
+            <mat-icon>save</mat-icon>
+            <span>Guardar producto</span>
+          </ng-container>
+        }
       </button>
     </div>
   </form>

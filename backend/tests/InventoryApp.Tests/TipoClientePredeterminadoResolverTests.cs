@@ -72,4 +72,16 @@ public class TipoClientePredeterminadoResolverTests
         // Act & Assert
         await Assert.ThrowsAsync<BusinessRuleException>(() => _resolver.ResolverIdPredeterminadoAsync());
     }
+
+    [Fact]
+    public async Task ResolverIdPredeterminadoAsync_Sin_Predeterminado_Con_SinClasificar_Inactivo_Lanza_Excepcion()
+    {
+        // Arrange
+        _repoMock.Setup(r => r.GetActivosAsync()).ReturnsAsync(new List<TipoCliente>());
+        var sinClasificarInactivo = new TipoCliente { Id = 1, Codigo = "SIN_CLASIFICAR", Nombre = "Sin clasificar", EsPredeterminado = false, Activo = false };
+        _repoMock.Setup(r => r.GetByCodigoAsync("SIN_CLASIFICAR")).ReturnsAsync(sinClasificarInactivo);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<BusinessRuleException>(() => _resolver.ResolverIdPredeterminadoAsync());
+    }
 }

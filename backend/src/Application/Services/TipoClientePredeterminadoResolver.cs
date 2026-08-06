@@ -38,10 +38,10 @@ public class TipoClientePredeterminadoResolver : ITipoClientePredeterminadoResol
 
         // Caso predeterminados.Count == 0 (Ninguno)
         var fallback = await _tipoClienteRepository.GetByCodigoAsync("SIN_CLASIFICAR");
-        if (fallback is null)
+        if (fallback is null || !fallback.Activo || fallback.Eliminado)
         {
-            _logger.LogError("Inconsistencia crítica del sistema: no se encontró ningún tipo de cliente predeterminado ni el tipo de respaldo obligatorio 'SIN_CLASIFICAR'.");
-            throw new BusinessRuleException("Inconsistencia en el sistema: no se encontró el tipo de cliente predeterminado ni el de respaldo 'SIN_CLASIFICAR'.");
+            _logger.LogError("Inconsistencia crítica del sistema: no se encontró ningún tipo de cliente predeterminado activo ni el tipo de respaldo activo y no eliminado 'SIN_CLASIFICAR'.");
+            throw new BusinessRuleException("Inconsistencia en el sistema: no se encontró el tipo de cliente predeterminado ni el de respaldo 'SIN_CLASIFICAR' activo.");
         }
 
         return fallback.Id;

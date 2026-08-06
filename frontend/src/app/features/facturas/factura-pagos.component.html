@@ -60,7 +60,12 @@
 
         <button mat-flat-button color="primary" [disabled]="!puedeRegistrar()" (click)="registrarPago()">
           @if (guardando()) { <mat-spinner diameter="20"></mat-spinner> }
-          @else { <mat-icon>payments</mat-icon> Registrar pago }
+          @else {
+            <ng-container>
+              <mat-icon>payments</mat-icon>
+              <span>Registrar pago</span>
+            </ng-container>
+          }
         </button>
       </mat-card>
     }
