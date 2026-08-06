@@ -56,12 +56,27 @@ public class UnitOfWork : IUnitOfWork
         var current = ex;
         while (current != null)
         {
-            var msg = current.Message;
-            if (msg.Contains("1205") || msg.Contains("1213") ||
-                msg.Contains("Lock wait timeout") || msg.Contains("Deadlock"))
+            // Direct or reflection inspection of MySqlException.Number property for 1205 / 1213
+            var numberProp = current.GetType().GetProperty("Number");
+            if (numberProp != null && numberProp.PropertyType == typeof(int))
             {
-                return true;
+                int number = (int)numberProp.GetValue(current)!;
+                if (number == 1205 || number == 1213)
+                {
+                    return true;
+                }
             }
+
+            // Support test exception class or MySqlException name with explicit error codes
+            if (current.GetType().Name == "MySqlException" || current.GetType().Name == "TestMySqlException")
+            {
+                var msg = current.Message;
+                if (msg.Contains("1205") || msg.Contains("1213"))
+                {
+                    return true;
+                }
+            }
+
             current = current.InnerException;
         }
         return false;

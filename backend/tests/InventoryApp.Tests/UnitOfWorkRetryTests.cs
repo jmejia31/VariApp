@@ -8,6 +8,15 @@ using Xunit;
 
 namespace InventoryApp.Tests;
 
+public class TestMySqlException : Exception
+{
+    public int Number { get; }
+    public TestMySqlException(int number, string message) : base(message)
+    {
+        Number = number;
+    }
+}
+
 public class UnitOfWorkRetryTests
 {
     private static AppDbContext CreateInMemoryContext()
@@ -73,7 +82,7 @@ public class UnitOfWorkRetryTests
             attempts++;
             if (attempts == 1)
             {
-                throw new Exception("Error 1205: Lock wait timeout exceeded; try restarting transaction");
+                throw new TestMySqlException(1205, "Lock wait timeout exceeded");
             }
             return Task.CompletedTask;
         });
@@ -93,7 +102,7 @@ public class UnitOfWorkRetryTests
             attempts++;
             if (attempts == 1)
             {
-                throw new Exception("Error 1213: Deadlock found when trying to get lock; try restarting transaction");
+                throw new TestMySqlException(1213, "Deadlock found when trying to get lock");
             }
             return Task.CompletedTask;
         });
@@ -102,17 +111,55 @@ public class UnitOfWorkRetryTests
     }
 
     [Fact]
-    public async Task ExecuteInTransactionAsync_NoReintentaErrorGenericoOMaximoSuperado()
+    public async Task ExecuteInTransactionAsync_SuperaMaximoTresIntentosYPropagaExcepcion()
     {
         await using var context = CreateInMemoryContext();
         var uow = new UnitOfWork(context);
 
         int attempts = 0;
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        await Assert.ThrowsAsync<TestMySqlException>(() =>
             uow.ExecuteInTransactionAsync(() =>
             {
                 attempts++;
-                throw new InvalidOperationException("Standard failure");
+                throw new TestMySqlException(1213, "Deadlock persistent failure");
+            }));
+
+        Assert.Equal(3, attempts);
+    }
+
+    [Fact]
+    public async Task ExecuteInTransactionAsync_NoReintentaViolacionDeUnicidad1062()
+    {
+        await using var context = CreateInMemoryContext();
+        var uow = new UnitOfWork(context);
+
+        int attempts = 0;
+        var innerEx = new Exception("IX_TipoClientes_EsPredeterminadoUnico duplicate key 1062");
+        var dbEx = new DbUpdateException("DbUpdateException", innerEx);
+
+        var thrown = await Assert.ThrowsAsync<UniqueConstraintViolationException>(() =>
+            uow.ExecuteInTransactionAsync(() =>
+            {
+                attempts++;
+                throw dbEx;
+            }));
+
+        Assert.Equal(1, attempts);
+        Assert.Equal("TipoClientePredeterminadoUnico", thrown.ConstraintName);
+    }
+
+    [Fact]
+    public async Task ExecuteInTransactionAsync_NoReintentaExcepcionGenericaNoMySql()
+    {
+        await using var context = CreateInMemoryContext();
+        var uow = new UnitOfWork(context);
+
+        int attempts = 0;
+        await Assert.ThrowsAsync<Exception>(() =>
+            uow.ExecuteInTransactionAsync(() =>
+            {
+                attempts++;
+                throw new Exception("Deadlock word in generic exception");
             }));
 
         Assert.Equal(1, attempts);
