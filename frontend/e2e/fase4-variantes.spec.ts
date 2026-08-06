@@ -306,7 +306,7 @@ test.describe('Fase 4 — variantes por color, SKU e inventario', () => {
     await page.waitForURL((url) => url.pathname === '/productos', { timeout: 20_000 });
   });
 
-  test('Formulario principal permite agregar colores y muestra la suma del stock', async ({ page }) => {
+  test('Formulario principal separa metadatos de la administración de variantes', async ({ page }) => {
     await loginUi(page);
 
     await page.goto(`/productos/${productoId}/editar`);
@@ -315,10 +315,15 @@ test.describe('Fase 4 — variantes por color, SKU e inventario', () => {
     await expect(page.locator('.variant-card')).toHaveCount(2);
     await expect(page.locator('.stock-summary').getByText('14 unidades', { exact: true })).toBeVisible();
 
-    await page.getByRole('button', { name: 'Agregar otro color' }).first().click();
-    await expect(page.locator('.variant-card')).toHaveCount(3);
-    await expect(page.locator('mat-select[formcontrolname="colorId"]')).toHaveCount(3);
-    await expect(page.locator('input[formcontrolname="cantidad"]')).toHaveCount(3);
+    await expect(page.getByRole('button', { name: 'Agregar otro color' })).toHaveCount(0);
+    const cantidades = page.locator('input[formcontrolname="cantidad"]');
+    await expect(cantidades).toHaveCount(2);
+    await expect(cantidades.nth(0)).toBeDisabled();
+    await expect(cantidades.nth(1)).toBeDisabled();
+
+    const administrarVariantes = page.getByRole('link', { name: 'Administrar variantes' });
+    await expect(administrarVariantes).toBeVisible();
+    await expect(administrarVariantes).toHaveAttribute('href', `/productos/${productoId}/variantes`);
   });
 
   test('Angular exige la variante exacta en compra y venta', async ({ page }) => {
