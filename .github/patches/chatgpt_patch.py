@@ -8,9 +8,7 @@ def read(path: str) -> str:
 
 
 def write(path: str, content: str) -> None:
-    destination = ROOT / path
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    destination.write_text(content, encoding="utf-8")
+    (ROOT / path).write_text(content, encoding="utf-8")
 
 
 def replace_once(text: str, old: str, new: str, label: str) -> str:
@@ -20,396 +18,398 @@ def replace_once(text: str, old: str, new: str, label: str) -> str:
     return text.replace(old, new, 1)
 
 
-write(
-    "backend/src/Application/DTOs/AjusteStockDto.cs",
-    '''namespace InventoryApp.Application.DTOs;
+def replace_between(text: str, start: str, end: str, replacement: str, label: str) -> str:
+    i = text.find(start)
+    if i < 0:
+        raise RuntimeError(f"{label}: inicio no encontrado")
+    j = text.find(end, i)
+    if j < 0:
+        raise RuntimeError(f"{label}: final no encontrado")
+    return text[:i] + replacement + text[j:]
 
-public sealed class AjusteStockRequest
-{
-    public int CantidadActualEsperada { get; set; }
-    public int CantidadNueva { get; set; }
-    public string Motivo { get; set; } = string.Empty;
-}
 
-public sealed class AjusteStockResultadoDto
-{
-    public int ProductoId { get; set; }
-    public int? ProductoVarianteId { get; set; }
-    public int CantidadAnterior { get; set; }
-    public int CantidadNueva { get; set; }
-    public int Diferencia { get; set; }
-    public string Motivo { get; set; } = string.Empty;
-}
-''')
+dto_path = "backend/src/Application/DTOs/CargaMasivaDto.cs"
+dto = read(dto_path)
+dto = replace_once(
+    dto,
+    '''    public Dictionary<string, string?> Datos { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+    public List<string> Mensajes { get; set; } = new();''',
+    '''    public Dictionary<string, string?> Datos { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+    public List<string> Mensajes { get; set; } = new();
 
-write(
-    "backend/src/Application/Interfaces/IInventarioAjusteService.cs",
-    '''using InventoryApp.Application.DTOs;
+    // Snapshot interno utilizado para impedir que una confirmación sobrescriba
+    // cambios de inventario realizados después de validar el archivo.
+    public int? ProductoIdSnapshot { get; set; }
+    public int? ProductoVarianteIdSnapshot { get; set; }
+    public int? CantidadActualSnapshot { get; set; }
+    public DateTime? FechaValidacionSnapshot { get; set; }''',
+    "propiedades snapshot")
+write(dto_path, dto)
 
-namespace InventoryApp.Application.Interfaces;
+service_path = "backend/src/Infrastructure/Services/CargaMasivaService.cs"
+service = read(service_path)
 
-public interface IInventarioAjusteService
-{
-    Task<AjusteStockResultadoDto> AjustarProductoAsync(
-        int productoId,
-        AjusteStockRequest request);
+service = replace_once(
+    service,
+    '''        var variantesConMovimientos = await _db.MovimientosInventario.AsNoTracking()
+            .Where(x => x.ProductoVarianteId.HasValue)
+            .Select(x => x.ProductoVarianteId!.Value)
+            .Distinct()
+            .ToListAsync(ct);
+''',
+    "",
+    "eliminar restricción por historial")
 
-    Task<AjusteStockResultadoDto> AjustarVarianteAsync(
-        int productoId,
-        int varianteId,
-        AjusteStockRequest request);
-}
-''')
+service = replace_once(
+    service,
+    '''            var existente = existentePorSku ?? existentePorColor;
+            if (existente is not null && variantesConMovimientos.Contains(existente.Id) && Entero(fila, "Cantidad") != existente.Cantidad)
+                AgregarError(errores, fila.NumeroFila, "Cantidad", "STOCK_CON_HISTORIAL", "No se puede reemplazar por carga masiva el stock de una variante que ya tiene movimientos. Usa un movimiento de inventario.", V(fila, "Cantidad"));
 
-write(
-    "backend/src/Application/Services/InventarioAjusteService.cs",
-    '''using InventoryApp.Application.DTOs;
-using InventoryApp.Application.Exceptions;
-using InventoryApp.Application.Interfaces;
-using InventoryApp.Domain.Entities;
-using InventoryApp.Domain.Enums;
+            var clave = $"{producto.Id}|{color.Id}|{NormalizarClave(sku)}";''',
+    '''            var existente = existentePorSku ?? existentePorColor;
+            fila.ProductoIdSnapshot = producto.Id;
+            fila.ProductoVarianteIdSnapshot = existente?.Id;
+            fila.CantidadActualSnapshot = existente?.Cantidad;
+            fila.FechaValidacionSnapshot = DateTime.UtcNow;
 
-namespace InventoryApp.Application.Services;
+            var clave = $"{producto.Id}|{color.Id}|{NormalizarClave(sku)}";''',
+    "capturar snapshot variante")
 
-public sealed class InventarioAjusteService : IInventarioAjusteService
-{
-    private readonly IInventarioConcurrencyService _concurrency;
-    private readonly IMovimientoInventarioRepository _movimientos;
-    private readonly IProductoRepository _productos;
-    private readonly ICurrentUserService _currentUser;
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IAuditoriaService _auditoria;
-
-    public InventarioAjusteService(
-        IInventarioConcurrencyService concurrency,
-        IMovimientoInventarioRepository movimientos,
-        IProductoRepository productos,
-        ICurrentUserService currentUser,
-        IUnitOfWork unitOfWork,
-        IAuditoriaService auditoria)
+confirmar_start = '''    public async Task<CargaMasivaDetalleDto> ConfirmarAsync(int id, CancellationToken cancellationToken = default)
+    {'''
+confirmar_end = '''    public async Task<ArchivoDescargableDto> DescargarErroresAsync'''
+confirmar_new = '''    public async Task<CargaMasivaDetalleDto> ConfirmarAsync(int id, CancellationToken cancellationToken = default)
     {
-        _concurrency = concurrency;
-        _movimientos = movimientos;
-        _productos = productos;
-        _currentUser = currentUser;
-        _unitOfWork = unitOfWork;
-        _auditoria = auditoria;
+        CargaMasiva? carga = null;
+        List<CargaMasivaFilaDto> filas = new();
+        var creados = 0;
+        var actualizados = 0;
+        var confirmadaAhora = false;
+
+        await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+        try
+        {
+            if (!_currentUser.EsAdministrador && !_currentUser.UsuarioId.HasValue)
+                throw new ForbiddenAccessException("No tienes acceso a esta carga masiva.");
+
+            if (_currentUser.EsAdministrador)
+            {
+                carga = await _db.CargasMasivas
+                    .FromSqlInterpolated($"SELECT c.* FROM CargasMasivas c WHERE c.Id = {id} FOR UPDATE")
+                    .AsTracking()
+                    .SingleOrDefaultAsync(cancellationToken);
+            }
+            else
+            {
+                var usuarioId = _currentUser.UsuarioId!.Value;
+                carga = await _db.CargasMasivas
+                    .FromSqlInterpolated($"SELECT c.* FROM CargasMasivas c WHERE c.Id = {id} AND c.CreadoPorUsuarioId = {usuarioId} FOR UPDATE")
+                    .AsTracking()
+                    .SingleOrDefaultAsync(cancellationToken);
+            }
+
+            if (carga is null)
+            {
+                var existe = await _db.CargasMasivas
+                    .AsNoTracking()
+                    .AnyAsync(x => x.Id == id, cancellationToken);
+                if (existe)
+                    throw new ForbiddenAccessException("No tienes acceso a esta carga masiva.");
+                throw new BusinessRuleException("La carga masiva no existe.");
+            }
+
+            await _db.Entry(carga)
+                .Collection(x => x.Errores)
+                .LoadAsync(cancellationToken);
+
+            filas = DeserializarFilas(carga.DatosNormalizadosJson);
+
+            if (carga.Estado == EstadoCargaMasiva.Confirmada)
+            {
+                await transaction.CommitAsync(cancellationToken);
+                return MapDetalle(
+                    carga,
+                    filas,
+                    carga.Errores.Select(MapError).ToList());
+            }
+
+            if (carga.Estado != EstadoCargaMasiva.Validada || carga.FilasConError > 0)
+                throw new BusinessRuleException("La carga contiene errores o no ha sido validada correctamente.");
+            if (filas.Count == 0 || filas.Any(x => !x.EsValida))
+                throw new BusinessRuleException("La vista previa validada no contiene filas confirmables.");
+
+            (creados, actualizados) = carga.Tipo switch
+            {
+                TipoCargaMasiva.Clientes => await AplicarClientesAsync(filas, cancellationToken),
+                TipoCargaMasiva.Proveedores => await AplicarProveedoresAsync(filas, cancellationToken),
+                TipoCargaMasiva.Colores => await AplicarColoresAsync(filas, cancellationToken),
+                TipoCargaMasiva.Productos => await AplicarProductosAsync(filas, cancellationToken),
+                TipoCargaMasiva.VariantesInventario => await AplicarVariantesAsync(carga.Id, filas, cancellationToken),
+                _ => throw new BusinessRuleException("El tipo de carga no es válido.")
+            };
+
+            carga.Estado = EstadoCargaMasiva.Confirmada;
+            carga.FilasProcesadas = filas.Count;
+            carga.RegistrosCreados = creados;
+            carga.RegistrosActualizados = actualizados;
+            carga.FechaConfirmacion = DateTime.UtcNow;
+            carga.ConfirmadoPorUsuarioId = _currentUser.UsuarioId;
+            carga.ConfirmadoPorNombreUsuario = _currentUser.NombreUsuario;
+            carga.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
+            carga.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
+            carga.FechaActualizacion = DateTime.UtcNow;
+            carga.ErrorGeneral = null;
+
+            await _db.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+            confirmadaAhora = true;
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync(cancellationToken);
+            _db.ChangeTracker.Clear();
+
+            if (carga is not null && carga.Estado != EstadoCargaMasiva.Confirmada)
+            {
+                var cargaFallida = await _db.CargasMasivas
+                    .FirstAsync(x => x.Id == id, cancellationToken);
+                cargaFallida.Estado = EstadoCargaMasiva.Fallida;
+                cargaFallida.ErrorGeneral =
+                    "La confirmación fue revertida completamente. Revalida el archivo antes de intentar nuevamente.";
+                cargaFallida.FechaActualizacion = DateTime.UtcNow;
+                cargaFallida.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
+                cargaFallida.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
+                await _db.SaveChangesAsync(cancellationToken);
+            }
+
+            _logger.LogError(ex, "Falló la confirmación transaccional de la carga masiva {CargaId}", id);
+
+            if (carga is not null)
+            {
+                await _auditoria.RegistrarAsync(
+                    ModuloSistema.CargasMasivas,
+                    AccionPermiso.Confirmar,
+                    $"Falló la confirmación de la carga masiva #{id}; la transacción fue revertida.",
+                    id,
+                    entidad: "CargaMasiva",
+                    resultado: "Error",
+                    error: "Confirmación transaccional revertida");
+            }
+
+            if (ex is BusinessRuleException or ForbiddenAccessException)
+                throw;
+
+            throw new BusinessRuleException(
+                "La importación no pudo confirmarse y ningún cambio fue aplicado. Revalida el archivo.");
+        }
+
+        if (confirmadaAhora)
+        {
+            await _auditoria.RegistrarAsync(
+                ModuloSistema.CargasMasivas,
+                AccionPermiso.Confirmar,
+                $"Confirmó la carga masiva #{id}: {creados} registros creados y {actualizados} actualizados.",
+                id,
+                entidad: "CargaMasiva",
+                valoresNuevos: new
+                {
+                    Tipo = carga!.Tipo,
+                    FilasProcesadas = filas.Count,
+                    RegistrosCreados = creados,
+                    RegistrosActualizados = actualizados
+                });
+        }
+
+        return await GetByIdAsync(id)
+            ?? throw new BusinessRuleException("No se pudo recuperar la carga confirmada.");
     }
 
-    public Task<AjusteStockResultadoDto> AjustarProductoAsync(
-        int productoId,
-        AjusteStockRequest request) =>
-        AjustarAsync(productoId, null, request);
+'''
+service = replace_between(service, confirmar_start, confirmar_end, confirmar_new, "confirmación bloqueada")
 
-    public Task<AjusteStockResultadoDto> AjustarVarianteAsync(
-        int productoId,
-        int varianteId,
-        AjusteStockRequest request) =>
-        AjustarAsync(productoId, varianteId, request);
-
-    private async Task<AjusteStockResultadoDto> AjustarAsync(
-        int productoId,
-        int? varianteId,
-        AjusteStockRequest request)
+aplicar_start = '''    private async Task<(int Creados, int Actualizados)> AplicarVariantesAsync'''
+aplicar_end = '''    private static CargaMasivaDto MapResumenExpression'''
+aplicar_new = '''    private async Task<(int Creados, int Actualizados)> AplicarVariantesAsync(
+        int cargaId,
+        List<CargaMasivaFilaDto> filas,
+        CancellationToken ct)
     {
-        if (productoId <= 0 || varianteId <= 0)
-            throw new BusinessRuleException("El producto o la variante indicada no es válida.");
-        if (request.CantidadActualEsperada < 0 || request.CantidadNueva < 0)
-            throw new BusinessRuleException("Las cantidades de inventario no pueden ser negativas.");
-        if (string.IsNullOrWhiteSpace(request.Motivo))
-            throw new BusinessRuleException("El motivo del ajuste de inventario es obligatorio.");
+        if (_db.Database.CurrentTransaction is null)
+            throw new InvalidOperationException("La confirmación de variantes requiere una transacción activa.");
 
-        var motivo = request.Motivo.Trim();
-        var diferencia = request.CantidadNueva - request.CantidadActualEsperada;
+        if (filas.Any(x => !x.ProductoIdSnapshot.HasValue))
+            throw new BusinessRuleException(
+                "La carga no contiene snapshots completos. Valida el archivo nuevamente.");
 
-        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        var productoIds = filas
+            .Select(x => x.ProductoIdSnapshot!.Value)
+            .Distinct()
+            .OrderBy(x => x)
+            .ToArray();
+        var varianteIds = filas
+            .Where(x => x.ProductoVarianteIdSnapshot.HasValue)
+            .Select(x => x.ProductoVarianteIdSnapshot!.Value)
+            .Distinct()
+            .OrderBy(x => x)
+            .ToArray();
+
+        var productos = new Dictionary<int, Producto>();
+        foreach (var productoId in productoIds)
         {
-            await _concurrency.AjustarStockPesimistaAsync(
-                productoId,
-                varianteId,
-                request.CantidadActualEsperada,
-                request.CantidadNueva);
+            var producto = await _db.Productos
+                .FromSqlInterpolated($"SELECT p.* FROM Productos p WHERE p.Id = {productoId} AND p.Eliminado = 0 FOR UPDATE")
+                .AsTracking()
+                .SingleOrDefaultAsync(ct)
+                ?? throw new BusinessRuleException(
+                    $"El producto ID '{productoId}' ya no existe. Revalida el archivo.");
+            productos.Add(producto.Id, producto);
+        }
 
-            await _movimientos.AddAsync(new MovimientoInventario
+        var variantes = new Dictionary<int, ProductoVariante>();
+        foreach (var varianteId in varianteIds)
+        {
+            var variante = await _db.ProductoVariantes
+                .FromSqlInterpolated($"SELECT v.* FROM ProductoVariantes v WHERE v.Id = {varianteId} AND v.Eliminado = 0 FOR UPDATE")
+                .AsTracking()
+                .SingleOrDefaultAsync(ct)
+                ?? throw new BusinessRuleException(
+                    $"La variante ID '{varianteId}' ya no existe. Revalida el archivo.");
+            variantes.Add(variante.Id, variante);
+        }
+
+        var colores = await _db.CatalogosProducto
+            .Where(x => x.Tipo == TipoCatalogoProducto.Color && x.Activo && !x.Eliminado)
+            .ToListAsync(ct);
+
+        var movimientos = new List<(Producto Producto, ProductoVariante Variante, CargaMasivaFilaDto Fila, int Anterior, int Nueva)>();
+        var productosAfectados = new HashSet<int>();
+        var creados = 0;
+        var actualizados = 0;
+
+        foreach (var fila in filas.OrderBy(x => x.ProductoIdSnapshot).ThenBy(x => x.ProductoVarianteIdSnapshot))
+        {
+            var producto = productos[fila.ProductoIdSnapshot!.Value];
+            var color = colores.FirstOrDefault(
+                x => NormalizarClave(x.Nombre) == NormalizarClave(V(fila, "Color")))
+                ?? throw new BusinessRuleException(
+                    "Uno de los colores dejó de estar disponible. Revalida el archivo.");
+            var sku = V(fila, "SKU")!;
+            var codigoBarras = NuloSiVacio(V(fila, "CodigoBarras"));
+            ProductoVariante variante;
+            int cantidadAnterior;
+
+            if (fila.ProductoVarianteIdSnapshot.HasValue)
             {
-                ProductoId = productoId,
-                ProductoVarianteId = varianteId,
+                variante = variantes[fila.ProductoVarianteIdSnapshot.Value];
+                if (variante.ProductoId != producto.Id)
+                    throw new BusinessRuleException("La variante cambió de producto. Revalida el archivo.");
+                if (!fila.CantidadActualSnapshot.HasValue ||
+                    variante.Cantidad != fila.CantidadActualSnapshot.Value)
+                {
+                    throw new BusinessRuleException(
+                        "El inventario cambió después de validar el archivo. Revalida la carga antes de confirmarla.");
+                }
+
+                cantidadAnterior = variante.Cantidad;
+                actualizados++;
+            }
+            else
+            {
+                var conflicto = await _db.ProductoVariantes
+                    .IgnoreQueryFilters()
+                    .AsNoTracking()
+                    .AnyAsync(x => !x.Eliminado &&
+                        (x.Sku == sku ||
+                         (x.ProductoId == producto.Id && x.ColorId == color.Id) ||
+                         (codigoBarras != null && x.CodigoBarras == codigoBarras)), ct);
+                if (conflicto)
+                {
+                    throw new BusinessRuleException(
+                        "Una variante fue creada o modificada después de validar el archivo. Revalida la carga.");
+                }
+
+                variante = new ProductoVariante
+                {
+                    ProductoId = producto.Id,
+                    CreadoPorUsuarioId = _currentUser.UsuarioId,
+                    CreadoPorNombreUsuario = _currentUser.NombreUsuario
+                };
+                _db.ProductoVariantes.Add(variante);
+                cantidadAnterior = 0;
+                creados++;
+            }
+
+            var cantidadNueva = Entero(fila, "Cantidad");
+            variante.ColorId = color.Id;
+            variante.Sku = sku;
+            variante.CodigoBarras = codigoBarras;
+            variante.Cantidad = cantidadNueva;
+            variante.UmbralStockBajo = Entero(fila, "UmbralStockBajo");
+            variante.Costo = Decimal(fila, "Costo");
+            variante.Precio = Decimal(fila, "Precio");
+            variante.Activo = Booleano(fila, "Activo");
+            variante.Eliminado = false;
+            variante.FechaEliminacion = null;
+            variante.EliminadoPorUsuarioId = null;
+            MarcarActualizacion(variante);
+
+            movimientos.Add((producto, variante, fila, cantidadAnterior, cantidadNueva));
+            productosAfectados.Add(producto.Id);
+        }
+
+        await _db.SaveChangesAsync(ct);
+
+        foreach (var item in movimientos.Where(x => x.Anterior != x.Nueva))
+        {
+            _db.MovimientosInventario.Add(new MovimientoInventario
+            {
+                ProductoId = item.Producto.Id,
+                ProductoVarianteId = item.Variante.Id,
+                ProductoColorSnapshot = V(item.Fila, "Color"),
+                ProductoSkuSnapshot = item.Variante.Sku,
                 Tipo = TipoMovimientoInventario.Ajuste,
-                Cantidad = Math.Abs(diferencia),
-                StockAnterior = request.CantidadActualEsperada,
-                StockNuevo = request.CantidadNueva,
-                ReferenciaTipo = varianteId.HasValue
-                    ? "AjusteProductoVariante"
-                    : "AjusteProducto",
-                ReferenciaId = varianteId ?? productoId,
-                Descripcion = $"Ajuste formal de inventario. Motivo: {motivo}",
+                Cantidad = Math.Abs(item.Nueva - item.Anterior),
+                StockAnterior = item.Anterior,
+                StockNuevo = item.Nueva,
+                CostoUnitario = item.Variante.Costo,
+                PrecioUnitario = item.Variante.Precio,
+                ReferenciaTipo = "CargaMasiva",
+                ReferenciaId = cargaId,
+                Descripcion = $"Ajuste por carga masiva #{cargaId}",
                 CreadoPorUsuarioId = _currentUser.UsuarioId,
                 CreadoPorNombreUsuario = _currentUser.NombreUsuario
             });
-
-            await _productos.SaveChangesAsync();
-        });
-
-        await _auditoria.RegistrarAsync(
-            ModuloSistema.Productos,
-            AccionPermiso.Editar,
-            varianteId.HasValue
-                ? $"Stock de variante ajustado. Producto {productoId}, variante {varianteId}."
-                : $"Stock de producto ajustado. Producto {productoId}.",
-            varianteId ?? productoId,
-            entidad: varianteId.HasValue ? "ProductoVariante" : "Producto",
-            valoresAnteriores: new { Cantidad = request.CantidadActualEsperada },
-            valoresNuevos: new
-            {
-                Cantidad = request.CantidadNueva,
-                Diferencia = diferencia,
-                Motivo = motivo
-            },
-            motivo: motivo);
-
-        return new AjusteStockResultadoDto
-        {
-            ProductoId = productoId,
-            ProductoVarianteId = varianteId,
-            CantidadAnterior = request.CantidadActualEsperada,
-            CantidadNueva = request.CantidadNueva,
-            Diferencia = diferencia,
-            Motivo = motivo
-        };
-    }
-}
-''')
-
-write(
-    "backend/src/API/Controllers/InventarioAjustesController.cs",
-    '''using InventoryApp.API.Filters;
-using InventoryApp.Application.Common;
-using InventoryApp.Application.DTOs;
-using InventoryApp.Application.Interfaces;
-using InventoryApp.Domain.Enums;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-
-namespace InventoryApp.API.Controllers;
-
-[ApiController]
-[Authorize]
-[Route("productos")]
-public sealed class InventarioAjustesController : ControllerBase
-{
-    private readonly IInventarioAjusteService _service;
-
-    public InventarioAjustesController(IInventarioAjusteService service)
-    {
-        _service = service;
-    }
-
-    [HttpPost("{productoId:int}/ajustes-stock")]
-    [RequierePermiso(ModuloSistema.Productos, AccionPermiso.Editar)]
-    public async Task<IActionResult> AjustarProducto(
-        int productoId,
-        [FromBody] AjusteStockRequest request)
-    {
-        var resultado = await _service.AjustarProductoAsync(productoId, request);
-        return Ok(ApiResponse<AjusteStockResultadoDto>.Ok(
-            resultado,
-            "Inventario del producto ajustado correctamente."));
-    }
-
-    [HttpPost("{productoId:int}/variantes/{varianteId:int}/ajustes-stock")]
-    [RequierePermiso(ModuloSistema.Productos, AccionPermiso.Editar)]
-    public async Task<IActionResult> AjustarVariante(
-        int productoId,
-        int varianteId,
-        [FromBody] AjusteStockRequest request)
-    {
-        var resultado = await _service.AjustarVarianteAsync(
-            productoId,
-            varianteId,
-            request);
-        return Ok(ApiResponse<AjusteStockResultadoDto>.Ok(
-            resultado,
-            "Inventario de la variante ajustado correctamente."));
-    }
-}
-''')
-
-program_path = "backend/src/API/Program.cs"
-program = read(program_path)
-program = replace_once(
-    program,
-    "builder.Services.AddScoped<IInventarioConcurrencyService, InventarioConcurrencyService>();",
-    "builder.Services.AddScoped<IInventarioConcurrencyService, InventarioConcurrencyService>();\nbuilder.Services.AddScoped<IInventarioAjusteService, InventarioAjusteService>();",
-    "registro DI de ajuste")
-write(program_path, program)
-
-producto_service_path = "backend/src/Application/Services/ProductoService.cs"
-producto_service = read(producto_service_path)
-producto_service = replace_once(
-    producto_service,
-    '''        producto.Nombre = dto.Nombre.Trim();
-        producto.Marca = marcaNombre;''',
-    '''        if (dto.Cantidad != producto.Cantidad)
-        {
-            throw new BusinessRuleException(
-                "El stock no puede modificarse desde el mantenimiento general. Utiliza la operación Ajustar inventario.");
         }
 
-        producto.Nombre = dto.Nombre.Trim();
-        producto.Marca = marcaNombre;''',
-    "bloqueo de stock en producto")
-producto_service = replace_once(
-    producto_service,
-    "        producto.Cantidad = dto.Cantidad;\n",
-    "",
-    "eliminar asignación directa producto")
-write(producto_service_path, producto_service)
-
-variante_service_path = "backend/src/Application/Services/ProductoVarianteService.cs"
-variante_service = read(variante_service_path)
-variante_service = replace_once(
-    variante_service,
-    '''        var anteriores = new { variante.ColorId, variante.Sku, variante.CodigoBarras, variante.Cantidad, variante.UmbralStockBajo, variante.Costo, variante.Precio };
-        var color = await ValidarAsync(productoId, id, dto);
-
-        variante.ColorId = color.Id;''',
-    '''        var anteriores = new { variante.ColorId, variante.Sku, variante.CodigoBarras, variante.Cantidad, variante.UmbralStockBajo, variante.Costo, variante.Precio };
-        var color = await ValidarAsync(productoId, id, dto);
-
-        if (dto.Cantidad != variante.Cantidad)
+        foreach (var producto in productos.Values.Where(x => productosAfectados.Contains(x.Id)))
         {
-            throw new BusinessRuleException(
-                "El stock de la variante no puede modificarse desde el mantenimiento general. Utiliza la operación Ajustar inventario.");
-        }
-
-        variante.ColorId = color.Id;''',
-    "bloqueo de stock en variante")
-variante_service = replace_once(
-    variante_service,
-    "        variante.Cantidad = dto.Cantidad;\n",
-    "",
-    "eliminar asignación directa variante")
-write(variante_service_path, variante_service)
-
-coordinator_path = "backend/src/Infrastructure/Services/InventarioConcurrencyService.cs"
-coordinator = read(coordinator_path)
-coordinator = replace_once(
-    coordinator,
-    '''        else
-        {
-            if (producto.Cantidad != cantidadActualEsperada)''',
-    '''        else
-        {
-            var variantesExistentes = await _productoVarianteRepository
-                .GetByProductoIdAsync(productoId, incluirInactivas: true);
-            if (variantesExistentes.Count > 0)
+            var lista = await _db.ProductoVariantes
+                .Where(x => x.ProductoId == producto.Id && !x.Eliminado)
+                .ToListAsync(ct);
+            var total = lista.Sum(x => x.Cantidad);
+            producto.Cantidad = total;
+            if (lista.Count > 0)
             {
-                throw new BusinessRuleException(
-                    "El producto tiene variantes. Ajusta el inventario de cada variante; el stock total se recalcula automáticamente.");
+                producto.Costo = total > 0
+                    ? Math.Round(
+                        lista.Sum(x => (x.Costo ?? 0m) * x.Cantidad) / total,
+                        2,
+                        MidpointRounding.AwayFromZero)
+                    : lista.Average(x => x.Costo ?? producto.Costo);
+                var activas = lista.Where(x => x.Activo).ToList();
+                producto.Precio = (activas.Count > 0 ? activas : lista)
+                    .Min(x => x.Precio ?? producto.Precio);
+                producto.ColorId = lista.Count == 1 ? lista[0].ColorId : null;
             }
+            MarcarActualizacion(producto);
+        }
 
-            if (producto.Cantidad != cantidadActualEsperada)''',
-    "prohibir ajuste agregado con variantes")
-write(coordinator_path, coordinator)
-
-write(
-    "backend/tests/InventoryApp.Tests/InventarioAjusteServiceTests.cs",
-    '''using InventoryApp.Application.DTOs;
-using InventoryApp.Application.Exceptions;
-using InventoryApp.Application.Interfaces;
-using InventoryApp.Application.Services;
-using InventoryApp.Domain.Entities;
-using InventoryApp.Domain.Enums;
-using Moq;
-using Xunit;
-
-namespace InventoryApp.Tests;
-
-public class InventarioAjusteServiceTests
-{
-    private readonly Mock<IInventarioConcurrencyService> _concurrency = new();
-    private readonly Mock<IMovimientoInventarioRepository> _movimientos = new();
-    private readonly Mock<IProductoRepository> _productos = new();
-    private readonly Mock<ICurrentUserService> _currentUser = new();
-    private readonly Mock<IAuditoriaService> _auditoria = new();
-    private readonly InventarioAjusteService _service;
-
-    public InventarioAjusteServiceTests()
-    {
-        _currentUser.SetupGet(x => x.UsuarioId).Returns(7);
-        _currentUser.SetupGet(x => x.NombreUsuario).Returns("inventario-admin");
-        _productos.Setup(x => x.SaveChangesAsync()).ReturnsAsync(true);
-
-        _service = new InventarioAjusteService(
-            _concurrency.Object,
-            _movimientos.Object,
-            _productos.Object,
-            _currentUser.Object,
-            new FakeUnitOfWork(),
-            _auditoria.Object);
+        return (creados, actualizados);
     }
 
-    [Fact]
-    public async Task AjustarProductoAsync_RegistraMovimientoAjuste()
-    {
-        MovimientoInventario? movimiento = null;
-        _movimientos.Setup(x => x.AddAsync(It.IsAny<MovimientoInventario>()))
-            .Callback<MovimientoInventario>(x => movimiento = x)
-            .Returns(Task.CompletedTask);
+'''
+service = replace_between(service, aplicar_start, aplicar_end, aplicar_new, "aplicar variantes con snapshot")
+write(service_path, service)
 
-        var resultado = await _service.AjustarProductoAsync(10, new AjusteStockRequest
-        {
-            CantidadActualEsperada = 8,
-            CantidadNueva = 5,
-            Motivo = "Conteo físico"
-        });
-
-        Assert.Equal(-3, resultado.Diferencia);
-        Assert.NotNull(movimiento);
-        Assert.Equal(TipoMovimientoInventario.Ajuste, movimiento!.Tipo);
-        Assert.Equal(3, movimiento.Cantidad);
-        Assert.Equal(8, movimiento.StockAnterior);
-        Assert.Equal(5, movimiento.StockNuevo);
-        Assert.Equal("AjusteProducto", movimiento.ReferenciaTipo);
-        _concurrency.Verify(x => x.AjustarStockPesimistaAsync(10, null, 8, 5), Times.Once);
-    }
-
-    [Fact]
-    public async Task AjustarVarianteAsync_PropagaConflictoDeStockObsoleto()
-    {
-        _concurrency.Setup(x => x.AjustarStockPesimistaAsync(10, 4, 8, 5))
-            .ThrowsAsync(new BusinessRuleException(
-                "El inventario cambió desde que se cargó el formulario."));
-
-        await Assert.ThrowsAsync<BusinessRuleException>(() =>
-            _service.AjustarVarianteAsync(10, 4, new AjusteStockRequest
-            {
-                CantidadActualEsperada = 8,
-                CantidadNueva = 5,
-                Motivo = "Conteo"
-            }));
-
-        _movimientos.Verify(x => x.AddAsync(It.IsAny<MovimientoInventario>()), Times.Never);
-    }
-
-    [Theory]
-    [InlineData(-1, 0, "motivo")]
-    [InlineData(0, -1, "motivo")]
-    [InlineData(0, 0, "")]
-    public async Task AjustarProductoAsync_ValidaSolicitud(
-        int esperada,
-        int nueva,
-        string motivo)
-    {
-        await Assert.ThrowsAsync<BusinessRuleException>(() =>
-            _service.AjustarProductoAsync(10, new AjusteStockRequest
-            {
-                CantidadActualEsperada = esperada,
-                CantidadNueva = nueva,
-                Motivo = motivo
-            }));
-    }
-}
-''')
-
-print("Ajustes formales de inventario conectados.")
+print("Carga masiva protegida con snapshots y locks.")
