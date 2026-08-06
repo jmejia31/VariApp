@@ -35,16 +35,13 @@ public class ProductoRepository : IProductoRepository
         if (_context.Database.CurrentTransaction is null)
             throw new InvalidOperationException("GetByIdForUpdateAsync requiere una transacción activa.");
 
-        var producto = await _context.Productos
+        // Este método bloquea exclusivamente la fila de Producto. Las variantes
+        // deben adquirirse después y únicamente mediante su propio SELECT ... FOR UPDATE,
+        // para evitar que EF Core conserve snapshots obsoletos en el ChangeTracker.
+        return await _context.Productos
             .FromSqlInterpolated($"SELECT p.* FROM Productos p WHERE p.Id = {id} AND p.Eliminado = 0 FOR UPDATE")
             .AsTracking()
             .FirstOrDefaultAsync();
-
-        if (producto != null)
-        {
-            await _context.Entry(producto).Collection(p => p.Variantes).Query().Where(v => !v.Eliminado).LoadAsync();
-        }
-        return producto;
     }
 
     public async Task<List<Producto>> GetByIdsForUpdateAsync(IEnumerable<int> ids)
