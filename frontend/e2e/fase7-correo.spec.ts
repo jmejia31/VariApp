@@ -47,6 +47,14 @@ async function createInvoice(request: APIRequestContext, token: string): Promise
   expect(productResponse.status(), await productResponse.text()).toBe(201);
   const product = await dataOf(productResponse);
 
+  const variantsResponse = await request.get(`${API_URL}/productos/${product.id}/variantes`, {
+    headers: authHeaders(token)
+  });
+  expect(variantsResponse.status(), await variantsResponse.text()).toBe(200);
+  const variants = await dataOf(variantsResponse);
+  const technicalVariant = variants.find((variant: any) => variant.esTecnica === true);
+  expect(technicalVariant, 'El producto simple debe exponer exactamente una variante técnica.').toBeTruthy();
+
   const saleResponse = await request.post(`${API_URL}/ventas`, {
     headers: authHeaders(token),
     data: {
@@ -56,7 +64,12 @@ async function createInvoice(request: APIRequestContext, token: string): Promise
       metodoPago: 'Efectivo',
       estadoPago: 'Pagado',
       notas: 'Certificación SMTP aislada',
-      detalles: [{ productoId: product.id, cantidad: 1, precioUnitario: 225 }]
+      detalles: [{
+        productoId: product.id,
+        productoVarianteId: technicalVariant.id,
+        cantidad: 1,
+        precioUnitario: 225
+      }]
     }
   });
   expect(saleResponse.status(), await saleResponse.text()).toBe(201);
