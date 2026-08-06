@@ -37,6 +37,7 @@ export class ProductoVariantesComponent implements OnInit {
   readonly colores = signal<CatalogoProducto[]>([]);
   readonly loading = signal(true);
   readonly saving = signal(false);
+  readonly ajustandoId = signal<number | null>(null);
   readonly errorMessage = signal<string | null>(null);
   readonly editandoId = signal<number | null>(null);
   readonly displayedColumns = ['color', 'sku', 'codigoBarras', 'stock', 'costo', 'precio', 'estado', 'acciones'];
@@ -78,6 +79,7 @@ export class ProductoVariantesComponent implements OnInit {
 
   editar(variante: ProductoVariante): void {
     this.editandoId.set(variante.id);
+    this.form.controls.cantidad.enable({ emitEvent: false });
     this.form.setValue({
       colorId: variante.colorId,
       sku: variante.sku,
@@ -87,12 +89,56 @@ export class ProductoVariantesComponent implements OnInit {
       costo: variante.costo,
       precio: variante.precio
     });
+    this.form.controls.cantidad.disable({ emitEvent: false });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   cancelar(): void {
     this.editandoId.set(null);
+    this.form.controls.cantidad.enable({ emitEvent: false });
     this.form.reset({ colorId: 0, sku: '', codigoBarras: '', cantidad: 0, umbralStockBajo: 5, costo: 0, precio: 0 });
+  }
+
+  ajustarStock(variante: ProductoVariante): void {
+    if (this.ajustandoId() !== null) return;
+
+    const cantidadTexto = window.prompt(
+      `Stock actual de ${variante.sku}: ${variante.cantidad}. Ingresa la nueva cantidad:`,
+      String(variante.cantidad)
+    );
+    if (cantidadTexto === null) return;
+
+    const cantidadNueva = Number(cantidadTexto.trim());
+    if (!Number.isInteger(cantidadNueva) || cantidadNueva < 0) {
+      this.errorMessage.set('La nueva cantidad debe ser un entero mayor o igual que cero.');
+      return;
+    }
+
+    const motivo = window.prompt('Motivo obligatorio del ajuste:')?.trim();
+    if (!motivo) {
+      this.errorMessage.set('El motivo del ajuste es obligatorio.');
+      return;
+    }
+
+    this.ajustandoId.set(variante.id);
+    this.errorMessage.set(null);
+    this.productoService.ajustarStockVariante(this.productoId, variante.id, {
+      cantidadActualEsperada: variante.cantidad,
+      cantidadNueva,
+      motivo
+    }).subscribe({
+      next: () => {
+        this.ajustandoId.set(null);
+        this.snackBar.open('Inventario de la variante ajustado correctamente.', 'Cerrar', { duration: 3500 });
+        this.cancelar();
+        this.cargar();
+      },
+      error: (err) => {
+        this.ajustandoId.set(null);
+        this.errorMessage.set(err.error?.message ?? 'No se pudo ajustar el inventario de la variante.');
+        this.cargar();
+      }
+    });
   }
 
   guardar(): void {

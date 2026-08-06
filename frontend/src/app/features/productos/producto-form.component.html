@@ -123,12 +123,23 @@
       <div class="variants-heading">
         <div>
           <h2 id="producto-variantes-title">Colores y existencias</h2>
-          <p>Agrega una fila por cada color disponible. La cantidad de cada fila alimenta el inventario de esa variante.</p>
+          @if (isEdit()) {
+            <p>Las variantes y el stock se administran por separado para impedir sobrescrituras de inventario.</p>
+          } @else {
+            <p>Agrega una fila por cada color disponible. La cantidad inicial alimenta el inventario de esa variante.</p>
+          }
         </div>
-        <button mat-stroked-button color="primary" type="button" (click)="agregarVariante()">
-          <mat-icon>add</mat-icon>
-          Agregar otro color
-        </button>
+        @if (isEdit() && productoId) {
+          <a mat-stroked-button color="primary" [routerLink]="['/productos', productoId, 'variantes']">
+            <mat-icon>tune</mat-icon>
+            Administrar variantes
+          </a>
+        } @else {
+          <button mat-stroked-button color="primary" type="button" (click)="agregarVariante()">
+            <mat-icon>add</mat-icon>
+            Agregar otro color
+          </button>
+        }
       </div>
 
       <div class="stock-summary" aria-live="polite">
@@ -154,9 +165,11 @@
                 <span class="variant-number">Color {{ i + 1 }}</span>
                 <strong>{{ variante.get('colorId')?.value ? 'Variante configurada' : 'Selecciona el color' }}</strong>
               </div>
-              <button mat-icon-button type="button" color="warn" [attr.aria-label]="'Quitar color ' + (i + 1)" title="Quitar color" (click)="quitarVariante(i)">
-                <mat-icon>delete</mat-icon>
-              </button>
+              @if (!isEdit()) {
+                <button mat-icon-button type="button" color="warn" [attr.aria-label]="'Quitar color ' + (i + 1)" title="Quitar color" (click)="quitarVariante(i)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              }
             </div>
 
             <div class="variant-grid">
@@ -176,7 +189,7 @@
               <mat-form-field appearance="outline" subscriptSizing="dynamic">
                 <mat-label>Cantidad disponible</mat-label>
                 <input matInput type="number" min="0" formControlName="cantidad" inputmode="numeric">
-                <mat-hint>Unidades disponibles únicamente en este color.</mat-hint>
+                <mat-hint>{{ isEdit() ? 'Solo lectura. Usa Administrar variantes → Ajustar stock.' : 'Cantidad inicial disponible en este color.' }}</mat-hint>
                 @if (variante.get('cantidad')?.hasError('min')) { <mat-error>La cantidad no puede ser negativa.</mat-error> }
               </mat-form-field>
 
@@ -213,10 +226,12 @@
         }
       </div>
 
-      <button class="add-color-bottom" mat-stroked-button color="primary" type="button" (click)="agregarVariante()">
-        <mat-icon>add_circle</mat-icon>
-        Agregar otro color
-      </button>
+      @if (!isEdit()) {
+        <button class="add-color-bottom" mat-stroked-button color="primary" type="button" (click)="agregarVariante()">
+          <mat-icon>add_circle</mat-icon>
+          Agregar otro color
+        </button>
+      }
     </section>
 
     @if (errorMessage()) { <p class="message error" role="alert">{{ errorMessage() }}</p> }

@@ -96,3 +96,19 @@ export interface ProductoFormValue {
   imagenesAEliminarIds?: number[];
   imagenPrincipalId?: number | null;
 }
+
+
+export interface AjusteStockRequest {
+  cantidadActualEsperada: number;
+  cantidadNueva: number;
+  motivo: string;
+}
+
+export interface AjusteStockResultado {
+  productoId: number;
+  productoVarianteId?: number;
+  cantidadAnterior: number;
+  cantidadNueva: number;
+  diferencia: number;
+  motivo: string;
+}

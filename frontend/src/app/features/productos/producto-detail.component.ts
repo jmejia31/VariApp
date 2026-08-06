@@ -25,6 +25,7 @@ export class ProductoDetailComponent implements OnInit {
   readonly descargando = signal<number | null>(null); // id de imagen en descarga, o -1 para "todas"
   readonly puedeExportar = signal(false);
   readonly puedeEditar = signal(false);
+  readonly ajustandoStock = signal(false);
 
   constructor(
     private productoService: ProductoService,
@@ -38,9 +39,66 @@ export class ProductoDetailComponent implements OnInit {
     this.puedeEditar.set(this.permisosRuntime.puede('Productos', 'Editar'));
 
     const id = Number(this.route.snapshot.paramMap.get('id'));
+    this.cargarProducto(id);
+  }
+
+  private cargarProducto(id: number): void {
+    this.loading.set(true);
     this.productoService.getById(id).subscribe({
-      next: (res) => { this.producto.set(res.data); this.loading.set(false); },
-      error: () => { this.notFound.set(true); this.loading.set(false); }
+      next: (res) => {
+        this.producto.set(res.data);
+        this.notFound.set(false);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.notFound.set(true);
+        this.loading.set(false);
+      }
+    });
+  }
+
+  ajustarStockProducto(): void {
+    const producto = this.producto();
+    if (!producto || producto.usaVariantes || this.ajustandoStock()) return;
+
+    const cantidadTexto = window.prompt(
+      `Stock actual: ${producto.cantidad}. Ingresa la nueva cantidad:`,
+      String(producto.cantidad)
+    );
+    if (cantidadTexto === null) return;
+
+    const cantidadNueva = Number(cantidadTexto.trim());
+    if (!Number.isInteger(cantidadNueva) || cantidadNueva < 0) {
+      this.snackBar.open('La nueva cantidad debe ser un entero mayor o igual que cero.', 'Cerrar', { duration: 5000 });
+      return;
+    }
+
+    const motivo = window.prompt('Motivo obligatorio del ajuste:')?.trim();
+    if (!motivo) {
+      this.snackBar.open('El motivo del ajuste es obligatorio.', 'Cerrar', { duration: 5000 });
+      return;
+    }
+
+    this.ajustandoStock.set(true);
+    this.productoService.ajustarStockProducto(producto.id, {
+      cantidadActualEsperada: producto.cantidad,
+      cantidadNueva,
+      motivo
+    }).subscribe({
+      next: () => {
+        this.ajustandoStock.set(false);
+        this.snackBar.open('Inventario ajustado correctamente.', 'Cerrar', { duration: 3500 });
+        this.cargarProducto(producto.id);
+      },
+      error: (err) => {
+        this.ajustandoStock.set(false);
+        this.snackBar.open(
+          err.error?.message ?? 'No se pudo ajustar el inventario.',
+          'Cerrar',
+          { duration: 6000 }
+        );
+        this.cargarProducto(producto.id);
+      }
     });
   }
 

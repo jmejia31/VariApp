@@ -53,7 +53,7 @@ export class ProductoFormComponent implements OnInit {
   readonly maxImagenes = MAX_IMAGENES;
   readonly auditoria = signal<{ creadoPor?: string; actualizadoPor?: string } | null>(null);
 
-  private productoId: number | null = null;
+  productoId: number | null = null;
   private imagenesAEliminarIds: number[] = [];
 
   form = this.fb.group({
@@ -206,6 +206,10 @@ export class ProductoFormComponent implements OnInit {
             precio: p.precio,
             activo: true
           }));
+        }
+
+        if (this.isEdit()) {
+          this.variantes.controls.forEach((control) => control.disable({ emitEvent: false }));
         }
 
         this.cargarModelos(marcaId, () => {

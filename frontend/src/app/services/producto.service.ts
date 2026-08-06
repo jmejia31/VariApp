@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { ApiResponse, PagedRequest, PagedResult } from '../core/models/api-response.model';
-import { Producto, ProductoFormValue, ProductoVariante, ProductoVarianteFormValue } from '../core/models/producto.model';
+import { AjusteStockRequest, AjusteStockResultado, Producto, ProductoFormValue, ProductoVariante, ProductoVarianteFormValue } from '../core/models/producto.model';
 
 export interface ProductoPagedRequest extends PagedRequest {
   categoriaId?: number;
@@ -75,6 +75,27 @@ export class ProductoService {
 
   eliminarVariante(productoId: number, varianteId: number): Observable<ApiResponse<object>> {
     return this.http.delete<ApiResponse<object>>(`${this.apiUrl}/${productoId}/variantes/${varianteId}`);
+  }
+
+  ajustarStockProducto(
+    productoId: number,
+    request: AjusteStockRequest
+  ): Observable<ApiResponse<AjusteStockResultado>> {
+    return this.http.post<ApiResponse<AjusteStockResultado>>(
+      `${this.apiUrl}/${productoId}/ajustes-stock`,
+      request
+    );
+  }
+
+  ajustarStockVariante(
+    productoId: number,
+    varianteId: number,
+    request: AjusteStockRequest
+  ): Observable<ApiResponse<AjusteStockResultado>> {
+    return this.http.post<ApiResponse<AjusteStockResultado>>(
+      `${this.apiUrl}/${productoId}/variantes/${varianteId}/ajustes-stock`,
+      request
+    );
   }
 
   activar(id: number): Observable<ApiResponse<Producto>> {

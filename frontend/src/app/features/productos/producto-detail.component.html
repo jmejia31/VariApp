@@ -25,6 +25,12 @@
           </div>
           @if (puedeEditar()) {
             <div class="header-actions">
+              @if (!p.usaVariantes) {
+                <button class="action-edit" mat-button type="button" (click)="ajustarStockProducto()" [disabled]="ajustandoStock()">
+                  <mat-icon>inventory</mat-icon>
+                  {{ ajustandoStock() ? 'Ajustando...' : 'Ajustar inventario' }}
+                </button>
+              }
               <a class="action-edit" [routerLink]="['/productos', p.id, 'variantes']" mat-button><mat-icon>tune</mat-icon> Variantes</a>
               <a class="action-edit" [routerLink]="['/productos', p.id, 'editar']" mat-button><mat-icon>edit</mat-icon> Editar</a>
             </div>
