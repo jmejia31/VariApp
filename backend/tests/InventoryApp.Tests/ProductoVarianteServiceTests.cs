@@ -27,6 +27,7 @@ public class ProductoVarianteServiceTests
         _currentUser.SetupGet(x => x.UsuarioId).Returns(2);
         _currentUser.SetupGet(x => x.NombreUsuario).Returns("admin");
         _productoRepository.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(_producto);
+        _productoRepository.Setup(r => r.GetByIdForUpdateAsync(1)).ReturnsAsync(_producto);
         _productoRepository.Setup(r => r.SaveChangesAsync()).ReturnsAsync(true);
         _repository.Setup(r => r.SaveChangesAsync()).ReturnsAsync(true);
         _repository.Setup(r => r.GetByProductoIdAsync(1, true)).ReturnsAsync(new List<ProductoVariante>());
@@ -37,6 +38,7 @@ public class ProductoVarianteServiceTests
             _productoRepository.Object,
             _catalogoService.Object,
             _currentUser.Object,
+            new FakeUnitOfWork(),
             _auditoria.Object);
     }
 
@@ -104,14 +106,16 @@ public class ProductoVarianteServiceTests
     [Fact]
     public async Task DeleteAsync_Con_Stock_No_Elimina()
     {
-        _repository.Setup(r => r.GetByIdAsync(5)).ReturnsAsync(new ProductoVariante
+        var variante = new ProductoVariante
         {
             Id = 5,
             ProductoId = 1,
             Sku = "CASE-S24U-BLK",
             Cantidad = 2,
             Activo = true
-        });
+        };
+        _repository.Setup(r => r.GetByIdAsync(5)).ReturnsAsync(variante);
+        _repository.Setup(r => r.GetByIdForUpdateAsync(5)).ReturnsAsync(variante);
 
         await Assert.ThrowsAsync<BusinessRuleException>(() => _service.DeleteAsync(1, 5));
         _repository.Verify(r => r.Update(It.IsAny<ProductoVariante>()), Times.Never);
@@ -123,6 +127,7 @@ public class ProductoVarianteServiceTests
         var negra = new ProductoVariante { Id = 5, ProductoId = 1, Sku = "BLACK", Cantidad = 3, Costo = 90, Precio = 210, Activo = true };
         var azul = new ProductoVariante { Id = 6, ProductoId = 1, Sku = "BLUE", Cantidad = 2, Costo = 110, Precio = 230, Activo = true };
         _repository.Setup(r => r.GetByIdAsync(5)).ReturnsAsync(negra);
+        _repository.Setup(r => r.GetByIdForUpdateAsync(5)).ReturnsAsync(negra);
         _repository.Setup(r => r.GetByProductoIdAsync(1, true)).ReturnsAsync(new List<ProductoVariante> { negra, azul });
 
         await _service.CambiarEstadoAsync(1, 5, false);

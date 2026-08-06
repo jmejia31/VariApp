@@ -237,7 +237,6 @@ public class ProductoService : IProductoService
             producto.Imagenes.OrderBy(i => i.Orden).First().EsPrincipal = true;
         }
 
-        _repository.Update(producto);
         await _repository.SaveChangesAsync();
 
         await _auditoria.RegistrarAsync(
@@ -279,7 +278,6 @@ public class ProductoService : IProductoService
         producto.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
         producto.FechaActualizacion = DateTime.UtcNow;
 
-        _repository.Update(producto);
         await _repository.SaveChangesAsync();
 
         await _auditoria.RegistrarAsync(
@@ -317,7 +315,6 @@ public class ProductoService : IProductoService
         producto.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
         producto.FechaActualizacion = DateTime.UtcNow;
 
-        _repository.Update(producto);
         var guardado = await _repository.SaveChangesAsync();
         if (guardado)
         {

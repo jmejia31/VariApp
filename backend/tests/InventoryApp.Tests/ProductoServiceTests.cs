@@ -124,7 +124,8 @@ public class ProductoServiceTests
         Assert.Equal(2, producto.EliminadoPorUsuarioId);
         Assert.NotNull(producto.FechaEliminacion);
         Assert.Equal(2, producto.Imagenes.Count);
-        _productoRepoMock.Verify(r => r.Update(producto), Times.Once);
+        _productoRepoMock.Verify(r => r.Update(producto), Times.Never);
+        _productoRepoMock.Verify(r => r.SaveChangesAsync(), Times.Once);
         _imageStorageMock.Verify(s => s.DeleteAsync(It.IsAny<string>()), Times.Never);
     }
 }
