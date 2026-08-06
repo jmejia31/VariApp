@@ -86,10 +86,15 @@ public class ProductoVarianteService : IProductoVarianteService
         var anteriores = new { variante.ColorId, variante.Sku, variante.CodigoBarras, variante.Cantidad, variante.UmbralStockBajo, variante.Costo, variante.Precio };
         var color = await ValidarAsync(productoId, id, dto);
 
+        if (dto.Cantidad != variante.Cantidad)
+        {
+            throw new BusinessRuleException(
+                "El stock de la variante no puede modificarse desde el mantenimiento general. Utiliza la operación Ajustar inventario.");
+        }
+
         variante.ColorId = color.Id;
         variante.Sku = NormalizarSku(dto.Sku);
         variante.CodigoBarras = NormalizarOpcional(dto.CodigoBarras);
-        variante.Cantidad = dto.Cantidad;
         variante.UmbralStockBajo = dto.UmbralStockBajo;
         variante.Costo = dto.Costo;
         variante.Precio = dto.Precio;

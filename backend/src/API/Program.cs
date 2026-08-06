@@ -113,6 +113,7 @@ builder.Services.AddScoped<IMovimientoInventarioService, MovimientoInventarioSer
 builder.Services.AddScoped<ICargaMasivaService, CargaMasivaService>();
 builder.Services.AddScoped<IReporteAdministrativoService, ReporteAdministrativoService>();
 builder.Services.AddScoped<IInventarioConcurrencyService, InventarioConcurrencyService>();
+builder.Services.AddScoped<IInventarioAjusteService, InventarioAjusteService>();
 
 // ===== JWT Authentication =====
 var jwtSecret = builder.Configuration["Jwt:Secret"]

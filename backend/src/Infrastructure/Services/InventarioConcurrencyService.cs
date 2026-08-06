@@ -146,6 +146,14 @@ public class InventarioConcurrencyService : IInventarioConcurrencyService
         }
         else
         {
+            var variantesExistentes = await _productoVarianteRepository
+                .GetByProductoIdAsync(productoId, incluirInactivas: true);
+            if (variantesExistentes.Count > 0)
+            {
+                throw new BusinessRuleException(
+                    "El producto tiene variantes. Ajusta el inventario de cada variante; el stock total se recalcula automáticamente.");
+            }
+
             if (producto.Cantidad != cantidadActualEsperada)
             {
                 throw new BusinessRuleException(

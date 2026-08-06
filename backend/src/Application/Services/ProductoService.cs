@@ -161,11 +161,16 @@ public class ProductoService : IProductoService
             dto.Marca,
             dto.Modelo);
 
+        if (dto.Cantidad != producto.Cantidad)
+        {
+            throw new BusinessRuleException(
+                "El stock no puede modificarse desde el mantenimiento general. Utiliza la operación Ajustar inventario.");
+        }
+
         producto.Nombre = dto.Nombre.Trim();
         producto.Marca = marcaNombre;
         producto.Modelo = modeloNombre;
         producto.Descripcion = string.IsNullOrWhiteSpace(dto.Descripcion) ? null : dto.Descripcion.Trim();
-        producto.Cantidad = dto.Cantidad;
         producto.Costo = dto.Costo;
         producto.Precio = dto.Precio;
         producto.UmbralStockBajo = dto.UmbralStockBajo;
