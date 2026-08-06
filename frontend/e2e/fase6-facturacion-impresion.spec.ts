@@ -49,7 +49,10 @@ async function loginUi(page: Page): Promise<void> {
   await page.waitForURL((url) => url.pathname !== '/login', { timeout: 20_000 });
 }
 
-async function crearProducto(request: APIRequestContext, indice: number): Promise<number> {
+async function crearProducto(
+  request: APIRequestContext,
+  indice: number
+): Promise<{ id: number; varianteTecnicaId: number }> {
   const response = await request.post(`${API_URL}/productos`, {
     headers: authHeaders(),
     multipart: {
@@ -64,7 +67,15 @@ async function crearProducto(request: APIRequestContext, indice: number): Promis
     }
   });
   expect(response.status(), await response.text()).toBe(201);
-  return (await dataOf(response)).id;
+  const producto = await dataOf(response);
+  const variantesResponse = await request.get(`${API_URL}/productos/${producto.id}/variantes`, {
+    headers: authHeaders()
+  });
+  expect(variantesResponse.status(), await variantesResponse.text()).toBe(200);
+  const variantes = await dataOf(variantesResponse);
+  const tecnica = variantes.find((item: any) => item.esTecnica === true);
+  expect(tecnica, `El producto ${producto.id} debe tener una variante técnica.`).toBeTruthy();
+  return { id: Number(producto.id), varianteTecnicaId: Number(tecnica.id) };
 }
 
 function leerMediaBox(pdf: Buffer): { ancho: number; alto: number } {
@@ -132,8 +143,9 @@ test.describe('Fase 6 — facturación e impresión', () => {
         metodoPago: 'Efectivo',
         estadoPago: 'Pagado',
         notas: 'Certificación de Carta, Legal, Oficio, A4, A5, POS 58 mm y POS 80 mm.',
-        detalles: productos.map((productoId, index) => ({
-          productoId,
+        detalles: productos.map((producto, index) => ({
+          productoId: producto.id,
+          productoVarianteId: producto.varianteTecnicaId,
           cantidad: index + 1,
           precioUnitario: 170 + (index + 1) * 25
         }))

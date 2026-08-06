@@ -300,6 +300,13 @@ test.describe('Fase 7 — aceptación end-to-end aislada', () => {
     });
     expect(productResponse.status(), await productResponse.text()).toBe(201);
     const product = await dataOf(productResponse);
+    const variantsResponse = await request.get(`${API_URL}/productos/${product.id}/variantes`, {
+      headers: authHeaders(adminToken)
+    });
+    expect(variantsResponse.status(), await variantsResponse.text()).toBe(200);
+    const variants = await dataOf(variantsResponse);
+    const technicalVariant = variants.find((variant: any) => variant.esTecnica === true);
+    expect(technicalVariant, 'El producto de factura debe tener una variante técnica.').toBeTruthy();
 
     const saleResponse = await request.post(`${API_URL}/ventas`, {
       headers: authHeaders(adminToken),
@@ -313,6 +320,7 @@ test.describe('Fase 7 — aceptación end-to-end aislada', () => {
         detalles: [
           {
             productoId: product.id,
+            productoVarianteId: technicalVariant.id,
             cantidad: 2,
             precioUnitario: 230
           }

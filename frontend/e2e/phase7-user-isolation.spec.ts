@@ -156,13 +156,26 @@ async function createConfirmedSale(
   customer: string,
   unitPrice: number
 ): Promise<Record<string, any>> {
+  const variantsResponse = await request.get(`${API_URL}/productos/${productId}/variantes`, {
+    headers: authHeaders(token)
+  });
+  expect(variantsResponse.status(), await variantsResponse.text()).toBe(200);
+  const variants = await dataOf(variantsResponse);
+  const technicalVariant = variants.find((variant: any) => variant.esTecnica === true);
+  expect(technicalVariant, `El producto ${productId} debe tener una variante técnica.`).toBeTruthy();
+
   const createResponse = await request.post(`${API_URL}/ventas`, {
     headers: authHeaders(token),
     data: {
       clienteNombre: customer,
       metodoPago: 'Efectivo',
       estadoPago: 'Pagado',
-      detalles: [{ productoId: productId, cantidad: 1, precioUnitario: unitPrice }]
+      detalles: [{
+        productoId: productId,
+        productoVarianteId: technicalVariant.id,
+        cantidad: 1,
+        precioUnitario: unitPrice
+      }]
     }
   });
   expect(createResponse.status(), await createResponse.text()).toBe(201);

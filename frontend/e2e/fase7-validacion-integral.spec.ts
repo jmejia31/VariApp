@@ -10,6 +10,7 @@ let marcaId = 0;
 let modeloId = 0;
 let productoVariantesId = 0;
 let productoSimpleId = 0;
+let productoSimpleVarianteTecnicaId = 0;
 let varianteBlancaId = 0;
 let varianteNegraId = 0;
 let varianteRojaId = 0;
@@ -83,6 +84,20 @@ async function crearProductoSimple(
   });
   expect(response.status(), await response.text()).toBe(201);
   return await dataOf(response);
+}
+
+async function obtenerVarianteTecnicaId(
+  request: APIRequestContext,
+  productoId: number
+): Promise<number> {
+  const response = await request.get(`${API_URL}/productos/${productoId}/variantes`, {
+    headers: headers()
+  });
+  expect(response.status(), await response.text()).toBe(200);
+  const variantes = await dataOf(response);
+  const tecnica = variantes.find((item: any) => item.esTecnica === true);
+  expect(tecnica, `El producto ${productoId} debe tener una variante técnica.`).toBeTruthy();
+  return Number(tecnica.id);
 }
 
 async function crearVenta(
@@ -209,6 +224,7 @@ test.describe('Fase 7 — pruebas, validación integral y cierre', () => {
 
     const simple = await crearProductoSimple(request, nombres.productoSimple, 20, 150);
     productoSimpleId = simple.id;
+    productoSimpleVarianteTecnicaId = await obtenerVarianteTecnicaId(request, productoSimpleId);
 
     const envioResponse = await request.get(`${API_URL}/costos-envio/predeterminado`, { headers: headers() });
     expect(envioResponse.status(), await envioResponse.text()).toBe(200);
@@ -315,7 +331,7 @@ test.describe('Fase 7 — pruebas, validación integral y cierre', () => {
         codigoPromocional: descuentoCodigo,
         costoEnvioId: envioPredeterminado.id,
         envioExonerado: false,
-        detalles: [{ productoId: productoSimpleId, cantidad: 1, precioUnitario: 300 }]
+        detalles: [{ productoId: productoSimpleId, productoVarianteId: productoSimpleVarianteTecnicaId, cantidad: 1, precioUnitario: 300 }]
       }
     });
     expect(calcular.status(), await calcular.text()).toBe(200);
@@ -330,7 +346,7 @@ test.describe('Fase 7 — pruebas, validación integral y cierre', () => {
     expect(calculo.subtotal + calculo.impuestoIncluido + calculo.impuestoAdicional + calculo.costoEnvio - calculo.totalDescuento).toBe(280);
 
     const venta = await crearVenta(request,
-      [{ productoId: productoSimpleId, cantidad: 1, precioUnitario: 300 }],
+      [{ productoId: productoSimpleId, productoVarianteId: productoSimpleVarianteTecnicaId, cantidad: 1, precioUnitario: 300 }],
       { codigoPromocional: descuentoCodigo, costoEnvioId: envioPredeterminado.id, envioExonerado: false });
     const confirmada = await confirmarVenta(request, venta.id);
     const factura = await obtenerFactura(request, confirmada.facturaId);
@@ -373,7 +389,7 @@ test.describe('Fase 7 — pruebas, validación integral y cierre', () => {
 
     const venta = await crearVenta(request, [
       { productoId: productoVariantesId, productoVarianteId: varianteNegraId, cantidad: 1, precioUnitario: 300 },
-      { productoId: productoSimpleId, cantidad: 2, precioUnitario: 150 }
+      { productoId: productoSimpleId, productoVarianteId: productoSimpleVarianteTecnicaId, cantidad: 2, precioUnitario: 150 }
     ], { costoEnvioId: envioPredeterminado.id });
 
     expect(venta.detalles).toHaveLength(2);
@@ -460,7 +476,7 @@ test.describe('Fase 7 — pruebas, validación integral y cierre', () => {
         metodoPago: 'Efectivo',
         estadoPago: 'Pendiente',
         envioExonerado: true,
-        detalles: [{ productoId: productoSimpleId, cantidad: 1, precioUnitario: 150 }]
+        detalles: [{ productoId: productoSimpleId, productoVarianteId: productoSimpleVarianteTecnicaId, cantidad: 1, precioUnitario: 150 }]
       }
     });
     expect(sinMotivo.status()).toBe(400);
@@ -468,7 +484,7 @@ test.describe('Fase 7 — pruebas, validación integral y cierre', () => {
 
     const motivo = `Exoneración autorizada F7 ${suffix}`;
     const venta = await crearVenta(request,
-      [{ productoId: productoSimpleId, cantidad: 1, precioUnitario: 150 }],
+      [{ productoId: productoSimpleId, productoVarianteId: productoSimpleVarianteTecnicaId, cantidad: 1, precioUnitario: 150 }],
       { envioExonerado: true, motivoExoneracionEnvio: motivo });
     expect(venta.envioExonerado).toBe(true);
     expect(venta.costoEnvio).toBe(0);
@@ -494,8 +510,14 @@ test.describe('Fase 7 — pruebas, validación integral y cierre', () => {
     const ventas: Record<string, any>[] = [];
     for (let index = 0; index < 4; index += 1) {
       const producto = await crearProductoSimple(request, `Producto concurrencia F7 ${suffix}-${index}`, 2, 120 + index);
+      const varianteTecnicaId = await obtenerVarianteTecnicaId(request, Number(producto.id));
       ventas.push(await crearVenta(request,
-        [{ productoId: producto.id, cantidad: 1, precioUnitario: 120 + index }],
+        [{
+          productoId: producto.id,
+          productoVarianteId: varianteTecnicaId,
+          cantidad: 1,
+          precioUnitario: 120 + index
+        }],
         { costoEnvioId: envioPredeterminado.id }));
     }
 
