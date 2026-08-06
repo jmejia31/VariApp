@@ -16,6 +16,8 @@ public class TipoCliente : AuditableEntity
     public bool Eliminado { get; set; }
     public DateTime? FechaEliminacion { get; set; }
     public int? EliminadoPorUsuarioId { get; set; }
+    
+    public string? EsPredeterminadoUnico { get; set; }
 
     public ICollection<Cliente> Clientes { get; set; } = new List<Cliente>();
 }

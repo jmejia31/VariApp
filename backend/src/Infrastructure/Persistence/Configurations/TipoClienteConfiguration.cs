@@ -40,6 +40,13 @@ public class TipoClienteConfiguration : IEntityTypeConfiguration<TipoCliente>
             .HasForeignKey(c => c.TipoClienteId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        builder.Property(tc => tc.EsPredeterminadoUnico)
+            .HasMaxLength(10)
+            .HasComputedColumnSql("IF(EsPredeterminado = 1 AND Activo = 1 AND Eliminado = 0, 'DEFAULT', NULL)", stored: true);
+
+        builder.HasIndex(tc => tc.EsPredeterminadoUnico)
+            .IsUnique();
+
         builder.HasQueryFilter(tc => !tc.Eliminado);
     }
 }

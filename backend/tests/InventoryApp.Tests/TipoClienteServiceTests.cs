@@ -20,7 +20,7 @@ public class TipoClienteServiceTests
     {
         _currentUserMock.Setup(c => c.UsuarioId).Returns(1);
         _currentUserMock.Setup(c => c.NombreUsuario).Returns("admin");
-        _service = new TipoClienteService(_repoMock.Object, _currentUserMock.Object, _auditoriaMock.Object);
+        _service = new TipoClienteService(_repoMock.Object, _currentUserMock.Object, _auditoriaMock.Object, new FakeUnitOfWork());
     }
 
     [Fact]

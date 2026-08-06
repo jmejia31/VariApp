@@ -11,15 +11,18 @@ public class TipoClienteService : ITipoClienteService
     private readonly ITipoClienteRepository _repository;
     private readonly ICurrentUserService _currentUser;
     private readonly IAuditoriaService _auditoria;
+    private readonly IUnitOfWork _unitOfWork;
 
     public TipoClienteService(
         ITipoClienteRepository repository,
         ICurrentUserService currentUser,
-        IAuditoriaService auditoria)
+        IAuditoriaService auditoria,
+        IUnitOfWork unitOfWork)
     {
         _repository = repository;
         _currentUser = currentUser;
         _auditoria = auditoria;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<List<TipoClienteDto>> GetAllAsync()
@@ -48,7 +51,6 @@ public class TipoClienteService : ITipoClienteService
         if (await _repository.ExisteNombreNormalizadoAsync(normalizado))
             throw new BusinessRuleException($"Ya existe un tipo de cliente con el nombre '{nombre}'.");
 
-        // Autogenerar código técnico único
         var baseCodigo = string.Concat(normalizado.Where(c => char.IsLetterOrDigit(c) || c == ' ')).Replace(" ", "_").Trim();
         if (string.IsNullOrEmpty(baseCodigo)) baseCodigo = "CUSTOM";
         var codigo = baseCodigo;
@@ -73,14 +75,24 @@ public class TipoClienteService : ITipoClienteService
             CreadoPorNombreUsuario = _currentUser.NombreUsuario
         };
 
-        if (tipo.EsPredeterminado)
+        try
         {
-            await DesmarcarPredeterminadosExistentesAsync();
-        }
+            await _unitOfWork.ExecuteInTransactionAsync(async () =>
+            {
+                if (tipo.EsPredeterminado)
+                {
+                    await DesmarcarPredeterminadosExistentesAsync();
+                }
 
-        await _repository.AddAsync(tipo);
-        await _repository.SaveChangesAsync();
-        await _auditoria.RegistrarAsync(ModuloSistema.TiposClientes, AccionPermiso.Crear, $"Tipo de cliente creado: {tipo.Nombre} ({tipo.Codigo})", tipo.Id);
+                await _repository.AddAsync(tipo);
+                await _repository.SaveChangesAsync();
+                await _auditoria.RegistrarAsync(ModuloSistema.TiposClientes, AccionPermiso.Crear, $"Tipo de cliente creado: {tipo.Nombre} ({tipo.Codigo})", tipo.Id);
+            });
+        }
+        catch (Exception ex) when (ex.InnerException?.Message.Contains("IX_TipoClientes_EsPredeterminadoUnico") == true)
+        {
+            throw new BusinessRuleException("Conflicto de concurrencia: Ya existe otro tipo de cliente marcado como predeterminado único. Inténtalo de nuevo.");
+        }
 
         return ToDto(tipo);
     }
@@ -125,19 +137,30 @@ public class TipoClienteService : ITipoClienteService
         tipo.Orden = dto.Orden;
         
         var cambioPredeterminado = !tipo.EsPredeterminado && dto.EsPredeterminado;
-        if (cambioPredeterminado)
+
+        try
         {
-            await DesmarcarPredeterminadosExistentesAsync();
-            tipo.EsPredeterminado = true;
+            await _unitOfWork.ExecuteInTransactionAsync(async () =>
+            {
+                if (cambioPredeterminado)
+                {
+                    await DesmarcarPredeterminadosExistentesAsync();
+                    tipo.EsPredeterminado = true;
+                }
+
+                tipo.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
+                tipo.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
+                tipo.FechaActualizacion = DateTime.UtcNow;
+
+                _repository.Update(tipo);
+                await _repository.SaveChangesAsync();
+                await _auditoria.RegistrarAsync(ModuloSistema.TiposClientes, AccionPermiso.Editar, $"Tipo de cliente actualizado: {tipo.Nombre} ({tipo.Codigo})", tipo.Id);
+            });
         }
-
-        tipo.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
-        tipo.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
-        tipo.FechaActualizacion = DateTime.UtcNow;
-
-        _repository.Update(tipo);
-        await _repository.SaveChangesAsync();
-        await _auditoria.RegistrarAsync(ModuloSistema.TiposClientes, AccionPermiso.Editar, $"Tipo de cliente actualizado: {tipo.Nombre} ({tipo.Codigo})", tipo.Id);
+        catch (Exception ex) when (ex.InnerException?.Message.Contains("IX_TipoClientes_EsPredeterminadoUnico") == true)
+        {
+            throw new BusinessRuleException("Conflicto de concurrencia: Ya existe otro tipo de cliente marcado como predeterminado único. Inténtalo de nuevo.");
+        }
 
         return ToDto(tipo);
     }
