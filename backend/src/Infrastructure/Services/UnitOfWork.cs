@@ -68,17 +68,9 @@ public class UnitOfWork : IUnitOfWork
     {
         for (Exception? current = exception; current is not null; current = current.InnerException)
         {
-            if (current is MySqlException mysqlException)
-            {
-                if (mysqlException.Number == 1062 || mysqlException.Message.Contains("IX_TipoClientes_EsPredeterminadoUnico"))
-                {
-                    return new UniqueConstraintViolationException(
-                        "TipoClientePredeterminadoUnico",
-                        "Conflicto de concurrencia: Ya existe otro tipo de cliente marcado como predeterminado único. Inténtalo de nuevo.",
-                        exception);
-                }
-            }
-            else if (current.Message.Contains("IX_TipoClientes_EsPredeterminadoUnico"))
+            if (current is MySqlException mysqlException &&
+                mysqlException.Number == 1062 &&
+                mysqlException.Message.Contains("IX_TipoClientes_EsPredeterminadoUnico", StringComparison.Ordinal))
             {
                 return new UniqueConstraintViolationException(
                     "TipoClientePredeterminadoUnico",

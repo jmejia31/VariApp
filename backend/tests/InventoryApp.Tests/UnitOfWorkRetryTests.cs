@@ -30,9 +30,13 @@ public class UnitOfWorkRetryTests
     private static MySqlException CreateRealMySqlException(int number, string message)
     {
         var ex = (MySqlException)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(typeof(MySqlException));
-        var field = typeof(MySqlException).GetField("_number", BindingFlags.NonPublic | BindingFlags.Instance)
+        var numberField = typeof(MySqlException).GetField("_number", BindingFlags.NonPublic | BindingFlags.Instance)
                     ?? typeof(MySqlException).GetField("<Number>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance);
-        field?.SetValue(ex, number);
+        numberField?.SetValue(ex, number);
+
+        var messageField = typeof(Exception).GetField("_message", BindingFlags.NonPublic | BindingFlags.Instance);
+        messageField?.SetValue(ex, message);
+
         return ex;
     }
 
@@ -171,5 +175,26 @@ public class UnitOfWorkRetryTests
             }));
 
         Assert.Equal(1, attempts);
+    }
+
+    [Fact]
+    public async Task ExecuteInTransactionAsync_NoTraduceError1062DeOtroIndice()
+    {
+        await using var context = CreateInMemoryContext();
+        var uow = new UnitOfWork(context);
+
+        int attempts = 0;
+        var mysqlEx = CreateRealMySqlException(1062, "Duplicate entry for key IX_Usuarios_NombreUsuario");
+        var dbEx = new DbUpdateException("DbUpdateException", mysqlEx);
+
+        var thrown = await Assert.ThrowsAsync<DbUpdateException>(() =>
+            uow.ExecuteInTransactionAsync(() =>
+            {
+                attempts++;
+                throw dbEx;
+            }));
+
+        Assert.Equal(1, attempts);
+        Assert.Same(dbEx, thrown);
     }
 }
