@@ -53,6 +53,8 @@ public sealed class InventarioAjusteService : IInventarioAjusteService
             throw new BusinessRuleException("Las cantidades de inventario no pueden ser negativas.");
         if (string.IsNullOrWhiteSpace(request.Motivo))
             throw new BusinessRuleException("El motivo del ajuste de inventario es obligatorio.");
+        if (request.CantidadActualEsperada == request.CantidadNueva)
+            throw new BusinessRuleException("La nueva cantidad debe ser diferente del stock actual.");
 
         var motivo = request.Motivo.Trim();
         var diferencia = request.CantidadNueva - request.CantidadActualEsperada;

@@ -24,6 +24,7 @@ public sealed class CargaMasivaService : ICargaMasivaService
     };
 
     private readonly AppDbContext _db;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly ICurrentUserService _currentUser;
     private readonly IAuditoriaService _auditoria;
     private readonly ILogger<CargaMasivaService> _logger;
@@ -31,12 +32,14 @@ public sealed class CargaMasivaService : ICargaMasivaService
 
     public CargaMasivaService(
         AppDbContext db,
+        IUnitOfWork unitOfWork,
         ICurrentUserService currentUser,
         IAuditoriaService auditoria,
         ILogger<CargaMasivaService> logger,
         ITipoClientePredeterminadoResolver predeterminadoResolver)
     {
         _db = db;
+        _unitOfWork = unitOfWork;
         _currentUser = currentUser;
         _auditoria = auditoria;
         _logger = logger;
@@ -255,111 +258,141 @@ public sealed class CargaMasivaService : ICargaMasivaService
         return MapDetalle(carga, filas, errores);
     }
 
-    public async Task<CargaMasivaDetalleDto> ConfirmarAsync(int id, CancellationToken cancellationToken = default)
+    public async Task<CargaMasivaDetalleDto> ConfirmarAsync(
+        int id,
+        CancellationToken cancellationToken = default)
     {
         CargaMasiva? carga = null;
         List<CargaMasivaFilaDto> filas = new();
         var creados = 0;
         var actualizados = 0;
         var confirmadaAhora = false;
+        var yaEstabaConfirmada = false;
 
-        await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
         try
         {
-            if (!_currentUser.EsAdministrador && !_currentUser.UsuarioId.HasValue)
-                throw new ForbiddenAccessException("No tienes acceso a esta carga masiva.");
+            await _unitOfWork.ExecuteInTransactionAsync(async () =>
+            {
+                cancellationToken.ThrowIfCancellationRequested();
 
-            if (_currentUser.EsAdministrador)
-            {
-                carga = await _db.CargasMasivas
-                    .FromSqlInterpolated($"SELECT c.* FROM CargasMasivas c WHERE c.Id = {id} FOR UPDATE")
-                    .AsTracking()
-                    .SingleOrDefaultAsync(cancellationToken);
-            }
-            else
-            {
-                var usuarioId = _currentUser.UsuarioId!.Value;
-                carga = await _db.CargasMasivas
-                    .FromSqlInterpolated($"SELECT c.* FROM CargasMasivas c WHERE c.Id = {id} AND c.CreadoPorUsuarioId = {usuarioId} FOR UPDATE")
-                    .AsTracking()
-                    .SingleOrDefaultAsync(cancellationToken);
-            }
+                // Todos los valores y entidades se recargan en cada intento. Esto
+                // es obligatorio porque UnitOfWork limpia el ChangeTracker después
+                // de un 1205/1213 antes de repetir la transacción completa.
+                carga = null;
+                filas = new List<CargaMasivaFilaDto>();
+                creados = 0;
+                actualizados = 0;
+                confirmadaAhora = false;
+                yaEstabaConfirmada = false;
 
-            if (carga is null)
-            {
-                var existe = await _db.CargasMasivas
-                    .AsNoTracking()
-                    .AnyAsync(x => x.Id == id, cancellationToken);
-                if (existe)
+                if (!_currentUser.EsAdministrador && !_currentUser.UsuarioId.HasValue)
                     throw new ForbiddenAccessException("No tienes acceso a esta carga masiva.");
-                throw new BusinessRuleException("La carga masiva no existe.");
-            }
 
-            await _db.Entry(carga)
-                .Collection(x => x.Errores)
-                .LoadAsync(cancellationToken);
+                if (_currentUser.EsAdministrador)
+                {
+                    carga = await _db.CargasMasivas
+                        .FromSqlInterpolated($"SELECT c.* FROM CargasMasivas c WHERE c.Id = {id} FOR UPDATE")
+                        .AsTracking()
+                        .SingleOrDefaultAsync(cancellationToken);
+                }
+                else
+                {
+                    var usuarioId = _currentUser.UsuarioId!.Value;
+                    carga = await _db.CargasMasivas
+                        .FromSqlInterpolated($"SELECT c.* FROM CargasMasivas c WHERE c.Id = {id} AND c.CreadoPorUsuarioId = {usuarioId} FOR UPDATE")
+                        .AsTracking()
+                        .SingleOrDefaultAsync(cancellationToken);
+                }
 
-            filas = DeserializarFilas(carga.DatosNormalizadosJson);
+                if (carga is null)
+                {
+                    var existe = await _db.CargasMasivas
+                        .AsNoTracking()
+                        .AnyAsync(x => x.Id == id, cancellationToken);
+                    if (existe)
+                        throw new ForbiddenAccessException("No tienes acceso a esta carga masiva.");
+                    throw new BusinessRuleException("La carga masiva no existe.");
+                }
 
-            if (carga.Estado == EstadoCargaMasiva.Confirmada)
-            {
-                await transaction.CommitAsync(cancellationToken);
-                return MapDetalle(
-                    carga,
-                    filas,
-                    carga.Errores.Select(MapError).ToList());
-            }
+                await _db.Entry(carga)
+                    .Collection(x => x.Errores)
+                    .LoadAsync(cancellationToken);
 
-            if (carga.Estado != EstadoCargaMasiva.Validada || carga.FilasConError > 0)
-                throw new BusinessRuleException("La carga contiene errores o no ha sido validada correctamente.");
-            if (filas.Count == 0 || filas.Any(x => !x.EsValida))
-                throw new BusinessRuleException("La vista previa validada no contiene filas confirmables.");
+                filas = DeserializarFilas(carga.DatosNormalizadosJson);
 
-            (creados, actualizados) = carga.Tipo switch
-            {
-                TipoCargaMasiva.Clientes => await AplicarClientesAsync(filas, cancellationToken),
-                TipoCargaMasiva.Proveedores => await AplicarProveedoresAsync(filas, cancellationToken),
-                TipoCargaMasiva.Colores => await AplicarColoresAsync(filas, cancellationToken),
-                TipoCargaMasiva.Productos => await AplicarProductosAsync(filas, cancellationToken),
-                TipoCargaMasiva.VariantesInventario => await AplicarVariantesAsync(carga.Id, filas, cancellationToken),
-                _ => throw new BusinessRuleException("El tipo de carga no es válido.")
-            };
+                if (carga.Estado == EstadoCargaMasiva.Confirmada)
+                {
+                    yaEstabaConfirmada = true;
+                    return;
+                }
 
-            carga.Estado = EstadoCargaMasiva.Confirmada;
-            carga.FilasProcesadas = filas.Count;
-            carga.RegistrosCreados = creados;
-            carga.RegistrosActualizados = actualizados;
-            carga.FechaConfirmacion = DateTime.UtcNow;
-            carga.ConfirmadoPorUsuarioId = _currentUser.UsuarioId;
-            carga.ConfirmadoPorNombreUsuario = _currentUser.NombreUsuario;
-            carga.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
-            carga.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
-            carga.FechaActualizacion = DateTime.UtcNow;
-            carga.ErrorGeneral = null;
+                if (carga.Estado != EstadoCargaMasiva.Validada || carga.FilasConError > 0)
+                    throw new BusinessRuleException("La carga contiene errores o no ha sido validada correctamente.");
+                if (filas.Count == 0 || filas.Any(x => !x.EsValida))
+                    throw new BusinessRuleException("La vista previa validada no contiene filas confirmables.");
 
-            await _db.SaveChangesAsync(cancellationToken);
-            await transaction.CommitAsync(cancellationToken);
-            confirmadaAhora = true;
+                (creados, actualizados) = carga.Tipo switch
+                {
+                    TipoCargaMasiva.Clientes => await AplicarClientesAsync(filas, cancellationToken),
+                    TipoCargaMasiva.Proveedores => await AplicarProveedoresAsync(filas, cancellationToken),
+                    TipoCargaMasiva.Colores => await AplicarColoresAsync(filas, cancellationToken),
+                    TipoCargaMasiva.Productos => await AplicarProductosAsync(filas, cancellationToken),
+                    TipoCargaMasiva.VariantesInventario => await AplicarVariantesAsync(carga.Id, filas, cancellationToken),
+                    _ => throw new BusinessRuleException("El tipo de carga no es válido.")
+                };
+
+                carga.Estado = EstadoCargaMasiva.Confirmada;
+                carga.FilasProcesadas = filas.Count;
+                carga.RegistrosCreados = creados;
+                carga.RegistrosActualizados = actualizados;
+                carga.FechaConfirmacion = DateTime.UtcNow;
+                carga.ConfirmadoPorUsuarioId = _currentUser.UsuarioId;
+                carga.ConfirmadoPorNombreUsuario = _currentUser.NombreUsuario;
+                carga.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
+                carga.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
+                carga.FechaActualizacion = DateTime.UtcNow;
+                carga.ErrorGeneral = null;
+                confirmadaAhora = true;
+            });
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
         catch (Exception ex)
         {
-            await transaction.RollbackAsync(cancellationToken);
             _db.ChangeTracker.Clear();
 
-            if (carga is not null && carga.Estado != EstadoCargaMasiva.Confirmada)
+            // Esta actualización se ejecuta únicamente después de que UnitOfWork
+            // agotó los reintentos transitorios y revirtió la transacción.
+            try
             {
                 var cargaFallida = await _db.CargasMasivas
-                    .FirstAsync(x => x.Id == id, cancellationToken);
-                cargaFallida.Estado = EstadoCargaMasiva.Fallida;
-                cargaFallida.ErrorGeneral =
-                    "La confirmación fue revertida completamente. Revalida el archivo antes de intentar nuevamente.";
-                cargaFallida.FechaActualizacion = DateTime.UtcNow;
-                cargaFallida.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
-                cargaFallida.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
-                await _db.SaveChangesAsync(cancellationToken);
+                    .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+                if (cargaFallida is not null &&
+                    cargaFallida.Estado != EstadoCargaMasiva.Confirmada)
+                {
+                    cargaFallida.Estado = EstadoCargaMasiva.Fallida;
+                    cargaFallida.ErrorGeneral =
+                        "La confirmación fue revertida completamente. Revalida el archivo antes de intentar nuevamente.";
+                    cargaFallida.FechaActualizacion = DateTime.UtcNow;
+                    cargaFallida.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
+                    cargaFallida.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
+                    await _db.SaveChangesAsync(cancellationToken);
+                }
+            }
+            catch (Exception persistenciaEx)
+            {
+                _logger.LogError(
+                    persistenciaEx,
+                    "No se pudo registrar el estado fallido de la carga masiva {CargaId}",
+                    id);
             }
 
-            _logger.LogError(ex, "Falló la confirmación transaccional de la carga masiva {CargaId}", id);
+            _logger.LogError(
+                ex,
+                "Falló la confirmación reintentable de la carga masiva {CargaId}",
+                id);
 
             if (carga is not null)
             {
@@ -378,6 +411,12 @@ public sealed class CargaMasivaService : ICargaMasivaService
 
             throw new BusinessRuleException(
                 "La importación no pudo confirmarse y ningún cambio fue aplicado. Revalida el archivo.");
+        }
+
+        if (yaEstabaConfirmada)
+        {
+            return await GetByIdAsync(id)
+                ?? throw new BusinessRuleException("No se pudo recuperar la carga confirmada.");
         }
 
         if (confirmadaAhora)

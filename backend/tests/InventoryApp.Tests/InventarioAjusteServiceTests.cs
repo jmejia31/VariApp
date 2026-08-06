@@ -76,6 +76,29 @@ public class InventarioAjusteServiceTests
         _movimientos.Verify(x => x.AddAsync(It.IsAny<MovimientoInventario>()), Times.Never);
     }
 
+    [Fact]
+    public async Task AjustarProductoAsync_SinDiferencia_NoCreaMovimiento()
+    {
+        await Assert.ThrowsAsync<BusinessRuleException>(() =>
+            _service.AjustarProductoAsync(10, new AjusteStockRequest
+            {
+                CantidadActualEsperada = 5,
+                CantidadNueva = 5,
+                Motivo = "Conteo físico"
+            }));
+
+        _concurrency.Verify(
+            x => x.AjustarStockPesimistaAsync(
+                It.IsAny<int>(),
+                It.IsAny<int?>(),
+                It.IsAny<int>(),
+                It.IsAny<int>()),
+            Times.Never);
+        _movimientos.Verify(
+            x => x.AddAsync(It.IsAny<MovimientoInventario>()),
+            Times.Never);
+    }
+
     [Theory]
     [InlineData(-1, 0, "motivo")]
     [InlineData(0, -1, "motivo")]

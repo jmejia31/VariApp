@@ -46,6 +46,7 @@ public class CargaMasivaConcurrencyTests
     {
         return new CargaMasivaService(
             context,
+            new UnitOfWork(context),
             CrearUsuarioActual().Object,
             Mock.Of<IAuditoriaService>(),
             Mock.Of<ILogger<CargaMasivaService>>(),
