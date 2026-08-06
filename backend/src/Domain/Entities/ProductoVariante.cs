@@ -16,6 +16,7 @@ public class ProductoVariante : AuditableEntity
     public int UmbralStockBajo { get; set; } = 5;
     public decimal? Costo { get; set; }
     public decimal? Precio { get; set; }
+    public bool EsTecnica { get; set; }
     public bool Activo { get; set; } = true;
     public bool Eliminado { get; set; }
     public DateTime? FechaEliminacion { get; set; }

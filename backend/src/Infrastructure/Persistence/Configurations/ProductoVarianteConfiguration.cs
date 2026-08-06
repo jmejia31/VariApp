@@ -14,9 +14,20 @@ public class ProductoVarianteConfiguration : IEntityTypeConfiguration<ProductoVa
         builder.Property(x => x.CodigoBarras).HasMaxLength(120);
         builder.Property(x => x.Costo).HasPrecision(18, 2);
         builder.Property(x => x.Precio).HasPrecision(18, 2);
+        builder.Property(x => x.EsTecnica).HasDefaultValue(false);
+
+        builder.Property<int?>("ProductoTecnicoUnico")
+            .HasComputedColumnSql(
+                "CASE WHEN `EsTecnica` = 1 AND `Eliminado` = 0 THEN `ProductoId` ELSE NULL END",
+                stored: true);
+
         builder.HasIndex(x => new { x.ProductoId, x.ColorId }).IsUnique();
         builder.HasIndex(x => x.Sku).IsUnique();
         builder.HasIndex(x => x.CodigoBarras).IsUnique();
+        builder.HasIndex("ProductoTecnicoUnico")
+            .IsUnique()
+            .HasDatabaseName("IX_ProductoVariantes_ProductoTecnicoUnico");
+
         builder.HasOne(x => x.Producto)
             .WithMany(x => x.Variantes)
             .HasForeignKey(x => x.ProductoId)
