@@ -21,6 +21,39 @@
   </div>
 
   <h2 class="section-title">Productos y variantes</h2>
+  <div class="producto-busqueda-remota">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Buscar producto por nombre, marca, modelo, color, SKU o código de barras</mat-label>
+      <input
+        matInput
+        data-testid="compra-producto-autocomplete"
+        [formControl]="buscadorProducto"
+        [matAutocomplete]="autoProductoCompra"
+        placeholder="Escribe al menos 2 caracteres..."
+        autocomplete="off">
+      @if (buscandoProducto()) { <mat-spinner matSuffix diameter="18"></mat-spinner> }
+      <mat-autocomplete
+        #autoProductoCompra="matAutocomplete"
+        [displayWith]="displayProductoOperacion"
+        (optionSelected)="onProductoBuscadoSeleccionado($event)">
+        @for (item of opcionesProducto(); track item.productoVarianteId) {
+          <mat-option [value]="item">
+            <strong>{{ item.productoNombre }}</strong>
+            <span class="opcion-detalle">
+              {{ item.colorNombre || 'Predeterminada' }} · {{ item.sku }} · stock actual {{ item.cantidadDisponible }} · costo L. {{ item.costo | number:'1.2-2' }}
+            </span>
+          </mat-option>
+        }
+        @if (!buscandoProducto() && opcionesProducto().length === 0 && buscadorProducto.value && buscadorProducto.value.toString().trim().length >= 2 && !errorBusquedaProducto()) {
+          <mat-option disabled>No se encontraron variantes activas para la compra.</mat-option>
+        }
+      </mat-autocomplete>
+      <mat-hint>La consulta es remota, admite stock cero y devuelve como máximo 30 variantes.</mat-hint>
+      @if (errorBusquedaProducto()) { <mat-error>{{ errorBusquedaProducto() }}</mat-error> }
+    </mat-form-field>
+    @if (mensajeBusquedaProducto()) { <p class="producto-busqueda-mensaje" role="status"><mat-icon>check_circle</mat-icon>{{ mensajeBusquedaProducto() }}</p> }
+  </div>
+
   <app-codigo-scanner-input
     [procesando]="procesandoEscaneo()"
     [mensaje]="mensajeEscaneo()"
@@ -55,7 +88,7 @@
       </div>
     }
   </div>
-  <button mat-button type="button" (click)="agregarDetalle()"><mat-icon>add</mat-icon> Agregar producto</button>
+  <button mat-button type="button" (click)="agregarDetalle()"><mat-icon>add</mat-icon> Agregar fila manual</button>
 
   <h2 class="section-title">Pago y totales</h2>
   <div class="fields-grid">
@@ -69,7 +102,7 @@
       <div><span>Importe bruto</span><span>L. {{ r.importeBruto | number:'1.2-2' }}</span></div><div><span>Subtotal sin impuesto</span><span>L. {{ (r.subtotalNeto ?? r.subtotal) | number:'1.2-2' }}</span></div>
       @for (i of r.impuestosAplicados; track i.impuestoId) { <div class="linea-impuesto"><span>{{ i.nombre }} ({{ i.tasa }}%)</span><span>L. {{ i.monto | number:'1.2-2' }}</span></div> }
       <div class="total"><span>Total proveedor</span><span>L. {{ r.total | number:'1.2-2' }}</span></div>
-    } @else { <p class="hint">Selecciona producto y variante para calcular.</p> }
+    } @else { <p class="hint">Busca o escanea un producto para calcular.</p> }
   </div>
   @if (errorMessage()) { <p class="error" role="alert">{{ errorMessage() }}</p> }
   <div class="form-actions"><a routerLink="/compras" mat-button>Cancelar</a><button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || detalles.length === 0 || !resultado() || saving()">Guardar borrador</button></div>
