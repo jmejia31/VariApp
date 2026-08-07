@@ -41,6 +41,11 @@ public class SeedPermisoService
         if (roles.VendedorCreado && !vendedorTieneMatriz)
             await SeedVendedorInicialAsync(roles.Vendedor);
 
+        // Persistir primero las matrices iniciales evita que el otorgamiento
+        // acumulativo interprete esas filas todavía Added como permisos ausentes
+        // y genere duplicados en el mismo arranque.
+        await _context.SaveChangesAsync();
+
         // Los permisos agregados por nuevas funciones se incorporan de forma
         // acumulativa únicamente en roles administrativos. No se modifica ningún
         // rol no administrativo y una fila existente (incluso Permitido=false)
