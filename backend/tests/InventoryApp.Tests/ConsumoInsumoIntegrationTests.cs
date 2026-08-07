@@ -59,7 +59,8 @@ public class ConsumoInsumoIntegrationTests
             currentUser.SetupGet(x => x.NombreUsuario).Returns("insumos.integration");
             var auditoria = new Mock<IAuditoriaService>();
             var usuarioScope = new Mock<IUsuarioScopeService>();
-            usuarioScope.Setup(x => x.ObtenerActualAsync()).ReturnsAsync(new UsuarioScopeActual(1, true));
+            usuarioScope.Setup(x => x.ObtenerActualAsync())
+                .ReturnsAsync(new UsuarioScopeActual(1, 1, "Administrador", true));
 
             var productoRepository = new ProductoRepository(context);
             var varianteRepository = new ProductoVarianteRepository(context);
