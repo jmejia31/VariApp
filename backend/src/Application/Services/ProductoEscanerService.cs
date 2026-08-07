@@ -155,6 +155,13 @@ public sealed class ProductoEscanerService : IProductoEscanerService
         return normalizado.ToLowerInvariant();
     }
 
+    private static string? ObtenerImagenMiniatura(Producto producto) =>
+        producto.Imagenes
+            .OrderByDescending(imagen => imagen.EsPrincipal)
+            .ThenBy(imagen => imagen.Orden)
+            .Select(imagen => imagen.Url)
+            .FirstOrDefault();
+
     private static ProductoEscaneadoVentaDto MapVenta(ProductoVariante variante) =>
         new()
         {
@@ -169,7 +176,8 @@ public sealed class ProductoEscanerService : IProductoEscanerService
             Sku = variante.Sku ?? string.Empty,
             CodigoBarras = variante.CodigoBarras,
             CantidadDisponible = variante.Cantidad,
-            Precio = variante.Precio ?? variante.Producto.Precio
+            Precio = variante.Precio ?? variante.Producto.Precio,
+            ImagenMiniaturaUrl = ObtenerImagenMiniatura(variante.Producto)
         };
 
     private static ProductoEscaneadoCompraDto MapCompra(ProductoVariante variante) =>
@@ -187,6 +195,7 @@ public sealed class ProductoEscanerService : IProductoEscanerService
             CodigoBarras = variante.CodigoBarras,
             CantidadDisponible = variante.Cantidad,
             Costo = variante.Costo ?? variante.Producto.Costo,
-            Precio = variante.Precio ?? variante.Producto.Precio
+            Precio = variante.Precio ?? variante.Producto.Precio,
+            ImagenMiniaturaUrl = ObtenerImagenMiniatura(variante.Producto)
         };
 }
