@@ -76,6 +76,36 @@ public class CompraValorizacionSnapshotTests
     }
 
     [Fact]
+    public async Task SaveChanges_Anulacion_RestauraCostoAnteriorNuloDeVariante()
+    {
+        await using var context = CrearContexto();
+        var (producto, variante, compra, detalle) = await SembrarBorradorAsync(context);
+        variante.Costo = null;
+        producto.Costo = 0m;
+        await context.SaveChangesAsync();
+
+        variante.Cantidad = 15;
+        variante.Costo = 6.67m;
+        producto.Cantidad = 15;
+        producto.Costo = 6.67m;
+        compra.Estado = EstadoDocumento.Confirmada;
+        await context.SaveChangesAsync();
+
+        Assert.Null(detalle.CostoVarianteAnteriorSnapshot);
+        Assert.Equal(6.67m, detalle.CostoVarianteNuevoSnapshot);
+
+        variante.Cantidad -= 5;
+        producto.Cantidad -= 5;
+        compra.Estado = EstadoDocumento.Anulada;
+        await context.SaveChangesAsync();
+
+        Assert.Equal(10, variante.Cantidad);
+        Assert.Null(variante.Costo);
+        Assert.Equal(10, producto.Cantidad);
+        Assert.Equal(0m, producto.Costo);
+    }
+
+    [Fact]
     public async Task SaveChanges_AnulacionHistoricaSinSnapshots_EsBloqueada()
     {
         await using var context = CrearContexto();
