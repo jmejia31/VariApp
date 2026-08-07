@@ -90,6 +90,7 @@ export interface ProductoEscaneadoBase {
   codigoBarras?: string | null;
   cantidadDisponible: number;
   precio: number;
+  imagenMiniaturaUrl?: string | null;
 }
 
 export interface ProductoEscaneadoVenta extends ProductoEscaneadoBase {}
