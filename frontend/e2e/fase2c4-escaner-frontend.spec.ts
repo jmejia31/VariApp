@@ -49,7 +49,7 @@ async function escanear(page: Page, codigo: string): Promise<void> {
   await input.press('Enter');
 }
 
-test.describe('Fase 2C.4 — frontend para lector USB o Bluetooth', () => {
+test.describe('Fase 2C.4 — frontend del escáner', () => {
   test.describe.configure({ mode: 'serial', retries: 0 });
 
   test.beforeAll(async ({ request }) => {
@@ -99,10 +99,10 @@ test.describe('Fase 2C.4 — frontend para lector USB o Bluetooth', () => {
     expect(productoResponse.status(), await productoResponse.text()).toBe(201);
   });
 
-  test('venta consolida lecturas repetidas y bloquea superar el stock', async ({ page }) => {
+  test('venta consolida lecturas repetidas, conserva ceros y bloquea superar stock', async ({ page }) => {
     await loginUi(page);
     await page.goto('/ventas/nueva');
-    await page.getByRole('button', { name: 'Activar modo escáner' }).click();
+    await page.getByRole('button', { name: 'Activar lector físico' }).click();
 
     await escanear(page, codigoBarras);
     await expect(page.getByText(/agregado a la venta/i)).toBeVisible();
@@ -110,7 +110,7 @@ test.describe('Fase 2C.4 — frontend para lector USB o Bluetooth', () => {
     await expect(cantidad).toHaveValue('1');
 
     await escanear(page, codigoBarras);
-    await expect(page.getByText(/cantidad actualizada a 2/i)).toBeVisible();
+    await expect(page.getByText(/cantidad consolidada en 2/i)).toBeVisible();
     await expect(cantidad).toHaveValue('2');
 
     await escanear(page, codigoBarras);
@@ -119,10 +119,10 @@ test.describe('Fase 2C.4 — frontend para lector USB o Bluetooth', () => {
     await expect(page.getByLabel(/Escanear SKU o código de barras/i)).toBeFocused();
   });
 
-  test('compra consolida lecturas y conserva el costo retornado por backend', async ({ page }) => {
+  test('compra consolida lecturas y conserva costo retornado por backend', async ({ page }) => {
     await loginUi(page);
     await page.goto('/compras/nueva');
-    await page.getByRole('button', { name: 'Activar modo escáner' }).click();
+    await page.getByRole('button', { name: 'Activar lector físico' }).click();
 
     await escanear(page, codigoBarras);
     await expect(page.getByText(/agregado a la compra/i)).toBeVisible();
@@ -131,8 +131,20 @@ test.describe('Fase 2C.4 — frontend para lector USB o Bluetooth', () => {
     await expect(fila.locator('input[formcontrolname="costoUnitario"]')).toHaveValue('100');
 
     await escanear(page, codigoBarras);
-    await expect(page.getByText(/cantidad actualizada a 2/i)).toBeVisible();
+    await expect(page.getByText(/cantidad consolidada en 2/i)).toBeVisible();
     await expect(fila.locator('input[formcontrolname="cantidad"]')).toHaveValue('2');
     await expect(page.getByLabel(/Escanear SKU o código de barras/i)).toBeFocused();
+  });
+
+  test('cámara e imagen quedan cableadas al formulario sin activar cámara en CI', async ({ page }) => {
+    await loginUi(page);
+    await page.goto('/ventas/nueva');
+    await page.getByRole('button', { name: 'Cámara o imagen' }).click();
+
+    await expect(page.getByRole('heading', { name: 'Escanear código' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Activar cámara' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Leer imagen' })).toBeVisible();
+    await page.getByRole('button', { name: 'Cerrar' }).click();
+    await expect(page.getByRole('heading', { name: 'Escanear código' })).toBeHidden();
   });
 });
