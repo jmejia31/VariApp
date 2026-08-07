@@ -16,7 +16,7 @@ public class PagedRequest
     public int PageSize
     {
         get => _pageSize;
-        set => _pageSize = value is < 1 or > 100 ? 10 : value;
+        set => _pageSize = Math.Clamp(value, 1, 200);
     }
 
     public string? Search { get; set; }
