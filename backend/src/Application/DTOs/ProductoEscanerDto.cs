@@ -38,6 +38,7 @@ public sealed class ProductoEscaneadoVentaDto
     public string? CodigoBarras { get; init; }
     public int CantidadDisponible { get; init; }
     public decimal Precio { get; init; }
+    public string? ImagenMiniaturaUrl { get; init; }
 }
 
 public sealed class ProductoEscaneadoCompraDto
@@ -55,4 +56,5 @@ public sealed class ProductoEscaneadoCompraDto
     public int CantidadDisponible { get; init; }
     public decimal Costo { get; init; }
     public decimal Precio { get; init; }
+    public string? ImagenMiniaturaUrl { get; init; }
 }
