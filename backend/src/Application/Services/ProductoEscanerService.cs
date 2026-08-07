@@ -2,6 +2,7 @@ using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities;
+using InventoryApp.Domain.Enums;
 
 namespace InventoryApp.Application.Services;
 
@@ -31,6 +32,12 @@ public sealed class ProductoEscanerService : IProductoEscanerService
         }
 
         var variante = resolucion.Dato!;
+        if (variante.Producto.TipoInventario != TipoInventario.MercaderiaVenta)
+        {
+            return ResultadoResolucionProductoEscaner<ProductoEscaneadoVentaDto>.Fallo(
+                EstadoResolucionProductoEscaner.NoOperativo,
+                "El código corresponde a un insumo administrativo y no puede venderse.");
+        }
         if (variante.Cantidad <= 0)
         {
             return ResultadoResolucionProductoEscaner<ProductoEscaneadoVentaDto>.Fallo(
@@ -68,7 +75,8 @@ public sealed class ProductoEscanerService : IProductoEscanerService
             terminoNormalizado,
             soloConStock: true,
             Math.Clamp(limite, 1, LimiteMaximoBusqueda),
-            cancellationToken);
+            cancellationToken,
+            TipoInventario.MercaderiaVenta);
 
         return variantes.Select(MapVenta).ToList();
     }

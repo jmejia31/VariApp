@@ -1,5 +1,6 @@
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities;
+using InventoryApp.Domain.Enums;
 using InventoryApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -98,7 +99,8 @@ public class ProductoVarianteRepository : IProductoVarianteRepository
         string terminoNormalizado,
         bool soloConStock,
         int limite,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        TipoInventario? tipoInventario = null)
     {
         var limiteSeguro = Math.Clamp(limite, 1, 30);
         var query = _context.ProductoVariantes
@@ -111,6 +113,9 @@ public class ProductoVarianteRepository : IProductoVarianteRepository
                 v.Activo &&
                 !v.Producto.Eliminado &&
                 v.Producto.Activo);
+
+        if (tipoInventario.HasValue)
+            query = query.Where(v => v.Producto.TipoInventario == tipoInventario.Value);
 
         if (soloConStock)
             query = query.Where(v => v.Cantidad > 0);

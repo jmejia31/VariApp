@@ -1,4 +1,5 @@
 using InventoryApp.Domain.Entities;
+using InventoryApp.Domain.Enums;
 
 namespace InventoryApp.Application.Interfaces;
 
@@ -19,7 +20,8 @@ public interface IProductoVarianteRepository
         string terminoNormalizado,
         bool soloConStock,
         int limite,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default,
+        TipoInventario? tipoInventario = null);
     Task<ProductoVariante?> GetByProductoColorAsync(int productoId, int colorId);
     Task AddAsync(ProductoVariante variante);
     void Update(ProductoVariante variante);

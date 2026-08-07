@@ -15,16 +15,16 @@ namespace InventoryApp.API.Controllers;
 public class VentasController : ControllerBase
 {
     private readonly IVentaService _ventaService;
-    private readonly IProductoService _productoService;
+    private readonly IProductoRepository _productoRepository;
     private readonly IProductoEscanerService _productoEscanerService;
 
     public VentasController(
         IVentaService ventaService,
-        IProductoService productoService,
+        IProductoRepository productoRepository,
         IProductoEscanerService productoEscanerService)
     {
         _ventaService = ventaService;
-        _productoService = productoService;
+        _productoRepository = productoRepository;
         _productoEscanerService = productoEscanerService;
     }
 
@@ -75,7 +75,7 @@ public class VentasController : ControllerBase
     [RequierePermiso(ModuloSistema.Ventas, AccionPermiso.Crear)]
     public async Task<IActionResult> Create([FromBody] CreateVentaDto dto)
     {
-        await ValidarProductosActivosAsync(dto.Detalles.Select(d => d.ProductoId));
+        await ValidarProductosVendiblesAsync(dto.Detalles.Select(d => d.ProductoId));
         var creada = await _ventaService.CreateAsync(dto);
         return CreatedAtAction(nameof(GetById), new { id = creada.Id },
             ApiResponse<VentaDto>.Ok(creada, "Venta creada en estado Borrador."));
@@ -85,7 +85,7 @@ public class VentasController : ControllerBase
     [RequierePermiso(ModuloSistema.Ventas, AccionPermiso.Crear)]
     public async Task<IActionResult> Calcular([FromBody] CalcularVentaRequest request)
     {
-        await ValidarProductosActivosAsync(request.Detalles.Select(d => d.ProductoId));
+        await ValidarProductosVendiblesAsync(request.Detalles.Select(d => d.ProductoId));
         var resultado = await _ventaService.CalcularVistaPreviaAsync(request);
         return Ok(ApiResponse<ResultadoCalculoDto>.Ok(resultado));
     }
@@ -94,7 +94,7 @@ public class VentasController : ControllerBase
     [RequierePermiso(ModuloSistema.Ventas, AccionPermiso.Editar)]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateVentaDto dto)
     {
-        await ValidarProductosActivosAsync(dto.Detalles.Select(d => d.ProductoId));
+        await ValidarProductosVendiblesAsync(dto.Detalles.Select(d => d.ProductoId));
         var actualizada = await _ventaService.UpdateAsync(id, dto);
         if (actualizada is null) return NotFound(ApiResponse<object>.Fail("Venta no encontrada."));
         return Ok(ApiResponse<VentaDto>.Ok(actualizada, "Venta actualizada correctamente."));
@@ -107,7 +107,7 @@ public class VentasController : ControllerBase
         var borrador = await _ventaService.GetByIdAsync(id);
         if (borrador is null) return NotFound(ApiResponse<object>.Fail("Venta no encontrada."));
 
-        await ValidarProductosActivosAsync(borrador.Detalles.Select(d => d.ProductoId));
+        await ValidarProductosVendiblesAsync(borrador.Detalles.Select(d => d.ProductoId));
         var confirmada = await _ventaService.ConfirmarAsync(id);
         if (confirmada is null) return NotFound(ApiResponse<object>.Fail("Venta no encontrada."));
         return Ok(ApiResponse<VentaDto>.Ok(confirmada, "Venta confirmada: stock actualizado y factura generada."));
@@ -152,16 +152,19 @@ public class VentasController : ControllerBase
                 ApiResponse<object>.Fail("No fue posible resolver el producto escaneado."))
         };
 
-    private async Task ValidarProductosActivosAsync(IEnumerable<int> productoIds)
+    private async Task ValidarProductosVendiblesAsync(IEnumerable<int> productoIds)
     {
         foreach (var productoId in productoIds.Distinct())
         {
-            var producto = await _productoService.GetByIdAsync(productoId)
+            var producto = await _productoRepository.GetByIdAsync(productoId)
                 ?? throw new BusinessRuleException($"El producto con id {productoId} no existe.");
 
             if (!producto.Activo)
                 throw new BusinessRuleException(
                     $"El producto '{producto.Nombre}' está inactivo. Actívalo antes de incluirlo en una venta.");
+            if (producto.TipoInventario != TipoInventario.MercaderiaVenta)
+                throw new BusinessRuleException(
+                    $"El producto '{producto.Nombre}' es un insumo administrativo y no puede venderse ni facturarse.");
         }
     }
 }
