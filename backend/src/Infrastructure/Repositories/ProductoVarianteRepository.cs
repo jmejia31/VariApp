@@ -83,6 +83,7 @@ public class ProductoVarianteRepository : IProductoVarianteRepository
         _context.ProductoVariantes
             .AsNoTracking()
             .Include(v => v.Producto)
+                .ThenInclude(p => p.Imagenes)
             .Include(v => v.Color)
             .Where(v =>
                 !v.Eliminado &&
@@ -103,6 +104,7 @@ public class ProductoVarianteRepository : IProductoVarianteRepository
         var query = _context.ProductoVariantes
             .AsNoTracking()
             .Include(v => v.Producto)
+                .ThenInclude(p => p.Imagenes)
             .Include(v => v.Color)
             .Where(v =>
                 !v.Eliminado &&
