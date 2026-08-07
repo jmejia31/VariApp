@@ -43,6 +43,20 @@ public class ComprasController : ControllerBase
         return CrearRespuestaEscaner(resultado);
     }
 
+    [HttpGet("productos/buscar")]
+    [RequiereAlgunoPermiso(ModuloSistema.Compras, AccionPermiso.Crear, AccionPermiso.Editar)]
+    public async Task<IActionResult> BuscarProductos(
+        [FromQuery] string termino,
+        [FromQuery] int limite = 30,
+        CancellationToken cancellationToken = default)
+    {
+        var resultados = await _productoEscanerService.BuscarParaCompraAsync(
+            termino,
+            limite,
+            cancellationToken);
+        return Ok(ApiResponse<List<ProductoEscaneadoCompraDto>>.Ok(resultados));
+    }
+
     [HttpGet]
     [RequierePermiso(ModuloSistema.Compras, AccionPermiso.Ver)]
     public async Task<IActionResult> GetPaged([FromQuery] PagedRequest request)
