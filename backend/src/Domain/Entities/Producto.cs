@@ -1,4 +1,5 @@
 using InventoryApp.Domain.Common;
+using InventoryApp.Domain.Enums;
 
 namespace InventoryApp.Domain.Entities;
 
@@ -12,6 +13,7 @@ public class Producto : AuditableEntity
     public string Modelo { get; set; } = string.Empty;
 
     public string? Descripcion { get; set; }
+    public TipoInventario TipoInventario { get; set; } = TipoInventario.MercaderiaVenta;
 
     // Compatibilidad durante la migración hacia inventario por variantes.
     // Cuando existan variantes, la cantidad consolidada se mantiene como la

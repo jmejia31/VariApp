@@ -1,4 +1,5 @@
 using InventoryApp.Domain.Entities;
+using InventoryApp.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -10,6 +11,9 @@ public class MovimientoInventarioConfiguration : IEntityTypeConfiguration<Movimi
     {
         builder.ToTable("MovimientosInventario");
         builder.Property(m => m.Tipo).HasConversion<string>().HasMaxLength(20);
+        builder.Property(m => m.Causa)
+            .HasConversion<int>()
+            .HasDefaultValue(CausaMovimientoInventario.NoEspecificada);
         builder.Property(m => m.ReferenciaTipo).IsRequired().HasMaxLength(30);
         builder.Property(m => m.Descripcion).HasMaxLength(300);
         builder.Property(m => m.ProductoColorSnapshot).HasMaxLength(100);
@@ -29,5 +33,6 @@ public class MovimientoInventarioConfiguration : IEntityTypeConfiguration<Movimi
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasIndex(m => new { m.ReferenciaTipo, m.ReferenciaId });
+        builder.HasIndex(m => new { m.Causa, m.Fecha });
     }
 }

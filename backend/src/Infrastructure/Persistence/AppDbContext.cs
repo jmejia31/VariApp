@@ -23,6 +23,8 @@ public class AppDbContext : DbContext
     public DbSet<CompraDetalle> CompraDetalles => Set<CompraDetalle>();
     public DbSet<CompraDocumento> CompraDocumentos => Set<CompraDocumento>();
     public DbSet<MovimientoInventario> MovimientosInventario => Set<MovimientoInventario>();
+    public DbSet<ConsumoInsumo> ConsumosInsumos => Set<ConsumoInsumo>();
+    public DbSet<ConsumoInsumoDetalle> ConsumoInsumoDetalles => Set<ConsumoInsumoDetalle>();
     public DbSet<MovimientoFinanciero> MovimientosFinancieros => Set<MovimientoFinanciero>();
     public DbSet<Venta> Ventas => Set<Venta>();
     public DbSet<VentaDetalle> VentaDetalles => Set<VentaDetalle>();

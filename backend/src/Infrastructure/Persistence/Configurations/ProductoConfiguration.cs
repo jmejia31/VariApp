@@ -1,4 +1,5 @@
 using InventoryApp.Domain.Entities;
+using InventoryApp.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -14,6 +15,9 @@ public class ProductoConfiguration : IEntityTypeConfiguration<Producto>
         builder.Property(p => p.Marca).IsRequired().HasMaxLength(100);
         builder.Property(p => p.Modelo).IsRequired().HasMaxLength(100);
         builder.Property(p => p.Descripcion).HasMaxLength(1000);
+        builder.Property(p => p.TipoInventario)
+            .HasConversion<int>()
+            .HasDefaultValue(TipoInventario.MercaderiaVenta);
         builder.Property(p => p.Costo).HasColumnType("decimal(18,2)");
         builder.Property(p => p.Precio).HasColumnType("decimal(18,2)");
         builder.Property(p => p.Activo).HasDefaultValue(true);
@@ -35,5 +39,6 @@ public class ProductoConfiguration : IEntityTypeConfiguration<Producto>
         builder.HasIndex(p => p.MarcaId).HasDatabaseName("IX_Productos_MarcaId");
         builder.HasIndex(p => p.ModeloId).HasDatabaseName("IX_Productos_ModeloId");
         builder.HasIndex(p => new { p.Eliminado, p.Activo }).HasDatabaseName("IX_Productos_Estado");
+        builder.HasIndex(p => new { p.TipoInventario, p.Eliminado, p.Activo }).HasDatabaseName("IX_Productos_TipoInventario_Estado");
     }
 }

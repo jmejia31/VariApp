@@ -13,6 +13,7 @@ public class MovimientoInventario
     public string? ProductoSkuSnapshot { get; set; }
 
     public TipoMovimientoInventario Tipo { get; set; }
+    public CausaMovimientoInventario Causa { get; set; } = CausaMovimientoInventario.NoEspecificada;
     public int Cantidad { get; set; }
     public int StockAnterior { get; set; }
     public int StockNuevo { get; set; }
