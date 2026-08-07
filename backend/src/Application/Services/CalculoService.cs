@@ -31,9 +31,9 @@ public class CalculoService : ICalculoService
         bool envioExonerado = false,
         string? motivoExoneracionEnvio = null)
     {
-        var importeBruto = Math.Round(detalles.Sum(d => d.Cantidad * d.PrecioUnitario), 2, MidpointRounding.AwayFromZero);
+        var importeBruto = RedondearMoneda(detalles.Sum(CalcularSubtotalLinea));
         var envio = await ResolverEnvioAsync(costoEnvioId, envioExonerado, motivoExoneracionEnvio, importeBruto);
-        var importeProductos = Math.Max(0, importeBruto - envio.Monto);
+        var importeProductos = RedondearMoneda(Math.Max(0, importeBruto - envio.Monto));
         var cantidadTotal = detalles.Sum(d => d.Cantidad);
         var ahora = DateTime.UtcNow;
         var descuentos = await _descuentoRepository.GetVigentesConRelacionesAsync(ahora);
@@ -80,13 +80,13 @@ public class CalculoService : ICalculoService
                 continue;
 
             var monto = descuento.Tipo == TipoDescuento.Porcentaje
-                ? Math.Round(baseElegible * descuento.Valor / 100m, 2, MidpointRounding.AwayFromZero)
-                : descuento.Valor;
+                ? RedondearMoneda(baseElegible * descuento.Valor / 100m)
+                : RedondearMoneda(descuento.Valor);
 
             if (descuento.MontoMaximoDescuento.HasValue && monto > descuento.MontoMaximoDescuento.Value)
-                monto = descuento.MontoMaximoDescuento.Value;
+                monto = RedondearMoneda(descuento.MontoMaximoDescuento.Value);
 
-            var disponible = Math.Max(0, importeProductos - totalDescuento);
+            var disponible = RedondearMoneda(Math.Max(0, importeProductos - totalDescuento));
             if (monto > disponible) monto = disponible;
             if (monto <= 0) continue;
 
@@ -99,7 +99,7 @@ public class CalculoService : ICalculoService
                 Valor = descuento.Valor,
                 Monto = monto
             });
-            totalDescuento += monto;
+            totalDescuento = RedondearMoneda(totalDescuento + monto);
 
             if (!descuento.Acumulable) break;
         }
@@ -124,7 +124,7 @@ public class CalculoService : ICalculoService
 
     public async Task<ResultadoCalculoDto> CalcularCompraAsync(List<DetalleCalculoInput> detalles, int? proveedorId)
     {
-        var importeBruto = detalles.Sum(d => d.Cantidad * d.PrecioUnitario);
+        var importeBruto = RedondearMoneda(detalles.Sum(CalcularSubtotalLinea));
         var impuestosAplicados = await CalcularImpuestosAsync(
             detalles,
             OperacionImpuesto.Compra,
@@ -176,7 +176,7 @@ public class CalculoService : ICalculoService
         {
             Id = costo.Id,
             Nombre = costo.Nombre,
-            Monto = Math.Round(costo.Monto, 2, MidpointRounding.AwayFromZero)
+            Monto = RedondearMoneda(costo.Monto)
         };
     }
 
@@ -188,13 +188,24 @@ public class CalculoService : ICalculoService
         List<ImpuestoAplicadoDto> impuestosAplicados,
         EnvioResuelto envio)
     {
-        var impuestoIncluido = impuestosAplicados.Where(i => i.IncluidoEnPrecio).Sum(i => i.Monto);
-        var impuestoAdicional = impuestosAplicados.Where(i => !i.IncluidoEnPrecio).Sum(i => i.Monto);
+        importeBruto = RedondearMoneda(importeBruto);
+        importeProductos = RedondearMoneda(importeProductos);
+        totalDescuento = RedondearMoneda(totalDescuento);
+        var impuestoIncluido = RedondearMoneda(impuestosAplicados.Where(i => i.IncluidoEnPrecio).Sum(i => i.Monto));
+        var impuestoAdicional = RedondearMoneda(impuestosAplicados.Where(i => !i.IncluidoEnPrecio).Sum(i => i.Monto));
+
         // El subtotal y el impuesto incluido describen el precio comercial antes
         // del descuento. El descuento se presenta y descuenta como componente separado.
-        var subtotalNeto = Math.Max(0, importeProductos - impuestoIncluido);
-        var total = Math.Max(0,
+        var subtotalNeto = RedondearMoneda(Math.Max(0, importeProductos - impuestoIncluido));
+        var total = RedondearMoneda(Math.Max(0,
+            subtotalNeto + impuestoIncluido + impuestoAdicional + envio.Monto - totalDescuento));
+
+        // Invariante monetaria de documento: después de redondear todos los componentes
+        // a centavos, el total persistible siempre se deriva de esos mismos componentes.
+        var totalConciliado = RedondearMoneda(
             subtotalNeto + impuestoIncluido + impuestoAdicional + envio.Monto - totalDescuento);
+        if (total != Math.Max(0, totalConciliado))
+            throw new BusinessRuleException("No fue posible conciliar los componentes monetarios del documento al centavo.");
 
         return new ResultadoCalculoDto
         {
@@ -204,12 +215,12 @@ public class CalculoService : ICalculoService
             DescuentosAplicados = descuentosAplicados,
             TotalDescuento = totalDescuento,
             ImpuestosAplicados = impuestosAplicados,
-            TotalImpuesto = impuestoIncluido + impuestoAdicional,
+            TotalImpuesto = RedondearMoneda(impuestoIncluido + impuestoAdicional),
             ImpuestoIncluido = impuestoIncluido,
             ImpuestoAdicional = impuestoAdicional,
             CostoEnvioId = envio.Id,
             CostoEnvioNombre = envio.Nombre,
-            CostoEnvio = envio.Monto,
+            CostoEnvio = RedondearMoneda(envio.Monto),
             EnvioExonerado = envio.Exonerado,
             MotivoExoneracionEnvio = envio.MotivoExoneracion,
             Total = total
@@ -304,13 +315,13 @@ public class CalculoService : ICalculoService
 
             var descuentoProrrateado = importeProductos <= 0
                 ? 0
-                : Math.Round(totalDescuento * (baseElegibleProductos / importeProductos), 2, MidpointRounding.AwayFromZero);
+                : RedondearMoneda(totalDescuento * (baseElegibleProductos / importeProductos));
 
             // El descuento reduce el total final, pero no reescribe la composición
             // histórica de un impuesto que ya estaba incluido en el precio comercial.
-            var importeSujeto = impuesto.IncluidoEnPrecio || impuesto.SeCalculaAntesDescuento
+            var importeSujeto = RedondearMoneda(impuesto.IncluidoEnPrecio || impuesto.SeCalculaAntesDescuento
                 ? baseElegibleProductos
-                : Math.Max(0, baseElegibleProductos - descuentoProrrateado);
+                : Math.Max(0, baseElegibleProductos - descuentoProrrateado));
 
             decimal baseImponible;
             decimal monto;
@@ -320,24 +331,22 @@ public class CalculoService : ICalculoService
                 if (impuesto.Tipo == TipoImpuesto.Porcentaje)
                 {
                     if (impuesto.Tasa <= 0) continue;
-                    baseImponible = Math.Round(
-                        importeSujeto / (1m + impuesto.Tasa / 100m),
-                        2,
-                        MidpointRounding.AwayFromZero);
-                    monto = Math.Round(importeSujeto - baseImponible, 2, MidpointRounding.AwayFromZero);
+                    baseImponible = RedondearMoneda(
+                        importeSujeto / (1m + impuesto.Tasa / 100m));
+                    monto = RedondearMoneda(importeSujeto - baseImponible);
                 }
                 else
                 {
-                    monto = Math.Min(impuesto.MontoFijo ?? 0, importeSujeto);
-                    baseImponible = Math.Max(0, importeSujeto - monto);
+                    monto = RedondearMoneda(Math.Min(impuesto.MontoFijo ?? 0, importeSujeto));
+                    baseImponible = RedondearMoneda(Math.Max(0, importeSujeto - monto));
                 }
             }
             else
             {
-                baseImponible = importeSujeto;
+                baseImponible = RedondearMoneda(importeSujeto);
                 monto = impuesto.Tipo == TipoImpuesto.Porcentaje
-                    ? Math.Round(baseImponible * impuesto.Tasa / 100m, 2, MidpointRounding.AwayFromZero)
-                    : impuesto.MontoFijo ?? 0;
+                    ? RedondearMoneda(baseImponible * impuesto.Tasa / 100m)
+                    : RedondearMoneda(impuesto.MontoFijo ?? 0);
             }
 
             if (monto <= 0) continue;
@@ -361,8 +370,9 @@ public class CalculoService : ICalculoService
 
     private static decimal AjustarBaseSinEnvio(decimal baseElegibleBruta, decimal importeBruto, decimal importeProductos)
     {
-        if (importeBruto <= 0 || importeProductos >= importeBruto) return baseElegibleBruta;
-        return Math.Round(baseElegibleBruta * (importeProductos / importeBruto), 2, MidpointRounding.AwayFromZero);
+        if (importeBruto <= 0 || importeProductos >= importeBruto)
+            return RedondearMoneda(baseElegibleBruta);
+        return RedondearMoneda(baseElegibleBruta * (importeProductos / importeBruto));
     }
 
     private static decimal CalcularBaseElegible(
@@ -374,13 +384,19 @@ public class CalculoService : ICalculoService
         var categorias = categoriaIds.ToHashSet();
 
         if (productos.Count == 0 && categorias.Count == 0)
-            return detalles.Sum(d => d.Cantidad * d.PrecioUnitario);
+            return RedondearMoneda(detalles.Sum(CalcularSubtotalLinea));
 
-        return detalles
+        return RedondearMoneda(detalles
             .Where(d => productos.Contains(d.ProductoId) ||
                 (d.CategoriaId.HasValue && categorias.Contains(d.CategoriaId.Value)))
-            .Sum(d => d.Cantidad * d.PrecioUnitario);
+            .Sum(CalcularSubtotalLinea));
     }
+
+    private static decimal CalcularSubtotalLinea(DetalleCalculoInput detalle) =>
+        RedondearMoneda(detalle.Cantidad * detalle.PrecioUnitario);
+
+    private static decimal RedondearMoneda(decimal valor) =>
+        Math.Round(valor, 2, MidpointRounding.AwayFromZero);
 
     private sealed class EnvioResuelto
     {
