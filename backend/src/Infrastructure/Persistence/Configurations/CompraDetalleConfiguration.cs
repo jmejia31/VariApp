@@ -11,6 +11,10 @@ public class CompraDetalleConfiguration : IEntityTypeConfiguration<CompraDetalle
         builder.ToTable("CompraDetalles");
         builder.Property(d => d.CostoUnitario).HasColumnType("decimal(18,2)");
         builder.Property(d => d.Subtotal).HasColumnType("decimal(18,2)");
+        builder.Property(d => d.CostoProductoAnteriorSnapshot).HasColumnType("decimal(18,2)");
+        builder.Property(d => d.CostoProductoNuevoSnapshot).HasColumnType("decimal(18,2)");
+        builder.Property(d => d.CostoVarianteAnteriorSnapshot).HasColumnType("decimal(18,2)");
+        builder.Property(d => d.CostoVarianteNuevoSnapshot).HasColumnType("decimal(18,2)");
         builder.Property(d => d.ProductoNombreSnapshot).IsRequired().HasMaxLength(150);
         builder.Property(d => d.ProductoMarcaSnapshot).IsRequired().HasMaxLength(100);
         builder.Property(d => d.ProductoModeloSnapshot).IsRequired().HasMaxLength(100);
