@@ -31,6 +31,39 @@
     </div>
 
     <h2 class="section-title">Productos</h2>
+    <div class="producto-busqueda-remota">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Buscar producto por nombre, marca, modelo, color, SKU o código de barras</mat-label>
+        <input
+          matInput
+          data-testid="venta-producto-autocomplete"
+          [formControl]="buscadorProducto"
+          [matAutocomplete]="autoProductoVenta"
+          placeholder="Escribe al menos 2 caracteres..."
+          autocomplete="off">
+        @if (buscandoProducto()) { <mat-spinner matSuffix diameter="18" style="margin-right: 8px;"></mat-spinner> }
+        <mat-autocomplete
+          #autoProductoVenta="matAutocomplete"
+          [displayWith]="displayProductoOperacion"
+          (optionSelected)="onProductoBuscadoSeleccionado($event)">
+          @for (item of opcionesProducto(); track item.productoVarianteId) {
+            <mat-option [value]="item">
+              <strong>{{ item.productoNombre }}</strong>
+              <span class="opcion-detalle">
+                {{ item.colorNombre || 'Predeterminada' }} · {{ item.sku }} · stock {{ item.cantidadDisponible }} · L. {{ item.precio | number:'1.2-2' }}
+              </span>
+            </mat-option>
+          }
+          @if (!buscandoProducto() && opcionesProducto().length === 0 && typeof buscadorProducto.value === 'string' && (buscadorProducto.value || '').trim().length >= 2 && !errorBusquedaProducto()) {
+            <mat-option disabled>No se encontraron variantes disponibles para la venta.</mat-option>
+          }
+        </mat-autocomplete>
+        <mat-hint>La consulta es remota y devuelve como máximo 30 variantes con stock.</mat-hint>
+        @if (errorBusquedaProducto()) { <mat-error>{{ errorBusquedaProducto() }}</mat-error> }
+      </mat-form-field>
+      @if (mensajeBusquedaProducto()) { <p class="producto-busqueda-mensaje" role="status"><mat-icon>check_circle</mat-icon>{{ mensajeBusquedaProducto() }}</p> }
+    </div>
+
     <app-codigo-scanner-input
       [procesando]="procesandoEscaneo()"
       [mensaje]="mensajeEscaneo()"
@@ -79,7 +112,7 @@
         </div>
       }
     </div>
-    <button mat-button type="button" (click)="agregarDetalle()"><mat-icon>add</mat-icon> Agregar producto</button>
+    <button mat-button type="button" (click)="agregarDetalle()"><mat-icon>add</mat-icon> Agregar fila manual</button>
 
     <h2 class="section-title">Pago, envío y totales</h2>
     <div class="fields-grid">
@@ -110,7 +143,7 @@
         <div><span>{{ r.envioExonerado ? 'Envío exonerado' : (r.costoEnvioNombre || 'Costo de envío') }}</span><span>{{ r.envioExonerado ? 'L. 0.00' : ('L. ' + (r.costoEnvio | number:'1.2-2')) }}</span></div>
         @if (r.envioExonerado && r.motivoExoneracionEnvio) { <div class="linea-descuento"><span>Motivo de exoneración</span><span>{{ r.motivoExoneracionEnvio }}</span></div> }
         <div class="total"><span>Total a cobrar</span><span>L. {{ r.total | number:'1.2-2' }}</span></div>
-      } @else { <p class="hint">Selecciona producto, variante y envío para ver el desglose financiero real.</p> }
+      } @else { <p class="hint">Busca o escanea un producto para ver el desglose financiero real.</p> }
     </div>
 
     @if (errorMessage()) { <p class="error" role="alert">{{ errorMessage() }}</p> }
