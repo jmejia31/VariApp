@@ -3,6 +3,7 @@ using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Application.Services;
 using InventoryApp.Domain.Entities;
+using InventoryApp.Domain.Enums;
 using Moq;
 using Xunit;
 
@@ -19,16 +20,9 @@ public sealed class ProductoAutocompleteServiceTests
     public async Task BuscarParaVenta_TerminoMenorADosCaracteres_RechazaSinConsultarRepositorio(string termino)
     {
         var service = new ProductoEscanerService(_repository.Object);
-
         await Assert.ThrowsAsync<BusinessRuleException>(() => service.BuscarParaVentaAsync(termino));
-
-        _repository.Verify(
-            x => x.BuscarPorTerminoAsync(
-                It.IsAny<string>(),
-                It.IsAny<bool>(),
-                It.IsAny<int>(),
-                It.IsAny<CancellationToken>()),
-            Times.Never);
+        _repository.Verify(x => x.BuscarPorTerminoAsync(
+            It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<int>(), It.IsAny<CancellationToken>(), It.IsAny<TipoInventario?>()), Times.Never);
     }
 
     [Fact]
@@ -37,20 +31,13 @@ public sealed class ProductoAutocompleteServiceTests
         string? terminoRecibido = null;
         bool? soloConStockRecibido = null;
         int? limiteRecibido = null;
+        TipoInventario? tipoRecibido = null;
         var variante = CrearVariante(cantidad: 7);
 
-        _repository
-            .Setup(x => x.BuscarPorTerminoAsync(
-                It.IsAny<string>(),
-                It.IsAny<bool>(),
-                It.IsAny<int>(),
-                It.IsAny<CancellationToken>()))
-            .Callback<string, bool, int, CancellationToken>((termino, soloConStock, limite, _) =>
-            {
-                terminoRecibido = termino;
-                soloConStockRecibido = soloConStock;
-                limiteRecibido = limite;
-            })
+        _repository.Setup(x => x.BuscarPorTerminoAsync(
+                It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<int>(), It.IsAny<CancellationToken>(), It.IsAny<TipoInventario?>()))
+            .Callback<string, bool, int, CancellationToken, TipoInventario?>((termino, soloConStock, limite, _, tipo) =>
+            { terminoRecibido = termino; soloConStockRecibido = soloConStock; limiteRecibido = limite; tipoRecibido = tipo; })
             .ReturnsAsync(new List<ProductoVariante> { variante });
 
         var service = new ProductoEscanerService(_repository.Object);
@@ -59,12 +46,11 @@ public sealed class ProductoAutocompleteServiceTests
         Assert.Equal("buds pro", terminoRecibido);
         Assert.True(soloConStockRecibido);
         Assert.Equal(30, limiteRecibido);
+        Assert.Equal(TipoInventario.MercaderiaVenta, tipoRecibido);
         Assert.Single(resultado);
         Assert.Equal(variante.Id, resultado[0].ProductoVarianteId);
         Assert.Equal(95m, resultado[0].Precio);
-        Assert.DoesNotContain(
-            typeof(ProductoEscaneadoVentaDto).GetProperties(),
-            propiedad => propiedad.Name.Equals("Costo", StringComparison.OrdinalIgnoreCase));
+        Assert.DoesNotContain(typeof(ProductoEscaneadoVentaDto).GetProperties(), p => p.Name.Equals("Costo", StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact]
@@ -74,17 +60,10 @@ public sealed class ProductoAutocompleteServiceTests
         int? limiteRecibido = null;
         var variante = CrearVariante(cantidad: 0);
 
-        _repository
-            .Setup(x => x.BuscarPorTerminoAsync(
-                It.IsAny<string>(),
-                It.IsAny<bool>(),
-                It.IsAny<int>(),
-                It.IsAny<CancellationToken>()))
-            .Callback<string, bool, int, CancellationToken>((_, soloConStock, limite, _) =>
-            {
-                soloConStockRecibido = soloConStock;
-                limiteRecibido = limite;
-            })
+        _repository.Setup(x => x.BuscarPorTerminoAsync(
+                It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<int>(), It.IsAny<CancellationToken>(), It.IsAny<TipoInventario?>()))
+            .Callback<string, bool, int, CancellationToken, TipoInventario?>((_, soloConStock, limite, _, _) =>
+            { soloConStockRecibido = soloConStock; limiteRecibido = limite; })
             .ReturnsAsync(new List<ProductoVariante> { variante });
 
         var service = new ProductoEscanerService(_repository.Object);
@@ -101,33 +80,13 @@ public sealed class ProductoAutocompleteServiceTests
     public async Task Buscar_TerminoMayorACienCaracteres_Rechaza()
     {
         var service = new ProductoEscanerService(_repository.Object);
-        var termino = new string('x', 101);
-
-        await Assert.ThrowsAsync<BusinessRuleException>(() => service.BuscarParaCompraAsync(termino));
+        await Assert.ThrowsAsync<BusinessRuleException>(() => service.BuscarParaCompraAsync(new string('x', 101)));
     }
 
-    private static ProductoVariante CrearVariante(int cantidad) =>
-        new()
-        {
-            Id = 31,
-            ProductoId = 12,
-            Producto = new Producto
-            {
-                Id = 12,
-                Nombre = "Buds Pro",
-                Marca = "VariStorehn",
-                Modelo = "3",
-                Costo = 40m,
-                Precio = 90m,
-                Activo = true,
-                Eliminado = false
-            },
-            Sku = "SKU-BUDS-NEGRO",
-            CodigoBarras = "000123456789",
-            Cantidad = cantidad,
-            Costo = 45m,
-            Precio = 95m,
-            Activo = true,
-            Eliminado = false
-        };
+    private static ProductoVariante CrearVariante(int cantidad) => new()
+    {
+        Id = 31, ProductoId = 12,
+        Producto = new Producto { Id = 12, Nombre = "Buds Pro", Marca = "VariStorehn", Modelo = "3", TipoInventario = TipoInventario.MercaderiaVenta, Costo = 40m, Precio = 90m, Activo = true, Eliminado = false },
+        Sku = "SKU-BUDS-NEGRO", CodigoBarras = "000123456789", Cantidad = cantidad, Costo = 45m, Precio = 95m, Activo = true, Eliminado = false
+    };
 }
