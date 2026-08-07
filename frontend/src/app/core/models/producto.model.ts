@@ -9,7 +9,7 @@ export interface ProductoVariante {
   id: number;
   productoId: number;
   productoNombre: string;
-  colorId: number;
+  colorId?: number;
   colorNombre: string;
   colorCodigoVisual?: string;
   sku: string;
@@ -28,7 +28,7 @@ export interface ProductoVariante {
 
 export interface ProductoVarianteFormValue {
   id?: number;
-  colorId: number;
+  colorId?: number;
   sku?: string;
   codigoBarras?: string;
   cantidad: number;
