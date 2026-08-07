@@ -1,0 +1,43 @@
+<section class="scanner-card" [class.scanner-card-active]="activo()" aria-labelledby="scanner-title">
+  <div class="scanner-heading">
+    <div>
+      <h3 id="scanner-title"><mat-icon>barcode_scanner</mat-icon> Lector USB / Bluetooth</h3>
+      <p>Activa el modo escáner. El lector debe enviar el código y finalizar con Enter.</p>
+    </div>
+    <button mat-stroked-button type="button" (click)="alternarModo()" [attr.aria-pressed]="activo()">
+      <mat-icon>{{ activo() ? 'pause_circle' : 'qr_code_scanner' }}</mat-icon>
+      {{ activo() ? 'Desactivar modo escáner' : 'Activar modo escáner' }}
+    </button>
+  </div>
+
+  @if (activo()) {
+    <div class="scanner-capture">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>{{ etiqueta }}</mat-label>
+        <input
+          #codigoInput
+          matInput
+          autocomplete="off"
+          inputmode="none"
+          [formControl]="codigo"
+          [disabled]="procesando"
+          (keydown.enter)="$event.preventDefault(); procesar()"
+          aria-describedby="scanner-help scanner-feedback">
+        @if (procesando) { <mat-spinner matSuffix diameter="18"></mat-spinner> }
+        @else { <mat-icon matSuffix>keyboard_return</mat-icon> }
+      </mat-form-field>
+      <button mat-flat-button color="primary" type="button" (click)="procesar()" [disabled]="procesando || !codigo.value.trim()">
+        <mat-icon>add_shopping_cart</mat-icon>
+        Agregar
+      </button>
+    </div>
+    <p id="scanner-help" class="scanner-help">El foco vuelve a este campo después de cada lectura. Al escribir en otro campo del formulario, el sistema no interrumpe tu trabajo.</p>
+  }
+
+  @if (mensaje) {
+    <p id="scanner-feedback" class="scanner-feedback" [class.scanner-error]="error" role="status" aria-live="polite">
+      <mat-icon>{{ error ? 'error' : 'check_circle' }}</mat-icon>
+      {{ mensaje }}
+    </p>
+  }
+</section>
