@@ -120,10 +120,12 @@ async function instalarFixtures(page: Page): Promise<void> {
     body: '<svg xmlns="http://www.w3.org/2000/svg" width="320" height="320"><rect width="320" height="320" fill="#2563eb"/><circle cx="160" cy="135" r="72" fill="#fff"/></svg>'
   }));
 
-  await page.route(/\/compras\/productos\/buscar(?:\?.*)?$/, (route) => json(route, [productoCompra]));
-  await page.route(/\/ventas\/productos\/buscar(?:\?.*)?$/, (route) => json(route, [productoVenta]));
+  // Los mocks deben apuntar únicamente a la API. Patrones sin host también
+  // interceptan las rutas Angular /compras y /ventas durante page.goto().
+  await page.route(/^http:\/\/localhost:5005\/compras\/productos\/buscar(?:\?.*)?$/, (route) => json(route, [productoCompra]));
+  await page.route(/^http:\/\/localhost:5005\/ventas\/productos\/buscar(?:\?.*)?$/, (route) => json(route, [productoVenta]));
 
-  await page.route(/\/compras\/calcular$/, (route) => json(route, {
+  await page.route(/^http:\/\/localhost:5005\/compras\/calcular$/, (route) => json(route, {
     importeBruto: 100,
     subtotal: 100,
     subtotalNeto: 100,
@@ -135,7 +137,7 @@ async function instalarFixtures(page: Page): Promise<void> {
     impuestoAdicional: 0,
     total: 100
   }));
-  await page.route(/\/ventas\/calcular$/, (route) => json(route, {
+  await page.route(/^http:\/\/localhost:5005\/ventas\/calcular$/, (route) => json(route, {
     importeBruto: 180,
     importeProductos: 180,
     subtotal: 180,
@@ -153,18 +155,18 @@ async function instalarFixtures(page: Page): Promise<void> {
     total: 180
   }));
 
-  await page.route(/\/costos-envio(?:\?.*)?$/, (route) => json(route, []));
+  await page.route(/^http:\/\/localhost:5005\/costos-envio(?:\?.*)?$/, (route) => json(route, []));
 
-  await page.route(/\/compras(?:\?.*)?$/, (route) => json(route, {
+  await page.route(/^http:\/\/localhost:5005\/compras(?:\?.*)?$/, (route) => json(route, {
     items: [compra], totalCount: 1, page: 1, pageSize: 10, totalPages: 1
   }));
-  await page.route(/\/compras\/9601$/, (route) => json(route, compra));
-  await page.route(/\/compras\/9601\/documentos$/, (route) => json(route, []));
+  await page.route(/^http:\/\/localhost:5005\/compras\/9601$/, (route) => json(route, compra));
+  await page.route(/^http:\/\/localhost:5005\/compras\/9601\/documentos$/, (route) => json(route, []));
 
-  await page.route(/\/ventas(?:\?.*)?$/, (route) => json(route, {
+  await page.route(/^http:\/\/localhost:5005\/ventas(?:\?.*)?$/, (route) => json(route, {
     items: [venta], totalCount: 1, page: 1, pageSize: 10, totalPages: 1
   }));
-  await page.route(/\/ventas\/9701$/, (route) => json(route, venta));
+  await page.route(/^http:\/\/localhost:5005\/ventas\/9701$/, (route) => json(route, venta));
 }
 
 test.describe('Fase 2C.5 — regresiones de variantes e imágenes', () => {
