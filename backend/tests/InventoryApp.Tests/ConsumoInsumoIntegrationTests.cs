@@ -35,27 +35,15 @@ public class ConsumoInsumoIntegrationTests
         await using (var setup = new AppDbContext(options))
         {
             await setup.Database.MigrateAsync();
-
             var producto = new Producto
             {
-                Nombre = "Bolsa administrativa",
-                Marca = "Interno",
-                Modelo = "BOLSA-TEST",
-                TipoInventario = TipoInventario.InsumoAdministrativo,
-                Cantidad = 5,
-                Costo = 10m,
-                Precio = 10m,
-                Activo = true
+                Nombre = "Bolsa administrativa", Marca = "Interno", Modelo = "BOLSA-TEST",
+                TipoInventario = TipoInventario.InsumoAdministrativo, Cantidad = 5, Costo = 10m, Precio = 10m, Activo = true
             };
             producto.Variantes.Add(new ProductoVariante
             {
-                Sku = "INS-TEST-001",
-                Cantidad = 5,
-                Costo = 10m,
-                Precio = 10m,
-                UmbralStockBajo = 1,
-                Activo = true,
-                EsTecnica = true
+                Sku = "INS-TEST-001", Cantidad = 5, Costo = 10m, Precio = 10m,
+                UmbralStockBajo = 1, Activo = true, EsTecnica = true
             });
             setup.Productos.Add(producto);
             await setup.SaveChangesAsync();
@@ -70,6 +58,8 @@ public class ConsumoInsumoIntegrationTests
             currentUser.SetupGet(x => x.UsuarioId).Returns(1);
             currentUser.SetupGet(x => x.NombreUsuario).Returns("insumos.integration");
             var auditoria = new Mock<IAuditoriaService>();
+            var usuarioScope = new Mock<IUsuarioScopeService>();
+            usuarioScope.Setup(x => x.ObtenerActualAsync()).ReturnsAsync(new UsuarioScopeActual(1, true));
 
             var productoRepository = new ProductoRepository(context);
             var varianteRepository = new ProductoVarianteRepository(context);
@@ -78,7 +68,7 @@ public class ConsumoInsumoIntegrationTests
                 new ConsumoInsumoRepository(context),
                 productoRepository,
                 varianteRepository,
-                new MovimientoInventarioRepository(context),
+                new MovimientoInventarioRepository(context, usuarioScope.Object),
                 inventario,
                 new UnitOfWork(context),
                 currentUser.Object,
@@ -104,10 +94,7 @@ public class ConsumoInsumoIntegrationTests
             Assert.Equal(3, productoConfirmado.Cantidad);
             Assert.Equal(3, varianteConfirmada.Cantidad);
             Assert.Equal(0, await context.MovimientosFinancieros.CountAsync());
-            Assert.Single(await context.MovimientosInventario.Where(m =>
-                m.ReferenciaTipo == "ConsumoInsumo" &&
-                m.ReferenciaId == borrador.Id &&
-                m.Causa == CausaMovimientoInventario.ConsumoAdministrativo).ToListAsync());
+            Assert.Single(await context.MovimientosInventario.Where(m => m.ReferenciaTipo == "ConsumoInsumo" && m.ReferenciaId == borrador.Id && m.Causa == CausaMovimientoInventario.ConsumoAdministrativo).ToListAsync());
 
             await Assert.ThrowsAsync<BusinessRuleException>(() => service.ConfirmarAsync(borrador.Id));
 
@@ -121,10 +108,7 @@ public class ConsumoInsumoIntegrationTests
             Assert.Equal(5, productoAnulado.Cantidad);
             Assert.Equal(5, varianteAnulada.Cantidad);
             Assert.Equal(0, await context.MovimientosFinancieros.CountAsync());
-            Assert.Single(await context.MovimientosInventario.Where(m =>
-                m.ReferenciaTipo == "ConsumoInsumo" &&
-                m.ReferenciaId == borrador.Id &&
-                m.Causa == CausaMovimientoInventario.ReversionConsumo).ToListAsync());
+            Assert.Single(await context.MovimientosInventario.Where(m => m.ReferenciaTipo == "ConsumoInsumo" && m.ReferenciaId == borrador.Id && m.Causa == CausaMovimientoInventario.ReversionConsumo).ToListAsync());
         }
         finally
         {
