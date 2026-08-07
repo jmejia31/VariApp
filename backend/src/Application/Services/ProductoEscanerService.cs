@@ -1,4 +1,5 @@
 using InventoryApp.Application.DTOs;
+using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities;
 
@@ -7,6 +8,9 @@ namespace InventoryApp.Application.Services;
 public sealed class ProductoEscanerService : IProductoEscanerService
 {
     private const int LongitudMaximaCodigo = 120;
+    private const int LongitudMinimaBusqueda = 2;
+    private const int LongitudMaximaBusqueda = 100;
+    private const int LimiteMaximoBusqueda = 30;
     private readonly IProductoVarianteRepository _varianteRepository;
 
     public ProductoEscanerService(IProductoVarianteRepository varianteRepository)
@@ -35,21 +39,7 @@ public sealed class ProductoEscanerService : IProductoEscanerService
         }
 
         return ResultadoResolucionProductoEscaner<ProductoEscaneadoVentaDto>.Encontrado(
-            new ProductoEscaneadoVentaDto
-            {
-                ProductoId = variante.ProductoId,
-                ProductoVarianteId = variante.Id,
-                ProductoNombre = variante.Producto.Nombre,
-                Marca = variante.Producto.Marca,
-                Modelo = variante.Producto.Modelo,
-                EsVarianteTecnica = variante.EsTecnica,
-                ColorId = variante.ColorId,
-                ColorNombre = variante.Color?.Nombre,
-                Sku = variante.Sku ?? string.Empty,
-                CodigoBarras = variante.CodigoBarras,
-                CantidadDisponible = variante.Cantidad,
-                Precio = variante.Precio ?? variante.Producto.Precio
-            });
+            MapVenta(variante));
     }
 
     public async Task<ResultadoResolucionProductoEscaner<ProductoEscaneadoCompraDto>> ResolverParaCompraAsync(
@@ -64,24 +54,38 @@ public sealed class ProductoEscanerService : IProductoEscanerService
                 resolucion.Mensaje);
         }
 
-        var variante = resolucion.Dato!;
         return ResultadoResolucionProductoEscaner<ProductoEscaneadoCompraDto>.Encontrado(
-            new ProductoEscaneadoCompraDto
-            {
-                ProductoId = variante.ProductoId,
-                ProductoVarianteId = variante.Id,
-                ProductoNombre = variante.Producto.Nombre,
-                Marca = variante.Producto.Marca,
-                Modelo = variante.Producto.Modelo,
-                EsVarianteTecnica = variante.EsTecnica,
-                ColorId = variante.ColorId,
-                ColorNombre = variante.Color?.Nombre,
-                Sku = variante.Sku ?? string.Empty,
-                CodigoBarras = variante.CodigoBarras,
-                CantidadDisponible = variante.Cantidad,
-                Costo = variante.Costo ?? variante.Producto.Costo,
-                Precio = variante.Precio ?? variante.Producto.Precio
-            });
+            MapCompra(resolucion.Dato!));
+    }
+
+    public async Task<List<ProductoEscaneadoVentaDto>> BuscarParaVentaAsync(
+        string termino,
+        int limite = LimiteMaximoBusqueda,
+        CancellationToken cancellationToken = default)
+    {
+        var terminoNormalizado = NormalizarTerminoBusqueda(termino);
+        var variantes = await _varianteRepository.BuscarPorTerminoAsync(
+            terminoNormalizado,
+            soloConStock: true,
+            Math.Clamp(limite, 1, LimiteMaximoBusqueda),
+            cancellationToken);
+
+        return variantes.Select(MapVenta).ToList();
+    }
+
+    public async Task<List<ProductoEscaneadoCompraDto>> BuscarParaCompraAsync(
+        string termino,
+        int limite = LimiteMaximoBusqueda,
+        CancellationToken cancellationToken = default)
+    {
+        var terminoNormalizado = NormalizarTerminoBusqueda(termino);
+        var variantes = await _varianteRepository.BuscarPorTerminoAsync(
+            terminoNormalizado,
+            soloConStock: false,
+            Math.Clamp(limite, 1, LimiteMaximoBusqueda),
+            cancellationToken);
+
+        return variantes.Select(MapCompra).ToList();
     }
 
     private async Task<ResultadoResolucionProductoEscaner<ProductoVariante>> ResolverVarianteAsync(
@@ -137,4 +141,52 @@ public sealed class ProductoEscanerService : IProductoEscanerService
 
         return ResultadoResolucionProductoEscaner<ProductoVariante>.Encontrado(variante);
     }
+
+    private static string NormalizarTerminoBusqueda(string termino)
+    {
+        var normalizado = termino?.Trim() ?? string.Empty;
+        if (normalizado.Length < LongitudMinimaBusqueda)
+            throw new BusinessRuleException(
+                $"Escribe al menos {LongitudMinimaBusqueda} caracteres para buscar productos.");
+        if (normalizado.Length > LongitudMaximaBusqueda)
+            throw new BusinessRuleException(
+                $"La búsqueda no puede superar {LongitudMaximaBusqueda} caracteres.");
+
+        return normalizado.ToLowerInvariant();
+    }
+
+    private static ProductoEscaneadoVentaDto MapVenta(ProductoVariante variante) =>
+        new()
+        {
+            ProductoId = variante.ProductoId,
+            ProductoVarianteId = variante.Id,
+            ProductoNombre = variante.Producto.Nombre,
+            Marca = variante.Producto.Marca,
+            Modelo = variante.Producto.Modelo,
+            EsVarianteTecnica = variante.EsTecnica,
+            ColorId = variante.ColorId,
+            ColorNombre = variante.Color?.Nombre,
+            Sku = variante.Sku ?? string.Empty,
+            CodigoBarras = variante.CodigoBarras,
+            CantidadDisponible = variante.Cantidad,
+            Precio = variante.Precio ?? variante.Producto.Precio
+        };
+
+    private static ProductoEscaneadoCompraDto MapCompra(ProductoVariante variante) =>
+        new()
+        {
+            ProductoId = variante.ProductoId,
+            ProductoVarianteId = variante.Id,
+            ProductoNombre = variante.Producto.Nombre,
+            Marca = variante.Producto.Marca,
+            Modelo = variante.Producto.Modelo,
+            EsVarianteTecnica = variante.EsTecnica,
+            ColorId = variante.ColorId,
+            ColorNombre = variante.Color?.Nombre,
+            Sku = variante.Sku ?? string.Empty,
+            CodigoBarras = variante.CodigoBarras,
+            CantidadDisponible = variante.Cantidad,
+            Costo = variante.Costo ?? variante.Producto.Costo,
+            Precio = variante.Precio ?? variante.Producto.Precio
+        };
 }
