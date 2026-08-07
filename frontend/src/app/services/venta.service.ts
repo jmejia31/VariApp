@@ -29,6 +29,13 @@ export class VentaService {
     return this.http.get<ApiResponse<ProductoEscaneadoVenta>>(`${this.apiUrl}/productos/por-codigo`, { params });
   }
 
+  buscarProductos(termino: string, limite = 30): Observable<ApiResponse<ProductoEscaneadoVenta[]>> {
+    const params = new HttpParams()
+      .set('termino', termino)
+      .set('limite', Math.max(1, Math.min(limite, 30)));
+    return this.http.get<ApiResponse<ProductoEscaneadoVenta[]>>(`${this.apiUrl}/productos/buscar`, { params });
+  }
+
   create(value: VentaFormValue): Observable<ApiResponse<Venta>> {
     return this.http.post<ApiResponse<Venta>>(this.apiUrl, value);
   }
