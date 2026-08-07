@@ -66,8 +66,72 @@ public class AppDbContext : DbContext
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
+        await ValidarAislamientoComercialVentasAsync(cancellationToken);
         await PrepararValorizacionComprasAsync(cancellationToken);
         return await base.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task ValidarAislamientoComercialVentasAsync(CancellationToken cancellationToken)
+    {
+        var productoIds = ChangeTracker.Entries<VentaDetalle>()
+            .Where(e => e.State is EntityState.Added or EntityState.Modified)
+            .Select(e => e.Entity.ProductoId)
+            .Where(id => id > 0)
+            .ToHashSet();
+
+        var ventasConfirmandose = ChangeTracker.Entries<Venta>()
+            .Where(e => e.State == EntityState.Modified &&
+                        e.OriginalValues.GetValue<EstadoDocumento>(nameof(Venta.Estado)) == EstadoDocumento.Borrador &&
+                        e.Entity.Estado == EstadoDocumento.Confirmada)
+            .Select(e => e.Entity.Id)
+            .Where(id => id > 0)
+            .ToList();
+
+        if (ventasConfirmandose.Count > 0)
+        {
+            var idsPersistidos = await VentaDetalles
+                .AsNoTracking()
+                .Where(d => ventasConfirmandose.Contains(d.VentaId))
+                .Select(d => d.ProductoId)
+                .Distinct()
+                .ToListAsync(cancellationToken);
+            productoIds.UnionWith(idsPersistidos);
+        }
+
+        if (productoIds.Count == 0)
+            return;
+
+        var productosRastreados = ChangeTracker.Entries<Producto>()
+            .Where(e => productoIds.Contains(e.Entity.Id))
+            .Select(e => e.Entity)
+            .ToList();
+
+        var insumoRastreado = productosRastreados
+            .FirstOrDefault(p => p.TipoInventario == TipoInventario.InsumoAdministrativo);
+        if (insumoRastreado is not null)
+        {
+            throw new BusinessRuleException(
+                $"El producto '{insumoRastreado.Nombre}' es un insumo administrativo y no puede venderse ni facturarse.");
+        }
+
+        var idsRastreados = productosRastreados.Select(p => p.Id).ToHashSet();
+        var idsPorConsultar = productoIds.Where(id => !idsRastreados.Contains(id)).ToList();
+        if (idsPorConsultar.Count == 0)
+            return;
+
+        var insumoPersistido = await Productos
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .Where(p => idsPorConsultar.Contains(p.Id) &&
+                        p.TipoInventario == TipoInventario.InsumoAdministrativo)
+            .Select(p => new { p.Id, p.Nombre })
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (insumoPersistido is not null)
+        {
+            throw new BusinessRuleException(
+                $"El producto '{insumoPersistido.Nombre}' es un insumo administrativo y no puede venderse ni facturarse.");
+        }
     }
 
     private async Task PrepararValorizacionComprasAsync(CancellationToken cancellationToken)
