@@ -21,6 +21,14 @@
   </div>
 
   <h2 class="section-title">Productos y variantes</h2>
+  <app-codigo-scanner-input
+    [procesando]="procesandoEscaneo()"
+    [mensaje]="mensajeEscaneo()"
+    [error]="errorEscaneo()"
+    etiqueta="Escanear SKU o código de barras para la compra"
+    (codigoLeido)="procesarCodigoEscaner($event)">
+  </app-codigo-scanner-input>
+
   <div class="detalles" formArrayName="detalles">
     @for (grupo of detalles.controls; track $index; let i = $index) {
       <div class="detalle-row" [formGroupName]="i">
@@ -35,7 +43,7 @@
           <mat-form-field appearance="outline" class="col-variante">
             <mat-label>Color / SKU</mat-label>
             <mat-select formControlName="productoVarianteId" required (selectionChange)="onVarianteSeleccionada(i, $event.value)">
-              @for (v of variantesDisponibles(grupo); track v.id) { <mat-option [value]="v.id">{{ v.colorNombre }} · {{ v.sku }} · stock {{ v.cantidad }} · costo L. {{ v.costo | number:'1.2-2' }}</mat-option> }
+              @for (v of variantesDisponibles(grupo); track v.id) { <mat-option [value]="v.id">{{ v.colorNombre || 'Predeterminada' }} · {{ v.sku }} · stock {{ v.cantidad }} · costo L. {{ v.costo | number:'1.2-2' }}</mat-option> }
             </mat-select>
             <mat-error>Selecciona una variante.</mat-error>
           </mat-form-field>
