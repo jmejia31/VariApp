@@ -61,13 +61,31 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
 
     public async Task<bool> ExisteMovimientoPosteriorAsync(
         int ultimoMovimientoOriginalId,
-        IReadOnlyCollection<int> productoIds)
+        IReadOnlyCollection<InventarioDemanda> demandas)
     {
-        var ids = productoIds.Distinct().ToArray();
-        if (ids.Length == 0) return false;
+        var claves = demandas
+            .Select(d => (d.ProductoId, d.ProductoVarianteId))
+            .Distinct()
+            .OrderBy(x => x.ProductoId)
+            .ThenBy(x => x.ProductoVarianteId ?? 0)
+            .ToArray();
 
-        return await _context.MovimientosInventario
-            .AsNoTracking()
-            .AnyAsync(m => m.Id > ultimoMovimientoOriginalId && ids.Contains(m.ProductoId));
+        foreach (var clave in claves)
+        {
+            var productoId = clave.ProductoId;
+            var varianteId = clave.ProductoVarianteId;
+
+            if (await _context.MovimientosInventario
+                .AsNoTracking()
+                .AnyAsync(m =>
+                    m.Id > ultimoMovimientoOriginalId &&
+                    m.ProductoId == productoId &&
+                    m.ProductoVarianteId == varianteId))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
