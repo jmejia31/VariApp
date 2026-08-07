@@ -45,6 +45,13 @@ public static class CatalogoPermisosBase
             AccionPermiso.EliminarPermanente, AccionPermiso.ConsultarHistorial
         }),
 
+        (ModuloSistema.TiposClientes, new[]
+        {
+            AccionPermiso.Ver, AccionPermiso.Crear, AccionPermiso.Editar,
+            AccionPermiso.Activar, AccionPermiso.Desactivar, AccionPermiso.EliminarLogico,
+            AccionPermiso.ConsultarHistorial
+        }),
+
         (ModuloSistema.Proveedores, new[]
         {
             AccionPermiso.Ver, AccionPermiso.Crear, AccionPermiso.Editar,
@@ -63,7 +70,8 @@ public static class CatalogoPermisosBase
         {
             AccionPermiso.Ver, AccionPermiso.Crear, AccionPermiso.Editar,
             AccionPermiso.Confirmar, AccionPermiso.Anular, AccionPermiso.EliminarLogico,
-            AccionPermiso.Exportar, AccionPermiso.Imprimir, AccionPermiso.ConsultarHistorial
+            AccionPermiso.Exportar, AccionPermiso.Imprimir, AccionPermiso.ConsultarHistorial,
+            AccionPermiso.ExonerarEnvio
         }),
 
         (ModuloSistema.Facturacion, new[]
@@ -79,6 +87,14 @@ public static class CatalogoPermisosBase
 
         (ModuloSistema.Inventario, new[] { AccionPermiso.Ver, AccionPermiso.Exportar }),
         (ModuloSistema.MovimientosInventario, new[] { AccionPermiso.Ver, AccionPermiso.Exportar }),
+
+        (ModuloSistema.InsumosAdministrativos, new[]
+        {
+            AccionPermiso.Ver, AccionPermiso.Crear, AccionPermiso.Editar,
+            AccionPermiso.Activar, AccionPermiso.Desactivar, AccionPermiso.EliminarLogico,
+            AccionPermiso.AjustarStock, AccionPermiso.RegistrarConsumo,
+            AccionPermiso.ConsultarHistorial, AccionPermiso.Exportar
+        }),
 
         (ModuloSistema.CargasMasivas, new[]
         {
@@ -131,6 +147,32 @@ public static class CatalogoPermisosBase
             AccionPermiso.EliminarPermanente, AccionPermiso.Duplicar, AccionPermiso.Aplicar,
             AccionPermiso.ConsultarHistorial
         }),
+    };
+
+    /// Permisos incorporados de forma acumulativa a roles administrativos existentes.
+    /// Si una fila ya existe, su valor Permitido se conserva y nunca se sobrescribe.
+    public static readonly (ModuloSistema Modulo, AccionPermiso Accion)[] NuevosPermisosAdministrador =
+    {
+        (ModuloSistema.TiposClientes, AccionPermiso.Ver),
+        (ModuloSistema.TiposClientes, AccionPermiso.Crear),
+        (ModuloSistema.TiposClientes, AccionPermiso.Editar),
+        (ModuloSistema.TiposClientes, AccionPermiso.Activar),
+        (ModuloSistema.TiposClientes, AccionPermiso.Desactivar),
+        (ModuloSistema.TiposClientes, AccionPermiso.EliminarLogico),
+        (ModuloSistema.TiposClientes, AccionPermiso.ConsultarHistorial),
+
+        (ModuloSistema.InsumosAdministrativos, AccionPermiso.Ver),
+        (ModuloSistema.InsumosAdministrativos, AccionPermiso.Crear),
+        (ModuloSistema.InsumosAdministrativos, AccionPermiso.Editar),
+        (ModuloSistema.InsumosAdministrativos, AccionPermiso.Activar),
+        (ModuloSistema.InsumosAdministrativos, AccionPermiso.Desactivar),
+        (ModuloSistema.InsumosAdministrativos, AccionPermiso.EliminarLogico),
+        (ModuloSistema.InsumosAdministrativos, AccionPermiso.AjustarStock),
+        (ModuloSistema.InsumosAdministrativos, AccionPermiso.RegistrarConsumo),
+        (ModuloSistema.InsumosAdministrativos, AccionPermiso.ConsultarHistorial),
+        (ModuloSistema.InsumosAdministrativos, AccionPermiso.Exportar),
+
+        (ModuloSistema.Ventas, AccionPermiso.ExonerarEnvio)
     };
 
     /// Los roles no administrativos dependen exclusivamente de su matriz persistida.

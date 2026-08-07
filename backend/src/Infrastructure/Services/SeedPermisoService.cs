@@ -41,6 +41,12 @@ public class SeedPermisoService
         if (roles.VendedorCreado && !vendedorTieneMatriz)
             await SeedVendedorInicialAsync(roles.Vendedor);
 
+        // Los permisos agregados por nuevas funciones se incorporan de forma
+        // acumulativa únicamente en roles administrativos. No se modifica ningún
+        // rol no administrativo y una fila existente (incluso Permitido=false)
+        // se respeta como decisión administrativa persistida.
+        await OtorgarNuevosPermisosAdministradoresAsync();
+
         await _context.SaveChangesAsync();
     }
 
@@ -188,6 +194,56 @@ public class SeedPermisoService
                 Accion = accion,
                 Permitido = true
             });
+        }
+    }
+
+    private async Task OtorgarNuevosPermisosAdministradoresAsync()
+    {
+        var administradores = await _context.Roles
+            .IgnoreQueryFilters()
+            .Where(r => r.EsAdministrador && !r.Eliminado)
+            .ToListAsync();
+
+        if (administradores.Count == 0)
+            return;
+
+        var catalogo = await _context.Permisos
+            .IgnoreQueryFilters()
+            .ToDictionaryAsync(p => (p.Modulo, p.Accion));
+
+        var rolIds = administradores.Select(r => r.Id).ToList();
+        var existentes = await _context.RolPermisos
+            .Where(rp => rp.RolId.HasValue && rolIds.Contains(rp.RolId.Value))
+            .ToListAsync();
+
+        foreach (var administrador in administradores)
+        {
+            foreach (var (modulo, accion) in CatalogoPermisosBase.NuevosPermisosAdministrador)
+            {
+                if (!catalogo.TryGetValue((modulo, accion), out var permisoCatalogo))
+                    continue;
+
+                var yaExiste = existentes.Any(rp =>
+                    rp.RolId == administrador.Id &&
+                    (rp.PermisoId == permisoCatalogo.Id ||
+                     (rp.Modulo == modulo && rp.Accion == accion)));
+
+                if (yaExiste)
+                    continue;
+
+                var nuevo = new RolPermiso
+                {
+                    Rol = RolUsuario.Administrador,
+                    RolId = administrador.Id,
+                    PermisoId = permisoCatalogo.Id,
+                    Modulo = modulo,
+                    Accion = accion,
+                    Permitido = true
+                };
+
+                _context.RolPermisos.Add(nuevo);
+                existentes.Add(nuevo);
+            }
         }
     }
 
