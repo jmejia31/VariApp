@@ -9,8 +9,8 @@ export interface ProductoVariante {
   id: number;
   productoId: number;
   productoNombre: string;
-  colorId?: number;
-  colorNombre?: string;
+  colorId: number;
+  colorNombre: string;
   colorCodigoVisual?: string;
   sku: string;
   codigoBarras?: string;
