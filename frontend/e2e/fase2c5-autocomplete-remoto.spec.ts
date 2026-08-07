@@ -148,6 +148,8 @@ test.describe('Fase 2C.5 — autocomplete remoto de productos', () => {
     });
 
     await loginUi(page);
+    catalogoRequests.length = 0;
+    busquedaRequests.length = 0;
     await page.goto('/ventas/nueva');
     await page.waitForTimeout(500);
     expect(catalogoRequests).toHaveLength(0);
