@@ -227,6 +227,8 @@ jobs:
             e2e/phase7-admin-role.spec.ts \
             e2e/phase7-user-isolation.spec.ts \
             e2e/phase7.spec.ts \
+            e2e/fase2c4-escaner-frontend.spec.ts \
+            e2e/fase2c5-autocomplete-remoto.spec.ts \
             --config=playwright.config.ts
 
       - name: Validar mensaje SMTP y PDF adjunto
