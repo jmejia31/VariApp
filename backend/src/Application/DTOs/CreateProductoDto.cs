@@ -1,3 +1,4 @@
+using InventoryApp.Domain.Enums;
 using Microsoft.AspNetCore.Http;
 
 namespace InventoryApp.Application.DTOs;
@@ -29,6 +30,7 @@ public class CreateProductoDto
     public string Modelo { get; set; } = string.Empty;
 
     public string? Descripcion { get; set; }
+    public TipoInventario TipoInventario { get; set; } = TipoInventario.MercaderiaVenta;
     public int Cantidad { get; set; }
     public decimal Costo { get; set; }
     public decimal Precio { get; set; }

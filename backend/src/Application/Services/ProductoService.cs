@@ -56,6 +56,7 @@ public class ProductoService : IProductoService
 
     public async Task<ProductoDto> CreateAsync(CreateProductoDto dto)
     {
+        ValidarTipoInventario(dto.TipoInventario);
         var imagenes = dto.Imagenes ?? new List<Microsoft.AspNetCore.Http.IFormFile>();
         if (imagenes.Count > MaxImagenes)
             throw new BusinessRuleException($"Un producto puede tener máximo {MaxImagenes} fotos.");
@@ -75,6 +76,7 @@ public class ProductoService : IProductoService
             Marca = marcaNombre,
             Modelo = modeloNombre,
             Descripcion = string.IsNullOrWhiteSpace(dto.Descripcion) ? null : dto.Descripcion.Trim(),
+            TipoInventario = dto.TipoInventario,
             Cantidad = dto.Cantidad,
             Costo = dto.Costo,
             Precio = dto.Precio,
@@ -116,6 +118,7 @@ public class ProductoService : IProductoService
             valoresNuevos: new
             {
                 producto.Nombre,
+                producto.TipoInventario,
                 producto.MarcaId,
                 producto.ModeloId,
                 producto.ColorId,
@@ -137,6 +140,7 @@ public class ProductoService : IProductoService
         var valoresAnteriores = new
         {
             producto.Nombre,
+            producto.TipoInventario,
             producto.Marca,
             producto.Modelo,
             producto.ColorId,
@@ -167,6 +171,11 @@ public class ProductoService : IProductoService
                 "El stock no puede modificarse desde el mantenimiento general. Utiliza la operación Ajustar inventario.");
         }
 
+        if (dto.TipoInventario.HasValue)
+        {
+            ValidarTipoInventario(dto.TipoInventario.Value);
+            producto.TipoInventario = dto.TipoInventario.Value;
+        }
         producto.Nombre = dto.Nombre.Trim();
         producto.Marca = marcaNombre;
         producto.Modelo = modeloNombre;
@@ -249,6 +258,7 @@ public class ProductoService : IProductoService
             valoresNuevos: new
             {
                 producto.Nombre,
+                producto.TipoInventario,
                 producto.MarcaId,
                 producto.ModeloId,
                 producto.ColorId,
@@ -374,6 +384,12 @@ public class ProductoService : IProductoService
         }
 
         return (marca, modelo);
+    }
+
+    private static void ValidarTipoInventario(TipoInventario tipoInventario)
+    {
+        if (!Enum.IsDefined(tipoInventario))
+            throw new BusinessRuleException("El tipo de inventario indicado no es válido.");
     }
 
     private static void ValidarImagenes(IEnumerable<Microsoft.AspNetCore.Http.IFormFile> imagenes)

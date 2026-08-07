@@ -1,3 +1,4 @@
+using InventoryApp.Domain.Enums;
 using Microsoft.AspNetCore.Http;
 
 namespace InventoryApp.Application.DTOs;
@@ -8,6 +9,9 @@ public class UpdateProductoDto
     public string Marca { get; set; } = string.Empty;
     public string Modelo { get; set; } = string.Empty;
     public string? Descripcion { get; set; }
+    // Nullable para que clientes antiguos que no envían el campo conserven
+    // la clasificación actual del producto.
+    public TipoInventario? TipoInventario { get; set; }
     public int Cantidad { get; set; }
     public decimal Costo { get; set; }
     public decimal Precio { get; set; }

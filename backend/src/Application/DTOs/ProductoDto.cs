@@ -1,3 +1,5 @@
+using InventoryApp.Domain.Enums;
+
 namespace InventoryApp.Application.DTOs;
 
 public class ProductoDto
@@ -7,6 +9,7 @@ public class ProductoDto
     public string Marca { get; set; } = string.Empty;
     public string Modelo { get; set; } = string.Empty;
     public string? Descripcion { get; set; }
+    public TipoInventario TipoInventario { get; set; }
     public int Cantidad { get; set; }
     public decimal Costo { get; set; }
     public decimal Precio { get; set; }
