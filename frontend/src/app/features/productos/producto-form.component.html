@@ -1,252 +1,87 @@
 <div class="header-row">
-  <a routerLink="/productos" mat-icon-button aria-label="Volver a productos" title="Volver a productos">
-    <mat-icon>arrow_back</mat-icon>
-  </a>
+  <a routerLink="/productos" mat-icon-button aria-label="Volver a productos" title="Volver a productos"><mat-icon>arrow_back</mat-icon></a>
   <div class="header-copy">
     <h1 id="producto-form-title" class="page-title">{{ isEdit() ? 'Editar producto' : 'Nuevo producto' }}</h1>
     <p class="page-subtitle">Registra cada color con su existencia. El stock total se calcula automáticamente.</p>
   </div>
 </div>
-
 @if (isEdit() && auditoria(); as a) {
-  <p class="audit-info">
-    Registrado por <strong>{{ a.creadoPor || '—' }}</strong>
-    @if (a.actualizadoPor) { <span>· Última actualización por <strong>{{ a.actualizadoPor }}</strong></span> }
-  </p>
+  <p class="audit-info">Registrado por <strong>{{ a.creadoPor || '—' }}</strong>@if (a.actualizadoPor) { <span>· Última actualización por <strong>{{ a.actualizadoPor }}</strong></span> }</p>
 }
-
 @if (loading()) {
   <div class="loading" aria-live="polite"><mat-spinner></mat-spinner></div>
 } @else {
-  <form class="card form" [formGroup]="form" (ngSubmit)="submit()" aria-labelledby="producto-form-title">
-    <section class="gallery-section" aria-labelledby="producto-fotos-title">
-      <div class="gallery-header">
-        <div>
-          <h2 id="producto-fotos-title">Fotos del producto</h2>
-          <p>La imagen principal se utiliza en listados y detalles. Puedes cargar hasta {{ maxImagenes }} fotografías.</p>
-        </div>
-        <span class="counter">{{ imagenes().length }}/{{ maxImagenes }} fotos</span>
-      </div>
-
-      <div class="gallery-grid">
-        @for (img of imagenes(); track img.url; let i = $index) {
-          <div class="gallery-item" [class.principal]="img.esPrincipal">
-            <app-producto-imagen
-              variant="gallery"
-              [src]="img.url"
-              [alt]="(img.esPrincipal ? 'Foto principal' : 'Foto adicional ' + (i + 1)) + ' de ' + (form.controls.nombre.value || 'producto')"
-              [fallbackLabel]="'No se pudo mostrar la fotografía ' + (i + 1)"
-              loading="lazy">
-            </app-producto-imagen>
-            @if (img.esPrincipal) { <span class="badge-principal">Principal</span> }
-            <div class="gallery-actions" aria-label="Acciones de fotografía">
-              @if (!img.esPrincipal) {
-                <button class="action-edit" mat-icon-button type="button" title="Marcar como principal" aria-label="Marcar imagen como principal" (click)="marcarComoPrincipal(i)">
-                  <mat-icon>star</mat-icon>
-                </button>
-              }
-              <button class="action-delete" mat-icon-button type="button" title="Quitar fotografía" aria-label="Quitar imagen" (click)="quitarImagen(i)">
-                <mat-icon>delete</mat-icon>
-              </button>
-            </div>
+<form class="card form" [formGroup]="form" (ngSubmit)="submit()" aria-labelledby="producto-form-title">
+  <section class="gallery-section" aria-labelledby="producto-fotos-title">
+    <div class="gallery-header"><div><h2 id="producto-fotos-title">Fotos del producto</h2><p>La imagen principal se utiliza en listados y detalles. Puedes cargar hasta {{ maxImagenes }} fotografías.</p></div><span class="counter">{{ imagenes().length }}/{{ maxImagenes }} fotos</span></div>
+    <div class="gallery-grid">
+      @for (img of imagenes(); track img.url; let i = $index) {
+        <div class="gallery-item" [class.principal]="img.esPrincipal">
+          <app-producto-imagen variant="gallery" [src]="img.url" [alt]="(img.esPrincipal ? 'Foto principal' : 'Foto adicional ' + (i + 1)) + ' de ' + (form.controls.nombre.value || 'producto')" [fallbackLabel]="'No se pudo mostrar la fotografía ' + (i + 1)" loading="lazy"></app-producto-imagen>
+          @if (img.esPrincipal) { <span class="badge-principal">Principal</span> }
+          <div class="gallery-actions" aria-label="Acciones de fotografía">
+            @if (!img.esPrincipal) { <button class="action-edit" mat-icon-button type="button" title="Marcar como principal" aria-label="Marcar imagen como principal" (click)="marcarComoPrincipal(i)"><mat-icon>star</mat-icon></button> }
+            <button class="action-delete" mat-icon-button type="button" title="Quitar fotografía" aria-label="Quitar imagen" (click)="quitarImagen(i)"><mat-icon>delete</mat-icon></button>
           </div>
-        }
-
-        @if (espaciosDisponibles > 0) {
-          <label class="gallery-upload" tabindex="0" (keydown.enter)="$event.preventDefault(); fileInput.click()" (keydown.space)="$event.preventDefault(); fileInput.click()">
-            <mat-icon aria-hidden="true">add_photo_alternate</mat-icon>
-            <strong>Agregar foto</strong>
-            <span>JPG, PNG o WebP</span>
-            <input #fileInput type="file" accept="image/jpeg,image/png,image/webp" multiple hidden (change)="onFilesSelected($event)">
-          </label>
-        }
-      </div>
-    </section>
-
-    <section class="data-section" aria-labelledby="producto-datos-title">
-      <div class="section-heading">
-        <h2 id="producto-datos-title">Información del producto</h2>
-        <p>Los datos generales identifican el artículo. Las existencias se administran por color en la siguiente sección.</p>
-      </div>
-
-      <div class="fields-grid">
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Nombre</mat-label>
-          <input matInput formControlName="nombre" autocomplete="off">
-          @if (form.controls.nombre.hasError('required')) { <mat-error>El nombre es obligatorio.</mat-error> }
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Marca</mat-label>
-          <mat-select formControlName="marcaId">
-            @for (marca of marcas(); track marca.id) { <mat-option [value]="marca.id">{{ marca.nombre }}</mat-option> }
-          </mat-select>
-          <mat-hint>Se administra desde el mantenimiento de Marcas.</mat-hint>
-          @if (form.controls.marcaId.hasError('required')) { <mat-error>Selecciona una marca.</mat-error> }
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Modelo</mat-label>
-          <mat-select formControlName="modeloId" [disabled]="!form.controls.marcaId.value || cargandoModelos()">
-            @for (modelo of modelos(); track modelo.id) { <mat-option [value]="modelo.id">{{ modelo.nombre }}</mat-option> }
-          </mat-select>
-          @if (!form.controls.marcaId.value) { <mat-hint>Selecciona primero una marca.</mat-hint> }
-          @else if (cargandoModelos()) { <mat-hint>Cargando modelos disponibles...</mat-hint> }
-          @if (form.controls.modeloId.hasError('required')) { <mat-error>Selecciona un modelo.</mat-error> }
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Categoría (opcional)</mat-label>
-          <mat-select formControlName="categoriaId">
-            <mat-option [value]="null">Sin categoría</mat-option>
-            @for (c of categorias(); track c.id) { <mat-option [value]="c.id">{{ c.nombre }}</mat-option> }
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Talla o tamaño (opcional)</mat-label>
-          <mat-select formControlName="tallaId">
-            <mat-option [value]="null">Sin talla</mat-option>
-            @for (talla of tallas(); track talla.id) { <mat-option [value]="talla.id">{{ talla.nombre }}</mat-option> }
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
-          <mat-label>Descripción (opcional)</mat-label>
-          <textarea matInput formControlName="descripcion" rows="3"></textarea>
-          <mat-hint>Incluye características útiles para distinguir el producto.</mat-hint>
-        </mat-form-field>
-      </div>
-    </section>
-
-    <section class="variants-section" aria-labelledby="producto-variantes-title">
-      <div class="variants-heading">
-        <div>
-          <h2 id="producto-variantes-title">Colores y existencias</h2>
-          @if (isEdit()) {
-            <p>Las variantes y el stock se administran por separado para impedir sobrescrituras de inventario.</p>
-          } @else {
-            <p>Agrega una fila por cada color disponible. La cantidad inicial alimenta el inventario de esa variante.</p>
-          }
         </div>
-        @if (isEdit() && productoId) {
-          <a mat-stroked-button color="primary" [routerLink]="['/productos', productoId, 'variantes']">
-            <mat-icon>tune</mat-icon>
-            Administrar variantes
-          </a>
-        } @else {
-          <button mat-stroked-button color="primary" type="button" (click)="agregarVariante()">
-            <mat-icon>add</mat-icon>
-            Agregar otro color
-          </button>
-        }
-      </div>
-
-      <div class="stock-summary" aria-live="polite">
-        <div>
-          <span>Colores registrados</span>
-          <strong>{{ variantes.length }}</strong>
-        </div>
-        <div>
-          <span>Stock total calculado</span>
-          <strong>{{ stockTotal }} unidades</strong>
-        </div>
-        <div>
-          <span>Umbral total</span>
-          <strong>{{ umbralTotal }} unidades</strong>
-        </div>
-      </div>
-
-      <div formArrayName="variantes" class="variants-list">
-        @for (variante of variantes.controls; track variante; let i = $index) {
-          <article class="variant-card" [formGroupName]="i">
-            <div class="variant-card-header">
-              <div>
-                <span class="variant-number">Color {{ i + 1 }}</span>
-                <strong>{{ variante.get('colorId')?.value ? 'Variante configurada' : 'Selecciona el color' }}</strong>
-              </div>
-              @if (!isEdit()) {
-                <button mat-icon-button type="button" color="warn" [attr.aria-label]="'Quitar color ' + (i + 1)" title="Quitar color" (click)="quitarVariante(i)">
-                  <mat-icon>delete</mat-icon>
-                </button>
-              }
-            </div>
-
-            <div class="variant-grid">
-              <mat-form-field appearance="outline" subscriptSizing="dynamic">
-                <mat-label>Color</mat-label>
-                <mat-select formControlName="colorId">
-                  @for (color of colores(); track color.id) {
-                    <mat-option [value]="color.id" [disabled]="colorYaSeleccionado(color.id, i)">
-                      <span class="select-swatch" [style.background]="color.codigoVisual || '#64748B'"></span>
-                      {{ color.nombre }}
-                    </mat-option>
-                  }
-                </mat-select>
-                @if (variante.get('colorId')?.hasError('required')) { <mat-error>Selecciona un color.</mat-error> }
-              </mat-form-field>
-
-              <mat-form-field appearance="outline" subscriptSizing="dynamic">
-                <mat-label>Cantidad disponible</mat-label>
-                <input matInput type="number" min="0" formControlName="cantidad" inputmode="numeric">
-                <mat-hint>{{ isEdit() ? 'Solo lectura. Usa Administrar variantes → Ajustar stock.' : 'Cantidad inicial disponible en este color.' }}</mat-hint>
-                @if (variante.get('cantidad')?.hasError('min')) { <mat-error>La cantidad no puede ser negativa.</mat-error> }
-              </mat-form-field>
-
-              <mat-form-field appearance="outline" subscriptSizing="dynamic">
-                <mat-label>SKU (opcional)</mat-label>
-                <input matInput formControlName="sku" maxlength="80" autocomplete="off">
-                <mat-hint>Si lo dejas vacío, el sistema generará uno único.</mat-hint>
-              </mat-form-field>
-
-              <mat-form-field appearance="outline" subscriptSizing="dynamic">
-                <mat-label>Código de barras (opcional)</mat-label>
-                <input matInput formControlName="codigoBarras" maxlength="120" autocomplete="off">
-              </mat-form-field>
-
-              <mat-form-field appearance="outline" subscriptSizing="dynamic">
-                <mat-label>Costo unitario (L.)</mat-label>
-                <input matInput type="number" min="0.01" step="0.01" formControlName="costo" inputmode="decimal">
-                @if (variante.get('costo')?.hasError('min')) { <mat-error>Ingresa un costo mayor que cero.</mat-error> }
-              </mat-form-field>
-
-              <mat-form-field appearance="outline" subscriptSizing="dynamic">
-                <mat-label>Precio de venta (L.)</mat-label>
-                <input matInput type="number" min="0.01" step="0.01" formControlName="precio" inputmode="decimal">
-                @if (variante.get('precio')?.hasError('min')) { <mat-error>Ingresa un precio mayor que cero.</mat-error> }
-              </mat-form-field>
-
-              <mat-form-field appearance="outline" subscriptSizing="dynamic">
-                <mat-label>Umbral de stock bajo</mat-label>
-                <input matInput type="number" min="0" formControlName="umbralStockBajo" inputmode="numeric">
-                <mat-hint>Alerta específica para este color.</mat-hint>
-              </mat-form-field>
-            </div>
-          </article>
-        }
-      </div>
-
-      @if (!isEdit()) {
-        <button class="add-color-bottom" mat-stroked-button color="primary" type="button" (click)="agregarVariante()">
-          <mat-icon>add_circle</mat-icon>
-          Agregar otro color
-        </button>
       }
-    </section>
-
-    @if (errorMessage()) { <p class="message error" role="alert">{{ errorMessage() }}</p> }
-
-    <div class="form-actions">
-      <a routerLink="/productos" mat-button type="button">Cancelar</a>
-      <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving() || variantes.length === 0">
-        @if (saving()) { <mat-spinner diameter="20"></mat-spinner><span>Guardando producto y colores...</span> }
-        @else {
-          <ng-container>
-            <mat-icon>save</mat-icon>
-            <span>Guardar producto</span>
-          </ng-container>
-        }
-      </button>
+      @if (espaciosDisponibles > 0) {
+        <label class="gallery-upload" tabindex="0" (keydown.enter)="$event.preventDefault(); fileInput.click()" (keydown.space)="$event.preventDefault(); fileInput.click()">
+          <mat-icon aria-hidden="true">add_photo_alternate</mat-icon><strong>Agregar foto</strong><span>JPG, PNG o WebP</span>
+          <input #fileInput type="file" accept="image/jpeg,image/png,image/webp" multiple hidden (change)="onFilesSelected($event)">
+        </label>
+      }
     </div>
-  </form>
+  </section>
+
+  <section class="data-section" aria-labelledby="producto-datos-title">
+    <div class="section-heading"><h2 id="producto-datos-title">Información del producto</h2><p>Clasifica el artículo como mercadería vendible o como insumo físico de uso interno.</p></div>
+    <div class="fields-grid">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Nombre</mat-label><input matInput formControlName="nombre" autocomplete="off">
+        @if (form.controls.nombre.hasError('required')) { <mat-error>El nombre es obligatorio.</mat-error> }
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Tipo de inventario</mat-label>
+        <mat-select formControlName="tipoInventario">
+          @for (tipo of tiposInventario; track tipo.value) { <mat-option [value]="tipo.value">{{ tipo.label }}</mat-option> }
+        </mat-select>
+        @if (form.controls.tipoInventario.value === TipoInventario.InsumoAdministrativo) {
+          <mat-hint>No aparecerá en ventas ni facturación; se controla mediante consumos internos.</mat-hint>
+        } @else { <mat-hint>Disponible para ventas y facturación comercial.</mat-hint> }
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-label>Marca</mat-label><mat-select formControlName="marcaId">@for (marca of marcas(); track marca.id) { <mat-option [value]="marca.id">{{ marca.nombre }}</mat-option> }</mat-select><mat-hint>Se administra desde el mantenimiento de Marcas.</mat-hint>@if (form.controls.marcaId.hasError('required')) { <mat-error>Selecciona una marca.</mat-error> }</mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-label>Modelo</mat-label><mat-select formControlName="modeloId" [disabled]="!form.controls.marcaId.value || cargandoModelos()">@for (modelo of modelos(); track modelo.id) { <mat-option [value]="modelo.id">{{ modelo.nombre }}</mat-option> }</mat-select>@if (!form.controls.marcaId.value) { <mat-hint>Selecciona primero una marca.</mat-hint> } @else if (cargandoModelos()) { <mat-hint>Cargando modelos disponibles...</mat-hint> }@if (form.controls.modeloId.hasError('required')) { <mat-error>Selecciona un modelo.</mat-error> }</mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-label>Categoría (opcional)</mat-label><mat-select formControlName="categoriaId"><mat-option [value]="null">Sin categoría</mat-option>@for (c of categorias(); track c.id) { <mat-option [value]="c.id">{{ c.nombre }}</mat-option> }</mat-select></mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-label>Talla o tamaño (opcional)</mat-label><mat-select formControlName="tallaId"><mat-option [value]="null">Sin talla</mat-option>@for (talla of tallas(); track talla.id) { <mat-option [value]="talla.id">{{ talla.nombre }}</mat-option> }</mat-select></mat-form-field>
+      <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic"><mat-label>Descripción (opcional)</mat-label><textarea matInput formControlName="descripcion" rows="3"></textarea><mat-hint>Incluye características útiles para distinguir el producto.</mat-hint></mat-form-field>
+    </div>
+  </section>
+
+  <section class="variants-section" aria-labelledby="producto-variantes-title">
+    <div class="variants-heading"><div><h2 id="producto-variantes-title">Colores y existencias</h2>@if (isEdit()) { <p>Las variantes y el stock se administran por separado para impedir sobrescrituras de inventario.</p> } @else { <p>Agrega una fila por cada color disponible. La cantidad inicial alimenta el inventario de esa variante.</p> }</div>
+      @if (isEdit() && productoId) { <a mat-stroked-button color="primary" [routerLink]="['/productos', productoId, 'variantes']"><mat-icon>tune</mat-icon>Administrar variantes</a> } @else { <button mat-stroked-button color="primary" type="button" (click)="agregarVariante()"><mat-icon>add</mat-icon>Agregar otro color</button> }
+    </div>
+    <div class="stock-summary" aria-live="polite"><div><span>Colores registrados</span><strong>{{ variantes.length }}</strong></div><div><span>Stock total calculado</span><strong>{{ stockTotal }} unidades</strong></div><div><span>Umbral total</span><strong>{{ umbralTotal }} unidades</strong></div></div>
+    <div formArrayName="variantes" class="variants-list">
+      @for (variante of variantes.controls; track variante; let i = $index) {
+        <article class="variant-card" [formGroupName]="i">
+          <div class="variant-card-header"><div><span class="variant-number">Color {{ i + 1 }}</span><strong>{{ variante.get('colorId')?.value ? 'Variante configurada' : 'Selecciona el color' }}</strong></div>@if (!isEdit()) { <button mat-icon-button type="button" color="warn" [attr.aria-label]="'Quitar color ' + (i + 1)" title="Quitar color" (click)="quitarVariante(i)"><mat-icon>delete</mat-icon></button> }</div>
+          <div class="variant-grid">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-label>Color</mat-label><mat-select formControlName="colorId">@for (color of colores(); track color.id) { <mat-option [value]="color.id" [disabled]="colorYaSeleccionado(color.id, i)"><span class="select-swatch" [style.background]="color.codigoVisual || '#64748B'"></span>{{ color.nombre }}</mat-option> }</mat-select>@if (variante.get('colorId')?.hasError('required')) { <mat-error>Selecciona un color.</mat-error> }</mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-label>Cantidad disponible</mat-label><input matInput type="number" min="0" formControlName="cantidad" inputmode="numeric"><mat-hint>{{ isEdit() ? 'Solo lectura. Usa Administrar variantes → Ajustar stock.' : 'Cantidad inicial disponible en este color.' }}</mat-hint>@if (variante.get('cantidad')?.hasError('min')) { <mat-error>La cantidad no puede ser negativa.</mat-error> }</mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-label>SKU (opcional)</mat-label><input matInput formControlName="sku" maxlength="80" autocomplete="off"><mat-hint>Si lo dejas vacío, el sistema generará uno único.</mat-hint></mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-label>Código de barras (opcional)</mat-label><input matInput formControlName="codigoBarras" maxlength="120" autocomplete="off"></mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-label>Costo unitario (L.)</mat-label><input matInput type="number" min="0.01" step="0.01" formControlName="costo" inputmode="decimal">@if (variante.get('costo')?.hasError('min')) { <mat-error>Ingresa un costo mayor que cero.</mat-error> }</mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-label>Precio de venta (L.)</mat-label><input matInput type="number" min="0.01" step="0.01" formControlName="precio" inputmode="decimal">@if (variante.get('precio')?.hasError('min')) { <mat-error>Ingresa un precio mayor que cero.</mat-error> }</mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-label>Umbral de stock bajo</mat-label><input matInput type="number" min="0" formControlName="umbralStockBajo" inputmode="numeric"><mat-hint>Alerta específica para este color.</mat-hint></mat-form-field>
+          </div>
+        </article>
+      }
+    </div>
+    @if (!isEdit()) { <button class="add-color-bottom" mat-stroked-button color="primary" type="button" (click)="agregarVariante()"><mat-icon>add_circle</mat-icon>Agregar otro color</button> }
+  </section>
+  @if (errorMessage()) { <p class="message error" role="alert">{{ errorMessage() }}</p> }
+  <div class="form-actions"><a routerLink="/productos" mat-button type="button">Cancelar</a><button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving() || variantes.length === 0">@if (saving()) { <mat-spinner diameter="20"></mat-spinner><span>Guardando producto y colores...</span> } @else { <ng-container><mat-icon>save</mat-icon><span>Guardar producto</span></ng-container> }</button></div>
+</form>
 }
