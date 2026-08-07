@@ -30,7 +30,19 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - name: Aplicar cierre funcional 2C.4
-        run: python3 scripts/chatgpt_fase2c4_complete.py
+        run: |
+          python3 scripts/chatgpt_fase2c4_complete.py
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('frontend/src/app/shared/codigo-scanner-dialog/codigo-scanner-dialog.component.ts')
+          text = path.read_text(encoding='utf-8')
+          expected = "{\n        formatsToSupport: ["
+          replacement = "{\n        verbose: false,\n        formatsToSupport: ["
+          count = text.count(expected)
+          if count != 2:
+              raise SystemExit(f'Se esperaban 2 configuraciones html5-qrcode y se encontraron {count}.')
+          path.write_text(text.replace(expected, replacement), encoding='utf-8')
+          PY
 
       - name: Instalar dependencias exactas
         working-directory: frontend
