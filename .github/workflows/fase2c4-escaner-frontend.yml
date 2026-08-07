@@ -1,4 +1,5 @@
 name: Fase 2C.4 - Frontend del escáner
+# Recertificación sobre el HEAD vigente de Desarrollo tras correcciones transversales de backend.
 
 on:
   push:
