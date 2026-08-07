@@ -219,7 +219,6 @@ public class AppDbContext : DbContext
     {
         if (!detalle.StockVarianteAnteriorSnapshot.HasValue ||
             !detalle.StockVarianteNuevoSnapshot.HasValue ||
-            !detalle.CostoVarianteAnteriorSnapshot.HasValue ||
             !detalle.CostoVarianteNuevoSnapshot.HasValue)
         {
             throw new BusinessRuleException(
