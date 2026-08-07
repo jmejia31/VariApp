@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { ApiResponse, PagedRequest, PagedResult } from '../core/models/api-response.model';
+import { ProductoEscaneadoCompra } from '../core/models/producto.model';
 import { Compra, CompraDocumento, CompraFormValue, ResultadoCalculo } from '../core/models/compra.model';
 
 interface DetalleCalculoInput {
@@ -27,6 +28,11 @@ export class CompraService {
 
   getById(id: number): Observable<ApiResponse<Compra>> {
     return this.http.get<ApiResponse<Compra>>(`${this.apiUrl}/${id}`);
+  }
+
+  buscarProductoPorCodigo(codigo: string): Observable<ApiResponse<ProductoEscaneadoCompra>> {
+    const params = new HttpParams().set('codigo', codigo);
+    return this.http.get<ApiResponse<ProductoEscaneadoCompra>>(`${this.apiUrl}/productos/por-codigo`, { params });
   }
 
   create(value: CompraFormValue): Observable<ApiResponse<Compra>> {
