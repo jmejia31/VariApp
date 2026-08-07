@@ -118,7 +118,6 @@ export class VentaFormComponent implements OnInit {
 
     this.buscadorProducto.valueChanges.pipe(
       debounceTime(300),
-      distinctUntilChanged(),
       switchMap((valor) => {
         const termino = typeof valor === 'string' ? valor.trim() : '';
         this.mensajeBusquedaProducto.set(null);
@@ -293,6 +292,7 @@ export class VentaFormComponent implements OnInit {
       actuales[indice] = {
         ...producto,
         cantidad: variantes.reduce((total, actual) => total + actual.cantidad, 0),
+        imagenPrincipalUrl: item.imagenMiniaturaUrl ?? producto.imagenPrincipalUrl,
         variantes,
         totalVariantes: variantes.length
       };
@@ -312,6 +312,7 @@ export class VentaFormComponent implements OnInit {
         estaAgotado: item.cantidadDisponible <= 0,
         estadoInventario: item.cantidadDisponible > 0 ? 'Disponible' : 'Agotado',
         activo: true,
+        imagenPrincipalUrl: item.imagenMiniaturaUrl ?? undefined,
         imagenes: [],
         totalImagenes: 0,
         variantes: [variante],
