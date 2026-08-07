@@ -97,7 +97,6 @@ export class CompraFormComponent implements OnInit {
 
     this.buscadorProducto.valueChanges.pipe(
       debounceTime(300),
-      distinctUntilChanged(),
       switchMap((valor) => {
         const termino = typeof valor === 'string' ? valor.trim() : '';
         this.mensajeBusquedaProducto.set(null);
@@ -249,6 +248,7 @@ export class CompraFormComponent implements OnInit {
         cantidad: variantes.reduce((total, actual) => total + actual.cantidad, 0),
         costo: item.costo,
         precio: item.precio,
+        imagenPrincipalUrl: item.imagenMiniaturaUrl ?? producto.imagenPrincipalUrl,
         variantes,
         totalVariantes: variantes.length
       };
@@ -268,6 +268,7 @@ export class CompraFormComponent implements OnInit {
         estaAgotado: item.cantidadDisponible <= 0,
         estadoInventario: item.cantidadDisponible > 0 ? 'Disponible' : 'Agotado',
         activo: true,
+        imagenPrincipalUrl: item.imagenMiniaturaUrl ?? undefined,
         imagenes: [],
         totalImagenes: 0,
         variantes: [variante],
