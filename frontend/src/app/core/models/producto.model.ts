@@ -9,8 +9,8 @@ export interface ProductoVariante {
   id: number;
   productoId: number;
   productoNombre: string;
-  colorId: number;
-  colorNombre: string;
+  colorId?: number;
+  colorNombre?: string;
   colorCodigoVisual?: string;
   sku: string;
   codigoBarras?: string;
@@ -77,6 +77,27 @@ export interface Producto {
   fechaActualizacion: string;
 }
 
+export interface ProductoEscaneadoBase {
+  productoId: number;
+  productoVarianteId: number;
+  productoNombre: string;
+  marca: string;
+  modelo: string;
+  esVarianteTecnica: boolean;
+  colorId?: number | null;
+  colorNombre?: string | null;
+  sku: string;
+  codigoBarras?: string | null;
+  cantidadDisponible: number;
+  precio: number;
+}
+
+export interface ProductoEscaneadoVenta extends ProductoEscaneadoBase {}
+
+export interface ProductoEscaneadoCompra extends ProductoEscaneadoBase {
+  costo: number;
+}
+
 export interface ProductoFormValue {
   nombre: string;
   marca: string;
@@ -96,7 +117,6 @@ export interface ProductoFormValue {
   imagenesAEliminarIds?: number[];
   imagenPrincipalId?: number | null;
 }
-
 
 export interface AjusteStockRequest {
   cantidadActualEsperada: number;
