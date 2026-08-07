@@ -15,6 +15,11 @@ public interface IProductoVarianteRepository
         string skuNormalizado,
         string codigoBarrasNormalizado,
         CancellationToken cancellationToken = default);
+    Task<List<ProductoVariante>> BuscarPorTerminoAsync(
+        string terminoNormalizado,
+        bool soloConStock,
+        int limite,
+        CancellationToken cancellationToken = default);
     Task<ProductoVariante?> GetByProductoColorAsync(int productoId, int colorId);
     Task AddAsync(ProductoVariante variante);
     void Update(ProductoVariante variante);
