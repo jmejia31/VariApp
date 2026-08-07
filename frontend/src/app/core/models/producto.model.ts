@@ -49,7 +49,7 @@ export interface Producto {
   marca: string;
   modelo: string;
   descripcion?: string;
-  tipoInventario: TipoInventario;
+  tipoInventario?: TipoInventario;
   cantidad: number;
   costo: number;
   precio: number;
