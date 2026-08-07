@@ -35,6 +35,13 @@ export class CompraService {
     return this.http.get<ApiResponse<ProductoEscaneadoCompra>>(`${this.apiUrl}/productos/por-codigo`, { params });
   }
 
+  buscarProductos(termino: string, limite = 30): Observable<ApiResponse<ProductoEscaneadoCompra[]>> {
+    const params = new HttpParams()
+      .set('termino', termino)
+      .set('limite', Math.max(1, Math.min(limite, 30)));
+    return this.http.get<ApiResponse<ProductoEscaneadoCompra[]>>(`${this.apiUrl}/productos/buscar`, { params });
+  }
+
   create(value: CompraFormValue): Observable<ApiResponse<Compra>> {
     return this.http.post<ApiResponse<Compra>>(this.apiUrl, value);
   }
