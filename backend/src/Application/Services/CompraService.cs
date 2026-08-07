@@ -47,47 +47,39 @@ public class CompraService : ICompraService
         _auditoria = auditoria;
     }
 
-    public async Task<PagedResult<CompraDto>> GetPagedAsync(PagedRequest request)
-    {
-        var (items, total) = await _compraRepository.GetPagedAsync(request);
-        return new PagedResult<CompraDto>
-        {
-            Items = items.Select(ToDto).ToList(),
-            TotalCount = total,
-            Page = request.Page,
-            PageSize = request.PageSize
-        };
-    }
-
     public async Task<CompraDto?> GetByIdAsync(int id)
     {
         var compra = await _compraRepository.GetByIdAsync(id);
         return compra is null ? null : ToDto(compra);
     }
 
-    public async Task<ResultadoCalculoDto> CalcularAsync(CalcularCompraDto dto)
+    public async Task<PagedResult<CompraDto>> GetPagedAsync(PagedRequest request)
     {
-        var inputs = await ArmarInputsCalculoAsync(dto.Detalles);
-        return await _calculoService.CalcularCompraAsync(inputs, dto.ProveedorId);
+        var (items, total) = await _compraRepository.GetPagedAsync(request);
+        return new PagedResult<CompraDto>
+        {
+            Items = items.Select(ToDto).ToList(),
+            Page = request.Page,
+            PageSize = request.PageSize,
+            TotalCount = total
+        };
     }
 
     public async Task<CompraDto> CreateAsync(CreateCompraDto dto)
     {
         var compra = new Compra
         {
-            NumeroCompra = await _compraRepository.GenerarNumeroAsync(),
-            Fecha = DateTime.UtcNow,
-            ProveedorNombre = dto.ProveedorNombre.Trim(),
+            NumeroCompra = await GenerarNumeroAsync(),
+            ProveedorNombre = dto.ProveedorNombre,
             ProveedorTelefono = dto.ProveedorTelefono,
             ProveedorDocumento = dto.ProveedorDocumento,
             DocumentoReferencia = dto.DocumentoReferencia,
-            MetodoPago = ParseMetodoPago(dto.MetodoPago),
-            EstadoPago = ParseEstadoPago(dto.EstadoPago),
+            MetodoPago = ParseEnum(dto.MetodoPago, MetodoPago.Efectivo),
+            EstadoPago = ParseEnum(dto.EstadoPago, EstadoPago.Pendiente),
             Estado = EstadoDocumento.Borrador,
             Notas = dto.Notas,
             CreadoPorUsuarioId = _currentUser.UsuarioId,
-            CreadoPorNombreUsuario = _currentUser.NombreUsuario,
-            FechaCreacion = DateTime.UtcNow
+            CreadoPorNombreUsuario = _currentUser.NombreUsuario
         };
 
         await VincularProveedorAsync(compra, dto);
@@ -96,7 +88,23 @@ public class CompraService : ICompraService
 
         await _compraRepository.AddAsync(compra);
         await _compraRepository.SaveChangesAsync();
-        await _auditoria.RegistrarAsync(ModuloSistema.Compras, AccionPermiso.Crear, $"Compra creada: {compra.NumeroCompra}.", compra.Id);
+
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Compras,
+            AccionPermiso.Crear,
+            $"Compra creada: {compra.NumeroCompra}.",
+            compra.Id,
+            entidad: "Compra",
+            valoresNuevos: new
+            {
+                compra.NumeroCompra,
+                compra.ProveedorNombre,
+                compra.Subtotal,
+                compra.Impuesto,
+                compra.Total,
+                Detalles = compra.Detalles.Count
+            });
+
         return ToDto(compra);
     }
 
@@ -119,12 +127,12 @@ public class CompraService : ICompraService
             Detalles = compra.Detalles.Count
         };
 
-        compra.ProveedorNombre = dto.ProveedorNombre.Trim();
+        compra.ProveedorNombre = dto.ProveedorNombre;
         compra.ProveedorTelefono = dto.ProveedorTelefono;
         compra.ProveedorDocumento = dto.ProveedorDocumento;
         compra.DocumentoReferencia = dto.DocumentoReferencia;
-        compra.MetodoPago = ParseMetodoPago(dto.MetodoPago);
-        compra.EstadoPago = ParseEstadoPago(dto.EstadoPago);
+        compra.MetodoPago = ParseEnum(dto.MetodoPago, MetodoPago.Efectivo);
+        compra.EstadoPago = ParseEnum(dto.EstadoPago, EstadoPago.Pendiente);
         compra.Notas = dto.Notas;
         compra.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
         compra.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
@@ -304,6 +312,7 @@ public class CompraService : ICompraService
                 .ToList();
             var inventario = await _inventarioConcurrency.BloquearYValidarInventarioAsync(demanda, esDeduccion: true);
 
+            var productoIds = inventario.Productos.Keys.OrderBy(x => x).ToArray();
             var ultimoMovimientoOriginalId = await _movimientoInventarioRepository
                 .GetUltimoMovimientoOriginalCompraIdAsync(compra.Id)
                 ?? throw new BusinessRuleException(
@@ -311,7 +320,7 @@ public class CompraService : ICompraService
 
             if (await _movimientoInventarioRepository.ExisteMovimientoPosteriorAsync(
                     ultimoMovimientoOriginalId,
-                    inventario.Demandas))
+                    productoIds))
             {
                 throw new BusinessRuleException(
                     "No se puede anular la compra porque existen movimientos posteriores de inventario sobre sus productos o variantes.");
@@ -420,170 +429,260 @@ public class CompraService : ICompraService
         _compraRepository.Update(compra);
         var eliminado = await _compraRepository.SaveChangesAsync();
         if (eliminado)
-            await _auditoria.RegistrarAsync(ModuloSistema.Compras, AccionPermiso.Eliminar, $"Borrador de compra eliminado: {compra.NumeroCompra}.", compra.Id);
+        {
+            await _auditoria.RegistrarAsync(
+                ModuloSistema.Compras,
+                AccionPermiso.EliminarLogico,
+                $"Borrador de compra eliminado lógicamente: {compra.NumeroCompra}.",
+                compra.Id,
+                entidad: "Compra",
+                valoresAnteriores: new
+                {
+                    compra.NumeroCompra,
+                    compra.ProveedorNombre,
+                    compra.Total,
+                    Detalles = compra.Detalles.Count
+                },
+                valoresNuevos: new
+                {
+                    compra.Eliminado,
+                    compra.FechaEliminacion
+                });
+        }
+
         return eliminado;
     }
 
-    private async Task VincularProveedorAsync(Compra compra, CompraBaseDto dto)
+    public async Task<ResultadoCalculoDto> CalcularVistaPreviaAsync(CalcularCompraRequest request)
     {
+        if (request.Detalles.Count == 0)
+            throw new BusinessRuleException("La compra debe tener al menos un producto.");
+
+        var entradas = new List<DetalleCalculoInput>();
+        foreach (var detalle in request.Detalles)
+        {
+            if (detalle.Cantidad <= 0 || detalle.PrecioUnitario <= 0)
+                throw new BusinessRuleException("La cantidad y el costo unitario deben ser mayores a cero.");
+
+            var producto = await ObtenerProductoActivoAsync(detalle.ProductoId);
+            entradas.Add(new DetalleCalculoInput
+            {
+                ProductoId = producto.Id,
+                CategoriaId = producto.CategoriaId,
+                Cantidad = detalle.Cantidad,
+                PrecioUnitario = detalle.PrecioUnitario
+            });
+        }
+
+        return await _calculoService.CalcularCompraAsync(entradas, request.ProveedorId);
+    }
+
+    private async Task VincularProveedorAsync(Compra compra, CreateCompraDto dto)
+    {
+        Proveedor? proveedor = null;
+
         if (dto.ProveedorId.HasValue)
         {
-            var proveedor = await _proveedorRepository.GetByIdAsync(dto.ProveedorId.Value)
+            proveedor = await _proveedorRepository.GetByIdAsync(dto.ProveedorId.Value)
                 ?? throw new BusinessRuleException("El proveedor seleccionado no existe.");
-            compra.ProveedorId = proveedor.Id;
-            compra.ProveedorNombre = proveedor.Nombre;
-            compra.ProveedorTelefono = proveedor.Telefono;
-            compra.ProveedorDocumento = proveedor.Documento;
+            if (!proveedor.Activo)
+                throw new BusinessRuleException("El proveedor seleccionado está inactivo.");
+        }
+        else if (DebeGestionarProveedor(dto.ProveedorNombre, dto.ProveedorDocumento, dto.ProveedorTelefono))
+        {
+            proveedor = await _proveedorRepository.BuscarCoincidenciaActivaAsync(
+                dto.ProveedorDocumento,
+                null,
+                dto.ProveedorTelefono,
+                dto.ProveedorNombre);
+
+            if (proveedor is null)
+            {
+                proveedor = new Proveedor
+                {
+                    Nombre = dto.ProveedorNombre.Trim(),
+                    Telefono = dto.ProveedorTelefono,
+                    Documento = dto.ProveedorDocumento,
+                    Activo = true,
+                    CreadoPorUsuarioId = _currentUser.UsuarioId,
+                    CreadoPorNombreUsuario = _currentUser.NombreUsuario
+                };
+                await _proveedorRepository.AddAsync(proveedor);
+            }
+        }
+
+        if (proveedor is null)
+        {
+            compra.ProveedorId = null;
+            compra.Proveedor = null;
             return;
         }
 
-        compra.ProveedorId = null;
+        compra.Proveedor = proveedor;
+        compra.ProveedorId = proveedor.Id == 0 ? null : proveedor.Id;
+        compra.ProveedorNombre = proveedor.Nombre;
+        compra.ProveedorTelefono = proveedor.Telefono;
+        compra.ProveedorDocumento = proveedor.Documento;
     }
 
-    private async Task ArmarDetallesAsync(Compra compra, IEnumerable<CompraDetalleInputDto> detallesDto)
-    {
-        foreach (var dto in detallesDto)
-        {
-            var producto = await _productoRepository.GetByIdAsync(dto.ProductoId)
-                ?? throw new BusinessRuleException($"Producto ID {dto.ProductoId} no existe.");
-            if (!producto.Activo)
-                throw new BusinessRuleException($"Producto '{producto.Nombre}' está inactivo.");
+    private static bool DebeGestionarProveedor(string? nombre, string? documento, string? telefono) =>
+        !string.IsNullOrWhiteSpace(documento)
+        || !string.IsNullOrWhiteSpace(telefono)
+        || !string.IsNullOrWhiteSpace(nombre);
 
+    private async Task ArmarDetallesAsync(Compra compra, List<CompraDetalleInputDto> detallesInput)
+    {
+        if (detallesInput.Count == 0)
+            throw new BusinessRuleException("La compra debe tener al menos un producto.");
+
+        foreach (var input in detallesInput)
+        {
+            if (input.Cantidad <= 0)
+                throw new BusinessRuleException("La cantidad de cada producto debe ser mayor a 0.");
+            if (input.CostoUnitario <= 0)
+                throw new BusinessRuleException("El costo unitario de cada producto debe ser mayor a 0.");
+
+            var producto = await ObtenerProductoActivoAsync(input.ProductoId);
             ProductoVariante? variante = null;
-            if (dto.ProductoVarianteId.HasValue)
+            if (input.ProductoVarianteId.HasValue)
             {
-                variante = await _productoVarianteRepository.GetByIdAsync(dto.ProductoVarianteId.Value)
-                    ?? throw new BusinessRuleException("La variante seleccionada no existe o fue eliminada.");
-                if (variante.ProductoId != producto.Id)
-                    throw new BusinessRuleException("La variante no pertenece al producto seleccionado.");
-                if (!variante.Activo)
-                    throw new BusinessRuleException("La variante seleccionada está inactiva.");
+                variante = await ObtenerVarianteAsync(input.ProductoVarianteId.Value, producto.Id, exigirActiva: true);
             }
-            else
+            else if (producto.Variantes.Any(v => v.Activo && !v.Eliminado))
             {
-                var variantes = await _productoVarianteRepository.GetByProductoIdAsync(producto.Id, incluirInactivas: true);
-                variante = variantes.SingleOrDefault(v => v.EsTecnica && !v.Eliminado)
-                    ?? throw new BusinessRuleException(
-                        $"El producto '{producto.Nombre}' no tiene una variante técnica disponible. Complete la migración de variante antes de comprarlo.");
+                throw new BusinessRuleException($"Debes seleccionar una variante para el producto '{producto.Nombre}'.");
             }
 
             compra.Detalles.Add(new CompraDetalle
             {
                 ProductoId = producto.Id,
-                ProductoVarianteId = variante.Id,
-                Cantidad = dto.Cantidad,
-                CostoUnitario = dto.CostoUnitario,
-                Subtotal = dto.Cantidad * dto.CostoUnitario,
+                ProductoVarianteId = variante?.Id,
+                Cantidad = input.Cantidad,
+                CostoUnitario = input.CostoUnitario,
+                Subtotal = input.Cantidad * input.CostoUnitario,
                 ProductoNombreSnapshot = producto.Nombre,
                 ProductoMarcaSnapshot = producto.Marca,
                 ProductoModeloSnapshot = producto.Modelo,
-                ProductoColorSnapshot = variante.Color?.Nombre,
-                ProductoSkuSnapshot = variante.Sku
+                ProductoColorSnapshot = variante?.Color?.Nombre,
+                ProductoSkuSnapshot = variante?.Sku
             });
         }
     }
 
     private async Task CalcularTotalesAsync(Compra compra)
     {
-        var inputs = await ArmarInputsCalculoAsync(compra.Detalles.Select(d => new CompraDetalleInputDto
+        var entradas = new List<DetalleCalculoInput>();
+        foreach (var detalle in compra.Detalles)
         {
-            ProductoId = d.ProductoId,
-            ProductoVarianteId = d.ProductoVarianteId,
-            Cantidad = d.Cantidad,
-            CostoUnitario = d.CostoUnitario
-        }));
-        var resultado = await _calculoService.CalcularCompraAsync(inputs, compra.ProveedorId);
+            var producto = await ObtenerProductoActivoAsync(detalle.ProductoId);
+            entradas.Add(new DetalleCalculoInput
+            {
+                ProductoId = producto.Id,
+                CategoriaId = producto.CategoriaId,
+                Cantidad = detalle.Cantidad,
+                PrecioUnitario = detalle.CostoUnitario
+            });
+        }
 
+        var resultado = await _calculoService.CalcularCompraAsync(entradas, compra.ProveedorId);
         compra.Subtotal = resultado.Subtotal;
         compra.Descuento = resultado.TotalDescuento;
         compra.Impuesto = resultado.TotalImpuesto;
         compra.Total = resultado.Total;
-        compra.ImpuestosAplicados = resultado.ImpuestosAplicados.Select(i => new CompraImpuesto
+        compra.ImpuestosAplicados = resultado.ImpuestosAplicados.Select(impuesto => new CompraImpuesto
         {
-            ImpuestoId = i.ImpuestoId,
-            ImpuestoNombreSnapshot = i.Nombre,
-            ImpuestoCodigoSnapshot = i.Codigo,
-            TasaSnapshot = i.Tasa,
-            BaseImponible = i.BaseImponible,
-            MontoAplicado = i.Monto,
-            IncluidoEnPrecioSnapshot = i.IncluidoEnPrecio
+            ImpuestoId = impuesto.ImpuestoId,
+            ImpuestoNombreSnapshot = impuesto.Nombre,
+            ImpuestoCodigoSnapshot = impuesto.Codigo,
+            TasaSnapshot = impuesto.Tasa,
+            BaseImponible = impuesto.BaseImponible,
+            MontoAplicado = impuesto.Monto,
+            IncluidoEnPrecioSnapshot = impuesto.IncluidoEnPrecio
         }).ToList();
+
+        if (compra.Total < 0)
+            throw new BusinessRuleException("El total de la compra no puede ser negativo.");
     }
 
-    private async Task<List<DetalleCalculoInput>> ArmarInputsCalculoAsync(IEnumerable<CompraDetalleInputDto> detallesDto)
+    private async Task<ProductoVariante> ObtenerVarianteAsync(int varianteId, int productoId, bool exigirActiva)
     {
-        var inputs = new List<DetalleCalculoInput>();
-        foreach (var d in detallesDto)
-        {
-            var producto = await _productoRepository.GetByIdAsync(d.ProductoId)
-                ?? throw new BusinessRuleException($"Producto ID {d.ProductoId} no existe.");
-            inputs.Add(new DetalleCalculoInput
-            {
-                ProductoId = producto.Id,
-                CategoriaId = producto.CategoriaId,
-                Cantidad = d.Cantidad,
-                PrecioUnitario = d.CostoUnitario
-            });
-        }
-        return inputs;
+        var variante = await _productoVarianteRepository.GetByIdAsync(varianteId)
+            ?? throw new BusinessRuleException("La variante seleccionada no existe.");
+        if (variante.ProductoId != productoId)
+            throw new BusinessRuleException("La variante seleccionada no pertenece al producto indicado.");
+        if (exigirActiva && !variante.Activo)
+            throw new BusinessRuleException($"La variante '{variante.Sku}' está inactiva.");
+        return variante;
     }
 
-    private static EstadoPago ParseEstadoPago(string value) =>
-        Enum.TryParse<EstadoPago>(value, true, out var estado) ? estado : EstadoPago.Pendiente;
-
-    private static MetodoPago ParseMetodoPago(string value) =>
-        Enum.TryParse<MetodoPago>(value, true, out var metodo) ? metodo : MetodoPago.Efectivo;
-
-    private static CompraDto ToDto(Compra c) => new()
+    private async Task<Producto> ObtenerProductoActivoAsync(int productoId)
     {
-        Id = c.Id,
-        NumeroCompra = c.NumeroCompra,
-        Fecha = c.Fecha,
-        ProveedorId = c.ProveedorId,
-        ProveedorNombre = c.ProveedorNombre,
-        ProveedorTelefono = c.ProveedorTelefono,
-        ProveedorDocumento = c.ProveedorDocumento,
-        DocumentoReferencia = c.DocumentoReferencia,
-        MetodoPago = c.MetodoPago.ToString(),
-        EstadoPago = c.EstadoPago.ToString(),
-        Estado = c.Estado.ToString(),
-        Subtotal = c.Subtotal,
-        Descuento = c.Descuento,
-        Impuesto = c.Impuesto,
-        Total = c.Total,
-        Notas = c.Notas,
-        Detalles = c.Detalles.Select(d => new CompraDetalleDto
+        var producto = await _productoRepository.GetByIdAsync(productoId)
+            ?? throw new BusinessRuleException($"El producto con id {productoId} no existe.");
+        if (!producto.Activo)
+            throw new BusinessRuleException(
+                $"El producto '{producto.Nombre}' está inactivo. Actívalo antes de utilizarlo en una compra.");
+        return producto;
+    }
+
+    private async Task<string> GenerarNumeroAsync()
+    {
+        var total = await _compraRepository.ContarTodasAsync();
+        return $"COM-{(total + 1):D6}";
+    }
+
+    private static TEnum ParseEnum<TEnum>(string value, TEnum valorPorDefecto) where TEnum : struct =>
+        Enum.TryParse<TEnum>(value, true, out var resultado) ? resultado : valorPorDefecto;
+
+    private static CompraDto ToDto(Compra compra) => new()
+    {
+        Id = compra.Id,
+        NumeroCompra = compra.NumeroCompra,
+        Fecha = compra.Fecha,
+        ProveedorId = compra.ProveedorId,
+        ProveedorNombre = compra.ProveedorNombre,
+        ProveedorTelefono = compra.ProveedorTelefono,
+        ProveedorDocumento = compra.ProveedorDocumento,
+        DocumentoReferencia = compra.DocumentoReferencia,
+        Estado = compra.Estado.ToString(),
+        EstadoPago = compra.EstadoPago.ToString(),
+        MetodoPago = compra.MetodoPago.ToString(),
+        Subtotal = compra.Subtotal,
+        Descuento = compra.Descuento,
+        Impuesto = compra.Impuesto,
+        Total = compra.Total,
+        Notas = compra.Notas,
+        Detalles = compra.Detalles.Select(detalle => new CompraDetalleDto
         {
-            Id = d.Id,
-            ProductoId = d.ProductoId,
-            ProductoVarianteId = d.ProductoVarianteId,
-            ProductoNombre = d.ProductoNombreSnapshot,
-            ProductoMarca = d.ProductoMarcaSnapshot,
-            ProductoModelo = d.ProductoModeloSnapshot,
-            ProductoColor = d.ProductoColorSnapshot,
-            ProductoSku = d.ProductoSkuSnapshot,
-            ProductoImagenPrincipalUrl = ProductoImagenSelector.ObtenerPrincipal(d.Producto),
-            Cantidad = d.Cantidad,
-            CostoUnitario = d.CostoUnitario,
-            Subtotal = d.Subtotal
+            Id = detalle.Id,
+            ProductoId = detalle.ProductoId,
+            ProductoVarianteId = detalle.ProductoVarianteId,
+            ProductoNombre = detalle.ProductoNombreSnapshot,
+            ProductoMarca = detalle.ProductoMarcaSnapshot,
+            ProductoModelo = detalle.ProductoModeloSnapshot,
+            ProductoColor = detalle.ProductoColorSnapshot,
+            ProductoSku = detalle.ProductoSkuSnapshot,
+            ProductoImagenPrincipalUrl = detalle.Producto?.ImagenPrincipal?.Url,
+            Cantidad = detalle.Cantidad,
+            CostoUnitario = detalle.CostoUnitario,
+            Subtotal = detalle.Subtotal
         }).ToList(),
-        ImpuestosAplicados = c.ImpuestosAplicados.Select(i => new ImpuestoAplicadoDto
+        ImpuestosAplicados = compra.ImpuestosAplicados.Select(impuesto => new ImpuestoAplicadoDto
         {
-            ImpuestoId = i.ImpuestoId,
-            Nombre = i.ImpuestoNombreSnapshot,
-            Codigo = i.ImpuestoCodigoSnapshot,
-            Tasa = i.TasaSnapshot,
-            BaseImponible = i.BaseImponible,
-            Monto = i.MontoAplicado,
-            IncluidoEnPrecio = i.IncluidoEnPrecioSnapshot
+            ImpuestoId = impuesto.ImpuestoId,
+            Nombre = impuesto.ImpuestoNombreSnapshot,
+            Codigo = impuesto.ImpuestoCodigoSnapshot,
+            Tasa = impuesto.TasaSnapshot,
+            BaseImponible = impuesto.BaseImponible,
+            Monto = impuesto.MontoAplicado,
+            IncluidoEnPrecio = impuesto.IncluidoEnPrecioSnapshot
         }).ToList(),
-        CreadoPorUsuarioId = c.CreadoPorUsuarioId,
-        CreadoPorNombreUsuario = c.CreadoPorNombreUsuario,
-        FechaCreacion = c.FechaCreacion,
-        ConfirmadoPorNombreUsuario = c.ConfirmadoPorNombreUsuario,
-        FechaConfirmacion = c.FechaConfirmacion,
-        AnuladoPorNombreUsuario = c.AnuladoPorNombreUsuario,
-        FechaAnulacion = c.FechaAnulacion,
-        MotivoAnulacion = c.MotivoAnulacion
+        CreadoPorNombreUsuario = compra.CreadoPorNombreUsuario,
+        FechaCreacion = compra.FechaCreacion,
+        ConfirmadoPorNombreUsuario = compra.ConfirmadoPorNombreUsuario,
+        FechaConfirmacion = compra.FechaConfirmacion,
+        AnuladoPorNombreUsuario = compra.AnuladoPorNombreUsuario,
+        FechaAnulacion = compra.FechaAnulacion,
+        MotivoAnulacion = compra.MotivoAnulacion
     };
 }
