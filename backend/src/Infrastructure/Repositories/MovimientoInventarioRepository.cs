@@ -61,26 +61,41 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
 
     public async Task<bool> ExisteMovimientoPosteriorAsync(
         int ultimoMovimientoOriginalId,
-        IReadOnlyCollection<InventarioDemanda> demandas)
+        IReadOnlyCollection<int> productoIds)
     {
-        var claves = demandas
-            .Select(d => (d.ProductoId, d.ProductoVarianteId))
+        var ids = productoIds.Distinct().OrderBy(x => x).ToArray();
+        if (ids.Length == 0) return false;
+
+        var movimientoTope = await _context.MovimientosInventario
+            .AsNoTracking()
+            .Where(m => m.Id == ultimoMovimientoOriginalId && m.ReferenciaTipo == "Compra")
+            .Select(m => new { m.ReferenciaId })
+            .SingleOrDefaultAsync();
+
+        if (movimientoTope is null)
+            throw new InvalidOperationException(
+                "El movimiento límite no corresponde a un movimiento original de compra.");
+
+        var clavesOriginales = await _context.MovimientosInventario
+            .AsNoTracking()
+            .Where(m =>
+                m.ReferenciaTipo == "Compra" &&
+                m.ReferenciaId == movimientoTope.ReferenciaId &&
+                ids.Contains(m.ProductoId))
+            .Select(m => new { m.ProductoId, m.ProductoVarianteId })
             .Distinct()
             .OrderBy(x => x.ProductoId)
-            .ThenBy(x => x.ProductoVarianteId ?? 0)
-            .ToArray();
+            .ThenBy(x => x.ProductoVarianteId)
+            .ToListAsync();
 
-        foreach (var clave in claves)
+        foreach (var clave in clavesOriginales)
         {
-            var productoId = clave.ProductoId;
-            var varianteId = clave.ProductoVarianteId;
-
             if (await _context.MovimientosInventario
                 .AsNoTracking()
                 .AnyAsync(m =>
                     m.Id > ultimoMovimientoOriginalId &&
-                    m.ProductoId == productoId &&
-                    m.ProductoVarianteId == varianteId))
+                    m.ProductoId == clave.ProductoId &&
+                    m.ProductoVarianteId == clave.ProductoVarianteId))
             {
                 return true;
             }
