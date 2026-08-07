@@ -25,6 +25,11 @@ public sealed class UpdateConsumoInsumoDto
     public List<ConsumoInsumoDetalleInputDto> Detalles { get; set; } = new();
 }
 
+public sealed class AnularConsumoInsumoDto
+{
+    public string MotivoAnulacion { get; set; } = string.Empty;
+}
+
 public sealed class ConsumoInsumoDetalleDto
 {
     public int Id { get; set; }

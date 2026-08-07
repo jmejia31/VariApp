@@ -10,6 +10,9 @@ public class ConsumoInsumoService : IConsumoInsumoService
 {
     private readonly IConsumoInsumoRepository _repository;
     private readonly IProductoRepository _productoRepository;
+    private readonly IProductoVarianteRepository _productoVarianteRepository;
+    private readonly IMovimientoInventarioRepository _movimientoInventarioRepository;
+    private readonly IInventarioConcurrencyService _inventarioConcurrency;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICurrentUserService _currentUser;
     private readonly IAuditoriaService _auditoria;
@@ -17,12 +20,18 @@ public class ConsumoInsumoService : IConsumoInsumoService
     public ConsumoInsumoService(
         IConsumoInsumoRepository repository,
         IProductoRepository productoRepository,
+        IProductoVarianteRepository productoVarianteRepository,
+        IMovimientoInventarioRepository movimientoInventarioRepository,
+        IInventarioConcurrencyService inventarioConcurrency,
         IUnitOfWork unitOfWork,
         ICurrentUserService currentUser,
         IAuditoriaService auditoria)
     {
         _repository = repository;
         _productoRepository = productoRepository;
+        _productoVarianteRepository = productoVarianteRepository;
+        _movimientoInventarioRepository = movimientoInventarioRepository;
+        _inventarioConcurrency = inventarioConcurrency;
         _unitOfWork = unitOfWork;
         _currentUser = currentUser;
         _auditoria = auditoria;
@@ -125,6 +134,214 @@ public class ConsumoInsumoService : IConsumoInsumoService
             entidad: nameof(ConsumoInsumo));
 
         return ToDto(actualizado);
+    }
+
+    public async Task<ConsumoInsumoDto?> ConfirmarAsync(int id)
+    {
+        var encontrado = false;
+        string? numero = null;
+
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            var consumo = await _repository.GetByIdForUpdateAsync(id);
+            if (consumo is null) return;
+            encontrado = true;
+            numero = consumo.NumeroConsumo;
+
+            if (consumo.Estado != EstadoConsumoInsumo.Borrador)
+                throw new BusinessRuleException("Solo los consumos en estado Borrador pueden confirmarse.");
+            if (consumo.Detalles.Count == 0)
+                throw new BusinessRuleException("El consumo debe contener al menos un insumo para confirmarse.");
+
+            var demanda = consumo.Detalles
+                .Select(d => new InventarioDemanda(d.ProductoId, d.ProductoVarianteId, d.Cantidad))
+                .ToList();
+            var inventario = await _inventarioConcurrency.BloquearYValidarInventarioAsync(demanda, esDeduccion: true);
+
+            foreach (var productoGrupo in inventario.Demandas.GroupBy(x => x.ProductoId))
+            {
+                var producto = inventario.Productos[productoGrupo.Key];
+                if (producto.TipoInventario != TipoInventario.InsumoAdministrativo)
+                    throw new BusinessRuleException($"El producto '{producto.Nombre}' ya no está clasificado como insumo administrativo.");
+                if (!producto.Activo || producto.Eliminado)
+                    throw new BusinessRuleException($"El insumo '{producto.Nombre}' no está operativo para registrar consumo.");
+
+                producto.Cantidad -= productoGrupo.Sum(x => x.Cantidad);
+                _productoRepository.Update(producto);
+            }
+
+            foreach (var item in inventario.Demandas)
+            {
+                var producto = inventario.Productos[item.ProductoId];
+                var detalles = consumo.Detalles
+                    .Where(d => d.ProductoId == item.ProductoId && d.ProductoVarianteId == item.ProductoVarianteId)
+                    .ToList();
+                var costoUnitario = detalles.Sum(d => d.CostoTotalSnapshot) / item.Cantidad;
+
+                var stockAnterior = producto.Cantidad + item.Cantidad;
+                var stockNuevo = producto.Cantidad;
+                string? sku = detalles.FirstOrDefault()?.SkuSnapshot;
+                string? color = detalles.FirstOrDefault()?.ColorSnapshot;
+
+                if (item.ProductoVarianteId.HasValue)
+                {
+                    var variante = inventario.Variantes[item.ProductoVarianteId.Value];
+                    if (!variante.Activo || variante.Eliminado)
+                        throw new BusinessRuleException($"La variante '{variante.Sku}' no está operativa para registrar consumo.");
+
+                    stockAnterior = variante.Cantidad;
+                    variante.Cantidad -= item.Cantidad;
+                    stockNuevo = variante.Cantidad;
+                    _productoVarianteRepository.Update(variante);
+                }
+
+                await _movimientoInventarioRepository.AddAsync(new MovimientoInventario
+                {
+                    ProductoId = producto.Id,
+                    ProductoVarianteId = item.ProductoVarianteId,
+                    ProductoColorSnapshot = color,
+                    ProductoSkuSnapshot = sku,
+                    Tipo = TipoMovimientoInventario.Salida,
+                    Causa = CausaMovimientoInventario.ConsumoAdministrativo,
+                    Cantidad = item.Cantidad,
+                    StockAnterior = stockAnterior,
+                    StockNuevo = stockNuevo,
+                    CostoUnitario = costoUnitario,
+                    ReferenciaTipo = "ConsumoInsumo",
+                    ReferenciaId = consumo.Id,
+                    Descripcion = $"Consumo administrativo {consumo.NumeroConsumo}",
+                    CreadoPorUsuarioId = _currentUser.UsuarioId,
+                    CreadoPorNombreUsuario = _currentUser.NombreUsuario,
+                    Fecha = DateTime.UtcNow
+                });
+            }
+
+            consumo.Estado = EstadoConsumoInsumo.Confirmado;
+            consumo.FechaConfirmacion = DateTime.UtcNow;
+            consumo.ConfirmadoPorUsuarioId = _currentUser.UsuarioId;
+            consumo.ConfirmadoPorNombreUsuario = _currentUser.NombreUsuario;
+            consumo.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
+            consumo.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
+            consumo.FechaActualizacion = DateTime.UtcNow;
+            _repository.Update(consumo);
+            await _repository.SaveChangesAsync();
+        });
+
+        if (!encontrado) return null;
+
+        var confirmado = await _repository.GetByIdAsync(id)
+            ?? throw new InvalidOperationException("No se pudo recuperar el consumo confirmado.");
+
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.InsumosAdministrativos,
+            AccionPermiso.RegistrarConsumo,
+            $"Consumo administrativo confirmado: {numero}",
+            id,
+            entidad: nameof(ConsumoInsumo));
+
+        return ToDto(confirmado);
+    }
+
+    public async Task<ConsumoInsumoDto?> AnularAsync(int id, string motivoAnulacion)
+    {
+        if (string.IsNullOrWhiteSpace(motivoAnulacion) || motivoAnulacion.Trim().Length > 500)
+            throw new BusinessRuleException("El motivo de anulación es obligatorio y no puede exceder 500 caracteres.");
+
+        var encontrado = false;
+        string? numero = null;
+        var motivo = motivoAnulacion.Trim();
+
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            var consumo = await _repository.GetByIdForUpdateAsync(id);
+            if (consumo is null) return;
+            encontrado = true;
+            numero = consumo.NumeroConsumo;
+
+            if (consumo.Estado != EstadoConsumoInsumo.Confirmado)
+                throw new BusinessRuleException("Solo los consumos confirmados pueden anularse.");
+
+            var demanda = consumo.Detalles
+                .Select(d => new InventarioDemanda(d.ProductoId, d.ProductoVarianteId, d.Cantidad))
+                .ToList();
+            var inventario = await _inventarioConcurrency.BloquearInventarioParaReversionAsync(demanda);
+
+            foreach (var productoGrupo in inventario.Demandas.GroupBy(x => x.ProductoId))
+            {
+                var producto = inventario.Productos[productoGrupo.Key];
+                producto.Cantidad += productoGrupo.Sum(x => x.Cantidad);
+                _productoRepository.Update(producto);
+            }
+
+            foreach (var item in inventario.Demandas)
+            {
+                var producto = inventario.Productos[item.ProductoId];
+                var detalles = consumo.Detalles
+                    .Where(d => d.ProductoId == item.ProductoId && d.ProductoVarianteId == item.ProductoVarianteId)
+                    .ToList();
+                var costoUnitario = detalles.Sum(d => d.CostoTotalSnapshot) / item.Cantidad;
+
+                var stockAnterior = producto.Cantidad - item.Cantidad;
+                var stockNuevo = producto.Cantidad;
+                string? sku = detalles.FirstOrDefault()?.SkuSnapshot;
+                string? color = detalles.FirstOrDefault()?.ColorSnapshot;
+
+                if (item.ProductoVarianteId.HasValue)
+                {
+                    var variante = inventario.Variantes[item.ProductoVarianteId.Value];
+                    stockAnterior = variante.Cantidad;
+                    variante.Cantidad += item.Cantidad;
+                    stockNuevo = variante.Cantidad;
+                    _productoVarianteRepository.Update(variante);
+                }
+
+                await _movimientoInventarioRepository.AddAsync(new MovimientoInventario
+                {
+                    ProductoId = producto.Id,
+                    ProductoVarianteId = item.ProductoVarianteId,
+                    ProductoColorSnapshot = color,
+                    ProductoSkuSnapshot = sku,
+                    Tipo = TipoMovimientoInventario.Reversion,
+                    Causa = CausaMovimientoInventario.ReversionConsumo,
+                    Cantidad = item.Cantidad,
+                    StockAnterior = stockAnterior,
+                    StockNuevo = stockNuevo,
+                    CostoUnitario = costoUnitario,
+                    ReferenciaTipo = "ConsumoInsumo",
+                    ReferenciaId = consumo.Id,
+                    Descripcion = $"Reversión de consumo administrativo {consumo.NumeroConsumo}: {motivo}",
+                    CreadoPorUsuarioId = _currentUser.UsuarioId,
+                    CreadoPorNombreUsuario = _currentUser.NombreUsuario,
+                    Fecha = DateTime.UtcNow
+                });
+            }
+
+            consumo.Estado = EstadoConsumoInsumo.Anulado;
+            consumo.FechaAnulacion = DateTime.UtcNow;
+            consumo.AnuladoPorUsuarioId = _currentUser.UsuarioId;
+            consumo.AnuladoPorNombreUsuario = _currentUser.NombreUsuario;
+            consumo.MotivoAnulacion = motivo;
+            consumo.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
+            consumo.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
+            consumo.FechaActualizacion = DateTime.UtcNow;
+            _repository.Update(consumo);
+            await _repository.SaveChangesAsync();
+        });
+
+        if (!encontrado) return null;
+
+        var anulado = await _repository.GetByIdAsync(id)
+            ?? throw new InvalidOperationException("No se pudo recuperar el consumo anulado.");
+
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.InsumosAdministrativos,
+            AccionPermiso.RegistrarConsumo,
+            $"Consumo administrativo anulado: {numero}",
+            id,
+            entidad: nameof(ConsumoInsumo),
+            motivo: motivo);
+
+        return ToDto(anulado);
     }
 
     public async Task<bool> DeleteBorradorAsync(int id)

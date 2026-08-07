@@ -1,6 +1,8 @@
 using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
+using InventoryApp.Domain.Entities;
 using InventoryApp.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,12 +26,22 @@ public class InventarioConcurrencyService : IInventarioConcurrencyService
         _productoVarianteRepository = productoVarianteRepository;
     }
 
-    public async Task<InventarioLockSet> BloquearYValidarInventarioAsync(
+    public Task<InventarioLockSet> BloquearYValidarInventarioAsync(
         IEnumerable<InventarioDemanda> demandMap,
-        bool esDeduccion = true)
+        bool esDeduccion = true) =>
+        BloquearYValidarCoreAsync(demandMap, esDeduccion, incluirEliminados: false);
+
+    public Task<InventarioLockSet> BloquearInventarioParaReversionAsync(
+        IEnumerable<InventarioDemanda> demandMap) =>
+        BloquearYValidarCoreAsync(demandMap, esDeduccion: false, incluirEliminados: true);
+
+    private async Task<InventarioLockSet> BloquearYValidarCoreAsync(
+        IEnumerable<InventarioDemanda> demandMap,
+        bool esDeduccion,
+        bool incluirEliminados)
     {
         if (_context.Database.CurrentTransaction is null)
-            throw new InvalidOperationException("BloquearYValidarInventarioAsync requiere una transacción activa.");
+            throw new InvalidOperationException("El bloqueo de inventario requiere una transacción activa.");
 
         var consolidada = demandMap
             .Select(x => x ?? throw new ArgumentException("La demanda de inventario contiene un elemento nulo.", nameof(demandMap)))
@@ -48,8 +60,8 @@ public class InventarioConcurrencyService : IInventarioConcurrencyService
         if (consolidada.Count == 0)
         {
             return new InventarioLockSet(
-                new Dictionary<int, InventoryApp.Domain.Entities.Producto>(),
-                new Dictionary<int, InventoryApp.Domain.Entities.ProductoVariante>(),
+                new Dictionary<int, Producto>(),
+                new Dictionary<int, ProductoVariante>(),
                 Array.Empty<InventarioDemanda>());
         }
 
@@ -59,8 +71,10 @@ public class InventarioConcurrencyService : IInventarioConcurrencyService
             .OrderBy(id => id)
             .ToList();
 
-        var productosMap = (await _productoRepository.GetByIdsForUpdateAsync(productoIds))
-            .ToDictionary(p => p.Id);
+        var productos = incluirEliminados
+            ? await BloquearProductosIncluyendoEliminadosAsync(productoIds)
+            : await _productoRepository.GetByIdsForUpdateAsync(productoIds);
+        var productosMap = productos.ToDictionary(p => p.Id);
 
         var varianteIds = consolidada
             .Where(x => x.ProductoVarianteId.HasValue)
@@ -69,13 +83,15 @@ public class InventarioConcurrencyService : IInventarioConcurrencyService
             .OrderBy(id => id)
             .ToList();
 
-        var variantesMap = (await _productoVarianteRepository.GetByIdsForUpdateAsync(varianteIds))
-            .ToDictionary(v => v.Id);
+        var variantes = incluirEliminados
+            ? await BloquearVariantesIncluyendoEliminadasAsync(varianteIds)
+            : await _productoVarianteRepository.GetByIdsForUpdateAsync(varianteIds);
+        var variantesMap = variantes.ToDictionary(v => v.Id);
 
         foreach (var productoGrupo in consolidada.GroupBy(x => x.ProductoId))
         {
             if (!productosMap.TryGetValue(productoGrupo.Key, out var producto))
-                throw new BusinessRuleException($"El producto ID '{productoGrupo.Key}' no existe o fue eliminado.");
+                throw new BusinessRuleException($"El producto ID '{productoGrupo.Key}' no existe físicamente.");
 
             var cantidadTotalProducto = productoGrupo.Sum(x => x.Cantidad);
             if (esDeduccion && producto.Cantidad < cantidadTotalProducto)
@@ -92,7 +108,7 @@ public class InventarioConcurrencyService : IInventarioConcurrencyService
             if (item.ProductoVarianteId.HasValue)
             {
                 if (!variantesMap.TryGetValue(item.ProductoVarianteId.Value, out var variante))
-                    throw new BusinessRuleException($"La variante ID '{item.ProductoVarianteId.Value}' no existe o fue eliminada.");
+                    throw new BusinessRuleException($"La variante ID '{item.ProductoVarianteId.Value}' no existe físicamente.");
 
                 if (variante.ProductoId != producto.Id)
                     throw new BusinessRuleException($"La variante ID '{variante.Id}' no pertenece al producto ID '{producto.Id}'.");
@@ -106,6 +122,38 @@ public class InventarioConcurrencyService : IInventarioConcurrencyService
         }
 
         return new InventarioLockSet(productosMap, variantesMap, consolidada);
+    }
+
+    private async Task<List<Producto>> BloquearProductosIncluyendoEliminadosAsync(IEnumerable<int> ids)
+    {
+        var resultado = new List<Producto>();
+        foreach (var id in ids.Distinct().OrderBy(x => x))
+        {
+            var producto = await _context.Productos
+                .FromSqlInterpolated($"SELECT p.* FROM Productos p WHERE p.Id = {id} FOR UPDATE")
+                .IgnoreQueryFilters()
+                .AsTracking()
+                .FirstOrDefaultAsync();
+            if (producto is not null)
+                resultado.Add(producto);
+        }
+        return resultado;
+    }
+
+    private async Task<List<ProductoVariante>> BloquearVariantesIncluyendoEliminadasAsync(IEnumerable<int> ids)
+    {
+        var resultado = new List<ProductoVariante>();
+        foreach (var id in ids.Distinct().OrderBy(x => x))
+        {
+            var variante = await _context.ProductoVariantes
+                .FromSqlInterpolated($"SELECT pv.* FROM ProductoVariantes pv WHERE pv.Id = {id} FOR UPDATE")
+                .IgnoreQueryFilters()
+                .AsTracking()
+                .FirstOrDefaultAsync();
+            if (variante is not null)
+                resultado.Add(variante);
+        }
+        return resultado;
     }
 
     public async Task AjustarStockPesimistaAsync(

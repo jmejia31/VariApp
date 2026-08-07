@@ -32,6 +32,12 @@ public interface IInventarioConcurrencyService
         IEnumerable<InventarioDemanda> demandMap,
         bool esDeduccion = true);
 
+    /// Bloquea las mismas filas en el orden global del protocolo 2B, pero permite
+    /// recuperar entidades inactivas o eliminadas lógicamente para restauraciones
+    /// históricas. Nunca reactiva ni elimina el soft-delete de las entidades.
+    Task<InventarioLockSet> BloquearInventarioParaReversionAsync(
+        IEnumerable<InventarioDemanda> demandMap);
+
     Task AjustarStockPesimistaAsync(
         int productoId,
         int? productoVarianteId,

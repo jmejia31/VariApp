@@ -57,6 +57,26 @@ public class InsumosAdministrativosController : ControllerBase
         return Ok(ApiResponse<ConsumoInsumoDto>.Ok(actualizado, "Consumo actualizado correctamente."));
     }
 
+    [HttpPost("{id:int}/confirmar")]
+    [RequierePermiso(ModuloSistema.InsumosAdministrativos, AccionPermiso.RegistrarConsumo)]
+    public async Task<IActionResult> Confirmar(int id)
+    {
+        var confirmado = await _service.ConfirmarAsync(id);
+        if (confirmado is null)
+            return NotFound(ApiResponse<object>.Fail("Consumo administrativo no encontrado."));
+        return Ok(ApiResponse<ConsumoInsumoDto>.Ok(confirmado, "Consumo confirmado y stock descontado correctamente."));
+    }
+
+    [HttpPost("{id:int}/anular")]
+    [RequierePermiso(ModuloSistema.InsumosAdministrativos, AccionPermiso.RegistrarConsumo)]
+    public async Task<IActionResult> Anular(int id, [FromBody] AnularConsumoInsumoDto dto)
+    {
+        var anulado = await _service.AnularAsync(id, dto.MotivoAnulacion);
+        if (anulado is null)
+            return NotFound(ApiResponse<object>.Fail("Consumo administrativo no encontrado."));
+        return Ok(ApiResponse<ConsumoInsumoDto>.Ok(anulado, "Consumo anulado y stock restaurado correctamente."));
+    }
+
     [HttpDelete("{id:int}")]
     [RequierePermiso(ModuloSistema.InsumosAdministrativos, AccionPermiso.EliminarLogico)]
     public async Task<IActionResult> Delete(int id)

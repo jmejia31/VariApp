@@ -8,5 +8,7 @@ public interface IConsumoInsumoService
     Task<ConsumoInsumoDto?> GetByIdAsync(int id);
     Task<ConsumoInsumoDto> CreateAsync(CreateConsumoInsumoDto dto);
     Task<ConsumoInsumoDto?> UpdateAsync(int id, UpdateConsumoInsumoDto dto);
+    Task<ConsumoInsumoDto?> ConfirmarAsync(int id);
+    Task<ConsumoInsumoDto?> AnularAsync(int id, string motivoAnulacion);
     Task<bool> DeleteBorradorAsync(int id);
 }
