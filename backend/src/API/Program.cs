@@ -56,6 +56,7 @@ builder.Services.AddScoped<ICatalogoProductoRepository, CatalogoProductoReposito
 builder.Services.AddScoped<IProveedorRepository, ProveedorRepository>();
 builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
 builder.Services.AddScoped<ITipoClienteRepository, TipoClienteRepository>();
+builder.Services.AddScoped<IConsumoInsumoRepository, ConsumoInsumoRepository>();
 builder.Services.AddScoped<IAuditoriaRepository, AuditoriaRepository>();
 builder.Services.AddScoped<IRolPermisoRepository, RolPermisoRepository>();
 builder.Services.AddScoped<IRolRepository, RolRepository>();
@@ -80,6 +81,7 @@ builder.Services.AddScoped<ICatalogoProductoService, CatalogoProductoService>();
 builder.Services.AddScoped<IProveedorService, ProveedorService>();
 builder.Services.AddScoped<IClienteService, ClienteService>();
 builder.Services.AddScoped<ITipoClienteService, TipoClienteService>();
+builder.Services.AddScoped<IConsumoInsumoService, ConsumoInsumoService>();
 builder.Services.AddScoped<ITipoClientePredeterminadoResolver, TipoClientePredeterminadoResolver>();
 builder.Services.AddScoped<IAuditoriaService, AuditoriaService>();
 builder.Services.AddScoped<IPermisoService, PermisoService>();
