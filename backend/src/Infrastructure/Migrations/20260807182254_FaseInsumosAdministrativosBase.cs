@@ -26,6 +26,20 @@ namespace InventoryApp.Infrastructure.Migrations
                 nullable: false,
                 defaultValue: 0);
 
+            // Backfill histórico no destructivo. Los movimientos inequívocos se
+            // clasifican según su referencia y dirección; los casos ambiguos
+            // permanecen en NoEspecificada (0) para no inventar trazabilidad.
+            migrationBuilder.Sql(@"
+                UPDATE MovimientosInventario
+                SET Causa = CASE
+                    WHEN ReferenciaTipo = 'Compra' AND Tipo = 'Entrada' THEN 1
+                    WHEN ReferenciaTipo = 'Venta' AND Tipo = 'Salida' THEN 2
+                    WHEN Tipo = 'Ajuste' THEN 4
+                    WHEN ReferenciaTipo = 'Compra' AND Tipo = 'Reversion' THEN 5
+                    WHEN ReferenciaTipo = 'Venta' AND Tipo = 'Reversion' THEN 6
+                    ELSE 0
+                END;");
+
             migrationBuilder.CreateTable(
                 name: "ConsumosInsumos",
                 columns: table => new
