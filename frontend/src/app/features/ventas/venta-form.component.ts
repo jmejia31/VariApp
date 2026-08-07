@@ -59,6 +59,12 @@ export class VentaFormComponent implements OnInit {
   readonly errorBusquedaCliente = signal<string | null>(null);
   private clienteId: number | null = null;
 
+  readonly buscadorProducto = new FormControl<string | ProductoEscaneadoVenta>('');
+  readonly opcionesProducto = signal<ProductoEscaneadoVenta[]>([]);
+  readonly buscandoProducto = signal(false);
+  readonly errorBusquedaProducto = signal<string | null>(null);
+  readonly mensajeBusquedaProducto = signal<string | null>(null);
+
   form = this.fb.group({
     clienteNombre: ['Cliente final', Validators.required],
     clienteTelefono: [''], clienteIdentidadORTN: [''], clienteCorreo: [''], clienteDireccion: [''],
@@ -79,9 +85,6 @@ export class VentaFormComponent implements OnInit {
   get detalles(): FormArray { return this.form.get('detalles') as FormArray; }
 
   ngOnInit(): void {
-    this.productoService.getPaged({ page: 1, pageSize: 200, sortBy: 'Nombre' })
-      .subscribe((res) => this.productos.set(res.data.items));
-
     this.costoEnvioService.getAll().subscribe({
       next: (res) => {
         const activos = res.data.filter((x) => x.activo);
@@ -113,6 +116,30 @@ export class VentaFormComponent implements OnInit {
       })
     ).subscribe((res) => { this.buscandoCliente.set(false); if (res) this.opcionesCliente.set(res.data); });
 
+    this.buscadorProducto.valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap((valor) => {
+        const termino = typeof valor === 'string' ? valor.trim() : '';
+        this.mensajeBusquedaProducto.set(null);
+        this.errorBusquedaProducto.set(null);
+        if (termino.length < 2) {
+          this.buscandoProducto.set(false);
+          this.opcionesProducto.set([]);
+          return of(null);
+        }
+
+        this.buscandoProducto.set(true);
+        return this.ventaService.buscarProductos(termino, 30).pipe(
+          catchError((err) => {
+            this.errorBusquedaProducto.set(err.error?.message ?? 'No se pudieron buscar productos. Intenta de nuevo.');
+            return of(null);
+          }),
+          finalize(() => this.buscandoProducto.set(false))
+        );
+      })
+    ).subscribe((res) => this.opcionesProducto.set(res?.data ?? []));
+
     this.form.get('envioExonerado')!.valueChanges.subscribe((exonerado) => {
       const motivo = this.form.get('motivoExoneracionEnvio')!;
       if (exonerado) motivo.addValidators([Validators.required, Validators.maxLength(500)]);
@@ -143,6 +170,21 @@ export class VentaFormComponent implements OnInit {
 
   displayCliente(cliente: Cliente): string { return cliente?.nombre ?? ''; }
 
+  displayProductoOperacion(item: ProductoEscaneadoVenta | string | null): string {
+    if (!item || typeof item === 'string') return typeof item === 'string' ? item : '';
+    const variante = item.colorNombre || (item.esVarianteTecnica ? 'Predeterminada' : item.sku);
+    return `${item.productoNombre}${variante ? ` · ${variante}` : ''}`;
+  }
+
+  onProductoBuscadoSeleccionado(event: MatAutocompleteSelectedEvent): void {
+    const item = event.option.value as ProductoEscaneadoVenta;
+    const resultado = this.aplicarProductoOperacion(item);
+    this.errorBusquedaProducto.set(resultado.ok ? null : resultado.mensaje);
+    this.mensajeBusquedaProducto.set(resultado.ok ? resultado.mensaje : null);
+    this.buscadorProducto.setValue('', { emitEvent: false });
+    this.opcionesProducto.set([]);
+  }
+
   procesarCodigoEscaner(codigo: string): void {
     if (this.procesandoEscaneo()) return;
     this.procesandoEscaneo.set(true);
@@ -155,7 +197,11 @@ export class VentaFormComponent implements OnInit {
         this.scannerInput?.reenfocar();
       })
     ).subscribe({
-      next: (res) => this.agregarProductoEscaneado(res.data),
+      next: (res) => {
+        const resultado = this.aplicarProductoOperacion(res.data);
+        this.errorEscaneo.set(!resultado.ok);
+        this.mensajeEscaneo.set(resultado.mensaje);
+      },
       error: (err) => {
         this.errorEscaneo.set(true);
         this.mensajeEscaneo.set(err.error?.message ?? 'No se pudo resolver el SKU o código de barras.');
@@ -163,7 +209,7 @@ export class VentaFormComponent implements OnInit {
     });
   }
 
-  private agregarProductoEscaneado(item: ProductoEscaneadoVenta): void {
+  private aplicarProductoOperacion(item: ProductoEscaneadoVenta): { ok: boolean; mensaje: string } {
     const coincidencias = this.detalles.controls
       .map((grupo, index) => ({ grupo, index }))
       .filter(({ grupo }) =>
@@ -178,11 +224,10 @@ export class VentaFormComponent implements OnInit {
       );
       const nuevaCantidad = cantidadActual + 1;
       if (nuevaCantidad > item.cantidadDisponible) {
-        this.errorEscaneo.set(true);
-        this.mensajeEscaneo.set(
-          `Stock insuficiente para ${item.productoNombre}. Disponible: ${item.cantidadDisponible}.`
-        );
-        return;
+        return {
+          ok: false,
+          mensaje: `Stock insuficiente para ${item.productoNombre}. Disponible: ${item.cantidadDisponible}.`
+        };
       }
 
       coincidencias[0].grupo.patchValue({
@@ -195,11 +240,10 @@ export class VentaFormComponent implements OnInit {
         .sort((a, b) => b - a)
         .forEach((index) => this.detalles.removeAt(index));
 
-      this.mensajeEscaneo.set(`${item.productoNombre}: cantidad consolidada en ${nuevaCantidad}.`);
-      return;
+      return { ok: true, mensaje: `${item.productoNombre}: cantidad consolidada en ${nuevaCantidad}.` };
     }
 
-    this.incorporarProductoEscaneado(item);
+    this.incorporarProductoOperacion(item);
     const filaVacia = this.detalles.controls.find((grupo) => !grupo.value.productoId);
     const valores = {
       productoId: item.productoId,
@@ -211,12 +255,13 @@ export class VentaFormComponent implements OnInit {
     else this.agregarDetalle(item.productoId, item.productoVarianteId, 1, item.precio);
 
     this.errorMessage.set(null);
-    this.mensajeEscaneo.set(
-      `${item.productoNombre}${item.colorNombre ? ` · ${item.colorNombre}` : ''} agregado a la venta.`
-    );
+    return {
+      ok: true,
+      mensaje: `${item.productoNombre}${item.colorNombre ? ` · ${item.colorNombre}` : ''} agregado a la venta.`
+    };
   }
 
-  private incorporarProductoEscaneado(item: ProductoEscaneadoVenta): void {
+  private incorporarProductoOperacion(item: ProductoEscaneadoVenta): void {
     const variante: ProductoVariante = {
       id: item.productoVarianteId,
       productoId: item.productoId,
@@ -245,7 +290,12 @@ export class VentaFormComponent implements OnInit {
       const indiceVariante = variantes.findIndex((actual) => actual.id === item.productoVarianteId);
       if (indiceVariante >= 0) variantes[indiceVariante] = { ...variantes[indiceVariante], ...variante };
       else variantes.push(variante);
-      actuales[indice] = { ...producto, cantidad: Math.max(producto.cantidad, item.cantidadDisponible), variantes, totalVariantes: variantes.length };
+      actuales[indice] = {
+        ...producto,
+        cantidad: variantes.reduce((total, actual) => total + actual.cantidad, 0),
+        variantes,
+        totalVariantes: variantes.length
+      };
     } else {
       actuales.push({
         id: item.productoId,
@@ -288,6 +338,7 @@ export class VentaFormComponent implements OnInit {
         });
         this.buscadorCliente.setValue(v.clienteNombre, { emitEvent: false });
         v.detalles.forEach((d) => this.agregarDetalle(d.productoId, d.productoVarianteId ?? null, d.cantidad, d.precioUnitario));
+        this.hidratarProductosReferenciados(v.detalles.map((detalle) => detalle.productoId));
         this.resultado.set({
           importeBruto: v.importeBruto, importeProductos: v.importeProductos, subtotal: v.subtotal,
           descuentosAplicados: v.descuentosAplicados, totalDescuento: v.descuento,
@@ -300,6 +351,18 @@ export class VentaFormComponent implements OnInit {
         this.loading.set(false);
       },
       error: () => this.loading.set(false)
+    });
+  }
+
+  private hidratarProductosReferenciados(productoIds: number[]): void {
+    [...new Set(productoIds)].forEach((productoId) => {
+      this.productoService.getById(productoId).subscribe({
+        next: (res) => {
+          const actuales = this.productos().filter((producto) => producto.id !== productoId);
+          this.productos.set([...actuales, res.data].sort((a, b) => a.nombre.localeCompare(b.nombre)));
+        },
+        error: () => this.errorMessage.set('No se pudo cargar la información actual de uno de los productos del borrador.')
+      });
     });
   }
 
