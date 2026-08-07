@@ -93,6 +93,43 @@ public class ProductoVarianteRepository : IProductoVarianteRepository
             .Take(2)
             .ToListAsync(cancellationToken);
 
+    public Task<List<ProductoVariante>> BuscarPorTerminoAsync(
+        string terminoNormalizado,
+        bool soloConStock,
+        int limite,
+        CancellationToken cancellationToken = default)
+    {
+        var limiteSeguro = Math.Clamp(limite, 1, 30);
+        var query = _context.ProductoVariantes
+            .AsNoTracking()
+            .Include(v => v.Producto)
+            .Include(v => v.Color)
+            .Where(v =>
+                !v.Eliminado &&
+                v.Activo &&
+                !v.Producto.Eliminado &&
+                v.Producto.Activo);
+
+        if (soloConStock)
+            query = query.Where(v => v.Cantidad > 0);
+
+        query = query.Where(v =>
+            v.Producto.Nombre.ToLower().Contains(terminoNormalizado) ||
+            v.Producto.Marca.ToLower().Contains(terminoNormalizado) ||
+            v.Producto.Modelo.ToLower().Contains(terminoNormalizado) ||
+            (v.Sku != null && v.Sku.ToLower().Contains(terminoNormalizado)) ||
+            (v.CodigoBarras != null && v.CodigoBarras.ToLower().Contains(terminoNormalizado)) ||
+            (v.Color != null && v.Color.Nombre.ToLower().Contains(terminoNormalizado)));
+
+        return query
+            .OrderBy(v => v.Producto.Nombre)
+            .ThenBy(v => v.Color != null ? v.Color.Nombre : string.Empty)
+            .ThenBy(v => v.Sku)
+            .ThenBy(v => v.Id)
+            .Take(limiteSeguro)
+            .ToListAsync(cancellationToken);
+    }
+
     public Task<ProductoVariante?> GetByProductoColorAsync(int productoId, int colorId) =>
         Query().FirstOrDefaultAsync(v => !v.Eliminado && v.ProductoId == productoId && v.ColorId == colorId);
 
