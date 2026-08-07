@@ -7,6 +7,8 @@
 .cliente-existente { color: var(--color-success); }
 .cliente-nuevo { color: var(--color-text-muted); }
 .opcion-detalle { margin-left: 8px; font-size: 11px; color: var(--color-text-muted); }
+.producto-busqueda-remota { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; .full-width { width: 100%; } }
+.producto-busqueda-mensaje { display: flex; align-items: center; gap: 6px; margin: -8px 0 6px; color: var(--color-success); font-size: 12px; mat-icon { font-size: 16px; width: 16px; height: 16px; } }
 .detalles { display: flex; flex-direction: column; gap: 4px; }
 .detalle-row { display: grid; grid-template-columns: 52px minmax(190px, 2.4fr) minmax(190px, 2fr) minmax(78px, .7fr) minmax(105px, 1fr) minmax(90px, auto) auto; gap: 8px; align-items: center; min-width: 0;
   .col-imagen { align-self: start; padding-top: 2px; }
