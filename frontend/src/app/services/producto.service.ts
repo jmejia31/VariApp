@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { ApiResponse, PagedRequest, PagedResult } from '../core/models/api-response.model';
-import { AjusteStockRequest, AjusteStockResultado, Producto, ProductoFormValue, ProductoVariante, ProductoVarianteFormValue } from '../core/models/producto.model';
+import { AjusteStockRequest, AjusteStockResultado, Producto, ProductoFormValue, ProductoVariante, ProductoVarianteFormValue, TipoInventario } from '../core/models/producto.model';
 
 export interface ProductoPagedRequest extends PagedRequest {
   categoriaId?: number;
@@ -13,6 +13,7 @@ export interface ProductoPagedRequest extends PagedRequest {
   modeloId?: number;
   activo?: boolean;
   agotado?: boolean;
+  tipoInventario?: TipoInventario;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -33,6 +34,7 @@ export class ProductoService {
     if (request.modeloId != null) params = params.set('modeloId', request.modeloId);
     if (request.activo != null) params = params.set('activo', request.activo);
     if (request.agotado != null) params = params.set('agotado', request.agotado);
+    if (request.tipoInventario != null) params = params.set('tipoInventario', request.tipoInventario);
     return this.http.get<ApiResponse<PagedResult<Producto>>>(this.apiUrl, { params });
   }
 
@@ -77,25 +79,12 @@ export class ProductoService {
     return this.http.delete<ApiResponse<object>>(`${this.apiUrl}/${productoId}/variantes/${varianteId}`);
   }
 
-  ajustarStockProducto(
-    productoId: number,
-    request: AjusteStockRequest
-  ): Observable<ApiResponse<AjusteStockResultado>> {
-    return this.http.post<ApiResponse<AjusteStockResultado>>(
-      `${this.apiUrl}/${productoId}/ajustes-stock`,
-      request
-    );
+  ajustarStockProducto(productoId: number, request: AjusteStockRequest): Observable<ApiResponse<AjusteStockResultado>> {
+    return this.http.post<ApiResponse<AjusteStockResultado>>(`${this.apiUrl}/${productoId}/ajustes-stock`, request);
   }
 
-  ajustarStockVariante(
-    productoId: number,
-    varianteId: number,
-    request: AjusteStockRequest
-  ): Observable<ApiResponse<AjusteStockResultado>> {
-    return this.http.post<ApiResponse<AjusteStockResultado>>(
-      `${this.apiUrl}/${productoId}/variantes/${varianteId}/ajustes-stock`,
-      request
-    );
+  ajustarStockVariante(productoId: number, varianteId: number, request: AjusteStockRequest): Observable<ApiResponse<AjusteStockResultado>> {
+    return this.http.post<ApiResponse<AjusteStockResultado>>(`${this.apiUrl}/${productoId}/variantes/${varianteId}/ajustes-stock`, request);
   }
 
   activar(id: number): Observable<ApiResponse<Producto>> {
@@ -123,6 +112,7 @@ export class ProductoService {
     formData.append('Marca', value.marca);
     formData.append('Modelo', value.modelo);
     if (value.descripcion) formData.append('Descripcion', value.descripcion);
+    formData.append('TipoInventario', String(value.tipoInventario ?? TipoInventario.MercaderiaVenta));
     formData.append('Cantidad', String(value.cantidad));
     formData.append('Costo', String(value.costo));
     formData.append('Precio', String(value.precio));
@@ -135,7 +125,7 @@ export class ProductoService {
 
     value.variantes.forEach((variante, index) => {
       if (variante.id != null) formData.append(`Variantes[${index}].Id`, String(variante.id));
-      formData.append(`Variantes[${index}].ColorId`, String(variante.colorId));
+      if (variante.colorId != null) formData.append(`Variantes[${index}].ColorId`, String(variante.colorId));
       if (variante.sku?.trim()) formData.append(`Variantes[${index}].Sku`, variante.sku.trim());
       if (variante.codigoBarras?.trim()) formData.append(`Variantes[${index}].CodigoBarras`, variante.codigoBarras.trim());
       formData.append(`Variantes[${index}].Cantidad`, String(variante.cantidad));
