@@ -1,0 +1,48 @@
+name: Temporal ChatGPT - dependencia escáner 2C.4
+
+on:
+  push:
+    branches:
+      - Desarrollo
+    paths:
+      - .github/workflows/chatgpt-fase2c4-dependencia.yml
+
+permissions:
+  contents: write
+
+jobs:
+  actualizar-lockfile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout Desarrollo
+        uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Fijar html5-qrcode y regenerar lockfile
+        working-directory: frontend
+        run: |
+          set -euo pipefail
+          npm install html5-qrcode@2.3.8 --save-exact --package-lock-only --legacy-peer-deps --ignore-scripts
+          node -e "const p=require('./package.json'); if(p.dependencies['html5-qrcode']!=='2.3.8') process.exit(1)"
+          node -e "const l=require('./package-lock.json'); if(l.packages['node_modules/html5-qrcode']?.version!=='2.3.8') process.exit(1)"
+
+      - name: Publicar dependencia en Desarrollo
+        run: |
+          set -euo pipefail
+          git config user.name 'jmejia31'
+          git config user.email '93171442+jmejia31@users.noreply.github.com'
+          git add frontend/package.json frontend/package-lock.json
+          if git diff --cached --quiet; then
+            echo 'La dependencia ya estaba sincronizada.'
+            exit 0
+          fi
+          git commit -m 'build(frontend): fijar html5-qrcode 2.3.8 para escáner 2C.4 [ChatGPT]'
+          git push origin HEAD:Desarrollo
