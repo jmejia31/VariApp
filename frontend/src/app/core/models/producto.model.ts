@@ -1,3 +1,8 @@
+export enum TipoInventario {
+  MercaderiaVenta = 1,
+  InsumoAdministrativo = 2
+}
+
 export interface ProductoImagen {
   id: number;
   url: string;
@@ -44,6 +49,7 @@ export interface Producto {
   marca: string;
   modelo: string;
   descripcion?: string;
+  tipoInventario: TipoInventario;
   cantidad: number;
   costo: number;
   precio: number;
@@ -104,6 +110,7 @@ export interface ProductoFormValue {
   marca: string;
   modelo: string;
   descripcion?: string;
+  tipoInventario: TipoInventario;
   cantidad: number;
   costo: number;
   precio: number;
