@@ -1,9 +1,9 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, ViewChild, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, AbstractControl, FormBuilder, FormArray, FormControl, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { of } from 'rxjs';
-import { debounceTime, distinctUntilChanged, switchMap, catchError } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, switchMap, catchError, finalize } from 'rxjs/operators';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -14,10 +14,11 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CompraService } from '../../services/compra.service';
 import { ProductoService } from '../../services/producto.service';
 import { ProveedorService } from '../../services/proveedor.service';
-import { Producto, ProductoVariante } from '../../core/models/producto.model';
+import { Producto, ProductoEscaneadoCompra, ProductoVariante } from '../../core/models/producto.model';
 import { Proveedor } from '../../core/models/proveedor.model';
 import { ResultadoCalculo } from '../../core/models/compra.model';
 import { ProductoImagenComponent } from '../../shared/producto-imagen/producto-imagen.component';
+import { CodigoScannerInputComponent } from '../../shared/codigo-scanner-input/codigo-scanner-input.component';
 
 @Component({
   selector: 'app-compra-form',
@@ -25,13 +26,15 @@ import { ProductoImagenComponent } from '../../shared/producto-imagen/producto-i
   imports: [
     CommonModule, ReactiveFormsModule, RouterLink, MatFormFieldModule, MatInputModule,
     MatSelectModule, MatAutocompleteModule, MatButtonModule, MatIconModule,
-    MatProgressSpinnerModule, ProductoImagenComponent
+    MatProgressSpinnerModule, ProductoImagenComponent, CodigoScannerInputComponent
   ],
   templateUrl: './compra-form.component.html',
   styleUrl: './compra-form.component.scss'
 })
 export class CompraFormComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
+  @ViewChild(CodigoScannerInputComponent) private scannerInput?: CodigoScannerInputComponent;
+
   readonly loading = signal(false);
   readonly saving = signal(false);
   readonly calculando = signal(false);
@@ -39,6 +42,9 @@ export class CompraFormComponent implements OnInit {
   readonly isEdit = signal(false);
   readonly productos = signal<Producto[]>([]);
   readonly resultado = signal<ResultadoCalculo | null>(null);
+  readonly procesandoEscaneo = signal(false);
+  readonly mensajeEscaneo = signal<string | null>(null);
+  readonly errorEscaneo = signal(false);
   private compraId: number | null = null;
 
   readonly buscadorProveedor = new FormControl('');
@@ -105,6 +111,111 @@ export class CompraFormComponent implements OnInit {
   }
 
   displayProveedor(proveedor: Proveedor): string { return proveedor?.nombre ?? ''; }
+
+  procesarCodigoEscaner(codigo: string): void {
+    if (this.procesandoEscaneo()) return;
+    this.procesandoEscaneo.set(true);
+    this.mensajeEscaneo.set(null);
+    this.errorEscaneo.set(false);
+
+    this.compraService.buscarProductoPorCodigo(codigo).pipe(
+      finalize(() => {
+        this.procesandoEscaneo.set(false);
+        this.scannerInput?.reenfocar();
+      })
+    ).subscribe({
+      next: (res) => this.agregarProductoEscaneado(res.data),
+      error: (err) => {
+        this.errorEscaneo.set(true);
+        this.mensajeEscaneo.set(err.error?.message ?? 'No se pudo resolver el SKU o código de barras.');
+      }
+    });
+  }
+
+  private agregarProductoEscaneado(item: ProductoEscaneadoCompra): void {
+    const existente = this.detalles.controls.find((grupo) =>
+      Number(grupo.value.productoVarianteId) === item.productoVarianteId
+    );
+
+    if (existente) {
+      const nuevaCantidad = Number(existente.value.cantidad || 0) + 1;
+      existente.patchValue({ cantidad: nuevaCantidad, costoUnitario: item.costo });
+      this.mensajeEscaneo.set(`${item.productoNombre}: cantidad actualizada a ${nuevaCantidad}.`);
+      return;
+    }
+
+    this.incorporarProductoEscaneado(item);
+    const filaVacia = this.detalles.controls.find((grupo) => !grupo.value.productoId);
+    const valores = {
+      productoId: item.productoId,
+      productoVarianteId: item.productoVarianteId,
+      cantidad: 1,
+      costoUnitario: item.costo
+    };
+    if (filaVacia) filaVacia.patchValue(valores);
+    else this.agregarDetalle(item.productoId, item.productoVarianteId, 1, item.costo);
+
+    this.errorMessage.set(null);
+    this.mensajeEscaneo.set(`${item.productoNombre}${item.colorNombre ? ` · ${item.colorNombre}` : ''} agregado a la compra.`);
+  }
+
+  private incorporarProductoEscaneado(item: ProductoEscaneadoCompra): void {
+    const variante: ProductoVariante = {
+      id: item.productoVarianteId,
+      productoId: item.productoId,
+      productoNombre: item.productoNombre,
+      colorId: item.colorId ?? undefined,
+      colorNombre: item.colorNombre ?? (item.esVarianteTecnica ? 'Predeterminada' : 'Sin color'),
+      sku: item.sku,
+      codigoBarras: item.codigoBarras ?? undefined,
+      cantidad: item.cantidadDisponible,
+      umbralStockBajo: 0,
+      costo: item.costo,
+      precio: item.precio,
+      activo: true,
+      tieneStockBajo: false,
+      estaAgotada: item.cantidadDisponible <= 0,
+      estadoInventario: item.cantidadDisponible > 0 ? 'Disponible' : 'Agotado',
+      fechaCreacion: '',
+      fechaActualizacion: ''
+    };
+
+    const actuales = [...this.productos()];
+    const indice = actuales.findIndex((producto) => producto.id === item.productoId);
+    if (indice >= 0) {
+      const producto = actuales[indice];
+      const variantes = [...(producto.variantes ?? [])];
+      const indiceVariante = variantes.findIndex((actual) => actual.id === item.productoVarianteId);
+      if (indiceVariante >= 0) variantes[indiceVariante] = { ...variantes[indiceVariante], ...variante };
+      else variantes.push(variante);
+      actuales[indice] = { ...producto, costo: item.costo, precio: item.precio, variantes, totalVariantes: variantes.length };
+    } else {
+      actuales.push({
+        id: item.productoId,
+        nombre: item.productoNombre,
+        marca: item.marca,
+        modelo: item.modelo,
+        cantidad: item.cantidadDisponible,
+        costo: item.costo,
+        precio: item.precio,
+        precioMinimo: item.precio,
+        precioMaximo: item.precio,
+        umbralStockBajo: 0,
+        tieneStockBajo: false,
+        estaAgotado: item.cantidadDisponible <= 0,
+        estadoInventario: item.cantidadDisponible > 0 ? 'Disponible' : 'Agotado',
+        activo: true,
+        imagenes: [],
+        totalImagenes: 0,
+        variantes: [variante],
+        totalVariantes: 1,
+        usaVariantes: true,
+        fechaCreacion: '',
+        fechaActualizacion: ''
+      });
+    }
+    this.productos.set(actuales.sort((a, b) => a.nombre.localeCompare(b.nombre)));
+  }
 
   private cargarCompra(id: number): void {
     this.loading.set(true);
