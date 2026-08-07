@@ -1,5 +1,6 @@
 using InventoryApp.Application.Common;
 using InventoryApp.Application.Interfaces;
+using InventoryApp.Application.Services;
 using InventoryApp.Domain.Entities;
 using InventoryApp.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Http;
@@ -77,8 +78,11 @@ public class FacturaRepository : IFacturaRepository
             ? await ConIncludes().FirstOrDefaultAsync(f => f.Id == id)
             : null;
 
-    public async Task AddAsync(Factura factura) =>
+    public async Task AddAsync(Factura factura)
+    {
+        FacturaDetalleDistribuidor.Aplicar(factura);
         await _context.Facturas.AddAsync(factura);
+    }
 
     public void Update(Factura factura) =>
         _context.Facturas.Update(factura);
