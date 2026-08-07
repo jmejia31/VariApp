@@ -20,4 +20,15 @@ public class CompraDetalle
     public string ProductoModeloSnapshot { get; set; } = string.Empty;
     public string? ProductoColorSnapshot { get; set; }
     public string? ProductoSkuSnapshot { get; set; }
+
+    // Snapshots de valoración capturados al confirmar la compra. Permanecen
+    // nullable para no alterar compras históricas anteriores a 2E.2.
+    public decimal? CostoProductoAnteriorSnapshot { get; set; }
+    public decimal? CostoProductoNuevoSnapshot { get; set; }
+    public decimal? CostoVarianteAnteriorSnapshot { get; set; }
+    public decimal? CostoVarianteNuevoSnapshot { get; set; }
+    public int? StockProductoAnteriorSnapshot { get; set; }
+    public int? StockProductoNuevoSnapshot { get; set; }
+    public int? StockVarianteAnteriorSnapshot { get; set; }
+    public int? StockVarianteNuevoSnapshot { get; set; }
 }
