@@ -144,7 +144,7 @@ test.describe('Fase 2C.4 — frontend del escáner', () => {
     await expect(page.getByRole('heading', { name: 'Escanear código' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Activar cámara' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Leer imagen' })).toBeVisible();
-    await page.getByRole('button', { name: 'Cerrar' }).click();
+    await page.getByRole('button', { name: 'Cerrar', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Escanear código' })).toBeHidden();
   });
 });
