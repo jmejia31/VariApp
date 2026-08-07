@@ -133,14 +133,30 @@ export class CompraFormComponent implements OnInit {
   }
 
   private agregarProductoEscaneado(item: ProductoEscaneadoCompra): void {
-    const existente = this.detalles.controls.find((grupo) =>
-      Number(grupo.value.productoVarianteId) === item.productoVarianteId
-    );
+    const coincidencias = this.detalles.controls
+      .map((grupo, index) => ({ grupo, index }))
+      .filter(({ grupo }) =>
+        Number(grupo.value.productoId) === item.productoId
+        && Number(grupo.value.productoVarianteId) === item.productoVarianteId
+      );
 
-    if (existente) {
-      const nuevaCantidad = Number(existente.value.cantidad || 0) + 1;
-      existente.patchValue({ cantidad: nuevaCantidad, costoUnitario: item.costo });
-      this.mensajeEscaneo.set(`${item.productoNombre}: cantidad actualizada a ${nuevaCantidad}.`);
+    if (coincidencias.length > 0) {
+      const cantidadActual = coincidencias.reduce(
+        (total, { grupo }) => total + Number(grupo.value.cantidad || 0),
+        0
+      );
+      const nuevaCantidad = cantidadActual + 1;
+      coincidencias[0].grupo.patchValue({
+        cantidad: nuevaCantidad,
+        costoUnitario: item.costo
+      });
+      coincidencias
+        .slice(1)
+        .map(({ index }) => index)
+        .sort((a, b) => b - a)
+        .forEach((index) => this.detalles.removeAt(index));
+
+      this.mensajeEscaneo.set(`${item.productoNombre}: cantidad consolidada en ${nuevaCantidad}.`);
       return;
     }
 
@@ -156,7 +172,9 @@ export class CompraFormComponent implements OnInit {
     else this.agregarDetalle(item.productoId, item.productoVarianteId, 1, item.costo);
 
     this.errorMessage.set(null);
-    this.mensajeEscaneo.set(`${item.productoNombre}${item.colorNombre ? ` · ${item.colorNombre}` : ''} agregado a la compra.`);
+    this.mensajeEscaneo.set(
+      `${item.productoNombre}${item.colorNombre ? ` · ${item.colorNombre}` : ''} agregado a la compra.`
+    );
   }
 
   private incorporarProductoEscaneado(item: ProductoEscaneadoCompra): void {
@@ -164,7 +182,7 @@ export class CompraFormComponent implements OnInit {
       id: item.productoVarianteId,
       productoId: item.productoId,
       productoNombre: item.productoNombre,
-      colorId: item.colorId ?? undefined,
+      colorId: item.colorId ?? 0,
       colorNombre: item.colorNombre ?? (item.esVarianteTecnica ? 'Predeterminada' : 'Sin color'),
       sku: item.sku,
       codigoBarras: item.codigoBarras ?? undefined,

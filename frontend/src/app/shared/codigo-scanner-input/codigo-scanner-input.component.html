@@ -1,13 +1,19 @@
 <section class="scanner-card" [class.scanner-card-active]="activo()" aria-labelledby="scanner-title">
   <div class="scanner-heading">
     <div>
-      <h3 id="scanner-title"><mat-icon>barcode_scanner</mat-icon> Lector USB / Bluetooth</h3>
-      <p>Activa el modo escáner. El lector debe enviar el código y finalizar con Enter.</p>
+      <h3 id="scanner-title"><mat-icon>barcode_scanner</mat-icon> Escáner de productos</h3>
+      <p>Usa un lector USB/Bluetooth, la cámara del dispositivo o una imagen guardada.</p>
     </div>
-    <button mat-stroked-button type="button" (click)="alternarModo()" [attr.aria-pressed]="activo()">
-      <mat-icon>{{ activo() ? 'pause_circle' : 'qr_code_scanner' }}</mat-icon>
-      {{ activo() ? 'Desactivar modo escáner' : 'Activar modo escáner' }}
-    </button>
+    <div class="scanner-actions">
+      <button mat-stroked-button type="button" (click)="alternarModo()" [attr.aria-pressed]="activo()">
+        <mat-icon>{{ activo() ? 'pause_circle' : 'keyboard' }}</mat-icon>
+        {{ activo() ? 'Desactivar lector físico' : 'Activar lector físico' }}
+      </button>
+      <button mat-flat-button color="primary" type="button" (click)="abrirCamara()" [disabled]="procesando">
+        <mat-icon>photo_camera</mat-icon>
+        Cámara o imagen
+      </button>
+    </div>
   </div>
 
   @if (activo()) {
@@ -18,7 +24,8 @@
           #codigoInput
           matInput
           autocomplete="off"
-          inputmode="none"
+          inputmode="text"
+          maxlength="100"
           [formControl]="codigo"
           [disabled]="procesando"
           (keydown.enter)="$event.preventDefault(); procesar()"
@@ -31,7 +38,9 @@
         Agregar
       </button>
     </div>
-    <p id="scanner-help" class="scanner-help">El foco vuelve a este campo después de cada lectura. Al escribir en otro campo del formulario, el sistema no interrumpe tu trabajo.</p>
+    <p id="scanner-help" class="scanner-help">
+      El foco vuelve a este campo únicamente después de una lectura. El sistema no interrumpe otros campos del formulario.
+    </p>
   }
 
   @if (mensaje) {

@@ -164,19 +164,38 @@ export class VentaFormComponent implements OnInit {
   }
 
   private agregarProductoEscaneado(item: ProductoEscaneadoVenta): void {
-    const existente = this.detalles.controls.find((grupo) =>
-      Number(grupo.value.productoVarianteId) === item.productoVarianteId
-    );
+    const coincidencias = this.detalles.controls
+      .map((grupo, index) => ({ grupo, index }))
+      .filter(({ grupo }) =>
+        Number(grupo.value.productoId) === item.productoId
+        && Number(grupo.value.productoVarianteId) === item.productoVarianteId
+      );
 
-    if (existente) {
-      const nuevaCantidad = Number(existente.value.cantidad || 0) + 1;
+    if (coincidencias.length > 0) {
+      const cantidadActual = coincidencias.reduce(
+        (total, { grupo }) => total + Number(grupo.value.cantidad || 0),
+        0
+      );
+      const nuevaCantidad = cantidadActual + 1;
       if (nuevaCantidad > item.cantidadDisponible) {
         this.errorEscaneo.set(true);
-        this.mensajeEscaneo.set(`Stock insuficiente para ${item.productoNombre}. Disponible: ${item.cantidadDisponible}.`);
+        this.mensajeEscaneo.set(
+          `Stock insuficiente para ${item.productoNombre}. Disponible: ${item.cantidadDisponible}.`
+        );
         return;
       }
-      existente.patchValue({ cantidad: nuevaCantidad, precioUnitario: item.precio });
-      this.mensajeEscaneo.set(`${item.productoNombre}: cantidad actualizada a ${nuevaCantidad}.`);
+
+      coincidencias[0].grupo.patchValue({
+        cantidad: nuevaCantidad,
+        precioUnitario: item.precio
+      });
+      coincidencias
+        .slice(1)
+        .map(({ index }) => index)
+        .sort((a, b) => b - a)
+        .forEach((index) => this.detalles.removeAt(index));
+
+      this.mensajeEscaneo.set(`${item.productoNombre}: cantidad consolidada en ${nuevaCantidad}.`);
       return;
     }
 
@@ -192,7 +211,9 @@ export class VentaFormComponent implements OnInit {
     else this.agregarDetalle(item.productoId, item.productoVarianteId, 1, item.precio);
 
     this.errorMessage.set(null);
-    this.mensajeEscaneo.set(`${item.productoNombre}${item.colorNombre ? ` · ${item.colorNombre}` : ''} agregado a la venta.`);
+    this.mensajeEscaneo.set(
+      `${item.productoNombre}${item.colorNombre ? ` · ${item.colorNombre}` : ''} agregado a la venta.`
+    );
   }
 
   private incorporarProductoEscaneado(item: ProductoEscaneadoVenta): void {
@@ -200,7 +221,7 @@ export class VentaFormComponent implements OnInit {
       id: item.productoVarianteId,
       productoId: item.productoId,
       productoNombre: item.productoNombre,
-      colorId: item.colorId ?? undefined,
+      colorId: item.colorId ?? 0,
       colorNombre: item.colorNombre ?? (item.esVarianteTecnica ? 'Predeterminada' : 'Sin color'),
       sku: item.sku,
       codigoBarras: item.codigoBarras ?? undefined,

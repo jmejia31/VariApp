@@ -1,11 +1,22 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, ElementRef, EventEmitter, Input, Output, ViewChild, signal } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  Output,
+  ViewChild,
+  signal
+} from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { CodigoScannerDialogComponent } from '../codigo-scanner-dialog/codigo-scanner-dialog.component';
 
 @Component({
   selector: 'app-codigo-scanner-input',
@@ -14,6 +25,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     CommonModule,
     ReactiveFormsModule,
     MatButtonModule,
+    MatDialogModule,
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
@@ -34,6 +46,8 @@ export class CodigoScannerInputComponent implements AfterViewInit {
   readonly activo = signal(false);
   readonly codigo = new FormControl('', { nonNullable: true });
 
+  constructor(private readonly dialog: MatDialog) {}
+
   ngAfterViewInit(): void {
     if (this.activo()) this.enfocar();
   }
@@ -42,6 +56,21 @@ export class CodigoScannerInputComponent implements AfterViewInit {
     this.activo.update((valor) => !valor);
     this.codigo.setValue('', { emitEvent: false });
     if (this.activo()) queueMicrotask(() => this.enfocar());
+  }
+
+  abrirCamara(): void {
+    const referencia = this.dialog.open(CodigoScannerDialogComponent, {
+      width: 'min(94vw, 680px)',
+      maxWidth: '680px',
+      disableClose: true,
+      autoFocus: false,
+      restoreFocus: true
+    });
+
+    referencia.afterClosed().subscribe((codigo: string | undefined) => {
+      const normalizado = codigo?.trim();
+      if (normalizado) this.codigoLeido.emit(normalizado);
+    });
   }
 
   procesar(): void {
