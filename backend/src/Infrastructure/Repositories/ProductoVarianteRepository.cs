@@ -76,6 +76,23 @@ public class ProductoVarianteRepository : IProductoVarianteRepository
     public Task<ProductoVariante?> GetByCodigoBarrasAsync(string codigoBarras) =>
         Query().FirstOrDefaultAsync(v => !v.Eliminado && v.CodigoBarras == codigoBarras);
 
+    public Task<List<ProductoVariante>> BuscarPorCodigoAsync(
+        string skuNormalizado,
+        string codigoBarrasNormalizado,
+        CancellationToken cancellationToken = default) =>
+        _context.ProductoVariantes
+            .AsNoTracking()
+            .Include(v => v.Producto)
+            .Include(v => v.Color)
+            .Where(v =>
+                !v.Eliminado &&
+                !v.Producto.Eliminado &&
+                ((v.Sku != null && v.Sku == skuNormalizado) ||
+                 (v.CodigoBarras != null && v.CodigoBarras == codigoBarrasNormalizado)))
+            .OrderBy(v => v.Id)
+            .Take(2)
+            .ToListAsync(cancellationToken);
+
     public Task<ProductoVariante?> GetByProductoColorAsync(int productoId, int colorId) =>
         Query().FirstOrDefaultAsync(v => !v.Eliminado && v.ProductoId == productoId && v.ColorId == colorId);
 

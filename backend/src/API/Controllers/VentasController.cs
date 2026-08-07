@@ -16,11 +16,28 @@ public class VentasController : ControllerBase
 {
     private readonly IVentaService _ventaService;
     private readonly IProductoService _productoService;
+    private readonly IProductoEscanerService _productoEscanerService;
 
-    public VentasController(IVentaService ventaService, IProductoService productoService)
+    public VentasController(
+        IVentaService ventaService,
+        IProductoService productoService,
+        IProductoEscanerService productoEscanerService)
     {
         _ventaService = ventaService;
         _productoService = productoService;
+        _productoEscanerService = productoEscanerService;
+    }
+
+    [HttpGet("productos/por-codigo")]
+    [RequiereAlgunoPermiso(ModuloSistema.Ventas, AccionPermiso.Crear, AccionPermiso.Editar)]
+    public async Task<IActionResult> BuscarProductoPorCodigo(
+        [FromQuery] string codigo,
+        CancellationToken cancellationToken)
+    {
+        var resultado = await _productoEscanerService.ResolverParaVentaAsync(
+            codigo,
+            cancellationToken);
+        return CrearRespuestaEscaner(resultado);
     }
 
     [HttpGet]
@@ -99,6 +116,27 @@ public class VentasController : ControllerBase
         if (!eliminada) return NotFound(ApiResponse<object>.Fail("Venta no encontrada."));
         return Ok(ApiResponse<object>.Ok(new { }, "Borrador de venta eliminado lógicamente."));
     }
+
+    private IActionResult CrearRespuestaEscaner(
+        ResultadoResolucionProductoEscaner<ProductoEscaneadoVentaDto> resultado) =>
+        resultado.Estado switch
+        {
+            EstadoResolucionProductoEscaner.Encontrado =>
+                Ok(ApiResponse<ProductoEscaneadoVentaDto>.Ok(
+                    resultado.Dato!,
+                    "Producto localizado correctamente.")),
+            EstadoResolucionProductoEscaner.EntradaInvalida =>
+                BadRequest(ApiResponse<object>.Fail(resultado.Mensaje)),
+            EstadoResolucionProductoEscaner.NoEncontrado =>
+                NotFound(ApiResponse<object>.Fail(resultado.Mensaje)),
+            EstadoResolucionProductoEscaner.Conflicto =>
+                Conflict(ApiResponse<object>.Fail(resultado.Mensaje)),
+            EstadoResolucionProductoEscaner.NoOperativo =>
+                UnprocessableEntity(ApiResponse<object>.Fail(resultado.Mensaje)),
+            _ => StatusCode(
+                StatusCodes.Status500InternalServerError,
+                ApiResponse<object>.Fail("No fue posible resolver el producto escaneado."))
+        };
 
     private async Task ValidarProductosActivosAsync(IEnumerable<int> productoIds)
     {
