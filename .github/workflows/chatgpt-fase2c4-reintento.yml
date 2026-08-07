@@ -1,0 +1,79 @@
+name: Temporal ChatGPT - reintento cierre escáner 2C.4
+
+on:
+  push:
+    branches:
+      - Desarrollo
+    paths:
+      - .github/workflows/chatgpt-fase2c4-reintento.yml
+
+permissions:
+  contents: write
+
+jobs:
+  corregir-validar-publicar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout Desarrollo
+        uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Ajustar contrato tipado de html5-qrcode
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('scripts/chatgpt_fase2c4_complete.py')
+          text = path.read_text(encoding='utf-8')
+          needle = "this.lector = new modulo.Html5Qrcode(this.readerId, {\n        formatsToSupport: ["
+          replacement = "this.lector = new modulo.Html5Qrcode(this.readerId, {\n        verbose: false,\n        formatsToSupport: ["
+          if text.count(needle) != 2:
+              raise SystemExit(f'Se esperaban 2 constructores y se encontraron {text.count(needle)}.')
+          path.write_text(text.replace(needle, replacement), encoding='utf-8')
+          PY
+
+      - name: Aplicar cierre funcional 2C.4
+        run: python3 scripts/chatgpt_fase2c4_complete.py
+
+      - name: Retirar reintento temporal
+        run: rm -f .github/workflows/chatgpt-fase2c4-reintento.yml
+
+      - name: Instalar dependencias exactas
+        working-directory: frontend
+        run: npm ci
+
+      - name: Validar TypeScript, calidad y contrato 2C.4
+        working-directory: frontend
+        run: npm run lint
+
+      - name: Compilar frontend de producción
+        working-directory: frontend
+        run: npm run build:prod
+
+      - name: Validar cambios preparados
+        run: |
+          set -euo pipefail
+          git diff --check
+          test -n "$(git status --porcelain)"
+          test ! -e .github/workflows/chatgpt-fase2c4-completar.yml
+          test ! -e .github/workflows/chatgpt-fase2c4-dependencia.yml
+          test ! -e .github/workflows/chatgpt-fase2c4-reintento.yml
+          test ! -e scripts/chatgpt_fase2c4_complete.py
+
+      - name: Publicar Fase 2C.4 en Desarrollo
+        run: |
+          set -euo pipefail
+          git config user.name 'jmejia31'
+          git config user.email '93171442+jmejia31@users.noreply.github.com'
+          git add -A
+          git commit -m 'feat(escaner): completar frontend cámara y lectores físicos 2C.4 [ChatGPT]'
+          git push origin HEAD:Desarrollo
