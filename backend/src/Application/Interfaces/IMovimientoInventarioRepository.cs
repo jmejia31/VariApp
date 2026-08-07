@@ -10,5 +10,5 @@ public interface IMovimientoInventarioRepository
     Task<int?> GetUltimoMovimientoOriginalCompraIdAsync(int compraId);
     Task<bool> ExisteMovimientoPosteriorAsync(
         int ultimoMovimientoOriginalId,
-        IReadOnlyCollection<int> productoIds);
+        IReadOnlyCollection<InventarioDemanda> demandas);
 }
