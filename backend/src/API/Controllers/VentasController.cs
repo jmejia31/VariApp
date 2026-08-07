@@ -40,6 +40,20 @@ public class VentasController : ControllerBase
         return CrearRespuestaEscaner(resultado);
     }
 
+    [HttpGet("productos/buscar")]
+    [RequiereAlgunoPermiso(ModuloSistema.Ventas, AccionPermiso.Crear, AccionPermiso.Editar)]
+    public async Task<IActionResult> BuscarProductos(
+        [FromQuery] string termino,
+        [FromQuery] int limite = 30,
+        CancellationToken cancellationToken = default)
+    {
+        var resultados = await _productoEscanerService.BuscarParaVentaAsync(
+            termino,
+            limite,
+            cancellationToken);
+        return Ok(ApiResponse<List<ProductoEscaneadoVentaDto>>.Ok(resultados));
+    }
+
     [HttpGet]
     [RequierePermiso(ModuloSistema.Ventas, AccionPermiso.Ver)]
     public async Task<IActionResult> GetPaged([FromQuery] PagedRequest request)
