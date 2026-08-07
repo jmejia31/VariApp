@@ -27,7 +27,7 @@ public class MovimientoInventarioRepositoryTests
 
         var existe = await repo.ExisteMovimientoPosteriorAsync(
             original.Id,
-            new[] { new InventarioDemanda(10, 101, 1) });
+            new[] { 10 });
 
         Assert.False(existe);
     }
@@ -48,7 +48,7 @@ public class MovimientoInventarioRepositoryTests
 
         var existe = await repo.ExisteMovimientoPosteriorAsync(
             original.Id,
-            new[] { new InventarioDemanda(20, 201, 1) });
+            new[] { 20 });
 
         Assert.True(existe);
     }
@@ -69,7 +69,7 @@ public class MovimientoInventarioRepositoryTests
 
         var conOtraVariante = await repo.ExisteMovimientoPosteriorAsync(
             original.Id,
-            new[] { new InventarioDemanda(30, null, 1) });
+            new[] { 30 });
         Assert.False(conOtraVariante);
 
         context.MovimientosInventario.Add(CrearMovimiento(30, null, "Ajuste", 3));
@@ -77,12 +77,12 @@ public class MovimientoInventarioRepositoryTests
 
         var conMismaClave = await repo.ExisteMovimientoPosteriorAsync(
             original.Id,
-            new[] { new InventarioDemanda(30, null, 1) });
+            new[] { 30 });
         Assert.True(conMismaClave);
     }
 
     [Fact]
-    public async Task ExisteMovimientoPosteriorAsync_DemandasDuplicadas_SeConsolidanSinCambiarResultado()
+    public async Task ExisteMovimientoPosteriorAsync_ProductosDuplicados_SeConsolidanSinCambiarResultado()
     {
         await using var context = CrearContexto();
         var scope = CrearScopeAdministrador();
@@ -97,13 +97,32 @@ public class MovimientoInventarioRepositoryTests
 
         var existe = await repo.ExisteMovimientoPosteriorAsync(
             original.Id,
-            new[]
-            {
-                new InventarioDemanda(40, 401, 1),
-                new InventarioDemanda(40, 401, 2)
-            });
+            new[] { 40, 40 });
 
         Assert.True(existe);
+    }
+
+    [Fact]
+    public async Task ExisteMovimientoPosteriorAsync_CompraConDosVariantes_DetectaSoloClavesOriginales()
+    {
+        await using var context = CrearContexto();
+        var scope = CrearScopeAdministrador();
+        var repo = new MovimientoInventarioRepository(context, scope.Object);
+
+        var originalA = CrearMovimiento(50, 501, "Compra", 7);
+        var originalB = CrearMovimiento(50, 502, "Compra", 7);
+        context.MovimientosInventario.AddRange(originalA, originalB);
+        await context.SaveChangesAsync();
+
+        context.MovimientosInventario.Add(CrearMovimiento(50, 503, "Venta", 8));
+        await context.SaveChangesAsync();
+
+        Assert.False(await repo.ExisteMovimientoPosteriorAsync(originalB.Id, new[] { 50 }));
+
+        context.MovimientosInventario.Add(CrearMovimiento(50, 502, "Venta", 9));
+        await context.SaveChangesAsync();
+
+        Assert.True(await repo.ExisteMovimientoPosteriorAsync(originalB.Id, new[] { 50 }));
     }
 
     private static AppDbContext CrearContexto()
