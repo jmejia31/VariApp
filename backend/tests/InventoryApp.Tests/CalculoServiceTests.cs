@@ -244,6 +244,37 @@ public class CalculoServiceTests
         Assert.Equal(1000m, resultado.Total);
     }
 
+    [Fact]
+    public async Task CalcularVentaAsync_RedondeaCadaLineaAntesDeSumar()
+    {
+        var resultado = await _service.CalcularVentaAsync(
+            new List<DetalleCalculoInput>
+            {
+                new() { ProductoId = 1, Cantidad = 1, PrecioUnitario = 0.335m },
+                new() { ProductoId = 2, Cantidad = 1, PrecioUnitario = 0.335m }
+            }, null, null, null);
+
+        Assert.Equal(0.68m, resultado.ImporteBruto);
+        Assert.Equal(0.68m, resultado.ImporteProductos);
+        Assert.Equal(0.68m, resultado.Subtotal);
+        Assert.Equal(0.68m, resultado.Total);
+    }
+
+    [Fact]
+    public async Task CalcularCompraAsync_RedondeaCadaLineaAntesDeSumar()
+    {
+        var resultado = await _service.CalcularCompraAsync(
+            new List<DetalleCalculoInput>
+            {
+                new() { ProductoId = 1, Cantidad = 1, PrecioUnitario = 10.005m },
+                new() { ProductoId = 2, Cantidad = 1, PrecioUnitario = 10.005m }
+            }, proveedorId: null);
+
+        Assert.Equal(20.02m, resultado.ImporteBruto);
+        Assert.Equal(20.02m, resultado.Subtotal);
+        Assert.Equal(20.02m, resultado.Total);
+    }
+
     private void ConfigurarImpuesto(int id, string nombre, string codigo, decimal tasa, bool incluido)
     {
         _impuestoRepository
