@@ -12,6 +12,7 @@ public class Marca : AuditableEntity
     public bool Eliminado { get; set; }
     public DateTime? FechaEliminacion { get; set; }
     public int? EliminadoPorUsuarioId { get; set; }
+    public string? NombreActivoUnico { get; private set; }
 
     public ICollection<Modelo> Modelos { get; set; } = new List<Modelo>();
 }

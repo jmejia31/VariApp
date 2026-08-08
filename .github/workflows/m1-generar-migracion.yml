@@ -39,8 +39,7 @@ jobs:
           dotnet ef migrations add M1NormalizarMaestrosProducto \
             --project backend/src/Infrastructure/InventoryApp.Infrastructure.csproj \
             --startup-project backend/src/API/InventoryApp.API.csproj \
-            --output-dir Migrations \
-            --no-build
+            --output-dir Migrations
 
       - name: Compilar backend con artefactos generados
         working-directory: backend

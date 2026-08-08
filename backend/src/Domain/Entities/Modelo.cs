@@ -14,4 +14,5 @@ public class Modelo : AuditableEntity
     public bool Eliminado { get; set; }
     public DateTime? FechaEliminacion { get; set; }
     public int? EliminadoPorUsuarioId { get; set; }
+    public string? NombreMarcaActivoUnico { get; private set; }
 }

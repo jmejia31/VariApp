@@ -9,12 +9,16 @@ public class ModeloConfiguration : IEntityTypeConfiguration<Modelo>
     public void Configure(EntityTypeBuilder<Modelo> builder)
     {
         builder.ToTable("Modelos");
+        builder.Property(x => x.Id).ValueGeneratedNever();
         builder.Property(x => x.Nombre).HasMaxLength(120).IsRequired();
         builder.Property(x => x.Descripcion).HasMaxLength(500);
         builder.Property(x => x.Activo).HasDefaultValue(true);
         builder.Property(x => x.Eliminado).HasDefaultValue(false);
+        builder.Property(x => x.NombreMarcaActivoUnico)
+            .HasMaxLength(180)
+            .HasComputedColumnSql("IF(Eliminado = 0, CONCAT(CAST(MarcaId AS CHAR), ':', LOWER(TRIM(Nombre))), NULL)", stored: true);
         builder.HasQueryFilter(x => !x.Eliminado);
-        builder.HasIndex(x => new { x.MarcaId, x.Nombre }).IsUnique().HasDatabaseName("UX_Modelos_Marca_Nombre");
+        builder.HasIndex(x => x.NombreMarcaActivoUnico).IsUnique().HasDatabaseName("UX_Modelos_Marca_Nombre_Activo");
         builder.HasIndex(x => new { x.MarcaId, x.Activo, x.Eliminado }).HasDatabaseName("IX_Modelos_Marca_Estado");
         builder.HasOne(x => x.Marca)
             .WithMany(x => x.Modelos)

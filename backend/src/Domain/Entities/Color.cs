@@ -13,4 +13,5 @@ public class Color : AuditableEntity
     public bool Eliminado { get; set; }
     public DateTime? FechaEliminacion { get; set; }
     public int? EliminadoPorUsuarioId { get; set; }
+    public string? NombreActivoUnico { get; private set; }
 }

@@ -9,12 +9,16 @@ public class TallaConfiguration : IEntityTypeConfiguration<Talla>
     public void Configure(EntityTypeBuilder<Talla> builder)
     {
         builder.ToTable("Tallas");
+        builder.Property(x => x.Id).ValueGeneratedNever();
         builder.Property(x => x.Nombre).HasMaxLength(120).IsRequired();
         builder.Property(x => x.Descripcion).HasMaxLength(500);
         builder.Property(x => x.Activo).HasDefaultValue(true);
         builder.Property(x => x.Eliminado).HasDefaultValue(false);
+        builder.Property(x => x.NombreActivoUnico)
+            .HasMaxLength(120)
+            .HasComputedColumnSql("IF(Eliminado = 0, LOWER(TRIM(Nombre)), NULL)", stored: true);
         builder.HasQueryFilter(x => !x.Eliminado);
-        builder.HasIndex(x => x.Nombre).IsUnique().HasDatabaseName("UX_Tallas_Nombre");
+        builder.HasIndex(x => x.NombreActivoUnico).IsUnique().HasDatabaseName("UX_Tallas_Nombre_Activo");
         builder.HasIndex(x => new { x.Activo, x.Eliminado }).HasDatabaseName("IX_Tallas_Estado");
     }
 }
