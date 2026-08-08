@@ -6,19 +6,21 @@ on:
       - Desarrollo
     paths:
       - .github/workflows/m1-generar-migracion.yml
-  workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   generate:
-    name: Generar migracion y snapshot M1
+    name: Generar, validar y publicar migracion M1
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - name: Checkout Desarrollo
         uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
 
       - name: Configurar .NET
         uses: actions/setup-dotnet@v4
@@ -34,21 +36,44 @@ jobs:
       - name: Instalar dotnet-ef 8.0.2
         run: dotnet tool install --global dotnet-ef --version 8.0.2
 
-      - name: Generar migracion M1
+      - name: Generar migracion y snapshot M1
         run: |
           dotnet ef migrations add M1NormalizarMaestrosProducto \
             --project backend/src/Infrastructure/InventoryApp.Infrastructure.csproj \
             --startup-project backend/src/API/InventoryApp.API.csproj \
             --output-dir Migrations
 
-      - name: Compilar backend con artefactos generados
+      - name: Incorporar backfill conservador
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          migrations = Path('backend/src/Infrastructure/Migrations')
+          files = sorted(p for p in migrations.glob('*_M1NormalizarMaestrosProducto.cs') if not p.name.endswith('.Designer.cs'))
+          if len(files) != 1:
+              raise SystemExit(f'Se esperaba una migración M1 y se encontraron {len(files)}')
+          path = files[0]
+          text = path.read_text(encoding='utf-8-sig')
+          marker = '            migrationBuilder.CreateIndex(\n'
+          if marker not in text:
+              raise SystemExit('No se encontró el punto seguro previo a índices.')
+          backfill = '''            // Backfill no destructivo: conserva exactamente los IDs del catálogo legacy\n            // para que Productos/ProductoVariantes sigan siendo compatibles hasta M2.\n            migrationBuilder.Sql(@\"\nINSERT INTO `Marcas`\n    (`Id`,`Nombre`,`Descripcion`,`Orden`,`Activo`,`Eliminado`,`FechaEliminacion`,`EliminadoPorUsuarioId`,`FechaCreacion`,`FechaActualizacion`,`CreadoPorUsuarioId`,`CreadoPorNombreUsuario`,`ActualizadoPorUsuarioId`,`ActualizadoPorNombreUsuario`)\nSELECT `Id`,`Nombre`,`Descripcion`,`Orden`,`Activo`,`Eliminado`,`FechaEliminacion`,`EliminadoPorUsuarioId`,`FechaCreacion`,`FechaActualizacion`,`CreadoPorUsuarioId`,`CreadoPorNombreUsuario`,`ActualizadoPorUsuarioId`,`ActualizadoPorNombreUsuario`\nFROM `CatalogosProducto` WHERE `Tipo` = 'Marca';\n\nINSERT INTO `Colores`\n    (`Id`,`Nombre`,`Descripcion`,`CodigoVisual`,`Orden`,`Activo`,`Eliminado`,`FechaEliminacion`,`EliminadoPorUsuarioId`,`FechaCreacion`,`FechaActualizacion`,`CreadoPorUsuarioId`,`CreadoPorNombreUsuario`,`ActualizadoPorUsuarioId`,`ActualizadoPorNombreUsuario`)\nSELECT `Id`,`Nombre`,`Descripcion`,`CodigoVisual`,`Orden`,`Activo`,`Eliminado`,`FechaEliminacion`,`EliminadoPorUsuarioId`,`FechaCreacion`,`FechaActualizacion`,`CreadoPorUsuarioId`,`CreadoPorNombreUsuario`,`ActualizadoPorUsuarioId`,`ActualizadoPorNombreUsuario`\nFROM `CatalogosProducto` WHERE `Tipo` = 'Color';\n\nINSERT INTO `Tallas`\n    (`Id`,`Nombre`,`Descripcion`,`Orden`,`Activo`,`Eliminado`,`FechaEliminacion`,`EliminadoPorUsuarioId`,`FechaCreacion`,`FechaActualizacion`,`CreadoPorUsuarioId`,`CreadoPorNombreUsuario`,`ActualizadoPorUsuarioId`,`ActualizadoPorNombreUsuario`)\nSELECT `Id`,`Nombre`,`Descripcion`,`Orden`,`Activo`,`Eliminado`,`FechaEliminacion`,`EliminadoPorUsuarioId`,`FechaCreacion`,`FechaActualizacion`,`CreadoPorUsuarioId`,`CreadoPorNombreUsuario`,`ActualizadoPorUsuarioId`,`ActualizadoPorNombreUsuario`\nFROM `CatalogosProducto` WHERE `Tipo` = 'Talla';\n\nINSERT INTO `Modelos`\n    (`Id`,`MarcaId`,`Nombre`,`Descripcion`,`Orden`,`Activo`,`Eliminado`,`FechaEliminacion`,`EliminadoPorUsuarioId`,`FechaCreacion`,`FechaActualizacion`,`CreadoPorUsuarioId`,`CreadoPorNombreUsuario`,`ActualizadoPorUsuarioId`,`ActualizadoPorNombreUsuario`)\nSELECT `Id`,`CatalogoPadreId`,`Nombre`,`Descripcion`,`Orden`,`Activo`,`Eliminado`,`FechaEliminacion`,`EliminadoPorUsuarioId`,`FechaCreacion`,`FechaActualizacion`,`CreadoPorUsuarioId`,`CreadoPorNombreUsuario`,`ActualizadoPorUsuarioId`,`ActualizadoPorNombreUsuario`\nFROM `CatalogosProducto` WHERE `Tipo` = 'Modelo';\n\");\n\n'''
+          text = text.replace(marker, backfill + marker, 1)
+          path.write_text(text, encoding='utf-8')
+          print(path)
+          PY
+
+      - name: Compilar backend con migracion
         working-directory: backend
         run: dotnet build InventoryApp.sln --configuration Release --no-restore
 
-      - name: Empaquetar migracion y snapshot
-        uses: actions/upload-artifact@v4
-        with:
-          name: m1-migracion-ef
-          path: backend/src/Infrastructure/Migrations/
-          if-no-files-found: error
-          retention-days: 1
+      - name: Publicar migracion y snapshot en Desarrollo
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'jmejia31'
+          git config user.email '93171442+jmejia31@users.noreply.github.com'
+          git add backend/src/Infrastructure/Migrations
+          git diff --cached --check
+          git commit -m 'db(m1): normalizar maestros y backfill legacy [ChatGPT]'
+          git push origin HEAD:Desarrollo
