@@ -11,17 +11,6 @@ namespace InventoryApp.Infrastructure.Services;
 public class CloudinaryPerfilImagenStorageService : IPerfilImagenStorageService
 {
     private const string BaseFolder = "variapp/perfiles";
-    private const long MaximoBytes = 5 * 1024 * 1024;
-
-    private static readonly HashSet<string> TiposPermitidos = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "image/jpeg", "image/png", "image/webp"
-    };
-
-    private static readonly HashSet<string> ExtensionesPermitidas = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ".jpg", ".jpeg", ".png", ".webp"
-    };
 
     private readonly Cloudinary _cloudinary;
     private readonly ILogger<CloudinaryPerfilImagenStorageService> _logger;
@@ -53,15 +42,12 @@ public class CloudinaryPerfilImagenStorageService : IPerfilImagenStorageService
 
     public async Task<(string Url, string PublicId)> UploadAsync(IFormFile foto)
     {
-        ValidarFoto(foto);
-
         try
         {
-            await using var stream = foto.OpenReadStream();
-            var nombreSeguro = $"perfil-{Guid.NewGuid():N}{Path.GetExtension(foto.FileName).ToLowerInvariant()}";
+            using var segura = await ImagenUploadSecurity.ProcesarAsync(foto);
             var parametros = new ImageUploadParams
             {
-                File = new FileDescription(nombreSeguro, stream),
+                File = new FileDescription(segura.NombreArchivo, segura.Contenido),
                 Folder = _folder,
                 UseFilename = false,
                 UniqueFilename = true,
@@ -77,7 +63,7 @@ public class CloudinaryPerfilImagenStorageService : IPerfilImagenStorageService
             var resultado = await _cloudinary.UploadAsync(parametros);
             if (resultado.Error is not null || resultado.SecureUrl is null || string.IsNullOrWhiteSpace(resultado.PublicId))
             {
-                _logger.LogWarning("Cloudinary rechazó una foto de perfil. Error={Error}", resultado.Error?.Message);
+                _logger.LogWarning("Cloudinary rechazó una fotografía de perfil sanitizada.");
                 throw new BusinessRuleException("No fue posible guardar la fotografía de perfil.");
             }
 
@@ -89,7 +75,7 @@ public class CloudinaryPerfilImagenStorageService : IPerfilImagenStorageService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error al subir una fotografía de perfil a Cloudinary.");
+            _logger.LogError(ex, "Error al subir una fotografía de perfil sanitizada a Cloudinary.");
             throw new BusinessRuleException("No fue posible guardar la fotografía de perfil. Intenta nuevamente.");
         }
     }
@@ -123,22 +109,7 @@ public class CloudinaryPerfilImagenStorageService : IPerfilImagenStorageService
         }
         catch (Exception ex)
         {
-            // La referencia de base de datos no debe restaurarse porque falló una
-            // limpieza remota; el incidente queda registrado para conciliación.
             _logger.LogError(ex, "No fue posible eliminar la foto de perfil {PublicId} de Cloudinary.", publicId);
         }
-    }
-
-    private static void ValidarFoto(IFormFile foto)
-    {
-        if (foto is null || foto.Length == 0)
-            throw new BusinessRuleException("Selecciona una fotografía válida.");
-
-        if (foto.Length > MaximoBytes)
-            throw new BusinessRuleException("La fotografía no puede superar 5 MB.");
-
-        var extension = Path.GetExtension(foto.FileName);
-        if (!TiposPermitidos.Contains(foto.ContentType) || !ExtensionesPermitidas.Contains(extension))
-            throw new BusinessRuleException("La fotografía debe ser JPG, PNG o WebP.");
     }
 }

@@ -23,6 +23,6 @@ public class UpdateProductoValidator : AbstractValidator<UpdateProductoDto>
 
         RuleForEach(x => x.ImagenesNuevas)
             .Must(ImagenValidationHelper.EsImagenValida)
-            .WithMessage("Cada imagen debe ser JPG, PNG o WEBP y pesar máximo 5 MB.");
+            .WithMessage("Cada imagen debe ser JPG, JPEG, PNG o WEBP y pesar máximo 10 MB.");
     }
 }

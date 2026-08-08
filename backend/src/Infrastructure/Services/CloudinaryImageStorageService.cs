@@ -42,21 +42,22 @@ public class CloudinaryImageStorageService : IImageStorageService
     {
         try
         {
-            await using var stream = file.OpenReadStream();
+            using var segura = await ImagenUploadSecurity.ProcesarAsync(file);
 
             var uploadParams = new ImageUploadParams
             {
-                File = new FileDescription(file.FileName, stream),
+                File = new FileDescription(segura.NombreArchivo, segura.Contenido),
                 Folder = _folder,
+                UseFilename = false,
+                UniqueFilename = true,
+                Overwrite = false,
                 Transformation = new Transformation().Width(800).Height(800).Crop("limit").Quality("auto")
             };
 
             var result = await _cloudinary.UploadAsync(uploadParams);
 
-            if (result.Error is not null)
-            {
-                throw new BusinessRuleException($"No se pudo subir la imagen a Cloudinary: {result.Error.Message}");
-            }
+            if (result.Error is not null || result.SecureUrl is null || string.IsNullOrWhiteSpace(result.PublicId))
+                throw new BusinessRuleException("No se pudo guardar la imagen del producto.");
 
             return (result.SecureUrl.ToString(), result.PublicId);
         }
@@ -64,10 +65,12 @@ public class CloudinaryImageStorageService : IImageStorageService
         {
             throw;
         }
-        catch (Exception ex)
+        catch
         {
+            // No se devuelve al cliente el mensaje técnico del proveedor externo,
+            // evitando filtrar detalles de configuración o infraestructura.
             throw new BusinessRuleException(
-                $"No se pudo subir la imagen a Cloudinary. Verifica las credenciales y permisos de Cloudinary. Detalle: {ex.Message}");
+                "No se pudo guardar la imagen del producto. Intenta nuevamente.");
         }
     }
 
@@ -86,9 +89,7 @@ public class CloudinaryImageStorageService : IImageStorageService
     public async Task<(Stream Contenido, string ContentType)?> DownloadAsync(string url)
     {
         // Streaming server-side en vez de redirigir a la URL de Cloudinary
-        // directamente (sección 11/12): el backend controla la autorización
-        // real de la descarga y puede nombrar el archivo de forma amigable,
-        // en vez de confiar en que la URL sea "secreta" por sí sola.
+        // directamente: el backend controla la autorización real de la descarga.
         using var httpClient = new HttpClient();
         try
         {
