@@ -4,15 +4,23 @@ Fecha de certificación técnica: 2026-08-07
 
 ## 1. Alcance
 
-Esta fase cierra documentalmente el Bloque 2C sin añadir reglas de negocio nuevas. Consolida la evidencia técnica de las fases 2C.1 a 2C.5 sobre la rama `Desarrollo` y deja expresamente separadas las validaciones automatizadas de las validaciones físicas o externas.
+Esta fase cierra documentalmente el Bloque 2C sin añadir reglas de negocio nuevas. Consolida la evidencia técnica real de las fases 2C.1 a 2C.5 sobre la rama `Desarrollo` y mantiene expresamente separadas las validaciones automatizadas de las validaciones físicas o externas.
 
-La certificación funcional de referencia previa a este documento corresponde al commit:
+El candidato funcional certificado por esta revisión corresponde al commit:
 
 ```text
-0a589a30564f37474e86bbcb6545a551ea624c80
+c5942990a36287ccb476c66f6f73c7d361d9eca3
 ```
 
-La rama `main` no forma parte del alcance de ejecución y permanece congelada.
+La rama `main` no forma parte del alcance de ejecución y permanece congelada en:
+
+```text
+85b4e02814823e9671803c23798a6ff0bf05c8f6
+```
+
+Producción no fue utilizada ni modificada.
+
+---
 
 ## 2. Componentes certificados
 
@@ -21,7 +29,7 @@ La rama `main` no forma parte del alcance de ejecución y permanece congelada.
 - Compatibilidad de productos simples mediante variante técnica.
 - Migraciones EF verificadas en MySQL descartable de CI.
 - Verificación de snapshot EF sin cambios pendientes en el flujo correspondiente.
-- Workflow permanente `Bloque 2C.1 - Variante técnica y migración` aprobado sobre el candidato funcional de cierre.
+- Workflow permanente `Bloque 2C.1 - Variante técnica y migración` aprobado sobre el candidato funcional vigente.
 
 ### 2C.2 — Ciclo de vida de variante técnica
 
@@ -61,34 +69,47 @@ Cobertura funcional:
 - carga diferida del escáner;
 - liberación de recursos del stream;
 - política de cámara configurada para el frontend;
-- validación estática específica del escáner integrada al `lint`.
+- validación estática específica del escáner integrada al `lint`;
+- workflow dedicado `Fase 2C.4 - Frontend del escáner` aprobado sobre el candidato funcional vigente.
 
 ### 2C.5 — Autocomplete remoto
 
 - eliminada la carga inicial masiva de productos desde los formularios de venta y compra;
-- búsqueda remota con `debounce`, cancelación de solicitudes anteriores y límite de servidor;
+- búsqueda remota con `debounceTime(300)`, cancelación de solicitudes anteriores y límite de servidor;
+- mínimo de 2 caracteres, máximo 100 y hasta 30 resultados;
 - selección exacta de variante;
 - venta sin exposición de costo y sin variantes agotadas;
 - compra con costo y admisión de stock cero;
 - hidratación puntual de productos referenciados al editar borradores;
 - preservación de imágenes en listas, detalles y formularios;
-- convergencia de autocomplete y escáner sobre la misma lógica de incorporación de líneas.
+- convergencia de autocomplete y escáner sobre la misma lógica de incorporación y consolidación de líneas.
 
-## 3. Evidencia automatizada del candidato funcional
+---
 
-### Backend Release
+## 3. Evidencia automatizada vigente
 
-Resultado:
+### 3.1 Backend Release
+
+Ejecución verificada en `Desarrollo - Compilación y pruebas`:
 
 ```text
+Run: 31215765026
 Build Release: aprobado
 Warnings: 0
 Errors: 0
-Pruebas unitarias/no integración: 173/173 aprobadas
+Pruebas unitarias/no integración: 201/201 aprobadas
+Fallidas: 0
 Omitidas: 0
 ```
 
-### MySQL
+El artefacto de pruebas generado por el workflow fue:
+
+```text
+Nombre: desarrollo-backend-tests.zip
+Artifact ID: 9008432398
+```
+
+### 3.2 MySQL 8.4
 
 - servicio real de CI: MySQL 8.4.11;
 - migraciones actuales: aprobadas;
@@ -97,93 +118,133 @@ Omitidas: 0
 - base de datos: efímera/descartable de CI;
 - Producción: no utilizada.
 
-### Frontend
+### 3.3 Frontend
 
 - `npm ci`: ejecutado;
 - TypeScript/lint: aprobado;
 - validación estática específica 2C.4: aprobada;
-- build de producción: aprobado.
+- build Angular de producción: aprobado.
 
-### Playwright integral
-
-Resultado final:
+El `lint` confirmó expresamente:
 
 ```text
-87 aprobadas
-0 fallos
+Fase 2C.4: validación estática del frontend del escáner aprobada.
 ```
 
-La suite incluyó expresamente:
+### 3.4 Playwright integral
 
-- tres escenarios de 2C.4 para escáner;
-- escenarios de 2C.5 para venta, compra, stock cero, ausencia de costo y regresiones de imágenes;
-- regresión de variantes;
-- facturación;
-- cargas masivas;
-- responsive;
-- accesibilidad;
-- permisos y aislamiento por usuario;
-- sesión;
-- seguridad básica y rendimiento controlado.
+Ejecución verificada en `Desarrollo - aceptación funcional integral`:
 
-### Correo/PDF aislado
+```text
+Run: 31215765514
+Playwright: 87/87 aprobadas
+Fallos: 0
+```
+
+La suite incluyó expresamente los escenarios de 2C.4:
+
+1. Venta consolida lecturas repetidas, conserva ceros iniciales y bloquea superar stock.
+2. Compra consolida lecturas y conserva el costo retornado por backend.
+3. Cámara e imagen quedan cableadas al formulario sin activar hardware real en CI.
+
+También incluyó los escenarios de 2C.5:
+
+1. Venta consulta bajo demanda, no carga catálogo masivo y no expone costo.
+2. Venta excluye variantes agotadas del autocomplete remoto.
+3. Compra admite stock cero, recibe costo y consolida selecciones repetidas.
+4. Regresión: compra y venta seleccionan la variante exacta mediante autocomplete remoto.
+5. Regresión: listas, detalles y formularios conservan imagen de producto con búsqueda remota.
+
+La aceptación integral volvió a cubrir además variantes, facturación, cargas masivas, responsive, accesibilidad, permisos, aislamiento por usuario, sesión, seguridad básica y rendimiento controlado.
+
+### 3.5 Correo/PDF aislado
 
 - SMTP efímero: aprobado;
 - reintento transitorio: aprobado;
 - un único mensaje persistido: aprobado;
 - PDF adjunto generado y validado: aprobado.
 
-### Workflows del candidato `0a589a3...`
+Artefacto integral:
 
 ```text
-Desarrollo - Compilación y pruebas: success
-Desarrollo - aceptación funcional integral: success
-Fase 2 - Auditoría de configuración y dependencias: success
-Fase 8 - Validación completa automatizada: success
-Bloque 2C.1 - Variante técnica y migración: success
-VariApp CI: skipped por condición del workflow
+Nombre: desarrollo-aceptacion-integral.zip
+Artifact ID: 9008664999
 ```
 
-Un workflow `skipped` por condición no se contabiliza como una validación ejecutada ni como un fallo.
+### 3.6 Workflows obligatorios sobre `c5942990...`
 
-## 4. Incidencia final corregida durante la certificación
+```text
+Desarrollo - Compilación y pruebas
+Run 31215765026 — success
 
-La primera aceptación de 2C.5 alcanzó 86/87 pruebas. La única falla no correspondía a la aplicación: un `page.route` de Playwright utilizaba un patrón sin host y capturaba por error la navegación Angular `/compras`, devolviendo el fixture JSON en lugar de permitir cargar la SPA.
+Desarrollo - aceptación funcional integral
+Run 31215765514 — success
 
-La corrección restringió los mocks a la API de desarrollo (`http://localhost:5005/...`). La ejecución posterior obtuvo 87/87 pruebas aprobadas, incluida la prueba de imágenes que había fallado.
+Fase 2 - Auditoría de configuración y dependencias
+Run 31215766762 — success
+
+Fase 8 - Validación completa automatizada
+Run 31215765159 — success
+
+Bloque 2C.1 - Variante técnica y migración
+Run 31215767604 — success
+
+Fase 2C.4 - Frontend del escáner
+Run 31215765486 — success
+
+VariApp CI
+Run 31215765320 — skipped por condición del workflow
+```
+
+Un workflow `skipped` por condición no se contabiliza como validación ejecutada ni como fallo.
+
+---
+
+## 4. Observaciones de dependencias y runners
+
+Los workflows obligatorios concluyen correctamente conforme a las políticas actuales del repositorio. Sin embargo, los runners muestran avisos de deprecación asociados a Node.js 20 en algunas Actions y `npm ci` informa vulnerabilidades dentro del árbol completo de dependencias, principalmente asociado al entorno de desarrollo/herramientas.
+
+Estos avisos no se silencian, no se presentan como inexistentes y deberán continuar bajo auditoría en los bloques posteriores. No constituyen una regresión funcional bloqueante de 2C según los controles vigentes que finalizaron en `success`.
+
+---
 
 ## 5. Límites y pendientes que NO se certifican como completados
 
-1. **Dispositivos físicos:** CI valida la integración de cámara sin activar hardware real. Deben mantenerse como validaciones manuales posteriores:
+1. **Dispositivos físicos:** CI valida la integración sin activar hardware real. Permanecen como validaciones manuales posteriores:
    - cámara real Android;
    - cámara real iPhone/iOS;
    - lector USB físico;
    - lector Bluetooth físico.
 2. **Permisos del navegador:** el comportamiento final ante permisos de cámara depende del navegador/dispositivo real y debe probarse externamente.
 3. **`TipoInventario`:** la diferenciación `MercaderiaVenta` / `InsumoAdministrativo` pertenece al bloque funcional de insumos administrativos y no se declara implementada por 2C.
-4. **Dependencias/deprecaciones:** los workflows actuales pasan según las políticas del repositorio, aunque los runners muestran avisos de deprecación de Node 20 en algunas Actions y npm informa dependencias de desarrollo que deberán seguir auditándose. Estos avisos no se silencian ni se presentan como corregidos por esta certificación.
+4. **Dependencias/deprecaciones:** los avisos de runners y dependencias se mantienen registrados para seguimiento; no se declaran corregidos por esta certificación.
 5. **Producción:** no existe certificación productiva, despliegue productivo ni autorización de merge derivada de este documento.
+
+---
 
 ## 6. Gobernanza
 
-Estado exigido al cierre:
+Estado verificado al cierre funcional:
 
 ```text
 Rama de trabajo: Desarrollo
+Candidato funcional: c5942990a36287ccb476c66f6f73c7d361d9eca3
 PR oficial: #2 Desarrollo -> main
 PR #2 abierto: sí
 PR #2 borrador: sí
 Merge: no autorizado
 Auto-merge: no autorizado
-main: congelada
-Producción: congelada
+main: 85b4e02814823e9671803c23798a6ff0bf05c8f6
+Producción: congelada y no modificada
 ```
 
 Este documento no autoriza despliegues, migraciones, modificaciones de secretos ni cambios de infraestructura productiva.
 
+---
+
 ## 7. Dictamen de Fase 2C.6
 
-Con la evidencia automatizada disponible:
+Con la evidencia automatizada vigente:
 
 ```text
 BLOQUE 2C — DESARROLLO: APROBADO
@@ -192,12 +253,13 @@ BLOQUE 2C — DESARROLLO: APROBADO
 2C.3 BACKEND DEL ESCÁNER: APROBADO
 2C.4 FRONTEND DEL ESCÁNER: APROBADO EN CI
 2C.5 AUTOCOMPLETE REMOTO: APROBADO
-PRUEBAS BACKEND: 173/173
+BACKEND RELEASE: 201/201
 PLAYWRIGHT INTEGRAL: 87/87
+MYSQL 8.4.11: APROBADO
 REGRESIONES BLOQUEANTES AUTOMATIZADAS: 0
 VALIDACIONES FÍSICAS: PENDIENTES Y EXTERNAS
 PRODUCCIÓN: NO AUTORIZADA
 MERGE A MAIN: NO AUTORIZADO
 ```
 
-El Bloque 2C queda funcionalmente cerrado en Desarrollo. Las validaciones físicas se mantienen explícitamente fuera de esta certificación automatizada.
+El Bloque 2C queda funcionalmente cerrado en `Desarrollo`. Las validaciones físicas permanecen explícitamente fuera de esta certificación automatizada.
