@@ -29,7 +29,8 @@ if (!string.IsNullOrWhiteSpace(port))
 }
 
 // ===== Controllers + FluentValidation =====
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+    options.Filters.Add<InventoryApp.API.Filters.MedirRendimientoBusquedaFilter>());
 builder.Services.Configure<FormOptions>(options =>
 {
     options.MultipartBodyLengthLimit = 30 * 1024 * 1024;
@@ -331,10 +332,6 @@ if (app.Configuration.GetValue<bool>("Database:ApplyMigrationsOnStartup"))
     var adminUsername = app.Configuration["SeedAdmin:Username"]?.Trim();
     var adminPassword = app.Configuration["SeedAdmin:Password"];
 
-    // SeedAdmin es exclusivamente de creación inicial. Se ejecuta antes del
-    // seeding de roles para que una cuenta nueva quede vinculada inmediatamente
-    // al rol dinámico Administrador. Una cuenta existente nunca recibe de nuevo
-    // contraseña, rol ni estado desde variables de entorno.
     if (!string.IsNullOrWhiteSpace(adminUsername) && !string.IsNullOrWhiteSpace(adminPassword))
     {
         var adminExiste = await db.Usuarios.AnyAsync(u => u.NombreUsuario == adminUsername);
