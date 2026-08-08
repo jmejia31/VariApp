@@ -14,7 +14,6 @@ public class ImpuestoConfiguration : IEntityTypeConfiguration<Impuesto>
         builder.Property(i => i.Codigo).IsRequired().HasMaxLength(50);
         builder.Property(i => i.Tasa).HasPrecision(9, 4);
         builder.Property(i => i.MontoFijo).HasPrecision(18, 4);
-
         builder.HasIndex(i => i.Codigo).IsUnique();
 
         builder.HasMany(i => i.Productos).WithOne().HasForeignKey(x => x.ImpuestoId).OnDelete(DeleteBehavior.Cascade);
@@ -80,18 +79,33 @@ public class ImpuestoOperacionConfiguration : IEntityTypeConfiguration<ImpuestoO
     }
 }
 
+public class HistorialAplicacionImpuestoConfiguration : IEntityTypeConfiguration<HistorialAplicacionImpuesto>
+{
+    public void Configure(EntityTypeBuilder<HistorialAplicacionImpuesto> builder)
+    {
+        builder.ToTable("HistorialAplicacionImpuestos");
+        builder.HasKey(x => x.Id);
+        builder.Property(x => x.DocumentoTipo).IsRequired().HasMaxLength(30);
+        builder.Property(x => x.BaseImponible).HasPrecision(18, 4);
+        builder.Property(x => x.TasaAplicada).HasPrecision(9, 4);
+        builder.Property(x => x.MontoAplicado).HasPrecision(18, 4);
+        builder.HasIndex(x => new { x.DocumentoTipo, x.DocumentoId });
+    }
+}
+
 public class VentaImpuestoConfiguration : IEntityTypeConfiguration<VentaImpuesto>
 {
     public void Configure(EntityTypeBuilder<VentaImpuesto> builder)
     {
         builder.ToTable("VentaImpuestos");
         builder.HasKey(x => x.Id);
-        builder.Property(x => x.ImpuestoNombreSnapshot).IsRequired();
+        builder.Property(x => x.ImpuestoNombreSnapshot).IsRequired().HasMaxLength(150);
         builder.Property(x => x.ImpuestoCodigoSnapshot).IsRequired().HasMaxLength(50);
         builder.Property(x => x.MontoAplicado).HasPrecision(18, 4);
         builder.Property(x => x.BaseImponible).HasPrecision(18, 4);
         builder.Property(x => x.TasaSnapshot).HasPrecision(9, 4);
         builder.Property(x => x.IncluidoEnPrecioSnapshot).HasDefaultValue(false);
+        builder.HasOne<Impuesto>().WithMany().HasForeignKey(x => x.ImpuestoId).OnDelete(DeleteBehavior.Restrict);
     }
 }
 
@@ -101,11 +115,12 @@ public class CompraImpuestoConfiguration : IEntityTypeConfiguration<CompraImpues
     {
         builder.ToTable("CompraImpuestos");
         builder.HasKey(x => x.Id);
-        builder.Property(x => x.ImpuestoNombreSnapshot).IsRequired();
+        builder.Property(x => x.ImpuestoNombreSnapshot).IsRequired().HasMaxLength(150);
         builder.Property(x => x.ImpuestoCodigoSnapshot).IsRequired().HasMaxLength(50);
         builder.Property(x => x.MontoAplicado).HasPrecision(18, 4);
         builder.Property(x => x.BaseImponible).HasPrecision(18, 4);
         builder.Property(x => x.TasaSnapshot).HasPrecision(9, 4);
         builder.Property(x => x.IncluidoEnPrecioSnapshot).HasDefaultValue(false);
+        builder.HasOne<Impuesto>().WithMany().HasForeignKey(x => x.ImpuestoId).OnDelete(DeleteBehavior.Restrict);
     }
 }

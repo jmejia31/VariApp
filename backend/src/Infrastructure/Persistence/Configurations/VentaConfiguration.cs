@@ -54,9 +54,11 @@ public class VentaConfiguration : IEntityTypeConfiguration<Venta>
             .HasForeignKey(i => i.VentaId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        // Venta y Factura son documentos históricos. Una eliminación física
+        // accidental de la venta nunca debe propagar la eliminación de factura.
         builder.HasOne(v => v.Factura)
             .WithOne(f => f.Venta)
             .HasForeignKey<Factura>(f => f.VentaId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

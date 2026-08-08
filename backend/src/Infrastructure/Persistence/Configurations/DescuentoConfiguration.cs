@@ -71,13 +71,29 @@ public class DescuentoRolConfiguration : IEntityTypeConfiguration<DescuentoRol>
     }
 }
 
+public class HistorialUsoDescuentoConfiguration : IEntityTypeConfiguration<HistorialUsoDescuento>
+{
+    public void Configure(EntityTypeBuilder<HistorialUsoDescuento> builder)
+    {
+        builder.ToTable("HistorialUsoDescuentos");
+        builder.HasKey(x => x.Id);
+        builder.Property(x => x.MontoAplicado).HasPrecision(18, 4);
+        builder.HasIndex(x => new { x.VentaId, x.Fecha });
+        builder.HasOne<Venta>().WithMany().HasForeignKey(x => x.VentaId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<Cliente>().WithMany().HasForeignKey(x => x.ClienteId).OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
 public class VentaDescuentoConfiguration : IEntityTypeConfiguration<VentaDescuento>
 {
     public void Configure(EntityTypeBuilder<VentaDescuento> builder)
     {
         builder.ToTable("VentaDescuentos");
         builder.HasKey(x => x.Id);
+        builder.Property(x => x.DescuentoNombreSnapshot).IsRequired().HasMaxLength(150);
+        builder.Property(x => x.DescuentoCodigoSnapshot).IsRequired().HasMaxLength(50);
         builder.Property(x => x.MontoAplicado).HasPrecision(18, 4);
         builder.Property(x => x.ValorSnapshot).HasPrecision(18, 4);
+        builder.HasOne<Descuento>().WithMany().HasForeignKey(x => x.DescuentoId).OnDelete(DeleteBehavior.Restrict);
     }
 }
