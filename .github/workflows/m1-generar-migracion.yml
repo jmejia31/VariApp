@@ -1,0 +1,55 @@
+name: M1 - Generar migracion EF descartable
+
+on:
+  push:
+    branches:
+      - Desarrollo
+    paths:
+      - .github/workflows/m1-generar-migracion.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  generate:
+    name: Generar migracion y snapshot M1
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout Desarrollo
+        uses: actions/checkout@v4
+
+      - name: Configurar .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+          cache: true
+          cache-dependency-path: backend/**/*.csproj
+
+      - name: Restaurar backend
+        working-directory: backend
+        run: dotnet restore InventoryApp.sln
+
+      - name: Instalar dotnet-ef 8.0.2
+        run: dotnet tool install --global dotnet-ef --version 8.0.2
+
+      - name: Generar migracion M1
+        run: |
+          dotnet ef migrations add M1NormalizarMaestrosProducto \
+            --project backend/src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project backend/src/API/InventoryApp.API.csproj \
+            --output-dir Migrations \
+            --no-build
+
+      - name: Compilar backend con artefactos generados
+        working-directory: backend
+        run: dotnet build InventoryApp.sln --configuration Release --no-restore
+
+      - name: Empaquetar migracion y snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: m1-migracion-ef
+          path: backend/src/Infrastructure/Migrations/
+          if-no-files-found: error
+          retention-days: 1
