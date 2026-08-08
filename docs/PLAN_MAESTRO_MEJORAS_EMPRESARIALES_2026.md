@@ -1,6 +1,6 @@
 # Plan Maestro de Mejoras Empresariales — VariApp
 
-Versión: 3.0 — Normalización de catálogos + variantes multidimensionales
+Versión: 4.0 — Saneamiento relacional integral + variantes multidimensionales
 Fecha: 2026-08-08
 Rama exclusiva: `Desarrollo`
 PR oficial: `#2 Desarrollo -> main` (debe permanecer abierto y en borrador)
@@ -10,51 +10,242 @@ Producción: congelada
 
 1. No modificar `main`, no crear ramas nuevas, no fusionar PR #2 y no habilitar auto-merge.
 2. No ejecutar migraciones, seeds, restauraciones, despliegues ni cambios de configuración sobre Producción.
-3. Toda fase debe comenzar auditando lo existente y debe reutilizar lo correcto sin reconstruirlo innecesariamente.
-4. Toda regla crítica de integridad se reforzará en backend y, cuando corresponda, también en MySQL.
+3. Antes de ampliar funcionalidad se saneará primero la estructura relacional que sirve de base al sistema.
+4. Toda regla crítica de integridad se reforzará en backend y, cuando corresponda, también en MySQL mediante PK, FK, UNIQUE, CHECK, índices o columnas generadas.
 5. Ninguna evolución puede reescribir históricos confirmados.
-6. Las operaciones de stock, compra, venta, factura, anulación y ajuste se resolverán contra la variante exacta.
-7. Los estados técnicos de máquinas de estado no se convertirán en catálogos editables sin necesidad funcional explícita.
-8. Los gastos financieros no se modelarán como productos; los insumos administrativos continúan separados de mercadería vendible.
-9. Cada fase se cierra con build, pruebas pertinentes, migraciones descartables cuando apliquen, regresión, CI real, documentación y evidencia.
-10. No se declarará `completo`, `funciona`, `certificado` o `100 %` sin evidencia técnica real.
+6. Los snapshots históricos deliberados NO se consideran un defecto de normalización y se conservarán.
+7. No se crearán tablas únicamente por estética: cada separación deberá responder a identidad, cardinalidad, integridad, mantenibilidad o necesidad administrativa real.
+8. Las operaciones de stock, compra, venta, factura, anulación y ajuste se resolverán contra la variante exacta después de M2.
+9. Los estados técnicos de máquinas de estado permanecerán como códigos/enums estables salvo requisito funcional explícito.
+10. Los gastos financieros no se modelarán como productos; los insumos administrativos permanecen separados de la mercadería vendible.
+11. Cada fase se cerrará con build, pruebas pertinentes, migraciones descartables cuando apliquen, regresión, CI real, documentación y evidencia.
+12. No se declarará `completo`, `funciona`, `certificado` o `100 %` sin evidencia técnica real.
 
-## 2. Aclaración funcional definitiva
+---
 
-La arquitectura comercial objetivo queda definida así:
+## 2. Resultado de la auditoría estructural de base de datos
+
+La base versionada de VariApp es funcional y tiene varias decisiones correctas, pero NO se considera todavía una base relacional final suficientemente saneada para construir encima el motor multidimensional de variantes.
+
+La auditoría se realizó sobre:
+
+- entidades de Domain;
+- `AppDbContext`;
+- configuraciones EF Core;
+- historial de migraciones;
+- `AppDbContextModelSnapshot`;
+- relaciones, índices, restricciones y delete behaviors representados por el modelo versionado.
+
+Esta auditoría describe el esquema que el código de `Desarrollo` pretende aplicar. No equivale a afirmar que una instancia externa concreta de MySQL/Aiven tenga exactamente ese estado hasta verificarla mediante un entorno de Desarrollo autorizado o una base descartable.
+
+### 2.1 Hallazgos que requieren corrección antes de M2
+
+#### A. Catálogo polimórfico `CatalogosProducto`
+
+Marca, Modelo, Color y Talla comparten actualmente una tabla genérica con discriminador `Tipo` y Modelo usa `CatalogoPadreId` para representar su Marca.
+
+Aunque una tabla genérica con discriminador no constituye por sí sola una violación automática de 3FN, en VariApp impide expresar con suficiente fuerza semántica el dominio objetivo y obliga a FKs genéricas. Para el modelo empresarial aprobado se reemplazará como fuente de verdad por:
+
+- `Marcas`;
+- `Modelos`;
+- `Colores`;
+- `Tallas`.
+
+Cada una tendrá entidad, tabla, mantenimiento, API y permisos propios.
+
+#### B. `Producto` conserva fuentes duplicadas/transitorias
+
+`Producto` mantiene simultáneamente:
+
+- `Marca` texto + `MarcaId`;
+- `Modelo` texto + `ModeloId`;
+- `ColorId`;
+- `TallaId`;
+- `Cantidad`, `Costo`, `Precio` agregados;
+- colección de variantes.
+
+Esta coexistencia fue válida como compatibilidad, pero después de M2 no puede seguir siendo una fuente operativa paralela. Marca/Modelo/Color/Talla pasarán a la variante y `Cantidad/Costo/Precio` de Producto serán únicamente resumen derivado cuando se mantengan.
+
+#### C. RBAC mantiene dos modelos simultáneos
+
+`Usuario` conserva `Rol` legado y `RolId` dinámico. `RolPermiso` conserva simultáneamente `Rol/Modulo/Accion` y `RolId/PermisoId`.
+
+La transición debe cerrarse para que las fuentes de verdad sean:
+
+- `Usuarios.RolId -> Roles.Id`;
+- `RolPermisos.RolId -> Roles.Id`;
+- `RolPermisos.PermisoId -> Permisos.Id`.
+
+Las columnas legacy se retirarán únicamente después del backfill y de comprobar compatibilidad de autorización.
+
+#### D. Tablas puente de descuentos incompletas en integridad referencial
+
+`DescuentoProductos`, `DescuentoCategorias`, `DescuentoClientes` y `DescuentoRoles` necesitan reforzar:
+
+- FK hacia el objeto destino además de FK hacia `Descuentos`;
+- UNIQUE por pareja para impedir asignaciones duplicadas.
+
+Objetivos conceptuales:
+
+- UNIQUE(`DescuentoId`, `ProductoId`);
+- UNIQUE(`DescuentoId`, `CategoriaId`);
+- UNIQUE(`DescuentoId`, `ClienteId`);
+- UNIQUE(`DescuentoId`, `RolId`).
+
+#### E. Tablas puente de impuestos incompletas en integridad referencial
+
+`ImpuestoProductos`, `ImpuestoCategorias`, `ImpuestoClientes`, `ImpuestoProveedores` e `ImpuestoOperaciones` requieren el mismo hardening:
+
+- FKs hacia las entidades destino;
+- UNIQUE por pareja;
+- UNIQUE(`ImpuestoId`, `Operacion`) para operaciones.
+
+#### F. Relaciones históricas/documentales con IDs no protegidos por FK
+
+Se revisarán y reforzarán, después de preflight, relaciones como:
+
+- `FacturaDetalle.ProductoId`;
+- `FacturaDetalle.ProductoVarianteId`;
+- `EnlacePublicoFactura.FacturaId`;
+- `HistorialEnvioFactura.FacturaId`;
+- `VentaDescuento.DescuentoId`;
+- `VentaImpuesto.ImpuestoId`;
+- `CompraImpuesto.ImpuestoId`;
+- referencias de historial que puedan tener FK segura.
+
+La política preferida para datos históricos será `Restrict/NoAction` o `SetNull` cuando corresponda, no borrado en cascada destructivo.
+
+#### G. Referencias polimórficas de Finanzas e Inventario
+
+`MovimientoFinanciero` mantiene `ModuloOrigen + ReferenciaId` y además `CompraId/VentaId/FacturaId`. Esto permite estados contradictorios y no ofrece integridad completa.
+
+Se normalizará hacia FKs tipadas, con una regla explícita de exactamente un origen cuando sea automático y sin origen documental cuando sea manual.
+
+`MovimientoInventario` mantiene `ReferenciaTipo + ReferenciaId`. Se evaluará migrarlo a referencias tipadas a:
+
+- Compra;
+- Venta;
+- Consumo de insumo;
+- Ajuste de inventario;
+- otras fuentes justificadas.
+
+Para ajustes manuales se incorporará una entidad/documento `AjusteInventario` si el preflight confirma que actualmente no existe una cabecera relacional equivalente.
+
+`HistorialAplicacionImpuesto` también será revisado para decidir entre FKs tipadas a Compra/Venta o consolidación con los snapshots `CompraImpuesto/VentaImpuesto`, evitando dos historiales contradictorios.
+
+#### H. Reglas de unicidad de negocio que necesitan corrección
+
+La unicidad actual basada únicamente en `Cliente.Nombre` y `Proveedor.Nombre` es demasiado restrictiva: personas o empresas distintas pueden compartir nombre.
+
+Objetivo:
+
+- `Nombre` será índice de búsqueda, no identidad universal;
+- `Cliente.IdentidadORTN` podrá ser único cuando exista, previo preflight;
+- `Proveedor.Documento` podrá ser único cuando exista, previo preflight;
+- correo/teléfono no se declararán únicos automáticamente sin requisito de negocio.
+
+`Categoria` deberá contar con nombre normalizado y unicidad segura si el negocio confirma que dos categorías vigentes no pueden compartir el mismo nombre.
+
+#### I. Predeterminados/singletons protegidos solo por lógica de aplicación
+
+Se reforzarán a nivel MySQL cuando la regla sea realmente única:
+
+- un solo `CostoEnvio` predeterminado activo/no eliminado;
+- una sola `EmpresaConfiguracion` activa si el contrato funcional confirma que la aplicación trabaja con una configuración activa global.
+
+Se reutilizará el patrón ya validado de columna generada + índice único utilizado por `TipoCliente` predeterminado.
+
+#### J. Precisión decimal inconsistente
+
+El snapshot muestra columnas monetarias/de cálculo que quedaron con precisión implícita amplia (`decimal(65,30)`) mientras otros módulos usan `decimal(18,2)` o `decimal(18,4)`.
+
+Se estandarizará:
+
+- dinero final/pagado/costo/precio/total: normalmente `decimal(18,2)`;
+- bases fiscales y montos internos que requieren precisión intermedia: `decimal(18,4)`;
+- tasas: `decimal(9,4)`;
+- redondeo final seguirá la política monetaria ya certificada.
+
+Toda reducción de precisión tendrá preflight de datos y prueba de no pérdida material antes de migrar.
+
+#### K. Longitudes/tipos de texto inconsistentes
+
+Se revisarán columnas que actualmente terminan como `longtext` por falta de configuración explícita aunque semánticamente sean correo, teléfono, RTN, usuario, URL o nombre.
+
+Se aplicarán límites razonables únicamente cuando exista contrato claro. JSON de auditoría, JSON de staging y textos realmente extensos conservarán tipos adecuados.
+
+#### L. Delete behaviors de documentos contables
+
+La relación `Venta -> Factura` no debe depender de un cascade destructivo como defensa final del histórico. Se revisará hacia `Restrict/NoAction` y se mantendrán anulaciones/soft delete como mecanismo funcional.
+
+Los cascades legítimos sobre detalles internos de un agregado podrán conservarse si el agregado raíz está protegido contra eliminación física.
+
+#### M. Métodos de pago con representación inconsistente
+
+Ventas/Compras persisten `MetodoPago` con una representación y `FacturaPago` utiliza otra. Además, el plan empresarial exige mantenimiento futuro de métodos de pago.
+
+Se decidirá una única arquitectura:
+
+- tabla `MetodosPago` con `Codigo` técnico estable, nombre administrable, orden, activo y auditoría;
+- FK para operaciones nuevas;
+- snapshot/código histórico para documentos confirmados;
+- compatibilidad temporal con enums existentes.
+
+No se romperán facturas históricas al renombrar/desactivar un método.
+
+### 2.2 Desnormalizaciones intencionales que deben conservarse
+
+No se eliminarán por intentar alcanzar una normalización académica ciega:
+
+- snapshots de Cliente/Proveedor en Venta/Compra confirmadas;
+- snapshots de Empresa/Cliente/Vendedor en Factura;
+- snapshots de Producto/Variante en CompraDetalle, VentaDetalle, FacturaDetalle y movimientos;
+- snapshots de impuesto/descuento aplicado;
+- totales monetarios de documentos confirmados;
+- JSON de auditoría;
+- JSON temporal de cargas masivas;
+- hash del token en enlaces públicos.
+
+Estas duplicaciones son deliberadas para inmutabilidad histórica, auditoría y reproducibilidad documental.
+
+---
+
+## 3. Arquitectura comercial definitiva
 
 ### Producto
 
-Representa la familia o concepto comercial principal. Contiene datos generales no inventariables por combinación, por ejemplo:
+Representa la familia o concepto comercial y conservará solo información general:
 
-- Nombre.
-- Categoría.
-- Tipo de inventario.
-- Descripción.
-- Imágenes generales.
-- Estado.
-- Auditoría.
+- Nombre;
+- Categoría;
+- Tipo de inventario;
+- Descripción;
+- imágenes generales;
+- estado;
+- auditoría.
 
 ### Variante
 
-Representa la unidad física exacta de inventario.
+Representa la unidad física exacta de inventario y podrá combinar:
 
-Una variante comercial puede combinar:
+- Marca;
+- Modelo;
+- Color;
+- Talla/Tamaño;
+- SKU;
+- Código de barras;
+- Cantidad;
+- Costo;
+- Precio;
+- Umbral de stock bajo;
+- imágenes propias;
+- estado.
 
-- Marca.
-- Modelo.
-- Color.
-- Talla/Tamaño.
-- SKU.
-- Código de barras.
-- Cantidad.
-- Costo.
-- Precio.
-- Umbral de stock bajo.
-- Imágenes propias.
-- Estado.
+La identidad comercial será:
 
-La cantidad se almacena en la variante exacta y nunca en una dimensión aislada.
+`Producto + Marca + Modelo + Color + Talla`
+
+Modelo exige Marca y debe pertenecer a ella.
 
 Ejemplos:
 
@@ -64,633 +255,742 @@ Ejemplos:
 - Camiseta + Nike + Modelo A + Negro + M = 6 unidades.
 - Camiseta + Nike + Modelo A + Negro + L = 9 unidades.
 
-## 3. Normalización obligatoria de catálogos
-
-El diseño final NO utilizará una única tabla genérica `CatalogosProducto` para Marca, Modelo, Color y Talla.
-
-Cada concepto tendrá entidad, tabla, mantenimiento, API y permisos propios.
-
-### 3.1 Tabla `Marcas`
-
-Campos base previstos:
-
-- `Id`.
-- `Nombre`.
-- `Descripcion`.
-- `Orden`.
-- `Activo`.
-- `Eliminado`.
-- auditoría de creación/actualización/eliminación lógica.
-
-Reglas:
-
-- nombre normalizado único entre registros vigentes;
-- soft delete;
-- no eliminar físicamente registros referenciados históricamente;
-- una Marca puede tener múltiples Modelos.
-
-### 3.2 Tabla `Modelos`
-
-Campos base previstos:
-
-- `Id`.
-- `MarcaId` FK obligatoria.
-- `Nombre`.
-- `Descripcion`.
-- `Orden`.
-- `Activo`.
-- `Eliminado`.
-- auditoría.
-
-Reglas:
-
-- todo Modelo pertenece a una Marca;
-- nombre único dentro de su Marca;
-- no activar un Modelo cuya Marca esté inactiva;
-- no cambiar de Marca un Modelo usado históricamente sin una regla de migración segura;
-- una Marca puede tener muchos Modelos.
-
-Se reforzará la coherencia Marca/Modelo también en el modelo de Variante mediante una FK/constraint compatible que impida asociar una combinación Modelo + Marca incoherente.
-
-### 3.3 Tabla `Colores`
-
-Campos base previstos:
-
-- `Id`.
-- `Nombre`.
-- `CodigoVisual`.
-- `Descripcion`.
-- `Orden`.
-- `Activo`.
-- `Eliminado`.
-- auditoría.
-
-Reglas:
-
-- nombre normalizado único;
-- código visual validado cuando exista;
-- soft delete;
-- histórico preservado.
-
-### 3.4 Tabla `Tallas`
-
-Campos base previstos:
-
-- `Id`.
-- `Nombre`.
-- `Descripcion`.
-- `Orden`.
-- `Activo`.
-- `Eliminado`.
-- auditoría.
-
-La tabla podrá representar talla/tamaño comercial según el producto, sin obligar a usarla cuando no corresponda.
-
-Reglas:
-
-- nombre normalizado único;
-- soft delete;
-- histórico preservado.
-
-### 3.5 Mantenimientos independientes
-
-Existirán mantenimientos independientes y navegables para:
-
-- Marcas.
-- Modelos.
-- Colores.
-- Tallas.
-
-Cada uno tendrá como mínimo:
-
-- listado;
-- búsqueda;
-- paginación/orden;
-- crear;
-- editar;
-- activar/desactivar;
-- eliminación lógica controlada;
-- auditoría;
-- permisos independientes;
-- estados loading/error/empty;
-- responsive y accesibilidad.
-
-Se permite reutilizar componentes/servicios base internamente para evitar duplicación, pero la semántica, entidad, tabla y endpoint público de cada mantenimiento serán independientes.
-
-## 4. Migración desde `CatalogosProducto`
-
-La tabla actual `CatalogosProducto` se considera infraestructura heredada/transitoria después de esta aclaración.
-
-La migración será no destructiva y por etapas:
-
-1. Preflight de datos actuales.
-2. Crear `Marcas`, `Modelos`, `Colores`, `Tallas`.
-3. Copiar datos preservando IDs cuando sea técnicamente seguro.
-4. Convertir `CatalogoPadreId` de los Modelos en `Modelos.MarcaId`.
-5. Verificar que cada Modelo tenga Marca válida.
-6. Actualizar FKs de Producto/Variante hacia las nuevas tablas.
-7. Actualizar servicios, repositorios, DTOs y frontend.
-8. Mantener compatibilidad temporal mientras existan referencias antiguas.
-9. Eliminar dependencia de `CatalogosProducto` del runtime.
-10. Retirar la tabla genérica únicamente cuando CI, migración descartable, snapshot EF y regresión demuestren que ya no tiene referencias funcionales.
-
-No se eliminará la tabla genérica prematuramente solo por limpieza estética.
-
-## 5. Identidad definitiva de una variante
-
-La identidad comercial de una variante será:
-
-`Producto + Marca + Modelo + Color + Talla`
-
-Las dimensiones podrán ser nullable cuando el producto no las utilice, excepto que Modelo siempre exige Marca.
-
-Reglas de integridad:
-
-- `ProductoId` obligatorio.
-- `ModeloId` implica `MarcaId`.
-- el Modelo debe pertenecer a la Marca indicada.
-- no puede existir dos veces la misma combinación comercial vigente.
-- SKU único globalmente.
-- código de barras único globalmente cuando exista.
-- soft delete no bloquea reutilización controlada de una combinación eliminada.
-- una variante con stock no se elimina físicamente.
-- la variante técnica continúa separada y conserva su unicidad por Producto.
-
-La unicidad multidimensional se reforzará en MySQL con columnas generadas/normalizadas o mecanismo equivalente que trate `NULL` de forma determinista y excluya variantes técnicas/eliminadas del índice comercial único.
-
-## 6. Fuente de verdad
-
-Después de M2:
-
-- `ProductoVariante.Cantidad` = fuente real de stock.
-- `ProductoVariante.Costo` = costo operativo de esa combinación.
-- `ProductoVariante.Precio` = precio operativo de esa combinación.
-- `ProductoVariante.UmbralStockBajo` = umbral de esa combinación.
-- `Producto.Cantidad` = resumen derivado/consolidado.
-- `Producto.Costo` = resumen/valoración derivada.
-- `Producto.Precio` = resumen informativo; la venta usa el precio de la variante.
-
-Los campos globales heredados de Marca/Modelo/Color/Talla en Producto se mantendrán temporalmente solo por compatibilidad y se retirarán de la fuente de verdad.
-
-## 7. Etiqueta canónica de variante
-
-Toda VariApp utilizará una única representación de variante:
-
-`Marca · Modelo · Color · Talla · SKU`
-
-Solo se muestran atributos existentes.
-
-Se reutilizará en:
-
-- Productos.
-- Compras.
-- Ventas.
-- Inventario.
-- Facturación.
-- PDF.
-- impresión.
-- correo/WhatsApp cuando aplique.
-- escáner.
-- autocomplete.
-- cargas masivas.
-- reportes.
-- auditoría.
-
 ---
 
 # FASE M0 — Auditoría y mapa de impacto
 
 Estado: COMPLETADA.
 
-La presente versión 3.0 actúa como aclaración funcional posterior a M0 y reemplaza cualquier conclusión de M0 que asumiera que `CatalogoProducto` debía conservarse como arquitectura final para Marca/Modelo/Color/Talla.
+Entregable: `docs/FASE_M0_AUDITORIA_MAPA_IMPACTO.md`.
 
-# FASE M1 — Normalización de catálogos maestros
+# FASE M0.B — Auditoría estructural de normalización
 
-Objetivo: crear la base normalizada que M2 necesita antes de mover todas las dimensiones a Variante.
+Estado: COMPLETADA A NIVEL DE ESQUEMA VERSIONADO.
 
-## M1.A — Diseño y preflight
+Objetivo cumplido: revisar el modelo relacional antes de continuar con variantes.
 
-- inventariar todos los usos de `CatalogoProducto`;
-- mapear FKs actuales;
-- detectar IDs inválidos;
-- validar Modelo -> Marca;
-- detectar nombres duplicados por tipo;
-- mapear permisos, endpoints, Angular y pruebas existentes;
-- preparar estrategia de compatibilidad y rollback.
+Resultado: se detectó deuda estructural suficiente para convertir M1 en una fase obligatoria de saneamiento integral, no únicamente de catálogos.
 
-## M1.B — Entidades y tablas independientes
+No se realizaron cambios funcionales ni migraciones externas durante M0.B.
 
-Crear:
+---
 
-- `Marca` / `Marcas`.
-- `Modelo` / `Modelos`.
-- `Color` / `Colores`.
+# FASE M1 — Saneamiento relacional integral de MySQL/EF Core
+
+Objetivo: dejar la base estructural lista para que M2 no nazca sobre fuentes duplicadas, FKs débiles o restricciones incompletas.
+
+**Gate obligatorio:** M2 NO puede iniciar hasta que M1 esté verde en migración descartable, snapshot EF, backend, frontend afectado e integración MySQL.
+
+## M1.A — Baseline y preflight de datos
+
+- congelar el baseline de `AppDbContextModelSnapshot`;
+- inventariar todas las entidades/tablas/FKs/índices;
+- generar consultas de preflight para duplicados y huérfanos;
+- comprobar `CatalogosProducto` por Tipo;
+- comprobar Modelo -> Marca;
+- comprobar SKU/barcode duplicados;
+- comprobar tablas puente duplicadas/huérfanas;
+- comprobar clientes/proveedores afectados por nuevas reglas de identidad;
+- comprobar configuraciones/predeterminados múltiples;
+- comprobar valores decimales incompatibles con las precisiones objetivo;
+- abortar fail-closed si una transformación no puede probarse segura.
+
+## M1.B — Normalización de Marcas, Modelos, Colores y Tallas
+
+Crear entidades y tablas independientes:
+
+- `Marca` / `Marcas`;
+- `Modelo` / `Modelos`;
+- `Color` / `Colores`;
 - `Talla` / `Tallas`.
 
-Agregar configuraciones EF, índices, FKs y query filters de soft delete.
+Reglas:
 
-## M1.C — Migración/backfill
+- `Modelo.MarcaId` obligatorio;
+- nombre de Modelo único dentro de Marca;
+- no activar Modelo con Marca inactiva;
+- nombres normalizados con unicidad vigente donde corresponda;
+- soft delete;
+- auditoría;
+- permisos independientes.
 
-- copiar datos desde `CatalogosProducto`;
-- preservar IDs cuando sea seguro;
-- convertir `CatalogoPadreId` a `Modelo.MarcaId`;
-- validar conteos y checksums lógicos;
-- ejecutar sobre MySQL descartable;
-- validar EF snapshot y SQL forward.
+Migración desde `CatalogosProducto`:
 
-## M1.D — Backend independiente
+1. copiar preservando IDs cuando sea seguro;
+2. convertir `CatalogoPadreId` a `Modelo.MarcaId`;
+3. verificar conteos y mapeos;
+4. migrar consumidores;
+5. retirar dependencia runtime de `CatalogosProducto`;
+6. retirar tabla genérica solo cuando no existan referencias funcionales y CI sea verde.
 
-Crear/adaptar por dominio:
+Mantenimientos independientes obligatorios:
 
-- repositories;
-- services;
-- DTOs;
-- validators;
-- controllers/endpoints;
-- permisos;
+- Marcas;
+- Modelos;
+- Colores;
+- Tallas.
+
+## M1.C — Normalización del RBAC legado
+
+Objetivo final:
+
+- `Usuarios.RolId` como fuente de verdad;
+- `RolPermisos(RolId, PermisoId)` como relación normalizada;
+- permisos definidos en `Permisos`.
+
+Trabajo:
+
+- preflight de usuarios sin RolId;
+- backfill desde enum legado;
+- reconciliar duplicados de RolPermiso;
+- validar autorización equivalente antes/después;
+- retirar dependencia runtime de `Usuario.Rol` y `RolPermiso.Rol/Modulo/Accion` cuando sea seguro;
+- mantener compatibilidad solo durante la transición.
+
+## M1.D — Integridad de tablas puente
+
+### Descuentos
+
+Agregar FKs y unicidad por pareja para:
+
+- DescuentoProducto;
+- DescuentoCategoria;
+- DescuentoCliente;
+- DescuentoRol.
+
+### Impuestos
+
+Agregar FKs y unicidad por pareja para:
+
+- ImpuestoProducto;
+- ImpuestoCategoria;
+- ImpuestoCliente;
+- ImpuestoProveedor;
+- ImpuestoOperacion.
+
+Antes de constraints:
+
+- eliminar únicamente duplicados demostrados semánticamente equivalentes mediante migración determinista;
+- no borrar históricos de uso;
+- fallar si existen huérfanos cuyo destino no pueda resolverse.
+
+## M1.E — Integridad documental e histórica
+
+Agregar/reforzar FKs seguras para IDs actualmente desprotegidos, incluyendo según preflight:
+
+- FacturaDetalle -> Producto;
+- FacturaDetalle -> ProductoVariante;
+- EnlacePublicoFactura -> Factura;
+- HistorialEnvioFactura -> Factura;
+- VentaDescuento -> Descuento;
+- VentaImpuesto -> Impuesto;
+- CompraImpuesto -> Impuesto;
+- historiales de impuesto/descuento -> sus documentos/clientes/usuarios cuando proceda.
+
+Política:
+
+- históricos normalmente `Restrict/NoAction`;
+- `SetNull` solo cuando perder la referencia viva sea aceptable pero se conserve snapshot;
+- evitar cascade destructivo de documentos contables.
+
+## M1.F — Normalización de orígenes financieros e inventario
+
+### MovimientoFinanciero
+
+Reemplazar la ambigüedad entre `ModuloOrigen/ReferenciaId` y múltiples IDs tipados por un contrato único.
+
+Objetivo:
+
+- FKs a Compra/Venta/Factura cuando correspondan;
+- regla de exclusividad de origen para movimientos automáticos;
+- movimientos manuales sin FK documental obligatoria;
+- reversión explícita y trazable.
+
+### MovimientoInventario
+
+Sustituir gradualmente `ReferenciaTipo/ReferenciaId` por referencias tipadas.
+
+Crear `AjusteInventario` como agregado/documento de ajuste si el preflight confirma que no existe estructura equivalente.
+
+Cada movimiento deberá poder demostrar su origen relacional o su carácter manual autorizado.
+
+### HistorialAplicacionImpuesto
+
+Decidir mediante evidencia entre:
+
+- FKs tipadas Compra/Venta;
+- o consolidación con `CompraImpuesto/VentaImpuesto`.
+
+No mantener dos fuentes históricas contradictorias.
+
+## M1.G — Identidad y unicidad de entidades maestras
+
+### Clientes
+
+- retirar UNIQUE de Nombre;
+- índice de búsqueda por nombre normalizado;
+- evaluar UNIQUE condicional de `IdentidadORTN` cuando exista;
+- no imponer unicidad a correo/teléfono sin requisito.
+
+### Proveedores
+
+- retirar UNIQUE de Nombre;
+- índice de búsqueda por nombre normalizado;
+- evaluar UNIQUE condicional de Documento cuando exista.
+
+### Categorías
+
+- incorporar `NombreNormalizado`;
+- UNIQUE vigente si el negocio mantiene categoría única por nombre;
+- preparar jerarquía únicamente si M1 confirma requisito real de subcategorías.
+
+## M1.H — Singletons y predeterminados
+
+Reforzar mediante restricciones MySQL:
+
+- un solo CostoEnvio predeterminado vigente;
+- una sola EmpresaConfiguracion activa si ese es el contrato real;
+- conservar el patrón robusto ya existente de TipoCliente predeterminado.
+
+Debe existir prueba de concurrencia que intente crear dos predeterminados simultáneos.
+
+## M1.I — Normalización de métodos de pago
+
+Crear, si el preflight confirma la administración dinámica prevista:
+
+`MetodosPago`
+
+Campos mínimos:
+
+- Id;
+- Codigo técnico estable;
+- Nombre;
+- Descripcion;
+- Orden;
+- Activo;
+- Eliminado;
 - auditoría.
 
-Rutas objetivo conceptuales:
+Migrar gradualmente Compras, Ventas y FacturaPagos a una representación consistente, conservando snapshots/códigos históricos.
 
-- `/api/marcas`.
-- `/api/modelos`.
-- `/api/colores`.
-- `/api/tallas`.
+## M1.J — Tipos, precisión, longitudes e índices
 
-## M1.E — Frontend de mantenimientos
+- estandarizar moneda a `decimal(18,2)`;
+- bases fiscales/cálculos intermedios a `decimal(18,4)` cuando corresponda;
+- tasas a `decimal(9,4)`;
+- eliminar precisiones implícitas `decimal(65,30)` donde no estén justificadas;
+- definir longitudes explícitas para correo, teléfono, RTN, nombres, URLs y usuarios;
+- conservar `json` y textos largos donde sí estén justificados;
+- revisar índices por consultas reales, no por intuición;
+- eliminar índices redundantes únicamente con evidencia.
 
-Crear/adaptar mantenimientos independientes para los cuatro catálogos.
+## M1.K — Delete behavior y protección histórica
 
-Modelo incluirá selección obligatoria de Marca y filtro por Marca.
+- cambiar Venta -> Factura a `Restrict/NoAction` si la regresión confirma compatibilidad;
+- revisar cascades de entidades maestras hacia históricos;
+- permitir cascades solo dentro de agregados cuyo root no sea físicamente eliminable;
+- mantener soft delete como política de maestros/documentos cuando aplique.
 
-## M1.F — Compatibilidad y retirada del catálogo genérico
+## M1.L — Migraciones y compatibilidad
 
-- migrar consumidores actuales;
-- bloquear nuevos usos de `CatalogoProducto` en código nuevo;
-- retirar dependencia runtime;
-- eliminar tabla/entidad genérica solamente cuando no queden referencias funcionales y las pruebas sean verdes.
+Las transformaciones se harán en migraciones pequeñas y reversibles lógicamente:
 
-## M1.G — Certificación
+- preflight;
+- expandir esquema;
+- backfill;
+- dual-read/compatibilidad temporal solo si es necesaria;
+- cambiar fuente de verdad;
+- validar;
+- retirar columnas/tabla legacy al final.
 
+No se mezclará en una única migración gigante la creación, backfill y destrucción de todas las estructuras.
+
+## M1.M — Certificación de base saneada
+
+Obligatorio:
+
+- `dotnet restore`;
 - backend Release;
 - unitarias;
 - integración MySQL;
-- migración desde historial realista;
-- frontend lint/build;
-- E2E de Marcas/Modelos/Colores/Tallas;
-- permisos;
-- auditoría;
-- CI real.
+- aplicar todo el historial de migraciones en base vacía descartable;
+- migrar una base descartable con estructura/datos legacy representativos;
+- comprobar `AppDbContextModelSnapshot`;
+- generar/revisar SQL forward;
+- pruebas de FKs, UNIQUE y CHECK/columnas generadas;
+- pruebas de concurrencia de predeterminados;
+- pruebas RBAC después del backfill;
+- frontend lint/build de mantenimientos afectados;
+- E2E de catálogos/RBAC cuando aplique;
+- GitHub Actions reales.
+
+Criterio de salida:
+
+**No quedan P0/P1 relacionales abiertos que puedan contaminar M2.**
+
+---
 
 # FASE M2 — Motor de variantes multidimensionales
 
-Objetivo: convertir `ProductoVariante` en la unidad exacta de inventario para Marca + Modelo + Color + Talla.
+Objetivo: convertir `ProductoVariante` en la unidad exacta de inventario para Marca + Modelo + Color + Talla sobre la base saneada de M1.
 
 ## M2.A — Dominio de Variante
 
 Agregar a `ProductoVariante`:
 
-- `MarcaId`.
-- `ModeloId`.
-- `ColorId`.
-- `TallaId`.
+- `MarcaId`;
+- `ModeloId`;
+- `ColorId`;
+- `TallaId`;
 - navegaciones a las cuatro tablas normalizadas.
 
 Mantener:
 
-- SKU.
-- código de barras.
-- cantidad.
-- costo.
-- precio.
-- umbral.
-- estado.
-- soft delete.
+- SKU;
+- código de barras;
+- cantidad;
+- costo;
+- precio;
+- umbral;
+- estado;
+- soft delete;
 - variante técnica.
 
 ## M2.B — Integridad MySQL
 
-- FK Variante -> Marca.
-- FK Variante -> Modelo.
-- FK Variante -> Color.
-- FK Variante -> Talla.
-- garantía Modelo pertenece a Marca mediante diseño relacional compatible.
-- índice único multidimensional comercial.
-- índice único SKU.
-- índice único código de barras cuando aplique.
-- unicidad de variante técnica por Producto.
+- FK Variante -> Marca;
+- FK Variante -> Modelo;
+- FK Variante -> Color;
+- FK Variante -> Talla;
+- garantía Modelo pertenece a Marca;
+- índice único multidimensional comercial;
+- SKU único global;
+- código de barras único global cuando exista;
+- variante técnica única por Producto;
+- tratamiento determinista de NULL y soft delete en la clave comercial.
 
-## M2.C — Migración/backfill de variantes
-
-Para variantes existentes:
+## M2.C — Backfill no destructivo de variantes
 
 - conservar `ProductoVariante.Id`;
 - conservar Color actual;
 - heredar Marca/Modelo/Talla legacy desde Producto cuando corresponda;
 - preservar SKU/barcode/stock/costo/precio;
-- detectar colisiones antes de aplicar;
-- abortar fail-closed si dos filas terminarían representando la misma combinación.
+- detectar colisiones antes de migrar;
+- abortar fail-closed ante combinaciones ambiguas.
 
 ## M2.D — DTO/API/Servicios
 
-Actualizar todos los contratos de Producto/Variante para devolver Marca, Modelo, Color y Talla de la variante.
+Actualizar contratos de Producto/Variante para devolver y validar Marca, Modelo, Color y Talla.
 
-Corregir además la inconsistencia de SKU:
+SKU:
 
-- SKU manual permitido;
-- SKU omitido -> backend genera uno único;
-- frontend no garantiza unicidad.
+- manual permitido;
+- vacío -> backend genera uno único;
+- frontend no es autoridad de unicidad.
 
-## M2.E — Nuevo constructor de variantes en Productos
+## M2.E — Constructor de variantes en Productos
 
-La sección actual `Colores y existencias` se reemplaza por `Variantes y existencias`.
+Reemplazar `Colores y existencias` por `Variantes y existencias`.
 
-Cada variante permitirá:
+Cada fila:
 
-- Marca.
-- Modelo dependiente de Marca.
-- Color.
-- Talla/Tamaño.
-- Cantidad.
-- SKU.
-- código de barras.
-- costo.
-- precio.
+- Marca;
+- Modelo dependiente de Marca;
+- Color;
+- Talla/Tamaño;
+- Cantidad;
+- SKU;
+- código de barras;
+- costo;
+- precio;
 - umbral.
 
-La información general del Producto dejará de imponer una única Marca/Modelo/Talla/Color como autoridad.
+Mejoras:
 
-Mejoras UX obligatorias:
-
-- `Agregar variante`.
-- copiar valores de la fila anterior.
-- validación inmediata de duplicados.
-- etiqueta canónica en vivo.
-- resumen de stock total.
-- resumen por dimensión.
-- errores por fila.
-- responsive.
+- `Agregar variante`;
+- copiar fila anterior;
+- validación de duplicados;
+- etiqueta canónica en vivo;
+- resumen total y por dimensión;
+- errores por fila;
+- responsive;
 - teclado/accesibilidad.
 
 ### Generador de combinaciones
 
-Para productos con muchas combinaciones se añadirá una herramienta que permita seleccionar múltiples:
+Permitir seleccionar múltiples Modelos/Colores/Tallas y generar una vista previa de combinaciones válidas antes de confirmar.
 
-- Modelos.
-- Colores.
-- Tallas.
-
-Y generar las combinaciones válidas para revisión antes de guardar, evitando capturar manualmente decenas de filas.
-
-No se generarán combinaciones automáticamente sin confirmación del usuario.
+No guardar combinaciones automáticamente sin confirmación.
 
 ## M2.F — Administrador de variantes
 
-Permitirá:
-
 - alta;
-- edición de atributos;
+- edición de atributos sin sobrescribir stock;
 - activar/desactivar;
 - ajuste de stock separado;
 - soft delete con stock cero;
-- filtros por Marca/Modelo/Color/Talla/SKU/barcode/estado;
+- filtros Marca/Modelo/Color/Talla/SKU/barcode/estado;
 - historial/auditoría;
-- stock bajo/agotar.
+- indicadores de stock bajo/agotado.
 
 ## M2.G — Imágenes por variante
 
-Extender imágenes para soportar:
+Extender imagen de Producto para soportar asociación a Variante o estructura equivalente normalizada.
 
-- galería general de Producto;
-- galería específica de Variante;
-- imagen principal por ámbito;
+- múltiples imágenes por variante;
+- principal por ámbito;
 - orden;
 - preview;
-- reemplazo;
-- eliminación segura;
-- fallback automático a imagen general del Producto.
+- reemplazo/eliminación segura;
+- fallback a imagen general del Producto;
+- seguridad de imágenes 2F preservada.
 
 ## M2.H — Compras
 
-Compras seleccionará `ProductoVarianteId` exacto.
-
-Mostrar:
-
-`Producto · Marca · Modelo · Color · Talla · SKU`
-
-Al confirmar:
-
-- aumentar solo esa variante;
-- actualizar costo de esa variante según política;
-- registrar movimiento exacto;
-- snapshot Marca/Modelo/Color/Talla/SKU;
-- anulación revierte la misma variante;
-- locks/concurrencia sobre la variante correcta.
+- seleccionar variante exacta;
+- etiqueta `Producto · Marca · Modelo · Color · Talla · SKU`;
+- sumar stock solo a esa variante;
+- costo por variante;
+- snapshots Marca/Modelo/Color/Talla/SKU;
+- anulación revierte exactamente esa variante;
+- concurrencia/locks sobre fila correcta.
 
 ## M2.I — Ventas
 
-Ventas seleccionará variante exacta.
+- seleccionar variante exacta;
+- validar stock exclusivamente de esa combinación;
+- descontar solo esa variante;
+- precio/costo/utilidad de variante;
+- snapshots completos;
+- anulación devuelve stock a la misma variante;
+- impedir sobreventa concurrente.
 
-- stock de una variante no puede utilizarse para cubrir otra;
-- precio/costo salen de la variante;
-- descuento/impuesto/envío permanecen compatibles;
-- anulación devuelve stock a la variante original;
-- concurrencia evita sobreventa.
+## M2.J — Facturación/PDF/impresión/compartición
 
-## M2.J — Facturación y documentos
+Agregar/preservar snapshots de:
 
-Ampliar snapshots históricos con:
-
-- Marca.
-- Modelo.
-- Color.
-- Talla.
-- SKU/barcode cuando corresponda.
+- Marca;
+- Modelo;
+- Color;
+- Talla;
+- SKU/código.
 
 Actualizar:
 
-- FacturaDetalle.
-- vista.
-- PDF.
-- impresión oficina/POS.
-- correo.
-- WhatsApp/compartición cuando incluya detalle.
-
-Renombrar o desactivar un catálogo nunca modifica una factura confirmada.
+- factura;
+- detalle;
+- PDF;
+- impresión oficina/POS;
+- correo;
+- WhatsApp/compartición.
 
 ## M2.K — Inventario y movimientos
 
-MovimientoInventario conservará snapshots de:
+- fuente de verdad: `ProductoVariante.Cantidad`;
+- Producto.Cantidad = resumen derivado;
+- movimientos apuntan a variante exacta;
+- snapshots completos;
+- valoración sin doble conteo Producto + Variante;
+- ajustes usando el documento normalizado de M1 cuando aplique.
 
-- Marca.
-- Modelo.
-- Color.
-- Talla.
-- SKU.
+## M2.L — Producto y vistas
 
-Reportará stock anterior/nuevo por variante exacta.
-
-## M2.L — Productos/listados/detalle
-
-Actualizar:
-
-- detalle de Producto;
-- listado;
-- tarjetas de variantes;
-- filtros;
-- badges;
-- precios mínimos/máximos;
-- imágenes;
-- resumen de stock.
+- Producto deja de imponer una sola Marca/Modelo/Color/Talla;
+- detalle muestra variantes completas;
+- filtros Marca -> Modelo -> Color -> Talla;
+- agrupación/resúmenes sin ocultar combinaciones distintas.
 
 ## M2.M — Escáner/autocomplete/búsqueda
 
-Los resultados deberán ser inequívocos e incluir dimensiones completas.
+Resolver siempre una variante exacta por SKU/barcode.
 
-Búsqueda por:
+Mostrar etiqueta canónica:
 
-- Producto.
-- Marca.
-- Modelo.
-- Color.
-- Talla.
-- SKU.
-- código de barras.
+`Marca · Modelo · Color · Talla · SKU`
 
 ## M2.N — Cargas masivas
 
-Actualizar `VariantesInventario` para soportar:
+Extender `VariantesInventario` con:
 
-- Producto.
-- Marca.
-- Modelo.
-- Color.
-- Talla.
-- SKU.
-- barcode.
-- cantidad.
-- costo.
-- precio.
-- umbral.
+- Producto;
+- Marca;
+- Modelo;
+- Color;
+- Talla;
+- SKU;
+- Barcode;
+- Cantidad;
+- Costo;
+- Precio;
+- Umbral.
 
-Validar:
+Validar Modelo->Marca, duplicados, catálogos inactivos, SKU/barcode y combinación comercial antes de confirmar.
 
-- Modelo pertenece a Marca;
-- catálogos activos;
-- combinación duplicada;
-- SKU/barcode duplicados;
-- valores numéricos;
-- errores antes de confirmar.
+## M2.O — Reportes/Dashboard
 
-## M2.O — Dashboard/reportes/exportaciones
+Analítica por:
 
-Agregar capacidades de análisis por:
+- Producto;
+- Marca;
+- Modelo;
+- Color;
+- Talla;
+- variante exacta.
 
-- Marca.
-- Modelo.
-- Color.
-- Talla.
-- combinación exacta.
+## M2.P — Auditoría/permisos
 
-Evitar doble conteo entre Producto y Variante.
+Auditar cambios de:
 
-## M2.P — Permisos/auditoría
+- dimensiones;
+- stock;
+- costo;
+- precio;
+- estado;
+- imágenes.
 
-Toda operación sensible de variante y mantenimientos deberá ser auditable y respetar permisos.
+## M2.Q — Certificación
 
-## M2.Q — Regresión y certificación M2
+Casos mínimos:
 
-Validar como mínimo:
-
-- producto simple/variante técnica;
-- producto con un Modelo y varios Colores;
-- producto con varios Modelos;
+- producto simple;
+- variante técnica;
+- un Modelo/múltiples Colores;
+- múltiples Modelos;
 - Color + Talla;
-- varios Modelos + Colores + Tallas;
-- compra;
-- anulación compra;
-- venta;
-- anulación venta;
-- stock concurrente;
-- facturación/PDF;
-- scanner/autocomplete;
-- carga masiva;
-- imágenes por variante;
+- Marca + Modelo + Color + Talla;
+- compras/anulaciones;
+- ventas/anulaciones;
+- concurrencia;
+- facturación;
+- PDF;
+- cargas;
+- escáner;
+- imágenes;
 - históricos;
 - permisos;
-- MySQL migration/backfill;
-- frontend responsive/accesibilidad;
-- CI real.
+- responsive/accesibilidad.
 
-# FASE M3 — Certificación ISV/ISC
+---
 
-La infraestructura fiscal persistente ya existe. M3 se concentrará en regresión, persistencia tras reinicio, snapshots históricos, seeds idempotentes y corrección solo si aparece una falla real.
+# FASE M3 — Configuración fiscal ISV/ISC
 
-# FASE M4 — Filtros y navegación persistente
+Objetivo: certificar y completar la persistencia fiscal ya existente.
 
-Implementar patrón reutilizable query params + sessionStorage para búsqueda, filtros, orden, página y pageSize en Productos, Compras, Ventas, Clientes, Inventario y Finanzas, con `Limpiar filtros`.
+- auditar Impuestos después de M1;
+- verificar ISV/ISC persistidos;
+- seed idempotente;
+- snapshots históricos;
+- permisos/auditoría;
+- cierre/reinicio de sesión y API;
+- no reactivar decisiones administrativas mediante seed.
 
-Los nuevos filtros de variante Marca/Modelo/Color/Talla deberán integrarse.
+---
+
+# FASE M4 — Estado persistente de filtros y navegación
+
+- búsqueda;
+- filtros;
+- página;
+- pageSize;
+- orden;
+- retorno desde detalle/edición;
+- `Limpiar filtros`;
+- query params + sessionStorage según necesidad;
+- aislamiento por usuario cuando corresponda.
+
+Cobertura inicial: Productos, Ventas, Compras, Clientes, Inventario y Finanzas.
+
+---
 
 # FASE M5 — Clientes y segmentación
 
-Extender TipoCliente existente con filtros, KPIs, reportes, exportaciones y segmentación sin recrear `TipoCliente`.
+- `TipoCliente` existente como base;
+- filtros y estadísticas por tipo;
+- reportes/exportaciones;
+- tipos administrables;
+- `SIN_CLASIFICAR` protegido;
+- segmentación extensible sin hardcodear etiquetas subjetivas.
 
-# FASE M6 — Mercadería / Insumos / Gastos
+La identidad de Cliente seguirá las reglas corregidas en M1.
 
-Completar UX, reportes y valoración manteniendo:
+---
+
+# FASE M6 — Mercadería, insumos administrativos y gastos
+
+Separar y completar:
 
 - mercadería vendible;
-- insumo administrativo inventariable no vendible;
+- insumo administrativo físico no vendible;
 - gasto financiero sin stock.
+
+Incluye permisos, vistas, reportes, valoración, consumos y bloqueo backend contra venta de insumos.
+
+---
 
 # FASE M7 — Costos de envío profesionales
 
-Extender `CostoEnvio` con geografía/modalidad cuando aplique y resolver integridad concurrente del predeterminado único a nivel BD, preservando snapshots históricos.
+Sobre la restricción de predeterminado ya reforzada en M1:
 
-# FASE M8 — Búsqueda y rendimiento
+- zona;
+- ciudad;
+- departamento;
+- modalidad/tipo de envío;
+- precio;
+- prioridad;
+- vigencia;
+- activo;
+- predeterminado;
+- historial;
+- snapshots de Venta/Factura;
+- eliminación/desactivación segura.
 
-Ampliar búsqueda transversal incluyendo las cuatro dimensiones normalizadas. Medir p50/p95 antes de crear índices adicionales.
+---
+
+# FASE M8 — Búsqueda inteligente y rendimiento
+
+- SKU/barcode;
+- Producto;
+- Marca;
+- Modelo;
+- Color;
+- Talla;
+- categoría;
+- Cliente/Proveedor;
+- teléfono/correo;
+- observaciones pertinentes;
+- DTOs ligeros;
+- paginación/cancelación/debounce;
+- p50/p95;
+- índices basados en medición.
+
+---
 
 # FASE M9 — Cargas masivas profesionales
 
-Elevar la infraestructura existente con progreso, versionado de plantillas, lotes, cancelación segura cuando sea viable y cobertura completa del modelo de variante M2.
+Extender la infraestructura existente:
 
-# FASE M10 — UI empresarial
+- preview;
+- validación;
+- progreso por etapas;
+- correctos/errores/omitidos;
+- descarga de errores;
+- códigos consistentes;
+- procesamiento por lotes;
+- plantillas versionadas;
+- auditoría;
+- variantes multidimensionales normalizadas.
 
-Normalizar tokens, componentes, estados, responsive, foco, teclado y WCAG. El constructor multidimensional de variantes será parte crítica de esta revisión.
+---
 
-# FASE M11 — Backup y restauración
+# FASE M10 — UI/UX empresarial y accesibilidad
 
-Diseñar backup/restore verificable exclusivamente en Desarrollo/infraestructura descartable durante este ciclo.
+- tokens visuales;
+- tipografía;
+- iconografía;
+- botones;
+- tarjetas;
+- encabezados;
+- estados loading/error/success/empty;
+- responsive;
+- teclado;
+- foco;
+- labels;
+- contraste WCAG;
+- componentes reutilizables.
+
+---
+
+# FASE M11 — Backups y restauración en Desarrollo
+
+- inventario de activos respaldables;
+- MySQL;
+- configuración;
+- documentos;
+- referencias/activos de imágenes;
+- checksum;
+- cifrado/control de acceso;
+- retención;
+- metadata;
+- restore en entorno descartable;
+- validación de integridad.
+
+Producción queda fuera de alcance.
+
+---
 
 # FASE M12 — Automatización transversal
 
-Reducir captura repetitiva mediante defaults, sugerencias, generador de combinaciones y acciones masivas seguras, manteniendo determinismo y auditoría.
+Revisar Productos, Compras, Ventas, Inventario, Clientes, Facturación, Finanzas, Cargas y Configuración para:
 
-# FASE M13 — Auditoría integral y certificación final
+- defaults administrables;
+- autocompletado;
+- cálculos;
+- preferencias;
+- acciones masivas seguras;
+- reducción de captura duplicada;
+- sugerencias y recordatorios operativos.
 
-Revisar arquitectura, seguridad, integridad, concurrencia, migraciones, rendimiento, UX, accesibilidad, documentación, dependencias, secretos/logs, backups y regresión completa.
+Toda automatización financiera/inventario debe ser determinista y auditable.
 
-## Orden oficial actualizado
+---
 
-`M0 -> M1 -> M2 -> M3 -> M4 -> M5 -> M6 -> M7 -> M8 -> M9 -> M10 -> M11 -> M12 -> M13`
+# FASE M13 — Auditoría integral, hardening y certificación final
 
-Dependencia obligatoria:
+Revisar:
 
-`M1 normalización de Marcas/Modelos/Colores/Tallas` debe cerrar antes de implementar la migración definitiva de `ProductoVariante` en M2.
+- arquitectura;
+- normalización e integridad relacional;
+- migraciones/snapshot;
+- seguridad;
+- autenticación/RBAC;
+- transacciones;
+- concurrencia;
+- datos históricos;
+- búsquedas/rendimiento;
+- UX/UI/accesibilidad;
+- backups;
+- logs/secrets;
+- código duplicado/muerto;
+- dependencias/vulnerabilidades;
+- facturación/inventario/clientes/finanzas.
 
-## Criterio de diseño final
+Validaciones mínimas:
 
-Al finalizar M2, el sistema deberá cumplir simultáneamente:
+- backend Release;
+- unitarias;
+- integración MySQL;
+- historial de migraciones desde cero;
+- upgrade desde esquema anterior representativo;
+- SQL forward;
+- EF snapshot;
+- frontend lint/TypeScript/build;
+- Playwright/E2E;
+- permisos;
+- seguridad;
+- Docker cuando forme parte del baseline;
+- GitHub Actions reales.
 
-- Marca tiene mantenimiento propio y tabla `Marcas`.
-- Modelo tiene mantenimiento propio y tabla `Modelos`.
-- Color tiene mantenimiento propio y tabla `Colores`.
-- Talla tiene mantenimiento propio y tabla `Tallas`.
-- Modelo depende relacionalmente de Marca.
-- Marca, Modelo, Color y Talla son atributos operativos de `ProductoVariante`.
-- el stock pertenece a la combinación exacta.
-- Compras, Ventas, Inventario y Facturación operan contra `ProductoVarianteId`.
-- documentos históricos conservan snapshots completos.
-- la antigua tabla genérica `CatalogosProducto` deja de ser fuente de verdad y se retira cuando ya no tenga dependencias runtime.
+Informe final separará:
+
+- AUTOMATIZADO Y COMPROBADO;
+- VALIDACIÓN EXTERNA/FÍSICA PENDIENTE.
+
+---
+
+## Orden obligatorio de ejecución
+
+`M0 ✅ -> M0.B ✅ -> M1 -> M2 -> M3 -> M4 -> M5 -> M6 -> M7 -> M8 -> M9 -> M10 -> M11 -> M12 -> M13`
+
+### Gate crítico
+
+`M1` es ahora prerequisito estructural obligatorio de `M2`.
+
+No se seguirá ampliando el motor de variantes sobre `CatalogosProducto`, RBAC dual, tablas puente sin integridad completa, orígenes polimórficos ambiguos o precisiones monetarias inconsistentes.
+
+### Política de compatibilidad
+
+El saneamiento será evolutivo y no destructivo:
+
+`preflight -> expandir -> backfill -> validar -> cambiar fuente de verdad -> regresión -> retirar legacy`.
+
+No se tocará Producción durante este ciclo.
