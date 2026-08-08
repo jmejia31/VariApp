@@ -34,5 +34,6 @@ public class EmpresaConfiguracion
     public string? TextoFactura { get; set; }
     public string? TextoReportes { get; set; }
     public bool Activa { get; set; } = true;
+    public string? ActivaUnica { get; private set; }
     public DateTime FechaActualizacion { get; set; } = DateTime.UtcNow;
 }

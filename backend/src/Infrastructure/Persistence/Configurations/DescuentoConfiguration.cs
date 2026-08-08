@@ -27,6 +27,50 @@ public class DescuentoConfiguration : IEntityTypeConfiguration<Descuento>
     }
 }
 
+public class DescuentoProductoConfiguration : IEntityTypeConfiguration<DescuentoProducto>
+{
+    public void Configure(EntityTypeBuilder<DescuentoProducto> builder)
+    {
+        builder.ToTable("DescuentoProductos");
+        builder.HasKey(x => x.Id);
+        builder.HasIndex(x => new { x.DescuentoId, x.ProductoId }).IsUnique().HasDatabaseName("UX_DescuentoProductos_Descuento_Producto");
+        builder.HasOne<Producto>().WithMany().HasForeignKey(x => x.ProductoId).OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
+public class DescuentoCategoriaConfiguration : IEntityTypeConfiguration<DescuentoCategoria>
+{
+    public void Configure(EntityTypeBuilder<DescuentoCategoria> builder)
+    {
+        builder.ToTable("DescuentoCategorias");
+        builder.HasKey(x => x.Id);
+        builder.HasIndex(x => new { x.DescuentoId, x.CategoriaId }).IsUnique().HasDatabaseName("UX_DescuentoCategorias_Descuento_Categoria");
+        builder.HasOne<Categoria>().WithMany().HasForeignKey(x => x.CategoriaId).OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
+public class DescuentoClienteConfiguration : IEntityTypeConfiguration<DescuentoCliente>
+{
+    public void Configure(EntityTypeBuilder<DescuentoCliente> builder)
+    {
+        builder.ToTable("DescuentoClientes");
+        builder.HasKey(x => x.Id);
+        builder.HasIndex(x => new { x.DescuentoId, x.ClienteId }).IsUnique().HasDatabaseName("UX_DescuentoClientes_Descuento_Cliente");
+        builder.HasOne<Cliente>().WithMany().HasForeignKey(x => x.ClienteId).OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
+public class DescuentoRolConfiguration : IEntityTypeConfiguration<DescuentoRol>
+{
+    public void Configure(EntityTypeBuilder<DescuentoRol> builder)
+    {
+        builder.ToTable("DescuentoRoles");
+        builder.HasKey(x => x.Id);
+        builder.HasIndex(x => new { x.DescuentoId, x.RolId }).IsUnique().HasDatabaseName("UX_DescuentoRoles_Descuento_Rol");
+        builder.HasOne<Rol>().WithMany().HasForeignKey(x => x.RolId).OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
 public class VentaDescuentoConfiguration : IEntityTypeConfiguration<VentaDescuento>
 {
     public void Configure(EntityTypeBuilder<VentaDescuento> builder)

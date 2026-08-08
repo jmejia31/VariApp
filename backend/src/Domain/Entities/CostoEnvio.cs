@@ -15,6 +15,7 @@ public class CostoEnvio : AuditableEntity
     public bool Eliminado { get; set; }
     public DateTime? FechaEliminacion { get; set; }
     public int? EliminadoPorUsuarioId { get; set; }
+    public string? PredeterminadoActivoUnico { get; private set; }
 
     public bool EstaVigente(DateTime fechaUtc) =>
         Activo &&

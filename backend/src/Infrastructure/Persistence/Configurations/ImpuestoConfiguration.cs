@@ -26,6 +26,60 @@ public class ImpuestoConfiguration : IEntityTypeConfiguration<Impuesto>
     }
 }
 
+public class ImpuestoProductoConfiguration : IEntityTypeConfiguration<ImpuestoProducto>
+{
+    public void Configure(EntityTypeBuilder<ImpuestoProducto> builder)
+    {
+        builder.ToTable("ImpuestoProductos");
+        builder.HasKey(x => x.Id);
+        builder.HasIndex(x => new { x.ImpuestoId, x.ProductoId }).IsUnique().HasDatabaseName("UX_ImpuestoProductos_Impuesto_Producto");
+        builder.HasOne<Producto>().WithMany().HasForeignKey(x => x.ProductoId).OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
+public class ImpuestoCategoriaConfiguration : IEntityTypeConfiguration<ImpuestoCategoria>
+{
+    public void Configure(EntityTypeBuilder<ImpuestoCategoria> builder)
+    {
+        builder.ToTable("ImpuestoCategorias");
+        builder.HasKey(x => x.Id);
+        builder.HasIndex(x => new { x.ImpuestoId, x.CategoriaId }).IsUnique().HasDatabaseName("UX_ImpuestoCategorias_Impuesto_Categoria");
+        builder.HasOne<Categoria>().WithMany().HasForeignKey(x => x.CategoriaId).OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
+public class ImpuestoClienteConfiguration : IEntityTypeConfiguration<ImpuestoCliente>
+{
+    public void Configure(EntityTypeBuilder<ImpuestoCliente> builder)
+    {
+        builder.ToTable("ImpuestoClientes");
+        builder.HasKey(x => x.Id);
+        builder.HasIndex(x => new { x.ImpuestoId, x.ClienteId }).IsUnique().HasDatabaseName("UX_ImpuestoClientes_Impuesto_Cliente");
+        builder.HasOne<Cliente>().WithMany().HasForeignKey(x => x.ClienteId).OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
+public class ImpuestoProveedorConfiguration : IEntityTypeConfiguration<ImpuestoProveedor>
+{
+    public void Configure(EntityTypeBuilder<ImpuestoProveedor> builder)
+    {
+        builder.ToTable("ImpuestoProveedores");
+        builder.HasKey(x => x.Id);
+        builder.HasIndex(x => new { x.ImpuestoId, x.ProveedorId }).IsUnique().HasDatabaseName("UX_ImpuestoProveedores_Impuesto_Proveedor");
+        builder.HasOne<Proveedor>().WithMany().HasForeignKey(x => x.ProveedorId).OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
+public class ImpuestoOperacionConfiguration : IEntityTypeConfiguration<ImpuestoOperacion>
+{
+    public void Configure(EntityTypeBuilder<ImpuestoOperacion> builder)
+    {
+        builder.ToTable("ImpuestoOperaciones");
+        builder.HasKey(x => x.Id);
+        builder.HasIndex(x => new { x.ImpuestoId, x.Operacion }).IsUnique().HasDatabaseName("UX_ImpuestoOperaciones_Impuesto_Operacion");
+    }
+}
+
 public class VentaImpuestoConfiguration : IEntityTypeConfiguration<VentaImpuesto>
 {
     public void Configure(EntityTypeBuilder<VentaImpuesto> builder)

@@ -55,8 +55,12 @@ public class ClienteService : IClienteService
     public async Task<ClienteDto> CreateAsync(CreateClienteDto dto)
     {
         var nombre = dto.Nombre.Trim();
-        if (await _repository.ExisteNombreAsync(nombre))
-            throw new BusinessRuleException($"Ya existe un cliente con el nombre '{nombre}'.");
+        if (string.IsNullOrWhiteSpace(nombre))
+            throw new BusinessRuleException("El nombre del cliente es obligatorio.");
+
+        var identidad = Limpiar(dto.IdentidadORTN);
+        if (identidad is not null && await _repository.ExisteIdentidadAsync(identidad))
+            throw new BusinessRuleException($"Ya existe un cliente con la identidad/RTN '{identidad}'.");
 
         int tipoClienteId;
         if (dto.TipoClienteId.HasValue && dto.TipoClienteId.Value > 0)
@@ -74,10 +78,10 @@ public class ClienteService : IClienteService
         var cliente = new Cliente
         {
             Nombre = nombre,
-            Telefono = dto.Telefono,
-            IdentidadORTN = dto.IdentidadORTN,
-            Correo = dto.Correo,
-            Direccion = dto.Direccion,
+            Telefono = Limpiar(dto.Telefono),
+            IdentidadORTN = identidad,
+            Correo = Limpiar(dto.Correo),
+            Direccion = Limpiar(dto.Direccion),
             Activo = true,
             TipoClienteId = tipoClienteId,
             CreadoPorUsuarioId = _currentUser.UsuarioId,
@@ -98,8 +102,12 @@ public class ClienteService : IClienteService
         if (cliente is null) return null;
 
         var nombre = dto.Nombre.Trim();
-        if (await _repository.ExisteNombreAsync(nombre, id))
-            throw new BusinessRuleException($"Ya existe un cliente con el nombre '{nombre}'.");
+        if (string.IsNullOrWhiteSpace(nombre))
+            throw new BusinessRuleException("El nombre del cliente es obligatorio.");
+
+        var identidad = Limpiar(dto.IdentidadORTN);
+        if (identidad is not null && await _repository.ExisteIdentidadAsync(identidad, id))
+            throw new BusinessRuleException($"Ya existe otro cliente con la identidad/RTN '{identidad}'.");
 
         if (dto.TipoClienteId.HasValue && dto.TipoClienteId.Value > 0)
         {
@@ -110,11 +118,10 @@ public class ClienteService : IClienteService
         }
 
         cliente.Nombre = nombre;
-        cliente.Telefono = dto.Telefono;
-        cliente.IdentidadORTN = dto.IdentidadORTN;
-        cliente.Correo = dto.Correo;
-        cliente.Direccion = dto.Direccion;
-        // El estado se administra exclusivamente mediante Activar/Desactivar.
+        cliente.Telefono = Limpiar(dto.Telefono);
+        cliente.IdentidadORTN = identidad;
+        cliente.Correo = Limpiar(dto.Correo);
+        cliente.Direccion = Limpiar(dto.Direccion);
         cliente.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
         cliente.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
         cliente.FechaActualizacion = DateTime.UtcNow;
@@ -165,6 +172,8 @@ public class ClienteService : IClienteService
             await _auditoria.RegistrarAsync(ModuloSistema.Clientes, AccionPermiso.EliminarLogico, $"Cliente desactivado como eliminación lógica: {cliente.Nombre}", id);
         return eliminado;
     }
+
+    private static string? Limpiar(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 
     private static ClienteDto ToDto(Cliente c, bool incluirVentas = true) => new()
     {
