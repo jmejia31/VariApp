@@ -56,9 +56,12 @@ public class ProductoImagenesValidatorTests
     }
 
     [Fact]
-    public void Imagen_Demasiado_Pesada_Es_Rechazada()
+    public void Imagen_Mayor_A_10Mb_Es_Rechazada()
     {
-        var imagenes = new List<FakeFormFile> { new("foto.jpg", "image/jpeg", 10 * 1024 * 1024) };
+        var imagenes = new List<FakeFormFile>
+        {
+            new("foto.jpg", "image/jpeg", ImagenValidationHelper.MaxBytesPorImagen + 1)
+        };
 
         var resultado = _validator.Validate(DtoBase(imagenes));
 
