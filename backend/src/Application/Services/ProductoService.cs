@@ -59,7 +59,7 @@ public class ProductoService : IProductoService
         ValidarTipoInventario(dto.TipoInventario);
         var imagenes = dto.Imagenes ?? new List<Microsoft.AspNetCore.Http.IFormFile>();
         if (imagenes.Count > MaxImagenes)
-            throw new BusinessRuleException($"Un producto puede tener máximo {MaxImagenes} fotos.");
+            throw new BusinessRuleException($"Un producto puede tener máximo {MaxImagenes} fotos generales.");
         ValidarImagenes(imagenes);
 
         await ValidarCategoriaAsync(dto.CategoriaId, exigirActiva: true);
@@ -97,6 +97,7 @@ public class ProductoService : IProductoService
             var (url, publicId) = await _imageStorage.UploadAsync(imagenes[i]);
             producto.Imagenes.Add(new ProductoImagen
             {
+                ProductoVarianteId = null,
                 Url = url,
                 PublicId = publicId,
                 Orden = i,
@@ -126,7 +127,7 @@ public class ProductoService : IProductoService
                 producto.Cantidad,
                 producto.Costo,
                 producto.Precio,
-                Imagenes = producto.Imagenes.Count
+                ImagenesGenerales = producto.Imagenes.Count(i => i.ProductoVarianteId == null)
             });
 
         return await GetByIdAsync(producto.Id) ?? ProductoMapper.ToDto(producto);
@@ -136,6 +137,7 @@ public class ProductoService : IProductoService
     {
         var producto = await _repository.GetByIdAsync(id);
         if (producto is null) return null;
+        var imagenesGenerales = producto.Imagenes.Where(i => i.ProductoVarianteId == null).ToList();
 
         var valoresAnteriores = new
         {
@@ -153,7 +155,7 @@ public class ProductoService : IProductoService
             producto.Precio,
             producto.UmbralStockBajo,
             producto.CategoriaId,
-            Imagenes = producto.Imagenes.Count,
+            Imagenes = imagenesGenerales.Count,
             ImagenPrincipalId = producto.ImagenPrincipal?.Id
         };
 
@@ -194,56 +196,60 @@ public class ProductoService : IProductoService
 
         if (dto.ImagenesAEliminarIds is { Count: > 0 })
         {
-            var aEliminar = producto.Imagenes
+            var aEliminar = imagenesGenerales
                 .Where(i => dto.ImagenesAEliminarIds.Contains(i.Id))
                 .ToList();
             foreach (var imagen in aEliminar)
             {
                 await _imageStorage.DeleteAsync(imagen.PublicId);
                 producto.Imagenes.Remove(imagen);
+                imagenesGenerales.Remove(imagen);
             }
         }
 
         var nuevas = dto.ImagenesNuevas ?? new List<Microsoft.AspNetCore.Http.IFormFile>();
-        if (producto.Imagenes.Count + nuevas.Count > MaxImagenes)
+        if (imagenesGenerales.Count + nuevas.Count > MaxImagenes)
             throw new BusinessRuleException(
-                $"Un producto puede tener máximo {MaxImagenes} fotos ({producto.Imagenes.Count} existentes + {nuevas.Count} nuevas excede el límite).");
+                $"Un producto puede tener máximo {MaxImagenes} fotos generales ({imagenesGenerales.Count} existentes + {nuevas.Count} nuevas excede el límite).");
         ValidarImagenes(nuevas);
 
-        var siguienteOrden = producto.Imagenes.Count == 0
+        var siguienteOrden = imagenesGenerales.Count == 0
             ? 0
-            : producto.Imagenes.Max(i => i.Orden) + 1;
-        var yaTienePrincipal = producto.Imagenes.Any(i => i.EsPrincipal);
+            : imagenesGenerales.Max(i => i.Orden) + 1;
+        var yaTienePrincipal = imagenesGenerales.Any(i => i.EsPrincipal);
 
         foreach (var archivo in nuevas)
         {
             var (url, publicId) = await _imageStorage.UploadAsync(archivo);
-            producto.Imagenes.Add(new ProductoImagen
+            var imagen = new ProductoImagen
             {
+                ProductoVarianteId = null,
                 Url = url,
                 PublicId = publicId,
                 Orden = siguienteOrden++,
-                EsPrincipal = !yaTienePrincipal && producto.Imagenes.Count == 0,
+                EsPrincipal = !yaTienePrincipal && imagenesGenerales.Count == 0,
                 CreadoPorUsuarioId = _currentUser.UsuarioId,
                 CreadoPorNombreUsuario = _currentUser.NombreUsuario
-            });
+            };
+            producto.Imagenes.Add(imagen);
+            imagenesGenerales.Add(imagen);
             yaTienePrincipal = true;
         }
 
         if (dto.ImagenPrincipalId.HasValue)
         {
-            var nuevaPrincipal = producto.Imagenes
+            var nuevaPrincipal = imagenesGenerales
                 .FirstOrDefault(i => i.Id == dto.ImagenPrincipalId.Value);
             if (nuevaPrincipal is null)
-                throw new BusinessRuleException("La imagen indicada como principal no pertenece a este producto.");
+                throw new BusinessRuleException("La imagen indicada como principal no pertenece a la galería general de este producto.");
 
-            foreach (var imagen in producto.Imagenes)
+            foreach (var imagen in imagenesGenerales)
                 imagen.EsPrincipal = false;
             nuevaPrincipal.EsPrincipal = true;
         }
-        else if (producto.Imagenes.Count > 0 && !producto.Imagenes.Any(i => i.EsPrincipal))
+        else if (imagenesGenerales.Count > 0 && !imagenesGenerales.Any(i => i.EsPrincipal))
         {
-            producto.Imagenes.OrderBy(i => i.Orden).First().EsPrincipal = true;
+            imagenesGenerales.OrderBy(i => i.Orden).First().EsPrincipal = true;
         }
 
         await _repository.SaveChangesAsync();
@@ -269,7 +275,7 @@ public class ProductoService : IProductoService
                 producto.Precio,
                 producto.UmbralStockBajo,
                 producto.CategoriaId,
-                Imagenes = producto.Imagenes.Count,
+                Imagenes = imagenesGenerales.Count,
                 ImagenPrincipalId = producto.ImagenPrincipal?.Id
             });
 
@@ -314,7 +320,8 @@ public class ProductoService : IProductoService
             producto.Modelo,
             producto.Activo,
             producto.Eliminado,
-            Imagenes = producto.Imagenes.Count
+            ImagenesGenerales = producto.Imagenes.Count(i => i.ProductoVarianteId == null),
+            ImagenesVariantes = producto.Imagenes.Count(i => i.ProductoVarianteId != null)
         };
 
         producto.Activo = false;
