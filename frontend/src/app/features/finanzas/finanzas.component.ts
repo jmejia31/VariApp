@@ -90,6 +90,7 @@ export class FinanzasComponent implements OnInit {
 
     this.puedeCrearMovimiento.set(this.permisosRuntime.puede('Finanzas', 'Crear'));
     this.puedeAnularMovimiento.set(this.permisosRuntime.puede('Finanzas', 'Anular'));
+    this.persistirEstado();
     this.cargarTodo();
   }
 
