@@ -9,7 +9,7 @@ public class TallaConfiguration : IEntityTypeConfiguration<Talla>
     public void Configure(EntityTypeBuilder<Talla> builder)
     {
         builder.ToTable("Tallas");
-        builder.Property(x => x.Id).ValueGeneratedNever();
+        builder.Property(x => x.Id).ValueGeneratedOnAdd();
         builder.Property(x => x.Nombre).HasMaxLength(120).IsRequired();
         builder.Property(x => x.Descripcion).HasMaxLength(500);
         builder.Property(x => x.Activo).HasDefaultValue(true);
