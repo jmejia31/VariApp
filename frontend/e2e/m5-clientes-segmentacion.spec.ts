@@ -129,6 +129,7 @@ test.describe('M5 — Clientes y segmentación', () => {
 
     await page.goto(`/clientes?tipoClienteId=${segmentoA.id}`);
     await expect(page.getByRole('heading', { name: 'Clientes', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Segmentación', exact: true })).toBeVisible();
     await expect(filaCliente(page, clienteA)).toBeVisible();
     await expect(filaCliente(page, clienteB)).toHaveCount(0);
 
@@ -136,9 +137,9 @@ test.describe('M5 — Clientes y segmentación', () => {
     const tarjetaB = page.locator('.segment-card', { hasText: segmentoB.nombre });
     await expect(tarjetaA).toBeVisible();
     await expect(tarjetaA).toHaveClass(/selected/);
-    await expect(tarjetaA).toContainText('1 clientes');
+    await expect(tarjetaA).toContainText('1 cliente');
     await expect(tarjetaB).toBeVisible();
-    await expect(tarjetaB).toContainText('1 clientes');
+    await expect(tarjetaB).toContainText('1 cliente');
 
     await expect(page).toHaveURL(new RegExp(`tipoClienteId=${segmentoA.id}`));
     await expect.poll(async () => page.evaluate((id) => {
