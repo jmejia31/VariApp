@@ -35,7 +35,14 @@ public sealed class ProductoVarianteImagenService : IProductoVarianteImagenServi
         var producto = await _productoRepository.GetByIdAsync(productoId);
         var variante = await _varianteRepository.GetByIdAsync(varianteId);
         if (producto is null || variante is null || variante.ProductoId != productoId) return null;
-        return Map(producto.Imagenes.Where(x => x.ProductoVarianteId == varianteId));
+
+        var especificas = producto.Imagenes.Where(x => x.ProductoVarianteId == varianteId).ToList();
+        if (especificas.Count > 0) return Map(especificas);
+
+        // Fallback explícito: si la variante no tiene galería propia se usan
+        // únicamente las imágenes generales del producto. El DTO conserva
+        // ProductoVarianteId = null para que el frontend pueda mostrar que es fallback.
+        return Map(producto.Imagenes.Where(x => x.ProductoVarianteId == null));
     }
 
     public async Task<IReadOnlyList<ProductoImagenDto>> AddAsync(
