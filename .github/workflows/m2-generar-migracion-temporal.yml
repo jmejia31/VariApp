@@ -1,0 +1,46 @@
+name: M2 - Generar migración EF temporal
+
+on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - .github/workflows/m2-generar-migracion-temporal.yml
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Restaurar e instalar EF
+        working-directory: backend
+        run: |
+          dotnet restore InventoryApp.sln
+          dotnet tool install --global dotnet-ef --version 8.0.8
+      - name: Generar migración M2 y comprobar modelo
+        working-directory: backend
+        run: |
+          dotnet ef migrations add M2VariantesMultidimensionales \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext
+          dotnet ef migrations has-pending-model-changes \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext
+      - name: Publicar migración generada en Desarrollo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add backend/src/Infrastructure/Migrations
+          git diff --cached --quiet && exit 1
+          git commit -m "db(m2): agregar migración de variantes multidimensionales [ChatGPT]"
+          git push origin HEAD:Desarrollo
