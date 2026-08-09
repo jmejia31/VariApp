@@ -796,6 +796,10 @@ Objetivo: certificar y completar la persistencia fiscal ya existente.
 
 # FASE M4 — Estado persistente de filtros y navegación
 
+Estado: **COMPLETADA / CERTIFICADA AUTOMÁTICAMENTE (2026-08-09)**.
+
+Entregable: `docs/FASE_M4_PERSISTENCIA_FILTROS_NAVEGACION.md`.
+
 - búsqueda;
 - filtros;
 - página;
@@ -806,7 +810,9 @@ Objetivo: certificar y completar la persistencia fiscal ya existente.
 - query params + sessionStorage según necesidad;
 - aislamiento por usuario cuando corresponda.
 
-Cobertura inicial: Productos, Ventas, Compras, Clientes, Inventario y Finanzas.
+Cobertura completada: Productos, Ventas, Compras, Clientes, Inventario y Finanzas.
+
+Evidencia enfocada: Playwright M4 sobre MySQL 8.4 descartable, run `31337474683` — **success**.
 
 ---
 
