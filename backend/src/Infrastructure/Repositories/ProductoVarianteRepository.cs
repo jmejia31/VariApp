@@ -65,6 +65,37 @@ public class ProductoVarianteRepository : IProductoVarianteRepository
             .ToListAsync();
     }
 
+    public Task<List<ProductoVariante>> GetForReporteAsync(
+        int? productoId = null,
+        int? marcaId = null,
+        int? modeloId = null,
+        int? colorId = null,
+        int? tallaId = null,
+        bool incluirInactivas = true,
+        CancellationToken cancellationToken = default)
+    {
+        var query = Query()
+            .AsNoTracking()
+            .Where(v => !v.Eliminado && !v.Producto.Eliminado);
+        if (!incluirInactivas)
+            query = query.Where(v => v.Activo && v.Producto.Activo);
+        if (productoId.HasValue) query = query.Where(v => v.ProductoId == productoId.Value);
+        if (marcaId.HasValue) query = query.Where(v => v.MarcaId == marcaId.Value);
+        if (modeloId.HasValue) query = query.Where(v => v.ModeloId == modeloId.Value);
+        if (colorId.HasValue) query = query.Where(v => v.ColorId == colorId.Value);
+        if (tallaId.HasValue) query = query.Where(v => v.TallaId == tallaId.Value);
+
+        return query
+            .OrderBy(v => v.Producto.Nombre)
+            .ThenBy(v => v.Marca != null ? v.Marca.Nombre : string.Empty)
+            .ThenBy(v => v.Modelo != null ? v.Modelo.Nombre : string.Empty)
+            .ThenBy(v => v.Color != null ? v.Color.Nombre : string.Empty)
+            .ThenBy(v => v.Talla != null ? v.Talla.Nombre : string.Empty)
+            .ThenBy(v => v.Sku)
+            .ThenBy(v => v.Id)
+            .ToListAsync(cancellationToken);
+    }
+
     public Task<ProductoVariante?> GetTecnicaByProductoIdAsync(int productoId, bool incluirEliminada = false)
     {
         var query = Query()
