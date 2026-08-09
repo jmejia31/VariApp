@@ -192,7 +192,7 @@ public sealed class QuestPdfFacturaPerfilesService : IFacturaPdfService
                             CeldaTexto(table.Cell(), detalle.Cantidad.ToString(), true, compacto);
                             var nombreProducto = compacto
                                 ? ConstruirProductoCompacto(detalle)
-                                : detalle.ProductoNombre;
+                                : ConstruirProductoPapel(detalle);
                             CeldaTexto(table.Cell(), nombreProducto, false, compacto);
                             if (!compacto)
                             {
@@ -374,11 +374,30 @@ public sealed class QuestPdfFacturaPerfilesService : IFacturaPdfService
 
     private static string ConstruirProductoCompacto(FacturaDetalleDto detalle)
     {
-        var clasificacion = string.Join(" ", new[] { detalle.ProductoMarca, detalle.ProductoModelo }
-            .Where(x => !string.IsNullOrWhiteSpace(x)));
+        var clasificacion = string.Join(" · ", new[]
+        {
+            detalle.ProductoMarca,
+            detalle.ProductoModelo,
+            detalle.VarianteColor,
+            detalle.VarianteTalla,
+            detalle.VarianteSku
+        }.Where(x => !string.IsNullOrWhiteSpace(x)));
         return string.IsNullOrWhiteSpace(clasificacion)
             ? detalle.ProductoNombre
             : $"{detalle.ProductoNombre} · {clasificacion}";
+    }
+
+    private static string ConstruirProductoPapel(FacturaDetalleDto detalle)
+    {
+        var variante = string.Join(" · ", new[]
+        {
+            detalle.VarianteColor,
+            detalle.VarianteTalla,
+            detalle.VarianteSku
+        }.Where(x => !string.IsNullOrWhiteSpace(x)));
+        return string.IsNullOrWhiteSpace(variante)
+            ? detalle.ProductoNombre
+            : $"{detalle.ProductoNombre} · {variante}";
     }
 
     private static void DibujarDetalleFiscal(ColumnDescriptor columna, FacturaDto factura, string color, bool compacto)

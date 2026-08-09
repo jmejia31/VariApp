@@ -325,7 +325,10 @@
                 <td class="col-cantidad">{{ d.cantidad }}</td>
                 <td class="col-producto">
                   {{ d.productoNombre }}
-                  <span class="clasificacion-termica">{{ d.productoMarca }} {{ d.productoModelo }}</span>
+                  @if (d.varianteColor || d.varianteTalla || d.varianteSku) {
+                    <small class="variante-detalle"> · {{ d.varianteColor || '' }}{{ d.varianteColor && d.varianteTalla ? ' · ' : '' }}{{ d.varianteTalla || '' }}{{ (d.varianteColor || d.varianteTalla) && d.varianteSku ? ' · ' : '' }}{{ d.varianteSku || '' }}</small>
+                  }
+                  <span class="clasificacion-termica">{{ d.productoMarca }} · {{ d.productoModelo }}@if (d.varianteColor) { · {{ d.varianteColor }}}@if (d.varianteTalla) { · {{ d.varianteTalla }}}@if (d.varianteSku) { · {{ d.varianteSku }}}</span>
                 </td>
                 <td class="col-marca">{{ d.productoMarca }}</td>
                 <td class="col-modelo">{{ d.productoModelo }}</td>

@@ -214,6 +214,7 @@ public class FacturaService : IFacturaService
             ProductoMarca = d.ProductoMarca,
             ProductoModelo = d.ProductoModelo,
             VarianteColor = d.VarianteColor,
+            VarianteTalla = d.VarianteTalla,
             VarianteSku = d.VarianteSku,
             Cantidad = d.Cantidad,
             PrecioUnitario = d.PrecioUnitario,
