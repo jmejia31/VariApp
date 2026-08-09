@@ -10,6 +10,7 @@ namespace InventoryApp.Application.Services;
 public class DashboardService : IDashboardService
 {
     private readonly IProductoRepository _productoRepository;
+    private readonly IProductoVarianteRepository _productoVarianteRepository;
     private readonly ICompraRepository _compraRepository;
     private readonly IVentaRepository _ventaRepository;
     private readonly IRevisionFinancieraRepository _revisionRepository;
@@ -18,6 +19,7 @@ public class DashboardService : IDashboardService
 
     public DashboardService(
         IProductoRepository productoRepository,
+        IProductoVarianteRepository productoVarianteRepository,
         ICompraRepository compraRepository,
         IVentaRepository ventaRepository,
         IRevisionFinancieraRepository revisionRepository,
@@ -25,6 +27,7 @@ public class DashboardService : IDashboardService
         IUsuarioScopeService usuarioScope)
     {
         _productoRepository = productoRepository;
+        _productoVarianteRepository = productoVarianteRepository;
         _compraRepository = compraRepository;
         _ventaRepository = ventaRepository;
         _revisionRepository = revisionRepository;
@@ -103,5 +106,101 @@ public class DashboardService : IDashboardService
             UltimaRevisionFinancieraPor = esAdministrador ? ultimaRevision?.RevisadoPorNombreUsuario : null,
             UltimoProductoRegistradoPor = esAdministrador ? ultimosProductos.FirstOrDefault()?.CreadoPorNombreUsuario : null
         };
+    }
+
+    public async Task<InventarioVariantesReporteDto> GetInventarioVariantesAsync(
+        int? productoId = null,
+        int? marcaId = null,
+        int? modeloId = null,
+        int? colorId = null,
+        int? tallaId = null,
+        bool incluirInactivas = true,
+        CancellationToken cancellationToken = default)
+    {
+        var alcance = await _usuarioScope.ObtenerActualAsync()
+            ?? throw new ForbiddenAccessException("No fue posible resolver el usuario autenticado y su rol vigente.");
+        var incluirCostos = alcance.EsAdministrador;
+        var variantes = await _productoVarianteRepository.GetForReporteAsync(
+            productoId, marcaId, modeloId, colorId, tallaId, incluirInactivas, cancellationToken);
+
+        // Única fuente de valoración: ProductoVariante. Nunca se suma Producto.Cantidad
+        // encima de las variantes, evitando doble conteo de inventario físico.
+        var filas = variantes.Select(v =>
+        {
+            var costoReal = v.Costo ?? v.Producto.Costo;
+            var precioReal = v.Precio ?? v.Producto.Precio;
+            var costoVisible = incluirCostos ? costoReal : 0m;
+            var valorCosto = incluirCostos ? Math.Round(costoReal * v.Cantidad, 2, MidpointRounding.AwayFromZero) : 0m;
+            var valorVenta = Math.Round(precioReal * v.Cantidad, 2, MidpointRounding.AwayFromZero);
+            return new InventarioVarianteFilaDto
+            {
+                ProductoVarianteId = v.Id,
+                ProductoId = v.ProductoId,
+                Producto = v.Producto.Nombre,
+                MarcaId = v.MarcaId,
+                Marca = v.Marca?.Nombre,
+                ModeloId = v.ModeloId,
+                Modelo = v.Modelo?.Nombre,
+                ColorId = v.ColorId,
+                Color = v.Color?.Nombre,
+                TallaId = v.TallaId,
+                Talla = v.Talla?.Nombre,
+                Sku = v.Sku ?? string.Empty,
+                CodigoBarras = v.CodigoBarras,
+                Etiqueta = ConstruirEtiqueta(v),
+                Cantidad = v.Cantidad,
+                Costo = costoVisible,
+                Precio = precioReal,
+                ValorCosto = valorCosto,
+                ValorVenta = valorVenta,
+                Activo = v.Activo,
+                EsTecnica = v.EsTecnica
+            };
+        }).ToList();
+
+        return new InventarioVariantesReporteDto
+        {
+            TotalVariantes = filas.Count,
+            TotalUnidades = filas.Sum(x => x.Cantidad),
+            ValorCosto = filas.Sum(x => x.ValorCosto),
+            ValorVenta = filas.Sum(x => x.ValorVenta),
+            PorProducto = Agrupar(filas, x => x.ProductoId, x => x.Producto),
+            PorMarca = Agrupar(filas, x => x.MarcaId, x => x.Marca),
+            PorModelo = Agrupar(filas, x => x.ModeloId, x => x.Modelo),
+            PorColor = Agrupar(filas, x => x.ColorId, x => x.Color),
+            PorTalla = Agrupar(filas, x => x.TallaId, x => x.Talla),
+            Variantes = filas
+        };
+    }
+
+    private static List<InventarioDimensionResumenDto> Agrupar(
+        IEnumerable<InventarioVarianteFilaDto> filas,
+        Func<InventarioVarianteFilaDto, int?> selectorId,
+        Func<InventarioVarianteFilaDto, string?> selectorNombre) =>
+        filas.GroupBy(x => new { Id = selectorId(x), Nombre = selectorNombre(x) })
+            .Select(g => new InventarioDimensionResumenDto
+            {
+                Id = g.Key.Id,
+                Nombre = g.Key.Nombre,
+                Variantes = g.Count(),
+                Unidades = g.Sum(x => x.Cantidad),
+                ValorCosto = g.Sum(x => x.ValorCosto),
+                ValorVenta = g.Sum(x => x.ValorVenta)
+            })
+            .OrderByDescending(x => x.Unidades)
+            .ThenBy(x => x.Nombre)
+            .ToList();
+
+    private static string ConstruirEtiqueta(ProductoVariante variante)
+    {
+        var partes = new[]
+        {
+            variante.Marca?.Nombre,
+            variante.Modelo?.Nombre,
+            variante.Color?.Nombre,
+            variante.Talla?.Nombre,
+            variante.Sku
+        }.Where(x => !string.IsNullOrWhiteSpace(x));
+        return string.Join(" · ", partes);
     }
 }
