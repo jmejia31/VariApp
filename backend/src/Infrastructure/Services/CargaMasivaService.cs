@@ -637,74 +637,129 @@ public sealed class CargaMasivaService : ICargaMasivaService
 
     private async Task ValidarVariantesAsync(List<CargaMasivaFilaDto> filas, List<CargaMasivaErrorDto> errores, CancellationToken ct)
     {
-        var productos = await _db.Productos.AsNoTracking().Include(x => x.Variantes).ToListAsync(ct);
-        var colores = await _db.CatalogosProducto.AsNoTracking()
-            .Where(x => x.Tipo == TipoCatalogoProducto.Color && x.Activo && !x.Eliminado)
-            .ToListAsync(ct);
+        var productos = await _db.Productos.AsNoTracking().Where(x => !x.Eliminado).ToListAsync(ct);
+        var marcas = await _db.Marcas.AsNoTracking().Where(x => x.Activo && !x.Eliminado).ToListAsync(ct);
+        var modelos = await _db.Modelos.AsNoTracking().Where(x => x.Activo && !x.Eliminado).ToListAsync(ct);
+        var colores = await _db.Colores.AsNoTracking().Where(x => x.Activo && !x.Eliminado).ToListAsync(ct);
+        var tallas = await _db.Tallas.AsNoTracking().Where(x => x.Activo && !x.Eliminado).ToListAsync(ct);
         var variantes = await _db.ProductoVariantes.IgnoreQueryFilters().AsNoTracking().Where(x => !x.Eliminado).ToListAsync(ct);
-        var claves = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var combinacionesArchivo = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var skusArchivo = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var codigosArchivo = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var fila in filas)
         {
             NormalizarTexto(fila, "Producto", 150, true, errores);
-            NormalizarTexto(fila, "Marca", 100, true, errores);
-            NormalizarTexto(fila, "Modelo", 100, true, errores);
-            NormalizarTexto(fila, "Color", 120, true, errores);
+            NormalizarTexto(fila, "Marca", 120, false, errores);
+            NormalizarTexto(fila, "Modelo", 120, false, errores);
+            NormalizarTexto(fila, "Color", 120, false, errores);
+            NormalizarTexto(fila, "Talla", 120, false, errores);
             NormalizarTexto(fila, "SKU", 80, false, errores, mayusculas: true);
-            NormalizarTexto(fila, "CodigoBarras", 100, false, errores);
+            NormalizarTexto(fila, "CodigoBarras", 120, false, errores);
             NormalizarEntero(fila, "Cantidad", 0, int.MaxValue, errores, requerido: true);
             NormalizarEntero(fila, "UmbralStockBajo", 0, int.MaxValue, errores, requerido: false, valorPredeterminado: 5);
             NormalizarDecimal(fila, "Costo", 0m, decimal.MaxValue, errores, requerido: true);
             NormalizarDecimal(fila, "Precio", 0.01m, decimal.MaxValue, errores, requerido: true);
             NormalizarActivo(fila, errores);
 
-            var claveProducto = ClaveProducto(V(fila, "Producto"), V(fila, "Marca"), V(fila, "Modelo"));
-            var producto = productos.FirstOrDefault(x => ClaveProducto(x.Nombre, x.Marca, x.Modelo) == claveProducto);
-            if (producto is null)
+            var nombreProducto = NormalizarClave(V(fila, "Producto"));
+            var candidatos = productos.Where(x => NormalizarClave(x.Nombre) == nombreProducto).ToList();
+            if (candidatos.Count == 0)
             {
                 AgregarError(errores, fila.NumeroFila, "Producto", "PRODUCTO_NO_EXISTE", "El producto debe existir antes de importar variantes.", V(fila, "Producto"));
                 continue;
             }
-
-            var color = colores.FirstOrDefault(x => NormalizarClave(x.Nombre) == NormalizarClave(V(fila, "Color")));
-            if (color is null)
+            if (candidatos.Count > 1)
             {
-                AgregarError(errores, fila.NumeroFila, "Color", "COLOR_NO_EXISTE", "El color debe existir y estar activo antes de importar variantes.", V(fila, "Color"));
+                AgregarError(errores, fila.NumeroFila, "Producto", "PRODUCTO_AMBIGUO", "Existe más de una familia de producto con ese nombre. Corrige el catálogo antes de importar.", V(fila, "Producto"));
+                continue;
+            }
+            var producto = candidatos[0];
+
+            var marcaNombre = V(fila, "Marca");
+            var modeloNombre = V(fila, "Modelo");
+            var colorNombre = V(fila, "Color");
+            var tallaNombre = V(fila, "Talla");
+            Marca? marca = null;
+            Modelo? modelo = null;
+            Color? color = null;
+            Talla? talla = null;
+
+            if (!string.IsNullOrWhiteSpace(marcaNombre))
+            {
+                marca = marcas.FirstOrDefault(x => NormalizarClave(x.Nombre) == NormalizarClave(marcaNombre));
+                if (marca is null)
+                    AgregarError(errores, fila.NumeroFila, "Marca", "MARCA_NO_EXISTE", "La marca debe existir y estar activa antes de importar variantes.", marcaNombre);
+            }
+
+            if (!string.IsNullOrWhiteSpace(modeloNombre))
+            {
+                if (marca is null)
+                    AgregarError(errores, fila.NumeroFila, "Modelo", "MODELO_REQUIERE_MARCA", "Todo modelo de una variante debe indicar su marca.", modeloNombre);
+                else
+                {
+                    modelo = modelos.FirstOrDefault(x => x.MarcaId == marca.Id && NormalizarClave(x.Nombre) == NormalizarClave(modeloNombre));
+                    if (modelo is null)
+                        AgregarError(errores, fila.NumeroFila, "Modelo", "MODELO_NO_EXISTE", "El modelo no existe, está inactivo o no pertenece a la marca indicada.", modeloNombre);
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(colorNombre))
+            {
+                color = colores.FirstOrDefault(x => NormalizarClave(x.Nombre) == NormalizarClave(colorNombre));
+                if (color is null)
+                    AgregarError(errores, fila.NumeroFila, "Color", "COLOR_NO_EXISTE", "El color debe existir y estar activo antes de importar variantes.", colorNombre);
+            }
+
+            if (!string.IsNullOrWhiteSpace(tallaNombre))
+            {
+                talla = tallas.FirstOrDefault(x => NormalizarClave(x.Nombre) == NormalizarClave(tallaNombre));
+                if (talla is null)
+                    AgregarError(errores, fila.NumeroFila, "Talla", "TALLA_NO_EXISTE", "La talla o tamaño debe existir y estar activo antes de importar variantes.", tallaNombre);
+            }
+
+            if (marca is null && modelo is null && color is null && talla is null)
+            {
+                AgregarError(errores, fila.NumeroFila, "Producto", "VARIANTE_SIN_DIMENSION", "Una variante comercial debe definir al menos Marca, Modelo, Color o Talla.", V(fila, "Producto"));
                 continue;
             }
 
+            var existentePorCombinacion = variantes.FirstOrDefault(x =>
+                x.ProductoId == producto.Id &&
+                x.MarcaId == marca?.Id && x.ModeloId == modelo?.Id &&
+                x.ColorId == color?.Id && x.TallaId == talla?.Id);
+
             var sku = V(fila, "SKU");
-            var existentePorColor = variantes.FirstOrDefault(x => x.ProductoId == producto.Id && x.ColorId == color.Id);
             if (string.IsNullOrWhiteSpace(sku))
             {
-                sku = existentePorColor?.Sku ?? $"VAR-{producto.Id:D6}-{color.Id:D4}";
+                sku = existentePorCombinacion?.Sku ?? $"VAR-{producto.Id:D6}-{(marca?.Id ?? 0):D4}-{(modelo?.Id ?? 0):D4}-{(color?.Id ?? 0):D4}-{(talla?.Id ?? 0):D4}";
                 fila.Datos["SKU"] = sku;
             }
 
             var existentePorSku = variantes.FirstOrDefault(x => NormalizarClave(x.Sku) == NormalizarClave(sku));
-            if (existentePorSku is not null && existentePorSku.ProductoId != producto.Id)
-                AgregarError(errores, fila.NumeroFila, "SKU", "SKU_EN_OTRO_PRODUCTO", "El SKU ya pertenece a otro producto.", sku);
-            if (existentePorColor is not null && existentePorSku is not null && existentePorColor.Id != existentePorSku.Id)
-                AgregarError(errores, fila.NumeroFila, "SKU", "COLOR_SKU_CONFLICTO", "El color y el SKU identifican variantes diferentes.", sku);
+            if (existentePorSku is not null && existentePorSku.Id != existentePorCombinacion?.Id)
+                AgregarError(errores, fila.NumeroFila, "SKU", "SKU_DUPLICADO", "El SKU ya pertenece a otra variante.", sku);
 
             var codigo = V(fila, "CodigoBarras");
-            if (!string.IsNullOrWhiteSpace(codigo) && variantes.Any(x => x.Id != existentePorColor?.Id && NormalizarClave(x.CodigoBarras) == NormalizarClave(codigo)))
+            if (!string.IsNullOrWhiteSpace(codigo) && variantes.Any(x => x.Id != existentePorCombinacion?.Id && NormalizarClave(x.CodigoBarras) == NormalizarClave(codigo)))
                 AgregarError(errores, fila.NumeroFila, "CodigoBarras", "CODIGO_BARRAS_DUPLICADO", "El código de barras ya está asignado a otra variante.", codigo);
 
-            var existente = existentePorSku ?? existentePorColor;
+            var claveCombinacion = $"{producto.Id}|{marca?.Id ?? 0}|{modelo?.Id ?? 0}|{color?.Id ?? 0}|{talla?.Id ?? 0}";
+            if (!combinacionesArchivo.Add(claveCombinacion))
+                AgregarError(errores, fila.NumeroFila, "Producto", "DUPLICADO_COMBINACION_ARCHIVO", "La misma combinación de Producto, Marca, Modelo, Color y Talla aparece más de una vez en el archivo.", V(fila, "Producto"));
+            if (!skusArchivo.Add(NormalizarClave(sku)))
+                AgregarError(errores, fila.NumeroFila, "SKU", "DUPLICADO_SKU_ARCHIVO", "El SKU aparece más de una vez en el archivo.", sku);
+            if (!string.IsNullOrWhiteSpace(codigo) && !codigosArchivo.Add(NormalizarClave(codigo)))
+                AgregarError(errores, fila.NumeroFila, "CodigoBarras", "DUPLICADO_CODIGO_ARCHIVO", "El código de barras aparece más de una vez en el archivo.", codigo);
+
+            var existente = existentePorCombinacion ?? existentePorSku;
             fila.ProductoIdSnapshot = producto.Id;
             fila.ProductoVarianteIdSnapshot = existente?.Id;
             fila.CantidadActualSnapshot = existente?.Cantidad;
             fila.FechaValidacionSnapshot = DateTime.UtcNow;
-
-            var clave = $"{producto.Id}|{color.Id}|{NormalizarClave(sku)}";
-            if (!claves.Add(clave))
-                AgregarError(errores, fila.NumeroFila, "SKU", "DUPLICADO_ARCHIVO", "La variante aparece más de una vez en el archivo.", sku);
-
             fila.Accion = existente is null ? "Crear" : "Actualizar";
         }
     }
-
     private async Task<(int Creados, int Actualizados)> AplicarClientesAsync(List<CargaMasivaFilaDto> filas, CancellationToken ct)
     {
         var existentes = await _db.Clientes.ToListAsync(ct);
@@ -874,32 +929,18 @@ public sealed class CargaMasivaService : ICargaMasivaService
     {
         if (_db.Database.CurrentTransaction is null)
             throw new InvalidOperationException("La confirmación de variantes requiere una transacción activa.");
-
         if (filas.Any(x => !x.ProductoIdSnapshot.HasValue))
-            throw new BusinessRuleException(
-                "La carga no contiene snapshots completos. Valida el archivo nuevamente.");
+            throw new BusinessRuleException("La carga no contiene snapshots completos. Valida el archivo nuevamente.");
 
-        var productoIds = filas
-            .Select(x => x.ProductoIdSnapshot!.Value)
-            .Distinct()
-            .OrderBy(x => x)
-            .ToArray();
-        var varianteIds = filas
-            .Where(x => x.ProductoVarianteIdSnapshot.HasValue)
-            .Select(x => x.ProductoVarianteIdSnapshot!.Value)
-            .Distinct()
-            .OrderBy(x => x)
-            .ToArray();
-
+        var productoIds = filas.Select(x => x.ProductoIdSnapshot!.Value).Distinct().OrderBy(x => x).ToArray();
+        var varianteIds = filas.Where(x => x.ProductoVarianteIdSnapshot.HasValue).Select(x => x.ProductoVarianteIdSnapshot!.Value).Distinct().OrderBy(x => x).ToArray();
         var productos = new Dictionary<int, Producto>();
         foreach (var productoId in productoIds)
         {
             var producto = await _db.Productos
                 .FromSqlInterpolated($"SELECT p.* FROM Productos p WHERE p.Id = {productoId} AND p.Eliminado = 0 FOR UPDATE")
-                .AsTracking()
-                .SingleOrDefaultAsync(ct)
-                ?? throw new BusinessRuleException(
-                    $"El producto ID '{productoId}' ya no existe. Revalida el archivo.");
+                .AsTracking().SingleOrDefaultAsync(ct)
+                ?? throw new BusinessRuleException($"El producto ID '{productoId}' ya no existe. Revalida el archivo.");
             productos.Add(producto.Id, producto);
         }
 
@@ -908,17 +949,15 @@ public sealed class CargaMasivaService : ICargaMasivaService
         {
             var variante = await _db.ProductoVariantes
                 .FromSqlInterpolated($"SELECT v.* FROM ProductoVariantes v WHERE v.Id = {varianteId} AND v.Eliminado = 0 FOR UPDATE")
-                .AsTracking()
-                .SingleOrDefaultAsync(ct)
-                ?? throw new BusinessRuleException(
-                    $"La variante ID '{varianteId}' ya no existe. Revalida el archivo.");
+                .AsTracking().SingleOrDefaultAsync(ct)
+                ?? throw new BusinessRuleException($"La variante ID '{varianteId}' ya no existe. Revalida el archivo.");
             variantes.Add(variante.Id, variante);
         }
 
-        var colores = await _db.CatalogosProducto
-            .Where(x => x.Tipo == TipoCatalogoProducto.Color && x.Activo && !x.Eliminado)
-            .ToListAsync(ct);
-
+        var marcas = await _db.Marcas.Where(x => x.Activo && !x.Eliminado).ToListAsync(ct);
+        var modelos = await _db.Modelos.Where(x => x.Activo && !x.Eliminado).ToListAsync(ct);
+        var colores = await _db.Colores.Where(x => x.Activo && !x.Eliminado).ToListAsync(ct);
+        var tallas = await _db.Tallas.Where(x => x.Activo && !x.Eliminado).ToListAsync(ct);
         var movimientos = new List<(Producto Producto, ProductoVariante Variante, CargaMasivaFilaDto Fila, int Anterior, int Nueva)>();
         var productosAfectados = new HashSet<int>();
         var creados = 0;
@@ -927,10 +966,25 @@ public sealed class CargaMasivaService : ICargaMasivaService
         foreach (var fila in filas.OrderBy(x => x.ProductoIdSnapshot).ThenBy(x => x.ProductoVarianteIdSnapshot))
         {
             var producto = productos[fila.ProductoIdSnapshot!.Value];
-            var color = colores.FirstOrDefault(
-                x => NormalizarClave(x.Nombre) == NormalizarClave(V(fila, "Color")))
-                ?? throw new BusinessRuleException(
-                    "Uno de los colores dejó de estar disponible. Revalida el archivo.");
+            var marcaNombre = V(fila, "Marca");
+            var modeloNombre = V(fila, "Modelo");
+            var colorNombre = V(fila, "Color");
+            var tallaNombre = V(fila, "Talla");
+            var marca = string.IsNullOrWhiteSpace(marcaNombre) ? null : marcas.FirstOrDefault(x => NormalizarClave(x.Nombre) == NormalizarClave(marcaNombre));
+            var modelo = string.IsNullOrWhiteSpace(modeloNombre) || marca is null ? null : modelos.FirstOrDefault(x => x.MarcaId == marca.Id && NormalizarClave(x.Nombre) == NormalizarClave(modeloNombre));
+            var color = string.IsNullOrWhiteSpace(colorNombre) ? null : colores.FirstOrDefault(x => NormalizarClave(x.Nombre) == NormalizarClave(colorNombre));
+            var talla = string.IsNullOrWhiteSpace(tallaNombre) ? null : tallas.FirstOrDefault(x => NormalizarClave(x.Nombre) == NormalizarClave(tallaNombre));
+
+            if ((!string.IsNullOrWhiteSpace(marcaNombre) && marca is null) ||
+                (!string.IsNullOrWhiteSpace(modeloNombre) && modelo is null) ||
+                (!string.IsNullOrWhiteSpace(colorNombre) && color is null) ||
+                (!string.IsNullOrWhiteSpace(tallaNombre) && talla is null))
+                throw new BusinessRuleException("Una dimensión de la variante dejó de estar disponible. Revalida el archivo.");
+
+            var marcaId = marca?.Id;
+            var modeloId = modelo?.Id;
+            var colorId = color?.Id;
+            var tallaId = talla?.Id;
             var sku = V(fila, "SKU")!;
             var codigoBarras = NuloSiVacio(V(fila, "CodigoBarras"));
             ProductoVariante variante;
@@ -939,32 +993,22 @@ public sealed class CargaMasivaService : ICargaMasivaService
             if (fila.ProductoVarianteIdSnapshot.HasValue)
             {
                 variante = variantes[fila.ProductoVarianteIdSnapshot.Value];
-                if (variante.ProductoId != producto.Id)
-                    throw new BusinessRuleException("La variante cambió de producto. Revalida el archivo.");
-                if (!fila.CantidadActualSnapshot.HasValue ||
-                    variante.Cantidad != fila.CantidadActualSnapshot.Value)
-                {
-                    throw new BusinessRuleException(
-                        "El inventario cambió después de validar el archivo. Revalida la carga antes de confirmarla.");
-                }
-
+                if (variante.ProductoId != producto.Id || variante.MarcaId != marcaId || variante.ModeloId != modeloId || variante.ColorId != colorId || variante.TallaId != tallaId)
+                    throw new BusinessRuleException("La identidad de la variante cambió después de validar. Revalida el archivo.");
+                if (!fila.CantidadActualSnapshot.HasValue || variante.Cantidad != fila.CantidadActualSnapshot.Value)
+                    throw new BusinessRuleException("El inventario cambió después de validar el archivo. Revalida la carga antes de confirmarla.");
                 cantidadAnterior = variante.Cantidad;
                 actualizados++;
             }
             else
             {
-                var conflicto = await _db.ProductoVariantes
-                    .IgnoreQueryFilters()
-                    .AsNoTracking()
-                    .AnyAsync(x => !x.Eliminado &&
-                        (x.Sku == sku ||
-                         (x.ProductoId == producto.Id && x.ColorId == color.Id) ||
-                         (codigoBarras != null && x.CodigoBarras == codigoBarras)), ct);
+                var conflicto = await _db.ProductoVariantes.IgnoreQueryFilters().AsNoTracking().AnyAsync(x =>
+                    !x.Eliminado &&
+                    (x.Sku == sku ||
+                     (codigoBarras != null && x.CodigoBarras == codigoBarras) ||
+                     (x.ProductoId == producto.Id && x.MarcaId == marcaId && x.ModeloId == modeloId && x.ColorId == colorId && x.TallaId == tallaId)), ct);
                 if (conflicto)
-                {
-                    throw new BusinessRuleException(
-                        "Una variante fue creada o modificada después de validar el archivo. Revalida la carga.");
-                }
+                    throw new BusinessRuleException("Una variante fue creada o modificada después de validar el archivo. Revalida la carga.");
 
                 variante = new ProductoVariante
                 {
@@ -978,7 +1022,10 @@ public sealed class CargaMasivaService : ICargaMasivaService
             }
 
             var cantidadNueva = Entero(fila, "Cantidad");
-            variante.ColorId = color.Id;
+            variante.MarcaId = marcaId;
+            variante.ModeloId = modeloId;
+            variante.ColorId = colorId;
+            variante.TallaId = tallaId;
             variante.Sku = sku;
             variante.CodigoBarras = codigoBarras;
             variante.Cantidad = cantidadNueva;
@@ -987,10 +1034,10 @@ public sealed class CargaMasivaService : ICargaMasivaService
             variante.Precio = Decimal(fila, "Precio");
             variante.Activo = Booleano(fila, "Activo");
             variante.Eliminado = false;
+            variante.EsTecnica = false;
             variante.FechaEliminacion = null;
             variante.EliminadoPorUsuarioId = null;
             MarcarActualizacion(variante);
-
             movimientos.Add((producto, variante, fila, cantidadAnterior, cantidadNueva));
             productosAfectados.Add(producto.Id);
         }
@@ -1003,7 +1050,10 @@ public sealed class CargaMasivaService : ICargaMasivaService
             {
                 ProductoId = item.Producto.Id,
                 ProductoVarianteId = item.Variante.Id,
-                ProductoColorSnapshot = V(item.Fila, "Color"),
+                ProductoMarcaSnapshot = NuloSiVacio(V(item.Fila, "Marca")),
+                ProductoModeloSnapshot = NuloSiVacio(V(item.Fila, "Modelo")),
+                ProductoColorSnapshot = NuloSiVacio(V(item.Fila, "Color")),
+                ProductoTallaSnapshot = NuloSiVacio(V(item.Fila, "Talla")),
                 ProductoSkuSnapshot = item.Variante.Sku,
                 Tipo = TipoMovimientoInventario.Ajuste,
                 Cantidad = Math.Abs(item.Nueva - item.Anterior),
@@ -1021,30 +1071,22 @@ public sealed class CargaMasivaService : ICargaMasivaService
 
         foreach (var producto in productos.Values.Where(x => productosAfectados.Contains(x.Id)))
         {
-            var lista = await _db.ProductoVariantes
-                .Where(x => x.ProductoId == producto.Id && !x.Eliminado)
-                .ToListAsync(ct);
+            var lista = await _db.ProductoVariantes.Where(x => x.ProductoId == producto.Id && !x.Eliminado).ToListAsync(ct);
             var total = lista.Sum(x => x.Cantidad);
             producto.Cantidad = total;
             if (lista.Count > 0)
             {
                 producto.Costo = total > 0
-                    ? Math.Round(
-                        lista.Sum(x => (x.Costo ?? 0m) * x.Cantidad) / total,
-                        2,
-                        MidpointRounding.AwayFromZero)
+                    ? Math.Round(lista.Sum(x => (x.Costo ?? 0m) * x.Cantidad) / total, 2, MidpointRounding.AwayFromZero)
                     : lista.Average(x => x.Costo ?? producto.Costo);
                 var activas = lista.Where(x => x.Activo).ToList();
-                producto.Precio = (activas.Count > 0 ? activas : lista)
-                    .Min(x => x.Precio ?? producto.Precio);
-                producto.ColorId = lista.Count == 1 ? lista[0].ColorId : null;
+                producto.Precio = (activas.Count > 0 ? activas : lista).Min(x => x.Precio ?? producto.Precio);
             }
             MarcarActualizacion(producto);
         }
 
         return (creados, actualizados);
     }
-
     private static CargaMasivaDto MapResumenExpression(CargaMasiva x) => new()
     {
         Id = x.Id,
