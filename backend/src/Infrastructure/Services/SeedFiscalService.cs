@@ -57,7 +57,13 @@ public class SeedFiscalService
         bool activo,
         OperacionImpuesto[] operaciones)
     {
-        var existe = await _context.Impuestos.AnyAsync(i => i.Codigo == codigo);
+        // El query filter oculta eliminados lógicamente. El seed debe ignorarlo:
+        // un borrado/desactivación administrativa sigue siendo una decisión
+        // persistida y no debe provocar recreación, reactivación ni colisión del
+        // índice único de Codigo durante un reinicio de la API.
+        var existe = await _context.Impuestos
+            .IgnoreQueryFilters()
+            .AnyAsync(i => i.Codigo == codigo);
         if (existe) return;
 
         var impuesto = new Impuesto
@@ -93,6 +99,7 @@ public class SeedFiscalService
     {
         var normalizado = codigo.Trim().ToUpperInvariant();
         var existe = await _context.Descuentos
+            .IgnoreQueryFilters()
             .AnyAsync(d => d.CodigoPromocionalNormalizado == normalizado);
         if (existe) return;
 
