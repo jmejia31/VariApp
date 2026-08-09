@@ -47,25 +47,15 @@ public static class ProductoMapper
             MarcaNombre = p.MarcaCatalogo?.Nombre,
             ModeloId = p.ModeloId,
             ModeloNombre = p.ModeloCatalogo?.Nombre,
-            ImagenPrincipalUrl = p.Imagenes
-                .Where(i => i.ProductoVarianteId == null)
-                .OrderByDescending(i => i.EsPrincipal)
-                .ThenBy(i => i.Orden)
-                .Select(i => i.Url)
-                .FirstOrDefault(),
+            ImagenPrincipalUrl = p.ImagenPrincipal?.Url,
             TotalImagenes = p.Imagenes.Count,
-            Imagenes = p.Imagenes
-                .OrderBy(i => i.ProductoVarianteId.HasValue)
-                .ThenBy(i => i.ProductoVarianteId)
-                .ThenBy(i => i.Orden)
-                .Select(i => new ProductoImagenDto
-                {
-                    Id = i.Id,
-                    Url = i.Url,
-                    Orden = i.Orden,
-                    EsPrincipal = i.EsPrincipal,
-                    ProductoVarianteId = i.ProductoVarianteId
-                }).ToList(),
+            Imagenes = p.Imagenes.OrderBy(i => i.Orden).Select(i => new ProductoImagenDto
+            {
+                Id = i.Id,
+                Url = i.Url,
+                Orden = i.Orden,
+                EsPrincipal = i.EsPrincipal
+            }).ToList(),
             Variantes = variantes.Select(v => new ProductoVarianteDto
             {
                 Id = v.Id,
@@ -107,15 +97,7 @@ public static class ProductoMapper
 
     private static string ConstruirEtiqueta(ProductoVariante variante)
     {
-        var partes = new[]
-        {
-            variante.Marca?.Nombre,
-            variante.Modelo?.Nombre,
-            variante.Color?.Nombre,
-            variante.Talla?.Nombre,
-            variante.Sku
-        };
-
+        var partes = new[] { variante.Marca?.Nombre, variante.Modelo?.Nombre, variante.Color?.Nombre, variante.Talla?.Nombre, variante.Sku };
         return string.Join(" · ", partes.Where(parte => !string.IsNullOrWhiteSpace(parte)));
     }
 }
