@@ -24,7 +24,7 @@ export interface ProductoVariante {
   colorCodigoVisual?: string | null;
   tallaId?: number | null;
   tallaNombre?: string | null;
-  etiqueta: string;
+  etiqueta?: string;
   sku: string;
   codigoBarras?: string | null;
   cantidad: number;
@@ -32,7 +32,7 @@ export interface ProductoVariante {
   costo: number;
   precio: number;
   activo: boolean;
-  esTecnica: boolean;
+  esTecnica?: boolean;
   tieneStockBajo: boolean;
   estaAgotada: boolean;
   estadoInventario: string;
