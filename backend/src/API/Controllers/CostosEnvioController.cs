@@ -72,7 +72,9 @@ public class CostosEnvioController : ControllerBase
         var nombre = dto.Nombre.Trim();
         if (await _db.CostosEnvio.AnyAsync(x => !x.Eliminado && x.Nombre.ToUpper() == nombre.ToUpper()))
             return Conflict(ApiResponse<object>.Fail("Ya existe un costo de envío con ese nombre."));
-        if (dto.EsPredeterminado) await DesmarcarPredeterminadosAsync();
+
+        await using var transaction = await _db.Database.BeginTransactionAsync();
+        if (dto.EsPredeterminado) await DesmarcarPredeterminadosYPersistirAsync();
 
         var item = new CostoEnvio
         {
@@ -92,6 +94,7 @@ public class CostosEnvioController : ControllerBase
         var salida = ToDto(item);
         await _auditoria.RegistrarAsync(ModuloSistema.Facturacion, AccionPermiso.Crear,
             $"Costo de envío creado: {item.Nombre}.", item.Id, entidad: "CostoEnvio", valoresNuevos: salida);
+        await transaction.CommitAsync();
         return CreatedAtAction(nameof(GetById), new { id = item.Id }, ApiResponse<CostoEnvioDto>.Ok(salida));
     }
 
@@ -106,7 +109,9 @@ public class CostosEnvioController : ControllerBase
         var nombre = dto.Nombre.Trim();
         if (await _db.CostosEnvio.AnyAsync(x => !x.Eliminado && x.Id != id && x.Nombre.ToUpper() == nombre.ToUpper()))
             return Conflict(ApiResponse<object>.Fail("Ya existe un costo de envío con ese nombre."));
-        if (dto.EsPredeterminado) await DesmarcarPredeterminadosAsync(id);
+
+        await using var transaction = await _db.Database.BeginTransactionAsync();
+        if (dto.EsPredeterminado) await DesmarcarPredeterminadosYPersistirAsync(id);
 
         item.Nombre = nombre;
         item.Descripcion = Normalizar(dto.Descripcion, 500);
@@ -123,6 +128,7 @@ public class CostosEnvioController : ControllerBase
         var salida = ToDto(item);
         await _auditoria.RegistrarAsync(ModuloSistema.Facturacion, AccionPermiso.Editar,
             $"Costo de envío actualizado: {item.Nombre}.", item.Id, entidad: "CostoEnvio", valoresNuevos: salida);
+        await transaction.CommitAsync();
         return Ok(ApiResponse<CostoEnvioDto>.Ok(salida));
     }
 
@@ -160,16 +166,24 @@ public class CostosEnvioController : ControllerBase
         return Ok(ApiResponse<object>.Ok(new { id }));
     }
 
-    private async Task DesmarcarPredeterminadosAsync(int? excluirId = null)
+    private async Task DesmarcarPredeterminadosYPersistirAsync(int? excluirId = null)
     {
         var items = await _db.CostosEnvio
             .Where(x => !x.Eliminado && x.EsPredeterminado && (!excluirId.HasValue || x.Id != excluirId.Value))
             .ToListAsync();
+        if (items.Count == 0) return;
+
+        var ahora = DateTime.UtcNow;
         foreach (var item in items)
         {
             item.EsPredeterminado = false;
-            item.FechaActualizacion = DateTime.UtcNow;
+            item.FechaActualizacion = ahora;
         }
+
+        // El índice único sobre PredeterminadoActivoUnico se evalúa por sentencia en MySQL.
+        // Persistimos primero el desmarcado dentro de la misma transacción para evitar un
+        // estado transitorio con dos valores 'DEFAULT' al promover otro costo de envío.
+        await _db.SaveChangesAsync();
     }
 
     private static string? Validar(GuardarCostoEnvioDto dto)
