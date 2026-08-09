@@ -63,10 +63,26 @@ public class CargaMasivaConcurrencyTests
         await using var context = new AppDbContext(options);
         await context.Database.MigrateAsync();
 
-        var color = new Color
+        // Reproduce la transición real M1: el maestro normalizado conserva el ID
+        // del catálogo legacy hasta que todos los consumidores cambien de fuente.
+        var colorLegacy = new CatalogoProducto
         {
+            Tipo = TipoCatalogoProducto.Color,
             Nombre = "Negro",
             CodigoVisual = "#111111",
+            Activo = true,
+            Eliminado = false,
+            CreadoPorUsuarioId = 1,
+            CreadoPorNombreUsuario = "integration-admin"
+        };
+        context.CatalogosProducto.Add(colorLegacy);
+        await context.SaveChangesAsync();
+
+        var color = new Color
+        {
+            Id = colorLegacy.Id,
+            Nombre = colorLegacy.Nombre,
+            CodigoVisual = colorLegacy.CodigoVisual,
             Activo = true,
             Eliminado = false,
             CreadoPorUsuarioId = 1,
@@ -126,6 +142,7 @@ public class CargaMasivaConcurrencyTests
                 ["Marca"] = producto.Marca,
                 ["Modelo"] = producto.Modelo,
                 ["Color"] = color.Nombre,
+                ["Talla"] = null,
                 ["SKU"] = variante.Sku,
                 ["CodigoBarras"] = variante.CodigoBarras,
                 ["Cantidad"] = cantidadNueva.ToString(),
