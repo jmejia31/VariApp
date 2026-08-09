@@ -1,0 +1,54 @@
+name: M3 proteger codigo fiscal
+
+on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - '.github/workflows/m3-fix-codigo-fiscal.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Aplicar proteccion fail-closed
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          path = Path('backend/src/Application/Services/ImpuestoService.cs')
+          text = path.read_text(encoding='utf-8')
+          old = '''        var codigo = dto.Codigo.Trim().ToUpperInvariant();\n        if (await _repository.ExisteCodigoAsync(codigo, id))\n            throw new BusinessRuleException($"Ya existe un impuesto con el código '{dto.Codigo}'.");\n\n        // No se recalculan documentos históricos: editar el impuesto solo afecta\n        // aplicaciones futuras (sección 12).\n        impuesto.Nombre = dto.Nombre.Trim();\n        impuesto.Codigo = codigo;'''
+          new = '''        var codigo = dto.Codigo.Trim().ToUpperInvariant();\n        if (!string.Equals(codigo, impuesto.Codigo, StringComparison.OrdinalIgnoreCase))\n            throw new BusinessRuleException("El código del impuesto es su identidad fiscal estable y no puede modificarse después de crearlo.");\n\n        // No se recalculan documentos históricos: editar el impuesto solo afecta\n        // aplicaciones futuras (sección 12).\n        impuesto.Nombre = dto.Nombre.Trim();'''
+          if text.count(old) != 1:
+              raise SystemExit(f'Firma UpdateAsync inesperada: {text.count(old)} coincidencias')
+          path.write_text(text.replace(old, new, 1), encoding='utf-8')
+          PY
+      - name: Compilar y ejecutar regresion M3
+        working-directory: backend
+        shell: bash
+        run: |
+          set -euo pipefail
+          dotnet restore InventoryApp.sln
+          dotnet build InventoryApp.sln --configuration Release --no-restore
+          dotnet test InventoryApp.sln --configuration Release --no-build --filter "FullyQualifiedName~SeedFiscalServiceTests|FullyQualifiedName~VentaFiscalSnapshotTests|FullyQualifiedName~ImpuestoCodigoEstableTests"
+      - name: Publicar y retirar workflow temporal
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/m3-fix-codigo-fiscal.yml
+          git add backend/src/Application/Services/ImpuestoService.cs
+          git commit -m "fix(m3): hacer inmutable la identidad fiscal [ChatGPT]"
+          git push origin HEAD:Desarrollo
