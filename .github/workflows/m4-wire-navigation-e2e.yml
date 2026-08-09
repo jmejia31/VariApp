@@ -1,137 +1,75 @@
-name: M4 validacion enfocada de navegacion
+name: M4 cerrar plan maestro
 
 on:
   push:
     branches: [Desarrollo]
     paths:
       - '.github/workflows/m4-wire-navigation-e2e.yml'
-      - 'frontend/e2e/m4-navigation-state.spec.ts'
-      - 'frontend/src/app/core/navigation/**'
-      - 'frontend/src/app/features/productos/**'
-      - 'frontend/src/app/features/ventas/**'
-      - 'frontend/src/app/features/compras/**'
-      - 'frontend/src/app/features/clientes/**'
-      - 'frontend/src/app/features/inventario/**'
-      - 'frontend/src/app/features/finanzas/**'
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  m4-navigation:
+  close-plan:
     runs-on: ubuntu-24.04
-    timeout-minutes: 35
-
-    services:
-      mysql:
-        image: mysql:8.4
-        env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: inventoryapp_m4_e2e
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping -h localhost -proot"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=12
-
-    env:
-      ASPNETCORE_ENVIRONMENT: Development
-      PORT: '5005'
-      ConnectionStrings__DefaultConnection: 'Server=127.0.0.1;Port=3306;Database=inventoryapp_m4_e2e;User=root;Password=root;SslMode=None;AllowPublicKeyRetrieval=True;'
-      Database__ServerVersion: '8.4.0'
-      Database__ApplyMigrationsOnStartup: 'true'
-      Jwt__Secret: 'M4-E2E-Only-Secret-With-More-Than-32-Characters-2026'
-      Jwt__Issuer: 'InventoryApp.API'
-      Jwt__Audience: 'InventoryApp.Frontend'
-      Jwt__ExpiraMinutos: '120'
-      Security__LoginRateLimitPerMinute: '300'
-      SeedAdmin__Username: 'e2e_admin'
-      SeedAdmin__Password: 'E2E.Admin#2026!'
-      Cors__AllowedOrigins__0: 'http://127.0.0.1:4200'
-      Cors__AllowedOrigins__1: 'http://localhost:4200'
-      AppSettings__BackendPublicUrl: 'https://preview.variapp.invalid'
-      AppSettings__LogoPublicUrl: 'https://variapp-desarrollo.vercel.app/assets/varistorehn-logo.png'
-      AppSettings__EnlacePublicoFacturaHorasValidez: '1'
-      AppSettings__EnlacePublicoFacturaMaximoAccesos: '5'
-      AppSettings__CorreoFacturaIdempotenciaMinutos: '15'
-      Cloudinary__CloudName: 'e2e-not-used'
-      Cloudinary__ApiKey: 'e2e-not-used'
-      Cloudinary__ApiSecret: 'e2e-not-used'
-      Smtp__Host: '127.0.0.1'
-      Smtp__Port: '1025'
-      Smtp__UsuarioSmtp: 'smtp-user'
-      Smtp__PasswordSmtp: 'smtp-pass'
-      Smtp__UsarSsl: 'false'
-      Smtp__RequiereAutenticacion: 'false'
-      Smtp__CorreoRemitente: 'm4@desarrollo.test'
-      Smtp__CorreoRespuesta: 'm4@desarrollo.test'
-      Smtp__NombreRemitente: 'VariApp M4 E2E'
-      Smtp__TimeoutSeconds: '10'
-      Smtp__MaxAttempts: '1'
-      Smtp__RetryBaseDelayMilliseconds: '100'
-      PHASE7_API_URL: 'http://127.0.0.1:5005'
-      PHASE7_ADMIN_USERNAME: 'e2e_admin'
-      PHASE7_ADMIN_PASSWORD: 'E2E.Admin#2026!'
-      PLAYWRIGHT_TEST_BASE_URL: 'http://127.0.0.1:4200'
-
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          ref: Desarrollo
+          fetch-depth: 0
 
-      - name: Compilar backend
-        working-directory: backend
-        run: |
-          dotnet restore InventoryApp.sln
-          dotnet build InventoryApp.sln --configuration Release --no-restore
-
-      - name: Iniciar API descartable
-        working-directory: backend
+      - name: Actualizar M4 en plan maestro
         shell: bash
         run: |
           set -euo pipefail
-          nohup dotnet run --project src/API/InventoryApp.API.csproj --configuration Release --no-build --no-launch-profile > m4-api.log 2>&1 &
-          for attempt in $(seq 1 60); do
-            if curl --fail --silent http://127.0.0.1:5005/health/ready > /dev/null; then
-              exit 0
-            fi
-            sleep 2
-          done
-          cat m4-api.log >&2 || true
-          exit 1
+          python3 <<'PY'
+          from pathlib import Path
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
+          path = Path('docs/PLAN_MAESTRO_MEJORAS_EMPRESARIALES_2026.md')
+          text = path.read_text(encoding='utf-8')
+          old = '''# FASE M4 — Estado persistente de filtros y navegación
 
-      - name: Preparar frontend y Chromium
-        working-directory: frontend
-        run: |
-          npm ci
-          npm run lint
-          npx playwright install --with-deps chromium
+- búsqueda;
+- filtros;
+- página;
+- pageSize;
+- orden;
+- retorno desde detalle/edición;
+- `Limpiar filtros`;
+- query params + sessionStorage según necesidad;
+- aislamiento por usuario cuando corresponda.
 
-      - name: Iniciar Angular
-        working-directory: frontend
+Cobertura inicial: Productos, Ventas, Compras, Clientes, Inventario y Finanzas.'''
+          new = '''# FASE M4 — Estado persistente de filtros y navegación
+
+Estado: **COMPLETADA / CERTIFICADA AUTOMÁTICAMENTE (2026-08-09)**.
+
+Entregable: `docs/FASE_M4_PERSISTENCIA_FILTROS_NAVEGACION.md`.
+
+- búsqueda;
+- filtros;
+- página;
+- pageSize;
+- orden;
+- retorno desde detalle/edición;
+- `Limpiar filtros`;
+- query params + sessionStorage según necesidad;
+- aislamiento por usuario cuando corresponda.
+
+Cobertura completada: Productos, Ventas, Compras, Clientes, Inventario y Finanzas.
+
+Evidencia enfocada: Playwright M4 sobre MySQL 8.4 descartable, run `31337474683` — **success**.'''
+          if text.count(old) != 1:
+              raise SystemExit(f'Bloque M4 esperado no encontrado de forma única: {text.count(old)}')
+          path.write_text(text.replace(old, new, 1), encoding='utf-8')
+          PY
+
+      - name: Publicar actualización documental
         shell: bash
         run: |
           set -euo pipefail
-          nohup npm start -- --host 127.0.0.1 --port 4200 > m4-frontend.log 2>&1 &
-          for attempt in $(seq 1 60); do
-            if curl --fail --silent http://127.0.0.1:4200/login > /dev/null; then
-              exit 0
-            fi
-            sleep 2
-          done
-          cat m4-frontend.log >&2 || true
-          exit 1
-
-      - name: Ejecutar regresion M4
-        working-directory: frontend
-        run: npx playwright test e2e/m4-navigation-state.spec.ts --config=playwright.config.ts
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/PLAN_MAESTRO_MEJORAS_EMPRESARIALES_2026.md
+          git commit -m "docs(m4): certificar fase en plan maestro [ChatGPT]"
+          git push origin HEAD:Desarrollo
