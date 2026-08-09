@@ -19,15 +19,5 @@ public class ProductoImagenConfiguration : IEntityTypeConfiguration<ProductoImag
             .WithMany(p => p.Imagenes)
             .HasForeignKey(i => i.ProductoId)
             .OnDelete(DeleteBehavior.Cascade);
-
-        builder.HasOne(i => i.ProductoVariante)
-            .WithMany(v => v.Imagenes)
-            .HasForeignKey(i => i.ProductoVarianteId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        builder.HasIndex(i => new { i.ProductoId, i.ProductoVarianteId, i.Orden })
-            .HasDatabaseName("IX_ProductoImagenes_Producto_Variante_Orden");
-        builder.HasIndex(i => new { i.ProductoVarianteId, i.EsPrincipal })
-            .HasDatabaseName("IX_ProductoImagenes_Variante_Principal");
     }
 }
