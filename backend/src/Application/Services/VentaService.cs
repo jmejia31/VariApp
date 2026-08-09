@@ -591,16 +591,39 @@ public class VentaService : IVentaService
 
     public async Task<ResultadoCalculoDto> CalcularVistaPreviaAsync(CalcularVentaRequest request)
     {
+        if (request.Detalles.Count == 0)
+            throw new BusinessRuleException("La venta debe tener al menos un producto.");
+
         var entradas = new List<DetalleCalculoInput>();
         foreach (var d in request.Detalles)
         {
-            var producto = await _productoRepository.GetByIdAsync(d.ProductoId);
+            if (d.Cantidad <= 0)
+                throw new BusinessRuleException("La cantidad de cada producto debe ser mayor a 0.");
+
+            var producto = await _productoRepository.GetByIdAsync(d.ProductoId)
+                ?? throw new BusinessRuleException($"El producto con id {d.ProductoId} no existe.");
+            if (!producto.Activo)
+                throw new BusinessRuleException($"El producto '{producto.Nombre}' está inactivo.");
+
+            ProductoVariante? variante = null;
+            if (d.ProductoVarianteId.HasValue)
+            {
+                variante = await ObtenerVarianteAsync(d.ProductoVarianteId.Value, producto.Id, exigirActiva: true);
+            }
+            else if (producto.Variantes.Any(v => v.Activo && !v.Eliminado))
+            {
+                throw new BusinessRuleException($"Debes seleccionar una variante para el producto '{producto.Nombre}'.");
+            }
+
+            if (variante is null && d.PrecioUnitario <= 0)
+                throw new BusinessRuleException("El precio unitario de cada producto debe ser mayor a 0.");
+
             entradas.Add(new DetalleCalculoInput
             {
-                ProductoId = d.ProductoId,
-                CategoriaId = producto?.CategoriaId,
+                ProductoId = producto.Id,
+                CategoriaId = producto.CategoriaId,
                 Cantidad = d.Cantidad,
-                PrecioUnitario = d.PrecioUnitario
+                PrecioUnitario = variante?.Precio ?? d.PrecioUnitario
             });
         }
 

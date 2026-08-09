@@ -262,15 +262,21 @@ test.describe('Fase 4 — variantes multidimensionales, SKU e inventario', () =>
     await page.locator('input[formcontrolname="nombre"]').fill(nombres.productoUi);
 
     const datosFamilia = page.locator('.data-section');
-    await datosFamilia.locator('mat-select[formcontrolname="marcaId"]').click();
+    const marcaPredeterminada = datosFamilia.getByRole('combobox', { name: 'Marca predeterminada (opcional)' });
+    await marcaPredeterminada.focus();
+    await marcaPredeterminada.press('Enter');
     await page.getByRole('option', { name: nombres.marca, exact: true }).click();
 
-    await datosFamilia.locator('mat-select[formcontrolname="modeloId"]').click();
+    const modeloPredeterminado = datosFamilia.getByRole('combobox', { name: 'Modelo predeterminado (opcional)' });
+    await modeloPredeterminado.focus();
+    await modeloPredeterminado.press('Enter');
     await page.getByRole('option', { name: nombres.modelo, exact: true }).click();
 
     const variantes = page.locator('.variant-card');
     const primeraVariante = variantes.nth(0);
-    await primeraVariante.locator('mat-select[formcontrolname="colorId"]').click();
+    const colorPrimera = primeraVariante.getByRole('combobox', { name: 'Color (opcional)' });
+    await colorPrimera.focus();
+    await colorPrimera.press('Enter');
     await page.getByRole('option', { name: nombres.color, exact: true }).click();
 
     await primeraVariante.locator('input[formcontrolname="cantidad"]').fill('2');
@@ -282,7 +288,9 @@ test.describe('Fase 4 — variantes multidimensionales, SKU e inventario', () =>
     await expect(variantes).toHaveCount(2);
 
     const segundaVariante = variantes.nth(1);
-    await segundaVariante.locator('mat-select[formcontrolname="colorId"]').click();
+    const colorSegunda = segundaVariante.getByRole('combobox', { name: 'Color (opcional)' });
+    await colorSegunda.focus();
+    await colorSegunda.press('Enter');
     await page.getByRole('option', { name: nombres.color2, exact: true }).click();
     await segundaVariante.locator('input[formcontrolname="cantidad"]').fill('3');
     await segundaVariante.locator('input[formcontrolname="costo"]').fill('100');

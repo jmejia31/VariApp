@@ -304,7 +304,7 @@ test.describe('Fase 7 — pruebas, validación integral y cierre', () => {
     expect((await dataOf(detalle)).activo).toBe(false);
   });
 
-  test('factura combinada mantiene subtotal L. 191.30, ISV L. 28.70, envío L. 80.00, descuento L. 20.00 y total L. 280.00', async ({ request }) => {
+  test('factura combinada usa precio de variante exacta: subtotal L. 60.87, ISV L. 9.13, envío L. 80.00, descuento L. 20.00 y total L. 130.00', async ({ request }) => {
     descuentoCodigo = `F7D20${suffix}`;
     const descuento = await request.post(`${API_URL}/descuentos`, {
       headers: headers(),
@@ -336,14 +336,14 @@ test.describe('Fase 7 — pruebas, validación integral y cierre', () => {
     });
     expect(calcular.status(), await calcular.text()).toBe(200);
     const calculo = await dataOf(calcular);
-    expect(calculo.importeBruto).toBe(300);
-    expect(calculo.importeProductos).toBe(220);
-    expect(calculo.subtotal).toBe(191.3);
-    expect(calculo.impuestoIncluido).toBe(28.7);
+    expect(calculo.importeBruto).toBe(150);
+    expect(calculo.importeProductos).toBe(70);
+    expect(calculo.subtotal).toBe(60.87);
+    expect(calculo.impuestoIncluido).toBe(9.13);
     expect(calculo.costoEnvio).toBe(80);
     expect(calculo.totalDescuento).toBe(20);
-    expect(calculo.total).toBe(280);
-    expect(calculo.subtotal + calculo.impuestoIncluido + calculo.impuestoAdicional + calculo.costoEnvio - calculo.totalDescuento).toBe(280);
+    expect(calculo.total).toBe(130);
+    expect(calculo.subtotal + calculo.impuestoIncluido + calculo.impuestoAdicional + calculo.costoEnvio - calculo.totalDescuento).toBe(130);
 
     const venta = await crearVenta(request,
       [{ productoId: productoSimpleId, productoVarianteId: productoSimpleVarianteTecnicaId, cantidad: 1, precioUnitario: 300 }],
@@ -351,11 +351,11 @@ test.describe('Fase 7 — pruebas, validación integral y cierre', () => {
     const confirmada = await confirmarVenta(request, venta.id);
     const factura = await obtenerFactura(request, confirmada.facturaId);
     expect(factura.detalles).toHaveLength(1);
-    expect(factura.subtotal).toBe(191.3);
-    expect(factura.impuestoIncluido).toBe(28.7);
+    expect(factura.subtotal).toBe(60.87);
+    expect(factura.impuestoIncluido).toBe(9.13);
     expect(factura.costoEnvio).toBe(80);
     expect(factura.descuento).toBe(20);
-    expect(factura.total).toBe(280);
+    expect(factura.total).toBe(130);
 
     const pagoParcial = await request.post(`${API_URL}/facturas/${factura.id}/pagos`, {
       headers: headers(),
@@ -364,15 +364,15 @@ test.describe('Fase 7 — pruebas, validación integral y cierre', () => {
     expect(pagoParcial.status(), await pagoParcial.text()).toBe(200);
     const facturaParcial = await dataOf(pagoParcial);
     expect(facturaParcial.totalPagado).toBe(100);
-    expect(facturaParcial.saldoPendiente).toBe(180);
+    expect(facturaParcial.saldoPendiente).toBe(30);
 
     const pagoFinal = await request.post(`${API_URL}/facturas/${factura.id}/pagos`, {
       headers: headers(),
-      data: { monto: 180, metodoPago: 'Transferencia', referencia: `TOTAL-${suffix}` }
+      data: { monto: 30, metodoPago: 'Transferencia', referencia: `TOTAL-${suffix}` }
     });
     expect(pagoFinal.status(), await pagoFinal.text()).toBe(200);
     const facturaPagada = await dataOf(pagoFinal);
-    expect(facturaPagada.totalPagado).toBe(280);
+    expect(facturaPagada.totalPagado).toBe(130);
     expect(facturaPagada.saldoPendiente).toBe(0);
 
     const pdf = await request.get(`${API_URL}/facturas/${factura.id}/pdf?formato=A4`, { headers: headers() });
@@ -536,9 +536,9 @@ test.describe('Fase 7 — pruebas, validación integral y cierre', () => {
 
   test('carga inválida detecta referencias inexistentes y cantidades negativas, genera reporte y auditoría', async ({ request }) => {
     const csv = [
-      'Producto,Marca,Modelo,Color,SKU,CodigoBarras,Cantidad,UmbralStockBajo,Costo,Precio,Activo',
-      `Producto inexistente ${suffix},${nombres.marca},${nombres.modelo},${nombres.blanco},F7-ERR-${suffix},,2,1,10,20,Si`,
-      `${nombres.productoVariantes},${nombres.marca},${nombres.modelo},${nombres.blanco},F7-NEG-${suffix},,-3,1,10,20,Si`
+      'Producto,Marca,Modelo,Color,Talla,SKU,CodigoBarras,Cantidad,UmbralStockBajo,Costo,Precio,Activo',
+      `Producto inexistente ${suffix},${nombres.marca},${nombres.modelo},${nombres.blanco},,F7-ERR-${suffix},,2,1,10,20,Si`,
+      `${nombres.productoVariantes},${nombres.marca},${nombres.modelo},${nombres.blanco},,F7-NEG-${suffix},,-3,1,10,20,Si`
     ].join('\n');
 
     const validar = await request.post(`${API_URL}/cargas-masivas/validar`, {

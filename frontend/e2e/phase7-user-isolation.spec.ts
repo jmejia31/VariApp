@@ -154,7 +154,7 @@ async function createConfirmedSale(
   token: string,
   productId: number,
   customer: string,
-  unitPrice: number
+  quantity: number
 ): Promise<Record<string, any>> {
   const variantsResponse = await request.get(`${API_URL}/productos/${productId}/variantes`, {
     headers: authHeaders(token)
@@ -173,8 +173,8 @@ async function createConfirmedSale(
       detalles: [{
         productoId: productId,
         productoVarianteId: technicalVariant.id,
-        cantidad: 1,
-        precioUnitario: unitPrice
+        cantidad: quantity,
+        precioUnitario: 250
       }]
     }
   });
@@ -242,8 +242,8 @@ test.describe('Fase 7 — permisos exactos y aislamiento por UsuarioId', () => {
     tokenA = await loginApi(request, USER_A.nombreUsuario, USER_A.password);
     tokenB = await loginApi(request, USER_B.nombreUsuario, USER_B.password);
 
-    const saleA = await createConfirmedSale(request, tokenA, Number(product.id), 'Cliente exclusivo A', 111);
-    const saleB = await createConfirmedSale(request, tokenB, Number(product.id), 'Cliente exclusivo B', 222);
+    const saleA = await createConfirmedSale(request, tokenA, Number(product.id), 'Cliente exclusivo A', 1);
+    const saleB = await createConfirmedSale(request, tokenB, Number(product.id), 'Cliente exclusivo B', 2);
     ventaAId = Number(saleA.id);
     ventaBId = Number(saleB.id);
   });
@@ -299,8 +299,8 @@ test.describe('Fase 7 — permisos exactos y aislamiento por UsuarioId', () => {
 
     const summaryA = await dataOf(summaryAResponse);
     const summaryB = await dataOf(summaryBResponse);
-    expect(Number(summaryA.ingresosTotales)).toBe(111);
-    expect(Number(summaryB.ingresosTotales)).toBe(222);
+    expect(Number(summaryA.ingresosTotales)).toBe(250);
+    expect(Number(summaryB.ingresosTotales)).toBe(500);
 
     const financialA = await financialMovementsFor(request, tokenA);
     const financialB = await financialMovementsFor(request, tokenB);

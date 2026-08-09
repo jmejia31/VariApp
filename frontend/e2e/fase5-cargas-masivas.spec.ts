@@ -227,8 +227,8 @@ test.describe('Fase 5 — cargas masivas controladas', () => {
     expect(productoCreado.cantidad).toBe(0);
 
     const variantesCsv = [
-      'Producto,Marca,Modelo,Color,SKU,CodigoBarras,Cantidad,UmbralStockBajo,Costo,Precio,Activo',
-      `${nombres.producto},${nombres.marca},${nombres.modelo},${nombres.color},${nombres.sku},750${suffix.slice(-9)},7,2,125.50,299.00,Si`
+      'Producto,Marca,Modelo,Color,Talla,SKU,CodigoBarras,Cantidad,UmbralStockBajo,Costo,Precio,Activo',
+      `${nombres.producto},${nombres.marca},${nombres.modelo},${nombres.color},,${nombres.sku},750${suffix.slice(-9)},7,2,125.50,299.00,Si`
     ].join('\n');
     const variante = await validarCsv(request, 'VariantesInventario', `variantes-${suffix}.csv`, variantesCsv);
     expect(variante.response.status(), await variante.response.text()).toBe(200);

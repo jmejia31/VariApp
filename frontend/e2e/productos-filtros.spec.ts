@@ -75,7 +75,16 @@ test('Productos filtra por relaciones normalizadas y estado de inventario', asyn
       Cantidad: '0',
       Costo: '80',
       Precio: '140',
-      UmbralStockBajo: '2'
+      UmbralStockBajo: '2',
+      'Variantes[0].MarcaId': String(brand.id),
+      'Variantes[0].ModeloId': String(model.id),
+      'Variantes[0].ColorId': String(color.id),
+      'Variantes[0].TallaId': String(size.id),
+      'Variantes[0].Cantidad': '0',
+      'Variantes[0].Costo': '80',
+      'Variantes[0].Precio': '140',
+      'Variantes[0].UmbralStockBajo': '2',
+      'Variantes[0].Activo': 'true'
     }
   });
   expect(productResponse.status(), await productResponse.text()).toBe(201);
