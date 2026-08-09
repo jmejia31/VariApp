@@ -118,6 +118,28 @@ export class ProductoFormComponent implements OnInit {
     this.form.controls.marcaId.valueChanges.subscribe((marcaId) => {
       this.form.controls.modeloId.setValue(null, { emitEvent: false });
       this.actualizarModelosCabecera(marcaId);
+
+      if (!this.isEdit() && marcaId) {
+        for (const control of this.variantes.controls) {
+          if (!this.normalizarId(control.get('marcaId')?.value)) {
+            control.get('marcaId')?.setValue(marcaId);
+            control.get('modeloId')?.setValue(null);
+          }
+        }
+      }
+    });
+
+    this.form.controls.modeloId.valueChanges.subscribe((modeloId) => {
+      if (this.isEdit() || !modeloId) return;
+      const marcaId = this.normalizarId(this.form.controls.marcaId.value);
+      if (!marcaId) return;
+
+      for (const control of this.variantes.controls) {
+        const marcaVarianteId = this.normalizarId(control.get('marcaId')?.value);
+        const modeloVarianteId = this.normalizarId(control.get('modeloId')?.value);
+        if (marcaVarianteId === marcaId && !modeloVarianteId)
+          control.get('modeloId')?.setValue(modeloId);
+      }
     });
   }
 

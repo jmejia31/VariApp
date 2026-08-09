@@ -566,8 +566,8 @@ public sealed class CargaMasivaService : ICargaMasivaService
 
     private async Task ValidarColoresAsync(List<CargaMasivaFilaDto> filas, List<CargaMasivaErrorDto> errores, CancellationToken ct)
     {
-        var existentes = await _db.CatalogosProducto.AsNoTracking()
-            .Where(x => x.Tipo == TipoCatalogoProducto.Color && !x.Eliminado)
+        var existentes = await _db.Colores.AsNoTracking()
+            .Where(x => !x.Eliminado)
             .ToListAsync(ct);
         var claves = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -832,40 +832,86 @@ public sealed class CargaMasivaService : ICargaMasivaService
 
     private async Task<(int Creados, int Actualizados)> AplicarColoresAsync(List<CargaMasivaFilaDto> filas, CancellationToken ct)
     {
-        var existentes = await _db.CatalogosProducto
+        var normalizados = await _db.Colores
+            .IgnoreQueryFilters()
+            .ToListAsync(ct);
+        var espejos = await _db.CatalogosProducto
             .Where(x => x.Tipo == TipoCatalogoProducto.Color)
             .IgnoreQueryFilters()
             .ToListAsync(ct);
         var creados = 0;
         var actualizados = 0;
+
         foreach (var fila in filas)
         {
             var nombre = V(fila, "Nombre")!;
-            var color = existentes.FirstOrDefault(x => !x.Eliminado && NormalizarClave(x.Nombre) == NormalizarClave(nombre));
-            if (color is null)
+            var clave = NormalizarClave(nombre);
+            var normalizado = normalizados.FirstOrDefault(x => !x.Eliminado && NormalizarClave(x.Nombre) == clave);
+            var espejo = espejos.FirstOrDefault(x => !x.Eliminado && NormalizarClave(x.Nombre) == clave);
+
+            if (normalizado is null)
             {
-                color = new CatalogoProducto
+                if (espejo is null)
                 {
-                    Tipo = TipoCatalogoProducto.Color,
+                    espejo = new CatalogoProducto
+                    {
+                        Tipo = TipoCatalogoProducto.Color,
+                        Nombre = nombre,
+                        CreadoPorUsuarioId = _currentUser.UsuarioId,
+                        CreadoPorNombreUsuario = _currentUser.NombreUsuario
+                    };
+                    _db.CatalogosProducto.Add(espejo);
+                    espejos.Add(espejo);
+                    // Se necesita el Id global del espejo para conservar compatibilidad
+                    // durante la retirada progresiva de CatalogosProducto.
+                    await _db.SaveChangesAsync(ct);
+                }
+
+                normalizado = new Color
+                {
+                    Id = espejo.Id,
                     CreadoPorUsuarioId = _currentUser.UsuarioId,
                     CreadoPorNombreUsuario = _currentUser.NombreUsuario
                 };
-                _db.CatalogosProducto.Add(color);
-                existentes.Add(color);
+                _db.Colores.Add(normalizado);
+                normalizados.Add(normalizado);
                 creados++;
             }
-            else actualizados++;
+            else
+            {
+                actualizados++;
+                if (espejo is null)
+                    throw new BusinessRuleException($"El color '{nombre}' no tiene su espejo legacy compatible. Ejecuta el saneamiento de datos antes de continuar.");
+                if (espejo.Id != normalizado.Id)
+                    throw new BusinessRuleException($"El color '{nombre}' presenta IDs incompatibles entre Colores y CatalogosProducto.");
+            }
 
-            color.Nombre = nombre;
-            color.CodigoVisual = NuloSiVacio(V(fila, "CodigoVisual"));
-            color.Descripcion = NuloSiVacio(V(fila, "Descripcion"));
-            color.Orden = Entero(fila, "Orden");
-            color.Activo = Booleano(fila, "Activo");
-            color.Eliminado = false;
-            color.FechaEliminacion = null;
-            color.EliminadoPorUsuarioId = null;
-            MarcarActualizacion(color);
+            var codigoVisual = NuloSiVacio(V(fila, "CodigoVisual"));
+            var descripcion = NuloSiVacio(V(fila, "Descripcion"));
+            var orden = Entero(fila, "Orden");
+            var activo = Booleano(fila, "Activo");
+
+            normalizado.Nombre = nombre;
+            normalizado.CodigoVisual = codigoVisual;
+            normalizado.Descripcion = descripcion;
+            normalizado.Orden = orden;
+            normalizado.Activo = activo;
+            normalizado.Eliminado = false;
+            normalizado.FechaEliminacion = null;
+            normalizado.EliminadoPorUsuarioId = null;
+            MarcarActualizacion(normalizado);
+
+            espejo.Nombre = nombre;
+            espejo.CodigoVisual = codigoVisual;
+            espejo.Descripcion = descripcion;
+            espejo.Orden = orden;
+            espejo.Activo = activo;
+            espejo.Eliminado = false;
+            espejo.FechaEliminacion = null;
+            espejo.EliminadoPorUsuarioId = null;
+            MarcarActualizacion(espejo);
         }
+
         return (creados, actualizados);
     }
 
