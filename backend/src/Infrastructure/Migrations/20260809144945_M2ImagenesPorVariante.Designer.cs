@@ -2635,7 +2635,7 @@ namespace InventoryApp.Infrastructure.Migrations
                         .ValueGeneratedOnAddOrUpdate()
                         .HasMaxLength(80)
                         .HasColumnType("varchar(80)")
-                        .HasComputedColumnSql("IF(EsPrincipal = 1, CONCAT(ProductoId, ':', IFNULL(ProductoVarianteId, 0)), NULL)", true);
+                        .HasComputedColumnSql("IF(EsPrincipal = 1, CONCAT(ProductoId, ':', IFNULL(ProductoVarianteId, 0)), NULL)", false);
 
                     b.Property<int>("ProductoId")
                         .HasColumnType("int");
@@ -2660,6 +2660,9 @@ namespace InventoryApp.Infrastructure.Migrations
                         .HasDatabaseName("UX_ProductoImagenes_Principal_Ambito");
 
                     b.HasIndex("ProductoVarianteId");
+
+                    b.HasIndex("ProductoId")
+                        .HasDatabaseName("IX_ProductoImagenes_ProductoId");
 
                     b.HasIndex("ProductoId", "ProductoVarianteId", "Orden")
                         .HasDatabaseName("IX_ProductoImagenes_Producto_Variante_Orden");
