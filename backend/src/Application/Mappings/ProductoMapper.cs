@@ -17,6 +17,10 @@ public static class ProductoMapper
             .ToList();
         var activas = variantes.Where(v => v.Activo).ToList();
         var precios = activas.Select(v => v.Precio ?? p.Precio).ToList();
+        var imagenesGenerales = p.Imagenes
+            .Where(i => i.ProductoVarianteId == null)
+            .OrderBy(i => i.Orden)
+            .ToList();
 
         return new ProductoDto
         {
@@ -48,13 +52,14 @@ public static class ProductoMapper
             ModeloId = p.ModeloId,
             ModeloNombre = p.ModeloCatalogo?.Nombre,
             ImagenPrincipalUrl = p.ImagenPrincipal?.Url,
-            TotalImagenes = p.Imagenes.Count,
-            Imagenes = p.Imagenes.OrderBy(i => i.Orden).Select(i => new ProductoImagenDto
+            TotalImagenes = imagenesGenerales.Count,
+            Imagenes = imagenesGenerales.Select(i => new ProductoImagenDto
             {
                 Id = i.Id,
                 Url = i.Url,
                 Orden = i.Orden,
-                EsPrincipal = i.EsPrincipal
+                EsPrincipal = i.EsPrincipal,
+                ProductoVarianteId = null
             }).ToList(),
             Variantes = variantes.Select(v => new ProductoVarianteDto
             {
