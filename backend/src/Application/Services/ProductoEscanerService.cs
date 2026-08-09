@@ -19,133 +19,60 @@ public sealed class ProductoEscanerService : IProductoEscanerService
         _varianteRepository = varianteRepository;
     }
 
-    public async Task<ResultadoResolucionProductoEscaner<ProductoEscaneadoVentaDto>> ResolverParaVentaAsync(
-        string codigo,
-        CancellationToken cancellationToken = default)
+    public async Task<ResultadoResolucionProductoEscaner<ProductoEscaneadoVentaDto>> ResolverParaVentaAsync(string codigo, CancellationToken cancellationToken = default)
     {
         var resolucion = await ResolverVarianteAsync(codigo, cancellationToken);
         if (resolucion.Estado != EstadoResolucionProductoEscaner.Encontrado)
-        {
-            return ResultadoResolucionProductoEscaner<ProductoEscaneadoVentaDto>.Fallo(
-                resolucion.Estado,
-                resolucion.Mensaje);
-        }
+            return ResultadoResolucionProductoEscaner<ProductoEscaneadoVentaDto>.Fallo(resolucion.Estado, resolucion.Mensaje);
 
         var variante = resolucion.Dato!;
         if (variante.Producto.TipoInventario != TipoInventario.MercaderiaVenta)
-        {
-            return ResultadoResolucionProductoEscaner<ProductoEscaneadoVentaDto>.Fallo(
-                EstadoResolucionProductoEscaner.NoOperativo,
-                "El código corresponde a un insumo administrativo y no puede venderse.");
-        }
+            return ResultadoResolucionProductoEscaner<ProductoEscaneadoVentaDto>.Fallo(EstadoResolucionProductoEscaner.NoOperativo, "El código corresponde a un insumo administrativo y no puede venderse.");
         if (variante.Cantidad <= 0)
-        {
-            return ResultadoResolucionProductoEscaner<ProductoEscaneadoVentaDto>.Fallo(
-                EstadoResolucionProductoEscaner.NoOperativo,
-                "La variante escaneada no tiene existencias disponibles para la venta.");
-        }
+            return ResultadoResolucionProductoEscaner<ProductoEscaneadoVentaDto>.Fallo(EstadoResolucionProductoEscaner.NoOperativo, "La variante escaneada no tiene existencias disponibles para la venta.");
 
-        return ResultadoResolucionProductoEscaner<ProductoEscaneadoVentaDto>.Encontrado(
-            MapVenta(variante));
+        return ResultadoResolucionProductoEscaner<ProductoEscaneadoVentaDto>.Encontrado(MapVenta(variante));
     }
 
-    public async Task<ResultadoResolucionProductoEscaner<ProductoEscaneadoCompraDto>> ResolverParaCompraAsync(
-        string codigo,
-        CancellationToken cancellationToken = default)
+    public async Task<ResultadoResolucionProductoEscaner<ProductoEscaneadoCompraDto>> ResolverParaCompraAsync(string codigo, CancellationToken cancellationToken = default)
     {
         var resolucion = await ResolverVarianteAsync(codigo, cancellationToken);
         if (resolucion.Estado != EstadoResolucionProductoEscaner.Encontrado)
-        {
-            return ResultadoResolucionProductoEscaner<ProductoEscaneadoCompraDto>.Fallo(
-                resolucion.Estado,
-                resolucion.Mensaje);
-        }
-
-        return ResultadoResolucionProductoEscaner<ProductoEscaneadoCompraDto>.Encontrado(
-            MapCompra(resolucion.Dato!));
+            return ResultadoResolucionProductoEscaner<ProductoEscaneadoCompraDto>.Fallo(resolucion.Estado, resolucion.Mensaje);
+        return ResultadoResolucionProductoEscaner<ProductoEscaneadoCompraDto>.Encontrado(MapCompra(resolucion.Dato!));
     }
 
-    public async Task<List<ProductoEscaneadoVentaDto>> BuscarParaVentaAsync(
-        string termino,
-        int limite = LimiteMaximoBusqueda,
-        CancellationToken cancellationToken = default)
+    public async Task<List<ProductoEscaneadoVentaDto>> BuscarParaVentaAsync(string termino, int limite = LimiteMaximoBusqueda, CancellationToken cancellationToken = default)
     {
         var terminoNormalizado = NormalizarTerminoBusqueda(termino);
-        var variantes = await _varianteRepository.BuscarPorTerminoAsync(
-            terminoNormalizado,
-            soloConStock: true,
-            Math.Clamp(limite, 1, LimiteMaximoBusqueda),
-            cancellationToken,
-            TipoInventario.MercaderiaVenta);
-
+        var variantes = await _varianteRepository.BuscarPorTerminoAsync(terminoNormalizado, true, Math.Clamp(limite, 1, LimiteMaximoBusqueda), cancellationToken, TipoInventario.MercaderiaVenta);
         return variantes.Select(MapVenta).ToList();
     }
 
-    public async Task<List<ProductoEscaneadoCompraDto>> BuscarParaCompraAsync(
-        string termino,
-        int limite = LimiteMaximoBusqueda,
-        CancellationToken cancellationToken = default)
+    public async Task<List<ProductoEscaneadoCompraDto>> BuscarParaCompraAsync(string termino, int limite = LimiteMaximoBusqueda, CancellationToken cancellationToken = default)
     {
         var terminoNormalizado = NormalizarTerminoBusqueda(termino);
-        var variantes = await _varianteRepository.BuscarPorTerminoAsync(
-            terminoNormalizado,
-            soloConStock: false,
-            Math.Clamp(limite, 1, LimiteMaximoBusqueda),
-            cancellationToken);
-
+        var variantes = await _varianteRepository.BuscarPorTerminoAsync(terminoNormalizado, false, Math.Clamp(limite, 1, LimiteMaximoBusqueda), cancellationToken);
         return variantes.Select(MapCompra).ToList();
     }
 
-    private async Task<ResultadoResolucionProductoEscaner<ProductoVariante>> ResolverVarianteAsync(
-        string codigo,
-        CancellationToken cancellationToken)
+    private async Task<ResultadoResolucionProductoEscaner<ProductoVariante>> ResolverVarianteAsync(string codigo, CancellationToken cancellationToken)
     {
         var codigoNormalizado = codigo?.Trim() ?? string.Empty;
         if (codigoNormalizado.Length == 0)
-        {
-            return ResultadoResolucionProductoEscaner<ProductoVariante>.Fallo(
-                EstadoResolucionProductoEscaner.EntradaInvalida,
-                "Ingresa un SKU o código de barras.");
-        }
-
+            return ResultadoResolucionProductoEscaner<ProductoVariante>.Fallo(EstadoResolucionProductoEscaner.EntradaInvalida, "Ingresa un SKU o código de barras.");
         if (codigoNormalizado.Length > LongitudMaximaCodigo)
-        {
-            return ResultadoResolucionProductoEscaner<ProductoVariante>.Fallo(
-                EstadoResolucionProductoEscaner.EntradaInvalida,
-                $"El código no puede superar {LongitudMaximaCodigo} caracteres.");
-        }
+            return ResultadoResolucionProductoEscaner<ProductoVariante>.Fallo(EstadoResolucionProductoEscaner.EntradaInvalida, $"El código no puede superar {LongitudMaximaCodigo} caracteres.");
 
-        var skuNormalizado = codigoNormalizado.ToUpperInvariant();
-        var coincidencias = await _varianteRepository.BuscarPorCodigoAsync(
-            skuNormalizado,
-            codigoNormalizado,
-            cancellationToken);
-
+        var coincidencias = await _varianteRepository.BuscarPorCodigoAsync(codigoNormalizado.ToUpperInvariant(), codigoNormalizado, cancellationToken);
         if (coincidencias.Count == 0)
-        {
-            return ResultadoResolucionProductoEscaner<ProductoVariante>.Fallo(
-                EstadoResolucionProductoEscaner.NoEncontrado,
-                "No se encontró una variante con el SKU o código de barras indicado.");
-        }
-
+            return ResultadoResolucionProductoEscaner<ProductoVariante>.Fallo(EstadoResolucionProductoEscaner.NoEncontrado, "No se encontró una variante con el SKU o código de barras indicado.");
         if (coincidencias.Count > 1)
-        {
-            return ResultadoResolucionProductoEscaner<ProductoVariante>.Fallo(
-                EstadoResolucionProductoEscaner.Conflicto,
-                "El código coincide con más de una variante. Corrige los identificadores antes de continuar.");
-        }
+            return ResultadoResolucionProductoEscaner<ProductoVariante>.Fallo(EstadoResolucionProductoEscaner.Conflicto, "El código coincide con más de una variante. Corrige los identificadores antes de continuar.");
 
         var variante = coincidencias[0];
-        if (variante.Eliminado ||
-            !variante.Activo ||
-            variante.Producto is null ||
-            variante.Producto.Eliminado ||
-            !variante.Producto.Activo)
-        {
-            return ResultadoResolucionProductoEscaner<ProductoVariante>.Fallo(
-                EstadoResolucionProductoEscaner.NoOperativo,
-                "El producto o su variante están inactivos y no pueden utilizarse en esta operación.");
-        }
+        if (variante.Eliminado || !variante.Activo || variante.Producto is null || variante.Producto.Eliminado || !variante.Producto.Activo)
+            return ResultadoResolucionProductoEscaner<ProductoVariante>.Fallo(EstadoResolucionProductoEscaner.NoOperativo, "El producto o su variante están inactivos y no pueden utilizarse en esta operación.");
 
         return ResultadoResolucionProductoEscaner<ProductoVariante>.Encontrado(variante);
     }
@@ -154,83 +81,81 @@ public sealed class ProductoEscanerService : IProductoEscanerService
     {
         var normalizado = termino?.Trim() ?? string.Empty;
         if (normalizado.Length < LongitudMinimaBusqueda)
-            throw new BusinessRuleException(
-                $"Escribe al menos {LongitudMinimaBusqueda} caracteres para buscar productos.");
+            throw new BusinessRuleException($"Escribe al menos {LongitudMinimaBusqueda} caracteres para buscar productos.");
         if (normalizado.Length > LongitudMaximaBusqueda)
-            throw new BusinessRuleException(
-                $"La búsqueda no puede superar {LongitudMaximaBusqueda} caracteres.");
-
+            throw new BusinessRuleException($"La búsqueda no puede superar {LongitudMaximaBusqueda} caracteres.");
         return normalizado.ToLowerInvariant();
     }
 
-    private static string? ObtenerImagenMiniatura(Producto producto) =>
-        producto.Imagenes
+    private static string? ObtenerImagenMiniatura(ProductoVariante variante)
+    {
+        var especifica = variante.Imagenes
             .OrderByDescending(imagen => imagen.EsPrincipal)
             .ThenBy(imagen => imagen.Orden)
             .Select(imagen => imagen.Url)
             .FirstOrDefault();
+        if (!string.IsNullOrWhiteSpace(especifica)) return especifica;
+
+        return variante.Producto.Imagenes
+            .Where(imagen => imagen.ProductoVarianteId == null)
+            .OrderByDescending(imagen => imagen.EsPrincipal)
+            .ThenBy(imagen => imagen.Orden)
+            .Select(imagen => imagen.Url)
+            .FirstOrDefault();
+    }
 
     private static string ConstruirEtiqueta(ProductoVariante variante)
     {
-        var partes = new[]
-        {
-            variante.Marca?.Nombre,
-            variante.Modelo?.Nombre,
-            variante.Color?.Nombre,
-            variante.Talla?.Nombre,
-            variante.Sku
-        };
+        var partes = new[] { variante.Marca?.Nombre, variante.Modelo?.Nombre, variante.Color?.Nombre, variante.Talla?.Nombre, variante.Sku };
         return string.Join(" · ", partes.Where(parte => !string.IsNullOrWhiteSpace(parte)));
     }
 
-    private static ProductoEscaneadoVentaDto MapVenta(ProductoVariante variante) =>
-        new()
-        {
-            ProductoId = variante.ProductoId,
-            ProductoVarianteId = variante.Id,
-            ProductoNombre = variante.Producto.Nombre,
-            Marca = variante.Marca?.Nombre ?? variante.Producto.Marca,
-            Modelo = variante.Modelo?.Nombre ?? variante.Producto.Modelo,
-            MarcaId = variante.MarcaId,
-            MarcaNombre = variante.Marca?.Nombre,
-            ModeloId = variante.ModeloId,
-            ModeloNombre = variante.Modelo?.Nombre,
-            ColorId = variante.ColorId,
-            ColorNombre = variante.Color?.Nombre,
-            TallaId = variante.TallaId,
-            TallaNombre = variante.Talla?.Nombre,
-            Etiqueta = ConstruirEtiqueta(variante),
-            EsVarianteTecnica = variante.EsTecnica,
-            Sku = variante.Sku ?? string.Empty,
-            CodigoBarras = variante.CodigoBarras,
-            CantidadDisponible = variante.Cantidad,
-            Precio = variante.Precio ?? variante.Producto.Precio,
-            ImagenMiniaturaUrl = ObtenerImagenMiniatura(variante.Producto)
-        };
+    private static ProductoEscaneadoVentaDto MapVenta(ProductoVariante variante) => new()
+    {
+        ProductoId = variante.ProductoId,
+        ProductoVarianteId = variante.Id,
+        ProductoNombre = variante.Producto.Nombre,
+        Marca = variante.Marca?.Nombre ?? variante.Producto.Marca,
+        Modelo = variante.Modelo?.Nombre ?? variante.Producto.Modelo,
+        MarcaId = variante.MarcaId,
+        MarcaNombre = variante.Marca?.Nombre,
+        ModeloId = variante.ModeloId,
+        ModeloNombre = variante.Modelo?.Nombre,
+        ColorId = variante.ColorId,
+        ColorNombre = variante.Color?.Nombre,
+        TallaId = variante.TallaId,
+        TallaNombre = variante.Talla?.Nombre,
+        Etiqueta = ConstruirEtiqueta(variante),
+        EsVarianteTecnica = variante.EsTecnica,
+        Sku = variante.Sku ?? string.Empty,
+        CodigoBarras = variante.CodigoBarras,
+        CantidadDisponible = variante.Cantidad,
+        Precio = variante.Precio ?? variante.Producto.Precio,
+        ImagenMiniaturaUrl = ObtenerImagenMiniatura(variante)
+    };
 
-    private static ProductoEscaneadoCompraDto MapCompra(ProductoVariante variante) =>
-        new()
-        {
-            ProductoId = variante.ProductoId,
-            ProductoVarianteId = variante.Id,
-            ProductoNombre = variante.Producto.Nombre,
-            Marca = variante.Marca?.Nombre ?? variante.Producto.Marca,
-            Modelo = variante.Modelo?.Nombre ?? variante.Producto.Modelo,
-            MarcaId = variante.MarcaId,
-            MarcaNombre = variante.Marca?.Nombre,
-            ModeloId = variante.ModeloId,
-            ModeloNombre = variante.Modelo?.Nombre,
-            ColorId = variante.ColorId,
-            ColorNombre = variante.Color?.Nombre,
-            TallaId = variante.TallaId,
-            TallaNombre = variante.Talla?.Nombre,
-            Etiqueta = ConstruirEtiqueta(variante),
-            EsVarianteTecnica = variante.EsTecnica,
-            Sku = variante.Sku ?? string.Empty,
-            CodigoBarras = variante.CodigoBarras,
-            CantidadDisponible = variante.Cantidad,
-            Costo = variante.Costo ?? variante.Producto.Costo,
-            Precio = variante.Precio ?? variante.Producto.Precio,
-            ImagenMiniaturaUrl = ObtenerImagenMiniatura(variante.Producto)
-        };
+    private static ProductoEscaneadoCompraDto MapCompra(ProductoVariante variante) => new()
+    {
+        ProductoId = variante.ProductoId,
+        ProductoVarianteId = variante.Id,
+        ProductoNombre = variante.Producto.Nombre,
+        Marca = variante.Marca?.Nombre ?? variante.Producto.Marca,
+        Modelo = variante.Modelo?.Nombre ?? variante.Producto.Modelo,
+        MarcaId = variante.MarcaId,
+        MarcaNombre = variante.Marca?.Nombre,
+        ModeloId = variante.ModeloId,
+        ModeloNombre = variante.Modelo?.Nombre,
+        ColorId = variante.ColorId,
+        ColorNombre = variante.Color?.Nombre,
+        TallaId = variante.TallaId,
+        TallaNombre = variante.Talla?.Nombre,
+        Etiqueta = ConstruirEtiqueta(variante),
+        EsVarianteTecnica = variante.EsTecnica,
+        Sku = variante.Sku ?? string.Empty,
+        CodigoBarras = variante.CodigoBarras,
+        CantidadDisponible = variante.Cantidad,
+        Costo = variante.Costo ?? variante.Producto.Costo,
+        Precio = variante.Precio ?? variante.Producto.Precio,
+        ImagenMiniaturaUrl = ObtenerImagenMiniatura(variante)
+    };
 }
