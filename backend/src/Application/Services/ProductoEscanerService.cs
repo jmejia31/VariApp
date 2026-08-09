@@ -73,7 +73,6 @@ public sealed class ProductoEscanerService : IProductoEscanerService
         var variante = coincidencias[0];
         if (variante.Eliminado || !variante.Activo || variante.Producto is null || variante.Producto.Eliminado || !variante.Producto.Activo)
             return ResultadoResolucionProductoEscaner<ProductoVariante>.Fallo(EstadoResolucionProductoEscaner.NoOperativo, "El producto o su variante están inactivos y no pueden utilizarse en esta operación.");
-
         return ResultadoResolucionProductoEscaner<ProductoVariante>.Encontrado(variante);
     }
 
@@ -87,22 +86,12 @@ public sealed class ProductoEscanerService : IProductoEscanerService
         return normalizado.ToLowerInvariant();
     }
 
-    private static string? ObtenerImagenMiniatura(ProductoVariante variante)
-    {
-        var especifica = variante.Imagenes
+    private static string? ObtenerImagenMiniatura(Producto producto) =>
+        producto.Imagenes
             .OrderByDescending(imagen => imagen.EsPrincipal)
             .ThenBy(imagen => imagen.Orden)
             .Select(imagen => imagen.Url)
             .FirstOrDefault();
-        if (!string.IsNullOrWhiteSpace(especifica)) return especifica;
-
-        return variante.Producto.Imagenes
-            .Where(imagen => imagen.ProductoVarianteId == null)
-            .OrderByDescending(imagen => imagen.EsPrincipal)
-            .ThenBy(imagen => imagen.Orden)
-            .Select(imagen => imagen.Url)
-            .FirstOrDefault();
-    }
 
     private static string ConstruirEtiqueta(ProductoVariante variante)
     {
@@ -112,50 +101,23 @@ public sealed class ProductoEscanerService : IProductoEscanerService
 
     private static ProductoEscaneadoVentaDto MapVenta(ProductoVariante variante) => new()
     {
-        ProductoId = variante.ProductoId,
-        ProductoVarianteId = variante.Id,
-        ProductoNombre = variante.Producto.Nombre,
-        Marca = variante.Marca?.Nombre ?? variante.Producto.Marca,
-        Modelo = variante.Modelo?.Nombre ?? variante.Producto.Modelo,
-        MarcaId = variante.MarcaId,
-        MarcaNombre = variante.Marca?.Nombre,
-        ModeloId = variante.ModeloId,
-        ModeloNombre = variante.Modelo?.Nombre,
-        ColorId = variante.ColorId,
-        ColorNombre = variante.Color?.Nombre,
-        TallaId = variante.TallaId,
-        TallaNombre = variante.Talla?.Nombre,
-        Etiqueta = ConstruirEtiqueta(variante),
-        EsVarianteTecnica = variante.EsTecnica,
-        Sku = variante.Sku ?? string.Empty,
-        CodigoBarras = variante.CodigoBarras,
-        CantidadDisponible = variante.Cantidad,
-        Precio = variante.Precio ?? variante.Producto.Precio,
-        ImagenMiniaturaUrl = ObtenerImagenMiniatura(variante)
+        ProductoId = variante.ProductoId, ProductoVarianteId = variante.Id, ProductoNombre = variante.Producto.Nombre,
+        Marca = variante.Marca?.Nombre ?? variante.Producto.Marca, Modelo = variante.Modelo?.Nombre ?? variante.Producto.Modelo,
+        MarcaId = variante.MarcaId, MarcaNombre = variante.Marca?.Nombre, ModeloId = variante.ModeloId, ModeloNombre = variante.Modelo?.Nombre,
+        ColorId = variante.ColorId, ColorNombre = variante.Color?.Nombre, TallaId = variante.TallaId, TallaNombre = variante.Talla?.Nombre,
+        Etiqueta = ConstruirEtiqueta(variante), EsVarianteTecnica = variante.EsTecnica, Sku = variante.Sku ?? string.Empty,
+        CodigoBarras = variante.CodigoBarras, CantidadDisponible = variante.Cantidad, Precio = variante.Precio ?? variante.Producto.Precio,
+        ImagenMiniaturaUrl = ObtenerImagenMiniatura(variante.Producto)
     };
 
     private static ProductoEscaneadoCompraDto MapCompra(ProductoVariante variante) => new()
     {
-        ProductoId = variante.ProductoId,
-        ProductoVarianteId = variante.Id,
-        ProductoNombre = variante.Producto.Nombre,
-        Marca = variante.Marca?.Nombre ?? variante.Producto.Marca,
-        Modelo = variante.Modelo?.Nombre ?? variante.Producto.Modelo,
-        MarcaId = variante.MarcaId,
-        MarcaNombre = variante.Marca?.Nombre,
-        ModeloId = variante.ModeloId,
-        ModeloNombre = variante.Modelo?.Nombre,
-        ColorId = variante.ColorId,
-        ColorNombre = variante.Color?.Nombre,
-        TallaId = variante.TallaId,
-        TallaNombre = variante.Talla?.Nombre,
-        Etiqueta = ConstruirEtiqueta(variante),
-        EsVarianteTecnica = variante.EsTecnica,
-        Sku = variante.Sku ?? string.Empty,
-        CodigoBarras = variante.CodigoBarras,
-        CantidadDisponible = variante.Cantidad,
-        Costo = variante.Costo ?? variante.Producto.Costo,
-        Precio = variante.Precio ?? variante.Producto.Precio,
-        ImagenMiniaturaUrl = ObtenerImagenMiniatura(variante)
+        ProductoId = variante.ProductoId, ProductoVarianteId = variante.Id, ProductoNombre = variante.Producto.Nombre,
+        Marca = variante.Marca?.Nombre ?? variante.Producto.Marca, Modelo = variante.Modelo?.Nombre ?? variante.Producto.Modelo,
+        MarcaId = variante.MarcaId, MarcaNombre = variante.Marca?.Nombre, ModeloId = variante.ModeloId, ModeloNombre = variante.Modelo?.Nombre,
+        ColorId = variante.ColorId, ColorNombre = variante.Color?.Nombre, TallaId = variante.TallaId, TallaNombre = variante.Talla?.Nombre,
+        Etiqueta = ConstruirEtiqueta(variante), EsVarianteTecnica = variante.EsTecnica, Sku = variante.Sku ?? string.Empty,
+        CodigoBarras = variante.CodigoBarras, CantidadDisponible = variante.Cantidad, Costo = variante.Costo ?? variante.Producto.Costo,
+        Precio = variante.Precio ?? variante.Producto.Precio, ImagenMiniaturaUrl = ObtenerImagenMiniatura(variante.Producto)
     };
 }
