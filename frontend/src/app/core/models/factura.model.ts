@@ -27,6 +27,7 @@ export interface FacturaDetalle {
   productoMarca: string;
   productoModelo: string;
   varianteColor?: string;
+  varianteTalla?: string;
   varianteSku?: string;
   cantidad: number;
   precioUnitario: number;
