@@ -61,7 +61,7 @@ async function crearCatalogo(
   return await dataOf(response);
 }
 
-test.describe('Fase 4 — variantes por color, SKU e inventario', () => {
+test.describe('Fase 4 — variantes multidimensionales, SKU e inventario', () => {
   test.describe.configure({ mode: 'serial', retries: 0 });
 
   test.beforeAll(async ({ request }) => {
@@ -276,7 +276,7 @@ test.describe('Fase 4 — variantes por color, SKU e inventario', () => {
     await page.locator('input[formcontrolname="precio"]').nth(0).fill('300');
     await page.locator('input[formcontrolname="umbralStockBajo"]').nth(0).fill('0');
 
-    await page.getByRole('button', { name: 'Agregar otro color' }).first().click();
+    await page.getByRole('button', { name: 'Agregar variante' }).first().click();
     await expect(page.locator('.variant-card')).toHaveCount(2);
 
     await colores.nth(1).click();
@@ -310,12 +310,12 @@ test.describe('Fase 4 — variantes por color, SKU e inventario', () => {
     await loginUi(page);
 
     await page.goto(`/productos/${productoId}/editar`);
-    await expect(page.getByRole('heading', { name: 'Colores y existencias' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Variantes y existencias' })).toBeVisible();
     await expect(page.getByText('Stock total calculado')).toBeVisible();
     await expect(page.locator('.variant-card')).toHaveCount(2);
     await expect(page.locator('.stock-summary').getByText('14 unidades', { exact: true })).toBeVisible();
 
-    await expect(page.getByRole('button', { name: 'Agregar otro color' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Agregar variante' })).toHaveCount(0);
     const cantidades = page.locator('input[formcontrolname="cantidad"]');
     await expect(cantidades).toHaveCount(2);
     await expect(cantidades.nth(0)).toBeDisabled();
@@ -330,7 +330,7 @@ test.describe('Fase 4 — variantes por color, SKU e inventario', () => {
     await loginUi(page);
 
     await page.goto(`/productos/${productoId}/variantes`);
-    await expect(page.getByRole('heading', { name: 'Variantes por color y SKU' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Variantes y existencias' })).toBeVisible();
     const fila = page.locator('table tr', { hasText: nombres.sku.toUpperCase() });
     await expect(fila).toBeVisible();
     await expect(fila.getByText(nombres.color)).toBeVisible();

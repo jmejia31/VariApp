@@ -201,10 +201,12 @@ test.describe('Mantenimientos reutilizables y correcciones críticas', () => {
     }
 
     await page.goto('/productos/nuevo');
-    await expect(page.locator('mat-select[formcontrolname="marcaId"]')).toBeVisible();
-    await expect(page.locator('mat-select[formcontrolname="modeloId"]')).toBeVisible();
-    await expect(page.locator('mat-select[formcontrolname="colorId"]')).toBeVisible();
-    await expect(page.locator('mat-select[formcontrolname="tallaId"]')).toBeVisible();
+    const primeraVariante = page.locator('.variant-card').first();
+    await expect(primeraVariante).toBeVisible();
+    await expect(primeraVariante.locator('mat-select[formcontrolname="marcaId"]')).toBeVisible();
+    await expect(primeraVariante.locator('mat-select[formcontrolname="modeloId"]')).toBeVisible();
+    await expect(primeraVariante.locator('mat-select[formcontrolname="colorId"]')).toBeVisible();
+    await expect(primeraVariante.locator('mat-select[formcontrolname="tallaId"]')).toBeVisible();
 
     await page.goto('/productos');
     const inputBusqueda = page.locator('mat-form-field.search-field input');
