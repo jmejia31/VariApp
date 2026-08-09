@@ -9,7 +9,9 @@ public class ModeloConfiguration : IEntityTypeConfiguration<Modelo>
     public void Configure(EntityTypeBuilder<Modelo> builder)
     {
         builder.ToTable("Modelos");
-        builder.Property(x => x.Id).ValueGeneratedNever();
+        // Los IDs copiados del catálogo legacy se preservan durante M1; las altas
+        // posteriores deben recibir un nuevo ID autogenerado y nunca reutilizar 0.
+        builder.Property(x => x.Id).ValueGeneratedOnAdd();
         builder.Property(x => x.Nombre).HasMaxLength(120).IsRequired();
         builder.Property(x => x.Descripcion).HasMaxLength(500);
         builder.Property(x => x.Activo).HasDefaultValue(true);
