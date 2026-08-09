@@ -45,8 +45,8 @@
           <strong>{{ segmento.nombre }}</strong>
           @if (!segmento.activo) { <span class="segment-status">Inactivo</span> }
         </span>
-        <span class="segment-value">{{ segmento.totalClientes }} clientes</span>
-        <span class="segment-meta">{{ segmento.clientesActivos }} activos · {{ segmento.totalVentas }} ventas</span>
+        <span class="segment-value">{{ segmento.totalClientes }} cliente{{ segmento.totalClientes === 1 ? '' : 's' }}</span>
+        <span class="segment-meta">{{ segmento.clientesActivos }} activo{{ segmento.clientesActivos === 1 ? '' : 's' }} · {{ segmento.totalVentas }} venta{{ segmento.totalVentas === 1 ? '' : 's' }}</span>
         <span class="segment-sales">{{ segmento.totalVendido | currency:'HNL':'symbol':'1.2-2' }}</span>
       </button>
     } @empty {
@@ -144,7 +144,7 @@
           </div>
           <p class="item-card-desc">{{ c.telefono || c.correo || 'Sin contacto registrado' }}</p>
           <div class="item-card-meta">
-            <span>{{ c.totalVentas }} ventas</span>
+            <span>{{ c.totalVentas }} venta{{ c.totalVentas === 1 ? '' : 's' }}</span>
             <span>{{ c.totalVendido | currency:'HNL':'symbol':'1.2-2' }}</span>
           </div>
           @if (puedeEditar() || puedeEliminar()) {
