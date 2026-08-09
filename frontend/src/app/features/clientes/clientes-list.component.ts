@@ -209,7 +209,7 @@ export class ClientesListComponent implements OnInit {
 
   async eliminar(c: Cliente): Promise<void> {
     const confirmado = await this.alerts.confirmar({ titulo: 'Eliminar cliente', mensaje: `Se ocultará a "${c.nombre}" sin borrar sus ventas históricas.`, tipo: 'peligro', confirmarTexto: 'Eliminar' });
-    if (!confirmirmado) return;
+    if (!confirmado) return;
 
     this.clienteService.delete(c.id).subscribe({
       next: () => {
