@@ -14,10 +14,14 @@ namespace InventoryApp.API.Controllers;
 public class ProductoVariantesController : ControllerBase
 {
     private readonly IProductoVarianteService _service;
+    private readonly IProductoVarianteImagenService _imagenService;
 
-    public ProductoVariantesController(IProductoVarianteService service)
+    public ProductoVariantesController(
+        IProductoVarianteService service,
+        IProductoVarianteImagenService imagenService)
     {
         _service = service;
+        _imagenService = imagenService;
     }
 
     [HttpGet]
@@ -62,6 +66,45 @@ public class ProductoVariantesController : ControllerBase
         return actualizada is null
             ? NotFound(ApiResponse<object>.Fail("Variante no encontrada."))
             : Ok(ApiResponse<ProductoVarianteDto>.Ok(actualizada, dto.Activo ? "Variante activada." : "Variante desactivada."));
+    }
+
+    [HttpGet("{id:int}/imagenes")]
+    [RequierePermiso(ModuloSistema.Productos, AccionPermiso.Ver)]
+    public async Task<IActionResult> GetImagenes(int productoId, int id)
+    {
+        var imagenes = await _imagenService.GetAsync(productoId, id);
+        return imagenes is null
+            ? NotFound(ApiResponse<object>.Fail("Variante no encontrada."))
+            : Ok(ApiResponse<IReadOnlyList<ProductoImagenDto>>.Ok(imagenes));
+    }
+
+    [HttpPost("{id:int}/imagenes")]
+    [Consumes("multipart/form-data")]
+    [RequierePermiso(ModuloSistema.Productos, AccionPermiso.Editar)]
+    public async Task<IActionResult> AgregarImagenes(int productoId, int id, [FromForm] List<IFormFile> archivos)
+    {
+        var imagenes = await _imagenService.AddAsync(productoId, id, archivos);
+        return Ok(ApiResponse<IReadOnlyList<ProductoImagenDto>>.Ok(imagenes, "Imágenes de la variante actualizadas correctamente."));
+    }
+
+    [HttpPatch("{id:int}/imagenes/{imagenId:int}/principal")]
+    [RequierePermiso(ModuloSistema.Productos, AccionPermiso.Editar)]
+    public async Task<IActionResult> EstablecerImagenPrincipal(int productoId, int id, int imagenId)
+    {
+        var actualizado = await _imagenService.SetPrincipalAsync(productoId, id, imagenId);
+        return actualizado
+            ? Ok(ApiResponse<object>.Ok(new { }, "Imagen principal de la variante actualizada."))
+            : NotFound(ApiResponse<object>.Fail("La imagen o la variante no existe en el ámbito indicado."));
+    }
+
+    [HttpDelete("{id:int}/imagenes/{imagenId:int}")]
+    [RequierePermiso(ModuloSistema.Productos, AccionPermiso.Editar)]
+    public async Task<IActionResult> EliminarImagen(int productoId, int id, int imagenId)
+    {
+        var eliminada = await _imagenService.DeleteAsync(productoId, id, imagenId);
+        return eliminada
+            ? Ok(ApiResponse<object>.Ok(new { }, "Imagen de la variante eliminada."))
+            : NotFound(ApiResponse<object>.Fail("La imagen o la variante no existe en el ámbito indicado."));
     }
 
     [HttpDelete("{id:int}")]
