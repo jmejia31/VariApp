@@ -12,16 +12,20 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CatalogoProducto } from '../../core/models/catalogo-producto.model';
-import { Producto, ProductoVariante, ProductoVarianteFormValue } from '../../core/models/producto.model';
+import { Producto, ProductoImagen, ProductoVariante, ProductoVarianteFormValue } from '../../core/models/producto.model';
 import { CatalogoProductoService } from '../../services/catalogo-producto.service';
 import { ProductoService } from '../../services/producto.service';
+import { ProductoImagenComponent } from '../../shared/producto-imagen/producto-imagen.component';
+
+const MAX_IMAGENES_VARIANTE = 5;
 
 @Component({
   selector: 'app-producto-variantes',
   standalone: true,
   imports: [
     CommonModule, ReactiveFormsModule, RouterLink, MatButtonModule, MatFormFieldModule,
-    MatIconModule, MatInputModule, MatProgressSpinnerModule, MatSelectModule, MatTableModule
+    MatIconModule, MatInputModule, MatProgressSpinnerModule, MatSelectModule, MatTableModule,
+    ProductoImagenComponent
   ],
   templateUrl: './producto-variantes.component.html',
   styleUrl: './producto-variantes.component.scss'
@@ -44,7 +48,12 @@ export class ProductoVariantesComponent implements OnInit {
   readonly ajustandoId = signal<number | null>(null);
   readonly errorMessage = signal<string | null>(null);
   readonly editandoId = signal<number | null>(null);
+  readonly imagenVariante = signal<ProductoVariante | null>(null);
+  readonly imagenesVariante = signal<ProductoImagen[]>([]);
+  readonly cargandoImagenes = signal(false);
+  readonly subiendoImagenes = signal(false);
   readonly displayedColumns = ['variante', 'sku', 'codigoBarras', 'stock', 'costo', 'precio', 'estado', 'acciones'];
+  readonly maxImagenesVariante = MAX_IMAGENES_VARIANTE;
   productoId = 0;
 
   readonly form = this.fb.group({
@@ -85,6 +94,12 @@ export class ProductoVariantesComponent implements OnInit {
       next: (res) => {
         this.producto.set(res.data);
         this.variantes.set(res.data.variantes ?? []);
+        const actual = this.imagenVariante();
+        if (actual) {
+          const refrescada = (res.data.variantes ?? []).find(v => v.id === actual.id) ?? null;
+          this.imagenVariante.set(refrescada);
+          if (refrescada) this.cargarImagenesVariante(refrescada, false);
+        }
         this.loading.set(false);
       },
       error: () => {
@@ -263,10 +278,109 @@ export class ProductoVariantesComponent implements OnInit {
     if (!window.confirm(`¿Eliminar lógicamente la variante ${variante.etiqueta || variante.sku}? Solo es posible con stock cero.`)) return;
     this.productoService.eliminarVariante(this.productoId, variante.id).subscribe({
       next: () => {
+        if (this.imagenVariante()?.id === variante.id) this.cerrarImagenesVariante();
         this.snackBar.open('Variante eliminada lógicamente.', 'Cerrar', { duration: 3000 });
         this.cargar();
       },
       error: (err) => this.errorMessage.set(err.error?.message ?? 'No se pudo eliminar la variante.')
+    });
+  }
+
+  gestionarImagenes(variante: ProductoVariante): void {
+    this.imagenVariante.set(variante);
+    this.cargarImagenesVariante(variante, true);
+  }
+
+  cerrarImagenesVariante(): void {
+    this.imagenVariante.set(null);
+    this.imagenesVariante.set([]);
+    this.cargandoImagenes.set(false);
+  }
+
+  cargarImagenesVariante(variante: ProductoVariante, desplazar: boolean): void {
+    this.cargandoImagenes.set(true);
+    this.productoService.getImagenesVariante(this.productoId, variante.id).subscribe({
+      next: (res) => {
+        this.imagenesVariante.set(res.data ?? []);
+        this.cargandoImagenes.set(false);
+        if (desplazar) {
+          setTimeout(() => document.getElementById('galeria-variante')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+        }
+      },
+      error: (err) => {
+        this.cargandoImagenes.set(false);
+        this.errorMessage.set(err.error?.message ?? 'No se pudieron cargar las imágenes de la variante.');
+      }
+    });
+  }
+
+  get imagenesSonFallback(): boolean {
+    const imagenes = this.imagenesVariante();
+    return imagenes.length > 0 && imagenes.every(imagen => imagen.productoVarianteId == null);
+  }
+
+  get imagenesEspecificasCount(): number {
+    return this.imagenesVariante().filter(imagen => imagen.productoVarianteId != null).length;
+  }
+
+  get espaciosImagenesVariante(): number {
+    return Math.max(0, this.maxImagenesVariante - this.imagenesEspecificasCount);
+  }
+
+  onImagenesVarianteSelected(event: Event): void {
+    const variante = this.imagenVariante();
+    const input = event.target as HTMLInputElement;
+    const archivos = Array.from(input.files ?? []);
+    input.value = '';
+    if (!variante || archivos.length === 0) return;
+    if (variante.esTecnica) {
+      this.errorMessage.set('La variante técnica usa la galería general del producto.');
+      return;
+    }
+
+    const seleccion = archivos.slice(0, this.espaciosImagenesVariante);
+    if (seleccion.length === 0) {
+      this.errorMessage.set(`La variante ya alcanzó el máximo de ${this.maxImagenesVariante} imágenes.`);
+      return;
+    }
+    if (archivos.length > seleccion.length) {
+      this.errorMessage.set(`Solo se cargarán ${seleccion.length} imagen(es); el máximo por variante es ${this.maxImagenesVariante}.`);
+    }
+
+    this.subiendoImagenes.set(true);
+    this.productoService.agregarImagenesVariante(this.productoId, variante.id, seleccion).subscribe({
+      next: (res) => {
+        this.imagenesVariante.set(res.data ?? []);
+        this.subiendoImagenes.set(false);
+        this.errorMessage.set(null);
+        this.snackBar.open('Galería específica de la variante actualizada.', 'Cerrar', { duration: 3000 });
+      },
+      error: (err) => {
+        this.subiendoImagenes.set(false);
+        this.errorMessage.set(err.error?.message ?? 'No se pudieron subir las imágenes de la variante.');
+      }
+    });
+  }
+
+  marcarPrincipalVariante(imagen: ProductoImagen): void {
+    const variante = this.imagenVariante();
+    if (!variante || imagen.productoVarianteId == null || imagen.esPrincipal) return;
+    this.productoService.marcarImagenPrincipalVariante(this.productoId, variante.id, imagen.id).subscribe({
+      next: () => this.cargarImagenesVariante(variante, false),
+      error: (err) => this.errorMessage.set(err.error?.message ?? 'No se pudo cambiar la imagen principal de la variante.')
+    });
+  }
+
+  eliminarImagenVariante(imagen: ProductoImagen): void {
+    const variante = this.imagenVariante();
+    if (!variante || imagen.productoVarianteId == null) return;
+    if (!window.confirm('¿Eliminar esta imagen de la variante? La imagen general del producto seguirá disponible como respaldo.')) return;
+    this.productoService.eliminarImagenVariante(this.productoId, variante.id, imagen.id).subscribe({
+      next: () => {
+        this.snackBar.open('Imagen de variante eliminada.', 'Cerrar', { duration: 2500 });
+        this.cargarImagenesVariante(variante, false);
+      },
+      error: (err) => this.errorMessage.set(err.error?.message ?? 'No se pudo eliminar la imagen de la variante.')
     });
   }
 }
