@@ -89,8 +89,8 @@ public sealed class ProductoAutocompleteIntegrationTests
 
             var ventaPorMarca = await service.BuscarParaVentaAsync("varistorehn");
             Assert.Single(ventaPorMarca);
-            Assert.Equal(marca.Nombre, ventaPorMarca[0].MarcaNombre);
-            Assert.Equal(modeloBuds.Nombre, ventaPorMarca[0].ModeloNombre);
+            Assert.Equal("VariStorehn", ventaPorMarca[0].MarcaNombre);
+            Assert.Equal("2C5", ventaPorMarca[0].ModeloNombre);
         }
         finally
         {
