@@ -76,6 +76,7 @@ builder.Services.AddScoped<IPerfilImagenStorageService, CloudinaryPerfilImagenSt
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IProductoService, ProductoService>();
 builder.Services.AddScoped<IProductoVarianteService, ProductoVarianteService>();
+builder.Services.AddScoped<IProductoVarianteImagenService, ProductoVarianteImagenService>();
 builder.Services.AddScoped<IProductoEscanerService, ProductoEscanerService>();
 builder.Services.AddScoped<ICategoriaService, CategoriaService>();
 builder.Services.AddScoped<ICatalogoProductoService, CatalogoProductoService>();
