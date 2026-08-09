@@ -8,6 +8,7 @@ public class FacturaDetalleDto
     public string ProductoMarca { get; set; } = string.Empty;
     public string ProductoModelo { get; set; } = string.Empty;
     public string? VarianteColor { get; set; }
+    public string? VarianteTalla { get; set; }
     public string? VarianteSku { get; set; }
     public int Cantidad { get; set; }
     public decimal PrecioUnitario { get; set; }
