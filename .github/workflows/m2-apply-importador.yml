@@ -1,0 +1,38 @@
+name: M2 aplicar importador multidimensional
+
+on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - '.github/workflows/m2-apply-importador.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Aplicar parche fail-closed
+        run: python3 .github/scripts/m2_patch_importador.py
+      - name: Compilar backend
+        working-directory: backend
+        run: dotnet build InventoryApp.sln --configuration Release
+      - name: Publicar y limpiar artefactos temporales
+        run: |
+          set -euo pipefail
+          rm -f .github/scripts/m2_patch_importador.py
+          rm -f .github/workflows/m2-apply-importador.yml
+          git config user.name 'VariApp Automation'
+          git config user.email 'actions@users.noreply.github.com'
+          git add backend/src/Infrastructure/Services/CargaMasivaService.cs
+          git add -u .github/scripts/m2_patch_importador.py .github/workflows/m2-apply-importador.yml
+          git commit -m 'feat(m2): normalizar importación multidimensional de variantes [ChatGPT]'
+          git push origin HEAD:Desarrollo
