@@ -1,5 +1,4 @@
 using InventoryApp.Application.DTOs;
-using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Application.Services;
 using InventoryApp.Domain.Entities;
@@ -35,12 +34,16 @@ public class ClienteServiceTests
     }
 
     [Fact]
-    public async Task CreateAsync_Nombre_Duplicado_Lanza_Excepcion()
+    public async Task CreateAsync_Nombre_Duplicado_Es_Permitido()
     {
         _repoMock.Setup(r => r.ExisteNombreAsync("Juan Pérez", null)).ReturnsAsync(true);
+        _repoMock.Setup(r => r.AddAsync(It.IsAny<Cliente>())).Returns(Task.CompletedTask);
+        _repoMock.Setup(r => r.SaveChangesAsync()).ReturnsAsync(true);
 
-        await Assert.ThrowsAsync<BusinessRuleException>(() =>
-            _service.CreateAsync(new CreateClienteDto { Nombre = "Juan Pérez" }));
+        await _service.CreateAsync(new CreateClienteDto { Nombre = "Juan Pérez" });
+
+        _repoMock.Verify(r => r.AddAsync(It.Is<Cliente>(c => c.Nombre == "Juan Pérez")), Times.Once);
+        _repoMock.Verify(r => r.ExisteIdentidadAsync(It.IsAny<string>(), It.IsAny<int?>()), Times.Never);
     }
 
     [Fact]
