@@ -63,9 +63,8 @@ public class CargaMasivaConcurrencyTests
         await using var context = new AppDbContext(options);
         await context.Database.MigrateAsync();
 
-        var color = new CatalogoProducto
+        var color = new Color
         {
-            Tipo = TipoCatalogoProducto.Color,
             Nombre = "Negro",
             CodigoVisual = "#111111",
             Activo = true,
@@ -73,7 +72,7 @@ public class CargaMasivaConcurrencyTests
             CreadoPorUsuarioId = 1,
             CreadoPorNombreUsuario = "integration-admin"
         };
-        context.CatalogosProducto.Add(color);
+        context.Colores.Add(color);
         await context.SaveChangesAsync();
 
         var producto = new Producto
@@ -81,6 +80,7 @@ public class CargaMasivaConcurrencyTests
             Nombre = "Producto carga concurrente",
             Marca = "Marca Test",
             Modelo = "Modelo Test",
+            TipoInventario = TipoInventario.MercaderiaVenta,
             Cantidad = cantidadActual,
             Costo = 10m,
             Precio = 20m,
