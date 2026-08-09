@@ -9,7 +9,9 @@ public class MarcaConfiguration : IEntityTypeConfiguration<Marca>
     public void Configure(EntityTypeBuilder<Marca> builder)
     {
         builder.ToTable("Marcas");
-        builder.Property(x => x.Id).ValueGeneratedNever();
+        // El backfill M1 conserva IDs legacy explícitos. Finalizado el backfill,
+        // las altas normales deben usar identidad autogenerada por MySQL.
+        builder.Property(x => x.Id).ValueGeneratedOnAdd();
         builder.Property(x => x.Nombre).HasMaxLength(120).IsRequired();
         builder.Property(x => x.Descripcion).HasMaxLength(500);
         builder.Property(x => x.Activo).HasDefaultValue(true);
