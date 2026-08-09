@@ -59,6 +59,7 @@ export class MovimientosListComponent implements OnInit {
     this.sortDirection = state.sortDirection === 'asc' ? 'asc' : 'desc';
     this.page = Math.max(1, Math.trunc(state.page));
     this.pageSize = [10, 25, 50].includes(state.pageSize) ? state.pageSize : 10;
+    this.persistirEstado();
     this.cargar();
   }
 
