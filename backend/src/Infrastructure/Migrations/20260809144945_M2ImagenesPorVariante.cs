@@ -10,21 +10,15 @@ namespace InventoryApp.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // MySQL 8.4 reconstruye ProductoImagenes al agregar una columna
-            // calculada almacenada. La FK histórica a Productos es válida, pero
-            // mantenerla activa durante esa reconstrucción provoca que InnoDB
-            // falle al recrearla. Se retira y se restablece dentro de la misma
-            // migración, preservando exactamente su semántica Cascade.
-            migrationBuilder.DropForeignKey(
-                name: "FK_ProductoImagenes_Productos_ProductoId",
-                table: "ProductoImagenes");
-
             migrationBuilder.AddColumn<int>(
                 name: "ProductoVarianteId",
                 table: "ProductoImagenes",
                 type: "int",
                 nullable: true);
 
+            // VIRTUAL es indexable en MySQL 8.4 y evita reconstruir físicamente
+            // ProductoImagenes, por lo que la FK histórica a Productos permanece
+            // intacta durante toda la migración.
             migrationBuilder.AddColumn<string>(
                 name: "PrincipalAmbitoKey",
                 table: "ProductoImagenes",
@@ -32,7 +26,7 @@ namespace InventoryApp.Infrastructure.Migrations
                 maxLength: 80,
                 nullable: true,
                 computedColumnSql: "IF(EsPrincipal = 1, CONCAT(ProductoId, ':', IFNULL(ProductoVarianteId, 0)), NULL)",
-                stored: true)
+                stored: false)
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateIndex(
@@ -51,18 +45,6 @@ namespace InventoryApp.Infrastructure.Migrations
                 column: "PrincipalAmbitoKey",
                 unique: true);
 
-            migrationBuilder.DropIndex(
-                name: "IX_ProductoImagenes_ProductoId",
-                table: "ProductoImagenes");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_ProductoImagenes_Productos_ProductoId",
-                table: "ProductoImagenes",
-                column: "ProductoId",
-                principalTable: "Productos",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
-
             migrationBuilder.AddForeignKey(
                 name: "FK_ProductoImagenes_ProductoVariantes_ProductoVarianteId",
                 table: "ProductoImagenes",
@@ -78,15 +60,6 @@ namespace InventoryApp.Infrastructure.Migrations
             migrationBuilder.DropForeignKey(
                 name: "FK_ProductoImagenes_ProductoVariantes_ProductoVarianteId",
                 table: "ProductoImagenes");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_ProductoImagenes_Productos_ProductoId",
-                table: "ProductoImagenes");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ProductoImagenes_ProductoId",
-                table: "ProductoImagenes",
-                column: "ProductoId");
 
             migrationBuilder.DropIndex(
                 name: "IX_ProductoImagenes_Producto_Variante_Orden",
@@ -107,14 +80,6 @@ namespace InventoryApp.Infrastructure.Migrations
             migrationBuilder.DropColumn(
                 name: "ProductoVarianteId",
                 table: "ProductoImagenes");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_ProductoImagenes_Productos_ProductoId",
-                table: "ProductoImagenes",
-                column: "ProductoId",
-                principalTable: "Productos",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
         }
     }
 }
