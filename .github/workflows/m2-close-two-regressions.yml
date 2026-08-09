@@ -1,0 +1,58 @@
+name: M2 cierre de dos regresiones
+
+on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - '.github/workflows/m2-close-two-regressions.yml'
+      - '.github/scripts/m2-close-two-regressions.py'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Aplicar parche fail-closed
+        run: python3 .github/scripts/m2-close-two-regressions.py
+
+      - name: Compilar backend Release
+        working-directory: backend
+        run: |
+          dotnet restore InventoryApp.sln
+          dotnet build InventoryApp.sln --configuration Release --no-restore
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Validar frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run lint
+          npm run build:prod
+
+      - name: Publicar y retirar mecanismo temporal
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/m2-close-two-regressions.yml .github/scripts/m2-close-two-regressions.py
+          git add backend/src/Infrastructure/Services/CargaMasivaService.cs frontend/src/app/features/productos/producto-form.component.ts
+          git diff --cached --check
+          git diff --cached --quiet && { echo 'No hubo cambios para publicar.'; exit 1; }
+          git commit -m "fix(m2): sincronizar predeterminados y colores normalizados [ChatGPT]"
+          git push origin HEAD:Desarrollo
