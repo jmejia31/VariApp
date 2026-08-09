@@ -1,0 +1,40 @@
+name: M2 aplicar generador de combinaciones
+
+on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - '.github/workflows/m2-apply-generator.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+      - name: Aplicar parche
+        run: python3 frontend/scripts/m2_wire_generator.py
+      - name: Validar frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run lint
+          npm run build:prod
+      - name: Publicar resultado y limpiar temporales
+        run: |
+          rm -f .github/workflows/m2-apply-generator.yml frontend/scripts/m2_wire_generator.py
+          git config user.name 'VariApp Automation'
+          git config user.email 'actions@users.noreply.github.com'
+          git add frontend/src/app/features/productos/producto-form.component.ts
+          git add frontend/src/app/features/productos/producto-form.component.html
+          git add -u .github/workflows/m2-apply-generator.yml frontend/scripts/m2_wire_generator.py
+          git commit -m 'feat(m2): integrar generador confirmado de variantes [ChatGPT]'
+          git push origin HEAD:Desarrollo
