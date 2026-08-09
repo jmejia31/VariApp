@@ -1,0 +1,50 @@
+name: M2 completar factura multidimensional
+
+on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - '.github/workflows/m2-apply-factura-variantes.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+      - name: Aplicar parche fail-closed
+        run: python3 scripts/m2_patch_factura_variantes.py
+      - name: Validar backend
+        working-directory: backend
+        run: |
+          dotnet restore InventoryApp.sln
+          dotnet build InventoryApp.sln --configuration Release --no-restore
+          dotnet test InventoryApp.sln --configuration Release --no-build --filter "Category!=Integration"
+      - name: Validar frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run lint
+          npm run build:prod
+      - name: Publicar y limpiar temporales
+        run: |
+          rm -f .github/workflows/m2-apply-factura-variantes.yml scripts/m2_patch_factura_variantes.py
+          git config user.name 'VariApp Automation'
+          git config user.email 'actions@users.noreply.github.com'
+          git add backend/src/Application/Services/FacturaService.cs
+          git add backend/src/Infrastructure/Services/QuestPdfFacturaPerfilesService.cs
+          git add frontend/src/app/features/facturas/factura-view.component.html
+          git add -u .github/workflows/m2-apply-factura-variantes.yml scripts/m2_patch_factura_variantes.py
+          git commit -m 'fix(m2): completar snapshots visibles en factura y POS [ChatGPT]'
+          git push origin HEAD:Desarrollo
