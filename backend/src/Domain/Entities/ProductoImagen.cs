@@ -6,11 +6,6 @@ public class ProductoImagen
     public int ProductoId { get; set; }
     public Producto? Producto { get; set; }
 
-    // Null = imagen general de la familia. Con valor = imagen específica de la
-    // variante exacta; el producto sigue siendo propietario para seguridad y limpieza.
-    public int? ProductoVarianteId { get; set; }
-    public ProductoVariante? ProductoVariante { get; set; }
-
     public string Url { get; set; } = string.Empty;
     public string PublicId { get; set; } = string.Empty;
     public int Orden { get; set; }
