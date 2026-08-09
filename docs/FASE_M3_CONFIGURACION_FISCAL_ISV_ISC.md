@@ -1,6 +1,6 @@
 # FASE M3 — Configuración fiscal ISV/ISC
 
-Estado: **EN VALIDACIÓN FINAL AUTOMATIZADA**
+Estado: **COMPLETADA / CERTIFICADA AUTOMÁTICAMENTE**
 
 Fecha: 2026-08-09  
 Rama: `Desarrollo`  
@@ -181,9 +181,9 @@ No se contabilizan como certificación final por sí solas. El cierre de M3 depe
 
 ---
 
-## 10. Gate final pendiente
+## 10. Gate final cumplido
 
-Para cambiar el estado a **COMPLETADA / CERTIFICADA AUTOMÁTICAMENTE**, el HEAD final debe demostrar:
+El HEAD funcional certificado `9ea747acd110914d6445f687caabf4cf42a1fefe` demostró:
 
 - Desarrollo - Compilación y pruebas: success;
 - migraciones MySQL 8.4: success;
@@ -196,7 +196,18 @@ Para cambiar el estado a **COMPLETADA / CERTIFICADA AUTOMÁTICAMENTE**, el HEAD 
 - Fase 8 - Validación completa automatizada: success;
 - ningún P0/P1 introducido por M3.
 
-`VariApp CI`, si aparece como `SKIPPED`, debe reportarse como tal y nunca contarse como verde.
+`VariApp CI` se registró como `SKIPPED` y no se contabiliza como workflow verde.
+
+Evidencia oficial del HEAD funcional certificado `9ea747acd110914d6445f687caabf4cf42a1fefe`:
+
+- `31330348378` — Desarrollo - Compilación y pruebas — **success**;
+- `31330348374` — Desarrollo - aceptación funcional integral — **success**;
+- `31330348396` — Fase 2 - Auditoría de configuración y dependencias — **success**;
+- `31330348421` — Bloque 2C.1 - Variante técnica y migración — **success**;
+- `31330348369` — Fase 8 - Validación completa automatizada — **success**;
+- `31330348386` — VariApp CI — **skipped**, no contabilizado como verde.
+
+Dentro de `31330348378` quedaron en success backend Release, pruebas no integración, frontend lint/build, Docker/higiene, migraciones MySQL 8.4, pruebas de integración MySQL (incluidos los escenarios fiscales M3), verificación de snapshot EF y SQL forward.
 
 ---
 
@@ -212,8 +223,8 @@ M3 se certifica sobre código versionado, persistencia y CI descartable. Producc
 
 ---
 
-## 12. Estado provisional
+## 12. Dictamen final
 
-**M3 — Configuración fiscal ISV/ISC: implementación cerrada; certificación automatizada final en ejecución.**
+**M3 — Configuración fiscal ISV/ISC: COMPLETADA / CERTIFICADA AUTOMÁTICAMENTE.**
 
 La siguiente fase del Plan Maestro será M4 — Estado persistente de filtros y navegación, únicamente después del cierre verde de M3.

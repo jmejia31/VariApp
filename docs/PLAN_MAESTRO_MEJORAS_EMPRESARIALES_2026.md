@@ -778,6 +778,10 @@ Casos mínimos:
 
 # FASE M3 — Configuración fiscal ISV/ISC
 
+Estado: **COMPLETADA / CERTIFICADA AUTOMÁTICAMENTE (2026-08-09)**.
+
+Entregable: `docs/FASE_M3_CONFIGURACION_FISCAL_ISV_ISC.md`.
+
 Objetivo: certificar y completar la persistencia fiscal ya existente.
 
 - auditar Impuestos después de M1;
