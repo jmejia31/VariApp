@@ -70,6 +70,16 @@
       @if (isEdit() && productoId) { <a mat-stroked-button color="primary" [routerLink]="['/productos', productoId, 'variantes']"><mat-icon>tune</mat-icon>Administrar variantes</a> } @else { <button mat-stroked-button color="primary" type="button" (click)="agregarVariante()"><mat-icon>add</mat-icon>Agregar variante</button> }
     </div>
     <div class="stock-summary" aria-live="polite"><div><span>Variantes físicas</span><strong>{{ variantes.length }}</strong></div><div><span>Stock total calculado</span><strong>{{ stockTotal }} unidades</strong></div><div><span>Umbral consolidado</span><strong>{{ umbralTotal }} unidades</strong></div></div>
+    @if (!isEdit()) {
+      <app-producto-combination-generator
+        [marcas]="marcas()"
+        [modelos]="modelosTodos()"
+        [colores]="colores()"
+        [tallas]="tallas()"
+        [combinacionesExistentes]="combinacionesActuales"
+        (combinacionesConfirmadas)="agregarCombinacionesGeneradas($event)">
+      </app-producto-combination-generator>
+    }
     <div formArrayName="variantes" class="variants-list">
       @for (variante of variantes.controls; track variante; let i = $index) {
         <article class="variant-card" [formGroupName]="i">

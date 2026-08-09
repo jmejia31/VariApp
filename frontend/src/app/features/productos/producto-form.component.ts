@@ -16,6 +16,7 @@ import { Categoria } from '../../core/models/categoria.model';
 import { CatalogoProducto } from '../../core/models/catalogo-producto.model';
 import { ProductoImagen, ProductoVariante, ProductoVarianteFormValue, TipoInventario } from '../../core/models/producto.model';
 import { ProductoImagenComponent } from '../../shared/producto-imagen/producto-imagen.component';
+import { ProductoCombinationGeneratorComponent } from './producto-combination-generator.component';
 
 interface ImagenPreview {
   id?: number;
@@ -32,7 +33,7 @@ const MAX_IMAGENES = 5;
   imports: [
     CommonModule, ReactiveFormsModule, RouterLink, MatFormFieldModule,
     MatInputModule, MatSelectModule, MatButtonModule, MatIconModule,
-    MatProgressSpinnerModule, ProductoImagenComponent
+    MatProgressSpinnerModule, ProductoImagenComponent, ProductoCombinationGeneratorComponent
   ],
   templateUrl: './producto-form.component.html',
   styleUrls: ['./producto-form.component.scss', './producto-form-variants.component.scss']
@@ -151,6 +152,49 @@ export class ProductoFormComponent implements OnInit {
       activo: true
     }));
     this.errorMessage.set(null);
+  }
+
+  get combinacionesActuales(): string[] {
+    return this.variantes.getRawValue().map(variante => this.claveCombinacion({
+      marcaId: this.normalizarId(variante.marcaId),
+      modeloId: this.normalizarId(variante.modeloId),
+      colorId: this.normalizarId(variante.colorId),
+      tallaId: this.normalizarId(variante.tallaId)
+    }));
+  }
+
+  agregarCombinacionesGeneradas(generadas: ProductoVarianteFormValue[]): void {
+    if (generadas.length === 0) return;
+
+    const inicial = this.variantes.length === 1 ? this.variantes.at(0).getRawValue() : null;
+    const esFilaInicialVacia = inicial && !inicial.id &&
+      !this.normalizarId(inicial.marcaId) && !this.normalizarId(inicial.modeloId) &&
+      !this.normalizarId(inicial.colorId) && !this.normalizarId(inicial.tallaId) &&
+      !String(inicial.sku ?? '').trim() && !String(inicial.codigoBarras ?? '').trim() &&
+      Number(inicial.cantidad ?? 0) === 0 && Number(inicial.costo ?? 0) === 0 && Number(inicial.precio ?? 0) === 0;
+    if (esFilaInicialVacia) this.variantes.clear();
+
+    const existentes = new Set(this.combinacionesActuales);
+    let agregadas = 0;
+    let omitidas = 0;
+    for (const variante of generadas) {
+      const clave = this.claveCombinacion(variante);
+      if (existentes.has(clave)) {
+        omitidas++;
+        continue;
+      }
+      this.variantes.push(this.crearVarianteGroup(variante));
+      existentes.add(clave);
+      agregadas++;
+    }
+
+    this.errorMessage.set(omitidas > 0
+      ? `${agregadas} combinación(es) agregada(s); ${omitidas} duplicada(s) fueron omitidas.`
+      : null);
+  }
+
+  private claveCombinacion(variante: Pick<ProductoVarianteFormValue, 'marcaId' | 'modeloId' | 'colorId' | 'tallaId'>): string {
+    return `${variante.marcaId ?? 0}:${variante.modeloId ?? 0}:${variante.colorId ?? 0}:${variante.tallaId ?? 0}`;
   }
 
   quitarVariante(index: number): void {
