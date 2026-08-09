@@ -60,8 +60,8 @@ public sealed class ProductoAutocompleteIntegrationTests
             await setup.SaveChangesAsync();
 
             setup.ProductoVariantes.AddRange(
-                CrearVariante(conStock, marca, modeloBuds, "SKU-BUDS-2C5", "000000002501", 4, 120m, 220m),
-                CrearVariante(sinStock, marca, modeloCable, "SKU-CABLE-2C5", "000000002502", 0, 35m, 80m));
+                CrearVariante(conStock.Id, marca.Id, modeloBuds.Id, "SKU-BUDS-2C5", "000000002501", 4, 120m, 220m),
+                CrearVariante(sinStock.Id, marca.Id, modeloCable.Id, "SKU-CABLE-2C5", "000000002502", 0, 35m, 80m));
             await setup.SaveChangesAsync();
         }
 
@@ -114,9 +114,9 @@ public sealed class ProductoAutocompleteIntegrationTests
         };
 
     private static ProductoVariante CrearVariante(
-        Producto producto,
-        Marca marca,
-        Modelo modelo,
+        int productoId,
+        int marcaId,
+        int modeloId,
         string sku,
         string codigoBarras,
         int cantidad,
@@ -124,12 +124,9 @@ public sealed class ProductoAutocompleteIntegrationTests
         decimal precio) =>
         new()
         {
-            ProductoId = producto.Id,
-            Producto = producto,
-            MarcaId = marca.Id,
-            Marca = marca,
-            ModeloId = modelo.Id,
-            Modelo = modelo,
+            ProductoId = productoId,
+            MarcaId = marcaId,
+            ModeloId = modeloId,
             Sku = sku,
             CodigoBarras = codigoBarras,
             Cantidad = cantidad,
