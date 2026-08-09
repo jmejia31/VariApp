@@ -24,7 +24,13 @@ public class ProductoRepository : IProductoRepository
             .Include(p => p.MarcaCatalogo)
             .Include(p => p.ModeloCatalogo)
             .Include(p => p.Variantes.Where(v => !v.Eliminado))
+                .ThenInclude(v => v.Marca)
+            .Include(p => p.Variantes.Where(v => !v.Eliminado))
+                .ThenInclude(v => v.Modelo)
+            .Include(p => p.Variantes.Where(v => !v.Eliminado))
                 .ThenInclude(v => v.Color)
+            .Include(p => p.Variantes.Where(v => !v.Eliminado))
+                .ThenInclude(v => v.Talla)
             .AsSplitQuery();
 
     public async Task<Producto?> GetByIdAsync(int id) =>
@@ -35,9 +41,6 @@ public class ProductoRepository : IProductoRepository
         if (_context.Database.CurrentTransaction is null)
             throw new InvalidOperationException("GetByIdForUpdateAsync requiere una transacción activa.");
 
-        // Este método bloquea exclusivamente la fila de Producto. Las variantes
-        // deben adquirirse después y únicamente mediante su propio SELECT ... FOR UPDATE,
-        // para evitar que EF Core conserve snapshots obsoletos en el ChangeTracker.
         return await _context.Productos
             .FromSqlInterpolated($"SELECT p.* FROM Productos p WHERE p.Id = {id} AND p.Eliminado = 0 FOR UPDATE")
             .AsTracking()
@@ -67,20 +70,19 @@ public class ProductoRepository : IProductoRepository
             if (filters.CategoriaId.HasValue)
                 query = query.Where(p => p.CategoriaId == filters.CategoriaId.Value);
             if (filters.ColorId.HasValue)
-                query = query.Where(p => p.ColorId == filters.ColorId.Value ||
-                    p.Variantes.Any(v => !v.Eliminado && v.ColorId == filters.ColorId.Value));
+                query = query.Where(p => p.Variantes.Any(v => !v.Eliminado && v.ColorId == filters.ColorId.Value));
             if (filters.TallaId.HasValue)
-                query = query.Where(p => p.TallaId == filters.TallaId.Value);
+                query = query.Where(p => p.Variantes.Any(v => !v.Eliminado && v.TallaId == filters.TallaId.Value));
             if (filters.MarcaId.HasValue)
-                query = query.Where(p => p.MarcaId == filters.MarcaId.Value);
+                query = query.Where(p => p.Variantes.Any(v => !v.Eliminado && v.MarcaId == filters.MarcaId.Value));
             if (filters.ModeloId.HasValue)
-                query = query.Where(p => p.ModeloId == filters.ModeloId.Value);
+                query = query.Where(p => p.Variantes.Any(v => !v.Eliminado && v.ModeloId == filters.ModeloId.Value));
             if (filters.Activo.HasValue)
                 query = query.Where(p => p.Activo == filters.Activo.Value);
             if (filters.Agotado.HasValue)
                 query = filters.Agotado.Value
-                    ? query.Where(p => p.Cantidad <= 0)
-                    : query.Where(p => p.Cantidad > 0);
+                    ? query.Where(p => !p.Variantes.Any(v => !v.Eliminado && v.Activo && v.Cantidad > 0))
+                    : query.Where(p => p.Variantes.Any(v => !v.Eliminado && v.Activo && v.Cantidad > 0));
         }
 
         if (!string.IsNullOrWhiteSpace(request.Search))
@@ -92,12 +94,13 @@ public class ProductoRepository : IProductoRepository
                 p.Modelo.ToLower().Contains(search) ||
                 (p.MarcaCatalogo != null && p.MarcaCatalogo.Nombre.ToLower().Contains(search)) ||
                 (p.ModeloCatalogo != null && p.ModeloCatalogo.Nombre.ToLower().Contains(search)) ||
-                (p.Color != null && p.Color.Nombre.ToLower().Contains(search)) ||
-                (p.Talla != null && p.Talla.Nombre.ToLower().Contains(search)) ||
                 p.Variantes.Any(v => !v.Eliminado &&
                     ((v.Sku != null && v.Sku.ToLower().Contains(search)) ||
                      (v.CodigoBarras != null && v.CodigoBarras.ToLower().Contains(search)) ||
-                     (v.Color != null && v.Color.Nombre.ToLower().Contains(search)))));
+                     (v.Marca != null && v.Marca.Nombre.ToLower().Contains(search)) ||
+                     (v.Modelo != null && v.Modelo.Nombre.ToLower().Contains(search)) ||
+                     (v.Color != null && v.Color.Nombre.ToLower().Contains(search)) ||
+                     (v.Talla != null && v.Talla.Nombre.ToLower().Contains(search)))));
         }
 
         var totalCount = await query.CountAsync();
@@ -106,17 +109,17 @@ public class ProductoRepository : IProductoRepository
         query = request.SortBy?.ToLower() switch
         {
             "marca" => sortDirDesc
-                ? query.OrderByDescending(p => p.MarcaCatalogo != null ? p.MarcaCatalogo.Nombre : p.Marca)
-                : query.OrderBy(p => p.MarcaCatalogo != null ? p.MarcaCatalogo.Nombre : p.Marca),
+                ? query.OrderByDescending(p => p.Variantes.Where(v => !v.Eliminado).Select(v => v.Marca != null ? v.Marca.Nombre : string.Empty).FirstOrDefault())
+                : query.OrderBy(p => p.Variantes.Where(v => !v.Eliminado).Select(v => v.Marca != null ? v.Marca.Nombre : string.Empty).FirstOrDefault()),
             "modelo" => sortDirDesc
-                ? query.OrderByDescending(p => p.ModeloCatalogo != null ? p.ModeloCatalogo.Nombre : p.Modelo)
-                : query.OrderBy(p => p.ModeloCatalogo != null ? p.ModeloCatalogo.Nombre : p.Modelo),
+                ? query.OrderByDescending(p => p.Variantes.Where(v => !v.Eliminado).Select(v => v.Modelo != null ? v.Modelo.Nombre : string.Empty).FirstOrDefault())
+                : query.OrderBy(p => p.Variantes.Where(v => !v.Eliminado).Select(v => v.Modelo != null ? v.Modelo.Nombre : string.Empty).FirstOrDefault()),
             "color" => sortDirDesc
-                ? query.OrderByDescending(p => p.Color != null ? p.Color.Nombre : string.Empty)
-                : query.OrderBy(p => p.Color != null ? p.Color.Nombre : string.Empty),
+                ? query.OrderByDescending(p => p.Variantes.Where(v => !v.Eliminado).Select(v => v.Color != null ? v.Color.Nombre : string.Empty).FirstOrDefault())
+                : query.OrderBy(p => p.Variantes.Where(v => !v.Eliminado).Select(v => v.Color != null ? v.Color.Nombre : string.Empty).FirstOrDefault()),
             "talla" => sortDirDesc
-                ? query.OrderByDescending(p => p.Talla != null ? p.Talla.Nombre : string.Empty)
-                : query.OrderBy(p => p.Talla != null ? p.Talla.Nombre : string.Empty),
+                ? query.OrderByDescending(p => p.Variantes.Where(v => !v.Eliminado).Select(v => v.Talla != null ? v.Talla.Nombre : string.Empty).FirstOrDefault())
+                : query.OrderBy(p => p.Variantes.Where(v => !v.Eliminado).Select(v => v.Talla != null ? v.Talla.Nombre : string.Empty).FirstOrDefault()),
             "cantidad" => sortDirDesc ? query.OrderByDescending(p => p.Cantidad) : query.OrderBy(p => p.Cantidad),
             "costo" => sortDirDesc ? query.OrderByDescending(p => p.Costo) : query.OrderBy(p => p.Costo),
             "precio" => sortDirDesc ? query.OrderByDescending(p => p.Precio) : query.OrderBy(p => p.Precio),
@@ -133,7 +136,7 @@ public class ProductoRepository : IProductoRepository
 
     public async Task<List<Producto>> GetStockBajoAsync() =>
         await ConIncludes()
-            .Where(p => p.Cantidad <= 0)
+            .Where(p => !p.Variantes.Any(v => !v.Eliminado && v.Activo && v.Cantidad > v.UmbralStockBajo))
             .OrderBy(p => p.Nombre)
             .ToListAsync();
 
@@ -147,13 +150,17 @@ public class ProductoRepository : IProductoRepository
         await _context.Productos.CountAsync();
 
     public async Task<int> GetTotalUnidadesAsync() =>
-        await _context.Productos.SumAsync(p => (int?)p.Cantidad) ?? 0;
+        await _context.ProductoVariantes.Where(v => !v.Eliminado).SumAsync(v => (int?)v.Cantidad) ?? 0;
 
     public async Task<decimal> GetValorTotalCostoAsync() =>
-        await _context.Productos.SumAsync(p => (decimal?)(p.Costo * p.Cantidad)) ?? 0m;
+        await _context.ProductoVariantes
+            .Where(v => !v.Eliminado)
+            .SumAsync(v => (decimal?)((v.Costo ?? 0m) * v.Cantidad)) ?? 0m;
 
     public async Task<decimal> GetValorTotalPrecioAsync() =>
-        await _context.Productos.SumAsync(p => (decimal?)(p.Precio * p.Cantidad)) ?? 0m;
+        await _context.ProductoVariantes
+            .Where(v => !v.Eliminado)
+            .SumAsync(v => (decimal?)((v.Precio ?? 0m) * v.Cantidad)) ?? 0m;
 
     public async Task AddAsync(Producto producto) =>
         await _context.Productos.AddAsync(producto);
