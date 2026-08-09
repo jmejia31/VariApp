@@ -1,6 +1,6 @@
 # FASE M2 — Motor de Variantes Multidimensionales
 
-Estado documental: **EN CERTIFICACIÓN AUTOMATIZADA FINAL**
+Estado documental: **COMPLETADA / CERTIFICADA AUTOMÁTICAMENTE**
 
 Fecha de cierre técnico: 2026-08-09
 Rama: `Desarrollo`
@@ -399,7 +399,16 @@ La matriz de M2 queda cubierta por:
 - frontend lint/build;
 - aislamiento Docker/higiene.
 
-Los IDs finales de GitHub Actions se incorporarán en este mismo documento únicamente cuando los jobs del HEAD de cierre concluyan en `success`.
+Evidencia final del HEAD funcional certificado `98603c21fa4b05b6e6c72565b579ab247b902b19`:
+
+- `31325383762` — Desarrollo - Compilación y pruebas — **success**;
+- `31325383745` — Desarrollo - aceptación funcional integral — **success**;
+- `31325383744` — Fase 2 - Auditoría de configuración y dependencias — **success**;
+- `31325383748` — Bloque 2C.1 - Variante técnica y migración — **success**;
+- `31325383772` — Fase 8 - Validación completa automatizada — **success**;
+- `31325383746` — VariApp CI — **skipped** (registrado como tal, no contabilizado como verde).
+
+Dentro de `31325383762` quedaron en **success** backend Release, pruebas unitarias, frontend lint/build de producción, Docker/higiene, historial de migraciones, migraciones actuales, integración MySQL 8.4, verificación de variante legacy/cargas/snapshot y SQL forward.
 
 ---
 
@@ -455,4 +464,27 @@ Para cambiar este estado a **COMPLETADA / CERTIFICADA AUTOMÁTICAMENTE**, el HEA
 - Fase 8 completa: success;
 - ningún P0/P1 introducido por M2.
 
-`VariApp CI` se reportará como `SKIPPED` cuando esa sea su conclusión real; nunca se contabilizará como workflow verde.
+`VariApp CI` se reportó como `SKIPPED`, tal como ocurrió en el HEAD certificado, y no se contabiliza como workflow verde.
+
+---
+
+## 20. Dictamen final M2
+
+**M2 — Motor de Variantes Multidimensionales: COMPLETADA / CERTIFICADA AUTOMÁTICAMENTE.**
+
+Criterios de salida verificados:
+
+- no existen fallos P0/P1 introducidos por M2 en los gates automatizados ejecutados;
+- backend Release y pruebas: success;
+- MySQL 8.4 descartable, migraciones e integración: success;
+- snapshot EF: coherente;
+- frontend lint/build: success;
+- aceptación funcional integral: success;
+- auditoría de dependencias/configuración: success;
+- variante técnica/migración: success;
+- Fase 8 completa: success;
+- `main` y Producción no forman parte de este cierre.
+
+Las validaciones físicas/externas enumeradas en la sección 17 permanecen separadas y no se presentan como ejecutadas.
+
+**Fase siguiente: M3 — Configuración fiscal ISV/ISC.**

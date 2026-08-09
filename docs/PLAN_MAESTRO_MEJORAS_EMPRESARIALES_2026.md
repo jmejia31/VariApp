@@ -532,6 +532,10 @@ Criterio de salida:
 
 # FASE M2 — Motor de variantes multidimensionales
 
+Estado: **COMPLETADA / CERTIFICADA AUTOMÁTICAMENTE (2026-08-09)**.
+
+Entregable: `docs/FASE_M2_VARIANTES_MULTIDIMENSIONALES.md`.
+
 Objetivo: convertir `ProductoVariante` en la unidad exacta de inventario para Marca + Modelo + Color + Talla sobre la base saneada de M1.
 
 ## M2.A — Dominio de Variante
