@@ -62,7 +62,6 @@ public class SeedFiscalServiceTests
             await primerContexto.SaveChangesAsync();
         }
 
-        // Simula un nuevo arranque de la API sobre el mismo estado persistido.
         await using (var segundoContexto = new AppDbContext(opciones))
         {
             await new SeedFiscalService(segundoContexto).SeedDefaultsAsync();
@@ -77,25 +76,30 @@ public class SeedFiscalServiceTests
     }
 
     [Fact]
-    public async Task SeedDefaultsAsync_NoReactivaRegistroEliminadoLogicamente()
+    public async Task SeedDefaultsAsync_NoReactivaNiRecreaRegistroEliminadoLogicamente()
     {
         var opciones = CrearOpciones($"fiscal-delete-{Guid.NewGuid():N}");
 
-        await using var db = new AppDbContext(opciones);
-        var seed = new SeedFiscalService(db);
-        await seed.SeedDefaultsAsync();
+        await using (var primerContexto = new AppDbContext(opciones))
+        {
+            await new SeedFiscalService(primerContexto).SeedDefaultsAsync();
+            var isc = await primerContexto.Impuestos.SingleAsync(i => i.Codigo == "ISC5");
+            isc.Eliminado = true;
+            isc.Activo = false;
+            isc.FechaEliminacion = DateTime.UtcNow;
+            await primerContexto.SaveChangesAsync();
+        }
 
-        var isc = await db.Impuestos.SingleAsync(i => i.Codigo == "ISC5");
-        isc.Eliminado = true;
-        isc.Activo = false;
-        isc.FechaEliminacion = DateTime.UtcNow;
-        await db.SaveChangesAsync();
+        await using var segundoContexto = new AppDbContext(opciones);
+        await new SeedFiscalService(segundoContexto).SeedDefaultsAsync();
 
-        await seed.SeedDefaultsAsync();
-
-        var filas = await db.Impuestos.Where(i => i.Codigo == "ISC5").ToListAsync();
+        var filas = await segundoContexto.Impuestos
+            .IgnoreQueryFilters()
+            .Where(i => i.Codigo == "ISC5")
+            .ToListAsync();
         var persistido = Assert.Single(filas);
         Assert.True(persistido.Eliminado);
         Assert.False(persistido.Activo);
+        Assert.NotNull(persistido.FechaEliminacion);
     }
 }
