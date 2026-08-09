@@ -19,7 +19,7 @@ public class ProductoImagenVarianteIntegrationTests
             .Options;
 
     // Gate final M2: cubre migración MySQL 8.4, unicidad por ámbito de imagen
-    // y se ejecuta junto a la aceptación E2E multidimensional del mismo HEAD.
+    // y se ejecuta junto a la aceptación E2E ya acotada a cada fila física de variante.
     [Fact]
     public async Task PrincipalPorAmbito_PermiteGeneralYUnaPorCadaVariante_PeroRechazaDuplicado()
     {
