@@ -77,6 +77,7 @@ export class ClientesListComponent implements OnInit {
     this.puedeActivar.set(this.permisosRuntime.puede('Clientes', 'Activar'));
     this.puedeDesactivar.set(this.permisosRuntime.puede('Clientes', 'Desactivar'));
     this.puedeEliminar.set(this.permisosRuntime.puede('Clientes', 'EliminarLogico'));
+    this.persistirEstado();
     this.cargar();
   }
 
