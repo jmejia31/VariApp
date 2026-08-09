@@ -18,6 +18,8 @@ public class ProductoImagenVarianteIntegrationTests
                 new MySqlServerVersion(new Version(8, 4, 0)))
             .Options;
 
+    // Gate MySQL de M2: además de la unicidad funcional, este caso verifica
+    // que el esquema final de imágenes por ámbito migra desde cero en 8.4.
     [Fact]
     public async Task PrincipalPorAmbito_PermiteGeneralYUnaPorCadaVariante_PeroRechazaDuplicado()
     {
