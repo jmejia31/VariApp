@@ -1,6 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -20,6 +20,7 @@ import { Categoria } from '../../core/models/categoria.model';
 import { CatalogoProducto } from '../../core/models/catalogo-producto.model';
 import { ConfirmDialogComponent } from '../../shared/confirm-dialog.component';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
+import { ListNavigationStateService } from '../../core/navigation/list-navigation-state.service';
 import { ProductoImagenComponent } from '../../shared/producto-imagen/producto-imagen.component';
 
 type EstadoProductoFiltro = 'todos' | 'activos' | 'inactivos' | 'agotados' | 'disponibles';
@@ -63,14 +64,29 @@ export class ProductosListComponent implements OnInit {
   modeloId: number | null = null;
   estado: EstadoProductoFiltro = 'todos';
 
-  private searchSubject = new Subject<string>();
+  private readonly navigationDefaults = {
+    page: 1,
+    pageSize: 10,
+    search: '',
+    sortBy: 'Nombre',
+    sortDirection: 'asc',
+    categoriaId: 0,
+    colorId: 0,
+    tallaId: 0,
+    marcaId: 0,
+    modeloId: 0,
+    estado: 'todos'
+  };
+  private readonly searchSubject = new Subject<string>();
 
   constructor(
     private productoService: ProductoService,
     private categoriaService: CategoriaService,
     private catalogoService: CatalogoProductoService,
     private dialog: MatDialog,
-    private permisosRuntime: PermisosRuntimeService
+    private permisosRuntime: PermisosRuntimeService,
+    private route: ActivatedRoute,
+    private navigationState: ListNavigationStateService
   ) {
     this.searchSubject.pipe(debounceTime(350)).subscribe(() => {
       this.page = 1;
@@ -79,6 +95,7 @@ export class ProductosListComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.restaurarEstado();
     this.puedeCrear.set(this.permisosRuntime.puede('Productos', 'Crear'));
     this.puedeEditar.set(this.permisosRuntime.puede('Productos', 'Editar'));
     this.puedeActivar.set(this.permisosRuntime.puede('Productos', 'Activar'));
@@ -118,7 +135,12 @@ export class ProductosListComponent implements OnInit {
   }
 
   limpiarFiltros(): void {
+    this.navigationState.clear('productos');
+    this.page = 1;
+    this.pageSize = 10;
     this.search = '';
+    this.sortBy = 'Nombre';
+    this.sortDirection = 'asc';
     this.categoriaId = null;
     this.colorId = null;
     this.tallaId = null;
@@ -126,11 +148,11 @@ export class ProductosListComponent implements OnInit {
     this.modeloId = null;
     this.estado = 'todos';
     this.modelos.set([]);
-    this.page = 1;
     this.cargar();
   }
 
   cargar(): void {
+    this.persistirEstado();
     this.loading.set(true);
     this.productoService.getPaged({
       page: this.page,
@@ -185,6 +207,7 @@ export class ProductosListComponent implements OnInit {
       this.sortBy = campo;
       this.sortDirection = 'asc';
     }
+    this.page = 1;
     this.cargar();
   }
 
@@ -204,6 +227,49 @@ export class ProductosListComponent implements OnInit {
     });
   }
 
+  private restaurarEstado(): void {
+    const state = this.navigationState.restore('productos', this.route, this.navigationDefaults);
+    this.page = this.positiveInt(state.page, 1);
+    this.pageSize = [10, 25, 50].includes(state.pageSize) ? state.pageSize : 10;
+    this.search = state.search;
+    this.sortBy = ['Nombre', 'Marca', 'Cantidad', 'Costo', 'Precio'].includes(state.sortBy) ? state.sortBy : 'Nombre';
+    this.sortDirection = state.sortDirection === 'desc' ? 'desc' : 'asc';
+    this.categoriaId = this.optionalId(state.categoriaId);
+    this.colorId = this.optionalId(state.colorId);
+    this.tallaId = this.optionalId(state.tallaId);
+    this.marcaId = this.optionalId(state.marcaId);
+    this.modeloId = this.optionalId(state.modeloId);
+    this.estado = ['todos', 'activos', 'inactivos', 'agotados', 'disponibles'].includes(state.estado)
+      ? state.estado as EstadoProductoFiltro
+      : 'todos';
+  }
+
+  private persistirEstado(): void {
+    this.navigationState.persist('productos', this.route, {
+      page: this.page,
+      pageSize: this.pageSize,
+      search: this.search,
+      sortBy: this.sortBy,
+      sortDirection: this.sortDirection,
+      categoriaId: this.categoriaId ?? 0,
+      colorId: this.colorId ?? 0,
+      tallaId: this.tallaId ?? 0,
+      marcaId: this.marcaId ?? 0,
+      modeloId: this.modeloId ?? 0,
+      estado: this.estado
+    }, this.navigationDefaults);
+  }
+
+  private positiveInt(value: number, fallback: number): number {
+    const normalized = Math.trunc(value);
+    return normalized > 0 ? normalized : fallback;
+  }
+
+  private optionalId(value: number): number | null {
+    const normalized = Math.trunc(value);
+    return normalized > 0 ? normalized : null;
+  }
+
   private cargarCatalogosFiltro(): void {
     this.loadingFilters.set(true);
     forkJoin({
@@ -218,6 +284,12 @@ export class ProductosListComponent implements OnInit {
         this.tallas.set(res.tallas.data);
         this.marcas.set(res.marcas.data);
         this.loadingFilters.set(false);
+        if (this.marcaId) {
+          this.catalogoService.getAll('Modelo', '', this.marcaId).subscribe({
+            next: (modelos) => this.modelos.set(modelos.data),
+            error: () => this.modelos.set([])
+          });
+        }
       },
       error: () => this.loadingFilters.set(false)
     });

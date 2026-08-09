@@ -1,13 +1,17 @@
 <header class="header-row"><div><h1 class="page-title">Movimientos de inventario</h1><p class="subtitle">Consulta entradas, salidas, reversiones y ajustes por producto, color y SKU.</p></div></header>
 <div class="card">
-  <mat-form-field appearance="outline" class="filter-field"><mat-label>Filtrar por tipo</mat-label><mat-select [(ngModel)]="filtroTipo" (selectionChange)="cargar()"><mat-option value="">Todos</mat-option><mat-option value="Entrada">Entrada</mat-option><mat-option value="Salida">Salida</mat-option><mat-option value="Reversion">Reversión</mat-option><mat-option value="Ajuste">Ajuste</mat-option></mat-select></mat-form-field>
+  <div class="product-toolbar" aria-label="Búsqueda y filtros de movimientos de inventario">
+    <mat-form-field appearance="outline" class="search-field"><mat-label>Buscar movimiento</mat-label><input matInput [ngModel]="search" (ngModelChange)="onSearchChange($event)" autocomplete="off"><mat-icon matSuffix>search</mat-icon></mat-form-field>
+    <mat-form-field appearance="outline" class="filter-field"><mat-label>Filtrar por tipo</mat-label><mat-select [(ngModel)]="filtroTipo" (selectionChange)="aplicarFiltros()"><mat-option value="">Todos</mat-option><mat-option value="Entrada">Entrada</mat-option><mat-option value="Salida">Salida</mat-option><mat-option value="Reversion">Reversión</mat-option><mat-option value="Ajuste">Ajuste</mat-option></mat-select></mat-form-field>
+    <button mat-stroked-button type="button" (click)="limpiarFiltros()"><mat-icon>filter_alt_off</mat-icon> Limpiar filtros</button>
+  </div>
   @if (loading()) { <div class="loading" aria-live="polite"><mat-spinner></mat-spinner><span class="sr-only">Cargando movimientos...</span></div> }
   @else {
     <p class="scroll-hint"><mat-icon>swipe</mat-icon> En pantallas pequeñas, desliza la tabla horizontalmente.</p>
     <div class="table-scroll" tabindex="0" aria-label="Tabla desplazable de movimientos de inventario">
       <table class="table">
         <caption class="sr-only">Historial de movimientos de inventario</caption>
-        <thead><tr><th><span class="sr-only">Imagen</span></th><th>Fecha</th><th>Producto</th><th>Variante</th><th>Tipo</th><th>Cantidad</th><th>Stock anterior</th><th>Stock posterior</th><th>Referencia</th><th>Responsable</th></tr></thead>
+        <thead><tr><th><span class="sr-only">Imagen</span></th><th class="sortable" (click)="ordenarPor('fecha')">Fecha</th><th class="sortable" (click)="ordenarPor('producto')">Producto</th><th>Variante</th><th class="sortable" (click)="ordenarPor('tipo')">Tipo</th><th>Cantidad</th><th>Stock anterior</th><th>Stock posterior</th><th>Referencia</th><th>Responsable</th></tr></thead>
         <tbody>
           @for (m of movimientos(); track m.id) {
             <tr>
@@ -18,9 +22,10 @@
               <td><span class="tipo" [class.entrada]="m.tipo === 'Entrada'" [class.salida]="m.tipo === 'Salida'" [class.reversion]="m.tipo === 'Reversion'">{{ m.tipo === 'Reversion' ? 'Reversión' : m.tipo }}</span></td>
               <td>{{ m.cantidad }}</td><td>{{ m.stockAnterior }}</td><td>{{ m.stockNuevo }}</td><td>{{ m.referenciaTipo }} #{{ m.referenciaId }}</td><td>{{ m.creadoPorNombreUsuario || '—' }}</td>
             </tr>
-          } @empty { <tr><td colspan="10" class="empty">No hay movimientos registrados con el filtro seleccionado.</td></tr> }
+          } @empty { <tr><td colspan="10" class="empty">No hay movimientos registrados con los filtros seleccionados.</td></tr> }
         </tbody>
       </table>
     </div>
+    <mat-paginator [length]="totalCount()" [pageSize]="pageSize" [pageIndex]="page - 1" [pageSizeOptions]="[10, 25, 50]" (page)="onPageChange($event)"></mat-paginator>
   }
 </div>

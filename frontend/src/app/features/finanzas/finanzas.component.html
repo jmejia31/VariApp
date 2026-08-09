@@ -129,10 +129,28 @@
       </form>
     }
 
+    <div class="product-toolbar" aria-label="Búsqueda y filtros de movimientos financieros">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Buscar movimiento</mat-label>
+        <input matInput [ngModel]="search" (ngModelChange)="onSearchChange($event)" [ngModelOptions]="{standalone: true}" autocomplete="off">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Tipo</mat-label>
+        <mat-select [(ngModel)]="filtroTipo" [ngModelOptions]="{standalone: true}" (selectionChange)="aplicarFiltrosMovimientos()">
+          <mat-option value="todos">Todos</mat-option>
+          <mat-option value="Ingreso">Ingresos</mat-option>
+          <mat-option value="Egreso">Egresos</mat-option>
+          <mat-option value="Ajuste">Ajustes</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <button mat-stroked-button type="button" (click)="limpiarFiltrosMovimientos()"><mat-icon>filter_alt_off</mat-icon> Limpiar filtros</button>
+    </div>
+
     <div class="table-scroll">
       <table class="table">
         <thead>
-          <tr><th>Fecha</th><th>Concepto</th><th>Categoría</th><th>Tipo</th><th>Monto</th><th>Origen</th><th>Registrado por</th><th>Estado</th><th></th></tr>
+          <tr><th class="sortable" (click)="ordenarMovimientos('fecha')">Fecha</th><th class="sortable" (click)="ordenarMovimientos('concepto')">Concepto</th><th>Categoría</th><th class="sortable" (click)="ordenarMovimientos('tipo')">Tipo</th><th class="sortable" (click)="ordenarMovimientos('monto')">Monto</th><th>Origen</th><th>Registrado por</th><th>Estado</th><th></th></tr>
         </thead>
         <tbody>
           @for (m of movimientos(); track m.id) {
@@ -152,7 +170,7 @@
               </td>
             </tr>
           } @empty {
-            <tr><td colspan="9" class="empty">No hay movimientos registrados.</td></tr>
+            <tr><td colspan="9" class="empty">No hay movimientos que coincidan con los filtros.</td></tr>
           }
         </tbody>
       </table>

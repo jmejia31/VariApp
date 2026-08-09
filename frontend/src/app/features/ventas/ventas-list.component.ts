@@ -1,6 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -12,6 +12,7 @@ import { debounceTime, Subject } from 'rxjs';
 import { VentaService } from '../../services/venta.service';
 import { Venta } from '../../core/models/venta.model';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
+import { ListNavigationStateService } from '../../core/navigation/list-navigation-state.service';
 import { ProductoImagenComponent } from '../../shared/producto-imagen/producto-imagen.component';
 
 @Component({
@@ -30,22 +31,59 @@ export class VentasListComponent implements OnInit {
   page = 1;
   pageSize = 10;
   search = '';
-  private searchSubject = new Subject<string>();
+  sortBy = 'Fecha';
+  sortDirection: 'asc' | 'desc' = 'desc';
 
-  constructor(private ventaService: VentaService, private permisosRuntime: PermisosRuntimeService) {
+  private readonly navigationDefaults = { page: 1, pageSize: 10, search: '', sortBy: 'Fecha', sortDirection: 'desc' };
+  private readonly searchSubject = new Subject<string>();
+
+  constructor(
+    private ventaService: VentaService,
+    private permisosRuntime: PermisosRuntimeService,
+    private route: ActivatedRoute,
+    private navigationState: ListNavigationStateService
+  ) {
     this.searchSubject.pipe(debounceTime(350)).subscribe(() => { this.page = 1; this.cargar(); });
   }
 
   ngOnInit(): void {
+    const state = this.navigationState.restore('ventas', this.route, this.navigationDefaults);
+    this.page = Math.max(1, Math.trunc(state.page));
+    this.pageSize = [10, 25, 50].includes(state.pageSize) ? state.pageSize : 10;
+    this.search = state.search;
+    this.sortBy = ['Fecha', 'ClienteNombre', 'Total'].includes(state.sortBy) ? state.sortBy : 'Fecha';
+    this.sortDirection = state.sortDirection === 'asc' ? 'asc' : 'desc';
     this.puedeCrear.set(this.permisosRuntime.puede('Ventas', 'Crear'));
     this.cargar();
   }
 
   onSearchChange(value: string): void { this.search = value; this.searchSubject.next(value); }
 
+  limpiarFiltros(): void {
+    this.navigationState.clear('ventas');
+    this.page = 1;
+    this.pageSize = 10;
+    this.search = '';
+    this.sortBy = 'Fecha';
+    this.sortDirection = 'desc';
+    this.cargar();
+  }
+
+  ordenarPor(campo: 'Fecha' | 'ClienteNombre' | 'Total'): void {
+    if (this.sortBy === campo) this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    else { this.sortBy = campo; this.sortDirection = campo === 'Fecha' ? 'desc' : 'asc'; }
+    this.page = 1;
+    this.cargar();
+  }
+
   cargar(): void {
+    this.navigationState.persist('ventas', this.route, {
+      page: this.page, pageSize: this.pageSize, search: this.search,
+      sortBy: this.sortBy, sortDirection: this.sortDirection
+    }, this.navigationDefaults);
+
     this.loading.set(true);
-    this.ventaService.getPaged({ page: this.page, pageSize: this.pageSize, search: this.search, sortBy: 'Fecha', sortDirection: 'desc' })
+    this.ventaService.getPaged({ page: this.page, pageSize: this.pageSize, search: this.search, sortBy: this.sortBy, sortDirection: this.sortDirection })
       .subscribe({
         next: (res) => { this.ventas.set(res.data.items); this.totalCount.set(res.data.totalCount); this.loading.set(false); },
         error: () => this.loading.set(false)

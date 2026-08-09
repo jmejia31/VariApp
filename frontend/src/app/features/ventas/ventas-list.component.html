@@ -4,13 +4,16 @@
 </div>
 
 <div class="card">
-  <mat-form-field appearance="outline" class="search-field"><mat-label>Buscar por número o cliente</mat-label><input matInput [ngModel]="search" (ngModelChange)="onSearchChange($event)"><mat-icon matSuffix>search</mat-icon></mat-form-field>
+  <div class="product-toolbar" aria-label="Búsqueda y orden de ventas">
+    <mat-form-field appearance="outline" class="search-field"><mat-label>Buscar por número o cliente</mat-label><input matInput [ngModel]="search" (ngModelChange)="onSearchChange($event)" autocomplete="off"><mat-icon matSuffix>search</mat-icon></mat-form-field>
+    <button mat-stroked-button type="button" (click)="limpiarFiltros()"><mat-icon>filter_alt_off</mat-icon> Limpiar filtros</button>
+  </div>
 
   @if (loading()) {
     <div class="loading"><mat-spinner></mat-spinner></div>
   } @else {
     <table class="table table-desktop">
-      <thead><tr><th><span class="sr-only">Producto</span></th><th>Número</th><th>Fecha</th><th>Cliente</th><th>Total</th><th>Factura</th><th>Estado</th><th>Vendida por</th><th></th></tr></thead>
+      <thead><tr><th><span class="sr-only">Producto</span></th><th>Número</th><th class="sortable" (click)="ordenarPor('Fecha')">Fecha</th><th class="sortable" (click)="ordenarPor('ClienteNombre')">Cliente</th><th class="sortable" (click)="ordenarPor('Total')">Total</th><th>Factura</th><th>Estado</th><th>Vendida por</th><th></th></tr></thead>
       <tbody>
         @for (v of ventas(); track v.id) {
           <tr>
