@@ -10,6 +10,49 @@ namespace InventoryApp.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            // Fail-closed: M1 debe haber normalizado todos los IDs que M2 va a reutilizar.
+            // Una CHECK temporal convierte cualquier inconsistencia en fallo de migración
+            // antes de retirar la FK legacy o modificar la estructura existente.
+            migrationBuilder.Sql(@"
+CREATE TEMPORARY TABLE `__M2_Preflight` (
+    `Ok` TINYINT NOT NULL,
+    CONSTRAINT `CK___M2_Preflight_Ok` CHECK (`Ok` = 1)
+);
+
+INSERT INTO `__M2_Preflight` (`Ok`)
+SELECT IF(
+    EXISTS(
+        SELECT 1
+        FROM `ProductoVariantes` pv
+        LEFT JOIN `Colores` c ON c.`Id` = pv.`ColorId`
+        WHERE pv.`ColorId` IS NOT NULL AND c.`Id` IS NULL
+    )
+    OR EXISTS(
+        SELECT 1
+        FROM `Productos` p
+        LEFT JOIN `Marcas` ma ON ma.`Id` = p.`MarcaId`
+        LEFT JOIN `Modelos` mo ON mo.`Id` = p.`ModeloId`
+        LEFT JOIN `Colores` co ON co.`Id` = p.`ColorId`
+        LEFT JOIN `Tallas` ta ON ta.`Id` = p.`TallaId`
+        WHERE (p.`MarcaId` IS NOT NULL AND ma.`Id` IS NULL)
+           OR (p.`ModeloId` IS NOT NULL AND mo.`Id` IS NULL)
+           OR (p.`ColorId` IS NOT NULL AND co.`Id` IS NULL)
+           OR (p.`TallaId` IS NOT NULL AND ta.`Id` IS NULL)
+    )
+    OR EXISTS(
+        SELECT 1
+        FROM `Productos` p
+        JOIN `Modelos` mo ON mo.`Id` = p.`ModeloId`
+        WHERE p.`ModeloId` IS NOT NULL
+          AND (p.`MarcaId` IS NULL OR mo.`MarcaId` <> p.`MarcaId`)
+    ),
+    0,
+    1
+);
+
+DROP TEMPORARY TABLE `__M2_Preflight`;
+");
+
             migrationBuilder.DropForeignKey(
                 name: "FK_ProductoVariantes_CatalogosProducto_ColorId",
                 table: "ProductoVariantes");
@@ -45,6 +88,19 @@ namespace InventoryApp.Infrastructure.Migrations
                 computedColumnSql: "CASE WHEN `Eliminado` = 0 THEN CONCAT(`ProductoId`, ':', COALESCE(`MarcaId`, 0), ':', COALESCE(`ModeloId`, 0), ':', COALESCE(`ColorId`, 0), ':', COALESCE(`TallaId`, 0)) ELSE NULL END",
                 stored: true)
                 .Annotation("MySql:CharSet", "utf8mb4");
+
+            // Backfill no destructivo: los IDs de M1 se conservaron exactamente.
+            // Las variantes técnicas permanecen sin dimensiones; las comerciales heredan
+            // Marca/Modelo/Talla del producto legacy y conservan su ColorId existente.
+            migrationBuilder.Sql(@"
+UPDATE `ProductoVariantes` pv
+JOIN `Productos` p ON p.`Id` = pv.`ProductoId`
+SET
+    pv.`MarcaId` = CASE WHEN pv.`EsTecnica` = 0 THEN p.`MarcaId` ELSE NULL END,
+    pv.`ModeloId` = CASE WHEN pv.`EsTecnica` = 0 THEN p.`ModeloId` ELSE NULL END,
+    pv.`TallaId` = CASE WHEN pv.`EsTecnica` = 0 THEN p.`TallaId` ELSE NULL END,
+    pv.`ColorId` = CASE WHEN pv.`EsTecnica` = 0 THEN pv.`ColorId` ELSE NULL END;
+");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProductoVariantes_Dimensiones",
@@ -108,6 +164,38 @@ namespace InventoryApp.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            // El downgrade colapsa Marca/Modelo/Talla y vuelve a Producto+Color.
+            // Si M2 ya contiene dos filas que colisionarían o un Color sin espejo legacy,
+            // se aborta explícitamente en vez de perder/corromper inventario.
+            migrationBuilder.Sql(@"
+CREATE TEMPORARY TABLE `__M2_DownGuard` (
+    `Ok` TINYINT NOT NULL,
+    CONSTRAINT `CK___M2_DownGuard_Ok` CHECK (`Ok` = 1)
+);
+
+INSERT INTO `__M2_DownGuard` (`Ok`)
+SELECT IF(
+    EXISTS(
+        SELECT 1
+        FROM `ProductoVariantes`
+        WHERE `ColorId` IS NOT NULL
+        GROUP BY `ProductoId`, `ColorId`
+        HAVING COUNT(*) > 1
+    )
+    OR EXISTS(
+        SELECT 1
+        FROM `ProductoVariantes` pv
+        LEFT JOIN `CatalogosProducto` cp
+          ON cp.`Id` = pv.`ColorId` AND cp.`Tipo` = 'Color'
+        WHERE pv.`ColorId` IS NOT NULL AND cp.`Id` IS NULL
+    ),
+    0,
+    1
+);
+
+DROP TEMPORARY TABLE `__M2_DownGuard`;
+");
+
             migrationBuilder.DropForeignKey(
                 name: "FK_ProductoVariantes_Colores_ColorId",
                 table: "ProductoVariantes");
