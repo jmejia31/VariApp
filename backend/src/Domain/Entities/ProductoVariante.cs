@@ -31,8 +31,6 @@ public class ProductoVariante : AuditableEntity
     public DateTime? FechaEliminacion { get; set; }
     public int? EliminadoPorUsuarioId { get; set; }
 
-    public ICollection<ProductoImagen> Imagenes { get; set; } = new List<ProductoImagen>();
-
     public bool TieneStockBajo => Activo && !Eliminado && Cantidad > 0 && Cantidad < UmbralStockBajo;
     public bool EstaAgotada => Activo && !Eliminado && Cantidad <= 0;
 }
