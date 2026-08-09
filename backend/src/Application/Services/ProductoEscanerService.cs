@@ -42,7 +42,7 @@ public sealed class ProductoEscanerService : IProductoEscanerService
         {
             return ResultadoResolucionProductoEscaner<ProductoEscaneadoVentaDto>.Fallo(
                 EstadoResolucionProductoEscaner.NoOperativo,
-                "El producto escaneado no tiene existencias disponibles para la venta.");
+                "La variante escaneada no tiene existencias disponibles para la venta.");
         }
 
         return ResultadoResolucionProductoEscaner<ProductoEscaneadoVentaDto>.Encontrado(
@@ -125,7 +125,7 @@ public sealed class ProductoEscanerService : IProductoEscanerService
         {
             return ResultadoResolucionProductoEscaner<ProductoVariante>.Fallo(
                 EstadoResolucionProductoEscaner.NoEncontrado,
-                "No se encontró un producto con el SKU o código de barras indicado.");
+                "No se encontró una variante con el SKU o código de barras indicado.");
         }
 
         if (coincidencias.Count > 1)
@@ -170,17 +170,37 @@ public sealed class ProductoEscanerService : IProductoEscanerService
             .Select(imagen => imagen.Url)
             .FirstOrDefault();
 
+    private static string ConstruirEtiqueta(ProductoVariante variante)
+    {
+        var partes = new[]
+        {
+            variante.Marca?.Nombre,
+            variante.Modelo?.Nombre,
+            variante.Color?.Nombre,
+            variante.Talla?.Nombre,
+            variante.Sku
+        };
+        return string.Join(" · ", partes.Where(parte => !string.IsNullOrWhiteSpace(parte)));
+    }
+
     private static ProductoEscaneadoVentaDto MapVenta(ProductoVariante variante) =>
         new()
         {
             ProductoId = variante.ProductoId,
             ProductoVarianteId = variante.Id,
             ProductoNombre = variante.Producto.Nombre,
-            Marca = variante.Producto.Marca,
-            Modelo = variante.Producto.Modelo,
-            EsVarianteTecnica = variante.EsTecnica,
+            Marca = variante.Marca?.Nombre ?? variante.Producto.Marca,
+            Modelo = variante.Modelo?.Nombre ?? variante.Producto.Modelo,
+            MarcaId = variante.MarcaId,
+            MarcaNombre = variante.Marca?.Nombre,
+            ModeloId = variante.ModeloId,
+            ModeloNombre = variante.Modelo?.Nombre,
             ColorId = variante.ColorId,
             ColorNombre = variante.Color?.Nombre,
+            TallaId = variante.TallaId,
+            TallaNombre = variante.Talla?.Nombre,
+            Etiqueta = ConstruirEtiqueta(variante),
+            EsVarianteTecnica = variante.EsTecnica,
             Sku = variante.Sku ?? string.Empty,
             CodigoBarras = variante.CodigoBarras,
             CantidadDisponible = variante.Cantidad,
@@ -194,11 +214,18 @@ public sealed class ProductoEscanerService : IProductoEscanerService
             ProductoId = variante.ProductoId,
             ProductoVarianteId = variante.Id,
             ProductoNombre = variante.Producto.Nombre,
-            Marca = variante.Producto.Marca,
-            Modelo = variante.Producto.Modelo,
-            EsVarianteTecnica = variante.EsTecnica,
+            Marca = variante.Marca?.Nombre ?? variante.Producto.Marca,
+            Modelo = variante.Modelo?.Nombre ?? variante.Producto.Modelo,
+            MarcaId = variante.MarcaId,
+            MarcaNombre = variante.Marca?.Nombre,
+            ModeloId = variante.ModeloId,
+            ModeloNombre = variante.Modelo?.Nombre,
             ColorId = variante.ColorId,
             ColorNombre = variante.Color?.Nombre,
+            TallaId = variante.TallaId,
+            TallaNombre = variante.Talla?.Nombre,
+            Etiqueta = ConstruirEtiqueta(variante),
+            EsVarianteTecnica = variante.EsTecnica,
             Sku = variante.Sku ?? string.Empty,
             CodigoBarras = variante.CodigoBarras,
             CantidadDisponible = variante.Cantidad,
