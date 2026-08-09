@@ -24,16 +24,23 @@ public sealed class ResultadoResolucionProductoEscaner<T> where T : class
         new() { Estado = estado, Mensaje = mensaje };
 }
 
-public sealed class ProductoEscaneadoVentaDto
+public abstract class ProductoEscaneadoBaseDto
 {
     public int ProductoId { get; init; }
     public int ProductoVarianteId { get; init; }
     public string ProductoNombre { get; init; } = string.Empty;
     public string Marca { get; init; } = string.Empty;
     public string Modelo { get; init; } = string.Empty;
-    public bool EsVarianteTecnica { get; init; }
+    public int? MarcaId { get; init; }
+    public string? MarcaNombre { get; init; }
+    public int? ModeloId { get; init; }
+    public string? ModeloNombre { get; init; }
     public int? ColorId { get; init; }
     public string? ColorNombre { get; init; }
+    public int? TallaId { get; init; }
+    public string? TallaNombre { get; init; }
+    public string Etiqueta { get; init; } = string.Empty;
+    public bool EsVarianteTecnica { get; init; }
     public string Sku { get; init; } = string.Empty;
     public string? CodigoBarras { get; init; }
     public int CantidadDisponible { get; init; }
@@ -41,20 +48,11 @@ public sealed class ProductoEscaneadoVentaDto
     public string? ImagenMiniaturaUrl { get; init; }
 }
 
-public sealed class ProductoEscaneadoCompraDto
+public sealed class ProductoEscaneadoVentaDto : ProductoEscaneadoBaseDto
 {
-    public int ProductoId { get; init; }
-    public int ProductoVarianteId { get; init; }
-    public string ProductoNombre { get; init; } = string.Empty;
-    public string Marca { get; init; } = string.Empty;
-    public string Modelo { get; init; } = string.Empty;
-    public bool EsVarianteTecnica { get; init; }
-    public int? ColorId { get; init; }
-    public string? ColorNombre { get; init; }
-    public string Sku { get; init; } = string.Empty;
-    public string? CodigoBarras { get; init; }
-    public int CantidadDisponible { get; init; }
+}
+
+public sealed class ProductoEscaneadoCompraDto : ProductoEscaneadoBaseDto
+{
     public decimal Costo { get; init; }
-    public decimal Precio { get; init; }
-    public string? ImagenMiniaturaUrl { get; init; }
 }
