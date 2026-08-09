@@ -47,15 +47,25 @@ public static class ProductoMapper
             MarcaNombre = p.MarcaCatalogo?.Nombre,
             ModeloId = p.ModeloId,
             ModeloNombre = p.ModeloCatalogo?.Nombre,
-            ImagenPrincipalUrl = p.ImagenPrincipal?.Url,
+            ImagenPrincipalUrl = p.Imagenes
+                .Where(i => i.ProductoVarianteId == null)
+                .OrderByDescending(i => i.EsPrincipal)
+                .ThenBy(i => i.Orden)
+                .Select(i => i.Url)
+                .FirstOrDefault(),
             TotalImagenes = p.Imagenes.Count,
-            Imagenes = p.Imagenes.OrderBy(i => i.Orden).Select(i => new ProductoImagenDto
-            {
-                Id = i.Id,
-                Url = i.Url,
-                Orden = i.Orden,
-                EsPrincipal = i.EsPrincipal
-            }).ToList(),
+            Imagenes = p.Imagenes
+                .OrderBy(i => i.ProductoVarianteId.HasValue)
+                .ThenBy(i => i.ProductoVarianteId)
+                .ThenBy(i => i.Orden)
+                .Select(i => new ProductoImagenDto
+                {
+                    Id = i.Id,
+                    Url = i.Url,
+                    Orden = i.Orden,
+                    EsPrincipal = i.EsPrincipal,
+                    ProductoVarianteId = i.ProductoVarianteId
+                }).ToList(),
             Variantes = variantes.Select(v => new ProductoVarianteDto
             {
                 Id = v.Id,
