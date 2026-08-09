@@ -8,6 +8,7 @@ export interface CompraDetalle {
   productoMarca: string;
   productoModelo: string;
   productoColor?: string;
+  productoTalla?: string;
   productoSku?: string;
   productoImagenPrincipalUrl?: string;
   cantidad: number;
