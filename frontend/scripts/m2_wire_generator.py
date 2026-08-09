@@ -25,11 +25,7 @@ addition = r'''  get combinacionesActuales(): string[] {
       marcaId: this.normalizarId(variante.marcaId),
       modeloId: this.normalizarId(variante.modeloId),
       colorId: this.normalizarId(variante.colorId),
-      tallaId: this.normalizarId(variante.tallaId),
-      cantidad: Number(variante.cantidad ?? 0),
-      umbralStockBajo: Number(variante.umbralStockBajo ?? 0),
-      costo: Number(variante.costo ?? 0),
-      precio: Number(variante.precio ?? 0)
+      tallaId: this.normalizarId(variante.tallaId)
     }));
   }
 
