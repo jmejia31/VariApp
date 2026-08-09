@@ -9,7 +9,7 @@ public class ColorConfiguration : IEntityTypeConfiguration<Color>
     public void Configure(EntityTypeBuilder<Color> builder)
     {
         builder.ToTable("Colores");
-        builder.Property(x => x.Id).ValueGeneratedNever();
+        builder.Property(x => x.Id).ValueGeneratedOnAdd();
         builder.Property(x => x.Nombre).HasMaxLength(120).IsRequired();
         builder.Property(x => x.Descripcion).HasMaxLength(500);
         builder.Property(x => x.CodigoVisual).HasMaxLength(30);
