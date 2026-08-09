@@ -681,7 +681,8 @@ public class VentaService : IVentaService
             ImpuestoCodigoSnapshot = i.Codigo,
             TasaSnapshot = i.Tasa,
             BaseImponible = i.BaseImponible,
-            MontoAplicado = i.Monto
+            MontoAplicado = i.Monto,
+            IncluidoEnPrecioSnapshot = i.IncluidoEnPrecio
         }).ToList();
 
         if (venta.Total < 0)
@@ -758,7 +759,8 @@ public class VentaService : IVentaService
             Codigo = i.ImpuestoCodigoSnapshot,
             Tasa = i.TasaSnapshot,
             BaseImponible = i.BaseImponible,
-            Monto = i.MontoAplicado
+            Monto = i.MontoAplicado,
+            IncluidoEnPrecio = i.IncluidoEnPrecioSnapshot
         }).ToList(),
         FacturaId = v.Factura?.Id,
         NumeroFactura = v.Factura?.NumeroFactura,
