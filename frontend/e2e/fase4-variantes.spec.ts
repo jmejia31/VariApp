@@ -268,24 +268,26 @@ test.describe('Fase 4 — variantes multidimensionales, SKU e inventario', () =>
     await datosFamilia.locator('mat-select[formcontrolname="modeloId"]').click();
     await page.getByRole('option', { name: nombres.modelo, exact: true }).click();
 
-    const colores = page.locator('mat-select[formcontrolname="colorId"]');
-    await colores.nth(0).click();
+    const variantes = page.locator('.variant-card');
+    const primeraVariante = variantes.nth(0);
+    await primeraVariante.locator('mat-select[formcontrolname="colorId"]').click();
     await page.getByRole('option', { name: nombres.color, exact: true }).click();
 
-    await page.locator('input[formcontrolname="cantidad"]').nth(0).fill('2');
-    await page.locator('input[formcontrolname="costo"]').nth(0).fill('100');
-    await page.locator('input[formcontrolname="precio"]').nth(0).fill('300');
-    await page.locator('input[formcontrolname="umbralStockBajo"]').nth(0).fill('0');
+    await primeraVariante.locator('input[formcontrolname="cantidad"]').fill('2');
+    await primeraVariante.locator('input[formcontrolname="costo"]').fill('100');
+    await primeraVariante.locator('input[formcontrolname="precio"]').fill('300');
+    await primeraVariante.locator('input[formcontrolname="umbralStockBajo"]').fill('0');
 
     await page.getByRole('button', { name: 'Agregar variante' }).first().click();
-    await expect(page.locator('.variant-card')).toHaveCount(2);
+    await expect(variantes).toHaveCount(2);
 
-    await colores.nth(1).click();
+    const segundaVariante = variantes.nth(1);
+    await segundaVariante.locator('mat-select[formcontrolname="colorId"]').click();
     await page.getByRole('option', { name: nombres.color2, exact: true }).click();
-    await page.locator('input[formcontrolname="cantidad"]').nth(1).fill('3');
-    await page.locator('input[formcontrolname="costo"]').nth(1).fill('100');
-    await page.locator('input[formcontrolname="precio"]').nth(1).fill('300');
-    await page.locator('input[formcontrolname="umbralStockBajo"]').nth(1).fill('0');
+    await segundaVariante.locator('input[formcontrolname="cantidad"]').fill('3');
+    await segundaVariante.locator('input[formcontrolname="costo"]').fill('100');
+    await segundaVariante.locator('input[formcontrolname="precio"]').fill('300');
+    await segundaVariante.locator('input[formcontrolname="umbralStockBajo"]').fill('0');
 
     await expect(page.locator('.stock-summary').getByText('5 unidades', { exact: true })).toBeVisible();
 
