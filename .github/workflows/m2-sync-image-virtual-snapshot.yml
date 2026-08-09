@@ -1,0 +1,63 @@
+name: M2 sincronizar snapshot imagen virtual
+
+on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - '.github/workflows/m2-sync-image-virtual-snapshot.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Sincronizar metadata EF de forma fail-closed
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          files = [
+              Path('backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs'),
+              Path('backend/src/Infrastructure/Migrations/20260809144945_M2ImagenesPorVariante.Designer.cs'),
+          ]
+          old_sql = '.HasComputedColumnSql("IF(EsPrincipal = 1, CONCAT(ProductoId, \':\', IFNULL(ProductoVarianteId, 0)), NULL)", true);'
+          new_sql = '.HasComputedColumnSql("IF(EsPrincipal = 1, CONCAT(ProductoId, \':\', IFNULL(ProductoVarianteId, 0)), NULL)", false);'
+          old_index = '''                    b.HasIndex("ProductoVarianteId");\n\n                    b.HasIndex("ProductoId", "ProductoVarianteId", "Orden")'''
+          new_index = '''                    b.HasIndex("ProductoVarianteId");\n\n                    b.HasIndex("ProductoId")\n                        .HasDatabaseName("IX_ProductoImagenes_ProductoId");\n\n                    b.HasIndex("ProductoId", "ProductoVarianteId", "Orden")'''
+          for path in files:
+              text = path.read_text(encoding='utf-8-sig')
+              if text.count(old_sql) != 1:
+                  raise SystemExit(f'Computed-column ancla no única en {path}')
+              if text.count(old_index) != 1:
+                  raise SystemExit(f'Index ancla no única en {path}')
+              text = text.replace(old_sql, new_sql, 1).replace(old_index, new_index, 1)
+              path.write_text(text, encoding='utf-8-sig')
+          PY
+      - name: Verificar modelo y compilar
+        working-directory: backend
+        run: |
+          set -euo pipefail
+          dotnet restore InventoryApp.sln
+          dotnet tool install --global dotnet-ef --version 8.0.8
+          dotnet ef migrations has-pending-model-changes --project src/Infrastructure/InventoryApp.Infrastructure.csproj --startup-project src/API/InventoryApp.API.csproj --context AppDbContext
+          dotnet build InventoryApp.sln --configuration Release --no-restore
+      - name: Publicar snapshot y limpiar workflow
+        run: |
+          set -euo pipefail
+          rm -f .github/workflows/m2-sync-image-virtual-snapshot.yml
+          git config user.name 'VariApp Automation'
+          git config user.email 'actions@users.noreply.github.com'
+          git add backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs
+          git add backend/src/Infrastructure/Migrations/20260809144945_M2ImagenesPorVariante.Designer.cs
+          git add -u .github/workflows/m2-sync-image-virtual-snapshot.yml
+          git commit -m 'chore(m2): sincronizar snapshot EF de imágenes [ChatGPT]'
+          git push origin HEAD:Desarrollo
