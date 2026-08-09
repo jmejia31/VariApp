@@ -18,7 +18,7 @@ internal static class CargaMasivaArchivoHelper
         [TipoCargaMasiva.Proveedores] = ["Nombre", "Telefono", "Documento", "Correo", "Direccion", "Activo"],
         [TipoCargaMasiva.Colores] = ["Nombre", "CodigoVisual", "Descripcion", "Orden", "Activo"],
         [TipoCargaMasiva.Productos] = ["Nombre", "Marca", "Modelo", "Categoria", "Talla", "Descripcion", "Costo", "Precio", "UmbralStockBajo", "Activo"],
-        [TipoCargaMasiva.VariantesInventario] = ["Producto", "Marca", "Modelo", "Color", "SKU", "CodigoBarras", "Cantidad", "UmbralStockBajo", "Costo", "Precio", "Activo"]
+        [TipoCargaMasiva.VariantesInventario] = ["Producto", "Marca", "Modelo", "Color", "Talla", "SKU", "CodigoBarras", "Cantidad", "UmbralStockBajo", "Costo", "Precio", "Activo"]
     };
 
     private static readonly Dictionary<TipoCargaMasiva, string[]> Ejemplos = new()
@@ -27,7 +27,7 @@ internal static class CargaMasivaArchivoHelper
         [TipoCargaMasiva.Proveedores] = ["Proveedor de ejemplo", "2222-2222", "08019000000000", "proveedor@ejemplo.test", "Tegucigalpa", "Si"],
         [TipoCargaMasiva.Colores] = ["Azul", "#2563EB", "Color azul", "10", "Si"],
         [TipoCargaMasiva.Productos] = ["Cobertor premium", "Samsung", "Galaxy S24 Ultra", "Fundas", "", "Cobertor de protección", "100.00", "220.00", "5", "Si"],
-        [TipoCargaMasiva.VariantesInventario] = ["Cobertor premium", "Samsung", "Galaxy S24 Ultra", "Azul", "", "", "10", "2", "100.00", "220.00", "Si"]
+        [TipoCargaMasiva.VariantesInventario] = ["Cobertor premium", "Samsung", "Galaxy S24 Ultra", "Azul", "XL", "", "", "10", "2", "100.00", "220.00", "Si"]
     };
 
     internal static string[] ObtenerColumnas(TipoCargaMasiva tipo) =>
@@ -49,7 +49,7 @@ internal static class CargaMasivaArchivoHelper
         TipoCargaMasiva.Proveedores => "Crear o actualizar proveedores por documento, correo, teléfono o nombre.",
         TipoCargaMasiva.Colores => "Crear o actualizar el catálogo de colores.",
         TipoCargaMasiva.Productos => "Crear o actualizar productos. Marca y modelo deben existir previamente.",
-        TipoCargaMasiva.VariantesInventario => "Crear o actualizar variantes por producto, color y SKU, con inventario inicial controlado.",
+        TipoCargaMasiva.VariantesInventario => "Crear o actualizar variantes exactas por producto + marca + modelo + color + talla, con SKU, código de barras e inventario controlado.",
         _ => string.Empty
     };
 
