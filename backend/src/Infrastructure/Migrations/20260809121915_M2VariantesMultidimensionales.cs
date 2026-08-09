@@ -10,26 +10,20 @@ namespace InventoryApp.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // Fail-closed: M1 debe haber normalizado todos los IDs que M2 va a reutilizar.
-            // Una CHECK temporal convierte cualquier inconsistencia en fallo de migración
-            // antes de retirar la FK legacy o modificar la estructura existente.
             migrationBuilder.Sql(@"
 CREATE TEMPORARY TABLE `__M2_Preflight` (
     `Ok` TINYINT NOT NULL,
     CONSTRAINT `CK___M2_Preflight_Ok` CHECK (`Ok` = 1)
 );
-
 INSERT INTO `__M2_Preflight` (`Ok`)
 SELECT IF(
     EXISTS(
-        SELECT 1
-        FROM `ProductoVariantes` pv
+        SELECT 1 FROM `ProductoVariantes` pv
         LEFT JOIN `Colores` c ON c.`Id` = pv.`ColorId`
         WHERE pv.`ColorId` IS NOT NULL AND c.`Id` IS NULL
     )
     OR EXISTS(
-        SELECT 1
-        FROM `Productos` p
+        SELECT 1 FROM `Productos` p
         LEFT JOIN `Marcas` ma ON ma.`Id` = p.`MarcaId`
         LEFT JOIN `Modelos` mo ON mo.`Id` = p.`ModeloId`
         LEFT JOIN `Colores` co ON co.`Id` = p.`ColorId`
@@ -40,27 +34,17 @@ SELECT IF(
            OR (p.`TallaId` IS NOT NULL AND ta.`Id` IS NULL)
     )
     OR EXISTS(
-        SELECT 1
-        FROM `Productos` p
+        SELECT 1 FROM `Productos` p
         JOIN `Modelos` mo ON mo.`Id` = p.`ModeloId`
         WHERE p.`ModeloId` IS NOT NULL
           AND (p.`MarcaId` IS NULL OR mo.`MarcaId` <> p.`MarcaId`)
-    ),
-    0,
-    1
+    ), 0, 1
 );
-
 DROP TEMPORARY TABLE `__M2_Preflight`;
 ");
 
-            migrationBuilder.DropForeignKey(
-                name: "FK_ProductoVariantes_CatalogosProducto_ColorId",
-                table: "ProductoVariantes");
-
-            migrationBuilder.DropIndex(
-                name: "IX_ProductoVariantes_ProductoId_ColorId",
-                table: "ProductoVariantes");
-
+            // Primero expandimos la tabla. El índice legacy todavía sostiene la FK de ProductoId
+            // en MySQL, por lo que no puede retirarse hasta crear el nuevo índice multidimensional.
             migrationBuilder.AddColumn<int>(
                 name: "MarcaId",
                 table: "ProductoVariantes",
@@ -89,9 +73,6 @@ DROP TEMPORARY TABLE `__M2_Preflight`;
                 stored: true)
                 .Annotation("MySql:CharSet", "utf8mb4");
 
-            // Backfill no destructivo: los IDs de M1 se conservaron exactamente.
-            // Las variantes técnicas permanecen sin dimensiones; las comerciales heredan
-            // Marca/Modelo/Talla del producto legacy y conservan su ColorId existente.
             migrationBuilder.Sql(@"
 UPDATE `ProductoVariantes` pv
 JOIN `Productos` p ON p.`Id` = pv.`ProductoId`
@@ -121,6 +102,16 @@ SET
                 name: "IX_ProductoVariantes_TallaId",
                 table: "ProductoVariantes",
                 column: "TallaId");
+
+            // Ya existe un índice con ProductoId como primera columna, así que el índice
+            // legacy puede retirarse sin dejar la FK de ProductoId sin soporte.
+            migrationBuilder.DropForeignKey(
+                name: "FK_ProductoVariantes_CatalogosProducto_ColorId",
+                table: "ProductoVariantes");
+
+            migrationBuilder.DropIndex(
+                name: "IX_ProductoVariantes_ProductoId_ColorId",
+                table: "ProductoVariantes");
 
             migrationBuilder.CreateIndex(
                 name: "UX_ProductoVariantes_IdentidadActiva",
@@ -164,90 +155,44 @@ SET
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            // El downgrade colapsa Marca/Modelo/Talla y vuelve a Producto+Color.
-            // Si M2 ya contiene dos filas que colisionarían o un Color sin espejo legacy,
-            // se aborta explícitamente en vez de perder/corromper inventario.
             migrationBuilder.Sql(@"
 CREATE TEMPORARY TABLE `__M2_DownGuard` (
     `Ok` TINYINT NOT NULL,
     CONSTRAINT `CK___M2_DownGuard_Ok` CHECK (`Ok` = 1)
 );
-
 INSERT INTO `__M2_DownGuard` (`Ok`)
 SELECT IF(
     EXISTS(
-        SELECT 1
-        FROM `ProductoVariantes`
+        SELECT 1 FROM `ProductoVariantes`
         WHERE `ColorId` IS NOT NULL
         GROUP BY `ProductoId`, `ColorId`
         HAVING COUNT(*) > 1
     )
     OR EXISTS(
-        SELECT 1
-        FROM `ProductoVariantes` pv
+        SELECT 1 FROM `ProductoVariantes` pv
         LEFT JOIN `CatalogosProducto` cp
           ON cp.`Id` = pv.`ColorId` AND cp.`Tipo` = 'Color'
         WHERE pv.`ColorId` IS NOT NULL AND cp.`Id` IS NULL
-    ),
-    0,
-    1
+    ), 0, 1
 );
-
 DROP TEMPORARY TABLE `__M2_DownGuard`;
 ");
 
             migrationBuilder.DropForeignKey(
                 name: "FK_ProductoVariantes_Colores_ColorId",
                 table: "ProductoVariantes");
-
             migrationBuilder.DropForeignKey(
                 name: "FK_ProductoVariantes_Marcas_MarcaId",
                 table: "ProductoVariantes");
-
             migrationBuilder.DropForeignKey(
                 name: "FK_ProductoVariantes_Modelos_ModeloId",
                 table: "ProductoVariantes");
-
             migrationBuilder.DropForeignKey(
                 name: "FK_ProductoVariantes_Tallas_TallaId",
                 table: "ProductoVariantes");
 
-            migrationBuilder.DropIndex(
-                name: "IX_ProductoVariantes_Dimensiones",
-                table: "ProductoVariantes");
-
-            migrationBuilder.DropIndex(
-                name: "IX_ProductoVariantes_MarcaId",
-                table: "ProductoVariantes");
-
-            migrationBuilder.DropIndex(
-                name: "IX_ProductoVariantes_ModeloId",
-                table: "ProductoVariantes");
-
-            migrationBuilder.DropIndex(
-                name: "IX_ProductoVariantes_TallaId",
-                table: "ProductoVariantes");
-
-            migrationBuilder.DropIndex(
-                name: "UX_ProductoVariantes_IdentidadActiva",
-                table: "ProductoVariantes");
-
-            migrationBuilder.DropColumn(
-                name: "IdentidadActivaUnica",
-                table: "ProductoVariantes");
-
-            migrationBuilder.DropColumn(
-                name: "MarcaId",
-                table: "ProductoVariantes");
-
-            migrationBuilder.DropColumn(
-                name: "ModeloId",
-                table: "ProductoVariantes");
-
-            migrationBuilder.DropColumn(
-                name: "TallaId",
-                table: "ProductoVariantes");
-
+            // Crear primero el índice legacy mantiene soportada la FK de ProductoId cuando
+            // posteriormente se retire IX_ProductoVariantes_Dimensiones.
             migrationBuilder.CreateIndex(
                 name: "IX_ProductoVariantes_ProductoId_ColorId",
                 table: "ProductoVariantes",
@@ -261,6 +206,35 @@ DROP TEMPORARY TABLE `__M2_DownGuard`;
                 principalTable: "CatalogosProducto",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Restrict);
+
+            migrationBuilder.DropIndex(
+                name: "IX_ProductoVariantes_Dimensiones",
+                table: "ProductoVariantes");
+            migrationBuilder.DropIndex(
+                name: "IX_ProductoVariantes_MarcaId",
+                table: "ProductoVariantes");
+            migrationBuilder.DropIndex(
+                name: "IX_ProductoVariantes_ModeloId",
+                table: "ProductoVariantes");
+            migrationBuilder.DropIndex(
+                name: "IX_ProductoVariantes_TallaId",
+                table: "ProductoVariantes");
+            migrationBuilder.DropIndex(
+                name: "UX_ProductoVariantes_IdentidadActiva",
+                table: "ProductoVariantes");
+
+            migrationBuilder.DropColumn(
+                name: "IdentidadActivaUnica",
+                table: "ProductoVariantes");
+            migrationBuilder.DropColumn(
+                name: "MarcaId",
+                table: "ProductoVariantes");
+            migrationBuilder.DropColumn(
+                name: "ModeloId",
+                table: "ProductoVariantes");
+            migrationBuilder.DropColumn(
+                name: "TallaId",
+                table: "ProductoVariantes");
         }
     }
 }
