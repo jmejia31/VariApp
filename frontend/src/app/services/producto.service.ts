@@ -125,7 +125,10 @@ export class ProductoService {
 
     value.variantes.forEach((variante, index) => {
       if (variante.id != null) formData.append(`Variantes[${index}].Id`, String(variante.id));
+      if (variante.marcaId != null) formData.append(`Variantes[${index}].MarcaId`, String(variante.marcaId));
+      if (variante.modeloId != null) formData.append(`Variantes[${index}].ModeloId`, String(variante.modeloId));
       if (variante.colorId != null) formData.append(`Variantes[${index}].ColorId`, String(variante.colorId));
+      if (variante.tallaId != null) formData.append(`Variantes[${index}].TallaId`, String(variante.tallaId));
       if (variante.sku?.trim()) formData.append(`Variantes[${index}].Sku`, variante.sku.trim());
       if (variante.codigoBarras?.trim()) formData.append(`Variantes[${index}].CodigoBarras`, variante.codigoBarras.trim());
       formData.append(`Variantes[${index}].Cantidad`, String(variante.cantidad));
