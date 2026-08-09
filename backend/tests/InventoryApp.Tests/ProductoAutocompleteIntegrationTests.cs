@@ -1,5 +1,6 @@
 using InventoryApp.Application.Services;
 using InventoryApp.Domain.Entities;
+using InventoryApp.Domain.Enums;
 using InventoryApp.Infrastructure.Persistence;
 using InventoryApp.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -27,14 +28,40 @@ public sealed class ProductoAutocompleteIntegrationTests
         {
             await setup.Database.MigrateAsync();
 
+            var marca = new Marca
+            {
+                Nombre = "VariStorehn",
+                Activo = true,
+                Eliminado = false
+            };
+            setup.Marcas.Add(marca);
+            await setup.SaveChangesAsync();
+
+            var modeloBuds = new Modelo
+            {
+                MarcaId = marca.Id,
+                Nombre = "2C5",
+                Activo = true,
+                Eliminado = false
+            };
+            var modeloCable = new Modelo
+            {
+                MarcaId = marca.Id,
+                Nombre = "USB-C",
+                Activo = true,
+                Eliminado = false
+            };
+            setup.Modelos.AddRange(modeloBuds, modeloCable);
+            await setup.SaveChangesAsync();
+
             var conStock = CrearProducto("Buds Pro Remoto", "VariStorehn", "2C5", 4);
             var sinStock = CrearProducto("Cable Remoto", "VariStorehn", "USB-C", 0);
             setup.Productos.AddRange(conStock, sinStock);
             await setup.SaveChangesAsync();
 
             setup.ProductoVariantes.AddRange(
-                CrearVariante(conStock, "SKU-BUDS-2C5", "000000002501", 4, 120m, 220m),
-                CrearVariante(sinStock, "SKU-CABLE-2C5", "000000002502", 0, 35m, 80m));
+                CrearVariante(conStock, marca, modeloBuds, "SKU-BUDS-2C5", "000000002501", 4, 120m, 220m),
+                CrearVariante(sinStock, marca, modeloCable, "SKU-CABLE-2C5", "000000002502", 0, 35m, 80m));
             await setup.SaveChangesAsync();
         }
 
@@ -62,6 +89,8 @@ public sealed class ProductoAutocompleteIntegrationTests
 
             var ventaPorMarca = await service.BuscarParaVentaAsync("varistorehn");
             Assert.Single(ventaPorMarca);
+            Assert.Equal(marca.Nombre, ventaPorMarca[0].MarcaNombre);
+            Assert.Equal(modeloBuds.Nombre, ventaPorMarca[0].ModeloNombre);
         }
         finally
         {
@@ -75,6 +104,7 @@ public sealed class ProductoAutocompleteIntegrationTests
             Nombre = nombre,
             Marca = marca,
             Modelo = modelo,
+            TipoInventario = TipoInventario.MercaderiaVenta,
             Cantidad = cantidad,
             Costo = 40m,
             Precio = 80m,
@@ -85,6 +115,8 @@ public sealed class ProductoAutocompleteIntegrationTests
 
     private static ProductoVariante CrearVariante(
         Producto producto,
+        Marca marca,
+        Modelo modelo,
         string sku,
         string codigoBarras,
         int cantidad,
@@ -94,6 +126,10 @@ public sealed class ProductoAutocompleteIntegrationTests
         {
             ProductoId = producto.Id,
             Producto = producto,
+            MarcaId = marca.Id,
+            Marca = marca,
+            ModeloId = modelo.Id,
+            Modelo = modelo,
             Sku = sku,
             CodigoBarras = codigoBarras,
             Cantidad = cantidad,
