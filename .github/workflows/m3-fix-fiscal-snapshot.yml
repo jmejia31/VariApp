@@ -1,0 +1,69 @@
+name: M3 corregir snapshot fiscal de venta
+
+on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - '.github/workflows/m3-fix-fiscal-snapshot.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Aplicar corrección fail-closed
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+
+          path = Path('backend/src/Application/Services/VentaService.cs')
+          text = path.read_text(encoding='utf-8')
+
+          old_persist = '''            BaseImponible = i.BaseImponible,\n            MontoAplicado = i.Monto\n        }).ToList();'''
+          new_persist = '''            BaseImponible = i.BaseImponible,\n            MontoAplicado = i.Monto,\n            IncluidoEnPrecioSnapshot = i.IncluidoEnPrecio\n        }).ToList();'''
+
+          old_dto = '''            BaseImponible = i.BaseImponible,\n            Monto = i.MontoAplicado\n        }).ToList(),'''
+          new_dto = '''            BaseImponible = i.BaseImponible,\n            Monto = i.MontoAplicado,\n            IncluidoEnPrecio = i.IncluidoEnPrecioSnapshot\n        }).ToList(),'''
+
+          if text.count(old_persist) != 1:
+              raise SystemExit(f'Firma de persistencia inesperada: {text.count(old_persist)} coincidencias')
+          if text.count(old_dto) != 1:
+              raise SystemExit(f'Firma DTO inesperada: {text.count(old_dto)} coincidencias')
+
+          text = text.replace(old_persist, new_persist, 1)
+          text = text.replace(old_dto, new_dto, 1)
+          path.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Compilar y ejecutar regresión fiscal
+        working-directory: backend
+        shell: bash
+        run: |
+          set -euo pipefail
+          dotnet restore InventoryApp.sln
+          dotnet build InventoryApp.sln --configuration Release --no-restore
+          dotnet test InventoryApp.sln --configuration Release --no-build --filter "FullyQualifiedName~SeedFiscalServiceTests|FullyQualifiedName~VentaFiscalSnapshotTests"
+
+      - name: Publicar y retirar workflow temporal
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/m3-fix-fiscal-snapshot.yml
+          git add backend/src/Application/Services/VentaService.cs
+          git commit -m "fix(m3): preservar snapshot fiscal incluido en precio [ChatGPT]"
+          git push origin HEAD:Desarrollo
