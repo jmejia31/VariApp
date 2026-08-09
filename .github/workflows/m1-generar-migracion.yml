@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   generate:
-    name: Generar, validar y publicar hardening M1
+    name: Generar, validar y publicar snapshot M1
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -36,12 +36,18 @@ jobs:
       - name: Instalar dotnet-ef 8.0.2
         run: dotnet tool install --global dotnet-ef --version 8.0.2
 
-      - name: Generar migracion de integridad M1
+      - name: Generar migracion pendiente M1
         run: |
-          dotnet ef migrations add M1EndurecerIntegridadRelacional \
+          dotnet ef migrations add M1CompletarModeloRelacional \
             --project backend/src/Infrastructure/InventoryApp.Infrastructure.csproj \
             --startup-project backend/src/API/InventoryApp.API.csproj \
             --output-dir Migrations
+
+      - name: Validar snapshot sin cambios pendientes
+        run: |
+          dotnet ef migrations has-pending-model-changes \
+            --project backend/src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project backend/src/API/InventoryApp.API.csproj
 
       - name: Compilar backend con migracion
         working-directory: backend
@@ -55,5 +61,5 @@ jobs:
           git config user.email '93171442+jmejia31@users.noreply.github.com'
           git add backend/src/Infrastructure/Migrations
           git diff --cached --check
-          git commit -m 'db(m1): endurecer integridad relacional [ChatGPT]'
+          git commit -m 'db(m1): completar modelo relacional y snapshot EF [ChatGPT]'
           git push origin HEAD:Desarrollo
