@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -10,45 +10,10 @@ namespace InventoryApp.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            // Nombre deja de ser identidad de negocio para clientes/proveedores.
             migrationBuilder.DropIndex(
                 name: "IX_Proveedores_Nombre",
                 table: "Proveedores");
-
-            migrationBuilder.DropIndex(
-                name: "IX_ImpuestoProveedores_ImpuestoId",
-                table: "ImpuestoProveedores");
-
-            migrationBuilder.DropIndex(
-                name: "IX_ImpuestoProductos_ImpuestoId",
-                table: "ImpuestoProductos");
-
-            migrationBuilder.DropIndex(
-                name: "IX_ImpuestoOperaciones_ImpuestoId",
-                table: "ImpuestoOperaciones");
-
-            migrationBuilder.DropIndex(
-                name: "IX_ImpuestoClientes_ImpuestoId",
-                table: "ImpuestoClientes");
-
-            migrationBuilder.DropIndex(
-                name: "IX_ImpuestoCategorias_ImpuestoId",
-                table: "ImpuestoCategorias");
-
-            migrationBuilder.DropIndex(
-                name: "IX_DescuentoRoles_DescuentoId",
-                table: "DescuentoRoles");
-
-            migrationBuilder.DropIndex(
-                name: "IX_DescuentoProductos_DescuentoId",
-                table: "DescuentoProductos");
-
-            migrationBuilder.DropIndex(
-                name: "IX_DescuentoClientes_DescuentoId",
-                table: "DescuentoClientes");
-
-            migrationBuilder.DropIndex(
-                name: "IX_DescuentoCategorias_DescuentoId",
-                table: "DescuentoCategorias");
 
             migrationBuilder.DropIndex(
                 name: "IX_Clientes_Nombre",
@@ -165,6 +130,9 @@ namespace InventoryApp.Infrastructure.Migrations
                 column: "DocumentoNormalizado",
                 unique: true);
 
+            // Primero se crean los índices compuestos que pueden respaldar las FKs
+            // existentes hacia Impuestos/Descuentos. Solo después se retiran los
+            // índices simples legacy; MySQL no permite hacerlo en el orden inverso.
             migrationBuilder.CreateIndex(
                 name: "IX_ImpuestoProveedores_ProveedorId",
                 table: "ImpuestoProveedores",
@@ -216,12 +184,6 @@ namespace InventoryApp.Infrastructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "UX_EmpresaConfiguraciones_Activa",
-                table: "EmpresaConfiguraciones",
-                column: "ActivaUnica",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_DescuentoRoles_RolId",
                 table: "DescuentoRoles",
                 column: "RolId");
@@ -263,6 +225,48 @@ namespace InventoryApp.Infrastructure.Migrations
                 name: "UX_DescuentoCategorias_Descuento_Categoria",
                 table: "DescuentoCategorias",
                 columns: new[] { "DescuentoId", "CategoriaId" },
+                unique: true);
+
+            migrationBuilder.DropIndex(
+                name: "IX_ImpuestoProveedores_ImpuestoId",
+                table: "ImpuestoProveedores");
+
+            migrationBuilder.DropIndex(
+                name: "IX_ImpuestoProductos_ImpuestoId",
+                table: "ImpuestoProductos");
+
+            migrationBuilder.DropIndex(
+                name: "IX_ImpuestoOperaciones_ImpuestoId",
+                table: "ImpuestoOperaciones");
+
+            migrationBuilder.DropIndex(
+                name: "IX_ImpuestoClientes_ImpuestoId",
+                table: "ImpuestoClientes");
+
+            migrationBuilder.DropIndex(
+                name: "IX_ImpuestoCategorias_ImpuestoId",
+                table: "ImpuestoCategorias");
+
+            migrationBuilder.DropIndex(
+                name: "IX_DescuentoRoles_DescuentoId",
+                table: "DescuentoRoles");
+
+            migrationBuilder.DropIndex(
+                name: "IX_DescuentoProductos_DescuentoId",
+                table: "DescuentoProductos");
+
+            migrationBuilder.DropIndex(
+                name: "IX_DescuentoClientes_DescuentoId",
+                table: "DescuentoClientes");
+
+            migrationBuilder.DropIndex(
+                name: "IX_DescuentoCategorias_DescuentoId",
+                table: "DescuentoCategorias");
+
+            migrationBuilder.CreateIndex(
+                name: "UX_EmpresaConfiguraciones_Activa",
+                table: "EmpresaConfiguraciones",
+                column: "ActivaUnica",
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -381,6 +385,53 @@ namespace InventoryApp.Infrastructure.Migrations
             migrationBuilder.DropForeignKey(
                 name: "FK_ImpuestoProveedores_Proveedores_ProveedorId",
                 table: "ImpuestoProveedores");
+
+            // Restaurar primero los índices simples que respaldaban las FKs
+            // originales; así los compuestos pueden retirarse sin romper MySQL.
+            migrationBuilder.CreateIndex(
+                name: "IX_ImpuestoProveedores_ImpuestoId",
+                table: "ImpuestoProveedores",
+                column: "ImpuestoId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ImpuestoProductos_ImpuestoId",
+                table: "ImpuestoProductos",
+                column: "ImpuestoId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ImpuestoOperaciones_ImpuestoId",
+                table: "ImpuestoOperaciones",
+                column: "ImpuestoId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ImpuestoClientes_ImpuestoId",
+                table: "ImpuestoClientes",
+                column: "ImpuestoId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ImpuestoCategorias_ImpuestoId",
+                table: "ImpuestoCategorias",
+                column: "ImpuestoId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DescuentoRoles_DescuentoId",
+                table: "DescuentoRoles",
+                column: "DescuentoId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DescuentoProductos_DescuentoId",
+                table: "DescuentoProductos",
+                column: "DescuentoId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DescuentoClientes_DescuentoId",
+                table: "DescuentoClientes",
+                column: "DescuentoId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DescuentoCategorias_DescuentoId",
+                table: "DescuentoCategorias",
+                column: "DescuentoId");
 
             migrationBuilder.DropIndex(
                 name: "IX_Proveedores_Nombre",
@@ -555,51 +606,6 @@ namespace InventoryApp.Infrastructure.Migrations
                 table: "Proveedores",
                 column: "Nombre",
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ImpuestoProveedores_ImpuestoId",
-                table: "ImpuestoProveedores",
-                column: "ImpuestoId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ImpuestoProductos_ImpuestoId",
-                table: "ImpuestoProductos",
-                column: "ImpuestoId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ImpuestoOperaciones_ImpuestoId",
-                table: "ImpuestoOperaciones",
-                column: "ImpuestoId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ImpuestoClientes_ImpuestoId",
-                table: "ImpuestoClientes",
-                column: "ImpuestoId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ImpuestoCategorias_ImpuestoId",
-                table: "ImpuestoCategorias",
-                column: "ImpuestoId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_DescuentoRoles_DescuentoId",
-                table: "DescuentoRoles",
-                column: "DescuentoId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_DescuentoProductos_DescuentoId",
-                table: "DescuentoProductos",
-                column: "DescuentoId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_DescuentoClientes_DescuentoId",
-                table: "DescuentoClientes",
-                column: "DescuentoId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_DescuentoCategorias_DescuentoId",
-                table: "DescuentoCategorias",
-                column: "DescuentoId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Clientes_Nombre",
