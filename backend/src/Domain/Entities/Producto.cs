@@ -54,7 +54,10 @@ public class Producto : AuditableEntity
     public bool TieneStockBajo => Activo && !Eliminado && Cantidad > 0 && Cantidad < UmbralStockBajo;
     public bool EstaAgotado => Activo && !Eliminado && Cantidad <= 0;
 
-    // Compatibilidad: imagen principal calculada a partir de la colección.
+    // La galería general del Producto y las galerías de variantes son ámbitos
+    // distintos. Una imagen específica nunca debe convertirse accidentalmente
+    // en la portada general del producto.
     public ProductoImagen? ImagenPrincipal =>
-        Imagenes.Where(i => i.EsPrincipal).FirstOrDefault() ?? Imagenes.OrderBy(i => i.Orden).FirstOrDefault();
+        Imagenes.Where(i => i.ProductoVarianteId == null && i.EsPrincipal).FirstOrDefault()
+        ?? Imagenes.Where(i => i.ProductoVarianteId == null).OrderBy(i => i.Orden).FirstOrDefault();
 }
