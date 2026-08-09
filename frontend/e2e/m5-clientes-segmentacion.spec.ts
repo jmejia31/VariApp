@@ -33,6 +33,10 @@ async function loginUi(page: Page): Promise<void> {
   await page.waitForURL((url) => url.pathname !== '/login', { timeout: 20_000 });
 }
 
+function filaCliente(page: Page, nombre: string) {
+  return page.locator('table.table-desktop tbody tr', { hasText: nombre });
+}
+
 test.describe('M5 — Clientes y segmentación', () => {
   test.describe.configure({ mode: 'serial', retries: 0 });
 
@@ -125,8 +129,8 @@ test.describe('M5 — Clientes y segmentación', () => {
 
     await page.goto(`/clientes?tipoClienteId=${segmentoA.id}`);
     await expect(page.getByRole('heading', { name: 'Clientes', exact: true })).toBeVisible();
-    await expect(page.getByText(clienteA, { exact: true })).toBeVisible();
-    await expect(page.getByText(clienteB, { exact: true })).not.toBeVisible();
+    await expect(filaCliente(page, clienteA)).toBeVisible();
+    await expect(filaCliente(page, clienteB)).toHaveCount(0);
 
     const tarjetaA = page.locator('.segment-card', { hasText: segmentoA.nombre });
     const tarjetaB = page.locator('.segment-card', { hasText: segmentoB.nombre });
@@ -144,20 +148,20 @@ test.describe('M5 — Clientes y segmentación', () => {
 
     await page.goto('/dashboard');
     await page.goto('/clientes');
-    await expect(page.getByText(clienteA, { exact: true })).toBeVisible();
-    await expect(page.getByText(clienteB, { exact: true })).not.toBeVisible();
+    await expect(filaCliente(page, clienteA)).toBeVisible();
+    await expect(filaCliente(page, clienteB)).toHaveCount(0);
     await expect(page).toHaveURL(new RegExp(`tipoClienteId=${segmentoA.id}`));
 
     await page.getByRole('button', { name: 'Limpiar filtros' }).click();
-    await expect(page.getByText(clienteA, { exact: true })).toBeVisible();
-    await expect(page.getByText(clienteB, { exact: true })).toBeVisible();
+    await expect(filaCliente(page, clienteA)).toBeVisible();
+    await expect(filaCliente(page, clienteB)).toBeVisible();
     await expect(page).not.toHaveURL(/tipoClienteId=/);
   });
 
   test('exporta CSV con el conjunto filtrado completo', async ({ page }) => {
     await loginUi(page);
     await page.goto(`/clientes?tipoClienteId=${segmentoA.id}`);
-    await expect(page.getByText(clienteA, { exact: true })).toBeVisible();
+    await expect(filaCliente(page, clienteA)).toBeVisible();
 
     const downloadPromise = page.waitForEvent('download');
     await page.getByRole('button', { name: 'Exportar CSV' }).click();
