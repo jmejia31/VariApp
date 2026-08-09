@@ -224,7 +224,10 @@ public class CompraService : ICompraService
                 {
                     ProductoId = producto.Id,
                     ProductoVarianteId = item.ProductoVarianteId,
+                    ProductoMarcaSnapshot = detalle.ProductoMarcaSnapshot,
+                    ProductoModeloSnapshot = detalle.ProductoModeloSnapshot,
                     ProductoColorSnapshot = detalle.ProductoColorSnapshot,
+                    ProductoTallaSnapshot = detalle.ProductoTallaSnapshot,
                     ProductoSkuSnapshot = detalle.ProductoSkuSnapshot,
                     Tipo = TipoMovimientoInventario.Entrada,
                     Cantidad = item.Cantidad,
@@ -353,7 +356,10 @@ public class CompraService : ICompraService
                 {
                     ProductoId = producto.Id,
                     ProductoVarianteId = item.ProductoVarianteId,
+                    ProductoMarcaSnapshot = detalle.ProductoMarcaSnapshot,
+                    ProductoModeloSnapshot = detalle.ProductoModeloSnapshot,
                     ProductoColorSnapshot = detalle.ProductoColorSnapshot,
+                    ProductoTallaSnapshot = detalle.ProductoTallaSnapshot,
                     ProductoSkuSnapshot = detalle.ProductoSkuSnapshot,
                     Tipo = TipoMovimientoInventario.Salida,
                     Cantidad = item.Cantidad,
@@ -561,9 +567,10 @@ public class CompraService : ICompraService
                 CostoUnitario = input.CostoUnitario,
                 Subtotal = input.Cantidad * input.CostoUnitario,
                 ProductoNombreSnapshot = producto.Nombre,
-                ProductoMarcaSnapshot = producto.Marca,
-                ProductoModeloSnapshot = producto.Modelo,
+                ProductoMarcaSnapshot = variante?.Marca?.Nombre ?? producto.Marca,
+                ProductoModeloSnapshot = variante?.Modelo?.Nombre ?? producto.Modelo,
                 ProductoColorSnapshot = variante?.Color?.Nombre,
+                ProductoTallaSnapshot = variante?.Talla?.Nombre,
                 ProductoSkuSnapshot = variante?.Sku
             });
         }
@@ -661,6 +668,7 @@ public class CompraService : ICompraService
             ProductoMarca = detalle.ProductoMarcaSnapshot,
             ProductoModelo = detalle.ProductoModeloSnapshot,
             ProductoColor = detalle.ProductoColorSnapshot,
+            ProductoTalla = detalle.ProductoTallaSnapshot,
             ProductoSku = detalle.ProductoSkuSnapshot,
             ProductoImagenPrincipalUrl = detalle.Producto?.ImagenPrincipal?.Url,
             Cantidad = detalle.Cantidad,

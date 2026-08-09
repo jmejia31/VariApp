@@ -9,6 +9,7 @@ public class CompraDetalleDto
     public string ProductoMarca { get; set; } = string.Empty;
     public string ProductoModelo { get; set; } = string.Empty;
     public string? ProductoColor { get; set; }
+    public string? ProductoTalla { get; set; }
     public string? ProductoSku { get; set; }
     public string? ProductoImagenPrincipalUrl { get; set; }
     public int Cantidad { get; set; }

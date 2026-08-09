@@ -9,7 +9,10 @@ public class MovimientoInventario
     public Producto? Producto { get; set; }
     public int? ProductoVarianteId { get; set; }
     public ProductoVariante? ProductoVariante { get; set; }
+    public string? ProductoMarcaSnapshot { get; set; }
+    public string? ProductoModeloSnapshot { get; set; }
     public string? ProductoColorSnapshot { get; set; }
+    public string? ProductoTallaSnapshot { get; set; }
     public string? ProductoSkuSnapshot { get; set; }
 
     public TipoMovimientoInventario Tipo { get; set; }

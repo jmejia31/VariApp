@@ -221,7 +221,10 @@ public class VentaService : IVentaService
                 {
                     ProductoId = producto.Id,
                     ProductoVarianteId = item.ProductoVarianteId,
+                    ProductoMarcaSnapshot = detalle.ProductoMarcaSnapshot,
+                    ProductoModeloSnapshot = detalle.ProductoModeloSnapshot,
                     ProductoColorSnapshot = detalle.ProductoColorSnapshot,
+                    ProductoTallaSnapshot = detalle.ProductoTallaSnapshot,
                     ProductoSkuSnapshot = detalle.ProductoSkuSnapshot,
                     Tipo = TipoMovimientoInventario.Salida,
                     Cantidad = item.Cantidad,
@@ -300,6 +303,7 @@ public class VentaService : IVentaService
                     ProductoMarca = d.ProductoMarcaSnapshot,
                     ProductoModelo = d.ProductoModeloSnapshot,
                     VarianteColor = d.ProductoColorSnapshot,
+                    VarianteTalla = d.ProductoTallaSnapshot,
                     VarianteSku = d.ProductoSkuSnapshot,
                     Cantidad = d.Cantidad,
                     PrecioUnitario = d.PrecioUnitario,
@@ -378,7 +382,10 @@ public class VentaService : IVentaService
                 {
                     ProductoId = producto.Id,
                     ProductoVarianteId = item.ProductoVarianteId,
+                    ProductoMarcaSnapshot = detalle.ProductoMarcaSnapshot,
+                    ProductoModeloSnapshot = detalle.ProductoModeloSnapshot,
                     ProductoColorSnapshot = detalle.ProductoColorSnapshot,
+                    ProductoTallaSnapshot = detalle.ProductoTallaSnapshot,
                     ProductoSkuSnapshot = detalle.ProductoSkuSnapshot,
                     Tipo = TipoMovimientoInventario.Entrada,
                     Cantidad = item.Cantidad,
@@ -548,7 +555,8 @@ public class VentaService : IVentaService
             }
 
             var costoUnitario = variante?.Costo ?? producto.Costo;
-            var subtotal = input.Cantidad * input.PrecioUnitario;
+            var precioUnitario = variante?.Precio ?? input.PrecioUnitario;
+            var subtotal = input.Cantidad * precioUnitario;
             var costoTotal = input.Cantidad * costoUnitario;
 
             venta.Detalles.Add(new VentaDetalle
@@ -556,14 +564,15 @@ public class VentaService : IVentaService
                 ProductoId = producto.Id,
                 ProductoVarianteId = variante?.Id,
                 Cantidad = input.Cantidad,
-                PrecioUnitario = input.PrecioUnitario,
+                PrecioUnitario = precioUnitario,
                 CostoUnitarioSnapshot = costoUnitario,
                 Subtotal = subtotal,
                 UtilidadBruta = subtotal - costoTotal,
                 ProductoNombreSnapshot = producto.Nombre,
-                ProductoMarcaSnapshot = producto.Marca,
-                ProductoModeloSnapshot = producto.Modelo,
+                ProductoMarcaSnapshot = variante?.Marca?.Nombre ?? producto.Marca,
+                ProductoModeloSnapshot = variante?.Modelo?.Nombre ?? producto.Modelo,
                 ProductoColorSnapshot = variante?.Color?.Nombre,
+                ProductoTallaSnapshot = variante?.Talla?.Nombre,
                 ProductoSkuSnapshot = variante?.Sku
             });
         }
@@ -702,6 +711,7 @@ public class VentaService : IVentaService
             ProductoMarca = d.ProductoMarcaSnapshot,
             ProductoModelo = d.ProductoModeloSnapshot,
             ProductoColor = d.ProductoColorSnapshot,
+            ProductoTalla = d.ProductoTallaSnapshot,
             ProductoSku = d.ProductoSkuSnapshot,
             ProductoImagenPrincipalUrl = d.Producto?.ImagenPrincipal?.Url,
             Cantidad = d.Cantidad,

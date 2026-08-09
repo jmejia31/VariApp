@@ -17,6 +17,7 @@ public class VentaDetalleConfiguration : IEntityTypeConfiguration<VentaDetalle>
         builder.Property(d => d.ProductoMarcaSnapshot).IsRequired().HasMaxLength(100);
         builder.Property(d => d.ProductoModeloSnapshot).IsRequired().HasMaxLength(100);
         builder.Property(d => d.ProductoColorSnapshot).HasMaxLength(100);
+        builder.Property(d => d.ProductoTallaSnapshot).HasMaxLength(100);
         builder.Property(d => d.ProductoSkuSnapshot).HasMaxLength(80);
 
         builder.HasOne(d => d.Producto)

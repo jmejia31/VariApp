@@ -16,7 +16,10 @@ public class MovimientoInventarioConfiguration : IEntityTypeConfiguration<Movimi
             .HasDefaultValue(CausaMovimientoInventario.NoEspecificada);
         builder.Property(m => m.ReferenciaTipo).IsRequired().HasMaxLength(30);
         builder.Property(m => m.Descripcion).HasMaxLength(300);
+        builder.Property(m => m.ProductoMarcaSnapshot).HasMaxLength(100);
+        builder.Property(m => m.ProductoModeloSnapshot).HasMaxLength(100);
         builder.Property(m => m.ProductoColorSnapshot).HasMaxLength(100);
+        builder.Property(m => m.ProductoTallaSnapshot).HasMaxLength(100);
         builder.Property(m => m.ProductoSkuSnapshot).HasMaxLength(80);
         builder.Property(m => m.CostoUnitario).HasColumnType("decimal(18,2)");
         builder.Property(m => m.PrecioUnitario).HasColumnType("decimal(18,2)");

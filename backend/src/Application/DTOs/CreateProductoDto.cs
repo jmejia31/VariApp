@@ -10,7 +10,10 @@ namespace InventoryApp.Application.DTOs;
 public class ProductoVarianteFormularioDto
 {
     public int? Id { get; set; }
-    public int ColorId { get; set; }
+    public int? MarcaId { get; set; }
+    public int? ModeloId { get; set; }
+    public int? ColorId { get; set; }
+    public int? TallaId { get; set; }
     public string? Sku { get; set; }
     public string? CodigoBarras { get; set; }
     public int Cantidad { get; set; }
@@ -42,7 +45,7 @@ public class CreateProductoDto
     public int? ModeloId { get; set; }
 
     /// <summary>
-    /// Colores/SKU del producto. El formulario nuevo siempre envía al menos uno.
+    /// Variantes físicas del producto. Cada fila puede combinar Marca/Modelo/Color/Talla.
     /// Se conserva compatibilidad con clientes anteriores que todavía no lo envían.
     /// </summary>
     public List<ProductoVarianteFormularioDto> Variantes { get; set; } = new();

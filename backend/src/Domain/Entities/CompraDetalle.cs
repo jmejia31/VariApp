@@ -19,6 +19,7 @@ public class CompraDetalle
     public string ProductoMarcaSnapshot { get; set; } = string.Empty;
     public string ProductoModeloSnapshot { get; set; } = string.Empty;
     public string? ProductoColorSnapshot { get; set; }
+    public string? ProductoTallaSnapshot { get; set; }
     public string? ProductoSkuSnapshot { get; set; }
 
     // Snapshots de valoración capturados al confirmar la compra. Permanecen
