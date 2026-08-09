@@ -818,6 +818,10 @@ Evidencia enfocada: Playwright M4 sobre MySQL 8.4 descartable, run `31337474683`
 
 # FASE M5 — Clientes y segmentación
 
+Estado: **COMPLETADA / CERTIFICADA AUTOMÁTICAMENTE (2026-08-09)**.
+
+Entregable: `docs/FASE_M5_CLIENTES_SEGMENTACION.md`.
+
 - `TipoCliente` existente como base;
 - filtros y estadísticas por tipo;
 - reportes/exportaciones;
@@ -825,7 +829,11 @@ Evidencia enfocada: Playwright M4 sobre MySQL 8.4 descartable, run `31337474683`
 - `SIN_CLASIFICAR` protegido;
 - segmentación extensible sin hardcodear etiquetas subjetivas.
 
-La identidad de Cliente seguirá las reglas corregidas en M1.
+Cobertura completada: mantenimiento dinámico de `TipoCliente`, filtro persistente por clasificación, estadísticas comparativas, exportación CSV filtrada, protección `SIN_CLASIFICAR` y conservación de las reglas de identidad de M1.
+
+Evidencia enfocada: MySQL 8.4 + backend 17/17 + Playwright M5 3/3, run `31339633125` — **success**.
+
+La identidad de Cliente sigue las reglas corregidas en M1.
 
 ---
 
