@@ -261,10 +261,11 @@ test.describe('Fase 4 — variantes multidimensionales, SKU e inventario', () =>
 
     await page.locator('input[formcontrolname="nombre"]').fill(nombres.productoUi);
 
-    await page.locator('mat-select[formcontrolname="marcaId"]').click();
+    const datosFamilia = page.locator('.data-section');
+    await datosFamilia.locator('mat-select[formcontrolname="marcaId"]').click();
     await page.getByRole('option', { name: nombres.marca, exact: true }).click();
 
-    await page.locator('mat-select[formcontrolname="modeloId"]').click();
+    await datosFamilia.locator('mat-select[formcontrolname="modeloId"]').click();
     await page.getByRole('option', { name: nombres.modelo, exact: true }).click();
 
     const colores = page.locator('mat-select[formcontrolname="colorId"]');
