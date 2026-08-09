@@ -10,6 +10,15 @@ namespace InventoryApp.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            // MySQL 8.4 reconstruye ProductoImagenes al agregar una columna
+            // calculada almacenada. La FK histórica a Productos es válida, pero
+            // mantenerla activa durante esa reconstrucción provoca que InnoDB
+            // falle al recrearla. Se retira y se restablece dentro de la misma
+            // migración, preservando exactamente su semántica Cascade.
+            migrationBuilder.DropForeignKey(
+                name: "FK_ProductoImagenes_Productos_ProductoId",
+                table: "ProductoImagenes");
+
             migrationBuilder.AddColumn<int>(
                 name: "ProductoVarianteId",
                 table: "ProductoImagenes",
@@ -26,9 +35,6 @@ namespace InventoryApp.Infrastructure.Migrations
                 stored: true)
                 .Annotation("MySql:CharSet", "utf8mb4");
 
-            // Se crea primero un índice cuyo prefijo es ProductoId. MySQL lo
-            // puede reutilizar para la FK existente ProductoImagenes->Productos;
-            // solo entonces es seguro retirar el índice simple anterior.
             migrationBuilder.CreateIndex(
                 name: "IX_ProductoImagenes_Producto_Variante_Orden",
                 table: "ProductoImagenes",
@@ -50,6 +56,14 @@ namespace InventoryApp.Infrastructure.Migrations
                 table: "ProductoImagenes");
 
             migrationBuilder.AddForeignKey(
+                name: "FK_ProductoImagenes_Productos_ProductoId",
+                table: "ProductoImagenes",
+                column: "ProductoId",
+                principalTable: "Productos",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
                 name: "FK_ProductoImagenes_ProductoVariantes_ProductoVarianteId",
                 table: "ProductoImagenes",
                 column: "ProductoVarianteId",
@@ -65,8 +79,10 @@ namespace InventoryApp.Infrastructure.Migrations
                 name: "FK_ProductoImagenes_ProductoVariantes_ProductoVarianteId",
                 table: "ProductoImagenes");
 
-            // La FK hacia Productos necesita conservar un índice por ProductoId
-            // antes de retirar el índice compuesto introducido por M2.
+            migrationBuilder.DropForeignKey(
+                name: "FK_ProductoImagenes_Productos_ProductoId",
+                table: "ProductoImagenes");
+
             migrationBuilder.CreateIndex(
                 name: "IX_ProductoImagenes_ProductoId",
                 table: "ProductoImagenes",
@@ -91,6 +107,14 @@ namespace InventoryApp.Infrastructure.Migrations
             migrationBuilder.DropColumn(
                 name: "ProductoVarianteId",
                 table: "ProductoImagenes");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_ProductoImagenes_Productos_ProductoId",
+                table: "ProductoImagenes",
+                column: "ProductoId",
+                principalTable: "Productos",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
         }
     }
 }
