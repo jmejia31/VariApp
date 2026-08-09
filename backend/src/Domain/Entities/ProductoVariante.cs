@@ -7,8 +7,17 @@ public class ProductoVariante : AuditableEntity
     public int ProductoId { get; set; }
     public Producto Producto { get; set; } = null!;
 
+    public int? MarcaId { get; set; }
+    public Marca? Marca { get; set; }
+
+    public int? ModeloId { get; set; }
+    public Modelo? Modelo { get; set; }
+
     public int? ColorId { get; set; }
-    public CatalogoProducto? Color { get; set; }
+    public Color? Color { get; set; }
+
+    public int? TallaId { get; set; }
+    public Talla? Talla { get; set; }
 
     public string? Sku { get; set; }
     public string? CodigoBarras { get; set; }

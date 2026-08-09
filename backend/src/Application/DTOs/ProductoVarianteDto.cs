@@ -5,9 +5,16 @@ public class ProductoVarianteDto
     public int Id { get; set; }
     public int ProductoId { get; set; }
     public string ProductoNombre { get; set; } = string.Empty;
-    public int ColorId { get; set; }
-    public string ColorNombre { get; set; } = string.Empty;
+    public int? MarcaId { get; set; }
+    public string? MarcaNombre { get; set; }
+    public int? ModeloId { get; set; }
+    public string? ModeloNombre { get; set; }
+    public int? ColorId { get; set; }
+    public string? ColorNombre { get; set; }
     public string? ColorCodigoVisual { get; set; }
+    public int? TallaId { get; set; }
+    public string? TallaNombre { get; set; }
+    public string Etiqueta { get; set; } = string.Empty;
     public string Sku { get; set; } = string.Empty;
     public string? CodigoBarras { get; set; }
     public int Cantidad { get; set; }
@@ -25,8 +32,11 @@ public class ProductoVarianteDto
 
 public class CreateProductoVarianteDto
 {
-    public int ColorId { get; set; }
-    public string Sku { get; set; } = string.Empty;
+    public int? MarcaId { get; set; }
+    public int? ModeloId { get; set; }
+    public int? ColorId { get; set; }
+    public int? TallaId { get; set; }
+    public string? Sku { get; set; }
     public string? CodigoBarras { get; set; }
     public int Cantidad { get; set; }
     public int UmbralStockBajo { get; set; } = 5;

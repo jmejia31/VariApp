@@ -12,6 +12,12 @@ public interface IProductoVarianteRepository
     Task<ProductoVariante?> GetTecnicaByProductoIdAsync(int productoId, bool incluirEliminada = false);
     Task<ProductoVariante?> GetBySkuAsync(string sku);
     Task<ProductoVariante?> GetByCodigoBarrasAsync(string codigoBarras);
+    Task<ProductoVariante?> GetByCombinacionAsync(
+        int productoId,
+        int? marcaId,
+        int? modeloId,
+        int? colorId,
+        int? tallaId);
     Task<List<ProductoVariante>> BuscarPorCodigoAsync(
         string skuNormalizado,
         string codigoBarrasNormalizado,
@@ -22,7 +28,6 @@ public interface IProductoVarianteRepository
         int limite,
         CancellationToken cancellationToken = default,
         TipoInventario? tipoInventario = null);
-    Task<ProductoVariante?> GetByProductoColorAsync(int productoId, int colorId);
     Task AddAsync(ProductoVariante variante);
     void Update(ProductoVariante variante);
     Task<bool> SaveChangesAsync();
