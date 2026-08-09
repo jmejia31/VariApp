@@ -9,7 +9,10 @@ public static class ProductoMapper
     {
         var variantes = p.Variantes
             .Where(v => !v.Eliminado)
-            .OrderBy(v => v.Color?.Nombre)
+            .OrderBy(v => v.Marca?.Nombre)
+            .ThenBy(v => v.Modelo?.Nombre)
+            .ThenBy(v => v.Color?.Nombre)
+            .ThenBy(v => v.Talla?.Nombre)
             .ThenBy(v => v.Sku)
             .ToList();
         var activas = variantes.Where(v => v.Activo).ToList();
@@ -58,9 +61,16 @@ public static class ProductoMapper
                 Id = v.Id,
                 ProductoId = v.ProductoId,
                 ProductoNombre = p.Nombre,
-                ColorId = v.ColorId ?? 0,
-                ColorNombre = v.Color?.Nombre ?? "Sin color",
+                MarcaId = v.MarcaId,
+                MarcaNombre = v.Marca?.Nombre,
+                ModeloId = v.ModeloId,
+                ModeloNombre = v.Modelo?.Nombre,
+                ColorId = v.ColorId,
+                ColorNombre = v.Color?.Nombre,
                 ColorCodigoVisual = v.Color?.CodigoVisual,
+                TallaId = v.TallaId,
+                TallaNombre = v.Talla?.Nombre,
+                Etiqueta = ConstruirEtiqueta(v),
                 Sku = v.Sku ?? string.Empty,
                 CodigoBarras = v.CodigoBarras,
                 Cantidad = v.Cantidad,
@@ -68,6 +78,7 @@ public static class ProductoMapper
                 Costo = v.Costo ?? p.Costo,
                 Precio = v.Precio ?? p.Precio,
                 Activo = v.Activo,
+                EsTecnica = v.EsTecnica,
                 TieneStockBajo = v.TieneStockBajo,
                 EstaAgotada = v.EstaAgotada,
                 EstadoInventario = v.EstaAgotada ? "Agotada" : v.TieneStockBajo ? "Stock bajo" : "Disponible",
@@ -82,5 +93,19 @@ public static class ProductoMapper
             FechaCreacion = p.FechaCreacion,
             FechaActualizacion = p.FechaActualizacion
         };
+    }
+
+    private static string ConstruirEtiqueta(ProductoVariante variante)
+    {
+        var partes = new[]
+        {
+            variante.Marca?.Nombre,
+            variante.Modelo?.Nombre,
+            variante.Color?.Nombre,
+            variante.Talla?.Nombre,
+            variante.Sku
+        };
+
+        return string.Join(" · ", partes.Where(parte => !string.IsNullOrWhiteSpace(parte)));
     }
 }
