@@ -19,7 +19,7 @@ public class ProductoImagenVarianteIntegrationTests
             .Options;
 
     // Gate final M2: cubre migración MySQL 8.4, unicidad por ámbito de imagen
-    // y forma parte de la certificación integral junto al E2E de variante exacta.
+    // y forma parte de la certificación integral posterior al cierre de regresiones.
     [Fact]
     public async Task PrincipalPorAmbito_PermiteGeneralYUnaPorCadaVariante_PeroRechazaDuplicado()
     {
