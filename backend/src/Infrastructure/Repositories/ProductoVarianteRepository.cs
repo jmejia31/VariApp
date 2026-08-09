@@ -21,7 +21,8 @@ public class ProductoVarianteRepository : IProductoVarianteRepository
             .Include(v => v.Marca)
             .Include(v => v.Modelo)
             .Include(v => v.Color)
-            .Include(v => v.Talla);
+            .Include(v => v.Talla)
+            .Include(v => v.Imagenes);
 
     public Task<ProductoVariante?> GetByIdAsync(int id) =>
         Query().FirstOrDefaultAsync(v => v.Id == id && !v.Eliminado);
@@ -65,16 +66,10 @@ public class ProductoVarianteRepository : IProductoVarianteRepository
             .ToListAsync();
     }
 
-    public Task<ProductoVariante?> GetTecnicaByProductoIdAsync(
-        int productoId,
-        bool incluirEliminada = false)
+    public Task<ProductoVariante?> GetTecnicaByProductoIdAsync(int productoId, bool incluirEliminada = false)
     {
-        var query = Query()
-            .IgnoreQueryFilters()
-            .Where(v => v.ProductoId == productoId && v.EsTecnica);
-        if (!incluirEliminada)
-            query = query.Where(v => !v.Eliminado);
-
+        var query = Query().IgnoreQueryFilters().Where(v => v.ProductoId == productoId && v.EsTecnica);
+        if (!incluirEliminada) query = query.Where(v => !v.Eliminado);
         return query.OrderByDescending(v => v.Id).FirstOrDefaultAsync();
     }
 
@@ -84,63 +79,39 @@ public class ProductoVarianteRepository : IProductoVarianteRepository
     public Task<ProductoVariante?> GetByCodigoBarrasAsync(string codigoBarras) =>
         Query().FirstOrDefaultAsync(v => !v.Eliminado && v.CodigoBarras == codigoBarras);
 
-    public Task<ProductoVariante?> GetByCombinacionAsync(
-        int productoId,
-        int? marcaId,
-        int? modeloId,
-        int? colorId,
-        int? tallaId) =>
-        Query().FirstOrDefaultAsync(v =>
-            !v.Eliminado &&
-            v.ProductoId == productoId &&
-            v.MarcaId == marcaId &&
-            v.ModeloId == modeloId &&
-            v.ColorId == colorId &&
-            v.TallaId == tallaId);
+    public Task<ProductoVariante?> GetByCombinacionAsync(int productoId, int? marcaId, int? modeloId, int? colorId, int? tallaId) =>
+        Query().FirstOrDefaultAsync(v => !v.Eliminado && v.ProductoId == productoId && v.MarcaId == marcaId && v.ModeloId == modeloId && v.ColorId == colorId && v.TallaId == tallaId);
 
-    public Task<List<ProductoVariante>> BuscarPorCodigoAsync(
-        string skuNormalizado,
-        string codigoBarrasNormalizado,
-        CancellationToken cancellationToken = default) =>
+    public Task<List<ProductoVariante>> BuscarPorCodigoAsync(string skuNormalizado, string codigoBarrasNormalizado, CancellationToken cancellationToken = default) =>
         _context.ProductoVariantes
             .AsNoTracking()
             .Include(v => v.Producto).ThenInclude(p => p.Imagenes)
+            .Include(v => v.Imagenes)
             .Include(v => v.Marca)
             .Include(v => v.Modelo)
             .Include(v => v.Color)
             .Include(v => v.Talla)
-            .Where(v =>
-                !v.Eliminado &&
-                !v.Producto.Eliminado &&
-                ((v.Sku != null && v.Sku == skuNormalizado) ||
-                 (v.CodigoBarras != null && v.CodigoBarras == codigoBarrasNormalizado)))
+            .Where(v => !v.Eliminado && !v.Producto.Eliminado && ((v.Sku != null && v.Sku == skuNormalizado) || (v.CodigoBarras != null && v.CodigoBarras == codigoBarrasNormalizado)))
             .OrderBy(v => v.Id)
             .Take(2)
+            .AsSplitQuery()
             .ToListAsync(cancellationToken);
 
-    public Task<List<ProductoVariante>> BuscarPorTerminoAsync(
-        string terminoNormalizado,
-        bool soloConStock,
-        int limite,
-        CancellationToken cancellationToken = default,
-        TipoInventario? tipoInventario = null)
+    public Task<List<ProductoVariante>> BuscarPorTerminoAsync(string terminoNormalizado, bool soloConStock, int limite, CancellationToken cancellationToken = default, TipoInventario? tipoInventario = null)
     {
         var limiteSeguro = Math.Clamp(limite, 1, 30);
         var query = _context.ProductoVariantes
             .AsNoTracking()
             .Include(v => v.Producto).ThenInclude(p => p.Imagenes)
+            .Include(v => v.Imagenes)
             .Include(v => v.Marca)
             .Include(v => v.Modelo)
             .Include(v => v.Color)
             .Include(v => v.Talla)
-            .Where(v =>
-                !v.Eliminado && v.Activo &&
-                !v.Producto.Eliminado && v.Producto.Activo);
+            .Where(v => !v.Eliminado && v.Activo && !v.Producto.Eliminado && v.Producto.Activo);
 
-        if (tipoInventario.HasValue)
-            query = query.Where(v => v.Producto.TipoInventario == tipoInventario.Value);
-        if (soloConStock)
-            query = query.Where(v => v.Cantidad > 0);
+        if (tipoInventario.HasValue) query = query.Where(v => v.Producto.TipoInventario == tipoInventario.Value);
+        if (soloConStock) query = query.Where(v => v.Cantidad > 0);
 
         query = query.Where(v =>
             v.Producto.Nombre.ToLower().Contains(terminoNormalizado) ||
@@ -160,13 +131,11 @@ public class ProductoVarianteRepository : IProductoVarianteRepository
             .ThenBy(v => v.Sku)
             .ThenBy(v => v.Id)
             .Take(limiteSeguro)
+            .AsSplitQuery()
             .ToListAsync(cancellationToken);
     }
 
-    public Task AddAsync(ProductoVariante variante) =>
-        _context.ProductoVariantes.AddAsync(variante).AsTask();
-
+    public Task AddAsync(ProductoVariante variante) => _context.ProductoVariantes.AddAsync(variante).AsTask();
     public void Update(ProductoVariante variante) => _context.ProductoVariantes.Update(variante);
-
     public async Task<bool> SaveChangesAsync() => await _context.SaveChangesAsync() > 0;
 }
