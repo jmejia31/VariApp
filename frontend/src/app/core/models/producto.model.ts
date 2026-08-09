@@ -8,22 +8,31 @@ export interface ProductoImagen {
   url: string;
   orden: number;
   esPrincipal: boolean;
+  productoVarianteId?: number | null;
 }
 
 export interface ProductoVariante {
   id: number;
   productoId: number;
   productoNombre: string;
-  colorId: number;
-  colorNombre: string;
-  colorCodigoVisual?: string;
+  marcaId?: number | null;
+  marcaNombre?: string | null;
+  modeloId?: number | null;
+  modeloNombre?: string | null;
+  colorId?: number | null;
+  colorNombre?: string | null;
+  colorCodigoVisual?: string | null;
+  tallaId?: number | null;
+  tallaNombre?: string | null;
+  etiqueta: string;
   sku: string;
-  codigoBarras?: string;
+  codigoBarras?: string | null;
   cantidad: number;
   umbralStockBajo: number;
   costo: number;
   precio: number;
   activo: boolean;
+  esTecnica: boolean;
   tieneStockBajo: boolean;
   estaAgotada: boolean;
   estadoInventario: string;
@@ -33,7 +42,10 @@ export interface ProductoVariante {
 
 export interface ProductoVarianteFormValue {
   id?: number;
-  colorId?: number;
+  marcaId?: number | null;
+  modeloId?: number | null;
+  colorId?: number | null;
+  tallaId?: number | null;
   sku?: string;
   codigoBarras?: string;
   cantidad: number;
@@ -89,9 +101,16 @@ export interface ProductoEscaneadoBase {
   productoNombre: string;
   marca: string;
   modelo: string;
-  esVarianteTecnica: boolean;
+  marcaId?: number | null;
+  marcaNombre?: string | null;
+  modeloId?: number | null;
+  modeloNombre?: string | null;
   colorId?: number | null;
   colorNombre?: string | null;
+  tallaId?: number | null;
+  tallaNombre?: string | null;
+  etiqueta?: string;
+  esVarianteTecnica: boolean;
   sku: string;
   codigoBarras?: string | null;
   cantidadDisponible: number;
