@@ -45,6 +45,17 @@ public class M12AutomatizacionTransversalTests
     }
 
     [Fact]
+    public void Controller_ExponeConfiguracionAdministrable()
+    {
+        var get = typeof(AutomatizacionesController).GetMethod(nameof(AutomatizacionesController.GetConfiguracion));
+        var update = typeof(AutomatizacionesController).GetMethod(nameof(AutomatizacionesController.UpdateConfiguracion));
+        Assert.NotNull(get);
+        Assert.NotNull(update);
+        Assert.Equal("configuracion", get!.GetCustomAttributes(typeof(HttpGetAttribute), true).Cast<HttpGetAttribute>().Single().Template);
+        Assert.Equal("configuracion", update!.GetCustomAttributes(typeof(HttpPutAttribute), true).Cast<HttpPutAttribute>().Single().Template);
+    }
+
+    [Fact]
     public void ContratoCubreLosNueveDominiosDelPlan()
     {
         var modulos = new[] { "Productos", "Compras", "Ventas", "Inventario", "Clientes", "Facturación", "Finanzas", "Cargas", "Configuración" };
