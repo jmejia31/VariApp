@@ -7,6 +7,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
@@ -15,6 +16,7 @@ import {
   CargaMasiva,
   CargaMasivaConfiguracion,
   CargaMasivaDetalle,
+  CargaMasivaProgreso,
   CargaMasivaTipo,
   TipoCargaMasiva
 } from '../../core/models/carga-masiva.model';
@@ -32,6 +34,7 @@ import { CargaMasivaService } from '../../services/carga-masiva.service';
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
+    MatProgressBarModule,
     MatProgressSpinnerModule,
     MatSelectModule,
     MatTableModule,
@@ -44,6 +47,7 @@ export class CargasMasivasComponent implements OnInit {
   readonly configuracion = signal<CargaMasivaConfiguracion | null>(null);
   readonly historial = signal<CargaMasiva[]>([]);
   readonly detalle = signal<CargaMasivaDetalle | null>(null);
+  readonly progreso = signal<CargaMasivaProgreso | null>(null);
   readonly archivo = signal<File | null>(null);
   readonly loading = signal(true);
   readonly validando = signal(false);
@@ -81,10 +85,15 @@ export class CargasMasivasComponent implements OnInit {
     return this.tipoActual?.columnas ?? [];
   }
 
+  get limiteVistaPrevia(): number {
+    return Math.max(25, Math.min(this.configuracion()?.maximoFilasVistaPrevia ?? 100, 500));
+  }
+
   seleccionarArchivo(event: Event): void {
     this.error.set(null);
     this.mensaje.set(null);
     this.detalle.set(null);
+    this.progreso.set(null);
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0] ?? null;
     if (!file) {
@@ -120,6 +129,7 @@ export class CargasMasivasComponent implements OnInit {
         this.detalle.set(res.data);
         this.mensaje.set(res.message || 'Archivo validado.');
         this.validando.set(false);
+        this.cargarProgreso(res.data.id);
         this.cargarHistorial();
       },
       error: (err) => {
@@ -132,7 +142,7 @@ export class CargasMasivasComponent implements OnInit {
   confirmar(): void {
     const carga = this.detalle();
     if (!carga?.puedeConfirmarse || this.confirmando()) return;
-    if (!window.confirm(`¿Confirmar ${carga.filasValidas} filas válidas? La operación se ejecutará en una sola transacción.`)) return;
+    if (!window.confirm(`¿Confirmar ${carga.filasValidas} filas válidas? La operación conservará atomicidad transaccional.`)) return;
 
     this.confirmando.set(true);
     this.error.set(null);
@@ -142,11 +152,13 @@ export class CargasMasivasComponent implements OnInit {
         this.detalle.set(res.data);
         this.mensaje.set(res.message || 'Carga confirmada correctamente.');
         this.confirmando.set(false);
+        this.cargarProgreso(res.data.id);
         this.cargarHistorial();
       },
       error: (err) => {
         this.error.set(err.error?.message ?? 'No se pudo confirmar la carga. No se aplicaron cambios parciales.');
         this.confirmando.set(false);
+        this.cargarProgreso(carga.id);
       }
     });
   }
@@ -164,20 +176,30 @@ export class CargasMasivasComponent implements OnInit {
       next: (res) => {
         this.detalle.set(res.data);
         this.tipoSeleccionado = res.data.tipo;
+        this.cargarProgreso(res.data.id);
       },
       error: (err) => this.error.set(err.error?.message ?? 'No se pudo abrir la carga seleccionada.')
     });
   }
 
+  cargarProgreso(id: number): void {
+    this.service.getProgreso(id).subscribe({
+      next: (res) => this.progreso.set(res.data),
+      error: () => this.progreso.set(null)
+    });
+  }
+
   descargarPlantilla(formato: 'csv' | 'xlsx'): void {
     this.descargando.set(true);
-    this.service.descargarPlantilla(this.tipoSeleccionado, formato).subscribe({
+    const version = this.configuracion()?.versionPlantillaActual;
+    this.service.descargarPlantilla(this.tipoSeleccionado, formato, version).subscribe({
       next: (blob) => {
-        this.guardarBlob(blob, `plantilla-${this.tipoSeleccionado.toLowerCase()}.${formato}`);
+        const sufijo = version ? `-${version.toLowerCase().replace('.', '-')}` : '';
+        this.guardarBlob(blob, `plantilla-${this.tipoSeleccionado.toLowerCase()}${sufijo}.${formato}`);
         this.descargando.set(false);
       },
       error: () => {
-        this.error.set('No se pudo descargar la plantilla.');
+        this.error.set('No se pudo descargar la plantilla vigente.');
         this.descargando.set(false);
       }
     });
@@ -201,6 +223,7 @@ export class CargasMasivasComponent implements OnInit {
 
   reiniciar(): void {
     this.detalle.set(null);
+    this.progreso.set(null);
     this.archivo.set(null);
     this.error.set(null);
     this.mensaje.set(null);
