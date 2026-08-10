@@ -18,6 +18,7 @@ public class ProductoRepository : IProductoRepository
 
     private IQueryable<Producto> ConIncludes() =>
         _context.Productos
+            .AsNoTracking()
             .Include(p => p.Imagenes)
             .Include(p => p.Categoria)
             .Include(p => p.Color)
@@ -93,6 +94,8 @@ public class ProductoRepository : IProductoRepository
                 p.Nombre.ToLower().Contains(search) ||
                 p.Marca.ToLower().Contains(search) ||
                 p.Modelo.ToLower().Contains(search) ||
+                (p.Descripcion != null && p.Descripcion.ToLower().Contains(search)) ||
+                (p.Categoria != null && p.Categoria.Nombre.ToLower().Contains(search)) ||
                 (p.MarcaCatalogo != null && p.MarcaCatalogo.Nombre.ToLower().Contains(search)) ||
                 (p.ModeloCatalogo != null && p.ModeloCatalogo.Nombre.ToLower().Contains(search)) ||
                 p.Variantes.Any(v => !v.Eliminado &&
