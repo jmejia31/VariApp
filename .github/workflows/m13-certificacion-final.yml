@@ -48,11 +48,14 @@ jobs:
             exit 1
           fi
           dotnet list InventoryApp.sln package --deprecated --include-transitive | tee ../m13-dotnet-deprecated.txt
-      - name: Auditar npm producción y desarrollo
+      - name: Auditar npm runtime y registrar tooling
         working-directory: frontend
+        shell: bash
         run: |
+          set -euo pipefail
           npm ci
-          npm audit --audit-level=high | tee ../m13-npm-audit.txt
+          npm audit --omit=dev --audit-level=high | tee ../m13-npm-runtime-audit.txt
+          npm audit --audit-level=high > ../m13-npm-tooling-audit.txt || true
       - name: Publicar auditorías de dependencias
         if: always()
         uses: actions/upload-artifact@v4
@@ -62,7 +65,8 @@ jobs:
             m13-static-audit.json
             m13-dotnet-vulnerable.txt
             m13-dotnet-deprecated.txt
-            m13-npm-audit.txt
+            m13-npm-runtime-audit.txt
+            m13-npm-tooling-audit.txt
           if-no-files-found: warn
           retention-days: 30
 
