@@ -18,7 +18,6 @@ public class ProductoRepository : IProductoRepository
 
     private IQueryable<Producto> ConIncludes() =>
         _context.Productos
-            .AsNoTracking()
             .Include(p => p.Imagenes)
             .Include(p => p.Categoria)
             .Include(p => p.Color)
@@ -65,7 +64,7 @@ public class ProductoRepository : IProductoRepository
 
     public async Task<(List<Producto> Items, int TotalCount)> GetPagedAsync(PagedRequest request)
     {
-        var query = ConIncludes().AsQueryable();
+        var query = ConIncludes().AsNoTracking().AsQueryable();
 
         if (request is ProductoPagedRequest filters)
         {
@@ -140,12 +139,14 @@ public class ProductoRepository : IProductoRepository
 
     public async Task<List<Producto>> GetStockBajoAsync() =>
         await ConIncludes()
+            .AsNoTracking()
             .Where(p => !p.Variantes.Any(v => !v.Eliminado && v.Activo && v.Cantidad > v.UmbralStockBajo))
             .OrderBy(p => p.Nombre)
             .ToListAsync();
 
     public async Task<List<Producto>> GetUltimosAgregadosAsync(int cantidad = 5) =>
         await ConIncludes()
+            .AsNoTracking()
             .OrderByDescending(p => p.FechaCreacion)
             .Take(cantidad)
             .ToListAsync();
