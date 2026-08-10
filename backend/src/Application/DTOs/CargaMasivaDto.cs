@@ -66,6 +66,14 @@ public class CargaMasivaConfiguracionDto
     public int MaximoFilas { get; set; }
     public string[] ExtensionesPermitidas { get; set; } = Array.Empty<string>();
     public List<CargaMasivaTipoDto> Tipos { get; set; } = new();
+
+    // M9: contrato explícito y versionado. El tamaño de lote describe la unidad
+    // operativa recomendada para UI/telemetría sin debilitar la atomicidad de la
+    // confirmación transaccional existente.
+    public string VersionPlantillaActual { get; set; } = "M9.1";
+    public int TamanoLoteProcesamiento { get; set; } = 250;
+    public int MaximoFilasVistaPrevia { get; set; } = 200;
+    public string[] EtapasProceso { get; set; } = ["Carga", "Lectura", "Validacion", "VistaPrevia", "Confirmacion"];
 }
 
 public class CargaMasivaTipoDto
@@ -74,6 +82,32 @@ public class CargaMasivaTipoDto
     public string Nombre { get; set; } = string.Empty;
     public string Descripcion { get; set; } = string.Empty;
     public string[] Columnas { get; set; } = Array.Empty<string>();
+    public string VersionPlantilla { get; set; } = "M9.1";
+}
+
+public class CargaMasivaProgresoDto
+{
+    public int Id { get; set; }
+    public string Estado { get; set; } = string.Empty;
+    public string EtapaActual { get; set; } = string.Empty;
+    public int Porcentaje { get; set; }
+    public int TotalFilas { get; set; }
+    public int FilasCorrectas { get; set; }
+    public int FilasConError { get; set; }
+    public int FilasOmitidas { get; set; }
+    public int FilasProcesadas { get; set; }
+    public int RegistrosCreados { get; set; }
+    public int RegistrosActualizados { get; set; }
+    public string VersionPlantilla { get; set; } = "M9.1";
+    public List<CargaMasivaEtapaDto> Etapas { get; set; } = new();
+}
+
+public class CargaMasivaEtapaDto
+{
+    public string Codigo { get; set; } = string.Empty;
+    public string Nombre { get; set; } = string.Empty;
+    public string Estado { get; set; } = "Pendiente";
+    public int Porcentaje { get; set; }
 }
 
 public class ValidarCargaMasivaRequest
