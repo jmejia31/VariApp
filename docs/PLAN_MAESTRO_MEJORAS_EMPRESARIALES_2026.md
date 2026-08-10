@@ -839,7 +839,11 @@ La identidad de Cliente sigue las reglas corregidas en M1.
 
 # FASE M6 — Mercadería, insumos administrativos y gastos
 
-Separar y completar:
+Estado: **COMPLETADA / CERTIFICADA AUTOMÁTICAMENTE (2026-08-09)**.
+
+Entregable: `docs/FASE_M6_MERCADERIA_INSUMOS_GASTOS.md`.
+
+Separación completada:
 
 - mercadería vendible;
 - insumo administrativo físico no vendible;
@@ -850,6 +854,10 @@ Incluye permisos, vistas, reportes, valoración, consumos y bloqueo backend cont
 ---
 
 # FASE M7 — Costos de envío profesionales
+
+Estado: **COMPLETADA / CERTIFICADA AUTOMÁTICAMENTE (2026-08-09)**.
+
+Entregable: `docs/FASE_M7_COSTOS_ENVIO_PROFESIONALES.md`.
 
 Sobre la restricción de predeterminado ya reforzada en M1:
 
