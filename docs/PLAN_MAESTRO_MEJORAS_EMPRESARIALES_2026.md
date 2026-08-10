@@ -878,6 +878,10 @@ Sobre la restricción de predeterminado ya reforzada en M1:
 
 # FASE M8 — Búsqueda inteligente y rendimiento
 
+Estado: **COMPLETADA / CERTIFICADA AUTOMÁTICAMENTE (2026-08-10)**.
+
+Entregable: `docs/FASE_M8_BUSQUEDA_INTELIGENTE_RENDIMIENTO.md`.
+
 - SKU/barcode;
 - Producto;
 - Marca;
@@ -897,7 +901,11 @@ Sobre la restricción de predeterminado ya reforzada en M1:
 
 # FASE M9 — Cargas masivas profesionales
 
-Extender la infraestructura existente:
+Estado: **COMPLETADA / CERTIFICADA AUTOMÁTICAMENTE (2026-08-10)**.
+
+Entregable: `docs/FASE_M9_CARGAS_MASIVAS_PROFESIONALES.md`.
+
+Cobertura cerrada sobre la infraestructura existente:
 
 - preview;
 - validación;
