@@ -1,0 +1,87 @@
+name: M11 - Backup operativo de Desarrollo
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '30 07 * * *'
+
+permissions:
+  contents: read
+
+env:
+  RETENTION_DAYS: '14'
+
+jobs:
+  backup-desarrollo:
+    name: Backup cifrado de varistorehn_desarrollo
+    if: ${{ github.event_name == 'workflow_dispatch' || vars.M11_DESARROLLO_BACKUP_SCHEDULE_ENABLED == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: varistorehn_desarrollo
+
+    steps:
+      - name: Checkout Desarrollo
+        uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+
+      - name: Verificar configuración externa requerida
+        shell: bash
+        env:
+          DB_HOST: ${{ secrets.M11_DESARROLLO_DB_HOST }}
+          DB_PORT: ${{ secrets.M11_DESARROLLO_DB_PORT }}
+          DB_NAME: ${{ secrets.M11_DESARROLLO_DB_NAME }}
+          DB_USER: ${{ secrets.M11_DESARROLLO_DB_USER }}
+          DB_PASSWORD: ${{ secrets.M11_DESARROLLO_DB_PASSWORD }}
+          BACKUP_PASSPHRASE: ${{ secrets.M11_BACKUP_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          for name in DB_HOST DB_PORT DB_NAME DB_USER DB_PASSWORD BACKUP_PASSPHRASE; do
+            if [ -z "${!name:-}" ]; then
+              echo "Falta el secreto requerido $name para ejecutar el backup real de Desarrollo." >&2
+              exit 1
+            fi
+          done
+
+      - name: Crear backup cifrado de Desarrollo
+        id: backup
+        shell: bash
+        env:
+          VARIAPP_ENVIRONMENT: desarrollo
+          DB_HOST: ${{ secrets.M11_DESARROLLO_DB_HOST }}
+          DB_PORT: ${{ secrets.M11_DESARROLLO_DB_PORT }}
+          DB_NAME: ${{ secrets.M11_DESARROLLO_DB_NAME }}
+          DB_USER: ${{ secrets.M11_DESARROLLO_DB_USER }}
+          DB_PASSWORD: ${{ secrets.M11_DESARROLLO_DB_PASSWORD }}
+          DB_SSL_MODE: REQUIRED
+          BACKUP_PASSPHRASE: ${{ secrets.M11_BACKUP_PASSPHRASE }}
+          OUTPUT_DIR: ${{ runner.temp }}/m11-backups
+          RETENTION_DAYS: ${{ env.RETENTION_DAYS }}
+          BACKUP_LABEL: desarrollo
+        run: |
+          set -euo pipefail
+          chmod +x scripts/m11_backup_desarrollo.sh
+          scripts/m11_backup_desarrollo.sh | tee "$RUNNER_TEMP/m11-backup-operativo.log"
+          backup_file="$(grep '^M11_BACKUP_FILE=' "$RUNNER_TEMP/m11-backup-operativo.log" | cut -d= -f2-)"
+          checksum_file="$(grep '^M11_BACKUP_SHA256=' "$RUNNER_TEMP/m11-backup-operativo.log" | cut -d= -f2-)"
+          metadata_file="$(grep '^M11_BACKUP_METADATA=' "$RUNNER_TEMP/m11-backup-operativo.log" | cut -d= -f2-)"
+          test -s "$backup_file"
+          test -s "$checksum_file"
+          test -s "$metadata_file"
+          grep -q '"environment": "desarrollo"' "$metadata_file"
+          grep -q '"encrypted": true' "$metadata_file"
+          grep -q '"productionInScope": false' "$metadata_file"
+          echo "backup_file=$backup_file" >> "$GITHUB_OUTPUT"
+          echo "checksum_file=$checksum_file" >> "$GITHUB_OUTPUT"
+          echo "metadata_file=$metadata_file" >> "$GITHUB_OUTPUT"
+
+      - name: Publicar únicamente artefactos cifrados
+        uses: actions/upload-artifact@v4
+        with:
+          name: m11-backup-desarrollo-${{ github.run_id }}
+          path: |
+            ${{ steps.backup.outputs.backup_file }}
+            ${{ steps.backup.outputs.checksum_file }}
+            ${{ steps.backup.outputs.metadata_file }}
+          if-no-files-found: error
+          retention-days: 14
