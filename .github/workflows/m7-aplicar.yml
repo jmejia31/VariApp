@@ -1,0 +1,286 @@
+name: M7 - aplicar costos de envio profesionales
+
+on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - '.github/workflows/m7-aplicar.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Aplicar M7 fail-closed
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+
+          def replace(path, old, new, count=1):
+              p = Path(path)
+              text = p.read_text()
+              if old not in text:
+                  raise SystemExit(f'Firma no encontrada en {path}: {old[:120]!r}')
+              text2 = text.replace(old, new, count)
+              p.write_text(text2)
+
+          # Dominio y DTOs de costo de envio.
+          replace('backend/src/Domain/Entities/CostoEnvio.cs',
+          '    public string? Descripcion { get; set; }\n    public decimal Monto { get; set; }',
+          '    public string? Descripcion { get; set; }\n    public string? Departamento { get; set; }\n    public string? Ciudad { get; set; }\n    public string? Zona { get; set; }\n    public string? Modalidad { get; set; }\n    public decimal Monto { get; set; }')
+
+          replace('backend/src/Application/DTOs/CostoEnvioDto.cs',
+          '    public string? Descripcion { get; set; }\n    public decimal Monto { get; set; }',
+          '    public string? Descripcion { get; set; }\n    public string? Departamento { get; set; }\n    public string? Ciudad { get; set; }\n    public string? Zona { get; set; }\n    public string? Modalidad { get; set; }\n    public decimal Monto { get; set; }', 2)
+          replace('backend/src/Application/DTOs/CostoEnvioDto.cs',
+          '    public bool Activo { get; set; }\n    public DateTime FechaCreacion { get; set; }',
+          '    public bool Activo { get; set; }\n    public bool EstaVigente { get; set; }\n    public DateTime FechaCreacion { get; set; }')
+          replace('backend/src/Application/DTOs/CostoEnvioDto.cs',
+          '}\n\npublic class GuardarCostoEnvioDto',
+          '}\n\npublic class ResolverCostoEnvioDto\n{\n    public string? Departamento { get; set; }\n    public string? Ciudad { get; set; }\n    public string? Zona { get; set; }\n    public string? Modalidad { get; set; }\n}\n\npublic class GuardarCostoEnvioDto')
+
+          # Repositorio: resolucion por cobertura, especificidad y prioridad.
+          replace('backend/src/Application/Interfaces/ICostoEnvioRepository.cs',
+          '    Task<CostoEnvio?> GetPredeterminadoVigenteAsync(DateTime fecha);',
+          '    Task<CostoEnvio?> GetPredeterminadoVigenteAsync(DateTime fecha);\n    Task<CostoEnvio?> ResolverVigenteAsync(string? departamento, string? ciudad, string? zona, string? modalidad, DateTime fecha);')
+
+          replace('backend/src/Infrastructure/Repositories/CostoEnvioRepository.cs',
+          '    public Task<bool> ExisteNombreAsync(string nombreNormalizado, int? excluirId = null) =>',
+          '''    public async Task<CostoEnvio?> ResolverVigenteAsync(string? departamento, string? ciudad, string? zona, string? modalidad, DateTime fecha)\n    {\n        var departamentoNormalizado = NormalizarClave(departamento);\n        var ciudadNormalizada = NormalizarClave(ciudad);\n        var zonaNormalizada = NormalizarClave(zona);\n        var modalidadNormalizada = NormalizarClave(modalidad);\n\n        var candidatos = await _context.CostosEnvio\n            .AsNoTracking()\n            .Where(x => !x.Eliminado && x.Activo)\n            .Where(x => !x.VigenteDesde.HasValue || x.VigenteDesde <= fecha)\n            .Where(x => !x.VigenteHasta.HasValue || x.VigenteHasta >= fecha)\n            .Where(x => string.IsNullOrEmpty(x.Departamento) || (departamentoNormalizado != null && x.Departamento!.ToUpper() == departamentoNormalizado))\n            .Where(x => string.IsNullOrEmpty(x.Ciudad) || (ciudadNormalizada != null && x.Ciudad!.ToUpper() == ciudadNormalizada))\n            .Where(x => string.IsNullOrEmpty(x.Zona) || (zonaNormalizada != null && x.Zona!.ToUpper() == zonaNormalizada))\n            .Where(x => string.IsNullOrEmpty(x.Modalidad) || (modalidadNormalizada != null && x.Modalidad!.ToUpper() == modalidadNormalizada))\n            .ToListAsync();\n\n        return candidatos\n            .OrderByDescending(Especificidad)\n            .ThenBy(x => x.Prioridad)\n            .ThenBy(x => x.Id)\n            .FirstOrDefault();\n    }\n\n    private static string? NormalizarClave(string? valor) =>\n        string.IsNullOrWhiteSpace(valor) ? null : valor.Trim().ToUpperInvariant();\n\n    private static int Especificidad(CostoEnvio x) =>\n        (string.IsNullOrWhiteSpace(x.Departamento) ? 0 : 1) +\n        (string.IsNullOrWhiteSpace(x.Ciudad) ? 0 : 1) +\n        (string.IsNullOrWhiteSpace(x.Zona) ? 0 : 1) +\n        (string.IsNullOrWhiteSpace(x.Modalidad) ? 0 : 1);\n\n    public Task<bool> ExisteNombreAsync(string nombreNormalizado, int? excluirId = null) =>''')
+
+          # Configuracion EF.
+          replace('backend/src/Infrastructure/Persistence/Configurations/CostoEnvioConfiguration.cs',
+          '        builder.Property(x => x.Nombre).HasMaxLength(120).IsRequired();\n        builder.Property(x => x.Descripcion).HasMaxLength(500);',
+          '        builder.Property(x => x.Nombre).HasMaxLength(150).IsRequired();\n        builder.Property(x => x.Descripcion).HasMaxLength(500);\n        builder.Property(x => x.Departamento).HasMaxLength(100);\n        builder.Property(x => x.Ciudad).HasMaxLength(120);\n        builder.Property(x => x.Zona).HasMaxLength(120);\n        builder.Property(x => x.Modalidad).HasMaxLength(100);')
+          replace('backend/src/Infrastructure/Persistence/Configurations/CostoEnvioConfiguration.cs',
+          '        builder.HasIndex(x => new { x.Activo, x.EsPredeterminado });',
+          '        builder.HasIndex(x => new { x.Activo, x.EsPredeterminado });\n        builder.HasIndex(x => new { x.Activo, x.Eliminado, x.Prioridad });\n        builder.HasIndex(x => x.Departamento);\n        builder.HasIndex(x => x.Ciudad);\n        builder.HasIndex(x => x.Zona);\n        builder.HasIndex(x => x.Modalidad);')
+
+          # Servicio de aplicacion (mantener paridad aunque el controller gestione transaccion/auditoria).
+          replace('backend/src/Application/Interfaces/ICostoEnvioService.cs',
+          '    Task<CostoEnvioDto?> GetPredeterminadoVigenteAsync();',
+          '    Task<CostoEnvioDto?> GetPredeterminadoVigenteAsync();\n    Task<CostoEnvioDto?> ResolverVigenteAsync(ResolverCostoEnvioDto dto);')
+          replace('backend/src/Application/Services/CostoEnvioService.cs',
+          '    public async Task<CostoEnvioDto> CreateAsync(GuardarCostoEnvioDto dto)',
+          '''    public async Task<CostoEnvioDto?> ResolverVigenteAsync(ResolverCostoEnvioDto dto)\n    {\n        var item = await _repository.ResolverVigenteAsync(dto.Departamento, dto.Ciudad, dto.Zona, dto.Modalidad, DateTime.UtcNow);\n        item ??= await _repository.GetPredeterminadoVigenteAsync(DateTime.UtcNow);\n        return item is null ? null : ToDto(item);\n    }\n\n    public async Task<CostoEnvioDto> CreateAsync(GuardarCostoEnvioDto dto)''')
+          replace('backend/src/Application/Services/CostoEnvioService.cs',
+          '            Descripcion = Normalizar(dto.Descripcion, 500),\n            Monto =',
+          '            Descripcion = Normalizar(dto.Descripcion, 500),\n            Departamento = Normalizar(dto.Departamento, 100),\n            Ciudad = Normalizar(dto.Ciudad, 120),\n            Zona = Normalizar(dto.Zona, 120),\n            Modalidad = Normalizar(dto.Modalidad, 100),\n            Monto =')
+          replace('backend/src/Application/Services/CostoEnvioService.cs',
+          '        item.Descripcion = Normalizar(dto.Descripcion, 500);\n        item.Monto =',
+          '        item.Descripcion = Normalizar(dto.Descripcion, 500);\n        item.Departamento = Normalizar(dto.Departamento, 100);\n        item.Ciudad = Normalizar(dto.Ciudad, 120);\n        item.Zona = Normalizar(dto.Zona, 120);\n        item.Modalidad = Normalizar(dto.Modalidad, 100);\n        item.Monto =')
+          replace('backend/src/Application/Services/CostoEnvioService.cs',
+          '        if (dto.Monto < 0)\n            throw new BusinessRuleException("El monto no puede ser negativo.");',
+          '        if (dto.Monto < 0)\n            throw new BusinessRuleException("El monto no puede ser negativo.");\n        if (dto.Prioridad < 0)\n            throw new BusinessRuleException("La prioridad no puede ser negativa.");\n        if (!string.IsNullOrWhiteSpace(dto.Departamento) && dto.Departamento.Trim().Length > 100)\n            throw new BusinessRuleException("El departamento no puede superar 100 caracteres.");\n        if (!string.IsNullOrWhiteSpace(dto.Ciudad) && dto.Ciudad.Trim().Length > 120)\n            throw new BusinessRuleException("La ciudad no puede superar 120 caracteres.");\n        if (!string.IsNullOrWhiteSpace(dto.Zona) && dto.Zona.Trim().Length > 120)\n            throw new BusinessRuleException("La zona no puede superar 120 caracteres.");\n        if (!string.IsNullOrWhiteSpace(dto.Modalidad) && dto.Modalidad.Trim().Length > 100)\n            throw new BusinessRuleException("La modalidad no puede superar 100 caracteres.");')
+          replace('backend/src/Application/Services/CostoEnvioService.cs',
+          '        Descripcion = x.Descripcion,\n        Monto = x.Monto,',
+          '        Descripcion = x.Descripcion,\n        Departamento = x.Departamento,\n        Ciudad = x.Ciudad,\n        Zona = x.Zona,\n        Modalidad = x.Modalidad,\n        Monto = x.Monto,')
+          replace('backend/src/Application/Services/CostoEnvioService.cs',
+          '        Activo = x.Activo,\n        FechaCreacion = x.FechaCreacion,',
+          '        Activo = x.Activo,\n        EstaVigente = x.EstaVigente(DateTime.UtcNow),\n        FechaCreacion = x.FechaCreacion,')
+
+          # Controller: resolver, historial y snapshots de auditoria.
+          replace('backend/src/API/Controllers/CostosEnvioController.cs',
+          '    private readonly IAuditoriaService _auditoria;\n\n    public CostosEnvioController(AppDbContext db, ICurrentUserService currentUser, IAuditoriaService auditoria)\n    {\n        _db = db;\n        _currentUser = currentUser;\n        _auditoria = auditoria;\n    }',
+          '    private readonly IAuditoriaService _auditoria;\n    private readonly ICostoEnvioRepository _repository;\n\n    public CostosEnvioController(AppDbContext db, ICurrentUserService currentUser, IAuditoriaService auditoria, ICostoEnvioRepository repository)\n    {\n        _db = db;\n        _currentUser = currentUser;\n        _auditoria = auditoria;\n        _repository = repository;\n    }')
+          replace('backend/src/API/Controllers/CostosEnvioController.cs',
+          '    [HttpGet("{id:int}")]\n    [RequierePermiso(ModuloSistema.Facturacion, AccionPermiso.Ver)]',
+          '''    [HttpGet("resolver")]\n    [RequierePermiso(ModuloSistema.Facturacion, AccionPermiso.Ver)]\n    public async Task<IActionResult> Resolver([FromQuery] string? departamento, [FromQuery] string? ciudad, [FromQuery] string? zona, [FromQuery] string? modalidad)\n    {\n        var item = await _repository.ResolverVigenteAsync(departamento, ciudad, zona, modalidad, DateTime.UtcNow);\n        item ??= await _repository.GetPredeterminadoVigenteAsync(DateTime.UtcNow);\n        return item is null\n            ? NotFound(ApiResponse<object>.Fail("No existe un costo de envío vigente que cubra los criterios indicados."))\n            : Ok(ApiResponse<CostoEnvioDto>.Ok(ToDto(item)));\n    }\n\n    [HttpGet("{id:int}/historial")]\n    [RequierePermiso(ModuloSistema.Facturacion, AccionPermiso.Ver)]\n    public async Task<IActionResult> Historial(int id, [FromQuery] int page = 1, [FromQuery] int pageSize = 50)\n    {\n        if (!await _db.CostosEnvio.IgnoreQueryFilters().AnyAsync(x => x.Id == id))\n            return NotFound(ApiResponse<object>.Fail("Costo de envío no encontrado."));\n        var resultado = await _auditoria.GetFilteredAsync(new AuditoriaFiltroDto\n        {\n            Entidad = "CostoEnvio",\n            ReferenciaId = id,\n            Page = Math.Max(1, page),\n            PageSize = Math.Clamp(pageSize, 1, 100)\n        });\n        return Ok(ApiResponse<PagedResult<RegistroAuditoriaDto>>.Ok(resultado));\n    }\n\n    [HttpGet("{id:int}")]\n    [RequierePermiso(ModuloSistema.Facturacion, AccionPermiso.Ver)]''')
+          replace('backend/src/API/Controllers/CostosEnvioController.cs',
+          '            Descripcion = Normalizar(dto.Descripcion, 500),\n            Monto =',
+          '            Descripcion = Normalizar(dto.Descripcion, 500),\n            Departamento = Normalizar(dto.Departamento, 100),\n            Ciudad = Normalizar(dto.Ciudad, 120),\n            Zona = Normalizar(dto.Zona, 120),\n            Modalidad = Normalizar(dto.Modalidad, 100),\n            Monto =')
+          replace('backend/src/API/Controllers/CostosEnvioController.cs',
+          '        await using var transaction = await _db.Database.BeginTransactionAsync();\n        if (dto.EsPredeterminado) await DesmarcarPredeterminadosYPersistirAsync(id);\n\n        item.Nombre = nombre;',
+          '        await using var transaction = await _db.Database.BeginTransactionAsync();\n        var anterior = ToDto(item);\n        if (dto.EsPredeterminado) await DesmarcarPredeterminadosYPersistirAsync(id);\n\n        item.Nombre = nombre;')
+          replace('backend/src/API/Controllers/CostosEnvioController.cs',
+          '        item.Descripcion = Normalizar(dto.Descripcion, 500);\n        item.Monto =',
+          '        item.Descripcion = Normalizar(dto.Descripcion, 500);\n        item.Departamento = Normalizar(dto.Departamento, 100);\n        item.Ciudad = Normalizar(dto.Ciudad, 120);\n        item.Zona = Normalizar(dto.Zona, 120);\n        item.Modalidad = Normalizar(dto.Modalidad, 100);\n        item.Monto =')
+          replace('backend/src/API/Controllers/CostosEnvioController.cs',
+          '            $"Costo de envío actualizado: {item.Nombre}.", item.Id, entidad: "CostoEnvio", valoresNuevos: salida);',
+          '            $"Costo de envío actualizado: {item.Nombre}.", item.Id, entidad: "CostoEnvio", valoresAnteriores: anterior, valoresNuevos: salida);')
+          replace('backend/src/API/Controllers/CostosEnvioController.cs',
+          '        if (item is null) return NotFound(ApiResponse<object>.Fail("Costo de envío no encontrado."));\n        item.Activo = dto.Activo;',
+          '        if (item is null) return NotFound(ApiResponse<object>.Fail("Costo de envío no encontrado."));\n        var anterior = ToDto(item);\n        item.Activo = dto.Activo;')
+          replace('backend/src/API/Controllers/CostosEnvioController.cs',
+          '            $"Costo de envío {(dto.Activo ? "activado" : "desactivado")}.", id, entidad: "CostoEnvio");',
+          '            $"Costo de envío {(dto.Activo ? "activado" : "desactivado")}.", id, entidad: "CostoEnvio", valoresAnteriores: anterior, valoresNuevos: ToDto(item));')
+          replace('backend/src/API/Controllers/CostosEnvioController.cs',
+          '        if (item is null) return NotFound(ApiResponse<object>.Fail("Costo de envío no encontrado."));\n        item.Eliminado = true;',
+          '        if (item is null) return NotFound(ApiResponse<object>.Fail("Costo de envío no encontrado."));\n        var anterior = ToDto(item);\n        item.Eliminado = true;')
+          replace('backend/src/API/Controllers/CostosEnvioController.cs',
+          '            "Costo de envío eliminado lógicamente.", id, entidad: "CostoEnvio");',
+          '            "Costo de envío eliminado lógicamente.", id, entidad: "CostoEnvio", valoresAnteriores: anterior, valoresNuevos: ToDto(item));')
+          replace('backend/src/API/Controllers/CostosEnvioController.cs',
+          '        if (dto.Monto < 0) return "El monto no puede ser negativo.";',
+          '        if (dto.Monto < 0) return "El monto no puede ser negativo.";\n        if (dto.Prioridad < 0) return "La prioridad no puede ser negativa.";\n        if (!string.IsNullOrWhiteSpace(dto.Departamento) && dto.Departamento.Trim().Length > 100) return "El departamento no puede superar 100 caracteres.";\n        if (!string.IsNullOrWhiteSpace(dto.Ciudad) && dto.Ciudad.Trim().Length > 120) return "La ciudad no puede superar 120 caracteres.";\n        if (!string.IsNullOrWhiteSpace(dto.Zona) && dto.Zona.Trim().Length > 120) return "La zona no puede superar 120 caracteres.";\n        if (!string.IsNullOrWhiteSpace(dto.Modalidad) && dto.Modalidad.Trim().Length > 100) return "La modalidad no puede superar 100 caracteres.";')
+          replace('backend/src/API/Controllers/CostosEnvioController.cs',
+          '        Descripcion = x.Descripcion,\n        Monto = x.Monto,',
+          '        Descripcion = x.Descripcion,\n        Departamento = x.Departamento,\n        Ciudad = x.Ciudad,\n        Zona = x.Zona,\n        Modalidad = x.Modalidad,\n        Monto = x.Monto,')
+          replace('backend/src/API/Controllers/CostosEnvioController.cs',
+          '        Activo = x.Activo,\n        FechaCreacion = x.FechaCreacion,',
+          '        Activo = x.Activo,\n        EstaVigente = x.EstaVigente(DateTime.UtcNow),\n        FechaCreacion = x.FechaCreacion,')
+
+          # Snapshot de cobertura en calculo, venta y factura.
+          replace('backend/src/Application/DTOs/CalculoDto.cs',
+          '    public string? CostoEnvioNombre { get; set; }\n    public decimal CostoEnvio { get; set; }',
+          '    public string? CostoEnvioNombre { get; set; }\n    public string? CostoEnvioDepartamento { get; set; }\n    public string? CostoEnvioCiudad { get; set; }\n    public string? CostoEnvioZona { get; set; }\n    public string? CostoEnvioModalidad { get; set; }\n    public decimal CostoEnvio { get; set; }')
+          replace('backend/src/Application/Services/CalculoService.cs',
+          '            Nombre = costo.Nombre,\n            Monto = RedondearMoneda(costo.Monto)',
+          '            Nombre = costo.Nombre,\n            Departamento = costo.Departamento,\n            Ciudad = costo.Ciudad,\n            Zona = costo.Zona,\n            Modalidad = costo.Modalidad,\n            Monto = RedondearMoneda(costo.Monto)')
+          replace('backend/src/Application/Services/CalculoService.cs',
+          '            CostoEnvioNombre = envio.Nombre,\n            CostoEnvio = RedondearMoneda(envio.Monto),',
+          '            CostoEnvioNombre = envio.Nombre,\n            CostoEnvioDepartamento = envio.Departamento,\n            CostoEnvioCiudad = envio.Ciudad,\n            CostoEnvioZona = envio.Zona,\n            CostoEnvioModalidad = envio.Modalidad,\n            CostoEnvio = RedondearMoneda(envio.Monto),')
+          replace('backend/src/Application/Services/CalculoService.cs',
+          '        public string? Nombre { get; init; }\n        public decimal Monto { get; init; }',
+          '        public string? Nombre { get; init; }\n        public string? Departamento { get; init; }\n        public string? Ciudad { get; init; }\n        public string? Zona { get; init; }\n        public string? Modalidad { get; init; }\n        public decimal Monto { get; init; }')
+
+          replace('backend/src/Domain/Entities/Venta.cs',
+          '    public string? CostoEnvioNombreSnapshot { get; set; }\n    public decimal? CostoEnvioMontoSnapshot { get; set; }',
+          '    public string? CostoEnvioNombreSnapshot { get; set; }\n    public string? CostoEnvioDepartamentoSnapshot { get; set; }\n    public string? CostoEnvioCiudadSnapshot { get; set; }\n    public string? CostoEnvioZonaSnapshot { get; set; }\n    public string? CostoEnvioModalidadSnapshot { get; set; }\n    public decimal? CostoEnvioMontoSnapshot { get; set; }')
+          replace('backend/src/Domain/Entities/Factura.cs',
+          '    public string? CostoEnvioNombreSnapshot { get; set; }\n    public decimal? CostoEnvioMontoSnapshot { get; set; }',
+          '    public string? CostoEnvioNombreSnapshot { get; set; }\n    public string? CostoEnvioDepartamentoSnapshot { get; set; }\n    public string? CostoEnvioCiudadSnapshot { get; set; }\n    public string? CostoEnvioZonaSnapshot { get; set; }\n    public string? CostoEnvioModalidadSnapshot { get; set; }\n    public decimal? CostoEnvioMontoSnapshot { get; set; }')
+          replace('backend/src/Infrastructure/Persistence/Configurations/VentaConfiguration.cs',
+          '        builder.Property(v => v.CostoEnvioNombreSnapshot).HasMaxLength(150);',
+          '        builder.Property(v => v.CostoEnvioNombreSnapshot).HasMaxLength(150);\n        builder.Property(v => v.CostoEnvioDepartamentoSnapshot).HasMaxLength(100);\n        builder.Property(v => v.CostoEnvioCiudadSnapshot).HasMaxLength(120);\n        builder.Property(v => v.CostoEnvioZonaSnapshot).HasMaxLength(120);\n        builder.Property(v => v.CostoEnvioModalidadSnapshot).HasMaxLength(100);')
+          replace('backend/src/Infrastructure/Persistence/Configurations/FacturaConfiguration.cs',
+          '        builder.Property(f => f.Observaciones).HasMaxLength(500);',
+          '        builder.Property(f => f.Observaciones).HasMaxLength(500);\n        builder.Property(f => f.CostoEnvioNombreSnapshot).HasMaxLength(150);\n        builder.Property(f => f.CostoEnvioDepartamentoSnapshot).HasMaxLength(100);\n        builder.Property(f => f.CostoEnvioCiudadSnapshot).HasMaxLength(120);\n        builder.Property(f => f.CostoEnvioZonaSnapshot).HasMaxLength(120);\n        builder.Property(f => f.CostoEnvioModalidadSnapshot).HasMaxLength(100);\n        builder.Property(f => f.CostoEnvio).HasColumnType("decimal(18,2)");\n        builder.Property(f => f.CostoEnvioMontoSnapshot).HasColumnType("decimal(18,2)");')
+
+          replace('backend/src/Application/DTOs/VentaDto.cs',
+          '    public string? CostoEnvioNombre { get; set; }\n    public bool EnvioExonerado',
+          '    public string? CostoEnvioNombre { get; set; }\n    public string? CostoEnvioDepartamento { get; set; }\n    public string? CostoEnvioCiudad { get; set; }\n    public string? CostoEnvioZona { get; set; }\n    public string? CostoEnvioModalidad { get; set; }\n    public bool EnvioExonerado')
+          replace('backend/src/Application/DTOs/FacturaDto.cs',
+          '    public string? CostoEnvioNombre { get; set; }\n    public bool EnvioExonerado',
+          '    public string? CostoEnvioNombre { get; set; }\n    public string? CostoEnvioDepartamento { get; set; }\n    public string? CostoEnvioCiudad { get; set; }\n    public string? CostoEnvioZona { get; set; }\n    public string? CostoEnvioModalidad { get; set; }\n    public bool EnvioExonerado')
+
+          replace('backend/src/Application/Services/VentaService.cs',
+          '                CostoEnvioNombreSnapshot = venta.CostoEnvioNombreSnapshot,\n                CostoEnvioMontoSnapshot = venta.CostoEnvioMontoSnapshot,',
+          '                CostoEnvioNombreSnapshot = venta.CostoEnvioNombreSnapshot,\n                CostoEnvioDepartamentoSnapshot = venta.CostoEnvioDepartamentoSnapshot,\n                CostoEnvioCiudadSnapshot = venta.CostoEnvioCiudadSnapshot,\n                CostoEnvioZonaSnapshot = venta.CostoEnvioZonaSnapshot,\n                CostoEnvioModalidadSnapshot = venta.CostoEnvioModalidadSnapshot,\n                CostoEnvioMontoSnapshot = venta.CostoEnvioMontoSnapshot,')
+          replace('backend/src/Application/Services/VentaService.cs',
+          '        venta.CostoEnvioNombreSnapshot = resultado.CostoEnvioNombre;\n        venta.CostoEnvioMontoSnapshot = resultado.CostoEnvio;',
+          '        venta.CostoEnvioNombreSnapshot = resultado.CostoEnvioNombre;\n        venta.CostoEnvioDepartamentoSnapshot = resultado.CostoEnvioDepartamento;\n        venta.CostoEnvioCiudadSnapshot = resultado.CostoEnvioCiudad;\n        venta.CostoEnvioZonaSnapshot = resultado.CostoEnvioZona;\n        venta.CostoEnvioModalidadSnapshot = resultado.CostoEnvioModalidad;\n        venta.CostoEnvioMontoSnapshot = resultado.CostoEnvio;')
+          replace('backend/src/Application/Services/VentaService.cs',
+          '        CostoEnvioNombre = v.CostoEnvioNombreSnapshot,\n        EnvioExonerado = v.EnvioExonerado,',
+          '        CostoEnvioNombre = v.CostoEnvioNombreSnapshot,\n        CostoEnvioDepartamento = v.CostoEnvioDepartamentoSnapshot,\n        CostoEnvioCiudad = v.CostoEnvioCiudadSnapshot,\n        CostoEnvioZona = v.CostoEnvioZonaSnapshot,\n        CostoEnvioModalidad = v.CostoEnvioModalidadSnapshot,\n        EnvioExonerado = v.EnvioExonerado,')
+          replace('backend/src/Application/Services/FacturaService.cs',
+          '            CostoEnvioNombre = f.CostoEnvioNombreSnapshot,\n            EnvioExonerado = f.EnvioExonerado,',
+          '            CostoEnvioNombre = f.CostoEnvioNombreSnapshot,\n            CostoEnvioDepartamento = f.CostoEnvioDepartamentoSnapshot,\n            CostoEnvioCiudad = f.CostoEnvioCiudadSnapshot,\n            CostoEnvioZona = f.CostoEnvioZonaSnapshot,\n            CostoEnvioModalidad = f.CostoEnvioModalidadSnapshot,\n            EnvioExonerado = f.EnvioExonerado,')
+
+          # Frontend modelos.
+          replace('frontend/src/app/core/models/costo-envio.model.ts',
+          '  descripcion?: string;\n  monto: number;',
+          '  descripcion?: string;\n  departamento?: string;\n  ciudad?: string;\n  zona?: string;\n  modalidad?: string;\n  monto: number;', 2)
+          replace('frontend/src/app/core/models/costo-envio.model.ts',
+          '  activo: boolean;\n  fechaCreacion:',
+          '  activo: boolean;\n  estaVigente: boolean;\n  fechaCreacion:')
+          replace('frontend/src/app/core/models/venta.model.ts',
+          '  costoEnvioNombre?: string;\n  costoEnvio?: number;',
+          '  costoEnvioNombre?: string;\n  costoEnvioDepartamento?: string;\n  costoEnvioCiudad?: string;\n  costoEnvioZona?: string;\n  costoEnvioModalidad?: string;\n  costoEnvio?: number;')
+          replace('frontend/src/app/core/models/venta.model.ts',
+          '  costoEnvioNombre?: string;\n  envioExonerado: boolean;',
+          '  costoEnvioNombre?: string;\n  costoEnvioDepartamento?: string;\n  costoEnvioCiudad?: string;\n  costoEnvioZona?: string;\n  costoEnvioModalidad?: string;\n  envioExonerado: boolean;')
+          replace('frontend/src/app/core/models/factura.model.ts',
+          '  costoEnvioNombre?: string;\n  envioExonerado: boolean;',
+          '  costoEnvioNombre?: string;\n  costoEnvioDepartamento?: string;\n  costoEnvioCiudad?: string;\n  costoEnvioZona?: string;\n  costoEnvioModalidad?: string;\n  envioExonerado: boolean;')
+
+          # Frontend mantenimiento de costos de envio.
+          replace('frontend/src/app/features/costos-envio/costos-envio.component.ts',
+          "  readonly columnas = ['nombre', 'monto', 'vigencia', 'estado', 'predeterminado', 'acciones'];",
+          "  readonly columnas = ['nombre', 'cobertura', 'monto', 'vigencia', 'estado', 'predeterminado', 'acciones'];")
+          replace('frontend/src/app/features/costos-envio/costos-envio.component.ts',
+          "    descripcion: ['', Validators.maxLength(500)],\n    monto:",
+          "    descripcion: ['', Validators.maxLength(500)],\n    departamento: ['', Validators.maxLength(100)],\n    ciudad: ['', Validators.maxLength(120)],\n    zona: ['', Validators.maxLength(120)],\n    modalidad: ['', Validators.maxLength(100)],\n    monto:")
+          replace('frontend/src/app/features/costos-envio/costos-envio.component.ts',
+          "      descripcion: item.descripcion ?? '',\n      monto: item.monto,",
+          "      descripcion: item.descripcion ?? '',\n      departamento: item.departamento ?? '',\n      ciudad: item.ciudad ?? '',\n      zona: item.zona ?? '',\n      modalidad: item.modalidad ?? '',\n      monto: item.monto,")
+          replace('frontend/src/app/features/costos-envio/costos-envio.component.ts',
+          "      nombre: '', descripcion: '', monto: 80, vigenteDesde: '', vigenteHasta: '',",
+          "      nombre: '', descripcion: '', departamento: '', ciudad: '', zona: '', modalidad: '', monto: 80, vigenteDesde: '', vigenteHasta: '',")
+          replace('frontend/src/app/features/costos-envio/costos-envio.component.ts',
+          "      descripcion: raw.descripcion?.trim() || undefined,\n      monto:",
+          "      descripcion: raw.descripcion?.trim() || undefined,\n      departamento: raw.departamento?.trim() || undefined,\n      ciudad: raw.ciudad?.trim() || undefined,\n      zona: raw.zona?.trim() || undefined,\n      modalidad: raw.modalidad?.trim() || undefined,\n      monto:")
+          replace('frontend/src/app/features/costos-envio/costos-envio.component.ts',
+          '  private fechaInput(fecha?: string): string {',
+          '''  cobertura(item: CostoEnvio): string {\n    const partes = [item.departamento, item.ciudad, item.zona].filter(Boolean);\n    const ubicacion = partes.length ? partes.join(' · ') : 'Cobertura general';\n    return item.modalidad ? `${ubicacion} · ${item.modalidad}` : ubicacion;\n  }\n\n  private fechaInput(fecha?: string): string {''')
+
+          replace('frontend/src/app/features/costos-envio/costos-envio.component.html',
+          '    <p>Administra el importe que VariApp separa una sola vez por factura. El valor predeterminado inicial es L. 80.00.</p>',
+          '    <p>Administra tarifas profesionales por departamento, ciudad, zona y modalidad. La tarifa más específica y de mayor prioridad puede resolverse automáticamente.</p>')
+          replace('frontend/src/app/features/costos-envio/costos-envio.component.html',
+          '''      <mat-form-field appearance="outline">\n        <mat-label>Monto</mat-label>''',
+          '''      <mat-form-field appearance="outline">\n        <mat-label>Departamento</mat-label>\n        <input matInput formControlName="departamento" maxlength="100" placeholder="Ej. Francisco Morazán">\n      </mat-form-field>\n      <mat-form-field appearance="outline">\n        <mat-label>Ciudad</mat-label>\n        <input matInput formControlName="ciudad" maxlength="120" placeholder="Ej. Tegucigalpa">\n      </mat-form-field>\n      <mat-form-field appearance="outline">\n        <mat-label>Zona</mat-label>\n        <input matInput formControlName="zona" maxlength="120" placeholder="Ej. Centro / Mall Multiplaza">\n      </mat-form-field>\n      <mat-form-field appearance="outline">\n        <mat-label>Modalidad</mat-label>\n        <input matInput formControlName="modalidad" maxlength="100" placeholder="Ej. Entrega local / Encomienda">\n      </mat-form-field>\n      <mat-form-field appearance="outline">\n        <mat-label>Monto</mat-label>''')
+          replace('frontend/src/app/features/costos-envio/costos-envio.component.html',
+          '''      <ng-container matColumnDef="monto">''',
+          '''      <ng-container matColumnDef="cobertura">\n        <th mat-header-cell *matHeaderCellDef>Cobertura / modalidad</th>\n        <td mat-cell *matCellDef="let item">{{ cobertura(item) }}</td>\n      </ng-container>\n      <ng-container matColumnDef="monto">''')
+          replace('frontend/src/app/features/costos-envio/costos-envio.component.html',
+          '''<td mat-cell *matCellDef="let item"><span class="badge" [class.inactive]="!item.activo">{{ item.activo ? 'Activo' : 'Inactivo' }}</span></td>''',
+          '''<td mat-cell *matCellDef="let item"><span class="badge" [class.inactive]="!item.activo || !item.estaVigente">{{ !item.activo ? 'Inactivo' : (item.estaVigente ? 'Vigente' : 'Fuera de vigencia') }}</span></td>''')
+
+          # Venta: solo ofrecer vigentes y describir cobertura en el selector.
+          replace('frontend/src/app/features/ventas/venta-form.component.ts',
+          '        const activos = res.data.filter((x) => x.activo);',
+          '        const activos = res.data.filter((x) => x.activo && x.estaVigente);')
+          replace('frontend/src/app/features/ventas/venta-form.component.html',
+          '''@for (envio of costosEnvio(); track envio.id) { <mat-option [value]="envio.id">{{ envio.nombre }} — L. {{ envio.monto | number:'1.2-2' }}{{ envio.esPredeterminado ? ' (Predeterminado)' : '' }}</mat-option> }''',
+          '''@for (envio of costosEnvio(); track envio.id) { <mat-option [value]="envio.id">{{ envio.nombre }} — L. {{ envio.monto | number:'1.2-2' }} · {{ envio.modalidad || 'Modalidad general' }} · {{ envio.zona || envio.ciudad || envio.departamento || 'Cobertura general' }}{{ envio.esPredeterminado ? ' (Predeterminado)' : '' }}</mat-option> }''')
+
+          # Test de snapshot profesional del calculo.
+          p = Path('backend/tests/InventoryApp.Tests/CalculoServiceTests.cs')
+          text = p.read_text()
+          marker = '    [Fact]\n    public async Task CalcularVentaAsync_ExoneracionSinMotivo_EsRechazada()'
+          if marker not in text:
+              raise SystemExit('No se encontro marcador de tests M7')
+          test = '''    [Fact]\n    public async Task CalcularVentaAsync_CostoSeleccionado_PreservaCoberturaProfesional()\n    {\n        _costoEnvioRepository\n            .Setup(r => r.GetByIdAsync(44))\n            .ReturnsAsync(new CostoEnvio\n            {\n                Id = 44,\n                Nombre = "Entrega Tegucigalpa Centro",\n                Departamento = "Francisco Morazán",\n                Ciudad = "Tegucigalpa",\n                Zona = "Centro",\n                Modalidad = "Entrega local",\n                Monto = 80m,\n                Activo = true\n            });\n\n        var resultado = await _service.CalcularVentaAsync(\n            new List<DetalleCalculoInput>\n            {\n                new() { ProductoId = 1, Cantidad = 1, PrecioUnitario = 300m }\n            }, null, null, null, costoEnvioId: 44);\n\n        Assert.Equal(44, resultado.CostoEnvioId);\n        Assert.Equal("Entrega Tegucigalpa Centro", resultado.CostoEnvioNombre);\n        Assert.Equal("Francisco Morazán", resultado.CostoEnvioDepartamento);\n        Assert.Equal("Tegucigalpa", resultado.CostoEnvioCiudad);\n        Assert.Equal("Centro", resultado.CostoEnvioZona);\n        Assert.Equal("Entrega local", resultado.CostoEnvioModalidad);\n        Assert.Equal(80m, resultado.CostoEnvio);\n    }\n\n'''
+          p.write_text(text.replace(marker, test + marker, 1))
+          PY
+
+      - name: Generar migracion EF M7
+        working-directory: backend
+        shell: bash
+        run: |
+          set -euo pipefail
+          dotnet restore InventoryApp.sln
+          dotnet tool install --global dotnet-ef --version 8.0.8
+          dotnet ef migrations add M7CostosEnvioProfesionales \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext \
+            --output-dir Persistence/Migrations
+          dotnet build InventoryApp.sln --configuration Release --no-restore
+          dotnet test InventoryApp.sln --configuration Release --no-build --filter "Category!=Integration"
+      - name: Validar frontend M7
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run lint
+          npm run build:prod
+      - name: Publicar lote M7 y retirar runner temporal
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/m7-aplicar.yml
+          git add backend frontend
+          git diff --cached --check
+          git commit -m 'feat(m7): profesionalizar costos de envio y snapshots [ChatGPT]'
+          git push origin HEAD:Desarrollo
