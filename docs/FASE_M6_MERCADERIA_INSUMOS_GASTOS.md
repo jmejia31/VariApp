@@ -82,7 +82,7 @@ M6 conserva y verifica las siguientes defensas:
 
 No fue necesaria una nueva migración de esquema para el núcleo de M6; se reutilizó la estructura versionada existente y se endurecieron servicios, consultas, DTOs, UI y pruebas.
 
-## 5. Pruebas M6
+## 5. Pruebas M6 e incidencias resueltas
 
 Se añadieron/reforzaron pruebas para:
 
@@ -96,9 +96,24 @@ Se añadieron/reforzaron pruebas para:
 - cálculo de utilidad neta;
 - protección existente contra venta de insumos administrativos.
 
-Durante el gate se detectó una regresión únicamente en las expresiones Moq de la prueba financiera por uso de argumentos opcionales. Se corrigió alineando los mocks con las firmas reales (`int? usuarioId`) y se repitió el gate completo hasta verde.
+Durante el cierre se detectaron dos fallos consecutivos de compilación exclusivamente en los mocks de `FinanzasServiceTests`:
 
-## 6. Evidencia CI del checkpoint funcional
+1. Moq no admite argumentos opcionales dentro de determinados expression trees cuando se omiten en el `Setup`.
+2. El primer ajuste intentó pasar `CancellationToken` a métodos cuya firma real recibe únicamente `int? usuarioId`.
+
+Causa raíz: desalineación entre las expresiones de prueba y las firmas reales de `IVentaRepository` / `ICompraRepository`; no era un defecto de la lógica funcional de M6.
+
+Corrección final:
+
+- se alinearon explícitamente los mocks con `int? usuarioId` usando `(int?)null`;
+- no se debilitó ninguna prueba;
+- no se eliminaron tests;
+- no se modificó la lógica de negocio para forzar CI verde;
+- se repitieron los gates completos hasta obtener éxito real.
+
+## 6. Evidencia CI
+
+### 6.1 Checkpoint funcional
 
 HEAD funcional certificado: `552b52e270f2f42dcc2a49215782efde73023d26`
 
@@ -119,6 +134,21 @@ Dentro de `Desarrollo - Compilación y pruebas` quedaron verificados, entre otro
 - Higiene del repositorio: SUCCESS.
 - migraciones e integración MySQL 8.4: SUCCESS.
 
+### 6.2 Checkpoint documental de cierre
+
+HEAD documental verificado antes de este resumen final: `136d918dcc080cd49bda1b9d89703fdd6245af21`.
+
+Resultados del HEAD documental:
+
+- `Desarrollo - Compilación y pruebas` — run `31345152745` — **SUCCESS**.
+- `Desarrollo - aceptación funcional integral` — run `31345152728` — **SUCCESS**.
+- `Fase 2 - Auditoría de configuración y dependencias` — run `31345152727` — **SUCCESS**.
+- `Bloque 2C.1 - Variante técnica y migración` — run `31345152784` — **SUCCESS**.
+- `Fase 8 - Validación completa automatizada` — run `31345152738` — **SUCCESS**.
+- `VariApp CI` — run `31345152747` — **SKIPPED**; no se contabiliza como fallo ni como validación verde.
+
+Por tanto, tanto el código funcional como el documento de certificación de M6 superaron los gates relevantes del repositorio.
+
 ## 7. Alcance no realizado
 
 - No se modificó `main`.
@@ -128,7 +158,7 @@ Dentro de `Desarrollo - Compilación y pruebas` quedaron verificados, entre otro
 - No se ejecutaron migraciones contra Producción.
 - No se modificaron secretos o credenciales productivas.
 
-## 8. Dictamen
+## 8. Dictamen final
 
 M6 deja separados los tres conceptos de negocio:
 
@@ -136,4 +166,37 @@ M6 deja separados los tres conceptos de negocio:
 
 La mercadería conserva inventario y valor comercial; los insumos conservan inventario físico y consumo interno pero no son vendibles; los gastos afectan Finanzas sin fabricar existencias ficticias.
 
-**FASE M6: COMPLETADA / CERTIFICADA AUTOMÁTICAMENTE.**
+No quedan fallos funcionales o de CI conocidos atribuibles a M6 después del cierre técnico y documental.
+
+**FASE M6: COMPLETADA / VALIDADA / CERTIFICADA AUTOMÁTICAMENTE.**
+
+## 9. Estado del plan y siguiente fase
+
+Fases empresariales cerradas hasta este punto:
+
+- M0 — Auditoría y mapa de impacto: COMPLETADA.
+- M1 — Saneamiento relacional integral: COMPLETADA / CERTIFICADA.
+- M2 — Motor de variantes multidimensionales: COMPLETADA / CERTIFICADA.
+- M3 — Configuración fiscal ISV/ISC: COMPLETADA / CERTIFICADA.
+- M4 — Estado persistente de filtros y navegación: COMPLETADA / CERTIFICADA.
+- M5 — Clientes y segmentación: COMPLETADA / CERTIFICADA.
+- M6 — Mercadería, insumos administrativos y gastos: **COMPLETADA / CERTIFICADA**.
+
+Siguiente fase oficial: **M7 — Costos de envío profesionales**.
+
+Alcance previsto de M7 según el Plan Maestro:
+
+- zona;
+- ciudad;
+- departamento;
+- modalidad/tipo de envío;
+- precio;
+- prioridad;
+- vigencia;
+- activo;
+- predeterminado;
+- historial;
+- snapshots de Venta/Factura;
+- eliminación/desactivación segura.
+
+M7 deberá construir sobre la restricción de costo de envío predeterminado ya reforzada en M1, sin crear una segunda fuente de verdad y conservando historial de documentos confirmados.
