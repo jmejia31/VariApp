@@ -29,6 +29,15 @@ public class ExceptionHandlingMiddleware
         {
             await _next(context);
         }
+        catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested)
+        {
+            // Navegaciones, cierres de pestaña y clientes que abortan una petición pueden
+            // cancelar una consulta EF/MySQL legítimamente. No es un error del servidor y
+            // no debe contaminar telemetría como 500/"Error no controlado".
+            _logger.LogDebug(
+                "Petición cancelada por el cliente. Referencia {Referencia}",
+                context.TraceIdentifier);
+        }
         catch (ValidationException ex)
         {
             _logger.LogWarning(ex, "Error de validación");
