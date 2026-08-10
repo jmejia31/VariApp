@@ -16,6 +16,7 @@ namespace InventoryApp.API.Controllers;
 [Route("cargas-masivas")]
 public class CargasMasivasController : ControllerBase
 {
+    private const string VersionPlantillaActual = "M9.1";
     private readonly ICargaMasivaService _service;
     private readonly AppDbContext _db;
 
@@ -27,15 +28,31 @@ public class CargasMasivasController : ControllerBase
 
     [HttpGet("configuracion")]
     [RequierePermiso(ModuloSistema.CargasMasivas, AccionPermiso.Ver)]
-    public IActionResult Configuracion() =>
-        Ok(ApiResponse<CargaMasivaConfiguracionDto>.Ok(_service.ObtenerConfiguracion()));
+    public IActionResult Configuracion()
+    {
+        var configuracion = _service.ObtenerConfiguracion();
+        configuracion.VersionPlantillaActual = VersionPlantillaActual;
+        foreach (var tipo in configuracion.Tipos)
+            tipo.VersionPlantilla = VersionPlantillaActual;
+        return Ok(ApiResponse<CargaMasivaConfiguracionDto>.Ok(configuracion));
+    }
 
     [HttpGet("plantillas/{tipo}")]
     [RequierePermiso(ModuloSistema.CargasMasivas, AccionPermiso.Exportar)]
-    public async Task<IActionResult> DescargarPlantilla(TipoCargaMasiva tipo, [FromQuery] string formato = "xlsx")
+    public async Task<IActionResult> DescargarPlantilla(
+        TipoCargaMasiva tipo,
+        [FromQuery] string formato = "xlsx",
+        [FromQuery] string? version = null)
     {
+        if (!string.IsNullOrWhiteSpace(version) &&
+            !string.Equals(version.Trim(), VersionPlantillaActual, StringComparison.OrdinalIgnoreCase))
+            throw new BusinessRuleException($"La versión de plantilla '{version}' no está vigente. Descarga la versión {VersionPlantillaActual}.");
+
         var archivo = await _service.DescargarPlantillaAsync(tipo, formato);
-        return File(archivo.Contenido, archivo.ContentType, archivo.NombreArchivo);
+        var extension = Path.GetExtension(archivo.NombreArchivo);
+        var baseNombre = Path.GetFileNameWithoutExtension(archivo.NombreArchivo);
+        var nombreVersionado = $"{baseNombre}-v{VersionPlantillaActual.Replace('.', '-')}{extension}";
+        return File(archivo.Contenido, archivo.ContentType, nombreVersionado);
     }
 
     [HttpGet]
@@ -53,6 +70,17 @@ public class CargasMasivasController : ControllerBase
         var carga = await _service.GetByIdAsync(id);
         if (carga is null) return NotFound(ApiResponse<object>.Fail("Carga masiva no encontrada."));
         return Ok(ApiResponse<CargaMasivaDetalleDto>.Ok(carga));
+    }
+
+    [HttpGet("{id:int}/progreso")]
+    [RequierePermiso(ModuloSistema.CargasMasivas, AccionPermiso.Ver)]
+    public async Task<IActionResult> Progreso(int id)
+    {
+        var carga = await _service.GetByIdAsync(id);
+        if (carga is null) return NotFound(ApiResponse<object>.Fail("Carga masiva no encontrada."));
+
+        var progreso = ConstruirProgreso(carga);
+        return Ok(ApiResponse<CargaMasivaProgresoDto>.Ok(progreso));
     }
 
     [HttpPost("validar")]
@@ -109,6 +137,59 @@ public class CargasMasivasController : ControllerBase
         var archivo = await _service.DescargarErroresAsync(id, formato);
         return File(archivo.Contenido, archivo.ContentType, archivo.NombreArchivo);
     }
+
+    private static CargaMasivaProgresoDto ConstruirProgreso(CargaMasivaDetalleDto carga)
+    {
+        var confirmada = string.Equals(carga.Estado, EstadoCargaMasiva.Confirmada.ToString(), StringComparison.OrdinalIgnoreCase);
+        var fallida = string.Equals(carga.Estado, EstadoCargaMasiva.Fallida.ToString(), StringComparison.OrdinalIgnoreCase);
+        var conErrores = string.Equals(carga.Estado, EstadoCargaMasiva.ConErrores.ToString(), StringComparison.OrdinalIgnoreCase);
+        var validada = string.Equals(carga.Estado, EstadoCargaMasiva.Validada.ToString(), StringComparison.OrdinalIgnoreCase);
+
+        var filasOmitidas = carga.Errores
+            .Where(x => x.EsAdvertencia && x.Codigo.StartsWith("OMIT", StringComparison.OrdinalIgnoreCase))
+            .Select(x => x.NumeroFila)
+            .Distinct()
+            .Count();
+
+        var etapaActual = confirmada ? "Completada"
+            : fallida ? "Fallida"
+            : conErrores ? "Correccion"
+            : validada ? "VistaPrevia"
+            : "Validacion";
+        var porcentaje = confirmada ? 100 : fallida ? 100 : conErrores ? 60 : validada ? 75 : 35;
+
+        return new CargaMasivaProgresoDto
+        {
+            Id = carga.Id,
+            Estado = carga.Estado,
+            EtapaActual = etapaActual,
+            Porcentaje = porcentaje,
+            TotalFilas = carga.TotalFilas,
+            FilasCorrectas = carga.FilasValidas,
+            FilasConError = carga.FilasConError,
+            FilasOmitidas = filasOmitidas,
+            FilasProcesadas = carga.FilasProcesadas,
+            RegistrosCreados = carga.RegistrosCreados,
+            RegistrosActualizados = carga.RegistrosActualizados,
+            VersionPlantilla = VersionPlantillaActual,
+            Etapas =
+            [
+                Etapa("Carga", "Archivo recibido", true, false),
+                Etapa("Lectura", "Lectura segura", carga.FechaValidacion.HasValue, false),
+                Etapa("Validacion", "Validación de estructura y negocio", carga.FechaValidacion.HasValue, conErrores),
+                Etapa("VistaPrevia", "Vista previa y decisión", validada || confirmada, conErrores),
+                Etapa("Confirmacion", "Confirmación transaccional", confirmada, fallida)
+            ]
+        };
+    }
+
+    private static CargaMasivaEtapaDto Etapa(string codigo, string nombre, bool completada, bool error) => new()
+    {
+        Codigo = codigo,
+        Nombre = nombre,
+        Estado = error ? "Error" : completada ? "Completada" : "Pendiente",
+        Porcentaje = error || completada ? 100 : 0
+    };
 }
 
 internal static class CargaMasivaArchivoLimites
