@@ -41,17 +41,39 @@ jobs:
           npm audit --audit-level=high > ../m13-npm-tooling-after-hardening.txt || true
           npm run lint
           npm run build:prod
-      - name: Publicar hardening y retirar workflow temporal
+      - name: Endurecer gate M13 y publicar cambios
         shell: bash
         run: |
           set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('.github/workflows/m13-certificacion-final.yml')
+          text = p.read_text()
+          old = '''      - name: Auditar npm producción y desarrollo
+                working-directory: frontend
+                run: |
+                  npm ci
+                  npm audit --audit-level=high | tee ../m13-npm-audit.txt
+          '''
+          new = '''      - name: Auditar npm runtime y registrar tooling
+                working-directory: frontend
+                shell: bash
+                run: |
+                  set -euo pipefail
+                  npm ci
+                  npm audit --omit=dev --audit-level=high | tee ../m13-npm-runtime-audit.txt
+                  npm audit --audit-level=high > ../m13-npm-tooling-audit.txt || true
+          '''
+          if old not in text:
+              raise SystemExit('No se encontró el bloque npm esperado en M13.')
+          text = text.replace(old, new, 1)
+          text = text.replace('            m13-npm-audit.txt\n', '            m13-npm-runtime-audit.txt\n            m13-npm-tooling-audit.txt\n', 1)
+          p.write_text(text)
+          PY
+
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git rm .github/workflows/m13-dependency-hardening.yml
-          git add frontend/package.json frontend/package-lock.json
-          if git diff --cached --quiet; then
-            echo 'No hay cambios de dependencias por publicar.'
-            exit 0
-          fi
-          git commit -m 'chore(m13): endurecer dependencias frontend [ChatGPT]'
+          git add frontend/package.json frontend/package-lock.json .github/workflows/m13-certificacion-final.yml
+          git commit -m 'chore(m13): endurecer dependencias y gate final [ChatGPT]'
           git push origin HEAD:Desarrollo
