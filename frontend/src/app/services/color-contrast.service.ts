@@ -10,12 +10,14 @@ interface RgbColor {
 export class ColorContrastService {
   readonly normalTextRatio = 4.5;
 
-  foregroundFor(background: string): '#ffffff' | '#111827' {
+  foregroundFor(background: string): '#ffffff' | '#111827' | '#000000' {
     const bg = this.parseHex(background);
     if (!bg) return '#ffffff';
-    const white = this.parseHex('#ffffff')!;
-    const dark = this.parseHex('#111827')!;
-    return this.contrast(white, bg) >= this.contrast(dark, bg) ? '#ffffff' : '#111827';
+
+    const candidates = ['#ffffff', '#111827', '#000000'] as const;
+    return candidates
+      .map(color => ({ color, ratio: this.contrast(this.parseHex(color)!, bg) }))
+      .sort((a, b) => b.ratio - a.ratio)[0].color;
   }
 
   ensureReadable(foreground: string, backgrounds: string[]): string {
