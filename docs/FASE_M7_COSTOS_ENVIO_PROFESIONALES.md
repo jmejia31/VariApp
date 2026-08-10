@@ -1,6 +1,6 @@
 # FASE M7 — Costos de envío profesionales
 
-Estado: **COMPLETADA / EN CERTIFICACIÓN FINAL AUTOMATIZADA**
+Estado: **COMPLETADA / CERTIFICADA AUTOMÁTICAMENTE**
 
 Fecha de cierre técnico: 2026-08-09 (Honduras)
 Rama exclusiva: `Desarrollo`
@@ -167,7 +167,7 @@ Archivo principal:
 
 `backend/src/Infrastructure/Persistence/Migrations/20260810013029_M7CostosEnvioProfesionales.cs`
 
-Incorpora cobertura geográfica/modal e índices de resolución sin destruir datos existentes.
+Incorpora cobertura geográfica/modal e índice de resolución sin destruir datos existentes.
 
 ### `M7SnapshotsProfesionalesEnvio`
 
@@ -175,7 +175,9 @@ Archivo principal:
 
 `backend/src/Infrastructure/Persistence/Migrations/20260810014301_M7SnapshotsProfesionalesEnvio.cs`
 
-Incorpora los snapshots profesionales de cobertura en Venta/Factura y actualiza el `AppDbContextModelSnapshot` mediante EF Core.
+Incorpora exclusivamente los snapshots profesionales de cobertura en Venta/Factura y actualiza el `AppDbContextModelSnapshot` mediante EF Core.
+
+Durante la certificación se detectó que esta segunda migración intentaba repetir el DDL de `Ciudad`, `Departamento`, `Zona`, `Modalidad` e índice ya creado por `M7CostosEnvioProfesionales`. Se corrigió la migración histórica para eliminar ese DDL duplicado, conservando una sola responsabilidad por migración. El historial completo volvió a aplicarse correctamente sobre MySQL 8.4 descartable.
 
 No se ejecutó ninguna migración contra Producción.
 
@@ -187,35 +189,54 @@ Se añadió/reforzó cobertura para:
 - predeterminado vigente;
 - exoneración de envío;
 - preservación de cobertura profesional Departamento/Ciudad/Zona/Modalidad;
+- historial completo de migraciones sobre MySQL 8.4 descartable;
 - compilación backend Release;
-- pruebas unitarias;
+- pruebas unitarias e integración MySQL;
 - frontend lint;
 - frontend build producción;
+- Playwright integral;
+- seguridad/runtime/accesibilidad;
 - generación oficial de migraciones EF.
 
-El workflow focalizado de cierre M7 `31347786727` terminó **SUCCESS**, incluyendo:
+Workflow focalizado de implementación M7:
 
-- parche fail-closed;
-- generación `M7SnapshotsProfesionalesEnvio`;
-- backend build;
-- pruebas backend no integración;
-- frontend lint/build;
-- limpieza de los workflows temporales.
+- `31347786727` — **SUCCESS**.
 
-Los gates oficiales del checkpoint documental final se ejecutan nuevamente sobre un commit normal de `Desarrollo` antes del dictamen definitivo.
+HEAD funcional certificado:
+
+`68849cf15513fbd76a116db568545403d3acfd20`
+
+Gates oficiales sobre ese HEAD:
+
+- `31348315383` — Desarrollo - Compilación y pruebas — **SUCCESS**;
+- `31348315380` — Desarrollo - aceptación funcional integral — **SUCCESS**;
+- `31348315366` — Fase 2 - Auditoría de configuración y dependencias — **SUCCESS**;
+- `31348315388` — Bloque 2C.1 - Variante técnica y migración — **SUCCESS**;
+- `31348315404` — Fase 8 - Validación completa automatizada — **SUCCESS**;
+- `31348315372` — VariApp CI — **SKIPPED** esperado por su configuración actual.
+
+La ejecución `31348315383` validó adicionalmente:
+
+- backend Release y pruebas;
+- frontend producción;
+- migraciones EF, variantes y cargas masivas en MySQL 8.4;
+- integración MySQL;
+- Docker/aislamiento de entornos;
+- higiene del repositorio.
 
 ## 11. Incidencias encontradas y correcciones
 
-Durante M7 se detectaron dos incidencias de automatización temporal:
+Durante M7 se detectaron y corrigieron tres incidencias sin debilitar validaciones:
 
 1. un primer lote no encontraba una firma exacta en `FacturaConfiguration`; falló cerrado antes de publicar cambios parciales;
-2. el primer runner documental del Plan Maestro no creó job correctamente y fue sustituido por una versión mínima que actualizó el plan y se autoeliminó.
+2. el primer runner documental del Plan Maestro no creó job correctamente y fue sustituido por una versión mínima que actualizó el plan y se autoeliminó;
+3. el gate MySQL detectó DDL duplicado entre las dos migraciones M7; se separaron correctamente sus responsabilidades y el historial completo pasó en MySQL 8.4.
 
-Ninguna de estas incidencias debilitó validaciones ni afectó datos productivos. Se mantuvo la política de corregir la causa y repetir la validación.
+Ninguna incidencia afectó Producción ni dejó cambios parciales inseguros.
 
 ## 12. Seguridad del proyecto
 
-M7 no autoriza ni realizó:
+M7 no autorizó ni realizó:
 
 - modificaciones de `main`;
 - creación de ramas;
@@ -223,6 +244,12 @@ M7 no autoriza ni realizó:
 - despliegues productivos;
 - migraciones sobre Producción;
 - modificación de secretos, credenciales, dominios, bases o activos productivos.
+
+Verificación final:
+
+- `main`: `85b4e02814823e9671803c23798a6ff0bf05c8f6`;
+- PR #2: abierto, borrador, `Desarrollo -> main`, sin merge;
+- Producción: congelada.
 
 ## 13. Dictamen técnico
 
@@ -234,10 +261,10 @@ La regla conceptual final es:
 
 Los documentos confirmados conservan el snapshot real aplicado y no dependen de la configuración futura de la tarifa.
 
-**M7 se considerará CERTIFICADA cuando los gates oficiales del HEAD documental final terminen en verde.**
+**M7 — COMPLETADA / CERTIFICADA.**
 
 ## 14. Siguiente fase
 
-Después del cierre verde de M7 corresponde:
+Corresponde continuar con:
 
 **M8 — Búsqueda inteligente y rendimiento**.
