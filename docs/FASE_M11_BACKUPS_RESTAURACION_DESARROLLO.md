@@ -2,7 +2,7 @@
 
 Fecha de cierre: 2026-08-10  
 Rama exclusiva: `Desarrollo`  
-HEAD funcional certificado: `b15adeaf7cb7557f4c0286b807cc60e9e4b03b7a`  
+HEAD funcional certificado base: `b15adeaf7cb7557f4c0286b807cc60e9e4b03b7a`  
 Producción: **FUERA DE ALCANCE**  
 Estado: **COMPLETADA / CERTIFICADA AUTOMÁTICAMENTE**
 
@@ -34,7 +34,7 @@ Los binarios que residen en proveedores externos no se confunden con el dump SQL
 - Existe checksum SHA-256 externo del artefacto cifrado y manifest SHA-256 interno por archivo.
 - La retención elimina exclusivamente artefactos que coincidan con el patrón autorizado de M11; no borra archivos ajenos.
 - `.gitignore` bloquea artefactos de backup/restore locales.
-- `DB_SSL_MODE` soporta `DISABLED`, `PREFERRED`, `REQUIRED`, `VERIFY_CA` y `VERIFY_IDENTITY`; el workflow operativo de Aiven exige `REQUIRED`.
+- `DB_SSL_MODE` soporta `DISABLED`, `PREFERRED`, `REQUIRED`, `VERIFY_CA` y `VERIFY_IDENTITY`; el flujo operativo de Aiven exige `REQUIRED`.
 
 ## 4. Restauración
 
@@ -82,17 +82,19 @@ La certificación automatizada ejecutó:
 ### Resultado certificado
 
 Workflow: `M11 - Backup y restauración en Desarrollo`  
-Run: **`31410746477` — SUCCESS**  
-HEAD: `b15adeaf7cb7557f4c0286b807cc60e9e4b03b7a`
+Run base: **`31410746477` — SUCCESS**  
+HEAD base: `b15adeaf7cb7557f4c0286b807cc60e9e4b03b7a`
 
 Todos los pasos del job `Backup cifrado y restore MySQL descartable` terminaron en `success`.
 
-Artifact:
+Artifact base:
 
 - nombre: `m11-backup-restore-desarrollo`;
 - ID: `9071507118`;
 - SHA-256: `d4ddb482c79d6ea92fe4032e387c3c30c24fec186b2de67b20c414895da2ff13`;
 - retención GitHub Actions: 14 días.
+
+La fase fue recertificada posteriormente sobre el hardening operativo de M11; los runs posteriores mantienen el mismo drill completo de backup→restore y no sustituyen la evidencia base anterior.
 
 ## 6. Resultado de integridad del restore
 
@@ -119,7 +121,11 @@ Se agregó:
 
 `.github/workflows/m11-backup-desarrollo-operativo.yml`
 
-Este workflow está preparado para ejecutar el mismo procedimiento contra la instancia real de Desarrollo mediante el environment GitHub `varistorehn_desarrollo` y secretos dedicados:
+El workflow utiliza exclusivamente el environment GitHub existente:
+
+`Desarrollo - variapp-api-desarrollo`
+
+y espera secretos dedicados, cuyos valores nunca son leídos ni versionados por el código:
 
 - `M11_DESARROLLO_DB_HOST`;
 - `M11_DESARROLLO_DB_PORT`;
@@ -128,13 +134,29 @@ Este workflow está preparado para ejecutar el mismo procedimiento contra la ins
 - `M11_DESARROLLO_DB_PASSWORD`;
 - `M11_BACKUP_PASSPHRASE`.
 
-El job exige TLS `REQUIRED`, publica únicamente el `.gpg`, su checksum y metadata no sensible, y mantiene retención de 14 días. Puede ejecutarse manualmente. El schedule diario solo ejecuta el job cuando la variable `M11_DESARROLLO_BACKUP_SCHEDULE_ENABLED` está establecida explícitamente en `true`.
+El job exige TLS `REQUIRED`, publica únicamente el `.gpg`, su checksum y metadata no sensible, y mantiene retención de 14 días.
+
+### Disparadores seguros
+
+Mientras `main` permanezca congelada, GitHub no debe considerarse dependiente del `schedule`/`workflow_dispatch` de un workflow que solo vive en `Desarrollo`. Para evitar modificar `main`, el workflow también soporta un trigger controlado desde la propia rama `Desarrollo`:
+
+- push a `Desarrollo` que afecte `.github/checkpoints/m11-backup-request` (o los scripts/workflow M11);
+- mensaje de commit que contenga exactamente `[M11-BACKUP-REAL]`;
+- secretos M11 disponibles en el environment `Desarrollo - variapp-api-desarrollo`.
+
+Sin el marcador explícito, el job real queda `skipped` y solo se ejecuta el gate estático de sintaxis/protecciones. Esto evita respaldos accidentales por cada commit.
+
+Cuando, en una liberación futura autorizada, la definición exista en la rama por defecto, el workflow mantiene además `workflow_dispatch` y schedule diario; el schedule solo ejecuta el backup si `M11_DESARROLLO_BACKUP_SCHEDULE_ENABLED=true`.
+
+### Validación del workflow operativo
+
+GitHub reconoció el workflow desde `Desarrollo`. El gate `Validar definición y protecciones M11` certificó sintaxis de ambos scripts y sus invariantes de seguridad, mientras el job con secretos quedó correctamente omitido en una ejecución normal de PR/push.
 
 ### Límite de evidencia externa
 
-La certificación automática anterior demuestra el proceso completo backup→restore sobre MySQL real descartable y el arranque de la aplicación restaurada. **No se afirma que se haya generado un backup de los datos actuales de Aiven Desarrollo**, porque las credenciales de esa instancia no están disponibles a este agente ni deben extraerse de Render. Esa ejecución externa queda habilitada de forma segura, pero requiere que los secretos anteriores existan en GitHub.
+La certificación automática demuestra el proceso completo backup→restore sobre MySQL real descartable y el arranque de la aplicación restaurada. **No se afirma que se haya generado un backup de los datos actuales de Aiven Desarrollo**, porque la integración GitHub disponible no permite leer/listar los secretos de ese environment y no se deben extraer credenciales desde Render.
 
-Esto no reduce la certificación del mecanismo M11; evita inventar una validación externa que no se ejecutó.
+Por tanto, el mecanismo M11 está certificado; la primera ejecución sobre los datos actuales de Aiven Desarrollo permanece como validación externa operativa hasta que los secretos M11 existan y se dispare explícitamente el job real.
 
 ## 8. Archivos principales
 
@@ -156,7 +178,8 @@ Durante M11:
 - no se habilitó auto-merge;
 - no se aplicó ningún restore contra Aiven ni Producción;
 - no se modificaron credenciales, dominios, servicios ni datos productivos;
-- ningún secreto fue incorporado al repositorio ni al artifact certificado.
+- ningún secreto fue incorporado al repositorio ni al artifact certificado;
+- no se creó un environment GitHub nuevo: se reutiliza el environment de Desarrollo existente.
 
 ## 10. Cierre
 
