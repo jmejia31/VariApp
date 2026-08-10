@@ -52,6 +52,21 @@ public class DashboardService : IDashboardService
             ? await _compraRepository.GetUltimasAsync()
             : new List<Compra>();
 
+        var totalProductosMercaderia = await _productoRepository.GetTotalProductosPorTipoAsync(TipoInventario.MercaderiaVenta);
+        var totalProductosInsumos = await _productoRepository.GetTotalProductosPorTipoAsync(TipoInventario.InsumoAdministrativo);
+        var totalUnidadesMercaderia = await _productoRepository.GetTotalUnidadesPorTipoAsync(TipoInventario.MercaderiaVenta);
+        var totalUnidadesInsumos = await _productoRepository.GetTotalUnidadesPorTipoAsync(TipoInventario.InsumoAdministrativo);
+
+        var valorCostoMercaderia = esAdministrador
+            ? await _productoRepository.GetValorTotalCostoPorTipoAsync(TipoInventario.MercaderiaVenta)
+            : 0m;
+        var valorCostoInsumos = esAdministrador
+            ? await _productoRepository.GetValorTotalCostoPorTipoAsync(TipoInventario.InsumoAdministrativo)
+            : 0m;
+        var valorVentaMercaderia = esAdministrador
+            ? await _productoRepository.GetValorTotalPrecioPorTipoAsync(TipoInventario.MercaderiaVenta)
+            : 0m;
+
         decimal balanceOperativo = 0;
         var ultimaRevision = esAdministrador ? await _revisionRepository.GetUltimaAsync() : null;
         if (esAdministrador)
@@ -65,10 +80,18 @@ public class DashboardService : IDashboardService
 
         return new DashboardResumenDto
         {
-            TotalProductos = await _productoRepository.GetTotalProductosAsync(),
-            TotalUnidades = await _productoRepository.GetTotalUnidadesAsync(),
-            ValorTotalInventario = esAdministrador ? await _productoRepository.GetValorTotalCostoAsync() : 0,
-            ValorPotencialVenta = esAdministrador ? await _productoRepository.GetValorTotalPrecioAsync() : 0,
+            TotalProductos = totalProductosMercaderia + totalProductosInsumos,
+            TotalUnidades = totalUnidadesMercaderia + totalUnidadesInsumos,
+            ValorTotalInventario = valorCostoMercaderia + valorCostoInsumos,
+            // Solo la mercadería vendible forma parte del potencial de venta.
+            ValorPotencialVenta = valorVentaMercaderia,
+            TotalProductosMercaderia = totalProductosMercaderia,
+            TotalProductosInsumosAdministrativos = totalProductosInsumos,
+            TotalUnidadesMercaderia = totalUnidadesMercaderia,
+            TotalUnidadesInsumosAdministrativos = totalUnidadesInsumos,
+            ValorInventarioCostoMercaderia = valorCostoMercaderia,
+            ValorInventarioCostoInsumosAdministrativos = valorCostoInsumos,
+            ValorPotencialVentaMercaderia = valorVentaMercaderia,
             ProductosStockBajo = stockBajo.Select(ProductoMapper.ToDto).ToList(),
             UltimosAgregados = ultimosProductos.Select(ProductoMapper.ToDto).ToList(),
 
@@ -131,7 +154,9 @@ public class DashboardService : IDashboardService
             var precioReal = v.Precio ?? v.Producto.Precio;
             var costoVisible = incluirCostos ? costoReal : 0m;
             var valorCosto = incluirCostos ? Math.Round(costoReal * v.Cantidad, 2, MidpointRounding.AwayFromZero) : 0m;
-            var valorVenta = Math.Round(precioReal * v.Cantidad, 2, MidpointRounding.AwayFromZero);
+            var valorVenta = v.Producto.TipoInventario == TipoInventario.MercaderiaVenta
+                ? Math.Round(precioReal * v.Cantidad, 2, MidpointRounding.AwayFromZero)
+                : 0m;
             return new InventarioVarianteFilaDto
             {
                 ProductoVarianteId = v.Id,
