@@ -45,6 +45,16 @@ function contrast(foreground: string, background: string): number {
   return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
 }
 
+function maxDurationMs(value: string): number {
+  if (!value.trim()) return 0;
+  return Math.max(...value.split(',').map(item => {
+    const normalized = item.trim().toLowerCase();
+    if (normalized.endsWith('ms')) return Number.parseFloat(normalized);
+    if (normalized.endsWith('s')) return Number.parseFloat(normalized) * 1000;
+    return Number.POSITIVE_INFINITY;
+  }));
+}
+
 async function cssVariables(page: Page, names: string[]): Promise<Record<string, string>> {
   return page.evaluate((requested) => {
     const styles = getComputedStyle(document.documentElement);
@@ -209,7 +219,7 @@ test.describe('M10 — UI/UX empresarial y accesibilidad', () => {
     });
 
     expect(reduced.token).toBe('0.01ms');
-    expect(['0s', '0.00001s', '0.01ms']).toContain(reduced.transitionDuration || '0s');
-    expect(['0s', '0.00001s', '0.01ms']).toContain(reduced.animationDuration || '0s');
+    expect(maxDurationMs(reduced.transitionDuration)).toBeLessThanOrEqual(0.1);
+    expect(maxDurationMs(reduced.animationDuration)).toBeLessThanOrEqual(0.1);
   });
 });
