@@ -966,6 +966,10 @@ Producción queda fuera de alcance.
 
 # FASE M12 — Automatización transversal
 
+Estado: **COMPLETADA / CERTIFICADA AUTOMÁTICAMENTE (2026-08-10)**.
+
+Entregable: .
+
 Revisar Productos, Compras, Ventas, Inventario, Clientes, Facturación, Finanzas, Cargas y Configuración para:
 
 - defaults administrables;
