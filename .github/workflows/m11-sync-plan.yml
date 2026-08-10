@@ -1,0 +1,87 @@
+name: M11 - Sincronizar cierre documental
+
+on:
+  push:
+    branches:
+      - Desarrollo
+    paths:
+      - .github/workflows/m11-sync-plan.yml
+
+permissions:
+  contents: write
+
+jobs:
+  sincronizar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+
+      - name: Marcar M11 como certificada en Plan Maestro
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('docs/PLAN_MAESTRO_MEJORAS_EMPRESARIALES_2026.md')
+          text = path.read_text(encoding='utf-8')
+
+          old = '''# FASE M11 — Backups y restauración en Desarrollo
+
+- inventario de activos respaldables;
+- MySQL;
+- configuración;
+- documentos;
+- referencias/activos de imágenes;
+- checksum;
+- cifrado/control de acceso;
+- retención;
+- metadata;
+- restore en entorno descartable;
+- validación de integridad.
+
+Producción queda fuera de alcance.
+'''
+
+          new = '''# FASE M11 — Backups y restauración en Desarrollo
+
+Estado: **COMPLETADA / CERTIFICADA AUTOMÁTICAMENTE (2026-08-10)**.
+
+Entregable: `docs/FASE_M11_BACKUPS_RESTAURACION_DESARROLLO.md`.
+
+- inventario de activos respaldables;
+- MySQL;
+- configuración;
+- documentos;
+- referencias/activos de imágenes;
+- checksum;
+- cifrado/control de acceso;
+- retención;
+- metadata;
+- restore en entorno descartable;
+- validación de integridad.
+
+Producción queda fuera de alcance.
+
+Evidencia automatizada: backup cifrado y restore íntegro sobre MySQL 8.4 descartable, con 54 tablas, 32 migraciones EF, conteos exactos por tabla y API restaurada saludable. El backup de la instancia Aiven Desarrollo real permanece como validación externa operativa y no se declara ejecutado sin credenciales verificables.
+'''
+
+          if old not in text:
+              raise SystemExit('No se encontró el bloque M11 esperado; sincronización abortada fail-closed.')
+
+          path.write_text(text.replace(old, new, 1), encoding='utf-8')
+          PY
+
+      - name: Retirar workflow temporal y publicar cierre
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm .github/workflows/m11-sync-plan.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/PLAN_MAESTRO_MEJORAS_EMPRESARIALES_2026.md .github/workflows/m11-sync-plan.yml
+          git diff --cached --check
+          git commit -m 'docs(m11): certificar fase en plan maestro [ChatGPT]'
+          git push origin HEAD:Desarrollo
