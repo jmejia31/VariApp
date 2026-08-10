@@ -2,6 +2,7 @@ using InventoryApp.API.Controllers;
 using InventoryApp.Application.DTOs;
 using InventoryApp.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
+using Xunit;
 
 namespace InventoryApp.Tests;
 
