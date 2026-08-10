@@ -6,6 +6,10 @@ public class CostoEnvio : AuditableEntity
 {
     public string Nombre { get; set; } = string.Empty;
     public string? Descripcion { get; set; }
+    public string? Departamento { get; set; }
+    public string? Ciudad { get; set; }
+    public string? Zona { get; set; }
+    public string? Modalidad { get; set; }
     public decimal Monto { get; set; }
     public DateTime? VigenteDesde { get; set; }
     public DateTime? VigenteHasta { get; set; }
