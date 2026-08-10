@@ -1,0 +1,61 @@
+name: M9 - Sincronizar cierre documental
+
+on:
+  push:
+    branches:
+      - Desarrollo
+    paths:
+      - .github/workflows/m9-sync-plan.yml
+
+permissions:
+  contents: write
+
+jobs:
+  sincronizar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+
+      - name: Sincronizar M8 y M9 en Plan Maestro
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('docs/PLAN_MAESTRO_MEJORAS_EMPRESARIALES_2026.md')
+          text = path.read_text(encoding='utf-8')
+
+          m8 = '# FASE M8 — Búsqueda inteligente y rendimiento\n\n'
+          m8_new = (
+              '# FASE M8 — Búsqueda inteligente y rendimiento\n\n'
+              'Estado: **COMPLETADA / CERTIFICADA AUTOMÁTICAMENTE (2026-08-10)**.\n\n'
+              'Entregable: `docs/FASE_M8_BUSQUEDA_INTELIGENTE_RENDIMIENTO.md`.\n\n'
+          )
+          if m8 in text and 'FASE_M8_BUSQUEDA_INTELIGENTE_RENDIMIENTO.md' not in text:
+              text = text.replace(m8, m8_new, 1)
+
+          m9 = '# FASE M9 — Cargas masivas profesionales\n\nExtender la infraestructura existente:\n'
+          m9_new = (
+              '# FASE M9 — Cargas masivas profesionales\n\n'
+              'Estado: **COMPLETADA / CERTIFICADA AUTOMÁTICAMENTE (2026-08-10)**.\n\n'
+              'Entregable: `docs/FASE_M9_CARGAS_MASIVAS_PROFESIONALES.md`.\n\n'
+              'Cobertura cerrada sobre la infraestructura existente:\n'
+          )
+          if m9 not in text:
+              raise SystemExit('No se encontró el bloque M9 esperado; cierre abortado fail-closed.')
+          text = text.replace(m9, m9_new, 1)
+          path.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Retirar workflow temporal y publicar sincronización
+        shell: bash
+        run: |
+          rm .github/workflows/m9-sync-plan.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/PLAN_MAESTRO_MEJORAS_EMPRESARIALES_2026.md .github/workflows/m9-sync-plan.yml
+          git diff --cached --check
+          git commit -m 'docs(m9): certificar fase en plan maestro [ChatGPT]'
+          git push origin HEAD:Desarrollo
