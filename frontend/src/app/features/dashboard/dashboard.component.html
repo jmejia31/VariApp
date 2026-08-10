@@ -25,10 +25,10 @@
       <article class="metric-card accent-green">
         <div>
           <span>{{ r.totalUnidades | number }}</span>
-          <p>Unidades en inventario</p>
+          <p>Unidades en inventario físico</p>
         </div>
         <mat-icon aria-hidden="true">inventory_2</mat-icon>
-        <footer>Productos activos: {{ r.totalProductos }}</footer>
+        <footer>Productos registrados: {{ r.totalProductos }}</footer>
       </article>
 
       <article class="metric-card accent-red">
@@ -51,6 +51,35 @@
         </article>
       }
     </div>
+
+    @if (esAdministrador()) {
+      <div class="metric-grid" aria-label="Separación de inventario por destino">
+        <article class="metric-card accent-green">
+          <div>
+            <span>{{ r.totalUnidadesMercaderia | number }}</span>
+            <p>Mercadería vendible</p>
+          </div>
+          <mat-icon aria-hidden="true">storefront</mat-icon>
+          <footer>{{ r.totalProductosMercaderia }} productos · Costo L. {{ r.valorInventarioCostoMercaderia | number:'1.2-2' }}</footer>
+        </article>
+        <article class="metric-card accent-orange">
+          <div>
+            <span>{{ r.totalUnidadesInsumosAdministrativos | number }}</span>
+            <p>Insumos administrativos</p>
+          </div>
+          <mat-icon aria-hidden="true">inventory</mat-icon>
+          <footer>{{ r.totalProductosInsumosAdministrativos }} productos · Costo L. {{ r.valorInventarioCostoInsumosAdministrativos | number:'1.2-2' }}</footer>
+        </article>
+        <article class="metric-card accent-cyan">
+          <div>
+            <span>L. {{ r.valorPotencialVentaMercaderia | number:'1.2-2' }}</span>
+            <p>Potencial de venta</p>
+          </div>
+          <mat-icon aria-hidden="true">payments</mat-icon>
+          <footer>Solo mercadería; los insumos internos no se valorizan como venta.</footer>
+        </article>
+      </div>
+    }
 
     <div class="dashboard-grid">
       <article class="card analytics-card">
