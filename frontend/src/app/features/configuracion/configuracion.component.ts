@@ -15,13 +15,14 @@ import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service
 import { CAMPOS_TEMA, TemaVisual } from '../../core/models/tema-visual.model';
 import { EmpresaConfiguracion } from '../../core/models/empresa-configuracion.model';
 import { AppAlertService } from '../../shared/alerts/app-alert.service';
+import { AutomatizacionConfiguracionCardComponent } from './automatizacion-configuracion-card.component';
 
 @Component({
   selector: 'app-configuracion',
   standalone: true,
   imports: [
     CommonModule, ReactiveFormsModule, FormsModule, MatFormFieldModule, MatInputModule,
-    MatButtonModule, MatIconModule, MatProgressSpinnerModule
+    MatButtonModule, MatIconModule, MatProgressSpinnerModule, AutomatizacionConfiguracionCardComponent
   ],
   templateUrl: './configuracion.component.html',
   styleUrl: './configuracion.component.scss'
