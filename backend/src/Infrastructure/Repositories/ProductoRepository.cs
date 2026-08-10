@@ -1,6 +1,7 @@
 using InventoryApp.Application.Common;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities;
+using InventoryApp.Domain.Enums;
 using InventoryApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -161,6 +162,24 @@ public class ProductoRepository : IProductoRepository
         await _context.ProductoVariantes
             .Where(v => !v.Eliminado)
             .SumAsync(v => (decimal?)((v.Precio ?? 0m) * v.Cantidad)) ?? 0m;
+
+    public async Task<int> GetTotalProductosPorTipoAsync(TipoInventario tipoInventario) =>
+        await _context.Productos.CountAsync(p => p.TipoInventario == tipoInventario);
+
+    public async Task<int> GetTotalUnidadesPorTipoAsync(TipoInventario tipoInventario) =>
+        await _context.ProductoVariantes
+            .Where(v => !v.Eliminado && v.Producto.TipoInventario == tipoInventario)
+            .SumAsync(v => (int?)v.Cantidad) ?? 0;
+
+    public async Task<decimal> GetValorTotalCostoPorTipoAsync(TipoInventario tipoInventario) =>
+        await _context.ProductoVariantes
+            .Where(v => !v.Eliminado && v.Producto.TipoInventario == tipoInventario)
+            .SumAsync(v => (decimal?)((v.Costo ?? v.Producto.Costo) * v.Cantidad)) ?? 0m;
+
+    public async Task<decimal> GetValorTotalPrecioPorTipoAsync(TipoInventario tipoInventario) =>
+        await _context.ProductoVariantes
+            .Where(v => !v.Eliminado && v.Producto.TipoInventario == tipoInventario)
+            .SumAsync(v => (decimal?)((v.Precio ?? v.Producto.Precio) * v.Cantidad)) ?? 0m;
 
     public async Task AddAsync(Producto producto) =>
         await _context.Productos.AddAsync(producto);
