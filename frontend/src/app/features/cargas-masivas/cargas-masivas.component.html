@@ -15,20 +15,23 @@
   </header>
 
   @if (error()) {
-    <div class="message error-message" role="alert">
-      <mat-icon>error_outline</mat-icon>
-      <span>{{ error() }}</span>
-    </div>
+    <app-feedback-state
+      type="error"
+      title="No se pudo completar la operación"
+      [message]="error() ?? ''" />
   }
   @if (mensaje()) {
-    <div class="message success-message" role="status">
-      <mat-icon>check_circle</mat-icon>
-      <span>{{ mensaje() }}</span>
-    </div>
+    <app-feedback-state
+      type="success"
+      title="Operación completada"
+      [message]="mensaje() ?? ''" />
   }
 
   @if (loading()) {
-    <div class="loading-state"><mat-spinner diameter="40"></mat-spinner><span>Cargando configuración…</span></div>
+    <app-feedback-state
+      type="loading"
+      title="Cargando configuración…"
+      message="Preparando plantillas, permisos y reglas de importación." />
   } @else {
     <section class="workflow-grid">
       <mat-card class="control-card">
@@ -146,7 +149,10 @@
       </div>
 
       @if (carga.errorGeneral) {
-        <div class="message error-message"><mat-icon>report_problem</mat-icon><span>{{ carga.errorGeneral }}</span></div>
+        <app-feedback-state
+          type="error"
+          title="La carga requiere atención"
+          [message]="carga.errorGeneral" />
       }
 
       <div class="table-shell preview-table" tabindex="0" aria-label="Vista previa de filas">
@@ -286,7 +292,10 @@
         <tr mat-row *matRowDef="let row; columns: columnasHistorial"></tr>
       </table>
       @if (historial().length === 0) {
-        <div class="empty-state"><mat-icon>inventory_2</mat-icon><span>Todavía no hay cargas registradas.</span></div>
+        <app-feedback-state
+          type="empty"
+          title="Todavía no hay cargas registradas"
+          message="Las validaciones e importaciones aparecerán aquí para mantener su trazabilidad." />
       }
     </div>
   </section>
