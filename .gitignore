@@ -68,5 +68,9 @@ Desktop.ini
 *.rar
 *.tar
 *.gz
+*.gpg
 *.sql.bak
 *.backup
+.m11-backups/
+m11-restored-files/
+m11-restore-report.json
