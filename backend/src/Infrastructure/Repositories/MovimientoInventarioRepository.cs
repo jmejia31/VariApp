@@ -1,5 +1,6 @@
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities;
+using InventoryApp.Domain.Enums;
 using InventoryApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -47,7 +48,24 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
         var alcance = await _usuarioScope.ObtenerActualAsync();
         var query = AplicarAlcance(ConIncludes(), alcance);
         if (productoId.HasValue) query = query.Where(m => m.ProductoId == productoId.Value);
-        if (!string.IsNullOrWhiteSpace(tipo)) query = query.Where(m => m.Tipo.ToString() == tipo);
+
+        if (!string.IsNullOrWhiteSpace(tipo))
+        {
+            // EF/Pomelo no traduce Enum.ToString() dentro del IQueryable. Resolver el
+            // valor antes de construir el predicado mantiene el filtro 100% SQL.
+            if (Enum.TryParse<TipoMovimientoInventario>(tipo.Trim(), ignoreCase: true, out var tipoMovimiento) &&
+                Enum.IsDefined(tipoMovimiento))
+            {
+                query = query.Where(m => m.Tipo == tipoMovimiento);
+            }
+            else
+            {
+                // Un filtro desconocido no debe provocar 500 ni convertirse en un
+                // filtro abierto: devuelve un conjunto vacío de forma fail-closed.
+                query = query.Where(_ => false);
+            }
+        }
+
         if (desde.HasValue) query = query.Where(m => m.Fecha >= desde.Value);
         if (hasta.HasValue) query = query.Where(m => m.Fecha <= hasta.Value);
         return await query.OrderByDescending(m => m.Fecha).Take(200).ToListAsync();
