@@ -8,6 +8,7 @@ on:
       - .github/workflows/m11-backup-desarrollo-operativo.yml
       - scripts/m11_backup_desarrollo.sh
       - scripts/m11_restore_desarrollo.sh
+      - .github/checkpoints/m11-backup-request
   pull_request:
     branches:
       - main
@@ -54,11 +55,16 @@ jobs:
           grep -q 'productionTouched' scripts/m11_restore_desarrollo.sh
 
   backup-desarrollo:
-    name: Backup cifrado de varistorehn_desarrollo
-    if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule' && vars.M11_DESARROLLO_BACKUP_SCHEDULE_ENABLED == 'true') }}
+    name: Backup cifrado de Desarrollo real
+    if: >-
+      ${{
+        github.event_name == 'workflow_dispatch' ||
+        (github.event_name == 'schedule' && vars.M11_DESARROLLO_BACKUP_SCHEDULE_ENABLED == 'true') ||
+        (github.event_name == 'push' && contains(github.event.head_commit.message, '[M11-BACKUP-REAL]'))
+      }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    environment: varistorehn_desarrollo
+    environment: "Desarrollo - variapp-api-desarrollo"
 
     steps:
       - name: Checkout Desarrollo
