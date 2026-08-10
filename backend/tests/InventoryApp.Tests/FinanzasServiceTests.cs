@@ -103,12 +103,12 @@ public class FinanzasServiceTests
             new() { Tipo = TipoMovimientoFinanciero.Egreso, Categoria = CategoriaMovimientoFinanciero.GastoOperativo, Monto = 75m, EsAutomatico = true, Estado = EstadoMovimientoFinanciero.Pagado },
             new() { Tipo = TipoMovimientoFinanciero.Egreso, Categoria = CategoriaMovimientoFinanciero.GastoOperativo, Monto = 25m, EsAutomatico = false, Estado = EstadoMovimientoFinanciero.Anulado }
         });
-        _ventaRepoMock.Setup(r => r.GetUtilidadBrutaTotalAsync(null)).ReturnsAsync(500m);
-        _ventaRepoMock.Setup(r => r.GetCuentasPorCobrarAsync(null)).ReturnsAsync(0m);
-        _ventaRepoMock.Setup(r => r.GetTotalDelMesAsync(null)).ReturnsAsync(0);
-        _ventaRepoMock.Setup(r => r.GetIngresosDelMesAsync(null)).ReturnsAsync(0m);
-        _compraRepoMock.Setup(r => r.GetCuentasPorPagarAsync(null)).ReturnsAsync(0m);
-        _compraRepoMock.Setup(r => r.GetTotalDelMesAsync(null)).ReturnsAsync(0);
+        _ventaRepoMock.Setup(r => r.GetUtilidadBrutaTotalAsync(CancellationToken.None)).ReturnsAsync(500m);
+        _ventaRepoMock.Setup(r => r.GetCuentasPorCobrarAsync(CancellationToken.None)).ReturnsAsync(0m);
+        _ventaRepoMock.Setup(r => r.GetTotalDelMesAsync(CancellationToken.None)).ReturnsAsync(0);
+        _ventaRepoMock.Setup(r => r.GetIngresosDelMesAsync(CancellationToken.None)).ReturnsAsync(0m);
+        _compraRepoMock.Setup(r => r.GetCuentasPorPagarAsync(CancellationToken.None)).ReturnsAsync(0m);
+        _compraRepoMock.Setup(r => r.GetTotalDelMesAsync(CancellationToken.None)).ReturnsAsync(0);
         _revisionRepoMock.Setup(r => r.GetUltimaAsync()).ReturnsAsync((RevisionFinanciera?)null);
         _productoRepoMock.Setup(r => r.GetValorTotalCostoPorTipoAsync(TipoInventario.MercaderiaVenta)).ReturnsAsync(800m);
         _productoRepoMock.Setup(r => r.GetValorTotalCostoPorTipoAsync(TipoInventario.InsumoAdministrativo)).ReturnsAsync(200m);
