@@ -106,7 +106,7 @@ public class M8BusquedaRepositoriosTests
             CreadoPorUsuarioId = 9,
             CreadoPorNombreUsuario = "Admin"
         };
-        context.TiposClientes.Add(tipo);
+        context.TipoClientes.Add(tipo);
         await context.SaveChangesAsync();
 
         for (var i = 1; i <= 35; i++)
