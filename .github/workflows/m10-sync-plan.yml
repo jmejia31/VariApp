@@ -1,0 +1,66 @@
+name: M10 - Sincronizar cierre documental
+
+on:
+  push:
+    branches:
+      - Desarrollo
+    paths:
+      - .github/workflows/m10-sync-plan.yml
+
+permissions:
+  contents: write
+
+jobs:
+  sincronizar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+
+      - name: Sincronizar M10 y checkpoint
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          plan = Path('docs/PLAN_MAESTRO_MEJORAS_EMPRESARIALES_2026.md')
+          text = plan.read_text(encoding='utf-8')
+          marker = '# FASE M10 — UI/UX empresarial y accesibilidad\n\n'
+          replacement = (
+              '# FASE M10 — UI/UX empresarial y accesibilidad\n\n'
+              'Estado: **COMPLETADA / CERTIFICADA AUTOMÁTICAMENTE (2026-08-10)**.\n\n'
+              'Entregable: `docs/FASE_M10_UI_UX_EMPRESARIAL_ACCESIBILIDAD.md`.\n\n'
+          )
+          if marker not in text:
+              raise SystemExit('No se encontró el bloque M10 esperado; cierre abortado fail-closed.')
+          if 'FASE_M10_UI_UX_EMPRESARIAL_ACCESIBILIDAD.md' not in text:
+              text = text.replace(marker, replacement, 1)
+          plan.write_text(text, encoding='utf-8')
+
+          checkpoint = Path('.github/checkpoints/m10')
+          checkpoint.parent.mkdir(parents=True, exist_ok=True)
+          checkpoint.write_text('''FASE=M10
+ESTADO=COMPLETADA_CERTIFICADA_AUTOMATICAMENTE
+FECHA=2026-08-10
+HEAD_FUNCIONAL=165c264333bc68b55660d16c832a103c7f3d9a8e
+RUN_M10=31403468817
+RUN_COMPILACION=31403468818
+RUN_FASE8=31403468645
+ARTIFACT_M10_ID=9068739857
+ARTIFACT_M10_SHA256=d1f498ac5ba97a9dd179bc648706fd53f7cb6090921848b41de229bc7bf93acd
+PLAYWRIGHT_M10=6_APROBADAS_0_FALLOS_0_OMITIDAS_0_ERRORES
+SIGUIENTE=M11_BACKUPS_RESTAURACION_DESARROLLO
+''', encoding='utf-8')
+          PY
+
+      - name: Retirar workflow temporal y publicar cierre
+        shell: bash
+        run: |
+          rm .github/workflows/m10-sync-plan.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/PLAN_MAESTRO_MEJORAS_EMPRESARIALES_2026.md .github/checkpoints/m10 .github/workflows/m10-sync-plan.yml
+          git diff --cached --check
+          git commit -m 'docs(m10): cerrar fase en plan maestro [ChatGPT]'
+          git push origin HEAD:Desarrollo
