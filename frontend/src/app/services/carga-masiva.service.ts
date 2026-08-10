@@ -7,6 +7,7 @@ import {
   CargaMasiva,
   CargaMasivaConfiguracion,
   CargaMasivaDetalle,
+  CargaMasivaProgreso,
   TipoCargaMasiva
 } from '../core/models/carga-masiva.model';
 
@@ -34,6 +35,10 @@ export class CargaMasivaService {
     return this.http.get<ApiResponse<CargaMasivaDetalle>>(`${this.apiUrl}/${id}`);
   }
 
+  getProgreso(id: number): Observable<ApiResponse<CargaMasivaProgreso>> {
+    return this.http.get<ApiResponse<CargaMasivaProgreso>>(`${this.apiUrl}/${id}/progreso`);
+  }
+
   validar(tipo: TipoCargaMasiva, archivo: File): Observable<ApiResponse<CargaMasivaDetalle>> {
     const formData = new FormData();
     formData.append('tipo', tipo);
@@ -45,9 +50,15 @@ export class CargaMasivaService {
     return this.http.post<ApiResponse<CargaMasivaDetalle>>(`${this.apiUrl}/${id}/confirmar`, {});
   }
 
-  descargarPlantilla(tipo: TipoCargaMasiva, formato: 'csv' | 'xlsx'): Observable<Blob> {
+  descargarPlantilla(
+    tipo: TipoCargaMasiva,
+    formato: 'csv' | 'xlsx',
+    version?: string
+  ): Observable<Blob> {
+    let params = new HttpParams().set('formato', formato);
+    if (version?.trim()) params = params.set('version', version.trim());
     return this.http.get(`${this.apiUrl}/plantillas/${tipo}`, {
-      params: { formato },
+      params,
       responseType: 'blob'
     });
   }
