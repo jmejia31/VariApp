@@ -99,11 +99,10 @@ test.describe('M10 — UI/UX empresarial y accesibilidad', () => {
     await expect(skip).toBeFocused();
     await expect(skip).toBeVisible();
     await page.keyboard.press('Enter');
-    await expect(page.locator('#contenido-principal')).toBeFocused();
+    await expect(page.locator('#main-content')).toBeFocused();
 
     const targetAudit = await page.evaluate(() => {
-      const main = document.querySelector('main#contenido-principal');
-      const nav = document.querySelector('aside[aria-label="Navegación principal"] nav');
+      const nav = document.querySelector('aside[aria-label="Menú principal"] nav[aria-label="Navegación principal"]');
       const interactive = Array.from(document.querySelectorAll<HTMLElement>(
         'button:not([disabled]), a[role="button"], .mat-mdc-button-base:not([disabled])'
       )).filter(element => {
@@ -119,7 +118,7 @@ test.describe('M10 — UI/UX empresarial y accesibilidad', () => {
         }))
         .filter(item => item.height < 44);
       return {
-        mainCount: document.querySelectorAll('main#contenido-principal').length,
+        mainCount: document.querySelectorAll('main#main-content').length,
         navExists: Boolean(nav),
         tooSmall
       };
@@ -185,7 +184,7 @@ test.describe('M10 — UI/UX empresarial y accesibilidad', () => {
         const layout = await page.evaluate(() => ({
           viewport: document.documentElement.clientWidth,
           documentWidth: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth),
-          mainVisible: Boolean(document.querySelector('main#contenido-principal'))
+          mainVisible: Boolean(document.querySelector('main#main-content'))
         }));
         expect(layout.mainVisible).toBe(true);
         expect(layout.documentWidth - layout.viewport, `${route} @ ${viewport.width}px`).toBeLessThanOrEqual(1);
