@@ -265,9 +265,9 @@ test.describe('Fase 8 — validación completa automatizada', () => {
   test('el enlace para saltar contenido funciona mediante teclado', async ({ page }) => {
     await login(page);
     await page.goto('/dashboard');
-    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+    const skip = page.getByRole('link', { name: 'Saltar al contenido principal' });
     await page.keyboard.press('Tab');
-    await expect(page.locator('.skip-link')).toBeFocused();
+    await expect(skip).toBeFocused();
     await page.keyboard.press('Enter');
     await expect(page.locator('main#main-content')).toBeFocused();
   });

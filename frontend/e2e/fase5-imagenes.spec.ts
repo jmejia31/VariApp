@@ -56,6 +56,27 @@ const productWithoutImage = {
   imagenes: []
 };
 
+const productOperationSale = {
+  productoId: product.id,
+  productoVarianteId: 503,
+  productoNombre: product.nombre,
+  marca: product.marca,
+  modelo: product.modelo,
+  esVarianteTecnica: true,
+  colorId: null,
+  colorNombre: 'Predeterminada',
+  sku: 'SKU-F5-VISUAL',
+  codigoBarras: '000000000503',
+  cantidadDisponible: product.cantidad,
+  precio: product.precio,
+  imagenMiniaturaUrl: okImage
+};
+
+const productOperationPurchase = {
+  ...productOperationSale,
+  costo: product.costo
+};
+
 const detail = {
   id: 11,
   productoId: product.id,
@@ -148,6 +169,9 @@ async function installFixtures(page: Page): Promise<void> {
     totalPages: 1
   }));
   await page.route(/^https?:\/\/(?:localhost|127\.0\.0\.1):5005\/(?:api\/)?productos\/501$/, (route) => json(route, product));
+
+  await page.route(/^https?:\/\/(?:localhost|127\.0\.0\.1):5005\/(?:api\/)?compras\/productos\/buscar(?:\?.*)?$/, (route) => json(route, [productOperationPurchase]));
+  await page.route(/^https?:\/\/(?:localhost|127\.0\.0\.1):5005\/(?:api\/)?ventas\/productos\/buscar(?:\?.*)?$/, (route) => json(route, [productOperationSale]));
 
   await page.route(/^https?:\/\/(?:localhost|127\.0\.0\.1):5005\/(?:api\/)?compras(?:\?.*)?$/, (route) => {
     if (route.request().method() === 'POST') return json(route, purchase);
@@ -251,7 +275,7 @@ test.describe('Fase 5 - tratamiento integral de imágenes', () => {
     await capture(page, 'compra-detalle');
 
     await page.goto('/compras/nueva');
-    await page.locator('.col-producto mat-select').first().click();
+    await page.getByTestId('compra-producto-autocomplete').fill(productOperationPurchase.sku);
     await page.getByRole('option', { name: /Producto visual Fase 5/ }).click();
     await expect(page.locator('.col-imagen app-producto-imagen img')).toBeVisible();
     await capture(page, 'compra-formulario');
@@ -265,7 +289,7 @@ test.describe('Fase 5 - tratamiento integral de imágenes', () => {
     await capture(page, 'venta-detalle');
 
     await page.goto('/ventas/nueva');
-    await page.locator('.col-producto mat-select').first().click();
+    await page.getByTestId('venta-producto-autocomplete').fill(productOperationSale.sku);
     await page.getByRole('option', { name: /Producto visual Fase 5/ }).click();
     await expect(page.locator('.col-imagen app-producto-imagen img')).toBeVisible();
     await capture(page, 'venta-formulario');

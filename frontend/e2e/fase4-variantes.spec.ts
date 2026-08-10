@@ -348,22 +348,19 @@ test.describe('Fase 4 — variantes multidimensionales, SKU e inventario', () =>
     await expect(fila.getByText('10', { exact: true })).toBeVisible();
 
     await page.goto('/ventas/nueva');
-    const productoVenta = page.locator('mat-select[formcontrolname="productoId"]').first();
-    await productoVenta.click();
+    const ventaInput = page.getByTestId('venta-producto-autocomplete');
+    await ventaInput.fill(nombres.sku);
     await page.getByRole('option', { name: new RegExp(nombres.producto) }).click();
     const varianteVenta = page.locator('mat-select[formcontrolname="productoVarianteId"]').first();
     await expect(varianteVenta).toBeVisible();
-    await varianteVenta.click();
-    await expect(page.getByRole('option', { name: new RegExp(nombres.sku.toUpperCase()) })).toBeVisible();
-    await page.keyboard.press('Escape');
+    await expect(varianteVenta).toContainText(nombres.sku.toUpperCase());
 
     await page.goto('/compras/nueva');
-    const productoCompra = page.locator('mat-select[formcontrolname="productoId"]').first();
-    await productoCompra.click();
+    const compraInput = page.getByTestId('compra-producto-autocomplete');
+    await compraInput.fill(nombres.sku);
     await page.getByRole('option', { name: new RegExp(nombres.producto) }).click();
     const varianteCompra = page.locator('mat-select[formcontrolname="productoVarianteId"]').first();
     await expect(varianteCompra).toBeVisible();
-    await varianteCompra.click();
-    await expect(page.getByRole('option', { name: new RegExp(nombres.sku.toUpperCase()) })).toBeVisible();
+    await expect(varianteCompra).toContainText(nombres.sku.toUpperCase());
   });
 });
