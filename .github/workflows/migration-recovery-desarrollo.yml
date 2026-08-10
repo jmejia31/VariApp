@@ -26,7 +26,7 @@ concurrency:
 
 jobs:
   recovery:
-    name: Reanudar M1 desde DDL parcialmente aplicado
+    name: Reanudar DDL parcial con restricciones Aiven
     runs-on: ubuntu-latest
     timeout-minutes: 35
 
@@ -80,6 +80,15 @@ jobs:
         run: |
           dotnet restore InventoryApp.sln
           dotnet tool install --global dotnet-ef --version 8.0.8
+
+      - name: Activar restricción de primary key equivalente a Aiven
+        shell: bash
+        run: |
+          set -euo pipefail
+          mysql_container="${{ job.services.mysql.id }}"
+          docker exec "$mysql_container" mysql -uroot -proot -e "SET GLOBAL sql_require_primary_key=ON;"
+          test "$(docker exec "$mysql_container" mysql -uroot -proot -Nse "SELECT @@GLOBAL.sql_require_primary_key;")" = 1
+          echo 'sql_require_primary_key=ON certificado para todas las conexiones nuevas.'
 
       - name: Crear baseline inmediatamente anterior a M1 endurecido
         working-directory: backend
@@ -136,7 +145,7 @@ jobs:
           for attempt in $(seq 1 75); do
             if curl --fail --silent http://127.0.0.1:5005/health > /dev/null && \
                curl --fail --silent http://127.0.0.1:5005/health/ready > /dev/null; then
-              echo 'API recuperó el DDL parcial y quedó saludable.'
+              echo 'API recuperó el DDL parcial bajo sql_require_primary_key=ON y quedó saludable.'
               exit 0
             fi
             if ! kill -0 "$(cat migration-recovery-api.pid)" 2>/dev/null; then
@@ -151,20 +160,23 @@ jobs:
           cat migration-recovery-api.log >&2 || true
           exit 1
 
-      - name: Verificar convergencia de esquema e historial
+      - name: Verificar convergencia de esquema, M2 e historial
         shell: bash
         run: |
           set -euo pipefail
           mysql_container="${{ job.services.mysql.id }}"
           q(){ docker exec "$mysql_container" mysql -uroot -proot inventoryapp_migration_recovery -Nse "$1"; }
 
+          test "$(q "SELECT @@GLOBAL.sql_require_primary_key;")" = 1
           test "$(q "SELECT COUNT(*) FROM __EFMigrationsHistory WHERE MigrationId='20260808165128_M1ReconciliarReintentoIntegridadRelacional';")" = 1
           test "$(q "SELECT COUNT(*) FROM __EFMigrationsHistory WHERE MigrationId='20260808165129_M1EndurecerIntegridadRelacional';")" = 1
+          test "$(q "SELECT COUNT(*) FROM __EFMigrationsHistory WHERE MigrationId='20260809121915_M2VariantesMultidimensionales';")" = 1
           test "$(q "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='Proveedores' AND COLUMN_NAME='DocumentoNormalizado';")" = 1
           test "$(q "SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='Proveedores' AND INDEX_NAME='IX_Proveedores_Nombre' AND NON_UNIQUE=1;")" = 1
           test "$(q "SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='Clientes' AND INDEX_NAME='IX_Clientes_Nombre' AND NON_UNIQUE=1;")" = 1
           test "$(q "SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='ImpuestoProveedores' AND INDEX_NAME='UX_ImpuestoProveedores_Impuesto_Proveedor' AND NON_UNIQUE=0;")" = 2
           test "$(q "SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='ImpuestoProveedores' AND INDEX_NAME='IX_ImpuestoProveedores_ImpuestoId';")" = 0
+          test "$(q "SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='ProductoVariantes' AND INDEX_NAME='IX_ProductoVariantes_Dimensiones';")" = 5
 
       - name: Verificar segundo arranque idempotente
         working-directory: backend
