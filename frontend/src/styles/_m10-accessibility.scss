@@ -16,12 +16,14 @@
   scroll-margin-top: 5rem;
 }
 
+/* El main recibe foco programático tras navegación. Se conserva una geometría de foco
+   transparente para no romper forced-colors; los controles interactivos mantienen
+   el foco visible reforzado definido por enterprise-design-system. */
 #main-content:focus {
-  outline: none;
+  outline: 1px solid transparent;
+  outline-offset: 0;
 }
 
-/* Se omite el anillo únicamente para el contenedor main programáticamente enfocado;
-   los controles interactivos mantienen :focus-visible obligatorio. */
 #main-content:focus-visible {
   box-shadow: none !important;
 }
@@ -86,7 +88,6 @@
   max-width: var(--content-readable);
 }
 
-/* Texto de ayuda y error de formularios debe ser legible incluso con zoom/reflow. */
 :where(.mat-mdc-form-field-hint, .mat-mdc-form-field-error, .app-form-help, .app-form-error) {
   max-width: var(--content-readable);
   line-height: 1.4;
@@ -99,13 +100,11 @@
   font-weight: var(--font-weight-medium);
 }
 
-/* Filas seleccionables: estado distinguible por más de color cuando se use esta utilidad. */
 .app-selected {
   border-inline-start: 4px solid var(--color-primary);
   background: color-mix(in srgb, var(--color-primary) 7%, var(--color-surface));
 }
 
-/* Acciones iconográficas deben tener superficie suficiente; el nombre accesible se valida en E2E. */
 .app-icon-action {
   min-inline-size: var(--target-min);
   min-block-size: var(--target-min);
@@ -113,7 +112,6 @@
   place-items: center;
 }
 
-/* Reflow WCAG: ninguna utilidad empresarial exige un ancho mayor que el viewport. */
 :where(.app-page, .app-section, .app-toolbar, .app-field-grid, .app-control-group, .app-surface-card) > * {
   min-width: 0;
 }
@@ -130,14 +128,12 @@
   }
 }
 
-/* En dispositivos táctiles se conserva una separación mínima entre objetivos adyacentes. */
 @media (pointer: coarse) {
   :where(button:not(.overlay), a[role='button'], .mat-mdc-button-base) {
     min-inline-size: var(--target-min);
   }
 }
 
-/* El usuario puede solicitar menos animación sin perder información ni estados. */
 @media (prefers-reduced-motion: reduce) {
   .skip-link,
   .app-surface-card--interactive {
@@ -146,8 +142,11 @@
   }
 }
 
-/* Windows High Contrast / forced colors: no se fuerzan colores que oculten controles. */
 @media (forced-colors: active) {
+  #main-content:focus {
+    outline-color: Canvas;
+  }
+
   .app-selected {
     border-inline-start-color: Highlight;
     background: Canvas;
