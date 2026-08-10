@@ -944,6 +944,10 @@ Entregable: `docs/FASE_M10_UI_UX_EMPRESARIAL_ACCESIBILIDAD.md`.
 
 # FASE M11 — Backups y restauración en Desarrollo
 
+Estado: **COMPLETADA / CERTIFICADA AUTOMÁTICAMENTE (2026-08-10)**.
+
+Entregable: `docs/FASE_M11_BACKUPS_RESTAURACION_DESARROLLO.md`.
+
 - inventario de activos respaldables;
 - MySQL;
 - configuración;
