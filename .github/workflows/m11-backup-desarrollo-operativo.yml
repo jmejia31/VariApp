@@ -1,6 +1,20 @@
 name: M11 - Backup operativo de Desarrollo
 
 on:
+  push:
+    branches:
+      - Desarrollo
+    paths:
+      - .github/workflows/m11-backup-desarrollo-operativo.yml
+      - scripts/m11_backup_desarrollo.sh
+      - scripts/m11_restore_desarrollo.sh
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/m11-backup-desarrollo-operativo.yml
+      - scripts/m11_backup_desarrollo.sh
+      - scripts/m11_restore_desarrollo.sh
   workflow_dispatch:
   schedule:
     - cron: '30 07 * * *'
@@ -12,9 +26,36 @@ env:
   RETENTION_DAYS: '14'
 
 jobs:
+  validar-definicion:
+    name: Validar definición y protecciones M11
+    if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validar sintaxis de scripts
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash -n scripts/m11_backup_desarrollo.sh
+          bash -n scripts/m11_restore_desarrollo.sh
+
+      - name: Validar invariantes de seguridad
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'Producción' scripts/m11_backup_desarrollo.sh
+          grep -q 'ALLOW_DESTRUCTIVE_RESTORE=YES_M11' scripts/m11_restore_desarrollo.sh
+          grep -q 'DB_SSL_MODE' scripts/m11_backup_desarrollo.sh
+          grep -q 'TARGET_DB_SSL_MODE' scripts/m11_restore_desarrollo.sh
+          grep -q 'productionInScope' scripts/m11_backup_desarrollo.sh
+          grep -q 'productionTouched' scripts/m11_restore_desarrollo.sh
+
   backup-desarrollo:
     name: Backup cifrado de varistorehn_desarrollo
-    if: ${{ github.event_name == 'workflow_dispatch' || vars.M11_DESARROLLO_BACKUP_SCHEDULE_ENABLED == 'true' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'schedule' && vars.M11_DESARROLLO_BACKUP_SCHEDULE_ENABLED == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment: varistorehn_desarrollo
