@@ -139,6 +139,25 @@ test.describe('M10 — UI/UX empresarial y accesibilidad', () => {
     expect(targetAudit.tooSmall).toEqual([]);
   });
 
+  test('el drawer móvil captura y devuelve el foco al activador', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await login(page);
+    await page.goto('/dashboard');
+
+    const toggle = page.getByRole('button', { name: 'Abrir menú principal' });
+    await expect(toggle).toBeVisible();
+    await toggle.focus();
+    await page.keyboard.press('Enter');
+
+    await expect(page.locator('#menu-toggle')).toHaveAttribute('aria-expanded', 'true');
+    const close = page.getByRole('button', { name: 'Cerrar menú', exact: true });
+    await expect(close).toBeFocused();
+
+    await page.keyboard.press('Escape');
+    await expect(page.locator('#menu-toggle')).toHaveAttribute('aria-expanded', 'false');
+    await expect(page.locator('#menu-toggle')).toBeFocused();
+  });
+
   test('los controles visibles de rutas críticas conservan nombre accesible', async ({ page }) => {
     await login(page);
     const routes = ['/dashboard', '/productos', '/ventas', '/cargas-masivas', '/configuracion'];
