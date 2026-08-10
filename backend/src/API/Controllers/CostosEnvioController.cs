@@ -53,6 +53,43 @@ public class CostosEnvioController : ControllerBase
             : Ok(ApiResponse<CostoEnvioDto>.Ok(ToDto(item)));
     }
 
+    [HttpPost("resolver")]
+    [RequierePermiso(ModuloSistema.Facturacion, AccionPermiso.Ver)]
+    public async Task<IActionResult> Resolver([FromBody] ResolverCostoEnvioDto dto)
+    {
+        var fecha = dto.FechaUtc?.ToUniversalTime() ?? DateTime.UtcNow;
+        var departamento = NormalizarClave(dto.Departamento);
+        var ciudad = NormalizarClave(dto.Ciudad);
+        var zona = NormalizarClave(dto.Zona);
+        var modalidad = NormalizarClave(dto.Modalidad);
+
+        var candidatos = await _db.CostosEnvio.AsNoTracking()
+            .Where(x => !x.Eliminado && x.Activo)
+            .Where(x => !x.VigenteDesde.HasValue || x.VigenteDesde <= fecha)
+            .Where(x => !x.VigenteHasta.HasValue || x.VigenteHasta >= fecha)
+            .ToListAsync();
+
+        var coincidencia = candidatos
+            .Where(x => Coincide(x.Departamento, departamento)
+                     && Coincide(x.Ciudad, ciudad)
+                     && Coincide(x.Zona, zona)
+                     && Coincide(x.Modalidad, modalidad))
+            .OrderByDescending(Especificidad)
+            .ThenBy(x => x.Prioridad)
+            .ThenBy(x => x.Id)
+            .FirstOrDefault();
+
+        coincidencia ??= candidatos
+            .Where(x => x.EsPredeterminado)
+            .OrderBy(x => x.Prioridad)
+            .ThenBy(x => x.Id)
+            .FirstOrDefault();
+
+        return coincidencia is null
+            ? NotFound(ApiResponse<object>.Fail("No existe un costo de envío vigente aplicable ni un predeterminado vigente."))
+            : Ok(ApiResponse<CostoEnvioDto>.Ok(ToDto(coincidencia)));
+    }
+
     [HttpGet("{id:int}")]
     [RequierePermiso(ModuloSistema.Facturacion, AccionPermiso.Ver)]
     public async Task<IActionResult> GetById(int id)
@@ -80,6 +117,10 @@ public class CostosEnvioController : ControllerBase
         {
             Nombre = nombre,
             Descripcion = Normalizar(dto.Descripcion, 500),
+            Departamento = Normalizar(dto.Departamento, 120),
+            Ciudad = Normalizar(dto.Ciudad, 120),
+            Zona = Normalizar(dto.Zona, 150),
+            Modalidad = Normalizar(dto.Modalidad, 80),
             Monto = Math.Round(dto.Monto, 2, MidpointRounding.AwayFromZero),
             VigenteDesde = dto.VigenteDesde?.ToUniversalTime(),
             VigenteHasta = dto.VigenteHasta?.ToUniversalTime(),
@@ -106,6 +147,9 @@ public class CostosEnvioController : ControllerBase
         if (error is not null) return BadRequest(ApiResponse<object>.Fail(error));
         var item = await _db.CostosEnvio.FirstOrDefaultAsync(x => x.Id == id && !x.Eliminado);
         if (item is null) return NotFound(ApiResponse<object>.Fail("Costo de envío no encontrado."));
+        if (item.EsPredeterminado && item.Activo && (!dto.EsPredeterminado || !dto.Activo))
+            return Conflict(ApiResponse<object>.Fail("Asigne primero otro costo de envío predeterminado activo antes de retirar el actual."));
+
         var nombre = dto.Nombre.Trim();
         if (await _db.CostosEnvio.AnyAsync(x => !x.Eliminado && x.Id != id && x.Nombre.ToUpper() == nombre.ToUpper()))
             return Conflict(ApiResponse<object>.Fail("Ya existe un costo de envío con ese nombre."));
@@ -115,6 +159,10 @@ public class CostosEnvioController : ControllerBase
 
         item.Nombre = nombre;
         item.Descripcion = Normalizar(dto.Descripcion, 500);
+        item.Departamento = Normalizar(dto.Departamento, 120);
+        item.Ciudad = Normalizar(dto.Ciudad, 120);
+        item.Zona = Normalizar(dto.Zona, 150);
+        item.Modalidad = Normalizar(dto.Modalidad, 80);
         item.Monto = Math.Round(dto.Monto, 2, MidpointRounding.AwayFromZero);
         item.VigenteDesde = dto.VigenteDesde?.ToUniversalTime();
         item.VigenteHasta = dto.VigenteHasta?.ToUniversalTime();
@@ -138,8 +186,10 @@ public class CostosEnvioController : ControllerBase
     {
         var item = await _db.CostosEnvio.FirstOrDefaultAsync(x => x.Id == id && !x.Eliminado);
         if (item is null) return NotFound(ApiResponse<object>.Fail("Costo de envío no encontrado."));
+        if (!dto.Activo && item.EsPredeterminado && item.Activo)
+            return Conflict(ApiResponse<object>.Fail("Asigne primero otro costo de envío predeterminado activo antes de desactivar el actual."));
+
         item.Activo = dto.Activo;
-        if (!dto.Activo) item.EsPredeterminado = false;
         item.FechaActualizacion = DateTime.UtcNow;
         await _db.SaveChangesAsync();
         await _auditoria.RegistrarAsync(ModuloSistema.Facturacion,
@@ -154,6 +204,9 @@ public class CostosEnvioController : ControllerBase
     {
         var item = await _db.CostosEnvio.FirstOrDefaultAsync(x => x.Id == id && !x.Eliminado);
         if (item is null) return NotFound(ApiResponse<object>.Fail("Costo de envío no encontrado."));
+        if (item.EsPredeterminado && item.Activo)
+            return Conflict(ApiResponse<object>.Fail("Asigne primero otro costo de envío predeterminado activo antes de eliminar el actual."));
+
         item.Eliminado = true;
         item.Activo = false;
         item.EsPredeterminado = false;
@@ -180,17 +233,16 @@ public class CostosEnvioController : ControllerBase
             item.FechaActualizacion = ahora;
         }
 
-        // El índice único sobre PredeterminadoActivoUnico se evalúa por sentencia en MySQL.
-        // Persistimos primero el desmarcado dentro de la misma transacción para evitar un
-        // estado transitorio con dos valores 'DEFAULT' al promover otro costo de envío.
         await _db.SaveChangesAsync();
     }
 
     private static string? Validar(GuardarCostoEnvioDto dto)
     {
         if (string.IsNullOrWhiteSpace(dto.Nombre)) return "El nombre es obligatorio.";
-        if (dto.Nombre.Trim().Length > 150) return "El nombre no puede superar 150 caracteres.";
+        if (dto.Nombre.Trim().Length > 120) return "El nombre no puede superar 120 caracteres.";
         if (dto.Monto < 0) return "El monto no puede ser negativo.";
+        if (dto.Prioridad < 0) return "La prioridad no puede ser negativa.";
+        if (dto.EsPredeterminado && !dto.Activo) return "Un costo de envío predeterminado debe estar activo.";
         if (dto.VigenteDesde.HasValue && dto.VigenteHasta.HasValue && dto.VigenteHasta < dto.VigenteDesde)
             return "La fecha final de vigencia no puede ser anterior a la fecha inicial.";
         return null;
@@ -202,11 +254,31 @@ public class CostosEnvioController : ControllerBase
         return limpio is not null && limpio.Length > maximo ? limpio[..maximo] : limpio;
     }
 
+    private static string? NormalizarClave(string? valor) =>
+        string.IsNullOrWhiteSpace(valor) ? null : valor.Trim().ToUpperInvariant();
+
+    private static bool Coincide(string? regla, string? solicitado)
+    {
+        if (string.IsNullOrWhiteSpace(regla)) return true;
+        if (string.IsNullOrWhiteSpace(solicitado)) return false;
+        return string.Equals(regla.Trim(), solicitado, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static int Especificidad(CostoEnvio x) =>
+        (string.IsNullOrWhiteSpace(x.Departamento) ? 0 : 1) +
+        (string.IsNullOrWhiteSpace(x.Ciudad) ? 0 : 1) +
+        (string.IsNullOrWhiteSpace(x.Zona) ? 0 : 1) +
+        (string.IsNullOrWhiteSpace(x.Modalidad) ? 0 : 1);
+
     private static CostoEnvioDto ToDto(CostoEnvio x) => new()
     {
         Id = x.Id,
         Nombre = x.Nombre,
         Descripcion = x.Descripcion,
+        Departamento = x.Departamento,
+        Ciudad = x.Ciudad,
+        Zona = x.Zona,
+        Modalidad = x.Modalidad,
         Monto = x.Monto,
         VigenteDesde = x.VigenteDesde,
         VigenteHasta = x.VigenteHasta,
