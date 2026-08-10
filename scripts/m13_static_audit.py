@@ -8,7 +8,6 @@ conflictos, binarios/temporales versionados y configuración de aislamiento sí 
 from __future__ import annotations
 
 import json
-import os
 import re
 import subprocess
 from pathlib import Path
@@ -53,8 +52,8 @@ secret_rules = [
     ("cloudinary-uri", re.compile(r"cloudinary://[^\s\"']+", re.I)),
 ]
 
-# Archivos de CI contienen credenciales efímeras deliberadas. La auditoría de secretos
-# versionados se concentra en código/configuración operativa, no fixtures/workflows/docs.
+# Workflows, fixtures y documentación contienen credenciales efímeras/ejemplos deliberados.
+# El escaneo de firmas de secretos se concentra en código/configuración operativa.
 secret_excluded_prefixes = (".github/", "docs/", "backend/tests/", "frontend/e2e/", "scripts/")
 for path in files:
     rel = str(path.relative_to(ROOT)).replace("\\", "/")
@@ -65,16 +64,29 @@ for path in files:
         if pattern.search(text):
             errors.append({"rule": rule, "path": rel})
 
-    # Password/secret literal real en JSON/YAML/C# operativo. Placeholders CHANGE_ME y
-    # configuración desde variables de entorno son válidos.
-    literal_patterns = [
-        ("password-literal", re.compile(r'(?i)[\"\']?(?:password|passwordsmtp|apisecret|jwt:secret)[\"\']?\s*[:=]\s*[\"\']([^\"\']+)[\"\']')),
-    ]
-    for rule, pattern in literal_patterns:
-        for match in pattern.finditer(text):
+    # Literales tipo Password/ApiSecret se evalúan solo en archivos de configuración.
+    # Así no se confunden campos UI type="password" ni metadata de package-lock con secretos.
+    config_like = (
+        path.name.startswith("appsettings")
+        or path.name in {"render.yaml", "vercel.json"}
+        or rel.startswith("frontend/src/environments/")
+        or path.name.startswith(".env")
+    )
+    if config_like:
+        literal_pattern = re.compile(
+            r'(?i)(?:password|passwordsmtp|apisecret|jwt:secret)\s*[\"\']?\s*[:=]\s*[\"\']([^\"\']+)[\"\']'
+        )
+        for match in literal_pattern.finditer(text):
             value = match.group(1).strip()
-            if value and "CHANGE_ME" not in value and "not-used" not in value.lower() and "environment" not in value.lower():
-                errors.append({"rule": rule, "path": rel})
+            allowed = (
+                not value
+                or "CHANGE_ME" in value
+                or "not-used" in value.lower()
+                or "environment" in value.lower()
+                or value.startswith("${")
+            )
+            if not allowed:
+                errors.append({"rule": "password-literal", "path": rel})
                 break
 
 conflict = re.compile(r"^(<<<<<<<|=======|>>>>>>>)", re.M)
@@ -89,7 +101,7 @@ for path in files:
 todo_re = re.compile(r"\b(TODO|FIXME|HACK|XXX)\b", re.I)
 for path in files:
     rel = str(path.relative_to(ROOT)).replace("\\", "/")
-    if rel.startswith(("docs/", ".github/")) or not is_text(path):
+    if rel.startswith(("docs/", ".github/", "scripts/m13_static_audit.py")) or not is_text(path):
         continue
     count = len(todo_re.findall(read(path)))
     if count:
@@ -108,6 +120,7 @@ for token in required_render:
     if token not in render:
         errors.append({"rule": "development-isolation", "path": "render.yaml"})
 
+# La configuración versionada debe contener placeholders, nunca credenciales reales.
 appsettings = json.loads(read(ROOT / "backend/src/API/appsettings.json"))
 for section, key in [
     ("ConnectionStrings", "DefaultConnection"),
