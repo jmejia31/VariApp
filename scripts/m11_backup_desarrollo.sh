@@ -31,10 +31,17 @@ done
 
 ENV_NORMALIZED="$(printf '%s' "$VARIAPP_ENVIRONMENT" | tr '[:upper:]' '[:lower:]')"
 DB_NORMALIZED="$(printf '%s' "$DB_NAME" | tr '[:upper:]' '[:lower:]')"
+DB_SSL_MODE="${DB_SSL_MODE:-PREFERRED}"
+DB_SSL_MODE="$(printf '%s' "$DB_SSL_MODE" | tr '[:lower:]' '[:upper:]')"
 
 case "$ENV_NORMALIZED" in
   desarrollo|development|ci) ;;
   *) fail "M11 solo permite backup de Desarrollo/CI. Entorno recibido: $VARIAPP_ENVIRONMENT" ;;
+esac
+
+case "$DB_SSL_MODE" in
+  DISABLED|PREFERRED|REQUIRED|VERIFY_CA|VERIFY_IDENTITY) ;;
+  *) fail "DB_SSL_MODE no soportado: $DB_SSL_MODE" ;;
 esac
 
 if [[ "$ENV_NORMALIZED" == *prod* || "$ENV_NORMALIZED" == *produccion* || "$DB_NORMALIZED" == *prod* || "$DB_NORMALIZED" == *produccion* ]]; then
@@ -63,10 +70,10 @@ cleanup() {
 trap cleanup EXIT
 
 export MYSQL_PWD="$DB_PASSWORD"
-MYSQL=(mysql --protocol=TCP -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" --default-character-set=utf8mb4)
+MYSQL=(mysql --protocol=TCP -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" --default-character-set=utf8mb4 "--ssl-mode=$DB_SSL_MODE")
 MYSQL_DB=("${MYSQL[@]}" "$DB_NAME")
 
-log "Validando conectividad con la base autorizada '$DB_NAME'..."
+log "Validando conectividad con la base autorizada '$DB_NAME' usando SSL_MODE=$DB_SSL_MODE..."
 "${MYSQL_DB[@]}" --batch --skip-column-names -e 'SELECT 1;' | grep -qx '1' || fail "No se pudo validar la conexión MySQL."
 
 MYSQL_VERSION="$("${MYSQL_DB[@]}" --batch --skip-column-names -e 'SELECT VERSION();' | head -n 1)"
@@ -80,7 +87,9 @@ MYSQL_PWD="$DB_PASSWORD" mysqldump \
   -h "$DB_HOST" \
   -P "$DB_PORT" \
   -u "$DB_USER" \
+  "--ssl-mode=$DB_SSL_MODE" \
   --single-transaction \
+  --skip-lock-tables \
   --quick \
   --hex-blob \
   --default-character-set=utf8mb4 \
@@ -173,6 +182,7 @@ metadata = {
     "environment": "${VARIAPP_ENVIRONMENT}",
     "databaseName": "${DB_NAME}",
     "databaseServerVersion": "${MYSQL_VERSION}",
+    "databaseSslMode": "${DB_SSL_MODE}",
     "efMigrationCount": int("${MIGRATION_COUNT}"),
     "baseTableCount": int("${TABLE_COUNT}"),
     "gitCommit": "${GIT_SHA}",
@@ -225,6 +235,7 @@ public = {
     "createdAtUtc": datetime.now(timezone.utc).isoformat(),
     "environment": "${VARIAPP_ENVIRONMENT}",
     "databaseName": "${DB_NAME}",
+    "databaseSslMode": "${DB_SSL_MODE}",
     "gitCommit": "${GIT_SHA}",
     "retentionDays": int("${RETENTION_DAYS}"),
     "encrypted": True,
