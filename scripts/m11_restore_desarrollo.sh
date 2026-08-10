@@ -33,10 +33,17 @@ done
 
 RESTORE_ENV_NORMALIZED="$(printf '%s' "$RESTORE_ENVIRONMENT" | tr '[:upper:]' '[:lower:]')"
 TARGET_DB_NORMALIZED="$(printf '%s' "$TARGET_DB_NAME" | tr '[:upper:]' '[:lower:]')"
+TARGET_DB_SSL_MODE="${TARGET_DB_SSL_MODE:-PREFERRED}"
+TARGET_DB_SSL_MODE="$(printf '%s' "$TARGET_DB_SSL_MODE" | tr '[:lower:]' '[:upper:]')"
 
 case "$RESTORE_ENV_NORMALIZED" in
   ci|desarrollo-descartable|development-disposable) ;;
   *) fail "M11 solo permite restore en CI o Desarrollo descartable. Entorno recibido: $RESTORE_ENVIRONMENT" ;;
+esac
+
+case "$TARGET_DB_SSL_MODE" in
+  DISABLED|PREFERRED|REQUIRED|VERIFY_CA|VERIFY_IDENTITY) ;;
+  *) fail "TARGET_DB_SSL_MODE no soportado: $TARGET_DB_SSL_MODE" ;;
 esac
 
 if [[ "$RESTORE_ENV_NORMALIZED" == *prod* || "$RESTORE_ENV_NORMALIZED" == *produccion* || "$TARGET_DB_NORMALIZED" == *prod* || "$TARGET_DB_NORMALIZED" == *produccion* ]]; then
@@ -124,9 +131,9 @@ PY
 [[ "$(printf '%s' "$SOURCE_DB_NAME" | tr '[:upper:]' '[:lower:]')" != "$TARGET_DB_NORMALIZED" ]] || fail "La base destino no puede ser la misma base origen."
 
 export MYSQL_PWD="$TARGET_DB_PASSWORD"
-MYSQL=(mysql --protocol=TCP -h "$TARGET_DB_HOST" -P "$TARGET_DB_PORT" -u "$TARGET_DB_USER" --default-character-set=utf8mb4)
+MYSQL=(mysql --protocol=TCP -h "$TARGET_DB_HOST" -P "$TARGET_DB_PORT" -u "$TARGET_DB_USER" --default-character-set=utf8mb4 "--ssl-mode=$TARGET_DB_SSL_MODE")
 
-log "Validando servidor MySQL destino..."
+log "Validando servidor MySQL destino usando SSL_MODE=$TARGET_DB_SSL_MODE..."
 "${MYSQL[@]}" --batch --skip-column-names -e 'SELECT 1;' | grep -qx '1' || fail "No se pudo conectar al servidor destino."
 
 [[ "$TARGET_DB_NAME" =~ ^[A-Za-z0-9_]+$ ]] || fail "TARGET_DB_NAME contiene caracteres no permitidos."
@@ -172,6 +179,7 @@ report = {
     "sourceDatabase": "${SOURCE_DB_NAME}",
     "targetDatabase": "${TARGET_DB_NAME}",
     "restoreEnvironment": "${RESTORE_ENVIRONMENT}",
+    "targetDatabaseSslMode": "${TARGET_DB_SSL_MODE}",
     "baseTableCount": int("${ACTUAL_TABLE_COUNT}"),
     "efMigrationCount": int("${ACTUAL_MIGRATION_COUNT}"),
     "checksumsVerified": True,
