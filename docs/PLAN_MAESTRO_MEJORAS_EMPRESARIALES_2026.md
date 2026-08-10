@@ -968,7 +968,7 @@ Producción queda fuera de alcance.
 
 Estado: **COMPLETADA / CERTIFICADA AUTOMÁTICAMENTE (2026-08-10)**.
 
-Entregable: .
+Entregable: `docs/FASE_M12_AUTOMATIZACION_TRANSVERSAL.md`.
 
 Revisar Productos, Compras, Ventas, Inventario, Clientes, Facturación, Finanzas, Cargas y Configuración para:
 
