@@ -16,19 +16,28 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: Desarrollo
-      - name: Corregir auditoría npm M13
+      - name: Diagnosticar y aplicar corrección
         shell: bash
         run: |
-          set -euo pipefail
-          python3 scripts/m13_patch_gate.py
-          grep -A8 'Auditar npm runtime' .github/workflows/m13-certificacion-final.yml
-          grep -q 'm13-npm-runtime-audit.txt' .github/workflows/m13-certificacion-final.yml
-          grep -q 'm13-npm-tooling-audit.txt' .github/workflows/m13-certificacion-final.yml
-          ! grep -q 'm13-npm-audit.txt' .github/workflows/m13-certificacion-final.yml
-
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git rm .github/workflows/m13-fix-audit-gate.yml scripts/m13_patch_gate.py
-          git add .github/workflows/m13-certificacion-final.yml
-          git commit -m 'fix(m13): endurecer auditoría npm final [ChatGPT]'
-          git push origin HEAD:Desarrollo
+          set +e
+          : > m13-patch-debug.txt
+          echo 'STEP=python' >> m13-patch-debug.txt
+          python3 scripts/m13_patch_gate.py >> m13-patch-debug.txt 2>&1
+          code=$?
+          echo "PYTHON_EXIT=$code" >> m13-patch-debug.txt
+          if [ "$code" -eq 0 ]; then
+            echo 'STEP=validate' >> m13-patch-debug.txt
+            grep -q 'Auditar npm runtime' .github/workflows/m13-certificacion-final.yml; echo "GREP_RUNTIME=$?" >> m13-patch-debug.txt
+            grep -q 'm13-npm-runtime-audit.txt' .github/workflows/m13-certificacion-final.yml; echo "GREP_RUNTIME_FILE=$?" >> m13-patch-debug.txt
+            grep -q 'm13-npm-tooling-audit.txt' .github/workflows/m13-certificacion-final.yml; echo "GREP_TOOLING_FILE=$?" >> m13-patch-debug.txt
+            grep -q 'm13-npm-audit.txt' .github/workflows/m13-certificacion-final.yml; echo "GREP_OLD_FILE=$?" >> m13-patch-debug.txt
+          fi
+          git status --short >> m13-patch-debug.txt 2>&1
+          exit "$code"
+      - name: Publicar diagnóstico
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m13-patch-debug
+          path: m13-patch-debug.txt
+          retention-days: 1
