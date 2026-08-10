@@ -2,8 +2,8 @@
   <header class="page-hero">
     <div>
       <span class="eyebrow">Administración de datos</span>
-      <h1>Cargas masivas</h1>
-      <p>Importa información con validación previa, vista de errores y confirmación transaccional.</p>
+      <h1>Cargas masivas profesionales</h1>
+      <p>Importa información con plantilla versionada, validación previa, vista de errores, progreso por etapas y confirmación transaccional.</p>
     </div>
     <div class="hero-badge">
       <mat-icon>fact_check</mat-icon>
@@ -35,7 +35,9 @@
         <mat-card-header>
           <div mat-card-avatar class="step-number">1</div>
           <mat-card-title>Selecciona el tipo de información</mat-card-title>
-          <mat-card-subtitle>Utiliza siempre la plantilla correspondiente.</mat-card-subtitle>
+          <mat-card-subtitle>
+            Plantilla vigente {{ configuracion()?.versionPlantillaActual }} · lote operativo {{ configuracion()?.tamanoLoteProcesamiento }} filas.
+          </mat-card-subtitle>
         </mat-card-header>
         <mat-card-content>
           <mat-form-field appearance="outline" class="full-width">
@@ -50,7 +52,7 @@
           @if (tipoActual; as tipo) {
             <div class="type-description">
               <mat-icon>info</mat-icon>
-              <p>{{ tipo.descripcion }}</p>
+              <p>{{ tipo.descripcion }} · Versión {{ tipo.versionPlantilla }}</p>
             </div>
             <div class="columns-list" aria-label="Columnas de la plantilla">
               @for (columna of tipo.columnas; track columna) {
@@ -113,6 +115,29 @@
         </span>
       </div>
 
+      @if (progreso(); as avance) {
+        <mat-card class="control-card" aria-label="Progreso de la carga masiva">
+          <mat-card-header>
+            <mat-card-title>{{ avance.porcentaje }}% · {{ avance.etapaActual }}</mat-card-title>
+            <mat-card-subtitle>Contrato de plantilla {{ avance.versionPlantilla }}</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <mat-progress-bar mode="determinate" [value]="avance.porcentaje"></mat-progress-bar>
+            <div class="summary-grid">
+              <article class="valid"><span>Correctas</span><strong>{{ avance.filasCorrectas }}</strong></article>
+              <article class="invalid"><span>Errores</span><strong>{{ avance.filasConError }}</strong></article>
+              <article class="warning"><span>Omitidas</span><strong>{{ avance.filasOmitidas }}</strong></article>
+              <article><span>Procesadas</span><strong>{{ avance.filasProcesadas }}/{{ avance.totalFilas }}</strong></article>
+            </div>
+            <div class="columns-list" aria-label="Etapas del proceso">
+              @for (etapa of avance.etapas; track etapa.codigo) {
+                <span>{{ etapa.nombre }} · {{ etapa.estado }}</span>
+              }
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+
       <div class="summary-grid">
         <article><span>Total de filas</span><strong>{{ carga.totalFilas }}</strong></article>
         <article class="valid"><span>Filas válidas</span><strong>{{ carga.filasValidas }}</strong></article>
@@ -135,7 +160,7 @@
             </tr>
           </thead>
           <tbody>
-            @for (fila of carga.filas.slice(0, 100); track fila.numeroFila) {
+            @for (fila of carga.filas.slice(0, limiteVistaPrevia); track fila.numeroFila) {
               <tr [class.row-error]="!fila.esValida">
                 <td>{{ fila.numeroFila }}</td>
                 <td><span class="action-pill" [class.update]="fila.accion === 'Actualizar'">{{ fila.accion }}</span></td>
@@ -154,8 +179,8 @@
           </tbody>
         </table>
       </div>
-      @if (carga.filas.length > 100) {
-        <p class="table-note">Se muestran las primeras 100 filas. El informe descargable contiene todos los errores.</p>
+      @if (carga.filas.length > limiteVistaPrevia) {
+        <p class="table-note">Se muestran las primeras {{ limiteVistaPrevia }} filas. El informe descargable conserva todos los errores y códigos.</p>
       }
 
       @if (carga.errores.length > 0) {
@@ -163,7 +188,7 @@
           <div class="errors-heading">
             <div>
               <h3>Observaciones encontradas</h3>
-              <p>Corrige los errores en el archivo y vuelve a validarlo.</p>
+              <p>Corrige los errores en el archivo y vuelve a validarlo. Cada observación conserva un código técnico consistente.</p>
             </div>
             <div class="button-row compact">
               <button mat-stroked-button type="button" (click)="descargarErrores('xlsx')" [disabled]="descargando()">
@@ -179,7 +204,7 @@
               <div [class.warning-item]="item.esAdvertencia">
                 <mat-icon>{{ item.esAdvertencia ? 'warning_amber' : 'error_outline' }}</mat-icon>
                 <span class="row-number">Fila {{ item.numeroFila }}</span>
-                <strong>{{ item.campo || 'Archivo' }}</strong>
+                <strong>{{ item.codigo }} · {{ item.campo || 'Archivo' }}</strong>
                 <span>{{ item.mensaje }}</span>
               </div>
             }
@@ -191,7 +216,7 @@
         <div>
           @if (carga.puedeConfirmarse) {
             <strong>La carga está lista para confirmarse.</strong>
-            <span>Se procesarán {{ carga.filasValidas }} filas en una sola transacción.</span>
+            <span>Se procesarán {{ carga.filasValidas }} filas conservando la atomicidad de la transacción.</span>
           } @else if (carga.estado === 'Confirmada') {
             <strong>Carga confirmada.</strong>
             <span>{{ carga.registrosCreados }} creados y {{ carga.registrosActualizados }} actualizados.</span>
