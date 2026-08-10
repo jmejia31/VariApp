@@ -18,13 +18,13 @@ import { SessionActivityService } from './core/auth/session-activity.service';
       <a class="skip-link" href="#main-content">Saltar al contenido principal</a>
       <div class="layout">
         @if (sidebarAbierto) {
-          <button class="overlay" type="button" (click)="cerrarSidebar()" aria-label="Cerrar menú lateral"></button>
+          <button class="overlay" type="button" (click)="cerrarSidebar(true)" aria-label="Cerrar menú lateral"></button>
         }
         <aside id="main-sidebar" class="sidebar" [class.abierto]="sidebarAbierto" aria-label="Menú principal">
           <div class="brand">
             <img class="brand-logo" [src]="identidad.logoUrl()" [alt]="identidad.nombreSistema()">
             <span>{{ identidad.nombreSistema() }}</span>
-            <button mat-icon-button class="cerrar-sidebar" (click)="cerrarSidebar()" aria-label="Cerrar menú">
+            <button mat-icon-button class="cerrar-sidebar" (click)="cerrarSidebar(true)" aria-label="Cerrar menú">
               <mat-icon>close</mat-icon>
             </button>
           </div>
@@ -97,13 +97,14 @@ import { SessionActivityService } from './core/auth/session-activity.service';
         <div class="main">
           <header class="topbar">
             <button
+              id="menu-toggle"
               mat-icon-button
               class="menu-toggle"
               (click)="toggleSidebar()"
               aria-controls="main-sidebar"
               [attr.aria-expanded]="sidebarAbierto"
-              aria-label="Abrir menú principal">
-              <mat-icon>menu</mat-icon>
+              [attr.aria-label]="sidebarAbierto ? 'Cerrar menú principal' : 'Abrir menú principal'">
+              <mat-icon>{{ sidebarAbierto ? 'close' : 'menu' }}</mat-icon>
             </button>
             <span class="header-text">
               @if (identidad.config().encabezadoActivo) {
@@ -177,13 +178,27 @@ export class AppComponent implements OnDestroy {
   }
 
   toggleSidebar(): void {
-    this.sidebarAbierto = !this.sidebarAbierto;
+    if (this.sidebarAbierto) {
+      this.cerrarSidebar(true);
+      return;
+    }
+
+    this.sidebarAbierto = true;
     this.sincronizarScrollMovil();
+    if (window.innerWidth <= 900) {
+      window.setTimeout(() => {
+        this.document.querySelector<HTMLElement>('#main-sidebar .cerrar-sidebar')?.focus();
+      });
+    }
   }
 
-  cerrarSidebar(): void {
+  cerrarSidebar(devolverFoco = false): void {
+    const estabaAbierto = this.sidebarAbierto;
     this.sidebarAbierto = false;
     this.sincronizarScrollMovil();
+    if (devolverFoco && estabaAbierto && window.innerWidth <= 900) {
+      window.setTimeout(() => this.document.getElementById('menu-toggle')?.focus());
+    }
   }
 
   cerrarSidebarEnMovil(): void {
@@ -197,7 +212,7 @@ export class AppComponent implements OnDestroy {
 
   @HostListener('window:keydown.escape')
   onEscape(): void {
-    this.cerrarSidebar();
+    if (this.sidebarAbierto) this.cerrarSidebar(true);
   }
 
   @HostListener('window:resize')
