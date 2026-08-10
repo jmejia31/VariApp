@@ -22,7 +22,9 @@ namespace InventoryApp.Infrastructure.Migrations
                 """
                 CREATE TEMPORARY TABLE __PreflightVarianteTecnica2C1
                 (
+                    Id TINYINT NOT NULL,
                     Violaciones INT NOT NULL,
+                    CONSTRAINT PK_PreflightVarianteTecnica2C1 PRIMARY KEY (Id),
                     CONSTRAINT CK_PreflightVarianteTecnica2C1_Cero
                         CHECK (Violaciones = 0)
                 );
@@ -30,8 +32,9 @@ namespace InventoryApp.Infrastructure.Migrations
 
             migrationBuilder.Sql(
                 """
-                INSERT INTO __PreflightVarianteTecnica2C1 (Violaciones)
+                INSERT INTO __PreflightVarianteTecnica2C1 (Id, Violaciones)
                 SELECT
+                    1,
                     (SELECT COUNT(*)
                        FROM Productos p
                       WHERE p.Eliminado = 0
