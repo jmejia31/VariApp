@@ -24,15 +24,12 @@ public sealed class MedirRendimientoBusquedaFilter : IAsyncActionFilter
             ["/compras/productos/por-codigo"] = "codigo"
         };
 
+    private static readonly BusquedaRendimientoMetricas Metricas = new();
     private readonly ILogger<MedirRendimientoBusquedaFilter> _logger;
-    private readonly BusquedaRendimientoMetricas _metricas;
 
-    public MedirRendimientoBusquedaFilter(
-        ILogger<MedirRendimientoBusquedaFilter> logger,
-        BusquedaRendimientoMetricas metricas)
+    public MedirRendimientoBusquedaFilter(ILogger<MedirRendimientoBusquedaFilter> logger)
     {
         _logger = logger;
-        _metricas = metricas;
     }
 
     public async Task OnActionExecutionAsync(
@@ -56,7 +53,7 @@ public sealed class MedirRendimientoBusquedaFilter : IAsyncActionFilter
             : 0;
         var estadoHttp = ObtenerEstadoHttp(ejecutado);
         var cantidadResultados = ObtenerCantidadResultados(ejecutado.Result, estadoHttp);
-        var resumen = _metricas.Registrar(ruta, reloj.ElapsedMilliseconds);
+        var resumen = Metricas.Registrar(ruta, reloj.ElapsedMilliseconds);
 
         _logger.LogInformation(
             "BusquedaOperativa Ruta={Ruta} DuracionMs={DuracionMs} P50Ms={P50Ms} P95Ms={P95Ms} Muestras={Muestras} LongitudTermino={LongitudTermino} CantidadResultados={CantidadResultados} EstadoHTTP={EstadoHTTP} CorrelationId={CorrelationId}",
