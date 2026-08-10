@@ -22,6 +22,15 @@ const rules = [
   {
     name: 'URLs javascript inseguras',
     expression: /(?:href|src)\s*=\s*["']javascript:/i
+  },
+  {
+    name: 'tabindex positivo que rompe el orden natural de teclado',
+    expression: /tabindex\s*=\s*["'][1-9]\d*["']/i
+  },
+  {
+    name: 'foco visible eliminado',
+    expression: /outline\s*:\s*(?:none|0(?:px)?)(?:\s*!important)?\s*;/i,
+    extensions: new Set(['.scss'])
   }
 ];
 
@@ -45,7 +54,9 @@ async function collectFiles(directory) {
 const failures = [];
 for (const file of await collectFiles(sourceDirectory)) {
   const content = await readFile(file, 'utf8');
+  const extension = path.extname(file);
   for (const rule of rules) {
+    if (rule.extensions && !rule.extensions.has(extension)) continue;
     const match = rule.expression.exec(content);
     if (!match) continue;
 
@@ -60,4 +71,4 @@ if (failures.length > 0) {
   process.exit(1);
 }
 
-console.info('Validación estática aprobada: sin marcadores de conflicto, debugger, trazas temporales ni URLs javascript.');
+console.info('Validación estática aprobada: calidad, seguridad básica y guardas de accesibilidad sin regresiones.');
