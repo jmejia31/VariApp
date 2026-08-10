@@ -104,7 +104,7 @@ public sealed class AutomatizacionService : IAutomatizacionService
         var limiteFinanzas = ahora.AddDays(-config.DiasMovimientoFinancieroPendienteAlerta);
 
         var stockBajo = await _db.ProductoVariantes.AsNoTracking()
-            .CountAsync(x => x.Activo && x.Cantidad <= x.StockMinimo, cancellationToken);
+            .CountAsync(x => x.Activo && x.Cantidad <= x.UmbralStockBajo, cancellationToken);
         var productosSinVariante = await _db.Productos.AsNoTracking()
             .CountAsync(x => x.Activo && !x.Variantes.Any(v => v.Activo), cancellationToken);
         var comprasBorrador = await _db.Compras.AsNoTracking()
@@ -115,12 +115,12 @@ public sealed class AutomatizacionService : IAutomatizacionService
             .CountAsync(x => x.Activo && string.IsNullOrEmpty(x.Telefono) && string.IsNullOrEmpty(x.Correo), cancellationToken);
         var ventasSinFactura = await _db.Ventas.AsNoTracking()
             .CountAsync(x => !x.Eliminado && x.Estado == EstadoDocumento.Confirmada && x.Factura == null, cancellationToken);
-        var financierosPendientes = await _db.MovimientoFinancieros.AsNoTracking()
+        var financierosPendientes = await _db.MovimientosFinancieros.AsNoTracking()
             .CountAsync(x => x.Estado == EstadoMovimientoFinanciero.Pendiente && x.Fecha <= limiteFinanzas, cancellationToken);
         var cargasPendientes = await _db.CargasMasivas.AsNoTracking()
             .CountAsync(x => (x.Estado == EstadoCargaMasiva.PendienteValidacion || x.Estado == EstadoCargaMasiva.ConErrores) && x.FechaCreacion <= limiteCarga, cancellationToken);
-        var configuracionIncompleta = !await _db.EmpresaConfiguracion.AsNoTracking()
-            .AnyAsync(x => x.Activo && !string.IsNullOrEmpty(x.NombreComercial), cancellationToken);
+        var configuracionIncompleta = !await _db.EmpresaConfiguraciones.AsNoTracking()
+            .AnyAsync(x => x.Activa && !string.IsNullOrEmpty(x.NombreComercial), cancellationToken);
 
         var sugerencias = new List<AutomatizacionSugerenciaDto>();
         Agregar(sugerencias, stockBajo, "M12-STOCK-BAJO", "Inventario", "Critica", "Variantes con stock bajo", "Revisa las variantes cuya cantidad alcanzó o bajó de su mínimo configurado.", "/inventario");
@@ -189,7 +189,7 @@ public sealed class AutomatizacionService : IAutomatizacionService
         {
             case "revisar-stock-bajo":
                 aplicables = await _db.ProductoVariantes.AsNoTracking()
-                    .Where(x => ids.Contains(x.Id) && x.Activo && x.Cantidad <= x.StockMinimo)
+                    .Where(x => ids.Contains(x.Id) && x.Activo && x.Cantidad <= x.UmbralStockBajo)
                     .Select(x => x.Id).ToListAsync(cancellationToken);
                 advertencias.Add("Vista previa solamente: no ajusta inventario ni crea movimientos.");
                 break;
