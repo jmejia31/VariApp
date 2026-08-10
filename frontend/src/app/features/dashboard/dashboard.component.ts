@@ -4,7 +4,9 @@ import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { DashboardService } from '../../services/dashboard.service';
+import { AutomatizacionService } from '../../services/automatizacion.service';
 import { DashboardResumen } from '../../core/models/dashboard.model';
+import { AutomatizacionResumen } from '../../core/models/automatizacion.model';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
 
 @Component({
@@ -18,12 +20,17 @@ export class DashboardComponent implements OnInit {
   private readonly permisosRuntime = inject(PermisosRuntimeService);
 
   readonly resumen = signal<DashboardResumen | null>(null);
+  readonly automatizacion = signal<AutomatizacionResumen | null>(null);
   readonly loading = signal(true);
+  readonly loadingAutomatizacion = signal(true);
   readonly esAdministrador = this.permisosRuntime.esAdministrador;
   readonly puedeVerVentas = signal(false);
   readonly puedeVerProductos = signal(false);
 
-  constructor(private dashboardService: DashboardService) {}
+  constructor(
+    private dashboardService: DashboardService,
+    private automatizacionService: AutomatizacionService
+  ) {}
 
   ngOnInit(): void {
     this.puedeVerVentas.set(this.permisosRuntime.puede('Ventas', 'Ver'));
@@ -36,6 +43,22 @@ export class DashboardComponent implements OnInit {
       },
       error: () => this.loading.set(false)
     });
+
+    this.automatizacionService.getSugerencias().subscribe({
+      next: (res) => {
+        this.automatizacion.set(res.data);
+        this.loadingAutomatizacion.set(false);
+      },
+      error: () => this.loadingAutomatizacion.set(false)
+    });
+  }
+
+  iconoSugerencia(modulo: string): string {
+    return ({
+      Inventario: 'inventory_2', Productos: 'sell', Compras: 'shopping_cart', Ventas: 'point_of_sale',
+      Clientes: 'groups', Facturación: 'receipt_long', Finanzas: 'account_balance_wallet',
+      Cargas: 'upload_file', Configuración: 'settings'
+    } as Record<string, string>)[modulo] ?? 'tips_and_updates';
   }
 
   maximoActividad(r: DashboardResumen): number {
@@ -50,22 +73,15 @@ export class DashboardComponent implements OnInit {
     return Math.max(8, Math.round((valor / this.maximoActividad(r)) * 100));
   }
 
-  ventasRecientes(r: DashboardResumen) {
-    return r.ultimasVentas.slice(0, 7);
-  }
-
-  comprasRecientes(r: DashboardResumen) {
-    return this.esAdministrador() ? r.ultimasCompras.slice(0, 7) : [];
-  }
+  ventasRecientes(r: DashboardResumen) { return r.ultimasVentas.slice(0, 7); }
+  comprasRecientes(r: DashboardResumen) { return this.esAdministrador() ? r.ultimasCompras.slice(0, 7) : []; }
 
   totalOperativo(r: DashboardResumen): number {
     const compras = this.esAdministrador() ? r.comprasDelMes : 0;
     return Math.max(1, r.ventasDelMes + compras + r.productosStockBajo.length);
   }
 
-  porcentaje(valor: number, total: number): number {
-    return Math.round((valor / Math.max(1, total)) * 100);
-  }
+  porcentaje(valor: number, total: number): number { return Math.round((valor / Math.max(1, total)) * 100); }
 
   donutBackground(r: DashboardResumen): string {
     const total = this.totalOperativo(r);
