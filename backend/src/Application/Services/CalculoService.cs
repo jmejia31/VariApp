@@ -176,6 +176,10 @@ public class CalculoService : ICalculoService
         {
             Id = costo.Id,
             Nombre = costo.Nombre,
+            Departamento = costo.Departamento,
+            Ciudad = costo.Ciudad,
+            Zona = costo.Zona,
+            Modalidad = costo.Modalidad,
             Monto = RedondearMoneda(costo.Monto)
         };
     }
@@ -220,6 +224,10 @@ public class CalculoService : ICalculoService
             ImpuestoAdicional = impuestoAdicional,
             CostoEnvioId = envio.Id,
             CostoEnvioNombre = envio.Nombre,
+            CostoEnvioDepartamento = envio.Departamento,
+            CostoEnvioCiudad = envio.Ciudad,
+            CostoEnvioZona = envio.Zona,
+            CostoEnvioModalidad = envio.Modalidad,
             CostoEnvio = RedondearMoneda(envio.Monto),
             EnvioExonerado = envio.Exonerado,
             MotivoExoneracionEnvio = envio.MotivoExoneracion,
@@ -402,6 +410,10 @@ public class CalculoService : ICalculoService
     {
         public int? Id { get; init; }
         public string? Nombre { get; init; }
+        public string? Departamento { get; init; }
+        public string? Ciudad { get; init; }
+        public string? Zona { get; init; }
+        public string? Modalidad { get; init; }
         public decimal Monto { get; init; }
         public bool Exonerado { get; init; }
         public string? MotivoExoneracion { get; init; }

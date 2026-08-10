@@ -49,6 +49,10 @@ public class ResultadoCalculoDto
 
     public int? CostoEnvioId { get; set; }
     public string? CostoEnvioNombre { get; set; }
+    public string? CostoEnvioDepartamento { get; set; }
+    public string? CostoEnvioCiudad { get; set; }
+    public string? CostoEnvioZona { get; set; }
+    public string? CostoEnvioModalidad { get; set; }
     public decimal CostoEnvio { get; set; }
     public bool EnvioExonerado { get; set; }
     public string? MotivoExoneracionEnvio { get; set; }

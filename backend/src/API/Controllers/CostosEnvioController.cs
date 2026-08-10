@@ -90,6 +90,23 @@ public class CostosEnvioController : ControllerBase
             : Ok(ApiResponse<CostoEnvioDto>.Ok(ToDto(coincidencia)));
     }
 
+    [HttpGet("{id:int}/historial")]
+    [RequierePermiso(ModuloSistema.Facturacion, AccionPermiso.Ver)]
+    public async Task<IActionResult> Historial(int id, [FromQuery] int page = 1, [FromQuery] int pageSize = 50)
+    {
+        if (!await _db.CostosEnvio.IgnoreQueryFilters().AnyAsync(x => x.Id == id))
+            return NotFound(ApiResponse<object>.Fail("Costo de envío no encontrado."));
+
+        var resultado = await _auditoria.GetFilteredAsync(new AuditoriaFiltroDto
+        {
+            Entidad = "CostoEnvio",
+            ReferenciaId = id,
+            Page = Math.Max(1, page),
+            PageSize = Math.Clamp(pageSize, 1, 100)
+        });
+        return Ok(ApiResponse<PagedResult<RegistroAuditoriaDto>>.Ok(resultado));
+    }
+
     [HttpGet("{id:int}")]
     [RequierePermiso(ModuloSistema.Facturacion, AccionPermiso.Ver)]
     public async Task<IActionResult> GetById(int id)
@@ -147,6 +164,7 @@ public class CostosEnvioController : ControllerBase
         if (error is not null) return BadRequest(ApiResponse<object>.Fail(error));
         var item = await _db.CostosEnvio.FirstOrDefaultAsync(x => x.Id == id && !x.Eliminado);
         if (item is null) return NotFound(ApiResponse<object>.Fail("Costo de envío no encontrado."));
+        var anterior = ToDto(item);
         if (item.EsPredeterminado && item.Activo && (!dto.EsPredeterminado || !dto.Activo))
             return Conflict(ApiResponse<object>.Fail("Asigne primero otro costo de envío predeterminado activo antes de retirar el actual."));
 
@@ -175,7 +193,7 @@ public class CostosEnvioController : ControllerBase
         await _db.SaveChangesAsync();
         var salida = ToDto(item);
         await _auditoria.RegistrarAsync(ModuloSistema.Facturacion, AccionPermiso.Editar,
-            $"Costo de envío actualizado: {item.Nombre}.", item.Id, entidad: "CostoEnvio", valoresNuevos: salida);
+            $"Costo de envío actualizado: {item.Nombre}.", item.Id, entidad: "CostoEnvio", valoresAnteriores: anterior, valoresNuevos: salida);
         await transaction.CommitAsync();
         return Ok(ApiResponse<CostoEnvioDto>.Ok(salida));
     }
@@ -186,6 +204,7 @@ public class CostosEnvioController : ControllerBase
     {
         var item = await _db.CostosEnvio.FirstOrDefaultAsync(x => x.Id == id && !x.Eliminado);
         if (item is null) return NotFound(ApiResponse<object>.Fail("Costo de envío no encontrado."));
+        var anterior = ToDto(item);
         if (!dto.Activo && item.EsPredeterminado && item.Activo)
             return Conflict(ApiResponse<object>.Fail("Asigne primero otro costo de envío predeterminado activo antes de desactivar el actual."));
 
@@ -194,7 +213,7 @@ public class CostosEnvioController : ControllerBase
         await _db.SaveChangesAsync();
         await _auditoria.RegistrarAsync(ModuloSistema.Facturacion,
             dto.Activo ? AccionPermiso.Activar : AccionPermiso.Desactivar,
-            $"Costo de envío {(dto.Activo ? "activado" : "desactivado")}.", id, entidad: "CostoEnvio");
+            $"Costo de envío {(dto.Activo ? "activado" : "desactivado")}.", id, entidad: "CostoEnvio", valoresAnteriores: anterior, valoresNuevos: ToDto(item));
         return Ok(ApiResponse<object>.Ok(new { id, dto.Activo }));
     }
 
@@ -204,6 +223,7 @@ public class CostosEnvioController : ControllerBase
     {
         var item = await _db.CostosEnvio.FirstOrDefaultAsync(x => x.Id == id && !x.Eliminado);
         if (item is null) return NotFound(ApiResponse<object>.Fail("Costo de envío no encontrado."));
+        var anterior = ToDto(item);
         if (item.EsPredeterminado && item.Activo)
             return Conflict(ApiResponse<object>.Fail("Asigne primero otro costo de envío predeterminado activo antes de eliminar el actual."));
 
@@ -215,7 +235,7 @@ public class CostosEnvioController : ControllerBase
         item.FechaActualizacion = DateTime.UtcNow;
         await _db.SaveChangesAsync();
         await _auditoria.RegistrarAsync(ModuloSistema.Facturacion, AccionPermiso.EliminarLogico,
-            "Costo de envío eliminado lógicamente.", id, entidad: "CostoEnvio");
+            "Costo de envío eliminado lógicamente.", id, entidad: "CostoEnvio", valoresAnteriores: anterior, valoresNuevos: ToDto(item));
         return Ok(ApiResponse<object>.Ok(new { id }));
     }
 
@@ -285,6 +305,7 @@ public class CostosEnvioController : ControllerBase
         Prioridad = x.Prioridad,
         EsPredeterminado = x.EsPredeterminado,
         Activo = x.Activo,
+        EstaVigente = x.EstaVigente(DateTime.UtcNow),
         FechaCreacion = x.FechaCreacion,
         FechaActualizacion = x.FechaActualizacion
     };

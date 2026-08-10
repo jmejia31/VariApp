@@ -87,7 +87,7 @@ export class VentaFormComponent implements OnInit {
   ngOnInit(): void {
     this.costoEnvioService.getAll().subscribe({
       next: (res) => {
-        const activos = res.data.filter((x) => x.activo);
+        const activos = res.data.filter((x) => x.activo && x.estaVigente);
         this.costosEnvio.set(activos);
         if (!this.form.value.costoEnvioId) {
           const predeterminado = activos.find((x) => x.esPredeterminado);

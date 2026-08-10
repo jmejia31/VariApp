@@ -15,6 +15,7 @@ public class CostoEnvioDto
     public int Prioridad { get; set; }
     public bool EsPredeterminado { get; set; }
     public bool Activo { get; set; }
+    public bool EstaVigente { get; set; }
     public DateTime FechaCreacion { get; set; }
     public DateTime FechaActualizacion { get; set; }
 }

@@ -19,6 +19,10 @@ public class VentaConfiguration : IEntityTypeConfiguration<Venta>
         builder.Property(v => v.Notas).HasMaxLength(1000);
         builder.Property(v => v.MotivoAnulacion).HasMaxLength(500);
         builder.Property(v => v.CostoEnvioNombreSnapshot).HasMaxLength(150);
+        builder.Property(v => v.CostoEnvioDepartamentoSnapshot).HasMaxLength(120);
+        builder.Property(v => v.CostoEnvioCiudadSnapshot).HasMaxLength(120);
+        builder.Property(v => v.CostoEnvioZonaSnapshot).HasMaxLength(150);
+        builder.Property(v => v.CostoEnvioModalidadSnapshot).HasMaxLength(80);
         builder.Property(v => v.MotivoExoneracionEnvio).HasMaxLength(500);
 
         builder.Property(v => v.ImporteBruto).HasColumnType("decimal(18,2)");

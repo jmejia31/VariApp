@@ -200,6 +200,25 @@ public class CalculoServiceTests
     }
 
     [Fact]
+    public async Task CalcularVentaAsync_CostoSeleccionado_PreservaCoberturaProfesional()
+    {
+        _costoEnvioRepository.Setup(r => r.GetByIdAsync(44)).ReturnsAsync(new CostoEnvio
+        {
+            Id = 44, Nombre = "Entrega Centro", Departamento = "Francisco Morazán", Ciudad = "Tegucigalpa",
+            Zona = "Centro", Modalidad = "Entrega local", Monto = 80m, Activo = true
+        });
+
+        var resultado = await _service.CalcularVentaAsync(
+            new List<DetalleCalculoInput> { new() { ProductoId = 1, Cantidad = 1, PrecioUnitario = 300m } },
+            null, null, null, costoEnvioId: 44);
+
+        Assert.Equal("Francisco Morazán", resultado.CostoEnvioDepartamento);
+        Assert.Equal("Tegucigalpa", resultado.CostoEnvioCiudad);
+        Assert.Equal("Centro", resultado.CostoEnvioZona);
+        Assert.Equal("Entrega local", resultado.CostoEnvioModalidad);
+    }
+
+    [Fact]
     public async Task CalcularVentaAsync_ExoneracionSinMotivo_EsRechazada()
     {
         var error = await Assert.ThrowsAsync<BusinessRuleException>(() =>

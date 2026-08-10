@@ -28,11 +28,15 @@ export class CostosEnvioComponent implements OnInit {
   readonly saving = signal(false);
   readonly error = signal<string | null>(null);
   readonly editandoId = signal<number | null>(null);
-  readonly columnas = ['nombre', 'monto', 'vigencia', 'estado', 'predeterminado', 'acciones'];
+  readonly columnas = ['nombre', 'cobertura', 'monto', 'vigencia', 'estado', 'predeterminado', 'acciones'];
 
   form = this.fb.group({
     nombre: ['', [Validators.required, Validators.maxLength(150)]],
     descripcion: ['', Validators.maxLength(500)],
+    departamento: ['', Validators.maxLength(120)],
+    ciudad: ['', Validators.maxLength(120)],
+    zona: ['', Validators.maxLength(150)],
+    modalidad: ['', Validators.maxLength(80)],
     monto: [80, [Validators.required, Validators.min(0)]],
     vigenteDesde: [''],
     vigenteHasta: [''],
@@ -66,6 +70,10 @@ export class CostosEnvioComponent implements OnInit {
     this.form.reset({
       nombre: item.nombre,
       descripcion: item.descripcion ?? '',
+      departamento: item.departamento ?? '',
+      ciudad: item.ciudad ?? '',
+      zona: item.zona ?? '',
+      modalidad: item.modalidad ?? '',
       monto: item.monto,
       vigenteDesde: this.fechaInput(item.vigenteDesde),
       vigenteHasta: this.fechaInput(item.vigenteHasta),
@@ -78,7 +86,7 @@ export class CostosEnvioComponent implements OnInit {
   cancelar(): void {
     this.editandoId.set(null);
     this.form.reset({
-      nombre: '', descripcion: '', monto: 80, vigenteDesde: '', vigenteHasta: '',
+      nombre: '', descripcion: '', departamento: '', ciudad: '', zona: '', modalidad: '', monto: 80, vigenteDesde: '', vigenteHasta: '',
       prioridad: 1, esPredeterminado: false, activo: true
     });
   }
@@ -91,6 +99,10 @@ export class CostosEnvioComponent implements OnInit {
     const value: GuardarCostoEnvio = {
       nombre: raw.nombre!.trim(),
       descripcion: raw.descripcion?.trim() || undefined,
+      departamento: raw.departamento?.trim() || undefined,
+      ciudad: raw.ciudad?.trim() || undefined,
+      zona: raw.zona?.trim() || undefined,
+      modalidad: raw.modalidad?.trim() || undefined,
       monto: Number(raw.monto),
       vigenteDesde: raw.vigenteDesde ? new Date(raw.vigenteDesde).toISOString() : null,
       vigenteHasta: raw.vigenteHasta ? new Date(raw.vigenteHasta).toISOString() : null,
@@ -126,6 +138,11 @@ export class CostosEnvioComponent implements OnInit {
       next: () => this.cargar(),
       error: (err) => this.error.set(err.error?.message ?? 'No se pudo eliminar el costo de envío.')
     });
+  }
+
+  cobertura(item: CostoEnvio): string {
+    const ubicacion = [item.departamento, item.ciudad, item.zona].filter(Boolean).join(' · ') || 'Cobertura general';
+    return item.modalidad ? `${ubicacion} · ${item.modalidad}` : ubicacion;
   }
 
   private fechaInput(fecha?: string): string {

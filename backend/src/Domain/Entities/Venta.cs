@@ -29,6 +29,10 @@ public class Venta : ConfirmableEntity
     public decimal CostoEnvio { get; set; }
     public int? CostoEnvioId { get; set; }
     public string? CostoEnvioNombreSnapshot { get; set; }
+    public string? CostoEnvioDepartamentoSnapshot { get; set; }
+    public string? CostoEnvioCiudadSnapshot { get; set; }
+    public string? CostoEnvioZonaSnapshot { get; set; }
+    public string? CostoEnvioModalidadSnapshot { get; set; }
     public decimal? CostoEnvioMontoSnapshot { get; set; }
     public bool EnvioExonerado { get; set; }
     public string? MotivoExoneracionEnvio { get; set; }

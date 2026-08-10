@@ -18,6 +18,11 @@ public class FacturaConfiguration : IEntityTypeConfiguration<Factura>
         builder.Property(f => f.VendedorNombreUsuario).IsRequired().HasMaxLength(150);
         builder.Property(f => f.MotivoAnulacion).HasMaxLength(500);
         builder.Property(f => f.Observaciones).HasMaxLength(500);
+        builder.Property(f => f.CostoEnvioNombreSnapshot).HasMaxLength(150);
+        builder.Property(f => f.CostoEnvioDepartamentoSnapshot).HasMaxLength(120);
+        builder.Property(f => f.CostoEnvioCiudadSnapshot).HasMaxLength(120);
+        builder.Property(f => f.CostoEnvioZonaSnapshot).HasMaxLength(150);
+        builder.Property(f => f.CostoEnvioModalidadSnapshot).HasMaxLength(80);
 
         builder.Property(f => f.Subtotal).HasColumnType("decimal(18,2)");
         builder.Property(f => f.Descuento).HasColumnType("decimal(18,2)");

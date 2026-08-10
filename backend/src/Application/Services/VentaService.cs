@@ -289,6 +289,10 @@ public class VentaService : IVentaService
                 Impuesto = venta.Impuesto,
                 CostoEnvioId = venta.CostoEnvioId,
                 CostoEnvioNombreSnapshot = venta.CostoEnvioNombreSnapshot,
+                CostoEnvioDepartamentoSnapshot = venta.CostoEnvioDepartamentoSnapshot,
+                CostoEnvioCiudadSnapshot = venta.CostoEnvioCiudadSnapshot,
+                CostoEnvioZonaSnapshot = venta.CostoEnvioZonaSnapshot,
+                CostoEnvioModalidadSnapshot = venta.CostoEnvioModalidadSnapshot,
                 CostoEnvioMontoSnapshot = venta.CostoEnvioMontoSnapshot,
                 CostoEnvio = venta.CostoEnvio,
                 EnvioExonerado = venta.EnvioExonerado,
@@ -656,6 +660,10 @@ public class VentaService : IVentaService
         venta.Impuesto = resultado.TotalImpuesto;
         venta.CostoEnvioId = resultado.CostoEnvioId;
         venta.CostoEnvioNombreSnapshot = resultado.CostoEnvioNombre;
+        venta.CostoEnvioDepartamentoSnapshot = resultado.CostoEnvioDepartamento;
+        venta.CostoEnvioCiudadSnapshot = resultado.CostoEnvioCiudad;
+        venta.CostoEnvioZonaSnapshot = resultado.CostoEnvioZona;
+        venta.CostoEnvioModalidadSnapshot = resultado.CostoEnvioModalidad;
         venta.CostoEnvioMontoSnapshot = resultado.CostoEnvio;
         venta.CostoEnvio = resultado.CostoEnvio;
         venta.EnvioExonerado = resultado.EnvioExonerado;
@@ -720,6 +728,10 @@ public class VentaService : IVentaService
         CostoEnvio = v.CostoEnvio,
         CostoEnvioId = v.CostoEnvioId,
         CostoEnvioNombre = v.CostoEnvioNombreSnapshot,
+        CostoEnvioDepartamento = v.CostoEnvioDepartamentoSnapshot,
+        CostoEnvioCiudad = v.CostoEnvioCiudadSnapshot,
+        CostoEnvioZona = v.CostoEnvioZonaSnapshot,
+        CostoEnvioModalidad = v.CostoEnvioModalidadSnapshot,
         EnvioExonerado = v.EnvioExonerado,
         MotivoExoneracionEnvio = v.MotivoExoneracionEnvio,
         Total = v.Total,
