@@ -1,4 +1,5 @@
 @use './styles/enterprise-design-system';
+@use './styles/m10-accessibility';
 
 * {
   box-sizing: border-box;
@@ -81,9 +82,6 @@ select,
   background: color-mix(in srgb, var(--color-primary) 22%, transparent);
 }
 
-/* Angular Material usa el tema precompilado. Estas reglas conectan los
-   componentes visibles con el tema administrable de VariApp y mantienen
-   contraste explícito aunque el administrador cambie la paleta. */
 .mat-mdc-raised-button.mat-primary,
 .mat-mdc-unelevated-button.mat-primary,
 .mat-mdc-fab.mat-primary,
