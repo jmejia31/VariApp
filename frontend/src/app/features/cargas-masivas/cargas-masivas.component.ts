@@ -21,6 +21,7 @@ import {
   TipoCargaMasiva
 } from '../../core/models/carga-masiva.model';
 import { CargaMasivaService } from '../../services/carga-masiva.service';
+import { FeedbackStateComponent } from '../../shared/feedback-state/feedback-state.component';
 
 @Component({
   selector: 'app-cargas-masivas',
@@ -38,7 +39,8 @@ import { CargaMasivaService } from '../../services/carga-masiva.service';
     MatProgressSpinnerModule,
     MatSelectModule,
     MatTableModule,
-    MatTooltipModule
+    MatTooltipModule,
+    FeedbackStateComponent
   ],
   templateUrl: './cargas-masivas.component.html',
   styleUrl: './cargas-masivas.component.scss'
