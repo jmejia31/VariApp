@@ -7,14 +7,17 @@ using Microsoft.Extensions.Logging;
 namespace InventoryApp.API.Filters;
 
 /// <summary>
-/// Métrica segura para los endpoints operativos de búsqueda y escaneo.
-/// Nunca registra el término, SKU ni código de barras recibido.
+/// Métrica segura para endpoints operativos de búsqueda y escaneo.
+/// Nunca registra términos, SKU, códigos de barras, teléfonos ni correos.
 /// </summary>
 public sealed class MedirRendimientoBusquedaFilter : IAsyncActionFilter
 {
     private static readonly IReadOnlyDictionary<string, string> RutasMedidas =
         new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
+            ["/productos"] = "search",
+            ["/clientes/buscar"] = "termino",
+            ["/proveedores/buscar"] = "termino",
             ["/ventas/productos/buscar"] = "termino",
             ["/ventas/productos/por-codigo"] = "codigo",
             ["/compras/productos/buscar"] = "termino",
@@ -22,10 +25,14 @@ public sealed class MedirRendimientoBusquedaFilter : IAsyncActionFilter
         };
 
     private readonly ILogger<MedirRendimientoBusquedaFilter> _logger;
+    private readonly BusquedaRendimientoMetricas _metricas;
 
-    public MedirRendimientoBusquedaFilter(ILogger<MedirRendimientoBusquedaFilter> logger)
+    public MedirRendimientoBusquedaFilter(
+        ILogger<MedirRendimientoBusquedaFilter> logger,
+        BusquedaRendimientoMetricas metricas)
     {
         _logger = logger;
+        _metricas = metricas;
     }
 
     public async Task OnActionExecutionAsync(
@@ -49,11 +56,15 @@ public sealed class MedirRendimientoBusquedaFilter : IAsyncActionFilter
             : 0;
         var estadoHttp = ObtenerEstadoHttp(ejecutado);
         var cantidadResultados = ObtenerCantidadResultados(ejecutado.Result, estadoHttp);
+        var resumen = _metricas.Registrar(ruta, reloj.ElapsedMilliseconds);
 
         _logger.LogInformation(
-            "BusquedaOperativa Ruta={Ruta} DuracionMs={DuracionMs} LongitudTermino={LongitudTermino} CantidadResultados={CantidadResultados} EstadoHTTP={EstadoHTTP} CorrelationId={CorrelationId}",
+            "BusquedaOperativa Ruta={Ruta} DuracionMs={DuracionMs} P50Ms={P50Ms} P95Ms={P95Ms} Muestras={Muestras} LongitudTermino={LongitudTermino} CantidadResultados={CantidadResultados} EstadoHTTP={EstadoHTTP} CorrelationId={CorrelationId}",
             ruta,
             reloj.ElapsedMilliseconds,
+            resumen.P50Ms,
+            resumen.P95Ms,
+            resumen.Muestras,
             longitudTermino,
             cantidadResultados,
             estadoHttp,
@@ -82,6 +93,16 @@ public sealed class MedirRendimientoBusquedaFilter : IAsyncActionFilter
         if (data is null) return 0;
         if (data is string) return 1;
         if (data is ICollection collection) return collection.Count;
+
+        var items = data.GetType().GetProperty("Items")?.GetValue(data);
+        if (items is ICollection itemsCollection)
+            return itemsCollection.Count;
+        if (items is IEnumerable itemsEnumerable)
+        {
+            var itemsCount = 0;
+            foreach (var _ in itemsEnumerable) itemsCount++;
+            return itemsCount;
+        }
 
         if (data is IEnumerable enumerable)
         {
