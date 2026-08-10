@@ -12,11 +12,13 @@ namespace InventoryApp.Infrastructure.Migrations
         {
             migrationBuilder.Sql(@"
 CREATE TEMPORARY TABLE `__M2_Preflight` (
+    `Id` TINYINT NOT NULL,
     `Ok` TINYINT NOT NULL,
+    CONSTRAINT `PK___M2_Preflight` PRIMARY KEY (`Id`),
     CONSTRAINT `CK___M2_Preflight_Ok` CHECK (`Ok` = 1)
 );
-INSERT INTO `__M2_Preflight` (`Ok`)
-SELECT IF(
+INSERT INTO `__M2_Preflight` (`Id`, `Ok`)
+SELECT 1, IF(
     EXISTS(
         SELECT 1 FROM `ProductoVariantes` pv
         LEFT JOIN `Colores` c ON c.`Id` = pv.`ColorId`
@@ -157,11 +159,13 @@ SET
         {
             migrationBuilder.Sql(@"
 CREATE TEMPORARY TABLE `__M2_DownGuard` (
+    `Id` TINYINT NOT NULL,
     `Ok` TINYINT NOT NULL,
+    CONSTRAINT `PK___M2_DownGuard` PRIMARY KEY (`Id`),
     CONSTRAINT `CK___M2_DownGuard_Ok` CHECK (`Ok` = 1)
 );
-INSERT INTO `__M2_DownGuard` (`Ok`)
-SELECT IF(
+INSERT INTO `__M2_DownGuard` (`Id`, `Ok`)
+SELECT 1, IF(
     EXISTS(
         SELECT 1 FROM `ProductoVariantes`
         WHERE `ColorId` IS NOT NULL
