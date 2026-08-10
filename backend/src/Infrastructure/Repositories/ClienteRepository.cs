@@ -30,8 +30,10 @@ public class ClienteRepository : IClienteRepository
     {
         var normalizado = termino.Trim().ToLower();
         if (string.IsNullOrWhiteSpace(normalizado)) return new List<Cliente>();
+        limite = Math.Clamp(limite, 1, 30);
 
         return await _context.Clientes
+            .AsNoTracking()
             .Include(c => c.TipoCliente)
             .Where(c => c.Activo && (
                 c.Nombre.ToLower().Contains(normalizado) ||

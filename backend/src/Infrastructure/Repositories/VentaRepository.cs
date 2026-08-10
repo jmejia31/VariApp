@@ -102,14 +102,18 @@ public class VentaRepository : IVentaRepository
     {
         var alcance = await _usuarioScope.ObtenerActualAsync();
         var usuarioSolicitado = alcance?.EsAdministrador == true ? request.UsuarioIdScope : null;
-        var query = AplicarAlcance(ConIncludes().AsQueryable(), alcance, usuarioSolicitado);
+        var query = AplicarAlcance(ConIncludes().AsNoTracking(), alcance, usuarioSolicitado);
 
         if (!string.IsNullOrWhiteSpace(request.Search))
         {
             var search = request.Search.Trim().ToLower();
             query = query.Where(v =>
                 v.NumeroVenta.ToLower().Contains(search) ||
-                v.ClienteNombre.ToLower().Contains(search));
+                v.ClienteNombre.ToLower().Contains(search) ||
+                (v.ClienteIdentidadORTN != null && v.ClienteIdentidadORTN.ToLower().Contains(search)) ||
+                (v.ClienteTelefono != null && v.ClienteTelefono.ToLower().Contains(search)) ||
+                (v.ClienteCorreo != null && v.ClienteCorreo.ToLower().Contains(search)) ||
+                (v.Notas != null && v.Notas.ToLower().Contains(search)));
         }
 
         var totalCount = await query.CountAsync();

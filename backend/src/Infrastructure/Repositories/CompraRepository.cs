@@ -97,14 +97,19 @@ public class CompraRepository : ICompraRepository
     {
         var alcance = await _usuarioScope.ObtenerActualAsync();
         var usuarioSolicitado = alcance?.EsAdministrador == true ? request.UsuarioIdScope : null;
-        var query = AplicarAlcance(ConIncludes().AsQueryable(), alcance, usuarioSolicitado);
+        var query = AplicarAlcance(ConIncludes().AsNoTracking(), alcance, usuarioSolicitado);
 
         if (!string.IsNullOrWhiteSpace(request.Search))
         {
             var search = request.Search.Trim().ToLower();
             query = query.Where(c =>
                 c.NumeroCompra.ToLower().Contains(search) ||
-                c.ProveedorNombre.ToLower().Contains(search));
+                c.ProveedorNombre.ToLower().Contains(search) ||
+                (c.ProveedorDocumento != null && c.ProveedorDocumento.ToLower().Contains(search)) ||
+                (c.ProveedorTelefono != null && c.ProveedorTelefono.ToLower().Contains(search)) ||
+                (c.ProveedorCorreo != null && c.ProveedorCorreo.ToLower().Contains(search)) ||
+                (c.DocumentoReferencia != null && c.DocumentoReferencia.ToLower().Contains(search)) ||
+                (c.Notas != null && c.Notas.ToLower().Contains(search)));
         }
 
         var totalCount = await query.CountAsync();

@@ -30,8 +30,10 @@ public class ProveedorRepository : IProveedorRepository
     {
         var normalizado = termino.Trim().ToLower();
         if (string.IsNullOrWhiteSpace(normalizado)) return new List<Proveedor>();
+        limite = Math.Clamp(limite, 1, 30);
 
         return await _context.Proveedores
+            .AsNoTracking()
             .Where(p => p.Activo && (
                 p.Nombre.ToLower().Contains(normalizado) ||
                 (p.Documento != null && p.Documento.ToLower().Contains(normalizado)) ||

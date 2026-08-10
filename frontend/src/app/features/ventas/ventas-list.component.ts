@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -8,7 +8,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { debounceTime, Subject } from 'rxjs';
+import { debounceTime, Subject, Subscription } from 'rxjs';
 import { VentaService } from '../../services/venta.service';
 import { Venta } from '../../core/models/venta.model';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
@@ -22,7 +22,7 @@ import { ProductoImagenComponent } from '../../shared/producto-imagen/producto-i
   templateUrl: './ventas-list.component.html',
   styleUrl: './ventas-list.component.scss'
 })
-export class VentasListComponent implements OnInit {
+export class VentasListComponent implements OnInit, OnDestroy {
   readonly ventas = signal<Venta[]>([]);
   readonly loading = signal(true);
   readonly totalCount = signal(0);
@@ -36,6 +36,9 @@ export class VentasListComponent implements OnInit {
 
   private readonly navigationDefaults = { page: 1, pageSize: 10, search: '', sortBy: 'Fecha', sortDirection: 'desc' };
   private readonly searchSubject = new Subject<string>();
+  private readonly searchSubscription: Subscription;
+  private consultaActual?: Subscription;
+  private secuenciaConsulta = 0;
 
   constructor(
     private ventaService: VentaService,
@@ -43,7 +46,7 @@ export class VentasListComponent implements OnInit {
     private route: ActivatedRoute,
     private navigationState: ListNavigationStateService
   ) {
-    this.searchSubject.pipe(debounceTime(350)).subscribe(() => { this.page = 1; this.cargar(); });
+    this.searchSubscription = this.searchSubject.pipe(debounceTime(350)).subscribe(() => { this.page = 1; this.cargar(); });
   }
 
   ngOnInit(): void {
@@ -55,6 +58,12 @@ export class VentasListComponent implements OnInit {
     this.sortDirection = state.sortDirection === 'asc' ? 'asc' : 'desc';
     this.puedeCrear.set(this.permisosRuntime.puede('Ventas', 'Crear'));
     this.cargar();
+  }
+
+  ngOnDestroy(): void {
+    this.consultaActual?.unsubscribe();
+    this.searchSubscription.unsubscribe();
+    this.searchSubject.complete();
   }
 
   onSearchChange(value: string): void { this.search = value; this.searchSubject.next(value); }
@@ -82,11 +91,20 @@ export class VentasListComponent implements OnInit {
       sortBy: this.sortBy, sortDirection: this.sortDirection
     }, this.navigationDefaults);
 
+    const secuencia = ++this.secuenciaConsulta;
+    this.consultaActual?.unsubscribe();
     this.loading.set(true);
-    this.ventaService.getPaged({ page: this.page, pageSize: this.pageSize, search: this.search, sortBy: this.sortBy, sortDirection: this.sortDirection })
+    this.consultaActual = this.ventaService.getPaged({ page: this.page, pageSize: this.pageSize, search: this.search, sortBy: this.sortBy, sortDirection: this.sortDirection })
       .subscribe({
-        next: (res) => { this.ventas.set(res.data.items); this.totalCount.set(res.data.totalCount); this.loading.set(false); },
-        error: () => this.loading.set(false)
+        next: (res) => {
+          if (secuencia !== this.secuenciaConsulta) return;
+          this.ventas.set(res.data.items);
+          this.totalCount.set(res.data.totalCount);
+          this.loading.set(false);
+        },
+        error: () => {
+          if (secuencia === this.secuenciaConsulta) this.loading.set(false);
+        }
       });
   }
 
