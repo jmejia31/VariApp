@@ -3,6 +3,7 @@ using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Application.Services;
 using InventoryApp.Domain.Entities;
+using InventoryApp.Domain.Enums;
 using Moq;
 using Xunit;
 
@@ -56,6 +57,72 @@ public class FinanzasServiceTests
         Assert.False(creado!.EsAutomatico);
         Assert.Equal(1, creado.CreadoPorUsuarioId);
         Assert.Equal("Manual", creado.ModuloOrigen);
+    }
+
+    [Fact]
+    public async Task RegistrarMovimientoManualAsync_Rechaza_Tipo_Y_Categoria_Invalidos()
+    {
+        await Assert.ThrowsAsync<BusinessRuleException>(() => _service.RegistrarMovimientoManualAsync(new CreateMovimientoManualDto
+        {
+            Tipo = "Desconocido", Categoria = "GastoOperativo", Concepto = "Error", Monto = 100
+        }));
+
+        await Assert.ThrowsAsync<BusinessRuleException>(() => _service.RegistrarMovimientoManualAsync(new CreateMovimientoManualDto
+        {
+            Tipo = "Egreso", Categoria = "Desconocida", Concepto = "Error", Monto = 100
+        }));
+
+        _movRepoMock.Verify(r => r.AddAsync(It.IsAny<MovimientoFinanciero>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task RegistrarMovimientoManualAsync_GastoOperativo_Debe_Ser_Egreso()
+    {
+        await Assert.ThrowsAsync<BusinessRuleException>(() => _service.RegistrarMovimientoManualAsync(new CreateMovimientoManualDto
+        {
+            Tipo = "Ingreso", Categoria = "GastoOperativo", Concepto = "No válido", Monto = 100
+        }));
+    }
+
+    [Fact]
+    public async Task RegistrarMovimientoManualAsync_Rechaza_Categorias_Automaticas()
+    {
+        await Assert.ThrowsAsync<BusinessRuleException>(() => _service.RegistrarMovimientoManualAsync(new CreateMovimientoManualDto
+        {
+            Tipo = "Ingreso", Categoria = "Venta", Concepto = "Venta manual", Monto = 100
+        }));
+    }
+
+    [Fact]
+    public async Task GetResumenAsync_Separa_GastosOperativos_De_Otros_Egresos()
+    {
+        _movRepoMock.Setup(r => r.GetFilteredAsync(null, null)).ReturnsAsync(new List<MovimientoFinanciero>
+        {
+            new() { Tipo = TipoMovimientoFinanciero.Egreso, Categoria = CategoriaMovimientoFinanciero.GastoOperativo, Monto = 100m, EsAutomatico = false, Estado = EstadoMovimientoFinanciero.Pagado },
+            new() { Tipo = TipoMovimientoFinanciero.Egreso, Categoria = CategoriaMovimientoFinanciero.Otro, Monto = 50m, EsAutomatico = false, Estado = EstadoMovimientoFinanciero.Pagado },
+            new() { Tipo = TipoMovimientoFinanciero.Egreso, Categoria = CategoriaMovimientoFinanciero.GastoOperativo, Monto = 75m, EsAutomatico = true, Estado = EstadoMovimientoFinanciero.Pagado },
+            new() { Tipo = TipoMovimientoFinanciero.Egreso, Categoria = CategoriaMovimientoFinanciero.GastoOperativo, Monto = 25m, EsAutomatico = false, Estado = EstadoMovimientoFinanciero.Anulado }
+        });
+        _ventaRepoMock.Setup(r => r.GetUtilidadBrutaTotalAsync()).ReturnsAsync(500m);
+        _ventaRepoMock.Setup(r => r.GetCuentasPorCobrarAsync()).ReturnsAsync(0m);
+        _ventaRepoMock.Setup(r => r.GetTotalDelMesAsync()).ReturnsAsync(0);
+        _ventaRepoMock.Setup(r => r.GetIngresosDelMesAsync()).ReturnsAsync(0m);
+        _compraRepoMock.Setup(r => r.GetCuentasPorPagarAsync()).ReturnsAsync(0m);
+        _compraRepoMock.Setup(r => r.GetTotalDelMesAsync()).ReturnsAsync(0);
+        _revisionRepoMock.Setup(r => r.GetUltimaAsync()).ReturnsAsync((RevisionFinanciera?)null);
+        _productoRepoMock.Setup(r => r.GetValorTotalCostoPorTipoAsync(TipoInventario.MercaderiaVenta)).ReturnsAsync(800m);
+        _productoRepoMock.Setup(r => r.GetValorTotalCostoPorTipoAsync(TipoInventario.InsumoAdministrativo)).ReturnsAsync(200m);
+        _productoRepoMock.Setup(r => r.GetValorTotalPrecioPorTipoAsync(TipoInventario.MercaderiaVenta)).ReturnsAsync(1200m);
+
+        var resultado = await _service.GetResumenAsync();
+
+        Assert.Equal(100m, resultado.GastosOperativos);
+        Assert.Equal(400m, resultado.UtilidadNeta);
+        Assert.Equal(1000m, resultado.ValorInventarioCosto);
+        Assert.Equal(800m, resultado.ValorInventarioCostoMercaderia);
+        Assert.Equal(200m, resultado.ValorInventarioCostoInsumosAdministrativos);
+        Assert.Equal(1200m, resultado.ValorPotencialVentaMercaderia);
+        Assert.Equal(400m, resultado.UtilidadInventarioPotencial);
     }
 
     [Fact]
