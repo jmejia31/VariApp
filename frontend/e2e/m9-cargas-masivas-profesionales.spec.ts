@@ -59,7 +59,9 @@ test.describe('M9 — cargas masivas profesionales', () => {
       headers: headers()
     });
     expect(obsoleta.status()).toBe(400);
-    expect(await obsoleta.text()).toContain('no está vigente');
+    const rechazo = await obsoleta.json();
+    expect(rechazo.success ?? rechazo.Success).toBe(false);
+    expect(rechazo.message ?? rechazo.Message).toContain('no está vigente');
   });
 
   test('expone progreso por etapas y conteos correctos/error/omitidos', async ({ request }) => {
