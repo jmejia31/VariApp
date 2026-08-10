@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Valida logs de ejecución de Fase 8 sin imprimir secretos."""
+"""Valida logs de ejecución sin imprimir secretos.
+
+Mantiene compatibilidad con los nombres históricos de Fase 8 y permite que
+fases de certificación posteriores reutilicen exactamente las mismas reglas
+sobre sus logs versionados.
+"""
 
 from __future__ import annotations
 
@@ -9,10 +14,21 @@ import re
 import sys
 from pathlib import Path
 
+
+def resolve_log_path(primary: str, fallback: str) -> Path:
+    primary_path = Path(primary)
+    if primary_path.exists():
+        return primary_path
+    fallback_path = Path(fallback)
+    if fallback_path.exists():
+        return fallback_path
+    return primary_path
+
+
 LOG_PATHS = [
-    Path("backend/fase8-api.log"),
-    Path("frontend/fase8-frontend.log"),
-    Path("fase8-smtp.log"),
+    resolve_log_path("backend/fase8-api.log", "backend/m13-api.log"),
+    resolve_log_path("frontend/fase8-frontend.log", "frontend/m13-frontend.log"),
+    resolve_log_path("fase8-smtp.log", "m13-smtp.log"),
 ]
 
 FATAL_PATTERNS = {
