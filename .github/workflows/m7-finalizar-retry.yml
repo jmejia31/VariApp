@@ -1,0 +1,93 @@
+name: M7 - finalizar retry
+
+on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - '.github/workflows/m7-finalizar-retry.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Aplicar parche M7 corregido
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          import textwrap
+
+          # FacturaConfiguration no configuraba aún el nombre snapshot: agregamos
+          # el anclaje real y dejamos que el parche original lo expanda.
+          p=Path('backend/src/Infrastructure/Persistence/Configurations/FacturaConfiguration.cs')
+          t=p.read_text()
+          anchor='        builder.Property(f => f.Observaciones).HasMaxLength(500);'
+          if anchor not in t:
+              raise SystemExit('Anclaje real de FacturaConfiguration no encontrado')
+          p.write_text(t.replace(anchor, anchor+'\n        builder.Property(f => f.CostoEnvioNombreSnapshot).HasMaxLength(150);',1))
+
+          # Los contratos frontend todavía no tenían las cuatro dimensiones M7.
+          p=Path('frontend/src/app/core/models/costo-envio.model.ts')
+          t=p.read_text()
+          sig='  descripcion?: string;\n  monto: number;'
+          if t.count(sig) != 2:
+              raise SystemExit(f'Firma costo-envio.model inesperada: {t.count(sig)}')
+          p.write_text(t.replace(sig,
+              '  descripcion?: string;\n  departamento?: string;\n  ciudad?: string;\n  zona?: string;\n  modalidad?: string;\n  monto: number;',2))
+
+          wf=Path('.github/workflows/m7-finalizar.yml').read_text()
+          ini="          python3 <<'PY'\n"
+          fin="\n          PY\n"
+          s=wf.find(ini)
+          if s < 0: raise SystemExit('No se encontró script base M7')
+          s += len(ini)
+          e=wf.find(fin,s)
+          if e < 0: raise SystemExit('No se encontró fin de script base M7')
+          script=textwrap.dedent(wf[s:e])
+          exec(compile(script,'m7_patch_base.py','exec'),{})
+          PY
+      - name: Generar migración snapshot y validar backend
+        working-directory: backend
+        shell: bash
+        run: |
+          set -euo pipefail
+          dotnet restore InventoryApp.sln
+          dotnet tool install --global dotnet-ef --version 8.0.8
+          dotnet ef migrations add M7SnapshotsProfesionalesEnvio --project src/Infrastructure/InventoryApp.Infrastructure.csproj --startup-project src/API/InventoryApp.API.csproj --context AppDbContext --output-dir Persistence/Migrations
+          dotnet build InventoryApp.sln --configuration Release --no-restore
+          dotnet test InventoryApp.sln --configuration Release --no-build --filter "Category!=Integration"
+      - name: Validar frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run lint
+          npm run build:prod
+      - name: Publicar cierre funcional limpio
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/m7-finalizar.yml .github/workflows/m7-finalizar-retry.yml
+          git add backend frontend
+          git diff --cached --check
+          git commit -m 'feat(m7): preservar cobertura histórica y auditoría de envíos [ChatGPT]'
+          git push origin HEAD:Desarrollo
