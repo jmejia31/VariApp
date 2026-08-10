@@ -32,12 +32,8 @@ jobs:
             @angular/cli@20.3.33 \
             @angular-devkit/build-angular@20.3.33 \
             @playwright/test@1.62.1
-          # Solo parches que npm puede resolver sin --force ni salto mayor.
           npm audit fix || true
-          # Runtime/producción debe quedar sin high/critical.
           npm audit --omit=dev --audit-level=high
-          # El tooling completo se registra para M13, pero advisories exclusivos de
-          # desarrollo no fuerzan una migración mayor de Angular sin necesidad funcional.
           npm audit --audit-level=high > ../m13-npm-tooling-after-hardening.txt || true
           npm run lint
           npm run build:prod
@@ -49,12 +45,10 @@ jobs:
           from pathlib import Path
           p = Path('.github/workflows/m13-certificacion-final.yml')
           text = p.read_text()
-          old = '''      - name: Auditar npm producción y desarrollo
-                working-directory: frontend
-                run: |
-                  npm ci
-                  npm audit --audit-level=high | tee ../m13-npm-audit.txt
-          '''
+          start_marker = '      - name: Auditar npm producción y desarrollo\n'
+          next_marker = '      - name: Publicar auditorías de dependencias\n'
+          start = text.index(start_marker)
+          end = text.index(next_marker, start)
           new = '''      - name: Auditar npm runtime y registrar tooling
                 working-directory: frontend
                 shell: bash
@@ -64,9 +58,7 @@ jobs:
                   npm audit --omit=dev --audit-level=high | tee ../m13-npm-runtime-audit.txt
                   npm audit --audit-level=high > ../m13-npm-tooling-audit.txt || true
           '''
-          if old not in text:
-              raise SystemExit('No se encontró el bloque npm esperado en M13.')
-          text = text.replace(old, new, 1)
+          text = text[:start] + new + text[end:]
           text = text.replace('            m13-npm-audit.txt\n', '            m13-npm-runtime-audit.txt\n            m13-npm-tooling-audit.txt\n', 1)
           p.write_text(text)
           PY
