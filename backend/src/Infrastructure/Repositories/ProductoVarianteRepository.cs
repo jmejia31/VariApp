@@ -158,6 +158,7 @@ public class ProductoVarianteRepository : IProductoVarianteRepository
         var query = _context.ProductoVariantes
             .AsNoTracking()
             .Include(v => v.Producto).ThenInclude(p => p.Imagenes)
+            .Include(v => v.Producto).ThenInclude(p => p.Categoria)
             .Include(v => v.Marca)
             .Include(v => v.Modelo)
             .Include(v => v.Color)
@@ -173,6 +174,8 @@ public class ProductoVarianteRepository : IProductoVarianteRepository
 
         query = query.Where(v =>
             v.Producto.Nombre.ToLower().Contains(terminoNormalizado) ||
+            (v.Producto.Descripcion != null && v.Producto.Descripcion.ToLower().Contains(terminoNormalizado)) ||
+            (v.Producto.Categoria != null && v.Producto.Categoria.Nombre.ToLower().Contains(terminoNormalizado)) ||
             (v.Sku != null && v.Sku.ToLower().Contains(terminoNormalizado)) ||
             (v.CodigoBarras != null && v.CodigoBarras.ToLower().Contains(terminoNormalizado)) ||
             (v.Marca != null && v.Marca.Nombre.ToLower().Contains(terminoNormalizado)) ||
