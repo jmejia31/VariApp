@@ -32,8 +32,13 @@ jobs:
             @angular/cli@20.3.33 \
             @angular-devkit/build-angular@20.3.33 \
             @playwright/test@1.62.1
-          npm audit fix
+          # Solo parches que npm puede resolver sin --force ni salto mayor.
+          npm audit fix || true
+          # Runtime/producción debe quedar sin high/critical.
           npm audit --omit=dev --audit-level=high
+          # El tooling completo se registra para M13, pero advisories exclusivos de
+          # desarrollo no fuerzan una migración mayor de Angular sin necesidad funcional.
+          npm audit --audit-level=high > ../m13-npm-tooling-after-hardening.txt || true
           npm run lint
           npm run build:prod
       - name: Publicar hardening y retirar workflow temporal
