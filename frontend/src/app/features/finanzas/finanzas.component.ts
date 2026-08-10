@@ -169,6 +169,18 @@ export class FinanzasComponent implements OnInit {
     this.aplicarFiltrosMovimientos();
   }
 
+  onTipoMovimientoChange(tipo: string): void {
+    if (tipo !== 'Egreso' && this.movimientoForm.controls.categoria.value === 'GastoOperativo') {
+      this.movimientoForm.controls.categoria.setValue('Otro');
+    }
+  }
+
+  onCategoriaMovimientoChange(categoria: string): void {
+    if (categoria === 'GastoOperativo' && this.movimientoForm.controls.tipo.value !== 'Egreso') {
+      this.movimientoForm.controls.tipo.setValue('Egreso');
+    }
+  }
+
   registrarMovimiento(): void {
     if (!this.puedeCrearMovimiento() || this.movimientoForm.invalid) return;
 
