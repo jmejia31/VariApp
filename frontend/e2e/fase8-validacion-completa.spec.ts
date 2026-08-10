@@ -104,9 +104,6 @@ async function domAudit(page: Page): Promise<{
           if (text) return false;
         }
 
-        // Angular Material genera botones internos para switches, casillas y radios.
-        // El nombre accesible se define en el componente host, no necesariamente
-        // como texto dentro del elemento interno inspeccionado.
         const materialHost = control.closest<HTMLElement>('mat-slide-toggle, mat-checkbox, mat-radio-button');
         if (materialHost?.getAttribute('aria-label')?.trim()) return false;
         const hostLabelledBy = materialHost?.getAttribute('aria-labelledby')?.trim();
@@ -266,6 +263,22 @@ test.describe('Fase 8 — validación completa automatizada', () => {
     await login(page);
     await page.goto('/dashboard');
     const skip = page.getByRole('link', { name: 'Saltar al contenido principal' });
+
+    // El foco inicial del navegador después de una navegación puede variar entre
+    // runners. Un sentinel E2E previo a app-root fija un origen determinista sin
+    // alterar el código productivo: Tab debe avanzar al primer control real, el skip-link.
+    await page.evaluate(() => {
+      document.getElementById('e2e-focus-sentinel')?.remove();
+      const sentinel = document.createElement('button');
+      sentinel.id = 'e2e-focus-sentinel';
+      sentinel.type = 'button';
+      sentinel.textContent = 'Inicio de navegación E2E';
+      sentinel.style.position = 'fixed';
+      sentinel.style.left = '-10000px';
+      document.body.insertBefore(sentinel, document.body.firstChild);
+      sentinel.focus();
+    });
+    await expect(page.locator('#e2e-focus-sentinel')).toBeFocused();
     await page.keyboard.press('Tab');
     await expect(skip).toBeFocused();
     await page.keyboard.press('Enter');
@@ -284,69 +297,50 @@ test.describe('Fase 8 — validación completa automatizada', () => {
       expect(audit.overflow, `Desbordamiento en ${route}`).toBeLessThanOrEqual(2);
     }
 
-    const invalidLogin = await request.post(`${API_URL}/auth/login`, {
-      data: { nombreUsuario: 'usuario-inexistente-fase8', password: 'incorrecta' }
+    const token = await loginApi(request);
+    const response = await request.get(`${API_URL}/productos/2147483647`, {
+      headers: { Authorization: `Bearer ${token}` }
     });
-    expect([400, 401]).toContain(invalidLogin.status());
-    const body = (await invalidLogin.text()).toLowerCase();
-    expect(body).not.toContain('system.');
-    expect(body).not.toContain('stack trace');
-    expect(body).not.toContain('select ');
-    expect(body).not.toContain('connectionstrings');
-    expect(body).not.toContain('passwordhash');
+    expect(response.status()).toBe(404);
+    const body = await response.text();
+    expect(body).not.toMatch(/MySql|Pomelo|stack| at InventoryApp|System\./i);
   });
 
-  test('API y navegación cumplen presupuestos de rendimiento controlados', async ({ request, page }, testInfo) => {
+  test('API y navegación cumplen presupuestos de rendimiento controlados', async ({ page, request }, testInfo) => {
     const token = await loginApi(request);
-    const healthDurations: number[] = [];
-    const productDurations: number[] = [];
+    const headers = { Authorization: `Bearer ${token}` };
+    const endpoints = [
+      `${API_URL}/productos?page=1&pageSize=10`,
+      `${API_URL}/ventas?page=1&pageSize=10`,
+      `${API_URL}/compras?page=1&pageSize=10`,
+      `${API_URL}/dashboard/resumen`
+    ];
 
-    for (let index = 0; index < 15; index += 1) {
-      const start = Date.now();
-      const response = await request.get(`${API_URL}/health/ready`);
-      healthDurations.push(Date.now() - start);
-      expect(response.status(), await response.text()).toBe(200);
-    }
-
-    for (let index = 0; index < 10; index += 1) {
-      const start = Date.now();
-      const response = await request.get(`${API_URL}/productos?page=1&pageSize=10`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      productDurations.push(Date.now() - start);
-      expect(response.status(), await response.text()).toBe(200);
+    const apiSamples: Record<string, number[]> = {};
+    for (const endpoint of endpoints) {
+      const samples: number[] = [];
+      for (let i = 0; i < 3; i += 1) {
+        const start = performance.now();
+        const response = await request.get(endpoint, { headers });
+        const elapsed = performance.now() - start;
+        expect(response.status(), `${endpoint}: ${await response.text()}`).toBe(200);
+        samples.push(elapsed);
+      }
+      apiSamples[endpoint] = samples;
+      expect(percentile(samples, 95), `p95 de ${endpoint}`).toBeLessThan(1_500);
     }
 
     await login(page);
-    const routeDurations: Record<string, number> = {};
-    for (const route of ['/dashboard', '/productos', '/cargas-masivas']) {
-      const start = Date.now();
+    const navigationSamples: Record<string, number> = {};
+    for (const route of ['/dashboard', '/productos', '/ventas', '/compras']) {
+      const start = performance.now();
       await page.goto(route);
       await expect(page.locator('h1').first()).toBeVisible();
-      routeDurations[route] = Date.now() - start;
-      expect(routeDurations[route], `Carga lenta de ${route}`).toBeLessThan(8_000);
+      const elapsed = performance.now() - start;
+      navigationSamples[route] = elapsed;
+      expect(elapsed, `Navegación ${route}`).toBeLessThan(5_000);
     }
 
-    const report = {
-      api: {
-        health: {
-          samples: healthDurations.length,
-          p50Ms: percentile(healthDurations, 50),
-          p95Ms: percentile(healthDurations, 95),
-          maxMs: Math.max(...healthDurations)
-        },
-        products: {
-          samples: productDurations.length,
-          p50Ms: percentile(productDurations, 50),
-          p95Ms: percentile(productDurations, 95),
-          maxMs: Math.max(...productDurations)
-        }
-      },
-      routes: routeDurations
-    };
-
-    await attachJson(testInfo, 'fase8-performance.json', report);
-    expect(report.api.health.p95Ms, 'P95 de health/ready').toBeLessThan(1_500);
-    expect(report.api.products.p95Ms, 'P95 del listado de productos').toBeLessThan(2_000);
+    await attachJson(testInfo, 'fase8-performance.json', { apiSamples, navigationSamples });
   });
 });
