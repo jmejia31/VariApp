@@ -1,0 +1,28 @@
+name: M12 - Corregir enlace Plan Maestro
+on:
+  push:
+    branches: [Desarrollo]
+    paths: [.github/workflows/m12-fix-plan-link.yml]
+permissions:
+  contents: write
+jobs:
+  corregir:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+      - name: Corregir entregable M12 y retirar workflow temporal
+        shell: bash
+        run: |
+          set -euo pipefail
+          sed -i '0,/Entregable: \./s//Entregable: `docs\/FASE_M12_AUTOMATIZACION_TRANSVERSAL.md`./' docs/PLAN_MAESTRO_MEJORAS_EMPRESARIALES_2026.md
+          grep -Fq 'Entregable: `docs/FASE_M12_AUTOMATIZACION_TRANSVERSAL.md`.' docs/PLAN_MAESTRO_MEJORAS_EMPRESARIALES_2026.md
+          rm .github/workflows/m12-fix-plan-link.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/PLAN_MAESTRO_MEJORAS_EMPRESARIALES_2026.md .github/workflows/m12-fix-plan-link.yml
+          git diff --cached --check
+          git commit -m 'docs(m12): corregir entregable en plan maestro [ChatGPT]'
+          git push origin HEAD:Desarrollo
