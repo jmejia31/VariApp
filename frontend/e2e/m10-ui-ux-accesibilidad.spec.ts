@@ -105,6 +105,22 @@ test.describe('M10 — UI/UX empresarial y accesibilidad', () => {
     await page.goto('/dashboard');
 
     const skip = page.getByRole('link', { name: 'Saltar al contenido principal' });
+
+    // El foco inicial del navegador después de una navegación no está garantizado
+    // entre runners. Un sentinel E2E previo a app-root fija un origen determinista
+    // sin alterar el código productivo ni usar retries.
+    await page.evaluate(() => {
+      document.getElementById('e2e-m10-focus-sentinel')?.remove();
+      const sentinel = document.createElement('button');
+      sentinel.id = 'e2e-m10-focus-sentinel';
+      sentinel.type = 'button';
+      sentinel.textContent = 'Inicio de navegación M10 E2E';
+      sentinel.style.position = 'fixed';
+      sentinel.style.left = '-10000px';
+      document.body.insertBefore(sentinel, document.body.firstChild);
+      sentinel.focus();
+    });
+    await expect(page.locator('#e2e-m10-focus-sentinel')).toBeFocused();
     await page.keyboard.press('Tab');
     await expect(skip).toBeFocused();
     await expect(skip).toBeVisible();
