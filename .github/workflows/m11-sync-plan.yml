@@ -24,54 +24,15 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
-
           path = Path('docs/PLAN_MAESTRO_MEJORAS_EMPRESARIALES_2026.md')
           text = path.read_text(encoding='utf-8')
-
-          old = '''# FASE M11 — Backups y restauración en Desarrollo
-
-- inventario de activos respaldables;
-- MySQL;
-- configuración;
-- documentos;
-- referencias/activos de imágenes;
-- checksum;
-- cifrado/control de acceso;
-- retención;
-- metadata;
-- restore en entorno descartable;
-- validación de integridad.
-
-Producción queda fuera de alcance.
-'''
-
-          new = '''# FASE M11 — Backups y restauración en Desarrollo
-
-Estado: **COMPLETADA / CERTIFICADA AUTOMÁTICAMENTE (2026-08-10)**.
-
-Entregable: `docs/FASE_M11_BACKUPS_RESTAURACION_DESARROLLO.md`.
-
-- inventario de activos respaldables;
-- MySQL;
-- configuración;
-- documentos;
-- referencias/activos de imágenes;
-- checksum;
-- cifrado/control de acceso;
-- retención;
-- metadata;
-- restore en entorno descartable;
-- validación de integridad.
-
-Producción queda fuera de alcance.
-
-Evidencia automatizada: backup cifrado y restore íntegro sobre MySQL 8.4 descartable, con 54 tablas, 32 migraciones EF, conteos exactos por tabla y API restaurada saludable. El backup de la instancia Aiven Desarrollo real permanece como validación externa operativa y no se declara ejecutado sin credenciales verificables.
-'''
-
-          if old not in text:
+          marker = '# FASE M11 — Backups y restauración en Desarrollo\n\n'
+          insert = marker + 'Estado: **COMPLETADA / CERTIFICADA AUTOMÁTICAMENTE (2026-08-10)**.\n\nEntregable: `docs/FASE_M11_BACKUPS_RESTAURACION_DESARROLLO.md`.\n\n'
+          if marker not in text:
               raise SystemExit('No se encontró el bloque M11 esperado; sincronización abortada fail-closed.')
-
-          path.write_text(text.replace(old, new, 1), encoding='utf-8')
+          if 'FASE_M11_BACKUPS_RESTAURACION_DESARROLLO.md' not in text:
+              text = text.replace(marker, insert, 1)
+          path.write_text(text, encoding='utf-8')
           PY
 
       - name: Retirar workflow temporal y publicar cierre
