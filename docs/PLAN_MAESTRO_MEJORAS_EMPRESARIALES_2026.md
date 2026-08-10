@@ -986,6 +986,14 @@ Toda automatización financiera/inventario debe ser determinista y auditable.
 
 # FASE M13 — Auditoría integral, hardening y certificación final
 
+Estado: **COMPLETADA / CERTIFICADA AUTOMÁTICAMENTE (2026-08-10)**.
+
+Entregable: `docs/FASE_M13_AUDITORIA_INTEGRAL_HARDENING_CERTIFICACION_FINAL.md`.
+
+HEAD funcional certificado: `19539c72d3a617d95bb3c03dfbde5f6b212ca1de`.
+
+Dictamen automatizado: **APROBADO — P0/P1 abiertos = 0; Producción tocada = false; validación externa/física permanece separada y pendiente**.
+
 Revisar:
 
 - arquitectura;
@@ -1027,9 +1035,19 @@ Informe final separará:
 
 ---
 
+## Cierre del Plan Maestro M0–M13
+
+El Plan Maestro de Mejoras Empresariales M0–M13 queda **COMPLETADO Y CERTIFICADO AUTOMÁTICAMENTE en `Desarrollo`** con M13.
+
+Este cierre **no autoriza** merge del PR #2, cambios en `main`, auto-merge, despliegue productivo ni modificación de recursos de Producción. Las validaciones externas/físicas permanecen como proceso separado cuando correspondan.
+
+No existe una fase M14 dentro del plan vigente; cualquier evolución posterior deberá abrir un nuevo plan o proceso formal de liberación/mantenimiento.
+
+---
+
 ## Orden obligatorio de ejecución
 
-`M0 ✅ -> M0.B ✅ -> M1 -> M2 -> M3 -> M4 -> M5 -> M6 -> M7 -> M8 -> M9 -> M10 -> M11 -> M12 -> M13`
+`M0 ✅ -> M0.B ✅ -> M1 ✅ -> M2 ✅ -> M3 ✅ -> M4 ✅ -> M5 ✅ -> M6 ✅ -> M7 ✅ -> M8 ✅ -> M9 ✅ -> M10 ✅ -> M11 ✅ -> M12 ✅ -> M13 ✅`
 
 ### Gate crítico
 
