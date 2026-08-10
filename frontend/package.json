@@ -28,10 +28,10 @@
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "20.3.31",
-    "@angular/cli": "20.3.31",
+    "@angular-devkit/build-angular": "20.3.33",
+    "@angular/cli": "20.3.33",
     "@angular/compiler-cli": "20.3.27",
-    "@playwright/test": "1.49.1",
+    "@playwright/test": "1.62.1",
     "typescript": "~5.8.3"
   },
   "overrides": {
