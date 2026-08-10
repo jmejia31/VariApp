@@ -1,3 +1,5 @@
+@use './styles/enterprise-design-system';
+
 * {
   box-sizing: border-box;
 }
@@ -41,10 +43,10 @@ body {
   min-height: 100%;
   margin: 0;
   overflow-x: hidden;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: var(--font-sans);
   background: var(--color-bg);
   color: var(--color-text);
-  line-height: 1.45;
+  line-height: var(--line-height-normal);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -155,11 +157,11 @@ mat-icon {
 }
 
 .mat-mdc-button-base {
-  min-height: 40px;
+  min-height: var(--target-min);
 }
 
 .mat-mdc-icon-button.mat-mdc-button-base {
-  min-width: 40px;
+  min-width: var(--target-min);
 }
 
 .mat-mdc-dialog-container {
@@ -206,7 +208,7 @@ h3,
 }
 
 .page-title {
-  line-height: 1.2;
+  line-height: var(--line-height-tight);
 }
 
 .page-subtitle,
@@ -215,7 +217,7 @@ h3,
 .empty,
 .error,
 .success {
-  line-height: 1.45;
+  line-height: var(--line-height-normal);
   overflow-wrap: anywhere;
 }
 
