@@ -10,7 +10,7 @@
   font-weight: 700;
   text-decoration: none;
   transform: translateY(-160%);
-  transition: transform 0.15s ease;
+  transition: transform var(--motion-fast) var(--ease-standard);
 
   &:focus {
     transform: translateY(0);
@@ -37,7 +37,7 @@
   overflow: hidden;
   padding: 20px 0 max(14px, env(safe-area-inset-bottom));
   background: var(--color-sidebar);
-  color: white;
+  color: var(--color-on-sidebar);
 
   .brand {
     min-width: 0;
@@ -52,7 +52,7 @@
       min-width: 0;
       display: -webkit-box;
       overflow: hidden;
-      color: white;
+      color: var(--color-on-sidebar);
       line-height: 1.22;
       overflow-wrap: anywhere;
       -webkit-box-orient: vertical;
@@ -73,7 +73,7 @@
       display: none;
       flex: 0 0 auto;
       margin-left: auto;
-      color: white;
+      color: var(--color-on-sidebar);
     }
   }
 
@@ -96,30 +96,33 @@
       gap: 12px;
       padding: 11px 16px;
       border-radius: 9px;
-      color: rgba(255, 255, 255, 0.76);
+      color: var(--color-on-sidebar);
       font-size: 14px;
       line-height: 1.3;
       text-decoration: none;
       overflow-wrap: anywhere;
-      transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+      transition:
+        background var(--motion-fast) var(--ease-standard),
+        color var(--motion-fast) var(--ease-standard),
+        transform var(--motion-fast) var(--ease-standard);
 
       mat-icon {
         flex: 0 0 24px;
       }
 
       &:hover {
-        background: rgba(255, 255, 255, 0.07);
-        color: white;
+        background: color-mix(in srgb, var(--color-on-sidebar) 10%, transparent);
+        color: var(--color-on-sidebar);
       }
 
       &:focus-visible {
-        outline-color: #67e8f9;
-        box-shadow: 0 0 0 3px rgba(103, 232, 249, 0.2);
+        outline-color: var(--color-on-sidebar);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-on-sidebar) 28%, transparent);
       }
 
       &.active {
-        background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
-        color: white;
+        background: var(--color-button);
+        color: var(--color-on-primary);
         box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16);
       }
     }
@@ -227,10 +230,10 @@
 }
 
 .profile-button {
-  width: 40px;
-  height: 40px;
+  width: var(--target-min);
+  height: var(--target-min);
   overflow: hidden;
-  padding: 3px !important;
+  padding: 4px !important;
 }
 
 .user-avatar,
@@ -248,8 +251,8 @@
 }
 
 .user-initials {
-  background: linear-gradient(145deg, var(--color-primary), var(--color-accent));
-  color: white;
+  background: var(--color-button);
+  color: var(--color-on-primary);
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.3px;
@@ -257,7 +260,7 @@
 
 .content {
   width: 100%;
-  max-width: 1600px;
+  max-width: var(--content-max);
   min-width: 0;
   flex: 1;
   margin: 0 auto;
@@ -317,7 +320,7 @@
     height: 100dvh;
     box-shadow: none;
     transform: translateX(-102%);
-    transition: transform 0.2s ease;
+    transition: transform var(--motion-normal) var(--ease-standard);
 
     &.abierto {
       box-shadow: 8px 0 32px rgba(0, 0, 0, 0.3);
@@ -370,8 +373,8 @@
   }
 
   .profile-button {
-    width: 38px;
-    height: 38px;
+    width: var(--target-min);
+    height: var(--target-min);
   }
 
   .user-avatar,
