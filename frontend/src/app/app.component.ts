@@ -16,6 +16,7 @@ import { SessionActivityService } from './core/auth/session-activity.service';
   template: `
     @if (auth.isAuthenticated()) {
       <a class="skip-link" href="#main-content">Saltar al contenido principal</a>
+      <div class="sr-only" role="status" aria-live="polite" aria-atomic="true">{{ routeAnnouncement }}</div>
       <div class="layout">
         @if (sidebarAbierto) {
           <button class="overlay" type="button" (click)="cerrarSidebar(true)" aria-label="Cerrar menú lateral"></button>
@@ -151,6 +152,7 @@ import { SessionActivityService } from './core/auth/session-activity.service';
 })
 export class AppComponent implements OnDestroy {
   sidebarAbierto = false;
+  routeAnnouncement = '';
 
   constructor(
     public auth: AuthService,
@@ -168,7 +170,10 @@ export class AppComponent implements OnDestroy {
       this.sessionActivity.iniciar();
     }
     this.router.events.subscribe((event) => {
-      if (event instanceof NavigationEnd) this.cerrarSidebar();
+      if (event instanceof NavigationEnd) {
+        this.cerrarSidebar();
+        this.gestionarFocoTrasNavegacion();
+      }
     });
   }
 
@@ -223,6 +228,20 @@ export class AppComponent implements OnDestroy {
   logout(): void {
     this.cerrarSidebar();
     this.sessionActivity.cerrarManual();
+  }
+
+  private gestionarFocoTrasNavegacion(): void {
+    if (!this.auth.isAuthenticated()) return;
+
+    window.setTimeout(() => {
+      const main = this.document.getElementById('main-content');
+      if (!main) return;
+
+      const titulo = main.querySelector('h1')?.textContent?.trim();
+      this.routeAnnouncement = titulo ? `Página cargada: ${titulo}` : 'Página cargada';
+      main.focus({ preventScroll: true });
+      main.scrollIntoView({ block: 'start', behavior: 'auto' });
+    });
   }
 
   private sincronizarScrollMovil(): void {
