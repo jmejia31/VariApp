@@ -63,7 +63,6 @@ public class M8BusquedaRepositoriosTests
                 ProveedorNombre = "Proveedor Uno",
                 ProveedorDocumento = "0801-9999",
                 ProveedorTelefono = "2233-4455",
-                ProveedorCorreo = "ventas@proveedor.test",
                 DocumentoReferencia = "FAC-7788",
                 Notas = "Compra urgente",
                 Fecha = DateTime.UtcNow,

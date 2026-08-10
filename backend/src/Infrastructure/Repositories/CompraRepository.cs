@@ -107,7 +107,6 @@ public class CompraRepository : ICompraRepository
                 c.ProveedorNombre.ToLower().Contains(search) ||
                 (c.ProveedorDocumento != null && c.ProveedorDocumento.ToLower().Contains(search)) ||
                 (c.ProveedorTelefono != null && c.ProveedorTelefono.ToLower().Contains(search)) ||
-                (c.ProveedorCorreo != null && c.ProveedorCorreo.ToLower().Contains(search)) ||
                 (c.DocumentoReferencia != null && c.DocumentoReferencia.ToLower().Contains(search)) ||
                 (c.Notas != null && c.Notas.ToLower().Contains(search)));
         }
