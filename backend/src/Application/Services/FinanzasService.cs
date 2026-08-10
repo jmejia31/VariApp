@@ -51,22 +51,32 @@ public class FinanzasService : IFinanzasService
             ? decimal.Round(utilidadBruta / ingresosTotales * 100m, 2)
             : 0m;
 
-        var gastosOperativosManuales = esAdministrador
-            ? noAnulados.Where(m => !m.EsAutomatico && m.Tipo == TipoMovimientoFinanciero.Egreso).Sum(m => m.Monto)
+        // Un gasto operativo es una categoría financiera explícita, no cualquier egreso manual.
+        var gastosOperativos = esAdministrador
+            ? noAnulados.Where(m =>
+                    !m.EsAutomatico &&
+                    m.Tipo == TipoMovimientoFinanciero.Egreso &&
+                    m.Categoria == CategoriaMovimientoFinanciero.GastoOperativo)
+                .Sum(m => m.Monto)
             : 0m;
-        var utilidadNeta = esAdministrador ? utilidadBruta - gastosOperativosManuales : 0m;
+        var utilidadNeta = esAdministrador ? utilidadBruta - gastosOperativos : 0m;
 
-        var valorInventarioCosto = esAdministrador
-            ? await _productoRepository.GetValorTotalCostoAsync()
+        var valorInventarioCostoMercaderia = esAdministrador
+            ? await _productoRepository.GetValorTotalCostoPorTipoAsync(TipoInventario.MercaderiaVenta)
             : 0m;
-        var valorPotencialVenta = esAdministrador
-            ? await _productoRepository.GetValorTotalPrecioAsync()
+        var valorInventarioCostoInsumos = esAdministrador
+            ? await _productoRepository.GetValorTotalCostoPorTipoAsync(TipoInventario.InsumoAdministrativo)
             : 0m;
+        var valorInventarioCosto = valorInventarioCostoMercaderia + valorInventarioCostoInsumos;
+        var valorPotencialVentaMercaderia = esAdministrador
+            ? await _productoRepository.GetValorTotalPrecioPorTipoAsync(TipoInventario.MercaderiaVenta)
+            : 0m;
+        var valorPotencialVenta = valorPotencialVentaMercaderia;
         var utilidadInventarioPotencial = esAdministrador
-            ? valorPotencialVenta - valorInventarioCosto
+            ? valorPotencialVentaMercaderia - valorInventarioCostoMercaderia
             : 0m;
-        var margenInventarioPotencial = esAdministrador && valorPotencialVenta > 0
-            ? decimal.Round(utilidadInventarioPotencial / valorPotencialVenta * 100m, 2)
+        var margenInventarioPotencial = esAdministrador && valorPotencialVentaMercaderia > 0
+            ? decimal.Round(utilidadInventarioPotencial / valorPotencialVentaMercaderia * 100m, 2)
             : 0m;
 
         var cuentasPorCobrar = await _ventaRepository.GetCuentasPorCobrarAsync();
@@ -87,11 +97,15 @@ public class FinanzasService : IFinanzasService
         {
             IngresosTotales = ingresosTotales,
             EgresosTotales = egresosTotales,
+            GastosOperativos = gastosOperativos,
             UtilidadBruta = utilidadBruta,
             MargenUtilidadBruta = margenUtilidadBruta,
             UtilidadNeta = utilidadNeta,
             ValorInventarioCosto = valorInventarioCosto,
+            ValorInventarioCostoMercaderia = valorInventarioCostoMercaderia,
+            ValorInventarioCostoInsumosAdministrativos = valorInventarioCostoInsumos,
             ValorPotencialVenta = valorPotencialVenta,
+            ValorPotencialVentaMercaderia = valorPotencialVentaMercaderia,
             UtilidadInventarioPotencial = utilidadInventarioPotencial,
             MargenInventarioPotencial = margenInventarioPotencial,
             CuentasPorCobrar = cuentasPorCobrar,
@@ -120,21 +134,31 @@ public class FinanzasService : IFinanzasService
         if (string.IsNullOrWhiteSpace(dto.Concepto))
             throw new BusinessRuleException("El concepto es obligatorio.");
 
-        if (!Enum.TryParse<TipoMovimientoFinanciero>(dto.Tipo, true, out var tipo))
-            tipo = TipoMovimientoFinanciero.Egreso;
-        if (!Enum.TryParse<CategoriaMovimientoFinanciero>(dto.Categoria, true, out var categoria))
-            categoria = CategoriaMovimientoFinanciero.GastoOperativo;
+        if (!Enum.TryParse<TipoMovimientoFinanciero>(dto.Tipo, true, out var tipo) || !Enum.IsDefined(tipo))
+            throw new BusinessRuleException("El tipo de movimiento financiero no es válido.");
+        if (!Enum.TryParse<CategoriaMovimientoFinanciero>(dto.Categoria, true, out var categoria) || !Enum.IsDefined(categoria))
+            throw new BusinessRuleException("La categoría financiera no es válida.");
+
+        if (categoria == CategoriaMovimientoFinanciero.GastoOperativo && tipo != TipoMovimientoFinanciero.Egreso)
+            throw new BusinessRuleException("Un gasto operativo debe registrarse como egreso.");
+
+        if (categoria is CategoriaMovimientoFinanciero.Venta or CategoriaMovimientoFinanciero.Compra or CategoriaMovimientoFinanciero.Reversion)
+            throw new BusinessRuleException("Las categorías Venta, Compra y Reversión son automáticas y no admiten registros manuales.");
 
         MetodoPago? metodoPago = null;
-        if (!string.IsNullOrWhiteSpace(dto.MetodoPago) && Enum.TryParse<MetodoPago>(dto.MetodoPago, true, out var mp))
+        if (!string.IsNullOrWhiteSpace(dto.MetodoPago))
+        {
+            if (!Enum.TryParse<MetodoPago>(dto.MetodoPago, true, out var mp) || !Enum.IsDefined(mp))
+                throw new BusinessRuleException("El método de pago no es válido.");
             metodoPago = mp;
+        }
 
         var movimiento = new MovimientoFinanciero
         {
             Tipo = tipo,
             Categoria = categoria,
-            Concepto = dto.Concepto,
-            Descripcion = dto.Descripcion,
+            Concepto = dto.Concepto.Trim(),
+            Descripcion = string.IsNullOrWhiteSpace(dto.Descripcion) ? null : dto.Descripcion.Trim(),
             Monto = dto.Monto,
             Estado = EstadoMovimientoFinanciero.Pagado,
             MetodoPago = metodoPago,
