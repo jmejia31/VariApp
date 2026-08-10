@@ -3,6 +3,8 @@ using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Enums;
+using InventoryApp.Infrastructure.Persistence;
+using InventoryApp.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,7 +17,8 @@ public sealed class AutomatizacionesController : ControllerBase
 {
     private readonly IAutomatizacionService _service;
 
-    public AutomatizacionesController(IAutomatizacionService service) => _service = service;
+    public AutomatizacionesController(AppDbContext db, ICurrentUserService currentUser)
+        => _service = new AutomatizacionService(db, currentUser);
 
     [HttpGet("configuracion")]
     [RequierePermiso(ModuloSistema.Configuracion, AccionPermiso.Ver)]
@@ -24,12 +27,8 @@ public sealed class AutomatizacionesController : ControllerBase
 
     [HttpPut("configuracion")]
     [RequierePermiso(ModuloSistema.Configuracion, AccionPermiso.Editar)]
-    public async Task<IActionResult> UpdateConfiguracion(
-        [FromBody] ActualizarAutomatizacionConfiguracionRequest request,
-        CancellationToken cancellationToken)
-        => Ok(ApiResponse<AutomatizacionConfiguracionDto>.Ok(
-            await _service.UpdateConfiguracionAsync(request, cancellationToken),
-            "Preferencias de automatización actualizadas."));
+    public async Task<IActionResult> UpdateConfiguracion([FromBody] ActualizarAutomatizacionConfiguracionRequest request, CancellationToken cancellationToken)
+        => Ok(ApiResponse<AutomatizacionConfiguracionDto>.Ok(await _service.UpdateConfiguracionAsync(request, cancellationToken), "Preferencias de automatización actualizadas."));
 
     [HttpGet("sugerencias")]
     [RequierePermiso(ModuloSistema.Dashboard, AccionPermiso.Ver)]
@@ -38,19 +37,11 @@ public sealed class AutomatizacionesController : ControllerBase
 
     [HttpGet("autocompletar")]
     [RequierePermiso(ModuloSistema.Dashboard, AccionPermiso.Ver)]
-    public async Task<IActionResult> Autocompletar(
-        [FromQuery] string contexto,
-        [FromQuery] string q,
-        CancellationToken cancellationToken)
-        => Ok(ApiResponse<IReadOnlyList<AutocompletadoItemDto>>.Ok(
-            await _service.AutocompletarAsync(contexto, q, cancellationToken)));
+    public async Task<IActionResult> Autocompletar([FromQuery] string contexto, [FromQuery] string q, CancellationToken cancellationToken)
+        => Ok(ApiResponse<IReadOnlyList<AutocompletadoItemDto>>.Ok(await _service.AutocompletarAsync(contexto, q, cancellationToken)));
 
     [HttpPost("acciones-masivas/previsualizar")]
     [RequierePermiso(ModuloSistema.Dashboard, AccionPermiso.Ver)]
-    public async Task<IActionResult> Previsualizar(
-        [FromBody] AccionMasivaPreviewRequest request,
-        CancellationToken cancellationToken)
-        => Ok(ApiResponse<AccionMasivaPreviewDto>.Ok(
-            await _service.PrevisualizarAccionMasivaAsync(request, cancellationToken),
-            "Vista previa calculada sin modificar datos."));
+    public async Task<IActionResult> Previsualizar([FromBody] AccionMasivaPreviewRequest request, CancellationToken cancellationToken)
+        => Ok(ApiResponse<AccionMasivaPreviewDto>.Ok(await _service.PrevisualizarAccionMasivaAsync(request, cancellationToken), "Vista previa calculada sin modificar datos."));
 }
