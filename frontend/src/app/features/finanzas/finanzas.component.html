@@ -124,14 +124,14 @@
       <form [formGroup]="movimientoForm" (ngSubmit)="registrarMovimiento()" class="movimiento-form">
         <mat-form-field appearance="outline">
           <mat-label>Tipo</mat-label>
-          <mat-select formControlName="tipo">
+          <mat-select formControlName="tipo" (selectionChange)="onTipoMovimientoChange($event.value)">
             <mat-option value="Egreso">Egreso</mat-option>
             <mat-option value="Ingreso">Ingreso</mat-option>
           </mat-select>
         </mat-form-field>
         <mat-form-field appearance="outline">
           <mat-label>Categoría</mat-label>
-          <mat-select formControlName="categoria">
+          <mat-select formControlName="categoria" (selectionChange)="onCategoriaMovimientoChange($event.value)">
             <mat-option value="GastoOperativo">Gasto operativo</mat-option>
             <mat-option value="Ajuste">Ajuste</mat-option>
             <mat-option value="Otro">Otro</mat-option>
