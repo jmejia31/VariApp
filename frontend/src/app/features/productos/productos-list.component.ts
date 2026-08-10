@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -11,7 +11,7 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { debounceTime, forkJoin, Subject } from 'rxjs';
+import { debounceTime, forkJoin, Subject, Subscription } from 'rxjs';
 import { ProductoService } from '../../services/producto.service';
 import { CategoriaService } from '../../services/categoria.service';
 import { CatalogoProductoService } from '../../services/catalogo-producto.service';
@@ -36,7 +36,7 @@ type EstadoProductoFiltro = 'todos' | 'activos' | 'inactivos' | 'agotados' | 'di
   templateUrl: './productos-list.component.html',
   styleUrl: './productos-list.component.scss'
 })
-export class ProductosListComponent implements OnInit {
+export class ProductosListComponent implements OnInit, OnDestroy {
   readonly productos = signal<Producto[]>([]);
   readonly categorias = signal<Categoria[]>([]);
   readonly colores = signal<CatalogoProducto[]>([]);
@@ -78,6 +78,9 @@ export class ProductosListComponent implements OnInit {
     estado: 'todos'
   };
   private readonly searchSubject = new Subject<string>();
+  private readonly searchSubscription: Subscription;
+  private cargaActual?: Subscription;
+  private secuenciaCarga = 0;
 
   constructor(
     private productoService: ProductoService,
@@ -88,7 +91,7 @@ export class ProductosListComponent implements OnInit {
     private route: ActivatedRoute,
     private navigationState: ListNavigationStateService
   ) {
-    this.searchSubject.pipe(debounceTime(350)).subscribe(() => {
+    this.searchSubscription = this.searchSubject.pipe(debounceTime(350)).subscribe(() => {
       this.page = 1;
       this.cargar();
     });
@@ -103,6 +106,13 @@ export class ProductosListComponent implements OnInit {
     this.puedeEliminar.set(this.permisosRuntime.puede('Productos', 'EliminarLogico'));
     this.cargarCatalogosFiltro();
     this.cargar();
+  }
+
+  ngOnDestroy(): void {
+    this.secuenciaCarga++;
+    this.cargaActual?.unsubscribe();
+    this.searchSubscription.unsubscribe();
+    this.searchSubject.complete();
   }
 
   onSearchChange(value: string): void {
@@ -154,7 +164,10 @@ export class ProductosListComponent implements OnInit {
   cargar(): void {
     this.persistirEstado();
     this.loading.set(true);
-    this.productoService.getPaged({
+
+    const cargaId = ++this.secuenciaCarga;
+    this.cargaActual?.unsubscribe();
+    this.cargaActual = this.productoService.getPaged({
       page: this.page,
       pageSize: this.pageSize,
       search: this.search,
@@ -169,11 +182,14 @@ export class ProductosListComponent implements OnInit {
       agotado: this.estado === 'agotados' ? true : this.estado === 'disponibles' ? false : undefined
     }).subscribe({
       next: (res) => {
+        if (cargaId !== this.secuenciaCarga) return;
         this.productos.set(res.data.items);
         this.totalCount.set(res.data.totalCount);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false)
+      error: () => {
+        if (cargaId === this.secuenciaCarga) this.loading.set(false);
+      }
     });
   }
 
