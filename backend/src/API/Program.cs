@@ -24,29 +24,20 @@ var builder = WebApplication.CreateBuilder(args);
 
 var port = Environment.GetEnvironmentVariable("PORT");
 if (!string.IsNullOrWhiteSpace(port))
-{
     builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
-}
 
-// ===== Controllers + FluentValidation =====
 builder.Services.AddControllers(options =>
     options.Filters.Add<InventoryApp.API.Filters.MedirRendimientoBusquedaFilter>());
-builder.Services.Configure<FormOptions>(options =>
-{
-    options.MultipartBodyLengthLimit = 30 * 1024 * 1024;
-});
+builder.Services.Configure<FormOptions>(options => options.MultipartBodyLengthLimit = 30 * 1024 * 1024);
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateProductoValidator>();
 
-// ===== DbContext (MySQL) =====
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("ConnectionStrings:DefaultConnection no configurado.");
 var mysqlServerVersion = Version.Parse(builder.Configuration["Database:ServerVersion"] ?? "8.4.3");
-
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connectionString, new MySqlServerVersion(mysqlServerVersion)));
 
-// ===== Repositorios y Servicios =====
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<IUsuarioScopeService, UsuarioScopeService>();
@@ -120,22 +111,14 @@ builder.Services.AddScoped<IReporteAdministrativoService, ReporteAdministrativoS
 builder.Services.AddScoped<IInventarioConcurrencyService, InventarioConcurrencyService>();
 builder.Services.AddScoped<IInventarioAjusteService, InventarioAjusteService>();
 
-// ===== JWT Authentication =====
 var jwtSecret = builder.Configuration["Jwt:Secret"]
     ?? throw new InvalidOperationException("Jwt:Secret no configurado.");
 var jwtIssuer = builder.Configuration["Jwt:Issuer"];
 var jwtAudience = builder.Configuration["Jwt:Audience"];
-
-if (jwtSecret.Contains("CHANGE_ME", StringComparison.OrdinalIgnoreCase) ||
-    Encoding.UTF8.GetByteCount(jwtSecret) < 32)
-{
+if (jwtSecret.Contains("CHANGE_ME", StringComparison.OrdinalIgnoreCase) || Encoding.UTF8.GetByteCount(jwtSecret) < 32)
     throw new InvalidOperationException("Jwt:Secret debe ser un secreto real de al menos 32 bytes.");
-}
-
 if (string.IsNullOrWhiteSpace(jwtIssuer) || string.IsNullOrWhiteSpace(jwtAudience))
-{
     throw new InvalidOperationException("Jwt:Issuer y Jwt:Audience son obligatorios.");
-}
 
 builder.Services.AddAuthentication(options =>
 {
@@ -176,15 +159,10 @@ builder.Services.AddAuthentication(options =>
         }
     };
 });
-
 builder.Services.AddAuthorization();
 
-// ===== Protección de intentos de acceso =====
 var loginRateLimitPerMinute = Math.Clamp(
-    builder.Configuration.GetValue<int?>("Security:LoginRateLimitPerMinute") ?? 60,
-    5,
-    300);
-
+    builder.Configuration.GetValue<int?>("Security:LoginRateLimitPerMinute") ?? 60, 5, 300);
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
@@ -192,10 +170,8 @@ builder.Services.AddRateLimiter(options =>
     {
         context.HttpContext.Response.ContentType = "application/json";
         await context.HttpContext.Response.WriteAsJsonAsync(
-            ApiResponse<object>.Fail("Demasiados intentos de acceso. Espera un minuto e intenta nuevamente."),
-            cancellationToken);
+            ApiResponse<object>.Fail("Demasiados intentos de acceso. Espera un minuto e intenta nuevamente."), cancellationToken);
     };
-
     options.AddPolicy("AuthLogin", httpContext =>
         RateLimitPartition.GetFixedWindowLimiter(
             partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "ip-desconocida",
@@ -208,54 +184,28 @@ builder.Services.AddRateLimiter(options =>
             }));
 });
 
-// ===== CORS =====
 var corsOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
 if (corsOrigins.Length == 0 || corsOrigins.Any(string.IsNullOrWhiteSpace))
-{
     throw new InvalidOperationException("Cors:AllowedOrigins debe contener al menos un origen válido.");
-}
+builder.Services.AddCors(options => options.AddPolicy("FrontendPolicy", policy =>
+    policy.WithOrigins(corsOrigins).AllowAnyHeader().AllowAnyMethod()));
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("FrontendPolicy", policy =>
-    {
-        policy.WithOrigins(corsOrigins)
-              .AllowAnyHeader()
-              .AllowAnyMethod();
-    });
-});
-
-// ===== Swagger (con soporte JWT Bearer) =====
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo { Title = "InventoryApp API", Version = "v1" });
-
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        Scheme = "Bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Description = "Ingresa: Bearer {tu token}"
+        Name = "Authorization", Type = SecuritySchemeType.Http, Scheme = "Bearer", BearerFormat = "JWT",
+        In = ParameterLocation.Header, Description = "Ingresa: Bearer {tu token}"
     });
-
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
-            },
-            Array.Empty<string>()
-        }
+        { new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" } }, Array.Empty<string>() }
     });
 });
 
 var app = builder.Build();
-
-// ===== Middleware pipeline =====
 var forwardedHeadersOptions = new ForwardedHeadersOptions
 {
     ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
@@ -263,14 +213,8 @@ var forwardedHeadersOptions = new ForwardedHeadersOptions
 };
 forwardedHeadersOptions.KnownNetworks.Clear();
 forwardedHeadersOptions.KnownProxies.Clear();
-
 app.UseForwardedHeaders(forwardedHeadersOptions);
-
-if (!app.Environment.IsDevelopment())
-{
-    app.UseHsts();
-}
-
+if (!app.Environment.IsDevelopment()) app.UseHsts();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.Use(async (context, next) =>
 {
@@ -282,43 +226,23 @@ app.Use(async (context, next) =>
 });
 
 var swaggerEnabled = app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Swagger:Enabled");
-if (swaggerEnabled)
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
+if (swaggerEnabled) { app.UseSwagger(); app.UseSwaggerUI(); }
 app.UseHttpsRedirection();
 app.UseCors("FrontendPolicy");
 app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapGet("/health", () => Results.Ok(new
-{
-    status = "ok",
-    service = "InventoryApp API"
-})).ExcludeFromDescription();
-
+app.MapGet("/health", () => Results.Ok(new { status = "ok", service = "InventoryApp API" })).ExcludeFromDescription();
 app.MapGet("/health/ready", async (AppDbContext db, CancellationToken cancellationToken) =>
 {
     var databaseReady = false;
-    try
-    {
-        databaseReady = await db.Database.CanConnectAsync(cancellationToken);
-    }
-    catch
-    {
-        databaseReady = false;
-    }
-
+    try { databaseReady = await db.Database.CanConnectAsync(cancellationToken); }
+    catch { databaseReady = false; }
     return databaseReady
         ? Results.Ok(new { status = "ready", database = "connected" })
-        : Results.Json(
-            new { status = "not_ready", database = "unavailable" },
-            statusCode: StatusCodes.Status503ServiceUnavailable);
+        : Results.Json(new { status = "not_ready", database = "unavailable" }, statusCode: StatusCodes.Status503ServiceUnavailable);
 }).ExcludeFromDescription();
-
 app.MapControllers();
 
 if (app.Configuration.GetValue<bool>("Database:ApplyMigrationsOnStartup"))
@@ -330,29 +254,37 @@ if (app.Configuration.GetValue<bool>("Database:ApplyMigrationsOnStartup"))
     var repairService = new ProductionDataRepairService(db);
     await repairService.RepairAsync();
 
+    // RBAC debe existir antes de crear cualquier usuario: RolId es obligatorio.
+    var seedPermisoService = new SeedPermisoService(db);
+    await seedPermisoService.SeedDefaultsAsync();
+
     var adminUsername = app.Configuration["SeedAdmin:Username"]?.Trim();
     var adminPassword = app.Configuration["SeedAdmin:Password"];
-
     if (!string.IsNullOrWhiteSpace(adminUsername) && !string.IsNullOrWhiteSpace(adminPassword))
     {
         var adminExiste = await db.Usuarios.AnyAsync(u => u.NombreUsuario == adminUsername);
         if (!adminExiste)
         {
+            var adminRolId = await db.Roles
+                .Where(r => r.EsAdministrador && r.Activo && !r.Eliminado)
+                .OrderBy(r => r.Id)
+                .Select(r => r.Id)
+                .FirstOrDefaultAsync();
+            if (adminRolId <= 0)
+                throw new InvalidOperationException("No existe un rol administrador dinámico activo para SeedAdmin.");
+
             db.Usuarios.Add(new Usuario
             {
                 NombreUsuario = adminUsername,
                 NombreCompleto = "Administrador",
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(adminPassword),
-                Rol = RolUsuario.Administrador,
+                RolId = adminRolId,
                 Activo = true,
                 FechaCreacion = DateTime.UtcNow
             });
             await db.SaveChangesAsync();
         }
     }
-
-    var seedPermisoService = new SeedPermisoService(db);
-    await seedPermisoService.SeedDefaultsAsync();
 
     var seedFiscalService = new SeedFiscalService(db);
     await seedFiscalService.SeedDefaultsAsync();
