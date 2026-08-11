@@ -58,6 +58,15 @@ jobs:
           path.write_text(text.replace(old, new, 1), encoding='utf-8')
           PY
           python3 backend/scripts/apply-erp-n0-3-runtime.py
+          python3 - <<'PY'
+          from pathlib import Path
+          for rel in ['backend/src/Application/Services/CompraService.cs', 'backend/src/Application/Services/VentaService.cs']:
+              path = Path(rel)
+              text = path.read_text(encoding='utf-8')
+              text = text.replace('ProductoMarcaSnapshot = variante.Marca?.Nombre,', 'ProductoMarcaSnapshot = variante.Marca?.Nombre ?? string.Empty,')
+              text = text.replace('ProductoModeloSnapshot = variante.Modelo?.Nombre,', 'ProductoModeloSnapshot = variante.Modelo?.Nombre ?? string.Empty,')
+              path.write_text(text, encoding='utf-8')
+          PY
       - name: Validar guardas N0.3
         run: python3 backend/scripts/check-erp-n0-3-runtime.py
       - name: Compilar y probar antes de publicar
