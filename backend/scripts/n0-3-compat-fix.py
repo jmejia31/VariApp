@@ -3,7 +3,6 @@ from pathlib import Path
 import re
 
 ROOT = Path(__file__).resolve().parents[2]
-
 def read(rel): return (ROOT / rel).read_text(encoding='utf-8')
 def write(rel, text): (ROOT / rel).write_text(text, encoding='utf-8')
 
@@ -11,9 +10,6 @@ def write(rel, text): (ROOT / rel).write_text(text, encoding='utf-8')
 p='backend/src/Application/Services/ProductoVarianteService.cs'
 t=read(p)
 t=t.replace('await MarcarProductoActualizadoAsync(producto);', 'await SincronizarProyeccionCompatibilidadAsync(producto);')
-
-# AsegurarTecnicaBajoLockAsync puede crear una técnica a partir de un producto pre-N0.3.
-# Sembramos el legado UNA sola vez al crearla; una técnica ya existente nunca vuelve a copiarse desde Producto.
 marker='''        var tecnica = await _repository.GetTecnicaByProductoIdAsync(producto.Id, true);
         if (tecnica is null)
         {'''
@@ -43,7 +39,6 @@ seed='''        if (esNueva)
         tecnica.Activo = producto.Activo;'''
 if seed_marker not in t: raise SystemExit('No se encontró punto de seed técnico generado')
 t=t.replace(seed_marker,seed,1)
-
 pattern=r'''    private async Task MarcarProductoActualizadoAsync\(Producto producto\)\n    \{.*?\n    \}\n'''
 projection='''    // Compatibilidad transitoria N0.3: Producto conserva un espejo DERIVADO, nunca autoridad operativa.
     private async Task SincronizarProyeccionCompatibilidadAsync(Producto producto)
@@ -87,7 +82,7 @@ t2,n=re.subn(pattern,projection,t,count=1,flags=re.S)
 if n!=1: raise SystemExit('No se reemplazó proyección compatibilidad')
 write(p,t2)
 
-# Mapper: Variante manda; fallback dimensional solo para técnica pre-backfill.
+# Mapper: Variante manda; fallback SOLO para técnica pre-backfill, incluyendo navegaciones normalizadas.
 p='backend/src/Application/Mappings/ProductoMapper.cs'; t=read(p)
 old='''        var marcaId = ValorComun(variantes, v => v.MarcaId);
         var modeloId = ValorComun(variantes, v => v.ModeloId);
@@ -102,10 +97,20 @@ if old not in t: raise SystemExit('Mapper IDs no localizado')
 t=t.replace(old,new,1)
 old_names='''        var marca = string.Join(" / ", marcaNombres!);
         var modelo = string.Join(" / ", modeloNombres!);'''
-new_names='''        var marca = marcaNombres.Count > 0 ? string.Join(" / ", marcaNombres!) : (soloTecnicaPreBackfill ? p.Marca : string.Empty);
-        var modelo = modeloNombres.Count > 0 ? string.Join(" / ", modeloNombres!) : (soloTecnicaPreBackfill ? p.Modelo : string.Empty);'''
+new_names='''        var marca = marcaNombres.Count > 0 ? string.Join(" / ", marcaNombres!) : (soloTecnicaPreBackfill ? p.MarcaCatalogo?.Nombre ?? p.Marca : string.Empty);
+        var modelo = modeloNombres.Count > 0 ? string.Join(" / ", modeloNombres!) : (soloTecnicaPreBackfill ? p.ModeloCatalogo?.Nombre ?? p.Modelo : string.Empty);'''
 if old_names not in t: raise SystemExit('Mapper nombres no localizado')
-write(p,t.replace(old_names,new_names,1))
+t=t.replace(old_names,new_names,1)
+old_entities='''        var color = colorId.HasValue ? variantes.FirstOrDefault(v => v.ColorId == colorId)?.Color : null;
+        var talla = tallaId.HasValue ? variantes.FirstOrDefault(v => v.TallaId == tallaId)?.Talla : null;
+        var marcaEntidad = marcaId.HasValue ? variantes.FirstOrDefault(v => v.MarcaId == marcaId)?.Marca : null;
+        var modeloEntidad = modeloId.HasValue ? variantes.FirstOrDefault(v => v.ModeloId == modeloId)?.Modelo : null;'''
+new_entities='''        var color = colorId.HasValue ? variantes.FirstOrDefault(v => v.ColorId == colorId)?.Color ?? (soloTecnicaPreBackfill ? p.ColorCatalogo : null) : null;
+        var talla = tallaId.HasValue ? variantes.FirstOrDefault(v => v.TallaId == tallaId)?.Talla ?? (soloTecnicaPreBackfill ? p.TallaCatalogo : null) : null;
+        var marcaEntidad = marcaId.HasValue ? variantes.FirstOrDefault(v => v.MarcaId == marcaId)?.Marca ?? (soloTecnicaPreBackfill ? p.MarcaCatalogo : null) : null;
+        var modeloEntidad = modeloId.HasValue ? variantes.FirstOrDefault(v => v.ModeloId == modeloId)?.Modelo ?? (soloTecnicaPreBackfill ? p.ModeloCatalogo : null) : null;'''
+if old_entities not in t: raise SystemExit('Mapper entidades no localizado')
+write(p,t.replace(old_entities,new_entities,1))
 
 # Venta: cliente antiguo sin VarianteId resuelve técnica; comerciales exigen variante exacta.
 p='backend/src/Application/Services/VentaService.cs'; t=read(p)
@@ -253,5 +258,4 @@ if errors:
     print('N0.3 FAIL:\n'+'\n'.join(errors),file=sys.stderr); sys.exit(1)
 print('N0.3 runtime guard: ProductoVariante es autoridad; Producto queda solo como proyección de compatibilidad.')
 ''')
-
 print('Ajuste N0.3 de compatibilidad derivada aplicado.')
