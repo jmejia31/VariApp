@@ -80,10 +80,11 @@ jobs:
         run: |
           c="${{ job.services.mysql.id }}"
           test "$(docker exec -i "$c" mysql -uroot -proot inventoryapp_n03_ci --batch --skip-column-names < backend/scripts/preflight-erp-n0-3-producto-variante.sql | tail -n 1)" = '0'
-      - name: Aplicar N0.3
+      - name: Aplicar N0.3 aislado
         working-directory: backend
         run: |
-          dotnet ef database update --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+          dotnet ef database update 20260811032000_N0_3_ConsolidarProductoVariante \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
             --startup-project src/API/InventoryApp.API.csproj --context AppDbContext
       - name: Postcheck N0.3 y datos preservados
         shell: bash
@@ -91,6 +92,8 @@ jobs:
           set -euo pipefail
           c="${{ job.services.mysql.id }}"
           test "$(docker exec -i "$c" mysql -uroot -proot inventoryapp_n03_ci --batch --skip-column-names < backend/scripts/postdeploy-erp-n0-3-producto-variante.sql | tail -n 1)" = '0'
+          test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n03_ci -Nse "SELECT COUNT(*) FROM __EFMigrationsHistory WHERE MigrationId='20260811032000_N0_3_ConsolidarProductoVariante';")" = '1'
+          test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n03_ci -Nse "SELECT COUNT(*) FROM __EFMigrationsHistory WHERE MigrationId='20260811174745_N0_4_ConsolidarRbacRelacional';")" = '0'
           test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n03_ci -Nse "SELECT COUNT(*) FROM ProductoVariantes WHERE Id=9350 AND Sku='TEC-N03-9300' AND MarcaId=9301 AND ModeloId=9302 AND ColorId=9303 AND TallaId=9304 AND Cantidad=7 AND Costo=10.00 AND Precio=20.00 AND UmbralStockBajo=2;")" = '1'
           if docker exec "$c" mysql -uroot -proot inventoryapp_n03_ci -e "UPDATE ProductoVariantes SET Sku=' ' WHERE Id=9350;"; then echo 'CHECK SKU vacío no bloqueó' >&2; exit 1; fi
           if docker exec "$c" mysql -uroot -proot inventoryapp_n03_ci -e "UPDATE ProductoVariantes SET ModeloId=9302, MarcaId=NULL WHERE Id=9350;"; then echo 'CHECK Modelo/Marca no bloqueó' >&2; exit 1; fi
