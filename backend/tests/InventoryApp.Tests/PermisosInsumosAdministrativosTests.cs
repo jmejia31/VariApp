@@ -14,53 +14,49 @@ public class PermisosInsumosAdministrativosTests
             .Options);
 
     [Fact]
-    public async Task SeedDefaultsAsync_Agrega_Permisos_Nuevos_Al_Administrador_Sin_Tocar_Vendedor()
+    public async Task SeedDefaultsAsync_AgregaPermisosNuevosAlAdministrador_SinOtorgarlosAlVendedor()
     {
         await using var context = CrearContexto();
         var service = new SeedPermisoService(context);
         await service.SeedDefaultsAsync();
 
-        var administrador = await context.Roles.IgnoreQueryFilters()
-            .SingleAsync(r => r.EsAdministrador);
-        var vendedor = await context.Roles.IgnoreQueryFilters()
-            .SingleAsync(r => r.NombreNormalizado == "VENDEDOR");
+        var administrador = await context.Roles.IgnoreQueryFilters().SingleAsync(r => r.EsAdministrador);
+        var vendedor = await context.Roles.IgnoreQueryFilters().SingleAsync(r => r.NombreNormalizado == "VENDEDOR");
 
         var adminInsumos = await context.RolPermisos
+            .Include(rp => rp.Permiso)
             .Where(rp => rp.RolId == administrador.Id &&
-                         rp.Modulo == ModuloSistema.InsumosAdministrativos)
+                         rp.Permiso.Modulo == ModuloSistema.InsumosAdministrativos)
             .ToListAsync();
-        Assert.NotEmpty(adminInsumos);
-        Assert.All(adminInsumos, rp => Assert.True(rp.Permitido));
-        Assert.Contains(adminInsumos, rp => rp.Accion == AccionPermiso.RegistrarConsumo);
-        Assert.Contains(adminInsumos, rp => rp.Accion == AccionPermiso.AjustarStock);
 
-        Assert.False(await context.RolPermisos.AnyAsync(rp =>
-            rp.RolId == vendedor.Id && rp.Modulo == ModuloSistema.InsumosAdministrativos));
+        Assert.NotEmpty(adminInsumos);
+        Assert.Contains(adminInsumos, rp => rp.Permiso.Accion == AccionPermiso.RegistrarConsumo);
+        Assert.Contains(adminInsumos, rp => rp.Permiso.Accion == AccionPermiso.AjustarStock);
+        Assert.False(await context.RolPermisos
+            .Include(rp => rp.Permiso)
+            .AnyAsync(rp => rp.RolId == vendedor.Id &&
+                            rp.Permiso.Modulo == ModuloSistema.InsumosAdministrativos));
     }
 
     [Fact]
-    public async Task SeedDefaultsAsync_No_Sobrescribe_Un_Permiso_Nuevo_Denegado_Expresamente()
+    public async Task SeedDefaultsAsync_RestauraGrantAdministradorAusente_SinDuplicarlo()
     {
         await using var context = CrearContexto();
         var service = new SeedPermisoService(context);
         await service.SeedDefaultsAsync();
 
-        var administrador = await context.Roles.IgnoreQueryFilters()
-            .SingleAsync(r => r.EsAdministrador);
-        var exonerar = await context.RolPermisos.SingleAsync(rp =>
-            rp.RolId == administrador.Id &&
-            rp.Modulo == ModuloSistema.Ventas &&
-            rp.Accion == AccionPermiso.ExonerarEnvio);
-        exonerar.Permitido = false;
-        await context.SaveChangesAsync();
+        var administrador = await context.Roles.IgnoreQueryFilters().SingleAsync(r => r.EsAdministrador);
+        var permiso = await context.Permisos.IgnoreQueryFilters().SingleAsync(p =>
+            p.Modulo == ModuloSistema.Ventas && p.Accion == AccionPermiso.ExonerarEnvio);
+        var grant = await context.RolPermisos.SingleAsync(rp =>
+            rp.RolId == administrador.Id && rp.PermisoId == permiso.Id);
 
+        context.RolPermisos.Remove(grant);
+        await context.SaveChangesAsync();
+        await service.SeedDefaultsAsync();
         await service.SeedDefaultsAsync();
 
-        var filas = await context.RolPermisos.Where(rp =>
-            rp.RolId == administrador.Id &&
-            rp.Modulo == ModuloSistema.Ventas &&
-            rp.Accion == AccionPermiso.ExonerarEnvio).ToListAsync();
-        var fila = Assert.Single(filas);
-        Assert.False(fila.Permitido);
+        Assert.Equal(1, await context.RolPermisos.CountAsync(rp =>
+            rp.RolId == administrador.Id && rp.PermisoId == permiso.Id));
     }
 }

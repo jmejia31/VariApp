@@ -1,0 +1,44 @@
+name: TEMP ERP-N0.4 - Generar migracion EF
+
+on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - 'backend/tests/InventoryApp.Tests/PermisoSeedServiceTests.cs'
+      - 'backend/tests/InventoryApp.Tests/PermisosInsumosAdministrativosTests.cs'
+      - '.github/workflows/temp-erp-n0-4-generate-migration.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  generar:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-actions[bot]'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Instalar EF
+        run: dotnet tool install --global dotnet-ef --version 8.0.8
+      - name: Generar migracion y snapshot N0.4
+        working-directory: backend
+        run: |
+          dotnet restore InventoryApp.sln
+          dotnet ef migrations add N0_4_ConsolidarRbacRelacional \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext \
+            --output-dir Migrations
+      - name: Publicar archivos generados en Desarrollo
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add backend/src/Infrastructure/Migrations
+          git diff --cached --quiet && exit 0
+          git commit -m 'chore(erp-n0.4): generar migracion y snapshot EF [automation]'
+          git push origin HEAD:Desarrollo
