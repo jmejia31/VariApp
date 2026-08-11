@@ -2,14 +2,12 @@ using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities;
-using InventoryApp.Domain.Enums;
 
 namespace InventoryApp.Application.Services;
 
 public class AuthService : IAuthService
 {
     private readonly IUsuarioRepository _usuarioRepository;
-    private readonly IRolRepository _rolRepository;
     private readonly IJwtService _jwtService;
 
     public AuthService(
@@ -18,8 +16,8 @@ public class AuthService : IAuthService
         IJwtService jwtService)
     {
         _usuarioRepository = usuarioRepository;
-        _rolRepository = rolRepository;
         _jwtService = jwtService;
+        _ = rolRepository; // Compatibilidad de constructor; RolId ya fue backfilleado por N0.4.
     }
 
     public async Task<LoginResponseDto?> LoginAsync(LoginRequestDto dto)
@@ -28,13 +26,11 @@ public class AuthService : IAuthService
         var usuario = await _usuarioRepository.GetByNombreUsuarioAsync(nombreUsuario);
         if (usuario is null || usuario.Eliminado) return null;
 
-        var passwordValida = BCrypt.Net.BCrypt.Verify(dto.Password, usuario.PasswordHash);
-        if (!passwordValida) return null;
+        if (!BCrypt.Net.BCrypt.Verify(dto.Password, usuario.PasswordHash))
+            return null;
 
         ValidarEstadoCuenta(usuario);
-        await AsegurarRolDinamicoAsync(usuario);
-        ValidarRol(usuario);
-
+        ValidarRolRelacional(usuario);
         return CrearRespuesta(usuario);
     }
 
@@ -44,9 +40,7 @@ public class AuthService : IAuthService
         if (usuario is null || usuario.Eliminado) return null;
 
         ValidarEstadoCuenta(usuario);
-        await AsegurarRolDinamicoAsync(usuario);
-        ValidarRol(usuario);
-
+        ValidarRolRelacional(usuario);
         return CrearRespuesta(usuario);
     }
 
@@ -58,7 +52,7 @@ public class AuthService : IAuthService
             Token = token,
             NombreUsuario = usuario.NombreUsuario,
             NombreCompleto = usuario.NombreCompleto,
-            Rol = usuario.RolEntidad!.Nombre,
+            Rol = usuario.RolEntidad.Nombre,
             FotoPerfilUrl = usuario.FotoPerfilUrl,
             ExpiraEn = expiraEn
         };
@@ -72,39 +66,9 @@ public class AuthService : IAuthService
             throw new BusinessRuleException("Esta cuenta está desactivada. Contacta a un administrador.");
     }
 
-    private static void ValidarRol(Usuario usuario)
+    private static void ValidarRolRelacional(Usuario usuario)
     {
-        if (usuario.RolEntidad is null || usuario.RolEntidad.Eliminado || !usuario.RolEntidad.Activo)
-            throw new BusinessRuleException("El rol asignado a esta cuenta está inactivo. Contacta a un administrador.");
-    }
-
-    private async Task AsegurarRolDinamicoAsync(Usuario usuario)
-    {
-        if (usuario.RolId.HasValue && usuario.RolEntidad is not null)
-            return;
-
-        // Compatibilidad de una sola vía para usuarios creados antes del catálogo
-        // dinámico. Se vinculan por el enum legado, pero desde este momento la
-        // fuente de verdad pasa a ser Rol.Id y nunca vuelve a consultarse una
-        // matriz legacy para autorizar solicitudes.
-        var nombreRolSistema = usuario.Rol == RolUsuario.Administrador
-            ? "Administrador"
-            : "Vendedor";
-
-        var rol = (await _rolRepository.GetAllAsync())
-            .FirstOrDefault(r =>
-                string.Equals(r.Nombre, nombreRolSistema, StringComparison.OrdinalIgnoreCase) &&
-                !r.Eliminado);
-
-        if (rol is null)
-            throw new BusinessRuleException("La cuenta no tiene un rol dinámico válido asignado. Contacta a un administrador.");
-
-        usuario.RolId = rol.Id;
-        usuario.RolEntidad = rol;
-        usuario.ActualizadoPorUsuarioId = usuario.Id;
-        usuario.FechaActualizacion = DateTime.UtcNow;
-
-        _usuarioRepository.Update(usuario);
-        await _usuarioRepository.SaveChangesAsync();
+        if (usuario.RolId <= 0 || usuario.RolEntidad is null || usuario.RolEntidad.Eliminado || !usuario.RolEntidad.Activo)
+            throw new BusinessRuleException("La cuenta no tiene un rol relacional activo válido. Contacta a un administrador.");
     }
 }
