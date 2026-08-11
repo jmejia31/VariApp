@@ -34,6 +34,8 @@ forbid('backend/src/Infrastructure/Services/CargaMasivaService.cs','producto.Umb
 require('backend/src/Infrastructure/Services/CargaMasivaService.cs','variante.Costo = Decimal(fila, "Costo")')
 require('backend/src/Infrastructure/Services/CargaMasivaService.cs','variante.Precio = Decimal(fila, "Precio")')
 require('backend/src/Infrastructure/Services/CargaMasivaService.cs','PRODUCTO_REQUIERE_VARIANTES')
+require('backend/src/Infrastructure/Services/CargaMasivaService.cs','conserva stock en su variante técnica')
+require('backend/src/Infrastructure/Services/CargaMasivaService.cs','tecnica.Eliminado = true')
 if errors:
     print('N0.3 FAIL:\n'+'\n'.join(errors),file=sys.stderr); sys.exit(1)
 print('N0.3 runtime guard: ProductoVariante es autoridad; Producto queda solo como proyección de compatibilidad.')

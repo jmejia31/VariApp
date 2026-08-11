@@ -1034,6 +1034,18 @@ public sealed class CargaMasivaService : ICargaMasivaService
             variantes.Add(variante.Id, variante);
         }
 
+        // N0.3: una familia no puede mezclar variante técnica y variantes comerciales activas.
+        // Se bloquea la técnica dentro de la misma transacción para que la conversión sea atómica.
+        var tecnicas = new Dictionary<int, ProductoVariante>();
+        foreach (var productoId in productoIds)
+        {
+            var tecnica = await _db.ProductoVariantes
+                .FromSqlInterpolated($"SELECT v.* FROM ProductoVariantes v WHERE v.ProductoId = {productoId} AND v.EsTecnica = 1 AND v.Eliminado = 0 FOR UPDATE")
+                .AsTracking().SingleOrDefaultAsync(ct);
+            if (tecnica is not null)
+                tecnicas.Add(productoId, tecnica);
+        }
+
         var marcas = await _db.Marcas.Where(x => x.Activo && !x.Eliminado).ToListAsync(ct);
         var modelos = await _db.Modelos.Where(x => x.Activo && !x.Eliminado).ToListAsync(ct);
         var colores = await _db.Colores.Where(x => x.Activo && !x.Eliminado).ToListAsync(ct);
@@ -1082,8 +1094,21 @@ public sealed class CargaMasivaService : ICargaMasivaService
             }
             else
             {
+                if (tecnicas.TryGetValue(producto.Id, out var tecnica))
+                {
+                    if (tecnica.Cantidad != 0)
+                        throw new BusinessRuleException($"El producto '{producto.Nombre}' conserva stock en su variante técnica. Ajusta o migra ese stock antes de crear variantes comerciales.");
+
+                    tecnica.Activo = false;
+                    tecnica.Eliminado = true;
+                    tecnica.FechaEliminacion = DateTime.UtcNow;
+                    tecnica.EliminadoPorUsuarioId = _currentUser.UsuarioId;
+                    MarcarActualizacion(tecnica);
+                    tecnicas.Remove(producto.Id);
+                }
+
                 var conflicto = await _db.ProductoVariantes.IgnoreQueryFilters().AsNoTracking().AnyAsync(x =>
-                    !x.Eliminado &&
+                    !x.Eliminado && !x.EsTecnica &&
                     (x.Sku == sku ||
                      (codigoBarras != null && x.CodigoBarras == codigoBarras) ||
                      (x.ProductoId == producto.Id && x.MarcaId == marcaId && x.ModeloId == modeloId && x.ColorId == colorId && x.TallaId == tallaId)), ct);

@@ -37,6 +37,15 @@ public sealed class N03AutoridadOperativaRegressionTests
         Assert.Contains("PRODUCTO_REQUIERE_VARIANTES", source);
     }
 
+    [Fact]
+    public void Carga_variantes_debe_convertir_tecnica_sin_mezclar_autoridades()
+    {
+        var source = Leer("backend/src/Infrastructure/Services/CargaMasivaService.cs");
+        Assert.Contains("conserva stock en su variante técnica", source);
+        Assert.Contains("tecnica.Eliminado = true", source);
+        Assert.Contains("!x.Eliminado && !x.EsTecnica", source);
+    }
+
     private static string Leer(string relativePath)
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
