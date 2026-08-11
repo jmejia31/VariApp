@@ -62,6 +62,7 @@ public class ProductosController : ControllerBase
 
         await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
+            AplicarProyeccionLegacy(dto);
             creado = await _productoService.CreateAsync(dto);
             await SincronizarVariantesAsync(creado.Id, dto.Variantes, Array.Empty<ProductoVarianteDto>());
         });
@@ -79,6 +80,7 @@ public class ProductosController : ControllerBase
 
         await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
+            AplicarProyeccionLegacy(dto);
             var existentes = await _varianteService.GetByProductoIdAsync(id, incluirInactivas: true);
             actualizado = await _productoService.UpdateAsync(id, dto);
             if (actualizado is not null)
@@ -223,98 +225,183 @@ public class ProductosController : ControllerBase
     }
 
     private async Task SincronizarVariantesAsync(
-    int productoId,
-    IReadOnlyCollection<ProductoVarianteFormularioDto> solicitadas,
-    IReadOnlyCollection<ProductoVarianteDto> existentes)
-{
-    var tecnica = existentes.SingleOrDefault(v => v.EsTecnica);
-    var comercialesExistentes = existentes.Where(v => !v.EsTecnica).ToList();
-
-    if (solicitadas.Count == 0)
+        int productoId,
+        IReadOnlyCollection<ProductoVarianteFormularioDto> solicitadas,
+        IReadOnlyCollection<ProductoVarianteDto> existentes)
     {
-        if (comercialesExistentes.Any(v => v.Cantidad != 0))
-            throw new BusinessRuleException("No puedes convertir el producto en simple mientras alguna variante comercial tenga existencias.");
-        foreach (var comercial in comercialesExistentes)
-            await _varianteService.DeleteAsync(productoId, comercial.Id);
-        await _varianteService.AsegurarTecnicaAsync(productoId);
-        return;
-    }
+        var tecnica = existentes.SingleOrDefault(v => v.EsTecnica);
+        var comercialesExistentes = existentes.Where(v => !v.EsTecnica).ToList();
 
-    if (tecnica is not null)
-        await _varianteService.RetirarTecnicaParaConversionAsync(productoId);
-
-    if (solicitadas.Any(v => !v.MarcaId.HasValue && !v.ModeloId.HasValue && !v.ColorId.HasValue && !v.TallaId.HasValue))
-        throw new BusinessRuleException("Cada variante comercial debe definir al menos Marca, Modelo, Color o Talla.");
-    if (solicitadas.Any(v => v.Cantidad < 0 || v.UmbralStockBajo < 0))
-        throw new BusinessRuleException("La cantidad y el umbral de cada variante no pueden ser negativos.");
-    if (solicitadas.Any(v => v.Costo < 0 || v.Precio <= 0))
-        throw new BusinessRuleException("Cada variante debe tener costo no negativo y precio mayor que cero.");
-
-    static string Clave(ProductoVarianteFormularioDto v) =>
-        $"{v.MarcaId ?? 0}:{v.ModeloId ?? 0}:{v.ColorId ?? 0}:{v.TallaId ?? 0}";
-    if (solicitadas.GroupBy(Clave).Any(g => g.Count() > 1))
-        throw new BusinessRuleException("No puedes registrar dos veces la misma combinación de Marca, Modelo, Color y Talla.");
-
-    var skus = solicitadas.Where(v => !string.IsNullOrWhiteSpace(v.Sku)).Select(v => v.Sku!.Trim().ToUpperInvariant()).ToList();
-    if (skus.Distinct(StringComparer.OrdinalIgnoreCase).Count() != skus.Count)
-        throw new BusinessRuleException("No puedes repetir un SKU dentro del mismo producto.");
-    var codigos = solicitadas.Where(v => !string.IsNullOrWhiteSpace(v.CodigoBarras)).Select(v => v.CodigoBarras!.Trim()).ToList();
-    if (codigos.Distinct(StringComparer.OrdinalIgnoreCase).Count() != codigos.Count)
-        throw new BusinessRuleException("No puedes repetir un código de barras dentro del mismo producto.");
-
-    var idsSolicitados = solicitadas.Where(v => v.Id.HasValue).Select(v => v.Id!.Value).ToHashSet();
-    foreach (var existente in comercialesExistentes.Where(v => !idsSolicitados.Contains(v.Id)))
-    {
-        if (existente.Cantidad > 0)
-            throw new BusinessRuleException($"No puedes retirar la variante '{existente.Etiqueta}' porque todavía tiene {existente.Cantidad} unidades.");
-        await _varianteService.DeleteAsync(productoId, existente.Id);
-    }
-
-    foreach (var solicitada in solicitadas)
-    {
-        var existente = solicitada.Id.HasValue ? comercialesExistentes.FirstOrDefault(v => v.Id == solicitada.Id.Value) : null;
-        if (solicitada.Id.HasValue && existente is null)
-            throw new BusinessRuleException("Una de las variantes indicadas no pertenece al producto.");
-
-        if (existente is not null && solicitada.Cantidad != existente.Cantidad)
-            throw new BusinessRuleException($"El stock de '{existente.Etiqueta}' debe cambiarse mediante Ajustar inventario para conservar trazabilidad.");
-
-        if (existente is null)
+        if (EsSolicitudTecnica(solicitadas))
         {
-            var creada = await _varianteService.CreateAsync(productoId, new CreateProductoVarianteDto
-            {
-                MarcaId = solicitada.MarcaId,
-                ModeloId = solicitada.ModeloId,
-                ColorId = solicitada.ColorId,
-                TallaId = solicitada.TallaId,
-                Sku = solicitada.Sku,
-                CodigoBarras = solicitada.CodigoBarras,
-                Cantidad = solicitada.Cantidad,
-                UmbralStockBajo = solicitada.UmbralStockBajo,
-                Costo = solicitada.Costo,
-                Precio = solicitada.Precio
-            });
-            if (!solicitada.Activo)
-                await _varianteService.CambiarEstadoAsync(productoId, creada.Id, false);
+            if (comercialesExistentes.Any(v => v.Cantidad != 0))
+                throw new BusinessRuleException("No puedes convertir el producto en simple mientras alguna variante comercial tenga existencias.");
+            foreach (var comercial in comercialesExistentes)
+                await _varianteService.DeleteAsync(productoId, comercial.Id);
+            await _varianteService.SincronizarTecnicaConProductoAsync(productoId);
+            return;
         }
-        else
+
+        if (solicitadas.Count == 0)
         {
-            var actualizada = await _varianteService.UpdateAsync(productoId, existente.Id, new UpdateProductoVarianteDto
+            if (comercialesExistentes.Any(v => v.Cantidad != 0))
+                throw new BusinessRuleException("No puedes convertir el producto en simple mientras alguna variante comercial tenga existencias.");
+            foreach (var comercial in comercialesExistentes)
+                await _varianteService.DeleteAsync(productoId, comercial.Id);
+            await _varianteService.AsegurarTecnicaAsync(productoId);
+            return;
+        }
+
+        if (tecnica is not null)
+            await _varianteService.RetirarTecnicaParaConversionAsync(productoId);
+
+        if (solicitadas.Any(v => !TieneDimension(v)))
+            throw new BusinessRuleException("Cada variante comercial debe definir al menos Marca, Modelo, Color o Talla.");
+        if (solicitadas.Any(v => v.Cantidad < 0 || v.UmbralStockBajo < 0))
+            throw new BusinessRuleException("La cantidad y el umbral de cada variante no pueden ser negativos.");
+        if (solicitadas.Any(v => v.Costo < 0 || v.Precio <= 0))
+            throw new BusinessRuleException("Cada variante debe tener costo no negativo y precio mayor que cero.");
+
+        static string Clave(ProductoVarianteFormularioDto v) =>
+            $"{v.MarcaId ?? 0}:{v.ModeloId ?? 0}:{v.ColorId ?? 0}:{v.TallaId ?? 0}";
+        if (solicitadas.GroupBy(Clave).Any(g => g.Count() > 1))
+            throw new BusinessRuleException("No puedes registrar dos veces la misma combinación de Marca, Modelo, Color y Talla.");
+
+        var skus = solicitadas.Where(v => !string.IsNullOrWhiteSpace(v.Sku)).Select(v => v.Sku!.Trim().ToUpperInvariant()).ToList();
+        if (skus.Distinct(StringComparer.OrdinalIgnoreCase).Count() != skus.Count)
+            throw new BusinessRuleException("No puedes repetir un SKU dentro del mismo producto.");
+        var codigos = solicitadas.Where(v => !string.IsNullOrWhiteSpace(v.CodigoBarras)).Select(v => v.CodigoBarras!.Trim()).ToList();
+        if (codigos.Distinct(StringComparer.OrdinalIgnoreCase).Count() != codigos.Count)
+            throw new BusinessRuleException("No puedes repetir un código de barras dentro del mismo producto.");
+
+        var idsSolicitados = solicitadas.Where(v => v.Id.HasValue).Select(v => v.Id!.Value).ToHashSet();
+        foreach (var existente in comercialesExistentes.Where(v => !idsSolicitados.Contains(v.Id)))
+        {
+            if (existente.Cantidad > 0)
+                throw new BusinessRuleException($"No puedes retirar la variante '{existente.Etiqueta}' porque todavía tiene {existente.Cantidad} unidades.");
+            await _varianteService.DeleteAsync(productoId, existente.Id);
+        }
+
+        foreach (var solicitada in solicitadas)
+        {
+            var existente = solicitada.Id.HasValue ? comercialesExistentes.FirstOrDefault(v => v.Id == solicitada.Id.Value) : null;
+            if (solicitada.Id.HasValue && existente is null)
+                throw new BusinessRuleException("Una de las variantes indicadas no pertenece al producto.");
+
+            if (existente is not null && solicitada.Cantidad != existente.Cantidad)
+                throw new BusinessRuleException($"El stock de '{existente.Etiqueta}' debe cambiarse mediante Ajustar inventario para conservar trazabilidad.");
+
+            if (existente is null)
             {
-                MarcaId = solicitada.MarcaId,
-                ModeloId = solicitada.ModeloId,
-                ColorId = solicitada.ColorId,
-                TallaId = solicitada.TallaId,
-                Sku = solicitada.Sku,
-                CodigoBarras = solicitada.CodigoBarras,
-                Cantidad = existente.Cantidad,
-                UmbralStockBajo = solicitada.UmbralStockBajo,
-                Costo = solicitada.Costo,
-                Precio = solicitada.Precio
-            }) ?? throw new BusinessRuleException("No se pudo actualizar una de las variantes del producto.");
-            if (actualizada.Activo != solicitada.Activo)
-                await _varianteService.CambiarEstadoAsync(productoId, existente.Id, solicitada.Activo);
+                var creada = await _varianteService.CreateAsync(productoId, new CreateProductoVarianteDto
+                {
+                    MarcaId = solicitada.MarcaId,
+                    ModeloId = solicitada.ModeloId,
+                    ColorId = solicitada.ColorId,
+                    TallaId = solicitada.TallaId,
+                    Sku = solicitada.Sku,
+                    CodigoBarras = solicitada.CodigoBarras,
+                    Cantidad = solicitada.Cantidad,
+                    UmbralStockBajo = solicitada.UmbralStockBajo,
+                    Costo = solicitada.Costo,
+                    Precio = solicitada.Precio
+                });
+                if (!solicitada.Activo)
+                    await _varianteService.CambiarEstadoAsync(productoId, creada.Id, false);
+            }
+            else
+            {
+                var actualizada = await _varianteService.UpdateAsync(productoId, existente.Id, new UpdateProductoVarianteDto
+                {
+                    MarcaId = solicitada.MarcaId,
+                    ModeloId = solicitada.ModeloId,
+                    ColorId = solicitada.ColorId,
+                    TallaId = solicitada.TallaId,
+                    Sku = solicitada.Sku,
+                    CodigoBarras = solicitada.CodigoBarras,
+                    Cantidad = existente.Cantidad,
+                    UmbralStockBajo = solicitada.UmbralStockBajo,
+                    Costo = solicitada.Costo,
+                    Precio = solicitada.Precio
+                }) ?? throw new BusinessRuleException("No se pudo actualizar una de las variantes del producto.");
+                if (actualizada.Activo != solicitada.Activo)
+                    await _varianteService.CambiarEstadoAsync(productoId, existente.Id, solicitada.Activo);
+            }
         }
     }
-}
+
+    private static void AplicarProyeccionLegacy(CreateProductoDto dto)
+    {
+        if (dto.Variantes.Count == 0) return;
+        var proyeccion = CalcularProyeccion(dto.Variantes);
+        dto.Cantidad = proyeccion.Cantidad;
+        dto.Costo = proyeccion.Costo;
+        dto.Precio = proyeccion.Precio;
+        dto.UmbralStockBajo = proyeccion.Umbral;
+        dto.MarcaId = proyeccion.MarcaId;
+        dto.ModeloId = proyeccion.ModeloId;
+        dto.ColorId = proyeccion.ColorId;
+        dto.TallaId = proyeccion.TallaId;
+        dto.Marca = string.Empty;
+        dto.Modelo = string.Empty;
+    }
+
+    private static void AplicarProyeccionLegacy(UpdateProductoDto dto)
+    {
+        if (dto.Variantes.Count == 0) return;
+        var proyeccion = CalcularProyeccion(dto.Variantes);
+        dto.Cantidad = proyeccion.Cantidad;
+        dto.Costo = proyeccion.Costo;
+        dto.Precio = proyeccion.Precio;
+        dto.UmbralStockBajo = proyeccion.Umbral;
+        dto.MarcaId = proyeccion.MarcaId;
+        dto.ModeloId = proyeccion.ModeloId;
+        dto.ColorId = proyeccion.ColorId;
+        dto.TallaId = proyeccion.TallaId;
+        dto.Marca = string.Empty;
+        dto.Modelo = string.Empty;
+    }
+
+    private static (int Cantidad, decimal Costo, decimal Precio, int Umbral, int? MarcaId, int? ModeloId, int? ColorId, int? TallaId)
+        CalcularProyeccion(IReadOnlyCollection<ProductoVarianteFormularioDto> variantes)
+    {
+        var cantidad = variantes.Sum(v => v.Cantidad);
+        var costo = cantidad > 0
+            ? Math.Round(variantes.Sum(v => v.Costo * v.Cantidad) / cantidad, 2, MidpointRounding.AwayFromZero)
+            : Math.Round(variantes.Average(v => v.Costo), 2, MidpointRounding.AwayFromZero);
+        var activas = variantes.Where(v => v.Activo).ToList();
+        var fuentePrecio = activas.Count > 0 ? activas : variantes;
+        var precio = fuentePrecio.Min(v => v.Precio);
+        var umbral = variantes.Sum(v => v.UmbralStockBajo);
+
+        return (
+            cantidad,
+            costo,
+            precio,
+            umbral,
+            ValorComun(variantes, v => v.MarcaId),
+            ValorComun(variantes, v => v.ModeloId),
+            ValorComun(variantes, v => v.ColorId),
+            ValorComun(variantes, v => v.TallaId));
+    }
+
+    private static int? ValorComun(
+        IReadOnlyCollection<ProductoVarianteFormularioDto> variantes,
+        Func<ProductoVarianteFormularioDto, int?> selector)
+    {
+        var valores = variantes.Select(selector).Distinct().Take(2).ToList();
+        return valores.Count == 1 ? valores[0] : null;
+    }
+
+    private static bool EsSolicitudTecnica(IReadOnlyCollection<ProductoVarianteFormularioDto> variantes)
+    {
+        if (variantes.Count != 1) return false;
+        var variante = variantes.Single();
+        return !TieneDimension(variante)
+            && string.IsNullOrWhiteSpace(variante.Sku)
+            && string.IsNullOrWhiteSpace(variante.CodigoBarras);
+    }
+
+    private static bool TieneDimension(ProductoVarianteFormularioDto variante) =>
+        variante.MarcaId.HasValue || variante.ModeloId.HasValue || variante.ColorId.HasValue || variante.TallaId.HasValue;
 }

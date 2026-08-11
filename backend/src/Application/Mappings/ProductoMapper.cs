@@ -16,7 +16,31 @@ public static class ProductoMapper
             .ThenBy(v => v.Sku)
             .ToList();
         var activas = variantes.Where(v => v.Activo).ToList();
-        var precios = activas.Select(v => v.Precio ?? p.Precio).ToList();
+        var operativas = activas.Count > 0 ? activas : variantes;
+        var stockTotal = variantes.Sum(v => v.Cantidad);
+        var costo = CalcularCosto(varianteFuente: variantes, fallback: p.Costo);
+        var precios = operativas.Where(v => v.Precio.HasValue).Select(v => v.Precio!.Value).ToList();
+        var precio = precios.Count > 0 ? precios.Min() : p.Precio;
+        var precioMaximo = precios.Count > 0 ? precios.Max() : p.Precio;
+        var umbral = variantes.Count > 0 ? variantes.Sum(v => v.UmbralStockBajo) : p.UmbralStockBajo;
+        var agotado = p.Activo && !p.Eliminado && (activas.Count == 0 || activas.All(v => v.Cantidad <= 0));
+        var stockBajo = p.Activo && !p.Eliminado && !agotado && activas.Any(v => v.TieneStockBajo);
+
+        var marcaId = ValorComun(varianteFuente: variantes, selector: v => v.MarcaId);
+        var modeloId = ValorComun(varianteFuente: variantes, selector: v => v.ModeloId);
+        var colorId = ValorComun(varianteFuente: variantes, selector: v => v.ColorId);
+        var tallaId = ValorComun(varianteFuente: variantes, selector: v => v.TallaId);
+
+        var marcaNombres = variantes.Select(v => v.Marca?.Nombre).Where(NoVacio).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        var modeloNombres = variantes.Select(v => v.Modelo?.Nombre).Where(NoVacio).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        var marca = variantes.Count > 0 ? string.Join(" / ", marcaNombres!) : (p.MarcaCatalogo?.Nombre ?? p.Marca);
+        var modelo = variantes.Count > 0 ? string.Join(" / ", modeloNombres!) : (p.ModeloCatalogo?.Nombre ?? p.Modelo);
+
+        var color = colorId.HasValue ? variantes.FirstOrDefault(v => v.ColorId == colorId)?.Color : null;
+        var talla = tallaId.HasValue ? variantes.FirstOrDefault(v => v.TallaId == tallaId)?.Talla : null;
+        var marcaEntidad = marcaId.HasValue ? variantes.FirstOrDefault(v => v.MarcaId == marcaId)?.Marca : null;
+        var modeloEntidad = modeloId.HasValue ? variantes.FirstOrDefault(v => v.ModeloId == modeloId)?.Modelo : null;
+
         var imagenesGenerales = p.Imagenes
             .Where(i => i.ProductoVarianteId == null)
             .OrderBy(i => i.Orden)
@@ -26,31 +50,33 @@ public static class ProductoMapper
         {
             Id = p.Id,
             Nombre = p.Nombre,
-            Marca = p.MarcaCatalogo?.Nombre ?? p.Marca,
-            Modelo = p.ModeloCatalogo?.Nombre ?? p.Modelo,
+            Marca = marca,
+            Modelo = modelo,
             Descripcion = p.Descripcion,
             TipoInventario = p.TipoInventario,
-            Cantidad = variantes.Count > 0 ? variantes.Sum(v => v.Cantidad) : p.Cantidad,
-            Costo = p.Costo,
-            Precio = p.Precio,
-            PrecioMinimo = precios.Count > 0 ? precios.Min() : p.Precio,
-            PrecioMaximo = precios.Count > 0 ? precios.Max() : p.Precio,
-            UmbralStockBajo = p.UmbralStockBajo,
-            TieneStockBajo = p.TieneStockBajo,
-            EstaAgotado = p.EstaAgotado,
-            EstadoInventario = p.EstaAgotado ? "Agotado" : p.TieneStockBajo ? "Stock bajo" : "Disponible",
+            Cantidad = variantes.Count > 0 ? stockTotal : p.Cantidad,
+            Costo = costo,
+            Precio = precio,
+            PrecioMinimo = precio,
+            PrecioMaximo = precioMaximo,
+            UmbralStockBajo = umbral,
+            TieneStockBajo = variantes.Count > 0 ? stockBajo : p.TieneStockBajo,
+            EstaAgotado = variantes.Count > 0 ? agotado : p.EstaAgotado,
+            EstadoInventario = (variantes.Count > 0 ? agotado : p.EstaAgotado)
+                ? "Agotado"
+                : (variantes.Count > 0 ? stockBajo : p.TieneStockBajo) ? "Stock bajo" : "Disponible",
             Activo = p.Activo,
             CategoriaId = p.CategoriaId,
             CategoriaNombre = p.Categoria?.Nombre,
-            ColorId = p.ColorId,
-            ColorNombre = p.Color?.Nombre,
-            ColorCodigoVisual = p.Color?.CodigoVisual,
-            TallaId = p.TallaId,
-            TallaNombre = p.Talla?.Nombre,
-            MarcaId = p.MarcaId,
-            MarcaNombre = p.MarcaCatalogo?.Nombre,
-            ModeloId = p.ModeloId,
-            ModeloNombre = p.ModeloCatalogo?.Nombre,
+            ColorId = colorId,
+            ColorNombre = color?.Nombre,
+            ColorCodigoVisual = color?.CodigoVisual,
+            TallaId = tallaId,
+            TallaNombre = talla?.Nombre,
+            MarcaId = marcaId,
+            MarcaNombre = marcaEntidad?.Nombre,
+            ModeloId = modeloId,
+            ModeloNombre = modeloEntidad?.Nombre,
             ImagenPrincipalUrl = p.ImagenPrincipal?.Url,
             TotalImagenes = imagenesGenerales.Count,
             Imagenes = imagenesGenerales.Select(i => new ProductoImagenDto
@@ -80,8 +106,8 @@ public static class ProductoMapper
                 CodigoBarras = v.CodigoBarras,
                 Cantidad = v.Cantidad,
                 UmbralStockBajo = v.UmbralStockBajo,
-                Costo = v.Costo ?? p.Costo,
-                Precio = v.Precio ?? p.Precio,
+                Costo = v.Costo ?? 0m,
+                Precio = v.Precio ?? 0m,
                 Activo = v.Activo,
                 EsTecnica = v.EsTecnica,
                 TieneStockBajo = v.TieneStockBajo,
@@ -99,6 +125,28 @@ public static class ProductoMapper
             FechaActualizacion = p.FechaActualizacion
         };
     }
+
+    private static decimal CalcularCosto(IReadOnlyCollection<ProductoVariante> varianteFuente, decimal fallback)
+    {
+        if (varianteFuente.Count == 0) return fallback;
+        var total = varianteFuente.Sum(v => v.Cantidad);
+        if (total > 0)
+            return Math.Round(varianteFuente.Sum(v => (v.Costo ?? 0m) * v.Cantidad) / total, 2, MidpointRounding.AwayFromZero);
+
+        var costos = varianteFuente.Where(v => v.Costo.HasValue).Select(v => v.Costo!.Value).ToList();
+        return costos.Count > 0 ? Math.Round(costos.Average(), 2, MidpointRounding.AwayFromZero) : 0m;
+    }
+
+    private static int? ValorComun(
+        IReadOnlyCollection<ProductoVariante> varianteFuente,
+        Func<ProductoVariante, int?> selector)
+    {
+        if (varianteFuente.Count == 0) return null;
+        var valores = varianteFuente.Select(selector).Distinct().Take(2).ToList();
+        return valores.Count == 1 ? valores[0] : null;
+    }
+
+    private static bool NoVacio(string? valor) => !string.IsNullOrWhiteSpace(valor);
 
     private static string ConstruirEtiqueta(ProductoVariante variante)
     {

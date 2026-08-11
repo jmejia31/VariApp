@@ -191,25 +191,44 @@ public class InventarioConcurrencyService : IInventarioConcurrencyService
             var todasVariantes = await _productoVarianteRepository.GetByProductoIdAsync(productoId, incluirInactivas: true);
             producto.Cantidad = todasVariantes.Sum(v => v.Cantidad);
             _productoRepository.Update(producto);
+            return;
         }
-        else
-        {
-            var variantesExistentes = await _productoVarianteRepository
-                .GetByProductoIdAsync(productoId, incluirInactivas: true);
-            if (variantesExistentes.Count > 0)
-            {
-                throw new BusinessRuleException(
-                    "El producto tiene variantes. Ajusta el inventario de cada variante; el stock total se recalcula automáticamente.");
-            }
 
-            if (producto.Cantidad != cantidadActualEsperada)
+        var variantesExistentes = await _productoVarianteRepository
+            .GetByProductoIdAsync(productoId, incluirInactivas: true);
+        var tecnica = variantesExistentes.SingleOrDefault(v => v.EsTecnica);
+        var comerciales = variantesExistentes.Where(v => !v.EsTecnica).ToList();
+
+        if (tecnica is not null && comerciales.Count == 0)
+        {
+            tecnica = await _productoVarianteRepository.GetByIdForUpdateAsync(tecnica.Id) ?? tecnica;
+            if (tecnica.Cantidad != cantidadActualEsperada)
             {
                 throw new BusinessRuleException(
                     "El inventario cambió desde que se cargó el formulario. Actualiza los datos e inténtalo nuevamente.");
             }
 
+            tecnica.Cantidad = cantidadNueva;
+            _productoVarianteRepository.Update(tecnica);
             producto.Cantidad = cantidadNueva;
             _productoRepository.Update(producto);
+            return;
         }
+
+        if (variantesExistentes.Count > 0)
+        {
+            throw new BusinessRuleException(
+                "El producto tiene variantes comerciales. Ajusta el inventario de cada variante; el stock total se recalcula automáticamente.");
+        }
+
+        // Compatibilidad previa al backfill N0.1: solo se ejecuta si aún no existe ninguna variante.
+        if (producto.Cantidad != cantidadActualEsperada)
+        {
+            throw new BusinessRuleException(
+                "El inventario cambió desde que se cargó el formulario. Actualiza los datos e inténtalo nuevamente.");
+        }
+
+        producto.Cantidad = cantidadNueva;
+        _productoRepository.Update(producto);
     }
 }
