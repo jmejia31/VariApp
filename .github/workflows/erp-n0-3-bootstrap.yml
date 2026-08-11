@@ -46,7 +46,18 @@ jobs:
         with:
           dotnet-version: '8.0.x'
       - name: Aplicar transformación N0.3 idempotente
-        run: python3 backend/scripts/apply-erp-n0-3-runtime.py
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('backend/scripts/apply-erp-n0-3-runtime.py')
+          text = path.read_text(encoding='utf-8')
+          old = '    if count != 1:\n        raise RuntimeError(f"{rel}: se esperaba 1 coincidencia y se encontraron {count}: {old[:90]!r}")\n    write(rel, text.replace(old, new, 1))'
+          new = '    if count < 1:\n        raise RuntimeError(f"{rel}: no se encontró la coincidencia esperada: {old[:90]!r}")\n    write(rel, text.replace(old, new, 1))'
+          if old not in text:
+              raise SystemExit('No se encontró la guardia replace_once esperada')
+          path.write_text(text.replace(old, new, 1), encoding='utf-8')
+          PY
+          python3 backend/scripts/apply-erp-n0-3-runtime.py
       - name: Validar guardas N0.3
         run: python3 backend/scripts/check-erp-n0-3-runtime.py
       - name: Compilar y probar antes de publicar
