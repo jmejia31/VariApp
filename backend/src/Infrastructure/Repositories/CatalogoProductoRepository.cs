@@ -1,4 +1,5 @@
 using InventoryApp.Application.Interfaces;
+using InventoryApp.Application.Models;
 using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Enums;
 using InventoryApp.Infrastructure.Persistence;
@@ -7,10 +8,9 @@ using Microsoft.EntityFrameworkCore;
 namespace InventoryApp.Infrastructure.Repositories;
 
 /// <summary>
-/// Persistencia de los mantenimientos Marca/Modelo/Color/Talla sobre tablas
-/// normalizadas. CatalogosProducto se conserva temporalmente como espejo de
-/// compatibilidad porque Productos y ProductoVariantes todavía referencian sus
-/// IDs; M2 retirará esa dependencia.
+/// Persistencia común sobre los cuatro maestros normalizados. El contrato conserva
+/// su nombre histórico para no romper consumidores HTTP, pero no consulta ni escribe
+/// la tabla legacy CatalogosProducto.
 /// </summary>
 public class CatalogoProductoRepository : ICatalogoProductoRepository
 {
@@ -21,7 +21,7 @@ public class CatalogoProductoRepository : ICatalogoProductoRepository
         _context = context;
     }
 
-    public async Task<List<CatalogoProducto>> GetAllAsync(
+    public async Task<List<MaestroProductoRegistro>> GetAllAsync(
         TipoCatalogoProducto tipo,
         string? buscar = null,
         int? catalogoPadreId = null)
@@ -31,7 +31,7 @@ public class CatalogoProductoRepository : ICatalogoProductoRepository
         return resultado;
     }
 
-    public async Task<List<CatalogoProducto>> GetActivosAsync(
+    public async Task<List<MaestroProductoRegistro>> GetActivosAsync(
         TipoCatalogoProducto tipo,
         int? catalogoPadreId = null)
     {
@@ -40,59 +40,72 @@ public class CatalogoProductoRepository : ICatalogoProductoRepository
         return resultado;
     }
 
-    public async Task<CatalogoProducto?> GetByIdAsync(int id)
+    public async Task<MaestroProductoRegistro?> GetByIdAsync(TipoCatalogoProducto tipo, int id)
     {
-        var marca = await _context.Marcas.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
-        if (marca is not null) return MapMarca(marca, incluirModelos: false);
-
-        var modelo = await _context.Modelos.AsNoTracking().Include(x => x.Marca).FirstOrDefaultAsync(x => x.Id == id);
-        if (modelo is not null) return MapModelo(modelo);
-
-        var color = await _context.Colores.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
-        if (color is not null) return MapColor(color);
-
-        var talla = await _context.Tallas.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
-        return talla is null ? null : MapTalla(talla);
+        switch (tipo)
+        {
+            case TipoCatalogoProducto.Marca:
+            {
+                var entidad = await _context.Marcas.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+                return entidad is null ? null : MapMarca(entidad, incluirModelos: false);
+            }
+            case TipoCatalogoProducto.Modelo:
+            {
+                var entidad = await _context.Modelos.AsNoTracking().Include(x => x.Marca).FirstOrDefaultAsync(x => x.Id == id);
+                return entidad is null ? null : MapModelo(entidad);
+            }
+            case TipoCatalogoProducto.Color:
+            {
+                var entidad = await _context.Colores.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+                return entidad is null ? null : MapColor(entidad);
+            }
+            case TipoCatalogoProducto.Talla:
+            {
+                var entidad = await _context.Tallas.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+                return entidad is null ? null : MapTalla(entidad);
+            }
+            default:
+                return null;
+        }
     }
 
-    public async Task<CatalogoProducto?> GetByIdConRelacionesAsync(int id)
+    public async Task<MaestroProductoRegistro?> GetByIdConRelacionesAsync(TipoCatalogoProducto tipo, int id)
     {
-        CatalogoProducto? resultado;
-        TipoCatalogoProducto tipo;
-
-        var marca = await _context.Marcas.AsNoTracking().Include(x => x.Modelos).FirstOrDefaultAsync(x => x.Id == id);
-        if (marca is not null)
+        MaestroProductoRegistro? resultado;
+        switch (tipo)
         {
-            resultado = MapMarca(marca, incluirModelos: true);
-            tipo = TipoCatalogoProducto.Marca;
-        }
-        else
-        {
-            var modelo = await _context.Modelos.AsNoTracking().Include(x => x.Marca).FirstOrDefaultAsync(x => x.Id == id);
-            if (modelo is not null)
+            case TipoCatalogoProducto.Marca:
             {
-                resultado = MapModelo(modelo);
-                tipo = TipoCatalogoProducto.Modelo;
+                var entidad = await _context.Marcas.AsNoTracking().Include(x => x.Modelos).FirstOrDefaultAsync(x => x.Id == id);
+                resultado = entidad is null ? null : MapMarca(entidad, incluirModelos: true);
+                break;
             }
-            else
+            case TipoCatalogoProducto.Modelo:
             {
-                var color = await _context.Colores.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
-                if (color is not null)
-                {
-                    resultado = MapColor(color);
-                    tipo = TipoCatalogoProducto.Color;
-                }
-                else
-                {
-                    var talla = await _context.Tallas.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
-                    if (talla is null) return null;
-                    resultado = MapTalla(talla);
-                    tipo = TipoCatalogoProducto.Talla;
-                }
+                var entidad = await _context.Modelos.AsNoTracking().Include(x => x.Marca).FirstOrDefaultAsync(x => x.Id == id);
+                resultado = entidad is null ? null : MapModelo(entidad);
+                break;
             }
+            case TipoCatalogoProducto.Color:
+            {
+                var entidad = await _context.Colores.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+                resultado = entidad is null ? null : MapColor(entidad);
+                break;
+            }
+            case TipoCatalogoProducto.Talla:
+            {
+                var entidad = await _context.Tallas.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+                resultado = entidad is null ? null : MapTalla(entidad);
+                break;
+            }
+            default:
+                resultado = null;
+                break;
         }
 
-        await CargarUsosProductoAsync(tipo, new List<CatalogoProducto> { resultado });
+        if (resultado is not null)
+            await CargarUsosProductoAsync(tipo, new List<MaestroProductoRegistro> { resultado });
+
         return resultado;
     }
 
@@ -118,56 +131,108 @@ public class CatalogoProductoRepository : ICatalogoProductoRepository
         };
     }
 
-    public async Task AddAsync(CatalogoProducto catalogo)
+    public async Task<int> AddAsync(MaestroProductoRegistro catalogo)
     {
-        await using var transaccion = await _context.Database.BeginTransactionAsync();
-        try
-        {
-            // Registro global temporal: conserva IDs compatibles con las FKs
-            // legacy de Producto/ProductoVariante hasta que M2 las reoriente.
-            var espejo = CrearEspejoLegacy(catalogo);
-            await _context.CatalogosProducto.AddAsync(espejo);
-            await _context.SaveChangesAsync();
-
-            catalogo.Id = espejo.Id;
-            await AgregarNormalizadoAsync(catalogo);
-            await _context.SaveChangesAsync();
-            await transaccion.CommitAsync();
-        }
-        catch
-        {
-            await transaccion.RollbackAsync();
-            throw;
-        }
-    }
-
-    public void Update(CatalogoProducto catalogo)
-    {
-        _context.CatalogosProducto.Update(CrearEspejoLegacy(catalogo));
-
         switch (catalogo.Tipo)
         {
             case TipoCatalogoProducto.Marca:
-                _context.Marcas.Update(CrearMarca(catalogo));
+            {
+                var entidad = CrearMarca(catalogo);
+                await _context.Marcas.AddAsync(entidad);
+                await _context.SaveChangesAsync();
+                catalogo.Id = entidad.Id;
                 break;
+            }
             case TipoCatalogoProducto.Modelo:
-                _context.Modelos.Update(CrearModelo(catalogo));
+            {
+                var entidad = CrearModelo(catalogo);
+                await _context.Modelos.AddAsync(entidad);
+                await _context.SaveChangesAsync();
+                catalogo.Id = entidad.Id;
                 break;
+            }
             case TipoCatalogoProducto.Color:
-                _context.Colores.Update(CrearColor(catalogo));
+            {
+                var entidad = CrearColor(catalogo);
+                await _context.Colores.AddAsync(entidad);
+                await _context.SaveChangesAsync();
+                catalogo.Id = entidad.Id;
                 break;
+            }
             case TipoCatalogoProducto.Talla:
-                _context.Tallas.Update(CrearTalla(catalogo));
+            {
+                var entidad = CrearTalla(catalogo);
+                await _context.Tallas.AddAsync(entidad);
+                await _context.SaveChangesAsync();
+                catalogo.Id = entidad.Id;
                 break;
+            }
             default:
                 throw new InvalidOperationException($"Tipo de catálogo no soportado: {catalogo.Tipo}.");
         }
+
+        return catalogo.Id;
     }
 
-    public async Task<bool> SaveChangesAsync() =>
-        await _context.SaveChangesAsync() > 0;
+    public async Task<bool> UpdateAsync(MaestroProductoRegistro catalogo)
+    {
+        switch (catalogo.Tipo)
+        {
+            case TipoCatalogoProducto.Marca:
+            {
+                var entidad = await _context.Marcas.IgnoreQueryFilters().FirstOrDefaultAsync(x => x.Id == catalogo.Id);
+                if (entidad is null) return false;
+                entidad.Nombre = catalogo.Nombre;
+                entidad.Descripcion = catalogo.Descripcion;
+                entidad.Orden = catalogo.Orden;
+                entidad.Activo = catalogo.Activo;
+                AplicarAuditoria(entidad, catalogo);
+                break;
+            }
+            case TipoCatalogoProducto.Modelo:
+            {
+                var entidad = await _context.Modelos.IgnoreQueryFilters().FirstOrDefaultAsync(x => x.Id == catalogo.Id);
+                if (entidad is null) return false;
+                entidad.MarcaId = catalogo.CatalogoPadreId
+                    ?? throw new InvalidOperationException("Todo modelo normalizado requiere MarcaId.");
+                entidad.Nombre = catalogo.Nombre;
+                entidad.Descripcion = catalogo.Descripcion;
+                entidad.Orden = catalogo.Orden;
+                entidad.Activo = catalogo.Activo;
+                AplicarAuditoria(entidad, catalogo);
+                break;
+            }
+            case TipoCatalogoProducto.Color:
+            {
+                var entidad = await _context.Colores.IgnoreQueryFilters().FirstOrDefaultAsync(x => x.Id == catalogo.Id);
+                if (entidad is null) return false;
+                entidad.Nombre = catalogo.Nombre;
+                entidad.Descripcion = catalogo.Descripcion;
+                entidad.CodigoVisual = catalogo.CodigoVisual;
+                entidad.Orden = catalogo.Orden;
+                entidad.Activo = catalogo.Activo;
+                AplicarAuditoria(entidad, catalogo);
+                break;
+            }
+            case TipoCatalogoProducto.Talla:
+            {
+                var entidad = await _context.Tallas.IgnoreQueryFilters().FirstOrDefaultAsync(x => x.Id == catalogo.Id);
+                if (entidad is null) return false;
+                entidad.Nombre = catalogo.Nombre;
+                entidad.Descripcion = catalogo.Descripcion;
+                entidad.Orden = catalogo.Orden;
+                entidad.Activo = catalogo.Activo;
+                AplicarAuditoria(entidad, catalogo);
+                break;
+            }
+            default:
+                return false;
+        }
 
-    private async Task<List<CatalogoProducto>> ConsultarNormalizadosAsync(
+        return await _context.SaveChangesAsync() > 0;
+    }
+
+    private async Task<List<MaestroProductoRegistro>> ConsultarNormalizadosAsync(
         TipoCatalogoProducto tipo,
         string? buscar,
         int? catalogoPadreId,
@@ -215,89 +280,70 @@ public class CatalogoProductoRepository : ICatalogoProductoRepository
                 return rows.Select(MapTalla).ToList();
             }
             default:
-                return new List<CatalogoProducto>();
+                return new List<MaestroProductoRegistro>();
         }
     }
 
-    private async Task CargarUsosProductoAsync(TipoCatalogoProducto tipo, List<CatalogoProducto> catalogos)
+    private async Task CargarUsosProductoAsync(
+        TipoCatalogoProducto tipo,
+        List<MaestroProductoRegistro> catalogos)
     {
         if (catalogos.Count == 0) return;
         var ids = catalogos.Select(x => x.Id).ToHashSet();
+        Dictionary<int, int> totales;
 
-        List<Producto> productos = tipo switch
-        {
-            TipoCatalogoProducto.Marca => await _context.Productos.AsNoTracking().Where(p => p.MarcaId.HasValue && ids.Contains(p.MarcaId.Value)).ToListAsync(),
-            TipoCatalogoProducto.Modelo => await _context.Productos.AsNoTracking().Where(p => p.ModeloId.HasValue && ids.Contains(p.ModeloId.Value)).ToListAsync(),
-            TipoCatalogoProducto.Color => await _context.Productos.AsNoTracking().Where(p => p.ColorId.HasValue && ids.Contains(p.ColorId.Value)).ToListAsync(),
-            TipoCatalogoProducto.Talla => await _context.Productos.AsNoTracking().Where(p => p.TallaId.HasValue && ids.Contains(p.TallaId.Value)).ToListAsync(),
-            _ => new List<Producto>()
-        };
-
-        foreach (var catalogo in catalogos)
-        {
-            switch (tipo)
-            {
-                case TipoCatalogoProducto.Marca:
-                    catalogo.ProductosComoMarca = productos.Where(p => p.MarcaId == catalogo.Id).ToList();
-                    break;
-                case TipoCatalogoProducto.Modelo:
-                    catalogo.ProductosComoModelo = productos.Where(p => p.ModeloId == catalogo.Id).ToList();
-                    break;
-                case TipoCatalogoProducto.Color:
-                    catalogo.ProductosComoColor = productos.Where(p => p.ColorId == catalogo.Id).ToList();
-                    break;
-                case TipoCatalogoProducto.Talla:
-                    catalogo.ProductosComoTalla = productos.Where(p => p.TallaId == catalogo.Id).ToList();
-                    break;
-            }
-        }
-    }
-
-    private async Task AgregarNormalizadoAsync(CatalogoProducto catalogo)
-    {
-        switch (catalogo.Tipo)
+        switch (tipo)
         {
             case TipoCatalogoProducto.Marca:
-                await _context.Marcas.AddAsync(CrearMarca(catalogo));
+            {
+                var pares = await _context.ProductoVariantes.AsNoTracking()
+                    .Where(v => !v.Eliminado && v.MarcaId.HasValue && ids.Contains(v.MarcaId.Value))
+                    .Select(v => new { CatalogoId = v.MarcaId!.Value, v.ProductoId })
+                    .Distinct()
+                    .ToListAsync();
+                totales = pares.GroupBy(x => x.CatalogoId).ToDictionary(g => g.Key, g => g.Count());
                 break;
+            }
             case TipoCatalogoProducto.Modelo:
-                await _context.Modelos.AddAsync(CrearModelo(catalogo));
+            {
+                var pares = await _context.ProductoVariantes.AsNoTracking()
+                    .Where(v => !v.Eliminado && v.ModeloId.HasValue && ids.Contains(v.ModeloId.Value))
+                    .Select(v => new { CatalogoId = v.ModeloId!.Value, v.ProductoId })
+                    .Distinct()
+                    .ToListAsync();
+                totales = pares.GroupBy(x => x.CatalogoId).ToDictionary(g => g.Key, g => g.Count());
                 break;
+            }
             case TipoCatalogoProducto.Color:
-                await _context.Colores.AddAsync(CrearColor(catalogo));
+            {
+                var pares = await _context.ProductoVariantes.AsNoTracking()
+                    .Where(v => !v.Eliminado && v.ColorId.HasValue && ids.Contains(v.ColorId.Value))
+                    .Select(v => new { CatalogoId = v.ColorId!.Value, v.ProductoId })
+                    .Distinct()
+                    .ToListAsync();
+                totales = pares.GroupBy(x => x.CatalogoId).ToDictionary(g => g.Key, g => g.Count());
                 break;
+            }
             case TipoCatalogoProducto.Talla:
-                await _context.Tallas.AddAsync(CrearTalla(catalogo));
+            {
+                var pares = await _context.ProductoVariantes.AsNoTracking()
+                    .Where(v => !v.Eliminado && v.TallaId.HasValue && ids.Contains(v.TallaId.Value))
+                    .Select(v => new { CatalogoId = v.TallaId!.Value, v.ProductoId })
+                    .Distinct()
+                    .ToListAsync();
+                totales = pares.GroupBy(x => x.CatalogoId).ToDictionary(g => g.Key, g => g.Count());
                 break;
+            }
             default:
-                throw new InvalidOperationException($"Tipo de catálogo no soportado: {catalogo.Tipo}.");
+                return;
         }
+
+        foreach (var catalogo in catalogos)
+            catalogo.TotalProductos = totales.GetValueOrDefault(catalogo.Id);
     }
 
-    private static CatalogoProducto CrearEspejoLegacy(CatalogoProducto x) => new()
+    private static Marca CrearMarca(MaestroProductoRegistro x) => new()
     {
-        Id = x.Id,
-        Tipo = x.Tipo,
-        Nombre = x.Nombre,
-        Descripcion = x.Descripcion,
-        CodigoVisual = x.CodigoVisual,
-        Orden = x.Orden,
-        Activo = x.Activo,
-        Eliminado = x.Eliminado,
-        FechaEliminacion = x.FechaEliminacion,
-        EliminadoPorUsuarioId = x.EliminadoPorUsuarioId,
-        CatalogoPadreId = x.CatalogoPadreId,
-        CreadoPorUsuarioId = x.CreadoPorUsuarioId,
-        CreadoPorNombreUsuario = x.CreadoPorNombreUsuario,
-        ActualizadoPorUsuarioId = x.ActualizadoPorUsuarioId,
-        ActualizadoPorNombreUsuario = x.ActualizadoPorNombreUsuario,
-        FechaCreacion = x.FechaCreacion,
-        FechaActualizacion = x.FechaActualizacion
-    };
-
-    private static Marca CrearMarca(CatalogoProducto x) => new()
-    {
-        Id = x.Id,
         Nombre = x.Nombre,
         Descripcion = x.Descripcion,
         Orden = x.Orden,
@@ -313,9 +359,8 @@ public class CatalogoProductoRepository : ICatalogoProductoRepository
         FechaActualizacion = x.FechaActualizacion
     };
 
-    private static Modelo CrearModelo(CatalogoProducto x) => new()
+    private static Modelo CrearModelo(MaestroProductoRegistro x) => new()
     {
-        Id = x.Id,
         MarcaId = x.CatalogoPadreId ?? throw new InvalidOperationException("Todo modelo normalizado requiere MarcaId."),
         Nombre = x.Nombre,
         Descripcion = x.Descripcion,
@@ -332,9 +377,8 @@ public class CatalogoProductoRepository : ICatalogoProductoRepository
         FechaActualizacion = x.FechaActualizacion
     };
 
-    private static Color CrearColor(CatalogoProducto x) => new()
+    private static Color CrearColor(MaestroProductoRegistro x) => new()
     {
-        Id = x.Id,
         Nombre = x.Nombre,
         Descripcion = x.Descripcion,
         CodigoVisual = x.CodigoVisual,
@@ -351,9 +395,8 @@ public class CatalogoProductoRepository : ICatalogoProductoRepository
         FechaActualizacion = x.FechaActualizacion
     };
 
-    private static Talla CrearTalla(CatalogoProducto x) => new()
+    private static Talla CrearTalla(MaestroProductoRegistro x) => new()
     {
-        Id = x.Id,
         Nombre = x.Nombre,
         Descripcion = x.Descripcion,
         Orden = x.Orden,
@@ -369,7 +412,47 @@ public class CatalogoProductoRepository : ICatalogoProductoRepository
         FechaActualizacion = x.FechaActualizacion
     };
 
-    private static CatalogoProducto MapMarca(Marca x, bool incluirModelos) => new()
+    private static void AplicarAuditoria(Marca entidad, MaestroProductoRegistro x)
+    {
+        entidad.Eliminado = x.Eliminado;
+        entidad.FechaEliminacion = x.FechaEliminacion;
+        entidad.EliminadoPorUsuarioId = x.EliminadoPorUsuarioId;
+        entidad.ActualizadoPorUsuarioId = x.ActualizadoPorUsuarioId;
+        entidad.ActualizadoPorNombreUsuario = x.ActualizadoPorNombreUsuario;
+        entidad.FechaActualizacion = x.FechaActualizacion;
+    }
+
+    private static void AplicarAuditoria(Modelo entidad, MaestroProductoRegistro x)
+    {
+        entidad.Eliminado = x.Eliminado;
+        entidad.FechaEliminacion = x.FechaEliminacion;
+        entidad.EliminadoPorUsuarioId = x.EliminadoPorUsuarioId;
+        entidad.ActualizadoPorUsuarioId = x.ActualizadoPorUsuarioId;
+        entidad.ActualizadoPorNombreUsuario = x.ActualizadoPorNombreUsuario;
+        entidad.FechaActualizacion = x.FechaActualizacion;
+    }
+
+    private static void AplicarAuditoria(Color entidad, MaestroProductoRegistro x)
+    {
+        entidad.Eliminado = x.Eliminado;
+        entidad.FechaEliminacion = x.FechaEliminacion;
+        entidad.EliminadoPorUsuarioId = x.EliminadoPorUsuarioId;
+        entidad.ActualizadoPorUsuarioId = x.ActualizadoPorUsuarioId;
+        entidad.ActualizadoPorNombreUsuario = x.ActualizadoPorNombreUsuario;
+        entidad.FechaActualizacion = x.FechaActualizacion;
+    }
+
+    private static void AplicarAuditoria(Talla entidad, MaestroProductoRegistro x)
+    {
+        entidad.Eliminado = x.Eliminado;
+        entidad.FechaEliminacion = x.FechaEliminacion;
+        entidad.EliminadoPorUsuarioId = x.EliminadoPorUsuarioId;
+        entidad.ActualizadoPorUsuarioId = x.ActualizadoPorUsuarioId;
+        entidad.ActualizadoPorNombreUsuario = x.ActualizadoPorNombreUsuario;
+        entidad.FechaActualizacion = x.FechaActualizacion;
+    }
+
+    private static MaestroProductoRegistro MapMarca(Marca x, bool incluirModelos) => new()
     {
         Id = x.Id,
         Tipo = TipoCatalogoProducto.Marca,
@@ -380,18 +463,17 @@ public class CatalogoProductoRepository : ICatalogoProductoRepository
         Eliminado = x.Eliminado,
         FechaEliminacion = x.FechaEliminacion,
         EliminadoPorUsuarioId = x.EliminadoPorUsuarioId,
+        TotalModelos = incluirModelos ? x.Modelos.Count : 0,
+        TotalModelosActivos = incluirModelos ? x.Modelos.Count(m => m.Activo && !m.Eliminado) : 0,
         CreadoPorUsuarioId = x.CreadoPorUsuarioId,
         CreadoPorNombreUsuario = x.CreadoPorNombreUsuario,
         ActualizadoPorUsuarioId = x.ActualizadoPorUsuarioId,
         ActualizadoPorNombreUsuario = x.ActualizadoPorNombreUsuario,
         FechaCreacion = x.FechaCreacion,
-        FechaActualizacion = x.FechaActualizacion,
-        ElementosHijos = incluirModelos
-            ? x.Modelos.Select(MapModeloSinMarca).ToList()
-            : new List<CatalogoProducto>()
+        FechaActualizacion = x.FechaActualizacion
     };
 
-    private static CatalogoProducto MapModelo(Modelo x) => new()
+    private static MaestroProductoRegistro MapModelo(Modelo x) => new()
     {
         Id = x.Id,
         Tipo = TipoCatalogoProducto.Modelo,
@@ -403,7 +485,8 @@ public class CatalogoProductoRepository : ICatalogoProductoRepository
         FechaEliminacion = x.FechaEliminacion,
         EliminadoPorUsuarioId = x.EliminadoPorUsuarioId,
         CatalogoPadreId = x.MarcaId,
-        CatalogoPadre = x.Marca is null ? null : MapMarca(x.Marca, incluirModelos: false),
+        CatalogoPadreNombre = x.Marca?.Nombre,
+        CatalogoPadreActivo = x.Marca?.Activo,
         CreadoPorUsuarioId = x.CreadoPorUsuarioId,
         CreadoPorNombreUsuario = x.CreadoPorNombreUsuario,
         ActualizadoPorUsuarioId = x.ActualizadoPorUsuarioId,
@@ -412,21 +495,7 @@ public class CatalogoProductoRepository : ICatalogoProductoRepository
         FechaActualizacion = x.FechaActualizacion
     };
 
-    private static CatalogoProducto MapModeloSinMarca(Modelo x) => new()
-    {
-        Id = x.Id,
-        Tipo = TipoCatalogoProducto.Modelo,
-        Nombre = x.Nombre,
-        Descripcion = x.Descripcion,
-        Orden = x.Orden,
-        Activo = x.Activo,
-        Eliminado = x.Eliminado,
-        CatalogoPadreId = x.MarcaId,
-        FechaCreacion = x.FechaCreacion,
-        FechaActualizacion = x.FechaActualizacion
-    };
-
-    private static CatalogoProducto MapColor(Color x) => new()
+    private static MaestroProductoRegistro MapColor(Color x) => new()
     {
         Id = x.Id,
         Tipo = TipoCatalogoProducto.Color,
@@ -446,7 +515,7 @@ public class CatalogoProductoRepository : ICatalogoProductoRepository
         FechaActualizacion = x.FechaActualizacion
     };
 
-    private static CatalogoProducto MapTalla(Talla x) => new()
+    private static MaestroProductoRegistro MapTalla(Talla x) => new()
     {
         Id = x.Id,
         Tipo = TipoCatalogoProducto.Talla,

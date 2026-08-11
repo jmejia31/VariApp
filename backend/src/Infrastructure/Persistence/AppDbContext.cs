@@ -13,7 +13,6 @@ public class AppDbContext : DbContext
     public DbSet<ProductoVariante> ProductoVariantes => Set<ProductoVariante>();
     public DbSet<ProductoImagen> ProductoImagenes => Set<ProductoImagen>();
     public DbSet<Categoria> Categorias => Set<Categoria>();
-    public DbSet<CatalogoProducto> CatalogosProducto => Set<CatalogoProducto>();
     public DbSet<Marca> Marcas => Set<Marca>();
     public DbSet<Modelo> Modelos => Set<Modelo>();
     public DbSet<Color> Colores => Set<Color>();

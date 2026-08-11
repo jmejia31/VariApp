@@ -1,0 +1,68 @@
+name: ERP-N0.2 - Generar migración EF temporal
+
+on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - 'backend/src/**'
+      - '.github/workflows/erp-n0-2-generate-migration.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: erp-n0-2-generate-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  generar:
+    if: ${{ !contains(github.event.head_commit.message, '[n0.2-migration]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: 'Server=127.0.0.1;Port=3306;Database=inventoryapp_n02_generator;User=root;Password=root;SslMode=None;AllowPublicKeyRetrieval=True;'
+      Database__ServerVersion: '8.4.0'
+      Database__ApplyMigrationsOnStartup: 'false'
+      Jwt__Secret: 'ERP-N0-2-Generator-Only-Secret-With-More-Than-32-Characters-2026'
+      Jwt__Issuer: 'VariApp.N0.2.Generator'
+      Jwt__Audience: 'VariApp.N0.2.Generator'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Restaurar solución
+        working-directory: backend
+        run: dotnet restore InventoryApp.sln
+      - name: Compilar antes de generar
+        working-directory: backend
+        run: dotnet build InventoryApp.sln --configuration Release --no-restore -warnaserror
+      - name: Instalar EF
+        run: dotnet tool install --global dotnet-ef --version 8.0.8
+      - name: Generar migración y snapshot N0.2
+        working-directory: backend
+        shell: bash
+        run: |
+          set -euo pipefail
+          dotnet ef migrations add N0_2_RetirarCatalogoProductoLegacy \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext \
+            --output-dir Migrations
+          if git diff --quiet -- src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs; then
+            echo 'La generación no actualizó el snapshot EF.' >&2
+            exit 1
+          fi
+      - name: Publicar migración generada en Desarrollo
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'VariApp ERP N0.2 Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add backend/src/Infrastructure/Migrations
+          test -n "$(git diff --cached --name-only)"
+          git commit -m 'db(n0.2): generar migración y snapshot [n0.2-migration] [ChatGPT]'
+          git push origin HEAD:Desarrollo

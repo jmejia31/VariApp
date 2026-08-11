@@ -40,5 +40,27 @@ public class ProductoConfiguration : IEntityTypeConfiguration<Producto>
         builder.HasIndex(p => p.ModeloId).HasDatabaseName("IX_Productos_ModeloId");
         builder.HasIndex(p => new { p.Eliminado, p.Activo }).HasDatabaseName("IX_Productos_Estado");
         builder.HasIndex(p => new { p.TipoInventario, p.Eliminado, p.Activo }).HasDatabaseName("IX_Productos_TipoInventario_Estado");
+
+        // ERP-N0.2: las proyecciones familiares dejan de depender de
+        // CatalogosProducto y apuntan al mismo maestro normalizado que las variantes.
+        builder.HasOne(p => p.Color)
+            .WithMany()
+            .HasForeignKey(p => p.ColorId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        builder.HasOne(p => p.Talla)
+            .WithMany()
+            .HasForeignKey(p => p.TallaId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        builder.HasOne(p => p.MarcaCatalogo)
+            .WithMany()
+            .HasForeignKey(p => p.MarcaId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        builder.HasOne(p => p.ModeloCatalogo)
+            .WithMany()
+            .HasForeignKey(p => p.ModeloId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }

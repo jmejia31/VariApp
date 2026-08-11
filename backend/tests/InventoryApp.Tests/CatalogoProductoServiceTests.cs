@@ -1,8 +1,8 @@
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
+using InventoryApp.Application.Models;
 using InventoryApp.Application.Services;
-using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Enums;
 using Moq;
 using Xunit;
@@ -31,7 +31,7 @@ public class CatalogoProductoServiceTests
     {
         _repository
             .Setup(r => r.GetAllAsync(TipoCatalogoProducto.Modelo, null, null))
-            .ReturnsAsync(new List<CatalogoProducto>
+            .ReturnsAsync(new List<MaestroProductoRegistro>
             {
                 new() { Id = 1, Tipo = TipoCatalogoProducto.Modelo, Nombre = "S24", Activo = true }
             });
@@ -56,15 +56,14 @@ public class CatalogoProductoServiceTests
     [Fact]
     public async Task CreateAsync_Color_NormalizaHexadecimalYAuditoria()
     {
-        CatalogoProducto? guardado = null;
+        MaestroProductoRegistro? guardado = null;
         _repository
             .Setup(r => r.ExisteNombreAsync(TipoCatalogoProducto.Color, "Azul", null, null))
             .ReturnsAsync(false);
         _repository
-            .Setup(r => r.AddAsync(It.IsAny<CatalogoProducto>()))
-            .Callback<CatalogoProducto>(c => guardado = c)
-            .Returns(Task.CompletedTask);
-        _repository.Setup(r => r.SaveChangesAsync()).ReturnsAsync(true);
+            .Setup(r => r.AddAsync(It.IsAny<MaestroProductoRegistro>()))
+            .Callback<MaestroProductoRegistro>(c => guardado = c)
+            .ReturnsAsync(41);
 
         var resultado = await _service.CreateAsync(TipoCatalogoProducto.Color, new CreateCatalogoProductoDto
         {
@@ -73,6 +72,7 @@ public class CatalogoProductoServiceTests
         });
 
         Assert.NotNull(guardado);
+        Assert.Equal(41, resultado.Id);
         Assert.Equal("Azul", guardado!.Nombre);
         Assert.Equal("#1D4ED8", guardado.CodigoVisual);
         Assert.Equal(7, guardado.CreadoPorUsuarioId);
@@ -82,14 +82,14 @@ public class CatalogoProductoServiceTests
     [Fact]
     public async Task ValidarSeleccionProducto_ModeloDeOtraMarca_LanzaReglaNegocio()
     {
-        _repository.Setup(r => r.GetByIdAsync(10)).ReturnsAsync(new CatalogoProducto
+        _repository.Setup(r => r.GetByIdAsync(TipoCatalogoProducto.Marca, 10)).ReturnsAsync(new MaestroProductoRegistro
         {
             Id = 10,
             Tipo = TipoCatalogoProducto.Marca,
             Nombre = "Samsung",
             Activo = true
         });
-        _repository.Setup(r => r.GetByIdAsync(20)).ReturnsAsync(new CatalogoProducto
+        _repository.Setup(r => r.GetByIdAsync(TipoCatalogoProducto.Modelo, 20)).ReturnsAsync(new MaestroProductoRegistro
         {
             Id = 20,
             Tipo = TipoCatalogoProducto.Modelo,
@@ -105,27 +105,48 @@ public class CatalogoProductoServiceTests
     }
 
     [Fact]
+    public async Task ValidarSeleccionProducto_IdsSolapados_ConsultaCadaMaestroPorTipo()
+    {
+        _repository.Setup(r => r.GetByIdAsync(TipoCatalogoProducto.Color, 10)).ReturnsAsync(new MaestroProductoRegistro
+        {
+            Id = 10,
+            Tipo = TipoCatalogoProducto.Color,
+            Nombre = "Negro",
+            Activo = true
+        });
+        _repository.Setup(r => r.GetByIdAsync(TipoCatalogoProducto.Marca, 10)).ReturnsAsync(new MaestroProductoRegistro
+        {
+            Id = 10,
+            Tipo = TipoCatalogoProducto.Marca,
+            Nombre = "Samsung",
+            Activo = true
+        });
+
+        await _service.ValidarSeleccionProductoAsync(10, null, 10, null);
+
+        _repository.Verify(r => r.GetByIdAsync(TipoCatalogoProducto.Color, 10), Times.Once);
+        _repository.Verify(r => r.GetByIdAsync(TipoCatalogoProducto.Marca, 10), Times.Once);
+    }
+
+    [Fact]
     public async Task DeleteAsync_MarcaConModelos_BloqueaEliminacion()
     {
-        var marca = new CatalogoProducto
+        var marca = new MaestroProductoRegistro
         {
             Id = 1,
             Tipo = TipoCatalogoProducto.Marca,
             Nombre = "Samsung",
-            Activo = true
+            Activo = true,
+            TotalModelos = 1,
+            TotalModelosActivos = 1
         };
-        marca.ElementosHijos.Add(new CatalogoProducto
-        {
-            Id = 2,
-            Tipo = TipoCatalogoProducto.Modelo,
-            Nombre = "A55",
-            CatalogoPadreId = 1
-        });
-        _repository.Setup(r => r.GetByIdConRelacionesAsync(1)).ReturnsAsync(marca);
+        _repository
+            .Setup(r => r.GetByIdConRelacionesAsync(TipoCatalogoProducto.Marca, 1))
+            .ReturnsAsync(marca);
 
         await Assert.ThrowsAsync<BusinessRuleException>(() =>
             _service.DeleteAsync(TipoCatalogoProducto.Marca, 1));
 
-        _repository.Verify(r => r.SaveChangesAsync(), Times.Never);
+        _repository.Verify(r => r.UpdateAsync(It.IsAny<MaestroProductoRegistro>()), Times.Never);
     }
 }

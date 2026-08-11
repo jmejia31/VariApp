@@ -33,16 +33,17 @@ public class Producto : AuditableEntity
     public int? CategoriaId { get; set; }
     public Categoria? Categoria { get; set; }
 
-    // Color heredado: se conserva para retrocompatibilidad y para crear la
-    // variante inicial de productos existentes. La fuente futura será Variantes.
+    // Proyección familiar de compatibilidad. Desde ERP-N0.2 estos IDs apuntan
+    // directamente a los maestros normalizados; la autoridad operacional de
+    // dimensiones continúa en ProductoVariante.
     public int? ColorId { get; set; }
-    public CatalogoProducto? Color { get; set; }
+    public Color? Color { get; set; }
     public int? TallaId { get; set; }
-    public CatalogoProducto? Talla { get; set; }
+    public Talla? Talla { get; set; }
     public int? MarcaId { get; set; }
-    public CatalogoProducto? MarcaCatalogo { get; set; }
+    public Marca? MarcaCatalogo { get; set; }
     public int? ModeloId { get; set; }
-    public CatalogoProducto? ModeloCatalogo { get; set; }
+    public Modelo? ModeloCatalogo { get; set; }
 
     public ICollection<ProductoImagen> Imagenes { get; set; } = new List<ProductoImagen>();
     public ICollection<ProductoVariante> Variantes { get; set; } = new List<ProductoVariante>();
