@@ -42,3 +42,5 @@ jobs:
           git diff --cached --quiet && exit 0
           git commit -m 'chore(erp-n0.4): generar migracion y snapshot EF [automation]'
           git push origin HEAD:Desarrollo
+
+# disparador temporal controlado ERP-N0.4
