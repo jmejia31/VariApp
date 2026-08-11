@@ -191,6 +191,7 @@ public class CompraServiceTests
     public async Task CreateAsync_Recalcula_Totales_Con_Motor_De_Calculo()
     {
         var producto = ProductoDePrueba();
+        producto.Variantes.Add(new ProductoVariante { Id = 8, ProductoId = producto.Id, Sku = "TEC-0000000001", Cantidad = producto.Cantidad, Costo = producto.Costo, Precio = producto.Precio, UmbralStockBajo = producto.UmbralStockBajo, EsTecnica = true, Activo = true });
         _productoRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(producto);
         _compraRepoMock.Setup(r => r.ContarTodasAsync()).ReturnsAsync(0);
         _calculoMock.Setup(c => c.CalcularCompraAsync(It.IsAny<List<DetalleCalculoInput>>(), It.IsAny<int?>()))
