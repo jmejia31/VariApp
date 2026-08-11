@@ -5,9 +5,9 @@ using Microsoft.EntityFrameworkCore;
 namespace InventoryApp.Infrastructure.Services;
 
 /// <summary>
-/// Resuelve en cada solicitud el usuario y rol vigentes desde MySQL. Esto evita
-/// que un JWT emitido antes de un cambio de rol conserve privilegios obsoletos y
-/// garantiza que el alcance de datos se aplique por Usuario.Id.
+/// Resuelve en cada solicitud el usuario y rol vigentes desde MySQL. El JWT solo
+/// identifica la sesión; los privilegios efectivos se determinan con la relación
+/// Usuario.RolId y los grants RolPermiso.
 /// </summary>
 public sealed class UsuarioScopeService : IUsuarioScopeService
 {
@@ -26,7 +26,6 @@ public sealed class UsuarioScopeService : IUsuarioScopeService
             return null;
 
         var usuarioId = _currentUser.UsuarioId.Value;
-
         return await _context.Usuarios
             .AsNoTracking()
             .Where(u =>
@@ -34,14 +33,13 @@ public sealed class UsuarioScopeService : IUsuarioScopeService
                 !u.Eliminado &&
                 u.Activo &&
                 !u.Bloqueado &&
-                u.RolId.HasValue &&
-                u.RolEntidad != null &&
+                u.RolId > 0 &&
                 u.RolEntidad.Activo &&
                 !u.RolEntidad.Eliminado)
             .Select(u => new UsuarioScopeActual(
                 u.Id,
-                u.RolId!.Value,
-                u.RolEntidad!.Nombre,
+                u.RolId,
+                u.RolEntidad.Nombre,
                 u.RolEntidad.EsAdministrador))
             .SingleOrDefaultAsync();
     }
