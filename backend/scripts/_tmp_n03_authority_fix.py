@@ -1,0 +1,433 @@
+from pathlib import Path
+import re
+
+
+def replace_method(path, start_pattern, next_pattern, replacement):
+    p = Path(path)
+    text = p.read_text(encoding='utf-8')
+    pattern = re.compile(start_pattern + r'.*?(?=' + next_pattern + r')', re.S)
+    new_text, count = pattern.subn(replacement.rstrip() + '\n\n', text, count=1)
+    if count != 1:
+        raise SystemExit(f'No se pudo reemplazar exactamente un bloque en {path}: {count}')
+    p.write_text(new_text, encoding='utf-8')
+
+
+venta_armar = r'''    private async Task ArmarDetallesAsync(Venta venta, List<VentaDetalleInputDto> detallesInput, bool validarStock)
+    {
+        if (detallesInput.Count == 0)
+            throw new BusinessRuleException("La venta debe tener al menos un producto.");
+
+        foreach (var input in detallesInput)
+        {
+            if (input.Cantidad <= 0)
+                throw new BusinessRuleException("La cantidad de cada producto debe ser mayor a 0.");
+            if (input.PrecioUnitario <= 0)
+                throw new BusinessRuleException("El precio unitario de cada producto debe ser mayor a 0.");
+
+            var producto = await _productoRepository.GetByIdAsync(input.ProductoId)
+                ?? throw new BusinessRuleException($"El producto con id {input.ProductoId} no existe.");
+
+            ProductoVariante variante;
+            if (input.ProductoVarianteId.HasValue)
+            {
+                variante = await ObtenerVarianteAsync(input.ProductoVarianteId.Value, producto.Id, exigirActiva: true);
+            }
+            else
+            {
+                var tecnica = producto.Variantes.SingleOrDefault(v => v.EsTecnica && v.Activo && !v.Eliminado);
+                if (tecnica is null && producto.Variantes.Any(v => !v.EsTecnica && v.Activo && !v.Eliminado))
+                    throw new BusinessRuleException($"Debes seleccionar una variante para el producto '{producto.Nombre}'.");
+                variante = tecnica
+                    ?? throw new BusinessRuleException($"El producto '{producto.Nombre}' no tiene una variante operativa activa. Corrige el inventario antes de venderlo.");
+            }
+
+            if (validarStock && variante.Cantidad < input.Cantidad)
+                throw new BusinessRuleException(
+                    $"Stock insuficiente para '{producto.Nombre}' / '{variante.Sku}': disponible {variante.Cantidad}, solicitado {input.Cantidad}.");
+
+            var costoUnitario = variante.Costo ?? 0m;
+            var precioUnitario = variante.Precio ?? input.PrecioUnitario;
+            var subtotal = input.Cantidad * precioUnitario;
+            var costoTotal = input.Cantidad * costoUnitario;
+
+            venta.Detalles.Add(new VentaDetalle
+            {
+                ProductoId = producto.Id,
+                ProductoVarianteId = variante.Id,
+                Cantidad = input.Cantidad,
+                PrecioUnitario = precioUnitario,
+                CostoUnitarioSnapshot = costoUnitario,
+                Subtotal = subtotal,
+                UtilidadBruta = subtotal - costoTotal,
+                ProductoNombreSnapshot = producto.Nombre,
+                ProductoMarcaSnapshot = variante.Marca?.Nombre,
+                ProductoModeloSnapshot = variante.Modelo?.Nombre,
+                ProductoColorSnapshot = variante.Color?.Nombre,
+                ProductoTallaSnapshot = variante.Talla?.Nombre,
+                ProductoSkuSnapshot = variante.Sku
+            });
+        }
+    }'''
+replace_method(
+    'backend/src/Application/Services/VentaService.cs',
+    r'    private async Task ArmarDetallesAsync\(Venta venta, List<VentaDetalleInputDto> detallesInput, bool validarStock\)\n    \{',
+    r'    private async Task<ProductoVariante> ObtenerVarianteAsync',
+    venta_armar)
+
+venta_preview = r'''    public async Task<ResultadoCalculoDto> CalcularVistaPreviaAsync(CalcularVentaRequest request)
+    {
+        if (request.Detalles.Count == 0)
+            throw new BusinessRuleException("La venta debe tener al menos un producto.");
+
+        var entradas = new List<DetalleCalculoInput>();
+        foreach (var d in request.Detalles)
+        {
+            if (d.Cantidad <= 0)
+                throw new BusinessRuleException("La cantidad de cada producto debe ser mayor a 0.");
+
+            var producto = await _productoRepository.GetByIdAsync(d.ProductoId)
+                ?? throw new BusinessRuleException($"El producto con id {d.ProductoId} no existe.");
+            if (!producto.Activo)
+                throw new BusinessRuleException($"El producto '{producto.Nombre}' está inactivo.");
+
+            ProductoVariante variante;
+            if (d.ProductoVarianteId.HasValue)
+            {
+                variante = await ObtenerVarianteAsync(d.ProductoVarianteId.Value, producto.Id, exigirActiva: true);
+            }
+            else
+            {
+                var tecnica = producto.Variantes.SingleOrDefault(v => v.EsTecnica && v.Activo && !v.Eliminado);
+                if (tecnica is null && producto.Variantes.Any(v => !v.EsTecnica && v.Activo && !v.Eliminado))
+                    throw new BusinessRuleException($"Debes seleccionar una variante para el producto '{producto.Nombre}'.");
+                variante = tecnica
+                    ?? throw new BusinessRuleException($"El producto '{producto.Nombre}' no tiene una variante operativa activa. Corrige el inventario antes de cotizarlo.");
+            }
+
+            if (!variante.Precio.HasValue && d.PrecioUnitario <= 0)
+                throw new BusinessRuleException("El precio unitario de cada producto debe ser mayor a 0.");
+
+            entradas.Add(new DetalleCalculoInput
+            {
+                ProductoId = producto.Id,
+                CategoriaId = producto.CategoriaId,
+                Cantidad = d.Cantidad,
+                PrecioUnitario = variante.Precio ?? d.PrecioUnitario
+            });
+        }
+
+        return await _calculoService.CalcularVentaAsync(entradas, request.ClienteId, _currentUser.RolId, request.CodigoPromocional, request.CostoEnvioId, request.EnvioExonerado, request.MotivoExoneracionEnvio);
+    }'''
+replace_method(
+    'backend/src/Application/Services/VentaService.cs',
+    r'    public async Task<ResultadoCalculoDto> CalcularVistaPreviaAsync\(CalcularVentaRequest request\)\n    \{',
+    r'    private async Task CalcularTotalesAsync',
+    venta_preview)
+
+compra_armar = r'''    private async Task ArmarDetallesAsync(Compra compra, List<CompraDetalleInputDto> detallesInput)
+    {
+        if (detallesInput.Count == 0)
+            throw new BusinessRuleException("La compra debe tener al menos un producto.");
+
+        foreach (var input in detallesInput)
+        {
+            if (input.Cantidad <= 0)
+                throw new BusinessRuleException("La cantidad de cada producto debe ser mayor a 0.");
+            if (input.CostoUnitario <= 0)
+                throw new BusinessRuleException("El costo unitario de cada producto debe ser mayor a 0.");
+
+            var producto = await ObtenerProductoActivoAsync(input.ProductoId);
+            ProductoVariante variante;
+            if (input.ProductoVarianteId.HasValue)
+            {
+                variante = await ObtenerVarianteAsync(input.ProductoVarianteId.Value, producto.Id, exigirActiva: true);
+            }
+            else
+            {
+                var tecnica = producto.Variantes.SingleOrDefault(v => v.EsTecnica && v.Activo && !v.Eliminado);
+                if (tecnica is null && producto.Variantes.Any(v => !v.EsTecnica && v.Activo && !v.Eliminado))
+                    throw new BusinessRuleException($"Debes seleccionar una variante para el producto '{producto.Nombre}'.");
+                variante = tecnica
+                    ?? throw new BusinessRuleException($"El producto '{producto.Nombre}' no tiene una variante operativa activa. Corrige el inventario antes de comprarlo.");
+            }
+
+            compra.Detalles.Add(new CompraDetalle
+            {
+                ProductoId = producto.Id,
+                ProductoVarianteId = variante.Id,
+                Cantidad = input.Cantidad,
+                CostoUnitario = input.CostoUnitario,
+                Subtotal = input.Cantidad * input.CostoUnitario,
+                ProductoNombreSnapshot = producto.Nombre,
+                ProductoMarcaSnapshot = variante.Marca?.Nombre,
+                ProductoModeloSnapshot = variante.Modelo?.Nombre,
+                ProductoColorSnapshot = variante.Color?.Nombre,
+                ProductoTallaSnapshot = variante.Talla?.Nombre,
+                ProductoSkuSnapshot = variante.Sku
+            });
+        }
+    }'''
+replace_method(
+    'backend/src/Application/Services/CompraService.cs',
+    r'    private async Task ArmarDetallesAsync\(Compra compra, List<CompraDetalleInputDto> detallesInput\)\n    \{',
+    r'    private async Task CalcularTotalesAsync',
+    compra_armar)
+
+validar_productos = r'''    private async Task ValidarProductosAsync(List<CargaMasivaFilaDto> filas, List<CargaMasivaErrorDto> errores, CancellationToken ct)
+    {
+        var marcas = await _db.Marcas.AsNoTracking().Where(x => x.Activo && !x.Eliminado).ToListAsync(ct);
+        var modelos = await _db.Modelos.AsNoTracking().Where(x => x.Activo && !x.Eliminado).ToListAsync(ct);
+        var tallas = await _db.Tallas.AsNoTracking().Where(x => x.Activo && !x.Eliminado).ToListAsync(ct);
+        var categorias = await _db.Categorias.AsNoTracking().Where(x => !x.Eliminada).ToListAsync(ct);
+        var productos = await _db.Productos.AsNoTracking()
+            .Include(x => x.Variantes.Where(v => !v.Eliminado))
+            .Where(x => !x.Eliminado)
+            .ToListAsync(ct);
+        var claves = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var fila in filas)
+        {
+            NormalizarTexto(fila, "Nombre", 150, true, errores);
+            NormalizarTexto(fila, "Marca", 100, true, errores);
+            NormalizarTexto(fila, "Modelo", 100, true, errores);
+            NormalizarTexto(fila, "Categoria", 150, false, errores);
+            NormalizarTexto(fila, "Talla", 120, false, errores);
+            NormalizarTexto(fila, "Descripcion", 1000, false, errores);
+            NormalizarDecimal(fila, "Costo", 0m, decimal.MaxValue, errores, requerido: true);
+            NormalizarDecimal(fila, "Precio", 0.01m, decimal.MaxValue, errores, requerido: true);
+            NormalizarEntero(fila, "UmbralStockBajo", 0, int.MaxValue, errores, requerido: false, valorPredeterminado: 5);
+            NormalizarActivo(fila, errores);
+
+            var marca = marcas.FirstOrDefault(x => NormalizarClave(x.Nombre) == NormalizarClave(V(fila, "Marca")));
+            if (marca is null)
+                AgregarError(errores, fila.NumeroFila, "Marca", "MARCA_NO_EXISTE", "La marca debe existir y estar activa antes de importar productos.", V(fila, "Marca"));
+
+            var modelo = marca is null ? null : modelos.FirstOrDefault(x => x.MarcaId == marca.Id && NormalizarClave(x.Nombre) == NormalizarClave(V(fila, "Modelo")));
+            if (modelo is null)
+                AgregarError(errores, fila.NumeroFila, "Modelo", "MODELO_NO_EXISTE", "El modelo debe existir, estar activo y pertenecer a la marca indicada.", V(fila, "Modelo"));
+
+            var categoria = V(fila, "Categoria");
+            if (!string.IsNullOrWhiteSpace(categoria) && !categorias.Any(x => x.Activa && NormalizarClave(x.Nombre) == NormalizarClave(categoria)))
+                AgregarError(errores, fila.NumeroFila, "Categoria", "CATEGORIA_NO_EXISTE", "La categoría indicada no existe o está inactiva.", categoria);
+
+            var talla = V(fila, "Talla");
+            if (!string.IsNullOrWhiteSpace(talla) && !tallas.Any(x => NormalizarClave(x.Nombre) == NormalizarClave(talla)))
+                AgregarError(errores, fila.NumeroFila, "Talla", "TALLA_NO_EXISTE", "La talla o tamaño indicado no existe o está inactivo.", talla);
+
+            var clave = ClaveProducto(fila.Datos);
+            if (!claves.Add(clave))
+                AgregarError(errores, fila.NumeroFila, "Nombre", "DUPLICADO_ARCHIVO", "El producto con la misma marca y modelo aparece más de una vez.", V(fila, "Nombre"));
+
+            var candidatos = productos.Where(x => NormalizarClave(x.Nombre) == NormalizarClave(V(fila, "Nombre"))).ToList();
+            if (candidatos.Count > 1)
+            {
+                AgregarError(errores, fila.NumeroFila, "Nombre", "PRODUCTO_AMBIGUO", "Existe más de una familia con ese nombre. Corrige el catálogo antes de importar.", V(fila, "Nombre"));
+                fila.Accion = "Actualizar";
+                continue;
+            }
+
+            if (candidatos.Count == 1)
+            {
+                var existente = candidatos[0];
+                var tecnica = existente.Variantes.SingleOrDefault(v => v.EsTecnica && !v.Eliminado);
+                if (tecnica is null && existente.Variantes.Any(v => !v.EsTecnica && !v.Eliminado))
+                    AgregarError(errores, fila.NumeroFila, "Nombre", "PRODUCTO_REQUIERE_VARIANTES", "El producto usa variantes comerciales. Actualiza sus dimensiones, costo y precio mediante la carga VariantesInventario.", V(fila, "Nombre"));
+                fila.Accion = "Actualizar";
+            }
+            else
+            {
+                fila.Accion = "Crear";
+            }
+        }
+    }'''
+replace_method(
+    'backend/src/Infrastructure/Services/CargaMasivaService.cs',
+    r'    private async Task ValidarProductosAsync\(List<CargaMasivaFilaDto> filas, List<CargaMasivaErrorDto> errores, CancellationToken ct\)\n    \{',
+    r'    private async Task ValidarVariantesAsync',
+    validar_productos)
+
+aplicar_productos = r'''    private async Task<(int Creados, int Actualizados)> AplicarProductosAsync(List<CargaMasivaFilaDto> filas, CancellationToken ct)
+    {
+        var marcas = await _db.Marcas.Where(x => x.Activo && !x.Eliminado).ToListAsync(ct);
+        var modelos = await _db.Modelos.Where(x => x.Activo && !x.Eliminado).ToListAsync(ct);
+        var tallas = await _db.Tallas.Where(x => x.Activo && !x.Eliminado).ToListAsync(ct);
+        var categorias = await _db.Categorias.Where(x => !x.Eliminada).ToListAsync(ct);
+        var existentes = await _db.Productos
+            .Include(x => x.Variantes.Where(v => !v.Eliminado))
+            .Where(x => !x.Eliminado)
+            .ToListAsync(ct);
+        var creados = 0;
+        var actualizados = 0;
+
+        foreach (var fila in filas)
+        {
+            var candidatos = existentes.Where(x => NormalizarClave(x.Nombre) == NormalizarClave(V(fila, "Nombre"))).ToList();
+            if (candidatos.Count > 1)
+                throw new BusinessRuleException($"El producto '{V(fila, "Nombre")}' es ambiguo. Revalida la carga.");
+
+            var producto = candidatos.SingleOrDefault();
+            var marca = marcas.First(x => NormalizarClave(x.Nombre) == NormalizarClave(V(fila, "Marca")));
+            var modelo = modelos.First(x => x.MarcaId == marca.Id && NormalizarClave(x.Nombre) == NormalizarClave(V(fila, "Modelo")));
+            var categoriaNombre = V(fila, "Categoria");
+            var tallaNombre = V(fila, "Talla");
+            var categoria = string.IsNullOrWhiteSpace(categoriaNombre) ? null : categorias.First(x => x.Activa && NormalizarClave(x.Nombre) == NormalizarClave(categoriaNombre));
+            var talla = string.IsNullOrWhiteSpace(tallaNombre) ? null : tallas.First(x => NormalizarClave(x.Nombre) == NormalizarClave(tallaNombre));
+
+            if (producto is null)
+            {
+                producto = new Producto
+                {
+                    Nombre = V(fila, "Nombre")!,
+                    CategoriaId = categoria?.Id,
+                    Descripcion = NuloSiVacio(V(fila, "Descripcion")),
+                    Activo = Booleano(fila, "Activo"),
+                    Eliminado = false,
+                    Cantidad = 0,
+                    CreadoPorUsuarioId = _currentUser.UsuarioId,
+                    CreadoPorNombreUsuario = _currentUser.NombreUsuario
+                };
+                _db.Productos.Add(producto);
+                await _db.SaveChangesAsync(ct);
+                existentes.Add(producto);
+                creados++;
+            }
+            else
+            {
+                actualizados++;
+            }
+
+            var variante = producto.Variantes.SingleOrDefault(v => v.EsTecnica && !v.Eliminado);
+            if (variante is null && producto.Variantes.Any(v => !v.EsTecnica && !v.Eliminado))
+                throw new BusinessRuleException($"El producto '{producto.Nombre}' usa variantes comerciales. Revalida y utiliza VariantesInventario.");
+
+            if (variante is null)
+            {
+                variante = new ProductoVariante
+                {
+                    ProductoId = producto.Id,
+                    Producto = producto,
+                    Sku = $"TEC-{producto.Id:D10}",
+                    Cantidad = 0,
+                    EsTecnica = true,
+                    CreadoPorUsuarioId = _currentUser.UsuarioId,
+                    CreadoPorNombreUsuario = _currentUser.NombreUsuario
+                };
+                _db.ProductoVariantes.Add(variante);
+                producto.Variantes.Add(variante);
+            }
+
+            variante.MarcaId = marca.Id;
+            variante.ModeloId = modelo.Id;
+            variante.ColorId = null;
+            variante.TallaId = talla?.Id;
+            variante.CodigoBarras = null;
+            variante.Costo = Decimal(fila, "Costo");
+            variante.Precio = Decimal(fila, "Precio");
+            variante.UmbralStockBajo = Entero(fila, "UmbralStockBajo");
+            variante.Activo = Booleano(fila, "Activo");
+            variante.Eliminado = false;
+            variante.FechaEliminacion = null;
+            variante.EliminadoPorUsuarioId = null;
+            MarcarActualizacion(variante);
+
+            producto.Nombre = V(fila, "Nombre")!;
+            producto.CategoriaId = categoria?.Id;
+            producto.Descripcion = NuloSiVacio(V(fila, "Descripcion"));
+            producto.Activo = variante.Activo;
+            producto.Eliminado = false;
+            producto.FechaEliminacion = null;
+            producto.EliminadoPorUsuarioId = null;
+            producto.Cantidad = variante.Cantidad;
+            producto.Marca = marca.Nombre;
+            producto.Modelo = modelo.Nombre;
+            producto.MarcaId = variante.MarcaId;
+            producto.ModeloId = variante.ModeloId;
+            producto.ColorId = variante.ColorId;
+            producto.TallaId = variante.TallaId;
+            producto.Costo = variante.Costo ?? 0m;
+            producto.Precio = variante.Precio ?? 0m;
+            producto.UmbralStockBajo = variante.UmbralStockBajo;
+            MarcarActualizacion(producto);
+        }
+        return (creados, actualizados);
+    }'''
+replace_method(
+    'backend/src/Infrastructure/Services/CargaMasivaService.cs',
+    r'    private async Task<\(int Creados, int Actualizados\)> AplicarProductosAsync\(List<CargaMasivaFilaDto> filas, CancellationToken ct\)\n    \{',
+    r'    private async Task<\(int Creados, int Actualizados\)> AplicarVariantesAsync',
+    aplicar_productos)
+
+guard = Path('backend/scripts/check-erp-n0-3-runtime.py')
+text = guard.read_text(encoding='utf-8')
+marker = "forbid('backend/src/Application/Services/ProductoEscanerService.cs','variante.Producto.Precio')\n"
+additions = """forbid('backend/src/Application/Services/VentaService.cs','producto.Cantidad < input.Cantidad')
+forbid('backend/src/Application/Services/VentaService.cs','variante?.Costo ?? producto.Costo')
+forbid('backend/src/Application/Services/VentaService.cs','ProductoVarianteId = variante?.Id')
+require('backend/src/Application/Services/VentaService.cs','ProductoVarianteId = variante.Id')
+require('backend/src/Application/Services/VentaService.cs','variante.Cantidad < input.Cantidad')
+forbid('backend/src/Application/Services/CompraService.cs','ProductoVarianteId = variante?.Id')
+require('backend/src/Application/Services/CompraService.cs','ProductoVarianteId = variante.Id')
+forbid('backend/src/Infrastructure/Services/CargaMasivaService.cs','producto.Costo = Decimal(fila, \"Costo\")')
+forbid('backend/src/Infrastructure/Services/CargaMasivaService.cs','producto.Precio = Decimal(fila, \"Precio\")')
+forbid('backend/src/Infrastructure/Services/CargaMasivaService.cs','producto.UmbralStockBajo = Entero(fila, \"UmbralStockBajo\")')
+require('backend/src/Infrastructure/Services/CargaMasivaService.cs','variante.Costo = Decimal(fila, \"Costo\")')
+require('backend/src/Infrastructure/Services/CargaMasivaService.cs','variante.Precio = Decimal(fila, \"Precio\")')
+require('backend/src/Infrastructure/Services/CargaMasivaService.cs','PRODUCTO_REQUIERE_VARIANTES')
+"""
+if additions not in text:
+    if marker not in text:
+        raise SystemExit('No se encontró marcador del runtime guard N0.3')
+    guard.write_text(text.replace(marker, marker + additions), encoding='utf-8')
+
+test = Path('backend/tests/InventoryApp.Tests/N03AutoridadOperativaRegressionTests.cs')
+test.write_text(r'''using Xunit;
+
+namespace InventoryApp.Tests;
+
+public sealed class N03AutoridadOperativaRegressionTests
+{
+    [Fact]
+    public void Venta_no_debe_usar_stock_ni_costo_legacy_de_producto()
+    {
+        var source = Leer("backend/src/Application/Services/VentaService.cs");
+        Assert.DoesNotContain("producto.Cantidad < input.Cantidad", source);
+        Assert.DoesNotContain("variante?.Costo ?? producto.Costo", source);
+        Assert.DoesNotContain("ProductoVarianteId = variante?.Id", source);
+        Assert.Contains("variante.Cantidad < input.Cantidad", source);
+        Assert.Contains("ProductoVarianteId = variante.Id", source);
+    }
+
+    [Fact]
+    public void Compra_nueva_debe_quedar_vinculada_a_variante_operativa()
+    {
+        var source = Leer("backend/src/Application/Services/CompraService.cs");
+        Assert.DoesNotContain("ProductoVarianteId = variante?.Id", source);
+        Assert.Contains("ProductoVarianteId = variante.Id", source);
+        Assert.Contains("no tiene una variante operativa activa", source);
+    }
+
+    [Fact]
+    public void Carga_productos_debe_escribir_operacion_en_variante_tecnica()
+    {
+        var source = Leer("backend/src/Infrastructure/Services/CargaMasivaService.cs");
+        Assert.DoesNotContain("producto.Costo = Decimal(fila, \"Costo\")", source);
+        Assert.DoesNotContain("producto.Precio = Decimal(fila, \"Precio\")", source);
+        Assert.DoesNotContain("producto.UmbralStockBajo = Entero(fila, \"UmbralStockBajo\")", source);
+        Assert.Contains("variante.Costo = Decimal(fila, \"Costo\")", source);
+        Assert.Contains("variante.Precio = Decimal(fila, \"Precio\")", source);
+        Assert.Contains("producto.Costo = variante.Costo ?? 0m", source);
+        Assert.Contains("PRODUCTO_REQUIERE_VARIANTES", source);
+    }
+
+    private static string Leer(string relativePath)
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null && !Directory.Exists(Path.Combine(directory.FullName, "backend", "src")))
+            directory = directory.Parent;
+        Assert.NotNull(directory);
+        var path = Path.Combine(directory!.FullName, relativePath.Replace('/', Path.DirectorySeparatorChar));
+        Assert.True(File.Exists(path), $"No se encontró el archivo de fuente requerido: {path}");
+        return File.ReadAllText(path);
+    }
+}
+''', encoding='utf-8')
