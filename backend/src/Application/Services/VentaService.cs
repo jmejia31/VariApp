@@ -577,8 +577,8 @@ public class VentaService : IVentaService
                 Subtotal = subtotal,
                 UtilidadBruta = subtotal - costoTotal,
                 ProductoNombreSnapshot = producto.Nombre,
-                ProductoMarcaSnapshot = variante.Marca?.Nombre,
-                ProductoModeloSnapshot = variante.Modelo?.Nombre,
+                ProductoMarcaSnapshot = variante.Marca?.Nombre ?? string.Empty,
+                ProductoModeloSnapshot = variante.Modelo?.Nombre ?? string.Empty,
                 ProductoColorSnapshot = variante.Color?.Nombre,
                 ProductoTallaSnapshot = variante.Talla?.Nombre,
                 ProductoSkuSnapshot = variante.Sku
