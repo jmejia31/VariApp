@@ -54,9 +54,18 @@ public class SeedPermisoServiceTests
         var permisoDashboard = await context.Permisos
             .IgnoreQueryFilters()
             .SingleAsync(p => p.Modulo == ModuloSistema.Dashboard && p.Accion == AccionPermiso.Ver);
+
+        // N0.4 deja DefaultVendedor vacío: los grants de vendedor son administrados.
+        // Simulamos un grant explícito asignado y luego retirado por administración.
+        context.RolPermisos.Add(new RolPermiso
+        {
+            RolId = vendedor.Id,
+            PermisoId = permisoDashboard.Id
+        });
+        await context.SaveChangesAsync();
+
         var grant = await context.RolPermisos
             .SingleAsync(p => p.RolId == vendedor.Id && p.PermisoId == permisoDashboard.Id);
-
         context.RolPermisos.Remove(grant);
         await context.SaveChangesAsync();
 
