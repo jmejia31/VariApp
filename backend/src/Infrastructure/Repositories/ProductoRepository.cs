@@ -20,8 +20,8 @@ public class ProductoRepository : IProductoRepository
         _context.Productos
             .Include(p => p.Imagenes)
             .Include(p => p.Categoria)
-            .Include(p => p.Color)
-            .Include(p => p.Talla)
+            .Include(p => p.ColorCatalogo)
+            .Include(p => p.TallaCatalogo)
             .Include(p => p.MarcaCatalogo)
             .Include(p => p.ModeloCatalogo)
             .Include(p => p.Variantes.Where(v => !v.Eliminado))
