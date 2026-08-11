@@ -593,7 +593,9 @@ public sealed class CargaMasivaService : ICargaMasivaService
 
     private async Task ValidarProductosAsync(List<CargaMasivaFilaDto> filas, List<CargaMasivaErrorDto> errores, CancellationToken ct)
     {
-        var catalogos = await _db.CatalogosProducto.AsNoTracking().Where(x => !x.Eliminado).ToListAsync(ct);
+        var marcas = await _db.Marcas.AsNoTracking().Where(x => x.Activo && !x.Eliminado).ToListAsync(ct);
+        var modelos = await _db.Modelos.AsNoTracking().Where(x => x.Activo && !x.Eliminado).ToListAsync(ct);
+        var tallas = await _db.Tallas.AsNoTracking().Where(x => x.Activo && !x.Eliminado).ToListAsync(ct);
         var categorias = await _db.Categorias.AsNoTracking().Where(x => !x.Eliminada).ToListAsync(ct);
         var productos = await _db.Productos.AsNoTracking().ToListAsync(ct);
         var claves = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -611,11 +613,11 @@ public sealed class CargaMasivaService : ICargaMasivaService
             NormalizarEntero(fila, "UmbralStockBajo", 0, int.MaxValue, errores, requerido: false, valorPredeterminado: 5);
             NormalizarActivo(fila, errores);
 
-            var marca = catalogos.FirstOrDefault(x => x.Tipo == TipoCatalogoProducto.Marca && x.Activo && NormalizarClave(x.Nombre) == NormalizarClave(V(fila, "Marca")));
+            var marca = marcas.FirstOrDefault(x => NormalizarClave(x.Nombre) == NormalizarClave(V(fila, "Marca")));
             if (marca is null)
                 AgregarError(errores, fila.NumeroFila, "Marca", "MARCA_NO_EXISTE", "La marca debe existir y estar activa antes de importar productos.", V(fila, "Marca"));
 
-            var modelo = marca is null ? null : catalogos.FirstOrDefault(x => x.Tipo == TipoCatalogoProducto.Modelo && x.Activo && x.CatalogoPadreId == marca.Id && NormalizarClave(x.Nombre) == NormalizarClave(V(fila, "Modelo")));
+            var modelo = marca is null ? null : modelos.FirstOrDefault(x => x.MarcaId == marca.Id && NormalizarClave(x.Nombre) == NormalizarClave(V(fila, "Modelo")));
             if (modelo is null)
                 AgregarError(errores, fila.NumeroFila, "Modelo", "MODELO_NO_EXISTE", "El modelo debe existir, estar activo y pertenecer a la marca indicada.", V(fila, "Modelo"));
 
@@ -624,7 +626,7 @@ public sealed class CargaMasivaService : ICargaMasivaService
                 AgregarError(errores, fila.NumeroFila, "Categoria", "CATEGORIA_NO_EXISTE", "La categoría indicada no existe o está inactiva.", categoria);
 
             var talla = V(fila, "Talla");
-            if (!string.IsNullOrWhiteSpace(talla) && !catalogos.Any(x => x.Tipo == TipoCatalogoProducto.Talla && x.Activo && NormalizarClave(x.Nombre) == NormalizarClave(talla)))
+            if (!string.IsNullOrWhiteSpace(talla) && !tallas.Any(x => NormalizarClave(x.Nombre) == NormalizarClave(talla)))
                 AgregarError(errores, fila.NumeroFila, "Talla", "TALLA_NO_EXISTE", "La talla o tamaño indicado no existe o está inactivo.", talla);
 
             var clave = ClaveProducto(fila.Datos);
@@ -832,13 +834,7 @@ public sealed class CargaMasivaService : ICargaMasivaService
 
     private async Task<(int Creados, int Actualizados)> AplicarColoresAsync(List<CargaMasivaFilaDto> filas, CancellationToken ct)
     {
-        var normalizados = await _db.Colores
-            .IgnoreQueryFilters()
-            .ToListAsync(ct);
-        var espejos = await _db.CatalogosProducto
-            .Where(x => x.Tipo == TipoCatalogoProducto.Color)
-            .IgnoreQueryFilters()
-            .ToListAsync(ct);
+        var normalizados = await _db.Colores.IgnoreQueryFilters().ToListAsync(ct);
         var creados = 0;
         var actualizados = 0;
 
@@ -846,30 +842,12 @@ public sealed class CargaMasivaService : ICargaMasivaService
         {
             var nombre = V(fila, "Nombre")!;
             var clave = NormalizarClave(nombre);
-            var normalizado = normalizados.FirstOrDefault(x => !x.Eliminado && NormalizarClave(x.Nombre) == clave);
-            var espejo = espejos.FirstOrDefault(x => !x.Eliminado && NormalizarClave(x.Nombre) == clave);
+            var normalizado = normalizados.FirstOrDefault(x => NormalizarClave(x.Nombre) == clave);
 
             if (normalizado is null)
             {
-                if (espejo is null)
-                {
-                    espejo = new CatalogoProducto
-                    {
-                        Tipo = TipoCatalogoProducto.Color,
-                        Nombre = nombre,
-                        CreadoPorUsuarioId = _currentUser.UsuarioId,
-                        CreadoPorNombreUsuario = _currentUser.NombreUsuario
-                    };
-                    _db.CatalogosProducto.Add(espejo);
-                    espejos.Add(espejo);
-                    // Se necesita el Id global del espejo para conservar compatibilidad
-                    // durante la retirada progresiva de CatalogosProducto.
-                    await _db.SaveChangesAsync(ct);
-                }
-
                 normalizado = new Color
                 {
-                    Id = espejo.Id,
                     CreadoPorUsuarioId = _currentUser.UsuarioId,
                     CreadoPorNombreUsuario = _currentUser.NombreUsuario
                 };
@@ -880,36 +858,17 @@ public sealed class CargaMasivaService : ICargaMasivaService
             else
             {
                 actualizados++;
-                if (espejo is null)
-                    throw new BusinessRuleException($"El color '{nombre}' no tiene su espejo legacy compatible. Ejecuta el saneamiento de datos antes de continuar.");
-                if (espejo.Id != normalizado.Id)
-                    throw new BusinessRuleException($"El color '{nombre}' presenta IDs incompatibles entre Colores y CatalogosProducto.");
             }
 
-            var codigoVisual = NuloSiVacio(V(fila, "CodigoVisual"));
-            var descripcion = NuloSiVacio(V(fila, "Descripcion"));
-            var orden = Entero(fila, "Orden");
-            var activo = Booleano(fila, "Activo");
-
             normalizado.Nombre = nombre;
-            normalizado.CodigoVisual = codigoVisual;
-            normalizado.Descripcion = descripcion;
-            normalizado.Orden = orden;
-            normalizado.Activo = activo;
+            normalizado.CodigoVisual = NuloSiVacio(V(fila, "CodigoVisual"));
+            normalizado.Descripcion = NuloSiVacio(V(fila, "Descripcion"));
+            normalizado.Orden = Entero(fila, "Orden");
+            normalizado.Activo = Booleano(fila, "Activo");
             normalizado.Eliminado = false;
             normalizado.FechaEliminacion = null;
             normalizado.EliminadoPorUsuarioId = null;
             MarcarActualizacion(normalizado);
-
-            espejo.Nombre = nombre;
-            espejo.CodigoVisual = codigoVisual;
-            espejo.Descripcion = descripcion;
-            espejo.Orden = orden;
-            espejo.Activo = activo;
-            espejo.Eliminado = false;
-            espejo.FechaEliminacion = null;
-            espejo.EliminadoPorUsuarioId = null;
-            MarcarActualizacion(espejo);
         }
 
         return (creados, actualizados);
@@ -917,7 +876,9 @@ public sealed class CargaMasivaService : ICargaMasivaService
 
     private async Task<(int Creados, int Actualizados)> AplicarProductosAsync(List<CargaMasivaFilaDto> filas, CancellationToken ct)
     {
-        var catalogos = await _db.CatalogosProducto.Where(x => !x.Eliminado).ToListAsync(ct);
+        var marcas = await _db.Marcas.Where(x => x.Activo && !x.Eliminado).ToListAsync(ct);
+        var modelos = await _db.Modelos.Where(x => x.Activo && !x.Eliminado).ToListAsync(ct);
+        var tallas = await _db.Tallas.Where(x => x.Activo && !x.Eliminado).ToListAsync(ct);
         var categorias = await _db.Categorias.Where(x => !x.Eliminada).ToListAsync(ct);
         var existentes = await _db.Productos.ToListAsync(ct);
         var creados = 0;
@@ -927,12 +888,12 @@ public sealed class CargaMasivaService : ICargaMasivaService
         {
             var clave = ClaveProducto(fila.Datos);
             var producto = existentes.FirstOrDefault(x => ClaveProducto(x.Nombre, x.Marca, x.Modelo) == clave);
-            var marca = catalogos.First(x => x.Tipo == TipoCatalogoProducto.Marca && x.Activo && NormalizarClave(x.Nombre) == NormalizarClave(V(fila, "Marca")));
-            var modelo = catalogos.First(x => x.Tipo == TipoCatalogoProducto.Modelo && x.Activo && x.CatalogoPadreId == marca.Id && NormalizarClave(x.Nombre) == NormalizarClave(V(fila, "Modelo")));
+            var marca = marcas.First(x => NormalizarClave(x.Nombre) == NormalizarClave(V(fila, "Marca")));
+            var modelo = modelos.First(x => x.MarcaId == marca.Id && NormalizarClave(x.Nombre) == NormalizarClave(V(fila, "Modelo")));
             var categoriaNombre = V(fila, "Categoria");
             var tallaNombre = V(fila, "Talla");
             var categoria = string.IsNullOrWhiteSpace(categoriaNombre) ? null : categorias.First(x => x.Activa && NormalizarClave(x.Nombre) == NormalizarClave(categoriaNombre));
-            var talla = string.IsNullOrWhiteSpace(tallaNombre) ? null : catalogos.First(x => x.Tipo == TipoCatalogoProducto.Talla && x.Activo && NormalizarClave(x.Nombre) == NormalizarClave(tallaNombre));
+            var talla = string.IsNullOrWhiteSpace(tallaNombre) ? null : tallas.First(x => NormalizarClave(x.Nombre) == NormalizarClave(tallaNombre));
 
             if (producto is null)
             {
@@ -946,7 +907,10 @@ public sealed class CargaMasivaService : ICargaMasivaService
                 existentes.Add(producto);
                 creados++;
             }
-            else actualizados++;
+            else
+            {
+                actualizados++;
+            }
 
             producto.Nombre = V(fila, "Nombre")!;
             producto.Marca = marca.Nombre;
