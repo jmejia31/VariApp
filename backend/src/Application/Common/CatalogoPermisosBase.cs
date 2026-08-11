@@ -91,7 +91,8 @@ public static class CatalogoPermisosBase
         (ModuloSistema.Facturacion, new[]
         {
             AccionPermiso.Ver, AccionPermiso.Exportar, AccionPermiso.Imprimir,
-            AccionPermiso.Compartir, AccionPermiso.Administrar
+            AccionPermiso.Compartir, AccionPermiso.Administrar, AccionPermiso.Aplicar,
+            AccionPermiso.Anular, AccionPermiso.CambiarEstado
         }),
         (ModuloSistema.Finanzas, new[]
         {
