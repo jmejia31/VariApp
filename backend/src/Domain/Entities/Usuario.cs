@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using InventoryApp.Domain.Enums;
 
 namespace InventoryApp.Domain.Entities;
@@ -8,11 +9,20 @@ public class Usuario
     public string NombreUsuario { get; set; } = string.Empty;
     public string NombreCompleto { get; set; } = string.Empty;
     public string PasswordHash { get; set; } = string.Empty;
-    /// Enum legado, se conserva por compatibilidad durante la migración a roles dinámicos.
-    public RolUsuario Rol { get; set; } = RolUsuario.Vendedor;
 
-    public int? RolId { get; set; }
-    public Rol? RolEntidad { get; set; }
+    /// <summary>
+    /// Fuente de verdad del rol del usuario desde ERP-N0.4.
+    /// </summary>
+    public int RolId { get; set; }
+    public Rol RolEntidad { get; set; } = null!;
+
+    /// <summary>
+    /// Compatibilidad binaria/fixtures antiguos. No se persiste y no puede usarse
+    /// para autorizar. El runtime de seguridad resuelve siempre RolId/RolEntidad.
+    /// </summary>
+    [NotMapped]
+    [Obsolete("ERP-N0.4: RolUsuario es compatibilidad no persistida; use RolId/RolEntidad.")]
+    public RolUsuario Rol { get; set; } = RolUsuario.Vendedor;
 
     public string? FotoPerfilUrl { get; set; }
     public string? FotoPerfilPublicId { get; set; }
