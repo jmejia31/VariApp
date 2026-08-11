@@ -3,41 +3,132 @@
 Fecha de cierre técnico: 2026-08-11  
 Plan rector: `PLAN_MAESTRO_ERP_V5`  
 Rama: `Desarrollo`  
-Estado: **✅ CERRADO / CERTIFICADO AUTOMÁTICAMENTE**
+Estado: **✅ CIERRE TÉCNICO COMPLETADO / PENDIENTE SOLO RECERTIFICACIÓN DEL COMMIT DOCUMENTAL**
 
 ---
 
-## 1. Objetivo
+## 1. Objetivo y autoridad definitiva
 
-Eliminar la doble autoridad persistida del subsistema de autorización y dejar como única fuente de verdad de RBAC la cadena relacional:
+ERP-N0.4 elimina la doble autoridad persistida del subsistema de autorización y deja una única fuente de verdad:
 
 ```text
 Usuario.RolId -> Rol -> RolPermiso.PermisoId -> Permiso
 ```
 
-ERP-N0.4 completa el backfill de roles y permisos, retira las columnas legacy de autorización, elimina el bypass implícito de administrador como mecanismo de autorización efectiva y conserva los accesos administrativos mediante grants explícitos.
-
-Los enums `ModuloSistema` y `AccionPermiso` permanecen como identificadores técnicos tipados de código y catálogo. No constituyen una segunda autoridad persistida.
-
----
-
-## 2. Autoridad resultante
-
-La autorización efectiva queda definida exclusivamente por una relación persistida `RolPermiso` válida entre un `RolId` y un `PermisoId`.
+Los enums `ModuloSistema` y `AccionPermiso` son identificadores técnicos tipados. No son una autoridad paralela.
 
 Reglas finales:
 
-- un usuario debe resolver un `RolId` relacional válido;
-- un rol obtiene acceso únicamente cuando existe un grant explícito `RolPermiso`;
-- `EsAdministrador` no concede acceso por bypass;
-- los roles administradores activos reciben grants explícitos a los permisos activos del catálogo;
-- una denegación se representa mediante ausencia del grant, no mediante una fila `Permitido=false`;
-- `Permiso.Modulo` y `Permiso.Accion` mantienen los códigos técnicos necesarios para atributos y resolución tipada;
-- `Importar`, `Cerrar` y `Reabrir` forman parte explícita del catálogo RBAC empresarial.
+- un usuario autoriza únicamente mediante grants persistidos `RolPermiso`;
+- ausencia de grant = denegación;
+- no existe persistencia `Permitido=false` en el modelo final;
+- `EsAdministrador` **NO es un bypass de autorización**;
+- los administradores acceden porque poseen grants relacionales explícitos;
+- roles no administradores mantienen una matriz plenamente administrable.
 
 ---
 
-## 3. Migración física de base de datos
+## 2. Semántica final del rol Administrador
+
+Se cerró la ambigüedad entre edición de matriz y seed de administradores.
+
+Contrato definitivo:
+
+1. `EsAdministrador` permanece como metadato de rol y marcador de invariancia/bootstrap.
+2. `PermisoService.TienePermisoAsync` no contiene `if (EsAdministrador) return true` ni equivalente; siempre consulta el repositorio relacional.
+3. Todo rol activo con `EsAdministrador=true` debe conservar grants explícitos para **todo el catálogo activo**.
+4. `SeedPermisoService` crea o restaura de forma idempotente cualquier grant administrativo explícito faltante.
+5. `PermisoService.UpdateMatrizAsync` rechaza una solicitud para un rol administrador cuando el conjunto de permisos concedidos no coincide exactamente con el catálogo activo.
+6. El rechazo ocurre **antes** de `ReemplazarMatrizPorRolIdAsync`; por tanto, una actualización inválida no muta ningún grant.
+7. Un rol no administrador sí puede agregar y retirar grants normalmente.
+8. Una matriz administrativa válida conserva el mismo estado semántico después de reiniciar: el seed no cambia nada cuando los grants completos ya existen.
+
+Esta semántica mantiene autorización fail-closed y evita que una reducción temporal de la matriz se restaure silenciosamente en el siguiente arranque.
+
+---
+
+## 3. Causa del M13 rojo previo y corrección
+
+Durante la primera certificación funcional de N0.4, M13 quedó rojo en Playwright aunque el gate RBAC dedicado estaba verde.
+
+La causa fue doble:
+
+### 3.1 E2E legacy destructivo
+
+`fase6-reportes-administrativos.spec.ts` todavía esperaba la semántica anterior de un Administrador con permisos "implícitos e inmutables". El E2E enviaba un `PUT` real para reducir la matriz y esperaba `HTTP 400`.
+
+Con N0.4, la matriz ya estaba representada por grants explícitos y el endpoint aceptó el cambio. El test falló después de haber mutado la matriz compartida del administrador, provocando 403 en pruebas posteriores.
+
+Corrección aplicada:
+
+- el E2E dejó de mutar la matriz del administrador;
+- ahora valida de forma no destructiva que el administrador posee grants relacionales explícitos.
+
+### 3.2 Catálogo de Facturación incompleto frente al runtime
+
+Al desaparecer el bypass implícito, se hicieron visibles permisos que controllers de Facturación ya exigían pero que no estaban en `CatalogoPermisosBase`.
+
+El catálogo quedó alineado con el contrato real de runtime:
+
+```text
+Facturacion:Ver
+Facturacion:Exportar
+Facturacion:Imprimir
+Facturacion:Compartir
+Facturacion:Administrar
+Facturacion:Aplicar
+Facturacion:Anular
+Facturacion:CambiarEstado
+```
+
+No se añadió ningún bypass ni se relajó la autorización.
+
+La corrección funcional anterior quedó certificada en:
+
+```text
+HEAD: c35ed520c55e960d1d6e8aa6da1539612995f3b8
+N0.4: 31533496253 — SUCCESS
+M13:  31533496201 — SUCCESS
+Playwright: 107 passed / 0 failed / 0 skipped
+```
+
+---
+
+## 4. Guarda permanente catálogo RBAC vs permisos de runtime
+
+Archivo:
+
+```text
+backend/tests/InventoryApp.Tests/N04CatalogoPermisosRuntimeTests.cs
+```
+
+La guarda ya no se limita a Facturación. Mediante reflexión sobre el assembly API inspecciona controllers y acciones protegidas que declaran:
+
+```text
+RequierePermisoAttribute
+RequiereAlgunoPermisoAttribute
+```
+
+Cada combinación `(ModuloSistema, AccionPermiso)` utilizada por runtime debe existir en:
+
+```text
+CatalogoPermisosBase.Definicion
+```
+
+Si un controller exige una combinación imposible de seedear/conceder, el test falla mostrando el permiso y origen exactos.
+
+Resultado del cierre funcional:
+
+```text
+Permisos runtime ausentes del catálogo: 0
+Permisos inventados para satisfacer la guarda: 0
+```
+
+Se mantienen además aserciones específicas de Facturación para su contrato crítico.
+
+---
+
+## 5. Migración física N0.4
 
 Migración certificada:
 
@@ -51,21 +142,9 @@ Archivo:
 backend/src/Infrastructure/Migrations/20260811174745_N0_4_ConsolidarRbacRelacional.cs
 ```
 
-### 3.1 Backfill seguro
+La migración realiza backfill defensivo de roles/permisos, elimina filas legacy `Permitido=false`, falla cerrado ante datos no representables, retira columnas RBAC legacy y conserva la autoridad relacional final.
 
-Antes de retirar columnas legacy, la migración:
-
-1. asegura los roles de sistema requeridos;
-2. preserva y normaliza roles dinámicos todavía representados únicamente por `Usuarios.Rol`;
-3. completa `Usuarios.RolId` desde el rol legacy cuando corresponde;
-4. transforma `RolPermisos.Rol` histórico a `RolId`;
-5. transforma `RolPermisos.Modulo + Accion` a `PermisoId`;
-6. elimina filas legacy `Permitido=false`, porque la ausencia del grant es la semántica final de denegación;
-7. ejecuta guardas fail-closed y aborta antes del DDL destructivo si existe un usuario o grant que no pueda representarse en el modelo relacional.
-
-### 3.2 Retiro físico legacy
-
-Después del backfill y las guardas, se retiran físicamente:
+Columnas físicas retiradas:
 
 ```text
 Usuarios.Rol
@@ -75,98 +154,48 @@ RolPermisos.Accion
 RolPermisos.Permitido
 ```
 
-Además:
-
-- `Usuarios.RolId` queda obligatorio;
-- `RolPermisos.RolId` queda obligatorio;
-- `RolPermisos.PermisoId` queda obligatorio;
-- se preservan las FKs relacionales;
-- se conserva la unicidad de `(RolId, PermisoId)`;
-- se materializan grants administrativos explícitos.
-
-### 3.3 Preservación del administrador
-
-Durante la revisión de la migración generada inicialmente se detectó que una versión automática intentaba eliminar el usuario administrador histórico `Id=1`.
-
-Ese comportamiento fue rechazado y corregido antes de la certificación. La versión final no elimina al administrador y el CI comprueba explícitamente que el usuario `Id=1` sobrevive y queda asociado al rol `ADMINISTRADOR`.
+El administrador histórico se preserva y queda asociado relacionalmente al rol `ADMINISTRADOR`.
 
 ---
 
-## 4. Preflight y postdeploy
+## 6. Preflight y postcheck
 
 ### Preflight
-
-Archivo:
 
 ```text
 backend/scripts/preflight-erp-n0-4-rbac.sql
 ```
 
-Valida de forma no destructiva:
+Comprueba, entre otros:
 
 - usuarios sin rol representable;
 - `RolId` huérfanos;
-- grants permitidos sin rol mapeable;
-- grants con `PermisoId` inválido;
-- combinaciones `Modulo/Accion` legacy sin permiso relacional equivalente.
+- grants legacy permitidos sin rol o permiso resoluble;
+- combinaciones legacy sin equivalente relacional;
+- duplicados incompatibles con `(RolId, PermisoId)`.
 
-Resultado certificado:
+Resultado certificado: `BloqueosN04 = 0`.
 
-```text
-BloqueosN04 = 0
-```
-
-### Postdeploy
-
-Archivo:
+### Postcheck
 
 ```text
 backend/scripts/postdeploy-erp-n0-4-rbac.sql
 ```
 
-Certifica:
+Comprueba:
 
-- ausencia física de las columnas RBAC legacy;
-- usuarios con roles válidos;
-- grants con rol y permiso válidos;
-- duplicados `(RolId, PermisoId) = 0`;
-- grants administrativos completos;
-- índice único relacional presente;
-- FKs `RolId -> Roles` y `PermisoId -> Permisos` presentes;
-- historial EF contiene la migración N0.4.
+- ausencia física de columnas RBAC legacy;
+- FKs e índices finales;
+- `RolId`/`PermisoId` obligatorios;
+- cero huérfanos;
+- cero duplicados `(RolId, PermisoId)`;
+- grants administrativos completos.
 
-Resultado certificado:
-
-```text
-BloqueosN04 = 0
-```
+Resultado certificado: `BloqueosN04 = 0`.
 
 ---
 
-## 5. Pruebas automatizadas N0.4
-
-Archivo dedicado:
-
-```text
-backend/tests/InventoryApp.Tests/N04RbacRelacionalTests.cs
-```
-
-Cobertura relevante:
-
-- sin scope de usuario => denegación fail-closed;
-- administrador sin grant explícito => denegado, sin bypass;
-- grant explícito => autorización concedida;
-- `RolPermiso` no expone campos persistentes legacy;
-- `Usuario.Rol` queda únicamente como compatibilidad no persistida y `RolId` es autoridad;
-- catálogo contiene `Importar`, `Cerrar` y `Reabrir`;
-- cargas masivas usan permiso `Importar`;
-- compras, ventas y finanzas incluyen `Cerrar/Reabrir` donde corresponde.
-
-También se migraron las pruebas históricas de `SeedPermisoService` para que validen el modelo relacional final y no reconstruyan entidades con campos legacy eliminados.
-
----
-
-## 6. CI dedicado de certificación
+## 7. Aislamiento definitivo del workflow N0.4
 
 Workflow:
 
@@ -175,130 +204,151 @@ Workflow:
 ERP-N0.4 - Certificación RBAC relacional
 ```
 
-Certificación funcional canónica:
+La aplicación de migración dejó de ejecutar `database update` sin target. El comando exacto es:
 
-```text
-Commit: 0edc0f68dcd639b8c3494d734edbc6737d4e8134
-Run:    31522638499
-Job:    93883233396
-Estado: SUCCESS
+```bash
+dotnet ef database update 20260811174745_N0_4_ConsolidarRbacRelacional \
+  --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+  --startup-project src/API/InventoryApp.API.csproj \
+  --context AppDbContext
 ```
 
-Entorno de prueba:
+Inmediatamente después, el workflow falla cerrado salvo que `__EFMigrationsHistory` cumpla:
 
 ```text
-GitHub Actions
-Ubuntu 24.04
-.NET SDK 8.0.x
-MySQL 8.4.11 efímero
-Base: inventoryapp_n04_ci
+20260811032000_N0_3_ConsolidarProductoVariante = exactamente 1
+20260811174745_N0_4_ConsolidarRbacRelacional = exactamente 1
+MigrationId > N0.4 = 0
 ```
 
-### Resultado backend
+Consecuencia: cuando existan N0.5, N0.6 o posteriores, este workflow seguirá certificando **únicamente N0.4** y no adelantará accidentalmente el esquema.
+
+---
+
+## 8. Pruebas automatizadas del cierre
+
+Cobertura N0.4 relevante:
+
+- usuario sin scope => denegación fail-closed;
+- `EsAdministrador=true` sin grant explícito => denegado;
+- grant explícito => autorizado;
+- administrador normal => grants explícitos completos;
+- reducción de matriz de administrador => rechazada;
+- rechazo => cero llamadas a reemplazo de matriz;
+- rol normal => puede agregar y retirar grants;
+- seed => idempotente;
+- grant administrativo faltante por alteración externa => restaurado por seed;
+- matriz administrativa válida => mismo estado semántico tras nuevo arranque;
+- modelo EF sin autoridad legacy persistida;
+- catálogo base cubre toda combinación declarada por atributos de autorización del API.
+
+Certificación funcional más reciente previa a esta actualización documental:
 
 ```text
-Build succeeded.
-Warnings: 0
-Errors:   0
-
-Tests passed: 280
-Tests failed: 0
-Tests skipped: 0
-```
-
-### Resultado de migración
-
-El workflow crea la base efímera desde cero hasta N0.3, siembra un caso RBAC legacy representativo, ejecuta el preflight, aplica N0.4 y ejecuta el postcheck.
-
-Evidencia del run:
-
-```text
-Applying migration '20260811174745_N0_4_ConsolidarRbacRelacional'.
-Done.
-```
-
-Además se comprobaron de forma automática:
-
-- supervivencia del administrador histórico `Id=1`;
-- transformación de un grant legacy permitido en grant relacional;
-- eliminación de la fila legacy denegada;
-- `BloqueosN04 = 0` antes y después según el gate correspondiente;
-- consistencia del snapshot EF.
-
-Resultado EF:
-
-```text
-No changes have been made to the model since the last migration.
+HEAD funcional: c3c0689c23b8c2d2111550b506632a2b5304efed
+N0.4 Run:      31536798883 — SUCCESS
+Backend:       289 passed / 0 failed / 0 skipped
+Build:         0 warnings / 0 errors
+Preflight:     SUCCESS
+N0.4 exacta:   SUCCESS
+Aislamiento:   N0.3=1 / N0.4=1 / posteriores=0
+Postcheck:     SUCCESS
+Snapshot EF:   CONSISTENTE
 ```
 
 ---
 
-## 7. Estrategia de reversión
+## 9. M13 transversal del cierre funcional
 
-N0.4 es una consolidación estructural sensible a seguridad.
+Sobre el mismo HEAD funcional `c3c0689c23b8c2d2111550b506632a2b5304efed`:
 
-La migración contiene una reconstrucción controlada del formato legacy únicamente cuando los grants existentes pueden representarse sin pérdida en el antiguo esquema `Administrador/Vendedor`. Si existen grants de roles dinámicos no representables, el downgrade se bloquea explícitamente antes de degradar la seguridad o perder información.
+```text
+M13 Run: 31536798929 — SUCCESS
+Runtime, seguridad HTTP y Playwright integral: SUCCESS
+Dictamen automatizado M13: SUCCESS
+Playwright: 107 passed / 0 failed / 0 skipped
+Artifact runtime: m13-runtime-e2e / ID 9119428621
+```
 
-Para una reversión operacional real de un entorno persistente debe utilizarse el respaldo y el procedimiento de rollback aprobados para ese entorno. Esta certificación no ejecutó restauraciones ni migraciones contra Producción.
+El E2E administrativo no destructivo pasó dentro de esos 107 casos.
 
 ---
 
-## 8. Seguridad y aislamiento
+## 10. Trazabilidad del commit documental final
 
-La certificación se ejecutó exclusivamente sobre infraestructura efímera de GitHub Actions.
+Git no permite que un commit documental contenga anticipadamente su propio SHA y los Run IDs que GitHub Actions generará después de publicarlo.
 
-No se realizó ninguna de las siguientes acciones:
+Por ello, esta versión del documento registra como evidencia incorporada el **último HEAD funcional completamente certificado** (`c3c0689c...`). El commit que actualiza exclusivamente este documento debe ser recertificado inmediatamente con los mismos gates N0.4 y M13.
 
-- migrar Aiven Producción;
-- migrar Aiven Desarrollo;
+La evidencia exacta del HEAD documental final queda en:
+
+- historial de GitHub Actions;
+- PR #2 `Desarrollo -> main`;
+- reporte final de cierre de ERP-N0.4.
+
+No se considera cerrado N0.4 si esa recertificación documental no termina verde.
+
+---
+
+## 11. Seguridad y aislamiento
+
+Todas las certificaciones N0.4 usan MySQL 8.4 efímero de GitHub Actions.
+
+No se ha realizado ninguna de estas acciones:
+
 - modificar `main`;
-- fusionar el PR #2;
+- crear ramas adicionales;
+- mergear PR #2;
 - habilitar auto-merge;
-- modificar credenciales, variables, dominios, servicios o activos productivos;
-- desplegar a Producción.
+- desplegar;
+- ejecutar N0.4 contra Aiven Producción;
+- ejecutar este cierre contra Aiven Desarrollo;
+- modificar secretos, credenciales, dominios, servicios o activos productivos.
 
-`main` y `varistorehn_producción` permanecen congelados.
+Producción permanece congelada y fuera del alcance.
 
 ---
 
-## 9. Archivos principales del cierre
+## 12. Archivos principales del cierre N0.4
 
 ```text
+backend/src/Application/Services/PermisoService.cs
+backend/src/Application/Common/CatalogoPermisosBase.cs
+backend/src/Infrastructure/Services/SeedPermisoService.cs
 backend/src/Infrastructure/Migrations/20260811174745_N0_4_ConsolidarRbacRelacional.cs
-backend/src/Infrastructure/Migrations/20260811174745_N0_4_ConsolidarRbacRelacional.Designer.cs
-backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs
 backend/scripts/preflight-erp-n0-4-rbac.sql
 backend/scripts/postdeploy-erp-n0-4-rbac.sql
 backend/tests/InventoryApp.Tests/N04RbacRelacionalTests.cs
+backend/tests/InventoryApp.Tests/N04AdministradorSemanticaTests.cs
+backend/tests/InventoryApp.Tests/N04CatalogoPermisosRuntimeTests.cs
 backend/tests/InventoryApp.Tests/SeedPermisoServiceTests.cs
+frontend/e2e/fase6-reportes-administrativos.spec.ts
 .github/workflows/erp-n0-4-ci.yml
 docs/ERP_N0_4_RBAC_RELACIONAL.md
 ```
 
-El workflow temporal utilizado únicamente para generar inicialmente la migración fue eliminado del repositorio después de obtener los artefactos EF definitivos.
-
 ---
 
-## 10. Dictamen
-
-Con base en la evidencia automatizada reproducible del run `31522638499`, N0.4 cumple el objetivo definido por la auditoría ERP-N0:
+## 13. Dictamen técnico previo a recertificación documental
 
 ```text
-BACKFILL RolId/PermisoId:                ✅
-LECTURAS/AUTORIZACIÓN RELACIONAL:         ✅
-BYPASS ADMIN COMO AUTORIDAD:              RETIRADO ✅
-GRANTS ADMIN EXPLÍCITOS:                  ✅
-LEGACY RBAC PERSISTIDO RETIRADO:          ✅
-PREFLIGHT:                                0 BLOQUEOS ✅
-POSTDEPLOY:                               0 BLOQUEOS ✅
-BUILD RELEASE:                            0 WARNINGS / 0 ERRORS ✅
-TESTS BACKEND:                            280 / 280 ✅
-MYSQL 8.4:                                ✅
-SNAPSHOT EF:                              CONSISTENTE ✅
-PRODUCCIÓN TOCADA:                        NO ✅
-MAIN MODIFICADA:                          NO ✅
+AUTORIDAD RBAC ÚNICA Y RELACIONAL:             ✅
+BYPASS EsAdministrador:                        AUSENTE ✅
+GRANTS ADMINISTRATIVOS EXPLÍCITOS:             ✅
+REDUCCIÓN DE MATRIZ ADMINISTRADOR:              RECHAZADA SIN MUTACIÓN ✅
+ROL NORMAL ADMINISTRABLE:                       ✅
+SEED IDEMPOTENTE / REARRANQUE COHERENTE:        ✅
+GUARDA CATÁLOGO VS ATRIBUTOS RUNTIME:           0 FALTANTES ✅
+MIGRACIÓN N0.4 AISLADA POR TARGET:              ✅
+MIGRACIONES POSTERIORES EN GATE N0.4:           0 ✅
+PREFLIGHT / POSTCHECK:                           ✅
+SNAPSHOT EF:                                    CONSISTENTE ✅
+BACKEND FUNCIONAL:                              289/289 ✅
+PLAYWRIGHT FUNCIONAL:                           107/107 ✅
+M13 FUNCIONAL:                                  SUCCESS ✅
+PRODUCCIÓN TOCADA:                              NO ✅
+MAIN MODIFICADA:                                NO ✅
+ERP-N0.5 INICIADO:                              NO ✅
 ```
 
-**ERP-N0.4 = ✅ CERRADO / CERTIFICADO AUTOMÁTICAMENTE.**
-
-La siguiente fase secuencial del plan ERP-N0 es **N0.5 — Catálogo administrable de métodos de pago**, respetando el orden del plan rector.
+La declaración definitiva **`✅ ERP-N0.4 = 100% CERRADO / CERTIFICADO`** corresponde únicamente después de recertificar el commit documental final sobre `Desarrollo`.
