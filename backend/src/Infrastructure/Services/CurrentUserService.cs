@@ -1,6 +1,5 @@
 using System.Security.Claims;
 using InventoryApp.Application.Interfaces;
-using InventoryApp.Domain.Enums;
 using Microsoft.AspNetCore.Http;
 
 namespace InventoryApp.Infrastructure.Services;
@@ -31,15 +30,6 @@ public class CurrentUserService : ICurrentUserService
 
     public string? NombreCompleto => User?.FindFirstValue("nombreCompleto");
 
-    public RolUsuario? Rol
-    {
-        get
-        {
-            var value = User?.FindFirstValue("rol");
-            return Enum.TryParse<RolUsuario>(value, out var rol) ? rol : null;
-        }
-    }
-
     public int? RolId
     {
         get
@@ -53,9 +43,8 @@ public class CurrentUserService : ICurrentUserService
     {
         get
         {
-            // Los privilegios administrativos solo se aceptan cuando el JWT contiene
-            // el claim explícito emitido desde el rol dinámico vigente. Los tokens
-            // antiguos que únicamente dicen "Administrador" fallan cerrados.
+            // Informativo únicamente. IPermisoService nunca concede por este claim;
+            // resuelve el rol vigente y sus grants desde MySQL.
             var value = User?.FindFirstValue("esAdministrador");
             return bool.TryParse(value, out var esAdmin) && esAdmin;
         }
