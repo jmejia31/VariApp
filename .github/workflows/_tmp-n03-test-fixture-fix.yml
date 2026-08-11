@@ -1,0 +1,33 @@
+name: TEMP N0.3 fixture fix
+
+on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - '.github/workflows/_tmp-n03-test-fixture-fix.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+      - name: Ajustar fixture al invariante N0.3
+        shell: bash
+        run: |
+          python3 -c 'from pathlib import Path; p=Path("backend/tests/InventoryApp.Tests/CompraServiceTests.cs"); s=p.read_text(); old="        var producto = ProductoDePrueba();\n        _productoRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(producto);\n        _compraRepoMock.Setup(r => r.ContarTodasAsync()).ReturnsAsync(0);"; new="        var producto = ProductoDePrueba();\n        producto.Variantes.Add(new ProductoVariante { Id = 8, ProductoId = producto.Id, Sku = \"TEC-0000000001\", Cantidad = producto.Cantidad, Costo = producto.Costo, Precio = producto.Precio, UmbralStockBajo = producto.UmbralStockBajo, EsTecnica = true, Activo = true });\n        _productoRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(producto);\n        _compraRepoMock.Setup(r => r.ContarTodasAsync()).ReturnsAsync(0);"; assert s.count(old)==1, s.count(old); p.write_text(s.replace(old,new), encoding="utf-8")'
+          git diff --check
+      - name: Publicar ajuste de prueba
+        shell: bash
+        run: |
+          git config user.name "jmejia31"
+          git config user.email "93171442+jmejia31@users.noreply.github.com"
+          git add backend/tests/InventoryApp.Tests/CompraServiceTests.cs
+          git diff --cached --check
+          git commit -m "test(erp-n0.3): alinear compra al invariante de variante [ChatGPT]"
+          git push origin HEAD:Desarrollo
