@@ -15,7 +15,7 @@ public class UpdateProductoValidator : AbstractValidator<UpdateProductoDto>
         {
             // Compatibilidad temporal para clientes anteriores a ERP-N0.1.
             RuleFor(x => x.Cantidad).GreaterThanOrEqualTo(0).WithMessage("La cantidad no puede ser negativa.");
-            RuleFor(x => x.Costo).GreaterThanOrEqualTo(0).WithMessage("El costo no puede ser negativo.");
+            RuleFor(x => x.Costo).GreaterThan(0).WithMessage("El costo debe ser mayor a 0.");
             RuleFor(x => x.Precio).GreaterThan(0).WithMessage("El precio debe ser mayor a 0.");
             RuleFor(x => x.UmbralStockBajo).GreaterThanOrEqualTo(0).WithMessage("El umbral de stock bajo no puede ser negativo.");
         });
