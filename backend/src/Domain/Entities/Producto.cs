@@ -37,9 +37,9 @@ public class Producto : AuditableEntity
     // directamente a los maestros normalizados; la autoridad operacional de
     // dimensiones continúa en ProductoVariante.
     public int? ColorId { get; set; }
-    public Color? Color { get; set; }
+    public Color? ColorCatalogo { get; set; }
     public int? TallaId { get; set; }
-    public Talla? Talla { get; set; }
+    public Talla? TallaCatalogo { get; set; }
     public int? MarcaId { get; set; }
     public Marca? MarcaCatalogo { get; set; }
     public int? ModeloId { get; set; }

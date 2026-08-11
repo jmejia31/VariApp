@@ -23,8 +23,6 @@ public class ProductoConfiguration : IEntityTypeConfiguration<Producto>
         builder.Property(p => p.Activo).HasDefaultValue(true);
         builder.Property(p => p.Eliminado).HasDefaultValue(false);
 
-        // Toda consulta ordinaria excluye registros eliminados. El historial de
-        // ventas/compras conserva sus snapshots y relaciones existentes.
         builder.HasQueryFilter(p => !p.Eliminado);
 
         builder.Ignore(p => p.ImagenPrincipal);
@@ -43,12 +41,12 @@ public class ProductoConfiguration : IEntityTypeConfiguration<Producto>
 
         // ERP-N0.2: las proyecciones familiares dejan de depender de
         // CatalogosProducto y apuntan al mismo maestro normalizado que las variantes.
-        builder.HasOne(p => p.Color)
+        builder.HasOne(p => p.ColorCatalogo)
             .WithMany()
             .HasForeignKey(p => p.ColorId)
             .OnDelete(DeleteBehavior.SetNull);
 
-        builder.HasOne(p => p.Talla)
+        builder.HasOne(p => p.TallaCatalogo)
             .WithMany()
             .HasForeignKey(p => p.TallaId)
             .OnDelete(DeleteBehavior.SetNull);
