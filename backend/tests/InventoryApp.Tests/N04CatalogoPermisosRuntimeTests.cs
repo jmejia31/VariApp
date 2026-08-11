@@ -7,12 +7,25 @@ namespace InventoryApp.Tests;
 public class N04CatalogoPermisosRuntimeTests
 {
     [Fact]
-    public void Facturacion_IncluyeAdministrar_RequeridoPorCostosEnvio()
+    public void Facturacion_IncluyeAccionesRequeridasPorControllersRuntime()
     {
         var acciones = CatalogoPermisosBase.Definicion
             .Single(x => x.Modulo == ModuloSistema.Facturacion)
             .Acciones;
 
-        Assert.Contains(AccionPermiso.Administrar, acciones);
+        foreach (var accion in new[]
+                 {
+                     AccionPermiso.Ver,
+                     AccionPermiso.Exportar,
+                     AccionPermiso.Imprimir,
+                     AccionPermiso.Compartir,
+                     AccionPermiso.Administrar,
+                     AccionPermiso.Aplicar,
+                     AccionPermiso.Anular,
+                     AccionPermiso.CambiarEstado
+                 })
+        {
+            Assert.Contains(accion, acciones);
+        }
     }
 }
