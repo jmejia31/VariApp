@@ -34,6 +34,191 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
+      - name: Migrar carga masiva fuera de CatalogosProducto
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('backend/src/Infrastructure/Services/CargaMasivaService.cs')
+          text = path.read_text(encoding='utf-8')
+
+          def replace_method(source, signature, replacement):
+              start = source.find(signature)
+              if start < 0:
+                  raise SystemExit('No se encontró método: ' + signature)
+              brace = source.find('{', start)
+              if brace < 0:
+                  raise SystemExit('No se encontró apertura: ' + signature)
+              depth = 0
+              end = None
+              for i in range(brace, len(source)):
+                  if source[i] == '{':
+                      depth += 1
+                  elif source[i] == '}':
+                      depth -= 1
+                      if depth == 0:
+                          end = i + 1
+                          break
+              if end is None:
+                  raise SystemExit('No se encontró cierre: ' + signature)
+              return source[:start] + replacement.rstrip() + source[end:]
+
+          validar_productos = '''    private async Task ValidarProductosAsync(List<CargaMasivaFilaDto> filas, List<CargaMasivaErrorDto> errores, CancellationToken ct)
+              {
+                  var marcas = await _db.Marcas.AsNoTracking().Where(x => x.Activo && !x.Eliminado).ToListAsync(ct);
+                  var modelos = await _db.Modelos.AsNoTracking().Where(x => x.Activo && !x.Eliminado).ToListAsync(ct);
+                  var tallas = await _db.Tallas.AsNoTracking().Where(x => x.Activo && !x.Eliminado).ToListAsync(ct);
+                  var categorias = await _db.Categorias.AsNoTracking().Where(x => !x.Eliminada).ToListAsync(ct);
+                  var productos = await _db.Productos.AsNoTracking().ToListAsync(ct);
+                  var claves = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+                  foreach (var fila in filas)
+                  {
+                      NormalizarTexto(fila, "Nombre", 150, true, errores);
+                      NormalizarTexto(fila, "Marca", 100, true, errores);
+                      NormalizarTexto(fila, "Modelo", 100, true, errores);
+                      NormalizarTexto(fila, "Categoria", 150, false, errores);
+                      NormalizarTexto(fila, "Talla", 120, false, errores);
+                      NormalizarTexto(fila, "Descripcion", 1000, false, errores);
+                      NormalizarDecimal(fila, "Costo", 0m, decimal.MaxValue, errores, requerido: true);
+                      NormalizarDecimal(fila, "Precio", 0.01m, decimal.MaxValue, errores, requerido: true);
+                      NormalizarEntero(fila, "UmbralStockBajo", 0, int.MaxValue, errores, requerido: false, valorPredeterminado: 5);
+                      NormalizarActivo(fila, errores);
+
+                      var marca = marcas.FirstOrDefault(x => NormalizarClave(x.Nombre) == NormalizarClave(V(fila, "Marca")));
+                      if (marca is null)
+                          AgregarError(errores, fila.NumeroFila, "Marca", "MARCA_NO_EXISTE", "La marca debe existir y estar activa antes de importar productos.", V(fila, "Marca"));
+
+                      var modelo = marca is null ? null : modelos.FirstOrDefault(x => x.MarcaId == marca.Id && NormalizarClave(x.Nombre) == NormalizarClave(V(fila, "Modelo")));
+                      if (modelo is null)
+                          AgregarError(errores, fila.NumeroFila, "Modelo", "MODELO_NO_EXISTE", "El modelo debe existir, estar activo y pertenecer a la marca indicada.", V(fila, "Modelo"));
+
+                      var categoria = V(fila, "Categoria");
+                      if (!string.IsNullOrWhiteSpace(categoria) && !categorias.Any(x => x.Activa && NormalizarClave(x.Nombre) == NormalizarClave(categoria)))
+                          AgregarError(errores, fila.NumeroFila, "Categoria", "CATEGORIA_NO_EXISTE", "La categoría indicada no existe o está inactiva.", categoria);
+
+                      var talla = V(fila, "Talla");
+                      if (!string.IsNullOrWhiteSpace(talla) && !tallas.Any(x => NormalizarClave(x.Nombre) == NormalizarClave(talla)))
+                          AgregarError(errores, fila.NumeroFila, "Talla", "TALLA_NO_EXISTE", "La talla o tamaño indicado no existe o está inactivo.", talla);
+
+                      var clave = ClaveProducto(fila.Datos);
+                      if (!claves.Add(clave))
+                          AgregarError(errores, fila.NumeroFila, "Nombre", "DUPLICADO_ARCHIVO", "El producto con la misma marca y modelo aparece más de una vez.", V(fila, "Nombre"));
+
+                      fila.Accion = productos.Any(x => ClaveProducto(x.Nombre, x.Marca, x.Modelo) == clave) ? "Actualizar" : "Crear";
+                  }
+              }'''
+
+          aplicar_colores = '''    private async Task<(int Creados, int Actualizados)> AplicarColoresAsync(List<CargaMasivaFilaDto> filas, CancellationToken ct)
+              {
+                  var normalizados = await _db.Colores.IgnoreQueryFilters().ToListAsync(ct);
+                  var creados = 0;
+                  var actualizados = 0;
+
+                  foreach (var fila in filas)
+                  {
+                      var nombre = V(fila, "Nombre")!;
+                      var clave = NormalizarClave(nombre);
+                      var normalizado = normalizados.FirstOrDefault(x => NormalizarClave(x.Nombre) == clave);
+
+                      if (normalizado is null)
+                      {
+                          normalizado = new Color
+                          {
+                              CreadoPorUsuarioId = _currentUser.UsuarioId,
+                              CreadoPorNombreUsuario = _currentUser.NombreUsuario
+                          };
+                          _db.Colores.Add(normalizado);
+                          normalizados.Add(normalizado);
+                          creados++;
+                      }
+                      else
+                      {
+                          actualizados++;
+                      }
+
+                      normalizado.Nombre = nombre;
+                      normalizado.CodigoVisual = NuloSiVacio(V(fila, "CodigoVisual"));
+                      normalizado.Descripcion = NuloSiVacio(V(fila, "Descripcion"));
+                      normalizado.Orden = Entero(fila, "Orden");
+                      normalizado.Activo = Booleano(fila, "Activo");
+                      normalizado.Eliminado = false;
+                      normalizado.FechaEliminacion = null;
+                      normalizado.EliminadoPorUsuarioId = null;
+                      MarcarActualizacion(normalizado);
+                  }
+
+                  return (creados, actualizados);
+              }'''
+
+          aplicar_productos = '''    private async Task<(int Creados, int Actualizados)> AplicarProductosAsync(List<CargaMasivaFilaDto> filas, CancellationToken ct)
+              {
+                  var marcas = await _db.Marcas.Where(x => x.Activo && !x.Eliminado).ToListAsync(ct);
+                  var modelos = await _db.Modelos.Where(x => x.Activo && !x.Eliminado).ToListAsync(ct);
+                  var tallas = await _db.Tallas.Where(x => x.Activo && !x.Eliminado).ToListAsync(ct);
+                  var categorias = await _db.Categorias.Where(x => !x.Eliminada).ToListAsync(ct);
+                  var existentes = await _db.Productos.ToListAsync(ct);
+                  var creados = 0;
+                  var actualizados = 0;
+
+                  foreach (var fila in filas)
+                  {
+                      var clave = ClaveProducto(fila.Datos);
+                      var producto = existentes.FirstOrDefault(x => ClaveProducto(x.Nombre, x.Marca, x.Modelo) == clave);
+                      var marca = marcas.First(x => NormalizarClave(x.Nombre) == NormalizarClave(V(fila, "Marca")));
+                      var modelo = modelos.First(x => x.MarcaId == marca.Id && NormalizarClave(x.Nombre) == NormalizarClave(V(fila, "Modelo")));
+                      var categoriaNombre = V(fila, "Categoria");
+                      var tallaNombre = V(fila, "Talla");
+                      var categoria = string.IsNullOrWhiteSpace(categoriaNombre) ? null : categorias.First(x => x.Activa && NormalizarClave(x.Nombre) == NormalizarClave(categoriaNombre));
+                      var talla = string.IsNullOrWhiteSpace(tallaNombre) ? null : tallas.First(x => NormalizarClave(x.Nombre) == NormalizarClave(tallaNombre));
+
+                      if (producto is null)
+                      {
+                          producto = new Producto
+                          {
+                              Cantidad = 0,
+                              CreadoPorUsuarioId = _currentUser.UsuarioId,
+                              CreadoPorNombreUsuario = _currentUser.NombreUsuario
+                          };
+                          _db.Productos.Add(producto);
+                          existentes.Add(producto);
+                          creados++;
+                      }
+                      else
+                      {
+                          actualizados++;
+                      }
+
+                      producto.Nombre = V(fila, "Nombre")!;
+                      producto.Marca = marca.Nombre;
+                      producto.Modelo = modelo.Nombre;
+                      producto.MarcaId = marca.Id;
+                      producto.ModeloId = modelo.Id;
+                      producto.CategoriaId = categoria?.Id;
+                      producto.TallaId = talla?.Id;
+                      producto.Descripcion = NuloSiVacio(V(fila, "Descripcion"));
+                      producto.Costo = Decimal(fila, "Costo");
+                      producto.Precio = Decimal(fila, "Precio");
+                      producto.UmbralStockBajo = Entero(fila, "UmbralStockBajo");
+                      producto.Activo = Booleano(fila, "Activo");
+                      producto.Eliminado = false;
+                      producto.FechaEliminacion = null;
+                      producto.EliminadoPorUsuarioId = null;
+                      MarcarActualizacion(producto);
+                  }
+                  return (creados, actualizados);
+              }'''
+
+          text = replace_method(text, '    private async Task ValidarProductosAsync(', validar_productos)
+          text = replace_method(text, '    private async Task<(int Creados, int Actualizados)> AplicarColoresAsync(', aplicar_colores)
+          text = replace_method(text, '    private async Task<(int Creados, int Actualizados)> AplicarProductosAsync(', aplicar_productos)
+
+          if 'CatalogosProducto' in text or 'new CatalogoProducto' in text:
+              raise SystemExit('Persisten referencias runtime a CatalogoProducto en CargaMasivaService.')
+
+          path.write_text(text, encoding='utf-8')
+          PY
       - name: Restaurar solución
         working-directory: backend
         run: dotnet restore InventoryApp.sln
@@ -56,13 +241,13 @@ jobs:
             echo 'La generación no actualizó el snapshot EF.' >&2
             exit 1
           fi
-      - name: Publicar migración generada en Desarrollo
+      - name: Publicar saneamiento y migración en Desarrollo
         shell: bash
         run: |
           set -euo pipefail
           git config user.name 'VariApp ERP N0.2 Bot'
           git config user.email 'actions@users.noreply.github.com'
-          git add backend/src/Infrastructure/Migrations
+          git add backend/src/Infrastructure/Services/CargaMasivaService.cs backend/src/Infrastructure/Migrations
           test -n "$(git diff --cached --name-only)"
-          git commit -m 'db(n0.2): generar migración y snapshot [n0.2-migration] [ChatGPT]'
+          git commit -m 'db(n0.2): retirar espejo legacy y generar migración [n0.2-migration] [ChatGPT]'
           git push origin HEAD:Desarrollo
