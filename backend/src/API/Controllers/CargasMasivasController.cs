@@ -84,7 +84,7 @@ public class CargasMasivasController : ControllerBase
     }
 
     [HttpPost("validar")]
-    [RequierePermiso(ModuloSistema.CargasMasivas, AccionPermiso.Crear)]
+    [RequierePermiso(ModuloSistema.CargasMasivas, AccionPermiso.Importar)]
     [RequestSizeLimit(CargaMasivaArchivoLimites.MaximoRequestBytes)]
     [RequestFormLimits(MultipartBodyLengthLimit = CargaMasivaArchivoLimites.MaximoRequestBytes)]
     public async Task<IActionResult> Validar(
