@@ -549,31 +549,33 @@ public class CompraService : ICompraService
                 throw new BusinessRuleException("El costo unitario de cada producto debe ser mayor a 0.");
 
             var producto = await ObtenerProductoActivoAsync(input.ProductoId);
-            ProductoVariante? variante = null;
+            ProductoVariante variante;
             if (input.ProductoVarianteId.HasValue)
             {
                 variante = await ObtenerVarianteAsync(input.ProductoVarianteId.Value, producto.Id, exigirActiva: true);
             }
             else
             {
-                variante = producto.Variantes.SingleOrDefault(v => v.EsTecnica && v.Activo && !v.Eliminado);
-                if (variante is null && producto.Variantes.Any(v => !v.EsTecnica && v.Activo && !v.Eliminado))
+                var tecnica = producto.Variantes.SingleOrDefault(v => v.EsTecnica && v.Activo && !v.Eliminado);
+                if (tecnica is null && producto.Variantes.Any(v => !v.EsTecnica && v.Activo && !v.Eliminado))
                     throw new BusinessRuleException($"Debes seleccionar una variante para el producto '{producto.Nombre}'.");
+                variante = tecnica
+                    ?? throw new BusinessRuleException($"El producto '{producto.Nombre}' no tiene una variante operativa activa. Corrige el inventario antes de comprarlo.");
             }
 
             compra.Detalles.Add(new CompraDetalle
             {
                 ProductoId = producto.Id,
-                ProductoVarianteId = variante?.Id,
+                ProductoVarianteId = variante.Id,
                 Cantidad = input.Cantidad,
                 CostoUnitario = input.CostoUnitario,
                 Subtotal = input.Cantidad * input.CostoUnitario,
                 ProductoNombreSnapshot = producto.Nombre,
-                ProductoMarcaSnapshot = variante?.Marca?.Nombre ?? producto.Marca,
-                ProductoModeloSnapshot = variante?.Modelo?.Nombre ?? producto.Modelo,
-                ProductoColorSnapshot = variante?.Color?.Nombre,
-                ProductoTallaSnapshot = variante?.Talla?.Nombre,
-                ProductoSkuSnapshot = variante?.Sku
+                ProductoMarcaSnapshot = variante.Marca?.Nombre,
+                ProductoModeloSnapshot = variante.Modelo?.Nombre,
+                ProductoColorSnapshot = variante.Color?.Nombre,
+                ProductoTallaSnapshot = variante.Talla?.Nombre,
+                ProductoSkuSnapshot = variante.Sku
             });
         }
     }

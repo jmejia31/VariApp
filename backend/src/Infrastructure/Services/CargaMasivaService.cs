@@ -597,7 +597,10 @@ public sealed class CargaMasivaService : ICargaMasivaService
         var modelos = await _db.Modelos.AsNoTracking().Where(x => x.Activo && !x.Eliminado).ToListAsync(ct);
         var tallas = await _db.Tallas.AsNoTracking().Where(x => x.Activo && !x.Eliminado).ToListAsync(ct);
         var categorias = await _db.Categorias.AsNoTracking().Where(x => !x.Eliminada).ToListAsync(ct);
-        var productos = await _db.Productos.AsNoTracking().ToListAsync(ct);
+        var productos = await _db.Productos.AsNoTracking()
+            .Include(x => x.Variantes.Where(v => !v.Eliminado))
+            .Where(x => !x.Eliminado)
+            .ToListAsync(ct);
         var claves = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var fila in filas)
@@ -633,7 +636,26 @@ public sealed class CargaMasivaService : ICargaMasivaService
             if (!claves.Add(clave))
                 AgregarError(errores, fila.NumeroFila, "Nombre", "DUPLICADO_ARCHIVO", "El producto con la misma marca y modelo aparece más de una vez.", V(fila, "Nombre"));
 
-            fila.Accion = productos.Any(x => ClaveProducto(x.Nombre, x.Marca, x.Modelo) == clave) ? "Actualizar" : "Crear";
+            var candidatos = productos.Where(x => NormalizarClave(x.Nombre) == NormalizarClave(V(fila, "Nombre"))).ToList();
+            if (candidatos.Count > 1)
+            {
+                AgregarError(errores, fila.NumeroFila, "Nombre", "PRODUCTO_AMBIGUO", "Existe más de una familia con ese nombre. Corrige el catálogo antes de importar.", V(fila, "Nombre"));
+                fila.Accion = "Actualizar";
+                continue;
+            }
+
+            if (candidatos.Count == 1)
+            {
+                var existente = candidatos[0];
+                var tecnica = existente.Variantes.SingleOrDefault(v => v.EsTecnica && !v.Eliminado);
+                if (tecnica is null && existente.Variantes.Any(v => !v.EsTecnica && !v.Eliminado))
+                    AgregarError(errores, fila.NumeroFila, "Nombre", "PRODUCTO_REQUIERE_VARIANTES", "El producto usa variantes comerciales. Actualiza sus dimensiones, costo y precio mediante la carga VariantesInventario.", V(fila, "Nombre"));
+                fila.Accion = "Actualizar";
+            }
+            else
+            {
+                fila.Accion = "Crear";
+            }
         }
     }
 
@@ -880,14 +902,20 @@ public sealed class CargaMasivaService : ICargaMasivaService
         var modelos = await _db.Modelos.Where(x => x.Activo && !x.Eliminado).ToListAsync(ct);
         var tallas = await _db.Tallas.Where(x => x.Activo && !x.Eliminado).ToListAsync(ct);
         var categorias = await _db.Categorias.Where(x => !x.Eliminada).ToListAsync(ct);
-        var existentes = await _db.Productos.ToListAsync(ct);
+        var existentes = await _db.Productos
+            .Include(x => x.Variantes.Where(v => !v.Eliminado))
+            .Where(x => !x.Eliminado)
+            .ToListAsync(ct);
         var creados = 0;
         var actualizados = 0;
 
         foreach (var fila in filas)
         {
-            var clave = ClaveProducto(fila.Datos);
-            var producto = existentes.FirstOrDefault(x => ClaveProducto(x.Nombre, x.Marca, x.Modelo) == clave);
+            var candidatos = existentes.Where(x => NormalizarClave(x.Nombre) == NormalizarClave(V(fila, "Nombre"))).ToList();
+            if (candidatos.Count > 1)
+                throw new BusinessRuleException($"El producto '{V(fila, "Nombre")}' es ambiguo. Revalida la carga.");
+
+            var producto = candidatos.SingleOrDefault();
             var marca = marcas.First(x => NormalizarClave(x.Nombre) == NormalizarClave(V(fila, "Marca")));
             var modelo = modelos.First(x => x.MarcaId == marca.Id && NormalizarClave(x.Nombre) == NormalizarClave(V(fila, "Modelo")));
             var categoriaNombre = V(fila, "Categoria");
@@ -899,11 +927,17 @@ public sealed class CargaMasivaService : ICargaMasivaService
             {
                 producto = new Producto
                 {
+                    Nombre = V(fila, "Nombre")!,
+                    CategoriaId = categoria?.Id,
+                    Descripcion = NuloSiVacio(V(fila, "Descripcion")),
+                    Activo = Booleano(fila, "Activo"),
+                    Eliminado = false,
                     Cantidad = 0,
                     CreadoPorUsuarioId = _currentUser.UsuarioId,
                     CreadoPorNombreUsuario = _currentUser.NombreUsuario
                 };
                 _db.Productos.Add(producto);
+                await _db.SaveChangesAsync(ct);
                 existentes.Add(producto);
                 creados++;
             }
@@ -912,21 +946,57 @@ public sealed class CargaMasivaService : ICargaMasivaService
                 actualizados++;
             }
 
+            var variante = producto.Variantes.SingleOrDefault(v => v.EsTecnica && !v.Eliminado);
+            if (variante is null && producto.Variantes.Any(v => !v.EsTecnica && !v.Eliminado))
+                throw new BusinessRuleException($"El producto '{producto.Nombre}' usa variantes comerciales. Revalida y utiliza VariantesInventario.");
+
+            if (variante is null)
+            {
+                variante = new ProductoVariante
+                {
+                    ProductoId = producto.Id,
+                    Producto = producto,
+                    Sku = $"TEC-{producto.Id:D10}",
+                    Cantidad = 0,
+                    EsTecnica = true,
+                    CreadoPorUsuarioId = _currentUser.UsuarioId,
+                    CreadoPorNombreUsuario = _currentUser.NombreUsuario
+                };
+                _db.ProductoVariantes.Add(variante);
+                producto.Variantes.Add(variante);
+            }
+
+            variante.MarcaId = marca.Id;
+            variante.ModeloId = modelo.Id;
+            variante.ColorId = null;
+            variante.TallaId = talla?.Id;
+            variante.CodigoBarras = null;
+            variante.Costo = Decimal(fila, "Costo");
+            variante.Precio = Decimal(fila, "Precio");
+            variante.UmbralStockBajo = Entero(fila, "UmbralStockBajo");
+            variante.Activo = Booleano(fila, "Activo");
+            variante.Eliminado = false;
+            variante.FechaEliminacion = null;
+            variante.EliminadoPorUsuarioId = null;
+            MarcarActualizacion(variante);
+
             producto.Nombre = V(fila, "Nombre")!;
-            producto.Marca = marca.Nombre;
-            producto.Modelo = modelo.Nombre;
-            producto.MarcaId = marca.Id;
-            producto.ModeloId = modelo.Id;
             producto.CategoriaId = categoria?.Id;
-            producto.TallaId = talla?.Id;
             producto.Descripcion = NuloSiVacio(V(fila, "Descripcion"));
-            producto.Costo = Decimal(fila, "Costo");
-            producto.Precio = Decimal(fila, "Precio");
-            producto.UmbralStockBajo = Entero(fila, "UmbralStockBajo");
-            producto.Activo = Booleano(fila, "Activo");
+            producto.Activo = variante.Activo;
             producto.Eliminado = false;
             producto.FechaEliminacion = null;
             producto.EliminadoPorUsuarioId = null;
+            producto.Cantidad = variante.Cantidad;
+            producto.Marca = marca.Nombre;
+            producto.Modelo = modelo.Nombre;
+            producto.MarcaId = variante.MarcaId;
+            producto.ModeloId = variante.ModeloId;
+            producto.ColorId = variante.ColorId;
+            producto.TallaId = variante.TallaId;
+            producto.Costo = variante.Costo ?? 0m;
+            producto.Precio = variante.Precio ?? 0m;
+            producto.UmbralStockBajo = variante.UmbralStockBajo;
             MarcarActualizacion(producto);
         }
         return (creados, actualizados);

@@ -544,42 +544,44 @@ public class VentaService : IVentaService
             var producto = await _productoRepository.GetByIdAsync(input.ProductoId)
                 ?? throw new BusinessRuleException($"El producto con id {input.ProductoId} no existe.");
 
-            if (validarStock && producto.Cantidad < input.Cantidad)
-                throw new BusinessRuleException(
-                    $"Stock insuficiente para '{producto.Nombre}': disponible {producto.Cantidad}, solicitado {input.Cantidad}.");
-
-            ProductoVariante? variante = null;
+            ProductoVariante variante;
             if (input.ProductoVarianteId.HasValue)
             {
                 variante = await ObtenerVarianteAsync(input.ProductoVarianteId.Value, producto.Id, exigirActiva: true);
             }
             else
             {
-                variante = producto.Variantes.SingleOrDefault(v => v.EsTecnica && v.Activo && !v.Eliminado);
-                if (variante is null && producto.Variantes.Any(v => !v.EsTecnica && v.Activo && !v.Eliminado))
+                var tecnica = producto.Variantes.SingleOrDefault(v => v.EsTecnica && v.Activo && !v.Eliminado);
+                if (tecnica is null && producto.Variantes.Any(v => !v.EsTecnica && v.Activo && !v.Eliminado))
                     throw new BusinessRuleException($"Debes seleccionar una variante para el producto '{producto.Nombre}'.");
+                variante = tecnica
+                    ?? throw new BusinessRuleException($"El producto '{producto.Nombre}' no tiene una variante operativa activa. Corrige el inventario antes de venderlo.");
             }
 
-            var costoUnitario = variante?.Costo ?? producto.Costo;
-            var precioUnitario = variante?.Precio ?? input.PrecioUnitario;
+            if (validarStock && variante.Cantidad < input.Cantidad)
+                throw new BusinessRuleException(
+                    $"Stock insuficiente para '{producto.Nombre}' / '{variante.Sku}': disponible {variante.Cantidad}, solicitado {input.Cantidad}.");
+
+            var costoUnitario = variante.Costo ?? 0m;
+            var precioUnitario = variante.Precio ?? input.PrecioUnitario;
             var subtotal = input.Cantidad * precioUnitario;
             var costoTotal = input.Cantidad * costoUnitario;
 
             venta.Detalles.Add(new VentaDetalle
             {
                 ProductoId = producto.Id,
-                ProductoVarianteId = variante?.Id,
+                ProductoVarianteId = variante.Id,
                 Cantidad = input.Cantidad,
                 PrecioUnitario = precioUnitario,
                 CostoUnitarioSnapshot = costoUnitario,
                 Subtotal = subtotal,
                 UtilidadBruta = subtotal - costoTotal,
                 ProductoNombreSnapshot = producto.Nombre,
-                ProductoMarcaSnapshot = variante?.Marca?.Nombre ?? producto.Marca,
-                ProductoModeloSnapshot = variante?.Modelo?.Nombre ?? producto.Modelo,
-                ProductoColorSnapshot = variante?.Color?.Nombre,
-                ProductoTallaSnapshot = variante?.Talla?.Nombre,
-                ProductoSkuSnapshot = variante?.Sku
+                ProductoMarcaSnapshot = variante.Marca?.Nombre,
+                ProductoModeloSnapshot = variante.Modelo?.Nombre,
+                ProductoColorSnapshot = variante.Color?.Nombre,
+                ProductoTallaSnapshot = variante.Talla?.Nombre,
+                ProductoSkuSnapshot = variante.Sku
             });
         }
     }
@@ -611,19 +613,21 @@ public class VentaService : IVentaService
             if (!producto.Activo)
                 throw new BusinessRuleException($"El producto '{producto.Nombre}' está inactivo.");
 
-            ProductoVariante? variante = null;
+            ProductoVariante variante;
             if (d.ProductoVarianteId.HasValue)
             {
                 variante = await ObtenerVarianteAsync(d.ProductoVarianteId.Value, producto.Id, exigirActiva: true);
             }
             else
             {
-                variante = producto.Variantes.SingleOrDefault(v => v.EsTecnica && v.Activo && !v.Eliminado);
-                if (variante is null && producto.Variantes.Any(v => !v.EsTecnica && v.Activo && !v.Eliminado))
+                var tecnica = producto.Variantes.SingleOrDefault(v => v.EsTecnica && v.Activo && !v.Eliminado);
+                if (tecnica is null && producto.Variantes.Any(v => !v.EsTecnica && v.Activo && !v.Eliminado))
                     throw new BusinessRuleException($"Debes seleccionar una variante para el producto '{producto.Nombre}'.");
+                variante = tecnica
+                    ?? throw new BusinessRuleException($"El producto '{producto.Nombre}' no tiene una variante operativa activa. Corrige el inventario antes de cotizarlo.");
             }
 
-            if (variante is null && d.PrecioUnitario <= 0)
+            if (!variante.Precio.HasValue && d.PrecioUnitario <= 0)
                 throw new BusinessRuleException("El precio unitario de cada producto debe ser mayor a 0.");
 
             entradas.Add(new DetalleCalculoInput
@@ -631,7 +635,7 @@ public class VentaService : IVentaService
                 ProductoId = producto.Id,
                 CategoriaId = producto.CategoriaId,
                 Cantidad = d.Cantidad,
-                PrecioUnitario = variante?.Precio ?? d.PrecioUnitario
+                PrecioUnitario = variante.Precio ?? d.PrecioUnitario
             });
         }
 
