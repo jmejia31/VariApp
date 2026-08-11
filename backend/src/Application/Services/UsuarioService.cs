@@ -31,11 +31,8 @@ public class UsuarioService : IUsuarioService
         _currentUser = currentUser;
     }
 
-    public async Task<List<UsuarioDto>> GetAllAsync()
-    {
-        var usuarios = await _repository.GetAllAsync();
-        return usuarios.Select(ToDto).ToList();
-    }
+    public async Task<List<UsuarioDto>> GetAllAsync() =>
+        (await _repository.GetAllAsync()).Select(ToDto).ToList();
 
     public async Task<PagedResult<UsuarioDto>> GetPagedAsync(PagedRequest request)
     {
@@ -55,15 +52,16 @@ public class UsuarioService : IUsuarioService
         return usuario is null ? null : ToDetalleDto(usuario);
     }
 
-    private async Task<Rol?> ResolverRolDinamicoAsync(int? rolId)
+    private async Task<Rol> ResolverRolDinamicoAsync(int? rolId)
     {
-        if (!rolId.HasValue) return null;
+        if (!rolId.HasValue || rolId.Value <= 0)
+            throw new BusinessRuleException("Debes seleccionar un rol válido.");
 
         var rol = await _rolRepository.GetByIdAsync(rolId.Value)
             ?? throw new BusinessRuleException("El rol seleccionado no existe.");
 
-        if (!rol.Activo)
-            throw new BusinessRuleException("No se puede asignar un rol inactivo.");
+        if (!rol.Activo || rol.Eliminado)
+            throw new BusinessRuleException("No se puede asignar un rol inactivo o eliminado.");
 
         return rol;
     }
@@ -74,24 +72,17 @@ public class UsuarioService : IUsuarioService
         var nombreCompleto = NormalizarNombreCompleto(dto.NombreCompleto);
         ValidarPasswordSegura(dto.Password);
 
-        var existente = await _repository.GetByNombreUsuarioAsync(nombreUsuario);
-        if (existente is not null)
+        if (await _repository.GetByNombreUsuarioAsync(nombreUsuario) is not null)
             throw new BusinessRuleException("Ya existe un usuario con ese nombre de usuario.");
 
-        var rolDinamico = await ResolverRolDinamicoAsync(dto.RolId);
-        if (!Enum.TryParse<RolUsuario>(dto.Rol, out var rolLegado))
-            rolLegado = RolUsuario.Vendedor;
-
-        if (rolDinamico is not null)
-            rolLegado = rolDinamico.EsAdministrador ? RolUsuario.Administrador : RolUsuario.Vendedor;
-
+        var rol = await ResolverRolDinamicoAsync(dto.RolId);
         var usuario = new Usuario
         {
             NombreUsuario = nombreUsuario,
             NombreCompleto = nombreCompleto,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password, workFactor: 12),
-            Rol = rolLegado,
-            RolId = rolDinamico?.Id,
+            RolId = rol.Id,
+            RolEntidad = rol,
             Activo = true,
             CreadoPorUsuarioId = _currentUser.UsuarioId
         };
@@ -102,15 +93,10 @@ public class UsuarioService : IUsuarioService
         await _auditoria.RegistrarAsync(
             ModuloSistema.Usuarios,
             AccionPermiso.Crear,
-            $"Creó el usuario '{usuario.NombreUsuario}' con rol '{(rolDinamico?.Nombre ?? rolLegado.ToString())}'.",
+            $"Creó el usuario '{usuario.NombreUsuario}' con rol '{rol.Nombre}'.",
             usuario.Id,
             entidad: "Usuario",
-            valoresNuevos: new
-            {
-                usuario.NombreUsuario,
-                usuario.NombreCompleto,
-                Rol = rolDinamico?.Nombre ?? rolLegado.ToString()
-            });
+            valoresNuevos: new { usuario.NombreUsuario, usuario.NombreCompleto, RolId = rol.Id, Rol = rol.Nombre });
 
         return ToDto(usuario);
     }
@@ -126,16 +112,10 @@ public class UsuarioService : IUsuarioService
         if (existente is not null && existente.Id != usuario.Id)
             throw new BusinessRuleException("Ya existe otro usuario con ese nombre de usuario.");
 
-        var datosAnteriores = new
-        {
-            usuario.NombreUsuario,
-            usuario.NombreCompleto,
-            Rol = usuario.RolEntidad?.Nombre ?? usuario.Rol.ToString()
-        };
-
-        var rolDinamico = await ResolverRolDinamicoAsync(dto.RolId);
-        var eraAdmin = usuario.RolEntidad?.EsAdministrador ?? usuario.Rol == RolUsuario.Administrador;
-        var seraAdmin = rolDinamico?.EsAdministrador ?? eraAdmin;
+        var rolAnterior = usuario.RolEntidad?.Nombre ?? "Sin rol válido";
+        var rolNuevo = await ResolverRolDinamicoAsync(dto.RolId);
+        var eraAdmin = usuario.RolEntidad?.EsAdministrador == true;
+        var seraAdmin = rolNuevo.EsAdministrador;
 
         if (eraAdmin && !seraAdmin && _currentUser.UsuarioId == usuario.Id)
         {
@@ -144,20 +124,14 @@ public class UsuarioService : IUsuarioService
                 throw new BusinessRuleException("No puedes quitarte a ti mismo el rol de administrador: eres el único administrador activo del sistema.");
         }
 
+        var datosAnteriores = new { usuario.NombreUsuario, usuario.NombreCompleto, Rol = rolAnterior, usuario.RolId };
+
         usuario.NombreUsuario = nombreUsuario;
         usuario.NombreCompleto = nombreCompleto;
+        usuario.RolId = rolNuevo.Id;
+        usuario.RolEntidad = rolNuevo;
         usuario.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
         usuario.FechaActualizacion = DateTime.UtcNow;
-
-        if (rolDinamico is not null)
-        {
-            usuario.RolId = rolDinamico.Id;
-            usuario.Rol = rolDinamico.EsAdministrador ? RolUsuario.Administrador : RolUsuario.Vendedor;
-        }
-        else if (Enum.TryParse<RolUsuario>(dto.Rol, out var rolLegado))
-        {
-            usuario.Rol = rolLegado;
-        }
 
         var huboResetPassword = !string.IsNullOrWhiteSpace(dto.NuevaPassword);
         if (huboResetPassword)
@@ -172,19 +146,16 @@ public class UsuarioService : IUsuarioService
         _repository.Update(usuario);
         await _repository.SaveChangesAsync();
 
-        // Se prioriza el rol recién resuelto. La navegación cargada en la entidad
-        // puede continuar apuntando al rol anterior hasta que el contexto se recargue.
-        var rolNuevo = rolDinamico?.Nombre ?? usuario.RolEntidad?.Nombre ?? usuario.Rol.ToString();
-        if (!string.Equals(datosAnteriores.Rol, rolNuevo, StringComparison.Ordinal))
+        if (datosAnteriores.RolId != rolNuevo.Id)
         {
             await _auditoria.RegistrarAsync(
                 ModuloSistema.Usuarios,
                 AccionPermiso.AsignarRol,
-                $"Cambió el rol del usuario '{usuario.NombreUsuario}' de '{datosAnteriores.Rol}' a '{rolNuevo}'.",
+                $"Cambió el rol del usuario '{usuario.NombreUsuario}' de '{rolAnterior}' a '{rolNuevo.Nombre}'.",
                 usuario.Id,
                 entidad: "Usuario",
-                valoresAnteriores: new { datosAnteriores.Rol },
-                valoresNuevos: new { Rol = rolNuevo });
+                valoresAnteriores: new { RolId = datosAnteriores.RolId, Rol = rolAnterior },
+                valoresNuevos: new { RolId = rolNuevo.Id, Rol = rolNuevo.Nombre });
         }
 
         await _auditoria.RegistrarAsync(
@@ -213,9 +184,7 @@ public class UsuarioService : IUsuarioService
     {
         var usuario = await _repository.GetByIdAsync(id);
         if (usuario is null) return null;
-
-        if (!activo)
-            await ValidarNoEsUltimoAdminAsync(usuario, "desactivar");
+        if (!activo) await ValidarNoEsUltimoAdminAsync(usuario, "desactivar");
 
         usuario.Activo = activo;
         usuario.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
@@ -240,7 +209,6 @@ public class UsuarioService : IUsuarioService
 
         var usuario = await _repository.GetByIdAsync(id)
             ?? throw new BusinessRuleException("El usuario no existe.");
-
         if (usuario.Id == _currentUser.UsuarioId)
             throw new BusinessRuleException("No puedes bloquearte a ti mismo.");
 
@@ -255,14 +223,8 @@ public class UsuarioService : IUsuarioService
         _repository.Update(usuario);
         await _repository.SaveChangesAsync();
 
-        await _auditoria.RegistrarAsync(
-            ModuloSistema.Usuarios,
-            AccionPermiso.Desactivar,
-            $"Bloqueó al usuario '{usuario.NombreUsuario}'.",
-            usuario.Id,
-            entidad: "Usuario",
-            motivo: motivo);
-
+        await _auditoria.RegistrarAsync(ModuloSistema.Usuarios, AccionPermiso.Desactivar,
+            $"Bloqueó al usuario '{usuario.NombreUsuario}'.", usuario.Id, entidad: "Usuario", motivo: motivo);
         return ToDto(usuario);
     }
 
@@ -280,13 +242,8 @@ public class UsuarioService : IUsuarioService
         _repository.Update(usuario);
         await _repository.SaveChangesAsync();
 
-        await _auditoria.RegistrarAsync(
-            ModuloSistema.Usuarios,
-            AccionPermiso.Activar,
-            $"Desbloqueó al usuario '{usuario.NombreUsuario}'.",
-            usuario.Id,
-            entidad: "Usuario");
-
+        await _auditoria.RegistrarAsync(ModuloSistema.Usuarios, AccionPermiso.Activar,
+            $"Desbloqueó al usuario '{usuario.NombreUsuario}'.", usuario.Id, entidad: "Usuario");
         return ToDto(usuario);
     }
 
@@ -294,12 +251,10 @@ public class UsuarioService : IUsuarioService
     {
         var usuario = await _repository.GetByIdAsync(id)
             ?? throw new BusinessRuleException("El usuario no existe.");
-
         if (usuario.Id == _currentUser.UsuarioId)
             throw new BusinessRuleException("No puedes eliminar tu propia cuenta.");
 
         await ValidarNoEsUltimoAdminAsync(usuario, "eliminar");
-
         usuario.Eliminado = true;
         usuario.Activo = false;
         usuario.FechaEliminacion = DateTime.UtcNow;
@@ -309,19 +264,13 @@ public class UsuarioService : IUsuarioService
         _repository.Update(usuario);
         await _repository.SaveChangesAsync();
 
-        await _auditoria.RegistrarAsync(
-            ModuloSistema.Usuarios,
-            AccionPermiso.EliminarLogico,
-            $"Eliminó lógicamente al usuario '{usuario.NombreUsuario}'.",
-            usuario.Id,
-            entidad: "Usuario");
+        await _auditoria.RegistrarAsync(ModuloSistema.Usuarios, AccionPermiso.EliminarLogico,
+            $"Eliminó lógicamente al usuario '{usuario.NombreUsuario}'.", usuario.Id, entidad: "Usuario");
     }
 
     private async Task ValidarNoEsUltimoAdminAsync(Usuario usuario, string accion)
     {
-        var esAdmin = usuario.RolEntidad?.EsAdministrador ?? usuario.Rol == RolUsuario.Administrador;
-        if (!esAdmin) return;
-
+        if (usuario.RolEntidad?.EsAdministrador != true) return;
         var otrosAdmins = await _repository.ContarAdministradoresActivosAsync(excluirUsuarioId: usuario.Id);
         if (otrosAdmins == 0)
             throw new BusinessRuleException($"No se puede {accion} este usuario: es el único administrador activo del sistema.");
@@ -331,9 +280,7 @@ public class UsuarioService : IUsuarioService
     {
         var normalizado = valor?.Trim() ?? string.Empty;
         if (!NombreUsuarioValido.IsMatch(normalizado))
-            throw new BusinessRuleException(
-                "El nombre de usuario debe tener entre 3 y 50 caracteres y usar únicamente letras, números, punto, guion o guion bajo.");
-
+            throw new BusinessRuleException("El nombre de usuario debe tener entre 3 y 50 caracteres y usar únicamente letras, números, punto, guion o guion bajo.");
         return normalizado;
     }
 
@@ -342,7 +289,6 @@ public class UsuarioService : IUsuarioService
         var normalizado = Regex.Replace(valor?.Trim() ?? string.Empty, "\\s+", " ");
         if (normalizado.Length < 3 || normalizado.Length > 150)
             throw new BusinessRuleException("El nombre completo debe tener entre 3 y 150 caracteres.");
-
         return normalizado;
     }
 
@@ -350,14 +296,8 @@ public class UsuarioService : IUsuarioService
     {
         if (string.IsNullOrWhiteSpace(password) || password.Length < 10 || password.Length > 128)
             throw new BusinessRuleException("La contraseña debe tener entre 10 y 128 caracteres.");
-
-        if (!password.Any(char.IsUpper) ||
-            !password.Any(char.IsLower) ||
-            !password.Any(char.IsDigit) ||
-            !password.Any(c => !char.IsLetterOrDigit(c)))
-        {
+        if (!password.Any(char.IsUpper) || !password.Any(char.IsLower) || !password.Any(char.IsDigit) || !password.Any(c => !char.IsLetterOrDigit(c)))
             throw new BusinessRuleException("La contraseña debe incluir mayúscula, minúscula, número y símbolo.");
-        }
     }
 
     private static UsuarioDto ToDto(Usuario u) => new()
@@ -365,7 +305,7 @@ public class UsuarioService : IUsuarioService
         Id = u.Id,
         NombreUsuario = u.NombreUsuario,
         NombreCompleto = u.NombreCompleto,
-        Rol = u.RolEntidad?.Nombre ?? u.Rol.ToString(),
+        Rol = u.RolEntidad?.Nombre ?? string.Empty,
         RolId = u.RolId,
         Activo = u.Activo,
         Bloqueado = u.Bloqueado,
@@ -377,7 +317,7 @@ public class UsuarioService : IUsuarioService
         Id = u.Id,
         NombreUsuario = u.NombreUsuario,
         NombreCompleto = u.NombreCompleto,
-        Rol = u.RolEntidad?.Nombre ?? u.Rol.ToString(),
+        Rol = u.RolEntidad?.Nombre ?? string.Empty,
         RolId = u.RolId,
         RolNombre = u.RolEntidad?.Nombre,
         Activo = u.Activo,
