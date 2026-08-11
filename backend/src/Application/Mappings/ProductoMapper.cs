@@ -26,20 +26,36 @@ public static class ProductoMapper
         var agotado = p.Activo && !p.Eliminado && (activas.Count == 0 || activas.All(v => v.Cantidad <= 0));
         var stockBajo = p.Activo && !p.Eliminado && !agotado && activas.Any(v => v.TieneStockBajo);
 
-        var marcaId = ValorComun(varianteFuente: variantes, selector: v => v.MarcaId);
-        var modeloId = ValorComun(varianteFuente: variantes, selector: v => v.ModeloId);
-        var colorId = ValorComun(varianteFuente: variantes, selector: v => v.ColorId);
-        var tallaId = ValorComun(varianteFuente: variantes, selector: v => v.TallaId);
+        var marcaId = variantes.Count > 0
+            ? ValorComun(varianteFuente: variantes, selector: v => v.MarcaId)
+            : p.MarcaId;
+        var modeloId = variantes.Count > 0
+            ? ValorComun(varianteFuente: variantes, selector: v => v.ModeloId)
+            : p.ModeloId;
+        var colorId = variantes.Count > 0
+            ? ValorComun(varianteFuente: variantes, selector: v => v.ColorId)
+            : p.ColorId;
+        var tallaId = variantes.Count > 0
+            ? ValorComun(varianteFuente: variantes, selector: v => v.TallaId)
+            : p.TallaId;
 
         var marcaNombres = variantes.Select(v => v.Marca?.Nombre).Where(NoVacio).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
         var modeloNombres = variantes.Select(v => v.Modelo?.Nombre).Where(NoVacio).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
         var marca = variantes.Count > 0 ? string.Join(" / ", marcaNombres!) : (p.MarcaCatalogo?.Nombre ?? p.Marca);
         var modelo = variantes.Count > 0 ? string.Join(" / ", modeloNombres!) : (p.ModeloCatalogo?.Nombre ?? p.Modelo);
 
-        var color = colorId.HasValue ? variantes.FirstOrDefault(v => v.ColorId == colorId)?.Color : null;
-        var talla = tallaId.HasValue ? variantes.FirstOrDefault(v => v.TallaId == tallaId)?.Talla : null;
-        var marcaEntidad = marcaId.HasValue ? variantes.FirstOrDefault(v => v.MarcaId == marcaId)?.Marca : null;
-        var modeloEntidad = modeloId.HasValue ? variantes.FirstOrDefault(v => v.ModeloId == modeloId)?.Modelo : null;
+        var color = variantes.Count > 0 && colorId.HasValue
+            ? variantes.FirstOrDefault(v => v.ColorId == colorId)?.Color
+            : p.ColorCatalogo;
+        var talla = variantes.Count > 0 && tallaId.HasValue
+            ? variantes.FirstOrDefault(v => v.TallaId == tallaId)?.Talla
+            : p.TallaCatalogo;
+        var marcaEntidad = variantes.Count > 0 && marcaId.HasValue
+            ? variantes.FirstOrDefault(v => v.MarcaId == marcaId)?.Marca
+            : p.MarcaCatalogo;
+        var modeloEntidad = variantes.Count > 0 && modeloId.HasValue
+            ? variantes.FirstOrDefault(v => v.ModeloId == modeloId)?.Modelo
+            : p.ModeloCatalogo;
 
         var imagenesGenerales = p.Imagenes
             .Where(i => i.ProductoVarianteId == null)
