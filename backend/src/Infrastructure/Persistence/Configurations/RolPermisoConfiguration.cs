@@ -11,23 +11,19 @@ public class RolPermisoConfiguration : IEntityTypeConfiguration<RolPermiso>
         builder.ToTable("RolPermisos");
         builder.HasKey(p => p.Id);
 
-        builder.Property(p => p.Rol).IsRequired();
-        builder.Property(p => p.Modulo).IsRequired();
-        builder.Property(p => p.Accion).IsRequired();
-        builder.Property(p => p.Permitido).IsRequired();
+        builder.Property(p => p.RolId).IsRequired();
+        builder.Property(p => p.PermisoId).IsRequired();
 
-        builder.HasOne<Rol>()
+        builder.HasOne(p => p.RolEntidad)
             .WithMany(r => r.Permisos)
             .HasForeignKey(p => p.RolId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasOne<Permiso>()
+        builder.HasOne(p => p.Permiso)
             .WithMany(p => p.Asignaciones)
-            .HasForeignKey(rp => rp.PermisoId)
+            .HasForeignKey(p => p.PermisoId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasIndex(p => new { p.Rol, p.Modulo, p.Accion });
-        builder.HasIndex(p => new { p.RolId, p.Modulo, p.Accion }).IsUnique();
         builder.HasIndex(p => new { p.RolId, p.PermisoId }).IsUnique();
     }
 }
