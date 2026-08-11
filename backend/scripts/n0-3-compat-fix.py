@@ -11,35 +11,41 @@ def write(rel, text): (ROOT / rel).write_text(text, encoding='utf-8')
 p='backend/src/Application/Services/ProductoVarianteService.cs'
 t=read(p)
 t=t.replace('await MarcarProductoActualizadoAsync(producto);', 'await SincronizarProyeccionCompatibilidadAsync(producto);')
-old='''                tecnica = new ProductoVariante
-                {
-                    ProductoId = producto.Id,
-                    Sku = CrearSkuTecnico(producto.Id),
-                    EsTecnica = true,
-                    CreadoPorUsuarioId = _currentUser.UsuarioId,
-                    CreadoPorNombreUsuario = _currentUser.NombreUsuario
-                };'''
-new='''                tecnica = new ProductoVariante
-                {
-                    ProductoId = producto.Id,
-                    MarcaId = producto.MarcaId,
-                    ModeloId = producto.ModeloId,
-                    ColorId = producto.ColorId,
-                    TallaId = producto.TallaId,
-                    Sku = CrearSkuTecnico(producto.Id),
-                    CodigoBarras = null,
-                    Cantidad = producto.Cantidad,
-                    UmbralStockBajo = producto.UmbralStockBajo,
-                    Costo = producto.Costo,
-                    Precio = producto.Precio,
-                    EsTecnica = true,
-                    CreadoPorUsuarioId = _currentUser.UsuarioId,
-                    CreadoPorNombreUsuario = _currentUser.NombreUsuario
-                };'''
-if old not in t: raise SystemExit('No se encontró alta técnica generada')
-t=t.replace(old,new,1)
+
+# AsegurarTecnicaBajoLockAsync puede crear una técnica a partir de un producto pre-N0.3.
+# Sembramos el legado UNA sola vez al crearla; una técnica ya existente nunca vuelve a copiarse desde Producto.
+marker='''        var tecnica = await _repository.GetTecnicaByProductoIdAsync(producto.Id, true);
+        if (tecnica is null)
+        {'''
+replacement_marker='''        var tecnica = await _repository.GetTecnicaByProductoIdAsync(producto.Id, true);
+        var esNueva = tecnica is null;
+        if (tecnica is null)
+        {'''
+if marker not in t: raise SystemExit('No se encontró marcador de alta técnica generada')
+t=t.replace(marker,replacement_marker,1)
+seed_marker='''        tecnica.EsTecnica = true;
+        tecnica.CodigoBarras = null;
+        tecnica.Activo = producto.Activo;'''
+seed='''        if (esNueva)
+        {
+            tecnica.MarcaId = producto.MarcaId;
+            tecnica.ModeloId = producto.ModeloId;
+            tecnica.ColorId = producto.ColorId;
+            tecnica.TallaId = producto.TallaId;
+            tecnica.Cantidad = producto.Cantidad;
+            tecnica.UmbralStockBajo = producto.UmbralStockBajo;
+            tecnica.Costo = producto.Costo;
+            tecnica.Precio = producto.Precio;
+        }
+
+        tecnica.EsTecnica = true;
+        tecnica.CodigoBarras = null;
+        tecnica.Activo = producto.Activo;'''
+if seed_marker not in t: raise SystemExit('No se encontró punto de seed técnico generado')
+t=t.replace(seed_marker,seed,1)
+
 pattern=r'''    private async Task MarcarProductoActualizadoAsync\(Producto producto\)\n    \{.*?\n    \}\n'''
-replacement='''    // Compatibilidad transitoria N0.3: Producto conserva un espejo DERIVADO, nunca autoridad operativa.
+projection='''    // Compatibilidad transitoria N0.3: Producto conserva un espejo DERIVADO, nunca autoridad operativa.
     private async Task SincronizarProyeccionCompatibilidadAsync(Producto producto)
     {
         var variantes = await _repository.GetByProductoIdAsync(producto.Id, true);
@@ -77,7 +83,7 @@ replacement='''    // Compatibilidad transitoria N0.3: Producto conserva un espe
         return lista.Count == 1 ? lista[0] : null;
     }
 '''
-t2,n=re.subn(pattern,replacement,t,count=1,flags=re.S)
+t2,n=re.subn(pattern,projection,t,count=1,flags=re.S)
 if n!=1: raise SystemExit('No se reemplazó proyección compatibilidad')
 write(p,t2)
 
@@ -94,12 +100,14 @@ new='''        var soloTecnicaPreBackfill = variantes.Count == 1 && variantes[0]
         var tallaId = ValorComun(variantes, v => v.TallaId) ?? (soloTecnicaPreBackfill ? p.TallaId : null);'''
 if old not in t: raise SystemExit('Mapper IDs no localizado')
 t=t.replace(old,new,1)
-t=t.replace('''        var marca = string.Join(" / ", marcaNombres!);
-        var modelo = string.Join(" / ", modeloNombres!);''','''        var marca = marcaNombres.Count > 0 ? string.Join(" / ", marcaNombres!) : (soloTecnicaPreBackfill ? p.Marca : string.Empty);
-        var modelo = modeloNombres.Count > 0 ? string.Join(" / ", modeloNombres!) : (soloTecnicaPreBackfill ? p.Modelo : string.Empty);''',1)
-write(p,t)
+old_names='''        var marca = string.Join(" / ", marcaNombres!);
+        var modelo = string.Join(" / ", modeloNombres!);'''
+new_names='''        var marca = marcaNombres.Count > 0 ? string.Join(" / ", marcaNombres!) : (soloTecnicaPreBackfill ? p.Marca : string.Empty);
+        var modelo = modeloNombres.Count > 0 ? string.Join(" / ", modeloNombres!) : (soloTecnicaPreBackfill ? p.Modelo : string.Empty);'''
+if old_names not in t: raise SystemExit('Mapper nombres no localizado')
+write(p,t.replace(old_names,new_names,1))
 
-# Venta: si cliente antiguo omite VarianteId, resuelve automáticamente variante técnica.
+# Venta: cliente antiguo sin VarianteId resuelve técnica; comerciales exigen variante exacta.
 p='backend/src/Application/Services/VentaService.cs'; t=read(p)
 old='''            ProductoVariante? variante = null;
             if (input.ProductoVarianteId.HasValue)
@@ -144,10 +152,9 @@ new='''            ProductoVariante? variante = null;
                     throw new BusinessRuleException($"Debes seleccionar una variante para el producto '{producto.Nombre}'.");
             }'''
 if old not in t: raise SystemExit('Venta preview no localizado')
-t=t.replace(old,new,1)
-write(p,t)
+write(p,t.replace(old,new,1))
 
-# Compra: misma resolución automática para producto simple.
+# Compra: mismo principio para producto simple.
 p='backend/src/Application/Services/CompraService.cs'; t=read(p)
 old='''            ProductoVariante? variante = null;
             if (input.ProductoVarianteId.HasValue)
@@ -172,7 +179,7 @@ new='''            ProductoVariante? variante = null;
 if old not in t: raise SystemExit('Compra ArmarDetalles no localizado')
 write(p,t.replace(old,new,1))
 
-# Concurrencia: Producto.Cantidad es fallback únicamente para demandas históricas sin VarianteId.
+# Concurrencia: Producto.Cantidad solo sirve como fallback histórico si falta VarianteId.
 p='backend/src/Infrastructure/Services/InventarioConcurrencyService.cs'; t=read(p)
 old='''            var cantidadTotalProducto = productoGrupo.Sum(x => x.Cantidad);
             if (esDeduccion && producto.Cantidad < cantidadTotalProducto)
