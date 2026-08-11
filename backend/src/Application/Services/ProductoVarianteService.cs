@@ -81,7 +81,7 @@ public class ProductoVarianteService : IProductoVarianteService
 
             await _repository.AddAsync(variante);
             await _repository.SaveChangesAsync();
-            await RecalcularProductoAsync(producto);
+            await SincronizarProyeccionCompatibilidadAsync(producto);
         });
 
         await _auditoria.RegistrarAsync(
@@ -132,7 +132,7 @@ public class ProductoVarianteService : IProductoVarianteService
             MarcarActualizacion(variante);
 
             await _repository.SaveChangesAsync();
-            await RecalcularProductoAsync(producto);
+            await SincronizarProyeccionCompatibilidadAsync(producto);
         });
 
         if (producto is null || variante is null) return null;
@@ -173,7 +173,7 @@ public class ProductoVarianteService : IProductoVarianteService
             MarcarActualizacion(variante);
             cambioRealizado = true;
             await _repository.SaveChangesAsync();
-            await RecalcularProductoAsync(producto);
+            await SincronizarProyeccionCompatibilidadAsync(producto);
         });
 
         if (producto is null || variante is null) return null;
@@ -217,7 +217,7 @@ public class ProductoVarianteService : IProductoVarianteService
             variante.EliminadoPorUsuarioId = _currentUser.UsuarioId;
             MarcarActualizacion(variante);
             guardado = await _repository.SaveChangesAsync();
-            await RecalcularProductoAsync(producto);
+            await SincronizarProyeccionCompatibilidadAsync(producto);
         });
 
         if (producto is null || variante is null) return false;
@@ -253,10 +253,67 @@ public class ProductoVarianteService : IProductoVarianteService
                 throw new BusinessRuleException("No puedes convertir el producto a variantes comerciales mientras la variante técnica tenga existencias. Ajusta primero su stock a cero.");
             MarcarEliminacionTecnica(tecnica);
             await _repository.SaveChangesAsync();
-            producto.Cantidad = 0;
-            producto.FechaActualizacion = DateTime.UtcNow;
-            await _productoRepository.SaveChangesAsync();
+            await SincronizarProyeccionCompatibilidadAsync(producto);
         });
+    }
+
+    public async Task<ProductoVarianteDto> SincronizarTecnicaAsync(int productoId, ProductoVarianteFormularioDto dto)
+    {
+        ProductoVariante? tecnica = null;
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            var producto = await _productoRepository.GetByIdForUpdateAsync(productoId)
+                ?? throw new BusinessRuleException("El producto no existe o fue eliminado.");
+            if (!string.IsNullOrWhiteSpace(dto.Sku) || !string.IsNullOrWhiteSpace(dto.CodigoBarras))
+                throw new BusinessRuleException("La variante técnica utiliza un SKU interno y no admite código de barras manual.");
+            if (dto.ModeloId.HasValue && !dto.MarcaId.HasValue)
+                throw new BusinessRuleException("Todo modelo debe indicar su marca.");
+            if (dto.Cantidad < 0 || dto.UmbralStockBajo < 0 || dto.Costo < 0 || dto.Precio <= 0)
+                throw new BusinessRuleException("La variante técnica requiere stock/umbral no negativos, costo no negativo y precio mayor que cero.");
+            await _catalogoService.ValidarSeleccionProductoAsync(dto.ColorId, dto.TallaId, dto.MarcaId, dto.ModeloId);
+
+            var vigentes = await _repository.GetByProductoIdAsync(productoId, true);
+            if (vigentes.Any(v => !v.EsTecnica))
+                throw new BusinessRuleException("No se puede sincronizar una variante técnica mientras existan variantes comerciales.");
+
+            tecnica = await _repository.GetTecnicaByProductoIdAsync(productoId, true);
+            var esNueva = tecnica is null || tecnica.Eliminado;
+            if (tecnica is null)
+            {
+                tecnica = new ProductoVariante
+                {
+                    ProductoId = productoId,
+                    Sku = CrearSkuTecnico(productoId),
+                    EsTecnica = true,
+                    CreadoPorUsuarioId = _currentUser.UsuarioId,
+                    CreadoPorNombreUsuario = _currentUser.NombreUsuario
+                };
+                await _repository.AddAsync(tecnica);
+            }
+            else if (!esNueva && tecnica.Cantidad != dto.Cantidad)
+            {
+                throw new BusinessRuleException("El stock del producto simple debe cambiarse mediante Ajustar inventario para conservar trazabilidad.");
+            }
+
+            tecnica.EsTecnica = true;
+            tecnica.MarcaId = dto.MarcaId;
+            tecnica.ModeloId = dto.ModeloId;
+            tecnica.ColorId = dto.ColorId;
+            tecnica.TallaId = dto.TallaId;
+            tecnica.CodigoBarras = null;
+            if (esNueva) tecnica.Cantidad = dto.Cantidad;
+            tecnica.UmbralStockBajo = dto.UmbralStockBajo;
+            tecnica.Costo = dto.Costo;
+            tecnica.Precio = dto.Precio;
+            tecnica.Activo = producto.Activo;
+            tecnica.Eliminado = false;
+            tecnica.FechaEliminacion = null;
+            tecnica.EliminadoPorUsuarioId = null;
+            MarcarActualizacion(tecnica);
+            await _repository.SaveChangesAsync();
+            await SincronizarProyeccionCompatibilidadAsync(producto);
+        });
+        return ToDto((await _repository.GetByIdAsync(tecnica!.Id))!);
     }
 
     public async Task SincronizarTecnicaConProductoAsync(int productoId)
@@ -274,7 +331,10 @@ public class ProductoVarianteService : IProductoVarianteService
                     throw new BusinessRuleException("El producto no puede conservar simultáneamente una variante técnica y variantes comerciales.");
                 return;
             }
-            await AsegurarTecnicaBajoLockAsync(producto);
+            tecnica ??= await AsegurarTecnicaBajoLockAsync(producto);
+            tecnica.Activo = producto.Activo;
+            MarcarActualizacion(tecnica);
+            await _repository.SaveChangesAsync();
         });
     }
 
@@ -299,6 +359,7 @@ public class ProductoVarianteService : IProductoVarianteService
             throw new BusinessRuleException("No se puede crear una variante técnica porque el producto tiene variantes comerciales.");
 
         var tecnica = await _repository.GetTecnicaByProductoIdAsync(producto.Id, true);
+        var esNueva = tecnica is null;
         if (tecnica is null)
         {
             tecnica = new ProductoVariante
@@ -312,16 +373,20 @@ public class ProductoVarianteService : IProductoVarianteService
             await _repository.AddAsync(tecnica);
         }
 
+        if (esNueva)
+        {
+            tecnica.MarcaId = producto.MarcaId;
+            tecnica.ModeloId = producto.ModeloId;
+            tecnica.ColorId = producto.ColorId;
+            tecnica.TallaId = producto.TallaId;
+            tecnica.Cantidad = producto.Cantidad;
+            tecnica.UmbralStockBajo = producto.UmbralStockBajo;
+            tecnica.Costo = producto.Costo;
+            tecnica.Precio = producto.Precio;
+        }
+
         tecnica.EsTecnica = true;
-        tecnica.MarcaId = null;
-        tecnica.ModeloId = null;
-        tecnica.ColorId = null;
-        tecnica.TallaId = null;
         tecnica.CodigoBarras = null;
-        tecnica.Cantidad = producto.Cantidad;
-        tecnica.UmbralStockBajo = producto.UmbralStockBajo;
-        tecnica.Costo = producto.Costo;
-        tecnica.Precio = producto.Precio;
         tecnica.Activo = producto.Activo;
         tecnica.Eliminado = false;
         tecnica.FechaEliminacion = null;
@@ -335,6 +400,8 @@ public class ProductoVarianteService : IProductoVarianteService
     {
         if (!dto.MarcaId.HasValue && !dto.ModeloId.HasValue && !dto.ColorId.HasValue && !dto.TallaId.HasValue)
             throw new BusinessRuleException("Una variante comercial debe definir al menos una dimensión: marca, modelo, color o talla.");
+        if (dto.ModeloId.HasValue && !dto.MarcaId.HasValue)
+            throw new BusinessRuleException("Todo modelo de variante debe indicar su marca.");
         if (dto.Cantidad < 0)
             throw new BusinessRuleException("El stock de la variante no puede ser negativo.");
         if (dto.UmbralStockBajo < 0)
@@ -383,28 +450,32 @@ public class ProductoVarianteService : IProductoVarianteService
         await _productoRepository.GetByIdAsync(productoId)
         ?? throw new BusinessRuleException("El producto no existe o fue eliminado.");
 
-    private async Task RecalcularProductoAsync(Producto producto)
+    // Compatibilidad transitoria N0.3: Producto conserva un espejo DERIVADO, nunca autoridad operativa.
+    private async Task SincronizarProyeccionCompatibilidadAsync(Producto producto)
     {
         var variantes = await _repository.GetByProductoIdAsync(producto.Id, true);
         var activas = variantes.Where(v => v.Activo).ToList();
         var total = variantes.Sum(v => v.Cantidad);
         producto.Cantidad = total;
-
+        producto.UmbralStockBajo = variantes.Sum(v => v.UmbralStockBajo);
         if (variantes.Count > 0)
         {
             producto.Costo = total > 0
                 ? Math.Round(variantes.Sum(v => (v.Costo ?? 0m) * v.Cantidad) / total, 2, MidpointRounding.AwayFromZero)
-                : variantes.Average(v => v.Costo ?? 0m);
-            var variantesPrecio = activas.Count > 0 ? activas : variantes;
-            producto.Precio = variantesPrecio.Min(v => v.Precio ?? producto.Precio);
-
-            var comerciales = variantes.Where(v => !v.EsTecnica).ToList();
-            producto.MarcaId = ValorComun(comerciales.Select(v => v.MarcaId));
-            producto.ModeloId = ValorComun(comerciales.Select(v => v.ModeloId));
-            producto.ColorId = ValorComun(comerciales.Select(v => v.ColorId));
-            producto.TallaId = ValorComun(comerciales.Select(v => v.TallaId));
+                : Math.Round(variantes.Average(v => v.Costo ?? 0m), 2, MidpointRounding.AwayFromZero);
+            var fuentePrecio = activas.Count > 0 ? activas : variantes;
+            producto.Precio = fuentePrecio.Min(v => v.Precio ?? 0m);
+            producto.MarcaId = ValorComun(variantes.Select(v => v.MarcaId));
+            producto.ModeloId = ValorComun(variantes.Select(v => v.ModeloId));
+            producto.ColorId = ValorComun(variantes.Select(v => v.ColorId));
+            producto.TallaId = ValorComun(variantes.Select(v => v.TallaId));
+            producto.Marca = producto.MarcaId.HasValue
+                ? variantes.FirstOrDefault(v => v.MarcaId == producto.MarcaId)?.Marca?.Nombre ?? producto.Marca
+                : string.Empty;
+            producto.Modelo = producto.ModeloId.HasValue
+                ? variantes.FirstOrDefault(v => v.ModeloId == producto.ModeloId)?.Modelo?.Nombre ?? producto.Modelo
+                : string.Empty;
         }
-
         producto.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
         producto.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
         producto.FechaActualizacion = DateTime.UtcNow;
@@ -413,9 +484,10 @@ public class ProductoVarianteService : IProductoVarianteService
 
     private static int? ValorComun(IEnumerable<int?> valores)
     {
-        var lista = valores.Distinct().ToList();
+        var lista = valores.Distinct().Take(2).ToList();
         return lista.Count == 1 ? lista[0] : null;
     }
+
 
     private void MarcarActualizacion(ProductoVariante variante)
     {

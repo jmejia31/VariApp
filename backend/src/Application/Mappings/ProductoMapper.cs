@@ -15,48 +15,32 @@ public static class ProductoMapper
             .ThenBy(v => v.Talla?.Nombre)
             .ThenBy(v => v.Sku)
             .ToList();
-        var variantesDimensionales = variantes.Where(v => !v.EsTecnica).ToList();
         var activas = variantes.Where(v => v.Activo).ToList();
         var operativas = activas.Count > 0 ? activas : variantes;
         var stockTotal = variantes.Sum(v => v.Cantidad);
-        var costo = CalcularCosto(varianteFuente: variantes, fallback: p.Costo);
+        var costo = CalcularCosto(variantes);
         var precios = operativas.Where(v => v.Precio.HasValue).Select(v => v.Precio!.Value).ToList();
-        var precio = precios.Count > 0 ? precios.Min() : p.Precio;
-        var precioMaximo = precios.Count > 0 ? precios.Max() : p.Precio;
-        var umbral = variantes.Count > 0 ? variantes.Sum(v => v.UmbralStockBajo) : p.UmbralStockBajo;
+        var precio = precios.Count > 0 ? precios.Min() : 0m;
+        var precioMaximo = precios.Count > 0 ? precios.Max() : 0m;
+        var umbral = variantes.Sum(v => v.UmbralStockBajo);
         var agotado = p.Activo && !p.Eliminado && (activas.Count == 0 || activas.All(v => v.Cantidad <= 0));
         var stockBajo = p.Activo && !p.Eliminado && !agotado && activas.Any(v => v.TieneStockBajo);
 
-        var marcaId = variantesDimensionales.Count > 0
-            ? ValorComun(varianteFuente: variantesDimensionales, selector: v => v.MarcaId)
-            : p.MarcaId;
-        var modeloId = variantesDimensionales.Count > 0
-            ? ValorComun(varianteFuente: variantesDimensionales, selector: v => v.ModeloId)
-            : p.ModeloId;
-        var colorId = variantesDimensionales.Count > 0
-            ? ValorComun(varianteFuente: variantesDimensionales, selector: v => v.ColorId)
-            : p.ColorId;
-        var tallaId = variantesDimensionales.Count > 0
-            ? ValorComun(varianteFuente: variantesDimensionales, selector: v => v.TallaId)
-            : p.TallaId;
+        var soloTecnicaPreBackfill = variantes.Count == 1 && variantes[0].EsTecnica;
+        var marcaId = ValorComun(variantes, v => v.MarcaId) ?? (soloTecnicaPreBackfill ? p.MarcaId : null);
+        var modeloId = ValorComun(variantes, v => v.ModeloId) ?? (soloTecnicaPreBackfill ? p.ModeloId : null);
+        var colorId = ValorComun(variantes, v => v.ColorId) ?? (soloTecnicaPreBackfill ? p.ColorId : null);
+        var tallaId = ValorComun(variantes, v => v.TallaId) ?? (soloTecnicaPreBackfill ? p.TallaId : null);
 
-        var marcaNombres = variantesDimensionales.Select(v => v.Marca?.Nombre).Where(NoVacio).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
-        var modeloNombres = variantesDimensionales.Select(v => v.Modelo?.Nombre).Where(NoVacio).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
-        var marca = variantesDimensionales.Count > 0 ? string.Join(" / ", marcaNombres!) : (p.MarcaCatalogo?.Nombre ?? p.Marca);
-        var modelo = variantesDimensionales.Count > 0 ? string.Join(" / ", modeloNombres!) : (p.ModeloCatalogo?.Nombre ?? p.Modelo);
+        var marcaNombres = variantes.Select(v => v.Marca?.Nombre).Where(NoVacio).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        var modeloNombres = variantes.Select(v => v.Modelo?.Nombre).Where(NoVacio).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        var marca = marcaNombres.Count > 0 ? string.Join(" / ", marcaNombres!) : (soloTecnicaPreBackfill ? p.MarcaCatalogo?.Nombre ?? p.Marca : string.Empty);
+        var modelo = modeloNombres.Count > 0 ? string.Join(" / ", modeloNombres!) : (soloTecnicaPreBackfill ? p.ModeloCatalogo?.Nombre ?? p.Modelo : string.Empty);
 
-        var color = variantesDimensionales.Count > 0 && colorId.HasValue
-            ? variantesDimensionales.FirstOrDefault(v => v.ColorId == colorId)?.Color
-            : p.ColorCatalogo;
-        var talla = variantesDimensionales.Count > 0 && tallaId.HasValue
-            ? variantesDimensionales.FirstOrDefault(v => v.TallaId == tallaId)?.Talla
-            : p.TallaCatalogo;
-        var marcaEntidad = variantesDimensionales.Count > 0 && marcaId.HasValue
-            ? variantesDimensionales.FirstOrDefault(v => v.MarcaId == marcaId)?.Marca
-            : p.MarcaCatalogo;
-        var modeloEntidad = variantesDimensionales.Count > 0 && modeloId.HasValue
-            ? variantesDimensionales.FirstOrDefault(v => v.ModeloId == modeloId)?.Modelo
-            : p.ModeloCatalogo;
+        var color = colorId.HasValue ? variantes.FirstOrDefault(v => v.ColorId == colorId)?.Color ?? (soloTecnicaPreBackfill ? p.ColorCatalogo : null) : null;
+        var talla = tallaId.HasValue ? variantes.FirstOrDefault(v => v.TallaId == tallaId)?.Talla ?? (soloTecnicaPreBackfill ? p.TallaCatalogo : null) : null;
+        var marcaEntidad = marcaId.HasValue ? variantes.FirstOrDefault(v => v.MarcaId == marcaId)?.Marca ?? (soloTecnicaPreBackfill ? p.MarcaCatalogo : null) : null;
+        var modeloEntidad = modeloId.HasValue ? variantes.FirstOrDefault(v => v.ModeloId == modeloId)?.Modelo ?? (soloTecnicaPreBackfill ? p.ModeloCatalogo : null) : null;
 
         var imagenesGenerales = p.Imagenes
             .Where(i => i.ProductoVarianteId == null)
@@ -71,17 +55,15 @@ public static class ProductoMapper
             Modelo = modelo,
             Descripcion = p.Descripcion,
             TipoInventario = p.TipoInventario,
-            Cantidad = variantes.Count > 0 ? stockTotal : p.Cantidad,
+            Cantidad = stockTotal,
             Costo = costo,
             Precio = precio,
             PrecioMinimo = precio,
             PrecioMaximo = precioMaximo,
             UmbralStockBajo = umbral,
-            TieneStockBajo = variantes.Count > 0 ? stockBajo : p.TieneStockBajo,
-            EstaAgotado = variantes.Count > 0 ? agotado : p.EstaAgotado,
-            EstadoInventario = (variantes.Count > 0 ? agotado : p.EstaAgotado)
-                ? "Agotado"
-                : (variantes.Count > 0 ? stockBajo : p.TieneStockBajo) ? "Stock bajo" : "Disponible",
+            TieneStockBajo = stockBajo,
+            EstaAgotado = agotado,
+            EstadoInventario = agotado ? "Agotado" : stockBajo ? "Stock bajo" : "Disponible",
             Activo = p.Activo,
             CategoriaId = p.CategoriaId,
             CategoriaNombre = p.Categoria?.Nombre,
@@ -143,23 +125,20 @@ public static class ProductoMapper
         };
     }
 
-    private static decimal CalcularCosto(IReadOnlyCollection<ProductoVariante> varianteFuente, decimal fallback)
+    private static decimal CalcularCosto(IReadOnlyCollection<ProductoVariante> variantes)
     {
-        if (varianteFuente.Count == 0) return fallback;
-        var total = varianteFuente.Sum(v => v.Cantidad);
+        if (variantes.Count == 0) return 0m;
+        var total = variantes.Sum(v => v.Cantidad);
         if (total > 0)
-            return Math.Round(varianteFuente.Sum(v => (v.Costo ?? 0m) * v.Cantidad) / total, 2, MidpointRounding.AwayFromZero);
-
-        var costos = varianteFuente.Where(v => v.Costo.HasValue).Select(v => v.Costo!.Value).ToList();
+            return Math.Round(variantes.Sum(v => (v.Costo ?? 0m) * v.Cantidad) / total, 2, MidpointRounding.AwayFromZero);
+        var costos = variantes.Where(v => v.Costo.HasValue).Select(v => v.Costo!.Value).ToList();
         return costos.Count > 0 ? Math.Round(costos.Average(), 2, MidpointRounding.AwayFromZero) : 0m;
     }
 
-    private static int? ValorComun(
-        IReadOnlyCollection<ProductoVariante> varianteFuente,
-        Func<ProductoVariante, int?> selector)
+    private static int? ValorComun(IReadOnlyCollection<ProductoVariante> variantes, Func<ProductoVariante, int?> selector)
     {
-        if (varianteFuente.Count == 0) return null;
-        var valores = varianteFuente.Select(selector).Distinct().Take(2).ToList();
+        if (variantes.Count == 0) return null;
+        var valores = variantes.Select(selector).Distinct().Take(2).ToList();
         return valores.Count == 1 ? valores[0] : null;
     }
 

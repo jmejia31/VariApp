@@ -102,22 +102,22 @@ public sealed class ProductoEscanerService : IProductoEscanerService
     private static ProductoEscaneadoVentaDto MapVenta(ProductoVariante variante) => new()
     {
         ProductoId = variante.ProductoId, ProductoVarianteId = variante.Id, ProductoNombre = variante.Producto.Nombre,
-        Marca = variante.Marca?.Nombre ?? variante.Producto.Marca, Modelo = variante.Modelo?.Nombre ?? variante.Producto.Modelo,
+        Marca = variante.Marca?.Nombre ?? string.Empty, Modelo = variante.Modelo?.Nombre ?? string.Empty,
         MarcaId = variante.MarcaId, MarcaNombre = variante.Marca?.Nombre, ModeloId = variante.ModeloId, ModeloNombre = variante.Modelo?.Nombre,
         ColorId = variante.ColorId, ColorNombre = variante.Color?.Nombre, TallaId = variante.TallaId, TallaNombre = variante.Talla?.Nombre,
         Etiqueta = ConstruirEtiqueta(variante), EsVarianteTecnica = variante.EsTecnica, Sku = variante.Sku ?? string.Empty,
-        CodigoBarras = variante.CodigoBarras, CantidadDisponible = variante.Cantidad, Precio = variante.Precio ?? variante.Producto.Precio,
+        CodigoBarras = variante.CodigoBarras, CantidadDisponible = variante.Cantidad, Precio = variante.Precio ?? 0m,
         ImagenMiniaturaUrl = ObtenerImagenMiniatura(variante.Producto)
     };
 
     private static ProductoEscaneadoCompraDto MapCompra(ProductoVariante variante) => new()
     {
         ProductoId = variante.ProductoId, ProductoVarianteId = variante.Id, ProductoNombre = variante.Producto.Nombre,
-        Marca = variante.Marca?.Nombre ?? variante.Producto.Marca, Modelo = variante.Modelo?.Nombre ?? variante.Producto.Modelo,
+        Marca = variante.Marca?.Nombre ?? string.Empty, Modelo = variante.Modelo?.Nombre ?? string.Empty,
         MarcaId = variante.MarcaId, MarcaNombre = variante.Marca?.Nombre, ModeloId = variante.ModeloId, ModeloNombre = variante.Modelo?.Nombre,
         ColorId = variante.ColorId, ColorNombre = variante.Color?.Nombre, TallaId = variante.TallaId, TallaNombre = variante.Talla?.Nombre,
         Etiqueta = ConstruirEtiqueta(variante), EsVarianteTecnica = variante.EsTecnica, Sku = variante.Sku ?? string.Empty,
-        CodigoBarras = variante.CodigoBarras, CantidadDisponible = variante.Cantidad, Costo = variante.Costo ?? variante.Producto.Costo,
-        Precio = variante.Precio ?? variante.Producto.Precio, ImagenMiniaturaUrl = ObtenerImagenMiniatura(variante.Producto)
+        CodigoBarras = variante.CodigoBarras, CantidadDisponible = variante.Cantidad, Costo = variante.Costo ?? 0m,
+        Precio = variante.Precio ?? 0m, ImagenMiniaturaUrl = ObtenerImagenMiniatura(variante.Producto)
     };
 }

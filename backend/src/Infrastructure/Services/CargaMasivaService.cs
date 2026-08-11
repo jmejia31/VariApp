@@ -1090,13 +1090,24 @@ public sealed class CargaMasivaService : ICargaMasivaService
                     ? Math.Round(lista.Sum(x => (x.Costo ?? 0m) * x.Cantidad) / total, 2, MidpointRounding.AwayFromZero)
                     : lista.Average(x => x.Costo ?? producto.Costo);
                 var activas = lista.Where(x => x.Activo).ToList();
-                producto.Precio = (activas.Count > 0 ? activas : lista).Min(x => x.Precio ?? producto.Precio);
+                producto.Precio = (activas.Count > 0 ? activas : lista).Min(x => x.Precio ?? 0m);
+                producto.UmbralStockBajo = lista.Sum(x => x.UmbralStockBajo);
+                producto.MarcaId = ValorComunCompat(lista.Select(x => x.MarcaId));
+                producto.ModeloId = ValorComunCompat(lista.Select(x => x.ModeloId));
+                producto.ColorId = ValorComunCompat(lista.Select(x => x.ColorId));
+                producto.TallaId = ValorComunCompat(lista.Select(x => x.TallaId));
             }
             MarcarActualizacion(producto);
         }
 
         return (creados, actualizados);
     }
+    private static int? ValorComunCompat(IEnumerable<int?> valores)
+    {
+        var lista = valores.Distinct().Take(2).ToList();
+        return lista.Count == 1 ? lista[0] : null;
+    }
+
     private static CargaMasivaDto MapResumenExpression(CargaMasiva x) => new()
     {
         Id = x.Id,

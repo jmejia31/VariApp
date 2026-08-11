@@ -62,9 +62,9 @@ public class ProductosController : ControllerBase
 
         await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
-            AplicarProyeccionLegacy(dto);
+            var (variantes, forzarTecnica) = ResolverVariantesSolicitud(dto);
             creado = await _productoService.CreateAsync(dto);
-            await SincronizarVariantesAsync(creado.Id, dto.Variantes, Array.Empty<ProductoVarianteDto>());
+            await SincronizarVariantesAsync(creado.Id, variantes, Array.Empty<ProductoVarianteDto>(), forzarTecnica);
         });
 
         var resultado = await _productoService.GetByIdAsync(creado!.Id) ?? creado;
@@ -80,12 +80,12 @@ public class ProductosController : ControllerBase
 
         await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
-            AplicarProyeccionLegacy(dto);
+            var (variantes, forzarTecnica) = ResolverVariantesSolicitud(dto);
             var existentes = await _varianteService.GetByProductoIdAsync(id, incluirInactivas: true);
             actualizado = await _productoService.UpdateAsync(id, dto);
             if (actualizado is not null)
             {
-                await SincronizarVariantesAsync(id, dto.Variantes, existentes);
+                await SincronizarVariantesAsync(id, variantes, existentes, forzarTecnica);
                 await _varianteService.SincronizarTecnicaConProductoAsync(id);
             }
         });
@@ -227,18 +227,19 @@ public class ProductosController : ControllerBase
     private async Task SincronizarVariantesAsync(
         int productoId,
         IReadOnlyCollection<ProductoVarianteFormularioDto> solicitadas,
-        IReadOnlyCollection<ProductoVarianteDto> existentes)
+        IReadOnlyCollection<ProductoVarianteDto> existentes,
+        bool forzarTecnica = false)
     {
         var tecnica = existentes.SingleOrDefault(v => v.EsTecnica);
         var comercialesExistentes = existentes.Where(v => !v.EsTecnica).ToList();
 
-        if (EsSolicitudTecnica(solicitadas))
+        if (forzarTecnica || EsSolicitudTecnica(solicitadas))
         {
             if (comercialesExistentes.Any(v => v.Cantidad != 0))
                 throw new BusinessRuleException("No puedes convertir el producto en simple mientras alguna variante comercial tenga existencias.");
             foreach (var comercial in comercialesExistentes)
                 await _varianteService.DeleteAsync(productoId, comercial.Id);
-            await _varianteService.SincronizarTecnicaConProductoAsync(productoId);
+            await _varianteService.SincronizarTecnicaAsync(productoId, solicitadas.Single());
             return;
         }
 
@@ -330,68 +331,34 @@ public class ProductosController : ControllerBase
         }
     }
 
-    private static void AplicarProyeccionLegacy(CreateProductoDto dto)
+    private static (IReadOnlyCollection<ProductoVarianteFormularioDto> Variantes, bool ForzarTecnica)
+        ResolverVariantesSolicitud(CreateProductoDto dto)
     {
-        if (dto.Variantes.Count == 0) return;
-        var proyeccion = CalcularProyeccion(dto.Variantes);
-        dto.Cantidad = proyeccion.Cantidad;
-        dto.Costo = proyeccion.Costo;
-        dto.Precio = proyeccion.Precio;
-        dto.UmbralStockBajo = proyeccion.Umbral;
-        dto.MarcaId = proyeccion.MarcaId;
-        dto.ModeloId = proyeccion.ModeloId;
-        dto.ColorId = proyeccion.ColorId;
-        dto.TallaId = proyeccion.TallaId;
-        dto.Marca = string.Empty;
-        dto.Modelo = string.Empty;
+        if (dto.Variantes.Count > 0) return (dto.Variantes, false);
+        return (new[] { DesdeCompatibilidad(dto.MarcaId, dto.ModeloId, dto.ColorId, dto.TallaId, dto.Cantidad, dto.UmbralStockBajo, dto.Costo, dto.Precio) }, true);
     }
 
-    private static void AplicarProyeccionLegacy(UpdateProductoDto dto)
+    private static (IReadOnlyCollection<ProductoVarianteFormularioDto> Variantes, bool ForzarTecnica)
+        ResolverVariantesSolicitud(UpdateProductoDto dto)
     {
-        if (dto.Variantes.Count == 0) return;
-        var proyeccion = CalcularProyeccion(dto.Variantes);
-        dto.Cantidad = proyeccion.Cantidad;
-        dto.Costo = proyeccion.Costo;
-        dto.Precio = proyeccion.Precio;
-        dto.UmbralStockBajo = proyeccion.Umbral;
-        dto.MarcaId = proyeccion.MarcaId;
-        dto.ModeloId = proyeccion.ModeloId;
-        dto.ColorId = proyeccion.ColorId;
-        dto.TallaId = proyeccion.TallaId;
-        dto.Marca = string.Empty;
-        dto.Modelo = string.Empty;
+        if (dto.Variantes.Count > 0) return (dto.Variantes, false);
+        return (new[] { DesdeCompatibilidad(dto.MarcaId, dto.ModeloId, dto.ColorId, dto.TallaId, dto.Cantidad, dto.UmbralStockBajo, dto.Costo, dto.Precio) }, true);
     }
 
-    private static (int Cantidad, decimal Costo, decimal Precio, int Umbral, int? MarcaId, int? ModeloId, int? ColorId, int? TallaId)
-        CalcularProyeccion(IReadOnlyCollection<ProductoVarianteFormularioDto> variantes)
+    private static ProductoVarianteFormularioDto DesdeCompatibilidad(
+        int? marcaId, int? modeloId, int? colorId, int? tallaId,
+        int cantidad, int umbral, decimal costo, decimal precio) => new()
     {
-        var cantidad = variantes.Sum(v => v.Cantidad);
-        var costo = cantidad > 0
-            ? Math.Round(variantes.Sum(v => v.Costo * v.Cantidad) / cantidad, 2, MidpointRounding.AwayFromZero)
-            : Math.Round(variantes.Average(v => v.Costo), 2, MidpointRounding.AwayFromZero);
-        var activas = variantes.Where(v => v.Activo).ToList();
-        var fuentePrecio = activas.Count > 0 ? activas : variantes;
-        var precio = fuentePrecio.Min(v => v.Precio);
-        var umbral = variantes.Sum(v => v.UmbralStockBajo);
-
-        return (
-            cantidad,
-            costo,
-            precio,
-            umbral,
-            ValorComun(variantes, v => v.MarcaId),
-            ValorComun(variantes, v => v.ModeloId),
-            ValorComun(variantes, v => v.ColorId),
-            ValorComun(variantes, v => v.TallaId));
-    }
-
-    private static int? ValorComun(
-        IReadOnlyCollection<ProductoVarianteFormularioDto> variantes,
-        Func<ProductoVarianteFormularioDto, int?> selector)
-    {
-        var valores = variantes.Select(selector).Distinct().Take(2).ToList();
-        return valores.Count == 1 ? valores[0] : null;
-    }
+        MarcaId = marcaId,
+        ModeloId = modeloId,
+        ColorId = colorId,
+        TallaId = tallaId,
+        Cantidad = cantidad,
+        UmbralStockBajo = umbral,
+        Costo = costo,
+        Precio = precio,
+        Activo = true
+    };
 
     private static bool EsSolicitudTecnica(IReadOnlyCollection<ProductoVarianteFormularioDto> variantes)
     {

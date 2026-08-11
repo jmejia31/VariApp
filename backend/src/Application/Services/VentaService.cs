@@ -553,9 +553,11 @@ public class VentaService : IVentaService
             {
                 variante = await ObtenerVarianteAsync(input.ProductoVarianteId.Value, producto.Id, exigirActiva: true);
             }
-            else if (producto.Variantes.Any(v => v.Activo && !v.Eliminado))
+            else
             {
-                throw new BusinessRuleException($"Debes seleccionar una variante para el producto '{producto.Nombre}'.");
+                variante = producto.Variantes.SingleOrDefault(v => v.EsTecnica && v.Activo && !v.Eliminado);
+                if (variante is null && producto.Variantes.Any(v => !v.EsTecnica && v.Activo && !v.Eliminado))
+                    throw new BusinessRuleException($"Debes seleccionar una variante para el producto '{producto.Nombre}'.");
             }
 
             var costoUnitario = variante?.Costo ?? producto.Costo;
@@ -614,9 +616,11 @@ public class VentaService : IVentaService
             {
                 variante = await ObtenerVarianteAsync(d.ProductoVarianteId.Value, producto.Id, exigirActiva: true);
             }
-            else if (producto.Variantes.Any(v => v.Activo && !v.Eliminado))
+            else
             {
-                throw new BusinessRuleException($"Debes seleccionar una variante para el producto '{producto.Nombre}'.");
+                variante = producto.Variantes.SingleOrDefault(v => v.EsTecnica && v.Activo && !v.Eliminado);
+                if (variante is null && producto.Variantes.Any(v => !v.EsTecnica && v.Activo && !v.Eliminado))
+                    throw new BusinessRuleException($"Debes seleccionar una variante para el producto '{producto.Nombre}'.");
             }
 
             if (variante is null && d.PrecioUnitario <= 0)

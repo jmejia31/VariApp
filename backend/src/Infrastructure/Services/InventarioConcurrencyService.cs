@@ -93,11 +93,12 @@ public class InventarioConcurrencyService : IInventarioConcurrencyService
             if (!productosMap.TryGetValue(productoGrupo.Key, out var producto))
                 throw new BusinessRuleException($"El producto ID '{productoGrupo.Key}' no existe físicamente.");
 
-            var cantidadTotalProducto = productoGrupo.Sum(x => x.Cantidad);
-            if (esDeduccion && producto.Cantidad < cantidadTotalProducto)
+            var demandasLegacySinVariante = productoGrupo.Where(x => !x.ProductoVarianteId.HasValue).ToList();
+            var cantidadLegacy = demandasLegacySinVariante.Sum(x => x.Cantidad);
+            if (esDeduccion && cantidadLegacy > 0 && producto.Cantidad < cantidadLegacy)
             {
                 throw new BusinessRuleException(
-                    $"Stock insuficiente para '{producto.Nombre}': disponible {producto.Cantidad}, solicitado {cantidadTotalProducto}.");
+                    $"Stock insuficiente para '{producto.Nombre}': disponible {producto.Cantidad}, solicitado {cantidadLegacy}.");
             }
         }
 

@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Http;
 namespace InventoryApp.Application.DTOs;
 
 /// <summary>
-/// Variante capturada dentro del formulario principal de productos.
-/// El stock consolidado del producto se calcula como la suma de estas filas.
+/// Unidad exacta de inventario capturada dentro del formulario principal.
+/// ProductoVariante es la única autoridad de SKU, barcode, stock, costo, precio, umbral y dimensiones.
 /// </summary>
 public class ProductoVarianteFormularioDto
 {
@@ -27,8 +27,8 @@ public class CreateProductoDto
 {
     public string Nombre { get; set; } = string.Empty;
 
-    // Compatibilidad temporal con clientes anteriores. Cuando se envían los IDs,
-    // el backend obtiene Marca/Modelo desde sus mantenimientos.
+    // Compatibilidad de entrada para clientes anteriores. Estos campos NO son fuente de verdad:
+    // el controlador los traduce a ProductoVariante y Producto no los usa operativamente.
     public string Marca { get; set; } = string.Empty;
     public string Modelo { get; set; } = string.Empty;
 

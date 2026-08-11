@@ -63,29 +63,13 @@ public class ProductoService : IProductoService
         ValidarImagenes(imagenes);
 
         await ValidarCategoriaAsync(dto.CategoriaId, exigirActiva: true);
-        await ValidarCatalogosAsync(dto.ColorId, dto.TallaId, dto.MarcaId, dto.ModeloId);
-        var (marcaNombre, modeloNombre) = await ResolverMarcaModeloAsync(
-            dto.MarcaId,
-            dto.ModeloId,
-            dto.Marca,
-            dto.Modelo);
 
         var producto = new Producto
         {
             Nombre = dto.Nombre.Trim(),
-            Marca = marcaNombre,
-            Modelo = modeloNombre,
             Descripcion = string.IsNullOrWhiteSpace(dto.Descripcion) ? null : dto.Descripcion.Trim(),
             TipoInventario = dto.TipoInventario,
-            Cantidad = dto.Cantidad,
-            Costo = dto.Costo,
-            Precio = dto.Precio,
-            UmbralStockBajo = dto.UmbralStockBajo,
             CategoriaId = dto.CategoriaId,
-            ColorId = dto.ColorId,
-            TallaId = dto.TallaId,
-            MarcaId = dto.MarcaId,
-            ModeloId = dto.ModeloId,
             Activo = true,
             Eliminado = false,
             CreadoPorUsuarioId = _currentUser.UsuarioId,
@@ -120,13 +104,7 @@ public class ProductoService : IProductoService
             {
                 producto.Nombre,
                 producto.TipoInventario,
-                producto.MarcaId,
-                producto.ModeloId,
-                producto.ColorId,
-                producto.TallaId,
-                producto.Cantidad,
-                producto.Costo,
-                producto.Precio,
+                producto.CategoriaId,
                 ImagenesGenerales = producto.Imagenes.Count(i => i.ProductoVarianteId == null)
             });
 
@@ -143,35 +121,13 @@ public class ProductoService : IProductoService
         {
             producto.Nombre,
             producto.TipoInventario,
-            producto.Marca,
-            producto.Modelo,
-            producto.ColorId,
-            producto.TallaId,
-            producto.MarcaId,
-            producto.ModeloId,
             producto.Descripcion,
-            producto.Cantidad,
-            producto.Costo,
-            producto.Precio,
-            producto.UmbralStockBajo,
             producto.CategoriaId,
             Imagenes = imagenesGenerales.Count,
             ImagenPrincipalId = producto.ImagenPrincipal?.Id
         };
 
         await ValidarCategoriaAsync(dto.CategoriaId, exigirActiva: false);
-        await ValidarCatalogosAsync(dto.ColorId, dto.TallaId, dto.MarcaId, dto.ModeloId);
-        var (marcaNombre, modeloNombre) = await ResolverMarcaModeloAsync(
-            dto.MarcaId,
-            dto.ModeloId,
-            dto.Marca,
-            dto.Modelo);
-
-        if (dto.Cantidad != producto.Cantidad)
-        {
-            throw new BusinessRuleException(
-                "El stock no puede modificarse desde el mantenimiento general. Utiliza la operación Ajustar inventario.");
-        }
 
         if (dto.TipoInventario.HasValue)
         {
@@ -179,17 +135,8 @@ public class ProductoService : IProductoService
             producto.TipoInventario = dto.TipoInventario.Value;
         }
         producto.Nombre = dto.Nombre.Trim();
-        producto.Marca = marcaNombre;
-        producto.Modelo = modeloNombre;
         producto.Descripcion = string.IsNullOrWhiteSpace(dto.Descripcion) ? null : dto.Descripcion.Trim();
-        producto.Costo = dto.Costo;
-        producto.Precio = dto.Precio;
-        producto.UmbralStockBajo = dto.UmbralStockBajo;
         producto.CategoriaId = dto.CategoriaId;
-        producto.ColorId = dto.ColorId;
-        producto.TallaId = dto.TallaId;
-        producto.MarcaId = dto.MarcaId;
-        producto.ModeloId = dto.ModeloId;
         producto.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
         producto.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
         producto.FechaActualizacion = DateTime.UtcNow;
@@ -265,15 +212,7 @@ public class ProductoService : IProductoService
             {
                 producto.Nombre,
                 producto.TipoInventario,
-                producto.MarcaId,
-                producto.ModeloId,
-                producto.ColorId,
-                producto.TallaId,
                 producto.Descripcion,
-                producto.Cantidad,
-                producto.Costo,
-                producto.Precio,
-                producto.UmbralStockBajo,
                 producto.CategoriaId,
                 Imagenes = imagenesGenerales.Count,
                 ImagenPrincipalId = producto.ImagenPrincipal?.Id
