@@ -23,7 +23,11 @@ public sealed class ReporteAdministrativoService : IReporteAdministrativoService
         AccionPermiso.AsignarRol,
         AccionPermiso.RestablecerContrasena,
         AccionPermiso.CambiarEstado,
-        AccionPermiso.Exportar
+        AccionPermiso.Exportar,
+        AccionPermiso.Importar,
+        AccionPermiso.Aprobar,
+        AccionPermiso.Cerrar,
+        AccionPermiso.Reabrir
     ];
 
     public ReporteAdministrativoService(AppDbContext db)
@@ -50,12 +54,12 @@ public sealed class ReporteAdministrativoService : IReporteAdministrativoService
             UsuariosActivos = usuarios.Count(x => x.Activo && !x.Bloqueado && !x.Eliminado && x.RolActivo),
             UsuariosBloqueados = usuarios.Count(x => x.Bloqueado),
             UsuariosEliminados = usuarios.Count(x => x.Eliminado),
-            UsuariosPrivilegiados = usuarios.Count(x => x.EsAdministrador || x.PermisosSensibles > 0),
+            UsuariosPrivilegiados = usuarios.Count(x => x.PermisosSensibles > 0),
             RolesTotales = roles.Count,
             RolesActivos = roles.Count(x => x.Activo && !x.Eliminado),
-            RolesSinPermisos = roles.Count(x => !x.EsAdministrador && x.Activo && !x.Eliminado && x.PermisosAsignados == 0),
+            RolesSinPermisos = roles.Count(x => x.Activo && !x.Eliminado && x.PermisosAsignados == 0),
             RolesSinUsuarios = roles.Count(x => x.Activo && !x.Eliminado && x.UsuariosAsignados == 0),
-            PermisosCatalogados = CatalogoPermisosBase.Definicion.Sum(x => x.Acciones.Length),
+            PermisosCatalogados = await _db.Permisos.AsNoTracking().CountAsync(x => x.Activo && !x.Eliminado, cancellationToken),
             EventosAuditoria = auditoria.Total,
             EventosExitosos = auditoria.Exitosos,
             EventosRechazados = auditoria.Rechazados,
@@ -70,16 +74,10 @@ public sealed class ReporteAdministrativoService : IReporteAdministrativoService
     public async Task<List<UsuarioAccesoReporteDto>> ObtenerUsuariosAccesoAsync(
         CancellationToken cancellationToken = default)
     {
-        var totalPermisos = CatalogoPermisosBase.Definicion.Sum(x => x.Acciones.Length);
-
-        // Pomelo/MySQL no traduce de forma estable COUNT(DISTINCT) sobre un tipo
-        // anónimo compuesto. Se consulta únicamente la proyección mínima y la
-        // consolidación se realiza en memoria; el volumen está acotado por la
-        // matriz de roles y no incluye datos operativos ni de auditoría.
         var permisosActivos = await _db.RolPermisos
             .AsNoTracking()
-            .Where(x => x.RolId.HasValue && x.Permitido)
-            .Select(x => new { RolId = x.RolId!.Value, x.Modulo, x.Accion })
+            .Where(x => x.Permiso.Activo && !x.Permiso.Eliminado)
+            .Select(x => new { x.RolId, x.Permiso.Modulo, x.Permiso.Accion })
             .ToListAsync(cancellationToken);
 
         var permisosPorRol = permisosActivos
@@ -102,12 +100,7 @@ public sealed class ReporteAdministrativoService : IReporteAdministrativoService
         return usuarios.Select(usuario =>
         {
             var rol = usuario.RolEntidad;
-            var esAdministrador = rol?.EsAdministrador == true;
-            permisosPorRol.TryGetValue(usuario.RolId ?? 0, out var conteo);
-            var permisos = esAdministrador ? totalPermisos : conteo?.Total ?? 0;
-            var sensibles = esAdministrador
-                ? CatalogoPermisosBase.Definicion.Sum(x => x.Acciones.Count(AccionesSensibles.Contains))
-                : conteo?.Sensibles ?? 0;
+            permisosPorRol.TryGetValue(usuario.RolId, out var conteo);
 
             return new UsuarioAccesoReporteDto
             {
@@ -116,13 +109,13 @@ public sealed class ReporteAdministrativoService : IReporteAdministrativoService
                 NombreCompleto = usuario.NombreCompleto,
                 RolId = usuario.RolId,
                 Rol = rol?.Nombre ?? "Sin rol",
-                EsAdministrador = esAdministrador,
+                EsAdministrador = rol?.EsAdministrador == true,
                 RolActivo = rol is { Activo: true, Eliminado: false },
                 Activo = usuario.Activo,
                 Bloqueado = usuario.Bloqueado,
                 Eliminado = usuario.Eliminado,
-                PermisosEfectivos = permisos,
-                PermisosSensibles = sensibles,
+                PermisosEfectivos = conteo?.Total ?? 0,
+                PermisosSensibles = conteo?.Sensibles ?? 0,
                 EstadoAcceso = EstadoAcceso(usuario.Activo, usuario.Bloqueado, usuario.Eliminado, rol),
                 FechaCreacion = usuario.FechaCreacion,
                 FechaActualizacion = usuario.FechaActualizacion
@@ -133,19 +126,25 @@ public sealed class ReporteAdministrativoService : IReporteAdministrativoService
     public async Task<List<RolPermisosReporteDto>> ObtenerRolesPermisosAsync(
         CancellationToken cancellationToken = default)
     {
-        var totalPosible = CatalogoPermisosBase.Definicion.Sum(x => x.Acciones.Length);
+        var totalPosible = await _db.Permisos
+            .AsNoTracking()
+            .CountAsync(x => x.Activo && !x.Eliminado, cancellationToken);
+
         var roles = await _db.Roles
             .AsNoTracking()
             .OrderBy(x => x.Nombre)
             .ToListAsync(cancellationToken);
+
         var permisos = await _db.RolPermisos
             .AsNoTracking()
-            .Where(x => x.RolId.HasValue && x.Permitido)
+            .Include(x => x.Permiso)
+            .Where(x => x.Permiso.Activo && !x.Permiso.Eliminado)
             .ToListAsync(cancellationToken);
+
         var usuariosPorRol = await _db.Usuarios
             .AsNoTracking()
-            .Where(x => x.RolId.HasValue && !x.Eliminado)
-            .GroupBy(x => x.RolId!.Value)
+            .Where(x => !x.Eliminado)
+            .GroupBy(x => x.RolId)
             .Select(g => new { RolId = g.Key, Total = g.Count() })
             .ToDictionaryAsync(x => x.RolId, x => x.Total, cancellationToken);
 
@@ -153,15 +152,13 @@ public sealed class ReporteAdministrativoService : IReporteAdministrativoService
         {
             var filas = permisos
                 .Where(x => x.RolId == rol.Id)
-                .GroupBy(x => new { x.Modulo, x.Accion })
+                .GroupBy(x => x.PermisoId)
                 .Select(x => x.First())
-                .OrderBy(x => x.Modulo.ToString())
-                .ThenBy(x => x.Accion.ToString())
+                .OrderBy(x => x.Permiso.Modulo.ToString())
+                .ThenBy(x => x.Permiso.Accion.ToString())
                 .ToList();
-            var total = rol.EsAdministrador ? totalPosible : filas.Count;
-            var sensibles = rol.EsAdministrador
-                ? CatalogoPermisosBase.Definicion.Sum(x => x.Acciones.Count(AccionesSensibles.Contains))
-                : filas.Count(x => AccionesSensibles.Contains(x.Accion));
+            var total = filas.Count;
+            var sensibles = filas.Count(x => AccionesSensibles.Contains(x.Permiso.Accion));
             var cobertura = totalPosible == 0 ? 0 : Math.Round(total * 100m / totalPosible, 2);
 
             return new RolPermisosReporteDto
@@ -174,19 +171,12 @@ public sealed class ReporteAdministrativoService : IReporteAdministrativoService
                 Eliminado = rol.Eliminado,
                 UsuariosAsignados = usuariosPorRol.GetValueOrDefault(rol.Id),
                 PermisosAsignados = total,
-                ModulosConAcceso = rol.EsAdministrador
-                    ? CatalogoPermisosBase.Definicion.Length
-                    : filas.Select(x => x.Modulo).Distinct().Count(),
+                ModulosConAcceso = filas.Select(x => x.Permiso.Modulo).Distinct().Count(),
                 PermisosSensibles = sensibles,
                 PorcentajeCobertura = cobertura,
                 NivelPrivilegio = NivelPrivilegio(rol.EsAdministrador, cobertura, sensibles),
                 EstadoConfiguracion = EstadoConfiguracion(rol, total, usuariosPorRol.GetValueOrDefault(rol.Id)),
-                Permisos = rol.EsAdministrador
-                    ? CatalogoPermisosBase.Definicion
-                        .SelectMany(x => x.Acciones.Select(a => $"{x.Modulo}:{a}"))
-                        .OrderBy(x => x)
-                        .ToList()
-                    : filas.Select(x => $"{x.Modulo}:{x.Accion}").ToList()
+                Permisos = filas.Select(x => $"{x.Permiso.Modulo}:{x.Permiso.Accion}").ToList()
             };
         }).ToList();
     }
@@ -337,8 +327,8 @@ public sealed class ReporteAdministrativoService : IReporteAdministrativoService
         IReadOnlyCollection<RolPermisosReporteDto> roles)
     {
         AgregarAlerta(resumen, "USUARIOS_BLOQUEADOS", "Media", "Usuarios bloqueados que requieren revisión administrativa.", usuarios.Count(x => x.Bloqueado && !x.Eliminado));
-        AgregarAlerta(resumen, "USUARIOS_SIN_ROL", "Alta", "Usuarios activos sin un rol dinámico válido.", usuarios.Count(x => x.Activo && !x.Eliminado && x.RolId is null));
-        AgregarAlerta(resumen, "ROLES_SIN_PERMISOS", "Alta", "Roles activos no administrativos sin permisos asignados.", roles.Count(x => x.Activo && !x.Eliminado && !x.EsAdministrador && x.PermisosAsignados == 0));
+        AgregarAlerta(resumen, "USUARIOS_SIN_ROL", "Alta", "Usuarios activos sin un rol dinámico válido.", usuarios.Count(x => x.Activo && !x.Eliminado && !x.RolActivo));
+        AgregarAlerta(resumen, "ROLES_SIN_PERMISOS", "Alta", "Roles activos sin grants relacionales asignados.", roles.Count(x => x.Activo && !x.Eliminado && x.PermisosAsignados == 0));
         AgregarAlerta(resumen, "ROLES_SIN_USUARIOS", "Informativa", "Roles activos que no tienen usuarios asignados.", roles.Count(x => x.Activo && !x.Eliminado && x.UsuariosAsignados == 0));
         AgregarAlerta(resumen, "EVENTOS_RECHAZADOS", "Media", "Operaciones rechazadas registradas en el período seleccionado.", resumen.EventosRechazados);
         AgregarAlerta(resumen, "EVENTOS_CON_ERROR", "Alta", "Operaciones con error registradas en el período seleccionado.", resumen.EventosConError);
@@ -370,14 +360,14 @@ public sealed class ReporteAdministrativoService : IReporteAdministrativoService
     {
         if (rol.Eliminado) return "Eliminado";
         if (!rol.Activo) return "Inactivo";
-        if (!rol.EsAdministrador && permisos == 0) return "Sin permisos";
+        if (permisos == 0) return "Sin permisos";
         if (usuarios == 0) return "Sin usuarios";
         return "Configurado";
     }
 
     private static string NivelPrivilegio(bool administrador, decimal cobertura, int sensibles)
     {
-        if (administrador) return "Crítico administrado";
+        if (administrador && cobertura >= 70m) return "Crítico administrado";
         if (cobertura >= 70m || sensibles >= 8) return "Alto";
         if (cobertura >= 35m || sensibles >= 3) return "Medio";
         return "Bajo";
