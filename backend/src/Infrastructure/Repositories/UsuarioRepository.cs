@@ -26,13 +26,16 @@ public class UsuarioRepository : IUsuarioRepository
     }
 
     public async Task<Usuario?> GetByIdAsync(int id) =>
-        await _context.Usuarios.Include(u => u.RolEntidad)
+        await _context.Usuarios
+            .Include(u => u.RolEntidad)
             .FirstOrDefaultAsync(u => u.Id == id && !u.Eliminado);
 
     public async Task<List<Usuario>> GetAllAsync() =>
-        await _context.Usuarios.Include(u => u.RolEntidad)
+        await _context.Usuarios
+            .Include(u => u.RolEntidad)
             .Where(u => !u.Eliminado)
-            .OrderBy(u => u.NombreUsuario).ToListAsync();
+            .OrderBy(u => u.NombreUsuario)
+            .ToListAsync();
 
     public async Task<PagedResult<Usuario>> GetPagedAsync(PagedRequest request)
     {
@@ -57,11 +60,7 @@ public class UsuarioRepository : IUsuarioRepository
         };
 
         var total = await query.CountAsync();
-        var items = await query
-            .Skip((request.Page - 1) * request.PageSize)
-            .Take(request.PageSize)
-            .ToListAsync();
-
+        var items = await query.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToListAsync();
         return new PagedResult<Usuario>
         {
             Items = items,
@@ -76,16 +75,11 @@ public class UsuarioRepository : IUsuarioRepository
             .Include(u => u.RolEntidad)
             .CountAsync(u =>
                 !u.Eliminado && u.Activo && !u.Bloqueado &&
-                ((u.RolEntidad != null && u.RolEntidad.EsAdministrador) ||
-                 (u.RolEntidad == null && u.Rol == Domain.Enums.RolUsuario.Administrador)) &&
+                u.RolEntidad.EsAdministrador &&
+                u.RolEntidad.Activo && !u.RolEntidad.Eliminado &&
                 (excluirUsuarioId == null || u.Id != excluirUsuarioId));
 
-    public async Task AddAsync(Usuario usuario) =>
-        await _context.Usuarios.AddAsync(usuario);
-
-    public void Update(Usuario usuario) =>
-        _context.Usuarios.Update(usuario);
-
-    public async Task<bool> SaveChangesAsync() =>
-        await _context.SaveChangesAsync() > 0;
+    public async Task AddAsync(Usuario usuario) => await _context.Usuarios.AddAsync(usuario);
+    public void Update(Usuario usuario) => _context.Usuarios.Update(usuario);
+    public async Task<bool> SaveChangesAsync() => await _context.SaveChangesAsync() > 0;
 }
