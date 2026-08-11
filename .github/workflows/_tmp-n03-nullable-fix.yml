@@ -1,0 +1,34 @@
+name: TEMP N0.3 nullable fix
+
+on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - '.github/workflows/_tmp-n03-nullable-fix.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+      - name: Ajustar snapshots no nulos
+        shell: bash
+        run: |
+          sed -i 's/ProductoMarcaSnapshot = variante.Marca?.Nombre,/ProductoMarcaSnapshot = variante.Marca?.Nombre ?? string.Empty,/g' backend/src/Application/Services/VentaService.cs backend/src/Application/Services/CompraService.cs
+          sed -i 's/ProductoModeloSnapshot = variante.Modelo?.Nombre,/ProductoModeloSnapshot = variante.Modelo?.Nombre ?? string.Empty,/g' backend/src/Application/Services/VentaService.cs backend/src/Application/Services/CompraService.cs
+          git diff --check
+      - name: Publicar corrección
+        shell: bash
+        run: |
+          git config user.name "jmejia31"
+          git config user.email "93171442+jmejia31@users.noreply.github.com"
+          git add backend/src/Application/Services/VentaService.cs backend/src/Application/Services/CompraService.cs
+          git diff --cached --check
+          git commit -m "fix(erp-n0.3): normalizar snapshots de variante no nulos [ChatGPT]"
+          git push origin HEAD:Desarrollo
