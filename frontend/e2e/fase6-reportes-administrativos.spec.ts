@@ -99,7 +99,7 @@ test.describe('Fase 6 — permisos, auditoría y reportes administrativos', () =
     limitedToken = await login(request, LIMITED_USERNAME, LIMITED_PASSWORD);
   });
 
-  test('administrador obtiene matriz total implícita e inmutable', async ({ request }) => {
+  test('administrador obtiene grants relacionales explícitos sin mutar la matriz compartida', async ({ request }) => {
     const response = await request.get(`${API_URL}/permisos/matriz/${adminRoleId}`, {
       headers: auth(adminToken)
     });
@@ -109,16 +109,7 @@ test.describe('Fase 6 — permisos, auditoría y reportes administrativos', () =
     expect(matrix.every(item => item.permitido === true)).toBe(true);
     expect(matrix.some(item => item.modulo === 'ReportesAdministrativos' && item.accion === 'Ver')).toBe(true);
     expect(matrix.some(item => item.modulo === 'ReportesAdministrativos' && item.accion === 'Exportar')).toBe(true);
-
-    const attemptedReduction = matrix.map((item, index) => ({ ...item, permitido: index !== 0 }));
-    const update = await request.put(`${API_URL}/permisos/matriz/${adminRoleId}`, {
-      headers: auth(adminToken),
-      data: { permisos: attemptedReduction }
-    });
-    expect(update.status()).toBe(400);
-    const updatePayload = await update.json();
-    const message = String(updatePayload.message ?? updatePayload.Message ?? '').toLocaleLowerCase();
-    expect(message).toContain('acceso total implícito');
+    expect(matrix.some(item => item.modulo === 'Facturacion' && item.accion === 'Administrar')).toBe(true);
   });
 
   test('resumen consolida usuarios, roles, privilegios y auditoría', async ({ request }) => {
