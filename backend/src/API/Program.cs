@@ -21,32 +21,15 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
-
 var port = Environment.GetEnvironmentVariable("PORT");
-if (!string.IsNullOrWhiteSpace(port))
-{
-    builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
-}
-
-// ===== Controllers + FluentValidation =====
-builder.Services.AddControllers(options =>
-    options.Filters.Add<InventoryApp.API.Filters.MedirRendimientoBusquedaFilter>());
-builder.Services.Configure<FormOptions>(options =>
-{
-    options.MultipartBodyLengthLimit = 30 * 1024 * 1024;
-});
+if (!string.IsNullOrWhiteSpace(port)) builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+builder.Services.AddControllers(options => options.Filters.Add<InventoryApp.API.Filters.MedirRendimientoBusquedaFilter>());
+builder.Services.Configure<FormOptions>(options => options.MultipartBodyLengthLimit = 30 * 1024 * 1024);
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateProductoValidator>();
-
-// ===== DbContext (MySQL) =====
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? throw new InvalidOperationException("ConnectionStrings:DefaultConnection no configurado.");
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("ConnectionStrings:DefaultConnection no configurado.");
 var mysqlServerVersion = Version.Parse(builder.Configuration["Database:ServerVersion"] ?? "8.4.3");
-
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySql(connectionString, new MySqlServerVersion(mysqlServerVersion)));
-
-// ===== Repositorios y Servicios =====
+builder.Services.AddDbContext<AppDbContext>(options => options.UseMySql(connectionString, new MySqlServerVersion(mysqlServerVersion)));
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<IUsuarioScopeService, UsuarioScopeService>();
@@ -119,253 +102,49 @@ builder.Services.AddScoped<ICargaMasivaService, CargaMasivaService>();
 builder.Services.AddScoped<IReporteAdministrativoService, ReporteAdministrativoService>();
 builder.Services.AddScoped<IInventarioConcurrencyService, InventarioConcurrencyService>();
 builder.Services.AddScoped<IInventarioAjusteService, InventarioAjusteService>();
-
-// ===== JWT Authentication =====
-var jwtSecret = builder.Configuration["Jwt:Secret"]
-    ?? throw new InvalidOperationException("Jwt:Secret no configurado.");
+var jwtSecret = builder.Configuration["Jwt:Secret"] ?? throw new InvalidOperationException("Jwt:Secret no configurado.");
 var jwtIssuer = builder.Configuration["Jwt:Issuer"];
 var jwtAudience = builder.Configuration["Jwt:Audience"];
-
-if (jwtSecret.Contains("CHANGE_ME", StringComparison.OrdinalIgnoreCase) ||
-    Encoding.UTF8.GetByteCount(jwtSecret) < 32)
+if (jwtSecret.Contains("CHANGE_ME", StringComparison.OrdinalIgnoreCase) || Encoding.UTF8.GetByteCount(jwtSecret) < 32) throw new InvalidOperationException("Jwt:Secret debe ser un secreto real de al menos 32 bytes.");
+if (string.IsNullOrWhiteSpace(jwtIssuer) || string.IsNullOrWhiteSpace(jwtAudience)) throw new InvalidOperationException("Jwt:Issuer y Jwt:Audience son obligatorios.");
+builder.Services.AddAuthentication(options => { options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme; options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme; }).AddJwtBearer(options =>
 {
-    throw new InvalidOperationException("Jwt:Secret debe ser un secreto real de al menos 32 bytes.");
-}
-
-if (string.IsNullOrWhiteSpace(jwtIssuer) || string.IsNullOrWhiteSpace(jwtAudience))
-{
-    throw new InvalidOperationException("Jwt:Issuer y Jwt:Audience son obligatorios.");
-}
-
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtIssuer,
-        ValidAudience = jwtAudience,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
-        ClockSkew = TimeSpan.Zero
-    };
-    options.Events = new JwtBearerEvents
-    {
-        OnAuthenticationFailed = async context =>
-        {
-            if (context.Exception is SecurityTokenExpiredException)
-            {
-                var auditoria = context.HttpContext.RequestServices.GetService<IAuditoriaService>();
-                if (auditoria is not null)
-                {
-                    await auditoria.RegistrarAsync(
-                        ModuloSistema.Usuarios,
-                        AccionPermiso.ConsultarHistorial,
-                        "Intento de uso de token expirado.",
-                        entidad: "Sesion",
-                        resultado: "Rechazado",
-                        error: "Token expirado");
-                }
-            }
-        }
-    };
+    options.TokenValidationParameters = new TokenValidationParameters { ValidateIssuer = true, ValidateAudience = true, ValidateLifetime = true, ValidateIssuerSigningKey = true, ValidIssuer = jwtIssuer, ValidAudience = jwtAudience, IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)), ClockSkew = TimeSpan.Zero };
+    options.Events = new JwtBearerEvents { OnAuthenticationFailed = async context => { if (context.Exception is SecurityTokenExpiredException) { var auditoria = context.HttpContext.RequestServices.GetService<IAuditoriaService>(); if (auditoria is not null) await auditoria.RegistrarAsync(ModuloSistema.Usuarios, AccionPermiso.ConsultarHistorial, "Intento de uso de token expirado.", entidad: "Sesion", resultado: "Rechazado", error: "Token expirado"); } } };
 });
-
 builder.Services.AddAuthorization();
-
-// ===== Protección de intentos de acceso =====
-var loginRateLimitPerMinute = Math.Clamp(
-    builder.Configuration.GetValue<int?>("Security:LoginRateLimitPerMinute") ?? 60,
-    5,
-    300);
-
-builder.Services.AddRateLimiter(options =>
-{
-    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-    options.OnRejected = async (context, cancellationToken) =>
-    {
-        context.HttpContext.Response.ContentType = "application/json";
-        await context.HttpContext.Response.WriteAsJsonAsync(
-            ApiResponse<object>.Fail("Demasiados intentos de acceso. Espera un minuto e intenta nuevamente."),
-            cancellationToken);
-    };
-
-    options.AddPolicy("AuthLogin", httpContext =>
-        RateLimitPartition.GetFixedWindowLimiter(
-            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "ip-desconocida",
-            factory: _ => new FixedWindowRateLimiterOptions
-            {
-                AutoReplenishment = true,
-                PermitLimit = loginRateLimitPerMinute,
-                QueueLimit = 0,
-                Window = TimeSpan.FromMinutes(1)
-            }));
-});
-
-// ===== CORS =====
+var loginRateLimitPerMinute = Math.Clamp(builder.Configuration.GetValue<int?>("Security:LoginRateLimitPerMinute") ?? 60, 5, 300);
+builder.Services.AddRateLimiter(options => { options.RejectionStatusCode = StatusCodes.Status429TooManyRequests; options.OnRejected = async (context, cancellationToken) => { context.HttpContext.Response.ContentType = "application/json"; await context.HttpContext.Response.WriteAsJsonAsync(ApiResponse<object>.Fail("Demasiados intentos de acceso. Espera un minuto e intenta nuevamente."), cancellationToken); }; options.AddPolicy("AuthLogin", httpContext => RateLimitPartition.GetFixedWindowLimiter(partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "ip-desconocida", factory: _ => new FixedWindowRateLimiterOptions { AutoReplenishment = true, PermitLimit = loginRateLimitPerMinute, QueueLimit = 0, Window = TimeSpan.FromMinutes(1) })); });
 var corsOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
-if (corsOrigins.Length == 0 || corsOrigins.Any(string.IsNullOrWhiteSpace))
-{
-    throw new InvalidOperationException("Cors:AllowedOrigins debe contener al menos un origen válido.");
-}
-
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("FrontendPolicy", policy =>
-    {
-        policy.WithOrigins(corsOrigins)
-              .AllowAnyHeader()
-              .AllowAnyMethod();
-    });
-});
-
-// ===== Swagger (con soporte JWT Bearer) =====
+if (corsOrigins.Length == 0 || corsOrigins.Any(string.IsNullOrWhiteSpace)) throw new InvalidOperationException("Cors:AllowedOrigins debe contener al menos un origen válido.");
+builder.Services.AddCors(options => options.AddPolicy("FrontendPolicy", policy => policy.WithOrigins(corsOrigins).AllowAnyHeader().AllowAnyMethod()));
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
-{
-    options.SwaggerDoc("v1", new OpenApiInfo { Title = "InventoryApp API", Version = "v1" });
-
-    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        Scheme = "Bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Description = "Ingresa: Bearer {tu token}"
-    });
-
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
-            },
-            Array.Empty<string>()
-        }
-    });
-});
-
+builder.Services.AddSwaggerGen(options => { options.SwaggerDoc("v1", new OpenApiInfo { Title = "InventoryApp API", Version = "v1" }); options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme { Name = "Authorization", Type = SecuritySchemeType.Http, Scheme = "Bearer", BearerFormat = "JWT", In = ParameterLocation.Header, Description = "Ingresa: Bearer {tu token}" }); options.AddSecurityRequirement(new OpenApiSecurityRequirement { { new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" } }, Array.Empty<string>() } }); });
 var app = builder.Build();
-
-// ===== Middleware pipeline =====
-var forwardedHeadersOptions = new ForwardedHeadersOptions
-{
-    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
-    ForwardLimit = 1
-};
-forwardedHeadersOptions.KnownNetworks.Clear();
-forwardedHeadersOptions.KnownProxies.Clear();
-
-app.UseForwardedHeaders(forwardedHeadersOptions);
-
-if (!app.Environment.IsDevelopment())
-{
-    app.UseHsts();
-}
-
+var forwardedHeadersOptions = new ForwardedHeadersOptions { ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto, ForwardLimit = 1 };
+forwardedHeadersOptions.KnownNetworks.Clear(); forwardedHeadersOptions.KnownProxies.Clear(); app.UseForwardedHeaders(forwardedHeadersOptions);
+if (!app.Environment.IsDevelopment()) app.UseHsts();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
-app.Use(async (context, next) =>
-{
-    context.Response.Headers.TryAdd("X-Content-Type-Options", "nosniff");
-    context.Response.Headers.TryAdd("X-Frame-Options", "DENY");
-    context.Response.Headers.TryAdd("Referrer-Policy", "no-referrer");
-    context.Response.Headers.TryAdd("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
-    await next();
-});
-
-var swaggerEnabled = app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Swagger:Enabled");
-if (swaggerEnabled)
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.UseHttpsRedirection();
-app.UseCors("FrontendPolicy");
-app.UseRateLimiter();
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapGet("/health", () => Results.Ok(new
-{
-    status = "ok",
-    service = "InventoryApp API"
-})).ExcludeFromDescription();
-
-app.MapGet("/health/ready", async (AppDbContext db, CancellationToken cancellationToken) =>
-{
-    var databaseReady = false;
-    try
-    {
-        databaseReady = await db.Database.CanConnectAsync(cancellationToken);
-    }
-    catch
-    {
-        databaseReady = false;
-    }
-
-    return databaseReady
-        ? Results.Ok(new { status = "ready", database = "connected" })
-        : Results.Json(
-            new { status = "not_ready", database = "unavailable" },
-            statusCode: StatusCodes.Status503ServiceUnavailable);
-}).ExcludeFromDescription();
-
+app.Use(async (context, next) => { context.Response.Headers.TryAdd("X-Content-Type-Options", "nosniff"); context.Response.Headers.TryAdd("X-Frame-Options", "DENY"); context.Response.Headers.TryAdd("Referrer-Policy", "no-referrer"); context.Response.Headers.TryAdd("Permissions-Policy", "camera=(), microphone=(), geolocation=()"); await next(); });
+var swaggerEnabled = app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Swagger:Enabled"); if (swaggerEnabled) { app.UseSwagger(); app.UseSwaggerUI(); }
+app.UseHttpsRedirection(); app.UseCors("FrontendPolicy"); app.UseRateLimiter(); app.UseAuthentication(); app.UseAuthorization();
+app.MapGet("/health", () => Results.Ok(new { status = "ok", service = "InventoryApp API" })).ExcludeFromDescription();
+app.MapGet("/health/ready", async (AppDbContext db, CancellationToken cancellationToken) => { var databaseReady = false; try { databaseReady = await db.Database.CanConnectAsync(cancellationToken); } catch { databaseReady = false; } return databaseReady ? Results.Ok(new { status = "ready", database = "connected" }) : Results.Json(new { status = "not_ready", database = "unavailable" }, statusCode: StatusCodes.Status503ServiceUnavailable); }).ExcludeFromDescription();
 app.MapControllers();
-
 if (app.Configuration.GetValue<bool>("Database:ApplyMigrationsOnStartup"))
 {
     await using var scope = app.Services.CreateAsyncScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     await db.Database.MigrateAsync();
-
-    var repairService = new ProductionDataRepairService(db);
-    await repairService.RepairAsync();
-
-    // RBAC se inicializa primero porque RolId es obligatorio para cualquier usuario.
-    var seedPermisoService = new SeedPermisoService(db);
-    await seedPermisoService.SeedDefaultsAsync();
-
-    var adminUsername = app.Configuration["SeedAdmin:Username"]?.Trim();
-    var adminPassword = app.Configuration["SeedAdmin:Password"];
-
-    if (!string.IsNullOrWhiteSpace(adminUsername) && !string.IsNullOrWhiteSpace(adminPassword))
+    var repairService = new ProductionDataRepairService(db); await repairService.RepairAsync();
+    var seedPermisoService = new SeedPermisoService(db); await seedPermisoService.SeedDefaultsAsync();
+    var adminUsername = app.Configuration["SeedAdmin:Username"]?.Trim(); var adminPassword = app.Configuration["SeedAdmin:Password"];
+    if (!string.IsNullOrWhiteSpace(adminUsername) && !string.IsNullOrWhiteSpace(adminPassword) && !await db.Usuarios.AnyAsync(u => u.NombreUsuario == adminUsername))
     {
-        var adminExiste = await db.Usuarios.AnyAsync(u => u.NombreUsuario == adminUsername);
-        if (!adminExiste)
-        {
-            var adminRolId = await db.Roles
-                .Where(r => r.EsAdministrador && r.Activo && !r.Eliminado)
-                .OrderBy(r => r.Id)
-                .Select(r => r.Id)
-                .FirstOrDefaultAsync();
-
-            if (adminRolId <= 0)
-                throw new InvalidOperationException("No existe un rol administrador dinámico activo para SeedAdmin.");
-
-            db.Usuarios.Add(new Usuario
-            {
-                NombreUsuario = adminUsername,
-                NombreCompleto = "Administrador",
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(adminPassword),
-                RolId = adminRolId,
-                Activo = true,
-                FechaCreacion = DateTime.UtcNow
-            });
-            await db.SaveChangesAsync();
-        }
+        var adminRolId = await db.Roles.Where(r => r.EsAdministrador && r.Activo && !r.Eliminado).OrderBy(r => r.Id).Select(r => r.Id).FirstOrDefaultAsync();
+        if (adminRolId <= 0) throw new InvalidOperationException("No existe un rol administrador dinámico activo para SeedAdmin.");
+        db.Usuarios.Add(new Usuario { NombreUsuario = adminUsername, NombreCompleto = "Administrador", PasswordHash = BCrypt.Net.BCrypt.HashPassword(adminPassword), RolId = adminRolId, Activo = true, FechaCreacion = DateTime.UtcNow }); await db.SaveChangesAsync();
     }
-
-    var seedFiscalService = new SeedFiscalService(db);
-    await seedFiscalService.SeedDefaultsAsync();
+    var seedFiscalService = new SeedFiscalService(db); await seedFiscalService.SeedDefaultsAsync();
 }
-
 await app.RunAsync();
