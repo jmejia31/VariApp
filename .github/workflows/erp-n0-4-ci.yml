@@ -92,13 +92,25 @@ jobs:
           resultado="$(docker exec -i "$c" mysql -uroot -proot inventoryapp_n04_ci --batch --skip-column-names < backend/scripts/preflight-erp-n0-4-rbac.sql | tail -n 1)"
           test "$resultado" = '0'
 
-      - name: Aplicar N0.4
+      - name: Aplicar N0.4 exacta
         working-directory: backend
         run: |
-          dotnet ef database update \
+          dotnet ef database update 20260811174745_N0_4_ConsolidarRbacRelacional \
             --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
             --startup-project src/API/InventoryApp.API.csproj \
             --context AppDbContext
+
+      - name: Verificar aislamiento histórico N0.4
+        shell: bash
+        run: |
+          set -euo pipefail
+          c="${{ job.services.mysql.id }}"
+          n03='20260811032000_N0_3_ConsolidarProductoVariante'
+          n04='20260811174745_N0_4_ConsolidarRbacRelacional'
+
+          test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n04_ci -Nse "SELECT COUNT(*) FROM __EFMigrationsHistory WHERE MigrationId='${n03}';")" = '1'
+          test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n04_ci -Nse "SELECT COUNT(*) FROM __EFMigrationsHistory WHERE MigrationId='${n04}';")" = '1'
+          test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n04_ci -Nse "SELECT COUNT(*) FROM __EFMigrationsHistory WHERE MigrationId > '${n04}';")" = '0'
 
       - name: Postcheck N0.4 y preservación
         shell: bash

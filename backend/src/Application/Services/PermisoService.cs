@@ -59,7 +59,9 @@ public class PermisoService : IPermisoService
         if (!rol.Activo)
             throw new BusinessRuleException("No se pueden asignar permisos a un rol inactivo.");
 
-        var matrizAnterior = await GetMatrizAsync(rolId);
+        var catalogoActivo = (await _permisoRepository.GetAllAsync())
+            .Where(p => p.Activo && !p.Eliminado)
+            .ToList();
         var nuevaMatriz = new List<RolPermiso>();
         var permisoIds = new HashSet<int>();
 
@@ -84,6 +86,19 @@ public class PermisoService : IPermisoService
             });
         }
 
+        if (rol.EsAdministrador)
+        {
+            var permisosActivos = catalogoActivo.Select(p => p.Id).ToHashSet();
+            if (!permisoIds.SetEquals(permisosActivos))
+            {
+                throw new BusinessRuleException(
+                    "Los roles administradores deben conservar grants explícitos para todo el catálogo activo.");
+            }
+        }
+
+        // La matriz solo se reemplaza después de validar por completo la invariancia
+        // administrativa. Un rechazo jamás puede dejar grants parcialmente mutados.
+        var matrizAnterior = await GetMatrizAsync(rolId);
         await _repository.ReemplazarMatrizPorRolIdAsync(rolId, nuevaMatriz);
         var matrizNueva = await GetMatrizAsync(rolId);
 
