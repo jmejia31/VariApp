@@ -92,6 +92,28 @@ Los aliases internos `Color` y `Talla` se conservan únicamente como propiedades
 
 `ProductoRepository` realiza `Include` únicamente sobre las navegaciones persistentes normalizadas.
 
+### 7.1 Regresión detectada por M13 y corrección final
+
+La primera certificación específica de N0.2 dejó visible una regresión que el gate amplio M13 detectó correctamente: al crear un producto simple con una variante técnica, el DTO podía devolver `MarcaId = null` aunque la familia tuviera una Marca normalizada válida. El mismo riesgo existía para Modelo, Color y Talla.
+
+Causa raíz: `ProductoMapper` utilizaba cualquier variante —incluida la variante técnica— como fuente de dimensiones. La variante técnica es un mecanismo de inventario para productos simples y deliberadamente no necesita repetir Marca/Modelo/Color/Talla.
+
+Corrección aplicada en el commit funcional:
+
+`d0fd4e4e842efd12bdbc8e41ee6a6cb7881a5fb0`
+
+Desde esa corrección:
+
+- stock/costo/precio siguen tomando las variantes operativas/técnicas según corresponda;
+- las dimensiones familiares toman variantes comerciales (`!EsTecnica`) cuando existen;
+- si no existen variantes comerciales, Marca/Modelo/Color/Talla se proyectan desde las FKs normalizadas de `Producto`;
+- no se vuelve a consultar ni persistir `CatalogoProducto`.
+
+Se agregaron pruebas de regresión específicas en `ProductoMapperTests` para:
+
+1. producto simple + variante técnica conserva los cuatro IDs/nombres normalizados familiares;
+2. producto con variante comercial conserva la prioridad dimensional de la variante comercial.
+
 ## 8. Carga masiva
 
 `CargaMasivaService` dejó de consultar o escribir `CatalogosProducto`.
@@ -132,29 +154,51 @@ Valida después de N0.2:
 
 Criterio: `ErroresN02 = 0`.
 
-## 10. Certificación automatizada
+## 10. Certificación automatizada final
 
-Workflow permanente:
+Workflow permanente N0.2:
 
 `.github/workflows/erp-n0-2-ci.yml`
 
-Gate funcional exitoso de referencia:
+### 10.1 Gate específico N0.2 sobre el SHA funcional corregido
 
-- run: `31450333907`
-- SHA funcional: `95bf467c8eba9e2ab204a4010e9678d4c4e9d51b`
+- run: `31452728906`
+- SHA funcional: `d0fd4e4e842efd12bdbc8e41ee6a6cb7881a5fb0`
 - MySQL: 8.4
-- build Release con `-warnaserror`: aprobado
-- backend: **270/270 pruebas aprobadas**
+- build Release con `-warnaserror`: **0 warnings / 0 errors**
+- backend: **272/272 pruebas aprobadas**
 - esquema inmediatamente anterior a N0.2: creado desde migraciones EF
 - dataset representativo legacy + normalizado: sembrado
 - preflight: `0`
 - migración N0.2: aplicada
 - postcheck: `0`
-- relaciones Marca/Modelo/Color/Talla del producto representativo: conservadas
-- `dotnet ef migrations has-pending-model-changes`: aprobado
+- tabla `CatalogosProducto`: inexistente después de la migración
+- relaciones normalizadas Marca/Modelo/Color/Talla: preservadas
+- `dotnet ef migrations has-pending-model-changes`: sin cambios pendientes
 - guardas estáticas de entidad/DbSet/configuración/acceso runtime legacy: aprobadas
 
-El workflow se ejecuta también en cada push a `Desarrollo`, por lo que el SHA final de documentación debe quedar verde antes de considerar cerrado el punto.
+### 10.2 Regresión transversal
+
+El cierre no se apoya únicamente en el gate específico. El SHA funcional corregido también quedó verde en:
+
+- `Desarrollo - Compilación y pruebas`: run `31452728877` — **SUCCESS**;
+- `Fase 8 - Validación completa automatizada`: run `31452728902` — **SUCCESS**;
+- `Desarrollo - aceptación funcional integral`: run `31452728978` — **SUCCESS**;
+- `M13 - Auditoría integral y certificación final`: run `31452728886` — **SUCCESS**.
+
+M13 ejecutó la suite Playwright integral completa:
+
+- **107/107 pruebas Playwright aprobadas**;
+- runtime y seguridad HTTP aprobados;
+- SMTP efímero, PDF y auditoría de logs aprobados;
+- frontend TypeScript/lint/build de producción aprobados;
+- migraciones, snapshot, upgrades y preservación histórica aprobados;
+- secretos, dependencias, Docker, aislamiento y backup vigente aprobados;
+- dictamen automatizado M13: **SUCCESS**.
+
+La regresión dimensional descrita en 7.1 fue detectada por M13 antes del cierre y quedó cubierta tanto por pruebas unitarias nuevas como por la aceptación/M13 posteriores.
+
+El commit documental que contiene este cierre debe volver a pasar los pipelines automáticos aplicables antes de considerar N0.2 formalmente cerrado en `Desarrollo`.
 
 ## 11. Alcance deliberadamente conservado
 
@@ -179,14 +223,18 @@ N0.2 se considera cerrada únicamente si se cumplen simultáneamente:
 - [x] consumidores de carga masiva migrados;
 - [x] lookups de maestro tipados;
 - [x] Producto conectado a maestros normalizados;
+- [x] variante técnica no borra la proyección dimensional normalizada de productos simples;
 - [x] migración EF + snapshot actualizados;
 - [x] migración forward-only segura;
 - [x] preflight y postcheck disponibles;
 - [x] build sin warnings/errors;
-- [x] suite backend completa verde;
+- [x] suite backend completa **272/272** verde;
 - [x] migración probada en MySQL 8.4 con datos representativos;
 - [x] snapshot EF sin cambios pendientes;
 - [x] guardas estáticas legacy verdes;
+- [x] aceptación funcional integral verde;
+- [x] M13 integral verde con **107/107 Playwright**;
+- [x] P0/P1 abiertos atribuibles a N0.2: **0**;
 - [x] producción no tocada;
 - [x] `main` no modificada ni fusionada desde este trabajo.
 
