@@ -45,6 +45,20 @@ public class Producto : AuditableEntity
     public int? ModeloId { get; set; }
     public Modelo? ModeloCatalogo { get; set; }
 
+    // Alias no persistentes para consumidores históricos internos. Ambos
+    // resuelven al maestro normalizado y EF los ignora explícitamente.
+    public Color? Color
+    {
+        get => ColorCatalogo;
+        set => ColorCatalogo = value;
+    }
+
+    public Talla? Talla
+    {
+        get => TallaCatalogo;
+        set => TallaCatalogo = value;
+    }
+
     public ICollection<ProductoImagen> Imagenes { get; set; } = new List<ProductoImagen>();
     public ICollection<ProductoVariante> Variantes { get; set; } = new List<ProductoVariante>();
 

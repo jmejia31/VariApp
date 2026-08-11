@@ -28,6 +28,8 @@ public class ProductoConfiguration : IEntityTypeConfiguration<Producto>
         builder.Ignore(p => p.ImagenPrincipal);
         builder.Ignore(p => p.TieneStockBajo);
         builder.Ignore(p => p.EstaAgotado);
+        builder.Ignore(p => p.Color);
+        builder.Ignore(p => p.Talla);
 
         builder.HasIndex(p => p.Nombre).HasDatabaseName("IX_Productos_Nombre");
         builder.HasIndex(p => p.Marca).HasDatabaseName("IX_Productos_Marca");
