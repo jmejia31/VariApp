@@ -5,11 +5,15 @@ on:
     branches: [Desarrollo]
     paths:
       - 'backend/scripts/preflight-erp-n0-6-origen-movimiento-inventario.sql'
+      - 'backend/scripts/validar-erp-n0-6-c2-backfill.sql'
+      - 'backend/src/Infrastructure/Migrations/20260812083000_N0_6_OrigenTipadoMovimientoInventario.cs'
       - '.github/workflows/erp-n0-6-preflight-ci.yml'
   pull_request:
     branches: [main]
     paths:
       - 'backend/scripts/preflight-erp-n0-6-origen-movimiento-inventario.sql'
+      - 'backend/scripts/validar-erp-n0-6-c2-backfill.sql'
+      - 'backend/src/Infrastructure/Migrations/20260812083000_N0_6_OrigenTipadoMovimientoInventario.cs'
       - '.github/workflows/erp-n0-6-preflight-ci.yml'
   workflow_dispatch:
 
@@ -53,49 +57,76 @@ jobs:
         run: |
           dotnet restore InventoryApp.sln
           dotnet tool install --global dotnet-ef --version 8.0.8
-      - name: Aplicar esquema actual
+      - name: Aplicar esquema previo a C2
         working-directory: backend
         run: |
-          dotnet ef database update \
+          dotnet ef database update 20260812023600_N0_5_BackfillMetodoPagoHistorico \
             --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
             --startup-project src/API/InventoryApp.API.csproj \
             --context AppDbContext
-      - name: Certificar preflight fail-closed
+      - name: Certificar preflight fail-closed C1
         shell: bash
         run: |
           set -euo pipefail
           c="${{ job.services.mysql.id }}"
           script='backend/scripts/preflight-erp-n0-6-origen-movimiento-inventario.sql'
-
           ejecutar_preflight() {
-            docker exec -i "$c" mysql -uroot -proot inventoryapp_n06_ci \
-              --batch --skip-column-names < "$script" | tail -n 1
+            docker exec -i "$c" mysql -uroot -proot inventoryapp_n06_ci --batch --skip-column-names < "$script" | tail -n 1
           }
-
           test "$(ejecutar_preflight)" = '0'
-
           docker exec "$c" mysql -uroot -proot inventoryapp_n06_ci -e "
-            INSERT INTO Productos
-              (Nombre,Marca,Modelo,Cantidad,Costo,Precio,UmbralStockBajo,Activo,Eliminado,FechaCreacion,FechaActualizacion)
-            VALUES
-              ('N06 Producto CI','VAEP','N06',1,1.00,1.00,0,1,0,UTC_TIMESTAMP(6),UTC_TIMESTAMP(6));"
-
-          docker exec "$c" mysql -uroot -proot inventoryapp_n06_ci -e "
-            SET @producto_id=(SELECT Id FROM Productos WHERE Nombre='N06 Producto CI' ORDER BY Id LIMIT 1);
-            INSERT INTO MovimientosInventario
-              (ProductoId,Tipo,Causa,Cantidad,StockAnterior,StockNuevo,ReferenciaTipo,ReferenciaId,Fecha)
-            VALUES
-              (@producto_id,'Entrada',0,1,0,1,'OrigenDesconocido',999999,UTC_TIMESTAMP(6));"
+            INSERT INTO Productos (Nombre,Marca,Modelo,Cantidad,Costo,Precio,UmbralStockBajo,Activo,Eliminado,FechaCreacion,FechaActualizacion)
+            VALUES ('N06 Producto CI','VAEP','N06',1,1.00,1.00,0,1,0,UTC_TIMESTAMP(6),UTC_TIMESTAMP(6));
+            SET @p=(SELECT Id FROM Productos WHERE Nombre='N06 Producto CI' ORDER BY Id LIMIT 1);
+            INSERT INTO MovimientosInventario (ProductoId,Tipo,Causa,Cantidad,StockAnterior,StockNuevo,ReferenciaTipo,ReferenciaId,Fecha)
+            VALUES (@p,'Entrada',0,1,0,1,'OrigenDesconocido',999999,UTC_TIMESTAMP(6));"
           test "$(ejecutar_preflight)" -gt 0
           docker exec "$c" mysql -uroot -proot inventoryapp_n06_ci -e "DELETE FROM MovimientosInventario WHERE ReferenciaTipo='OrigenDesconocido';"
-
-          docker exec "$c" mysql -uroot -proot inventoryapp_n06_ci -e "
-            SET @producto_id=(SELECT Id FROM Productos WHERE Nombre='N06 Producto CI' ORDER BY Id LIMIT 1);
-            INSERT INTO MovimientosInventario
-              (ProductoId,Tipo,Causa,Cantidad,StockAnterior,StockNuevo,ReferenciaTipo,ReferenciaId,Fecha)
-            VALUES
-              (@producto_id,'Entrada',0,1,0,1,'Compra',999999,UTC_TIMESTAMP(6));"
-          test "$(ejecutar_preflight)" -gt 0
-          docker exec "$c" mysql -uroot -proot inventoryapp_n06_ci -e "DELETE FROM MovimientosInventario WHERE ReferenciaTipo='Compra' AND ReferenciaId=999999;"
-
           test "$(ejecutar_preflight)" = '0'
+      - name: Sembrar historia representativa legacy
+        shell: bash
+        run: |
+          set -euo pipefail
+          c="${{ job.services.mysql.id }}"
+          docker exec "$c" mysql -uroot -proot inventoryapp_n06_ci -e "
+            INSERT INTO Compras (NumeroCompra,Fecha,ProveedorNombre,Estado,EstadoPago,MetodoPago,Subtotal,Descuento,Impuesto,Total,Eliminado,FechaCreacion,FechaActualizacion)
+            VALUES ('N06-COMPRA',UTC_TIMESTAMP(6),'Proveedor N06','Borrador','Pendiente','Efectivo',1,0,0,1,0,UTC_TIMESTAMP(6),UTC_TIMESTAMP(6));
+            INSERT INTO Ventas (NumeroVenta,Fecha,ClienteNombre,Estado,EstadoPago,MetodoPago,ImporteBruto,ImporteProductos,Subtotal,Descuento,Impuesto,CostoEnvio,EnvioExonerado,Total,CostoTotal,UtilidadBruta,Eliminado,FechaCreacion,FechaActualizacion)
+            VALUES ('N06-VENTA',UTC_TIMESTAMP(6),'Cliente N06','Borrador','Pendiente','Efectivo',1,1,1,0,0,0,0,1,0,1,0,UTC_TIMESTAMP(6),UTC_TIMESTAMP(6));
+            INSERT INTO ConsumosInsumos (NumeroConsumo,FechaConsumo,Estado,AreaDestino,Motivo,Eliminado,FechaCreacion,FechaActualizacion)
+            VALUES ('N06-CONSUMO',UTC_TIMESTAMP(6),'Borrador','QA','Fixture N06',0,UTC_TIMESTAMP(6),UTC_TIMESTAMP(6));
+            SET @p=(SELECT Id FROM Productos WHERE Nombre='N06 Producto CI' ORDER BY Id LIMIT 1);
+            SET @c=(SELECT Id FROM Compras WHERE NumeroCompra='N06-COMPRA');
+            SET @v=(SELECT Id FROM Ventas WHERE NumeroVenta='N06-VENTA');
+            SET @i=(SELECT Id FROM ConsumosInsumos WHERE NumeroConsumo='N06-CONSUMO');
+            INSERT INTO MovimientosInventario (ProductoId,Tipo,Causa,Cantidad,StockAnterior,StockNuevo,ReferenciaTipo,ReferenciaId,Fecha) VALUES
+              (@p,'Entrada',0,1,0,1,'Compra',@c,UTC_TIMESTAMP(6)),
+              (@p,'Salida',0,1,1,0,'CompraAnulada',@c,UTC_TIMESTAMP(6)),
+              (@p,'Salida',0,1,1,0,'Venta',@v,UTC_TIMESTAMP(6)),
+              (@p,'Entrada',0,1,0,1,'VentaAnulada',@v,UTC_TIMESTAMP(6)),
+              (@p,'Salida',0,1,1,0,'ConsumoInsumo',@i,UTC_TIMESTAMP(6));"
+          test "$(docker exec -i "$c" mysql -uroot -proot inventoryapp_n06_ci --batch --skip-column-names < backend/scripts/preflight-erp-n0-6-origen-movimiento-inventario.sql | tail -n 1)" = '0'
+      - name: Aplicar C2 y validar backfill tipado
+        working-directory: backend
+        shell: bash
+        run: |
+          set -euo pipefail
+          dotnet ef database update \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext
+          cd ..
+          c="${{ job.services.mysql.id }}"
+          test "$(docker exec -i "$c" mysql -uroot -proot inventoryapp_n06_ci --batch --skip-column-names < backend/scripts/validar-erp-n0-6-c2-backfill.sql | tail -n 1)" = '0'
+          docker exec "$c" mysql -uroot -proot inventoryapp_n06_ci -e "
+            SELECT ReferenciaTipo,ReferenciaId,CompraId,VentaId,ConsumoInsumoId
+              FROM MovimientosInventario
+             WHERE ReferenciaTipo IN ('Compra','CompraAnulada','Venta','VentaAnulada','ConsumoInsumo')
+             ORDER BY Id;"
+      - name: Verificar snapshot EF sin drift de modelo
+        working-directory: backend
+        run: |
+          dotnet ef migrations has-pending-model-changes \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext
