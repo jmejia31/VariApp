@@ -2,10 +2,10 @@ using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Application.Services;
-using InventoryApp.Domain.Entities.Catalogos;
 using InventoryApp.Domain.Enums;
 using Moq;
 using Xunit;
+using MetodoPagoEntity = InventoryApp.Domain.Entities.Catalogos.MetodoPago;
 
 namespace InventoryApp.Tests;
 
@@ -44,11 +44,11 @@ public class MetodoPagoServiceTests
     [Fact]
     public async Task CreateAsync_NormalizaCodigo_CanonizaMetadata_YAudita()
     {
-        MetodoPago? creado = null;
+        MetodoPagoEntity? creado = null;
         _repository.Setup(x => x.ExisteCodigoAsync("TRANSFERENCIA_BAC", null)).ReturnsAsync(false);
         _repository
-            .Setup(x => x.AddAsync(It.IsAny<MetodoPago>()))
-            .Callback<MetodoPago>(x => creado = x)
+            .Setup(x => x.AddAsync(It.IsAny<MetodoPagoEntity>()))
+            .Callback<MetodoPagoEntity>(x => creado = x)
             .Returns(Task.CompletedTask);
         _repository.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
 
@@ -98,14 +98,14 @@ public class MetodoPagoServiceTests
             Tipo = "Efectivo"
         }));
 
-        _repository.Verify(x => x.AddAsync(It.IsAny<MetodoPago>()), Times.Never);
+        _repository.Verify(x => x.AddAsync(It.IsAny<MetodoPagoEntity>()), Times.Never);
         _repository.Verify(x => x.SaveChangesAsync(), Times.Never);
     }
 
     [Fact]
     public async Task UpdateAsync_ActualizaCampos_MarcaUsuario_YAuditaAntesDespues()
     {
-        var metodo = new MetodoPago
+        var metodo = new MetodoPagoEntity
         {
             Id = 10,
             Codigo = "TARJETA",
@@ -154,7 +154,7 @@ public class MetodoPagoServiceTests
     [Fact]
     public async Task CambiarEstadoAsync_DesactivaSinEliminar_YAudita()
     {
-        var metodo = new MetodoPago
+        var metodo = new MetodoPagoEntity
         {
             Id = 11,
             Codigo = "TRANSFERENCIA",
@@ -186,7 +186,7 @@ public class MetodoPagoServiceTests
     [Fact]
     public async Task DeleteAsync_AplicaEliminacionLogicaConTrazabilidad()
     {
-        var metodo = new MetodoPago
+        var metodo = new MetodoPagoEntity
         {
             Id = 12,
             Codigo = "OTRO",
