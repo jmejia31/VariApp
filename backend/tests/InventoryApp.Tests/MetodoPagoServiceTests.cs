@@ -135,7 +135,7 @@ public class MetodoPagoServiceTests
         Assert.True(metodo.RequiereBanco);
         Assert.Equal(7, metodo.ActualizadoPorUsuarioId);
         Assert.Equal("admin.pruebas", metodo.ActualizadoPorNombreUsuario);
-        Assert.NotNull(metodo.FechaActualizacion);
+        Assert.NotEqual(default, metodo.FechaActualizacion);
         _repository.Verify(x => x.Update(metodo), Times.Once);
 
         _auditoria.Verify(x => x.RegistrarAsync(
