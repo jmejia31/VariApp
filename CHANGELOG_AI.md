@@ -4,6 +4,20 @@ Bitácora colaborativa de cambios realizados por Javier Mejía, Codex, AntiG/Ant
 
 No reemplaza `git log`: registra intención, alcance, validaciones y handoff. Todo changeset intencional debe incluir una entrada breve; no modificar otros colaborativos si su contenido no cambió.
 
+## 2026-08-12 — N0.5.08 Backend/API/CRUD/DTOs MetodoPago — LISTO
+
+**Responsable:** ChatGPT mediante conexiones autorizadas GitHub + Google Drive.
+
+**Objetivo/alcance:** cerrar el backend administrable del catálogo relacional `MetodoPago` sin reintroducir el enum legacy como autoridad. Quedaron integrados DTOs, contratos e implementación de repositorio/servicio, API CRUD, activar/desactivar, reordenamiento, validación/canonicalización de metadata, DI, RBAC relacional y auditoría de mutaciones.
+
+**Correcciones durante validación:** el CI inicial sobre `90fa101dca265c936f9007bf26209f903e24e4e3` detectó que los atributos runtime `MetodosPago:*` todavía no podían seedearse desde `CatalogoPermisosBase`; se incorporó el módulo con el mantenimiento completo en `b94aa0d9346f6efafe73b7911f07673ef07aceee`. Después se añadieron pruebas dirigidas del servicio en `016cfa1ff5712ad1d1e14d06f179de470d6a07c1`; dos fallos estrictamente de prueba —ambigüedad entidad/enum y analyzer xUnit sobre `DateTime` no nullable— se corrigieron forward-only en `d35030bfaa10018fa1a74b6e1efeca11d5cb5bd3` y `5827e610cf9cae1b6a3d5745d10e1cee59df6c78`.
+
+**Cobertura dirigida:** crear normaliza código/canoniza metadata y audita; código duplicado falla cerrado sin persistir; editar registra usuario/auditoría; activar-desactivar preserva eliminación lógica; eliminar aplica trazabilidad; reordenamiento rechaza IDs duplicados antes de persistir. La prueba runtime de catálogo RBAC vuelve a garantizar que todos los permisos exigidos por controladores existen en el catálogo base.
+
+**Validación real final:** ERP-N0.5 run `31650122695` terminó `SUCCESS` completo: restore/build/pruebas backend, esquema relacional, historia representativa, fail-closed, preflight, backfill, postcheck y snapshot EF. El CI general `31650122667` terminó `SUCCESS` completo en Backend Release/pruebas, migraciones e integración MySQL 8.4, Docker, frontend e higiene.
+
+**Control:** `N0.5.08` queda `LISTO` y habilita `N0.5.09`, `N0.5.10` y `N0.5.11` según dependencias de `COLA`. No se tocó `main`, Producción, merge/auto-merge de PR #2, force-push ni ramas nuevas.
+
 ## 2026-08-12 — VAEP v2.2 EXECUTION_TRUTH + CI sin push funcional de GITHUB_TOKEN — CONFIGURADO
 
 **Responsable:** ChatGPT mediante conectores autorizados GitHub + Google Drive + Programación.
