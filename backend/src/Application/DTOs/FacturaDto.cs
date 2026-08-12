@@ -25,6 +25,9 @@ public class FacturaPagoDto
     public DateTime FechaPago { get; set; }
     public decimal Monto { get; set; }
     public string MetodoPago { get; set; } = string.Empty;
+    public int? BancoId { get; set; }
+    public string? BancoCodigo { get; set; }
+    public string? BancoNombre { get; set; }
     public string? Referencia { get; set; }
     public string? Observaciones { get; set; }
     public bool Anulado { get; set; }
@@ -36,6 +39,7 @@ public class RegistrarFacturaPagoDto
 {
     public decimal Monto { get; set; }
     public string MetodoPago { get; set; } = "Efectivo";
+    public int? BancoId { get; set; }
     public string? Referencia { get; set; }
     public string? Observaciones { get; set; }
     public DateTime? FechaPago { get; set; }

@@ -3,6 +3,7 @@ using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Enums;
+using CatalogoBanco = InventoryApp.Domain.Entities.Catalogos.Banco;
 using CatalogoMetodoPago = InventoryApp.Domain.Entities.Catalogos.MetodoPago;
 
 namespace InventoryApp.Application.Services;
@@ -54,6 +55,8 @@ public class FacturaService : IFacturaService
         if (metodoPagoCatalogo.RequiereReferencia && string.IsNullOrWhiteSpace(referencia))
             throw new BusinessRuleException("Debe indicar la referencia para el método de pago seleccionado.");
 
+        var banco = await ResolverBancoAsync(dto.BancoId, metodoPagoCatalogo.RequiereBanco);
+
         RecalcularPago(factura);
         if (factura.SaldoPendiente <= 0)
             throw new BusinessRuleException("La factura ya se encuentra pagada.");
@@ -67,6 +70,10 @@ public class FacturaService : IFacturaService
             MetodoPagoId = metodoPagoCatalogo.Id,
             MetodoPagoCatalogo = metodoPagoCatalogo,
             MetodoPago = DerivarMetodoPagoLegacy(metodoPagoCatalogo),
+            BancoId = banco?.Id,
+            Banco = banco,
+            BancoCodigoSnapshot = banco?.Codigo,
+            BancoNombreSnapshot = banco?.Nombre,
             Referencia = referencia,
             Observaciones = Normalizar(dto.Observaciones, 500),
             CreadoPorUsuarioId = usuarioId,
@@ -167,6 +174,19 @@ public class FacturaService : IFacturaService
 
         return await _repository.GetMetodoPagoPorCodigoONombreAsync(valor.Trim())
             ?? throw new BusinessRuleException($"El método de pago '{valor.Trim()}' no existe en el catálogo.");
+    }
+
+    private async Task<CatalogoBanco?> ResolverBancoAsync(int? bancoId, bool requerido)
+    {
+        if (!bancoId.HasValue || bancoId.Value <= 0)
+        {
+            if (requerido)
+                throw new BusinessRuleException("Debe indicar un banco válido para el método de pago seleccionado.");
+            return null;
+        }
+
+        return await _repository.GetBancoActivoPorIdAsync(bancoId.Value)
+            ?? throw new BusinessRuleException("El banco indicado no existe o no se encuentra activo.");
     }
 
     private static MetodoPago DerivarMetodoPagoLegacy(CatalogoMetodoPago metodoPago)
@@ -272,6 +292,9 @@ public class FacturaService : IFacturaService
             FechaPago = p.FechaPago,
             Monto = p.Monto,
             MetodoPago = p.MetodoPagoCatalogo?.Nombre ?? string.Empty,
+            BancoId = p.BancoId,
+            BancoCodigo = p.BancoCodigoSnapshot ?? p.Banco?.Codigo,
+            BancoNombre = p.BancoNombreSnapshot ?? p.Banco?.Nombre,
             Referencia = p.Referencia,
             Observaciones = p.Observaciones,
             Anulado = p.Anulado,

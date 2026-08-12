@@ -6,6 +6,7 @@ using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Enums;
 using Moq;
 using Xunit;
+using CatalogoBanco = InventoryApp.Domain.Entities.Catalogos.Banco;
 using CatalogoMetodoPago = InventoryApp.Domain.Entities.Catalogos.MetodoPago;
 
 namespace InventoryApp.Tests;
@@ -107,6 +108,80 @@ public class FacturaServicePagosTests
     }
 
     [Fact]
+    public async Task RegistrarPago_SinBancoCuandoMetodoLoRequiere_EsRechazado()
+    {
+        var factura = CrearFactura(300m);
+        var (service, repository) = CrearServicio(factura, transferenciaRequiereBanco: true);
+
+        var error = await Assert.ThrowsAsync<BusinessRuleException>(() =>
+            service.RegistrarPagoAsync(
+                factura.Id,
+                new RegistrarFacturaPagoDto { Monto = 100m, MetodoPago = "Transferencia" },
+                7,
+                "tester"));
+
+        Assert.Contains("banco", error.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Empty(factura.Pagos);
+        repository.Verify(x => x.SaveChangesAsync(), Times.Never);
+    }
+
+    [Fact]
+    public async Task RegistrarPago_ConBancoInexistente_EsRechazadoFailClosed()
+    {
+        var factura = CrearFactura(300m);
+        var (service, repository) = CrearServicio(factura, transferenciaRequiereBanco: true);
+
+        var error = await Assert.ThrowsAsync<BusinessRuleException>(() =>
+            service.RegistrarPagoAsync(
+                factura.Id,
+                new RegistrarFacturaPagoDto { Monto = 100m, MetodoPago = "Transferencia", BancoId = 999 },
+                7,
+                "tester"));
+
+        Assert.Contains("banco", error.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Empty(factura.Pagos);
+        repository.Verify(x => x.SaveChangesAsync(), Times.Never);
+    }
+
+    [Fact]
+    public async Task RegistrarPago_ConBancoValido_PersisteFkYSnapshotsAuditables()
+    {
+        var factura = CrearFactura(300m);
+        var (service, repository) = CrearServicio(factura, transferenciaRequiereBanco: true);
+
+        var resultado = await service.RegistrarPagoAsync(
+            factura.Id,
+            new RegistrarFacturaPagoDto { Monto = 100m, MetodoPago = "Transferencia", BancoId = 5 },
+            7,
+            "tester");
+
+        var pago = Assert.Single(factura.Pagos);
+        Assert.Equal(5, pago.BancoId);
+        Assert.Equal("BAC", pago.BancoCodigoSnapshot);
+        Assert.Equal("BAC Credomatic", pago.BancoNombreSnapshot);
+        Assert.Equal(5, resultado.Pagos.Single().BancoId);
+        Assert.Equal("BAC Credomatic", resultado.Pagos.Single().BancoNombre);
+        repository.Verify(x => x.GetBancoActivoPorIdAsync(5), Times.Once);
+        repository.Verify(x => x.SaveChangesAsync(), Times.Once);
+    }
+
+    [Fact]
+    public async Task RegistrarPago_MetodoSinBanco_AceptaBancoOmitidoSinConsultarCatalogo()
+    {
+        var factura = CrearFactura(300m);
+        var (service, repository) = CrearServicio(factura);
+
+        await service.RegistrarPagoAsync(
+            factura.Id,
+            new RegistrarFacturaPagoDto { Monto = 100m, MetodoPago = "Transferencia" },
+            7,
+            "tester");
+
+        Assert.Null(factura.Pagos.Single().BancoId);
+        repository.Verify(x => x.GetBancoActivoPorIdAsync(It.IsAny<int>()), Times.Never);
+    }
+
+    [Fact]
     public async Task AnularPago_RecalculaSaldoYConservaTrazabilidad()
     {
         var factura = CrearFactura(300m);
@@ -161,17 +236,26 @@ public class FacturaServicePagosTests
 
     private static (FacturaService Service, Mock<IFacturaRepository> Repository) CrearServicio(
         Factura factura,
-        bool transferenciaRequiereReferencia = false)
+        bool transferenciaRequiereReferencia = false,
+        bool transferenciaRequiereBanco = false)
     {
         var repository = new Mock<IFacturaRepository>();
         repository.Setup(x => x.GetByIdAsync(factura.Id)).ReturnsAsync(factura);
         repository.Setup(x => x.SaveChangesAsync()).ReturnsAsync(true);
         repository.Setup(x => x.GetMetodoPagoPorCodigoONombreAsync(It.IsAny<string>()))
             .ReturnsAsync((string valor) => valor.Trim().Equals("Transferencia", StringComparison.OrdinalIgnoreCase)
-                ? CrearMetodoPago(2, "TRANSFERENCIA", "Transferencia", transferenciaRequiereReferencia)
+                ? CrearMetodoPago(2, "TRANSFERENCIA", "Transferencia", transferenciaRequiereReferencia, transferenciaRequiereBanco)
                 : valor.Trim().Equals("Efectivo", StringComparison.OrdinalIgnoreCase)
                     ? CrearMetodoPago(1, "EFECTIVO", "Efectivo")
                     : null);
+        repository.Setup(x => x.GetBancoActivoPorIdAsync(5))
+            .ReturnsAsync(new CatalogoBanco
+            {
+                Id = 5,
+                Codigo = "BAC",
+                Nombre = "BAC Credomatic",
+                Activo = true
+            });
 
         var empresa = new Mock<IEmpresaConfiguracionService>();
         empresa.Setup(x => x.GetActivaAsync()).ReturnsAsync(new EmpresaConfiguracionDto());
@@ -183,12 +267,14 @@ public class FacturaServicePagosTests
         int id,
         string codigo,
         string nombre,
-        bool requiereReferencia = false) => new()
+        bool requiereReferencia = false,
+        bool requiereBanco = false) => new()
     {
         Id = id,
         Codigo = codigo,
         Nombre = nombre,
         Activo = true,
-        RequiereReferencia = requiereReferencia
+        RequiereReferencia = requiereReferencia,
+        RequiereBanco = requiereBanco
     };
 }

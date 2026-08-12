@@ -5,6 +5,7 @@ using InventoryApp.Domain.Entities;
 using InventoryApp.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using CatalogoBanco = InventoryApp.Domain.Entities.Catalogos.Banco;
 using CatalogoMetodoPago = InventoryApp.Domain.Entities.Catalogos.MetodoPago;
 
 namespace InventoryApp.Infrastructure.Repositories;
@@ -30,6 +31,8 @@ public class FacturaRepository : IFacturaRepository
             .Include(f => f.Detalles)
             .Include(f => f.Pagos)
                 .ThenInclude(p => p.MetodoPagoCatalogo)
+            .Include(f => f.Pagos)
+                .ThenInclude(p => p.Banco)
             .Include(f => f.Venta)
                 .ThenInclude(v => v!.MetodoPagoCatalogo)
             .Include(f => f.Venta)
@@ -85,6 +88,11 @@ public class FacturaRepository : IFacturaRepository
             .FirstOrDefaultAsync(m => m.Activo && !m.Eliminado &&
                 (m.Codigo.ToUpper() == normalizado || m.Nombre.ToUpper() == normalizado));
     }
+
+    public Task<CatalogoBanco?> GetBancoActivoPorIdAsync(int id) =>
+        _context.Set<CatalogoBanco>()
+            .AsNoTracking()
+            .FirstOrDefaultAsync(b => b.Id == id && b.Activo && !b.Eliminado);
 
     public async Task<Factura?> GetByIdParaEnlacePublicoValidadoAsync(int id) =>
         TieneAccesoPublicoValidado(id)
