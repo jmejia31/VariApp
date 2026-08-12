@@ -67,6 +67,46 @@ public class FacturaServicePagosTests
     }
 
     [Fact]
+    public async Task RegistrarPago_SinReferenciaCuandoMetodoLaRequiere_EsRechazado()
+    {
+        var factura = CrearFactura(300m);
+        var (service, repository) = CrearServicio(factura, transferenciaRequiereReferencia: true);
+
+        var error = await Assert.ThrowsAsync<BusinessRuleException>(() =>
+            service.RegistrarPagoAsync(
+                factura.Id,
+                new RegistrarFacturaPagoDto { Monto = 100m, MetodoPago = "Transferencia", Referencia = "   " },
+                7,
+                "tester"));
+
+        Assert.Contains("referencia", error.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Empty(factura.Pagos);
+        repository.Verify(x => x.SaveChangesAsync(), Times.Never);
+    }
+
+    [Fact]
+    public async Task RegistrarPago_ConReferenciaCuandoMetodoLaRequiere_SeRegistraNormalizada()
+    {
+        var factura = CrearFactura(300m);
+        var (service, repository) = CrearServicio(factura, transferenciaRequiereReferencia: true);
+
+        var resultado = await service.RegistrarPagoAsync(
+            factura.Id,
+            new RegistrarFacturaPagoDto
+            {
+                Monto = 100m,
+                MetodoPago = "Transferencia",
+                Referencia = "  TRX-001  "
+            },
+            7,
+            "tester");
+
+        Assert.Equal(100m, resultado.TotalPagado);
+        Assert.Equal("TRX-001", factura.Pagos.Single().Referencia);
+        repository.Verify(x => x.SaveChangesAsync(), Times.Once);
+    }
+
+    [Fact]
     public async Task AnularPago_RecalculaSaldoYConservaTrazabilidad()
     {
         var factura = CrearFactura(300m);
@@ -119,14 +159,16 @@ public class FacturaServicePagosTests
         }
     };
 
-    private static (FacturaService Service, Mock<IFacturaRepository> Repository) CrearServicio(Factura factura)
+    private static (FacturaService Service, Mock<IFacturaRepository> Repository) CrearServicio(
+        Factura factura,
+        bool transferenciaRequiereReferencia = false)
     {
         var repository = new Mock<IFacturaRepository>();
         repository.Setup(x => x.GetByIdAsync(factura.Id)).ReturnsAsync(factura);
         repository.Setup(x => x.SaveChangesAsync()).ReturnsAsync(true);
         repository.Setup(x => x.GetMetodoPagoPorCodigoONombreAsync(It.IsAny<string>()))
             .ReturnsAsync((string valor) => valor.Trim().Equals("Transferencia", StringComparison.OrdinalIgnoreCase)
-                ? CrearMetodoPago(2, "TRANSFERENCIA", "Transferencia")
+                ? CrearMetodoPago(2, "TRANSFERENCIA", "Transferencia", transferenciaRequiereReferencia)
                 : valor.Trim().Equals("Efectivo", StringComparison.OrdinalIgnoreCase)
                     ? CrearMetodoPago(1, "EFECTIVO", "Efectivo")
                     : null);
@@ -137,11 +179,16 @@ public class FacturaServicePagosTests
         return (new FacturaService(repository.Object, empresa.Object), repository);
     }
 
-    private static CatalogoMetodoPago CrearMetodoPago(int id, string codigo, string nombre) => new()
+    private static CatalogoMetodoPago CrearMetodoPago(
+        int id,
+        string codigo,
+        string nombre,
+        bool requiereReferencia = false) => new()
     {
         Id = id,
         Codigo = codigo,
         Nombre = nombre,
-        Activo = true
+        Activo = true,
+        RequiereReferencia = requiereReferencia
     };
 }
