@@ -59,7 +59,9 @@ Estado operativo controlado por `COLA`:
   - [x] N0.6.C3 Postcheck, constraints e integridad histórica. Corrección final `01c1116e6db4e839b56176333251e3992fa09d77`; ERP-N0.6 `31581993553` y CI general `31581993565` en verde.
 - [ ] N0.6.D Aplicación, servicios y API — subdividida para mantener autoridad tipada por concern:
   - [x] N0.6.D1 Repositorio/consultas de `MovimientoInventario` migradas a `CompraId` como autoridad relacional. Funcional `2a2e093f66899b9c02c18026ecd3f270b6a730c1`; corrección de fixture `c19aa5005ef7262d91f118f5f4adf7b78aaf41e9`; CI general `31585718867` en verde completo.
-  - [ ] N0.6.D2 Productores `CompraService`/`VentaService`/`ConsumoInsumoService` hacia FKs tipadas.
+  - [ ] N0.6.D2 Productores de `MovimientoInventario` — subdivididos:
+    - [ ] N0.6.D2A Mapping de `CompraId/VentaId/ConsumoInsumoId` en dominio/EF — implementación publicada; `VALIDANDO`.
+    - [ ] N0.6.D2B `CompraService`/`VentaService`/`ConsumoInsumoService` escriben FKs tipadas.
   - [ ] N0.6.D3 Contrato DTO/API de inventario + verificación de autoridad tipada en finanzas.
 - [ ] N0.6.E–H Frontend si aplica, seguridad/auditoría, QA/CI y certificación según `COLA`.
 
