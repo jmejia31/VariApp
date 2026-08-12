@@ -36,11 +36,11 @@ Estado operativo controlado por `COLA`:
   - [x] N0.5.06 A3: migrar lecturas/propagación de Venta hacia la relación. Funcional `c024cc7c96da45f6d2b21867950de3c4dce49fd4`; pruebas dirigidas `05687cffcf9d34b3fdd8efd9becf9d158b61f028`.
   - [x] N0.5.06 B: retirar autoridad legacy de `FacturaPago`. Implementación hasta `d5e9a98c17848001fc64387c709a72ce0e379cd3`; fixtures relacionales `e8ab2b733affea70ba47b3ea8a7ff450c6b7766f`; CI general `31567189353` y ERP-N0.5 `31567189393` en verde.
   - [x] N0.5.06 C: retirar autoridad legacy de `MovimientoFinanciero`. Funcional `0f14b9b9f5248a01cb6c98fa456cd306fe38ae19`; CI general `31568099446` y ERP-N0.5 `31568099373` en verde.
-- [ ] N0.5.07 Reglas operativas — subdividido para mantener cambios pequeños:
+- [x] N0.5.07 Reglas operativas — cerrada en hijos pequeños y certificada por CI:
   - [x] N0.5.07A: elegibilidad `Activo` + preservación histórica. Funcional `11c958ead2a7a8cc5a3b1db4b502cbe63e8efba7`; CI general `31571200414` y ERP-N0.5 `31571200316` en verde.
-  - [ ] N0.5.07B: `RequiereReferencia` + `RequiereBanco` — subdividida; trabajo concurrente controlado por `COLA`.
-  - [ ] N0.5.07C: `PermiteCambio` + `Orden` + `Metadata`.
-- [ ] N0.5.08 Backend/API/CRUD/DTOs.
+  - [x] N0.5.07B: `RequiereReferencia` + `RequiereBanco`; B1/B2 certificados, incluyendo Banco normalizado y fail-closed. Cierre de B2 hasta `16fdf809ced379dff8d1b970ba684644668ec1e5`; CI ERP-N0.5 `31633767440` y general `31633767490` en verde.
+  - [x] N0.5.07C: `PermiteCambio` + `Orden` + `Metadata`; C1/C2 certificados hasta `ce3b218b296f3a7de417870659a6ce08de428e40`; CI ERP-N0.5 `31638441486` y general `31638441384` en verde.
+- [x] N0.5.08 Backend/API/CRUD/DTOs. DTO/repositorio/servicio/API/DI/RBAC/auditoría completados; permisos `MetodosPago:*` incorporados al catálogo en `b94aa0d9346f6efafe73b7911f07673ef07aceee`; pruebas dirigidas del servicio cerradas en `5827e610cf9cae1b6a3d5745d10e1cee59df6c78`; ERP-N0.5 `31650122695` y CI general `31650122667` en verde completo.
 - [ ] N0.5.09 Frontend administrable/selectores dinámicos.
 - [ ] N0.5.10 RBAC + auditoría.
 - [ ] N0.5.11 Reportes/facturas/PDFs.
