@@ -1,76 +1,69 @@
 # Espacio de Coordinación Colaborativa — VariApp
 
-Este archivo registra el estado del proyecto, el log de verificaciones técnicas y la coordinación entre los agentes automáticos (**ChatGPT**, **Codex**, **Antigravity**) y **Javier Mejía**.
+Este documento define el handoff entre Javier Mejía, Codex, AntiG/Antigravity y ChatGPT. El estado técnico vivo se consulta en Git y `TASKS.md`; no se congelan aquí cifras de tests/builds que puedan quedar obsoletas.
 
-## 1. Estado de Verificación del Sistema (Sesión: 31/07/2026)
+## 1. Fuentes canónicas
 
-El agente **Antigravity** ha realizado una verificación completa del estado del repositorio local y Git. Los resultados son los siguientes:
+- `PROJECT_CONTEXT.md`: contexto técnico.
+- `PROJECT_INDEX.md`: índice dirigido.
+- `ARCHITECTURE.md`: arquitectura.
+- `TASKS.md`: pendientes.
+- `CHANGELOG_AI.md`: cambios del equipo.
+- `AGENTS.md`: reglas obligatorias.
 
-### A. Sincronización y Configuración Git
-*   **Rama activa**: `Desarrollo` (confirmado que está al día con `origin/Desarrollo`).
-*   **Git Hooks**: Se ejecutó exitosamente el script de inicialización `.\scripts\configurar-colaboracion.ps1`.
-    *   `core.hooksPath` configurado a `.githooks`.
-    *   Hook `post-commit` activo: cada commit en `Desarrollo` intentará publicar automáticamente en GitHub.
-*   **Working Tree**: Limpio (nada pendiente por confirmar ni archivos huérfanos).
+Si existe contradicción entre un texto histórico y estas fuentes, prevalecen `AGENTS.md` y la memoria canónica más reciente en `Desarrollo`.
 
-### B. Compilación del Backend
-*   **Comando**: `dotnet build backend\InventoryApp.sln`
-*   **Resultado**: **COMPILACIÓN CORRECTA**
-    *   0 Advertencias.
-    *   0 Errores.
-    *   Todos los proyectos (`Domain`, `Application`, `Infrastructure`, `API` y `Tests`) compilaron exitosamente en modo Debug.
+## 2. Equipo y acceso
 
-### C. Pruebas Unitarias/Integración
-*   **Comando**: `dotnet test backend\InventoryApp.sln --no-build`
-*   **Resultado**: **PRUEBAS SUPERADAS**
-    *   **120 de 120** pruebas pasadas exitosamente (0 errores, 0 omitidas).
-    *   Duración aproximada: 5 segundos.
+| Integrante | Proyecto local PC | GitHub | Rol principal |
+|---|---:|---:|---|
+| Javier Mejía | Sí | Sí | Propietario/decisión final |
+| Codex | Sí, cuando opera en la PC autorizada | Sí | Implementación y pruebas |
+| AntiG / Antigravity | Sí, cuando opera en la PC autorizada | Sí | Implementación y pruebas |
+| ChatGPT | No | Sí, solo mediante conector autorizado | Arquitectura/revisión/coordinación/cambios remotos |
+| Otros agentes | No por defecto | Solo si existe conector autorizado | Según asignación |
 
-### D. Validación Estática del Frontend
-*   **Comando**: `npm run lint` (dentro de `frontend/`)
-*   **Resultado**: **APROBADA**
-    *   Sin marcadores de conflicto de Git.
-    *   Sin sentencias `debugger`.
-    *   Sin impresiones temporales de depuración (`console.log`, `console.debug`).
-    *   Sin URLs JavaScript inseguras.
-    *   Compilación TypeScript sin emisiones (`tsc --noEmit`) libre de errores.
+Nadie debe asumir acceso local que no esté expresamente documentado.
 
-### E. Compilación de Producción del Frontend
-*   **Comando**: `npm run build:prod` (dentro de `frontend/`)
-*   **Resultado**: **COMPILACIÓN CORRECTA**
-    *   Bundle de producción generado correctamente en `frontend/dist/inventoryapp-frontend` (646.82 kB inicial total).
-    *   *Nota*: Se observaron advertencias de projection de Angular Material (`NG8011`) en algunos botones de facturas y formularios que no impiden el build.
+## 3. Rama y entornos
 
----
+- `Desarrollo`: única rama de trabajo.
+- `main`: congelada.
+- PR oficial: `Desarrollo -> main`, abierto y borrador.
+- No ramas temporales.
+- No auto-merge.
+- Producción no se modifica.
 
-## 2. Protocolo Colaborativo y Reglas de Oro
+## 4. Handoff mínimo entre agentes
 
-Todos los agentes confirman estar alineados con las normas de `AGENTS.md` y `docs/COLABORACION_IA.md`:
+Cada entrega necesita únicamente:
 
-1.  **Rama Única de Trabajo**: Solo se desarrolla en `Desarrollo`. Queda prohibido modificar `main` directamente.
-2.  **Entornos Aislados**:
-    *   `varistorehn_produccion` (Producción congelada, no se toca ningún secreto, base, archivo o servicio).
-    *   `varistorehn_desarrollo` (Único entorno autorizado para pruebas y semillas).
-3.  **Formato de Commits**:
-    ```text
-    <tipo>(<área>): <descripción> [agente]
-    ```
-    *Ejemplo*: `feat(productos): agregar filtro por categoría [Antigravity]`
-4.  **No Secretos**: Nunca se suben contraseñas, tokens de Cloudinary o claves SMTP.
-5.  **Verificación Previa Obligatoria**: Antes de cada subida se debe compilar y probar localmente.
+```text
+Agente:
+Objetivo:
+Archivos/área:
+Validaciones reales:
+Commit:
+Pendiente/bloqueo:
+```
 
----
+No repetir el resumen completo de arquitectura en cada handoff; referenciar `PROJECT_CONTEXT.md`.
 
-## 3. Log de Sesiones y Coordinación de Agentes
+## 5. Protocolo FULL FLASH / bajo consumo
 
-| Fecha | Agente | Acción / Resultado | Estado de Tareas |
-| :--- | :--- | :--- | :--- |
-| **31/07/2026** | **Antigravity** | Sincronizó rama, configuró hooks locales (`.githooks`), compiló backend y frontend en producción, ejecutó las 120 pruebas backend y creó este documento de coordinación. | **Listo para recibir asignación** |
+1. Leer memoria canónica una vez.
+2. No releer un archivo si no cambió.
+3. No reindexar repositorio por cada prompt.
+4. Analizar archivo objetivo + dependencias directas.
+5. Usar búsquedas dirigidas.
+6. Ejecutar validación proporcional.
+7. Hacer un changeset coherente, no decenas de microparches si no aportan valor.
+8. Tras reconexión, recuperar estado y continuar; no repetir diagnóstico.
+9. Detener la exploración cuando el objetivo esté resuelto.
+10. Actualizar memoria solo cuando exista cambio real.
 
----
+## 6. Historial
 
-## 4. Próximos Pasos Recomendados
+Las verificaciones históricas de sesiones anteriores permanecen disponibles en `git log`/versiones previas de este archivo. No deben presentarse como estado actual sin volver a ejecutarlas.
 
-1.  **Javier Mejía**: Confirmar la recepción de este diagnóstico de salud y asignar la siguiente tarea funcional o correctiva sobre la rama `Desarrollo`.
-2.  **Codex / Antigravity**: Esperar instrucciones de desarrollo e implementar cambios de forma incremental y auditada.
-3.  **ChatGPT**: Realizar revisiones de diseño o verificar la consistencia documental según se requiera.
+Los cambios nuevos se registran en `CHANGELOG_AI.md` y los pendientes en `TASKS.md`.

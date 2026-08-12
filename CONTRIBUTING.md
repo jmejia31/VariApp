@@ -1,63 +1,63 @@
 # Contribuir a VariApp
 
-## Ramas
+## Rama de trabajo
 
-- `main`: versión estable. No recibe commits directos.
-- `Desarrollo`: integración compartida de Javier Mejía y los agentes de IA.
-- Ramas temporales opcionales: `feature/<tema>`, `fix/<tema>` o `chore/<tema>`. Deben integrarse primero en `Desarrollo`.
+- `main`: referencia productiva congelada; no recibe commits directos desde este flujo.
+- `Desarrollo`: **única rama de trabajo e integración autorizada**.
+- No crear ramas temporales `feature/*`, `fix/*`, `chore/*` ni equivalentes sin autorización expresa de Javier Mejía.
+- El PR oficial `Desarrollo -> main` debe permanecer abierto y en borrador; no fusionar ni habilitar auto-merge.
 
-Ningún cambio puede fusionarse a `main` sin autorización expresa de Javier Mejía.
+## Contexto antes de tocar código
 
-## Preparación
+Leer en este orden:
+
+1. `AGENTS.md`.
+2. `PROJECT_CONTEXT.md`.
+3. `TASKS.md`.
+4. `PROJECT_INDEX.md` si se necesita localizar el área.
+
+No volver a indexar todo el repositorio ni releer archivos ya documentados si no cambiaron.
+
+## Preparación local
+
+Para Javier, Codex o AntiG/Antigravity:
 
 ```bash
 git fetch origin
 git switch Desarrollo
 git pull --rebase origin Desarrollo
+git status --short --branch
 ```
 
-En Windows puede ejecutarse una sola vez:
+Si hay cambios locales ajenos, preservarlos y resolver el conflicto de forma explícita.
 
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts\configurar-colaboracion.ps1
-```
+## Implementación
 
-Esto configura el hook compartido que intenta publicar automáticamente cada commit realizado en `Desarrollo`.
+- Cambios pequeños y localizados.
+- Inspeccionar el archivo objetivo y dependencias directas.
+- Evitar refactors no solicitados.
+- No tocar Producción.
+- No subir secretos ni temporales.
+- Actualizar memoria/arquitectura solo cuando el cambio realmente la invalide.
 
-## Antes de publicar
+## Validación
 
-```bash
-git status
-git diff --check
-```
+Aplicar la validación proporcional definida en `AGENTS.md`.
 
-Backend:
+Para cambios documentales no se exige build completo. Para cambios transversales, seguridad, persistencia, migraciones o cierre formal de fase, ejecutar la suite aplicable completa.
 
-```bash
-cd backend
-dotnet build InventoryApp.sln --configuration Release
-dotnet test InventoryApp.sln --configuration Release
-```
+## Publicación
 
-Frontend:
+1. revisar diff;
+2. comprobar que la rama es `Desarrollo`;
+3. commit descriptivo;
+4. push a `origin/Desarrollo`;
+5. registrar cambio relevante en `CHANGELOG_AI.md` y pendiente en `TASKS.md` cuando aplique.
 
-```bash
-cd frontend
-npm ci
-npm run build:prod
-```
+## Rendimiento
 
-## Pull Requests
-
-Todo Pull Request hacia `main` debe:
-
-- originarse desde `Desarrollo`;
-- crearse como borrador;
-- describir alcance, pruebas, migraciones, riesgos y pendientes;
-- mantener CI aprobado;
-- evitar secretos y artefactos temporales;
-- permanecer sin merge hasta autorización expresa.
-
-## Definición de terminado
-
-Un cambio está terminado cuando compila, las pruebas aplicables pasan, la documentación está actualizada, no introduce archivos temporales ni secretos, y el commit está publicado en GitHub.
+- No repetir `fetch/pull/status` sin necesidad.
+- No releer archivos sin cambios.
+- No escanear módulos no relacionados.
+- Tras reconexión, recuperar estado con `PROJECT_CONTEXT.md` + `TASKS.md` + Git, no reiniciar el análisis.
+- Si una tarea puede terminarse con menos archivos/comandos, preferir esa ruta sin sacrificar validación.

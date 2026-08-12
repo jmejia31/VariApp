@@ -1,79 +1,103 @@
-# Espacio colaborativo: Javier + ChatGPT + Codex + Antigravity
+# Colaboración IA — VariApp
 
 ## Objetivo
 
-Coordinar todo el desarrollo de VariApp mediante GitHub, evitando cambios aislados, pérdida de contexto, archivos temporales y modificaciones directas sobre producción.
+Coordinar a Javier Mejía, Codex, AntiG/Antigravity y ChatGPT con mínima pérdida de contexto, mínimo trabajo redundante y máxima trazabilidad en `Desarrollo`.
 
-## Estructura oficial
-
-- `main`: código estable y productivo.
-- `Desarrollo`: integración compartida y única rama secundaria oficial.
-- Pull Request colaborativo: muestra en tiempo real la diferencia entre `Desarrollo` y `main`.
-- Issue de coordinación: registra decisiones, responsables, bloqueos y próximos pasos.
-- GitHub Actions: valida compilación y pruebas en cada actualización de `Desarrollo`.
-
-## Responsabilidades
+## Equipo
 
 ### Javier Mejía
 
-- Define prioridades y aprueba cambios funcionales.
-- Autoriza expresamente migraciones, despliegues y merge a `main`.
-- Resuelve decisiones de negocio y aceptación visual.
-
-### ChatGPT
-
-- Audita repositorio, arquitectura, Pull Requests y documentación.
-- Coordina cambios mediante GitHub y deja evidencia verificable.
-- No realiza merge ni despliegues productivos sin autorización.
+- propietario del proyecto;
+- define prioridades y aceptación;
+- autoriza merge, Producción, migraciones productivas y cambios de reglas.
 
 ### Codex
 
-- Implementa, refactoriza, prueba y corrige código desde un checkout actualizado.
-- Debe leer `AGENTS.md` antes de actuar.
-- Debe publicar cada commit en `Desarrollo` y reportar sus verificaciones.
+- implementa y prueba desde el proyecto local autorizado;
+- debe trabajar sobre `Desarrollo`;
+- debe reutilizar la memoria canónica y evitar reescaneos/relecturas innecesarias;
+- tras reconexión debe continuar desde Git + `PROJECT_CONTEXT.md` + `TASKS.md`, no reiniciar el diagnóstico.
 
-### Antigravity
+### AntiG / Antigravity
 
-- Implementa o revisa cambios desde el mismo flujo Git.
-- Debe sincronizar `Desarrollo` antes de editar y publicar sus commits al finalizar.
-- No debe conservar cambios relevantes únicamente en su entorno local.
+- implementa y prueba desde el proyecto local autorizado;
+- sincroniza `Desarrollo` antes del trabajo y publica cambios trazables;
+- aplica las mismas reglas de rendimiento y memoria canónica.
 
-## Ciclo de una tarea
+### ChatGPT
 
-1. La tarea se registra en el issue colaborativo o en el Pull Request.
-2. El agente sincroniza `Desarrollo`.
-3. Implementa un alcance pequeño y verificable.
-4. Ejecuta compilación y pruebas aplicables.
-5. Crea commit con identificación del agente.
-6. El hook local publica el commit automáticamente cuando está configurado.
-7. GitHub Actions certifica la actualización.
-8. El agente registra resultado, riesgos y pendientes.
-9. Javier revisa y decide el siguiente paso.
+- arquitectura, auditoría, coordinación, revisión y cambios remotos cuando exista conexión GitHub autorizada;
+- no tiene acceso al filesystem local de la PC por defecto;
+- no debe afirmar cambios locales si solo actuó sobre GitHub.
 
-## Actualización automática
+## Acceso
 
-El repositorio incluye `.githooks/post-commit`. Después de ejecutar `scripts/configurar-colaboracion.ps1`, cada commit creado mientras la rama activa sea `Desarrollo` intentará ejecutar:
+### Local
 
-```bash
-git push origin Desarrollo
+Únicamente Javier Mejía, Codex y AntiG/Antigravity tienen acceso reconocido al proyecto local de la PC.
+
+Cualquier ampliación debe ser indicada explícitamente por Javier y documentada aquí/`AGENTS.md`.
+
+### GitHub remoto
+
+Otros agentes, incluido ChatGPT, solo operan mediante conectores/conexiones GitHub autorizados y disponibles. El permiso remoto no implica acceso local.
+
+## Memoria compartida
+
+Fuentes canónicas:
+
+- `PROJECT_CONTEXT.md` — contexto técnico.
+- `PROJECT_INDEX.md` — mapa de carpetas.
+- `ARCHITECTURE.md` — patrones y fronteras.
+- `TASKS.md` — pendientes.
+- `CHANGELOG_AI.md` — bitácora.
+
+Todos los agentes deben actualizar estas fuentes en vez de volver a crear diagnósticos paralelos.
+
+## Flujo eficiente de una tarea
+
+1. leer `AGENTS.md`, `PROJECT_CONTEXT.md`, `TASKS.md`;
+2. localizar el módulo con `PROJECT_INDEX.md`;
+3. revisar solo archivos objetivo y dependencias directas;
+4. implementar el mínimo cambio correcto;
+5. validar proporcionalmente;
+6. publicar en `Desarrollo`;
+7. actualizar `CHANGELOG_AI.md`/`TASKS.md` si corresponde.
+
+## Optimización de tokens y tiempo
+
+- No volver a recorrer todo el repositorio.
+- No releer archivos ya documentados si no cambiaron.
+- No repetir comandos ya confirmados por una reconexión.
+- Usar `git diff`/historial para saber qué cambió desde el último contexto conocido.
+- Usar búsquedas dirigidas por símbolo/ruta.
+- Abrir únicamente el documento de fase/punto necesario.
+- Finalizar cuando el objetivo y sus validaciones estén completos.
+- Si falta una decisión de negocio real, preguntarla; no intentar resolverla escaneando módulos no relacionados.
+
+## Recuperación tras reconexión/compactación
+
+Una reconexión no reinicia la tarea. El agente recupera estado con:
+
+```text
+PROJECT_CONTEXT.md
+TASKS.md
+git status --short --branch
+git log -3
 ```
 
-La automatización no crea commits por sí sola: primero debe existir un commit intencional y revisable. Si no hay conexión o autenticación, el commit se conserva localmente y el hook muestra la instrucción para reintentar.
+Después continúa con los archivos de la tarea. Solo una modificación estructural importante habilita una nueva revisión arquitectónica amplia.
 
-## Reglas de exclusión
+## Git y Producción
 
-No se aceptan en GitHub:
+- rama única: `Desarrollo`;
+- no crear ramas adicionales;
+- `main` no se toca;
+- PR `Desarrollo -> main` permanece en borrador;
+- no auto-merge;
+- Producción congelada;
+- no secretos;
+- no migraciones productivas sin autorización.
 
-- credenciales o secretos;
-- `node_modules`, `bin`, `obj`, `dist` o `.angular`;
-- reportes de Playwright o TestResults;
-- registros, cachés, respaldos o archivos temporales;
-- código muerto, pruebas deshabilitadas o archivos sin referencia;
-- migraciones ejecutadas en producción sin autorización.
-
-## Estado actual al crear este espacio
-
-- `main` permanece sin modificaciones.
-- `Desarrollo` nació desde el commit certificado `b863bb2d8fe23177da040c60bdbb5fe2288f022e`.
-- La rama anterior `agent/mejoras-variapp` queda como referencia histórica hasta que pueda eliminarse de forma segura.
-- No se ha realizado ningún merge a `main`.
+Las reglas completas están en `AGENTS.md` y `docs/ENTORNOS_DESARROLLO_PRODUCCION.md`.

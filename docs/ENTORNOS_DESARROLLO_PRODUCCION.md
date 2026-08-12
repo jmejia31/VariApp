@@ -5,160 +5,108 @@
 Solo existen dos entornos lógicos autorizados:
 
 ```text
-varistorehn_producción (Producción)
+varistorehn_producción
 varistorehn_desarrollo
 ```
 
-Los nombres técnicos existentes de servicios, proyectos, dominios, bases, usuarios o claves pueden diferir. Deben mapearse a uno de los dos entornos oficiales y no deben renombrarse ni recrearse cuando exista riesgo de afectar funcionamiento.
+Los nombres técnicos de servicios, dominios, bases, usuarios o claves pueden diferir; deben mapearse a uno de esos dos entornos y no renombrarse/recrearse si existe riesgo de afectar operación.
 
-| Elemento | varistorehn_producción (Producción) | varistorehn_desarrollo |
+| Elemento | Producción | Desarrollo |
 |---|---|---|
-| Git | rama `main`, referencia de solo lectura | rama única `Desarrollo` |
-| Vercel | proyecto técnico `varistorehn`, dominio `varistorehn.vercel.app` | proyecto técnico `variapp-desarrollo`, dominio `variapp-desarrollo.vercel.app` |
-| Render | servicio técnico productivo `variapp-api` | servicio técnico `variapp-api-desarrollo` |
-| Aiven | datos, variables y usuario administrativo existentes | usuario de aplicación `varistorehn_desarrollo` y variables de Desarrollo existentes |
-| Cloudinary | claves, activos y variables productivas existentes | clave etiquetada `varistorehn_desarrollo` y prefijo `varistorehn_desarrollo/` |
+| Git | `main`, congelada | `Desarrollo`, única rama de trabajo |
+| Vercel | proyecto técnico `varistorehn` | proyecto técnico `variapp-desarrollo` |
+| Render | servicio técnico `variapp-api` | servicio técnico `variapp-api-desarrollo` |
+| Aiven | datos/variables/administración productiva | usuario/base/variables de aplicación de Desarrollo |
+| Cloudinary | claves/activos productivos | prefijo `varistorehn_desarrollo/` y credenciales de Desarrollo |
 
-## 2. Regla absoluta sobre Producción
+## 2. Producción congelada
 
-Producción no se toca. Está prohibido modificar o eliminar:
+Está prohibido modificar o eliminar desde el flujo de Desarrollo:
 
-- rama `main`;
+- `main`;
 - variables, secretos y credenciales productivos;
 - dominios, certificados, servicios y despliegues productivos;
 - bases, usuarios, datos, respaldos o migraciones productivos;
 - usuario administrativo `avnadmin` de Aiven;
-- claves `Raíz`, moderación y flujos de medios de Cloudinary;
-- activos Cloudinary productivos;
-- variables ya existentes de Producción y Desarrollo.
+- claves internas/productivas y activos productivos de Cloudinary;
+- recursos externos basándose únicamente en su nombre.
 
-No se realizará ni siquiera un cambio de nombre visible sobre Producción durante estas fases.
+No desplegar ni migrar Producción sin autorización expresa de Javier Mejía.
 
 ## 3. Regla de eliminación
 
-Solo puede eliminarse un recurso cuando se compruebe que:
+Un recurso solo puede eliminarse si se demuestra que:
 
 1. pertenece exclusivamente a Desarrollo;
-2. duplica una función ya cubierta por `varistorehn_desarrollo`;
-3. no tiene consumidores, dependencias, datos, secretos ni referencias activas;
-4. su eliminación no afecta Producción;
-5. Javier Mejía autoriza expresamente la eliminación.
-
-Nunca se elimina un recurso por coincidencia de nombre. `avnadmin`, las claves internas de Cloudinary, previews históricos y ejecuciones anteriores no son automáticamente terceros entornos.
-
-Con la evidencia disponible no se identificó un tercer entorno permanente que pudiera eliminarse de forma segura. Por esa razón no se eliminó ningún recurso externo.
+2. duplica una función ya cubierta;
+3. no tiene consumidores, dependencias, datos ni secretos necesarios;
+4. no afecta Producción;
+5. Javier autoriza expresamente su eliminación.
 
 ## 4. GitHub
 
-- `main`: referencia productiva, no se modifica.
-- `Desarrollo`: única rama de trabajo.
-- No se crean ramas adicionales.
-- Cada cambio se confirma y publica en `origin/Desarrollo`.
-- El PR `Desarrollo -> main` permanece en borrador.
-- No hay auto-merge.
+- `Desarrollo` es la única rama de trabajo.
+- No crear ramas adicionales.
+- Cada cambio autorizado se publica en `origin/Desarrollo`.
+- PR `Desarrollo -> main` permanece en borrador.
+- No auto-merge.
 
-## 5. Render
+## 5. Acceso local y remoto
 
-### Producción
+Acceso reconocido al proyecto local de la PC:
 
-Se conserva sin cambios el servicio técnico existente `variapp-api`, sus variables, dominio, región, conexión y despliegue.
+- Javier Mejía;
+- Codex;
+- AntiG / Antigravity.
 
-### Desarrollo
+ChatGPT y otros agentes no tienen acceso local por defecto. Pueden operar GitHub solo mediante un conector autorizado. Una operación remota en GitHub no equivale a sincronizar la copia local.
 
-Recurso autorizado:
+Después de un cambio remoto, Javier/Codex/AntiG sincronizan localmente:
 
-- entorno lógico: `varistorehn_desarrollo`;
-- entorno visible actual: Desarrollo;
-- servicio técnico existente: `variapp-api-desarrollo`;
-- rama: `Desarrollo`;
-- runtime: Docker;
-- dominio: `variapp-api-desarrollo.onrender.com`.
-
-Variables de Desarrollo que se mantienen:
-
-```text
-ConnectionStrings__DefaultConnection
-Cloudinary__CloudName
-Cloudinary__ApiKey
-Cloudinary__ApiSecret
-Cloudinary__EnvironmentPrefix=varistorehn_desarrollo
-Smtp__Host
-Smtp__UsuarioSmtp
-Smtp__PasswordSmtp
-Smtp__CorreoRemitente
-SeedAdmin__Username
-SeedAdmin__Password
-Database__ApplyMigrationsOnStartup=false
+```bash
+git fetch origin
+git switch Desarrollo
+git pull --rebase origin Desarrollo
 ```
 
-Los valores no deben compartirse ni copiarse al repositorio. Su auditoría corresponde a la Fase 2.
+## 6. Render
 
-## 6. Aiven
+Producción conserva `variapp-api` sin cambios.
 
-- El servicio existente se conserva.
-- `avnadmin` se conserva como usuario administrativo.
-- El usuario de aplicación de Desarrollo es `varistorehn_desarrollo`.
-- Las variables y credenciales actuales de Producción y Desarrollo se mantienen.
-- La aplicación de Desarrollo no debe usar `avnadmin`.
-- La aplicación de Desarrollo debe usar su base y credenciales designadas.
-- No se crea otro servicio, base o usuario por iniciativa de un agente.
+Desarrollo utiliza el servicio técnico `variapp-api-desarrollo`, rama `Desarrollo` y configuración/secretos exclusivos de Desarrollo.
 
-La revisión de bases, privilegios y conexiones cruzadas corresponde a la Fase 2 y se hará sin modificar Producción.
+No copiar valores reales al repositorio.
 
-## 7. Cloudinary
+## 7. Aiven
 
-- Las claves productivas y las claves internas se conservan.
-- La clave etiquetada `varistorehn_desarrollo` es la referencia autorizada para Desarrollo.
-- El prefijo obligatorio es `varistorehn_desarrollo/`.
-- Desarrollo no puede eliminar un `PublicId` que no comience con ese prefijo.
+- conservar el servicio existente y `avnadmin` como administrador;
+- aplicación de Desarrollo debe usar su usuario/base designados, no `avnadmin`;
+- no crear/eliminar servicio, base o usuario por iniciativa de un agente;
+- no cruzar cadenas de conexión entre Producción y Desarrollo.
 
-Nuevas cargas de Desarrollo:
+## 8. Cloudinary
 
-```text
-varistorehn_desarrollo/inventoryapp/productos
-varistorehn_desarrollo/inventoryapp/compras
-varistorehn_desarrollo/variapp/perfiles
-```
+- conservar claves y activos productivos;
+- Desarrollo usa el prefijo obligatorio `varistorehn_desarrollo/`;
+- Desarrollo no elimina `PublicId` fuera de ese prefijo;
+- secretos Cloudinary nunca se versionan.
 
-Producción mantiene sus rutas y variables actuales.
+## 9. Vercel
 
-## 8. Vercel
+- Producción conserva el proyecto `varistorehn` y su dominio/configuración sin cambios.
+- Desarrollo utiliza `variapp-desarrollo`, con `frontend` como raíz técnica cuando corresponda y backend de Desarrollo.
+- Un preview de Desarrollo nunca debe apuntar a API/base productiva.
 
-### Producción
+## 10. Rendimiento de los agentes
 
-Se conservan sin cambios el proyecto técnico `varistorehn`, su dominio, variables, rama productiva y despliegues.
+Esta separación de entornos ya está documentada. Por tanto:
 
-### Desarrollo
+- no volver a auditar todos los proveedores externos en cada tarea;
+- no releer este documento si no cambió y la tarea no afecta infraestructura;
+- consultar únicamente la sección/recurso directamente afectado;
+- una reconexión no justifica repetir la auditoría de entornos;
+- cualquier cambio estructural de infraestructura sí debe actualizar `PROJECT_CONTEXT.md` y este documento.
 
-Recurso autorizado:
+## 11. Fuente de reglas
 
-- entorno lógico: `varistorehn_desarrollo`;
-- proyecto técnico existente: `variapp-desarrollo`;
-- Production Branch: `Desarrollo`;
-- dominio: `variapp-desarrollo.vercel.app`;
-- Root Directory: `frontend`.
-
-El proxy mantiene:
-
-```text
-varistorehn.vercel.app/api/* -> variapp-api.onrender.com
-variapp-desarrollo.vercel.app/api/* -> variapp-api-desarrollo.onrender.com
-```
-
-Los Preview generados dentro del proyecto productivo no se modificarán desde este trabajo porque hacerlo cambiaría la configuración de Producción. Se auditarán en la Fase 2 y solo se cambiarán con autorización expresa.
-
-## 9. Cierre de la Fase 1
-
-La Fase 1 queda cerrada porque:
-
-- se definieron exactamente dos entornos lógicos;
-- los recursos aportados por el propietario quedaron asignados a esos entornos;
-- Producción quedó formalmente congelada;
-- `Desarrollo` quedó como única rama de trabajo;
-- el prefijo oficial `varistorehn_desarrollo` está versionado y validado por CI;
-- se conservaron variables y recursos existentes;
-- no se ejecutó ninguna eliminación insegura;
-- no se identificó un tercer entorno permanente confirmado;
-- la compilación y la aceptación automatizada de la estandarización quedaron aprobadas.
-
-La Fase 2 puede iniciar como auditoría de solo lectura y correcciones exclusivamente en `Desarrollo`.
+Las reglas colaborativas completas están en `AGENTS.md`. La memoria técnica está en `PROJECT_CONTEXT.md`. Los pendientes viven en `TASKS.md`.

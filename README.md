@@ -1,61 +1,81 @@
-# VariApp — Administración de inventario y operación de VariStorehn
+# VariApp — ERP para la operación de VariStorehn
 
-VariApp es una aplicación web para administrar la operación comercial de VariStorehn: productos, inventario, compras, ventas, clientes, proveedores, facturas, finanzas, usuarios, roles, permisos, descuentos, impuestos y auditoría.
+VariApp es una aplicación web para administrar productos, variantes, inventario, compras, ventas, clientes, proveedores, facturación, finanzas, usuarios, roles, permisos, auditoría y reportes, con evolución planificada hacia un ERP empresarial completo.
 
-La factura generada actualmente se considera **comprobante comercial interno**. No se presenta como comprobante fiscal autorizado por el SAR mientras VariStorehn no disponga de CAI, rango autorizado y demás requisitos tributarios aplicables.
+La factura actual se considera comprobante comercial interno mientras no exista habilitación fiscal SAR/CAI aplicable.
 
-## Arquitectura y stack
+## Memoria canónica del proyecto
 
-- Frontend: Angular 20, componentes standalone, Signals y Angular Material.
+Para evitar reanalizar el repositorio en cada sesión, el equipo debe usar:
+
+1. `AGENTS.md` — reglas obligatorias.
+2. `PROJECT_CONTEXT.md` — contexto técnico principal.
+3. `TASKS.md` — pendientes.
+4. `PROJECT_INDEX.md` — mapa del repositorio.
+5. `ARCHITECTURE.md` — arquitectura/patrones.
+6. `CHANGELOG_AI.md` — bitácora colaborativa.
+
+No volver a recorrer todo el repositorio ni releer archivos documentados si no cambiaron.
+
+## Stack
+
+- Frontend: Angular 20, standalone components, Signals, Angular Material.
 - Backend: ASP.NET Core 8 Web API.
-- Arquitectura backend: capas `Domain`, `Application`, `Infrastructure` y `API`.
-- Persistencia: MySQL mediante Entity Framework Core 8 y Pomelo.
-- Autenticación: JWT y BCrypt.
-- Archivos e imágenes: Cloudinary.
+- Capas backend: Domain, Application, Infrastructure, API.
+- Datos: MySQL + EF Core 8/Pomelo.
+- Seguridad: JWT, BCrypt, RBAC relacional.
+- Medios: Cloudinary.
 - PDF: QuestPDF.
-- Correo: SMTP autenticado.
-- Pruebas E2E: Playwright con Chromium.
-- Producción: Vercel, Render, Aiven y Cloudinary.
+- Correo: SMTP.
+- E2E: Playwright/Chromium.
+- Infraestructura: Vercel, Render, Aiven y Cloudinary.
 
-## Funcionalidades principales
+## Funcionalidad principal
 
-- CRUD de productos con múltiples imágenes, imagen principal, stock y eliminación lógica.
-- Categorías, clientes y proveedores con acciones independientes para ver, crear, editar, activar, desactivar y eliminar lógicamente.
-- Compras y ventas con alcance por `UsuarioId`, estados, confirmación, anulación y trazabilidad.
-- Comprobantes de proveedor en JPG, PNG, WebP o PDF asociados a compras.
-- Descuentos e impuestos administrables desde la interfaz.
-- Impuestos incluidos en el precio o adicionados al subtotal.
-- Factura única para descarga, impresión, WhatsApp y correo.
-- Enlaces públicos de factura con token aleatorio, hash SHA-256, expiración, revocación y límite de accesos.
-- Dashboard, finanzas y movimientos aislados por usuario para perfiles no administrativos.
-- Usuarios, roles y permisos por acción.
-- Roles dinámicos de sistema creados incrementalmente sin sobrescribir matrices administradas.
-- Perfil propio con cambio de nombre, usuario, contraseña y fotografía.
-- Auditoría transversal reservada al administrador.
-- Interfaz adaptativa para escritorio, tablet y teléfono.
+- productos y variantes;
+- color, talla, marca y modelo;
+- categorías;
+- inventario y movimientos;
+- compras/proveedores;
+- ventas/clientes;
+- facturación/pagos;
+- descuentos, impuestos y costos de envío;
+- finanzas;
+- usuarios, roles y permisos;
+- auditoría;
+- cargas masivas y reportes administrativos;
+- perfil/configuración visual/empresa.
 
-## Seguridad y alcance de datos
+## Arquitectura
 
-El administrador conserva acceso global. Los demás usuarios reciben únicamente la información permitida por su matriz de permisos y, en los módulos transaccionales, los registros asociados a su `UsuarioId`.
+Backend:
 
-Los permisos se validan en dos capas:
+```text
+Domain <- Application <- Infrastructure
+                    ^
+                    |
+                   API (composition root / HTTP)
+```
 
-- Backend: filtros y reglas de negocio protegen cada endpoint.
-- Frontend: rutas, módulos, botones y acciones se muestran según el permiso exacto.
+Flujo típico:
 
-La interfaz no sustituye la seguridad del backend. Una solicitud manual sin autorización debe recibir `403 Forbidden` o ser rechazada por la regla de negocio correspondiente.
+```text
+Angular -> API -> Application Service -> Repository -> EF Core -> MySQL
+```
+
+Ver `ARCHITECTURE.md` para detalles y `PROJECT_INDEX.md` para localizar componentes.
 
 ## Preparación local
 
-### Requisitos
+El acceso local reconocido corresponde únicamente a Javier Mejía, Codex y AntiG/Antigravity, salvo cambio explícito documentado por Javier.
 
-- .NET SDK 8.
-- Node.js 20 o compatible con Angular 20.
-- npm.
-- MySQL 8.
-- Credenciales de Cloudinary solo cuando se prueben cargas reales.
+```powershell
+git fetch origin
+git switch Desarrollo
+git pull --rebase origin Desarrollo
+```
 
-### Backend
+Backend:
 
 ```powershell
 cd backend
@@ -63,16 +83,7 @@ dotnet restore InventoryApp.sln
 dotnet build InventoryApp.sln
 ```
 
-Para ejecutar la API desde `backend/src/API`:
-
-```powershell
-$env:ASPNETCORE_ENVIRONMENT="Development"
-dotnet run
-```
-
-Swagger se habilita en desarrollo. La URL exacta depende de `launchSettings.json` o de `ASPNETCORE_URLS`.
-
-### Frontend
+Frontend:
 
 ```powershell
 cd frontend
@@ -80,17 +91,9 @@ npm ci
 npm start
 ```
 
-Build de producción:
+## Configuración
 
-```powershell
-npm run build:prod
-```
-
-## Configuración y secretos
-
-No se deben guardar valores reales en GitHub, `appsettings.json`, capturas o documentación.
-
-Claves principales del backend:
+Nunca guardar secretos reales en Git. Configurar mediante variables/secret stores del entorno:
 
 ```text
 ConnectionStrings__DefaultConnection
@@ -101,66 +104,29 @@ Jwt__Audience
 Cloudinary__CloudName
 Cloudinary__ApiKey
 Cloudinary__ApiSecret
-AppSettings__BackendPublicUrl
-AppSettings__LogoPublicUrl
-AppSettings__EnlacePublicoFacturaHorasValidez
-AppSettings__EnlacePublicoFacturaMaximoAccesos
 Smtp__Host
-Smtp__Port
 Smtp__UsuarioSmtp
 Smtp__PasswordSmtp
-Smtp__UsarSsl
-Smtp__CorreoRemitente
-Smtp__NombreRemitente
-Smtp__TimeoutSeconds
 SeedAdmin__Username
 SeedAdmin__Password
 Database__ApplyMigrationsOnStartup
 ```
 
-`SeedAdmin` se utiliza únicamente para crear la cuenta inicial cuando todavía no existe. Un despliegue posterior no restablece su contraseña, rol o estado. En una instalación limpia, el administrador se crea antes del seeding de roles y queda vinculado al rol dinámico `Administrador`.
+La lista anterior es orientativa; consultar configuración del módulo afectado en lugar de releer toda la infraestructura.
 
-## Base de datos y migraciones
+## Migraciones
 
-Las migraciones se revisan antes de aplicarlas. En producción no se ejecuta una migración sin:
+- versionadas con EF Core;
+- revisar `Up()` y operaciones destructivas;
+- preferir transición aditiva/expand-and-contract;
+- no aplicar migraciones en Producción sin autorización expresa, respaldo y validación;
+- no ejecutar simultáneamente dos mecanismos de aplicación de la misma migración.
 
-1. Respaldo automático de Aiven verificado.
-2. Exportación SQL local disponible.
-3. Build y pruebas aprobadas.
-4. Revisión del método `Up()` y del SQL forward.
-5. Autorización del propietario.
+## Validación
 
-Comprobar cambios pendientes del modelo:
+La validación es proporcional al cambio, según `AGENTS.md`.
 
-```powershell
-cd backend
-dotnet ef migrations has-pending-model-changes `
-  --project src/Infrastructure/InventoryApp.Infrastructure.csproj `
-  --startup-project src/API/InventoryApp.API.csproj `
-  --context AppDbContext
-```
-
-Aplicar migraciones en un entorno autorizado:
-
-```powershell
-cd backend
-dotnet ef database update `
-  --project src/Infrastructure/InventoryApp.Infrastructure.csproj `
-  --startup-project src/API/InventoryApp.API.csproj `
-  --context AppDbContext
-```
-
-El script forward revisable de la Fase 6 se encuentra en:
-
-```text
-docs/migraciones/004_fase6_seguridad_facturacion_perfil.sql
-```
-
-No debe ejecutarse manualmente y además habilitar `Database__ApplyMigrationsOnStartup=true` durante el mismo despliegue, porque se intentaría aplicar el mismo cambio por dos rutas distintas.
-
-## Compilación y pruebas
-
-Backend:
+Comandos globales disponibles cuando el alcance lo justifique:
 
 ```powershell
 cd backend
@@ -168,74 +134,56 @@ dotnet build InventoryApp.sln --configuration Release
 dotnet test InventoryApp.sln --configuration Release
 ```
 
-Frontend:
-
 ```powershell
 cd frontend
 npm ci
 npm run build:prod
 ```
 
-Pruebas E2E locales, después de iniciar API, MySQL y Angular:
-
 ```powershell
 cd frontend
 npx playwright test --config=playwright.config.ts
 ```
 
-El workflow `.github/workflows/ci.yml` certifica de forma controlada:
+No mantener números fijos de pruebas como estado permanente en este README; consultar CI/commit vigente.
 
-- generación o detección de la migración EF;
-- ausencia de operaciones destructivas en `Up()`;
-- alineación del modelo y el snapshot;
-- generación y revisión básica del SQL forward;
-- build Release del backend;
-- **69 pruebas backend**;
-- build de producción de Angular;
-- MySQL 8.4 temporal;
-- aplicación completa de migraciones en la base temporal;
-- API y Angular efímeros;
-- **9 pruebas end-to-end con Chromium**;
-- autorización Administrador, Vendedor y rol personalizado;
-- PDF privado/público, encabezados y revocación;
-- login responsivo en seis resoluciones.
-
-El workflow no aplica migraciones a Aiven ni despliega Render o Vercel.
-
-## Estructura del repositorio
+## Estructura
 
 ```text
 backend/
   src/
-    Domain/          Entidades y enumeraciones
-    Application/     DTO, interfaces, servicios, reglas y validadores
-    Infrastructure/  EF Core, repositorios, migraciones, Cloudinary, SMTP y PDF
-    API/             Controladores, filtros, middleware y configuración
+    Domain/
+    Application/
+    Infrastructure/
+    API/
   tests/
-    InventoryApp.Tests/
-
 frontend/
-  e2e/               pruebas Playwright
+  e2e/
   src/app/
-    core/             autenticación, guards, interceptores y modelos
-    features/         módulos funcionales
-    services/         clientes HTTP
-
+    core/
+    features/
+    services/
 docs/
-  migraciones/                        scripts SQL revisables
-  PLAN_CIERRE_VARIAPP.md
-  VALIDACION_PRODUCCION.md
-  FASE6_CERTIFICACION.md
-  FASE7_CERTIFICACION_AISLADA.md
+.github/workflows/
+scripts/
 ```
 
 ## Flujo de publicación
 
-1. Trabajar en una rama distinta de `main`.
-2. Mantener el Pull Request en borrador mientras haya validaciones externas pendientes.
-3. Ejecutar CI controlado.
-4. Revisar migraciones y pruebas.
-5. Crear un Preview autorizado.
-6. Validar perfiles, cálculos, PDF, correo, WhatsApp y Cloudinary con servicios reales.
-7. Aplicar la migración productiva mediante una sola estrategia autorizada.
-8. Fusionar a `main` únicamente con autorización expresa del propietario.
+1. Trabajar **únicamente en `Desarrollo`**.
+2. No crear ramas adicionales sin autorización expresa.
+3. Mantener el PR `Desarrollo -> main` en borrador.
+4. Ejecutar validación proporcional y CI cuando aplique.
+5. No tocar Producción.
+6. Fusionar a `main` únicamente cuando Javier Mejía lo autorice expresamente.
+
+## Colaboración eficiente
+
+- fuente base: `PROJECT_CONTEXT.md`;
+- no reindexar todo el repo por cada solicitud;
+- no releer archivos sin cambios;
+- tras reconexión, recuperar estado con `PROJECT_CONTEXT.md`, `TASKS.md` y Git;
+- analizar archivo objetivo + dependencias directas;
+- detener la exploración cuando el objetivo esté cumplido.
+
+Reglas completas: `AGENTS.md` y `docs/COLABORACION_IA.md`.

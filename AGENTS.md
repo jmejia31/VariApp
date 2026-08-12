@@ -1,133 +1,162 @@
-# Reglas de colaboración — VariApp
+# Reglas obligatorias de colaboración — VariApp
 
-Este archivo es obligatorio para Javier Mejía, ChatGPT, Codex, Antigravity y cualquier otro agente que trabaje en el repositorio.
+Este archivo es vinculante para Javier Mejía, Codex, AntiG/Antigravity, ChatGPT y cualquier otro agente autorizado.
 
-## Fuente única de verdad
+## 1. Fuente de contexto y orden de lectura
 
-- GitHub es la fuente única de verdad del proyecto.
-- `main` es una referencia productiva de solo lectura: no se desarrolla, no se reescribe, no se fusiona, no se publica y no se modifica desde este flujo.
-- `Desarrollo` es la única rama de trabajo compartido.
-- Está prohibido crear ramas adicionales sin autorización expresa de Javier Mejía.
-- Todo cambio intencional debe confirmarse y publicarse en `origin/Desarrollo`.
-- El Pull Request `Desarrollo -> main` debe permanecer en borrador mientras existan validaciones pendientes.
+Lectura mínima al iniciar una tarea:
 
-## Entornos oficiales
+1. `AGENTS.md`.
+2. `PROJECT_CONTEXT.md`.
+3. `TASKS.md`.
+4. `PROJECT_INDEX.md` solo para localizar el área.
+5. `ARCHITECTURE.md` solo si la tarea es estructural/transversal.
 
-Solo existen dos entornos lógicos autorizados:
+No releer por defecto `README.md`, todos los documentos de `docs/`, todos los planes ni todo el código. Abrir únicamente lo relacionado con la tarea.
 
-```text
-varistorehn_producción (Producción)
-varistorehn_desarrollo
-```
+## 2. Equipo permanente
 
-Los nombres técnicos ya existentes de servicios, proyectos, dominios, bases o claves pueden diferir. No deben renombrarse ni recrearse cuando el cambio pueda afectar Producción. Un nombre técnico distinto no constituye por sí solo un tercer entorno si está documentado como parte de uno de los dos entornos oficiales.
+- **Javier Mejía:** propietario, prioridades, aceptación y autorizaciones finales.
+- **Codex:** implementación/pruebas desde el proyecto local cuando opera en la PC autorizada.
+- **AntiG / Antigravity:** implementación/pruebas desde el proyecto local cuando opera en la PC autorizada.
+- **ChatGPT:** arquitectura, auditoría, coordinación y cambios remotos mediante el conector GitHub autorizado.
 
-## Producción congelada
+## 3. Matriz de acceso
 
-Durante todo el trabajo en `Desarrollo` queda prohibido modificar o eliminar:
+### Acceso local a la PC/proyecto
 
-- variables, secretos, credenciales, dominios, certificados, conexiones, bases, servicios y despliegues productivos;
-- el usuario administrativo `avnadmin` de Aiven;
-- claves `Raíz`, moderación o flujos de medios de Cloudinary;
-- variables ya existentes de Producción o Desarrollo;
-- activos, registros, respaldos o migraciones productivas.
+Solo se considera autorizado para:
 
-Solo puede eliminarse un recurso cuando se demuestre simultáneamente que:
+- Javier Mejía;
+- Codex;
+- AntiG / Antigravity.
 
-1. pertenece exclusivamente a Desarrollo;
-2. duplica una función ya cubierta por `varistorehn_desarrollo`;
-3. no tiene consumidores, dependencias, datos ni secretos necesarios;
-4. su eliminación no afecta Producción;
-5. Javier Mejía autoriza expresamente la eliminación.
+ChatGPT y cualquier otro agente se consideran **sin acceso al filesystem local** salvo que Javier documente explícitamente lo contrario en el futuro.
 
-Nunca se elimina un recurso únicamente por su nombre.
+### Acceso GitHub
 
-## Inicio obligatorio de cada sesión
+- Javier, Codex y AntiG pueden operar Git/GitHub desde el checkout autorizado.
+- ChatGPT u otro agente puede operar remotamente solo mediante una conexión GitHub autorizada y disponible.
+- Tener conexión GitHub no equivale a tener acceso local.
+- Ningún agente debe afirmar que sincronizó/modificó la PC si únicamente modificó GitHub.
+
+## 4. Git: reglas inviolables
+
+- `Desarrollo` es la única rama de trabajo.
+- `main` está congelada y no recibe cambios desde este flujo.
+- No crear ramas `feature/*`, `fix/*`, `chore/*` ni ninguna otra sin autorización expresa de Javier.
+- No fusionar PR #2.
+- No habilitar auto-merge.
+- El PR `Desarrollo -> main` permanece en borrador.
+- Todo cambio autorizado se publica directamente en `origin/Desarrollo`.
+- Preservar cambios locales ajenos; nunca usar `reset --hard` o descartes destructivos sin autorización.
+
+Inicio local normal para Javier/Codex/AntiG:
 
 ```bash
 git fetch origin
 git switch Desarrollo
 git pull --rebase origin Desarrollo
-git status
+git status --short --branch
 ```
 
-Si existen cambios locales ajenos, el agente debe preservarlos y explicar el conflicto; nunca debe descartarlos, sobrescribirlos ni usar `git reset --hard` sin autorización.
+No repetir `fetch/pull/status` compulsivamente durante la misma tarea. Volver a comprobar justo antes de publicar si existe riesgo de concurrencia.
 
-## Flujo obligatorio por cambio
+## 5. Optimización de rendimiento y tokens — OBLIGATORIA
 
-1. Leer `AGENTS.md`, `CONTRIBUTING.md`, `docs/COLABORACION_IA.md` y `docs/ENTORNOS_DESARROLLO_PRODUCCION.md`.
-2. Confirmar que la rama actual sea `Desarrollo`.
-3. Revisar el estado y los últimos commits antes de editar.
-4. Analizar alcance, dependencias y riesgos.
-5. Hacer cambios pequeños, coherentes y trazables.
-6. Ejecutar las verificaciones afectadas.
-7. Actualizar la documentación cuando cambie comportamiento, configuración o arquitectura.
-8. Crear un commit descriptivo indicando el agente.
-9. Subir inmediatamente el commit a `origin/Desarrollo`.
-10. Registrar el resultado en el Pull Request colaborativo o en el issue de coordinación.
+1. `PROJECT_CONTEXT.md` es la memoria base: no reconstruirla en cada solicitud.
+2. No recorrer todo el repositorio otra vez salvo cambio estructural grande o petición expresa de Javier.
+3. Analizar primero únicamente los archivos que se modificarán.
+4. Expandir después solo a dependencias directas necesarias.
+5. **No releer archivos ya documentados a menos que hayan cambiado.** Usar `git diff`, SHA, historial o estado Git para comprobarlo.
+6. Usar búsquedas por símbolo/nombre/ruta (`rg`, búsqueda de código) antes que listados recursivos masivos.
+7. Leer rangos relevantes de archivos grandes; no volcar archivos completos si solo se necesita una función/sección.
+8. Si una tarea puede resolverse tocando menos archivos, elegir la alternativa de menor impacto.
+9. No analizar módulos no relacionados una vez exista evidencia suficiente.
+10. Agrupar comandos relacionados y validaciones cuando sea seguro, evitando ciclos repetitivos de lectura/estado.
+11. No generar documentos temporales, scripts efímeros o workflows temporales salvo necesidad técnica real y retiro controlado.
+12. Terminar la implementación cuando se cumpla el objetivo y las validaciones aplicables; no continuar explorando por curiosidad.
+13. Si una ambigüedad no puede resolverse con una inspección dirigida, pedir aclaración en vez de indexar todo el proyecto.
 
-## Formato de commits
+### Protocolo tras reconexión o compactación de contexto
+
+No reiniciar el trabajo desde cero. Ejecutar únicamente:
+
+1. leer `PROJECT_CONTEXT.md` y `TASKS.md`;
+2. `git status --short --branch`;
+3. revisar los últimos 1–3 commits si hubo movimiento remoto;
+4. revisar el diff de archivos de la tarea;
+5. continuar desde el último punto verificable.
+
+Una reconexión **no** justifica repetir el inventario arquitectónico, releer todos los documentos ni volver a ejecutar los mismos comandos ya confirmados.
+
+## 6. Cuándo sí renovar el mapa arquitectónico
+
+Solo cuando ocurra, entre otros:
+
+- nueva capa/proyecto principal;
+- módulo ERP mayor nuevo;
+- cambio de persistencia/framework estructural;
+- rediseño de autenticación/RBAC;
+- cambio transversal de tenancy, integración, despliegue u observabilidad.
+
+En ese caso se hace **una sola revisión arquitectónica**, se actualizan `PROJECT_CONTEXT.md`, `PROJECT_INDEX.md` y `ARCHITECTURE.md`, y las sesiones siguientes reutilizan esa memoria.
+
+## 7. Producción congelada
+
+Solo existen dos entornos lógicos:
+
+```text
+varistorehn_producción
+varistorehn_desarrollo
+```
+
+Durante el trabajo en `Desarrollo` está prohibido modificar o eliminar recursos productivos: `main`, variables, secretos, credenciales, dominios, certificados, bases, datos, servicios, despliegues, respaldos, migraciones, activos o configuraciones de Producción.
+
+No exponer secretos. No usar `avnadmin` como usuario de aplicación de Desarrollo. No eliminar activos Cloudinary fuera del prefijo autorizado. No ejecutar migraciones productivas sin autorización expresa.
+
+## 8. Alcance y edición
+
+- No modificar archivos no relacionados.
+- Evitar refactors globales para resolver tareas locales.
+- Preservar compatibilidad durante migraciones legacy.
+- No dejar código muerto, debug temporal, archivos huérfanos o secretos.
+- Actualizar documentación canónica solo si cambió lo que documenta.
+
+## 9. Validación proporcional
+
+### Solo documentación
+
+- revisar diff;
+- comprobar enlaces/rutas/nombres mencionados cuando sea necesario;
+- no ejecutar builds completos sin motivo.
+
+### Cambio backend localizado
+
+- ejecutar pruebas/compilación dirigidas al área cuando existan;
+- ampliar a suite completa si el cambio es transversal, de seguridad, datos, migraciones o cierre formal de fase.
+
+### Cambio frontend localizado
+
+- lint/build/pruebas dirigidas aplicables;
+- ampliar a E2E cuando cambien autenticación, permisos, navegación, facturación o flujo crítico.
+
+La calidad es obligatoria; el objetivo es evitar validaciones globales redundantes cuando el cambio no las necesita.
+
+## 10. Commits y handoff
+
+Formato recomendado:
 
 ```text
 <tipo>(<área>): <descripción> [agente]
 ```
 
-Ejemplos:
+Cada entrega debe indicar de forma compacta:
 
-```text
-fix(auth): corregir validación de permisos [Codex]
-feat(productos): agregar filtro por categoría [Antigravity]
-docs(colaboración): actualizar protocolo [ChatGPT]
-chore(repo): limpiar temporales [Javier]
-```
-
-Tipos permitidos: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `ci`, `perf`, `security`.
-
-## Verificación mínima
-
-Backend:
-
-```bash
-cd backend
-dotnet restore InventoryApp.sln
-dotnet build InventoryApp.sln --configuration Release
-dotnet test InventoryApp.sln --configuration Release
-```
-
-Frontend:
-
-```bash
-cd frontend
-npm ci
-npm run lint
-npm run build:prod
-```
-
-Las pruebas E2E se ejecutan cuando el cambio afecta autenticación, permisos, navegación, facturación o flujos críticos.
-
-## Reglas de seguridad y limpieza
-
-- Nunca guardar contraseñas, tokens, cadenas productivas, claves SMTP o credenciales de Cloudinary.
-- Nunca aplicar migraciones en Aiven ni desplegar a Producción sin autorización expresa.
-- Nunca eliminar datos productivos.
-- Desarrollo nunca puede usar la cadena o la base productiva.
-- Desarrollo debe usar `Cloudinary__EnvironmentPrefix=varistorehn_desarrollo`.
-- Desarrollo no puede eliminar un activo Cloudinary cuyo `PublicId` no comience con `varistorehn_desarrollo/`.
-- Un Preview de Desarrollo nunca puede apuntar al backend o base de datos productivos.
-- No versionar `node_modules`, `bin`, `obj`, `dist`, `.angular`, reportes de pruebas, registros, temporales ni respaldos.
-- No modificar archivos no relacionados con la tarea.
-- No dejar código comentado, pruebas deshabilitadas, marcadores temporales ni archivos sin uso.
-- Cualquier cambio de base de datos debe incluir migración, revisión de `Up()`, SQL forward y estrategia de reversión.
-
-## Comunicación entre agentes
-
-Cada entrega debe indicar:
-
-- agente responsable;
-- objetivo del cambio;
-- archivos modificados;
-- pruebas ejecutadas y resultado;
-- riesgos o pendientes;
+- objetivo;
+- archivos/área;
+- validaciones reales;
+- riesgos/pendientes;
 - commit publicado.
 
-Un agente no debe asumir que otro agente todavía conserva contexto local. Toda decisión relevante debe quedar registrada en GitHub.
+Registrar cambios relevantes en `CHANGELOG_AI.md` y pendientes en `TASKS.md`. No duplicar información extensa que ya vive en documentos de fase.
