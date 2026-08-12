@@ -2,6 +2,7 @@ using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Application.Services;
+using InventoryApp.Domain.Common;
 using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Enums;
 using Moq;
@@ -112,6 +113,10 @@ public class VentaServiceTests
         Assert.Equal("Confirmada", resultado!.Estado);
         Assert.Equal(4, venta.ConfirmadoPorUsuarioId);
         Assert.Equal("vendedor1", venta.ConfirmadoPorNombreUsuario);
+        _movInvRepoMock.Verify(r => r.AddConOrigenTipadoAsync(
+            It.Is<MovimientoInventario>(m => m.Tipo == TipoMovimientoInventario.Salida && m.Cantidad == 3),
+            It.Is<OrigenMovimientoInventario>(o => o.VentaId == venta.Id && o.CompraId == null && o.ConsumoInsumoId == null)), Times.Once);
+        _movInvRepoMock.Verify(r => r.AddAsync(It.IsAny<MovimientoInventario>()), Times.Never);
     }
 
     [Fact]
@@ -127,8 +132,9 @@ public class VentaServiceTests
         Assert.Equal(4, variante.Cantidad);
         Assert.Equal(8, producto.Cantidad);
         Assert.Equal("M185-BLK", resultado!.Detalles.Single().ProductoSku);
-        _movInvRepoMock.Verify(r => r.AddAsync(It.Is<MovimientoInventario>(m =>
-            m.ProductoVarianteId == 8 && m.StockAnterior == 6 && m.StockNuevo == 4)), Times.Once);
+        _movInvRepoMock.Verify(r => r.AddConOrigenTipadoAsync(
+            It.Is<MovimientoInventario>(m => m.ProductoVarianteId == 8 && m.StockAnterior == 6 && m.StockNuevo == 4),
+            It.Is<OrigenMovimientoInventario>(o => o.VentaId == venta.Id)), Times.Once);
     }
 
     [Fact]
@@ -161,7 +167,7 @@ public class VentaServiceTests
 
         Assert.Equal(2, producto.Cantidad);
         Assert.Equal(EstadoDocumento.Borrador, venta.Estado);
-        _movInvRepoMock.Verify(r => r.AddAsync(It.IsAny<MovimientoInventario>()), Times.Never);
+        _movInvRepoMock.Verify(r => r.AddConOrigenTipadoAsync(It.IsAny<MovimientoInventario>(), It.IsAny<OrigenMovimientoInventario>()), Times.Never);
     }
 
     [Fact]
@@ -199,6 +205,9 @@ public class VentaServiceTests
         Assert.Equal("Anulada", resultado!.Estado);
         Assert.Equal(EstadoFactura.Anulada, factura.Estado);
         Assert.Equal("Cliente se arrepintió", factura.MotivoAnulacion);
+        _movInvRepoMock.Verify(r => r.AddConOrigenTipadoAsync(
+            It.Is<MovimientoInventario>(m => m.Causa == CausaMovimientoInventario.AnulacionVenta && m.Tipo == TipoMovimientoInventario.Entrada),
+            It.Is<OrigenMovimientoInventario>(o => o.VentaId == venta.Id)), Times.Once);
     }
 
     [Fact]
