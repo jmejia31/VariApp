@@ -23,14 +23,19 @@ Fuente resumida de pendientes. El detalle operativo vive en VAEP v2; no duplicar
 
 ## ERP-N0.5 — MetodoPago
 
-Estado inicial cargado en `COLA`:
+Estado operativo controlado por `COLA`:
 
 - [x] N0.5.01 Análisis y diagnóstico.
 - [x] N0.5.02 Diseño funcional.
 - [x] N0.5.03 Auditoría legacy.
 - [x] N0.5.04 Entidad/persistencia relacional.
 - [x] N0.5.05 Seed/preflight/backfill histórico.
-- [ ] N0.5.06 Eliminar doble autoridad enum/string.
+- [ ] N0.5.06 Eliminar doble autoridad enum/string, subdividido para evitar un changeset transversal gigante:
+  - [ ] N0.5.06 A1: preparar `IVentaRepository`/`VentaRepository` para resolver y cargar `MetodoPagoCatalogo`; implementación incluida en el changeset funcional actual y pendiente de certificación CI antes de marcar `LISTO`.
+  - [ ] N0.5.06 A2: migrar escrituras de `VentaService` hacia `MetodoPagoId`/catálogo.
+  - [ ] N0.5.06 A3: migrar lecturas/propagación de Venta hacia la relación.
+  - [ ] N0.5.06 B: retirar autoridad legacy de `FacturaPago`.
+  - [ ] N0.5.06 C: retirar autoridad legacy de `MovimientoFinanciero`.
 - [ ] N0.5.07 Reglas operativas.
 - [ ] N0.5.08 Backend/API/CRUD/DTOs.
 - [ ] N0.5.09 Frontend administrable/selectores dinámicos.

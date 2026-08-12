@@ -4,6 +4,7 @@ using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Enums;
 using InventoryApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using CatalogoMetodoPago = InventoryApp.Domain.Entities.Catalogos.MetodoPago;
 
 namespace InventoryApp.Infrastructure.Repositories;
 
@@ -25,6 +26,7 @@ public class VentaRepository : IVentaRepository
 
     private IQueryable<Venta> ConIncludes() =>
         _context.Ventas
+            .Include(v => v.MetodoPagoCatalogo)
             .Include(v => v.Detalles)
                 .ThenInclude(d => d.Producto)
                     .ThenInclude(p => p!.Imagenes)
@@ -91,11 +93,25 @@ public class VentaRepository : IVentaRepository
         if (cabecera is null)
             return null;
 
+        await _context.Entry(cabecera).Reference(v => v.MetodoPagoCatalogo).LoadAsync();
         await _context.Entry(cabecera).Collection(v => v.Detalles).LoadAsync();
         await _context.Entry(cabecera).Collection(v => v.DescuentosAplicados).LoadAsync();
         await _context.Entry(cabecera).Collection(v => v.ImpuestosAplicados).LoadAsync();
 
         return cabecera;
+    }
+
+    public async Task<CatalogoMetodoPago?> GetMetodoPagoPorCodigoONombreAsync(string valor)
+    {
+        if (string.IsNullOrWhiteSpace(valor))
+            return null;
+
+        var normalizado = valor.Trim();
+        return await _context.Set<CatalogoMetodoPago>()
+            .AsNoTracking()
+            .FirstOrDefaultAsync(m =>
+                !m.Eliminado &&
+                (m.Codigo == normalizado || m.Nombre == normalizado));
     }
 
     public async Task<(List<Venta> Items, int TotalCount)> GetPagedAsync(PagedRequest request)
