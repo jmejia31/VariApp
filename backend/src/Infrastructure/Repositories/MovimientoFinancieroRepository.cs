@@ -125,7 +125,7 @@ public class MovimientoFinancieroRepository : IMovimientoFinancieroRepository
     {
         var normalizado = valor.Trim().ToUpper();
         return await _context.Set<CatalogoMetodoPago>()
-            .FirstOrDefaultAsync(m => !m.Eliminado &&
+            .FirstOrDefaultAsync(m => m.Activo && !m.Eliminado &&
                 (m.Codigo.ToUpper() == normalizado || m.Nombre.ToUpper() == normalizado));
     }
 
@@ -136,6 +136,9 @@ public class MovimientoFinancieroRepository : IMovimientoFinancieroRepository
     {
         if (movimiento.MetodoPagoCatalogo is not null)
         {
+            if (!movimiento.MetodoPagoCatalogo.Activo || movimiento.MetodoPagoCatalogo.Eliminado)
+                throw new BusinessRuleException("El método de pago seleccionado está inactivo o eliminado.");
+
             movimiento.MetodoPagoId = movimiento.MetodoPagoCatalogo.Id;
             movimiento.MetodoPago = null;
             return;
@@ -143,6 +146,11 @@ public class MovimientoFinancieroRepository : IMovimientoFinancieroRepository
 
         if (movimiento.MetodoPagoId.HasValue)
         {
+            var catalogoPorId = await _context.Set<CatalogoMetodoPago>()
+                .FirstOrDefaultAsync(m => m.Id == movimiento.MetodoPagoId.Value && m.Activo && !m.Eliminado)
+                ?? throw new BusinessRuleException("El método de pago seleccionado está inactivo, eliminado o no existe.");
+
+            movimiento.MetodoPagoCatalogo = catalogoPorId;
             movimiento.MetodoPago = null;
             return;
         }
@@ -152,7 +160,7 @@ public class MovimientoFinancieroRepository : IMovimientoFinancieroRepository
 
         var catalogo = await GetMetodoPagoPorCodigoONombreAsync(movimiento.MetodoPago.Value.ToString())
             ?? throw new BusinessRuleException(
-                $"El método de pago legacy '{movimiento.MetodoPago.Value}' no existe en el catálogo relacional.");
+                $"El método de pago legacy '{movimiento.MetodoPago.Value}' no existe o no está activo en el catálogo relacional.");
 
         movimiento.MetodoPagoId = catalogo.Id;
         movimiento.MetodoPagoCatalogo = catalogo;

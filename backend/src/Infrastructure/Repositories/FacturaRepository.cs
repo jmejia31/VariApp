@@ -82,7 +82,7 @@ public class FacturaRepository : IFacturaRepository
         var normalizado = valor.Trim().ToUpper();
         return await _context.Set<CatalogoMetodoPago>()
             .AsNoTracking()
-            .FirstOrDefaultAsync(m => !m.Eliminado &&
+            .FirstOrDefaultAsync(m => m.Activo && !m.Eliminado &&
                 (m.Codigo.ToUpper() == normalizado || m.Nombre.ToUpper() == normalizado));
     }
 

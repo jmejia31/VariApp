@@ -36,7 +36,10 @@ Estado operativo controlado por `COLA`:
   - [x] N0.5.06 A3: migrar lecturas/propagación de Venta hacia la relación. Funcional `c024cc7c96da45f6d2b21867950de3c4dce49fd4`; pruebas dirigidas `05687cffcf9d34b3fdd8efd9becf9d158b61f028`.
   - [x] N0.5.06 B: retirar autoridad legacy de `FacturaPago`. Implementación hasta `d5e9a98c17848001fc64387c709a72ce0e379cd3`; fixtures relacionales `e8ab2b733affea70ba47b3ea8a7ff450c6b7766f`; CI general `31567189353` y ERP-N0.5 `31567189393` en verde.
   - [x] N0.5.06 C: retirar autoridad legacy de `MovimientoFinanciero`. Funcional `0f14b9b9f5248a01cb6c98fa456cd306fe38ae19`; CI general `31568099446` y ERP-N0.5 `31568099373` en verde.
-- [ ] N0.5.07 Reglas operativas.
+- [ ] N0.5.07 Reglas operativas — subdividido para mantener cambios pequeños:
+  - [ ] N0.5.07A: elegibilidad `Activo` + preservación histórica — implementación publicada; `VALIDANDO` hasta CI real.
+  - [ ] N0.5.07B: `RequiereReferencia` + `RequiereBanco`.
+  - [ ] N0.5.07C: `PermiteCambio` + `Orden` + `Metadata`.
 - [ ] N0.5.08 Backend/API/CRUD/DTOs.
 - [ ] N0.5.09 Frontend administrable/selectores dinámicos.
 - [ ] N0.5.10 RBAC + auditoría.

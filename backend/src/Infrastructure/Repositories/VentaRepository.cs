@@ -110,7 +110,7 @@ public class VentaRepository : IVentaRepository
         return await _context.Set<CatalogoMetodoPago>()
             .AsNoTracking()
             .FirstOrDefaultAsync(m =>
-                !m.Eliminado &&
+                m.Activo && !m.Eliminado &&
                 (m.Codigo == normalizado || m.Nombre == normalizado));
     }
 

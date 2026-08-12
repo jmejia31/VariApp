@@ -4,6 +4,16 @@ Bitácora colaborativa de cambios realizados por Javier Mejía, Codex, AntiG/Ant
 
 No reemplaza `git log`: registra intención, alcance, validaciones y handoff. Todo changeset intencional debe incluir una entrada breve; no modificar otros colaborativos si su contenido no cambió.
 
+## 2026-08-12 — N0.5.07A: elegibilidad Activo + preservación histórica — VALIDANDO
+
+**Responsable:** ChatGPT mediante conexión GitHub autorizada.
+
+**Objetivo/alcance:** primer hijo de N0.5.07. Los resolvers de `VentaRepository`, `FacturaRepository` y `MovimientoFinancieroRepository` solo devuelven métodos `Activo && !Eliminado` para operaciones nuevas. El límite de persistencia financiera rechaza también una FK/navegación directa inactiva o eliminada. Las lecturas históricas no filtran la navegación, por lo que relaciones existentes continúan visibles tras desactivar el catálogo; las reversiones históricas conservan su relación original.
+
+**Pruebas dirigidas:** nuevo `MetodoPagoElegibilidadRepositoryTests` cubre resolver activo/inactivo/eliminado en los tres consumidores, lectura histórica de un método inactivo y fail-closed de una nueva operación financiera con catálogo inactivo.
+
+**Validación:** pendiente de CI real sobre el commit funcional; no declarar `LISTO` hasta verificar build/tests proporcionales.
+
 ## 2026-08-11 — N0.5.06 C: MovimientoFinanciero migra a autoridad relacional — LISTO
 
 **Responsable:** ChatGPT mediante conexión GitHub autorizada.
