@@ -4,6 +4,18 @@ Bitácora colaborativa de cambios realizados por Javier Mejía, Codex, AntiG/Ant
 
 No reemplaza `git log`: registra intención, alcance, validaciones y handoff. Todo changeset intencional debe incluir una entrada breve; no modificar otros colaborativos si su contenido no cambió.
 
+## 2026-08-11 — N0.5.06 A3: lectura y propagación de Venta migradas a MetodoPago relacional
+
+**Responsable:** ChatGPT mediante conexión GitHub autorizada.
+
+**Resultado:** microtarea A3 `LISTO`. El commit funcional `c024cc7c96da45f6d2b21867950de3c4dce49fd4` eliminó el uso de `Venta.MetodoPago` como autoridad de lectura/propagación dentro de `VentaService`: `VentaDto.MetodoPago` se obtiene desde `MetodoPagoCatalogo.Nombre` y el `MovimientoFinanciero` automático creado al confirmar una venta recibe `MetodoPagoId`/`MetodoPagoCatalogo`; su enum legacy se deriva únicamente del catálogo cuando existe.
+
+**Pruebas dirigidas:** `05687cffcf9d34b3fdd8efd9becf9d158b61f028` añadió cobertura para comprobar que el DTO usa el nombre del catálogo aunque el enum legacy difiera y que la confirmación propaga FK/navegación al movimiento financiero sin copiar el enum legacy de Venta.
+
+**Validación real:** CI general run `31566541771`: job `Backend Release y pruebas` completó `success`, incluyendo restore, build Release y pruebas backend no-integración; `Frontend producción`, `Higiene del repositorio` y `Docker y aislamiento de entornos` también completaron `success`. El job MySQL seguía ejecutándose al cierre operativo de A3, por lo que no se atribuye un resultado aún no finalizado. El workflow dedicado ERP-N0.5 run `31566541808` fue generado sobre el mismo SHA y continuaba su certificación histórica.
+
+**Control:** A3 no modifica `FacturaPago` ni el servicio financiero general. El siguiente punto de la cadena es B, que debe retirar la autoridad enum de `FacturaPago` y sus DTOs/flujos sin ampliar todavía reglas operativas de N0.5.07.
+
 ## 2026-08-11 — N0.5.06 A2: escrituras de Venta migradas a MetodoPago relacional
 
 **Responsable:** ChatGPT mediante conexión GitHub autorizada.
@@ -12,9 +24,9 @@ No reemplaza `git log`: registra intención, alcance, validaciones y handoff. To
 
 **Pruebas dirigidas:** `e00e20c614c8c66c34f726c82ef4922d48dc21d8` añadió `VentaMetodoPagoServiceTests` para creación con FK/navegación, rechazo de método inexistente y actualización hacia catálogo relacional.
 
-**Validación real:** workflow `ERP-N0.5 - Certificación MetodoPago histórico` run `31566179324`: etapa `Restaurar, compilar y probar backend` completada `success`, incluyendo las pruebas nuevas; también completaron correctamente creación de esquema, historia representativa, fail-closed y preflight mientras el resto de la certificación histórica continuaba. CI general run `31566179269` fue generado para el mismo SHA; Docker e higiene ya estaban `success` al cierre operativo de A2. No se atribuye todavía resultado final a pasos que seguían en ejecución.
+**Validación real:** workflow `ERP-N0.5 - Certificación MetodoPago histórico` run `31566179324` completó finalmente `success`: restore/build/tests backend, esquema, historia representativa, fail-closed, preflight, backfill, postcheck y snapshot EF quedaron verdes. CI general run `31566179269` fue generado para el mismo SHA; Docker e higiene estaban `success` durante el cierre operativo.
 
-**Control:** A2 no cambia migraciones ni contratos HTTP; `CreateVentaDto/UpdateVentaDto.MetodoPago` sigue siendo adaptador string temporal. N0.5.06 no está cerrado: A3 debe migrar lectura de `VentaDto` y propagación automática hacia `MovimientoFinanciero` para que tampoco tomen decisiones desde `Venta.MetodoPago` legacy.
+**Control:** A2 no cambia migraciones ni contratos HTTP; `CreateVentaDto/UpdateVentaDto.MetodoPago` sigue siendo adaptador string temporal. N0.5.06 no está cerrado: A3 migra lectura de `VentaDto` y propagación automática hacia `MovimientoFinanciero`.
 
 ## 2026-08-11 — Cierre N0.5.06 A1: repositorio Venta preparado para MetodoPago relacional
 
