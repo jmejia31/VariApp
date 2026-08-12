@@ -2,6 +2,7 @@ using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
+using InventoryApp.Domain.Common;
 using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Enums;
 using CatalogoMetodoPago = InventoryApp.Domain.Entities.Catalogos.MetodoPago;
@@ -224,7 +225,7 @@ public class VentaService : IVentaService
                     _productoVarianteRepository.Update(variante);
                 }
 
-                await _movimientoInventarioRepository.AddAsync(new MovimientoInventario
+                await _movimientoInventarioRepository.AddConOrigenTipadoAsync(new MovimientoInventario
                 {
                     ProductoId = producto.Id,
                     ProductoVarianteId = item.ProductoVarianteId,
@@ -239,12 +240,10 @@ public class VentaService : IVentaService
                     StockNuevo = stockNuevoMovimiento,
                     PrecioUnitario = precioUnitarioMovimiento,
                     CostoUnitario = costoUnitarioMovimiento,
-                    ReferenciaTipo = "Venta",
-                    ReferenciaId = venta.Id,
                     Descripcion = $"Salida por venta {venta.NumeroVenta}",
                     CreadoPorUsuarioId = _currentUser.UsuarioId,
                     CreadoPorNombreUsuario = _currentUser.NombreUsuario
-                });
+                }, OrigenMovimientoInventario.DesdeVenta(venta.Id));
             }
 
             await _movimientoFinancieroRepository.AddAsync(new MovimientoFinanciero
@@ -391,7 +390,7 @@ public class VentaService : IVentaService
                     _productoVarianteRepository.Update(variante);
                 }
 
-                await _movimientoInventarioRepository.AddAsync(new MovimientoInventario
+                await _movimientoInventarioRepository.AddConOrigenTipadoAsync(new MovimientoInventario
                 {
                     ProductoId = producto.Id,
                     ProductoVarianteId = item.ProductoVarianteId,
@@ -401,17 +400,16 @@ public class VentaService : IVentaService
                     ProductoTallaSnapshot = detalle.ProductoTallaSnapshot,
                     ProductoSkuSnapshot = detalle.ProductoSkuSnapshot,
                     Tipo = TipoMovimientoInventario.Entrada,
+                    Causa = CausaMovimientoInventario.AnulacionVenta,
                     Cantidad = item.Cantidad,
                     StockAnterior = stockAnteriorMovimiento,
                     StockNuevo = stockNuevoMovimiento,
                     PrecioUnitario = precioUnitarioMovimiento,
                     CostoUnitario = costoUnitarioMovimiento,
-                    ReferenciaTipo = "VentaAnulada",
-                    ReferenciaId = venta.Id,
                     Descripcion = $"Entrada por anulación de venta {venta.NumeroVenta}. Motivo: {motivo}",
                     CreadoPorUsuarioId = _currentUser.UsuarioId,
                     CreadoPorNombreUsuario = _currentUser.NombreUsuario
-                });
+                }, OrigenMovimientoInventario.DesdeVenta(venta.Id));
             }
 
             await _movimientoFinancieroRepository.AddAsync(new MovimientoFinanciero
