@@ -4,15 +4,19 @@ Bitácora colaborativa de cambios realizados por Javier Mejía, Codex, AntiG/Ant
 
 No reemplaza `git log`: registra intención, alcance, validaciones y handoff. Todo changeset intencional debe incluir una entrada breve; no modificar otros colaborativos si su contenido no cambió.
 
-## 2026-08-11 — N0.5.06 C: MovimientoFinanciero migra a autoridad relacional — VALIDANDO
+## 2026-08-11 — N0.5.06 C: MovimientoFinanciero migra a autoridad relacional — LISTO
 
 **Responsable:** ChatGPT mediante conexión GitHub autorizada.
 
-**Objetivo/alcance:** retirar `MovimientoFinanciero.MetodoPago` legacy como autoridad persistente/operativa sin adelantar N0.5.07. `IMovimientoFinancieroRepository` resuelve catálogo por código/nombre; todas las lecturas cargan `MetodoPagoCatalogo`; el límite de persistencia normaliza cualquier entrada legacy transitoria hacia `MetodoPagoId` y limpia el enum antes de guardar. La reversión pagada de compra copia exclusivamente FK/navegación relacional y falla cerrada si el original carece de relación. `FinanzasService` resuelve movimientos manuales contra catálogo y sus DTOs leen el nombre relacional.
+**Resultado:** `MovimientoFinanciero.MetodoPago` legacy dejó de ser autoridad persistente/operativa sin adelantar N0.5.07. `IMovimientoFinancieroRepository` resuelve catálogo por código/nombre; todas las lecturas cargan `MetodoPagoCatalogo`; el límite de persistencia normaliza cualquier entrada legacy transitoria hacia `MetodoPagoId` y limpia el enum antes de guardar. La reversión pagada de compra copia exclusivamente FK/navegación relacional y falla cerrada si el original carece de relación. `FinanzasService` resuelve movimientos manuales contra catálogo y sus DTOs leen el nombre relacional.
 
-**Pruebas dirigidas:** se amplían `FinanzasServiceTests` para persistencia/lectura relacional y fail-closed de método inexistente; `MovimientoFinancieroRepositoryTests` verifica normalización legacy→FK, carga de navegación y reversión sin propagación del enum.
+**Pruebas dirigidas:** `FinanzasServiceTests` cubre persistencia/lectura relacional y fail-closed de método inexistente; `MovimientoFinancieroRepositoryTests` cubre normalización legacy→FK, carga de navegación y reversión sin propagación del enum.
 
-**Validación:** pendiente de CI real sobre este changeset; no declarar `LISTO` hasta comprobar build/tests y certificación proporcional.
+**Evidencia funcional:** commit `0f14b9b9f5248a01cb6c98fa456cd306fe38ae19` publicado en `Desarrollo`. El temporal accidental `NOPE_DO_NOT_CREATE` fue eliminado de la punta efectiva mediante fast-forward, sin force-push.
+
+**Validación real:** workflow dedicado `ERP-N0.5 - Certificación MetodoPago histórico`, run `31568099373`, terminó `success`: restauración/compilación/pruebas backend, esquema relacional, historia representativa, fail-closed, preflight, backfill, postcheck/preservación y snapshot EF quedaron verdes. El CI general run `31568099446` seguía ejecutando integración MySQL al cierre de esta microtarea, por lo que no se le atribuye un resultado final aún no emitido por GitHub.
+
+**Control:** `N0.5.06C` queda `LISTO`; con A1/A2/A3/B/C cerradas, la siguiente tarea de la cadena es `N0.5.07`, sujeta a reconciliación de HEAD/dependencias en una corrida posterior.
 
 ## 2026-08-11 — N0.5.06 B: FacturaPago migra hacia MetodoPago relacional — LISTO
 
