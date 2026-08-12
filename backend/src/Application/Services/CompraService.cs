@@ -2,6 +2,7 @@ using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
+using InventoryApp.Domain.Common;
 using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Enums;
 
@@ -220,7 +221,7 @@ public class CompraService : ICompraService
                     _productoVarianteRepository.Update(variante);
                 }
 
-                await _movimientoInventarioRepository.AddAsync(new MovimientoInventario
+                await _movimientoInventarioRepository.AddConOrigenTipadoAsync(new MovimientoInventario
                 {
                     ProductoId = producto.Id,
                     ProductoVarianteId = item.ProductoVarianteId,
@@ -234,12 +235,10 @@ public class CompraService : ICompraService
                     StockAnterior = stockAnteriorMovimiento,
                     StockNuevo = stockNuevoMovimiento,
                     CostoUnitario = costoEntradaPonderado,
-                    ReferenciaTipo = "Compra",
-                    ReferenciaId = compra.Id,
                     Descripcion = $"Entrada por compra {compra.NumeroCompra}",
                     CreadoPorUsuarioId = _currentUser.UsuarioId,
                     CreadoPorNombreUsuario = _currentUser.NombreUsuario
-                });
+                }, OrigenMovimientoInventario.DesdeCompra(compra.Id));
             }
 
             foreach (var productoGrupo in inventario.Demandas.GroupBy(x => x.ProductoId))
@@ -352,7 +351,7 @@ public class CompraService : ICompraService
                     _productoVarianteRepository.Update(variante);
                 }
 
-                await _movimientoInventarioRepository.AddAsync(new MovimientoInventario
+                await _movimientoInventarioRepository.AddConOrigenTipadoAsync(new MovimientoInventario
                 {
                     ProductoId = producto.Id,
                     ProductoVarianteId = item.ProductoVarianteId,
@@ -362,16 +361,15 @@ public class CompraService : ICompraService
                     ProductoTallaSnapshot = detalle.ProductoTallaSnapshot,
                     ProductoSkuSnapshot = detalle.ProductoSkuSnapshot,
                     Tipo = TipoMovimientoInventario.Salida,
+                    Causa = CausaMovimientoInventario.AnulacionCompra,
                     Cantidad = item.Cantidad,
                     StockAnterior = stockAnteriorMovimiento,
                     StockNuevo = stockNuevoMovimiento,
                     CostoUnitario = costoUnitarioMovimiento,
-                    ReferenciaTipo = "CompraAnulada",
-                    ReferenciaId = compra.Id,
                     Descripcion = $"Salida por anulación de compra {compra.NumeroCompra}. Motivo: {motivo}",
                     CreadoPorUsuarioId = _currentUser.UsuarioId,
                     CreadoPorNombreUsuario = _currentUser.NombreUsuario
-                });
+                }, OrigenMovimientoInventario.DesdeCompra(compra.Id));
             }
 
             foreach (var productoGrupo in inventario.Demandas.GroupBy(x => x.ProductoId))
