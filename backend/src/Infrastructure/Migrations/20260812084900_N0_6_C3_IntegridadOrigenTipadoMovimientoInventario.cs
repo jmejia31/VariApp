@@ -8,17 +8,16 @@ namespace InventoryApp.Infrastructure.Migrations;
 
 /// <summary>
 /// ERP-N0.6 C3: certifica la integridad histórica del backfill tipado y
-/// establece la exclusividad permanente del origen de MovimientoInventario.
-/// Durante la transición hacia N0.6.D, triggers de compatibilidad derivan las
-/// FKs tipadas desde ReferenciaTipo/ReferenciaId para que los productores legacy
-/// sigan operando sin debilitar el constraint. Las columnas legacy se conservan
-/// hasta su retiro seguro posterior.
+/// establece integridad permanente para los orígenes documentales mapeables
+/// (Compra/Venta/ConsumoInsumo). Durante la transición hacia N0.6.D, triggers
+/// derivan las FKs desde ReferenciaTipo/ReferenciaId. Los movimientos de ajuste
+/// no documentales conservan exclusivamente el snapshot legacy y cero FKs.
 /// </summary>
 [DbContext(typeof(AppDbContext))]
 [Migration("20260812084900_N0_6_C3_IntegridadOrigenTipadoMovimientoInventario")]
 public sealed class N0_6_C3_IntegridadOrigenTipadoMovimientoInventario : Migration
 {
-    private const string ConstraintOrigenExclusivo =
+    private const string ConstraintOrigen =
         "CK_MovimientosInventario_OrigenTipado_Exclusivo_N06";
     private const string TriggerInsert =
         "TR_MovimientosInventario_N06_OrigenTipado_BI";
@@ -27,9 +26,6 @@ public sealed class N0_6_C3_IntegridadOrigenTipadoMovimientoInventario : Migrati
 
     protected override void Up(MigrationBuilder migrationBuilder)
     {
-        // Fail-closed antes de instalar el contrato permanente. C2 ya debe
-        // haber dejado exactamente una FK tipada por fila y equivalencia 1:1
-        // con el snapshot legacy.
         migrationBuilder.Sql("""
             DROP TEMPORARY TABLE IF EXISTS __N06C3Guard;
             CREATE TEMPORARY TABLE __N06C3Guard
@@ -44,7 +40,7 @@ public sealed class N0_6_C3_IntegridadOrigenTipadoMovimientoInventario : Migrati
               FROM MovimientosInventario m
              WHERE (m.CompraId IS NOT NULL)
                  + (m.VentaId IS NOT NULL)
-                 + (m.ConsumoInsumoId IS NOT NULL) <> 1;
+                 + (m.ConsumoInsumoId IS NOT NULL) > 1;
 
             INSERT INTO __N06C3Guard (Id, Violaciones)
             SELECT 2, COUNT(*)
@@ -61,13 +57,19 @@ public sealed class N0_6_C3_IntegridadOrigenTipadoMovimientoInventario : Migrati
                     AND (m.ConsumoInsumoId IS NULL OR m.ConsumoInsumoId <> m.ReferenciaId
                          OR m.CompraId IS NOT NULL OR m.VentaId IS NOT NULL));
 
+            INSERT INTO __N06C3Guard (Id, Violaciones)
+            SELECT 3, COUNT(*)
+              FROM MovimientosInventario m
+             WHERE CAST(m.ReferenciaTipo AS BINARY) NOT IN (
+                       CAST('Compra' AS BINARY), CAST('CompraAnulada' AS BINARY),
+                       CAST('Venta' AS BINARY), CAST('VentaAnulada' AS BINARY),
+                       CAST('ConsumoInsumo' AS BINARY))
+               AND (CAST(m.Tipo AS BINARY) <> CAST('Ajuste' AS BINARY)
+                    OR m.CompraId IS NOT NULL OR m.VentaId IS NOT NULL OR m.ConsumoInsumoId IS NOT NULL);
+
             DROP TEMPORARY TABLE __N06C3Guard;
             """);
 
-        // Puente de compatibilidad estrictamente transitorio: hasta N0.6.D los
-        // productores de aplicación siguen enviando la referencia legacy. Los
-        // triggers derivan una y solo una FK tipada; tipos desconocidos quedan
-        // sin origen y son rechazados por el CHECK posterior.
         migrationBuilder.Sql($"""
             CREATE TRIGGER {TriggerInsert}
             BEFORE INSERT ON MovimientosInventario
@@ -102,11 +104,27 @@ public sealed class N0_6_C3_IntegridadOrigenTipadoMovimientoInventario : Migrati
 
         migrationBuilder.Sql($"""
             ALTER TABLE MovimientosInventario
-            ADD CONSTRAINT {ConstraintOrigenExclusivo}
+            ADD CONSTRAINT {ConstraintOrigen}
             CHECK (
-                (CompraId IS NOT NULL)
-              + (VentaId IS NOT NULL)
-              + (ConsumoInsumoId IS NOT NULL) = 1
+                ((CompraId IS NOT NULL) + (VentaId IS NOT NULL) + (ConsumoInsumoId IS NOT NULL) <= 1)
+                AND
+                (
+                    (CAST(ReferenciaTipo AS BINARY) IN (CAST('Compra' AS BINARY), CAST('CompraAnulada' AS BINARY))
+                        AND CompraId = ReferenciaId AND VentaId IS NULL AND ConsumoInsumoId IS NULL)
+                    OR
+                    (CAST(ReferenciaTipo AS BINARY) IN (CAST('Venta' AS BINARY), CAST('VentaAnulada' AS BINARY))
+                        AND VentaId = ReferenciaId AND CompraId IS NULL AND ConsumoInsumoId IS NULL)
+                    OR
+                    (CAST(ReferenciaTipo AS BINARY) = CAST('ConsumoInsumo' AS BINARY)
+                        AND ConsumoInsumoId = ReferenciaId AND CompraId IS NULL AND VentaId IS NULL)
+                    OR
+                    (CAST(Tipo AS BINARY) = CAST('Ajuste' AS BINARY)
+                        AND CAST(ReferenciaTipo AS BINARY) NOT IN (
+                            CAST('Compra' AS BINARY), CAST('CompraAnulada' AS BINARY),
+                            CAST('Venta' AS BINARY), CAST('VentaAnulada' AS BINARY),
+                            CAST('ConsumoInsumo' AS BINARY))
+                        AND CompraId IS NULL AND VentaId IS NULL AND ConsumoInsumoId IS NULL)
+                )
             );
             """);
     }
@@ -117,7 +135,7 @@ public sealed class N0_6_C3_IntegridadOrigenTipadoMovimientoInventario : Migrati
         migrationBuilder.Sql($"DROP TRIGGER IF EXISTS {TriggerInsert};");
         migrationBuilder.Sql($"""
             ALTER TABLE MovimientosInventario
-            DROP CHECK {ConstraintOrigenExclusivo};
+            DROP CHECK {ConstraintOrigen};
             """);
     }
 }

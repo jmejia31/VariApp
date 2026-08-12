@@ -1,21 +1,26 @@
 -- ERP-N0.6 C1 — preflight histórico de origen de MovimientoInventario.
 -- SOLO LECTURA. No modifica datos ni esquema.
 -- Debe devolver BloqueosN06 = 0 antes de ejecutar el backfill de N0.6.C2.
--- Contrato de mapeo:
+-- Contrato de mapeo documental:
 --   Compra / CompraAnulada -> CompraId
 --   Venta / VentaAnulada -> VentaId
 --   ConsumoInsumo -> ConsumoInsumoId
+-- Los movimientos Tipo=Ajuste pueden conservar temporalmente un origen legacy
+-- no documental (p. ej. CargaMasiva) y no participan del backfill de FKs tipadas.
 
 SET @tipos_invalidos := (
     SELECT COUNT(*)
       FROM MovimientosInventario m
      WHERE m.ReferenciaTipo IS NULL
-        OR CAST(m.ReferenciaTipo AS BINARY) NOT IN (
-             CAST('Compra' AS BINARY),
-             CAST('CompraAnulada' AS BINARY),
-             CAST('Venta' AS BINARY),
-             CAST('VentaAnulada' AS BINARY),
-             CAST('ConsumoInsumo' AS BINARY)
+        OR (
+             CAST(m.ReferenciaTipo AS BINARY) NOT IN (
+               CAST('Compra' AS BINARY),
+               CAST('CompraAnulada' AS BINARY),
+               CAST('Venta' AS BINARY),
+               CAST('VentaAnulada' AS BINARY),
+               CAST('ConsumoInsumo' AS BINARY)
+             )
+             AND CAST(m.Tipo AS BINARY) <> CAST('Ajuste' AS BINARY)
            )
 );
 

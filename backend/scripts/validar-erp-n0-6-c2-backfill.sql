@@ -1,10 +1,12 @@
 -- ERP-N0.6 C2 — validación del backfill tipado de MovimientoInventario.
 -- Solo lectura. Debe devolver ErroresN06C2 = 0.
+-- Los movimientos documentales mapeables deben tener exactamente su FK tipada;
+-- los ajustes no documentales conservan cero FKs durante la transición.
 
 SET @errores :=
     (SELECT COUNT(*)
        FROM MovimientosInventario m
-      WHERE (m.CompraId IS NOT NULL) + (m.VentaId IS NOT NULL) + (m.ConsumoInsumoId IS NOT NULL) <> 1)
+      WHERE (m.CompraId IS NOT NULL) + (m.VentaId IS NOT NULL) + (m.ConsumoInsumoId IS NOT NULL) > 1)
   + (SELECT COUNT(*)
        FROM MovimientosInventario m
       WHERE CAST(m.ReferenciaTipo AS BINARY) IN (CAST('Compra' AS BINARY), CAST('CompraAnulada' AS BINARY))
@@ -17,6 +19,13 @@ SET @errores :=
        FROM MovimientosInventario m
       WHERE CAST(m.ReferenciaTipo AS BINARY) = CAST('ConsumoInsumo' AS BINARY)
         AND (m.ConsumoInsumoId IS NULL OR m.ConsumoInsumoId <> m.ReferenciaId OR m.CompraId IS NOT NULL OR m.VentaId IS NOT NULL))
+  + (SELECT COUNT(*)
+       FROM MovimientosInventario m
+      WHERE CAST(m.ReferenciaTipo AS BINARY) NOT IN (
+                CAST('Compra' AS BINARY), CAST('CompraAnulada' AS BINARY),
+                CAST('Venta' AS BINARY), CAST('VentaAnulada' AS BINARY),
+                CAST('ConsumoInsumo' AS BINARY))
+        AND (m.CompraId IS NOT NULL OR m.VentaId IS NOT NULL OR m.ConsumoInsumoId IS NOT NULL))
   + (SELECT COUNT(*)
        FROM information_schema.columns
       WHERE table_schema = DATABASE()
