@@ -256,7 +256,9 @@ public class VentaService : IVentaService
                 Estado = venta.EstadoPago == EstadoPago.Pagado
                     ? EstadoMovimientoFinanciero.Pagado
                     : EstadoMovimientoFinanciero.Pendiente,
-                MetodoPago = venta.MetodoPago,
+                MetodoPagoId = venta.MetodoPagoId,
+                MetodoPagoCatalogo = venta.MetodoPagoCatalogo,
+                MetodoPago = venta.MetodoPagoCatalogo is null ? null : DerivarMetodoPagoLegacy(venta.MetodoPagoCatalogo),
                 EsAutomatico = true,
                 ModuloOrigen = "Venta",
                 ReferenciaId = venta.Id,
@@ -756,7 +758,7 @@ public class VentaService : IVentaService
         ClienteDireccion = v.ClienteDireccion,
         Estado = v.Estado.ToString(),
         EstadoPago = v.EstadoPago.ToString(),
-        MetodoPago = v.MetodoPago.ToString(),
+        MetodoPago = v.MetodoPagoCatalogo?.Nombre ?? string.Empty,
         ImporteBruto = v.ImporteBruto,
         ImporteProductos = v.ImporteProductos,
         Subtotal = v.Subtotal,
