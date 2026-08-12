@@ -75,7 +75,13 @@ jobs:
           test "$(ejecutar_preflight)" = '0'
 
           docker exec "$c" mysql -uroot -proot inventoryapp_n06_ci -e "
-            SET @producto_id=(SELECT Id FROM Productos ORDER BY Id LIMIT 1);
+            INSERT INTO Productos
+              (Nombre,Marca,Modelo,Cantidad,Costo,Precio,UmbralStockBajo,Activo,Eliminado,FechaCreacion,FechaActualizacion)
+            VALUES
+              ('N06 Producto CI','VAEP','N06',1,1.00,1.00,0,1,0,UTC_TIMESTAMP(6),UTC_TIMESTAMP(6));"
+
+          docker exec "$c" mysql -uroot -proot inventoryapp_n06_ci -e "
+            SET @producto_id=(SELECT Id FROM Productos WHERE Nombre='N06 Producto CI' ORDER BY Id LIMIT 1);
             INSERT INTO MovimientosInventario
               (ProductoId,Tipo,Causa,Cantidad,StockAnterior,StockNuevo,ReferenciaTipo,ReferenciaId,Fecha)
             VALUES
@@ -84,7 +90,7 @@ jobs:
           docker exec "$c" mysql -uroot -proot inventoryapp_n06_ci -e "DELETE FROM MovimientosInventario WHERE ReferenciaTipo='OrigenDesconocido';"
 
           docker exec "$c" mysql -uroot -proot inventoryapp_n06_ci -e "
-            SET @producto_id=(SELECT Id FROM Productos ORDER BY Id LIMIT 1);
+            SET @producto_id=(SELECT Id FROM Productos WHERE Nombre='N06 Producto CI' ORDER BY Id LIMIT 1);
             INSERT INTO MovimientosInventario
               (ProductoId,Tipo,Causa,Cantidad,StockAnterior,StockNuevo,ReferenciaTipo,ReferenciaId,Fecha)
             VALUES
