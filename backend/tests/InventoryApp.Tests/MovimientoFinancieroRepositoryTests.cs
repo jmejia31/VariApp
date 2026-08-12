@@ -63,6 +63,27 @@ public class MovimientoFinancieroRepositoryTests
     }
 
     [Fact]
+    public async Task AddAsync_ReversionCompra_IgnoraSnapshotModuloOrigenDesactualizado()
+    {
+        await using var context = CrearContexto();
+        var repo = CrearRepositorio(context);
+        var original = CrearOriginal(EstadoMovimientoFinanciero.Pendiente);
+        original.ModuloOrigen = "SnapshotLegacyIncorrecto";
+        context.MovimientosFinancieros.Add(original);
+        await context.SaveChangesAsync();
+
+        var reversion = CrearReversion(original.CompraId!.Value);
+        reversion.ModuloOrigen = "OtroSnapshotLegacy";
+
+        await repo.AddAsync(reversion);
+        await context.SaveChangesAsync();
+
+        var unico = Assert.Single(await context.MovimientosFinancieros.ToListAsync());
+        Assert.Equal(original.Id, unico.Id);
+        Assert.Equal(EstadoMovimientoFinanciero.Anulado, unico.Estado);
+    }
+
+    [Fact]
     public async Task AddAsync_MovimientoConEnumLegacy_SeNormalizaARelacionYElEnumNoSePersiste()
     {
         await using var context = CrearContexto();
@@ -127,6 +148,23 @@ public class MovimientoFinancieroRepositoryTests
         Assert.Equal(original.Id, encontrado!.Id);
         Assert.Equal("Compra", encontrado.ModuloOrigen);
         Assert.Equal("Transferencia bancaria", encontrado.MetodoPagoCatalogo!.Nombre);
+    }
+
+    [Fact]
+    public async Task GetByCompraIdAsync_UsaCompraIdAunqueSnapshotModuloOrigenNoCoincida()
+    {
+        await using var context = CrearContexto();
+        var repo = CrearRepositorio(context);
+        var original = CrearOriginal(EstadoMovimientoFinanciero.Pagado);
+        original.ModuloOrigen = "LegacyDesalineado";
+        context.MovimientosFinancieros.Add(original);
+        await context.SaveChangesAsync();
+
+        var encontrado = await repo.GetByCompraIdAsync(original.CompraId!.Value);
+
+        Assert.NotNull(encontrado);
+        Assert.Equal(original.Id, encontrado!.Id);
+        Assert.Equal("LegacyDesalineado", encontrado.ModuloOrigen);
     }
 
     private static AppDbContext CrearContexto()
