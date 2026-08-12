@@ -6,14 +6,18 @@ on:
     paths:
       - 'backend/scripts/preflight-erp-n0-6-origen-movimiento-inventario.sql'
       - 'backend/scripts/validar-erp-n0-6-c2-backfill.sql'
+      - 'backend/scripts/postcheck-erp-n0-6-c3-origen-tipado.sql'
       - 'backend/src/Infrastructure/Migrations/20260812083000_N0_6_OrigenTipadoMovimientoInventario.cs'
+      - 'backend/src/Infrastructure/Migrations/20260812084900_N0_6_C3_IntegridadOrigenTipadoMovimientoInventario.cs'
       - '.github/workflows/erp-n0-6-preflight-ci.yml'
   pull_request:
     branches: [main]
     paths:
       - 'backend/scripts/preflight-erp-n0-6-origen-movimiento-inventario.sql'
       - 'backend/scripts/validar-erp-n0-6-c2-backfill.sql'
+      - 'backend/scripts/postcheck-erp-n0-6-c3-origen-tipado.sql'
       - 'backend/src/Infrastructure/Migrations/20260812083000_N0_6_OrigenTipadoMovimientoInventario.cs'
+      - 'backend/src/Infrastructure/Migrations/20260812084900_N0_6_C3_IntegridadOrigenTipadoMovimientoInventario.cs'
       - '.github/workflows/erp-n0-6-preflight-ci.yml'
   workflow_dispatch:
 
@@ -106,7 +110,7 @@ jobs:
               (@p,'Entrada',0,1,0,1,'VentaAnulada',@v,UTC_TIMESTAMP(6)),
               (@p,'Salida',0,1,1,0,'ConsumoInsumo',@i,UTC_TIMESTAMP(6));"
           test "$(docker exec -i "$c" mysql -uroot -proot inventoryapp_n06_ci --batch --skip-column-names < backend/scripts/preflight-erp-n0-6-origen-movimiento-inventario.sql | tail -n 1)" = '0'
-      - name: Aplicar C2 y validar backfill tipado
+      - name: Aplicar C2/C3 y validar integridad tipada
         working-directory: backend
         shell: bash
         run: |
@@ -118,11 +122,26 @@ jobs:
           cd ..
           c="${{ job.services.mysql.id }}"
           test "$(docker exec -i "$c" mysql -uroot -proot inventoryapp_n06_ci --batch --skip-column-names < backend/scripts/validar-erp-n0-6-c2-backfill.sql | tail -n 1)" = '0'
+          test "$(docker exec -i "$c" mysql -uroot -proot inventoryapp_n06_ci --batch --skip-column-names < backend/scripts/postcheck-erp-n0-6-c3-origen-tipado.sql | tail -n 1)" = '0'
           docker exec "$c" mysql -uroot -proot inventoryapp_n06_ci -e "
             SELECT ReferenciaTipo,ReferenciaId,CompraId,VentaId,ConsumoInsumoId
               FROM MovimientosInventario
              WHERE ReferenciaTipo IN ('Compra','CompraAnulada','Venta','VentaAnulada','ConsumoInsumo')
              ORDER BY Id;"
+      - name: Probar constraint permanente C3 fail-closed
+        shell: bash
+        run: |
+          set -euo pipefail
+          c="${{ job.services.mysql.id }}"
+          if docker exec "$c" mysql -uroot -proot inventoryapp_n06_ci -e "
+            UPDATE MovimientosInventario
+               SET VentaId=(SELECT Id FROM Ventas WHERE NumeroVenta='N06-VENTA')
+             WHERE ReferenciaTipo='Compra'
+             LIMIT 1;"; then
+            echo 'ERROR: el constraint C3 permitió dos orígenes tipados simultáneos.' >&2
+            exit 1
+          fi
+          test "$(docker exec -i "$c" mysql -uroot -proot inventoryapp_n06_ci --batch --skip-column-names < backend/scripts/postcheck-erp-n0-6-c3-origen-tipado.sql | tail -n 1)" = '0'
       - name: Verificar snapshot EF sin drift de modelo
         working-directory: backend
         run: |
