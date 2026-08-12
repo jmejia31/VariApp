@@ -27,5 +27,6 @@ public enum ModuloSistema
     CargasMasivas = 23,
     ReportesAdministrativos = 24,
     TiposClientes = 25,
-    InsumosAdministrativos = 26
+    InsumosAdministrativos = 26,
+    MetodosPago = 27
 }
