@@ -93,3 +93,14 @@ Cada entrada debe contener, de forma breve:
 - referencia al commit cuando sea útil.
 
 No registrar secretos, credenciales ni datos sensibles.
+# 2026-08-11 — Catálogo público VARISTOREHN sin redirección a login
+
+**Responsable:** Codex.
+
+**Objetivo:** mostrar en el escaparate los productos activos existentes mediante una consulta pública segura, sin requerir sesión ni modificar la base de datos.
+
+**Alcance:** proyección pública sin costos ni auditoría, nuevo controlador independiente con `GET /tienda/productos`, consumo desde `frontend/src/app/features/varistorehn` y personalización mediante identidad/tema públicos ya existentes.
+
+**Validaciones:** backend Release compiló sin advertencias ni errores; las 2 pruebas dirigidas `TiendaPublicaTests` aprobaron; frontend `npm run lint` y `npm run build:prod` aprobaron. La suite backend completa aprobó 273/291 y las 18 integraciones restantes fallaron por rechazo de credenciales del MySQL local, no por este cambio.
+
+**Riesgos/pendientes:** el catálogo expone únicamente información comercial; las operaciones administrativas continúan protegidas.

@@ -1,6 +1,9 @@
 <div class="storefront">
   <nav class="navbar" aria-label="Navegación de la tienda">
-    <a class="logo" href="#inicio" aria-label="VARISTOREHN inicio">VARISTORE<span>HN</span></a>
+    <a class="logo" href="#inicio" [attr.aria-label]="identidad.nombreSistema() + ' inicio'">
+      <img [src]="identidad.logoUrl()" [alt]="identidad.nombreSistema()">
+      <span>{{ identidad.nombreSistema() }}</span>
+    </a>
     <div class="nav-links">
       <a href="#inicio">Inicio</a>
       <a href="#tienda">Tienda</a>
@@ -14,9 +17,9 @@
 
   <header id="inicio" class="hero">
     <div class="hero-content">
-      <p class="eyebrow">PREMIUM LIFESTYLE</p>
+      <p class="eyebrow">{{ identidad.config().eslogan || 'PREMIUM LIFESTYLE' }}</p>
       <h1>Estilo que define tu <span>esencia</span></h1>
-      <p>Descubre nuestra colección exclusiva de accesorios y gadgets de alta gama.</p>
+      <p>{{ identidad.config().descripcionSistema || 'Descubre nuestra colección exclusiva de productos.' }}</p>
       <a class="primary-button" href="#tienda">Ver colección</a>
     </div>
   </header>
@@ -77,17 +80,17 @@
         <h2>Nosotros</h2>
         <span></span>
       </div>
-      <p>En <strong>VARISTOREHN</strong> nos dedicamos a traer lo último en tecnología y moda para elevar tu estilo de vida.</p>
+      <p>En <strong>{{ identidad.config().nombreComercial }}</strong> trabajamos para ofrecerte una colección cuidadosamente seleccionada.</p>
       <div class="social-links">
-        <a href="https://www.tiktok.com/@varistorehn" target="_blank" rel="noopener noreferrer">TikTok</a>
-        <a href="https://www.facebook.com/varistorehn" target="_blank" rel="noopener noreferrer">Facebook</a>
-        <a href="https://www.instagram.com/varistorehn" target="_blank" rel="noopener noreferrer">Instagram</a>
+        @if (identidad.config().facebook) { <a [href]="identidad.config().facebook" target="_blank" rel="noopener noreferrer">Facebook</a> }
+        @if (identidad.config().instagram) { <a [href]="identidad.config().instagram" target="_blank" rel="noopener noreferrer">Instagram</a> }
+        @if (identidad.config().whatsApp) { <a [href]="enlaceWhatsapp()" target="_blank" rel="noopener noreferrer">WhatsApp</a> }
       </div>
-      <strong>@@VARISTOREHN</strong>
+      <strong>{{ identidad.nombreSistema() }}</strong>
     </section>
   </main>
 
-  <footer>© 2026 VARISTOREHN. Todos los derechos reservados.</footer>
+  <footer>{{ identidad.copyright() }}</footer>
 
   @if (carritoAbierto()) {
     <button class="cart-overlay" type="button" (click)="carritoAbierto.set(false)" aria-label="Cerrar carrito"></button>

@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { Producto } from '../../core/models/producto.model';
-import { ProductoService } from '../../services/producto.service';
+import { EmpresaIdentidadService } from '../../services/empresa-identidad.service';
+import { ProductoCatalogoPublico, VaristorehnService } from './varistorehn.service';
 
 interface ProductoTienda {
   id: number;
@@ -25,7 +25,8 @@ interface ItemCarrito extends ProductoTienda {
   styleUrl: './varistorehn.component.scss'
 })
 export class VaristorehnComponent implements OnInit {
-  private readonly productoService = inject(ProductoService);
+  private readonly varistorehnService = inject(VaristorehnService);
+  readonly identidad = inject(EmpresaIdentidadService);
 
   readonly productos = signal<ProductoTienda[]>([]);
   readonly cargando = signal(true);
@@ -35,15 +36,14 @@ export class VaristorehnComponent implements OnInit {
   readonly imagenActiva = signal<Record<number, number>>({});
 
   ngOnInit(): void {
-    this.productoService.getPaged({ page: 1, pageSize: 48, activo: true }).subscribe({
+    this.varistorehnService.obtenerProductos().subscribe({
       next: (response) => {
         this.productos.set(response.data?.items
-          ?.filter((producto) => producto.activo)
           .map((producto) => this.mapearProducto(producto)) ?? []);
         this.cargando.set(false);
       },
       error: () => {
-        this.errorCatalogo.set('No fue posible cargar el catálogo. La consulta actual requiere una sesión autorizada.');
+        this.errorCatalogo.set('No fue posible cargar el catálogo en este momento.');
         this.cargando.set(false);
       }
     });
@@ -94,10 +94,17 @@ export class VaristorehnComponent implements OnInit {
       .map((item) => `• ${item.nombre} x${item.unidades} — ${this.moneda(item.precio * item.unidades)}`)
       .join('\n');
     const mensaje = `Hola VARISTOREHN, deseo realizar este pedido:\n\n${detalle}\n\nTotal: ${this.moneda(this.totalCarrito())}`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(mensaje)}`, '_blank', 'noopener,noreferrer');
+    const telefono = (this.identidad.config().whatsApp || '').replace(/\D/g, '');
+    const destino = telefono ? `https://wa.me/${telefono}` : 'https://wa.me/';
+    window.open(`${destino}?text=${encodeURIComponent(mensaje)}`, '_blank', 'noopener,noreferrer');
   }
 
-  private mapearProducto(producto: Producto): ProductoTienda {
+  enlaceWhatsapp(): string {
+    const telefono = (this.identidad.config().whatsApp || '').replace(/\D/g, '');
+    return telefono ? `https://wa.me/${telefono}` : 'https://wa.me/';
+  }
+
+  private mapearProducto(producto: ProductoCatalogoPublico): ProductoTienda {
     const imagenes = producto.imagenes
       .slice()
       .sort((a, b) => a.orden - b.orden)
@@ -107,11 +114,11 @@ export class VaristorehnComponent implements OnInit {
     return {
       id: producto.id,
       nombre: producto.nombre,
-      precio: producto.precioMinimo || producto.precio,
-      descripcion: producto.descripcion || `${producto.marcaNombre || producto.marca} ${producto.modeloNombre || producto.modelo}`.trim(),
+      precio: producto.precio,
+      descripcion: producto.descripcion || `${producto.marcaNombre || ''} ${producto.modeloNombre || ''}`.trim(),
       categoria: producto.categoriaNombre || 'Colección',
       imagenes,
-      disponible: !producto.estaAgotado && producto.cantidad > 0
+      disponible: !producto.estaAgotado && producto.cantidadDisponible > 0
     };
   }
 
