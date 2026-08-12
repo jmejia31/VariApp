@@ -37,8 +37,8 @@ Estado operativo controlado por `COLA`:
   - [x] N0.5.06 B: retirar autoridad legacy de `FacturaPago`. Implementación hasta `d5e9a98c17848001fc64387c709a72ce0e379cd3`; fixtures relacionales `e8ab2b733affea70ba47b3ea8a7ff450c6b7766f`; CI general `31567189353` y ERP-N0.5 `31567189393` en verde.
   - [x] N0.5.06 C: retirar autoridad legacy de `MovimientoFinanciero`. Funcional `0f14b9b9f5248a01cb6c98fa456cd306fe38ae19`; CI general `31568099446` y ERP-N0.5 `31568099373` en verde.
 - [ ] N0.5.07 Reglas operativas — subdividido para mantener cambios pequeños:
-  - [ ] N0.5.07A: elegibilidad `Activo` + preservación histórica — implementación publicada; `VALIDANDO` hasta CI real.
-  - [ ] N0.5.07B: `RequiereReferencia` + `RequiereBanco`.
+  - [x] N0.5.07A: elegibilidad `Activo` + preservación histórica. Funcional `11c958ead2a7a8cc5a3b1db4b502cbe63e8efba7`; CI general `31571200414` y ERP-N0.5 `31571200316` en verde.
+  - [ ] N0.5.07B: `RequiereReferencia` + `RequiereBanco` — subdividida; trabajo concurrente controlado por `COLA`.
   - [ ] N0.5.07C: `PermiteCambio` + `Orden` + `Metadata`.
 - [ ] N0.5.08 Backend/API/CRUD/DTOs.
 - [ ] N0.5.09 Frontend administrable/selectores dinámicos.
@@ -52,7 +52,7 @@ Estado operativo controlado por `COLA`:
 ## ERP-N0.6 — Referencias polimórficas críticas
 
 - [x] N0.6.A Auditoría y preflight: autoridad legacy de inventario, estado relacional parcial de finanzas, productores/consumidores, riesgos, transición, rollback y plan de pruebas documentados en `docs/ERP_N0_6_REFERENCIAS_POLIMORFICAS_PREFLIGHT.md`.
-- [ ] N0.6.B Dominio y contratos: introducir origen tipado coherente sin mezclar origen con operación/reversión.
+- [x] N0.6.B Dominio y contratos: origen tipado puro `Compra`/`Venta`/`ConsumoInsumo` con invariante de exactamente un origen. Funcional `5fe605cc93470a4f4b90f73185016b9e15bc622e`; CI general `31575657900` Backend Release/pruebas `SUCCESS`.
 - [ ] N0.6.C Persistencia/migración: FKs, preflight histórico, backfill determinista, constraints y postcheck antes de retirar autoridad legacy.
 - [ ] N0.6.D–H Aplicación/API, frontend si aplica, seguridad/auditoría, QA/CI y certificación según `COLA`.
 
