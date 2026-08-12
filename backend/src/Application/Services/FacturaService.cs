@@ -50,6 +50,9 @@ public class FacturaService : IFacturaService
             throw new BusinessRuleException("El monto del pago debe ser mayor que cero.");
 
         var metodoPagoCatalogo = await ResolverMetodoPagoAsync(dto.MetodoPago);
+        var referencia = Normalizar(dto.Referencia, 120);
+        if (metodoPagoCatalogo.RequiereReferencia && string.IsNullOrWhiteSpace(referencia))
+            throw new BusinessRuleException("Debe indicar la referencia para el método de pago seleccionado.");
 
         RecalcularPago(factura);
         if (factura.SaldoPendiente <= 0)
@@ -64,7 +67,7 @@ public class FacturaService : IFacturaService
             MetodoPagoId = metodoPagoCatalogo.Id,
             MetodoPagoCatalogo = metodoPagoCatalogo,
             MetodoPago = DerivarMetodoPagoLegacy(metodoPagoCatalogo),
-            Referencia = Normalizar(dto.Referencia, 120),
+            Referencia = referencia,
             Observaciones = Normalizar(dto.Observaciones, 500),
             CreadoPorUsuarioId = usuarioId,
             CreadoPorNombreUsuario = Normalizar(nombreUsuario, 150)
