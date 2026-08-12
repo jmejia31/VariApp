@@ -1,0 +1,48 @@
+name: VAEP - Reparacion temporal snapshot EF
+
+on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - '.github/workflows/vaep-ef-snapshot-repair.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  generar-snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Instalar EF Core CLI
+        run: dotnet tool install --global dotnet-ef --version 8.0.8
+      - name: Generar migracion y snapshot canonicos
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f backend/src/Infrastructure/Persistence/Migrations/20260812111800_ERP_N05_BancoNormalizado.cs
+          cd backend
+          dotnet restore InventoryApp.sln
+          dotnet ef migrations add ERP_N05_BancoNormalizadoCanonical \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext \
+            --output-dir Migrations
+          dotnet ef migrations has-pending-model-changes \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext
+      - name: Mostrar archivos generados
+        run: |
+          git status --short
+          ls -la backend/src/Infrastructure/Migrations/*ERP_N05_BancoNormalizadoCanonical* backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vaep-ef-n05-banco-canonical
+          path: |
+            backend/src/Infrastructure/Migrations/*ERP_N05_BancoNormalizadoCanonical*
+            backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs
+          if-no-files-found: error
