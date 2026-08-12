@@ -173,9 +173,9 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
             while (await reader.ReadAsync())
             {
                 var id = reader.GetInt32(0);
-                var compraId = reader.IsDBNull(1) ? null : reader.GetInt32(1);
-                var ventaId = reader.IsDBNull(2) ? null : reader.GetInt32(2);
-                var consumoInsumoId = reader.IsDBNull(3) ? null : reader.GetInt32(3);
+                int? compraId = reader.IsDBNull(1) ? null : reader.GetInt32(1);
+                int? ventaId = reader.IsDBNull(2) ? null : reader.GetInt32(2);
+                int? consumoInsumoId = reader.IsDBNull(3) ? null : reader.GetInt32(3);
                 var cantidadOrigenes = (compraId.HasValue ? 1 : 0) +
                                        (ventaId.HasValue ? 1 : 0) +
                                        (consumoInsumoId.HasValue ? 1 : 0);
