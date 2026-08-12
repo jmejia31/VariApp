@@ -3,6 +3,11 @@ name: ERP-N0.5 - Certificación MetodoPago histórico
 on:
   push:
     branches: [Desarrollo]
+    paths:
+      - 'backend/src/**'
+      - 'backend/tests/**'
+      - 'backend/scripts/*erp-n0-5*'
+      - '.github/workflows/erp-n0-5-ci.yml'
   pull_request:
     branches: [main]
     paths:
@@ -181,7 +186,6 @@ jobs:
           resultado="$(docker exec -i "$c" mysql -uroot -proot inventoryapp_n05_ci --batch --skip-column-names < backend/scripts/postdeploy-erp-n0-5-metodo-pago.sql | tail -n 1)"
           test "$resultado" = '0'
 
-          # El registro ajeno consume Id=1 para demostrar que enum 1..4 NO se usa como FK.
           test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n05_ci -Nse "SELECT COUNT(*) FROM MetodosPago WHERE Codigo='ChequeExterno' AND Id=1;")" = '1'
           test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n05_ci -Nse "SELECT COUNT(*) FROM MetodosPago WHERE (Codigo='Efectivo' AND Id=1) OR (Codigo='Transferencia' AND Id=2) OR (Codigo='Tarjeta' AND Id=3) OR (Codigo='Otro' AND Id=4);")" = '0'
 

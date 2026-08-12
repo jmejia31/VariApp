@@ -3,6 +3,12 @@ name: ERP-N0.2 - Certificación CatalogoProducto legacy
 on:
   push:
     branches: [Desarrollo]
+    paths:
+      - 'backend/src/**'
+      - 'backend/tests/**'
+      - 'backend/scripts/preflight-erp-n0-2-catalogos-normalizados.sql'
+      - 'backend/scripts/postdeploy-erp-n0-2-catalogos-normalizados.sql'
+      - '.github/workflows/erp-n0-2-ci.yml'
   pull_request:
     branches: [main]
     paths:

@@ -3,6 +3,11 @@ name: ERP-N0.4 - Certificación RBAC relacional
 on:
   push:
     branches: [Desarrollo]
+    paths:
+      - 'backend/src/**'
+      - 'backend/tests/**'
+      - 'backend/scripts/*erp-n0-4*'
+      - '.github/workflows/erp-n0-4-ci.yml'
   pull_request:
     branches: [main]
     paths:

@@ -4,6 +4,18 @@ Bitácora colaborativa de cambios realizados por Javier Mejía, Codex, AntiG/Ant
 
 No reemplaza `git log`: registra intención, alcance, validaciones y handoff. Todo changeset intencional debe incluir una entrada breve; no modificar otros colaborativos si su contenido no cambió.
 
+## 2026-08-11 — VAEP-001: reducir ejecuciones CI redundantes en certificaciones ERP-N0
+
+**Responsable:** ChatGPT mediante conexión GitHub autorizada.
+
+**Objetivo:** evitar que los workflows históricos de certificación ERP-N0.2, N0.3, N0.4 y N0.5 consuman CI ante cambios exclusivamente frontend/documentales/no relacionados, sin reducir cobertura cuando cambien backend, tests, scripts propios o el workflow correspondiente.
+
+**Alcance:** se añadieron filtros `paths` al evento `push` de `.github/workflows/erp-n0-2-ci.yml`, `erp-n0-3-ci.yml`, `erp-n0-4-ci.yml` y `erp-n0-5-ci.yml`, alineándolos con sus filtros de `pull_request`. `workflow_dispatch` permanece intacto y el CI general `desarrollo-ci.yml` no se reduce.
+
+**Validación previa real:** se inspeccionaron los triggers existentes y se confirmó que N0.1 ya tenía `paths` en `push`, mientras N0.2–N0.5 ejecutaban en todo push a `Desarrollo`. La modificación conserva ejecución para `backend/src/**`, `backend/tests/**`, scripts ERP-N0 específicos y cambios del propio workflow. No se usó `[skip ci]` en este changeset porque modifica GitHub Actions.
+
+**Pendiente de cierre:** confirmar que GitHub acepta los YAML y observar las ejecuciones disparadas por el propio changeset antes de marcar `VAEP-001` como `LISTO`.
+
 ## 2026-08-11 — VAEP v2: Plan Maestro ERP V5 completo + cola granular
 
 **Responsable:** ChatGPT mediante conectores autorizados GitHub + Google Drive.
