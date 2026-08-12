@@ -1,4 +1,4 @@
-# PLAN DE EJECUCIÓN AUTÓNOMA — VAEP v2.1 FINISH_FIRST
+# PLAN DE EJECUCIÓN AUTÓNOMA — VAEP v2.2 EXECUTION_TRUTH
 
 > VariApp Autonomous Execution Protocol. Fuente rectora: **Plan Maestro ERP V5 — VariApp**. Fuente operativa: Google Sheets. Autoridad técnica y evidencia: GitHub `jmejia31/VariApp`, rama `Desarrollo`.
 
@@ -20,20 +20,15 @@ VAEP cubre ERP-N0→N9 y los tracks T0–T12. Las funcionalidades futuras no-cor
 
 El tablero contiene `DASHBOARD`, `COLA`, `PLAN_MAESTRO`, `CONFIG`, `BITACORA` y `LEYENDA`.
 
-## 3. Granularidad obligatoria
+## 3. Granularidad y calidad obligatorias
 
-Ningún agente debe resolver un punto ERP grande en un único changeset. Salvo descomposición específica, cada punto se divide en:
+Ningún agente debe resolver un punto ERP grande en un único changeset. Salvo descomposición específica, cada punto se divide en `PRE`, `DOMAIN`, `DB_MIG`, `BACKEND_API`, `FRONTEND_UX`, `SEC_AUDIT`, `TEST_CI` y `DOC_CERT` cuando apliquen.
 
-1. `PRE`: auditoría/preflight, alcance, riesgos, dependencias, rollback y criterios.
-2. `DOMAIN`: dominio, invariantes y contratos.
-3. `DB_MIG`: persistencia, constraints, índices, migración/backfill/reconciliación/rollback.
-4. `BACKEND_API`: aplicación, servicios, repositorios, DTOs y API.
-5. `FRONTEND_UX`: UI/UX, formularios, tablas, responsive, accesibilidad y permisos UI.
-6. `SEC_AUDIT`: RBAC, auditoría, seguridad y observabilidad.
-7. `TEST_CI`: unit/integration/contract/E2E/security/migration/performance tests y CI aplicable.
-8. `DOC_CERT`: documentación, evidencia, checkpoint, regresión y cierre.
+Si una microtarea sigue siendo demasiado grande, **debe subdividirse antes de editar**. Una microtarea representa un solo concern coherente y verificable.
 
-Si una microtarea sigue siendo demasiado grande, **debe subdividirse antes de editar**. Una microtarea debe representar un solo concern coherente y verificable.
+`RUNNER_QUALITY_MODE=COMPLETO_SIN_RECORTES`: está prohibido omitir, rebajar, simplificar artificialmente o diferir trabajo necesario solo para avanzar más rápido. Si una tarea exige un prerrequisito técnico accesible en `Desarrollo`, el Runner debe crearlo como hijo/prerrequisito, encadenar sus dependencias y resolverlo con criterio senior.
+
+Solo puede escalarse como bloqueo externo real aquello que ChatGPT no pueda resolver por falta de acceso/credencial externa indispensable, autorización humana/productiva obligatoria, recurso físico/externo inaccesible, decisión de negocio no inferible o una restricción explícita de seguridad/gobernanza. Todo bloqueo externo debe registrar rol/persona, acción exacta, evidencia, condición de retorno y lo intentado antes de escalar.
 
 ## 4. Máquina de estados
 
@@ -50,19 +45,33 @@ PENDIENTE -> EN_PROGRESO -> VALIDANDO -> LISTO
 
 Antes de cualquier lectura funcional, adquisición de tarea, modificación de Sheet, commit o validación:
 
-1. leer `RUNNER_MUTEX_STATE/TOKEN/HEARTBEAT/TASK/CI/TTL`;
+1. leer `RUNNER_MUTEX_STATE/TOKEN/HEARTBEAT/TASK/CI/TTL`, `RUNNER_ACTIVITY_STATE` y `RUNNER_LAST_REAL_ACTION_AT`;
 2. comprobar `COLA` y GitHub CI;
-3. si otra corrida está activa, abortar la nueva invocación antes de tocar trabajo;
-4. si el mutex está libre/recuperable, adquirirlo con token único y releerlo;
-5. renovar heartbeat como máximo cada 5 minutos y antes/después de escrituras críticas;
-6. antes de publicar, confirmar que el token sigue siendo propio;
-7. liberar solo el propio mutex y solo cuando no quede CI relacionado `QUEUED/IN_PROGRESS`.
+3. si otra corrida está realmente activa, abortar la nueva invocación antes de tocar trabajo;
+4. si el mutex está libre o recuperable, adquirirlo con token único y releerlo;
+5. antes de cualquier escritura crítica, confirmar que el token sigue siendo propio;
+6. nunca liberar ni reemplazar un mutex ajeno.
 
 Una invocación manual o programada superpuesta se autoaborta. Nunca pueden ejecutarse dos corridas efectivas simultáneamente.
 
+### 5.1 Execution Truth — mutex no equivale a actividad
+
+`RUNNER_MUTEX_STATE=RUNNING` **no es evidencia suficiente** para afirmar que ChatGPT sigue ejecutándose.
+
+La actividad real se clasifica mediante `RUNNER_ACTIVITY_STATE` y evidencia verificable:
+
+- `ACTIVE`: existe una invocación viva con `RUNNER_LAST_REAL_ACTION_AT` reciente y acciones reales de conector/código/estado;
+- `WAITING_CI`: la invocación puede haber terminado, pero existe CI relacionado realmente `QUEUED/IN_PROGRESS`; el lease solo protege ese trabajo;
+- `IDLE_PLATFORM_LIMIT`: la invocación terminó por límite real de plataforma/capacidad y dejó handoff exacto;
+- `IDLE`: no existe invocación activa ni CI relacionado ejecutándose.
+
+El heartbeat y `RUNNER_LAST_REAL_ACTION_AT` solo se renuevan al realizar una acción real: lectura/escritura de conector, inspección GitHub, reconciliación, cambio de estado, commit o validación. Está prohibido renovar heartbeat únicamente para aparentar actividad.
+
+Si heartbeat/last real action superan TTL y GitHub no muestra CI relacionado `QUEUED/IN_PROGRESS` ni existe progreso posterior en `COLA/BITACORA`, el lease propio es stale y debe recuperarse en la siguiente invocación.
+
 ## 6. Política de selección FINISH_FIRST
 
-Esta es la política obligatoria de selección desde 2026-08-12 y sustituye el comportamiento histórico de saltar entre puntos hermanos independientes.
+Esta es la política obligatoria de selección y sustituye el comportamiento histórico de saltar entre puntos hermanos independientes.
 
 ### 6.1 Reconciliar antes de abrir trabajo
 
@@ -73,13 +82,11 @@ En cada corrida:
 3. leer `CONFIG`, `COLA` y `BITACORA`;
 4. reconciliar contra GitHub **todas** las filas propias `EN_PROGRESO/VALIDANDO` antes de seleccionar nuevas `PENDIENTE`.
 
-Un lock `AGENTE=ChatGPT` perteneciente al Runner no se considera automáticamente “lock ajeno”. Si está stale debe reconciliarse/recuperarse conforme al lease y CI. Locks de Javier, Codex, AntiG/Antigravity u otro agente sí son concurrencia externa.
+Un lock `AGENTE=ChatGPT` perteneciente al Runner no es automáticamente “lock ajeno”. Si está stale debe reconciliarse/recuperarse conforme al lease y CI. Locks de Javier, Codex, AntiG/Antigravity u otro agente sí son concurrencia externa.
 
 ### 6.2 Punto padre foco
 
-El runner debe determinar el **PUNTO PADRE FOCO más antiguo ya iniciado y no cerrado dentro de la fase actual**.
-
-Ejemplo: si `N0.5` tiene hijos/subhijos abiertos, `N0.5` es el foco. El foco incluye toda su cadena requerida hasta cierre formal, no solo la microtarea actualmente visible.
+El Runner determina el **PUNTO PADRE FOCO más antiguo ya iniciado y no cerrado dentro de la fase actual**.
 
 Mientras exista un punto foco abierto:
 
@@ -90,50 +97,38 @@ Mientras exista un punto foco abierto:
 
 ### 6.3 Sin tope artificial de microtareas
 
-No existe un máximo fijo de 3 microtareas por corrida. El runner continúa dentro del mismo foco mientras gates, seguridad, tiempo y capacidad sigan verdes.
+No existe un máximo fijo de 3 microtareas por corrida. El Runner maximiza **trabajo real dentro de la invocación disponible** mientras gates, seguridad, tiempo y capacidad sigan verdes.
 
 Puede detenerse únicamente por:
 
-- CI relacionado aún activo y necesidad de esperar;
-- bloqueo técnico real;
-- dependencia pendiente no resoluble;
+- límite real de invocación/plataforma/capacidad;
+- CI relacionado todavía activo cuando la invocación ya no tenga capacidad para seguir reconciliándolo;
+- bloqueo externo real;
+- dependencia no resoluble;
 - gate fallido;
 - conflicto/concurrencia real;
-- autorización humana necesaria;
+- autorización humana obligatoria;
 - riesgo para `main` o Producción;
 - evidencia insuficiente;
-- límite real de tiempo/capacidad;
-- cierre completo del foco o ausencia de tareas elegibles dentro del foco.
+- cierre completo del foco o ausencia de tareas elegibles.
 
-### 6.4 Bloqueos no permiten abandonar el foco
+No existe garantía de un proceso ChatGPT residente durante toda la hora entre ejecuciones programadas. VAEP debe optimizar el trabajo dentro de cada invocación y dejar un handoff exacto; está prohibido fingir polling/background después de que la invocación haya terminado.
 
-Un `BLOQUEADO` dentro del punto foco **no autoriza saltar a un hermano independiente** para mantener throughput.
+### 6.4 Bloqueos y foco
 
-El runner debe:
-
-1. registrar causa/evidencia;
-2. no reintentar en bucle durante la misma corrida;
-3. conservar el mismo punto foco;
-4. detenerse y esperar nueva evidencia/condición;
-5. cambiar de foco solo cuando el actual quede `LISTO`/`CANCELADO` o Javier autorice expresamente el cambio.
-
-Esto evita árboles parcialmente abiertos y deuda operacional invisible.
+Un `BLOQUEADO` dentro del punto foco no autoriza saltar por conveniencia a un hermano. Un bloqueo externo real ya escalado puede permitir trabajo verdaderamente independiente y seguro siempre que no permita cerrar falsamente el padre/gate.
 
 ### 6.5 Reconciliación de padres
-
-Los estados padre deben reflejar a sus hijos:
 
 - hijo `EN_PROGRESO/VALIDANDO` → padre operativo `EN_PROGRESO`;
 - todos los hijos requeridos `LISTO` → padre puede cerrarse `LISTO` con evidencia;
 - bloqueo dependiente que impide cierre → documentar/propagar el bloqueo.
 
-No debe quedar un padre `EN_PROGRESO` abandonado mientras el runner abre otro árbol.
+No debe quedar un padre `EN_PROGRESO` abandonado mientras el Runner abre otro árbol.
 
 ### 6.6 Recuperación actual
 
-Mientras `CONFIG.RUNNER_CURRENT_RECOVERY_TARGET=N0.5`, el Runner debe recuperar y cerrar `N0.5` antes de abrir nuevo trabajo de `N0.6`. El trabajo ya válido realizado en `N0.6` se preserva y no se revierte; simplemente no se abren nuevas tareas allí hasta cerrar `N0.5`.
-
-Al cerrar el recovery target, `RUNNER_CURRENT_RECOVERY_TARGET` debe actualizarse al siguiente punto padre más antiguo ya iniciado y no cerrado, o quedar vacío si no existe.
+Mientras `CONFIG.RUNNER_CURRENT_RECOVERY_TARGET=N0.5`, el Runner debe recuperar y cerrar `N0.5` antes de abrir nuevo trabajo de `N0.6`. El trabajo ya válido de `N0.6` se preserva y no se revierte.
 
 ## 7. Ejecución de una microtarea
 
@@ -142,7 +137,7 @@ Dentro del punto foco:
 1. seleccionar solo tarea con dependencias directas/transitivas `LISTO` y ningún ancestro bloqueante;
 2. marcar `EN_PROGRESO` y agente/inicio antes de editar;
 3. limitar cambios a archivos objetivo y dependencias directas;
-4. no releer archivos ya documentados salvo que hayan cambiado;
+4. cumplir literalmente: **“No releer archivos ya documentados a menos que hayan cambiado.”**;
 5. pasar a `VALIDANDO` antes de validaciones finales;
 6. ejecutar validaciones reales proporcionales;
 7. publicar exclusivamente en `Desarrollo` por fast-forward y sin force-push;
@@ -150,11 +145,56 @@ Dentro del punto foco:
 9. registrar commit/validaciones en `COLA` y transición en `BITACORA`;
 10. marcar `LISTO` solo con evidencia suficiente.
 
-Nunca inventar pruebas, CI, despliegues o estados externos.
+Nunca inventar pruebas, CI, despliegues, actividad o estados externos.
 
-## 8. Gates de fase y orden estricto
+## 8. Continuidad anti-idle realista
 
-VAEP usa `GATE-N0` ... `GATE-N9`.
+`RUNNER_CONTINUITY_POLICY=NO_IDLE_WHILE_CAPACITY` y `RUNNER_TIME_BUDGET_POLICY=MAXIMIZAR_INVOCACION_REAL`.
+
+Mientras una invocación siga viva:
+
+- no puede terminar voluntariamente solo porque publicó un commit o inició CI si todavía dispone de capacidad real;
+- si CI está `QUEUED/IN_PROGRESS`, puede consultarlo nuevamente y renovar actividad solo cuando realmente realice esa consulta;
+- si CI termina `SUCCESS`, debe reconciliar/cerrar y continuar inmediatamente;
+- si CI termina `FAIL`, el fallo pasa a ser trabajo de la misma microtarea y debe inspeccionarse/corregirse dentro de la misma invocación cuando sea seguro;
+- si no hay CI activo y existe trabajo elegible/recuperable, una respuesta final normal está prohibida salvo una causa válida de detención.
+
+Si la plataforma termina o limita la invocación antes de poder continuar, la causa se registra como `PLATFORM_INVOCATION_LIMIT`; no debe presentarse la espera posterior como actividad de ChatGPT.
+
+## 9. Pre-final gate obligatorio
+
+Antes de **cualquier respuesta final** de una corrida que adquirió mutex, el Runner debe:
+
+1. releer token, hora, HEAD, `COLA`, CI y `RUNNER_LAST_REAL_ACTION_AT`;
+2. si no existe CI activo, existe trabajo elegible/recuperable y no existe una causa válida de detención: **respuesta final prohibida; continuar trabajando**;
+3. si existe CI activo y la invocación tiene capacidad, seguir reconciliándolo;
+4. si la invocación termina por límite real: persistir `ACTIVITY_STATE=IDLE_PLATFORM_LIMIT`, `STOP_REASON=PLATFORM_INVOCATION_LIMIT` y `RESUME_POINT` exacto; liberar mutex si no hay CI activo;
+5. si termina dejando CI activo: `ACTIVITY_STATE=WAITING_CI`, persistir CI/TASK/RESUME_POINT y conservar únicamente el lease protector;
+6. si termina por bloqueo externo, seguridad o ausencia real de elegibles: `ACTIVITY_STATE=IDLE`, persistir causa y punto de retorno y liberar mutex si no hay CI activo;
+7. toda detención con trabajo restante debe generar una **ALERTA DE CONTINUIDAD** con causa, tarea, último CI/evidencia, punto exacto de reanudación y próxima ventana conocida.
+
+Un heartbeat viejo nunca puede justificar afirmar al usuario que el Runner “sigue trabajando”.
+
+## 10. GitHub Actions — generación sí, push funcional con GITHUB_TOKEN no
+
+`RUNNER_FORBID_GITHUB_TOKEN_PUSH=OBLIGATORIO` y `RUNNER_CI_GENERATOR_MODE=ARTIFACT_ONLY_NO_PUSH`.
+
+Está prohibido crear o usar workflows temporales con `permissions: contents: write` para commitear/pushear cambios funcionales, migraciones o snapshots a `Desarrollo` mediante `GITHUB_TOKEN`.
+
+GitHub Actions puede:
+
+- compilar y probar;
+- ejecutar MySQL/integraciones;
+- generar SQL, migraciones, snapshots u otros artefactos;
+- publicar esos resultados como artifacts.
+
+El Runner debe descargar/inspeccionar el artifact y publicar el changeset final mediante el conector GitHub normal, confirmando HEAD y fast-forward.
+
+Si un CI aparece `completed/action_required` y no contiene jobs, no debe tratarse como fallo funcional ni espera pasiva. El Runner debe investigar inmediatamente la causa. Si se produjo después de un commit generado desde un workflow/GITHUB_TOKEN, debe retirar el mecanismo escritor temporal y publicar la siguiente sincronización mediante el conector GitHub normal para recuperar CI ordinario. Solo se escala a Javier cuando GitHub requiera una aprobación que no pueda evitarse de forma técnica segura.
+
+## 11. Gates de fase y orden estricto
+
+VAEP usa `GATE-N0` ... `GATE-N9`:
 
 ```text
 GATE-N0 -> ERP-N1 -> GATE-N1 -> ERP-N2 -> GATE-N2 -> ERP-N3 ->
@@ -164,9 +204,9 @@ GATE-N6 -> ERP-N7 -> GATE-N7 -> ERP-N8 -> GATE-N8 -> ERP-N9 -> GATE-N9
 
 Los gates aplican Definition of Done global: backend/frontend, migraciones, tests, E2E relevantes, seguridad, permisos, auditoría, backfill/reconciliación, rollback, documentación, evidencia y cero P0/P1 abiertos. Una fase no se cierra solo porque compile.
 
-## 9. Estado especializado ERP-N0.5 — MetodoPago
+## 12. Estado especializado ERP-N0.5 — MetodoPago
 
-La cadena N0.5 se gobierna como un único punto foco hasta su cierre formal. El orden operativo vigente es:
+La cadena N0.5 se gobierna como un único punto foco hasta su cierre formal:
 
 ```text
 N0.5.07B1 -> N0.5.07B2 -> N0.5.07C -> cerrar N0.5.07 ->
@@ -174,49 +214,40 @@ N0.5.08 -> N0.5.09/N0.5.10/N0.5.11 -> N0.5.12 ->
 N0.5.13 -> N0.5.14 -> N0.5.15
 ```
 
-`N0.5.07A` ya está certificado. `N0.5.13` debe reconciliar primero el workflow histórico existente; está prohibido duplicar workflows por confiar ciegamente en estados desactualizados.
+`N0.5.07A` y `N0.5.07B1` ya están certificados. `N0.5.07B2` permanece `VALIDANDO` hasta certificar Banco normalizado, FK/snapshots, fail-closed y migración/snapshot EF sin drift. `N0.5.13` debe reconciliar primero el workflow histórico existente; está prohibido duplicar workflows por confiar en estados desactualizados.
 
-## 10. Concurrencia y publicación
+## 13. Concurrencia y publicación
 
 - Antes de publicar, confirmar HEAD remoto y mutex propio.
 - Preservar commits de Codex, AntiG y otros agentes.
 - Nunca force-push.
 - No crear ramas nuevas.
-- Si existe conflicto real no resoluble de forma dirigida: registrar evidencia y detener el foco; no abrir un hermano para esquivar el conflicto.
+- Si existe conflicto real no resoluble de forma dirigida: registrar evidencia y detener el foco; no abrir un hermano para esquivarlo.
 
-## 11. Evidencia obligatoria
+## 14. Evidencia obligatoria
 
 Cada changeset intencional debe actualizar `CHANGELOG_AI.md`. `TASKS.md` cambia cuando cambia estado/bloqueo/pendiente. Contexto/índice/arquitectura solo si cambia la realidad que documentan.
 
 Para `LISTO`, según aplique deben existir commit SHA, validaciones reales, `COLA` actualizada y transición en `BITACORA`.
 
-## 12. Seguridad y Producción
+## 15. Seguridad y Producción
 
 VAEP no autoriza tocar `main`, fusionar PR #2, habilitar auto-merge, crear ramas nuevas, modificar Producción, secretos, variables, credenciales, bases, dominios, servicios, activos o ejecutar migraciones productivas.
 
 ERP-N9.4 y cualquier operación productiva permanecen bloqueadas hasta autorización expresa de Javier.
 
-## 13. Informe de cierre
+## 16. Informe de cierre
 
-Cada corrida que adquirió mutex produce un único informe consolidado al final, con:
-
-- proyecto/repo/rama y HEAD inicial/final;
-- microtareas procesadas y evidencia;
-- validaciones/CI reales;
-- bloqueos/riesgos;
-- punto foco actual y progreso restante;
-- siguiente elegible dentro del foco;
-- motivo exacto de detención;
-- estado de seguridad de `main`, Producción y PR #2.
+Cada corrida que adquirió mutex produce un único informe consolidado al final, con proyecto/repo/rama y HEAD inicial/final; microtareas procesadas y evidencia; validaciones/CI reales; bloqueos/riesgos; punto foco; siguiente elegible; motivo exacto de detención; actividad real (`ACTIVE`, `WAITING_CI`, `IDLE_PLATFORM_LIMIT` o `IDLE`); y estado de seguridad de `main`, Producción y PR #2.
 
 Una invocación rechazada por mutex muestra únicamente la alerta breve de concurrencia.
 
-## 14. Opción manual
+## 17. Opción manual
 
-Mientras exista mutex `RUNNING`, lease activo o CI relacionado `QUEUED/IN_PROGRESS`, el Runner no debe invitar al usuario a ejecutar manualmente. Si la UI nativa muestra el botón de todos modos, el mutex impide que esa pulsación produzca una segunda ejecución efectiva.
+Mientras exista actividad real, lease vigente o CI relacionado `QUEUED/IN_PROGRESS`, el Runner no debe invitar al usuario a ejecutar manualmente. Si la UI nativa muestra el botón de todos modos, el mutex impide que esa pulsación produzca una segunda ejecución efectiva.
 
-## 15. Qué debe hacer Javier
+## 18. Qué debe hacer Javier
 
-Para trabajo ya incluido en ERP V5: **nada**. No necesita escribir “continúa”. El Runner debe retomar el punto foco y seguir hasta un bloqueo real o cierre.
+Para trabajo ya incluido en ERP V5: **nada**. No necesita escribir “continúa”. El Runner debe retomar el punto foco y seguir hasta un bloqueo real, límite verificable de invocación o cierre.
 
 Para trabajo nuevo fuera del Plan Maestro, se requiere incorporación explícita a la cola/plan conforme a gobierno vigente.
