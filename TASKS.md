@@ -19,7 +19,7 @@ Fuente resumida de pendientes. El detalle operativo vive en VAEP v2; no duplicar
 - [x] Plan Maestro original convertido a Google Docs como fuente rectora permanente para el runner.
 - [x] Cola granular v2 creada con 778 microtareas y 131 filas de plan/gobierno.
 - [ ] Javier/Codex/AntiG: sincronizar checkout local y ejecutar `scripts/configurar-colaboracion.ps1` cuando corresponda.
-- [ ] `VAEP-001`: optimizar triggers redundantes de GitHub Actions sin reducir cobertura necesaria.
+- [x] `VAEP-001`: optimizar triggers redundantes de GitHub Actions sin reducir cobertura necesaria. Cerrado en `d2466a3047e7cd2001f1cf998faa08c4ae229c1b`.
 
 ## ERP-N0.5 — MetodoPago
 
