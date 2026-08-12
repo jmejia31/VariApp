@@ -4,6 +4,18 @@ Bitácora colaborativa de cambios realizados por Javier Mejía, Codex, AntiG/Ant
 
 No reemplaza `git log`: registra intención, alcance, validaciones y handoff. Todo changeset intencional debe incluir una entrada breve; no modificar otros colaborativos si su contenido no cambió.
 
+## 2026-08-11 — N0.5.06 A2: escrituras de Venta migradas a MetodoPago relacional
+
+**Responsable:** ChatGPT mediante conexión GitHub autorizada.
+
+**Resultado:** microtarea A2 `LISTO`. El commit funcional `32feca8840122c7eccd58246a6db7196730d8491` migró `VentaService.CreateAsync/UpdateAsync`: el texto temporal del DTO se resuelve contra el catálogo persistente mediante `IVentaRepository.GetMetodoPagoPorCodigoONombreAsync`, se establecen `MetodoPagoId` y `MetodoPagoCatalogo`, y el enum legacy queda únicamente como proyección de compatibilidad derivada. Un método inexistente o vacío produce `BusinessRuleException`; ya no existe fallback silencioso de método desconocido a `Efectivo`.
+
+**Pruebas dirigidas:** `e00e20c614c8c66c34f726c82ef4922d48dc21d8` añadió `VentaMetodoPagoServiceTests` para creación con FK/navegación, rechazo de método inexistente y actualización hacia catálogo relacional.
+
+**Validación real:** workflow `ERP-N0.5 - Certificación MetodoPago histórico` run `31566179324`: etapa `Restaurar, compilar y probar backend` completada `success`, incluyendo las pruebas nuevas; también completaron correctamente creación de esquema, historia representativa, fail-closed y preflight mientras el resto de la certificación histórica continuaba. CI general run `31566179269` fue generado para el mismo SHA; Docker e higiene ya estaban `success` al cierre operativo de A2. No se atribuye todavía resultado final a pasos que seguían en ejecución.
+
+**Control:** A2 no cambia migraciones ni contratos HTTP; `CreateVentaDto/UpdateVentaDto.MetodoPago` sigue siendo adaptador string temporal. N0.5.06 no está cerrado: A3 debe migrar lectura de `VentaDto` y propagación automática hacia `MovimientoFinanciero` para que tampoco tomen decisiones desde `Venta.MetodoPago` legacy.
+
 ## 2026-08-11 — Cierre N0.5.06 A1: repositorio Venta preparado para MetodoPago relacional
 
 **Responsable:** ChatGPT mediante conexión GitHub autorizada.
@@ -24,7 +36,7 @@ No reemplaza `git log`: registra intención, alcance, validaciones y handoff. To
 
 **Alcance funcional de A1:**
 
-- `IVentaRepository` expone resolución de `MetodoPago` por código o nombre;
+- `IVentaRepository` expone resolución de `MetodoPago` por código/nombre;
 - `VentaRepository` carga `MetodoPagoCatalogo` en consultas operativas normales;
 - la lectura transaccional `FOR UPDATE` carga explícitamente la navegación `MetodoPagoCatalogo`;
 - se añade resolución dirigida contra el catálogo persistente excluyendo registros eliminados;
