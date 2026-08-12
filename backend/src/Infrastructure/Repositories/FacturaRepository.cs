@@ -80,7 +80,7 @@ public class FacturaRepository : IFacturaRepository
     public async Task<CatalogoMetodoPago?> GetMetodoPagoPorCodigoONombreAsync(string valor)
     {
         var normalizado = valor.Trim().ToUpper();
-        return await _context.MetodosPago
+        return await _context.Set<CatalogoMetodoPago>()
             .AsNoTracking()
             .FirstOrDefaultAsync(m => !m.Eliminado &&
                 (m.Codigo.ToUpper() == normalizado || m.Nombre.ToUpper() == normalizado));
