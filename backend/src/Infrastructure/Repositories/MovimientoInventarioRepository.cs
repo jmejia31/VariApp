@@ -51,8 +51,6 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
 
         if (!string.IsNullOrWhiteSpace(tipo))
         {
-            // EF/Pomelo no traduce Enum.ToString() dentro del IQueryable. Resolver el
-            // valor antes de construir el predicado mantiene el filtro 100% SQL.
             if (Enum.TryParse<TipoMovimientoInventario>(tipo.Trim(), ignoreCase: true, out var tipoMovimiento) &&
                 Enum.IsDefined(tipoMovimiento))
             {
@@ -60,8 +58,6 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
             }
             else
             {
-                // Un filtro desconocido no debe provocar 500 ni convertirse en un
-                // filtro abierto: devuelve un conjunto vacío de forma fail-closed.
                 query = query.Where(_ => false);
             }
         }
@@ -71,11 +67,27 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
         return await query.OrderByDescending(m => m.Fecha).Take(200).ToListAsync();
     }
 
-    public async Task<int?> GetUltimoMovimientoOriginalCompraIdAsync(int compraId) =>
-        await _context.MovimientosInventario
+    public async Task<int?> GetUltimoMovimientoOriginalCompraIdAsync(int compraId)
+    {
+        if (!_context.Database.IsRelational())
+        {
+            // El provider InMemory de las pruebas unitarias no admite FromSql.
+            // Produccion/MySQL usa exclusivamente CompraId como autoridad de origen.
+            return await _context.MovimientosInventario
+                .AsNoTracking()
+                .Where(m =>
+                    m.ReferenciaTipo == "Compra" &&
+                    m.ReferenciaId == compraId &&
+                    m.Tipo == TipoMovimientoInventario.Entrada)
+                .MaxAsync(m => (int?)m.Id);
+        }
+
+        return await _context.MovimientosInventario
+            .FromSqlInterpolated($"SELECT * FROM MovimientosInventario WHERE CompraId = {compraId}")
             .AsNoTracking()
-            .Where(m => m.ReferenciaTipo == "Compra" && m.ReferenciaId == compraId)
+            .Where(m => m.Tipo == TipoMovimientoInventario.Entrada)
             .MaxAsync(m => (int?)m.Id);
+    }
 
     public async Task<bool> ExisteMovimientoPosteriorAsync(
         int ultimoMovimientoOriginalId,
@@ -84,22 +96,79 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
         var ids = productoIds.Distinct().OrderBy(x => x).ToArray();
         if (ids.Length == 0) return false;
 
+        if (!_context.Database.IsRelational())
+            return await ExisteMovimientoPosteriorLegacyParaProviderNoRelacionalAsync(ultimoMovimientoOriginalId, ids);
+
+        var movimientoTopeEsCompra = await _context.MovimientosInventario
+            .FromSqlInterpolated($"SELECT * FROM MovimientosInventario WHERE Id = {ultimoMovimientoOriginalId} AND CompraId IS NOT NULL")
+            .AsNoTracking()
+            .Where(m => m.Tipo == TipoMovimientoInventario.Entrada)
+            .AnyAsync();
+
+        if (!movimientoTopeEsCompra)
+            throw new InvalidOperationException(
+                "El movimiento limite no corresponde a un movimiento original de compra tipado.");
+
+        // C2/C3 certificaron CompraId en la base de datos antes de mapearla al modelo EF.
+        // Esta consulta usa directamente esa FK tipada y deja de tomar decisiones con
+        // ReferenciaTipo/ReferenciaId. D2 retirara el bridge transitorio al migrar productores.
+        var clavesOriginales = await _context.MovimientosInventario
+            .FromSqlInterpolated($"""
+                SELECT m.*
+                  FROM MovimientosInventario m
+                  JOIN MovimientosInventario limite ON limite.Id = {ultimoMovimientoOriginalId}
+                 WHERE limite.CompraId IS NOT NULL
+                   AND limite.Tipo = 'Entrada'
+                   AND m.CompraId = limite.CompraId
+                   AND m.Tipo = 'Entrada'
+                """)
+            .AsNoTracking()
+            .Where(m => ids.Contains(m.ProductoId))
+            .Select(m => new { m.ProductoId, m.ProductoVarianteId })
+            .Distinct()
+            .OrderBy(x => x.ProductoId)
+            .ThenBy(x => x.ProductoVarianteId)
+            .ToListAsync();
+
+        foreach (var clave in clavesOriginales)
+        {
+            if (await _context.MovimientosInventario
+                .AsNoTracking()
+                .AnyAsync(m =>
+                    m.Id > ultimoMovimientoOriginalId &&
+                    m.ProductoId == clave.ProductoId &&
+                    m.ProductoVarianteId == clave.ProductoVarianteId))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private async Task<bool> ExisteMovimientoPosteriorLegacyParaProviderNoRelacionalAsync(
+        int ultimoMovimientoOriginalId,
+        IReadOnlyCollection<int> productoIds)
+    {
         var movimientoTope = await _context.MovimientosInventario
             .AsNoTracking()
-            .Where(m => m.Id == ultimoMovimientoOriginalId && m.ReferenciaTipo == "Compra")
+            .Where(m =>
+                m.Id == ultimoMovimientoOriginalId &&
+                m.ReferenciaTipo == "Compra" &&
+                m.Tipo == TipoMovimientoInventario.Entrada)
             .Select(m => new { m.ReferenciaId })
             .SingleOrDefaultAsync();
 
         if (movimientoTope is null)
             throw new InvalidOperationException(
-                "El movimiento límite no corresponde a un movimiento original de compra.");
+                "El movimiento limite no corresponde a un movimiento original de compra.");
 
         var clavesOriginales = await _context.MovimientosInventario
             .AsNoTracking()
             .Where(m =>
                 m.ReferenciaTipo == "Compra" &&
                 m.ReferenciaId == movimientoTope.ReferenciaId &&
-                ids.Contains(m.ProductoId))
+                productoIds.Contains(m.ProductoId))
             .Select(m => new { m.ProductoId, m.ProductoVarianteId })
             .Distinct()
             .OrderBy(x => x.ProductoId)
