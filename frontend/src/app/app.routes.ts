@@ -3,7 +3,14 @@ import { authGuard } from './core/guards/auth.guard';
 import { permisoGuard } from './core/guards/permiso.guard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+  {
+    path: '',
+    loadComponent: () => import('./features/varistorehn/varistorehn.component').then(m => m.VaristorehnComponent)
+  },
+  {
+    path: 'varistorehn',
+    loadComponent: () => import('./features/varistorehn/varistorehn.component').then(m => m.VaristorehnComponent)
+  },
   {
     path: 'login',
     loadComponent: () => import('./features/login/login.component').then(m => m.LoginComponent)
@@ -319,5 +326,5 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./features/perfil/perfil.component').then(m => m.PerfilComponent)
   },
-  { path: '**', redirectTo: 'dashboard' }
+  { path: '**', redirectTo: '' }
 ];

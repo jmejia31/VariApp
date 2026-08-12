@@ -1,0 +1,119 @@
+<div class="storefront">
+  <nav class="navbar" aria-label="Navegación de la tienda">
+    <a class="logo" href="#inicio" aria-label="VARISTOREHN inicio">VARISTORE<span>HN</span></a>
+    <div class="nav-links">
+      <a href="#inicio">Inicio</a>
+      <a href="#tienda">Tienda</a>
+      <a href="#nosotros">Nosotros</a>
+    </div>
+    <button class="cart-button" type="button" (click)="carritoAbierto.set(true)" aria-label="Abrir carrito">
+      <span aria-hidden="true">🛒</span>
+      <strong>{{ totalUnidades() }}</strong>
+    </button>
+  </nav>
+
+  <header id="inicio" class="hero">
+    <div class="hero-content">
+      <p class="eyebrow">PREMIUM LIFESTYLE</p>
+      <h1>Estilo que define tu <span>esencia</span></h1>
+      <p>Descubre nuestra colección exclusiva de accesorios y gadgets de alta gama.</p>
+      <a class="primary-button" href="#tienda">Ver colección</a>
+    </div>
+  </header>
+
+  <main>
+    <section id="tienda" class="products-section">
+      <div class="section-header">
+        <p>COLECCIÓN</p>
+        <h2>Nuestros productos exclusivos</h2>
+        <span></span>
+      </div>
+
+      @if (cargando()) {
+        <p class="catalog-state">Cargando productos...</p>
+      } @else if (errorCatalogo()) {
+        <p class="catalog-state error">{{ errorCatalogo() }}</p>
+      } @else if (productos().length === 0) {
+        <p class="catalog-state">No hay productos activos disponibles en este momento.</p>
+      }
+
+      <div class="product-grid">
+        @for (producto of productos(); track producto.id) {
+          <article class="product-card">
+            <div class="product-image">
+              @if (producto.imagenes.length > 0) {
+                <img [src]="producto.imagenes[indiceImagen(producto.id)]" [alt]="producto.nombre">
+                @if (producto.imagenes.length > 1) {
+                  <button class="gallery-button previous" type="button" (click)="moverImagen(producto, -1)" aria-label="Imagen anterior">‹</button>
+                  <button class="gallery-button next" type="button" (click)="moverImagen(producto, 1)" aria-label="Imagen siguiente">›</button>
+                  <div class="dots">
+                    @for (imagen of producto.imagenes; track imagen; let indice = $index) {
+                      <button type="button" [class.active]="indiceImagen(producto.id) === indice" (click)="mostrarImagen(producto.id, indice)" [attr.aria-label]="'Mostrar imagen ' + (indice + 1)"></button>
+                    }
+                  </div>
+                }
+              } @else {
+                <div class="image-placeholder" aria-hidden="true">{{ producto.nombre.charAt(0) }}</div>
+              }
+              @if (!producto.disponible) { <span class="sold-out">Agotado</span> }
+            </div>
+            <div class="product-info">
+              <p class="category">{{ producto.categoria }}</p>
+              <h3>{{ producto.nombre }}</h3>
+              <p class="description">{{ producto.descripcion }}</p>
+              <div class="product-footer">
+                <strong>L {{ producto.precio | number:'1.2-2' }}</strong>
+                <button type="button" (click)="agregar(producto)" [disabled]="!producto.disponible" [attr.aria-label]="'Agregar ' + producto.nombre">+</button>
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+    </section>
+
+    <section id="nosotros" class="about-section">
+      <div class="section-header">
+        <p>NUESTRA HISTORIA</p>
+        <h2>Nosotros</h2>
+        <span></span>
+      </div>
+      <p>En <strong>VARISTOREHN</strong> nos dedicamos a traer lo último en tecnología y moda para elevar tu estilo de vida.</p>
+      <div class="social-links">
+        <a href="https://www.tiktok.com/@varistorehn" target="_blank" rel="noopener noreferrer">TikTok</a>
+        <a href="https://www.facebook.com/varistorehn" target="_blank" rel="noopener noreferrer">Facebook</a>
+        <a href="https://www.instagram.com/varistorehn" target="_blank" rel="noopener noreferrer">Instagram</a>
+      </div>
+      <strong>@@VARISTOREHN</strong>
+    </section>
+  </main>
+
+  <footer>© 2026 VARISTOREHN. Todos los derechos reservados.</footer>
+
+  @if (carritoAbierto()) {
+    <button class="cart-overlay" type="button" (click)="carritoAbierto.set(false)" aria-label="Cerrar carrito"></button>
+    <aside class="cart-panel" aria-label="Tu carrito">
+      <header>
+        <h2>Tu carrito</h2>
+        <button type="button" (click)="carritoAbierto.set(false)" aria-label="Cerrar carrito">×</button>
+      </header>
+      <div class="cart-items">
+        @for (item of carrito(); track item.id) {
+          <article class="cart-item">
+            <div><strong>{{ item.nombre }}</strong><small>L {{ item.precio | number:'1.2-2' }}</small></div>
+            <div class="quantity">
+              <button type="button" (click)="cambiarUnidades(item.id, -1)">−</button>
+              <span>{{ item.unidades }}</span>
+              <button type="button" (click)="cambiarUnidades(item.id, 1)">+</button>
+            </div>
+          </article>
+        } @empty {
+          <p class="empty-cart">Tu carrito está vacío.</p>
+        }
+      </div>
+      <div class="cart-footer">
+        <p><span>Total</span><strong>L {{ totalCarrito() | number:'1.2-2' }}</strong></p>
+        <button class="primary-button" type="button" (click)="realizarPedido()" [disabled]="carrito().length === 0">Realizar pedido por WhatsApp</button>
+      </div>
+    </aside>
+  }
+</div>
