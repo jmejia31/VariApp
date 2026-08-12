@@ -97,11 +97,18 @@ public class ConsumoInsumoIntegrationTests
             Assert.Equal(0, await context.MovimientosFinancieros.CountAsync());
 
             var movimientoConfirmacion = await context.MovimientosInventario.SingleAsync(
-                m => m.ConsumoInsumoId == borrador.Id && m.Causa == CausaMovimientoInventario.ConsumoAdministrativo);
-            Assert.Null(movimientoConfirmacion.CompraId);
-            Assert.Null(movimientoConfirmacion.VentaId);
-            Assert.Equal("ConsumoInsumo", movimientoConfirmacion.ReferenciaTipo);
-            Assert.Equal(borrador.Id, movimientoConfirmacion.ReferenciaId);
+                m => m.ReferenciaTipo == "ConsumoInsumo" &&
+                     m.ReferenciaId == borrador.Id &&
+                     m.Causa == CausaMovimientoInventario.ConsumoAdministrativo);
+            var origenTipadoConfirmacion = await context.Database.SqlQueryInterpolated<int>($"""
+                SELECT COUNT(*) AS Value
+                  FROM MovimientosInventario
+                 WHERE Id = {movimientoConfirmacion.Id}
+                   AND ConsumoInsumoId = {borrador.Id}
+                   AND CompraId IS NULL
+                   AND VentaId IS NULL
+                """).SingleAsync();
+            Assert.Equal(1, origenTipadoConfirmacion);
 
             await Assert.ThrowsAsync<BusinessRuleException>(() => service.ConfirmarAsync(borrador.Id));
 
@@ -117,11 +124,18 @@ public class ConsumoInsumoIntegrationTests
             Assert.Equal(0, await context.MovimientosFinancieros.CountAsync());
 
             var movimientoReversion = await context.MovimientosInventario.SingleAsync(
-                m => m.ConsumoInsumoId == borrador.Id && m.Causa == CausaMovimientoInventario.ReversionConsumo);
-            Assert.Null(movimientoReversion.CompraId);
-            Assert.Null(movimientoReversion.VentaId);
-            Assert.Equal("ConsumoInsumo", movimientoReversion.ReferenciaTipo);
-            Assert.Equal(borrador.Id, movimientoReversion.ReferenciaId);
+                m => m.ReferenciaTipo == "ConsumoInsumo" &&
+                     m.ReferenciaId == borrador.Id &&
+                     m.Causa == CausaMovimientoInventario.ReversionConsumo);
+            var origenTipadoReversion = await context.Database.SqlQueryInterpolated<int>($"""
+                SELECT COUNT(*) AS Value
+                  FROM MovimientosInventario
+                 WHERE Id = {movimientoReversion.Id}
+                   AND ConsumoInsumoId = {borrador.Id}
+                   AND CompraId IS NULL
+                   AND VentaId IS NULL
+                """).SingleAsync();
+            Assert.Equal(1, origenTipadoReversion);
         }
         finally
         {
