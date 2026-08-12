@@ -95,7 +95,13 @@ public class ConsumoInsumoIntegrationTests
             Assert.Equal(3, productoConfirmado.Cantidad);
             Assert.Equal(3, varianteConfirmada.Cantidad);
             Assert.Equal(0, await context.MovimientosFinancieros.CountAsync());
-            Assert.Single(await context.MovimientosInventario.Where(m => m.ReferenciaTipo == "ConsumoInsumo" && m.ReferenciaId == borrador.Id && m.Causa == CausaMovimientoInventario.ConsumoAdministrativo).ToListAsync());
+
+            var movimientoConfirmacion = await context.MovimientosInventario.SingleAsync(
+                m => m.ConsumoInsumoId == borrador.Id && m.Causa == CausaMovimientoInventario.ConsumoAdministrativo);
+            Assert.Null(movimientoConfirmacion.CompraId);
+            Assert.Null(movimientoConfirmacion.VentaId);
+            Assert.Equal("ConsumoInsumo", movimientoConfirmacion.ReferenciaTipo);
+            Assert.Equal(borrador.Id, movimientoConfirmacion.ReferenciaId);
 
             await Assert.ThrowsAsync<BusinessRuleException>(() => service.ConfirmarAsync(borrador.Id));
 
@@ -109,7 +115,13 @@ public class ConsumoInsumoIntegrationTests
             Assert.Equal(5, productoAnulado.Cantidad);
             Assert.Equal(5, varianteAnulada.Cantidad);
             Assert.Equal(0, await context.MovimientosFinancieros.CountAsync());
-            Assert.Single(await context.MovimientosInventario.Where(m => m.ReferenciaTipo == "ConsumoInsumo" && m.ReferenciaId == borrador.Id && m.Causa == CausaMovimientoInventario.ReversionConsumo).ToListAsync());
+
+            var movimientoReversion = await context.MovimientosInventario.SingleAsync(
+                m => m.ConsumoInsumoId == borrador.Id && m.Causa == CausaMovimientoInventario.ReversionConsumo);
+            Assert.Null(movimientoReversion.CompraId);
+            Assert.Null(movimientoReversion.VentaId);
+            Assert.Equal("ConsumoInsumo", movimientoReversion.ReferenciaTipo);
+            Assert.Equal(borrador.Id, movimientoReversion.ReferenciaId);
         }
         finally
         {
