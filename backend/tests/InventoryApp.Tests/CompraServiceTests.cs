@@ -3,6 +3,7 @@ using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Application.Services;
+using InventoryApp.Domain.Common;
 using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Enums;
 using Moq;
@@ -109,7 +110,10 @@ public class CompraServiceTests
         Assert.Equal("Confirmada", resultado!.Estado);
         Assert.Equal(3, compra.ConfirmadoPorUsuarioId);
         Assert.Equal("comprador1", compra.ConfirmadoPorNombreUsuario);
-        _movInvRepoMock.Verify(r => r.AddAsync(It.Is<MovimientoInventario>(m => m.Tipo == TipoMovimientoInventario.Entrada && m.Cantidad == 5)), Times.Once);
+        _movInvRepoMock.Verify(r => r.AddConOrigenTipadoAsync(
+            It.Is<MovimientoInventario>(m => m.Tipo == TipoMovimientoInventario.Entrada && m.Cantidad == 5),
+            It.Is<OrigenMovimientoInventario>(o => o.CompraId == compra.Id && o.VentaId == null && o.ConsumoInsumoId == null)), Times.Once);
+        _movInvRepoMock.Verify(r => r.AddAsync(It.IsAny<MovimientoInventario>()), Times.Never);
     }
 
     [Fact]
@@ -125,8 +129,9 @@ public class CompraServiceTests
         Assert.Equal(8, variante.Cantidad);
         Assert.Equal(15, producto.Cantidad);
         Assert.Equal("M185-BLK", resultado!.Detalles.Single().ProductoSku);
-        _movInvRepoMock.Verify(r => r.AddAsync(It.Is<MovimientoInventario>(m =>
-            m.ProductoVarianteId == 8 && m.StockAnterior == 3 && m.StockNuevo == 8)), Times.Once);
+        _movInvRepoMock.Verify(r => r.AddConOrigenTipadoAsync(
+            It.Is<MovimientoInventario>(m => m.ProductoVarianteId == 8 && m.StockAnterior == 3 && m.StockNuevo == 8),
+            It.Is<OrigenMovimientoInventario>(o => o.CompraId == compra.Id)), Times.Once);
     }
 
     [Fact]
@@ -150,6 +155,9 @@ public class CompraServiceTests
         Assert.Equal("Anulada", resultado!.Estado);
         Assert.Equal("Producto dañado devuelto al proveedor", compra.MotivoAnulacion);
         Assert.Equal(3, compra.AnuladoPorUsuarioId);
+        _movInvRepoMock.Verify(r => r.AddConOrigenTipadoAsync(
+            It.Is<MovimientoInventario>(m => m.Causa == CausaMovimientoInventario.AnulacionCompra && m.Tipo == TipoMovimientoInventario.Salida),
+            It.Is<OrigenMovimientoInventario>(o => o.CompraId == compra.Id)), Times.Once);
     }
 
     [Fact]
