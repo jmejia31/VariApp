@@ -4,13 +4,25 @@ Bitácora colaborativa de cambios realizados por Javier Mejía, Codex, AntiG/Ant
 
 No reemplaza `git log`: registra intención, alcance, validaciones y handoff. Todo changeset intencional debe incluir una entrada breve; no modificar otros colaborativos si su contenido no cambió.
 
+## 2026-08-12 — VAEP v2.2 EXECUTION_TRUTH + CI sin push funcional de GITHUB_TOKEN — CONFIGURADO
+
+**Responsable:** ChatGPT mediante conectores autorizados GitHub + Google Drive + Programación.
+
+**Problema detectado:** la corrida programada de las 13:02 terminó después de publicar la reparación EF, pero `RUNNER_MUTEX_STATE` quedó `RUNNING` con heartbeat 13:03, lo que podía confundirse con actividad real. Además, la reparación canónica de `N0.5.07B2` fue publicada por el workflow temporal `vaep-ef-snapshot-repair.yml` con `permissions: contents: write`; el HEAD `fc2ca060bbc7eefd84ead93ea370b292e3e200f2` quedó técnicamente actualizado, pero los workflows `pull_request` asociados aparecieron `action_required` y sin jobs, por lo que no constituyen evidencia de fallo funcional ni de CI ejecutado.
+
+**Corrección de gobierno:** `PLAN_EJECUCION_AUTONOMA.md` evoluciona a VAEP v2.2 `EXECUTION_TRUTH`: el mutex deja de ser equivalente a actividad; se incorporan `RUNNER_ACTIVITY_STATE`, `RUNNER_LAST_REAL_ACTION_AT`, `STOP_REASON`, `RESUME_POINT` y un PRE-FINAL GATE obligatorio. Una respuesta final queda prohibida cuando la invocación todavía tiene capacidad, no hay CI activo y existe trabajo recuperable. Si la plataforma termina la invocación, debe declararse `IDLE_PLATFORM_LIMIT`/`WAITING_CI` según corresponda en vez de fingir ejecución continua.
+
+**Corrección CI:** queda prohibido usar workflows temporales con `contents: write` para commitear/pushear cambios funcionales o migraciones mediante `GITHUB_TOKEN`. Actions podrá generar artefactos, pero la publicación final debe realizarla el Runner mediante el conector GitHub normal y fast-forward. `action_required` con jobs vacíos debe investigarse inmediatamente y no dejarse esperando hasta la siguiente hora.
+
+**Continuidad B2:** `N0.5.07B2` continúa `VALIDANDO`; el snapshot/migración EF canónicos de Banco permanecen en `fc2ca060...`. El siguiente changeset operativo retira el workflow temporal escritor mediante el conector GitHub normal para provocar una sincronización ordinaria del PR y obtener CI real. No se toca `main`, Producción, merge/auto-merge de PR #2, force-push ni ramas nuevas.
+
 ## 2026-08-12 — VAEP v2.1 FINISH_FIRST: cerrar árbol foco antes de abrir hermanos
 
 **Responsable:** ChatGPT mediante conectores autorizados GitHub + Google Drive + Programación.
 
 **Objetivo/alcance:** corregir la selección que permitía dejar `N0.5` parcialmente abierto mientras el runner avanzaba `N0.6`. Se alinea `PLAN_EJECUCION_AUTONOMA.md`, `CONFIG` y el prompt de `VariApp VAEP v2 Runner` para priorizar el punto padre más antiguo ya iniciado y terminar todos sus hijos/subhijos antes de abrir un hermano.
 
-**Cambios de gobierno:** `MAX_MICROTAREAS_POR_CORRIDA=SIN_TOPE_FIJO`; `REGLA_BLOQUEO=NO_SALTAR_ARBOL_FOCO`; política `RUNNER_SELECTION_POLICY=FINISH_FIRST`; locks propios stale deben reconciliarse/recuperarse; padres deben reflejar estado de hijos; un bloqueo real conserva el foco y detiene la corrida en vez de saltar a otra línea. `RUNNER_CURRENT_RECOVERY_TARGET=N0.5` congela nuevas aperturas de N0.6 hasta cerrar N0.5, preservando intacto todo lo ya certificado en N0.6.
+**Cambios de gobierno:** `MAX_MICROTAREAS_POR_CORRIDA=SIN_TOPE_FIJO`; `REGLA_BLOQUEO=NO_SALTAR_ARBOL_FOCO`; política `RUNNER_SELECTION_POLICY=FINISH_FIRST`; locks propios stale deben reconciliarse/recuperarse; padres deben reflejar estado de hijos; un bloqueo real conserva el foco y detiene la corrida en vez de saltarlo. `RUNNER_CURRENT_RECOVERY_TARGET=N0.5` congela nuevas aperturas de N0.6 hasta cerrar N0.5, preservando intacto todo lo ya certificado en N0.6.
 
 **Evidencia:** protocolo versionado en commit `9efbfbe7d7d8a701d86b1aa60940321747c61783`; tablero CONFIG/BITACORA actualizado y Runner horario actualizado en sitio. Cambio exclusivamente documental/de gobierno, con `[skip ci]`; no modifica código funcional, main, Producción, PR #2, auto-merge ni ramas.
 
