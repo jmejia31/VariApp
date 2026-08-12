@@ -4,6 +4,7 @@ using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Enums;
+using CatalogoMetodoPago = InventoryApp.Domain.Entities.Catalogos.MetodoPago;
 
 namespace InventoryApp.Application.Services;
 
@@ -76,6 +77,7 @@ public class VentaService : IVentaService
 
     public async Task<VentaDto> CreateAsync(CreateVentaDto dto)
     {
+        var metodoPagoCatalogo = await ResolverMetodoPagoAsync(dto.MetodoPago);
         var venta = new Venta
         {
             NumeroVenta = CrearNumeroTemporal("VEN"),
@@ -84,7 +86,9 @@ public class VentaService : IVentaService
             ClienteIdentidadORTN = dto.ClienteIdentidadORTN,
             ClienteCorreo = dto.ClienteCorreo,
             ClienteDireccion = dto.ClienteDireccion,
-            MetodoPago = ParseEnum(dto.MetodoPago, MetodoPago.Efectivo),
+            MetodoPagoId = metodoPagoCatalogo.Id,
+            MetodoPagoCatalogo = metodoPagoCatalogo,
+            MetodoPago = DerivarMetodoPagoLegacy(metodoPagoCatalogo),
             EstadoPago = ParseEnum(dto.EstadoPago, EstadoPago.Pendiente),
             Estado = EstadoDocumento.Borrador,
             // Descuento/Impuesto NO se toman de dto: se recalculan abajo (sección 13).
@@ -139,12 +143,15 @@ public class VentaService : IVentaService
         if (venta.Estado != EstadoDocumento.Borrador)
             throw new BusinessRuleException("Solo se pueden editar ventas en estado Borrador.");
 
+        var metodoPagoCatalogo = await ResolverMetodoPagoAsync(dto.MetodoPago);
         venta.ClienteNombre = string.IsNullOrWhiteSpace(dto.ClienteNombre) ? "Cliente final" : dto.ClienteNombre;
         venta.ClienteTelefono = dto.ClienteTelefono;
         venta.ClienteIdentidadORTN = dto.ClienteIdentidadORTN;
         venta.ClienteCorreo = dto.ClienteCorreo;
         venta.ClienteDireccion = dto.ClienteDireccion;
-        venta.MetodoPago = ParseEnum(dto.MetodoPago, MetodoPago.Efectivo);
+        venta.MetodoPagoId = metodoPagoCatalogo.Id;
+        venta.MetodoPagoCatalogo = metodoPagoCatalogo;
+        venta.MetodoPago = DerivarMetodoPagoLegacy(metodoPagoCatalogo);
         venta.EstadoPago = ParseEnum(dto.EstadoPago, EstadoPago.Pendiente);
         venta.Notas = dto.Notas;
         venta.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
@@ -703,6 +710,28 @@ public class VentaService : IVentaService
 
         if (venta.Total < 0)
             throw new BusinessRuleException("El total de la venta no puede ser negativo.");
+    }
+
+    private async Task<CatalogoMetodoPago> ResolverMetodoPagoAsync(string valor)
+    {
+        if (string.IsNullOrWhiteSpace(valor))
+            throw new BusinessRuleException("El método de pago es obligatorio.");
+
+        var metodoPago = await _ventaRepository.GetMetodoPagoPorCodigoONombreAsync(valor.Trim());
+        return metodoPago
+            ?? throw new BusinessRuleException($"El método de pago '{valor.Trim()}' no existe en el catálogo.");
+    }
+
+    private static MetodoPago DerivarMetodoPagoLegacy(CatalogoMetodoPago metodoPago)
+    {
+        if (Enum.TryParse<MetodoPago>(metodoPago.Codigo, true, out var porCodigo))
+            return porCodigo;
+        if (Enum.TryParse<MetodoPago>(metodoPago.Nombre, true, out var porNombre))
+            return porNombre;
+
+        // Compatibilidad transitoria: un método administrable nuevo no representable por el enum
+        // se proyecta en la columna legacy como Otro. La FK MetodoPagoId sigue siendo la autoridad.
+        return MetodoPago.Otro;
     }
 
     private static string CrearNumeroTemporal(string prefijo)
