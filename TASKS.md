@@ -57,7 +57,11 @@ Estado operativo controlado por `COLA`:
   - [x] N0.6.C1 Preflight histórico read-only: valida tipos legacy admitidos, IDs positivos y documentos origen existentes antes de cualquier backfill. Funcional hasta `8b1ca4ceae848280cea59ba7103e6cd7ef227170`; workflow dedicado `31577099764` y CI general `31577099759` en verde.
   - [x] N0.6.C2 FKs tipadas nullable + migración/backfill determinista, preservando columnas legacy durante transición. Funcional `7375a61165b7e9e32feb6054e843937963472e67`; ERP-N0.6 `31579173571` y CI general `31579173553` en verde.
   - [x] N0.6.C3 Postcheck, constraints e integridad histórica. Corrección final `01c1116e6db4e839b56176333251e3992fa09d77`; ERP-N0.6 `31581993553` y CI general `31581993565` en verde.
-- [ ] N0.6.D–H Aplicación/API, frontend si aplica, seguridad/auditoría, QA/CI y certificación según `COLA`.
+- [ ] N0.6.D Aplicación, servicios y API — subdividida para mantener autoridad tipada por concern:
+  - [x] N0.6.D1 Repositorio/consultas de `MovimientoInventario` migradas a `CompraId` como autoridad relacional. Funcional `2a2e093f66899b9c02c18026ecd3f270b6a730c1`; corrección de fixture `c19aa5005ef7262d91f118f5f4adf7b78aaf41e9`; CI general `31585718867` en verde completo.
+  - [ ] N0.6.D2 Productores `CompraService`/`VentaService`/`ConsumoInsumoService` hacia FKs tipadas.
+  - [ ] N0.6.D3 Contrato DTO/API de inventario + verificación de autoridad tipada en finanzas.
+- [ ] N0.6.E–H Frontend si aplica, seguridad/auditoría, QA/CI y certificación según `COLA`.
 
 N0.6 puede avanzar de forma independiente del trabajo todavía abierto de N0.5 cuando sus dependencias propias estén satisfechas; N0.7 sí depende de N0.6 según el Plan Maestro.
 
