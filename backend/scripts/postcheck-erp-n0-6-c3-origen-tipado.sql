@@ -34,6 +34,13 @@ SET @errores :=
         AND constraint_name IN (
             'FK_MovimientosInventario_Compras_CompraId_N06',
             'FK_MovimientosInventario_Ventas_VentaId_N06',
-            'FK_MovimientosInventario_ConsumosInsumos_ConsumoInsumoId_N06'));
+            'FK_MovimientosInventario_ConsumosInsumos_ConsumoInsumoId_N06'))
+  + (SELECT IF(COUNT(*) = 2, 0, 1)
+       FROM information_schema.triggers
+      WHERE trigger_schema = DATABASE()
+        AND event_object_table = 'MovimientosInventario'
+        AND trigger_name IN (
+            'TR_MovimientosInventario_N06_OrigenTipado_BI',
+            'TR_MovimientosInventario_N06_OrigenTipado_BU'));
 
 SELECT @errores AS ErroresN06C3;
