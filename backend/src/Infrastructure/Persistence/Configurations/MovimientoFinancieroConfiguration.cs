@@ -24,8 +24,15 @@ public class MovimientoFinancieroConfiguration : IEntityTypeConfiguration<Movimi
         builder.HasIndex(m => m.CompraId);
         builder.HasIndex(m => m.VentaId);
         builder.HasIndex(m => m.FacturaId);
+        builder.HasIndex(m => m.MetodoPagoId)
+            .HasDatabaseName("IX_MovimientosFinancieros_MetodoPagoId");
         builder.HasIndex(m => new { m.ModuloOrigen, m.ReferenciaId });
         builder.HasIndex(m => new { m.Estado, m.Fecha });
+
+        builder.HasOne(m => m.MetodoPagoCatalogo)
+            .WithMany()
+            .HasForeignKey(m => m.MetodoPagoId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne<Compra>()
             .WithMany()

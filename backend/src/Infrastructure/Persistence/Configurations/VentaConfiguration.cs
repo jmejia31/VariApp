@@ -41,7 +41,14 @@ public class VentaConfiguration : IEntityTypeConfiguration<Venta>
         builder.Property(v => v.MetodoPago).HasConversion<string>().HasMaxLength(20);
         builder.Property(v => v.Eliminado).HasDefaultValue(false);
         builder.HasIndex(v => v.Eliminado);
+        builder.HasIndex(v => v.MetodoPagoId)
+            .HasDatabaseName("IX_Ventas_MetodoPagoId");
         builder.HasQueryFilter(v => !v.Eliminado);
+
+        builder.HasOne(v => v.MetodoPagoCatalogo)
+            .WithMany()
+            .HasForeignKey(v => v.MetodoPagoId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasMany(v => v.Detalles)
             .WithOne(d => d.Venta)

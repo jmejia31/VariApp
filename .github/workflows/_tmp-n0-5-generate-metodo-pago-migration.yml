@@ -1,0 +1,56 @@
+name: TMP N0.5 - Generar migracion MetodoPago
+
+on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - 'backend/src/Domain/Entities/Catalogos/MetodoPago.cs'
+      - 'backend/src/Domain/Entities/Venta.cs'
+      - 'backend/src/Domain/Entities/FacturaPago.cs'
+      - 'backend/src/Domain/Entities/MovimientoFinanciero.cs'
+      - 'backend/src/Infrastructure/Persistence/Configurations/MetodoPagoConfiguration.cs'
+      - 'backend/src/Infrastructure/Persistence/Configurations/VentaConfiguration.cs'
+      - 'backend/src/Infrastructure/Persistence/Configurations/FacturaPagoConfiguration.cs'
+      - 'backend/src/Infrastructure/Persistence/Configurations/MovimientoFinancieroConfiguration.cs'
+
+permissions:
+  contents: read
+
+jobs:
+  generar-migracion:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restaurar backend
+        working-directory: backend
+        run: dotnet restore InventoryApp.sln
+
+      - name: Instalar EF
+        run: dotnet tool install --global dotnet-ef --version 8.0.8
+
+      - name: Generar migracion y snapshot N0.5
+        working-directory: backend
+        run: |
+          dotnet ef migrations add N0_5_MetodoPagoRelacionalBase \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext \
+            --output-dir Migrations
+
+      - name: Inventario generado
+        working-directory: backend
+        run: git status --short src/Infrastructure/Migrations
+
+      - name: Empaquetar migracion generada
+        uses: actions/upload-artifact@v4
+        with:
+          name: n0-5-metodo-pago-migration
+          path: backend/src/Infrastructure/Migrations
+          if-no-files-found: error
+          retention-days: 1

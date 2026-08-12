@@ -19,7 +19,12 @@ public class Venta : ConfirmableEntity
 
     public EstadoDocumento Estado { get; set; } = EstadoDocumento.Borrador;
     public EstadoPago EstadoPago { get; set; } = EstadoPago.Pendiente;
+
+    // Compatibilidad ERP-N0: el enum sigue operativo hasta completar el backfill
+    // y migrar servicios/contratos. MetodoPagoId será la FK relacional definitiva.
     public MetodoPago MetodoPago { get; set; } = MetodoPago.Efectivo;
+    public int? MetodoPagoId { get; set; }
+    public InventoryApp.Domain.Entities.Catalogos.MetodoPago? MetodoPagoCatalogo { get; set; }
 
     public decimal ImporteBruto { get; set; }
     public decimal ImporteProductos { get; set; }
