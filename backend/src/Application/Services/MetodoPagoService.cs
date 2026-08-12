@@ -1,8 +1,8 @@
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
-using InventoryApp.Domain.Entities.Catalogos;
 using InventoryApp.Domain.Enums;
+using MetodoPagoEntity = InventoryApp.Domain.Entities.Catalogos.MetodoPago;
 
 namespace InventoryApp.Application.Services;
 
@@ -31,7 +31,7 @@ public sealed class MetodoPagoService : IMetodoPagoService
         ValidarCampos(dto.Nombre, dto.Tipo, dto.Orden);
         if (await _repository.ExisteCodigoAsync(codigo)) throw new BusinessRuleException($"Ya existe un método de pago con código '{codigo}'.");
 
-        var item = new MetodoPago
+        var item = new MetodoPagoEntity
         {
             Codigo = codigo,
             Nombre = dto.Nombre.Trim(),
@@ -124,7 +124,7 @@ public sealed class MetodoPagoService : IMetodoPagoService
         });
     }
 
-    private void MarcarActualizacion(MetodoPago item)
+    private void MarcarActualizacion(MetodoPagoEntity item)
     {
         item.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
         item.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
@@ -146,7 +146,7 @@ public sealed class MetodoPagoService : IMetodoPagoService
         return normalizado;
     }
 
-    private static MetodoPagoDto ToDto(MetodoPago x) => new()
+    private static MetodoPagoDto ToDto(MetodoPagoEntity x) => new()
     {
         Id = x.Id, Codigo = x.Codigo, Nombre = x.Nombre, Tipo = x.Tipo, Activo = x.Activo,
         RequiereReferencia = x.RequiereReferencia, RequiereBanco = x.RequiereBanco,
