@@ -4,6 +4,7 @@ using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Enums;
 using InventoryApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using CatalogoMetodoPago = InventoryApp.Domain.Entities.Catalogos.MetodoPago;
 
 namespace InventoryApp.Infrastructure.Repositories;
 
@@ -17,6 +18,9 @@ public class MovimientoFinancieroRepository : IMovimientoFinancieroRepository
         _context = context;
         _usuarioScope = usuarioScope;
     }
+
+    private IQueryable<MovimientoFinanciero> ConMetodoPago() =>
+        _context.MovimientosFinancieros.Include(m => m.MetodoPagoCatalogo);
 
     private static IQueryable<MovimientoFinanciero> AplicarAlcance(
         IQueryable<MovimientoFinanciero> query,
@@ -34,7 +38,7 @@ public class MovimientoFinancieroRepository : IMovimientoFinancieroRepository
     {
         if (EsReversionAutomaticaDeCompra(movimiento))
         {
-            var original = await _context.MovimientosFinancieros
+            var original = await ConMetodoPago()
                 .Where(m =>
                     m.CompraId == movimiento.CompraId &&
                     m.EsAutomatico &&
@@ -58,8 +62,14 @@ public class MovimientoFinancieroRepository : IMovimientoFinancieroRepository
 
             if (original.Estado == EstadoMovimientoFinanciero.Pagado)
             {
+                if (!original.MetodoPagoId.HasValue)
+                    throw new BusinessRuleException(
+                        "El movimiento financiero original de la compra no tiene un método de pago relacional y no puede revertirse de forma segura.");
+
                 movimiento.Estado = EstadoMovimientoFinanciero.Pendiente;
-                movimiento.MetodoPago = original.MetodoPago;
+                movimiento.MetodoPagoId = original.MetodoPagoId;
+                movimiento.MetodoPagoCatalogo = original.MetodoPagoCatalogo;
+                movimiento.MetodoPago = null;
                 movimiento.ReferenciaId = original.Id;
                 await _context.MovimientosFinancieros.AddAsync(movimiento);
                 return;
@@ -69,13 +79,14 @@ public class MovimientoFinancieroRepository : IMovimientoFinancieroRepository
                 "El movimiento financiero original de la compra ya está anulado y no admite otra reversión.");
         }
 
+        await NormalizarMetodoPagoRelacionalAsync(movimiento);
         await _context.MovimientosFinancieros.AddAsync(movimiento);
     }
 
     public async Task<MovimientoFinanciero?> GetByIdAsync(int id)
     {
         var alcance = await _usuarioScope.ObtenerActualAsync();
-        return await AplicarAlcance(_context.MovimientosFinancieros, alcance)
+        return await AplicarAlcance(ConMetodoPago(), alcance)
             .FirstOrDefaultAsync(m => m.Id == id);
     }
 
@@ -85,7 +96,7 @@ public class MovimientoFinancieroRepository : IMovimientoFinancieroRepository
     public async Task<MovimientoFinanciero?> GetByCompraIdAsync(int compraId)
     {
         var alcance = await _usuarioScope.ObtenerActualAsync();
-        return await AplicarAlcance(_context.MovimientosFinancieros, alcance)
+        return await AplicarAlcance(ConMetodoPago(), alcance)
             .Where(m =>
                 m.CompraId == compraId &&
                 m.EsAutomatico &&
@@ -97,21 +108,56 @@ public class MovimientoFinancieroRepository : IMovimientoFinancieroRepository
     public async Task<MovimientoFinanciero?> GetByVentaIdAsync(int ventaId)
     {
         var alcance = await _usuarioScope.ObtenerActualAsync();
-        return await AplicarAlcance(_context.MovimientosFinancieros, alcance)
+        return await AplicarAlcance(ConMetodoPago(), alcance)
             .FirstOrDefaultAsync(m => m.VentaId == ventaId && m.EsAutomatico);
     }
 
     public async Task<List<MovimientoFinanciero>> GetFilteredAsync(DateTime? desde, DateTime? hasta)
     {
         var alcance = await _usuarioScope.ObtenerActualAsync();
-        var query = AplicarAlcance(_context.MovimientosFinancieros.AsQueryable(), alcance);
+        var query = AplicarAlcance(ConMetodoPago(), alcance);
         if (desde.HasValue) query = query.Where(m => m.Fecha >= desde.Value);
         if (hasta.HasValue) query = query.Where(m => m.Fecha <= hasta.Value);
         return await query.OrderByDescending(m => m.Fecha).ToListAsync();
     }
 
+    public async Task<CatalogoMetodoPago?> GetMetodoPagoPorCodigoONombreAsync(string valor)
+    {
+        var normalizado = valor.Trim().ToUpper();
+        return await _context.Set<CatalogoMetodoPago>()
+            .FirstOrDefaultAsync(m => !m.Eliminado &&
+                (m.Codigo.ToUpper() == normalizado || m.Nombre.ToUpper() == normalizado));
+    }
+
     public async Task<bool> SaveChangesAsync() =>
         await _context.SaveChangesAsync() > 0;
+
+    private async Task NormalizarMetodoPagoRelacionalAsync(MovimientoFinanciero movimiento)
+    {
+        if (movimiento.MetodoPagoCatalogo is not null)
+        {
+            movimiento.MetodoPagoId = movimiento.MetodoPagoCatalogo.Id;
+            movimiento.MetodoPago = null;
+            return;
+        }
+
+        if (movimiento.MetodoPagoId.HasValue)
+        {
+            movimiento.MetodoPago = null;
+            return;
+        }
+
+        if (!movimiento.MetodoPago.HasValue)
+            return;
+
+        var catalogo = await GetMetodoPagoPorCodigoONombreAsync(movimiento.MetodoPago.Value.ToString())
+            ?? throw new BusinessRuleException(
+                $"El método de pago legacy '{movimiento.MetodoPago.Value}' no existe en el catálogo relacional.");
+
+        movimiento.MetodoPagoId = catalogo.Id;
+        movimiento.MetodoPagoCatalogo = catalogo;
+        movimiento.MetodoPago = null;
+    }
 
     private static bool EsReversionAutomaticaDeCompra(MovimientoFinanciero movimiento) =>
         movimiento.EsAutomatico &&

@@ -4,6 +4,16 @@ Bitácora colaborativa de cambios realizados por Javier Mejía, Codex, AntiG/Ant
 
 No reemplaza `git log`: registra intención, alcance, validaciones y handoff. Todo changeset intencional debe incluir una entrada breve; no modificar otros colaborativos si su contenido no cambió.
 
+## 2026-08-11 — N0.5.06 C: MovimientoFinanciero migra a autoridad relacional — VALIDANDO
+
+**Responsable:** ChatGPT mediante conexión GitHub autorizada.
+
+**Objetivo/alcance:** retirar `MovimientoFinanciero.MetodoPago` legacy como autoridad persistente/operativa sin adelantar N0.5.07. `IMovimientoFinancieroRepository` resuelve catálogo por código/nombre; todas las lecturas cargan `MetodoPagoCatalogo`; el límite de persistencia normaliza cualquier entrada legacy transitoria hacia `MetodoPagoId` y limpia el enum antes de guardar. La reversión pagada de compra copia exclusivamente FK/navegación relacional y falla cerrada si el original carece de relación. `FinanzasService` resuelve movimientos manuales contra catálogo y sus DTOs leen el nombre relacional.
+
+**Pruebas dirigidas:** se amplían `FinanzasServiceTests` para persistencia/lectura relacional y fail-closed de método inexistente; `MovimientoFinancieroRepositoryTests` verifica normalización legacy→FK, carga de navegación y reversión sin propagación del enum.
+
+**Validación:** pendiente de CI real sobre este changeset; no declarar `LISTO` hasta comprobar build/tests y certificación proporcional.
+
 ## 2026-08-11 — N0.5.06 B: FacturaPago migra hacia MetodoPago relacional — LISTO
 
 **Responsable:** ChatGPT mediante conexión GitHub autorizada.

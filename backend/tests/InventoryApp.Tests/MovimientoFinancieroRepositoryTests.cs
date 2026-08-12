@@ -7,6 +7,7 @@ using InventoryApp.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
+using CatalogoMetodoPago = InventoryApp.Domain.Entities.Catalogos.MetodoPago;
 
 namespace InventoryApp.Tests;
 
@@ -33,7 +34,7 @@ public class MovimientoFinancieroRepositoryTests
     }
 
     [Fact]
-    public async Task AddAsync_ReversionCompraPagada_ConservaOriginalYCreaReversionPendienteVinculada()
+    public async Task AddAsync_ReversionCompraPagada_PropagaRelacionSinEnumLegacy()
     {
         await using var context = CrearContexto();
         var repo = CrearRepositorio(context);
@@ -44,16 +45,54 @@ public class MovimientoFinancieroRepositoryTests
         await repo.AddAsync(CrearReversion(original.CompraId!.Value));
         await context.SaveChangesAsync();
 
-        var movimientos = await context.MovimientosFinancieros.OrderBy(m => m.Id).ToListAsync();
+        var movimientos = await context.MovimientosFinancieros
+            .Include(m => m.MetodoPagoCatalogo)
+            .OrderBy(m => m.Id)
+            .ToListAsync();
         Assert.Equal(2, movimientos.Count);
         Assert.Equal(EstadoMovimientoFinanciero.Pagado, movimientos[0].Estado);
 
         var reversion = movimientos[1];
         Assert.Equal(EstadoMovimientoFinanciero.Pendiente, reversion.Estado);
         Assert.Equal(original.Id, reversion.ReferenciaId);
-        Assert.Equal(original.MetodoPago, reversion.MetodoPago);
+        Assert.Equal(original.MetodoPagoId, reversion.MetodoPagoId);
+        Assert.Equal("Transferencia bancaria", reversion.MetodoPagoCatalogo!.Nombre);
+        Assert.Null(reversion.MetodoPago);
         Assert.Equal(CategoriaMovimientoFinanciero.Reversion, reversion.Categoria);
         Assert.Equal(TipoMovimientoFinanciero.Ingreso, reversion.Tipo);
+    }
+
+    [Fact]
+    public async Task AddAsync_MovimientoConEnumLegacy_SeNormalizaARelacionYElEnumNoSePersiste()
+    {
+        await using var context = CrearContexto();
+        var repo = CrearRepositorio(context);
+        var catalogo = CrearCatalogo();
+        context.Set<CatalogoMetodoPago>().Add(catalogo);
+        await context.SaveChangesAsync();
+
+        var movimiento = new MovimientoFinanciero
+        {
+            Tipo = TipoMovimientoFinanciero.Egreso,
+            Categoria = CategoriaMovimientoFinanciero.GastoOperativo,
+            Concepto = "Pago legado",
+            Monto = 50m,
+            Estado = EstadoMovimientoFinanciero.Pagado,
+            MetodoPago = MetodoPago.Transferencia,
+            EsAutomatico = false,
+            ModuloOrigen = "Manual",
+            CreadoPorUsuarioId = 9
+        };
+
+        await repo.AddAsync(movimiento);
+        await context.SaveChangesAsync();
+
+        var persistido = await context.MovimientosFinancieros
+            .Include(m => m.MetodoPagoCatalogo)
+            .SingleAsync();
+        Assert.Equal(catalogo.Id, persistido.MetodoPagoId);
+        Assert.Equal("Transferencia bancaria", persistido.MetodoPagoCatalogo!.Nombre);
+        Assert.Null(persistido.MetodoPago);
     }
 
     [Fact]
@@ -72,7 +111,7 @@ public class MovimientoFinancieroRepositoryTests
     }
 
     [Fact]
-    public async Task GetByCompraIdAsync_PrefiereMovimientoOriginalSobreReversion()
+    public async Task GetByCompraIdAsync_PrefiereMovimientoOriginalSobreReversionYCargaMetodoPago()
     {
         await using var context = CrearContexto();
         var repo = CrearRepositorio(context);
@@ -87,6 +126,7 @@ public class MovimientoFinancieroRepositoryTests
         Assert.NotNull(encontrado);
         Assert.Equal(original.Id, encontrado!.Id);
         Assert.Equal("Compra", encontrado.ModuloOrigen);
+        Assert.Equal("Transferencia bancaria", encontrado.MetodoPagoCatalogo!.Nombre);
     }
 
     private static AppDbContext CrearContexto()
@@ -105,20 +145,36 @@ public class MovimientoFinancieroRepositoryTests
         return new MovimientoFinancieroRepository(context, scope.Object);
     }
 
-    private static MovimientoFinanciero CrearOriginal(EstadoMovimientoFinanciero estado) => new()
+    private static MovimientoFinanciero CrearOriginal(EstadoMovimientoFinanciero estado)
     {
-        Tipo = TipoMovimientoFinanciero.Egreso,
-        Categoria = CategoriaMovimientoFinanciero.Compra,
-        Concepto = "Compra original",
-        Monto = 100m,
-        Estado = estado,
-        MetodoPago = MetodoPago.Transferencia,
-        EsAutomatico = true,
-        ModuloOrigen = "Compra",
-        ReferenciaId = 77,
-        CompraId = 77,
-        CreadoPorUsuarioId = 9,
-        CreadoPorNombreUsuario = "Admin"
+        var catalogo = CrearCatalogo();
+        return new MovimientoFinanciero
+        {
+            Tipo = TipoMovimientoFinanciero.Egreso,
+            Categoria = CategoriaMovimientoFinanciero.Compra,
+            Concepto = "Compra original",
+            Monto = 100m,
+            Estado = estado,
+            MetodoPagoId = catalogo.Id,
+            MetodoPagoCatalogo = catalogo,
+            MetodoPago = null,
+            EsAutomatico = true,
+            ModuloOrigen = "Compra",
+            ReferenciaId = 77,
+            CompraId = 77,
+            CreadoPorUsuarioId = 9,
+            CreadoPorNombreUsuario = "Admin"
+        };
+    }
+
+    private static CatalogoMetodoPago CrearCatalogo() => new()
+    {
+        Id = 700,
+        Codigo = "TRANSFERENCIA",
+        Nombre = "Transferencia bancaria",
+        Tipo = "Transferencia",
+        Activo = true,
+        Orden = 2
     };
 
     private static MovimientoFinanciero CrearReversion(int compraId) => new()

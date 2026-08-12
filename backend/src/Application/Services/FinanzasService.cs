@@ -3,6 +3,7 @@ using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Enums;
+using CatalogoMetodoPago = InventoryApp.Domain.Entities.Catalogos.MetodoPago;
 
 namespace InventoryApp.Application.Services;
 
@@ -51,7 +52,6 @@ public class FinanzasService : IFinanzasService
             ? decimal.Round(utilidadBruta / ingresosTotales * 100m, 2)
             : 0m;
 
-        // Un gasto operativo es una categoría financiera explícita, no cualquier egreso manual.
         var gastosOperativos = esAdministrador
             ? noAnulados.Where(m =>
                     !m.EsAutomatico &&
@@ -145,12 +145,11 @@ public class FinanzasService : IFinanzasService
         if (categoria is CategoriaMovimientoFinanciero.Venta or CategoriaMovimientoFinanciero.Compra or CategoriaMovimientoFinanciero.Reversion)
             throw new BusinessRuleException("Las categorías Venta, Compra y Reversión son automáticas y no admiten registros manuales.");
 
-        MetodoPago? metodoPago = null;
+        CatalogoMetodoPago? metodoPagoCatalogo = null;
         if (!string.IsNullOrWhiteSpace(dto.MetodoPago))
         {
-            if (!Enum.TryParse<MetodoPago>(dto.MetodoPago, true, out var mp) || !Enum.IsDefined(mp))
-                throw new BusinessRuleException("El método de pago no es válido.");
-            metodoPago = mp;
+            metodoPagoCatalogo = await _movimientoRepository.GetMetodoPagoPorCodigoONombreAsync(dto.MetodoPago.Trim())
+                ?? throw new BusinessRuleException($"El método de pago '{dto.MetodoPago.Trim()}' no existe en el catálogo.");
         }
 
         var movimiento = new MovimientoFinanciero
@@ -161,7 +160,8 @@ public class FinanzasService : IFinanzasService
             Descripcion = string.IsNullOrWhiteSpace(dto.Descripcion) ? null : dto.Descripcion.Trim(),
             Monto = dto.Monto,
             Estado = EstadoMovimientoFinanciero.Pagado,
-            MetodoPago = metodoPago,
+            MetodoPagoId = metodoPagoCatalogo?.Id,
+            MetodoPagoCatalogo = metodoPagoCatalogo,
             EsAutomatico = false,
             ModuloOrigen = "Manual",
             CreadoPorUsuarioId = _currentUser.UsuarioId,
@@ -253,7 +253,7 @@ public class FinanzasService : IFinanzasService
         Descripcion = m.Descripcion,
         Monto = m.Monto,
         Estado = m.Estado.ToString(),
-        MetodoPago = m.MetodoPago?.ToString(),
+        MetodoPago = m.MetodoPagoCatalogo?.Nombre,
         EsAutomatico = m.EsAutomatico,
         ModuloOrigen = m.ModuloOrigen,
         CreadoPorNombreUsuario = m.CreadoPorNombreUsuario,

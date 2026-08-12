@@ -6,6 +6,7 @@ using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Enums;
 using Moq;
 using Xunit;
+using CatalogoMetodoPago = InventoryApp.Domain.Entities.Catalogos.MetodoPago;
 
 namespace InventoryApp.Tests;
 
@@ -57,6 +58,54 @@ public class FinanzasServiceTests
         Assert.False(creado!.EsAutomatico);
         Assert.Equal(1, creado.CreadoPorUsuarioId);
         Assert.Equal("Manual", creado.ModuloOrigen);
+    }
+
+    [Fact]
+    public async Task RegistrarMovimientoManualAsync_MetodoPagoUsaCatalogoRelacional()
+    {
+        var catalogo = new CatalogoMetodoPago { Id = 12, Codigo = "TRANSFERENCIA", Nombre = "Transferencia bancaria", Tipo = "Transferencia" };
+        _movRepoMock.Setup(r => r.GetMetodoPagoPorCodigoONombreAsync("Transferencia"))
+            .ReturnsAsync(catalogo);
+
+        MovimientoFinanciero? creado = null;
+        _movRepoMock.Setup(r => r.AddAsync(It.IsAny<MovimientoFinanciero>()))
+            .Callback<MovimientoFinanciero>(m => creado = m)
+            .Returns(Task.CompletedTask);
+
+        var resultado = await _service.RegistrarMovimientoManualAsync(new CreateMovimientoManualDto
+        {
+            Tipo = "Egreso",
+            Categoria = "GastoOperativo",
+            Concepto = "Pago proveedor",
+            Monto = 250m,
+            MetodoPago = "Transferencia"
+        });
+
+        Assert.NotNull(creado);
+        Assert.Equal(12, creado!.MetodoPagoId);
+        Assert.Same(catalogo, creado.MetodoPagoCatalogo);
+        Assert.Null(creado.MetodoPago);
+        Assert.Equal("Transferencia bancaria", resultado.MetodoPago);
+    }
+
+    [Fact]
+    public async Task RegistrarMovimientoManualAsync_MetodoPagoInexistente_FallaCerrado()
+    {
+        _movRepoMock.Setup(r => r.GetMetodoPagoPorCodigoONombreAsync("Cripto"))
+            .ReturnsAsync((CatalogoMetodoPago?)null);
+
+        var error = await Assert.ThrowsAsync<BusinessRuleException>(() =>
+            _service.RegistrarMovimientoManualAsync(new CreateMovimientoManualDto
+            {
+                Tipo = "Egreso",
+                Categoria = "GastoOperativo",
+                Concepto = "Pago inválido",
+                Monto = 100m,
+                MetodoPago = "Cripto"
+            }));
+
+        Assert.Contains("no existe en el catálogo", error.Message, StringComparison.OrdinalIgnoreCase);
+        _movRepoMock.Verify(r => r.AddAsync(It.IsAny<MovimientoFinanciero>()), Times.Never);
     }
 
     [Fact]
