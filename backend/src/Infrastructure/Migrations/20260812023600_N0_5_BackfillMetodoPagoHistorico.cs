@@ -176,8 +176,9 @@ public sealed class N0_5_BackfillMetodoPagoHistorico : Migration
              WHERE fp.MetodoPagoId IS NULL;
             """);
 
-        // Postcheck dentro de la propia migración. Si cualquier fila queda sin mapa,
-        // apunta a otro Codigo o cambia el valor legacy, el proceso falla cerrado.
+        // Postcheck dentro de la propia migración. Cada guard se ejecuta en un
+        // statement independiente porque MySQL no permite reabrir la misma tabla
+        // temporal más de una vez dentro de un SELECT compuesto.
         migrationBuilder.Sql("""
             DROP TEMPORARY TABLE IF EXISTS __N05PostGuard;
             CREATE TEMPORARY TABLE __N05PostGuard
@@ -188,79 +189,104 @@ public sealed class N0_5_BackfillMetodoPagoHistorico : Migration
             );
 
             INSERT INTO __N05PostGuard (Id, Violaciones)
-            SELECT 1,
-                IF((SELECT COUNT(*)
-                      FROM MetodosPago mp
-                     WHERE mp.Activo = 1
-                       AND mp.Eliminado = 0
-                       AND (
-                            (CAST(mp.Codigo AS BINARY) = CAST('Efectivo' AS BINARY)
-                             AND CAST(mp.Nombre AS BINARY) = CAST('Efectivo' AS BINARY)
-                             AND CAST(mp.Tipo AS BINARY) = CAST('Efectivo' AS BINARY))
-                         OR (CAST(mp.Codigo AS BINARY) = CAST('Transferencia' AS BINARY)
-                             AND CAST(mp.Nombre AS BINARY) = CAST('Transferencia' AS BINARY)
-                             AND CAST(mp.Tipo AS BINARY) = CAST('Transferencia' AS BINARY))
-                         OR (CAST(mp.Codigo AS BINARY) = CAST('Tarjeta' AS BINARY)
-                             AND CAST(mp.Nombre AS BINARY) = CAST('Tarjeta' AS BINARY)
-                             AND CAST(mp.Tipo AS BINARY) = CAST('Tarjeta' AS BINARY))
-                         OR (CAST(mp.Codigo AS BINARY) = CAST('Otro' AS BINARY)
-                             AND CAST(mp.Nombre AS BINARY) = CAST('Otro' AS BINARY)
-                             AND CAST(mp.Tipo AS BINARY) = CAST('Otro' AS BINARY))
-                       )) = 4, 0, 1)
-              + (SELECT COUNT(*)
-                   FROM Ventas v
-                  WHERE v.MetodoPagoId IS NULL
-                     OR NOT EXISTS (
-                         SELECT 1 FROM MetodosPago mp
-                          WHERE mp.Id = v.MetodoPagoId
-                            AND CAST(mp.Codigo AS BINARY) = CAST(v.MetodoPago AS BINARY)))
-              + (SELECT COUNT(*)
-                   FROM FacturaPagos fp
-                  WHERE fp.MetodoPagoId IS NULL
-                     OR NOT EXISTS (
-                         SELECT 1 FROM MetodosPago mp
-                          WHERE mp.Id = fp.MetodoPagoId
-                            AND CAST(mp.Codigo AS BINARY) = CAST(
-                                CASE fp.MetodoPago
-                                    WHEN 1 THEN 'Efectivo'
-                                    WHEN 2 THEN 'Transferencia'
-                                    WHEN 3 THEN 'Tarjeta'
-                                    WHEN 4 THEN 'Otro'
-                                END AS BINARY)))
-              + (SELECT COUNT(*)
-                   FROM MovimientosFinancieros mf
-                  WHERE (mf.MetodoPago IS NULL AND mf.MetodoPagoId IS NOT NULL)
-                     OR (mf.MetodoPago IS NOT NULL AND
-                         (mf.MetodoPagoId IS NULL OR NOT EXISTS (
-                             SELECT 1 FROM MetodosPago mp
-                              WHERE mp.Id = mf.MetodoPagoId
-                                AND CAST(mp.Codigo AS BINARY) = CAST(mf.MetodoPago AS BINARY)))))
-              + ABS((SELECT COUNT(*) FROM Ventas) - (SELECT COUNT(*) FROM __N05VentasAntes))
-              + ABS((SELECT COUNT(*) FROM FacturaPagos) - (SELECT COUNT(*) FROM __N05FacturaPagosAntes))
-              + ABS((SELECT COUNT(*) FROM MovimientosFinancieros) - (SELECT COUNT(*) FROM __N05MovimientosAntes))
-              + ABS((SELECT COUNT(*) FROM Compras) - (SELECT COUNT(*) FROM __N05ComprasAntes))
-              + (SELECT COUNT(*)
-                   FROM __N05VentasAntes a
-                   LEFT JOIN Ventas v ON v.Id = a.Id
-                  WHERE v.Id IS NULL
-                     OR CAST(v.MetodoPago AS BINARY) <> CAST(a.MetodoPago AS BINARY))
-              + (SELECT COUNT(*)
-                   FROM __N05FacturaPagosAntes a
-                   LEFT JOIN FacturaPagos fp ON fp.Id = a.Id
-                  WHERE fp.Id IS NULL OR fp.MetodoPago <> a.MetodoPago)
-              + (SELECT COUNT(*)
-                   FROM __N05MovimientosAntes a
-                   LEFT JOIN MovimientosFinancieros mf ON mf.Id = a.Id
-                  WHERE mf.Id IS NULL
-                     OR NOT (
-                         (mf.MetodoPago IS NULL AND a.MetodoPago IS NULL)
-                         OR (mf.MetodoPago IS NOT NULL AND a.MetodoPago IS NOT NULL
-                             AND CAST(mf.MetodoPago AS BINARY) = CAST(a.MetodoPago AS BINARY))))
-              + (SELECT COUNT(*)
-                   FROM __N05ComprasAntes a
-                   LEFT JOIN Compras c ON c.Id = a.Id
-                  WHERE c.Id IS NULL
-                     OR CAST(c.MetodoPago AS BINARY) <> CAST(a.MetodoPago AS BINARY));
+            SELECT 1, IF(COUNT(*) = 4, 0, 1)
+              FROM MetodosPago mp
+             WHERE mp.Activo = 1
+               AND mp.Eliminado = 0
+               AND (
+                    (CAST(mp.Codigo AS BINARY) = CAST('Efectivo' AS BINARY)
+                     AND CAST(mp.Nombre AS BINARY) = CAST('Efectivo' AS BINARY)
+                     AND CAST(mp.Tipo AS BINARY) = CAST('Efectivo' AS BINARY))
+                 OR (CAST(mp.Codigo AS BINARY) = CAST('Transferencia' AS BINARY)
+                     AND CAST(mp.Nombre AS BINARY) = CAST('Transferencia' AS BINARY)
+                     AND CAST(mp.Tipo AS BINARY) = CAST('Transferencia' AS BINARY))
+                 OR (CAST(mp.Codigo AS BINARY) = CAST('Tarjeta' AS BINARY)
+                     AND CAST(mp.Nombre AS BINARY) = CAST('Tarjeta' AS BINARY)
+                     AND CAST(mp.Tipo AS BINARY) = CAST('Tarjeta' AS BINARY))
+                 OR (CAST(mp.Codigo AS BINARY) = CAST('Otro' AS BINARY)
+                     AND CAST(mp.Nombre AS BINARY) = CAST('Otro' AS BINARY)
+                     AND CAST(mp.Tipo AS BINARY) = CAST('Otro' AS BINARY))
+               );
+
+            INSERT INTO __N05PostGuard (Id, Violaciones)
+            SELECT 2, COUNT(*)
+              FROM Ventas v
+             WHERE v.MetodoPagoId IS NULL
+                OR NOT EXISTS (
+                    SELECT 1 FROM MetodosPago mp
+                     WHERE mp.Id = v.MetodoPagoId
+                       AND CAST(mp.Codigo AS BINARY) = CAST(v.MetodoPago AS BINARY));
+
+            INSERT INTO __N05PostGuard (Id, Violaciones)
+            SELECT 3, COUNT(*)
+              FROM FacturaPagos fp
+             WHERE fp.MetodoPagoId IS NULL
+                OR NOT EXISTS (
+                    SELECT 1 FROM MetodosPago mp
+                     WHERE mp.Id = fp.MetodoPagoId
+                       AND CAST(mp.Codigo AS BINARY) = CAST(
+                           CASE fp.MetodoPago
+                               WHEN 1 THEN 'Efectivo'
+                               WHEN 2 THEN 'Transferencia'
+                               WHEN 3 THEN 'Tarjeta'
+                               WHEN 4 THEN 'Otro'
+                           END AS BINARY));
+
+            INSERT INTO __N05PostGuard (Id, Violaciones)
+            SELECT 4, COUNT(*)
+              FROM MovimientosFinancieros mf
+             WHERE (mf.MetodoPago IS NULL AND mf.MetodoPagoId IS NOT NULL)
+                OR (mf.MetodoPago IS NOT NULL AND
+                    (mf.MetodoPagoId IS NULL OR NOT EXISTS (
+                        SELECT 1 FROM MetodosPago mp
+                         WHERE mp.Id = mf.MetodoPagoId
+                           AND CAST(mp.Codigo AS BINARY) = CAST(mf.MetodoPago AS BINARY))));
+
+            INSERT INTO __N05PostGuard (Id, Violaciones)
+            SELECT 5, ABS((SELECT COUNT(*) FROM Ventas) - COUNT(*))
+              FROM __N05VentasAntes;
+
+            INSERT INTO __N05PostGuard (Id, Violaciones)
+            SELECT 6, COUNT(*)
+              FROM __N05VentasAntes a
+              LEFT JOIN Ventas v ON v.Id = a.Id
+             WHERE v.Id IS NULL
+                OR CAST(v.MetodoPago AS BINARY) <> CAST(a.MetodoPago AS BINARY);
+
+            INSERT INTO __N05PostGuard (Id, Violaciones)
+            SELECT 7, ABS((SELECT COUNT(*) FROM FacturaPagos) - COUNT(*))
+              FROM __N05FacturaPagosAntes;
+
+            INSERT INTO __N05PostGuard (Id, Violaciones)
+            SELECT 8, COUNT(*)
+              FROM __N05FacturaPagosAntes a
+              LEFT JOIN FacturaPagos fp ON fp.Id = a.Id
+             WHERE fp.Id IS NULL OR fp.MetodoPago <> a.MetodoPago;
+
+            INSERT INTO __N05PostGuard (Id, Violaciones)
+            SELECT 9, ABS((SELECT COUNT(*) FROM MovimientosFinancieros) - COUNT(*))
+              FROM __N05MovimientosAntes;
+
+            INSERT INTO __N05PostGuard (Id, Violaciones)
+            SELECT 10, COUNT(*)
+              FROM __N05MovimientosAntes a
+              LEFT JOIN MovimientosFinancieros mf ON mf.Id = a.Id
+             WHERE mf.Id IS NULL
+                OR NOT (
+                    (mf.MetodoPago IS NULL AND a.MetodoPago IS NULL)
+                    OR (mf.MetodoPago IS NOT NULL AND a.MetodoPago IS NOT NULL
+                        AND CAST(mf.MetodoPago AS BINARY) = CAST(a.MetodoPago AS BINARY)));
+
+            INSERT INTO __N05PostGuard (Id, Violaciones)
+            SELECT 11, ABS((SELECT COUNT(*) FROM Compras) - COUNT(*))
+              FROM __N05ComprasAntes;
+
+            INSERT INTO __N05PostGuard (Id, Violaciones)
+            SELECT 12, COUNT(*)
+              FROM __N05ComprasAntes a
+              LEFT JOIN Compras c ON c.Id = a.Id
+             WHERE c.Id IS NULL
+                OR CAST(c.MetodoPago AS BINARY) <> CAST(a.MetodoPago AS BINARY);
 
             DROP TEMPORARY TABLE __N05PostGuard;
             DROP TEMPORARY TABLE __N05VentasAntes;
