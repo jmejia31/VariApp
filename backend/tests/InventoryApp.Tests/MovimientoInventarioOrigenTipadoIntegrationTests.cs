@@ -43,7 +43,7 @@ public class MovimientoInventarioOrigenTipadoIntegrationTests
             };
             var compra = new Compra
             {
-                NumeroCompra = $"N06-D1-{Guid.NewGuid():N}",
+                NumeroCompra = $"D1-{Guid.NewGuid():N}"[..18],
                 ProveedorNombre = "Proveedor D1",
                 Estado = EstadoDocumento.Borrador,
                 EstadoPago = EstadoPago.Pendiente,
