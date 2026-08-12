@@ -14,9 +14,9 @@ No reemplaza `git log`: registra intención, alcance, validaciones y handoff. To
 
 **Evidencia funcional:** commit `0f14b9b9f5248a01cb6c98fa456cd306fe38ae19` publicado en `Desarrollo`. El temporal accidental `NOPE_DO_NOT_CREATE` fue eliminado de la punta efectiva mediante fast-forward, sin force-push.
 
-**Validación real:** workflow dedicado `ERP-N0.5 - Certificación MetodoPago histórico`, run `31568099373`, terminó `success`: restauración/compilación/pruebas backend, esquema relacional, historia representativa, fail-closed, preflight, backfill, postcheck/preservación y snapshot EF quedaron verdes. El CI general run `31568099446` seguía ejecutando integración MySQL al cierre de esta microtarea, por lo que no se le atribuye un resultado final aún no emitido por GitHub.
+**Validación real:** workflow dedicado `ERP-N0.5 - Certificación MetodoPago histórico`, run `31568099373`, terminó `success`: restauración/compilación/pruebas backend, esquema relacional, historia representativa, fail-closed, preflight, backfill, postcheck/preservación y snapshot EF quedaron verdes. El CI general run `31568099446` también terminó `success` en sus cinco jobs: Backend Release/pruebas, migraciones e integración MySQL, Docker, frontend e higiene.
 
-**Control:** `N0.5.06C` queda `LISTO`; con A1/A2/A3/B/C cerradas, la siguiente tarea de la cadena es `N0.5.07`, sujeta a reconciliación de HEAD/dependencias en una corrida posterior.
+**Control:** `N0.5.06C` y su padre `N0.5.06` quedan `LISTO`; con A1/A2/A3/B/C cerradas, la siguiente tarea de la cadena es `N0.5.07`, dependiente directamente de C.
 
 ## 2026-08-11 — N0.5.06 B: FacturaPago migra hacia MetodoPago relacional — LISTO
 
