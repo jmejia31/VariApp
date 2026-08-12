@@ -23,12 +23,6 @@ public class MovimientoInventario
     public decimal? CostoUnitario { get; set; }
     public decimal? PrecioUnitario { get; set; }
 
-    // Autoridad relacional de origen incorporada físicamente por ERP-N0.6 C2/C3.
-    // Las columnas legacy permanecen temporalmente como snapshot de compatibilidad.
-    public int? CompraId { get; set; }
-    public int? VentaId { get; set; }
-    public int? ConsumoInsumoId { get; set; }
-
     public string ReferenciaTipo { get; set; } = string.Empty;
     public int ReferenciaId { get; set; }
     public string? Descripcion { get; set; }

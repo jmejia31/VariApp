@@ -1,4 +1,5 @@
 using InventoryApp.Application.Interfaces;
+using InventoryApp.Domain.Common;
 using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Enums;
 using InventoryApp.Infrastructure.Persistence;
@@ -33,6 +34,60 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
 
     public async Task AddAsync(MovimientoInventario movimiento) =>
         await _context.MovimientosInventario.AddAsync(movimiento);
+
+    public async Task AddConOrigenTipadoAsync(
+        MovimientoInventario movimiento,
+        OrigenMovimientoInventario origen)
+    {
+        ArgumentNullException.ThrowIfNull(movimiento);
+        ArgumentNullException.ThrowIfNull(origen);
+
+        movimiento.ReferenciaTipo = CrearReferenciaTipoSnapshot(movimiento, origen);
+        movimiento.ReferenciaId = origen.DocumentoId;
+
+        if (!_context.Database.IsRelational())
+        {
+            await AddAsync(movimiento);
+            return;
+        }
+
+        var tipo = movimiento.Tipo.ToString();
+        var causa = (int)movimiento.Causa;
+
+        await _context.Database.ExecuteSqlInterpolatedAsync($"""
+            INSERT INTO MovimientosInventario
+                (ProductoId, ProductoVarianteId,
+                 ProductoMarcaSnapshot, ProductoModeloSnapshot, ProductoColorSnapshot,
+                 ProductoTallaSnapshot, ProductoSkuSnapshot,
+                 Tipo, Causa, Cantidad, StockAnterior, StockNuevo,
+                 CostoUnitario, PrecioUnitario,
+                 ReferenciaTipo, ReferenciaId,
+                 CompraId, VentaId, ConsumoInsumoId,
+                 Descripcion, CreadoPorUsuarioId, CreadoPorNombreUsuario, Fecha)
+            VALUES
+                ({movimiento.ProductoId}, {movimiento.ProductoVarianteId},
+                 {movimiento.ProductoMarcaSnapshot}, {movimiento.ProductoModeloSnapshot}, {movimiento.ProductoColorSnapshot},
+                 {movimiento.ProductoTallaSnapshot}, {movimiento.ProductoSkuSnapshot},
+                 {tipo}, {causa}, {movimiento.Cantidad}, {movimiento.StockAnterior}, {movimiento.StockNuevo},
+                 {movimiento.CostoUnitario}, {movimiento.PrecioUnitario},
+                 {movimiento.ReferenciaTipo}, {movimiento.ReferenciaId},
+                 {origen.CompraId}, {origen.VentaId}, {origen.ConsumoInsumoId},
+                 {movimiento.Descripcion}, {movimiento.CreadoPorUsuarioId}, {movimiento.CreadoPorNombreUsuario}, {movimiento.Fecha})
+            """);
+    }
+
+    private static string CrearReferenciaTipoSnapshot(
+        MovimientoInventario movimiento,
+        OrigenMovimientoInventario origen) =>
+        origen.Tipo switch
+        {
+            TipoOrigenMovimientoInventario.Compra when movimiento.Causa == CausaMovimientoInventario.AnulacionCompra => "CompraAnulada",
+            TipoOrigenMovimientoInventario.Compra => "Compra",
+            TipoOrigenMovimientoInventario.Venta when movimiento.Causa == CausaMovimientoInventario.AnulacionVenta => "VentaAnulada",
+            TipoOrigenMovimientoInventario.Venta => "Venta",
+            TipoOrigenMovimientoInventario.ConsumoInsumo => "ConsumoInsumo",
+            _ => throw new InvalidOperationException($"Origen de inventario no soportado: {origen.Tipo}.")
+        };
 
     public async Task<List<MovimientoInventario>> GetByProductoAsync(int productoId)
     {
@@ -71,8 +126,6 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
     {
         if (!_context.Database.IsRelational())
         {
-            // El provider InMemory de las pruebas unitarias no admite FromSql.
-            // Produccion/MySQL usa exclusivamente CompraId como autoridad de origen.
             return await _context.MovimientosInventario
                 .AsNoTracking()
                 .Where(m =>
@@ -109,9 +162,6 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
             throw new InvalidOperationException(
                 "El movimiento limite no corresponde a un movimiento original de compra tipado.");
 
-        // C2/C3 certificaron CompraId en la base de datos antes de mapearla al modelo EF.
-        // Esta consulta usa directamente esa FK tipada y deja de tomar decisiones con
-        // ReferenciaTipo/ReferenciaId. D2 retirara el bridge transitorio al migrar productores.
         var clavesOriginales = await _context.MovimientosInventario
             .FromSqlInterpolated($"""
                 SELECT m.*
