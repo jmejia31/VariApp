@@ -5,6 +5,7 @@ using InventoryApp.Domain.Entities;
 using InventoryApp.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using CatalogoMetodoPago = InventoryApp.Domain.Entities.Catalogos.MetodoPago;
 
 namespace InventoryApp.Infrastructure.Repositories;
 
@@ -28,6 +29,9 @@ public class FacturaRepository : IFacturaRepository
         _context.Facturas
             .Include(f => f.Detalles)
             .Include(f => f.Pagos)
+                .ThenInclude(p => p.MetodoPagoCatalogo)
+            .Include(f => f.Venta)
+                .ThenInclude(v => v!.MetodoPagoCatalogo)
             .Include(f => f.Venta)
                 .ThenInclude(v => v!.DescuentosAplicados)
             .Include(f => f.Venta)
@@ -71,6 +75,15 @@ public class FacturaRepository : IFacturaRepository
         return await AplicarAlcance(ConIncludes(), alcance)
             .OrderByDescending(f => f.FechaEmision)
             .ToListAsync();
+    }
+
+    public async Task<CatalogoMetodoPago?> GetMetodoPagoPorCodigoONombreAsync(string valor)
+    {
+        var normalizado = valor.Trim().ToUpper();
+        return await _context.MetodosPago
+            .AsNoTracking()
+            .FirstOrDefaultAsync(m => !m.Eliminado &&
+                (m.Codigo.ToUpper() == normalizado || m.Nombre.ToUpper() == normalizado));
     }
 
     public async Task<Factura?> GetByIdParaEnlacePublicoValidadoAsync(int id) =>

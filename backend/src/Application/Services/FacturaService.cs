@@ -3,6 +3,7 @@ using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Enums;
+using CatalogoMetodoPago = InventoryApp.Domain.Entities.Catalogos.MetodoPago;
 
 namespace InventoryApp.Application.Services;
 
@@ -48,8 +49,7 @@ public class FacturaService : IFacturaService
         if (dto.Monto <= 0)
             throw new BusinessRuleException("El monto del pago debe ser mayor que cero.");
 
-        if (!Enum.TryParse<MetodoPago>(dto.MetodoPago?.Trim(), true, out var metodoPago))
-            throw new BusinessRuleException("El método de pago no es válido.");
+        var metodoPagoCatalogo = await ResolverMetodoPagoAsync(dto.MetodoPago);
 
         RecalcularPago(factura);
         if (factura.SaldoPendiente <= 0)
@@ -61,7 +61,9 @@ public class FacturaService : IFacturaService
         {
             FechaPago = dto.FechaPago?.ToUniversalTime() ?? DateTime.UtcNow,
             Monto = Math.Round(dto.Monto, 2, MidpointRounding.AwayFromZero),
-            MetodoPago = metodoPago,
+            MetodoPagoId = metodoPagoCatalogo.Id,
+            MetodoPagoCatalogo = metodoPagoCatalogo,
+            MetodoPago = DerivarMetodoPagoLegacy(metodoPagoCatalogo),
             Referencia = Normalizar(dto.Referencia, 120),
             Observaciones = Normalizar(dto.Observaciones, 500),
             CreadoPorUsuarioId = usuarioId,
@@ -153,6 +155,24 @@ public class FacturaService : IFacturaService
         if (factura.Estado is EstadoFactura.Anulada or EstadoFactura.Cancelada)
             throw new BusinessRuleException("No se pueden registrar operaciones sobre una factura anulada o cancelada.");
         return factura;
+    }
+
+    private async Task<CatalogoMetodoPago> ResolverMetodoPagoAsync(string valor)
+    {
+        if (string.IsNullOrWhiteSpace(valor))
+            throw new BusinessRuleException("El método de pago es obligatorio.");
+
+        return await _repository.GetMetodoPagoPorCodigoONombreAsync(valor.Trim())
+            ?? throw new BusinessRuleException($"El método de pago '{valor.Trim()}' no existe en el catálogo.");
+    }
+
+    private static MetodoPago DerivarMetodoPagoLegacy(CatalogoMetodoPago metodoPago)
+    {
+        if (Enum.TryParse<MetodoPago>(metodoPago.Codigo, true, out var porCodigo))
+            return porCodigo;
+        if (Enum.TryParse<MetodoPago>(metodoPago.Nombre, true, out var porNombre))
+            return porNombre;
+        return MetodoPago.Otro;
     }
 
     private static void RecalcularPago(Factura factura)
@@ -248,7 +268,7 @@ public class FacturaService : IFacturaService
             Id = p.Id,
             FechaPago = p.FechaPago,
             Monto = p.Monto,
-            MetodoPago = p.MetodoPago.ToString(),
+            MetodoPago = p.MetodoPagoCatalogo?.Nombre ?? string.Empty,
             Referencia = p.Referencia,
             Observaciones = p.Observaciones,
             Anulado = p.Anulado,
@@ -301,7 +321,7 @@ public class FacturaService : IFacturaService
             Total = f.Total,
             TotalPagado = totalPagado,
             SaldoPendiente = saldoPendiente,
-            MetodoPago = f.Venta?.MetodoPago.ToString() ?? string.Empty,
+            MetodoPago = f.Venta?.MetodoPagoCatalogo?.Nombre ?? string.Empty,
             EstadoPago = f.Venta?.EstadoPago.ToString() ?? string.Empty,
             Observaciones = f.Observaciones,
             Detalles = detalles,

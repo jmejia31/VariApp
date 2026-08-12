@@ -1,4 +1,5 @@
 using InventoryApp.Domain.Entities;
+using CatalogoMetodoPago = InventoryApp.Domain.Entities.Catalogos.MetodoPago;
 
 namespace InventoryApp.Application.Interfaces;
 
@@ -7,6 +8,7 @@ public interface IFacturaRepository
     Task<Factura?> GetByIdAsync(int id);
     Task<Factura?> GetByVentaIdAsync(int ventaId);
     Task<List<Factura>> GetAllAsync();
+    Task<CatalogoMetodoPago?> GetMetodoPagoPorCodigoONombreAsync(string valor);
 
     /// <summary>
     /// Recupera la factura sin aplicar el alcance del usuario autenticado.
