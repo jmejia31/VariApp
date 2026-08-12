@@ -65,12 +65,13 @@ public class ConsumoInsumoIntegrationTests
 
             var productoRepository = new ProductoRepository(context);
             var varianteRepository = new ProductoVarianteRepository(context);
+            var movimientoRepository = new MovimientoInventarioRepository(context, usuarioScope.Object);
             var inventario = new InventarioConcurrencyService(context, productoRepository, varianteRepository);
             var service = new ConsumoInsumoService(
                 new ConsumoInsumoRepository(context),
                 productoRepository,
                 varianteRepository,
-                new MovimientoInventarioRepository(context, usuarioScope.Object),
+                movimientoRepository,
                 inventario,
                 new UnitOfWork(context),
                 currentUser.Object,
@@ -102,6 +103,17 @@ public class ConsumoInsumoIntegrationTests
                      m.ReferenciaId == borrador.Id &&
                      m.Causa == CausaMovimientoInventario.ConsumoAdministrativo);
             Assert.Equal(1, await ContarOrigenTipadoAsync(context, movimientoConfirmacion.Id, borrador.Id));
+
+            var movimientoService = new MovimientoInventarioService(movimientoRepository);
+            var movimientoDto = (await movimientoService.GetFilteredAsync(productoId, null, null, null))
+                .Single(m => m.Id == movimientoConfirmacion.Id);
+            Assert.Equal("ConsumoInsumo", movimientoDto.OrigenTipo);
+            Assert.Equal(borrador.Id, movimientoDto.OrigenId);
+            Assert.Null(movimientoDto.CompraId);
+            Assert.Null(movimientoDto.VentaId);
+            Assert.Equal(borrador.Id, movimientoDto.ConsumoInsumoId);
+            Assert.Equal("ConsumoInsumo", movimientoDto.ReferenciaTipo);
+            Assert.Equal(borrador.Id, movimientoDto.ReferenciaId);
 
             await Assert.ThrowsAsync<BusinessRuleException>(() => service.ConfirmarAsync(borrador.Id));
 

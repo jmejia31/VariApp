@@ -13,6 +13,15 @@ public class MovimientoInventarioDto
     public int Cantidad { get; set; }
     public int StockAnterior { get; set; }
     public int StockNuevo { get; set; }
+
+    // ERP-N0.6: origen tipado autoritativo. ReferenciaTipo/ReferenciaId se
+    // conservan temporalmente como snapshot de compatibilidad hasta N0.8.
+    public string? OrigenTipo { get; set; }
+    public int? OrigenId { get; set; }
+    public int? CompraId { get; set; }
+    public int? VentaId { get; set; }
+    public int? ConsumoInsumoId { get; set; }
+
     public string ReferenciaTipo { get; set; } = string.Empty;
     public int ReferenciaId { get; set; }
     public string? Descripcion { get; set; }

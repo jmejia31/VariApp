@@ -1,3 +1,4 @@
+using System.Data;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Common;
 using InventoryApp.Domain.Entities;
@@ -121,6 +122,90 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
         if (hasta.HasValue) query = query.Where(m => m.Fecha <= hasta.Value);
         return await query.OrderByDescending(m => m.Fecha).Take(200).ToListAsync();
     }
+
+    public async Task<IReadOnlyDictionary<int, MovimientoInventarioOrigenPersistido>> GetOrigenesTipadosAsync(
+        IReadOnlyCollection<int> movimientoIds)
+    {
+        var ids = movimientoIds.Distinct().OrderBy(x => x).ToArray();
+        if (ids.Length == 0)
+            return new Dictionary<int, MovimientoInventarioOrigenPersistido>();
+
+        if (!_context.Database.IsRelational())
+        {
+            var movimientos = await _context.MovimientosInventario
+                .AsNoTracking()
+                .Where(m => ids.Contains(m.Id))
+                .Select(m => new { m.Id, m.ReferenciaTipo, m.ReferenciaId })
+                .ToListAsync();
+
+            return movimientos.ToDictionary(
+                m => m.Id,
+                m => CrearOrigenCompatibilidadNoRelacional(m.Id, m.ReferenciaTipo, m.ReferenciaId));
+        }
+
+        var resultado = new Dictionary<int, MovimientoInventarioOrigenPersistido>();
+        var connection = _context.Database.GetDbConnection();
+        var abrirAqui = connection.State != ConnectionState.Open;
+        if (abrirAqui)
+            await connection.OpenAsync();
+
+        try
+        {
+            await using var command = connection.CreateCommand();
+            var parametros = new List<string>(ids.Length);
+            for (var i = 0; i < ids.Length; i++)
+            {
+                var nombre = $"@id{i}";
+                parametros.Add(nombre);
+                var parameter = command.CreateParameter();
+                parameter.ParameterName = nombre;
+                parameter.Value = ids[i];
+                command.Parameters.Add(parameter);
+            }
+
+            command.CommandText = $"""
+                SELECT Id, CompraId, VentaId, ConsumoInsumoId
+                  FROM MovimientosInventario
+                 WHERE Id IN ({string.Join(", ", parametros)})
+                """;
+
+            await using var reader = await command.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                var id = reader.GetInt32(0);
+                var compraId = reader.IsDBNull(1) ? null : reader.GetInt32(1);
+                var ventaId = reader.IsDBNull(2) ? null : reader.GetInt32(2);
+                var consumoInsumoId = reader.IsDBNull(3) ? null : reader.GetInt32(3);
+                var cantidadOrigenes = (compraId.HasValue ? 1 : 0) +
+                                       (ventaId.HasValue ? 1 : 0) +
+                                       (consumoInsumoId.HasValue ? 1 : 0);
+                if (cantidadOrigenes > 1)
+                    throw new InvalidOperationException($"El movimiento {id} tiene más de un origen tipado persistido.");
+
+                resultado[id] = new MovimientoInventarioOrigenPersistido(
+                    id, compraId, ventaId, consumoInsumoId);
+            }
+        }
+        finally
+        {
+            if (abrirAqui)
+                await connection.CloseAsync();
+        }
+
+        return resultado;
+    }
+
+    private static MovimientoInventarioOrigenPersistido CrearOrigenCompatibilidadNoRelacional(
+        int movimientoId,
+        string referenciaTipo,
+        int referenciaId) =>
+        referenciaTipo switch
+        {
+            "Compra" or "CompraAnulada" => new(movimientoId, referenciaId, null, null),
+            "Venta" or "VentaAnulada" => new(movimientoId, null, referenciaId, null),
+            "ConsumoInsumo" => new(movimientoId, null, null, referenciaId),
+            _ => new(movimientoId, null, null, null)
+        };
 
     public async Task<int?> GetUltimoMovimientoOriginalCompraIdAsync(int compraId)
     {
