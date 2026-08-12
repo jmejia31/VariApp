@@ -50,7 +50,7 @@ SET @ventas_huerfanas := (
 SET @consumos_huerfanos := (
     SELECT COUNT(*)
       FROM MovimientosInventario m
-      LEFT JOIN ConsumosInsumo c ON c.Id = m.ReferenciaId
+      LEFT JOIN ConsumosInsumos c ON c.Id = m.ReferenciaId
      WHERE CAST(m.ReferenciaTipo AS BINARY) = CAST('ConsumoInsumo' AS BINARY)
        AND c.Id IS NULL
 );
