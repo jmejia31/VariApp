@@ -15,13 +15,16 @@ Fuente operativa de pendientes. Mantenerla corta; los detalles extensos viven en
 - [x] Unificar reglas de colaboración y eliminar autorización de ramas temporales.
 - [x] Definir matriz de acceso local/remoto del equipo.
 - [x] Incorporar protocolo de optimización de rendimiento/tokens y recuperación tras reconexión.
-- [ ] Javier/Codex/AntiG: sincronizar el checkout local con `origin/Desarrollo` después de este changeset documental.
-- [ ] Continuar ERP-N0 desde el siguiente punto formal del plan rector, usando la documentación ERP-N0 específica y el último commit de `Desarrollo` como evidencia.
+- [x] ERP-N0 Punto 5: seed, preflight fail-closed, backfill histórico `MetodoPago`, postcheck y certificación MySQL 8.4.
+- [ ] Javier/Codex/AntiG: mantener el checkout local sincronizado con `origin/Desarrollo` antes de continuar trabajo local.
+- [ ] Continuar ERP-N0 desde el siguiente punto formal del plan rector, reutilizando `docs/ERP_N0_PUNTO_5_METODO_PAGO_BACKFILL.md` y el último commit de `Desarrollo` como handoff.
 - [ ] Antes de marcar N0 cerrado, verificar que no queden consumidores legacy, migraciones transitorias pendientes, contratos antiguos o documentación contradictoria.
 
 ## Último baseline técnico documentado
 
-`0a60b9b6de7f7d14bbb40de5795cc3c390e57279` — cierre documental de persistencia relacional base de `MetodoPago`.
+Implementación N0.5 certificada: `0b0d18b6fe5cee2380175b0d6175b87274ad157e`.
+
+Punto 5 cerrado: migración `20260812023600_N0_5_BackfillMetodoPagoHistorico`, preflight/postcheck dedicados y CI N0.5 verde. Consultar `docs/ERP_N0_PUNTO_5_METODO_PAGO_BACKFILL.md` para evidencia y reglas de continuidad.
 
 La numeración del nombre de una migración no sustituye el número de punto del plan. Consultar el documento de fase/punto vigente.
 
