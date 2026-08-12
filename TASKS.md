@@ -55,7 +55,7 @@ Estado operativo controlado por `COLA`:
 - [x] N0.6.B Dominio y contratos: origen tipado puro `Compra`/`Venta`/`ConsumoInsumo` con invariante de exactamente un origen. Funcional `5fe605cc93470a4f4b90f73185016b9e15bc622e`; CI general `31575657900` Backend Release/pruebas `SUCCESS`.
 - [ ] N0.6.C Persistencia/migración — subdividida para ejecutar transición fail-closed en cambios pequeños:
   - [x] N0.6.C1 Preflight histórico read-only: valida tipos legacy admitidos, IDs positivos y documentos origen existentes antes de cualquier backfill. Funcional hasta `8b1ca4ceae848280cea59ba7103e6cd7ef227170`; workflow dedicado `31577099764` y CI general `31577099759` en verde.
-  - [ ] N0.6.C2 FKs tipadas nullable + migración/backfill determinista, preservando columnas legacy durante transición.
+  - [x] N0.6.C2 FKs tipadas nullable + migración/backfill determinista, preservando columnas legacy durante transición. Funcional `7375a61165b7e9e32feb6054e843937963472e67`; ERP-N0.6 `31579173571` y CI general `31579173553` en verde.
   - [ ] N0.6.C3 Postcheck, constraints e integridad histórica; cierre del padre N0.6.C.
 - [ ] N0.6.D–H Aplicación/API, frontend si aplica, seguridad/auditoría, QA/CI y certificación según `COLA`.
 
