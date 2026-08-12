@@ -53,7 +53,10 @@ Estado operativo controlado por `COLA`:
 
 - [x] N0.6.A Auditoría y preflight: autoridad legacy de inventario, estado relacional parcial de finanzas, productores/consumidores, riesgos, transición, rollback y plan de pruebas documentados en `docs/ERP_N0_6_REFERENCIAS_POLIMORFICAS_PREFLIGHT.md`.
 - [x] N0.6.B Dominio y contratos: origen tipado puro `Compra`/`Venta`/`ConsumoInsumo` con invariante de exactamente un origen. Funcional `5fe605cc93470a4f4b90f73185016b9e15bc622e`; CI general `31575657900` Backend Release/pruebas `SUCCESS`.
-- [ ] N0.6.C Persistencia/migración: FKs, preflight histórico, backfill determinista, constraints y postcheck antes de retirar autoridad legacy.
+- [ ] N0.6.C Persistencia/migración — subdividida para ejecutar transición fail-closed en cambios pequeños:
+  - [x] N0.6.C1 Preflight histórico read-only: valida tipos legacy admitidos, IDs positivos y documentos origen existentes antes de cualquier backfill. Funcional hasta `8b1ca4ceae848280cea59ba7103e6cd7ef227170`; workflow dedicado `31577099764` y CI general `31577099759` en verde.
+  - [ ] N0.6.C2 FKs tipadas nullable + migración/backfill determinista, preservando columnas legacy durante transición.
+  - [ ] N0.6.C3 Postcheck, constraints e integridad histórica; cierre del padre N0.6.C.
 - [ ] N0.6.D–H Aplicación/API, frontend si aplica, seguridad/auditoría, QA/CI y certificación según `COLA`.
 
 N0.6 puede avanzar de forma independiente del trabajo todavía abierto de N0.5 cuando sus dependencias propias estén satisfechas; N0.7 sí depende de N0.6 según el Plan Maestro.
