@@ -1,6 +1,7 @@
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
+using InventoryApp.Domain.Common;
 using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Enums;
 
@@ -195,25 +196,25 @@ public class ConsumoInsumoService : IConsumoInsumoService
                     _productoVarianteRepository.Update(variante);
                 }
 
-                await _movimientoInventarioRepository.AddAsync(new MovimientoInventario
-                {
-                    ProductoId = producto.Id,
-                    ProductoVarianteId = item.ProductoVarianteId,
-                    ProductoColorSnapshot = color,
-                    ProductoSkuSnapshot = sku,
-                    Tipo = TipoMovimientoInventario.Salida,
-                    Causa = CausaMovimientoInventario.ConsumoAdministrativo,
-                    Cantidad = item.Cantidad,
-                    StockAnterior = stockAnterior,
-                    StockNuevo = stockNuevo,
-                    CostoUnitario = costoUnitario,
-                    ReferenciaTipo = "ConsumoInsumo",
-                    ReferenciaId = consumo.Id,
-                    Descripcion = $"Consumo administrativo {consumo.NumeroConsumo}",
-                    CreadoPorUsuarioId = _currentUser.UsuarioId,
-                    CreadoPorNombreUsuario = _currentUser.NombreUsuario,
-                    Fecha = DateTime.UtcNow
-                });
+                await _movimientoInventarioRepository.AddConOrigenTipadoAsync(
+                    new MovimientoInventario
+                    {
+                        ProductoId = producto.Id,
+                        ProductoVarianteId = item.ProductoVarianteId,
+                        ProductoColorSnapshot = color,
+                        ProductoSkuSnapshot = sku,
+                        Tipo = TipoMovimientoInventario.Salida,
+                        Causa = CausaMovimientoInventario.ConsumoAdministrativo,
+                        Cantidad = item.Cantidad,
+                        StockAnterior = stockAnterior,
+                        StockNuevo = stockNuevo,
+                        CostoUnitario = costoUnitario,
+                        Descripcion = $"Consumo administrativo {consumo.NumeroConsumo}",
+                        CreadoPorUsuarioId = _currentUser.UsuarioId,
+                        CreadoPorNombreUsuario = _currentUser.NombreUsuario,
+                        Fecha = DateTime.UtcNow
+                    },
+                    OrigenMovimientoInventario.DesdeConsumoInsumo(consumo.Id));
             }
 
             consumo.Estado = EstadoConsumoInsumo.Confirmado;
@@ -295,25 +296,25 @@ public class ConsumoInsumoService : IConsumoInsumoService
                     _productoVarianteRepository.Update(variante);
                 }
 
-                await _movimientoInventarioRepository.AddAsync(new MovimientoInventario
-                {
-                    ProductoId = producto.Id,
-                    ProductoVarianteId = item.ProductoVarianteId,
-                    ProductoColorSnapshot = color,
-                    ProductoSkuSnapshot = sku,
-                    Tipo = TipoMovimientoInventario.Reversion,
-                    Causa = CausaMovimientoInventario.ReversionConsumo,
-                    Cantidad = item.Cantidad,
-                    StockAnterior = stockAnterior,
-                    StockNuevo = stockNuevo,
-                    CostoUnitario = costoUnitario,
-                    ReferenciaTipo = "ConsumoInsumo",
-                    ReferenciaId = consumo.Id,
-                    Descripcion = $"Reversión de consumo administrativo {consumo.NumeroConsumo}: {motivo}",
-                    CreadoPorUsuarioId = _currentUser.UsuarioId,
-                    CreadoPorNombreUsuario = _currentUser.NombreUsuario,
-                    Fecha = DateTime.UtcNow
-                });
+                await _movimientoInventarioRepository.AddConOrigenTipadoAsync(
+                    new MovimientoInventario
+                    {
+                        ProductoId = producto.Id,
+                        ProductoVarianteId = item.ProductoVarianteId,
+                        ProductoColorSnapshot = color,
+                        ProductoSkuSnapshot = sku,
+                        Tipo = TipoMovimientoInventario.Reversion,
+                        Causa = CausaMovimientoInventario.ReversionConsumo,
+                        Cantidad = item.Cantidad,
+                        StockAnterior = stockAnterior,
+                        StockNuevo = stockNuevo,
+                        CostoUnitario = costoUnitario,
+                        Descripcion = $"Reversión de consumo administrativo {consumo.NumeroConsumo}: {motivo}",
+                        CreadoPorUsuarioId = _currentUser.UsuarioId,
+                        CreadoPorNombreUsuario = _currentUser.NombreUsuario,
+                        Fecha = DateTime.UtcNow
+                    },
+                    OrigenMovimientoInventario.DesdeConsumoInsumo(consumo.Id));
             }
 
             consumo.Estado = EstadoConsumoInsumo.Anulado;
