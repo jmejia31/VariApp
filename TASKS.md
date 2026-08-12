@@ -33,7 +33,7 @@ Estado operativo controlado por `COLA`:
 - [ ] N0.5.06 Eliminar doble autoridad enum/string, subdividido para evitar un changeset transversal gigante:
   - [x] N0.5.06 A1: preparar `IVentaRepository`/`VentaRepository` para resolver y cargar `MetodoPagoCatalogo`. Funcional `d987cb669de6dfbd00b8691a46e27f566e32138c`; backend y certificación ERP-N0.5 en verde.
   - [x] N0.5.06 A2: migrar escrituras de `VentaService` hacia `MetodoPagoId`/catálogo. Funcional `32feca8840122c7eccd58246a6db7196730d8491`; pruebas dirigidas `e00e20c614c8c66c34f726c82ef4922d48dc21d8`.
-  - [ ] N0.5.06 A3: migrar lecturas/propagación de Venta hacia la relación.
+  - [x] N0.5.06 A3: migrar lecturas/propagación de Venta hacia la relación. Funcional `c024cc7c96da45f6d2b21867950de3c4dce49fd4`; pruebas dirigidas `05687cffcf9d34b3fdd8efd9becf9d158b61f028`.
   - [ ] N0.5.06 B: retirar autoridad legacy de `FacturaPago`.
   - [ ] N0.5.06 C: retirar autoridad legacy de `MovimientoFinanciero`.
 - [ ] N0.5.07 Reglas operativas.
