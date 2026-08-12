@@ -6,55 +6,46 @@ No reemplaza `git log`: registra intención, alcance, validaciones y handoff. Lo
 
 ## Regla obligatoria
 
-Todo changeset intencional debe incluir una entrada breve en este archivo. El objetivo es que otro agente pueda continuar sin reconstruir la historia.
+Todo changeset intencional debe incluir una entrada breve en este archivo. No es necesario modificar otros colaborativos si su contenido no cambió; evitar ruido documental.
 
-No es necesario modificar `PROJECT_CONTEXT.md`, `ARCHITECTURE.md` u otros documentos si su contenido no cambió; evitar actualizaciones artificiales de fecha.
+## 2026-08-11 — VAEP v1: ejecución autónoma, Drive y dependencias
+
+**Responsable:** ChatGPT mediante conexiones autorizadas GitHub + Google Drive.
+
+**Objetivo:** permitir ejecución autónoma de puntos autorizados sin necesitar una instrucción manual por cada tarea, manteniendo control de proyecto, dependencia, concurrencia y evidencia.
+
+**Alcance:**
+
+- creación de `PLAN_EJECUCION_AUTONOMA.md`;
+- creación del Google Sheet `VariApp — Cola de Ejecución Autónoma VAEP` con pestañas `COLA`, `CONFIG` y `BITACORA`;
+- estados estrictos `PENDIENTE -> EN_PROGRESO -> VALIDANDO -> LISTO|BLOQUEADO`;
+- GitHub como autoridad técnica y Drive como tablero operativo;
+- selección por prioridad + dependencias;
+- lock lógico por estado/agente y revalidación de HEAD antes de publicar;
+- regla de continuidad: una tarea bloqueada no detiene la cola, pero solo se puede pasar a tareas sin dependencia directa ni transitiva de la bloqueada;
+- prohibición de reintentos en bucle de una tarea bloqueada;
+- actualización de `AGENTS.md` y `TASKS.md` para hacer VAEP vinculante;
+- preparación de ejecución recurrente de ChatGPT con un máximo operativo de una tarea completada por corrida, pudiendo saltar bloqueadas independientes.
+
+**Validación real:** se verificó el Sheet creado y sus primeras filas; repositorio/rama se comprobaron antes de preparar el changeset. No se tocó `main`, Producción, secretos, bases ni recursos externos productivos.
+
+**Riesgo controlado:** el repositorio tiene trabajo concurrente. Toda publicación VAEP debe ser fast-forward y preservar cambios de otros agentes; nunca force-push.
 
 ## 2026-08-11 — Gobierno colaborativo v2: identidad, aislamiento y evidencia
 
 **Responsable:** ChatGPT mediante conexión GitHub autorizada.
 
-**Baseline remoto final verificado antes de editar:** `3dcc1eb8f304674c48758f7ce66c7dca404f6b00` sobre `Desarrollo`.
-
 **Objetivo:** impedir confusión entre proyectos, reducir trabajo repetitivo y convertir trazabilidad y arranque de sesión en guardrails verificables.
 
-**Alcance:**
+**Alcance:** gate por `PROJECT_ID=VARIAPP`, aislamiento entre proyectos, lectura mínima de colaborativos, evidencia obligatoria en `CHANGELOG_AI.md`, `scripts/iniciar-sesion-ia.ps1`, `pre-commit`, hardening de `post-commit`, configuración colaborativa y política limitada `[skip ci]`.
 
-- gate obligatorio al inicio de cada conversación/sesión;
-- identidad `PROJECT_ID=VARIAPP` + repositorio/rama antes de cualquier escritura;
-- aislamiento explícito de contexto entre proyectos;
-- lectura mínima obligatoria de colaborativos antes de trabajar;
-- obligación de registrar cada changeset en `CHANGELOG_AI.md`;
-- actualización selectiva de `TASKS.md`, contexto, índice y arquitectura para evitar ruido;
-- nuevo `scripts/iniciar-sesion-ia.ps1` read-only;
-- nuevo `.githooks/pre-commit` que bloquea repositorio/rama incorrectos y commits sin evidencia;
-- hardening de `.githooks/post-commit` para no publicar si `origin` no es VariApp;
-- hardening de `scripts/configurar-colaboracion.ps1` para validar identidad del remote;
-- política limitada `[skip ci]` para cambios exclusivamente administrativos/locales;
-- tarea registrada para optimizar duplicidad de triggers CI en un changeset independiente.
-
-**Validación real:** se verificaron repositorio `jmejia31/VariApp`, rama `Desarrollo`, HEAD remoto y los archivos colaborativos afectados. Un primer intento de publicación fue rechazado correctamente por GitHub cuando `Desarrollo` avanzó; no se forzó la rama. Después se observaron y preservaron dos avances concurrentes: cierre documental ERP-N0 Punto 5 hasta `f878c4b30122dc2e594b2805cf2fca423bb5ca31` y escaparate frontend en `3dcc1eb8f304674c48758f7ce66c7dca404f6b00`. No se modificó código de aplicación, migraciones, datos ni Producción en este changeset.
+**Validación real:** se preservaron avances concurrentes sin force-push y no se modificó código funcional, datos ni Producción.
 
 ## 2026-08-11 — Gobierno colaborativo y memoria canónica
 
 **Responsable:** ChatGPT mediante conexión GitHub autorizada.
 
-**Alcance:**
-
-- creación de `PROJECT_CONTEXT.md`;
-- creación de `PROJECT_INDEX.md`;
-- creación de `ARCHITECTURE.md`;
-- creación de `TASKS.md`;
-- creación de `CHANGELOG_AI.md`;
-- alineación de `AGENTS.md`, `CONTRIBUTING.md`, `README.md` y documentación colaborativa;
-- eliminación de la regla que permitía ramas temporales;
-- definición de `Desarrollo` como única rama de trabajo;
-- definición explícita de acceso local: Javier, Codex y AntiG/Antigravity;
-- definición de ChatGPT/otros agentes como acceso remoto vía conector GitHub salvo autorización futura;
-- incorporación de reglas de rendimiento/tokens;
-- incorporación de protocolo de recuperación tras reconexión/compactación sin reescaneo global.
-
-**Validación:** cambio exclusivamente documental; se verificó el estado remoto de `Desarrollo` y la documentación administrativa afectada. No se modificó código, datos, migraciones ni Producción.
+**Alcance:** creación de `PROJECT_CONTEXT.md`, `PROJECT_INDEX.md`, `ARCHITECTURE.md`, `TASKS.md`, `CHANGELOG_AI.md`; alineación colaborativa; `Desarrollo` como única rama; matriz de acceso y reglas de rendimiento/tokens.
 
 **Baseline previo:** `0a60b9b6de7f7d14bbb40de5795cc3c390e57279`.
 
@@ -62,45 +53,22 @@ No es necesario modificar `PROJECT_CONTEXT.md`, `ARCHITECTURE.md` u otros docume
 
 **Responsable:** ChatGPT mediante conexión GitHub autorizada.
 
-**Objetivo:** cerrar la migración histórica hacia `MetodoPagoId` sin pérdida ni reinterpretación de datos legacy.
+**Cambios:** migración `20260812023600_N0_5_BackfillMetodoPagoHistorico`, seed idempotente, backfill exacto, preflight/postcheck, workflow N0.5 y acta documental.
 
-**Cambios:**
+**Validación real:** workflow dedicado N0.5 run `31558300465` success y CI general run `31558300370` en verde.
 
-- migración forward-only `20260812023600_N0_5_BackfillMetodoPagoHistorico`;
-- seed idempotente de `Efectivo`, `Transferencia`, `Tarjeta` y `Otro` por `Codigo` estable;
-- backfill exacto de `Venta`, `FacturaPago` y `MovimientoFinanciero`;
-- preflight `backend/scripts/preflight-erp-n0-5-metodo-pago.sql`;
-- postcheck `backend/scripts/postdeploy-erp-n0-5-metodo-pago.sql`;
-- workflow dedicado `.github/workflows/erp-n0-5-ci.yml`;
-- corrección del postcheck para la limitación `Can't reopen table` de tablas temporales en MySQL 8.4;
-- acta `docs/ERP_N0_PUNTO_5_METODO_PAGO_BACKFILL.md`;
-- actualización de `TASKS.md` para continuidad del equipo.
+**Handoff:** enum y columnas legacy permanecen temporalmente hasta migrar consumidores posteriores previstos.
 
-**Validación real:** workflow dedicado N0.5 run `31558300465` en success, incluyendo prueba fail-closed, preflight válido, backfill 1:1, postcheck y snapshot EF. CI general `Desarrollo - Compilación y pruebas` run `31558300370` completó backend, frontend, higiene, Docker, migraciones actuales, integración MySQL, snapshot y SQL forward en verde.
-
-**Handoff:** el enum y columnas legacy permanecen temporalmente; no retirarlos ni endurecer `MetodoPagoId` hasta migrar los consumidores posteriores previstos por la auditoría del Punto 3.
-
-## Formato futuro
-
-Cada entrada debe contener, de forma breve:
-
-- fecha;
-- agente;
-- objetivo;
-- archivos/áreas modificadas;
-- validaciones reales;
-- riesgos/pendientes;
-- referencia al commit cuando sea útil.
-
-No registrar secretos, credenciales ni datos sensibles.
-# 2026-08-11 — Catálogo público VARISTOREHN sin redirección a login
+## 2026-08-11 — Catálogo público VARISTOREHN sin redirección a login
 
 **Responsable:** Codex.
 
-**Objetivo:** mostrar en el escaparate los productos activos existentes mediante una consulta pública segura, sin requerir sesión ni modificar la base de datos.
+**Objetivo:** mostrar productos activos existentes mediante consulta pública segura sin sesión ni cambio de base de datos.
 
-**Alcance:** proyección pública sin costos ni auditoría, nuevo controlador independiente con `GET /tienda/productos`, consumo desde `frontend/src/app/features/varistorehn` y personalización mediante identidad/tema públicos ya existentes.
+**Alcance:** proyección pública sin costos/auditoría, `GET /tienda/productos`, consumo desde `frontend/src/app/features/varistorehn` y personalización con identidad/tema públicos.
 
-**Validaciones:** backend Release compiló sin advertencias ni errores; las 2 pruebas dirigidas `TiendaPublicaTests` aprobaron; frontend `npm run lint` y `npm run build:prod` aprobaron. La suite backend completa aprobó 273/291 y las 18 integraciones restantes fallaron por rechazo de credenciales del MySQL local, no por este cambio.
+**Validaciones:** backend Release sin advertencias/errores; 2 pruebas `TiendaPublicaTests` aprobadas; frontend lint y build producción aprobados. Suite backend 273/291; 18 integraciones fallaron por credenciales MySQL locales, no por el cambio.
 
-**Riesgos/pendientes:** el catálogo expone únicamente información comercial; las operaciones administrativas continúan protegidas.
+## Formato futuro
+
+Cada entrada debe contener fecha, agente, objetivo, archivos/áreas, validaciones reales, riesgos/pendientes y commit cuando sea útil. No registrar secretos, credenciales ni datos sensibles.
