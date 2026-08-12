@@ -42,8 +42,8 @@ public class MovimientoFinancieroRepository : IMovimientoFinancieroRepository
                 .Where(m =>
                     m.CompraId == movimiento.CompraId &&
                     m.EsAutomatico &&
-                    m.ModuloOrigen == "Compra" &&
-                    m.Tipo == TipoMovimientoFinanciero.Egreso)
+                    m.Tipo == TipoMovimientoFinanciero.Egreso &&
+                    m.Categoria == CategoriaMovimientoFinanciero.Compra)
                 .OrderBy(m => m.Id)
                 .FirstOrDefaultAsync()
                 ?? throw new BusinessRuleException(
@@ -100,7 +100,8 @@ public class MovimientoFinancieroRepository : IMovimientoFinancieroRepository
             .Where(m =>
                 m.CompraId == compraId &&
                 m.EsAutomatico &&
-                m.ModuloOrigen == "Compra")
+                m.Tipo == TipoMovimientoFinanciero.Egreso &&
+                m.Categoria == CategoriaMovimientoFinanciero.Compra)
             .OrderBy(m => m.Id)
             .FirstOrDefaultAsync();
     }
@@ -170,7 +171,6 @@ public class MovimientoFinancieroRepository : IMovimientoFinancieroRepository
     private static bool EsReversionAutomaticaDeCompra(MovimientoFinanciero movimiento) =>
         movimiento.EsAutomatico &&
         movimiento.CompraId.HasValue &&
-        movimiento.ModuloOrigen == "Reversion" &&
         movimiento.Tipo == TipoMovimientoFinanciero.Ingreso &&
         movimiento.Categoria == CategoriaMovimientoFinanciero.Reversion;
 }
