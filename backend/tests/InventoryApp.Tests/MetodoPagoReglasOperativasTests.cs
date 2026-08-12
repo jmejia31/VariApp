@@ -22,7 +22,7 @@ public class MetodoPagoReglasOperativasTests
     {
         var metodo = new MetodoPago();
 
-        Assert.Throws<JsonException>(() => metodo.Metadata = "{\"terminal\":");
+        Assert.ThrowsAny<JsonException>(() => metodo.Metadata = "{\"terminal\":");
     }
 
     [Fact]
