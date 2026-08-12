@@ -6,6 +6,7 @@ using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Enums;
 using Moq;
 using Xunit;
+using CatalogoMetodoPago = InventoryApp.Domain.Entities.Catalogos.MetodoPago;
 
 namespace InventoryApp.Tests;
 
@@ -112,7 +113,9 @@ public class FacturaServicePagosTests
         {
             Id = 9,
             NumeroVenta = "VEN-000009",
-            EstadoPago = EstadoPago.Pendiente
+            EstadoPago = EstadoPago.Pendiente,
+            MetodoPagoId = 1,
+            MetodoPagoCatalogo = CrearMetodoPago(1, "EFECTIVO", "Efectivo")
         }
     };
 
@@ -121,10 +124,24 @@ public class FacturaServicePagosTests
         var repository = new Mock<IFacturaRepository>();
         repository.Setup(x => x.GetByIdAsync(factura.Id)).ReturnsAsync(factura);
         repository.Setup(x => x.SaveChangesAsync()).ReturnsAsync(true);
+        repository.Setup(x => x.GetMetodoPagoPorCodigoONombreAsync(It.IsAny<string>()))
+            .ReturnsAsync((string valor) => valor.Trim().Equals("Transferencia", StringComparison.OrdinalIgnoreCase)
+                ? CrearMetodoPago(2, "TRANSFERENCIA", "Transferencia")
+                : valor.Trim().Equals("Efectivo", StringComparison.OrdinalIgnoreCase)
+                    ? CrearMetodoPago(1, "EFECTIVO", "Efectivo")
+                    : null);
 
         var empresa = new Mock<IEmpresaConfiguracionService>();
         empresa.Setup(x => x.GetActivaAsync()).ReturnsAsync(new EmpresaConfiguracionDto());
 
         return (new FacturaService(repository.Object, empresa.Object), repository);
     }
+
+    private static CatalogoMetodoPago CrearMetodoPago(int id, string codigo, string nombre) => new()
+    {
+        Id = id,
+        Codigo = codigo,
+        Nombre = nombre,
+        Activo = true
+    };
 }
