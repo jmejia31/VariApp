@@ -1,0 +1,95 @@
+name: ERP-N0.6 - Preflight referencias polimorficas
+
+on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - 'backend/scripts/preflight-erp-n0-6-origen-movimiento-inventario.sql'
+      - '.github/workflows/erp-n0-6-preflight-ci.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'backend/scripts/preflight-erp-n0-6-origen-movimiento-inventario.sql'
+      - '.github/workflows/erp-n0-6-preflight-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: erp-n0-6-preflight-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  preflight-origen-inventario:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: inventoryapp_n06_ci
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -proot"
+          --health-interval=10s --health-timeout=5s --health-retries=12
+    env:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: Server=127.0.0.1;Port=3306;Database=inventoryapp_n06_ci;User=root;Password=root;SslMode=None;AllowPublicKeyRetrieval=True;
+      Database__ServerVersion: 8.4.0
+      Database__ApplyMigrationsOnStartup: 'false'
+      Jwt__Secret: ERP-N0-6-CI-Only-Secret-With-More-Than-32-Characters-2026
+      Jwt__Issuer: VariApp.CI
+      Jwt__Audience: VariApp.CI.Frontend
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Restaurar e instalar EF
+        working-directory: backend
+        run: |
+          dotnet restore InventoryApp.sln
+          dotnet tool install --global dotnet-ef --version 8.0.8
+      - name: Aplicar esquema actual
+        working-directory: backend
+        run: |
+          dotnet ef database update \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext
+      - name: Certificar preflight fail-closed
+        shell: bash
+        run: |
+          set -euo pipefail
+          c="${{ job.services.mysql.id }}"
+          script='backend/scripts/preflight-erp-n0-6-origen-movimiento-inventario.sql'
+
+          ejecutar_preflight() {
+            docker exec -i "$c" mysql -uroot -proot inventoryapp_n06_ci \
+              --batch --skip-column-names < "$script" | tail -n 1
+          }
+
+          test "$(ejecutar_preflight)" = '0'
+
+          docker exec "$c" mysql -uroot -proot inventoryapp_n06_ci -e "
+            SET @producto_id=(SELECT Id FROM Productos ORDER BY Id LIMIT 1);
+            INSERT INTO MovimientosInventario
+              (ProductoId,Tipo,Causa,Cantidad,StockAnterior,StockNuevo,ReferenciaTipo,ReferenciaId,Fecha)
+            VALUES
+              (@producto_id,'Entrada',0,1,0,1,'OrigenDesconocido',999999,UTC_TIMESTAMP(6));"
+          test "$(ejecutar_preflight)" -gt 0
+          docker exec "$c" mysql -uroot -proot inventoryapp_n06_ci -e "DELETE FROM MovimientosInventario WHERE ReferenciaTipo='OrigenDesconocido';"
+
+          docker exec "$c" mysql -uroot -proot inventoryapp_n06_ci -e "
+            SET @producto_id=(SELECT Id FROM Productos ORDER BY Id LIMIT 1);
+            INSERT INTO MovimientosInventario
+              (ProductoId,Tipo,Causa,Cantidad,StockAnterior,StockNuevo,ReferenciaTipo,ReferenciaId,Fecha)
+            VALUES
+              (@producto_id,'Entrada',0,1,0,1,'Compra',999999,UTC_TIMESTAMP(6));"
+          test "$(ejecutar_preflight)" -gt 0
+          docker exec "$c" mysql -uroot -proot inventoryapp_n06_ci -e "DELETE FROM MovimientosInventario WHERE ReferenciaTipo='Compra' AND ReferenciaId=999999;"
+
+          test "$(ejecutar_preflight)" = '0'
