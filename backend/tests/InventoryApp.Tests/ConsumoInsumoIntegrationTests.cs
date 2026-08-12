@@ -1,3 +1,4 @@
+using System.Data;
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
@@ -100,15 +101,7 @@ public class ConsumoInsumoIntegrationTests
                 m => m.ReferenciaTipo == "ConsumoInsumo" &&
                      m.ReferenciaId == borrador.Id &&
                      m.Causa == CausaMovimientoInventario.ConsumoAdministrativo);
-            var origenTipadoConfirmacion = await context.Database.SqlQueryInterpolated<int>($"""
-                SELECT COUNT(*) AS Value
-                  FROM MovimientosInventario
-                 WHERE Id = {movimientoConfirmacion.Id}
-                   AND ConsumoInsumoId = {borrador.Id}
-                   AND CompraId IS NULL
-                   AND VentaId IS NULL
-                """).SingleAsync();
-            Assert.Equal(1, origenTipadoConfirmacion);
+            Assert.Equal(1, await ContarOrigenTipadoAsync(context, movimientoConfirmacion.Id, borrador.Id));
 
             await Assert.ThrowsAsync<BusinessRuleException>(() => service.ConfirmarAsync(borrador.Id));
 
@@ -127,19 +120,52 @@ public class ConsumoInsumoIntegrationTests
                 m => m.ReferenciaTipo == "ConsumoInsumo" &&
                      m.ReferenciaId == borrador.Id &&
                      m.Causa == CausaMovimientoInventario.ReversionConsumo);
-            var origenTipadoReversion = await context.Database.SqlQueryInterpolated<int>($"""
-                SELECT COUNT(*) AS Value
-                  FROM MovimientosInventario
-                 WHERE Id = {movimientoReversion.Id}
-                   AND ConsumoInsumoId = {borrador.Id}
-                   AND CompraId IS NULL
-                   AND VentaId IS NULL
-                """).SingleAsync();
-            Assert.Equal(1, origenTipadoReversion);
+            Assert.Equal(1, await ContarOrigenTipadoAsync(context, movimientoReversion.Id, borrador.Id));
         }
         finally
         {
             await context.Database.EnsureDeletedAsync();
+        }
+    }
+
+    private static async Task<int> ContarOrigenTipadoAsync(
+        AppDbContext context,
+        int movimientoId,
+        int consumoInsumoId)
+    {
+        var connection = context.Database.GetDbConnection();
+        var abrirAqui = connection.State != ConnectionState.Open;
+        if (abrirAqui)
+            await connection.OpenAsync();
+
+        try
+        {
+            await using var command = connection.CreateCommand();
+            command.CommandText = """
+                SELECT COUNT(*)
+                  FROM MovimientosInventario
+                 WHERE Id = @movimientoId
+                   AND ConsumoInsumoId = @consumoInsumoId
+                   AND CompraId IS NULL
+                   AND VentaId IS NULL
+                """;
+
+            var movimientoParam = command.CreateParameter();
+            movimientoParam.ParameterName = "@movimientoId";
+            movimientoParam.Value = movimientoId;
+            command.Parameters.Add(movimientoParam);
+
+            var consumoParam = command.CreateParameter();
+            consumoParam.ParameterName = "@consumoInsumoId";
+            consumoParam.Value = consumoInsumoId;
+            command.Parameters.Add(consumoParam);
+
+            return Convert.ToInt32(await command.ExecuteScalarAsync());
+        }
+        finally
+        {
+            if (abrirAqui)
+                await connection.CloseAsync();
         }
     }
 }
