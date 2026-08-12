@@ -60,8 +60,11 @@ Estado operativo controlado por `COLA`:
 - [ ] N0.6.D Aplicación, servicios y API — subdividida para mantener autoridad tipada por concern:
   - [x] N0.6.D1 Repositorio/consultas de `MovimientoInventario` migradas a `CompraId` como autoridad relacional. Funcional `2a2e093f66899b9c02c18026ecd3f270b6a730c1`; corrección de fixture `c19aa5005ef7262d91f118f5f4adf7b78aaf41e9`; CI general `31585718867` en verde completo.
   - [ ] N0.6.D2 Productores de `MovimientoInventario` — subdivididos:
-    - [ ] N0.6.D2A Mapping de `CompraId/VentaId/ConsumoInsumoId` en dominio/EF — implementación publicada; `VALIDANDO`.
-    - [ ] N0.6.D2B `CompraService`/`VentaService`/`ConsumoInsumoService` escriben FKs tipadas.
+    - [x] N0.6.D2A boundary de escritura `typed-first` certificado; corrección final `6eadf19a27a0c7c90b0cec54262070f896209738`; CI general `31587640123` en verde completo.
+    - [ ] N0.6.D2B productores tipados — subdividido:
+      - [x] N0.6.D2B1 `CompraService` confirma/anula mediante `AddConOrigenTipadoAsync` + `OrigenMovimientoInventario.DesdeCompra`; funcional `e62b0667f4faace2d8d6520f753547b3e2624a1d`, pruebas `c76124980914edbea57ad7ff97eaa705171a2d58`, CI general `31589093189` en verde completo.
+      - [ ] N0.6.D2B2 migrar productor `VentaService`.
+      - [ ] N0.6.D2B3 migrar productor `ConsumoInsumoService`.
   - [ ] N0.6.D3 Contrato DTO/API de inventario + verificación de autoridad tipada en finanzas.
 - [ ] N0.6.E–H Frontend si aplica, seguridad/auditoría, QA/CI y certificación según `COLA`.
 
