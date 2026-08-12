@@ -2,7 +2,38 @@
 
 Bitácora colaborativa de cambios realizados por Javier Mejía, Codex, AntiG/Antigravity, ChatGPT y futuros agentes autorizados.
 
-No reemplaza `git log`: registra intención, alcance y handoff. Los SHA exactos se consultan en Git.
+No reemplaza `git log`: registra intención, alcance, validaciones y handoff. Los SHA exactos se consultan en Git.
+
+## Regla obligatoria
+
+Todo changeset intencional debe incluir una entrada breve en este archivo. El objetivo es que otro agente pueda continuar sin reconstruir la historia.
+
+No es necesario modificar `PROJECT_CONTEXT.md`, `ARCHITECTURE.md` u otros documentos si su contenido no cambió; evitar actualizaciones artificiales de fecha.
+
+## 2026-08-11 — Gobierno colaborativo v2: identidad, aislamiento y evidencia
+
+**Responsable:** ChatGPT mediante conexión GitHub autorizada.
+
+**Baseline remoto final verificado antes de editar:** `3dcc1eb8f304674c48758f7ce66c7dca404f6b00` sobre `Desarrollo`.
+
+**Objetivo:** impedir confusión entre proyectos, reducir trabajo repetitivo y convertir trazabilidad y arranque de sesión en guardrails verificables.
+
+**Alcance:**
+
+- gate obligatorio al inicio de cada conversación/sesión;
+- identidad `PROJECT_ID=VARIAPP` + repositorio/rama antes de cualquier escritura;
+- aislamiento explícito de contexto entre proyectos;
+- lectura mínima obligatoria de colaborativos antes de trabajar;
+- obligación de registrar cada changeset en `CHANGELOG_AI.md`;
+- actualización selectiva de `TASKS.md`, contexto, índice y arquitectura para evitar ruido;
+- nuevo `scripts/iniciar-sesion-ia.ps1` read-only;
+- nuevo `.githooks/pre-commit` que bloquea repositorio/rama incorrectos y commits sin evidencia;
+- hardening de `.githooks/post-commit` para no publicar si `origin` no es VariApp;
+- hardening de `scripts/configurar-colaboracion.ps1` para validar identidad del remote;
+- política limitada `[skip ci]` para cambios exclusivamente administrativos/locales;
+- tarea registrada para optimizar duplicidad de triggers CI en un changeset independiente.
+
+**Validación real:** se verificaron repositorio `jmejia31/VariApp`, rama `Desarrollo`, HEAD remoto y los archivos colaborativos afectados. Un primer intento de publicación fue rechazado correctamente por GitHub cuando `Desarrollo` avanzó; no se forzó la rama. Después se observaron y preservaron dos avances concurrentes: cierre documental ERP-N0 Punto 5 hasta `f878c4b30122dc2e594b2805cf2fca423bb5ca31` y escaparate frontend en `3dcc1eb8f304674c48758f7ce66c7dca404f6b00`. No se modificó código de aplicación, migraciones, datos ni Producción en este changeset.
 
 ## 2026-08-11 — Gobierno colaborativo y memoria canónica
 

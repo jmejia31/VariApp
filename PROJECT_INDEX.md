@@ -4,22 +4,23 @@
 
 ## Lectura inicial mínima
 
-1. `AGENTS.md` — reglas obligatorias.
-2. `PROJECT_CONTEXT.md` — contexto técnico base.
+1. `AGENTS.md` — reglas obligatorias y gate de identidad.
+2. `PROJECT_CONTEXT.md` — contexto técnico base e identidad `VARIAPP`.
 3. `TASKS.md` — trabajo pendiente/vigente.
-4. `PROJECT_INDEX.md` — localizar archivos.
-5. `ARCHITECTURE.md` — solo cuando la tarea implique arquitectura, dependencias transversales o diseño.
+4. última entrada relevante de `CHANGELOG_AI.md` — continuidad entre agentes.
+5. `PROJECT_INDEX.md` — localizar archivos.
+6. `ARCHITECTURE.md` — solo cuando la tarea implique arquitectura, dependencias transversales o diseño.
 
 No leer todos los documentos administrativos en cada tarea. Consultarlos solo cuando sean relevantes.
 
 ## Raíz
 
 - `AGENTS.md`: reglas obligatorias para cualquier agente.
-- `PROJECT_CONTEXT.md`: memoria técnica canónica.
+- `PROJECT_CONTEXT.md`: memoria técnica canónica e identidad inequívoca del proyecto.
 - `PROJECT_INDEX.md`: este índice.
 - `ARCHITECTURE.md`: arquitectura y patrones.
 - `TASKS.md`: pendientes operativos.
-- `CHANGELOG_AI.md`: bitácora de cambios del equipo.
+- `CHANGELOG_AI.md`: bitácora/evidencia de cada changeset.
 - `README.md`: introducción, stack y operación básica.
 - `CONTRIBUTING.md`: flujo Git y criterios de contribución.
 - `implementation_plan.md`: plan de implementación histórico/específico cuando aplique.
@@ -31,23 +32,23 @@ No leer todos los documentos administrativos en cada tarea. Consultarlos solo cu
 
 ### `backend/src/Domain`
 
-Responsabilidad: entidades, enums y elementos puros de dominio. No debe depender de Infrastructure ni API.
+Entidades, enums y elementos puros de dominio. No debe depender de Infrastructure ni API.
 
 ### `backend/src/Application`
 
-Responsabilidad: casos de uso, DTO, interfaces, servicios, validadores y contratos. Puede depender de Domain, no de detalles concretos de infraestructura.
+Casos de uso, DTO, interfaces, servicios, validadores y contratos. Puede depender de Domain, no de detalles concretos de infraestructura.
 
 ### `backend/src/Infrastructure`
 
-Responsabilidad: EF Core, `AppDbContext`, repositorios, configuraciones, migraciones, Cloudinary, SMTP, QuestPDF y demás adaptadores concretos.
+EF Core, `AppDbContext`, repositorios, configuraciones, migraciones, Cloudinary, SMTP, QuestPDF y demás adaptadores concretos.
 
 ### `backend/src/API`
 
-Responsabilidad: controladores, middleware, filtros, configuración HTTP, autenticación/autorización, DI y arranque. `Program.cs` es el composition root.
+Controladores, middleware, filtros, configuración HTTP, autenticación/autorización, DI y arranque. `Program.cs` es el composition root.
 
 ### `backend/tests`
 
-Responsabilidad: pruebas backend. Ejecutar pruebas dirigidas para cambios localizados y suite completa en cierres/cambios transversales.
+Pruebas backend. Ejecutar pruebas dirigidas para cambios localizados y suite completa en cierres/cambios transversales.
 
 ## Frontend
 
@@ -75,7 +76,7 @@ Pruebas Playwright para flujos críticos.
 
 ### `docs/`
 
-Documentación funcional, técnica, certificaciones, auditorías ERP-N0 y scripts/guías complementarias.
+Documentación funcional, técnica, certificaciones, auditorías ERP-N0 y guías complementarias.
 
 Administración colaborativa central:
 
@@ -87,20 +88,28 @@ Documentación ERP-N0: archivos `docs/ERP_N0_*.md` y documentos específicos por
 
 No cargar toda la carpeta `docs` por defecto. Abrir únicamente el documento asociado al punto en ejecución.
 
-## Automatización y CI
+## Automatización local de colaboración
+
+- `scripts/iniciar-sesion-ia.ps1`: gate read-only de identidad, rama, HEAD, divergencia y estado del checkout. Ejecutarlo al inicio de cada conversación/sesión local.
+- `scripts/configurar-colaboracion.ps1`: configuración inicial/sincronización del flujo local y hooks.
+- `.githooks/pre-commit`: bloquea commits locales si repo/rama son incorrectos o falta `CHANGELOG_AI.md` en el changeset.
+- `.githooks/post-commit`: publica commits de `Desarrollo` solo si `origin` pertenece realmente a VariApp.
+
+## CI
 
 - `.github/workflows/`: CI y automatizaciones versionadas.
-- `.githooks/`: hooks compartidos locales.
-- `scripts/`: scripts auxiliares de configuración/validación.
+- Para cambios puramente administrativos/locales puede utilizarse `[skip ci]` bajo las condiciones estrictas de `AGENTS.md`.
+- Los workflows y triggers solo deben modificarse con inspección dirigida; no desactivar validaciones funcionales para ahorrar tiempo.
 
 ## Regla de navegación dirigida
 
 Para una tarea normal:
 
-1. identificar módulo;
-2. abrir el archivo de entrada del módulo;
-3. seguir únicamente imports/interfaces/repositorios/DTO directamente relacionados;
-4. buscar símbolos concretos con `rg`/búsqueda de código;
-5. detener expansión cuando ya exista evidencia suficiente para implementar.
+1. confirmar PROJECT_ID/repo/rama;
+2. identificar módulo;
+3. abrir archivo de entrada;
+4. seguir únicamente imports/interfaces/repositorios/DTO directamente relacionados;
+5. buscar símbolos concretos;
+6. detener expansión cuando exista evidencia suficiente.
 
 No listar recursivamente todo `backend`, `frontend` o `docs` salvo cambio estructural justificado.

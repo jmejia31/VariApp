@@ -1,6 +1,20 @@
 # PROJECT_CONTEXT — VariApp
 
-> Fuente principal de contexto técnico del proyecto. Todo integrante debe leer este archivo antes de volver a explorar código ya documentado.
+> Fuente principal de contexto técnico de **VariApp exclusivamente**. Todo integrante debe leer este archivo antes de explorar código ya documentado.
+
+## 0. Identidad inequívoca del proyecto
+
+```text
+PROJECT_ID: VARIAPP
+Repositorio GitHub: jmejia31/VariApp
+Repository ID: 1293033995
+Rama única de trabajo: Desarrollo
+PR oficial: #2 Desarrollo -> main
+```
+
+Esta identidad funciona como frontera anti-contaminación entre proyectos. Si la sesión actual no puede comprobar que está operando sobre `jmejia31/VariApp`, no debe modificar nada usando este contexto.
+
+Nunca importar automáticamente rutas, ramas, planes, bases, reglas o decisiones de otro proyecto. Un cambio explícito de proyecto exige volver a verificar la identidad del repositorio destino y leer sus propios documentos canónicos.
 
 ## 1. Estado canónico
 
@@ -10,17 +24,33 @@
 - PR oficial: `Desarrollo -> main`, debe permanecer abierto y en borrador hasta autorización expresa de Javier Mejía.
 - Entornos lógicos autorizados: `varistorehn_producción` y `varistorehn_desarrollo`.
 - Baseline arquitectónico revisado: `0a60b9b6de7f7d14bbb40de5795cc3c390e57279`.
-- Fecha de consolidación de contexto: 2026-08-11.
+- Fecha de consolidación arquitectónica: 2026-08-11.
+
+El baseline arquitectónico no pretende ser el HEAD actual. Para estado operativo vivo consultar Git + `TASKS.md` + `CHANGELOG_AI.md`.
 
 Este archivo reemplaza la necesidad de reanalizar el repositorio completo en cada sesión. Se actualiza cuando exista un cambio arquitectónico real, un módulo ERP mayor nuevo o una modificación transversal que invalide este mapa.
 
-## 2. Propósito del sistema
+## 2. Bootstrap obligatorio de conversación/sesión
+
+Cada conversación nueva, cambio de agente, reconexión o compactación comienza así:
+
+1. verificar `PROJECT_ID=VARIAPP` y repositorio `jmejia31/VariApp`;
+2. verificar rama `Desarrollo` y HEAD actual;
+3. leer `AGENTS.md`;
+4. leer este archivo;
+5. leer `TASKS.md` y la última entrada relevante de `CHANGELOG_AI.md`;
+6. revisar solo commits nuevos desde el handoff/baseline operativo conocido;
+7. abrir únicamente archivos afectados que sean necesarios para la tarea.
+
+Con acceso local, usar `scripts/iniciar-sesion-ia.ps1` como gate read-only antes de editar. Con acceso remoto, ejecutar la verificación equivalente mediante el conector GitHub disponible.
+
+## 3. Propósito del sistema
 
 VariApp administra la operación comercial de VariStorehn y evoluciona hacia un ERP empresarial: catálogo de productos, variantes, inventario, compras, ventas, clientes, proveedores, facturación, finanzas, usuarios, roles, permisos, auditoría, reportes e integraciones.
 
 La factura actual es un comprobante comercial interno mientras no exista habilitación fiscal SAR/CAI aplicable.
 
-## 3. Stack vigente
+## 4. Stack vigente
 
 ### Frontend
 
@@ -52,7 +82,7 @@ La factura actual es un comprobante comercial interno mientras no exista habilit
 - SMTP para correo.
 - Vercel para frontend, Render para API, Aiven para MySQL y Cloudinary para medios.
 
-## 4. Arquitectura funcional resumida
+## 5. Arquitectura funcional resumida
 
 ### Backend
 
@@ -72,33 +102,29 @@ Flujo típico:
 
 `Route -> Guard -> Standalone Component -> Angular Service -> API -> estado/UI`
 
-## 5. Dominios/módulos actualmente presentes
+## 6. Dominios/módulos actualmente presentes
 
 El repositorio ya contiene funcionalidad para, entre otros:
 
 - Dashboard.
-- Productos.
-- Variantes de producto.
+- Productos y variantes.
 - Catálogos de producto: color, talla, marca y modelo.
 - Categorías.
 - Clientes y tipos de cliente.
 - Proveedores.
-- Usuarios.
-- Roles y permisos.
+- Usuarios, roles y permisos.
 - Auditoría.
 - Compras y documentos de compra.
 - Ventas.
 - Facturación y pagos.
-- Descuentos.
-- Impuestos.
-- Costos de envío.
+- Descuentos, impuestos y costos de envío.
 - Inventario y movimientos.
 - Finanzas y movimientos financieros.
 - Cargas masivas.
 - Reportería administrativa.
 - Perfil, tema visual y configuración empresarial.
 
-## 6. Seguridad y autorización
+## 7. Seguridad y autorización
 
 - Autenticación JWT.
 - Autorización backend obligatoria; el frontend no sustituye controles del servidor.
@@ -109,7 +135,7 @@ El repositorio ya contiene funcionalidad para, entre otros:
 - Auditoría transversal.
 - Secretos únicamente en configuración segura de entornos; nunca en Git.
 
-## 7. Persistencia y migraciones
+## 8. Persistencia y migraciones
 
 - `AppDbContext` usa EF Core/MySQL.
 - Las configuraciones de entidad se aplican desde el assembly de Infrastructure.
@@ -117,7 +143,7 @@ El repositorio ya contiene funcionalidad para, entre otros:
 - Producción no recibe migraciones sin autorización expresa de Javier Mejía y validaciones previas.
 - ERP-N0 usa transiciones expand-and-contract para retirar legacy sin big-bang.
 
-## 8. Roadmap rector vigente
+## 9. Roadmap rector vigente
 
 El baseline histórico M0–M13 se conserva cerrado. La evolución ERP sigue, en orden estricto:
 
@@ -138,13 +164,15 @@ Transversales T0–T12: arquitectura, BD, migraciones, seguridad, auditoría, QA
 
 No se inicia N1 hasta cerrar formalmente N0.
 
-## 9. Estado técnico reciente relevante
+## 10. Estado técnico reciente relevante
 
-A la fecha del baseline, ERP-N0 contiene documentación de auditoría legacy y trabajo de normalización de producto/variantes, RBAC relacional y `MetodoPago`. El commit `0a60b9b6de7f7d14bbb40de5795cc3c390e57279` cerró documentalmente la persistencia relacional base de `MetodoPago`, manteniendo compatibilidad legacy de transición.
+El contexto arquitectónico documenta auditoría legacy y normalización de producto/variantes, RBAC relacional y `MetodoPago` dentro de ERP-N0.
 
-Para el siguiente trabajo concreto consultar siempre `TASKS.md` y la documentación ERP-N0 afectada; no inferir el siguiente punto por el nombre de una migración.
+El commit `0a60b9b6de7f7d14bbb40de5795cc3c390e57279` cerró documentalmente la persistencia relacional base de `MetodoPago`, manteniendo compatibilidad legacy de transición.
 
-## 10. Equipo y acceso
+Después del primer changeset de gobierno colaborativo (`215d5feed3cdd4725b7c89a48bf8bad55874c6aa`), `Desarrollo` continuó con trabajo ERP-N0.5. El estado operativo exacto debe leerse en `TASKS.md`, `CHANGELOG_AI.md` y Git; no inferirlo del baseline arquitectónico.
+
+## 11. Equipo y acceso
 
 Equipo permanente:
 
@@ -159,22 +187,31 @@ Acceso al filesystem/proyecto local de la PC: únicamente Javier Mejía, Codex y
 
 ChatGPT y cualquier otro agente se consideran **sin acceso local**. Pueden usar GitHub únicamente mediante una conexión/conector autorizado y comprobado. Nunca deben afirmar que modificaron archivos locales de la PC si solo modificaron GitHub.
 
-## 11. Regla de rendimiento y tokens
+## 12. Evidencia y continuidad
+
+- Cada changeset intencional registra una entrada breve en `CHANGELOG_AI.md`.
+- `TASKS.md` cambia cuando cambia el estado operativo, aparece un bloqueo o surge un pendiente relevante.
+- `PROJECT_CONTEXT.md`, `PROJECT_INDEX.md` y `ARCHITECTURE.md` solo se editan cuando cambia lo que documentan.
+- Las reglas colaborativas se actualizan cuando cambian gobierno, accesos o protocolo.
+- Git (`commit`, diff, workflow real) es la evidencia técnica; nunca inventar resultados.
+
+Este criterio garantiza trazabilidad sin inflar artificialmente los documentos canónicos.
+
+## 13. Regla de rendimiento y tokens
 
 1. No volver a recorrer todo el repositorio para cada solicitud.
 2. Usar este archivo como contexto base.
-3. Leer solo archivos directamente afectados y sus dependencias directas.
+3. Leer solo archivos directamente afectados y dependencias directas.
 4. No releer archivos ya documentados si Git demuestra que no cambiaron.
-5. Detectar cambios desde el baseline/último commit conocido con `git diff`, `git log` o búsquedas dirigidas.
+5. Detectar cambios con `git diff`, `git log` o búsquedas dirigidas.
 6. Expandir el análisis únicamente cuando aparezca una dependencia real.
 7. Si una tarea puede resolverse modificando menos archivos, elegir esa solución.
 8. Priorizar cambios pequeños, localizados, reversibles y verificables.
 9. No analizar módulos no relacionados una vez cumplido el objetivo.
-10. Si la solicitud es realmente ambigua y el repositorio no la resuelve de forma dirigida, pedir aclaración en lugar de explorar todo el proyecto.
-11. Tras una reconexión o compactación de contexto, no reiniciar el diagnóstico: releer `PROJECT_CONTEXT.md`, `TASKS.md`, revisar `git status` y los últimos commits, y continuar.
-12. Solo renovar este contexto completo cuando cambie de forma importante la arquitectura o se agregue un módulo mayor.
+10. Tras reconexión/compactación, recuperar estado y continuar; no reiniciar diagnóstico.
+11. Solo renovar este contexto completo cuando cambie de forma importante la arquitectura o se agregue un módulo mayor.
 
-## 12. Cuándo actualizar este archivo
+## 14. Cuándo actualizar este archivo
 
 Actualizar si ocurre alguno de estos eventos:
 

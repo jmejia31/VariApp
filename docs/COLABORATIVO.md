@@ -1,44 +1,68 @@
 # Espacio de Coordinación Colaborativa — VariApp
 
-Este documento define el handoff entre Javier Mejía, Codex, AntiG/Antigravity y ChatGPT. El estado técnico vivo se consulta en Git y `TASKS.md`; no se congelan aquí cifras de tests/builds que puedan quedar obsoletas.
+Este documento define el handoff entre Javier Mejía, Codex, AntiG/Antigravity y ChatGPT. El estado técnico vivo se consulta en Git, `TASKS.md` y `CHANGELOG_AI.md`; no se congelan aquí cifras de tests/builds que puedan quedar obsoletas.
 
-## 1. Fuentes canónicas
+## 1. Identidad y gate de sesión
 
-- `PROJECT_CONTEXT.md`: contexto técnico.
+```text
+PROJECT_ID=VARIAPP
+REPOSITORY=jmejia31/VariApp
+BRANCH=Desarrollo
+```
+
+Toda conversación/sesión nueva comienza confirmando esos tres valores. Si alguno no coincide, no se modifica nada con estas reglas.
+
+Con acceso local: `scripts/iniciar-sesion-ia.ps1`.
+
+Con acceso remoto: comprobación equivalente mediante GitHub.
+
+## 2. Fuentes canónicas
+
+- `PROJECT_CONTEXT.md`: contexto técnico/identidad.
 - `PROJECT_INDEX.md`: índice dirigido.
 - `ARCHITECTURE.md`: arquitectura.
 - `TASKS.md`: pendientes.
-- `CHANGELOG_AI.md`: cambios del equipo.
+- `CHANGELOG_AI.md`: evidencia de cambios.
 - `AGENTS.md`: reglas obligatorias.
 
-Si existe contradicción entre un texto histórico y estas fuentes, prevalecen `AGENTS.md` y la memoria canónica más reciente en `Desarrollo`.
+Si existe contradicción entre texto histórico/memoria y estas fuentes, prevalecen la evidencia Git y las fuentes canónicas más recientes de `Desarrollo`.
 
-## 2. Equipo y acceso
+## 3. Equipo y acceso
 
 | Integrante | Proyecto local PC | GitHub | Rol principal |
 |---|---:|---:|---|
 | Javier Mejía | Sí | Sí | Propietario/decisión final |
-| Codex | Sí, cuando opera en la PC autorizada | Sí | Implementación y pruebas |
-| AntiG / Antigravity | Sí, cuando opera en la PC autorizada | Sí | Implementación y pruebas |
-| ChatGPT | No | Sí, solo mediante conector autorizado | Arquitectura/revisión/coordinación/cambios remotos |
-| Otros agentes | No por defecto | Solo si existe conector autorizado | Según asignación |
+| Codex | Sí, cuando opera en PC autorizada | Sí | Implementación/pruebas |
+| AntiG / Antigravity | Sí, cuando opera en PC autorizada | Sí | Implementación/pruebas |
+| ChatGPT | No | Sí, con conector autorizado | Arquitectura/revisión/coordinación/cambios remotos |
+| Otros agentes | No por defecto | Solo con conector autorizado | Según asignación |
 
-Nadie debe asumir acceso local que no esté expresamente documentado.
+Nadie debe asumir acceso local que no esté documentado.
 
-## 3. Rama y entornos
+## 4. Aislamiento entre proyectos
+
+- Esta coordinación aplica exclusivamente a VariApp.
+- No reutilizar rutas, ramas, planes o decisiones de otro proyecto.
+- Una conversación no cambia de proyecto por inferencia.
+- Un cambio explícito de proyecto obliga a ejecutar el gate del proyecto destino antes de escribir.
+
+## 5. Rama y entornos
 
 - `Desarrollo`: única rama de trabajo.
 - `main`: congelada.
-- PR oficial: `Desarrollo -> main`, abierto y borrador.
+- PR #2: abierto y borrador.
 - No ramas temporales.
 - No auto-merge.
 - Producción no se modifica.
 
-## 4. Handoff mínimo entre agentes
+## 6. Evidencia y handoff mínimo
 
-Cada entrega necesita únicamente:
+Cada changeset registra `CHANGELOG_AI.md`. Si cambia el estado operativo, también `TASKS.md`.
+
+Handoff:
 
 ```text
+Proyecto confirmado:
 Agente:
 Objetivo:
 Archivos/área:
@@ -47,23 +71,28 @@ Commit:
 Pendiente/bloqueo:
 ```
 
-No repetir el resumen completo de arquitectura en cada handoff; referenciar `PROJECT_CONTEXT.md`.
+No repetir arquitectura completa; referenciar `PROJECT_CONTEXT.md`.
 
-## 5. Protocolo FULL FLASH / bajo consumo
+## 7. Protocolo FULL FLASH / bajo consumo
 
-1. Leer memoria canónica una vez.
-2. No releer un archivo si no cambió.
-3. No reindexar repositorio por cada prompt.
-4. Analizar archivo objetivo + dependencias directas.
-5. Usar búsquedas dirigidas.
-6. Ejecutar validación proporcional.
-7. Hacer un changeset coherente, no decenas de microparches si no aportan valor.
-8. Tras reconexión, recuperar estado y continuar; no repetir diagnóstico.
-9. Detener la exploración cuando el objetivo esté resuelto.
-10. Actualizar memoria solo cuando exista cambio real.
+1. Gate de identidad.
+2. Leer memoria canónica una vez.
+3. No releer archivo si no cambió.
+4. No reindexar repositorio por prompt.
+5. Analizar objetivo + dependencias directas.
+6. Usar búsquedas dirigidas.
+7. Validación proporcional.
+8. Changeset coherente, evitando microparches sin valor.
+9. Tras reconexión recuperar estado; no repetir diagnóstico.
+10. Detener exploración al resolver objetivo.
+11. Actualizar documentos solo cuando cambie su contenido real.
 
-## 6. Historial
+## 8. Guardrails locales
 
-Las verificaciones históricas de sesiones anteriores permanecen disponibles en `git log`/versiones previas de este archivo. No deben presentarse como estado actual sin volver a ejecutarlas.
+- `.githooks/pre-commit`: bloquea repo/rama incorrectos y exige `CHANGELOG_AI.md`.
+- `.githooks/post-commit`: auto-push solo si `origin` es VariApp y la rama es `Desarrollo`.
+- `scripts/iniciar-sesion-ia.ps1`: diagnóstico corto de sesión.
 
-Los cambios nuevos se registran en `CHANGELOG_AI.md` y los pendientes en `TASKS.md`.
+## 9. Mejora continua
+
+Las mejoras de bajo riesgo y directamente relacionadas pueden aplicarse. Las transversales se registran en `TASKS.md` para ejecución controlada. El objetivo es reducir latencia, tokens, trabajo repetido y errores sin sacrificar validación ni trazabilidad.

@@ -2,7 +2,33 @@
 
 ## Objetivo
 
-Coordinar a Javier Mejía, Codex, AntiG/Antigravity y ChatGPT con mínima pérdida de contexto, mínimo trabajo redundante y máxima trazabilidad en `Desarrollo`.
+Coordinar a Javier Mejía, Codex, AntiG/Antigravity y ChatGPT con mínima pérdida de contexto, mínimo trabajo redundante, aislamiento entre proyectos y máxima trazabilidad en `Desarrollo`.
+
+## Identidad de este proyecto
+
+```text
+PROJECT_ID=VARIAPP
+REPOSITORY=jmejia31/VariApp
+BRANCH=Desarrollo
+```
+
+Estas reglas pertenecen a VariApp. No se trasladan automáticamente a otro proyecto y ningún contexto de otro proyecto puede autorizar cambios aquí.
+
+## Inicio de CADA conversación/sesión
+
+Antes de escribir:
+
+1. confirmar identidad del proyecto/repo/rama;
+2. leer `AGENTS.md`;
+3. leer `PROJECT_CONTEXT.md`;
+4. leer `TASKS.md`;
+5. leer la última entrada relevante de `CHANGELOG_AI.md`;
+6. revisar únicamente commits nuevos desde el handoff conocido;
+7. abrir solo archivos objetivo/dependencias directas.
+
+Localmente, ejecutar `scripts/iniciar-sesion-ia.ps1`. Remotamente, realizar la verificación equivalente mediante GitHub.
+
+Si hay discrepancia entre memoria y repositorio real, prevalece el repositorio y el agente no escribe hasta resolverla.
 
 ## Equipo
 
@@ -15,9 +41,9 @@ Coordinar a Javier Mejía, Codex, AntiG/Antigravity y ChatGPT con mínima pérdi
 ### Codex
 
 - implementa y prueba desde el proyecto local autorizado;
-- debe trabajar sobre `Desarrollo`;
-- debe reutilizar la memoria canónica y evitar reescaneos/relecturas innecesarias;
-- tras reconexión debe continuar desde Git + `PROJECT_CONTEXT.md` + `TASKS.md`, no reiniciar el diagnóstico.
+- trabaja sobre `Desarrollo`;
+- usa memoria canónica y evita reescaneos/relecturas innecesarias;
+- tras reconexión continúa desde Git + contexto, no reinicia diagnóstico.
 
 ### AntiG / Antigravity
 
@@ -29,75 +55,61 @@ Coordinar a Javier Mejía, Codex, AntiG/Antigravity y ChatGPT con mínima pérdi
 
 - arquitectura, auditoría, coordinación, revisión y cambios remotos cuando exista conexión GitHub autorizada;
 - no tiene acceso al filesystem local de la PC por defecto;
-- no debe afirmar cambios locales si solo actuó sobre GitHub.
+- no afirma cambios locales si solo actuó sobre GitHub.
 
 ## Acceso
 
-### Local
+Acceso local reconocido: Javier Mejía, Codex y AntiG/Antigravity.
 
-Únicamente Javier Mejía, Codex y AntiG/Antigravity tienen acceso reconocido al proyecto local de la PC.
-
-Cualquier ampliación debe ser indicada explícitamente por Javier y documentada aquí/`AGENTS.md`.
-
-### GitHub remoto
-
-Otros agentes, incluido ChatGPT, solo operan mediante conectores/conexiones GitHub autorizados y disponibles. El permiso remoto no implica acceso local.
+ChatGPT y otros agentes operan remotamente solo mediante conectores GitHub autorizados, salvo ampliación explícita documentada por Javier.
 
 ## Memoria compartida
 
-Fuentes canónicas:
-
-- `PROJECT_CONTEXT.md` — contexto técnico.
+- `PROJECT_CONTEXT.md` — contexto técnico e identidad.
 - `PROJECT_INDEX.md` — mapa de carpetas.
 - `ARCHITECTURE.md` — patrones y fronteras.
 - `TASKS.md` — pendientes.
-- `CHANGELOG_AI.md` — bitácora.
+- `CHANGELOG_AI.md` — evidencia/handoff.
 
-Todos los agentes deben actualizar estas fuentes en vez de volver a crear diagnósticos paralelos.
+## Evidencia por cambio
 
-## Flujo eficiente de una tarea
+Cada changeset debe actualizar `CHANGELOG_AI.md`. `TASKS.md` se actualiza si cambia el estado operativo. Contexto/arquitectura/índice y documentos colaborativos solo se modifican si su contenido realmente cambió.
 
-1. leer `AGENTS.md`, `PROJECT_CONTEXT.md`, `TASKS.md`;
-2. localizar el módulo con `PROJECT_INDEX.md`;
-3. revisar solo archivos objetivo y dependencias directas;
-4. implementar el mínimo cambio correcto;
-5. validar proporcionalmente;
-6. publicar en `Desarrollo`;
-7. actualizar `CHANGELOG_AI.md`/`TASKS.md` si corresponde.
+Esto cumple trazabilidad sin generar ruido documental artificial.
+
+## Flujo eficiente
+
+1. gate de proyecto;
+2. leer memoria canónica;
+3. localizar módulo con `PROJECT_INDEX.md`;
+4. revisar solo objetivo + dependencias directas;
+5. implementar mínimo cambio correcto;
+6. validar proporcionalmente;
+7. registrar evidencia;
+8. publicar en `Desarrollo`;
+9. handoff con SHA/pendiente.
 
 ## Optimización de tokens y tiempo
 
 - No volver a recorrer todo el repositorio.
 - No releer archivos ya documentados si no cambiaron.
-- No repetir comandos ya confirmados por una reconexión.
-- Usar `git diff`/historial para saber qué cambió desde el último contexto conocido.
+- No repetir comandos ya confirmados por reconexión.
+- Usar Git para saber qué cambió.
 - Usar búsquedas dirigidas por símbolo/ruta.
-- Abrir únicamente el documento de fase/punto necesario.
-- Finalizar cuando el objetivo y sus validaciones estén completos.
-- Si falta una decisión de negocio real, preguntarla; no intentar resolverla escaneando módulos no relacionados.
+- Abrir únicamente documento de fase/punto necesario.
+- Finalizar al completar objetivo + validaciones.
+- Preguntar decisiones de negocio reales en lugar de escanear módulos no relacionados.
 
-## Recuperación tras reconexión/compactación
+## Git, CI y Producción
 
-Una reconexión no reinicia la tarea. El agente recupera estado con:
-
-```text
-PROJECT_CONTEXT.md
-TASKS.md
-git status --short --branch
-git log -3
-```
-
-Después continúa con los archivos de la tarea. Solo una modificación estructural importante habilita una nueva revisión arquitectónica amplia.
-
-## Git y Producción
-
-- rama única: `Desarrollo`;
-- no crear ramas adicionales;
+- rama única `Desarrollo`;
+- no ramas adicionales;
 - `main` no se toca;
-- PR `Desarrollo -> main` permanece en borrador;
+- PR #2 permanece borrador;
 - no auto-merge;
 - Producción congelada;
 - no secretos;
-- no migraciones productivas sin autorización.
+- no migraciones productivas sin autorización;
+- `[skip ci]` solo para cambios administrativos/locales permitidos por `AGENTS.md`.
 
-Las reglas completas están en `AGENTS.md` y `docs/ENTORNOS_DESARROLLO_PRODUCCION.md`.
+Las reglas completas viven en `AGENTS.md`.
