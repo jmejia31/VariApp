@@ -1,124 +1,173 @@
-# PLAN DE EJECUCIÓN AUTÓNOMA — VAEP v1
+# PLAN DE EJECUCIÓN AUTÓNOMA — VAEP v2
 
-> VariApp Autonomous Execution Protocol. Fuente operativa humana: Google Sheets. Autoridad técnica y evidencia: GitHub `jmejia31/VariApp`, rama `Desarrollo`.
+> VariApp Autonomous Execution Protocol. Fuente rectora: **Plan Maestro ERP V5 — VariApp**. Fuente operativa: Google Sheets. Autoridad técnica y evidencia: GitHub `jmejia31/VariApp`, rama `Desarrollo`.
 
-## 1. Identidad y fuentes
+## 1. Identidad y fuentes obligatorias
 
 - `PROJECT_ID`: `VARIAPP`
 - Repositorio: `jmejia31/VariApp`
-- Rama única de trabajo: `Desarrollo`
-- PR oficial: `#2`, siempre abierto y Draft hasta autorización de Javier Mejía.
-- Tablero operativo: `VariApp — Cola de Ejecución Autónoma VAEP`
-- Google Sheet: https://docs.google.com/spreadsheets/d/1RSgaF6q9wnvWT6cSO3bsxpesofompYUYUA7aohPMWTM/edit
+- Rama única: `Desarrollo`
+- PR oficial: `#2 Desarrollo -> main`, siempre abierto y Draft hasta autorización expresa de Javier Mejía.
+- Plan rector en Drive: https://docs.google.com/document/d/1rWGOP_Z64kM4Q2NZbrTvge3ReqJkJ_vJmhByogbPbR8/edit
+- Tablero VAEP v2: https://docs.google.com/spreadsheets/d/19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY/edit
 - GitHub prevalece para código, commits, CI, arquitectura y evidencia verificable.
 
-## 2. Objetivo
+El `.docx` original fue convertido a Google Docs para que el runner pueda consultar permanentemente la fuente rectora sin depender de una conversación concreta.
 
-Permitir que ChatGPT consuma automáticamente los puntos autorizados sin requerir una instrucción manual para cada uno, preservando aislamiento de proyecto, trazabilidad, calidad, concurrencia segura y las restricciones de Producción.
+## 2. Cobertura integral del Plan Maestro ERP V5
 
-## 3. Estados permitidos
+VAEP v2 incorpora todo el roadmap ERP Core definido por el plan:
 
-`PENDIENTE -> EN_PROGRESO -> VALIDANDO -> LISTO`
+1. ERP-N0 — Saneamiento y retiro legacy.
+2. ERP-N1 — Inventario empresarial.
+3. ERP-N2 — Compras empresariales.
+4. ERP-N3 — Ventas empresariales.
+5. ERP-N4 — Tesorería, CxC, CxP y Contabilidad.
+6. ERP-N5 — Reportería, BI y analítica.
+7. ERP-N6 — Multiempresa y SaaS.
+8. ERP-N7 — Integraciones empresariales.
+9. ERP-N8 — Production Readiness.
+10. ERP-N9 — Go-live y Hypercare.
 
-Una tarea puede pasar de `EN_PROGRESO` o `VALIDANDO` a `BLOQUEADO` si existe un impedimento real. `CANCELADO` requiere instrucción explícita de Javier o evidencia inequívoca de que el punto dejó de aplicar.
+Los tracks `T0`–`T12` son obligatorios y transversales. Las funcionalidades futuras no obligatorias para el Core —RRHH, CRM, MRP, activos fijos, proyectos, servicio técnico, logística avanzada y ecommerce futuro— están registradas en `PLAN_MAESTRO`, pero con `NO_AUTORIZADO`; no pueden autoejecutarse sin autorización explícita de Javier.
 
-Está prohibido marcar `LISTO` sin evidencia verificable.
+El tablero contiene:
 
-## 4. Selección de tarea
+- `DASHBOARD`: estado resumido.
+- `COLA`: microtareas ejecutables y dependencias.
+- `PLAN_MAESTRO`: puntos padre ERP-N0→N9, gates, T0–T12 y backlog futuro.
+- `CONFIG`: invariantes operativas.
+- `BITACORA`: transiciones y evidencia.
+- `LEYENDA`: estados y significado.
 
-En cada ejecución autónoma:
+Baseline VAEP v2: **778 microtareas** y **131 filas de plan/gobierno**, con el Plan Maestro completo representado.
 
-1. confirmar `PROJECT_ID=VARIAPP`, repositorio y rama;
-2. leer `AGENTS.md`, `PROJECT_CONTEXT.md`, `TASKS.md` y la última entrada relevante de `CHANGELOG_AI.md`;
-3. leer `CONFIG` y `COLA` del Sheet VAEP;
-4. descartar tareas de otro `PROJECT_ID`, repositorio o rama;
-5. ordenar tareas `PENDIENTE` por `PRIORIDAD` ascendente y luego por orden de fila;
-6. elegir la primera tarea cuyas dependencias estén todas en `LISTO`;
-7. antes de escribir, volver a confirmar HEAD remoto y que ningún otro agente haya tomado la tarea;
-8. registrar `EN_PROGRESO` y agente;
-9. ejecutar solo el alcance de esa tarea y sus dependencias directas necesarias;
-10. pasar a `VALIDANDO`, ejecutar validaciones proporcionales y registrar evidencia;
-11. si todo cumple, publicar en `Desarrollo`, actualizar colaborativos aplicables y marcar `LISTO`.
+## 3. Granularidad obligatoria
 
-## 5. Regla crítica de bloqueo y continuidad
+Ningún agente debe intentar resolver un punto ERP grande en un único changeset.
+
+Salvo que un punto tenga una descomposición específica, cada punto funcional se divide en microtareas pequeñas:
+
+1. `PRE`: auditoría/preflight, alcance, riesgos, dependencias, rollback y criterios.
+2. `DOMAIN`: dominio, invariantes y contratos.
+3. `DB_MIG`: persistencia, constraints, índices, migración/backfill/reconciliación/rollback cuando aplique.
+4. `BACKEND_API`: aplicación, servicios, repositorios, DTOs y API.
+5. `FRONTEND_UX`: UI/UX, formularios, tablas, responsive, accesibilidad y permisos UI.
+6. `SEC_AUDIT`: RBAC, auditoría, seguridad y observabilidad.
+7. `TEST_CI`: unit/integration/contract/E2E/security/migration/performance tests y CI aplicable.
+8. `DOC_CERT`: documentación, evidencia, checkpoint, regresión y cierre del punto.
+
+Si una microtarea sigue siendo demasiado grande, **debe subdividirse antes de editar**. El criterio operativo es un solo concern coherente y verificable por microtarea; no se permite convertir una fila en un refactor transversal gigante.
+
+Si una etapa no aplica técnicamente al punto, se marca `LISTO` como `N/A` solo después de dejar evidencia suficiente; no se crea código artificial para “cumplir” una columna.
+
+## 4. Máquina de estados
+
+```text
+PENDIENTE -> EN_PROGRESO -> VALIDANDO -> LISTO
+                     \-> BLOQUEADO
+```
+
+`CANCELADO` requiere instrucción explícita de Javier o evidencia inequívoca de que el punto dejó de aplicar.
+
+Está prohibido `PENDIENTE -> LISTO` sin ejecución/reconciliación y evidencia verificable.
+
+## 5. Selección de tareas
+
+En cada corrida:
+
+1. confirmar `PROJECT_ID=VARIAPP`, repo y rama;
+2. leer `AGENTS.md`, `PROJECT_CONTEXT.md`, `TASKS.md`, última entrada relevante de `CHANGELOG_AI.md` y este archivo;
+3. consultar `CONFIG`, `COLA` y `BITACORA`;
+4. reconciliar estados con el HEAD real de GitHub;
+5. ordenar `PENDIENTE` por `PRIORIDAD` ascendente y orden de fila;
+6. elegir solamente tareas con todas sus dependencias directas/transitivas resueltas;
+7. respetar lock lógico de `EN_PROGRESO`/`VALIDANDO` + agente;
+8. marcar `EN_PROGRESO` antes de implementar;
+9. marcar `VALIDANDO` antes de las comprobaciones finales;
+10. publicar exclusivamente en `Desarrollo`, actualizar evidencia y marcar `LISTO` solo si cumple.
+
+El runner puede completar **hasta 3 microtareas pequeñas por corrida**. Debe detenerse antes si el siguiente punto aumenta el riesgo, requiere una decisión humana o convertiría la corrida en un cambio demasiado grande.
+
+## 6. Regla crítica de bloqueo y continuidad
 
 Una tarea `BLOQUEADO` **no detiene toda la cola**.
 
-Después de registrar el bloqueo, el agente debe buscar la siguiente tarea `PENDIENTE` elegible. Puede continuar únicamente cuando la nueva tarea **no dependa directa ni transitivamente** de ninguna tarea bloqueada pendiente de resolver.
+Después de registrar causa y evidencia, el runner busca la siguiente `PENDIENTE` elegible. Puede continuar únicamente cuando esa tarea **no dependa directa ni transitivamente** de ninguna tarea bloqueada.
 
-Formalmente, una tarea `T` es elegible solo si:
+Ejemplo:
 
-- todas sus dependencias directas están `LISTO`; y
-- ningún ancestro de `T` en el grafo de dependencias está `BLOQUEADO`.
+```text
+A = BLOQUEADO
+B depende de A  -> NO elegible
+C depende de B  -> NO elegible
+D independiente -> SÍ elegible
+```
 
-Si `A` está bloqueada y `B -> A`, `C -> B`, entonces `B` y `C` no son elegibles. Una tarea `D` sin relación con `A` sí puede ejecutarse.
+Una tarea bloqueada no se reintenta en bucle durante la misma corrida.
 
-Una tarea bloqueada no se reintenta en bucle durante la misma ejecución. Se conserva causa, evidencia y siguiente acción requerida.
+## 7. Gates de fase y orden estricto
 
-## 6. Concurrencia y lock lógico
+VAEP crea `GATE-N0` ... `GATE-N9`.
 
-- Una tarea con estado `EN_PROGRESO` o `VALIDANDO` y `AGENTE` asignado se considera tomada.
-- Ningún segundo agente debe trabajar esa misma tarea.
-- Justo antes de publicar, comprobar nuevamente HEAD de `Desarrollo`.
-- Si otro agente avanzó la rama, integrar preservando sus cambios; nunca force-push.
-- Si el conflicto no puede resolverse de forma dirigida y segura, marcar `BLOQUEADO` con evidencia y continuar solo con tareas independientes.
+El orden rector es:
 
-## 7. Evidencia obligatoria
+```text
+GATE-N0 -> ERP-N1 -> GATE-N1 -> ERP-N2 -> GATE-N2 -> ERP-N3 ->
+GATE-N3 -> ERP-N4 -> GATE-N4 -> ERP-N5 -> GATE-N5 -> ERP-N6 ->
+GATE-N6 -> ERP-N7 -> GATE-N7 -> ERP-N8 -> GATE-N8 -> ERP-N9 -> GATE-N9
+```
 
-Para marcar `LISTO` deben existir, según aplique:
+Los gates aplican Definition of Done global: backend/frontend, migraciones, tests, E2E relevantes, seguridad, permisos, auditoría, backfill/reconciliación, rollback documentado, documentación, evidencia y cero P0/P1 abiertos. Una fase no se cierra solamente porque compile.
 
-- cambio publicado en `Desarrollo`;
-- commit SHA;
-- validaciones reales ejecutadas;
-- `CHANGELOG_AI.md` actualizado;
-- `TASKS.md` actualizado cuando cambie estado operativo;
-- `PROJECT_CONTEXT.md`, `PROJECT_INDEX.md` o `ARCHITECTURE.md` solo si realmente cambió lo que documentan;
-- fila de `COLA` actualizada;
-- registro de transición en `BITACORA`.
+## 8. Estado inicial especializado de ERP-N0.5 — MetodoPago
 
-No inventar pruebas, resultados, despliegues ni estados externos.
+El checklist aportado por Javier se cargó explícitamente en `COLA`:
 
-## 8. Política de seguridad
+| ID | Punto | Estado inicial |
+|---|---|---|
+| N0.5.01 | Análisis y diagnóstico inicial | LISTO |
+| N0.5.02 | Diseño funcional de MetodoPago | LISTO |
+| N0.5.03 | Auditoría legacy de MetodoPago | LISTO |
+| N0.5.04 | Entidad y persistencia relacional MetodoPago | LISTO |
+| N0.5.05 | Seed + preflight + backfill histórico | LISTO |
+| N0.5.06 | Eliminar doble autoridad enum/string | PENDIENTE |
+| N0.5.07 | Reglas operativas de métodos de pago | PENDIENTE |
+| N0.5.08 | Backend/API/CRUD/DTOs | PENDIENTE |
+| N0.5.09 | Frontend administrable/selectores dinámicos | PENDIENTE |
+| N0.5.10 | RBAC + auditoría | PENDIENTE |
+| N0.5.11 | Reportes, facturas y PDFs | PENDIENTE |
+| N0.5.12 | Tests de regresión N0.5 | PENDIENTE |
+| N0.5.13 | Workflow CI dedicado N0.5 | PENDIENTE / RECONCILIAR |
+| N0.5.14 | Recertificación integral M13 | PENDIENTE |
+| N0.5.15 | Documentación formal y cierre | PENDIENTE |
 
-VAEP no autoriza:
+Para `N0.5.13`, GitHub ya contiene evidencia histórica de workflow/run N0.5. El runner debe **reconciliar antes de implementar** y cerrar la fila si el criterio actual ya está satisfecho; está prohibido duplicar workflows por confiar ciegamente en un checklist desactualizado.
 
-- tocar `main`;
-- fusionar PR #2;
-- habilitar auto-merge;
-- crear ramas adicionales;
-- modificar Producción, secretos, variables, credenciales, bases, dominios, servicios o activos productivos;
-- ejecutar migraciones productivas;
-- saltarse validaciones funcionales mediante `[skip ci]`.
+## 9. Concurrencia y publicación
 
-## 9. Alcance por ejecución
+- Una tarea `EN_PROGRESO`/`VALIDANDO` con `AGENTE` se considera tomada.
+- Antes de publicar, volver a confirmar HEAD remoto.
+- Preservar commits de Codex, AntiG y otros agentes.
+- Nunca force-push.
+- Si el conflicto no puede resolverse de forma dirigida y segura: `BLOQUEADO` + evidencia, luego buscar tarea independiente.
 
-Objetivo por ejecución programada: completar una tarea elegible de extremo a extremo. Las tareas que resulten bloqueadas no cuentan como tarea completada; después del bloqueo se puede intentar la siguiente independiente dentro de la misma ejecución, evitando ciclos infinitos.
+## 10. Evidencia obligatoria
 
-Si no existe ninguna tarea elegible, terminar sin realizar cambios funcionales. Si toda la cola está `LISTO`, registrar cierre únicamente cuando aporte valor y no generar commits vacíos.
+Cada changeset intencional debe actualizar `CHANGELOG_AI.md`. `TASKS.md` cambia cuando cambia estado/bloqueo/pendiente. Contexto/índice/arquitectura solo si cambia la realidad que documentan.
 
-## 10. Cómo agregar nuevas tareas
+Para marcar `LISTO`, según aplique deben existir commit SHA, validaciones reales, fila actualizada en `COLA` y transición registrada en `BITACORA`. Nunca inventar pruebas, CI, despliegues ni estados externos.
 
-Javier puede agregar filas en la hoja `COLA` indicando como mínimo:
+## 11. Seguridad y Producción
 
-- `ID` único;
-- `TAREA`;
-- `ESTADO=PENDIENTE`;
-- `PRIORIDAD`;
-- `DEPENDENCIAS` por ID, separadas por coma cuando sean varias;
-- `PROJECT_ID=VARIAPP`;
-- `REPOSITORIO=jmejia31/VariApp`;
-- `RAMA=Desarrollo`;
-- criterios de aceptación y validaciones esperadas.
+VAEP no autoriza tocar `main`, fusionar PR #2, habilitar auto-merge, crear ramas nuevas, modificar Producción, secretos, variables, credenciales, bases, dominios, servicios, activos o ejecutar migraciones productivas.
 
-Si faltan criterios imprescindibles y no pueden deducirse con inspección dirigida, la tarea debe marcarse `BLOQUEADO`, no improvisarse.
+ERP-N9.4 y cualquier operación productiva permanecerán bloqueadas hasta autorización expresa de Javier, aunque la fila exista en el Plan Maestro.
 
-## 11. Fuente de verdad y reconciliación
+## 12. Qué debe hacer Javier
 
-El Sheet define qué trabajo está solicitado y su estado operativo. GitHub demuestra qué trabajo existe realmente. Ante contradicción:
+Para trabajo ya incluido en ERP V5: **nada**. No necesita escribir “continúa con el siguiente punto”.
 
-1. no sobrescribir evidencia válida;
-2. comprobar commits/CI/archivos afectados;
-3. reconciliar el Sheet con GitHub;
-4. registrar la corrección en `BITACORA` y, si corresponde, `CHANGELOG_AI.md`.
+Para añadir una mejora nueva fuera del Plan Maestro, puede agregarla a `COLA` o pedir a ChatGPT incorporarla. Debe indicar al menos objetivo/criterio; VAEP completará proyecto/repo/rama/dependencias cuando pueda inferirse con evidencia.
 
-Nunca marcar código como inexistente solo porque el Sheet está desactualizado, ni marcar `LISTO` solo porque el Sheet lo diga sin evidencia GitHub.
+El archivo `PLAN_EJECUCION_AUTONOMA.md` es protocolo versionado; el Sheet es el tablero vivo. Javier no necesita editar este Markdown para que el runner continúe.
