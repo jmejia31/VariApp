@@ -49,6 +49,15 @@ Estado operativo controlado por `COLA`:
 - [ ] N0.5.14 Recertificación M13.
 - [ ] N0.5.15 Documentación formal y cierre.
 
+## ERP-N0.6 — Referencias polimórficas críticas
+
+- [x] N0.6.A Auditoría y preflight: autoridad legacy de inventario, estado relacional parcial de finanzas, productores/consumidores, riesgos, transición, rollback y plan de pruebas documentados en `docs/ERP_N0_6_REFERENCIAS_POLIMORFICAS_PREFLIGHT.md`.
+- [ ] N0.6.B Dominio y contratos: introducir origen tipado coherente sin mezclar origen con operación/reversión.
+- [ ] N0.6.C Persistencia/migración: FKs, preflight histórico, backfill determinista, constraints y postcheck antes de retirar autoridad legacy.
+- [ ] N0.6.D–H Aplicación/API, frontend si aplica, seguridad/auditoría, QA/CI y certificación según `COLA`.
+
+N0.6 puede avanzar de forma independiente del trabajo todavía abierto de N0.5 cuando sus dependencias propias estén satisfechas; N0.7 sí depende de N0.6 según el Plan Maestro.
+
 Después, VAEP continúa automáticamente con N0.6, N0.7, N0.8 y `GATE-N0`. Si una tarea queda bloqueada, puede saltar solo a una tarea sin dependencia directa/transitiva de la bloqueada.
 
 ## Fuentes VAEP v2
