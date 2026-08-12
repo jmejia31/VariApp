@@ -247,3 +247,10 @@ Migración, seed idempotente, backfill, preflight/postcheck y workflow N0.5 cert
 ## Formato futuro
 
 Cada entrada debe contener fecha, agente, objetivo, alcance, validaciones reales, riesgos/pendientes y commit cuando sea útil. No registrar secretos ni datos sensibles.
+## 2026-08-12 - N0.5.07B2 - snapshot EF canonico de Banco - VALIDANDO
+
+**Responsable:** ChatGPT / VAEP v2 Runner.
+
+**Correccion:** los CI 31622173253 y 31622173357 demostraron que la logica Banco/fail-closed y las pruebas pasaban, pero dotnet ef migrations has-pending-model-changes detecto drift porque la migracion inicial de Banco no actualizo el snapshot EF canonico. Se reemplaza esa migracion manual por una migracion generada con EF Core 8.0.8, su Designer y AppDbContextModelSnapshot, sin relajar ninguna validacion ni alterar el diseno normalizado.
+
+**Control:** B2 permanece VALIDANDO hasta que los CI reales sobre el changeset canonico terminen en verde. No se toca main, Produccion, PR #2, auto-merge ni ramas nuevas.
