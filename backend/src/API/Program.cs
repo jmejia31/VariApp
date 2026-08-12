@@ -85,6 +85,8 @@ builder.Services.AddScoped<IMovimientoFinancieroRepository, MovimientoFinanciero
 builder.Services.AddScoped<ICompraService, CompraService>();
 builder.Services.AddScoped<IVentaRepository, VentaRepository>();
 builder.Services.AddScoped<IFacturaRepository, FacturaRepository>();
+builder.Services.AddScoped<IMetodoPagoRepository, MetodoPagoRepository>();
+builder.Services.AddScoped<IMetodoPagoService, MetodoPagoService>();
 builder.Services.AddScoped<IEmpresaConfiguracionRepository, EmpresaConfiguracionRepository>();
 builder.Services.AddScoped<IRevisionFinancieraRepository, RevisionFinancieraRepository>();
 builder.Services.AddScoped<IVentaService, VentaService>();
