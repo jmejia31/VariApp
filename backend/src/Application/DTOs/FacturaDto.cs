@@ -23,7 +23,12 @@ public class FacturaPagoDto
 {
     public int Id { get; set; }
     public DateTime FechaPago { get; set; }
+    /// <summary>Importe aplicado contablemente a la factura.</summary>
     public decimal Monto { get; set; }
+    /// <summary>Importe efectivamente recibido antes de devolver cambio.</summary>
+    public decimal MontoRecibido { get; set; }
+    /// <summary>Cambio devuelto al cliente.</summary>
+    public decimal Cambio { get; set; }
     public string MetodoPago { get; set; } = string.Empty;
     public int? BancoId { get; set; }
     public string? BancoCodigo { get; set; }
@@ -37,6 +42,7 @@ public class FacturaPagoDto
 
 public class RegistrarFacturaPagoDto
 {
+    /// <summary>Importe entregado/recibido. Si el método permite cambio puede superar el saldo pendiente.</summary>
     public decimal Monto { get; set; }
     public string MetodoPago { get; set; } = "Efectivo";
     public int? BancoId { get; set; }

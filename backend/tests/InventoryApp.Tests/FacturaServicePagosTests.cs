@@ -28,6 +28,8 @@ public class FacturaServicePagosTests
         Assert.Equal(100m, resultado.TotalPagado);
         Assert.Equal(200m, resultado.SaldoPendiente);
         Assert.Equal("ParcialmentePagada", resultado.Estado);
+        Assert.Equal(100m, factura.Pagos.Single().MontoRecibido);
+        Assert.Equal(0m, factura.Pagos.Single().Cambio);
         Assert.Equal(EstadoPago.Parcial, factura.Venta!.EstadoPago);
         repository.Verify(x => x.SaveChangesAsync(), Times.Once);
     }
@@ -51,7 +53,7 @@ public class FacturaServicePagosTests
     }
 
     [Fact]
-    public async Task RegistrarPagoSuperiorAlSaldo_EsRechazado()
+    public async Task RegistrarPagoSuperiorAlSaldo_SiMetodoNoPermiteCambio_EsRechazado()
     {
         var factura = CrearFactura(300m);
         var (service, _) = CrearServicio(factura);
@@ -65,6 +67,32 @@ public class FacturaServicePagosTests
 
         Assert.Contains("saldo pendiente", error.Message, StringComparison.OrdinalIgnoreCase);
         Assert.Empty(factura.Pagos);
+    }
+
+    [Fact]
+    public async Task RegistrarPagoSuperiorAlSaldo_SiMetodoPermiteCambio_AplicaSoloSaldoYRegistraCambio()
+    {
+        var factura = CrearFactura(300m);
+        var (service, repository) = CrearServicio(factura, efectivoPermiteCambio: true);
+
+        var resultado = await service.RegistrarPagoAsync(
+            factura.Id,
+            new RegistrarFacturaPagoDto { Monto = 350m, MetodoPago = "Efectivo" },
+            7,
+            "tester");
+
+        var pago = Assert.Single(factura.Pagos);
+        Assert.Equal(300m, pago.Monto);
+        Assert.Equal(350m, pago.MontoRecibido);
+        Assert.Equal(50m, pago.Cambio);
+        Assert.Equal(300m, resultado.TotalPagado);
+        Assert.Equal(0m, resultado.SaldoPendiente);
+        Assert.Equal(300m, resultado.Pagos.Single().Monto);
+        Assert.Equal(350m, resultado.Pagos.Single().MontoRecibido);
+        Assert.Equal(50m, resultado.Pagos.Single().Cambio);
+        Assert.Equal("Pagada", resultado.Estado);
+        Assert.Equal(EstadoPago.Pagado, factura.Venta!.EstadoPago);
+        repository.Verify(x => x.SaveChangesAsync(), Times.Once);
     }
 
     [Fact]
@@ -190,6 +218,8 @@ public class FacturaServicePagosTests
             Id = 22,
             FacturaId = factura.Id,
             Monto = 300m,
+            MontoRecibido = 300m,
+            Cambio = 0m,
             MetodoPago = MetodoPago.Efectivo
         });
         factura.TotalPagado = 300m;
@@ -237,7 +267,8 @@ public class FacturaServicePagosTests
     private static (FacturaService Service, Mock<IFacturaRepository> Repository) CrearServicio(
         Factura factura,
         bool transferenciaRequiereReferencia = false,
-        bool transferenciaRequiereBanco = false)
+        bool transferenciaRequiereBanco = false,
+        bool efectivoPermiteCambio = false)
     {
         var repository = new Mock<IFacturaRepository>();
         repository.Setup(x => x.GetByIdAsync(factura.Id)).ReturnsAsync(factura);
@@ -246,7 +277,7 @@ public class FacturaServicePagosTests
             .ReturnsAsync((string valor) => valor.Trim().Equals("Transferencia", StringComparison.OrdinalIgnoreCase)
                 ? CrearMetodoPago(2, "TRANSFERENCIA", "Transferencia", transferenciaRequiereReferencia, transferenciaRequiereBanco)
                 : valor.Trim().Equals("Efectivo", StringComparison.OrdinalIgnoreCase)
-                    ? CrearMetodoPago(1, "EFECTIVO", "Efectivo")
+                    ? CrearMetodoPago(1, "EFECTIVO", "Efectivo", permiteCambio: efectivoPermiteCambio)
                     : null);
         repository.Setup(x => x.GetBancoActivoPorIdAsync(5))
             .ReturnsAsync(new CatalogoBanco
@@ -268,13 +299,15 @@ public class FacturaServicePagosTests
         string codigo,
         string nombre,
         bool requiereReferencia = false,
-        bool requiereBanco = false) => new()
+        bool requiereBanco = false,
+        bool permiteCambio = false) => new()
     {
         Id = id,
         Codigo = codigo,
         Nombre = nombre,
         Activo = true,
         RequiereReferencia = requiereReferencia,
-        RequiereBanco = requiereBanco
+        RequiereBanco = requiereBanco,
+        PermiteCambio = permiteCambio
     };
 }

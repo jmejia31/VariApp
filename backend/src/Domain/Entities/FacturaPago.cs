@@ -9,7 +9,12 @@ public class FacturaPago : AuditableEntity
     public Factura? Factura { get; set; }
 
     public DateTime FechaPago { get; set; } = DateTime.UtcNow;
+    /// <summary>Importe efectivamente aplicado a la deuda de la factura.</summary>
     public decimal Monto { get; set; }
+    /// <summary>Importe entregado/recibido antes de calcular cambio.</summary>
+    public decimal MontoRecibido { get; set; }
+    /// <summary>Cambio devuelto al cliente; nunca forma parte del total pagado.</summary>
+    public decimal Cambio { get; set; }
 
     public MetodoPago MetodoPago { get; set; } = MetodoPago.Efectivo;
     public int? MetodoPagoId { get; set; }

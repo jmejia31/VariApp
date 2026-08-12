@@ -47,7 +47,8 @@ public class FacturaService : IFacturaService
         string? nombreUsuario)
     {
         var factura = await ObtenerOperableAsync(facturaId);
-        if (dto.Monto <= 0)
+        var montoRecibido = Math.Round(dto.Monto, 2, MidpointRounding.AwayFromZero);
+        if (montoRecibido <= 0)
             throw new BusinessRuleException("El monto del pago debe ser mayor que cero.");
 
         var metodoPagoCatalogo = await ResolverMetodoPagoAsync(dto.MetodoPago);
@@ -60,13 +61,24 @@ public class FacturaService : IFacturaService
         RecalcularPago(factura);
         if (factura.SaldoPendiente <= 0)
             throw new BusinessRuleException("La factura ya se encuentra pagada.");
-        if (dto.Monto > factura.SaldoPendiente)
-            throw new BusinessRuleException("El pago no puede superar el saldo pendiente de la factura.");
+
+        var montoAplicado = montoRecibido;
+        var cambio = 0m;
+        if (montoRecibido > factura.SaldoPendiente)
+        {
+            if (!metodoPagoCatalogo.PermiteCambio)
+                throw new BusinessRuleException("El pago no puede superar el saldo pendiente de la factura para el método de pago seleccionado.");
+
+            montoAplicado = factura.SaldoPendiente;
+            cambio = Math.Round(montoRecibido - montoAplicado, 2, MidpointRounding.AwayFromZero);
+        }
 
         factura.Pagos.Add(new FacturaPago
         {
             FechaPago = dto.FechaPago?.ToUniversalTime() ?? DateTime.UtcNow,
-            Monto = Math.Round(dto.Monto, 2, MidpointRounding.AwayFromZero),
+            Monto = montoAplicado,
+            MontoRecibido = montoRecibido,
+            Cambio = cambio,
             MetodoPagoId = metodoPagoCatalogo.Id,
             MetodoPagoCatalogo = metodoPagoCatalogo,
             MetodoPago = DerivarMetodoPagoLegacy(metodoPagoCatalogo),
@@ -291,6 +303,8 @@ public class FacturaService : IFacturaService
             Id = p.Id,
             FechaPago = p.FechaPago,
             Monto = p.Monto,
+            MontoRecibido = p.MontoRecibido > 0 ? p.MontoRecibido : p.Monto,
+            Cambio = p.Cambio,
             MetodoPago = p.MetodoPagoCatalogo?.Nombre ?? string.Empty,
             BancoId = p.BancoId,
             BancoCodigo = p.BancoCodigoSnapshot ?? p.Banco?.Codigo,

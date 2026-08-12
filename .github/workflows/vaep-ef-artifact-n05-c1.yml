@@ -1,0 +1,48 @@
+name: VAEP - Generar artefacto EF N0.5.07C1
+
+on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - '.github/workflows/vaep-ef-artifact-n05-c1.yml'
+      - 'backend/src/Domain/Entities/FacturaPago.cs'
+      - 'backend/src/Infrastructure/Persistence/Configurations/FacturaPagoConfiguration.cs'
+
+permissions:
+  contents: read
+
+jobs:
+  generar-migracion:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Instalar EF Core CLI
+        run: dotnet tool install --global dotnet-ef --version 8.0.8
+      - name: Generar migracion y snapshot canonicos sin publicar
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd backend
+          dotnet restore InventoryApp.sln
+          dotnet ef migrations add ERP_N05_PermiteCambioAuditable \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext \
+            --output-dir Migrations
+          dotnet ef migrations has-pending-model-changes \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext
+          cd ..
+      - name: Empaquetar artefactos EF para publicacion por el Runner
+        uses: actions/upload-artifact@v4
+        with:
+          name: vaep-n05-c1-ef-canonical
+          if-no-files-found: error
+          retention-days: 2
+          path: |
+            backend/src/Infrastructure/Migrations/*ERP_N05_PermiteCambioAuditable*.cs
+            backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs

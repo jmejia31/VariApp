@@ -11,6 +11,8 @@ public class FacturaPagoConfiguration : IEntityTypeConfiguration<FacturaPago>
         builder.ToTable("FacturaPagos");
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Monto).HasPrecision(18, 2).IsRequired();
+        builder.Property(x => x.MontoRecibido).HasPrecision(18, 2).IsRequired();
+        builder.Property(x => x.Cambio).HasPrecision(18, 2).IsRequired();
         builder.Property(x => x.Referencia).HasMaxLength(120);
         builder.Property(x => x.BancoCodigoSnapshot).HasMaxLength(50);
         builder.Property(x => x.BancoNombreSnapshot).HasMaxLength(120);
