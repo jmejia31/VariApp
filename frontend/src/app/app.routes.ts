@@ -94,6 +94,12 @@ export const routes: Routes = [
     loadComponent: () => import('./features/catalogos-producto/catalogo-producto-list.component').then(m => m.CatalogoProductoListComponent)
   },
   {
+    path: 'metodos-pago',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'MetodosPago', accion: 'Ver' },
+    loadComponent: () => import('./features/metodos-pago/metodos-pago.component').then(m => m.MetodosPagoComponent)
+  },
+  {
     path: 'proveedores',
     canActivate: [authGuard, permisoGuard],
     data: { modulo: 'Proveedores', accion: 'Ver' },
