@@ -79,9 +79,17 @@ public sealed class N0_6_OrigenTipadoMovimientoInventario : Migration
             nullable: true);
 
         // Snapshot temporal del contrato legacy para demostrar que el backfill no lo altera.
+        // Se declara PK explícita para ser compatible con MySQL administrado cuando
+        // sql_require_primary_key está habilitado, preservando los tipos legacy exactos.
         migrationBuilder.Sql("""
             DROP TEMPORARY TABLE IF EXISTS __N06C2Antes;
-            CREATE TEMPORARY TABLE __N06C2Antes AS
+            CREATE TEMPORARY TABLE __N06C2Antes
+            (
+                Id INT NOT NULL PRIMARY KEY,
+                ReferenciaTipo VARCHAR(30) NOT NULL,
+                ReferenciaId INT NOT NULL
+            );
+            INSERT INTO __N06C2Antes (Id, ReferenciaTipo, ReferenciaId)
                 SELECT Id, ReferenciaTipo, ReferenciaId
                   FROM MovimientosInventario;
             """);
