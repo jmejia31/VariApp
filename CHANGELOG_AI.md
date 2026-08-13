@@ -4,6 +4,20 @@ Bitácora colaborativa de cambios realizados por Javier Mejía, Codex, AntiG/Ant
 
 No reemplaza `git log`: registra intención, alcance, validaciones y handoff. Todo changeset intencional debe incluir una entrada breve; no modificar otros colaborativos si su contenido no cambió.
 
+## 2026-08-13 — ERP-N0.5 MetodoPago — CIERRE FORMAL
+
+**Responsable:** ChatGPT mediante conexiones autorizadas GitHub + Google Drive.
+
+**Objetivo/alcance:** cerrar formalmente ERP-N0.5 después de completar frontend/selectores, RBAC/auditoría, reportes/facturas/PDF, regresión integral, workflow dedicado y recertificación M13. Se crea `docs/ERP_N0_5_METODOS_PAGO.md` como documento canónico y se reconcilia `TASKS.md` contra la evidencia real de COLA/GitHub.
+
+**Correcciones de recertificación:** N0.5.14 detectó incompatibilidad con MySQL administrado/Aiven cuando `sql_require_primary_key=ON`. Se reemplazaron snapshots temporales `CREATE TEMPORARY TABLE ... AS SELECT` por tablas explícitas con PK y tipos históricos exactos en `20260812023600_N0_5_BackfillMetodoPagoHistorico.cs` (`20b3c3b42c8dbeff884a71493d4e1f9b33ad2394`) y, como regresión transversal descubierta por M13, en `20260812083000_N0_6_OrigenTipadoMovimientoInventario.cs` (`1bbccd9cccdcc181ab8c1e842ea0ff8343831197`). No se alteró el significado funcional ni el backfill histórico.
+
+**Validación real final sobre `1bbccd9cccdcc181ab8c1e842ea0ff8343831197`:** ERP-N0.5 `31753406161` SUCCESS; recovery MySQL/Aiven-like `31753406119` SUCCESS; M11 backup/restore `31753406267` SUCCESS; Desarrollo build/tests `31753406190` SUCCESS; aceptación funcional integral `31753406328` SUCCESS; M13 `31753406059`, attempt 2, SUCCESS. M13 cubrió historial desde cero con MySQL estricto, integración, SQL forward, upgrade representativo, preservación histórica, frontend, runtime/Playwright, SMTP/PDF, seguridad/auditoría, Docker y vigencia de backup.
+
+**Documentación:** `docs/ERP_N0_5_METODOS_PAGO.md` documenta contrato canónico, códigos históricos estables, migraciones, backend/API, frontend, históricos/snapshots, trazabilidad N0.5.09–N0.5.14, CI y riesgos residuales. `TASKS.md` queda reconciliado con los puntos ya certificados.
+
+**Control:** ERP-N0.5 queda funcionalmente cerrado; N0.5.15 completa el cierre documental. No se tocó `main`, Producción, merge/auto-merge del PR #2, secretos, infraestructura productiva, force-push ni ramas nuevas.
+
 ## 2026-08-12 — N0.5.08 Backend/API/CRUD/DTOs MetodoPago — LISTO
 
 **Responsable:** ChatGPT mediante conexiones autorizadas GitHub + Google Drive.
@@ -156,7 +170,7 @@ No reemplaza `git log`: registra intención, alcance, validaciones y handoff. To
 
 **Evidencia funcional:** commit `0f14b9b9f5248a01cb6c98fa456cd306fe38ae19` publicado en `Desarrollo`. El temporal accidental `NOPE_DO_NOT_CREATE` fue eliminado de la punta efectiva mediante fast-forward, sin force-push.
 
-**Validación real:** workflow dedicado `ERP-N0.5 - Certificación MetodoPago histórico`, run `31568099373`, terminó `success`: restauración/compilación/pruebas backend, esquema relacional, historia representativa, fail-closed, preflight, backfill, postcheck/preservación y snapshot EF quedaron verdes. El CI general run `31568099446` también terminó `success` en sus cinco jobs: Backend Release/pruebas, migraciones e integración MySQL, Docker, frontend e higiene.
+**Validación real:** workflow dedicado `ERP-N0.5 - Certificación MetodoPago histórico`, run `31568099373`, terminó `success`: restauración/compilación/pruebas backend, esquema relacional, historia representativa, fail-closed, preflight, backfill histórico, postcheck/preservación 1:1 y snapshot EF quedaron verdes. El CI general run `31568099446` también terminó `success` en sus cinco jobs: Backend Release/pruebas, migraciones e integración MySQL, Docker, frontend e higiene.
 
 **Control:** `N0.5.06C` y su padre `N0.5.06` quedan `LISTO`; con A1/A2/A3/B/C cerradas, la siguiente tarea de la cadena es `N0.5.07`, dependiente directamente de C.
 
