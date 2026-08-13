@@ -307,6 +307,8 @@ public class VentaService : IVentaService
                 MotivoExoneracionEnvio = venta.MotivoExoneracionEnvio,
                 Total = venta.Total,
                 SaldoPendiente = venta.Total,
+                MetodoPagoCodigoSnapshot = venta.MetodoPagoCatalogo?.Codigo,
+                MetodoPagoNombreSnapshot = venta.MetodoPagoCatalogo?.Nombre,
                 Detalles = venta.Detalles.Select(d => new FacturaDetalle
                 {
                     ProductoId = d.ProductoId,

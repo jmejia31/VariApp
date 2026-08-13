@@ -19,6 +19,10 @@ public class FacturaPago : AuditableEntity
     public MetodoPago MetodoPago { get; set; } = MetodoPago.Efectivo;
     public int? MetodoPagoId { get; set; }
     public InventoryApp.Domain.Entities.Catalogos.MetodoPago? MetodoPagoCatalogo { get; set; }
+    /// <summary>Código inmutable del método de pago al momento de registrar el pago.</summary>
+    public string? MetodoPagoCodigoSnapshot { get; set; }
+    /// <summary>Nombre inmutable del método de pago al momento de registrar el pago.</summary>
+    public string? MetodoPagoNombreSnapshot { get; set; }
 
     public int? BancoId { get; set; }
     public InventoryApp.Domain.Entities.Catalogos.Banco? Banco { get; set; }
