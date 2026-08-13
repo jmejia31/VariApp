@@ -7,6 +7,7 @@ on:
       - 'backend/src/**'
       - 'backend/tests/**'
       - 'backend/scripts/*erp-n0-5*'
+      - 'frontend/e2e/n0-5-metodos-pago-regresion.spec.ts'
       - '.github/workflows/erp-n0-5-ci.yml'
   pull_request:
     branches: [main]
@@ -14,6 +15,7 @@ on:
       - 'backend/src/**'
       - 'backend/tests/**'
       - 'backend/scripts/*erp-n0-5*'
+      - 'frontend/e2e/n0-5-metodos-pago-regresion.spec.ts'
       - '.github/workflows/erp-n0-5-ci.yml'
   workflow_dispatch:
 
@@ -27,7 +29,7 @@ concurrency:
 jobs:
   metodo-pago-historico:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
     services:
       mysql:
         image: mysql:8.4
@@ -217,3 +219,52 @@ jobs:
             --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
             --startup-project src/API/InventoryApp.API.csproj \
             --context AppDbContext
+
+      - name: Configurar Node.js para regresión frontend N0.5
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Instalar frontend y Chromium
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run lint
+          npm run build:prod
+          npx playwright install --with-deps chromium
+
+      - name: Iniciar Angular para regresión N0.5
+        shell: bash
+        run: |
+          set -euo pipefail
+          nohup npm --prefix frontend start -- --host 127.0.0.1 --port 4200 > frontend/n0-5-frontend.log 2>&1 &
+          echo $! > frontend/n0-5-frontend.pid
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:4200/login > /dev/null; then
+              echo 'Angular N0.5 listo.'
+              exit 0
+            fi
+            sleep 2
+          done
+          cat frontend/n0-5-frontend.log >&2 || true
+          exit 1
+
+      - name: Ejecutar regresión frontend/E2E N0.5
+        working-directory: frontend
+        env:
+          PLAYWRIGHT_TEST_BASE_URL: http://127.0.0.1:4200
+        run: npx playwright test e2e/n0-5-metodos-pago-regresion.spec.ts --config=playwright.config.ts
+
+      - name: Publicar evidencia E2E N0.5
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: erp-n0-5-e2e
+          path: |
+            frontend/n0-5-frontend.log
+            frontend/playwright-report/
+            frontend/test-results/
+          if-no-files-found: ignore
+          retention-days: 14
