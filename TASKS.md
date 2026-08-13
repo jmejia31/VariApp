@@ -41,13 +41,13 @@ Estado operativo controlado por `COLA`:
   - [x] N0.5.07B: `RequiereReferencia` + `RequiereBanco`; B1/B2 certificados, incluyendo Banco normalizado y fail-closed. Cierre de B2 hasta `16fdf809ced379dff8d1b970ba684644668ec1e5`; CI ERP-N0.5 `31633767440` y general `31633767490` en verde.
   - [x] N0.5.07C: `PermiteCambio` + `Orden` + `Metadata`; C1/C2 certificados hasta `ce3b218b296f3a7de417870659a6ce08de428e40`; CI ERP-N0.5 `31638441486` y general `31638441384` en verde.
 - [x] N0.5.08 Backend/API/CRUD/DTOs. DTO/repositorio/servicio/API/DI/RBAC/auditoría completados; permisos `MetodosPago:*` incorporados al catálogo en `b94aa0d9346f6efafe73b7911f07673ef07aceee`; pruebas dirigidas del servicio cerradas en `5827e610cf9cae1b6a3d5745d10e1cee59df6c78`; ERP-N0.5 `31650122695` y CI general `31650122667` en verde completo.
-- [ ] N0.5.09 Frontend administrable/selectores dinámicos.
-- [ ] N0.5.10 RBAC + auditoría.
-- [ ] N0.5.11 Reportes/facturas/PDFs.
-- [ ] N0.5.12 Tests de regresión.
-- [ ] N0.5.13 Workflow CI dedicado — **reconciliar primero con evidencia GitHub existente; no duplicar**.
-- [ ] N0.5.14 Recertificación M13.
-- [ ] N0.5.15 Documentación formal y cierre.
+- [x] N0.5.09 Frontend administrable/selectores dinámicos. Cierre `7da9cc73f75598dedbf7630f8b131d7dc5f72af8`; ERP-N0.5 `31662728534`, Desarrollo `31662728587` y M10 `31662728555` SUCCESS.
+- [x] N0.5.10 RBAC + auditoría. Cierre `fe669fd0f3138193b04bcbbad96934d4e93b8ccb`; ERP-N0.5 `31671574303` y Desarrollo `31671574330` SUCCESS.
+- [x] N0.5.11 Reportes/facturas/PDFs. Cierre `fd841429d04d4663278cf0605be54b13d5b0178b`; ERP-N0.5 `31737978596` y Desarrollo `31737978473` SUCCESS.
+- [x] N0.5.12 Tests de regresión. Cierre `eaa52c4b92c6932b33afa8eb2b334ed8dec3593f`; ERP-N0.5 `31745717643`, build `31745717778`, aceptación integral `31745717860` y Fase 8 `31745717633` SUCCESS.
+- [x] N0.5.13 Workflow CI dedicado — reconciliado sin duplicar `.github/workflows/erp-n0-5-ci.yml`; run `31745717643` SUCCESS.
+- [x] N0.5.14 Recertificación M13. SHA `1bbccd9cccdcc181ab8c1e842ea0ff8343831197`; N0.5 `31753406161`, recovery MySQL `31753406119`, M11 `31753406267`, build `31753406190`, aceptación integral `31753406328` y M13 `31753406059` attempt 2 SUCCESS.
+- [ ] N0.5.15 Documentación formal y cierre — documento canónico publicado en `docs/ERP_N0_5_METODOS_PAGO.md`; pendiente únicamente reconciliar changelog/tablero final de esta microtarea.
 
 ## ERP-N0.6 — Referencias polimórficas críticas
 
