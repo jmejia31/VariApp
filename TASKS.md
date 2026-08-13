@@ -47,7 +47,7 @@ Estado operativo controlado por `COLA`:
 - [x] N0.5.12 Tests de regresión. Cierre `eaa52c4b92c6932b33afa8eb2b334ed8dec3593f`; ERP-N0.5 `31745717643`, build `31745717778`, aceptación integral `31745717860` y Fase 8 `31745717633` SUCCESS.
 - [x] N0.5.13 Workflow CI dedicado — reconciliado sin duplicar `.github/workflows/erp-n0-5-ci.yml`; run `31745717643` SUCCESS.
 - [x] N0.5.14 Recertificación M13. SHA `1bbccd9cccdcc181ab8c1e842ea0ff8343831197`; N0.5 `31753406161`, recovery MySQL `31753406119`, M11 `31753406267`, build `31753406190`, aceptación integral `31753406328` y M13 `31753406059` attempt 2 SUCCESS.
-- [ ] N0.5.15 Documentación formal y cierre — documento canónico publicado en `docs/ERP_N0_5_METODOS_PAGO.md`; pendiente únicamente reconciliar changelog/tablero final de esta microtarea.
+- [x] N0.5.15 Documentación formal y cierre — `docs/ERP_N0_5_METODOS_PAGO.md`, `CHANGELOG_AI.md`, `TASKS.md` y tablero VAEP reconciliados; ERP-N0.5 formalmente cerrado.
 
 ## ERP-N0.6 — Referencias polimórficas críticas
 
@@ -68,9 +68,7 @@ Estado operativo controlado por `COLA`:
   - [ ] N0.6.D3 Contrato DTO/API de inventario + verificación de autoridad tipada en finanzas.
 - [ ] N0.6.E–H Frontend si aplica, seguridad/auditoría, QA/CI y certificación según `COLA`.
 
-N0.6 puede avanzar de forma independiente del trabajo todavía abierto de N0.5 cuando sus dependencias propias estén satisfechas; N0.7 sí depende de N0.6 según el Plan Maestro.
-
-Después, VAEP continúa automáticamente con N0.6, N0.7, N0.8 y `GATE-N0`. Si una tarea queda bloqueada, puede saltar solo a una tarea sin dependencia directa/transitiva de la bloqueada.
+ERP-N0.5 ya está cerrado. VAEP continúa con N0.6, N0.7, N0.8 y `GATE-N0` respetando sus dependencias directas/transitivas.
 
 ## Fuentes VAEP v2
 
