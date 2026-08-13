@@ -108,7 +108,7 @@ public class VentaRepository : IVentaRepository
 
         var normalizado = valor.Trim();
         return await _context.Set<CatalogoMetodoPago>()
-            .AsNoTracking()
+            .AsTracking()
             .FirstOrDefaultAsync(m =>
                 m.Activo && !m.Eliminado &&
                 (m.Codigo == normalizado || m.Nombre == normalizado));
