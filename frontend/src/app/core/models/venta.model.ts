@@ -64,7 +64,7 @@ export interface Venta {
   clienteDireccion?: string;
   estado: 'Borrador' | 'Confirmada' | 'Anulada';
   estadoPago: 'Pendiente' | 'Pagado' | 'Parcial';
-  metodoPago: 'Efectivo' | 'Transferencia' | 'Tarjeta' | 'Otro';
+  metodoPago: string;
   importeBruto: number;
   importeProductos: number;
   subtotal: number;

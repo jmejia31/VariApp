@@ -18,7 +18,6 @@ public sealed class MetodosPagoController : ControllerBase
     [RequierePermiso(ModuloSistema.MetodosPago, AccionPermiso.Ver)]
     public async Task<IActionResult> GetAll()=>Ok(ApiResponse<List<MetodoPagoDto>>.Ok(await _service.GetAllAsync()));
     [HttpGet("activos")]
-    [RequierePermiso(ModuloSistema.Ventas, AccionPermiso.Ver)]
     public async Task<IActionResult> GetActivos()=>Ok(ApiResponse<List<MetodoPagoDto>>.Ok(await _service.GetActivosAsync()));
     [HttpGet("bancos-activos")]
     [RequierePermiso(ModuloSistema.Ventas, AccionPermiso.Ver)]

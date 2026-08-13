@@ -116,7 +116,7 @@
 
     <h2 class="section-title">Pago, envío y totales</h2>
     <div class="fields-grid">
-      <mat-form-field appearance="outline"><mat-label>Método de pago</mat-label><mat-select formControlName="metodoPago"><mat-option value="Efectivo">Efectivo</mat-option><mat-option value="Transferencia">Transferencia</mat-option><mat-option value="Tarjeta">Tarjeta</mat-option><mat-option value="Otro">Otro</mat-option></mat-select></mat-form-field>
+      <app-metodo-pago-select formControlName="metodoPago" [preservarValorActual]="isEdit()"></app-metodo-pago-select>
       <mat-form-field appearance="outline"><mat-label>Estado de pago</mat-label><mat-select formControlName="estadoPago"><mat-option value="Pendiente">Pendiente</mat-option><mat-option value="Pagado">Pagado</mat-option><mat-option value="Parcial">Parcial</mat-option></mat-select></mat-form-field>
       <mat-form-field appearance="outline"><mat-label>Código promocional (opcional)</mat-label><input matInput formControlName="codigoPromocional" placeholder="Ej. VERANO10"></mat-form-field>
       <mat-form-field appearance="outline">

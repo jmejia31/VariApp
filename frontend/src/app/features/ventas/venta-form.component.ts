@@ -22,6 +22,7 @@ import { CostoEnvio } from '../../core/models/costo-envio.model';
 import { ResultadoCalculo } from '../../core/models/venta.model';
 import { ProductoImagenComponent } from '../../shared/producto-imagen/producto-imagen.component';
 import { CodigoScannerInputComponent } from '../../shared/codigo-scanner-input/codigo-scanner-input.component';
+import { MetodoPagoSelectComponent } from '../../shared/metodo-pago-select/metodo-pago-select.component';
 
 @Component({
   selector: 'app-venta-form',
@@ -30,7 +31,7 @@ import { CodigoScannerInputComponent } from '../../shared/codigo-scanner-input/c
     CommonModule, ReactiveFormsModule, RouterLink, MatFormFieldModule, MatInputModule,
     MatSelectModule, MatAutocompleteModule, MatButtonModule, MatIconModule,
     MatProgressSpinnerModule, MatCheckboxModule, ProductoImagenComponent,
-    CodigoScannerInputComponent
+    CodigoScannerInputComponent, MetodoPagoSelectComponent
   ],
   templateUrl: './venta-form.component.html',
   styleUrl: './venta-form.component.scss'

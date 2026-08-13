@@ -15,6 +15,7 @@ import { FinanzasResumen, MovimientoFinanciero, RevisionFinanciera } from '../..
 import { AnularDialogComponent } from '../../shared/anular-dialog.component';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
 import { ListNavigationStateService } from '../../core/navigation/list-navigation-state.service';
+import { MetodoPagoSelectComponent } from '../../shared/metodo-pago-select/metodo-pago-select.component';
 
 type FiltroTipoMovimiento = 'todos' | 'Ingreso' | 'Egreso' | 'Ajuste';
 type OrdenMovimientoFinanciero = 'fecha' | 'concepto' | 'tipo' | 'monto';
@@ -24,7 +25,7 @@ type OrdenMovimientoFinanciero = 'fecha' | 'concepto' | 'tipo' | 'monto';
   standalone: true,
   imports: [
     CommonModule, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatSelectModule,
-    MatButtonModule, MatIconModule, MatProgressSpinnerModule, MatDialogModule
+    MatButtonModule, MatIconModule, MatProgressSpinnerModule, MatDialogModule, MetodoPagoSelectComponent
   ],
   templateUrl: './finanzas.component.html',
   styleUrl: './finanzas.component.scss'
@@ -58,7 +59,7 @@ export class FinanzasComponent implements OnInit {
     concepto: ['', Validators.required],
     descripcion: [''],
     monto: [0, [Validators.required, Validators.min(0.01)]],
-    metodoPago: ['Efectivo']
+    metodoPago: ['Efectivo', Validators.required]
   });
 
   readonly revisionForm = this.fb.group({
