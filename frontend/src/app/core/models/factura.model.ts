@@ -42,7 +42,12 @@ export interface FacturaPago {
   id: number;
   fechaPago: string;
   monto: number;
+  montoRecibido: number;
+  cambio: number;
   metodoPago: string;
+  bancoId?: number;
+  bancoCodigo?: string;
+  bancoNombre?: string;
   referencia?: string;
   observaciones?: string;
   anulado: boolean;
@@ -54,6 +59,7 @@ export interface RegistrarFacturaPago {
   fechaPago?: string;
   monto: number;
   metodoPago: string;
+  bancoId?: number;
   referencia?: string;
   observaciones?: string;
 }

@@ -11,6 +11,12 @@ export interface MetodoPago {
   metadata?: string | null;
 }
 
+export interface BancoLookup {
+  id: number;
+  codigo: string;
+  nombre: string;
+}
+
 export interface MetodoPagoCreate {
   codigo: string;
   nombre: string;

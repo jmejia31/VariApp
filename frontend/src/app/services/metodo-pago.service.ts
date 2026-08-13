@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { ApiResponse } from '../core/models/api-response.model';
-import { MetodoPago, MetodoPagoCreate, MetodoPagoUpdate, ReordenarMetodoPago } from '../core/models/metodo-pago.model';
+import { BancoLookup, MetodoPago, MetodoPagoCreate, MetodoPagoUpdate, ReordenarMetodoPago } from '../core/models/metodo-pago.model';
 
 @Injectable({ providedIn: 'root' })
 export class MetodoPagoService {
@@ -16,6 +16,10 @@ export class MetodoPagoService {
 
   getActivos(): Observable<ApiResponse<MetodoPago[]>> {
     return this.http.get<ApiResponse<MetodoPago[]>>(`${this.url}/activos`);
+  }
+
+  getBancosActivos(): Observable<ApiResponse<BancoLookup[]>> {
+    return this.http.get<ApiResponse<BancoLookup[]>>(`${this.url}/bancos-activos`);
   }
 
   getById(id: number): Observable<ApiResponse<MetodoPago>> {

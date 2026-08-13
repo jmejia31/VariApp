@@ -20,7 +20,6 @@ public sealed class MetodosPagoController : ControllerBase
     [HttpGet("activos")]
     public async Task<IActionResult> GetActivos()=>Ok(ApiResponse<List<MetodoPagoDto>>.Ok(await _service.GetActivosAsync()));
     [HttpGet("bancos-activos")]
-    [RequierePermiso(ModuloSistema.Ventas, AccionPermiso.Ver)]
     public async Task<IActionResult> GetBancosActivos(){var bancos=await _facturaRepository.GetBancosActivosAsync();var lookup=bancos.Select(b=>new {b.Id,b.Codigo,b.Nombre}).ToList();return Ok(ApiResponse<object>.Ok(lookup));}
     [HttpGet("{id:int}")]
     [RequierePermiso(ModuloSistema.MetodosPago, AccionPermiso.Ver)]

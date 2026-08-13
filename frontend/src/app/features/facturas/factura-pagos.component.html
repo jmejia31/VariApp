@@ -33,24 +33,42 @@
         <h2>Registrar pago</h2>
         <div class="campos">
           <mat-form-field appearance="outline">
-            <mat-label>Monto</mat-label>
-            <input matInput type="number" min="0.01" [max]="item.saldoPendiente" step="0.01" [(ngModel)]="pago.monto">
+            <mat-label>Monto recibido</mat-label>
+            <input matInput type="number" min="0.01" [attr.max]="metodoSeleccionado()?.permiteCambio ? null : item.saldoPendiente" step="0.01" [(ngModel)]="pago.monto">
             <span matTextPrefix>L.&nbsp;</span>
+            @if (cambioEstimado() > 0) {
+              <mat-hint>Cambio estimado: {{ cambioEstimado() | currency:'HNL':'symbol':'1.2-2':'es-HN' }}</mat-hint>
+            }
           </mat-form-field>
 
           <mat-form-field appearance="outline">
             <mat-label>Método de pago</mat-label>
-            <mat-select [(ngModel)]="pago.metodoPago">
-              @for (metodo of metodosPago; track metodo) {
-                <mat-option [value]="metodo">{{ metodo }}</mat-option>
+            <mat-select [(ngModel)]="pago.metodoPago" [disabled]="cargandoCatalogos()" (selectionChange)="onMetodoPagoChange()">
+              @for (metodo of metodosPago(); track metodo.id) {
+                <mat-option [value]="metodo.codigo">{{ metodo.nombre }}</mat-option>
               }
             </mat-select>
+            @if (cargandoCatalogos()) { <mat-spinner matSuffix diameter="18"></mat-spinner> }
           </mat-form-field>
 
           <mat-form-field appearance="outline">
-            <mat-label>Referencia</mat-label>
-            <input matInput maxlength="120" [(ngModel)]="pago.referencia">
+            <mat-label>Referencia{{ metodoSeleccionado()?.requiereReferencia ? ' *' : '' }}</mat-label>
+            <input matInput maxlength="120" [required]="metodoSeleccionado()?.requiereReferencia ?? false" [(ngModel)]="pago.referencia">
+            @if (metodoSeleccionado()?.requiereReferencia) {
+              <mat-hint>Obligatoria para este método.</mat-hint>
+            }
           </mat-form-field>
+
+          @if (metodoSeleccionado()?.requiereBanco) {
+            <mat-form-field appearance="outline">
+              <mat-label>Banco *</mat-label>
+              <mat-select [(ngModel)]="pago.bancoId" required>
+                @for (banco of bancos(); track banco.id) {
+                  <mat-option [value]="banco.id">{{ banco.nombre }} ({{ banco.codigo }})</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          }
 
           <mat-form-field appearance="outline" class="observaciones">
             <mat-label>Observaciones</mat-label>
@@ -81,8 +99,11 @@
               <tr>
                 <th>Fecha</th>
                 <th>Método</th>
+                <th>Banco</th>
                 <th>Referencia</th>
-                <th>Monto</th>
+                <th>Recibido</th>
+                <th>Aplicado</th>
+                <th>Cambio</th>
                 <th>Estado</th>
                 <th>Acciones</th>
               </tr>
@@ -92,8 +113,11 @@
                 <tr [class.anulado]="pagoItem.anulado">
                   <td>{{ pagoItem.fechaPago | date:'dd/MM/yyyy HH:mm' }}</td>
                   <td>{{ pagoItem.metodoPago }}</td>
+                  <td>{{ pagoItem.bancoNombre || '—' }}@if (pagoItem.bancoCodigo) { ({{ pagoItem.bancoCodigo }}) }</td>
                   <td>{{ pagoItem.referencia || '—' }}</td>
+                  <td>{{ pagoItem.montoRecibido | currency:'HNL':'symbol':'1.2-2':'es-HN' }}</td>
                   <td>{{ pagoItem.monto | currency:'HNL':'symbol':'1.2-2':'es-HN' }}</td>
+                  <td>{{ pagoItem.cambio | currency:'HNL':'symbol':'1.2-2':'es-HN' }}</td>
                   <td>{{ pagoItem.anulado ? 'Anulado' : 'Aplicado' }}</td>
                   <td>
                     <button mat-button color="warn"
@@ -105,7 +129,7 @@
                   </td>
                 </tr>
                 @if (pagoItem.anulado && pagoItem.motivoAnulacion) {
-                  <tr class="motivo"><td colspan="6">Motivo: {{ pagoItem.motivoAnulacion }}</td></tr>
+                  <tr class="motivo"><td colspan="9">Motivo: {{ pagoItem.motivoAnulacion }}</td></tr>
                 }
               }
             </tbody>
