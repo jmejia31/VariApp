@@ -11,6 +11,7 @@ public interface IFacturaRepository
     Task<List<Factura>> GetAllAsync();
     Task<CatalogoMetodoPago?> GetMetodoPagoPorCodigoONombreAsync(string valor);
     Task<CatalogoBanco?> GetBancoActivoPorIdAsync(int id);
+    Task<List<CatalogoBanco>> GetBancosActivosAsync();
 
     /// <summary>
     /// Recupera la factura sin aplicar el alcance del usuario autenticado.
