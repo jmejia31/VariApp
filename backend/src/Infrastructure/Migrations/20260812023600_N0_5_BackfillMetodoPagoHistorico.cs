@@ -80,19 +80,44 @@ public sealed class N0_5_BackfillMetodoPagoHistorico : Migration
 
         // Snapshot temporal de cada valor legacy y su identidad. Se usa después del
         // backfill para demostrar que no cambió ni una fila ni un valor histórico.
+        // Se declaran PK explícitas para ser compatibles con MySQL administrado/Aiven
+        // cuando sql_require_primary_key está habilitado.
         migrationBuilder.Sql("""
             DROP TEMPORARY TABLE IF EXISTS __N05VentasAntes;
             DROP TEMPORARY TABLE IF EXISTS __N05FacturaPagosAntes;
             DROP TEMPORARY TABLE IF EXISTS __N05MovimientosAntes;
             DROP TEMPORARY TABLE IF EXISTS __N05ComprasAntes;
 
-            CREATE TEMPORARY TABLE __N05VentasAntes AS
+            CREATE TEMPORARY TABLE __N05VentasAntes
+            (
+                Id INT NOT NULL PRIMARY KEY,
+                MetodoPago VARCHAR(20) NOT NULL
+            );
+            INSERT INTO __N05VentasAntes (Id, MetodoPago)
                 SELECT Id, MetodoPago FROM Ventas;
-            CREATE TEMPORARY TABLE __N05FacturaPagosAntes AS
+
+            CREATE TEMPORARY TABLE __N05FacturaPagosAntes
+            (
+                Id INT NOT NULL PRIMARY KEY,
+                MetodoPago INT NOT NULL
+            );
+            INSERT INTO __N05FacturaPagosAntes (Id, MetodoPago)
                 SELECT Id, MetodoPago FROM FacturaPagos;
-            CREATE TEMPORARY TABLE __N05MovimientosAntes AS
+
+            CREATE TEMPORARY TABLE __N05MovimientosAntes
+            (
+                Id INT NOT NULL PRIMARY KEY,
+                MetodoPago VARCHAR(20) NULL
+            );
+            INSERT INTO __N05MovimientosAntes (Id, MetodoPago)
                 SELECT Id, MetodoPago FROM MovimientosFinancieros;
-            CREATE TEMPORARY TABLE __N05ComprasAntes AS
+
+            CREATE TEMPORARY TABLE __N05ComprasAntes
+            (
+                Id INT NOT NULL PRIMARY KEY,
+                MetodoPago VARCHAR(20) NOT NULL
+            );
+            INSERT INTO __N05ComprasAntes (Id, MetodoPago)
                 SELECT Id, MetodoPago FROM Compras;
             """);
 
