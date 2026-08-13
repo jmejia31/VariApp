@@ -50,7 +50,7 @@ public sealed class MetodoPagoService : IMetodoPagoService
         {
             await _repository.AddAsync(item);
             await _repository.SaveChangesAsync();
-            await _auditoria.RegistrarAsync(ModuloSistema.MetodosPago, AccionPermiso.Crear, $"Método de pago creado: {item.Nombre} ({item.Codigo})", item.Id);
+            await _auditoria.RegistrarEstrictoAsync(ModuloSistema.MetodosPago, AccionPermiso.Crear, $"Método de pago creado: {item.Nombre} ({item.Codigo})", item.Id);
         });
         return ToDto(item);
     }
@@ -61,18 +61,23 @@ public sealed class MetodoPagoService : IMetodoPagoService
         var item = await _repository.GetByIdAsync(id);
         if (item is null) return null;
         var anteriores = ToDto(item);
-        item.Nombre = dto.Nombre.Trim();
-        item.Tipo = dto.Tipo.Trim();
-        item.Activo = dto.Activo;
-        item.RequiereReferencia = dto.RequiereReferencia;
-        item.RequiereBanco = dto.RequiereBanco;
-        item.PermiteCambio = dto.PermiteCambio;
-        item.Orden = dto.Orden;
-        item.Metadata = dto.Metadata;
-        MarcarActualizacion(item);
-        _repository.Update(item);
-        await _repository.SaveChangesAsync();
-        await _auditoria.RegistrarAsync(ModuloSistema.MetodosPago, AccionPermiso.Editar, $"Método de pago actualizado: {item.Nombre} ({item.Codigo})", item.Id, valoresAnteriores: anteriores, valoresNuevos: ToDto(item));
+
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            item.Nombre = dto.Nombre.Trim();
+            item.Tipo = dto.Tipo.Trim();
+            item.Activo = dto.Activo;
+            item.RequiereReferencia = dto.RequiereReferencia;
+            item.RequiereBanco = dto.RequiereBanco;
+            item.PermiteCambio = dto.PermiteCambio;
+            item.Orden = dto.Orden;
+            item.Metadata = dto.Metadata;
+            MarcarActualizacion(item);
+            _repository.Update(item);
+            await _repository.SaveChangesAsync();
+            await _auditoria.RegistrarEstrictoAsync(ModuloSistema.MetodosPago, AccionPermiso.Editar, $"Método de pago actualizado: {item.Nombre} ({item.Codigo})", item.Id, valoresAnteriores: anteriores, valoresNuevos: ToDto(item));
+        });
+
         return ToDto(item);
     }
 
@@ -81,11 +86,23 @@ public sealed class MetodoPagoService : IMetodoPagoService
         var item = await _repository.GetByIdAsync(id);
         if (item is null) return null;
         if (item.Activo == activo) return ToDto(item);
-        item.Activo = activo;
-        MarcarActualizacion(item);
-        _repository.Update(item);
-        await _repository.SaveChangesAsync();
-        await _auditoria.RegistrarAsync(ModuloSistema.MetodosPago, activo ? AccionPermiso.Activar : AccionPermiso.Desactivar, $"Método de pago {(activo ? "activado" : "desactivado")}: {item.Nombre} ({item.Codigo})", item.Id);
+        var anteriores = ToDto(item);
+
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            item.Activo = activo;
+            MarcarActualizacion(item);
+            _repository.Update(item);
+            await _repository.SaveChangesAsync();
+            await _auditoria.RegistrarEstrictoAsync(
+                ModuloSistema.MetodosPago,
+                activo ? AccionPermiso.Activar : AccionPermiso.Desactivar,
+                $"Método de pago {(activo ? "activado" : "desactivado")}: {item.Nombre} ({item.Codigo})",
+                item.Id,
+                valoresAnteriores: anteriores,
+                valoresNuevos: ToDto(item));
+        });
+
         return ToDto(item);
     }
 
@@ -93,14 +110,26 @@ public sealed class MetodoPagoService : IMetodoPagoService
     {
         var item = await _repository.GetByIdAsync(id);
         if (item is null) return false;
-        item.Eliminado = true;
-        item.Activo = false;
-        item.FechaEliminacion = DateTime.UtcNow;
-        item.EliminadoPorUsuarioId = _currentUser.UsuarioId;
-        MarcarActualizacion(item);
-        _repository.Update(item);
-        await _repository.SaveChangesAsync();
-        await _auditoria.RegistrarAsync(ModuloSistema.MetodosPago, AccionPermiso.EliminarLogico, $"Método de pago eliminado lógicamente: {item.Nombre} ({item.Codigo})", item.Id);
+        var anteriores = ToDto(item);
+
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            item.Eliminado = true;
+            item.Activo = false;
+            item.FechaEliminacion = DateTime.UtcNow;
+            item.EliminadoPorUsuarioId = _currentUser.UsuarioId;
+            MarcarActualizacion(item);
+            _repository.Update(item);
+            await _repository.SaveChangesAsync();
+            await _auditoria.RegistrarEstrictoAsync(
+                ModuloSistema.MetodosPago,
+                AccionPermiso.EliminarLogico,
+                $"Método de pago eliminado lógicamente: {item.Nombre} ({item.Codigo})",
+                item.Id,
+                valoresAnteriores: anteriores,
+                valoresNuevos: ToDto(item));
+        });
+
         return true;
     }
 
@@ -120,7 +149,7 @@ public sealed class MetodoPagoService : IMetodoPagoService
                 _repository.Update(item);
             }
             await _repository.SaveChangesAsync();
-            await _auditoria.RegistrarAsync(ModuloSistema.MetodosPago, AccionPermiso.Editar, $"Reordenamiento de {items.Count} métodos de pago.", entidad: "MetodoPago");
+            await _auditoria.RegistrarEstrictoAsync(ModuloSistema.MetodosPago, AccionPermiso.Editar, $"Reordenamiento de {items.Count} métodos de pago.", entidad: "MetodoPago");
         });
     }
 
