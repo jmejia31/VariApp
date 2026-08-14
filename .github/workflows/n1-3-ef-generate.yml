@@ -68,6 +68,101 @@ jobs:
             --context AppDbContext \
             --output-dir Migrations
           python scripts/n1_3_finalize_persistence.py
+          python - <<'PY'
+          from pathlib import Path
+
+          migrations = Path('backend/src/Infrastructure/Migrations')
+          files = [p for p in migrations.glob('*_N1_3_UbicacionAlmacenPersistencia.cs') if not p.name.endswith('.Designer.cs')]
+          if len(files) != 1:
+              raise SystemExit(f'Se esperaba una migración N1.3 y se hallaron {len(files)}')
+          path = files[0]
+          text = path.read_text(encoding='utf-8-sig')
+
+          old_checks = '''                ALTER TABLE UbicacionesAlmacen
+                    ADD CONSTRAINT CK_UbicacionesAlmacen_Codigo_NoVacio CHECK (CHAR_LENGTH(TRIM(Codigo)) > 0),
+                    ADD CONSTRAINT CK_UbicacionesAlmacen_Nombre_NoVacio CHECK (CHAR_LENGTH(TRIM(Nombre)) > 0),
+                    ADD CONSTRAINT CK_UbicacionesAlmacen_Tipo_Valido CHECK (Tipo BETWEEN 1 AND 6),
+                    ADD CONSTRAINT CK_UbicacionesAlmacen_Padre_NoSelf CHECK (UbicacionPadreId IS NULL OR UbicacionPadreId <> Id);
+'''
+          new_checks = '''                ALTER TABLE UbicacionesAlmacen
+                    ADD CONSTRAINT CK_UbicacionesAlmacen_Codigo_NoVacio CHECK (CHAR_LENGTH(TRIM(Codigo)) > 0),
+                    ADD CONSTRAINT CK_UbicacionesAlmacen_Nombre_NoVacio CHECK (CHAR_LENGTH(TRIM(Nombre)) > 0),
+                    ADD CONSTRAINT CK_UbicacionesAlmacen_Tipo_Valido CHECK (Tipo BETWEEN 1 AND 6);
+'''
+          if old_checks not in text:
+              raise SystemExit('No se encontró bloque CHECK esperado para parche MySQL')
+          text = text.replace(old_checks, new_checks, 1)
+
+          post_marker = '''            migrationBuilder.Sql("""
+                DROP TEMPORARY TABLE IF EXISTS __N13CPostGuard;
+'''
+          trigger_block = '''            migrationBuilder.Sql("""
+                CREATE TRIGGER TR_UbicacionesAlmacen_NoSelf_Insert
+                AFTER INSERT ON UbicacionesAlmacen
+                FOR EACH ROW
+                BEGIN
+                    IF NEW.UbicacionPadreId IS NOT NULL AND NEW.UbicacionPadreId = NEW.Id THEN
+                        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Una ubicacion no puede ser su propio padre.';
+                    END IF;
+                END;
+                """);
+
+            migrationBuilder.Sql("""
+                CREATE TRIGGER TR_UbicacionesAlmacen_NoSelf_Update
+                BEFORE UPDATE ON UbicacionesAlmacen
+                FOR EACH ROW
+                BEGIN
+                    IF NEW.UbicacionPadreId IS NOT NULL AND NEW.UbicacionPadreId = NEW.Id THEN
+                        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Una ubicacion no puede ser su propio padre.';
+                    END IF;
+                END;
+                """);
+
+'''
+          if post_marker not in text:
+              raise SystemExit('No se encontró marcador de postcheck')
+          text = text.replace(post_marker, trigger_block + post_marker, 1)
+
+          old_post = '''                SELECT 8, CASE WHEN COUNT(*) = 4 THEN 0 ELSE 1 END
+                  FROM information_schema.table_constraints
+                 WHERE constraint_schema = DATABASE()
+                   AND table_name = 'UbicacionesAlmacen'
+                   AND constraint_type = 'CHECK'
+                   AND constraint_name IN (
+                        'CK_UbicacionesAlmacen_Codigo_NoVacio',
+                        'CK_UbicacionesAlmacen_Nombre_NoVacio',
+                        'CK_UbicacionesAlmacen_Tipo_Valido',
+                        'CK_UbicacionesAlmacen_Padre_NoSelf');
+
+                DROP TEMPORARY TABLE __N13CPostGuard;
+'''
+          new_post = '''                SELECT 8, CASE WHEN COUNT(*) = 3 THEN 0 ELSE 1 END
+                  FROM information_schema.table_constraints
+                 WHERE constraint_schema = DATABASE()
+                   AND table_name = 'UbicacionesAlmacen'
+                   AND constraint_type = 'CHECK'
+                   AND constraint_name IN (
+                        'CK_UbicacionesAlmacen_Codigo_NoVacio',
+                        'CK_UbicacionesAlmacen_Nombre_NoVacio',
+                        'CK_UbicacionesAlmacen_Tipo_Valido');
+
+                INSERT INTO __N13CPostGuard (Id, Violaciones)
+                SELECT 9, CASE WHEN COUNT(*) = 2 THEN 0 ELSE 1 END
+                  FROM information_schema.triggers
+                 WHERE trigger_schema = DATABASE()
+                   AND event_object_table = 'UbicacionesAlmacen'
+                   AND trigger_name IN (
+                        'TR_UbicacionesAlmacen_NoSelf_Insert',
+                        'TR_UbicacionesAlmacen_NoSelf_Update');
+
+                DROP TEMPORARY TABLE __N13CPostGuard;
+'''
+          if old_post not in text:
+              raise SystemExit('No se encontró postcheck de CHECKs esperado')
+          text = text.replace(old_post, new_post, 1)
+          path.write_text(text, encoding='utf-8-sig')
+          print(f'Compatibilidad MySQL aplicada a {path.name}: self-parent protegido por triggers.')
+          PY
 
       - name: Verificar snapshot sin drift
         run: |
