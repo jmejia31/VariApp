@@ -46,22 +46,26 @@ public sealed class N07AjusteInventarioSeguridadRegressionTests
     }
 
     [Fact]
-    public void Ajustes_stock_legacy_deben_delegar_en_la_autoridad_formal()
+    public void Ajustes_stock_legacy_deben_delegar_en_la_autoridad_formal_atomica()
     {
-        var source = Leer("backend/src/Application/Services/InventarioAjusteService.cs");
+        var adapter = Leer("backend/src/Application/Services/InventarioAjusteService.cs");
+        var formal = Leer("backend/src/Application/Services/AjusteInventarioService.cs");
 
-        Assert.Contains("IAjusteInventarioService _ajustes", source);
-        Assert.Contains("_ajustes.CreateAsync(", source);
-        Assert.Contains("_ajustes.ConfirmarAsync(", source);
+        Assert.Contains("IAjusteInventarioService _ajustes", adapter);
+        Assert.Equal(2, ContarOcurrencias(adapter, "_ajustes.AjustarStockCompatibilidadAsync("));
 
-        Assert.DoesNotContain("IInventarioConcurrencyService", source);
-        Assert.DoesNotContain("IMovimientoInventarioRepository", source);
-        Assert.DoesNotContain("IProductoRepository", source);
-        Assert.DoesNotContain("IUnitOfWork", source);
-        Assert.DoesNotContain("IAuditoriaService", source);
-        Assert.DoesNotContain("new MovimientoInventario", source);
-        Assert.DoesNotContain("AjusteProductoVariante", source);
-        Assert.DoesNotContain("AjusteProducto\"", source);
+        Assert.DoesNotContain("IInventarioConcurrencyService", adapter);
+        Assert.DoesNotContain("IMovimientoInventarioRepository", adapter);
+        Assert.DoesNotContain("IProductoRepository", adapter);
+        Assert.DoesNotContain("IUnitOfWork", adapter);
+        Assert.DoesNotContain("IAuditoriaService", adapter);
+        Assert.DoesNotContain("new MovimientoInventario", adapter);
+        Assert.DoesNotContain("AjusteProductoVariante", adapter);
+        Assert.DoesNotContain("AjusteProducto\"", adapter);
+
+        Assert.Contains("AjustarStockCompatibilidadAsync", formal);
+        Assert.Contains("cantidadesEsperadas.TryGetValue", formal);
+        Assert.Contains("cantidadEsperada != cantidadAnterior", formal);
     }
 
     private static int ContarOcurrencias(string source, string value)
