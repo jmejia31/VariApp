@@ -6,25 +6,25 @@ export const AJUSTES_INVENTARIO_ROUTES: Routes = [
   {
     path: 'inventario/ajustes',
     canActivate: [authGuard, permisoGuard],
-    data: { modulo: 'MovimientosInventario', accion: 'Ver' },
+    data: { modulo: 'Inventario', accion: 'Ver' },
     loadComponent: () => import('./ajustes-list.component').then(m => m.AjustesListComponent)
   },
   {
     path: 'inventario/ajustes/nuevo',
     canActivate: [authGuard, permisoGuard],
-    data: { modulo: 'MovimientosInventario', accion: 'Crear' },
+    data: { modulo: 'Inventario', accion: 'Crear' },
     loadComponent: () => import('./ajuste-form.component').then(m => m.AjusteFormComponent)
   },
   {
     path: 'inventario/ajustes/:id/editar',
     canActivate: [authGuard, permisoGuard],
-    data: { modulo: 'MovimientosInventario', accion: 'Editar' },
+    data: { modulo: 'Inventario', accion: 'Editar' },
     loadComponent: () => import('./ajuste-form.component').then(m => m.AjusteFormComponent)
   },
   {
     path: 'inventario/ajustes/:id',
     canActivate: [authGuard, permisoGuard],
-    data: { modulo: 'MovimientosInventario', accion: 'Ver' },
+    data: { modulo: 'Inventario', accion: 'Ver' },
     loadComponent: () => import('./ajuste-detail.component').then(m => m.AjusteDetailComponent)
   }
 ];
