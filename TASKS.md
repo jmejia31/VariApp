@@ -108,6 +108,19 @@ ERP-N0.5, ERP-N0.6, ERP-N0.7 y ERP-N0.8 están formalmente cerrados. `GATE-N0=LI
 
 **ERP-N1.1 queda formalmente cerrado.** Siguiente foco autorizado por VAEP: `N1.2.A — Almacenes / auditoría y preflight`.
 
+## ✅ ERP-N1.3 — Ubicaciones internas de almacén — cierre certificado (2026-08-14)
+
+- [x] N1.3.A Preflight y diseño — `docs/ERP_N1_3_UBICACIONES_PREFLIGHT.md`; topología jerárquica aditiva definida sin stock, sin `SucursalId`/`EmpresaId` duplicados y con N1.4 como autoridad futura de existencias.
+- [x] N1.3.B Dominio y contratos — `UbicacionAlmacen`, `TipoUbicacionAlmacen`, DTOs y guardas de contrato; backend Release/unitarias certificados.
+- [x] N1.3.C Persistencia/migración — `20260814211647_N1_3_UbicacionAlmacenPersistencia`; FK a Almacén, jerarquía autorreferente compuesta del mismo Almacén, código activo único, constraints y triggers MySQL 8.4 para self-parent; snapshot sin drift e historial MySQL certificado.
+- [x] N1.3.D Aplicación, servicios y API — repositorio/servicio/controller/DI, paginación y filtros, padre activo/mismo Almacén, prevención de ciclos y protección de descendientes; cierre funcional `4d2cc04b363df602f6de97b7f5ea876ea35a6196`; Backend Release/unitarias `31843085895` / `94903923345` SUCCESS.
+- [x] N1.3.E Frontend/UX — listado responsive, filtros server-side, formulario jerárquico, selectores de Almacén/padre, rutas y menú principal RBAC; cierre `91f878ef3cbc56219b637e9b62c99bdd1109a9df`; Frontend producción `31846161956` / `94912936660` SUCCESS.
+- [x] N1.3.F RBAC/auditoría/seguridad/observabilidad — módulo `UbicacionesAlmacen`, permisos por endpoint, auditoría de mutaciones y regresiones que congelan autorización/auditoría; baseline `4a6be38683f03fc2076f18a71115480c930ba79b`; backend `94913888850` SUCCESS.
+- [x] N1.3.G QA, regresión y CI — run agregado `31846485117` SUCCESS: higiene `94913888918`, backend `94913888850`, frontend `94913888865`, Docker `94913888808` y MySQL 8.4/integración `94913888844`.
+- [x] N1.3.H Documentación y certificación — fuente canónica `docs/ERP_N1_3_UBICACIONES_ALMACEN.md`, `TASKS.md`, `CHANGELOG_AI.md` y VAEP reconciliados preservando historial.
+
+**Resultado:** ERP-N1.3 queda cerrado como topología interna de Almacenes. No introduce autoridad de cantidad ni stock. El siguiente foco es **N1.4.A — ExistenciaVariante — Preflight y diseño**, responsable de diseñar la autoridad de existencias por Almacén/Ubicación y la transición desde `ProductoVariante.Cantidad`.
+
 ## ERP-N1.2 — Almacenes empresariales
 
 - [x] N1.2.A Auditoría y preflight — no existía implementación legacy Almacén/Bodega/Ubicación; Almacén definido como hijo obligatorio de Sucursal, sin adelantar stock N1.4 ni multiempresa N6.
