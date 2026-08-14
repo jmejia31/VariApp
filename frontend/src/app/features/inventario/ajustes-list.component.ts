@@ -246,7 +246,7 @@ export class AjustesListComponent implements OnInit {
           if (!response.success) {
             this.ajustes.set([]);
             this.totalCount.set(0);
-            this.error.set(response.message || response.errors?.join(' ') || 'No fue posible cargar los ajustes.');
+            this.error.set(this.extraerRespuestaFallida(response, 'No fue posible cargar los ajustes.'));
             return;
           }
 
@@ -302,7 +302,13 @@ export class AjustesListComponent implements OnInit {
     this.ajusteService.confirmar(ajuste.id)
       .pipe(finalize(() => this.processingId.set(null)))
       .subscribe({
-        next: () => this.cargar(),
+        next: (response) => {
+          if (!response.success) {
+            this.error.set(this.extraerRespuestaFallida(response, 'No fue posible confirmar el ajuste.'));
+            return;
+          }
+          this.cargar();
+        },
         error: (err) => this.error.set(this.extraerError(err, 'No fue posible confirmar el ajuste.'))
       });
   }
@@ -321,13 +327,25 @@ export class AjustesListComponent implements OnInit {
     this.ajusteService.anular(ajuste.id, motivo)
       .pipe(finalize(() => this.processingId.set(null)))
       .subscribe({
-        next: () => this.cargar(),
+        next: (response) => {
+          if (!response.success) {
+            this.error.set(this.extraerRespuestaFallida(response, 'No fue posible anular el ajuste.'));
+            return;
+          }
+          this.cargar();
+        },
         error: (err) => this.error.set(this.extraerError(err, 'No fue posible anular el ajuste.'))
       });
   }
 
   trackById(_: number, ajuste: AjusteInventario): number {
     return ajuste.id;
+  }
+
+  private extraerRespuestaFallida(response: { message?: string; errors?: string[] }, fallback: string): string {
+    if (typeof response.message === 'string' && response.message.trim()) return response.message;
+    if (Array.isArray(response.errors) && response.errors.length) return response.errors.join(' ');
+    return fallback;
   }
 
   private extraerError(error: any, fallback: string): string {
