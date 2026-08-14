@@ -1,4 +1,4 @@
-name: ERP-N1.2 - Preparar reconciliación documental
+name: ERP-N1.2 - Finalizar reconciliación documental
 
 on:
   push:
@@ -9,19 +9,28 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  preparar:
+  finalizar:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Generar copias reconciliadas
-        run: python scripts/n1_2_reconcile_docs.py
-      - name: Publicar artefacto documental
-        uses: actions/upload-artifact@v4
         with:
-          name: n1-2-doc-reconciled
-          path: /tmp/n12-docs/
-          if-no-files-found: error
-          retention-days: 1
+          fetch-depth: 0
+      - name: Generar colaborativos reconciliados
+        run: |
+          set -euo pipefail
+          python scripts/n1_2_reconcile_docs.py
+          cp /tmp/n12-docs/TASKS.md TASKS.md
+          cp /tmp/n12-docs/CHANGELOG_AI.md CHANGELOG_AI.md
+      - name: Retirar helpers temporales y publicar cierre
+        run: |
+          set -euo pipefail
+          git config user.name 'VariApp VAEP Runner'
+          git config user.email 'actions@users.noreply.github.com'
+          git rm .github/workflows/n1-2-doc-reconcile.yml scripts/n1_2_reconcile_docs.py
+          git add TASKS.md CHANGELOG_AI.md
+          git diff --cached --check
+          git commit -m 'docs(N1.2.H): reconciliar cierre formal de almacenes'
+          git push origin HEAD:Desarrollo
