@@ -52,36 +52,14 @@ public sealed class AjusteInventarioService : IAjusteInventarioService
     {
         ValidarCabecera(dto.Motivo, dto.Observaciones, dto.Detalles);
         var (usuarioId, nombreUsuario) = ObtenerUsuarioActual();
-        var creadoId = 0;
+        AjusteInventario? creado = null;
 
         await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
-            var ahora = DateTime.UtcNow;
-            var ajuste = new AjusteInventario
-            {
-                NumeroAjuste = $"TMP-{Guid.NewGuid():N}"[..20],
-                FechaAjuste = dto.FechaAjuste ?? ahora,
-                Motivo = dto.Motivo.Trim(),
-                Observaciones = NormalizarOpcional(dto.Observaciones),
-                CreadoPorUsuarioId = usuarioId,
-                CreadoPorNombreUsuario = nombreUsuario,
-                ActualizadoPorUsuarioId = usuarioId,
-                ActualizadoPorNombreUsuario = nombreUsuario,
-                FechaCreacion = ahora,
-                FechaActualizacion = ahora
-            };
-
-            await ReemplazarDetallesAsync(ajuste, dto.Detalles);
-            await _repository.AddAsync(ajuste);
-            await _repository.SaveChangesAsync();
-
-            ajuste.NumeroAjuste = $"AI-{ajuste.Id:D6}";
-            _repository.Update(ajuste);
-            await _repository.SaveChangesAsync();
-            creadoId = ajuste.Id;
+            creado = await CrearBorradorInternoAsync(dto, usuarioId, nombreUsuario);
         });
 
-        var creado = await _repository.GetByIdAsync(creadoId)
+        creado ??= await _repository.GetByIdAsync(creado?.Id ?? 0)
             ?? throw new InvalidOperationException("No se pudo recuperar el ajuste recién creado.");
 
         await _auditoria.RegistrarAsync(
@@ -147,120 +125,7 @@ public sealed class AjusteInventarioService : IAjusteInventarioService
             var ajuste = await _repository.GetByIdForUpdateAsync(id);
             if (ajuste is null) return;
             encontrado = true;
-
-            if (ajuste.Estado != EstadoAjusteInventario.Borrador)
-                throw new BusinessRuleException("Solo los ajustes en estado Borrador pueden confirmarse.");
-            if (ajuste.Detalles.Count == 0)
-                throw new BusinessRuleException("El ajuste debe contener al menos un detalle para confirmarse.");
-
-            var lockRequest = ajuste.Detalles
-                .OrderBy(d => d.ProductoId)
-                .ThenBy(d => d.ProductoVarianteId)
-                .Select(d => new InventarioDemanda(d.ProductoId, d.ProductoVarianteId, 1))
-                .ToList();
-            var inventario = await _inventarioConcurrency.BloquearInventarioParaReversionAsync(lockRequest);
-
-            var productosCompletos = new Dictionary<int, Producto>();
-            foreach (var productoId in ajuste.Detalles.Select(d => d.ProductoId).Distinct().OrderBy(x => x))
-            {
-                productosCompletos[productoId] = await _productoRepository.GetByIdAsync(productoId)
-                    ?? throw new BusinessRuleException($"El producto ID '{productoId}' ya no está disponible para confirmar el ajuste.");
-            }
-
-            foreach (var detalle in ajuste.Detalles.OrderBy(d => d.ProductoId).ThenBy(d => d.ProductoVarianteId))
-            {
-                if (!inventario.Productos.TryGetValue(detalle.ProductoId, out var producto))
-                    throw new BusinessRuleException($"El producto ID '{detalle.ProductoId}' ya no existe físicamente.");
-                if (producto.Eliminado)
-                    throw new BusinessRuleException($"El producto '{producto.Nombre}' fue eliminado y no puede ajustarse.");
-
-                var productoCompleto = productosCompletos[detalle.ProductoId];
-                ProductoVariante? variante = null;
-                int cantidadAnterior;
-                decimal costoUnitario;
-
-                if (detalle.ProductoVarianteId.HasValue)
-                {
-                    if (!inventario.Variantes.TryGetValue(detalle.ProductoVarianteId.Value, out variante))
-                        throw new BusinessRuleException($"La variante ID '{detalle.ProductoVarianteId.Value}' ya no existe físicamente.");
-                    if (variante.ProductoId != detalle.ProductoId)
-                        throw new BusinessRuleException("La variante indicada ya no pertenece al producto del ajuste.");
-                    if (variante.Eliminado)
-                        throw new BusinessRuleException($"La variante '{variante.Sku}' fue eliminada y no puede ajustarse.");
-
-                    cantidadAnterior = variante.Cantidad;
-                    costoUnitario = variante.Costo ?? producto.Costo;
-                }
-                else
-                {
-                    var variantesOperativas = productoCompleto.Variantes.Where(v => !v.Eliminado).ToList();
-                    if (variantesOperativas.Count > 0)
-                    {
-                        throw new BusinessRuleException(
-                            $"El producto '{producto.Nombre}' posee variantes. El ajuste debe identificar una variante concreta.");
-                    }
-
-                    cantidadAnterior = producto.Cantidad;
-                    costoUnitario = producto.Costo;
-                }
-
-                if (detalle.CantidadObjetivo == cantidadAnterior)
-                {
-                    throw new BusinessRuleException(
-                        $"El detalle del producto '{producto.Nombre}' no produce una diferencia real de inventario.");
-                }
-
-                detalle.MaterializarConfirmacion(cantidadAnterior, costoUnitario);
-                AplicarSnapshotsIdentidad(detalle, productoCompleto, variante);
-
-                var diferencia = detalle.CantidadObjetivo - cantidadAnterior;
-                if (variante is not null)
-                {
-                    variante.Cantidad = detalle.CantidadObjetivo;
-                    _productoVarianteRepository.Update(variante);
-                    producto.Cantidad += diferencia;
-                }
-                else
-                {
-                    producto.Cantidad = detalle.CantidadObjetivo;
-                }
-                _productoRepository.Update(producto);
-
-                await _movimientoInventarioRepository.AddConOrigenTipadoAsync(
-                    new MovimientoInventario
-                    {
-                        ProductoId = detalle.ProductoId,
-                        ProductoVarianteId = detalle.ProductoVarianteId,
-                        ProductoColorSnapshot = detalle.ColorSnapshot,
-                        ProductoSkuSnapshot = detalle.SkuSnapshot,
-                        Tipo = TipoMovimientoInventario.Ajuste,
-                        Causa = CausaMovimientoInventario.AjusteManual,
-                        Cantidad = Math.Abs(diferencia),
-                        StockAnterior = cantidadAnterior,
-                        StockNuevo = detalle.CantidadObjetivo,
-                        CostoUnitario = costoUnitario,
-                        Descripcion = $"Ajuste formal de inventario {ajuste.NumeroAjuste}. Motivo: {ajuste.Motivo}",
-                        CreadoPorUsuarioId = usuarioId,
-                        CreadoPorNombreUsuario = nombreUsuario,
-                        Fecha = DateTime.UtcNow
-                    },
-                    OrigenMovimientoInventario.DesdeAjusteInventario(ajuste.Id));
-            }
-
-            var ahora = DateTime.UtcNow;
-            ajuste.Confirmar(usuarioId, nombreUsuario, ahora);
-            ajuste.ActualizadoPorUsuarioId = usuarioId;
-            ajuste.ActualizadoPorNombreUsuario = nombreUsuario;
-            ajuste.FechaActualizacion = ahora;
-            _repository.Update(ajuste);
-            await _repository.SaveChangesAsync();
-
-            await _auditoria.RegistrarEstrictoAsync(
-                ModuloSistema.Inventario,
-                AccionPermiso.Confirmar,
-                $"Ajuste de inventario confirmado: {ajuste.NumeroAjuste}",
-                ajuste.Id,
-                entidad: nameof(AjusteInventario));
+            await ConfirmarInternoAsync(ajuste, usuarioId, nombreUsuario, null);
         });
 
         if (!encontrado) return null;
@@ -269,6 +134,69 @@ public sealed class AjusteInventarioService : IAjusteInventarioService
             ?? throw new InvalidOperationException("No se pudo recuperar el ajuste confirmado.");
 
         return ToDto(confirmado);
+    }
+
+    public async Task<AjusteStockResultadoDto> AjustarStockCompatibilidadAsync(
+        int productoId,
+        int? varianteId,
+        AjusteStockRequest request)
+    {
+        ValidarSolicitudCompatibilidad(productoId, varianteId, request);
+        var (usuarioId, nombreUsuario) = ObtenerUsuarioActual();
+        var motivo = request.Motivo.Trim();
+        AjusteInventario? confirmado = null;
+
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            confirmado = await CrearBorradorInternoAsync(
+                new CreateAjusteInventarioDto
+                {
+                    Motivo = motivo,
+                    Observaciones = "Creado y confirmado atómicamente por adaptador de compatibilidad legacy.",
+                    Detalles =
+                    {
+                        new AjusteInventarioDetalleInputDto
+                        {
+                            ProductoId = productoId,
+                            ProductoVarianteId = varianteId,
+                            CantidadObjetivo = request.CantidadNueva
+                        }
+                    }
+                },
+                usuarioId,
+                nombreUsuario);
+
+            var cantidadesEsperadas = new Dictionary<(int ProductoId, int? ProductoVarianteId), int>
+            {
+                [(productoId, varianteId)] = request.CantidadActualEsperada
+            };
+
+            await ConfirmarInternoAsync(
+                confirmado,
+                usuarioId,
+                nombreUsuario,
+                cantidadesEsperadas);
+        });
+
+        var ajuste = confirmado
+            ?? throw new InvalidOperationException("No se pudo materializar el ajuste formal de compatibilidad.");
+        var detalle = ajuste.Detalles.Single(d =>
+            d.ProductoId == productoId && d.ProductoVarianteId == varianteId);
+
+        var cantidadAnterior = detalle.CantidadAnteriorSnapshot
+            ?? throw new InvalidOperationException("El ajuste confirmado no materializó el stock anterior.");
+        var cantidadNueva = detalle.CantidadNuevaSnapshot
+            ?? throw new InvalidOperationException("El ajuste confirmado no materializó el stock nuevo.");
+
+        return new AjusteStockResultadoDto
+        {
+            ProductoId = productoId,
+            ProductoVarianteId = varianteId,
+            CantidadAnterior = cantidadAnterior,
+            CantidadNueva = cantidadNueva,
+            Diferencia = detalle.DiferenciaSnapshot ?? cantidadNueva - cantidadAnterior,
+            Motivo = motivo
+        };
     }
 
     public async Task<AjusteInventarioDto?> AnularAsync(int id, string motivoAnulacion)
@@ -393,6 +321,167 @@ public sealed class AjusteInventarioService : IAjusteInventarioService
         return ToDto(anulado);
     }
 
+    private async Task<AjusteInventario> CrearBorradorInternoAsync(
+        CreateAjusteInventarioDto dto,
+        int usuarioId,
+        string nombreUsuario)
+    {
+        ValidarCabecera(dto.Motivo, dto.Observaciones, dto.Detalles);
+        var ahora = DateTime.UtcNow;
+        var ajuste = new AjusteInventario
+        {
+            NumeroAjuste = $"TMP-{Guid.NewGuid():N}"[..20],
+            FechaAjuste = dto.FechaAjuste ?? ahora,
+            Motivo = dto.Motivo.Trim(),
+            Observaciones = NormalizarOpcional(dto.Observaciones),
+            CreadoPorUsuarioId = usuarioId,
+            CreadoPorNombreUsuario = nombreUsuario,
+            ActualizadoPorUsuarioId = usuarioId,
+            ActualizadoPorNombreUsuario = nombreUsuario,
+            FechaCreacion = ahora,
+            FechaActualizacion = ahora
+        };
+
+        await ReemplazarDetallesAsync(ajuste, dto.Detalles);
+        await _repository.AddAsync(ajuste);
+        await _repository.SaveChangesAsync();
+
+        ajuste.NumeroAjuste = $"AI-{ajuste.Id:D6}";
+        _repository.Update(ajuste);
+        await _repository.SaveChangesAsync();
+        return ajuste;
+    }
+
+    private async Task ConfirmarInternoAsync(
+        AjusteInventario ajuste,
+        int usuarioId,
+        string nombreUsuario,
+        IReadOnlyDictionary<(int ProductoId, int? ProductoVarianteId), int>? cantidadesEsperadas)
+    {
+        if (ajuste.Estado != EstadoAjusteInventario.Borrador)
+            throw new BusinessRuleException("Solo los ajustes en estado Borrador pueden confirmarse.");
+        if (ajuste.Detalles.Count == 0)
+            throw new BusinessRuleException("El ajuste debe contener al menos un detalle para confirmarse.");
+
+        var lockRequest = ajuste.Detalles
+            .OrderBy(d => d.ProductoId)
+            .ThenBy(d => d.ProductoVarianteId)
+            .Select(d => new InventarioDemanda(d.ProductoId, d.ProductoVarianteId, 1))
+            .ToList();
+        var inventario = await _inventarioConcurrency.BloquearInventarioParaReversionAsync(lockRequest);
+
+        var productosCompletos = new Dictionary<int, Producto>();
+        foreach (var productoId in ajuste.Detalles.Select(d => d.ProductoId).Distinct().OrderBy(x => x))
+        {
+            productosCompletos[productoId] = await _productoRepository.GetByIdAsync(productoId)
+                ?? throw new BusinessRuleException($"El producto ID '{productoId}' ya no está disponible para confirmar el ajuste.");
+        }
+
+        foreach (var detalle in ajuste.Detalles.OrderBy(d => d.ProductoId).ThenBy(d => d.ProductoVarianteId))
+        {
+            if (!inventario.Productos.TryGetValue(detalle.ProductoId, out var producto))
+                throw new BusinessRuleException($"El producto ID '{detalle.ProductoId}' ya no existe físicamente.");
+            if (producto.Eliminado)
+                throw new BusinessRuleException($"El producto '{producto.Nombre}' fue eliminado y no puede ajustarse.");
+
+            var productoCompleto = productosCompletos[detalle.ProductoId];
+            ProductoVariante? variante = null;
+            int cantidadAnterior;
+            decimal costoUnitario;
+
+            if (detalle.ProductoVarianteId.HasValue)
+            {
+                if (!inventario.Variantes.TryGetValue(detalle.ProductoVarianteId.Value, out variante))
+                    throw new BusinessRuleException($"La variante ID '{detalle.ProductoVarianteId.Value}' ya no existe físicamente.");
+                if (variante.ProductoId != detalle.ProductoId)
+                    throw new BusinessRuleException("La variante indicada ya no pertenece al producto del ajuste.");
+                if (variante.Eliminado)
+                    throw new BusinessRuleException($"La variante '{variante.Sku}' fue eliminada y no puede ajustarse.");
+
+                cantidadAnterior = variante.Cantidad;
+                costoUnitario = variante.Costo ?? producto.Costo;
+            }
+            else
+            {
+                var variantesOperativas = productoCompleto.Variantes.Where(v => !v.Eliminado).ToList();
+                if (variantesOperativas.Count > 0)
+                {
+                    throw new BusinessRuleException(
+                        $"El producto '{producto.Nombre}' posee variantes. El ajuste debe identificar una variante concreta.");
+                }
+
+                cantidadAnterior = producto.Cantidad;
+                costoUnitario = producto.Costo;
+            }
+
+            var key = (detalle.ProductoId, detalle.ProductoVarianteId);
+            if (cantidadesEsperadas is not null &&
+                cantidadesEsperadas.TryGetValue(key, out var cantidadEsperada) &&
+                cantidadEsperada != cantidadAnterior)
+            {
+                throw new BusinessRuleException(
+                    $"El stock actual cambió desde la lectura del cliente. Esperado: {cantidadEsperada}; actual: {cantidadAnterior}. Actualiza la información y vuelve a intentar.");
+            }
+
+            if (detalle.CantidadObjetivo == cantidadAnterior)
+            {
+                throw new BusinessRuleException(
+                    $"El detalle del producto '{producto.Nombre}' no produce una diferencia real de inventario.");
+            }
+
+            detalle.MaterializarConfirmacion(cantidadAnterior, costoUnitario);
+            AplicarSnapshotsIdentidad(detalle, productoCompleto, variante);
+
+            var diferencia = detalle.CantidadObjetivo - cantidadAnterior;
+            if (variante is not null)
+            {
+                variante.Cantidad = detalle.CantidadObjetivo;
+                _productoVarianteRepository.Update(variante);
+                producto.Cantidad += diferencia;
+            }
+            else
+            {
+                producto.Cantidad = detalle.CantidadObjetivo;
+            }
+            _productoRepository.Update(producto);
+
+            await _movimientoInventarioRepository.AddConOrigenTipadoAsync(
+                new MovimientoInventario
+                {
+                    ProductoId = detalle.ProductoId,
+                    ProductoVarianteId = detalle.ProductoVarianteId,
+                    ProductoColorSnapshot = detalle.ColorSnapshot,
+                    ProductoSkuSnapshot = detalle.SkuSnapshot,
+                    Tipo = TipoMovimientoInventario.Ajuste,
+                    Causa = CausaMovimientoInventario.AjusteManual,
+                    Cantidad = Math.Abs(diferencia),
+                    StockAnterior = cantidadAnterior,
+                    StockNuevo = detalle.CantidadObjetivo,
+                    CostoUnitario = costoUnitario,
+                    Descripcion = $"Ajuste formal de inventario {ajuste.NumeroAjuste}. Motivo: {ajuste.Motivo}",
+                    CreadoPorUsuarioId = usuarioId,
+                    CreadoPorNombreUsuario = nombreUsuario,
+                    Fecha = DateTime.UtcNow
+                },
+                OrigenMovimientoInventario.DesdeAjusteInventario(ajuste.Id));
+        }
+
+        var ahora = DateTime.UtcNow;
+        ajuste.Confirmar(usuarioId, nombreUsuario, ahora);
+        ajuste.ActualizadoPorUsuarioId = usuarioId;
+        ajuste.ActualizadoPorNombreUsuario = nombreUsuario;
+        ajuste.FechaActualizacion = ahora;
+        _repository.Update(ajuste);
+        await _repository.SaveChangesAsync();
+
+        await _auditoria.RegistrarEstrictoAsync(
+            ModuloSistema.Inventario,
+            AccionPermiso.Confirmar,
+            $"Ajuste de inventario confirmado: {ajuste.NumeroAjuste}",
+            ajuste.Id,
+            entidad: nameof(AjusteInventario));
+    }
+
     private async Task ReemplazarDetallesAsync(
         AjusteInventario ajuste,
         IReadOnlyCollection<AjusteInventarioDetalleInputDto> detalles)
@@ -449,6 +538,21 @@ public sealed class AjusteInventarioService : IAjusteInventarioService
             throw new BusinessRuleException("El ajuste no puede contener más de 200 líneas.");
         if (detalles.Any(d => d.ProductoId <= 0 || d.ProductoVarianteId <= 0 || d.CantidadObjetivo < 0))
             throw new BusinessRuleException("Cada línea debe indicar producto/variante válidos y una cantidad objetivo no negativa.");
+    }
+
+    private static void ValidarSolicitudCompatibilidad(
+        int productoId,
+        int? varianteId,
+        AjusteStockRequest request)
+    {
+        if (productoId <= 0 || varianteId <= 0)
+            throw new BusinessRuleException("El producto o la variante indicada no es válida.");
+        if (request.CantidadActualEsperada < 0 || request.CantidadNueva < 0)
+            throw new BusinessRuleException("Las cantidades de inventario no pueden ser negativas.");
+        if (string.IsNullOrWhiteSpace(request.Motivo))
+            throw new BusinessRuleException("El motivo del ajuste de inventario es obligatorio.");
+        if (request.CantidadActualEsperada == request.CantidadNueva)
+            throw new BusinessRuleException("La nueva cantidad debe ser diferente del stock actual.");
     }
 
     private (int UsuarioId, string NombreUsuario) ObtenerUsuarioActual()
