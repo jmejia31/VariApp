@@ -9,5 +9,16 @@ public enum TipoOrigenMovimientoInventario
 {
     Compra = 1,
     Venta = 2,
-    ConsumoInsumo = 3
+    ConsumoInsumo = 3,
+    AjusteInventario = 4
+}
+
+/// <summary>
+/// Ciclo de vida del documento empresarial de ajuste de inventario.
+/// </summary>
+public enum EstadoAjusteInventario
+{
+    Borrador = 1,
+    Confirmado = 2,
+    Anulado = 3
 }
