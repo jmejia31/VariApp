@@ -9,5 +9,9 @@ public interface IAjusteInventarioService
     Task<AjusteInventarioDto> CreateAsync(CreateAjusteInventarioDto dto);
     Task<AjusteInventarioDto?> UpdateAsync(int id, UpdateAjusteInventarioDto dto);
     Task<AjusteInventarioDto?> ConfirmarAsync(int id);
+    Task<AjusteStockResultadoDto> AjustarStockCompatibilidadAsync(
+        int productoId,
+        int? varianteId,
+        AjusteStockRequest request);
     Task<AjusteInventarioDto?> AnularAsync(int id, string motivoAnulacion);
 }
