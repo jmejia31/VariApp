@@ -82,7 +82,18 @@ Estado operativo controlado por `COLA`:
 - [x] N0.7.G QA, regresión y CI.
 - [x] N0.7.H Documentación y certificación — fuente canónica `docs/ERP_N0_7_AJUSTE_INVENTARIO.md`; SHA funcional `cd5c1f058fc7a24fd477a4c9e8cda7cff4c99850`; CI principal `31808933744`, aceptación integral `31808933692` y M13 `31808933833` terminaron SUCCESS completo, incluido runtime/Playwright y dictamen automatizado final.
 
-ERP-N0.5, ERP-N0.6 y ERP-N0.7 están formalmente cerrados. Siguiente foco FINISH_FIRST elegible: `N0.8.A`, conforme a dependencias VAEP.
+## ERP-N0.8 — Migraciones y limpieza
+
+- [x] N0.8.A Auditoría y preflight — `docs/ERP_N0_8_MIGRACIONES_LIMPIEZA_PREFLIGHT.md`; inventario read-only, riesgos, históricos, rollback y estrategia B–H definidos; CI principal `31815060021` SUCCESS.
+- [x] N0.8.B Dominio y contratos — Compra expone contrato relacional de MetodoPago y MovimientoInventario orígenes tipados; `c20151391d696ebe1d172ae3341e579cc371c35f`.
+- [x] N0.8.C Persistencia/migración/datos — `20260814155400_N0_8_PersistenciaLimpiezaTransicional`; `Compras.MetodoPagoId` backfilleado por código estable + FK; FKs tipadas de inventario reconciliadas con EF; snapshot/postcheck sin drift; `b7b1db8746beac2a6e3f25c68afcafd8768383c8`.
+- [x] N0.8.D Aplicación/servicios/API — Compra usa MetodoPago relacional como autoridad; bridge legacy one-way bajo lock fail-closed; MovimientoInventario usa EF para orígenes tipados; cierre dirigido `633d8fc36e2b825a6362f418c01254c8886f37fe`, 375/375 backend tests SUCCESS.
+- [x] N0.8.E Frontend/UX — Compras consume catálogo de pagos activo dinámico por código estable, sin lista hardcodeada; loading/error/inactivo fail-closed + reintento; `4693502282f54e3adfeee97669e0ca7ffa10b3ae`, M10/N0.5 E2E SUCCESS.
+- [x] N0.8.F RBAC/auditoría/seguridad/observabilidad — N/A verificado para superficie nueva; permisos y auditoría existentes permanecen aplicables; N0.4 SUCCESS sobre el SHA E.
+- [x] N0.8.G QA, regresión y CI — SHA funcional final `369158761ad05671b9a1859d17796c8ca4a09bf8`; CI `31821172124`, M10 `31821172381`, Fase 8 `31821172230`, Acceptance `31821172223` y M13 `31821172341` SUCCESS completos.
+- [x] N0.8.H Documentación/certificación — fuente canónica `docs/ERP_N0_8_MIGRACIONES_LIMPIEZA.md`; rollback forward-only, autoridad final y compatibilidad histórica deliberadamente preservada documentados.
+
+ERP-N0.5, ERP-N0.6, ERP-N0.7 y ERP-N0.8 están formalmente cerrados. El siguiente foco debe seleccionarse únicamente desde VAEP con el gate ERP-N0 y sus dependencias reconciliados; no iniciar ERP-N1 por inferencia fuera del tablero.
 
 ## Fuentes VAEP v2
 
