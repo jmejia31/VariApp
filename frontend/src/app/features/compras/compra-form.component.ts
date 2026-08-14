@@ -14,9 +14,11 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CompraService } from '../../services/compra.service';
 import { ProductoService } from '../../services/producto.service';
 import { ProveedorService } from '../../services/proveedor.service';
+import { MetodoPagoService } from '../../services/metodo-pago.service';
 import { Producto, ProductoEscaneadoCompra, ProductoVariante } from '../../core/models/producto.model';
 import { Proveedor } from '../../core/models/proveedor.model';
 import { ResultadoCalculo } from '../../core/models/compra.model';
+import { MetodoPago } from '../../core/models/metodo-pago.model';
 import { ProductoImagenComponent } from '../../shared/producto-imagen/producto-imagen.component';
 import { CodigoScannerInputComponent } from '../../shared/codigo-scanner-input/codigo-scanner-input.component';
 
@@ -45,6 +47,9 @@ export class CompraFormComponent implements OnInit {
   readonly procesandoEscaneo = signal(false);
   readonly mensajeEscaneo = signal<string | null>(null);
   readonly errorEscaneo = signal(false);
+  readonly metodosPago = signal<MetodoPago[]>([]);
+  readonly cargandoMetodosPago = signal(false);
+  readonly errorMetodosPago = signal<string | null>(null);
   private compraId: number | null = null;
 
   readonly buscadorProveedor = new FormControl('');
@@ -62,7 +67,7 @@ export class CompraFormComponent implements OnInit {
 
   form = this.fb.group({
     proveedorNombre: ['', Validators.required], proveedorTelefono: [''], proveedorDocumento: [''],
-    documentoReferencia: [''], metodoPago: ['Efectivo', Validators.required],
+    documentoReferencia: [''], metodoPago: ['', Validators.required],
     estadoPago: ['Pendiente', Validators.required], notas: [''], detalles: this.fb.array([])
   });
 
@@ -70,6 +75,7 @@ export class CompraFormComponent implements OnInit {
     private compraService: CompraService,
     private productoService: ProductoService,
     private proveedorService: ProveedorService,
+    private metodoPagoService: MetodoPagoService,
     private route: ActivatedRoute,
     private router: Router
   ) {}
@@ -77,6 +83,8 @@ export class CompraFormComponent implements OnInit {
   get detalles(): FormArray { return this.form.get('detalles') as FormArray; }
 
   ngOnInit(): void {
+    this.cargarMetodosPagoActivos();
+
     const idParam = this.route.snapshot.paramMap.get('id');
     if (idParam) { this.isEdit.set(true); this.compraId = Number(idParam); this.cargarCompra(this.compraId); }
     else this.agregarDetalle();
@@ -281,6 +289,61 @@ export class CompraFormComponent implements OnInit {
     this.productos.set(actuales.sort((a, b) => a.nombre.localeCompare(b.nombre)));
   }
 
+  cargarMetodosPagoActivos(): void {
+    this.cargandoMetodosPago.set(true);
+    this.errorMetodosPago.set(null);
+
+    this.metodoPagoService.getActivos().pipe(
+      finalize(() => this.cargandoMetodosPago.set(false))
+    ).subscribe({
+      next: (res) => {
+        this.metodosPago.set([...res.data].sort((a, b) => a.orden - b.orden || a.nombre.localeCompare(b.nombre)));
+        this.reconciliarMetodoPagoActivo();
+      },
+      error: () => {
+        this.metodosPago.set([]);
+        const control = this.form.controls.metodoPago;
+        control.setValue('', { emitEvent: false });
+        control.markAsTouched();
+        this.errorMetodosPago.set('No se pudieron cargar los métodos de pago activos.');
+      }
+    });
+  }
+
+  private reconciliarMetodoPagoActivo(): void {
+    const control = this.form.controls.metodoPago;
+    const metodos = this.metodosPago();
+    if (metodos.length === 0) {
+      control.setValue('', { emitEvent: false });
+      this.errorMetodosPago.set('No hay métodos de pago activos disponibles.');
+      return;
+    }
+
+    const valor = (control.value ?? '').trim();
+    if (!valor) {
+      control.setValue(metodos[0].nombre, { emitEvent: false });
+      this.errorMetodosPago.set(null);
+      return;
+    }
+
+    const coincidente = metodos.find((metodo) => metodo.nombre === valor || metodo.codigo === valor);
+    if (coincidente) {
+      if (control.value !== coincidente.nombre) control.setValue(coincidente.nombre, { emitEvent: false });
+      this.errorMetodosPago.set(null);
+      return;
+    }
+
+    if (this.isEdit()) {
+      control.setValue('', { emitEvent: false });
+      control.markAsTouched();
+      this.errorMetodosPago.set('El método de pago del borrador ya no está activo. Selecciona uno vigente.');
+      return;
+    }
+
+    control.setValue(metodos[0].nombre, { emitEvent: false });
+    this.errorMetodosPago.set(null);
+  }
+
   private cargarCompra(id: number): void {
     this.loading.set(true);
     this.compraService.getById(id).subscribe({
@@ -292,6 +355,7 @@ export class CompraFormComponent implements OnInit {
           proveedorDocumento: c.proveedorDocumento, documentoReferencia: c.documentoReferencia,
           metodoPago: c.metodoPago, estadoPago: c.estadoPago, notas: c.notas
         });
+        this.reconciliarMetodoPagoActivo();
         c.detalles.forEach((d) => this.agregarDetalle(d.productoId, d.productoVarianteId ?? null, d.cantidad, d.costoUnitario));
         this.hidratarProductosReferenciados(c.detalles.map((detalle) => detalle.productoId));
 

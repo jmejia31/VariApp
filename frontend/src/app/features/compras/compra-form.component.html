@@ -92,7 +92,19 @@
 
   <h2 class="section-title">Pago y totales</h2>
   <div class="fields-grid">
-    <mat-form-field appearance="outline"><mat-label>Método de pago</mat-label><mat-select formControlName="metodoPago"><mat-option value="Efectivo">Efectivo</mat-option><mat-option value="Transferencia">Transferencia</mat-option><mat-option value="Tarjeta">Tarjeta</mat-option><mat-option value="Otro">Otro</mat-option></mat-select></mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Método de pago</mat-label>
+      <mat-select formControlName="metodoPago" [disabled]="cargandoMetodosPago() || metodosPago().length === 0">
+        @for (metodo of metodosPago(); track metodo.id) {
+          <mat-option [value]="metodo.nombre">{{ metodo.nombre }}</mat-option>
+        }
+      </mat-select>
+      @if (cargandoMetodosPago()) { <mat-hint>Cargando métodos de pago...</mat-hint> }
+      @if (errorMetodosPago()) { <mat-error>{{ errorMetodosPago() }}</mat-error> }
+    </mat-form-field>
+    @if (errorMetodosPago() && metodosPago().length === 0 && !cargandoMetodosPago()) {
+      <button mat-button type="button" (click)="cargarMetodosPagoActivos()"><mat-icon>refresh</mat-icon> Reintentar métodos de pago</button>
+    }
     <mat-form-field appearance="outline"><mat-label>Estado de pago</mat-label><mat-select formControlName="estadoPago"><mat-option value="Pendiente">Pendiente</mat-option><mat-option value="Pagado">Pagado</mat-option><mat-option value="Parcial">Parcial</mat-option></mat-select></mat-form-field>
     <mat-form-field appearance="outline" class="full-width"><mat-label>Notas</mat-label><textarea matInput formControlName="notas" rows="2"></textarea></mat-form-field>
   </div>
