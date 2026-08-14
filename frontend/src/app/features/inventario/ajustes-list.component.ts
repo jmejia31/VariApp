@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -118,6 +119,20 @@ import { AjusteInventarioService } from '../../services/ajuste-inventario.servic
                 <td data-label="Detalles">{{ ajuste.detalles.length }}</td>
                 <td data-label="Impacto">{{ (ajuste.impactoCostoTotalSnapshot || 0) | currency:'HNL':'symbol-narrow':'1.2-2' }}</td>
                 <td data-label="Acciones" class="row-actions">
+                  <button mat-button type="button" [disabled]="processingId() !== null" (click)="ver(ajuste)">
+                    <mat-icon>visibility</mat-icon>
+                    Ver
+                  </button>
+                  <button
+                    mat-button
+                    color="primary"
+                    type="button"
+                    *ngIf="ajuste.estado === 'Borrador'"
+                    [disabled]="processingId() !== null"
+                    (click)="editar(ajuste)">
+                    <mat-icon>edit</mat-icon>
+                    Editar
+                  </button>
                   <button
                     mat-stroked-button
                     color="primary"
@@ -138,7 +153,7 @@ import { AjusteInventarioService } from '../../services/ajuste-inventario.servic
                     <mat-icon>undo</mat-icon>
                     Anular
                   </button>
-                  <span class="muted" *ngIf="ajuste.estado === 'Anulado'">Sin acciones</span>
+                  <span class="muted" *ngIf="ajuste.estado === 'Anulado'">Solo lectura</span>
                 </td>
               </tr>
             </tbody>
@@ -171,7 +186,7 @@ import { AjusteInventarioService } from '../../services/ajuste-inventario.servic
     .empty h2, .empty p { margin: 0; }
     .empty mat-icon { width: 42px; height: 42px; font-size: 42px; opacity: .5; }
     .table-shell { overflow-x: auto; border: 1px solid rgba(127,127,127,.22); border-radius: 12px; }
-    table { width: 100%; border-collapse: collapse; min-width: 980px; }
+    table { width: 100%; border-collapse: collapse; min-width: 1120px; }
     th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid rgba(127,127,127,.16); vertical-align: middle; }
     th { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; opacity: .72; }
     tbody tr:last-child td { border-bottom: 0; }
@@ -179,8 +194,8 @@ import { AjusteInventarioService } from '../../services/ajuste-inventario.servic
     .status.confirmado { background: rgba(46,125,50,.14); }
     .status.anulado { background: rgba(198,40,40,.14); }
     .status.borrador { background: rgba(245,124,0,.14); }
-    .actions-column { width: 170px; }
-    .row-actions { white-space: nowrap; }
+    .actions-column { width: 310px; }
+    .row-actions { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
     .muted { opacity: .55; font-size: 13px; }
     @media (max-width: 1050px) { .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); } .filter-actions { grid-column: span 2; } }
     @media (max-width: 640px) { .ajustes-page { padding: 16px; } .page-header { flex-direction: column; } .filters { grid-template-columns: 1fr; } .filter-actions { grid-column: auto; } }
@@ -200,7 +215,10 @@ export class AjustesListComponent implements OnInit {
   page = 1;
   pageSize = 10;
 
-  constructor(private readonly ajusteService: AjusteInventarioService) {}
+  constructor(
+    private readonly ajusteService: AjusteInventarioService,
+    private readonly router: Router
+  ) {}
 
   ngOnInit(): void {
     this.cargar();
@@ -264,6 +282,15 @@ export class AjustesListComponent implements OnInit {
     this.page = event.pageIndex + 1;
     this.pageSize = event.pageSize;
     this.cargar();
+  }
+
+  ver(ajuste: AjusteInventario): void {
+    void this.router.navigate(['/inventario/ajustes', ajuste.id]);
+  }
+
+  editar(ajuste: AjusteInventario): void {
+    if (ajuste.estado !== 'Borrador') return;
+    void this.router.navigate(['/inventario/ajustes', ajuste.id, 'editar']);
   }
 
   confirmar(ajuste: AjusteInventario): void {
