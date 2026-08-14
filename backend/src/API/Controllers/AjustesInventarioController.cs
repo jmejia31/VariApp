@@ -14,19 +14,23 @@ namespace InventoryApp.API.Controllers;
 public sealed class AjustesInventarioController : ControllerBase
 {
     private readonly IAjusteInventarioService _service;
+    private readonly IAjusteInventarioConsultaService _consulta;
 
-    public AjustesInventarioController(IAjusteInventarioService service)
+    public AjustesInventarioController(
+        IAjusteInventarioService service,
+        IAjusteInventarioConsultaService consulta)
     {
         _service = service;
+        _consulta = consulta;
     }
 
     [HttpGet]
     [RequierePermiso(ModuloSistema.Inventario, AccionPermiso.Ver)]
-    [ProducesResponseType(typeof(ApiResponse<List<AjusteInventarioDto>>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetAll()
+    [ProducesResponseType(typeof(ApiResponse<PagedResult<AjusteInventarioDto>>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAll([FromQuery] AjusteInventarioFiltroDto filtro)
     {
-        var ajustes = await _service.GetAllAsync();
-        return Ok(ApiResponse<List<AjusteInventarioDto>>.Ok(ajustes));
+        var resultado = await _consulta.GetPagedAsync(filtro);
+        return Ok(ApiResponse<PagedResult<AjusteInventarioDto>>.Ok(resultado));
     }
 
     [HttpGet("{id:int}")]
