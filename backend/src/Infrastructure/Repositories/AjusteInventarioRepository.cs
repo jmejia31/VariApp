@@ -1,3 +1,4 @@
+using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities;
 using InventoryApp.Infrastructure.Persistence;
@@ -24,6 +25,59 @@ public class AjusteInventarioRepository : IAjusteInventarioRepository
             .OrderByDescending(a => a.FechaAjuste)
             .ThenByDescending(a => a.Id)
             .ToListAsync();
+
+    public async Task<(List<AjusteInventario> Items, int TotalCount)> GetPagedAsync(
+        AjusteInventarioFiltroDto filtro)
+    {
+        IQueryable<AjusteInventario> query = _context.AjustesInventario.AsNoTracking();
+
+        if (filtro.Estado.HasValue)
+            query = query.Where(a => a.Estado == filtro.Estado.Value);
+        if (filtro.Desde.HasValue)
+            query = query.Where(a => a.FechaAjuste >= filtro.Desde.Value);
+        if (filtro.Hasta.HasValue)
+            query = query.Where(a => a.FechaAjuste <= filtro.Hasta.Value);
+        if (filtro.ProductoId.HasValue)
+            query = query.Where(a => a.Detalles.Any(d => d.ProductoId == filtro.ProductoId.Value));
+        if (filtro.ProductoVarianteId.HasValue)
+            query = query.Where(a => a.Detalles.Any(d => d.ProductoVarianteId == filtro.ProductoVarianteId.Value));
+
+        if (!string.IsNullOrWhiteSpace(filtro.Search))
+        {
+            var search = filtro.Search.Trim();
+            query = query.Where(a =>
+                a.NumeroAjuste.Contains(search) ||
+                a.Motivo.Contains(search) ||
+                (a.Observaciones != null && a.Observaciones.Contains(search)));
+        }
+
+        var totalCount = await query.CountAsync();
+        var desc = string.Equals(filtro.SortDirection, "desc", StringComparison.OrdinalIgnoreCase);
+        query = filtro.SortBy?.Trim().ToLowerInvariant() switch
+        {
+            "numeroajuste" or "numero" => desc
+                ? query.OrderByDescending(a => a.NumeroAjuste)
+                : query.OrderBy(a => a.NumeroAjuste),
+            "estado" => desc
+                ? query.OrderByDescending(a => a.Estado).ThenByDescending(a => a.Id)
+                : query.OrderBy(a => a.Estado).ThenBy(a => a.Id),
+            "motivo" => desc
+                ? query.OrderByDescending(a => a.Motivo).ThenByDescending(a => a.Id)
+                : query.OrderBy(a => a.Motivo).ThenBy(a => a.Id),
+            _ => desc
+                ? query.OrderByDescending(a => a.FechaAjuste).ThenByDescending(a => a.Id)
+                : query.OrderBy(a => a.FechaAjuste).ThenBy(a => a.Id)
+        };
+
+        var items = await query
+            .Include(a => a.Detalles)
+            .AsSplitQuery()
+            .Skip((filtro.Page - 1) * filtro.PageSize)
+            .Take(filtro.PageSize)
+            .ToListAsync();
+
+        return (items, totalCount);
+    }
 
     public async Task<AjusteInventario?> GetByIdAsync(int id) =>
         await ConDetalles().FirstOrDefaultAsync(a => a.Id == id);
