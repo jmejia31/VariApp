@@ -63,7 +63,7 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
                  Tipo, Causa, Cantidad, StockAnterior, StockNuevo,
                  CostoUnitario, PrecioUnitario,
                  ReferenciaTipo, ReferenciaId,
-                 CompraId, VentaId, ConsumoInsumoId,
+                 CompraId, VentaId, ConsumoInsumoId, AjusteInventarioId,
                  Descripcion, CreadoPorUsuarioId, CreadoPorNombreUsuario, Fecha)
             VALUES
                 ({movimiento.ProductoId}, {movimiento.ProductoVarianteId},
@@ -72,7 +72,7 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
                  {tipo}, {causa}, {movimiento.Cantidad}, {movimiento.StockAnterior}, {movimiento.StockNuevo},
                  {movimiento.CostoUnitario}, {movimiento.PrecioUnitario},
                  {movimiento.ReferenciaTipo}, {movimiento.ReferenciaId},
-                 {origen.CompraId}, {origen.VentaId}, {origen.ConsumoInsumoId},
+                 {origen.CompraId}, {origen.VentaId}, {origen.ConsumoInsumoId}, {origen.AjusteInventarioId},
                  {movimiento.Descripcion}, {movimiento.CreadoPorUsuarioId}, {movimiento.CreadoPorNombreUsuario}, {movimiento.Fecha})
             """);
     }
@@ -87,6 +87,7 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
             TipoOrigenMovimientoInventario.Venta when movimiento.Causa == CausaMovimientoInventario.AnulacionVenta => "VentaAnulada",
             TipoOrigenMovimientoInventario.Venta => "Venta",
             TipoOrigenMovimientoInventario.ConsumoInsumo => "ConsumoInsumo",
+            TipoOrigenMovimientoInventario.AjusteInventario => "AjusteInventario",
             _ => throw new InvalidOperationException($"Origen de inventario no soportado: {origen.Tipo}.")
         };
 
@@ -164,7 +165,7 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
             }
 
             command.CommandText = $"""
-                SELECT Id, CompraId, VentaId, ConsumoInsumoId
+                SELECT Id, CompraId, VentaId, ConsumoInsumoId, AjusteInventarioId
                   FROM MovimientosInventario
                  WHERE Id IN ({string.Join(", ", parametros)})
                 """;
@@ -176,14 +177,16 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
                 int? compraId = reader.IsDBNull(1) ? null : reader.GetInt32(1);
                 int? ventaId = reader.IsDBNull(2) ? null : reader.GetInt32(2);
                 int? consumoInsumoId = reader.IsDBNull(3) ? null : reader.GetInt32(3);
+                int? ajusteInventarioId = reader.IsDBNull(4) ? null : reader.GetInt32(4);
                 var cantidadOrigenes = (compraId.HasValue ? 1 : 0) +
                                        (ventaId.HasValue ? 1 : 0) +
-                                       (consumoInsumoId.HasValue ? 1 : 0);
+                                       (consumoInsumoId.HasValue ? 1 : 0) +
+                                       (ajusteInventarioId.HasValue ? 1 : 0);
                 if (cantidadOrigenes > 1)
                     throw new InvalidOperationException($"El movimiento {id} tiene más de un origen tipado persistido.");
 
                 resultado[id] = new MovimientoInventarioOrigenPersistido(
-                    id, compraId, ventaId, consumoInsumoId);
+                    id, compraId, ventaId, consumoInsumoId, ajusteInventarioId);
             }
         }
         finally
@@ -204,6 +207,7 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
             "Compra" or "CompraAnulada" => new(movimientoId, referenciaId, null, null),
             "Venta" or "VentaAnulada" => new(movimientoId, null, referenciaId, null),
             "ConsumoInsumo" => new(movimientoId, null, null, referenciaId),
+            "AjusteInventario" => new(movimientoId, null, null, null, referenciaId),
             _ => new(movimientoId, null, null, null)
         };
 
