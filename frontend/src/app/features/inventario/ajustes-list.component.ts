@@ -15,6 +15,7 @@ import {
   AjusteInventarioFiltro,
   EstadoAjusteInventario
 } from '../../core/models/ajuste-inventario.model';
+import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
 import { AjusteInventarioService } from '../../services/ajuste-inventario.service';
 
 @Component({
@@ -39,10 +40,16 @@ import { AjusteInventarioService } from '../../services/ajuste-inventario.servic
           <h1 id="ajustes-title">Ajustes de inventario</h1>
           <p class="subtitle">Consulta y controla el ciclo Borrador → Confirmado → Anulado.</p>
         </div>
-        <button mat-flat-button color="primary" type="button" (click)="cargar()" [disabled]="loading()">
-          <mat-icon>refresh</mat-icon>
-          Actualizar
-        </button>
+        <div class="page-actions">
+          <button *ngIf="puedeCrear()" mat-flat-button color="primary" type="button" (click)="nuevo()" [disabled]="loading()">
+            <mat-icon>add</mat-icon>
+            Nuevo ajuste
+          </button>
+          <button mat-stroked-button type="button" (click)="cargar()" [disabled]="loading()">
+            <mat-icon>refresh</mat-icon>
+            Actualizar
+          </button>
+        </div>
       </header>
 
       <form class="filters" (ngSubmit)="aplicarFiltros()">
@@ -127,7 +134,7 @@ import { AjusteInventarioService } from '../../services/ajuste-inventario.servic
                     mat-button
                     color="primary"
                     type="button"
-                    *ngIf="ajuste.estado === 'Borrador'"
+                    *ngIf="puedeEditar() && ajuste.estado === 'Borrador'"
                     [disabled]="processingId() !== null"
                     (click)="editar(ajuste)">
                     <mat-icon>edit</mat-icon>
@@ -137,7 +144,7 @@ import { AjusteInventarioService } from '../../services/ajuste-inventario.servic
                     mat-stroked-button
                     color="primary"
                     type="button"
-                    *ngIf="ajuste.estado === 'Borrador'"
+                    *ngIf="puedeConfirmar() && ajuste.estado === 'Borrador'"
                     [disabled]="processingId() === ajuste.id"
                     (click)="confirmar(ajuste)">
                     <mat-icon>check_circle</mat-icon>
@@ -147,7 +154,7 @@ import { AjusteInventarioService } from '../../services/ajuste-inventario.servic
                     mat-stroked-button
                     color="warn"
                     type="button"
-                    *ngIf="ajuste.estado === 'Confirmado'"
+                    *ngIf="puedeAnular() && ajuste.estado === 'Confirmado'"
                     [disabled]="processingId() === ajuste.id"
                     (click)="anular(ajuste)">
                     <mat-icon>undo</mat-icon>
@@ -175,6 +182,7 @@ import { AjusteInventarioService } from '../../services/ajuste-inventario.servic
     :host { display: block; }
     .ajustes-page { padding: 24px; max-width: 1500px; margin: 0 auto; }
     .page-header { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; margin-bottom: 24px; }
+    .page-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
     .eyebrow { margin: 0 0 4px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; opacity: .65; }
     h1 { margin: 0; font-size: clamp(24px, 3vw, 34px); }
     .subtitle { margin: 6px 0 0; opacity: .72; }
@@ -198,7 +206,7 @@ import { AjusteInventarioService } from '../../services/ajuste-inventario.servic
     .row-actions { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
     .muted { opacity: .55; font-size: 13px; }
     @media (max-width: 1050px) { .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); } .filter-actions { grid-column: span 2; } }
-    @media (max-width: 640px) { .ajustes-page { padding: 16px; } .page-header { flex-direction: column; } .filters { grid-template-columns: 1fr; } .filter-actions { grid-column: auto; } }
+    @media (max-width: 640px) { .ajustes-page { padding: 16px; } .page-header { flex-direction: column; } .page-actions { width: 100%; justify-content: flex-start; } .filters { grid-template-columns: 1fr; } .filter-actions { grid-column: auto; } }
   `]
 })
 export class AjustesListComponent implements OnInit {
@@ -207,6 +215,10 @@ export class AjustesListComponent implements OnInit {
   readonly loading = signal(false);
   readonly error = signal('');
   readonly processingId = signal<number | null>(null);
+  readonly puedeCrear = signal(false);
+  readonly puedeEditar = signal(false);
+  readonly puedeConfirmar = signal(false);
+  readonly puedeAnular = signal(false);
 
   search = '';
   estado: '' | EstadoAjusteInventario = '';
@@ -217,10 +229,15 @@ export class AjustesListComponent implements OnInit {
 
   constructor(
     private readonly ajusteService: AjusteInventarioService,
+    private readonly permisosRuntime: PermisosRuntimeService,
     private readonly router: Router
   ) {}
 
   ngOnInit(): void {
+    this.puedeCrear.set(this.permisosRuntime.puede('Inventario', 'Crear'));
+    this.puedeEditar.set(this.permisosRuntime.puede('Inventario', 'Editar'));
+    this.puedeConfirmar.set(this.permisosRuntime.puede('Inventario', 'Confirmar'));
+    this.puedeAnular.set(this.permisosRuntime.puede('Inventario', 'Anular'));
     this.cargar();
   }
 
@@ -284,17 +301,22 @@ export class AjustesListComponent implements OnInit {
     this.cargar();
   }
 
+  nuevo(): void {
+    if (!this.puedeCrear()) return;
+    void this.router.navigate(['/inventario/ajustes/nuevo']);
+  }
+
   ver(ajuste: AjusteInventario): void {
     void this.router.navigate(['/inventario/ajustes', ajuste.id]);
   }
 
   editar(ajuste: AjusteInventario): void {
-    if (ajuste.estado !== 'Borrador') return;
+    if (!this.puedeEditar() || ajuste.estado !== 'Borrador') return;
     void this.router.navigate(['/inventario/ajustes', ajuste.id, 'editar']);
   }
 
   confirmar(ajuste: AjusteInventario): void {
-    if (ajuste.estado !== 'Borrador' || this.processingId() !== null) return;
+    if (!this.puedeConfirmar() || ajuste.estado !== 'Borrador' || this.processingId() !== null) return;
     if (!window.confirm(`¿Confirmar el ajuste ${ajuste.numeroAjuste}? Esta operación aplicará el inventario.`)) return;
 
     this.processingId.set(ajuste.id);
@@ -314,7 +336,7 @@ export class AjustesListComponent implements OnInit {
   }
 
   anular(ajuste: AjusteInventario): void {
-    if (ajuste.estado !== 'Confirmado' || this.processingId() !== null) return;
+    if (!this.puedeAnular() || ajuste.estado !== 'Confirmado' || this.processingId() !== null) return;
 
     const motivo = window.prompt(`Motivo obligatorio para anular ${ajuste.numeroAjuste}:`, '')?.trim() ?? '';
     if (!motivo) {
