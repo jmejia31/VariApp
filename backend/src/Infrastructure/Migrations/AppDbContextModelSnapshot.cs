@@ -332,6 +332,99 @@ namespace InventoryApp.Infrastructure.Migrations
                 b.ToTable("Sucursales", (string)null);
             });
 
+            modelBuilder.Entity("InventoryApp.Domain.Entities.Almacen", b =>
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
+
+                MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                b.Property<bool>("Activo")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("tinyint(1)")
+                    .HasDefaultValue(true);
+
+                b.Property<string>("ActualizadoPorNombreUsuario")
+                    .HasMaxLength(150)
+                    .HasColumnType("varchar(150)");
+
+                b.Property<int?>("ActualizadoPorUsuarioId")
+                    .HasColumnType("int");
+
+                b.Property<string>("Codigo")
+                    .IsRequired()
+                    .HasMaxLength(40)
+                    .HasColumnType("varchar(40)");
+
+                b.Property<string>("CodigoActivoUnico")
+                    .ValueGeneratedOnAddOrUpdate()
+                    .HasMaxLength(40)
+                    .HasColumnType("varchar(40)")
+                    .HasComputedColumnSql("IF(Eliminado = 0, UPPER(TRIM(Codigo)), NULL)", true);
+
+                b.Property<string>("CreadoPorNombreUsuario")
+                    .HasMaxLength(150)
+                    .HasColumnType("varchar(150)");
+
+                b.Property<int?>("CreadoPorUsuarioId")
+                    .HasColumnType("int");
+
+                b.Property<bool>("Eliminado")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("tinyint(1)")
+                    .HasDefaultValue(false);
+
+                b.Property<int?>("EliminadoPorUsuarioId")
+                    .HasColumnType("int");
+
+                b.Property<DateTime>("FechaActualizacion")
+                    .HasColumnType("datetime(6)");
+
+                b.Property<DateTime>("FechaCreacion")
+                    .HasColumnType("datetime(6)");
+
+                b.Property<DateTime?>("FechaEliminacion")
+                    .HasColumnType("datetime(6)");
+
+                b.Property<string>("Nombre")
+                    .IsRequired()
+                    .HasMaxLength(150)
+                    .HasColumnType("varchar(150)");
+
+                b.Property<int>("SucursalId")
+                    .HasColumnType("int");
+
+                b.Property<int>("Tipo")
+                    .HasColumnType("int");
+
+                b.HasKey("Id");
+
+                b.HasIndex("CodigoActivoUnico")
+                    .IsUnique()
+                    .HasDatabaseName("UX_Almacenes_Codigo_Activo");
+
+                b.HasIndex("SucursalId")
+                    .HasDatabaseName("IX_Almacenes_SucursalId");
+
+                b.HasIndex("Tipo", "Activo", "Eliminado")
+                    .HasDatabaseName("IX_Almacenes_Tipo_Estado");
+
+                b.ToTable("Almacenes", (string)null);
+            });
+
+            modelBuilder.Entity("InventoryApp.Domain.Entities.Almacen", b =>
+            {
+                b.HasOne("InventoryApp.Domain.Entities.Sucursal", "Sucursal")
+                    .WithMany()
+                    .HasForeignKey("SucursalId")
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .IsRequired()
+                    .HasConstraintName("FK_Almacenes_Sucursales_SucursalId");
+
+                b.Navigation("Sucursal");
+            });
+
             modelBuilder.Entity("InventoryApp.Domain.Entities.Compra", b =>
             {
                 b.HasOne("InventoryApp.Domain.Entities.Catalogos.MetodoPago", "MetodoPagoCatalogo")
