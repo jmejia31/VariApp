@@ -69,6 +69,7 @@ builder.Services.AddScoped<IClienteService, ClienteService>();
 builder.Services.AddScoped<ITipoClienteService, TipoClienteService>();
 builder.Services.AddScoped<IConsumoInsumoService, ConsumoInsumoService>();
 builder.Services.AddScoped<IAjusteInventarioService, AjusteInventarioService>();
+builder.Services.AddScoped<IAjusteInventarioConsultaService, AjusteInventarioConsultaService>();
 builder.Services.AddScoped<ITipoClientePredeterminadoResolver, TipoClientePredeterminadoResolver>();
 builder.Services.AddScoped<IAuditoriaService, AuditoriaService>();
 builder.Services.AddScoped<IPermisoService, PermisoService>();
