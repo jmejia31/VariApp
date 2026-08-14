@@ -413,6 +413,96 @@ namespace InventoryApp.Infrastructure.Migrations
                 b.ToTable("Almacenes", (string)null);
             });
 
+            modelBuilder.Entity("InventoryApp.Domain.Entities.UbicacionAlmacen", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Activa")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("ActualizadoPorNombreUsuario")
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)");
+
+                    b.Property<int?>("ActualizadoPorUsuarioId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AlmacenId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Codigo")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("varchar(60)");
+
+                    b.Property<string>("CodigoActivoUnico")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasMaxLength(60)
+                        .HasColumnType("varchar(60)")
+                        .HasComputedColumnSql("IF(Eliminado = 0, UPPER(TRIM(Codigo)), NULL)", true);
+
+                    b.Property<string>("CreadoPorNombreUsuario")
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)");
+
+                    b.Property<int?>("CreadoPorUsuarioId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Eliminado")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false);
+
+                    b.Property<int?>("EliminadoPorUsuarioId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("FechaActualizacion")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("FechaEliminacion")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)");
+
+                    b.Property<int>("Tipo")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UbicacionPadreId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasAlternateKey("AlmacenId", "Id")
+                        .HasName("AK_UbicacionesAlmacen_AlmacenId_Id");
+
+                    b.HasIndex("AlmacenId")
+                        .HasDatabaseName("IX_UbicacionesAlmacen_AlmacenId");
+
+                    b.HasIndex("AlmacenId", "CodigoActivoUnico")
+                        .IsUnique()
+                        .HasDatabaseName("UX_UbicacionesAlmacen_Almacen_Codigo_Activo");
+
+                    b.HasIndex("AlmacenId", "UbicacionPadreId")
+                        .HasDatabaseName("IX_UbicacionesAlmacen_Padre");
+
+                    b.HasIndex("Tipo", "Activa", "Eliminado")
+                        .HasDatabaseName("IX_UbicacionesAlmacen_Tipo_Estado");
+
+                    b.ToTable("UbicacionesAlmacen", (string)null);
+                });
+
             modelBuilder.Entity("InventoryApp.Domain.Entities.Almacen", b =>
             {
                 b.HasOne("InventoryApp.Domain.Entities.Sucursal", "Sucursal")
@@ -424,6 +514,27 @@ namespace InventoryApp.Infrastructure.Migrations
 
                 b.Navigation("Sucursal");
             });
+
+            modelBuilder.Entity("InventoryApp.Domain.Entities.UbicacionAlmacen", b =>
+                {
+                    b.HasOne("InventoryApp.Domain.Entities.Almacen", "Almacen")
+                        .WithMany()
+                        .HasForeignKey("AlmacenId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_UbicacionesAlmacen_Almacenes_AlmacenId");
+
+                    b.HasOne("InventoryApp.Domain.Entities.UbicacionAlmacen", "UbicacionPadre")
+                        .WithMany("Hijas")
+                        .HasForeignKey("AlmacenId", "UbicacionPadreId")
+                        .HasPrincipalKey("AlmacenId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("FK_UbicacionesAlmacen_Padre_MismoAlmacen");
+
+                    b.Navigation("Almacen");
+
+                    b.Navigation("UbicacionPadre");
+                });
 
             modelBuilder.Entity("InventoryApp.Domain.Entities.Compra", b =>
             {
@@ -494,6 +605,11 @@ namespace InventoryApp.Infrastructure.Migrations
             {
                 b.Navigation("Detalles");
             });
+            modelBuilder.Entity("InventoryApp.Domain.Entities.UbicacionAlmacen", b =>
+                {
+                    b.Navigation("Hijas");
+                });
+
         }
     }
 
