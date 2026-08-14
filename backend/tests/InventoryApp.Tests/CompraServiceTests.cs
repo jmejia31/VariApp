@@ -8,6 +8,7 @@ using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Enums;
 using Moq;
 using Xunit;
+using CatalogoMetodoPago = InventoryApp.Domain.Entities.Catalogos.MetodoPago;
 
 namespace InventoryApp.Tests;
 
@@ -30,6 +31,15 @@ public class CompraServiceTests
         _currentUserMock.Setup(c => c.UsuarioId).Returns(3);
         _currentUserMock.Setup(c => c.NombreUsuario).Returns("comprador1");
         _compraRepoMock.Setup(r => r.SaveChangesAsync()).ReturnsAsync(true);
+        _compraRepoMock
+            .Setup(r => r.GetMetodoPagoPorCodigoONombreAsync(It.IsAny<string>()))
+            .ReturnsAsync((string valor) => new CatalogoMetodoPago
+            {
+                Id = 1,
+                Codigo = valor.Trim(),
+                Nombre = valor.Trim(),
+                Activo = true
+            });
 
         _service = new CompraService(
             _compraRepoMock.Object,
@@ -50,7 +60,24 @@ public class CompraServiceTests
 
     private static Compra CompraDePrueba(int cantidad = 5, int? varianteId = null, EstadoDocumento estado = EstadoDocumento.Borrador)
     {
-        var compra = new Compra { Id = 1, NumeroCompra = "COM-000001", ProveedorNombre = "Proveedor X", Estado = estado, Total = 20 };
+        var metodo = new CatalogoMetodoPago
+        {
+            Id = 1,
+            Codigo = "Efectivo",
+            Nombre = "Efectivo",
+            Activo = true
+        };
+        var compra = new Compra
+        {
+            Id = 1,
+            NumeroCompra = "COM-000001",
+            ProveedorNombre = "Proveedor X",
+            Estado = estado,
+            Total = 20,
+            MetodoPagoId = metodo.Id,
+            MetodoPagoCatalogo = metodo,
+            MetodoPago = MetodoPago.Efectivo
+        };
         compra.Detalles.Add(new CompraDetalle
         {
             ProductoId = 1,
@@ -114,6 +141,10 @@ public class CompraServiceTests
             It.Is<MovimientoInventario>(m => m.Tipo == TipoMovimientoInventario.Entrada && m.Cantidad == 5),
             It.Is<OrigenMovimientoInventario>(o => o.CompraId == compra.Id && o.VentaId == null && o.ConsumoInsumoId == null)), Times.Once);
         _movInvRepoMock.Verify(r => r.AddAsync(It.IsAny<MovimientoInventario>()), Times.Never);
+        _movFinRepoMock.Verify(r => r.AddAsync(It.Is<MovimientoFinanciero>(m =>
+            m.CompraId == compra.Id &&
+            m.MetodoPagoId == compra.MetodoPagoId &&
+            m.MetodoPago == MetodoPago.Efectivo)), Times.Once);
     }
 
     [Fact]
@@ -140,6 +171,18 @@ public class CompraServiceTests
         var compra = new Compra { Id = 1, Estado = EstadoDocumento.Confirmada };
         _compraRepoMock.Setup(r => r.GetByIdForUpdateAsync(1)).ReturnsAsync(compra);
         await Assert.ThrowsAsync<BusinessRuleException>(() => _service.ConfirmarAsync(1));
+    }
+
+    [Fact]
+    public async Task ConfirmarAsync_Sin_MetodoPago_Relacional_Lanza_Excepcion()
+    {
+        var compra = CompraDePrueba();
+        compra.MetodoPagoId = null;
+        compra.MetodoPagoCatalogo = null;
+        _compraRepoMock.Setup(r => r.GetByIdForUpdateAsync(1)).ReturnsAsync(compra);
+
+        var ex = await Assert.ThrowsAsync<BusinessRuleException>(() => _service.ConfirmarAsync(1));
+        Assert.Contains("método de pago relacional", ex.Message);
     }
 
     [Fact]
@@ -219,6 +262,59 @@ public class CompraServiceTests
         Assert.Equal(0, creada.Descuento);
         Assert.Equal(3, creada.Impuesto);
         Assert.Equal(23, creada.Total);
+        Assert.Equal(1, creada.MetodoPagoId);
+    }
+
+    [Fact]
+    public async Task CreateAsync_MetodoAdministrable_Nuevo_Conserva_Id_Y_Proyecta_Legacy_Otro()
+    {
+        var metodo = new CatalogoMetodoPago
+        {
+            Id = 9,
+            Codigo = "QR_EMPRESARIAL",
+            Nombre = "QR empresarial",
+            Activo = true
+        };
+        _compraRepoMock
+            .Setup(r => r.GetMetodoPagoPorCodigoONombreAsync("QR_EMPRESARIAL"))
+            .ReturnsAsync(metodo);
+
+        var producto = ProductoDePrueba();
+        producto.Variantes.Add(new ProductoVariante { Id = 8, ProductoId = producto.Id, Sku = "TEC-0000000001", Cantidad = 10, Costo = 5, Precio = 10, EsTecnica = true, Activo = true });
+        _productoRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(producto);
+        _compraRepoMock.Setup(r => r.ContarTodasAsync()).ReturnsAsync(0);
+        _calculoMock.Setup(c => c.CalcularCompraAsync(It.IsAny<List<DetalleCalculoInput>>(), It.IsAny<int?>()))
+            .ReturnsAsync(new ResultadoCalculoDto { Subtotal = 10, Total = 10 });
+        Compra? creada = null;
+        _compraRepoMock.Setup(r => r.AddAsync(It.IsAny<Compra>())).Callback<Compra>(c => creada = c).Returns(Task.CompletedTask);
+
+        await _service.CreateAsync(new CreateCompraDto
+        {
+            ProveedorNombre = "Proveedor X",
+            MetodoPago = "QR_EMPRESARIAL",
+            Detalles = new List<CompraDetalleInputDto> { new() { ProductoId = 1, Cantidad = 1, CostoUnitario = 10 } }
+        });
+
+        Assert.NotNull(creada);
+        Assert.Equal(9, creada!.MetodoPagoId);
+        Assert.Same(metodo, creada.MetodoPagoCatalogo);
+        Assert.Equal(MetodoPago.Otro, creada.MetodoPago);
+    }
+
+    [Fact]
+    public async Task CreateAsync_MetodoPago_No_Existe_Falla_Cerrado()
+    {
+        _compraRepoMock
+            .Setup(r => r.GetMetodoPagoPorCodigoONombreAsync("INEXISTENTE"))
+            .ReturnsAsync((CatalogoMetodoPago?)null);
+
+        var ex = await Assert.ThrowsAsync<BusinessRuleException>(() => _service.CreateAsync(new CreateCompraDto
+        {
+            MetodoPago = "INEXISTENTE"
+        }));
+
+        Assert.Contains("no existe en el catálogo", ex.Message);
+        _compraRepoMock.Verify(r => r.AddAsync(It.IsAny<Compra>()), Times.Never);
     }
 
     [Fact]

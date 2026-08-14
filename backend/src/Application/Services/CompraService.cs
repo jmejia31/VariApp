@@ -5,6 +5,7 @@ using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Common;
 using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Enums;
+using CatalogoMetodoPago = InventoryApp.Domain.Entities.Catalogos.MetodoPago;
 
 namespace InventoryApp.Application.Services;
 
@@ -68,6 +69,7 @@ public class CompraService : ICompraService
 
     public async Task<CompraDto> CreateAsync(CreateCompraDto dto)
     {
+        var metodoPago = await ResolverMetodoPagoAsync(dto.MetodoPago);
         var compra = new Compra
         {
             NumeroCompra = await GenerarNumeroAsync(),
@@ -75,7 +77,9 @@ public class CompraService : ICompraService
             ProveedorTelefono = dto.ProveedorTelefono,
             ProveedorDocumento = dto.ProveedorDocumento,
             DocumentoReferencia = dto.DocumentoReferencia,
-            MetodoPago = ParseEnum(dto.MetodoPago, MetodoPago.Efectivo),
+            MetodoPagoId = metodoPago.Id,
+            MetodoPagoCatalogo = metodoPago,
+            MetodoPago = DerivarMetodoPagoLegacy(metodoPago),
             EstadoPago = ParseEnum(dto.EstadoPago, EstadoPago.Pendiente),
             Estado = EstadoDocumento.Borrador,
             Notas = dto.Notas,
@@ -100,6 +104,8 @@ public class CompraService : ICompraService
             {
                 compra.NumeroCompra,
                 compra.ProveedorNombre,
+                compra.MetodoPagoId,
+                MetodoPagoCodigo = compra.MetodoPagoCatalogo?.Codigo,
                 compra.Subtotal,
                 compra.Impuesto,
                 compra.Total,
@@ -116,10 +122,13 @@ public class CompraService : ICompraService
         if (compra.Estado != EstadoDocumento.Borrador)
             throw new BusinessRuleException("Solo se pueden editar compras en estado Borrador.");
 
+        var metodoPago = await ResolverMetodoPagoAsync(dto.MetodoPago);
         var valoresAnteriores = new
         {
             compra.ProveedorNombre,
             compra.DocumentoReferencia,
+            compra.MetodoPagoId,
+            MetodoPagoCodigo = compra.MetodoPagoCatalogo?.Codigo,
             compra.MetodoPago,
             compra.EstadoPago,
             compra.Subtotal,
@@ -132,7 +141,9 @@ public class CompraService : ICompraService
         compra.ProveedorTelefono = dto.ProveedorTelefono;
         compra.ProveedorDocumento = dto.ProveedorDocumento;
         compra.DocumentoReferencia = dto.DocumentoReferencia;
-        compra.MetodoPago = ParseEnum(dto.MetodoPago, MetodoPago.Efectivo);
+        compra.MetodoPagoId = metodoPago.Id;
+        compra.MetodoPagoCatalogo = metodoPago;
+        compra.MetodoPago = DerivarMetodoPagoLegacy(metodoPago);
         compra.EstadoPago = ParseEnum(dto.EstadoPago, EstadoPago.Pendiente);
         compra.Notas = dto.Notas;
         compra.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
@@ -159,6 +170,8 @@ public class CompraService : ICompraService
             {
                 compra.ProveedorNombre,
                 compra.DocumentoReferencia,
+                compra.MetodoPagoId,
+                MetodoPagoCodigo = compra.MetodoPagoCatalogo?.Codigo,
                 compra.MetodoPago,
                 compra.EstadoPago,
                 compra.Subtotal,
@@ -182,6 +195,10 @@ public class CompraService : ICompraService
                 throw new BusinessRuleException("Solo se pueden confirmar compras en estado Borrador.");
             if (compra.Detalles.Count == 0)
                 throw new BusinessRuleException("La compra debe tener al menos un producto para confirmarse.");
+            if (!compra.MetodoPagoId.HasValue || compra.MetodoPagoCatalogo is null)
+                throw new BusinessRuleException("La compra no tiene un método de pago relacional válido.");
+            if (!compra.MetodoPagoCatalogo.Activo || compra.MetodoPagoCatalogo.Eliminado)
+                throw new BusinessRuleException("El método de pago de la compra está inactivo y no puede utilizarse para confirmar una operación nueva.");
 
             var demanda = compra.Detalles
                 .Select(d => new InventarioDemanda(d.ProductoId, d.ProductoVarianteId, d.Cantidad))
@@ -271,7 +288,9 @@ public class CompraService : ICompraService
                 Estado = compra.EstadoPago == EstadoPago.Pagado
                     ? EstadoMovimientoFinanciero.Pagado
                     : EstadoMovimientoFinanciero.Pendiente,
-                MetodoPago = compra.MetodoPago,
+                MetodoPagoId = compra.MetodoPagoId,
+                MetodoPagoCatalogo = compra.MetodoPagoCatalogo,
+                MetodoPago = DerivarMetodoPagoLegacy(compra.MetodoPagoCatalogo),
                 EsAutomatico = true,
                 ModuloOrigen = "Compra",
                 ReferenciaId = compra.Id,
@@ -634,6 +653,26 @@ public class CompraService : ICompraService
         return producto;
     }
 
+    private async Task<CatalogoMetodoPago> ResolverMetodoPagoAsync(string valor)
+    {
+        if (string.IsNullOrWhiteSpace(valor))
+            throw new BusinessRuleException("El método de pago es obligatorio.");
+
+        var metodoPago = await _compraRepository.GetMetodoPagoPorCodigoONombreAsync(valor.Trim());
+        return metodoPago
+            ?? throw new BusinessRuleException($"El método de pago '{valor.Trim()}' no existe en el catálogo.");
+    }
+
+    private static MetodoPago DerivarMetodoPagoLegacy(CatalogoMetodoPago metodoPago)
+    {
+        if (Enum.TryParse<MetodoPago>(metodoPago.Codigo, true, out var porCodigo))
+            return porCodigo;
+        if (Enum.TryParse<MetodoPago>(metodoPago.Nombre, true, out var porNombre))
+            return porNombre;
+
+        return MetodoPago.Otro;
+    }
+
     private async Task<string> GenerarNumeroAsync()
     {
         var total = await _compraRepository.ContarTodasAsync();
@@ -655,7 +694,7 @@ public class CompraService : ICompraService
         DocumentoReferencia = compra.DocumentoReferencia,
         Estado = compra.Estado.ToString(),
         EstadoPago = compra.EstadoPago.ToString(),
-        MetodoPago = compra.MetodoPago.ToString(),
+        MetodoPago = compra.MetodoPagoCatalogo?.Nombre ?? compra.MetodoPago.ToString(),
         Subtotal = compra.Subtotal,
         Descuento = compra.Descuento,
         Impuesto = compra.Impuesto,
