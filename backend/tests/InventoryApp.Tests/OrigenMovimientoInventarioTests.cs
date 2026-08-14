@@ -16,6 +16,7 @@ public class OrigenMovimientoInventarioTests
         Assert.Equal(10, origen.CompraId);
         Assert.Null(origen.VentaId);
         Assert.Null(origen.ConsumoInsumoId);
+        Assert.Null(origen.AjusteInventarioId);
     }
 
     [Fact]
@@ -27,6 +28,7 @@ public class OrigenMovimientoInventarioTests
         Assert.Equal(20, origen.VentaId);
         Assert.Null(origen.CompraId);
         Assert.Null(origen.ConsumoInsumoId);
+        Assert.Null(origen.AjusteInventarioId);
     }
 
     [Fact]
@@ -38,20 +40,46 @@ public class OrigenMovimientoInventarioTests
         Assert.Equal(30, origen.ConsumoInsumoId);
         Assert.Null(origen.CompraId);
         Assert.Null(origen.VentaId);
+        Assert.Null(origen.AjusteInventarioId);
+    }
+
+    [Fact]
+    public void DesdeAjusteInventario_ExponeSoloAjusteComoOrigen()
+    {
+        var origen = OrigenMovimientoInventario.DesdeAjusteInventario(40);
+
+        Assert.Equal(TipoOrigenMovimientoInventario.AjusteInventario, origen.Tipo);
+        Assert.Equal(40, origen.DocumentoId);
+        Assert.Equal(40, origen.AjusteInventarioId);
+        Assert.Null(origen.CompraId);
+        Assert.Null(origen.VentaId);
+        Assert.Null(origen.ConsumoInsumoId);
     }
 
     [Fact]
     public void DesdeIds_SinOrigen_FallaCerrado()
     {
         Assert.Throws<InvalidOperationException>(() =>
-            OrigenMovimientoInventario.DesdeIds(null, null, null));
+            OrigenMovimientoInventario.DesdeIds(null, null, null, null));
     }
 
     [Fact]
     public void DesdeIds_ConMasDeUnOrigen_FallaCerrado()
     {
         Assert.Throws<InvalidOperationException>(() =>
-            OrigenMovimientoInventario.DesdeIds(1, 2, null));
+            OrigenMovimientoInventario.DesdeIds(1, 2, null, null));
+
+        Assert.Throws<InvalidOperationException>(() =>
+            OrigenMovimientoInventario.DesdeIds(null, null, 3, 4));
+    }
+
+    [Fact]
+    public void DesdeIds_ConAjusteInventario_ConstruyeOrigenTipado()
+    {
+        var origen = OrigenMovimientoInventario.DesdeIds(null, null, null, 40);
+
+        Assert.Equal(TipoOrigenMovimientoInventario.AjusteInventario, origen.Tipo);
+        Assert.Equal(40, origen.AjusteInventarioId);
     }
 
     [Theory]
@@ -61,5 +89,7 @@ public class OrigenMovimientoInventarioTests
     {
         Assert.Throws<ArgumentOutOfRangeException>(() =>
             OrigenMovimientoInventario.DesdeCompra(id));
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            OrigenMovimientoInventario.DesdeAjusteInventario(id));
     }
 }

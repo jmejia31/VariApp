@@ -5,7 +5,7 @@ namespace InventoryApp.Domain.Common;
 /// <summary>
 /// Contrato de dominio para identificar de forma tipada el documento empresarial
 /// que origina un movimiento de inventario. Exige exactamente un origen válido.
-/// La persistencia de sus FKs se incorpora en N0.6.C.
+/// La persistencia de sus FKs se incorpora por fases según el documento origen.
 /// </summary>
 public sealed record OrigenMovimientoInventario
 {
@@ -15,6 +15,7 @@ public sealed record OrigenMovimientoInventario
     public int? CompraId => Tipo == TipoOrigenMovimientoInventario.Compra ? DocumentoId : null;
     public int? VentaId => Tipo == TipoOrigenMovimientoInventario.Venta ? DocumentoId : null;
     public int? ConsumoInsumoId => Tipo == TipoOrigenMovimientoInventario.ConsumoInsumo ? DocumentoId : null;
+    public int? AjusteInventarioId => Tipo == TipoOrigenMovimientoInventario.AjusteInventario ? DocumentoId : null;
 
     private OrigenMovimientoInventario(TipoOrigenMovimientoInventario tipo, int documentoId)
     {
@@ -34,15 +35,20 @@ public sealed record OrigenMovimientoInventario
     public static OrigenMovimientoInventario DesdeConsumoInsumo(int consumoInsumoId) =>
         new(TipoOrigenMovimientoInventario.ConsumoInsumo, consumoInsumoId);
 
+    public static OrigenMovimientoInventario DesdeAjusteInventario(int ajusteInventarioId) =>
+        new(TipoOrigenMovimientoInventario.AjusteInventario, ajusteInventarioId);
+
     public static OrigenMovimientoInventario DesdeIds(
         int? compraId,
         int? ventaId,
-        int? consumoInsumoId)
+        int? consumoInsumoId,
+        int? ajusteInventarioId = null)
     {
         var cantidadOrigenes =
             (compraId.HasValue ? 1 : 0) +
             (ventaId.HasValue ? 1 : 0) +
-            (consumoInsumoId.HasValue ? 1 : 0);
+            (consumoInsumoId.HasValue ? 1 : 0) +
+            (ajusteInventarioId.HasValue ? 1 : 0);
 
         if (cantidadOrigenes != 1)
             throw new InvalidOperationException("Un movimiento originado por documento debe tener exactamente un origen tipado.");
@@ -53,6 +59,9 @@ public sealed record OrigenMovimientoInventario
         if (ventaId.HasValue)
             return DesdeVenta(ventaId.Value);
 
-        return DesdeConsumoInsumo(consumoInsumoId!.Value);
+        if (consumoInsumoId.HasValue)
+            return DesdeConsumoInsumo(consumoInsumoId.Value);
+
+        return DesdeAjusteInventario(ajusteInventarioId!.Value);
     }
 }
