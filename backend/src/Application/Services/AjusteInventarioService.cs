@@ -141,14 +141,12 @@ public sealed class AjusteInventarioService : IAjusteInventarioService
     {
         var (usuarioId, nombreUsuario) = ObtenerUsuarioActual();
         var encontrado = false;
-        string? numero = null;
 
         await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
             var ajuste = await _repository.GetByIdForUpdateAsync(id);
             if (ajuste is null) return;
             encontrado = true;
-            numero = ajuste.NumeroAjuste;
 
             if (ajuste.Estado != EstadoAjusteInventario.Borrador)
                 throw new BusinessRuleException("Solo los ajustes en estado Borrador pueden confirmarse.");
@@ -256,19 +254,19 @@ public sealed class AjusteInventarioService : IAjusteInventarioService
             ajuste.FechaActualizacion = ahora;
             _repository.Update(ajuste);
             await _repository.SaveChangesAsync();
+
+            await _auditoria.RegistrarEstrictoAsync(
+                ModuloSistema.Inventario,
+                AccionPermiso.Confirmar,
+                $"Ajuste de inventario confirmado: {ajuste.NumeroAjuste}",
+                ajuste.Id,
+                entidad: nameof(AjusteInventario));
         });
 
         if (!encontrado) return null;
 
         var confirmado = await _repository.GetByIdAsync(id)
             ?? throw new InvalidOperationException("No se pudo recuperar el ajuste confirmado.");
-
-        await _auditoria.RegistrarAsync(
-            ModuloSistema.Inventario,
-            AccionPermiso.Confirmar,
-            $"Ajuste de inventario confirmado: {numero}",
-            id,
-            entidad: nameof(AjusteInventario));
 
         return ToDto(confirmado);
     }
@@ -281,14 +279,12 @@ public sealed class AjusteInventarioService : IAjusteInventarioService
         var (usuarioId, nombreUsuario) = ObtenerUsuarioActual();
         var motivo = motivoAnulacion.Trim();
         var encontrado = false;
-        string? numero = null;
 
         await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
             var ajuste = await _repository.GetByIdForUpdateAsync(id);
             if (ajuste is null) return;
             encontrado = true;
-            numero = ajuste.NumeroAjuste;
 
             if (ajuste.Estado != EstadoAjusteInventario.Confirmado)
                 throw new BusinessRuleException("Solo los ajustes confirmados pueden anularse.");
@@ -379,20 +375,20 @@ public sealed class AjusteInventarioService : IAjusteInventarioService
             ajuste.FechaActualizacion = ahora;
             _repository.Update(ajuste);
             await _repository.SaveChangesAsync();
+
+            await _auditoria.RegistrarEstrictoAsync(
+                ModuloSistema.Inventario,
+                AccionPermiso.Anular,
+                $"Ajuste de inventario anulado: {ajuste.NumeroAjuste}",
+                ajuste.Id,
+                entidad: nameof(AjusteInventario),
+                motivo: motivo);
         });
 
         if (!encontrado) return null;
 
         var anulado = await _repository.GetByIdAsync(id)
             ?? throw new InvalidOperationException("No se pudo recuperar el ajuste anulado.");
-
-        await _auditoria.RegistrarAsync(
-            ModuloSistema.Inventario,
-            AccionPermiso.Anular,
-            $"Ajuste de inventario anulado: {numero}",
-            id,
-            entidad: nameof(AjusteInventario),
-            motivo: motivo);
 
         return ToDto(anulado);
     }
