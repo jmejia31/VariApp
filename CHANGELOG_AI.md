@@ -4,6 +4,22 @@ Bitácora colaborativa de cambios realizados por Javier Mejía, Codex, AntiG/Ant
 
 No reemplaza `git log`: registra intención, alcance, validaciones y handoff. Todo changeset intencional debe incluir una entrada breve; no modificar otros colaborativos si su contenido no cambió.
 
+## 2026-08-14 — ERP-N1.1 Sucursales empresariales — CIERRE FORMAL
+
+**Responsable:** ChatGPT mediante conexiones autorizadas GitHub + Google Drive.
+
+**Objetivo/alcance:** implementar y certificar el primer maestro de ERP-N1, `Sucursal`, de extremo a extremo: dominio/contratos, persistencia MySQL forward-only, API, RBAC relacional, auditoría, observabilidad, frontend responsive/accesible y QA específico. `EmpresaId` queda nullable como reserva de compatibilidad futura, sin FK ni semántica tenant antes de ERP-N6; Almacenes/Ubicaciones/Existencias permanecen en N1.2/N1.3/N1.4.
+
+**Resultado funcional:** tabla `Sucursales` con código activo único mediante columna computada, índices de EmpresaId/estado, soft-delete y rollback fail-closed; API `/sucursales` con búsqueda/filtros/paginación, CRUD, activar/desactivar idempotente y baja lógica; `ModuloSistema.Sucursales=28` con grants persistidos `Ver/Crear/Editar/Activar/Desactivar/EliminarLogico`; auditoría `Entidad=Sucursal`; métricas P50/P95 de búsqueda sin término ni PII; frontend Angular con lista server-side, estados loading/error/vacío, formulario, permisos runtime, tabla desktop/cards móvil y rutas protegidas.
+
+**Trazabilidad:** B `0a576db21e583a76418ce037ca53f8c30d3b7eb1`; C persistencia `3ca70a8b41125ba501b9d94261e43d9dcd269df9` + snapshot `65785999934d8f02ffdf947fa24f48ceb9059076`; D aplicación/API `c511039680938fb758c60cf199a0c665462c7e79` + pruebas `805818140ef78183e52a17d196f36c452d39ebc2`; E `d3009e051ffea91631673dc764e56fdf8cab70b2`; F `9ead42f594aea12c20612d7c15e21768c090f828`; G base `704d451e216ab4a48042ae8bfaca5995d77e9cdb`; fix QA `b82c8d8325866fdf4408e22424fefe692965b8d9`; certificado G `42a241162dc54c8fddf040a7321d57dd229f7e5b`.
+
+**Defecto descubierto por E2E:** el primer certificado dedicado `31829945647` creó correctamente la Sucursal pero encontró `HTTP 500` al filtrar Auditoría por `accion=Crear`; `AuditoriaRepository` usaba `enum.ToString()` dentro de LINQ, no traducible de forma segura por EF/MySQL. Se corrigió forward-only a `Enum.TryParse<TEnum>` + comparación tipada y filtro inválido fail-closed; además `AuditoriaRepository.cs` quedó incluido en los paths del workflow N1.1 para impedir regresión silenciosa.
+
+**Validación real final:** workflow permanente `ERP-N1.1 - Certificación Sucursales`, run `31830346962`, job `94864277702`, `SUCCESS`: restore, build Release `-warnaserror`, unit tests, API, migraciones MySQL 8.4, health/ready, npm ci, lint, build producción, Angular, Chromium/Playwright y E2E específico. El E2E valida 401 anónimo, correlation ID, alta/normalización, duplicados, auditoría, filtros/paginación, idempotencia, edición sin mutar estado, reactivación, UI móvil sin overflow y soft-delete. M10 del frontend también quedó verde en `31829186290`.
+
+**Documentación/control:** fuente canónica `docs/ERP_N1_1_SUCURSALES.md`; `TASKS.md`, CHANGELOG y tablero VAEP reconciliados. `main`, Producción, merge/auto-merge del PR #2, secretos y force-push permanecen intactos. **ERP-N1.1 queda formalmente cerrado** y el siguiente foco autorizado es `N1.2.A — Almacenes / auditoría y preflight`.
+
 ## 2026-08-14 — ERP-N0.8 Migraciones y limpieza — CIERRE FORMAL
 
 **Responsable:** ChatGPT mediante conexiones autorizadas GitHub + Google Drive.
@@ -44,7 +60,7 @@ No reemplaza `git log`: registra intención, alcance, validaciones y handoff. To
 
 **Validación final sobre `0e35a9f75c49b6ddfbd5ef21d426521e2b559c40`:** ERP-N0.6 `31754907625` SUCCESS; Desarrollo build/tests `31754907682` SUCCESS; recovery MySQL `31754907598` SUCCESS; M11 backup/restore `31754907601` SUCCESS; Fase 8 `31754907626` SUCCESS; aceptación integral `31754907600` SUCCESS; M13 `31754907614` SUCCESS. Las pruebas críticas demuestran que la FK tipada manda aunque el snapshot legacy discrepe, que el bridge sólo cubre escritores legacy sin FK y que un mismatch tipado/legacy falla cerrado.
 
-**Control:** N0.6.G y N0.6.H quedan cerrados, `TASKS.md` y VAEP se reconcilian y el siguiente foco FINISH_FIRST es N0.7.A — AjusteInventario formal / auditoría y preflight. No se tocó `main`, Producción, merge/auto-merge del PR #2, secretos, infraestructura productiva, force-push ni ramas nuevas.
+**Control:** N0.6.G y N0.6.H quedan cerrados, `TASKS.md` y VAEP se reconcilian y el siguiente foco FINISH_FIRST es N0.7.A — AjusteInventario formal / auditoría y preflight. No se tocó main, Producción, merge/auto-merge del PR #2, secretos, infraestructura productiva, force-push ni ramas nuevas.
 
 ## 2026-08-13 — ERP-N0.5 MetodoPago — CIERRE FORMAL
 
