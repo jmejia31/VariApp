@@ -102,7 +102,11 @@ public static class CatalogoPermisosBase
             AccionPermiso.Imprimir, AccionPermiso.Administrar,
             AccionPermiso.Cerrar, AccionPermiso.Reabrir
         }),
-        (ModuloSistema.Inventario, new[] { AccionPermiso.Ver, AccionPermiso.Exportar }),
+        (ModuloSistema.Inventario, new[]
+        {
+            AccionPermiso.Ver, AccionPermiso.Crear, AccionPermiso.Editar,
+            AccionPermiso.Confirmar, AccionPermiso.Anular, AccionPermiso.Exportar
+        }),
         (ModuloSistema.MovimientosInventario, new[] { AccionPermiso.Ver, AccionPermiso.Exportar }),
         (ModuloSistema.InsumosAdministrativos, new[]
         {
