@@ -38,8 +38,9 @@ jobs:
             --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
             --startup-project src/API/InventoryApp.API.csproj \
             --context AppDbContext
+          cd ..
           mkdir -p /tmp/n12-ef
-          git status --porcelain -- src/Infrastructure/Migrations | cut -c4- > /tmp/n12-files.txt
+          git status --porcelain -- backend/src/Infrastructure/Migrations | cut -c4- > /tmp/n12-files.txt
           test -s /tmp/n12-files.txt
           while IFS= read -r file; do
             mkdir -p "/tmp/n12-ef/$(dirname "$file")"
