@@ -4,6 +4,20 @@ Bitácora colaborativa de cambios realizados por Javier Mejía, Codex, AntiG/Ant
 
 No reemplaza `git log`: registra intención, alcance, validaciones y handoff. Todo changeset intencional debe incluir una entrada breve; no modificar otros colaborativos si su contenido no cambió.
 
+## 2026-08-14 — ERP-N0.7 AjusteInventario formal — CIERRE FORMAL
+
+**Responsable:** ChatGPT mediante conexiones autorizadas GitHub + Google Drive.
+
+**Objetivo/alcance:** cerrar formalmente ERP-N0.7 después de completar el agregado `AjusteInventario`, persistencia/snapshots, API y frontend, RBAC, auditoría crítica, correlación HTTP, regresión y certificación. Durante N0.7.H se detectó que los endpoints legacy `ajustes-stock`, aunque ya tenían el permiso correcto, todavía conservaban `InventarioAjusteService` como segunda autoridad de mutación. El cierre se detuvo y la arquitectura se corrigió antes de certificar.
+
+**Corrección final:** `InventarioAjusteService` queda como adaptador puro hacia `IAjusteInventarioService`; el servicio formal concentra la única autoridad de stock. La compatibilidad legacy crea y confirma el `AjusteInventario` dentro de una sola transacción, conserva `CantidadActualEsperada` como precondición comprobada bajo lock y falla cerrada antes de movimiento/mutación si la lectura del cliente está obsoleta. Confirmar/Anular mantienen auditoría `RegistrarEstrictoAsync` dentro de la misma transacción y movimientos con origen tipado `AjusteInventarioId`.
+
+**Cadena correctiva H:** `554c9f24902e12388c00e8ca093aa29b533c2ac1`, `3416e47e811a2f7c7387bbdaf9964e745a0f6021`, `28a0fe5a945c2071fe160bd208ca9cfc4a07013d`, `d0bd3b18f092d189efea5ee69b229bce669387f5`, `f26b7513cfb34ce9a9be54202b2363c1f19e712c`, `6e17376837e13fb70960da7b523785f54c23b04b`, `7079263f86461bae136b509151da491d2b8bfcbe` y SHA funcional final `cd5c1f058fc7a24fd477a4c9e8cda7cff4c99850`. El run sobre `7079263f...` reveló un test histórico que aún construía el adaptador con seis dependencias eliminadas; se corrigió forward-only en `cd5c1f05...`, sin ocultar el fallo.
+
+**Validación final sobre `cd5c1f058fc7a24fd477a4c9e8cda7cff4c99850`:** CI principal `31808933744` SUCCESS completo, incluida integración MySQL 8.4; aceptación integral `31808933692` SUCCESS completo, incluido Playwright/SMTP/PDF; M13 `31808933833` COMPLETED/SUCCESS, incluido backend/MySQL/migraciones/upgrade histórico, frontend, Docker/backup, secretos/dependencias, seguridad HTTP, runtime/Playwright, SMTP/PDF/logs y `Dictamen automatizado M13` SUCCESS exigiendo todos los gates verdes.
+
+**Documentación/control:** fuente canónica `docs/ERP_N0_7_AJUSTE_INVENTARIO.md`; `TASKS.md`, CHANGELOG y tablero VAEP quedan reconciliados. N0.7.A–H quedan cerrados y el siguiente foco FINISH_FIRST elegible es `N0.8.A`. No se tocó `main`, Producción, merge/auto-merge del PR #2, secretos, infraestructura productiva, force-push ni ramas nuevas.
+
 ## 2026-08-13 — ERP-N0.6 Referencias polimórficas críticas — CIERRE FORMAL
 
 **Responsable:** ChatGPT mediante conexiones autorizadas GitHub + Google Drive.
