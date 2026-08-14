@@ -45,6 +45,9 @@ import { SessionActivityService } from './core/auth/session-activity.service';
             @if (permisosRuntime.puede('Almacenes', 'Ver')) {
               <a routerLink="/almacenes" routerLinkActive="active" ariaCurrentWhenActive="page"><mat-icon>warehouse</mat-icon> Almacenes</a>
             }
+            @if (permisosRuntime.puede('UbicacionesAlmacen', 'Ver')) {
+              <a routerLink="/ubicaciones-almacen" routerLinkActive="active" ariaCurrentWhenActive="page"><mat-icon>account_tree</mat-icon> Ubicaciones</a>
+            }
             @if (permisosRuntime.puede('Colores', 'Ver')) {
               <a routerLink="/colores" routerLinkActive="active" ariaCurrentWhenActive="page"><mat-icon>palette</mat-icon> Colores</a>
             }
