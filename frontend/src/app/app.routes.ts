@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { permisoGuard } from './core/guards/permiso.guard';
+import { AJUSTES_INVENTARIO_ROUTES } from './features/inventario/ajustes.routes';
 
 export const routes: Routes = [
   {
@@ -321,6 +322,7 @@ export const routes: Routes = [
     data: { modulo: 'MovimientosInventario', accion: 'Ver' },
     loadComponent: () => import('./features/inventario/movimientos-list.component').then(m => m.MovimientosListComponent)
   },
+  ...AJUSTES_INVENTARIO_ROUTES,
   {
     path: 'configuracion',
     canActivate: [authGuard, permisoGuard],
