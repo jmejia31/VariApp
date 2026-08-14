@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using InventoryApp.Domain.Common;
 using InventoryApp.Domain.Enums;
 
@@ -18,7 +19,18 @@ public class Compra : ConfirmableEntity
 
     public EstadoDocumento Estado { get; set; } = EstadoDocumento.Borrador;
     public EstadoPago EstadoPago { get; set; } = EstadoPago.Pendiente;
+
+    // Compatibilidad histórica ERP-N0. El enum se conserva hasta que N0.8.C/D
+    // materialice y migre la relación; no debe ser la autoridad de operaciones nuevas.
     public MetodoPago MetodoPago { get; set; } = MetodoPago.Efectivo;
+
+    // Contrato de dominio N0.8.B. La persistencia se habilita expresamente en N0.8.C
+    // para evitar que esta microtarea genere DDL o una migración implícita.
+    [NotMapped]
+    public int? MetodoPagoId { get; set; }
+
+    [NotMapped]
+    public InventoryApp.Domain.Entities.Catalogos.MetodoPago? MetodoPagoCatalogo { get; set; }
 
     public decimal Subtotal { get; set; }
     public decimal Descuento { get; set; }
