@@ -1,34 +1,20 @@
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
-using InventoryApp.Domain.Entities;
-using InventoryApp.Domain.Enums;
 
 namespace InventoryApp.Application.Services;
 
+/// <summary>
+/// Adaptador de compatibilidad para los endpoints legacy de ajuste directo.
+/// La única autoridad que materializa cambios de stock es IAjusteInventarioService.
+/// </summary>
 public sealed class InventarioAjusteService : IInventarioAjusteService
 {
-    private readonly IInventarioConcurrencyService _concurrency;
-    private readonly IMovimientoInventarioRepository _movimientos;
-    private readonly IProductoRepository _productos;
-    private readonly ICurrentUserService _currentUser;
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IAuditoriaService _auditoria;
+    private readonly IAjusteInventarioService _ajustes;
 
-    public InventarioAjusteService(
-        IInventarioConcurrencyService concurrency,
-        IMovimientoInventarioRepository movimientos,
-        IProductoRepository productos,
-        ICurrentUserService currentUser,
-        IUnitOfWork unitOfWork,
-        IAuditoriaService auditoria)
+    public InventarioAjusteService(IAjusteInventarioService ajustes)
     {
-        _concurrency = concurrency;
-        _movimientos = movimientos;
-        _productos = productos;
-        _currentUser = currentUser;
-        _unitOfWork = unitOfWork;
-        _auditoria = auditoria;
+        _ajustes = ajustes;
     }
 
     public Task<AjusteStockResultadoDto> AjustarProductoAsync(
@@ -57,60 +43,45 @@ public sealed class InventarioAjusteService : IInventarioAjusteService
             throw new BusinessRuleException("La nueva cantidad debe ser diferente del stock actual.");
 
         var motivo = request.Motivo.Trim();
-        var diferencia = request.CantidadNueva - request.CantidadActualEsperada;
-
-        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        var borrador = await _ajustes.CreateAsync(new CreateAjusteInventarioDto
         {
-            await _concurrency.AjustarStockPesimistaAsync(
-                productoId,
-                varianteId,
-                request.CantidadActualEsperada,
-                request.CantidadNueva);
-
-            await _movimientos.AddAsync(new MovimientoInventario
+            Motivo = motivo,
+            Observaciones =
+                $"Compatibilidad endpoint legacy. Stock esperado por cliente: {request.CantidadActualEsperada}.",
+            Detalles =
             {
-                ProductoId = productoId,
-                ProductoVarianteId = varianteId,
-                Tipo = TipoMovimientoInventario.Ajuste,
-                Cantidad = Math.Abs(diferencia),
-                StockAnterior = request.CantidadActualEsperada,
-                StockNuevo = request.CantidadNueva,
-                ReferenciaTipo = varianteId.HasValue
-                    ? "AjusteProductoVariante"
-                    : "AjusteProducto",
-                ReferenciaId = varianteId ?? productoId,
-                Descripcion = $"Ajuste formal de inventario. Motivo: {motivo}",
-                CreadoPorUsuarioId = _currentUser.UsuarioId,
-                CreadoPorNombreUsuario = _currentUser.NombreUsuario
-            });
-
-            await _productos.SaveChangesAsync();
+                new AjusteInventarioDetalleInputDto
+                {
+                    ProductoId = productoId,
+                    ProductoVarianteId = varianteId,
+                    CantidadObjetivo = request.CantidadNueva
+                }
+            }
         });
 
-        await _auditoria.RegistrarAsync(
-            ModuloSistema.Productos,
-            AccionPermiso.Editar,
-            varianteId.HasValue
-                ? $"Stock de variante ajustado. Producto {productoId}, variante {varianteId}."
-                : $"Stock de producto ajustado. Producto {productoId}.",
-            varianteId ?? productoId,
-            entidad: varianteId.HasValue ? "ProductoVariante" : "Producto",
-            valoresAnteriores: new { Cantidad = request.CantidadActualEsperada },
-            valoresNuevos: new
-            {
-                Cantidad = request.CantidadNueva,
-                Diferencia = diferencia,
-                Motivo = motivo
-            },
-            motivo: motivo);
+        var confirmado = await _ajustes.ConfirmarAsync(borrador.Id)
+            ?? throw new InvalidOperationException(
+                "No se pudo recuperar el ajuste formal durante la confirmación del endpoint legacy.");
+
+        var detalle = confirmado.Detalles.SingleOrDefault(d =>
+            d.ProductoId == productoId && d.ProductoVarianteId == varianteId)
+            ?? throw new InvalidOperationException(
+                "El ajuste formal confirmado no contiene el detalle de inventario solicitado.");
+
+        var cantidadAnterior = detalle.CantidadAnteriorSnapshot
+            ?? throw new InvalidOperationException(
+                "El ajuste formal confirmado no materializó el snapshot de stock anterior.");
+        var cantidadNueva = detalle.CantidadNuevaSnapshot
+            ?? throw new InvalidOperationException(
+                "El ajuste formal confirmado no materializó el snapshot de stock nuevo.");
 
         return new AjusteStockResultadoDto
         {
             ProductoId = productoId,
             ProductoVarianteId = varianteId,
-            CantidadAnterior = request.CantidadActualEsperada,
-            CantidadNueva = request.CantidadNueva,
-            Diferencia = diferencia,
+            CantidadAnterior = cantidadAnterior,
+            CantidadNueva = cantidadNueva,
+            Diferencia = detalle.DiferenciaSnapshot ?? cantidadNueva - cantidadAnterior,
             Motivo = motivo
         };
     }
