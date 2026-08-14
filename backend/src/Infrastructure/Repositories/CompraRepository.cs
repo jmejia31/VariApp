@@ -90,6 +90,22 @@ public class CompraRepository : ICompraRepository
             return null;
 
         await _context.Entry(cabecera).Reference(c => c.MetodoPagoCatalogo).LoadAsync();
+
+        // Bridge transitorio one-way ERP-N0.8.D. Una fila creada por un escritor
+        // legacy después del backfill puede seguir trayendo únicamente el enum.
+        // Antes de confirmar, bajo el mismo lock, se materializa la FK relacional
+        // siempre que exista una equivalencia activa y no eliminada. Si no existe,
+        // CompraService mantiene el rechazo fail-closed y la operación no muta stock.
+        if (!cabecera.MetodoPagoId.HasValue)
+        {
+            var metodoPago = await GetMetodoPagoPorCodigoONombreAsync(cabecera.MetodoPago.ToString());
+            if (metodoPago is not null)
+            {
+                cabecera.MetodoPagoId = metodoPago.Id;
+                cabecera.MetodoPagoCatalogo = metodoPago;
+            }
+        }
+
         await _context.Entry(cabecera).Collection(c => c.Detalles).LoadAsync();
         await _context.Entry(cabecera).Collection(c => c.ImpuestosAplicados).LoadAsync();
 
