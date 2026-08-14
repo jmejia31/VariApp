@@ -12,10 +12,13 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { AjusteInventarioFormValue } from '../../core/models/ajuste-inventario.model';
+import { Producto, ProductoVariante } from '../../core/models/producto.model';
 import { AjusteInventarioService } from '../../services/ajuste-inventario.service';
+import { ProductoService } from '../../services/producto.service';
 
 @Component({
   selector: 'app-ajuste-form',
@@ -27,7 +30,8 @@ import { AjusteInventarioService } from '../../services/ajuste-inventario.servic
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatSelectModule
   ],
   template: `
     <section class="form-page" aria-labelledby="ajuste-form-title">
@@ -47,12 +51,12 @@ import { AjusteInventarioService } from '../../services/ajuste-inventario.servic
         <span>{{ error() }}</span>
       </div>
 
-      <div class="loading" *ngIf="loading()">
+      <div class="loading" *ngIf="loading() || catalogLoading()" aria-live="polite">
         <mat-spinner diameter="36"></mat-spinner>
-        <span>Cargando borrador…</span>
+        <span>{{ loading() ? 'Cargando borrador…' : 'Cargando productos…' }}</span>
       </div>
 
-      <form *ngIf="!loading()" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+      <form *ngIf="!loading() && !catalogLoading()" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
         <div class="grid two">
           <mat-form-field appearance="outline">
             <mat-label>Fecha de ajuste</mat-label>
@@ -74,7 +78,7 @@ import { AjusteInventarioService } from '../../services/ajuste-inventario.servic
         <div class="details-header">
           <div>
             <h2>Conteo físico</h2>
-            <p>Agrega al menos un producto o variante y su cantidad objetivo.</p>
+            <p>Selecciona el producto o variante y registra la cantidad física objetivo.</p>
           </div>
           <button mat-stroked-button color="primary" type="button" (click)="agregarDetalle()">
             <mat-icon>add</mat-icon>
@@ -87,14 +91,26 @@ import { AjusteInventarioService } from '../../services/ajuste-inventario.servic
             <span class="detail-number">#{{ i + 1 }}</span>
 
             <mat-form-field appearance="outline">
-              <mat-label>Producto ID</mat-label>
-              <input matInput type="number" min="1" step="1" formControlName="productoId" required />
-              <mat-error>Indica un producto válido.</mat-error>
+              <mat-label>Producto</mat-label>
+              <mat-select formControlName="productoId" required (selectionChange)="onProductoChange(i, $event.value)">
+                <mat-option *ngFor="let producto of productos()" [value]="producto.id">
+                  {{ etiquetaProducto(producto) }}
+                </mat-option>
+              </mat-select>
+              <mat-error>Selecciona un producto válido.</mat-error>
             </mat-form-field>
 
             <mat-form-field appearance="outline">
-              <mat-label>Variante ID (opcional)</mat-label>
-              <input matInput type="number" min="1" step="1" formControlName="productoVarianteId" />
+              <mat-label>Variante</mat-label>
+              <mat-select formControlName="productoVarianteId">
+                <mat-option *ngIf="variantesProducto(detail.get('productoId')?.value).length === 0" [value]="null">
+                  Producto sin variantes
+                </mat-option>
+                <mat-option *ngFor="let variante of variantesProducto(detail.get('productoId')?.value)" [value]="variante.id">
+                  {{ etiquetaVariante(variante) }}
+                </mat-option>
+              </mat-select>
+              <mat-hint *ngIf="variantesProducto(detail.get('productoId')?.value).length > 0">Selecciona la variante física concreta.</mat-hint>
             </mat-form-field>
 
             <mat-form-field appearance="outline">
@@ -117,7 +133,7 @@ import { AjusteInventarioService } from '../../services/ajuste-inventario.servic
 
         <div class="actions">
           <button mat-button type="button" (click)="volver()" [disabled]="saving()">Cancelar</button>
-          <button mat-flat-button color="primary" type="submit" [disabled]="saving() || form.invalid">
+          <button mat-flat-button color="primary" type="submit" [disabled]="saving() || form.invalid || productos().length === 0">
             <mat-spinner *ngIf="saving()" diameter="20"></mat-spinner>
             <mat-icon *ngIf="!saving()">save</mat-icon>
             {{ saving() ? 'Guardando…' : 'Guardar borrador' }}
@@ -139,25 +155,28 @@ import { AjusteInventarioService } from '../../services/ajuste-inventario.servic
     .details-header h2, .details-header p { margin: 0; }
     .details-header p { margin-top: 4px; opacity: .68; }
     .details { display: grid; gap: 10px; }
-    .detail { display: grid; grid-template-columns: auto 1fr 1fr 1fr auto; align-items: start; gap: 10px; padding: 14px; border: 1px solid rgba(127,127,127,.22); border-radius: 12px; }
+    .detail { display: grid; grid-template-columns: auto minmax(220px, 1.4fr) minmax(220px, 1.4fr) minmax(150px, .8fr) auto; align-items: start; gap: 10px; padding: 14px; border: 1px solid rgba(127,127,127,.22); border-radius: 12px; }
     .detail-number { padding-top: 18px; font-weight: 700; opacity: .55; }
     .actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
     .actions button mat-spinner { display: inline-block; margin-right: 8px; }
     .loading, .error { display: flex; align-items: center; gap: 10px; padding: 24px; border-radius: 12px; }
     .loading { justify-content: center; }
     .error { margin-bottom: 16px; border: 1px solid rgba(244,67,54,.32); background: rgba(244,67,54,.06); }
+    @media (max-width: 900px) { .detail { grid-template-columns: 1fr 1fr; } .detail-number { grid-column: 1 / -1; padding-top: 0; } }
     @media (max-width: 760px) {
       .form-page { padding: 16px; }
       .grid.two, .detail { grid-template-columns: 1fr; }
-      .detail-number { padding-top: 0; }
+      .detail-number { grid-column: auto; }
       .details-header { align-items: stretch; flex-direction: column; }
     }
   `]
 })
 export class AjusteFormComponent implements OnInit {
   readonly loading = signal(false);
+  readonly catalogLoading = signal(true);
   readonly saving = signal(false);
   readonly error = signal('');
+  readonly productos = signal<Producto[]>([]);
 
   readonly ajusteId: number | null;
   readonly form: UntypedFormGroup;
@@ -165,6 +184,7 @@ export class AjusteFormComponent implements OnInit {
   constructor(
     private readonly fb: UntypedFormBuilder,
     private readonly ajusteService: AjusteInventarioService,
+    private readonly productoService: ProductoService,
     private readonly route: ActivatedRoute,
     private readonly router: Router
   ) {
@@ -183,6 +203,7 @@ export class AjusteFormComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.cargarProductos();
     if (this.ajusteId) this.cargar(this.ajusteId);
   }
 
@@ -194,6 +215,33 @@ export class AjusteFormComponent implements OnInit {
     if (this.detalles.length > 1) this.detalles.removeAt(index);
   }
 
+  onProductoChange(index: number, productoId: number): void {
+    const detalle = this.detalles.at(index);
+    detalle.get('productoVarianteId')?.setValue(null);
+    const variantes = this.variantesProducto(productoId);
+    if (variantes.length === 1) detalle.get('productoVarianteId')?.setValue(variantes[0].id);
+  }
+
+  variantesProducto(productoId: number | null | undefined): ProductoVariante[] {
+    if (!productoId) return [];
+    return this.productos().find(producto => producto.id === Number(productoId))?.variantes ?? [];
+  }
+
+  etiquetaProducto(producto: Producto): string {
+    const identidad = [producto.marcaNombre || producto.marca, producto.modeloNombre || producto.modelo]
+      .filter(Boolean)
+      .join(' · ');
+    return identidad ? `${producto.nombre} — ${identidad}` : producto.nombre;
+  }
+
+  etiquetaVariante(variante: ProductoVariante): string {
+    const identidad = [variante.marcaNombre, variante.modeloNombre, variante.colorNombre, variante.tallaNombre]
+      .filter(Boolean)
+      .join(' · ');
+    const sku = variante.sku ? `SKU ${variante.sku}` : `Variante #${variante.id}`;
+    return identidad ? `${identidad} — ${sku} — Stock ${variante.cantidad}` : `${sku} — Stock ${variante.cantidad}`;
+  }
+
   guardar(): void {
     if (this.form.invalid || this.saving()) {
       this.form.markAllAsTouched();
@@ -201,6 +249,14 @@ export class AjusteFormComponent implements OnInit {
     }
 
     const raw = this.form.getRawValue();
+    const detalleSinVariante = raw.detalles.find((detalle: any) =>
+      this.variantesProducto(Number(detalle.productoId)).length > 0 && !detalle.productoVarianteId
+    );
+    if (detalleSinVariante) {
+      this.error.set('Selecciona una variante concreta para cada producto que maneja variantes.');
+      return;
+    }
+
     const value: AjusteInventarioFormValue = {
       fechaAjuste: raw.fechaAjuste ? new Date(raw.fechaAjuste).toISOString() : null,
       motivo: String(raw.motivo).trim(),
@@ -232,6 +288,33 @@ export class AjusteFormComponent implements OnInit {
 
   volver(): void {
     this.router.navigate(['/inventario/ajustes']);
+  }
+
+  private cargarProductos(): void {
+    this.catalogLoading.set(true);
+    this.productoService.getPaged({
+      page: 1,
+      pageSize: 50,
+      activo: true,
+      sortBy: 'Nombre',
+      sortDirection: 'asc'
+    }).pipe(finalize(() => this.catalogLoading.set(false))).subscribe({
+      next: (response) => {
+        if (!response.success) {
+          this.productos.set([]);
+          this.error.set(response.message || 'No fue posible cargar los productos disponibles.');
+          return;
+        }
+        this.productos.set(response.data.items);
+        if (response.data.totalCount > response.data.items.length) {
+          this.error.set('Hay más de 50 productos activos. Refina el catálogo antes de registrar el ajuste para evitar seleccionar un producto incorrecto.');
+        }
+      },
+      error: (err) => {
+        this.productos.set([]);
+        this.error.set(this.extraerError(err, 'No fue posible cargar los productos disponibles.'));
+      }
+    });
   }
 
   private cargar(id: number): void {
@@ -274,7 +357,7 @@ export class AjusteFormComponent implements OnInit {
   private crearDetalle(value?: { productoId?: number; productoVarianteId?: number | ''; cantidadObjetivo?: number }): UntypedFormGroup {
     return this.fb.group({
       productoId: [value?.productoId ?? null, [Validators.required, Validators.min(1)]],
-      productoVarianteId: [value?.productoVarianteId ?? ''],
+      productoVarianteId: [value?.productoVarianteId ?? null],
       cantidadObjetivo: [value?.cantidadObjetivo ?? 0, [Validators.required, Validators.min(0)]]
     });
   }
