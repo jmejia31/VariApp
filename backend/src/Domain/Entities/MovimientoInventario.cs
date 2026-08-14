@@ -29,18 +29,11 @@ public class MovimientoInventario
     public string ReferenciaTipo { get; set; } = string.Empty;
     public int ReferenciaId { get; set; }
 
-    // Contrato de dominio N0.8.B. Las columnas ya existen parcialmente en el esquema
-    // por N0.6/N0.7, pero el mapeo EF se incorpora únicamente en N0.8.C.
-    [NotMapped]
+    // FKs tipadas físicas creadas por N0.6/N0.7 y materializadas en el modelo EF
+    // por N0.8.C. Debe existir como máximo una para cada movimiento.
     public int? CompraId { get; set; }
-
-    [NotMapped]
     public int? VentaId { get; set; }
-
-    [NotMapped]
     public int? ConsumoInsumoId { get; set; }
-
-    [NotMapped]
     public int? AjusteInventarioId { get; set; }
 
     [NotMapped]

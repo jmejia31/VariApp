@@ -94,8 +94,8 @@ public sealed class N08MigracionesLimpiezaPreflightIntegrationTests
             Assert.Equal(1, authorityPresence["MovimientosInventario.CompraId"]);
             Assert.Equal(1, authorityPresence["MovimientosInventario.AjusteInventarioId"]);
 
-            // Brecha confirmada que N0.8 debe resolver antes de retirar el enum legacy.
-            Assert.Equal(0, authorityPresence["Compras.MetodoPagoId"]);
+            // La brecha detectada por N0.8.A queda materializada desde N0.8.C.
+            Assert.Equal(1, authorityPresence["Compras.MetodoPagoId"]);
 
             Assert.Contains("Productos.Cantidad", compatibilityColumns);
             Assert.Contains("Productos.Costo", compatibilityColumns);

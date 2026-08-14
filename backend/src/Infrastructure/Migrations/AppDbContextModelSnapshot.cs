@@ -41,6 +41,42 @@ namespace InventoryApp.Infrastructure.Migrations
                     .HasColumnType("varchar(120)");
             });
 
+            modelBuilder.Entity("InventoryApp.Domain.Entities.Compra", b =>
+            {
+                b.Property<int?>("MetodoPagoId")
+                    .HasColumnType("int");
+
+                b.HasIndex("MetodoPagoId")
+                    .HasDatabaseName("IX_Compras_MetodoPagoId");
+            });
+
+            modelBuilder.Entity("InventoryApp.Domain.Entities.MovimientoInventario", b =>
+            {
+                b.Property<int?>("CompraId")
+                    .HasColumnType("int");
+
+                b.Property<int?>("VentaId")
+                    .HasColumnType("int");
+
+                b.Property<int?>("ConsumoInsumoId")
+                    .HasColumnType("int");
+
+                b.Property<int?>("AjusteInventarioId")
+                    .HasColumnType("int");
+
+                b.HasIndex("CompraId")
+                    .HasDatabaseName("IX_MovimientosInventario_CompraId");
+
+                b.HasIndex("VentaId")
+                    .HasDatabaseName("IX_MovimientosInventario_VentaId");
+
+                b.HasIndex("ConsumoInsumoId")
+                    .HasDatabaseName("IX_MovimientosInventario_ConsumoInsumoId");
+
+                b.HasIndex("AjusteInventarioId")
+                    .HasDatabaseName("IX_MovimientosInventario_AjusteInventarioId");
+            });
+
             modelBuilder.Entity("InventoryApp.Domain.Entities.AjusteInventario", b =>
             {
                 b.Property<int>("Id")
@@ -197,6 +233,44 @@ namespace InventoryApp.Infrastructure.Migrations
                 b.HasIndex("ProductoVarianteId");
 
                 b.ToTable("AjusteInventarioDetalles", (string)null);
+            });
+
+            modelBuilder.Entity("InventoryApp.Domain.Entities.Compra", b =>
+            {
+                b.HasOne("InventoryApp.Domain.Entities.Catalogos.MetodoPago", "MetodoPagoCatalogo")
+                    .WithMany()
+                    .HasForeignKey("MetodoPagoId")
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .HasConstraintName("FK_Compras_MetodosPago_MetodoPagoId");
+
+                b.Navigation("MetodoPagoCatalogo");
+            });
+
+            modelBuilder.Entity("InventoryApp.Domain.Entities.MovimientoInventario", b =>
+            {
+                b.HasOne("InventoryApp.Domain.Entities.Compra", null)
+                    .WithMany()
+                    .HasForeignKey("CompraId")
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .HasConstraintName("FK_MovimientosInventario_Compras_CompraId_N06");
+
+                b.HasOne("InventoryApp.Domain.Entities.Venta", null)
+                    .WithMany()
+                    .HasForeignKey("VentaId")
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .HasConstraintName("FK_MovimientosInventario_Ventas_VentaId_N06");
+
+                b.HasOne("InventoryApp.Domain.Entities.ConsumoInsumo", null)
+                    .WithMany()
+                    .HasForeignKey("ConsumoInsumoId")
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .HasConstraintName("FK_MovimientosInventario_ConsumosInsumos_ConsumoInsumoId_N06");
+
+                b.HasOne("InventoryApp.Domain.Entities.AjusteInventario", null)
+                    .WithMany()
+                    .HasForeignKey("AjusteInventarioId")
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .HasConstraintName("FK_MovInv_AjusteInventarioId_N07");
             });
 
             modelBuilder.Entity("InventoryApp.Domain.Entities.AjusteInventarioDetalle", b =>

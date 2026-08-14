@@ -35,6 +35,39 @@ public class MovimientoInventarioConfiguration : IEntityTypeConfiguration<Movimi
             .HasForeignKey(m => m.ProductoVarianteId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        builder.HasIndex(m => m.CompraId)
+            .HasDatabaseName("IX_MovimientosInventario_CompraId");
+        builder.HasIndex(m => m.VentaId)
+            .HasDatabaseName("IX_MovimientosInventario_VentaId");
+        builder.HasIndex(m => m.ConsumoInsumoId)
+            .HasDatabaseName("IX_MovimientosInventario_ConsumoInsumoId");
+        builder.HasIndex(m => m.AjusteInventarioId)
+            .HasDatabaseName("IX_MovimientosInventario_AjusteInventarioId");
+
+        builder.HasOne<Compra>()
+            .WithMany()
+            .HasForeignKey(m => m.CompraId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_MovimientosInventario_Compras_CompraId_N06");
+
+        builder.HasOne<Venta>()
+            .WithMany()
+            .HasForeignKey(m => m.VentaId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_MovimientosInventario_Ventas_VentaId_N06");
+
+        builder.HasOne<ConsumoInsumo>()
+            .WithMany()
+            .HasForeignKey(m => m.ConsumoInsumoId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_MovimientosInventario_ConsumosInsumos_ConsumoInsumoId_N06");
+
+        builder.HasOne<AjusteInventario>()
+            .WithMany()
+            .HasForeignKey(m => m.AjusteInventarioId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_MovInv_AjusteInventarioId_N07");
+
         builder.HasIndex(m => new { m.ReferenciaTipo, m.ReferenciaId });
         builder.HasIndex(m => new { m.Causa, m.Fecha });
     }
