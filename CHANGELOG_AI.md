@@ -4,6 +4,18 @@ Bitácora colaborativa de cambios realizados por Javier Mejía, Codex, AntiG/Ant
 
 No reemplaza `git log`: registra intención, alcance, validaciones y handoff. Todo changeset intencional debe incluir una entrada breve; no modificar otros colaborativos si su contenido no cambió.
 
+## 2026-08-13 — ERP-N0.6 Referencias polimórficas críticas — CIERRE FORMAL
+
+**Responsable:** ChatGPT mediante conexiones autorizadas GitHub + Google Drive.
+
+**Objetivo/alcance:** cerrar formalmente ERP-N0.6 después de migrar la autoridad de origen de movimientos de inventario desde `ReferenciaTipo/ReferenciaId` hacia relaciones tipadas `CompraId`/`VentaId`/`ConsumoInsumoId`, preservando los campos legacy sólo como snapshots/bridge de transición. En finanzas se confirmó que `CompraId`/`VentaId`/`FacturaId` siguen siendo la autoridad y `ModuloOrigen/ReferenciaId` permanecen únicamente para auditoría/correlación.
+
+**Resultado:** dominio tipado `Compra`/`Venta`/`ConsumoInsumo`; preflight y backfill fail-closed; C2/C3 y boundary typed-first; productores Compra/Venta/ConsumoInsumo migrados; contrato DTO/API tipado; frontend y nueva superficie RBAC marcados N/A por inspección dirigida; QA/regresión N0.6 cerrada sin crear pruebas redundantes. La fuente canónica final es `docs/ERP_N0_6_REFERENCIAS_POLIMORFICAS.md`; el preflight inicial permanece como antecedente histórico.
+
+**Validación final sobre `0e35a9f75c49b6ddfbd5ef21d426521e2b559c40`:** ERP-N0.6 `31754907625` SUCCESS; Desarrollo build/tests `31754907682` SUCCESS; recovery MySQL `31754907598` SUCCESS; M11 backup/restore `31754907601` SUCCESS; Fase 8 `31754907626` SUCCESS; aceptación integral `31754907600` SUCCESS; M13 `31754907614` SUCCESS. Las pruebas críticas demuestran que la FK tipada manda aunque el snapshot legacy discrepe, que el bridge sólo cubre escritores legacy sin FK y que un mismatch tipado/legacy falla cerrado.
+
+**Control:** N0.6.G y N0.6.H quedan cerrados, `TASKS.md` y VAEP se reconcilian y el siguiente foco FINISH_FIRST es N0.7.A — AjusteInventario formal / auditoría y preflight. No se tocó `main`, Producción, merge/auto-merge del PR #2, secretos, infraestructura productiva, force-push ni ramas nuevas.
+
 ## 2026-08-13 — ERP-N0.5 MetodoPago — CIERRE FORMAL
 
 **Responsable:** ChatGPT mediante conexiones autorizadas GitHub + Google Drive.
