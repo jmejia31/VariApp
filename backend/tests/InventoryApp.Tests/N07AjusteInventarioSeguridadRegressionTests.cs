@@ -31,6 +31,20 @@ public sealed class N07AjusteInventarioSeguridadRegressionTests
             source);
     }
 
+    [Fact]
+    public void Confirmar_y_anular_deben_exigir_auditoria_critica_transaccional()
+    {
+        var source = Leer("backend/src/Application/Services/AjusteInventarioService.cs");
+
+        Assert.Equal(2, ContarOcurrencias(source, "_auditoria.RegistrarEstrictoAsync("));
+        Assert.Contains("AccionPermiso.Confirmar", source);
+        Assert.Contains("AccionPermiso.Anular", source);
+
+        // Crear/editar conservan auditoría tolerante; las dos operaciones que mutan stock
+        // deben quedar cubiertas por la variante estricta dentro de la transacción.
+        Assert.Equal(2, ContarOcurrencias(source, "_auditoria.RegistrarAsync("));
+    }
+
     private static int ContarOcurrencias(string source, string value)
     {
         var count = 0;
