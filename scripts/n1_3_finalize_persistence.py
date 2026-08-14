@@ -241,17 +241,22 @@ def harden_migration(path: Path) -> None:
         f'    [DbContext(typeof(AppDbContext))]\n    [Migration("{migration_id}")]\n' + class_marker,
         1)
 
-    up_marker = '        protected override void Up(MigrationBuilder migrationBuilder)\n        {\n'
-    if up_marker not in text:
+    up_open = '        protected override void Up(MigrationBuilder migrationBuilder)\n        {\n'
+    if up_open not in text:
         raise RuntimeError('No se encontró Up() generado')
-    text = text.replace(up_marker, up_marker + PRECHECK, 1)
+    text = text.replace(up_open, up_open + PRECHECK, 1)
 
-    down_marker = '        /// <inheritdoc />\n        protected override void Down(MigrationBuilder migrationBuilder)\n'
-    if down_marker not in text:
-        raise RuntimeError('No se encontró marcador Down()')
-    text = text.replace(down_marker, POSTCHECK + '        /// <inheritdoc />\n        protected override void Down(MigrationBuilder migrationBuilder)\n', 1)
+    up_close = '        }\n\n        /// <inheritdoc />\n        protected override void Down(MigrationBuilder migrationBuilder)\n'
+    if up_close not in text:
+        raise RuntimeError('No se encontró cierre de Up()')
+    text = text.replace(
+        up_close,
+        POSTCHECK + '        }\n\n        /// <inheritdoc />\n        protected override void Down(MigrationBuilder migrationBuilder)\n',
+        1)
 
     down_open = '        protected override void Down(MigrationBuilder migrationBuilder)\n        {\n'
+    if down_open not in text:
+        raise RuntimeError('No se encontró Down() generado')
     text = text.replace(down_open, down_open + DOWN_GUARD, 1)
     path.write_text(text, encoding='utf-8-sig')
 
