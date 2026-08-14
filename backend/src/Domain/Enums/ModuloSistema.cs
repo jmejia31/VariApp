@@ -29,5 +29,6 @@ public enum ModuloSistema
     TiposClientes = 25,
     InsumosAdministrativos = 26,
     MetodosPago = 27,
-    Sucursales = 28
+    Sucursales = 28,
+    Almacenes = 29
 }
