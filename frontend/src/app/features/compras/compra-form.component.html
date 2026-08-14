@@ -94,9 +94,9 @@
   <div class="fields-grid">
     <mat-form-field appearance="outline">
       <mat-label>Método de pago</mat-label>
-      <mat-select formControlName="metodoPago" [disabled]="cargandoMetodosPago() || metodosPago().length === 0">
+      <mat-select formControlName="metodoPago">
         @for (metodo of metodosPago(); track metodo.id) {
-          <mat-option [value]="metodo.nombre">{{ metodo.nombre }}</mat-option>
+          <mat-option [value]="metodo.codigo">{{ metodo.nombre }}</mat-option>
         }
       </mat-select>
       @if (cargandoMetodosPago()) { <mat-hint>Cargando métodos de pago...</mat-hint> }
@@ -117,6 +117,6 @@
     } @else { <p class="hint">Busca o escanea un producto para calcular.</p> }
   </div>
   @if (errorMessage()) { <p class="error" role="alert">{{ errorMessage() }}</p> }
-  <div class="form-actions"><a routerLink="/compras" mat-button>Cancelar</a><button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || detalles.length === 0 || !resultado() || saving()">Guardar borrador</button></div>
+  <div class="form-actions"><a routerLink="/compras" mat-button>Cancelar</a><button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || detalles.length === 0 || !resultado() || saving() || cargandoMetodosPago() || metodosPago().length === 0 || !!errorMetodosPago()">Guardar borrador</button></div>
 </form>
 }

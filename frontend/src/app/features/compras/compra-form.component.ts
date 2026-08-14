@@ -321,14 +321,14 @@ export class CompraFormComponent implements OnInit {
 
     const valor = (control.value ?? '').trim();
     if (!valor) {
-      control.setValue(metodos[0].nombre, { emitEvent: false });
+      control.setValue(metodos[0].codigo, { emitEvent: false });
       this.errorMetodosPago.set(null);
       return;
     }
 
-    const coincidente = metodos.find((metodo) => metodo.nombre === valor || metodo.codigo === valor);
+    const coincidente = metodos.find((metodo) => metodo.codigo === valor || metodo.nombre === valor);
     if (coincidente) {
-      if (control.value !== coincidente.nombre) control.setValue(coincidente.nombre, { emitEvent: false });
+      if (control.value !== coincidente.codigo) control.setValue(coincidente.codigo, { emitEvent: false });
       this.errorMetodosPago.set(null);
       return;
     }
@@ -340,7 +340,7 @@ export class CompraFormComponent implements OnInit {
       return;
     }
 
-    control.setValue(metodos[0].nombre, { emitEvent: false });
+    control.setValue(metodos[0].codigo, { emitEvent: false });
     this.errorMetodosPago.set(null);
   }
 
@@ -355,7 +355,7 @@ export class CompraFormComponent implements OnInit {
           proveedorDocumento: c.proveedorDocumento, documentoReferencia: c.documentoReferencia,
           metodoPago: c.metodoPago, estadoPago: c.estadoPago, notas: c.notas
         });
-        this.reconciliarMetodoPagoActivo();
+        if (!this.cargandoMetodosPago()) this.reconciliarMetodoPagoActivo();
         c.detalles.forEach((d) => this.agregarDetalle(d.productoId, d.productoVarianteId ?? null, d.cantidad, d.costoUnitario));
         this.hidratarProductosReferenciados(c.detalles.map((detalle) => detalle.productoId));
 
@@ -458,7 +458,16 @@ export class CompraFormComponent implements OnInit {
   }
 
   submit(): void {
-    if (this.form.invalid || this.detalles.length === 0 || !this.resultado() || this.saving()) return;
+    if (
+      this.form.invalid ||
+      this.detalles.length === 0 ||
+      !this.resultado() ||
+      this.saving() ||
+      this.cargandoMetodosPago() ||
+      this.metodosPago().length === 0 ||
+      !!this.errorMetodosPago()
+    ) return;
+
     this.saving.set(true); this.errorMessage.set(null);
     const value = { ...this.form.getRawValue(), descuento: 0, impuesto: 0 } as any;
     const request$ = this.isEdit() ? this.compraService.update(this.compraId!, value) : this.compraService.create(value);
