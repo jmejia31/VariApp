@@ -57,18 +57,21 @@ Estado operativo controlado por `COLA`:
   - [x] N0.6.C1 Preflight histórico read-only: valida tipos legacy admitidos, IDs positivos y documentos origen existentes antes de cualquier backfill. Funcional hasta `8b1ca4ceae848280cea59ba7103e6cd7ef227170`; workflow dedicado `31577099764` y CI general `31577099759` en verde.
   - [x] N0.6.C2 FKs tipadas nullable + migración/backfill determinista, preservando columnas legacy durante transición. Funcional `7375a61165b7e9e32feb6054e843937963472e67`; ERP-N0.6 `31579173571` y CI general `31579173553` en verde.
   - [x] N0.6.C3 Postcheck, constraints e integridad histórica. Corrección final `01c1116e6db4e839b56176333251e3992fa09d77`; ERP-N0.6 `31581993553` y CI general `31581993565` en verde.
-- [ ] N0.6.D Aplicación, servicios y API — subdividida para mantener autoridad tipada por concern:
+- [x] N0.6.D Aplicación, servicios y API — autoridad tipada consolidada:
   - [x] N0.6.D1 Repositorio/consultas de `MovimientoInventario` migradas a `CompraId` como autoridad relacional. Funcional `2a2e093f66899b9c02c18026ecd3f270b6a730c1`; corrección de fixture `c19aa5005ef7262d91f118f5f4adf7b78aaf41e9`; CI general `31585718867` en verde completo.
   - [x] N0.6.D2 Productores de `MovimientoInventario` — boundary typed-first y los tres productores documentales certificados:
     - [x] N0.6.D2A boundary de escritura `typed-first` certificado; corrección final `6eadf19a27a0c7c90b0cec54262070f896209738`; CI general `31587640123` en verde completo.
     - [x] N0.6.D2B productores tipados:
       - [x] N0.6.D2B1 `CompraService` confirma/anula mediante `AddConOrigenTipadoAsync` + `OrigenMovimientoInventario.DesdeCompra`; funcional `e62b0667f4faace2d8d6520f753547b3e2624a1d`, pruebas `c76124980914edbea57ad7ff97eaa705171a2d58`, CI general `31589093189` en verde completo.
       - [x] N0.6.D2B2 `VentaService` confirma/anula mediante origen tipado; funcional `bac4d61b34813168b087fd7e9caf740a518c354a`, pruebas `06dea3390e0c40bef94e80f2e0ce30f482cac1f2`, CI general `31589968458` en verde completo.
-      - [x] N0.6.D2B3 `ConsumoInsumoService` confirma/anula mediante origen tipado; funcional `8648cc61f29a878d213ff2ddcce4e3731a81ff43`, prueba de integración corregida hasta `ed570bb842ae4fbeb57b981bd596dfafbecf6072`, CI general `31594243722` en verde completo. Los fallos previos `31593684786` y `31593975660` fueron defectos de prueba/build y quedaron corregidos sin modificar el servicio funcional.
-  - [ ] N0.6.D3 Contrato DTO/API de inventario + verificación de autoridad tipada en finanzas.
-- [ ] N0.6.E–H Frontend si aplica, seguridad/auditoría, QA/CI y certificación según `COLA`.
+      - [x] N0.6.D2B3 `ConsumoInsumoService` confirma/anula mediante origen tipado; funcional `8648cc61f29a878d213ff2ddcce4e3731a81ff43`, prueba de integración corregida hasta `ed570bb842ae4fbeb57b981bd596dfafbecf6072`, CI general `31594243722` en verde completo.
+  - [x] N0.6.D3 Contrato DTO/API de inventario + autoridad tipada en finanzas: `MovimientoInventarioDto` expone `OrigenTipo/OrigenId/CompraId/VentaId/ConsumoInsumoId`; el servicio deriva esos campos desde FKs tipadas y finanzas mantiene `CompraId/VentaId/FacturaId` como autoridad relacional.
+- [x] N0.6.E Frontend/UX — N/A verificado: no existe consumidor Angular del contrato legacy que requiera cambio.
+- [x] N0.6.F RBAC/auditoría/seguridad/observabilidad — N/A verificado: no se añadió nueva superficie de autorización.
+- [x] N0.6.G QA, regresión y CI — cobertura existente suficiente y ejecutada: ERP-N0.6 `31754907625`, build `31754907682`, Fase 8 `31754907626`, aceptación integral `31754907600` y M13 `31754907614` en SUCCESS.
+- [x] N0.6.H Documentación y certificación — fuente canónica `docs/ERP_N0_6_REFERENCIAS_POLIMORFICAS.md`; cierre formal sobre SHA funcional `0e35a9f75c49b6ddfbd5ef21d426521e2b559c40`.
 
-ERP-N0.5 ya está cerrado. VAEP continúa con N0.6, N0.7, N0.8 y `GATE-N0` respetando sus dependencias directas/transitivas.
+ERP-N0.5 y ERP-N0.6 están cerrados. El siguiente foco FINISH_FIRST es **N0.7.A — AjusteInventario formal / Auditoría y preflight**; después continúan N0.7, N0.8 y `GATE-N0` según dependencias.
 
 ## Fuentes VAEP v2
 
