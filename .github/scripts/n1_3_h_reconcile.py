@@ -1,7 +1,7 @@
 from pathlib import Path
 import re
 
-TASKS_SECTION = r'''## ✅ ERP-N1.3 — Ubicaciones internas de almacén — cierre certificado (2026-08-14)
+TASKS_SECTION = '''## ✅ ERP-N1.3 — Ubicaciones internas de almacén — cierre certificado (2026-08-14)
 
 - [x] N1.3.A Preflight y diseño — `docs/ERP_N1_3_UBICACIONES_PREFLIGHT.md`; topología jerárquica aditiva definida sin stock, sin `SucursalId`/`EmpresaId` duplicados y con N1.4 como autoridad futura de existencias.
 - [x] N1.3.B Dominio y contratos — `UbicacionAlmacen`, `TipoUbicacionAlmacen`, DTOs y guardas de contrato; backend Release/unitarias certificados.
@@ -16,54 +16,32 @@ TASKS_SECTION = r'''## ✅ ERP-N1.3 — Ubicaciones internas de almacén — cie
 
 '''
 
-CHANGELOG_SECTION = r'''## [2026-08-14] — ERP-N1.3: Ubicaciones internas de almacén
+CHANGELOG_SECTION = '''## 2026-08-14 — ERP-N1.3 Ubicaciones internas de almacén — CIERRE FORMAL
 
-### Alcance
+**Responsable:** ChatGPT mediante conexiones autorizadas GitHub + Google Drive.
 
-Se completó ERP-N1.3 como maestro jerárquico de topología interna de Almacenes. `UbicacionAlmacen` modela pasillos, estantes, racks, secciones, bins y otras ubicaciones internas, sin introducir todavía existencias ni cantidades.
+**Objetivo/alcance:** completar `UbicacionAlmacen` como topología física jerárquica interna de cada Almacén para pasillos, estantes, racks, secciones, bins y otras ubicaciones, sin introducir todavía existencias, cantidades ni semántica WMS avanzada.
 
-### Cambios principales
+**Resultado funcional:** `UbicacionAlmacen.AlmacenId` es la única relación organizacional persistida; `SucursalId` y `EmpresaId` se derivan transitivamente. Padre opcional restringido al mismo Almacén, prevención de ciclos directos/indirectos, protección de descendientes al mover/desactivar/eliminar, código operativo único por Almacén, soft-delete y estados idempotentes. MySQL 8.4 conserva la invariante anti-self-parent mediante triggers porque un CHECK no puede referenciar el `Id AUTO_INCREMENT`. API `/ubicaciones-almacen` soporta búsqueda, Almacén, padre/raíz, tipo, estado, paginación, CRUD y operaciones de estado. Frontend incorpora listado responsive, filtros server-side, formulario jerárquico, selectores de Almacén/padre, rutas y menú protegidos por RBAC.
 
-- Se añadió `UbicacionAlmacen` con Almacén obligatorio, padre opcional, tipo estable, estado operativo, soft-delete y auditoría.
-- La persistencia impide padres de otro Almacén mediante FK autorreferente compuesta y protege código operativo único dentro del Almacén.
-- MySQL 8.4 conserva la invariante anti-self-parent mediante triggers físicos porque un `CHECK` no puede referenciar el `Id AUTO_INCREMENT`.
-- El servicio valida Almacén/padre operativos, previene ciclos indirectos y bloquea mover, desactivar o eliminar nodos cuando sus descendientes lo hacen inseguro.
-- Se publicó API CRUD/consulta con paginación, filtros, activar/desactivar y RBAC `UbicacionesAlmacen`.
-- El frontend incorpora listado responsive, filtros server-side, formulario jerárquico, selección de Almacén/padre y acceso de menú protegido por permiso.
-- Se añadieron regresiones para los 9 contratos de autorización del controller y auditoría de Crear/Editar/Activar/Desactivar/EliminarLogico.
+**RBAC/auditoría/seguridad:** módulo `UbicacionesAlmacen`, permisos `Ver/Crear/Editar/Activar/Desactivar/EliminarLogico`, auditoría de mutaciones con referencia de entidad y pruebas que congelan los 9 contratos de autorización. Se reutilizan Correlation ID, ProblemDetails, headers de seguridad y health/readiness globales. N1.3 no contiene campos de stock; `ExistenciaVariante` queda reservado para ERP-N1.4.
 
-### Seguridad y consistencia
+**Trazabilidad:** D backend `4d2cc04b363df602f6de97b7f5ea876ea35a6196`, run `31843085895`, job `94903923345` SUCCESS; E frontend `91f878ef3cbc56219b637e9b62c99bdd1109a9df`, run `31846161956`, job `94912936660` SUCCESS; F/G baseline `4a6be38683f03fc2076f18a71115480c930ba79b`.
 
-- No se duplican `SucursalId` ni `EmpresaId` en Ubicación; el contexto se deriva desde Almacén/Sucursal.
-- N1.3 no contiene campos de stock ni cantidad. `ExistenciaVariante` queda reservado para ERP-N1.4.
-- Se reutilizan autenticación/autorización global, Correlation ID, ProblemDetails, headers de seguridad y health/readiness existentes.
+**QA real:** run agregado `31846485117` SUCCESS: higiene `94913888918`, Backend Release/unitarias `94913888850`, frontend producción `94913888865`, Docker `94913888808` y MySQL 8.4/integración `94913888844`; el job MySQL aplicó migraciones actuales, ejecutó `Category=Integration`, verificó snapshot/variantes/cargas y generó SQL forward sin regresiones.
 
-### Evidencia
-
-- D backend: `4d2cc04b363df602f6de97b7f5ea876ea35a6196`; run `31843085895`, job `94903923345` SUCCESS.
-- E frontend: `91f878ef3cbc56219b637e9b62c99bdd1109a9df`; run `31846161956`, job `94912936660` SUCCESS.
-- F/G baseline: `4a6be38683f03fc2076f18a71115480c930ba79b`.
-- QA agregado run `31846485117`: higiene, Backend Release/unitarias, frontend producción, Docker y MySQL 8.4/integración SUCCESS; job MySQL `94913888844` aplicó migraciones actuales, `Category=Integration`, snapshot/variantes/cargas y SQL forward.
-
-### Documentación
-
-- Preflight: `docs/ERP_N1_3_UBICACIONES_PREFLIGHT.md`.
-- Cierre canónico: `docs/ERP_N1_3_UBICACIONES_ALMACEN.md`.
-
-### Siguiente foco
-
-`N1.4.A — ExistenciaVariante — Preflight y diseño`.
+**Documentación/control:** preflight `docs/ERP_N1_3_UBICACIONES_PREFLIGHT.md`; cierre canónico `docs/ERP_N1_3_UBICACIONES_ALMACEN.md`; TASKS, CHANGELOG y tablero VAEP reconciliados preservando historial. `main`, Producción, merge/auto-merge del PR #2, secretos y force-push permanecen intactos. **ERP-N1.3 queda formalmente cerrado** y el siguiente foco FINISH_FIRST es `N1.4.A — ExistenciaVariante — Preflight y diseño`.
 
 '''
 
 
-def insert_before(text: str, pattern: str, section: str, label: str) -> str:
-    if 'ERP-N1.3' in text and label in text:
-        return text
-    match = re.search(pattern, text, flags=re.MULTILINE)
+def insertar(texto: str, patron: str, seccion: str, etiqueta: str) -> str:
+    if 'ERP-N1.3' in texto and etiqueta in texto:
+        return texto
+    match = re.search(patron, texto, flags=re.MULTILINE)
     if not match:
-        raise SystemExit(f'No se encontró marcador de inserción para {label}')
-    return text[:match.start()] + section + text[match.start():]
+        raise SystemExit(f'No se encontró marcador de inserción para {etiqueta}')
+    return texto[:match.start()] + seccion + texto[match.start():]
 
 
 def main() -> None:
@@ -72,8 +50,8 @@ def main() -> None:
     tasks = tasks_path.read_text(encoding='utf-8')
     changelog = changelog_path.read_text(encoding='utf-8')
 
-    tasks_new = insert_before(tasks, r'^## .*ERP-N1\.2', TASKS_SECTION, 'cierre certificado')
-    changelog_new = insert_before(changelog, r'^## \[2026-08-14\] — ERP-N1\.2', CHANGELOG_SECTION, 'Ubicaciones internas de almacén')
+    tasks_new = insertar(tasks, r'^## .*ERP-N1\.2', TASKS_SECTION, 'cierre certificado')
+    changelog_new = insertar(changelog, r'^## 2026-08-14 — ERP-N1\.2', CHANGELOG_SECTION, 'Ubicaciones internas de almacén')
 
     out = Path('out')
     out.mkdir(exist_ok=True)
@@ -84,6 +62,8 @@ def main() -> None:
         raise SystemExit('Reconciliación no incrementó ambos colaborativos')
     if 'N1.4.A — ExistenciaVariante' not in tasks_new or 'N1.4.A — ExistenciaVariante' not in changelog_new:
         raise SystemExit('Falta siguiente foco N1.4.A')
+    if 'ERP-N1.2' not in tasks_new or 'ERP-N1.1' not in changelog_new:
+        raise SystemExit('La reconciliación no preservó historial previo')
 
     print(f'TASKS: {len(tasks)} -> {len(tasks_new)} bytes')
     print(f'CHANGELOG: {len(changelog)} -> {len(changelog_new)} bytes')
