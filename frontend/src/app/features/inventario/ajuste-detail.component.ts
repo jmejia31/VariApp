@@ -5,6 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { finalize } from 'rxjs';
+import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
 import { AjusteInventario } from '../../core/models/ajuste-inventario.model';
 import { AjusteInventarioService } from '../../services/ajuste-inventario.service';
 
@@ -26,7 +27,7 @@ import { AjusteInventarioService } from '../../services/ajuste-inventario.servic
             <p class="subtitle">Detalle y trazabilidad del ajuste de inventario.</p>
           </div>
           <div class="header-actions">
-            @if (item.estado === 'Borrador') {
+            @if (item.estado === 'Borrador' && puedeEditar()) {
               <a mat-stroked-button [routerLink]="['/inventario/ajustes', item.id, 'editar']">
                 <mat-icon>edit</mat-icon> Editar borrador
               </a>
@@ -136,17 +137,20 @@ export class AjusteDetailComponent implements OnInit {
   readonly ajuste = signal<AjusteInventario | null>(null);
   readonly loading = signal(true);
   readonly error = signal('');
+  readonly puedeEditar = signal(false);
 
   private readonly ajusteId: number;
 
   constructor(
     private readonly route: ActivatedRoute,
-    private readonly ajusteService: AjusteInventarioService
+    private readonly ajusteService: AjusteInventarioService,
+    private readonly permisosRuntime: PermisosRuntimeService
   ) {
     this.ajusteId = Number(this.route.snapshot.paramMap.get('id'));
   }
 
   ngOnInit(): void {
+    this.puedeEditar.set(this.permisosRuntime.puede('Inventario', 'Editar'));
     if (!Number.isInteger(this.ajusteId) || this.ajusteId <= 0) {
       this.loading.set(false);
       this.error.set('El identificador del ajuste no es válido.');
