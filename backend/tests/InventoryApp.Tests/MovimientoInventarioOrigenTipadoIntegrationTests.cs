@@ -150,6 +150,7 @@ public class MovimientoInventarioOrigenTipadoIntegrationTests
                     Fecha = DateTime.UtcNow
                 },
                 OrigenMovimientoInventario.DesdeCompra(compra.Id));
+            await context.SaveChangesAsync();
 
             var compraIdTipado = await context.Database
                 .SqlQueryRaw<int>("SELECT CompraId AS Value FROM MovimientosInventario ORDER BY Id DESC LIMIT 1")

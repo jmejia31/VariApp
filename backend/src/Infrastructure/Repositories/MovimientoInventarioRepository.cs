@@ -1,4 +1,3 @@
-using System.Data;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Common;
 using InventoryApp.Domain.Entities;
@@ -45,36 +44,12 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
 
         movimiento.ReferenciaTipo = CrearReferenciaTipoSnapshot(movimiento, origen);
         movimiento.ReferenciaId = origen.DocumentoId;
+        movimiento.CompraId = origen.CompraId;
+        movimiento.VentaId = origen.VentaId;
+        movimiento.ConsumoInsumoId = origen.ConsumoInsumoId;
+        movimiento.AjusteInventarioId = origen.AjusteInventarioId;
 
-        if (!_context.Database.IsRelational())
-        {
-            await AddAsync(movimiento);
-            return;
-        }
-
-        var tipo = movimiento.Tipo.ToString();
-        var causa = (int)movimiento.Causa;
-
-        await _context.Database.ExecuteSqlInterpolatedAsync($"""
-            INSERT INTO MovimientosInventario
-                (ProductoId, ProductoVarianteId,
-                 ProductoMarcaSnapshot, ProductoModeloSnapshot, ProductoColorSnapshot,
-                 ProductoTallaSnapshot, ProductoSkuSnapshot,
-                 Tipo, Causa, Cantidad, StockAnterior, StockNuevo,
-                 CostoUnitario, PrecioUnitario,
-                 ReferenciaTipo, ReferenciaId,
-                 CompraId, VentaId, ConsumoInsumoId, AjusteInventarioId,
-                 Descripcion, CreadoPorUsuarioId, CreadoPorNombreUsuario, Fecha)
-            VALUES
-                ({movimiento.ProductoId}, {movimiento.ProductoVarianteId},
-                 {movimiento.ProductoMarcaSnapshot}, {movimiento.ProductoModeloSnapshot}, {movimiento.ProductoColorSnapshot},
-                 {movimiento.ProductoTallaSnapshot}, {movimiento.ProductoSkuSnapshot},
-                 {tipo}, {causa}, {movimiento.Cantidad}, {movimiento.StockAnterior}, {movimiento.StockNuevo},
-                 {movimiento.CostoUnitario}, {movimiento.PrecioUnitario},
-                 {movimiento.ReferenciaTipo}, {movimiento.ReferenciaId},
-                 {origen.CompraId}, {origen.VentaId}, {origen.ConsumoInsumoId}, {origen.AjusteInventarioId},
-                 {movimiento.Descripcion}, {movimiento.CreadoPorUsuarioId}, {movimiento.CreadoPorNombreUsuario}, {movimiento.Fecha})
-            """);
+        await AddAsync(movimiento);
     }
 
     private static string CrearReferenciaTipoSnapshot(
@@ -133,66 +108,48 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
 
         if (!_context.Database.IsRelational())
         {
-            var movimientos = await _context.MovimientosInventario
+            var legacy = await _context.MovimientosInventario
                 .AsNoTracking()
                 .Where(m => ids.Contains(m.Id))
                 .Select(m => new { m.Id, m.ReferenciaTipo, m.ReferenciaId })
                 .ToListAsync();
 
-            return movimientos.ToDictionary(
+            return legacy.ToDictionary(
                 m => m.Id,
                 m => CrearOrigenCompatibilidadNoRelacional(m.Id, m.ReferenciaTipo, m.ReferenciaId));
         }
 
-        var resultado = new Dictionary<int, MovimientoInventarioOrigenPersistido>();
-        var connection = _context.Database.GetDbConnection();
-        var abrirAqui = connection.State != ConnectionState.Open;
-        if (abrirAqui)
-            await connection.OpenAsync();
-
-        try
-        {
-            await using var command = connection.CreateCommand();
-            var parametros = new List<string>(ids.Length);
-            for (var i = 0; i < ids.Length; i++)
+        var movimientos = await _context.MovimientosInventario
+            .AsNoTracking()
+            .Where(m => ids.Contains(m.Id))
+            .Select(m => new
             {
-                var nombre = $"@id{i}";
-                parametros.Add(nombre);
-                var parameter = command.CreateParameter();
-                parameter.ParameterName = nombre;
-                parameter.Value = ids[i];
-                command.Parameters.Add(parameter);
-            }
+                m.Id,
+                m.CompraId,
+                m.VentaId,
+                m.ConsumoInsumoId,
+                m.AjusteInventarioId
+            })
+            .ToListAsync();
 
-            command.CommandText = $"""
-                SELECT Id, CompraId, VentaId, ConsumoInsumoId, AjusteInventarioId
-                  FROM MovimientosInventario
-                 WHERE Id IN ({string.Join(", ", parametros)})
-                """;
-
-            await using var reader = await command.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
-            {
-                var id = reader.GetInt32(0);
-                int? compraId = reader.IsDBNull(1) ? null : reader.GetInt32(1);
-                int? ventaId = reader.IsDBNull(2) ? null : reader.GetInt32(2);
-                int? consumoInsumoId = reader.IsDBNull(3) ? null : reader.GetInt32(3);
-                int? ajusteInventarioId = reader.IsDBNull(4) ? null : reader.GetInt32(4);
-                var cantidadOrigenes = (compraId.HasValue ? 1 : 0) +
-                                       (ventaId.HasValue ? 1 : 0) +
-                                       (consumoInsumoId.HasValue ? 1 : 0) +
-                                       (ajusteInventarioId.HasValue ? 1 : 0);
-                if (cantidadOrigenes > 1)
-                    throw new InvalidOperationException($"El movimiento {id} tiene más de un origen tipado persistido.");
-
-                resultado[id] = new MovimientoInventarioOrigenPersistido(
-                    id, compraId, ventaId, consumoInsumoId, ajusteInventarioId);
-            }
-        }
-        finally
+        var resultado = new Dictionary<int, MovimientoInventarioOrigenPersistido>(movimientos.Count);
+        foreach (var movimiento in movimientos)
         {
-            if (abrirAqui)
-                await connection.CloseAsync();
+            var cantidadOrigenes =
+                (movimiento.CompraId.HasValue ? 1 : 0) +
+                (movimiento.VentaId.HasValue ? 1 : 0) +
+                (movimiento.ConsumoInsumoId.HasValue ? 1 : 0) +
+                (movimiento.AjusteInventarioId.HasValue ? 1 : 0);
+
+            if (cantidadOrigenes > 1)
+                throw new InvalidOperationException($"El movimiento {movimiento.Id} tiene más de un origen tipado persistido.");
+
+            resultado[movimiento.Id] = new MovimientoInventarioOrigenPersistido(
+                movimiento.Id,
+                movimiento.CompraId,
+                movimiento.VentaId,
+                movimiento.ConsumoInsumoId,
+                movimiento.AjusteInventarioId);
         }
 
         return resultado;
@@ -225,9 +182,8 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
         }
 
         return await _context.MovimientosInventario
-            .FromSqlInterpolated($"SELECT * FROM MovimientosInventario WHERE CompraId = {compraId}")
             .AsNoTracking()
-            .Where(m => m.Tipo == TipoMovimientoInventario.Entrada)
+            .Where(m => m.CompraId == compraId && m.Tipo == TipoMovimientoInventario.Entrada)
             .MaxAsync(m => (int?)m.Id);
     }
 
@@ -241,28 +197,25 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
         if (!_context.Database.IsRelational())
             return await ExisteMovimientoPosteriorLegacyParaProviderNoRelacionalAsync(ultimoMovimientoOriginalId, ids);
 
-        var movimientoTopeEsCompra = await _context.MovimientosInventario
-            .FromSqlInterpolated($"SELECT * FROM MovimientosInventario WHERE Id = {ultimoMovimientoOriginalId} AND CompraId IS NOT NULL")
+        var compraId = await _context.MovimientosInventario
             .AsNoTracking()
-            .Where(m => m.Tipo == TipoMovimientoInventario.Entrada)
-            .AnyAsync();
+            .Where(m =>
+                m.Id == ultimoMovimientoOriginalId &&
+                m.CompraId != null &&
+                m.Tipo == TipoMovimientoInventario.Entrada)
+            .Select(m => m.CompraId)
+            .SingleOrDefaultAsync();
 
-        if (!movimientoTopeEsCompra)
+        if (!compraId.HasValue)
             throw new InvalidOperationException(
                 "El movimiento limite no corresponde a un movimiento original de compra tipado.");
 
         var clavesOriginales = await _context.MovimientosInventario
-            .FromSqlInterpolated($"""
-                SELECT m.*
-                  FROM MovimientosInventario m
-                  JOIN MovimientosInventario limite ON limite.Id = {ultimoMovimientoOriginalId}
-                 WHERE limite.CompraId IS NOT NULL
-                   AND limite.Tipo = 'Entrada'
-                   AND m.CompraId = limite.CompraId
-                   AND m.Tipo = 'Entrada'
-                """)
             .AsNoTracking()
-            .Where(m => ids.Contains(m.ProductoId))
+            .Where(m =>
+                m.CompraId == compraId.Value &&
+                m.Tipo == TipoMovimientoInventario.Entrada &&
+                ids.Contains(m.ProductoId))
             .Select(m => new { m.ProductoId, m.ProductoVarianteId })
             .Distinct()
             .OrderBy(x => x.ProductoId)
