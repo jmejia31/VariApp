@@ -6,6 +6,7 @@ on:
       - Desarrollo
     paths:
       - '.github/workflows/n1-3-ef-generate.yml'
+      - 'scripts/n1_3_finalize_persistence.py'
   workflow_dispatch:
 
 permissions:
