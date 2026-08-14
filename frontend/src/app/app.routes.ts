@@ -71,6 +71,24 @@ export const routes: Routes = [
     loadComponent: () => import('./features/categorias/categoria-form.component').then(m => m.CategoriaFormComponent)
   },
   {
+    path: 'sucursales',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Sucursales', accion: 'Ver' },
+    loadComponent: () => import('./features/sucursales/sucursales-list.component').then(m => m.SucursalesListComponent)
+  },
+  {
+    path: 'sucursales/nueva',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Sucursales', accion: 'Crear' },
+    loadComponent: () => import('./features/sucursales/sucursal-form.component').then(m => m.SucursalFormComponent)
+  },
+  {
+    path: 'sucursales/:id/editar',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Sucursales', accion: 'Editar' },
+    loadComponent: () => import('./features/sucursales/sucursal-form.component').then(m => m.SucursalFormComponent)
+  },
+  {
     path: 'colores',
     canActivate: [authGuard, permisoGuard],
     data: { modulo: 'Colores', accion: 'Ver', tipo: 'Color', titulo: 'Colores', singular: 'Color', icono: 'palette' },
