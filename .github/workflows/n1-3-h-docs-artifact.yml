@@ -1,0 +1,28 @@
+name: ERP-N1.3 - Reconciliar colaborativos
+
+on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - '.github/workflows/n1-3-h-docs-artifact.yml'
+      - '.github/scripts/n1_3_h_reconcile.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  reconciliar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reconciliar TASKS y CHANGELOG
+        run: python .github/scripts/n1_3_h_reconcile.py
+      - name: Publicar artefacto documental
+        uses: actions/upload-artifact@v4
+        with:
+          name: n1-3-h-colaborativos
+          path: |
+            out/TASKS.md
+            out/CHANGELOG_AI.md
+          retention-days: 1
