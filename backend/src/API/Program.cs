@@ -129,6 +129,7 @@ var app = builder.Build();
 var forwardedHeadersOptions = new ForwardedHeadersOptions { ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto, ForwardLimit = 1 };
 forwardedHeadersOptions.KnownNetworks.Clear(); forwardedHeadersOptions.KnownProxies.Clear(); app.UseForwardedHeaders(forwardedHeadersOptions);
 if (!app.Environment.IsDevelopment()) app.UseHsts();
+app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.Use(async (context, next) => { context.Response.Headers.TryAdd("X-Content-Type-Options", "nosniff"); context.Response.Headers.TryAdd("X-Frame-Options", "DENY"); context.Response.Headers.TryAdd("Referrer-Policy", "no-referrer"); context.Response.Headers.TryAdd("Permissions-Policy", "camera=(), microphone=(), geolocation=()"); await next(); });
 var swaggerEnabled = app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Swagger:Enabled"); if (swaggerEnabled) { app.UseSwagger(); app.UseSwaggerUI(); }
