@@ -45,6 +45,25 @@ public sealed class N07AjusteInventarioSeguridadRegressionTests
         Assert.Equal(2, ContarOcurrencias(source, "_auditoria.RegistrarAsync("));
     }
 
+    [Fact]
+    public void Ajustes_stock_legacy_deben_delegar_en_la_autoridad_formal()
+    {
+        var source = Leer("backend/src/Application/Services/InventarioAjusteService.cs");
+
+        Assert.Contains("IAjusteInventarioService _ajustes", source);
+        Assert.Contains("_ajustes.CreateAsync(", source);
+        Assert.Contains("_ajustes.ConfirmarAsync(", source);
+
+        Assert.DoesNotContain("IInventarioConcurrencyService", source);
+        Assert.DoesNotContain("IMovimientoInventarioRepository", source);
+        Assert.DoesNotContain("IProductoRepository", source);
+        Assert.DoesNotContain("IUnitOfWork", source);
+        Assert.DoesNotContain("IAuditoriaService", source);
+        Assert.DoesNotContain("new MovimientoInventario", source);
+        Assert.DoesNotContain("AjusteProductoVariante", source);
+        Assert.DoesNotContain("AjusteProducto\"", source);
+    }
+
     private static int ContarOcurrencias(string source, string value)
     {
         var count = 0;
