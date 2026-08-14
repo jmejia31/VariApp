@@ -71,7 +71,18 @@ Estado operativo controlado por `COLA`:
 - [x] N0.6.G QA, regresión y CI — cobertura existente suficiente y ejecutada: ERP-N0.6 `31754907625`, build `31754907682`, Fase 8 `31754907626`, aceptación integral `31754907600` y M13 `31754907614` en SUCCESS.
 - [x] N0.6.H Documentación y certificación — fuente canónica `docs/ERP_N0_6_REFERENCIAS_POLIMORFICAS.md`; cierre formal sobre SHA funcional `0e35a9f75c49b6ddfbd5ef21d426521e2b559c40`.
 
-ERP-N0.5 y ERP-N0.6 están cerrados. El siguiente foco FINISH_FIRST es **N0.7.A — AjusteInventario formal / Auditoría y preflight**; después continúan N0.7, N0.8 y `GATE-N0` según dependencias.
+## ERP-N0.7 — AjusteInventario formal
+
+- [x] N0.7.A Auditoría y preflight — fuente histórica `docs/ERP_N0_7_AJUSTE_INVENTARIO_PREFLIGHT.md`; autoridad única de stock, transición legacy, rollback y matriz de validación definidos.
+- [x] N0.7.B Dominio y contratos formales.
+- [x] N0.7.C Persistencia e integridad histórica.
+- [x] N0.7.D Backend/API/reglas de negocio.
+- [x] N0.7.E Frontend/UX.
+- [x] N0.7.F RBAC, auditoría, seguridad y observabilidad — permisos relacionales, auditoría crítica transaccional y correlación HTTP certificados.
+- [x] N0.7.G QA, regresión y CI — cerrado antes de H.
+- [ ] N0.7.H Documentación y certificación — documento canónico publicado en `docs/ERP_N0_7_AJUSTE_INVENTARIO.md`; SHA funcional `cd5c1f058fc7a24fd477a4c9e8cda7cff4c99850`; CI principal `31808933744` SUCCESS y aceptación integral `31808933692` SUCCESS. Pendiente únicamente el último job runtime de M13 `31808933833` antes de promover H a `LISTO`.
+
+ERP-N0.5 y ERP-N0.6 están cerrados. ERP-N0.7 está funcionalmente implementado y H permanece en certificación final; no abrir N0.8 hasta reconciliar el último gate M13 y cerrar H en VAEP.
 
 ## Fuentes VAEP v2
 
