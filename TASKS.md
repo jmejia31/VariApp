@@ -79,10 +79,10 @@ Estado operativo controlado por `COLA`:
 - [x] N0.7.D Backend/API/reglas de negocio.
 - [x] N0.7.E Frontend/UX.
 - [x] N0.7.F RBAC, auditoría, seguridad y observabilidad — permisos relacionales, auditoría crítica transaccional y correlación HTTP certificados.
-- [x] N0.7.G QA, regresión y CI — cerrado antes de H.
-- [ ] N0.7.H Documentación y certificación — documento canónico publicado en `docs/ERP_N0_7_AJUSTE_INVENTARIO.md`; SHA funcional `cd5c1f058fc7a24fd477a4c9e8cda7cff4c99850`; CI principal `31808933744` SUCCESS y aceptación integral `31808933692` SUCCESS. Pendiente únicamente el último job runtime de M13 `31808933833` antes de promover H a `LISTO`.
+- [x] N0.7.G QA, regresión y CI.
+- [x] N0.7.H Documentación y certificación — fuente canónica `docs/ERP_N0_7_AJUSTE_INVENTARIO.md`; SHA funcional `cd5c1f058fc7a24fd477a4c9e8cda7cff4c99850`; CI principal `31808933744`, aceptación integral `31808933692` y M13 `31808933833` terminaron SUCCESS completo, incluido runtime/Playwright y dictamen automatizado final.
 
-ERP-N0.5 y ERP-N0.6 están cerrados. ERP-N0.7 está funcionalmente implementado y H permanece en certificación final; no abrir N0.8 hasta reconciliar el último gate M13 y cerrar H en VAEP.
+ERP-N0.5, ERP-N0.6 y ERP-N0.7 están formalmente cerrados. Siguiente foco FINISH_FIRST elegible: `N0.8.A`, conforme a dependencias VAEP.
 
 ## Fuentes VAEP v2
 
