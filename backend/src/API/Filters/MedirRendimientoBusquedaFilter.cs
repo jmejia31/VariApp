@@ -17,6 +17,7 @@ public sealed class MedirRendimientoBusquedaFilter : IAsyncActionFilter
         {
             ["/productos"] = "search",
             ["/sucursales"] = "buscar",
+            ["/almacenes"] = "buscar",
             ["/clientes/buscar"] = "termino",
             ["/proveedores/buscar"] = "termino",
             ["/ventas/productos/buscar"] = "termino",
