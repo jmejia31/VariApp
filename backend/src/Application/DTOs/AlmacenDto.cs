@@ -3,7 +3,6 @@ namespace InventoryApp.Application.DTOs;
 public class AlmacenDto
 {
     public int Id { get; set; }
-    public int? EmpresaId { get; set; }
     public int SucursalId { get; set; }
     public string SucursalCodigo { get; set; } = string.Empty;
     public string SucursalNombre { get; set; } = string.Empty;
@@ -20,7 +19,6 @@ public class AlmacenDto
 
 public class CreateAlmacenDto
 {
-    public int? EmpresaId { get; set; }
     public int SucursalId { get; set; }
     public string Codigo { get; set; } = string.Empty;
     public string Nombre { get; set; } = string.Empty;
@@ -29,7 +27,6 @@ public class CreateAlmacenDto
 
 public class UpdateAlmacenDto
 {
-    public int? EmpresaId { get; set; }
     public int SucursalId { get; set; }
     public string Codigo { get; set; } = string.Empty;
     public string Nombre { get; set; } = string.Empty;

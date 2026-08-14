@@ -19,7 +19,7 @@ public class AlmacenDomainTests
     }
 
     [Fact]
-    public void Almacen_Nuevo_IniciaActivoSinEliminacionYEmpresaNoForzada()
+    public void Almacen_Nuevo_IniciaActivoYSinEliminacion()
     {
         var almacen = new Almacen();
 
@@ -27,21 +27,22 @@ public class AlmacenDomainTests
         Assert.False(almacen.Eliminado);
         Assert.Null(almacen.FechaEliminacion);
         Assert.Null(almacen.EliminadoPorUsuarioId);
-        Assert.Null(almacen.EmpresaId);
     }
 
     [Fact]
-    public void ContratosAlmacen_PreservanEmpresaIdNullableParaN6()
+    public void ContratosAlmacen_UsanSucursalComoJerarquiaSinEmpresaDuplicada()
     {
-        var create = new CreateAlmacenDto { EmpresaId = 7, SucursalId = 11 };
-        var update = new UpdateAlmacenDto { EmpresaId = 7, SucursalId = 11 };
-        var response = new AlmacenDto { EmpresaId = 7, SucursalId = 11 };
+        Assert.Null(typeof(Almacen).GetProperty("EmpresaId"));
+        Assert.Null(typeof(AlmacenDto).GetProperty("EmpresaId"));
+        Assert.Null(typeof(CreateAlmacenDto).GetProperty("EmpresaId"));
+        Assert.Null(typeof(UpdateAlmacenDto).GetProperty("EmpresaId"));
 
-        Assert.Equal(7, create.EmpresaId);
-        Assert.Equal(7, update.EmpresaId);
-        Assert.Equal(7, response.EmpresaId);
+        var create = new CreateAlmacenDto { SucursalId = 11 };
+        var update = new UpdateAlmacenDto { SucursalId = 12 };
+        var response = new AlmacenDto { SucursalId = 13 };
+
         Assert.Equal(11, create.SucursalId);
-        Assert.Equal(11, update.SucursalId);
-        Assert.Equal(11, response.SucursalId);
+        Assert.Equal(12, update.SucursalId);
+        Assert.Equal(13, response.SucursalId);
     }
 }
