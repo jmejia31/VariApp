@@ -20,6 +20,7 @@ on:
       - backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs
       - backend/src/Infrastructure/Persistence/Configurations/SucursalConfiguration.cs
       - backend/src/Infrastructure/Repositories/SucursalRepository.cs
+      - backend/src/Infrastructure/Repositories/AuditoriaRepository.cs
       - backend/tests/InventoryApp.Tests/Sucursal*.cs
       - frontend/src/app/app.component.ts
       - frontend/src/app/app.routes.ts
@@ -35,6 +36,7 @@ on:
       - backend/src/**/Sucursal*.cs
       - backend/src/API/Controllers/SucursalesController.cs
       - backend/src/API/Filters/MedirRendimientoBusquedaFilter.cs
+      - backend/src/Infrastructure/Repositories/AuditoriaRepository.cs
       - backend/tests/InventoryApp.Tests/Sucursal*.cs
       - frontend/src/app/features/sucursales/**
       - frontend/src/app/core/models/sucursal.model.ts
