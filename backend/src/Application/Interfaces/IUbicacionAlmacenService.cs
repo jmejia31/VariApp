@@ -5,7 +5,7 @@ namespace InventoryApp.Application.Interfaces;
 public interface IUbicacionAlmacenService
 {
     Task<UbicacionAlmacenPaginaDto> BuscarAsync(UbicacionAlmacenFiltroDto filtro);
-    Task<List<UbicacionAlmacenDto>> GetActivasAsync(int almacenId);
+    Task<List<UbicacionAlmacenDto>> GetActivasAsync(int? almacenId = null, int? ubicacionPadreId = null);
     IReadOnlyList<TipoUbicacionAlmacenDto> GetTipos();
     Task<UbicacionAlmacenDto?> GetByIdAsync(int id);
     Task<UbicacionAlmacenDto> CreateAsync(CreateUbicacionAlmacenDto dto);

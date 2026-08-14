@@ -30,5 +30,6 @@ public enum ModuloSistema
     InsumosAdministrativos = 26,
     MetodosPago = 27,
     Sucursales = 28,
-    Almacenes = 29
+    Almacenes = 29,
+    UbicacionesAlmacen = 30
 }

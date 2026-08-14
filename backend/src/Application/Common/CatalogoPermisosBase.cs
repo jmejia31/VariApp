@@ -58,6 +58,7 @@ public static class CatalogoPermisosBase
         (ModuloSistema.MetodosPago, AccionesMantenimiento),
         (ModuloSistema.Sucursales, AccionesMantenimiento),
         (ModuloSistema.Almacenes, AccionesMantenimiento),
+        (ModuloSistema.UbicacionesAlmacen, AccionesMantenimiento),
         (ModuloSistema.Clientes, new[]
         {
             AccionPermiso.Ver, AccionPermiso.Crear, AccionPermiso.Editar,
