@@ -139,6 +139,26 @@ public class AjusteInventarioServiceTests
             Times.Never);
     }
 
+    [Fact]
+    public async Task AnularAsync_SegundaAnulacion_FallaCerradoSinNuevoMovimiento()
+    {
+        var fixture = new Fixture();
+        var ajuste = CrearBorrador(7, productoId: 10, cantidadObjetivo: 8);
+        var detalle = Assert.Single(ajuste.Detalles);
+        detalle.MaterializarConfirmacion(cantidadAnterior: 5, costoUnitario: 2m);
+        ajuste.Confirmar(99, "tester", DateTime.UtcNow.AddMinutes(-2));
+        ajuste.Anular(99, "tester", "Primera anulación", DateTime.UtcNow.AddMinutes(-1));
+        fixture.Ajustes.Setup(x => x.GetByIdForUpdateAsync(ajuste.Id)).ReturnsAsync(ajuste);
+
+        var ex = await Assert.ThrowsAsync<BusinessRuleException>(() =>
+            fixture.Service.AnularAsync(ajuste.Id, "Reintento duplicado"));
+
+        Assert.Contains("confirmados", ex.Message, StringComparison.OrdinalIgnoreCase);
+        fixture.Movimientos.Verify(
+            x => x.AddConOrigenTipadoAsync(It.IsAny<MovimientoInventario>(), It.IsAny<OrigenMovimientoInventario>()),
+            Times.Never);
+    }
+
     private static AjusteInventario CrearBorrador(int id, int productoId, int cantidadObjetivo)
     {
         var ajuste = new AjusteInventario
