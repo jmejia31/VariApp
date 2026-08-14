@@ -74,7 +74,7 @@ jobs:
 
     env:
       ASPNETCORE_ENVIRONMENT: Development
-      PORT: '5006'
+      PORT: '5005'
       ConnectionStrings__DefaultConnection: 'Server=127.0.0.1;Port=3306;Database=inventoryapp_n12_almacenes;User=root;Password=root;SslMode=None;AllowPublicKeyRetrieval=True;'
       Database__ServerVersion: '8.4.0'
       Database__ApplyMigrationsOnStartup: 'true'
@@ -92,7 +92,7 @@ jobs:
       Cloudinary__CloudName: 'e2e-not-used'
       Cloudinary__ApiKey: 'e2e-not-used'
       Cloudinary__ApiSecret: 'e2e-not-used'
-      PHASE7_API_URL: 'http://127.0.0.1:5006'
+      PHASE7_API_URL: 'http://127.0.0.1:5005'
       PHASE7_ADMIN_USERNAME: 'e2e_admin'
       PHASE7_ADMIN_PASSWORD: 'E2E.Admin#2026!'
       PLAYWRIGHT_TEST_BASE_URL: 'http://127.0.0.1:4201'
@@ -128,8 +128,8 @@ jobs:
             > n12-almacenes-api.log 2>&1 &
           echo $! > n12-almacenes-api.pid
           for attempt in $(seq 1 60); do
-            if curl --fail --silent http://127.0.0.1:5006/health > /dev/null && \
-               curl --fail --silent http://127.0.0.1:5006/health/ready > /dev/null; then
+            if curl --fail --silent http://127.0.0.1:5005/health > /dev/null && \
+               curl --fail --silent http://127.0.0.1:5005/health/ready > /dev/null; then
               echo 'API N1.2 lista y MySQL conectado.'
               exit 0
             fi
