@@ -108,6 +108,19 @@ ERP-N0.5, ERP-N0.6, ERP-N0.7 y ERP-N0.8 están formalmente cerrados. `GATE-N0=LI
 
 **ERP-N1.1 queda formalmente cerrado.** Siguiente foco autorizado por VAEP: `N1.2.A — Almacenes / auditoría y preflight`.
 
+## ERP-N1.2 — Almacenes empresariales
+
+- [x] N1.2.A Auditoría y preflight — no existía implementación legacy Almacén/Bodega/Ubicación; Almacén definido como hijo obligatorio de Sucursal, sin adelantar stock N1.4 ni multiempresa N6.
+- [x] N1.2.B Dominio y contratos — `Almacen`, `TipoAlmacen` estable Tienda/Bodega/Transito/Devolucion/Cuarentena y DTOs; autoridad jerárquica única `SucursalId`; corrección concurrente final `85f2b845ca60d8e797425bd5b0f9a7d597a6cfa8` retiró `EmpresaId` duplicada y añadió guarda arquitectónica.
+- [x] N1.2.C Persistencia/migración — tabla `Almacenes`, FK Restrict a `Sucursales`, código activo único, índices/checks, preflight/postcheck y rollback fail-closed; HEAD `bebafe3abb2ddc66448c805b107f8d1f8ee3f3e9`; CI `31834214669` con MySQL/integración/snapshot sin drift SUCCESS.
+- [x] N1.2.D Aplicación/API/RBAC — repositorio, servicio, validadores, CRUD, filtros/paginación, jerarquía fail-closed, estado idempotente, soft-delete, `ModuloSistema.Almacenes=29` y permisos seedables; `5a97bf3844069a565e1aecf39e4b8001c10f386b`.
+- [x] N1.2.E Frontend/UX — mantenimiento responsive, filtros server-side, selector Sucursal activa, catálogo de tipos API, rutas/menú RBAC y formulario sin EmpresaId/stock; `3a1b8004f2120c4be6459bb46fd120eff8704fe9`; M10 `31835928799` SUCCESS.
+- [x] N1.2.F RBAC/auditoría/seguridad/observabilidad — auditoría `Entidad=Almacen`, correlation/health globales y métrica P50/P95 `/almacenes` sin término ni PII; `30c7e9ff1dedf69eb860916b92b1d5bee0941084`.
+- [x] N1.2.G QA/regresión/CI — workflow dedicado `.github/workflows/n1-2-almacenes-ci.yml`; fallos reales de harness puerto y orden de rutas corregidos en `3049cfdf637eb1c1d2fb0be7f9881e517a3cf13f` y `053152ae51de3617bf30a4e9987574c7879e3049`; run final `31837394309` SUCCESS, Playwright 8/8.
+- [x] N1.2.H Documentación/certificación — fuente canónica `docs/ERP_N1_2_ALMACENES.md`; arquitectura, migración/rollback, API/RBAC, UX, observabilidad, QA y DoD documentados.
+
+**ERP-N1.2 queda formalmente cerrado.** Siguiente foco autorizado por VAEP: `N1.3.A — Ubicaciones internas / auditoría y preflight`.
+
 ## Fuentes VAEP v2
 
 Plan rector:
