@@ -93,7 +93,20 @@ Estado operativo controlado por `COLA`:
 - [x] N0.8.G QA, regresión y CI — SHA funcional final `369158761ad05671b9a1859d17796c8ca4a09bf8`; CI `31821172124`, M10 `31821172381`, Fase 8 `31821172230`, Acceptance `31821172223` y M13 `31821172341` SUCCESS completos.
 - [x] N0.8.H Documentación/certificación — fuente canónica `docs/ERP_N0_8_MIGRACIONES_LIMPIEZA.md`; rollback forward-only, autoridad final y compatibilidad histórica deliberadamente preservada documentados.
 
-ERP-N0.5, ERP-N0.6, ERP-N0.7 y ERP-N0.8 están formalmente cerrados. El siguiente foco debe seleccionarse únicamente desde VAEP con el gate ERP-N0 y sus dependencias reconciliados; no iniciar ERP-N1 por inferencia fuera del tablero.
+ERP-N0.5, ERP-N0.6, ERP-N0.7 y ERP-N0.8 están formalmente cerrados. `GATE-N0=LISTO` fue revalidado antes de iniciar ERP-N1.
+
+## ERP-N1.1 — Sucursales empresariales
+
+- [x] N1.1.A Auditoría y preflight — no existía entidad/DbSet Sucursal; alcance, riesgos y compatibilidad futura definidos sin adelantar multiempresa.
+- [x] N1.1.B Dominio y contratos — entidad y DTOs en `0a576db21e583a76418ce037ca53f8c30d3b7eb1`.
+- [x] N1.1.C Persistencia/migración — tabla `Sucursales`, índices/constraints, preflight/rollback fail-closed y snapshot EF; cierre `65785999934d8f02ffdf947fa24f48ceb9059076`.
+- [x] N1.1.D Aplicación/API/RBAC — repositorio, servicio, validadores, CRUD, estado idempotente, soft-delete, paginación y permisos relacionales; cobertura dirigida hasta `805818140ef78183e52a17d196f36c452d39ebc2`.
+- [x] N1.1.E Frontend/UX — mantenimiento responsive, filtros/paginación server-side, rutas/menú protegidos y M10 verde; `d3009e051ffea91631673dc764e56fdf8cab70b2`.
+- [x] N1.1.F RBAC/auditoría/seguridad/observabilidad — auditoría `Entidad=Sucursal`, correlation ID y métrica P50/P95 sin PII; `9ead42f594aea12c20612d7c15e21768c090f828`.
+- [x] N1.1.G QA/regresión/CI — workflow dedicado `.github/workflows/n1-1-sucursales-ci.yml`; primer E2E detectó filtro de Auditoría no traducible por EF/MySQL, corregido en `b82c8d8325866fdf4408e22424fefe692965b8d9`; certificado final run `31830346962` SUCCESS sobre `42a241162dc54c8fddf040a7321d57dd229f7e5b`.
+- [x] N1.1.H Documentación/certificación — fuente canónica `docs/ERP_N1_1_SUCURSALES.md`; rollback, ERD, API, RBAC, UX, observabilidad, defecto encontrado por E2E y DoD documentados.
+
+**ERP-N1.1 queda formalmente cerrado.** Siguiente foco autorizado por VAEP: `N1.2.A — Almacenes / auditoría y preflight`.
 
 ## Fuentes VAEP v2
 
