@@ -4,7 +4,10 @@ const API_URL = process.env['PHASE7_API_URL'] ?? 'http://127.0.0.1:5005';
 const ADMIN_USERNAME = process.env['PHASE7_ADMIN_USERNAME'] ?? 'e2e_admin';
 const ADMIN_PASSWORD = process.env['PHASE7_ADMIN_PASSWORD'] ?? 'E2E.Admin#2026!';
 const suffix = `${Date.now()}`;
+const nombreProducto = `Producto Ajuste E2E ${suffix}`;
+const skuVariante = `AJ-E2E-${suffix}`;
 const motivoAjuste = `Conteo E2E N0.7 ${suffix}`;
+const motivoCreacionUi = `Creación UI E2E N0.7 ${suffix}`;
 
 let token = '';
 let ajusteId = 0;
@@ -66,7 +69,7 @@ async function crearProductoFixture(request: APIRequestContext): Promise<{ produ
   const response = await request.post(`${API_URL}/productos`, {
     headers: headers(),
     multipart: {
-      Nombre: `Producto Ajuste E2E ${suffix}`,
+      Nombre: nombreProducto,
       Marca: `Marca Ajuste E2E ${suffix}`,
       Modelo: `Modelo Ajuste E2E ${suffix}`,
       MarcaId: String(marca.id),
@@ -76,7 +79,7 @@ async function crearProductoFixture(request: APIRequestContext): Promise<{ produ
       Precio: '180',
       UmbralStockBajo: '1',
       'Variantes[0].ColorId': String(color.id),
-      'Variantes[0].Sku': `AJ-E2E-${suffix}`,
+      'Variantes[0].Sku': skuVariante,
       'Variantes[0].CodigoBarras': `91${suffix.slice(-10)}`,
       'Variantes[0].Cantidad': '3',
       'Variantes[0].UmbralStockBajo': '1',
@@ -148,17 +151,50 @@ test.describe('N0.7.E - Ajustes de inventario', () => {
     await expect(page.getByText(motivoAjuste)).toBeVisible();
   });
 
-  test('creación expone formulario y detalles dinámicos', async ({ page }) => {
+  test('crea un borrador por UI usando selectores de producto/variante deterministas', async ({ page }) => {
     await page.goto('/inventario/ajustes/nuevo');
 
     await expect(page.getByRole('heading', { name: 'Nuevo ajuste' })).toBeVisible();
-    await expect(page.locator('form')).toBeVisible();
+    const details = page.locator('article.detail');
+    await expect(details).toHaveCount(1);
 
+    await page.locator('input[formcontrolname="motivo"]').fill(motivoCreacionUi);
+    const productoSelect = details.locator('mat-select[formcontrolname="productoId"]');
+    await productoSelect.click();
+    await page.getByRole('option', { name: new RegExp(nombreProducto) }).click();
+
+    const varianteSelect = details.locator('mat-select[formcontrolname="productoVarianteId"]');
+    await expect(varianteSelect).not.toHaveAttribute('aria-disabled', 'true');
+    await varianteSelect.click();
+    await page.getByRole('option', { name: new RegExp(skuVariante) }).click();
+    await details.locator('input[formcontrolname="cantidadObjetivo"]').fill('4');
+
+    const createResponse = page.waitForResponse((response) =>
+      response.url().endsWith('/inventario/ajustes')
+      && response.request().method() === 'POST'
+    );
+    await page.getByRole('button', { name: /Guardar borrador/i }).click();
+    const response = await createResponse;
+    expect(response.status(), await response.text()).toBe(201);
+    await expect(page).toHaveURL(/\/inventario\/ajustes$/);
+
+    const search = page.getByPlaceholder('Número o motivo');
+    await search.fill(motivoCreacionUi);
+    await page.getByRole('button', { name: /^Aplicar$/i }).click();
+    const createdRow = page.locator('tbody tr').filter({ hasText: motivoCreacionUi });
+    await expect(createdRow).toHaveCount(1);
+    await expect(createdRow).toContainText('Borrador');
+  });
+
+  test('mantiene detalles dinámicos sin perder el selector de inventario', async ({ page }) => {
+    await page.goto('/inventario/ajustes/nuevo');
     const details = page.locator('article.detail');
     await expect(details).toHaveCount(1);
 
     await page.getByRole('button', { name: /Agregar detalle/i }).click();
     await expect(details).toHaveCount(2);
+    await expect(details.nth(1).locator('mat-select[formcontrolname="productoId"]')).toBeVisible();
+    await expect(details.nth(1).locator('mat-select[formcontrolname="productoVarianteId"]')).toBeVisible();
 
     await page.getByRole('button', { name: 'Eliminar detalle' }).last().click();
     await expect(details).toHaveCount(1);
