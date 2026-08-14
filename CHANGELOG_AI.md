@@ -4,6 +4,22 @@ Bitácora colaborativa de cambios realizados por Javier Mejía, Codex, AntiG/Ant
 
 No reemplaza `git log`: registra intención, alcance, validaciones y handoff. Todo changeset intencional debe incluir una entrada breve; no modificar otros colaborativos si su contenido no cambió.
 
+## 2026-08-14 — ERP-N0.8 Migraciones y limpieza — CIERRE FORMAL
+
+**Responsable:** ChatGPT mediante conexiones autorizadas GitHub + Google Drive.
+
+**Objetivo/alcance:** cerrar ERP-N0.8 después de consolidar el preflight de saneamiento, materializar la relación `Compras.MetodoPagoId`, reconciliar las FKs tipadas de `MovimientoInventario` con el modelo EF, retirar el raw SQL como autoridad normal de origen, migrar Compra hacia el catálogo relacional de métodos de pago y eliminar la lista hardcodeada de pagos del formulario de Compras. El saneamiento fue deliberadamente conservador: una columna legacy solo se retira físicamente cuando históricos, reversión y consumidores permiten demostrar que el DROP es seguro.
+
+**Resultado funcional:** `Compras.MetodoPagoId` se backfillea por `MetodosPago.Codigo` estable —nunca por equivalencia de IDs— y queda protegido por FK; Compra crea/edita/confirma mediante catálogo activo y falla cerrado ante métodos no representables. El bridge legacy es one-way y bajo lock: una fila histórica válida con FK nula converge al catálogo antes de confirmar, sin convertir el enum en autoridad. `MovimientoInventario` persiste/consulta `CompraId`/`VentaId`/`ConsumoInsumoId`/`AjusteInventarioId` mediante EF; `ReferenciaTipo/ReferenciaId` quedan solo como snapshot/correlación. El frontend de Compras consume `/metodos-pago/activos`, muestra el nombre, envía el código estable y bloquea Guardar ante loading/error/0 métodos/inactividad.
+
+**Persistencia/rollback:** migración `20260814155400_N0_8_PersistenciaLimpiezaTransicional`, postcheck `backend/scripts/postdeploy-erp-n0-8-c-persistencia.sql` y snapshot EF reconciliado. La migración es forward-only: el rollback seguro exige respaldo/restauración compatible o corrección forward; no se autoriza un DROP improvisado de la nueva FK. `Producto.Cantidad/Costo`, `Compra.MetodoPago`, `MovimientoInventario.ReferenciaTipo/ReferenciaId` y `MovimientoFinanciero.ModuloOrigen/ReferenciaId` permanecen únicamente donde cumplen una función histórica/snapshot/bridge demostrada, no como autoridad primaria.
+
+**Trazabilidad A–G:** A `c7d39903eb978337d501a37c4d9c32b506c450f3`; B `c20151391d696ebe1d172ae3341e579cc371c35f`; C `b7b1db8746beac2a6e3f25c68afcafd8768383c8`; D cierre dirigido `633d8fc36e2b825a6362f418c01254c8886f37fe`; E `4693502282f54e3adfeee97669e0ca7ffa10b3ae`; G/funcional final `369158761ad05671b9a1859d17796c8ca4a09bf8`. La regresión específica `frontend/e2e/n0-8-compras-metodos-pago-regresion.spec.ts` cubre método administrable dinámico y catálogo no disponible fail-closed.
+
+**Validación final sobre `369158761ad05671b9a1859d17796c8ca4a09bf8`:** CI principal `31821172124` SUCCESS completo; M10 `31821172381` SUCCESS; Fase 8 `31821172230` SUCCESS; aceptación integral `31821172223` SUCCESS incluido Playwright/SMTP/PDF; M13 `31821172341` SUCCESS completo incluido historial MySQL, integración, SQL forward, upgrade histórico, frontend, seguridad HTTP, Playwright, SMTP/PDF/logs y `Dictamen automatizado M13` SUCCESS. No quedan P0/P1 conocidos atribuibles a ERP-N0.8.
+
+**Documentación/control:** fuente final `docs/ERP_N0_8_MIGRACIONES_LIMPIEZA.md`; preflight `docs/ERP_N0_8_MIGRACIONES_LIMPIEZA_PREFLIGHT.md`; `TASKS.md`, CHANGELOG y tablero VAEP se reconcilian en N0.8.H. No se tocó `main`, Producción, merge/auto-merge del PR #2, secretos, infraestructura productiva, force-push ni ramas nuevas. El siguiente foco debe seleccionarse únicamente desde el gate/dependencias VAEP.
+
 ## 2026-08-14 — ERP-N0.7 AjusteInventario formal — CIERRE FORMAL
 
 **Responsable:** ChatGPT mediante conexiones autorizadas GitHub + Google Drive.
