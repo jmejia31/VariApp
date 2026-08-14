@@ -1,5 +1,6 @@
 using InventoryApp.Application.Common;
 using InventoryApp.Domain.Entities;
+using CatalogoMetodoPago = InventoryApp.Domain.Entities.Catalogos.MetodoPago;
 
 namespace InventoryApp.Application.Interfaces;
 
@@ -7,6 +8,7 @@ public interface ICompraRepository
 {
     Task<Compra?> GetByIdAsync(int id);
     Task<Compra?> GetByIdForUpdateAsync(int id);
+    Task<CatalogoMetodoPago?> GetMetodoPagoPorCodigoONombreAsync(string valor);
     Task<(List<Compra> Items, int TotalCount)> GetPagedAsync(PagedRequest request);
     Task<int> GetTotalDelMesAsync(int? usuarioId = null);
     Task<decimal> GetCuentasPorPagarAsync(int? usuarioId = null);
