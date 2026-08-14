@@ -7,7 +7,8 @@ public sealed record MovimientoInventarioOrigenPersistido(
     int MovimientoId,
     int? CompraId,
     int? VentaId,
-    int? ConsumoInsumoId);
+    int? ConsumoInsumoId,
+    int? AjusteInventarioId);
 
 public interface IMovimientoInventarioRepository
 {
