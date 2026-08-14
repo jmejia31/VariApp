@@ -1,3 +1,6 @@
+using InventoryApp.Application.Common;
+using InventoryApp.Domain.Enums;
+
 namespace InventoryApp.Application.DTOs;
 
 public sealed class AjusteInventarioDetalleInputDto
@@ -26,6 +29,21 @@ public sealed class UpdateAjusteInventarioDto
 public sealed class AnularAjusteInventarioDto
 {
     public string MotivoAnulacion { get; set; } = string.Empty;
+}
+
+public sealed class AjusteInventarioFiltroDto : PagedRequest
+{
+    public AjusteInventarioFiltroDto()
+    {
+        SortBy = "FechaAjuste";
+        SortDirection = "desc";
+    }
+
+    public EstadoAjusteInventario? Estado { get; set; }
+    public DateTime? Desde { get; set; }
+    public DateTime? Hasta { get; set; }
+    public int? ProductoId { get; set; }
+    public int? ProductoVarianteId { get; set; }
 }
 
 public sealed class AjusteInventarioDetalleDto
