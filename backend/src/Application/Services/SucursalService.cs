@@ -91,7 +91,8 @@ public sealed class SucursalService : ISucursalService
             ModuloSistema.Sucursales,
             AccionPermiso.Crear,
             $"Sucursal creada: {sucursal.Codigo} - {sucursal.Nombre}",
-            sucursal.Id);
+            sucursal.Id,
+            entidad: "Sucursal");
 
         return ToDto(sucursal);
     }
@@ -127,7 +128,8 @@ public sealed class SucursalService : ISucursalService
             ModuloSistema.Sucursales,
             AccionPermiso.Editar,
             $"Sucursal actualizada: {sucursal.Codigo} - {sucursal.Nombre}",
-            sucursal.Id);
+            sucursal.Id,
+            entidad: "Sucursal");
 
         return ToDto(sucursal);
     }
@@ -153,7 +155,8 @@ public sealed class SucursalService : ISucursalService
             ModuloSistema.Sucursales,
             activa ? AccionPermiso.Activar : AccionPermiso.Desactivar,
             $"Sucursal {(activa ? "activada" : "desactivada")}: {sucursal.Codigo} - {sucursal.Nombre}",
-            sucursal.Id);
+            sucursal.Id,
+            entidad: "Sucursal");
 
         return ToDto(sucursal);
     }
@@ -179,7 +182,8 @@ public sealed class SucursalService : ISucursalService
                 ModuloSistema.Sucursales,
                 AccionPermiso.EliminarLogico,
                 $"Sucursal eliminada lógicamente: {sucursal.Codigo} - {sucursal.Nombre}",
-                sucursal.Id);
+                sucursal.Id,
+                entidad: "Sucursal");
         }
 
         return eliminado;

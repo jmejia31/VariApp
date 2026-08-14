@@ -16,6 +16,7 @@ public sealed class MedirRendimientoBusquedaFilter : IAsyncActionFilter
         new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["/productos"] = "search",
+            ["/sucursales"] = "buscar",
             ["/clientes/buscar"] = "termino",
             ["/proveedores/buscar"] = "termino",
             ["/ventas/productos/buscar"] = "termino",
