@@ -1,3 +1,4 @@
+using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Application.Services;
@@ -69,6 +70,120 @@ public class AjusteInventarioServiceTests
         Assert.Null(origen.CompraId);
         Assert.Null(origen.VentaId);
         Assert.Null(origen.ConsumoInsumoId);
+    }
+
+    [Fact]
+    public async Task AjustarStockCompatibilidadAsync_CreaYConfirmaEnUnaTransaccionFormal()
+    {
+        var fixture = new Fixture();
+        var producto = new Producto
+        {
+            Id = 10,
+            Nombre = "Producto legacy",
+            Cantidad = 5,
+            Costo = 3m
+        };
+        AjusteInventario? ajusteCreado = null;
+
+        fixture.Productos.Setup(x => x.GetByIdAsync(producto.Id)).ReturnsAsync(producto);
+        fixture.Ajustes
+            .Setup(x => x.AddAsync(It.IsAny<AjusteInventario>()))
+            .Callback<AjusteInventario>(ajuste =>
+            {
+                ajuste.Id = 77;
+                var index = 1;
+                foreach (var detalle in ajuste.Detalles)
+                {
+                    detalle.Id = 770 + index++;
+                    detalle.AjusteInventarioId = ajuste.Id;
+                }
+                ajusteCreado = ajuste;
+            })
+            .Returns(Task.CompletedTask);
+        fixture.Concurrency
+            .Setup(x => x.BloquearInventarioParaReversionAsync(It.IsAny<IEnumerable<InventarioDemanda>>()))
+            .ReturnsAsync(new InventarioLockSet(
+                new Dictionary<int, Producto> { [producto.Id] = producto },
+                new Dictionary<int, ProductoVariante>()));
+
+        OrigenMovimientoInventario? origen = null;
+        fixture.Movimientos
+            .Setup(x => x.AddConOrigenTipadoAsync(It.IsAny<MovimientoInventario>(), It.IsAny<OrigenMovimientoInventario>()))
+            .Callback<MovimientoInventario, OrigenMovimientoInventario>((_, o) => origen = o)
+            .Returns(Task.CompletedTask);
+
+        var resultado = await fixture.Service.AjustarStockCompatibilidadAsync(
+            producto.Id,
+            null,
+            new AjusteStockRequest
+            {
+                CantidadActualEsperada = 5,
+                CantidadNueva = 8,
+                Motivo = "Conteo legacy"
+            });
+
+        Assert.Equal(5, resultado.CantidadAnterior);
+        Assert.Equal(8, resultado.CantidadNueva);
+        Assert.Equal(3, resultado.Diferencia);
+        Assert.Equal(8, producto.Cantidad);
+        Assert.NotNull(ajusteCreado);
+        Assert.Equal(EstadoAjusteInventario.Confirmado, ajusteCreado!.Estado);
+        Assert.Equal("AI-000077", ajusteCreado.NumeroAjuste);
+        Assert.Equal(77, origen!.AjusteInventarioId);
+        fixture.UnitOfWork.Verify(
+            x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task AjustarStockCompatibilidadAsync_StockEsperadoDesactualizado_FallaAntesDeMutar()
+    {
+        var fixture = new Fixture();
+        var producto = new Producto
+        {
+            Id = 10,
+            Nombre = "Producto legacy",
+            Cantidad = 6,
+            Costo = 3m
+        };
+        AjusteInventario? ajusteCreado = null;
+
+        fixture.Productos.Setup(x => x.GetByIdAsync(producto.Id)).ReturnsAsync(producto);
+        fixture.Ajustes
+            .Setup(x => x.AddAsync(It.IsAny<AjusteInventario>()))
+            .Callback<AjusteInventario>(ajuste =>
+            {
+                ajuste.Id = 78;
+                ajusteCreado = ajuste;
+            })
+            .Returns(Task.CompletedTask);
+        fixture.Concurrency
+            .Setup(x => x.BloquearInventarioParaReversionAsync(It.IsAny<IEnumerable<InventarioDemanda>>()))
+            .ReturnsAsync(new InventarioLockSet(
+                new Dictionary<int, Producto> { [producto.Id] = producto },
+                new Dictionary<int, ProductoVariante>()));
+
+        var ex = await Assert.ThrowsAsync<BusinessRuleException>(() =>
+            fixture.Service.AjustarStockCompatibilidadAsync(
+                producto.Id,
+                null,
+                new AjusteStockRequest
+                {
+                    CantidadActualEsperada = 5,
+                    CantidadNueva = 8,
+                    Motivo = "Conteo legacy"
+                }));
+
+        Assert.Contains("Esperado: 5; actual: 6", ex.Message);
+        Assert.Equal(6, producto.Cantidad);
+        Assert.NotNull(ajusteCreado);
+        Assert.Equal(EstadoAjusteInventario.Borrador, ajusteCreado!.Estado);
+        fixture.Movimientos.Verify(
+            x => x.AddConOrigenTipadoAsync(It.IsAny<MovimientoInventario>(), It.IsAny<OrigenMovimientoInventario>()),
+            Times.Never);
+        fixture.UnitOfWork.Verify(
+            x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()),
+            Times.Once);
     }
 
     [Fact]
