@@ -21,7 +21,7 @@ public sealed class InventarioAjustesController : ControllerBase
     }
 
     [HttpPost("{productoId:int}/ajustes-stock")]
-    [RequierePermiso(ModuloSistema.Productos, AccionPermiso.Editar)]
+    [RequierePermiso(ModuloSistema.Inventario, AccionPermiso.Confirmar)]
     public async Task<IActionResult> AjustarProducto(
         int productoId,
         [FromBody] AjusteStockRequest request)
@@ -33,7 +33,7 @@ public sealed class InventarioAjustesController : ControllerBase
     }
 
     [HttpPost("{productoId:int}/variantes/{varianteId:int}/ajustes-stock")]
-    [RequierePermiso(ModuloSistema.Productos, AccionPermiso.Editar)]
+    [RequierePermiso(ModuloSistema.Inventario, AccionPermiso.Confirmar)]
     public async Task<IActionResult> AjustarVariante(
         int productoId,
         int varianteId,
