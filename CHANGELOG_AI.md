@@ -4,6 +4,22 @@ Bitácora colaborativa de cambios realizados por Javier Mejía, Codex, AntiG/Ant
 
 No reemplaza `git log`: registra intención, alcance, validaciones y handoff. Todo changeset intencional debe incluir una entrada breve; no modificar otros colaborativos si su contenido no cambió.
 
+## 2026-08-14 — ERP-N1.3 Ubicaciones internas de almacén — CIERRE FORMAL
+
+**Responsable:** ChatGPT mediante conexiones autorizadas GitHub + Google Drive.
+
+**Objetivo/alcance:** completar `UbicacionAlmacen` como topología física jerárquica interna de cada Almacén para pasillos, estantes, racks, secciones, bins y otras ubicaciones, sin introducir todavía existencias, cantidades ni semántica WMS avanzada.
+
+**Resultado funcional:** `UbicacionAlmacen.AlmacenId` es la única relación organizacional persistida; `SucursalId` y `EmpresaId` se derivan transitivamente. Padre opcional restringido al mismo Almacén, prevención de ciclos directos/indirectos, protección de descendientes al mover/desactivar/eliminar, código operativo único por Almacén, soft-delete y estados idempotentes. MySQL 8.4 conserva la invariante anti-self-parent mediante triggers porque un CHECK no puede referenciar el `Id AUTO_INCREMENT`. API `/ubicaciones-almacen` soporta búsqueda, Almacén, padre/raíz, tipo, estado, paginación, CRUD y operaciones de estado. Frontend incorpora listado responsive, filtros server-side, formulario jerárquico, selectores de Almacén/padre, rutas y menú protegidos por RBAC.
+
+**RBAC/auditoría/seguridad:** módulo `UbicacionesAlmacen`, permisos `Ver/Crear/Editar/Activar/Desactivar/EliminarLogico`, auditoría de mutaciones con referencia de entidad y pruebas que congelan los 9 contratos de autorización. Se reutilizan Correlation ID, ProblemDetails, headers de seguridad y health/readiness globales. N1.3 no contiene campos de stock; `ExistenciaVariante` queda reservado para ERP-N1.4.
+
+**Trazabilidad:** D backend `4d2cc04b363df602f6de97b7f5ea876ea35a6196`, run `31843085895`, job `94903923345` SUCCESS; E frontend `91f878ef3cbc56219b637e9b62c99bdd1109a9df`, run `31846161956`, job `94912936660` SUCCESS; F/G baseline `4a6be38683f03fc2076f18a71115480c930ba79b`.
+
+**QA real:** run agregado `31846485117` SUCCESS: higiene `94913888918`, Backend Release/unitarias `94913888850`, frontend producción `94913888865`, Docker `94913888808` y MySQL 8.4/integración `94913888844`; el job MySQL aplicó migraciones actuales, ejecutó `Category=Integration`, verificó snapshot/variantes/cargas y generó SQL forward sin regresiones.
+
+**Documentación/control:** preflight `docs/ERP_N1_3_UBICACIONES_PREFLIGHT.md`; cierre canónico `docs/ERP_N1_3_UBICACIONES_ALMACEN.md`; TASKS, CHANGELOG y tablero VAEP reconciliados preservando historial. `main`, Producción, merge/auto-merge del PR #2, secretos y force-push permanecen intactos. **ERP-N1.3 queda formalmente cerrado** y el siguiente foco FINISH_FIRST es `N1.4.A — ExistenciaVariante — Preflight y diseño`.
+
 ## 2026-08-14 — ERP-N1.2 Almacenes empresariales — CIERRE FORMAL
 
 **Responsable:** ChatGPT mediante conexiones autorizadas GitHub + Google Drive.
