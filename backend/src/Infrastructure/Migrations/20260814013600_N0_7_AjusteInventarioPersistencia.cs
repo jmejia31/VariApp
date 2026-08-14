@@ -108,7 +108,7 @@ public sealed class N0_7_AjusteInventarioPersistencia : Migration
             ALTER TABLE MovimientosInventario
                 ADD COLUMN AjusteInventarioId INT NULL,
                 ADD INDEX IX_MovimientosInventario_AjusteInventarioId (AjusteInventarioId),
-                ADD CONSTRAINT FK_MovimientosInventario_AjustesInventario_AjusteInventarioId_N07
+                ADD CONSTRAINT FK_MovInv_AjusteInventarioId_N07
                     FOREIGN KEY (AjusteInventarioId) REFERENCES AjustesInventario(Id) ON DELETE RESTRICT;
             """);
 
