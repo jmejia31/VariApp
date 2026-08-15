@@ -56,10 +56,13 @@ public sealed partial class AjusteInventarioService
 
         // Bridge legacy bloqueado después de la autoridad física. Sus cantidades sólo
         // reciben el delta autoritativo y no participan en ninguna decisión de stock.
+        // Una variante puede aparecer en varios almacenes/ubicaciones; el bridge agregado
+        // debe bloquearse una sola vez por producto/variante para evitar locks redundantes.
         var lockRequest = ajuste.Detalles
-            .OrderBy(d => d.ProductoId)
-            .ThenBy(d => d.ProductoVarianteId)
-            .Select(d => new InventarioDemanda(d.ProductoId, d.ProductoVarianteId, 1))
+            .GroupBy(d => (d.ProductoId, d.ProductoVarianteId))
+            .OrderBy(g => g.Key.ProductoId)
+            .ThenBy(g => g.Key.ProductoVarianteId)
+            .Select(g => new InventarioDemanda(g.Key.ProductoId, g.Key.ProductoVarianteId, 1))
             .ToList();
         var inventarioLegacy = await _inventarioConcurrency.BloquearInventarioParaReversionAsync(lockRequest);
 
