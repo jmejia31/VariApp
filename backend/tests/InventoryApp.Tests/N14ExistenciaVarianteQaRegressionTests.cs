@@ -34,6 +34,34 @@ public class N14ExistenciaVarianteQaRegressionTests
     }
 
     [Fact]
+    public void EstablecerStocks_FalloDeValidacionTardia_NoDejaEstadoParcialmenteMutado()
+    {
+        var existencia = new ExistenciaVariante();
+        existencia.EstablecerStocks(
+            stockFisico: 30,
+            stockReservado: 5,
+            stockTransito: 2,
+            stockMinimo: 6,
+            stockMaximo: 60);
+
+        var error = Assert.Throws<ArgumentException>(() =>
+            existencia.EstablecerStocks(
+                stockFisico: 50,
+                stockReservado: 10,
+                stockTransito: 8,
+                stockMinimo: 20,
+                stockMaximo: 19));
+
+        Assert.Equal("stockMaximo", error.ParamName);
+        Assert.Equal(30, existencia.StockFisico);
+        Assert.Equal(5, existencia.StockReservado);
+        Assert.Equal(25, existencia.StockDisponible);
+        Assert.Equal(2, existencia.StockTransito);
+        Assert.Equal(6, existencia.StockMinimo);
+        Assert.Equal(60, existencia.StockMaximo);
+    }
+
+    [Fact]
     public void EstablecerStocks_ReconfiguracionValida_RecalculaDisponibleSinArrastrarSnapshotAnterior()
     {
         var existencia = new ExistenciaVariante();
