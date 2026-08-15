@@ -78,4 +78,32 @@ public class N14ExistenciaVarianteQaRegressionTests
         Assert.False(existencia.EstaAgotada);
         Assert.False(existencia.TieneStockBajo);
     }
+
+    [Fact]
+    public void IndicadoresStock_RespetanUmbralesDeDisponible()
+    {
+        var existencia = new ExistenciaVariante();
+
+        existencia.EstablecerStocks(
+            stockFisico: 10,
+            stockReservado: 5,
+            stockTransito: 0,
+            stockMinimo: 5,
+            stockMaximo: 20);
+
+        Assert.Equal(5, existencia.StockDisponible);
+        Assert.True(existencia.TieneStockBajo);
+        Assert.False(existencia.EstaAgotada);
+
+        existencia.EstablecerStocks(
+            stockFisico: 10,
+            stockReservado: 10,
+            stockTransito: 0,
+            stockMinimo: 5,
+            stockMaximo: 20);
+
+        Assert.Equal(0, existencia.StockDisponible);
+        Assert.True(existencia.TieneStockBajo);
+        Assert.True(existencia.EstaAgotada);
+    }
 }
