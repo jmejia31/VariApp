@@ -1,3 +1,4 @@
+using InventoryApp.Domain.Common;
 using InventoryApp.Domain.Entities;
 using InventoryApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -23,7 +24,7 @@ public class N15KardexPersistenceModelTests
         var correlationId = entity.FindProperty(nameof(MovimientoInventario.CorrelationId));
         Assert.NotNull(correlationId);
         Assert.False(correlationId!.IsNullable);
-        Assert.Equal(100, correlationId.GetMaxLength());
+        Assert.Equal(ContextoFisicoMovimientoInventario.MaxCorrelationIdLength, correlationId.GetMaxLength());
         Assert.Equal(string.Empty, correlationId.GetDefaultValue());
 
         var correlationIndex = Assert.Single(entity.GetIndexes().Where(i =>
