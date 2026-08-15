@@ -36,7 +36,8 @@ public sealed class N14AjusteInventarioServiceCutoverContractTests
         await sut.BloquearParaConfirmacionAsync(new[] { detalleA, detalleB });
 
         Assert.False(fake.UltimoEsDeduccion);
-        var demandas = Assert.NotNull(fake.UltimasDemandas);
+        Assert.NotNull(fake.UltimasDemandas);
+        var demandas = fake.UltimasDemandas!;
         Assert.Equal(2, demandas.Count);
         Assert.Contains(demandas, d =>
             d.ProductoId == 11 &&
