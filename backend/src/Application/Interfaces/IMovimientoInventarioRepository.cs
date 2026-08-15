@@ -14,6 +14,10 @@ public interface IMovimientoInventarioRepository
 {
     Task AddAsync(MovimientoInventario movimiento);
     Task AddConOrigenTipadoAsync(MovimientoInventario movimiento, OrigenMovimientoInventario origen);
+    Task AddConOrigenTipadoAsync(
+        MovimientoInventario movimiento,
+        OrigenMovimientoInventario origen,
+        ContextoFisicoMovimientoInventario contexto);
     Task<List<MovimientoInventario>> GetByProductoAsync(int productoId);
     Task<List<MovimientoInventario>> GetFilteredAsync(int? productoId, string? tipo, DateTime? desde, DateTime? hasta);
     Task<IReadOnlyDictionary<int, MovimientoInventarioOrigenPersistido>> GetOrigenesTipadosAsync(
