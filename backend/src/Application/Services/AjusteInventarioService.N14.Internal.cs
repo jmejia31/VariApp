@@ -73,6 +73,7 @@ public sealed partial class AjusteInventarioService
                 ?? throw new BusinessRuleException($"El producto ID '{productoId}' ya no está disponible para confirmar el ajuste.");
         }
 
+        var correlationId = $"ajuste:{ajuste.Id}:confirmar:{Guid.NewGuid():N}";
         foreach (var detalle in ajuste.Detalles
                      .OrderBy(d => d.ProductoVarianteId)
                      .ThenBy(d => d.AlmacenId)
@@ -80,8 +81,6 @@ public sealed partial class AjusteInventarioService
         {
             if (!inventarioLegacy.Productos.TryGetValue(detalle.ProductoId, out var producto))
                 throw new BusinessRuleException($"El producto ID '{detalle.ProductoId}' ya no existe físicamente.");
-            if (producto.Eliminado)
-                throw new BusinessRuleException($"El producto '{producto.Nombre}' fue eliminado y no puede ajustarse.");
             if (!detalle.ProductoVarianteId.HasValue ||
                 !inventarioLegacy.Variantes.TryGetValue(detalle.ProductoVarianteId.Value, out var variante))
             {
@@ -113,6 +112,12 @@ public sealed partial class AjusteInventarioService
             var transicion = await cutover.AplicarConfirmacionConSnapshotAsync(existencias, detalle);
             SincronizarProyeccionLegacy(producto, variante, transicion.Diferencia, ajuste.NumeroAjuste);
 
+            var contextoKardex = ContextoFisicoMovimientoInventario.Crear(
+                detalle.ProductoVarianteId.Value,
+                detalle.AlmacenId ?? throw new BusinessRuleException("El ajuste no posee almacén físico válido para registrar Kardex."),
+                detalle.UbicacionAlmacenId,
+                correlationId);
+
             await _movimientoInventarioRepository.AddConOrigenTipadoAsync(
                 new MovimientoInventario
                 {
@@ -133,7 +138,8 @@ public sealed partial class AjusteInventarioService
                     CreadoPorNombreUsuario = nombreUsuario,
                     Fecha = DateTime.UtcNow
                 },
-                OrigenMovimientoInventario.DesdeAjusteInventario(ajuste.Id));
+                OrigenMovimientoInventario.DesdeAjusteInventario(ajuste.Id),
+                contextoKardex);
         }
 
         var ahora = DateTime.UtcNow;
