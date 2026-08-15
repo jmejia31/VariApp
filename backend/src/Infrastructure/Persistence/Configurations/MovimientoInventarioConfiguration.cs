@@ -9,7 +9,10 @@ public class MovimientoInventarioConfiguration : IEntityTypeConfiguration<Movimi
 {
     public void Configure(EntityTypeBuilder<MovimientoInventario> builder)
     {
-        builder.ToTable("MovimientosInventario");
+        builder.ToTable("MovimientosInventario", table =>
+            table.HasCheckConstraint(
+                "CK_MovimientosInventario_Ubicacion_RequiereAlmacen",
+                "`UbicacionAlmacenId` IS NULL OR `AlmacenId` IS NOT NULL"));
         builder.Property(m => m.Tipo).HasConversion<string>().HasMaxLength(20);
         builder.Property(m => m.Causa)
             .HasConversion<int>()
@@ -34,6 +37,20 @@ public class MovimientoInventarioConfiguration : IEntityTypeConfiguration<Movimi
             .WithMany()
             .HasForeignKey(m => m.ProductoVarianteId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasIndex(m => new { m.AlmacenId, m.UbicacionAlmacenId })
+            .HasDatabaseName("IX_MovimientosInventario_Almacen_Ubicacion");
+        builder.HasOne(m => m.Almacen)
+            .WithMany()
+            .HasForeignKey(m => m.AlmacenId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_MovimientosInventario_Almacenes_AlmacenId_N14");
+        builder.HasOne(m => m.UbicacionAlmacen)
+            .WithMany()
+            .HasForeignKey(m => new { m.AlmacenId, m.UbicacionAlmacenId })
+            .HasPrincipalKey(u => new { u.AlmacenId, u.Id })
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_MovimientosInventario_Ubicacion_MismoAlmacen_N14");
 
         builder.HasIndex(m => m.CompraId)
             .HasDatabaseName("IX_MovimientosInventario_CompraId");
