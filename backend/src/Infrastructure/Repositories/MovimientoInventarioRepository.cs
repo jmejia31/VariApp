@@ -1,3 +1,4 @@
+using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Common;
 using InventoryApp.Domain.Entities;
@@ -133,6 +134,100 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
         if (desde.HasValue) query = query.Where(m => m.Fecha >= desde.Value);
         if (hasta.HasValue) query = query.Where(m => m.Fecha <= hasta.Value);
         return await query.OrderByDescending(m => m.Fecha).Take(200).ToListAsync();
+    }
+
+    public async Task<(List<MovimientoInventario> Items, int TotalCount)> GetPagedAsync(MovimientoInventarioQueryDto filter)
+    {
+        ArgumentNullException.ThrowIfNull(filter);
+
+        var alcance = await _usuarioScope.ObtenerActualAsync();
+        var query = AplicarAlcance(ConIncludes(), alcance);
+
+        if (filter.ProductoId.HasValue)
+            query = query.Where(m => m.ProductoId == filter.ProductoId.Value);
+        if (filter.ProductoVarianteId.HasValue)
+            query = query.Where(m => m.ProductoVarianteId == filter.ProductoVarianteId.Value);
+        if (filter.AlmacenId.HasValue)
+            query = query.Where(m => m.AlmacenId == filter.AlmacenId.Value);
+        if (filter.UbicacionAlmacenId.HasValue)
+            query = query.Where(m => m.UbicacionAlmacenId == filter.UbicacionAlmacenId.Value);
+
+        if (!string.IsNullOrWhiteSpace(filter.Tipo))
+        {
+            if (Enum.TryParse<TipoMovimientoInventario>(filter.Tipo.Trim(), true, out var tipoMovimiento) &&
+                Enum.IsDefined(tipoMovimiento))
+            {
+                query = query.Where(m => m.Tipo == tipoMovimiento);
+            }
+            else
+            {
+                query = query.Where(_ => false);
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(filter.Causa))
+        {
+            if (Enum.TryParse<CausaMovimientoInventario>(filter.Causa.Trim(), true, out var causaMovimiento) &&
+                Enum.IsDefined(causaMovimiento))
+            {
+                query = query.Where(m => m.Causa == causaMovimiento);
+            }
+            else
+            {
+                query = query.Where(_ => false);
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(filter.CorrelationId))
+        {
+            var correlationId = filter.CorrelationId.Trim();
+            query = query.Where(m => m.CorrelationId == correlationId);
+        }
+
+        if (!string.IsNullOrWhiteSpace(filter.OrigenTipo))
+        {
+            var origenTipo = filter.OrigenTipo.Trim().ToLowerInvariant();
+            query = origenTipo switch
+            {
+                "compra" => filter.OrigenId.HasValue
+                    ? query.Where(m => m.CompraId == filter.OrigenId.Value)
+                    : query.Where(m => m.CompraId != null),
+                "venta" => filter.OrigenId.HasValue
+                    ? query.Where(m => m.VentaId == filter.OrigenId.Value)
+                    : query.Where(m => m.VentaId != null),
+                "consumoinsumo" or "consumo" => filter.OrigenId.HasValue
+                    ? query.Where(m => m.ConsumoInsumoId == filter.OrigenId.Value)
+                    : query.Where(m => m.ConsumoInsumoId != null),
+                "ajusteinventario" or "ajuste" => filter.OrigenId.HasValue
+                    ? query.Where(m => m.AjusteInventarioId == filter.OrigenId.Value)
+                    : query.Where(m => m.AjusteInventarioId != null),
+                _ => query.Where(_ => false)
+            };
+        }
+        else if (filter.OrigenId.HasValue)
+        {
+            var origenId = filter.OrigenId.Value;
+            query = query.Where(m =>
+                m.CompraId == origenId ||
+                m.VentaId == origenId ||
+                m.ConsumoInsumoId == origenId ||
+                m.AjusteInventarioId == origenId);
+        }
+
+        if (filter.Desde.HasValue)
+            query = query.Where(m => m.Fecha >= filter.Desde.Value);
+        if (filter.Hasta.HasValue)
+            query = query.Where(m => m.Fecha <= filter.Hasta.Value);
+
+        var totalCount = await query.CountAsync();
+        var items = await query
+            .OrderByDescending(m => m.Fecha)
+            .ThenByDescending(m => m.Id)
+            .Skip((filter.Page - 1) * filter.PageSize)
+            .Take(filter.PageSize)
+            .ToListAsync();
+
+        return (items, totalCount);
     }
 
     public async Task<IReadOnlyDictionary<int, MovimientoInventarioOrigenPersistido>> GetOrigenesTipadosAsync(
