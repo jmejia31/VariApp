@@ -1,3 +1,4 @@
+using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
@@ -13,6 +14,7 @@ public class ConsumoInsumoService : IConsumoInsumoService
     private readonly IProductoRepository _productoRepository;
     private readonly IProductoVarianteRepository _productoVarianteRepository;
     private readonly IMovimientoInventarioRepository _movimientoInventarioRepository;
+    private readonly IKardexMovimientoWriter _kardexMovimientoWriter;
     private readonly IInventarioConcurrencyService _inventarioConcurrency;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICurrentUserService _currentUser;
@@ -26,12 +28,14 @@ public class ConsumoInsumoService : IConsumoInsumoService
         IInventarioConcurrencyService inventarioConcurrency,
         IUnitOfWork unitOfWork,
         ICurrentUserService currentUser,
-        IAuditoriaService auditoria)
+        IAuditoriaService auditoria,
+        IKardexMovimientoWriter? kardexMovimientoWriter = null)
     {
         _repository = repository;
         _productoRepository = productoRepository;
         _productoVarianteRepository = productoVarianteRepository;
         _movimientoInventarioRepository = movimientoInventarioRepository;
+        _kardexMovimientoWriter = kardexMovimientoWriter ?? new KardexMovimientoWriter(movimientoInventarioRepository);
         _inventarioConcurrency = inventarioConcurrency;
         _unitOfWork = unitOfWork;
         _currentUser = currentUser;
@@ -158,6 +162,7 @@ public class ConsumoInsumoService : IConsumoInsumoService
                 .Select(d => new InventarioDemanda(d.ProductoId, d.ProductoVarianteId, d.Cantidad))
                 .ToList();
             var inventario = await _inventarioConcurrency.BloquearYValidarInventarioAsync(demanda, esDeduccion: true);
+            var correlationId = KardexCorrelationId.ConsumoConfirmar(consumo.Id);
 
             foreach (var productoGrupo in inventario.Demandas.GroupBy(x => x.ProductoId))
             {
@@ -196,7 +201,7 @@ public class ConsumoInsumoService : IConsumoInsumoService
                     _productoVarianteRepository.Update(variante);
                 }
 
-                await _movimientoInventarioRepository.AddConOrigenTipadoAsync(
+                await _kardexMovimientoWriter.RegistrarCorrelacionadoAsync(
                     new MovimientoInventario
                     {
                         ProductoId = producto.Id,
@@ -214,7 +219,8 @@ public class ConsumoInsumoService : IConsumoInsumoService
                         CreadoPorNombreUsuario = _currentUser.NombreUsuario,
                         Fecha = DateTime.UtcNow
                     },
-                    OrigenMovimientoInventario.DesdeConsumoInsumo(consumo.Id));
+                    OrigenMovimientoInventario.DesdeConsumoInsumo(consumo.Id),
+                    correlationId);
             }
 
             consumo.Estado = EstadoConsumoInsumo.Confirmado;
@@ -266,6 +272,7 @@ public class ConsumoInsumoService : IConsumoInsumoService
                 .Select(d => new InventarioDemanda(d.ProductoId, d.ProductoVarianteId, d.Cantidad))
                 .ToList();
             var inventario = await _inventarioConcurrency.BloquearInventarioParaReversionAsync(demanda);
+            var correlationId = KardexCorrelationId.ConsumoAnular(consumo.Id);
 
             foreach (var productoGrupo in inventario.Demandas.GroupBy(x => x.ProductoId))
             {
@@ -296,7 +303,7 @@ public class ConsumoInsumoService : IConsumoInsumoService
                     _productoVarianteRepository.Update(variante);
                 }
 
-                await _movimientoInventarioRepository.AddConOrigenTipadoAsync(
+                await _kardexMovimientoWriter.RegistrarCorrelacionadoAsync(
                     new MovimientoInventario
                     {
                         ProductoId = producto.Id,
@@ -314,7 +321,8 @@ public class ConsumoInsumoService : IConsumoInsumoService
                         CreadoPorNombreUsuario = _currentUser.NombreUsuario,
                         Fecha = DateTime.UtcNow
                     },
-                    OrigenMovimientoInventario.DesdeConsumoInsumo(consumo.Id));
+                    OrigenMovimientoInventario.DesdeConsumoInsumo(consumo.Id),
+                    correlationId);
             }
 
             consumo.Estado = EstadoConsumoInsumo.Anulado;
