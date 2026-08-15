@@ -14,12 +14,25 @@ public interface IMovimientoInventarioRepository
 {
     Task AddAsync(MovimientoInventario movimiento);
     Task AddConOrigenTipadoAsync(MovimientoInventario movimiento, OrigenMovimientoInventario origen);
+    Task<List<MovimientoInventario>> GetByProductoAsync(int productoId);
+    Task<List<MovimientoInventario>> GetFilteredAsync(int? productoId, string? tipo, DateTime? desde, DateTime? hasta);
+    Task<IReadOnlyDictionary<int, MovimientoInventarioOrigenPersistido>> GetOrigenesTipadosAsync(
+        IReadOnlyCollection<int> movimientoIds);
+    Task<int?> GetUltimoMovimientoOriginalCompraIdAsync(int compraId);
+    Task<bool> ExisteMovimientoPosteriorAsync(
+        int ultimoMovimientoOriginalId,
+        IReadOnlyCollection<int> productoIds);
+}
 
-    async Task AddConOrigenTipadoAsync(
+public static class MovimientoInventarioRepositoryExtensions
+{
+    public static Task AddConOrigenTipadoAsync(
+        this IMovimientoInventarioRepository repository,
         MovimientoInventario movimiento,
         OrigenMovimientoInventario origen,
         ContextoFisicoMovimientoInventario contexto)
     {
+        ArgumentNullException.ThrowIfNull(repository);
         ArgumentNullException.ThrowIfNull(movimiento);
         ArgumentNullException.ThrowIfNull(origen);
         ArgumentNullException.ThrowIfNull(contexto);
@@ -29,15 +42,6 @@ public interface IMovimientoInventarioRepository
         movimiento.UbicacionAlmacenId = contexto.UbicacionAlmacenId;
         movimiento.CorrelationId = contexto.CorrelationId;
 
-        await AddConOrigenTipadoAsync(movimiento, origen);
+        return repository.AddConOrigenTipadoAsync(movimiento, origen);
     }
-
-    Task<List<MovimientoInventario>> GetByProductoAsync(int productoId);
-    Task<List<MovimientoInventario>> GetFilteredAsync(int? productoId, string? tipo, DateTime? desde, DateTime? hasta);
-    Task<IReadOnlyDictionary<int, MovimientoInventarioOrigenPersistido>> GetOrigenesTipadosAsync(
-        IReadOnlyCollection<int> movimientoIds);
-    Task<int?> GetUltimoMovimientoOriginalCompraIdAsync(int compraId);
-    Task<bool> ExisteMovimientoPosteriorAsync(
-        int ultimoMovimientoOriginalId,
-        IReadOnlyCollection<int> productoIds);
 }
