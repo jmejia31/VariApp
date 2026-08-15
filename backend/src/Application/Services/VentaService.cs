@@ -17,7 +17,7 @@ public class VentaService : IVentaService
     private readonly IProductoVarianteRepository _productoVarianteRepository;
     private readonly IInventarioConcurrencyService _inventarioConcurrency;
     private readonly IFacturaRepository _facturaRepository;
-    private readonly IMovimientoInventarioRepository _movimientoInventarioRepository;
+    private readonly VentaKardexMovimientoRegistrar _ventaKardexMovimientoRegistrar;
     private readonly IMovimientoFinancieroRepository _movimientoFinancieroRepository;
     private readonly IEmpresaConfiguracionService _empresaConfiguracionService;
     private readonly ICalculoService _calculoService;
@@ -40,7 +40,8 @@ public class VentaService : IVentaService
         ICurrentUserService currentUser,
         IUnitOfWork unitOfWork,
         IAuditoriaService auditoria,
-        ITipoClientePredeterminadoResolver predeterminadoResolver)
+        ITipoClientePredeterminadoResolver predeterminadoResolver,
+        IKardexMovimientoWriter? kardexMovimientoWriter = null)
     {
         _ventaRepository = ventaRepository;
         _clienteRepository = clienteRepository;
@@ -48,7 +49,8 @@ public class VentaService : IVentaService
         _productoVarianteRepository = productoVarianteRepository;
         _inventarioConcurrency = inventarioConcurrency;
         _facturaRepository = facturaRepository;
-        _movimientoInventarioRepository = movimientoInventarioRepository;
+        _ventaKardexMovimientoRegistrar = new VentaKardexMovimientoRegistrar(
+            kardexMovimientoWriter ?? new KardexMovimientoWriter(movimientoInventarioRepository));
         _movimientoFinancieroRepository = movimientoFinancieroRepository;
         _empresaConfiguracionService = empresaConfiguracionService;
         _calculoService = calculoService;
@@ -225,7 +227,7 @@ public class VentaService : IVentaService
                     _productoVarianteRepository.Update(variante);
                 }
 
-                await _movimientoInventarioRepository.AddConOrigenTipadoAsync(new MovimientoInventario
+                await _ventaKardexMovimientoRegistrar.RegistrarConfirmacionAsync(venta.Id, new MovimientoInventario
                 {
                     ProductoId = producto.Id,
                     ProductoVarianteId = item.ProductoVarianteId,
@@ -243,7 +245,7 @@ public class VentaService : IVentaService
                     Descripcion = $"Salida por venta {venta.NumeroVenta}",
                     CreadoPorUsuarioId = _currentUser.UsuarioId,
                     CreadoPorNombreUsuario = _currentUser.NombreUsuario
-                }, OrigenMovimientoInventario.DesdeVenta(venta.Id));
+                });
             }
 
             await _movimientoFinancieroRepository.AddAsync(new MovimientoFinanciero
@@ -392,7 +394,7 @@ public class VentaService : IVentaService
                     _productoVarianteRepository.Update(variante);
                 }
 
-                await _movimientoInventarioRepository.AddConOrigenTipadoAsync(new MovimientoInventario
+                await _ventaKardexMovimientoRegistrar.RegistrarAnulacionAsync(venta.Id, new MovimientoInventario
                 {
                     ProductoId = producto.Id,
                     ProductoVarianteId = item.ProductoVarianteId,
@@ -411,7 +413,7 @@ public class VentaService : IVentaService
                     Descripcion = $"Entrada por anulación de venta {venta.NumeroVenta}. Motivo: {motivo}",
                     CreadoPorUsuarioId = _currentUser.UsuarioId,
                     CreadoPorNombreUsuario = _currentUser.NombreUsuario
-                }, OrigenMovimientoInventario.DesdeVenta(venta.Id));
+                });
             }
 
             await _movimientoFinancieroRepository.AddAsync(new MovimientoFinanciero
