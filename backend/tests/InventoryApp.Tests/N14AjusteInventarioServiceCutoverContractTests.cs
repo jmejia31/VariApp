@@ -25,6 +25,32 @@ public sealed class N14AjusteInventarioServiceCutoverContractTests
     }
 
     [Fact]
+    public async Task BloquearParaConfirmacion_MismaVarianteEnUbicacionesDistintas_PreservaDosClavesFisicas()
+    {
+        var fake = new FakeExistenciaConcurrencyService();
+        var sut = new AjusteInventarioExistenciaCutoverService(fake);
+        var detalleA = CrearDetalle(cantidadObjetivo: 7);
+        var detalleB = CrearDetalle(cantidadObjetivo: 4);
+        detalleB.UbicacionAlmacenId = 8;
+
+        await sut.BloquearParaConfirmacionAsync(new[] { detalleA, detalleB });
+
+        Assert.False(fake.UltimoEsDeduccion);
+        var demandas = Assert.NotNull(fake.UltimasDemandas);
+        Assert.Equal(2, demandas.Count);
+        Assert.Contains(demandas, d =>
+            d.ProductoId == 11 &&
+            d.ProductoVarianteId == 101 &&
+            d.AlmacenId == 7 &&
+            d.UbicacionAlmacenId == 3);
+        Assert.Contains(demandas, d =>
+            d.ProductoId == 11 &&
+            d.ProductoVarianteId == 101 &&
+            d.AlmacenId == 7 &&
+            d.UbicacionAlmacenId == 8);
+    }
+
+    [Fact]
     public async Task AplicarObjetivoConfirmacion_AjustaStockFisicoConPrecondicionPesimista()
     {
         var fake = new FakeExistenciaConcurrencyService();
