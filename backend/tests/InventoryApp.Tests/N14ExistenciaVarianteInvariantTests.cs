@@ -28,7 +28,7 @@ public sealed class N14ExistenciaVarianteInvariantTests
     }
 
     [Fact]
-    public void EstablecerStocks_CeroFisico_ProduceAgotadaSinDisponibleNegativo()
+    public void EstablecerStocks_CeroFisico_ProduceAgotadaYStockBajoSinDisponibleNegativo()
     {
         var existencia = new ExistenciaVariante();
 
@@ -41,6 +41,6 @@ public sealed class N14ExistenciaVarianteInvariantTests
 
         Assert.Equal(0, existencia.StockDisponible);
         Assert.True(existencia.EstaAgotada);
-        Assert.False(existencia.TieneStockBajo);
+        Assert.True(existencia.TieneStockBajo);
     }
 }
