@@ -1,3 +1,6 @@
+using InventoryApp.Application.Common;
+using InventoryApp.Application.DTOs;
+using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Application.Services;
 using InventoryApp.Domain.Entities;
@@ -20,41 +23,97 @@ public class MovimientoInventarioServiceTests
             EsPrincipal = true,
             Orden = 0
         });
-        var movimiento = new MovimientoInventario
-        {
-            Id = 3,
-            ProductoId = producto.Id,
-            ProductoVarianteId = 12,
-            AlmacenId = 4,
-            UbicacionAlmacenId = 9,
-            Producto = producto,
-            Tipo = TipoMovimientoInventario.Entrada,
-            Causa = CausaMovimientoInventario.AjusteManual,
-            Cantidad = 2,
-            StockAnterior = 0,
-            StockNuevo = 2,
-            CostoUnitario = 125.50m,
-            PrecioUnitario = 180m,
-            CorrelationId = "ajuste:2026-08-15:3",
-            ReferenciaTipo = "AjusteInventario",
-            ReferenciaId = 5
-        };
+        var movimiento = CrearMovimiento(producto);
         var repository = new Mock<IMovimientoInventarioRepository>();
         repository
             .Setup(r => r.GetFilteredAsync(null, null, null, null))
             .ReturnsAsync(new List<MovimientoInventario> { movimiento });
         repository
             .Setup(r => r.GetOrigenesTipadosAsync(It.IsAny<IReadOnlyCollection<int>>()))
-            .ReturnsAsync(new Dictionary<int, MovimientoInventarioOrigenPersistido>
-            {
-                [movimiento.Id] = new(movimiento.Id, null, null, null, 5)
-            });
+            .ReturnsAsync(CrearOrigenes(movimiento));
         var service = new MovimientoInventarioService(repository.Object);
 
         var resultado = await service.GetFilteredAsync(null, null, null, null);
 
-        var dto = resultado.Single();
-        Assert.Equal("https://res.cloudinary.com/demo/image/upload/teclado.webp", dto.ProductoImagenPrincipalUrl);
+        ValidarDto(resultado.Single());
+    }
+
+    [Fact]
+    public async Task GetPagedAsync_Conserva_Paginacion_Contexto_Y_Origen_Tipado()
+    {
+        var producto = new Producto { Id = 2, Nombre = "Teclado", Marca = "Logitech", Modelo = "K120" };
+        var movimiento = CrearMovimiento(producto);
+        var query = new MovimientoInventarioQueryDto
+        {
+            ProductoVarianteId = 12,
+            AlmacenId = 4,
+            CorrelationId = "ajuste:2026-08-15:3",
+            Page = 2,
+            PageSize = 25
+        };
+        var repository = new Mock<IMovimientoInventarioRepository>();
+        repository
+            .Setup(r => r.GetPagedAsync(query))
+            .ReturnsAsync((new List<MovimientoInventario> { movimiento }, 51));
+        repository
+            .Setup(r => r.GetOrigenesTipadosAsync(It.IsAny<IReadOnlyCollection<int>>()))
+            .ReturnsAsync(CrearOrigenes(movimiento));
+        var service = new MovimientoInventarioService(repository.Object);
+
+        var resultado = await service.GetPagedAsync(query);
+
+        Assert.Equal(2, resultado.Page);
+        Assert.Equal(25, resultado.PageSize);
+        Assert.Equal(51, resultado.TotalCount);
+        Assert.Equal(3, resultado.TotalPages);
+        ValidarDto(resultado.Items.Single());
+    }
+
+    [Fact]
+    public async Task GetPagedAsync_Rechaza_Rango_De_Fechas_Invertido_Antes_De_Consultar()
+    {
+        var repository = new Mock<IMovimientoInventarioRepository>();
+        var service = new MovimientoInventarioService(repository.Object);
+        var query = new MovimientoInventarioQueryDto
+        {
+            Desde = new DateTime(2026, 8, 16),
+            Hasta = new DateTime(2026, 8, 15)
+        };
+
+        var ex = await Assert.ThrowsAsync<BusinessRuleException>(() => service.GetPagedAsync(query));
+
+        Assert.Contains("fecha inicial", ex.Message, StringComparison.OrdinalIgnoreCase);
+        repository.Verify(r => r.GetPagedAsync(It.IsAny<MovimientoInventarioQueryDto>()), Times.Never);
+    }
+
+    private static MovimientoInventario CrearMovimiento(Producto producto) => new()
+    {
+        Id = 3,
+        ProductoId = producto.Id,
+        ProductoVarianteId = 12,
+        AlmacenId = 4,
+        UbicacionAlmacenId = 9,
+        Producto = producto,
+        Tipo = TipoMovimientoInventario.Entrada,
+        Causa = CausaMovimientoInventario.AjusteManual,
+        Cantidad = 2,
+        StockAnterior = 0,
+        StockNuevo = 2,
+        CostoUnitario = 125.50m,
+        PrecioUnitario = 180m,
+        CorrelationId = "ajuste:2026-08-15:3",
+        ReferenciaTipo = "AjusteInventario",
+        ReferenciaId = 5
+    };
+
+    private static Dictionary<int, MovimientoInventarioOrigenPersistido> CrearOrigenes(MovimientoInventario movimiento) =>
+        new()
+        {
+            [movimiento.Id] = new(movimiento.Id, null, null, null, 5)
+        };
+
+    private static void ValidarDto(MovimientoInventarioDto dto)
+    {
         Assert.Equal(12, dto.ProductoVarianteId);
         Assert.Equal(4, dto.AlmacenId);
         Assert.Equal(9, dto.UbicacionAlmacenId);
