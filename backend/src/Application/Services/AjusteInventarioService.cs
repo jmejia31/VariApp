@@ -17,6 +17,7 @@ public sealed class AjusteInventarioService : IAjusteInventarioService
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICurrentUserService _currentUser;
     private readonly IAuditoriaService _auditoria;
+    private readonly IExistenciaVarianteConcurrencyService? _existenciaVarianteConcurrency;
 
     public AjusteInventarioService(
         IAjusteInventarioRepository repository,
@@ -26,7 +27,8 @@ public sealed class AjusteInventarioService : IAjusteInventarioService
         IInventarioConcurrencyService inventarioConcurrency,
         IUnitOfWork unitOfWork,
         ICurrentUserService currentUser,
-        IAuditoriaService auditoria)
+        IAuditoriaService auditoria,
+        IExistenciaVarianteConcurrencyService? existenciaVarianteConcurrency = null)
     {
         _repository = repository;
         _productoRepository = productoRepository;
@@ -36,6 +38,7 @@ public sealed class AjusteInventarioService : IAjusteInventarioService
         _unitOfWork = unitOfWork;
         _currentUser = currentUser;
         _auditoria = auditoria;
+        _existenciaVarianteConcurrency = existenciaVarianteConcurrency;
     }
 
     public async Task<List<AjusteInventarioDto>> GetAllAsync() =>
