@@ -23,8 +23,8 @@ jobs:
         with:
           dotnet-version: '8.0.x'
       - run: dotnet restore backend/InventoryApp.sln
-      - name: Transformar writer en workspace efimero
-        run: python backend/scripts/n1_4_d_transform_ajuste_writer.py
+      - name: Materializar writer certificado de forma idempotente
+        run: python backend/scripts/n1_4_d_apply_cutover_idempotent.py
       - name: Compilar backend Release
         run: dotnet build backend/InventoryApp.sln --configuration Release --no-restore
       - name: Ejecutar pruebas N1.4 de Ajuste
