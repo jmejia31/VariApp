@@ -26,6 +26,11 @@ public class MovimientoInventario
     public string? ProductoTallaSnapshot { get; set; }
     public string? ProductoSkuSnapshot { get; set; }
 
+    // Correlación durable del evento de inventario. Los movimientos nuevos deben
+    // persistirla para trazabilidad end-to-end; el vacío sólo puede existir en
+    // histórico anterior al cutover N1.5.
+    public string CorrelationId { get; set; } = string.Empty;
+
     public TipoMovimientoInventario Tipo { get; set; }
     public CausaMovimientoInventario Causa { get; set; } = CausaMovimientoInventario.NoEspecificada;
     public int Cantidad { get; set; }
