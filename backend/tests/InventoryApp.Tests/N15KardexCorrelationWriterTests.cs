@@ -1,6 +1,7 @@
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Common;
 using InventoryApp.Domain.Entities;
+using InventoryApp.Domain.Enums;
 using Moq;
 using Xunit;
 
@@ -23,7 +24,7 @@ public class N15KardexCorrelationWriterTests
         var movimiento = new MovimientoInventario
         {
             ProductoId = 11,
-            Tipo = Domain.Enums.TipoMovimientoInventario.Entrada,
+            Tipo = TipoMovimientoInventario.Entrada,
             Cantidad = 2,
             StockAnterior = 3,
             StockNuevo = 5,
