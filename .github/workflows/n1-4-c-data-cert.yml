@@ -85,6 +85,17 @@ jobs:
             --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
             --startup-project src/API/InventoryApp.API.csproj \
             --context AppDbContext
+          docker exec "${{ job.services.mysql.id }}" mysql -uroot -proot inventoryapp_n14c -e "
+            INSERT INTO Sucursales
+              (EmpresaId,Codigo,Nombre,Direccion,Telefono,Correo,ZonaHoraria,Activa,FechaCreacion,FechaActualizacion,CreadoPorNombreUsuario,Eliminado)
+            VALUES
+              (NULL,'SUC-N14C','Sucursal fixture N1.4.C',NULL,NULL,NULL,'America/Tegucigalpa',1,UTC_TIMESTAMP(6),UTC_TIMESTAMP(6),'VAEP N1.4.C cert',0);
+            SET @sucursal_id = LAST_INSERT_ID();
+            INSERT INTO Almacenes
+              (SucursalId,Codigo,Nombre,Tipo,Activo,Eliminado,FechaCreacion,FechaActualizacion,CreadoPorNombreUsuario)
+            VALUES
+              (@sucursal_id,'ALM-N14C','Almacen fixture N1.4.C',1,1,0,UTC_TIMESTAMP(6),UTC_TIMESTAMP(6),'VAEP N1.4.C cert');"
+          printf '%s\n' 'Fixture legacy=OK' 'Sucursal=1' 'AlmacenActivo=1' > /tmp/n1-4-c-fixture.txt
 
       - name: Verificar precondiciones deterministas
         working-directory: .
@@ -105,8 +116,8 @@ jobs:
           set -euo pipefail
           c="${{ job.services.mysql.id }}"
           docker exec -i "$c" mysql -uroot -proot inventoryapp_n14c --batch \
-            < backend/scripts/preflight-n1-4-c-existencia-variante.sql | tee /tmp/n14c-preflight.txt
-          grep -q 'OK_LEGACY_PRESERVADO' /tmp/n14c-preflight.txt
+            < backend/scripts/preflight-n1-4-c-existencia-variante.sql | tee /tmp/n1-4-c-preflight.txt
+          grep -q 'OK_LEGACY_PRESERVADO' /tmp/n1-4-c-preflight.txt
 
       - name: Ejecutar backfill real y reconciliar
         working-directory: .
@@ -114,11 +125,11 @@ jobs:
           set -euo pipefail
           c="${{ job.services.mysql.id }}"
           docker exec -i "$c" mysql -uroot -proot inventoryapp_n14c --batch \
-            < backend/scripts/backfill-n1-4-c-existencia-variante.sql | tee /tmp/n14c-backfill.txt
-          grep -q 'OK_BACKFILL_RECONCILIADO' /tmp/n14c-backfill.txt
+            < backend/scripts/backfill-n1-4-c-existencia-variante.sql | tee /tmp/n1-4-c-backfill.txt
+          grep -q 'OK_BACKFILL_RECONCILIADO' /tmp/n1-4-c-backfill.txt
           docker exec -i "$c" mysql -uroot -proot inventoryapp_n14c --batch \
-            < backend/scripts/postcheck-n1-4-c-existencia-variante.sql | tee /tmp/n14c-postcheck.txt
-          grep -q 'OK_RECONCILIADO' /tmp/n14c-postcheck.txt
+            < backend/scripts/postcheck-n1-4-c-existencia-variante.sql | tee /tmp/n1-4-c-postcheck.txt
+          grep -q 'OK_RECONCILIADO' /tmp/n1-4-c-postcheck.txt
           mismatch="$(docker exec "$c" mysql -uroot -proot inventoryapp_n14c -Nse "
             SELECT COUNT(*) FROM (
               SELECT pv.Id
@@ -148,15 +159,15 @@ jobs:
           test "$activos" = '2'
           set +e
           docker exec -i "$c" mysql -uroot -proot inventoryapp_n14c --batch \
-            < backend/scripts/backfill-n1-4-c-existencia-variante.sql > /tmp/n14c-ambiguous.txt 2>&1
+            < backend/scripts/backfill-n1-4-c-existencia-variante.sql > /tmp/n1-4-c-ambiguous.txt 2>&1
           rc=$?
           set -e
-          cat /tmp/n14c-ambiguous.txt
+          cat /tmp/n1-4-c-ambiguous.txt
           test "$rc" -ne 0
-          grep -q 'se requiere mapeo explicito antes del backfill' /tmp/n14c-ambiguous.txt
+          grep -q 'se requiere mapeo explicito antes del backfill' /tmp/n1-4-c-ambiguous.txt
           filas="$(docker exec "$c" mysql -uroot -proot inventoryapp_n14c -Nse "SELECT COUNT(*) FROM ExistenciasVariante;")"
           test "$filas" = '0'
-          echo 'OK_FAIL_CLOSED_AMBIGUO'
+          echo 'OK_FAIL_CLOSED_AMBIGUO' | tee -a /tmp/n1-4-c-ambiguous.txt
 
       - name: Evidencia final
         working-directory: .
