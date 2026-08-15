@@ -30,6 +30,7 @@ public class AppDbContext : DbContext
     public DbSet<ConsumoInsumoDetalle> ConsumoInsumoDetalles => Set<ConsumoInsumoDetalle>();
     public DbSet<AjusteInventario> AjustesInventario => Set<AjusteInventario>();
     public DbSet<AjusteInventarioDetalle> AjusteInventarioDetalles => Set<AjusteInventarioDetalle>();
+    public DbSet<ExistenciaVariante> ExistenciasVariante => Set<ExistenciaVariante>();
     public DbSet<MovimientoFinanciero> MovimientosFinancieros => Set<MovimientoFinanciero>();
     public DbSet<Venta> Ventas => Set<Venta>();
     public DbSet<VentaDetalle> VentaDetalles => Set<VentaDetalle>();
