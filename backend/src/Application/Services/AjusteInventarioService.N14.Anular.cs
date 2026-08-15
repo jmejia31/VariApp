@@ -35,10 +35,13 @@ public sealed partial class AjusteInventarioService
             // Bridge de compatibilidad: estas filas se bloquean únicamente para mantener
             // Producto.Cantidad/ProductoVariante.Cantidad como proyección agregada.
             // Nunca se leen para decidir stock, snapshots ni viabilidad de la reversión.
+            // Una variante puede existir en varias filas físicas del ajuste; el bridge
+            // agregado se bloquea una sola vez por producto/variante.
             var lockRequest = ajuste.Detalles
-                .OrderBy(d => d.ProductoId)
-                .ThenBy(d => d.ProductoVarianteId)
-                .Select(d => new InventarioDemanda(d.ProductoId, d.ProductoVarianteId, 1))
+                .GroupBy(d => (d.ProductoId, d.ProductoVarianteId))
+                .OrderBy(g => g.Key.ProductoId)
+                .ThenBy(g => g.Key.ProductoVarianteId)
+                .Select(g => new InventarioDemanda(g.Key.ProductoId, g.Key.ProductoVarianteId, 1))
                 .ToList();
             var inventarioLegacy = await _inventarioConcurrency.BloquearInventarioParaReversionAsync(lockRequest);
 
