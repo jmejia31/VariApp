@@ -91,7 +91,8 @@ public sealed class ExistenciaVarianteService : IExistenciaVarianteService
 
         AplicarStocks(existencia, dto.StockFisico, dto.StockReservado, dto.StockTransito, dto.StockMinimo, dto.StockMaximo);
         await _repository.AddAsync(existencia);
-        await _repository.SaveChangesAsync();
+        if (!await _repository.SaveChangesAsync())
+            throw new BusinessRuleException("No fue posible persistir la existencia de inventario.");
 
         await _auditoria.RegistrarAsync(
             ModuloSistema.Inventario,
@@ -135,7 +136,8 @@ public sealed class ExistenciaVarianteService : IExistenciaVarianteService
         existencia.FechaActualizacion = DateTime.UtcNow;
 
         _repository.Update(existencia);
-        await _repository.SaveChangesAsync();
+        if (!await _repository.SaveChangesAsync())
+            throw new BusinessRuleException("No fue posible persistir la configuración de la existencia de inventario.");
 
         await _auditoria.RegistrarAsync(
             ModuloSistema.Inventario,
