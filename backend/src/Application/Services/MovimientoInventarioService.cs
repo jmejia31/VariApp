@@ -32,29 +32,40 @@ public class MovimientoInventarioService : IMovimientoInventarioService
             { CompraId: not null } => "Compra",
             { VentaId: not null } => "Venta",
             { ConsumoInsumoId: not null } => "ConsumoInsumo",
+            { AjusteInventarioId: not null } => "AjusteInventario",
             _ => null
         };
 
-        var origenId = origen?.CompraId ?? origen?.VentaId ?? origen?.ConsumoInsumoId;
+        var origenId = origen?.CompraId ??
+                       origen?.VentaId ??
+                       origen?.ConsumoInsumoId ??
+                       origen?.AjusteInventarioId;
 
         return new MovimientoInventarioDto
         {
             Id = m.Id,
             ProductoId = m.ProductoId,
             ProductoVarianteId = m.ProductoVarianteId,
+            AlmacenId = m.AlmacenId,
+            UbicacionAlmacenId = m.UbicacionAlmacenId,
             ProductoNombre = m.Producto?.Nombre ?? "(producto eliminado)",
             ProductoColor = m.ProductoColorSnapshot ?? m.ProductoVariante?.Color?.Nombre,
             ProductoSku = m.ProductoSkuSnapshot ?? m.ProductoVariante?.Sku,
             ProductoImagenPrincipalUrl = m.Producto?.ImagenPrincipal?.Url,
             Tipo = m.Tipo.ToString(),
+            Causa = m.Causa.ToString(),
             Cantidad = m.Cantidad,
             StockAnterior = m.StockAnterior,
             StockNuevo = m.StockNuevo,
+            CostoUnitario = m.CostoUnitario,
+            PrecioUnitario = m.PrecioUnitario,
+            CorrelationId = m.CorrelationId,
             OrigenTipo = origenTipo,
             OrigenId = origenId,
             CompraId = origen?.CompraId,
             VentaId = origen?.VentaId,
             ConsumoInsumoId = origen?.ConsumoInsumoId,
+            AjusteInventarioId = origen?.AjusteInventarioId,
             ReferenciaTipo = m.ReferenciaTipo,
             ReferenciaId = m.ReferenciaId,
             Descripcion = m.Descripcion,
