@@ -487,12 +487,16 @@ public sealed class AjusteInventarioService : IAjusteInventarioService
         IReadOnlyCollection<AjusteInventarioDetalleInputDto> detalles)
     {
         var duplicado = detalles
-            .GroupBy(d => (d.ProductoId, d.ProductoVarianteId))
+            .GroupBy(d => (d.ProductoId, d.ProductoVarianteId, d.AlmacenId, d.UbicacionAlmacenId))
             .FirstOrDefault(g => g.Count() > 1);
         if (duplicado is not null)
-            throw new BusinessRuleException("Cada producto/variante puede aparecer una sola vez en el ajuste.");
+            throw new BusinessRuleException("Cada producto/variante/almacén/ubicación puede aparecer una sola vez en el ajuste.");
 
-        foreach (var entrada in detalles.OrderBy(d => d.ProductoId).ThenBy(d => d.ProductoVarianteId))
+        foreach (var entrada in detalles
+            .OrderBy(d => d.ProductoId)
+            .ThenBy(d => d.ProductoVarianteId)
+            .ThenBy(d => d.AlmacenId)
+            .ThenBy(d => d.UbicacionAlmacenId))
         {
             var producto = await _productoRepository.GetByIdAsync(entrada.ProductoId)
                 ?? throw new BusinessRuleException($"El producto ID '{entrada.ProductoId}' no existe.");
@@ -516,6 +520,8 @@ public sealed class AjusteInventarioService : IAjusteInventarioService
             {
                 ProductoId = entrada.ProductoId,
                 ProductoVarianteId = entrada.ProductoVarianteId,
+                AlmacenId = entrada.AlmacenId > 0 ? entrada.AlmacenId : null,
+                UbicacionAlmacenId = entrada.UbicacionAlmacenId,
                 CantidadObjetivo = entrada.CantidadObjetivo,
                 FechaCreacion = DateTime.UtcNow,
                 FechaActualizacion = DateTime.UtcNow
@@ -608,6 +614,8 @@ public sealed class AjusteInventarioService : IAjusteInventarioService
                 Id = d.Id,
                 ProductoId = d.ProductoId,
                 ProductoVarianteId = d.ProductoVarianteId,
+                AlmacenId = d.AlmacenId ?? 0,
+                UbicacionAlmacenId = d.UbicacionAlmacenId,
                 CantidadObjetivo = d.CantidadObjetivo,
                 CantidadAnteriorSnapshot = d.CantidadAnteriorSnapshot,
                 CantidadNuevaSnapshot = d.CantidadNuevaSnapshot,
