@@ -7,6 +7,8 @@ public sealed class AjusteInventarioDetalleInputDto
 {
     public int ProductoId { get; set; }
     public int? ProductoVarianteId { get; set; }
+    public int AlmacenId { get; set; }
+    public int? UbicacionAlmacenId { get; set; }
     public int CantidadObjetivo { get; set; }
 }
 
@@ -44,6 +46,8 @@ public sealed class AjusteInventarioFiltroDto : PagedRequest
     public DateTime? Hasta { get; set; }
     public int? ProductoId { get; set; }
     public int? ProductoVarianteId { get; set; }
+    public int? AlmacenId { get; set; }
+    public int? UbicacionAlmacenId { get; set; }
 }
 
 public sealed class AjusteInventarioDetalleDto
@@ -51,6 +55,8 @@ public sealed class AjusteInventarioDetalleDto
     public int Id { get; set; }
     public int ProductoId { get; set; }
     public int? ProductoVarianteId { get; set; }
+    public int AlmacenId { get; set; }
+    public int? UbicacionAlmacenId { get; set; }
     public int CantidadObjetivo { get; set; }
     public int? CantidadAnteriorSnapshot { get; set; }
     public int? CantidadNuevaSnapshot { get; set; }
