@@ -72,6 +72,7 @@ builder.Services.AddScoped<IAlmacenService, AlmacenService>();
 builder.Services.AddScoped<IUbicacionAlmacenService, UbicacionAlmacenService>();
 builder.Services.AddScoped<IExistenciaVarianteService, ExistenciaVarianteService>();
 builder.Services.AddScoped<IExistenciaVarianteConcurrencyService, ExistenciaVarianteConcurrencyService>();
+builder.Services.AddScoped<AjusteInventarioExistenciaCutoverService>();
 builder.Services.AddScoped<ICatalogoProductoService, CatalogoProductoService>();
 builder.Services.AddScoped<IProveedorService, ProveedorService>();
 builder.Services.AddScoped<IClienteService, ClienteService>();
