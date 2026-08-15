@@ -1,3 +1,4 @@
+using InventoryApp.Domain.Common;
 using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -26,7 +27,7 @@ public class MovimientoInventarioConfiguration : IEntityTypeConfiguration<Movimi
         builder.Property(m => m.ProductoSkuSnapshot).HasMaxLength(80);
         builder.Property(m => m.CorrelationId)
             .IsRequired()
-            .HasMaxLength(100)
+            .HasMaxLength(ContextoFisicoMovimientoInventario.MaxCorrelationIdLength)
             .HasDefaultValue(string.Empty);
         builder.Property(m => m.CostoUnitario).HasColumnType("decimal(18,2)");
         builder.Property(m => m.PrecioUnitario).HasColumnType("decimal(18,2)");
