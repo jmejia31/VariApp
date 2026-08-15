@@ -4,7 +4,7 @@ using InventoryApp.Domain.Entities;
 
 namespace InventoryApp.Application.Services;
 
-internal static class AjusteInventarioExistenciaContext
+public static class AjusteInventarioExistenciaContext
 {
     public static InventarioDemandaExistencia CrearDemanda(AjusteInventarioDetalle detalle, int cantidad = 1)
     {
