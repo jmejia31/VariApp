@@ -33,7 +33,7 @@ BEGIN
 
     IF v_almacenes_activos <> 1 THEN
         SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = 'N1.4.C abortado: el legado no identifica almacen y no existe exactamente un almacen activo; se requiere mapeo explicito antes del backfill';
+            SET MESSAGE_TEXT = 'N1.4.C abortado: almacen legacy ambiguo; se requiere mapeo explicito antes del backfill';
     END IF;
 
     SELECT COUNT(*)
