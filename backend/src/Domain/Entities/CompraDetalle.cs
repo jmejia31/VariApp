@@ -11,6 +11,14 @@ public class CompraDetalle
     public int? ProductoVarianteId { get; set; }
     public ProductoVariante? ProductoVariante { get; set; }
 
+    // Contexto físico N1.4. Nullable exclusivamente para preservar documentos
+    // históricos previos al cutover; las operaciones nuevas lo validan de forma
+    // explícita y nunca infieren un almacén arbitrario.
+    public int? AlmacenId { get; set; }
+    public Almacen? Almacen { get; set; }
+    public int? UbicacionAlmacenId { get; set; }
+    public UbicacionAlmacen? UbicacionAlmacen { get; set; }
+
     public int Cantidad { get; set; }
     public decimal CostoUnitario { get; set; }
     public decimal Subtotal { get; set; }
