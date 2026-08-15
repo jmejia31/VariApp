@@ -1,4 +1,6 @@
+using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs;
+using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities;
 
@@ -21,6 +23,25 @@ public class MovimientoInventarioService : IMovimientoInventarioService
         return movimientos
             .Select(m => ToDto(m, origenes.GetValueOrDefault(m.Id)))
             .ToList();
+    }
+
+    public async Task<PagedResult<MovimientoInventarioDto>> GetPagedAsync(MovimientoInventarioQueryDto query)
+    {
+        ArgumentNullException.ThrowIfNull(query);
+
+        if (query.Desde.HasValue && query.Hasta.HasValue && query.Desde.Value > query.Hasta.Value)
+            throw new BusinessRuleException("La fecha inicial del Kardex no puede ser posterior a la fecha final.");
+
+        var (items, totalCount) = await _repository.GetPagedAsync(query);
+        var origenes = await _repository.GetOrigenesTipadosAsync(items.Select(m => m.Id).ToArray());
+
+        return new PagedResult<MovimientoInventarioDto>
+        {
+            Items = items.Select(m => ToDto(m, origenes.GetValueOrDefault(m.Id))).ToList(),
+            Page = query.Page,
+            PageSize = query.PageSize,
+            TotalCount = totalCount
+        };
     }
 
     private static MovimientoInventarioDto ToDto(
