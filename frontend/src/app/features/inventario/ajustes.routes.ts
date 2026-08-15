@@ -4,6 +4,12 @@ import { permisoGuard } from '../../core/guards/permiso.guard';
 
 export const AJUSTES_INVENTARIO_ROUTES: Routes = [
   {
+    path: 'inventario/existencias',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Inventario', accion: 'Ver' },
+    loadComponent: () => import('./existencias-variante-list.component').then(m => m.ExistenciasVarianteListComponent)
+  },
+  {
     path: 'inventario/ajustes',
     canActivate: [authGuard, permisoGuard],
     data: { modulo: 'Inventario', accion: 'Ver' },
