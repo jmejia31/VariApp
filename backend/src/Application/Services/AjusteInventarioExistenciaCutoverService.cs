@@ -4,6 +4,11 @@ using InventoryApp.Domain.Entities;
 
 namespace InventoryApp.Application.Services;
 
+public sealed record AjusteInventarioExistenciaTransicion(
+    int StockAnterior,
+    int StockNuevo,
+    int Diferencia);
+
 /// <summary>
 /// Orquesta el cutover de AjusteInventario hacia ExistenciaVariante como autoridad
 /// física de stock. Mantiene los locks y escrituras pesimistas fuera del bridge
@@ -35,7 +40,7 @@ public sealed class AjusteInventarioExistenciaCutoverService
         return _existenciaConcurrency.BloquearExistenciasParaReversionAsync(demandas);
     }
 
-    public async Task<int> AplicarObjetivoConfirmacionAsync(
+    public async Task<AjusteInventarioExistenciaTransicion> AplicarConfirmacionConSnapshotAsync(
         InventarioExistenciaLockSet lockSet,
         AjusteInventarioDetalle detalle)
     {
@@ -44,8 +49,9 @@ public sealed class AjusteInventarioExistenciaCutoverService
             existencia,
             detalle.CantidadObjetivo);
 
+        var stockAnterior = existencia.StockFisico;
         var diferencia = AjusteInventarioExistenciaStock.CalcularDiferencia(
-            existencia.StockFisico,
+            stockAnterior,
             detalle.CantidadObjetivo);
         if (diferencia == 0)
             throw new BusinessRuleException("El detalle no produce una diferencia real sobre el stock físico autoritativo.");
@@ -53,19 +59,31 @@ public sealed class AjusteInventarioExistenciaCutoverService
         var clave = AjusteInventarioExistenciaContext.CrearClave(detalle);
         await _existenciaConcurrency.AjustarStockFisicoPesimistaAsync(
             clave,
-            existencia.StockFisico,
+            stockAnterior,
             detalle.CantidadObjetivo);
 
-        return diferencia;
+        return new AjusteInventarioExistenciaTransicion(
+            stockAnterior,
+            detalle.CantidadObjetivo,
+            diferencia);
     }
 
-    public async Task<int> AplicarReversionAsync(
+    public async Task<int> AplicarObjetivoConfirmacionAsync(
+        InventarioExistenciaLockSet lockSet,
+        AjusteInventarioDetalle detalle)
+    {
+        var transicion = await AplicarConfirmacionConSnapshotAsync(lockSet, detalle);
+        return transicion.Diferencia;
+    }
+
+    public async Task<AjusteInventarioExistenciaTransicion> AplicarReversionConSnapshotAsync(
         InventarioExistenciaLockSet lockSet,
         AjusteInventarioDetalle detalle)
     {
         var existencia = AjusteInventarioExistenciaStock.ObtenerExistencia(lockSet, detalle);
         var diferenciaOriginal = detalle.DiferenciaSnapshot
             ?? throw new BusinessRuleException("El ajuste no contiene una diferencia histórica válida para revertir.");
+        var stockAnterior = existencia.StockFisico;
         var objetivo = AjusteInventarioExistenciaStock.CalcularObjetivoReversion(
             existencia,
             diferenciaOriginal);
@@ -73,9 +91,20 @@ public sealed class AjusteInventarioExistenciaCutoverService
         var clave = AjusteInventarioExistenciaContext.CrearClave(detalle);
         await _existenciaConcurrency.AjustarStockFisicoPesimistaAsync(
             clave,
-            existencia.StockFisico,
+            stockAnterior,
             objetivo);
 
-        return objetivo;
+        return new AjusteInventarioExistenciaTransicion(
+            stockAnterior,
+            objetivo,
+            -diferenciaOriginal);
+    }
+
+    public async Task<int> AplicarReversionAsync(
+        InventarioExistenciaLockSet lockSet,
+        AjusteInventarioDetalle detalle)
+    {
+        var transicion = await AplicarReversionConSnapshotAsync(lockSet, detalle);
+        return transicion.StockNuevo;
     }
 }
