@@ -25,6 +25,8 @@ jobs:
       - run: dotnet restore backend/InventoryApp.sln
       - name: Materializar writer certificado de forma idempotente
         run: python backend/scripts/n1_4_d_apply_cutover_idempotent.py
+      - name: Dividir servicio en partials transportables
+        run: python backend/scripts/n1_4_d_split_ajuste_service.py
       - name: Compilar backend Release
         run: dotnet build backend/InventoryApp.sln --configuration Release --no-restore
       - name: Ejecutar pruebas N1.4 de Ajuste
@@ -36,10 +38,11 @@ jobs:
         run: |
           mkdir -p /tmp/n14d/backend/src/Application/Services
           mkdir -p /tmp/n14d/backend/src/Application/DTOs
-          cp backend/src/Application/Services/AjusteInventarioService.cs /tmp/n14d/backend/src/Application/Services/
+          cp backend/src/Application/Services/AjusteInventarioService.N14.*.cs /tmp/n14d/backend/src/Application/Services/
           cp backend/src/Application/DTOs/AjusteStockDto.cs /tmp/n14d/backend/src/Application/DTOs/
+          sha1sum /tmp/n14d/backend/src/Application/Services/*.cs /tmp/n14d/backend/src/Application/DTOs/AjusteStockDto.cs
       - uses: actions/upload-artifact@v4
         with:
-          name: n1-4-d-ajuste-writer
+          name: n1-4-d-ajuste-writer-partials
           path: /tmp/n14d
           if-no-files-found: error
