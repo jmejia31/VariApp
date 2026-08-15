@@ -35,7 +35,7 @@ jobs:
             {
                 b.Navigation("Detalles");
             });
-'''
+          '''
           if marker not in text:
               raise SystemExit('Marker compacto no encontrado; abortando sin modificar snapshot.')
           if 'IX_CompraDetalles_Almacen_Ubicacion' in text:
@@ -176,7 +176,7 @@ jobs:
                 b.Navigation("UbicacionAlmacen");
             });
 
-'''
+          '''
           text = text.replace(marker, delta + marker, 1)
           path.write_text(text, encoding='utf-8')
           print(f'patched snapshot lines={len(text.splitlines())}')
