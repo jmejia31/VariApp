@@ -8,9 +8,9 @@ namespace InventoryApp.Tests;
 public sealed class N15KardexVentaIntegrationContractTests
 {
     [Fact]
-    public void VentaService_debe_consumir_writer_canonico_de_Kardex()
+    public void Registrar_de_venta_debe_consumir_writer_canonico_de_Kardex()
     {
-        var constructor = typeof(VentaService)
+        var constructor = typeof(VentaKardexMovimientoRegistrar)
             .GetConstructors()
             .Single();
 
