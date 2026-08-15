@@ -10,7 +10,7 @@ namespace InventoryApp.Tests;
 public class MovimientoInventarioServiceTests
 {
     [Fact]
-    public async Task GetFilteredAsync_Incluye_Imagen_Principal_Y_Origen_Tipado()
+    public async Task GetFilteredAsync_Incluye_Contexto_Empresarial_Completo_Y_Origen_Tipado()
     {
         var producto = new Producto { Id = 2, Nombre = "Teclado", Marca = "Logitech", Modelo = "K120" };
         producto.Imagenes.Add(new ProductoImagen
@@ -24,12 +24,19 @@ public class MovimientoInventarioServiceTests
         {
             Id = 3,
             ProductoId = producto.Id,
+            ProductoVarianteId = 12,
+            AlmacenId = 4,
+            UbicacionAlmacenId = 9,
             Producto = producto,
             Tipo = TipoMovimientoInventario.Entrada,
+            Causa = CausaMovimientoInventario.AjustePositivo,
             Cantidad = 2,
             StockAnterior = 0,
             StockNuevo = 2,
-            ReferenciaTipo = "Compra",
+            CostoUnitario = 125.50m,
+            PrecioUnitario = 180m,
+            CorrelationId = "ajuste:2026-08-15:3",
+            ReferenciaTipo = "AjusteInventario",
             ReferenciaId = 5
         };
         var repository = new Mock<IMovimientoInventarioRepository>();
@@ -40,7 +47,7 @@ public class MovimientoInventarioServiceTests
             .Setup(r => r.GetOrigenesTipadosAsync(It.IsAny<IReadOnlyCollection<int>>()))
             .ReturnsAsync(new Dictionary<int, MovimientoInventarioOrigenPersistido>
             {
-                [movimiento.Id] = new(movimiento.Id, 5, null, null)
+                [movimiento.Id] = new(movimiento.Id, null, null, null, 5)
             });
         var service = new MovimientoInventarioService(repository.Object);
 
@@ -48,12 +55,20 @@ public class MovimientoInventarioServiceTests
 
         var dto = resultado.Single();
         Assert.Equal("https://res.cloudinary.com/demo/image/upload/teclado.webp", dto.ProductoImagenPrincipalUrl);
-        Assert.Equal("Compra", dto.OrigenTipo);
+        Assert.Equal(12, dto.ProductoVarianteId);
+        Assert.Equal(4, dto.AlmacenId);
+        Assert.Equal(9, dto.UbicacionAlmacenId);
+        Assert.Equal("AjustePositivo", dto.Causa);
+        Assert.Equal(125.50m, dto.CostoUnitario);
+        Assert.Equal(180m, dto.PrecioUnitario);
+        Assert.Equal("ajuste:2026-08-15:3", dto.CorrelationId);
+        Assert.Equal("AjusteInventario", dto.OrigenTipo);
         Assert.Equal(5, dto.OrigenId);
-        Assert.Equal(5, dto.CompraId);
+        Assert.Equal(5, dto.AjusteInventarioId);
+        Assert.Null(dto.CompraId);
         Assert.Null(dto.VentaId);
         Assert.Null(dto.ConsumoInsumoId);
-        Assert.Equal("Compra", dto.ReferenciaTipo);
+        Assert.Equal("AjusteInventario", dto.ReferenciaTipo);
         Assert.Equal(5, dto.ReferenciaId);
     }
 }
