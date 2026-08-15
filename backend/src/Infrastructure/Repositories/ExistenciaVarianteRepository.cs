@@ -26,18 +26,12 @@ public sealed class ExistenciaVarianteRepository : IExistenciaVarianteRepository
         int? ubicacionAlmacenId,
         bool forUpdate = false)
     {
-        var query = BaseQuery(tracking: true)
-            .Where(e =>
-                e.ProductoVarianteId == productoVarianteId &&
-                e.AlmacenId == almacenId &&
-                e.UbicacionAlmacenId == ubicacionAlmacenId);
-
         if (forUpdate)
         {
             if (_context.Database.CurrentTransaction is null)
                 throw new InvalidOperationException("El bloqueo de ExistenciaVariante requiere una transacción activa.");
 
-            return await query
+            return await Existencias
                 .FromSqlInterpolated($@"
                     SELECT ev.*
                     FROM ExistenciasVariante ev
@@ -53,7 +47,11 @@ public sealed class ExistenciaVarianteRepository : IExistenciaVarianteRepository
                 .SingleOrDefaultAsync();
         }
 
-        return await query.SingleOrDefaultAsync();
+        return await BaseQuery(tracking: true)
+            .SingleOrDefaultAsync(e =>
+                e.ProductoVarianteId == productoVarianteId &&
+                e.AlmacenId == almacenId &&
+                e.UbicacionAlmacenId == ubicacionAlmacenId);
     }
 
     public async Task<(List<ExistenciaVariante> Items, int Total)> BuscarAsync(
