@@ -1,3 +1,4 @@
+using InventoryApp.Domain.Common;
 using InventoryApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -21,8 +22,8 @@ public sealed class N1_5_KardexCorrelation : Migration
         migrationBuilder.AddColumn<string>(
             name: "CorrelationId",
             table: "MovimientosInventario",
-            type: "varchar(100)",
-            maxLength: 100,
+            type: $"varchar({ContextoFisicoMovimientoInventario.MaxCorrelationIdLength})",
+            maxLength: ContextoFisicoMovimientoInventario.MaxCorrelationIdLength,
             nullable: false,
             defaultValue: string.Empty)
             .Annotation("MySql:CharSet", "utf8mb4");
