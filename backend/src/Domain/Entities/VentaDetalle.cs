@@ -11,6 +11,12 @@ public class VentaDetalle
     public int? ProductoVarianteId { get; set; }
     public ProductoVariante? ProductoVariante { get; set; }
 
+    // Contexto físico N1.4. Nullable sólo por compatibilidad histórica.
+    public int? AlmacenId { get; set; }
+    public Almacen? Almacen { get; set; }
+    public int? UbicacionAlmacenId { get; set; }
+    public UbicacionAlmacen? UbicacionAlmacen { get; set; }
+
     public int Cantidad { get; set; }
     public decimal PrecioUnitario { get; set; }
     public decimal CostoUnitarioSnapshot { get; set; }
