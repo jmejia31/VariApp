@@ -8,7 +8,10 @@ public class ConsumoInsumoDetalleConfiguration : IEntityTypeConfiguration<Consum
 {
     public void Configure(EntityTypeBuilder<ConsumoInsumoDetalle> builder)
     {
-        builder.ToTable("ConsumoInsumoDetalles");
+        builder.ToTable("ConsumoInsumoDetalles", table =>
+            table.HasCheckConstraint(
+                "CK_ConsumoInsumoDetalles_Ubicacion_RequiereAlmacen",
+                "`UbicacionAlmacenId` IS NULL OR `AlmacenId` IS NOT NULL"));
         builder.Property(d => d.CostoUnitarioSnapshot).HasColumnType("decimal(18,2)");
         builder.Property(d => d.CostoTotalSnapshot).HasColumnType("decimal(18,2)");
         builder.Property(d => d.NombreSnapshot).IsRequired().HasMaxLength(150);
@@ -26,5 +29,19 @@ public class ConsumoInsumoDetalleConfiguration : IEntityTypeConfiguration<Consum
             .WithMany()
             .HasForeignKey(d => d.ProductoVarianteId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasIndex(d => new { d.AlmacenId, d.UbicacionAlmacenId })
+            .HasDatabaseName("IX_ConsumoInsumoDetalles_Almacen_Ubicacion");
+        builder.HasOne(d => d.Almacen)
+            .WithMany()
+            .HasForeignKey(d => d.AlmacenId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_ConsumoInsumoDetalles_Almacenes_AlmacenId_N14");
+        builder.HasOne(d => d.UbicacionAlmacen)
+            .WithMany()
+            .HasForeignKey(d => new { d.AlmacenId, d.UbicacionAlmacenId })
+            .HasPrincipalKey(u => new { u.AlmacenId, u.Id })
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_ConsumoInsumoDetalles_Ubicacion_MismoAlmacen_N14");
     }
 }
