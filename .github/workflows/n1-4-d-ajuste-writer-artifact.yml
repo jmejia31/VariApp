@@ -1,0 +1,45 @@
+name: N1.4.D - Certificar AjusteInventario writer
+
+on:
+  push:
+    branches: [Desarrollo]
+
+permissions:
+  contents: read
+
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    env:
+      ConnectionStrings__DefaultConnection: "Server=127.0.0.1;Port=3306;Database=variapp_n14d_ajuste;User=root;Password=design-only;"
+      Database__ServerVersion: "8.4.3"
+      Jwt__Secret: "n14d-design-time-secret-only-1234567890"
+      Jwt__Issuer: "VariApp.N14D"
+      Jwt__Audience: "VariApp.N14D"
+      Cors__AllowedOrigins__0: "http://localhost:4200"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - run: dotnet restore backend/InventoryApp.sln
+      - name: Transformar writer en workspace efimero
+        run: python backend/scripts/n1_4_d_transform_ajuste_writer.py
+      - name: Compilar backend Release
+        run: dotnet build backend/InventoryApp.sln --configuration Release --no-restore
+      - name: Ejecutar pruebas N1.4 de Ajuste
+        run: >-
+          dotnet test backend/tests/InventoryApp.Tests/InventoryApp.Tests.csproj
+          --configuration Release --no-build
+          --filter "FullyQualifiedName~N14AjusteInventario"
+      - name: Empaquetar fuentes certificadas
+        run: |
+          mkdir -p /tmp/n14d/backend/src/Application/Services
+          mkdir -p /tmp/n14d/backend/src/Application/DTOs
+          cp backend/src/Application/Services/AjusteInventarioService.cs /tmp/n14d/backend/src/Application/Services/
+          cp backend/src/Application/DTOs/AjusteStockDto.cs /tmp/n14d/backend/src/Application/DTOs/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: n1-4-d-ajuste-writer
+          path: /tmp/n14d
+          if-no-files-found: error
