@@ -68,4 +68,21 @@ public static class AjusteInventarioExistenciaStock
                 $"El stock físico objetivo ({cantidadObjetivo}) no puede quedar por debajo del stock reservado ({existencia.StockReservado}).");
         }
     }
+
+    public static int CalcularObjetivoReversion(
+        ExistenciaVariante existencia,
+        int diferenciaOriginal)
+    {
+        ArgumentNullException.ThrowIfNull(existencia);
+
+        var objetivo = existencia.StockFisico - diferenciaOriginal;
+        if (objetivo < 0)
+        {
+            throw new BusinessRuleException(
+                "La reversión del ajuste dejaría el stock físico autoritativo en negativo.");
+        }
+
+        ValidarObjetivoContraReservado(existencia, objetivo);
+        return objetivo;
+    }
 }
