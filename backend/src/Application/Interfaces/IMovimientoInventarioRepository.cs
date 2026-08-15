@@ -1,3 +1,4 @@
+using InventoryApp.Application.DTOs;
 using InventoryApp.Domain.Common;
 using InventoryApp.Domain.Entities;
 
@@ -16,6 +17,7 @@ public interface IMovimientoInventarioRepository
     Task AddConOrigenTipadoAsync(MovimientoInventario movimiento, OrigenMovimientoInventario origen);
     Task<List<MovimientoInventario>> GetByProductoAsync(int productoId);
     Task<List<MovimientoInventario>> GetFilteredAsync(int? productoId, string? tipo, DateTime? desde, DateTime? hasta);
+    Task<(List<MovimientoInventario> Items, int TotalCount)> GetPagedAsync(MovimientoInventarioQueryDto query);
     Task<IReadOnlyDictionary<int, MovimientoInventarioOrigenPersistido>> GetOrigenesTipadosAsync(
         IReadOnlyCollection<int> movimientoIds);
     Task<int?> GetUltimoMovimientoOriginalCompraIdAsync(int compraId);
