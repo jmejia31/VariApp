@@ -54,6 +54,31 @@ public sealed class ExistenciaVarianteRepository : IExistenciaVarianteRepository
                 e.UbicacionAlmacenId == ubicacionAlmacenId);
     }
 
+    public async Task<ExistenciaVariante?> GetByClaveParaReversionAsync(
+        int productoVarianteId,
+        int almacenId,
+        int? ubicacionAlmacenId)
+    {
+        if (_context.Database.CurrentTransaction is null)
+            throw new InvalidOperationException("El bloqueo de reversión de ExistenciaVariante requiere una transacción activa.");
+
+        return await Existencias
+            .FromSqlInterpolated($@"
+                SELECT ev.*
+                FROM ExistenciasVariante ev
+                WHERE ev.ProductoVarianteId = {productoVarianteId}
+                  AND ev.AlmacenId = {almacenId}
+                  AND (({ubicacionAlmacenId} IS NULL AND ev.UbicacionAlmacenId IS NULL)
+                       OR ev.UbicacionAlmacenId = {ubicacionAlmacenId})
+                FOR UPDATE")
+            .IgnoreQueryFilters()
+            .Include(e => e.ProductoVariante)
+                .ThenInclude(v => v.Producto)
+            .Include(e => e.Almacen)
+            .Include(e => e.UbicacionAlmacen)
+            .SingleOrDefaultAsync();
+    }
+
     public async Task<(List<ExistenciaVariante> Items, int Total)> BuscarAsync(
         int? productoId,
         int? productoVarianteId,
