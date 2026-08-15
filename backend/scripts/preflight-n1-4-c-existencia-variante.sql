@@ -12,7 +12,7 @@ SELECT
 
 -- 1. Contrato físico mínimo esperado.
 SELECT
-    t.TABLE_NAME,
+    esperado.TABLE_NAME_ESPERADA AS Tabla,
     CASE WHEN t.TABLE_NAME IS NULL THEN 'FALTA' ELSE 'OK' END AS Estado
 FROM (
     SELECT 'ProductoVariantes' AS TABLE_NAME_ESPERADA
@@ -42,18 +42,19 @@ LEFT JOIN information_schema.COLUMNS c
 -- existe una asignación determinística; nunca escoger un almacén arbitrariamente.
 SELECT
     COUNT(*) AS TotalAlmacenes,
-    SUM(CASE WHEN COALESCE(Activo, 0) = 1 AND COALESCE(Eliminado, 0) = 0 THEN 1 ELSE 0 END) AS AlmacenesActivos
+    SUM(CASE WHEN Activo = 1 AND Eliminado = 0 THEN 1 ELSE 0 END) AS AlmacenesActivos
 FROM Almacenes;
 
 SELECT
     Id,
+    Codigo,
     Nombre,
     SucursalId,
     Tipo,
     Activo,
     Eliminado
 FROM Almacenes
-WHERE COALESCE(Eliminado, 0) = 0
+WHERE Eliminado = 0
 ORDER BY SucursalId, Id;
 
 -- 4. Magnitud y calidad del stock legacy que se migrará. No se admite cantidad
@@ -65,25 +66,25 @@ SELECT
     SUM(CASE WHEN Cantidad > 0 THEN 1 ELSE 0 END) AS VariantesConStock,
     COALESCE(SUM(Cantidad), 0) AS StockLegacyTotal
 FROM ProductoVariantes
-WHERE COALESCE(Eliminado, 0) = 0;
+WHERE Eliminado = 0;
 
 SELECT
     Id AS ProductoVarianteId,
     ProductoId,
     Cantidad
 FROM ProductoVariantes
-WHERE COALESCE(Eliminado, 0) = 0
+WHERE Eliminado = 0
   AND Cantidad < 0
 ORDER BY Id;
 
--- 5. Estado de la autoridad nueva antes del backfill.
+-- 5. Estado de la autoridad nueva antes del backfill. ExistenciaVariante no
+-- implementa soft-delete: toda fila persistida es stock vivo.
 SELECT
     COUNT(*) AS ExistenciasActuales,
     COALESCE(SUM(StockFisico), 0) AS StockFisicoActual,
     COALESCE(SUM(StockReservado), 0) AS StockReservadoActual,
     COALESCE(SUM(StockTransito), 0) AS StockTransitoActual
-FROM ExistenciasVariante
-WHERE COALESCE(Eliminado, 0) = 0;
+FROM ExistenciasVariante;
 
 -- 6. Duplicados lógicos que harían inseguro un upsert posterior.
 SELECT
@@ -92,7 +93,6 @@ SELECT
     COALESCE(UbicacionAlmacenId, 0) AS UbicacionNormalizada,
     COUNT(*) AS Repeticiones
 FROM ExistenciasVariante
-WHERE COALESCE(Eliminado, 0) = 0
 GROUP BY ProductoVarianteId, AlmacenId, COALESCE(UbicacionAlmacenId, 0)
 HAVING COUNT(*) > 1
 ORDER BY Repeticiones DESC, ProductoVarianteId;
