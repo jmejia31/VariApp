@@ -6,6 +6,7 @@ on:
     branches: [Desarrollo]
     paths:
       - '.github/workflows/n1-4-c-data-cert.yml'
+      - 'backend/scripts/backfill-n1-4-c-existencia-variante.sql'
   workflow_dispatch:
 
 permissions:
