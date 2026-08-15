@@ -1,0 +1,44 @@
+name: N1.4.D - Generar migracion contexto existencia
+
+on:
+  push:
+    branches: [Desarrollo]
+
+permissions:
+  contents: read
+
+jobs:
+  generate-migration:
+    runs-on: ubuntu-latest
+    env:
+      ConnectionStrings__DefaultConnection: "Server=127.0.0.1;Port=3306;Database=variapp_n14d_design;User=root;Password=design-only;"
+      Database__ServerVersion: "8.4.3"
+      Jwt__Secret: "n14d-design-time-secret-only-1234567890"
+      Jwt__Issuer: "VariApp.N14D"
+      Jwt__Audience: "VariApp.N14D"
+      Cors__AllowedOrigins__0: "http://localhost:4200"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - run: dotnet restore backend/InventoryApp.sln
+      - run: dotnet tool install --global dotnet-ef --version 8.0.8
+      - name: Generar migracion EF sin publicar
+        run: |
+          dotnet ef migrations add N1_4_D_ContextoExistenciaOperaciones \
+            --project backend/src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project backend/src/API/InventoryApp.API.csproj \
+            --context AppDbContext \
+            --output-dir Migrations
+      - name: Empaquetar evidencia generada
+        run: |
+          mkdir -p /tmp/n14d
+          cp backend/src/Infrastructure/Migrations/*N1_4_D_ContextoExistenciaOperaciones*.cs /tmp/n14d/
+          cp backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs /tmp/n14d/
+          ls -la /tmp/n14d
+      - uses: actions/upload-artifact@v4
+        with:
+          name: n1-4-d-context-migration
+          path: /tmp/n14d
+          if-no-files-found: error
