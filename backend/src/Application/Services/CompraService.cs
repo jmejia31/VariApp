@@ -17,6 +17,7 @@ public class CompraService : ICompraService
     private readonly IProductoVarianteRepository _productoVarianteRepository;
     private readonly IInventarioConcurrencyService _inventarioConcurrency;
     private readonly IMovimientoInventarioRepository _movimientoInventarioRepository;
+    private readonly IKardexMovimientoWriter _kardexMovimientoWriter;
     private readonly IMovimientoFinancieroRepository _movimientoFinancieroRepository;
     private readonly ICalculoService _calculoService;
     private readonly ICurrentUserService _currentUser;
@@ -34,7 +35,8 @@ public class CompraService : ICompraService
         ICalculoService calculoService,
         ICurrentUserService currentUser,
         IUnitOfWork unitOfWork,
-        IAuditoriaService auditoria)
+        IAuditoriaService auditoria,
+        IKardexMovimientoWriter? kardexMovimientoWriter = null)
     {
         _compraRepository = compraRepository;
         _proveedorRepository = proveedorRepository;
@@ -42,6 +44,7 @@ public class CompraService : ICompraService
         _productoVarianteRepository = productoVarianteRepository;
         _inventarioConcurrency = inventarioConcurrency;
         _movimientoInventarioRepository = movimientoInventarioRepository;
+        _kardexMovimientoWriter = kardexMovimientoWriter ?? new KardexMovimientoWriter(movimientoInventarioRepository);
         _movimientoFinancieroRepository = movimientoFinancieroRepository;
         _calculoService = calculoService;
         _currentUser = currentUser;
@@ -207,6 +210,7 @@ public class CompraService : ICompraService
 
             var stocksProductoAnteriores = inventario.Productos.ToDictionary(x => x.Key, x => x.Value.Cantidad);
             var costosProductoAnteriores = inventario.Productos.ToDictionary(x => x.Key, x => x.Value.Costo);
+            var correlationId = KardexCorrelationId.CompraConfirmar(compra.Id);
 
             foreach (var item in inventario.Demandas)
             {
@@ -238,7 +242,7 @@ public class CompraService : ICompraService
                     _productoVarianteRepository.Update(variante);
                 }
 
-                await _movimientoInventarioRepository.AddConOrigenTipadoAsync(new MovimientoInventario
+                await _kardexMovimientoWriter.RegistrarCorrelacionadoAsync(new MovimientoInventario
                 {
                     ProductoId = producto.Id,
                     ProductoVarianteId = item.ProductoVarianteId,
@@ -255,7 +259,7 @@ public class CompraService : ICompraService
                     Descripcion = $"Entrada por compra {compra.NumeroCompra}",
                     CreadoPorUsuarioId = _currentUser.UsuarioId,
                     CreadoPorNombreUsuario = _currentUser.NombreUsuario
-                }, OrigenMovimientoInventario.DesdeCompra(compra.Id));
+                }, OrigenMovimientoInventario.DesdeCompra(compra.Id), correlationId);
             }
 
             foreach (var productoGrupo in inventario.Demandas.GroupBy(x => x.ProductoId))
@@ -348,6 +352,7 @@ public class CompraService : ICompraService
             }
 
             var stocksProductoAnteriores = inventario.Productos.ToDictionary(x => x.Key, x => x.Value.Cantidad);
+            var correlationId = KardexCorrelationId.CompraAnular(compra.Id);
 
             foreach (var item in inventario.Demandas)
             {
@@ -370,7 +375,7 @@ public class CompraService : ICompraService
                     _productoVarianteRepository.Update(variante);
                 }
 
-                await _movimientoInventarioRepository.AddConOrigenTipadoAsync(new MovimientoInventario
+                await _kardexMovimientoWriter.RegistrarCorrelacionadoAsync(new MovimientoInventario
                 {
                     ProductoId = producto.Id,
                     ProductoVarianteId = item.ProductoVarianteId,
@@ -388,7 +393,7 @@ public class CompraService : ICompraService
                     Descripcion = $"Salida por anulación de compra {compra.NumeroCompra}. Motivo: {motivo}",
                     CreadoPorUsuarioId = _currentUser.UsuarioId,
                     CreadoPorNombreUsuario = _currentUser.NombreUsuario
-                }, OrigenMovimientoInventario.DesdeCompra(compra.Id));
+                }, OrigenMovimientoInventario.DesdeCompra(compra.Id), correlationId);
             }
 
             foreach (var productoGrupo in inventario.Demandas.GroupBy(x => x.ProductoId))

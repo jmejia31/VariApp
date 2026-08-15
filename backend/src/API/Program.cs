@@ -94,6 +94,7 @@ builder.Services.AddScoped<ICompraRepository, CompraRepository>();
 builder.Services.AddScoped<ICompraDocumentoRepository, CompraDocumentoRepository>();
 builder.Services.AddScoped<ICompraDocumentoService, CompraDocumentoService>();
 builder.Services.AddScoped<IMovimientoInventarioRepository, MovimientoInventarioRepository>();
+builder.Services.AddScoped<IKardexMovimientoWriter, KardexMovimientoWriter>();
 builder.Services.AddScoped<IMovimientoFinancieroRepository, MovimientoFinancieroRepository>();
 builder.Services.AddScoped<ICompraService, CompraService>();
 builder.Services.AddScoped<IVentaRepository, VentaRepository>();
