@@ -16,6 +16,12 @@ public class AjusteInventarioDetalle : BaseEntity
     public int? ProductoVarianteId { get; set; }
     public ProductoVariante? ProductoVariante { get; set; }
 
+    // Contexto físico N1.4. Nullable para históricos anteriores al cutover.
+    public int? AlmacenId { get; set; }
+    public Almacen? Almacen { get; set; }
+    public int? UbicacionAlmacenId { get; set; }
+    public UbicacionAlmacen? UbicacionAlmacen { get; set; }
+
     public int CantidadObjetivo { get; set; }
     public int? CantidadAnteriorSnapshot { get; private set; }
     public int? CantidadNuevaSnapshot { get; private set; }
