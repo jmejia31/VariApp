@@ -14,10 +14,24 @@ public interface IMovimientoInventarioRepository
 {
     Task AddAsync(MovimientoInventario movimiento);
     Task AddConOrigenTipadoAsync(MovimientoInventario movimiento, OrigenMovimientoInventario origen);
-    Task AddConOrigenTipadoAsync(
+
+    async Task AddConOrigenTipadoAsync(
         MovimientoInventario movimiento,
         OrigenMovimientoInventario origen,
-        ContextoFisicoMovimientoInventario contexto);
+        ContextoFisicoMovimientoInventario contexto)
+    {
+        ArgumentNullException.ThrowIfNull(movimiento);
+        ArgumentNullException.ThrowIfNull(origen);
+        ArgumentNullException.ThrowIfNull(contexto);
+
+        movimiento.ProductoVarianteId = contexto.ProductoVarianteId;
+        movimiento.AlmacenId = contexto.AlmacenId;
+        movimiento.UbicacionAlmacenId = contexto.UbicacionAlmacenId;
+        movimiento.CorrelationId = contexto.CorrelationId;
+
+        await AddConOrigenTipadoAsync(movimiento, origen);
+    }
+
     Task<List<MovimientoInventario>> GetByProductoAsync(int productoId);
     Task<List<MovimientoInventario>> GetFilteredAsync(int? productoId, string? tipo, DateTime? desde, DateTime? hasta);
     Task<IReadOnlyDictionary<int, MovimientoInventarioOrigenPersistido>> GetOrigenesTipadosAsync(
