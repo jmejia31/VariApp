@@ -49,7 +49,7 @@ public sealed class N14AjusteInventarioServiceCutoverContractTests
         var fake = new FakeExistenciaConcurrencyService();
         var sut = new AjusteInventarioExistenciaCutoverService(fake);
         var detalle = CrearDetalle(cantidadObjetivo: 15);
-        detalle.DiferenciaSnapshot = 5;
+        detalle.MaterializarConfirmacion(cantidadAnterior: 10, costoUnitario: 1m);
         var existencia = CrearExistencia(stockFisico: 15, stockReservado: 4);
         var clave = new InventarioExistenciaClave(101, 7, 3);
         var lockSet = new InventarioExistenciaLockSet(
