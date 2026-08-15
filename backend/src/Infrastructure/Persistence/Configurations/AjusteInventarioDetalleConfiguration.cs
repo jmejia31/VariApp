@@ -8,7 +8,10 @@ public sealed class AjusteInventarioDetalleConfiguration : IEntityTypeConfigurat
 {
     public void Configure(EntityTypeBuilder<AjusteInventarioDetalle> builder)
     {
-        builder.ToTable("AjusteInventarioDetalles");
+        builder.ToTable("AjusteInventarioDetalles", table =>
+            table.HasCheckConstraint(
+                "CK_AjusteInventarioDetalles_Ubicacion_RequiereAlmacen",
+                "`UbicacionAlmacenId` IS NULL OR `AlmacenId` IS NOT NULL"));
         builder.Property(d => d.CostoUnitarioSnapshot).HasColumnType("decimal(18,2)");
         builder.Property(d => d.NombreSnapshot).HasMaxLength(150);
         builder.Property(d => d.SkuSnapshot).HasMaxLength(80);
@@ -37,5 +40,19 @@ public sealed class AjusteInventarioDetalleConfiguration : IEntityTypeConfigurat
             .HasForeignKey(d => d.ProductoVarianteId)
             .OnDelete(DeleteBehavior.Restrict)
             .HasConstraintName("FK_AjusteInventarioDetalles_ProductoVariantes");
+
+        builder.HasIndex(d => new { d.AlmacenId, d.UbicacionAlmacenId })
+            .HasDatabaseName("IX_AjusteInventarioDetalles_Almacen_Ubicacion");
+        builder.HasOne(d => d.Almacen)
+            .WithMany()
+            .HasForeignKey(d => d.AlmacenId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_AjusteInventarioDetalles_Almacenes_AlmacenId_N14");
+        builder.HasOne(d => d.UbicacionAlmacen)
+            .WithMany()
+            .HasForeignKey(d => new { d.AlmacenId, d.UbicacionAlmacenId })
+            .HasPrincipalKey(u => new { u.AlmacenId, u.Id })
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_AjusteInventarioDetalles_Ubicacion_MismoAlmacen_N14");
     }
 }
