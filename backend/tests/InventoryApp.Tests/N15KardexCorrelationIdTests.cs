@@ -33,7 +33,7 @@ public class N15KardexCorrelationIdTests
                 : KardexCorrelationId.ConsumoAnular(id);
 
         Assert.Equal(esperado, actual);
-        Assert.EndsWith(":anular", actual, StringComparison.Ordinal);
+        Assert.EndsWith(":anular", actual);
     }
 
     [Theory]
