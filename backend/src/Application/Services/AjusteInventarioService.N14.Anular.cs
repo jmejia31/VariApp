@@ -44,6 +44,7 @@ public sealed partial class AjusteInventarioService
                 .Select(g => new InventarioDemanda(g.Key.ProductoId, g.Key.ProductoVarianteId, 1))
                 .ToList();
             var inventarioLegacy = await _inventarioConcurrency.BloquearInventarioParaReversionAsync(lockRequest);
+            var correlationId = $"ajuste:{ajuste.Id}:anular:{Guid.NewGuid():N}";
 
             foreach (var detalle in ajuste.Detalles
                          .OrderBy(d => d.ProductoVarianteId)
@@ -67,6 +68,12 @@ public sealed partial class AjusteInventarioService
 
                 SincronizarProyeccionLegacy(producto, variante, transicion.Diferencia, ajuste.NumeroAjuste);
 
+                var contextoKardex = ContextoFisicoMovimientoInventario.Crear(
+                    detalle.ProductoVarianteId.Value,
+                    detalle.AlmacenId ?? throw new BusinessRuleException("El ajuste no posee almacén físico válido para revertir Kardex."),
+                    detalle.UbicacionAlmacenId,
+                    correlationId);
+
                 await _movimientoInventarioRepository.AddConOrigenTipadoAsync(
                     new MovimientoInventario
                     {
@@ -87,7 +94,8 @@ public sealed partial class AjusteInventarioService
                         CreadoPorNombreUsuario = nombreUsuario,
                         Fecha = DateTime.UtcNow
                     },
-                    OrigenMovimientoInventario.DesdeAjusteInventario(ajuste.Id));
+                    OrigenMovimientoInventario.DesdeAjusteInventario(ajuste.Id),
+                    contextoKardex);
             }
 
             var ahora = DateTime.UtcNow;
