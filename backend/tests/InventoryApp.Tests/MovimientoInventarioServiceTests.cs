@@ -29,7 +29,7 @@ public class MovimientoInventarioServiceTests
             UbicacionAlmacenId = 9,
             Producto = producto,
             Tipo = TipoMovimientoInventario.Entrada,
-            Causa = CausaMovimientoInventario.AjustePositivo,
+            Causa = CausaMovimientoInventario.AjusteManual,
             Cantidad = 2,
             StockAnterior = 0,
             StockNuevo = 2,
@@ -58,7 +58,7 @@ public class MovimientoInventarioServiceTests
         Assert.Equal(12, dto.ProductoVarianteId);
         Assert.Equal(4, dto.AlmacenId);
         Assert.Equal(9, dto.UbicacionAlmacenId);
-        Assert.Equal("AjustePositivo", dto.Causa);
+        Assert.Equal("AjusteManual", dto.Causa);
         Assert.Equal(125.50m, dto.CostoUnitario);
         Assert.Equal(180m, dto.PrecioUnitario);
         Assert.Equal("ajuste:2026-08-15:3", dto.CorrelationId);
