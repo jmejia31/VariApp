@@ -10,6 +10,10 @@ public interface IExistenciaVarianteRepository
         int almacenId,
         int? ubicacionAlmacenId,
         bool forUpdate = false);
+    Task<ExistenciaVariante?> GetByClaveParaReversionAsync(
+        int productoVarianteId,
+        int almacenId,
+        int? ubicacionAlmacenId);
     Task<(List<ExistenciaVariante> Items, int Total)> BuscarAsync(
         int? productoId,
         int? productoVarianteId,
