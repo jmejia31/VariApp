@@ -44,4 +44,42 @@ public static class MovimientoInventarioRepositoryExtensions
 
         return repository.AddConOrigenTipadoAsync(movimiento, origen);
     }
+
+    /// <summary>
+    /// Persiste un movimiento con origen tipado y correlación durable cuando el
+    /// contrato de la operación todavía no expone una ubicación física. Esto
+    /// permite cortar Compra/Venta/Consumo hacia N1.5 sin inventar AlmacenId ni
+    /// UbicacionAlmacenId; ambos permanecen nulos hasta que el contrato funcional
+    /// aporte una existencia física autoritativa.
+    /// </summary>
+    public static Task AddConOrigenTipadoCorrelacionadoAsync(
+        this IMovimientoInventarioRepository repository,
+        MovimientoInventario movimiento,
+        OrigenMovimientoInventario origen,
+        string correlationId)
+    {
+        ArgumentNullException.ThrowIfNull(repository);
+        ArgumentNullException.ThrowIfNull(movimiento);
+        ArgumentNullException.ThrowIfNull(origen);
+
+        var normalizado = correlationId?.Trim();
+        if (string.IsNullOrWhiteSpace(normalizado))
+            throw new ArgumentException("El CorrelationId del movimiento de inventario es obligatorio.", nameof(correlationId));
+
+        if (normalizado.Length > ContextoFisicoMovimientoInventario.MaxCorrelationIdLength)
+        {
+            throw new ArgumentException(
+                $"El CorrelationId no puede exceder {ContextoFisicoMovimientoInventario.MaxCorrelationIdLength} caracteres.",
+                nameof(correlationId));
+        }
+
+        if (!normalizado.All(EsCaracterSeguroCorrelationId))
+            throw new ArgumentException("El CorrelationId contiene caracteres no permitidos.", nameof(correlationId));
+
+        movimiento.CorrelationId = normalizado;
+        return repository.AddConOrigenTipadoAsync(movimiento, origen);
+    }
+
+    private static bool EsCaracterSeguroCorrelationId(char value) =>
+        char.IsAsciiLetterOrDigit(value) || value is '-' or '_' or '.' or ':';
 }

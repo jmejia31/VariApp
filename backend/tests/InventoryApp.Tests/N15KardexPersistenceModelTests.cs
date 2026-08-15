@@ -38,4 +38,20 @@ public class N15KardexPersistenceModelTests
             "IX_MovimientosInventario_CorrelationId_Fecha",
             correlationIndex.GetDatabaseName());
     }
+
+    [Fact]
+    public void Modelo_Kardex_Preserva_ContextoFisico_Parcial_Sin_Inventar_Ubicacion()
+    {
+        var options = new DbContextOptionsBuilder<AppDbContext>()
+            .UseInMemoryDatabase($"n15c-context-{Guid.NewGuid():N}")
+            .Options;
+
+        using var context = new AppDbContext(options);
+        var entity = context.Model.FindEntityType(typeof(MovimientoInventario));
+
+        Assert.NotNull(entity);
+        Assert.True(entity!.FindProperty(nameof(MovimientoInventario.ProductoVarianteId))!.IsNullable);
+        Assert.True(entity.FindProperty(nameof(MovimientoInventario.AlmacenId))!.IsNullable);
+        Assert.True(entity.FindProperty(nameof(MovimientoInventario.UbicacionAlmacenId))!.IsNullable);
+    }
 }

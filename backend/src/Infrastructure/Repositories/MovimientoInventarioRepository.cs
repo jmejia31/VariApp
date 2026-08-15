@@ -49,6 +49,15 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
         movimiento.ConsumoInsumoId = origen.ConsumoInsumoId;
         movimiento.AjusteInventarioId = origen.AjusteInventarioId;
 
+        // Compatibilidad de corte N1.5: los productores legacy que todavía no
+        // entregan un CorrelationId explícito quedan agrupados por operación y
+        // fase empresarial, sin inventar contexto físico. Los callers ya
+        // migrados conservan su correlación explícita, pero también pasan por
+        // la misma validación fail-closed del writer canónico.
+        movimiento.CorrelationId = string.IsNullOrWhiteSpace(movimiento.CorrelationId)
+            ? CrearCorrelationIdCompatibilidad(movimiento.ReferenciaTipo, origen.DocumentoId)
+            : NormalizarCorrelationId(movimiento.CorrelationId);
+
         await AddAsync(movimiento);
     }
 
@@ -65,6 +74,33 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
             TipoOrigenMovimientoInventario.AjusteInventario => "AjusteInventario",
             _ => throw new InvalidOperationException($"Origen de inventario no soportado: {origen.Tipo}.")
         };
+
+    private static string CrearCorrelationIdCompatibilidad(string referenciaTipo, int documentoId)
+    {
+        if (documentoId <= 0)
+            throw new InvalidOperationException("El origen tipado debe estar persistido antes de registrar movimientos de Kardex.");
+
+        return NormalizarCorrelationId($"{referenciaTipo.ToLowerInvariant()}:{documentoId}");
+    }
+
+    private static string NormalizarCorrelationId(string correlationId)
+    {
+        var normalizado = correlationId.Trim();
+        if (normalizado.Length == 0)
+            throw new InvalidOperationException("CorrelationId no puede ser vacío en un movimiento nuevo de Kardex.");
+        if (normalizado.Length > ContextoFisicoMovimientoInventario.MaxCorrelationIdLength)
+        {
+            throw new InvalidOperationException(
+                $"CorrelationId excede {ContextoFisicoMovimientoInventario.MaxCorrelationIdLength} caracteres.");
+        }
+        if (!normalizado.All(EsCaracterSeguroCorrelationId))
+            throw new InvalidOperationException("CorrelationId contiene caracteres no permitidos.");
+
+        return normalizado;
+    }
+
+    private static bool EsCaracterSeguroCorrelationId(char value) =>
+        char.IsAsciiLetterOrDigit(value) || value is '-' or '_' or '.' or ':';
 
     public async Task<List<MovimientoInventario>> GetByProductoAsync(int productoId)
     {
