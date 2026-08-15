@@ -24,6 +24,10 @@ public class MovimientoInventarioConfiguration : IEntityTypeConfiguration<Movimi
         builder.Property(m => m.ProductoColorSnapshot).HasMaxLength(100);
         builder.Property(m => m.ProductoTallaSnapshot).HasMaxLength(100);
         builder.Property(m => m.ProductoSkuSnapshot).HasMaxLength(80);
+        builder.Property(m => m.CorrelationId)
+            .IsRequired()
+            .HasMaxLength(100)
+            .HasDefaultValue(string.Empty);
         builder.Property(m => m.CostoUnitario).HasColumnType("decimal(18,2)");
         builder.Property(m => m.PrecioUnitario).HasColumnType("decimal(18,2)");
 
@@ -87,5 +91,7 @@ public class MovimientoInventarioConfiguration : IEntityTypeConfiguration<Movimi
 
         builder.HasIndex(m => new { m.ReferenciaTipo, m.ReferenciaId });
         builder.HasIndex(m => new { m.Causa, m.Fecha });
+        builder.HasIndex(m => new { m.CorrelationId, m.Fecha })
+            .HasDatabaseName("IX_MovimientosInventario_CorrelationId_Fecha");
     }
 }
