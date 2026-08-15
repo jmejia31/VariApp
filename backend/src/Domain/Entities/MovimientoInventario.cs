@@ -11,6 +11,15 @@ public class MovimientoInventario
     public Producto? Producto { get; set; }
     public int? ProductoVarianteId { get; set; }
     public ProductoVariante? ProductoVariante { get; set; }
+
+    // Contexto físico de la existencia afectada. Nullable para movimientos
+    // históricos anteriores al cutover N1.4; los movimientos nuevos deben fijar
+    // la clave exacta utilizada por la operación.
+    public int? AlmacenId { get; set; }
+    public Almacen? Almacen { get; set; }
+    public int? UbicacionAlmacenId { get; set; }
+    public UbicacionAlmacen? UbicacionAlmacen { get; set; }
+
     public string? ProductoMarcaSnapshot { get; set; }
     public string? ProductoModeloSnapshot { get; set; }
     public string? ProductoColorSnapshot { get; set; }
