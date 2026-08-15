@@ -10,6 +10,18 @@ export const AJUSTES_INVENTARIO_ROUTES: Routes = [
     loadComponent: () => import('./existencias-variante-list.component').then(m => m.ExistenciasVarianteListComponent)
   },
   {
+    path: 'inventario/existencias/nueva',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Inventario', accion: 'Crear' },
+    loadComponent: () => import('./existencia-variante-form.component').then(m => m.ExistenciaVarianteFormComponent)
+  },
+  {
+    path: 'inventario/existencias/:id/editar',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Inventario', accion: 'Editar' },
+    loadComponent: () => import('./existencia-variante-form.component').then(m => m.ExistenciaVarianteFormComponent)
+  },
+  {
     path: 'inventario/ajustes',
     canActivate: [authGuard, permisoGuard],
     data: { modulo: 'Inventario', accion: 'Ver' },
