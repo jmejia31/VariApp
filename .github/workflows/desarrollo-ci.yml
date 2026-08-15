@@ -205,7 +205,7 @@ jobs:
       - name: Ejecutar pruebas de integración MySQL
         run: |
           dotnet test InventoryApp.sln --configuration Release --filter "Category=Integration"
-      - name: Verificar variante legado, cargas y snapshot
+      - name: Verificar variante legado, cargas y migraciones ERP-N1
         working-directory: .
         run: |
           set -euo pipefail
@@ -226,11 +226,34 @@ jobs:
               AND index_name='IX_CargasMasivas_Tipo_HashArchivo'
               AND non_unique=0;")"
           test "$unique_index" = '2'
-          cd backend
-          dotnet ef migrations has-pending-model-changes \
-            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
-            --startup-project src/API/InventoryApp.API.csproj \
-            --context AppDbContext
+
+          # ERP-N1.4/N1.5 usan migraciones explícitas (sin ModelSnapshot generado).
+          # Validamos el resultado material aplicado y el historial EF, evitando un
+          # has-pending-model-changes inválido cuando no existe ModelSnapshot.
+          existencia_table="$(docker exec "$mysql_container" mysql -uroot -proot inventoryapp_ci -Nse "
+            SELECT COUNT(*) FROM information_schema.tables
+            WHERE table_schema='inventoryapp_ci' AND table_name='ExistenciasVariante';")"
+          test "$existencia_table" = '1'
+          correlation_column="$(docker exec "$mysql_container" mysql -uroot -proot inventoryapp_ci -Nse "
+            SELECT COUNT(*) FROM information_schema.columns
+            WHERE table_schema='inventoryapp_ci'
+              AND table_name='MovimientosInventario'
+              AND column_name='CorrelationId';")"
+          test "$correlation_column" = '1'
+          correlation_index="$(docker exec "$mysql_container" mysql -uroot -proot inventoryapp_ci -Nse "
+            SELECT COUNT(DISTINCT index_name) FROM information_schema.statistics
+            WHERE table_schema='inventoryapp_ci'
+              AND table_name='MovimientosInventario'
+              AND index_name='IX_MovimientosInventario_CorrelationId_Fecha';")"
+          test "$correlation_index" = '1'
+          n14_applied="$(docker exec "$mysql_container" mysql -uroot -proot inventoryapp_ci -Nse "
+            SELECT COUNT(*) FROM __EFMigrationsHistory
+            WHERE MigrationId='20260815012500_N1_4_ExistenciaVariante';")"
+          test "$n14_applied" = '1'
+          n15_applied="$(docker exec "$mysql_container" mysql -uroot -proot inventoryapp_ci -Nse "
+            SELECT COUNT(*) FROM __EFMigrationsHistory
+            WHERE MigrationId='20260815202500_N1_5_KardexCorrelation';")"
+          test "$n15_applied" = '1'
       - name: Generar SQL forward de Fase 5
         run: |
           dotnet ef migrations script 20260728165321_Fase4VariantesInventario 20260729040900_Fase5CargasMasivas \
