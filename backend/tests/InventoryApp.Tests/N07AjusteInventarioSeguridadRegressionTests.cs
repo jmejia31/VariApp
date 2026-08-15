@@ -34,7 +34,7 @@ public sealed class N07AjusteInventarioSeguridadRegressionTests
     [Fact]
     public void Confirmar_y_anular_deben_exigir_auditoria_critica_transaccional()
     {
-        var source = Leer("backend/src/Application/Services/AjusteInventarioService.cs");
+        var source = LeerServicioAjusteFormal();
 
         Assert.Equal(2, ContarOcurrencias(source, "_auditoria.RegistrarEstrictoAsync("));
         Assert.Contains("AccionPermiso.Confirmar", source);
@@ -49,7 +49,7 @@ public sealed class N07AjusteInventarioSeguridadRegressionTests
     public void Ajustes_stock_legacy_deben_delegar_en_la_autoridad_formal_atomica()
     {
         var adapter = Leer("backend/src/Application/Services/InventarioAjusteService.cs");
-        var formal = Leer("backend/src/Application/Services/AjusteInventarioService.cs");
+        var formal = LeerServicioAjusteFormal();
 
         Assert.Contains("IAjusteInventarioService _ajustes", adapter);
         Assert.Equal(2, ContarOcurrencias(adapter, "_ajustes.AjustarStockCompatibilidadAsync("));
@@ -66,7 +66,16 @@ public sealed class N07AjusteInventarioSeguridadRegressionTests
         Assert.Contains("AjustarStockCompatibilidadAsync", formal);
         Assert.Contains("cantidadesEsperadas.TryGetValue", formal);
         Assert.Contains("cantidadEsperada != cantidadAnterior", formal);
+        Assert.Contains("StockFisico", formal);
+        Assert.Contains("SincronizarProyeccionLegacy", formal);
     }
+
+    private static string LeerServicioAjusteFormal() => string.Join(
+        Environment.NewLine,
+        Leer("backend/src/Application/Services/AjusteInventarioService.N14.Core.cs"),
+        Leer("backend/src/Application/Services/AjusteInventarioService.N14.Anular.cs"),
+        Leer("backend/src/Application/Services/AjusteInventarioService.N14.Internal.cs"),
+        Leer("backend/src/Application/Services/AjusteInventarioService.N14.Helpers.cs"));
 
     private static int ContarOcurrencias(string source, string value)
     {
