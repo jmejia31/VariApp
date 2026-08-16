@@ -24,6 +24,9 @@ public sealed class ConteoInventarioConfiguration : IEntityTypeConfiguration<Con
         builder.Property(x => x.CreadoPorNombreUsuario).HasMaxLength(150);
         builder.Property(x => x.ActualizadoPorNombreUsuario).HasMaxLength(150);
 
+        builder.HasAlternateKey(x => new { x.Id, x.AlmacenId })
+            .HasName("AK_ConteosInventario_Id_AlmacenId");
+
         builder.HasIndex(x => x.Numero)
             .IsUnique()
             .HasDatabaseName("UX_ConteosInventario_Numero");
@@ -57,8 +60,9 @@ public sealed class ConteoInventarioConfiguration : IEntityTypeConfiguration<Con
 
         builder.HasMany(x => x.Detalles)
             .WithOne(x => x.ConteoInventario)
-            .HasForeignKey(x => x.ConteoInventarioId)
+            .HasForeignKey(x => new { x.ConteoInventarioId, x.AlmacenId })
+            .HasPrincipalKey(x => new { x.Id, x.AlmacenId })
             .OnDelete(DeleteBehavior.Cascade)
-            .HasConstraintName("FK_ConteoInventarioDetalles_ConteosInventario");
+            .HasConstraintName("FK_ConteoInventarioDetalles_Conteo_MismoAlmacen");
     }
 }
