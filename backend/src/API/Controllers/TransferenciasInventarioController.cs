@@ -2,6 +2,7 @@ using InventoryApp.API.Filters;
 using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Interfaces;
+using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,13 +16,16 @@ public sealed class TransferenciasInventarioController : ControllerBase
 {
     private readonly ITransferenciaInventarioService _service;
     private readonly ITransferenciaInventarioMovimientoService _movimientos;
+    private readonly IAuditoriaService? _auditoria;
 
     public TransferenciasInventarioController(
         ITransferenciaInventarioService service,
-        ITransferenciaInventarioMovimientoService movimientos)
+        ITransferenciaInventarioMovimientoService movimientos,
+        IAuditoriaService? auditoria = null)
     {
         _service = service;
         _movimientos = movimientos;
+        _auditoria = auditoria;
     }
 
     [HttpGet]
@@ -48,6 +52,12 @@ public sealed class TransferenciasInventarioController : ControllerBase
     public async Task<IActionResult> Create([FromBody] CreateTransferenciaInventarioDto dto)
     {
         var creada = await _service.CreateAsync(dto);
+        await AuditarAsync(
+            AccionPermiso.Crear,
+            creada.Id,
+            $"Transferencia de inventario creada: {creada.Numero}",
+            valoresNuevos: new { creada.Numero, creada.AlmacenOrigenId, creada.AlmacenDestinoId, creada.Estado });
+
         return CreatedAtAction(
             nameof(GetById),
             new { id = creada.Id },
@@ -62,6 +72,12 @@ public sealed class TransferenciasInventarioController : ControllerBase
         if (actualizada is null)
             return NotFound(ApiResponse<object>.Fail("Transferencia de inventario no encontrada."));
 
+        await AuditarAsync(
+            AccionPermiso.Editar,
+            actualizada.Id,
+            $"Transferencia de inventario actualizada: {actualizada.Numero}",
+            valoresNuevos: new { actualizada.AlmacenOrigenId, actualizada.AlmacenDestinoId, actualizada.Estado });
+
         return Ok(ApiResponse<TransferenciaInventarioDto>.Ok(actualizada, "Transferencia actualizada correctamente."));
     }
 
@@ -72,6 +88,12 @@ public sealed class TransferenciasInventarioController : ControllerBase
         var transferencia = await _service.SolicitarAsync(id);
         if (transferencia is null)
             return NotFound(ApiResponse<object>.Fail("Transferencia de inventario no encontrada."));
+
+        await AuditarAsync(
+            AccionPermiso.CambiarEstado,
+            transferencia.Id,
+            $"Transferencia solicitada: {transferencia.Numero}",
+            valoresNuevos: new { transferencia.Estado });
 
         return Ok(ApiResponse<TransferenciaInventarioDto>.Ok(transferencia, "Transferencia solicitada correctamente."));
     }
@@ -84,6 +106,12 @@ public sealed class TransferenciasInventarioController : ControllerBase
         if (transferencia is null)
             return NotFound(ApiResponse<object>.Fail("Transferencia de inventario no encontrada."));
 
+        await AuditarAsync(
+            AccionPermiso.Aprobar,
+            transferencia.Id,
+            $"Transferencia aprobada: {transferencia.Numero}",
+            valoresNuevos: new { transferencia.Estado });
+
         return Ok(ApiResponse<TransferenciaInventarioDto>.Ok(transferencia, "Transferencia aprobada correctamente."));
     }
 
@@ -94,6 +122,12 @@ public sealed class TransferenciasInventarioController : ControllerBase
         var transferencia = await _movimientos.DespacharAsync(id, dto);
         if (transferencia is null)
             return NotFound(ApiResponse<object>.Fail("Transferencia de inventario no encontrada."));
+
+        await AuditarAsync(
+            AccionPermiso.Confirmar,
+            transferencia.Id,
+            $"Transferencia despachada: {transferencia.Numero}",
+            valoresNuevos: new { transferencia.Estado });
 
         return Ok(ApiResponse<TransferenciaInventarioDto>.Ok(transferencia, "Transferencia despachada correctamente."));
     }
@@ -106,6 +140,12 @@ public sealed class TransferenciasInventarioController : ControllerBase
         if (transferencia is null)
             return NotFound(ApiResponse<object>.Fail("Transferencia de inventario no encontrada."));
 
+        await AuditarAsync(
+            AccionPermiso.Confirmar,
+            transferencia.Id,
+            $"Transferencia recibida: {transferencia.Numero}",
+            valoresNuevos: new { transferencia.Estado });
+
         return Ok(ApiResponse<TransferenciaInventarioDto>.Ok(transferencia, "Transferencia recibida correctamente."));
     }
 
@@ -117,6 +157,33 @@ public sealed class TransferenciasInventarioController : ControllerBase
         if (transferencia is null)
             return NotFound(ApiResponse<object>.Fail("Transferencia de inventario no encontrada."));
 
+        await AuditarAsync(
+            AccionPermiso.Anular,
+            transferencia.Id,
+            $"Transferencia cancelada: {transferencia.Numero}",
+            valoresNuevos: new { transferencia.Estado },
+            motivo: dto.Motivo);
+
         return Ok(ApiResponse<TransferenciaInventarioDto>.Ok(transferencia, "Transferencia cancelada correctamente."));
+    }
+
+    private Task AuditarAsync(
+        AccionPermiso accion,
+        int referenciaId,
+        string descripcion,
+        object? valoresNuevos = null,
+        string? motivo = null)
+    {
+        if (_auditoria is null)
+            return Task.CompletedTask;
+
+        return _auditoria.RegistrarAsync(
+            ModuloSistema.MovimientosInventario,
+            accion,
+            descripcion,
+            referenciaId,
+            entidad: nameof(TransferenciaInventario),
+            valoresNuevos: valoresNuevos,
+            motivo: motivo);
     }
 }
