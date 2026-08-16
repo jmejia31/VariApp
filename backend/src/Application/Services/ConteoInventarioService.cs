@@ -187,8 +187,6 @@ public sealed class ConteoInventarioService : IConteoInventarioService
             var conteo = await _repository.GetByIdForUpdateAsync(id);
             if (conteo is null) return;
 
-            // Reintentos de la misma transición son idempotentes: no reescriben
-            // timestamps, actor ni datos del documento.
             if (conteo.Estado == estadoObjetivo)
             {
                 resultado = conteo;
@@ -243,6 +241,10 @@ public sealed class ConteoInventarioService : IConteoInventarioService
                 AlmacenId = existencia.AlmacenId,
                 UbicacionAlmacenId = existencia.UbicacionAlmacenId,
                 ProductoSkuSnapshot = variante.Sku,
+                ProductoMarcaSnapshot = variante.Marca?.Nombre ?? variante.Producto.Marca,
+                ProductoModeloSnapshot = variante.Modelo?.Nombre ?? variante.Producto.Modelo,
+                ProductoColorSnapshot = variante.Color?.Nombre,
+                ProductoTallaSnapshot = variante.Talla?.Nombre,
                 CreadoPorUsuarioId = usuarioId,
                 CreadoPorNombreUsuario = _currentUser.NombreUsuario,
                 ActualizadoPorUsuarioId = usuarioId,
