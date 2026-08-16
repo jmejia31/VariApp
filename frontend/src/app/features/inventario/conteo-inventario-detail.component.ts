@@ -68,6 +68,7 @@ export class ConteoInventarioDetailComponent implements OnInit {
   accionando = false;
   error = '';
   private id = 0;
+  private capturasOriginales: Record<number, number | null> = {};
 
   constructor(private readonly service: ConteoInventarioService, private readonly route: ActivatedRoute, private readonly router: Router, private readonly permisos: PermisosRuntimeService) {}
   ngOnInit(): void { this.id = Number(this.route.snapshot.paramMap.get('id')); this.cargar(); }
@@ -77,12 +78,30 @@ export class ConteoInventarioDetailComponent implements OnInit {
   get puedeAprobar(): boolean { return this.permisos.puede('MovimientosInventario', 'Aprobar'); }
   get puedeAnular(): boolean { return this.permisos.puede('MovimientosInventario', 'Anular'); }
   get puedeCambiarEstado(): boolean { return this.permisos.puede('MovimientosInventario', 'CambiarEstado'); }
-  get hayCapturasPendientes(): boolean { return Object.values(this.capturas).some(value => value !== null && value !== undefined && value >= 0); }
+  get hayCapturasPendientes(): boolean {
+    return Object.entries(this.capturas).some(([detalleId, value]) => {
+      const id = Number(detalleId);
+      return value !== null && value !== undefined && Number.isInteger(value) && value >= 0 && value !== this.capturasOriginales[id];
+    });
+  }
 
   cargar(): void {
     if (!Number.isInteger(this.id) || this.id <= 0) { this.loading = false; this.error = 'Identificador de conteo inválido.'; return; }
     this.loading = true; this.error = '';
-    this.service.getById(this.id).pipe(finalize(() => this.loading = false)).subscribe({ next: response => { if (!response.success) { this.error = response.message || 'No se pudo cargar el conteo.'; return; } this.conteo = response.data; this.capturas = {}; for (const detalle of response.data.detalles) this.capturas[detalle.id] = detalle.cantidadContada ?? null; }, error: () => this.error = 'No se pudo cargar el conteo.' });
+    this.service.getById(this.id).pipe(finalize(() => this.loading = false)).subscribe({
+      next: response => {
+        if (!response.success) { this.error = response.message || 'No se pudo cargar el conteo.'; return; }
+        this.conteo = response.data;
+        this.capturas = {};
+        this.capturasOriginales = {};
+        for (const detalle of response.data.detalles) {
+          const cantidad = detalle.cantidadContada ?? null;
+          this.capturas[detalle.id] = cantidad;
+          this.capturasOriginales[detalle.id] = cantidad;
+        }
+      },
+      error: () => this.error = 'No se pudo cargar el conteo.'
+    });
   }
 
   guardarCapturas(): void {
@@ -90,11 +109,11 @@ export class ConteoInventarioDetailComponent implements OnInit {
     const lineas: CapturarConteoInventarioLinea[] = [];
     for (const detalle of this.conteo.detalles) {
       const cantidadContada = this.capturas[detalle.id];
-      if (cantidadContada === null || cantidadContada === undefined) continue;
+      if (cantidadContada === null || cantidadContada === undefined || cantidadContada === this.capturasOriginales[detalle.id]) continue;
       if (!Number.isInteger(cantidadContada) || cantidadContada < 0) { this.error = 'Las cantidades capturadas deben ser enteros mayores o iguales a cero.'; return; }
       lineas.push({ detalleId: detalle.id, cantidadContada });
     }
-    if (!lineas.length) { this.error = 'Ingresa al menos una cantidad válida.'; return; }
+    if (!lineas.length) { this.error = 'No hay cambios de captura pendientes.'; return; }
     this.ejecutar(this.service.capturarLote(this.id, lineas));
   }
   iniciar(): void { if (confirm('¿Iniciar el conteo? El alcance quedará bloqueado para captura.')) this.ejecutar(this.service.iniciar(this.id)); }
