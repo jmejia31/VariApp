@@ -152,13 +152,16 @@ test.describe('Transferencias de inventario - lifecycle UI', () => {
     });
 
     await page.goto('/inventario/transferencias/41');
-    await expect(page.getByRole('heading', { name: 'Recepción y discrepancias' })).toBeVisible();
+    const recepcion = page.locator('section.recepcion');
+    await expect(recepcion.getByRole('heading', { name: 'Recepción y discrepancias' })).toBeVisible();
 
-    await page.locator('input[name="recibida-501"]').fill('1');
-    await page.locator('input[name="faltante-501"]').fill('1');
-    await page.locator('input[name="danada-501"]').fill('1');
-    await page.locator('input[name="sobrante-501"]').fill('2');
-    await expect(page.getByText('Cuadra', { exact: true })).toBeVisible();
+    const cantidades = recepcion.getByRole('spinbutton');
+    await expect(cantidades).toHaveCount(4);
+    await cantidades.nth(0).fill('1');
+    await cantidades.nth(1).fill('1');
+    await cantidades.nth(2).fill('1');
+    await cantidades.nth(3).fill('2');
+    await expect(recepcion.getByText('Cuadra', { exact: true })).toBeVisible();
 
     page.once('dialog', dialog => dialog.accept());
     await page.getByRole('button', { name: 'Registrar recepción' }).click();
