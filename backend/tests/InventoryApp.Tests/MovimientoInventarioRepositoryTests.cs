@@ -20,6 +20,22 @@ public class MovimientoInventarioRepositoryTests
         var repo = new MovimientoInventarioRepository(context, scope.Object);
         var fecha = new DateTime(2026, 8, 15, 20, 0, 0, DateTimeKind.Utc);
 
+        var producto = new Producto
+        {
+            Id = 10,
+            Nombre = "Producto Kardex",
+            Activo = true
+        };
+        producto.Variantes.Add(new ProductoVariante
+        {
+            Id = 101,
+            ProductoId = producto.Id,
+            Producto = producto,
+            Sku = "KDX-101",
+            Activo = true
+        });
+        context.Productos.Add(producto);
+
         context.MovimientosInventario.AddRange(
             new MovimientoInventario
             {
