@@ -62,6 +62,29 @@ public sealed class N17ConteoInventarioAjusteTests
     }
 
     [Fact]
+    public async Task GenerarAjuste_VinculoExistenteSinAjusteDisponible_FallaCerradoSinDuplicar()
+    {
+        var repository = new Mock<IConteoInventarioRepository>();
+        var existencias = new Mock<IExistenciaVarianteRepository>();
+        var currentUser = new Mock<ICurrentUserService>();
+        var unitOfWork = CrearUnitOfWork();
+        var ajustes = new Mock<IAjusteInventarioService>();
+        var conteo = CrearAprobadoConDiferencia();
+        conteo.Detalles.Single().VincularAjuste(55);
+        repository.Setup(x => x.GetByIdForUpdateAsync(10)).ReturnsAsync(conteo);
+        ajustes.Setup(x => x.GetByIdAsync(55)).ReturnsAsync((AjusteInventarioDto?)null);
+        var service = new ConteoInventarioService(repository.Object, existencias.Object, currentUser.Object, unitOfWork.Object, ajustes.Object);
+
+        var error = await Assert.ThrowsAsync<BusinessRuleException>(() => service.GenerarAjusteAsync(10));
+
+        Assert.Contains("ya no está disponible", error.Message, StringComparison.OrdinalIgnoreCase);
+        ajustes.Verify(x => x.GetByIdAsync(55), Times.Once);
+        ajustes.Verify(x => x.CreateAsync(It.IsAny<CreateAjusteInventarioDto>()), Times.Never);
+        repository.Verify(x => x.Update(It.IsAny<ConteoInventario>()), Times.Never);
+        repository.Verify(x => x.SaveChangesAsync(), Times.Never);
+    }
+
+    [Fact]
     public async Task GenerarAjuste_SinDiferencias_FallaCerradoSinCrearNiPersistir()
     {
         var repository = new Mock<IConteoInventarioRepository>();
@@ -99,6 +122,30 @@ public sealed class N17ConteoInventarioAjusteTests
         Assert.Contains("vínculos de ajuste inconsistentes", error.Message, StringComparison.OrdinalIgnoreCase);
         ajustes.Verify(x => x.GetByIdAsync(It.IsAny<int>()), Times.Never);
         ajustes.Verify(x => x.CreateAsync(It.IsAny<CreateAjusteInventarioDto>()), Times.Never);
+        repository.Verify(x => x.SaveChangesAsync(), Times.Never);
+    }
+
+    [Fact]
+    public async Task GenerarAjuste_VinculosADistintosAjustes_FallaCerradoSinConsultarNiCrear()
+    {
+        var repository = new Mock<IConteoInventarioRepository>();
+        var existencias = new Mock<IExistenciaVarianteRepository>();
+        var currentUser = new Mock<ICurrentUserService>();
+        var unitOfWork = CrearUnitOfWork();
+        var ajustes = new Mock<IAjusteInventarioService>();
+        var conteo = CrearAprobadoConDosDiferencias();
+        var detalles = conteo.Detalles.OrderBy(x => x.Id).ToList();
+        detalles[0].VincularAjuste(55);
+        detalles[1].VincularAjuste(56);
+        repository.Setup(x => x.GetByIdForUpdateAsync(10)).ReturnsAsync(conteo);
+        var service = new ConteoInventarioService(repository.Object, existencias.Object, currentUser.Object, unitOfWork.Object, ajustes.Object);
+
+        var error = await Assert.ThrowsAsync<BusinessRuleException>(() => service.GenerarAjusteAsync(10));
+
+        Assert.Contains("vínculos de ajuste inconsistentes", error.Message, StringComparison.OrdinalIgnoreCase);
+        ajustes.Verify(x => x.GetByIdAsync(It.IsAny<int>()), Times.Never);
+        ajustes.Verify(x => x.CreateAsync(It.IsAny<CreateAjusteInventarioDto>()), Times.Never);
+        repository.Verify(x => x.Update(It.IsAny<ConteoInventario>()), Times.Never);
         repository.Verify(x => x.SaveChangesAsync(), Times.Never);
     }
 
