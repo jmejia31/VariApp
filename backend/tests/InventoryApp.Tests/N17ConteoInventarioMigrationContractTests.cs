@@ -21,8 +21,8 @@ public class N17ConteoInventarioMigrationContractTests
     [Fact]
     public void Snapshot_Canonico_Incluye_Parte_N17()
     {
-        var metodo = typeof(AppDbContextModelSnapshot)
-            .Assembly
+        var ensamblado = typeof(N1_7_ConteoInventarioPersistencia).Assembly;
+        var metodo = ensamblado
             .GetType("InventoryApp.Infrastructure.Migrations.AppDbContextSnapshotN14D")?
             .GetMethod("ApplyPart9", BindingFlags.NonPublic | BindingFlags.Static);
 
