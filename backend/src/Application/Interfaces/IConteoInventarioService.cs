@@ -13,5 +13,6 @@ public interface IConteoInventarioService
     Task<ConteoInventarioDto?> CapturarDetalleAsync(int id, int detalleId, CapturarConteoInventarioDetalleDto dto);
     Task<ConteoInventarioDto?> CerrarAsync(int id);
     Task<ConteoInventarioDto?> AprobarAsync(int id);
+    Task<AjusteInventarioDto?> GenerarAjusteAsync(int id);
     Task<ConteoInventarioDto?> CancelarAsync(int id, string motivo);
 }
