@@ -17,6 +17,7 @@ public sealed class N1_6_TransferenciaOrigenMovimientoInventario : Migration
     private const string ConstraintOrigen = "CK_MovimientosInventario_OrigenTipado_Exclusivo_N06";
     private const string TriggerInsert = "TR_MovimientosInventario_N06_OrigenTipado_BI";
     private const string TriggerUpdate = "TR_MovimientosInventario_N06_OrigenTipado_BU";
+    private const string TransferenciaFk = "FK_MovimientosInventario_TransferenciasInventario_TransferenciaInventarioId";
 
     protected override void Up(MigrationBuilder migrationBuilder)
     {
@@ -37,7 +38,7 @@ public sealed class N1_6_TransferenciaOrigenMovimientoInventario : Migration
             columns: new[] { "TransferenciaInventarioId", "Fecha" });
 
         migrationBuilder.AddForeignKey(
-            name: "FK_MovimientosInventario_TransferenciasInventario_TransferenciaInventarioId_N16",
+            name: TransferenciaFk,
             table: "MovimientosInventario",
             column: "TransferenciaInventarioId",
             principalTable: "TransferenciasInventario",
@@ -51,7 +52,7 @@ public sealed class N1_6_TransferenciaOrigenMovimientoInventario : Migration
         CrearBridgeCincoOrigenes(migrationBuilder);
         CrearConstraintCincoOrigenes(migrationBuilder);
 
-        migrationBuilder.Sql("""
+        migrationBuilder.Sql($"""
             DROP TEMPORARY TABLE IF EXISTS __N16OrigenPostGuard;
             CREATE TEMPORARY TABLE __N16OrigenPostGuard
             (
@@ -72,7 +73,7 @@ public sealed class N1_6_TransferenciaOrigenMovimientoInventario : Migration
               FROM information_schema.referential_constraints
              WHERE constraint_schema = DATABASE()
                AND table_name = 'MovimientosInventario'
-               AND constraint_name = 'FK_MovimientosInventario_TransferenciasInventario_TransferenciaInventarioId_N16';
+               AND constraint_name = '{TransferenciaFk}';
 
             DROP TEMPORARY TABLE __N16OrigenPostGuard;
             """);
@@ -102,7 +103,7 @@ public sealed class N1_6_TransferenciaOrigenMovimientoInventario : Migration
         migrationBuilder.Sql($"ALTER TABLE MovimientosInventario DROP CHECK {ConstraintOrigen};");
 
         migrationBuilder.DropForeignKey(
-            name: "FK_MovimientosInventario_TransferenciasInventario_TransferenciaInventarioId_N16",
+            name: TransferenciaFk,
             table: "MovimientosInventario");
         migrationBuilder.DropIndex(
             name: "IX_MovInv_Transferencia_Fecha_N16",
@@ -236,11 +237,18 @@ public sealed class N1_6_TransferenciaOrigenMovimientoInventario : Migration
                 AND
                 (
                     (CAST(ReferenciaTipo AS BINARY) IN (CAST('Compra' AS BINARY), CAST('CompraAnulada' AS BINARY)) AND CompraId = ReferenciaId AND VentaId IS NULL AND ConsumoInsumoId IS NULL AND AjusteInventarioId IS NULL)
-                    OR (CAST(ReferenciaTipo AS BINARY) IN (CAST('Venta' AS BINARY), CAST('VentaAnulada' AS BINARY)) AND VentaId = ReferenciaId AND CompraId IS NULL AND ConsumoInsumoId IS NULL AND AjusteInventarioId IS NULL)
-                    OR (CAST(ReferenciaTipo AS BINARY) = CAST('ConsumoInsumo' AS BINARY) AND ConsumoInsumoId = ReferenciaId AND CompraId IS NULL AND VentaId IS NULL AND AjusteInventarioId IS NULL)
-                    OR (CAST(ReferenciaTipo AS BINARY) = CAST('AjusteInventario' AS BINARY) AND AjusteInventarioId = ReferenciaId AND CompraId IS NULL AND VentaId IS NULL AND ConsumoInsumoId IS NULL)
-                    OR (CAST(Tipo AS BINARY) = CAST('Ajuste' AS BINARY)
-                        AND CAST(ReferenciaTipo AS BINARY) NOT IN (CAST('Compra' AS BINARY), CAST('CompraAnulada' AS BINARY), CAST('Venta' AS BINARY), CAST('VentaAnulada' AS BINARY), CAST('ConsumoInsumo' AS BINARY), CAST('AjusteInventario' AS BINARY))
+                    OR
+                    (CAST(ReferenciaTipo AS BINARY) IN (CAST('Venta' AS BINARY), CAST('VentaAnulada' AS BINARY)) AND VentaId = ReferenciaId AND CompraId IS NULL AND ConsumoInsumoId IS NULL AND AjusteInventarioId IS NULL)
+                    OR
+                    (CAST(ReferenciaTipo AS BINARY) = CAST('ConsumoInsumo' AS BINARY) AND ConsumoInsumoId = ReferenciaId AND CompraId IS NULL AND VentaId IS NULL AND AjusteInventarioId IS NULL)
+                    OR
+                    (CAST(ReferenciaTipo AS BINARY) = CAST('AjusteInventario' AS BINARY) AND AjusteInventarioId = ReferenciaId AND CompraId IS NULL AND VentaId IS NULL AND ConsumoInsumoId IS NULL)
+                    OR
+                    (CAST(Tipo AS BINARY) = CAST('Ajuste' AS BINARY)
+                        AND CAST(ReferenciaTipo AS BINARY) NOT IN (
+                            CAST('Compra' AS BINARY), CAST('CompraAnulada' AS BINARY),
+                            CAST('Venta' AS BINARY), CAST('VentaAnulada' AS BINARY),
+                            CAST('ConsumoInsumo' AS BINARY), CAST('AjusteInventario' AS BINARY))
                         AND CompraId IS NULL AND VentaId IS NULL AND ConsumoInsumoId IS NULL AND AjusteInventarioId IS NULL)
                 )
             );
