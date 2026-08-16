@@ -69,8 +69,8 @@ public class N16TransferenciaInventarioPersistenceTests
         var movimientoTransferenciaFk = Assert.Single(movimiento.GetForeignKeys()
             .Where(fk => fk.PrincipalEntityType.ClrType == typeof(TransferenciaInventario)));
         Assert.Equal(DeleteBehavior.Restrict, movimientoTransferenciaFk.DeleteBehavior);
-        Assert.Equal(
-            "FK_MovimientosInventario_TransferenciasInventario_TransferenciaInventarioId",
-            movimientoTransferenciaFk.GetConstraintName());
+        var constraintName = movimientoTransferenciaFk.GetConstraintName();
+        Assert.Equal("FK_MovInv_TransferenciaInventarioId_N16", constraintName);
+        Assert.True(constraintName!.Length <= 64, "El identificador físico de la FK debe ser válido en MySQL.");
     }
 }
