@@ -115,6 +115,60 @@ public sealed class TransferenciaInventarioMovimientoService
         return resultado is null ? null : Map(resultado);
     }
 
+    public async Task<TransferenciaInventarioDto?> CancelarAsync(
+        int id,
+        CancelarTransferenciaInventarioDto dto)
+    {
+        ArgumentNullException.ThrowIfNull(dto);
+        if (id <= 0) return null;
+        var usuarioId = ObtenerUsuarioId();
+        TransferenciaInventario? resultado = null;
+
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            var transferencia = await _repository.GetByIdForUpdateAsync(id);
+            if (transferencia is null) return;
+            if (transferencia.Estado == EstadoTransferenciaInventario.Cancelada)
+            {
+                resultado = transferencia;
+                return;
+            }
+            if (transferencia.Estado == EstadoTransferenciaInventario.Recibida)
+                throw new BusinessRuleException("Una transferencia recibida no puede cancelarse.");
+
+            if (transferencia.Estado == EstadoTransferenciaInventario.EnTransito)
+            {
+                var lockSet = await _existencias.BloquearParaCancelacionEnTransitoAsync(transferencia);
+                var transiciones = await _existencias.AplicarCancelacionEnTransitoAsync(lockSet, transferencia);
+                await _kardex.RegistrarCancelacionAsync(
+                    transferencia,
+                    transiciones,
+                    usuarioId,
+                    _currentUser.NombreUsuario);
+            }
+
+            try
+            {
+                transferencia.Cancelar(usuarioId, dto.Motivo, DateTime.UtcNow);
+            }
+            catch (ArgumentException ex)
+            {
+                throw new BusinessRuleException(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new BusinessRuleException(ex.Message);
+            }
+
+            MarcarActualizacion(transferencia, usuarioId);
+            _repository.Update(transferencia);
+            await _repository.SaveChangesAsync();
+            resultado = transferencia;
+        });
+
+        return resultado is null ? null : Map(resultado);
+    }
+
     private static void AplicarDespacho(
         TransferenciaInventario transferencia,
         DespacharTransferenciaInventarioDto dto)
