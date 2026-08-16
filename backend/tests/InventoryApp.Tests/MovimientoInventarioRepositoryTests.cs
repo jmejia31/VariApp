@@ -1,3 +1,4 @@
+using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Enums;
@@ -11,6 +12,101 @@ namespace InventoryApp.Tests;
 
 public class MovimientoInventarioRepositoryTests
 {
+    [Fact]
+    public async Task GetPagedAsync_Filtra_Contexto_Origen_Correlacion_Y_Pagina()
+    {
+        await using var context = CrearContexto();
+        var scope = CrearScopeAdministrador();
+        var repo = new MovimientoInventarioRepository(context, scope.Object);
+        var fecha = new DateTime(2026, 8, 15, 20, 0, 0, DateTimeKind.Utc);
+
+        context.MovimientosInventario.AddRange(
+            new MovimientoInventario
+            {
+                ProductoId = 10,
+                ProductoVarianteId = 101,
+                AlmacenId = 4,
+                UbicacionAlmacenId = 8,
+                Tipo = TipoMovimientoInventario.Entrada,
+                Causa = CausaMovimientoInventario.AnulacionVenta,
+                Cantidad = 2,
+                StockAnterior = 3,
+                StockNuevo = 5,
+                CorrelationId = "venta:9:anular",
+                ReferenciaTipo = "VentaAnulada",
+                ReferenciaId = 9,
+                VentaId = 9,
+                Fecha = fecha
+            },
+            new MovimientoInventario
+            {
+                ProductoId = 10,
+                ProductoVarianteId = 101,
+                AlmacenId = 4,
+                UbicacionAlmacenId = 8,
+                Tipo = TipoMovimientoInventario.Salida,
+                Causa = CausaMovimientoInventario.NoEspecificada,
+                Cantidad = 1,
+                StockAnterior = 5,
+                StockNuevo = 4,
+                CorrelationId = "venta:10:confirmar",
+                ReferenciaTipo = "Venta",
+                ReferenciaId = 10,
+                VentaId = 10,
+                Fecha = fecha.AddMinutes(1)
+            });
+        await context.SaveChangesAsync();
+
+        var query = new MovimientoInventarioQueryDto
+        {
+            ProductoId = 10,
+            ProductoVarianteId = 101,
+            AlmacenId = 4,
+            UbicacionAlmacenId = 8,
+            Tipo = "Entrada",
+            Causa = "AnulacionVenta",
+            CorrelationId = " venta:9:anular ",
+            OrigenTipo = "Venta",
+            OrigenId = 9,
+            Desde = fecha.AddMinutes(-1),
+            Hasta = fecha.AddMinutes(1),
+            Page = 1,
+            PageSize = 10
+        };
+
+        var (items, totalCount) = await repo.GetPagedAsync(query);
+
+        Assert.Equal(1, totalCount);
+        var item = Assert.Single(items);
+        Assert.Equal(9, item.VentaId);
+        Assert.Equal("venta:9:anular", item.CorrelationId);
+        Assert.Equal(4, item.AlmacenId);
+        Assert.Equal(8, item.UbicacionAlmacenId);
+    }
+
+    [Theory]
+    [InlineData("tipo-invalido", null)]
+    [InlineData(null, "causa-invalida")]
+    public async Task GetPagedAsync_EnumInvalido_DevuelvePaginaVacia(string? tipo, string? causa)
+    {
+        await using var context = CrearContexto();
+        var scope = CrearScopeAdministrador();
+        var repo = new MovimientoInventarioRepository(context, scope.Object);
+        context.MovimientosInventario.Add(CrearMovimiento(5, 50, "Venta", 20));
+        await context.SaveChangesAsync();
+
+        var (items, totalCount) = await repo.GetPagedAsync(new MovimientoInventarioQueryDto
+        {
+            Tipo = tipo,
+            Causa = causa,
+            Page = 1,
+            PageSize = 20
+        });
+
+        Assert.Empty(items);
+        Assert.Equal(0, totalCount);
+    }
+
     [Fact]
     public async Task ExisteMovimientoPosteriorAsync_OtraVarianteDelMismoProducto_NoBloquea()
     {
@@ -153,6 +249,7 @@ public class MovimientoInventarioRepositoryTests
         Cantidad = 1,
         StockAnterior = 1,
         StockNuevo = referenciaTipo == "Compra" ? 2 : 0,
+        CorrelationId = $"{referenciaTipo.ToLowerInvariant()}:{referenciaId}",
         ReferenciaTipo = referenciaTipo,
         ReferenciaId = referenciaId
     };
