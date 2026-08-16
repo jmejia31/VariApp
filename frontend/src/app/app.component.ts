@@ -80,6 +80,7 @@ import { SessionActivityService } from './core/auth/session-activity.service';
             }
             @if (permisosRuntime.puede('MovimientosInventario', 'Ver')) {
               <a routerLink="/inventario/movimientos" routerLinkActive="active" ariaCurrentWhenActive="page"><mat-icon>sync_alt</mat-icon> Movimientos</a>
+              <a routerLink="/inventario/transferencias" routerLinkActive="active" ariaCurrentWhenActive="page"><mat-icon>swap_horiz</mat-icon> Transferencias</a>
             }
             @if (permisosRuntime.puede('Inventario', 'Ver')) {
               <a routerLink="/inventario/ajustes" routerLinkActive="active" ariaCurrentWhenActive="page"><mat-icon>tune</mat-icon> Ajustes de inventario</a>
