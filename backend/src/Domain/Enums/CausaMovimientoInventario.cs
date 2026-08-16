@@ -9,5 +9,8 @@ public enum CausaMovimientoInventario
     AjusteManual = 4,
     AnulacionCompra = 5,
     AnulacionVenta = 6,
-    ReversionConsumo = 7
+    ReversionConsumo = 7,
+    TransferenciaDespacho = 8,
+    TransferenciaRecepcion = 9,
+    TransferenciaCancelacion = 10
 }
