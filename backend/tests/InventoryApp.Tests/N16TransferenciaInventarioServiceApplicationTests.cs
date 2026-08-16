@@ -50,6 +50,50 @@ public sealed class N16TransferenciaInventarioServiceApplicationTests
         repository.Verify(x => x.SaveChangesAsync(), Times.Never);
     }
 
+    [Fact]
+    public async Task Lifecycle_AprobarDespacharRecibir_RecorreEstadosEmpresariales()
+    {
+        var transferencia = CrearTransferenciaSolicitada();
+        var detalleId = transferencia.Detalles.Single().Id;
+        var repository = new Mock<ITransferenciaInventarioRepository>();
+        repository.Setup(x => x.GetByIdForUpdateAsync(transferencia.Id)).ReturnsAsync(transferencia);
+        var service = CrearService(repository);
+
+        var aprobada = await service.AprobarAsync(transferencia.Id, new AprobarTransferenciaInventarioDto
+        {
+            Detalles = { new AprobarTransferenciaInventarioDetalleDto { DetalleId = detalleId, CantidadAprobada = 3 } }
+        });
+        Assert.NotNull(aprobada);
+        Assert.Equal("Aprobada", aprobada!.Estado);
+
+        var enTransito = await service.DespacharAsync(transferencia.Id, new DespacharTransferenciaInventarioDto
+        {
+            Detalles = { new DespacharTransferenciaInventarioDetalleDto { DetalleId = detalleId, CantidadDespachada = 3 } }
+        });
+        Assert.NotNull(enTransito);
+        Assert.Equal("EnTransito", enTransito!.Estado);
+
+        var recibida = await service.RecibirAsync(transferencia.Id, new RecibirTransferenciaInventarioDto
+        {
+            Detalles =
+            {
+                new RecibirTransferenciaInventarioDetalleDto
+                {
+                    DetalleId = detalleId,
+                    CantidadRecibida = 3,
+                    CantidadFaltante = 0,
+                    CantidadDanada = 0,
+                    CantidadSobrante = 0
+                }
+            }
+        });
+
+        Assert.NotNull(recibida);
+        Assert.Equal("Recibida", recibida!.Estado);
+        repository.Verify(x => x.Update(transferencia), Times.Exactly(3));
+        repository.Verify(x => x.SaveChangesAsync(), Times.Exactly(3));
+    }
+
     private static TransferenciaInventarioService CrearService(Mock<ITransferenciaInventarioRepository> repository)
     {
         var almacenes = new Mock<IAlmacenRepository>();
