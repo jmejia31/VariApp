@@ -38,6 +38,8 @@ public class MovimientoInventarioConfiguration : IEntityTypeConfiguration<Movimi
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasIndex(m => m.ProductoVarianteId);
+        builder.HasIndex(m => new { m.ProductoId, m.ProductoVarianteId, m.Fecha })
+            .HasDatabaseName("IX_MovInv_Producto_Variante_Fecha_N15");
         builder.HasOne(m => m.ProductoVariante)
             .WithMany()
             .HasForeignKey(m => m.ProductoVarianteId)
@@ -45,6 +47,8 @@ public class MovimientoInventarioConfiguration : IEntityTypeConfiguration<Movimi
 
         builder.HasIndex(m => new { m.AlmacenId, m.UbicacionAlmacenId })
             .HasDatabaseName("IX_MovimientosInventario_Almacen_Ubicacion");
+        builder.HasIndex(m => new { m.AlmacenId, m.UbicacionAlmacenId, m.Fecha })
+            .HasDatabaseName("IX_MovInv_Almacen_Ubicacion_Fecha_N15");
         builder.HasOne(m => m.Almacen)
             .WithMany()
             .HasForeignKey(m => m.AlmacenId)
@@ -59,12 +63,20 @@ public class MovimientoInventarioConfiguration : IEntityTypeConfiguration<Movimi
 
         builder.HasIndex(m => m.CompraId)
             .HasDatabaseName("IX_MovimientosInventario_CompraId");
+        builder.HasIndex(m => new { m.CompraId, m.Fecha })
+            .HasDatabaseName("IX_MovInv_Compra_Fecha_N15");
         builder.HasIndex(m => m.VentaId)
             .HasDatabaseName("IX_MovimientosInventario_VentaId");
+        builder.HasIndex(m => new { m.VentaId, m.Fecha })
+            .HasDatabaseName("IX_MovInv_Venta_Fecha_N15");
         builder.HasIndex(m => m.ConsumoInsumoId)
             .HasDatabaseName("IX_MovimientosInventario_ConsumoInsumoId");
+        builder.HasIndex(m => new { m.ConsumoInsumoId, m.Fecha })
+            .HasDatabaseName("IX_MovInv_Consumo_Fecha_N15");
         builder.HasIndex(m => m.AjusteInventarioId)
             .HasDatabaseName("IX_MovimientosInventario_AjusteInventarioId");
+        builder.HasIndex(m => new { m.AjusteInventarioId, m.Fecha })
+            .HasDatabaseName("IX_MovInv_Ajuste_Fecha_N15");
 
         builder.HasOne<Compra>()
             .WithMany()
