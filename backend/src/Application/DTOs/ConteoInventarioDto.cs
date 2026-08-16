@@ -101,7 +101,7 @@ public class CancelarConteoInventarioDto
     public string Motivo { get; set; } = string.Empty;
 }
 
-public class ConteoInventarioQueryDto
+public class ConteoInventarioQueryDto : IValidatableObject
 {
     public int Page { get; set; } = 1;
     public int PageSize { get; set; } = 20;
@@ -113,6 +113,16 @@ public class ConteoInventarioQueryDto
     public EstadoConteoInventario? Estado { get; set; }
     public DateTime? Desde { get; set; }
     public DateTime? Hasta { get; set; }
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (Desde.HasValue && Hasta.HasValue && Desde.Value > Hasta.Value)
+        {
+            yield return new ValidationResult(
+                "Desde no puede ser posterior a Hasta.",
+                new[] { nameof(Desde), nameof(Hasta) });
+        }
+    }
 }
 
 public class ConteoInventarioResumenDto
