@@ -35,6 +35,17 @@ const transferencia = (estado = 'Borrador') => ({
   }]
 });
 
+const transferenciaEnTransito = () => ({
+  ...transferencia('EnTransito'),
+  fechaAprobacion: '2026-08-16T10:05:00Z',
+  fechaDespacho: '2026-08-16T10:10:00Z',
+  detalles: transferencia().detalles.map(detalle => ({
+    ...detalle,
+    cantidadAprobada: 3,
+    cantidadDespachada: 3
+  }))
+});
+
 test.describe('Transferencias de inventario - lifecycle UI', () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(() => {
@@ -102,5 +113,61 @@ test.describe('Transferencias de inventario - lifecycle UI', () => {
 
     await expect.poll(() => solicitudRegistrada).toBe(true);
     await expect(page.getByText('Solicitada', { exact: true })).toBeVisible();
+  });
+
+  test('registra recepción parcial con faltante, daño y sobrante', async ({ page }) => {
+    const enTransito = transferenciaEnTransito();
+    await page.route('**/transferencias-inventario/41', route => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ success: true, data: enTransito })
+    }));
+
+    let payload: unknown;
+    await page.route('**/transferencias-inventario/41/recibir', async route => {
+      payload = route.request().postDataJSON();
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          success: true,
+          data: {
+            ...enTransito,
+            estado: 'Recibida',
+            fechaRecepcion: '2026-08-16T10:30:00Z',
+            detalles: enTransito.detalles.map(detalle => ({
+              ...detalle,
+              cantidadRecibida: 1,
+              cantidadFaltante: 1,
+              cantidadDanada: 1,
+              cantidadSobrante: 2
+            }))
+          }
+        })
+      });
+    });
+
+    await page.goto('/inventario/transferencias/41');
+    await expect(page.getByRole('heading', { name: 'Recepción y discrepancias' })).toBeVisible();
+
+    await page.locator('input[name="recibida-501"]').fill('1');
+    await page.locator('input[name="faltante-501"]').fill('1');
+    await page.locator('input[name="danada-501"]').fill('1');
+    await page.locator('input[name="sobrante-501"]').fill('2');
+    await expect(page.getByText('Cuadra', { exact: true })).toBeVisible();
+
+    page.once('dialog', dialog => dialog.accept());
+    await page.getByRole('button', { name: 'Registrar recepción' }).click();
+
+    await expect.poll(() => payload).toEqual({
+      detalles: [{
+        detalleId: 501,
+        cantidadRecibida: 1,
+        cantidadFaltante: 1,
+        cantidadDanada: 1,
+        cantidadSobrante: 2
+      }]
+    });
+    await expect(page.getByText('Recibida', { exact: true })).toBeVisible();
   });
 });
