@@ -114,7 +114,7 @@ public sealed class TransferenciasInventarioController : ControllerBase
     [RequierePermiso(ModuloSistema.MovimientosInventario, AccionPermiso.Anular)]
     public async Task<IActionResult> Cancelar(int id, [FromBody] CancelarTransferenciaInventarioDto dto)
     {
-        var transferencia = await _service.CancelarAsync(id, dto);
+        var transferencia = await _movimientos.CancelarAsync(id, dto);
         if (transferencia is null)
             return NotFound(ApiResponse<object>.Fail("Transferencia de inventario no encontrada."));
 
