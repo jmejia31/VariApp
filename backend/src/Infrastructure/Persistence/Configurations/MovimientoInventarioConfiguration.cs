@@ -110,7 +110,7 @@ public class MovimientoInventarioConfiguration : IEntityTypeConfiguration<Movimi
             .WithMany()
             .HasForeignKey(m => m.TransferenciaInventarioId)
             .OnDelete(DeleteBehavior.Restrict)
-            .HasConstraintName("FK_MovimientosInventario_TransferenciasInventario_TransferenciaInventarioId_N16");
+            .HasConstraintName("FK_MovimientosInventario_TransferenciasInventario_TransferenciaInventarioId");
 
         builder.HasIndex(m => new { m.ReferenciaTipo, m.ReferenciaId });
         builder.HasIndex(m => new { m.Causa, m.Fecha });
