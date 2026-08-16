@@ -52,10 +52,64 @@ public sealed class N17ConteoInventarioServiceTests
         repository.Verify(x => x.GetPagedAsync(It.Is<ConteoInventarioQueryDto>(q => q.Page == 1 && q.PageSize == 100)), Times.Once);
     }
 
+    [Fact]
+    public async Task CapturarDetalle_MismaCantidad_EsIdempotenteSinPersistir()
+    {
+        var repository = new Mock<IConteoInventarioRepository>();
+        var existencias = new Mock<IExistenciaVarianteRepository>();
+        var currentUser = new Mock<ICurrentUserService>();
+        currentUser.SetupGet(x => x.UsuarioId).Returns(7);
+        var unitOfWork = CrearUnitOfWork();
+        var conteo = CrearConteoCiegoEnProceso();
+        var detalle = conteo.Detalles.Single();
+        detalle.RegistrarConteo(6, 7, DateTime.UtcNow.AddMinutes(-1));
+        repository.Setup(x => x.GetByIdForUpdateAsync(18)).ReturnsAsync(conteo);
+        var service = new ConteoInventarioService(repository.Object, existencias.Object, currentUser.Object, unitOfWork.Object);
+
+        var resultado = await service.CapturarDetalleAsync(
+            18,
+            detalle.Id,
+            new CapturarConteoInventarioDetalleDto { CantidadContada = 6 });
+
+        Assert.NotNull(resultado);
+        Assert.Equal(6, resultado!.Detalles.Single().CantidadContada);
+        repository.Verify(x => x.Update(It.IsAny<ConteoInventario>()), Times.Never);
+        repository.Verify(x => x.SaveChangesAsync(), Times.Never);
+    }
+
+    [Fact]
+    public async Task Iniciar_ReintentoEnProceso_EsIdempotenteSinPersistir()
+    {
+        var repository = new Mock<IConteoInventarioRepository>();
+        var existencias = new Mock<IExistenciaVarianteRepository>();
+        var currentUser = new Mock<ICurrentUserService>();
+        currentUser.SetupGet(x => x.UsuarioId).Returns(7);
+        var unitOfWork = CrearUnitOfWork();
+        var conteo = CrearConteoCiegoEnProceso();
+        repository.Setup(x => x.GetByIdForUpdateAsync(18)).ReturnsAsync(conteo);
+        var service = new ConteoInventarioService(repository.Object, existencias.Object, currentUser.Object, unitOfWork.Object);
+
+        var resultado = await service.IniciarAsync(18);
+
+        Assert.NotNull(resultado);
+        Assert.Equal(EstadoConteoInventario.EnProceso, resultado!.Estado);
+        repository.Verify(x => x.Update(It.IsAny<ConteoInventario>()), Times.Never);
+        repository.Verify(x => x.SaveChangesAsync(), Times.Never);
+    }
+
+    private static Mock<IUnitOfWork> CrearUnitOfWork()
+    {
+        var unitOfWork = new Mock<IUnitOfWork>();
+        unitOfWork.Setup(x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()))
+            .Returns<Func<Task>>(operation => operation());
+        return unitOfWork;
+    }
+
     private static ConteoInventario CrearConteoCiegoEnProceso()
     {
         var detalle = new ConteoInventarioDetalle
         {
+            Id = 4,
             ProductoVarianteId = 9,
             AlmacenId = 3
         };
