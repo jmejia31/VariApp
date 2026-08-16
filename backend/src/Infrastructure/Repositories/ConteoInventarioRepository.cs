@@ -26,9 +26,11 @@ public sealed class ConteoInventarioRepository : IConteoInventarioRepository
             .AsSplitQuery();
     }
 
-    public async Task<(List<ConteoInventario> Items, int TotalCount)> GetPagedAsync(ConteoInventarioFiltroDto filtro)
+    public async Task<(List<ConteoInventario> Items, int TotalCount)> GetPagedAsync(ConteoInventarioQueryDto filtro)
     {
         ArgumentNullException.ThrowIfNull(filtro);
+        var page = Math.Max(1, filtro.Page);
+        var pageSize = Math.Clamp(filtro.PageSize, 1, 100);
         IQueryable<ConteoInventario> query = Conteos.AsNoTracking();
 
         if (filtro.Estado.HasValue) query = query.Where(x => x.Estado == filtro.Estado.Value);
@@ -36,33 +38,25 @@ public sealed class ConteoInventarioRepository : IConteoInventarioRepository
         if (filtro.AlmacenId.HasValue) query = query.Where(x => x.AlmacenId == filtro.AlmacenId.Value);
         if (filtro.UbicacionAlmacenId.HasValue) query = query.Where(x => x.UbicacionAlmacenId == filtro.UbicacionAlmacenId.Value);
         if (filtro.CategoriaId.HasValue) query = query.Where(x => x.CategoriaId == filtro.CategoriaId.Value);
-        if (filtro.EsCiego.HasValue) query = query.Where(x => x.EsCiego == filtro.EsCiego.Value);
         if (filtro.Desde.HasValue) query = query.Where(x => x.FechaCreacion >= filtro.Desde.Value);
         if (filtro.Hasta.HasValue) query = query.Where(x => x.FechaCreacion <= filtro.Hasta.Value);
-        if (!string.IsNullOrWhiteSpace(filtro.Numero))
+        if (!string.IsNullOrWhiteSpace(filtro.Search))
         {
-            var numero = filtro.Numero.Trim();
-            query = query.Where(x => x.Numero.Contains(numero));
+            var search = filtro.Search.Trim();
+            query = query.Where(x => x.Numero.Contains(search) || (x.Observaciones != null && x.Observaciones.Contains(search)));
         }
 
         var totalCount = await query.CountAsync();
-        var desc = string.Equals(filtro.SortDirection, "desc", StringComparison.OrdinalIgnoreCase);
-        query = filtro.SortBy?.Trim().ToLowerInvariant() switch
-        {
-            "numero" => desc ? query.OrderByDescending(x => x.Numero).ThenByDescending(x => x.Id) : query.OrderBy(x => x.Numero).ThenBy(x => x.Id),
-            "estado" => desc ? query.OrderByDescending(x => x.Estado).ThenByDescending(x => x.Id) : query.OrderBy(x => x.Estado).ThenBy(x => x.Id),
-            "tipo" => desc ? query.OrderByDescending(x => x.Tipo).ThenByDescending(x => x.Id) : query.OrderBy(x => x.Tipo).ThenBy(x => x.Id),
-            _ => desc ? query.OrderByDescending(x => x.FechaCreacion).ThenByDescending(x => x.Id) : query.OrderBy(x => x.FechaCreacion).ThenBy(x => x.Id)
-        };
-
         var items = await query
+            .OrderByDescending(x => x.FechaCreacion)
+            .ThenByDescending(x => x.Id)
             .Include(x => x.Almacen)
             .Include(x => x.UbicacionAlmacen)
             .Include(x => x.Categoria)
             .Include(x => x.Detalles).ThenInclude(x => x.ProductoVariante)
             .AsSplitQuery()
-            .Skip((filtro.Page - 1) * filtro.PageSize)
-            .Take(filtro.PageSize)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync();
         return (items, totalCount);
     }
