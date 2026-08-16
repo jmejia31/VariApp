@@ -2,7 +2,6 @@ using InventoryApp.API.Filters;
 using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Interfaces;
-using InventoryApp.Application.Services;
 using InventoryApp.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,11 +14,11 @@ namespace InventoryApp.API.Controllers;
 public sealed class TransferenciasInventarioController : ControllerBase
 {
     private readonly ITransferenciaInventarioService _service;
-    private readonly TransferenciaInventarioMovimientoService _movimientos;
+    private readonly ITransferenciaInventarioMovimientoService _movimientos;
 
     public TransferenciasInventarioController(
         ITransferenciaInventarioService service,
-        TransferenciaInventarioMovimientoService movimientos)
+        ITransferenciaInventarioMovimientoService movimientos)
     {
         _service = service;
         _movimientos = movimientos;
