@@ -75,8 +75,7 @@ import { TransferenciaInventarioService } from '../../services/transferencia-inv
   `]
 })
 export class TransferenciaFormComponent implements OnInit {
-  readonly id = Number(this.route.snapshot.paramMap.get('id')) || 0;
-  readonly editando = this.id > 0;
+  readonly id: number;
   loading = false;
   saving = false;
   error = '';
@@ -86,7 +85,11 @@ export class TransferenciaFormComponent implements OnInit {
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly service: TransferenciaInventarioService
-  ) {}
+  ) {
+    this.id = Number(this.route.snapshot.paramMap.get('id')) || 0;
+  }
+
+  get editando(): boolean { return this.id > 0; }
 
   ngOnInit(): void {
     if (!this.editando) return;
