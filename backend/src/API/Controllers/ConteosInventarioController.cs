@@ -74,6 +74,16 @@ public sealed class ConteosInventarioController : ControllerBase
         return Ok(ApiResponse<ConteoInventarioDto>.Ok(conteo, "Captura registrada correctamente."));
     }
 
+    [HttpPut("{id:int}/detalles/captura-lote")]
+    [RequierePermiso(ModuloSistema.MovimientosInventario, AccionPermiso.Editar)]
+    public async Task<IActionResult> CapturarLote(int id, [FromBody] CapturarConteoInventarioLoteDto dto)
+    {
+        var conteo = await _service.CapturarLoteAsync(id, dto);
+        if (conteo is null) return NotFound(ApiResponse<object>.Fail("Conteo de inventario no encontrado."));
+        await AuditarAsync(AccionPermiso.Editar, conteo, $"Captura por lote registrada ({dto.Lineas.Count} líneas).");
+        return Ok(ApiResponse<ConteoInventarioDto>.Ok(conteo, "Captura por lote registrada correctamente."));
+    }
+
     [HttpPost("{id:int}/cerrar")]
     [RequierePermiso(ModuloSistema.MovimientosInventario, AccionPermiso.Cerrar)]
     public Task<IActionResult> Cerrar(int id) => EjecutarTransicionAsync(id, _service.CerrarAsync, AccionPermiso.Cerrar, "Conteo cerrado correctamente.");
