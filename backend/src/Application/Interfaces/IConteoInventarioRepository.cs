@@ -5,7 +5,7 @@ namespace InventoryApp.Application.Interfaces;
 
 public interface IConteoInventarioRepository
 {
-    Task<(List<ConteoInventario> Items, int TotalCount)> GetPagedAsync(ConteoInventarioFiltroDto filtro);
+    Task<(List<ConteoInventario> Items, int TotalCount)> GetPagedAsync(ConteoInventarioQueryDto query);
     Task<ConteoInventario?> GetByIdAsync(int id);
     Task<ConteoInventario?> GetByIdForUpdateAsync(int id);
     Task<bool> ExisteNumeroAsync(string numero, int? excluirId = null);
