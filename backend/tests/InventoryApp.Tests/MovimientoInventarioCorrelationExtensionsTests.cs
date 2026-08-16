@@ -1,3 +1,4 @@
+using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Common;
 using InventoryApp.Domain.Entities;
@@ -108,6 +109,10 @@ public class MovimientoInventarioCorrelationExtensionsTests
             DateTime? desde,
             DateTime? hasta) =>
             Task.FromResult(new List<MovimientoInventario>());
+
+        public Task<(List<MovimientoInventario> Items, int TotalCount)> GetPagedAsync(
+            MovimientoInventarioQueryDto query) =>
+            Task.FromResult((new List<MovimientoInventario>(), 0));
 
         public Task<IReadOnlyDictionary<int, MovimientoInventarioOrigenPersistido>> GetOrigenesTipadosAsync(
             IReadOnlyCollection<int> movimientoIds) =>
