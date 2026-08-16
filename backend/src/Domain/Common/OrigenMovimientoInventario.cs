@@ -2,101 +2,75 @@ using InventoryApp.Domain.Enums;
 
 namespace InventoryApp.Domain.Common;
 
+/// <summary>
+/// Contrato de dominio para identificar de forma tipada el documento empresarial
+/// que origina un movimiento de inventario. Exige exactamente un origen válido.
+/// La persistencia de sus FKs se incorpora por fases según el documento origen.
+/// </summary>
 public sealed record OrigenMovimientoInventario
 {
-    private OrigenMovimientoInventario(
-        TipoOrigenMovimientoInventario tipo,
-        int? compraId,
-        int? ventaId,
-        int? consumoInsumoId,
-        int? ajusteInventarioId,
-        int? transferenciaInventarioId)
+    public TipoOrigenMovimientoInventario Tipo { get; }
+    public int DocumentoId { get; }
+
+    public int? CompraId => Tipo == TipoOrigenMovimientoInventario.Compra ? DocumentoId : null;
+    public int? VentaId => Tipo == TipoOrigenMovimientoInventario.Venta ? DocumentoId : null;
+    public int? ConsumoInsumoId => Tipo == TipoOrigenMovimientoInventario.ConsumoInsumo ? DocumentoId : null;
+    public int? AjusteInventarioId => Tipo == TipoOrigenMovimientoInventario.AjusteInventario ? DocumentoId : null;
+    public int? TransferenciaInventarioId => Tipo == TipoOrigenMovimientoInventario.TransferenciaInventario ? DocumentoId : null;
+
+    private OrigenMovimientoInventario(TipoOrigenMovimientoInventario tipo, int documentoId)
     {
+        if (documentoId <= 0)
+            throw new ArgumentOutOfRangeException(nameof(documentoId), "El identificador del documento origen debe ser mayor que cero.");
+
         Tipo = tipo;
-        CompraId = compraId;
-        VentaId = ventaId;
-        ConsumoInsumoId = consumoInsumoId;
-        AjusteInventarioId = ajusteInventarioId;
-        TransferenciaInventarioId = transferenciaInventarioId;
+        DocumentoId = documentoId;
     }
 
-    public TipoOrigenMovimientoInventario Tipo { get; }
-    public int? CompraId { get; }
-    public int? VentaId { get; }
-    public int? ConsumoInsumoId { get; }
-    public int? AjusteInventarioId { get; }
-    public int? TransferenciaInventarioId { get; }
+    public static OrigenMovimientoInventario DesdeCompra(int compraId) =>
+        new(TipoOrigenMovimientoInventario.Compra, compraId);
 
-    public int Id => Tipo switch
-    {
-        TipoOrigenMovimientoInventario.Compra => CompraId!.Value,
-        TipoOrigenMovimientoInventario.Venta => VentaId!.Value,
-        TipoOrigenMovimientoInventario.ConsumoInsumo => ConsumoInsumoId!.Value,
-        TipoOrigenMovimientoInventario.AjusteInventario => AjusteInventarioId!.Value,
-        TipoOrigenMovimientoInventario.TransferenciaInventario => TransferenciaInventarioId!.Value,
-        _ => throw new InvalidOperationException($"Origen tipado no soportado: {Tipo}.")
-    };
+    public static OrigenMovimientoInventario DesdeVenta(int ventaId) =>
+        new(TipoOrigenMovimientoInventario.Venta, ventaId);
 
-    public static OrigenMovimientoInventario DesdeCompra(int compraId)
-        => Crear(compraId, null, null, null, null);
+    public static OrigenMovimientoInventario DesdeConsumoInsumo(int consumoInsumoId) =>
+        new(TipoOrigenMovimientoInventario.ConsumoInsumo, consumoInsumoId);
 
-    public static OrigenMovimientoInventario DesdeVenta(int ventaId)
-        => Crear(null, ventaId, null, null, null);
+    public static OrigenMovimientoInventario DesdeAjusteInventario(int ajusteInventarioId) =>
+        new(TipoOrigenMovimientoInventario.AjusteInventario, ajusteInventarioId);
 
-    public static OrigenMovimientoInventario DesdeConsumoInsumo(int consumoInsumoId)
-        => Crear(null, null, consumoInsumoId, null, null);
-
-    public static OrigenMovimientoInventario DesdeAjusteInventario(int ajusteInventarioId)
-        => Crear(null, null, null, ajusteInventarioId, null);
-
-    public static OrigenMovimientoInventario DesdeTransferenciaInventario(int transferenciaInventarioId)
-        => Crear(null, null, null, null, transferenciaInventarioId);
+    public static OrigenMovimientoInventario DesdeTransferenciaInventario(int transferenciaInventarioId) =>
+        new(TipoOrigenMovimientoInventario.TransferenciaInventario, transferenciaInventarioId);
 
     public static OrigenMovimientoInventario DesdeIds(
         int? compraId,
         int? ventaId,
         int? consumoInsumoId,
-        int? ajusteInventarioId,
+        int? ajusteInventarioId = null,
         int? transferenciaInventarioId = null)
-        => Crear(compraId, ventaId, consumoInsumoId, ajusteInventarioId, transferenciaInventarioId);
-
-    private static OrigenMovimientoInventario Crear(
-        int? compraId,
-        int? ventaId,
-        int? consumoInsumoId,
-        int? ajusteInventarioId,
-        int? transferenciaInventarioId)
     {
-        var ids = new[]
-        {
-            compraId,
-            ventaId,
-            consumoInsumoId,
-            ajusteInventarioId,
-            transferenciaInventarioId
-        };
+        var cantidadOrigenes =
+            (compraId.HasValue ? 1 : 0) +
+            (ventaId.HasValue ? 1 : 0) +
+            (consumoInsumoId.HasValue ? 1 : 0) +
+            (ajusteInventarioId.HasValue ? 1 : 0) +
+            (transferenciaInventarioId.HasValue ? 1 : 0);
 
-        if (ids.Count(id => id.HasValue) != 1)
-            throw new ArgumentException("El movimiento debe tener exactamente un origen tipado.");
-
-        if (ids.Any(id => id.HasValue && id.Value <= 0))
-            throw new ArgumentOutOfRangeException(nameof(compraId), "Los identificadores de origen deben ser mayores que cero.");
+        if (cantidadOrigenes != 1)
+            throw new InvalidOperationException("Un movimiento originado por documento debe tener exactamente un origen tipado.");
 
         if (compraId.HasValue)
-            return new(TipoOrigenMovimientoInventario.Compra, compraId, null, null, null, null);
-        if (ventaId.HasValue)
-            return new(TipoOrigenMovimientoInventario.Venta, null, ventaId, null, null, null);
-        if (consumoInsumoId.HasValue)
-            return new(TipoOrigenMovimientoInventario.ConsumoInsumo, null, null, consumoInsumoId, null, null);
-        if (ajusteInventarioId.HasValue)
-            return new(TipoOrigenMovimientoInventario.AjusteInventario, null, null, null, ajusteInventarioId, null);
+            return DesdeCompra(compraId.Value);
 
-        return new(
-            TipoOrigenMovimientoInventario.TransferenciaInventario,
-            null,
-            null,
-            null,
-            null,
-            transferenciaInventarioId);
+        if (ventaId.HasValue)
+            return DesdeVenta(ventaId.Value);
+
+        if (consumoInsumoId.HasValue)
+            return DesdeConsumoInsumo(consumoInsumoId.Value);
+
+        if (ajusteInventarioId.HasValue)
+            return DesdeAjusteInventario(ajusteInventarioId.Value);
+
+        return DesdeTransferenciaInventario(transferenciaInventarioId!.Value);
     }
 }

@@ -24,13 +24,22 @@ public class OrigenMovimientoInventarioTests
         };
 
         Assert.Equal(tipo, origen.Tipo);
-        Assert.Equal(id, origen.Id);
+        Assert.Equal(id, origen.DocumentoId);
+        Assert.Equal(id, origen.Tipo switch
+        {
+            TipoOrigenMovimientoInventario.Compra => origen.CompraId,
+            TipoOrigenMovimientoInventario.Venta => origen.VentaId,
+            TipoOrigenMovimientoInventario.ConsumoInsumo => origen.ConsumoInsumoId,
+            TipoOrigenMovimientoInventario.AjusteInventario => origen.AjusteInventarioId,
+            TipoOrigenMovimientoInventario.TransferenciaInventario => origen.TransferenciaInventarioId,
+            _ => null
+        });
     }
 
     [Fact]
     public void DesdeIds_FallaSiNoHayOrigen()
     {
-        var exception = Assert.Throws<ArgumentException>(
+        var exception = Assert.Throws<InvalidOperationException>(
             () => OrigenMovimientoInventario.DesdeIds(null, null, null, null, null));
         Assert.Contains("exactamente un origen", exception.Message);
     }
@@ -38,7 +47,7 @@ public class OrigenMovimientoInventarioTests
     [Fact]
     public void DesdeIds_FallaSiHayMasDeUnOrigen()
     {
-        var exception = Assert.Throws<ArgumentException>(
+        var exception = Assert.Throws<InvalidOperationException>(
             () => OrigenMovimientoInventario.DesdeIds(
                 compraId: 1,
                 ventaId: null,
