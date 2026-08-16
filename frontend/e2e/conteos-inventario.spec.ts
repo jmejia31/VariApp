@@ -79,6 +79,12 @@ async function autenticar(page: Page): Promise<void> {
   }));
 }
 
+async function seleccionarMatOption(page: Page, label: string, opcion: string): Promise<void> {
+  await page.getByRole('combobox', { name: label }).click();
+  await page.getByRole('option', { name: opcion }).click();
+  await expect(page.locator('.cdk-overlay-backdrop')).toHaveCount(0);
+}
+
 test.describe('N1.7.E - Conteos físicos', () => {
   test.beforeEach(async ({ page }) => autenticar(page));
 
@@ -103,6 +109,41 @@ test.describe('N1.7.E - Conteos físicos', () => {
     await expect(row).toContainText('En proceso');
     await expect(row).toContainText('0 / 1');
     await row.getByRole('button', { name: 'Ver conteo' }).click();
+    await expect(page).toHaveURL(/\/inventario\/conteos\/701$/);
+  });
+
+  test('crea conteo por ubicación usando catálogos activos y scope físico válido', async ({ page }) => {
+    await page.route('**/almacenes/activos', route => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ success: true, message: 'OK', errors: [], data: [{ id: 11, sucursalId: 1, sucursalCodigo: 'S1', sucursalNombre: 'Principal', codigo: 'BOD', nombre: 'Bodega E2E', tipo: 'Bodega', activo: true, fechaCreacion: '2026-08-16T00:00:00Z', fechaActualizacion: '2026-08-16T00:00:00Z' }] })
+    }));
+    await page.route('**/categorias/activas', route => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ success: true, message: 'OK', errors: [], data: [{ id: 5, nombre: 'Accesorios', activa: true, totalProductos: 1, fechaCreacion: '2026-08-16T00:00:00Z', fechaActualizacion: '2026-08-16T00:00:00Z' }] })
+    }));
+    await page.route('**/ubicaciones-almacen/activas?**', route => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ success: true, message: 'OK', errors: [], data: [{ id: 23, almacenId: 11, almacenCodigo: 'BOD', almacenNombre: 'Bodega E2E', codigo: 'A-01', nombre: 'Pasillo A', tipo: 'Pasillo', activa: true, fechaCreacion: '2026-08-16T00:00:00Z', fechaActualizacion: '2026-08-16T00:00:00Z' }] })
+    }));
+    await page.route('**/conteos-inventario', async route => {
+      if (route.request().method() !== 'POST') return route.continue();
+      const payload = route.request().postDataJSON();
+      expect(payload.tipo).toBe(3);
+      expect(payload.almacenId).toBe(11);
+      expect(payload.ubicacionAlmacenId).toBe(23);
+      expect(payload.productoVarianteIds).toEqual([44]);
+      await route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify({ success: true, message: 'Creado', errors: [], data: { ...conteoBase, tipo: 3, tipoNombre: 'PorUbicacion', ubicacionAlmacenId: 23, ubicacionNombre: 'Pasillo A' } }) });
+    });
+
+    await page.goto('/inventario/conteos/nuevo');
+    await seleccionarMatOption(page, 'Tipo', 'Por ubicación');
+    await seleccionarMatOption(page, 'Almacén', 'BOD · Bodega E2E');
+    await seleccionarMatOption(page, 'Ubicación', 'A-01 · Pasillo A');
+    await page.getByRole('textbox', { name: 'Variantes específicas' }).fill('44');
+    await page.getByRole('button', { name: 'Crear conteo' }).click();
     await expect(page).toHaveURL(/\/inventario\/conteos\/701$/);
   });
 
