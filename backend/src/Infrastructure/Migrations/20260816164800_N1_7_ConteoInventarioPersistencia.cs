@@ -74,6 +74,7 @@ namespace InventoryApp.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ConteosInventario", x => x.Id);
+                    table.UniqueConstraint("AK_ConteosInventario_Id_AlmacenId", x => new { x.Id, x.AlmacenId });
                     table.ForeignKey("FK_ConteosInventario_Almacenes_AlmacenId", x => x.AlmacenId, "Almacenes", "Id", onDelete: ReferentialAction.Restrict);
                     table.ForeignKey("FK_ConteosInventario_Categorias_CategoriaId", x => x.CategoriaId, "Categorias", "Id", onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
@@ -117,7 +118,12 @@ namespace InventoryApp.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ConteoInventarioDetalles", x => x.Id);
-                    table.ForeignKey("FK_ConteoInventarioDetalles_ConteosInventario", x => x.ConteoInventarioId, "ConteosInventario", "Id", onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ConteoInventarioDetalles_Conteo_MismoAlmacen",
+                        columns: x => new { x.ConteoInventarioId, x.AlmacenId },
+                        principalTable: "ConteosInventario",
+                        principalColumns: new[] { "Id", "AlmacenId" },
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey("FK_ConteoDetalles_ProductoVariantes_ProductoVarianteId", x => x.ProductoVarianteId, "ProductoVariantes", "Id", onDelete: ReferentialAction.Restrict);
                     table.ForeignKey("FK_ConteoDetalles_Almacenes_AlmacenId", x => x.AlmacenId, "Almacenes", "Id", onDelete: ReferentialAction.Restrict);
                     table.ForeignKey("FK_ConteoDetalles_AjustesInventario_AjusteInventarioId", x => x.AjusteInventarioId, "AjustesInventario", "Id", onDelete: ReferentialAction.Restrict);
@@ -138,6 +144,7 @@ namespace InventoryApp.Infrastructure.Migrations
 
             migrationBuilder.CreateIndex("IX_ConteoDetalles_AjusteInventarioId", "ConteoInventarioDetalles", "AjusteInventarioId");
             migrationBuilder.CreateIndex("IX_ConteoDetalles_AlmacenId_UbicacionAlmacenId", "ConteoInventarioDetalles", new[] { "AlmacenId", "UbicacionAlmacenId" });
+            migrationBuilder.CreateIndex("IX_ConteoDetalles_ConteoInventarioId_AlmacenId", "ConteoInventarioDetalles", new[] { "ConteoInventarioId", "AlmacenId" });
             migrationBuilder.CreateIndex("IX_ConteoDetalles_ExistenciaFisica", "ConteoInventarioDetalles", new[] { "ProductoVarianteId", "AlmacenId", "UbicacionAlmacenId" });
             migrationBuilder.CreateIndex("UX_ConteoDetalles_ClaveFisica", "ConteoInventarioDetalles", new[] { "ConteoInventarioId", "ProductoVarianteId", "AlmacenId", "UbicacionNormalizada" }, unique: true);
 
@@ -156,6 +163,13 @@ namespace InventoryApp.Infrastructure.Migrations
                    AND table_name IN ('ConteosInventario','ConteoInventarioDetalles');
                 INSERT INTO __N17CPostGuard (Id, Violaciones)
                 SELECT 2, CASE WHEN COUNT(*) = 1 THEN 0 ELSE 1 END
+                  FROM information_schema.table_constraints
+                 WHERE constraint_schema = DATABASE()
+                   AND table_name = 'ConteosInventario'
+                   AND constraint_name = 'AK_ConteosInventario_Id_AlmacenId'
+                   AND constraint_type = 'UNIQUE';
+                INSERT INTO __N17CPostGuard (Id, Violaciones)
+                SELECT 3, CASE WHEN COUNT(*) = 1 THEN 0 ELSE 1 END
                   FROM information_schema.statistics
                  WHERE table_schema = DATABASE()
                    AND table_name = 'ConteoInventarioDetalles'
