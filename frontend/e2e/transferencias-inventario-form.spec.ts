@@ -135,11 +135,15 @@ test.describe('Transferencias de inventario - formulario', () => {
     await page.getByRole('option', { name: /Funda Premium.*SKU SKU-77/ }).click();
     await page.locator('.cdk-overlay-backdrop').waitFor({ state: 'detached' });
 
-    await page.getByLabel('Ubicación origen').click();
+    const ubicacionOrigen = page.getByLabel('Ubicación origen');
+    await ubicacionOrigen.focus();
+    await ubicacionOrigen.press('Enter');
     await page.getByRole('option', { name: /PISO.*Piso venta/ }).click();
     await page.locator('.cdk-overlay-backdrop').waitFor({ state: 'detached' });
 
-    await page.getByLabel('Ubicación destino').click();
+    const ubicacionDestino = page.getByLabel('Ubicación destino');
+    await ubicacionDestino.focus();
+    await ubicacionDestino.press('Enter');
     await page.getByRole('option', { name: /RACK-A.*Rack A/ }).click();
     await page.locator('.cdk-overlay-backdrop').waitFor({ state: 'detached' });
 
