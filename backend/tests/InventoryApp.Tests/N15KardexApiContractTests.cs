@@ -1,9 +1,13 @@
 using System.Reflection;
 using InventoryApp.API.Controllers;
 using InventoryApp.API.Filters;
+using InventoryApp.Application.Common;
+using InventoryApp.Application.DTOs;
+using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Moq;
 using Xunit;
 
 namespace InventoryApp.Tests;
@@ -38,6 +42,33 @@ public sealed class N15KardexApiContractTests
         var permiso = Assert.Single(metodo.GetCustomAttributes<RequierePermisoAttribute>());
         Assert.Equal(ModuloSistema.MovimientosInventario, LeerCampoPrivado<ModuloSistema>(permiso, "_modulo"));
         Assert.Equal(AccionPermiso.Ver, LeerCampoPrivado<AccionPermiso>(permiso, "_accion"));
+    }
+
+    [Fact]
+    public async Task GetPaged_Conserva_Envelope_ApiResponse_Y_Metadatos_De_Paginacion()
+    {
+        var query = new MovimientoInventarioQueryDto { Page = 2, PageSize = 25 };
+        var esperado = new PagedResult<MovimientoInventarioDto>
+        {
+            Page = 2,
+            PageSize = 25,
+            TotalCount = 51,
+            Items = new List<MovimientoInventarioDto>
+            {
+                new() { Id = 7, ProductoId = 3, CorrelationId = "venta:9:confirmar" }
+            }
+        };
+        var service = new Mock<IMovimientoInventarioService>();
+        service.Setup(s => s.GetPagedAsync(query)).ReturnsAsync(esperado);
+        var controller = new MovimientosInventarioController(service.Object);
+
+        var action = await controller.GetPaged(query);
+
+        var ok = Assert.IsType<OkObjectResult>(action);
+        var envelope = Assert.IsType<ApiResponse<PagedResult<MovimientoInventarioDto>>>(ok.Value);
+        Assert.True(envelope.Success);
+        Assert.Same(esperado, envelope.Data);
+        Assert.Equal(3, envelope.Data!.TotalPages);
     }
 
     private static IEnumerable<MethodInfo> MetodosHttp(Type tipo) =>
