@@ -110,7 +110,12 @@ public static class CatalogoPermisosBase
             AccionPermiso.Ver, AccionPermiso.Crear, AccionPermiso.Editar,
             AccionPermiso.Confirmar, AccionPermiso.Anular, AccionPermiso.Exportar
         }),
-        (ModuloSistema.MovimientosInventario, new[] { AccionPermiso.Ver, AccionPermiso.Exportar }),
+        (ModuloSistema.MovimientosInventario, new[]
+        {
+            AccionPermiso.Ver, AccionPermiso.Crear, AccionPermiso.Editar,
+            AccionPermiso.Confirmar, AccionPermiso.Anular, AccionPermiso.Aprobar,
+            AccionPermiso.CambiarEstado, AccionPermiso.Exportar
+        }),
         (ModuloSistema.InsumosAdministrativos, new[]
         {
             AccionPermiso.Ver, AccionPermiso.Crear, AccionPermiso.Editar,
