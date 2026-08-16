@@ -104,7 +104,7 @@ Cierre certificado en `75196d80602dc1c0d715b6b52069267d0cf6282c`. CI push `#3191
 
 ### N1.5.G — QA, regresión y CI
 
-Cierre certificado sobre `4871da115e72d205513ea23aa9fe95c1e4818e6b`, tree `3472011576fbb6f2114fab15d16016e2c83d5d43`.
+La base funcional de cierre quedó en `4871da115e72d205513ea23aa9fe95c1e4818e6b`, tree `3472011576fbb6f2114fab15d16016e2c83d5d43`.
 
 La QA detectó que los filtros/orden del Kardex no tenían índices compuestos suficientemente alineados. Se corrigió causalmente mediante índices para:
 
@@ -114,7 +114,9 @@ La QA detectó que los filtros/orden del Kardex no tenían índices compuestos s
 
 También se publicó la migración reversible `20260816005000_N1_5_KardexQueryIndexes`.
 
-`Desarrollo - Compilación y pruebas #31918223873` terminó `SUCCESS` sobre exactamente ese HEAD, incluyendo backend/unitarias, frontend producción, Docker, higiene, migraciones e integración MySQL. No quedaron P0/P1 abiertos atribuibles al punto.
+`Desarrollo - Compilación y pruebas #31918223873` terminó `SUCCESS` sobre exactamente ese HEAD, incluyendo backend/unitarias, frontend producción, Docker, higiene, migraciones e integración MySQL.
+
+La aceptación integral posterior descubrió una regresión de harness en `frontend/e2e/fase5-imagenes.spec.ts`: el fixture de `/inventario/movimientos` seguía devolviendo el contrato legacy como arreglo mientras la UI N1.5 ya consume `PagedResult`. La aplicación y el DTO continuaban exponiendo `ProductoImagenPrincipalUrl`; el fallo era del mock de regresión, no de la proyección productiva. Se corrigió en `bb2cc9753063a688796979897857d3f57364257a`, alineando el fixture con `items/totalCount/page/pageSize` y congelando además variante, causa, origen tipado y correlación del Kardex. Este commit debe quedar certificado por los pipelines causales antes del cierre formal de N1.5.H.
 
 ## 8. Rollback y operación
 
@@ -146,4 +148,4 @@ PR #2 debe permanecer abierto y Draft.
 
 ## 10. Criterio de cierre
 
-ERP-N1.5 puede cerrarse cuando este documento quede publicado en `Desarrollo`, el CI causal del changeset documental sea reconciliado y el tablero VAEP registre N1.5.H como `LISTO` con commit/evidencia y `RESUME_POINT` dirigido al siguiente punto elegible.
+ERP-N1.5 puede cerrarse cuando este documento quede publicado en `Desarrollo`, el CI causal del changeset documental y la aceptación del fix `bb2cc9753063a688796979897857d3f57364257a` queden reconciliados, y el tablero VAEP registre N1.5.H como `LISTO` con commit/evidencia y `RESUME_POINT` dirigido al siguiente punto elegible.
