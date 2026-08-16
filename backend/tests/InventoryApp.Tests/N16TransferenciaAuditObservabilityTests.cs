@@ -1,3 +1,4 @@
+using InventoryApp.Application.Common;
 using InventoryApp.Domain.Common;
 using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Enums;
