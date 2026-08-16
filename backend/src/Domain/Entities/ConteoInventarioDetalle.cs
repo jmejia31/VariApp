@@ -17,6 +17,7 @@ public class ConteoInventarioDetalle : AuditableEntity
     public UbicacionAlmacen? UbicacionAlmacen { get; set; }
 
     public int StockEsperadoSnapshot { get; private set; }
+    public bool SnapshotMaterializado { get; private set; }
     public int? CantidadContada { get; private set; }
     public int? Diferencia { get; private set; }
     public DateTime? FechaConteo { get; private set; }
@@ -41,6 +42,7 @@ public class ConteoInventarioDetalle : AuditableEntity
             throw new InvalidOperationException("No puede reemplazarse el snapshot después de capturar la línea.");
 
         StockEsperadoSnapshot = stockFisicoEsperado;
+        SnapshotMaterializado = true;
         Diferencia = null;
     }
 
@@ -51,6 +53,7 @@ public class ConteoInventarioDetalle : AuditableEntity
         if (usuarioId <= 0)
             throw new ArgumentOutOfRangeException(nameof(usuarioId), "El usuario de conteo debe ser válido.");
         ValidarClaveFisica();
+        ValidarSnapshotMaterializado();
 
         CantidadContada = cantidadContada;
         ContadoPorUsuarioId = usuarioId;
@@ -60,6 +63,7 @@ public class ConteoInventarioDetalle : AuditableEntity
 
     public void CerrarDiferencia()
     {
+        ValidarSnapshotMaterializado();
         if (!CantidadContada.HasValue)
             throw new InvalidOperationException("La línea debe tener una cantidad contada antes de cerrar su diferencia.");
 
@@ -86,6 +90,12 @@ public class ConteoInventarioDetalle : AuditableEntity
             throw new InvalidOperationException("La variante es obligatoria en una línea de conteo.");
         if (AlmacenId <= 0)
             throw new InvalidOperationException("El almacén es obligatorio en una línea de conteo.");
+    }
+
+    public void ValidarSnapshotMaterializado()
+    {
+        if (!SnapshotMaterializado)
+            throw new InvalidOperationException("La línea debe materializar su snapshot de stock físico antes de operar.");
     }
 
     public string ClaveFisicaNormalizada => $"{ProductoVarianteId}:{AlmacenId}:{UbicacionAlmacenId?.ToString() ?? "ROOT"}";
