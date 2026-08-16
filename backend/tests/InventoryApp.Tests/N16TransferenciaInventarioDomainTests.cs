@@ -44,6 +44,23 @@ public class N16TransferenciaInventarioDomainTests
     }
 
     [Fact]
+    public void Aprobar_SinCantidadAprobada_FallaCerradoYSinMutarAuditoria()
+    {
+        var transferencia = CrearBorrador();
+        transferencia.Solicitar(1, DateTime.UtcNow);
+
+        var fechaAntes = transferencia.FechaAprobacion;
+        var usuarioAntes = transferencia.AprobadaPorUsuarioId;
+
+        Assert.Throws<InvalidOperationException>(() =>
+            transferencia.Aprobar(2, DateTime.UtcNow));
+
+        Assert.Equal(EstadoTransferenciaInventario.Solicitada, transferencia.Estado);
+        Assert.Equal(fechaAntes, transferencia.FechaAprobacion);
+        Assert.Equal(usuarioAntes, transferencia.AprobadaPorUsuarioId);
+    }
+
+    [Fact]
     public void RegistrarRecepcion_CuandoBalanceSuperaDespacho_NoMutaEstado()
     {
         var detalle = new TransferenciaInventarioDetalle();
