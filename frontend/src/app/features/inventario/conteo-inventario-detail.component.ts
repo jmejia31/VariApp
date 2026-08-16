@@ -9,7 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { finalize } from 'rxjs';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
-import { ConteoInventario, ConteoInventarioDetalle, EstadoConteoInventario } from '../../core/models/conteo-inventario.model';
+import { CapturarConteoInventarioLinea, ConteoInventario, ConteoInventarioDetalle, EstadoConteoInventario } from '../../core/models/conteo-inventario.model';
 import { ConteoInventarioService } from '../../services/conteo-inventario.service';
 
 @Component({
@@ -87,7 +87,13 @@ export class ConteoInventarioDetailComponent implements OnInit {
 
   guardarCapturas(): void {
     if (!this.conteo) return;
-    const lineas = this.conteo.detalles.map(d => ({ detalleId: d.id, cantidadContada: this.capturas[d.id] })).filter((x): x is { detalleId: number; cantidadContada: number } => Number.isInteger(x.cantidadContada) && x.cantidadContada >= 0);
+    const lineas: CapturarConteoInventarioLinea[] = [];
+    for (const detalle of this.conteo.detalles) {
+      const cantidadContada = this.capturas[detalle.id];
+      if (cantidadContada === null || cantidadContada === undefined) continue;
+      if (!Number.isInteger(cantidadContada) || cantidadContada < 0) { this.error = 'Las cantidades capturadas deben ser enteros mayores o iguales a cero.'; return; }
+      lineas.push({ detalleId: detalle.id, cantidadContada });
+    }
     if (!lineas.length) { this.error = 'Ingresa al menos una cantidad válida.'; return; }
     this.ejecutar(this.service.capturarLote(this.id, lineas));
   }
