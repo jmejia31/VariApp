@@ -10,7 +10,7 @@ namespace InventoryApp.Application.Services;
 /// Casos de uso físicos de la transferencia. Estado documental, existencias y
 /// Kardex cambian dentro de la misma transacción para impedir tránsito huérfano.
 /// </summary>
-public sealed class TransferenciaInventarioMovimientoService
+public sealed class TransferenciaInventarioMovimientoService : ITransferenciaInventarioMovimientoService
 {
     private readonly ITransferenciaInventarioRepository _repository;
     private readonly TransferenciaInventarioExistenciaService _existencias;
