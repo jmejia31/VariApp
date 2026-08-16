@@ -1,0 +1,98 @@
+using InventoryApp.Domain.Entities;
+using InventoryApp.Domain.Enums;
+using Xunit;
+
+namespace InventoryApp.Tests;
+
+public class N16TransferenciaInventarioDomainTests
+{
+    [Fact]
+    public void Solicitar_ConOrigenYDestinoIguales_FallaCerrado()
+    {
+        var transferencia = CrearBorrador();
+        transferencia.AlmacenDestinoId = transferencia.AlmacenOrigenId;
+
+        var error = Assert.Throws<InvalidOperationException>(() =>
+            transferencia.Solicitar(7, DateTime.UtcNow));
+
+        Assert.Contains("distintos", error.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal(EstadoTransferenciaInventario.Borrador, transferencia.Estado);
+    }
+
+    [Fact]
+    public void Lifecycle_Completo_PreservaTransicionesEsperadas()
+    {
+        var transferencia = CrearBorrador();
+        var detalle = Assert.Single(transferencia.Detalles);
+
+        transferencia.Solicitar(7, DateTime.UtcNow);
+        Assert.Equal(EstadoTransferenciaInventario.Solicitada, transferencia.Estado);
+
+        detalle.AprobarCantidad(4);
+        transferencia.Aprobar(8, DateTime.UtcNow);
+        Assert.Equal(EstadoTransferenciaInventario.Aprobada, transferencia.Estado);
+
+        detalle.RegistrarDespacho(4);
+        transferencia.MarcarEnTransito(9, DateTime.UtcNow);
+        Assert.Equal(EstadoTransferenciaInventario.EnTransito, transferencia.Estado);
+
+        detalle.RegistrarRecepcion(recibida: 3, faltante: 1, danada: 0, sobrante: 0);
+        transferencia.Recibir(10, DateTime.UtcNow);
+
+        Assert.Equal(EstadoTransferenciaInventario.Recibida, transferencia.Estado);
+        Assert.True(detalle.RecepcionCerrada);
+    }
+
+    [Fact]
+    public void RegistrarRecepcion_CuandoBalanceSuperaDespacho_NoMutaEstado()
+    {
+        var detalle = new TransferenciaInventarioDetalle();
+        detalle.EstablecerCantidadSolicitada(5);
+        detalle.AprobarCantidad(5);
+        detalle.RegistrarDespacho(5);
+
+        Assert.Throws<InvalidOperationException>(() =>
+            detalle.RegistrarRecepcion(recibida: 4, faltante: 1, danada: 1, sobrante: 0));
+
+        Assert.Equal(0, detalle.CantidadRecibida);
+        Assert.Equal(0, detalle.CantidadFaltante);
+        Assert.Equal(0, detalle.CantidadDanada);
+        Assert.Equal(0, detalle.CantidadSobrante);
+    }
+
+    [Fact]
+    public void Cancelar_TransferenciaRecibida_FallaCerrado()
+    {
+        var transferencia = CrearBorrador();
+        var detalle = Assert.Single(transferencia.Detalles);
+        transferencia.Solicitar(1, DateTime.UtcNow);
+        detalle.AprobarCantidad(4);
+        transferencia.Aprobar(2, DateTime.UtcNow);
+        detalle.RegistrarDespacho(4);
+        transferencia.MarcarEnTransito(3, DateTime.UtcNow);
+        detalle.RegistrarRecepcion(4, 0, 0, 0);
+        transferencia.Recibir(4, DateTime.UtcNow);
+
+        Assert.Throws<InvalidOperationException>(() =>
+            transferencia.Cancelar(5, "no aplica", DateTime.UtcNow));
+
+        Assert.Equal(EstadoTransferenciaInventario.Recibida, transferencia.Estado);
+    }
+
+    private static TransferenciaInventario CrearBorrador()
+    {
+        var detalle = new TransferenciaInventarioDetalle
+        {
+            ProductoVarianteId = 50
+        };
+        detalle.EstablecerCantidadSolicitada(4);
+
+        return new TransferenciaInventario
+        {
+            Numero = "TRF-0001",
+            AlmacenOrigenId = 1,
+            AlmacenDestinoId = 2,
+            Detalles = new List<TransferenciaInventarioDetalle> { detalle }
+        };
+    }
+}
