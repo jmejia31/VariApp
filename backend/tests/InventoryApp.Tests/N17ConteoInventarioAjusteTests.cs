@@ -90,7 +90,7 @@ public sealed class N17ConteoInventarioAjusteTests
         var unitOfWork = CrearUnitOfWork();
         var ajustes = new Mock<IAjusteInventarioService>();
         var conteo = CrearAprobadoConDosDiferencias();
-        conteo.Detalles[0].VincularAjuste(55);
+        conteo.Detalles.First().VincularAjuste(55);
         repository.Setup(x => x.GetByIdForUpdateAsync(10)).ReturnsAsync(conteo);
         var service = new ConteoInventarioService(repository.Object, existencias.Object, currentUser.Object, unitOfWork.Object, ajustes.Object);
 
