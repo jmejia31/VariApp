@@ -135,23 +135,26 @@ export class TransferenciaDetailComponent implements OnInit {
   }
 
   aprobar(): void {
-    if (!this.item || !window.confirm('¿Aprobar las cantidades solicitadas de esta transferencia?')) return;
+    const transferencia = this.item;
+    if (!transferencia || !window.confirm('¿Aprobar las cantidades solicitadas de esta transferencia?')) return;
     this.runAction(() => this.service.aprobar(this.id, {
-      detalles: this.item.detalles.map(d => ({ detalleId: d.id, cantidadAprobada: d.cantidadSolicitada }))
+      detalles: transferencia.detalles.map(d => ({ detalleId: d.id, cantidadAprobada: d.cantidadSolicitada }))
     }));
   }
 
   despachar(): void {
-    if (!this.item || !window.confirm('¿Despachar las cantidades aprobadas? Esta acción afecta stock físico.')) return;
+    const transferencia = this.item;
+    if (!transferencia || !window.confirm('¿Despachar las cantidades aprobadas? Esta acción afecta stock físico.')) return;
     this.runAction(() => this.service.despachar(this.id, {
-      detalles: this.item.detalles.map(d => ({ detalleId: d.id, cantidadDespachada: d.cantidadAprobada }))
+      detalles: transferencia.detalles.map(d => ({ detalleId: d.id, cantidadDespachada: d.cantidadAprobada }))
     }));
   }
 
   recibir(): void {
-    if (!this.item || !window.confirm('¿Registrar recepción completa de lo despachado, sin discrepancias?')) return;
+    const transferencia = this.item;
+    if (!transferencia || !window.confirm('¿Registrar recepción completa de lo despachado, sin discrepancias?')) return;
     this.runAction(() => this.service.recibir(this.id, {
-      detalles: this.item.detalles.map(d => ({
+      detalles: transferencia.detalles.map(d => ({
         detalleId: d.id,
         cantidadRecibida: d.cantidadDespachada,
         cantidadFaltante: 0,
