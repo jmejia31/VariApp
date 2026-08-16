@@ -13,6 +13,7 @@ public sealed class N16TransferenciasInventarioControllerBehaviorTests
     public async Task Create_RetornaCreatedAtActionConRecursoCreado()
     {
         var service = new Mock<ITransferenciaInventarioService>();
+        var movimientos = new Mock<ITransferenciaInventarioMovimientoService>();
         var dto = new CreateTransferenciaInventarioDto
         {
             AlmacenOrigenId = 1,
@@ -21,7 +22,7 @@ public sealed class N16TransferenciasInventarioControllerBehaviorTests
         };
         var creado = new TransferenciaInventarioDto { Id = 77, Numero = "TR-77", AlmacenOrigenId = 1, AlmacenDestinoId = 2 };
         service.Setup(x => x.CreateAsync(dto)).ReturnsAsync(creado);
-        var controller = new TransferenciasInventarioController(service.Object);
+        var controller = new TransferenciasInventarioController(service.Object, movimientos.Object);
 
         var result = await controller.Create(dto);
 
@@ -37,9 +38,10 @@ public sealed class N16TransferenciasInventarioControllerBehaviorTests
     public async Task AccionesSobreIdInexistente_RetornanNotFound(string accion)
     {
         var service = new Mock<ITransferenciaInventarioService>();
+        var movimientos = new Mock<ITransferenciaInventarioMovimientoService>();
         service.Setup(x => x.GetByIdAsync(999)).ReturnsAsync((TransferenciaInventarioDto?)null);
         service.Setup(x => x.SolicitarAsync(999)).ReturnsAsync((TransferenciaInventarioDto?)null);
-        var controller = new TransferenciasInventarioController(service.Object);
+        var controller = new TransferenciasInventarioController(service.Object, movimientos.Object);
 
         IActionResult result = accion == "get"
             ? await controller.GetById(999)
@@ -52,6 +54,7 @@ public sealed class N16TransferenciasInventarioControllerBehaviorTests
     public async Task Recibir_DelegaDiscrepanciasAlCasoDeUsoYRetornaOk()
     {
         var service = new Mock<ITransferenciaInventarioService>();
+        var movimientos = new Mock<ITransferenciaInventarioMovimientoService>();
         var dto = new RecibirTransferenciaInventarioDto
         {
             Detalles =
@@ -67,12 +70,12 @@ public sealed class N16TransferenciasInventarioControllerBehaviorTests
             }
         };
         var recibida = new TransferenciaInventarioDto { Id = 21, Estado = "Recibida" };
-        service.Setup(x => x.RecibirAsync(21, dto)).ReturnsAsync(recibida);
-        var controller = new TransferenciasInventarioController(service.Object);
+        movimientos.Setup(x => x.RecibirAsync(21, dto)).ReturnsAsync(recibida);
+        var controller = new TransferenciasInventarioController(service.Object, movimientos.Object);
 
         var result = await controller.Recibir(21, dto);
 
         Assert.IsType<OkObjectResult>(result);
-        service.Verify(x => x.RecibirAsync(21, dto), Times.Once);
+        movimientos.Verify(x => x.RecibirAsync(21, dto), Times.Once);
     }
 }
