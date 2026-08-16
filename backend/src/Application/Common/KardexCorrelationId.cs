@@ -20,6 +20,15 @@ public static class KardexCorrelationId
 
     public static string ConsumoAnular(int consumoInsumoId) => Crear("consumo", consumoInsumoId, "anular");
 
+    public static string TransferenciaDespachar(int transferenciaId) =>
+        Crear("transferencia", transferenciaId, "despachar");
+
+    public static string TransferenciaRecibir(int transferenciaId) =>
+        Crear("transferencia", transferenciaId, "recibir");
+
+    public static string TransferenciaCancelar(int transferenciaId) =>
+        Crear("transferencia", transferenciaId, "cancelar");
+
     private static string Crear(string modulo, int documentoId, string operacion)
     {
         if (documentoId <= 0)
