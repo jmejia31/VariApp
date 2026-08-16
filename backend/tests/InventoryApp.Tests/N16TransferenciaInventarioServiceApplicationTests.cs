@@ -59,20 +59,7 @@ public sealed class N16TransferenciaInventarioServiceApplicationTests
         repository.Setup(x => x.GetByIdForUpdateAsync(transferencia.Id)).ReturnsAsync(transferencia);
         var service = CrearService(repository);
 
-        var aprobada = await service.AprobarAsync(transferencia.Id, new AprobarTransferenciaInventarioDto
-        {
-            Detalles = { new AprobarTransferenciaInventarioDetalleDto { DetalleId = detalleId, CantidadAprobada = 3 } }
-        });
-        Assert.NotNull(aprobada);
-        Assert.Equal("Aprobada", aprobada!.Estado);
-
-        var enTransito = await service.DespacharAsync(transferencia.Id, new DespacharTransferenciaInventarioDto
-        {
-            Detalles = { new DespacharTransferenciaInventarioDetalleDto { DetalleId = detalleId, CantidadDespachada = 3 } }
-        });
-        Assert.NotNull(enTransito);
-        Assert.Equal("EnTransito", enTransito!.Estado);
-
+        await AprobarYDespacharAsync(service, transferencia.Id, detalleId, 3);
         var recibida = await service.RecibirAsync(transferencia.Id, new RecibirTransferenciaInventarioDto
         {
             Detalles =
@@ -92,6 +79,80 @@ public sealed class N16TransferenciaInventarioServiceApplicationTests
         Assert.Equal("Recibida", recibida!.Estado);
         repository.Verify(x => x.Update(transferencia), Times.Exactly(3));
         repository.Verify(x => x.SaveChangesAsync(), Times.Exactly(3));
+    }
+
+    [Fact]
+    public async Task Recibir_PreservaFaltantesDanosYSobrantesDelDocumento()
+    {
+        var transferencia = CrearTransferenciaSolicitada();
+        var detalleId = transferencia.Detalles.Single().Id;
+        var repository = new Mock<ITransferenciaInventarioRepository>();
+        repository.Setup(x => x.GetByIdForUpdateAsync(transferencia.Id)).ReturnsAsync(transferencia);
+        var service = CrearService(repository);
+        await AprobarYDespacharAsync(service, transferencia.Id, detalleId, 3);
+
+        var recibida = await service.RecibirAsync(transferencia.Id, new RecibirTransferenciaInventarioDto
+        {
+            Detalles =
+            {
+                new RecibirTransferenciaInventarioDetalleDto
+                {
+                    DetalleId = detalleId,
+                    CantidadRecibida = 1,
+                    CantidadFaltante = 1,
+                    CantidadDanada = 1,
+                    CantidadSobrante = 2
+                }
+            }
+        });
+
+        var detalle = Assert.Single(recibida!.Detalles);
+        Assert.Equal(1, detalle.CantidadRecibida);
+        Assert.Equal(1, detalle.CantidadFaltante);
+        Assert.Equal(1, detalle.CantidadDanada);
+        Assert.Equal(2, detalle.CantidadSobrante);
+        Assert.Equal("Recibida", recibida.Estado);
+    }
+
+    [Fact]
+    public async Task Cancelar_DesdeSolicitada_RegistraMotivoYEsIdempotenteAlReintentar()
+    {
+        var transferencia = CrearTransferenciaSolicitada();
+        var repository = new Mock<ITransferenciaInventarioRepository>();
+        repository.Setup(x => x.GetByIdForUpdateAsync(transferencia.Id)).ReturnsAsync(transferencia);
+        var service = CrearService(repository);
+        var dto = new CancelarTransferenciaInventarioDto { Motivo = "Solicitud duplicada" };
+
+        var cancelada = await service.CancelarAsync(transferencia.Id, dto);
+        var reintento = await service.CancelarAsync(transferencia.Id, dto);
+
+        Assert.NotNull(cancelada);
+        Assert.Equal("Cancelada", cancelada!.Estado);
+        Assert.Equal("Solicitud duplicada", cancelada.MotivoCancelacion);
+        Assert.Equal("Cancelada", reintento!.Estado);
+        repository.Verify(x => x.Update(transferencia), Times.Once);
+        repository.Verify(x => x.SaveChangesAsync(), Times.Once);
+    }
+
+    private static async Task AprobarYDespacharAsync(
+        TransferenciaInventarioService service,
+        int transferenciaId,
+        int detalleId,
+        int cantidad)
+    {
+        var aprobada = await service.AprobarAsync(transferenciaId, new AprobarTransferenciaInventarioDto
+        {
+            Detalles = { new AprobarTransferenciaInventarioDetalleDto { DetalleId = detalleId, CantidadAprobada = cantidad } }
+        });
+        Assert.NotNull(aprobada);
+        Assert.Equal("Aprobada", aprobada!.Estado);
+
+        var enTransito = await service.DespacharAsync(transferenciaId, new DespacharTransferenciaInventarioDto
+        {
+            Detalles = { new DespacharTransferenciaInventarioDetalleDto { DetalleId = detalleId, CantidadDespachada = cantidad } }
+        });
+        Assert.NotNull(enTransito);
+        Assert.Equal("EnTransito", enTransito!.Estado);
     }
 
     private static TransferenciaInventarioService CrearService(Mock<ITransferenciaInventarioRepository> repository)
