@@ -27,6 +27,13 @@ public class N17ConteoInventarioPersistenceModelTests
             i.Properties.Select(p => p.Name).SequenceEqual(new[] { nameof(ConteoInventario.Numero) })));
         Assert.True(numero.IsUnique);
 
+        var scopeConteo = Assert.Single(conteo.GetKeys().Where(k =>
+            k.Properties.Select(p => p.Name).SequenceEqual(new[]
+            {
+                nameof(ConteoInventario.Id), nameof(ConteoInventario.AlmacenId)
+            })));
+        Assert.Equal("AK_ConteosInventario_Id_AlmacenId", scopeConteo.GetName());
+
         var scopeUbicacionFk = Assert.Single(conteo.GetForeignKeys().Where(fk =>
             fk.Properties.Select(p => p.Name).SequenceEqual(new[]
             {
@@ -38,6 +45,18 @@ public class N17ConteoInventarioPersistenceModelTests
         Assert.Equal(
             new[] { nameof(UbicacionAlmacen.AlmacenId), nameof(UbicacionAlmacen.Id) },
             scopeUbicacionFk.PrincipalKey.Properties.Select(p => p.Name));
+
+        var conteoMismoAlmacenFk = Assert.Single(detalle.GetForeignKeys().Where(fk =>
+            fk.PrincipalEntityType.ClrType == typeof(ConteoInventario) &&
+            fk.Properties.Select(p => p.Name).SequenceEqual(new[]
+            {
+                nameof(ConteoInventarioDetalle.ConteoInventarioId),
+                nameof(ConteoInventarioDetalle.AlmacenId)
+            })));
+        Assert.Equal(DeleteBehavior.Cascade, conteoMismoAlmacenFk.DeleteBehavior);
+        Assert.Equal(
+            new[] { nameof(ConteoInventario.Id), nameof(ConteoInventario.AlmacenId) },
+            conteoMismoAlmacenFk.PrincipalKey.Properties.Select(p => p.Name));
 
         var ubicacionNormalizada = detalle.FindProperty("UbicacionNormalizada");
         Assert.NotNull(ubicacionNormalizada);
