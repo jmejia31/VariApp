@@ -48,7 +48,7 @@ public class MovimientoInventarioService : IMovimientoInventarioService
         MovimientoInventario m,
         MovimientoInventarioOrigenPersistido? origen)
     {
-        var origenTipo = origen switch
+        var origenTipoTipado = origen switch
         {
             { CompraId: not null } => "Compra",
             { VentaId: not null } => "Venta",
@@ -58,11 +58,18 @@ public class MovimientoInventarioService : IMovimientoInventarioService
             _ => null
         };
 
-        var origenId = origen?.CompraId ??
-                       origen?.VentaId ??
-                       origen?.ConsumoInsumoId ??
-                       origen?.AjusteInventarioId ??
-                       origen?.TransferenciaInventarioId;
+        var origenTipoLegacy = NormalizarOrigenLegacy(m.ReferenciaTipo);
+        var origenTipo = origenTipoTipado ?? origenTipoLegacy;
+
+        var origenIdTipado = origen?.CompraId ??
+                             origen?.VentaId ??
+                             origen?.ConsumoInsumoId ??
+                             origen?.AjusteInventarioId ??
+                             origen?.TransferenciaInventarioId;
+        var origenId = origenIdTipado ?? (origenTipoLegacy is not null && m.ReferenciaId > 0 ? m.ReferenciaId : null);
+
+        var transferenciaInventarioId = origen?.TransferenciaInventarioId ??
+            (origenTipo == "TransferenciaInventario" && m.ReferenciaId > 0 ? m.ReferenciaId : null);
 
         return new MovimientoInventarioDto
         {
@@ -89,12 +96,28 @@ public class MovimientoInventarioService : IMovimientoInventarioService
             VentaId = origen?.VentaId,
             ConsumoInsumoId = origen?.ConsumoInsumoId,
             AjusteInventarioId = origen?.AjusteInventarioId,
-            TransferenciaInventarioId = origen?.TransferenciaInventarioId,
+            TransferenciaInventarioId = transferenciaInventarioId,
             ReferenciaTipo = m.ReferenciaTipo,
             ReferenciaId = m.ReferenciaId,
             Descripcion = m.Descripcion,
             CreadoPorNombreUsuario = m.CreadoPorNombreUsuario,
             Fecha = m.Fecha
+        };
+    }
+
+    private static string? NormalizarOrigenLegacy(string? referenciaTipo)
+    {
+        if (string.IsNullOrWhiteSpace(referenciaTipo))
+            return null;
+
+        return referenciaTipo.Trim().ToLowerInvariant() switch
+        {
+            "compra" or "compraanulada" => "Compra",
+            "venta" or "ventaanulada" => "Venta",
+            "consumoinsumo" => "ConsumoInsumo",
+            "ajusteinventario" => "AjusteInventario",
+            "transferenciainventario" or "transferencia" => "TransferenciaInventario",
+            _ => null
         };
     }
 }
