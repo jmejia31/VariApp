@@ -18,21 +18,16 @@ public sealed class CreateTransferenciaInventarioValidator : AbstractValidator<C
 {
     public CreateTransferenciaInventarioValidator()
     {
-        AplicarReglas(this);
-    }
-
-    internal static void AplicarReglas<T>(AbstractValidator<T> validator) where T : CreateTransferenciaInventarioDto
-    {
-        validator.RuleFor(x => x.AlmacenOrigenId).GreaterThan(0);
-        validator.RuleFor(x => x.AlmacenDestinoId)
+        RuleFor(x => x.AlmacenOrigenId).GreaterThan(0);
+        RuleFor(x => x.AlmacenDestinoId)
             .GreaterThan(0)
             .NotEqual(x => x.AlmacenOrigenId)
             .WithMessage("El almacén de destino debe ser distinto del almacén de origen.");
-        validator.RuleFor(x => x.Observaciones).MaximumLength(1000);
-        validator.RuleFor(x => x.Detalles)
+        RuleFor(x => x.Observaciones).MaximumLength(1000);
+        RuleFor(x => x.Detalles)
             .NotEmpty().WithMessage("La transferencia debe contener al menos un detalle.");
-        validator.RuleForEach(x => x.Detalles).SetValidator(new TransferenciaInventarioDetalleInputValidator());
-        validator.RuleFor(x => x.Detalles)
+        RuleForEach(x => x.Detalles).SetValidator(new TransferenciaInventarioDetalleInputValidator());
+        RuleFor(x => x.Detalles)
             .Must(SinDuplicados)
             .When(x => x.Detalles is { Count: > 0 })
             .WithMessage("No puede repetirse la misma variante y par de ubicaciones dentro de la transferencia.");
@@ -70,7 +65,10 @@ public sealed class AprobarTransferenciaInventarioValidator : AbstractValidator<
     public AprobarTransferenciaInventarioValidator()
     {
         RuleFor(x => x.Detalles).NotEmpty();
-        RuleFor(x => x.Detalles).Must(SinIdsDuplicados).WithMessage("La aprobación contiene detalles duplicados.");
+        RuleFor(x => x.Detalles)
+            .Must(SinIdsDuplicados)
+            .When(x => x.Detalles is { Count: > 0 })
+            .WithMessage("La aprobación contiene detalles duplicados.");
         RuleForEach(x => x.Detalles).ChildRules(detalle =>
         {
             detalle.RuleFor(x => x.DetalleId).GreaterThan(0);
@@ -89,6 +87,7 @@ public sealed class DespacharTransferenciaInventarioValidator : AbstractValidato
         RuleFor(x => x.Detalles).NotEmpty();
         RuleFor(x => x.Detalles)
             .Must(detalles => detalles.Select(x => x.DetalleId).Distinct().Count() == detalles.Count)
+            .When(x => x.Detalles is { Count: > 0 })
             .WithMessage("El despacho contiene detalles duplicados.");
         RuleForEach(x => x.Detalles).ChildRules(detalle =>
         {
@@ -105,6 +104,7 @@ public sealed class RecibirTransferenciaInventarioValidator : AbstractValidator<
         RuleFor(x => x.Detalles).NotEmpty();
         RuleFor(x => x.Detalles)
             .Must(detalles => detalles.Select(x => x.DetalleId).Distinct().Count() == detalles.Count)
+            .When(x => x.Detalles is { Count: > 0 })
             .WithMessage("La recepción contiene detalles duplicados.");
         RuleForEach(x => x.Detalles).ChildRules(detalle =>
         {
