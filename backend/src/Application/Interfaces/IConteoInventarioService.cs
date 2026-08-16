@@ -11,6 +11,7 @@ public interface IConteoInventarioService
     Task<ConteoInventarioDto?> UpdateAsync(int id, UpdateConteoInventarioDto dto);
     Task<ConteoInventarioDto?> IniciarAsync(int id);
     Task<ConteoInventarioDto?> CapturarDetalleAsync(int id, int detalleId, CapturarConteoInventarioDetalleDto dto);
+    Task<ConteoInventarioDto?> CapturarLoteAsync(int id, CapturarConteoInventarioLoteDto dto);
     Task<ConteoInventarioDto?> CerrarAsync(int id);
     Task<ConteoInventarioDto?> AprobarAsync(int id);
     Task<AjusteInventarioDto?> GenerarAjusteAsync(int id);
