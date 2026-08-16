@@ -31,6 +31,30 @@ public sealed class N16TransferenciaAuditObservabilityTests
     }
 
     [Fact]
+    public void Recepcion_PreservaActorYTimestampSinSobrescribirDespacho()
+    {
+        var transferencia = CrearBorradorValido();
+        var solicitud = new DateTime(2026, 8, 16, 10, 0, 0, DateTimeKind.Utc);
+        var aprobacion = solicitud.AddMinutes(1);
+        var despacho = aprobacion.AddMinutes(1);
+        var recepcion = despacho.AddMinutes(5);
+
+        transferencia.Solicitar(101, solicitud);
+        transferencia.Detalles.Single().AprobarCantidad(3);
+        transferencia.Aprobar(202, aprobacion);
+        transferencia.Detalles.Single().RegistrarDespacho(3);
+        transferencia.MarcarEnTransito(303, despacho);
+        transferencia.Detalles.Single().RegistrarRecepcion(3);
+        transferencia.MarcarRecibida(404, recepcion);
+
+        Assert.Equal(303, transferencia.DespachadaPorUsuarioId);
+        Assert.Equal(despacho, transferencia.FechaDespacho);
+        Assert.Equal(404, transferencia.RecibidaPorUsuarioId);
+        Assert.Equal(recepcion, transferencia.FechaRecepcion);
+        Assert.Equal(EstadoTransferenciaInventario.Recibida, transferencia.Estado);
+    }
+
+    [Fact]
     public void Cancelacion_PreservaActorTimestampYMotivoNormalizado()
     {
         var transferencia = CrearBorradorValido();
