@@ -20,63 +20,84 @@ public sealed class TransferenciaKardexMovimientoRegistrar
         _writer = writer ?? throw new ArgumentNullException(nameof(writer));
     }
 
-    public async Task RegistrarDespachoAsync(
+    public Task RegistrarDespachoAsync(
         TransferenciaInventario transferencia,
         IReadOnlyCollection<TransferenciaInventarioTransitoTransicion> transiciones,
         int usuarioId,
-        string? nombreUsuario)
-    {
-        ValidarTransferenciaPersistida(transferencia, usuarioId);
-        var correlationId = KardexCorrelationId.TransferenciaDespachar(transferencia.Id);
-        var origen = OrigenMovimientoInventario.DesdeTransferenciaInventario(transferencia.Id);
+        string? nombreUsuario) =>
+        RegistrarFisicosAsync(
+            transferencia,
+            transiciones.Where(x => x.CantidadFisica < 0),
+            KardexCorrelationId.TransferenciaDespachar(transferencia.Id),
+            TipoMovimientoInventario.Salida,
+            CausaMovimientoInventario.TransferenciaDespacho,
+            usuarioId,
+            nombreUsuario,
+            origenFisico: true,
+            cantidadSelector: x => checked(-x.CantidadFisica),
+            descripcion: $"Despacho de transferencia {transferencia.Numero} hacia almacén {transferencia.AlmacenDestinoId}.");
 
-        foreach (var transicion in transiciones.Where(x => x.CantidadFisica < 0))
-        {
-            var detalle = BuscarDetalle(transferencia, transicion.Clave, origen: true);
-            var cantidad = checked(-transicion.CantidadFisica);
-            var movimiento = CrearMovimiento(
-                transferencia,
-                detalle,
-                transicion,
-                TipoMovimientoInventario.Salida,
-                CausaMovimientoInventario.TransferenciaDespacho,
-                cantidad,
-                usuarioId,
-                nombreUsuario,
-                $"Despacho de transferencia {transferencia.Numero} hacia almacén {transferencia.AlmacenDestinoId}.");
-            var contexto = ContextoFisicoMovimientoInventario.Crear(
-                transicion.Clave.ProductoVarianteId,
-                transicion.Clave.AlmacenId,
-                transicion.Clave.UbicacionAlmacenId,
-                correlationId);
-
-            await _writer.RegistrarFisicoAsync(movimiento, origen, contexto);
-        }
-    }
-
-    public async Task RegistrarRecepcionAsync(
+    public Task RegistrarRecepcionAsync(
         TransferenciaInventario transferencia,
         IReadOnlyCollection<TransferenciaInventarioTransitoTransicion> transiciones,
         int usuarioId,
-        string? nombreUsuario)
+        string? nombreUsuario) =>
+        RegistrarFisicosAsync(
+            transferencia,
+            transiciones.Where(x => x.CantidadFisica > 0),
+            KardexCorrelationId.TransferenciaRecibir(transferencia.Id),
+            TipoMovimientoInventario.Entrada,
+            CausaMovimientoInventario.TransferenciaRecepcion,
+            usuarioId,
+            nombreUsuario,
+            origenFisico: false,
+            cantidadSelector: x => x.CantidadFisica,
+            descripcion: $"Recepción de transferencia {transferencia.Numero} desde almacén {transferencia.AlmacenOrigenId}.");
+
+    public Task RegistrarCancelacionAsync(
+        TransferenciaInventario transferencia,
+        IReadOnlyCollection<TransferenciaInventarioTransitoTransicion> transiciones,
+        int usuarioId,
+        string? nombreUsuario) =>
+        RegistrarFisicosAsync(
+            transferencia,
+            transiciones.Where(x => x.CantidadFisica > 0 && x.Clave.AlmacenId == transferencia.AlmacenOrigenId),
+            KardexCorrelationId.TransferenciaCancelar(transferencia.Id),
+            TipoMovimientoInventario.Entrada,
+            CausaMovimientoInventario.TransferenciaCancelacion,
+            usuarioId,
+            nombreUsuario,
+            origenFisico: true,
+            cantidadSelector: x => x.CantidadFisica,
+            descripcion: $"Reversión por cancelación de transferencia {transferencia.Numero} desde tránsito.");
+
+    private async Task RegistrarFisicosAsync(
+        TransferenciaInventario transferencia,
+        IEnumerable<TransferenciaInventarioTransitoTransicion> transiciones,
+        string correlationId,
+        TipoMovimientoInventario tipo,
+        CausaMovimientoInventario causa,
+        int usuarioId,
+        string? nombreUsuario,
+        bool origenFisico,
+        Func<TransferenciaInventarioTransitoTransicion, int> cantidadSelector,
+        string descripcion)
     {
         ValidarTransferenciaPersistida(transferencia, usuarioId);
-        var correlationId = KardexCorrelationId.TransferenciaRecibir(transferencia.Id);
         var origen = OrigenMovimientoInventario.DesdeTransferenciaInventario(transferencia.Id);
 
-        foreach (var transicion in transiciones.Where(x => x.CantidadFisica > 0))
+        foreach (var transicion in transiciones)
         {
-            var detalle = BuscarDetalle(transferencia, transicion.Clave, origen: false);
+            var detalle = BuscarDetalle(transferencia, transicion.Clave, origenFisico);
             var movimiento = CrearMovimiento(
-                transferencia,
                 detalle,
                 transicion,
-                TipoMovimientoInventario.Entrada,
-                CausaMovimientoInventario.TransferenciaRecepcion,
-                transicion.CantidadFisica,
+                tipo,
+                causa,
+                cantidadSelector(transicion),
                 usuarioId,
                 nombreUsuario,
-                $"Recepción de transferencia {transferencia.Numero} desde almacén {transferencia.AlmacenOrigenId}.");
+                descripcion);
             var contexto = ContextoFisicoMovimientoInventario.Crear(
                 transicion.Clave.ProductoVarianteId,
                 transicion.Clave.AlmacenId,
@@ -88,7 +109,6 @@ public sealed class TransferenciaKardexMovimientoRegistrar
     }
 
     private static MovimientoInventario CrearMovimiento(
-        TransferenciaInventario transferencia,
         TransferenciaInventarioDetalle detalle,
         TransferenciaInventarioTransitoTransicion transicion,
         TipoMovimientoInventario tipo,
