@@ -131,7 +131,7 @@ test.describe('N1.7.E - Conteos físicos', () => {
     await input.fill('6');
     await page.getByRole('button', { name: 'Guardar capturas' }).click();
     await expect(page.getByText('Oculto')).toBeVisible();
-    await expect(page.getByText('-2', { exact: true })).toBeVisible();
+    await expect(page.locator('tbody').getByText('-2', { exact: true })).toBeVisible();
   });
 
   test('cierra y aprueba el lifecycle sólo mediante acciones explícitas', async ({ page }) => {
