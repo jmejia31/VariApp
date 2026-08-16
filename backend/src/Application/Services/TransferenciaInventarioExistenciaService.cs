@@ -19,9 +19,8 @@ public sealed record TransferenciaInventarioTransitoTransicion(
     int CantidadFisica);
 
 /// <summary>
-/// Orquesta despacho y recepción contra ExistenciaVariante como autoridad única.
-/// Los locks se adquieren en un único conjunto ordenado antes de mutar origen o
-/// destino, evitando dependencias de ProductoVariante.Cantidad.
+/// Orquesta despacho, recepción y reversión contra ExistenciaVariante como autoridad única.
+/// Los locks se adquieren en un único conjunto ordenado antes de mutar origen o destino.
 /// </summary>
 public sealed class TransferenciaInventarioExistenciaService
 {
@@ -38,10 +37,12 @@ public sealed class TransferenciaInventarioExistenciaService
         return _existencias.BloquearYValidarExistenciasAsync(demandas, esDeduccion: false);
     }
 
-    /// <summary>
-    /// Compatibilidad para pruebas/adapters previos que entregan únicamente
-    /// demandas de origen ya bloqueadas.
-    /// </summary>
+    public Task<InventarioExistenciaLockSet> BloquearParaCancelacionEnTransitoAsync(TransferenciaInventario transferencia)
+    {
+        var demandas = TransferenciaInventarioExistenciaContext.ConstruirDemandasBloqueoDespacho(transferencia);
+        return _existencias.BloquearYValidarExistenciasAsync(demandas, esDeduccion: false);
+    }
+
     public async Task<IReadOnlyList<TransferenciaInventarioExistenciaTransicion>> AplicarDespachoAsync(
         InventarioExistenciaLockSet lockSet)
     {
@@ -179,6 +180,69 @@ public sealed class TransferenciaInventarioExistenciaService
                 transitoAnterior,
                 transitoNuevo,
                 recibido));
+        }
+
+        return transiciones;
+    }
+
+    public async Task<IReadOnlyList<TransferenciaInventarioTransitoTransicion>> AplicarCancelacionEnTransitoAsync(
+        InventarioExistenciaLockSet lockSet,
+        TransferenciaInventario transferencia)
+    {
+        ArgumentNullException.ThrowIfNull(lockSet);
+        ArgumentNullException.ThrowIfNull(transferencia);
+
+        var origen = Consolidar(TransferenciaInventarioExistenciaContext.ConstruirDemandasDespacho(transferencia));
+        var destino = Consolidar(TransferenciaInventarioExistenciaContext.ConstruirDemandasTransitoDestino(transferencia));
+        var transiciones = new List<TransferenciaInventarioTransitoTransicion>(origen.Count + destino.Count);
+
+        foreach (var demanda in origen)
+        {
+            var existencia = ObtenerExistencia(lockSet, demanda.Clave, "reversión de origen");
+            var fisicoAnterior = existencia.StockFisico;
+            var fisicoNuevo = checked(fisicoAnterior + demanda.Cantidad);
+            var transito = existencia.StockTransito;
+
+            await _existencias.AjustarStocksPesimistaAsync(
+                demanda.Clave,
+                fisicoAnterior,
+                fisicoNuevo,
+                transito,
+                transito);
+
+            transiciones.Add(new TransferenciaInventarioTransitoTransicion(
+                demanda.Clave,
+                fisicoAnterior,
+                fisicoNuevo,
+                transito,
+                transito,
+                demanda.Cantidad));
+        }
+
+        foreach (var demanda in destino)
+        {
+            var existencia = ObtenerExistencia(lockSet, demanda.Clave, "cierre de tránsito por cancelación");
+            if (existencia.StockTransito < demanda.Cantidad)
+                throw new BusinessRuleException("La cancelación intentaría revertir más tránsito del registrado en destino.");
+
+            var fisico = existencia.StockFisico;
+            var transitoAnterior = existencia.StockTransito;
+            var transitoNuevo = checked(transitoAnterior - demanda.Cantidad);
+
+            await _existencias.AjustarStocksPesimistaAsync(
+                demanda.Clave,
+                fisico,
+                fisico,
+                transitoAnterior,
+                transitoNuevo);
+
+            transiciones.Add(new TransferenciaInventarioTransitoTransicion(
+                demanda.Clave,
+                fisico,
+                fisico,
+                transitoAnterior,
+                transitoNuevo,
+                0));
         }
 
         return transiciones;
