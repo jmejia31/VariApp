@@ -205,20 +205,37 @@ async function installFixtures(page: Page): Promise<void> {
   }));
   await page.route(/^https?:\/\/(?:localhost|127\.0\.0\.1):5005\/(?:api\/)?ventas\/701$/, (route) => json(route, sale));
 
-  await page.route(/^https?:\/\/(?:localhost|127\.0\.0\.1):5005\/(?:api\/)?inventario\/movimientos(?:\?.*)?$/, (route) => json(route, [{
-    id: 801,
-    productoId: product.id,
-    productoNombre: product.nombre,
-    productoImagenPrincipalUrl: okImage,
-    tipo: 'Entrada',
-    cantidad: 1,
-    stockAnterior: 7,
-    stockNuevo: 8,
-    referenciaTipo: 'Compra',
-    referenciaId: 601,
-    fecha: '2026-07-27T12:00:00Z',
-    creadoPorNombreUsuario: ADMIN_USERNAME
-  }]));
+  await page.route(/^https?:\/\/(?:localhost|127\.0\.0\.1):5005\/(?:api\/)?inventario\/movimientos(?:\?.*)?$/, (route) => json(route, {
+    items: [{
+      id: 801,
+      productoId: product.id,
+      productoVarianteId: productOperationPurchase.productoVarianteId,
+      almacenId: null,
+      ubicacionAlmacenId: null,
+      productoNombre: product.nombre,
+      productoSku: productOperationPurchase.sku,
+      productoImagenPrincipalUrl: okImage,
+      tipo: 'Entrada',
+      causa: 'Compra',
+      cantidad: 1,
+      stockAnterior: 7,
+      stockNuevo: 8,
+      costoUnitario: product.costo,
+      precioUnitario: product.precio,
+      correlationId: 'compra:601:confirmar',
+      origenTipo: 'Compra',
+      origenId: 601,
+      compraId: 601,
+      referenciaTipo: 'Compra',
+      referenciaId: 601,
+      fecha: '2026-07-27T12:00:00Z',
+      creadoPorNombreUsuario: ADMIN_USERNAME
+    }],
+    totalCount: 1,
+    page: 1,
+    pageSize: 25,
+    totalPages: 1
+  }));
 }
 
 async function expectNoOverflow(page: Page): Promise<void> {
