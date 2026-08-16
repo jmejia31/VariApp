@@ -105,6 +105,8 @@ public class ConteoInventario : AuditableEntity
             throw new InvalidOperationException("El conteo debe materializar al menos una línea antes de iniciar.");
         if (Detalles.Any(x => x.AlmacenId != AlmacenId))
             throw new InvalidOperationException("Todas las líneas deben pertenecer al almacén del conteo.");
+        if (Detalles.Any(x => !x.SnapshotMaterializado))
+            throw new InvalidOperationException("Todas las líneas deben materializar el snapshot de stock físico antes de iniciar.");
     }
 
     private void ValidarScope()
