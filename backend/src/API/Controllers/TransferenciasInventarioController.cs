@@ -2,6 +2,7 @@ using InventoryApp.API.Filters;
 using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Interfaces;
+using InventoryApp.Application.Services;
 using InventoryApp.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,10 +15,14 @@ namespace InventoryApp.API.Controllers;
 public sealed class TransferenciasInventarioController : ControllerBase
 {
     private readonly ITransferenciaInventarioService _service;
+    private readonly TransferenciaInventarioMovimientoService _movimientos;
 
-    public TransferenciasInventarioController(ITransferenciaInventarioService service)
+    public TransferenciasInventarioController(
+        ITransferenciaInventarioService service,
+        TransferenciaInventarioMovimientoService movimientos)
     {
         _service = service;
+        _movimientos = movimientos;
     }
 
     [HttpGet]
@@ -87,7 +92,7 @@ public sealed class TransferenciasInventarioController : ControllerBase
     [RequierePermiso(ModuloSistema.MovimientosInventario, AccionPermiso.Confirmar)]
     public async Task<IActionResult> Despachar(int id, [FromBody] DespacharTransferenciaInventarioDto dto)
     {
-        var transferencia = await _service.DespacharAsync(id, dto);
+        var transferencia = await _movimientos.DespacharAsync(id, dto);
         if (transferencia is null)
             return NotFound(ApiResponse<object>.Fail("Transferencia de inventario no encontrada."));
 
@@ -98,7 +103,7 @@ public sealed class TransferenciasInventarioController : ControllerBase
     [RequierePermiso(ModuloSistema.MovimientosInventario, AccionPermiso.Confirmar)]
     public async Task<IActionResult> Recibir(int id, [FromBody] RecibirTransferenciaInventarioDto dto)
     {
-        var transferencia = await _service.RecibirAsync(id, dto);
+        var transferencia = await _movimientos.RecibirAsync(id, dto);
         if (transferencia is null)
             return NotFound(ApiResponse<object>.Fail("Transferencia de inventario no encontrada."));
 
