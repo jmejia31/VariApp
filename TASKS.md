@@ -134,6 +134,19 @@ ERP-N0.5, ERP-N0.6, ERP-N0.7 y ERP-N0.8 están formalmente cerrados. `GATE-N0=LI
 
 **ERP-N1.2 queda formalmente cerrado.** Siguiente foco autorizado por VAEP: `N1.3.A — Ubicaciones internas / auditoría y preflight`.
 
+## ERP-N1.5 — Kardex empresarial
+
+- [x] N1.5.A Auditoría y preflight — `docs/ERP_N1_5_KARDEX_EMPRESARIAL_PREFLIGHT.md`; gaps de contexto físico, correlación durable, contrato paginado, seguridad e históricos documentados.
+- [x] N1.5.B Dominio y contratos — contrato de Kardex y correlación durable cerrado en `625ba5a3777e0b8ffb38ecba1ea3fa1956270029`.
+- [x] N1.5.C Persistencia/migración/datos — `CorrelationId` y esquema certificado en `55dbaa334ac6bbf236f6b5f376a0dcd69f2d2354`; Desarrollo `31911214659`, aceptación `31911214717`, Fase8 `31911214610` y recovery MySQL `31911214658` SUCCESS.
+- [x] N1.5.D Aplicación/servicios/API — writer canónico, correlación determinística y consulta paginada/filtros empresariales; `6f4a3cb8f7e854c40569db08fe2f9dd05aca126f`.
+- [x] N1.5.E Frontend/UX — UI Kardex paginada, filtros, responsive/accesibilidad; `dd510978a16675b1839998ab8156e63f469a0b78`, M10 `31917459334` SUCCESS.
+- [x] N1.5.F RBAC/auditoría/seguridad/observabilidad — scope fail-closed y correlación saneada; `75196d80602dc1c0d715b6b52069267d0cf6282c`.
+- [x] N1.5.G QA/regresión/CI — índices compuestos y migración `20260816005000_N1_5_KardexQueryIndexes`; base funcional `4871da115e72d205513ea23aa9fe95c1e4818e6b`; CI `31918223873` SUCCESS.
+- [x] N1.5.H Documentación/certificación — cierre funcional `7a37998c8ff94299904135471d328c0d8b91c705`; Desarrollo `31923298004`, aceptación `31923298037`, Fase8 `31923298063` y M13 `31923298066` SUCCESS completos; documento canónico `docs/ERP_N1_5_KARDEX_EMPRESARIAL.md` reconciliado.
+
+**ERP-N1.5 queda formalmente cerrado.** Siguiente foco FINISH_FIRST: `N1.6.A — Transferencias — Auditoría y preflight`.
+
 ## Fuentes VAEP v2
 
 Plan rector:
