@@ -61,6 +61,26 @@ public class N16TransferenciaInventarioDomainTests
     }
 
     [Fact]
+    public void Despachar_SinCantidadDespachada_FallaCerradoYSinMutarAuditoria()
+    {
+        var transferencia = CrearBorrador();
+        var detalle = Assert.Single(transferencia.Detalles);
+        transferencia.Solicitar(1, DateTime.UtcNow);
+        detalle.AprobarCantidad(4);
+        transferencia.Aprobar(2, DateTime.UtcNow);
+
+        var fechaAntes = transferencia.FechaDespacho;
+        var usuarioAntes = transferencia.DespachadaPorUsuarioId;
+
+        Assert.Throws<InvalidOperationException>(() =>
+            transferencia.MarcarEnTransito(3, DateTime.UtcNow));
+
+        Assert.Equal(EstadoTransferenciaInventario.Aprobada, transferencia.Estado);
+        Assert.Equal(fechaAntes, transferencia.FechaDespacho);
+        Assert.Equal(usuarioAntes, transferencia.DespachadaPorUsuarioId);
+    }
+
+    [Fact]
     public void RegistrarRecepcion_CuandoBalanceSuperaDespacho_NoMutaEstado()
     {
         var detalle = new TransferenciaInventarioDetalle();
