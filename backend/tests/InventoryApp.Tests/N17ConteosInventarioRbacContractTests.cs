@@ -24,6 +24,7 @@ public sealed class N17ConteosInventarioRbacContractTests
     [InlineData(nameof(ConteosInventarioController.Capturar), AccionPermiso.Editar)]
     [InlineData(nameof(ConteosInventarioController.Cerrar), AccionPermiso.Cerrar)]
     [InlineData(nameof(ConteosInventarioController.Aprobar), AccionPermiso.Aprobar)]
+    [InlineData(nameof(ConteosInventarioController.GenerarAjuste), AccionPermiso.Crear)]
     [InlineData(nameof(ConteosInventarioController.Cancelar), AccionPermiso.Anular)]
     public void Endpoint_UsaPermisoEspecificoMovimientosInventario(string metodo, AccionPermiso accion)
     {
