@@ -21,13 +21,13 @@ public sealed class TransferenciaInventarioMovimientoService
     public TransferenciaInventarioMovimientoService(
         ITransferenciaInventarioRepository repository,
         TransferenciaInventarioExistenciaService existencias,
-        TransferenciaKardexMovimientoRegistrar kardex,
+        IKardexMovimientoWriter kardexWriter,
         ICurrentUserService currentUser,
         IUnitOfWork unitOfWork)
     {
         _repository = repository;
         _existencias = existencias;
-        _kardex = kardex;
+        _kardex = new TransferenciaKardexMovimientoRegistrar(kardexWriter);
         _currentUser = currentUser;
         _unitOfWork = unitOfWork;
     }
