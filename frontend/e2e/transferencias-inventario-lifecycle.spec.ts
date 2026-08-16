@@ -116,7 +116,7 @@ test.describe('Transferencias de inventario - lifecycle UI', () => {
     await page.getByRole('button', { name: 'Solicitar' }).click();
 
     await expect.poll(() => solicitudRegistrada).toBe(true);
-    await expect(page.getByText('Solicitada', { exact: true })).toBeVisible();
+    await expect(page.getByRole('strong').filter({ hasText: /^Solicitada$/ })).toBeVisible();
   });
 
   test('registra recepción parcial con faltante, daño y sobrante', async ({ page }) => {
