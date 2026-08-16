@@ -10,8 +10,14 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { finalize } from 'rxjs';
+import { Almacen } from '../../core/models/almacen.model';
+import { Categoria } from '../../core/models/categoria.model';
 import { ConteoInventarioFormValue, TipoConteoInventario } from '../../core/models/conteo-inventario.model';
+import { UbicacionAlmacen } from '../../core/models/ubicacion-almacen.model';
+import { AlmacenService } from '../../services/almacen.service';
+import { CategoriaService } from '../../services/categoria.service';
 import { ConteoInventarioService } from '../../services/conteo-inventario.service';
+import { UbicacionAlmacenService } from '../../services/ubicacion-almacen.service';
 
 @Component({
   selector: 'app-conteo-inventario-form',
@@ -23,15 +29,15 @@ import { ConteoInventarioService } from '../../services/conteo-inventario.servic
       <form #form="ngForm" (ngSubmit)="guardar()" class="card" novalidate>
         <div class="grid">
           <mat-form-field appearance="outline"><mat-label>Tipo</mat-label><mat-select required name="tipo" [(ngModel)]="model.tipo" (selectionChange)="sincronizarTipo()"><mat-option *ngFor="let item of tipos" [value]="item.value">{{ item.label }}</mat-option></mat-select></mat-form-field>
-          <mat-form-field appearance="outline"><mat-label>Almacén ID</mat-label><input matInput required min="1" type="number" name="almacenId" [(ngModel)]="model.almacenId" /></mat-form-field>
-          <mat-form-field *ngIf="requiereUbicacion" appearance="outline"><mat-label>Ubicación ID</mat-label><input matInput required min="1" type="number" name="ubicacionAlmacenId" [(ngModel)]="model.ubicacionAlmacenId" /></mat-form-field>
-          <mat-form-field *ngIf="requiereCategoria" appearance="outline"><mat-label>Categoría ID</mat-label><input matInput required min="1" type="number" name="categoriaId" [(ngModel)]="model.categoriaId" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Almacén</mat-label><mat-select required name="almacenId" [(ngModel)]="model.almacenId" (selectionChange)="onAlmacenChange()"><mat-option *ngFor="let almacen of almacenes" [value]="almacen.id">{{ almacen.codigo }} · {{ almacen.nombre }}</mat-option></mat-select><mat-hint *ngIf="!almacenes.length && !cargandoCatalogos">No hay almacenes activos disponibles.</mat-hint></mat-form-field>
+          <mat-form-field *ngIf="requiereUbicacion" appearance="outline"><mat-label>Ubicación</mat-label><mat-select required name="ubicacionAlmacenId" [(ngModel)]="model.ubicacionAlmacenId" [disabled]="!model.almacenId || cargandoUbicaciones"><mat-option *ngFor="let ubicacion of ubicaciones" [value]="ubicacion.id">{{ ubicacion.codigo }} · {{ ubicacion.nombre }}</mat-option></mat-select><mat-hint *ngIf="model.almacenId && !ubicaciones.length && !cargandoUbicaciones">El almacén no tiene ubicaciones activas.</mat-hint></mat-form-field>
+          <mat-form-field *ngIf="requiereCategoria" appearance="outline"><mat-label>Categoría</mat-label><mat-select required name="categoriaId" [(ngModel)]="model.categoriaId"><mat-option *ngFor="let categoria of categorias" [value]="categoria.id">{{ categoria.nombre }}</mat-option></mat-select><mat-hint *ngIf="!categorias.length && !cargandoCatalogos">No hay categorías activas disponibles.</mat-hint></mat-form-field>
         </div>
         <mat-checkbox name="esCiego" [(ngModel)]="model.esCiego">Ocultar stock esperado durante la captura (conteo ciego)</mat-checkbox>
         <mat-form-field appearance="outline" class="full"><mat-label>Variantes específicas</mat-label><input matInput name="variantes" [(ngModel)]="variantesTexto" placeholder="Ej. 101, 102, 103" /><mat-hint>Opcional para alcances automáticos; si se especifican, usa IDs separados por coma.</mat-hint></mat-form-field>
         <mat-form-field appearance="outline" class="full"><mat-label>Observaciones</mat-label><textarea matInput rows="4" name="observaciones" [(ngModel)]="model.observaciones"></textarea></mat-form-field>
         <div *ngIf="error" class="error" role="alert">{{ error }}</div>
-        <div class="actions"><button mat-button type="button" [disabled]="saving" (click)="volver()">Cancelar</button><button mat-flat-button color="primary" type="submit" [disabled]="saving || form.invalid"><mat-spinner *ngIf="saving" diameter="20"></mat-spinner><span *ngIf="!saving">{{ id ? 'Guardar cambios' : 'Crear conteo' }}</span></button></div>
+        <div class="actions"><button mat-button type="button" [disabled]="saving" (click)="volver()">Cancelar</button><button mat-flat-button color="primary" type="submit" [disabled]="saving || cargandoCatalogos || form.invalid"><mat-spinner *ngIf="saving" diameter="20"></mat-spinner><span *ngIf="!saving">{{ id ? 'Guardar cambios' : 'Crear conteo' }}</span></button></div>
       </form>
     </section>
   `,
@@ -49,13 +55,26 @@ export class ConteoInventarioFormComponent implements OnInit {
   ];
   id: number | null = null;
   saving = false;
+  cargandoCatalogos = true;
+  cargandoUbicaciones = false;
   error = '';
   variantesTexto = '';
+  almacenes: Almacen[] = [];
+  ubicaciones: UbicacionAlmacen[] = [];
+  categorias: Categoria[] = [];
   model: ConteoInventarioFormValue = { tipo: TipoConteoInventario.General, almacenId: 0, esCiego: false, productoVarianteIds: [], observaciones: '' };
 
-  constructor(private readonly service: ConteoInventarioService, private readonly route: ActivatedRoute, private readonly router: Router) {}
+  constructor(
+    private readonly service: ConteoInventarioService,
+    private readonly almacenesService: AlmacenService,
+    private readonly ubicacionesService: UbicacionAlmacenService,
+    private readonly categoriasService: CategoriaService,
+    private readonly route: ActivatedRoute,
+    private readonly router: Router
+  ) {}
 
   ngOnInit(): void {
+    this.cargarCatalogos();
     const value = Number(this.route.snapshot.paramMap.get('id'));
     this.id = Number.isInteger(value) && value > 0 ? value : null;
     if (!this.id) return;
@@ -64,23 +83,65 @@ export class ConteoInventarioFormComponent implements OnInit {
       const item = response.data;
       this.model = { tipo: item.tipo, almacenId: item.almacenId, ubicacionAlmacenId: item.ubicacionAlmacenId, categoriaId: item.categoriaId, esCiego: item.esCiego, observaciones: item.observaciones, productoVarianteIds: item.detalles.map(x => x.productoVarianteId) };
       this.variantesTexto = this.model.productoVarianteIds.join(', ');
+      this.cargarUbicaciones(false);
     }, error: () => this.error = 'No se pudo cargar el conteo.' });
   }
 
   get requiereUbicacion(): boolean { return this.model.tipo === TipoConteoInventario.PorUbicacion; }
   get requiereCategoria(): boolean { return this.model.tipo === TipoConteoInventario.PorCategoria; }
-  sincronizarTipo(): void { this.model.esCiego = this.model.tipo === TipoConteoInventario.Ciego || this.model.esCiego; if (!this.requiereUbicacion) this.model.ubicacionAlmacenId = null; if (!this.requiereCategoria) this.model.categoriaId = null; }
+
+  sincronizarTipo(): void {
+    this.model.esCiego = this.model.tipo === TipoConteoInventario.Ciego || this.model.esCiego;
+    if (!this.requiereUbicacion) this.model.ubicacionAlmacenId = null;
+    if (!this.requiereCategoria) this.model.categoriaId = null;
+  }
+
+  onAlmacenChange(): void {
+    this.model.ubicacionAlmacenId = null;
+    this.cargarUbicaciones(true);
+  }
 
   guardar(): void {
     this.error = '';
     if (!this.model.almacenId || this.model.almacenId < 1) { this.error = 'Selecciona un almacén válido.'; return; }
-    const ids = this.variantesTexto.split(',').map(x => Number(x.trim())).filter(x => Number.isInteger(x) && x > 0);
-    const invalidos = this.variantesTexto.split(',').map(x => x.trim()).filter(Boolean).length !== ids.length;
-    if (invalidos) { this.error = 'Las variantes deben ser IDs numéricos positivos separados por coma.'; return; }
+    if (this.requiereUbicacion && (!this.model.ubicacionAlmacenId || this.model.ubicacionAlmacenId < 1)) { this.error = 'Selecciona una ubicación válida para el conteo por ubicación.'; return; }
+    if (this.requiereCategoria && (!this.model.categoriaId || this.model.categoriaId < 1)) { this.error = 'Selecciona una categoría válida para el conteo por categoría.'; return; }
+    const tokens = this.variantesTexto.split(',').map(x => x.trim()).filter(Boolean);
+    const ids = tokens.map(x => Number(x)).filter(x => Number.isInteger(x) && x > 0);
+    if (tokens.length !== ids.length) { this.error = 'Las variantes deben ser IDs numéricos positivos separados por coma.'; return; }
     const value: ConteoInventarioFormValue = { ...this.model, productoVarianteIds: [...new Set(ids)] };
     this.saving = true;
     const request = this.id ? this.service.update(this.id, value) : this.service.create(value);
     request.pipe(finalize(() => this.saving = false)).subscribe({ next: response => { if (!response.success) { this.error = response.message || 'No se pudo guardar el conteo.'; return; } void this.router.navigate(['/inventario/conteos', response.data.id]); }, error: err => this.error = err?.error?.message || 'No se pudo guardar el conteo.' });
   }
+
   volver(): void { void this.router.navigate(['/inventario/conteos']); }
+
+  private cargarCatalogos(): void {
+    this.cargandoCatalogos = true;
+    let pendientes = 2;
+    const finalizar = () => { pendientes--; if (pendientes === 0) this.cargandoCatalogos = false; };
+
+    this.almacenesService.getActivos().subscribe({
+      next: response => { if (response.success) this.almacenes = response.data; else this.error = response.message || 'No se pudieron cargar los almacenes activos.'; finalizar(); },
+      error: () => { this.error = 'No se pudieron cargar los almacenes activos.'; finalizar(); }
+    });
+    this.categoriasService.getActivas().subscribe({
+      next: response => { if (response.success) this.categorias = response.data; else this.error = response.message || 'No se pudieron cargar las categorías activas.'; finalizar(); },
+      error: () => { this.error = 'No se pudieron cargar las categorías activas.'; finalizar(); }
+    });
+  }
+
+  private cargarUbicaciones(limpiarSiFalla: boolean): void {
+    if (!this.model.almacenId || this.model.almacenId < 1) { this.ubicaciones = []; return; }
+    this.cargandoUbicaciones = true;
+    this.ubicacionesService.getActivas(this.model.almacenId).pipe(finalize(() => this.cargandoUbicaciones = false)).subscribe({
+      next: response => {
+        if (!response.success) { this.ubicaciones = []; if (limpiarSiFalla) this.model.ubicacionAlmacenId = null; this.error = response.message || 'No se pudieron cargar las ubicaciones del almacén.'; return; }
+        this.ubicaciones = response.data;
+        if (this.model.ubicacionAlmacenId && !this.ubicaciones.some(x => x.id === this.model.ubicacionAlmacenId)) this.model.ubicacionAlmacenId = null;
+      },
+      error: () => { this.ubicaciones = []; if (limpiarSiFalla) this.model.ubicacionAlmacenId = null; this.error = 'No se pudieron cargar las ubicaciones del almacén.'; }
+    });
+  }
 }
