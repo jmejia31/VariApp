@@ -19,7 +19,9 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
         _usuarioScope = usuarioScope;
     }
 
-    private static IQueryable<MovimientoInventario> AplicarAlcance(IQueryable<MovimientoInventario> query, UsuarioScopeActual? alcance)
+    private static IQueryable<MovimientoInventario> AplicarAlcance(
+        IQueryable<MovimientoInventario> query,
+        UsuarioScopeActual? alcance)
     {
         if (alcance is null) return query.Where(_ => false);
         return alcance.EsAdministrador ? query : query.Where(m => m.CreadoPorUsuarioId == alcance.UsuarioId);
@@ -49,12 +51,7 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
         movimiento.VentaId = origen.VentaId;
         movimiento.ConsumoInsumoId = origen.ConsumoInsumoId;
         movimiento.AjusteInventarioId = origen.AjusteInventarioId;
-
-        // Compatibilidad de corte N1.5: los productores legacy que todavía no
-        // entregan un CorrelationId explícito quedan agrupados por operación y
-        // fase empresarial, sin inventar contexto físico. Los callers ya
-        // migrados conservan su correlación explícita, pero también pasan por
-        // la misma validación fail-closed del writer canónico.
+        movimiento.TransferenciaInventarioId = origen.TransferenciaInventarioId;
         movimiento.CorrelationId = string.IsNullOrWhiteSpace(movimiento.CorrelationId)
             ? CrearCorrelationIdCompatibilidad(movimiento.ReferenciaTipo, origen.DocumentoId)
             : NormalizarCorrelationId(movimiento.CorrelationId);
@@ -73,6 +70,7 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
             TipoOrigenMovimientoInventario.Venta => "Venta",
             TipoOrigenMovimientoInventario.ConsumoInsumo => "ConsumoInsumo",
             TipoOrigenMovimientoInventario.AjusteInventario => "AjusteInventario",
+            TipoOrigenMovimientoInventario.TransferenciaInventario => "TransferenciaInventario",
             _ => throw new InvalidOperationException($"Origen de inventario no soportado: {origen.Tipo}.")
         };
 
@@ -90,10 +88,7 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
         if (normalizado.Length == 0)
             throw new InvalidOperationException("CorrelationId no puede ser vacío en un movimiento nuevo de Kardex.");
         if (normalizado.Length > ContextoFisicoMovimientoInventario.MaxCorrelationIdLength)
-        {
-            throw new InvalidOperationException(
-                $"CorrelationId excede {ContextoFisicoMovimientoInventario.MaxCorrelationIdLength} caracteres.");
-        }
+            throw new InvalidOperationException($"CorrelationId excede {ContextoFisicoMovimientoInventario.MaxCorrelationIdLength} caracteres.");
         if (!normalizado.All(EsCaracterSeguroCorrelationId))
             throw new InvalidOperationException("CorrelationId contiene caracteres no permitidos.");
 
@@ -112,7 +107,11 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
             .ToListAsync();
     }
 
-    public async Task<List<MovimientoInventario>> GetFilteredAsync(int? productoId, string? tipo, DateTime? desde, DateTime? hasta)
+    public async Task<List<MovimientoInventario>> GetFilteredAsync(
+        int? productoId,
+        string? tipo,
+        DateTime? desde,
+        DateTime? hasta)
     {
         var alcance = await _usuarioScope.ObtenerActualAsync();
         var query = AplicarAlcance(ConIncludes(), alcance);
@@ -120,15 +119,10 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
 
         if (!string.IsNullOrWhiteSpace(tipo))
         {
-            if (Enum.TryParse<TipoMovimientoInventario>(tipo.Trim(), ignoreCase: true, out var tipoMovimiento) &&
-                Enum.IsDefined(tipoMovimiento))
-            {
+            if (Enum.TryParse<TipoMovimientoInventario>(tipo.Trim(), true, out var tipoMovimiento) && Enum.IsDefined(tipoMovimiento))
                 query = query.Where(m => m.Tipo == tipoMovimiento);
-            }
             else
-            {
                 query = query.Where(_ => false);
-            }
         }
 
         if (desde.HasValue) query = query.Where(m => m.Fecha >= desde.Value);
@@ -143,39 +137,25 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
         var alcance = await _usuarioScope.ObtenerActualAsync();
         var query = AplicarAlcance(ConIncludes(), alcance);
 
-        if (filter.ProductoId.HasValue)
-            query = query.Where(m => m.ProductoId == filter.ProductoId.Value);
-        if (filter.ProductoVarianteId.HasValue)
-            query = query.Where(m => m.ProductoVarianteId == filter.ProductoVarianteId.Value);
-        if (filter.AlmacenId.HasValue)
-            query = query.Where(m => m.AlmacenId == filter.AlmacenId.Value);
-        if (filter.UbicacionAlmacenId.HasValue)
-            query = query.Where(m => m.UbicacionAlmacenId == filter.UbicacionAlmacenId.Value);
+        if (filter.ProductoId.HasValue) query = query.Where(m => m.ProductoId == filter.ProductoId.Value);
+        if (filter.ProductoVarianteId.HasValue) query = query.Where(m => m.ProductoVarianteId == filter.ProductoVarianteId.Value);
+        if (filter.AlmacenId.HasValue) query = query.Where(m => m.AlmacenId == filter.AlmacenId.Value);
+        if (filter.UbicacionAlmacenId.HasValue) query = query.Where(m => m.UbicacionAlmacenId == filter.UbicacionAlmacenId.Value);
 
         if (!string.IsNullOrWhiteSpace(filter.Tipo))
         {
-            if (Enum.TryParse<TipoMovimientoInventario>(filter.Tipo.Trim(), true, out var tipoMovimiento) &&
-                Enum.IsDefined(tipoMovimiento))
-            {
+            if (Enum.TryParse<TipoMovimientoInventario>(filter.Tipo.Trim(), true, out var tipoMovimiento) && Enum.IsDefined(tipoMovimiento))
                 query = query.Where(m => m.Tipo == tipoMovimiento);
-            }
             else
-            {
                 query = query.Where(_ => false);
-            }
         }
 
         if (!string.IsNullOrWhiteSpace(filter.Causa))
         {
-            if (Enum.TryParse<CausaMovimientoInventario>(filter.Causa.Trim(), true, out var causaMovimiento) &&
-                Enum.IsDefined(causaMovimiento))
-            {
+            if (Enum.TryParse<CausaMovimientoInventario>(filter.Causa.Trim(), true, out var causaMovimiento) && Enum.IsDefined(causaMovimiento))
                 query = query.Where(m => m.Causa == causaMovimiento);
-            }
             else
-            {
                 query = query.Where(_ => false);
-            }
         }
 
         if (!string.IsNullOrWhiteSpace(filter.CorrelationId))
@@ -201,6 +181,9 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
                 "ajusteinventario" or "ajuste" => filter.OrigenId.HasValue
                     ? query.Where(m => m.AjusteInventarioId == filter.OrigenId.Value)
                     : query.Where(m => m.AjusteInventarioId != null),
+                "transferenciainventario" or "transferencia" => filter.OrigenId.HasValue
+                    ? query.Where(m => m.TransferenciaInventarioId == filter.OrigenId.Value)
+                    : query.Where(m => m.TransferenciaInventarioId != null),
                 _ => query.Where(_ => false)
             };
         }
@@ -211,13 +194,12 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
                 m.CompraId == origenId ||
                 m.VentaId == origenId ||
                 m.ConsumoInsumoId == origenId ||
-                m.AjusteInventarioId == origenId);
+                m.AjusteInventarioId == origenId ||
+                m.TransferenciaInventarioId == origenId);
         }
 
-        if (filter.Desde.HasValue)
-            query = query.Where(m => m.Fecha >= filter.Desde.Value);
-        if (filter.Hasta.HasValue)
-            query = query.Where(m => m.Fecha <= filter.Hasta.Value);
+        if (filter.Desde.HasValue) query = query.Where(m => m.Fecha >= filter.Desde.Value);
+        if (filter.Hasta.HasValue) query = query.Where(m => m.Fecha <= filter.Hasta.Value);
 
         var totalCount = await query.CountAsync();
         var items = await query
@@ -242,12 +224,14 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
             var legacy = await _context.MovimientosInventario
                 .AsNoTracking()
                 .Where(m => ids.Contains(m.Id))
-                .Select(m => new { m.Id, m.ReferenciaTipo, m.ReferenciaId })
+                .Select(m => new { m.Id, m.ReferenciaTipo, m.ReferenciaId, m.TransferenciaInventarioId })
                 .ToListAsync();
 
             return legacy.ToDictionary(
                 m => m.Id,
-                m => CrearOrigenCompatibilidadNoRelacional(m.Id, m.ReferenciaTipo, m.ReferenciaId));
+                m => m.TransferenciaInventarioId.HasValue
+                    ? new MovimientoInventarioOrigenPersistido(m.Id, null, null, null, null, m.TransferenciaInventarioId)
+                    : CrearOrigenCompatibilidadNoRelacional(m.Id, m.ReferenciaTipo, m.ReferenciaId));
         }
 
         var movimientos = await _context.MovimientosInventario
@@ -259,7 +243,8 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
                 m.CompraId,
                 m.VentaId,
                 m.ConsumoInsumoId,
-                m.AjusteInventarioId
+                m.AjusteInventarioId,
+                m.TransferenciaInventarioId
             })
             .ToListAsync();
 
@@ -270,7 +255,8 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
                 (movimiento.CompraId.HasValue ? 1 : 0) +
                 (movimiento.VentaId.HasValue ? 1 : 0) +
                 (movimiento.ConsumoInsumoId.HasValue ? 1 : 0) +
-                (movimiento.AjusteInventarioId.HasValue ? 1 : 0);
+                (movimiento.AjusteInventarioId.HasValue ? 1 : 0) +
+                (movimiento.TransferenciaInventarioId.HasValue ? 1 : 0);
 
             if (cantidadOrigenes > 1)
                 throw new InvalidOperationException($"El movimiento {movimiento.Id} tiene más de un origen tipado persistido.");
@@ -280,7 +266,8 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
                 movimiento.CompraId,
                 movimiento.VentaId,
                 movimiento.ConsumoInsumoId,
-                movimiento.AjusteInventarioId);
+                movimiento.AjusteInventarioId,
+                movimiento.TransferenciaInventarioId);
         }
 
         return resultado;
@@ -296,6 +283,7 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
             "Venta" or "VentaAnulada" => new(movimientoId, null, referenciaId, null),
             "ConsumoInsumo" => new(movimientoId, null, null, referenciaId),
             "AjusteInventario" => new(movimientoId, null, null, null, referenciaId),
+            "TransferenciaInventario" => new(movimientoId, null, null, null, null, referenciaId),
             _ => new(movimientoId, null, null, null)
         };
 
@@ -338,8 +326,7 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
             .SingleOrDefaultAsync();
 
         if (!compraId.HasValue)
-            throw new InvalidOperationException(
-                "El movimiento limite no corresponde a un movimiento original de compra tipado.");
+            throw new InvalidOperationException("El movimiento limite no corresponde a un movimiento original de compra tipado.");
 
         var clavesOriginales = await _context.MovimientosInventario
             .AsNoTracking()
@@ -383,8 +370,7 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
             .SingleOrDefaultAsync();
 
         if (movimientoTope is null)
-            throw new InvalidOperationException(
-                "El movimiento limite no corresponde a un movimiento original de compra.");
+            throw new InvalidOperationException("El movimiento limite no corresponde a un movimiento original de compra.");
 
         var clavesOriginales = await _context.MovimientosInventario
             .AsNoTracking()
