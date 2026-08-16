@@ -5,7 +5,7 @@ namespace InventoryApp.Application.Interfaces;
 
 public interface IConteoInventarioService
 {
-    Task<PagedResult<ConteoInventarioDto>> GetPagedAsync(ConteoInventarioFiltroDto filtro);
+    Task<PagedResult<ConteoInventarioDto>> GetPagedAsync(ConteoInventarioQueryDto query);
     Task<ConteoInventarioDto?> GetByIdAsync(int id);
     Task<ConteoInventarioDto> CreateAsync(CreateConteoInventarioDto dto);
     Task<ConteoInventarioDto?> UpdateAsync(int id, UpdateConteoInventarioDto dto);
