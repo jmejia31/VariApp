@@ -8,13 +8,11 @@ test.describe('Transferencias de inventario - acceso', () => {
 
   test('deniega la ruta a un usuario autenticado sin MovimientosInventario:Ver', async ({ page }) => {
     await page.addInitScript(() => {
-      localStorage.setItem('token', 'e2e-token');
-      localStorage.setItem('usuario', JSON.stringify({
-        id: 999,
-        nombreUsuario: 'e2e-transferencias-sin-permiso',
-        nombreCompleto: 'E2E Transferencias Sin Permiso',
-        rol: 'Operador'
-      }));
+      localStorage.setItem('inventoryapp_token', 'e2e-token-sin-permiso-transferencias');
+      localStorage.setItem('inventoryapp_user', 'e2e-transferencias-sin-permiso');
+      localStorage.setItem('inventoryapp_nombre_completo', 'E2E Transferencias Sin Permiso');
+      localStorage.setItem('inventoryapp_rol', 'Operador');
+      localStorage.setItem('inventoryapp_expira_en', '2099-12-31T23:59:59Z');
     });
 
     await page.route('**/permisos/mis-permisos', async route => {
@@ -23,6 +21,7 @@ test.describe('Transferencias de inventario - acceso', () => {
         contentType: 'application/json',
         body: JSON.stringify({
           success: true,
+          message: 'Permisos cargados',
           data: {
             permisos: ['Dashboard:Ver'],
             esAdministrador: false
@@ -33,5 +32,6 @@ test.describe('Transferencias de inventario - acceso', () => {
 
     await page.goto('/inventario/transferencias');
     await expect(page).toHaveURL(/\/dashboard(?:\?|$)/);
+    await expect(page).not.toHaveURL(/\/inventario\/transferencias(?:\?|$)/);
   });
 });
