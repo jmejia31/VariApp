@@ -75,7 +75,7 @@ builder.Services.AddScoped<IExistenciaVarianteService, ExistenciaVarianteService
 builder.Services.AddScoped<IExistenciaVarianteConcurrencyService, ExistenciaVarianteConcurrencyService>();
 builder.Services.AddScoped<AjusteInventarioExistenciaCutoverService>();
 builder.Services.AddScoped<TransferenciaInventarioExistenciaService>();
-builder.Services.AddScoped<TransferenciaInventarioMovimientoService>();
+builder.Services.AddScoped<ITransferenciaInventarioMovimientoService, TransferenciaInventarioMovimientoService>();
 builder.Services.AddScoped<ITransferenciaInventarioService, TransferenciaInventarioService>();
 builder.Services.AddScoped<ICatalogoProductoService, CatalogoProductoService>();
 builder.Services.AddScoped<IProveedorService, ProveedorService>();
