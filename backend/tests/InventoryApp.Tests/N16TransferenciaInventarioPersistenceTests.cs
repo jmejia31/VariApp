@@ -1,14 +1,18 @@
 using InventoryApp.Domain.Entities;
+using InventoryApp.Infrastructure.Migrations;
 using InventoryApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using System.Reflection;
 using Xunit;
 
 namespace InventoryApp.Tests;
 
 public class N16TransferenciaInventarioPersistenceTests
 {
+    private const string TransferenciaFkCanonical = "FK_MovInv_TransferenciaInventarioId_N16";
+
     [Fact]
     public void ModeloEf_MapeaCabeceraDetalleConRestriccionesRelacionales()
     {
@@ -70,7 +74,19 @@ public class N16TransferenciaInventarioPersistenceTests
             .Where(fk => fk.PrincipalEntityType.ClrType == typeof(TransferenciaInventario)));
         Assert.Equal(DeleteBehavior.Restrict, movimientoTransferenciaFk.DeleteBehavior);
         var constraintName = movimientoTransferenciaFk.GetConstraintName();
-        Assert.Equal("FK_MovInv_TransferenciaInventarioId_N16", constraintName);
+        Assert.Equal(TransferenciaFkCanonical, constraintName);
         Assert.True(constraintName!.Length <= 64, "El identificador físico de la FK debe ser válido en MySQL.");
+    }
+
+    [Fact]
+    public void MigracionOrigenTipado_UsaLaMismaFkCanonicaQueElModelo()
+    {
+        var campo = typeof(N1_6_TransferenciaOrigenMovimientoInventario)
+            .GetField("TransferenciaFk", BindingFlags.NonPublic | BindingFlags.Static);
+
+        Assert.NotNull(campo);
+        Assert.True(campo!.IsLiteral, "TransferenciaFk debe permanecer como constante para Up/Down y postguard.");
+        Assert.Equal(TransferenciaFkCanonical, campo.GetRawConstantValue());
+        Assert.True(TransferenciaFkCanonical.Length <= 64);
     }
 }
