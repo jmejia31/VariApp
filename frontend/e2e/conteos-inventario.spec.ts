@@ -96,6 +96,7 @@ test.describe('N1.7.E - Conteos físicos', () => {
 
     await page.goto('/inventario/conteos');
     await expect(page.getByRole('heading', { name: 'Conteos físicos' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Conteos físicos' })).toHaveAttribute('href', '/inventario/conteos');
     const row = page.locator('tbody tr').filter({ hasText: 'CNT-E2E-701' });
     await expect(row).toHaveCount(1);
     await expect(row).toContainText('Ciego');
