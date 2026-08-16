@@ -23,6 +23,10 @@ async function dataOf(response: APIResponse): Promise<any> {
   return payload.data ?? payload.Data;
 }
 
+async function esperarCerrarOverlay(page: Page): Promise<void> {
+  await expect(page.locator('.cdk-overlay-backdrop')).toHaveCount(0);
+}
+
 async function loginApi(request: APIRequestContext): Promise<string> {
   const response = await request.post(`${API_URL}/auth/login`, {
     data: { nombreUsuario: ADMIN_USERNAME, password: ADMIN_PASSWORD }
@@ -208,16 +212,19 @@ test.describe('N0.7.E - Ajustes de inventario', () => {
     const productoSelect = details.locator('mat-select[formcontrolname="productoId"]');
     await productoSelect.click();
     await page.getByRole('option', { name: new RegExp(nombreProducto) }).click();
+    await esperarCerrarOverlay(page);
 
     const varianteSelect = details.locator('mat-select[formcontrolname="productoVarianteId"]');
     await expect(varianteSelect).not.toHaveAttribute('aria-disabled', 'true');
     await varianteSelect.click();
     await page.getByRole('option', { name: new RegExp(skuVariante) }).click();
+    await esperarCerrarOverlay(page);
 
     const existenciaSelect = details.locator('mat-select[formcontrolname="existenciaId"]');
     await expect(existenciaSelect).not.toHaveAttribute('aria-disabled', 'true');
     await existenciaSelect.click();
     await page.getByRole('option', { name: new RegExp(nombreAlmacen) }).click();
+    await esperarCerrarOverlay(page);
 
     await details.locator('input[formcontrolname="cantidadObjetivo"]').fill('4');
 
