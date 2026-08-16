@@ -13,17 +13,20 @@ public sealed class ConteoInventarioService : IConteoInventarioService
     private readonly IExistenciaVarianteRepository _existencias;
     private readonly ICurrentUserService _currentUser;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IAjusteInventarioService? _ajustes;
 
     public ConteoInventarioService(
         IConteoInventarioRepository repository,
         IExistenciaVarianteRepository existencias,
         ICurrentUserService currentUser,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        IAjusteInventarioService? ajustes = null)
     {
         _repository = repository;
         _existencias = existencias;
         _currentUser = currentUser;
         _unitOfWork = unitOfWork;
+        _ajustes = ajustes;
     }
 
     public async Task<PagedResult<ConteoInventarioDto>> GetPagedAsync(ConteoInventarioQueryDto query)
@@ -163,6 +166,69 @@ public sealed class ConteoInventarioService : IConteoInventarioService
             id,
             EstadoConteoInventario.Aprobado,
             (conteo, usuarioId, ahora) => conteo.Aprobar(usuarioId, ahora));
+
+    public async Task<AjusteInventarioDto?> GenerarAjusteAsync(int id)
+    {
+        if (id <= 0) return null;
+        if (_ajustes is null)
+            throw new InvalidOperationException("El servicio formal de ajustes no está disponible para materializar diferencias de conteo.");
+
+        AjusteInventarioDto? resultado = null;
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            var conteo = await _repository.GetByIdForUpdateAsync(id);
+            if (conteo is null) return;
+            if (conteo.Estado != EstadoConteoInventario.Aprobado)
+                throw new BusinessRuleException("Solo un conteo aprobado puede generar un ajuste formal de diferencias.");
+
+            var diferencias = conteo.Detalles
+                .Where(x => x.Diferencia.HasValue && x.Diferencia.Value != 0)
+                .OrderBy(x => x.ProductoVarianteId)
+                .ThenBy(x => x.AlmacenId)
+                .ThenBy(x => x.UbicacionAlmacenId)
+                .ToList();
+            if (diferencias.Count == 0)
+                throw new BusinessRuleException("El conteo aprobado no contiene diferencias que requieran ajuste.");
+
+            var ajustesExistentes = diferencias
+                .Where(x => x.AjusteInventarioId.HasValue)
+                .Select(x => x.AjusteInventarioId!.Value)
+                .Distinct()
+                .ToList();
+            if (ajustesExistentes.Count > 1 || (ajustesExistentes.Count == 1 && diferencias.Any(x => !x.AjusteInventarioId.HasValue)))
+                throw new BusinessRuleException("Las diferencias del conteo presentan vínculos de ajuste inconsistentes y requieren reconciliación.");
+            if (ajustesExistentes.Count == 1)
+            {
+                resultado = await _ajustes.GetByIdAsync(ajustesExistentes[0])
+                    ?? throw new BusinessRuleException("El ajuste previamente vinculado al conteo ya no está disponible.");
+                return;
+            }
+
+            var dto = new CreateAjusteInventarioDto
+            {
+                Motivo = $"Diferencias de conteo físico {conteo.Numero}",
+                Observaciones = $"Ajuste borrador generado automáticamente desde el conteo aprobado {conteo.Numero}. Requiere confirmación formal posterior.",
+                Detalles = diferencias.Select(detalle => new AjusteInventarioDetalleInputDto
+                {
+                    ProductoId = detalle.ProductoVariante.ProductoId,
+                    ProductoVarianteId = detalle.ProductoVarianteId,
+                    AlmacenId = detalle.AlmacenId,
+                    UbicacionAlmacenId = detalle.UbicacionAlmacenId,
+                    CantidadObjetivo = detalle.CantidadContada
+                        ?? throw new BusinessRuleException("Una línea con diferencia no posee cantidad contada materializada.")
+                }).ToList()
+            };
+
+            resultado = await _ajustes.CreateAsync(dto);
+            foreach (var detalle in diferencias)
+                detalle.VincularAjuste(resultado.Id);
+
+            _repository.Update(conteo);
+            await _repository.SaveChangesAsync();
+        });
+
+        return resultado;
+    }
 
     public Task<ConteoInventarioDto?> CancelarAsync(int id, string motivo)
     {
