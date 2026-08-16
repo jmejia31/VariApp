@@ -175,6 +175,6 @@ test.describe('Transferencias de inventario - lifecycle UI', () => {
         cantidadSobrante: 2
       }]
     });
-    await expect(page.getByText('Recibida', { exact: true })).toBeVisible();
+    await expect(page.getByRole('strong').filter({ hasText: /^Recibida$/ })).toBeVisible();
   });
 });
