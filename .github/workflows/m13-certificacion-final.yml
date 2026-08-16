@@ -120,17 +120,53 @@ jobs:
           mysql_container="${{ job.services.mysql.id }}"
           docker exec "$mysql_container" mysql -uroot -proot -e "SET GLOBAL sql_require_primary_key=ON; CREATE DATABASE IF NOT EXISTS inventoryapp_m13_upgrade;"
           test "$(docker exec "$mysql_container" mysql -uroot -proot -Nse 'SELECT @@GLOBAL.sql_require_primary_key;')" = 1
-      - name: Historial completo desde cero
+      - name: Historial completo desde cero y esquema ERP-N1 materializado
         working-directory: backend
+        shell: bash
         run: |
+          set -euo pipefail
           dotnet ef database update \
             --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
             --startup-project src/API/InventoryApp.API.csproj \
             --context AppDbContext
-          dotnet ef migrations has-pending-model-changes \
-            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
-            --startup-project src/API/InventoryApp.API.csproj \
-            --context AppDbContext
+
+          mysql_container="${{ job.services.mysql.id }}"
+          table_count="$(docker exec "$mysql_container" mysql -uroot -proot inventoryapp_m13_fresh -Nse "
+            SELECT COUNT(*) FROM information_schema.tables
+            WHERE table_schema='inventoryapp_m13_fresh' AND table_name='ExistenciasVariante';")"
+          test "$table_count" = '1'
+
+          correlation_column="$(docker exec "$mysql_container" mysql -uroot -proot inventoryapp_m13_fresh -Nse "
+            SELECT COUNT(*) FROM information_schema.columns
+            WHERE table_schema='inventoryapp_m13_fresh'
+              AND table_name='MovimientosInventario'
+              AND column_name='CorrelationId';")"
+          test "$correlation_column" = '1'
+
+          for index_name in \
+            IX_MovInv_Producto_Variante_Fecha_N15 \
+            IX_MovInv_Almacen_Ubicacion_Fecha_N15 \
+            IX_MovInv_Compra_Fecha_N15 \
+            IX_MovInv_Venta_Fecha_N15 \
+            IX_MovInv_Consumo_Fecha_N15 \
+            IX_MovInv_Ajuste_Fecha_N15; do
+            index_count="$(docker exec "$mysql_container" mysql -uroot -proot inventoryapp_m13_fresh -Nse "
+              SELECT COUNT(DISTINCT index_name) FROM information_schema.statistics
+              WHERE table_schema='inventoryapp_m13_fresh'
+                AND table_name='MovimientosInventario'
+                AND index_name='$index_name';")"
+            test "$index_count" = '1'
+          done
+
+          for migration_id in \
+            20260815012500_N1_4_ExistenciaVariante \
+            20260815202500_N1_5_KardexCorrelation \
+            20260816005000_N1_5_KardexQueryIndexes; do
+            migration_count="$(docker exec "$mysql_container" mysql -uroot -proot inventoryapp_m13_fresh -Nse "
+              SELECT COUNT(*) FROM __EFMigrationsHistory
+              WHERE MigrationId='$migration_id';")"
+            test "$migration_count" = '1'
+          done
       - name: Integración MySQL sobre esquema actual
         working-directory: backend
         run: dotnet test InventoryApp.sln --configuration Release --no-build --filter "Category=Integration" --logger "trx;LogFileName=m13-integration.trx"
