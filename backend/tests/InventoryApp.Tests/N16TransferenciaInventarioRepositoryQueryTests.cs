@@ -87,17 +87,38 @@ public sealed class N16TransferenciaInventarioRepositoryQueryTests
         int usuarioId,
         EstadoTransferenciaInventario estado,
         DateTime fecha,
-        string? observaciones = null) =>
-        new()
+        string? observaciones = null)
+    {
+        var detalle = new TransferenciaInventarioDetalle
+        {
+            Id = 1000 + id,
+            ProductoVarianteId = 1,
+            CreadoPorUsuarioId = usuarioId,
+            FechaCreacion = fecha
+        };
+        detalle.EstablecerCantidadSolicitada(1);
+
+        var transferencia = new TransferenciaInventario
         {
             Id = id,
             Numero = numero,
             AlmacenOrigenId = origen,
             AlmacenDestinoId = destino,
-            Estado = estado,
             Observaciones = observaciones,
             CreadoPorUsuarioId = usuarioId,
             FechaCreacion = fecha,
-            Detalles = new List<TransferenciaInventarioDetalle>()
+            Detalles = new List<TransferenciaInventarioDetalle> { detalle }
         };
+
+        if (estado is EstadoTransferenciaInventario.Solicitada or EstadoTransferenciaInventario.Aprobada)
+            transferencia.Solicitar(usuarioId, fecha);
+
+        if (estado == EstadoTransferenciaInventario.Aprobada)
+        {
+            detalle.AprobarCantidad(1);
+            transferencia.Aprobar(usuarioId, fecha);
+        }
+
+        return transferencia;
+    }
 }
