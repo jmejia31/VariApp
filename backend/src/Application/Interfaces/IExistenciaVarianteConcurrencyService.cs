@@ -62,4 +62,18 @@ public interface IExistenciaVarianteConcurrencyService
         InventarioExistenciaClave clave,
         int cantidadActualEsperada,
         int cantidadNueva);
+
+    /// <summary>
+    /// Ajusta conjuntamente StockFisico y StockTransito sobre la misma existencia
+    /// ya bloqueada. N1.6 lo usa para transferencias sin crear una segunda autoridad.
+    /// La implementación por defecto mantiene compatibilidad binaria con adapters de
+    /// pruebas antiguos y falla cerrado cuando no soportan tránsito.
+    /// </summary>
+    Task AjustarStocksPesimistaAsync(
+        InventarioExistenciaClave clave,
+        int stockFisicoActualEsperado,
+        int stockFisicoNuevo,
+        int stockTransitoActualEsperado,
+        int stockTransitoNuevo) =>
+        throw new NotSupportedException("El adapter de existencias no soporta actualización autoritativa de StockTransito.");
 }
