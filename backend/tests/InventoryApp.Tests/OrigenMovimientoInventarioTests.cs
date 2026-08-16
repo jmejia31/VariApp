@@ -1,5 +1,6 @@
 using InventoryApp.Domain.Common;
 using InventoryApp.Domain.Enums;
+using Xunit;
 
 namespace InventoryApp.Tests;
 
