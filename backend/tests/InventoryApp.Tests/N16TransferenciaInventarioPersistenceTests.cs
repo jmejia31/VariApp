@@ -70,7 +70,7 @@ public class N16TransferenciaInventarioPersistenceTests
             .Where(fk => fk.PrincipalEntityType.ClrType == typeof(TransferenciaInventario)));
         Assert.Equal(DeleteBehavior.Restrict, movimientoTransferenciaFk.DeleteBehavior);
         Assert.Equal(
-            "FK_MovimientosInventario_TransferenciasInventario_TransferenciaInventarioId_N16",
+            "FK_MovimientosInventario_TransferenciasInventario_TransferenciaInventarioId",
             movimientoTransferenciaFk.GetConstraintName());
     }
 }
