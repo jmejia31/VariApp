@@ -84,7 +84,7 @@ public class N16TransferenciaInventarioDomainTests
     }
 
     [Fact]
-    public void Cancelar_TransferenciaRecibida_FallaCerrado()
+    public void Cancelar_TransferenciaRecibida_FallaCerradoYSinMutarAuditoria()
     {
         var transferencia = CrearBorrador();
         var detalle = Assert.Single(transferencia.Detalles);
@@ -96,10 +96,17 @@ public class N16TransferenciaInventarioDomainTests
         detalle.RegistrarRecepcion(4, 0, 0, 0);
         transferencia.Recibir(4, DateTime.UtcNow);
 
+        var fechaAntes = transferencia.FechaCancelacion;
+        var usuarioAntes = transferencia.CanceladaPorUsuarioId;
+        var motivoAntes = transferencia.MotivoCancelacion;
+
         Assert.Throws<InvalidOperationException>(() =>
             transferencia.Cancelar(5, "no aplica", DateTime.UtcNow));
 
         Assert.Equal(EstadoTransferenciaInventario.Recibida, transferencia.Estado);
+        Assert.Equal(fechaAntes, transferencia.FechaCancelacion);
+        Assert.Equal(usuarioAntes, transferencia.CanceladaPorUsuarioId);
+        Assert.Equal(motivoAntes, transferencia.MotivoCancelacion);
     }
 
     private static TransferenciaInventario CrearBorrador()
