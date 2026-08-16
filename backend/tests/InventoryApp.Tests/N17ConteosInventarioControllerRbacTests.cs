@@ -2,20 +2,33 @@ using System.Globalization;
 using InventoryApp.API.Controllers;
 using InventoryApp.API.Filters;
 using InventoryApp.Domain.Enums;
+using Microsoft.AspNetCore.Authorization;
 using Xunit;
 
 namespace InventoryApp.Tests;
 
 public class N17ConteosInventarioControllerRbacTests
 {
+    [Fact]
+    public void Controller_ExigeAutenticacionGlobal()
+    {
+        Assert.Contains(
+            typeof(ConteosInventarioController).CustomAttributes,
+            atributo => atributo.AttributeType == typeof(AuthorizeAttribute));
+    }
+
     [Theory]
+    [InlineData(nameof(ConteosInventarioController.Buscar), AccionPermiso.Ver)]
+    [InlineData(nameof(ConteosInventarioController.Obtener), AccionPermiso.Ver)]
     [InlineData(nameof(ConteosInventarioController.Crear), AccionPermiso.Crear)]
     [InlineData(nameof(ConteosInventarioController.Actualizar), AccionPermiso.Editar)]
     [InlineData(nameof(ConteosInventarioController.Iniciar), AccionPermiso.CambiarEstado)]
+    [InlineData(nameof(ConteosInventarioController.Capturar), AccionPermiso.Editar)]
     [InlineData(nameof(ConteosInventarioController.Cerrar), AccionPermiso.Cerrar)]
     [InlineData(nameof(ConteosInventarioController.Aprobar), AccionPermiso.Aprobar)]
+    [InlineData(nameof(ConteosInventarioController.GenerarAjuste), AccionPermiso.Crear)]
     [InlineData(nameof(ConteosInventarioController.Cancelar), AccionPermiso.Anular)]
-    public void Lifecycle_ExigePermisoEspecificoDeMovimientosInventario(
+    public void Endpoints_ExigenPermisoEspecificoDeMovimientosInventario(
         string metodo,
         AccionPermiso accionEsperada)
     {
