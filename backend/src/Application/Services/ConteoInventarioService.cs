@@ -115,7 +115,10 @@ public sealed class ConteoInventarioService : IConteoInventarioService
     }
 
     public Task<ConteoInventarioDto?> IniciarAsync(int id) =>
-        TransicionarAsync(id, (conteo, usuarioId, ahora) => conteo.Iniciar(usuarioId, ahora));
+        TransicionarAsync(
+            id,
+            EstadoConteoInventario.EnProceso,
+            (conteo, usuarioId, ahora) => conteo.Iniciar(usuarioId, ahora));
 
     public async Task<ConteoInventarioDto?> CapturarDetalleAsync(int id, int detalleId, CapturarConteoInventarioDetalleDto dto)
     {
@@ -132,6 +135,13 @@ public sealed class ConteoInventarioService : IConteoInventarioService
                 throw new BusinessRuleException("Solo un conteo en proceso admite capturas.");
             var detalle = conteo.Detalles.SingleOrDefault(x => x.Id == detalleId)
                 ?? throw new BusinessRuleException("La línea no pertenece al conteo indicado.");
+
+            if (detalle.CantidadContada == dto.CantidadContada)
+            {
+                resultado = conteo;
+                return;
+            }
+
             detalle.RegistrarConteo(dto.CantidadContada, usuarioId, DateTime.UtcNow);
             MarcarActualizacion(conteo, usuarioId);
             _repository.Update(conteo);
@@ -143,19 +153,31 @@ public sealed class ConteoInventarioService : IConteoInventarioService
     }
 
     public Task<ConteoInventarioDto?> CerrarAsync(int id) =>
-        TransicionarAsync(id, (conteo, usuarioId, ahora) => conteo.Cerrar(usuarioId, ahora));
+        TransicionarAsync(
+            id,
+            EstadoConteoInventario.Cerrado,
+            (conteo, usuarioId, ahora) => conteo.Cerrar(usuarioId, ahora));
 
     public Task<ConteoInventarioDto?> AprobarAsync(int id) =>
-        TransicionarAsync(id, (conteo, usuarioId, ahora) => conteo.Aprobar(usuarioId, ahora));
+        TransicionarAsync(
+            id,
+            EstadoConteoInventario.Aprobado,
+            (conteo, usuarioId, ahora) => conteo.Aprobar(usuarioId, ahora));
 
     public Task<ConteoInventarioDto?> CancelarAsync(int id, string motivo)
     {
         if (string.IsNullOrWhiteSpace(motivo))
             throw new BusinessRuleException("El motivo de cancelación es obligatorio.");
-        return TransicionarAsync(id, (conteo, usuarioId, ahora) => conteo.Cancelar(usuarioId, motivo, ahora));
+        return TransicionarAsync(
+            id,
+            EstadoConteoInventario.Cancelado,
+            (conteo, usuarioId, ahora) => conteo.Cancelar(usuarioId, motivo, ahora));
     }
 
-    private async Task<ConteoInventarioDto?> TransicionarAsync(int id, Action<ConteoInventario, int, DateTime> accion)
+    private async Task<ConteoInventarioDto?> TransicionarAsync(
+        int id,
+        EstadoConteoInventario estadoObjetivo,
+        Action<ConteoInventario, int, DateTime> accion)
     {
         if (id <= 0) return null;
         var usuarioId = ObtenerUsuarioId();
@@ -164,6 +186,15 @@ public sealed class ConteoInventarioService : IConteoInventarioService
         {
             var conteo = await _repository.GetByIdForUpdateAsync(id);
             if (conteo is null) return;
+
+            // Reintentos de la misma transición son idempotentes: no reescriben
+            // timestamps, actor ni datos del documento.
+            if (conteo.Estado == estadoObjetivo)
+            {
+                resultado = conteo;
+                return;
+            }
+
             accion(conteo, usuarioId, DateTime.UtcNow);
             MarcarActualizacion(conteo, usuarioId);
             _repository.Update(conteo);
