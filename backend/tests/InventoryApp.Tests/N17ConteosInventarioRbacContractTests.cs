@@ -32,11 +32,11 @@ public sealed class N17ConteosInventarioRbacContractTests
         var permiso = method.GetCustomAttribute<RequierePermisoAttribute>();
 
         Assert.NotNull(permiso);
-        var moduloProperty = typeof(RequierePermisoAttribute).GetProperty("Modulo");
-        var accionProperty = typeof(RequierePermisoAttribute).GetProperty("Accion");
-        Assert.NotNull(moduloProperty);
-        Assert.NotNull(accionProperty);
-        Assert.Equal(ModuloSistema.MovimientosInventario, moduloProperty!.GetValue(permiso));
-        Assert.Equal(accion, accionProperty!.GetValue(permiso));
+        var moduloField = typeof(RequierePermisoAttribute).GetField("_modulo", BindingFlags.Instance | BindingFlags.NonPublic);
+        var accionField = typeof(RequierePermisoAttribute).GetField("_accion", BindingFlags.Instance | BindingFlags.NonPublic);
+        Assert.NotNull(moduloField);
+        Assert.NotNull(accionField);
+        Assert.Equal(ModuloSistema.MovimientosInventario, moduloField!.GetValue(permiso));
+        Assert.Equal(accion, accionField!.GetValue(permiso));
     }
 }
