@@ -180,7 +180,7 @@ export class TransferenciaFormComponent implements OnInit {
     forkJoin({
       almacenes: this.almacenService.getActivos(),
       ubicaciones: this.ubicacionService.getActivas(),
-      productos: this.productoService.getPaged({ page: 1, pageSize: 500, activo: true, sortBy: 'Nombre', sortDirection: 'asc' })
+      productos: this.productoService.getPaged({ page: 1, pageSize: 200, activo: true, sortBy: 'Nombre', sortDirection: 'asc' })
     }).pipe(finalize(() => this.catalogLoading = false)).subscribe({
       next: result => {
         this.almacenes = result.almacenes.success ? result.almacenes.data : [];
