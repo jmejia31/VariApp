@@ -227,12 +227,15 @@ export class TransferenciaDetailComponent implements OnInit {
   volver(): void { void this.router.navigate(['/inventario/transferencias']); }
 
   private prepararRecepcion(transferencia: TransferenciaInventario): void {
-    this.recepcion = Object.fromEntries(transferencia.detalles.map(detalle => [detalle.id, {
-      recibida: detalle.estado === undefined ? detalle.cantidadDespachada : detalle.cantidadRecibida,
-      faltante: detalle.cantidadFaltante,
-      danada: detalle.cantidadDanada,
-      sobrante: detalle.cantidadSobrante
-    }]));
+    this.recepcion = Object.fromEntries(transferencia.detalles.map(detalle => {
+      const tieneRecepcion = detalle.cantidadRecibida > 0 || detalle.cantidadFaltante > 0 || detalle.cantidadDanada > 0 || detalle.cantidadSobrante > 0;
+      return [detalle.id, {
+        recibida: tieneRecepcion ? detalle.cantidadRecibida : detalle.cantidadDespachada,
+        faltante: detalle.cantidadFaltante,
+        danada: detalle.cantidadDanada,
+        sobrante: detalle.cantidadSobrante
+      }];
+    }));
   }
 
   private runAction(operationFactory: () => ReturnType<TransferenciaInventarioService['solicitar']>): void {
