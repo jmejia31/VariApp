@@ -46,7 +46,12 @@ public class AuditoriaService : IAuditoriaService
             accion = AccionPermiso.EliminarLogico;
 
         var http = _httpContextAccessor.HttpContext;
-        var correlationId = http?.Request.Headers["X-Correlation-Id"].FirstOrDefault() ?? http?.TraceIdentifier;
+
+        // CorrelationIdMiddleware valida/normaliza X-Correlation-ID y establece
+        // TraceIdentifier antes de autenticación/autorización y de los servicios.
+        // La auditoría consume únicamente ese valor saneado; nunca vuelve a
+        // confiar en el header bruto controlado por el cliente.
+        var correlationId = http?.TraceIdentifier;
 
         await _repository.AddAsync(new RegistroAuditoria
         {
