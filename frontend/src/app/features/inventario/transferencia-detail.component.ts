@@ -93,7 +93,7 @@ import { TransferenciaInventarioService } from '../../services/transferencia-inv
   `]
 })
 export class TransferenciaDetailComponent implements OnInit {
-  readonly id = Number(this.route.snapshot.paramMap.get('id')) || 0;
+  readonly id: number;
   item: TransferenciaInventario | null = null;
   loading = false;
   busy = false;
@@ -105,7 +105,9 @@ export class TransferenciaDetailComponent implements OnInit {
     private readonly router: Router,
     private readonly service: TransferenciaInventarioService,
     private readonly permisos: PermisosRuntimeService
-  ) {}
+  ) {
+    this.id = Number(this.route.snapshot.paramMap.get('id')) || 0;
+  }
 
   ngOnInit(): void { this.cargar(); }
 
@@ -135,21 +137,21 @@ export class TransferenciaDetailComponent implements OnInit {
   aprobar(): void {
     if (!this.item || !window.confirm('¿Aprobar las cantidades solicitadas de esta transferencia?')) return;
     this.runAction(() => this.service.aprobar(this.id, {
-      detalles: this.item!.detalles.map(d => ({ detalleId: d.id, cantidadAprobada: d.cantidadSolicitada }))
+      detalles: this.item.detalles.map(d => ({ detalleId: d.id, cantidadAprobada: d.cantidadSolicitada }))
     }));
   }
 
   despachar(): void {
     if (!this.item || !window.confirm('¿Despachar las cantidades aprobadas? Esta acción afecta stock físico.')) return;
     this.runAction(() => this.service.despachar(this.id, {
-      detalles: this.item!.detalles.map(d => ({ detalleId: d.id, cantidadDespachada: d.cantidadAprobada }))
+      detalles: this.item.detalles.map(d => ({ detalleId: d.id, cantidadDespachada: d.cantidadAprobada }))
     }));
   }
 
   recibir(): void {
     if (!this.item || !window.confirm('¿Registrar recepción completa de lo despachado, sin discrepancias?')) return;
     this.runAction(() => this.service.recibir(this.id, {
-      detalles: this.item!.detalles.map(d => ({
+      detalles: this.item.detalles.map(d => ({
         detalleId: d.id,
         cantidadRecibida: d.cantidadDespachada,
         cantidadFaltante: 0,
