@@ -205,7 +205,7 @@ async function installFixtures(page: Page): Promise<void> {
   }));
   await page.route(/^https?:\/\/(?:localhost|127\.0\.0\.1):5005\/(?:api\/)?ventas\/701$/, (route) => json(route, sale));
 
-  await page.route(/^https?:\/\/(?:localhost|127\.0\.0\.1):5005\/(?:api\/)?inventario\/movimientos(?:\?.*)?$/, (route) => json(route, {
+  await page.route(/^https?:\/\/(?:localhost|127\.0\.0\.1):5005\/(?:api\/)?inventario\/movimientos\/paged(?:\?.*)?$/, (route) => json(route, {
     items: [{
       id: 801,
       productoId: product.id,
