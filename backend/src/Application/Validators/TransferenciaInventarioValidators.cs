@@ -134,8 +134,8 @@ public sealed class TransferenciaInventarioFiltroValidator : AbstractValidator<T
         RuleFor(x => x.AlmacenOrigenId).GreaterThan(0).When(x => x.AlmacenOrigenId.HasValue);
         RuleFor(x => x.AlmacenDestinoId).GreaterThan(0).When(x => x.AlmacenDestinoId.HasValue);
         RuleFor(x => x.Numero).MaximumLength(80);
-        RuleFor(x => x.Pagina).GreaterThan(0);
-        RuleFor(x => x.TamanoPagina).InclusiveBetween(1, 100);
+        RuleFor(x => x.Page).GreaterThan(0);
+        RuleFor(x => x.PageSize).InclusiveBetween(1, 100);
         RuleFor(x => x.Hasta)
             .Must((filtro, hasta) => !filtro.Desde.HasValue || !hasta.HasValue || hasta.Value >= filtro.Desde.Value)
             .WithMessage("La fecha Hasta debe ser igual o posterior a Desde.");
