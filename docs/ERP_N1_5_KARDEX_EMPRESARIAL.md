@@ -69,7 +69,7 @@ N1.5.E cortó la UI del Kardex hacia la consulta paginada real del backend. La p
 
 La cobertura Playwright certificó el flujo sobre API y MySQL descartables, evitando mocks como criterio único de aceptación de la experiencia.
 
-## 7. Evidencia técnica A–G
+## 7. Evidencia técnica A–H
 
 ### N1.5.A — Auditoría y preflight
 
@@ -116,7 +116,16 @@ También se publicó la migración reversible `20260816005000_N1_5_KardexQueryIn
 
 `Desarrollo - Compilación y pruebas #31918223873` terminó `SUCCESS` sobre exactamente ese HEAD, incluyendo backend/unitarias, frontend producción, Docker, higiene, migraciones e integración MySQL.
 
-La aceptación integral posterior descubrió una regresión de harness en `frontend/e2e/fase5-imagenes.spec.ts`: el fixture de `/inventario/movimientos` seguía devolviendo el contrato legacy como arreglo mientras la UI N1.5 ya consume `PagedResult`. La aplicación y el DTO continuaban exponiendo `ProductoImagenPrincipalUrl`; el fallo era del mock de regresión, no de la proyección productiva. Se corrigió en `bb2cc9753063a688796979897857d3f57364257a`, alineando el fixture con `items/totalCount/page/pageSize` y congelando además variante, causa, origen tipado y correlación del Kardex. Este commit debe quedar certificado por los pipelines causales antes del cierre formal de N1.5.H.
+La aceptación integral posterior descubrió una regresión de harness en `frontend/e2e/fase5-imagenes.spec.ts`: el fixture de `/inventario/movimientos` seguía devolviendo el contrato legacy como arreglo mientras la UI N1.5 ya consume `PagedResult`. La aplicación y el DTO continuaban exponiendo `ProductoImagenPrincipalUrl`; el fallo era del mock de regresión, no de la proyección productiva. Se corrigió en `bb2cc9753063a688796979897857d3f57364257a`, alineando el fixture con `items/totalCount/page/pageSize` y congelando además variante, causa, origen tipado y correlación del Kardex.
+
+### N1.5.H — Documentación y certificación
+
+El checkpoint de certificación vigente es `ef24e8cb08f339935f49dd501363d58bd49338cf`. Sobre ese SHA quedaron reconciliados como `SUCCESS`:
+
+- `Desarrollo - Compilación y pruebas #31921869670`;
+- `Aceptación integral #31921869659`.
+
+El mismo checkpoint mantiene la certificación M13 `#31921869752` como gate final todavía en ejecución al momento de esta actualización. N1.5.H no se declara `LISTO` hasta reconciliar ese gate y cualquier otro gate final exigido por el tablero; no se interpreta un CI parcial como certificación completa.
 
 ## 8. Rollback y operación
 
@@ -148,4 +157,4 @@ PR #2 debe permanecer abierto y Draft.
 
 ## 10. Criterio de cierre
 
-ERP-N1.5 puede cerrarse cuando este documento quede publicado en `Desarrollo`, el CI causal del changeset documental y la aceptación del fix `bb2cc9753063a688796979897857d3f57364257a` queden reconciliados, y el tablero VAEP registre N1.5.H como `LISTO` con commit/evidencia y `RESUME_POINT` dirigido al siguiente punto elegible.
+ERP-N1.5 queda listo para cierre formal cuando los gates finales del checkpoint N1.5.H estén reconciliados sin fallos causales, este documento permanezca alineado con la evidencia real y el tablero VAEP registre N1.5.H como `LISTO` con commit/evidencia y `RESUME_POINT` dirigido al siguiente punto elegible. Hasta entonces, N1.5.H permanece en certificación activa y no se reabren N1.5.A–G.
