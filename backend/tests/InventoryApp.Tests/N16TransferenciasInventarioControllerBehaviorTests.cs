@@ -1,5 +1,6 @@
 using InventoryApp.API.Controllers;
 using InventoryApp.Application.DTOs;
+using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -77,5 +78,52 @@ public sealed class N16TransferenciasInventarioControllerBehaviorTests
 
         Assert.IsType<OkObjectResult>(result);
         movimientos.Verify(x => x.RecibirAsync(21, dto), Times.Once);
+    }
+
+    [Fact]
+    public async Task Despachar_IdInexistente_RetornaNotFound()
+    {
+        var service = new Mock<ITransferenciaInventarioService>();
+        var movimientos = new Mock<ITransferenciaInventarioMovimientoService>();
+        var dto = new DespacharTransferenciaInventarioDto();
+        movimientos.Setup(x => x.DespacharAsync(404, dto)).ReturnsAsync((TransferenciaInventarioDto?)null);
+        var controller = new TransferenciasInventarioController(service.Object, movimientos.Object);
+
+        var result = await controller.Despachar(404, dto);
+
+        Assert.IsType<NotFoundObjectResult>(result);
+    }
+
+    [Fact]
+    public async Task Despachar_ReglaDeNegocio_PropagaExcepcionParaProblemDetailsGlobal()
+    {
+        var service = new Mock<ITransferenciaInventarioService>();
+        var movimientos = new Mock<ITransferenciaInventarioMovimientoService>();
+        var dto = new DespacharTransferenciaInventarioDto();
+        movimientos
+            .Setup(x => x.DespacharAsync(31, dto))
+            .ThrowsAsync(new BusinessRuleException("Solo una transferencia aprobada puede despacharse."));
+        var controller = new TransferenciasInventarioController(service.Object, movimientos.Object);
+
+        var error = await Assert.ThrowsAsync<BusinessRuleException>(() => controller.Despachar(31, dto));
+
+        Assert.Contains("aprobada", error.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task Recibir_ReintentoYaRecibido_RetornaElMismoRecursoSinTransformarLaRespuesta()
+    {
+        var service = new Mock<ITransferenciaInventarioService>();
+        var movimientos = new Mock<ITransferenciaInventarioMovimientoService>();
+        var dto = new RecibirTransferenciaInventarioDto();
+        var yaRecibida = new TransferenciaInventarioDto { Id = 32, Estado = "Recibida" };
+        movimientos.Setup(x => x.RecibirAsync(32, dto)).ReturnsAsync(yaRecibida);
+        var controller = new TransferenciasInventarioController(service.Object, movimientos.Object);
+
+        var result = await controller.Recibir(32, dto);
+
+        var ok = Assert.IsType<OkObjectResult>(result);
+        Assert.Same(yaRecibida, ok.Value);
+        movimientos.Verify(x => x.RecibirAsync(32, dto), Times.Once);
     }
 }
