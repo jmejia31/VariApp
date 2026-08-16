@@ -71,6 +71,16 @@ public class N04CatalogoPermisosRuntimeTests
         }
     }
 
+    [Fact]
+    public void MovimientosInventario_IncluyeCerrarParaConteosFisicos()
+    {
+        var acciones = CatalogoPermisosBase.Definicion
+            .Single(x => x.Modulo == ModuloSistema.MovimientosInventario)
+            .Acciones;
+
+        Assert.Contains(AccionPermiso.Cerrar, acciones);
+    }
+
     private static IEnumerable<(ModuloSistema Modulo, AccionPermiso Accion, string Origen)> ExtraerPermisos(
         MemberInfo miembro,
         string origen)
