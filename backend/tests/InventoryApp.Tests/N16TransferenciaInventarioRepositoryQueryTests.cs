@@ -18,6 +18,7 @@ public sealed class N16TransferenciaInventarioRepositoryQueryTests
             .Options;
 
         await using var context = new AppDbContext(options);
+        SeedAlmacenes(context, 10, 20, 30);
         var transferencias = new[]
         {
             Crear(1, "TRF-001", 10, 20, 7, EstadoTransferenciaInventario.Solicitada, new DateTime(2026, 8, 14)),
@@ -56,6 +57,7 @@ public sealed class N16TransferenciaInventarioRepositoryQueryTests
             .Options;
 
         await using var context = new AppDbContext(options);
+        SeedAlmacenes(context, 1, 2, 3, 4);
         context.Set<TransferenciaInventario>().AddRange(
             Crear(11, "TRF-ALFA-01", 1, 2, 7, EstadoTransferenciaInventario.Borrador, new DateTime(2026, 8, 14), "reposición central"),
             Crear(12, "TRF-ALFA-02", 1, 3, 7, EstadoTransferenciaInventario.Borrador, new DateTime(2026, 8, 15), "reposición secundaria"),
@@ -77,6 +79,21 @@ public sealed class N16TransferenciaInventarioRepositoryQueryTests
         Assert.Equal(2, total);
         var item = Assert.Single(items);
         Assert.Equal("TRF-ALFA-02", item.Numero);
+    }
+
+    private static void SeedAlmacenes(AppDbContext context, params int[] ids)
+    {
+        context.Set<Almacen>().AddRange(ids.Distinct().Select(id => new Almacen
+        {
+            Id = id,
+            SucursalId = 1,
+            Codigo = $"ALM-{id}",
+            Nombre = $"Almacén {id}",
+            Tipo = TipoAlmacen.Bodega,
+            Activo = true,
+            Eliminado = false,
+            CreadoPorUsuarioId = 7
+        }));
     }
 
     private static TransferenciaInventario Crear(
