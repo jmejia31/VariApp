@@ -44,8 +44,8 @@ public sealed class N16TransferenciaAuditObservabilityTests
         transferencia.Aprobar(202, aprobacion);
         transferencia.Detalles.Single().RegistrarDespacho(3);
         transferencia.MarcarEnTransito(303, despacho);
-        transferencia.Detalles.Single().RegistrarRecepcion(3);
-        transferencia.MarcarRecibida(404, recepcion);
+        transferencia.Detalles.Single().RegistrarRecepcion(3, 0, 0, 0);
+        transferencia.Recibir(404, recepcion);
 
         Assert.Equal(303, transferencia.DespachadaPorUsuarioId);
         Assert.Equal(despacho, transferencia.FechaDespacho);
