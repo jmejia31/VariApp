@@ -1,5 +1,7 @@
 import { expect, Page, test } from '@playwright/test';
 
+const almacenActivo = { id: 11, sucursalId: 1, sucursalCodigo: 'S1', sucursalNombre: 'Principal', codigo: 'BOD', nombre: 'Bodega E2E', tipo: 'Bodega', activo: true, fechaCreacion: '2026-08-16T00:00:00Z', fechaActualizacion: '2026-08-16T00:00:00Z' };
+
 const conteoBase = {
   id: 701,
   numero: 'CNT-E2E-701',
@@ -77,6 +79,11 @@ async function autenticar(page: Page): Promise<void> {
       }
     })
   }));
+  await page.route('**/almacenes/activos', route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ success: true, message: 'OK', errors: [], data: [almacenActivo] })
+  }));
 }
 
 async function seleccionarMatOption(page: Page, label: string, opcion: string): Promise<void> {
@@ -88,17 +95,21 @@ async function seleccionarMatOption(page: Page, label: string, opcion: string): 
 test.describe('N1.7.E - Conteos físicos', () => {
   test.beforeEach(async ({ page }) => autenticar(page));
 
-  test('lista conteos con filtros, estado y métricas operativas', async ({ page }) => {
-    await page.route('**/conteos-inventario?**', route => route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({
-        success: true,
-        message: 'OK',
-        errors: [],
-        data: { items: [conteoBase], page: 1, pageSize: 20, totalCount: 1, totalPages: 1 }
-      })
-    }));
+  test('lista conteos con filtros, catálogo de almacenes, estado y métricas operativas', async ({ page }) => {
+    const consultas: URL[] = [];
+    await page.route('**/conteos-inventario?**', route => {
+      consultas.push(new URL(route.request().url()));
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          success: true,
+          message: 'OK',
+          errors: [],
+          data: { items: [conteoBase], page: 1, pageSize: 20, totalCount: 1, totalPages: 1 }
+        })
+      });
+    });
 
     await page.goto('/inventario/conteos');
     await expect(page.getByRole('heading', { name: 'Conteos físicos' })).toBeVisible();
@@ -108,16 +119,16 @@ test.describe('N1.7.E - Conteos físicos', () => {
     await expect(row).toContainText('Ciego');
     await expect(row).toContainText('En proceso');
     await expect(row).toContainText('0 / 1');
+
+    await seleccionarMatOption(page, 'Almacén', 'BOD · Bodega E2E');
+    await page.getByRole('button', { name: 'Filtrar' }).click();
+    await expect.poll(() => consultas.at(-1)?.searchParams.get('almacenId')).toBe('11');
+
     await row.getByRole('button', { name: 'Ver conteo' }).click();
     await expect(page).toHaveURL(/\/inventario\/conteos\/701$/);
   });
 
   test('crea conteo por ubicación usando catálogos activos y scope físico válido', async ({ page }) => {
-    await page.route('**/almacenes/activos', route => route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({ success: true, message: 'OK', errors: [], data: [{ id: 11, sucursalId: 1, sucursalCodigo: 'S1', sucursalNombre: 'Principal', codigo: 'BOD', nombre: 'Bodega E2E', tipo: 'Bodega', activo: true, fechaCreacion: '2026-08-16T00:00:00Z', fechaActualizacion: '2026-08-16T00:00:00Z' }] })
-    }));
     await page.route('**/categorias/activas', route => route.fulfill({
       status: 200,
       contentType: 'application/json',
