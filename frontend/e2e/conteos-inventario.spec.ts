@@ -106,6 +106,25 @@ test.describe('N1.7.E - Conteos físicos', () => {
     await expect(page).toHaveURL(/\/inventario\/conteos\/701$/);
   });
 
+  test('no habilita persistencia cuando la captura cargada no fue modificada', async ({ page }) => {
+    const actual = {
+      ...structuredClone(conteoBase),
+      cantidadCapturadas: 1,
+      detalles: [{ ...conteoBase.detalles[0], cantidadContada: 8, diferencia: 0 }]
+    };
+    await page.route('**/conteos-inventario/701', route => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ success: true, message: 'OK', errors: [], data: actual })
+    }));
+
+    await page.goto('/inventario/conteos/701');
+    const guardar = page.getByRole('button', { name: 'Guardar capturas' });
+    await expect(guardar).toBeDisabled();
+    await page.getByLabel('Cantidad contada para SKU-E2E-44').fill('7');
+    await expect(guardar).toBeEnabled();
+  });
+
   test('modo ciego oculta stock esperado y captura lote sin exponerlo', async ({ page }) => {
     let actual: any = structuredClone(conteoBase);
     await page.route('**/conteos-inventario/701', async route => {
