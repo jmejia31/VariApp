@@ -133,8 +133,43 @@ public sealed class ExistenciaVarianteConcurrencyService : IExistenciaVarianteCo
         int cantidadActualEsperada,
         int cantidadNueva)
     {
+        var existencia = await CargarYValidarPrecondicionAsync(clave);
+        if (cantidadActualEsperada < 0 || cantidadNueva < 0)
+            throw new BusinessRuleException("Las cantidades de inventario no pueden ser negativas.");
+        if (existencia.StockFisico != cantidadActualEsperada)
+            throw new BusinessRuleException(
+                "El inventario cambió desde que se cargó el formulario. Actualiza los datos e inténtalo nuevamente.");
+
+        AplicarEstado(existencia, cantidadNueva, existencia.StockTransito);
+    }
+
+    public async Task AjustarStocksPesimistaAsync(
+        InventarioExistenciaClave clave,
+        int stockFisicoActualEsperado,
+        int stockFisicoNuevo,
+        int stockTransitoActualEsperado,
+        int stockTransitoNuevo)
+    {
+        var existencia = await CargarYValidarPrecondicionAsync(clave);
+        if (stockFisicoActualEsperado < 0 || stockFisicoNuevo < 0 ||
+            stockTransitoActualEsperado < 0 || stockTransitoNuevo < 0)
+        {
+            throw new BusinessRuleException("El stock físico y el stock en tránsito no pueden ser negativos.");
+        }
+        if (existencia.StockFisico != stockFisicoActualEsperado ||
+            existencia.StockTransito != stockTransitoActualEsperado)
+        {
+            throw new BusinessRuleException(
+                "El inventario físico o en tránsito cambió durante la operación. Reintenta con datos actualizados.");
+        }
+
+        AplicarEstado(existencia, stockFisicoNuevo, stockTransitoNuevo);
+    }
+
+    private async Task<ExistenciaVariante> CargarYValidarPrecondicionAsync(InventarioExistenciaClave clave)
+    {
         if (_context.Database.CurrentTransaction is null)
-            throw new InvalidOperationException("AjustarStockFisicoPesimistaAsync requiere una transacción activa.");
+            throw new InvalidOperationException("El ajuste pesimista de existencias requiere una transacción activa.");
 
         if (clave.ProductoVarianteId <= 0 || clave.AlmacenId <= 0 ||
             (clave.UbicacionAlmacenId.HasValue && clave.UbicacionAlmacenId.Value <= 0))
@@ -142,28 +177,22 @@ public sealed class ExistenciaVarianteConcurrencyService : IExistenciaVarianteCo
             throw new BusinessRuleException("La clave de existencia no es válida.");
         }
 
-        if (cantidadActualEsperada < 0 || cantidadNueva < 0)
-            throw new BusinessRuleException("Las cantidades de inventario no pueden ser negativas.");
-
-        var existencia = await _repository.GetByClaveAsync(
+        return await _repository.GetByClaveAsync(
             clave.ProductoVarianteId,
             clave.AlmacenId,
             clave.UbicacionAlmacenId,
             forUpdate: true)
             ?? throw new BusinessRuleException("La existencia indicada no existe.");
+    }
 
-        if (existencia.StockFisico != cantidadActualEsperada)
-        {
-            throw new BusinessRuleException(
-                "El inventario cambió desde que se cargó el formulario. Actualiza los datos e inténtalo nuevamente.");
-        }
-
+    private void AplicarEstado(ExistenciaVariante existencia, int stockFisicoNuevo, int stockTransitoNuevo)
+    {
         try
         {
             existencia.EstablecerStocks(
-                cantidadNueva,
+                stockFisicoNuevo,
                 existencia.StockReservado,
-                existencia.StockTransito,
+                stockTransitoNuevo,
                 existencia.StockMinimo,
                 existencia.StockMaximo);
         }
