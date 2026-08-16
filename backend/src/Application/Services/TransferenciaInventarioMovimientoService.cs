@@ -7,24 +7,27 @@ using InventoryApp.Domain.Enums;
 namespace InventoryApp.Application.Services;
 
 /// <summary>
-/// Casos de uso físicos de la transferencia. Estado documental y existencias
-/// cambian dentro de la misma transacción para impedir tránsito huérfano.
+/// Casos de uso físicos de la transferencia. Estado documental, existencias y
+/// Kardex cambian dentro de la misma transacción para impedir tránsito huérfano.
 /// </summary>
 public sealed class TransferenciaInventarioMovimientoService
 {
     private readonly ITransferenciaInventarioRepository _repository;
     private readonly TransferenciaInventarioExistenciaService _existencias;
+    private readonly TransferenciaKardexMovimientoRegistrar _kardex;
     private readonly ICurrentUserService _currentUser;
     private readonly IUnitOfWork _unitOfWork;
 
     public TransferenciaInventarioMovimientoService(
         ITransferenciaInventarioRepository repository,
         TransferenciaInventarioExistenciaService existencias,
+        TransferenciaKardexMovimientoRegistrar kardex,
         ICurrentUserService currentUser,
         IUnitOfWork unitOfWork)
     {
         _repository = repository;
         _existencias = existencias;
+        _kardex = kardex;
         _currentUser = currentUser;
         _unitOfWork = unitOfWork;
     }
@@ -52,7 +55,12 @@ public sealed class TransferenciaInventarioMovimientoService
 
             AplicarDespacho(transferencia, dto);
             var lockSet = await _existencias.BloquearParaDespachoAsync(transferencia);
-            await _existencias.AplicarDespachoCompletoAsync(lockSet, transferencia);
+            var transiciones = await _existencias.AplicarDespachoCompletoAsync(lockSet, transferencia);
+            await _kardex.RegistrarDespachoAsync(
+                transferencia,
+                transiciones,
+                usuarioId,
+                _currentUser.NombreUsuario);
 
             transferencia.MarcarEnTransito(usuarioId, DateTime.UtcNow);
             MarcarActualizacion(transferencia, usuarioId);
@@ -86,12 +94,16 @@ public sealed class TransferenciaInventarioMovimientoService
                 throw new BusinessRuleException("Solo una transferencia en tránsito puede recibirse.");
 
             AplicarRecepcion(transferencia, dto);
-            // Verifica recepción cerrada antes de tocar el stock.
             if (transferencia.Detalles.Any(x => !x.RecepcionCerrada))
                 throw new BusinessRuleException("Todos los detalles deben cerrar su recepción antes de completar la transferencia.");
 
             var lockSet = await _existencias.BloquearParaRecepcionAsync(transferencia);
-            await _existencias.AplicarRecepcionAsync(lockSet, transferencia);
+            var transiciones = await _existencias.AplicarRecepcionAsync(lockSet, transferencia);
+            await _kardex.RegistrarRecepcionAsync(
+                transferencia,
+                transiciones,
+                usuarioId,
+                _currentUser.NombreUsuario);
 
             transferencia.Recibir(usuarioId, DateTime.UtcNow);
             MarcarActualizacion(transferencia, usuarioId);
