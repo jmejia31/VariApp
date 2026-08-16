@@ -8,11 +8,11 @@ public static class TransferenciaInventarioExistenciaContext
 {
     public static IReadOnlyList<InventarioDemandaExistencia> ConstruirDemandasDespacho(
         TransferenciaInventario transferencia) =>
-        ConstruirDemandas(transferencia, destino: false, usarCantidadRecibida: false);
+        ConstruirDemandasDespachadas(transferencia, destino: false);
 
     public static IReadOnlyList<InventarioDemandaExistencia> ConstruirDemandasTransitoDestino(
         TransferenciaInventario transferencia) =>
-        ConstruirDemandas(transferencia, destino: true, usarCantidadRecibida: false);
+        ConstruirDemandasDespachadas(transferencia, destino: true);
 
     public static IReadOnlyList<InventarioDemandaExistencia> ConstruirDemandasBloqueoDespacho(
         TransferenciaInventario transferencia) =>
@@ -20,14 +20,64 @@ public static class TransferenciaInventarioExistenciaContext
             .Concat(ConstruirDemandasTransitoDestino(transferencia))
             .ToList();
 
-    public static IReadOnlyList<InventarioDemandaExistencia> ConstruirDemandasRecepcionDestino(
+    /// <summary>
+    /// Demanda usada para cerrar el tránsito: siempre representa lo despachado,
+    /// incluso cuando un detalle termina totalmente faltante o dañado.
+    /// </summary>
+    public static IReadOnlyList<InventarioDemandaExistencia> ConstruirDemandasCierreTransitoDestino(
         TransferenciaInventario transferencia) =>
-        ConstruirDemandas(transferencia, destino: true, usarCantidadRecibida: true);
+        ConstruirDemandasTransitoDestino(transferencia);
 
-    private static IReadOnlyList<InventarioDemandaExistencia> ConstruirDemandas(
+    /// <summary>
+    /// Materializa únicamente unidades realmente recibidas como stock físico.
+    /// Faltantes y dañadas no entran al disponible; sobrantes permanecen como
+    /// discrepancia explícita hasta una operación empresarial de aceptación.
+    /// </summary>
+    public static IReadOnlyList<InventarioDemandaExistencia> ConstruirDemandasIngresoDestino(
+        TransferenciaInventario transferencia)
+    {
+        ValidarBase(transferencia, destino: true);
+        var demandas = new List<InventarioDemandaExistencia>();
+        foreach (var detalle in transferencia.Detalles)
+        {
+            ValidarVariante(detalle);
+            if (detalle.CantidadRecibida <= 0)
+                continue;
+
+            demandas.Add(CrearDemanda(
+                transferencia.AlmacenDestinoId,
+                detalle.UbicacionDestinoId,
+                detalle,
+                detalle.CantidadRecibida));
+        }
+
+        return demandas;
+    }
+
+    private static IReadOnlyList<InventarioDemandaExistencia> ConstruirDemandasDespachadas(
         TransferenciaInventario transferencia,
-        bool destino,
-        bool usarCantidadRecibida)
+        bool destino)
+    {
+        ValidarBase(transferencia, destino);
+        var almacenId = destino ? transferencia.AlmacenDestinoId : transferencia.AlmacenOrigenId;
+        var demandas = new List<InventarioDemandaExistencia>(transferencia.Detalles.Count);
+        foreach (var detalle in transferencia.Detalles)
+        {
+            ValidarVariante(detalle);
+            if (detalle.CantidadDespachada <= 0)
+                throw new BusinessRuleException("Cada detalle debe tener una cantidad despachada mayor que cero.");
+
+            demandas.Add(CrearDemanda(
+                almacenId,
+                destino ? detalle.UbicacionDestinoId : detalle.UbicacionOrigenId,
+                detalle,
+                detalle.CantidadDespachada));
+        }
+
+        return demandas;
+    }
+
+    private static void ValidarBase(TransferenciaInventario transferencia, bool destino)
     {
         ArgumentNullException.ThrowIfNull(transferencia);
         var almacenId = destino ? transferencia.AlmacenDestinoId : transferencia.AlmacenOrigenId;
@@ -35,30 +85,23 @@ public static class TransferenciaInventarioExistenciaContext
             throw new BusinessRuleException($"La transferencia no tiene un almacén de {(destino ? "destino" : "origen")} válido.");
         if (transferencia.Detalles.Count == 0)
             throw new BusinessRuleException("La transferencia no contiene detalles físicos.");
-
-        var demandas = new List<InventarioDemandaExistencia>(transferencia.Detalles.Count);
-        foreach (var detalle in transferencia.Detalles)
-        {
-            if (detalle.ProductoVarianteId <= 0 || detalle.ProductoVariante is null || detalle.ProductoVariante.ProductoId <= 0)
-                throw new BusinessRuleException("Cada detalle debe tener una variante cargada con producto válido.");
-
-            var cantidad = usarCantidadRecibida ? detalle.CantidadRecibida : detalle.CantidadDespachada;
-            if (cantidad <= 0)
-            {
-                throw new BusinessRuleException(
-                    usarCantidadRecibida
-                        ? "Cada detalle debe registrar una cantidad recibida mayor que cero para materializar stock destino."
-                        : "Cada detalle debe tener una cantidad despachada mayor que cero.");
-            }
-
-            demandas.Add(new InventarioDemandaExistencia(
-                detalle.ProductoVariante.ProductoId,
-                detalle.ProductoVarianteId,
-                almacenId,
-                destino ? detalle.UbicacionDestinoId : detalle.UbicacionOrigenId,
-                cantidad));
-        }
-
-        return demandas;
     }
+
+    private static void ValidarVariante(TransferenciaInventarioDetalle detalle)
+    {
+        if (detalle.ProductoVarianteId <= 0 || detalle.ProductoVariante is null || detalle.ProductoVariante.ProductoId <= 0)
+            throw new BusinessRuleException("Cada detalle debe tener una variante cargada con producto válido.");
+    }
+
+    private static InventarioDemandaExistencia CrearDemanda(
+        int almacenId,
+        int? ubicacionId,
+        TransferenciaInventarioDetalle detalle,
+        int cantidad) =>
+        new(
+            detalle.ProductoVariante.ProductoId,
+            detalle.ProductoVarianteId,
+            almacenId,
+            ubicacionId,
+            cantidad);
 }
