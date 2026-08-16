@@ -54,6 +54,7 @@ public sealed class ConteoInventarioService : IConteoInventarioService
     public async Task<ConteoInventarioDto> CreateAsync(CreateConteoInventarioDto dto)
     {
         ArgumentNullException.ThrowIfNull(dto);
+        ValidarScope(dto.Tipo, dto.UbicacionAlmacenId, dto.CategoriaId);
         var usuarioId = ObtenerUsuarioId();
         var ahora = DateTime.UtcNow;
         var conteo = new ConteoInventario
@@ -89,6 +90,7 @@ public sealed class ConteoInventarioService : IConteoInventarioService
     {
         ArgumentNullException.ThrowIfNull(dto);
         if (id <= 0) return null;
+        ValidarScope(dto.Tipo, dto.UbicacionAlmacenId, dto.CategoriaId);
         var usuarioId = ObtenerUsuarioId();
         ConteoInventario? resultado = null;
 
@@ -455,6 +457,18 @@ public sealed class ConteoInventarioService : IConteoInventarioService
     private static int ValidarId(int id, string nombre) => id > 0
         ? id
         : throw new BusinessRuleException($"{nombre} debe ser válido.");
+
+    private static void ValidarScope(TipoConteoInventario tipo, int? ubicacionAlmacenId, int? categoriaId)
+    {
+        if (ubicacionAlmacenId.HasValue && ubicacionAlmacenId.Value <= 0)
+            throw new BusinessRuleException("UbicacionAlmacenId debe ser válido cuando se especifica.");
+        if (categoriaId.HasValue && categoriaId.Value <= 0)
+            throw new BusinessRuleException("CategoriaId debe ser válido cuando se especifica.");
+        if (tipo == TipoConteoInventario.PorUbicacion && !ubicacionAlmacenId.HasValue)
+            throw new BusinessRuleException("Un conteo por ubicación requiere UbicacionAlmacenId.");
+        if (tipo == TipoConteoInventario.PorCategoria && !categoriaId.HasValue)
+            throw new BusinessRuleException("Un conteo por categoría requiere CategoriaId.");
+    }
 
     private static string? Normalizar(string? valor) => string.IsNullOrWhiteSpace(valor) ? null : valor.Trim();
 
