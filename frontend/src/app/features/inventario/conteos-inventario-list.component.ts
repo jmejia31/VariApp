@@ -11,12 +11,14 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { finalize } from 'rxjs';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
+import { Almacen } from '../../core/models/almacen.model';
 import {
   ConteoInventario,
   ConteoInventarioFiltro,
   EstadoConteoInventario,
   TipoConteoInventario
 } from '../../core/models/conteo-inventario.model';
+import { AlmacenService } from '../../services/almacen.service';
 import { ConteoInventarioService } from '../../services/conteo-inventario.service';
 
 @Component({
@@ -40,10 +42,11 @@ import { ConteoInventarioService } from '../../services/conteo-inventario.servic
         <mat-form-field appearance="outline"><mat-label>Buscar</mat-label><input matInput name="search" [(ngModel)]="search" placeholder="Número, almacén..." /></mat-form-field>
         <mat-form-field appearance="outline"><mat-label>Estado</mat-label><mat-select name="estado" [(ngModel)]="estado"><mat-option [value]="null">Todos</mat-option><mat-option *ngFor="let item of estados" [value]="item.value">{{ item.label }}</mat-option></mat-select></mat-form-field>
         <mat-form-field appearance="outline"><mat-label>Tipo</mat-label><mat-select name="tipo" [(ngModel)]="tipo"><mat-option [value]="null">Todos</mat-option><mat-option *ngFor="let item of tipos" [value]="item.value">{{ item.label }}</mat-option></mat-select></mat-form-field>
-        <mat-form-field appearance="outline"><mat-label>Almacén ID</mat-label><input matInput type="number" min="1" name="almacen" [(ngModel)]="almacenId" /></mat-form-field>
+        <mat-form-field appearance="outline"><mat-label>Almacén</mat-label><mat-select name="almacen" [(ngModel)]="almacenId"><mat-option [value]="null">Todos</mat-option><mat-option *ngFor="let almacen of almacenes" [value]="almacen.id">{{ almacen.codigo }} · {{ almacen.nombre }}</mat-option></mat-select></mat-form-field>
         <div class="filter-actions"><button mat-flat-button color="primary" type="submit">Filtrar</button><button mat-button type="button" (click)="limpiar()">Limpiar</button></div>
       </form>
 
+      <div *ngIf="catalogoError" class="catalog-warning" role="status"><mat-icon>info</mat-icon><span>{{ catalogoError }}</span><button mat-button type="button" (click)="cargarAlmacenes()">Reintentar catálogo</button></div>
       <div *ngIf="loading" class="state" aria-live="polite"><mat-spinner diameter="36"></mat-spinner><span>Cargando conteos…</span></div>
       <div *ngIf="!loading && error" class="state error" role="alert"><mat-icon>error_outline</mat-icon><span>{{ error }}</span><button mat-button type="button" (click)="cargar()">Reintentar</button></div>
       <div *ngIf="!loading && !error && items.length === 0" class="state empty"><mat-icon>inventory_2</mat-icon><strong>No hay conteos para los filtros seleccionados.</strong></div>
@@ -69,14 +72,16 @@ import { ConteoInventarioService } from '../../services/conteo-inventario.servic
     </section>
   `,
   styles: [`
-    .page{padding:24px;display:grid;gap:20px}.header{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}.header h1{margin:0;font-size:1.75rem}.header p{margin:6px 0 0;color:var(--text-secondary,#667085)}.eyebrow{text-transform:uppercase;letter-spacing:.08em;font-size:.72rem;font-weight:700;color:var(--primary,#3f51b5)!important}.header button mat-icon{margin-right:6px}.filters{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:12px;align-items:start}.filter-actions{display:flex;gap:6px;padding-top:4px}.state{min-height:180px;display:flex;align-items:center;justify-content:center;gap:12px;border:1px dashed #d0d5dd;border-radius:12px;padding:24px}.state.error{color:#b42318}.state.empty{flex-direction:column;color:#667085}.table-wrap{overflow:auto;border:1px solid #e4e7ec;border-radius:12px}table{width:100%;border-collapse:collapse;min-width:900px}th,td{padding:14px 16px;text-align:left;border-bottom:1px solid #eaecf0;vertical-align:middle}th{font-size:.78rem;text-transform:uppercase;letter-spacing:.04em;color:#667085;background:#f9fafb}td small{display:block;margin-top:3px;color:#667085}.badge{display:inline-flex;border-radius:999px;padding:4px 9px;background:#f2f4f7;font-size:.78rem;font-weight:600}.diff{color:#b54708}.actions{white-space:nowrap}@media(max-width:900px){.page{padding:16px}.header{flex-direction:column}.filters{grid-template-columns:1fr 1fr}.filter-actions{grid-column:1/-1}}@media(max-width:560px){.filters{grid-template-columns:1fr}}
+    .page{padding:24px;display:grid;gap:20px}.header{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}.header h1{margin:0;font-size:1.75rem}.header p{margin:6px 0 0;color:var(--text-secondary,#667085)}.eyebrow{text-transform:uppercase;letter-spacing:.08em;font-size:.72rem;font-weight:700;color:var(--primary,#3f51b5)!important}.header button mat-icon{margin-right:6px}.filters{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:12px;align-items:start}.filter-actions{display:flex;gap:6px;padding-top:4px}.catalog-warning{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;background:#fffaeb;color:#7a2e0e}.state{min-height:180px;display:flex;align-items:center;justify-content:center;gap:12px;border:1px dashed #d0d5dd;border-radius:12px;padding:24px}.state.error{color:#b42318}.state.empty{flex-direction:column;color:#667085}.table-wrap{overflow:auto;border:1px solid #e4e7ec;border-radius:12px}table{width:100%;border-collapse:collapse;min-width:900px}th,td{padding:14px 16px;text-align:left;border-bottom:1px solid #eaecf0;vertical-align:middle}th{font-size:.78rem;text-transform:uppercase;letter-spacing:.04em;color:#667085;background:#f9fafb}td small{display:block;margin-top:3px;color:#667085}.badge{display:inline-flex;border-radius:999px;padding:4px 9px;background:#f2f4f7;font-size:.78rem;font-weight:600}.diff{color:#b54708}.actions{white-space:nowrap}@media(max-width:900px){.page{padding:16px}.header{flex-direction:column}.filters{grid-template-columns:1fr 1fr}.filter-actions{grid-column:1/-1}}@media(max-width:560px){.filters{grid-template-columns:1fr}}
   `]
 })
 export class ConteosInventarioListComponent implements OnInit {
   readonly EstadoConteoInventario = EstadoConteoInventario;
   items: ConteoInventario[] = [];
+  almacenes: Almacen[] = [];
   loading = false;
   error = '';
+  catalogoError = '';
   totalCount = 0;
   page = 1;
   pageSize = 20;
@@ -100,11 +105,24 @@ export class ConteosInventarioListComponent implements OnInit {
     { value: TipoConteoInventario.Ciego, label: 'Ciego' }
   ];
 
-  constructor(private readonly service: ConteoInventarioService, private readonly router: Router, private readonly permisos: PermisosRuntimeService) {}
+  constructor(
+    private readonly service: ConteoInventarioService,
+    private readonly almacenesService: AlmacenService,
+    private readonly router: Router,
+    private readonly permisos: PermisosRuntimeService
+  ) {}
 
-  ngOnInit(): void { this.cargar(); }
+  ngOnInit(): void { this.cargarAlmacenes(); this.cargar(); }
   get puedeCrear(): boolean { return this.permisos.puede('MovimientosInventario', 'Crear'); }
   get puedeEditar(): boolean { return this.permisos.puede('MovimientosInventario', 'Editar'); }
+
+  cargarAlmacenes(): void {
+    this.catalogoError = '';
+    this.almacenesService.getActivos().subscribe({
+      next: response => { if (response.success) this.almacenes = response.data; else this.catalogoError = response.message || 'No se pudo cargar el catálogo de almacenes.'; },
+      error: () => this.catalogoError = 'No se pudo cargar el catálogo de almacenes.'
+    });
+  }
 
   cargar(): void {
     this.loading = true; this.error = '';
