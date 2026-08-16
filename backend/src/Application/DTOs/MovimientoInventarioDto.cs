@@ -20,14 +20,15 @@ public class MovimientoInventarioDto
     public decimal? PrecioUnitario { get; set; }
     public string CorrelationId { get; set; } = string.Empty;
 
-    // ERP-N0.6: origen tipado autoritativo. ReferenciaTipo/ReferenciaId se
-    // conservan temporalmente como snapshot de compatibilidad hasta N0.8.
+    // Origen tipado autoritativo. ReferenciaTipo/ReferenciaId se conservan
+    // temporalmente como snapshot de compatibilidad para históricos legacy.
     public string? OrigenTipo { get; set; }
     public int? OrigenId { get; set; }
     public int? CompraId { get; set; }
     public int? VentaId { get; set; }
     public int? ConsumoInsumoId { get; set; }
     public int? AjusteInventarioId { get; set; }
+    public int? TransferenciaInventarioId { get; set; }
 
     public string ReferenciaTipo { get; set; } = string.Empty;
     public int ReferenciaId { get; set; }
