@@ -40,8 +40,11 @@ public sealed class ExistenciaVarianteRepository : IExistenciaVarianteRepository
                       AND (({ubicacionAlmacenId} IS NULL AND ev.UbicacionAlmacenId IS NULL)
                            OR ev.UbicacionAlmacenId = {ubicacionAlmacenId})
                     FOR UPDATE")
-                .Include(e => e.ProductoVariante)
-                    .ThenInclude(v => v.Producto)
+                .Include(e => e.ProductoVariante).ThenInclude(v => v.Producto)
+                .Include(e => e.ProductoVariante).ThenInclude(v => v.Marca)
+                .Include(e => e.ProductoVariante).ThenInclude(v => v.Modelo)
+                .Include(e => e.ProductoVariante).ThenInclude(v => v.Color)
+                .Include(e => e.ProductoVariante).ThenInclude(v => v.Talla)
                 .Include(e => e.Almacen)
                 .Include(e => e.UbicacionAlmacen)
                 .SingleOrDefaultAsync();
@@ -72,8 +75,11 @@ public sealed class ExistenciaVarianteRepository : IExistenciaVarianteRepository
                        OR ev.UbicacionAlmacenId = {ubicacionAlmacenId})
                 FOR UPDATE")
             .IgnoreQueryFilters()
-            .Include(e => e.ProductoVariante)
-                .ThenInclude(v => v.Producto)
+            .Include(e => e.ProductoVariante).ThenInclude(v => v.Producto)
+            .Include(e => e.ProductoVariante).ThenInclude(v => v.Marca)
+            .Include(e => e.ProductoVariante).ThenInclude(v => v.Modelo)
+            .Include(e => e.ProductoVariante).ThenInclude(v => v.Color)
+            .Include(e => e.ProductoVariante).ThenInclude(v => v.Talla)
             .Include(e => e.Almacen)
             .Include(e => e.UbicacionAlmacen)
             .SingleOrDefaultAsync();
@@ -148,8 +154,11 @@ public sealed class ExistenciaVarianteRepository : IExistenciaVarianteRepository
     private IQueryable<ExistenciaVariante> BaseQuery(bool tracking)
     {
         IQueryable<ExistenciaVariante> query = Existencias
-            .Include(e => e.ProductoVariante)
-                .ThenInclude(v => v.Producto)
+            .Include(e => e.ProductoVariante).ThenInclude(v => v.Producto)
+            .Include(e => e.ProductoVariante).ThenInclude(v => v.Marca)
+            .Include(e => e.ProductoVariante).ThenInclude(v => v.Modelo)
+            .Include(e => e.ProductoVariante).ThenInclude(v => v.Color)
+            .Include(e => e.ProductoVariante).ThenInclude(v => v.Talla)
             .Include(e => e.Almacen)
             .Include(e => e.UbicacionAlmacen);
 
