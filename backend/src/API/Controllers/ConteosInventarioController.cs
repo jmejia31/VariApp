@@ -82,6 +82,19 @@ public sealed class ConteosInventarioController : ControllerBase
     [RequierePermiso(ModuloSistema.MovimientosInventario, AccionPermiso.Aprobar)]
     public Task<IActionResult> Aprobar(int id) => EjecutarTransicionAsync(id, _service.AprobarAsync, AccionPermiso.Aprobar, "Conteo aprobado correctamente.");
 
+    [HttpPost("{id:int}/generar-ajuste")]
+    [RequierePermiso(ModuloSistema.MovimientosInventario, AccionPermiso.Crear)]
+    public async Task<IActionResult> GenerarAjuste(int id)
+    {
+        var ajuste = await _service.GenerarAjusteAsync(id);
+        if (ajuste is null)
+            return NotFound(ApiResponse<object>.Fail("Conteo de inventario no encontrado."));
+
+        return Ok(ApiResponse<AjusteInventarioDto>.Ok(
+            ajuste,
+            "Ajuste borrador generado desde las diferencias del conteo. Requiere confirmación formal posterior."));
+    }
+
     [HttpPost("{id:int}/cancelar")]
     [RequierePermiso(ModuloSistema.MovimientosInventario, AccionPermiso.Anular)]
     public async Task<IActionResult> Cancelar(int id, [FromBody] CancelarConteoInventarioDto dto)
