@@ -17,7 +17,7 @@ public sealed class N1_6_TransferenciaOrigenMovimientoInventario : Migration
     private const string ConstraintOrigen = "CK_MovimientosInventario_OrigenTipado_Exclusivo_N06";
     private const string TriggerInsert = "TR_MovimientosInventario_N06_OrigenTipado_BI";
     private const string TriggerUpdate = "TR_MovimientosInventario_N06_OrigenTipado_BU";
-    private const string TransferenciaFk = "FK_MovimientosInventario_TransferenciasInventario_TransferenciaInventarioId";
+    private const string TransferenciaFk = "FK_MovInv_TransferenciaInventarioId_N16";
 
     protected override void Up(MigrationBuilder migrationBuilder)
     {
