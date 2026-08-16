@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using InventoryApp.Domain.Enums;
 
 namespace InventoryApp.Application.DTOs;
@@ -62,6 +63,7 @@ public class CreateConteoInventarioDto
     public int? CategoriaId { get; set; }
     public bool EsCiego { get; set; }
     public string? Observaciones { get; set; }
+    [Required]
     public List<int> ProductoVarianteIds { get; set; } = new();
 }
 
@@ -73,6 +75,7 @@ public class UpdateConteoInventarioDto
     public int? CategoriaId { get; set; }
     public bool EsCiego { get; set; }
     public string? Observaciones { get; set; }
+    [Required]
     public List<int> ProductoVarianteIds { get; set; } = new();
 }
 
@@ -83,6 +86,7 @@ public class CapturarConteoInventarioDetalleDto
 
 public class CapturarConteoInventarioLoteDto
 {
+    [Required]
     public List<CapturaConteoInventarioLineaDto> Lineas { get; set; } = new();
 }
 
