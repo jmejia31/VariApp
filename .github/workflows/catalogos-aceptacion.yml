@@ -231,6 +231,9 @@ jobs:
             e2e/fase2c5-autocomplete-remoto.spec.ts \
             e2e/fase2c5-regresiones-compatibilidad.spec.ts \
             e2e/m5-clientes-segmentacion.spec.ts \
+            e2e/transferencias-inventario-acceso.spec.ts \
+            e2e/transferencias-inventario-form.spec.ts \
+            e2e/transferencias-inventario-lifecycle.spec.ts \
             --grep-invert="Angular exige la variante exacta en compra y venta|Compras y Ventas muestran imágenes o fallback en listas, formularios y detalles" \
             --config=playwright.config.ts
 
