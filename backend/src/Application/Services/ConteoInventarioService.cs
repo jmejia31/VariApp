@@ -155,6 +155,69 @@ public sealed class ConteoInventarioService : IConteoInventarioService
         return resultado is null ? null : Map(resultado);
     }
 
+    public async Task<ConteoInventarioDto?> CapturarLoteAsync(int id, CapturarConteoInventarioLoteDto dto)
+    {
+        ArgumentNullException.ThrowIfNull(dto);
+        if (id <= 0) return null;
+        if (dto.Lineas.Count == 0)
+            throw new BusinessRuleException("La captura por lote requiere al menos una línea.");
+        if (dto.Lineas.Any(x => x.DetalleId <= 0))
+            throw new BusinessRuleException("Todas las líneas del lote deben identificar un detalle válido.");
+        if (dto.Lineas.Any(x => x.CantidadContada < 0))
+            throw new BusinessRuleException("Las cantidades contadas no pueden ser negativas.");
+
+        var idsDuplicados = dto.Lineas
+            .GroupBy(x => x.DetalleId)
+            .Where(x => x.Count() > 1)
+            .Select(x => x.Key)
+            .OrderBy(x => x)
+            .ToList();
+        if (idsDuplicados.Count > 0)
+            throw new BusinessRuleException($"La captura por lote contiene detalles duplicados: {string.Join(", ", idsDuplicados)}.");
+
+        var usuarioId = ObtenerUsuarioId();
+        ConteoInventario? resultado = null;
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            var conteo = await _repository.GetByIdForUpdateAsync(id);
+            if (conteo is null) return;
+            if (conteo.Estado != EstadoConteoInventario.EnProceso)
+                throw new BusinessRuleException("Solo un conteo en proceso admite capturas.");
+
+            var detallesPorId = conteo.Detalles.ToDictionary(x => x.Id);
+            var inexistentes = dto.Lineas
+                .Where(x => !detallesPorId.ContainsKey(x.DetalleId))
+                .Select(x => x.DetalleId)
+                .OrderBy(x => x)
+                .ToList();
+            if (inexistentes.Count > 0)
+                throw new BusinessRuleException($"Una o más líneas no pertenecen al conteo indicado: {string.Join(", ", inexistentes)}.");
+
+            var ahora = DateTime.UtcNow;
+            var huboCambios = false;
+            foreach (var linea in dto.Lineas.OrderBy(x => x.DetalleId))
+            {
+                var detalle = detallesPorId[linea.DetalleId];
+                if (detalle.CantidadContada == linea.CantidadContada) continue;
+                detalle.RegistrarConteo(linea.CantidadContada, usuarioId, ahora);
+                huboCambios = true;
+            }
+
+            if (!huboCambios)
+            {
+                resultado = conteo;
+                return;
+            }
+
+            MarcarActualizacion(conteo, usuarioId);
+            _repository.Update(conteo);
+            await _repository.SaveChangesAsync();
+            resultado = conteo;
+        });
+
+        return resultado is null ? null : Map(resultado);
+    }
+
     public Task<ConteoInventarioDto?> CerrarAsync(int id) =>
         TransicionarAsync(
             id,
