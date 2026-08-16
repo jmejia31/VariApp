@@ -22,6 +22,7 @@ public sealed class TransferenciaInventarioRepository : ITransferenciaInventario
             .Include(t => t.AlmacenOrigen)
             .Include(t => t.AlmacenDestino)
             .Include(t => t.Detalles)
+                .ThenInclude(d => d.ProductoVariante)
             .AsSplitQuery();
 
     public async Task<(List<TransferenciaInventario> Items, int TotalCount)> GetPagedAsync(
@@ -79,6 +80,7 @@ public sealed class TransferenciaInventarioRepository : ITransferenciaInventario
             .Include(t => t.AlmacenOrigen)
             .Include(t => t.AlmacenDestino)
             .Include(t => t.Detalles)
+                .ThenInclude(d => d.ProductoVariante)
             .AsSplitQuery()
             .Skip((filtro.Page - 1) * filtro.PageSize)
             .Take(filtro.PageSize)
@@ -104,7 +106,11 @@ public sealed class TransferenciaInventarioRepository : ITransferenciaInventario
         {
             await _context.Entry(transferencia).Reference(t => t.AlmacenOrigen).LoadAsync();
             await _context.Entry(transferencia).Reference(t => t.AlmacenDestino).LoadAsync();
-            await _context.Entry(transferencia).Collection(t => t.Detalles).LoadAsync();
+            await _context.Entry(transferencia)
+                .Collection(t => t.Detalles)
+                .Query()
+                .Include(d => d.ProductoVariante)
+                .LoadAsync();
         }
 
         return transferencia;
