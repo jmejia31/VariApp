@@ -9,7 +9,8 @@ public sealed record MovimientoInventarioOrigenPersistido(
     int? CompraId,
     int? VentaId,
     int? ConsumoInsumoId,
-    int? AjusteInventarioId = null);
+    int? AjusteInventarioId = null,
+    int? TransferenciaInventarioId = null);
 
 public interface IMovimientoInventarioRepository
 {
