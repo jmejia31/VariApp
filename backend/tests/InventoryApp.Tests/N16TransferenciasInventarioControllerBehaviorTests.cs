@@ -1,4 +1,5 @@
 using InventoryApp.API.Controllers;
+using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
@@ -111,7 +112,7 @@ public sealed class N16TransferenciasInventarioControllerBehaviorTests
     }
 
     [Fact]
-    public async Task Recibir_ReintentoYaRecibido_RetornaElMismoRecursoSinTransformarLaRespuesta()
+    public async Task Recibir_ReintentoYaRecibido_RetornaMismoRecursoDentroDelEnvelopeApi()
     {
         var service = new Mock<ITransferenciaInventarioService>();
         var movimientos = new Mock<ITransferenciaInventarioMovimientoService>();
@@ -123,7 +124,9 @@ public sealed class N16TransferenciasInventarioControllerBehaviorTests
         var result = await controller.Recibir(32, dto);
 
         var ok = Assert.IsType<OkObjectResult>(result);
-        Assert.Same(yaRecibida, ok.Value);
+        var envelope = Assert.IsType<ApiResponse<TransferenciaInventarioDto>>(ok.Value);
+        Assert.True(envelope.Success);
+        Assert.Same(yaRecibida, envelope.Data);
         movimientos.Verify(x => x.RecibirAsync(32, dto), Times.Once);
     }
 }
