@@ -39,6 +39,27 @@ public class N17ConteoInventarioDomainTests
     }
 
     [Fact]
+    public void Iniciar_SinSnapshotFisicoMaterializado_FallaCerrado()
+    {
+        var conteo = CrearConteo();
+        conteo.Detalles = new List<ConteoInventarioDetalle>
+        {
+            new()
+            {
+                ProductoVarianteId = 20,
+                AlmacenId = 10,
+                UbicacionAlmacenId = 30
+            }
+        };
+
+        Assert.Throws<InvalidOperationException>(() => conteo.Iniciar(1, DateTime.UtcNow));
+
+        Assert.Equal(EstadoConteoInventario.Borrador, conteo.Estado);
+        Assert.Null(conteo.FechaInicio);
+        Assert.False(Assert.Single(conteo.Detalles).SnapshotMaterializado);
+    }
+
+    [Fact]
     public void Cerrar_ConLineaPendiente_FallaCerradoYSinMutarAuditoria()
     {
         var conteo = CrearConteo();
