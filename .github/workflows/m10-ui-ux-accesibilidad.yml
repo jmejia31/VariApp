@@ -11,9 +11,13 @@ on:
       - frontend/src/app/app.component.*
       - frontend/src/app/services/theme-applier.service.ts
       - frontend/src/app/services/color-contrast.service.ts
+      - frontend/src/app/services/movimiento-inventario.service.ts
+      - frontend/src/app/core/models/movimiento-inventario.model.ts
       - frontend/src/app/shared/feedback-state/**
       - frontend/src/app/features/cargas-masivas/**
+      - frontend/src/app/features/inventario/movimientos-list.component.*
       - frontend/e2e/m10-ui-ux-accesibilidad.spec.ts
+      - frontend/e2e/n1-5-kardex.spec.ts
   pull_request:
     branches:
       - main
@@ -24,9 +28,13 @@ on:
       - frontend/src/app/app.component.*
       - frontend/src/app/services/theme-applier.service.ts
       - frontend/src/app/services/color-contrast.service.ts
+      - frontend/src/app/services/movimiento-inventario.service.ts
+      - frontend/src/app/core/models/movimiento-inventario.model.ts
       - frontend/src/app/shared/feedback-state/**
       - frontend/src/app/features/cargas-masivas/**
+      - frontend/src/app/features/inventario/movimientos-list.component.*
       - frontend/e2e/m10-ui-ux-accesibilidad.spec.ts
+      - frontend/e2e/n1-5-kardex.spec.ts
   workflow_dispatch:
 
 permissions:
@@ -153,11 +161,12 @@ jobs:
           cat m10-frontend.log >&2 || true
           exit 1
 
-      - name: Ejecutar Playwright M10
+      - name: Ejecutar Playwright M10 y Kardex N1.5
         working-directory: frontend
         run: |
           npx playwright test \
             e2e/m10-ui-ux-accesibilidad.spec.ts \
+            e2e/n1-5-kardex.spec.ts \
             --config=playwright.config.ts
 
       - name: Publicar evidencia M10
