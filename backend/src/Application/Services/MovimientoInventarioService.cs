@@ -54,13 +54,15 @@ public class MovimientoInventarioService : IMovimientoInventarioService
             { VentaId: not null } => "Venta",
             { ConsumoInsumoId: not null } => "ConsumoInsumo",
             { AjusteInventarioId: not null } => "AjusteInventario",
+            { TransferenciaInventarioId: not null } => "TransferenciaInventario",
             _ => null
         };
 
         var origenId = origen?.CompraId ??
                        origen?.VentaId ??
                        origen?.ConsumoInsumoId ??
-                       origen?.AjusteInventarioId;
+                       origen?.AjusteInventarioId ??
+                       origen?.TransferenciaInventarioId;
 
         return new MovimientoInventarioDto
         {
@@ -87,6 +89,7 @@ public class MovimientoInventarioService : IMovimientoInventarioService
             VentaId = origen?.VentaId,
             ConsumoInsumoId = origen?.ConsumoInsumoId,
             AjusteInventarioId = origen?.AjusteInventarioId,
+            TransferenciaInventarioId = origen?.TransferenciaInventarioId,
             ReferenciaTipo = m.ReferenciaTipo,
             ReferenciaId = m.ReferenciaId,
             Descripcion = m.Descripcion,
