@@ -1,95 +1,59 @@
 using InventoryApp.Domain.Common;
 using InventoryApp.Domain.Enums;
-using Xunit;
 
 namespace InventoryApp.Tests;
 
 public class OrigenMovimientoInventarioTests
 {
-    [Fact]
-    public void DesdeCompra_ExponeSoloCompraComoOrigen()
+    [Theory]
+    [InlineData(TipoOrigenMovimientoInventario.Compra, 11)]
+    [InlineData(TipoOrigenMovimientoInventario.Venta, 22)]
+    [InlineData(TipoOrigenMovimientoInventario.ConsumoInsumo, 33)]
+    [InlineData(TipoOrigenMovimientoInventario.AjusteInventario, 44)]
+    [InlineData(TipoOrigenMovimientoInventario.TransferenciaInventario, 55)]
+    public void Factory_CreaOrigenTipadoValido(TipoOrigenMovimientoInventario tipo, int id)
     {
-        var origen = OrigenMovimientoInventario.DesdeCompra(10);
+        var origen = tipo switch
+        {
+            TipoOrigenMovimientoInventario.Compra => OrigenMovimientoInventario.DesdeCompra(id),
+            TipoOrigenMovimientoInventario.Venta => OrigenMovimientoInventario.DesdeVenta(id),
+            TipoOrigenMovimientoInventario.ConsumoInsumo => OrigenMovimientoInventario.DesdeConsumoInsumo(id),
+            TipoOrigenMovimientoInventario.AjusteInventario => OrigenMovimientoInventario.DesdeAjusteInventario(id),
+            TipoOrigenMovimientoInventario.TransferenciaInventario => OrigenMovimientoInventario.DesdeTransferenciaInventario(id),
+            _ => throw new InvalidOperationException()
+        };
 
-        Assert.Equal(TipoOrigenMovimientoInventario.Compra, origen.Tipo);
-        Assert.Equal(10, origen.DocumentoId);
-        Assert.Equal(10, origen.CompraId);
-        Assert.Null(origen.VentaId);
-        Assert.Null(origen.ConsumoInsumoId);
-        Assert.Null(origen.AjusteInventarioId);
+        Assert.Equal(tipo, origen.Tipo);
+        Assert.Equal(id, origen.Id);
     }
 
     [Fact]
-    public void DesdeVenta_ExponeSoloVentaComoOrigen()
+    public void DesdeIds_FallaSiNoHayOrigen()
     {
-        var origen = OrigenMovimientoInventario.DesdeVenta(20);
-
-        Assert.Equal(TipoOrigenMovimientoInventario.Venta, origen.Tipo);
-        Assert.Equal(20, origen.VentaId);
-        Assert.Null(origen.CompraId);
-        Assert.Null(origen.ConsumoInsumoId);
-        Assert.Null(origen.AjusteInventarioId);
+        var exception = Assert.Throws<ArgumentException>(
+            () => OrigenMovimientoInventario.DesdeIds(null, null, null, null, null));
+        Assert.Contains("exactamente un origen", exception.Message);
     }
 
     [Fact]
-    public void DesdeConsumoInsumo_ExponeSoloConsumoComoOrigen()
+    public void DesdeIds_FallaSiHayMasDeUnOrigen()
     {
-        var origen = OrigenMovimientoInventario.DesdeConsumoInsumo(30);
-
-        Assert.Equal(TipoOrigenMovimientoInventario.ConsumoInsumo, origen.Tipo);
-        Assert.Equal(30, origen.ConsumoInsumoId);
-        Assert.Null(origen.CompraId);
-        Assert.Null(origen.VentaId);
-        Assert.Null(origen.AjusteInventarioId);
-    }
-
-    [Fact]
-    public void DesdeAjusteInventario_ExponeSoloAjusteComoOrigen()
-    {
-        var origen = OrigenMovimientoInventario.DesdeAjusteInventario(40);
-
-        Assert.Equal(TipoOrigenMovimientoInventario.AjusteInventario, origen.Tipo);
-        Assert.Equal(40, origen.DocumentoId);
-        Assert.Equal(40, origen.AjusteInventarioId);
-        Assert.Null(origen.CompraId);
-        Assert.Null(origen.VentaId);
-        Assert.Null(origen.ConsumoInsumoId);
-    }
-
-    [Fact]
-    public void DesdeIds_SinOrigen_FallaCerrado()
-    {
-        Assert.Throws<InvalidOperationException>(() =>
-            OrigenMovimientoInventario.DesdeIds(null, null, null, null));
-    }
-
-    [Fact]
-    public void DesdeIds_ConMasDeUnOrigen_FallaCerrado()
-    {
-        Assert.Throws<InvalidOperationException>(() =>
-            OrigenMovimientoInventario.DesdeIds(1, 2, null, null));
-
-        Assert.Throws<InvalidOperationException>(() =>
-            OrigenMovimientoInventario.DesdeIds(null, null, 3, 4));
-    }
-
-    [Fact]
-    public void DesdeIds_ConAjusteInventario_ConstruyeOrigenTipado()
-    {
-        var origen = OrigenMovimientoInventario.DesdeIds(null, null, null, 40);
-
-        Assert.Equal(TipoOrigenMovimientoInventario.AjusteInventario, origen.Tipo);
-        Assert.Equal(40, origen.AjusteInventarioId);
+        var exception = Assert.Throws<ArgumentException>(
+            () => OrigenMovimientoInventario.DesdeIds(
+                compraId: 1,
+                ventaId: null,
+                consumoInsumoId: null,
+                ajusteInventarioId: null,
+                transferenciaInventarioId: 2));
+        Assert.Contains("exactamente un origen", exception.Message);
     }
 
     [Theory]
     [InlineData(0)]
-    [InlineData(-1)]
-    public void OrigenConIdNoPositivo_EsRechazado(int id)
+    [InlineData(-5)]
+    public void Factory_FallaSiIdNoEsPositivo(int id)
     {
-        Assert.Throws<ArgumentOutOfRangeException>(() =>
-            OrigenMovimientoInventario.DesdeCompra(id));
-        Assert.Throws<ArgumentOutOfRangeException>(() =>
-            OrigenMovimientoInventario.DesdeAjusteInventario(id));
+        Assert.Throws<ArgumentOutOfRangeException>(() => OrigenMovimientoInventario.DesdeCompra(id));
+        Assert.Throws<ArgumentOutOfRangeException>(() => OrigenMovimientoInventario.DesdeTransferenciaInventario(id));
     }
 }

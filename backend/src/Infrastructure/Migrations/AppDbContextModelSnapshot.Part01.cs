@@ -56,6 +56,9 @@ namespace InventoryApp.Infrastructure.Migrations
                 b.Property<int?>("AjusteInventarioId")
                     .HasColumnType("int");
 
+                b.Property<int?>("TransferenciaInventarioId")
+                    .HasColumnType("int");
+
                 b.HasIndex("CompraId")
                     .HasDatabaseName("IX_MovimientosInventario_CompraId");
 
@@ -67,6 +70,12 @@ namespace InventoryApp.Infrastructure.Migrations
 
                 b.HasIndex("AjusteInventarioId")
                     .HasDatabaseName("IX_MovimientosInventario_AjusteInventarioId");
+
+                b.HasIndex("TransferenciaInventarioId")
+                    .HasDatabaseName("IX_MovimientosInventario_TransferenciaInventarioId");
+
+                b.HasIndex("TransferenciaInventarioId", "Fecha")
+                    .HasDatabaseName("IX_MovInv_Transferencia_Fecha_N16");
             });
             modelBuilder.Entity("InventoryApp.Domain.Entities.AjusteInventario", b =>
             {

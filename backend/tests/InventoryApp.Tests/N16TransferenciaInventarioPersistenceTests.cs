@@ -1,6 +1,8 @@
 using InventoryApp.Domain.Entities;
 using InventoryApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Xunit;
 
 namespace InventoryApp.Tests;
@@ -15,15 +17,18 @@ public class N16TransferenciaInventarioPersistenceTests
             .Options;
 
         using var context = new AppDbContext(options);
-        var transferencia = context.Model.FindEntityType(typeof(TransferenciaInventario));
-        var detalle = context.Model.FindEntityType(typeof(TransferenciaInventarioDetalle));
+        var model = context.GetService<IDesignTimeModel>().Model;
+        var transferencia = model.FindEntityType(typeof(TransferenciaInventario));
+        var detalle = model.FindEntityType(typeof(TransferenciaInventarioDetalle));
+        var movimiento = model.FindEntityType(typeof(MovimientoInventario));
 
         Assert.NotNull(transferencia);
         Assert.NotNull(detalle);
+        Assert.NotNull(movimiento);
         Assert.Equal("TransferenciasInventario", transferencia!.GetTableName());
         Assert.Equal("TransferenciaInventarioDetalles", detalle!.GetTableName());
 
-        var numero = Assert.IsAssignableFrom<Microsoft.EntityFrameworkCore.Metadata.IReadOnlyProperty>(
+        var numero = Assert.IsAssignableFrom<IReadOnlyProperty>(
             transferencia.FindProperty(nameof(TransferenciaInventario.Numero)));
         Assert.Equal(30, numero.GetMaxLength());
 
@@ -59,5 +64,13 @@ public class N16TransferenciaInventarioPersistenceTests
             .ToList();
         Assert.Equal(2, ubicacionFks.Count);
         Assert.All(ubicacionFks, fk => Assert.Equal(DeleteBehavior.Restrict, fk.DeleteBehavior));
+
+        Assert.NotNull(movimiento!.FindProperty(nameof(MovimientoInventario.TransferenciaInventarioId)));
+        var movimientoTransferenciaFk = Assert.Single(movimiento.GetForeignKeys()
+            .Where(fk => fk.PrincipalEntityType.ClrType == typeof(TransferenciaInventario)));
+        Assert.Equal(DeleteBehavior.Restrict, movimientoTransferenciaFk.DeleteBehavior);
+        Assert.Equal(
+            "FK_MovimientosInventario_TransferenciasInventario_TransferenciaInventarioId_N16",
+            movimientoTransferenciaFk.GetConstraintName());
     }
 }

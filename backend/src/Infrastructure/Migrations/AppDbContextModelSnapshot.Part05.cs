@@ -36,6 +36,12 @@ namespace InventoryApp.Infrastructure.Migrations
                     .HasForeignKey("AjusteInventarioId")
                     .OnDelete(DeleteBehavior.Restrict)
                     .HasConstraintName("FK_MovInv_AjusteInventarioId_N07");
+
+                b.HasOne("InventoryApp.Domain.Entities.TransferenciaInventario", null)
+                    .WithMany()
+                    .HasForeignKey("TransferenciaInventarioId")
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .HasConstraintName("FK_MovimientosInventario_TransferenciasInventario_TransferenciaInventarioId_N16");
             });
             modelBuilder.Entity("InventoryApp.Domain.Entities.AjusteInventarioDetalle", b =>
             {

@@ -77,6 +77,10 @@ public class MovimientoInventarioConfiguration : IEntityTypeConfiguration<Movimi
             .HasDatabaseName("IX_MovimientosInventario_AjusteInventarioId");
         builder.HasIndex(m => new { m.AjusteInventarioId, m.Fecha })
             .HasDatabaseName("IX_MovInv_Ajuste_Fecha_N15");
+        builder.HasIndex(m => m.TransferenciaInventarioId)
+            .HasDatabaseName("IX_MovimientosInventario_TransferenciaInventarioId");
+        builder.HasIndex(m => new { m.TransferenciaInventarioId, m.Fecha })
+            .HasDatabaseName("IX_MovInv_Transferencia_Fecha_N16");
 
         builder.HasOne<Compra>()
             .WithMany()
@@ -101,6 +105,12 @@ public class MovimientoInventarioConfiguration : IEntityTypeConfiguration<Movimi
             .HasForeignKey(m => m.AjusteInventarioId)
             .OnDelete(DeleteBehavior.Restrict)
             .HasConstraintName("FK_MovInv_AjusteInventarioId_N07");
+
+        builder.HasOne<TransferenciaInventario>()
+            .WithMany()
+            .HasForeignKey(m => m.TransferenciaInventarioId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_MovimientosInventario_TransferenciasInventario_TransferenciaInventarioId_N16");
 
         builder.HasIndex(m => new { m.ReferenciaTipo, m.ReferenciaId });
         builder.HasIndex(m => new { m.Causa, m.Fecha });

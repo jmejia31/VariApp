@@ -43,12 +43,12 @@ public class MovimientoInventario
     public string ReferenciaTipo { get; set; } = string.Empty;
     public int ReferenciaId { get; set; }
 
-    // FKs tipadas físicas creadas por N0.6/N0.7 y materializadas en el modelo EF
-    // por N0.8.C. Debe existir como máximo una para cada movimiento.
+    // FKs tipadas físicas. Debe existir como máximo una por movimiento.
     public int? CompraId { get; set; }
     public int? VentaId { get; set; }
     public int? ConsumoInsumoId { get; set; }
     public int? AjusteInventarioId { get; set; }
+    public int? TransferenciaInventarioId { get; set; }
 
     [NotMapped]
     public OrigenMovimientoInventario? OrigenTipado
@@ -59,7 +59,8 @@ public class MovimientoInventario
                 (CompraId.HasValue ? 1 : 0) +
                 (VentaId.HasValue ? 1 : 0) +
                 (ConsumoInsumoId.HasValue ? 1 : 0) +
-                (AjusteInventarioId.HasValue ? 1 : 0);
+                (AjusteInventarioId.HasValue ? 1 : 0) +
+                (TransferenciaInventarioId.HasValue ? 1 : 0);
 
             if (cantidadOrigenes == 0)
                 return null;
@@ -68,7 +69,8 @@ public class MovimientoInventario
                 CompraId,
                 VentaId,
                 ConsumoInsumoId,
-                AjusteInventarioId);
+                AjusteInventarioId,
+                TransferenciaInventarioId);
         }
     }
 
