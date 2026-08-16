@@ -1,4 +1,4 @@
-import { APIRequestContext, APIResponse, expect, Page, test } from '@playwright/test';
+import { APIRequestContext, APIResponse, expect, Locator, Page, test } from '@playwright/test';
 
 const API_URL = process.env['PHASE7_API_URL'] ?? 'http://127.0.0.1:5005';
 const ADMIN_USERNAME = process.env['PHASE7_ADMIN_USERNAME'] ?? 'e2e_admin';
@@ -25,6 +25,12 @@ async function dataOf(response: APIResponse): Promise<any> {
 
 async function esperarCerrarOverlay(page: Page): Promise<void> {
   await expect(page.locator('.cdk-overlay-backdrop')).toHaveCount(0);
+}
+
+async function abrirSelectConTeclado(page: Page, select: Locator): Promise<void> {
+  await select.focus();
+  await page.keyboard.press('Enter');
+  await expect(select).toHaveAttribute('aria-expanded', 'true');
 }
 
 async function loginApi(request: APIRequestContext): Promise<string> {
@@ -210,19 +216,19 @@ test.describe('N0.7.E - Ajustes de inventario', () => {
 
     await page.locator('input[formcontrolname="motivo"]').fill(motivoCreacionUi);
     const productoSelect = details.locator('mat-select[formcontrolname="productoId"]');
-    await productoSelect.click();
+    await abrirSelectConTeclado(page, productoSelect);
     await page.getByRole('option', { name: new RegExp(nombreProducto) }).click();
     await esperarCerrarOverlay(page);
 
     const varianteSelect = details.locator('mat-select[formcontrolname="productoVarianteId"]');
     await expect(varianteSelect).not.toHaveAttribute('aria-disabled', 'true');
-    await varianteSelect.click();
+    await abrirSelectConTeclado(page, varianteSelect);
     await page.getByRole('option', { name: new RegExp(skuVariante) }).click();
     await esperarCerrarOverlay(page);
 
     const existenciaSelect = details.locator('mat-select[formcontrolname="existenciaId"]');
     await expect(existenciaSelect).not.toHaveAttribute('aria-disabled', 'true');
-    await existenciaSelect.click();
+    await abrirSelectConTeclado(page, existenciaSelect);
     await page.getByRole('option', { name: new RegExp(nombreAlmacen) }).click();
     await esperarCerrarOverlay(page);
 
