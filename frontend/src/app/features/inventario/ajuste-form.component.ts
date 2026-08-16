@@ -16,8 +16,10 @@ import { MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { AjusteInventarioFormValue } from '../../core/models/ajuste-inventario.model';
+import { ExistenciaVariante } from '../../core/models/existencia-variante.model';
 import { Producto, ProductoVariante } from '../../core/models/producto.model';
 import { AjusteInventarioService } from '../../services/ajuste-inventario.service';
+import { ExistenciaVarianteService } from '../../services/existencia-variante.service';
 import { ProductoService } from '../../services/producto.service';
 
 @Component({
@@ -42,7 +44,7 @@ import { ProductoService } from '../../services/producto.service';
         <div>
           <p class="eyebrow">Inventario empresarial</p>
           <h1 id="ajuste-form-title">{{ ajusteId ? 'Editar borrador' : 'Nuevo ajuste' }}</h1>
-          <p>Cada detalle establece la cantidad física objetivo. El ajuste se aplicará únicamente al confirmar.</p>
+          <p>Cada detalle establece la cantidad física objetivo sobre una existencia concreta. El ajuste se aplicará únicamente al confirmar.</p>
         </div>
       </header>
 
@@ -78,7 +80,7 @@ import { ProductoService } from '../../services/producto.service';
         <div class="details-header">
           <div>
             <h2>Conteo físico</h2>
-            <p>Selecciona el producto o variante y registra la cantidad física objetivo.</p>
+            <p>Selecciona producto, variante y la existencia exacta por almacén/ubicación antes de indicar la cantidad objetivo.</p>
           </div>
           <button mat-stroked-button color="primary" type="button" (click)="agregarDetalle()">
             <mat-icon>add</mat-icon>
@@ -102,15 +104,35 @@ import { ProductoService } from '../../services/producto.service';
 
             <mat-form-field appearance="outline">
               <mat-label>Variante</mat-label>
-              <mat-select formControlName="productoVarianteId">
-                <mat-option *ngIf="variantesProducto(detail.get('productoId')?.value).length === 0" [value]="null">
-                  Producto sin variantes
-                </mat-option>
+              <mat-select
+                formControlName="productoVarianteId"
+                required
+                (selectionChange)="onVarianteChange(i, $event.value)">
                 <mat-option *ngFor="let variante of variantesProducto(detail.get('productoId')?.value)" [value]="variante.id">
                   {{ etiquetaVariante(variante) }}
                 </mat-option>
               </mat-select>
               <mat-hint *ngIf="variantesProducto(detail.get('productoId')?.value).length > 0">Selecciona la variante física concreta.</mat-hint>
+              <mat-hint *ngIf="detail.get('productoId')?.value && variantesProducto(detail.get('productoId')?.value).length === 0">El producto no tiene una variante operativa disponible.</mat-hint>
+              <mat-error>Selecciona una variante válida.</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Existencia física</mat-label>
+              <mat-select
+                formControlName="existenciaId"
+                required
+                [disabled]="!detail.get('productoVarianteId')?.value || cargandoExistenciasVariante(detail.get('productoVarianteId')?.value)"
+                (selectionChange)="onExistenciaChange(i, $event.value)">
+                <mat-option
+                  *ngFor="let existencia of existenciasVariante(detail.get('productoVarianteId')?.value)"
+                  [value]="existencia.id">
+                  {{ etiquetaExistencia(existencia) }}
+                </mat-option>
+              </mat-select>
+              <mat-hint *ngIf="cargandoExistenciasVariante(detail.get('productoVarianteId')?.value)">Cargando existencias físicas…</mat-hint>
+              <mat-hint *ngIf="detail.get('productoVarianteId')?.value && !cargandoExistenciasVariante(detail.get('productoVarianteId')?.value) && existenciasVariante(detail.get('productoVarianteId')?.value).length === 0">La variante no tiene existencias por almacén disponibles.</mat-hint>
+              <mat-error>Selecciona una existencia física válida.</mat-error>
             </mat-form-field>
 
             <mat-form-field appearance="outline">
@@ -144,7 +166,7 @@ import { ProductoService } from '../../services/producto.service';
   `,
   styles: [`
     :host { display: block; }
-    .form-page { max-width: 1100px; margin: 0 auto; padding: 24px; }
+    .form-page { max-width: 1240px; margin: 0 auto; padding: 24px; }
     header { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 24px; }
     header h1, header p { margin: 0; }
     header p:not(.eyebrow) { margin-top: 6px; opacity: .72; }
@@ -155,14 +177,14 @@ import { ProductoService } from '../../services/producto.service';
     .details-header h2, .details-header p { margin: 0; }
     .details-header p { margin-top: 4px; opacity: .68; }
     .details { display: grid; gap: 10px; }
-    .detail { display: grid; grid-template-columns: auto minmax(220px, 1.4fr) minmax(220px, 1.4fr) minmax(150px, .8fr) auto; align-items: start; gap: 10px; padding: 14px; border: 1px solid rgba(127,127,127,.22); border-radius: 12px; }
+    .detail { display: grid; grid-template-columns: auto minmax(190px, 1.2fr) minmax(190px, 1.2fr) minmax(280px, 1.7fr) minmax(150px, .7fr) auto; align-items: start; gap: 10px; padding: 14px; border: 1px solid rgba(127,127,127,.22); border-radius: 12px; }
     .detail-number { padding-top: 18px; font-weight: 700; opacity: .55; }
     .actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
     .actions button mat-spinner { display: inline-block; margin-right: 8px; }
     .loading, .error { display: flex; align-items: center; gap: 10px; padding: 24px; border-radius: 12px; }
     .loading { justify-content: center; }
     .error { margin-bottom: 16px; border: 1px solid rgba(244,67,54,.32); background: rgba(244,67,54,.06); }
-    @media (max-width: 900px) { .detail { grid-template-columns: 1fr 1fr; } .detail-number { grid-column: 1 / -1; padding-top: 0; } }
+    @media (max-width: 1080px) { .detail { grid-template-columns: 1fr 1fr; } .detail-number { grid-column: 1 / -1; padding-top: 0; } }
     @media (max-width: 760px) {
       .form-page { padding: 16px; }
       .grid.two, .detail { grid-template-columns: 1fr; }
@@ -177,6 +199,8 @@ export class AjusteFormComponent implements OnInit {
   readonly saving = signal(false);
   readonly error = signal('');
   readonly productos = signal<Producto[]>([]);
+  readonly existenciasPorVariante = signal<Record<number, ExistenciaVariante[]>>({});
+  readonly cargandoExistencias = signal<Record<number, boolean>>({});
 
   readonly ajusteId: number | null;
   readonly form: UntypedFormGroup;
@@ -185,6 +209,7 @@ export class AjusteFormComponent implements OnInit {
     private readonly fb: UntypedFormBuilder,
     private readonly ajusteService: AjusteInventarioService,
     private readonly productoService: ProductoService,
+    private readonly existenciaService: ExistenciaVarianteService,
     private readonly route: ActivatedRoute,
     private readonly router: Router
   ) {
@@ -217,14 +242,54 @@ export class AjusteFormComponent implements OnInit {
 
   onProductoChange(index: number, productoId: number): void {
     const detalle = this.detalles.at(index);
-    detalle.get('productoVarianteId')?.setValue(null);
+    detalle.patchValue({
+      productoVarianteId: null,
+      existenciaId: null,
+      almacenId: null,
+      ubicacionAlmacenId: null
+    });
+
     const variantes = this.variantesProducto(productoId);
-    if (variantes.length === 1) detalle.get('productoVarianteId')?.setValue(variantes[0].id);
+    if (variantes.length === 1) {
+      detalle.get('productoVarianteId')?.setValue(variantes[0].id);
+      this.onVarianteChange(index, variantes[0].id);
+    }
+  }
+
+  onVarianteChange(index: number, varianteId: number | null): void {
+    const detalle = this.detalles.at(index);
+    detalle.patchValue({ existenciaId: null, almacenId: null, ubicacionAlmacenId: null });
+    if (varianteId && varianteId > 0) this.cargarExistencias(varianteId, index);
+  }
+
+  onExistenciaChange(index: number, existenciaId: number | null): void {
+    const detalle = this.detalles.at(index);
+    const varianteId = Number(detalle.get('productoVarianteId')?.value);
+    const existencia = this.existenciasVariante(varianteId).find(item => item.id === Number(existenciaId));
+    if (!existencia) {
+      detalle.patchValue({ almacenId: null, ubicacionAlmacenId: null });
+      return;
+    }
+
+    detalle.patchValue({
+      almacenId: existencia.almacenId,
+      ubicacionAlmacenId: existencia.ubicacionAlmacenId ?? null
+    });
   }
 
   variantesProducto(productoId: number | null | undefined): ProductoVariante[] {
     if (!productoId) return [];
-    return this.productos().find(producto => producto.id === Number(productoId))?.variantes ?? [];
+    return this.productos().find(producto => producto.id === Number(productoId))?.variantes?.filter(v => v.activo && !v.eliminado) ?? [];
+  }
+
+  existenciasVariante(varianteId: number | null | undefined): ExistenciaVariante[] {
+    const id = Number(varianteId);
+    return Number.isInteger(id) && id > 0 ? this.existenciasPorVariante()[id] ?? [] : [];
+  }
+
+  cargandoExistenciasVariante(varianteId: number | null | undefined): boolean {
+    const id = Number(varianteId);
+    return Number.isInteger(id) && id > 0 ? this.cargandoExistencias()[id] === true : false;
   }
 
   etiquetaProducto(producto: Producto): string {
@@ -239,7 +304,14 @@ export class AjusteFormComponent implements OnInit {
       .filter(Boolean)
       .join(' · ');
     const sku = variante.sku ? `SKU ${variante.sku}` : `Variante #${variante.id}`;
-    return identidad ? `${identidad} — ${sku} — Stock ${variante.cantidad}` : `${sku} — Stock ${variante.cantidad}`;
+    return identidad ? `${identidad} — ${sku}` : sku;
+  }
+
+  etiquetaExistencia(existencia: ExistenciaVariante): string {
+    const ubicacion = existencia.ubicacionAlmacenId
+      ? `${existencia.ubicacionCodigo || `#${existencia.ubicacionAlmacenId}`} · ${existencia.ubicacionNombre || 'Ubicación'}`
+      : 'Raíz / sin ubicación';
+    return `${existencia.almacenCodigo} · ${existencia.almacenNombre} — ${ubicacion} — Stock ${existencia.stockFisico}`;
   }
 
   guardar(): void {
@@ -249,11 +321,14 @@ export class AjusteFormComponent implements OnInit {
     }
 
     const raw = this.form.getRawValue();
-    const detalleSinVariante = raw.detalles.find((detalle: any) =>
-      this.variantesProducto(Number(detalle.productoId)).length > 0 && !detalle.productoVarianteId
-    );
-    if (detalleSinVariante) {
-      this.error.set('Selecciona una variante concreta para cada producto que maneja variantes.');
+    const detallesResueltos = raw.detalles.map((detalle: any) => {
+      const varianteId = Number(detalle.productoVarianteId);
+      const existencia = this.existenciasVariante(varianteId).find(item => item.id === Number(detalle.existenciaId));
+      return { detalle, existencia };
+    });
+
+    if (detallesResueltos.some(({ existencia }: any) => !existencia)) {
+      this.error.set('Selecciona una existencia física válida para cada detalle antes de guardar el borrador.');
       return;
     }
 
@@ -261,9 +336,11 @@ export class AjusteFormComponent implements OnInit {
       fechaAjuste: raw.fechaAjuste ? new Date(raw.fechaAjuste).toISOString() : null,
       motivo: String(raw.motivo).trim(),
       observaciones: String(raw.observaciones || '').trim() || null,
-      detalles: raw.detalles.map((detalle: any) => ({
+      detalles: detallesResueltos.map(({ detalle, existencia }: any) => ({
         productoId: Number(detalle.productoId),
-        productoVarianteId: detalle.productoVarianteId ? Number(detalle.productoVarianteId) : null,
+        productoVarianteId: Number(detalle.productoVarianteId),
+        almacenId: existencia.almacenId,
+        ubicacionAlmacenId: existencia.ubicacionAlmacenId ?? null,
         cantidadObjetivo: Number(detalle.cantidadObjetivo)
       }))
     };
@@ -342,11 +419,22 @@ export class AjusteFormComponent implements OnInit {
           });
           this.detalles.clear();
           ajuste.detalles.forEach((detalle) => {
+            const index = this.detalles.length;
             this.detalles.push(this.crearDetalle({
               productoId: detalle.productoId,
-              productoVarianteId: detalle.productoVarianteId ?? '',
+              productoVarianteId: detalle.productoVarianteId ?? null,
+              almacenId: detalle.almacenId,
+              ubicacionAlmacenId: detalle.ubicacionAlmacenId ?? null,
               cantidadObjetivo: detalle.cantidadObjetivo
             }));
+            if (detalle.productoVarianteId) {
+              this.cargarExistencias(
+                detalle.productoVarianteId,
+                index,
+                detalle.almacenId,
+                detalle.ubicacionAlmacenId ?? null
+              );
+            }
           });
           if (this.detalles.length === 0) this.detalles.push(this.crearDetalle());
         },
@@ -354,10 +442,79 @@ export class AjusteFormComponent implements OnInit {
       });
   }
 
-  private crearDetalle(value?: { productoId?: number; productoVarianteId?: number | ''; cantidadObjetivo?: number }): UntypedFormGroup {
+  private cargarExistencias(
+    varianteId: number,
+    detalleIndex: number,
+    almacenPersistido?: number | null,
+    ubicacionPersistida?: number | null
+  ): void {
+    const existentes = this.existenciasPorVariante()[varianteId];
+    if (existentes) {
+      this.seleccionarExistenciaPersistida(detalleIndex, existentes, almacenPersistido, ubicacionPersistida);
+      return;
+    }
+
+    this.cargandoExistencias.update(actual => ({ ...actual, [varianteId]: true }));
+    this.existenciaService.getPaged({
+      page: 1,
+      pageSize: 200,
+      productoVarianteId: varianteId
+    }).pipe(finalize(() => {
+      this.cargandoExistencias.update(actual => ({ ...actual, [varianteId]: false }));
+    })).subscribe({
+      next: response => {
+        if (!response.success || !response.data) {
+          this.existenciasPorVariante.update(actual => ({ ...actual, [varianteId]: [] }));
+          this.error.set(response.message || 'No fue posible cargar las existencias físicas de la variante.');
+          return;
+        }
+        const items = response.data.items ?? [];
+        this.existenciasPorVariante.update(actual => ({ ...actual, [varianteId]: items }));
+        this.seleccionarExistenciaPersistida(detalleIndex, items, almacenPersistido, ubicacionPersistida);
+      },
+      error: err => {
+        this.existenciasPorVariante.update(actual => ({ ...actual, [varianteId]: [] }));
+        this.error.set(this.extraerError(err, 'No fue posible cargar las existencias físicas de la variante.'));
+      }
+    });
+  }
+
+  private seleccionarExistenciaPersistida(
+    detalleIndex: number,
+    existencias: ExistenciaVariante[],
+    almacenPersistido?: number | null,
+    ubicacionPersistida?: number | null
+  ): void {
+    if (!almacenPersistido || detalleIndex < 0 || detalleIndex >= this.detalles.length) return;
+    const ubicacion = ubicacionPersistida ?? null;
+    const encontrada = existencias.find(item =>
+      item.almacenId === almacenPersistido && (item.ubicacionAlmacenId ?? null) === ubicacion
+    );
+    if (!encontrada) {
+      this.error.set('Una existencia física del borrador ya no está disponible. Revisa el detalle antes de guardarlo.');
+      return;
+    }
+    this.detalles.at(detalleIndex).patchValue({
+      existenciaId: encontrada.id,
+      almacenId: encontrada.almacenId,
+      ubicacionAlmacenId: encontrada.ubicacionAlmacenId ?? null
+    });
+  }
+
+  private crearDetalle(value?: {
+    productoId?: number | null;
+    productoVarianteId?: number | null;
+    existenciaId?: number | null;
+    almacenId?: number | null;
+    ubicacionAlmacenId?: number | null;
+    cantidadObjetivo?: number;
+  }): UntypedFormGroup {
     return this.fb.group({
       productoId: [value?.productoId ?? null, [Validators.required, Validators.min(1)]],
-      productoVarianteId: [value?.productoVarianteId ?? null],
+      productoVarianteId: [value?.productoVarianteId ?? null, [Validators.required, Validators.min(1)]],
+      existenciaId: [value?.existenciaId ?? null, [Validators.required, Validators.min(1)]],
+      almacenId: [value?.almacenId ?? null, [Validators.required, Validators.min(1)]],
+      ubicacionAlmacenId: [value?.ubicacionAlmacenId ?? null],
       cantidadObjetivo: [value?.cantidadObjetivo ?? 0, [Validators.required, Validators.min(0)]]
     });
   }

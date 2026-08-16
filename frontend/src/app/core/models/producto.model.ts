@@ -32,6 +32,7 @@ export interface ProductoVariante {
   costo: number;
   precio: number;
   activo: boolean;
+  eliminado?: boolean;
   esTecnica?: boolean;
   tieneStockBajo: boolean;
   estaAgotada: boolean;

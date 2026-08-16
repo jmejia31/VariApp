@@ -25,16 +25,16 @@ test.describe('ERP-N1.5 — Kardex empresarial', () => {
 
     await expect(page.getByRole('heading', { name: 'Kardex de inventario', exact: true })).toBeVisible();
     await expect(page.getByText('Filtros del Kardex', { exact: true })).toBeVisible();
-    await expect(page.getByLabel('Producto')).toBeVisible();
-    await expect(page.getByLabel('Variante')).toBeVisible();
-    await expect(page.getByLabel('Almacén')).toBeVisible();
-    await expect(page.getByLabel('Ubicación')).toBeVisible();
-    await expect(page.getByLabel('Tipo de movimiento')).toBeVisible();
-    await expect(page.getByLabel('Causa')).toBeVisible();
-    await expect(page.getByLabel('Documento origen')).toBeVisible();
-    await expect(page.getByLabel('Correlation ID')).toBeVisible();
+    await expect(page.getByRole('combobox', { name: 'Producto', exact: true })).toBeVisible();
+    await expect(page.getByRole('combobox', { name: 'Variante', exact: true })).toBeVisible();
+    await expect(page.getByRole('combobox', { name: 'Almacén', exact: true })).toBeVisible();
+    await expect(page.getByRole('combobox', { name: 'Ubicación', exact: true })).toBeVisible();
+    await expect(page.getByRole('combobox', { name: 'Tipo de movimiento', exact: true })).toBeVisible();
+    await expect(page.getByRole('combobox', { name: 'Causa', exact: true })).toBeVisible();
+    await expect(page.getByRole('combobox', { name: 'Documento origen', exact: true })).toBeVisible();
+    await expect(page.getByRole('textbox', { name: 'Correlation ID', exact: true })).toBeVisible();
 
-    await page.getByLabel('Correlation ID').fill('venta:999999:confirmar');
+    await page.getByRole('textbox', { name: 'Correlation ID', exact: true }).fill('venta:999999:confirmar');
     const filtrada = page.waitForResponse(response => {
       const url = new URL(response.url());
       return url.pathname.endsWith('/inventario/movimientos/paged') &&

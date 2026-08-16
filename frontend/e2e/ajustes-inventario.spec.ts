@@ -8,9 +8,11 @@ const nombreProducto = `Producto Ajuste E2E ${suffix}`;
 const skuVariante = `AJ-E2E-${suffix}`;
 const motivoAjuste = `Conteo E2E N0.7 ${suffix}`;
 const motivoCreacionUi = `Creación UI E2E N0.7 ${suffix}`;
+const nombreAlmacen = `Bodega Ajuste E2E ${suffix}`;
 
 let token = '';
 let ajusteId = 0;
+let almacenId = 0;
 
 function headers(): Record<string, string> {
   return { Authorization: `Bearer ${token}` };
@@ -96,23 +98,66 @@ async function crearProductoFixture(request: APIRequestContext): Promise<{ produ
   return { productoId: producto.id, varianteId: producto.variantes[0].id };
 }
 
+async function crearContextoFisicoFixture(request: APIRequestContext, varianteId: number): Promise<number> {
+  const sucursal = await crearCatalogo(request, 'sucursales', {
+    codigo: `SUC-AJ-${suffix.slice(-8)}`,
+    nombre: `Sucursal Ajuste E2E ${suffix}`,
+    direccion: 'Fixture M13',
+    zonaHoraria: 'America/Tegucigalpa'
+  });
+
+  const almacen = await crearCatalogo(request, 'almacenes', {
+    sucursalId: sucursal.id,
+    codigo: `ALM-AJ-${suffix.slice(-8)}`,
+    nombre: nombreAlmacen,
+    tipo: 'Bodega'
+  });
+
+  const response = await request.post(`${API_URL}/existencias-variante`, {
+    headers: headers(),
+    data: {
+      productoVarianteId: varianteId,
+      almacenId: almacen.id,
+      ubicacionAlmacenId: null,
+      stockFisico: 3,
+      stockReservado: 0,
+      stockTransito: 0,
+      stockMinimo: 0,
+      stockMaximo: null
+    }
+  });
+  expect(response.status(), await response.text()).toBe(201);
+  const existencia = await dataOf(response);
+  expect(existencia.id).toBeGreaterThan(0);
+  expect(existencia.almacenId).toBe(almacen.id);
+  return almacen.id;
+}
+
 async function crearAjusteFixture(
   request: APIRequestContext,
   productoId: number,
-  varianteId: number
+  varianteId: number,
+  almacen: number
 ): Promise<number> {
   const response = await request.post(`${API_URL}/inventario/ajustes`, {
     headers: headers(),
     data: {
       motivo: motivoAjuste,
       observaciones: 'Fixture Playwright determinista para lifecycle Borrador→Confirmado→Anulado.',
-      detalles: [{ productoId, productoVarianteId: varianteId, cantidadObjetivo: 5 }]
+      detalles: [{
+        productoId,
+        productoVarianteId: varianteId,
+        almacenId: almacen,
+        ubicacionAlmacenId: null,
+        cantidadObjetivo: 5
+      }]
     }
   });
   expect(response.status(), await response.text()).toBe(201);
   const ajuste = await dataOf(response);
   expect(ajuste.id).toBeGreaterThan(0);
   expect(ajuste.estado).toBe('Borrador');
+  expect(ajuste.detalles[0].almacenId).toBe(almacen);
   return ajuste.id;
 }
 
@@ -132,7 +177,8 @@ test.describe('N0.7.E - Ajustes de inventario', () => {
   test.beforeAll(async ({ request }) => {
     token = await loginApi(request);
     const producto = await crearProductoFixture(request);
-    ajusteId = await crearAjusteFixture(request, producto.productoId, producto.varianteId);
+    almacenId = await crearContextoFisicoFixture(request, producto.varianteId);
+    ajusteId = await crearAjusteFixture(request, producto.productoId, producto.varianteId, almacenId);
   });
 
   test.beforeEach(async ({ page }) => {
@@ -151,7 +197,7 @@ test.describe('N0.7.E - Ajustes de inventario', () => {
     await expect(page.getByText(motivoAjuste)).toBeVisible();
   });
 
-  test('crea un borrador por UI usando selectores de producto/variante deterministas', async ({ page }) => {
+  test('crea un borrador por UI usando variante y existencia física deterministas', async ({ page }) => {
     await page.goto('/inventario/ajustes/nuevo');
 
     await expect(page.getByRole('heading', { name: 'Nuevo ajuste' })).toBeVisible();
@@ -167,6 +213,12 @@ test.describe('N0.7.E - Ajustes de inventario', () => {
     await expect(varianteSelect).not.toHaveAttribute('aria-disabled', 'true');
     await varianteSelect.click();
     await page.getByRole('option', { name: new RegExp(skuVariante) }).click();
+
+    const existenciaSelect = details.locator('mat-select[formcontrolname="existenciaId"]');
+    await expect(existenciaSelect).not.toHaveAttribute('aria-disabled', 'true');
+    await existenciaSelect.click();
+    await page.getByRole('option', { name: new RegExp(nombreAlmacen) }).click();
+
     await details.locator('input[formcontrolname="cantidadObjetivo"]').fill('4');
 
     const createResponse = page.waitForResponse((response) =>
@@ -186,7 +238,7 @@ test.describe('N0.7.E - Ajustes de inventario', () => {
     await expect(createdRow).toContainText('Borrador');
   });
 
-  test('mantiene detalles dinámicos sin perder el selector de inventario', async ({ page }) => {
+  test('mantiene detalles dinámicos sin perder el selector de existencia física', async ({ page }) => {
     await page.goto('/inventario/ajustes/nuevo');
     const details = page.locator('article.detail');
     await expect(details).toHaveCount(1);
@@ -195,17 +247,19 @@ test.describe('N0.7.E - Ajustes de inventario', () => {
     await expect(details).toHaveCount(2);
     await expect(details.nth(1).locator('mat-select[formcontrolname="productoId"]')).toBeVisible();
     await expect(details.nth(1).locator('mat-select[formcontrolname="productoVarianteId"]')).toBeVisible();
+    await expect(details.nth(1).locator('mat-select[formcontrolname="existenciaId"]')).toBeVisible();
 
     await page.getByRole('button', { name: 'Eliminar detalle' }).last().click();
     await expect(details).toHaveCount(1);
   });
 
-  test('edición sólo se ofrece al borrador fixture y abre la ruta correcta', async ({ page }) => {
+  test('edición recupera la existencia física del borrador y abre la ruta correcta', async ({ page }) => {
     const row = await buscarFilaFixture(page);
     await row.getByRole('button', { name: /^Editar$/i }).click();
     await expect(page).toHaveURL(new RegExp(`/inventario/ajustes/${ajusteId}/editar$`));
     await expect(page.getByRole('heading', { name: 'Editar borrador' })).toBeVisible();
     await expect(page.locator('input[formcontrolname="motivo"]')).toHaveValue(motivoAjuste);
+    await expect(page.locator('mat-select[formcontrolname="existenciaId"]')).toContainText(nombreAlmacen);
   });
 
   test('confirma el fixture mediante diálogo explícito y materializa el estado', async ({ page }) => {

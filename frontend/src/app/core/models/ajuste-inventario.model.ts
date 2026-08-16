@@ -4,7 +4,9 @@ export type EstadoAjusteInventario = 'Borrador' | 'Confirmado' | 'Anulado';
 
 export interface AjusteInventarioDetalleInput {
   productoId: number;
-  productoVarianteId?: number | null;
+  productoVarianteId: number;
+  almacenId: number;
+  ubicacionAlmacenId?: number | null;
   cantidadObjetivo: number;
 }
 
@@ -19,6 +21,8 @@ export interface AjusteInventarioDetalle {
   id: number;
   productoId: number;
   productoVarianteId?: number | null;
+  almacenId: number;
+  ubicacionAlmacenId?: number | null;
   cantidadObjetivo: number;
   cantidadAnteriorSnapshot?: number | null;
   cantidadNuevaSnapshot?: number | null;
@@ -55,4 +59,6 @@ export interface AjusteInventarioFiltro extends PagedRequest {
   hasta?: string;
   productoId?: number;
   productoVarianteId?: number;
+  almacenId?: number;
+  ubicacionAlmacenId?: number;
 }

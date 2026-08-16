@@ -49,11 +49,17 @@ test('M4 restaura filtros, pagina, orden y aísla sessionStorage por usuario', a
   await page.goto('/clientes');
   await expect(page.getByRole('textbox', { name: 'Buscar clientes' })).toHaveValue('M4Cliente');
 
-  await page.goto('/inventario/movimientos?search=M4SKU&filtroTipo=Entrada&pageSize=25&sortBy=producto&sortDirection=asc');
-  await expect(page.getByRole('textbox', { name: 'Buscar movimiento' })).toHaveValue('M4SKU');
+  await page.goto('/inventario/movimientos?filtroTipo=Entrada&filtroCausa=Compra&correlationId=M4-CORR&pageSize=25');
+  await expect(page.getByRole('combobox', { name: 'Tipo de movimiento', exact: true })).toContainText('Entrada');
+  await expect(page.getByRole('combobox', { name: 'Causa', exact: true })).toContainText('Compra');
+  await expect(page.getByRole('textbox', { name: 'Correlation ID', exact: true })).toHaveValue('M4-CORR');
+  await expect(page).toHaveURL(/filtroTipo=Entrada/);
   await page.goto('/dashboard');
   await page.goto('/inventario/movimientos');
-  await expect(page.getByRole('textbox', { name: 'Buscar movimiento' })).toHaveValue('M4SKU');
+  await expect(page.getByRole('combobox', { name: 'Tipo de movimiento', exact: true })).toContainText('Entrada');
+  await expect(page.getByRole('combobox', { name: 'Causa', exact: true })).toContainText('Compra');
+  await expect(page.getByRole('textbox', { name: 'Correlation ID', exact: true })).toHaveValue('M4-CORR');
+  await expect(page).toHaveURL(/correlationId=M4-CORR/);
 
   await page.goto('/finanzas?search=M4Finanzas&filtroTipo=Egreso&sortBy=monto&sortDirection=asc');
   await expect(page.getByRole('textbox', { name: 'Buscar movimiento' })).toHaveValue('M4Finanzas');
