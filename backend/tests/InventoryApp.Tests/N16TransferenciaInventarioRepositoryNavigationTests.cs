@@ -1,4 +1,5 @@
 using InventoryApp.Domain.Entities;
+using InventoryApp.Domain.Enums;
 using InventoryApp.Infrastructure.Persistence;
 using InventoryApp.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -16,20 +17,54 @@ public sealed class N16TransferenciaInventarioRepositoryNavigationTests
             .Options;
 
         await using var context = new AppDbContext(options);
+        var producto = new Producto
+        {
+            Id = 44,
+            Nombre = "Producto N1.6",
+            Marca = "Marca snapshot",
+            Modelo = "Modelo snapshot",
+            Activo = true,
+            Eliminado = false,
+            CreadoPorUsuarioId = 7
+        };
         var variante = new ProductoVariante
         {
             Id = 91,
-            ProductoId = 44,
+            ProductoId = producto.Id,
+            Producto = producto,
             Sku = "SKU-N16",
             Activo = true,
-            Eliminado = false
+            Eliminado = false,
+            CreadoPorUsuarioId = 7
+        };
+        var origen = new Almacen
+        {
+            Id = 1,
+            SucursalId = 1,
+            Codigo = "ALM-N16-O",
+            Nombre = "Origen N1.6",
+            Tipo = TipoAlmacen.Bodega,
+            Activo = true,
+            CreadoPorUsuarioId = 7
+        };
+        var destino = new Almacen
+        {
+            Id = 2,
+            SucursalId = 1,
+            Codigo = "ALM-N16-D",
+            Nombre = "Destino N1.6",
+            Tipo = TipoAlmacen.Bodega,
+            Activo = true,
+            CreadoPorUsuarioId = 7
         };
         var transferencia = new TransferenciaInventario
         {
             Id = 31,
             Numero = "TRF-NAV-001",
-            AlmacenOrigenId = 1,
-            AlmacenDestinoId = 2,
+            AlmacenOrigenId = origen.Id,
+            AlmacenOrigen = origen,
+            AlmacenDestinoId = destino.Id,
+            AlmacenDestino = destino,
             CreadoPorUsuarioId = 7,
             Detalles = new List<TransferenciaInventarioDetalle>
             {
@@ -43,7 +78,9 @@ public sealed class N16TransferenciaInventarioRepositoryNavigationTests
             }
         };
 
+        context.Set<Producto>().Add(producto);
         context.Set<ProductoVariante>().Add(variante);
+        context.Set<Almacen>().AddRange(origen, destino);
         context.Set<TransferenciaInventario>().Add(transferencia);
         await context.SaveChangesAsync();
         context.ChangeTracker.Clear();
@@ -52,7 +89,9 @@ public sealed class N16TransferenciaInventarioRepositoryNavigationTests
         var encontrada = await repository.GetByIdAsync(transferencia.Id);
 
         Assert.NotNull(encontrada);
-        var detalle = Assert.Single(encontrada!.Detalles);
+        Assert.Equal("Origen N1.6", encontrada!.AlmacenOrigen.Nombre);
+        Assert.Equal("Destino N1.6", encontrada.AlmacenDestino.Nombre);
+        var detalle = Assert.Single(encontrada.Detalles);
         Assert.NotNull(detalle.ProductoVariante);
         Assert.Equal(44, detalle.ProductoVariante.ProductoId);
         Assert.Equal("SKU-N16", detalle.ProductoVariante.Sku);
