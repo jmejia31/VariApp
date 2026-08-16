@@ -1,6 +1,7 @@
 using System.Reflection;
 using InventoryApp.API.Controllers;
 using InventoryApp.API.Filters;
+using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Xunit;
@@ -13,6 +14,17 @@ public sealed class N16TransferenciaSecurityContractTests
     public void Controller_RequiereAutenticacionGlobal()
     {
         Assert.NotNull(typeof(TransferenciasInventarioController).GetCustomAttribute<AuthorizeAttribute>());
+    }
+
+    [Fact]
+    public void Controller_ExponeAuditoriaComoDependenciaInyectable()
+    {
+        var constructor = Assert.Single(typeof(TransferenciasInventarioController).GetConstructors());
+        var parametroAuditoria = Assert.Single(
+            constructor.GetParameters().Where(x => x.ParameterType == typeof(IAuditoriaService)));
+
+        Assert.True(parametroAuditoria.HasDefaultValue);
+        Assert.Null(parametroAuditoria.DefaultValue);
     }
 
     [Theory]
