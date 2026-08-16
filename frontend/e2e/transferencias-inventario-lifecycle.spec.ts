@@ -49,8 +49,11 @@ const transferenciaEnTransito = () => ({
 test.describe('Transferencias de inventario - lifecycle UI', () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(() => {
-      localStorage.setItem('token', 'e2e-token');
-      localStorage.setItem('usuario', JSON.stringify({ id: 1, nombreUsuario: 'admin-e2e', nombreCompleto: 'Admin E2E', rol: 'Administrador' }));
+      localStorage.setItem('inventoryapp_token', 'e2e-token-transferencias-lifecycle');
+      localStorage.setItem('inventoryapp_user', 'admin-e2e');
+      localStorage.setItem('inventoryapp_nombre_completo', 'Admin E2E');
+      localStorage.setItem('inventoryapp_rol', 'Administrador');
+      localStorage.setItem('inventoryapp_expira_en', '2099-12-31T23:59:59Z');
     });
 
     await page.route('**/permisos/mis-permisos', route => route.fulfill({
@@ -58,6 +61,7 @@ test.describe('Transferencias de inventario - lifecycle UI', () => {
       contentType: 'application/json',
       body: JSON.stringify({
         success: true,
+        message: 'Permisos cargados',
         data: {
           permisos: [
             'MovimientosInventario:Ver',
