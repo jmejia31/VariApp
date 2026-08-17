@@ -49,7 +49,7 @@ public sealed class N19SerieAuditPrivacyTests
             It.IsAny<int?>(),
             "SerieInventario",
             null,
-            It.Is<object?>(payload => payload is not null && payload.GetType().GetProperty("NumeroSerie") is null),
+            It.Is<object?>(payload => payload != null && payload.GetType().GetProperty("NumeroSerie") == null),
             null,
             "Exito",
             null), Times.Once);
