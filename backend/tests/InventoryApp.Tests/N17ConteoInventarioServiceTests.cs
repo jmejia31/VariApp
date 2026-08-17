@@ -57,6 +57,32 @@ public sealed class N17ConteoInventarioServiceTests
     }
 
     [Fact]
+    public async Task GetById_ConteoCiegoCerrado_RevelaReferenciaYDiferencia()
+    {
+        var repository = new Mock<IConteoInventarioRepository>();
+        var existencias = new Mock<IExistenciaVarianteRepository>();
+        var currentUser = new Mock<ICurrentUserService>();
+        var unitOfWork = new Mock<IUnitOfWork>();
+        var conteo = CrearConteoCiegoEnProceso();
+        conteo.Detalles.Single().RegistrarConteo(6, 7, DateTime.UtcNow);
+        conteo.Cerrar(7, DateTime.UtcNow);
+        repository.Setup(x => x.GetByIdAsync(18)).ReturnsAsync(conteo);
+        var service = new ConteoInventarioService(repository.Object, existencias.Object, currentUser.Object, unitOfWork.Object);
+
+        var dto = await service.GetByIdAsync(18);
+
+        Assert.NotNull(dto);
+        Assert.True(dto!.EsCiego);
+        Assert.Equal(EstadoConteoInventario.Cerrado, dto.Estado);
+        Assert.Single(dto.Detalles);
+        Assert.Equal(14, dto.Detalles[0].StockEsperado.GetValueOrDefault());
+        Assert.Equal(6, dto.Detalles[0].CantidadContada.GetValueOrDefault());
+        Assert.Equal(-8, dto.Detalles[0].Diferencia.GetValueOrDefault());
+        Assert.Equal(1, dto.CantidadConDiferencia);
+        Assert.Equal(-8, dto.DiferenciaNeta);
+    }
+
+    [Fact]
     public async Task GetPaged_NormalizaLimitesAntesDeConsultarRepositorio()
     {
         var repository = new Mock<IConteoInventarioRepository>();
