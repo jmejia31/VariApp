@@ -107,8 +107,8 @@ public sealed class N17ConteosInventarioControllerBehaviorTests
             "ConteoInventario",
             null,
             It.Is<object>(valores =>
-                JsonSerializer.Serialize(valores).Contains("4", StringComparison.Ordinal) &&
-                JsonSerializer.Serialize(valores).Contains("17", StringComparison.Ordinal)),
+                JsonSerializer.Serialize(valores, (JsonSerializerOptions?)null).Contains("4", StringComparison.Ordinal) &&
+                JsonSerializer.Serialize(valores, (JsonSerializerOptions?)null).Contains("17", StringComparison.Ordinal)),
             null,
             "Exito",
             null), Times.Once);
@@ -142,8 +142,8 @@ public sealed class N17ConteosInventarioControllerBehaviorTests
             "ConteoInventario",
             null,
             It.Is<object>(valores =>
-                JsonSerializer.Serialize(valores).Contains("17", StringComparison.Ordinal) &&
-                JsonSerializer.Serialize(valores).Contains("21", StringComparison.Ordinal)),
+                JsonSerializer.Serialize(valores, (JsonSerializerOptions?)null).Contains("17", StringComparison.Ordinal) &&
+                JsonSerializer.Serialize(valores, (JsonSerializerOptions?)null).Contains("21", StringComparison.Ordinal)),
             null,
             "Exito",
             null), Times.Once);
@@ -234,7 +234,7 @@ public sealed class N17ConteosInventarioControllerBehaviorTests
             77,
             "ConteoInventario",
             null,
-            It.Is<object>(valores => JsonSerializer.Serialize(valores).Contains("901", StringComparison.Ordinal)),
+            It.Is<object>(valores => JsonSerializer.Serialize(valores, (JsonSerializerOptions?)null).Contains("901", StringComparison.Ordinal)),
             null,
             "Exito",
             null), Times.Once);
