@@ -108,44 +108,62 @@ ERP-N0.5, ERP-N0.6, ERP-N0.7 y ERP-N0.8 están formalmente cerrados. `GATE-N0=LI
 
 **ERP-N1.1 queda formalmente cerrado.** Siguiente foco autorizado por VAEP: `N1.2.A — Almacenes / auditoría y preflight`.
 
-## ✅ ERP-N1.3 — Ubicaciones internas de almacén — cierre certificado (2026-08-14)
+## ERP-N1.3 — Ubicaciones internas de almacén
 
 - [x] N1.3.A Preflight y diseño — `docs/ERP_N1_3_UBICACIONES_PREFLIGHT.md`; topología jerárquica aditiva definida sin stock, sin `SucursalId`/`EmpresaId` duplicados y con N1.4 como autoridad futura de existencias.
 - [x] N1.3.B Dominio y contratos — `UbicacionAlmacen`, `TipoUbicacionAlmacen`, DTOs y guardas de contrato; backend Release/unitarias certificados.
 - [x] N1.3.C Persistencia/migración — `20260814211647_N1_3_UbicacionAlmacenPersistencia`; FK a Almacén, jerarquía autorreferente compuesta del mismo Almacén, código activo único, constraints y triggers MySQL 8.4 para self-parent; snapshot sin drift e historial MySQL certificado.
-- [x] N1.3.D Aplicación, servicios y API — repositorio/servicio/controller/DI, paginación y filtros, padre activo/mismo Almacén, prevención de ciclos y protección de descendientes; cierre funcional `4d2cc04b363df602f6de97b7f5ea876ea35a6196`; Backend Release/unitarias `31843085895` / `94903923345` SUCCESS.
-- [x] N1.3.E Frontend/UX — listado responsive, filtros server-side, formulario jerárquico, selectores de Almacén/padre, rutas y menú principal RBAC; cierre `91f878ef3cbc56219b637e9b62c99bdd1109a9df`; Frontend producción `31846161956` / `94912936660` SUCCESS.
-- [x] N1.3.F RBAC/auditoría/seguridad/observabilidad — módulo `UbicacionesAlmacen`, permisos por endpoint, auditoría de mutaciones y regresiones que congelan autorización/auditoría; baseline `4a6be38683f03fc2076f18a71115480c930ba79b`; backend `94913888850` SUCCESS.
-- [x] N1.3.G QA, regresión y CI — run agregado `31846485117` SUCCESS: higiene `94913888918`, backend `94913888850`, frontend `94913888865`, Docker `94913888808` y MySQL 8.4/integración `94913888844`.
-- [x] N1.3.H Documentación y certificación — fuente canónica `docs/ERP_N1_3_UBICACIONES_ALMACEN.md`, `TASKS.md`, `CHANGELOG_AI.md` y VAEP reconciliados preservando historial.
-
-**Resultado:** ERP-N1.3 queda cerrado como topología interna de Almacenes. No introduce autoridad de cantidad ni stock. El siguiente foco es **N1.4.A — ExistenciaVariante — Preflight y diseño**, responsable de diseñar la autoridad de existencias por Almacén/Ubicación y la transición desde `ProductoVariante.Cantidad`.
+- [x] N1.3.D Aplicación, servicios y API — repositorio/servicio/controller/DI, paginación y filtros, padre activo/mismo Almacén, prevención de ciclos y protección de descendientes; cierre funcional `4d2cc04b363df602f6de97b7f5ea876ea35a6196`.
+- [x] N1.3.E Frontend/UX — listado responsive, filtros server-side, formulario jerárquico, selectores de Almacén/padre, rutas y menú principal RBAC; cierre `91f878ef3cbc56219b637e9b62c99bdd1109a9df`.
+- [x] N1.3.F RBAC/auditoría/seguridad/observabilidad — módulo `UbicacionesAlmacen`, permisos por endpoint y auditoría de mutaciones.
+- [x] N1.3.G QA, regresión y CI — run agregado `31846485117` SUCCESS.
+- [x] N1.3.H Documentación y certificación — fuente canónica `docs/ERP_N1_3_UBICACIONES_ALMACEN.md`.
 
 ## ERP-N1.2 — Almacenes empresariales
 
 - [x] N1.2.A Auditoría y preflight — no existía implementación legacy Almacén/Bodega/Ubicación; Almacén definido como hijo obligatorio de Sucursal, sin adelantar stock N1.4 ni multiempresa N6.
-- [x] N1.2.B Dominio y contratos — `Almacen`, `TipoAlmacen` estable Tienda/Bodega/Transito/Devolucion/Cuarentena y DTOs; autoridad jerárquica única `SucursalId`; corrección concurrente final `85f2b845ca60d8e797425bd5b0f9a7d597a6cfa8` retiró `EmpresaId` duplicada y añadió guarda arquitectónica.
-- [x] N1.2.C Persistencia/migración — tabla `Almacenes`, FK Restrict a `Sucursales`, código activo único, índices/checks, preflight/postcheck y rollback fail-closed; HEAD `bebafe3abb2ddc66448c805b107f8d1f8ee3f3e9`; CI `31834214669` con MySQL/integración/snapshot sin drift SUCCESS.
-- [x] N1.2.D Aplicación/API/RBAC — repositorio, servicio, validadores, CRUD, filtros/paginación, jerarquía fail-closed, estado idempotente, soft-delete, `ModuloSistema.Almacenes=29` y permisos seedables; `5a97bf3844069a565e1aecf39e4b8001c10f386b`.
-- [x] N1.2.E Frontend/UX — mantenimiento responsive, filtros server-side, selector Sucursal activa, catálogo de tipos API, rutas/menú RBAC y formulario sin EmpresaId/stock; `3a1b8004f2120c4be6459bb46fd120eff8704fe9`; M10 `31835928799` SUCCESS.
-- [x] N1.2.F RBAC/auditoría/seguridad/observabilidad — auditoría `Entidad=Almacen`, correlation/health globales y métrica P50/P95 `/almacenes` sin término ni PII; `30c7e9ff1dedf69eb860916b92b1d5bee0941084`.
-- [x] N1.2.G QA/regresión/CI — workflow dedicado `.github/workflows/n1-2-almacenes-ci.yml`; fallos reales de harness puerto y orden de rutas corregidos en `3049cfdf637eb1c1d2fb0be7f9881e517a3cf13f` y `053152ae51de3617bf30a4e9987574c7879e3049`; run final `31837394309` SUCCESS, Playwright 8/8.
-- [x] N1.2.H Documentación/certificación — fuente canónica `docs/ERP_N1_2_ALMACENES.md`; arquitectura, migración/rollback, API/RBAC, UX, observabilidad, QA y DoD documentados.
-
-**ERP-N1.2 queda formalmente cerrado.** Siguiente foco autorizado por VAEP: `N1.3.A — Ubicaciones internas / auditoría y preflight`.
+- [x] N1.2.B Dominio y contratos — `Almacen`, `TipoAlmacen` estable Tienda/Bodega/Transito/Devolucion/Cuarentena y DTOs; autoridad jerárquica única `SucursalId`.
+- [x] N1.2.C Persistencia/migración — tabla `Almacenes`, FK Restrict a `Sucursales`, código activo único, índices/checks, preflight/postcheck y rollback fail-closed.
+- [x] N1.2.D Aplicación/API/RBAC — repositorio, servicio, validadores, CRUD, filtros/paginación, jerarquía fail-closed, estado idempotente, soft-delete y permisos seedables.
+- [x] N1.2.E Frontend/UX — mantenimiento responsive, filtros server-side, selector Sucursal activa, catálogo de tipos API y rutas/menú RBAC.
+- [x] N1.2.F RBAC/auditoría/seguridad/observabilidad — auditoría `Entidad=Almacen`, correlation/health globales y métrica P50/P95 `/almacenes` sin PII.
+- [x] N1.2.G QA/regresión/CI — workflow dedicado `.github/workflows/n1-2-almacenes-ci.yml`; run final `31837394309` SUCCESS, Playwright 8/8.
+- [x] N1.2.H Documentación/certificación — fuente canónica `docs/ERP_N1_2_ALMACENES.md`.
 
 ## ERP-N1.5 — Kardex empresarial
 
-- [x] N1.5.A Auditoría y preflight — `docs/ERP_N1_5_KARDEX_EMPRESARIAL_PREFLIGHT.md`; gaps de contexto físico, correlación durable, contrato paginado, seguridad e históricos documentados.
+- [x] N1.5.A Auditoría y preflight — `docs/ERP_N1_5_KARDEX_EMPRESARIAL_PREFLIGHT.md`.
 - [x] N1.5.B Dominio y contratos — contrato de Kardex y correlación durable cerrado en `625ba5a3777e0b8ffb38ecba1ea3fa1956270029`.
-- [x] N1.5.C Persistencia/migración/datos — `CorrelationId` y esquema certificado en `55dbaa334ac6bbf236f6b5f376a0dcd69f2d2354`; Desarrollo `31911214659`, aceptación `31911214717`, Fase8 `31911214610` y recovery MySQL `31911214658` SUCCESS.
-- [x] N1.5.D Aplicación/servicios/API — writer canónico, correlación determinística y consulta paginada/filtros empresariales; `6f4a3cb8f7e854c40569db08fe2f9dd05aca126f`.
-- [x] N1.5.E Frontend/UX — UI Kardex paginada, filtros, responsive/accesibilidad; `dd510978a16675b1839998ab8156e63f469a0b78`, M10 `31917459334` SUCCESS.
-- [x] N1.5.F RBAC/auditoría/seguridad/observabilidad — scope fail-closed y correlación saneada; `75196d80602dc1c0d715b6b52069267d0cf6282c`.
-- [x] N1.5.G QA/regresión/CI — índices compuestos y migración `20260816005000_N1_5_KardexQueryIndexes`; base funcional `4871da115e72d205513ea23aa9fe95c1e4818e6b`; CI `31918223873` SUCCESS.
-- [x] N1.5.H Documentación/certificación — cierre funcional `7a37998c8ff94299904135471d328c0d8b91c705`; Desarrollo `31923298004`, aceptación `31923298037`, Fase8 `31923298063` y M13 `31923298066` SUCCESS completos; documento canónico `docs/ERP_N1_5_KARDEX_EMPRESARIAL.md` reconciliado.
+- [x] N1.5.C Persistencia/migración/datos — `CorrelationId` y esquema certificado en `55dbaa334ac6bbf236f6b5f376a0dcd69f2d2354`.
+- [x] N1.5.D Aplicación/servicios/API — writer canónico, correlación determinística y consulta paginada/filtros empresariales.
+- [x] N1.5.E Frontend/UX — UI Kardex paginada, filtros, responsive/accesibilidad.
+- [x] N1.5.F RBAC/auditoría/seguridad/observabilidad — scope fail-closed y correlación saneada.
+- [x] N1.5.G QA/regresión/CI — índices compuestos y migración; CI `31918223873` SUCCESS.
+- [x] N1.5.H Documentación/certificación — cierre funcional `7a37998c8ff94299904135471d328c0d8b91c705`; documento canónico `docs/ERP_N1_5_KARDEX_EMPRESARIAL.md`.
 
-**ERP-N1.5 queda formalmente cerrado.** Siguiente foco FINISH_FIRST: `N1.6.A — Transferencias — Auditoría y preflight`.
+## ERP-N1.6 — Transferencias entre almacenes
+
+- [x] N1.6.A Auditoría y preflight — `docs/ERP_N1_6_TRANSFERENCIAS_PREFLIGHT.md`; autoridad `ExistenciaVariante`, concurrencia, Kardex, RBAC, rollback y matriz de pruebas definidos.
+- [x] N1.6.B Dominio y contratos — lifecycle `Borrador → Solicitada → Aprobada → EnTransito → Recibida` + cancelación controlada, discrepancias y recepción parcial.
+- [x] N1.6.C Persistencia/migración — entidades, FKs, origen tipado de Kardex y reconciliación de migración duplicada certificados.
+- [x] N1.6.D Aplicación/servicios/API — workflow físico transaccional, despacho/recepción/cancelación, reversión de tránsito, Kardex tipado y consulta por transferencia.
+- [x] N1.6.E Frontend/UX — flujo empresarial de transferencias y E2E causal certificado.
+- [x] N1.6.F RBAC/auditoría/seguridad/observabilidad — permisos relacionales, auditoría del lifecycle y correlation saneado.
+- [x] N1.6.G QA/regresión/CI — regresiones de atomicidad, invariantes del lifecycle y Playwright estabilizados; gates causales verdes.
+- [x] N1.6.H Documentación/certificación — `docs/ERP_N1_6_TRANSFERENCIAS.md`, ADR y runbook canónicos.
+
+**ERP-N1.6 queda formalmente cerrado.**
+
+## ERP-N1.7 — Conteos físicos
+
+- [x] N1.7.A Auditoría y preflight — `docs/ERP_N1_7_CONTEOS_FISICOS_PREFLIGHT.md`; `ExistenciaVariante.StockFisico` preservada como autoridad y diferencias materializadas únicamente mediante `AjusteInventario`.
+- [x] N1.7.B Dominio y contratos — General/Cíclico/PorUbicación/PorCategoría/Ciego, lifecycle, snapshots, capturas, diferencias y vínculo posterior a ajuste.
+- [x] N1.7.C Persistencia/migración — `ConteosInventario`/detalles, FKs, checks, unicidad física, snapshot EF, preflight y postcheck.
+- [x] N1.7.D Aplicación/servicios/API — CRUD/lifecycle, captura individual/lote atómica, paginación, idempotencia de ajuste y contrato HTTP/RBAC.
+- [x] N1.7.E Frontend/UX — listado, filtros, formulario, detalle, captura dirty-only, catálogos físicos, modo ciego, rutas/menú y E2E.
+- [x] N1.7.F RBAC/auditoría/seguridad/observabilidad — auditoría del lifecycle, correlation saneado y privacidad fail-closed de conteos ciegos activos/cancelados.
+- [x] N1.7.G QA/regresión/CI — baseline funcional `7bba45d13a3fe0579285ed273062f66b2796893f`; Desarrollo `31995868136`, aceptación `31995868251`, Fase 8 `31995868120`, M13 `31995868144` y M10 `31995868110` en `SUCCESS`.
+- [ ] N1.7.H Documentación/certificación — documentación canónica publicada: `docs/ERP_N1_7_CONTEOS_FISICOS.md`, `docs/ADR_N1_7_CONTEOS_CIEGOS_Y_AJUSTES.md`, `docs/RUNBOOK_N1_7_CONTEOS_FISICOS.md` y `docs/ERD_N1_7_CONTEOS_FISICOS.md`; falta únicamente certificar el HEAD documental final y registrar el cierre formal en VAEP.
 
 ## Fuentes VAEP v2
 
