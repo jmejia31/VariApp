@@ -49,7 +49,7 @@ public sealed class N17ConteoInventarioServiceTests
         Assert.True(dto!.EsCiego);
         Assert.Equal(EstadoConteoInventario.EnProceso, dto.Estado);
         Assert.Single(dto.Detalles);
-        Assert.Equal(6, dto.Detalles[0].CantidadContada);
+        Assert.Equal(6, dto.Detalles[0].CantidadContada.GetValueOrDefault());
         Assert.Null(dto.Detalles[0].StockEsperado);
         Assert.Null(dto.Detalles[0].Diferencia);
         Assert.Equal(0, dto.CantidadConDiferencia);
@@ -97,7 +97,7 @@ public sealed class N17ConteoInventarioServiceTests
             new CapturarConteoInventarioDetalleDto { CantidadContada = 6 });
 
         Assert.NotNull(resultado);
-        Assert.Equal(6, resultado!.Detalles.Single().CantidadContada);
+        Assert.Equal(6, resultado!.Detalles.Single().CantidadContada.GetValueOrDefault());
         repository.Verify(x => x.Update(It.IsAny<ConteoInventario>()), Times.Never);
         repository.Verify(x => x.SaveChangesAsync(), Times.Never);
     }
