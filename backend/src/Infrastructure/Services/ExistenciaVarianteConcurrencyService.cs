@@ -140,7 +140,24 @@ public sealed class ExistenciaVarianteConcurrencyService : IExistenciaVarianteCo
             throw new BusinessRuleException(
                 "El inventario cambió desde que se cargó el formulario. Actualiza los datos e inténtalo nuevamente.");
 
-        AplicarEstado(existencia, cantidadNueva, existencia.StockTransito);
+        AplicarEstado(existencia, cantidadNueva, existencia.StockReservado, existencia.StockTransito);
+    }
+
+    public async Task AjustarStockReservadoPesimistaAsync(
+        InventarioExistenciaClave clave,
+        int stockReservadoActualEsperado,
+        int stockReservadoNuevo)
+    {
+        var existencia = await CargarYValidarPrecondicionAsync(clave);
+        if (stockReservadoActualEsperado < 0 || stockReservadoNuevo < 0)
+            throw new BusinessRuleException("El stock reservado no puede ser negativo.");
+        if (existencia.StockReservado != stockReservadoActualEsperado)
+            throw new BusinessRuleException(
+                "El stock reservado cambió durante la operación. Reintenta con datos actualizados.");
+        if (stockReservadoNuevo > existencia.StockFisico)
+            throw new BusinessRuleException("El stock reservado no puede superar el stock físico autoritativo.");
+
+        AplicarEstado(existencia, existencia.StockFisico, stockReservadoNuevo, existencia.StockTransito);
     }
 
     public async Task AjustarStocksPesimistaAsync(
@@ -163,7 +180,7 @@ public sealed class ExistenciaVarianteConcurrencyService : IExistenciaVarianteCo
                 "El inventario físico o en tránsito cambió durante la operación. Reintenta con datos actualizados.");
         }
 
-        AplicarEstado(existencia, stockFisicoNuevo, stockTransitoNuevo);
+        AplicarEstado(existencia, stockFisicoNuevo, existencia.StockReservado, stockTransitoNuevo);
     }
 
     private async Task<ExistenciaVariante> CargarYValidarPrecondicionAsync(InventarioExistenciaClave clave)
@@ -185,13 +202,17 @@ public sealed class ExistenciaVarianteConcurrencyService : IExistenciaVarianteCo
             ?? throw new BusinessRuleException("La existencia indicada no existe.");
     }
 
-    private void AplicarEstado(ExistenciaVariante existencia, int stockFisicoNuevo, int stockTransitoNuevo)
+    private void AplicarEstado(
+        ExistenciaVariante existencia,
+        int stockFisicoNuevo,
+        int stockReservadoNuevo,
+        int stockTransitoNuevo)
     {
         try
         {
             existencia.EstablecerStocks(
                 stockFisicoNuevo,
-                existencia.StockReservado,
+                stockReservadoNuevo,
                 stockTransitoNuevo,
                 existencia.StockMinimo,
                 existencia.StockMaximo);
