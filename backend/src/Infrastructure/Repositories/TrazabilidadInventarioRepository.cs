@@ -148,7 +148,7 @@ public sealed class TrazabilidadInventarioRepository : ITrazabilidadInventarioRe
     public Task<bool> TieneStockFisicoAsync(int productoVarianteId) =>
         _context.Set<ExistenciaVariante>().AsNoTracking().AnyAsync(x =>
             x.ProductoVarianteId == productoVarianteId &&
-            (x.StockActual != 0 || x.StockReservado != 0));
+            (x.StockFisico != 0 || x.StockReservado != 0 || x.StockTransito != 0));
 
     public Task<bool> TieneLotesActivosAsync(int productoVarianteId) =>
         Lotes.AsNoTracking().AnyAsync(x => x.ProductoVarianteId == productoVarianteId && x.Activo);
