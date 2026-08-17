@@ -84,7 +84,6 @@ namespace InventoryApp.Infrastructure.Migrations
             {
                 b.HasOne("InventoryApp.Domain.Entities.Venta", "Venta").WithMany().HasForeignKey("VentaId")
                     .OnDelete(DeleteBehavior.Restrict).HasConstraintName("FK_ReservasInventario_Ventas_VentaId");
-                b.Navigation("Detalles");
                 b.Navigation("Venta");
             });
 
@@ -103,6 +102,11 @@ namespace InventoryApp.Infrastructure.Migrations
                 b.Navigation("ProductoVariante");
                 b.Navigation("ReservaInventario");
                 b.Navigation("UbicacionAlmacen");
+            });
+
+            modelBuilder.Entity("InventoryApp.Domain.Entities.ReservaInventario", b =>
+            {
+                b.Navigation("Detalles");
             });
         }
     }
