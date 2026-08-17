@@ -48,6 +48,28 @@ public sealed class N19TrazabilidadControllerSecurityTests
     }
 
     [Theory]
+    [InlineData(nameof(TrazabilidadInventarioController.GetConfiguracion), typeof(HttpGetAttribute), "variantes/{productoVarianteId:int}/configuracion")]
+    [InlineData(nameof(TrazabilidadInventarioController.Configurar), typeof(HttpPutAttribute), "variantes/{productoVarianteId:int}/configuracion")]
+    [InlineData(nameof(TrazabilidadInventarioController.GetLotes), typeof(HttpGetAttribute), "lotes")]
+    [InlineData(nameof(TrazabilidadInventarioController.GetLote), typeof(HttpGetAttribute), "lotes/{id:int}")]
+    [InlineData(nameof(TrazabilidadInventarioController.CrearLote), typeof(HttpPostAttribute), "lotes")]
+    [InlineData(nameof(TrazabilidadInventarioController.ActualizarLote), typeof(HttpPutAttribute), "lotes/{id:int}")]
+    [InlineData(nameof(TrazabilidadInventarioController.DesactivarLote), typeof(HttpPostAttribute), "lotes/{id:int}/desactivar")]
+    [InlineData(nameof(TrazabilidadInventarioController.GetSeries), typeof(HttpGetAttribute), "series")]
+    [InlineData(nameof(TrazabilidadInventarioController.GetSerie), typeof(HttpGetAttribute), "series/{id:int}")]
+    [InlineData(nameof(TrazabilidadInventarioController.CrearSerie), typeof(HttpPostAttribute), "series")]
+    [InlineData(nameof(TrazabilidadInventarioController.DarDeBajaSerie), typeof(HttpPostAttribute), "series/{id:int}/baja")]
+    public void Cada_endpoint_mantiene_verbo_y_ruta_estables(string metodo, Type atributoHttpEsperado, string rutaEsperada)
+    {
+        var method = typeof(TrazabilidadInventarioController).GetMethod(metodo)
+            ?? throw new InvalidOperationException($"No se encontró {metodo}.");
+        var atributo = Assert.Single(method.GetCustomAttributes(atributoHttpEsperado, inherit: true)) as HttpMethodAttribute;
+
+        Assert.NotNull(atributo);
+        Assert.Equal(rutaEsperada, atributo.Template);
+    }
+
+    [Theory]
     [InlineData(nameof(TrazabilidadInventarioController.GetConfiguracion), AccionPermiso.Ver)]
     [InlineData(nameof(TrazabilidadInventarioController.Configurar), AccionPermiso.Editar)]
     [InlineData(nameof(TrazabilidadInventarioController.GetLotes), AccionPermiso.Ver)]
