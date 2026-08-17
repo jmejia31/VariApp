@@ -3,6 +3,7 @@ using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
+using InventoryApp.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Xunit;
@@ -97,5 +98,54 @@ public sealed class N17ConteosInventarioControllerBehaviorTests
 
         Assert.IsType<OkObjectResult>(result);
         service.Verify(x => x.CancelarAsync(20, dto.Motivo), Times.Once);
+    }
+
+    [Fact]
+    public async Task GenerarAjuste_AuditaConteoYAjusteGenerado()
+    {
+        var service = new Mock<IConteoInventarioService>();
+        var auditoria = new Mock<IAuditoriaService>();
+        var ajuste = new AjusteInventarioDto { Id = 901 };
+        service.Setup(x => x.GenerarAjusteAsync(77)).ReturnsAsync(ajuste);
+        var controller = new ConteosInventarioController(service.Object, auditoria.Object);
+
+        var result = await controller.GenerarAjuste(77);
+
+        Assert.IsType<OkObjectResult>(result);
+        auditoria.Verify(x => x.RegistrarAsync(
+            ModuloSistema.MovimientosInventario,
+            AccionPermiso.Crear,
+            It.Is<string>(descripcion => descripcion.Contains("Ajuste", StringComparison.OrdinalIgnoreCase)),
+            77,
+            "ConteoInventario",
+            null,
+            It.Is<object>(valores => valores.ToString()!.Contains("901", StringComparison.Ordinal)),
+            null,
+            "Exito",
+            null), Times.Once);
+    }
+
+    [Fact]
+    public async Task GenerarAjuste_ConteoInexistente_NoAudita()
+    {
+        var service = new Mock<IConteoInventarioService>();
+        var auditoria = new Mock<IAuditoriaService>();
+        service.Setup(x => x.GenerarAjusteAsync(404)).ReturnsAsync((AjusteInventarioDto?)null);
+        var controller = new ConteosInventarioController(service.Object, auditoria.Object);
+
+        var result = await controller.GenerarAjuste(404);
+
+        Assert.IsType<NotFoundObjectResult>(result);
+        auditoria.Verify(x => x.RegistrarAsync(
+            It.IsAny<ModuloSistema>(),
+            It.IsAny<AccionPermiso>(),
+            It.IsAny<string>(),
+            It.IsAny<int?>(),
+            It.IsAny<string?>(),
+            It.IsAny<object?>(),
+            It.IsAny<object?>(),
+            It.IsAny<string?>(),
+            It.IsAny<string>(),
+            It.IsAny<string?>()), Times.Never);
     }
 }
