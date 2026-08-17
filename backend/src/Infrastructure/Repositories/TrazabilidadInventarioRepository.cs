@@ -132,7 +132,6 @@ public sealed class TrazabilidadInventarioRepository : ITrazabilidadInventarioRe
             return Series
                 .FromSqlInterpolated($"SELECT si.* FROM SeriesInventario si WHERE si.Id = {id} FOR UPDATE")
                 .AsTracking()
-                .Include(x => x.LoteInventario)
                 .FirstOrDefaultAsync();
         }
 
