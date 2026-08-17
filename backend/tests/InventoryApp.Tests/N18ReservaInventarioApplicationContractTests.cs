@@ -20,6 +20,7 @@ public sealed class N18ReservaInventarioApplicationContractTests
         Assert.Contains(typeof(IProductoVarianteRepository), dependencias);
         Assert.Contains(typeof(IExistenciaVarianteConcurrencyService), dependencias);
         Assert.Contains(typeof(ICurrentUserService), dependencias);
+        Assert.Contains(typeof(IAuditoriaService), dependencias);
         Assert.Contains(typeof(IUnitOfWork), dependencias);
     }
 

@@ -12,6 +12,7 @@ namespace InventoryApp.Application.Services;
 /// Borrador; al activarlo se incrementa StockReservado sobre ExistenciaVariante
 /// bajo lock pesimista. Liberar, expirar, cancelar una reserva activa o consumirla
 /// retira exactamente la misma reserva sin usar cantidades legacy como autoridad.
+/// Las mutaciones y su auditoría crítica se confirman dentro de la misma transacción.
 /// </summary>
 public sealed class ReservaInventarioService : IReservaInventarioService
 {
@@ -19,6 +20,7 @@ public sealed class ReservaInventarioService : IReservaInventarioService
     private readonly IProductoVarianteRepository _variantes;
     private readonly IExistenciaVarianteConcurrencyService _existencias;
     private readonly ICurrentUserService _currentUser;
+    private readonly IAuditoriaService _auditoria;
     private readonly IUnitOfWork _unitOfWork;
 
     public ReservaInventarioService(
@@ -26,13 +28,15 @@ public sealed class ReservaInventarioService : IReservaInventarioService
         IProductoVarianteRepository variantes,
         IExistenciaVarianteConcurrencyService existencias,
         ICurrentUserService currentUser,
+        IAuditoriaService auditoria,
         IUnitOfWork unitOfWork)
     {
-        _repository = repository;
-        _variantes = variantes;
-        _existencias = existencias;
-        _currentUser = currentUser;
-        _unitOfWork = unitOfWork;
+        _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+        _variantes = variantes ?? throw new ArgumentNullException(nameof(variantes));
+        _existencias = existencias ?? throw new ArgumentNullException(nameof(existencias));
+        _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
+        _auditoria = auditoria ?? throw new ArgumentNullException(nameof(auditoria));
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
     }
 
     public async Task<PagedResult<ReservaInventarioDto>> GetPagedAsync(ReservaInventarioQueryDto query)
@@ -82,6 +86,10 @@ public sealed class ReservaInventarioService : IReservaInventarioService
         {
             await _repository.AddAsync(reserva);
             await _repository.SaveChangesAsync();
+            await AuditarEstrictoAsync(
+                AccionPermiso.Crear,
+                reserva,
+                "Reserva de inventario creada.");
         });
 
         return Map(await _repository.GetByIdAsync(reserva.Id) ?? reserva);
@@ -110,6 +118,10 @@ public sealed class ReservaInventarioService : IReservaInventarioService
             MarcarActualizacion(reserva, usuarioId);
             reserva.ValidarDocumento();
             await _repository.SaveChangesAsync();
+            await AuditarEstrictoAsync(
+                AccionPermiso.Editar,
+                reserva,
+                "Reserva de inventario actualizada.");
             resultado = reserva;
         });
 
@@ -117,76 +129,106 @@ public sealed class ReservaInventarioService : IReservaInventarioService
     }
 
     public Task<ReservaInventarioDto> ActivarAsync(int id) =>
-        CambiarReservaAsync(id, EstadoReservaInventario.Activa, async (reserva, usuarioId, ahora) =>
-        {
-            var lockSet = await BloquearReservaAsync(reserva, validarDisponible: true);
-            foreach (var demanda in lockSet.Demandas)
+        CambiarReservaAsync(
+            id,
+            EstadoReservaInventario.Activa,
+            AccionPermiso.Confirmar,
+            "Reserva activada correctamente.",
+            async (reserva, usuarioId, ahora) =>
             {
-                var existencia = lockSet.Existencias[demanda.Clave];
-                await _existencias.AjustarStockReservadoPesimistaAsync(
-                    demanda.Clave,
-                    existencia.StockReservado,
-                    checked(existencia.StockReservado + demanda.Cantidad));
-            }
-            reserva.Activar(usuarioId, ahora);
-        });
+                var lockSet = await BloquearReservaAsync(reserva, validarDisponible: true);
+                foreach (var demanda in lockSet.Demandas)
+                {
+                    var existencia = lockSet.Existencias[demanda.Clave];
+                    await _existencias.AjustarStockReservadoPesimistaAsync(
+                        demanda.Clave,
+                        existencia.StockReservado,
+                        checked(existencia.StockReservado + demanda.Cantidad));
+                }
+                reserva.Activar(usuarioId, ahora);
+            });
 
     public Task<ReservaInventarioDto> ConsumirAsync(int id) =>
-        CambiarReservaAsync(id, EstadoReservaInventario.Consumida, async (reserva, usuarioId, ahora) =>
-        {
-            if (reserva.Estado != EstadoReservaInventario.Activa)
-                throw new BusinessRuleException("Solo una reserva activa puede consumirse.");
-
-            foreach (var detalle in reserva.Detalles)
+        CambiarReservaAsync(
+            id,
+            EstadoReservaInventario.Consumida,
+            AccionPermiso.Confirmar,
+            "Reserva consumida correctamente.",
+            async (reserva, usuarioId, ahora) =>
             {
-                if (!detalle.EstaConsumida)
-                    detalle.RegistrarConsumo(detalle.CantidadReservada);
-            }
+                if (reserva.Estado != EstadoReservaInventario.Activa)
+                    throw new BusinessRuleException("Solo una reserva activa puede consumirse.");
 
-            await RetirarStockReservadoAsync(reserva);
-            reserva.Consumir(usuarioId, ahora);
-        });
+                foreach (var detalle in reserva.Detalles)
+                {
+                    if (!detalle.EstaConsumida)
+                        detalle.RegistrarConsumo(detalle.CantidadReservada);
+                }
+
+                await RetirarStockReservadoAsync(reserva);
+                reserva.Consumir(usuarioId, ahora);
+            });
 
     public Task<ReservaInventarioDto> LiberarAsync(int id, LiberarReservaInventarioDto dto)
     {
         ArgumentNullException.ThrowIfNull(dto);
-        return CambiarReservaAsync(id, EstadoReservaInventario.Liberada, async (reserva, usuarioId, ahora) =>
-        {
-            if (reserva.Estado != EstadoReservaInventario.Activa)
-                throw new BusinessRuleException("Solo una reserva activa puede liberarse.");
-            await RetirarStockReservadoAsync(reserva);
-            reserva.Liberar(usuarioId, dto.Motivo, ahora);
-        });
+        return CambiarReservaAsync(
+            id,
+            EstadoReservaInventario.Liberada,
+            AccionPermiso.Anular,
+            "Reserva liberada.",
+            async (reserva, usuarioId, ahora) =>
+            {
+                if (reserva.Estado != EstadoReservaInventario.Activa)
+                    throw new BusinessRuleException("Solo una reserva activa puede liberarse.");
+                await RetirarStockReservadoAsync(reserva);
+                reserva.Liberar(usuarioId, dto.Motivo, ahora);
+            },
+            dto.Motivo);
     }
 
     public Task<ReservaInventarioDto> ExpirarAsync(int id) =>
-        CambiarReservaAsync(id, EstadoReservaInventario.Expirada, async (reserva, usuarioId, ahora) =>
-        {
-            if (reserva.Estado != EstadoReservaInventario.Activa)
-                throw new BusinessRuleException("Solo una reserva activa puede expirar.");
-            if (!reserva.FechaExpiracion.HasValue || ahora < reserva.FechaExpiracion.Value)
-                throw new BusinessRuleException("La reserva todavía no alcanzó su fecha de expiración.");
-            await RetirarStockReservadoAsync(reserva);
-            reserva.Expirar(usuarioId, ahora);
-        });
+        CambiarReservaAsync(
+            id,
+            EstadoReservaInventario.Expirada,
+            AccionPermiso.CambiarEstado,
+            "Reserva expirada correctamente.",
+            async (reserva, usuarioId, ahora) =>
+            {
+                if (reserva.Estado != EstadoReservaInventario.Activa)
+                    throw new BusinessRuleException("Solo una reserva activa puede expirar.");
+                if (!reserva.FechaExpiracion.HasValue || ahora < reserva.FechaExpiracion.Value)
+                    throw new BusinessRuleException("La reserva todavía no alcanzó su fecha de expiración.");
+                await RetirarStockReservadoAsync(reserva);
+                reserva.Expirar(usuarioId, ahora);
+            });
 
     public Task<ReservaInventarioDto> CancelarAsync(int id, CancelarReservaInventarioDto dto)
     {
         ArgumentNullException.ThrowIfNull(dto);
-        return CambiarReservaAsync(id, EstadoReservaInventario.Cancelada, async (reserva, usuarioId, ahora) =>
-        {
-            if (reserva.Estado == EstadoReservaInventario.Activa)
-                await RetirarStockReservadoAsync(reserva);
-            else if (reserva.Estado != EstadoReservaInventario.Borrador)
-                throw new BusinessRuleException("Solo una reserva en borrador o activa puede cancelarse.");
-            reserva.Cancelar(usuarioId, dto.Motivo, ahora);
-        });
+        return CambiarReservaAsync(
+            id,
+            EstadoReservaInventario.Cancelada,
+            AccionPermiso.Anular,
+            "Reserva cancelada.",
+            async (reserva, usuarioId, ahora) =>
+            {
+                if (reserva.Estado == EstadoReservaInventario.Activa)
+                    await RetirarStockReservadoAsync(reserva);
+                else if (reserva.Estado != EstadoReservaInventario.Borrador)
+                    throw new BusinessRuleException("Solo una reserva en borrador o activa puede cancelarse.");
+                reserva.Cancelar(usuarioId, dto.Motivo, ahora);
+            },
+            dto.Motivo);
     }
 
     private async Task<ReservaInventarioDto> CambiarReservaAsync(
         int id,
         EstadoReservaInventario estadoIdempotente,
-        Func<ReservaInventario, int, DateTime, Task> operacion)
+        AccionPermiso accionAuditoria,
+        string descripcionAuditoria,
+        Func<ReservaInventario, int, DateTime, Task> operacion,
+        string? motivoAuditoria = null)
     {
         if (id <= 0) throw new BusinessRuleException("La reserva indicada no es válida.");
         var usuarioId = ObtenerUsuarioId();
@@ -196,15 +238,18 @@ public sealed class ReservaInventarioService : IReservaInventarioService
         {
             var reserva = await _repository.GetByIdAsync(id, tracking: true)
                 ?? throw new BusinessRuleException("La reserva indicada no existe.");
-            if (reserva.Estado == estadoIdempotente)
+            if (reserva.Estado != estadoIdempotente)
             {
-                resultado = reserva;
-                return;
+                await operacion(reserva, usuarioId, DateTime.UtcNow);
+                MarcarActualizacion(reserva, usuarioId);
+                await _repository.SaveChangesAsync();
             }
 
-            await operacion(reserva, usuarioId, DateTime.UtcNow);
-            MarcarActualizacion(reserva, usuarioId);
-            await _repository.SaveChangesAsync();
+            await AuditarEstrictoAsync(
+                accionAuditoria,
+                reserva,
+                descripcionAuditoria,
+                motivoAuditoria);
             resultado = reserva;
         });
 
@@ -314,6 +359,41 @@ public sealed class ReservaInventarioService : IReservaInventarioService
         reserva.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
         reserva.FechaActualizacion = DateTime.UtcNow;
     }
+
+    private Task AuditarEstrictoAsync(
+        AccionPermiso accion,
+        ReservaInventario reserva,
+        string descripcion,
+        string? motivo = null) =>
+        _auditoria.RegistrarEstrictoAsync(
+            ModuloSistema.MovimientosInventario,
+            accion,
+            descripcion,
+            reserva.Id,
+            entidad: nameof(ReservaInventario),
+            valoresNuevos: new
+            {
+                reserva.Numero,
+                reserva.VentaId,
+                Estado = reserva.Estado.ToString(),
+                reserva.FechaExpiracion,
+                reserva.FechaActivacion,
+                reserva.FechaConsumo,
+                reserva.FechaLiberacion,
+                reserva.FechaExpiracionAplicada,
+                reserva.FechaCancelacion,
+                reserva.ActualizadoPorUsuarioId,
+                reserva.ActualizadoPorNombreUsuario,
+                Detalles = reserva.Detalles.Select(d => new
+                {
+                    d.ProductoVarianteId,
+                    d.AlmacenId,
+                    d.UbicacionAlmacenId,
+                    d.CantidadReservada,
+                    d.CantidadConsumida
+                }).ToArray()
+            },
+            motivo: motivo);
 
     private static void ValidarFechaExpiracionBorrador(DateTime? fechaExpiracion, DateTime ahora)
     {

@@ -117,6 +117,20 @@ public sealed class N18ReservaInventarioStockReservadoTests
         currentUser.SetupGet(x => x.UsuarioId).Returns(5);
         currentUser.SetupGet(x => x.NombreUsuario).Returns("qa-reservas");
 
+        var auditoria = new Mock<IAuditoriaService>();
+        auditoria.Setup(x => x.RegistrarEstrictoAsync(
+                It.IsAny<ModuloSistema>(),
+                It.IsAny<AccionPermiso>(),
+                It.IsAny<string>(),
+                It.IsAny<int?>(),
+                It.IsAny<string?>(),
+                It.IsAny<object?>(),
+                It.IsAny<object?>(),
+                It.IsAny<string?>(),
+                It.IsAny<string>(),
+                It.IsAny<string?>()))
+            .Returns(Task.CompletedTask);
+
         var unitOfWork = new Mock<IUnitOfWork>();
         unitOfWork.Setup(x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()))
             .Returns((Func<Task> action) => action());
@@ -126,6 +140,7 @@ public sealed class N18ReservaInventarioStockReservadoTests
             variantes.Object,
             existencias.Object,
             currentUser.Object,
+            auditoria.Object,
             unitOfWork.Object);
     }
 
