@@ -1,0 +1,34 @@
+using InventoryApp.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace InventoryApp.Infrastructure.Persistence.Configurations;
+
+public class SerieInventarioConfiguration : IEntityTypeConfiguration<SerieInventario>
+{
+    public void Configure(EntityTypeBuilder<SerieInventario> builder)
+    {
+        builder.ToTable("SeriesInventario");
+        builder.HasKey(x => x.Id);
+        builder.Property(x => x.NumeroSerie).HasMaxLength(160).IsRequired();
+        builder.Property(x => x.Estado).HasConversion<int>();
+
+        builder.HasIndex(x => x.NumeroSerie)
+            .IsUnique()
+            .HasDatabaseName("UX_SeriesInventario_NumeroSerie");
+        builder.HasIndex(x => new { x.ProductoVarianteId, x.Estado })
+            .HasDatabaseName("IX_SeriesInventario_Variante_Estado");
+        builder.HasIndex(x => x.LoteInventarioId)
+            .HasDatabaseName("IX_SeriesInventario_LoteInventarioId");
+
+        builder.HasOne(x => x.ProductoVariante)
+            .WithMany()
+            .HasForeignKey(x => x.ProductoVarianteId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(x => x.LoteInventario)
+            .WithMany()
+            .HasForeignKey(x => x.LoteInventarioId)
+            .OnDelete(DeleteBehavior.Restrict);
+    }
+}
