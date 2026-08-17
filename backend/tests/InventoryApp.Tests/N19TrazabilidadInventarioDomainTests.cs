@@ -117,6 +117,33 @@ public class N19TrazabilidadInventarioDomainTests
     }
 
     [Fact]
+    public void Lote_codigo_invalido_no_borra_identidad_previa()
+    {
+        var lote = new LoteInventario { ProductoVarianteId = 11 };
+        var vencimientoOriginal = new DateTime(2027, 1, 31);
+        lote.ConfigurarIdentidad("LOTE-SEGURO", null, vencimientoOriginal, true);
+
+        Assert.Throws<ArgumentException>(() => lote.ConfigurarIdentidad("   ", null, new DateTime(2028, 1, 31), true));
+
+        Assert.Equal("LOTE-SEGURO", lote.Codigo);
+        Assert.Equal(vencimientoOriginal.Date, lote.FechaVencimiento);
+    }
+
+    [Fact]
+    public void Lote_alerta_negativa_falla_sin_mutar_vigencia()
+    {
+        var lote = new LoteInventario { ProductoVarianteId = 11 };
+        var vencimiento = new DateTime(2026, 9, 1);
+        lote.ConfigurarIdentidad("L-ALERTA", null, vencimiento, true);
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => lote.VenceDentroDe(new DateTime(2026, 8, 17), -1));
+
+        Assert.Equal("L-ALERTA", lote.Codigo);
+        Assert.Equal(vencimiento.Date, lote.FechaVencimiento);
+        Assert.True(lote.Activo);
+    }
+
+    [Fact]
     public void Serie_normaliza_identidad_y_lifecycle_es_fail_closed()
     {
         var serie = new SerieInventario { ProductoVarianteId = 11 };
@@ -155,6 +182,32 @@ public class N19TrazabilidadInventarioDomainTests
 
         Assert.Throws<InvalidOperationException>(() => serie.LiberarReserva());
         Assert.Equal(EstadoSerieInventario.Baja, serie.Estado);
+    }
+
+    [Fact]
+    public void Serie_identidad_invalida_no_borra_numero_previo()
+    {
+        var serie = new SerieInventario { ProductoVarianteId = 11 };
+        serie.ConfigurarIdentidad("SN-SEGURA");
+
+        Assert.Throws<ArgumentException>(() => serie.ConfigurarIdentidad("  "));
+
+        Assert.Equal("SN-SEGURA", serie.NumeroSerie);
+        Assert.Equal(EstadoSerieInventario.Disponible, serie.Estado);
+    }
+
+    [Fact]
+    public void Serie_lote_no_persistido_falla_sin_reemplazar_vinculo_existente()
+    {
+        var serie = new SerieInventario { ProductoVarianteId = 11 };
+        var loteValido = new LoteInventario { Id = 8, ProductoVarianteId = 11 };
+        serie.VincularLote(loteValido);
+
+        var loteNoPersistido = new LoteInventario { ProductoVarianteId = 11 };
+        Assert.Throws<InvalidOperationException>(() => serie.VincularLote(loteNoPersistido));
+
+        Assert.Equal(8, serie.LoteInventarioId);
+        Assert.Same(loteValido, serie.LoteInventario);
     }
 
     [Fact]
