@@ -400,7 +400,7 @@ public sealed class ConteoInventarioService : IConteoInventarioService
 
     private ConteoInventarioDto Map(ConteoInventario conteo)
     {
-        var ocultarEsperado = conteo.EsCiego &&
+        var ocultarReferencia = conteo.EsCiego &&
             conteo.Estado is EstadoConteoInventario.Borrador or EstadoConteoInventario.EnProceso;
         return new ConteoInventarioDto
         {
@@ -427,8 +427,8 @@ public sealed class ConteoInventarioService : IConteoInventarioService
             MotivoCancelacion = conteo.MotivoCancelacion,
             CantidadLineas = conteo.CantidadLineas,
             CantidadCapturadas = conteo.CantidadCapturadas,
-            CantidadConDiferencia = conteo.CantidadConDiferencia,
-            DiferenciaNeta = conteo.DiferenciaNeta,
+            CantidadConDiferencia = ocultarReferencia ? 0 : conteo.CantidadConDiferencia,
+            DiferenciaNeta = ocultarReferencia ? 0 : conteo.DiferenciaNeta,
             Detalles = conteo.Detalles.Select(d => new ConteoInventarioDetalleDto
             {
                 Id = d.Id,
@@ -436,9 +436,9 @@ public sealed class ConteoInventarioService : IConteoInventarioService
                 ProductoVarianteId = d.ProductoVarianteId,
                 AlmacenId = d.AlmacenId,
                 UbicacionAlmacenId = d.UbicacionAlmacenId,
-                StockEsperado = ocultarEsperado ? null : d.StockEsperadoSnapshot,
+                StockEsperado = ocultarReferencia ? null : d.StockEsperadoSnapshot,
                 CantidadContada = d.CantidadContada,
-                Diferencia = d.Diferencia,
+                Diferencia = ocultarReferencia ? null : d.Diferencia,
                 FechaConteo = d.FechaConteo,
                 ContadoPorUsuarioId = d.ContadoPorUsuarioId,
                 AjusteInventarioId = d.AjusteInventarioId,
