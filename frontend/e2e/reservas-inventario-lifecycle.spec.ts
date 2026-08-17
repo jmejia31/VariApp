@@ -58,4 +58,16 @@ test.describe('Reservas de inventario - UX y lifecycle', () => {
     await expect(page.getByText('Activa', { exact: true })).toBeVisible();
     await expect(page.getByText('Reserva activada.', { exact: true })).toBeVisible();
   });
+
+  test('impide expirar desde la UI una reserva activa antes de su vencimiento', async ({ page }) => {
+    await login(page);
+    const activaFutura = { ...borrador, estado: 'Activa', fechaActivacion: '2026-08-17T10:15:00Z', fechaExpiracion: '2099-08-18T10:00:00Z' };
+    await page.route('**/reservas-inventario/801', async route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true, message: '', data: activaFutura }) }));
+
+    await page.goto('/inventario/reservas/801');
+    const expirar = page.getByRole('button', { name: 'Expirar', exact: true });
+    await expect(expirar).toBeVisible();
+    await expect(expirar).toBeDisabled();
+    await expect(expirar).toHaveAttribute('title', 'Disponible cuando alcance su fecha de expiración');
+  });
 });
