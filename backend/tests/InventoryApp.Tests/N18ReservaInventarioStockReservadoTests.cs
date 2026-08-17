@@ -45,7 +45,7 @@ public sealed class N18ReservaInventarioStockReservadoTests
     public async Task Liberar_ReservaActiva_RetiraExactamenteStockReservado_YPreservaFisico()
     {
         var reserva = CrearBorrador(cantidad: 3);
-        reserva.Activar(usuarioId: 5, fecha: DateTime.UtcNow);
+        reserva.Activar(usuarioId: 5, fechaUtc: DateTime.UtcNow);
         var existencia = CrearExistencia(reserva, stockFisico: 12, stockReservado: 5);
         var clave = new InventarioExistenciaClave(10, 20, null);
 
