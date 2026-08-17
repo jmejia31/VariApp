@@ -62,6 +62,14 @@ public sealed class TrazabilidadInventarioRepository : ITrazabilidadInventarioRe
 
     public Task<LoteInventario?> GetLoteByIdAsync(int id, bool tracking = false)
     {
+        if (_context.Database.CurrentTransaction is not null)
+        {
+            return Lotes
+                .FromSqlInterpolated($"SELECT li.* FROM LotesInventario li WHERE li.Id = {id} FOR UPDATE")
+                .AsTracking()
+                .FirstOrDefaultAsync();
+        }
+
         var query = tracking ? Lotes.AsTracking() : Lotes.AsNoTracking();
         return query.FirstOrDefaultAsync(x => x.Id == id);
     }
