@@ -12,6 +12,26 @@ namespace InventoryApp.Tests;
 public sealed class N17ConteoInventarioServiceTests
 {
     [Fact]
+    public async Task GetById_ConteoCiegoEnBorrador_NoExponeStockEsperado()
+    {
+        var repository = new Mock<IConteoInventarioRepository>();
+        var existencias = new Mock<IExistenciaVarianteRepository>();
+        var currentUser = new Mock<ICurrentUserService>();
+        var unitOfWork = new Mock<IUnitOfWork>();
+        var conteo = CrearConteoCiegoBorrador();
+        repository.Setup(x => x.GetByIdAsync(18)).ReturnsAsync(conteo);
+        var service = new ConteoInventarioService(repository.Object, existencias.Object, currentUser.Object, unitOfWork.Object);
+
+        var dto = await service.GetByIdAsync(18);
+
+        Assert.NotNull(dto);
+        Assert.True(dto!.EsCiego);
+        Assert.Equal(EstadoConteoInventario.Borrador, dto.Estado);
+        Assert.Single(dto.Detalles);
+        Assert.Null(dto.Detalles[0].StockEsperado);
+    }
+
+    [Fact]
     public async Task GetById_ConteoCiegoEnProceso_NoExponeStockEsperado()
     {
         var repository = new Mock<IConteoInventarioRepository>();
@@ -105,7 +125,7 @@ public sealed class N17ConteoInventarioServiceTests
         return unitOfWork;
     }
 
-    private static ConteoInventario CrearConteoCiegoEnProceso()
+    private static ConteoInventario CrearConteoCiegoBorrador()
     {
         var detalle = new ConteoInventarioDetalle
         {
@@ -114,7 +134,7 @@ public sealed class N17ConteoInventarioServiceTests
             AlmacenId = 3
         };
         detalle.MaterializarSnapshot(14);
-        var conteo = new ConteoInventario
+        return new ConteoInventario
         {
             Id = 18,
             Numero = "CNT-CIEGO-18",
@@ -123,6 +143,11 @@ public sealed class N17ConteoInventarioServiceTests
             EsCiego = true,
             Detalles = new List<ConteoInventarioDetalle> { detalle }
         };
+    }
+
+    private static ConteoInventario CrearConteoCiegoEnProceso()
+    {
+        var conteo = CrearConteoCiegoBorrador();
         conteo.Iniciar(7, DateTime.UtcNow);
         return conteo;
     }
