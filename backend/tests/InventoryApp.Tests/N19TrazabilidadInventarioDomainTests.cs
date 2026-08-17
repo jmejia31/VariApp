@@ -56,6 +56,38 @@ public class N19TrazabilidadInventarioDomainTests
     }
 
     [Fact]
+    public void Lote_vigencia_respeta_limites_de_fecha_y_alerta_cero()
+    {
+        var hoy = new DateTime(2026, 8, 17, 23, 59, 59, DateTimeKind.Utc);
+        var lote = new LoteInventario { ProductoVarianteId = 11 };
+        lote.ConfigurarIdentidad("L-HOY", null, hoy, true);
+
+        Assert.False(lote.EstaVencido(hoy));
+        Assert.True(lote.VenceDentroDe(hoy, 0));
+        Assert.True(lote.EstaVencido(hoy.AddDays(1)));
+        Assert.False(lote.VenceDentroDe(hoy.AddDays(1), 30));
+    }
+
+    [Fact]
+    public void Lote_reconfiguracion_invalida_no_deja_identidad_parcialmente_mutada()
+    {
+        var lote = new LoteInventario { ProductoVarianteId = 11 };
+        var fabricacionOriginal = new DateTime(2026, 8, 1);
+        var vencimientoOriginal = new DateTime(2026, 9, 1);
+        lote.ConfigurarIdentidad("LOTE-ORIGINAL", fabricacionOriginal, vencimientoOriginal, true);
+
+        Assert.Throws<InvalidOperationException>(() => lote.ConfigurarIdentidad(
+            "LOTE-NUEVO",
+            new DateTime(2026, 10, 1),
+            new DateTime(2026, 9, 30),
+            true));
+
+        Assert.Equal("LOTE-ORIGINAL", lote.Codigo);
+        Assert.Equal(fabricacionOriginal.Date, lote.FechaFabricacion);
+        Assert.Equal(vencimientoOriginal.Date, lote.FechaVencimiento);
+    }
+
+    [Fact]
     public void Serie_normaliza_identidad_y_lifecycle_es_fail_closed()
     {
         var serie = new SerieInventario { ProductoVarianteId = 11 };
@@ -75,6 +107,25 @@ public class N19TrazabilidadInventarioDomainTests
         serie.Vender();
         Assert.Equal(EstadoSerieInventario.Vendida, serie.Estado);
         Assert.Throws<InvalidOperationException>(() => serie.DarDeBaja());
+        Assert.Equal(EstadoSerieInventario.Vendida, serie.Estado);
+    }
+
+    [Fact]
+    public void Serie_transicion_invalida_no_muta_estado()
+    {
+        var serie = new SerieInventario { ProductoVarianteId = 11 };
+        serie.ConfigurarIdentidad("SN-TRANSITO");
+        serie.MarcarEnTransito();
+
+        Assert.Throws<InvalidOperationException>(() => serie.Vender());
+        Assert.Equal(EstadoSerieInventario.EnTransito, serie.Estado);
+
+        serie.RecibirDeTransito();
+        serie.Reservar();
+        serie.DarDeBaja();
+
+        Assert.Throws<InvalidOperationException>(() => serie.LiberarReserva());
+        Assert.Equal(EstadoSerieInventario.Baja, serie.Estado);
     }
 
     [Fact]
