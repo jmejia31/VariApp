@@ -57,6 +57,67 @@ public sealed class N19TrazabilidadInventarioApplicationTests
     }
 
     [Fact]
+    public async Task Crear_lote_rechaza_misma_clave_idempotente_con_payload_diferente()
+    {
+        var variante = new ProductoVariante { Id = 11, Activo = true };
+        variante.ConfigurarTrazabilidad(true, false, true, 30);
+        var existente = new LoteInventario { Id = 7, ProductoVarianteId = 11 };
+        existente.ConfigurarIdentidad("LOTE-001", new DateTime(2026, 8, 1), new DateTime(2027, 8, 1), true);
+
+        var repo = new Mock<ITrazabilidadInventarioRepository>();
+        repo.Setup(x => x.GetLoteByCodigoAsync(11, "LOTE-001", false)).ReturnsAsync(existente);
+        var variantes = new Mock<IProductoVarianteRepository>();
+        variantes.Setup(x => x.GetByIdForUpdateAsync(11)).ReturnsAsync(variante);
+        var service = CrearService(repo, variantes);
+
+        var ex = await Assert.ThrowsAsync<BusinessRuleException>(() => service.CrearLoteAsync(new CrearLoteInventarioRequest
+        {
+            ProductoVarianteId = 11,
+            Codigo = "LOTE-001",
+            FechaFabricacion = new DateTime(2026, 8, 2),
+            FechaVencimiento = new DateTime(2027, 8, 1)
+        }));
+
+        Assert.Contains("datos diferentes", ex.Message, StringComparison.OrdinalIgnoreCase);
+        repo.Verify(x => x.TryAddLoteAsync(It.IsAny<LoteInventario>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task Consultar_lotes_rechaza_rango_de_vencimiento_invertido_sin_tocar_repositorio()
+    {
+        var repo = new Mock<ITrazabilidadInventarioRepository>();
+        var service = CrearService(repo, new Mock<IProductoVarianteRepository>());
+
+        var ex = await Assert.ThrowsAsync<BusinessRuleException>(() => service.GetLotesAsync(new LoteInventarioQueryDto
+        {
+            VenceDesde = new DateTime(2027, 8, 2),
+            VenceHasta = new DateTime(2027, 8, 1)
+        }));
+
+        Assert.Contains("fecha inicial", ex.Message, StringComparison.OrdinalIgnoreCase);
+        repo.Verify(x => x.GetLotesPagedAsync(It.IsAny<LoteInventarioQueryDto>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task Consultar_series_normaliza_paginacion_sin_deformar_total()
+    {
+        var repo = new Mock<ITrazabilidadInventarioRepository>();
+        repo.Setup(x => x.GetSeriesPagedAsync(It.IsAny<SerieInventarioQueryDto>()))
+            .ReturnsAsync((Array.Empty<SerieInventario>(), 245));
+        var service = CrearService(repo, new Mock<IProductoVarianteRepository>());
+
+        var resultado = await service.GetSeriesAsync(new SerieInventarioQueryDto
+        {
+            Page = 0,
+            PageSize = 999
+        });
+
+        Assert.Equal(1, resultado.Page);
+        Assert.Equal(200, resultado.PageSize);
+        Assert.Equal(245, resultado.TotalCount);
+    }
+
+    [Fact]
     public async Task Crear_serie_con_lote_opcional_respeta_contrato_B()
     {
         var variante = new ProductoVariante { Id = 11, Activo = true };
