@@ -105,6 +105,50 @@ public sealed class N19TrazabilidadInventarioApplicationTests
     }
 
     [Fact]
+    public async Task Crear_serie_rechaza_lote_inactivo_sin_persistir_serie()
+    {
+        var variante = new ProductoVariante { Id = 11, Activo = true };
+        variante.ConfigurarTrazabilidad(true, true, false);
+        var lote = new LoteInventario { Id = 8, ProductoVarianteId = 11 };
+        lote.ConfigurarIdentidad("L-11", null, null, false);
+        lote.Desactivar();
+
+        var repo = new Mock<ITrazabilidadInventarioRepository>();
+        repo.Setup(x => x.GetLoteByIdAsync(8, false)).ReturnsAsync(lote);
+        var variantes = new Mock<IProductoVarianteRepository>();
+        variantes.Setup(x => x.GetByIdForUpdateAsync(11)).ReturnsAsync(variante);
+        var service = CrearService(repo, variantes);
+
+        var ex = await Assert.ThrowsAsync<BusinessRuleException>(() => service.CrearSerieAsync(new CrearSerieInventarioRequest
+        {
+            ProductoVarianteId = 11,
+            NumeroSerie = "SN-INACTIVA",
+            LoteInventarioId = 8
+        }));
+
+        Assert.Contains("inactivo", ex.Message, StringComparison.OrdinalIgnoreCase);
+        repo.Verify(x => x.GetSerieByNumeroAsync(It.IsAny<string>(), It.IsAny<bool>()), Times.Never);
+        repo.Verify(x => x.TryAddSerieAsync(It.IsAny<SerieInventario>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task Desactivar_lote_rechaza_si_existen_series_activas()
+    {
+        var lote = new LoteInventario { Id = 8, ProductoVarianteId = 11 };
+        lote.ConfigurarIdentidad("L-11", null, null, false);
+        var repo = new Mock<ITrazabilidadInventarioRepository>();
+        repo.Setup(x => x.GetLoteByIdAsync(8, true)).ReturnsAsync(lote);
+        repo.Setup(x => x.TieneSeriesActivasEnLoteAsync(8)).ReturnsAsync(true);
+        var service = CrearService(repo, new Mock<IProductoVarianteRepository>());
+
+        var ex = await Assert.ThrowsAsync<BusinessRuleException>(() => service.DesactivarLoteAsync(8));
+
+        Assert.Contains("series activas", ex.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.True(lote.Activo);
+        repo.Verify(x => x.SaveChangesAsync(), Times.Never);
+    }
+
+    [Fact]
     public async Task Baja_de_serie_es_idempotente()
     {
         var serie = new SerieInventario { Id = 5, ProductoVarianteId = 11 };
