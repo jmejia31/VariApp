@@ -14,6 +14,46 @@ async function login(page: Page): Promise<void> {
 test.describe('Reservas de inventario - formulario', () => {
   test('crea un borrador con clave física y cantidad', async ({ page }) => {
     await login(page);
+
+    await page.route('**/existencias-variante**', async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          success: true,
+          message: 'OK',
+          data: {
+            items: [{
+              id: 915,
+              productoVarianteId: 15,
+              productoNombre: 'Producto E2E',
+              varianteSku: 'SKU-E2E-15',
+              almacenId: 3,
+              almacenCodigo: 'ALM-03',
+              almacenNombre: 'Almacén E2E',
+              ubicacionAlmacenId: 8,
+              ubicacionCodigo: 'UBI-08',
+              ubicacionNombre: 'Ubicación E2E',
+              stockFisico: 10,
+              stockReservado: 0,
+              stockDisponible: 10,
+              stockTransito: 0,
+              stockMinimo: 0,
+              stockMaximo: 100,
+              tieneStockBajo: false,
+              estaAgotada: false,
+              fechaCreacion: '2026-08-17T00:00:00Z',
+              fechaActualizacion: '2026-08-17T00:00:00Z'
+            }],
+            page: 1,
+            pageSize: 200,
+            totalItems: 1,
+            totalPages: 1
+          }
+        })
+      });
+    });
+
     let payload: unknown;
     await page.route('**/reservas-inventario', async route => {
       if (route.request().method() !== 'POST') { await route.continue(); return; }
@@ -23,11 +63,16 @@ test.describe('Reservas de inventario - formulario', () => {
 
     await page.goto('/inventario/reservas/nueva');
     await expect(page.getByRole('heading', { name: 'Nueva reserva' })).toBeVisible();
-    await page.getByLabel('Variante').fill('15');
-    await page.getByLabel('Almacén').fill('3');
-    await page.getByLabel('Ubicación').fill('8');
-    await page.getByLabel('Cantidad').fill('4');
-    await page.getByRole('button', { name: 'Guardar reserva' }).click();
+
+    const selector = page.locator('mat-select[formcontrolname="existenciaVarianteId"]').first();
+    await selector.click();
+    await expect(selector).toHaveAttribute('aria-expanded', 'true');
+    await page.getByRole('option', { name: /Producto E2E.*SKU-E2E-15.*ALM-03.*UBI-08.*disponible 10/ }).click();
+    await expect(selector).toHaveAttribute('aria-expanded', 'false');
+    await expect(page.locator('.cdk-overlay-backdrop')).toHaveCount(0);
+
+    await page.locator('input[formcontrolname="cantidad"]').first().fill('4');
+    await page.getByRole('button', { name: 'Guardar reserva', exact: true }).click();
 
     await expect(page).toHaveURL(/\/inventario\/reservas\/901$/);
     expect(payload).toMatchObject({ detalles: [{ productoVarianteId: 15, almacenId: 3, ubicacionAlmacenId: 8, cantidad: 4 }] });
