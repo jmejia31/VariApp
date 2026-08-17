@@ -22,7 +22,8 @@ test('filtra reservas usando el catálogo activo de almacenes', async ({ page })
 
   await page.goto('/inventario/reservas');
   const almacen = page.getByLabel('Almacén');
-  await almacen.click();
+  await expect(almacen).toBeVisible();
+  await almacen.locator('.mat-mdc-select-trigger').click();
   await expect(almacen).toHaveAttribute('aria-expanded', 'true');
   await page.getByRole('option', { name: 'BOD-11 · Bodega Central' }).click();
   await expect(almacen).toHaveAttribute('aria-expanded', 'false');
