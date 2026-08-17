@@ -220,7 +220,7 @@ public sealed class N19TrazabilidadInventarioApplicationTests
             NumeroSerie = "SN-GLOBAL"
         }));
 
-        Assert.Contains("datos diferentes", ex.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("otro producto variante", ex.Message, StringComparison.OrdinalIgnoreCase);
         repo.Verify(x => x.TryAddSerieAsync(It.IsAny<SerieInventario>()), Times.Never);
     }
 
