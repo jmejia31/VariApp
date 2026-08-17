@@ -43,6 +43,23 @@ public class N19TrazabilidadInventarioDomainTests
     }
 
     [Fact]
+    public void Dias_alerta_acepta_limites_y_rechaza_superior_sin_mutar_configuracion()
+    {
+        var variante = new ProductoVariante();
+
+        variante.ConfigurarTrazabilidad(true, false, true, 0);
+        Assert.Equal(0, variante.DiasAlertaVencimiento);
+
+        variante.ConfigurarTrazabilidad(true, false, true, 3650);
+        Assert.Equal(3650, variante.DiasAlertaVencimiento);
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => variante.ConfigurarTrazabilidad(true, false, true, 3651));
+        Assert.True(variante.ControlaLote);
+        Assert.True(variante.ControlaFechaVencimiento);
+        Assert.Equal(3650, variante.DiasAlertaVencimiento);
+    }
+
+    [Fact]
     public void Lote_normaliza_codigo_y_rechaza_vencimiento_anterior_a_fabricacion()
     {
         var lote = new LoteInventario { ProductoVarianteId = 11 };
