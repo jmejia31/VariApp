@@ -101,6 +101,57 @@ public sealed class N17ConteosInventarioControllerBehaviorTests
     }
 
     [Fact]
+    public async Task Cancelar_RegistraAuditoriaConMotivoYReferencia()
+    {
+        var service = new Mock<IConteoInventarioService>();
+        var auditoria = new Mock<IAuditoriaService>();
+        var dto = new CancelarConteoInventarioDto { Motivo = "Diferencias requieren reconteo" };
+        var cancelado = new ConteoInventarioDto { Id = 20, Numero = "CNT-20" };
+        service.Setup(x => x.CancelarAsync(20, dto.Motivo)).ReturnsAsync(cancelado);
+        var controller = new ConteosInventarioController(service.Object, auditoria.Object);
+
+        var result = await controller.Cancelar(20, dto);
+
+        Assert.IsType<OkObjectResult>(result);
+        auditoria.Verify(x => x.RegistrarAsync(
+            ModuloSistema.MovimientosInventario,
+            AccionPermiso.Anular,
+            It.Is<string>(descripcion => descripcion.Contains("cancelado", StringComparison.OrdinalIgnoreCase)),
+            20,
+            "ConteoInventario",
+            null,
+            It.IsAny<object>(),
+            dto.Motivo,
+            "Exito",
+            null), Times.Once);
+    }
+
+    [Fact]
+    public async Task Cerrar_RegistraAuditoriaConPermisoCerrar()
+    {
+        var service = new Mock<IConteoInventarioService>();
+        var auditoria = new Mock<IAuditoriaService>();
+        var cerrado = new ConteoInventarioDto { Id = 30, Numero = "CNT-30", Estado = "Cerrado" };
+        service.Setup(x => x.CerrarAsync(30)).ReturnsAsync(cerrado);
+        var controller = new ConteosInventarioController(service.Object, auditoria.Object);
+
+        var result = await controller.Cerrar(30);
+
+        Assert.IsType<OkObjectResult>(result);
+        auditoria.Verify(x => x.RegistrarAsync(
+            ModuloSistema.MovimientosInventario,
+            AccionPermiso.Cerrar,
+            It.Is<string>(descripcion => descripcion.Contains("cerrado", StringComparison.OrdinalIgnoreCase)),
+            30,
+            "ConteoInventario",
+            null,
+            It.IsAny<object>(),
+            null,
+            "Exito",
+            null), Times.Once);
+    }
+
+    [Fact]
     public async Task GenerarAjuste_AuditaConteoYAjusteGenerado()
     {
         var service = new Mock<IConteoInventarioService>();
