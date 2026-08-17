@@ -19,6 +19,18 @@ public class SerieInventario : AuditableEntity
         NumeroSerie = numeroSerie.Trim().ToUpperInvariant();
     }
 
+    public void VincularLote(LoteInventario lote)
+    {
+        ArgumentNullException.ThrowIfNull(lote);
+        if (ProductoVarianteId <= 0) throw new InvalidOperationException("La variante de la serie debe estar definida antes de vincular un lote.");
+        if (lote.Id <= 0) throw new InvalidOperationException("El lote debe estar persistido antes de vincularse a una serie.");
+        if (lote.ProductoVarianteId != ProductoVarianteId)
+            throw new InvalidOperationException("La serie y el lote deben pertenecer a la misma variante.");
+
+        LoteInventarioId = lote.Id;
+        LoteInventario = lote;
+    }
+
     public void Reservar()
     {
         ExigirEstado(EstadoSerieInventario.Disponible, "Sólo una serie disponible puede reservarse.");
