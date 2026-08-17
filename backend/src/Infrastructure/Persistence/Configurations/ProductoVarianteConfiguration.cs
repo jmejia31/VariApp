@@ -15,6 +15,17 @@ public class ProductoVarianteConfiguration : IEntityTypeConfiguration<ProductoVa
         builder.Property(x => x.Costo).HasPrecision(18, 2);
         builder.Property(x => x.Precio).HasPrecision(18, 2);
         builder.Property(x => x.EsTecnica).HasDefaultValue(false);
+        builder.Property(x => x.ControlaLote).HasDefaultValue(false);
+        builder.Property(x => x.ControlaNumeroSerie).HasDefaultValue(false);
+        builder.Property(x => x.ControlaFechaVencimiento).HasDefaultValue(false);
+        builder.Property(x => x.DiasAlertaVencimiento);
+
+        builder.ToTable(t => t.HasCheckConstraint(
+            "CK_ProductoVariantes_TrazabilidadVencimiento",
+            "`ControlaFechaVencimiento` = 0 OR `ControlaLote` = 1"));
+        builder.ToTable(t => t.HasCheckConstraint(
+            "CK_ProductoVariantes_AlertaVencimiento",
+            "(`DiasAlertaVencimiento` IS NULL AND `ControlaFechaVencimiento` = 0) OR (`ControlaFechaVencimiento` = 1 AND (`DiasAlertaVencimiento` IS NULL OR `DiasAlertaVencimiento` >= 0))"));
 
         builder.Property<string?>("IdentidadActivaUnica")
             .HasMaxLength(160)
