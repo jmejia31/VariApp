@@ -2,6 +2,7 @@ using InventoryApp.Domain.Entities;
 using InventoryApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Xunit;
 
 namespace InventoryApp.Tests;
 
