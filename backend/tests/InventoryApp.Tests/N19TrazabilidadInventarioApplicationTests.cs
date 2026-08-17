@@ -236,6 +236,24 @@ public sealed class N19TrazabilidadInventarioApplicationTests
         var unit = new Mock<IUnitOfWork>();
         unit.Setup(x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()))
             .Returns((Func<Task> operation) => operation());
-        return new TrazabilidadInventarioService(repo.Object, variantes.Object, current.Object, unit.Object);
+        var auditoria = new Mock<IAuditoriaService>();
+        auditoria.Setup(x => x.RegistrarEstrictoAsync(
+                It.IsAny<ModuloSistema>(),
+                It.IsAny<AccionPermiso>(),
+                It.IsAny<string>(),
+                It.IsAny<int?>(),
+                It.IsAny<string?>(),
+                It.IsAny<object?>(),
+                It.IsAny<object?>(),
+                It.IsAny<string?>(),
+                It.IsAny<string>(),
+                It.IsAny<string?>()))
+            .Returns(Task.CompletedTask);
+        return new TrazabilidadInventarioService(
+            repo.Object,
+            variantes.Object,
+            current.Object,
+            unit.Object,
+            auditoria.Object);
     }
 }
