@@ -22,7 +22,7 @@ import { ReservaInventarioService } from '../../services/reserva-inventario.serv
           <button *ngIf="puedeConfirmar && reserva.estado === 'Borrador'" mat-flat-button color="primary" type="button" [disabled]="procesando" (click)="activar()">Activar</button>
           <button *ngIf="puedeConfirmar && reserva.estado === 'Activa'" mat-flat-button color="primary" type="button" [disabled]="procesando" (click)="consumir()">Consumir</button>
           <button *ngIf="puedeAnular && reserva.estado === 'Activa'" mat-stroked-button type="button" [disabled]="procesando" (click)="liberar()">Liberar</button>
-          <button *ngIf="puedeCambiarEstado && reserva.estado === 'Activa'" mat-stroked-button type="button" [disabled]="procesando" (click)="expirar()">Expirar</button>
+          <button *ngIf="puedeCambiarEstado && reserva.estado === 'Activa'" mat-stroked-button type="button" [disabled]="procesando || !reservaPuedeExpirar" [attr.aria-disabled]="procesando || !reservaPuedeExpirar" [title]="reservaPuedeExpirar ? 'Marcar reserva como expirada' : 'Disponible cuando alcance su fecha de expiración'" (click)="expirar()">Expirar</button>
           <button *ngIf="puedeAnular && (reserva.estado === 'Borrador' || reserva.estado === 'Activa')" mat-stroked-button color="warn" type="button" [disabled]="procesando" (click)="cancelar()">Cancelar</button>
         </div>
       </header>
@@ -56,11 +56,16 @@ export class ReservaInventarioDetailComponent implements OnInit {
   get puedeConfirmar(): boolean { return this.permisos.puede('MovimientosInventario', 'Confirmar'); }
   get puedeAnular(): boolean { return this.permisos.puede('MovimientosInventario', 'Anular'); }
   get puedeCambiarEstado(): boolean { return this.permisos.puede('MovimientosInventario', 'CambiarEstado'); }
+  get reservaPuedeExpirar(): boolean {
+    if (!this.reserva?.fechaExpiracion) return false;
+    const expiracion = Date.parse(this.reserva.fechaExpiracion);
+    return !Number.isNaN(expiracion) && expiracion <= Date.now();
+  }
 
   cargar(): void { this.loading = true; this.error = ''; this.service.getById(this.id).pipe(finalize(() => this.loading = false)).subscribe({ next: r => { if (!r.success) { this.error = r.message || 'No se pudo cargar la reserva.'; return; } this.reserva = r.data; }, error: () => this.error = 'No se pudo cargar la reserva.' }); }
   activar(): void { if (!confirm('¿Activar esta reserva y bloquear stock disponible?')) return; this.ejecutar(() => this.service.activar(this.id), 'Reserva activada.'); }
   consumir(): void { if (!confirm('¿Consumir definitivamente esta reserva?')) return; this.ejecutar(() => this.service.consumir(this.id), 'Reserva consumida.'); }
-  expirar(): void { if (!confirm('¿Marcar esta reserva como expirada y liberar el stock?')) return; this.ejecutar(() => this.service.expirar(this.id), 'Reserva expirada.'); }
+  expirar(): void { if (!this.reservaPuedeExpirar) { this.error = 'La reserva todavía no alcanzó su fecha de expiración.'; return; } if (!confirm('¿Marcar esta reserva como expirada y liberar el stock?')) return; this.ejecutar(() => this.service.expirar(this.id), 'Reserva expirada.'); }
   liberar(): void { const motivo = prompt('Motivo de liberación:')?.trim(); if (!motivo) return; this.ejecutar(() => this.service.liberar(this.id, motivo), 'Reserva liberada.'); }
   cancelar(): void { const motivo = prompt('Motivo de cancelación:')?.trim(); if (!motivo) return; this.ejecutar(() => this.service.cancelar(this.id, motivo), 'Reserva cancelada.'); }
   editar(): void { void this.router.navigate(['/inventario/reservas', this.id, 'editar']); }
