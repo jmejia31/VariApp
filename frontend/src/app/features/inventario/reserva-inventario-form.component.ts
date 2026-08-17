@@ -33,7 +33,7 @@ import { ReservaInventarioService } from '../../services/reserva-inventario.serv
             <mat-form-field appearance="outline" class="physical-select">
               <mat-label>Existencia física</mat-label>
               <mat-select formControlName="existenciaVarianteId" required (selectionChange)="onExistenciaChange(i)">
-                <mat-option *ngFor="let existencia of existencias" [value]="existencia.id">
+                <mat-option *ngFor="let existencia of existencias" [value]="existencia.id" [disabled]="existencia.stockDisponible <= 0">
                   {{ etiquetaExistencia(existencia) }}
                 </mat-option>
               </mat-select>
@@ -43,7 +43,7 @@ import { ReservaInventarioService } from '../../services/reserva-inventario.serv
             <button mat-icon-button color="warn" type="button" aria-label="Quitar línea" [disabled]="detalles.length === 1" (click)="quitarDetalle(i)"><mat-icon>delete_outline</mat-icon></button>
           </div>
         </section>
-        <footer><button mat-button type="button" (click)="volver()">Cancelar</button><button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || guardando || !existencias.length"><mat-spinner *ngIf="guardando" diameter="20"></mat-spinner><span *ngIf="!guardando">Guardar reserva</span></button></footer>
+        <footer><button mat-button type="button" (click)="volver()">Cancelar</button><button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || guardando || !hayExistenciasReservables"><mat-spinner *ngIf="guardando" diameter="20"></mat-spinner><span *ngIf="!guardando">Guardar reserva</span></button></footer>
       </form>
     </section>
   `,
@@ -67,6 +67,7 @@ export class ReservaInventarioFormComponent implements OnInit {
   ) { this.agregarDetalle(); }
 
   get detalles(): FormArray<FormGroup> { return this.form.controls.detalles; }
+  get hayExistenciasReservables(): boolean { return this.existencias.some(x => x.stockDisponible > 0); }
 
   ngOnInit(): void {
     const raw = this.route.snapshot.paramMap.get('id');
@@ -107,7 +108,8 @@ export class ReservaInventarioFormComponent implements OnInit {
 
   etiquetaExistencia(existencia: ExistenciaVariante): string {
     const ubicacion = existencia.ubicacionCodigo ? ` / ${existencia.ubicacionCodigo}` : ' / raíz';
-    return `${existencia.productoNombre} · ${existencia.varianteSku} · ${existencia.almacenCodigo}${ubicacion} · disponible ${existencia.stockDisponible}`;
+    const disponibilidad = existencia.stockDisponible > 0 ? `disponible ${existencia.stockDisponible}` : 'sin stock disponible';
+    return `${existencia.productoNombre} · ${existencia.varianteSku} · ${existencia.almacenCodigo}${ubicacion} · ${disponibilidad}`;
   }
 
   cargar(): void {
