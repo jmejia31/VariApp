@@ -134,8 +134,26 @@ jobs:
 
       - name: Snapshot EF consistente
         working-directory: backend
+        shell: bash
         run: |
-          dotnet ef migrations has-pending-model-changes \
+          set -euo pipefail
+
+          if dotnet ef migrations has-pending-model-changes \
             --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
             --startup-project src/API/InventoryApp.API.csproj \
-            --context AppDbContext
+            --context AppDbContext; then
+            exit 0
+          fi
+
+          echo '::group::Diagnóstico EF del drift detectado'
+          rm -rf /tmp/variapp-ef-diagnostic
+          dotnet ef migrations add __CI_ModelDiff \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext \
+            --output-dir /tmp/variapp-ef-diagnostic
+
+          find /tmp/variapp-ef-diagnostic -maxdepth 1 -type f -name '*.cs' -print -exec sed -n '1,260p' {} \;
+          echo '::endgroup::'
+          echo 'Snapshot EF inconsistente: el bloque anterior contiene la migración diagnóstica efímera.' >&2
+          exit 1
