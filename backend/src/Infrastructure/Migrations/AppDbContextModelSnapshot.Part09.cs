@@ -102,7 +102,6 @@ namespace InventoryApp.Infrastructure.Migrations
                     .OnDelete(DeleteBehavior.Restrict).HasConstraintName("FK_ConteosInventario_Ubicacion_MismoAlmacen");
                 b.Navigation("Almacen");
                 b.Navigation("Categoria");
-                b.Navigation("Detalles");
                 b.Navigation("UbicacionAlmacen");
             });
 
@@ -125,6 +124,11 @@ namespace InventoryApp.Infrastructure.Migrations
                 b.Navigation("ConteoInventario");
                 b.Navigation("ProductoVariante");
                 b.Navigation("UbicacionAlmacen");
+            });
+
+            modelBuilder.Entity("InventoryApp.Domain.Entities.ConteoInventario", b =>
+            {
+                b.Navigation("Detalles");
             });
         }
     }
