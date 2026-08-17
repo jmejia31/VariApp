@@ -32,13 +32,14 @@ public sealed class N17ConteoInventarioServiceTests
     }
 
     [Fact]
-    public async Task GetById_ConteoCiegoEnProceso_NoExponeStockEsperado()
+    public async Task GetById_ConteoCiegoEnProceso_NoExponeReferenciaNiDiferenciaInferible()
     {
         var repository = new Mock<IConteoInventarioRepository>();
         var existencias = new Mock<IExistenciaVarianteRepository>();
         var currentUser = new Mock<ICurrentUserService>();
         var unitOfWork = new Mock<IUnitOfWork>();
         var conteo = CrearConteoCiegoEnProceso();
+        conteo.Detalles.Single().RegistrarConteo(6, 7, DateTime.UtcNow);
         repository.Setup(x => x.GetByIdAsync(18)).ReturnsAsync(conteo);
         var service = new ConteoInventarioService(repository.Object, existencias.Object, currentUser.Object, unitOfWork.Object);
 
@@ -48,7 +49,11 @@ public sealed class N17ConteoInventarioServiceTests
         Assert.True(dto!.EsCiego);
         Assert.Equal(EstadoConteoInventario.EnProceso, dto.Estado);
         Assert.Single(dto.Detalles);
+        Assert.Equal(6, dto.Detalles[0].CantidadContada);
         Assert.Null(dto.Detalles[0].StockEsperado);
+        Assert.Null(dto.Detalles[0].Diferencia);
+        Assert.Equal(0, dto.CantidadConDiferencia);
+        Assert.Equal(0, dto.DiferenciaNeta);
     }
 
     [Fact]
