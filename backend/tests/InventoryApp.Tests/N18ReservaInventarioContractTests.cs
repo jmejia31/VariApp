@@ -61,6 +61,34 @@ public class N18ReservaInventarioContractTests
     }
 
     [Fact]
+    public void Query_rechaza_rango_de_expiracion_invertido()
+    {
+        var dto = new ReservaInventarioQueryDto
+        {
+            ExpiraDesde = new DateTime(2026, 8, 18, 0, 0, 0, DateTimeKind.Utc),
+            ExpiraHasta = new DateTime(2026, 8, 17, 0, 0, 0, DateTimeKind.Utc)
+        };
+
+        var errores = Validar(dto);
+
+        Assert.Contains(errores, x =>
+            x.MemberNames.Contains(nameof(ReservaInventarioQueryDto.ExpiraDesde)) &&
+            x.MemberNames.Contains(nameof(ReservaInventarioQueryDto.ExpiraHasta)));
+    }
+
+    [Fact]
+    public void Query_admite_rango_de_expiracion_ordenado()
+    {
+        var dto = new ReservaInventarioQueryDto
+        {
+            ExpiraDesde = new DateTime(2026, 8, 17, 0, 0, 0, DateTimeKind.Utc),
+            ExpiraHasta = new DateTime(2026, 8, 18, 0, 0, 0, DateTimeKind.Utc)
+        };
+
+        Assert.Empty(Validar(dto));
+    }
+
+    [Fact]
     public void Liberar_y_cancelar_exigen_motivo_no_vacio()
     {
         Assert.NotEmpty(Validar(new LiberarReservaInventarioDto { Motivo = string.Empty }));
