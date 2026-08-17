@@ -2,6 +2,7 @@ using InventoryApp.API.Controllers;
 using InventoryApp.API.Filters;
 using InventoryApp.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Xunit;
 
 namespace InventoryApp.Tests;
@@ -17,6 +18,17 @@ public sealed class N19TrazabilidadControllerSecurityTests
         Assert.Empty(type.GetCustomAttributes(typeof(AllowAnonymousAttribute), inherit: true));
         Assert.All(type.GetMethods().Where(m => m.DeclaringType == type), method =>
             Assert.Empty(method.GetCustomAttributes(typeof(AllowAnonymousAttribute), inherit: true)));
+    }
+
+    [Fact]
+    public void Contrato_HTTP_mantiene_ruta_canonica_y_ApiController()
+    {
+        var type = typeof(TrazabilidadInventarioController);
+        var route = Assert.Single(type.GetCustomAttributes(typeof(RouteAttribute), inherit: true)) as RouteAttribute;
+
+        Assert.NotNull(route);
+        Assert.Equal("trazabilidad-inventario", route.Template);
+        Assert.Single(type.GetCustomAttributes(typeof(ApiControllerAttribute), inherit: true));
     }
 
     [Theory]
