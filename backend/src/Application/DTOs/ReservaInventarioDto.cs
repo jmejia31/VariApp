@@ -85,18 +85,33 @@ public sealed class CancelarReservaInventarioDto
     public string Motivo { get; set; } = string.Empty;
 }
 
-public sealed class ReservaInventarioQueryDto
+public sealed class ReservaInventarioQueryDto : IValidatableObject
 {
     public string? Busqueda { get; set; }
     public string? Estado { get; set; }
+
     [Range(1, int.MaxValue)]
     public int? VentaId { get; set; }
+
     [Range(1, int.MaxValue)]
     public int? AlmacenId { get; set; }
+
     public DateTime? ExpiraDesde { get; set; }
     public DateTime? ExpiraHasta { get; set; }
+
     [Range(1, int.MaxValue)]
     public int Page { get; set; } = 1;
+
     [Range(1, 100)]
     public int PageSize { get; set; } = 20;
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (ExpiraDesde.HasValue && ExpiraHasta.HasValue && ExpiraDesde.Value > ExpiraHasta.Value)
+        {
+            yield return new ValidationResult(
+                "ExpiraDesde no puede ser posterior a ExpiraHasta.",
+                new[] { nameof(ExpiraDesde), nameof(ExpiraHasta) });
+        }
+    }
 }
