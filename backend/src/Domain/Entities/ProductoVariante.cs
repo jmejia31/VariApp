@@ -25,7 +25,36 @@ public class ProductoVariante : AuditableEntity
     public bool Eliminado { get; set; }
     public DateTime? FechaEliminacion { get; set; }
     public int? EliminadoPorUsuarioId { get; set; }
+
+    // N1.9 — trazabilidad logística opt-in. Estos flags no forman parte de la
+    // identidad comercial de la variante y no alteran el comportamiento de las
+    // variantes existentes mientras permanezcan desactivados.
+    public bool ControlaLote { get; private set; }
+    public bool ControlaNumeroSerie { get; private set; }
+    public bool ControlaFechaVencimiento { get; private set; }
+    public int? DiasAlertaVencimiento { get; private set; }
+
     public ICollection<ProductoImagen> Imagenes { get; set; } = new List<ProductoImagen>();
     public bool TieneStockBajo => Activo && !Eliminado && Cantidad > 0 && Cantidad < UmbralStockBajo;
     public bool EstaAgotada => Activo && !Eliminado && Cantidad <= 0;
+    public bool RequiereTrazabilidad => ControlaLote || ControlaNumeroSerie || ControlaFechaVencimiento;
+
+    public void ConfigurarTrazabilidad(
+        bool controlaLote,
+        bool controlaNumeroSerie,
+        bool controlaFechaVencimiento,
+        int? diasAlertaVencimiento = null)
+    {
+        if (controlaFechaVencimiento && !controlaLote)
+            throw new InvalidOperationException("El control de vencimiento requiere control de lote para preservar una identidad logística durable.");
+        if (diasAlertaVencimiento.HasValue && diasAlertaVencimiento.Value < 0)
+            throw new ArgumentOutOfRangeException(nameof(diasAlertaVencimiento), "Los días de alerta de vencimiento no pueden ser negativos.");
+        if (!controlaFechaVencimiento && diasAlertaVencimiento.HasValue)
+            throw new InvalidOperationException("Los días de alerta sólo aplican cuando el control de vencimiento está habilitado.");
+
+        ControlaLote = controlaLote;
+        ControlaNumeroSerie = controlaNumeroSerie;
+        ControlaFechaVencimiento = controlaFechaVencimiento;
+        DiasAlertaVencimiento = controlaFechaVencimiento ? diasAlertaVencimiento : null;
+    }
 }
