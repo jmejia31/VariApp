@@ -1,3 +1,4 @@
+using InventoryApp.Application.Common;
 using InventoryApp.Domain.Enums;
 
 namespace InventoryApp.Application.DTOs;
@@ -37,6 +38,22 @@ public class CrearLoteInventarioRequest
     public DateTime? FechaVencimiento { get; set; }
 }
 
+public sealed class ActualizarLoteInventarioRequest
+{
+    public string Codigo { get; set; } = string.Empty;
+    public DateTime? FechaFabricacion { get; set; }
+    public DateTime? FechaVencimiento { get; set; }
+}
+
+public sealed class LoteInventarioQueryDto : PagedRequest
+{
+    public int? ProductoVarianteId { get; set; }
+    public bool? Activo { get; set; }
+    public DateTime? VenceDesde { get; set; }
+    public DateTime? VenceHasta { get; set; }
+    public bool? SoloVencidos { get; set; }
+}
+
 public class SerieInventarioDto
 {
     public int Id { get; set; }
@@ -51,4 +68,11 @@ public class CrearSerieInventarioRequest
     public int ProductoVarianteId { get; set; }
     public int? LoteInventarioId { get; set; }
     public string NumeroSerie { get; set; } = string.Empty;
+}
+
+public sealed class SerieInventarioQueryDto : PagedRequest
+{
+    public int? ProductoVarianteId { get; set; }
+    public int? LoteInventarioId { get; set; }
+    public EstadoSerieInventario? Estado { get; set; }
 }
