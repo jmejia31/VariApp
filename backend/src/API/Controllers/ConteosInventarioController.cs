@@ -70,7 +70,7 @@ public sealed class ConteosInventarioController : ControllerBase
     {
         var conteo = await _service.CapturarDetalleAsync(id, detalleId, dto);
         if (conteo is null) return NotFound(ApiResponse<object>.Fail("Conteo de inventario no encontrado."));
-        await AuditarAsync(AccionPermiso.Editar, conteo, $"Línea {detalleId} capturada.");
+        await AuditarCapturaAsync(conteo, detalleId, dto.CantidadContada);
         return Ok(ApiResponse<ConteoInventarioDto>.Ok(conteo, "Captura registrada correctamente."));
     }
 
@@ -80,7 +80,7 @@ public sealed class ConteosInventarioController : ControllerBase
     {
         var conteo = await _service.CapturarLoteAsync(id, dto);
         if (conteo is null) return NotFound(ApiResponse<object>.Fail("Conteo de inventario no encontrado."));
-        await AuditarAsync(AccionPermiso.Editar, conteo, $"Captura por lote registrada ({dto.Lineas.Count} líneas).");
+        await AuditarCapturaLoteAsync(conteo, dto);
         return Ok(ApiResponse<ConteoInventarioDto>.Ok(conteo, "Captura por lote registrada correctamente."));
     }
 
@@ -139,6 +139,43 @@ public sealed class ConteosInventarioController : ControllerBase
             entidad: nameof(ConteoInventario),
             valoresNuevos: new { conteo.Numero, conteo.Estado, conteo.AlmacenId, conteo.UbicacionAlmacenId, conteo.CategoriaId },
             motivo: motivo);
+    }
+
+    private Task AuditarCapturaAsync(ConteoInventarioDto conteo, int detalleId, int cantidadContada)
+    {
+        if (_auditoria is null) return Task.CompletedTask;
+        return _auditoria.RegistrarAsync(
+            ModuloSistema.MovimientosInventario,
+            AccionPermiso.Editar,
+            $"Línea {detalleId} capturada.",
+            conteo.Id,
+            entidad: nameof(ConteoInventario),
+            valoresNuevos: new
+            {
+                conteo.Numero,
+                ConteoInventarioDetalleId = detalleId,
+                CantidadContada = cantidadContada,
+                conteo.AlmacenId,
+                conteo.UbicacionAlmacenId
+            });
+    }
+
+    private Task AuditarCapturaLoteAsync(ConteoInventarioDto conteo, CapturarConteoInventarioLoteDto dto)
+    {
+        if (_auditoria is null) return Task.CompletedTask;
+        return _auditoria.RegistrarAsync(
+            ModuloSistema.MovimientosInventario,
+            AccionPermiso.Editar,
+            $"Captura por lote registrada ({dto.Lineas.Count} líneas).",
+            conteo.Id,
+            entidad: nameof(ConteoInventario),
+            valoresNuevos: new
+            {
+                conteo.Numero,
+                conteo.AlmacenId,
+                conteo.UbicacionAlmacenId,
+                Lineas = dto.Lineas.Select(linea => new { linea.DetalleId, linea.CantidadContada }).ToArray()
+            });
     }
 
     private Task AuditarGeneracionAjusteAsync(int conteoId, int ajusteInventarioId)
