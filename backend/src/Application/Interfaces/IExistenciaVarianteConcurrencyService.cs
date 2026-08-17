@@ -64,6 +64,17 @@ public interface IExistenciaVarianteConcurrencyService
         int cantidadNueva);
 
     /// <summary>
+    /// Ajusta StockReservado sobre la fila autoritativa ya protegida por la misma
+    /// transacción. N1.8 lo usa para activar/liberar/consumir/expirar reservas sin
+    /// crear una segunda autoridad de disponibilidad.
+    /// </summary>
+    Task AjustarStockReservadoPesimistaAsync(
+        InventarioExistenciaClave clave,
+        int stockReservadoActualEsperado,
+        int stockReservadoNuevo) =>
+        throw new NotSupportedException("El adapter de existencias no soporta actualización autoritativa de StockReservado.");
+
+    /// <summary>
     /// Ajusta conjuntamente StockFisico y StockTransito sobre la misma existencia
     /// ya bloqueada. N1.6 lo usa para transferencias sin crear una segunda autoridad.
     /// La implementación por defecto mantiene compatibilidad binaria con adapters de
