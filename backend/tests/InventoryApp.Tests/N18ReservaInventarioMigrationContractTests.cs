@@ -2,6 +2,7 @@ using System.Reflection;
 using InventoryApp.Infrastructure.Migrations;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Migrations.Operations;
+using Xunit;
 
 namespace InventoryApp.Tests;
 
