@@ -78,6 +78,5 @@ test('rechaza localmente un rango de expiración invertido', async ({ page }) =>
   await page.getByRole('button', { name: 'Filtrar', exact: true }).click();
 
   await expect(page.getByRole('alert')).toContainText('“Expira desde” no puede ser posterior a “Expira hasta”');
-  await page.waitForTimeout(100);
   expect(consultas).toBe(consultasIniciales);
 });
