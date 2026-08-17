@@ -1,4 +1,30 @@
-import { expect, test } from '@playwright/test';
+import { expect, Page, test } from '@playwright/test';
+
+const ADMIN_USERNAME = process.env['PHASE7_ADMIN_USERNAME'] ?? 'e2e_admin';
+const ADMIN_PASSWORD = process.env['PHASE7_ADMIN_PASSWORD'] ?? 'E2E.Admin#2026!';
+
+async function loginConPermisoSoloDashboard(page: Page): Promise<void> {
+  await page.route('**/permisos/mis-permisos', async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        success: true,
+        message: 'Permisos cargados',
+        data: {
+          esAdministrador: false,
+          permisos: ['Dashboard:Ver']
+        }
+      })
+    });
+  });
+
+  await page.goto('/login');
+  await page.locator('input[formcontrolname="nombreUsuario"]').fill(ADMIN_USERNAME);
+  await page.locator('input[formcontrolname="password"]').fill(ADMIN_PASSWORD);
+  await page.locator('button[type="submit"]').click();
+  await expect(page).toHaveURL(/\/dashboard(?:\?|$)/, { timeout: 20_000 });
+}
 
 test.describe('Ajustes de inventario - control de acceso', () => {
   test('redirige a login cuando se intenta abrir el módulo sin sesión autenticada', async ({ page }) => {
@@ -8,28 +34,7 @@ test.describe('Ajustes de inventario - control de acceso', () => {
   });
 
   test('deniega el módulo a un usuario autenticado sin permiso Inventario:Ver', async ({ page }) => {
-    await page.addInitScript(() => {
-      localStorage.setItem('inventoryapp_token', 'e2e-token-sin-permiso-inventario');
-      localStorage.setItem('inventoryapp_user', 'e2e-sin-inventario');
-      localStorage.setItem('inventoryapp_nombre_completo', 'E2E Sin Inventario');
-      localStorage.setItem('inventoryapp_rol', 'Operador');
-      localStorage.setItem('inventoryapp_expira_en', '2099-12-31T23:59:59Z');
-    });
-
-    await page.route('**/permisos/mis-permisos', async route => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          success: true,
-          message: 'Permisos cargados',
-          data: {
-            esAdministrador: false,
-            permisos: ['Dashboard:Ver']
-          }
-        })
-      });
-    });
+    await loginConPermisoSoloDashboard(page);
 
     await page.goto('/inventario/ajustes');
 
