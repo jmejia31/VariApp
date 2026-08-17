@@ -17,6 +17,17 @@ public class N17ConteosInventarioControllerRbacTests
             atributo => atributo.AttributeType == typeof(AuthorizeAttribute));
     }
 
+    [Fact]
+    public void Endpoints_NoPermitenBypassAnonimo()
+    {
+        var endpoints = typeof(ConteosInventarioController)
+            .GetMethods()
+            .Where(m => m.DeclaringType == typeof(ConteosInventarioController));
+
+        Assert.DoesNotContain(endpoints, method =>
+            method.CustomAttributes.Any(attribute => attribute.AttributeType == typeof(AllowAnonymousAttribute)));
+    }
+
     [Theory]
     [InlineData(nameof(ConteosInventarioController.Buscar), AccionPermiso.Ver)]
     [InlineData(nameof(ConteosInventarioController.GetById), AccionPermiso.Ver)]
