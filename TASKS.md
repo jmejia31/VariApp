@@ -163,7 +163,22 @@ ERP-N0.5, ERP-N0.6, ERP-N0.7 y ERP-N0.8 están formalmente cerrados. `GATE-N0=LI
 - [x] N1.7.E Frontend/UX — listado, filtros, formulario, detalle, captura dirty-only, catálogos físicos, modo ciego, rutas/menú y E2E.
 - [x] N1.7.F RBAC/auditoría/seguridad/observabilidad — auditoría del lifecycle, correlation saneado y privacidad fail-closed de conteos ciegos activos/cancelados.
 - [x] N1.7.G QA/regresión/CI — baseline funcional `7bba45d13a3fe0579285ed273062f66b2796893f`; Desarrollo `31995868136`, aceptación `31995868251`, Fase 8 `31995868120`, M13 `31995868144` y M10 `31995868110` en `SUCCESS`.
-- [ ] N1.7.H Documentación/certificación — documentación canónica publicada: `docs/ERP_N1_7_CONTEOS_FISICOS.md`, `docs/ADR_N1_7_CONTEOS_CIEGOS_Y_AJUSTES.md`, `docs/RUNBOOK_N1_7_CONTEOS_FISICOS.md` y `docs/ERD_N1_7_CONTEOS_FISICOS.md`; falta únicamente certificar el HEAD documental final y registrar el cierre formal en VAEP.
+- [x] N1.7.H Documentación/certificación — cierre formal ya registrado en VAEP; documentos `docs/ERP_N1_7_CONTEOS_FISICOS.md`, `docs/ADR_N1_7_CONTEOS_CIEGOS_Y_AJUSTES.md`, `docs/RUNBOOK_N1_7_CONTEOS_FISICOS.md` y `docs/ERD_N1_7_CONTEOS_FISICOS.md`; evidencia de cierre `d65b54d69a0a6dc6aea271c315d9a5b7b1967516`, `8b951c063babf2c49943922c668cbe9ce43eadfb`, `5b5fa045c5ba7c69746d579e4fd8c92cd077586e`, `048b960c521b681f0ebba370725ea4de816853b4` y `6c5c155c66ca090b35f05b254c854b0172c7efdc`.
+
+**ERP-N1.7 queda formalmente cerrado.**
+
+## ERP-N1.8 — Reservas de inventario
+
+- [x] N1.8.A Auditoría y preflight — `docs/ERP_N1_8_RESERVAS_PREFLIGHT.md`; `ExistenciaVariante` permanece como única autoridad cuantitativa, `ReservaInventario` explica `StockReservado`, identidad física Variante+Almacén+Ubicación y prevención de overselling mediante lock pesimista.
+- [x] N1.8.B Dominio y contratos — agregado/DTOs e invariantes de Reserva certificados; CI Development/Acceptance/Fase8/M10/M13 verde sobre `fa61d1804d9cf0ef013e81c3401ac964785ef243`.
+- [x] N1.8.C Persistencia/migración/datos — EF, DbSets, migración física, snapshot, preflight/postcheck/reconcile, rollback/runbook y pruebas certificados; cierre `00b79a29c610c0cf50a9e18173489678f1101e23`.
+- [x] N1.8.D Aplicación/servicios/API — repositorio, servicio, API/DI, lifecycle autoritativo de `StockReservado`, locks pesimistas, idempotencia, RBAC/auditoría y contratos HTTP; cierre hasta `9e2e080aa70c9bdb4fbb5ee097a3262f2e671071`.
+- [x] N1.8.E Frontend/UX — mantenimiento de Reservas, selector físico `ExistenciaVariante`, estados físico/reservado/disponible, permisos/rutas, loading/error/vacío, responsive, accesibilidad y E2E; HEAD certificado `593247dddf8e5cdfba47502553ece638bc5e50aa`.
+- [x] N1.8.F RBAC/auditoría/seguridad/observabilidad — auditoría crítica obligatoria, transaccional y fail-closed mediante `RegistrarEstrictoAsync` dentro de `IUnitOfWork`; RBAC relacional y CorrelationId saneado; cierre funcional `95baf2763b912e1015a3bdd25a37aca649e34c37`.
+- [x] N1.8.G QA/regresión/CI — Development `32035509947`, Acceptance `32035509805`, Fase8 `32035509973`, M10 `32035509930` y M13 `32035509964` en SUCCESS completo sobre `95baf2763b912e1015a3bdd25a37aca649e34c37`.
+- [x] N1.8.H Documentación/certificación — cierre canónico `docs/ERP_N1_8_RESERVAS.md`, `docs/ADR_N1_8_RESERVAS_STOCK_RESERVADO_Y_OVERSELLING.md`, `docs/RUNBOOK_N1_8_RESERVAS.md` y `docs/ERD_N1_8_RESERVAS.md` publicado en `11865b97f00f662728f7fe85a7466af89a9084df`; checkpoint final del HEAD documental: Development `32037186026`, Acceptance `32037186011`, Fase8 `32037186066`, M10 `32037186054` y M13 `32037186024` SUCCESS completo, incluido Runtime/Playwright y Dictamen automatizado M13.
+
+**ERP-N1.8 queda formalmente cerrado.** Siguiente foco VAEP: `N1.9.A — Series, lotes y vencimientos — Auditoría y preflight`.
 
 ## Fuentes VAEP v2
 

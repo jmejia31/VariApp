@@ -4,6 +4,20 @@ Bitácora colaborativa de cambios realizados por Javier Mejía, Codex, AntiG/Ant
 
 No reemplaza `git log`: registra intención, alcance, validaciones y handoff. Todo changeset intencional debe incluir una entrada breve; no modificar otros colaborativos si su contenido no cambió.
 
+## 2026-08-17 — ERP-N1.8 Reservas de inventario — CIERRE FORMAL
+
+**Responsable:** ChatGPT mediante conexiones autorizadas GitHub + Google Drive.
+
+**Objetivo/alcance:** cerrar formalmente ERP-N1.8 después de completar auditoría/preflight, dominio y contratos, persistencia/migración, backend/API, frontend/UX, RBAC, auditoría crítica, seguridad/observabilidad, regresión integral y documentación. El objetivo empresarial queda cumplido: diferenciar stock físico, reservado y disponible e impedir overselling sin crear una segunda autoridad cuantitativa.
+
+**Resultado funcional:** `ExistenciaVariante` permanece como autoridad única de cantidad por clave física `ProductoVarianteId + AlmacenId + UbicacionAlmacenId`; `ReservaInventario` y sus detalles explican el compromiso reservado y su lifecycle. Activar/consumir/liberar/expirar/cancelar opera bajo lock pesimista y transacción; la auditoría crítica es obligatoria y usa `RegistrarEstrictoAsync` dentro de `IUnitOfWork`, por lo que una mutación no puede confirmarse si su evidencia falla. Frontend y API conservan RBAC relacional, CorrelationId saneado, estados físico/reservado/disponible y protección de rutas/acciones.
+
+**Documentación:** `docs/ERP_N1_8_RESERVAS.md`, `docs/ADR_N1_8_RESERVAS_STOCK_RESERVADO_Y_OVERSELLING.md`, `docs/RUNBOOK_N1_8_RESERVAS.md` y `docs/ERD_N1_8_RESERVAS.md`, publicados en `11865b97f00f662728f7fe85a7466af89a9084df`. El baseline funcional previo es `95baf2763b912e1015a3bdd25a37aca649e34c37`.
+
+**Validación final del HEAD documental `11865b97...`:** Development `32037186026` SUCCESS 5/5; Acceptance `32037186011` SUCCESS incluido Playwright integral + SMTP/PDF; Fase8 `32037186066` SUCCESS; M10 `32037186054` SUCCESS; M13 `32037186024` SUCCESS completo, incluido Backend/MySQL/migraciones/upgrade, Frontend, Docker/backup, Secretos/Higiene, Runtime/Playwright, SMTP/PDF/logs y `Dictamen automatizado M13` SUCCESS.
+
+**Control:** `TASKS.md` queda reconciliado con VAEP, incluyendo el desfase histórico de `N1.7.H` que ya estaba `LISTO` en el tablero. `N1.8.A–H` quedan formalmente cerrados. `main`, Producción, merge/auto-merge del PR #2, secretos, infraestructura productiva, force-push y ramas nuevas permanecen intactos. Siguiente foco FINISH_FIRST: `N1.9.A — Series, lotes y vencimientos — Auditoría y preflight`.
+
 ## 2026-08-14 — ERP-N1.3 Ubicaciones internas de almacén — CIERRE FORMAL
 
 **Responsable:** ChatGPT mediante conexiones autorizadas GitHub + Google Drive.
