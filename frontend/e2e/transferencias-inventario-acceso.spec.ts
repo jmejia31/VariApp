@@ -1,4 +1,30 @@
-import { test, expect } from '@playwright/test';
+import { expect, Page, test } from '@playwright/test';
+
+const ADMIN_USERNAME = process.env['PHASE7_ADMIN_USERNAME'] ?? 'e2e_admin';
+const ADMIN_PASSWORD = process.env['PHASE7_ADMIN_PASSWORD'] ?? 'E2E.Admin#2026!';
+
+async function loginConPermisoSoloDashboard(page: Page): Promise<void> {
+  await page.route('**/permisos/mis-permisos', async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        success: true,
+        message: 'Permisos cargados',
+        data: {
+          permisos: ['Dashboard:Ver'],
+          esAdministrador: false
+        }
+      })
+    });
+  });
+
+  await page.goto('/login');
+  await page.locator('input[formcontrolname="nombreUsuario"]').fill(ADMIN_USERNAME);
+  await page.locator('input[formcontrolname="password"]').fill(ADMIN_PASSWORD);
+  await page.locator('button[type="submit"]').click();
+  await expect(page).toHaveURL(/\/dashboard(?:\?|$)/, { timeout: 20_000 });
+}
 
 test.describe('Transferencias de inventario - acceso', () => {
   test('redirige al login cuando no existe sesión', async ({ page }) => {
@@ -7,28 +33,7 @@ test.describe('Transferencias de inventario - acceso', () => {
   });
 
   test('deniega la ruta a un usuario autenticado sin MovimientosInventario:Ver', async ({ page }) => {
-    await page.addInitScript(() => {
-      localStorage.setItem('inventoryapp_token', 'e2e-token-sin-permiso-transferencias');
-      localStorage.setItem('inventoryapp_user', 'e2e-transferencias-sin-permiso');
-      localStorage.setItem('inventoryapp_nombre_completo', 'E2E Transferencias Sin Permiso');
-      localStorage.setItem('inventoryapp_rol', 'Operador');
-      localStorage.setItem('inventoryapp_expira_en', '2099-12-31T23:59:59Z');
-    });
-
-    await page.route('**/permisos/mis-permisos', async route => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          success: true,
-          message: 'Permisos cargados',
-          data: {
-            permisos: ['Dashboard:Ver'],
-            esAdministrador: false
-          }
-        })
-      });
-    });
+    await loginConPermisoSoloDashboard(page);
 
     await page.goto('/inventario/transferencias');
     await expect(page).toHaveURL(/\/dashboard(?:\?|$)/);
