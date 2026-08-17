@@ -42,6 +42,39 @@ public sealed class N18ReservaInventarioStockReservadoTests
     }
 
     [Fact]
+    public async Task Activar_DosVeces_EsIdempotente_YNoDuplicaStockReservado()
+    {
+        var reserva = CrearBorrador(cantidad: 3);
+        var existencia = CrearExistencia(reserva, stockFisico: 12, stockReservado: 2);
+        var clave = new InventarioExistenciaClave(10, 20, null);
+
+        var repository = new Mock<IReservaInventarioRepository>();
+        repository.Setup(x => x.GetByIdAsync(7, It.IsAny<bool>())).ReturnsAsync(reserva);
+        repository.Setup(x => x.SaveChangesAsync()).Returns(Task.CompletedTask);
+
+        var existencias = new Mock<IExistenciaVarianteConcurrencyService>();
+        existencias.Setup(x => x.BloquearYValidarExistenciasAsync(
+                It.IsAny<IEnumerable<InventarioDemandaExistencia>>(), true))
+            .ReturnsAsync(new InventarioExistenciaLockSet(
+                new Dictionary<InventarioExistenciaClave, ExistenciaVariante> { [clave] = existencia },
+                new[] { new InventarioDemandaExistencia(1, 10, 20, null, 3) }));
+        existencias.Setup(x => x.AjustarStockReservadoPesimistaAsync(clave, 2, 5))
+            .Returns(Task.CompletedTask)
+            .Callback(() => existencia.EstablecerStocks(
+                existencia.StockFisico, 5, existencia.StockTransito,
+                existencia.StockMinimo, existencia.StockMaximo));
+
+        var service = CrearServicio(repository, existencias);
+        await service.ActivarAsync(7);
+        await service.ActivarAsync(7);
+
+        Assert.Equal(5, existencia.StockReservado);
+        existencias.Verify(x => x.BloquearYValidarExistenciasAsync(
+            It.IsAny<IEnumerable<InventarioDemandaExistencia>>(), true), Times.Once);
+        existencias.Verify(x => x.AjustarStockReservadoPesimistaAsync(clave, 2, 5), Times.Once);
+    }
+
+    [Fact]
     public async Task Liberar_ReservaActiva_RetiraExactamenteStockReservado_YPreservaFisico()
     {
         var reserva = CrearBorrador(cantidad: 3);
