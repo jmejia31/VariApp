@@ -74,25 +74,6 @@ namespace InventoryApp.Infrastructure.Migrations
                 b.HasIndex("TransferenciaInventarioId")
                     .HasDatabaseName("IX_MovimientosInventario_TransferenciaInventarioId");
 
-                // ERP-N1.5 — índices de trazabilidad por operación y dimensión física.
-                b.HasIndex("ProductoId", "ProductoVarianteId", "Fecha")
-                    .HasDatabaseName("IX_MovInv_Producto_Variante_Fecha_N15");
-
-                b.HasIndex("AlmacenId", "UbicacionAlmacenId", "Fecha")
-                    .HasDatabaseName("IX_MovInv_Almacen_Ubicacion_Fecha_N15");
-
-                b.HasIndex("CompraId", "Fecha")
-                    .HasDatabaseName("IX_MovInv_Compra_Fecha_N15");
-
-                b.HasIndex("VentaId", "Fecha")
-                    .HasDatabaseName("IX_MovInv_Venta_Fecha_N15");
-
-                b.HasIndex("ConsumoInsumoId", "Fecha")
-                    .HasDatabaseName("IX_MovInv_Consumo_Fecha_N15");
-
-                b.HasIndex("AjusteInventarioId", "Fecha")
-                    .HasDatabaseName("IX_MovInv_Ajuste_Fecha_N15");
-
                 b.HasIndex("TransferenciaInventarioId", "Fecha")
                     .HasDatabaseName("IX_MovInv_Transferencia_Fecha_N16");
             });

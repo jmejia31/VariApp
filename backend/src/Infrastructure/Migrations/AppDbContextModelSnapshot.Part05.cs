@@ -109,6 +109,22 @@ namespace InventoryApp.Infrastructure.Migrations
                 b.Property<int?>("UbicacionAlmacenId").HasColumnType("int");
                 b.HasIndex("AlmacenId", "UbicacionAlmacenId")
                     .HasDatabaseName("IX_MovimientosInventario_Almacen_Ubicacion");
+
+                // ERP-N1.5 — índices de trazabilidad declarados después de materializar
+                // AlmacenId/UbicacionAlmacenId para mantener el snapshot determinista.
+                b.HasIndex("ProductoId", "ProductoVarianteId", "Fecha")
+                    .HasDatabaseName("IX_MovInv_Producto_Variante_Fecha_N15");
+                b.HasIndex("AlmacenId", "UbicacionAlmacenId", "Fecha")
+                    .HasDatabaseName("IX_MovInv_Almacen_Ubicacion_Fecha_N15");
+                b.HasIndex("CompraId", "Fecha")
+                    .HasDatabaseName("IX_MovInv_Compra_Fecha_N15");
+                b.HasIndex("VentaId", "Fecha")
+                    .HasDatabaseName("IX_MovInv_Venta_Fecha_N15");
+                b.HasIndex("ConsumoInsumoId", "Fecha")
+                    .HasDatabaseName("IX_MovInv_Consumo_Fecha_N15");
+                b.HasIndex("AjusteInventarioId", "Fecha")
+                    .HasDatabaseName("IX_MovInv_Ajuste_Fecha_N15");
+
                 b.ToTable("MovimientosInventario", null, t =>
                 {
                     t.HasCheckConstraint("CK_MovimientosInventario_Ubicacion_RequiereAlmacen", "`UbicacionAlmacenId` IS NULL OR `AlmacenId` IS NOT NULL");
