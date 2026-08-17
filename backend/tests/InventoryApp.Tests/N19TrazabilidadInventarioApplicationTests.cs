@@ -31,6 +31,35 @@ public sealed class N19TrazabilidadInventarioApplicationTests
     }
 
     [Fact]
+    public async Task Configurar_misma_politica_es_idempotente_y_no_revalida_stock_ni_persiste()
+    {
+        var variante = new ProductoVariante { Id = 11, Activo = true };
+        variante.ConfigurarTrazabilidad(true, true, true, 45);
+        var repo = new Mock<ITrazabilidadInventarioRepository>();
+        var variantes = new Mock<IProductoVarianteRepository>();
+        variantes.Setup(x => x.GetByIdForUpdateAsync(11)).ReturnsAsync(variante);
+        var service = CrearService(repo, variantes);
+
+        var resultado = await service.ConfigurarAsync(11, new ConfigurarTrazabilidadVarianteRequest
+        {
+            ControlaLote = true,
+            ControlaNumeroSerie = true,
+            ControlaFechaVencimiento = true,
+            DiasAlertaVencimiento = 45
+        });
+
+        Assert.True(resultado.ControlaLote);
+        Assert.True(resultado.ControlaNumeroSerie);
+        Assert.True(resultado.ControlaFechaVencimiento);
+        Assert.Equal(45, resultado.DiasAlertaVencimiento);
+        repo.Verify(x => x.TieneStockFisicoAsync(It.IsAny<int>()), Times.Never);
+        repo.Verify(x => x.TieneLotesActivosAsync(It.IsAny<int>()), Times.Never);
+        repo.Verify(x => x.TieneSeriesActivasAsync(It.IsAny<int>()), Times.Never);
+        variantes.Verify(x => x.Update(It.IsAny<ProductoVariante>()), Times.Never);
+        variantes.Verify(x => x.SaveChangesAsync(), Times.Never);
+    }
+
+    [Fact]
     public async Task Crear_lote_es_idempotente_por_variante_y_codigo_si_payload_es_equivalente()
     {
         var variante = new ProductoVariante { Id = 11, Activo = true };
@@ -139,6 +168,60 @@ public sealed class N19TrazabilidadInventarioApplicationTests
         Assert.Equal("SN-001", resultado.NumeroSerie);
         Assert.Null(resultado.LoteInventarioId);
         repo.Verify(x => x.TryAddSerieAsync(It.Is<SerieInventario>(s => s.ProductoVarianteId == 11 && s.LoteInventarioId == null)), Times.Once);
+    }
+
+    [Fact]
+    public async Task Crear_serie_es_idempotente_si_numero_variante_y_lote_coinciden()
+    {
+        var variante = new ProductoVariante { Id = 11, Activo = true };
+        variante.ConfigurarTrazabilidad(true, true, false);
+        var lote = new LoteInventario { Id = 8, ProductoVarianteId = 11 };
+        lote.ConfigurarIdentidad("L-11", null, null, false);
+        var existente = new SerieInventario { Id = 21, ProductoVarianteId = 11 };
+        existente.ConfigurarIdentidad("SN-IDEMP");
+        existente.VincularLote(lote);
+
+        var repo = new Mock<ITrazabilidadInventarioRepository>();
+        repo.Setup(x => x.GetLoteByIdAsync(8, false)).ReturnsAsync(lote);
+        repo.Setup(x => x.GetSerieByNumeroAsync("SN-IDEMP", false)).ReturnsAsync(existente);
+        var variantes = new Mock<IProductoVarianteRepository>();
+        variantes.Setup(x => x.GetByIdForUpdateAsync(11)).ReturnsAsync(variante);
+        var service = CrearService(repo, variantes);
+
+        var resultado = await service.CrearSerieAsync(new CrearSerieInventarioRequest
+        {
+            ProductoVarianteId = 11,
+            NumeroSerie = " sn-idemp ",
+            LoteInventarioId = 8
+        });
+
+        Assert.Equal(21, resultado.Id);
+        Assert.Equal(8, resultado.LoteInventarioId);
+        repo.Verify(x => x.TryAddSerieAsync(It.IsAny<SerieInventario>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task Crear_serie_rechaza_numero_existente_con_variante_distinta()
+    {
+        var variante = new ProductoVariante { Id = 11, Activo = true };
+        variante.ConfigurarTrazabilidad(false, true, false);
+        var existente = new SerieInventario { Id = 21, ProductoVarianteId = 12 };
+        existente.ConfigurarIdentidad("SN-GLOBAL");
+
+        var repo = new Mock<ITrazabilidadInventarioRepository>();
+        repo.Setup(x => x.GetSerieByNumeroAsync("SN-GLOBAL", false)).ReturnsAsync(existente);
+        var variantes = new Mock<IProductoVarianteRepository>();
+        variantes.Setup(x => x.GetByIdForUpdateAsync(11)).ReturnsAsync(variante);
+        var service = CrearService(repo, variantes);
+
+        var ex = await Assert.ThrowsAsync<BusinessRuleException>(() => service.CrearSerieAsync(new CrearSerieInventarioRequest
+        {
+            ProductoVarianteId = 11,
+            NumeroSerie = "SN-GLOBAL"
+        }));
+
+        Assert.Contains("datos diferentes", ex.Message, StringComparison.OrdinalIgnoreCase);
+        repo.Verify(x => x.TryAddSerieAsync(It.IsAny<SerieInventario>()), Times.Never);
     }
 
     [Fact]
