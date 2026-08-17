@@ -100,6 +100,7 @@ public sealed class ConteosInventarioController : ControllerBase
         if (ajuste is null)
             return NotFound(ApiResponse<object>.Fail("Conteo de inventario no encontrado."));
 
+        await AuditarGeneracionAjusteAsync(id, ajuste.Id);
         return Ok(ApiResponse<AjusteInventarioDto>.Ok(
             ajuste,
             "Ajuste borrador generado desde las diferencias del conteo. Requiere confirmación formal posterior."));
@@ -138,5 +139,17 @@ public sealed class ConteosInventarioController : ControllerBase
             entidad: nameof(ConteoInventario),
             valoresNuevos: new { conteo.Numero, conteo.Estado, conteo.AlmacenId, conteo.UbicacionAlmacenId, conteo.CategoriaId },
             motivo: motivo);
+    }
+
+    private Task AuditarGeneracionAjusteAsync(int conteoId, int ajusteInventarioId)
+    {
+        if (_auditoria is null) return Task.CompletedTask;
+        return _auditoria.RegistrarAsync(
+            ModuloSistema.MovimientosInventario,
+            AccionPermiso.Crear,
+            "Ajuste borrador generado desde diferencias de conteo físico.",
+            conteoId,
+            entidad: nameof(ConteoInventario),
+            valoresNuevos: new { ConteoInventarioId = conteoId, AjusteInventarioId = ajusteInventarioId });
     }
 }
