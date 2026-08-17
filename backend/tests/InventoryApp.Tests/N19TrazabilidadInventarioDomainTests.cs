@@ -76,4 +76,18 @@ public class N19TrazabilidadInventarioDomainTests
         Assert.Equal(EstadoSerieInventario.Vendida, serie.Estado);
         Assert.Throws<InvalidOperationException>(() => serie.DarDeBaja());
     }
+
+    [Fact]
+    public void Serie_no_puede_vincularse_a_lote_de_otra_variante()
+    {
+        var serie = new SerieInventario { ProductoVarianteId = 11 };
+        var loteAjeno = new LoteInventario { Id = 7, ProductoVarianteId = 12 };
+
+        Assert.Throws<InvalidOperationException>(() => serie.VincularLote(loteAjeno));
+        Assert.Null(serie.LoteInventarioId);
+
+        var loteValido = new LoteInventario { Id = 8, ProductoVarianteId = 11 };
+        serie.VincularLote(loteValido);
+        Assert.Equal(8, serie.LoteInventarioId);
+    }
 }
