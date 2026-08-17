@@ -75,16 +75,7 @@ export class ReservaInventarioFormComponent implements OnInit {
       if (!Number.isInteger(this.id) || this.id <= 0) { this.error = 'Identificador de reserva inválido.'; this.loading = false; return; }
       this.editando = true;
     }
-
-    this.existenciaService.getPaged({ page: 1, pageSize: 200, sortBy: 'productoNombre', sortDirection: 'asc' }).subscribe({
-      next: response => {
-        if (!response.success) { this.error = response.message || 'No se pudieron cargar las existencias físicas.'; this.loading = false; return; }
-        this.existencias = response.data.items;
-        if (this.editando) this.cargar();
-        else this.loading = false;
-      },
-      error: () => { this.error = 'No se pudieron cargar las existencias físicas.'; this.loading = false; }
-    });
+    this.cargarExistencias();
   }
 
   agregarDetalle(): void {
@@ -151,7 +142,7 @@ export class ReservaInventarioFormComponent implements OnInit {
     const detalles = raw.detalles.map(d => ({ productoVarianteId: Number(d['productoVarianteId']), almacenId: Number(d['almacenId']), ubicacionAlmacenId: d['ubicacionAlmacenId'] ? Number(d['ubicacionAlmacenId']) : null, cantidad: Number(d['cantidad']) }));
     const claves = detalles.map(d => `${d.productoVarianteId}:${d.almacenId}:${d.ubicacionAlmacenId ?? 'root'}`);
     if (new Set(claves).size !== claves.length) { this.error = 'No puedes reservar dos veces la misma existencia física dentro del documento.'; return; }
-    const sobreReserva = raw.detalles.find((d, index) => {
+    const sobreReserva = raw.detalles.find(d => {
       const existencia = this.existencias.find(x => x.id === Number(d['existenciaVarianteId']));
       return existencia && Number(d['cantidad']) > existencia.stockDisponible;
     });
@@ -164,5 +155,24 @@ export class ReservaInventarioFormComponent implements OnInit {
   }
 
   volver(): void { void this.router.navigate(['/inventario/reservas']); }
+
+  private cargarExistencias(page = 1, acumuladas: ExistenciaVariante[] = []): void {
+    this.existenciaService.getPaged({ page, pageSize: 200, sortBy: 'productoNombre', sortDirection: 'asc' }).subscribe({
+      next: response => {
+        if (!response.success) { this.error = response.message || 'No se pudieron cargar las existencias físicas.'; this.loading = false; return; }
+        const nuevas = [...acumuladas, ...response.data.items];
+        if (page < response.data.totalPages && page < 50) {
+          this.cargarExistencias(page + 1, nuevas);
+          return;
+        }
+        this.existencias = nuevas;
+        if (response.data.totalPages > 50) this.error = 'El catálogo físico supera el límite operativo de carga. Refina el inventario antes de crear la reserva.';
+        if (this.editando) this.cargar();
+        else this.loading = false;
+      },
+      error: () => { this.error = 'No se pudieron cargar las existencias físicas.'; this.loading = false; }
+    });
+  }
+
   private toLocalInput(value?: string | null): string | null { if (!value) return null; const date = new Date(value); const offset = date.getTimezoneOffset() * 60000; return new Date(date.getTime() - offset).toISOString().slice(0,16); }
 }
