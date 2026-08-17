@@ -28,6 +28,11 @@ public sealed class ReservaInventarioDetalleConfiguration : IEntityTypeConfigura
         builder.Property<int>("UbicacionNormalizada")
             .HasComputedColumnSql("COALESCE(`UbicacionAlmacenId`, 0)", stored: true);
 
+        // Índice histórico explícito: el esquema ya lo posee y sigue siendo útil
+        // para navegación directa por cabecera de reserva.
+        builder.HasIndex(x => x.ReservaInventarioId)
+            .HasDatabaseName("IX_ReservaInventarioDetalles_ReservaInventarioId");
+
         builder.HasIndex(new[]
             {
                 nameof(ReservaInventarioDetalle.ReservaInventarioId),

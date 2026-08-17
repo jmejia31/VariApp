@@ -37,6 +37,10 @@ public class MovimientoInventarioConfiguration : IEntityTypeConfiguration<Movimi
             .HasForeignKey(m => m.ProductoId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        // Índice histórico explícito: permanece en el esquema y evita drift EF
+        // mientras N1.5 agrega índices compuestos orientados a trazabilidad.
+        builder.HasIndex(m => m.ProductoId)
+            .HasDatabaseName("IX_MovimientosInventario_ProductoId");
         builder.HasIndex(m => m.ProductoVarianteId);
         builder.HasIndex(m => new { m.ProductoId, m.ProductoVarianteId, m.Fecha })
             .HasDatabaseName("IX_MovInv_Producto_Variante_Fecha_N15");

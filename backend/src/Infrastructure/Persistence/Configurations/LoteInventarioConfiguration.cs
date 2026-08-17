@@ -14,6 +14,8 @@ public class LoteInventarioConfiguration : IEntityTypeConfiguration<LoteInventar
             .HasName("AK_LotesInventario_Variante_Id");
         builder.Property(x => x.Codigo).HasMaxLength(100).IsRequired();
         builder.Property(x => x.Activo).HasDefaultValue(true);
+        builder.Property(x => x.CreadoPorNombreUsuario).HasMaxLength(150);
+        builder.Property(x => x.ActualizadoPorNombreUsuario).HasMaxLength(150);
 
         builder.HasIndex(x => new { x.ProductoVarianteId, x.Codigo })
             .IsUnique()

@@ -12,6 +12,8 @@ public class SerieInventarioConfiguration : IEntityTypeConfiguration<SerieInvent
         builder.HasKey(x => x.Id);
         builder.Property(x => x.NumeroSerie).HasMaxLength(160).IsRequired();
         builder.Property(x => x.Estado).HasConversion<int>();
+        builder.Property(x => x.CreadoPorNombreUsuario).HasMaxLength(150);
+        builder.Property(x => x.ActualizadoPorNombreUsuario).HasMaxLength(150);
 
         builder.HasIndex(x => x.NumeroSerie)
             .IsUnique()
