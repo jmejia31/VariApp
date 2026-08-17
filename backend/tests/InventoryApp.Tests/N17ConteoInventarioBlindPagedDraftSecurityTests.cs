@@ -149,7 +149,7 @@ public sealed class N17ConteoInventarioBlindPagedDraftSecurityTests
         Assert.True(dto.EsCiego);
         Assert.Equal(EstadoConteoInventario.Cancelado, dto.Estado);
         Assert.Null(dto.FechaCierre);
-        Assert.Equal(29, linea.CantidadContada);
+        Assert.Equal(29, linea.CantidadContada.GetValueOrDefault());
         Assert.Null(linea.StockEsperado);
         Assert.Null(linea.Diferencia);
         Assert.Equal(0, dto.CantidadConDiferencia);
@@ -200,9 +200,9 @@ public sealed class N17ConteoInventarioBlindPagedDraftSecurityTests
         var linea = Assert.Single(dto!.Detalles);
         Assert.Equal(EstadoConteoInventario.Cerrado, dto.Estado);
         Assert.NotNull(dto.FechaCierre);
-        Assert.Equal(40, linea.StockEsperado);
-        Assert.Equal(37, linea.CantidadContada);
-        Assert.Equal(-3, linea.Diferencia);
+        Assert.Equal(40, linea.StockEsperado.GetValueOrDefault());
+        Assert.Equal(37, linea.CantidadContada.GetValueOrDefault());
+        Assert.Equal(-3, linea.Diferencia.GetValueOrDefault());
         Assert.Equal(1, dto.CantidadConDiferencia);
         Assert.Equal(-3, dto.DiferenciaNeta);
     }
