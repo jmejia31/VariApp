@@ -13,16 +13,7 @@ public sealed class N18ReservaInventarioStockReservadoTests
     public async Task Activar_ReservaStockSobreExistenciaAutoritativa_YNoMutaStockFisico()
     {
         var reserva = CrearBorrador(cantidad: 3);
-        var existencia = new ExistenciaVariante
-        {
-            Id = 91,
-            ProductoVarianteId = 10,
-            AlmacenId = 20,
-            StockFisico = 12,
-            StockReservado = 2,
-            StockTransito = 0,
-            ProductoVariante = reserva.Detalles.Single().ProductoVariante
-        };
+        var existencia = CrearExistencia(reserva, stockFisico: 12, stockReservado: 2);
         var clave = new InventarioExistenciaClave(10, 20, null);
 
         var repository = new Mock<IReservaInventarioRepository>();
@@ -55,16 +46,7 @@ public sealed class N18ReservaInventarioStockReservadoTests
     {
         var reserva = CrearBorrador(cantidad: 3);
         reserva.Activar(usuarioId: 5, fecha: DateTime.UtcNow);
-        var existencia = new ExistenciaVariante
-        {
-            Id = 91,
-            ProductoVarianteId = 10,
-            AlmacenId = 20,
-            StockFisico = 12,
-            StockReservado = 5,
-            StockTransito = 0,
-            ProductoVariante = reserva.Detalles.Single().ProductoVariante
-        };
+        var existencia = CrearExistencia(reserva, stockFisico: 12, stockReservado: 5);
         var clave = new InventarioExistenciaClave(10, 20, null);
 
         var repository = new Mock<IReservaInventarioRepository>();
@@ -112,6 +94,27 @@ public sealed class N18ReservaInventarioStockReservadoTests
             existencias.Object,
             currentUser.Object,
             unitOfWork.Object);
+    }
+
+    private static ExistenciaVariante CrearExistencia(
+        ReservaInventario reserva,
+        int stockFisico,
+        int stockReservado)
+    {
+        var existencia = new ExistenciaVariante
+        {
+            Id = 91,
+            ProductoVarianteId = 10,
+            AlmacenId = 20,
+            ProductoVariante = reserva.Detalles.Single().ProductoVariante
+        };
+        existencia.EstablecerStocks(
+            stockFisico,
+            stockReservado,
+            stockTransito: 0,
+            stockMinimo: 0,
+            stockMaximo: null);
+        return existencia;
     }
 
     private static ReservaInventario CrearBorrador(int cantidad)
