@@ -47,10 +47,23 @@ public class N19TrazabilidadPersistenceModelTests
         Assert.True(loteUnico.IsUnique);
         Assert.Equal(new[] { "ProductoVarianteId", "Codigo" }, loteUnico.Properties.Select(p => p.Name));
 
+        Assert.Contains(lote.GetKeys(), key =>
+            key.Properties.Select(p => p.Name).SequenceEqual(new[] { "ProductoVarianteId", "Id" }));
+
         var serieUnica = serie.GetIndexes().Single(i =>
             i.GetDatabaseName() == "UX_SeriesInventario_NumeroSerie");
         Assert.True(serieUnica.IsUnique);
         Assert.Equal(new[] { "NumeroSerie" }, serieUnica.Properties.Select(p => p.Name));
+
+        var indiceSerieLote = serie.GetIndexes().Single(i =>
+            i.GetDatabaseName() == "IX_SeriesInventario_Variante_LoteInventarioId");
+        Assert.Equal(new[] { "ProductoVarianteId", "LoteInventarioId" }, indiceSerieLote.Properties.Select(p => p.Name));
+
+        var fkSerieLote = serie.GetForeignKeys().Single(fk =>
+            fk.PrincipalEntityType.ClrType == typeof(LoteInventario));
+        Assert.Equal(new[] { "ProductoVarianteId", "LoteInventarioId" }, fkSerieLote.Properties.Select(p => p.Name));
+        Assert.Equal(new[] { "ProductoVarianteId", "Id" }, fkSerieLote.PrincipalKey.Properties.Select(p => p.Name));
+        Assert.Equal(DeleteBehavior.Restrict, fkSerieLote.DeleteBehavior);
 
         Assert.All(lote.GetForeignKeys(), fk => Assert.Equal(DeleteBehavior.Restrict, fk.DeleteBehavior));
         Assert.All(serie.GetForeignKeys(), fk => Assert.Equal(DeleteBehavior.Restrict, fk.DeleteBehavior));

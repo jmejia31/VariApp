@@ -10,6 +10,8 @@ public class LoteInventarioConfiguration : IEntityTypeConfiguration<LoteInventar
     {
         builder.ToTable("LotesInventario");
         builder.HasKey(x => x.Id);
+        builder.HasAlternateKey(x => new { x.ProductoVarianteId, x.Id })
+            .HasName("AK_LotesInventario_Variante_Id");
         builder.Property(x => x.Codigo).HasMaxLength(100).IsRequired();
         builder.Property(x => x.Activo).HasDefaultValue(true);
 

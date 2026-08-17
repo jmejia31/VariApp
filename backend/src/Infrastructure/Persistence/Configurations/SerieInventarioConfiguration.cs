@@ -18,8 +18,8 @@ public class SerieInventarioConfiguration : IEntityTypeConfiguration<SerieInvent
             .HasDatabaseName("UX_SeriesInventario_NumeroSerie");
         builder.HasIndex(x => new { x.ProductoVarianteId, x.Estado })
             .HasDatabaseName("IX_SeriesInventario_Variante_Estado");
-        builder.HasIndex(x => x.LoteInventarioId)
-            .HasDatabaseName("IX_SeriesInventario_LoteInventarioId");
+        builder.HasIndex(x => new { x.ProductoVarianteId, x.LoteInventarioId })
+            .HasDatabaseName("IX_SeriesInventario_Variante_LoteInventarioId");
 
         builder.HasOne(x => x.ProductoVariante)
             .WithMany()
@@ -28,7 +28,8 @@ public class SerieInventarioConfiguration : IEntityTypeConfiguration<SerieInvent
 
         builder.HasOne(x => x.LoteInventario)
             .WithMany()
-            .HasForeignKey(x => x.LoteInventarioId)
+            .HasForeignKey(x => new { x.ProductoVarianteId, x.LoteInventarioId })
+            .HasPrincipalKey(x => new { x.ProductoVarianteId, x.Id })
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

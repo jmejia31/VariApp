@@ -27,18 +27,33 @@ WHERE table_schema = DATABASE()
   AND table_name IN ('LotesInventario', 'SeriesInventario');
 
 SELECT 'FKs restrictivas N1.9 presentes' AS CheckName,
-       COUNT(*) >= 3 AS Ok
+       COUNT(*) = 3
+       AND SUM(delete_rule IN ('RESTRICT', 'NO ACTION')) = 3 AS Ok
 FROM information_schema.referential_constraints
 WHERE constraint_schema = DATABASE()
   AND constraint_name IN (
       'FK_LotesInventario_ProductoVariantes_ProductoVarianteId',
       'FK_SeriesInventario_ProductoVariantes_ProductoVarianteId',
-      'FK_SeriesInventario_LotesInventario_LoteInventarioId'
+      'FK_SeriesInventario_LotesInventario_ProductoVarianteId_LoteInventarioId'
   );
 
+SELECT 'Serie y lote comparten variante por FK compuesta' AS CheckName,
+       COUNT(*) = 2
+       AND SUM(ordinal_position = 1
+               AND column_name = 'ProductoVarianteId'
+               AND referenced_column_name = 'ProductoVarianteId') = 1
+       AND SUM(ordinal_position = 2
+               AND column_name = 'LoteInventarioId'
+               AND referenced_column_name = 'Id') = 1 AS Ok
+FROM information_schema.key_column_usage
+WHERE constraint_schema = DATABASE()
+  AND table_name = 'SeriesInventario'
+  AND constraint_name = 'FK_SeriesInventario_LotesInventario_ProductoVarianteId_LoteInventarioId'
+  AND referenced_table_name = 'LotesInventario';
+
 SELECT 'Baseline legacy conservado' AS CheckName,
-       SUM(CASE WHEN ControlaLote = 0
-                 AND ControlaNumeroSerie = 0
-                 AND ControlaFechaVencimiento = 0
-                 AND DiasAlertaVencimiento IS NULL THEN 1 ELSE 0 END) = COUNT(*) AS Ok
+       COALESCE(SUM(CASE WHEN ControlaLote = 0
+                          AND ControlaNumeroSerie = 0
+                          AND ControlaFechaVencimiento = 0
+                          AND DiasAlertaVencimiento IS NULL THEN 1 ELSE 0 END), 0) = COUNT(*) AS Ok
 FROM ProductoVariantes;

@@ -41,6 +41,7 @@ namespace InventoryApp.Infrastructure.Migrations
                 b.Property<DateTime?>("FechaVencimiento").HasColumnType("datetime(6)");
                 b.Property<int>("ProductoVarianteId").HasColumnType("int");
                 b.HasKey("Id");
+                b.HasAlternateKey("ProductoVarianteId", "Id").HasName("AK_LotesInventario_Variante_Id");
                 b.HasIndex("FechaVencimiento").HasDatabaseName("IX_LotesInventario_FechaVencimiento");
                 b.HasIndex("ProductoVarianteId", "Codigo").IsUnique().HasDatabaseName("UX_LotesInventario_Variante_Codigo");
                 b.ToTable("LotesInventario", t =>
@@ -64,9 +65,9 @@ namespace InventoryApp.Infrastructure.Migrations
                 b.Property<string>("NumeroSerie").IsRequired().HasMaxLength(160).HasColumnType("varchar(160)");
                 b.Property<int>("ProductoVarianteId").HasColumnType("int");
                 b.HasKey("Id");
-                b.HasIndex("LoteInventarioId").HasDatabaseName("IX_SeriesInventario_LoteInventarioId");
                 b.HasIndex("NumeroSerie").IsUnique().HasDatabaseName("UX_SeriesInventario_NumeroSerie");
                 b.HasIndex("ProductoVarianteId", "Estado").HasDatabaseName("IX_SeriesInventario_Variante_Estado");
+                b.HasIndex("ProductoVarianteId", "LoteInventarioId").HasDatabaseName("IX_SeriesInventario_Variante_LoteInventarioId");
                 b.ToTable("SeriesInventario");
             });
 
@@ -81,8 +82,10 @@ namespace InventoryApp.Infrastructure.Migrations
             modelBuilder.Entity("InventoryApp.Domain.Entities.SerieInventario", b =>
             {
                 b.HasOne("InventoryApp.Domain.Entities.LoteInventario", "LoteInventario").WithMany()
-                    .HasForeignKey("LoteInventarioId").OnDelete(DeleteBehavior.Restrict)
-                    .HasConstraintName("FK_SeriesInventario_LotesInventario_LoteInventarioId");
+                    .HasForeignKey("ProductoVarianteId", "LoteInventarioId")
+                    .HasPrincipalKey("ProductoVarianteId", "Id")
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .HasConstraintName("FK_SeriesInventario_LotesInventario_ProductoVarianteId_LoteInventarioId");
                 b.HasOne("InventoryApp.Domain.Entities.ProductoVariante", "ProductoVariante").WithMany()
                     .HasForeignKey("ProductoVarianteId").OnDelete(DeleteBehavior.Restrict).IsRequired()
                     .HasConstraintName("FK_SeriesInventario_ProductoVariantes_ProductoVarianteId");

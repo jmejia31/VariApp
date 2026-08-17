@@ -93,6 +93,7 @@ namespace InventoryApp.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_LotesInventario", x => x.Id);
+                    table.UniqueConstraint("AK_LotesInventario_Variante_Id", x => new { x.ProductoVarianteId, x.Id });
                     table.CheckConstraint("CK_LotesInventario_Fechas", "`FechaFabricacion` IS NULL OR `FechaVencimiento` IS NULL OR `FechaVencimiento` >= `FechaFabricacion`");
                     table.ForeignKey("FK_LotesInventario_ProductoVariantes_ProductoVarianteId", x => x.ProductoVarianteId, "ProductoVariantes", "Id", onDelete: ReferentialAction.Restrict);
                 }).Annotation("MySql:CharSet", "utf8mb4");
@@ -117,7 +118,12 @@ namespace InventoryApp.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_SeriesInventario", x => x.Id);
-                    table.ForeignKey("FK_SeriesInventario_LotesInventario_LoteInventarioId", x => x.LoteInventarioId, "LotesInventario", "Id", onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        "FK_SeriesInventario_LotesInventario_ProductoVarianteId_LoteInventarioId",
+                        x => new { x.ProductoVarianteId, x.LoteInventarioId },
+                        "LotesInventario",
+                        new[] { "ProductoVarianteId", "Id" },
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey("FK_SeriesInventario_ProductoVariantes_ProductoVarianteId", x => x.ProductoVarianteId, "ProductoVariantes", "Id", onDelete: ReferentialAction.Restrict);
                 }).Annotation("MySql:CharSet", "utf8mb4");
 
@@ -125,7 +131,7 @@ namespace InventoryApp.Infrastructure.Migrations
             migrationBuilder.CreateIndex("IX_LotesInventario_FechaVencimiento", "LotesInventario", "FechaVencimiento");
             migrationBuilder.CreateIndex("UX_SeriesInventario_NumeroSerie", "SeriesInventario", "NumeroSerie", unique: true);
             migrationBuilder.CreateIndex("IX_SeriesInventario_Variante_Estado", "SeriesInventario", new[] { "ProductoVarianteId", "Estado" });
-            migrationBuilder.CreateIndex("IX_SeriesInventario_LoteInventarioId", "SeriesInventario", "LoteInventarioId");
+            migrationBuilder.CreateIndex("IX_SeriesInventario_Variante_LoteInventarioId", "SeriesInventario", new[] { "ProductoVarianteId", "LoteInventarioId" });
 
             migrationBuilder.Sql("""
                 DROP TEMPORARY TABLE IF EXISTS __N19CPostGuard;
@@ -146,6 +152,15 @@ namespace InventoryApp.Infrastructure.Migrations
                  WHERE table_schema = DATABASE()
                    AND table_name = 'ProductoVariantes'
                    AND column_name IN ('ControlaLote','ControlaNumeroSerie','ControlaFechaVencimiento','DiasAlertaVencimiento');
+                INSERT INTO __N19CPostGuard (Id, Violaciones)
+                SELECT 3, CASE WHEN COUNT(*) = 2 THEN 0 ELSE 1 END
+                  FROM information_schema.key_column_usage
+                 WHERE constraint_schema = DATABASE()
+                   AND table_name = 'SeriesInventario'
+                   AND constraint_name = 'FK_SeriesInventario_LotesInventario_ProductoVarianteId_LoteInventarioId'
+                   AND referenced_table_name = 'LotesInventario'
+                   AND ((ordinal_position = 1 AND column_name = 'ProductoVarianteId' AND referenced_column_name = 'ProductoVarianteId')
+                     OR (ordinal_position = 2 AND column_name = 'LoteInventarioId' AND referenced_column_name = 'Id'));
                 DROP TEMPORARY TABLE __N19CPostGuard;
                 """);
         }
