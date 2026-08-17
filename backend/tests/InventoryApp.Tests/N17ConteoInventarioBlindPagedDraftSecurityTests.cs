@@ -121,7 +121,7 @@ public sealed class N17ConteoInventarioBlindPagedDraftSecurityTests
             AlmacenId = 5
         };
         detalle.MaterializarSnapshot(34);
-        detalle.Capturar(29, 77, DateTime.UtcNow);
+        detalle.RegistrarConteo(29, 77, DateTime.UtcNow);
 
         var conteo = new ConteoInventario
         {
