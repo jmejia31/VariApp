@@ -119,7 +119,7 @@ namespace InventoryApp.Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_SeriesInventario", x => x.Id);
                     table.ForeignKey(
-                        "FK_SeriesInventario_LotesInventario_ProductoVarianteId_LoteInventarioId",
+                        "FK_SeriesInventario_LotesInventario_Variante_Lote",
                         x => new { x.ProductoVarianteId, x.LoteInventarioId },
                         "LotesInventario",
                         new[] { "ProductoVarianteId", "Id" },
@@ -157,7 +157,7 @@ namespace InventoryApp.Infrastructure.Migrations
                   FROM information_schema.key_column_usage
                  WHERE constraint_schema = DATABASE()
                    AND table_name = 'SeriesInventario'
-                   AND constraint_name = 'FK_SeriesInventario_LotesInventario_ProductoVarianteId_LoteInventarioId'
+                   AND constraint_name = 'FK_SeriesInventario_LotesInventario_Variante_Lote'
                    AND referenced_table_name = 'LotesInventario'
                    AND ((ordinal_position = 1 AND column_name = 'ProductoVarianteId' AND referenced_column_name = 'ProductoVarianteId')
                      OR (ordinal_position = 2 AND column_name = 'LoteInventarioId' AND referenced_column_name = 'Id'));

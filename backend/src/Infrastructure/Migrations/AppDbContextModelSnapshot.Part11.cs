@@ -85,7 +85,7 @@ namespace InventoryApp.Infrastructure.Migrations
                     .HasForeignKey("ProductoVarianteId", "LoteInventarioId")
                     .HasPrincipalKey("ProductoVarianteId", "Id")
                     .OnDelete(DeleteBehavior.Restrict)
-                    .HasConstraintName("FK_SeriesInventario_LotesInventario_ProductoVarianteId_LoteInventarioId");
+                    .HasConstraintName("FK_SeriesInventario_LotesInventario_Variante_Lote");
                 b.HasOne("InventoryApp.Domain.Entities.ProductoVariante", "ProductoVariante").WithMany()
                     .HasForeignKey("ProductoVarianteId").OnDelete(DeleteBehavior.Restrict).IsRequired()
                     .HasConstraintName("FK_SeriesInventario_ProductoVariantes_ProductoVarianteId");

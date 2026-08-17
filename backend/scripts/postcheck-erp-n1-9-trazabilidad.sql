@@ -34,7 +34,7 @@ WHERE constraint_schema = DATABASE()
   AND constraint_name IN (
       'FK_LotesInventario_ProductoVariantes_ProductoVarianteId',
       'FK_SeriesInventario_ProductoVariantes_ProductoVarianteId',
-      'FK_SeriesInventario_LotesInventario_ProductoVarianteId_LoteInventarioId'
+      'FK_SeriesInventario_LotesInventario_Variante_Lote'
   );
 
 SELECT 'Serie y lote comparten variante por FK compuesta' AS CheckName,
@@ -48,7 +48,7 @@ SELECT 'Serie y lote comparten variante por FK compuesta' AS CheckName,
 FROM information_schema.key_column_usage
 WHERE constraint_schema = DATABASE()
   AND table_name = 'SeriesInventario'
-  AND constraint_name = 'FK_SeriesInventario_LotesInventario_ProductoVarianteId_LoteInventarioId'
+  AND constraint_name = 'FK_SeriesInventario_LotesInventario_Variante_Lote'
   AND referenced_table_name = 'LotesInventario';
 
 SELECT 'Baseline legacy conservado' AS CheckName,

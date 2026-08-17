@@ -30,6 +30,7 @@ public class SerieInventarioConfiguration : IEntityTypeConfiguration<SerieInvent
             .WithMany()
             .HasForeignKey(x => new { x.ProductoVarianteId, x.LoteInventarioId })
             .HasPrincipalKey(x => new { x.ProductoVarianteId, x.Id })
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_SeriesInventario_LotesInventario_Variante_Lote");
     }
 }
