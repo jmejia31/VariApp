@@ -56,4 +56,53 @@ public sealed class N17ConteoInventarioBlindPagedDraftSecurityTests
         Assert.Equal(0, dto.CantidadConDiferencia);
         Assert.Equal(0, dto.DiferenciaNeta);
     }
+
+    [Fact]
+    public async Task GetPaged_ConteoCiegoCanceladoAntesDeCierre_MantieneReferenciaOculta()
+    {
+        var repository = new Mock<IConteoInventarioRepository>();
+        var existencias = new Mock<IExistenciaVarianteRepository>();
+        var currentUser = new Mock<ICurrentUserService>();
+        var unitOfWork = new Mock<IUnitOfWork>();
+
+        var detalle = new ConteoInventarioDetalle
+        {
+            Id = 5,
+            ProductoVarianteId = 10,
+            AlmacenId = 4
+        };
+        detalle.MaterializarSnapshot(21);
+
+        var conteo = new ConteoInventario
+        {
+            Id = 19,
+            Numero = "CNT-CIEGO-CANCELADO-19",
+            Tipo = TipoConteoInventario.Ciego,
+            AlmacenId = 4,
+            EsCiego = true,
+            Detalles = new List<ConteoInventarioDetalle> { detalle }
+        };
+        conteo.Cancelar(77, "Cancelado antes del cierre", DateTime.UtcNow);
+
+        repository.Setup(x => x.GetPagedAsync(It.IsAny<ConteoInventarioQueryDto>()))
+            .ReturnsAsync((new List<ConteoInventario> { conteo }, 1));
+
+        var service = new ConteoInventarioService(
+            repository.Object,
+            existencias.Object,
+            currentUser.Object,
+            unitOfWork.Object);
+
+        var pagina = await service.GetPagedAsync(new ConteoInventarioQueryDto());
+
+        var dto = Assert.Single(pagina.Items);
+        var linea = Assert.Single(dto.Detalles);
+        Assert.True(dto.EsCiego);
+        Assert.Equal(EstadoConteoInventario.Cancelado, dto.Estado);
+        Assert.Null(dto.FechaCierre);
+        Assert.Null(linea.StockEsperado);
+        Assert.Null(linea.Diferencia);
+        Assert.Equal(0, dto.CantidadConDiferencia);
+        Assert.Equal(0, dto.DiferenciaNeta);
+    }
 }

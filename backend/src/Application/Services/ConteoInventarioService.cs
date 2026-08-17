@@ -400,8 +400,7 @@ public sealed class ConteoInventarioService : IConteoInventarioService
 
     private ConteoInventarioDto Map(ConteoInventario conteo)
     {
-        var ocultarReferencia = conteo.EsCiego &&
-            conteo.Estado is EstadoConteoInventario.Borrador or EstadoConteoInventario.EnProceso;
+        var ocultarReferencia = conteo.EsCiego && !conteo.FechaCierre.HasValue;
         return new ConteoInventarioDto
         {
             Id = conteo.Id,
