@@ -81,6 +81,7 @@ public class UpdateConteoInventarioDto
 
 public class CapturarConteoInventarioDetalleDto
 {
+    [Range(0, int.MaxValue)]
     public int CantidadContada { get; set; }
 }
 
@@ -92,7 +93,10 @@ public class CapturarConteoInventarioLoteDto
 
 public class CapturaConteoInventarioLineaDto
 {
+    [Range(1, int.MaxValue)]
     public int DetalleId { get; set; }
+
+    [Range(0, int.MaxValue)]
     public int CantidadContada { get; set; }
 }
 
