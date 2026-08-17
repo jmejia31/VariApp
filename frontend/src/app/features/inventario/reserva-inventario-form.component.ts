@@ -50,7 +50,7 @@ import { ReservaInventarioService } from '../../services/reserva-inventario.serv
   styles: [`.page{padding:24px;display:grid;gap:18px;max-width:1120px;margin:0 auto}.eyebrow{margin:12px 0 0;text-transform:uppercase;letter-spacing:.08em;font-size:.72rem;font-weight:700;color:var(--primary,#3f51b5)}h1{margin:4px 0}header p{color:#667085}.state{min-height:160px;display:flex;align-items:center;justify-content:center;gap:12px}.error{padding:12px;border-radius:10px;background:#fef3f2;color:#b42318}.card{border:1px solid #e4e7ec;border-radius:12px;padding:18px;background:#fff;display:grid;gap:14px}.general{grid-template-columns:1fr 1fr}.section-title{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.section-title h2{margin:0;font-size:1.1rem}.section-title p{margin:4px 0 0;color:#667085}.line{display:grid;grid-template-columns:minmax(0,3fr) minmax(150px,1fr) auto;gap:10px;align-items:start;border-top:1px solid #eaecf0;padding-top:14px}.physical-select{min-width:0}footer{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}footer button mat-spinner{display:inline-block}@media(max-width:850px){.page{padding:16px}.general,.line{grid-template-columns:1fr 1fr}.line>button{justify-self:start}}@media(max-width:520px){.general,.line{grid-template-columns:1fr}.section-title{flex-direction:column}}`]
 })
 export class ReservaInventarioFormComponent implements OnInit {
-  form = this.fb.group({ ventaId: [null as number | null, [Validators.min(1)]], fechaExpiracion: [null as string | null], detalles: this.fb.array<FormGroup>([]) });
+  form: FormGroup;
   existencias: ExistenciaVariante[] = [];
   editando = false;
   loading = true;
@@ -64,9 +64,12 @@ export class ReservaInventarioFormComponent implements OnInit {
     private readonly router: Router,
     private readonly service: ReservaInventarioService,
     private readonly existenciaService: ExistenciaVarianteService
-  ) { this.agregarDetalle(); }
+  ) {
+    this.form = this.fb.group({ ventaId: [null as number | null, [Validators.min(1)]], fechaExpiracion: [null as string | null], detalles: this.fb.array<FormGroup>([]) });
+    this.agregarDetalle();
+  }
 
-  get detalles(): FormArray<FormGroup> { return this.form.controls.detalles; }
+  get detalles(): FormArray<FormGroup> { return this.form.controls['detalles'] as FormArray<FormGroup>; }
   get hayExistenciasReservables(): boolean { return this.existencias.some(x => x.stockDisponible > 0); }
 
   ngOnInit(): void {
@@ -141,17 +144,19 @@ export class ReservaInventarioFormComponent implements OnInit {
   guardar(): void {
     if (this.form.invalid || this.detalles.length === 0) { this.form.markAllAsTouched(); return; }
     const raw = this.form.getRawValue();
-    const detalles = raw.detalles.map(d => ({ productoVarianteId: Number(d['productoVarianteId']), almacenId: Number(d['almacenId']), ubicacionAlmacenId: d['ubicacionAlmacenId'] ? Number(d['ubicacionAlmacenId']) : null, cantidad: Number(d['cantidad']) }));
-    const claves = detalles.map(d => `${d.productoVarianteId}:${d.almacenId}:${d.ubicacionAlmacenId ?? 'root'}`);
+    const detalles = raw['detalles'].map((d: Record<string, unknown>) => ({ productoVarianteId: Number(d['productoVarianteId']), almacenId: Number(d['almacenId']), ubicacionAlmacenId: d['ubicacionAlmacenId'] ? Number(d['ubicacionAlmacenId']) : null, cantidad: Number(d['cantidad']) }));
+    const claves = detalles.map((d: { productoVarianteId: number; almacenId: number; ubicacionAlmacenId: number | null }) => `${d.productoVarianteId}:${d.almacenId}:${d.ubicacionAlmacenId ?? 'root'}`);
     if (new Set(claves).size !== claves.length) { this.error = 'No puedes reservar dos veces la misma existencia física dentro del documento.'; return; }
-    const sobreReserva = raw.detalles.find(d => {
+    const sobreReserva = raw['detalles'].find((d: Record<string, unknown>) => {
       const existencia = this.existencias.find(x => x.id === Number(d['existenciaVarianteId']));
       return existencia && Number(d['cantidad']) > existencia.stockDisponible;
     });
     if (sobreReserva) { this.error = 'La cantidad solicitada supera el stock disponible de una de las existencias seleccionadas.'; return; }
 
-    const fechaExpiracion = raw.fechaExpiracion ? new Date(raw.fechaExpiracion).toISOString() : null;
-    const request = this.editando ? this.service.update(this.id, { fechaExpiracion, detalles }) : this.service.create({ ventaId: raw.ventaId ? Number(raw.ventaId) : null, fechaExpiracion, detalles });
+    const fechaExpiracionRaw = raw['fechaExpiracion'] as string | null;
+    const ventaIdRaw = raw['ventaId'] as number | null;
+    const fechaExpiracion = fechaExpiracionRaw ? new Date(fechaExpiracionRaw).toISOString() : null;
+    const request = this.editando ? this.service.update(this.id, { fechaExpiracion, detalles }) : this.service.create({ ventaId: ventaIdRaw ? Number(ventaIdRaw) : null, fechaExpiracion, detalles });
     this.guardando = true; this.error = '';
     request.pipe(finalize(() => this.guardando = false)).subscribe({ next: r => { if (!r.success) { this.error = r.message || 'No se pudo guardar la reserva.'; return; } void this.router.navigate(['/inventario/reservas', r.data.id]); }, error: () => this.error = 'No se pudo guardar la reserva.' });
   }
