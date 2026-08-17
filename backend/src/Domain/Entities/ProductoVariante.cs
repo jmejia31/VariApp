@@ -27,16 +27,11 @@ public class ProductoVariante : AuditableEntity
     public DateTime? FechaEliminacion { get; set; }
     public int? EliminadoPorUsuarioId { get; set; }
 
-    // N1.9.B — contrato de dominio todavía no persistente. N1.9.C será la única
-    // etapa autorizada para materializar columnas/FKs/migraciones y retirar estos
-    // NotMapped de forma coordinada con snapshot y preflight SQL.
-    [NotMapped]
+    // N1.9.C — política opt-in persistida. Las variantes existentes conservan
+    // comportamiento legacy con todos los controles desactivados por defecto.
     public bool ControlaLote { get; private set; }
-    [NotMapped]
     public bool ControlaNumeroSerie { get; private set; }
-    [NotMapped]
     public bool ControlaFechaVencimiento { get; private set; }
-    [NotMapped]
     public int? DiasAlertaVencimiento { get; private set; }
 
     public ICollection<ProductoImagen> Imagenes { get; set; } = new List<ProductoImagen>();
