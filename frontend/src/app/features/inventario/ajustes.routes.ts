@@ -25,6 +25,12 @@ export const AJUSTES_INVENTARIO_ROUTES: Routes = [
     loadComponent: () => import('./existencia-variante-form.component').then(m => m.ExistenciaVarianteFormComponent)
   },
   {
+    path: 'inventario/trazabilidad/:varianteId',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Inventario', accion: 'Editar' },
+    loadComponent: () => import('./trazabilidad-variante-page.component').then(m => m.TrazabilidadVariantePageComponent)
+  },
+  {
     path: 'inventario/ajustes',
     canActivate: [authGuard, permisoGuard],
     data: { modulo: 'Inventario', accion: 'Ver' },
