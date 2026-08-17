@@ -400,7 +400,8 @@ public sealed class ConteoInventarioService : IConteoInventarioService
 
     private ConteoInventarioDto Map(ConteoInventario conteo)
     {
-        var ocultarEsperado = conteo.EsCiego && conteo.Estado == EstadoConteoInventario.EnProceso;
+        var ocultarEsperado = conteo.EsCiego &&
+            conteo.Estado is EstadoConteoInventario.Borrador or EstadoConteoInventario.EnProceso;
         return new ConteoInventarioDto
         {
             Id = conteo.Id,
