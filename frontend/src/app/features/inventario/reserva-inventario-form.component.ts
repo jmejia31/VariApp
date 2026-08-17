@@ -25,7 +25,7 @@ import { ReservaInventarioService } from '../../services/reserva-inventario.serv
       <form *ngIf="!loading" [formGroup]="form" (ngSubmit)="guardar()">
         <section class="card general">
           <mat-form-field appearance="outline"><mat-label>Venta (opcional)</mat-label><input matInput type="number" min="1" formControlName="ventaId" /></mat-form-field>
-          <mat-form-field appearance="outline"><mat-label>Fecha de expiración</mat-label><input matInput type="datetime-local" formControlName="fechaExpiracion" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Fecha de expiración</mat-label><input matInput type="datetime-local" [min]="fechaExpiracionMinima" formControlName="fechaExpiracion" /><mat-hint>Debe ser futura.</mat-hint></mat-form-field>
         </section>
         <section class="card" formArrayName="detalles">
           <div class="section-title"><div><h2>Detalle físico</h2><p>La existencia seleccionada define variante, almacén y ubicación sin pedir IDs manuales.</p></div><button mat-stroked-button type="button" (click)="agregarDetalle()"><mat-icon>add</mat-icon>Agregar línea</button></div>
@@ -56,6 +56,7 @@ export class ReservaInventarioFormComponent implements OnInit {
   loading = true;
   guardando = false;
   error = '';
+  readonly fechaExpiracionMinima = this.toLocalInput(new Date().toISOString()) ?? '';
   private id = 0;
 
   constructor(
@@ -154,6 +155,13 @@ export class ReservaInventarioFormComponent implements OnInit {
     if (sobreReserva) { this.error = 'La cantidad solicitada supera el stock disponible de una de las existencias seleccionadas.'; return; }
 
     const fechaExpiracionRaw = raw['fechaExpiracion'] as string | null;
+    if (fechaExpiracionRaw) {
+      const fechaExpiracionDate = new Date(fechaExpiracionRaw);
+      if (Number.isNaN(fechaExpiracionDate.getTime()) || fechaExpiracionDate.getTime() <= Date.now()) {
+        this.error = 'La fecha de expiración debe ser futura.';
+        return;
+      }
+    }
     const ventaIdRaw = raw['ventaId'] as number | null;
     const fechaExpiracion = fechaExpiracionRaw ? new Date(fechaExpiracionRaw).toISOString() : null;
     const request = this.editando ? this.service.update(this.id, { fechaExpiracion, detalles }) : this.service.create({ ventaId: ventaIdRaw ? Number(ventaIdRaw) : null, fechaExpiracion, detalles });
