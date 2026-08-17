@@ -86,6 +86,69 @@ public sealed class N17ConteosInventarioControllerBehaviorTests
     }
 
     [Fact]
+    public async Task Capturar_AuditaDetalleYCantidadContada()
+    {
+        var service = new Mock<IConteoInventarioService>();
+        var auditoria = new Mock<IAuditoriaService>();
+        var dto = new CapturarConteoInventarioDetalleDto { CantidadContada = 17 };
+        var conteo = new ConteoInventarioDto { Id = 12, Numero = "CNT-12", AlmacenId = 3 };
+        service.Setup(x => x.CapturarDetalleAsync(12, 4, dto)).ReturnsAsync(conteo);
+        var controller = new ConteosInventarioController(service.Object, auditoria.Object);
+
+        var result = await controller.Capturar(12, 4, dto);
+
+        Assert.IsType<OkObjectResult>(result);
+        auditoria.Verify(x => x.RegistrarAsync(
+            ModuloSistema.MovimientosInventario,
+            AccionPermiso.Editar,
+            It.Is<string>(descripcion => descripcion.Contains("4", StringComparison.Ordinal)),
+            12,
+            "ConteoInventario",
+            null,
+            It.Is<object>(valores =>
+                valores.ToString()!.Contains("4", StringComparison.Ordinal) &&
+                valores.ToString()!.Contains("17", StringComparison.Ordinal)),
+            null,
+            "Exito",
+            null), Times.Once);
+    }
+
+    [Fact]
+    public async Task CapturarLote_AuditaLineasYCantidades()
+    {
+        var service = new Mock<IConteoInventarioService>();
+        var auditoria = new Mock<IAuditoriaService>();
+        var dto = new CapturarConteoInventarioLoteDto
+        {
+            Lineas =
+            {
+                new CapturaConteoInventarioLineaDto { DetalleId = 4, CantidadContada = 17 },
+                new CapturaConteoInventarioLineaDto { DetalleId = 5, CantidadContada = 21 }
+            }
+        };
+        var conteo = new ConteoInventarioDto { Id = 12, Numero = "CNT-12", AlmacenId = 3 };
+        service.Setup(x => x.CapturarLoteAsync(12, dto)).ReturnsAsync(conteo);
+        var controller = new ConteosInventarioController(service.Object, auditoria.Object);
+
+        var result = await controller.CapturarLote(12, dto);
+
+        Assert.IsType<OkObjectResult>(result);
+        auditoria.Verify(x => x.RegistrarAsync(
+            ModuloSistema.MovimientosInventario,
+            AccionPermiso.Editar,
+            It.Is<string>(descripcion => descripcion.Contains("2", StringComparison.Ordinal)),
+            12,
+            "ConteoInventario",
+            null,
+            It.Is<object>(valores =>
+                valores.ToString()!.Contains("17", StringComparison.Ordinal) &&
+                valores.ToString()!.Contains("21", StringComparison.Ordinal)),
+            null,
+            "Exito",
+            null), Times.Once);
+    }
+
+    [Fact]
     public async Task Cancelar_DelegaMotivoYRetornaOk()
     {
         var service = new Mock<IConteoInventarioService>();
@@ -131,7 +194,7 @@ public sealed class N17ConteosInventarioControllerBehaviorTests
     {
         var service = new Mock<IConteoInventarioService>();
         var auditoria = new Mock<IAuditoriaService>();
-        var cerrado = new ConteoInventarioDto { Id = 30, Numero = "CNT-30", Estado = "Cerrado" };
+        var cerrado = new ConteoInventarioDto { Id = 30, Numero = "CNT-30", Estado = EstadoConteoInventario.Cerrado };
         service.Setup(x => x.CerrarAsync(30)).ReturnsAsync(cerrado);
         var controller = new ConteosInventarioController(service.Object, auditoria.Object);
 
