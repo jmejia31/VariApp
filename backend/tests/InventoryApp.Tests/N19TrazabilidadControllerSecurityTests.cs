@@ -31,6 +31,22 @@ public sealed class N19TrazabilidadControllerSecurityTests
         Assert.Single(type.GetCustomAttributes(typeof(ApiControllerAttribute), inherit: true));
     }
 
+    [Fact]
+    public void Todos_los_endpoints_HTTP_exigen_exactamente_un_permiso_relacional()
+    {
+        var type = typeof(TrazabilidadInventarioController);
+        var endpoints = type.GetMethods()
+            .Where(method => method.DeclaringType == type)
+            .Where(method => method.GetCustomAttributes(inherit: true).Any(attribute =>
+                attribute.GetType().Name.StartsWith("Http", StringComparison.Ordinal) &&
+                attribute.GetType().Name.EndsWith("Attribute", StringComparison.Ordinal)))
+            .ToList();
+
+        Assert.NotEmpty(endpoints);
+        Assert.All(endpoints, method =>
+            Assert.Single(method.GetCustomAttributes(typeof(RequierePermisoAttribute), inherit: true)));
+    }
+
     [Theory]
     [InlineData(nameof(TrazabilidadInventarioController.GetConfiguracion), AccionPermiso.Ver)]
     [InlineData(nameof(TrazabilidadInventarioController.Configurar), AccionPermiso.Editar)]
