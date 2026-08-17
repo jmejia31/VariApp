@@ -20,6 +20,10 @@ public class N17ConteosInventarioControllerRbacTests
     [Fact]
     public void Endpoints_NoPermitenBypassAnonimo()
     {
+        Assert.DoesNotContain(
+            typeof(ConteosInventarioController).CustomAttributes,
+            atributo => atributo.AttributeType == typeof(AllowAnonymousAttribute));
+
         var endpoints = typeof(ConteosInventarioController)
             .GetMethods()
             .Where(m => m.DeclaringType == typeof(ConteosInventarioController));
