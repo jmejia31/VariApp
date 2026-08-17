@@ -21,9 +21,11 @@ test('filtra reservas usando el catálogo activo de almacenes', async ({ page })
   });
 
   await page.goto('/inventario/reservas');
-  const almacen = page.getByLabel('Almacén');
+  const almacen = page.getByRole('combobox', { name: 'Almacén' });
   await expect(almacen).toBeVisible();
-  await almacen.locator('.mat-mdc-select-trigger').click();
+  await almacen.focus();
+  await expect(almacen).toBeFocused();
+  await almacen.press('Enter');
   await expect(almacen).toHaveAttribute('aria-expanded', 'true');
   await page.getByRole('option', { name: 'BOD-11 · Bodega Central' }).click();
   await expect(almacen).toHaveAttribute('aria-expanded', 'false');
