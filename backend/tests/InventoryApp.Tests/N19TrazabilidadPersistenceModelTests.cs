@@ -70,6 +70,30 @@ public class N19TrazabilidadPersistenceModelTests
     }
 
     [Fact]
+    public void Modelo_EF_Debe_Conservar_Longitudes_E_Indices_Operativos_De_Trazabilidad()
+    {
+        var options = new DbContextOptionsBuilder<AppDbContext>()
+            .UseInMemoryDatabase($"n19-metadata-{Guid.NewGuid():N}")
+            .Options;
+
+        using var db = new AppDbContext(options);
+        var lote = db.Model.FindEntityType(typeof(LoteInventario))!;
+        var serie = db.Model.FindEntityType(typeof(SerieInventario))!;
+
+        Assert.Equal(100, lote.FindProperty(nameof(LoteInventario.Codigo))!.GetMaxLength());
+        Assert.False(lote.FindProperty(nameof(LoteInventario.Codigo))!.IsNullable);
+        Assert.Contains(lote.GetIndexes(), i =>
+            i.GetDatabaseName() == "IX_LotesInventario_FechaVencimiento" &&
+            i.Properties.Select(p => p.Name).SequenceEqual(new[] { "FechaVencimiento" }));
+
+        Assert.Equal(160, serie.FindProperty(nameof(SerieInventario.NumeroSerie))!.GetMaxLength());
+        Assert.False(serie.FindProperty(nameof(SerieInventario.NumeroSerie))!.IsNullable);
+        Assert.Contains(serie.GetIndexes(), i =>
+            i.GetDatabaseName() == "IX_SeriesInventario_Variante_Estado" &&
+            i.Properties.Select(p => p.Name).SequenceEqual(new[] { "ProductoVarianteId", "Estado" }));
+    }
+
+    [Fact]
     public void DbContext_Debe_Exponer_Lotes_Y_Series()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
