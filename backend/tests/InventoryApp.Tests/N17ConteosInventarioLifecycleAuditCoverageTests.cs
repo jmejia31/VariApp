@@ -96,6 +96,40 @@ public sealed class N17ConteosInventarioLifecycleAuditCoverageTests
         VerificarAuditoria(auditoria, AccionPermiso.Aprobar, 44);
     }
 
+    [Theory]
+    [InlineData("iniciar")]
+    [InlineData("cerrar")]
+    [InlineData("aprobar")]
+    public async Task TransicionSobreConteoInexistente_NoRegistraAuditoriaDeExito(string transicion)
+    {
+        var service = new Mock<IConteoInventarioService>();
+        var auditoria = new Mock<IAuditoriaService>();
+        service.Setup(x => x.IniciarAsync(404)).ReturnsAsync((ConteoInventarioDto?)null);
+        service.Setup(x => x.CerrarAsync(404)).ReturnsAsync((ConteoInventarioDto?)null);
+        service.Setup(x => x.AprobarAsync(404)).ReturnsAsync((ConteoInventarioDto?)null);
+        var controller = new ConteosInventarioController(service.Object, auditoria.Object);
+
+        IActionResult result = transicion switch
+        {
+            "iniciar" => await controller.Iniciar(404),
+            "cerrar" => await controller.Cerrar(404),
+            _ => await controller.Aprobar(404)
+        };
+
+        Assert.IsType<NotFoundObjectResult>(result);
+        auditoria.Verify(x => x.RegistrarAsync(
+            It.IsAny<ModuloSistema>(),
+            It.IsAny<AccionPermiso>(),
+            It.IsAny<string>(),
+            It.IsAny<int?>(),
+            It.IsAny<string?>(),
+            It.IsAny<object?>(),
+            It.IsAny<object?>(),
+            It.IsAny<string?>(),
+            It.IsAny<string>(),
+            It.IsAny<string?>()), Times.Never);
+    }
+
     private static void VerificarAuditoria(
         Mock<IAuditoriaService> auditoria,
         AccionPermiso accion,
