@@ -2,7 +2,7 @@ using InventoryApp.API.Controllers;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Application.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Routing;
 using Xunit;
 
 namespace InventoryApp.Tests;
