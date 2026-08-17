@@ -31,6 +31,8 @@ public class AppDbContext : DbContext
     public DbSet<AjusteInventario> AjustesInventario => Set<AjusteInventario>();
     public DbSet<AjusteInventarioDetalle> AjusteInventarioDetalles => Set<AjusteInventarioDetalle>();
     public DbSet<ExistenciaVariante> ExistenciasVariante => Set<ExistenciaVariante>();
+    public DbSet<LoteInventario> LotesInventario => Set<LoteInventario>();
+    public DbSet<SerieInventario> SeriesInventario => Set<SerieInventario>();
     public DbSet<ReservaInventario> ReservasInventario => Set<ReservaInventario>();
     public DbSet<ReservaInventarioDetalle> ReservaInventarioDetalles => Set<ReservaInventarioDetalle>();
     public DbSet<MovimientoFinanciero> MovimientosFinancieros => Set<MovimientoFinanciero>();
