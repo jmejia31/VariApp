@@ -8,8 +8,9 @@ using InventoryApp.Domain.Enums;
 namespace InventoryApp.Application.Services;
 
 /// <summary>
-/// Vertical N1.9.D para administrar la identidad trazable opt-in sin convertir
-/// lotes/series en una segunda autoridad cuantitativa de inventario.
+/// Vertical N1.9.D/F para administrar la identidad trazable opt-in sin convertir
+/// lotes/series en una segunda autoridad cuantitativa de inventario y dejando
+/// evidencia de auditoría estricta en cada mutación empresarial.
 /// </summary>
 public sealed class TrazabilidadInventarioService : ITrazabilidadInventarioService
 {
@@ -17,17 +18,20 @@ public sealed class TrazabilidadInventarioService : ITrazabilidadInventarioServi
     private readonly IProductoVarianteRepository _variantes;
     private readonly ICurrentUserService _currentUser;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IAuditoriaService _auditoria;
 
     public TrazabilidadInventarioService(
         ITrazabilidadInventarioRepository repository,
         IProductoVarianteRepository variantes,
         ICurrentUserService currentUser,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        IAuditoriaService auditoria)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         _variantes = variantes ?? throw new ArgumentNullException(nameof(variantes));
         _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        _auditoria = auditoria ?? throw new ArgumentNullException(nameof(auditoria));
     }
 
     public async Task<ConfiguracionTrazabilidadVarianteDto?> GetConfiguracionAsync(int productoVarianteId)
@@ -58,6 +62,14 @@ public sealed class TrazabilidadInventarioService : ITrazabilidadInventarioServi
                 resultado = MapConfiguracion(variante);
                 return;
             }
+
+            var anterior = new
+            {
+                variante.ControlaLote,
+                variante.ControlaNumeroSerie,
+                variante.ControlaFechaVencimiento,
+                variante.DiasAlertaVencimiento
+            };
 
             var habilitaDimension =
                 (!variante.ControlaLote && request.ControlaLote) ||
@@ -93,6 +105,21 @@ public sealed class TrazabilidadInventarioService : ITrazabilidadInventarioServi
             _variantes.Update(variante);
             await _variantes.SaveChangesAsync();
             resultado = MapConfiguracion(variante);
+
+            await _auditoria.RegistrarEstrictoAsync(
+                ModuloSistema.MovimientosInventario,
+                AccionPermiso.Editar,
+                "Configuración de trazabilidad de variante actualizada.",
+                referenciaId: variante.Id,
+                entidad: "ProductoVarianteTrazabilidad",
+                valoresAnteriores: anterior,
+                valoresNuevos: new
+                {
+                    variante.ControlaLote,
+                    variante.ControlaNumeroSerie,
+                    variante.ControlaFechaVencimiento,
+                    variante.DiasAlertaVencimiento
+                });
         });
 
         return resultado!;
@@ -152,6 +179,19 @@ public sealed class TrazabilidadInventarioService : ITrazabilidadInventarioServi
             }
 
             resultado = MapLote(candidato);
+            await _auditoria.RegistrarEstrictoAsync(
+                ModuloSistema.MovimientosInventario,
+                AccionPermiso.Crear,
+                "Lote de inventario registrado.",
+                referenciaId: candidato.Id,
+                entidad: "LoteInventario",
+                valoresNuevos: new
+                {
+                    candidato.ProductoVarianteId,
+                    candidato.FechaFabricacion,
+                    candidato.FechaVencimiento,
+                    candidato.Activo
+                });
         });
         return resultado!;
     }
@@ -168,6 +208,14 @@ public sealed class TrazabilidadInventarioService : ITrazabilidadInventarioServi
                 ?? throw new BusinessRuleException("El lote indicado no existe.");
             if (!lote.Activo) throw new BusinessRuleException("Un lote inactivo no puede editarse.");
 
+            var anterior = new
+            {
+                lote.ProductoVarianteId,
+                lote.FechaFabricacion,
+                lote.FechaVencimiento,
+                lote.Activo
+            };
+
             var variante = await _variantes.GetByIdForUpdateAsync(lote.ProductoVarianteId)
                 ?? throw new BusinessRuleException("La variante asociada al lote no existe.");
             ValidarVarianteParaLote(variante, request.FechaVencimiento);
@@ -181,6 +229,21 @@ public sealed class TrazabilidadInventarioService : ITrazabilidadInventarioServi
             MarcarActualizacion(lote);
             await _repository.SaveChangesAsync();
             resultado = MapLote(lote);
+
+            await _auditoria.RegistrarEstrictoAsync(
+                ModuloSistema.MovimientosInventario,
+                AccionPermiso.Editar,
+                "Lote de inventario actualizado.",
+                referenciaId: lote.Id,
+                entidad: "LoteInventario",
+                valoresAnteriores: anterior,
+                valoresNuevos: new
+                {
+                    lote.ProductoVarianteId,
+                    lote.FechaFabricacion,
+                    lote.FechaVencimiento,
+                    lote.Activo
+                });
         });
         return resultado!;
     }
@@ -205,6 +268,14 @@ public sealed class TrazabilidadInventarioService : ITrazabilidadInventarioServi
             MarcarActualizacion(lote);
             await _repository.SaveChangesAsync();
             resultado = MapLote(lote);
+
+            await _auditoria.RegistrarEstrictoAsync(
+                ModuloSistema.MovimientosInventario,
+                AccionPermiso.Anular,
+                "Lote de inventario desactivado.",
+                referenciaId: lote.Id,
+                entidad: "LoteInventario",
+                valoresNuevos: new { lote.ProductoVarianteId, lote.Activo });
         });
         return resultado!;
     }
@@ -287,6 +358,18 @@ public sealed class TrazabilidadInventarioService : ITrazabilidadInventarioServi
             }
 
             resultado = MapSerie(candidato);
+            await _auditoria.RegistrarEstrictoAsync(
+                ModuloSistema.MovimientosInventario,
+                AccionPermiso.Crear,
+                "Serie de inventario registrada.",
+                referenciaId: candidato.Id,
+                entidad: "SerieInventario",
+                valoresNuevos: new
+                {
+                    candidato.ProductoVarianteId,
+                    candidato.LoteInventarioId,
+                    candidato.Estado
+                });
         });
         return resultado!;
     }
@@ -305,6 +388,7 @@ public sealed class TrazabilidadInventarioService : ITrazabilidadInventarioServi
                 return;
             }
 
+            var estadoAnterior = serie.Estado;
             try
             {
                 serie.DarDeBaja();
@@ -316,6 +400,15 @@ public sealed class TrazabilidadInventarioService : ITrazabilidadInventarioServi
             MarcarActualizacion(serie);
             await _repository.SaveChangesAsync();
             resultado = MapSerie(serie);
+
+            await _auditoria.RegistrarEstrictoAsync(
+                ModuloSistema.MovimientosInventario,
+                AccionPermiso.Anular,
+                "Serie de inventario dada de baja.",
+                referenciaId: serie.Id,
+                entidad: "SerieInventario",
+                valoresAnteriores: new { Estado = estadoAnterior },
+                valoresNuevos: new { serie.ProductoVarianteId, serie.LoteInventarioId, serie.Estado });
         });
         return resultado!;
     }
