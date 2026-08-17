@@ -22,12 +22,11 @@ test('filtra reservas usando el catálogo activo de almacenes', async ({ page })
 
   await page.goto('/inventario/reservas');
   const almacen = page.getByLabel('Almacén');
-  await almacen.focus();
-  await almacen.press('ArrowDown');
+  await almacen.click();
   await expect(almacen).toHaveAttribute('aria-expanded', 'true');
   await page.getByRole('option', { name: 'BOD-11 · Bodega Central' }).click();
   await expect(almacen).toHaveAttribute('aria-expanded', 'false');
-  await page.locator('.cdk-overlay-backdrop').waitFor({ state: 'detached' }).catch(() => undefined);
+  await expect(page.locator('.cdk-overlay-backdrop')).toHaveCount(0);
   await page.getByRole('button', { name: 'Filtrar', exact: true }).click();
 
   await expect.poll(() => consultas.some(url => new URL(url).searchParams.get('almacenId') === '11')).toBeTruthy();
