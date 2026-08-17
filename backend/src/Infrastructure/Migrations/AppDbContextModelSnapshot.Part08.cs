@@ -112,7 +112,6 @@ namespace InventoryApp.Infrastructure.Migrations
                     .HasConstraintName("FK_TransferenciasInventario_Almacenes_Origen");
                 b.Navigation("AlmacenDestino");
                 b.Navigation("AlmacenOrigen");
-                b.Navigation("Detalles");
             });
 
             modelBuilder.Entity("InventoryApp.Domain.Entities.TransferenciaInventarioDetalle", b =>
@@ -137,6 +136,11 @@ namespace InventoryApp.Infrastructure.Migrations
                 b.Navigation("TransferenciaInventario");
                 b.Navigation("UbicacionDestino");
                 b.Navigation("UbicacionOrigen");
+            });
+
+            modelBuilder.Entity("InventoryApp.Domain.Entities.TransferenciaInventario", b =>
+            {
+                b.Navigation("Detalles");
             });
         }
     }
