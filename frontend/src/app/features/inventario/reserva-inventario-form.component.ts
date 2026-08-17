@@ -1,0 +1,69 @@
+import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { finalize } from 'rxjs';
+import { ReservaInventarioService } from '../../services/reserva-inventario.service';
+
+@Component({
+  selector: 'app-reserva-inventario-form',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, MatButtonModule, MatFormFieldModule, MatIconModule, MatInputModule, MatProgressSpinnerModule],
+  template: `
+    <section class="page" aria-labelledby="reserva-form-title">
+      <header><button mat-button type="button" (click)="volver()"><mat-icon>arrow_back</mat-icon>Reservas</button><p class="eyebrow">Inventario empresarial</p><h1 id="reserva-form-title">{{ editando ? 'Editar reserva' : 'Nueva reserva' }}</h1><p>Define las claves físicas y cantidades que quedarán reservadas al activar el documento.</p></header>
+      <div *ngIf="loading" class="state"><mat-spinner diameter="36"></mat-spinner><span>Cargando…</span></div>
+      <div *ngIf="error" class="error" role="alert">{{ error }}</div>
+      <form *ngIf="!loading" [formGroup]="form" (ngSubmit)="guardar()">
+        <section class="card general">
+          <mat-form-field appearance="outline"><mat-label>Venta (opcional)</mat-label><input matInput type="number" min="1" formControlName="ventaId" /></mat-form-field>
+          <mat-form-field appearance="outline"><mat-label>Fecha de expiración</mat-label><input matInput type="datetime-local" formControlName="fechaExpiracion" /></mat-form-field>
+        </section>
+        <section class="card" formArrayName="detalles">
+          <div class="section-title"><div><h2>Detalle físico</h2><p>Una línea por combinación variante + almacén + ubicación.</p></div><button mat-stroked-button type="button" (click)="agregarDetalle()"><mat-icon>add</mat-icon>Agregar línea</button></div>
+          <div *ngFor="let grupo of detalles.controls; let i = index" class="line" [formGroupName]="i">
+            <mat-form-field appearance="outline"><mat-label>Variante</mat-label><input matInput type="number" min="1" formControlName="productoVarianteId" required /></mat-form-field>
+            <mat-form-field appearance="outline"><mat-label>Almacén</mat-label><input matInput type="number" min="1" formControlName="almacenId" required /></mat-form-field>
+            <mat-form-field appearance="outline"><mat-label>Ubicación</mat-label><input matInput type="number" min="1" formControlName="ubicacionAlmacenId" /></mat-form-field>
+            <mat-form-field appearance="outline"><mat-label>Cantidad</mat-label><input matInput type="number" min="1" formControlName="cantidad" required /></mat-form-field>
+            <button mat-icon-button color="warn" type="button" aria-label="Quitar línea" [disabled]="detalles.length === 1" (click)="quitarDetalle(i)"><mat-icon>delete_outline</mat-icon></button>
+          </div>
+        </section>
+        <footer><button mat-button type="button" (click)="volver()">Cancelar</button><button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || guardando"><mat-spinner *ngIf="guardando" diameter="20"></mat-spinner><span *ngIf="!guardando">Guardar reserva</span></button></footer>
+      </form>
+    </section>
+  `,
+  styles: [`.page{padding:24px;display:grid;gap:18px;max-width:1120px;margin:0 auto}.eyebrow{margin:12px 0 0;text-transform:uppercase;letter-spacing:.08em;font-size:.72rem;font-weight:700;color:var(--primary,#3f51b5)}h1{margin:4px 0}header p{color:#667085}.state{min-height:160px;display:flex;align-items:center;justify-content:center;gap:12px}.error{padding:12px;border-radius:10px;background:#fef3f2;color:#b42318}.card{border:1px solid #e4e7ec;border-radius:12px;padding:18px;background:#fff;display:grid;gap:14px}.general{grid-template-columns:1fr 1fr}.section-title{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.section-title h2{margin:0;font-size:1.1rem}.section-title p{margin:4px 0 0;color:#667085}.line{display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:10px;align-items:start;border-top:1px solid #eaecf0;padding-top:14px}footer{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}footer button mat-spinner{display:inline-block}@media(max-width:850px){.page{padding:16px}.general,.line{grid-template-columns:1fr 1fr}.line>button{justify-self:start}}@media(max-width:520px){.general,.line{grid-template-columns:1fr}.section-title{flex-direction:column}}`]
+})
+export class ReservaInventarioFormComponent implements OnInit {
+  form = this.fb.group({ ventaId: [null as number | null, [Validators.min(1)]], fechaExpiracion: [null as string | null], detalles: this.fb.array<FormGroup>([]) });
+  editando = false;
+  loading = false;
+  guardando = false;
+  error = '';
+  private id = 0;
+
+  constructor(private readonly fb: FormBuilder, private readonly route: ActivatedRoute, private readonly router: Router, private readonly service: ReservaInventarioService) { this.agregarDetalle(); }
+  get detalles(): FormArray<FormGroup> { return this.form.controls.detalles; }
+  ngOnInit(): void { const raw = this.route.snapshot.paramMap.get('id'); if (!raw) return; this.id = Number(raw); if (!Number.isInteger(this.id) || this.id <= 0) { this.error = 'Identificador de reserva inválido.'; return; } this.editando = true; this.cargar(); }
+  agregarDetalle(): void { this.detalles.push(this.fb.group({ productoVarianteId: [null as number | null, [Validators.required, Validators.min(1)]], almacenId: [null as number | null, [Validators.required, Validators.min(1)]], ubicacionAlmacenId: [null as number | null, [Validators.min(1)]], cantidad: [1, [Validators.required, Validators.min(1)]] })); }
+  quitarDetalle(index: number): void { if (this.detalles.length > 1) this.detalles.removeAt(index); }
+
+  cargar(): void { this.loading = true; this.error = ''; this.service.getById(this.id).pipe(finalize(() => this.loading = false)).subscribe({ next: r => { if (!r.success) { this.error = r.message || 'No se pudo cargar la reserva.'; return; } if (r.data.estado !== 'Borrador') { this.error = 'Sólo las reservas en Borrador pueden editarse.'; return; } this.detalles.clear(); r.data.detalles.forEach(d => this.detalles.push(this.fb.group({ productoVarianteId: [d.productoVarianteId, [Validators.required, Validators.min(1)]], almacenId: [d.almacenId, [Validators.required, Validators.min(1)]], ubicacionAlmacenId: [d.ubicacionAlmacenId ?? null, [Validators.min(1)]], cantidad: [d.cantidadReservada, [Validators.required, Validators.min(1)]] }))); this.form.patchValue({ fechaExpiracion: this.toLocalInput(r.data.fechaExpiracion) }); }, error: () => this.error = 'No se pudo cargar la reserva.' }); }
+  guardar(): void {
+    if (this.form.invalid || this.detalles.length === 0) { this.form.markAllAsTouched(); return; }
+    const raw = this.form.getRawValue();
+    const detalles = raw.detalles.map(d => ({ productoVarianteId: Number(d['productoVarianteId']), almacenId: Number(d['almacenId']), ubicacionAlmacenId: d['ubicacionAlmacenId'] ? Number(d['ubicacionAlmacenId']) : null, cantidad: Number(d['cantidad']) }));
+    const fechaExpiracion = raw.fechaExpiracion ? new Date(raw.fechaExpiracion).toISOString() : null;
+    const request = this.editando ? this.service.update(this.id, { fechaExpiracion, detalles }) : this.service.create({ ventaId: raw.ventaId ? Number(raw.ventaId) : null, fechaExpiracion, detalles });
+    this.guardando = true; this.error = '';
+    request.pipe(finalize(() => this.guardando = false)).subscribe({ next: r => { if (!r.success) { this.error = r.message || 'No se pudo guardar la reserva.'; return; } void this.router.navigate(['/inventario/reservas', r.data.id]); }, error: () => this.error = 'No se pudo guardar la reserva.' });
+  }
+  volver(): void { void this.router.navigate(['/inventario/reservas']); }
+  private toLocalInput(value?: string | null): string | null { if (!value) return null; const date = new Date(value); const offset = date.getTimezoneOffset() * 60000; return new Date(date.getTime() - offset).toISOString().slice(0,16); }
+}
