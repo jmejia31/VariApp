@@ -95,6 +95,27 @@ test.describe('Costeo de inventario - política empresarial', () => {
     await expect(page.getByText('FIFO', { exact: true }).first()).toBeVisible();
   });
 
+  test('bloquea el mismo método y motivos menores al contrato mínimo antes del API', async ({ page }) => {
+    await loginConPermisosCosteo(page);
+    await mockLecturas(page);
+    await page.goto('/inventario/costeo');
+
+    const cambio = page.locator('.change-form');
+    const boton = cambio.getByRole('button', { name: 'Aplicar política' });
+    const motivo = cambio.locator('textarea[name="motivo"]');
+
+    await motivo.fill('Motivo válido para probar el mismo método');
+    await expect(boton).toBeDisabled();
+
+    await cambio.locator('mat-select').click();
+    await page.getByRole('option', { name: 'FIFO', exact: true }).click();
+    await motivo.fill('ab');
+    await expect(boton).toBeDisabled();
+
+    await motivo.fill('abc');
+    await expect(boton).toBeEnabled();
+  });
+
   test('convierte filtros temporales a UTC y bloquea rangos invertidos antes del API', async ({ page }) => {
     await loginConPermisosCosteo(page);
     await mockLecturas(page);
