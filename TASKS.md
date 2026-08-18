@@ -178,7 +178,20 @@ ERP-N0.5, ERP-N0.6, ERP-N0.7 y ERP-N0.8 están formalmente cerrados. `GATE-N0=LI
 - [x] N1.8.G QA/regresión/CI — Development `32035509947`, Acceptance `32035509805`, Fase8 `32035509973`, M10 `32035509930` y M13 `32035509964` en SUCCESS completo sobre `95baf2763b912e1015a3bdd25a37aca649e34c37`.
 - [x] N1.8.H Documentación/certificación — cierre canónico `docs/ERP_N1_8_RESERVAS.md`, `docs/ADR_N1_8_RESERVAS_STOCK_RESERVADO_Y_OVERSELLING.md`, `docs/RUNBOOK_N1_8_RESERVAS.md` y `docs/ERD_N1_8_RESERVAS.md` publicado en `11865b97f00f662728f7fe85a7466af89a9084df`; checkpoint final del HEAD documental: Development `32037186026`, Acceptance `32037186011`, Fase8 `32037186066`, M10 `32037186054` y M13 `32037186024` SUCCESS completo, incluido Runtime/Playwright y Dictamen automatizado M13.
 
-**ERP-N1.8 queda formalmente cerrado.** Siguiente foco VAEP: `N1.9.A — Series, lotes y vencimientos — Auditoría y preflight`.
+**ERP-N1.8 queda formalmente cerrado.**
+
+## ERP-N1.9 — Series, lotes y vencimientos
+
+- [x] N1.9.A Auditoría y preflight — `docs/ERP_N1_9_SERIES_LOTES_VENCIMIENTOS_PREFLIGHT.md`; alcance opt-in, autoridad cuantitativa de `ExistenciaVariante`, riesgos, cutover histórico, rollback y matriz de pruebas definidos.
+- [x] N1.9.B Dominio y contratos — política opcional por variante + contratos `LoteInventario`/`SerieInventario`, invariantes y compatibilidad histórica; certificado sobre `eeab04e94b13d8160e6964452000c90750cb2ef2`.
+- [x] N1.9.C Persistencia/migración/datos — migración `20260817100000_N1_9_TrazabilidadLotesSeries`, flags opt-in, FKs/índices/checks, preflight/postcheck/snapshot y preservación histórica sin backfill inventado; certificado sobre `1e63ac3305f3abb4648c6070261c56986f1224c3`.
+- [x] N1.9.D Aplicación/servicios/API — repositorio, servicio, endpoints y contrato HTTP de trazabilidad materializados; drift EF reconciliado y gates backend verdes.
+- [x] N1.9.E Frontend/UX — configuración por variante, captura/listado de lotes y series, vencimiento y navegación protegida por RBAC.
+- [x] N1.9.F RBAC/auditoría/seguridad/observabilidad — permisos relacionales, auditoría estricta/idempotente y hardening HTTP/RBAC; baseline final del punto `48f301dc4eb28951ee03c69874450a8e962104c1`.
+- [x] N1.9.G QA/regresión/CI — regresión integral de lote/serie/vencimiento cerrada; baseline `4b5a5c9a8b495fcef62464bf50010ac69117fe48`, con Development/Fase8/M10/M13 verdes.
+- [ ] N1.9.H Documentación/certificación — paquete documental publicado hasta `7bc4b7935cc92e15d24f90a79f3915ab14e2d243`; Development `32089179243`, Fase8 `32089179144`, M10 `32089179156` y Acceptance `32089179228` ya SUCCESS. Falta reconciliar M13 `32089179175`, actualizar `CHANGELOG_AI.md` y cerrar formalmente H en VAEP.
+
+**ERP-N1.9 permanece abierto únicamente en N1.9.H hasta completar el gate M13 y el cierre colaborativo.**
 
 ## Fuentes VAEP v2
 
