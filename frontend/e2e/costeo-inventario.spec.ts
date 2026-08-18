@@ -82,7 +82,7 @@ test.describe('Costeo de inventario - política empresarial', () => {
     await page.goto('/inventario/costeo');
     await expect(page.getByRole('heading', { name: 'Política de costeo' })).toBeVisible();
     await expect(page.getByText('Promedio Ponderado', { exact: true }).first()).toBeVisible();
-    await expect(page.getByText('Política inicial')).toBeVisible();
+    await expect(page.getByText('Política inicial').first()).toBeVisible();
 
     const cambio = page.locator('.change-form');
     await cambio.locator('mat-select').click();
