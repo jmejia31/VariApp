@@ -1,3 +1,4 @@
+using InventoryApp.Application.Common;
 using InventoryApp.Domain.Enums;
 
 namespace InventoryApp.Application.DTOs;
@@ -66,7 +67,7 @@ public class OrdenCompraDto
     public List<OrdenCompraDetalleDto> Detalles { get; set; } = new();
 }
 
-public class OrdenCompraFiltroDto : PaginacionDto
+public class OrdenCompraFiltroDto : PagedRequest
 {
     public EstadoOrdenCompra? Estado { get; set; }
     public int? ProveedorId { get; set; }
