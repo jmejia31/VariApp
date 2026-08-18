@@ -33,19 +33,11 @@ const borrador = {
   }]
 };
 
-async function login(page: Page): Promise<void> {
+async function login(page: Page, permisos: string[] = ['Dashboard:Ver', 'Compras:Ver', 'Compras:Crear', 'Compras:Editar', 'Compras:Confirmar', 'Compras:Aprobar', 'Compras:Rechazar']): Promise<void> {
   await page.route('**/permisos/mis-permisos', route => route.fulfill({
     status: 200,
     contentType: 'application/json',
-    body: JSON.stringify({
-      success: true,
-      message: '',
-      errors: [],
-      data: {
-        permisos: ['Dashboard:Ver', 'Compras:Ver', 'Compras:Crear', 'Compras:Editar', 'Compras:Confirmar', 'Compras:Aprobar', 'Compras:Rechazar'],
-        esAdministrador: false
-      }
-    })
+    body: JSON.stringify({ success: true, message: '', errors: [], data: { permisos, esAdministrador: false } })
   }));
 
   await page.goto('/login');
@@ -61,33 +53,15 @@ async function mockCatalogos(page: Page): Promise<void> {
     contentType: 'application/json',
     body: JSON.stringify({ success: true, message: '', errors: [], data: [{ id: 31, nombre: 'Proveedor E2E', activo: true }] })
   }));
-
   await page.route('**/productos?**', route => route.fulfill({
     status: 200,
     contentType: 'application/json',
-    body: JSON.stringify({
-      success: true,
-      message: '',
-      errors: [],
-      data: {
-        items: [{ id: 11, nombre: 'Producto E2E', marcaNombre: 'Marca E2E', activo: true, variantes: [], imagenes: [] }],
-        page: 1,
-        pageSize: 100,
-        totalCount: 1,
-        totalPages: 1
-      }
-    })
+    body: JSON.stringify({ success: true, message: '', errors: [], data: { items: [{ id: 11, nombre: 'Producto E2E', marcaNombre: 'Marca E2E', activo: true, variantes: [], imagenes: [] }], page: 1, pageSize: 100, totalCount: 1, totalPages: 1 } })
   }));
-
   await page.route('**/productos/11/variantes**', route => route.fulfill({
     status: 200,
     contentType: 'application/json',
-    body: JSON.stringify({
-      success: true,
-      message: '',
-      errors: [],
-      data: [{ id: 111, productoId: 11, productoNombre: 'Producto E2E', sku: 'SKU-E2E-AZUL', etiqueta: 'SKU-E2E-AZUL · Azul · M', activo: true, eliminado: false }]
-    })
+    body: JSON.stringify({ success: true, message: '', errors: [], data: [{ id: 111, productoId: 11, productoNombre: 'Producto E2E', sku: 'SKU-E2E-AZUL', etiqueta: 'SKU-E2E-AZUL · Azul · M', activo: true, eliminado: false }] })
   }));
 }
 
@@ -147,11 +121,7 @@ test.describe('Solicitud de compra - frontend documental', () => {
     let enviados = 0;
     await page.route('**/solicitudes-compra/701/enviar', async route => {
       enviados += 1;
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ success: true, message: '', errors: [], data: { ...borrador, estado: 'Solicitada', fechaSolicitudUtc: '2026-08-18T17:30:00Z' } })
-      });
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true, message: '', errors: [], data: { ...borrador, estado: 'Solicitada', fechaSolicitudUtc: '2026-08-18T17:30:00Z' } }) });
     });
 
     await page.goto('/solicitudes-compra?detalle=701');
@@ -160,5 +130,17 @@ test.describe('Solicitud de compra - frontend documental', () => {
     await expect.poll(() => enviados).toBe(1);
     await expect(page.getByText('Solicitada', { exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Editar borrador' })).toHaveCount(0);
+  });
+
+  test('un usuario con solo Compras:Ver no recibe controles de mutación', async ({ page }) => {
+    await login(page, ['Dashboard:Ver', 'Compras:Ver']);
+    await mockCatalogos(page);
+    await mockListado(page);
+
+    await page.goto('/solicitudes-compra');
+    await expect(page.getByRole('button', { name: 'Nueva solicitud' })).toHaveCount(0);
+    await page.goto('/solicitudes-compra?detalle=701');
+    await expect(page.getByRole('button', { name: 'Editar borrador' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Enviar', exact: true })).toHaveCount(0);
   });
 });
