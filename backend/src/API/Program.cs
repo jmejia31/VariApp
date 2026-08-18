@@ -44,6 +44,7 @@ builder.Services.AddScoped<IConteoInventarioRepository, ConteoInventarioReposito
 builder.Services.AddScoped<ITransferenciaInventarioRepository, TransferenciaInventarioRepository>();
 builder.Services.AddScoped<IReservaInventarioRepository, ReservaInventarioRepository>();
 builder.Services.AddScoped<ITrazabilidadInventarioRepository, TrazabilidadInventarioRepository>();
+builder.Services.AddScoped<IPoliticaCosteoInventarioRepository, PoliticaCosteoInventarioRepository>();
 builder.Services.AddScoped<ICatalogoProductoRepository, CatalogoProductoRepository>();
 builder.Services.AddScoped<IProveedorRepository, ProveedorRepository>();
 builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
@@ -83,6 +84,7 @@ builder.Services.AddScoped<ITransferenciaInventarioMovimientoService, Transferen
 builder.Services.AddScoped<ITransferenciaInventarioService, TransferenciaInventarioService>();
 builder.Services.AddScoped<IReservaInventarioService, ReservaInventarioService>();
 builder.Services.AddScoped<ITrazabilidadInventarioService, TrazabilidadInventarioService>();
+builder.Services.AddScoped<IPoliticaCosteoInventarioService, PoliticaCosteoInventarioService>();
 builder.Services.AddScoped<ICatalogoProductoService, CatalogoProductoService>();
 builder.Services.AddScoped<IProveedorService, ProveedorService>();
 builder.Services.AddScoped<IClienteService, ClienteService>();
