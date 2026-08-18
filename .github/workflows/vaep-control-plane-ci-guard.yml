@@ -13,6 +13,7 @@ on:
 permissions:
   contents: read
   actions: write
+  issues: write
 
 concurrency:
   group: vaep-control-plane-ci-guard-${{ github.event.pull_request.head.sha || github.sha }}
@@ -22,9 +23,14 @@ jobs:
   suppress-redundant-ci:
     name: Cancelar CI redundante de commits Jules-only
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     env:
       GH_TOKEN: ${{ github.token }}
+      JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
+      JULES_API_BASE: https://jules.googleapis.com/v1alpha
+      EXPECTED_OWNER: jmejia31
+      EXPECTED_REPO: VariApp
+      EXPECTED_BRANCH: Desarrollo
     steps:
       - uses: actions/checkout@v4
         with:
@@ -82,6 +88,84 @@ jobs:
                 ;;
             esac
           done
+
+      - name: Diagnóstico Jules pre-session resiliente
+        if: steps.classify.outputs.control_plane == 'true'
+        shell: bash
+        run: |
+          set +e
+          target_sha="${{ github.event.pull_request.head.sha || github.sha }}"
+          manifest=$(git diff-tree --no-commit-id --name-only --diff-filter=A -r "$target_sha" -- 'vaep/jules/diagnostic/*.json' | head -n 1)
+          if [[ -z "$manifest" || ! -f "$manifest" ]]; then
+            echo 'Sin manifiesto diagnóstico nuevo; no-op.'
+            exit 0
+          fi
+
+          dispatch_id=$(jq -r '.dispatchId // "UNKNOWN"' "$manifest" 2>/dev/null)
+          mkdir -p "$RUNNER_TEMP/vaep-jules-diag"
+          stage='STARTED'
+          detail='VAEP control-plane guard started Jules pre-session diagnostic.'
+          rc=0
+
+          if [[ -z "${JULES_API_KEY:-}" ]]; then
+            stage='SECRET_MISSING'
+            detail='JULES_API_KEY is not available to this workflow.'
+            rc=20
+          else
+            http_code=$(curl --silent --show-error --output "$RUNNER_TEMP/vaep-jules-diag/sources.json" --write-out '%{http_code}' \
+              -H "x-goog-api-key: $JULES_API_KEY" \
+              "$JULES_API_BASE/sources?pageSize=100")
+            curl_rc=$?
+            if [[ $curl_rc -ne 0 || "$http_code" -lt 200 || "$http_code" -ge 300 ]]; then
+              stage='JULES_API_ERROR'
+              detail="Jules GET /sources failed (curl_rc=$curl_rc, http=$http_code)."
+              rc=30
+            else
+              source_name=$(jq -r --arg owner "$EXPECTED_OWNER" --arg repo "$EXPECTED_REPO" \
+                '.sources[]? | select(.githubRepo.owner == $owner and .githubRepo.repo == $repo) | .name' \
+                "$RUNNER_TEMP/vaep-jules-diag/sources.json" | head -n 1)
+              if [[ -z "$source_name" || "$source_name" == 'null' ]]; then
+                stage='SOURCE_NOT_VISIBLE'
+                detail='API key can list sources, but jmejia31/VariApp is not visible.'
+                rc=31
+              else
+                branch_ok=$(jq -r --arg name "$source_name" --arg branch "$EXPECTED_BRANCH" \
+                  '[.sources[]? | select(.name == $name) | (.githubRepo.branches // [])[]? | select(.displayName == $branch)] | length > 0' \
+                  "$RUNNER_TEMP/vaep-jules-diag/sources.json")
+                if [[ "$branch_ok" != 'true' ]]; then
+                  stage='BRANCH_NOT_VISIBLE'
+                  detail='VariApp source is visible, but Desarrollo is not exposed by Jules source metadata.'
+                  rc=32
+                else
+                  stage='PRESESSION_OK'
+                  detail='Secret, Jules API, VariApp source and Desarrollo branch are visible.'
+                  rc=0
+                fi
+              fi
+            fi
+          fi
+
+          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          body=$(cat <<EOF
+VAEP Jules P0 diagnostic result.
+
+- Dispatch: \`$dispatch_id\`
+- Stage: \`$stage\`
+- Detail: $detail
+- Workflow run: $run_url
+- Repository expected: \`jmejia31/VariApp\`
+- Branch expected: \`Desarrollo\`
+
+No Jules task/session was created by this diagnostic step. No secret value was printed or persisted.
+EOF
+          )
+
+          gh issue create \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "[VAEP-JULES-DIAG] $dispatch_id $stage" \
+            --body "$body" >/dev/null
+
+          exit $rc
 
       - name: Preservar cobertura funcional
         if: steps.classify.outputs.control_plane != 'true'
