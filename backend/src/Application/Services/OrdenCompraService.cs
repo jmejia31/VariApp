@@ -1,5 +1,9 @@
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
 using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs;
+using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Enums;
@@ -8,10 +12,11 @@ namespace InventoryApp.Application.Services;
 
 public sealed class OrdenCompraService : IOrdenCompraService
 {
+    private const string IdempotencyConstraint = "UX_OrdenesCompra_IdempotencyKey";
     private const string EntidadAuditoria = "OrdenCompra";
-
     private readonly IOrdenCompraRepository _repository;
     private readonly IProveedorRepository _proveedores;
+    private readonly IProductoRepository _productos;
     private readonly ISolicitudCompraRepository _solicitudes;
     private readonly ICurrentUserService _currentUser;
     private readonly IUnitOfWork _unitOfWork;
@@ -20,27 +25,26 @@ public sealed class OrdenCompraService : IOrdenCompraService
     public OrdenCompraService(
         IOrdenCompraRepository repository,
         IProveedorRepository proveedores,
+        IProductoRepository productos,
         ISolicitudCompraRepository solicitudes,
         ICurrentUserService currentUser,
         IUnitOfWork unitOfWork,
         IAuditoriaService auditoria)
     {
-        _repository = repository;
-        _proveedores = proveedores;
-        _solicitudes = solicitudes;
-        _currentUser = currentUser;
-        _unitOfWork = unitOfWork;
-        _auditoria = auditoria;
+        _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+        _proveedores = proveedores ?? throw new ArgumentNullException(nameof(proveedores));
+        _productos = productos ?? throw new ArgumentNullException(nameof(productos));
+        _solicitudes = solicitudes ?? throw new ArgumentNullException(nameof(solicitudes));
+        _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        _auditoria = auditoria ?? throw new ArgumentNullException(nameof(auditoria));
     }
 
     public async Task<PagedResult<OrdenCompraDto>> GetPagedAsync(OrdenCompraFiltroDto filtro)
     {
         ArgumentNullException.ThrowIfNull(filtro);
-        if (filtro.Desde.HasValue && filtro.Hasta.HasValue && filtro.Desde.Value > filtro.Hasta.Value)
-            throw new ArgumentException("El rango de fechas es inválido.", nameof(filtro));
-
-        filtro.Page = Math.Max(1, filtro.Page);
-        filtro.PageSize = Math.Clamp(filtro.PageSize, 1, 100);
+        if (filtro.Desde.HasValue && filtro.Hasta.HasValue && filtro.Desde > filtro.Hasta)
+            throw new BusinessRuleException("El rango de fechas es inválido.");
         var (items, total) = await _repository.GetPagedAsync(filtro);
         return new PagedResult<OrdenCompraDto>
         {
@@ -58,159 +62,235 @@ public sealed class OrdenCompraService : IOrdenCompraService
         return orden is null ? null : Map(orden);
     }
 
-    public async Task<OrdenCompraDto> CreateAsync(CreateOrdenCompraDto dto)
+    public async Task<OrdenCompraDto> CreateAsync(CreateOrdenCompraDto dto, string idempotencyKey)
     {
         ArgumentNullException.ThrowIfNull(dto);
-        ValidarDetalles(dto.Detalles);
-        var proveedor = await RequerirProveedorAsync(dto.ProveedorId);
-        await ValidarSolicitudAsync(dto.SolicitudCompraId, dto.ProveedorId);
+        var key = NormalizarIdempotencyKey(idempotencyKey);
+        var fingerprint = CalcularFingerprint(dto);
 
-        var orden = new OrdenCompra
+        var previa = await _repository.GetByIdempotencyKeyAsync(key);
+        if (previa is not null)
+            return Map(ResolverReintento(previa, fingerprint));
+
+        OrdenCompra? creada = null;
+        try
         {
-            NumeroOrden = await GenerarNumeroAsync(),
-            SolicitudCompraId = dto.SolicitudCompraId,
-            ProveedorId = proveedor.Id,
-            ProveedorNombreSnapshot = proveedor.Nombre,
-            ProveedorDocumentoSnapshot = Normalizar(proveedor.Documento),
-            Moneda = NormalizarMoneda(dto.Moneda),
-            CondicionesCompra = Normalizar(dto.CondicionesCompra),
-            FechaEsperadaUtc = dto.FechaEsperadaUtc,
-            Observaciones = Normalizar(dto.Observaciones),
-            Detalles = dto.Detalles.Select(CrearDetalle).ToList()
-        };
-        orden.ValidarDocumento();
+            await _unitOfWork.ExecuteInTransactionAsync(async () =>
+            {
+                var concurrente = await _repository.GetByIdempotencyKeyAsync(key, tracking: true);
+                if (concurrente is not null)
+                {
+                    creada = ResolverReintento(concurrente, fingerprint);
+                    return;
+                }
 
-        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+                var usuarioId = ObtenerUsuarioId();
+                var ahora = DateTime.UtcNow;
+                var documento = await ConstruirDocumentoAsync(dto);
+                var orden = new OrdenCompra
+                {
+                    NumeroOrden = await GenerarNumeroAsync(ahora),
+                    SolicitudCompraId = dto.SolicitudCompraId,
+                    ProveedorId = documento.Proveedor.Id,
+                    ProveedorNombreSnapshot = documento.Proveedor.Nombre.Trim(),
+                    ProveedorDocumentoSnapshot = Normalizar(documento.Proveedor.Documento),
+                    Moneda = NormalizarMoneda(dto.Moneda),
+                    CondicionesCompra = Normalizar(dto.CondicionesCompra),
+                    FechaEsperadaUtc = dto.FechaEsperadaUtc,
+                    Observaciones = Normalizar(dto.Observaciones),
+                    FechaCreacion = ahora,
+                    FechaActualizacion = ahora,
+                    CreadoPorUsuarioId = usuarioId,
+                    CreadoPorNombreUsuario = Normalizar(_currentUser.NombreUsuario),
+                    Detalles = documento.Detalles
+                };
+                orden.EstablecerIdempotencia(key, fingerprint);
+                ValidarDominio(orden.ValidarDocumento);
+
+                await _repository.AddAsync(orden);
+                await _repository.SaveChangesAsync();
+                await RegistrarAuditoriaAsync(AccionPermiso.Crear, "Orden de compra creada", orden, valoresNuevos: Snapshot(orden));
+                creada = orden;
+            });
+        }
+        catch (UniqueConstraintViolationException ex) when (ex.ConstraintName == IdempotencyConstraint)
         {
-            await _repository.AddAsync(orden);
-            await _repository.SaveChangesAsync();
-            await RegistrarAuditoriaAsync(AccionPermiso.Crear, "Orden de compra creada", orden, valoresNuevos: Snapshot(orden));
-        });
+            var concurrente = await _repository.GetByIdempotencyKeyAsync(key)
+                ?? throw new ConflictException("La clave de idempotencia fue consumida concurrentemente y no pudo recuperarse de forma segura.");
+            creada = ResolverReintento(concurrente, fingerprint);
+        }
 
-        return Map(orden);
+        return Map(creada ?? throw new InvalidOperationException("La creación de la orden no produjo un resultado."));
     }
 
     public async Task<OrdenCompraDto> UpdateAsync(int id, UpdateOrdenCompraDto dto)
     {
         ArgumentNullException.ThrowIfNull(dto);
-        ValidarId(id);
-        ValidarDetalles(dto.Detalles);
-        var proveedor = await RequerirProveedorAsync(dto.ProveedorId);
-        await ValidarSolicitudAsync(dto.SolicitudCompraId, dto.ProveedorId);
-        var detalles = dto.Detalles.Select(CrearDetalle).ToList();
-        foreach (var detalle in detalles) detalle.Validar();
-
-        OrdenCompra? resultado = null;
+        OrdenCompra? actualizada = null;
         await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
-            var orden = await RequerirForUpdateAsync(id);
-            orden.AsegurarEditable();
+            var orden = await ObtenerBloqueadaAsync(id);
+            ValidarDominio(orden.AsegurarEditable);
             var anterior = Snapshot(orden);
+            var documento = await ConstruirDocumentoAsync(dto);
 
             orden.SolicitudCompraId = dto.SolicitudCompraId;
-            orden.ProveedorId = proveedor.Id;
-            orden.ProveedorNombreSnapshot = proveedor.Nombre;
-            orden.ProveedorDocumentoSnapshot = Normalizar(proveedor.Documento);
+            orden.ProveedorId = documento.Proveedor.Id;
+            orden.ProveedorNombreSnapshot = documento.Proveedor.Nombre.Trim();
+            orden.ProveedorDocumentoSnapshot = Normalizar(documento.Proveedor.Documento);
             orden.Moneda = NormalizarMoneda(dto.Moneda);
             orden.CondicionesCompra = Normalizar(dto.CondicionesCompra);
             orden.FechaEsperadaUtc = dto.FechaEsperadaUtc;
             orden.Observaciones = Normalizar(dto.Observaciones);
             orden.Detalles.Clear();
-            foreach (var detalle in detalles) orden.Detalles.Add(detalle);
-            orden.ValidarDocumento();
+            foreach (var detalle in documento.Detalles)
+                orden.Detalles.Add(detalle);
+            MarcarActualizacion(orden);
+            ValidarDominio(orden.ValidarDocumento);
 
             await _repository.SaveChangesAsync();
             await RegistrarAuditoriaAsync(AccionPermiso.Editar, "Orden de compra editada", orden, anterior, Snapshot(orden));
-            resultado = orden;
+            actualizada = orden;
         });
-
-        return Map(resultado!);
+        return Map(actualizada!);
     }
 
-    public async Task<OrdenCompraDto> EnviarAprobacionAsync(int id)
-    {
-        ValidarId(id);
-        var (usuarioId, _) = RequerirUsuario();
-        OrdenCompra? resultado = null;
-        await _unitOfWork.ExecuteInTransactionAsync(async () =>
-        {
-            var orden = await RequerirForUpdateAsync(id);
-            var anterior = Snapshot(orden);
-            orden.EnviarAprobacion(usuarioId, DateTime.UtcNow);
-            await _repository.SaveChangesAsync();
-            await RegistrarAuditoriaAsync(AccionPermiso.Confirmar, "Orden de compra enviada a aprobación", orden, anterior, Snapshot(orden));
-            resultado = orden;
-        });
-        return Map(resultado!);
-    }
+    public Task<OrdenCompraDto> EnviarAprobacionAsync(int id) =>
+        EjecutarTransicionAsync(id, AccionPermiso.Confirmar, "Orden de compra enviada a aprobación",
+            orden => orden.EnviarAprobacion(ObtenerUsuarioId(), DateTime.UtcNow));
 
-    public async Task<OrdenCompraDto> AprobarAsync(int id)
-    {
-        ValidarId(id);
-        var (usuarioId, nombre) = RequerirUsuario();
-        OrdenCompra? resultado = null;
-        await _unitOfWork.ExecuteInTransactionAsync(async () =>
-        {
-            var orden = await RequerirForUpdateAsync(id);
-            var anterior = Snapshot(orden);
-            orden.Aprobar(usuarioId, nombre, DateTime.UtcNow);
-            await _repository.SaveChangesAsync();
-            await RegistrarAuditoriaAsync(AccionPermiso.Aprobar, "Orden de compra aprobada", orden, anterior, Snapshot(orden));
-            resultado = orden;
-        });
-        return Map(resultado!);
-    }
+    public Task<OrdenCompraDto> AprobarAsync(int id) =>
+        EjecutarTransicionAsync(id, AccionPermiso.Aprobar, "Orden de compra aprobada",
+            orden => orden.Aprobar(ObtenerUsuarioId(), _currentUser.NombreCompleto ?? _currentUser.NombreUsuario, DateTime.UtcNow));
 
     public async Task<OrdenCompraDto> CancelarAsync(int id, CancelarOrdenCompraDto dto)
     {
         ArgumentNullException.ThrowIfNull(dto);
-        ValidarId(id);
-        var motivo = Normalizar(dto.Motivo) ?? throw new ArgumentException("El motivo de cancelación es obligatorio.", nameof(dto));
-        var (usuarioId, _) = RequerirUsuario();
+        var motivo = Normalizar(dto.Motivo) ?? throw new BusinessRuleException("El motivo de cancelación es obligatorio.");
+        return await EjecutarTransicionAsync(id, AccionPermiso.Anular, "Orden de compra cancelada",
+            orden => orden.Cancelar(ObtenerUsuarioId(), motivo, DateTime.UtcNow), motivo);
+    }
+
+    private async Task<OrdenCompraDto> EjecutarTransicionAsync(
+        int id,
+        AccionPermiso accion,
+        string descripcion,
+        Action<OrdenCompra> transicion,
+        string? motivo = null)
+    {
         OrdenCompra? resultado = null;
         await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
-            var orden = await RequerirForUpdateAsync(id);
+            var orden = await ObtenerBloqueadaAsync(id);
             var anterior = Snapshot(orden);
-            orden.Cancelar(usuarioId, motivo, DateTime.UtcNow);
+            ValidarDominio(() => transicion(orden));
+            MarcarActualizacion(orden);
             await _repository.SaveChangesAsync();
-            await RegistrarAuditoriaAsync(AccionPermiso.Anular, "Orden de compra cancelada", orden, anterior, Snapshot(orden), motivo);
+            await RegistrarAuditoriaAsync(accion, descripcion, orden, anterior, Snapshot(orden), motivo);
             resultado = orden;
         });
         return Map(resultado!);
     }
 
-    private async Task<Proveedor> RequerirProveedorAsync(int proveedorId)
+    private async Task<(Proveedor Proveedor, List<OrdenCompraDetalle> Detalles)> ConstruirDocumentoAsync(CreateOrdenCompraDto dto)
     {
-        if (proveedorId <= 0) throw new ArgumentOutOfRangeException(nameof(proveedorId));
-        return await _proveedores.GetByIdAsync(proveedorId)
-            ?? throw new KeyNotFoundException("Proveedor no encontrado.");
-    }
+        if (dto.ProveedorId <= 0)
+            throw new BusinessRuleException("El proveedor es obligatorio.");
+        if (dto.Detalles is null || dto.Detalles.Count == 0)
+            throw new BusinessRuleException("La orden de compra debe contener al menos un detalle.");
 
-    private async Task ValidarSolicitudAsync(int? solicitudId, int proveedorId)
-    {
-        if (!solicitudId.HasValue) return;
-        if (solicitudId.Value <= 0) throw new ArgumentOutOfRangeException(nameof(solicitudId));
-        var solicitud = await _solicitudes.GetByIdAsync(solicitudId.Value)
-            ?? throw new KeyNotFoundException("Solicitud de compra no encontrada.");
-        if (solicitud.Estado != EstadoSolicitudCompra.Aprobada)
-            throw new InvalidOperationException("La orden solo puede vincular una solicitud de compra aprobada.");
-        if (solicitud.ProveedorId.HasValue && solicitud.ProveedorId.Value != proveedorId)
-            throw new InvalidOperationException("El proveedor de la orden no coincide con el de la solicitud aprobada.");
-    }
+        var proveedor = await _proveedores.GetByIdAsync(dto.ProveedorId)
+            ?? throw new BusinessRuleException("El proveedor indicado no existe.");
+        if (!proveedor.Activo)
+            throw new BusinessRuleException("El proveedor indicado está inactivo.");
 
-    private async Task<OrdenCompra> RequerirForUpdateAsync(int id) =>
-        await _repository.GetByIdForUpdateAsync(id)
-            ?? throw new KeyNotFoundException("Orden de compra no encontrada.");
-
-    private async Task<string> GenerarNumeroAsync()
-    {
-        for (var intento = 0; intento < 5; intento++)
+        if (dto.SolicitudCompraId.HasValue)
         {
-            var numero = $"OC-{DateTime.UtcNow:yyyyMMddHHmmssfff}-{Guid.NewGuid():N}"[..32].ToUpperInvariant();
-            if (!await _repository.ExisteNumeroAsync(numero)) return numero;
+            if (dto.SolicitudCompraId.Value <= 0)
+                throw new BusinessRuleException("La solicitud de compra vinculada no es válida.");
+            var solicitud = await _solicitudes.GetByIdAsync(dto.SolicitudCompraId.Value)
+                ?? throw new BusinessRuleException("La solicitud de compra vinculada no existe.");
+            if (solicitud.Estado != EstadoSolicitudCompra.Aprobada)
+                throw new BusinessRuleException("Solo una solicitud de compra aprobada puede originar una orden de compra.");
+            if (solicitud.ProveedorId.HasValue && solicitud.ProveedorId.Value != proveedor.Id)
+                throw new BusinessRuleException("El proveedor de la orden debe coincidir con el proveedor de la solicitud aprobada.");
         }
-        throw new InvalidOperationException("No fue posible generar un número único de orden de compra.");
+
+        var cacheProductos = new Dictionary<int, Producto>();
+        var detalles = new List<OrdenCompraDetalle>(dto.Detalles.Count);
+        foreach (var input in dto.Detalles)
+        {
+            if (input.ProductoId <= 0)
+                throw new BusinessRuleException("Cada detalle debe indicar un producto válido.");
+            if (!cacheProductos.TryGetValue(input.ProductoId, out var producto))
+            {
+                producto = await _productos.GetByIdAsync(input.ProductoId)
+                    ?? throw new BusinessRuleException($"El producto {input.ProductoId} no existe.");
+                if (!producto.Activo || producto.Eliminado)
+                    throw new BusinessRuleException($"El producto {input.ProductoId} no está disponible para compras.");
+                cacheProductos[input.ProductoId] = producto;
+            }
+
+            ProductoVariante? variante = null;
+            if (input.ProductoVarianteId.HasValue)
+            {
+                variante = producto.Variantes.FirstOrDefault(x => x.Id == input.ProductoVarianteId.Value && !x.Eliminado)
+                    ?? throw new BusinessRuleException($"La variante {input.ProductoVarianteId.Value} no pertenece al producto {producto.Id} o fue eliminada.");
+                if (!variante.Activo)
+                    throw new BusinessRuleException($"La variante {variante.Id} está inactiva.");
+            }
+
+            var detalle = new OrdenCompraDetalle
+            {
+                ProductoId = producto.Id,
+                ProductoVarianteId = variante?.Id,
+                Observacion = Normalizar(input.Observacion),
+                ProductoSkuSnapshot = Normalizar(variante?.Sku),
+                ProductoNombreSnapshot = producto.Nombre.Trim(),
+                ProductoMarcaSnapshot = Normalizar(variante?.Marca?.Nombre) ?? Normalizar(producto.Marca),
+                ProductoModeloSnapshot = Normalizar(variante?.Modelo?.Nombre) ?? Normalizar(producto.Modelo),
+                ProductoColorSnapshot = Normalizar(variante?.Color?.Nombre),
+                ProductoTallaSnapshot = Normalizar(variante?.Talla?.Nombre)
+            };
+            ValidarDominio(() => detalle.EstablecerValores(input.CantidadOrdenada, input.PrecioUnitario, input.Descuento, input.Impuesto));
+            detalles.Add(detalle);
+        }
+
+        return (proveedor, detalles);
+    }
+
+    private async Task<OrdenCompra> ObtenerBloqueadaAsync(int id)
+    {
+        if (id <= 0)
+            throw new ResourceNotFoundException("Orden de compra no encontrada.");
+        return await _repository.GetByIdForUpdateAsync(id)
+            ?? throw new ResourceNotFoundException("Orden de compra no encontrada.");
+    }
+
+    private async Task<string> GenerarNumeroAsync(DateTime fechaUtc)
+    {
+        var prefijo = $"OC-{fechaUtc:yyyy}-";
+        var ultimo = await _repository.GetUltimoNumeroAsync(prefijo);
+        var consecutivo = 1;
+        if (!string.IsNullOrWhiteSpace(ultimo) && ultimo.Length > prefijo.Length &&
+            int.TryParse(ultimo[prefijo.Length..], out var actual) && actual > 0)
+            consecutivo = actual + 1;
+
+        var numero = $"{prefijo}{consecutivo:D6}";
+        if (await _repository.ExisteNumeroAsync(numero))
+            throw new ConflictException("No fue posible reservar un número único para la orden de compra. Reintenta con la misma clave de idempotencia.");
+        return numero;
+    }
+
+    private int ObtenerUsuarioId() => _currentUser.EstaAutenticado && _currentUser.UsuarioId is > 0
+        ? _currentUser.UsuarioId.Value
+        : throw new ForbiddenAccessException("No existe un usuario autenticado válido para ejecutar la operación.");
+
+    private void MarcarActualizacion(OrdenCompra orden)
+    {
+        orden.FechaActualizacion = DateTime.UtcNow;
+        orden.ActualizadoPorUsuarioId = ObtenerUsuarioId();
+        orden.ActualizadoPorNombreUsuario = Normalizar(_currentUser.NombreUsuario);
     }
 
     private Task RegistrarAuditoriaAsync(
@@ -247,44 +327,78 @@ public sealed class OrdenCompraService : IOrdenCompraService
         orden.FechaCancelacionUtc
     };
 
-    private (int UsuarioId, string? Nombre) RequerirUsuario()
+    private static OrdenCompra ResolverReintento(OrdenCompra existente, string fingerprint)
     {
-        if (!_currentUser.EstaAutenticado || _currentUser.UsuarioId is not > 0)
-            throw new InvalidOperationException("Se requiere un usuario autenticado para esta transición.");
-        return (_currentUser.UsuarioId.Value, _currentUser.NombreCompleto ?? _currentUser.NombreUsuario);
+        if (!string.Equals(existente.IdempotencyFingerprint, fingerprint, StringComparison.Ordinal))
+            throw new ConflictException("La clave de idempotencia ya fue utilizada con un payload diferente.");
+        return existente;
     }
 
-    private static void ValidarId(int id)
+    private static string NormalizarIdempotencyKey(string key)
     {
-        if (id <= 0) throw new ArgumentOutOfRangeException(nameof(id));
+        if (string.IsNullOrWhiteSpace(key))
+            throw new BusinessRuleException("El encabezado Idempotency-Key es obligatorio.");
+        var normalized = key.Trim();
+        if (normalized.Length > 128)
+            throw new BusinessRuleException("Idempotency-Key no puede superar 128 caracteres.");
+        if (normalized.Any(ch => !(char.IsLetterOrDigit(ch) || ch is '-' or '_' or '.' or ':')))
+            throw new BusinessRuleException("Idempotency-Key contiene caracteres no permitidos.");
+        return normalized;
     }
 
-    private static void ValidarDetalles(IReadOnlyCollection<OrdenCompraDetalleInputDto>? detalles)
+    private static string CalcularFingerprint(CreateOrdenCompraDto dto)
     {
-        if (detalles is null || detalles.Count == 0)
-            throw new ArgumentException("La orden de compra debe contener al menos un detalle.", nameof(detalles));
-        foreach (var detalle in detalles)
+        var canonico = new
         {
-            if (detalle.ProductoId <= 0) throw new ArgumentException("Cada detalle debe indicar un producto válido.", nameof(detalles));
-            if (detalle.ProductoVarianteId is <= 0) throw new ArgumentException("La variante debe ser válida cuando se especifica.", nameof(detalles));
-            if (detalle.CantidadOrdenada <= 0) throw new ArgumentException("La cantidad ordenada debe ser mayor que cero.", nameof(detalles));
-            if (detalle.PrecioUnitario < 0 || detalle.Descuento < 0 || detalle.Impuesto < 0)
-                throw new ArgumentException("Los importes del detalle no pueden ser negativos.", nameof(detalles));
-            if (detalle.Descuento > detalle.CantidadOrdenada * detalle.PrecioUnitario)
-                throw new ArgumentException("El descuento no puede superar el subtotal del detalle.", nameof(detalles));
-        }
-    }
-
-    private static OrdenCompraDetalle CrearDetalle(OrdenCompraDetalleInputDto input)
-    {
-        var detalle = new OrdenCompraDetalle
-        {
-            ProductoId = input.ProductoId,
-            ProductoVarianteId = input.ProductoVarianteId,
-            Observacion = Normalizar(input.Observacion)
+            dto.SolicitudCompraId,
+            dto.ProveedorId,
+            Moneda = NormalizarMoneda(dto.Moneda),
+            CondicionesCompra = Normalizar(dto.CondicionesCompra),
+            dto.FechaEsperadaUtc,
+            Observaciones = Normalizar(dto.Observaciones),
+            Detalles = (dto.Detalles ?? new List<OrdenCompraDetalleInputDto>()).Select(x => new
+            {
+                x.ProductoId,
+                x.ProductoVarianteId,
+                x.CantidadOrdenada,
+                x.PrecioUnitario,
+                x.Descuento,
+                x.Impuesto,
+                Observacion = Normalizar(x.Observacion)
+            }).ToArray()
         };
-        detalle.EstablecerValores(input.CantidadOrdenada, input.PrecioUnitario, input.Descuento, input.Impuesto);
-        return detalle;
+        var json = JsonSerializer.Serialize(canonico);
+        return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(json))).ToLowerInvariant();
+    }
+
+    private static string NormalizarMoneda(string? moneda)
+    {
+        var normalizada = string.IsNullOrWhiteSpace(moneda) ? "HNL" : moneda.Trim().ToUpperInvariant();
+        if (normalizada.Length != 3 || normalizada.Any(ch => ch < 'A' || ch > 'Z'))
+            throw new BusinessRuleException("La moneda debe usar un código ISO alfabético de tres caracteres.");
+        return normalizada;
+    }
+
+    private static string? Normalizar(string? valor) => string.IsNullOrWhiteSpace(valor) ? null : valor.Trim();
+
+    private static void ValidarDominio(Action accion)
+    {
+        try
+        {
+            accion();
+        }
+        catch (BusinessRuleException)
+        {
+            throw;
+        }
+        catch (ArgumentException ex)
+        {
+            throw new BusinessRuleException(ex.Message);
+        }
+        catch (InvalidOperationException ex)
+        {
+            throw new BusinessRuleException(ex.Message);
+        }
     }
 
     private static OrdenCompraDto Map(OrdenCompra orden) => new()
@@ -306,30 +420,20 @@ public sealed class OrdenCompraService : IOrdenCompraService
         FechaEnvioAprobacionUtc = orden.FechaEnvioAprobacionUtc,
         FechaAprobacionUtc = orden.FechaAprobacionUtc,
         FechaCancelacionUtc = orden.FechaCancelacionUtc,
-        Detalles = orden.Detalles.Select(d => new OrdenCompraDetalleDto
+        Detalles = orden.Detalles.OrderBy(x => x.Id).Select(x => new OrdenCompraDetalleDto
         {
-            Id = d.Id,
-            ProductoId = d.ProductoId,
-            ProductoVarianteId = d.ProductoVarianteId,
-            CantidadOrdenada = d.CantidadOrdenada,
-            PrecioUnitario = d.PrecioUnitario,
-            Descuento = d.Descuento,
-            Impuesto = d.Impuesto,
-            Subtotal = d.Subtotal,
-            Total = d.Total,
-            Observacion = d.Observacion,
-            ProductoSkuSnapshot = d.ProductoSkuSnapshot,
-            ProductoNombreSnapshot = d.ProductoNombreSnapshot
+            Id = x.Id,
+            ProductoId = x.ProductoId,
+            ProductoVarianteId = x.ProductoVarianteId,
+            CantidadOrdenada = x.CantidadOrdenada,
+            PrecioUnitario = x.PrecioUnitario,
+            Descuento = x.Descuento,
+            Impuesto = x.Impuesto,
+            Subtotal = x.Subtotal,
+            Total = x.Total,
+            Observacion = x.Observacion,
+            ProductoSkuSnapshot = x.ProductoSkuSnapshot,
+            ProductoNombreSnapshot = x.ProductoNombreSnapshot
         }).ToList()
     };
-
-    private static string NormalizarMoneda(string? moneda)
-    {
-        var valor = string.IsNullOrWhiteSpace(moneda) ? "HNL" : moneda.Trim().ToUpperInvariant();
-        if (valor.Length != 3 || !valor.All(char.IsLetter))
-            throw new ArgumentException("La moneda debe usar un código ISO de tres letras.", nameof(moneda));
-        return valor;
-    }
-
-    private static string? Normalizar(string? valor) => string.IsNullOrWhiteSpace(valor) ? null : valor.Trim();
 }

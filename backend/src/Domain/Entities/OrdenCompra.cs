@@ -21,6 +21,12 @@ public class OrdenCompra : AuditableEntity
     public DateTime? FechaEsperadaUtc { get; set; }
     public string? Observaciones { get; set; }
 
+    // N2.2.D — la idempotencia de creación es un atributo durable del documento.
+    // El fingerprint nunca se expone por API; solo permite distinguir un replay
+    // legítimo del reuso de una misma clave con un payload diferente.
+    public string? IdempotencyKey { get; private set; }
+    public string? IdempotencyFingerprint { get; private set; }
+
     public DateTime? FechaEnvioAprobacionUtc { get; private set; }
     public int? EnviadaAprobacionPorUsuarioId { get; private set; }
     public DateTime? FechaAprobacionUtc { get; private set; }
@@ -37,6 +43,21 @@ public class OrdenCompra : AuditableEntity
     public decimal Descuento => Detalles.Sum(x => x.Descuento);
     public decimal Impuesto => Detalles.Sum(x => x.Impuesto);
     public decimal Total => Detalles.Sum(x => x.Total);
+
+    public void EstablecerIdempotencia(string key, string fingerprint)
+    {
+        if (string.IsNullOrWhiteSpace(key) || key.Trim().Length > 128)
+            throw new ArgumentException("La clave de idempotencia es obligatoria y no puede superar 128 caracteres.", nameof(key));
+        if (string.IsNullOrWhiteSpace(fingerprint) || fingerprint.Trim().Length != 64)
+            throw new ArgumentException("El fingerprint de idempotencia debe ser SHA-256 hexadecimal.", nameof(fingerprint));
+        if (IdempotencyKey is not null && !string.Equals(IdempotencyKey, key.Trim(), StringComparison.Ordinal))
+            throw new InvalidOperationException("La clave de idempotencia de una orden no puede sustituirse.");
+        if (IdempotencyFingerprint is not null && !string.Equals(IdempotencyFingerprint, fingerprint.Trim(), StringComparison.Ordinal))
+            throw new InvalidOperationException("El fingerprint de idempotencia de una orden no puede sustituirse.");
+
+        IdempotencyKey = key.Trim();
+        IdempotencyFingerprint = fingerprint.Trim().ToLowerInvariant();
+    }
 
     public void AsegurarEditable()
     {
@@ -100,6 +121,8 @@ public class OrdenCompra : AuditableEntity
             throw new InvalidOperationException("La solicitud de compra debe ser válida cuando se especifica.");
         if (Detalles.Count == 0)
             throw new InvalidOperationException("La orden de compra debe contener al menos un detalle.");
+        if ((IdempotencyKey is null) != (IdempotencyFingerprint is null))
+            throw new InvalidOperationException("La idempotencia de la orden debe persistir clave y fingerprint de forma atómica.");
 
         foreach (var detalle in Detalles)
             detalle.Validar();

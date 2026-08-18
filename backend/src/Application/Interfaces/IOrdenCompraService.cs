@@ -7,7 +7,7 @@ public interface IOrdenCompraService
 {
     Task<PagedResult<OrdenCompraDto>> GetPagedAsync(OrdenCompraFiltroDto filtro);
     Task<OrdenCompraDto?> GetByIdAsync(int id);
-    Task<OrdenCompraDto> CreateAsync(CreateOrdenCompraDto dto);
+    Task<OrdenCompraDto> CreateAsync(CreateOrdenCompraDto dto, string idempotencyKey);
     Task<OrdenCompraDto> UpdateAsync(int id, UpdateOrdenCompraDto dto);
     Task<OrdenCompraDto> EnviarAprobacionAsync(int id);
     Task<OrdenCompraDto> AprobarAsync(int id);

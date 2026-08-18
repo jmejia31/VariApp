@@ -3,6 +3,7 @@ using System.Text.Json;
 using FluentValidation;
 using InventoryApp.Application.Common;
 using InventoryApp.Application.Exceptions;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace InventoryApp.API.Middleware;
@@ -31,9 +32,6 @@ public class ExceptionHandlingMiddleware
         }
         catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested)
         {
-            // Navegaciones, cierres de pestaña y clientes que abortan una petición pueden
-            // cancelar una consulta EF/MySQL legítimamente. No es un error del servidor y
-            // no debe contaminar telemetría como 500/"Error no controlado".
             _logger.LogDebug(
                 "Petición cancelada por el cliente. Referencia {Referencia}",
                 context.TraceIdentifier);
@@ -55,6 +53,21 @@ public class ExceptionHandlingMiddleware
         {
             _logger.LogWarning(ex, "Acceso denegado por permisos");
             await EscribirAsync(context, HttpStatusCode.Forbidden, ApiResponse<object>.Fail(ex.Message));
+        }
+        catch (ResourceNotFoundException ex)
+        {
+            _logger.LogInformation(ex, "Recurso no encontrado");
+            await EscribirProblemaAsync(context, HttpStatusCode.NotFound, "Recurso no encontrado", ex.Message);
+        }
+        catch (ConflictException ex)
+        {
+            _logger.LogWarning(ex, "Conflicto de operación");
+            await EscribirProblemaAsync(context, HttpStatusCode.Conflict, "Conflicto de operación", ex.Message);
+        }
+        catch (UniqueConstraintViolationException ex)
+        {
+            _logger.LogWarning(ex, "Conflicto de unicidad {Constraint}", ex.ConstraintName);
+            await EscribirProblemaAsync(context, HttpStatusCode.Conflict, "Conflicto de unicidad", ex.Message);
         }
         catch (DbUpdateException ex)
         {
@@ -92,6 +105,25 @@ public class ExceptionHandlingMiddleware
                 HttpStatusCode.InternalServerError,
                 ApiResponse<object>.Fail($"Ocurrió un error interno. Intenta nuevamente más tarde. Referencia: {referencia}."));
         }
+    }
+
+    private static async Task EscribirProblemaAsync(
+        HttpContext context,
+        HttpStatusCode statusCode,
+        string title,
+        string detail)
+    {
+        var problem = new ProblemDetails
+        {
+            Status = (int)statusCode,
+            Title = title,
+            Detail = detail,
+            Instance = context.Request.Path
+        };
+        problem.Extensions["traceId"] = context.TraceIdentifier;
+        context.Response.ContentType = "application/problem+json";
+        context.Response.StatusCode = (int)statusCode;
+        await context.Response.WriteAsync(JsonSerializer.Serialize(problem, JsonOptions));
     }
 
     private static async Task EscribirAsync(HttpContext context, HttpStatusCode statusCode, ApiResponse<object> response)

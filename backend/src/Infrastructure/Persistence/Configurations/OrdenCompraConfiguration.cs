@@ -22,6 +22,8 @@ public sealed class OrdenCompraConfiguration : IEntityTypeConfiguration<OrdenCom
         builder.Property(x => x.Moneda).HasMaxLength(3).IsRequired();
         builder.Property(x => x.CondicionesCompra).HasMaxLength(1000);
         builder.Property(x => x.Observaciones).HasMaxLength(1000);
+        builder.Property(x => x.IdempotencyKey).HasMaxLength(128);
+        builder.Property(x => x.IdempotencyFingerprint).HasMaxLength(64);
         builder.Property(x => x.AprobadaPorNombreSnapshot).HasMaxLength(150);
         builder.Property(x => x.MotivoCancelacion).HasMaxLength(500);
         builder.Property(x => x.CreadoPorNombreUsuario).HasMaxLength(150);
@@ -30,6 +32,10 @@ public sealed class OrdenCompraConfiguration : IEntityTypeConfiguration<OrdenCom
         builder.HasIndex(x => x.NumeroOrden)
             .IsUnique()
             .HasDatabaseName("UX_OrdenesCompra_NumeroOrden");
+
+        builder.HasIndex(x => x.IdempotencyKey)
+            .IsUnique()
+            .HasDatabaseName("UX_OrdenesCompra_IdempotencyKey");
 
         builder.HasIndex(x => new { x.Estado, x.FechaEsperadaUtc })
             .HasDatabaseName("IX_OrdenesCompra_Estado_FechaEsperada");
