@@ -1,4 +1,5 @@
-export type EstadoOrdenCompra = 'Borrador' | 'PendienteAprobacion' | 'Aprobada' | 'Cancelada';
+export type EstadoOrdenCompraNombre = 'Borrador' | 'PendienteAprobacion' | 'Aprobada' | 'Cancelada';
+export type EstadoOrdenCompra = EstadoOrdenCompraNombre | 1 | 2 | 3 | 4;
 
 export interface OrdenCompraDetalleInput {
   productoId: number;
@@ -23,7 +24,7 @@ export interface OrdenCompraFormValue {
 export interface OrdenCompraFiltro {
   page: number;
   pageSize: number;
-  estado?: EstadoOrdenCompra | null;
+  estado?: EstadoOrdenCompraNombre | null;
   proveedorId?: number | null;
   solicitudCompraId?: number | null;
   numero?: string | null;
