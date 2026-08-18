@@ -43,6 +43,10 @@ public class OrdenCompraDetalleDto
     public string? Observacion { get; set; }
     public string? ProductoSkuSnapshot { get; set; }
     public string? ProductoNombreSnapshot { get; set; }
+    public string? ProductoMarcaSnapshot { get; set; }
+    public string? ProductoModeloSnapshot { get; set; }
+    public string? ProductoColorSnapshot { get; set; }
+    public string? ProductoTallaSnapshot { get; set; }
 }
 
 public class OrdenCompraDto
