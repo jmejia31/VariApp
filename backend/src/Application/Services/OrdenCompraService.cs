@@ -45,6 +45,8 @@ public sealed class OrdenCompraService : IOrdenCompraService
         ArgumentNullException.ThrowIfNull(filtro);
         if (filtro.Desde.HasValue && filtro.Hasta.HasValue && filtro.Desde > filtro.Hasta)
             throw new BusinessRuleException("El rango de fechas es inválido.");
+        filtro.Page = Math.Max(1, filtro.Page);
+        filtro.PageSize = Math.Clamp(filtro.PageSize, 1, 100);
         var (items, total) = await _repository.GetPagedAsync(filtro);
         return new PagedResult<OrdenCompraDto>
         {
@@ -89,7 +91,7 @@ public sealed class OrdenCompraService : IOrdenCompraService
                 var documento = await ConstruirDocumentoAsync(dto);
                 var orden = new OrdenCompra
                 {
-                    NumeroOrden = await GenerarNumeroAsync(ahora),
+                    NumeroOrden = await GenerarNumeroAsync(),
                     SolicitudCompraId = dto.SolicitudCompraId,
                     ProveedorId = documento.Proveedor.Id,
                     ProveedorNombreSnapshot = documento.Proveedor.Nombre.Trim(),
@@ -267,19 +269,16 @@ public sealed class OrdenCompraService : IOrdenCompraService
             ?? throw new ResourceNotFoundException("Orden de compra no encontrada.");
     }
 
-    private async Task<string> GenerarNumeroAsync(DateTime fechaUtc)
+    private async Task<string> GenerarNumeroAsync()
     {
-        var prefijo = $"OC-{fechaUtc:yyyy}-";
-        var ultimo = await _repository.GetUltimoNumeroAsync(prefijo);
-        var consecutivo = 1;
-        if (!string.IsNullOrWhiteSpace(ultimo) && ultimo.Length > prefijo.Length &&
-            int.TryParse(ultimo[prefijo.Length..], out var actual) && actual > 0)
-            consecutivo = actual + 1;
-
-        var numero = $"{prefijo}{consecutivo:D6}";
-        if (await _repository.ExisteNumeroAsync(numero))
-            throw new ConflictException("No fue posible reservar un número único para la orden de compra. Reintenta con la misma clave de idempotencia.");
-        return numero;
+        for (var intento = 0; intento < 5; intento++)
+        {
+            var baseNumero = $"OC-{DateTime.UtcNow:yyyyMMddHHmmssfff}-{Guid.NewGuid():N}".ToUpperInvariant();
+            var numero = baseNumero[..Math.Min(32, baseNumero.Length)];
+            if (!await _repository.ExisteNumeroAsync(numero))
+                return numero;
+        }
+        throw new ConflictException("No fue posible generar un número único de orden de compra.");
     }
 
     private int ObtenerUsuarioId() => _currentUser.EstaAutenticado && _currentUser.UsuarioId is > 0
