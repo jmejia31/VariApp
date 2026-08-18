@@ -98,6 +98,60 @@ jobs:
             --startup-project src/API/InventoryApp.API.csproj \
             --context AppDbContext
 
+      - name: Preparar configuración empresarial del baseline efímero
+        shell: bash
+        run: |
+          set -euo pipefail
+          mysql_container="${{ job.services.mysql.id }}"
+          q(){ docker exec "$mysql_container" mysql -uroot -proot inventoryapp_migration_recovery -Nse "$1"; }
+
+          activas="$(q "SELECT COUNT(*) FROM EmpresaConfiguraciones WHERE Activa = 1;")"
+          if [ "$activas" -gt 1 ]; then
+            echo "Baseline inválido: se encontraron $activas configuraciones empresariales activas." >&2
+            exit 1
+          fi
+
+          if [ "$activas" -eq 0 ]; then
+            docker exec "$mysql_container" mysql -uroot -proot inventoryapp_migration_recovery -e "
+              INSERT INTO EmpresaConfiguraciones (
+                NombreComercial,
+                Eslogan,
+                NombreVisibleSistema,
+                DescripcionSistema,
+                MensajeLogin,
+                Copyright,
+                MostrarCopyright,
+                UsarAnioAutomaticoCopyright,
+                EncabezadoActivo,
+                PiePaginaActivo,
+                Moneda,
+                ZonaHoraria,
+                FormatoFecha,
+                Activa,
+                FechaActualizacion
+              ) VALUES (
+                'VariStorehn CI Recovery',
+                'Eleva tu mundo digital',
+                'VariStorehn CI Recovery',
+                'Baseline efimero de recuperacion',
+                'CI migration recovery',
+                'CI only',
+                1,
+                1,
+                1,
+                1,
+                'HNL',
+                'America/Tegucigalpa',
+                'dd/MM/yyyy',
+                1,
+                UTC_TIMESTAMP()
+              );
+            "
+          fi
+
+          test "$(q "SELECT COUNT(*) FROM EmpresaConfiguraciones WHERE Activa = 1;")" = 1
+          echo 'Baseline efímero certificado con exactamente una configuración empresarial activa.'
+
       - name: Simular DDL parcial de un despliegue interrumpido
         shell: bash
         run: |
