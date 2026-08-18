@@ -11,11 +11,8 @@ public sealed class N110CosteoDominioTests
     public void PromedioPonderado_con_asignacion_valida_conserva_cantidad_y_costo()
     {
         var asignacion = AsignacionCostoInventario.Crear(4, 125.50m);
-
         var resultado = ResultadoCosteoInventario.Crear(
-            MetodoCosteoInventario.PromedioPonderado,
-            4,
-            new[] { asignacion });
+            MetodoCosteoInventario.PromedioPonderado, 4, new[] { asignacion });
 
         Assert.Equal(4, resultado.Cantidad);
         Assert.Equal(502.00m, resultado.CostoTotal);
@@ -28,9 +25,7 @@ public sealed class N110CosteoDominioTests
         var asignacion = AsignacionCostoInventario.Crear(3, 10m);
 
         Assert.Throws<ArgumentException>(() => ResultadoCosteoInventario.Crear(
-            MetodoCosteoInventario.PromedioPonderado,
-            4,
-            new[] { asignacion }));
+            MetodoCosteoInventario.PromedioPonderado, 4, new[] { asignacion }));
     }
 
     [Fact]
@@ -39,9 +34,7 @@ public sealed class N110CosteoDominioTests
         var sinCapa = AsignacionCostoInventario.Crear(2, 30m);
 
         Assert.Throws<ArgumentException>(() => ResultadoCosteoInventario.Crear(
-            MetodoCosteoInventario.FIFO,
-            2,
-            new[] { sinCapa }));
+            MetodoCosteoInventario.FIFO, 2, new[] { sinCapa }));
     }
 
     [Fact]
@@ -54,9 +47,7 @@ public sealed class N110CosteoDominioTests
         };
 
         var resultado = ResultadoCosteoInventario.Crear(
-            MetodoCosteoInventario.FIFO,
-            5,
-            asignaciones);
+            MetodoCosteoInventario.FIFO, 5, asignaciones);
 
         Assert.Equal(56m, resultado.CostoTotal);
         Assert.Equal(11.2m, resultado.CostoUnitarioPromedio);
@@ -67,10 +58,7 @@ public sealed class N110CosteoDominioTests
     {
         var inicio = new DateTime(2026, 8, 17, 20, 0, 0, DateTimeKind.Utc);
         var politica = PoliticaCosteoInventario.Crear(
-            1,
-            MetodoCosteoInventario.PromedioPonderado,
-            inicio,
-            "Cutover N1.10");
+            1, MetodoCosteoInventario.PromedioPonderado, inicio, "Cutover N1.10");
 
         politica.Cerrar(inicio.AddHours(1));
 
@@ -84,14 +72,7 @@ public sealed class N110CosteoDominioTests
     {
         var fecha = new DateTime(2026, 8, 17, 20, 0, 0, DateTimeKind.Utc);
         var capa = CapaCostoInventario.Crear(
-            productoVarianteId: 10,
-            almacenId: 2,
-            ubicacionAlmacenId: 4,
-            movimientoInventarioOrigenId: 99,
-            cantidad: 8,
-            costoUnitario: 25m,
-            fechaOrigenUtc: fecha,
-            correlationId: "n110-fifo-99");
+            10, 2, 4, 99, 8, 25m, fecha, "n110-fifo-99");
 
         capa.Consumir(3);
         Assert.Equal(5, capa.CantidadRestante);
@@ -108,9 +89,39 @@ public sealed class N110CosteoDominioTests
         var fecha = new DateTime(2026, 8, 17, 20, 0, 0, DateTimeKind.Utc);
         var estandar = CostoEstandarInventario.Crear(10, 100m, fecha, "Costo estándar inicial");
 
-        var variacion = estandar.CalcularVariacion(costoRealUnitario: 110m, cantidad: 3);
+        var variacion = estandar.CalcularVariacion(110m, 3);
 
         Assert.Equal(30m, variacion);
         Assert.True(estandar.EstaVigente);
+    }
+
+    [Fact]
+    public void AsignacionPersistibleFifo_exige_capa_y_conserva_costo_historico()
+    {
+        var asignacion = AsignacionCostoMovimientoInventario.Crear(
+            movimientoInventarioId: 200,
+            productoVarianteId: 10,
+            metodo: MetodoCosteoInventario.FIFO,
+            cantidad: 2,
+            costoUnitario: 45m,
+            correlationId: "n110-salida-200",
+            capaCostoInventarioId: 101);
+
+        Assert.Equal(90m, asignacion.CostoTotal);
+        Assert.Equal(101, asignacion.CapaCostoInventarioId);
+        Assert.Throws<ArgumentException>(() => AsignacionCostoMovimientoInventario.Crear(
+            201, 10, MetodoCosteoInventario.FIFO, 1, 45m, "n110-salida-201"));
+    }
+
+    [Fact]
+    public void VariacionEstandar_preserva_signo_real_menos_estandar()
+    {
+        var sobre = VariacionCostoEstandarInventario.Crear(
+            300, 10, 20, 4, 115m, 100m, "n110-var-300");
+        var bajo = VariacionCostoEstandarInventario.Crear(
+            301, 10, 20, 2, 90m, 100m, "n110-var-301");
+
+        Assert.Equal(60m, sobre.VariacionTotal);
+        Assert.Equal(-20m, bajo.VariacionTotal);
     }
 }
