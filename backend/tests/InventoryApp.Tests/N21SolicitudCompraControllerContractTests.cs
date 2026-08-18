@@ -21,15 +21,15 @@ public sealed class N21SolicitudCompraControllerContractTests
         Assert.Equal("solicitudes-compra", route.Template);
     }
 
-    public static IEnumerable<object[]> AccionesProtegidas()
+    public static IEnumerable<object?[]> AccionesProtegidas()
     {
-        yield return new object[] { nameof(SolicitudesCompraController.Buscar), typeof(HttpGetAttribute), null, AccionPermiso.Ver };
-        yield return new object[] { nameof(SolicitudesCompraController.GetById), typeof(HttpGetAttribute), "{id:int}", AccionPermiso.Ver };
-        yield return new object[] { nameof(SolicitudesCompraController.Create), typeof(HttpPostAttribute), null, AccionPermiso.Crear };
-        yield return new object[] { nameof(SolicitudesCompraController.Update), typeof(HttpPutAttribute), "{id:int}", AccionPermiso.Editar };
-        yield return new object[] { nameof(SolicitudesCompraController.Enviar), typeof(HttpPostAttribute), "{id:int}/enviar", AccionPermiso.Confirmar };
-        yield return new object[] { nameof(SolicitudesCompraController.Aprobar), typeof(HttpPostAttribute), "{id:int}/aprobar", AccionPermiso.Aprobar };
-        yield return new object[] { nameof(SolicitudesCompraController.Rechazar), typeof(HttpPostAttribute), "{id:int}/rechazar", AccionPermiso.Rechazar };
+        yield return new object?[] { nameof(SolicitudesCompraController.Buscar), typeof(HttpGetAttribute), null, AccionPermiso.Ver };
+        yield return new object?[] { nameof(SolicitudesCompraController.GetById), typeof(HttpGetAttribute), "{id:int}", AccionPermiso.Ver };
+        yield return new object?[] { nameof(SolicitudesCompraController.Create), typeof(HttpPostAttribute), null, AccionPermiso.Crear };
+        yield return new object?[] { nameof(SolicitudesCompraController.Update), typeof(HttpPutAttribute), "{id:int}", AccionPermiso.Editar };
+        yield return new object?[] { nameof(SolicitudesCompraController.Enviar), typeof(HttpPostAttribute), "{id:int}/enviar", AccionPermiso.Confirmar };
+        yield return new object?[] { nameof(SolicitudesCompraController.Aprobar), typeof(HttpPostAttribute), "{id:int}/aprobar", AccionPermiso.Aprobar };
+        yield return new object?[] { nameof(SolicitudesCompraController.Rechazar), typeof(HttpPostAttribute), "{id:int}/rechazar", AccionPermiso.Rechazar };
     }
 
     [Theory]
