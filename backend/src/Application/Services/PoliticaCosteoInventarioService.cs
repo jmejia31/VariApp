@@ -42,6 +42,8 @@ public sealed class PoliticaCosteoInventarioService : IPoliticaCosteoInventarioS
     public async Task<PagedResult<PoliticaCosteoInventarioDto>> GetHistorialAsync(PoliticaCosteoInventarioQueryDto query)
     {
         ArgumentNullException.ThrowIfNull(query);
+        ValidarUtcOpcional(query.DesdeUtc, nameof(query.DesdeUtc));
+        ValidarUtcOpcional(query.HastaUtc, nameof(query.HastaUtc));
         if (query.DesdeUtc.HasValue && query.HastaUtc.HasValue && query.DesdeUtc > query.HastaUtc)
             throw new BusinessRuleException("El rango de vigencia es inválido: DesdeUtc no puede ser posterior a HastaUtc.");
         if (query.Metodo.HasValue && !Enum.IsDefined(typeof(MetodoCosteoInventario), query.Metodo.Value))
@@ -117,6 +119,12 @@ public sealed class PoliticaCosteoInventarioService : IPoliticaCosteoInventarioS
     private async Task<EmpresaConfiguracion> ObtenerEmpresaActivaAsync() =>
         await _empresas.GetActivaAsync()
         ?? throw new BusinessRuleException("No existe una configuración empresarial activa.");
+
+    private static void ValidarUtcOpcional(DateTime? valor, string campo)
+    {
+        if (valor.HasValue && valor.Value.Kind != DateTimeKind.Utc)
+            throw new BusinessRuleException($"{campo} debe expresarse en UTC.");
+    }
 
     private static PoliticaCosteoInventarioDto Map(PoliticaCosteoInventario politica) => new()
     {

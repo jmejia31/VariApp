@@ -75,6 +75,49 @@ public sealed class N110PoliticaCosteoInventarioApplicationTests
             It.IsAny<PoliticaCosteoInventarioQueryDto>()), Times.Never);
     }
 
+    [Fact]
+    public async Task Historial_rechaza_fechas_no_utc_antes_de_consultar_persistencia()
+    {
+        var (service, repository, _) = CrearServicio(null);
+
+        await Assert.ThrowsAsync<BusinessRuleException>(() => service.GetHistorialAsync(
+            new PoliticaCosteoInventarioQueryDto
+            {
+                DesdeUtc = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Local)
+            }));
+
+        repository.Verify(x => x.GetHistorialAsync(
+            It.IsAny<int>(),
+            It.IsAny<PoliticaCosteoInventarioQueryDto>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task Sin_empresa_activa_falla_cerrado_antes_de_leer_politica()
+    {
+        var repository = new Mock<IPoliticaCosteoInventarioRepository>();
+        var empresas = new Mock<IEmpresaConfiguracionRepository>();
+        empresas.Setup(x => x.GetActivaAsync()).ReturnsAsync((EmpresaConfiguracion?)null);
+        var currentUser = new Mock<ICurrentUserService>();
+        var unitOfWork = new Mock<IUnitOfWork>();
+        var service = new PoliticaCosteoInventarioService(repository.Object, empresas.Object, currentUser.Object, unitOfWork.Object);
+
+        await Assert.ThrowsAsync<BusinessRuleException>(() => service.GetVigenteAsync());
+        repository.Verify(x => x.GetVigenteAsync(It.IsAny<int>(), It.IsAny<bool>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task Catalogo_expone_solo_los_tres_metodos_canonicos()
+    {
+        var (service, _, _) = CrearServicio(null);
+
+        var metodos = await service.GetMetodosAsync();
+
+        Assert.Equal(3, metodos.Count);
+        Assert.Equal(
+            new[] { MetodoCosteoInventario.PromedioPonderado, MetodoCosteoInventario.FIFO, MetodoCosteoInventario.Estandar },
+            metodos.Select(x => x.Id).ToArray());
+    }
+
     private static (
         PoliticaCosteoInventarioService Service,
         Mock<IPoliticaCosteoInventarioRepository> Repository,
