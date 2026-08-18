@@ -6,6 +6,10 @@ on:
       - Desarrollo
     paths:
       - 'vaep/jules/diagnostic/*.json'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -26,7 +30,7 @@ jobs:
       - name: Checkout diagnostic commit
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 2
 
       - name: Diagnose Jules pre-session integration
@@ -35,12 +39,14 @@ jobs:
           set +e
           mkdir -p "$RUNNER_TEMP/vaep-jules-diag"
 
-          manifest=$(git diff-tree --no-commit-id --name-only --diff-filter=A -r "$GITHUB_SHA" -- 'vaep/jules/diagnostic/*.json' | head -n 1)
-          dispatch_id='UNKNOWN'
-          if [[ -n "$manifest" && -f "$manifest" ]]; then
-            dispatch_id=$(jq -r '.dispatchId // "UNKNOWN"' "$manifest" 2>/dev/null)
+          target_sha="${{ github.event.pull_request.head.sha || github.sha }}"
+          manifest=$(git diff-tree --no-commit-id --name-only --diff-filter=A -r "$target_sha" -- 'vaep/jules/diagnostic/*.json' | head -n 1)
+          if [[ -z "$manifest" || ! -f "$manifest" ]]; then
+            echo "El último commit no agrega un manifiesto diagnóstico Jules; salida no-op."
+            exit 0
           fi
 
+          dispatch_id=$(jq -r '.dispatchId // "UNKNOWN"' "$manifest" 2>/dev/null)
           stage='STARTED'
           detail='GitHub Actions diagnostic job started.'
           rc=0
