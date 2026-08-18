@@ -71,7 +71,7 @@ public sealed class N110CosteoDominioTests
     public void CapaFifo_consume_y_restaura_sin_superar_saldo_original()
     {
         var fecha = new DateTime(2026, 8, 17, 20, 0, 0, DateTimeKind.Utc);
-        var capa = CapaCostoInventario.Crear(
+        var capa = CapaCostoInventario.CrearDesdeMovimiento(
             10, 2, 4, 99, 8, 25m, fecha, "n110-fifo-99");
 
         capa.Consumir(3);
@@ -81,6 +81,31 @@ public sealed class N110CosteoDominioTests
         capa.Restaurar(2);
         Assert.Equal(7, capa.CantidadRestante);
         Assert.Throws<InvalidOperationException>(() => capa.Restaurar(2));
+    }
+
+    [Fact]
+    public void CapaApertura_no_inventa_movimiento_historico()
+    {
+        var fecha = new DateTime(2026, 8, 17, 20, 0, 0, DateTimeKind.Utc);
+        var capa = CapaCostoInventario.CrearApertura(
+            10, 2, null, 5, 31.25m, fecha, "n110-cutover-10", "Stock preexistente certificado");
+
+        Assert.True(capa.EsApertura);
+        Assert.Null(capa.MovimientoInventarioOrigenId);
+        Assert.Null(capa.CapaCostoOrigenId);
+        Assert.Equal("Stock preexistente certificado", capa.MotivoApertura);
+    }
+
+    [Fact]
+    public void CapaTransferida_conserva_linaje_de_capa_origen()
+    {
+        var fecha = new DateTime(2026, 8, 17, 20, 0, 0, DateTimeKind.Utc);
+        var capa = CapaCostoInventario.CrearDesdeMovimiento(
+            10, 3, 7, 120, 2, 45m, fecha, "n110-transfer-120", capaCostoOrigenId: 101);
+
+        Assert.False(capa.EsApertura);
+        Assert.Equal(120, capa.MovimientoInventarioOrigenId);
+        Assert.Equal(101, capa.CapaCostoOrigenId);
     }
 
     [Fact]
