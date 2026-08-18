@@ -64,6 +64,7 @@ import { SessionActivityService } from './core/auth/session-activity.service';
               <a routerLink="/metodos-pago" routerLinkActive="active" ariaCurrentWhenActive="page"><mat-icon>payments</mat-icon> Métodos de pago</a>
             }
             @if (permisosRuntime.puede('Compras', 'Ver')) {
+              <a routerLink="/solicitudes-compra" routerLinkActive="active" ariaCurrentWhenActive="page"><mat-icon>request_quote</mat-icon> Solicitudes de compra</a>
               <a routerLink="/compras" routerLinkActive="active" ariaCurrentWhenActive="page"><mat-icon>shopping_cart</mat-icon> Compras</a>
             }
             @if (permisosRuntime.puede('Proveedores', 'Ver')) {
