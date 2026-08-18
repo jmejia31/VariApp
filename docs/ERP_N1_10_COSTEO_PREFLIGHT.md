@@ -2,105 +2,102 @@
 
 ## 1. Propósito
 
-Definir el punto de partida real para ERP-N1.10 antes de introducir dominio, persistencia o algoritmos nuevos. El objetivo rector es disponer de **una política de costeo coherente y auditable para la empresa**, contemplando Promedio Ponderado Móvil, FIFO y Costo Estándar cuando corresponda, sin romper históricos ni crear una segunda autoridad de stock.
+Definir el punto de partida real de ERP-N1.10 antes de introducir persistencia o integración runtime. El objetivo rector es disponer de **una política de costeo única, coherente, reversible y auditable para la empresa**, contemplando Promedio Ponderado Móvil, FIFO y Costo Estándar cuando corresponda, sin romper históricos ni crear una segunda autoridad de stock.
 
-Este documento es PRE: no introduce todavía entidades, migraciones, endpoints ni UI funcionales de N1.10.B–H.
+Este documento es PRE: no introduce migraciones, endpoints ni UI funcionales de N1.10.C–H.
 
 ## 2. Dependencias y límites
 
 - Dependencia VAEP directa: `N1.5.H` — LISTO.
-- `N1.9.H` fue cerrado antes de abrir este punto y no se reabre.
-- `ExistenciaVariante` sigue siendo la única autoridad cuantitativa del stock vivo por Variante + Almacén + Ubicación.
+- `N1.9.H` está cerrado y no se reabre.
+- `ExistenciaVariante` continúa como única autoridad cuantitativa del stock vivo por Variante + Almacén + Ubicación.
 - ERP-N1.10 define **valoración**, no una segunda cantidad.
-- ERP-N6 continúa siendo la fase responsable de multiempresa/SaaS. N1.10 no debe inventar una entidad tenant ni una FK `Empresa` inexistente.
-- El sistema sí posee `EmpresaConfiguracion` activa única; en el contexto actual single-company esa configuración representa el ámbito empresarial efectivo. La evolución tenant-aware se hará en N6 sin reescribir históricos de costeo.
+- ERP-N6 sigue siendo responsable de multiempresa/SaaS. N1.10 no inventa una entidad tenant ni una FK `Empresa` inexistente.
+- `EmpresaConfiguracion` activa única representa el ámbito empresarial efectivo del sistema actual single-company; N6 podrá tenantizar esta política sin reinterpretar históricos.
 
 ## 3. Estado real encontrado
 
 ### 3.1 Autoridades actuales de costo
 
-Hoy existen dos proyecciones persistidas de costo corriente:
+Existen dos proyecciones persistidas de costo corriente:
 
 - `Producto.Costo` — costo consolidado de compatibilidad a nivel producto.
 - `ProductoVariante.Costo` — costo operativo a nivel variante.
 
-La compra confirmada aplica actualmente **promedio ponderado móvil**:
+La confirmación de compra aplica hoy **Promedio Ponderado Móvil** dentro de `CompraService`:
 
-- para una variante: `(valor anterior + valor de entrada) / stock nuevo`;
-- para el producto consolidado: `(costo anterior * stock anterior + valor entrada) / stock nuevo`;
-- redondeo actual: 2 decimales, `MidpointRounding.AwayFromZero`.
+- Variante: `(valor anterior + valor entrada) / stock nuevo`.
+- Producto consolidado: `(costo anterior * stock anterior + valor entrada) / stock nuevo`.
+- Redondeo: 2 decimales con `MidpointRounding.AwayFromZero`.
 
-Por tanto, el sistema ya implementa de facto una política de Promedio Ponderado, pero la política está embebida dentro de `CompraService`; no existe un contrato de costeo explícito ni una selección empresarial administrable.
+Por tanto, Promedio Ponderado ya es la política de facto, pero no existe todavía una política empresarial explícita ni un boundary único de costeo.
 
-### 3.2 Stock y valoración están parcialmente desacoplados
+### 3.2 Cantidad y valoración están correctamente separadas en N1.4
 
-`ExistenciaVariante` contiene `StockFisico`, `StockReservado`, `StockDisponible`, `StockTransito`, mínimos y máximos, pero **no contiene costo**. Esto es correcto como principio: la existencia física no debe transformarse en una autoridad paralela de valoración.
+`ExistenciaVariante` contiene `StockFisico`, `StockReservado`, `StockDisponible`, `StockTransito`, mínimos y máximos, pero no costo. Esta separación debe preservarse.
 
-`MovimientoInventario` sí conserva `CostoUnitario` nullable como snapshot del evento, además de cantidad, stock anterior/nuevo, origen tipado y `CorrelationId`. El Kardex ya ofrece la base de trazabilidad para reconstruir eventos, pero ese snapshot por sí solo no implementa FIFO ni costo estándar.
+`MovimientoInventario` conserva `CostoUnitario` nullable como snapshot del evento, además de cantidad, stock anterior/nuevo, origen tipado y `CorrelationId`. Esto es base de auditoría/Kardex, pero no constituye por sí mismo un motor FIFO o Estándar.
 
-### 3.3 Compras
+### 3.3 Compras: cálculo en servicio, snapshots/reversión en persistencia
 
-`CompraDetalle.CostoUnitario` conserva el costo real de entrada. Además existen campos históricos de valoración (`CostoProductoAnteriorSnapshot`, `CostoProductoNuevoSnapshot`, `CostoVarianteAnteriorSnapshot`, `CostoVarianteNuevoSnapshot`, stocks anterior/nuevo), pero el flujo actual inspeccionado de `CompraService.ConfirmarAsync` no materializa esos snapshots antes/después.
+`CompraDetalle.CostoUnitario` conserva el costo real de entrada y posee snapshots de valoración anterior/nueva para Producto y Variante.
 
-El costo corriente se recalcula directamente dentro de `CompraService`, lo que mezcla workflow documental, inventario y política de valoración.
+La revisión completa del flujo confirmó que esos snapshots **sí se materializan**. `AppDbContext.SaveChangesAsync` llama a `PrepararValorizacionComprasAsync`; ante transición `Borrador → Confirmada`, `CapturarSnapshotsValorizacion` lee `OriginalValues` y valores nuevos de Producto/Variante y los persiste en los detalles.
 
-### 3.4 Ventas
+Ante transición `Confirmada → Anulada`, `RestaurarValorizacionAsync` valida que los snapshots estén completos, restaura costo/stock de Variante y recompone el agregado de Producto. La operación falla cerrada si el estado físico no coincide con el esperado.
 
-`VentaDetalle` persiste:
+Esto corrige una conclusión preliminar de la primera lectura de `CompraService`: **la reversión de valoración sí existe**. El problema real es arquitectónico: la política está fragmentada entre `CompraService` y `AppDbContext`, mezclando reglas contables con el boundary de persistencia.
 
-- `CostoUnitarioSnapshot`;
-- `UtilidadBruta`;
-- precio y snapshots comerciales.
+### 3.4 Ventas: COGS congelado demasiado pronto
 
-El costo de venta se toma hoy desde `ProductoVariante.Costo` en `ArmarDetallesAsync`, es decir **al crear/editar el borrador**, no al confirmar físicamente la salida. Si una compra o ajuste modifica el costo mientras una venta permanece en borrador, el `CostoUnitarioSnapshot`, el COGS y la utilidad pueden quedar obsoletos al confirmar.
+`VentaDetalle` persiste `CostoUnitarioSnapshot` y `UtilidadBruta`.
 
-Este comportamiento debe corregirse en N1.10: el costo contable de la salida debe congelarse en el momento autoritativo de confirmación, bajo el mismo control transaccional/concurrencia del inventario.
+`VentaService.ArmarDetallesAsync` toma hoy `ProductoVariante.Costo` al crear/editar el borrador. La confirmación física posterior reutiliza ese snapshot. Si el costo cambia mientras la venta permanece en borrador, COGS y utilidad pueden quedar obsoletos.
 
-### 3.5 Anulación de compras
+N1.10 debe congelar el costo contable de salida **en la confirmación autoritativa**, bajo la misma transacción/lock del inventario, y persistirlo como historia inmutable.
 
-La anulación actual protege la secuencia física: falla cerrada si existen movimientos posteriores de inventario. Sin embargo, después de restar cantidades **no restaura explícitamente el costo anterior de Producto/Variante**. En un esquema de promedio ponderado, si la compra anulada fue el último movimiento, la reversión debe restaurar determinísticamente la valoración previa o calcular una reversión matemáticamente equivalente.
+### 3.5 Ámbito empresarial actual
 
-Los campos snapshot ya presentes en `CompraDetalle` sugieren una intención histórica de soportar esta reversibilidad, pero no están conectados al flujo inspeccionado. N1.10 debe resolverlo y cubrirlo con pruebas causales.
+No existe `Domain/Entities/Empresa.cs`. `Sucursal.EmpresaId` está expresamente reservado para ERP-N6 y no es todavía una relación tenant-aware.
 
-### 3.6 Ámbito empresa
+Sí existe `EmpresaConfiguracion` activa única. N1.10 puede vincular inicialmente su política a esa configuración y dejar la tenantización para N6.
 
-No existe actualmente `Domain/Entities/Empresa.cs`. `Sucursal.EmpresaId` está expresamente reservado para ERP-N6 y no constituye todavía una relación tenant-aware.
+## 4. Riesgos confirmados
 
-Sí existe `EmpresaConfiguracion`, con unicidad activa y datos operativos/fiscales. Para no adelantar N6, la política N1.10 debe operar inicialmente en el único ámbito empresarial activo. El diseño debe permitir que N6 agregue aislamiento por empresa sin cambiar el significado de movimientos históricos.
+### R1 — Política fragmentada entre Application y Persistence
 
-## 4. Problemas y riesgos confirmados
+El cálculo promedio está en `CompraService`, mientras captura y reversión están en `AppDbContext.SaveChangesAsync`. Un método nuevo obligaría a extender dos boundaries que no deberían poseer política contable de forma independiente.
 
-### R1 — Política implícita y acoplada
-
-El promedio ponderado está codificado dentro de `CompraService`; cambiar de método requeriría tocar workflows documentales. Riesgo: divergencia entre compras, ventas, ajustes, transferencias, conteos y reportes.
+**Dirección:** extraer la autoridad a `ICosteoInventarioService`/estrategias transaccionales y dejar al DbContext como persistencia/invariantes estructurales, no como motor contable.
 
 ### R2 — Doble proyección Producto/Variante
 
-`Producto.Costo` y `ProductoVariante.Costo` pueden divergir si un flujo actualiza uno sin reconciliar el otro. La autoridad de valoración de N1.10 debe declararse explícitamente. Recomendación: la Variante es la unidad mínima valorable; Producto debe ser proyección consolidada/compatibilidad, nunca una autoridad independiente.
+`Producto.Costo` y `ProductoVariante.Costo` pueden divergir si un flujo nuevo actualiza uno sin reconciliar el otro.
 
-### R3 — Costo de venta congelado demasiado pronto
+**Dirección:** `ProductoVariante` es la unidad mínima valorable; `Producto.Costo` queda como proyección consolidada/compatibilidad.
 
-Una venta en borrador captura costo antes de la confirmación. Esto puede producir COGS/utilidad históricos incorrectos aunque el stock físico se confirme correctamente.
+### R3 — Costo de venta congelado en borrador
 
-### R4 — Reversión de compra no restaura valoración
+Una venta puede confirmar COGS/utilidad de un costo viejo aunque el stock físico se bloquee correctamente al confirmar.
 
-Una anulación físicamente segura puede dejar el costo promedio posterior a la compra anulada. Riesgo de valoración residual incorrecta.
+### R4 — FIFO no tiene capas contables
 
-### R5 — FIFO no tiene capas
+No existe una entidad de capas de costo ni asignaciones de consumo. `LoteInventario` N1.9 representa identidad logística, no autoridad contable; no debe reutilizarse como capa FIFO.
 
-No existe una entidad de capas/lotes contables de costo ni asignaciones de consumo. Los lotes N1.9 son **identidad logística**, no capas contables FIFO; no deben reutilizarse como autoridad contable porque un producto sin control de lote también debe poder usar FIFO.
+### R5 — Costo estándar no tiene vigencia ni variación
 
-### R6 — Costo estándar no tiene vigencia ni variación
+No existe costo estándar temporal por Variante ni evidencia de variación real vs estándar.
 
-No existe contrato de costo estándar efectivo ni registro de variaciones compra-real vs estándar. Sobrescribir `ProductoVariante.Costo` perdería historia y es insuficiente.
+### R6 — Transferencias y ajustes
 
-### R7 — Transferencias y ajustes
+- Transferir inventario no debe crear utilidad ni modificar el valor empresarial total; FIFO debe preservar procedencia de capas.
+- Ajuste negativo consume costo según política.
+- Ajuste positivo exige fuente explícita de valoración.
+- Conteos físicos sólo afectan costo cuando materializan un Ajuste.
 
-Una transferencia entre almacenes no debe crear utilidad ni cambiar costo empresarial; con FIFO debe trasladar la identidad de capas o una asignación equivalente. Ajustes positivos requieren una fuente explícita de valoración; ajustes negativos deben consumir costo según la política vigente.
+### R7 — Históricos
 
-### R8 — Históricos
-
-No se puede recalcular retrospectivamente COGS/utilidad de documentos cerrados sin una política explícita de migración. Los snapshots existentes deben preservarse. El cutover de N1.10 debe ser forward-only y determinista.
+No se puede reinterpretar COGS/utilidad cerrados al cambiar política. El cutover debe ser forward-only, temporalmente versionado y auditable.
 
 ## 5. Decisiones de arquitectura para N1.10.B–H
 
@@ -108,136 +105,136 @@ No se puede recalcular retrospectivamente COGS/utilidad de documentos cerrados s
 
 - **Cantidad:** `ExistenciaVariante`.
 - **Unidad mínima de valoración:** `ProductoVariante`.
-- **Producto.Costo:** proyección consolidada de compatibilidad, no autoridad primaria.
-- **Costo histórico de salida:** snapshot/asignación persistida al confirmar el movimiento, nunca recalculado desde el costo corriente al consultar.
-- **Política:** una única política activa para el ámbito empresarial actual; preparada para tenantización en N6.
+- **Producto.Costo:** proyección consolidada de compatibilidad.
+- **Costo histórico de salida:** snapshot/asignación persistida en confirmación, nunca recalculado al consultar.
+- **Política:** versión temporal única para el ámbito empresarial actual.
+- **Reversión:** usa evidencia histórica original, nunca la política/costo corriente del momento de anular.
 
 ### 5.2 Métodos objetivo
 
 #### Promedio Ponderado Móvil
 
-Debe preservar el comportamiento actual como default de migración para evitar reinterpretar históricos. La lógica debe salir de `CompraService` hacia un servicio/estrategia de costeo transaccional reutilizable.
+Default de compatibilidad. Debe preservar el algoritmo actual y su reversibilidad, pero mover la lógica desde `CompraService`/`AppDbContext` hacia el boundary de costeo.
 
 #### FIFO
 
-Requiere capas contables separadas de `LoteInventario`, como concepto propuesto `CapaCostoInventario`:
+Requiere `CapaCostoInventario` independiente de lotes logísticos:
 
-- Variante;
-- contexto físico Almacén/Ubicación cuando corresponda;
-- cantidad original/restante;
-- costo unitario;
-- fecha/orden durable;
-- origen tipado/correlación;
-- referencia a compra/ajuste/transferencia de origen.
+- Variante.
+- Almacén/Ubicación cuando aplique.
+- cantidad original/restante.
+- costo unitario.
+- fecha/orden durable.
+- movimiento origen/correlation.
 
-Cada salida debe persistir su asignación a una o más capas para hacer el COGS auditable e inmutable.
+Cada salida debe persistir una o varias asignaciones a capas, de modo que COGS sea inmutable y auditable.
 
 #### Costo Estándar
 
-Requiere valor estándar vigente por Variante y registro explícito de variaciones. El costo real de compra no debe perderse. La venta usa el estándar vigente congelado según la regla empresarial; las diferencias deben quedar auditables.
+Requiere valor estándar versionado por Variante y registro de variación. El costo real de compra se conserva siempre.
 
 ### 5.3 Política empresarial sin adelantar N6
 
-Opción recomendada para N1.10.B/C:
-
-- definir `MetodoCosteoInventario` como contrato estable (`PromedioPonderado`, `FIFO`, `Estandar`);
-- persistir la selección en el ámbito de `EmpresaConfiguracion` activa única o en una configuración de costeo 1:1 con ella;
-- default/backfill: `PromedioPonderado` porque reproduce el comportamiento actual;
-- prohibir múltiples políticas activas simultáneas en el contexto single-company;
-- documentar la migración de clave empresarial a N6 como evolución de aislamiento, no como cambio semántico de históricos.
+- `MetodoCosteoInventario`: `PromedioPonderado`, `FIFO`, `Estandar`.
+- Política temporal vinculada a `EmpresaConfiguracion` activa única.
+- Default/backfill: `PromedioPonderado` para preservar semántica actual.
+- Una sola política vigente en el ámbito actual.
+- Un cambio de política crea un nuevo corte temporal; no reescribe históricos.
 
 ## 6. Flujos que N1.10 debe cubrir
 
-1. **Compra confirmada** — entrada valorada según política; snapshot auditable.
-2. **Compra anulada** — reversión determinística si la secuencia lo permite.
-3. **Venta confirmada** — COGS congelado al confirmar, no al crear borrador.
-4. **Venta anulada** — restauración física y valoración compatible con el costo histórico original.
-5. **Transferencia** — traslado sin generar ganancia/pérdida; FIFO conserva procedencia de capa.
-6. **Ajuste negativo** — consumo por política.
-7. **Ajuste positivo** — costo explícito/justificado; nunca costo cero implícito salvo regla documentada.
-8. **Conteo físico** — cualquier diferencia que materialice Ajuste debe obedecer el punto anterior.
-9. **Kardex/reportes** — costo histórico del movimiento y COGS deben ser reproducibles sin consultar costo corriente.
-10. **Reservas** — no reconocen COGS mientras no exista salida física; no deben mutar capas/costo.
-11. **Lotes/series N1.9** — identidad logística puede correlacionarse con valoración, pero no sustituye capas contables.
+1. Compra confirmada: entrada valorada según política y evidencia histórica.
+2. Compra anulada: reversión basada en evidencia original; preservar protección actual fail-closed.
+3. Venta confirmada: congelar COGS en confirmación, no en borrador.
+4. Venta anulada: restaurar valoración compatible con el costo histórico de la salida original.
+5. Transferencia: trasladar valor sin ganancia/pérdida; FIFO preserva capas/procedencia.
+6. Ajuste negativo: consumo según política.
+7. Ajuste positivo: valoración explícita/justificada.
+8. Conteo físico: diferencias materializadas vía Ajuste obedecen la misma política.
+9. Kardex/reportes: reproducir costo histórico sin consultar costo corriente.
+10. Reservas: no reconocen COGS ni consumen capas mientras no exista salida física.
+11. Lotes/series: identidad logística correlacionable, nunca sustituto de capas contables.
 
 ## 7. Persistencia/cutover esperado para N1.10.C
 
-El diseño definitivo se cierra en B, pero C deberá mantener estas guardas:
-
 - migraciones aditivas y forward-only;
-- default de política a Promedio Ponderado para preservar semántica actual;
-- no backfill inventado de capas FIFO sobre stock histórico sin evidencia suficiente;
-- si se habilita FIFO con stock preexistente, crear una **capa de apertura explícita** usando costo corriente certificado y registrar su origen/cutover;
-- costo estándar requiere alta explícita antes de activarse cuando exista stock;
-- índices y constraints para impedir capas negativas, consumo superior a saldo y ambigüedad de política;
-- snapshot/modelo EF sin drift;
-- preflight/postcheck y rollback documentados antes de cualquier activación.
+- política inicial Promedio Ponderado;
+- conservar columnas/snapshots existentes durante transición;
+- no inventar backfill FIFO sobre históricos sin evidencia;
+- si se activa FIFO con stock preexistente, capa de apertura explícita usando costo corriente certificado y marca de cutover;
+- Estándar requiere costo vigente explícito antes de activarse con stock;
+- unicidad de política vigente;
+- capas sin cantidad negativa ni sobreconsumo;
+- asignaciones históricas ligadas a movimientos;
+- variaciones estándar persistidas;
+- snapshot EF sin drift;
+- preflight/postcheck y rollback documentados.
 
 ## 8. API/UX/RBAC esperados
 
-N1.10.D–F deberá separar:
+N1.10.D–F debe separar:
 
 - consulta de política y estado de costeo;
-- cambio de política con preflight y restricciones de cutover;
-- mantenimiento/versión de costo estándar cuando aplique;
+- cambio de política con preflight/cutover;
+- mantenimiento versionado de costo estándar;
 - consulta auditable de capas/asignaciones/variaciones;
 - reportes de costo/COGS/utilidad.
 
-Los cambios de política o costo estándar son operaciones sensibles: RBAC explícito, auditoría estricta y correlation obligatorios. Una política no puede cambiarse silenciosamente si existen existencias/capas incompatibles.
+Cambiar política o costo estándar es operación sensible: RBAC explícito, auditoría estricta y correlation obligatorios.
 
 ## 9. Matriz mínima de pruebas
 
 ### Dominio
 
-- enum/contratos de política válidos;
-- promedio ponderado exacto y redondeo definido;
-- FIFO orden estable y consumo parcial/multicapa;
-- costo estándar y variación;
-- cantidades/costos negativos fail-closed.
+- políticas válidas e intervalos temporales;
+- promedio exacto/redondeo;
+- FIFO parcial y multicapa;
+- estándar y variación;
+- cantidades/costos inválidos fail-closed.
 
 ### Integración/MySQL
 
-- concurrencia de dos entradas/salidas;
-- unicidad de política activa;
+- unicidad de política vigente;
 - capas FIFO sin saldo negativo;
+- asignaciones suman exactamente la salida;
 - transferencias preservan valor;
 - migración desde baseline real y snapshot EF sin drift.
 
 ### Servicios
 
-- compra promedio y reversión restauran costo;
+- compra promedio y reversión preservan el comportamiento certificado actual;
+- DbContext deja de poseer la política una vez migrada la autoridad;
 - venta en borrador no congela COGS definitivo;
-- confirmación de venta congela costo actual bajo lock;
-- FIFO asigna capas y persiste COGS;
+- confirmación congela costo bajo lock;
+- FIFO asigna/persiste capas;
 - estándar persiste variación;
-- ajuste positivo exige valoración válida;
 - reservas no alteran costo.
 
 ### E2E/contrato
 
-- consulta y cambio autorizado de política;
+- consulta/cambio autorizado de política;
 - bloqueo de cambio incompatible;
-- venta muestra utilidad consistente con COGS confirmado;
-- reportes/Kardex reproducen costo histórico.
+- utilidad consistente con COGS confirmado;
+- Kardex/reportes reproducen costo histórico.
 
 ## 10. Rollback
 
-Antes de N1.10.C el rollback es documental: este preflight no modifica runtime.
+Antes de N1.10.C, los cambios A/B son aditivos de documentación/contrato y no alteran runtime.
 
-Para la implementación posterior:
+En implementación posterior:
 
-- no eliminar `Producto.Costo`, `ProductoVariante.Costo`, `VentaDetalle.CostoUnitarioSnapshot` ni `MovimientoInventario.CostoUnitario` durante el cutover;
-- mantener compatibilidad de lectura mientras las nuevas autoridades se certifican;
-- cambios de política deben tener preflight y condición de retorno explícita;
-- una vez existan movimientos bajo FIFO/Estándar, volver a otro método no puede reinterpretar históricos: debe ser un nuevo corte temporal documentado.
+- no eliminar `Producto.Costo`, `ProductoVariante.Costo`, snapshots de `CompraDetalle`, `VentaDetalle.CostoUnitarioSnapshot` ni `MovimientoInventario.CostoUnitario` durante cutover;
+- mantener compatibilidad hasta certificar la nueva autoridad;
+- cambio de política con preflight y condición de retorno explícita;
+- nunca reinterpretar movimientos históricos al volver/cambiar método.
 
 ## 11. Criterio de cierre de N1.10.A
 
-N1.10.A queda listo cuando:
+N1.10.A queda cerrado cuando:
 
-- autoridad actual y algoritmo implícito están identificados;
-- divergencias de compra/venta/anulación están documentadas;
-- alcance Promedio/FIFO/Estándar está separado de stock y de N6;
-- consumidores causales y riesgos están enumerados;
-- transición/rollback y matriz de pruebas están definidos;
-- N1.10.B puede diseñar dominio sin volver a escanear globalmente el repositorio.
+- algoritmo implícito y autoridad actual están identificados;
+- captura/restauración existente en DbContext está documentada correctamente;
+- riesgo de COGS de venta en borrador está identificado;
+- Promedio/FIFO/Estándar están separados de cantidad y de N6;
+- consumidores, transición, rollback y pruebas están definidos;
+- N1.10.B puede continuar sin reescaneo global.
