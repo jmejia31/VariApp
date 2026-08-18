@@ -4,6 +4,20 @@ Bitácora colaborativa de cambios realizados por Javier Mejía, Codex, AntiG/Ant
 
 No reemplaza `git log`: registra intención, alcance, validaciones y handoff. Todo changeset intencional debe incluir una entrada breve; no modificar otros colaborativos si su contenido no cambió.
 
+## 2026-08-17 — ERP-N1.9 Series, lotes y vencimientos — CIERRE FORMAL
+
+**Responsable:** ChatGPT mediante conexiones autorizadas GitHub + Google Drive.
+
+**Objetivo/alcance:** cerrar formalmente ERP-N1.9 después de completar auditoría/preflight, dominio y contratos, persistencia/migración, aplicación/API, frontend/UX, RBAC/auditoría/seguridad, QA/regresión y documentación. La capacidad queda deliberadamente opt-in por `ProductoVariante`: Lote, Número de Serie y Fecha de Vencimiento no se imponen a todos los productos y `ExistenciaVariante` continúa siendo la única autoridad cuantitativa del stock físico.
+
+**Resultado funcional:** `LoteInventario` y `SerieInventario` funcionan como subledger de identidad trazable, no como una segunda autoridad de cantidad. La persistencia es aditiva y preserva históricos con flags desactivados por defecto, sin inventar backfill de lotes/series/vencimientos. La API y UI permiten configurar la política por variante, capturar/listar lotes y series y controlar vencimientos. La seguridad usa RBAC relacional de `MovimientosInventario`, auditoría estricta transaccional e idempotente, correlation saneado y contratos HTTP protegidos. Durante QA se detectó y corrigió causalmente la falta de límite de longitud de `NumeroSerie`; el dominio ahora rechaza valores de más de 120 caracteres antes de mutar estado.
+
+**Documentación:** paquete canónico compuesto por `docs/ERP_N1_9_SERIES_LOTES_VENCIMIENTOS.md`, `docs/ADR_N1_9_AUTORIDAD_TRAZABILIDAD.md`, `docs/ERD_N1_9_TRAZABILIDAD.md`, `docs/RUNBOOK_N1_9_TRAZABILIDAD.md`, `docs/OPENAPI_N1_9_TRAZABILIDAD.md`, `docs/RUNBOOK_N1_9_MIGRACION.md` y `docs/CERTIFICACION_N1_9_TRAZABILIDAD.md`. El baseline funcional de QA es `4b5a5c9a8b495fcef62464bf50010ac69117fe48`; el baseline documental certificable es `7bc4b7935cc92e15d24f90a79f3915ab14e2d243`.
+
+**Validación final de `7bc4b793...`:** Development `32089179243` SUCCESS; Acceptance `32089179228` SUCCESS; Fase8 `32089179144` SUCCESS; M10 `32089179156` SUCCESS; M13 `32089179175` SUCCESS. El estado colaborativo posterior es exclusivamente documental `[skip ci]`: `TASKS.md` reconciliado en `67da8adc9e3dfad87140346050ee731b3dd8abc8` y certificado final actualizado en `81b5478458f8dfd5aa33e4653a3b413e1b4bbb36`.
+
+**Control:** `N1.9.A–H` quedan cerrados; el tablero VAEP debe avanzar a `N1.10.A` únicamente si sus dependencias están `LISTO`. `main`, Producción, merge/auto-merge del PR #2, secretos, infraestructura productiva, force-push y ramas nuevas permanecen intactos.
+
 ## 2026-08-17 — ERP-N1.8 Reservas de inventario — CIERRE FORMAL
 
 **Responsable:** ChatGPT mediante conexiones autorizadas GitHub + Google Drive.
@@ -40,7 +54,7 @@ No reemplaza `git log`: registra intención, alcance, validaciones y handoff. To
 
 **Objetivo/alcance:** implementar y certificar `Almacen` como maestro hijo obligatorio de `Sucursal`, con tipos Tienda/Bodega/Transito/Devolucion/Cuarentena, persistencia MySQL, API, RBAC relacional, auditoría, observabilidad, frontend responsive/accesible y QA dedicado, sin adelantar ubicaciones N1.3, existencias por almacén N1.4 ni multiempresa N6.
 
-**Resultado funcional:** `Almacen.SucursalId` queda como única jerarquía organizacional de N1.2; una introducción concurrente de `EmpresaId` duplicada fue detectada y corregida forward-only en `85f2b845ca60d8e797425bd5b0f9a7d597a6cfa8`. Persistencia final con FK Restrict a `Sucursales`, código activo único, checks/índices y rollback fail-closed. API `/almacenes` soporta CRUD, filtros/paginación, catálogo de tipos, activos y operaciones de estado idempotentes. Crear/mover/reactivar falla cerrado si la Sucursal no existe o está inactiva. RBAC `Almacenes=29`, auditoría `Entidad=Almacen` y métrica P50/P95 sin término/PII quedan integrados. Frontend ofrece lista server-side, selector Sucursal/tipo, rutas y menú protegidos, tabla/cards responsive y formulario sin stock ni EmpresaId.
+**Resultado funcional:** `Almacen.SucursalId` queda como única jerarquía organizacional de N1.2; una introducción concurrente de `EmpresaId` duplicada fue detectada y corregida forward-only en `85f2b845ca60d8e797425bd5b0f9a7d597a6cfa8`. Persistencia final con FK Restrict a `Sucursales`, código activo único, índices/checks y rollback fail-closed. API `/almacenes` soporta CRUD, filtros/paginación, catálogo de tipos, activos y operaciones de estado. Crear/mover/reactivar falla cerrado si la Sucursal no existe o está inactiva. RBAC `Almacenes=29`, auditoría `Entidad=Almacen` y métrica P50/P95 sin término/PII quedan integrados. Frontend ofrece lista server-side, selector Sucursal/tipo, rutas y menú protegidos, tabla/cards responsive y formulario sin stock ni EmpresaId.
 
 **Trazabilidad:** B final `85f2b845ca60d8e797425bd5b0f9a7d597a6cfa8`; C `bebafe3abb2ddc66448c805b107f8d1f8ee3f3e9`; D `5a97bf3844069a565e1aecf39e4b8001c10f386b`; E `3a1b8004f2120c4be6459bb46fd120eff8704fe9`; F `30c7e9ff1dedf69eb860916b92b1d5bee0941084`; G base `f6f51bb6d0d5d1910e9561de30d934b30fa2d83e`, corrección harness `3049cfdf637eb1c1d2fb0be7f9881e517a3cf13f` y corrección routing/final funcional `053152ae51de3617bf30a4e9987574c7879e3049`. Documento canónico publicado en `a507eee7e69a5bed15226855098c0c0a28e7962e`.
 
@@ -296,7 +310,7 @@ No reemplaza `git log`: registra intención, alcance, validaciones y handoff. To
 
 **Pruebas dirigidas:** `05687cffcf9d34b3fdd8efd9becf9d158b61f028` añadió cobertura para comprobar que el DTO usa el nombre del catálogo aunque el enum legacy difiera y que la confirmación propaga FK/navegación al movimiento financiero sin copiar el enum legacy de Venta.
 
-**Validación real:** CI general run `31566541771`: job `Backend Release y pruebas` completó `success`, incluyendo restore, build Release y pruebas backend no-integración; `Frontend producción`, `Higiene del repositorio` y `Docker y aislamiento de entornos` también completaron `success`. El job MySQL seguía ejecutándose al cierre operativo de A3, por lo que no se atribuye un resultado aún no finalizado. El workflow dedicado ERP-N0.5 run `31566541808` fue generado sobre el mismo SHA y continuaba su certificación histórica.
+**Validación real:** CI general run `31566541771`: job `Backend Release y pruebas` completó `success`, incluyendo restore, build Release y pruebas backend no-integración; `Frontend producción`, `Higiene del repositorio` y `Docker y aislamiento de entornos` también completaron `success`. El job MySQL seguía ejecutándose al cierre operativo de A3, por lo que no se atribuye un resultado aún no finalizado. El workflow dedicado ERP-N0.5 run `31566541808` fue generado para el mismo SHA y continuaba su certificación histórica.
 
 **Control:** A3 no modifica `FacturaPago` ni el servicio financiero general. El siguiente punto de la cadena es B, que debe retirar la autoridad enum de `FacturaPago` y sus DTOs/flujos sin ampliar todavía reglas operativas de N0.5.07.
 
