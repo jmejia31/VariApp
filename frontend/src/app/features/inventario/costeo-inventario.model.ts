@@ -7,7 +7,6 @@ export enum MetodoCosteoInventario {
 export interface MetodoCosteoInventarioOption {
   id: MetodoCosteoInventario;
   nombre: string;
-  descripcion?: string | null;
 }
 
 export interface PoliticaCosteoInventario {
@@ -17,26 +16,22 @@ export interface PoliticaCosteoInventario {
   metodoNombre: string;
   vigenteDesdeUtc: string;
   vigenteHastaUtc?: string | null;
-  observacion?: string | null;
-  creadoPorUsuarioId?: number | null;
+  estaVigente: boolean;
+  motivo: string;
+  fechaCreacion: string;
+  fechaActualizacion: string;
 }
 
 export interface PoliticaCosteoInventarioQuery {
   page?: number;
   pageSize?: number;
   metodo?: MetodoCosteoInventario;
+  vigente?: boolean;
   desdeUtc?: string;
   hastaUtc?: string;
 }
 
 export interface CambiarPoliticaCosteoInventarioRequest {
   metodo: MetodoCosteoInventario;
-  observacion?: string | null;
-}
-
-export interface PagedResult<T> {
-  items: T[];
-  total: number;
-  page: number;
-  pageSize: number;
+  motivo: string;
 }
