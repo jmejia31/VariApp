@@ -432,7 +432,11 @@ public sealed class OrdenCompraService : IOrdenCompraService
             Total = x.Total,
             Observacion = x.Observacion,
             ProductoSkuSnapshot = x.ProductoSkuSnapshot,
-            ProductoNombreSnapshot = x.ProductoNombreSnapshot
+            ProductoNombreSnapshot = x.ProductoNombreSnapshot,
+            ProductoMarcaSnapshot = x.ProductoMarcaSnapshot,
+            ProductoModeloSnapshot = x.ProductoModeloSnapshot,
+            ProductoColorSnapshot = x.ProductoColorSnapshot,
+            ProductoTallaSnapshot = x.ProductoTallaSnapshot
         }).ToList()
     };
 }
