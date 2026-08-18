@@ -60,4 +60,15 @@ public class N19SerieInventarioLifecycleRegressionTests
         Assert.Equal(8, serie.LoteInventarioId);
         Assert.Same(loteValido, serie.LoteInventario);
     }
+
+    [Fact]
+    public void Identidad_invalida_no_reemplaza_numero_serie_valido_preexistente()
+    {
+        var serie = new SerieInventario { ProductoVarianteId = 11 };
+        serie.ConfigurarIdentidad("SN-VALIDA");
+
+        Assert.Throws<InvalidOperationException>(() => serie.ConfigurarIdentidad(new string('X', 121)));
+
+        Assert.Equal("SN-VALIDA", serie.NumeroSerie);
+    }
 }
