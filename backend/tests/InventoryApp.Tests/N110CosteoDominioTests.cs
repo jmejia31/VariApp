@@ -1,3 +1,4 @@
+using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Enums;
 using InventoryApp.Domain.ValueObjects;
 using Xunit;
@@ -59,5 +60,57 @@ public sealed class N110CosteoDominioTests
 
         Assert.Equal(56m, resultado.CostoTotal);
         Assert.Equal(11.2m, resultado.CostoUnitarioPromedio);
+    }
+
+    [Fact]
+    public void Politica_es_version_temporal_y_no_se_puede_cerrar_dos_veces()
+    {
+        var inicio = new DateTime(2026, 8, 17, 20, 0, 0, DateTimeKind.Utc);
+        var politica = PoliticaCosteoInventario.Crear(
+            1,
+            MetodoCosteoInventario.PromedioPonderado,
+            inicio,
+            "Cutover N1.10");
+
+        politica.Cerrar(inicio.AddHours(1));
+
+        Assert.False(politica.EstaVigente);
+        Assert.Equal(inicio.AddHours(1), politica.VigenteHastaUtc);
+        Assert.Throws<InvalidOperationException>(() => politica.Cerrar(inicio.AddHours(2)));
+    }
+
+    [Fact]
+    public void CapaFifo_consume_y_restaura_sin_superar_saldo_original()
+    {
+        var fecha = new DateTime(2026, 8, 17, 20, 0, 0, DateTimeKind.Utc);
+        var capa = CapaCostoInventario.Crear(
+            productoVarianteId: 10,
+            almacenId: 2,
+            ubicacionAlmacenId: 4,
+            movimientoInventarioOrigenId: 99,
+            cantidad: 8,
+            costoUnitario: 25m,
+            fechaOrigenUtc: fecha,
+            correlationId: "n110-fifo-99");
+
+        capa.Consumir(3);
+        Assert.Equal(5, capa.CantidadRestante);
+        Assert.Equal(125m, capa.ValorRestante);
+
+        capa.Restaurar(2);
+        Assert.Equal(7, capa.CantidadRestante);
+        Assert.Throws<InvalidOperationException>(() => capa.Restaurar(2));
+    }
+
+    [Fact]
+    public void CostoEstandar_calcula_variacion_sin_perder_costo_real()
+    {
+        var fecha = new DateTime(2026, 8, 17, 20, 0, 0, DateTimeKind.Utc);
+        var estandar = CostoEstandarInventario.Crear(10, 100m, fecha, "Costo estándar inicial");
+
+        var variacion = estandar.CalcularVariacion(costoRealUnitario: 110m, cantidad: 3);
+
+        Assert.Equal(30m, variacion);
+        Assert.True(estandar.EstaVigente);
     }
 }
