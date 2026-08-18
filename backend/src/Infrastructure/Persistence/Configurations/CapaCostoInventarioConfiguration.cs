@@ -38,6 +38,8 @@ public sealed class CapaCostoInventarioConfiguration : IEntityTypeConfiguration<
             .HasDatabaseName("IX_CapasCosto_MovimientoOrigen");
         builder.HasIndex(x => new { x.ProductoVarianteId, x.CapaCostoOrigenId })
             .HasDatabaseName("IX_CapasCosto_Linaje");
+        builder.HasIndex(x => new { x.AlmacenId, x.UbicacionAlmacenId })
+            .HasDatabaseName("IX_CapasCosto_Almacen_Ubicacion");
 
         builder.HasOne<ProductoVariante>()
             .WithMany()

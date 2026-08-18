@@ -4,8 +4,9 @@ using InventoryApp.Domain.Enums;
 namespace InventoryApp.Domain.Entities;
 
 /// <summary>
-/// Evidencia inmutable del costo atribuido a un movimiento confirmado. Para FIFO
-/// referencia la capa consumida; para Promedio/Estándar la capa puede ser nula.
+/// Evidencia inmutable del costo atribuido a un movimiento confirmado. FIFO
+/// referencia la capa consumida; Promedio/Estándar no pueden apropiarse de una
+/// capa contable FIFO.
 /// </summary>
 public sealed class AsignacionCostoMovimientoInventario : AuditableEntity
 {
@@ -48,6 +49,8 @@ public sealed class AsignacionCostoMovimientoInventario : AuditableEntity
             throw new ArgumentOutOfRangeException(nameof(capaCostoInventarioId));
         if (metodo == MetodoCosteoInventario.FIFO && !capaCostoInventarioId.HasValue)
             throw new ArgumentException("Una asignación FIFO debe identificar la capa consumida.", nameof(capaCostoInventarioId));
+        if (metodo != MetodoCosteoInventario.FIFO && capaCostoInventarioId.HasValue)
+            throw new ArgumentException("Sólo FIFO puede referenciar una capa de costo.", nameof(capaCostoInventarioId));
 
         return new AsignacionCostoMovimientoInventario
         {
