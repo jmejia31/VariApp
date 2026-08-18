@@ -43,4 +43,21 @@ public class N19SerieInventarioLifecycleRegressionTests
         Assert.Throws<InvalidOperationException>(() => serie.DarDeBaja());
         Assert.Equal(EstadoSerieInventario.Baja, serie.Estado);
     }
+
+    [Fact]
+    public void Vinculo_de_lote_invalido_no_reemplaza_lote_valido_preexistente()
+    {
+        var serie = new SerieInventario { ProductoVarianteId = 11 };
+        serie.ConfigurarIdentidad("SN-LOTE-ATOMICIDAD");
+        var loteValido = new LoteInventario { Id = 8, ProductoVarianteId = 11 };
+        loteValido.ConfigurarIdentidad("L-11", null, null, false);
+        serie.VincularLote(loteValido);
+
+        var loteAjeno = new LoteInventario { Id = 9, ProductoVarianteId = 12 };
+        loteAjeno.ConfigurarIdentidad("L-12", null, null, false);
+
+        Assert.Throws<InvalidOperationException>(() => serie.VincularLote(loteAjeno));
+        Assert.Equal(8, serie.LoteInventarioId);
+        Assert.Same(loteValido, serie.LoteInventario);
+    }
 }
