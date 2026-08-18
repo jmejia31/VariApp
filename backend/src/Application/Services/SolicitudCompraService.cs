@@ -2,23 +2,29 @@ using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities;
+using InventoryApp.Domain.Enums;
 
 namespace InventoryApp.Application.Services;
 
 public sealed class SolicitudCompraService : ISolicitudCompraService
 {
+    private const string EntidadAuditoria = "SolicitudCompra";
+
     private readonly ISolicitudCompraRepository _repository;
     private readonly ICurrentUserService _currentUser;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IAuditoriaService _auditoria;
 
     public SolicitudCompraService(
         ISolicitudCompraRepository repository,
         ICurrentUserService currentUser,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        IAuditoriaService auditoria)
     {
         _repository = repository;
         _currentUser = currentUser;
         _unitOfWork = unitOfWork;
+        _auditoria = auditoria;
     }
 
     public async Task<PagedResult<SolicitudCompraDto>> GetPagedAsync(SolicitudCompraFiltroDto filtro)
@@ -59,8 +65,18 @@ public sealed class SolicitudCompraService : ISolicitudCompraService
             Detalles = dto.Detalles.Select(CrearDetalle).ToList()
         };
         solicitud.ValidarDocumento();
-        await _repository.AddAsync(solicitud);
-        await _repository.SaveChangesAsync();
+
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            await _repository.AddAsync(solicitud);
+            await _repository.SaveChangesAsync();
+            await RegistrarAuditoriaEstrictoAsync(
+                AccionPermiso.Crear,
+                "Solicitud de compra creada",
+                solicitud,
+                valoresNuevos: SnapshotAuditoria(solicitud));
+        });
+
         return Map(solicitud);
     }
 
@@ -80,6 +96,8 @@ public sealed class SolicitudCompraService : ISolicitudCompraService
         {
             var solicitud = await RequerirForUpdateAsync(id);
             solicitud.AsegurarEditable();
+            var anterior = SnapshotAuditoria(solicitud);
+
             solicitud.ProveedorId = dto.ProveedorId;
             solicitud.Notas = Normalizar(dto.Notas);
             solicitud.Detalles.Clear();
@@ -87,6 +105,12 @@ public sealed class SolicitudCompraService : ISolicitudCompraService
             solicitud.ValidarDocumento();
 
             await _repository.SaveChangesAsync();
+            await RegistrarAuditoriaEstrictoAsync(
+                AccionPermiso.Editar,
+                "Solicitud de compra editada",
+                solicitud,
+                anterior,
+                SnapshotAuditoria(solicitud));
             resultado = solicitud;
         });
 
@@ -102,8 +126,15 @@ public sealed class SolicitudCompraService : ISolicitudCompraService
         await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
             var solicitud = await RequerirForUpdateAsync(id);
+            var anterior = SnapshotAuditoria(solicitud);
             solicitud.Solicitar(usuarioId, nombre, DateTime.UtcNow);
             await _repository.SaveChangesAsync();
+            await RegistrarAuditoriaEstrictoAsync(
+                AccionPermiso.Confirmar,
+                "Solicitud de compra enviada a aprobación",
+                solicitud,
+                anterior,
+                SnapshotAuditoria(solicitud));
             resultado = solicitud;
         });
 
@@ -119,8 +150,15 @@ public sealed class SolicitudCompraService : ISolicitudCompraService
         await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
             var solicitud = await RequerirForUpdateAsync(id);
+            var anterior = SnapshotAuditoria(solicitud);
             solicitud.Aprobar(usuarioId, nombre, DateTime.UtcNow);
             await _repository.SaveChangesAsync();
+            await RegistrarAuditoriaEstrictoAsync(
+                AccionPermiso.Aprobar,
+                "Solicitud de compra aprobada",
+                solicitud,
+                anterior,
+                SnapshotAuditoria(solicitud));
             resultado = solicitud;
         });
 
@@ -131,7 +169,8 @@ public sealed class SolicitudCompraService : ISolicitudCompraService
     {
         ArgumentNullException.ThrowIfNull(dto);
         ValidarId(id);
-        if (string.IsNullOrWhiteSpace(dto.Motivo))
+        var motivo = Normalizar(dto.Motivo);
+        if (motivo is null)
             throw new ArgumentException("El motivo de rechazo es obligatorio.", nameof(dto));
 
         var (usuarioId, nombre) = RequerirUsuario();
@@ -140,13 +179,53 @@ public sealed class SolicitudCompraService : ISolicitudCompraService
         await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
             var solicitud = await RequerirForUpdateAsync(id);
-            solicitud.Rechazar(usuarioId, nombre, dto.Motivo, DateTime.UtcNow);
+            var anterior = SnapshotAuditoria(solicitud);
+            solicitud.Rechazar(usuarioId, nombre, motivo, DateTime.UtcNow);
             await _repository.SaveChangesAsync();
+            await RegistrarAuditoriaEstrictoAsync(
+                AccionPermiso.Rechazar,
+                "Solicitud de compra rechazada",
+                solicitud,
+                anterior,
+                SnapshotAuditoria(solicitud),
+                motivo);
             resultado = solicitud;
         });
 
         return Map(resultado!);
     }
+
+    private Task RegistrarAuditoriaEstrictoAsync(
+        AccionPermiso accion,
+        string descripcion,
+        SolicitudCompra solicitud,
+        object? valoresAnteriores = null,
+        object? valoresNuevos = null,
+        string? motivo = null) =>
+        _auditoria.RegistrarEstrictoAsync(
+            ModuloSistema.Compras,
+            accion,
+            descripcion,
+            referenciaId: solicitud.Id,
+            entidad: EntidadAuditoria,
+            valoresAnteriores: valoresAnteriores,
+            valoresNuevos: valoresNuevos,
+            motivo: motivo);
+
+    // La bitácora conserva únicamente metadatos necesarios para reconstruir el
+    // lifecycle. Notas y observaciones libres se excluyen para no replicar texto
+    // potencialmente sensible en el subsistema de auditoría.
+    private static object SnapshotAuditoria(SolicitudCompra solicitud) => new
+    {
+        solicitud.NumeroSolicitud,
+        Estado = solicitud.Estado.ToString(),
+        solicitud.ProveedorId,
+        Lineas = solicitud.Detalles.Count,
+        solicitud.FechaSolicitudUtc,
+        solicitud.SolicitadaPorUsuarioId,
+        solicitud.FechaDecisionUtc,
+        solicitud.DecididaPorUsuarioId
+    };
 
     private async Task<SolicitudCompra> RequerirForUpdateAsync(int id) =>
         await _repository.GetByIdForUpdateAsync(id)
