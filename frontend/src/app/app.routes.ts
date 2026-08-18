@@ -275,6 +275,12 @@ export const routes: Routes = [
     loadComponent: () => import('./features/solicitudes-compra/solicitudes-compra-shell.component').then(m => m.SolicitudesCompraShellComponent)
   },
   {
+    path: 'ordenes-compra',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Compras', accion: 'Ver' },
+    loadComponent: () => import('./features/ordenes-compra/ordenes-compra-shell.component').then(m => m.OrdenesCompraShellComponent)
+  },
+  {
     path: 'compras',
     canActivate: [authGuard, permisoGuard],
     data: { modulo: 'Compras', accion: 'Ver' },
