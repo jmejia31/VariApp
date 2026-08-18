@@ -189,9 +189,9 @@ ERP-N0.5, ERP-N0.6, ERP-N0.7 y ERP-N0.8 están formalmente cerrados. `GATE-N0=LI
 - [x] N1.9.E Frontend/UX — configuración por variante, captura/listado de lotes y series, vencimiento y navegación protegida por RBAC.
 - [x] N1.9.F RBAC/auditoría/seguridad/observabilidad — permisos relacionales, auditoría estricta/idempotente y hardening HTTP/RBAC; baseline final del punto `48f301dc4eb28951ee03c69874450a8e962104c1`.
 - [x] N1.9.G QA/regresión/CI — regresión integral de lote/serie/vencimiento cerrada; baseline `4b5a5c9a8b495fcef62464bf50010ac69117fe48`, con Development/Fase8/M10/M13 verdes.
-- [ ] N1.9.H Documentación/certificación — paquete documental publicado hasta `7bc4b7935cc92e15d24f90a79f3915ab14e2d243`; Development `32089179243`, Fase8 `32089179144`, M10 `32089179156` y Acceptance `32089179228` ya SUCCESS. Falta reconciliar M13 `32089179175`, actualizar `CHANGELOG_AI.md` y cerrar formalmente H en VAEP.
+- [x] N1.9.H Documentación/certificación — paquete canónico de documentación, ADR/ERD/runbooks/OpenAPI y matriz de certificación completado; baseline documental `7bc4b7935cc92e15d24f90a79f3915ab14e2d243` certificado con Development `32089179243`, Acceptance `32089179228`, Fase8 `32089179144`, M10 `32089179156` y M13 `32089179175` SUCCESS. `CHANGELOG_AI.md`, certificado y tablero VAEP reconciliados mediante commits documentales `[skip ci]` posteriores.
 
-**ERP-N1.9 permanece abierto únicamente en N1.9.H hasta completar el gate M13 y el cierre colaborativo.**
+**ERP-N1.9 queda formalmente cerrado. Siguiente foco VAEP: `N1.10.A`, sujeto a dependencia/elegibilidad confirmada en COLA.**
 
 ## Fuentes VAEP v2
 
