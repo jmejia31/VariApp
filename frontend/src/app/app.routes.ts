@@ -340,6 +340,12 @@ export const routes: Routes = [
     data: { modulo: 'MovimientosInventario', accion: 'Ver' },
     loadComponent: () => import('./features/inventario/movimientos-list.component').then(m => m.MovimientosListComponent)
   },
+  {
+    path: 'inventario/costeo',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'MovimientosInventario', accion: 'Ver' },
+    loadComponent: () => import('./features/inventario/costeo-inventario.component').then(m => m.CosteoInventarioComponent)
+  },
   ...AJUSTES_INVENTARIO_ROUTES,
   {
     path: 'configuracion',
