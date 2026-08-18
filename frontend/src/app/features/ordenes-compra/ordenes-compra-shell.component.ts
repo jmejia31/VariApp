@@ -10,7 +10,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { finalize, Subscription } from 'rxjs';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
-import { EstadoOrdenCompra, OrdenCompra } from '../../core/models/orden-compra.model';
+import { EstadoOrdenCompra, EstadoOrdenCompraNombre, OrdenCompra } from '../../core/models/orden-compra.model';
 import { Proveedor } from '../../core/models/proveedor.model';
 import { OrdenCompraService } from '../../services/orden-compra.service';
 import { ProveedorService } from '../../services/proveedor.service';
@@ -201,11 +201,11 @@ export class OrdenesCompraShellComponent implements OnInit, OnDestroy {
   readonly detalleLoading = signal(false);
   readonly detalleError = signal<string | null>(null);
 
-  readonly estados: EstadoOrdenCompra[] = ['Borrador', 'PendienteAprobacion', 'Aprobada', 'Cancelada'];
+  readonly estados: EstadoOrdenCompraNombre[] = ['Borrador', 'PendienteAprobacion', 'Aprobada', 'Cancelada'];
   page = 1;
   pageSize = 10;
   numero = '';
-  estado: EstadoOrdenCompra | '' = '';
+  estado: EstadoOrdenCompraNombre | '' = '';
   proveedorId: number | null = null;
   desde = '';
   hasta = '';
@@ -331,7 +331,20 @@ export class OrdenesCompraShellComponent implements OnInit, OnDestroy {
   }
 
   etiquetaEstado(estado: EstadoOrdenCompra): string {
-    return estado === 'PendienteAprobacion' ? 'Pendiente de aprobación' : estado;
+    switch (estado) {
+      case 1:
+      case 'Borrador':
+        return 'Borrador';
+      case 2:
+      case 'PendienteAprobacion':
+        return 'Pendiente de aprobación';
+      case 3:
+      case 'Aprobada':
+        return 'Aprobada';
+      case 4:
+      case 'Cancelada':
+        return 'Cancelada';
+    }
   }
 
   descripcionVariante(linea: OrdenCompra['detalles'][number]): string {
