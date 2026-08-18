@@ -399,20 +399,20 @@ export class SolicitudesCompraShellComponent implements OnInit, OnDestroy {
       return null;
     }
 
-    const detalles = this.lineas.map((linea, index) => {
-      if (!linea.productoId) throw new Error(`Selecciona el producto de la línea ${index + 1}.`);
-      if (!Number.isFinite(linea.cantidadSolicitada) || linea.cantidadSolicitada <= 0) throw new Error(`La cantidad de la línea ${index + 1} debe ser mayor que cero.`);
-      if (linea.costoEstimadoUnitario != null && (!Number.isFinite(linea.costoEstimadoUnitario) || linea.costoEstimadoUnitario < 0)) throw new Error(`El costo estimado de la línea ${index + 1} no puede ser negativo.`);
-      return {
-        productoId: linea.productoId,
-        productoVarianteId: linea.productoVarianteId,
-        cantidadSolicitada: linea.cantidadSolicitada,
-        costoEstimadoUnitario: linea.costoEstimadoUnitario,
-        observacion: linea.observacion.trim() || null
-      };
-    });
-
     try {
+      const detalles = this.lineas.map((linea, index) => {
+        if (!linea.productoId) throw new Error(`Selecciona el producto de la línea ${index + 1}.`);
+        if (!Number.isFinite(linea.cantidadSolicitada) || linea.cantidadSolicitada <= 0) throw new Error(`La cantidad de la línea ${index + 1} debe ser mayor que cero.`);
+        if (linea.costoEstimadoUnitario != null && (!Number.isFinite(linea.costoEstimadoUnitario) || linea.costoEstimadoUnitario < 0)) throw new Error(`El costo estimado de la línea ${index + 1} no puede ser negativo.`);
+        return {
+          productoId: linea.productoId,
+          productoVarianteId: linea.productoVarianteId,
+          cantidadSolicitada: linea.cantidadSolicitada,
+          costoEstimadoUnitario: linea.costoEstimadoUnitario,
+          observacion: linea.observacion.trim() || null
+        };
+      });
+
       return {
         proveedorId: this.formProveedorId,
         notas: this.formNotas.trim() || null,
