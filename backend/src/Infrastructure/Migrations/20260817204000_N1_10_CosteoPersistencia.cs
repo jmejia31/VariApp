@@ -32,6 +32,33 @@ namespace InventoryApp.Infrastructure.Migrations
                   FROM information_schema.tables
                  WHERE table_schema = DATABASE()
                    AND table_name = 'EmpresaConfiguraciones';
+
+                -- Fresh install: Program.cs ejecuta MigrateAsync antes del seeding de aplicación.
+                -- Sólo una tabla absolutamente vacía puede recibir este bootstrap. Si existe
+                -- cualquier configuración previa (activa o inactiva), los guards de upgrade
+                -- permanecen fail-closed y exigen exactamente una activa.
+                INSERT INTO `EmpresaConfiguraciones`
+                    (`NombreComercial`,`Eslogan`,`NombreVisibleSistema`,`DescripcionSistema`,`MensajeLogin`,
+                     `Copyright`,`MostrarCopyright`,`UsarAnioAutomaticoCopyright`,`EncabezadoActivo`,`PiePaginaActivo`,
+                     `Moneda`,`ZonaHoraria`,`FormatoFecha`,`Activa`,`FechaActualizacion`)
+                SELECT
+                    'VariStorehn',
+                    'Eleva tu mundo digital',
+                    'VariStorehn',
+                    'Sistema integral de inventario y ventas',
+                    'Bienvenido a VariStorehn',
+                    'VariStorehn',
+                    1,
+                    1,
+                    1,
+                    1,
+                    'HNL',
+                    'America/Tegucigalpa',
+                    'dd/MM/yyyy',
+                    1,
+                    UTC_TIMESTAMP()
+                WHERE NOT EXISTS (SELECT 1 FROM `EmpresaConfiguraciones` LIMIT 1);
+
                 INSERT INTO __N110CGuard (Id, Violaciones)
                 SELECT 3, CASE WHEN COUNT(*) = 1 THEN 0 ELSE 1 END
                   FROM `EmpresaConfiguraciones`
