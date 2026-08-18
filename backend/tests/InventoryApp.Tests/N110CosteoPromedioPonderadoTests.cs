@@ -29,18 +29,16 @@ public sealed class N110CosteoPromedioPonderadoTests
         Assert.Equal(12.34m, costo);
     }
 
-    [Theory]
-    [InlineData(-1, 0, 1, 10)]
-    [InlineData(0, -1, 1, 10)]
-    [InlineData(0, 0, 0, 10)]
-    [InlineData(0, 0, 1, -1)]
-    public void Rechaza_entradas_invalidas(int stockAnterior, decimal costoAnterior, int cantidadEntrada, decimal valorEntrada)
+    [Fact]
+    public void Rechaza_entradas_invalidas()
     {
         Assert.Throws<ArgumentOutOfRangeException>(() =>
-            CosteoPromedioPonderado.CalcularCostoUnitario(
-                stockAnterior,
-                costoAnterior,
-                cantidadEntrada,
-                valorEntrada));
+            CosteoPromedioPonderado.CalcularCostoUnitario(-1, 0m, 1, 10m));
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            CosteoPromedioPonderado.CalcularCostoUnitario(0, -1m, 1, 10m));
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            CosteoPromedioPonderado.CalcularCostoUnitario(0, 0m, 0, 10m));
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            CosteoPromedioPonderado.CalcularCostoUnitario(0, 0m, 1, -1m));
     }
 }
