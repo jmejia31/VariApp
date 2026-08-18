@@ -17,9 +17,16 @@ public sealed class N110CosteoPersistenciaModelTests
         using var db = new AppDbContext(options);
         var model = db.Model;
 
+        var empresaConfiguracion = model.FindEntityType(typeof(EmpresaConfiguracion));
+        Assert.NotNull(empresaConfiguracion);
+        Assert.Equal("EmpresaConfiguraciones", empresaConfiguracion!.GetTableName());
+
         var politica = model.FindEntityType(typeof(PoliticaCosteoInventario));
         Assert.NotNull(politica);
         Assert.Equal("PoliticasCosteoInventario", politica!.GetTableName());
+        Assert.Contains(politica.GetForeignKeys(), fk =>
+            fk.PrincipalEntityType.ClrType == typeof(EmpresaConfiguracion) &&
+            fk.PrincipalEntityType.GetTableName() == "EmpresaConfiguraciones");
         Assert.Contains(politica.GetIndexes(), i =>
             i.IsUnique && i.Properties.Any(p => p.Name == "EmpresaConfiguracionVigenteId"));
 
