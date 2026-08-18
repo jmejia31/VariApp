@@ -16,13 +16,25 @@ public sealed class PoliticaCosteoInventarioRepository : IPoliticaCosteoInventar
         _context = context ?? throw new ArgumentNullException(nameof(context));
     }
 
-    public Task<PoliticaCosteoInventario?> GetVigenteAsync(int empresaConfiguracionId, bool tracking = false)
+    public async Task<PoliticaCosteoInventario?> GetVigenteAsync(int empresaConfiguracionId, bool tracking = false)
     {
         if (empresaConfiguracionId <= 0)
-            return Task.FromResult<PoliticaCosteoInventario?>(null);
+            return null;
+
+        if (tracking && _context.Database.IsRelational())
+        {
+            // La columna computada forma parte del índice UNIQUE de la política vigente.
+            // Bloquear esa clave serializa cambios concurrentes y evita que la API dependa
+            // de una colisión de índice como mecanismo normal de concurrencia.
+            var bloqueadas = await Politicas
+                .FromSqlInterpolated($"SELECT * FROM `PoliticasCosteoInventario` WHERE `EmpresaConfiguracionVigenteId` = {empresaConfiguracionId} FOR UPDATE")
+                .AsTracking()
+                .ToListAsync();
+            return bloqueadas.SingleOrDefault();
+        }
 
         var query = tracking ? Politicas.AsTracking() : Politicas.AsNoTracking();
-        return query.SingleOrDefaultAsync(x =>
+        return await query.SingleOrDefaultAsync(x =>
             x.EmpresaConfiguracionId == empresaConfiguracionId && x.VigenteHastaUtc == null);
     }
 
