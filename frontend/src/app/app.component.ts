@@ -83,6 +83,7 @@ import { SessionActivityService } from './core/auth/session-activity.service';
               <a routerLink="/inventario/transferencias" routerLinkActive="active" ariaCurrentWhenActive="page"><mat-icon>swap_horiz</mat-icon> Transferencias</a>
               <a routerLink="/inventario/conteos" routerLinkActive="active" ariaCurrentWhenActive="page"><mat-icon>fact_check</mat-icon> Conteos físicos</a>
               <a routerLink="/inventario/reservas" routerLinkActive="active" ariaCurrentWhenActive="page"><mat-icon>event_available</mat-icon> Reservas</a>
+              <a routerLink="/inventario/costeo" routerLinkActive="active" ariaCurrentWhenActive="page"><mat-icon>calculate</mat-icon> Costeo</a>
             }
             @if (permisosRuntime.puede('Inventario', 'Ver')) {
               <a routerLink="/inventario/ajustes" routerLinkActive="active" ariaCurrentWhenActive="page"><mat-icon>tune</mat-icon> Ajustes de inventario</a>
