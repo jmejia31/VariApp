@@ -99,7 +99,13 @@ public sealed class N110PoliticaCosteoInventarioApplicationTests
         empresas.Setup(x => x.GetActivaAsync()).ReturnsAsync((EmpresaConfiguracion?)null);
         var currentUser = new Mock<ICurrentUserService>();
         var unitOfWork = new Mock<IUnitOfWork>();
-        var service = new PoliticaCosteoInventarioService(repository.Object, empresas.Object, currentUser.Object, unitOfWork.Object);
+        var auditoria = CrearAuditoria();
+        var service = new PoliticaCosteoInventarioService(
+            repository.Object,
+            empresas.Object,
+            currentUser.Object,
+            unitOfWork.Object,
+            auditoria.Object);
 
         await Assert.ThrowsAsync<BusinessRuleException>(() => service.GetVigenteAsync());
         repository.Verify(x => x.GetVigenteAsync(It.IsAny<int>(), It.IsAny<bool>()), Times.Never);
@@ -146,10 +152,36 @@ public sealed class N110PoliticaCosteoInventarioApplicationTests
             .Setup(x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()))
             .Returns<Func<Task>>(operation => operation());
 
+        var auditoria = CrearAuditoria();
+
         return (
-            new PoliticaCosteoInventarioService(repository.Object, empresas.Object, currentUser.Object, unitOfWork.Object),
+            new PoliticaCosteoInventarioService(
+                repository.Object,
+                empresas.Object,
+                currentUser.Object,
+                unitOfWork.Object,
+                auditoria.Object),
             repository,
             capturada);
+    }
+
+    private static Mock<IAuditoriaService> CrearAuditoria()
+    {
+        var auditoria = new Mock<IAuditoriaService>();
+        auditoria
+            .Setup(x => x.RegistrarEstrictoAsync(
+                It.IsAny<ModuloSistema>(),
+                It.IsAny<AccionPermiso>(),
+                It.IsAny<string>(),
+                It.IsAny<int?>(),
+                It.IsAny<string?>(),
+                It.IsAny<object?>(),
+                It.IsAny<object?>(),
+                It.IsAny<string?>(),
+                It.IsAny<string>(),
+                It.IsAny<string?>()))
+            .Returns(Task.CompletedTask);
+        return auditoria;
     }
 
     private sealed class CapturaPolitica
