@@ -60,7 +60,7 @@ test.describe('Costeo de inventario - acceso', () => {
     await expect(page).toHaveURL(/\/inventario\/costeo(?:\?|$)/);
     await expect(page.getByRole('heading', { name: 'Política de costeo' })).toBeVisible();
     await expect(page.getByText('Promedio Ponderado', { exact: true }).first()).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Cambiar política' })).toHaveCount(0);
+    await expect(page.locator('mat-card-title').filter({ hasText: /^Cambiar política$/ })).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Aplicar política' })).toHaveCount(0);
   });
 });
