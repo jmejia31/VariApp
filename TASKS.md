@@ -191,7 +191,33 @@ ERP-N0.5, ERP-N0.6, ERP-N0.7 y ERP-N0.8 están formalmente cerrados. `GATE-N0=LI
 - [x] N1.9.G QA/regresión/CI — regresión integral de lote/serie/vencimiento cerrada; baseline `4b5a5c9a8b495fcef62464bf50010ac69117fe48`, con Development/Fase8/M10/M13 verdes.
 - [x] N1.9.H Documentación/certificación — paquete canónico de documentación, ADR/ERD/runbooks/OpenAPI y matriz de certificación completado; baseline documental `7bc4b7935cc92e15d24f90a79f3915ab14e2d243` certificado con Development `32089179243`, Acceptance `32089179228`, Fase8 `32089179144`, M10 `32089179156` y M13 `32089179175` SUCCESS. `CHANGELOG_AI.md`, certificado y tablero VAEP reconciliados mediante commits documentales `[skip ci]` posteriores.
 
-**ERP-N1.9 queda formalmente cerrado. Siguiente foco VAEP: `N1.10.A`, sujeto a dependencia/elegibilidad confirmada en COLA.**
+**ERP-N1.9 queda formalmente cerrado.**
+
+## ERP-N1.10 — Costeo empresarial
+
+- [x] N1.10.A Auditoría y preflight — alcance, autoridad de costo, riesgos de cutover, compatibilidad histórica, rollback y matriz de validación certificados.
+- [x] N1.10.B Dominio y contratos — política de costeo empresarial y contratos normalizados definidos sin romper históricos.
+- [x] N1.10.C Persistencia/migración/datos — esquema, índices, snapshots/cutover y controles de integridad certificados.
+- [x] N1.10.D Aplicación/servicios/API — cálculo y consulta de costos bajo transacción, locks y paginación/filtros empresariales.
+- [x] N1.10.E Frontend/UX — política e historial de costeo integrados con permisos, responsive y regresión E2E.
+- [x] N1.10.F RBAC/auditoría/seguridad/observabilidad — autorización relacional, auditoría crítica y hardening transversal certificados.
+- [x] N1.10.G QA/regresión/CI — baseline `142435e063767e6106bdc8dad2ccb9dd7645f137`; Development `32134812652`, Fase 8 `32134812633`, M10 `32134812567`, Acceptance `32134812695`, M13 `32134812757` y recovery MySQL `32134812773` SUCCESS.
+- [x] N1.10.H Documentación/certificación — fuente canónica `docs/CERTIFICACION_N1_10_COSTEO.md`; punto formalmente cerrado y gap histórico de tablero N1.9.F→N1.10.F reconciliado contra evidencia real.
+
+**ERP-N1.10 queda formalmente cerrado.**
+
+## ERP-N2.1 — Solicitud de compra
+
+- [x] N2.1.A Auditoría y preflight — documento independiente, lifecycle y límites de no-inventario definidos; evidencia `13ea9a853885e1242d6511cdeadfa722726e4aff`.
+- [x] N2.1.B Dominio y contratos — agregado `SolicitudCompra`, estados y DTOs; evidencia `464a7bf0ddc410dc95810b1ee9cc4c762fc523d4`.
+- [x] N2.1.C Persistencia/migración/datos — esquema relacional, detalles, integridad y snapshot EF certificados; evidencia `5aaab004f9e56f79d4e2fa0580c5bca9687e8519`.
+- [x] N2.1.D Aplicación/servicios/API — CRUD/transiciones, filtros/paginación y decisiones serializadas con transacción + `FOR UPDATE`; cierre `01770a23cbf9a50e7d21a0a7913f32e31ce6070a`.
+- [x] N2.1.E Frontend/UX — contrato/ruta `f52f9f746427d18675073ba769c2a78c2f13d900`, listado/detalle `112ef6b8660fb12c80d6981eac81b55f6c32bdec` y flujo formulario/transiciones cerrado hasta `07275df6af316aff83f250c6cf9d9b1b1ad335d3`.
+- [x] N2.1.F RBAC/auditoría/seguridad/observabilidad — grants relacionales sin bypass de administrador, auditoría estricta transaccional y correlation-id seguro; cierres `d3f039efafe0bf7ccfd487ba4ca7c66e07625fc3`, `adea50ac65bacceff42cd23c110afea77817ca44` y `12b26459004dc01a17b5b2af4602dbb906470bae`.
+- [x] N2.1.G QA/regresión/CI — baseline `a1a6f699cbad0186d0e0d7d7ac7f366c51009f7c`; CI `32172981351` SUCCESS, incluido frontend, backend, MySQL y 994/994 pruebas backend.
+- [x] N2.1.H Documentación/certificación — ADR, documento canónico y runbook publicados en `d8760bff2e9322e6f09612f64a89c2de888aa9d8`; `TASKS.md`, `CHANGELOG_AI.md` y VAEP reconciliados en el changeset de cierre.
+
+**ERP-N2.1 queda formalmente cerrado. Siguiente foco FINISH_FIRST: `N2.2.A — Orden de compra — Auditoría y preflight`.**
 
 ## Fuentes VAEP v2
 
