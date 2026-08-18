@@ -5,6 +5,8 @@ namespace InventoryApp.Domain.Entities;
 
 public class SerieInventario : AuditableEntity
 {
+    private const int NumeroSerieMaxLength = 120;
+
     public int ProductoVarianteId { get; set; }
     public ProductoVariante ProductoVariante { get; set; } = null!;
     public int? LoteInventarioId { get; set; }
@@ -16,7 +18,12 @@ public class SerieInventario : AuditableEntity
     {
         if (ProductoVarianteId <= 0) throw new InvalidOperationException("La variante es obligatoria para identificar una serie.");
         if (string.IsNullOrWhiteSpace(numeroSerie)) throw new ArgumentException("El número de serie es obligatorio.", nameof(numeroSerie));
-        NumeroSerie = numeroSerie.Trim().ToUpperInvariant();
+
+        var numeroNormalizado = numeroSerie.Trim().ToUpperInvariant();
+        if (numeroNormalizado.Length > NumeroSerieMaxLength)
+            throw new InvalidOperationException($"El número de serie no puede superar {NumeroSerieMaxLength} caracteres.");
+
+        NumeroSerie = numeroNormalizado;
     }
 
     public void VincularLote(LoteInventario lote)
