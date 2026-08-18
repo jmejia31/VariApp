@@ -31,11 +31,11 @@ namespace InventoryApp.Infrastructure.Migrations
                 SELECT 2, CASE WHEN COUNT(*) = 1 THEN 0 ELSE 1 END
                   FROM information_schema.tables
                  WHERE table_schema = DATABASE()
-                   AND table_name = 'EmpresaConfiguracion';
+                   AND table_name = 'EmpresaConfiguraciones';
                 INSERT INTO __N110CGuard (Id, Violaciones)
                 SELECT 3, CASE WHEN COUNT(*) = 1 THEN 0 ELSE 1 END
-                  FROM `EmpresaConfiguracion`
-                 WHERE `Activo` = 1;
+                  FROM `EmpresaConfiguraciones`
+                 WHERE `Activa` = 1;
                 DROP TEMPORARY TABLE __N110CGuard;
                 """);
 
@@ -63,7 +63,7 @@ namespace InventoryApp.Infrastructure.Migrations
                     table.PrimaryKey("PK_PoliticasCosteoInventario", x => x.Id);
                     table.CheckConstraint("CK_PoliticasCosteo_Metodo", "`Metodo` IN (1,2,3)");
                     table.CheckConstraint("CK_PoliticasCosteo_Vigencia", "`VigenteHastaUtc` IS NULL OR `VigenteHastaUtc` > `VigenteDesdeUtc`");
-                    table.ForeignKey("FK_PoliticasCosteo_EmpresaConfiguracion", x => x.EmpresaConfiguracionId, "EmpresaConfiguracion", "Id", onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey("FK_PoliticasCosteo_EmpresaConfiguracion", x => x.EmpresaConfiguracionId, "EmpresaConfiguraciones", "Id", onDelete: ReferentialAction.Restrict);
                 }).Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
@@ -214,8 +214,8 @@ namespace InventoryApp.Infrastructure.Migrations
                     (`EmpresaConfiguracionId`,`Metodo`,`VigenteDesdeUtc`,`VigenteHastaUtc`,`Motivo`,`FechaCreacion`,`FechaActualizacion`)
                 SELECT `Id`, 1, UTC_TIMESTAMP(6), NULL,
                        'Cutover ERP-N1.10 — Promedio Ponderado compatible', UTC_TIMESTAMP(6), UTC_TIMESTAMP(6)
-                  FROM `EmpresaConfiguracion`
-                 WHERE `Activo` = 1;
+                  FROM `EmpresaConfiguraciones`
+                 WHERE `Activa` = 1;
 
                 DROP TEMPORARY TABLE IF EXISTS __N110CPostGuard;
                 CREATE TEMPORARY TABLE __N110CPostGuard
