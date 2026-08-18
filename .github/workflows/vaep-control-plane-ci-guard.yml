@@ -1,0 +1,88 @@
+name: VAEP Control Plane CI Guard
+
+on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - 'vaep/jules/**'
+      - '.github/workflows/vaep-jules-*.yml'
+      - '.github/workflows/vaep-control-plane-ci-guard.yml'
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: vaep-control-plane-ci-guard-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  suppress-redundant-ci:
+    name: Cancelar CI redundante de commits Jules-only
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 2
+
+      - name: Clasificar último commit
+        id: classify
+        shell: bash
+        run: |
+          set -euo pipefail
+          changed="$(git diff-tree --no-commit-id --name-only -r HEAD)"
+          test -n "$changed"
+
+          control_plane=true
+          while IFS= read -r path; do
+            case "$path" in
+              vaep/jules/*|.github/workflows/vaep-jules-*.yml|.github/workflows/vaep-control-plane-ci-guard.yml)
+                ;;
+              *)
+                control_plane=false
+                break
+                ;;
+            esac
+          done <<< "$changed"
+
+          echo "control_plane=$control_plane" >> "$GITHUB_OUTPUT"
+          printf 'Último commit:\n%s\ncontrol_plane=%s\n' "$changed" "$control_plane"
+
+      - name: Cancelar ejecuciones redundantes del mismo HEAD
+        if: steps.classify.outputs.control_plane == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          head_sha="${{ github.event.pull_request.head.sha || github.sha }}"
+          current_run="$GITHUB_RUN_ID"
+
+          gh api --paginate \
+            -H 'Accept: application/vnd.github+json' \
+            "/repos/$GITHUB_REPOSITORY/actions/runs?head_sha=$head_sha&per_page=100" \
+            --jq '.workflow_runs[] | [.id, .name, .status] | @tsv' |
+          while IFS=$'\t' read -r run_id name status; do
+            [ "$run_id" = "$current_run" ] && continue
+            case "$name" in
+              'VAEP Jules Diagnostic'|'VAEP Jules Secondary'|'VAEP Control Plane CI Guard')
+                continue
+                ;;
+            esac
+            case "$status" in
+              queued|in_progress|requested|waiting|pending)
+                echo "Cancelando run redundante $run_id ($name, $status) para HEAD $head_sha"
+                gh api --method POST \
+                  -H 'Accept: application/vnd.github+json' \
+                  "/repos/$GITHUB_REPOSITORY/actions/runs/$run_id/cancel" >/dev/null || true
+                ;;
+            esac
+          done
+
+      - name: Preservar cobertura funcional
+        if: steps.classify.outputs.control_plane != 'true'
+        run: echo 'Commit funcional o mixto detectado; el guard no cancela ninguna validación.'
