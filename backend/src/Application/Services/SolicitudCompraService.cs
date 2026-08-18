@@ -9,11 +9,16 @@ public sealed class SolicitudCompraService : ISolicitudCompraService
 {
     private readonly ISolicitudCompraRepository _repository;
     private readonly ICurrentUserService _currentUser;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public SolicitudCompraService(ISolicitudCompraRepository repository, ICurrentUserService currentUser)
+    public SolicitudCompraService(
+        ISolicitudCompraRepository repository,
+        ICurrentUserService currentUser,
+        IUnitOfWork unitOfWork)
     {
         _repository = repository;
         _currentUser = currentUser;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<PagedResult<SolicitudCompraDto>> GetPagedAsync(SolicitudCompraFiltroDto filtro)
@@ -62,61 +67,94 @@ public sealed class SolicitudCompraService : ISolicitudCompraService
     public async Task<SolicitudCompraDto> UpdateAsync(int id, UpdateSolicitudCompraDto dto)
     {
         ArgumentNullException.ThrowIfNull(dto);
+        ValidarId(id);
         ValidarDetalles(dto.Detalles);
-        var solicitud = await RequerirTrackingAsync(id);
-        solicitud.AsegurarEditable();
 
-        // Se valida todo el nuevo documento antes de reemplazar el detalle persistido,
-        // evitando mutaciones parciales cuando una línea posterior es inválida.
+        // Se valida todo el nuevo documento antes de abrir la transacción y antes
+        // de reemplazar el detalle persistido, evitando mutaciones parciales.
         var nuevosDetalles = dto.Detalles.Select(CrearDetalle).ToList();
         foreach (var detalle in nuevosDetalles) detalle.Validar();
 
-        solicitud.ProveedorId = dto.ProveedorId;
-        solicitud.Notas = Normalizar(dto.Notas);
-        solicitud.Detalles.Clear();
-        foreach (var detalle in nuevosDetalles) solicitud.Detalles.Add(detalle);
-        solicitud.ValidarDocumento();
+        SolicitudCompra? resultado = null;
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            var solicitud = await RequerirForUpdateAsync(id);
+            solicitud.AsegurarEditable();
+            solicitud.ProveedorId = dto.ProveedorId;
+            solicitud.Notas = Normalizar(dto.Notas);
+            solicitud.Detalles.Clear();
+            foreach (var detalle in nuevosDetalles) solicitud.Detalles.Add(detalle);
+            solicitud.ValidarDocumento();
 
-        await _repository.SaveChangesAsync();
-        return Map(solicitud);
+            await _repository.SaveChangesAsync();
+            resultado = solicitud;
+        });
+
+        return Map(resultado!);
     }
 
     public async Task<SolicitudCompraDto> EnviarAsync(int id)
     {
-        var solicitud = await RequerirTrackingAsync(id);
+        ValidarId(id);
         var (usuarioId, nombre) = RequerirUsuario();
-        solicitud.Solicitar(usuarioId, nombre, DateTime.UtcNow);
-        await _repository.SaveChangesAsync();
-        return Map(solicitud);
+        SolicitudCompra? resultado = null;
+
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            var solicitud = await RequerirForUpdateAsync(id);
+            solicitud.Solicitar(usuarioId, nombre, DateTime.UtcNow);
+            await _repository.SaveChangesAsync();
+            resultado = solicitud;
+        });
+
+        return Map(resultado!);
     }
 
     public async Task<SolicitudCompraDto> AprobarAsync(int id)
     {
-        var solicitud = await RequerirTrackingAsync(id);
+        ValidarId(id);
         var (usuarioId, nombre) = RequerirUsuario();
-        solicitud.Aprobar(usuarioId, nombre, DateTime.UtcNow);
-        await _repository.SaveChangesAsync();
-        return Map(solicitud);
+        SolicitudCompra? resultado = null;
+
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            var solicitud = await RequerirForUpdateAsync(id);
+            solicitud.Aprobar(usuarioId, nombre, DateTime.UtcNow);
+            await _repository.SaveChangesAsync();
+            resultado = solicitud;
+        });
+
+        return Map(resultado!);
     }
 
     public async Task<SolicitudCompraDto> RechazarAsync(int id, RechazarSolicitudCompraDto dto)
     {
         ArgumentNullException.ThrowIfNull(dto);
+        ValidarId(id);
         if (string.IsNullOrWhiteSpace(dto.Motivo))
             throw new ArgumentException("El motivo de rechazo es obligatorio.", nameof(dto));
 
-        var solicitud = await RequerirTrackingAsync(id);
         var (usuarioId, nombre) = RequerirUsuario();
-        solicitud.Rechazar(usuarioId, nombre, dto.Motivo, DateTime.UtcNow);
-        await _repository.SaveChangesAsync();
-        return Map(solicitud);
+        SolicitudCompra? resultado = null;
+
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            var solicitud = await RequerirForUpdateAsync(id);
+            solicitud.Rechazar(usuarioId, nombre, dto.Motivo, DateTime.UtcNow);
+            await _repository.SaveChangesAsync();
+            resultado = solicitud;
+        });
+
+        return Map(resultado!);
     }
 
-    private async Task<SolicitudCompra> RequerirTrackingAsync(int id)
+    private async Task<SolicitudCompra> RequerirForUpdateAsync(int id) =>
+        await _repository.GetByIdForUpdateAsync(id)
+            ?? throw new KeyNotFoundException("Solicitud de compra no encontrada.");
+
+    private static void ValidarId(int id)
     {
         if (id <= 0) throw new ArgumentOutOfRangeException(nameof(id));
-        return await _repository.GetByIdAsync(id, tracking: true)
-            ?? throw new KeyNotFoundException("Solicitud de compra no encontrada.");
     }
 
     private (int UsuarioId, string? Nombre) RequerirUsuario()

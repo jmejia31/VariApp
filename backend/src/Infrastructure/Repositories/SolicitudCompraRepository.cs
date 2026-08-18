@@ -65,6 +65,30 @@ public sealed class SolicitudCompraRepository : ISolicitudCompraRepository
     public Task<SolicitudCompra?> GetByIdAsync(int id, bool tracking = false) =>
         ConDetalle(tracking).FirstOrDefaultAsync(x => x.Id == id);
 
+    public async Task<SolicitudCompra?> GetByIdForUpdateAsync(int id)
+    {
+        if (_context.Database.CurrentTransaction is null)
+            throw new InvalidOperationException("GetByIdForUpdateAsync requiere una transacción activa.");
+
+        var solicitud = await Solicitudes
+            .FromSqlInterpolated($"SELECT sc.* FROM SolicitudesCompra sc WHERE sc.Id = {id} FOR UPDATE")
+            .AsTracking()
+            .FirstOrDefaultAsync();
+
+        if (solicitud is not null)
+        {
+            await _context.Entry(solicitud).Reference(x => x.Proveedor).LoadAsync();
+            await _context.Entry(solicitud)
+                .Collection(x => x.Detalles)
+                .Query()
+                .Include(x => x.Producto)
+                .Include(x => x.ProductoVariante)
+                .LoadAsync();
+        }
+
+        return solicitud;
+    }
+
     public Task<bool> ExisteNumeroAsync(string numero, int? excluirId = null)
     {
         var normalizado = numero.Trim();
