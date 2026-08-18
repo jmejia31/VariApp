@@ -19,7 +19,7 @@ public sealed class N110PoliticaCosteoInventarioApplicationTests
             MetodoCosteoInventario.PromedioPonderado,
             DateTime.UtcNow.AddDays(-10),
             "Política inicial");
-        var (service, repository, _) = CrearServicio(vigente);
+        var (service, repository, _, auditoria) = CrearServicio(vigente);
 
         var result = await service.CambiarAsync(new CambiarPoliticaCosteoInventarioDto
         {
@@ -31,17 +31,28 @@ public sealed class N110PoliticaCosteoInventarioApplicationTests
         Assert.True(result.EstaVigente);
         repository.Verify(x => x.AddAsync(It.IsAny<PoliticaCosteoInventario>()), Times.Never);
         repository.Verify(x => x.SaveChangesAsync(), Times.Never);
+        auditoria.Verify(x => x.RegistrarEstrictoAsync(
+            It.IsAny<ModuloSistema>(),
+            It.IsAny<AccionPermiso>(),
+            It.IsAny<string>(),
+            It.IsAny<int?>(),
+            It.IsAny<string?>(),
+            It.IsAny<object?>(),
+            It.IsAny<object?>(),
+            It.IsAny<string?>(),
+            It.IsAny<string>(),
+            It.IsAny<string?>()), Times.Never);
     }
 
     [Fact]
-    public async Task Cambiar_metodo_cierra_vigente_y_abre_nueva_version_sin_reescribir_historia()
+    public async Task Cambiar_metodo_cierra_vigente_abre_version_y_audita_estrictamente()
     {
         var vigente = PoliticaCosteoInventario.Crear(
             1,
             MetodoCosteoInventario.PromedioPonderado,
             DateTime.UtcNow.AddDays(-10),
             "Política inicial");
-        var (service, repository, capturada) = CrearServicio(vigente);
+        var (service, repository, capturada, auditoria) = CrearServicio(vigente);
 
         var result = await service.CambiarAsync(new CambiarPoliticaCosteoInventarioDto
         {
@@ -56,12 +67,23 @@ public sealed class N110PoliticaCosteoInventarioApplicationTests
         Assert.True(capturada.Value.EstaVigente);
         repository.Verify(x => x.AddAsync(It.IsAny<PoliticaCosteoInventario>()), Times.Once);
         repository.Verify(x => x.SaveChangesAsync(), Times.Once);
+        auditoria.Verify(x => x.RegistrarEstrictoAsync(
+            ModuloSistema.MovimientosInventario,
+            AccionPermiso.Editar,
+            "Política de costeo de inventario actualizada.",
+            It.IsAny<int?>(),
+            "PoliticaCosteoInventario",
+            It.IsNotNull<object>(),
+            It.IsNotNull<object>(),
+            "Adopción FIFO empresarial",
+            It.IsAny<string>(),
+            It.IsAny<string?>()), Times.Once);
     }
 
     [Fact]
     public async Task Historial_rechaza_rango_invertido_antes_de_consultar_persistencia()
     {
-        var (service, repository, _) = CrearServicio(null);
+        var (service, repository, _, _) = CrearServicio(null);
 
         await Assert.ThrowsAsync<BusinessRuleException>(() => service.GetHistorialAsync(
             new PoliticaCosteoInventarioQueryDto
@@ -78,7 +100,7 @@ public sealed class N110PoliticaCosteoInventarioApplicationTests
     [Fact]
     public async Task Historial_rechaza_fechas_no_utc_antes_de_consultar_persistencia()
     {
-        var (service, repository, _) = CrearServicio(null);
+        var (service, repository, _, _) = CrearServicio(null);
 
         await Assert.ThrowsAsync<BusinessRuleException>(() => service.GetHistorialAsync(
             new PoliticaCosteoInventarioQueryDto
@@ -114,7 +136,7 @@ public sealed class N110PoliticaCosteoInventarioApplicationTests
     [Fact]
     public async Task Catalogo_expone_solo_los_tres_metodos_canonicos()
     {
-        var (service, _, _) = CrearServicio(null);
+        var (service, _, _, _) = CrearServicio(null);
 
         var metodos = await service.GetMetodosAsync();
 
@@ -127,7 +149,8 @@ public sealed class N110PoliticaCosteoInventarioApplicationTests
     private static (
         PoliticaCosteoInventarioService Service,
         Mock<IPoliticaCosteoInventarioRepository> Repository,
-        CapturaPolitica Capturada) CrearServicio(PoliticaCosteoInventario? vigente)
+        CapturaPolitica Capturada,
+        Mock<IAuditoriaService> Auditoria) CrearServicio(PoliticaCosteoInventario? vigente)
     {
         var repository = new Mock<IPoliticaCosteoInventarioRepository>();
         repository
@@ -162,7 +185,8 @@ public sealed class N110PoliticaCosteoInventarioApplicationTests
                 unitOfWork.Object,
                 auditoria.Object),
             repository,
-            capturada);
+            capturada,
+            auditoria);
     }
 
     private static Mock<IAuditoriaService> CrearAuditoria()
