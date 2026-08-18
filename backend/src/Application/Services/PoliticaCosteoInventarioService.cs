@@ -18,17 +18,20 @@ public sealed class PoliticaCosteoInventarioService : IPoliticaCosteoInventarioS
     private readonly IEmpresaConfiguracionRepository _empresas;
     private readonly ICurrentUserService _currentUser;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IAuditoriaService _auditoria;
 
     public PoliticaCosteoInventarioService(
         IPoliticaCosteoInventarioRepository repository,
         IEmpresaConfiguracionRepository empresas,
         ICurrentUserService currentUser,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        IAuditoriaService auditoria)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         _empresas = empresas ?? throw new ArgumentNullException(nameof(empresas));
         _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        _auditoria = auditoria ?? throw new ArgumentNullException(nameof(auditoria));
     }
 
     public async Task<PoliticaCosteoInventarioDto> GetVigenteAsync()
@@ -86,12 +89,23 @@ public sealed class PoliticaCosteoInventarioService : IPoliticaCosteoInventarioS
             var vigente = await _repository.GetVigenteAsync(empresa.Id, tracking: true);
 
             // Idempotencia semántica: solicitar de nuevo el método ya vigente no crea
-            // una versión histórica artificial ni modifica su motivo original.
+            // una versión histórica artificial ni genera auditoría duplicada.
             if (vigente is not null && vigente.Metodo == dto.Metodo)
             {
                 resultado = vigente;
                 return;
             }
+
+            var anterior = vigente is null
+                ? null
+                : new
+                {
+                    vigente.Id,
+                    vigente.Metodo,
+                    vigente.VigenteDesdeUtc,
+                    vigente.VigenteHastaUtc,
+                    vigente.EstaVigente
+                };
 
             var ahora = DateTime.UtcNow;
             if (vigente is not null)
@@ -111,6 +125,22 @@ public sealed class PoliticaCosteoInventarioService : IPoliticaCosteoInventarioS
             await _repository.AddAsync(nueva);
             await _repository.SaveChangesAsync();
             resultado = nueva;
+
+            await _auditoria.RegistrarEstrictoAsync(
+                ModuloSistema.MovimientosInventario,
+                AccionPermiso.Editar,
+                "Política de costeo de inventario actualizada.",
+                referenciaId: nueva.Id,
+                entidad: "PoliticaCosteoInventario",
+                valoresAnteriores: anterior,
+                valoresNuevos: new
+                {
+                    nueva.Id,
+                    nueva.Metodo,
+                    nueva.VigenteDesdeUtc,
+                    nueva.EstaVigente
+                },
+                motivo: motivo);
         });
 
         return Map(resultado ?? throw new BusinessRuleException("No fue posible materializar la política de costeo."));
