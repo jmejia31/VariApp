@@ -72,7 +72,10 @@ test.describe('Recepción de mercancía - shell y acceso', () => {
     await page.route('**/recepciones-compra**', async route => {
       const request = route.request();
       const requestUrl = new URL(request.url());
-      if (request.method() !== 'GET' || !requestUrl.pathname.startsWith('/api/recepciones-compra')) {
+      const esListadoApi = request.method() === 'GET'
+        && request.resourceType() !== 'document'
+        && requestUrl.pathname === '/recepciones-compra';
+      if (!esListadoApi) {
         await route.continue();
         return;
       }
