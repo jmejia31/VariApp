@@ -20,6 +20,8 @@ public sealed class RecepcionCompraDetalleConfiguration : IEntityTypeConfigurati
                 "CantidadDanada + CantidadSobrante <= CantidadRecibida");
             table.HasCheckConstraint("CK_RecepcionCompraDetalles_ActividadFisica",
                 "CantidadRecibida > 0 OR CantidadFaltante > 0");
+            table.HasCheckConstraint("CK_RecepcionCompraDetalles_CostoNoNegativo",
+                "CostoUnitarioSnapshot >= 0");
         });
 
         builder.Property(x => x.Id).ValueGeneratedOnAdd();
