@@ -79,6 +79,26 @@ public sealed class N23RecepcionCompraPersistenceModelTests
     }
 
     [Fact]
+    public void Checks_persistentes_blindan_idempotencia_cantidades_y_costo()
+    {
+        using var context = CrearContexto();
+        var cabecera = context.Model.FindEntityType(typeof(RecepcionCompra));
+        var detalle = context.Model.FindEntityType(typeof(RecepcionCompraDetalle));
+
+        Assert.NotNull(cabecera);
+        Assert.NotNull(detalle);
+
+        var checksCabecera = cabecera!.GetCheckConstraints().Select(c => c.Name).ToHashSet(StringComparer.Ordinal);
+        var checksDetalle = detalle!.GetCheckConstraints().Select(c => c.Name).ToHashSet(StringComparer.Ordinal);
+
+        Assert.Contains("CK_RecepcionesCompra_IdempotenciaAtomica", checksCabecera);
+        Assert.Contains("CK_RecepcionCompraDetalles_CantidadesNoNegativas", checksDetalle);
+        Assert.Contains("CK_RecepcionCompraDetalles_BalanceFisico", checksDetalle);
+        Assert.Contains("CK_RecepcionCompraDetalles_ActividadFisica", checksDetalle);
+        Assert.Contains("CK_RecepcionCompraDetalles_CostoNoNegativo", checksDetalle);
+    }
+
+    [Fact]
     public void Detalle_restringe_dependencias_fisicas_y_cascade_solo_desde_cabecera()
     {
         using var context = CrearContexto();
