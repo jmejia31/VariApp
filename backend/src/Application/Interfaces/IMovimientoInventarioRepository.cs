@@ -10,7 +10,8 @@ public sealed record MovimientoInventarioOrigenPersistido(
     int? VentaId,
     int? ConsumoInsumoId,
     int? AjusteInventarioId = null,
-    int? TransferenciaInventarioId = null);
+    int? TransferenciaInventarioId = null,
+    int? RecepcionCompraId = null);
 
 public interface IMovimientoInventarioRepository
 {
@@ -48,13 +49,6 @@ public static class MovimientoInventarioRepositoryExtensions
         return repository.AddConOrigenTipadoAsync(movimiento, origen);
     }
 
-    /// <summary>
-    /// Persiste un movimiento con origen tipado y correlación durable cuando el
-    /// contrato de la operación todavía no expone una ubicación física. Esto
-    /// permite cortar Compra/Venta/Consumo hacia N1.5 sin inventar AlmacenId ni
-    /// UbicacionAlmacenId; ambos permanecen nulos hasta que el contrato funcional
-    /// aporte una existencia física autoritativa.
-    /// </summary>
     public static Task AddConOrigenTipadoCorrelacionadoAsync(
         this IMovimientoInventarioRepository repository,
         MovimientoInventario movimiento,
