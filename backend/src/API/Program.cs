@@ -88,6 +88,7 @@ builder.Services.AddScoped<ITransferenciaInventarioMovimientoService, Transferen
 builder.Services.AddScoped<ITransferenciaInventarioService, TransferenciaInventarioService>();
 builder.Services.AddScoped<ISolicitudCompraService, SolicitudCompraService>();
 builder.Services.AddScoped<IOrdenCompraService, OrdenCompraService>();
+builder.Services.AddScoped<RecepcionCompraKardexRegistrar>();
 builder.Services.AddScoped<IRecepcionCompraService, RecepcionCompraService>();
 builder.Services.AddScoped<IReservaInventarioService, ReservaInventarioService>();
 builder.Services.AddScoped<ITrazabilidadInventarioService, TrazabilidadInventarioService>();
