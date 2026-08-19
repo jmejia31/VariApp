@@ -64,6 +64,7 @@ public sealed class N23RecepcionCompraSecurityAuditObservabilityTests
             Mock.Of<IAlmacenRepository>(),
             Mock.Of<IUbicacionAlmacenRepository>(),
             new RecepcionCompraExistenciaMaterializador(Mock.Of<IExistenciaVarianteConcurrencyService>()),
+            new RecepcionCompraKardexRegistrar(Mock.Of<IKardexMovimientoWriter>(), currentUser.Object),
             currentUser.Object,
             unitOfWork,
             Mock.Of<IAuditoriaService>());
