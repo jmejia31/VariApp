@@ -91,7 +91,7 @@ test.describe('Recepción de mercancía - shell y acceso', () => {
     await expect(page.getByRole('heading', { name: 'Recepción de mercancía' })).toBeVisible();
     await expect(page.getByText('RC-2026-000041')).toBeVisible();
     await expect(page.getByText('OC-2026-000017')).toBeVisible();
-    await expect(page.getByText('Borrador', { exact: true })).toBeVisible();
+    await expect(page.locator('span.status[data-status="1"]')).toHaveText('Borrador');
 
     await page.locator('input[name="ordenCompraId"]').fill('17');
     await page.locator('mat-select[name="estado"]').click();
