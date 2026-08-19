@@ -18,6 +18,7 @@ public sealed class RecepcionCompraService : IRecepcionCompraService
     private readonly IOrdenCompraRepository _ordenes;
     private readonly IAlmacenRepository _almacenes;
     private readonly IUbicacionAlmacenRepository _ubicaciones;
+    private readonly RecepcionCompraExistenciaMaterializador _existencias;
     private readonly ICurrentUserService _currentUser;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IAuditoriaService _auditoria;
@@ -27,6 +28,7 @@ public sealed class RecepcionCompraService : IRecepcionCompraService
         IOrdenCompraRepository ordenes,
         IAlmacenRepository almacenes,
         IUbicacionAlmacenRepository ubicaciones,
+        RecepcionCompraExistenciaMaterializador existencias,
         ICurrentUserService currentUser,
         IUnitOfWork unitOfWork,
         IAuditoriaService auditoria)
@@ -35,6 +37,7 @@ public sealed class RecepcionCompraService : IRecepcionCompraService
         _ordenes = ordenes ?? throw new ArgumentNullException(nameof(ordenes));
         _almacenes = almacenes ?? throw new ArgumentNullException(nameof(almacenes));
         _ubicaciones = ubicaciones ?? throw new ArgumentNullException(nameof(ubicaciones));
+        _existencias = existencias ?? throw new ArgumentNullException(nameof(existencias));
         _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _auditoria = auditoria ?? throw new ArgumentNullException(nameof(auditoria));
@@ -45,6 +48,7 @@ public sealed class RecepcionCompraService : IRecepcionCompraService
         ArgumentNullException.ThrowIfNull(filtro);
         if (filtro.DesdeUtc.HasValue && filtro.HastaUtc.HasValue && filtro.DesdeUtc > filtro.HastaUtc)
             throw new BusinessRuleException("El rango de fechas es inválido.");
+
         filtro.Page = Math.Max(1, filtro.Page);
         filtro.PageSize = Math.Clamp(filtro.PageSize, 1, 100);
         var (items, total) = await _repository.GetPagedAsync(filtro);
@@ -154,11 +158,99 @@ public sealed class RecepcionCompraService : IRecepcionCompraService
         return Map(actualizada!);
     }
 
-    public Task<RecepcionCompraDto> ConfirmarAsync(int id) =>
-        throw new NotSupportedException("La materialización física de la recepción se implementa en el siguiente bloque de N2.3.D.");
+    public async Task<RecepcionCompraDto> ConfirmarAsync(int id)
+    {
+        RecepcionCompra? resultado = null;
+        var usuarioId = ObtenerUsuarioId();
 
-    public Task<RecepcionCompraDto> AnularAsync(int id, AnularRecepcionCompraDto dto) =>
-        throw new NotSupportedException("La reversión física de la recepción se implementa en el siguiente bloque de N2.3.D.");
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            var recepcion = await ObtenerBloqueadaAsync(id);
+            if (recepcion.Estado == EstadoRecepcionCompra.Recibida)
+            {
+                resultado = recepcion;
+                return;
+            }
+
+            if (recepcion.Estado != EstadoRecepcionCompra.Borrador)
+                throw new BusinessRuleException("Solo una recepción en borrador puede confirmarse.");
+
+            var orden = await ObtenerOrdenAprobadaAsync(recepcion.OrdenCompraId);
+            await ValidarRecepcionesMultiplesAsync(recepcion, orden);
+            var anterior = Snapshot(recepcion);
+
+            await _existencias.AplicarAsync(recepcion.Detalles);
+            ValidarDominio(() => recepcion.Confirmar(usuarioId, _currentUser.NombreUsuario, DateTime.UtcNow));
+            MarcarActualizacion(recepcion);
+            await _repository.SaveChangesAsync();
+            await RegistrarAuditoriaAsync(
+                AccionPermiso.Confirmar,
+                "Recepción de compra confirmada y materializada en inventario",
+                recepcion,
+                anterior,
+                Snapshot(recepcion));
+            resultado = recepcion;
+        });
+
+        return Map(resultado ?? throw new InvalidOperationException("La confirmación de la recepción no produjo un resultado."));
+    }
+
+    public async Task<RecepcionCompraDto> AnularAsync(int id, AnularRecepcionCompraDto dto)
+    {
+        ArgumentNullException.ThrowIfNull(dto);
+        RecepcionCompra? resultado = null;
+        var usuarioId = ObtenerUsuarioId();
+
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            var recepcion = await ObtenerBloqueadaAsync(id);
+            if (recepcion.Estado == EstadoRecepcionCompra.Anulada)
+            {
+                resultado = recepcion;
+                return;
+            }
+
+            if (recepcion.Estado != EstadoRecepcionCompra.Recibida)
+                throw new BusinessRuleException("Solo una recepción materializada puede anularse.");
+
+            var anterior = Snapshot(recepcion);
+            await _existencias.RevertirAsync(recepcion.Detalles);
+            ValidarDominio(() => recepcion.Anular(usuarioId, dto.Motivo, DateTime.UtcNow));
+            MarcarActualizacion(recepcion);
+            await _repository.SaveChangesAsync();
+            await RegistrarAuditoriaAsync(
+                AccionPermiso.Anular,
+                "Recepción de compra anulada y stock físico revertido",
+                recepcion,
+                anterior,
+                Snapshot(recepcion),
+                dto.Motivo);
+            resultado = recepcion;
+        });
+
+        return Map(resultado ?? throw new InvalidOperationException("La anulación de la recepción no produjo un resultado."));
+    }
+
+    private async Task ValidarRecepcionesMultiplesAsync(RecepcionCompra recepcion, OrdenCompra orden)
+    {
+        var detallesOrden = orden.Detalles.ToDictionary(x => x.Id);
+        foreach (var detalle in recepcion.Detalles)
+        {
+            if (!detallesOrden.TryGetValue(detalle.OrdenCompraDetalleId, out var detalleOrden))
+                throw new BusinessRuleException($"La línea {detalle.OrdenCompraDetalleId} ya no pertenece a la orden de compra.");
+
+            var acumulada = await _repository.GetCantidadAceptadaAcumuladaPorDetalleAsync(
+                detalle.OrdenCompraDetalleId,
+                recepcion.Id);
+            var proyectada = acumulada + detalle.CantidadAceptada;
+            if (proyectada > detalleOrden.CantidadOrdenada)
+            {
+                throw new BusinessRuleException(
+                    $"La recepción de la línea {detalle.OrdenCompraDetalleId} supera la cantidad ordenada. " +
+                    $"Ordenada={detalleOrden.CantidadOrdenada}; recibida previamente={acumulada}; actual={detalle.CantidadAceptada}.");
+            }
+        }
+    }
 
     private async Task<OrdenCompra> ObtenerOrdenAprobadaAsync(int ordenCompraId)
     {
