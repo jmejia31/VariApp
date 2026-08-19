@@ -51,6 +51,14 @@
             "development": { "buildTarget": "inventoryapp-frontend:build:development" }
           },
           "defaultConfiguration": "development"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "tsconfig.spec.json",
+            "runner": "vitest",
+            "buildTarget": "inventoryapp-frontend:build:development"
+          }
         }
       }
     }
