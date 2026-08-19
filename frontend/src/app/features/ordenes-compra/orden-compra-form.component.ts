@@ -31,16 +31,7 @@ type LineaForm = FormGroup<{
 @Component({
   selector: 'app-orden-compra-form',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    MatButtonModule,
-    MatFormFieldModule,
-    MatIconModule,
-    MatInputModule,
-    MatProgressSpinnerModule,
-    MatSelectModule
-  ],
+  imports: [CommonModule, ReactiveFormsModule, MatButtonModule, MatFormFieldModule, MatIconModule, MatInputModule, MatProgressSpinnerModule, MatSelectModule],
   template: `
     <section class="form-shell" aria-labelledby="orden-form-title">
       <header>
@@ -63,9 +54,7 @@ type LineaForm = FormGroup<{
               <mat-form-field appearance="outline">
                 <mat-label>Proveedor</mat-label>
                 <mat-select formControlName="proveedorId" required>
-                  @for (proveedor of proveedores(); track proveedor.id) {
-                    <mat-option [value]="proveedor.id">{{ proveedor.nombre }}</mat-option>
-                  }
+                  @for (proveedor of proveedores(); track proveedor.id) { <mat-option [value]="proveedor.id">{{ proveedor.nombre }}</mat-option> }
                 </mat-select>
                 @if (form.controls.proveedorId.touched && form.controls.proveedorId.invalid) { <mat-error>Seleccione un proveedor.</mat-error> }
               </mat-form-field>
@@ -74,9 +63,7 @@ type LineaForm = FormGroup<{
                 <mat-label>Solicitud aprobada</mat-label>
                 <mat-select formControlName="solicitudCompraId">
                   <mat-option [value]="null">Sin solicitud origen</mat-option>
-                  @for (solicitud of solicitudes(); track solicitud.id) {
-                    <mat-option [value]="solicitud.id">{{ solicitud.numeroSolicitud }}</mat-option>
-                  }
+                  @for (solicitud of solicitudes(); track solicitud.id) { <mat-option [value]="solicitud.id">{{ solicitud.numeroSolicitud }}</mat-option> }
                 </mat-select>
               </mat-form-field>
 
@@ -118,9 +105,7 @@ type LineaForm = FormGroup<{
                     <mat-form-field appearance="outline">
                       <mat-label>Producto</mat-label>
                       <mat-select formControlName="productoId" (selectionChange)="productoCambiado(i)" required>
-                        @for (producto of productos(); track producto.id) {
-                          <mat-option [value]="producto.id">{{ producto.nombre }}</mat-option>
-                        }
+                        @for (producto of productos(); track producto.id) { <mat-option [value]="producto.id">{{ producto.nombre }}</mat-option> }
                       </mat-select>
                     </mat-form-field>
 
@@ -128,41 +113,18 @@ type LineaForm = FormGroup<{
                       <mat-label>Variante</mat-label>
                       <mat-select formControlName="productoVarianteId">
                         <mat-option [value]="null">Sin variante</mat-option>
-                        @for (variante of variantesPorLinea()[i] || []; track variante.id) {
-                          <mat-option [value]="variante.id">{{ variante.etiqueta || variante.sku }}</mat-option>
-                        }
+                        @for (variante of variantesPorLinea()[i] || []; track variante.id) { <mat-option [value]="variante.id">{{ variante.etiqueta || variante.sku }}</mat-option> }
                       </mat-select>
                     </mat-form-field>
 
-                    <mat-form-field appearance="outline">
-                      <mat-label>Cantidad</mat-label>
-                      <input matInput type="number" min="0.0001" step="0.0001" formControlName="cantidadOrdenada" required>
-                    </mat-form-field>
-
-                    <mat-form-field appearance="outline">
-                      <mat-label>Precio unitario</mat-label>
-                      <input matInput type="number" min="0" step="0.01" formControlName="precioUnitario" required>
-                    </mat-form-field>
-
-                    <mat-form-field appearance="outline">
-                      <mat-label>Descuento</mat-label>
-                      <input matInput type="number" min="0" step="0.01" formControlName="descuento">
-                    </mat-form-field>
-
-                    <mat-form-field appearance="outline">
-                      <mat-label>Impuesto</mat-label>
-                      <input matInput type="number" min="0" step="0.01" formControlName="impuesto">
-                    </mat-form-field>
-
-                    <mat-form-field appearance="outline" class="wide">
-                      <mat-label>Observación de línea</mat-label>
-                      <input matInput formControlName="observacion" maxlength="500">
-                    </mat-form-field>
+                    <mat-form-field appearance="outline"><mat-label>Cantidad</mat-label><input matInput type="number" min="0.0001" step="0.0001" formControlName="cantidadOrdenada" required></mat-form-field>
+                    <mat-form-field appearance="outline"><mat-label>Precio unitario</mat-label><input matInput type="number" min="0" step="0.01" formControlName="precioUnitario" required></mat-form-field>
+                    <mat-form-field appearance="outline"><mat-label>Descuento</mat-label><input matInput type="number" min="0" step="0.01" formControlName="descuento"></mat-form-field>
+                    <mat-form-field appearance="outline"><mat-label>Impuesto</mat-label><input matInput type="number" min="0" step="0.01" formControlName="impuesto"></mat-form-field>
+                    <mat-form-field appearance="outline" class="wide"><mat-label>Observación de línea</mat-label><input matInput formControlName="observacion" maxlength="500"></mat-form-field>
                   </div>
                   <div class="line-total" aria-label="Total de la línea">{{ totalLinea(i) | number:'1.2-2' }}</div>
-                  <button mat-icon-button type="button" (click)="eliminarLinea(i)" [disabled]="detalles.length === 1" [attr.aria-label]="'Eliminar línea ' + (i + 1)">
-                    <mat-icon>delete</mat-icon>
-                  </button>
+                  <button mat-icon-button type="button" (click)="eliminarLinea(i)" [disabled]="detalles.length === 1" [attr.aria-label]="'Eliminar línea ' + (i + 1)"><mat-icon>delete</mat-icon></button>
                 </article>
               }
             </div>
@@ -234,14 +196,6 @@ export class OrdenCompraFormComponent implements OnInit, OnDestroy {
     observaciones: this.fb.nonNullable.control('', Validators.maxLength(1000)),
     detalles: this.fb.array<LineaForm>([])
   });
-
-  readonly subtotal = computed(() => this.detalles.controls.reduce((sum, _, i) => {
-    const v = this.detalles.at(i).getRawValue();
-    return sum + this.numero(v.cantidadOrdenada) * this.numero(v.precioUnitario);
-  }, 0));
-  readonly descuentoTotal = computed(() => this.detalles.controls.reduce((sum, _, i) => sum + this.numero(this.detalles.at(i).controls.descuento.value), 0));
-  readonly impuestoTotal = computed(() => this.detalles.controls.reduce((sum, _, i) => sum + this.numero(this.detalles.at(i).controls.impuesto.value), 0));
-  readonly total = computed(() => this.subtotal() - this.descuentoTotal() + this.impuestoTotal());
 
   private readonly subscriptions = new Subscription();
   private idempotencyKey = this.nuevaIdempotencyKey();
@@ -322,6 +276,23 @@ export class OrdenCompraFormComponent implements OnInit, OnDestroy {
     const v = this.detalles.at(index).getRawValue();
     return this.numero(v.cantidadOrdenada) * this.numero(v.precioUnitario) - this.numero(v.descuento) + this.numero(v.impuesto);
   }
+
+  subtotal(): number {
+    return this.detalles.controls.reduce((sum, linea) => {
+      const v = linea.getRawValue();
+      return sum + this.numero(v.cantidadOrdenada) * this.numero(v.precioUnitario);
+    }, 0);
+  }
+
+  descuentoTotal(): number {
+    return this.detalles.controls.reduce((sum, linea) => sum + this.numero(linea.controls.descuento.value), 0);
+  }
+
+  impuestoTotal(): number {
+    return this.detalles.controls.reduce((sum, linea) => sum + this.numero(linea.controls.impuesto.value), 0);
+  }
+
+  total(): number { return this.subtotal() - this.descuentoTotal() + this.impuestoTotal(); }
 
   guardar(): void {
     this.error.set(null);
