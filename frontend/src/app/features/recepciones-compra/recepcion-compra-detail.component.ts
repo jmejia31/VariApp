@@ -19,8 +19,8 @@ import { AnularDialogComponent } from '../../shared/anular-dialog.component';
     <h2 mat-dialog-title>{{ data.title }}</h2>
     <mat-dialog-content>{{ data.message }}</mat-dialog-content>
     <mat-dialog-actions align="end">
-      <button mat-button [mat-dialog-close]="false">Cancelar</button>
-      <button mat-flat-button [mat-dialog-close]="true">Confirmar</button>
+      <button mat-button type="button" [mat-dialog-close]="false">Cancelar</button>
+      <button mat-flat-button type="button" [mat-dialog-close]="true">Confirmar</button>
     </mat-dialog-actions>
   `
 })
@@ -43,7 +43,9 @@ export class ConfirmarRecepcionDialogComponent {
         <button mat-stroked-button type="button" (click)="volver()"><mat-icon>arrow_back</mat-icon> Volver</button>
       </header>
 
-      @if (loading()) {
+      @if (!puedeVer()) {
+        <div class="state-panel error" role="alert"><mat-icon>lock</mat-icon><span>No tienes permiso para consultar esta recepción de compra.</span></div>
+      } @else if (loading()) {
         <div class="state-panel" role="status"><mat-spinner diameter="36"></mat-spinner><span>Cargando recepción…</span></div>
       } @else if (error()) {
         <div class="state-panel error" role="alert"><mat-icon>error_outline</mat-icon><span>{{ error() }}</span><button mat-stroked-button type="button" (click)="cargar()">Reintentar</button></div>
@@ -85,7 +87,7 @@ export class ConfirmarRecepcionDialogComponent {
           @if (esRecibida(item.estado) && puedeAnular()) {
             <button mat-stroked-button type="button" [disabled]="procesando()" (click)="anular()" data-testid="anular-recepcion"><mat-icon>undo</mat-icon> Anular recepción</button>
           }
-          @if (procesando()) { <mat-spinner diameter="24"></mat-spinner> }
+          @if (procesando()) { <mat-spinner diameter="24" aria-label="Procesando acción de recepción"></mat-spinner> }
         </div>
       }
     </section>
@@ -102,19 +104,22 @@ export class RecepcionCompraDetailComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
 
   readonly recepcion = signal<RecepcionCompra | null>(null);
-  readonly loading = signal(true);
+  readonly loading = signal(false);
   readonly procesando = signal(false);
   readonly error = signal('');
+  readonly puedeVer = signal(false);
   readonly puedeConfirmar = signal(false);
   readonly puedeAnular = signal(false);
   private recepcionId = 0;
 
   ngOnInit(): void {
+    this.puedeVer.set(this.permisos.puede('Compras', 'Ver'));
     this.puedeConfirmar.set(this.permisos.puede('Compras', 'Confirmar'));
     this.puedeAnular.set(this.permisos.puede('Compras', 'Anular'));
+    if (!this.puedeVer()) return;
+
     this.recepcionId = Number(this.route.snapshot.paramMap.get('id'));
     if (!Number.isInteger(this.recepcionId) || this.recepcionId <= 0) {
-      this.loading.set(false);
       this.error.set('El identificador de la recepción no es válido.');
       return;
     }
@@ -122,31 +127,35 @@ export class RecepcionCompraDetailComponent implements OnInit {
   }
 
   cargar(): void {
-    if (this.recepcionId <= 0) return;
+    if (!this.puedeVer() || this.recepcionId <= 0 || this.loading()) return;
     this.loading.set(true);
     this.error.set('');
     this.service.getById(this.recepcionId).pipe(finalize(() => this.loading.set(false))).subscribe({
       next: response => this.recepcion.set(response.data),
-      error: err => this.error.set(err?.error?.detail || err?.error?.message || 'No fue posible cargar la recepción de compra.')
+      error: () => this.error.set('No fue posible cargar la recepción de compra.')
     });
   }
 
   confirmar(): void {
     const actual = this.recepcion();
     if (!actual || !this.esBorrador(actual.estado) || !this.puedeConfirmar() || this.procesando()) return;
+    this.procesando.set(true);
     const ref = this.dialog.open(ConfirmarRecepcionDialogComponent, {
+      disableClose: true,
       data: {
         title: 'Confirmar recepción',
         message: 'Al confirmar se materializará la cantidad aceptada en el stock físico. Esta acción queda auditada.'
       }
     });
     ref.afterClosed().subscribe((confirmado: boolean | undefined) => {
-      if (!confirmado) return;
-      this.procesando.set(true);
+      if (!confirmado) {
+        this.procesando.set(false);
+        return;
+      }
       this.error.set('');
       this.service.confirmar(this.recepcionId).pipe(finalize(() => this.procesando.set(false))).subscribe({
         next: response => this.recepcion.set(response.data),
-        error: err => this.error.set(err?.error?.detail || err?.error?.message || 'No fue posible confirmar la recepción.')
+        error: () => this.error.set('No fue posible confirmar la recepción.')
       });
     });
   }
@@ -154,7 +163,9 @@ export class RecepcionCompraDetailComponent implements OnInit {
   anular(): void {
     const actual = this.recepcion();
     if (!actual || !this.esRecibida(actual.estado) || !this.puedeAnular() || this.procesando()) return;
+    this.procesando.set(true);
     const ref = this.dialog.open(AnularDialogComponent, {
+      disableClose: true,
       data: {
         title: 'Anular recepción de compra',
         message: 'La anulación revertirá el stock materializado. Indica el motivo obligatorio:'
@@ -162,12 +173,14 @@ export class RecepcionCompraDetailComponent implements OnInit {
     });
     ref.afterClosed().subscribe((motivo: string | undefined) => {
       const normalizado = motivo?.trim();
-      if (!normalizado) return;
-      this.procesando.set(true);
+      if (!normalizado) {
+        this.procesando.set(false);
+        return;
+      }
       this.error.set('');
       this.service.anular(this.recepcionId, normalizado).pipe(finalize(() => this.procesando.set(false))).subscribe({
         next: response => this.recepcion.set(response.data),
-        error: err => this.error.set(err?.error?.detail || err?.error?.message || 'No fue posible anular la recepción.')
+        error: () => this.error.set('No fue posible anular la recepción.')
       });
     });
   }
