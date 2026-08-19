@@ -41,7 +41,12 @@ namespace InventoryApp.Infrastructure.Migrations
                 b.HasIndex("IdempotencyKey").IsUnique().HasDatabaseName("UX_RecepcionesCompra_IdempotencyKey");
                 b.HasIndex("NumeroRecepcion").IsUnique().HasDatabaseName("UX_RecepcionesCompra_NumeroRecepcion");
                 b.HasIndex("OrdenCompraId", "Estado").HasDatabaseName("IX_RecepcionesCompra_OrdenCompra_Estado");
-                b.ToTable("RecepcionesCompra");
+                b.ToTable("RecepcionesCompra", t =>
+                {
+                    t.HasCheckConstraint(
+                        "CK_RecepcionesCompra_IdempotenciaAtomica",
+                        "(IdempotencyKey IS NULL AND IdempotencyFingerprint IS NULL) OR (IdempotencyKey IS NOT NULL AND CHAR_LENGTH(TRIM(IdempotencyKey)) > 0 AND IdempotencyFingerprint IS NOT NULL AND CHAR_LENGTH(IdempotencyFingerprint) = 64)");
+                });
             });
 
             modelBuilder.Entity("InventoryApp.Domain.Entities.RecepcionCompraDetalle", b =>
@@ -87,6 +92,7 @@ namespace InventoryApp.Infrastructure.Migrations
                     t.HasCheckConstraint("CK_RecepcionCompraDetalles_ActividadFisica", "CantidadRecibida > 0 OR CantidadFaltante > 0");
                     t.HasCheckConstraint("CK_RecepcionCompraDetalles_BalanceFisico", "CantidadDanada + CantidadSobrante <= CantidadRecibida");
                     t.HasCheckConstraint("CK_RecepcionCompraDetalles_CantidadesNoNegativas", "CantidadRecibida >= 0 AND CantidadDanada >= 0 AND CantidadFaltante >= 0 AND CantidadSobrante >= 0");
+                    t.HasCheckConstraint("CK_RecepcionCompraDetalles_CostoNoNegativo", "CostoUnitarioSnapshot >= 0");
                 });
             });
 
