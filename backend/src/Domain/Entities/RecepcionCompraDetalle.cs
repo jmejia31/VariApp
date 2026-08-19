@@ -35,7 +35,9 @@ public class RecepcionCompraDetalle : AuditableEntity
     public string? ProductoColorSnapshot { get; set; }
     public string? ProductoTallaSnapshot { get; set; }
 
-    public decimal CantidadAceptada => CantidadRecibida - CantidadDanada;
+    // Unidades dañadas y sobrantes se mantienen explícitas fuera del stock aceptado.
+    // La política para aceptar sobrantes pertenece a la materialización transaccional de N2.3.D.
+    public decimal CantidadAceptada => CantidadRecibida - CantidadDanada - CantidadSobrante;
     public bool TieneActividadFisica => CantidadRecibida > 0 || CantidadFaltante > 0;
 
     public void EstablecerCantidades(
@@ -82,6 +84,8 @@ public class RecepcionCompraDetalle : AuditableEntity
             throw new ArgumentOutOfRangeException(nameof(cantidadDanada), "La cantidad dañada no puede superar la cantidad recibida.");
         if (cantidadSobrante > cantidadRecibida)
             throw new ArgumentOutOfRangeException(nameof(cantidadSobrante), "La cantidad sobrante debe formar parte de la cantidad físicamente recibida.");
+        if (cantidadDanada + cantidadSobrante > cantidadRecibida)
+            throw new InvalidOperationException("Las cantidades dañada y sobrante no pueden superar conjuntamente la cantidad físicamente recibida.");
         if (cantidadRecibida == 0 && cantidadFaltante == 0)
             throw new InvalidOperationException("El detalle debe registrar recepción física o faltante.");
     }
