@@ -46,6 +46,36 @@ public class N23RecepcionCompraContractTests
     }
 
     [Fact]
+    public void DetalleDto_DanadoMasSobranteSuperaRecibido_FallaValidacion()
+    {
+        var dto = CrearDetalleValido();
+        dto.CantidadRecibida = 10m;
+        dto.CantidadDanada = 6m;
+        dto.CantidadSobrante = 5m;
+
+        var errores = Validar(dto);
+
+        Assert.Contains(errores, e => e.MemberNames.Contains(nameof(RecepcionCompraDetalleInputDto.CantidadRecibida)));
+        Assert.Contains(errores, e => e.MemberNames.Contains(nameof(RecepcionCompraDetalleInputDto.CantidadDanada)));
+        Assert.Contains(errores, e => e.MemberNames.Contains(nameof(RecepcionCompraDetalleInputDto.CantidadSobrante)));
+    }
+
+    [Fact]
+    public void DetalleDto_SinRecepcionNiFaltante_FallaValidacion()
+    {
+        var dto = CrearDetalleValido();
+        dto.CantidadRecibida = 0m;
+        dto.CantidadDanada = 0m;
+        dto.CantidadFaltante = 0m;
+        dto.CantidadSobrante = 0m;
+
+        var errores = Validar(dto);
+
+        Assert.Contains(errores, e => e.MemberNames.Contains(nameof(RecepcionCompraDetalleInputDto.CantidadRecibida)));
+        Assert.Contains(errores, e => e.MemberNames.Contains(nameof(RecepcionCompraDetalleInputDto.CantidadFaltante)));
+    }
+
+    [Fact]
     public void DetalleDto_ClaveFisicaInvalida_FallaValidacion()
     {
         var dto = CrearDetalleValido();
