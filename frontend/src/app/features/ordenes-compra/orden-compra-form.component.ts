@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, computed, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -187,6 +187,8 @@ export class OrdenCompraFormComponent implements OnInit, OnDestroy {
   readonly ordenId = signal<number | null>(null);
   readonly editando = computed(() => this.ordenId() !== null);
 
+  private readonly fb = inject(FormBuilder);
+
   readonly form = this.fb.group({
     solicitudCompraId: this.fb.control<number | null>(null),
     proveedorId: this.fb.control<number | null>(null, Validators.required),
@@ -201,7 +203,6 @@ export class OrdenCompraFormComponent implements OnInit, OnDestroy {
   private idempotencyKey = this.nuevaIdempotencyKey();
 
   constructor(
-    private readonly fb: FormBuilder,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly ordenService: OrdenCompraService,
