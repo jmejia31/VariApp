@@ -47,6 +47,27 @@ public class RecepcionCompraDetalleDto
     public string? ProductoTallaSnapshot { get; set; }
 }
 
+public class RecepcionCompraSaldoOrdenDto
+{
+    public int OrdenCompraId { get; set; }
+    public string NumeroOrden { get; set; } = string.Empty;
+    public EstadoOrdenCompra EstadoOrden { get; set; }
+    public List<RecepcionCompraSaldoLineaDto> Lineas { get; set; } = new();
+    public bool Completa => Lineas.Count > 0 && Lineas.All(x => x.CantidadPendiente <= 0m);
+}
+
+public class RecepcionCompraSaldoLineaDto
+{
+    public int OrdenCompraDetalleId { get; set; }
+    public int ProductoId { get; set; }
+    public int? ProductoVarianteId { get; set; }
+    public string? ProductoSkuSnapshot { get; set; }
+    public string? ProductoNombreSnapshot { get; set; }
+    public decimal CantidadOrdenada { get; set; }
+    public decimal CantidadAceptadaAcumulada { get; set; }
+    public decimal CantidadPendiente { get; set; }
+}
+
 public class CreateRecepcionCompraDto
 {
     [Range(1, int.MaxValue)]
