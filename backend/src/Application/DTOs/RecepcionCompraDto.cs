@@ -68,7 +68,7 @@ public class UpdateRecepcionCompraDto
     public List<RecepcionCompraDetalleInputDto> Detalles { get; set; } = new();
 }
 
-public class RecepcionCompraDetalleInputDto
+public class RecepcionCompraDetalleInputDto : IValidatableObject
 {
     [Range(1, int.MaxValue)]
     public int OrdenCompraDetalleId { get; set; }
@@ -90,6 +90,23 @@ public class RecepcionCompraDetalleInputDto
 
     [Range(typeof(decimal), "0", "79228162514264337593543950335")]
     public decimal CantidadSobrante { get; set; }
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (CantidadDanada + CantidadSobrante > CantidadRecibida)
+        {
+            yield return new ValidationResult(
+                "Las cantidades dañada y sobrante no pueden superar conjuntamente la cantidad físicamente recibida.",
+                new[] { nameof(CantidadRecibida), nameof(CantidadDanada), nameof(CantidadSobrante) });
+        }
+
+        if (CantidadRecibida == 0m && CantidadFaltante == 0m)
+        {
+            yield return new ValidationResult(
+                "El detalle debe registrar recepción física o faltante.",
+                new[] { nameof(CantidadRecibida), nameof(CantidadFaltante) });
+        }
+    }
 }
 
 public class AnularRecepcionCompraDto
