@@ -17,6 +17,7 @@ public sealed record OrigenMovimientoInventario
     public int? ConsumoInsumoId => Tipo == TipoOrigenMovimientoInventario.ConsumoInsumo ? DocumentoId : null;
     public int? AjusteInventarioId => Tipo == TipoOrigenMovimientoInventario.AjusteInventario ? DocumentoId : null;
     public int? TransferenciaInventarioId => Tipo == TipoOrigenMovimientoInventario.TransferenciaInventario ? DocumentoId : null;
+    public int? RecepcionCompraId => Tipo == TipoOrigenMovimientoInventario.RecepcionCompra ? DocumentoId : null;
 
     private OrigenMovimientoInventario(TipoOrigenMovimientoInventario tipo, int documentoId)
     {
@@ -42,35 +43,39 @@ public sealed record OrigenMovimientoInventario
     public static OrigenMovimientoInventario DesdeTransferenciaInventario(int transferenciaInventarioId) =>
         new(TipoOrigenMovimientoInventario.TransferenciaInventario, transferenciaInventarioId);
 
+    public static OrigenMovimientoInventario DesdeRecepcionCompra(int recepcionCompraId) =>
+        new(TipoOrigenMovimientoInventario.RecepcionCompra, recepcionCompraId);
+
     public static OrigenMovimientoInventario DesdeIds(
         int? compraId,
         int? ventaId,
         int? consumoInsumoId,
         int? ajusteInventarioId = null,
-        int? transferenciaInventarioId = null)
+        int? transferenciaInventarioId = null,
+        int? recepcionCompraId = null)
     {
         var cantidadOrigenes =
             (compraId.HasValue ? 1 : 0) +
             (ventaId.HasValue ? 1 : 0) +
             (consumoInsumoId.HasValue ? 1 : 0) +
             (ajusteInventarioId.HasValue ? 1 : 0) +
-            (transferenciaInventarioId.HasValue ? 1 : 0);
+            (transferenciaInventarioId.HasValue ? 1 : 0) +
+            (recepcionCompraId.HasValue ? 1 : 0);
 
         if (cantidadOrigenes != 1)
             throw new InvalidOperationException("Un movimiento originado por documento debe tener exactamente un origen tipado.");
 
         if (compraId.HasValue)
             return DesdeCompra(compraId.Value);
-
         if (ventaId.HasValue)
             return DesdeVenta(ventaId.Value);
-
         if (consumoInsumoId.HasValue)
             return DesdeConsumoInsumo(consumoInsumoId.Value);
-
         if (ajusteInventarioId.HasValue)
             return DesdeAjusteInventario(ajusteInventarioId.Value);
+        if (transferenciaInventarioId.HasValue)
+            return DesdeTransferenciaInventario(transferenciaInventarioId.Value);
 
-        return DesdeTransferenciaInventario(transferenciaInventarioId!.Value);
+        return DesdeRecepcionCompra(recepcionCompraId!.Value);
     }
 }
