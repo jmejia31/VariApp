@@ -80,7 +80,7 @@ Estado operativo controlado por `COLA`:
 - [x] N0.7.E Frontend/UX.
 - [x] N0.7.F RBAC, auditoría, seguridad y observabilidad — permisos relacionales, auditoría crítica transaccional y correlación HTTP certificados.
 - [x] N0.7.G QA, regresión y CI.
-- [x] N0.7.H Documentación y certificación — fuente canónica `docs/ERP_N0_7_AJUSTE_INVENTARIO.md`; SHA funcional `cd5c1f058fc7a24fd477a4c9e8cda7cff4c99850`; CI principal `31808933744`, aceptación integral `31808933692` y M13 `31808933833` terminaron SUCCESS completo, incluido runtime/Playwright y dictamen automatizado final.
+- [x] N0.7.H Documentación/certificación — fuente canónica `docs/ERP_N0_7_AJUSTE_INVENTARIO.md`; SHA funcional `cd5c1f058fc7a24fd477a4c9e8cda7cff4c99850`; CI principal `31808933744`, aceptación integral `31808933692` y M13 `31808933833` terminaron SUCCESS completo, incluido runtime/Playwright y dictamen automatizado final.
 
 ## ERP-N0.8 — Migraciones y limpieza
 
@@ -227,10 +227,12 @@ ERP-N0.5, ERP-N0.6, ERP-N0.7 y ERP-N0.8 están formalmente cerrados. `GATE-N0=LI
 - [x] N2.2.D Aplicación/servicios/API — repositorio/servicio/controller, filtros/paginación, ProblemDetails, snapshots e idempotencia durable; cierre hasta `a5340f991b0f93438ac184afeac41cc9ed82a756`.
 - [x] N2.2.E Frontend/UX — shell/listado E.1 `26a7eada...`, create/edit/detalle E.2 `9ede060d...` y lifecycle aprobación/cancelación E.3 `f9000061...`, todos certificados.
 - [x] N2.2.F RBAC/auditoría/seguridad/observabilidad — permisos relacionales exactos, auditoría transaccional, correlation segura y snapshot EF reconciliado hasta `1eb26cf60a3d4e1e37f9c89b60929f432de3c1ac`.
-- [x] N2.2.G QA/regresión/CI — G.1 backend/seguridad/idempotencia `23fa5ac6...`; G.2 frontend/E2E/performance y G.3 MySQL/migración sobre `b4d477e2de25077c459d02b479968c93c93bc910`; Development `32218997006`, Acceptance `32218996971`, Fase8 `32218996994`, M10 `32218996973` y M13 `32218996978` SUCCESS.
-- [ ] N2.2.H Documentación/certificación — paquete canónico publicado; validar HEAD documental, reconciliar `CHANGELOG_AI.md`/VAEP y cerrar formalmente antes de N2.3.A.
+- [x] N2.2.G QA/regresión/CI — G.1 backend/seguridad/idempotencia `23fa5ac6...`; G.2/G.3 `b4d477e2de25077c459d02b479968c93c93bc910`; Development `32218997006`, Acceptance `32218996971`, Fase8 `32218996994`, M10 `32218996973` y M13 `32218996978` SUCCESS.
+- [ ] N2.2.H Documentación/certificación — paquete canónico publicado; reconciliación VAEP v3.5 dividida sobre BASE_HEAD común `74f362faff440cf514e9c412225a1b619f1cb8ad`:
+  - [x] N2.2.H.1 ChatGPT — `TASKS.md` reconciliado contra evidencia funcional existente y `CHANGELOG_AI.md` verificado sin reescritura histórica redundante; tablero VAEP actualizado.
+  - [ ] N2.2.H.2 Jules — revisión independiente y, si procede, corrección exclusiva de `docs/CERTIFICACION_N2_2_ORDEN_COMPRA.md`; pendiente de despacho/resultado Jules sobre el mismo BASE_HEAD.
 
-**ERP-N2.2 permanece en cierre documental N2.2.H. Siguiente foco bloqueado hasta certificación: `N2.3.A — Recepción de mercancía — Auditoría y preflight`.**
+**ERP-N2.2 conserva certificación funcional completa; el cierre documental H permanece abierto únicamente por H.2 + cross-review final. `N2.3.F` continúa bloqueado hasta `N2.2.H=LISTO`; N2.3.A–E ya fueron ejecutados/certificados por VAEP.**
 
 ## Fuentes VAEP v2
 
@@ -238,10 +240,3 @@ Plan rector:
 https://docs.google.com/document/d/1rWGOP_Z64kM4Q2NZbrTvge3ReqJkJ_vJmhByogbPbR8/edit
 
 Tablero:
-https://docs.google.com/spreadsheets/d/19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY/edit
-
-Protocolo: `PLAN_EJECUCION_AUTONOMA.md`.
-
-## Continuidad
-
-En nueva conversación/sesión: confirmar proyecto/repo/rama; leer `AGENTS.md`, `PROJECT_CONTEXT.md`, este archivo y última entrada relevante de `CHANGELOG_AI.md`. Si es ejecución autónoma, leer además `PLAN_EJECUCION_AUTONOMA.md` y el tablero VAEP. Revisar solo commits/archivos que cambiaron y continuar sin reindexar el proyecto.
