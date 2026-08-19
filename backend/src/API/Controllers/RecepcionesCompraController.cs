@@ -38,6 +38,16 @@ public sealed class RecepcionesCompraController : ControllerBase
             : Ok(ApiResponse<RecepcionCompraDto>.Ok(recepcion));
     }
 
+    [HttpGet("ordenes/{ordenCompraId:int}/saldo")]
+    [RequierePermiso(ModuloSistema.Compras, AccionPermiso.Ver)]
+    public async Task<IActionResult> GetSaldoOrden(int ordenCompraId)
+    {
+        var saldo = await _service.GetSaldoOrdenAsync(ordenCompraId);
+        return saldo is null
+            ? Problem(statusCode: StatusCodes.Status404NotFound, title: "Orden de compra no encontrada", detail: "No existe una orden de compra con el identificador indicado.")
+            : Ok(ApiResponse<RecepcionCompraSaldoOrdenDto>.Ok(saldo));
+    }
+
     [HttpPost]
     [RequierePermiso(ModuloSistema.Compras, AccionPermiso.Crear)]
     public async Task<IActionResult> Create(
