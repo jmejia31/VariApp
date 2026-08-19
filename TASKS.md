@@ -217,7 +217,20 @@ ERP-N0.5, ERP-N0.6, ERP-N0.7 y ERP-N0.8 están formalmente cerrados. `GATE-N0=LI
 - [x] N2.1.G QA/regresión/CI — baseline `a1a6f699cbad0186d0e0d7d7ac7f366c51009f7c`; CI `32172981351` SUCCESS, incluido frontend, backend, MySQL y 994/994 pruebas backend.
 - [x] N2.1.H Documentación/certificación — ADR, documento canónico y runbook publicados en `d8760bff2e9322e6f09612f64a89c2de888aa9d8`; `TASKS.md`, `CHANGELOG_AI.md` y VAEP reconciliados en el changeset de cierre.
 
-**ERP-N2.1 queda formalmente cerrado. Siguiente foco FINISH_FIRST: `N2.2.A — Orden de compra — Auditoría y preflight`.**
+**ERP-N2.1 queda formalmente cerrado.**
+
+## ERP-N2.2 — Orden de compra
+
+- [x] N2.2.A Auditoría y preflight — `docs/ERP_N2_2_ORDEN_COMPRA_PREFLIGHT.md`; OrdenCompra separada de SolicitudCompra/Compra/Recepción/Factura y frontera de no-stock definida.
+- [x] N2.2.B Dominio y contratos — agregado/detalle, lifecycle, moneda, proveedor, totales e invariantes; baseline `88047cde42929c1b2dcd8faf77da1c6543a2f2a9` + fix `f17983ef49bb8f5032e6fb328564f36c02f103b9`.
+- [x] N2.2.C Persistencia/migración/datos — migración `20260818204700_N2_2_OrdenCompraPersistencia`, guards fail-closed y MySQL 8.4 certificados; `adff03723b4336b570328179e468e8470e611b95`, M12 `32184108722` SUCCESS.
+- [x] N2.2.D Aplicación/servicios/API — repositorio/servicio/controller, filtros/paginación, ProblemDetails, snapshots e idempotencia durable; cierre hasta `a5340f991b0f93438ac184afeac41cc9ed82a756`.
+- [x] N2.2.E Frontend/UX — shell/listado E.1 `26a7eada...`, create/edit/detalle E.2 `9ede060d...` y lifecycle aprobación/cancelación E.3 `f9000061...`, todos certificados.
+- [x] N2.2.F RBAC/auditoría/seguridad/observabilidad — permisos relacionales exactos, auditoría transaccional, correlation segura y snapshot EF reconciliado hasta `1eb26cf60a3d4e1e37f9c89b60929f432de3c1ac`.
+- [x] N2.2.G QA/regresión/CI — G.1 backend/seguridad/idempotencia `23fa5ac6...`; G.2 frontend/E2E/performance y G.3 MySQL/migración sobre `b4d477e2de25077c459d02b479968c93c93bc910`; Development `32218997006`, Acceptance `32218996971`, Fase8 `32218996994`, M10 `32218996973` y M13 `32218996978` SUCCESS.
+- [ ] N2.2.H Documentación/certificación — paquete canónico publicado; validar HEAD documental, reconciliar `CHANGELOG_AI.md`/VAEP y cerrar formalmente antes de N2.3.A.
+
+**ERP-N2.2 permanece en cierre documental N2.2.H. Siguiente foco bloqueado hasta certificación: `N2.3.A — Recepción de mercancía — Auditoría y preflight`.**
 
 ## Fuentes VAEP v2
 
