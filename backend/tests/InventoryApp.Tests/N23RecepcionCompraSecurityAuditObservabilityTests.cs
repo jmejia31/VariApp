@@ -63,6 +63,7 @@ public sealed class N23RecepcionCompraSecurityAuditObservabilityTests
             Mock.Of<IOrdenCompraRepository>(),
             Mock.Of<IAlmacenRepository>(),
             Mock.Of<IUbicacionAlmacenRepository>(),
+            Mock.Of<IMovimientoInventarioRepository>(),
             new RecepcionCompraExistenciaMaterializador(Mock.Of<IExistenciaVarianteConcurrencyService>()),
             new RecepcionCompraKardexRegistrar(Mock.Of<IKardexMovimientoWriter>(), currentUser.Object),
             currentUser.Object,
@@ -75,6 +76,75 @@ public sealed class N23RecepcionCompraSecurityAuditObservabilityTests
             await Assert.ThrowsAsync<ForbiddenAccessException>(() => service.AnularAsync(44, new() { Motivo = "QA" }));
 
         Assert.Equal(0, unitOfWork.Calls);
+    }
+
+    [Fact]
+    public async Task Anular_con_movimientos_posteriores_falla_antes_de_revertir_y_persistir()
+    {
+        var detalle = new RecepcionCompraDetalle
+        {
+            OrdenCompraDetalleId = 101,
+            ProductoId = 20,
+            ProductoVarianteId = 30,
+            AlmacenId = 40,
+            CostoUnitarioSnapshot = 12.50m
+        };
+        detalle.EstablecerCantidades(5m);
+
+        var recepcion = new RecepcionCompra
+        {
+            Id = 44,
+            NumeroRecepcion = "RC-GUARD-44",
+            OrdenCompraId = 10,
+            Detalles = new List<RecepcionCompraDetalle> { detalle }
+        };
+        recepcion.Confirmar(7, "qa", DateTime.UtcNow.AddMinutes(-5));
+
+        var repository = new Mock<IRecepcionCompraRepository>(MockBehavior.Strict);
+        repository.Setup(x => x.GetByIdForUpdateAsync(44)).ReturnsAsync(recepcion);
+
+        var movimientos = new Mock<IMovimientoInventarioRepository>(MockBehavior.Strict);
+        movimientos.Setup(x => x.ExisteMovimientoPosteriorRecepcionAsync(44)).ReturnsAsync(true);
+
+        var currentUser = new Mock<ICurrentUserService>(MockBehavior.Loose);
+        currentUser.SetupGet(x => x.EstaAutenticado).Returns(true);
+        currentUser.SetupGet(x => x.UsuarioId).Returns(7);
+        currentUser.SetupGet(x => x.NombreUsuario).Returns("qa");
+
+        var auditoria = new Mock<IAuditoriaService>(MockBehavior.Strict);
+        var unitOfWork = new CountingUnitOfWork();
+        var service = new RecepcionCompraService(
+            repository.Object,
+            Mock.Of<IOrdenCompraRepository>(),
+            Mock.Of<IAlmacenRepository>(),
+            Mock.Of<IUbicacionAlmacenRepository>(),
+            movimientos.Object,
+            new RecepcionCompraExistenciaMaterializador(Mock.Of<IExistenciaVarianteConcurrencyService>(MockBehavior.Strict)),
+            new RecepcionCompraKardexRegistrar(Mock.Of<IKardexMovimientoWriter>(MockBehavior.Strict), currentUser.Object),
+            currentUser.Object,
+            unitOfWork,
+            auditoria.Object);
+
+        var ex = await Assert.ThrowsAsync<BusinessRuleException>(
+            () => service.AnularAsync(44, new() { Motivo = "Reversión QA" }));
+
+        Assert.Contains("movimientos de inventario posteriores", ex.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal(EstadoRecepcionCompra.Recibida, recepcion.Estado);
+        Assert.Null(recepcion.FechaAnulacionUtc);
+        Assert.Equal(1, unitOfWork.Calls);
+        movimientos.Verify(x => x.ExisteMovimientoPosteriorRecepcionAsync(44), Times.Once);
+        repository.Verify(x => x.SaveChangesAsync(), Times.Never);
+        auditoria.Verify(
+            x => x.RegistrarEstrictoAsync(
+                It.IsAny<ModuloSistema>(),
+                It.IsAny<AccionPermiso>(),
+                It.IsAny<string>(),
+                It.IsAny<int?>(),
+                It.IsAny<string?>(),
+                It.IsAny<object?>(),
+                It.IsAny<object?>(),
+                It.IsAny<string?>()),
+            Times.Never);
     }
 
     [Fact]
