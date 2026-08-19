@@ -26,6 +26,7 @@ public interface IMovimientoInventarioRepository
     Task<bool> ExisteMovimientoPosteriorAsync(
         int ultimoMovimientoOriginalId,
         IReadOnlyCollection<int> productoIds);
+    Task<bool> ExisteMovimientoPosteriorRecepcionAsync(int recepcionCompraId);
 }
 
 public static class MovimientoInventarioRepositoryExtensions
