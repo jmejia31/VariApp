@@ -119,7 +119,7 @@ export class RecepcionesCompraShellComponent implements OnInit {
       ordenCompraId: this.ordenCompraId,
       estado: (this.estado || null) as EstadoRecepcionCompraNombre | null,
       desdeUtc: this.desde ? new Date(`${this.desde}T00:00:00`).toISOString() : null,
-      hastaUtc: this.hasta ? new Date(`${this.hasta}T23:59:59`).toISOString() : null
+      hastaUtc: this.finDiaUtc(this.hasta)
     }).pipe(finalize(() => this.loading.set(false))).subscribe({
       next: response => { this.recepciones.set(response.data?.items ?? []); this.totalCount.set(response.data?.totalCount ?? 0); },
       error: err => this.error.set(err?.error?.detail || err?.error?.message || 'No fue posible cargar las recepciones de compra.')
@@ -134,5 +134,13 @@ export class RecepcionesCompraShellComponent implements OnInit {
 
   etiquetaEstado(estado: EstadoRecepcionCompra): string {
     return ({ '1': 'Borrador', '2': 'Recibida', '3': 'Anulada', Borrador: 'Borrador', Recibida: 'Recibida', Anulada: 'Anulada' } as Record<string,string>)[String(estado)] ?? String(estado);
+  }
+
+  private finDiaUtc(fecha: string): string | null {
+    if (!fecha) return null;
+    const siguienteMedianocheLocal = new Date(`${fecha}T00:00:00`);
+    siguienteMedianocheLocal.setDate(siguienteMedianocheLocal.getDate() + 1);
+    const ultimoSegundo = new Date(siguienteMedianocheLocal.getTime() - 1000).toISOString();
+    return ultimoSegundo.replace(/\.\d{3}Z$/, '.9999999Z');
   }
 }
