@@ -121,17 +121,18 @@ test.describe('OrdenCompra lifecycle - aprobación, cancelación y RBAC', () => 
 
     page.on('dialog', dialog => void dialog.accept());
     await abrirDetalle(page);
+    const detalle = page.locator('article.detail-panel');
 
-    await page.getByRole('button', { name: 'Enviar a aprobación' }).click();
-    await expect(page.getByRole('status')).toContainText('Orden enviada a aprobación correctamente.');
-    await expect(page.getByText('Pendiente de aprobación', { exact: true })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Aprobar' })).toBeVisible();
+    await detalle.getByRole('button', { name: 'Enviar a aprobación' }).click();
+    await expect(detalle.getByRole('status')).toContainText('Orden enviada a aprobación correctamente.');
+    await expect(detalle.getByText('Pendiente de aprobación', { exact: true })).toBeVisible();
+    await expect(detalle.getByRole('button', { name: 'Aprobar' })).toBeVisible();
 
-    await page.getByRole('button', { name: 'Aprobar' }).click();
-    await expect(page.getByRole('status')).toContainText('Orden de compra aprobada correctamente.');
-    await expect(page.getByText('Aprobada', { exact: true })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Aprobar' })).toHaveCount(0);
-    await expect(page.getByRole('button', { name: 'Cancelar' })).toHaveCount(0);
+    await detalle.getByRole('button', { name: 'Aprobar' }).click();
+    await expect(detalle.getByRole('status')).toContainText('Orden de compra aprobada correctamente.');
+    await expect(detalle.getByText('Aprobada', { exact: true })).toBeVisible();
+    await expect(detalle.getByRole('button', { name: 'Aprobar' })).toHaveCount(0);
+    await expect(detalle.getByRole('button', { name: 'Cancelar' })).toHaveCount(0);
   });
 
   test('cancelación exige motivo y envía la causa al backend', async ({ page }) => {
@@ -144,10 +145,11 @@ test.describe('OrdenCompra lifecycle - aprobación, cancelación y RBAC', () => 
       void dialog.accept();
     });
     await abrirDetalle(page);
+    const detalle = page.locator('article.detail-panel');
 
-    await page.getByRole('button', { name: 'Cancelar' }).click();
-    await expect(page.getByRole('status')).toContainText('Orden de compra cancelada correctamente.');
-    await expect(page.getByText('Cancelada', { exact: true })).toBeVisible();
+    await detalle.getByRole('button', { name: 'Cancelar' }).click();
+    await expect(detalle.getByRole('status')).toContainText('Orden de compra cancelada correctamente.');
+    await expect(detalle.getByText('Cancelada', { exact: true })).toBeVisible();
     expect(motivoCapturado).toBe('Proveedor no puede cumplir la fecha');
   });
 
@@ -155,9 +157,10 @@ test.describe('OrdenCompra lifecycle - aprobación, cancelación y RBAC', () => 
     await loginConPermisos(page, ['Dashboard:Ver', 'Compras:Ver']);
     await mockOrdenes(page, 'Borrador');
     await abrirDetalle(page);
+    const detalle = page.locator('article.detail-panel');
 
-    await expect(page.getByRole('button', { name: 'Enviar a aprobación' })).toHaveCount(0);
-    await expect(page.getByRole('button', { name: 'Aprobar' })).toHaveCount(0);
-    await expect(page.getByRole('button', { name: 'Cancelar' })).toHaveCount(0);
+    await expect(detalle.getByRole('button', { name: 'Enviar a aprobación' })).toHaveCount(0);
+    await expect(detalle.getByRole('button', { name: 'Aprobar' })).toHaveCount(0);
+    await expect(detalle.getByRole('button', { name: 'Cancelar' })).toHaveCount(0);
   });
 });
