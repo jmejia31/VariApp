@@ -71,6 +71,9 @@ namespace InventoryApp.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_RecepcionesCompra", x => x.Id);
+                    table.CheckConstraint(
+                        "CK_RecepcionesCompra_IdempotenciaAtomica",
+                        "(IdempotencyKey IS NULL AND IdempotencyFingerprint IS NULL) OR (IdempotencyKey IS NOT NULL AND CHAR_LENGTH(TRIM(IdempotencyKey)) > 0 AND IdempotencyFingerprint IS NOT NULL AND CHAR_LENGTH(IdempotencyFingerprint) = 64)");
                     table.ForeignKey(
                         name: "FK_RecepcionesCompra_OrdenesCompra_OrdenCompraId",
                         column: x => x.OrdenCompraId,
@@ -116,6 +119,7 @@ namespace InventoryApp.Infrastructure.Migrations
                     table.CheckConstraint("CK_RecepcionCompraDetalles_CantidadesNoNegativas", "CantidadRecibida >= 0 AND CantidadDanada >= 0 AND CantidadFaltante >= 0 AND CantidadSobrante >= 0");
                     table.CheckConstraint("CK_RecepcionCompraDetalles_BalanceFisico", "CantidadDanada + CantidadSobrante <= CantidadRecibida");
                     table.CheckConstraint("CK_RecepcionCompraDetalles_ActividadFisica", "CantidadRecibida > 0 OR CantidadFaltante > 0");
+                    table.CheckConstraint("CK_RecepcionCompraDetalles_CostoNoNegativo", "CostoUnitarioSnapshot >= 0");
                     table.ForeignKey("FK_RecepcionCompraDetalles_RecepcionesCompra_RecepcionCompraId", x => x.RecepcionCompraId, "RecepcionesCompra", "Id", onDelete: ReferentialAction.Cascade);
                     table.ForeignKey("FK_RecepcionCompraDetalles_OrdenCompraDetalles_OrdenCompraDetalleId", x => x.OrdenCompraDetalleId, "OrdenCompraDetalles", "Id", onDelete: ReferentialAction.Restrict);
                     table.ForeignKey("FK_RecepcionCompraDetalles_Productos_ProductoId", x => x.ProductoId, "Productos", "Id", onDelete: ReferentialAction.Restrict);
