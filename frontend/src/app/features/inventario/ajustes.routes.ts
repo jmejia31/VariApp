@@ -54,6 +54,12 @@ export const AJUSTES_INVENTARIO_ROUTES: Routes = [
     data: { modulo: 'Inventario', accion: 'Ver' },
     loadComponent: () => import('./ajuste-detail.component').then(m => m.AjusteDetailComponent)
   },
+  {
+    path: 'recepciones-compra',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Compras', accion: 'Ver' },
+    loadComponent: () => import('../recepciones-compra/recepciones-compra-shell.component').then(m => m.RecepcionesCompraShellComponent)
+  },
   ...TRANSFERENCIAS_INVENTARIO_ROUTES,
   ...CONTEOS_INVENTARIO_ROUTES,
   ...RESERVAS_INVENTARIO_ROUTES
