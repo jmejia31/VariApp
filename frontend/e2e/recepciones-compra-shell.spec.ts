@@ -57,7 +57,32 @@ function respuestaListado() {
   };
 }
 
+async function interceptarListado(page: Page, urls?: string[]): Promise<void> {
+  await page.route('**/recepciones-compra**', async route => {
+    const request = route.request();
+    const requestUrl = new URL(request.url());
+    const esListadoApi = request.method() === 'GET'
+      && request.resourceType() !== 'document'
+      && requestUrl.pathname === '/recepciones-compra';
+    if (!esListadoApi) {
+      await route.continue();
+      return;
+    }
+    urls?.push(request.url());
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(respuestaListado())
+    });
+  });
+}
+
 test.describe('Recepción de mercancía - shell y acceso', () => {
+  test('redirige a login sin sesión autenticada', async ({ page }) => {
+    await page.goto('/recepciones-compra');
+    await expect(page).toHaveURL(/\/login(?:\?|$)/);
+  });
+
   test('deniega la ruta a un usuario autenticado sin Compras:Ver', async ({ page }) => {
     await loginConPermisos(page, ['Dashboard:Ver']);
 
@@ -65,27 +90,21 @@ test.describe('Recepción de mercancía - shell y acceso', () => {
     await expect(page).toHaveURL(/\/dashboard(?:\?|$)/);
   });
 
+  test('oculta Nueva recepción cuando existe Compras:Ver pero falta Compras:Crear', async ({ page }) => {
+    await loginConPermisos(page, ['Dashboard:Ver', 'Compras:Ver']);
+    await interceptarListado(page);
+
+    await page.goto('/recepciones-compra');
+
+    await expect(page.getByRole('heading', { name: 'Recepción de mercancía' })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Nueva recepción/i })).toHaveCount(0);
+  });
+
   test('lista recepciones y aplica filtros contra el contrato paginado', async ({ page }) => {
     await loginConPermisos(page, ['Dashboard:Ver', 'Compras:Ver']);
 
     const urls: string[] = [];
-    await page.route('**/recepciones-compra**', async route => {
-      const request = route.request();
-      const requestUrl = new URL(request.url());
-      const esListadoApi = request.method() === 'GET'
-        && request.resourceType() !== 'document'
-        && requestUrl.pathname === '/recepciones-compra';
-      if (!esListadoApi) {
-        await route.continue();
-        return;
-      }
-      urls.push(request.url());
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify(respuestaListado())
-      });
-    });
+    await interceptarListado(page, urls);
 
     await page.goto('/recepciones-compra');
     await expect(page.getByRole('heading', { name: 'Recepción de mercancía' })).toBeVisible();
