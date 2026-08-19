@@ -12,5 +12,7 @@ public enum CausaMovimientoInventario
     ReversionConsumo = 7,
     TransferenciaDespacho = 8,
     TransferenciaRecepcion = 9,
-    TransferenciaCancelacion = 10
+    TransferenciaCancelacion = 10,
+    RecepcionCompra = 11,
+    AnulacionRecepcionCompra = 12
 }
