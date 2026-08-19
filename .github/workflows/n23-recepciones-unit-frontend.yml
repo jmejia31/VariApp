@@ -24,7 +24,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: n23-recepciones-unit-frontend-${{ github.ref }}
@@ -37,6 +37,8 @@ jobs:
     steps:
       - name: Checkout Desarrollo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node 20
         uses: actions/setup-node@v4
@@ -64,6 +66,21 @@ jobs:
       - name: Build frontend production
         working-directory: frontend
         run: npm run build:prod
+
+      - name: Materialize calibrated package lock on Desarrollo
+        if: github.event_name == 'push' && github.ref == 'refs/heads/Desarrollo'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add frontend/package.json frontend/package-lock.json
+          if git diff --cached --quiet; then
+            echo "Calibrated dependencies already materialized."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "test(N2.3.G.1): fijar Vitest y jsdom reproducibles [ChatGPT]"
+          git push origin HEAD:Desarrollo
 
       - name: Upload calibrated lockfiles
         if: always()
