@@ -40,6 +40,19 @@ describe('RecepcionesCompraShellComponent RBAC', () => {
     expect(router.navigate).not.toHaveBeenCalled();
   });
 
+  it('pagina de forma explícita sin perder el tamaño solicitado', () => {
+    const { component, service } = crear(['Compras:Ver']);
+    component.ngOnInit();
+    service.getPaged.mockClear();
+
+    component.cambiarPagina({ pageIndex: 2, pageSize: 50, length: 180, previousPageIndex: 1 });
+
+    expect(component.page).toBe(3);
+    expect(component.pageSize).toBe(50);
+    expect(service.getPaged).toHaveBeenCalledTimes(1);
+    expect(service.getPaged).toHaveBeenCalledWith(expect.objectContaining({ page: 3, pageSize: 50 }));
+  });
+
   it('sanitiza el error del backend y no expone detail/message sensibles', () => {
     const { component, service } = crear(['Compras:Ver']);
     service.getPaged.mockImplementation(() => throwError(() => ({
