@@ -6,55 +6,43 @@ using Xunit;
 
 namespace InventoryApp.Tests;
 
-public class MovimientoInventarioCorrelationExtensionsTests
+public sealed class MovimientoInventarioCorrelationExtensionsTests
 {
     [Fact]
-    public async Task AddConOrigenTipadoAsync_ConContextoFisico_MaterializaContextoCompleto()
+    public async Task AddConOrigenTipadoCorrelacionadoAsync_NormalizaCorrelationId()
     {
         var repository = new RepositorySpy();
-        var movimiento = new MovimientoInventario();
-        var contexto = ContextoFisicoMovimientoInventario.Crear(
-            productoVarianteId: 7,
-            almacenId: 11,
-            ubicacionAlmacenId: 13,
-            correlationId: "ajuste-99-abc");
 
-        await repository.AddConOrigenTipadoAsync(
-            movimiento,
-            OrigenMovimientoInventario.DesdeAjusteInventario(99),
-            contexto);
+        await repository.AddConOrigenTipadoCorrelacionadoAsync(
+            new MovimientoInventario(),
+            OrigenMovimientoInventario.DesdeCompra(7),
+            "  compra:7:confirmar  ");
 
-        Assert.Same(movimiento, repository.UltimoMovimiento);
-        Assert.Equal(7, movimiento.ProductoVarianteId);
-        Assert.Equal(11, movimiento.AlmacenId);
-        Assert.Equal(13, movimiento.UbicacionAlmacenId);
-        Assert.Equal("ajuste-99-abc", movimiento.CorrelationId);
-        Assert.Equal(99, repository.UltimoOrigen?.AjusteInventarioId);
+        Assert.NotNull(repository.UltimoMovimiento);
+        Assert.Equal("compra:7:confirmar", repository.UltimoMovimiento!.CorrelationId);
+        Assert.NotNull(repository.UltimoOrigen);
+        Assert.Equal(7, repository.UltimoOrigen!.DocumentoId);
     }
 
     [Fact]
-    public async Task AddConOrigenTipadoCorrelacionadoAsync_NormalizaYPersisteCorrelationId()
+    public async Task AddConOrigenTipadoCorrelacionadoAsync_CorrelationIdVacio_FallaCerrado()
     {
         var repository = new RepositorySpy();
-        var movimiento = new MovimientoInventario();
 
-        await repository.AddConOrigenTipadoCorrelacionadoAsync(
-            movimiento,
-            OrigenMovimientoInventario.DesdeCompra(42),
-            "  compra-42-abc  ");
+        await Assert.ThrowsAsync<ArgumentException>(() =>
+            repository.AddConOrigenTipadoCorrelacionadoAsync(
+                new MovimientoInventario(),
+                OrigenMovimientoInventario.DesdeCompra(1),
+                "   "));
 
-        Assert.Same(movimiento, repository.UltimoMovimiento);
-        Assert.Equal("compra-42-abc", movimiento.CorrelationId);
-        Assert.Equal(42, repository.UltimoOrigen?.CompraId);
-        Assert.Null(movimiento.AlmacenId);
-        Assert.Null(movimiento.UbicacionAlmacenId);
+        Assert.Null(repository.UltimoMovimiento);
     }
 
     [Theory]
-    [InlineData("")]
-    [InlineData("   ")]
-    [InlineData("compra/42")]
-    public async Task AddConOrigenTipadoCorrelacionadoAsync_CorrelationIdInvalido_FallaCerrado(string correlationId)
+    [InlineData("compra:1 con espacio")]
+    [InlineData("compra/1")]
+    [InlineData("compra#1")]
+    public async Task AddConOrigenTipadoCorrelacionadoAsync_CorrelationIdInseguro_FallaCerrado(string correlationId)
     {
         var repository = new RepositorySpy();
 
@@ -125,6 +113,9 @@ public class MovimientoInventarioCorrelationExtensionsTests
         public Task<bool> ExisteMovimientoPosteriorAsync(
             int ultimoMovimientoOriginalId,
             IReadOnlyCollection<int> productoIds) =>
+            Task.FromResult(false);
+
+        public Task<bool> ExisteMovimientoPosteriorRecepcionAsync(int recepcionCompraId) =>
             Task.FromResult(false);
     }
 }
