@@ -11,7 +11,8 @@ public enum TipoOrigenMovimientoInventario
     Venta = 2,
     ConsumoInsumo = 3,
     AjusteInventario = 4,
-    TransferenciaInventario = 5
+    TransferenciaInventario = 5,
+    RecepcionCompra = 6
 }
 
 /// <summary>
