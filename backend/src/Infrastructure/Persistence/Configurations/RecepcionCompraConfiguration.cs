@@ -12,7 +12,12 @@ public sealed class RecepcionCompraConfiguration : IEntityTypeConfiguration<Rece
 {
     public void Configure(EntityTypeBuilder<RecepcionCompra> builder)
     {
-        builder.ToTable("RecepcionesCompra");
+        builder.ToTable("RecepcionesCompra", table =>
+        {
+            table.HasCheckConstraint(
+                "CK_RecepcionesCompra_IdempotenciaAtomica",
+                "(IdempotencyKey IS NULL AND IdempotencyFingerprint IS NULL) OR (IdempotencyKey IS NOT NULL AND CHAR_LENGTH(TRIM(IdempotencyKey)) > 0 AND IdempotencyFingerprint IS NOT NULL AND CHAR_LENGTH(IdempotencyFingerprint) = 64)");
+        });
 
         builder.Property(x => x.Id).ValueGeneratedOnAdd();
         builder.Property(x => x.NumeroRecepcion).HasMaxLength(40).IsRequired();
