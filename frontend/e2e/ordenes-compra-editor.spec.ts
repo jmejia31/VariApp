@@ -23,7 +23,8 @@ async function mockCatalogos(page: Page): Promise<void> {
 
 async function seleccionar(page: Page, control: string, opcion: string): Promise<void> {
   const select = page.locator(`mat-select[formcontrolname="${control}"]`).first();
-  await select.click();
+  await select.focus();
+  await select.press('Enter');
   await expect(select).toHaveAttribute('aria-expanded', 'true');
   await page.getByRole('option', { name: opcion, exact: true }).click();
   await expect(select).toHaveAttribute('aria-expanded', 'false');
