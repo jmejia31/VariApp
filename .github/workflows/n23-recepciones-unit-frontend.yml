@@ -11,6 +11,16 @@ on:
       - "frontend/package-lock.json"
       - "frontend/src/app/features/recepciones-compra/**/*.spec.ts"
       - ".github/workflows/n23-recepciones-unit-frontend.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "frontend/angular.json"
+      - "frontend/tsconfig.spec.json"
+      - "frontend/package.json"
+      - "frontend/package-lock.json"
+      - "frontend/src/app/features/recepciones-compra/**/*.spec.ts"
+      - ".github/workflows/n23-recepciones-unit-frontend.yml"
   workflow_dispatch:
 
 permissions:
