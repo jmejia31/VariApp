@@ -70,11 +70,13 @@ test.describe('Recepción de mercancía - shell y acceso', () => {
 
     const urls: string[] = [];
     await page.route('**/recepciones-compra**', async route => {
-      if (route.request().method() !== 'GET') {
+      const request = route.request();
+      const requestUrl = new URL(request.url());
+      if (request.method() !== 'GET' || !requestUrl.pathname.startsWith('/api/recepciones-compra')) {
         await route.continue();
         return;
       }
-      urls.push(route.request().url());
+      urls.push(request.url());
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
