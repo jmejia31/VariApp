@@ -67,7 +67,7 @@ async function mockCatalogos(page: Page): Promise<void> {
 
 async function mockListado(page: Page): Promise<void> {
   await page.route(/\/solicitudes-compra(?:\?.*)?$/, route => {
-    if (route.request().method() !== 'GET') return route.fallback();
+    if (route.request().method() !== 'GET' || route.request().resourceType() === 'document') return route.fallback();
     return route.fulfill({
       status: 200,
       contentType: 'application/json',
