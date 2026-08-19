@@ -58,6 +58,18 @@ function recepcion(estado: 1 | 2 | 3) {
   };
 }
 
+async function interceptarDetalle(page: Page, estadoInicial: 1 | 2 | 3): Promise<void> {
+  await page.route('**/recepciones-compra/41**', async route => {
+    const request = route.request();
+    const url = new URL(request.url());
+    if (request.method() === 'GET' && request.resourceType() !== 'document' && url.pathname === '/recepciones-compra/41') {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true, message: '', data: recepcion(estadoInicial) }) });
+      return;
+    }
+    await route.continue();
+  });
+}
+
 test.describe('Recepción de mercancía - formulario y detalle', () => {
   test('crea un borrador desde una orden aprobada y almacén activo sin IDs manuales', async ({ page }) => {
     await page.route('**/ordenes-compra**', async route => {
@@ -116,6 +128,17 @@ test.describe('Recepción de mercancía - formulario y detalle', () => {
     expect(payload.ordenCompraId).toBe(10);
     expect(payload.detalles).toHaveLength(1);
     expect(payload.detalles[0]).toMatchObject({ ordenCompraDetalleId: 100, almacenId: 2, cantidadRecibida: 5, cantidadDanada: 1, cantidadFaltante: 0, cantidadSobrante: 0 });
+  });
+
+  test('oculta Confirmar y Anular sin grants aunque exista Compras:Ver', async ({ page }) => {
+    await loginConPermisos(page, ['Dashboard:Ver', 'Compras:Ver']);
+    await interceptarDetalle(page, 1);
+
+    await page.goto('/recepciones-compra/41');
+
+    await expect(page.locator('strong.status')).toHaveText('Borrador');
+    await expect(page.getByTestId('confirmar-recepcion')).toHaveCount(0);
+    await expect(page.getByTestId('anular-recepcion')).toHaveCount(0);
   });
 
   test('respeta estado y permisos al confirmar y anular con MatDialog', async ({ page }) => {
