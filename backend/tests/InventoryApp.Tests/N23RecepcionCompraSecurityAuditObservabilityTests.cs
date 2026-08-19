@@ -143,6 +143,8 @@ public sealed class N23RecepcionCompraSecurityAuditObservabilityTests
                 It.IsAny<string?>(),
                 It.IsAny<object?>(),
                 It.IsAny<object?>(),
+                It.IsAny<string?>(),
+                It.IsAny<string>(),
                 It.IsAny<string?>()),
             Times.Never);
     }
