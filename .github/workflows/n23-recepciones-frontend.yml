@@ -6,6 +6,7 @@ on:
     paths:
       - .github/workflows/n23-recepciones-frontend.yml
       - frontend/e2e/recepciones-compra-shell.spec.ts
+      - frontend/e2e/recepcion-compra-form-detail.spec.ts
       - frontend/src/app/core/models/recepcion-compra.model.ts
       - frontend/src/app/services/recepcion-compra.service.ts
       - frontend/src/app/features/recepciones-compra/**
@@ -17,6 +18,7 @@ on:
     paths:
       - .github/workflows/n23-recepciones-frontend.yml
       - frontend/e2e/recepciones-compra-shell.spec.ts
+      - frontend/e2e/recepcion-compra-form-detail.spec.ts
       - frontend/src/app/core/models/recepcion-compra.model.ts
       - frontend/src/app/services/recepcion-compra.service.ts
       - frontend/src/app/features/recepciones-compra/**
@@ -34,9 +36,9 @@ concurrency:
 
 jobs:
   recepciones-frontend:
-    name: Shell, RBAC, listado y filtros
+    name: Shell, formulario, detalle y RBAC
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 40
     services:
       mysql:
         image: mysql:8.4
@@ -118,9 +120,9 @@ jobs:
           done
           cat n23-frontend.log >&2 || true
           exit 1
-      - name: Ejecutar E2E N2.3.E.1
+      - name: Ejecutar E2E N2.3.E.1 y E.2
         working-directory: frontend
-        run: npx playwright test e2e/recepciones-compra-shell.spec.ts --config=playwright.config.ts
+        run: npx playwright test e2e/recepciones-compra-shell.spec.ts e2e/recepcion-compra-form-detail.spec.ts --config=playwright.config.ts
       - name: Publicar evidencia N2.3 frontend
         if: always()
         uses: actions/upload-artifact@v4
