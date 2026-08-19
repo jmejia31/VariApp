@@ -34,15 +34,22 @@ public class RecepcionCompra : AuditableEntity
     {
         if (string.IsNullOrWhiteSpace(key) || key.Trim().Length > 128)
             throw new ArgumentException("La clave de idempotencia es obligatoria y no puede superar 128 caracteres.", nameof(key));
-        if (string.IsNullOrWhiteSpace(fingerprint) || fingerprint.Trim().Length != 64)
+
+        var fingerprintNormalizado = fingerprint?.Trim();
+        if (string.IsNullOrWhiteSpace(fingerprintNormalizado) ||
+            fingerprintNormalizado.Length != 64 ||
+            !fingerprintNormalizado.All(Uri.IsHexDigit))
+        {
             throw new ArgumentException("El fingerprint de idempotencia debe ser SHA-256 hexadecimal.", nameof(fingerprint));
+        }
+
         if (IdempotencyKey is not null && !string.Equals(IdempotencyKey, key.Trim(), StringComparison.Ordinal))
             throw new InvalidOperationException("La clave de idempotencia de una recepción no puede sustituirse.");
-        if (IdempotencyFingerprint is not null && !string.Equals(IdempotencyFingerprint, fingerprint.Trim(), StringComparison.OrdinalIgnoreCase))
+        if (IdempotencyFingerprint is not null && !string.Equals(IdempotencyFingerprint, fingerprintNormalizado, StringComparison.OrdinalIgnoreCase))
             throw new InvalidOperationException("El fingerprint de idempotencia de una recepción no puede sustituirse.");
 
         IdempotencyKey = key.Trim();
-        IdempotencyFingerprint = fingerprint.Trim().ToLowerInvariant();
+        IdempotencyFingerprint = fingerprintNormalizado.ToLowerInvariant();
     }
 
     public void AsegurarEditable()
