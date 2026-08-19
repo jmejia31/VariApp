@@ -9,6 +9,7 @@ on:
       - frontend/src/app/core/models/recepcion-compra.model.ts
       - frontend/src/app/services/recepcion-compra.service.ts
       - frontend/src/app/features/recepciones-compra/**
+      - frontend/src/app/features/inventario/ajustes.routes.ts
       - frontend/src/app/app.routes.ts
       - backend/src/**
   pull_request:
@@ -19,6 +20,7 @@ on:
       - frontend/src/app/core/models/recepcion-compra.model.ts
       - frontend/src/app/services/recepcion-compra.service.ts
       - frontend/src/app/features/recepciones-compra/**
+      - frontend/src/app/features/inventario/ajustes.routes.ts
       - frontend/src/app/app.routes.ts
       - backend/src/**
   workflow_dispatch:
