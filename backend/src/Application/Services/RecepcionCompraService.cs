@@ -18,6 +18,7 @@ public sealed class RecepcionCompraService : IRecepcionCompraService
     private readonly IOrdenCompraRepository _ordenes;
     private readonly IAlmacenRepository _almacenes;
     private readonly IUbicacionAlmacenRepository _ubicaciones;
+    private readonly IMovimientoInventarioRepository _movimientosInventario;
     private readonly RecepcionCompraExistenciaMaterializador _existencias;
     private readonly RecepcionCompraKardexRegistrar _kardex;
     private readonly ICurrentUserService _currentUser;
@@ -29,6 +30,7 @@ public sealed class RecepcionCompraService : IRecepcionCompraService
         IOrdenCompraRepository ordenes,
         IAlmacenRepository almacenes,
         IUbicacionAlmacenRepository ubicaciones,
+        IMovimientoInventarioRepository movimientosInventario,
         RecepcionCompraExistenciaMaterializador existencias,
         RecepcionCompraKardexRegistrar kardex,
         ICurrentUserService currentUser,
@@ -39,6 +41,7 @@ public sealed class RecepcionCompraService : IRecepcionCompraService
         _ordenes = ordenes ?? throw new ArgumentNullException(nameof(ordenes));
         _almacenes = almacenes ?? throw new ArgumentNullException(nameof(almacenes));
         _ubicaciones = ubicaciones ?? throw new ArgumentNullException(nameof(ubicaciones));
+        _movimientosInventario = movimientosInventario ?? throw new ArgumentNullException(nameof(movimientosInventario));
         _existencias = existencias ?? throw new ArgumentNullException(nameof(existencias));
         _kardex = kardex ?? throw new ArgumentNullException(nameof(kardex));
         _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
@@ -252,6 +255,12 @@ public sealed class RecepcionCompraService : IRecepcionCompraService
 
             if (recepcion.Estado != EstadoRecepcionCompra.Recibida)
                 throw new BusinessRuleException("Solo una recepción materializada puede anularse.");
+
+            if (await _movimientosInventario.ExisteMovimientoPosteriorRecepcionAsync(recepcion.Id))
+            {
+                throw new BusinessRuleException(
+                    "No se puede anular la recepción porque existen movimientos de inventario posteriores relacionados.");
+            }
 
             var anterior = Snapshot(recepcion);
             var transiciones = await _existencias.RevertirAsync(recepcion.Detalles);
