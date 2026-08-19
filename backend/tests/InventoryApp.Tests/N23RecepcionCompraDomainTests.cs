@@ -109,7 +109,9 @@ public class N23RecepcionCompraDomainTests
     public void ValidarDocumento_ClaveFisicaDuplicada_FallaCerrado()
     {
         var recepcion = CrearRecepcion();
-        recepcion.Detalles.Add(CrearDetalle());
+        var detalleDuplicado = CrearDetalle();
+        detalleDuplicado.EstablecerCantidades(cantidadRecibida: 1m);
+        recepcion.Detalles.Add(detalleDuplicado);
 
         var error = Assert.Throws<InvalidOperationException>(() => recepcion.ValidarDocumento());
 
