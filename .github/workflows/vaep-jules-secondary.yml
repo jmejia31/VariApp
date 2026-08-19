@@ -5,7 +5,7 @@ on:
     branches:
       - Desarrollo
     paths:
-      - 'vaep/jules/dispatch/*.json'
+      - "vaep/jules/dispatch/*.json"
 
 permissions:
   contents: read
@@ -26,6 +26,7 @@ jobs:
       EXPECTED_BRANCH: Desarrollo
       JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
       GH_TOKEN: ${{ github.token }}
+
     steps:
       - name: Checkout dispatch commit
         uses: actions/checkout@v4
@@ -37,133 +38,242 @@ jobs:
         id: manifest
         shell: bash
         run: |
+          set +e
+
+          mapfile -t added_manifests < <(
+            git diff-tree --no-commit-id --name-only --diff-filter=A -r "$GITHUB_SHA" -- "vaep/jules/dispatch/*.json"
+          )
+          manifest_candidate=""
+          dispatch_id=""
+          task_id=""
+          primary_base=""
+
+          if [[ ${#added_manifests[@]} -eq 1 ]]; then
+            manifest_candidate="${added_manifests[0]}"
+            dispatch_id="$(jq -r '.dispatchId // empty' "$manifest_candidate" 2>/dev/null)"
+            task_id="$(jq -r '.taskId // empty' "$manifest_candidate" 2>/dev/null)"
+            primary_base="$(jq -r '.primaryBaseHead // empty' "$manifest_candidate" 2>/dev/null)"
+          fi
+
+          {
+            printf 'manifest=%s\n' "$manifest_candidate"
+            printf 'dispatch_id=%s\n' "$dispatch_id"
+            printf 'task_id=%s\n' "$task_id"
+            printf 'primary_base=%s\n' "$primary_base"
+          } >> "$GITHUB_OUTPUT"
+
           set -euo pipefail
 
           if [[ -z "${JULES_API_KEY:-}" ]]; then
-            echo 'JULES_API_KEY is not configured.' >&2
+            echo "JULES_API_KEY is not configured." >&2
             exit 20
           fi
 
-          mapfile -t manifests < <(git diff-tree --no-commit-id --name-only --diff-filter=A -r "$GITHUB_SHA" -- 'vaep/jules/dispatch/*.json')
-          if [[ ${#manifests[@]} -ne 1 ]]; then
-            echo "Expected exactly one newly added Jules dispatch manifest; found ${#manifests[@]}." >&2
+          if [[ ${#added_manifests[@]} -ne 1 ]]; then
+            echo "Expected exactly one newly added Jules dispatch manifest; found ${#added_manifests[@]}." >&2
             exit 21
           fi
 
-          manifest="${manifests[0]}"
+          manifest="${added_manifests[0]}"
+          mapfile -t changed_files < <(
+            git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA"
+          )
+          if [[ ${#changed_files[@]} -ne 1 || "${changed_files[0]}" != "$manifest" ]]; then
+            echo "Dispatch commit must change exactly the single new manifest file." >&2
+            printf 'Changed files:\n' >&2
+            printf ' - %s\n' "${changed_files[@]}" >&2
+            exit 22
+          fi
+
           jq -e '
             type == "object" and
-            (.dispatchId | type == "string" and length > 0) and
-            (.taskId | type == "string" and length > 0) and
+            (.dispatchId | type == "string" and test("^[A-Za-z0-9_.-]+$")) and
+            (.taskId | type == "string" and test("^[A-Za-z0-9_.-]+$")) and
             (.expectedBranch == "Desarrollo") and
             (.primaryBaseHead | type == "string" and test("^[0-9a-fA-F]{40}$")) and
             (.prompt | type == "string" and length > 0) and
             (.fileScopeHint | type == "string")
           ' "$manifest" >/dev/null
 
-          dispatch_id=$(jq -r '.dispatchId' "$manifest")
-          task_id=$(jq -r '.taskId' "$manifest")
-          branch=$(jq -r '.expectedBranch' "$manifest")
-          primary_base=$(jq -r '.primaryBaseHead' "$manifest")
+          dispatch_id="$(jq -r '.dispatchId' "$manifest")"
+          task_id="$(jq -r '.taskId' "$manifest")"
+          branch="$(jq -r '.expectedBranch' "$manifest")"
+          primary_base="$(jq -r '.primaryBaseHead' "$manifest")"
 
           if [[ "$branch" != "$EXPECTED_BRANCH" ]]; then
             echo "Refusing unexpected branch: $branch" >&2
-            exit 22
+            exit 23
           fi
 
-          echo "manifest=$manifest" >> "$GITHUB_OUTPUT"
-          echo "dispatch_id=$dispatch_id" >> "$GITHUB_OUTPUT"
-          echo "task_id=$task_id" >> "$GITHUB_OUTPUT"
-          echo "primary_base=$primary_base" >> "$GITHUB_OUTPUT"
+          {
+            printf 'manifest=%s\n' "$manifest"
+            printf 'dispatch_id=%s\n' "$dispatch_id"
+            printf 'task_id=%s\n' "$task_id"
+            printf 'primary_base=%s\n' "$primary_base"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Resolve Jules source
         id: source
         shell: bash
         run: |
           set -euo pipefail
+
           mkdir -p "$RUNNER_TEMP/vaep-jules"
+          page_token=""
+          source_name=""
+          declare -A seen_tokens=()
 
-          curl --fail-with-body --silent --show-error \
-            -H "x-goog-api-key: $JULES_API_KEY" \
-            "$JULES_API_BASE/sources?pageSize=100" \
-            > "$RUNNER_TEMP/vaep-jules/sources.json"
+          for page in $(seq 1 50); do
+            url="$JULES_API_BASE/sources?pageSize=100"
+            if [[ -n "$page_token" ]]; then
+              encoded_token="$(jq -rn --arg v "$page_token" '$v|@uri')"
+              url="${url}&pageToken=${encoded_token}"
+            fi
 
-          source_name=$(jq -r \
-            --arg owner "$EXPECTED_OWNER" \
-            --arg repo "$EXPECTED_REPO" \
-            '.sources[]? | select(.githubRepo.owner == $owner and .githubRepo.repo == $repo) | .name' \
-            "$RUNNER_TEMP/vaep-jules/sources.json" | head -n 1)
+            response="$RUNNER_TEMP/vaep-jules/sources-${page}.json"
+            curl --fail-with-body --silent --show-error \
+              -H "x-goog-api-key: $JULES_API_KEY" \
+              "$url" > "$response"
 
-          if [[ -z "$source_name" || "$source_name" == "null" ]]; then
-            echo "VariApp is not connected to Jules for this API key." >&2
-            exit 30
-          fi
+            source_name="$(jq -r \
+              --arg owner "$EXPECTED_OWNER" \
+              --arg repo "$EXPECTED_REPO" \
+              '[.sources[]? | select(.githubRepo.owner == $owner and .githubRepo.repo == $repo)] | first | .name // empty' \
+              "$response")"
 
-          jq -e \
-            --arg name "$source_name" \
-            --arg branch "$EXPECTED_BRANCH" \
-            '.sources[] | select(.name == $name) | (.githubRepo.branches // []) | any(.displayName == $branch)' \
-            "$RUNNER_TEMP/vaep-jules/sources.json" >/dev/null || {
-              echo "Branch Desarrollo is not visible in the connected Jules source." >&2
-              exit 31
-            }
+            if [[ -n "$source_name" ]]; then
+              jq -e \
+                --arg name "$source_name" \
+                --arg branch "$EXPECTED_BRANCH" \
+                '[.sources[]? | select(.name == $name)] | first |
+                 (.githubRepo.branches // []) | any(.displayName == $branch)' \
+                "$response" >/dev/null || {
+                  echo "Branch Desarrollo is not visible in the connected Jules source." >&2
+                  exit 31
+                }
+              printf 'source_name=%s\n' "$source_name" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
 
-          echo "source_name=$source_name" >> "$GITHUB_OUTPUT"
+            next_token="$(jq -r '.nextPageToken // empty' "$response")"
+            if [[ -z "$next_token" ]]; then
+              break
+            fi
+            if [[ -n "${seen_tokens[$next_token]+x}" ]]; then
+              echo "Repeated Jules sources page token detected; failing closed." >&2
+              exit 32
+            fi
+            seen_tokens["$next_token"]=1
+            page_token="$next_token"
+
+            if [[ "$page" -eq 50 ]]; then
+              echo "Jules sources pagination exceeded 50 pages." >&2
+              exit 33
+            fi
+          done
+
+          echo "VariApp is not connected to Jules for this API key." >&2
+          exit 30
 
       - name: Reuse or create Jules session
         id: session
         shell: bash
+        env:
+          MANIFEST_PATH: ${{ steps.manifest.outputs.manifest }}
+          DISPATCH_ID: ${{ steps.manifest.outputs.dispatch_id }}
+          TASK_ID: ${{ steps.manifest.outputs.task_id }}
+          PRIMARY_BASE: ${{ steps.manifest.outputs.primary_base }}
+          SOURCE_NAME: ${{ steps.source.outputs.source_name }}
         run: |
           set -euo pipefail
-          manifest='${{ steps.manifest.outputs.manifest }}'
-          dispatch_id='${{ steps.manifest.outputs.dispatch_id }}'
-          task_id='${{ steps.manifest.outputs.task_id }}'
-          primary_base='${{ steps.manifest.outputs.primary_base }}'
-          source_name='${{ steps.source.outputs.source_name }}'
-          title="VAEP ${dispatch_id}"
 
-          # Idempotency for manual workflow re-runs: reuse a recent session with the exact dispatch title.
-          curl --fail-with-body --silent --show-error \
-            -H "x-goog-api-key: $JULES_API_KEY" \
-            "$JULES_API_BASE/sessions?pageSize=100" \
-            > "$RUNNER_TEMP/vaep-jules/sessions.json"
+          mkdir -p "$RUNNER_TEMP/vaep-jules"
+          title="VAEP ${DISPATCH_ID}"
+          page_token=""
+          session_name=""
+          pagination_complete="false"
+          declare -A seen_tokens=()
 
-          session_name=$(jq -r --arg title "$title" '.sessions[]? | select(.title == $title) | .name' "$RUNNER_TEMP/vaep-jules/sessions.json" | head -n 1)
+          for page in $(seq 1 50); do
+            url="$JULES_API_BASE/sessions?pageSize=100"
+            if [[ -n "$page_token" ]]; then
+              encoded_token="$(jq -rn --arg v "$page_token" '$v|@uri')"
+              url="${url}&pageToken=${encoded_token}"
+            fi
 
-          if [[ -z "$session_name" || "$session_name" == "null" ]]; then
-            user_prompt=$(jq -r '.prompt' "$manifest")
-            file_scope=$(jq -r '.fileScopeHint' "$manifest")
+            response="$RUNNER_TEMP/vaep-jules/sessions-${page}.json"
+            curl --fail-with-body --silent --show-error \
+              -H "x-goog-api-key: $JULES_API_KEY" \
+              "$url" > "$response"
 
-            cat > "$RUNNER_TEMP/vaep-jules/prompt.txt" <<EOF
-You are Jules, the secondary developer of the VariApp VAEP automation.
+            session_name="$(jq -r \
+              --arg title "$title" \
+              '[.sessions[]? | select(.title == $title)] | first | .name // empty' \
+              "$response")"
 
-MANDATORY IDENTITY
-PROJECT_ID=VARIAPP
-REPOSITORY=jmejia31/VariApp
-BRANCH=Desarrollo
-PRIMARY_BASE_HEAD=$primary_base
-VAEP_TASK_ID=$task_id
-FILE_SCOPE_HINT=$file_scope
+            if [[ -n "$session_name" ]]; then
+              break
+            fi
 
-Before changing anything, read AGENTS.md and the Jules integration rules under docs/VAEP_JULES.md. Confirm the repository and branch. Work only inside your cloud workspace. Do not create a branch, pull request, merge, deployment, production change, secret, or GitHub push. Never touch main or Production. Do not expose credentials.
+            next_token="$(jq -r '.nextPageToken // empty' "$response")"
+            if [[ -z "$next_token" ]]; then
+              pagination_complete="true"
+              break
+            fi
+            if [[ -n "${seen_tokens[$next_token]+x}" ]]; then
+              echo "Repeated Jules sessions page token detected; failing closed." >&2
+              exit 41
+            fi
+            seen_tokens["$next_token"]=1
+            page_token="$next_token"
 
-You are working in parallel with ChatGPT. Inspect only the assigned scope and its direct dependencies. If files/contracts in FILE_SCOPE_HINT have materially diverged from PRIMARY_BASE_HEAD in a way that makes this assignment unsafe, make no code changes and report the conflict clearly. Otherwise implement the assigned task completely, run proportional real tests, and leave a reviewable ChangeSet/gitPatch. Preserve unrelated work.
+            if [[ "$page" -eq 50 ]]; then
+              echo "Jules sessions pagination exceeded 50 pages." >&2
+              exit 42
+            fi
+          done
 
-ASSIGNED VAEP MICROTASK
-$user_prompt
-EOF
+          if [[ -z "$session_name" ]]; then
+            if [[ "$pagination_complete" != "true" ]]; then
+              echo "Sessions pagination did not finish normally; refusing session creation." >&2
+              exit 43
+            fi
+
+            user_prompt="$(jq -r '.prompt' "$MANIFEST_PATH")"
+            file_scope="$(jq -r '.fileScopeHint' "$MANIFEST_PATH")"
+            prompt_file="$RUNNER_TEMP/vaep-jules/prompt.txt"
+
+            printf '%s\n' \
+              "You are Jules, the secondary developer of the VariApp VAEP automation." \
+              "" \
+              "MANDATORY IDENTITY" \
+              "PROJECT_ID=VARIAPP" \
+              "REPOSITORY=jmejia31/VariApp" \
+              "BRANCH=Desarrollo" \
+              "PRIMARY_BASE_HEAD=$PRIMARY_BASE" \
+              "VAEP_TASK_ID=$TASK_ID" \
+              "FILE_SCOPE_HINT=$file_scope" \
+              "" \
+              "Before changing anything, read AGENTS.md and docs/VAEP_JULES.md. Confirm repository and branch." \
+              "Work only inside your Jules cloud workspace. Do not create branches, pull requests, pushes, merges, deployments, Production changes, secrets, or changes to main. Never expose credentials." \
+              "Do not publish anything to GitHub. Your deliverable is a reviewable ChangeSet/gitPatch only." \
+              "Inspect only the assigned scope and direct dependencies. If FILE_SCOPE_HINT materially diverged from PRIMARY_BASE_HEAD and makes the task unsafe, make no code changes and report the conflict." \
+              "Otherwise complete the assigned task, run proportional tests, preserve unrelated work, and return ChangeSet/gitPatch with baseCommitId." \
+              "" \
+              "ASSIGNED VAEP MICROTASK" \
+              "$user_prompt" > "$prompt_file"
 
             jq -n \
-              --arg prompt "$(cat "$RUNNER_TEMP/vaep-jules/prompt.txt")" \
+              --arg prompt "$(cat "$prompt_file")" \
               --arg title "$title" \
-              --arg source "$source_name" \
+              --arg source "$SOURCE_NAME" \
               --arg branch "$EXPECTED_BRANCH" \
               '{
                 prompt: $prompt,
                 title: $title,
                 sourceContext: {
                   source: $source,
-                  githubRepoContext: { startingBranch: $branch }
+                  githubRepoContext: {startingBranch: $branch}
                 },
                 requirePlanApproval: false
               }' > "$RUNNER_TEMP/vaep-jules/create-session.json"
@@ -176,102 +286,179 @@ EOF
               "$JULES_API_BASE/sessions" \
               > "$RUNNER_TEMP/vaep-jules/session-created.json"
 
-            session_name=$(jq -r '.name' "$RUNNER_TEMP/vaep-jules/session-created.json")
+            session_name="$(jq -r '.name // empty' "$RUNNER_TEMP/vaep-jules/session-created.json")"
           fi
 
-          if [[ -z "$session_name" || "$session_name" == "null" ]]; then
-            echo 'Jules did not return a session resource name.' >&2
-            exit 40
+          if [[ -z "$session_name" ]]; then
+            echo "Jules did not return a session resource name." >&2
+            exit 44
           fi
 
           session_id="${session_name#sessions/}"
-          echo "session_name=$session_name" >> "$GITHUB_OUTPUT"
-          echo "session_id=$session_id" >> "$GITHUB_OUTPUT"
+          {
+            printf 'session_name=%s\n' "$session_name"
+            printf 'session_id=%s\n' "$session_id"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Poll Jules until terminal state
         id: poll
         shell: bash
+        env:
+          SESSION_NAME: ${{ steps.session.outputs.session_name }}
+          SESSION_ID: ${{ steps.session.outputs.session_id }}
         run: |
           set -euo pipefail
-          session_name='${{ steps.session.outputs.session_name }}'
-          session_id='${{ steps.session.outputs.session_id }}'
-          terminal_state=''
 
-          for _ in $(seq 1 220); do
+          terminal_state=""
+          deadline=$((SECONDS + 6600))
+
+          while (( SECONDS < deadline )); do
             curl --fail-with-body --silent --show-error \
               -H "x-goog-api-key: $JULES_API_KEY" \
-              "$JULES_API_BASE/$session_name" \
+              "$JULES_API_BASE/$SESSION_NAME" \
               > "$RUNNER_TEMP/vaep-jules/session-latest.json"
 
-            state=$(jq -r '.state // "UNKNOWN"' "$RUNNER_TEMP/vaep-jules/session-latest.json")
-            echo "Jules session $session_id state: $state"
+            state="$(jq -r '.state // "UNKNOWN"' "$RUNNER_TEMP/vaep-jules/session-latest.json")"
+            echo "Jules session $SESSION_ID state: $state"
 
             case "$state" in
-              COMPLETED|FAILED|AWAITING_USER_FEEDBACK|PAUSED)
+              COMPLETED|FAILED|AWAITING_USER_FEEDBACK|PAUSED|AWAITING_PLAN_APPROVAL)
                 terminal_state="$state"
                 break
+                ;;
+              QUEUED|PLANNING|IN_PROGRESS)
+                ;;
+              *)
+                echo "Non-terminal Jules state observed: $state"
                 ;;
             esac
             sleep 30
           done
 
           if [[ -z "$terminal_state" ]]; then
-            terminal_state='WORKFLOW_TIMEOUT'
+            terminal_state="WORKFLOW_TIMEOUT"
           fi
 
-          echo "terminal_state=$terminal_state" >> "$GITHUB_OUTPUT"
+          printf 'terminal_state=%s\n' "$terminal_state" >> "$GITHUB_OUTPUT"
 
       - name: Collect Jules evidence and patch
         id: collect
         if: always() && steps.session.outputs.session_name != ''
         shell: bash
+        env:
+          SESSION_NAME: ${{ steps.session.outputs.session_name }}
+          MANIFEST_PATH: ${{ steps.manifest.outputs.manifest }}
+          DISPATCH_ID: ${{ steps.manifest.outputs.dispatch_id }}
+          TASK_ID: ${{ steps.manifest.outputs.task_id }}
+          REQUESTED_BASE: ${{ steps.manifest.outputs.primary_base }}
+          TERMINAL_STATE: ${{ steps.poll.outputs.terminal_state }}
         run: |
           set -euo pipefail
-          session_name='${{ steps.session.outputs.session_name }}'
-          dispatch_id='${{ steps.manifest.outputs.dispatch_id }}'
-          task_id='${{ steps.manifest.outputs.task_id }}'
-          requested_base='${{ steps.manifest.outputs.primary_base }}'
-          terminal_state='${{ steps.poll.outputs.terminal_state }}'
 
-          mkdir -p "$RUNNER_TEMP/vaep-jules/result"
+          result_dir="$RUNNER_TEMP/vaep-jules/result"
+          mkdir -p "$result_dir"
+          page_token=""
+          declare -A seen_tokens=()
+          printf '{"activities":[]}\n' > "$result_dir/activities.json"
 
-          curl --fail-with-body --silent --show-error \
-            -H "x-goog-api-key: $JULES_API_KEY" \
-            "$JULES_API_BASE/$session_name/activities?pageSize=100" \
-            > "$RUNNER_TEMP/vaep-jules/result/activities.json"
+          for page in $(seq 1 100); do
+            url="$JULES_API_BASE/$SESSION_NAME/activities?pageSize=100"
+            if [[ -n "$page_token" ]]; then
+              encoded_token="$(jq -rn --arg v "$page_token" '$v|@uri')"
+              url="${url}&pageToken=${encoded_token}"
+            fi
 
-          cp "$RUNNER_TEMP/vaep-jules/session-latest.json" "$RUNNER_TEMP/vaep-jules/result/session.json" 2>/dev/null || true
-          cp '${{ steps.manifest.outputs.manifest }}' "$RUNNER_TEMP/vaep-jules/result/dispatch.json"
+            response="$RUNNER_TEMP/vaep-jules/activities-${page}.json"
+            curl --fail-with-body --silent --show-error \
+              -H "x-goog-api-key: $JULES_API_KEY" \
+              "$url" > "$response"
 
-          jq '[.activities[]? | .artifacts[]? | .changeSet?.gitPatch? | select(. != null)] | last // null' \
-            "$RUNNER_TEMP/vaep-jules/result/activities.json" \
-            > "$RUNNER_TEMP/vaep-jules/result/gitpatch.json"
+            jq -s \
+              '{activities: ((.[0].activities // []) + (.[1].activities // []))}' \
+              "$result_dir/activities.json" "$response" \
+              > "$result_dir/activities.next.json"
+            mv "$result_dir/activities.next.json" "$result_dir/activities.json"
 
-          patch_present=$(jq -r 'type == "object"' "$RUNNER_TEMP/vaep-jules/result/gitpatch.json")
-          actual_base=''
-          suggested=''
-          if [[ "$patch_present" == 'true' ]]; then
-            actual_base=$(jq -r '.baseCommitId // ""' "$RUNNER_TEMP/vaep-jules/result/gitpatch.json")
-            suggested=$(jq -r '.suggestedCommitMessage // ""' "$RUNNER_TEMP/vaep-jules/result/gitpatch.json")
-            jq -r '.unidiffPatch // ""' "$RUNNER_TEMP/vaep-jules/result/gitpatch.json" > "$RUNNER_TEMP/vaep-jules/result/changes.patch"
+            next_token="$(jq -r '.nextPageToken // empty' "$response")"
+            if [[ -z "$next_token" ]]; then
+              pagination_complete="true"
+              break
+            fi
+            if [[ -n "${seen_tokens[$next_token]+x}" ]]; then
+              echo "Repeated Jules activities page token detected; refusing partial collection." >&2
+              exit 60
+            fi
+            seen_tokens["$next_token"]=1
+            page_token="$next_token"
+
+            if [[ "$page" -eq 100 ]]; then
+              echo "Jules activities pagination exceeded 100 pages; refusing partial collection." >&2
+              exit 61
+            fi
+          done
+
+          if [[ "${pagination_complete:-false}" != "true" ]]; then
+            echo "Activities collection was partial; refusing evidence generation." >&2
+            exit 62
+          fi
+
+          if [[ -f "$RUNNER_TEMP/vaep-jules/session-latest.json" ]]; then
+            cp "$RUNNER_TEMP/vaep-jules/session-latest.json" "$result_dir/session.json"
           else
-            : > "$RUNNER_TEMP/vaep-jules/result/changes.patch"
+            curl --fail-with-body --silent --show-error \
+              -H "x-goog-api-key: $JULES_API_KEY" \
+              "$JULES_API_BASE/$SESSION_NAME" > "$result_dir/session.json"
+          fi
+          cp "$MANIFEST_PATH" "$result_dir/dispatch.json"
+
+          jq '
+            [
+              .activities[]? as $activity
+              | $activity.artifacts[]?
+              | .changeSet?.gitPatch?
+              | select(. != null)
+              | {createTime: ($activity.createTime // ""), patch: .}
+            ]
+            | sort_by(.createTime)
+            | last
+            | .patch // null
+          ' "$result_dir/activities.json" > "$result_dir/gitpatch.json"
+
+          patch_present="$(jq -r 'type == "object"' "$result_dir/gitpatch.json")"
+          actual_base=""
+          suggested=""
+          if [[ "$patch_present" == "true" ]]; then
+            actual_base="$(jq -r '.baseCommitId // ""' "$result_dir/gitpatch.json")"
+            suggested="$(jq -r '.suggestedCommitMessage // ""' "$result_dir/gitpatch.json")"
+            jq -r '.unidiffPatch // ""' "$result_dir/gitpatch.json" > "$result_dir/changes.patch"
+          else
+            : > "$result_dir/changes.patch"
           fi
 
           jq -n \
-            --arg dispatchId "$dispatch_id" \
-            --arg taskId "$task_id" \
-            --arg session "$session_name" \
-            --arg state "$terminal_state" \
-            --arg requestedBase "$requested_base" \
+            --arg dispatchId "$DISPATCH_ID" \
+            --arg taskId "$TASK_ID" \
+            --arg session "$SESSION_NAME" \
+            --arg state "${TERMINAL_STATE:-UNKNOWN}" \
+            --arg requestedBase "$REQUESTED_BASE" \
             --arg actualBase "$actual_base" \
             --arg suggestedCommitMessage "$suggested" \
             --argjson patchPresent "$patch_present" \
-            '{dispatchId:$dispatchId,taskId:$taskId,session:$session,state:$state,requestedBase:$requestedBase,actualPatchBase:$actualBase,patchPresent:$patchPresent,suggestedCommitMessage:$suggestedCommitMessage}' \
-            > "$RUNNER_TEMP/vaep-jules/result/result.json"
+            '{
+              dispatchId:$dispatchId,
+              taskId:$taskId,
+              session:$session,
+              state:$state,
+              requestedBase:$requestedBase,
+              actualPatchBase:$actualBase,
+              patchPresent:$patchPresent,
+              suggestedCommitMessage:$suggestedCommitMessage
+            }' > "$result_dir/result.json"
 
-          echo "patch_present=$patch_present" >> "$GITHUB_OUTPUT"
-          echo "actual_base=$actual_base" >> "$GITHUB_OUTPUT"
+          {
+            printf 'patch_present=%s\n' "$patch_present"
+            printf 'actual_base=%s\n' "$actual_base"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Upload Jules result artifact
         if: always() && steps.session.outputs.session_name != ''
@@ -283,32 +470,36 @@ EOF
           retention-days: 14
 
       - name: Register result as GitHub issue
-        if: always() && steps.session.outputs.session_name != ''
+        if: always()
         shell: bash
+        env:
+          DISPATCH_ID: ${{ steps.manifest.outputs.dispatch_id }}
+          TASK_ID: ${{ steps.manifest.outputs.task_id }}
+          SESSION_NAME: ${{ steps.session.outputs.session_name }}
+          TERMINAL_STATE: ${{ steps.poll.outputs.terminal_state }}
+          PATCH_PRESENT: ${{ steps.collect.outputs.patch_present }}
+          ACTUAL_BASE: ${{ steps.collect.outputs.actual_base }}
         run: |
           set -euo pipefail
-          dispatch_id='${{ steps.manifest.outputs.dispatch_id }}'
-          task_id='${{ steps.manifest.outputs.task_id }}'
-          session_name='${{ steps.session.outputs.session_name }}'
-          state='${{ steps.poll.outputs.terminal_state }}'
-          patch_present='${{ steps.collect.outputs.patch_present }}'
-          actual_base='${{ steps.collect.outputs.actual_base }}'
 
+          dispatch_id="${DISPATCH_ID:-UNKNOWN}"
+          task_id="${TASK_ID:-UNKNOWN}"
+          session_name="${SESSION_NAME:-NOT_CREATED}"
+          state="${TERMINAL_STATE:-UNKNOWN}"
+          patch_present="${PATCH_PRESENT:-false}"
+          actual_base="${ACTUAL_BASE:-NONE}"
           run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
-          body=$(cat <<EOF
-VAEP Jules secondary-worker result.
 
-- Dispatch: \`$dispatch_id\`
-- Task: \`$task_id\`
-- Jules session: \`$session_name\`
-- Terminal state: \`$state\`
-- Patch present: \`$patch_present\`
-- Patch base: \`$actual_base\`
-- Workflow run: $run_url
-
-The patch is an artifact only. It has NOT been pushed, merged, or applied to \`Desarrollo\`. ChatGPT/VAEP must reconcile the artifact against current HEAD before publication.
-EOF
-          )
+          printf -v body '%s\n\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n%s\n' \
+            'VAEP Jules secondary-worker result.' \
+            "- Dispatch: \`$dispatch_id\`" \
+            "- Task: \`$task_id\`" \
+            "- Jules session: \`$session_name\`" \
+            "- Terminal state: \`$state\`" \
+            "- Patch present: \`$patch_present\`" \
+            "- Patch base: \`$actual_base\`" \
+            "- Workflow run: $run_url" \
+            'The patch is an artifact only. It has NOT been applied to `Desarrollo`, pushed, merged, or deployed. ChatGPT/VAEP must reconcile it against current HEAD before any publication.'
 
           gh issue create \
             --repo "$GITHUB_REPOSITORY" \
@@ -316,18 +507,28 @@ EOF
             --body "$body" >/dev/null
 
       - name: Enforce successful worker result
-        if: always() && steps.session.outputs.session_name != ''
+        if: always()
         shell: bash
+        env:
+          SESSION_NAME: ${{ steps.session.outputs.session_name }}
+          TERMINAL_STATE: ${{ steps.poll.outputs.terminal_state }}
+          PATCH_PRESENT: ${{ steps.collect.outputs.patch_present }}
         run: |
           set -euo pipefail
-          state='${{ steps.poll.outputs.terminal_state }}'
-          patch_present='${{ steps.collect.outputs.patch_present }}'
 
-          if [[ "$state" != 'COMPLETED' ]]; then
+          session_name="${SESSION_NAME:-}"
+          state="${TERMINAL_STATE:-UNKNOWN}"
+          patch_present="${PATCH_PRESENT:-false}"
+
+          if [[ -z "$session_name" ]]; then
+            echo "Jules session was not created." >&2
+            exit 49
+          fi
+          if [[ "$state" != "COMPLETED" ]]; then
             echo "Jules did not complete successfully: $state" >&2
             exit 50
           fi
-          if [[ "$patch_present" != 'true' ]]; then
-            echo 'Jules completed without a ChangeSet/gitPatch; VAEP must inspect the session before certifying the task.' >&2
+          if [[ "$patch_present" != "true" ]]; then
+            echo "Jules completed without a ChangeSet/gitPatch." >&2
             exit 51
           fi
