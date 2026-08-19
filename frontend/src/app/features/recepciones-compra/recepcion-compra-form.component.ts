@@ -9,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { finalize, forkJoin } from 'rxjs';
+import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
 import { Almacen } from '../../core/models/almacen.model';
 import { OrdenCompra } from '../../core/models/orden-compra.model';
 import { RecepcionCompraFormValue, RecepcionCompraSaldoLinea, RecepcionCompraSaldoOrden } from '../../core/models/recepcion-compra.model';
@@ -40,7 +41,9 @@ import { RecepcionCompraService } from '../../services/recepcion-compra.service'
         <button mat-stroked-button type="button" (click)="volver()"><mat-icon>arrow_back</mat-icon> Volver</button>
       </header>
 
-      @if (cargandoCatalogos()) {
+      @if (!puedeCrear()) {
+        <div class="state-panel error" role="alert"><mat-icon>lock</mat-icon><span>No tienes permiso para crear recepciones de compra.</span></div>
+      } @else if (cargandoCatalogos()) {
         <div class="state-panel" role="status"><mat-spinner diameter="36"></mat-spinner><span>Cargando órdenes y almacenes…</span></div>
       } @else {
         <form [formGroup]="form" (ngSubmit)="guardar()" class="form-grid" novalidate>
@@ -110,7 +113,7 @@ import { RecepcionCompraService } from '../../services/recepcion-compra.service'
           <div class="actions span-2">
             <button mat-button type="button" (click)="volver()">Cancelar</button>
             <button mat-flat-button type="submit" [disabled]="!puedeGuardar()" data-testid="guardar-recepcion">
-              @if (guardando()) { <mat-spinner diameter="20"></mat-spinner> } @else { <mat-icon>save</mat-icon> }
+              @if (guardando()) { <mat-spinner diameter="20" aria-label="Guardando recepción"></mat-spinner> } @else { <mat-icon>save</mat-icon> }
               Guardar borrador
             </button>
           </div>
@@ -129,14 +132,16 @@ export class RecepcionCompraFormComponent implements OnInit {
   private readonly recepciones = inject(RecepcionCompraService);
   private readonly ordenesService = inject(OrdenCompraService);
   private readonly almacenesService = inject(AlmacenService);
+  private readonly permisos = inject(PermisosRuntimeService);
 
   readonly ordenes = signal<OrdenCompra[]>([]);
   readonly almacenes = signal<Almacen[]>([]);
   readonly saldo = signal<RecepcionCompraSaldoOrden | null>(null);
-  readonly cargandoCatalogos = signal(true);
+  readonly cargandoCatalogos = signal(false);
   readonly cargandoSaldo = signal(false);
   readonly guardando = signal(false);
   readonly error = signal('');
+  readonly puedeCrear = signal(false);
 
   readonly form = this.fb.group({
     ordenCompraId: [null as number | null, Validators.required],
@@ -147,6 +152,10 @@ export class RecepcionCompraFormComponent implements OnInit {
   get detalles(): FormArray { return this.form.controls.detalles; }
 
   ngOnInit(): void {
+    this.puedeCrear.set(this.permisos.puede('Compras', 'Crear'));
+    if (!this.puedeCrear()) return;
+
+    this.cargandoCatalogos.set(true);
     forkJoin({
       ordenes: this.ordenesService.getPaged({ page: 1, pageSize: 100, estado: 'Aprobada' }),
       almacenes: this.almacenesService.getActivos()
@@ -160,11 +169,12 @@ export class RecepcionCompraFormComponent implements OnInit {
           this.seleccionarOrden(preseleccionada);
         }
       },
-      error: err => this.error.set(err?.error?.detail || err?.error?.message || 'No fue posible cargar las órdenes aprobadas y almacenes activos.')
+      error: () => this.error.set('No fue posible cargar las órdenes aprobadas y almacenes activos.')
     });
   }
 
   seleccionarOrden(ordenCompraId: number | null): void {
+    if (!this.puedeCrear()) return;
     this.detalles.clear();
     this.saldo.set(null);
     this.error.set('');
@@ -182,7 +192,7 @@ export class RecepcionCompraFormComponent implements OnInit {
         for (const linea of saldo.lineas) this.detalles.push(this.crearDetalle(linea));
         if (!saldo.lineas.length || saldo.completa) this.error.set('La orden seleccionada no tiene cantidades pendientes por recibir.');
       },
-      error: err => this.error.set(err?.error?.detail || err?.error?.message || 'No fue posible cargar el saldo pendiente de la orden.')
+      error: () => this.error.set('No fue posible cargar el saldo pendiente de la orden.')
     });
   }
 
@@ -204,12 +214,12 @@ export class RecepcionCompraFormComponent implements OnInit {
 
   puedeGuardar(): boolean {
     const saldo = this.saldo();
-    return !this.guardando() && !this.cargandoSaldo() && this.form.valid && !!saldo && !saldo.completa && saldo.lineas.length > 0
+    return this.puedeCrear() && !this.guardando() && !this.cargandoSaldo() && this.form.valid && !!saldo && !saldo.completa && saldo.lineas.length > 0
       && saldo.lineas.every((linea, index) => !this.errorLinea(index, linea));
   }
 
   guardar(): void {
-    if (!this.puedeGuardar()) {
+    if (!this.puedeCrear() || !this.puedeGuardar()) {
       this.form.markAllAsTouched();
       return;
     }
@@ -237,7 +247,7 @@ export class RecepcionCompraFormComponent implements OnInit {
     this.error.set('');
     this.recepciones.create(payload).pipe(finalize(() => this.guardando.set(false))).subscribe({
       next: response => void this.router.navigate(['/recepciones-compra', response.data.id]),
-      error: err => this.error.set(err?.error?.detail || err?.error?.message || 'No fue posible guardar la recepción de compra.')
+      error: () => this.error.set('No fue posible guardar la recepción de compra.')
     });
   }
 
