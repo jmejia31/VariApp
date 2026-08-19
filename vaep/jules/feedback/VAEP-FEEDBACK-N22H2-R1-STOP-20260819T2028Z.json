@@ -1,0 +1,8 @@
+{
+  "feedbackId": "VAEP-FEEDBACK-N22H2-R1-STOP-20260819T2028Z",
+  "dispatchId": "VAEP-JULES-N22H2-R1-20260819T1913Z",
+  "taskId": "N2.2.H.2",
+  "sessionName": "sessions/12103263808292463808",
+  "expectedBranch": "Desarrollo",
+  "prompt": "VAEP CONTROL PLANE: esta sesión está SUPERSEDED y su tarea N2.2.H.2 ya fue reconciliada/certificada por VAEP. Detén inmediatamente cualquier trabajo nuevo. NO modifiques más archivos, NO generes cambios adicionales, NO toques workflows VAEP, TASKS, CHANGELOG, certificados ni código funcional. NO crees rama, PR, push, merge ni deploy. Si la sesión permite finalizar, conclúyela sin cambios adicionales y conserva únicamente observaciones ya producidas como evidencia histórica. Cualquier diff actual de esta sesión queda RECHAZADO/NO AUTORITATIVO y no debe competir con la tarea vigente N2.3.G.2."
+}
