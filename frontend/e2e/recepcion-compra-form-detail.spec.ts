@@ -102,9 +102,11 @@ test.describe('Recepción de mercancía - formulario y detalle', () => {
 
     await page.getByTestId('orden-compra-select').click();
     await page.getByRole('option', { name: /OC-2026-000010/ }).click();
+    await expect(page.locator('.cdk-overlay-backdrop.cdk-overlay-backdrop-showing')).toHaveCount(0);
     await expect(page.getByText('SKU-007')).toBeVisible();
 
-    await page.getByTestId('almacen-0').click();
+    await page.getByTestId('almacen-0').focus();
+    await page.keyboard.press('Enter');
     await page.getByRole('option', { name: /ALM-01/ }).click();
     await page.getByTestId('recibida-0').fill('5');
     await page.getByTestId('danada-0').fill('1');
@@ -121,7 +123,7 @@ test.describe('Recepción de mercancía - formulario y detalle', () => {
     await page.route('**/recepciones-compra/41**', async route => {
       const request = route.request();
       const url = new URL(request.url());
-      if (request.method() === 'GET' && url.pathname === '/recepciones-compra/41') {
+      if (request.method() === 'GET' && request.resourceType() !== 'document' && url.pathname === '/recepciones-compra/41') {
         await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true, message: '', data: recepcion(estado) }) });
         return;
       }
