@@ -26,6 +26,7 @@ public class N23RecepcionesCompraApiContractTests
     [Theory]
     [InlineData(nameof(RecepcionesCompraController.Buscar), "Ver")]
     [InlineData(nameof(RecepcionesCompraController.GetById), "Ver")]
+    [InlineData(nameof(RecepcionesCompraController.GetSaldoOrden), "Ver")]
     [InlineData(nameof(RecepcionesCompraController.Create), "Crear")]
     [InlineData(nameof(RecepcionesCompraController.Update), "Editar")]
     [InlineData(nameof(RecepcionesCompraController.Confirmar), "Confirmar")]
@@ -57,6 +58,15 @@ public class N23RecepcionesCompraApiContractTests
     {
         AssertPost(nameof(RecepcionesCompraController.Confirmar), "{id:int}/confirmar");
         AssertPost(nameof(RecepcionesCompraController.Anular), "{id:int}/anular");
+    }
+
+    [Fact]
+    public void Saldo_orden_conserva_ruta_get_estable()
+    {
+        var method = typeof(RecepcionesCompraController).GetMethod(nameof(RecepcionesCompraController.GetSaldoOrden))
+            ?? throw new InvalidOperationException("No existe GetSaldoOrden.");
+        var attr = Assert.Single(method.GetCustomAttributes<HttpGetAttribute>());
+        Assert.Equal("ordenes/{ordenCompraId:int}/saldo", attr.Template);
     }
 
     private static void AssertPost(string methodName, string template)
