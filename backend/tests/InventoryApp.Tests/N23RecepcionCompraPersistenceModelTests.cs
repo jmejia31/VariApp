@@ -1,6 +1,7 @@
 using InventoryApp.Domain.Entities;
 using InventoryApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Xunit;
 
@@ -82,8 +83,9 @@ public sealed class N23RecepcionCompraPersistenceModelTests
     public void Checks_persistentes_blindan_idempotencia_cantidades_y_costo()
     {
         using var context = CrearContexto();
-        var cabecera = context.Model.FindEntityType(typeof(RecepcionCompra));
-        var detalle = context.Model.FindEntityType(typeof(RecepcionCompraDetalle));
+        var designTimeModel = context.GetService<IDesignTimeModel>().Model;
+        var cabecera = designTimeModel.FindEntityType(typeof(RecepcionCompra));
+        var detalle = designTimeModel.FindEntityType(typeof(RecepcionCompraDetalle));
 
         Assert.NotNull(cabecera);
         Assert.NotNull(detalle);
