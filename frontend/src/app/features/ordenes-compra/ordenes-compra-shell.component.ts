@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -38,10 +39,10 @@ import { ProveedorService } from '../../services/proveedor.service';
           <p>Consulta y controla documentos de compra sin afectar inventario hasta la recepción autorizada.</p>
         </div>
         @if (permisosRuntime.puede('Compras', 'Crear')) {
-          <span class="next-action" aria-label="La creación de órdenes se habilitará en el editor del siguiente paso">
+          <button mat-flat-button type="button" (click)="nuevaOrden()">
             <mat-icon>add_shopping_cart</mat-icon>
-            Creación disponible en el editor
-          </span>
+            Nueva orden
+          </button>
         }
       </header>
 
@@ -106,7 +107,12 @@ import { ProveedorService } from '../../services/proveedor.service';
                   <td><span class="status" [attr.data-status]="orden.estado">{{ etiquetaEstado(orden.estado) }}</span></td>
                   <td>{{ orden.fechaEsperadaUtc ? (orden.fechaEsperadaUtc | date:'mediumDate') : '—' }}</td>
                   <td class="numeric">{{ orden.total | currency:orden.moneda:'symbol-narrow':'1.2-2' }}</td>
-                  <td><button mat-stroked-button type="button" (click)="verDetalle(orden.id)"><mat-icon>visibility</mat-icon> Ver</button></td>
+                  <td class="row-actions">
+                    <button mat-stroked-button type="button" (click)="verDetalle(orden.id)"><mat-icon>visibility</mat-icon> Ver</button>
+                    @if (esBorrador(orden) && permisosRuntime.puede('Compras', 'Editar')) {
+                      <button mat-stroked-button type="button" (click)="editarOrden(orden.id)"><mat-icon>edit</mat-icon> Editar</button>
+                    }
+                  </td>
                 </tr>
               }
             </tbody>
@@ -130,7 +136,12 @@ import { ProveedorService } from '../../services/proveedor.service';
         <article class="detail-panel" aria-labelledby="detail-title">
           <div class="detail-heading">
             <div><p class="eyebrow">Detalle</p><h2 id="detail-title">{{ orden.numeroOrden }}</h2></div>
-            <button mat-icon-button type="button" (click)="cerrarDetalle()" aria-label="Cerrar detalle"><mat-icon>close</mat-icon></button>
+            <div class="row-actions">
+              @if (esBorrador(orden) && permisosRuntime.puede('Compras', 'Editar')) {
+                <button mat-stroked-button type="button" (click)="editarOrden(orden.id)"><mat-icon>edit</mat-icon> Editar</button>
+              }
+              <button mat-icon-button type="button" (click)="cerrarDetalle()" aria-label="Cerrar detalle"><mat-icon>close</mat-icon></button>
+            </div>
           </div>
           <dl class="summary-grid">
             <div><dt>Proveedor</dt><dd>{{ orden.proveedorNombre }}</dd></div>
@@ -162,13 +173,13 @@ import { ProveedorService } from '../../services/proveedor.service';
     .page-header h1, .detail-heading h2 { margin: .1rem 0 .35rem; }
     .page-header p { margin: 0; max-width: 70ch; color: var(--text-secondary, #5f6368); }
     .eyebrow { margin: 0; font-size: .75rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--primary-color, #3157d5); }
-    .next-action { display: inline-flex; align-items: center; gap: .4rem; padding: .65rem .85rem; border-radius: .75rem; background: var(--surface-variant, #eef2ff); white-space: nowrap; }
     .filters { display: grid; grid-template-columns: repeat(5, minmax(140px, 1fr)); gap: .75rem; align-items: start; }
-    .filter-actions { display: flex; gap: .5rem; grid-column: 1 / -1; }
+    .filter-actions, .row-actions { display: flex; gap: .5rem; align-items: center; }
+    .filter-actions { grid-column: 1 / -1; }
     .state-panel { min-height: 9rem; display: flex; align-items: center; justify-content: center; gap: .75rem; border: 1px dashed var(--border-color, #d6dae3); border-radius: 1rem; padding: 1rem; }
     .state-panel.error { color: var(--warn-color, #b3261e); }
     .table-wrap { overflow-x: auto; border: 1px solid var(--border-color, #e1e4ea); border-radius: 1rem; }
-    table { width: 100%; border-collapse: collapse; min-width: 850px; }
+    table { width: 100%; border-collapse: collapse; min-width: 900px; }
     th, td { padding: .85rem 1rem; text-align: left; border-bottom: 1px solid var(--border-color, #eceff3); }
     th { font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; }
     tr:last-child td { border-bottom: 0; }
@@ -188,7 +199,7 @@ import { ProveedorService } from '../../services/proveedor.service';
     .line-card span { display: block; margin-top: .25rem; color: var(--text-secondary, #62666d); }
     .line-totals { text-align: right; }
     @media (max-width: 900px) { .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); } .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-    @media (max-width: 600px) { .page-header, .detail-heading, .line-card { flex-direction: column; } .filters, .summary-grid { grid-template-columns: 1fr; } .next-action { white-space: normal; } .line-totals { text-align: left; } }
+    @media (max-width: 600px) { .page-header, .detail-heading, .line-card { flex-direction: column; } .filters, .summary-grid { grid-template-columns: 1fr; } .row-actions { flex-wrap: wrap; } .line-totals { text-align: left; } }
   `]
 })
 export class OrdenesCompraShellComponent implements OnInit, OnDestroy {
@@ -217,9 +228,10 @@ export class OrdenesCompraShellComponent implements OnInit, OnDestroy {
   private secuenciaDetalle = 0;
 
   constructor(
-    private ordenService: OrdenCompraService,
-    private proveedorService: ProveedorService,
-    public permisosRuntime: PermisosRuntimeService
+    private readonly ordenService: OrdenCompraService,
+    private readonly proveedorService: ProveedorService,
+    private readonly router: Router,
+    public readonly permisosRuntime: PermisosRuntimeService
   ) {}
 
   ngOnInit(): void {
@@ -295,6 +307,15 @@ export class OrdenesCompraShellComponent implements OnInit, OnDestroy {
     this.cerrarDetalle();
     this.cargar();
   }
+
+  nuevaOrden(): void { void this.router.navigate(['/ordenes-compra/nueva']); }
+
+  editarOrden(id: number): void {
+    if (!Number.isInteger(id) || id <= 0) return;
+    void this.router.navigate(['/ordenes-compra', id, 'editar']);
+  }
+
+  esBorrador(orden: OrdenCompra): boolean { return orden.estado === 1 || orden.estado === 'Borrador'; }
 
   verDetalle(id: number): void {
     if (!Number.isInteger(id) || id <= 0) return;
