@@ -281,6 +281,18 @@ export const routes: Routes = [
     loadComponent: () => import('./features/ordenes-compra/ordenes-compra-shell.component').then(m => m.OrdenesCompraShellComponent)
   },
   {
+    path: 'ordenes-compra/nueva',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Compras', accion: 'Crear' },
+    loadComponent: () => import('./features/ordenes-compra/orden-compra-form.component').then(m => m.OrdenCompraFormComponent)
+  },
+  {
+    path: 'ordenes-compra/:id/editar',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Compras', accion: 'Editar' },
+    loadComponent: () => import('./features/ordenes-compra/orden-compra-form.component').then(m => m.OrdenCompraFormComponent)
+  },
+  {
     path: 'compras',
     canActivate: [authGuard, permisoGuard],
     data: { modulo: 'Compras', accion: 'Ver' },
