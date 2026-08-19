@@ -49,6 +49,7 @@ public class MovimientoInventario
     public int? ConsumoInsumoId { get; set; }
     public int? AjusteInventarioId { get; set; }
     public int? TransferenciaInventarioId { get; set; }
+    public int? RecepcionCompraId { get; set; }
 
     [NotMapped]
     public OrigenMovimientoInventario? OrigenTipado
@@ -60,7 +61,8 @@ public class MovimientoInventario
                 (VentaId.HasValue ? 1 : 0) +
                 (ConsumoInsumoId.HasValue ? 1 : 0) +
                 (AjusteInventarioId.HasValue ? 1 : 0) +
-                (TransferenciaInventarioId.HasValue ? 1 : 0);
+                (TransferenciaInventarioId.HasValue ? 1 : 0) +
+                (RecepcionCompraId.HasValue ? 1 : 0);
 
             if (cantidadOrigenes == 0)
                 return null;
@@ -70,7 +72,8 @@ public class MovimientoInventario
                 VentaId,
                 ConsumoInsumoId,
                 AjusteInventarioId,
-                TransferenciaInventarioId);
+                TransferenciaInventarioId,
+                RecepcionCompraId);
         }
     }
 
