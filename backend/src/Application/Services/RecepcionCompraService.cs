@@ -19,6 +19,7 @@ public sealed class RecepcionCompraService : IRecepcionCompraService
     private readonly IAlmacenRepository _almacenes;
     private readonly IUbicacionAlmacenRepository _ubicaciones;
     private readonly RecepcionCompraExistenciaMaterializador _existencias;
+    private readonly RecepcionCompraKardexRegistrar _kardex;
     private readonly ICurrentUserService _currentUser;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IAuditoriaService _auditoria;
@@ -29,6 +30,7 @@ public sealed class RecepcionCompraService : IRecepcionCompraService
         IAlmacenRepository almacenes,
         IUbicacionAlmacenRepository ubicaciones,
         RecepcionCompraExistenciaMaterializador existencias,
+        RecepcionCompraKardexRegistrar kardex,
         ICurrentUserService currentUser,
         IUnitOfWork unitOfWork,
         IAuditoriaService auditoria)
@@ -38,6 +40,7 @@ public sealed class RecepcionCompraService : IRecepcionCompraService
         _almacenes = almacenes ?? throw new ArgumentNullException(nameof(almacenes));
         _ubicaciones = ubicaciones ?? throw new ArgumentNullException(nameof(ubicaciones));
         _existencias = existencias ?? throw new ArgumentNullException(nameof(existencias));
+        _kardex = kardex ?? throw new ArgumentNullException(nameof(kardex));
         _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _auditoria = auditoria ?? throw new ArgumentNullException(nameof(auditoria));
@@ -215,7 +218,8 @@ public sealed class RecepcionCompraService : IRecepcionCompraService
             await ValidarRecepcionesMultiplesAsync(recepcion, orden);
             var anterior = Snapshot(recepcion);
 
-            await _existencias.AplicarAsync(recepcion.Detalles);
+            var transiciones = await _existencias.AplicarAsync(recepcion.Detalles);
+            await _kardex.RegistrarConfirmacionAsync(recepcion, transiciones);
             ValidarDominio(() => recepcion.Confirmar(usuarioId, _currentUser.NombreUsuario, DateTime.UtcNow));
             MarcarActualizacion(recepcion);
             await _repository.SaveChangesAsync();
@@ -250,7 +254,8 @@ public sealed class RecepcionCompraService : IRecepcionCompraService
                 throw new BusinessRuleException("Solo una recepción materializada puede anularse.");
 
             var anterior = Snapshot(recepcion);
-            await _existencias.RevertirAsync(recepcion.Detalles);
+            var transiciones = await _existencias.RevertirAsync(recepcion.Detalles);
+            await _kardex.RegistrarAnulacionAsync(recepcion, transiciones);
             ValidarDominio(() => recepcion.Anular(usuarioId, dto.Motivo, DateTime.UtcNow));
             MarcarActualizacion(recepcion);
             await _repository.SaveChangesAsync();
