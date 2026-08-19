@@ -46,6 +46,13 @@ WHERE IdempotencyKey IS NOT NULL
 GROUP BY IdempotencyKey
 HAVING COUNT(*) > 1;
 
+SELECT 'N2.3.C_POSTCHECK_IDEMPOTENCIA_INVALIDA' AS CheckName,
+       COUNT(*) AS FilasInvalidas
+FROM RecepcionesCompra
+WHERE (IdempotencyKey IS NULL) <> (IdempotencyFingerprint IS NULL)
+   OR (IdempotencyKey IS NOT NULL AND CHAR_LENGTH(TRIM(IdempotencyKey)) = 0)
+   OR (IdempotencyFingerprint IS NOT NULL AND CHAR_LENGTH(IdempotencyFingerprint) <> 64);
+
 SELECT 'N2.3.C_POSTCHECK_DUP_CLAVE_FISICA' AS CheckName,
        RecepcionCompraId,
        OrdenCompraDetalleId,
@@ -63,6 +70,7 @@ WHERE CantidadRecibida < 0
    OR CantidadDanada < 0
    OR CantidadFaltante < 0
    OR CantidadSobrante < 0
+   OR CostoUnitarioSnapshot < 0
    OR CantidadDanada + CantidadSobrante > CantidadRecibida
    OR (CantidadRecibida = 0 AND CantidadFaltante = 0);
 
@@ -88,7 +96,7 @@ LEFT JOIN ProductoVariantes pv ON pv.Id = d.ProductoVarianteId
 LEFT JOIN Almacenes a ON a.Id = d.AlmacenId
 LEFT JOIN UbicacionesAlmacen u ON u.Id = d.UbicacionAlmacenId;
 
--- Resultado esperado: tablas presentes; números/idempotencia únicos; una sola clave física por
--- recepción+línea+almacén+ubicación; checks de cantidades sin violaciones; FKs restrictivas a
--- OrdenCompra/detalles/producto/variante/almacén/ubicación y cascade únicamente cabecera->detalle;
--- cero huérfanos y ninguna ubicación asociada a otro almacén.
+-- Resultado esperado: tablas presentes; números/idempotencia únicos; idempotencia clave+fingerprint
+-- atómica; una sola clave física por recepción+línea+almacén+ubicación; cantidades y costo sin
+-- violaciones; FKs restrictivas a OrdenCompra/detalles/producto/variante/almacén/ubicación y cascade
+-- únicamente cabecera->detalle; cero huérfanos y ninguna ubicación asociada a otro almacén.
