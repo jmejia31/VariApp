@@ -68,6 +68,42 @@ public sealed class RecepcionCompraService : IRecepcionCompraService
         return recepcion is null ? null : Map(recepcion);
     }
 
+    public async Task<RecepcionCompraSaldoOrdenDto?> GetSaldoOrdenAsync(int ordenCompraId)
+    {
+        if (ordenCompraId <= 0)
+            return null;
+
+        var orden = await _ordenes.GetByIdAsync(ordenCompraId);
+        if (orden is null)
+            return null;
+
+        var lineas = new List<RecepcionCompraSaldoLineaDto>(orden.Detalles.Count);
+        foreach (var detalle in orden.Detalles.OrderBy(x => x.Id))
+        {
+            var acumulada = await _repository.GetCantidadAceptadaAcumuladaPorDetalleAsync(detalle.Id);
+            var pendiente = Math.Max(0m, detalle.CantidadOrdenada - acumulada);
+            lineas.Add(new RecepcionCompraSaldoLineaDto
+            {
+                OrdenCompraDetalleId = detalle.Id,
+                ProductoId = detalle.ProductoId,
+                ProductoVarianteId = detalle.ProductoVarianteId,
+                ProductoSkuSnapshot = detalle.ProductoSkuSnapshot,
+                ProductoNombreSnapshot = detalle.ProductoNombreSnapshot,
+                CantidadOrdenada = detalle.CantidadOrdenada,
+                CantidadAceptadaAcumulada = acumulada,
+                CantidadPendiente = pendiente
+            });
+        }
+
+        return new RecepcionCompraSaldoOrdenDto
+        {
+            OrdenCompraId = orden.Id,
+            NumeroOrden = orden.NumeroOrden,
+            EstadoOrden = orden.Estado,
+            Lineas = lineas
+        };
+    }
+
     public async Task<RecepcionCompraDto> CreateAsync(CreateRecepcionCompraDto dto, string idempotencyKey)
     {
         ArgumentNullException.ThrowIfNull(dto);
