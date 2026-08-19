@@ -91,6 +91,8 @@ test.describe('Recepción de mercancía - shell y acceso', () => {
     await page.locator('input[name="ordenCompraId"]').fill('17');
     await page.locator('mat-select[name="estado"]').click();
     await page.getByRole('option', { name: 'Borrador', exact: true }).click();
+    await page.locator('input[name="desde"]').fill('2026-08-01');
+    await page.locator('input[name="hasta"]').fill('2026-08-19');
     await page.getByRole('button', { name: 'Filtrar' }).click();
 
     await expect.poll(() => urls.length).toBeGreaterThan(1);
@@ -99,5 +101,19 @@ test.describe('Recepción de mercancía - shell y acceso', () => {
     expect(filtrada.searchParams.get('estado')).toBe('Borrador');
     expect(filtrada.searchParams.get('page')).toBe('1');
     expect(filtrada.searchParams.get('pageSize')).toBe('20');
+
+    const fechasEsperadas = await page.evaluate(() => {
+      const desdeUtc = new Date('2026-08-01T00:00:00').toISOString();
+      const siguienteMedianocheLocal = new Date('2026-08-19T00:00:00');
+      siguienteMedianocheLocal.setDate(siguienteMedianocheLocal.getDate() + 1);
+      const ultimoSegundo = new Date(siguienteMedianocheLocal.getTime() - 1000).toISOString();
+      return {
+        desdeUtc,
+        hastaUtc: ultimoSegundo.replace(/\.\d{3}Z$/, '.9999999Z')
+      };
+    });
+    expect(filtrada.searchParams.get('desdeUtc')).toBe(fechasEsperadas.desdeUtc);
+    expect(filtrada.searchParams.get('hastaUtc')).toBe(fechasEsperadas.hastaUtc);
+    expect(filtrada.searchParams.get('hastaUtc')).toMatch(/\.9999999Z$/);
   });
 });
