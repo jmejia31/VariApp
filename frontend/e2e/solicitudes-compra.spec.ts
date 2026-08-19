@@ -66,11 +66,14 @@ async function mockCatalogos(page: Page): Promise<void> {
 }
 
 async function mockListado(page: Page): Promise<void> {
-  await page.route('**/solicitudes-compra?**', route => route.fulfill({
-    status: 200,
-    contentType: 'application/json',
-    body: JSON.stringify({ success: true, message: '', errors: [], data: { items: [borrador], page: 1, pageSize: 10, totalCount: 1, totalPages: 1 } })
-  }));
+  await page.route(/\/solicitudes-compra(?:\?.*)?$/, route => {
+    if (route.request().method() !== 'GET') return route.fallback();
+    return route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ success: true, message: '', errors: [], data: { items: [borrador], page: 1, pageSize: 10, totalCount: 1, totalPages: 1 } })
+    });
+  });
   await page.route('**/solicitudes-compra/701', route => {
     if (route.request().method() !== 'GET') return route.fallback();
     return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true, message: '', errors: [], data: borrador }) });
@@ -125,6 +128,7 @@ test.describe('Solicitud de compra - frontend documental', () => {
     });
 
     await page.goto('/solicitudes-compra?detalle=701');
+    await expect(page.getByRole('heading', { name: 'Detalle de solicitud de compra' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Editar borrador' })).toBeVisible();
     await page.getByRole('button', { name: 'Enviar', exact: true }).click();
     await expect.poll(() => enviados).toBe(1);
@@ -140,6 +144,7 @@ test.describe('Solicitud de compra - frontend documental', () => {
     await page.goto('/solicitudes-compra');
     await expect(page.getByRole('button', { name: 'Nueva solicitud' })).toHaveCount(0);
     await page.goto('/solicitudes-compra?detalle=701');
+    await expect(page.getByRole('heading', { name: 'Detalle de solicitud de compra' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Editar borrador' })).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Enviar', exact: true })).toHaveCount(0);
   });
