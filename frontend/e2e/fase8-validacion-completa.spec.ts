@@ -163,7 +163,7 @@ test.describe('Fase 8 — validación completa automatizada', () => {
     await expect(page).toHaveURL(/\/login$/);
 
     const unauthorized = await request.get(`${API_URL}/productos?page=1&pageSize=1`);
-    expect(unauthorized.status()).toBe(401);
+    expect(unauthorized.status(), await unauthorized.text()).toBe(401);
 
     const invalidToken = await request.get(`${API_URL}/productos?page=1&pageSize=1`, {
       headers: { Authorization: 'Bearer token-invalido-fase-8' }
@@ -262,11 +262,15 @@ test.describe('Fase 8 — validación completa automatizada', () => {
   test('el enlace para saltar contenido funciona mediante teclado', async ({ page }) => {
     await login(page);
     await page.goto('/dashboard');
+    const main = page.locator('main#main-content');
     const skip = page.getByRole('link', { name: 'Saltar al contenido principal' });
 
-    // El foco inicial del navegador después de una navegación puede variar entre
-    // runners. Un sentinel E2E previo a app-root fija un origen determinista sin
-    // alterar el código productivo: Tab debe avanzar al primer control real, el skip-link.
+    // AppComponent enfoca main de forma asíncrona tras NavigationEnd. Esperar ese
+    // foco productivo antes de crear el sentinel evita una carrera entre callbacks.
+    await expect(main).toBeFocused();
+
+    // Desde un origen E2E determinista, Tab debe avanzar al primer control real:
+    // el skip-link, sin modificar el comportamiento accesible de producción.
     await page.evaluate(() => {
       document.getElementById('e2e-focus-sentinel')?.remove();
       const sentinel = document.createElement('button');
@@ -282,7 +286,7 @@ test.describe('Fase 8 — validación completa automatizada', () => {
     await page.keyboard.press('Tab');
     await expect(skip).toBeFocused();
     await page.keyboard.press('Enter');
-    await expect(page.locator('main#main-content')).toBeFocused();
+    await expect(main).toBeFocused();
   });
 
   test('formularios críticos exponen nombres accesibles y mensajes sin detalles internos', async ({ page, request }) => {
