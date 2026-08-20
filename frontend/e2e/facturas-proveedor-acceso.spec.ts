@@ -34,11 +34,11 @@ async function loginConPermisos(page: Page, permisos: PermisoCompras[]): Promise
 }
 
 async function mockFacturasProveedor(page: Page): Promise<void> {
-  await page.route('**/facturas-proveedor**', async route => {
+  await page.route(/\/facturas-proveedor(?:\/1)?(?:\?.*)?$/, async route => {
     const request = route.request();
     const url = new URL(request.url());
     const esApiFacturaProveedor = request.resourceType() !== 'document'
-      && url.pathname.startsWith('/facturas-proveedor');
+      && (url.pathname === '/facturas-proveedor' || url.pathname === '/facturas-proveedor/1');
 
     if (!esApiFacturaProveedor) {
       await route.continue();
