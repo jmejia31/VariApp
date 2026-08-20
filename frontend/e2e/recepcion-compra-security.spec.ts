@@ -39,6 +39,11 @@ async function mockListadoVacio(page: Page): Promise<void> {
 
 async function mockDetalleBorrador(page: Page): Promise<void> {
   await page.route('**/recepciones-compra/1', async route => {
+    if (route.request().resourceType() === 'document') {
+      await route.fallback();
+      return;
+    }
+
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
