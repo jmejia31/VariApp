@@ -35,6 +35,7 @@ namespace InventoryApp.Infrastructure.Migrations
             ApplyPart14(modelBuilder);
             ApplyPart15(modelBuilder);
             ApplyPart16(modelBuilder);
+            ApplyPart17(modelBuilder);
         }
     }
 
