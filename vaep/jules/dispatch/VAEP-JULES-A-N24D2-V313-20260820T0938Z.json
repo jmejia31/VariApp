@@ -6,9 +6,9 @@
   "repository": "jmejia31/VariApp",
   "branch": "Desarrollo",
   "expectedBranch": "Desarrollo",
-  "baseHead": "8ec9a5dc65a190bac057079bf2443508963f76a9",
-  "primaryBaseHead": "8ec9a5dc65a190bac057079bf2443508963f76a9",
-  "prompt": "Ejecuta exclusivamente N2.4.D.2 como lane de N2.4.D. Implementa/revisa los contratos HTTP, controller/API de FacturaProveedor, rutas, status codes y ProblemDetails sobre los contratos backend ya definidos, sin invadir el service/repository de D.1 ni el review D.3. Respeta la separación OrdenCompra/Recepcion/FacturaProveedor, fail-closed y cero stock/Kardex/finanzas. Scope de escritura exclusivo: backend/src/API/Controllers/*FacturaProveedor* y backend/tests/**FacturaProveedor*Controller*. Antes de cambiar, inspecciona contratos de Application necesarios solo como lectura y confirma compatibilidad con HEAD base. REVIEW-FIRST obligatorio al terminar: base exacta, scope, diff, tests ejecutados/no ejecutados, observaciones, riesgos y recomendaciones; no ocultes limitaciones. Si aparece AWAITING_USER_FEEDBACK o AWAITING_PLAN_APPROVAL rutinario, el worker VAEP v3.13 debe resolverlo inline mediante sendMessage/approvePlan, maximo 3 auto-followups, y continuar polling hasta terminal real. Entrega solo ChangeSet/gitPatch; no push, PR, merge, main, Produccion, secrets ni trabajo N2.4.E/N2.5.",
+  "baseHead": "d97b9a1bb37cd8b27852b2b1a8ea80ce0d46aed5",
+  "primaryBaseHead": "d97b9a1bb37cd8b27852b2b1a8ea80ce0d46aed5",
+  "prompt": "RECOVERY de la misma N2.4.D.2 y del mismo dispatchId, sin crear scope ni sesión duplicada. Ejecuta exclusivamente los contratos HTTP/controller/API de FacturaProveedor sobre la base D.1 ya materializada. Implementa rutas, status codes y ProblemDetails consumiendo IFacturaProveedorService/DTOs existentes; no invadas service/repository de D.1 ni review D.3. Respeta OrdenCompra/Recepcion/FacturaProveedor, fail-closed y cero stock/Kardex/finanzas. Scope de escritura exclusivo: backend/src/API/Controllers/*FacturaProveedor* y backend/tests/**FacturaProveedor*Controller*. REVIEW-FIRST obligatorio al terminar: base exacta, scope, diff, tests ejecutados/no ejecutados, observaciones, riesgos y recomendaciones. AWAITING_USER_FEEDBACK o AWAITING_PLAN_APPROVAL rutinario se resuelven inline por VAEP v3.13 con sendMessage/approvePlan, máximo 3 followups, continuando polling hasta terminal real. Entrega sólo ChangeSet/gitPatch; no push, PR, merge, main, Produccion, secrets ni N2.4.E/N2.5.",
   "scope": {
     "write": [
       "backend/src/API/Controllers/*FacturaProveedor*",
