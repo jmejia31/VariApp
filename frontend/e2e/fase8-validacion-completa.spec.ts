@@ -163,7 +163,7 @@ test.describe('Fase 8 — validación completa automatizada', () => {
     await expect(page).toHaveURL(/\/login$/);
 
     const unauthorized = await request.get(`${API_URL}/productos?page=1&pageSize=1`);
-    expect(unauthorized.status(), await unauthorized.text()).toBe(401);
+    expect(unauthorized.status()).toBe(401);
 
     const invalidToken = await request.get(`${API_URL}/productos?page=1&pageSize=1`, {
       headers: { Authorization: 'Bearer token-invalido-fase-8' }
