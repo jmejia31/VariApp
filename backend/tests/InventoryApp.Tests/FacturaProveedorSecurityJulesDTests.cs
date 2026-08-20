@@ -1,0 +1,86 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using InventoryApp.Application.DTOs;
+using InventoryApp.Application.Exceptions;
+using InventoryApp.Application.Interfaces;
+using InventoryApp.Application.Services;
+using InventoryApp.Domain.Entities;
+using InventoryApp.Domain.Enums;
+using Moq;
+using Xunit;
+
+namespace InventoryApp.Tests;
+
+public class FacturaProveedorSecurityJulesDTests
+{
+    private readonly Mock<IFacturaProveedorRepository> _repositoryMock;
+    private readonly Mock<IOrdenCompraRepository> _ordenCompraRepositoryMock;
+    private readonly Mock<IRecepcionCompraRepository> _recepcionCompraRepositoryMock;
+    private readonly Mock<ICurrentUserService> _currentUserMock;
+    private readonly Mock<IAuditoriaService> _auditoriaMock;
+    private readonly Mock<IUnitOfWork> _unitOfWorkMock;
+    private readonly FacturaProveedorService _service;
+
+    public FacturaProveedorSecurityJulesDTests()
+    {
+        _repositoryMock = new Mock<IFacturaProveedorRepository>();
+        _ordenCompraRepositoryMock = new Mock<IOrdenCompraRepository>();
+        _recepcionCompraRepositoryMock = new Mock<IRecepcionCompraRepository>();
+        _currentUserMock = new Mock<ICurrentUserService>();
+        _auditoriaMock = new Mock<IAuditoriaService>();
+        _unitOfWorkMock = new Mock<IUnitOfWork>();
+
+        _service = new FacturaProveedorService(
+            _repositoryMock.Object,
+            _ordenCompraRepositoryMock.Object,
+            _recepcionCompraRepositoryMock.Object,
+            _currentUserMock.Object,
+            _unitOfWorkMock.Object,
+            _auditoriaMock.Object
+        );
+    }
+
+    [Fact]
+    public async Task CreateAsync_WhenUserIsNotAuthenticated_ShouldThrowForbiddenAccessException()
+    {
+        // Arrange
+        _currentUserMock.Setup(x => x.EstaAutenticado).Returns(false);
+
+        var dto = new CreateFacturaProveedorDto
+        {
+            ProveedorId = 1,
+            OrdenCompraId = 1,
+            NumeroFactura = "F-123",
+            Moneda = "HNL",
+            FechaEmisionUtc = DateTime.UtcNow,
+            Detalles = new List<FacturaProveedorDetalleInputDto>
+            {
+                new() { OrdenCompraDetalleId = 1, CantidadFacturada = 1, PrecioUnitario = 100 }
+            }
+        };
+
+        _repositoryMock.Setup(x => x.GetByProveedorNumeroAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<bool>())).ReturnsAsync((FacturaProveedor?)null);
+
+        var validOrden = new OrdenCompra { ProveedorId = 1, ProveedorNombreSnapshot = "Proveedor 1" };
+        var prop = typeof(OrdenCompra).GetProperty("Estado");
+        prop?.SetValue(validOrden, EstadoOrdenCompra.Aprobada);
+        var detallesProp = typeof(OrdenCompra).GetProperty("Detalles");
+        var detalle = new OrdenCompraDetalle { Id = 1, ProductoId = 1, ProductoNombreSnapshot = "Producto 1" };
+        var precioProp = typeof(OrdenCompraDetalle).GetProperty("PrecioUnitario");
+        precioProp?.SetValue(detalle, 100m);
+        var detalles = new List<OrdenCompraDetalle> { detalle };
+        detallesProp?.SetValue(validOrden, detalles);
+
+        _ordenCompraRepositoryMock.Setup(x => x.GetByIdAsync(It.IsAny<int>(), It.IsAny<bool>())).ReturnsAsync(validOrden); 
+        _ordenCompraRepositoryMock.Setup(x => x.GetByIdForUpdateAsync(It.IsAny<int>())).ReturnsAsync(validOrden);
+
+        _unitOfWorkMock.Setup(x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>())).Returns(async (Func<Task> action) => {
+            await action();
+        });
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ForbiddenAccessException>(() => _service.CreateAsync(dto));
+        Assert.Equal("No existe un usuario autenticado válido para ejecutar la operación.", exception.Message);
+    }
+}
