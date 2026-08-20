@@ -1,4 +1,4 @@
-name: VAEP Jules Secondary Worker
+name: VAEP Jules A Trusted Secondary Worker
 
 on:
   push:
@@ -40,11 +40,11 @@ jobs:
           ref: ${{ github.sha }}
           fetch-depth: 2
 
-      - name: Execute VAEP v3.13 Jules A worker
+      - name: Execute VAEP Jules integration v3.19 worker
         shell: bash
-        run: bash .github/scripts/vaep-jules-worker-v313.sh
+        run: bash .github/scripts/vaep-jules-worker-v319.sh
 
-      - name: Upload Jules result artifact
+      - name: Upload Jules A result artifact
         if: always() && env.RESULT_DIR != ''
         uses: actions/upload-artifact@v4
         with:
