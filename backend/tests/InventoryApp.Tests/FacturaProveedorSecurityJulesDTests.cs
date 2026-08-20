@@ -7,6 +7,7 @@ using InventoryApp.Application.Interfaces;
 using InventoryApp.Application.Services;
 using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Enums;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -20,6 +21,7 @@ public class FacturaProveedorSecurityJulesDTests
     private readonly Mock<ICurrentUserService> _currentUserMock;
     private readonly Mock<IAuditoriaService> _auditoriaMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
+    private readonly Mock<ILogger<FacturaProveedorService>> _loggerMock;
     private readonly FacturaProveedorService _service;
 
     public FacturaProveedorSecurityJulesDTests()
@@ -30,6 +32,7 @@ public class FacturaProveedorSecurityJulesDTests
         _currentUserMock = new Mock<ICurrentUserService>();
         _auditoriaMock = new Mock<IAuditoriaService>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
+        _loggerMock = new Mock<ILogger<FacturaProveedorService>>();
 
         _service = new FacturaProveedorService(
             _repositoryMock.Object,
@@ -37,7 +40,8 @@ public class FacturaProveedorSecurityJulesDTests
             _recepcionCompraRepositoryMock.Object,
             _currentUserMock.Object,
             _unitOfWorkMock.Object,
-            _auditoriaMock.Object
+            _auditoriaMock.Object,
+            _loggerMock.Object
         );
     }
 
@@ -72,7 +76,7 @@ public class FacturaProveedorSecurityJulesDTests
         var detalles = new List<OrdenCompraDetalle> { detalle };
         detallesProp?.SetValue(validOrden, detalles);
 
-        _ordenCompraRepositoryMock.Setup(x => x.GetByIdAsync(It.IsAny<int>(), It.IsAny<bool>())).ReturnsAsync(validOrden); 
+        _ordenCompraRepositoryMock.Setup(x => x.GetByIdAsync(It.IsAny<int>(), It.IsAny<bool>())).ReturnsAsync(validOrden);
         _ordenCompraRepositoryMock.Setup(x => x.GetByIdForUpdateAsync(It.IsAny<int>())).ReturnsAsync(validOrden);
 
         _unitOfWorkMock.Setup(x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>())).Returns(async (Func<Task> action) => {

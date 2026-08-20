@@ -4,6 +4,7 @@ using InventoryApp.Application.Interfaces;
 using InventoryApp.Application.Services;
 using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Enums;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -17,6 +18,7 @@ public sealed class N24FacturaProveedorServiceTests
     private readonly Mock<ICurrentUserService> _currentUser = new();
     private readonly Mock<IUnitOfWork> _unitOfWork = new();
     private readonly Mock<IAuditoriaService> _auditoria = new();
+    private readonly Mock<ILogger<FacturaProveedorService>> _logger = new();
     private readonly FacturaProveedorService _service;
 
     public N24FacturaProveedorServiceTests()
@@ -35,7 +37,8 @@ public sealed class N24FacturaProveedorServiceTests
             _recepciones.Object,
             _currentUser.Object,
             _unitOfWork.Object,
-            _auditoria.Object);
+            _auditoria.Object,
+            _logger.Object);
     }
 
     [Fact]

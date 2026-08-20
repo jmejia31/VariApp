@@ -7,6 +7,7 @@ using InventoryApp.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -15,11 +16,12 @@ namespace InventoryApp.Tests;
 public sealed class N24FacturaProveedorControllerTests
 {
     private readonly Mock<IFacturaProveedorService> _serviceMock = new();
+    private readonly Mock<ILogger<FacturasProveedorController>> _loggerMock = new();
     private readonly FacturasProveedorController _controller;
 
     public N24FacturaProveedorControllerTests()
     {
-        _controller = new FacturasProveedorController(_serviceMock.Object);
+        _controller = new FacturasProveedorController(_serviceMock.Object, _loggerMock.Object);
     }
 
     [Fact]

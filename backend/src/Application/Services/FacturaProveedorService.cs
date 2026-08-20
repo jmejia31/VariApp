@@ -4,6 +4,7 @@ using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Enums;
+using Microsoft.Extensions.Logging;
 
 namespace InventoryApp.Application.Services;
 
@@ -17,6 +18,7 @@ public sealed class FacturaProveedorService : IFacturaProveedorService
     private readonly ICurrentUserService _currentUser;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IAuditoriaService _auditoria;
+    private readonly ILogger<FacturaProveedorService> _logger;
 
     public FacturaProveedorService(
         IFacturaProveedorRepository repository,
@@ -24,7 +26,8 @@ public sealed class FacturaProveedorService : IFacturaProveedorService
         IRecepcionCompraRepository recepcionesCompra,
         ICurrentUserService currentUser,
         IUnitOfWork unitOfWork,
-        IAuditoriaService auditoria)
+        IAuditoriaService auditoria,
+        ILogger<FacturaProveedorService> logger)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         _ordenesCompra = ordenesCompra ?? throw new ArgumentNullException(nameof(ordenesCompra));
@@ -32,6 +35,7 @@ public sealed class FacturaProveedorService : IFacturaProveedorService
         _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _auditoria = auditoria ?? throw new ArgumentNullException(nameof(auditoria));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async Task<PagedResult<FacturaProveedorDto>> GetPagedAsync(FacturaProveedorFiltroDto filtro)
@@ -70,7 +74,10 @@ public sealed class FacturaProveedorService : IFacturaProveedorService
 
         var existente = await _repository.GetByProveedorNumeroAsync(dto.ProveedorId, dto.NumeroFactura);
         if (existente is not null)
+        {
+            _logger.LogInformation("Factura de proveedor ya existente. Resolviendo reintento idempotente.");
             return Map(ResolverReintento(existente, dto));
+        }
 
         FacturaProveedor? creada = null;
         try
@@ -80,6 +87,7 @@ public sealed class FacturaProveedorService : IFacturaProveedorService
                 var concurrente = await _repository.GetByProveedorNumeroAsync(dto.ProveedorId, dto.NumeroFactura, tracking: true);
                 if (concurrente is not null)
                 {
+                    _logger.LogInformation("Factura concurrente detectada dentro de la transacción.");
                     creada = ResolverReintento(concurrente, dto);
                     return;
                 }
@@ -95,12 +103,14 @@ public sealed class FacturaProveedorService : IFacturaProveedorService
 
                 await _repository.AddAsync(factura);
                 await _repository.SaveChangesAsync();
+                _logger.LogInformation("Factura de proveedor {Id} creada en base de datos.", factura.Id);
                 await RegistrarAuditoriaAsync(AccionPermiso.Crear, "Factura de proveedor creada", factura, valoresNuevos: Snapshot(factura));
                 creada = factura;
             });
         }
         catch (UniqueConstraintViolationException ex) when (ex.ConstraintName == NumeroConstraint)
         {
+            _logger.LogWarning(ex, "Violación de constraint única detectada para proveedor {ProveedorId} y número de factura.", dto.ProveedorId);
             var concurrente = await _repository.GetByProveedorNumeroAsync(dto.ProveedorId, dto.NumeroFactura)
                 ?? throw new ConflictException("La factura fue creada concurrentemente y no pudo recuperarse de forma segura.");
             creada = ResolverReintento(concurrente, dto);
@@ -133,6 +143,7 @@ public sealed class FacturaProveedorService : IFacturaProveedorService
             ValidarDominio(factura.ValidarDocumento);
 
             await _repository.SaveChangesAsync();
+            _logger.LogInformation("Factura de proveedor {Id} editada exitosamente.", factura.Id);
             await RegistrarAuditoriaAsync(AccionPermiso.Editar, "Factura de proveedor editada", factura, anterior, Snapshot(factura));
             actualizada = factura;
         });
@@ -148,6 +159,7 @@ public sealed class FacturaProveedorService : IFacturaProveedorService
             var factura = await ObtenerBloqueadaAsync(id);
             if (factura.Estado == EstadoFacturaProveedor.Registrada)
             {
+                _logger.LogInformation("La factura de proveedor {Id} ya se encontraba registrada.", factura.Id);
                 registrada = factura;
                 return;
             }
@@ -170,6 +182,7 @@ public sealed class FacturaProveedorService : IFacturaProveedorService
             factura.ActualizadoPorUsuarioId = usuarioId;
             factura.ActualizadoPorNombreUsuario = Normalizar(_currentUser.NombreUsuario);
             await _repository.SaveChangesAsync();
+            _logger.LogInformation("Factura de proveedor {Id} confirmada/registrada exitosamente.", factura.Id);
             await RegistrarAuditoriaAsync(AccionPermiso.Confirmar, "Factura de proveedor registrada", factura, anterior, Snapshot(factura));
             registrada = factura;
         });
@@ -189,6 +202,7 @@ public sealed class FacturaProveedorService : IFacturaProveedorService
             var factura = await ObtenerBloqueadaAsync(id);
             if (factura.Estado == EstadoFacturaProveedor.Anulada)
             {
+                _logger.LogInformation("La factura de proveedor {Id} ya se encontraba anulada.", factura.Id);
                 anulada = factura;
                 return;
             }
@@ -202,6 +216,7 @@ public sealed class FacturaProveedorService : IFacturaProveedorService
             factura.ActualizadoPorUsuarioId = usuarioId;
             factura.ActualizadoPorNombreUsuario = Normalizar(_currentUser.NombreUsuario);
             await _repository.SaveChangesAsync();
+            _logger.LogInformation("Factura de proveedor {Id} anulada exitosamente.", factura.Id);
             await RegistrarAuditoriaAsync(AccionPermiso.Anular, "Factura de proveedor anulada", factura, anterior, Snapshot(factura), motivo);
             anulada = factura;
         });
