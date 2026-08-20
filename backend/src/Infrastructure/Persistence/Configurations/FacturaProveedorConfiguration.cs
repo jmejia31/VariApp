@@ -12,7 +12,17 @@ public sealed class FacturaProveedorConfiguration : IEntityTypeConfiguration<Fac
 {
     public void Configure(EntityTypeBuilder<FacturaProveedor> builder)
     {
-        builder.ToTable("FacturasProveedor");
+        builder.ToTable("FacturasProveedor", table =>
+        {
+            table.HasCheckConstraint("CK_FacturasProveedor_IdsValidos",
+                "ProveedorId > 0 AND OrdenCompraId > 0");
+            table.HasCheckConstraint("CK_FacturasProveedor_EstadoValido",
+                "Estado IN (1, 2, 3)");
+            table.HasCheckConstraint("CK_FacturasProveedor_MonedaIso3",
+                "CHAR_LENGTH(TRIM(Moneda)) = 3");
+            table.HasCheckConstraint("CK_FacturasProveedor_FechasValidas",
+                "FechaVencimientoUtc IS NULL OR FechaVencimientoUtc >= FechaEmisionUtc");
+        });
 
         builder.Property(x => x.Id).ValueGeneratedOnAdd();
         builder.Property(x => x.NumeroFactura).HasMaxLength(80).IsRequired();

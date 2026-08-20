@@ -12,7 +12,15 @@ public sealed class FacturaProveedorDetalleConfiguration : IEntityTypeConfigurat
 {
     public void Configure(EntityTypeBuilder<FacturaProveedorDetalle> builder)
     {
-        builder.ToTable("FacturaProveedorDetalles");
+        builder.ToTable("FacturaProveedorDetalles", table =>
+        {
+            table.HasCheckConstraint("CK_FacturaProveedorDetalles_IdsValidos",
+                "OrdenCompraDetalleId > 0 AND ProductoId > 0 AND (ProductoVarianteId IS NULL OR ProductoVarianteId > 0)");
+            table.HasCheckConstraint("CK_FacturaProveedorDetalles_ImportesValidos",
+                "CantidadFacturada > 0 AND PrecioUnitarioSnapshot >= 0 AND DescuentoSnapshot >= 0 AND ImpuestoSnapshot >= 0");
+            table.HasCheckConstraint("CK_FacturaProveedorDetalles_DescuentoValido",
+                "DescuentoSnapshot <= CantidadFacturada * PrecioUnitarioSnapshot");
+        });
 
         builder.Property(x => x.Id).ValueGeneratedOnAdd();
         builder.Property(x => x.CantidadFacturada).HasPrecision(18, 4).IsRequired();
