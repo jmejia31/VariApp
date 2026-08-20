@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { permisoGuard } from './core/guards/permiso.guard';
 import { AJUSTES_INVENTARIO_ROUTES } from './features/inventario/ajustes.routes';
+import { FACTURAS_PROVEEDOR_ROUTES } from './features/compras/facturas-proveedor/facturas-proveedor.routes';
 
 export const routes: Routes = [
   {
@@ -371,6 +372,7 @@ export const routes: Routes = [
     loadComponent: () => import('./features/inventario/costeo-inventario.component').then(m => m.CosteoInventarioComponent)
   },
   ...AJUSTES_INVENTARIO_ROUTES,
+  ...FACTURAS_PROVEEDOR_ROUTES,
   {
     path: 'configuracion',
     canActivate: [authGuard, permisoGuard],
