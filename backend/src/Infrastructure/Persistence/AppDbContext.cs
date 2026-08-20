@@ -41,6 +41,8 @@ public class AppDbContext : DbContext
     public DbSet<Factura> Facturas => Set<Factura>();
     public DbSet<FacturaDetalle> FacturaDetalles => Set<FacturaDetalle>();
     public DbSet<FacturaPago> FacturaPagos => Set<FacturaPago>();
+    public DbSet<FacturaProveedor> FacturasProveedor => Set<FacturaProveedor>();
+    public DbSet<FacturaProveedorDetalle> FacturaProveedorDetalles => Set<FacturaProveedorDetalle>();
     public DbSet<EmpresaConfiguracion> EmpresaConfiguraciones => Set<EmpresaConfiguracion>();
     public DbSet<RevisionFinanciera> RevisionesFinancieras => Set<RevisionFinanciera>();
     public DbSet<RegistroAuditoria> RegistrosAuditoria => Set<RegistroAuditoria>();
