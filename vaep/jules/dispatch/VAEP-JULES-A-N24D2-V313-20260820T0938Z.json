@@ -1,0 +1,40 @@
+{
+  "dispatchId": "VAEP-JULES-A-N24D2-V313-20260820T0938Z",
+  "taskId": "N2.4.D.2",
+  "workerId": "JULES_A",
+  "role": "Programador Secundario Confiable - contratos HTTP/controller FacturaProveedor",
+  "repository": "jmejia31/VariApp",
+  "branch": "Desarrollo",
+  "expectedBranch": "Desarrollo",
+  "baseHead": "8ec9a5dc65a190bac057079bf2443508963f76a9",
+  "primaryBaseHead": "8ec9a5dc65a190bac057079bf2443508963f76a9",
+  "prompt": "Ejecuta exclusivamente N2.4.D.2 como lane de N2.4.D. Implementa/revisa los contratos HTTP, controller/API de FacturaProveedor, rutas, status codes y ProblemDetails sobre los contratos backend ya definidos, sin invadir el service/repository de D.1 ni el review D.3. Respeta la separación OrdenCompra/Recepcion/FacturaProveedor, fail-closed y cero stock/Kardex/finanzas. Scope de escritura exclusivo: backend/src/API/Controllers/*FacturaProveedor* y backend/tests/**FacturaProveedor*Controller*. Antes de cambiar, inspecciona contratos de Application necesarios solo como lectura y confirma compatibilidad con HEAD base. REVIEW-FIRST obligatorio al terminar: base exacta, scope, diff, tests ejecutados/no ejecutados, observaciones, riesgos y recomendaciones; no ocultes limitaciones. Si aparece AWAITING_USER_FEEDBACK o AWAITING_PLAN_APPROVAL rutinario, el worker VAEP v3.13 debe resolverlo inline mediante sendMessage/approvePlan, maximo 3 auto-followups, y continuar polling hasta terminal real. Entrega solo ChangeSet/gitPatch; no push, PR, merge, main, Produccion, secrets ni trabajo N2.4.E/N2.5.",
+  "scope": {
+    "write": [
+      "backend/src/API/Controllers/*FacturaProveedor*",
+      "backend/tests/**FacturaProveedor*Controller*"
+    ],
+    "read": [
+      "backend/src/Application/**FacturaProveedor*",
+      "backend/src/Infrastructure/**FacturaProveedor*",
+      "backend/src/API/Controllers",
+      "backend/tests"
+    ]
+  },
+  "fileScopeHint": "backend/src/API/Controllers/*FacturaProveedor*; backend/tests/**FacturaProveedor*Controller*",
+  "forbidden": [
+    "main",
+    "Produccion",
+    "merge",
+    "force-push",
+    "secrets",
+    "N2.4.D.1-write",
+    "N2.4.D.3-write",
+    "N2.4.E",
+    "N2.5",
+    "stock",
+    "kardex",
+    "finanzas",
+    "files-outside-scope"
+  ]
+}
