@@ -45,6 +45,7 @@ builder.Services.AddScoped<ITransferenciaInventarioRepository, TransferenciaInve
 builder.Services.AddScoped<ISolicitudCompraRepository, SolicitudCompraRepository>();
 builder.Services.AddScoped<IOrdenCompraRepository, OrdenCompraRepository>();
 builder.Services.AddScoped<IRecepcionCompraRepository, RecepcionCompraRepository>();
+builder.Services.AddScoped<IFacturaProveedorRepository, FacturaProveedorRepository>();
 builder.Services.AddScoped<IReservaInventarioRepository, ReservaInventarioRepository>();
 builder.Services.AddScoped<ITrazabilidadInventarioRepository, TrazabilidadInventarioRepository>();
 builder.Services.AddScoped<IPoliticaCosteoInventarioRepository, PoliticaCosteoInventarioRepository>();
@@ -90,6 +91,7 @@ builder.Services.AddScoped<ISolicitudCompraService, SolicitudCompraService>();
 builder.Services.AddScoped<IOrdenCompraService, OrdenCompraService>();
 builder.Services.AddScoped<RecepcionCompraKardexRegistrar>();
 builder.Services.AddScoped<IRecepcionCompraService, RecepcionCompraService>();
+builder.Services.AddScoped<IFacturaProveedorService, FacturaProveedorService>();
 builder.Services.AddScoped<IReservaInventarioService, ReservaInventarioService>();
 builder.Services.AddScoped<ITrazabilidadInventarioService, TrazabilidadInventarioService>();
 builder.Services.AddScoped<IPoliticaCosteoInventarioService, PoliticaCosteoInventarioService>();
