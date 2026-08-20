@@ -13,6 +13,7 @@ public sealed class FacturaProveedorService : IFacturaProveedorService
     private const string EntidadAuditoria = "FacturaProveedor";
     private readonly IFacturaProveedorRepository _repository;
     private readonly IOrdenCompraRepository _ordenesCompra;
+    private readonly IRecepcionCompraRepository _recepcionesCompra;
     private readonly ICurrentUserService _currentUser;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IAuditoriaService _auditoria;
@@ -20,12 +21,14 @@ public sealed class FacturaProveedorService : IFacturaProveedorService
     public FacturaProveedorService(
         IFacturaProveedorRepository repository,
         IOrdenCompraRepository ordenesCompra,
+        IRecepcionCompraRepository recepcionesCompra,
         ICurrentUserService currentUser,
         IUnitOfWork unitOfWork,
         IAuditoriaService auditoria)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         _ordenesCompra = ordenesCompra ?? throw new ArgumentNullException(nameof(ordenesCompra));
+        _recepcionesCompra = recepcionesCompra ?? throw new ArgumentNullException(nameof(recepcionesCompra));
         _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _auditoria = auditoria ?? throw new ArgumentNullException(nameof(auditoria));
@@ -151,8 +154,17 @@ public sealed class FacturaProveedorService : IFacturaProveedorService
             if (factura.Estado != EstadoFacturaProveedor.Borrador)
                 throw new BusinessRuleException("Solo una factura de proveedor en borrador puede registrarse.");
 
-            var anterior = Snapshot(factura);
             var usuarioId = ObtenerUsuarioId();
+            var orden = await _ordenesCompra.GetByIdForUpdateAsync(factura.OrdenCompraId)
+                ?? throw new BusinessRuleException("La orden de compra asociada a la factura ya no existe.");
+            if (orden.Estado != EstadoOrdenCompra.Aprobada)
+                throw new BusinessRuleException("Solo puede registrarse una factura respaldada por una orden de compra aprobada.");
+            if (orden.ProveedorId != factura.ProveedorId)
+                throw new BusinessRuleException("El proveedor de la factura ya no coincide con el proveedor de la orden de compra.");
+
+            await ValidarLimitesRegistroAsync(factura, orden);
+
+            var anterior = Snapshot(factura);
             ValidarDominio(() => factura.Registrar(usuarioId, _currentUser.NombreCompleto ?? _currentUser.NombreUsuario, DateTime.UtcNow));
             factura.FechaActualizacion = DateTime.UtcNow;
             factura.ActualizadoPorUsuarioId = usuarioId;
@@ -194,6 +206,37 @@ public sealed class FacturaProveedorService : IFacturaProveedorService
             anulada = factura;
         });
         return Map(anulada!);
+    }
+
+    private async Task ValidarLimitesRegistroAsync(FacturaProveedor factura, OrdenCompra orden)
+    {
+        var detallesOrden = orden.Detalles.ToDictionary(x => x.Id);
+        foreach (var detalle in factura.Detalles)
+        {
+            if (!detallesOrden.TryGetValue(detalle.OrdenCompraDetalleId, out var detalleOrden))
+                throw new BusinessRuleException($"La línea {detalle.OrdenCompraDetalleId} ya no pertenece a la orden de compra asociada.");
+
+            var facturadoPrevio = await _repository.GetCantidadRegistradaAcumuladaPorDetalleAsync(
+                detalle.OrdenCompraDetalleId,
+                factura.Id);
+            var recibidoAceptado = await _recepcionesCompra.GetCantidadAceptadaAcumuladaPorDetalleAsync(
+                detalle.OrdenCompraDetalleId);
+            var facturadoProyectado = facturadoPrevio + detalle.CantidadFacturada;
+
+            if (facturadoProyectado > detalleOrden.CantidadOrdenada)
+            {
+                throw new BusinessRuleException(
+                    $"La facturación acumulada de la línea {detalle.OrdenCompraDetalleId} supera la cantidad comprada. " +
+                    $"Comprada={detalleOrden.CantidadOrdenada}; facturada previamente={facturadoPrevio}; actual={detalle.CantidadFacturada}.");
+            }
+
+            if (facturadoProyectado > recibidoAceptado)
+            {
+                throw new BusinessRuleException(
+                    $"La facturación acumulada de la línea {detalle.OrdenCompraDetalleId} supera la cantidad recibida y aceptada. " +
+                    $"Recibida={recibidoAceptado}; facturada previamente={facturadoPrevio}; actual={detalle.CantidadFacturada}.");
+            }
+        }
     }
 
     private async Task<OrdenCompra> ObtenerOrdenAprobadaAsync(int ordenCompraId, int proveedorId)

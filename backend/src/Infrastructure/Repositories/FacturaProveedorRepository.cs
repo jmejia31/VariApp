@@ -2,6 +2,7 @@ using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities;
+using InventoryApp.Domain.Enums;
 using InventoryApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -102,6 +103,21 @@ public sealed class FacturaProveedorRepository : IFacturaProveedorRepository
         var numero = numeroFactura.Trim().ToUpperInvariant();
         return ConDetalles(tracking)
             .FirstOrDefaultAsync(x => x.ProveedorId == proveedorId && x.NumeroFactura == numero);
+    }
+
+    public async Task<decimal> GetCantidadRegistradaAcumuladaPorDetalleAsync(
+        int ordenCompraDetalleId,
+        int? excluirFacturaId = null)
+    {
+        var query = _context.Set<FacturaProveedorDetalle>()
+            .AsNoTracking()
+            .Where(x => x.OrdenCompraDetalleId == ordenCompraDetalleId
+                && x.FacturaProveedor.Estado == EstadoFacturaProveedor.Registrada);
+
+        if (excluirFacturaId.HasValue)
+            query = query.Where(x => x.FacturaProveedorId != excluirFacturaId.Value);
+
+        return await query.SumAsync(x => x.CantidadFacturada);
     }
 
     public Task AddAsync(FacturaProveedor factura) => _context.Set<FacturaProveedor>().AddAsync(factura).AsTask();

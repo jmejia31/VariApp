@@ -3,6 +3,7 @@ using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Application.Services;
 using InventoryApp.Domain.Entities;
+using InventoryApp.Domain.Enums;
 using Moq;
 using Xunit;
 
@@ -12,6 +13,7 @@ public sealed class N24FacturaProveedorServiceTests
 {
     private readonly Mock<IFacturaProveedorRepository> _repository = new();
     private readonly Mock<IOrdenCompraRepository> _ordenes = new();
+    private readonly Mock<IRecepcionCompraRepository> _recepciones = new();
     private readonly Mock<ICurrentUserService> _currentUser = new();
     private readonly Mock<IUnitOfWork> _unitOfWork = new();
     private readonly Mock<IAuditoriaService> _auditoria = new();
@@ -30,6 +32,7 @@ public sealed class N24FacturaProveedorServiceTests
         _service = new FacturaProveedorService(
             _repository.Object,
             _ordenes.Object,
+            _recepciones.Object,
             _currentUser.Object,
             _unitOfWork.Object,
             _auditoria.Object);
@@ -112,9 +115,64 @@ public sealed class N24FacturaProveedorServiceTests
 
         var result = await _service.RegistrarAsync(55);
 
-        Assert.Equal(InventoryApp.Domain.Enums.EstadoFacturaProveedor.Registrada, result.Estado);
+        Assert.Equal(EstadoFacturaProveedor.Registrada, result.Estado);
+        _repository.Verify(x => x.SaveChangesAsync(), Times.Never);
+        _ordenes.Verify(x => x.GetByIdForUpdateAsync(It.IsAny<int>()), Times.Never);
+        _recepciones.VerifyNoOtherCalls();
+        _auditoria.VerifyNoOtherCalls();
+    }
+
+    [Fact]
+    public async Task RegistrarAsync_SuperaCantidadComprada_FallaAntesDePersistir()
+    {
+        var factura = CrearFacturaExistente();
+        var orden = CrearOrdenAprobada(2m);
+        _repository.Setup(x => x.GetByIdForUpdateAsync(55)).ReturnsAsync(factura);
+        _ordenes.Setup(x => x.GetByIdForUpdateAsync(20)).ReturnsAsync(orden);
+        _repository.Setup(x => x.GetCantidadRegistradaAcumuladaPorDetalleAsync(21, 55)).ReturnsAsync(1m);
+        _recepciones.Setup(x => x.GetCantidadAceptadaAcumuladaPorDetalleAsync(21, null)).ReturnsAsync(10m);
+
+        var ex = await Assert.ThrowsAsync<BusinessRuleException>(() => _service.RegistrarAsync(55));
+
+        Assert.Contains("cantidad comprada", ex.Message, StringComparison.OrdinalIgnoreCase);
         _repository.Verify(x => x.SaveChangesAsync(), Times.Never);
         _auditoria.VerifyNoOtherCalls();
+    }
+
+    [Fact]
+    public async Task RegistrarAsync_SuperaCantidadRecibidaAceptada_FallaAntesDePersistir()
+    {
+        var factura = CrearFacturaExistente();
+        var orden = CrearOrdenAprobada(5m);
+        _repository.Setup(x => x.GetByIdForUpdateAsync(55)).ReturnsAsync(factura);
+        _ordenes.Setup(x => x.GetByIdForUpdateAsync(20)).ReturnsAsync(orden);
+        _repository.Setup(x => x.GetCantidadRegistradaAcumuladaPorDetalleAsync(21, 55)).ReturnsAsync(1m);
+        _recepciones.Setup(x => x.GetCantidadAceptadaAcumuladaPorDetalleAsync(21, null)).ReturnsAsync(2m);
+
+        var ex = await Assert.ThrowsAsync<BusinessRuleException>(() => _service.RegistrarAsync(55));
+
+        Assert.Contains("cantidad recibida", ex.Message, StringComparison.OrdinalIgnoreCase);
+        _repository.Verify(x => x.SaveChangesAsync(), Times.Never);
+        _auditoria.VerifyNoOtherCalls();
+    }
+
+    [Fact]
+    public async Task RegistrarAsync_DentroDeLimites_BloqueaOrdenYRegistra()
+    {
+        var factura = CrearFacturaExistente();
+        var orden = CrearOrdenAprobada(5m);
+        _repository.Setup(x => x.GetByIdForUpdateAsync(55)).ReturnsAsync(factura);
+        _ordenes.Setup(x => x.GetByIdForUpdateAsync(20)).ReturnsAsync(orden);
+        _repository.Setup(x => x.GetCantidadRegistradaAcumuladaPorDetalleAsync(21, 55)).ReturnsAsync(1m);
+        _recepciones.Setup(x => x.GetCantidadAceptadaAcumuladaPorDetalleAsync(21, null)).ReturnsAsync(4m);
+
+        var result = await _service.RegistrarAsync(55);
+
+        Assert.Equal(EstadoFacturaProveedor.Registrada, result.Estado);
+        _ordenes.Verify(x => x.GetByIdForUpdateAsync(20), Times.Once);
+        _repository.Verify(x => x.GetCantidadRegistradaAcumuladaPorDetalleAsync(21, 55), Times.Once);
+        _recepciones.Verify(x => x.GetCantidadAceptadaAcumuladaPorDetalleAsync(21, null), Times.Once);
+        _repository.Verify(x => x.SaveChangesAsync(), Times.Once);
     }
 
     [Fact]
@@ -127,7 +185,7 @@ public sealed class N24FacturaProveedorServiceTests
 
         var result = await _service.AnularAsync(55, new AnularFacturaProveedorDto { Motivo = "Duplicado" });
 
-        Assert.Equal(InventoryApp.Domain.Enums.EstadoFacturaProveedor.Anulada, result.Estado);
+        Assert.Equal(EstadoFacturaProveedor.Anulada, result.Estado);
         _repository.Verify(x => x.SaveChangesAsync(), Times.Never);
         _auditoria.VerifyNoOtherCalls();
     }
@@ -142,6 +200,7 @@ public sealed class N24FacturaProveedorServiceTests
 
         await Assert.ThrowsAsync<ForbiddenAccessException>(() => _service.RegistrarAsync(55));
 
+        _ordenes.Verify(x => x.GetByIdForUpdateAsync(It.IsAny<int>()), Times.Never);
         _repository.Verify(x => x.SaveChangesAsync(), Times.Never);
         _auditoria.VerifyNoOtherCalls();
     }
@@ -169,6 +228,31 @@ public sealed class N24FacturaProveedorServiceTests
             Observaciones = "documento estable",
             Detalles = new List<FacturaProveedorDetalle> { detalle }
         };
+    }
+
+    private static OrdenCompra CrearOrdenAprobada(decimal cantidadOrdenada)
+    {
+        var detalle = new OrdenCompraDetalle
+        {
+            Id = 21,
+            OrdenCompraId = 20,
+            ProductoId = 31,
+            ProductoNombreSnapshot = "Producto QA"
+        };
+        detalle.EstablecerValores(cantidadOrdenada, 100m);
+
+        var orden = new OrdenCompra
+        {
+            Id = 20,
+            NumeroOrden = "OC-TEST-20",
+            ProveedorId = 10,
+            ProveedorNombreSnapshot = "Proveedor QA",
+            Moneda = "HNL",
+            Detalles = new List<OrdenCompraDetalle> { detalle }
+        };
+        orden.EnviarAprobacion(7, DateTime.UtcNow.AddMinutes(-2));
+        orden.Aprobar(7, "Compras QA", DateTime.UtcNow.AddMinutes(-1));
+        return orden;
     }
 
     private static CreateFacturaProveedorDto CrearDto() => new()
