@@ -1,12 +1,25 @@
-# VAEP — Jules como segundo desarrollador
+# VAEP — Entrenamiento canónico de Jules
 
-## 1. Objetivo
+## 1. Propósito y alcance
 
-Integrar Jules como **segundo desarrollador del VAEP junto a ChatGPT** para consumir la cola pendiente de VariApp con mayor throughput sin perder la autoridad técnica de GitHub, la rama única `Desarrollo`, los gates ni la trazabilidad.
+Este documento es **vinculante y común para todos los workers Jules autorizados en VariApp**. Aplica por igual a Jules A, Jules B, Jules C y cualquier cuenta Jules futura. No existe un entrenamiento reducido por worker.
 
-Jules no sustituye al Runner ni crea una automatización soberana. ChatGPT/VAEP conserva el control plane: selección, locks, `COLA`, `BITACORA`, reconciliación, certificación y publicación.
+La única diferencia permitida entre workers es su identidad técnica (`WORKER_ID`), su API key privada y su asignación/scope actual. Las reglas de ingeniería, seguridad, gobierno, calidad, revisión y entrega son idénticas.
 
-## 2. Identidad invariable
+Rol canónico después de certificar el smoke:
+
+```text
+PROGRAMADOR SECUNDARIO CONFIABLE
+TRUSTED_SECONDARY_DEVELOPER
+```
+
+Durante onboarding/smoke el worker permanece en probation y **no recibe trabajo ERP autoritativo**.
+
+ChatGPT/VAEP conserva siempre el control plane: selección de tarea, precedencia, locks, COLA, BITACORA, revisión, reconciliación, integración, CI, certificación y publicación.
+
+## 2. Identidad obligatoria
+
+Antes de analizar, editar o ejecutar:
 
 ```text
 PROJECT_ID=VARIAPP
@@ -14,186 +27,260 @@ REPOSITORY=jmejia31/VariApp
 BRANCH=Desarrollo
 ```
 
-Reglas inviolables para Jules:
+Cada Jules debe además conocer su `WORKER_ID` individual (`JULES_A`, `JULES_B`, `JULES_C`, etc.) y la microtarea exacta asignada.
 
-- leer `AGENTS.md` antes de editar;
-- trabajar únicamente sobre el source de `jmejia31/VariApp` y `Desarrollo`;
-- no tocar `main` ni Producción;
-- no crear ramas, PR, merge, auto-merge ni deployment;
-- no publicar cambios funcionales por sí mismo;
-- no exponer secretos;
-- preservar trabajo concurrente;
-- ejecutar validaciones proporcionales reales;
-- devolver cambios como `ChangeSet/gitPatch` para reconciliación del VAEP.
+Lectura mínima obligatoria antes de editar:
 
-## 3. Modelo de ejecución
+1. `AGENTS.md`;
+2. `PROJECT_CONTEXT.md`;
+3. `TASKS.md` cuando la tarea dependa del estado funcional;
+4. este archivo `docs/VAEP_JULES.md`;
+5. archivos objetivo y dependencias directas de la microtarea.
 
-Jules ejecuta el agente en su entorno cloud. La CLI `jules` puede instalarse y usarse desde la PC para iniciar/monitorizar sesiones y traer patches, pero no convierte el runtime del agente en un proceso local.
+No reescanear todo el repositorio salvo razón técnica real. Reutilizar contexto y evidencia existente.
 
-Arquitectura:
+## 3. Reglas inviolables
+
+Todos los Jules, sin excepción:
+
+- trabajan únicamente sobre `jmejia31/VariApp` y la rama base `Desarrollo`;
+- no modifican `main`;
+- no tocan Producción;
+- no crean ramas;
+- no crean PR;
+- no hacen push;
+- no hacen merge ni auto-merge;
+- no despliegan;
+- no modifican secretos, credenciales, dominios, bases o infraestructura productiva;
+- no exponen secretos ni valores sensibles;
+- no gobiernan la cola ni se autoasignan trabajo;
+- no publican cambios funcionales directamente a GitHub;
+- entregan exclusivamente `ChangeSet/gitPatch` para revisión de ChatGPT/VAEP;
+- preservan trabajo concurrente ajeno;
+- respetan exactamente `FILE_SCOPE_HINT` y `PRIMARY_BASE_HEAD`;
+- si el scope/base divergió de forma material y hace insegura la tarea, **no editan** y reportan el conflicto.
+
+`COMPLETED` de Jules **no significa `LISTO` en VAEP**. Siempre existe revisión posterior de ChatGPT/VAEP.
+
+## 4. Regla de una tarea por desarrollador
+
+Cada cuenta Jules representa un developer lógico independiente.
 
 ```text
-                       VAEP / ChatGPT
+Jules A -> máximo 1 tarea autoritativa activa
+Jules B -> máximo 1 tarea autoritativa activa
+Jules C -> máximo 1 tarea autoritativa activa
+```
+
+No usar una sola cuenta Jules para múltiples asignaciones simultáneas en operación normal. Si existen varias cuentas certificadas, VAEP distribuye una tarea por cuenta.
+
+Todos trabajan sobre el **mismo punto principal elegible** del Plan Maestro. No adelantar `N+1` mientras el padre `N` siga abierto. Si el punto puede subdividirse con seguridad, VAEP crea hijos con scopes no solapados. Si no existen suficientes scopes de escritura, workers sobrantes se usan para QA/cross-review/security/contracts read-only del mismo padre; nunca se inventa trabajo.
+
+## 5. Modo de trabajo FULL FLASH PERFECT
+
+Velocidad máxima útil sin degradar calidad.
+
+Cada Jules debe:
+
+1. inspeccionar primero solo archivos objetivo y dependencias directas;
+2. no repetir inventarios ya conocidos;
+3. implementar el cambio coherente mínimo que complete el criterio;
+4. ejecutar validaciones proporcionales reales;
+5. corregir cualquier defecto causal encontrado dentro del scope;
+6. revisar su diff completo antes de entregar;
+7. reportar observaciones, riesgos, limitaciones, recomendaciones y detalles a mejorar;
+8. no declarar PASS de una prueba que no ejecutó;
+9. terminar su microtarea antes de pedir otra.
+
+FINISH_FIRST: no abandonar una microtarea a medio cerrar para iniciar otra.
+
+## 6. Calidad de ingeniería obligatoria
+
+Antes de entregar, Jules revisa como mínimo cuando aplique:
+
+- arquitectura y separación de responsabilidades;
+- contratos API/DTOs;
+- persistencia, migraciones e invariantes;
+- concurrencia e idempotencia;
+- RBAC/autorización;
+- seguridad y exposición de datos;
+- auditoría y trazabilidad;
+- manejo de errores;
+- UX, accesibilidad y estados loading/error/empty;
+- regresión;
+- pruebas unit/integration/contract/E2E reales disponibles;
+- build/lint;
+- compatibilidad con Plan Maestro ERP V5 y trabajo ya cerrado.
+
+Las observaciones se clasifican de manera práctica:
+
+```text
+BLOCKER / P0-P1 -> corregir antes de entregar
+REQUIRED         -> corregir antes de LISTO
+P2/P3            -> registrar y justificar
+N/A              -> justificar técnicamente
+```
+
+## 7. Higiene absoluta del ChangeSet
+
+Esta regla es crítica y nace de defectos reales observados durante onboarding.
+
+Jules **NO debe crear ni incluir en su diff archivos temporales o auxiliares para transportar el patch**, incluyendo, entre otros:
+
+```text
+changes.patch
+*.patch
+*.diff
+*.orig
+*.rej
+*.bak
+backup*
+tmp*
+```
+
+El `ChangeSet/gitPatch` lo proporciona Jules mediante su mecanismo de salida; **no debe materializarse como archivo dentro del repositorio/workspace versionable**.
+
+Antes de finalizar:
+
+```text
+git status --short
+git diff --check
+git diff --name-only
+```
+
+Debe comprobar que los únicos archivos modificados son los autorizados por `FILE_SCOPE_HINT`.
+
+Si detecta un artefacto temporal propio, debe eliminarlo antes de entregar.
+
+Un ChangeSet contaminado por archivos temporales se clasifica `REQUIRED_FIX` y no se integra aunque el código funcional sea correcto.
+
+## 8. Base, scope y concurrencia
+
+El manifest contiene:
+
+- `taskId`;
+- `expectedBranch=Desarrollo`;
+- `primaryBaseHead`;
+- `fileScopeHint`;
+- prompt y criterios de aceptación.
+
+Jules debe verificar HEAD/base al inicio. Si existe una divergencia no solapada y técnicamente segura, puede continuar solo cuando el prompt lo permita y debe reportarla. Si existe solapamiento material, contrato cambiado o riesgo de sobrescribir trabajo ajeno, no debe editar.
+
+Nunca modificar archivos fuera del scope “para ayudar” salvo que exista un bloqueo causal real y el prompt autorice explícitamente ampliar el alcance. De lo contrario, reportar el hallazgo a VAEP.
+
+## 9. Protocolo de entrega
+
+La entrega correcta incluye:
+
+1. `ChangeSet/gitPatch`;
+2. `baseCommitId` exacto;
+3. lista real de archivos modificados;
+4. pruebas/comandos ejecutados y resultados;
+5. pruebas no ejecutadas y causa;
+6. autoevaluación del diff;
+7. observaciones;
+8. riesgos;
+9. limitaciones;
+10. recomendaciones/detalles a mejorar.
+
+No publicar, commitear, pushear, abrir PR ni hacer merge.
+
+## 10. Review de VAEP posterior
+
+ChatGPT/VAEP revisa siempre:
+
+1. identidad y sesión correctas;
+2. `baseCommitId`;
+3. scope;
+4. archivos tocados;
+5. ausencia de artefactos temporales;
+6. diff funcional;
+7. contratos/arquitectura;
+8. seguridad/RBAC;
+9. auditoría/datos;
+10. pruebas y CI;
+11. autoevaluación y observaciones de Jules;
+12. compatibilidad con HEAD vigente.
+
+Si pasa, VAEP aplica/recrea el patch sobre `Desarrollo`, ejecuta validaciones y registra evidencia. Si falla, el mismo worker recibe una corrección R1/R2 sobre la misma microtarea; no se abre trabajo nuevo para ocultar el fallo.
+
+## 11. Estados y feedback
+
+Estados de bootstrap como `QUEUED`, `PLANNING`, clonando o configurando no cuentan por sí solos como progreso útil.
+
+- sin primera actividad útil ~5 min: `BOOTSTRAP_STALLED`;
+- sin progreso útil ~10 min: recovery/failover controlado;
+- `PAUSED` sin activities/patch: no cuenta como ACTIVE;
+- `AWAITING_USER_FEEDBACK` rutinario: VAEP responde rápidamente;
+- `COMPLETED`: entra inmediatamente en review; no recibe nueva tarea antes de reconciliar resultado.
+
+Una sesión superseded nunca recupera ownership por sí sola.
+
+## 12. Smoke obligatorio por cuenta nueva
+
+Cada nueva cuenta Jules debe demostrar independientemente:
+
+```text
+API auth
+source jmejia31/VariApp
+branch Desarrollo
+session válida
+lectura de AGENTS.md + docs/VAEP_JULES.md
+scope exacto
+ChangeSet/gitPatch
+baseCommitId
+patch limpio
+sin branch/PR/push/merge/deploy
+sin secretos
+```
+
+**Patch limpio significa que no contiene `changes.patch`, `*.patch`, `*.diff`, backups ni archivos fuera del scope.**
+
+Solo entonces:
+
+```text
+JULES_<ID>_ENABLED=TRUE
+JULES_<ID>_ROLE=TRUSTED_SECONDARY_DEVELOPER
+```
+
+## 13. Arquitectura multi-worker
+
+```text
+                     VAEP / ChatGPT
                     control plane único
-                            |
-              +-------------+-------------+
-              |                           |
-      carril primario                carril Jules
-        ChatGPT                      secundario
-              |                           |
-      cambios + pruebas         ChangeSet/gitPatch artifact
-              |                           |
-              +-------------+-------------+
-                            |
-                reconciliación de HEAD
-                            |
-                 publicación autorizada
-                     origin/Desarrollo
+                           |
+        +------------------+------------------+
+        |                  |                  |
+    ChatGPT A           Jules A            Jules B/C...
+     primary        trusted secondary    trusted secondary
+        |                  |                  |
+        +------------------+------------------+
+                           |
+                  review + reconciliación
+                           |
+                    tests / CI / DoD
+                           |
+                    origin/Desarrollo
 ```
 
-## 4. Paralelismo seguro
+GitHub es autoridad técnica/evidencia; el Sheet VAEP es control operativo.
 
-El carril primario conserva `FINISH_FIRST`. Jules puede recibir **una** microtarea adicional cuando todas estas condiciones sean verdaderas:
+## 14. Criterio de éxito
 
-1. pertenece a la fase/gate vigente;
-2. todas sus dependencias directas y transitivas están `LISTO`;
-3. ningún ancestro está bloqueado;
-4. no está tomada por otro agente;
-5. está marcada `PARALLEL_SAFE=SI` tras inspección real;
-6. `FILE_SCOPE_HINT` no solapa archivos, contratos, migraciones, tablas ni invariantes con el trabajo primario;
-7. su resultado puede integrarse sin cerrar falsamente un padre/gate;
-8. no implica Producción, secretos ni autorización humana obligatoria.
-
-Si cualquiera falla, Jules no recibe la tarea. La ausencia de una tarea paralela segura nunca detiene a ChatGPT.
-
-El límite inicial es `JULES_MAX_CONCURRENT=1`. Solo se aumenta después de evidencia real de estabilidad y cero colisiones.
-
-## 5. Protocolo de despacho
-
-No se usa el flujo estándar de PR de Jules. Tampoco se requiere modificar `main`.
-
-El VAEP crea un único manifest inmutable por despacho:
+Una microtarea Jules solo se considera cerrada cuando se cumple:
 
 ```text
-vaep/jules/dispatch/<TASK_ID>-<BASE8>-<UTC_TIMESTAMP>.json
+asignación válida
+-> sesión Jules
+-> trabajo dentro del scope
+-> ChangeSet limpio
+-> auto-review Jules
+-> review ChatGPT/VAEP
+-> reconciliación contra HEAD
+-> pruebas/CI requeridas
+-> integración autorizada en Desarrollo
+-> COLA/BITACORA/evidencia actualizadas
+-> LISTO
 ```
 
-Formato:
-
-```json
-{
-  "dispatchId": "N2.3.D-abcdef12-20260818T161500Z",
-  "taskId": "N2.3.D",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "40-char-git-sha",
-  "fileScopeHint": "backend/src/...; backend/tests/...",
-  "prompt": "Alcance exacto + criterios de aceptación + validaciones requeridas",
-  "createdAt": "2026-08-18T16:15:00Z"
-}
-```
-
-Reglas del manifest:
-
-- un solo manifest nuevo por commit;
-- el commit contiene únicamente el manifest de control plane;
-- no usar `[skip ci]`, porque debe disparar el workflow Jules;
-- nunca mezclar código de aplicación con el dispatch;
-- `primaryBaseHead` es el HEAD conocido al asignar la tarea;
-- el workflow obtiene el `baseCommitId` real del patch y VAEP decide compatibilidad al reconciliar.
-
-## 6. GitHub Action
-
-`.github/workflows/vaep-jules-secondary.yml` escucha exclusivamente pushes a `Desarrollo` que agregan `vaep/jules/dispatch/*.json`.
-
-El workflow:
-
-1. valida el manifest;
-2. exige el secret `JULES_API_KEY`;
-3. lista los sources de Jules y exige `jmejia31/VariApp` + rama `Desarrollo`;
-4. crea o reutiliza idempotentemente una sesión titulada con `dispatchId`;
-5. no envía `automationMode=AUTO_CREATE_PR`;
-6. deja el plan autoaprobado para ejecución unattended;
-7. monitorea la sesión hasta estado terminal;
-8. descarga actividades y `ChangeSet/gitPatch`;
-9. conserva `session.json`, `activities.json`, `gitpatch.json`, `changes.patch`, `dispatch.json` y `result.json` como artifact de GitHub Actions;
-10. crea un Issue `[VAEP-JULES] ... result` solo como señal/evidencia;
-11. **no hace commit ni push funcional**.
-
-GitHub Actions actúa aquí como generador de artifact, compatible con `RUNNER_CI_GENERATOR_MODE=ARTIFACT_ONLY_NO_PUSH`.
-
-## 7. Reconciliación del resultado
-
-ChatGPT/VAEP reconcilia antes de publicar:
-
-1. identificar la fila `AGENTE=Jules` y su `dispatchId/session`;
-2. recuperar artifact/Issue del worker;
-3. leer `gitPatch.baseCommitId` y `unidiffPatch`;
-4. revalidar HEAD actual de `Desarrollo`;
-5. comprobar que los archivos tocados respetan `FILE_SCOPE_HINT` y no invaden el carril primario;
-6. revisar código, seguridad y criterios de aceptación;
-7. aplicar/recrear el patch sobre HEAD actual únicamente si es seguro;
-8. ejecutar pruebas/CI proporcionales;
-9. actualizar `COLA`, `BITACORA`, `CHANGELOG_AI.md` y `TASKS.md` cuando corresponda;
-10. publicar por fast-forward normal en `Desarrollo`;
-11. marcar `LISTO` solo con evidencia suficiente.
-
-Si la base divergió pero el cambio es claramente integrable y no solapa, el VAEP puede rebasarlo/recrearlo de forma controlada. Si existe conflicto material, descarta el resultado y redispatcha sobre un HEAD nuevo; nunca force-push.
-
-## 8. Estados en COLA
-
-Columnas adicionales:
-
-- `PARALLEL_SAFE`: `SI | NO | EVALUAR`;
-- `FILE_SCOPE_HINT`: archivos/capas/contratos permitidos;
-- `WORKER_SESSION`: `dispatchId` y/o sesión Jules;
-- `WORKER_BASE_HEAD`: base conocida y luego `baseCommitId` real;
-- `WORKER_RESULT`: estado, artifact/run/Issue y reconciliación.
-
-`AGENTE=Jules` solo se usa para una tarea realmente despachada/activa. Una fila candidata no se bloquea anticipadamente solo por estar marcada `PARALLEL_SAFE=SI`.
-
-## 9. Activación segura
-
-`CONFIG.JULES_ENABLED` permanece `PENDING_EXTERNAL_AUTH` hasta completar:
-
-1. conectar `jmejia31/VariApp` en Jules mediante su GitHub App;
-2. confirmar que el source expone `Desarrollo`;
-3. generar una Jules API key;
-4. guardar esa clave exclusivamente como GitHub Actions secret `JULES_API_KEY`;
-5. ejecutar smoke test;
-6. comprobar que el workflow genera evidencia sin rama/PR/push funcional;
-7. cambiar `JULES_ENABLED=TRUE`.
-
-La clave nunca se copia al Sheet, código, manifest, Issue, log o prompt.
-
-## 10. Configuración local opcional
-
-Para control desde la PC:
-
-```powershell
-npm install -g @google/jules
-jules login
-jules remote list --repo
-```
-
-El script `scripts/configurar-jules-vaep.ps1` automatiza el preflight local y el registro seguro del secret mediante GitHub CLI cuando esas herramientas están disponibles.
-
-Una vez activado, la ejecución ordinaria se hace desde VAEP; no se deben lanzar manualmente sesiones Jules sobre las mismas filas sin registrarlas en `COLA`.
-
-## 11. Criterio de éxito
-
-La integración queda operativa cuando se demuestre un ciclo completo:
-
-```text
-PENDIENTE elegible
-  -> asignación Jules
-  -> manifest Desarrollo
-  -> sesión Jules
-  -> patch artifact
-  -> reconciliación ChatGPT
-  -> validaciones reales
-  -> commit Desarrollo
-  -> COLA/BITACORA/CHANGELOG actualizados
-  -> LISTO
-```
-
-Después de varias ejecuciones sin colisión puede evaluarse aumentar `JULES_MAX_CONCURRENT`, manteniendo un único control plane y scopes no solapados.
+Esta formación es idéntica para todos los Jules. Ningún worker nuevo puede omitirla ni usar instrucciones simplificadas como sustituto.
