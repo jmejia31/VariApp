@@ -1,6 +1,6 @@
 # Reglas obligatorias de colaboración — VariApp
 
-Este archivo es vinculante para Javier Mejía, Codex, AntiG/Antigravity, ChatGPT, Jules y cualquier agente autorizado.
+Este archivo es vinculante para Javier Mejía, Codex, AntiG/Antigravity, ChatGPT, Vibe, Jules A/B/C/D y cualquier agente autorizado.
 
 ## 0. Gate obligatorio de identidad
 
@@ -18,167 +18,236 @@ Con acceso local, Javier/Codex/AntiG ejecutan:
 powershell -ExecutionPolicy Bypass -File scripts\iniciar-sesion-ia.ps1
 ```
 
-Con acceso remoto, ChatGPT confirma repositorio, `Desarrollo`, HEAD actual, `AGENTS.md`, `PROJECT_CONTEXT.md`, `TASKS.md` y commits relevantes desde el último handoff. Jules opera como worker cloud subordinado al VAEP y debe leer además `docs/VAEP_JULES.md` antes de editar.
+Con acceso remoto, ChatGPT/VAEP confirma repositorio, `Desarrollo`, HEAD actual y fuentes canónicas. Una sesión pertenece a un solo proyecto; contexto de otros proyectos no es confiable.
 
-Lectura mínima por sesión: `AGENTS.md` -> `PROJECT_CONTEXT.md` -> `TASKS.md` -> última entrada relevante de `CHANGELOG_AI.md`. `PROJECT_INDEX.md` solo para localizar; `ARCHITECTURE.md` solo para cambios estructurales. En ejecución VAEP también leer `PLAN_EJECUCION_AUTONOMA.md`, `CONFIG/COLA/BITACORA` y la fuente rectora.
+## 1. Autoridad y precedencia
 
-Una sesión pertenece a un solo proyecto. Contexto, rutas, ramas, credenciales, bases, reglas o planes de otro proyecto son no confiables para VariApp. Si memoria y repo discrepan, prevalece la evidencia actual del repositorio.
+Para control plane global:
 
-## 1. Fuentes canónicas
+```text
+CONFIG.RUNNER_PROTOCOL_VERSION=VAEP_V4_6_KEYED_MUTEX_HARD_EXECUTION
+```
 
-- Contexto técnico: `PROJECT_CONTEXT.md`.
-- Pendientes resumidos: `TASKS.md`.
-- Evidencia colaborativa: `CHANGELOG_AI.md`.
-- Protocolo autónomo: `PLAN_EJECUCION_AUTONOMA.md`.
-- Integración Jules: `docs/VAEP_JULES.md`.
-- Plan rector: `Plan Maestro ERP V5 — VariApp`.
-- Plan rector en Drive: https://docs.google.com/document/d/1rWGOP_Z64kM4Q2NZbrTvge3ReqJkJ_vJmhByogbPbR8/edit
-- Tablero VAEP v2: https://docs.google.com/spreadsheets/d/19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY/edit
+Para Jules A/B/C/D:
 
-La realidad actual se determina por identidad + HEAD + contexto + tareas + changelog + archivos afectados. No reconstruir el proyecto desde cero.
+```text
+CONFIG.JULES_PROTOCOL_VERSION=V3.20_CURRENT
+JULES_MAX_ATTEMPTS_PER_TASK=2
+JULES_REWORK_MAX=1
+JULES_R3_PLUS=PROHIBIDO
+```
+
+Orden obligatorio para Jules:
+
+1. `docs/VAEP_AUTHORITY.md`;
+2. `docs/VAEP_V320_RETRY_CAP.md`;
+3. manifest actual;
+4. `AGENTS.md`;
+5. `docs/VAEP_JULES.md`;
+6. Plan Maestro/CONFIG/COLA/BITACORA trasladados por VAEP;
+7. HEAD/código/pruebas actuales.
+
+Cualquier referencia operativa incompatible a v3.19 o anterior es histórica y no puede gobernar nuevos dispatches. Los cuatro workflows Jules deben ejecutar exclusivamente `.github/scripts/vaep-jules-worker-v320.sh`.
+
+Fuentes canónicas adicionales:
+
+- `PROJECT_CONTEXT.md` — contexto técnico.
+- `TASKS.md` — pendientes resumidos.
+- `CHANGELOG_AI.md` — evidencia colaborativa.
+- `PLAN_EJECUCION_AUTONOMA.md` — protocolo autónomo general.
+- Plan rector Drive — Plan Maestro ERP V5.
+- Sheet VAEP — `CONFIG/COLA/BITACORA` operativos.
+
+GitHub es autoridad técnica/evidencia; Drive es control operativo.
 
 ## 2. Equipo y acceso
 
-- Javier: propietario, prioridades, aceptación y autorizaciones finales.
+- Javier: propietario, prioridades y autorizaciones finales.
 - Codex: implementación/pruebas desde checkout local autorizado.
 - AntiG/Antigravity: implementación/pruebas desde checkout local autorizado.
-- ChatGPT: control plane VAEP, arquitectura, auditoría, coordinación, implementación remota, reconciliación y publicación autorizada.
-- Jules: segundo desarrollador VAEP; ejecuta microtareas paralelas seguras en su workspace cloud y entrega `ChangeSet/gitPatch`; no publica código, no crea ramas/PR y no gobierna la cola.
+- ChatGPT/VAEP: control plane, QA, arquitectura, reconciliación, integración, publicación remota autorizada, CI, certificación y failover.
+- Vibe: QA/corrector externo autorizado cuando VAEP delega `QA_TAKEOVER`.
+- Jules A/B/C/D: implementers autónomos confiables en workspace cloud, máximo un write-scope autoritativo por cuenta; entregan `ChangeSet/gitPatch` y nunca publican directamente.
 
-Solo Javier/Codex/AntiG se consideran con acceso local al checkout de la PC. ChatGPT no debe afirmar que modificó/sincronizó la PC por tener acceso GitHub/Drive. La CLI local de Jules controla sesiones remotas; no convierte a Jules en un agente con acceso reconocido al checkout local.
+Solo Javier/Codex/AntiG se consideran con acceso local al checkout de la PC. ChatGPT/Vibe/Jules no deben afirmar acceso local por tener conectores remotos.
 
-Drive es tablero operativo; GitHub es autoridad técnica y de evidencia. Nunca ejecutar filas cuyo `PROJECT_ID`, repo o rama no coincidan exactamente.
-
-## 3. Git — reglas inviolables
+## 3. Git y Producción — reglas inviolables
 
 - `Desarrollo` es la única rama de trabajo.
 - `main` está congelada.
+- PR #2 `Desarrollo -> main` permanece Draft.
 - No crear ramas adicionales sin autorización explícita.
-- No fusionar PR #2 ni habilitar auto-merge.
-- PR #2 permanece Draft.
-- Publicar cambios autorizados directamente en `origin/Desarrollo`.
-- Preservar trabajo ajeno; nunca force-push, `reset --hard` ni descartes destructivos sin autorización.
-- Jules tiene prohibido `AUTO_CREATE_PR`, crear rama, merge o push funcional. Su salida es artifact/patch para reconciliación de ChatGPT/VAEP.
+- No merge/auto-merge/force-push/reset destructivo.
+- No tocar Producción, secretos, credenciales, dominios, certificados, bases/datos productivos, servicios, deploys o infraestructura productiva.
+- No ejecutar migraciones productivas sin autorización expresa.
+- Jules: no branch, PR, push, merge, deploy ni publicación funcional; solo artifact/patch.
 
-Con acceso local, después del gate:
+Preservar trabajo concurrente ajeno y revalidar HEAD antes de publicar.
 
-```bash
-git fetch origin
-git switch Desarrollo
-git pull --rebase origin Desarrollo
-git status --short --branch
-```
+## 4. Rendimiento y continuidad
 
-No repetir estos comandos compulsivamente; reconfirmar antes de publicar cuando exista riesgo real de concurrencia.
-
-## 4. Producción congelada
-
-Entornos lógicos:
-
-```text
-varistorehn_producción
-varistorehn_desarrollo
-```
-
-Está prohibido modificar/eliminar recursos productivos: `main`, variables, secretos, credenciales, dominios, certificados, bases, datos, servicios, despliegues, respaldos, migraciones, activos o configuraciones. No ejecutar migraciones productivas sin autorización expresa.
-
-## 5. Rendimiento y consumo — obligatorio
-
-1. Reutilizar `PROJECT_CONTEXT.md`; no rehacer inventarios en cada prompt.
-2. No recorrer todo el repo salvo cambio estructural real o petición expresa.
-3. Revisar primero solo archivos objetivo y dependencias directas.
-4. **No releer archivos ya documentados a menos que hayan cambiado.** Verificar por diff/SHA/historial.
+1. Reutilizar `PROJECT_CONTEXT.md`, bitácora, commits y evidencia previa.
+2. No reescanear todo el repo salvo cambio estructural o causa técnica real.
+3. Revisar primero archivos objetivo y dependencias directas.
+4. No releer archivos ya documentados si no cambiaron.
 5. Buscar por símbolo/ruta antes de listados recursivos.
-6. Leer rangos relevantes de archivos grandes.
-7. Elegir la solución suficiente de menor impacto.
-8. No explorar módulos no relacionados tras obtener evidencia suficiente.
-9. Agrupar comandos/validaciones cuando sea seguro.
-10. No crear scripts/artefactos temporales sin necesidad técnica real.
-11. Terminar al cumplir objetivo y validaciones.
-12. Si una ambigüedad no se resuelve con inspección dirigida, bloquear/pedir aclaración; no indexar todo el proyecto.
-13. Tras movimiento remoto, revisar primero nombres de commits/archivos y abrir solo lo afectado.
+6. Agrupar validaciones cuando sea seguro.
+7. Elegir el cambio suficiente de menor superficie.
+8. Evitar temporales y trabajo redundante.
+9. Continuar mientras exista trabajo autorizado/seguro y capacidad real.
+10. Nunca fingir actividad, PASS, CI, sesión, progreso o `LISTO`.
 
-`[skip ci]` solo puede usarse cuando todos los cambios sean documentación o infraestructura local de colaboración y no se modifique app, workflows, dependencias, migraciones, entorno o despliegue. Nunca usarlo para esconder validaciones funcionales. Los manifests `vaep/jules/dispatch/*.json` no llevan `[skip ci]` porque deben disparar el worker Jules.
+`MAX_VOLUNTARY_IDLE=0` para lanes Jules cuando exista trabajo seguro.
 
-## 6. Reconexión/compactación
+## 5. Evidencia y validación
 
-Confirmar identidad, leer contexto/tareas, revisar solo 1–3 commits si hubo movimiento, revisar diff de tarea y continuar desde el último punto verificable. En VAEP, reconciliar Sheet con GitHub. Una reconexión no justifica repetir arquitectura completa.
+Todo changeset intencional debe dejar evidencia trazable. Actualizar `CHANGELOG_AI.md`; `TASKS.md` si cambia estado/pendiente; gobierno solo si cambian reglas/accesos.
 
-Renovar mapa arquitectónico solo ante nueva capa/módulo ERP mayor, cambio estructural de persistencia/framework, rediseño auth/RBAC o cambio transversal de tenancy/integración/deploy/observabilidad.
+Validación proporcional:
 
-## 7. Evidencia de cada changeset
+- docs/gobierno: diff, sintaxis y consistencia;
+- backend: build/tests dirigidos; ampliar para seguridad/datos/migraciones/cierre;
+- frontend: lint/build/tests; E2E en auth/permisos/navegación/facturación/flujos críticos;
+- gates ERP: DoD, migraciones, seguridad, RBAC, auditoría, QA, documentación, rollback y regresión aplicable;
+- Jules: verificar `baseCommitId`, attempt, scope, diff, archivos, pruebas, auto-review, observaciones, riesgos y compatibilidad con HEAD antes de integrar.
 
-Todo changeset intencional:
+`COMPLETED` Jules nunca equivale a `LISTO`.
 
-1. actualiza `CHANGELOG_AI.md`;
-2. actualiza `TASKS.md` si cambió estado/bloqueo/pendiente;
-3. actualiza contexto/índice/arquitectura solo si cambió lo que documentan;
-4. actualiza gobierno solo si cambiaron reglas/accesos;
-5. usa commit descriptivo con agente cuando aplique;
-6. entrega SHA y validaciones reales;
-7. nunca inventa pruebas, CI o estados externos.
+## 6. Estados de COLA
 
-Los manifests Jules son artefactos de control plane, no implementación funcional. Deben quedar trazados en `COLA/BITACORA`; el changeset funcional resultante se documenta al reconciliar y publicar el patch.
-
-## 8. Validación proporcional
-
-- Docs/gobierno: diff y consistencia; sin builds inútiles.
-- Backend localizado: build/tests dirigidos; ampliar si seguridad/datos/migraciones/cierre.
-- Frontend localizado: lint/build/tests dirigidos; E2E en auth/permisos/navegación/facturación/flujos críticos.
-- Gates ERP: DoD global, migraciones, seguridad, permisos, auditoría, QA, documentación y regresión aplicable.
-- Resultado Jules: revisar `baseCommitId`, patch, alcance, seguridad y pruebas antes de integrarlo; la afirmación de Jules nunca sustituye evidencia real del VAEP.
-
-## 9. VAEP v2 — ejecución autónoma
-
-La especificación completa vive en `PLAN_EJECUCION_AUTONOMA.md`. El complemento obligatorio del carril secundario vive en `docs/VAEP_JULES.md` y las claves `JULES_*`/`RUNNER_PARALLEL_SECONDARY_POLICY` de `CONFIG` prevalecen para esa integración.
-
-VAEP v2 representa el Plan Maestro ERP V5 completo en `PLAN_MAESTRO` y mantiene microtareas ejecutables en `COLA`. Los tracks T0–T12 son obligatorios. Las funciones futuras no-core están registradas, pero `NO_AUTORIZADO` y no son autoejecutables.
-
-Máquina de estados:
+Únicos valores válidos:
 
 ```text
-PENDIENTE -> EN_PROGRESO -> VALIDANDO -> LISTO
-                     \-> BLOQUEADO
+PENDIENTE|EN_PROGRESO|VALIDANDO|LISTO|BLOQUEADO|CANCELADO
 ```
 
-Selección:
+Metadata de workers, waits, dispatches, timestamps, SHA, attempts o CI nunca se escribe en `ESTADO`.
 
-- menor `PRIORIDAD` elegible compatible con el punto foco y gates vigentes;
-- todas las dependencias directas/transitivas deben estar resueltas;
-- `EN_PROGRESO`/`VALIDANDO` + agente actúa como lock de esa fila;
-- revalidar HEAD antes de publicar.
+Una tarea se promueve a `LISTO` solo con evidencia suficiente, dependencias válidas y cero P0/P1.
 
-### Granularidad
+## 7. Cuatro Jules y ownership
 
-Cada punto se divide en microtareas `PRE`, `DOMAIN`, `DB_MIG`, `BACKEND_API`, `FRONTEND_UX`, `SEC_AUDIT`, `TEST_CI`, `DOC_CERT`, salvo descomposición especializada. Si una microtarea todavía es grande, subdividirla antes de editar.
+Para padres nuevos/no iniciados cuando aplique:
 
-No existe un máximo artificial fijo de microtareas por invocación: el Runner maximiza trabajo real mientras capacidad, gates, seguridad y continuidad sigan verdes, conforme a `PLAN_EJECUCION_AUTONOMA.md` y `CONFIG` vigentes.
+```text
+.1 = Jules A
+.2 = Jules B
+.3 = Jules C
+.4 = Jules D
+ChatGPT/VAEP = QA/controller/release/failover externo
+```
 
-### Bloqueos
+Varios Jules pueden colaborar sobre el mismo padre o tarea lógica solo con scopes de escritura mutuamente excluyentes o review/tests/read-only. Nunca dos writers sobre el mismo archivo/scope.
 
-Una tarea `BLOQUEADO` no paraliza toda la cola. Después de registrar causa/evidencia, continuar únicamente con otra que **NO dependa directa NI transitivamente** de la bloqueada y que no permita cerrar falsamente un padre/gate. No reintentar el mismo bloqueo en bucle.
+Un dispatch nuevo válido = un commit = exactamente un manifest nuevo del worker correspondiente.
 
-### Fases
+Paths:
 
-`GATE-N0` ... `GATE-N9` hacen cumplir el orden N0→N1→N2→N3→N4→N5→N6→N7→N8→N9. Ninguna fase se cierra solo porque compile.
+```text
+A: vaep/jules/dispatch/*.json
+B: vaep/jules-b/dispatch/*.json
+C: vaep/jules-c/dispatch/*.json
+D: vaep/jules-d/dispatch/*.json
+```
 
-### Coordinación primaria + Jules
+## 8. Retry Cap Jules v3.20
 
-- ChatGPT conserva el control plane, el carril primario, la reconciliación y la única publicación funcional remota del VAEP.
-- `FINISH_FIRST` continúa gobernando el carril primario.
-- Jules puede ejecutar un carril secundario únicamente si `CONFIG.JULES_ENABLED=TRUE` y la tarea cumple `PARALLEL_SAFE=SI` con `FILE_SCOPE_HINT` no solapado.
-- El límite inicial es `JULES_MAX_CONCURRENT=1` aunque la cuenta admita más capacidad; se escala solo tras evidencia de cero colisiones.
-- Jules no toma el mutex global del controlador para ejecutar su workspace; la exclusión se hace por lock de fila + scope. ChatGPT mantiene el mutex del control plane.
-- Un Jules activo/fallido no detiene a ChatGPT. ChatGPT continúa trabajo primario mientras Jules produce el patch.
-- El resultado Jules nunca se aplica automáticamente: se reconcilia contra HEAD, se valida y solo entonces se publica en `Desarrollo`.
+Regla dura:
 
-Cada transición actualiza `COLA`/`BITACORA`. Cada changeset funcional actualiza `CHANGELOG_AI.md`. Ante contradicción entre Sheet y GitHub, reconciliar usando GitHub como autoridad técnica antes de continuar.
+```text
+ATTEMPT=1          ejecución inicial
+ATTEMPT=2 / R2     única y última corrección Jules
+R3+                PROHIBIDO
+```
 
-## 10. Mejora continua
+Si ATTEMPT=1 falla REVIEW-FIRST, se permite como máximo un R2 dirigido. Si ATTEMPT=2 conserva REQUIRED/BLOCKER/P0/P1, scope leak, evidence mismatch, contrato incorrecto o defecto que impida `LISTO`:
 
-Aplicar mejoras de bajo riesgo relacionadas con la tarea; registrar mejoras transversales separadas en `TASKS.md`; evitar refactors infinitos. Medir por menos relecturas, menos comandos/CI redundantes, mayor throughput seguro, menor superficie y cero pérdida de trazabilidad.
+```text
+JULES_RETRY_EXHAUSTED
+OWNER=CHATGPT_VAEP_VIBE
+ACTION=QA_TAKEOVER_CORRECT_TEST_CERTIFY
+```
 
-## 11. Commits y handoff
+No devolver la tarea a ningún Jules. Cambiar de Jules no reinicia el contador; work-stealing hereda attempts.
+
+Un dispatch sin sesión ni primera actividad útil es fallo de bootstrap/infraestructura y puede recuperarse de forma controlada, pero ese recovery no habilita más de dos intentos de contenido.
+
+## 9. Handoff y cero idle
+
+Al terminal Jules:
+
+1. resultado -> `VALIDANDO`/REVIEW-FIRST;
+2. scope anterior queda congelado para QA;
+3. lane Jules se reutiliza inmediatamente si existe trabajo seguro;
+4. si ATTEMPT=1 requiere fix, solo un R2 puede volver al Jules;
+5. si R2 falla, QA externo corrige y el Jules pasa a otra tarea segura.
+
+Prioridad de lane libre:
+
+1. único R2 todavía permitido de su tarea cuando corresponda;
+2. trabajo que cierre el padre actual con scope exclusivo;
+3. siguiente SAFE elegible/preasignado;
+4. preflight/tests/security/contracts/performance/docs útiles ante dependencia real.
+
+No reabrir `LISTO` solo para ocupar capacidad. No duplicar preflights certificados.
+
+## 10. Sprint 40 — regla extraordinaria vigente
+
+```text
+SPRINT_START_AT=2026-08-20T22:45:00-06:00
+SPRINT_DEADLINE_AT=2026-08-21T06:00:00-06:00
+SPRINT_TIMEZONE=America/Tegucigalpa
+SPRINT_PARENT_TARGET=40
+```
+
+Objetivo operativo: 40 nuevos padres reales `MICROTAREA` en `LISTO` desde el inicio del sprint. No cuentan `MICROTAREA_HIJA`, support packets, preflights repetidos, manifests, sesiones ni `COMPLETED` sin QA/DoD.
+
+Los cuatro Jules deben recibir esta meta en cada sesión v3.20. Checkpoints agregados :00/:15/:30/:45 deben revisar salud A/B/C/D, tarea/attempt, terminales, review queue, QA takeovers, padres `LISTO`, faltantes hasta 40, velocidad requerida y blockers.
+
+La meta no autoriza saltar dependencias, bajar tests, aceptar P0/P1, false PASS/LISTO, integrar stale patches ni tocar main/Producción/secrets.
+
+## 11. Watchdog y actividad real
+
+Dispatch != ACTIVE. Jules ACTIVE exige sesión correlacionada + actividad técnica útil.
+
+- >5 min sin primera actividad útil: `BOOTSTRAP_STALLED`.
+- >=10 min sin progreso: recovery/failover controlado, sin duplicar ownership.
+- `PAUSED` sin trabajo útil: no ACTIVE.
+- terminal: review y handoff inmediatos.
+
+El worker v3.20 resuelve waits rutinarios inline; máximo tres auto-followups por ejecución y luego `AUTO_FEEDBACK_EXHAUSTED`.
+
+## 12. Handoff técnico GitHub
+
+Al terminal, `.github/scripts/vaep-jules-worker-v320.sh` crea Issue de resultado con:
+
+```text
+protocol=v3.20
+taskAttempt=1|2
+controllerHandoff=REVIEW_IMMEDIATELY_AND_ASSIGN_NEXT_SAFE
+SPRINT_PARENT_TARGET=40
+```
+
+Esa Issue es la señal técnica inmediata para el control plane. Los checkpoints ChatGPT :00/:15/:30/:45 son la red de seguridad de recolección/reasignación; no existe permiso para dejar una entrega terminal esperando por conveniencia.
+
+## 13. Definition of Done y cierre
+
+Una tarea solo puede quedar `LISTO` cuando:
+
+```text
+requisito funcional completado
++ arquitectura/persistencia/API/frontend correctos cuando apliquen
++ permisos/auditoría correctos
++ tests/migración/documentación correctos
++ observabilidad cuando aplique
++ regresión verde
++ cero P0/P1
++ evidencia real
+```
+
+Rapidez nunca sustituye calidad.
+
+## 14. Commits y handoff humano
 
 Formato recomendado:
 
@@ -186,4 +255,4 @@ Formato recomendado:
 <tipo>(<área>): <descripción> [agente]
 ```
 
-Cada entrega indica proyecto, objetivo, área, validaciones, riesgos/pendientes y SHA. Para trabajo Jules, incluir también `dispatchId/session`, `baseCommitId` y resultado de reconciliación. Referenciar contexto canónico en vez de repetir arquitectura completa.
+Cada entrega debe indicar proyecto, objetivo, validaciones reales, riesgos/pendientes y SHA. Para Jules incluir `dispatchId`, `session`, `taskAttempt`, `baseCommitId`, resultado de review y decisión PASS/R2/QA_TAKEOVER.
