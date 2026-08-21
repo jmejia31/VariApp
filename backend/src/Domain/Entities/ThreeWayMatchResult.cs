@@ -12,6 +12,10 @@ public class ThreeWayMatchResult : AuditableEntity
     private readonly List<ThreeWayMatchLineDiscrepancy> _discrepancias = new();
     public IReadOnlyCollection<ThreeWayMatchLineDiscrepancy> Discrepancias => _discrepancias.AsReadOnly();
 
+    private ThreeWayMatchResult()
+    {
+    }
+
     private ThreeWayMatchResult(int ordenCompraId, ThreeWayMatchStatus estado, IEnumerable<ThreeWayMatchLineDiscrepancy> discrepancias)
     {
         OrdenCompraId = ordenCompraId;
