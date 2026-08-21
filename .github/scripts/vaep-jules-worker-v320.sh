@@ -1,129 +1,301 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-: "${RUNNER_TEMP:?RUNNER_TEMP is required}"
+: "${JULES_API_KEY:?Jules API key is required}"
+: "${JULES_API_BASE:=https://jules.googleapis.com/v1alpha}"
+: "${EXPECTED_OWNER:=jmejia31}"
+: "${EXPECTED_REPO:=VariApp}"
+: "${EXPECTED_BRANCH:=Desarrollo}"
 : "${DISPATCH_PATH:?DISPATCH_PATH is required}"
+: "${SESSION_TITLE_PREFIX:?SESSION_TITLE_PREFIX is required}"
+: "${ARTIFACT_PREFIX:?ARTIFACT_PREFIX is required}"
+: "${ISSUE_PREFIX:?ISSUE_PREFIX is required}"
+: "${WORKER_LABEL:=Jules}"
+: "${WORKER_ID:=}"
+: "${GH_TOKEN:?GH_TOKEN is required}"
 : "${GITHUB_SHA:?GITHUB_SHA is required}"
+: "${GITHUB_REPOSITORY:?GITHUB_REPOSITORY is required}"
+: "${GITHUB_RUN_ID:?GITHUB_RUN_ID is required}"
+: "${GITHUB_SERVER_URL:=https://github.com}"
+: "${RUNNER_TEMP:?RUNNER_TEMP is required}"
 
-# v3.20 hard gate: one worker-specific manifest per workflow invocation and
-# at most two CONTENT attempts for the same logical task. taskAttempt is
-# canonical for new manifests; R2 is accepted as the second/last attempt.
-mapfile -t attempt_manifests < <(git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA" -- "$DISPATCH_PATH/*.json")
-[[ ${#attempt_manifests[@]} -eq 1 ]] || {
-  echo "v3.20 expected exactly one manifest under $DISPATCH_PATH for this worker; found ${#attempt_manifests[@]}" >&2
-  exit 72
+readonly VAEP_JULES_PROTOCOL="v3.20"
+readonly JULES_MAX_ATTEMPTS_PER_TASK=2
+readonly JULES_REWORK_MAX=1
+readonly SPRINT_PARENT_TARGET=40
+readonly SPRINT_DEADLINE="2026-08-21T06:00:00-06:00"
+readonly SPRINT_TIMEZONE="America/Tegucigalpa"
+
+work="$RUNNER_TEMP/vaep-jules-v320"
+result_dir="$work/result"
+mkdir -p "$result_dir"
+
+fail() { echo "$*" >&2; exit "${2:-1}"; }
+api_get() { curl --fail-with-body --silent --show-error -H "x-goog-api-key: $JULES_API_KEY" "$1"; }
+api_post_json() {
+  local url="$1" body_file="$2"
+  curl --fail-with-body --silent --show-error -X POST -H "Content-Type: application/json" -H "x-goog-api-key: $JULES_API_KEY" --data-binary @"$body_file" "$url"
+}
+api_post_empty() {
+  local url="$1"
+  curl --fail-with-body --silent --show-error -X POST -H "Content-Type: application/json" -H "x-goog-api-key: $JULES_API_KEY" "$url"
 }
 
-attempt_manifest="${attempt_manifests[0]}"
-read -r dispatch_id task_attempt < <(python3 - "$attempt_manifest" <<'PY'
+# Atomic dispatch invariant: one new manifest, one changed file, one worker.
+mapfile -t added_manifests < <(git diff-tree --no-commit-id --name-only --diff-filter=A -r "$GITHUB_SHA" -- "$DISPATCH_PATH/*.json")
+[[ ${#added_manifests[@]} -eq 1 ]] || fail "v3.20 expected exactly one newly added dispatch manifest for this worker; found ${#added_manifests[@]}." 21
+manifest="${added_manifests[0]}"
+mapfile -t changed_files < <(git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA")
+[[ ${#changed_files[@]} -eq 1 && "${changed_files[0]}" == "$manifest" ]] || fail "v3.20 dispatch commit must change exactly the single new worker manifest." 22
+
+jq -e '
+  type == "object" and
+  (.dispatchId | type == "string" and test("^[A-Za-z0-9_.-]+$")) and
+  (.taskId | type == "string" and test("^[A-Za-z0-9_.-]+$")) and
+  (.expectedBranch == "Desarrollo") and
+  (.primaryBaseHead | type == "string" and test("^[0-9a-fA-F]{40}$")) and
+  (.prompt | type == "string" and length > 0) and
+  (.fileScopeHint | type == "string") and
+  ((.taskAttempt == null) or ((.taskAttempt | type) == "number"))
+' "$manifest" >/dev/null || fail "Invalid v3.20 dispatch manifest schema." 23
+if [[ -n "$WORKER_ID" ]]; then
+  jq -e --arg worker "$WORKER_ID" '.workerId == $worker' "$manifest" >/dev/null || fail "Unexpected workerId in dispatch manifest." 24
+fi
+
+dispatch_id="$(jq -r '.dispatchId' "$manifest")"
+task_id="$(jq -r '.taskId' "$manifest")"
+primary_base="$(jq -r '.primaryBaseHead' "$manifest")"
+file_scope="$(jq -r '.fileScopeHint' "$manifest")"
+user_prompt="$(jq -r '.prompt' "$manifest")"
+
+# Hard retry cap. New manifests SHOULD carry taskAttempt; compatibility manifests
+# without it infer ATTEMPT=2 only from an explicit R2 dispatch label, otherwise 1.
+task_attempt="$(python3 - "$manifest" <<'PY'
 import json
 import re
 import sys
 from pathlib import Path
 
-manifest = Path(sys.argv[1])
-data = json.loads(manifest.read_text(encoding="utf-8"))
-dispatch_id = str(data.get("dispatchId") or manifest.stem)
-explicit = data.get("taskAttempt")
-
-m = re.search(r"(?:^|-)R(\d+)(?:-|$)", dispatch_id, flags=re.IGNORECASE)
+p = Path(sys.argv[1])
+data = json.loads(p.read_text(encoding='utf-8'))
+dispatch_id = str(data['dispatchId'])
+explicit = data.get('taskAttempt')
+m = re.search(r'(?:^|-)R(\d+)(?:-|$)', dispatch_id, flags=re.IGNORECASE)
 label_attempt = int(m.group(1)) if m else None
 
-if explicit is None:
-    if label_attempt is not None:
-        attempt = label_attempt
-    else:
-        attempt = 1
-else:
-    try:
-        attempt = int(explicit)
-    except (TypeError, ValueError):
-        raise SystemExit("v3.20 taskAttempt must be integer 1 or 2")
-
 if label_attempt is not None and label_attempt >= 3:
-    raise SystemExit(f"v3.20 rejects Jules R3+: {dispatch_id}")
+    raise SystemExit(f'R3+ prohibited by VAEP Jules v3.20: {dispatch_id}')
+
+if explicit is None:
+    attempt = 2 if label_attempt == 2 else 1
+else:
+    if isinstance(explicit, bool):
+        raise SystemExit('taskAttempt must be integer 1 or 2')
+    attempt = int(explicit)
+
 if attempt not in (1, 2):
-    raise SystemExit(f"v3.20 rejects taskAttempt={attempt}; allowed=1,2")
+    raise SystemExit(f'taskAttempt={attempt} rejected; v3.20 allows only 1 or 2')
 if label_attempt == 2 and attempt != 2:
-    raise SystemExit("v3.20 R2 dispatch must declare/infer taskAttempt=2")
-
-print(dispatch_id, attempt)
+    raise SystemExit('R2 dispatch must be ATTEMPT=2')
+print(attempt)
 PY
-) || {
-  echo "v3.20 retry-cap validation failed for $attempt_manifest" >&2
-  exit 73
-}
+)" || fail "v3.20 retry-cap validation failed." 25
 
-export VAEP_TASK_ATTEMPT="$task_attempt"
-export VAEP_DISPATCH_ID="$dispatch_id"
-export JULES_MAX_ATTEMPTS_PER_TASK=2
-export JULES_REWORK_MAX=1
-
-legacy_worker=".github/scripts/vaep-jules-worker-v313.sh"
-runtime_worker="$RUNNER_TEMP/vaep-jules-worker-v320-runtime.sh"
-
-[[ -f "$legacy_worker" ]] || {
-  echo "Legacy common worker not found: $legacy_worker" >&2
-  exit 70
-}
-
-python3 - "$legacy_worker" "$runtime_worker" <<'PY'
-from pathlib import Path
-import sys
-
-source_path = Path(sys.argv[1])
-runtime_path = Path(sys.argv[2])
-text = source_path.read_text(encoding="utf-8")
-
-text = text.replace(
-    'work="$RUNNER_TEMP/vaep-jules-v313"',
-    'work="$RUNNER_TEMP/vaep-jules-v320"',
-)
-
-old_validation = '''mapfile -t changed_files < <(git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA")
-[[ ${#changed_files[@]} -eq 1 && "${changed_files[0]}" == "$manifest" ]] || fail "Dispatch commit must change exactly the single new manifest." 22'''
-new_validation = '''mapfile -t changed_files < <(git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA")
-[[ ${#changed_files[@]} -ge 1 ]] || fail "Dispatch commit has no changed files." 22
-for changed in "${changed_files[@]}"; do
-  [[ "$changed" =~ ^vaep/jules(-[b-d])?/dispatch/[A-Za-z0-9_.-]+\\.json$ ]] || fail "v3.20 atomic dispatch contains non-dispatch file: $changed" 22
+page_token=""
+source_name=""
+declare -A seen_source_tokens=()
+for page in $(seq 1 50); do
+  args=(--fail-with-body --silent --show-error --get -H "x-goog-api-key: $JULES_API_KEY" --data-urlencode "pageSize=100")
+  [[ -z "$page_token" ]] || args+=(--data-urlencode "pageToken=$page_token")
+  response="$work/sources-$page.json"
+  curl "${args[@]}" "$JULES_API_BASE/sources" > "$response"
+  source_name="$(jq -r --arg owner "$EXPECTED_OWNER" --arg repo "$EXPECTED_REPO" '[.sources[]? | select(.githubRepo.owner == $owner and .githubRepo.repo == $repo)] | first | .name // empty' "$response")"
+  if [[ -n "$source_name" ]]; then
+    jq -e --arg name "$source_name" --arg branch "$EXPECTED_BRANCH" '[.sources[]? | select(.name == $name)] | first | (.githubRepo.branches // []) | any(.displayName == $branch)' "$response" >/dev/null || fail "Desarrollo is not visible in Jules source." 31
+    break
+  fi
+  next_token="$(jq -r '.nextPageToken // empty' "$response")"
+  [[ -n "$next_token" ]] || break
+  [[ -z "${seen_source_tokens[$next_token]+x}" ]] || fail "Repeated source page token." 32
+  seen_source_tokens["$next_token"]=1
+  page_token="$next_token"
+  [[ "$page" -lt 50 ]] || fail "Source pagination exceeded 50 pages." 33
 done
-mapfile -t worker_changed_files < <(git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA" -- "$DISPATCH_PATH/*.json")
-[[ ${#worker_changed_files[@]} -eq 1 && "${worker_changed_files[0]}" == "$manifest" ]] || fail "Expected exactly one v3.20 manifest for ${WORKER_ID:-JULES_A}." 22'''
-if old_validation not in text:
-    raise SystemExit("v3.20 adapter: dispatch validation block not found")
-text = text.replace(old_validation, new_validation)
+[[ -n "$source_name" ]] || fail "VariApp/Desarrollo is not connected to Jules." 30
 
-identity_needle = '    "PROJECT_ID=VARIAPP" \\\n'
-identity_replacement = (
-    identity_needle
-    + '    "VAEP_JULES_PROTOCOL=v3.20" \\\n'
-    + '    "VAEP_AUTHORITY_FILE=docs/VAEP_AUTHORITY.md" \\\n'
-    + '    "VAEP_RETRY_POLICY_FILE=docs/VAEP_V320_RETRY_CAP.md" \\\n'
-    + '    "TASK_ATTEMPT=${VAEP_TASK_ATTEMPT}" \\\n'
-    + '    "JULES_MAX_ATTEMPTS_PER_TASK=2" \\\n'
-    + '    "JULES_REWORK_MAX=1" \\\n'
-)
-if identity_needle not in text:
-    raise SystemExit("v3.20 adapter: identity prompt anchor not found")
-text = text.replace(identity_needle, identity_replacement, 1)
+title="${SESSION_TITLE_PREFIX}${dispatch_id}"
+page_token=""
+session_name=""
+pagination_complete=false
+declare -A seen_session_tokens=()
+for page in $(seq 1 50); do
+  args=(--fail-with-body --silent --show-error --get -H "x-goog-api-key: $JULES_API_KEY" --data-urlencode "pageSize=100")
+  [[ -z "$page_token" ]] || args+=(--data-urlencode "pageToken=$page_token")
+  response="$work/sessions-$page.json"
+  curl "${args[@]}" "$JULES_API_BASE/sessions" > "$response"
+  session_name="$(jq -r --arg title "$title" '[.sessions[]? | select(.title == $title)] | first | .name // empty' "$response")"
+  [[ -z "$session_name" ]] || break
+  next_token="$(jq -r '.nextPageToken // empty' "$response")"
+  if [[ -z "$next_token" ]]; then pagination_complete=true; break; fi
+  [[ -z "${seen_session_tokens[$next_token]+x}" ]] || fail "Repeated session page token." 41
+  seen_session_tokens["$next_token"]=1
+  page_token="$next_token"
+  [[ "$page" -lt 50 ]] || fail "Session pagination exceeded 50 pages." 42
+done
 
-text = text.replace(
-    'Before changing anything, read AGENTS.md and docs/VAEP_JULES.md. Confirm repository, branch and assigned scope.',
-    'Before changing anything, read docs/VAEP_AUTHORITY.md, docs/VAEP_V320_RETRY_CAP.md, AGENTS.md and docs/VAEP_JULES.md. Confirm repository, branch, VAEP Jules protocol v3.20, TASK_ATTEMPT and assigned scope. HARD RULE: this logical task allows only ATTEMPT=1 plus one final correction ATTEMPT=2/R2. Never request, propose or perform Jules R3+. If ATTEMPT=2 still has a blocking defect, report it precisely for ChatGPT/VAEP/Vibe QA takeover and finish your evidence; do not start a third round.',
-)
+if [[ -z "$session_name" ]]; then
+  [[ "$pagination_complete" == true ]] || fail "Session pagination did not finish normally." 43
+  prompt_file="$work/prompt.txt"
+  printf '%s\n' \
+    "You are $WORKER_LABEL, an autonomous trusted implementer of the VariApp VAEP team." \
+    "PROJECT_ID=VARIAPP" \
+    "WORKER_ID=${WORKER_ID:-JULES_A}" \
+    "REPOSITORY=jmejia31/VariApp" \
+    "BRANCH=Desarrollo" \
+    "VAEP_JULES_PROTOCOL=v3.20" \
+    "VAEP_AUTHORITY_FILE=docs/VAEP_AUTHORITY.md" \
+    "VAEP_RETRY_POLICY_FILE=docs/VAEP_V320_RETRY_CAP.md" \
+    "PRIMARY_BASE_HEAD=$primary_base" \
+    "VAEP_TASK_ID=$task_id" \
+    "TASK_ATTEMPT=$task_attempt" \
+    "JULES_MAX_ATTEMPTS_PER_TASK=2" \
+    "JULES_REWORK_MAX=1" \
+    "FILE_SCOPE_HINT=$file_scope" \
+    "SPRINT_PARENT_TARGET=$SPRINT_PARENT_TARGET" \
+    "SPRINT_DEADLINE=$SPRINT_DEADLINE" \
+    "SPRINT_TIMEZONE=$SPRINT_TIMEZONE" \
+    "" \
+    "Before changing anything, read docs/VAEP_AUTHORITY.md and docs/VAEP_V320_RETRY_CAP.md FIRST, then AGENTS.md and docs/VAEP_JULES.md. v3.20 overrides any incompatible v3.19-or-earlier text." \
+    "HARD RETRY RULE: this logical task allows only ATTEMPT=1 plus one final correction ATTEMPT=2/R2. Never request, propose, create or perform Jules R3+. If ATTEMPT=2 still contains a blocking defect, report it exactly for ChatGPT/VAEP/Vibe QA takeover and finish your evidence." \
+    "TEAM SPRINT: four Jules are targeting at least 40 new parent MICROTAREA rows genuinely LISTO by 2026-08-21 06:00 America/Tegucigalpa. This throughput target NEVER permits false PASS/LISTO, skipped dependencies, reduced tests, scope leaks or weaker quality." \
+    "Work only inside your Jules cloud workspace. Never create branches, pull requests, pushes, merges, deployments, Production changes, secrets, or changes to main." \
+    "Do not publish anything to GitHub. Return a reviewable ChangeSet/gitPatch with exact baseCommitId." \
+    "Inspect only assigned scope and direct dependencies. If scope materially diverged from PRIMARY_BASE_HEAD and makes the task unsafe, make no changes and report the conflict." \
+    "Run proportional tests. Report observations, limitations, risks, recommendations and tests not executed; never claim false PASS." \
+    "Perform final self-review of git status, full diff, scope, contracts, security/RBAC, audit/data and tests before COMPLETED." \
+    "" \
+    "ASSIGNED VAEP MICROTASK" \
+    "$user_prompt" > "$prompt_file"
 
-stale_prompt = 'VAEP v3.13 automated follow-up.'
-current_prompt = (
-    'VAEP Jules integration v3.20 automated follow-up. '
-    'Global ChatGPT/VAEP control-plane remains governed by CONFIG.RUNNER_PROTOCOL_VERSION. '
-    'Retry cap is hard: maximum two Jules content attempts per logical task; R2 is final; R3+ prohibited; after failed R2 ownership transfers to ChatGPT/VAEP/Vibe QA and this Jules moves to next safe work.'
-)
-if stale_prompt not in text:
-    raise SystemExit("v3.20 adapter: stale v3.13 follow-up anchor not found")
-text = text.replace(stale_prompt, current_prompt)
+  jq -n --arg prompt "$(cat "$prompt_file")" --arg title "$title" --arg source "$source_name" --arg branch "$EXPECTED_BRANCH" '{prompt:$prompt,title:$title,sourceContext:{source:$source,githubRepoContext:{startingBranch:$branch}},requirePlanApproval:false}' > "$work/create-session.json"
+  api_post_json "$JULES_API_BASE/sessions" "$work/create-session.json" > "$work/session-created.json"
+  session_name="$(jq -r '.name // empty' "$work/session-created.json")"
+fi
+[[ -n "$session_name" ]] || fail "Jules did not return a session resource." 44
+session_id="${session_name#sessions/}"
 
-runtime_path.write_text(text, encoding="utf-8")
-PY
+deadline=$((SECONDS + 6600))
+terminal_state=""
+auto_feedback_count=0
+max_followups=3
+routine_prompt="VAEP Jules v3.20 automated follow-up. Continue autonomously inside the assigned task and FILE_SCOPE_HINT. Authority order: docs/VAEP_AUTHORITY.md -> docs/VAEP_V320_RETRY_CAP.md -> dispatch -> AGENTS.md/docs/VAEP_JULES.md -> code/tests. TASK_ATTEMPT=$task_attempt; maximum content attempts=2; R2 is final; Jules R3+ is prohibited. Resolve routine ambiguity without human confirmation. Do not expand scope. If implementation and validations are complete, perform final self-review, report every observation/limitation/risk/recommendation and every test not executed, preserve a reviewable ChangeSet/gitPatch with baseCommitId, and finish COMPLETED. If ATTEMPT=2 still has a blocking defect, report it precisely for ChatGPT/VAEP/Vibe QA takeover and complete evidence rather than attempting another Jules round. Team sprint target remains 40 genuine parent MICROTAREA LISTO by $SPRINT_DEADLINE; never trade quality for count."
 
-chmod +x "$runtime_worker"
-exec bash "$runtime_worker"
+while (( SECONDS < deadline )); do
+  api_get "$JULES_API_BASE/$session_name" > "$work/session-latest.json"
+  state="$(jq -r '.state // "UNKNOWN"' "$work/session-latest.json")"
+  echo "Jules v3.20 session $session_id state: $state (attempt $task_attempt/2; auto followups $auto_feedback_count/$max_followups)"
+  case "$state" in
+    COMPLETED|FAILED|PAUSED)
+      terminal_state="$state"
+      break
+      ;;
+    AWAITING_PLAN_APPROVAL)
+      if (( auto_feedback_count >= max_followups )); then terminal_state="AUTO_FEEDBACK_EXHAUSTED"; break; fi
+      api_post_empty "$JULES_API_BASE/$session_name:approvePlan" >/dev/null
+      auto_feedback_count=$((auto_feedback_count + 1))
+      sleep 10
+      ;;
+    AWAITING_USER_FEEDBACK)
+      if (( auto_feedback_count >= max_followups )); then terminal_state="AUTO_FEEDBACK_EXHAUSTED"; break; fi
+      jq -n --arg prompt "$routine_prompt" '{prompt:$prompt}' > "$work/inline-feedback.json"
+      api_post_json "$JULES_API_BASE/$session_name:sendMessage" "$work/inline-feedback.json" >/dev/null
+      auto_feedback_count=$((auto_feedback_count + 1))
+      sleep 10
+      ;;
+    QUEUED|PLANNING|IN_PROGRESS)
+      sleep 30
+      ;;
+    *)
+      echo "Non-terminal Jules state: $state"
+      sleep 30
+      ;;
+  esac
+done
+[[ -n "$terminal_state" ]] || terminal_state="WORKFLOW_TIMEOUT"
+
+printf '{"activities":[]}\n' > "$result_dir/activities.json"
+page_token=""
+pagination_complete=false
+declare -A seen_activity_tokens=()
+for page in $(seq 1 100); do
+  args=(--fail-with-body --silent --show-error --get -H "x-goog-api-key: $JULES_API_KEY" --data-urlencode "pageSize=100")
+  [[ -z "$page_token" ]] || args+=(--data-urlencode "pageToken=$page_token")
+  response="$work/activities-$page.json"
+  curl "${args[@]}" "$JULES_API_BASE/$session_name/activities" > "$response"
+  jq -s '{activities: ((.[0].activities // []) + (.[1].activities // []))}' "$result_dir/activities.json" "$response" > "$result_dir/activities.next.json"
+  mv "$result_dir/activities.next.json" "$result_dir/activities.json"
+  next_token="$(jq -r '.nextPageToken // empty' "$response")"
+  if [[ -z "$next_token" ]]; then pagination_complete=true; break; fi
+  [[ -z "${seen_activity_tokens[$next_token]+x}" ]] || fail "Repeated activity page token." 60
+  seen_activity_tokens["$next_token"]=1
+  page_token="$next_token"
+  [[ "$page" -lt 100 ]] || fail "Activity pagination exceeded 100 pages." 61
+done
+[[ "$pagination_complete" == true ]] || fail "Partial Jules activities collection refused." 62
+
+if [[ -f "$work/session-latest.json" ]]; then cp "$work/session-latest.json" "$result_dir/session.json"; else api_get "$JULES_API_BASE/$session_name" > "$result_dir/session.json"; fi
+cp "$manifest" "$result_dir/dispatch.json"
+jq '[.activities[]? as $a | $a.artifacts[]? | .changeSet?.gitPatch? | select(. != null) | {createTime:($a.createTime // ""),patch:.}] | sort_by(.createTime) | last | .patch // null' "$result_dir/activities.json" > "$result_dir/gitpatch.json"
+patch_present="$(jq -r 'type == "object"' "$result_dir/gitpatch.json")"
+actual_base=""
+suggested=""
+if [[ "$patch_present" == true ]]; then
+  actual_base="$(jq -r '.baseCommitId // ""' "$result_dir/gitpatch.json")"
+  suggested="$(jq -r '.suggestedCommitMessage // ""' "$result_dir/gitpatch.json")"
+  jq -r '.unidiffPatch // ""' "$result_dir/gitpatch.json" > "$result_dir/changes.patch"
+else
+  : > "$result_dir/changes.patch"
+fi
+
+jq -n \
+  --arg protocol "$VAEP_JULES_PROTOCOL" \
+  --arg workerId "${WORKER_ID:-JULES_A}" \
+  --arg dispatchId "$dispatch_id" \
+  --arg taskId "$task_id" \
+  --arg session "$session_name" \
+  --arg state "$terminal_state" \
+  --arg requestedBase "$primary_base" \
+  --arg actualBase "$actual_base" \
+  --arg suggestedCommitMessage "$suggested" \
+  --argjson patchPresent "$patch_present" \
+  --argjson autoFeedbackCount "$auto_feedback_count" \
+  --argjson taskAttempt "$task_attempt" \
+  --argjson maxAttempts "$JULES_MAX_ATTEMPTS_PER_TASK" \
+  --argjson sprintParentTarget "$SPRINT_PARENT_TARGET" \
+  --arg sprintDeadline "$SPRINT_DEADLINE" \
+  '{protocol:$protocol,workerId:$workerId,dispatchId:$dispatchId,taskId:$taskId,taskAttempt:$taskAttempt,maxAttempts:$maxAttempts,session:$session,state:$state,requestedBase:$requestedBase,actualPatchBase:$actualBase,patchPresent:$patchPresent,suggestedCommitMessage:$suggestedCommitMessage,autoFeedbackCount:$autoFeedbackCount,sprintParentTarget:$sprintParentTarget,sprintDeadline:$sprintDeadline,controllerHandoff:"REVIEW_IMMEDIATELY_AND_ASSIGN_NEXT_SAFE"}' \
+  > "$result_dir/result.json"
+
+run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+printf -v issue_body '%s\n\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n%s\n' \
+  "VAEP $WORKER_LABEL v3.20 result and controller handoff signal." \
+  "- Protocol: \`v3.20\`" \
+  "- Worker: \`${WORKER_ID:-JULES_A}\`" \
+  "- Dispatch: \`$dispatch_id\`" \
+  "- Task: \`$task_id\`" \
+  "- Task attempt: \`$task_attempt/2\`; Jules R3+ is PROHIBITED" \
+  "- Jules session: \`$session_name\`" \
+  "- Terminal state: \`$terminal_state\`" \
+  "- Inline auto-feedback count: \`$auto_feedback_count\`" \
+  "- Patch present: \`$patch_present\`; patch base: \`$actual_base\`" \
+  "- Controller handoff: \`REVIEW_IMMEDIATELY_AND_ASSIGN_NEXT_SAFE\`" \
+  "- Sprint: target $SPRINT_PARENT_TARGET genuine parents LISTO by $SPRINT_DEADLINE ($SPRINT_TIMEZONE)" \
+  "- Workflow run: $run_url" \
+  'Artifact only. Nothing was applied to Desarrollo, pushed, merged or deployed. VAEP/ChatGPT review is mandatory. If ATTEMPT=2 fails review, ChatGPT/VAEP/Vibe takes over; do not create a Jules R3.'
+gh issue create --repo "$GITHUB_REPOSITORY" --title "$ISSUE_PREFIX $dispatch_id result" --body "$issue_body" >/dev/null
+
+printf 'ARTIFACT_NAME=%s-%s\n' "$ARTIFACT_PREFIX" "$dispatch_id" >> "$GITHUB_ENV"
+printf 'RESULT_DIR=%s\n' "$result_dir" >> "$GITHUB_ENV"
+
+[[ "$terminal_state" == COMPLETED ]] || fail "Jules did not complete successfully: $terminal_state" 50
+[[ "$patch_present" == true ]] || fail "Jules completed without ChangeSet/gitPatch." 51
