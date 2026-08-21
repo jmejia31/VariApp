@@ -92,6 +92,7 @@ builder.Services.AddScoped<IOrdenCompraService, OrdenCompraService>();
 builder.Services.AddScoped<RecepcionCompraKardexRegistrar>();
 builder.Services.AddScoped<IRecepcionCompraService, RecepcionCompraService>();
 builder.Services.AddScoped<IFacturaProveedorService, FacturaProveedorService>();
+builder.Services.AddScoped<IThreeWayMatchService, ThreeWayMatchService>();
 builder.Services.AddScoped<IReservaInventarioService, ReservaInventarioService>();
 builder.Services.AddScoped<ITrazabilidadInventarioService, TrazabilidadInventarioService>();
 builder.Services.AddScoped<IPoliticaCosteoInventarioService, PoliticaCosteoInventarioService>();
