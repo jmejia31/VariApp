@@ -40,9 +40,9 @@ jobs:
           ref: ${{ github.sha }}
           fetch-depth: 2
 
-      - name: Execute VAEP Jules integration v3.19 worker
+      - name: Execute VAEP Jules integration v3.20 worker
         shell: bash
-        run: bash .github/scripts/vaep-jules-worker-v319.sh
+        run: bash .github/scripts/vaep-jules-worker-v320.sh
 
       - name: Upload Jules D result artifact
         if: always() && env.RESULT_DIR != ''
