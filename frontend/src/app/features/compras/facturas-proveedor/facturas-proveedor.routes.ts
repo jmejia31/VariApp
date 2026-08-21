@@ -32,5 +32,29 @@ export const FACTURAS_PROVEEDOR_ROUTES: Routes = [
     canActivate: [authGuard, permisoGuard],
     data: { modulo: 'Compras', accion: 'Ver' },
     loadComponent: () => import('./facturas-proveedor.components').then(m => m.FacturasProveedorListComponent)
+  },
+  {
+    path: 'devoluciones-proveedor/nueva',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Compras', accion: 'Crear' },
+    loadComponent: () => import('../devoluciones-proveedor/devoluciones-proveedor.components').then(m => m.DevolucionProveedorFormComponent)
+  },
+  {
+    path: 'devoluciones-proveedor/:id/editar',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Compras', accion: 'Editar' },
+    loadComponent: () => import('../devoluciones-proveedor/devoluciones-proveedor.components').then(m => m.DevolucionProveedorFormComponent)
+  },
+  {
+    path: 'devoluciones-proveedor/:id',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Compras', accion: 'Ver' },
+    loadComponent: () => import('../devoluciones-proveedor/devoluciones-proveedor.components').then(m => m.DevolucionProveedorDetailComponent)
+  },
+  {
+    path: 'devoluciones-proveedor',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Compras', accion: 'Ver' },
+    loadComponent: () => import('../devoluciones-proveedor/devoluciones-proveedor.components').then(m => m.DevolucionesProveedorListComponent)
   }
 ];
