@@ -4,6 +4,12 @@ import { permisoGuard } from '../../../core/guards/permiso.guard';
 
 export const FACTURAS_PROVEEDOR_ROUTES: Routes = [
   {
+    path: 'compras/:id/three-way-match',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Compras', accion: 'Ver' },
+    loadComponent: () => import('../three-way-match/three-way-match.component').then(m => m.ThreeWayMatchComponent)
+  },
+  {
     path: 'facturas-proveedor/nueva',
     canActivate: [authGuard, permisoGuard],
     data: { modulo: 'Compras', accion: 'Crear' },
