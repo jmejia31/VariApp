@@ -19,4 +19,4 @@ N2.5 reconcilia `OrdenCompra` (N2.2), `RecepcionCompra` (N2.3) y `FacturaProveed
 - El `Down()` de la migración elimina las tablas N2.5 y por tanto es destructivo para la evidencia histórica; no se considera rollback seguro por defecto.
 
 ## Estado
-ADR reconciliado por ChatGPT/VAEP durante QA takeover de N2.5.H. La certificación global permanece `VALIDANDO` hasta CI/DoD causal del HEAD final.
+**LISTO / CERTIFICADO.** ChatGPT/VAEP cerró N2.5.H después de reconciliar E/F/G y verificar sobre el mismo HEAD funcional `5022c04b74780af871ab9d56c58c376d57b6519e` los gates Development `32497393667`, Acceptance `32497393606`, Fase8 `32497393712` y M13 `32497393747`, todos `SUCCESS`, con P0=0/P1=0.
