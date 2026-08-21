@@ -1,131 +1,190 @@
-# VAEP — Entrenamiento canónico de Jules
+# VAEP — Entrenamiento canónico de Jules v3.20
 
-## 1. Propósito y alcance
+## 0. Autoridad obligatoria
 
-Este documento es **vinculante y común para todos los workers Jules autorizados en VariApp**. Aplica por igual a Jules A, Jules B, Jules C y cualquier cuenta Jules futura. No existe un entrenamiento reducido por worker.
+Este documento es vinculante para Jules A/B/C/D. Antes de cualquier otra regla operativa, todo worker debe leer en este orden:
 
-La única diferencia permitida entre workers es su identidad técnica (`WORKER_ID`), su API key privada y su asignación/scope actual. Las reglas de ingeniería, seguridad, gobierno, calidad, revisión y entrega son idénticas.
-
-Rol canónico después de certificar el smoke:
-
-```text
-PROGRAMADOR SECUNDARIO CONFIABLE
-TRUSTED_SECONDARY_DEVELOPER
-```
-
-Durante onboarding/smoke el worker permanece en probation y **no recibe trabajo ERP autoritativo**.
-
-ChatGPT/VAEP conserva siempre el control plane: selección de tarea, precedencia, locks, COLA, BITACORA, revisión, reconciliación, integración, CI, certificación y publicación.
-
-## 2. Identidad obligatoria
-
-Antes de analizar, editar o ejecutar:
+1. `docs/VAEP_AUTHORITY.md`;
+2. `docs/VAEP_V320_RETRY_CAP.md`;
+3. manifest actual de dispatch;
+4. `AGENTS.md`;
+5. este archivo;
+6. Plan Maestro/CONFIG cuando el orquestador los haya trasladado al prompt;
+7. código y pruebas actuales.
 
 ```text
 PROJECT_ID=VARIAPP
 REPOSITORY=jmejia31/VariApp
 BRANCH=Desarrollo
+JULES_PROTOCOL=V3.20_CURRENT
+GLOBAL_CONTROL_PLANE=VAEP_V4_6_KEYED_MUTEX_HARD_EXECUTION
+JULES_MAX_ATTEMPTS_PER_TASK=2
+JULES_REWORK_MAX=1
+JULES_R3_PLUS=PROHIBIDO
+SPRINT_PARENT_TARGET=40
+SPRINT_DEADLINE=2026-08-21T06:00:00-06:00
+SPRINT_TIMEZONE=America/Tegucigalpa
 ```
 
-Cada Jules debe además conocer su `WORKER_ID` individual (`JULES_A`, `JULES_B`, `JULES_C`, etc.) y la microtarea exacta asignada.
+Cualquier texto operativo v3.19 o anterior incompatible es histórico y NO gobierna un dispatch nuevo. Los scripts `vaep-jules-worker-v313.sh` y `vaep-jules-worker-v319.sh` permanecen únicamente como historia/compatibilidad y **no deben ser ejecutados por los cuatro workflows Jules actuales**.
 
-Lectura mínima obligatoria antes de editar:
+## 1. Propósito y rol
 
-1. `AGENTS.md`;
-2. `PROJECT_CONTEXT.md`;
-3. `TASKS.md` cuando la tarea dependa del estado funcional;
-4. este archivo `docs/VAEP_JULES.md`;
-5. archivos objetivo y dependencias directas de la microtarea.
+Jules A, B, C y D son implementers autónomos confiables dentro del alcance exacto asignado. ChatGPT/VAEP conserva control plane, selección, locks, COLA/BITACORA, review, reconciliación, integración, CI, certificación y publicación. Vibe puede actuar como QA/corrector externo cuando el control plane le delegue un `QA_TAKEOVER`.
 
-No reescanear todo el repositorio salvo razón técnica real. Reutilizar contexto y evidencia existente.
+Cada Jules trabaja en su workspace cloud y entrega `ChangeSet/gitPatch`. Nunca publica directamente.
+
+## 2. Identidad y lectura mínima
+
+Antes de editar:
+
+```text
+PROJECT_ID=VARIAPP
+REPOSITORY=jmejia31/VariApp
+BRANCH=Desarrollo
+WORKER_ID=JULES_A|JULES_B|JULES_C|JULES_D
+TASK_ATTEMPT=1|2
+```
+
+Lectura mínima:
+
+1. `docs/VAEP_AUTHORITY.md`;
+2. `docs/VAEP_V320_RETRY_CAP.md`;
+3. `AGENTS.md`;
+4. `PROJECT_CONTEXT.md` cuando aplique al cambio;
+5. `TASKS.md` cuando el estado funcional sea relevante;
+6. `docs/VAEP_JULES.md`;
+7. archivos objetivo y dependencias directas.
+
+No reescanear todo el repositorio salvo razón técnica real.
 
 ## 3. Reglas inviolables
 
 Todos los Jules, sin excepción:
 
-- trabajan únicamente sobre `jmejia31/VariApp` y la rama base `Desarrollo`;
-- no modifican `main`;
-- no tocan Producción;
-- no crean ramas;
-- no crean PR;
-- no hacen push;
-- no hacen merge ni auto-merge;
-- no despliegan;
+- trabajan solo sobre `jmejia31/VariApp` y base `Desarrollo`;
+- no modifican `main` ni Producción;
+- no crean ramas, PR, push, merge, auto-merge ni deploy;
 - no modifican secretos, credenciales, dominios, bases o infraestructura productiva;
-- no exponen secretos ni valores sensibles;
-- no gobiernan la cola ni se autoasignan trabajo;
-- no publican cambios funcionales directamente a GitHub;
-- entregan exclusivamente `ChangeSet/gitPatch` para revisión de ChatGPT/VAEP;
-- preservan trabajo concurrente ajeno;
-- respetan exactamente `FILE_SCOPE_HINT` y `PRIMARY_BASE_HEAD`;
-- si el scope/base divergió de forma material y hace insegura la tarea, **no editan** y reportan el conflicto.
+- no exponen valores sensibles;
+- no gobiernan ni falsifican COLA/BITACORA;
+- no publican cambios funcionales;
+- entregan exclusivamente `ChangeSet/gitPatch` para revisión;
+- respetan exactamente `FILE_SCOPE_HINT`, `PRIMARY_BASE_HEAD`, contratos y ownership;
+- no escriben sobre scope activo de otro worker;
+- si base/scope/contrato diverge materialmente y hace inseguro el cambio, no fuerzan la edición y reportan el conflicto;
+- nunca declaran PASS de una prueba no ejecutada.
 
-`COMPLETED` de Jules **no significa `LISTO` en VAEP**. Siempre existe revisión posterior de ChatGPT/VAEP.
+`COMPLETED` de Jules nunca significa `LISTO` en VAEP.
 
-## 4. Regla de una tarea por desarrollador
-
-Cada cuenta Jules representa un developer lógico independiente.
+## 4. Cardinalidad y cero colisiones
 
 ```text
-Jules A -> máximo 1 tarea autoritativa activa
-Jules B -> máximo 1 tarea autoritativa activa
-Jules C -> máximo 1 tarea autoritativa activa
+Jules A -> máximo 1 write-scope autoritativo activo
+Jules B -> máximo 1 write-scope autoritativo activo
+Jules C -> máximo 1 write-scope autoritativo activo
+Jules D -> máximo 1 write-scope autoritativo activo
 ```
 
-No usar una sola cuenta Jules para múltiples asignaciones simultáneas en operación normal. Si existen varias cuentas certificadas, VAEP distribuye una tarea por cuenta.
+Varios Jules pueden colaborar sobre el mismo padre o incluso la misma tarea lógica únicamente mediante scopes mutuamente excluyentes o review/tests/read-only. Dos workers nunca escriben simultáneamente el mismo archivo/scope.
 
-Todos trabajan sobre el **mismo punto principal elegible** del Plan Maestro. No adelantar `N+1` mientras el padre `N` siga abierto. Si el punto puede subdividirse con seguridad, VAEP crea hijos con scopes no solapados. Si no existen suficientes scopes de escritura, workers sobrantes se usan para QA/cross-review/security/contracts read-only del mismo padre; nunca se inventa trabajo.
+## 5. Retry Cap v3.20 — regla dura
 
-## 5. Modo de trabajo FULL FLASH PERFECT
+Cada tarea/hija lógica dispone de un máximo absoluto de DOS intentos Jules de contenido:
 
-Velocidad máxima útil sin degradar calidad.
+```text
+ATTEMPT=1 -> ejecución inicial
+ATTEMPT=2 / R2 -> única y última corrección Jules
+R3+ -> PROHIBIDO
+```
+
+Si `ATTEMPT=1` no pasa REVIEW-FIRST, VAEP puede emitir un único R2 dirigido. Si `ATTEMPT=2` conserva REQUIRED/BLOCKER/P0/P1, scope leak, evidence mismatch, contrato incorrecto o cualquier defecto que impida `LISTO`, el estado operativo es:
+
+```text
+JULES_RETRY_EXHAUSTED
+OWNER=CHATGPT_VAEP_VIBE
+ACTION=QA_TAKEOVER_CORRECT_TEST_CERTIFY
+```
+
+La tarea no vuelve a Jules. Cambiar de Jules no reinicia el contador; work-stealing hereda `ATTEMPT_COUNT`.
+
+Un dispatch que nunca obtiene sesión ni primera actividad técnica útil es fallo de bootstrap/infraestructura y puede recuperarse de manera controlada. Ese recovery no autoriza más de dos intentos de contenido ni puede utilizarse para crear loops.
+
+## 6. Handoff después del terminal
+
+Al entregar resultado terminal, el scope anterior queda congelado para review. El Jules NO permanece esperando QA si existe trabajo seguro autorizado: el control plane lo reasigna a la siguiente tarea segura/preasignada, mientras ChatGPT/VAEP revisa detrás.
+
+Prioridad v3.20:
+
+1. si ATTEMPT=1 falló y todavía no consumió R2, único R2 dirigido cuando corresponda;
+2. trabajo útil que cierre el padre actual con scope exclusivo;
+3. siguiente tarea SAFE elegible/preasignada;
+4. preflight/tests/security/contracts/performance/docs útiles cuando una dependencia impida writes funcionales.
+
+Si R2 se agotó, ese Jules salta obligatoriamente a la siguiente tarea segura; la corrección queda en QA externo.
+
+`MAX_VOLUNTARY_IDLE=0` permanece vigente.
+
+## 7. FULL FLASH PERFECT
 
 Cada Jules debe:
 
-1. inspeccionar primero solo archivos objetivo y dependencias directas;
-2. no repetir inventarios ya conocidos;
-3. implementar el cambio coherente mínimo que complete el criterio;
+1. inspeccionar solo archivos objetivo y dependencias directas;
+2. reutilizar contexto y evidencia válidos;
+3. implementar el changeset mínimo coherente que satisfaga el criterio;
 4. ejecutar validaciones proporcionales reales;
-5. corregir cualquier defecto causal encontrado dentro del scope;
-6. revisar su diff completo antes de entregar;
-7. reportar observaciones, riesgos, limitaciones, recomendaciones y detalles a mejorar;
-8. no declarar PASS de una prueba que no ejecutó;
-9. terminar su microtarea antes de pedir otra.
+5. corregir defectos causales dentro del scope y del attempt disponible;
+6. revisar el diff completo antes de entregar;
+7. reportar observaciones, riesgos, limitaciones, recomendaciones y pruebas no ejecutadas;
+8. finalizar con evidencia limpia y exacta.
 
-FINISH_FIRST: no abandonar una microtarea a medio cerrar para iniciar otra.
+Velocidad nunca autoriza false PASS/LISTO ni reducción de QA.
 
-## 6. Calidad de ingeniería obligatoria
+## 8. Sprint 40
 
-Antes de entregar, Jules revisa como mínimo cuando aplique:
+Ventana extraordinaria actual:
+
+```text
+SPRINT_START_AT=2026-08-20T22:45:00-06:00
+SPRINT_DEADLINE_AT=2026-08-21T06:00:00-06:00
+SPRINT_PARENT_TARGET=40
+SPRINT_TIMEZONE=America/Tegucigalpa
+```
+
+Los cuatro Jules deben conocer esta meta de equipo. Cuenta solamente un padre operativo real `MICROTAREA` que pase genuinamente a `LISTO` después de QA/DoD. No cuentan hijos internos, support packets, preflights repetidos, manifests, sesiones ni `COMPLETED` sin review.
+
+La meta no modifica la Definition of Done: dependencias, seguridad, RBAC, auditoría, datos, UX, pruebas, CI y cero P0/P1 siguen siendo obligatorios.
+
+## 9. Calidad de ingeniería
+
+Antes de entregar, revisar cuando aplique:
 
 - arquitectura y separación de responsabilidades;
 - contratos API/DTOs;
-- persistencia, migraciones e invariantes;
+- persistencia, migraciones, invariantes y rollback;
 - concurrencia e idempotencia;
 - RBAC/autorización;
 - seguridad y exposición de datos;
-- auditoría y trazabilidad;
+- auditoría/trazabilidad;
 - manejo de errores;
-- UX, accesibilidad y estados loading/error/empty;
+- UX/accesibilidad/loading/error/empty;
 - regresión;
-- pruebas unit/integration/contract/E2E reales disponibles;
+- unit/integration/contract/E2E reales disponibles;
 - build/lint;
-- compatibilidad con Plan Maestro ERP V5 y trabajo ya cerrado.
+- compatibilidad con Plan Maestro ERP V5 y trabajo certificado.
 
-Las observaciones se clasifican de manera práctica:
+Clasificación:
 
 ```text
-BLOCKER / P0-P1 -> corregir antes de entregar
-REQUIRED         -> corregir antes de LISTO
+BLOCKER / P0-P1 -> no puede pasar a LISTO
+REQUIRED         -> corregir dentro del attempt disponible; si R2 se agota => QA takeover
 P2/P3            -> registrar y justificar
 N/A              -> justificar técnicamente
 ```
 
-## 7. Higiene absoluta del ChangeSet
+## 10. Higiene absoluta del ChangeSet
 
-Esta regla es crítica y nace de defectos reales observados durante onboarding.
-
-Jules **NO debe crear ni incluir en su diff archivos temporales o auxiliares para transportar el patch**, incluyendo, entre otros:
+No crear ni incluir archivos temporales para transportar patches:
 
 ```text
 changes.patch
@@ -138,8 +197,6 @@ backup*
 tmp*
 ```
 
-El `ChangeSet/gitPatch` lo proporciona Jules mediante su mecanismo de salida; **no debe materializarse como archivo dentro del repositorio/workspace versionable**.
-
 Antes de finalizar:
 
 ```text
@@ -148,139 +205,103 @@ git diff --check
 git diff --name-only
 ```
 
-Debe comprobar que los únicos archivos modificados son los autorizados por `FILE_SCOPE_HINT`.
+Los únicos archivos modificados deben ser los autorizados por `FILE_SCOPE_HINT`.
 
-Si detecta un artefacto temporal propio, debe eliminarlo antes de entregar.
+## 11. Base, scope y manifest
 
-Un ChangeSet contaminado por archivos temporales se clasifica `REQUIRED_FIX` y no se integra aunque el código funcional sea correcto.
+Todo manifest v3.20 nuevo debe incluir o permitir derivar:
 
-## 8. Base, scope y concurrencia
-
-El manifest contiene:
-
+- `dispatchId`;
 - `taskId`;
+- `workerId`;
 - `expectedBranch=Desarrollo`;
 - `primaryBaseHead`;
 - `fileScopeHint`;
-- prompt y criterios de aceptación.
+- `prompt` y criterios de aceptación;
+- `taskAttempt=1|2` para ejecución/rework de contenido.
 
-Jules debe verificar HEAD/base al inicio. Si existe una divergencia no solapada y técnicamente segura, puede continuar solo cuando el prompt lo permita y debe reportarla. Si existe solapamiento material, contrato cambiado o riesgo de sobrescribir trabajo ajeno, no debe editar.
+El worker v3.20 rechaza `taskAttempt>2` y un dispatch ID explícito `R3+`.
 
-Nunca modificar archivos fuera del scope “para ayudar” salvo que exista un bloqueo causal real y el prompt autorice explícitamente ampliar el alcance. De lo contrario, reportar el hallazgo a VAEP.
-
-## 9. Protocolo de entrega
+## 12. Protocolo de entrega
 
 La entrega correcta incluye:
 
 1. `ChangeSet/gitPatch`;
 2. `baseCommitId` exacto;
 3. lista real de archivos modificados;
-4. pruebas/comandos ejecutados y resultados;
+4. pruebas ejecutadas y resultados;
 5. pruebas no ejecutadas y causa;
-6. autoevaluación del diff;
+6. auto-review del diff;
 7. observaciones;
 8. riesgos;
 9. limitaciones;
-10. recomendaciones/detalles a mejorar.
+10. recomendaciones;
+11. `TASK_ATTEMPT` real.
 
 No publicar, commitear, pushear, abrir PR ni hacer merge.
 
-## 10. Review de VAEP posterior
+## 13. Review posterior y QA takeover
 
-ChatGPT/VAEP revisa siempre:
+ChatGPT/VAEP revisa siempre identidad, sesión, protocol version, attempt, base, scope, diff, contratos, seguridad/RBAC, auditoría/datos, pruebas/CI, auto-review y compatibilidad con HEAD.
 
-1. identidad y sesión correctas;
-2. `baseCommitId`;
-3. scope;
-4. archivos tocados;
-5. ausencia de artefactos temporales;
-6. diff funcional;
-7. contratos/arquitectura;
-8. seguridad/RBAC;
-9. auditoría/datos;
-10. pruebas y CI;
-11. autoevaluación y observaciones de Jules;
-12. compatibilidad con HEAD vigente.
+- PASS -> integrar/recrear seguro, validar y promover según DoD.
+- FAIL en ATTEMPT=1 -> como máximo un R2 dirigido.
+- FAIL en ATTEMPT=2 -> `JULES_RETRY_EXHAUSTED`; ChatGPT/VAEP/Vibe corrige, prueba, integra y certifica. Prohibido redispatch Jules R3+.
 
-Si pasa, VAEP aplica/recrea el patch sobre `Desarrollo`, ejecuta validaciones y registra evidencia. Si falla, el mismo worker recibe una corrección R1/R2 sobre la misma microtarea; no se abre trabajo nuevo para ocultar el fallo.
+## 14. Estados y feedback
 
-## 11. Estados y feedback
-
-Estados de bootstrap como `QUEUED`, `PLANNING`, clonando o configurando no cuentan por sí solos como progreso útil.
+Bootstrap `QUEUED`, `PLANNING`, clonando o configurando no cuentan por sí solos como progreso.
 
 - sin primera actividad útil ~5 min: `BOOTSTRAP_STALLED`;
 - sin progreso útil ~10 min: recovery/failover controlado;
-- `PAUSED` sin activities/patch: no cuenta como ACTIVE;
-- `AWAITING_USER_FEEDBACK` rutinario: VAEP responde rápidamente;
-- `COMPLETED`: entra inmediatamente en review; no recibe nueva tarea antes de reconciliar resultado.
+- `PAUSED` sin activities/patch: no ACTIVE;
+- `AWAITING_USER_FEEDBACK` rutinario: worker v3.20 resuelve inline;
+- `AWAITING_PLAN_APPROVAL` rutinario: worker v3.20 autoaprueba cuando ya está autorizado;
+- `COMPLETED`: review inmediato y handoff de lane a trabajo seguro;
+- sesión superseded: nunca recupera ownership por sí sola.
 
-Una sesión superseded nunca recupera ownership por sí sola.
+Máximo tres auto-followups rutinarios por ejecución; después se reporta `AUTO_FEEDBACK_EXHAUSTED` para control plane, sin loop infinito.
 
-## 12. Smoke obligatorio por cuenta nueva
+## 15. Workflow autoritativo
 
-Cada nueva cuenta Jules debe demostrar independientemente:
-
-```text
-API auth
-source jmejia31/VariApp
-branch Desarrollo
-session válida
-lectura de AGENTS.md + docs/VAEP_JULES.md
-scope exacto
-ChangeSet/gitPatch
-baseCommitId
-patch limpio
-sin branch/PR/push/merge/deploy
-sin secretos
-```
-
-**Patch limpio significa que no contiene `changes.patch`, `*.patch`, `*.diff`, backups ni archivos fuera del scope.**
-
-Solo entonces:
+Los cuatro workflows actuales deben ejecutar exclusivamente:
 
 ```text
-JULES_<ID>_ENABLED=TRUE
-JULES_<ID>_ROLE=TRUSTED_SECONDARY_DEVELOPER
+.github/scripts/vaep-jules-worker-v320.sh
 ```
 
-## 13. Arquitectura multi-worker
+Paths:
 
 ```text
-                     VAEP / ChatGPT
-                    control plane único
-                           |
-        +------------------+------------------+
-        |                  |                  |
-    ChatGPT A           Jules A            Jules B/C...
-     primary        trusted secondary    trusted secondary
-        |                  |                  |
-        +------------------+------------------+
-                           |
-                  review + reconciliación
-                           |
-                    tests / CI / DoD
-                           |
-                    origin/Desarrollo
+A -> vaep/jules/dispatch/*.json
+B -> vaep/jules-b/dispatch/*.json
+C -> vaep/jules-c/dispatch/*.json
+D -> vaep/jules-d/dispatch/*.json
 ```
 
-GitHub es autoridad técnica/evidencia; el Sheet VAEP es control operativo.
+Un dispatch nuevo válido = un commit = exactamente un manifest nuevo del worker correspondiente. No agrupar manifests ni archivos de aplicación en el mismo dispatch commit.
 
-## 14. Criterio de éxito
+Al terminal, el worker crea Issue de resultado con `controllerHandoff=REVIEW_IMMEDIATELY_AND_ASSIGN_NEXT_SAFE`; esto es señal técnica para el control plane y los checkpoints de 15 minutos.
 
-Una microtarea Jules solo se considera cerrada cuando se cumple:
+## 16. Criterio de éxito
+
+Una tarea Jules solo es `LISTO` cuando:
 
 ```text
 asignación válida
+-> protocolo v3.20
+-> ATTEMPT válido 1|2
 -> sesión Jules
--> trabajo dentro del scope
+-> trabajo dentro de scope
 -> ChangeSet limpio
 -> auto-review Jules
 -> review ChatGPT/VAEP
 -> reconciliación contra HEAD
--> pruebas/CI requeridas
+-> pruebas/CI/DoD requeridos
 -> integración autorizada en Desarrollo
 -> COLA/BITACORA/evidencia actualizadas
+-> cero P0/P1
 -> LISTO
 ```
 
-Esta formación es idéntica para todos los Jules. Ningún worker nuevo puede omitirla ni usar instrucciones simplificadas como sustituto.
+No existe excepción por Sprint 40 ni por velocidad.
