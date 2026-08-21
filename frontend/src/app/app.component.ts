@@ -67,6 +67,7 @@ import { SessionActivityService } from './core/auth/session-activity.service';
               <a routerLink="/solicitudes-compra" routerLinkActive="active" ariaCurrentWhenActive="page"><mat-icon>request_quote</mat-icon> Solicitudes de compra</a>
               <a routerLink="/ordenes-compra" routerLinkActive="active" ariaCurrentWhenActive="page"><mat-icon>receipt_long</mat-icon> Órdenes de compra</a>
               <a routerLink="/recepciones-compra" routerLinkActive="active" ariaCurrentWhenActive="page"><mat-icon>inventory_2</mat-icon> Recepciones de compra</a>
+              <a routerLink="/devoluciones-proveedor" routerLinkActive="active" ariaCurrentWhenActive="page"><mat-icon>assignment_return</mat-icon> Devoluciones a proveedor</a>
               <a routerLink="/compras" routerLinkActive="active" ariaCurrentWhenActive="page"><mat-icon>shopping_cart</mat-icon> Compras</a>
             }
             @if (permisosRuntime.puede('Proveedores', 'Ver')) {
