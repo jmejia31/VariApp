@@ -108,6 +108,14 @@ Estado operativo controlado por `COLA`:
 
 **ERP-N2.7 queda formalmente cerrado.**
 
+## ERP-N2.8 — Cuentas por pagar
+
+- [x] N2.8.A-G completados y certificados en COLA.
+- [x] N2.8.H paquete documental canónico materializado: ERP/ADR/contrato HTTP/runbook/rollback/certificación.
+- [ ] Cierre formal de N2.8.H condicionado únicamente a Development + Acceptance + Fase8 + M13 SUCCESS sobre el commit documental de cierre y reconciliación final de `CHANGELOG_AI.md`/COLA.
+
+El baseline previo al paquete documental (`1dd45e4679fcb01ed5052ff648019db1da8f1d53`) ya tenía los cuatro gates causales en SUCCESS y P0/P1 conocidos=0. No promover N2.9 antes del cierre formal de N2.8.H.
+
 ## Fuentes VAEP v2
 
 Plan rector:
