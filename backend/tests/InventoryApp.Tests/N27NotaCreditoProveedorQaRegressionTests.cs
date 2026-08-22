@@ -64,7 +64,7 @@ public class N27NotaCreditoProveedorQaRegressionTests
 
         facturas.Verify(x => x.GetByIdAsync(It.IsAny<int>(), It.IsAny<bool>()), Times.Never);
         proveedores.Verify(x => x.GetByIdAsync(It.IsAny<int>()), Times.Never);
-        devoluciones.Verify(x => x.GetByIdAsync(It.IsAny<int>()), Times.Never);
+        devoluciones.Verify(x => x.GetByIdAsync(It.IsAny<int>(), It.IsAny<bool>()), Times.Never);
         repository.Verify(x => x.AddAsync(It.IsAny<InventoryApp.Domain.Entities.NotaCreditoProveedor>()), Times.Never);
         repository.Verify(x => x.SaveChangesAsync(), Times.Never);
         unitOfWork.Verify(x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()), Times.Never);
