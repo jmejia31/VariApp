@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from '../../../core/guards/auth.guard';
 import { permisoGuard } from '../../../core/guards/permiso.guard';
+import { CUENTAS_POR_PAGAR_ROUTES } from '../../finanzas/cuentas-por-pagar/cuentas-por-pagar.routes';
 
 export const FACTURAS_PROVEEDOR_ROUTES: Routes = [
   {
@@ -80,5 +81,6 @@ export const FACTURAS_PROVEEDOR_ROUTES: Routes = [
     canActivate: [authGuard, permisoGuard],
     data: { modulo: 'Compras', accion: 'Ver' },
     loadComponent: () => import('../notas-credito-proveedor/notas-credito-proveedor.components').then(m => m.NotasCreditoProveedorListComponent)
-  }
+  },
+  ...CUENTAS_POR_PAGAR_ROUTES
 ];
