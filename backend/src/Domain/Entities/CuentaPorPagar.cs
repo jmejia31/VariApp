@@ -74,6 +74,8 @@ namespace InventoryApp.Domain.Entities
                 throw new InvalidOperationException("La fecha de vencimiento no puede ser anterior a la fecha de emisión.");
             if (MontoOriginal <= 0m)
                 throw new InvalidOperationException("El monto original de la cuenta por pagar debe ser mayor que cero.");
+            if (!Enum.IsDefined(typeof(CondicionPagoProveedor), CondicionPago))
+                throw new InvalidOperationException("La condición de pago de proveedor no es válida.");
             if (CondicionPago == CondicionPagoProveedor.Contado && FechaVencimientoUtc != FechaEmisionUtc)
                 throw new InvalidOperationException("Una obligación de contado debe vencer en la fecha de emisión.");
             if (CondicionPago == CondicionPagoProveedor.Credito && FechaVencimientoUtc <= FechaEmisionUtc)
@@ -95,6 +97,8 @@ namespace InventoryApp.Domain.Entities
         {
             if (Estado == EstadoCuentaPorPagar.Anulada)
                 throw new InvalidOperationException("No pueden aplicarse movimientos a una cuenta por pagar anulada.");
+            if (!Enum.IsDefined(typeof(TipoAplicacionCuentaPorPagar), tipo))
+                throw new ArgumentOutOfRangeException(nameof(tipo), "El tipo de aplicación de cuenta por pagar no es válido.");
             if (monto <= 0m)
                 throw new ArgumentOutOfRangeException(nameof(monto), "El monto aplicado debe ser mayor que cero.");
             if (fechaUtc.Kind != DateTimeKind.Utc)
