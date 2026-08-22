@@ -114,6 +114,42 @@ public sealed class NotaCreditoProveedorRepository : INotaCreditoProveedorReposi
         int facturaProveedorId,
         int? excluirNotaCreditoId = null)
     {
+        if (_context.Database.CurrentTransaction is null)
+            throw new InvalidOperationException(
+                "GetCreditoRegistradoAcumuladoPorFacturaAsync requiere una transacción activa para serializar el crédito por factura.");
+
+        var factura = await _context.Set<FacturaProveedor>()
+            .FromSqlInterpolated($"SELECT f.* FROM FacturasProveedor f WHERE f.Id = {facturaProveedorId} FOR UPDATE")
+            .AsTracking()
+            .FirstOrDefaultAsync()
+            ?? throw new ResourceNotFoundException("La factura de proveedor asociada ya no existe.");
+
+        if (factura.Estado != EstadoFacturaProveedor.Registrada)
+            throw new BusinessRuleException(
+                "La nota de crédito sólo puede registrarse contra una factura de proveedor registrada.");
+
+        if (excluirNotaCreditoId.HasValue)
+        {
+            var nota = _context.ChangeTracker.Entries<NotaCreditoProveedor>()
+                .Where(x => x.Entity.Id == excluirNotaCreditoId.Value)
+                .Select(x => x.Entity)
+                .SingleOrDefault();
+
+            if (nota?.DevolucionProveedorId is int devolucionId)
+            {
+                var devolucion = await _context.Set<DevolucionProveedor>()
+                    .FromSqlInterpolated($"SELECT d.* FROM DevolucionesProveedor d WHERE d.Id = {devolucionId} FOR UPDATE")
+                    .AsTracking()
+                    .FirstOrDefaultAsync()
+                    ?? throw new BusinessRuleException("La devolución de proveedor vinculada ya no existe.");
+
+                if (devolucion.Estado != EstadoDevolucionProveedor.Confirmada)
+                    throw new BusinessRuleException("La devolución vinculada debe permanecer confirmada al registrar la nota de crédito.");
+                if (devolucion.FacturaProveedorId != factura.Id || devolucion.ProveedorId != nota.ProveedorId)
+                    throw new BusinessRuleException("La devolución vinculada no corresponde a la factura y proveedor indicados.");
+            }
+        }
+
         var query = _context.Set<NotaCreditoProveedor>()
             .AsNoTracking()
             .Where(x => x.FacturaProveedorId == facturaProveedorId
