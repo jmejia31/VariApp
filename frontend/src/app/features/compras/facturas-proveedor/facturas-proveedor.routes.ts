@@ -56,5 +56,29 @@ export const FACTURAS_PROVEEDOR_ROUTES: Routes = [
     canActivate: [authGuard, permisoGuard],
     data: { modulo: 'Compras', accion: 'Ver' },
     loadComponent: () => import('../devoluciones-proveedor/devoluciones-proveedor.components').then(m => m.DevolucionesProveedorListComponent)
+  },
+  {
+    path: 'notas-credito-proveedor/nueva',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Compras', accion: 'Crear' },
+    loadComponent: () => import('../notas-credito-proveedor/notas-credito-proveedor.components').then(m => m.NotaCreditoProveedorFormComponent)
+  },
+  {
+    path: 'notas-credito-proveedor/:id/editar',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Compras', accion: 'Editar' },
+    loadComponent: () => import('../notas-credito-proveedor/notas-credito-proveedor.components').then(m => m.NotaCreditoProveedorFormComponent)
+  },
+  {
+    path: 'notas-credito-proveedor/:id',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Compras', accion: 'Ver' },
+    loadComponent: () => import('../notas-credito-proveedor/notas-credito-proveedor.components').then(m => m.NotaCreditoProveedorDetailComponent)
+  },
+  {
+    path: 'notas-credito-proveedor',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Compras', accion: 'Ver' },
+    loadComponent: () => import('../notas-credito-proveedor/notas-credito-proveedor.components').then(m => m.NotasCreditoProveedorListComponent)
   }
 ];
