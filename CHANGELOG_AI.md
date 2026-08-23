@@ -104,7 +104,7 @@ No reemplaza `git log`: registra intención, alcance, validaciones y handoff. To
 
 **Trazabilidad:** D backend `4d2cc04b363df602f6de97b7f5ea876ea35a6196`, run `31843085895`, job `94903923345` SUCCESS; E frontend `91f878ef3cbc56219b637e9b62c99bdd1109a9df`, run `31846161956`, job `94912936660` SUCCESS; F/G baseline `4a6be38683f03fc2076f18a71115480c930ba79b`.
 
-**QA real:** el primer certificado `31836552560` dejó 6 pruebas API verdes y detectó que el harness levantaba API en 5006 mientras Angular consumía 5005; se corrigió sin alterar la app. El segundo `31836970704` confirmó el login y detectó que `provideRoutes(ALMACENES_ROUTES)` registraba Almacenes después del wildcard `**`; se corrigió a `provideRouter([...ALMACENES_ROUTES, ...routes])`. El certificado final `31837394309`, job `94886619205`, terminó `SUCCESS`: build `-warnaserror`, 376 tests backend, API+migraciones MySQL 8.4+health, npm ci/lint/build, Angular y Playwright `8 passed / 0 failed / 0 skipped`.
+**QA real:** run agregado `31846485117` SUCCESS: higiene `94913888918`, Backend Release/unitarias `94913888850`, frontend producción `94913888865`, Docker `94913888808` y MySQL 8.4/integración `94913888844`; el job MySQL aplicó migraciones actuales, ejecutó `Category=Integration`, verificó snapshot/variantes/cargas y generó SQL forward sin regresiones.
 
 **Documentación/control:** preflight `docs/ERP_N1_3_UBICACIONES_PREFLIGHT.md`; cierre canónico `docs/ERP_N1_3_UBICACIONES_ALMACEN.md`; TASKS, CHANGELOG y tablero VAEP reconciliados preservando historial. `main`, Producción, merge/auto-merge del PR #2, secretos y force-push permanecen intactos. **ERP-N1.3 queda formalmente cerrado** y el siguiente foco FINISH_FIRST es `N1.4.A — ExistenciaVariante — Preflight y diseño`.
 
@@ -245,8 +245,6 @@ No reemplaza `git log`: registra intención, alcance, validaciones y handoff. To
 ## 2026-08-12 — N0.6.D2B1: productor Compra migra a origen tipado — LISTO
 
 **Responsable:** ChatGPT mediante conexión GitHub autorizada.
-
-**Objetivo/alcance:** migrar exclusivamente el productor de movimientos de inventario de Compras al boundary `typed-first` ya certificado en D2A, sin tocar Venta, ConsumoInsumo, EF, migraciones ni contratos HTTP. D2B se subdividió adaptativamente en D2B1 Compra, D2B2 Venta y D2B3 ConsumoInsumo para mantener un concern por changeset.
 
 **Resultado:** `CompraService.ConfirmarAsync` y `AnularAsync` escriben mediante `IMovimientoInventarioRepository.AddConOrigenTipadoAsync` con `OrigenMovimientoInventario.DesdeCompra(compra.Id)`. La anulación usa `CausaMovimientoInventario.AnulacionCompra`, por lo que el repositorio deriva el snapshot legacy `CompraAnulada` sin recuperar autoridad desde `ReferenciaTipo/ReferenciaId`.
 
