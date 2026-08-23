@@ -20,11 +20,14 @@ public sealed class EvaluacionProveedorConfiguration : IEntityTypeConfiguration<
         });
 
         builder.HasKey(x => x.Id);
+        builder.Property(x => x.Id).ValueGeneratedOnAdd();
 
         builder.Property(x => x.CantidadOrdenada).HasPrecision(18, 4);
         builder.Property(x => x.CantidadAceptada).HasPrecision(18, 4);
         builder.Property(x => x.CantidadDanada).HasPrecision(18, 4);
         builder.Property(x => x.CantidadSobrante).HasPrecision(18, 4);
+        builder.Property(x => x.CreadoPorNombreUsuario).HasMaxLength(150);
+        builder.Property(x => x.ActualizadoPorNombreUsuario).HasMaxLength(150);
 
         builder.HasIndex(x => x.RecepcionCompraId)
             .HasDatabaseName("IX_EvaluacionesProveedor_RecepcionCompra");
@@ -38,16 +41,19 @@ public sealed class EvaluacionProveedorConfiguration : IEntityTypeConfiguration<
         builder.HasOne(x => x.Proveedor)
             .WithMany()
             .HasForeignKey(x => x.ProveedorId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_EvaluacionesProveedor_Proveedores_ProveedorId");
 
         builder.HasOne(x => x.OrdenCompra)
             .WithMany()
             .HasForeignKey(x => x.OrdenCompraId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_EvaluacionesProveedor_OrdenesCompra_OrdenCompraId");
 
         builder.HasOne(x => x.RecepcionCompra)
             .WithMany()
             .HasForeignKey(x => x.RecepcionCompraId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_EvaluacionesProveedor_RecepcionesCompra_RecepcionCompraId");
     }
 }
