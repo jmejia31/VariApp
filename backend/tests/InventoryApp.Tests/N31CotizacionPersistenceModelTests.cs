@@ -20,18 +20,13 @@ public sealed class N31CotizacionPersistenceModelTests
 
         Assert.Contains(entity.GetIndexes(), index =>
             index.Properties.Select(property => property.Name)
-                .SequenceEqual(new[]
-                {
-                    nameof(Cotizacion.ClienteId),
-                    nameof(Cotizacion.Estado),
-                    nameof(Cotizacion.FechaEmisionUtc)
-                }) &&
-            index.GetDatabaseName() == "IX_Cotizaciones_Cliente_Estado_FechaEmision");
+                .SequenceEqual(new[] { nameof(Cotizacion.ClienteId) }) &&
+            index.GetDatabaseName() == "IX_Cotizaciones_ClienteId");
 
         Assert.Contains(entity.GetIndexes(), index =>
             index.Properties.Select(property => property.Name)
-                .SequenceEqual(new[] { nameof(Cotizacion.FechaVigenciaUtc) }) &&
-            index.GetDatabaseName() == "IX_Cotizaciones_FechaVigenciaUtc");
+                .SequenceEqual(new[] { nameof(Cotizacion.Estado) }) &&
+            index.GetDatabaseName() == "IX_Cotizaciones_Estado");
 
         var clienteFk = entity.GetForeignKeys().Single(fk =>
             fk.Properties.Count == 1 && fk.Properties[0].Name == nameof(Cotizacion.ClienteId));
