@@ -118,7 +118,7 @@ No reemplaza `git log`: registra intención, alcance, validaciones y handoff. To
 
 **Trazabilidad:** B final `85f2b845ca60d8e797425bd5b0f9a7d597a6cfa8`; C `bebafe3abb2ddc66448c805b107f8d1f8ee3f3e9`; D `5a97bf3844069a565e1aecf39e4b8001c10f386b`; E `3a1b8004f2120c4be6459bb46fd120eff8704fe9`; F `30c7e9ff1dedf69eb860916b92b1d5bee0941084`; G base `f6f51bb6d0d5d1910e9561de30d934b30fa2d83e`, corrección harness `3049cfdf637eb1c1d2fb0be7f9881e517a3cf13f` y corrección routing/final funcional `053152ae51de3617bf30a4e9987574c7879e3049`. Documento canónico publicado en `a507eee7e69a5bed15226855098c0c0a28e7962e`.
 
-**QA real:** el primer certificado `31836552560` dejó 6 pruebas API verdes y detectó que el harness levantaba API en 5006 mientras Angular consumía 5005; se corrigió sin alterar la app. El segundo `31836970704` confirmó el login y detectó que `provideRoutes(ALMACENES_ROUTES)` registraba Almacenes después del wildcard `**`; se corrigió a `provideRouter([...ALMACENES_ROUTES, ...routes])`. El certificado final `31837394309`, job `94886619205`, terminó `SUCCESS`: build `-warnaserror`, 376 tests backend, API+migraciones MySQL 8.4+health, npm ci/lint/build, Angular y Playwright `8 passed / 0 failed / 0 skipped`.
+**QA real:** el primer certificado `31836552560` dejó 6 pruebas API verdes y detectó que el harness levantaba API en 5006 mientras Angular consumía 5005; se corrigió sin alterar la app. El segundo `31836970704` confirmó el login y detectó que `provideRoutes(ALMACENES_ROUTES)` registraba Almacenes después del wildcard `**`; se corrigió a `provideRouter([...ALMACENES_ROUTES, ...routes])`. El certificado final `31837394309`, job `94886619205`, terminó `SUCCESS`: build `-warnaserror`, 376 tests backend, API+migraciones MySQL 8.4+health, npm ci, lint, build producción, Angular y Playwright `8 passed / 0 failed / 0 skipped`.
 
 **Documentación/control:** fuente canónica `docs/ERP_N1_2_ALMACENES.md`; TASKS, CHANGELOG y tablero VAEP se reconcilian en N1.2.H. `main`, Producción, PR #2 merge/auto-merge, secretos y force-push permanecen intactos. **ERP-N1.2 queda formalmente cerrado** y el siguiente foco FINISH_FIRST es `N1.3.A — Ubicaciones internas / auditoría y preflight`.
 
@@ -218,7 +218,7 @@ No reemplaza `git log`: registra intención, alcance, validaciones y handoff. To
 
 **Corrección CI:** queda prohibido usar workflows temporales con `contents: write` para commitear/pushear cambios funcionales o migraciones mediante `GITHUB_TOKEN`. Actions podrá generar artefactos, pero la publicación final debe realizarla el Runner mediante el conector GitHub normal y fast-forward. `action_required` con jobs vacíos debe investigarse inmediatamente y no dejarse esperando hasta la siguiente hora.
 
-**Continuidad B2:** `N0.5.07B2` continúa `VALIDANDO`; el snapshot/migración EF canónicos de Banco permanecen en `fc2ca060...`. El siguiente changeset operativo retira el workflow temporal escritor mediante el conector GitHub normal para provocar una sincronización ordinaria del PR y obtener CI real. No se toca main, Producción, merge/auto-merge de PR #2, force-push ni ramas nuevas.
+**Continuidad B2:** `N0.5.07B2` continúa `VALIDANDO`; el snapshot/migración EF canónicos de Banco permanecen en `fc2ca060...`. El siguiente changeset operativo retira el workflow temporal escritor mediante el conector GitHub normal para provocar una sincronización ordinaria del PR y obtener CI real. No se toca `main`, Producción, merge/auto-merge de PR #2, force-push ni ramas nuevas.
 
 ## 2026-08-12 — VAEP v2.1 FINISH_FIRST: cerrar árbol foco antes de abrir hermanos
 
@@ -469,4 +469,4 @@ Cada entrada debe contener fecha, agente, objetivo, alcance, validaciones reales
 
 **Correccion:** los CI 31622173253 y 31622173357 demostraron que la logica Banco/fail-closed y las pruebas pasaban, pero dotnet ef migrations has-pending-model-changes detecto drift porque la migracion inicial de Banco no actualizo el snapshot EF canonico. Se reemplaza esa migracion manual por una migracion generada con EF Core 8.0.8, su Designer y AppDbContextModelSnapshot, sin relajar ninguna validacion ni alterar el diseno normalizado.
 
-**Control:** B2 permanece VALIDANDO hasta que los CI reales sobre el changeset canonico terminen en verde. No se toca main, Produccion, PR #2, auto-merge ni ramas nuevas.
+**Control:** B2 permanece VALIDANDO hasta que los CI reales sobre el changeset canonico terminen en verde. No se toca `main`, Produccion, PR #2, auto-merge ni ramas nuevas.
