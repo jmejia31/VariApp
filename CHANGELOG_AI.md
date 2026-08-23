@@ -47,7 +47,6 @@ No reemplaza `git log`: registra intención, alcance, validaciones y handoff. To
 **Documentación:** `docs/ERP_N2_2_ORDEN_COMPRA.md`, `docs/RUNBOOK_N2_2_ORDEN_COMPRA.md`, `docs/ADR_N2_2_ORDEN_COMPRA_AUTORIDAD_DOCUMENTAL.md`, `docs/OPENAPI_N2_2_ORDEN_COMPRA.md` y `docs/CERTIFICACION_N2_2_ORDEN_COMPRA.md`, más el preflight histórico `docs/ERP_N2_2_ORDEN_COMPRA_PREFLIGHT.md`.
 
 **Control:** `N2.2.A–H` quedan formalmente cerrados. El siguiente foco FINISH_FIRST elegible es `N2.3.A — Recepción de mercancía — Auditoría y preflight`, donde recién debe materializarse el incremento de stock por recepción real. El scope Jules no fue editado ni integrado. `main`, Producción, merge/auto-merge del PR #2, ramas nuevas, force-push, secretos e infraestructura productiva permanecen intactos.
-
 ## 2026-08-18 — ERP-N2.1 SolicitudCompra — CIERRE FORMAL
 
 **Responsable:** ChatGPT mediante conexiones autorizadas GitHub + Google Drive, preservando cambios concurrentes publicados en `Desarrollo`.
@@ -97,7 +96,6 @@ No reemplaza `git log`: registra intención, alcance, validaciones y handoff. To
 **Responsable:** ChatGPT mediante conexiones autorizadas GitHub + Google Drive.
 
 **Objetivo/alcance:** completar `UbicacionAlmacen` como topología física jerárquica interna de cada Almacén para pasillos, estantes, racks, secciones, bins y otras ubicaciones, sin introducir todavía existencias, cantidades ni semántica WMS avanzada.
-
 **Resultado funcional:** `UbicacionAlmacen.AlmacenId` es la única relación organizacional persistida; `SucursalId` y `EmpresaId` se derivan transitivamente. Padre opcional restringido al mismo Almacén, prevención de ciclos directos/indirectos, protección de descendientes al mover/desactivar/eliminar, código operativo único por Almacén, soft-delete y estados idempotentes. MySQL 8.4 conserva la invariante anti-self-parent mediante triggers porque un CHECK no puede referenciar el `Id AUTO_INCREMENT`. API `/ubicaciones-almacen` soporta búsqueda, Almacén, padre/raíz, tipo, estado, paginación, CRUD y operaciones de estado. Frontend incorpora listado responsive, filtros server-side, formulario jerárquico, selectores de Almacén/padre, rutas y menú protegidos por RBAC.
 
 **RBAC/auditoría/seguridad:** módulo `UbicacionesAlmacen`, permisos `Ver/Crear/Editar/Activar/Desactivar/EliminarLogico`, auditoría de mutaciones con referencia de entidad y pruebas que congelan los 9 contratos de autorización. Se reutilizan Correlation ID, ProblemDetails, headers de seguridad y health/readiness globales. N1.3 no contiene campos de stock; `ExistenciaVariante` queda reservado para ERP-N1.4.
@@ -116,7 +114,7 @@ No reemplaza `git log`: registra intención, alcance, validaciones y handoff. To
 
 **Resultado funcional:** `Almacen.SucursalId` queda como única jerarquía organizacional de N1.2; una introducción concurrente de `EmpresaId` duplicada fue detectada y corregida forward-only en `85f2b845ca60d8e797425bd5b0f9a7d597a6cfa8`. Persistencia final con FK Restrict a `Sucursales`, código activo único, índices/checks y rollback fail-closed. API `/almacenes` soporta CRUD, filtros/paginación, catálogo de tipos, activos y operaciones de estado. Crear/mover/reactivar falla cerrado si la Sucursal no existe o está inactiva. RBAC `Almacenes=29`, auditoría `Entidad=Almacen` y métrica P50/P95 sin término/PII quedan integrados. Frontend ofrece lista server-side, selector Sucursal/tipo, rutas y menú protegidos, tabla/cards responsive y formulario sin stock ni EmpresaId.
 
-**Trazabilidad:** B final `85f2b845ca60d8e797425bd5b0f9a7d597a6cfa8`; C `bebafe3abb2ddc66448c805b107f8d1f8ee3f3e9`; D `5a97bf3844069a565e1aecf39e4b8001c10f386b`; E `3a1b8004f2120c4be6459bb46fd120eff8704fe9`; F `30c7e9ff1dedf69eb860916b92b1d5bee0941084`; G base `f6f51bb6d0d5d1910e9561de30d934b30fa79b`; corrección harness `3049cfdf637eb1c1d2fb0be7f9881e517a3cf13f` y corrección routing/final funcional `053152ae51de3617bf30a4e9987574c7879e3049`. Documento canónico publicado en `a507eee7e69a5bed15226855098c0c0a28e7962e`.
+**Trazabilidad:** B final `85f2b845ca60d8e797425bd5b0f9a7d597a6cfa8`; C `bebafe3abb2ddc66448c805b107f8d1f8ee3f3e9`; D `5a97bf3844069a565e1aecf39e4b8001c10f386b`; E `3a1b8004f2120c4be6459bb46fd120eff8704fe9`; F `30c7e9ff1dedf69eb860916b92b1d5bee0941084`; G base `f6f51bb6d0d5d1910e9561de30d934b30fa2d83e`; corrección harness `3049cfdf637eb1c1d2fb0be7f9881e517a3cf13f` y corrección routing/final funcional `053152ae51de3617bf30a4e9987574c7879e3049`. Documento canónico publicado en `a507eee7e69a5bed15226855098c0c0a28e7962e`.
 
 **QA real:** el primer certificado `31836552560` dejó 6 pruebas API verdes y detectó que el harness levantaba API en 5006 mientras Angular consumía 5005; se corrigió sin alterar la app. El segundo `31836970704` confirmó el login y detectó que `provideRoutes(ALMACENES_ROUTES)` registraba Almacenes después del wildcard `**`; se corrigió a `provideRouter([...ALMACENES_ROUTES, ...routes])`. El certificado final `31837394309`, job `94886619205`, terminó `SUCCESS`: build `-warnaserror`, 376 tests backend, API+migraciones MySQL 8.4+health, npm ci/lint/build, Angular y Playwright `8 passed / 0 failed / 0 skipped`.
 
@@ -147,7 +145,6 @@ No reemplaza `git log`: registra intención, alcance, validaciones y handoff. To
 **Resultado funcional:** `Compras.MetodoPagoId` se backfillea por `MetodosPago.Codigo` estable —nunca por equivalencia de IDs— y queda protegido por FK; Compra crea/edita/confirma mediante catálogo activo y falla cerrado ante métodos no representables. El bridge legacy es one-way y bajo lock: una fila histórica válida con FK nula converge al catálogo antes de confirmar, sin convertir el enum en autoridad. `MovimientoInventario` persiste/consulta `CompraId`/`VentaId`/`ConsumoInsumoId`/`AjusteInventarioId` mediante EF; `ReferenciaTipo/ReferenciaId` quedan solo como snapshot/correlación. El frontend de Compras consume `/metodos-pago/activos`, muestra el nombre, envía el código estable y bloquea Guardar ante loading/error/0 métodos/inactividad.
 
 **Persistencia/rollback:** migración `20260814155400_N0_8_PersistenciaLimpiezaTransicional`, postcheck `backend/scripts/postdeploy-erp-n0-8-c-persistencia.sql` y snapshot EF reconciliado. La migración es forward-only: el rollback seguro exige respaldo/restauración compatible o corrección forward; no se autoriza un DROP improvisado de la nueva FK. `Producto.Cantidad/Costo`, `Compra.MetodoPago`, `MovimientoInventario.ReferenciaTipo/ReferenciaId` y `MovimientoFinanciero.ModuloOrigen/ReferenciaId` permanecen únicamente donde cumplen una función histórica/snapshot/bridge demostrada, no como autoridad primaria.
-
 **Trazabilidad A–G:** A `c7d39903eb978337d501a37c4d9c32b506c450f3`; B `c20151391d696ebe1d172ae3341e579cc371c35f`; C `b7b1db8746beac2a6e3f25c68afcafd8768383c8`; D cierre dirigido `633d8fc36e2b825a6362f418c01254c8886f37fe`; E `4693502282f54e3adfeee97669e0ca7ffa10b3ae`; G/funcional final `369158761ad05671b9a1859d17796c8ca4a09bf8`. La regresión específica `frontend/e2e/n0-8-compras-metodos-pago-regresion.spec.ts` cubre método administrable dinámico y catálogo no disponible fail-closed.
 
 **Validación final sobre `369158761ad05671b9a1859d17796c8ca4a09bf8`:** CI principal `31821172124` SUCCESS completo; M10 `31821172381` SUCCESS; Fase 8 `31821172230` SUCCESS; aceptación integral `31821172223` SUCCESS incluido Playwright/SMTP/PDF; M13 `31821172341` SUCCESS completo incluido historial MySQL, integración, SQL forward, upgrade histórico, frontend, seguridad HTTP, Playwright, SMTP/PDF/logs y `Dictamen automatizado M13` SUCCESS. No quedan P0/P1 conocidos atribuibles a ERP-N0.8.
@@ -197,7 +194,6 @@ No reemplaza `git log`: registra intención, alcance, validaciones y handoff. To
 ## 2026-08-12 — N0.5.08 Backend/API/CRUD/DTOs MetodoPago — LISTO
 
 **Responsable:** ChatGPT mediante conexiones autorizadas GitHub + Google Drive.
-
 **Objetivo/alcance:** cerrar el backend administrable del catálogo relacional `MetodoPago` sin reintroducir el enum legacy como autoridad. Quedaron integrados DTOs, contratos e implementación de repositorio/servicio, API CRUD, activar/desactivar, reordenamiento, validación/canonicalización de metadata, DI, RBAC relacional y auditoría de mutaciones.
 
 **Correcciones durante validación:** el CI inicial sobre `90fa101dca265c936f9007bf26209f903e24e4e3` detectó que los atributos runtime `MetodosPago:*` todavía no podían seedearse desde `CatalogoPermisosBase`; se incorporó el módulo con el mantenimiento completo en `b94aa0d9346f6efafe73b7911f07673ef07aceee`. Después se añadieron pruebas dirigidas del servicio en `016cfa1ff5712ad1d1e14d06f179de470d6a07c1`; dos fallos estrictamente de prueba —ambigüedad entidad/enum y analyzer xUnit sobre `DateTime` no nullable— se corrigieron forward-only en `d35030bfaa10018fa1a74b6e1efeca11d5cb5bd3` y `5827e610cf9cae1b6a3d5745d10e1cee59df6c78`.
@@ -218,7 +214,7 @@ No reemplaza `git log`: registra intención, alcance, validaciones y handoff. To
 
 **Corrección CI:** queda prohibido usar workflows temporales con `contents: write` para commitear/pushear cambios funcionales o migraciones mediante `GITHUB_TOKEN`. Actions podrá generar artefactos, pero la publicación final debe realizarla el Runner mediante el conector GitHub normal y fast-forward. `action_required` con jobs vacíos debe investigarse inmediatamente y no dejarse esperando hasta la siguiente hora.
 
-**Continuidad B2:** `N0.5.07B2` continúa `VALIDANDO`; el snapshot/migración EF canónicos de Banco permanecen en `fc2ca060...`. El siguiente changeset operativo retira el workflow temporal escritor mediante el conector GitHub normal para provocar una sincronización ordinaria del PR y obtener CI real. No se toca `main`, Producción, merge/auto-merge de PR #2, force-push ni ramas nuevas.
+**Continuidad B2:** `N0.5.07B2` continúa `VALIDANDO`; el snapshot/migración EF canónicos de Banco permanecen en `fc2ca060...`. El siguiente changeset operativo retira el workflow temporal escritor mediante el conector GitHub normal para provocar una sincronización ordinaria del PR y obtener CI real. No se toca main, Producción, merge/auto-merge de PR #2, force-push ni ramas nuevas.
 
 ## 2026-08-12 — VAEP v2.1 FINISH_FIRST: cerrar árbol foco antes de abrir hermanos
 
@@ -247,7 +243,6 @@ No reemplaza `git log`: registra intención, alcance, validaciones y handoff. To
 **Responsable:** ChatGPT mediante conexión GitHub autorizada.
 
 **Objetivo/alcance:** migrar exclusivamente el productor de movimientos de inventario de Compras al boundary `typed-first` ya certificado en D2A, sin tocar Venta, ConsumoInsumo, EF, migraciones ni contratos HTTP. D2B se subdividió adaptativamente en D2B1 Compra, D2B2 Venta y D2B3 ConsumoInsumo para mantener un concern por changeset.
-
 **Resultado:** `CompraService.ConfirmarAsync` y `AnularAsync` escriben mediante `IMovimientoInventarioRepository.AddConOrigenTipadoAsync` con `OrigenMovimientoInventario.DesdeCompra(compra.Id)`. La anulación usa `CausaMovimientoInventario.AnulacionCompra`, por lo que el repositorio deriva el snapshot legacy `CompraAnulada` sin recuperar autoridad desde `ReferenciaTipo/ReferenciaId`.
 
 **Evidencia funcional:** `e62b0667f4faace2d8d6520f753547b3e2624a1d`. Pruebas dirigidas actualizadas en `c76124980914edbea57ad7ff97eaa705171a2d58`, comprobando confirmación y anulación con origen Compra tipado y ausencia de uso del `AddAsync` legacy en la confirmación.
@@ -297,7 +292,6 @@ No reemplaza `git log`: registra intención, alcance, validaciones y handoff. To
 ## 2026-08-12 — N0.6.B: contrato de origen tipado de MovimientoInventario — LISTO
 
 **Responsable:** ChatGPT mediante conexión GitHub autorizada.
-
 **Objetivo/alcance:** introducir exclusivamente el contrato de dominio e invariante del origen tipado definido por el preflight N0.6.A, sin adelantar persistencia, configuración EF, backfill ni consumidores de N0.6.C/D.
 
 **Resultado:** se añadieron `TipoOrigenMovimientoInventario` y el value object `OrigenMovimientoInventario`. El contrato representa `Compra`, `Venta` o `ConsumoInsumo`, expone el identificador tipado correspondiente y falla cerrado si no existe origen, existen varios orígenes o el identificador no es positivo. La operación concreta continúa separada en `TipoMovimientoInventario`/`CausaMovimientoInventario`; no se codifican anulaciones/reversiones en strings del origen.
@@ -308,7 +302,7 @@ No reemplaza `git log`: registra intención, alcance, validaciones y handoff. To
 
 **Validación real:** CI general run `31575657900`: `Backend Release y pruebas` terminó `SUCCESS`, incluyendo restore, build Release y pruebas backend no-integración; `Frontend producción`, `Higiene del repositorio` y `Docker y aislamiento de entornos` también terminaron `SUCCESS`. El job MySQL continuaba ejecutándose al cierre proporcional de B y no se usa como evidencia de cierre porque esta microtarea no modifica EF ni persistencia.
 
-**Concurrencia/control:** `N0.5.07B/07B1` mantiene lock de otro runner ChatGPT y no fue intervenido. `N0.6.C` queda habilitada por dependencia; deberá añadir persistencia nullable, preflight/backfill/constraints/postcheck sin retirar aún las columnas legacy. No se tocó main, Producción, PR #2, auto-merge ni ramas nuevas.
+**Concurrencia/control:** `N0.5.07B/07B1` mantiene lock de otro runner y no fue intervenido. `N0.6.C` queda habilitada por dependencia; deberá añadir persistencia nullable, preflight/backfill/constraints/postcheck sin retirar aún las columnas legacy. No se tocó main, Producción, PR #2, auto-merge ni ramas nuevas.
 
 ## 2026-08-12 — N0.6.A: preflight de referencias polimórficas críticas — LISTO
 
@@ -347,7 +341,6 @@ No reemplaza `git log`: registra intención, alcance, validaciones y handoff. To
 **Evidencia funcional:** commit `0f14b9b9f5248a01cb6c98fa456cd306fe38ae19` publicado en `Desarrollo`. El temporal accidental `NOPE_DO_NOT_CREATE` fue eliminado de la punta efectiva mediante fast-forward, sin force-push.
 
 **Validación real:** workflow dedicado `ERP-N0.5 - Certificación MetodoPago histórico`, run `31568099373`, terminó `success`: restauración/compilación/pruebas backend, esquema relacional, historia representativa, fail-closed, preflight, backfill histórico, postcheck/preservación 1:1 y snapshot EF quedaron verdes. El CI general run `31568099446` también terminó `success` en sus cinco jobs: Backend Release/pruebas, migraciones e integración MySQL, Docker, frontend e higiene.
-
 **Control:** `N0.5.06C` y su padre `N0.5.06` quedan `LISTO`; con A1/A2/A3/B/C cerradas, la siguiente tarea de la cadena es `N0.5.07`, dependiente directamente de C.
 
 ## 2026-08-11 — N0.5.06 B: FacturaPago migra hacia MetodoPago relacional — LISTO
@@ -397,7 +390,6 @@ No reemplaza `git log`: registra intención, alcance, validaciones y handoff. To
 **Continuidad:** N0.5.06 no está cerrado. El siguiente punto elegible de esta cadena es A2: migrar escrituras de `VentaService` hacia `MetodoPagoId`/catálogo. A3, FacturaPago y MovimientoFinanciero continúan después según dependencias VAEP.
 
 ## 2026-08-11 — N0.5.06 A1: preparar Venta para autoridad relacional de MetodoPago
-
 **Responsable:** ChatGPT mediante conexión GitHub autorizada.
 
 **Objetivo:** iniciar la eliminación de la doble autoridad de métodos de pago con un changeset pequeño y coherente, preparando el repositorio de Venta para que las siguientes microtareas puedan resolver y leer el catálogo relacional sin depender del enum legacy.
@@ -420,7 +412,7 @@ No reemplaza `git log`: registra intención, alcance, validaciones y handoff. To
 
 **Responsable:** ChatGPT mediante conexión GitHub autorizada.
 
-**Objetivo:** evitar que los workflows históricos de certificación ERP-N0.2, N0.3, N0.4 y N0.5 consuman CI ante cambios exclusivamente frontend/documentales/no relacionados, sin reducir cobertura cuando cambien backend, tests, scripts propios o el workflow correspondiente.
+**Objetivo:** evitar que los workflows históricos de certificación ERP-N0.2, N0.3, N0.4 y N0.5 consuman CI ante cambios exclusivamente frontend/documentales/no relacionados, sin reducir cobertura cuando cambian backend, tests, scripts propios o el workflow correspondiente.
 
 **Alcance:** se añadieron filtros `paths` al evento `push` de `.github/workflows/erp-n0-2-ci.yml`, `erp-n0-3-ci.yml`, `erp-n0-4-ci.yml` y `erp-n0-5-ci.yml`, alineándolos con sus filtros de `pull_request`. `workflow_dispatch` permanece intacto y el CI general `desarrollo-ci.yml` no se reduce.
 
@@ -447,7 +439,6 @@ Estados estrictos, selección por prioridad/dependencias, lock lógico y bloqueo
 ## 2026-08-11 — Gobierno colaborativo v2
 
 Gate `PROJECT_ID=VARIAPP`, aislamiento entre proyectos, lectura mínima, evidencia obligatoria y hardening de publicación.
-
 ## 2026-08-11 — Gobierno colaborativo y memoria canónica
 
 Creación/alineación de memoria canónica y reglas de continuidad.
