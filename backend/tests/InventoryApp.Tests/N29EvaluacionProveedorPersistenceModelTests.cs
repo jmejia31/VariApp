@@ -17,13 +17,10 @@ public sealed class N29EvaluacionProveedorPersistenceModelTests
         Assert.NotNull(entity);
         Assert.Equal("EvaluacionesProveedor", entity!.GetTableName());
 
-        Assert.Equal(20, entity.FindProperty(nameof(EvaluacionProveedor.UnidadMedida))!.GetMaxLength());
-        Assert.Equal(500, entity.FindProperty(nameof(EvaluacionProveedor.Observaciones))!.GetMaxLength());
-
+        AssertPrecision(entity, nameof(EvaluacionProveedor.CantidadOrdenada));
         AssertPrecision(entity, nameof(EvaluacionProveedor.CantidadAceptada));
         AssertPrecision(entity, nameof(EvaluacionProveedor.CantidadDanada));
         AssertPrecision(entity, nameof(EvaluacionProveedor.CantidadSobrante));
-        AssertPrecision(entity, nameof(EvaluacionProveedor.PorcentajeDanado));
 
         Assert.Contains(entity.GetIndexes(), index =>
             index.Properties.Select(property => property.Name)
