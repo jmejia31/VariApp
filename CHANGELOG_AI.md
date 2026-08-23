@@ -118,7 +118,7 @@ No reemplaza `git log`: registra intención, alcance, validaciones y handoff. To
 
 **Objetivo/alcance:** implementar y certificar el primer maestro de ERP-N1, `Sucursal`, de extremo a extremo: dominio/contratos, persistencia MySQL forward-only, API, RBAC relacional, auditoría, observabilidad, frontend responsive/accesible y QA específico. `EmpresaId` queda nullable como reserva de compatibilidad futura, sin FK ni semántica tenant antes de ERP-N6; Almacenes/Ubicaciones/Existencias permanecen en N1.2/N1.3/N1.4.
 
-**Resultado funcional:** tabla `Sucursales` con código activo único mediante columna computada, índices de EmpresaId/estado, soft-delete y rollback fail-closed; API `/sucursales` con búsqueda/filtros/paginación, CRUD, activar/desactivar idempotente y baja lógica; `ModuloSistema.Sucursales=28` con grants persistidos `Ver/Crear/Editar/Activar/Desactivar/EliminarLogico`; auditoría `Entidad=Sucursal`; métricas P50/P95 de búsqueda sin término ni PII; frontend Angular con lista server-side, estados loading/error/vacío, formulario, permisos runtime, tabla desktop/cards móvil y rutas protegidas.
+**Resultado funcional:** tabla `Sucursales` con código activo único mediante columna computada, índices de EmpresaId/estado, soft-delete y rollback fail-closed; API `/sucursales` con búsqueda/filtros/paginación, CRUD, activar/desactivar idempotente y baja lógica; `ModuloSistema.Sucursales=28` con grants persistidos `Ver/Crear/Editar/Activar/Desactivar/EliminarLogico`; auditoría `Entidad=Sucursal`; métricas P50/P95 de búsqueda sin término/PII; frontend Angular con lista server-side, estados loading/error/vacío, formulario, permisos runtime, tabla desktop/cards móvil y rutas protegidas.
 
 **Trazabilidad:** B `0a576db21e583a76418ce037ca53f8c30d3b7eb1`; C persistencia `3ca70a8b41125ba501b9d94261e43d9dcd269df9` + snapshot `65785999934d8f02ffdf947fa24f48ceb9059076`; D aplicación/API `c511039680938fb758c60cf199a0c665462c7e79` + pruebas `805818140ef78183e52a17d196f36c452d39ebc2`; E `d3009e051ffea91631673dc764e56fdf8cab70b2`; F `9ead42f594aea12c20612d7c15e21768c090f828`; G base `704d451e216ab4a48042ae8bfaca5995d77e9cdb`; fix QA `b82c8d8325866fdf4408e22424fefe692965b8d9`; certificado G `42a241162dc54c8fddf040a7321d57dd229f7e5b`.
 
@@ -208,7 +208,7 @@ No reemplaza `git log`: registra intención, alcance, validaciones y handoff. To
 
 **Corrección CI:** queda prohibido usar workflows temporales con `contents: write` para commitear/pushear cambios funcionales o migraciones mediante `GITHUB_TOKEN`. Actions podrá generar artefactos, pero la publicación final debe realizarla el Runner mediante el conector GitHub normal y fast-forward. `action_required` con jobs vacíos debe investigarse inmediatamente y no dejarse esperando hasta la siguiente hora.
 
-**Continuidad B2:** `N0.5.07B2` continúa `VALIDANDO`; el snapshot/migración EF canónicos de Banco permanecen en `fc2ca060...`. El siguiente changeset operativo retira el workflow temporal escritor mediante el conector GitHub normal para provocar una sincronización ordinaria del PR y obtener CI real. No se toca `main`, Producción, PR #2, auto-merge ni ramas nuevas.
+**Continuidad B2:** `N0.5.07B2` continúa `VALIDANDO`; el snapshot/migración EF canónicos de Banco permanecen en `fc2ca060...`. El siguiente changeset operativo retira el workflow temporal escritor mediante el conector GitHub normal para provocar una sincronización ordinaria del PR y obtener CI real. No se toca `main`, Producción, merge/auto-merge de PR #2, force-push ni ramas nuevas.
 
 ## 2026-08-12 — VAEP v2.1 FINISH_FIRST: cerrar árbol foco antes de abrir hermanos
 
@@ -296,7 +296,7 @@ No reemplaza `git log`: registra intención, alcance, validaciones y handoff. To
 
 **Evidencia funcional:** `5fe605cc93470a4f4b90f73185016b9e15bc622e`, publicado por fast-forward exclusivamente en `Desarrollo`.
 
-**Validación real:** en el CI general run `31575657900`, el job `Backend Release y pruebas` terminó `SUCCESS`, incluyendo restore, build Release y pruebas backend no-integración; `Frontend producción`, `Higiene del repositorio` y `Docker y aislamiento de entornos` también terminaron `SUCCESS`. El job MySQL continuaba ejecutándose al cierre proporcional de B y no se usa como evidencia de cierre porque esta microtarea no modifica EF ni persistencia.
+**Validación real:** CI general run `31575657900`: `Backend Release y pruebas` terminó `SUCCESS`, incluyendo restore, build Release y pruebas backend no-integración; `Frontend producción`, `Higiene del repositorio` y `Docker y aislamiento de entornos` también terminaron `SUCCESS`. El job MySQL continuaba ejecutándose al cierre proporcional de B y no se usa como evidencia de cierre porque esta microtarea no modifica EF ni persistencia.
 
 **Concurrencia/control:** `N0.5.07B/07B1` mantiene lock de otro runner y no fue intervenido. `N0.6.C` queda habilitada por dependencia; deberá añadir persistencia nullable, preflight/backfill/constraints/postcheck sin retirar aún las columnas legacy. No se tocó main, Producción, PR #2, auto-merge ni ramas nuevas.
 
