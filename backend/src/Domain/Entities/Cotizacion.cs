@@ -41,8 +41,10 @@ public class Cotizacion : AuditableEntity
 
         ValidarUsuario(usuarioId);
         ValidarDocumento();
+        var fechaValidada = AsegurarUtc(fechaUtc, nameof(fechaUtc));
+
         Estado = EstadoCotizacion.Enviada;
-        FechaEnvioUtc = AsegurarUtc(fechaUtc, nameof(fechaUtc));
+        FechaEnvioUtc = fechaValidada;
         EnviadaPorUsuarioId = usuarioId;
     }
 
@@ -52,8 +54,10 @@ public class Cotizacion : AuditableEntity
             throw new InvalidOperationException("Solo una cotización enviada puede aceptarse.");
 
         ValidarUsuario(usuarioId);
+        var fechaValidada = AsegurarUtc(fechaUtc, nameof(fechaUtc));
+
         Estado = EstadoCotizacion.Aceptada;
-        FechaAceptacionUtc = AsegurarUtc(fechaUtc, nameof(fechaUtc));
+        FechaAceptacionUtc = fechaValidada;
         AceptadaPorUsuarioId = usuarioId;
     }
 
@@ -65,10 +69,13 @@ public class Cotizacion : AuditableEntity
             throw new ArgumentException("El motivo de rechazo es obligatorio.", nameof(motivo));
 
         ValidarUsuario(usuarioId);
+        var fechaValidada = AsegurarUtc(fechaUtc, nameof(fechaUtc));
+        var motivoValidado = motivo.Trim();
+
         Estado = EstadoCotizacion.Rechazada;
-        FechaRechazoUtc = AsegurarUtc(fechaUtc, nameof(fechaUtc));
+        FechaRechazoUtc = fechaValidada;
         RechazadaPorUsuarioId = usuarioId;
-        MotivoRechazo = motivo.Trim();
+        MotivoRechazo = motivoValidado;
     }
 
     public void Convertir(int usuarioId, DateTime fechaUtc)
@@ -77,8 +84,10 @@ public class Cotizacion : AuditableEntity
             throw new InvalidOperationException("Solo una cotización aceptada puede convertirse.");
 
         ValidarUsuario(usuarioId);
+        var fechaValidada = AsegurarUtc(fechaUtc, nameof(fechaUtc));
+
         Estado = EstadoCotizacion.Convertida;
-        FechaConversionUtc = AsegurarUtc(fechaUtc, nameof(fechaUtc));
+        FechaConversionUtc = fechaValidada;
         ConvertidaPorUsuarioId = usuarioId;
     }
 

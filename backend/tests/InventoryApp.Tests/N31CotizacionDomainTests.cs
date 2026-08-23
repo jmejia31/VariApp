@@ -92,6 +92,41 @@ public class N31CotizacionDomainTests
     }
 
     [Fact]
+    public void Transiciones_Con_Fecha_NoUtc_No_Mutan_Estado_Ni_Metadata()
+    {
+        var fechaLocal = DateTime.SpecifyKind(FechaUtc, DateTimeKind.Local);
+
+        var borrador = CrearValida();
+        Assert.Throws<ArgumentException>(() => borrador.Enviar(1, fechaLocal));
+        Assert.Equal(EstadoCotizacion.Borrador, borrador.Estado);
+        Assert.Null(borrador.FechaEnvioUtc);
+        Assert.Null(borrador.EnviadaPorUsuarioId);
+
+        var enviadaParaAceptar = CrearValida();
+        enviadaParaAceptar.Enviar(1, FechaUtc);
+        Assert.Throws<ArgumentException>(() => enviadaParaAceptar.Aceptar(2, fechaLocal));
+        Assert.Equal(EstadoCotizacion.Enviada, enviadaParaAceptar.Estado);
+        Assert.Null(enviadaParaAceptar.FechaAceptacionUtc);
+        Assert.Null(enviadaParaAceptar.AceptadaPorUsuarioId);
+
+        var enviadaParaRechazar = CrearValida();
+        enviadaParaRechazar.Enviar(1, FechaUtc);
+        Assert.Throws<ArgumentException>(() => enviadaParaRechazar.Rechazar(2, "No acepta", fechaLocal));
+        Assert.Equal(EstadoCotizacion.Enviada, enviadaParaRechazar.Estado);
+        Assert.Null(enviadaParaRechazar.FechaRechazoUtc);
+        Assert.Null(enviadaParaRechazar.RechazadaPorUsuarioId);
+        Assert.Null(enviadaParaRechazar.MotivoRechazo);
+
+        var aceptada = CrearValida();
+        aceptada.Enviar(1, FechaUtc);
+        aceptada.Aceptar(2, FechaUtc.AddMinutes(1));
+        Assert.Throws<ArgumentException>(() => aceptada.Convertir(3, fechaLocal));
+        Assert.Equal(EstadoCotizacion.Aceptada, aceptada.Estado);
+        Assert.Null(aceptada.FechaConversionUtc);
+        Assert.Null(aceptada.ConvertidaPorUsuarioId);
+    }
+
+    [Fact]
     public void DuplicarComoBorrador_Crea_Nuevo_Agregado_Sin_Mutar_Original()
     {
         var original = CrearValida();
