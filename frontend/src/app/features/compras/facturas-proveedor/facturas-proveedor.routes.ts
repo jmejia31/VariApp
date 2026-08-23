@@ -82,5 +82,11 @@ export const FACTURAS_PROVEEDOR_ROUTES: Routes = [
     data: { modulo: 'Compras', accion: 'Ver' },
     loadComponent: () => import('../notas-credito-proveedor/notas-credito-proveedor.components').then(m => m.NotasCreditoProveedorListComponent)
   },
+  {
+    path: 'evaluaciones-proveedor',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Compras', accion: 'Ver' },
+    loadComponent: () => import('../evaluaciones-proveedor/evaluaciones-proveedor.component').then(m => m.EvaluacionesProveedorComponent)
+  },
   ...CUENTAS_POR_PAGAR_ROUTES
 ];
