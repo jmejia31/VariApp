@@ -10,12 +10,12 @@ public class CotizacionDetalleConfiguration : IEntityTypeConfiguration<Cotizacio
     {
         builder.ToTable("CotizacionDetalles", table =>
         {
-            table.HasCheckConstraint("CK_CotizacionDetalles_Cantidad", "`Cantidad` > 0");
-            table.HasCheckConstraint("CK_CotizacionDetalles_PrecioUnitario", "`PrecioUnitario` >= 0");
+            table.HasCheckConstraint("CK_CotizacionDetalles_Cantidad_Positiva", "`Cantidad` > 0");
+            table.HasCheckConstraint("CK_CotizacionDetalles_PrecioUnitario_NoNegativo", "`PrecioUnitario` >= 0");
         });
 
-        builder.Property(d => d.Cantidad).HasColumnType("decimal(18,4)");
-        builder.Property(d => d.PrecioUnitario).HasColumnType("decimal(18,2)");
+        builder.Property(d => d.Cantidad).HasPrecision(18, 4);
+        builder.Property(d => d.PrecioUnitario).HasPrecision(18, 4);
         builder.Property(d => d.ProductoSkuSnapshot).HasMaxLength(80);
         builder.Property(d => d.ProductoNombreSnapshot).HasMaxLength(150);
         builder.Property(d => d.ProductoMarcaSnapshot).HasMaxLength(100);
@@ -23,7 +23,8 @@ public class CotizacionDetalleConfiguration : IEntityTypeConfiguration<Cotizacio
         builder.Property(d => d.ProductoColorSnapshot).HasMaxLength(100);
         builder.Property(d => d.ProductoTallaSnapshot).HasMaxLength(100);
 
-        builder.HasIndex(d => d.CotizacionId).HasDatabaseName("IX_CotizacionDetalles_CotizacionId");
+        builder.HasIndex(d => new { d.CotizacionId, d.ProductoId, d.ProductoVarianteId })
+            .HasDatabaseName("IX_CotizacionDetalles_Cotizacion_Producto_Variante");
         builder.HasIndex(d => d.ProductoId).HasDatabaseName("IX_CotizacionDetalles_ProductoId");
         builder.HasIndex(d => d.ProductoVarianteId).HasDatabaseName("IX_CotizacionDetalles_ProductoVarianteId");
 
