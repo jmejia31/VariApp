@@ -42,19 +42,23 @@ namespace InventoryApp.Infrastructure.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     ClienteId = table.Column<int>(type: "int", nullable: false),
-                    ClienteNombreSnapshot = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: true)
+                    ClienteNombreSnapshot = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    ClienteIdentidadSnapshot = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: true)
+                    ClienteDocumentoSnapshot = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    ClienteTelefonoSnapshot = table.Column<string>(type: "varchar(30)", maxLength: 30, nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    ClienteCorreoSnapshot = table.Column<string>(type: "varchar(150)", maxLength: 150, nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    FechaEmisionUtc = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    FechaVigenciaUtc = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     Estado = table.Column<int>(type: "int", nullable: false),
                     Observaciones = table.Column<string>(type: "varchar(1000)", maxLength: 1000, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    FechaEnvioUtc = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    EnviadaPorUsuarioId = table.Column<int>(type: "int", nullable: true),
+                    FechaAceptacionUtc = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    AceptadaPorUsuarioId = table.Column<int>(type: "int", nullable: true),
+                    FechaRechazoUtc = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    RechazadaPorUsuarioId = table.Column<int>(type: "int", nullable: true),
+                    MotivoRechazo = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    FechaConversionUtc = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    ConvertidaPorUsuarioId = table.Column<int>(type: "int", nullable: true),
                     FechaCreacion = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     FechaActualizacion = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     CreadoPorUsuarioId = table.Column<int>(type: "int", nullable: true),
@@ -67,7 +71,7 @@ namespace InventoryApp.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Cotizaciones", x => x.Id);
-                    table.CheckConstraint("CK_Cotizaciones_Estado_Valido", "`Estado` IN (0, 1, 2, 3, 4)");
+                    table.CheckConstraint("CK_Cotizaciones_Estado", "`Estado` IN (0, 1, 2, 3, 4)");
                     table.ForeignKey(
                         name: "FK_Cotizaciones_Clientes_ClienteId",
                         column: x => x.ClienteId,
@@ -136,14 +140,14 @@ namespace InventoryApp.Infrastructure.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Cotizaciones_Cliente_Estado_FechaEmision",
+                name: "IX_Cotizaciones_ClienteId",
                 table: "Cotizaciones",
-                columns: new[] { "ClienteId", "Estado", "FechaEmisionUtc" });
+                column: "ClienteId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Cotizaciones_FechaVigenciaUtc",
+                name: "IX_Cotizaciones_Estado",
                 table: "Cotizaciones",
-                column: "FechaVigenciaUtc");
+                column: "Estado");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CotizacionDetalles_Cotizacion_Producto_Variante",

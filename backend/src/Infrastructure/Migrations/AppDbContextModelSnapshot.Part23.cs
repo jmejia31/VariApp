@@ -14,36 +14,34 @@ namespace InventoryApp.Infrastructure.Migrations
 
             cotizacion.ToTable("Cotizaciones", table =>
             {
-                table.HasCheckConstraint("CK_Cotizaciones_Estado_Valido", "`Estado` IN (0, 1, 2, 3, 4)");
+                table.HasCheckConstraint("CK_Cotizaciones_Estado", "`Estado` IN (0, 1, 2, 3, 4)");
             });
 
             cotizacion.Property(x => x.Id).ValueGeneratedOnAdd();
-            cotizacion.Property(x => x.ClienteNombreSnapshot).HasMaxLength(200);
-            cotizacion.Property(x => x.ClienteIdentidadSnapshot).HasMaxLength(50);
-            cotizacion.Property(x => x.ClienteTelefonoSnapshot).HasMaxLength(30);
-            cotizacion.Property(x => x.ClienteCorreoSnapshot).HasMaxLength(150);
-            cotizacion.Property(x => x.Estado).HasConversion<int>();
+            cotizacion.Property(x => x.ClienteNombreSnapshot).IsRequired().HasMaxLength(200);
+            cotizacion.Property(x => x.ClienteDocumentoSnapshot).HasMaxLength(50);
+            cotizacion.Property(x => x.Estado).HasConversion<int>().IsRequired();
             cotizacion.Property(x => x.Observaciones).HasMaxLength(1000);
+            cotizacion.Property(x => x.MotivoRechazo).HasMaxLength(500);
             cotizacion.Property(x => x.CreadoPorNombreUsuario).HasMaxLength(150);
             cotizacion.Property(x => x.ActualizadoPorNombreUsuario).HasMaxLength(150);
             cotizacion.Ignore(x => x.Total);
+            cotizacion.Ignore(x => x.EsEditable);
 
-            cotizacion.HasIndex(x => new { x.ClienteId, x.Estado, x.FechaEmisionUtc })
-                .HasDatabaseName("IX_Cotizaciones_Cliente_Estado_FechaEmision");
-            cotizacion.HasIndex(x => x.FechaVigenciaUtc)
-                .HasDatabaseName("IX_Cotizaciones_FechaVigenciaUtc");
+            cotizacion.HasIndex(x => x.ClienteId)
+                .HasDatabaseName("IX_Cotizaciones_ClienteId");
+            cotizacion.HasIndex(x => x.Estado)
+                .HasDatabaseName("IX_Cotizaciones_Estado");
 
             cotizacion.HasOne(x => x.Cliente)
                 .WithMany()
                 .HasForeignKey(x => x.ClienteId)
-                .OnDelete(DeleteBehavior.Restrict)
-                .HasConstraintName("FK_Cotizaciones_Clientes_ClienteId");
+                .OnDelete(DeleteBehavior.Restrict);
 
             cotizacion.HasMany(x => x.Detalles)
                 .WithOne(x => x.Cotizacion)
                 .HasForeignKey(x => x.CotizacionId)
-                .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("FK_CotizacionDetalles_Cotizaciones_CotizacionId");
+                .OnDelete(DeleteBehavior.Cascade);
 
             var detalle = modelBuilder.Entity<CotizacionDetalle>();
 
@@ -76,13 +74,11 @@ namespace InventoryApp.Infrastructure.Migrations
             detalle.HasOne(x => x.Producto)
                 .WithMany()
                 .HasForeignKey(x => x.ProductoId)
-                .OnDelete(DeleteBehavior.Restrict)
-                .HasConstraintName("FK_CotizacionDetalles_Productos_ProductoId");
+                .OnDelete(DeleteBehavior.Restrict);
             detalle.HasOne(x => x.ProductoVariante)
                 .WithMany()
                 .HasForeignKey(x => x.ProductoVarianteId)
-                .OnDelete(DeleteBehavior.Restrict)
-                .HasConstraintName("FK_CotizacionDetalles_ProductoVariantes_ProductoVarianteId");
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
