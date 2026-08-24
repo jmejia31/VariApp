@@ -14,19 +14,6 @@ on:
       - backend/tests/**
       - scripts/fase7_*
       - scripts/fase8_*
-  pull_request:
-    branches:
-      - main
-    paths:
-      - .github/workflows/catalogos-aceptacion.yml
-      - frontend/e2e/**
-      - frontend/scripts/**
-      - frontend/package.json
-      - frontend/src/**
-      - backend/src/**
-      - backend/tests/**
-      - scripts/fase7_*
-      - scripts/fase8_*
   workflow_dispatch:
 
 permissions:
