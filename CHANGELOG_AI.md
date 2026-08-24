@@ -4,6 +4,12 @@ Bitácora colaborativa de cambios realizados por Javier Mejía, Codex, AntiG/Ant
 
 No reemplaza `git log`: registra intención, alcance, validaciones y handoff. Todo changeset intencional debe incluir una entrada breve; no modificar otros colaborativos si su contenido no cambió.
 
+## 2026-08-24 — Codex — guía operativa por dominio
+
+- Se amplió `PROJECT_INDEX.md` con mapa por capas, matriz por dominio, flujos transversales y límites de inspección para cambios locales.
+- Se corrigió el mapa de datos para reflejar las dos ubicaciones históricas reales de migraciones.
+- Se registró el cambio en `ARCHITECTURE_CHANGELOG.md`; no se modificó código ni configuración.
+
 ## 2026-08-24 — Codex — contexto ChatGPT/VAEP
 
 - Se incorporó `docs/CONTEXTO_CHATGPT_VAEP.md` como referencia histórica/operativa de VariApp.

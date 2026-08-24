@@ -135,8 +135,72 @@ No listar recursivamente todo `backend`, `frontend` o `docs` salvo cambio estruc
 
 - Backend: `backend/src/API/Program.cs`; controladores bajo `backend/src/API/Controllers`. La mayoría declara una base con `[Route("...")]`; salud se expone directamente como `/health` y `/health/ready`.
 - Frontend: `frontend/src/main.ts` -> `frontend/src/app/app.config.ts` -> `frontend/src/app/app.routes.ts`. Algunas áreas agregan rutas en archivos `*.routes.ts` dentro de su feature.
-- Datos: `backend/src/Infrastructure/Persistence/AppDbContext.cs` y `Persistence/Configurations`. Las migraciones vigentes están en `backend/src/Infrastructure/Migrations`; no crear una segunda ubicación.
+- Datos: `backend/src/Infrastructure/Persistence/AppDbContext.cs` y `Persistence/Configurations`. Existen migraciones históricas vigentes en `backend/src/Infrastructure/Migrations` y `backend/src/Infrastructure/Persistence/Migrations`; inspeccionar ambas ubicaciones y no moverlas ni consolidarlas desde un cambio local.
 - Dependencias: proyectos `backend/src/*/*.csproj`, solución `backend/InventoryApp.sln`, `frontend/package.json` y `frontend/angular.json`.
+
+## Mapa operativo por capas
+
+```text
+Angular route/component
+  -> frontend/src/app/services o core/services
+  -> API Controller ([Route]/[Http*])
+  -> Application Service + DTO/validator/interface
+  -> Domain entity/enum/invariant
+  -> Infrastructure Repository/Service
+  -> AppDbContext + Configuration + MySQL
+```
+
+- Angular: `frontend/src/app/features`, `core`, `services` y `app.routes.ts`.
+- API: `backend/src/API/Controllers`; composición, middleware y DI en `backend/src/API/Program.cs`.
+- Application: `backend/src/Application/{Services,Interfaces,DTOs,Validators}`.
+- Domain: `backend/src/Domain/{Entities,Enums,Common}`.
+- Infrastructure/DB: `backend/src/Infrastructure/{Repositories,Services,Persistence}` y las dos carpetas históricas de migraciones indicadas arriba.
+- Integraciones: contratos en `Application/Interfaces`, adaptadores concretos en `Infrastructure/Services` y registro DI en `Program.cs` (Cloudinary, QuestPDF, SMTP y exportaciones).
+
+## Mapa por dominio
+
+Las rutas mostradas son bases de navegación/API. Para una operación concreta, abrir el archivo citado y localizar su `[Http*]`, DTO o método; no cargar el dominio completo.
+
+| Dominio | Angular / ruta | API y Application | Domain, Infrastructure y migraciones ancla |
+| --- | --- | --- | --- |
+| Autenticación | `features/login`; `/login`; `core/auth`, `core/guards`, `core/interceptors` | `AuthController` (`auth`); `AuthService`; `IJwtService` | `Usuario`; `UsuarioRepository`; `Infrastructure/Services/JwtService.cs`; `20260720101639_Fases18SesionConfigPermisosCalculos` |
+| Usuarios | `features/usuarios`; `/usuarios` | `UsuariosController` (`usuarios`); `UsuarioService` | `Usuario`; `UsuarioRepository`; migraciones `Fase1UsuariosCategoriasImagenes` y `Fases11_17TemaFacturasUsuarios` |
+| Roles y permisos | `features/roles`, `features/permisos`; `/roles`, `/permisos` | `RolesController`, `PermisosController`; `RolService`, `PermisoService`, `PermisoCatalogoService` | `Rol`, `Permiso`, `RolPermiso`; repositorios homónimos; `AddRolPermisos`, `Fases1_10RolesDescuentosImpuestos`, `N0_4_ConsolidarRbacRelacional` |
+| Productos, categorías e imágenes | `features/productos`, `categorias`, `catalogos-producto`; `/productos`, `/categorias`, `/marcas`, `/modelos`, `/tallas`, `/colores` | `ProductosController`, `ProductoVariantesController`, `CategoriasController` y controladores de catálogo; servicios `Producto*`, `CategoriaService`, `CatalogoProductoService` | `Producto`, `ProductoVariante`, `ProductoImagen`, `Categoria`; repositorios homónimos; adaptadores Cloudinary; migraciones `CatalogosProductoYCategoriaSoftDelete`, `M1NormalizarMaestrosProducto`, `M2VariantesMultidimensionales`, `M2ImagenesPorVariante`, `N0_2_*`, `N0_3_*` |
+| Proveedores | `features/proveedores`; `/proveedores` | `ProveedoresController` (`proveedores`); `ProveedorService` | `Proveedor`; `ProveedorRepository`; `20260711022435_AddProveedores` y migraciones N2 de evaluación/documentos cuando aplique |
+| Clientes | `features/clientes`, `tipo-clientes`; `/clientes`, `/tipo-clientes` | `ClientesController`, `TipoClientesController`; `ClienteService`, `TipoClienteService` | `Cliente`, `TipoCliente`; repositorios homónimos; `AddClientes`, `AddTipoCliente`, `AddTipoClientePredeterminadoUnico` |
+| Compras | `features/compras`, `solicitudes-compra`, `ordenes-compra`, `recepciones-compra`; rutas `/compras`, `/solicitudes-compra`, `/ordenes-compra`, `/recepciones-compra` | controladores `Compras`, `SolicitudesCompra`, `OrdenesCompra`, `RecepcionesCompra`, `FacturasProveedor`, `DevolucionesProveedor`, `NotasCreditoProveedor`; servicios homónimos y `ThreeWayMatchService` | entidades/repositorios `Compra*`, `SolicitudCompra*`, `OrdenCompra*`, `RecepcionCompra*`, `FacturaProveedor*`; migraciones `Fase2MovimientosCompras`, `N2_1_*` a `N2_9_*` repartidas entre ambas carpetas históricas |
+| Ventas y facturas | `features/ventas`, `facturas`, `cotizaciones`, `pedidos-venta`; `/ventas`, `/facturas/:id`, rutas feature de cotizaciones/pedidos | `VentasController` (`ventas`), `FacturasController` (`facturas`), `CotizacionesController`, `PedidosVentaController`; `VentaService`, `FacturaService`, `CotizacionService`, `PedidoVentaService` | entidades/repositorios homónimos; `QuestPdfFacturaService`; migraciones `Fase3Fase4VentasFacturacionFinanzas`, `Fase8FacturacionPagosCostosEnvioVariantes`, `N3_1_CotizacionPersistencia`, `N3_2_PedidoVentaPersistencia`, `N3_3_C_PedidoVentaReservaInventario` |
+| Inventario | `features/inventario`, `almacenes`, `sucursales`, `ubicaciones-almacen`; `/inventario/*` y rutas feature | controladores `AjustesInventario`, `MovimientosInventario`, `ExistenciasVariante`, `ReservasInventario`, `TransferenciasInventario`, `ConteosInventario`, `CosteoInventario`, `Almacenes`, `Sucursales`, `UbicacionesAlmacen`; servicios homónimos | entidades/repositorios de existencia, movimiento, ajuste, reserva, transferencia, conteo, costo y ubicación; migraciones `N0_6_*`, `N0_7_*`, `N1_1_*` a `N1_10_*` |
+| Finanzas | `features/finanzas`; `/finanzas` y ruta feature `/cuentas-por-pagar` | `FinanzasController` (`finanzas`), `CuentasPorPagarController` (`cuentas-por-pagar`); `FinanzasService`, `CuentaPorPagarService` | `MovimientoFinanciero`, `RevisionFinanciera`, `CuentaPorPagar`; repositorios correspondientes; `Fase3Fase4VentasFacturacionFinanzas`, `N2_8_CuentasPorPagarPersistencia` |
+| Descuentos e impuestos | `features/descuentos`, `impuestos`; `/descuentos`, `/impuestos` | `DescuentosController`, `ImpuestosController`; `DescuentoService`, `ImpuestoService` | `Descuento`, `Impuesto`; repositorios homónimos; `Fases1_10RolesDescuentosImpuestos` |
+| Auditoría | `features/auditoria`; `/auditoria` | `AuditoriaController` (`auditoria`); `AuditoriaService` | `RegistroAuditoria`; `AuditoriaRepository`; `Fase9AuditoriaCentralizada` |
+| Configuración | `features/configuracion`; `/configuracion` | `EmpresaConfiguracionController` (`empresa-configuracion`); `EmpresaConfiguracionService` | `EmpresaConfiguracion`; repositorio homónimo; migraciones transversales `Fases18SesionConfigPermisosCalculos` y `M12AutomatizacionTransversal` |
+| Tema visual | configuración y servicios `tema-visual.service.ts`, `theme-applier.service.ts`; entrada desde `/configuracion` | `TemaVisualController` (`tema-visual`); `TemaVisualService` | `TemaVisual`; `TemaVisualRepository`; `Fases11_17TemaFacturasUsuarios` |
+| Perfil | `features/perfil`; `/perfil` | `PerfilController` (`perfil`); `PerfilService` | usa `Usuario` y almacenamiento de imagen mediante `IPerfilImagenStorageService`/`CloudinaryPerfilImagenStorageService`; `Fase6SeguridadFacturacionPerfil` |
+
+Los nombres de migración son anclas de búsqueda, no una lista exhaustiva ni autorización para aplicarlas. Confirmar siempre `AppDbContextModelSnapshot` y referencias al símbolo afectado.
+
+## Flujos transversales
+
+- Sesión y permiso: route guard/interceptor -> `AuthController` o controlador funcional -> autorización/servicio -> auditoría.
+- Escritura transaccional: componente -> servicio HTTP -> controlador -> servicio Application -> repositorio/`IUnitOfWork` -> `AppDbContext`.
+- Inventario comercial: compra/recepción o venta/pedido -> servicio funcional -> existencia/reserva/kardex -> movimiento y trazabilidad; revisar ambos dominios solo si el cambio cruza esa frontera.
+- Facturación: venta/documento -> `FacturaService` -> repositorios -> QuestPDF; correo y enlaces públicos pasan por sus interfaces/adaptadores.
+- Multimedia: UI multipart -> controlador/servicio -> interfaz de almacenamiento -> Cloudinary; las reglas de entorno permanecen en `docs/ENTORNOS_DESARROLLO_PRODUCCION.md`.
+- Errores y observabilidad: `Program.cs` -> `CorrelationIdMiddleware` -> `ExceptionHandlingMiddleware`; filtros y health checks viven en API.
+
+## Alcance: qué no volver a inspeccionar
+
+Ante un cambio local no volver a leer toda la solución, todos los controladores, todas las migraciones, todo `docs` ni todos los tests. Abrir solo la fila del dominio, el punto de entrada y sus dependencias directas. Ampliar el alcance únicamente si:
+
+- cambia un contrato compartido entre Angular y API;
+- cambia entidad, relación, transacción o migración;
+- afecta autenticación, permisos, auditoría, configuración o integración transversal;
+- el símbolo aparece en varios dominios o la documentación contradice el código;
+- el cambio es arquitectónico según `ARCHITECTURE.md`.
+
+Para CSS, texto, validación de formulario o CRUD localizado, no inspeccionar migraciones ni dominios vecinos sin evidencia de dependencia. Para un endpoint localizado, no recorrer todos los controladores: seguir Controller -> DTO/Service -> Interface/Repository -> Entity/Configuration -> prueba dirigida.
 
 ## Comandos verificados
 

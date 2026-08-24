@@ -6,6 +6,13 @@ Registro conciso de cambios que obligan a actualizar `PROJECT_INDEX.md`, `PROJEC
 
 Cada entrada debe indicar fecha, cambio observable, documentos/rutas afectados y verificación. Solo se agrega cuando cambian arquitectura, módulos, integraciones, rutas/API, datos o comandos documentados.
 
+## 2026-08-24 — Guía operativa por dominio
+
+- Cambio: `PROJECT_INDEX.md` amplió el mapa por capas a una matriz navegable por dominio y flujos transversales.
+- Cobertura: frontend, API, Application, Domain, Infrastructure, DB/integraciones y migraciones ancla de los dominios principales.
+- Alcance: se definieron límites explícitos para evitar reinspecciones globales ante cambios locales.
+- Verificación: rutas y archivos citados contrastados con el checkout; guard documental y diff validados; sin cambios de código o configuración.
+
 ## 2026-08-24 — Contexto histórico ChatGPT/VAEP
 
 - Cambio: se incorporó `docs/CONTEXTO_CHATGPT_VAEP.md` y se enlazó desde `PROJECT_INDEX.md`.
