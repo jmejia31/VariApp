@@ -32,6 +32,8 @@ public sealed class N32PedidoVentaPersistenceModelTests
 
         Assert.Equal(128, entity.FindProperty(nameof(PedidoVenta.IdempotencyKey))!.GetMaxLength());
         Assert.Equal(64, entity.FindProperty(nameof(PedidoVenta.IdempotencyFingerprint))!.GetMaxLength());
+        Assert.Contains(entity.GetCheckConstraints(), check => check.Name == "CK_PedidosVenta_Idempotencia_Atomica");
+        Assert.Contains(entity.GetCheckConstraints(), check => check.Name == "CK_PedidosVenta_IdempotencyFingerprint_Sha256");
 
         AssertRestrict(entity, nameof(PedidoVenta.CotizacionId));
         AssertRestrict(entity, nameof(PedidoVenta.ClienteId));

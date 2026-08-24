@@ -17,6 +17,9 @@ public sealed class PedidoVentaConfiguration : IEntityTypeConfiguration<PedidoVe
             table.HasCheckConstraint(
                 "CK_PedidosVenta_Idempotencia_Atomica",
                 "((`IdempotencyKey` IS NULL AND `IdempotencyFingerprint` IS NULL) OR (`IdempotencyKey` IS NOT NULL AND `IdempotencyFingerprint` IS NOT NULL))");
+            table.HasCheckConstraint(
+                "CK_PedidosVenta_IdempotencyFingerprint_Sha256",
+                "(`IdempotencyFingerprint` IS NULL OR (CHAR_LENGTH(`IdempotencyFingerprint`) = 64 AND `IdempotencyFingerprint` REGEXP '^[0-9a-f]{64}$'))");
         });
 
         builder.Property(p => p.Estado).HasConversion<int>().IsRequired();
