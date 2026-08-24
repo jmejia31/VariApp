@@ -12,7 +12,7 @@ REPOSITORY=jmejia31/VariApp
 BRANCH=Desarrollo
 ```
 
-Estas reglas pertenecen a VariApp. No se trasladan automáticamente a otro proyecto y ningún contexto de otro proyecto puede autorizar cambios aquí.
+Estas reglas pertenecen a VariApp y solo el contexto canónico de VariApp puede autorizar cambios aquí.
 
 ## Inicio de CADA conversación/sesión
 

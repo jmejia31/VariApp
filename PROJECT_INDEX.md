@@ -84,6 +84,7 @@ Administración colaborativa central:
 - `docs/COLABORACION_IA.md`
 - `docs/COLABORATIVO.md`
 - `docs/ENTORNOS_DESARROLLO_PRODUCCION.md`
+- `docs/CONTEXTO_CHATGPT_VAEP.md`: contexto histórico/operativo ChatGPT/VAEP de VariApp; no es fuente de estado actual.
 
 Documentación ERP-N0: archivos `docs/ERP_N0_*.md` y documentos específicos por punto.
 

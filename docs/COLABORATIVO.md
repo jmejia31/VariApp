@@ -42,7 +42,7 @@ Nadie debe asumir acceso local que no esté documentado.
 ## 4. Aislamiento entre proyectos
 
 - Esta coordinación aplica exclusivamente a VariApp.
-- No reutilizar rutas, ramas, planes o decisiones de otro proyecto.
+- Usar únicamente rutas, ramas, planes y decisiones verificadas de VariApp.
 - Una conversación no cambia de proyecto por inferencia.
 - Un cambio explícito de proyecto obliga a ejecutar el gate del proyecto destino antes de escribir.
 

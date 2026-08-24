@@ -18,7 +18,7 @@ REPOSITORY=jmejia31/VariApp
 BRANCH=Desarrollo
 ```
 
-Con acceso remoto, verificar los mismos datos mediante GitHub. Si no coinciden, detenerse: ninguna memoria previa autoriza escribir en otro proyecto.
+Con acceso remoto, verificar los mismos datos mediante GitHub. Si no coinciden, detenerse: solo el contexto canónico de VariApp autoriza cambios aquí.
 
 Después leer únicamente:
 
@@ -57,7 +57,7 @@ Si hay cambios locales ajenos, preservarlos y resolver el conflicto explícitame
 - Evitar refactors no solicitados.
 - No tocar Producción.
 - No subir secretos ni temporales.
-- No mezclar contexto de otros proyectos.
+- Usar únicamente contexto canónico y verificable de VariApp.
 - Actualizar memoria/arquitectura solo cuando el cambio realmente la invalide.
 
 ## Evidencia obligatoria

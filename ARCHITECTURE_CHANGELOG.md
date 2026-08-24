@@ -6,6 +6,13 @@ Registro conciso de cambios que obligan a actualizar `PROJECT_INDEX.md`, `PROJEC
 
 Cada entrada debe indicar fecha, cambio observable, documentos/rutas afectados y verificación. Solo se agrega cuando cambian arquitectura, módulos, integraciones, rutas/API, datos o comandos documentados.
 
+## 2026-08-24 — Contexto histórico ChatGPT/VAEP
+
+- Cambio: se incorporó `docs/CONTEXTO_CHATGPT_VAEP.md` y se enlazó desde `PROJECT_INDEX.md`.
+- Alcance: automatización VAEP, validación causal, cadena compras-recepciones-reservas-facturación, no duplicación y consulta selectiva.
+- Límite: referencia histórica/operativa de VariApp; las fuentes canónicas y el HEAD actual prevalecen.
+- Verificación: enlaces y guard documental local comprobados; sin cambios en código de producción.
+
 ## 2026-08-24 — Inicialización del mapa técnico persistente
 
 - Cambio: se consolidó `PROJECT_INDEX.md` como mapa operativo y se agregó un índice de decisión para cambios frecuentes.

@@ -18,7 +18,7 @@ Con acceso local, Javier/Codex/AntiG ejecutan:
 powershell -ExecutionPolicy Bypass -File scripts\iniciar-sesion-ia.ps1
 ```
 
-Con acceso remoto, ChatGPT/VAEP confirma repositorio, `Desarrollo`, HEAD actual y fuentes canónicas. Una sesión pertenece a un solo proyecto; contexto de otros proyectos no es confiable.
+Con acceso remoto, ChatGPT/VAEP confirma repositorio, `Desarrollo`, HEAD actual y fuentes canónicas. Toda sesión de VariApp usa únicamente contexto verificado de VariApp.
 
 ## 1. Autoridad y precedencia
 
