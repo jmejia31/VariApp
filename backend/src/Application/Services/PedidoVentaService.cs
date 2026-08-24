@@ -156,7 +156,7 @@ public sealed class PedidoVentaService : IPedidoVentaService
             id,
             AccionPermiso.Confirmar,
             "Pedido de venta confirmado.",
-            static (pedido, usuarioId, nombre) => pedido.Confirmar(usuarioId, nombre));
+            static (pedido, usuarioId, nombre) => pedido.Confirmar(usuarioId, nombre, DateTime.UtcNow));
 
     public async Task<PedidoVentaDto> AnularAsync(int id, string motivo)
     {
@@ -167,7 +167,7 @@ public sealed class PedidoVentaService : IPedidoVentaService
             id,
             AccionPermiso.Anular,
             "Pedido de venta anulado.",
-            (pedido, usuarioId, nombre) => pedido.Anular(usuarioId, nombre, motivo),
+            (pedido, usuarioId, nombre) => pedido.Anular(usuarioId, nombre, motivo, DateTime.UtcNow),
             motivo.Trim());
     }
 
