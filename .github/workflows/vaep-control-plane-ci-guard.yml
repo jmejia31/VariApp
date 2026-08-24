@@ -5,6 +5,9 @@ on:
     branches: [Desarrollo]
     paths:
       - 'vaep/jules/**'
+      - 'vaep/jules-b/**'
+      - 'vaep/jules-c/**'
+      - 'vaep/jules-d/**'
       - '.github/workflows/vaep-jules-*.yml'
       - '.github/workflows/vaep-control-plane-ci-guard.yml'
   pull_request:
@@ -48,7 +51,7 @@ jobs:
           control_plane=true
           while IFS= read -r path; do
             case "$path" in
-              vaep/jules/*|.github/workflows/vaep-jules-*.yml|.github/workflows/vaep-control-plane-ci-guard.yml)
+              vaep/jules/*|vaep/jules-b/*|vaep/jules-c/*|vaep/jules-d/*|.github/workflows/vaep-jules-*.yml|.github/workflows/vaep-control-plane-ci-guard.yml)
                 ;;
               *)
                 control_plane=false
@@ -95,7 +98,11 @@ jobs:
         run: |
           set +e
           target_sha="${{ github.event.pull_request.head.sha || github.sha }}"
-          manifest=$(git diff-tree --no-commit-id --name-only --diff-filter=A -r "$target_sha" -- 'vaep/jules/diagnostic/*.json' | head -n 1)
+          manifest=$(git diff-tree --no-commit-id --name-only --diff-filter=A -r "$target_sha" -- \
+            'vaep/jules/diagnostic/*.json' \
+            'vaep/jules-b/diagnostic/*.json' \
+            'vaep/jules-c/diagnostic/*.json' \
+            'vaep/jules-d/diagnostic/*.json' | head -n 1)
           if [[ -z "$manifest" || ! -f "$manifest" ]]; then
             echo 'Sin manifiesto diagnóstico nuevo; no-op.'
             exit 0
