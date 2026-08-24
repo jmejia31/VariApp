@@ -3,8 +3,8 @@ name: Desarrollo - Compilación y pruebas
 on:
   push:
     branches: [Desarrollo]
-  pull_request:
-    branches: [main]
+    paths-ignore:
+      - 'vaep/**'
   workflow_dispatch:
 
 permissions:
