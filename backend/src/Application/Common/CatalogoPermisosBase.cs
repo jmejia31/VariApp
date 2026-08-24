@@ -88,8 +88,9 @@ public static class CatalogoPermisosBase
         (ModuloSistema.Ventas, new[]
         {
             AccionPermiso.Ver, AccionPermiso.Crear, AccionPermiso.Editar,
-            AccionPermiso.Confirmar, AccionPermiso.Anular, AccionPermiso.Aprobar,
+            AccionPermiso.Confirmar, AccionPermiso.Anular, AccionPermiso.Aprobar, AccionPermiso.Rechazar,
             AccionPermiso.Cerrar, AccionPermiso.Reabrir, AccionPermiso.EliminarLogico,
+            AccionPermiso.EliminarPermanente, AccionPermiso.Duplicar,
             AccionPermiso.Exportar, AccionPermiso.Imprimir, AccionPermiso.ConsultarHistorial,
             AccionPermiso.ExonerarEnvio
         }),

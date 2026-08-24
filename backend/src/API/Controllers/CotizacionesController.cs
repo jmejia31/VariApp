@@ -2,10 +2,7 @@ using InventoryApp.API.Filters;
 using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Interfaces;
-using InventoryApp.Application.Services;
 using InventoryApp.Domain.Enums;
-using InventoryApp.Infrastructure.Persistence;
-using InventoryApp.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,24 +15,9 @@ public sealed class CotizacionesController : ControllerBase
 {
     private readonly ICotizacionService _service;
 
-    public CotizacionesController(
-        AppDbContext db,
-        IClienteRepository clientes,
-        IProductoRepository productos,
-        IProductoVarianteRepository variantes,
-        IAuditoriaService auditoria,
-        ICurrentUserService currentUser,
-        IUnitOfWork unitOfWork)
+    public CotizacionesController(ICotizacionService service)
     {
-        ArgumentNullException.ThrowIfNull(db);
-        _service = new CotizacionService(
-            new CotizacionRepository(db),
-            clientes,
-            productos,
-            variantes,
-            auditoria,
-            currentUser,
-            unitOfWork);
+        _service = service ?? throw new ArgumentNullException(nameof(service));
     }
 
     [HttpGet]
