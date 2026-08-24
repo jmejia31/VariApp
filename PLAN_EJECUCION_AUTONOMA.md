@@ -14,6 +14,10 @@
 
 El `.docx` original fue convertido a Google Docs para que el runner consulte permanentemente la fuente rectora sin depender de una conversación concreta.
 
+### 1.1 Gate de versión antes de automatizar
+
+Antes de adquirir mutex o mutar `CONFIG/COLA/BITACORA`, resolver la versión Jules mediante `docs/VAEP_AUTHORITY.md`. Mientras persista la alerta 3.20/3.21, la corrida queda en modo `READ_ONLY_PROTOCOL_CONFLICT`: puede reconciliar HEAD, commits, CI y documentos, pero no crear dispatches, cambiar ownership ni presentar una versión como vigente. El handoff debe indicar las fuentes contradictorias y la decisión requerida. El protocolo global `VAEP_V4_6_KEYED_MUTEX_HARD_EXECUTION` permanece identificable; el conflicto está limitado al subprotocolo Jules.
+
 ## 2. Cobertura integral del Plan Maestro ERP V5
 
 VAEP cubre ERP-N0→N9 y los tracks T0–T12. Las funcionalidades futuras no-core —RRHH, CRM, MRP, activos fijos, proyectos, servicio técnico, logística avanzada y ecommerce futuro— permanecen `NO_AUTORIZADO` y no pueden autoejecutarse sin autorización explícita de Javier.

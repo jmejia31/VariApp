@@ -43,6 +43,8 @@ Todo changeset intencional deja evidencia en `CHANGELOG_AI.md`; `TASKS.md` cambi
 
 Protocolo: `PLAN_EJECUCION_AUTONOMA.md`.
 
+Alerta operativa observada el 2026-08-24: las fuentes locales discrepan entre Jules v3.20 y v3.21. Consultar `docs/VAEP_AUTHORITY.md`; mientras su alerta siga abierta, no iniciar automatización mutante dependiente de esa versión.
+
 Tablero operativo:
 https://docs.google.com/spreadsheets/d/19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY/edit
 

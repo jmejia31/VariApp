@@ -2,6 +2,12 @@
 
 Registro operativo resumido de cierres ERP certificados. La autoridad de ejecución detallada permanece en COLA/CONFIG y el Plan Maestro.
 
+## Bloqueo de gobierno VAEP
+
+- [ ] Reconciliar en una única fuente autoritativa la versión Jules: `AGENTS.md`/`docs/VAEP_AUTHORITY.md` declaran v3.20 y `docs/VAEP_V321_PARENT_CLOSURE.md` declara v3.21.
+- Hasta resolverlo, no ejecutar nuevos dispatches, redispatches, cambios de ownership ni automatización mutante dependiente de esa versión; el diagnóstico read-only permanece permitido.
+- El estado del Sheet/Drive no fue consultado en esta actualización. Los cierres y siguientes tareas listados abajo son evidencia histórica documentada, no una lectura fresca de `COLA`.
+
 ## ERP-N2.2 — Orden de compra
 
 - [x] N2.2.A-H completados y certificados por evidencia autoritativa VAEP.

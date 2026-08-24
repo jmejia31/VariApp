@@ -1,5 +1,7 @@
 # VAEP — Autoridad de versión operativa
 
+> **ALERTA DE CONFLICTO OPERATIVO — 2026-08-24:** `AGENTS.md` y este archivo declaran `V3.20_CURRENT`, mientras `docs/VAEP_V321_PARENT_CLOSURE.md` declara `V3.21_CURRENT` y una precedencia incompatible. El control-plane global v4.6 no está en disputa, pero el subprotocolo Jules sí. Hasta que Javier o un changeset de gobierno autoritativo alinee esas fuentes, quedan bloqueados nuevos dispatches, redispatches, cambios de ownership y automatizaciones mutantes dependientes de la versión Jules. Se permiten reconciliación, lectura, diagnóstico y verificación sin escritura externa. No inferir la versión vigente desde commits de cierre ni desde el nombre de un documento.
+
 Estado vigente para VariApp al 2026-08-20.
 
 ```text
