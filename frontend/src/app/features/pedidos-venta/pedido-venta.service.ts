@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ApiResponse, PagedResult } from '../../core/models/api-response.model';
-import { CreatePedidoVenta, PedidoVenta, PedidoVentaFiltro, UpdatePedidoVenta } from './pedido-venta.model';
+import { ConfirmarPedidoVenta, CreatePedidoVenta, PedidoVenta, PedidoVentaFiltro, UpdatePedidoVenta } from './pedido-venta.model';
 
 @Injectable({providedIn:'root'})
 export class PedidoVentaService {
@@ -23,6 +23,6 @@ export class PedidoVentaService {
   getById(id:number){ return this.http.get<ApiResponse<PedidoVenta>>(`${this.url}/${id}`); }
   create(v:CreatePedidoVenta,idempotencyKey:string){ const headers=new HttpHeaders().set('Idempotency-Key',idempotencyKey.trim()); return this.http.post<ApiResponse<PedidoVenta>>(this.url,v,{headers}); }
   update(id:number,v:UpdatePedidoVenta){ return this.http.put<ApiResponse<PedidoVenta>>(`${this.url}/${id}`,{...v,id}); }
-  confirmar(id:number){ return this.http.post<ApiResponse<PedidoVenta>>(`${this.url}/${id}/confirmar`,{}); }
+  confirmar(id:number,v:ConfirmarPedidoVenta){ return this.http.post<ApiResponse<PedidoVenta>>(`${this.url}/${id}/confirmar`,v); }
   anular(id:number,motivo:string){ return this.http.post<ApiResponse<PedidoVenta>>(`${this.url}/${id}/anular`,{motivo:motivo.trim()}); }
 }
