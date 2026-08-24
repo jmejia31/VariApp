@@ -39,11 +39,10 @@ public sealed class N33ReservaAutomaticaApplicationContractTests
 
         Assert.NotNull(method);
         var parameters = method!.GetParameters();
-        Assert.Equal(3, parameters.Length);
+        Assert.Equal(2, parameters.Length);
         Assert.Equal(typeof(int), parameters[0].ParameterType);
         Assert.Equal(typeof(ConfirmarPedidoVentaDto), parameters[1].ParameterType);
-        Assert.Equal(typeof(CancellationToken), parameters[2].ParameterType);
-        Assert.Equal(typeof(Task), method.ReturnType);
+        Assert.Equal(typeof(Task<PedidoVentaDto>), method.ReturnType);
     }
 
     [Fact]
