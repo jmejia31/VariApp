@@ -4,3 +4,5 @@ export interface PedidoVenta { id:number; cotizacionId?:number|null; clienteId:n
 export interface PedidoVentaFiltro { cotizacionId?:number|null; clienteId?:number|null; estado?:EstadoPedidoVenta|null; fechaDesdeUtc?:string|null; fechaHastaUtc?:string|null; page:number; pageSize:number; sortBy?:string; sortDirection?:'asc'|'desc'; }
 export interface CreatePedidoVenta { cotizacionId:number; observaciones?:string|null; }
 export interface UpdatePedidoVenta { id:number; observaciones?:string|null; }
+export interface AsignacionReservaPedido { productoVarianteId:number; almacenId:number; ubicacionAlmacenId?:number|null; cantidad:number; }
+export interface ConfirmarPedidoVenta { asignaciones:AsignacionReservaPedido[]; }
