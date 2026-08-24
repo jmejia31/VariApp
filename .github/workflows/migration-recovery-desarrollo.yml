@@ -8,13 +8,6 @@ on:
       - backend/src/Infrastructure/Migrations/**
       - backend/src/API/Program.cs
       - .github/workflows/migration-recovery-desarrollo.yml
-  pull_request:
-    branches:
-      - main
-    paths:
-      - backend/src/Infrastructure/Migrations/**
-      - backend/src/API/Program.cs
-      - .github/workflows/migration-recovery-desarrollo.yml
   workflow_dispatch:
 
 permissions:
