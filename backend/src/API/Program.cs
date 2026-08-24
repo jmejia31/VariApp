@@ -53,6 +53,7 @@ builder.Services.AddScoped<ICatalogoProductoRepository, CatalogoProductoReposito
 builder.Services.AddScoped<IProveedorRepository, ProveedorRepository>();
 builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
 builder.Services.AddScoped<ICotizacionRepository, CotizacionRepository>();
+builder.Services.AddScoped<IPedidoVentaRepository, PedidoVentaRepository>();
 builder.Services.AddScoped<ITipoClienteRepository, TipoClienteRepository>();
 builder.Services.AddScoped<IConsumoInsumoRepository, ConsumoInsumoRepository>();
 builder.Services.AddScoped<IAjusteInventarioRepository, AjusteInventarioRepository>();
@@ -101,6 +102,7 @@ builder.Services.AddScoped<ICatalogoProductoService, CatalogoProductoService>();
 builder.Services.AddScoped<IProveedorService, ProveedorService>();
 builder.Services.AddScoped<IClienteService, ClienteService>();
 builder.Services.AddScoped<ICotizacionService, CotizacionService>();
+builder.Services.AddScoped<IPedidoVentaService, PedidoVentaService>();
 builder.Services.AddScoped<ITipoClienteService, TipoClienteService>();
 builder.Services.AddScoped<IConsumoInsumoService, ConsumoInsumoService>();
 builder.Services.AddScoped<IAjusteInventarioService, AjusteInventarioService>();
