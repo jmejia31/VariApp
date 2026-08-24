@@ -66,10 +66,10 @@ public sealed class PedidosVentaController : ControllerBase
 
     [HttpPost("{id:int}/confirmar")]
     [RequierePermiso(ModuloSistema.Ventas, AccionPermiso.Confirmar)]
-    public async Task<IActionResult> Confirmar(int id)
+    public async Task<IActionResult> Confirmar(int id, [FromBody] ConfirmarPedidoVentaDto dto)
     {
-        var pedido = await _service.ConfirmarAsync(id);
-        return Ok(ApiResponse<PedidoVentaDto>.Ok(pedido, "Pedido de venta confirmado correctamente."));
+        var pedido = await _service.ConfirmarAsync(id, dto);
+        return Ok(ApiResponse<PedidoVentaDto>.Ok(pedido, "Pedido de venta confirmado y reserva de inventario activada correctamente."));
     }
 
     [HttpPost("{id:int}/anular")]

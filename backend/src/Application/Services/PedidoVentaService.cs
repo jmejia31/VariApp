@@ -6,6 +6,7 @@ using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Enums;
+using InventoryApp.Domain.ValueObjects;
 
 namespace InventoryApp.Application.Services;
 
@@ -16,19 +17,28 @@ public sealed class PedidoVentaService : IPedidoVentaService
     private readonly IAuditoriaService _auditoriaService;
     private readonly ICurrentUserService _currentUserService;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IReservaInventarioRepository? _reservaRepository;
+    private readonly IProductoVarianteRepository? _variantes;
+    private readonly IExistenciaVarianteConcurrencyService? _existencias;
 
     public PedidoVentaService(
         IPedidoVentaRepository repository,
         ICotizacionRepository cotizacionRepository,
         IAuditoriaService auditoriaService,
         ICurrentUserService currentUserService,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        IReservaInventarioRepository? reservaRepository = null,
+        IProductoVarianteRepository? variantes = null,
+        IExistenciaVarianteConcurrencyService? existencias = null)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         _cotizacionRepository = cotizacionRepository ?? throw new ArgumentNullException(nameof(cotizacionRepository));
         _auditoriaService = auditoriaService ?? throw new ArgumentNullException(nameof(auditoriaService));
         _currentUserService = currentUserService ?? throw new ArgumentNullException(nameof(currentUserService));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        _reservaRepository = reservaRepository;
+        _variantes = variantes;
+        _existencias = existencias;
     }
 
     public async Task<PedidoVentaDto> GetByIdAsync(int id)
@@ -151,12 +161,157 @@ public sealed class PedidoVentaService : IPedidoVentaService
         return await GetByIdAsync(dto.Id);
     }
 
-    public Task<PedidoVentaDto> ConfirmarAsync(int id) =>
-        CambiarEstadoAsync(
-            id,
-            AccionPermiso.Confirmar,
-            "Pedido de venta confirmado.",
-            static (pedido, usuarioId, nombre) => pedido.Confirmar(usuarioId, nombre, DateTime.UtcNow));
+    public async Task<PedidoVentaDto> ConfirmarAsync(int id, ConfirmarPedidoVentaDto dto)
+    {
+        if (id <= 0)
+            throw new BusinessRuleException("El identificador del pedido debe ser mayor que cero.");
+        ArgumentNullException.ThrowIfNull(dto);
+        if (dto.Asignaciones is null || dto.Asignaciones.Count == 0)
+            throw new BusinessRuleException("La confirmación requiere asignaciones físicas explícitas de inventario.");
+
+        var reservas = _reservaRepository
+            ?? throw new InvalidOperationException("IReservaInventarioRepository no está configurado para confirmar pedidos con reserva.");
+        var variantes = _variantes
+            ?? throw new InvalidOperationException("IProductoVarianteRepository no está configurado para confirmar pedidos con reserva.");
+        var existencias = _existencias
+            ?? throw new InvalidOperationException("IExistenciaVarianteConcurrencyService no está configurado para confirmar pedidos con reserva.");
+        var (usuarioId, nombreUsuario) = RequerirUsuario();
+        var asignaciones = dto.Asignaciones.Select(x =>
+            AsignacionReservaAutomatica.Crear(x.ProductoVarianteId, x.AlmacenId, x.UbicacionAlmacenId, x.Cantidad)).ToArray();
+
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            var pedido = await RequerirForUpdateAsync(id);
+            var reservaExistente = await reservas.GetByPedidoVentaIdAsync(id, tracking: true);
+
+            if (pedido.Estado == EstadoPedidoVenta.Confirmado)
+            {
+                if (reservaExistente is null || reservaExistente.Estado != EstadoReservaInventario.Activa)
+                    throw new BusinessRuleException("El pedido confirmado no tiene una reserva automática activa consistente.");
+                ValidarReplayReserva(reservaExistente, asignaciones);
+                return;
+            }
+
+            if (pedido.Estado != EstadoPedidoVenta.Borrador)
+                throw new BusinessRuleException("Solo un pedido en borrador puede confirmarse con reserva automática.");
+            if (reservaExistente is not null)
+                throw new BusinessRuleException("El pedido ya tiene una reserva automática persistida y no puede crear otra.");
+
+            var plan = pedido.PrepararReservaAutomatica(asignaciones);
+            var varianteIds = plan.Asignaciones.Select(x => x.ProductoVarianteId).Distinct().ToArray();
+            var variantesPersistidas = await variantes.GetByIdsForUpdateAsync(varianteIds);
+            if (variantesPersistidas.Count != varianteIds.Length)
+                throw new BusinessRuleException("Una o más variantes asignadas no existen.");
+
+            var porId = variantesPersistidas.ToDictionary(x => x.Id);
+            foreach (var variante in variantesPersistidas)
+            {
+                if (variante.Eliminado || !variante.Activo)
+                    throw new BusinessRuleException($"La variante {variante.Id} no está activa para reservar inventario.");
+            }
+
+            var demandas = plan.Asignaciones.Select(asignacion =>
+            {
+                var variante = porId[asignacion.ProductoVarianteId];
+                return new InventarioDemandaExistencia(
+                    variante.ProductoId,
+                    asignacion.ProductoVarianteId,
+                    asignacion.AlmacenId,
+                    asignacion.UbicacionAlmacenId,
+                    asignacion.Cantidad);
+            }).ToArray();
+
+            var lockSet = await existencias.BloquearYValidarExistenciasAsync(demandas, esDeduccion: true);
+            var ahora = DateTime.UtcNow;
+            var nombreReserva = await GenerarNumeroReservaAsync(reservas, ahora);
+            var reserva = new ReservaInventario
+            {
+                Numero = nombreReserva,
+                PedidoVentaId = pedido.Id,
+                FechaCreacion = ahora,
+                FechaActualizacion = ahora,
+                CreadoPorUsuarioId = usuarioId,
+                CreadoPorNombreUsuario = _currentUserService.NombreUsuario,
+                ActualizadoPorUsuarioId = usuarioId,
+                ActualizadoPorNombreUsuario = _currentUserService.NombreUsuario
+            };
+
+            foreach (var asignacion in plan.Asignaciones)
+            {
+                var variante = porId[asignacion.ProductoVarianteId];
+                var detalle = new ReservaInventarioDetalle
+                {
+                    ReservaInventario = reserva,
+                    ProductoVarianteId = variante.Id,
+                    ProductoVariante = variante,
+                    AlmacenId = asignacion.AlmacenId,
+                    UbicacionAlmacenId = asignacion.UbicacionAlmacenId,
+                    ProductoSkuSnapshot = variante.Sku,
+                    ProductoMarcaSnapshot = variante.Marca?.Nombre,
+                    ProductoModeloSnapshot = variante.Modelo?.Nombre,
+                    ProductoColorSnapshot = variante.Color?.Nombre,
+                    ProductoTallaSnapshot = variante.Talla?.Nombre,
+                    FechaCreacion = ahora,
+                    FechaActualizacion = ahora,
+                    CreadoPorUsuarioId = usuarioId,
+                    CreadoPorNombreUsuario = _currentUserService.NombreUsuario,
+                    ActualizadoPorUsuarioId = usuarioId,
+                    ActualizadoPorNombreUsuario = _currentUserService.NombreUsuario
+                };
+                detalle.EstablecerCantidadReservada(asignacion.Cantidad);
+                detalle.ValidarClaveFisica();
+                reserva.Detalles.Add(detalle);
+            }
+
+            reserva.ValidarDocumento();
+            await reservas.AddAsync(reserva);
+            await reservas.SaveChangesAsync();
+
+            foreach (var demanda in lockSet.Demandas)
+            {
+                var existencia = lockSet.Existencias[demanda.Clave];
+                await existencias.AjustarStockReservadoPesimistaAsync(
+                    demanda.Clave,
+                    existencia.StockReservado,
+                    checked(existencia.StockReservado + demanda.Cantidad));
+            }
+
+            reserva.Activar(usuarioId, ahora);
+            pedido.Confirmar(usuarioId, nombreUsuario, ahora);
+            _repository.Update(pedido);
+            await _repository.SaveChangesAsync();
+
+            await _auditoriaService.RegistrarEstrictoAsync(
+                ModuloSistema.MovimientosInventario,
+                AccionPermiso.Confirmar,
+                "Reserva automática activada al confirmar pedido de venta.",
+                reserva.Id,
+                nameof(ReservaInventario),
+                valoresNuevos: new
+                {
+                    reserva.PedidoVentaId,
+                    reserva.Numero,
+                    reserva.Estado,
+                    Detalles = reserva.Detalles.Select(x => new
+                    {
+                        x.ProductoVarianteId,
+                        x.AlmacenId,
+                        x.UbicacionAlmacenId,
+                        x.CantidadReservada
+                    }).ToArray()
+                });
+
+            await _auditoriaService.RegistrarEstrictoAsync(
+                ModuloSistema.Ventas,
+                AccionPermiso.Confirmar,
+                "Pedido de venta confirmado con reserva automática.",
+                pedido.Id,
+                nameof(PedidoVenta),
+                valoresNuevos: new { pedido.Estado, ReservaInventarioId = reserva.Id });
+        });
+
+        return await GetByIdAsync(id);
+    }
 
     public async Task<PedidoVentaDto> AnularAsync(int id, string motivo)
     {
@@ -220,6 +375,42 @@ public sealed class PedidoVentaService : IPedidoVentaService
             throw new ForbiddenAccessException("No se pudo resolver la identidad del usuario autenticado.");
 
         return (_currentUserService.UsuarioId.Value, nombre);
+    }
+
+    private static async Task<string> GenerarNumeroReservaAsync(IReservaInventarioRepository reservas, DateTime fechaUtc)
+    {
+        for (var intento = 0; intento < 5; intento++)
+        {
+            var sufijo = Guid.NewGuid().ToString("N")[..6].ToUpperInvariant();
+            var numero = $"RSV-{fechaUtc:yyyyMMddHHmmssfff}-{sufijo}";
+            if (!await reservas.ExisteNumeroAsync(numero))
+                return numero;
+        }
+
+        throw new BusinessRuleException("No fue posible generar un número único para la reserva automática.");
+    }
+
+    private static void ValidarReplayReserva(
+        ReservaInventario reserva,
+        IReadOnlyCollection<AsignacionReservaAutomatica> asignaciones)
+    {
+        var persistidas = reserva.Detalles
+            .Select(x => (x.ProductoVarianteId, x.AlmacenId, x.UbicacionAlmacenId, x.CantidadReservada))
+            .OrderBy(x => x.ProductoVarianteId)
+            .ThenBy(x => x.AlmacenId)
+            .ThenBy(x => x.UbicacionAlmacenId)
+            .ThenBy(x => x.CantidadReservada)
+            .ToArray();
+        var solicitadas = asignaciones
+            .Select(x => (x.ProductoVarianteId, x.AlmacenId, x.UbicacionAlmacenId, x.Cantidad))
+            .OrderBy(x => x.ProductoVarianteId)
+            .ThenBy(x => x.AlmacenId)
+            .ThenBy(x => x.UbicacionAlmacenId)
+            .ThenBy(x => x.Cantidad)
+            .ToArray();
+
+        if (!persistidas.SequenceEqual(solicitadas))
+            throw new BusinessRuleException("El pedido ya fue confirmado con una asignación física diferente.");
     }
 
     private static string NormalizarIdempotencyKey(string key)

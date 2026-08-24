@@ -58,6 +58,19 @@ public sealed class UpdatePedidoVentaDto
     public string? Observaciones { get; set; }
 }
 
+public sealed class ConfirmarPedidoVentaDto
+{
+    public List<AsignacionReservaPedidoDto> Asignaciones { get; set; } = new();
+}
+
+public sealed class AsignacionReservaPedidoDto
+{
+    public int ProductoVarianteId { get; set; }
+    public int AlmacenId { get; set; }
+    public int? UbicacionAlmacenId { get; set; }
+    public int Cantidad { get; set; }
+}
+
 public sealed class AnularPedidoVentaDto
 {
     public string Motivo { get; set; } = string.Empty;

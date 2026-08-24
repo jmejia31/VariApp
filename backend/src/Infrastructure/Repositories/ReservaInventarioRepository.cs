@@ -47,6 +47,9 @@ public sealed class ReservaInventarioRepository : IReservaInventarioRepository
     public Task<ReservaInventario?> GetByIdAsync(int id, bool tracking = false) =>
         ConDetalle(tracking).FirstOrDefaultAsync(x => x.Id == id);
 
+    public Task<ReservaInventario?> GetByPedidoVentaIdAsync(int pedidoVentaId, bool tracking = false) =>
+        ConDetalle(tracking).FirstOrDefaultAsync(x => x.PedidoVentaId == pedidoVentaId);
+
     public Task<bool> ExisteNumeroAsync(string numero, int? excluirId = null)
     {
         var normalizado = numero.Trim();
