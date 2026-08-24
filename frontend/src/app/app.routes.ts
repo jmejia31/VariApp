@@ -3,6 +3,7 @@ import { authGuard } from './core/guards/auth.guard';
 import { permisoGuard } from './core/guards/permiso.guard';
 import { AJUSTES_INVENTARIO_ROUTES } from './features/inventario/ajustes.routes';
 import { FACTURAS_PROVEEDOR_ROUTES } from './features/compras/facturas-proveedor/facturas-proveedor.routes';
+import { PEDIDOS_VENTA_ROUTES } from './features/pedidos-venta/pedidos-venta.routes';
 
 export const routes: Routes = [
   {
@@ -373,6 +374,7 @@ export const routes: Routes = [
   },
   ...AJUSTES_INVENTARIO_ROUTES,
   ...FACTURAS_PROVEEDOR_ROUTES,
+  ...PEDIDOS_VENTA_ROUTES,
   {
     path: 'configuracion',
     canActivate: [authGuard, permisoGuard],
