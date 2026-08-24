@@ -75,7 +75,7 @@ jobs:
           while IFS=$'\t' read -r run_id name status; do
             [ "$run_id" = "$current_run" ] && continue
             case "$name" in
-              'VAEP Jules Diagnostic'|'VAEP Jules Secondary'|'VAEP Control Plane CI Guard')
+              VAEP\ Jules*|'VAEP Control Plane CI Guard')
                 continue
                 ;;
             esac
