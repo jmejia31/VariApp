@@ -4,6 +4,13 @@ Bitácora colaborativa de cambios realizados por Javier Mejía, Codex, AntiG/Ant
 
 No reemplaza `git log`: registra intención, alcance, validaciones y handoff. Todo changeset intencional debe incluir una entrada breve; no modificar otros colaborativos si su contenido no cambió.
 
+## 2026-08-24 — Codex — mapa técnico persistente
+
+- Se consolidó `PROJECT_INDEX.md` como mapa rápido con índice de decisión, puntos de entrada y comandos verificados.
+- Se creó `ARCHITECTURE_CHANGELOG.md` y se enlazó la convención de mantenimiento desde el contexto y la arquitectura canónicos.
+- Se alineó la declaración `PROJECT_ID: VARIAPP` con el guard obligatorio de inicio de sesión.
+- Cambio exclusivamente documental; no se ejecutó ni modificó código de producción.
+
 ## 2026-08-23 — ERP-N3.1 Cotizaciones — CIERRE FORMAL
 
 **Responsable:** ChatGPT/VAEP v3.21 mediante PARENT-CLOSURE-FIRST y QA takeover documental.

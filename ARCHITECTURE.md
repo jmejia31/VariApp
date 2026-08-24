@@ -142,7 +142,7 @@ Los transversales T0–T12 aplican durante todo el roadmap.
 3. No introducir una segunda vía de autorización, cálculo o persistencia sin razón arquitectónica documentada.
 4. Preservar compatibilidad durante migraciones legacy.
 5. Toda nueva dependencia transversal debe justificarse.
-6. Toda modificación estructural debe actualizar `PROJECT_CONTEXT.md`, `PROJECT_INDEX.md` y este archivo.
+6. Toda modificación estructural debe actualizar `PROJECT_CONTEXT.md`, `PROJECT_INDEX.md`, este archivo y `ARCHITECTURE_CHANGELOG.md`.
 
 ## 9. Qué se considera cambio arquitectónico importante
 

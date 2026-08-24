@@ -4,7 +4,7 @@
 
 ## 1. Estado canónico
 
-- `PROJECT_ID`: `VARIAPP`
+- PROJECT_ID: VARIAPP
 - Repositorio: `jmejia31/VariApp`
 - Rama de trabajo: `Desarrollo`
 - `main`: congelada
@@ -23,7 +23,7 @@ VariApp/VariStorehn evoluciona hacia un ERP empresarial. Backend ASP.NET Core 8 
 
 Áreas principales: productos/variantes/catálogos, inventario, compras, ventas, clientes, proveedores, facturación, finanzas, usuarios, roles, permisos, descuentos, impuestos, envíos, cargas masivas, auditoría, reportes y tienda pública VariStorehn.
 
-Consultar `ARCHITECTURE.md` solo ante cambio estructural/transversal y `PROJECT_INDEX.md` para localizar responsabilidades.
+Consultar `PROJECT_INDEX.md` para localizar responsabilidades y su índice de decisión. Abrir `ARCHITECTURE.md` solo ante cambio estructural/transversal; todo cambio del mapa se registra en `ARCHITECTURE_CHANGELOG.md`.
 
 ## 3. Persistencia, seguridad e invariantes
 
@@ -64,4 +64,4 @@ El repositorio también contiene trabajo concurrente de escaparate/tienda VariSt
 
 ## 7. Regla de actualización
 
-Actualizar este archivo solo ante cambio real de arquitectura, stack, gobierno transversal, fuente de verdad, roadmap rector o flujo autónomo. Para avances ordinarios usar `TASKS.md`, `CHANGELOG_AI.md` y el tablero VAEP.
+Actualizar este archivo solo ante cambio real de arquitectura, stack, gobierno transversal, fuente de verdad, roadmap rector o flujo autónomo. Cuando cambien arquitectura, módulos, integraciones, rutas/API, datos o comandos, actualizar también el mapa de `PROJECT_INDEX.md` y agregar una entrada a `ARCHITECTURE_CHANGELOG.md`. Para avances ordinarios usar `TASKS.md`, `CHANGELOG_AI.md` y el tablero VAEP.

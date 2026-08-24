@@ -19,6 +19,7 @@ No leer todos los documentos administrativos en cada tarea. Consultarlos solo cu
 - `PROJECT_CONTEXT.md`: memoria técnica canónica e identidad inequívoca del proyecto.
 - `PROJECT_INDEX.md`: este índice.
 - `ARCHITECTURE.md`: arquitectura y patrones.
+- `ARCHITECTURE_CHANGELOG.md`: registro breve de cambios que alteran el mapa técnico.
 - `TASKS.md`: pendientes operativos.
 - `CHANGELOG_AI.md`: bitácora/evidencia de cada changeset.
 - `README.md`: introducción, stack y operación básica.
@@ -113,3 +114,60 @@ Para una tarea normal:
 6. detener expansión cuando exista evidencia suficiente.
 
 No listar recursivamente todo `backend`, `frontend` o `docs` salvo cambio estructural justificado.
+
+## Índice de decisión para cambios frecuentes
+
+| Petición | Abrir primero | Seguir solo si aplica |
+| --- | --- | --- |
+| Endpoint o contrato HTTP | `backend/src/API/Controllers/<Area>Controller.cs` | DTO, interfaz y servicio homónimos en `Application`; cliente en `frontend/src/app/services` |
+| Regla de negocio | `backend/src/Application/Services/<Area>Service.cs` | interfaz/DTO/validator; entidad o enum en `Domain` |
+| Tabla, relación o índice | entidad en `backend/src/Domain/Entities` + `backend/src/Infrastructure/Persistence/AppDbContext.cs` | `Persistence/Configurations`, `Migrations` y scripts SQL de `backend/scripts` |
+| Consulta o persistencia | `backend/src/Infrastructure/Repositories/<Area>Repository.cs` | interfaz en `Application/Interfaces` y configuración EF correspondiente |
+| Pantalla o formulario | `frontend/src/app/features/<area>` | servicio HTTP en `frontend/src/app/services` y modelos compartidos |
+| Ruta, menú o permiso visual | `frontend/src/app/app.routes.ts` o `features/**/**.routes.ts` | `core/guards`, `core/navigation` y permiso del endpoint backend |
+| Login, JWT o permisos | `AuthController.cs`, `Program.cs` y servicios Auth/RBAC | `core/auth`, `core/guards`, interceptor y pruebas de acceso |
+| Imagen, PDF, correo o exportación | interfaz en `Application/Interfaces` | implementación en `Infrastructure/Services` y registro DI en `Program.cs` |
+| Variable o entorno | `backend/src/API/appsettings*.json`, `frontend/src/environments`, `frontend/vercel.json`, `render.yaml` | `docs/ENTORNOS_DESARROLLO_PRODUCCION.md`; nunca copiar secretos |
+| Prueba localizada | `backend/tests/InventoryApp.Tests` o `frontend/e2e` | workflow específico en `.github/workflows` |
+
+## Puntos de entrada, API y datos
+
+- Backend: `backend/src/API/Program.cs`; controladores bajo `backend/src/API/Controllers`. La mayoría declara una base con `[Route("...")]`; salud se expone directamente como `/health` y `/health/ready`.
+- Frontend: `frontend/src/main.ts` -> `frontend/src/app/app.config.ts` -> `frontend/src/app/app.routes.ts`. Algunas áreas agregan rutas en archivos `*.routes.ts` dentro de su feature.
+- Datos: `backend/src/Infrastructure/Persistence/AppDbContext.cs` y `Persistence/Configurations`. Las migraciones vigentes están en `backend/src/Infrastructure/Migrations`; no crear una segunda ubicación.
+- Dependencias: proyectos `backend/src/*/*.csproj`, solución `backend/InventoryApp.sln`, `frontend/package.json` y `frontend/angular.json`.
+
+## Comandos verificados
+
+Desde `backend`:
+
+```powershell
+dotnet restore InventoryApp.sln
+dotnet build InventoryApp.sln --configuration Release
+dotnet test InventoryApp.sln --configuration Release
+dotnet run --project src/API/InventoryApp.API.csproj
+```
+
+Desde `frontend`:
+
+```powershell
+npm ci
+npm start
+npm run lint
+npm run build:prod
+npm test
+npx playwright test
+```
+
+Los scripts `start`, `lint`, `build:prod` y `test` existen en `frontend/package.json`; Playwright está declarado y `frontend/playwright.config.ts` existe.
+
+## Convención de mantenimiento
+
+Cuando cambie una capa, módulo, integración, ruta/API, modelo de datos o comando:
+
+1. actualizar la fila o sección afectada de este mapa;
+2. actualizar `PROJECT_CONTEXT.md` o `ARCHITECTURE.md` solo si cambia la realidad transversal;
+3. agregar una entrada fechada a `ARCHITECTURE_CHANGELOG.md` con alcance, rutas y verificación;
+4. registrar el changeset normal en `CHANGELOG_AI.md`.
+
+No registrar en el changelog arquitectónico correcciones internas que no cambien este mapa.
