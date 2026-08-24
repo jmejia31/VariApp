@@ -28,8 +28,17 @@ public sealed class ReservaInventarioConfiguration : IEntityTypeConfiguration<Re
             .HasDatabaseName("UX_ReservasInventario_Numero");
         builder.HasIndex(x => new { x.Estado, x.FechaExpiracion })
             .HasDatabaseName("IX_ReservasInventario_Estado_Expiracion");
+        builder.HasIndex(x => x.PedidoVentaId)
+            .IsUnique()
+            .HasDatabaseName("UX_ReservasInventario_PedidoVentaId");
         builder.HasIndex(x => x.VentaId)
             .HasDatabaseName("IX_ReservasInventario_VentaId");
+
+        builder.HasOne(x => x.PedidoVenta)
+            .WithMany()
+            .HasForeignKey(x => x.PedidoVentaId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_ReservasInventario_PedidosVenta_PedidoVentaId");
 
         builder.HasOne(x => x.Venta)
             .WithMany()

@@ -10,6 +10,9 @@ public class ReservaInventario : AuditableEntity
     public int? VentaId { get; set; }
     public Venta? Venta { get; set; }
 
+    public int? PedidoVentaId { get; set; }
+    public PedidoVenta? PedidoVenta { get; set; }
+
     public EstadoReservaInventario Estado { get; private set; } = EstadoReservaInventario.Borrador;
     public DateTime? FechaExpiracion { get; set; }
 

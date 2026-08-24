@@ -37,11 +37,13 @@ namespace InventoryApp.Infrastructure.Migrations
                 b.Property<string>("MotivoCancelacion").HasMaxLength(500).HasColumnType("varchar(500)");
                 b.Property<string>("MotivoLiberacion").HasMaxLength(500).HasColumnType("varchar(500)");
                 b.Property<string>("Numero").IsRequired().HasMaxLength(40).HasColumnType("varchar(40)");
+                b.Property<int?>("PedidoVentaId").HasColumnType("int");
                 b.Property<int?>("VentaId").HasColumnType("int");
 
                 b.HasKey("Id");
                 b.HasIndex("Estado", "FechaExpiracion").HasDatabaseName("IX_ReservasInventario_Estado_Expiracion");
                 b.HasIndex("Numero").IsUnique().HasDatabaseName("UX_ReservasInventario_Numero");
+                b.HasIndex("PedidoVentaId").IsUnique().HasDatabaseName("UX_ReservasInventario_PedidoVentaId");
                 b.HasIndex("VentaId").HasDatabaseName("IX_ReservasInventario_VentaId");
                 b.ToTable("ReservasInventario");
             });
@@ -82,8 +84,11 @@ namespace InventoryApp.Infrastructure.Migrations
 
             modelBuilder.Entity("InventoryApp.Domain.Entities.ReservaInventario", b =>
             {
+                b.HasOne("InventoryApp.Domain.Entities.PedidoVenta", "PedidoVenta").WithMany().HasForeignKey("PedidoVentaId")
+                    .OnDelete(DeleteBehavior.Restrict).HasConstraintName("FK_ReservasInventario_PedidosVenta_PedidoVentaId");
                 b.HasOne("InventoryApp.Domain.Entities.Venta", "Venta").WithMany().HasForeignKey("VentaId")
                     .OnDelete(DeleteBehavior.Restrict).HasConstraintName("FK_ReservasInventario_Ventas_VentaId");
+                b.Navigation("PedidoVenta");
                 b.Navigation("Venta");
             });
 
