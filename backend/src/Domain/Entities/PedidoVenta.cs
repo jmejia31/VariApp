@@ -1,5 +1,6 @@
 using InventoryApp.Domain.Common;
 using InventoryApp.Domain.Enums;
+using InventoryApp.Domain.ValueObjects;
 
 namespace InventoryApp.Domain.Entities;
 
@@ -34,11 +35,6 @@ public class PedidoVenta : ConfirmableEntity
     public bool EstaAnulado => Estado == EstadoPedidoVenta.Anulado;
     public decimal Total => _detalles.Sum(x => x.Total);
 
-    /// <summary>
-    /// Materializa el pedido a partir de una cotización aceptada y persistida.
-    /// No convierte ni muta la cotización; esa coordinación transaccional pertenece
-    /// a Application (N3.2.D), donde también se resolverán replay y concurrencia.
-    /// </summary>
     public static PedidoVenta CrearDesdeCotizacion(Cotizacion cotizacion)
     {
         ArgumentNullException.ThrowIfNull(cotizacion);
@@ -87,6 +83,17 @@ public class PedidoVenta : ConfirmableEntity
 
         IdempotencyKey = keyNormalizada;
         IdempotencyFingerprint = fingerprintNormalizado;
+    }
+
+    public ReservaAutomaticaPedido PrepararReservaAutomatica(IEnumerable<AsignacionReservaAutomatica> asignaciones)
+    {
+        if (Id <= 0)
+            throw new InvalidOperationException("El pedido debe estar persistido antes de preparar su reserva automática.");
+        if (Estado != EstadoPedidoVenta.Borrador)
+            throw new InvalidOperationException("Solo un pedido en borrador puede preparar una reserva automática.");
+
+        ValidarDocumento();
+        return ReservaAutomaticaPedido.Crear(Id, _detalles, asignaciones);
     }
 
     public void ActualizarObservaciones(string? observaciones)
