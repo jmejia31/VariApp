@@ -7,8 +7,8 @@ Registro operativo resumido de cierres ERP certificados. La autoridad de ejecuci
 - [x] Autoridad documental unificada en Jules v3.25 con cierre por padre y checkpoints `:00/:15/:30/:45/:55`.
 - v3.20/v3.21 quedan como historia; se conservan ATTEMPT1+R2, R3 prohibido, QA takeover y gates de evidencia.
 - [x] Worker compartido y cuatro workflows Jules alineados estáticamente con v3.25, conservando la ruta `vaep-jules-worker-v320.sh` por compatibilidad.
-- [x] Prueba controlada disponible: `bash .github/scripts/vaep-jules-worker-v320.sh --static-self-test`; valida guardrails sin red, secretos, sesión ni attempt.
-- Pendiente de prueba de integración real: requiere un manifest de dispatch y crea sesión/consume attempt; no ejecutar sin una tarea autorizada.
+- [x] Guard de throughput v3.26: objetivo `3 LISTO / rolling 60m`, dwell máximo de parent 20 min, recovery/failover sin progreso y presupuesto de lane Jules de 18 min antes de handoff al controller.
+- [x] Prueba controlada disponible: `bash .github/scripts/vaep-jules-throughput-guard-v326.sh --static-self-test`; valida guardrails sin red, secretos, sesión ni attempt.
 
 ## ERP-N2.2 — Orden de compra
 
@@ -86,9 +86,17 @@ Documentación: `docs/ERP_N2_9_EVALUACION_PROVEEDORES.md`, `docs/RUNBOOK_N2_9_EV
 - [x] `Venta` conserva la autoridad operativa/financiera; `Factura` permanece ligada a `VentaId`; `PedidoVenta` conserva lifecycle independiente sin duplicar stock, Kardex, facturación ni finanzas.
 - [x] Baseline funcional reutilizado: `a167434880eab07c3b08ca651ae9309da964c23b`, M13 `#32809392404` SUCCESS; delta funcional de N3.5.B-G=0 y P0/P1 atribuibles conocidos=0.
 - [x] Certificación canónica publicada: `docs/CERTIFICACION_N3_5_VENTA_FACTURA.md`.
-- [ ] Cierre H pendiente únicamente de reconciliar `CHANGELOG_AI.md` preservando historial y registrar el commit documental final antes de marcar `N3.5.H=LISTO`.
+- [x] N3.5.H cierre documental publicado byte-perfect en `4296e72b8b5a87ef4e779e3ec6f8af083e396374`; `CHANGELOG_AI.md` quedó exactamente `+17/-0` y blob `9e0f74a66e0064543aa1a92d9ffc02c15a6d3862`.
 
-**ERP-N3.5 está materialmente certificado pero no se declara formalmente cerrado hasta completar el último gate documental de H. Siguiente parent preparado: `N3.6.A — Devoluciones — Auditoría y preflight`, con promoción bloqueada hasta `N3.5.H=LISTO`.**
+**ERP-N3.5 queda formalmente cerrado. El siguiente foco dependency-valid es `N3.6.A — Devoluciones de cliente / Auditoría y preflight`.**
+
+## ERP-N3.6 — Devoluciones de cliente
+
+- [x] N3.6.A auditoría/preflight reconciliado después del cierre real de N3.5.H; no existe `DevolucionCliente` en el baseline y las decisiones no demostradas permanecen `DECISION_PENDING` para B.
+- [ ] N3.6.B dominio/contratos — siguiente tarea dependency-valid; debe definir invariantes/lifecycle con pruebas puras antes de persistencia.
+- [ ] N3.6.C-H pendientes de sus dependencias; no se adelantan por prewarm.
+
+**N3.6.A queda `LISTO`. Siguiente foco: `N3.6.B — Dominio/contratos`.**
 
 ## Fuentes VAEP v2
 
