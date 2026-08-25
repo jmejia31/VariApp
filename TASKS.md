@@ -6,7 +6,9 @@ Registro operativo resumido de cierres ERP certificados. La autoridad de ejecuci
 
 - [x] Autoridad documental unificada en Jules v3.25 con cierre por padre y checkpoints `:00/:15/:30/:45/:55`.
 - v3.20/v3.21 quedan como historia; se conservan ATTEMPT1+R2, R3 prohibido, QA takeover y gates de evidencia.
-- Esta actualización no modificó el Sheet ni el sistema de tareas. La ejecución real debe confirmarse mediante evidencia del ejecutor.
+- [x] Worker compartido y cuatro workflows Jules alineados estáticamente con v3.25, conservando la ruta `vaep-jules-worker-v320.sh` por compatibilidad.
+- [x] Prueba controlada disponible: `bash .github/scripts/vaep-jules-worker-v320.sh --static-self-test`; valida guardrails sin red, secretos, sesión ni attempt.
+- Pendiente de prueba de integración real: requiere un manifest de dispatch y crea sesión/consume attempt; no ejecutar sin una tarea autorizada.
 
 ## ERP-N2.2 — Orden de compra
 

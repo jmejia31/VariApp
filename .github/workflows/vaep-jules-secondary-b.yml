@@ -40,7 +40,7 @@ jobs:
           ref: ${{ github.sha }}
           fetch-depth: 2
 
-      - name: Execute VAEP Jules integration v3.20 worker
+      - name: Execute VAEP Jules integration v3.25 worker (v320 compatibility path)
         shell: bash
         run: bash .github/scripts/vaep-jules-worker-v320.sh
 

@@ -1,6 +1,25 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Compatibility filename: all four Jules lane workflows call this path.
+# Runtime semantics are governed by VAEP/Jules v3.25.
+readonly VAEP_JULES_PROTOCOL="v3.25"
+readonly JULES_MAX_ATTEMPTS_PER_TASK=2
+readonly JULES_REWORK_MAX=1
+readonly PARENT_CLOSE_FIRST=true
+readonly VAEP_CHECKPOINTS=":00,:15,:30,:45,:55"
+
+if [[ "${1:-}" == "--static-self-test" ]]; then
+  [[ "$VAEP_JULES_PROTOCOL" == "v3.25" ]]
+  [[ "$JULES_MAX_ATTEMPTS_PER_TASK" -eq 2 ]]
+  [[ "$JULES_REWORK_MAX" -eq 1 ]]
+  [[ "$PARENT_CLOSE_FIRST" == true ]]
+  [[ "$VAEP_CHECKPOINTS" == ":00,:15,:30,:45,:55" ]]
+  printf '{"status":"ok","protocol":"%s","maxAttempts":%d,"r3Prohibited":true,"qaTakeoverOnR2Failure":true,"parentCloseFirst":%s,"checkpoints":"%s","networkUsed":false,"sessionCreated":false,"attemptConsumed":false}\n' \
+    "$VAEP_JULES_PROTOCOL" "$JULES_MAX_ATTEMPTS_PER_TASK" "$PARENT_CLOSE_FIRST" "$VAEP_CHECKPOINTS"
+  exit 0
+fi
+
 : "${JULES_API_KEY:?Jules API key is required}"
 : "${JULES_API_BASE:=https://jules.googleapis.com/v1alpha}"
 : "${EXPECTED_OWNER:=jmejia31}"
@@ -19,14 +38,7 @@ set -euo pipefail
 : "${GITHUB_SERVER_URL:=https://github.com}"
 : "${RUNNER_TEMP:?RUNNER_TEMP is required}"
 
-readonly VAEP_JULES_PROTOCOL="v3.20"
-readonly JULES_MAX_ATTEMPTS_PER_TASK=2
-readonly JULES_REWORK_MAX=1
-readonly SPRINT_PARENT_TARGET=40
-readonly SPRINT_DEADLINE="2026-08-21T06:00:00-06:00"
-readonly SPRINT_TIMEZONE="America/Tegucigalpa"
-
-work="$RUNNER_TEMP/vaep-jules-v320"
+work="$RUNNER_TEMP/vaep-jules-v325"
 result_dir="$work/result"
 mkdir -p "$result_dir"
 
@@ -43,10 +55,10 @@ api_post_empty() {
 
 # Atomic dispatch invariant: one new manifest, one changed file, one worker.
 mapfile -t added_manifests < <(git diff-tree --no-commit-id --name-only --diff-filter=A -r "$GITHUB_SHA" -- "$DISPATCH_PATH/*.json")
-[[ ${#added_manifests[@]} -eq 1 ]] || fail "v3.20 expected exactly one newly added dispatch manifest for this worker; found ${#added_manifests[@]}." 21
+[[ ${#added_manifests[@]} -eq 1 ]] || fail "v3.25 expected exactly one newly added dispatch manifest for this worker; found ${#added_manifests[@]}." 21
 manifest="${added_manifests[0]}"
 mapfile -t changed_files < <(git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA")
-[[ ${#changed_files[@]} -eq 1 && "${changed_files[0]}" == "$manifest" ]] || fail "v3.20 dispatch commit must change exactly the single new worker manifest." 22
+[[ ${#changed_files[@]} -eq 1 && "${changed_files[0]}" == "$manifest" ]] || fail "v3.25 dispatch commit must change exactly the single new worker manifest." 22
 
 jq -e '
   type == "object" and
@@ -57,7 +69,7 @@ jq -e '
   (.prompt | type == "string" and length > 0) and
   (.fileScopeHint | type == "string") and
   ((.taskAttempt == null) or ((.taskAttempt | type) == "number"))
-' "$manifest" >/dev/null || fail "Invalid v3.20 dispatch manifest schema." 23
+' "$manifest" >/dev/null || fail "Invalid v3.25 dispatch manifest schema." 23
 if [[ -n "$WORKER_ID" ]]; then
   jq -e --arg worker "$WORKER_ID" '.workerId == $worker' "$manifest" >/dev/null || fail "Unexpected workerId in dispatch manifest." 24
 fi
@@ -84,7 +96,7 @@ m = re.search(r'(?:^|-)R(\d+)(?:-|$)', dispatch_id, flags=re.IGNORECASE)
 label_attempt = int(m.group(1)) if m else None
 
 if label_attempt is not None and label_attempt >= 3:
-    raise SystemExit(f'R3+ prohibited by VAEP Jules v3.20: {dispatch_id}')
+    raise SystemExit(f'R3+ prohibited by VAEP Jules v3.25: {dispatch_id}')
 
 if explicit is None:
     attempt = 2 if label_attempt == 2 else 1
@@ -94,12 +106,12 @@ else:
     attempt = int(explicit)
 
 if attempt not in (1, 2):
-    raise SystemExit(f'taskAttempt={attempt} rejected; v3.20 allows only 1 or 2')
+    raise SystemExit(f'taskAttempt={attempt} rejected; v3.25 allows only 1 or 2')
 if label_attempt == 2 and attempt != 2:
     raise SystemExit('R2 dispatch must be ATTEMPT=2')
 print(attempt)
 PY
-)" || fail "v3.20 retry-cap validation failed." 25
+)" || fail "v3.25 retry-cap validation failed." 25
 
 page_token=""
 source_name=""
@@ -152,27 +164,27 @@ if [[ -z "$session_name" ]]; then
     "WORKER_ID=${WORKER_ID:-JULES_A}" \
     "REPOSITORY=jmejia31/VariApp" \
     "BRANCH=Desarrollo" \
-    "VAEP_JULES_PROTOCOL=v3.20" \
+    "VAEP_JULES_PROTOCOL=v3.25" \
+    "GLOBAL_CONTROL_PLANE=VAEP_V4_6_KEYED_MUTEX_HARD_EXECUTION" \
+    "PARENT_CLOSE_FIRST=true" \
+    "VAEP_CHECKPOINTS=$VAEP_CHECKPOINTS" \
     "VAEP_AUTHORITY_FILE=docs/VAEP_AUTHORITY.md" \
-    "VAEP_RETRY_POLICY_FILE=docs/VAEP_V320_RETRY_CAP.md" \
     "PRIMARY_BASE_HEAD=$primary_base" \
     "VAEP_TASK_ID=$task_id" \
     "TASK_ATTEMPT=$task_attempt" \
     "JULES_MAX_ATTEMPTS_PER_TASK=2" \
     "JULES_REWORK_MAX=1" \
     "FILE_SCOPE_HINT=$file_scope" \
-    "SPRINT_PARENT_TARGET=$SPRINT_PARENT_TARGET" \
-    "SPRINT_DEADLINE=$SPRINT_DEADLINE" \
-    "SPRINT_TIMEZONE=$SPRINT_TIMEZONE" \
     "" \
-    "Before changing anything, read docs/VAEP_AUTHORITY.md and docs/VAEP_V320_RETRY_CAP.md FIRST, then AGENTS.md and docs/VAEP_JULES.md. v3.20 overrides any incompatible v3.19-or-earlier text." \
+    "Before changing anything, read docs/VAEP_AUTHORITY.md FIRST, then the dispatch, AGENTS.md, PLAN_EJECUCION_AUTONOMA.md and docs/VAEP_JULES.md. v3.25 is the only operational Jules authority." \
     "HARD RETRY RULE: this logical task allows only ATTEMPT=1 plus one final correction ATTEMPT=2/R2. Never request, propose, create or perform Jules R3+. If ATTEMPT=2 still contains a blocking defect, report it exactly for ChatGPT/VAEP/Vibe QA takeover and finish your evidence." \
-    "TEAM SPRINT: four Jules are targeting at least 40 new parent MICROTAREA rows genuinely LISTO by 2026-08-21 06:00 America/Tegucigalpa. This throughput target NEVER permits false PASS/LISTO, skipped dependencies, reduced tests, scope leaks or weaker quality." \
+    "PARENT CLOSE FIRST: stay inside the assigned exclusive scope of the current parent. Preparation never promotes N+1. Dispatch, activity or COMPLETED never equals LISTO without review, causal validation and evidence." \
+    "CHECKPOINTS: the task system declares :00/:15/:30/:45 with backup :55. A declared schedule is not proof that a checkpoint ran; only executor evidence is." \
     "Work only inside your Jules cloud workspace. Never create branches, pull requests, pushes, merges, deployments, Production changes, secrets, or changes to main." \
     "Do not publish anything to GitHub. Return a reviewable ChangeSet/gitPatch with exact baseCommitId." \
     "Inspect only assigned scope and direct dependencies. If scope materially diverged from PRIMARY_BASE_HEAD and makes the task unsafe, make no changes and report the conflict." \
     "Run proportional tests. Report observations, limitations, risks, recommendations and tests not executed; never claim false PASS." \
-    "Perform final self-review of git status, full diff, scope, contracts, security/RBAC, audit/data and tests before COMPLETED." \
+    "Before COMPLETED, perform two independent self-reviews and report SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. Review git status, full diff, scope, contracts, security/RBAC, audit/data, tests, temporary files and every unexecuted validation." \
     "" \
     "ASSIGNED VAEP MICROTASK" \
     "$user_prompt" > "$prompt_file"
@@ -188,12 +200,12 @@ deadline=$((SECONDS + 6600))
 terminal_state=""
 auto_feedback_count=0
 max_followups=3
-routine_prompt="VAEP Jules v3.20 automated follow-up. Continue autonomously inside the assigned task and FILE_SCOPE_HINT. Authority order: docs/VAEP_AUTHORITY.md -> docs/VAEP_V320_RETRY_CAP.md -> dispatch -> AGENTS.md/docs/VAEP_JULES.md -> code/tests. TASK_ATTEMPT=$task_attempt; maximum content attempts=2; R2 is final; Jules R3+ is prohibited. Resolve routine ambiguity without human confirmation. Do not expand scope. If implementation and validations are complete, perform final self-review, report every observation/limitation/risk/recommendation and every test not executed, preserve a reviewable ChangeSet/gitPatch with baseCommitId, and finish COMPLETED. If ATTEMPT=2 still has a blocking defect, report it precisely for ChatGPT/VAEP/Vibe QA takeover and complete evidence rather than attempting another Jules round. Team sprint target remains 40 genuine parent MICROTAREA LISTO by $SPRINT_DEADLINE; never trade quality for count."
+routine_prompt="VAEP Jules v3.25 automated follow-up. Continue inside the assigned exclusive scope of the current parent. Authority: docs/VAEP_AUTHORITY.md -> dispatch -> AGENTS.md/PLAN_EJECUCION_AUTONOMA.md/docs/VAEP_JULES.md -> code/tests. TASK_ATTEMPT=$task_attempt; maximum attempts=2; R2 is final; R3+ is prohibited and transfers correction to ChatGPT/VAEP/Vibe QA takeover. Do not expand scope or promote N+1. COMPLETED never equals LISTO. Before COMPLETED emit two independent reviews, SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2; report observations, limitations, risks, recommendations and tests not executed; preserve a reviewable ChangeSet/gitPatch with baseCommitId. Never trade quality or causal evidence for throughput."
 
 while (( SECONDS < deadline )); do
   api_get "$JULES_API_BASE/$session_name" > "$work/session-latest.json"
   state="$(jq -r '.state // "UNKNOWN"' "$work/session-latest.json")"
-  echo "Jules v3.20 session $session_id state: $state (attempt $task_attempt/2; auto followups $auto_feedback_count/$max_followups)"
+  echo "Jules v3.25 session $session_id state: $state (attempt $task_attempt/2; auto followups $auto_feedback_count/$max_followups)"
   case "$state" in
     COMPLETED|FAILED|PAUSED)
       terminal_state="$state"
@@ -271,15 +283,15 @@ jq -n \
   --argjson autoFeedbackCount "$auto_feedback_count" \
   --argjson taskAttempt "$task_attempt" \
   --argjson maxAttempts "$JULES_MAX_ATTEMPTS_PER_TASK" \
-  --argjson sprintParentTarget "$SPRINT_PARENT_TARGET" \
-  --arg sprintDeadline "$SPRINT_DEADLINE" \
-  '{protocol:$protocol,workerId:$workerId,dispatchId:$dispatchId,taskId:$taskId,taskAttempt:$taskAttempt,maxAttempts:$maxAttempts,session:$session,state:$state,requestedBase:$requestedBase,actualPatchBase:$actualBase,patchPresent:$patchPresent,suggestedCommitMessage:$suggestedCommitMessage,autoFeedbackCount:$autoFeedbackCount,sprintParentTarget:$sprintParentTarget,sprintDeadline:$sprintDeadline,controllerHandoff:"REVIEW_IMMEDIATELY_AND_ASSIGN_NEXT_SAFE"}' \
+  --argjson parentCloseFirst "$PARENT_CLOSE_FIRST" \
+  --arg checkpoints "$VAEP_CHECKPOINTS" \
+  '{protocol:$protocol,globalControlPlane:"VAEP_V4_6_KEYED_MUTEX_HARD_EXECUTION",parentCloseFirst:$parentCloseFirst,checkpoints:$checkpoints,workerId:$workerId,dispatchId:$dispatchId,taskId:$taskId,taskAttempt:$taskAttempt,maxAttempts:$maxAttempts,r3Prohibited:true,qaTakeoverOnR2Failure:true,session:$session,state:$state,requestedBase:$requestedBase,actualPatchBase:$actualBase,patchPresent:$patchPresent,suggestedCommitMessage:$suggestedCommitMessage,autoFeedbackCount:$autoFeedbackCount,controllerHandoff:"REVIEW_IMMEDIATELY_AND_ASSIGN_NEXT_SAFE"}' \
   > "$result_dir/result.json"
 
 run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
 printf -v issue_body '%s\n\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n%s\n' \
-  "VAEP $WORKER_LABEL v3.20 result and controller handoff signal." \
-  "- Protocol: \`v3.20\`" \
+  "VAEP $WORKER_LABEL v3.25 result and controller handoff signal." \
+  "- Protocol: \`v3.25\`; global control-plane: \`v4.6\`" \
   "- Worker: \`${WORKER_ID:-JULES_A}\`" \
   "- Dispatch: \`$dispatch_id\`" \
   "- Task: \`$task_id\`" \
@@ -289,7 +301,7 @@ printf -v issue_body '%s\n\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n%s\n' 
   "- Inline auto-feedback count: \`$auto_feedback_count\`" \
   "- Patch present: \`$patch_present\`; patch base: \`$actual_base\`" \
   "- Controller handoff: \`REVIEW_IMMEDIATELY_AND_ASSIGN_NEXT_SAFE\`" \
-  "- Sprint: target $SPRINT_PARENT_TARGET genuine parents LISTO by $SPRINT_DEADLINE ($SPRINT_TIMEZONE)" \
+  "- Parent-close-first: \`true\`; checkpoints: \`$VAEP_CHECKPOINTS\`" \
   "- Workflow run: $run_url" \
   'Artifact only. Nothing was applied to Desarrollo, pushed, merged or deployed. VAEP/ChatGPT review is mandatory. If ATTEMPT=2 fails review, ChatGPT/VAEP/Vibe takes over; do not create a Jules R3.'
 gh issue create --repo "$GITHUB_REPOSITORY" --title "$ISSUE_PREFIX $dispatch_id result" --body "$issue_body" >/dev/null
