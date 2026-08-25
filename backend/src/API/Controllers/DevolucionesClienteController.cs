@@ -2,10 +2,7 @@ using InventoryApp.API.Filters;
 using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Interfaces;
-using InventoryApp.Application.Services;
 using InventoryApp.Domain.Enums;
-using InventoryApp.Infrastructure.Persistence;
-using InventoryApp.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,10 +15,9 @@ public sealed class DevolucionesClienteController : ControllerBase
 {
     private readonly IDevolucionClienteService _service;
 
-    public DevolucionesClienteController(AppDbContext db, IUsuarioScopeService scope, IVentaRepository ventas, IFacturaRepository facturas, IAuditoriaService auditoria, ICurrentUserService currentUser, IUnitOfWork unitOfWork)
+    public DevolucionesClienteController(IDevolucionClienteService service)
     {
-        var repository = new DevolucionClienteRepository(db, scope);
-        _service = new DevolucionClienteService(repository, ventas, facturas, auditoria, currentUser, unitOfWork);
+        _service = service ?? throw new ArgumentNullException(nameof(service));
     }
 
     [HttpGet]
