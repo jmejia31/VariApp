@@ -28,9 +28,9 @@ namespace InventoryApp.Infrastructure.Migrations
             builder.HasIndex(x => new { x.OrdenCompraId, x.FechaCreacion })
                 .HasDatabaseName("IX_ThreeWayMatchResultados_OrdenCompra_Fecha");
 
-            builder.HasOne<OrdenCompra>()
+            builder.HasOne("InventoryApp.Domain.Entities.OrdenCompra", null)
                 .WithMany()
-                .HasForeignKey(x => x.OrdenCompraId)
+                .HasForeignKey("OrdenCompraId")
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_ThreeWayMatchResultados_OrdenesCompra_OrdenCompraId");
 
