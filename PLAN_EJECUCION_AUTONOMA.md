@@ -16,7 +16,7 @@ El `.docx` original fue convertido a Google Docs para que el runner consulte per
 
 ### 1.1 Gate de versión antes de automatizar
 
-Antes de adquirir mutex o mutar `CONFIG/COLA/BITACORA`, resolver la versión Jules mediante `docs/VAEP_AUTHORITY.md`. Mientras persista la alerta 3.20/3.21, la corrida queda en modo `READ_ONLY_PROTOCOL_CONFLICT`: puede reconciliar HEAD, commits, CI y documentos, pero no crear dispatches, cambiar ownership ni presentar una versión como vigente. El handoff debe indicar las fuentes contradictorias y la decisión requerida. El protocolo global `VAEP_V4_6_KEYED_MUTEX_HARD_EXECUTION` permanece identificable; el conflicto está limitado al subprotocolo Jules.
+La autoridad unificada es Jules `V3.25_CURRENT` bajo el control-plane global v4.6. Antes de adquirir mutex o mutar estado, comprobar que la ejecución declara v3.25, `PARENT_CLOSE_FIRST` y checkpoints `:00/:15/:30/:45/:55`. El Sheet registra/describe automatizaciones; el sistema de tareas las ejecuta. La ausencia de evidencia del ejecutor obliga a reportar `IDLE/NO_EVIDENCE`, nunca a afirmar que un checkpoint o automatización corrió.
 
 ## 2. Cobertura integral del Plan Maestro ERP V5
 

@@ -1,5 +1,7 @@
 # VAEP/Jules v3.21 — Rolling Parent40
 
+> HISTÓRICO desde 2026-08-24: v3.25 gobierna la operación actual. Esta cola conserva evidencia del esquema v3.21 y no autoriza trabajo nuevo.
+
 > HISTORIA: este documento sustituye operativamente `docs/VAEP_V320_SPRINT40_QUEUE.md`. La cola v3.20 se conserva para auditoría; su ventana de tiempo ya venció.
 
 ## Objetivo

@@ -1,5 +1,7 @@
 # VAEP Jules v3.20 — Retry Cap R2 + QA Takeover + Sprint 40
 
+> HISTÓRICO desde 2026-08-24: v3.25 es la autoridad operativa. Se conservan de este documento el origen auditable de ATTEMPT1+R2, R3 prohibido y QA takeover, ya incorporados en la autoridad actual.
+
 Fecha de activación efectiva de esta orden: 2026-08-20 23:02 America/Tegucigalpa.
 
 Este documento es una extensión normativa obligatoria de `docs/VAEP_AUTHORITY.md`, `docs/VAEP_JULES.md`, `AGENTS.md` y del Plan Maestro ERP V5. En cualquier contradicción sobre rework/attempts/throughput, v3.20 prevalece sobre v3.19 y anteriores. No modifica la autoridad global `VAEP_V4_6_KEYED_MUTEX_HARD_EXECUTION` de ChatGPT/VAEP.

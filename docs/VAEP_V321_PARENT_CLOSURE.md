@@ -1,8 +1,10 @@
 # VAEP/Jules v3.21 — Parent Closure First + Rolling Parent40
 
+> HISTÓRICO desde 2026-08-24: v3.25 es la única autoridad operativa. Este archivo conserva la evolución v3.21 y no gobierna nuevos dispatches.
+
 Activación: `2026-08-21T22:57:00-06:00` (`America/Tegucigalpa`).
 
-Este documento es la norma operativa vigente del subprotocolo Jules A/B/C/D. **v3.20 se conserva como historial**, pero v3.21 prevalece cuando exista contradicción en prioridad de trabajo, uso de capacidad, Sprint40 o handoff. No degrada el control-plane global `VAEP_V4_6_KEYED_MUTEX_HARD_EXECUTION`.
+Este documento fue la norma v3.21. Se conserva como historial y no degrada el control-plane global `VAEP_V4_6_KEYED_MUTEX_HARD_EXECUTION`.
 
 ## 1. Ley principal
 

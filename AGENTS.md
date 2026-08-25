@@ -31,7 +31,9 @@ CONFIG.RUNNER_PROTOCOL_VERSION=VAEP_V4_6_KEYED_MUTEX_HARD_EXECUTION
 Para Jules A/B/C/D:
 
 ```text
-CONFIG.JULES_PROTOCOL_VERSION=V3.20_CURRENT
+CONFIG.JULES_PROTOCOL_VERSION=V3.25_CURRENT
+PARENT_CLOSE_FIRST=TRUE
+CHECKPOINTS=:00,:15,:30,:45,:55
 JULES_MAX_ATTEMPTS_PER_TASK=2
 JULES_REWORK_MAX=1
 JULES_R3_PLUS=PROHIBIDO
@@ -40,14 +42,13 @@ JULES_R3_PLUS=PROHIBIDO
 Orden obligatorio para Jules:
 
 1. `docs/VAEP_AUTHORITY.md`;
-2. `docs/VAEP_V320_RETRY_CAP.md`;
-3. manifest actual;
-4. `AGENTS.md`;
-5. `docs/VAEP_JULES.md`;
-6. Plan Maestro/CONFIG/COLA/BITACORA trasladados por VAEP;
-7. HEAD/código/pruebas actuales.
+2. manifest actual;
+3. `AGENTS.md`;
+4. `PLAN_EJECUCION_AUTONOMA.md` y `docs/VAEP_JULES.md`;
+5. Plan Maestro/CONFIG/COLA/BITACORA trasladados por VAEP;
+6. HEAD/código/pruebas actuales.
 
-Cualquier referencia operativa incompatible a v3.19 o anterior es histórica y no puede gobernar nuevos dispatches. Los cuatro workflows Jules deben ejecutar exclusivamente `.github/scripts/vaep-jules-worker-v320.sh`.
+Las reglas v3.20/v3.21 se conservan como historia y no gobiernan nuevos dispatches. El Sheet registra/configura la operación declarada; el sistema de tareas es quien ejecuta. Esta autoridad documental no demuestra ni modifica por sí sola workers, sesiones, checkpoints o automatizaciones reales: su actividad requiere evidencia del ejecutor.
 
 Fuentes canónicas adicionales:
 
@@ -150,7 +151,7 @@ C: vaep/jules-c/dispatch/*.json
 D: vaep/jules-d/dispatch/*.json
 ```
 
-## 8. Retry Cap Jules v3.20
+## 8. Retry Cap Jules v3.25
 
 Regla dura:
 
@@ -191,20 +192,18 @@ Prioridad de lane libre:
 
 No reabrir `LISTO` solo para ocupar capacidad. No duplicar preflights certificados.
 
-## 10. Sprint 40 — regla extraordinaria vigente
+## 10. Cierre por padre y checkpoints v3.25
 
 ```text
-SPRINT_START_AT=2026-08-20T22:45:00-06:00
-SPRINT_DEADLINE_AT=2026-08-21T06:00:00-06:00
-SPRINT_TIMEZONE=America/Tegucigalpa
-SPRINT_PARENT_TARGET=40
+PARENT_CLOSE_FIRST=TRUE
+CHECKPOINTS=:00,:15,:30,:45,:55
 ```
 
-Objetivo operativo: 40 nuevos padres reales `MICROTAREA` en `LISTO` desde el inicio del sprint. No cuentan `MICROTAREA_HIJA`, support packets, preflights repetidos, manifests, sesiones ni `COMPLETED` sin QA/DoD.
+Toda capacidad segura converge en el padre dependency-valid vigente con scopes no solapados. Ningún padre pasa a `LISTO` por actividad, dispatch o `COMPLETED`: requiere DoD, evidencia causal, CI/pruebas aplicables y cero P0/P1.
 
-Los cuatro Jules deben recibir esta meta en cada sesión v3.20. Checkpoints agregados :00/:15/:30/:45 deben revisar salud A/B/C/D, tarea/attempt, terminales, review queue, QA takeovers, padres `LISTO`, faltantes hasta 40, velocidad requerida y blockers.
+Los checkpoints automáticos declarados son `:00`, `:15`, `:30`, `:45` y respaldo `:55`. Cada uno reconcilia tarea/padre, ownership, actividad real, attempts, review queue, CI causal, handoff, bloqueo y punto de reanudación. Un horario declarado no prueba que el ejecutor haya corrido.
 
-La meta no autoriza saltar dependencias, bajar tests, aceptar P0/P1, false PASS/LISTO, integrar stale patches ni tocar main/Producción/secrets.
+El cierre por padre no autoriza saltar dependencias, bajar pruebas, aceptar P0/P1, false PASS/LISTO, integrar patches stale ni tocar main/Producción/secrets.
 
 ## 11. Watchdog y actividad real
 
@@ -215,20 +214,20 @@ Dispatch != ACTIVE. Jules ACTIVE exige sesión correlacionada + actividad técni
 - `PAUSED` sin trabajo útil: no ACTIVE.
 - terminal: review y handoff inmediatos.
 
-El worker v3.20 resuelve waits rutinarios inline; máximo tres auto-followups por ejecución y luego `AUTO_FEEDBACK_EXHAUSTED`.
+El ejecutor resuelve waits rutinarios dentro de su capacidad real y deja handoff al agotarla. La documentación no puede afirmar que una automatización o checkpoint corrió sin evidencia del sistema de tareas.
 
 ## 12. Handoff técnico GitHub
 
-Al terminal, `.github/scripts/vaep-jules-worker-v320.sh` crea Issue de resultado con:
+Al terminal, el ejecutor v3.25 debe emitir evidencia equivalente a:
 
 ```text
-protocol=v3.20
+protocol=v3.25
 taskAttempt=1|2
 controllerHandoff=REVIEW_IMMEDIATELY_AND_ASSIGN_NEXT_SAFE
-SPRINT_PARENT_TARGET=40
+parentCloseFirst=true
 ```
 
-Esa Issue es la señal técnica inmediata para el control plane. Los checkpoints ChatGPT :00/:15/:30/:45 son la red de seguridad de recolección/reasignación; no existe permiso para dejar una entrega terminal esperando por conveniencia.
+La Issue o evidencia equivalente del ejecutor es la señal técnica. Los scripts/workflows existentes no fueron modificados por esta gobernanza y deben verificarse antes de atribuirles compatibilidad v3.25. Los checkpoints `:00/:15/:30/:45/:55` son red de recuperación y no permiso para dejar una entrega terminal esperando.
 
 ## 13. Definition of Done y cierre
 
