@@ -1,12 +1,12 @@
 # ERP-N3.6 — Devoluciones de cliente — Auditoría y preflight
 
-**Estado:** PREWARM / PROMOTION_BLOCKED_BY_N3.5.H  
-**Owner de cierre:** ChatGPT/VAEP v3.25 Closure Governor  
+**Estado:** LISTO — cierre N3.6.A reconciliado contra HEAD posterior a N3.5.H  
+**Owner de cierre:** ChatGPT/VAEP v3.26 Closure Governor  
 **Rama autorizada:** `Desarrollo`
 
 ## Objetivo
 
-Preparar el alcance verificable de N3.6 antes de introducir dominio o persistencia. Este documento no promueve N3.6.A a `LISTO` mientras `N3.5.H` permanezca abierto y no crea contratos futuros por inferencia.
+Preparar el alcance verificable de N3.6 antes de introducir dominio o persistencia. N3.6.A queda cerrado únicamente como auditoría/preflight: no crea contratos futuros por inferencia ni adelanta N3.6.B.
 
 ## Hechos confirmados en el HEAD vigente
 
@@ -62,14 +62,19 @@ Hasta N3.6.B no se asume ni implementa ninguna de estas decisiones:
 - **N3.6.G:** regresión causal y CI aplicable.
 - **N3.6.H:** documentación/certificación final, TASKS/CHANGELOG solo con cierre real.
 
-## Criterio de salida de N3.6.A
+## Criterio de salida de N3.6.A — CUMPLIDO
 
-N3.6.A puede cerrarse únicamente después de que `N3.5.H=LISTO`, este preflight sea reconciliado contra el HEAD vigente y las decisiones todavía no demostradas permanezcan explícitamente `DECISION_PENDING` para N3.6.B. Este documento no autoriza promoción anticipada.
+N3.6.A puede cerrarse únicamente después de que `N3.5.H=LISTO`, este preflight sea reconciliado contra el HEAD vigente y las decisiones todavía no demostradas permanezcan explícitamente `DECISION_PENDING` para N3.6.B.
+
+Cierre ejecutado después de la publicación certificada de N3.5.H en `4296e72b8b5a87ef4e779e3ec6f8af083e396374`: el preflight fue releído contra `Desarrollo`, no apareció una entidad/agregado `DevolucionCliente`, y todas las decisiones no demostradas continúan expresamente reservadas para N3.6.B. No hay delta de producto, persistencia, API ni frontend en N3.6.A.
 
 ## Evidencia inspeccionada
 
 - `backend/src/Domain/Entities/Venta.cs`
 - `backend/src/Domain/Entities/Factura.cs`
 - `backend/src/Domain/Entities/DevolucionProveedor.cs`
-- búsqueda dirigida sin resultados para `DevolucionCliente`
-- Issue Jules D #526, usado únicamente como evidencia prewarm reconciliada; sus prescripciones futuras rechazadas no se convierten en contrato.
+- búsqueda dirigida fresca sin resultados para `class DevolucionCliente`
+- Issue Jules A #596 / artifact `9577507511`, usado únicamente como evidencia de closure-readiness; no se integra su documento stale porque declaraba N3.5.H todavía abierto.
+- cierre N3.5.H `4296e72b8b5a87ef4e779e3ec6f8af083e396374`, diff exacto `CHANGELOG_AI.md +17/-0`.
+
+**Resultado:** `N3.6.A=LISTO`. Siguiente tarea dependency-valid: `N3.6.B — Dominio/contratos`, que debe resolver explícitamente los `DECISION_PENDING` anteriores con pruebas puras antes de persistencia.
