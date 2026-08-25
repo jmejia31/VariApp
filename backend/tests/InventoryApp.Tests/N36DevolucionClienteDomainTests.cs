@@ -6,245 +6,97 @@ namespace InventoryApp.Tests;
 
 public class N36DevolucionClienteDomainTests
 {
-    private static readonly DateTime FechaBaseUtc = new(2026, 8, 25, 19, 0, 0, DateTimeKind.Utc);
-
     [Fact]
-    public void CrearDesdeVenta_ConfirmadaPersistida_ConFacturaElegible_PreservaOrigenSinMutarlo()
+    public void ValidarDocumento_requiere_venta_motivo_y_detalle()
     {
-        var venta = CrearVentaConfirmada();
-        var factura = CrearFactura(venta.Id, EstadoFactura.Emitida);
+        var devolucion = CrearValida();
+        devolucion.VentaId = 0;
 
-        var devolucion = DevolucionCliente.CrearDesdeVenta(venta, factura);
+        Assert.Throws<InvalidOperationException>(() => devolucion.ValidarDocumento());
 
-        Assert.Equal(venta.Id, devolucion.VentaId);
-        Assert.Same(venta, devolucion.Venta);
-        Assert.Equal(factura.Id, devolucion.FacturaId);
-        Assert.Same(factura, devolucion.Factura);
-        Assert.Equal(EstadoDevolucionCliente.Borrador, devolucion.Estado);
-        Assert.True(devolucion.EsEditable);
-        Assert.Equal(EstadoDocumento.Confirmada, venta.Estado);
-        Assert.Equal(EstadoFactura.Emitida, factura.Estado);
+        devolucion = CrearValida();
+        devolucion.Motivo = " ";
+        Assert.Throws<InvalidOperationException>(() => devolucion.ValidarDocumento());
+
+        devolucion = CrearValida();
+        devolucion.Detalles.Clear();
+        Assert.Throws<InvalidOperationException>(() => devolucion.ValidarDocumento());
     }
 
     [Fact]
-    public void CrearDesdeVenta_OrigenNoElegible_FallaCerrado()
+    public void ValidarDocumento_rechaza_detalle_venta_duplicado()
     {
-        Assert.Throws<ArgumentNullException>(() => DevolucionCliente.CrearDesdeVenta(null!));
+        var devolucion = CrearValida();
+        devolucion.Detalles.Add(CrearDetalle(10));
 
-        var noPersistida = CrearVentaConfirmada(id: 0);
-        Assert.Throws<InvalidOperationException>(() => DevolucionCliente.CrearDesdeVenta(noPersistida));
-
-        var borrador = CrearVentaConfirmada();
-        borrador.Estado = EstadoDocumento.Borrador;
-        Assert.Throws<InvalidOperationException>(() => DevolucionCliente.CrearDesdeVenta(borrador));
-
-        var eliminada = CrearVentaConfirmada();
-        eliminada.Eliminado = true;
-        Assert.Throws<InvalidOperationException>(() => DevolucionCliente.CrearDesdeVenta(eliminada));
-    }
-
-    [Theory]
-    [InlineData(EstadoFactura.Borrador)]
-    [InlineData(EstadoFactura.Anulada)]
-    [InlineData(EstadoFactura.Cancelada)]
-    public void CrearDesdeVenta_FacturaNoElegible_FallaCerrado(EstadoFactura estado)
-    {
-        var venta = CrearVentaConfirmada();
-        var factura = CrearFactura(venta.Id, estado);
-
-        Assert.Throws<InvalidOperationException>(() => DevolucionCliente.CrearDesdeVenta(venta, factura));
+        Assert.Throws<InvalidOperationException>(() => devolucion.ValidarDocumento());
     }
 
     [Fact]
-    public void CrearDesdeVenta_FacturaDeOtraVenta_FallaCerrado()
+    public void Confirmar_y_anular_respetan_lifecycle_y_utc()
     {
-        var venta = CrearVentaConfirmada();
-        var factura = CrearFactura(venta.Id + 1, EstadoFactura.Emitida);
+        var devolucion = CrearValida();
+        var confirmadaUtc = new DateTime(2026, 8, 25, 18, 0, 0, DateTimeKind.Utc);
+        var anuladaUtc = confirmadaUtc.AddMinutes(15);
 
-        Assert.Throws<InvalidOperationException>(() => DevolucionCliente.CrearDesdeVenta(venta, factura));
-    }
-
-    [Fact]
-    public void AgregarDetalle_ParcialValido_CopiaSnapshotsYDefineResolucionSinEfectosLaterales()
-    {
-        var venta = CrearVentaConfirmada();
-        var detalle = CrearDetalleVenta(venta.Id, cantidad: 5, precioUnitario: 120m);
-        venta.Detalles.Add(detalle);
-        var devolucion = DevolucionCliente.CrearDesdeVenta(venta);
-
-        devolucion.AgregarDetalle(detalle, cantidad: 2, cantidadYaDevuelta: 1, TipoResolucionDevolucionCliente.Reintegro);
-
-        var devuelto = Assert.Single(devolucion.Detalles);
-        Assert.Equal(detalle.Id, devuelto.VentaDetalleId);
-        Assert.Equal(detalle.ProductoId, devuelto.ProductoId);
-        Assert.Equal(detalle.ProductoVarianteId, devuelto.ProductoVarianteId);
-        Assert.Equal(2, devuelto.Cantidad);
-        Assert.Equal(5, devuelto.CantidadVendidaSnapshot);
-        Assert.Equal(120m, devuelto.PrecioUnitarioSnapshot);
-        Assert.Equal(TipoResolucionDevolucionCliente.Reintegro, devuelto.Resolucion);
-        Assert.Equal(240m, devuelto.MontoReferencia);
-        Assert.Equal(240m, devolucion.MontoReferencia);
-        Assert.Equal(5, detalle.Cantidad);
-        Assert.Equal(EstadoDocumento.Confirmada, venta.Estado);
-    }
-
-    [Fact]
-    public void AgregarDetalle_SobredevolucionODuplicado_FallaCerrado()
-    {
-        var venta = CrearVentaConfirmada();
-        var detalle = CrearDetalleVenta(venta.Id, cantidad: 3, precioUnitario: 50m);
-        venta.Detalles.Add(detalle);
-        var devolucion = DevolucionCliente.CrearDesdeVenta(venta);
-
-        Assert.Throws<InvalidOperationException>(() =>
-            devolucion.AgregarDetalle(detalle, cantidad: 2, cantidadYaDevuelta: 2, TipoResolucionDevolucionCliente.Cambio));
-
-        devolucion.AgregarDetalle(detalle, cantidad: 1, cantidadYaDevuelta: 0, TipoResolucionDevolucionCliente.Cambio);
-        Assert.Throws<InvalidOperationException>(() =>
-            devolucion.AgregarDetalle(detalle, cantidad: 1, cantidadYaDevuelta: 0, TipoResolucionDevolucionCliente.CreditoAFavor));
-    }
-
-    [Fact]
-    public void AgregarDetalle_DeOtraVenta_FallaCerrado()
-    {
-        var venta = CrearVentaConfirmada();
-        var detalle = CrearDetalleVenta(venta.Id + 1, cantidad: 2, precioUnitario: 80m);
-        var devolucion = DevolucionCliente.CrearDesdeVenta(venta);
-
-        Assert.Throws<InvalidOperationException>(() =>
-            devolucion.AgregarDetalle(detalle, 1, 0, TipoResolucionDevolucionCliente.Reintegro));
-    }
-
-    [Fact]
-    public void EstablecerIdempotencia_NormalizaYNoPermiteSustitucion()
-    {
-        var devolucion = DevolucionCliente.CrearDesdeVenta(CrearVentaConfirmada());
-        var fingerprint = new string('A', 64);
-
-        devolucion.EstablecerIdempotencia(" devolucion-001 ", fingerprint);
-        devolucion.EstablecerIdempotencia("devolucion-001", fingerprint.ToLowerInvariant());
-
-        Assert.Equal("devolucion-001", devolucion.IdempotencyKey);
-        Assert.Equal(fingerprint.ToLowerInvariant(), devolucion.IdempotencyFingerprint);
-        Assert.Throws<InvalidOperationException>(() => devolucion.EstablecerIdempotencia("devolucion-002", fingerprint));
-        Assert.Throws<InvalidOperationException>(() => devolucion.EstablecerIdempotencia("devolucion-001", new string('b', 64)));
-    }
-
-    [Fact]
-    public void Confirmar_SinDetalleOSinIdempotencia_FallaCerrado()
-    {
-        var venta = CrearVentaConfirmada();
-        var detalle = CrearDetalleVenta(venta.Id, cantidad: 2, precioUnitario: 100m);
-
-        var sinDetalle = DevolucionCliente.CrearDesdeVenta(venta);
-        sinDetalle.EstablecerIdempotencia("dev-1", new string('a', 64));
-        Assert.Throws<InvalidOperationException>(() => sinDetalle.Confirmar(1, "qa", FechaBaseUtc));
-
-        var sinIdempotencia = DevolucionCliente.CrearDesdeVenta(venta);
-        sinIdempotencia.AgregarDetalle(detalle, 1, 0, TipoResolucionDevolucionCliente.Reintegro);
-        Assert.Throws<InvalidOperationException>(() => sinIdempotencia.Confirmar(1, "qa", FechaBaseUtc));
-    }
-
-    [Fact]
-    public void Confirmar_ContratoValido_RegistraLifecycleSinMutarVentaNiFactura()
-    {
-        var venta = CrearVentaConfirmada();
-        var factura = CrearFactura(venta.Id, EstadoFactura.Pagada);
-        var detalle = CrearDetalleVenta(venta.Id, cantidad: 4, precioUnitario: 75m);
-        var devolucion = DevolucionCliente.CrearDesdeVenta(venta, factura);
-        devolucion.AgregarDetalle(detalle, 4, 0, TipoResolucionDevolucionCliente.CreditoAFavor);
-        devolucion.EstablecerIdempotencia("dev-total-1", new string('c', 64));
-
-        devolucion.Confirmar(7, " qa ", FechaBaseUtc);
+        devolucion.Confirmar(7, confirmadaUtc);
 
         Assert.Equal(EstadoDevolucionCliente.Confirmada, devolucion.Estado);
-        Assert.True(devolucion.EstaConfirmada);
-        Assert.False(devolucion.EsEditable);
-        Assert.Equal(FechaBaseUtc, devolucion.FechaConfirmacion);
-        Assert.Equal(7, devolucion.ConfirmadoPorUsuarioId);
-        Assert.Equal("qa", devolucion.ConfirmadoPorNombreUsuario);
-        Assert.Equal(EstadoDocumento.Confirmada, venta.Estado);
-        Assert.Equal(EstadoFactura.Pagada, factura.Estado);
-        Assert.Equal(0m, factura.TotalPagado);
-    }
+        Assert.Equal(7, devolucion.ConfirmadaPorUsuarioId);
+        Assert.Equal(confirmadaUtc, devolucion.FechaConfirmacionUtc);
+        Assert.Throws<InvalidOperationException>(() => devolucion.Confirmar(7, confirmadaUtc));
 
-    [Fact]
-    public void Anular_Confirmada_RegistraAuditoriaSinEjecutarEfectosFisicosOFinancieros()
-    {
-        var venta = CrearVentaConfirmada();
-        var factura = CrearFactura(venta.Id, EstadoFactura.Emitida);
-        var detalle = CrearDetalleVenta(venta.Id, cantidad: 2, precioUnitario: 90m);
-        var devolucion = DevolucionCliente.CrearDesdeVenta(venta, factura);
-        devolucion.AgregarDetalle(detalle, 1, 0, TipoResolucionDevolucionCliente.Cambio);
-        devolucion.EstablecerIdempotencia("dev-2", new string('d', 64));
-        devolucion.Confirmar(1, "qa", FechaBaseUtc);
-        var fechaAnulacion = FechaBaseUtc.AddMinutes(10);
-
-        devolucion.Anular(2, " admin ", " Cliente desistió ", fechaAnulacion);
+        devolucion.Anular(9, "Error de captura", anuladaUtc);
 
         Assert.Equal(EstadoDevolucionCliente.Anulada, devolucion.Estado);
-        Assert.True(devolucion.EstaAnulada);
-        Assert.Equal(fechaAnulacion, devolucion.FechaAnulacion);
-        Assert.Equal(2, devolucion.AnuladoPorUsuarioId);
-        Assert.Equal("admin", devolucion.AnuladoPorNombreUsuario);
-        Assert.Equal("Cliente desistió", devolucion.MotivoAnulacion);
-        Assert.Equal(EstadoDocumento.Confirmada, venta.Estado);
-        Assert.Equal(EstadoFactura.Emitida, factura.Estado);
-        Assert.Equal(2, detalle.Cantidad);
+        Assert.Equal(9, devolucion.AnuladaPorUsuarioId);
+        Assert.Equal("Error de captura", devolucion.MotivoAnulacion);
+        Assert.Equal(anuladaUtc, devolucion.FechaAnulacionUtc);
     }
 
     [Fact]
-    public void ConfirmarOAnular_TransicionInvalida_FallaCerrado()
+    public void Confirmar_rechaza_fecha_no_utc()
     {
-        var venta = CrearVentaConfirmada();
-        var detalle = CrearDetalleVenta(venta.Id, cantidad: 2, precioUnitario: 90m);
-        var devolucion = DevolucionCliente.CrearDesdeVenta(venta);
+        var devolucion = CrearValida();
+        var local = DateTime.SpecifyKind(new DateTime(2026, 8, 25, 12, 0, 0), DateTimeKind.Local);
 
-        Assert.Throws<InvalidOperationException>(() =>
-            devolucion.Anular(1, "qa", "motivo", FechaBaseUtc));
-
-        devolucion.AgregarDetalle(detalle, 1, 0, TipoResolucionDevolucionCliente.Reintegro);
-        devolucion.EstablecerIdempotencia("dev-3", new string('e', 64));
-        devolucion.Confirmar(1, "qa", FechaBaseUtc);
-
-        Assert.Throws<InvalidOperationException>(() => devolucion.Confirmar(1, "qa", FechaBaseUtc.AddMinutes(1)));
-        Assert.Throws<InvalidOperationException>(() =>
-            devolucion.AgregarDetalle(detalle, 1, 0, TipoResolucionDevolucionCliente.Cambio));
+        Assert.Throws<ArgumentException>(() => devolucion.Confirmar(1, local));
     }
 
-    private static Venta CrearVentaConfirmada(int id = 501) => new()
+    [Fact]
+    public void TotalReferencial_suma_detalles_sin_inventar_credito_financiero()
     {
-        Id = id,
-        NumeroVenta = "V-501",
-        Estado = EstadoDocumento.Confirmada,
-        ClienteNombre = "Cliente",
-        Total = 500m
+        var devolucion = CrearValida();
+        devolucion.Detalles.Add(new DevolucionClienteDetalle
+        {
+            VentaDetalleId = 11,
+            ProductoId = 2,
+            Cantidad = 1,
+            PrecioUnitarioSnapshot = 50.125m,
+            ProductoNombreSnapshot = "Producto B"
+        });
+
+        Assert.Equal(250.3750m, devolucion.TotalReferencial);
+    }
+
+    private static DevolucionCliente CrearValida() => new()
+    {
+        NumeroDevolucion = "DEV-CLI-0001",
+        VentaId = 100,
+        ClienteId = 5,
+        ClienteNombreSnapshot = "Cliente prueba",
+        Motivo = "Producto no requerido",
+        Detalles = new List<DevolucionClienteDetalle> { CrearDetalle(10) }
     };
 
-    private static Factura CrearFactura(int ventaId, EstadoFactura estado) => new()
+    private static DevolucionClienteDetalle CrearDetalle(int ventaDetalleId) => new()
     {
-        Id = 601,
-        VentaId = ventaId,
-        NumeroFactura = "F-601",
-        Estado = estado,
-        ClienteNombre = "Cliente",
-        EmpresaNombre = "VariStore",
-        Total = 500m
-    };
-
-    private static VentaDetalle CrearDetalleVenta(int ventaId, int cantidad, decimal precioUnitario) => new()
-    {
-        Id = 701,
-        VentaId = ventaId,
-        ProductoId = 11,
-        ProductoVarianteId = 21,
-        Cantidad = cantidad,
-        PrecioUnitario = precioUnitario,
-        ProductoSkuSnapshot = "SKU-001",
-        ProductoNombreSnapshot = "Producto",
-        ProductoMarcaSnapshot = "Marca",
-        ProductoModeloSnapshot = "Modelo",
-        ProductoColorSnapshot = "Negro",
-        ProductoTallaSnapshot = "M"
+        VentaDetalleId = ventaDetalleId,
+        ProductoId = 1,
+        ProductoVarianteId = 2,
+        Cantidad = 2,
+        PrecioUnitarioSnapshot = 100.125m,
+        ProductoNombreSnapshot = "Producto A",
+        ProductoSkuSnapshot = "SKU-A"
     };
 }
