@@ -80,6 +80,16 @@ Documentación: `docs/ERP_N2_9_EVALUACION_PROVEEDORES.md`, `docs/RUNBOOK_N2_9_EV
 
 **ERP-N3.4 queda formalmente cerrado. Siguiente MICROTAREA dependency-valid: `N3.5.A — Venta/factura — Auditoría y preflight`.**
 
+## ERP-N3.5 — Venta/factura
+
+- [x] N3.5.A-G completados y certificados en COLA mediante preflight y N/A grounded donde el desacople ya estaba implementado.
+- [x] `Venta` conserva la autoridad operativa/financiera; `Factura` permanece ligada a `VentaId`; `PedidoVenta` conserva lifecycle independiente sin duplicar stock, Kardex, facturación ni finanzas.
+- [x] Baseline funcional reutilizado: `a167434880eab07c3b08ca651ae9309da964c23b`, M13 `#32809392404` SUCCESS; delta funcional de N3.5.B-G=0 y P0/P1 atribuibles conocidos=0.
+- [x] Certificación canónica publicada: `docs/CERTIFICACION_N3_5_VENTA_FACTURA.md`.
+- [ ] Cierre H pendiente únicamente de reconciliar `CHANGELOG_AI.md` preservando historial y registrar el commit documental final antes de marcar `N3.5.H=LISTO`.
+
+**ERP-N3.5 está materialmente certificado pero no se declara formalmente cerrado hasta completar el último gate documental de H. Siguiente parent preparado: `N3.6.A — Devoluciones — Auditoría y preflight`, con promoción bloqueada hasta `N3.5.H=LISTO`.**
+
 ## Fuentes VAEP v2
 
 Plan rector:
