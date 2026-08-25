@@ -1,10 +1,10 @@
+using System.Reflection;
 using InventoryApp.API.Controllers;
 using InventoryApp.API.Filters;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Application.Services;
 using InventoryApp.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 using Xunit;
 
 namespace InventoryApp.Tests;
@@ -32,8 +32,12 @@ public sealed class N36DevolucionClienteApplicationContractTests
         var method = typeof(DevolucionesClienteController).GetMethod(metodo);
         Assert.NotNull(method);
         var permiso = method!.GetCustomAttributes(typeof(RequierePermisoAttribute), true).Cast<RequierePermisoAttribute>().Single();
-        Assert.Equal(ModuloSistema.Ventas, permiso.Modulo);
-        Assert.Equal(accion, permiso.Accion);
+        var moduloField = typeof(RequierePermisoAttribute).GetField("_modulo", BindingFlags.Instance | BindingFlags.NonPublic);
+        var accionField = typeof(RequierePermisoAttribute).GetField("_accion", BindingFlags.Instance | BindingFlags.NonPublic);
+        Assert.NotNull(moduloField);
+        Assert.NotNull(accionField);
+        Assert.Equal(ModuloSistema.Ventas, Assert.IsType<ModuloSistema>(moduloField!.GetValue(permiso)));
+        Assert.Equal(accion, Assert.IsType<AccionPermiso>(accionField!.GetValue(permiso)));
     }
 
     [Fact]
