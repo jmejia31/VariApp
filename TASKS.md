@@ -49,6 +49,25 @@ Documentación: `docs/ERP_N2_9_EVALUACION_PROVEEDORES.md`, `docs/RUNBOOK_N2_9_EV
 
 **ERP-N3.1 queda formalmente cerrado. Parent40=30/40; GAP=10. Siguiente MICROTAREA dependency-valid: `N3.2.A — Pedidos de venta / Auditoría y preflight`.**
 
+## ERP-N3.2 — Pedidos de venta
+
+- [x] N3.2.A-H completados y certificados en COLA.
+- [x] PedidoVenta preserva lifecycle, idempotencia durable y persistencia propia sin adelantar la reserva automática de inventario.
+- [x] Certificación canónica: `docs/CERTIFICACION_N3_2_PEDIDOS.md`.
+
+**ERP-N3.2 queda formalmente cerrado. El siguiente foco dependency-valid es `N3.3.A — Reserva automática de inventario / Auditoría y preflight`.**
+
+## ERP-N3.3 — Reserva automática de inventario
+
+- [x] N3.3.A-G completados y certificados en COLA.
+- [x] La confirmación de PedidoVenta reutiliza `ReservaInventario` y la autoridad física `ExistenciaVariante`; no crea una segunda autoridad cuantitativa ni inventa selección automática de almacén/ubicación.
+- [x] N3.3.H documentación/certificación publicada mediante paquete atómico VAEP v3.25.
+- [x] Certificación: `docs/CERTIFICACION_N3_3_RESERVA_AUTOMATICA.md`.
+- [x] Runbook: `docs/RUNBOOK_N3_3_RESERVA_AUTOMATICA.md`.
+- [x] ADR de autoridad reutilizado: `docs/ADR_N1_8_RESERVAS_STOCK_RESERVADO_Y_OVERSELLING.md`.
+
+**ERP-N3.3 queda formalmente cerrado. Siguiente MICROTAREA dependency-valid: `N3.4.A — Remisiones/entregas / Auditoría y preflight`.**
+
 ## Fuentes VAEP v2
 
 Plan rector:

@@ -520,3 +520,13 @@ Cada entrada debe contener fecha, agente, objetivo, alcance, validaciones reales
 **Correccion:** los CI 31622173253 y 31622173357 demostraron que la logica Banco/fail-closed y las pruebas pasaban, pero dotnet ef migrations has-pending-model-changes detecto drift porque la migracion inicial de Banco no actualizo el snapshot EF canonico. Se reemplaza esa migracion manual por una migracion generada con EF Core 8.0.8, su Designer y AppDbContextModelSnapshot, sin relajar ninguna validacion ni alterar el diseno normalizado.
 
 **Control:** B2 permanece VALIDANDO hasta que los CI reales sobre el changeset canonico terminen en verde. No se toca main, Produccion, PR #2, auto-merge ni ramas nuevas.
+
+## 2026-08-24 — ERP-N3.3 Reserva automática de inventario — CIERRE FORMAL
+
+**Responsable:** ChatGPT/VAEP v3.25 mediante PARENT CLOSURE GOVERNOR y ATOMIC_PARENT_PUBLISH documental.
+
+**Objetivo/alcance:** cerrar formalmente N3.3.A-H sin reabrir código funcional. La confirmación de `PedidoVenta` reutiliza `ReservaInventario` y la autoridad física `ExistenciaVariante`; la reserva compromete `StockReservado` sin mover `StockFisico` por el mero acto de reservar y no introduce una segunda autoridad cuantitativa ni selección automática inventada de almacén/ubicación.
+
+**Evidencia:** baseline funcional `960ac07ed1e96d1d2e98a51fdb5dc216fbc8d0f3`; N3.3.D/E/F/G ya estaban `LISTO` en COLA, la regresión E2E `reservation-automatic-flow.spec.ts` fue aceptada por el control VAEP y P0/P1 bloqueantes conocidos atribuibles a N3.3=0. Los fallos de workflows legacy ERP-N0 observados en paralelo no se usan como gate causal sin evidencia directa.
+
+**Documentación/control:** `docs/CERTIFICACION_N3_3_RESERVA_AUTOMATICA.md`, `docs/RUNBOOK_N3_3_RESERVA_AUTOMATICA.md` y el ADR vigente `docs/ADR_N1_8_RESERVAS_STOCK_RESERVADO_Y_OVERSELLING.md`. `TASKS.md` se reconcilia en el mismo commit atómico. Siguiente parent dependency-valid: `N3.4.A — Remisiones/entregas / Auditoría y preflight`.
