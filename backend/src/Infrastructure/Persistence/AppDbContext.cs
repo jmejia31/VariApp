@@ -50,6 +50,8 @@ public class AppDbContext : DbContext
     public DbSet<Permiso> Permisos => Set<Permiso>();
     public DbSet<Cotizacion> Cotizaciones => Set<Cotizacion>();
     public DbSet<CotizacionDetalle> CotizacionDetalles => Set<CotizacionDetalle>();
+    public DbSet<PreparacionPedidoVenta> PreparacionesPedidoVenta => Set<PreparacionPedidoVenta>();
+    public DbSet<PreparacionPedidoVentaDetalle> PreparacionPedidoVentaDetalles => Set<PreparacionPedidoVentaDetalle>();
 
     public DbSet<Descuento> Descuentos => Set<Descuento>();
     public DbSet<DescuentoProducto> DescuentoProductos => Set<DescuentoProducto>();
