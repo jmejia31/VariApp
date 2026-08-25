@@ -90,7 +90,7 @@ namespace InventoryApp.Infrastructure.Migrations
                 SELECT 1, CASE WHEN COUNT(*) = 1 THEN 0 ELSE 1 END FROM information_schema.statistics
                  WHERE table_schema = DATABASE() AND table_name = 'PreparacionesPedidoVenta' AND index_name = 'UX_PreparacionesPedidoVenta_PedidoVentaId';
                 INSERT INTO __N34CPostGuard (Id, Violaciones)
-                SELECT 2, CASE WHEN COUNT(*) = 1 THEN 0 ELSE 1 END FROM information_schema.statistics
+                SELECT 2, CASE WHEN COUNT(*) = 4 THEN 0 ELSE 1 END FROM information_schema.statistics
                  WHERE table_schema = DATABASE() AND table_name = 'PreparacionPedidoVentaDetalles' AND index_name = 'UX_PreparacionPedidoVentaDetalles_ClaveFisica';
                 DROP TEMPORARY TABLE __N34CPostGuard;
                 """);
