@@ -6,7 +6,6 @@ using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Enums;
-using Microsoft.EntityFrameworkCore;
 
 namespace InventoryApp.Application.Services;
 
@@ -95,7 +94,7 @@ public sealed class DevolucionClienteService : IDevolucionClienteService
                 id = devolucion.Id;
             });
         }
-        catch (DbUpdateException)
+        catch (Exception ex) when (string.Equals(ex.GetType().FullName, "Microsoft.EntityFrameworkCore.DbUpdateException", StringComparison.Ordinal))
         {
             var replay = await _repository.GetByIdempotencyKeyAsync(key, tracking: false);
             if (replay is null) throw;
