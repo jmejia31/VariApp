@@ -4,6 +4,23 @@ Bitácora colaborativa de cambios realizados por Javier Mejía, Codex, AntiG/Ant
 
 No reemplaza `git log`: registra intención, alcance, validaciones y handoff. Todo changeset intencional debe incluir una entrada breve; no modificar otros colaborativos si su contenido no cambió.
 
+## 2026-08-25 — ERP-N3.5 Venta/factura — CIERRE FORMAL
+
+**Responsable:** ChatGPT/VAEP v3.25 Closure Governor.
+
+**Objetivo/alcance:** registrar el cierre formal del bloque N3.5 (Venta y Factura), confirmando que dichas entidades conservan su autoridad existente y que `PedidoVenta` (N3.2) permanece estrictamente desacoplado, sin introducir una conversión directa (`PedidoVenta` ↔ `Venta`), FKs cross-document, idempotencia, ni orquestación nueva.
+
+**Evidencia:** las microtareas fueron concluidas y validadas según su dominio:
+- N3.5.A #516 `LISTO`
+- N3.5.B #517 `LISTO` N/A domain grounded
+- N3.5.C #518 `LISTO` N/A persistence grounded
+- N3.5.D #519 `LISTO` N/A Application/API grounded
+- N3.5.E #520 `LISTO` N/A frontend grounded
+- N3.5.F #521 `LISTO` N/A security/audit grounded
+- N3.5.G #522 `LISTO` N/A QA/CI grounded
+
+**Certificación funcional:** el control reporta la certificación `56a422f0bf0e882fa6c9d800061154031f701091`, TASKS `a298bf537c98da8a9f1e31f4a2d8f8e6cc50e572`, con baseline funcional en `a167434880eab07c3b08ca651ae9309da964c23b` tras M13 #32809392404 en `SUCCESS`. P0/P1 atribuibles conocidos a la fecha: 0.
+
 ## 2026-08-24 — Codex — ejecutor Jules v3.25
 
 - Se alineó `.github/scripts/vaep-jules-worker-v320.sh` con semántica v3.25 conservando el nombre por compatibilidad con cuatro workflows.
