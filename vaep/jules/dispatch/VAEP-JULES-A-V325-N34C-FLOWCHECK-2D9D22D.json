@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-A-V325-N34C-FLOWCHECK-2D9D22D",
+  "taskId": "N3.4.C-FLOWCHECK",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "9ddacc069c65c6e080b6d6ad697cad9914e38fd0",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ-ONLY cross-review of N3.4.C evidence, gates and direct dependencies. Do not modify repository files or take implementation ownership.",
+  "prompt": "Validate the complete VAEP/Jules v3.25 dispatch flow end to end and perform a read-only cross-review of N3.4.C. Confirm receipt of this exact dispatch, VariApp source access, Desarrollo visibility, resolved current HEAD, relevant N3.4.C evidence, tests/gates and any blockers. Do not duplicate ACTIVE ownership. Do not edit files, do not commit, do not push, do not create branches or PRs, do not merge and do not deploy. If the assigned scope has materially diverged from PRIMARY_BASE_HEAD or another active owner makes the review unsafe, fail closed and report the exact conflict. Return READY or NOT_READY with concrete evidence, limitations, risks, unexecuted checks, and SELF_REVIEW_PASS_1 plus SELF_REVIEW_PASS_2. This dispatch is intentionally review-only so it can validate the full v3.25 transport/session/control path without interfering with ChatGPT/VAEP implementation work."
+}
