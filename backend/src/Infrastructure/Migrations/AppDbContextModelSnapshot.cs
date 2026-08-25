@@ -19,36 +19,16 @@ namespace InventoryApp.Infrastructure.Migrations
     {
         internal static void Apply(ModelBuilder modelBuilder)
         {
-            ApplyPart1(modelBuilder);
-            ApplyPart2(modelBuilder);
-            ApplyPart3(modelBuilder);
-            ApplyPart4(modelBuilder);
-            ApplyPart5(modelBuilder);
-            ApplyPart6(modelBuilder);
-            ApplyPart7(modelBuilder);
-            ApplyPart8(modelBuilder);
-            ApplyPart9(modelBuilder);
-            ApplyPart10(modelBuilder);
-            ApplyPart11(modelBuilder);
-            ApplyPart12(modelBuilder);
-            ApplyPart13(modelBuilder);
-            ApplyPart14(modelBuilder);
-            ApplyPart15(modelBuilder);
-            ApplyPart16(modelBuilder);
-            ApplyPart17(modelBuilder);
-            ApplyPart18(modelBuilder);
-            ApplyPart19(modelBuilder);
-            ApplyPart20(modelBuilder);
-            ApplyPart21(modelBuilder);
-            ApplyPart22(modelBuilder);
-            ApplyPart23(modelBuilder);
-            ApplyPart24(modelBuilder);
+            ApplyPart1(modelBuilder); ApplyPart2(modelBuilder); ApplyPart3(modelBuilder); ApplyPart4(modelBuilder); ApplyPart5(modelBuilder);
+            ApplyPart6(modelBuilder); ApplyPart7(modelBuilder); ApplyPart8(modelBuilder); ApplyPart9(modelBuilder); ApplyPart10(modelBuilder);
+            ApplyPart11(modelBuilder); ApplyPart12(modelBuilder); ApplyPart13(modelBuilder); ApplyPart14(modelBuilder); ApplyPart15(modelBuilder);
+            ApplyPart16(modelBuilder); ApplyPart17(modelBuilder); ApplyPart18(modelBuilder); ApplyPart19(modelBuilder); ApplyPart20(modelBuilder);
+            ApplyPart21(modelBuilder); ApplyPart22(modelBuilder); ApplyPart23(modelBuilder); ApplyPart24(modelBuilder); ApplyPart25(modelBuilder);
         }
     }
 
     public partial class ERP_N05_PermiteCambioAuditable
     {
-        internal void ApplyTargetModelForSnapshot(ModelBuilder modelBuilder)
-            => BuildTargetModel(modelBuilder);
+        internal void ApplyTargetModelForSnapshot(ModelBuilder modelBuilder) => BuildTargetModel(modelBuilder);
     }
 }
