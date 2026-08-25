@@ -8,6 +8,7 @@ on:
       - 'vaep/jules-b/**'
       - 'vaep/jules-c/**'
       - 'vaep/jules-d/**'
+      - '.github/scripts/vaep-jules-*.sh'
       - '.github/workflows/vaep-jules-*.yml'
       - '.github/workflows/vaep-control-plane-ci-guard.yml'
   pull_request:
@@ -40,6 +41,14 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 2
 
+      - name: Validar sintaxis y contrato de ejecutores VAEP/Jules
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash -n .github/scripts/vaep-jules-worker-v320.sh
+          bash -n .github/scripts/vaep-jules-throughput-guard-v326.sh
+          bash .github/scripts/vaep-jules-throughput-guard-v326.sh --static-self-test
+
       - name: Clasificar último commit
         id: classify
         shell: bash
@@ -51,7 +60,7 @@ jobs:
           control_plane=true
           while IFS= read -r path; do
             case "$path" in
-              vaep/jules/*|vaep/jules-b/*|vaep/jules-c/*|vaep/jules-d/*|.github/workflows/vaep-jules-*.yml|.github/workflows/vaep-control-plane-ci-guard.yml)
+              vaep/jules/*|vaep/jules-b/*|vaep/jules-c/*|vaep/jules-d/*|.github/scripts/vaep-jules-*.sh|.github/workflows/vaep-jules-*.yml|.github/workflows/vaep-control-plane-ci-guard.yml)
                 ;;
               *)
                 control_plane=false
