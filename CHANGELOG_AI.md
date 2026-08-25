@@ -4,23 +4,6 @@ Bitácora colaborativa de cambios realizados por Javier Mejía, Codex, AntiG/Ant
 
 No reemplaza `git log`: registra intención, alcance, validaciones y handoff. Todo changeset intencional debe incluir una entrada breve; no modificar otros colaborativos si su contenido no cambió.
 
-## 2026-08-25 — ERP-N3.5 Venta/factura — CIERRE FORMAL
-
-**Responsable:** ChatGPT/VAEP v3.25 Closure Governor.
-
-**Objetivo/alcance:** registrar el cierre formal del bloque N3.5 (Venta y Factura), confirmando que dichas entidades conservan su autoridad existente y que `PedidoVenta` (N3.2) permanece estrictamente desacoplado, sin introducir una conversión directa (`PedidoVenta` ↔ `Venta`), FKs cross-document, idempotencia, ni orquestación nueva.
-
-**Evidencia:** las microtareas fueron concluidas y validadas según su dominio:
-- N3.5.A #516 `LISTO`
-- N3.5.B #517 `LISTO` N/A domain grounded
-- N3.5.C #518 `LISTO` N/A persistence grounded
-- N3.5.D #519 `LISTO` N/A Application/API grounded
-- N3.5.E #520 `LISTO` N/A frontend grounded
-- N3.5.F #521 `LISTO` N/A security/audit grounded
-- N3.5.G #522 `LISTO` N/A QA/CI grounded
-
-**Certificación funcional:** el control reporta la certificación `56a422f0bf0e882fa6c9d800061154031f701091`, TASKS `a298bf537c98da8a9f1e31f4a2d8f8e6cc50e572`, con baseline funcional en `a167434880eab07c3b08ca651ae9309da964c23b` tras M13 #32809392404 en `SUCCESS`. P0/P1 atribuibles conocidos a la fecha: 0.
-
 ## 2026-08-24 — Codex — ejecutor Jules v3.25
 
 - Se alineó `.github/scripts/vaep-jules-worker-v320.sh` con semántica v3.25 conservando el nombre por compatibilidad con cuatro workflows.
@@ -233,7 +216,7 @@ No reemplaza `git log`: registra intención, alcance, validaciones y handoff. To
 
 **Validación final sobre `cd5c1f058fc7a24fd477a4c9e8cda7cff4c99850`:** CI principal `31808933744` SUCCESS completo, incluida integración MySQL 8.4; aceptación integral `31808933692` SUCCESS completo, incluido Playwright/SMTP/PDF; M13 `31808933833` COMPLETED/SUCCESS, incluido backend/MySQL/migraciones/upgrade histórico, frontend, Docker/backup, secretos/dependencias, seguridad HTTP, runtime/Playwright, SMTP/PDF/logs y `Dictamen automatizado M13` SUCCESS exigiendo todos los gates verdes.
 
-**Documentación/control:** fuente canónica `docs/ERP_N0_7_AJUSTE_INVENTARIO.md`; `TASKS.md`, CHANGELOG y tablero VAEP quedan reconciliados. N0.7.A–H quedan cerrados y el siguiente foco FINISH_FIRST elegible es `N0.8.A`. No se tocó main, Producción, ramas nuevas, merge/auto-merge, force-push, secretos ni deploy.
+**Documentación/control:** fuente canónica `docs/ERP_N0_7_AJUSTE_INVENTARIO.md`; `TASKS.md`, CHANGELOG y tablero VAEP quedan reconciliados. N0.7.A–H quedan cerrados y el siguiente foco FINISH_FIRST elegible es `N0.8.A`. No se tocó main, Producción, merge/auto-merge del PR #2, secretos, infraestructura productiva, force-push ni ramas nuevas.
 
 ## 2026-08-13 — ERP-N0.6 Referencias polimórficas críticas — CIERRE FORMAL
 
@@ -245,7 +228,7 @@ No reemplaza `git log`: registra intención, alcance, validaciones y handoff. To
 
 **Validación final sobre `0e35a9f75c49b6ddfbd5ef21d426521e2b559c40`:** ERP-N0.6 `31754907625` SUCCESS; Desarrollo build/tests `31754907682` SUCCESS; recovery MySQL `31754907598` SUCCESS; M11 backup/restore `31754907601` SUCCESS; Fase 8 `31754907626` SUCCESS; aceptación integral `31754907600` SUCCESS; M13 `31754907614` SUCCESS. Las pruebas críticas demuestran que la FK tipada manda aunque el snapshot legacy discrepe, que el bridge sólo cubre escritores legacy sin FK y que un mismatch tipado/legacy falla cerrado.
 
-**Control:** N0.6.G y N0.6.H quedan cerrados, `TASKS.md` y VAEP se reconcilian y el siguiente foco FINISH_FIRST es N0.7.A — AjusteInventario formal / auditoría y preflight. No se tocó main, Producción, ramas nuevas, merge/auto-merge, force-push, secretos ni deploy.
+**Control:** N0.6.G y N0.6.H quedan cerrados, `TASKS.md` y VAEP se reconcilian y el siguiente foco FINISH_FIRST es N0.7.A — AjusteInventario formal / auditoría y preflight. No se tocó main, Producción, merge/auto-merge del PR #2, secretos, infraestructura productiva, force-push ni ramas nuevas.
 
 ## 2026-08-13 — ERP-N0.5 MetodoPago — CIERRE FORMAL
 
@@ -255,7 +238,7 @@ No reemplaza `git log`: registra intención, alcance, validaciones y handoff. To
 
 **Correcciones de recertificación:** N0.5.14 detectó incompatibilidad con MySQL administrado/Aiven cuando `sql_require_primary_key=ON`. Se reemplazaron snapshots temporales `CREATE TEMPORARY TABLE ... AS SELECT` por tablas explícitas con PK y tipos históricos exactos en `20260812023600_N0_5_BackfillMetodoPagoHistorico.cs` (`20b3c3b42c8dbeff884a71493d4e1f9b33ad2394`) y, como regresión transversal descubierta por M13, en `20260812083000_N0_6_OrigenTipadoMovimientoInventario.cs` (`1bbccd9cccdcc181ab8c1e842ea0ff8343831197`). No se alteró el significado funcional ni el backfill histórico.
 
-**Validación real final sobre `1bbccd9cccdcc181ab8c1e842ea0ff8343831197`:** ERP-N0.5 `31753406161` SUCCESS; recovery MySQL/Aiven-like `31753406119` SUCCESS; M11 backup/restore `31753406267` SUCCESS; Desarrollo build/tests `31753406190` SUCCESS; aceptación funcional integral `31753406328` SUCCESS; M13 `31753406059`, attempt 2, SUCCESS. M13 cubrió historial desde cero con MySQL estricto, integración, SQL forward, upgrade histórico, preservación histórica, frontend, runtime/Playwright, SMTP/PDF, seguridad/auditoría, Docker y vigencia de backup.
+**Validación real final sobre `1bbccd9cccdcc181ab8c1e842ea0ff8343831197`:** ERP-N0.5 `31753406161` SUCCESS; recovery MySQL/Aiven-like `31753406119` SUCCESS; M11 backup/restore `31753406267` SUCCESS; Desarrollo build/tests `31753406190` SUCCESS; aceptación funcional integral `31753406328` SUCCESS; M13 `31753406059`, attempt 2, SUCCESS. M13 cubrió historial desde cero con MySQL estricto, integración, SQL forward, upgrade representativo, preservación histórica, frontend, runtime/Playwright, SMTP/PDF, seguridad/auditoría, Docker y vigencia de backup.
 
 **Documentación:** `docs/ERP_N0_5_METODOS_PAGO.md` documenta contrato canónico, códigos históricos estables, migraciones, backend/API, frontend, históricos/snapshots, trazabilidad N0.5.09–N0.5.14, CI y riesgos residuales. `TASKS.md` queda reconciliado con los puntos ya certificados.
 
@@ -285,7 +268,7 @@ No reemplaza `git log`: registra intención, alcance, validaciones y handoff. To
 
 **Corrección CI:** queda prohibido usar workflows temporales con `contents: write` para commitear/pushear cambios funcionales o migraciones mediante `GITHUB_TOKEN`. Actions podrá generar artefactos, pero la publicación final debe realizarla el Runner mediante el conector GitHub normal y fast-forward. `action_required` con jobs vacíos debe investigarse inmediatamente y no dejarse esperando hasta la siguiente hora.
 
-**Continuidad B2:** `N0.5.07B2` continúa `VALIDANDO`; el snapshot/migración EF canónicos de Banco permanecen en `fc2ca060...`. El siguiente changeset operativo retira el workflow temporal escritor mediante el conector GitHub normal para provocar una sincronización ordinaria del PR y obtener CI real. No se toca main, Producción, merge/auto-merge de PR #2, force-push ni ramas nuevas.
+**Continuidad B2:** `N0.5.07B2` continúa `VALIDANDO`; el snapshot/migración EF canónicos de Banco permanecen en `fc2ca060...`. El siguiente changeset operativo retira el workflow temporal escritor mediante el conector GitHub normal para provocar una sincronización ordinaria del PR y obtener CI real. No se toca `main`, Producción, merge/auto-merge de PR #2, force-push ni ramas nuevas.
 
 ## 2026-08-12 — VAEP v2.1 FINISH_FIRST: cerrar árbol foco antes de abrir hermanos
 
