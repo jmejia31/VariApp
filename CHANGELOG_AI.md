@@ -4,6 +4,23 @@ Bitácora colaborativa de cambios realizados por Javier Mejía, Codex, AntiG/Ant
 
 No reemplaza `git log`: registra intención, alcance, validaciones y handoff. Todo changeset intencional debe incluir una entrada breve; no modificar otros colaborativos si su contenido no cambió.
 
+## 2026-08-25 — ERP-N3.5 Venta/factura — CIERRE FORMAL
+
+**Responsable:** ChatGPT/VAEP v3.25 Closure Governor.
+
+**Objetivo/alcance:** registrar el cierre formal del bloque N3.5 (Venta y Factura), confirmando que dichas entidades conservan su autoridad existente y que `PedidoVenta` (N3.2) permanece estrictamente desacoplado, sin introducir una conversión directa (`PedidoVenta` ↔ `Venta`), FKs cross-document, idempotencia, ni orquestación nueva.
+
+**Evidencia:** las microtareas fueron concluidas y validadas según su dominio:
+- N3.5.A #516 `LISTO`
+- N3.5.B #517 `LISTO` N/A domain grounded
+- N3.5.C #518 `LISTO` N/A persistence grounded
+- N3.5.D #519 `LISTO` N/A Application/API grounded
+- N3.5.E #520 `LISTO` N/A frontend grounded
+- N3.5.F #521 `LISTO` N/A security/audit grounded
+- N3.5.G #522 `LISTO` N/A QA/CI grounded
+
+**Certificación funcional:** el control reporta la certificación `56a422f0bf0e882fa6c9d800061154031f701091`, TASKS `a298bf537c98da8a9f1e31f4a2d8f8e6cc50e572`, con baseline funcional en `a167434880eab07c3b08ca651ae9309da964c23b` tras M13 #32809392404 en `SUCCESS`. P0/P1 atribuibles conocidos a la fecha: 0.
+
 ## 2026-08-24 — Codex — ejecutor Jules v3.25
 
 - Se alineó `.github/scripts/vaep-jules-worker-v320.sh` con semántica v3.25 conservando el nombre por compatibilidad con cuatro workflows.
@@ -80,7 +97,7 @@ No reemplaza `git log`: registra intención, alcance, validaciones y handoff. To
 
 **Objetivo/alcance:** cierre formal canónico de ERP-N2.7 Nota de crédito de proveedor, con N2.7.A-H completadas, sin adelantar trabajo de N2.8.
 
-**Validación:** baseline funcional `42f83b365392f45de39bd0e0ca4fa0638dd0eb10` y paquete documental `c466ec3099c2a498c2353af82b99ce0be9d46e29`; Development #32574284665, Acceptance #32574284640, Fase8 #32574284638 y M13 #32574284639 SUCCESS. El HEAD de control-plane `e72f709bdade0dbec6198fa483aaa213a5e6c66d` también terminó Development #32576077991, Acceptance #32576077933, Fase8 #32576077965, M13 #32576077925 y recovery MySQL #32576077970 en SUCCESS. P0/P1 bloqueantes conocidos=0.
+**Validación:** baseline funcional `42f83b365392f45de39bd0e0ca4fa0638dd0eb10` y paquete documental `c466ec3099c2a498c2353af82b99ce0be9d46e29`; Development #32574284665, Acceptance #32574284640, Fase8 #32574284638 y M13 #32574284639 SUCCESS. El HEAD de control-plane `e72f709bdade0dbec6198fa483aaa213a5e6c66d` también terminó Development #32576077991, Acceptance #32576077965, Fase8 #32576077965, M13 #32576077925 y recovery MySQL #32576077970 en SUCCESS. P0/P1 bloqueantes conocidos=0.
 
 ## 2026-08-19 — ERP-N2.2 OrdenCompra — CIERRE FORMAL
 
@@ -104,7 +121,7 @@ No reemplaza `git log`: registra intención, alcance, validaciones y handoff. To
 
 **Objetivo/alcance:** cerrar formalmente ERP-N2.1 después de completar preflight, dominio/contratos, persistencia/migración, aplicación/API, frontend/UX, RBAC/auditoría/seguridad/observabilidad, QA/regresión/CI y documentación. `SolicitudCompra` queda como documento empresarial independiente con lifecycle `Borrador → Solicitada → Aprobada/Rechazada` y sin efectos de stock, Kardex, costeo o finanzas.
 
-**Decisiones y seguridad:** una solicitud aprobada continúa siendo documental y no crea implícitamente una `Compra`; la materialización posterior pertenece a `N2.2` y siguientes. Update/Enviar/Aprobar/Rechazar se serializan con transacción y lock pesimista. La autorización usa grants relacionales sin bypass efectivo por `EsAdministrador`. Crear/Editar/Enviar/Aprobar/Rechazar registran auditoría estricta dentro de la unidad transaccional, sin copiar notas u observaciones sensibles. Correlation ID, health/readiness y configuración segura reutilizan la infraestructura transversal existente.
+**Decisiones y seguridad:** una solicitud aprobada continúa siendo documental y no crea implícitamente una `Compra`; la materialización posterior pertenece a `N2.2` y siguientes. Update/Enviar/Aprobar/Rechazar se serializan con transacción y lock pesimista. La autorización usa grants relacionales sin bypass efectivo por `EsAdministrador`. Crear/Editar/Enviar/Aprobar/Rechazar registran auditoría `RegistrarEstrictoAsync` dentro de la misma transacción, sin copiar notas u observaciones sensibles. Correlation ID, health/readiness y configuración segura reutilizan la infraestructura transversal existente.
 
 **Trazabilidad:** D `01770a23cbf9a50e7d21a0a7913f32e31ce6070a`; E.1 `f52f9f746427d18675073ba769c2a78c2f13d900`; E.2 `112ef6b8660fb12c80d6981eac81b55f6c32bdec`; E.3 hasta `07275df6af316aff83f250c6cf9d9b1b1ad335d3`; F.1 `d3f039efafe0bf7ccfd487ba4ca7c66e07625fc3`; F.2 `adea50ac65bacceff42cd23c110afea77817ca44`; F.3 `12b26459004dc01a17b5b2af4602dbb906470bae`; G baseline `a1a6f699cbad0186d0e0d7d7ac7f366c51009f7c`; paquete documental H `d8760bff2e9322e6f09612f64a89c2de888aa9d8`.
 
@@ -122,7 +139,7 @@ No reemplaza `git log`: registra intención, alcance, validaciones y handoff. To
 
 **Resultado funcional:** `LoteInventario` y `SerieInventario` funcionan como subledger de identidad trazable, no como una segunda autoridad de cantidad. La persistencia es aditiva y preserva históricos con flags desactivados por defecto, sin inventar backfill de lotes/series/vencimientos. La API y UI permiten configurar la política por variante, capturar/listar lotes y series y controlar vencimientos. La seguridad usa RBAC relacional de `MovimientosInventario`, auditoría estricta transaccional e idempotente, correlation saneado y contratos HTTP protegidos. Durante QA se detectó y corrigió causalmente la falta de límite de longitud de `NumeroSerie`; el dominio ahora rechaza valores de más de 120 caracteres antes de mutar estado.
 
-**Documentación:** paquete canónico compuesto por `docs/ERP_N1_9_SERIES_LOTES_VENCIMIENTOS.md`, `docs/ADR_N1_9_AUTORIDAD_TRAZABILIDAD.md`, `docs/ERD_N1_9_TRAZABILIDAD.md`, `docs/RUNBOOK_N1_9_TRAZABILIDAD.md`, `docs/OPENAPI_N1_9_TRAZABILIDAD.md`, `docs/RUNBOOK_N1_9_MIGRACION.md` y `docs/CERTIFICACION_N1_9_TRAZABILIDAD.md`. El baseline funcional de QA es `4b5a5c9a8b495fcef62464bf50010ac69117fe48`; el baseline documental certificable es `7bc4b7935cc92e15d24f90a79f3915ab14e2d243`.
+**Documentación:** paquete canónico compuesto por `docs/ERP_N1_9_SERIES_LOTES_VENCIMIENTOS.md`, `docs/ADR_N1_9_AUTORIDAD_TRAZABILIDAD.md`, `docs/ERD_N1_9_TRAZABILIDAD.md`, `docs/RUNBOOK_N1_9_TRAZABILIDAD.md`, `docs/OPENAPI_N2_1_SOLICITUD_COMPRA.md` y `docs/CERTIFICACION_N1_9_TRAZABILIDAD.md`. El baseline funcional de QA es `4b5a5c9a8b495fcef62464bf50010ac69117fe48`; el baseline documental certificable es `7bc4b7935cc92e15d24f90a79f3915ab14e2d243`.
 
 **Validación final de `7bc4b793...`:** Development `32089179243` SUCCESS; Acceptance `32089179228` SUCCESS; Fase8 `32089179144` SUCCESS; M10 `32089179156` SUCCESS; M13 `32089179175` SUCCESS. El estado colaborativo posterior es exclusivamente documental `[skip ci]`: `TASKS.md` reconciliado en `67da8adc9e3dfad87140346050ee731b3dd8abc8` y certificado final actualizado en `81b5478458f8dfd5aa33e4653a3b413e1b4bbb36`.
 
@@ -268,7 +285,7 @@ No reemplaza `git log`: registra intención, alcance, validaciones y handoff. To
 
 **Corrección CI:** queda prohibido usar workflows temporales con `contents: write` para commitear/pushear cambios funcionales o migraciones mediante `GITHUB_TOKEN`. Actions podrá generar artefactos, pero la publicación final debe realizarla el Runner mediante el conector GitHub normal y fast-forward. `action_required` con jobs vacíos debe investigarse inmediatamente y no dejarse esperando hasta la siguiente hora.
 
-**Continuidad B2:** `N0.5.07B2` continúa `VALIDANDO`; el snapshot/migración EF canónicos de Banco permanecen en `fc2ca060...`. El siguiente changeset operativo retira el workflow temporal escritor mediante el conector GitHub normal para provocar una sincronización ordinaria del PR y obtener CI real. No se toca `main`, Producción, merge/auto-merge de PR #2, force-push ni ramas nuevas.
+**Continuidad B2:** `N0.5.07B2` continúa `VALIDANDO`; el snapshot/migración EF canónicos de Banco permanecen en `fc2ca060...`. El siguiente changeset operativo retira el workflow temporal escritor mediante el conector GitHub normal para provocar una sincronización ordinaria del PR y obtener CI real. No se toca main, Producción, merge/auto-merge de PR #2, force-push ni ramas nuevas.
 
 ## 2026-08-12 — VAEP v2.1 FINISH_FIRST: cerrar árbol foco antes de abrir hermanos
 
