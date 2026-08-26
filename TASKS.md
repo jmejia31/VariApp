@@ -92,11 +92,17 @@ Documentación: `docs/ERP_N2_9_EVALUACION_PROVEEDORES.md`, `docs/RUNBOOK_N2_9_EV
 
 ## ERP-N3.6 — Devoluciones de cliente
 
-- [x] N3.6.A auditoría/preflight reconciliado después del cierre real de N3.5.H; no existe `DevolucionCliente` en el baseline y las decisiones no demostradas permanecen `DECISION_PENDING` para B.
-- [ ] N3.6.B dominio/contratos — siguiente tarea dependency-valid; debe definir invariantes/lifecycle con pruebas puras antes de persistencia.
-- [ ] N3.6.C-H pendientes de sus dependencias; no se adelantan por prewarm.
+- [x] N3.6.A auditoría/preflight reconciliado después del cierre real de N3.5.H.
+- [x] N3.6.B dominio/contratos completado y certificado.
+- [x] N3.6.C persistencia/migración/datos completada y certificada.
+- [x] N3.6.D Application/API completado y certificado.
+- [x] N3.6.E frontend/UX completado y certificado.
+- [x] N3.6.F RBAC/auditoría/seguridad/observabilidad completado y certificado.
+- [x] N3.6.G QA/regresión/CI completado; baseline funcional `6c5a3164ab11a1dcdcdfa9418c61bb0165251239`, con Development `#32913855654`, Acceptance `#32913854936`, Fase 8 `#32913854958` y M13 `#32913854923` en SUCCESS; P0/P1 funcionales conocidos=0.
+- [x] N3.6.H certificación canónica publicada en `4fe25e8cf656f82e3883f0585fa29358769aa48c` y runbook en `d906393fc26b0073ac782721ea08cb0fa35827b5`.
+- [ ] Cierre formal H pendiente únicamente de reconciliar `CHANGELOG_AI.md` de forma aditiva/history-preserving y obtener gate causal del rollup final; no false LISTO.
 
-**N3.6.A queda `LISTO`. Siguiente foco: `N3.6.B — Dominio/contratos`.**
+**N3.6 permanece abierto exclusivamente por el rollup final de CHANGELOG. Siguiente parent dependency-valid tras H=LISTO: `N3.7.A — Nota de crédito / Auditoría y preflight`.**
 
 ## Fuentes VAEP v2
 
