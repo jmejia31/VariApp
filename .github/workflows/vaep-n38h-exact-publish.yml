@@ -31,17 +31,22 @@ jobs:
           EXPECTED_TASKS_SOURCE_BLOB: 09264b4b76eb9adf15abae038bafb2bb179333ba
           EXPECTED_CHANGELOG_SOURCE_BLOB: 4ae1376702e4ba9f2ed64930dd4dcfb150a765f9
         run: |
-          set -euo pipefail
+          set -euxo pipefail
+          trap 'rc=$?; echo "::error::N3.8.H publisher failed rc=${rc} line=${LINENO} command=${BASH_COMMAND}"; exit ${rc}' ERR
           git config user.name 'VAEP Controller'
           git config user.email 'actions@users.noreply.github.com'
 
           for attempt in 1 2 3 4; do
             git fetch origin Desarrollo --depth=1
             BASE_HEAD="$(git rev-parse origin/Desarrollo)"
+            echo "publisher attempt=${attempt} base=${BASE_HEAD}"
             git checkout --detach "$BASE_HEAD"
 
-            test "$(git hash-object TASKS.md)" = "$EXPECTED_TASKS_SOURCE_BLOB"
-            test "$(git hash-object CHANGELOG_AI.md)" = "$EXPECTED_CHANGELOG_SOURCE_BLOB"
+            ACTUAL_TASKS_BLOB="$(git hash-object TASKS.md)"
+            ACTUAL_CHANGELOG_BLOB="$(git hash-object CHANGELOG_AI.md)"
+            echo "source TASKS=${ACTUAL_TASKS_BLOB} CHANGELOG=${ACTUAL_CHANGELOG_BLOB}"
+            test "$ACTUAL_TASKS_BLOB" = "$EXPECTED_TASKS_SOURCE_BLOB"
+            test "$ACTUAL_CHANGELOG_BLOB" = "$EXPECTED_CHANGELOG_SOURCE_BLOB"
             test ! -e docs/CERTIFICACION_N3_8_NOTA_DEBITO_CLIENTE.md
             cp TASKS.md /tmp/TASKS.source
             cp CHANGELOG_AI.md /tmp/CHANGELOG.source
@@ -93,6 +98,10 @@ jobs:
             cmp -n "$(stat -c%s /tmp/TASKS.source)" /tmp/TASKS.source TASKS.md
             cmp -n "$(stat -c%s /tmp/CHANGELOG.source)" /tmp/CHANGELOG.source CHANGELOG_AI.md
             git add -N docs/CERTIFICACION_N3_8_NOTA_DEBITO_CLIENTE.md
+            echo 'changed files:'
+            git diff --name-only | sort
+            echo 'numstat:'
+            git diff --numstat -- TASKS.md CHANGELOG_AI.md docs/CERTIFICACION_N3_8_NOTA_DEBITO_CLIENTE.md
             test "$(git diff --name-only | sort)" = $'CHANGELOG_AI.md\nTASKS.md\ndocs/CERTIFICACION_N3_8_NOTA_DEBITO_CLIENTE.md'
             test "$(git diff --numstat -- TASKS.md | cut -f2)" = "0"
             test "$(git diff --numstat -- CHANGELOG_AI.md | cut -f2)" = "0"
