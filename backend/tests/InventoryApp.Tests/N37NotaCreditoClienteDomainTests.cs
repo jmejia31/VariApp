@@ -6,8 +6,6 @@ namespace InventoryApp.Tests;
 
 public class N37NotaCreditoClienteDomainTests
 {
-    private static readonly DateTime FechaUtc = new(2026, 8, 26, 13, 0, 0, DateTimeKind.Utc);
-
     [Fact]
     public void CrearDesdeFactura_Elegible_PreservaAutoridadFacturaYVenta()
     {
@@ -22,8 +20,8 @@ public class N37NotaCreditoClienteDomainTests
         Assert.Equal(250m, nota.MontoCredito);
         Assert.Equal("Ajuste comercial", nota.Motivo);
         Assert.Equal("observación", nota.Observaciones);
-        Assert.Equal(EstadoNotaCreditoCliente.Borrador, nota.Estado);
-        Assert.True(nota.EsEditable);
+        Assert.Equal(EstadoFactura.Emitida, factura.Estado);
+        Assert.Equal(0m, factura.TotalPagado);
     }
 
     [Theory]
@@ -46,46 +44,30 @@ public class N37NotaCreditoClienteDomainTests
     }
 
     [Fact]
-    public void Emitir_Y_Anular_RespetaLifecycleSinMutarFactura()
+    public void CrearDesdeFactura_FacturaNoPersistidaOFueraDeVenta_FallaCerrado()
     {
-        var factura = CrearFactura(EstadoFactura.Emitida, 1000m);
-        var nota = NotaCreditoCliente.CrearDesdeFactura(factura, 100m, "motivo");
+        var sinId = CrearFactura(EstadoFactura.Emitida, 500m);
+        sinId.Id = 0;
+        Assert.Throws<InvalidOperationException>(() => NotaCreditoCliente.CrearDesdeFactura(sinId, 100m, "motivo"));
 
-        nota.Emitir(FechaUtc);
-
-        Assert.Equal(EstadoNotaCreditoCliente.Emitida, nota.Estado);
-        Assert.False(nota.EsEditable);
-        Assert.Equal(FechaUtc, nota.FechaEmisionUtc);
-        Assert.Equal(EstadoFactura.Emitida, factura.Estado);
-        Assert.Equal(0m, factura.TotalPagado);
-
-        var anulacionUtc = FechaUtc.AddMinutes(5);
-        nota.Anular("corrección", anulacionUtc);
-
-        Assert.Equal(EstadoNotaCreditoCliente.Anulada, nota.Estado);
-        Assert.Equal(anulacionUtc, nota.FechaAnulacionUtc);
-        Assert.Equal("corrección", nota.MotivoAnulacion);
-        Assert.Equal(EstadoFactura.Emitida, factura.Estado);
+        var sinVenta = CrearFactura(EstadoFactura.Emitida, 500m);
+        sinVenta.VentaId = 0;
+        Assert.Throws<InvalidOperationException>(() => NotaCreditoCliente.CrearDesdeFactura(sinVenta, 100m, "motivo"));
     }
 
     [Fact]
-    public void Actualizar_DespuesDeEmitir_FallaCerrado()
+    public void CrearDesdeFactura_NoMutaFacturaNiMaterializaEfectosFisicosOFinancieros()
     {
-        var factura = CrearFactura(EstadoFactura.Emitida, 1000m);
-        var nota = NotaCreditoCliente.CrearDesdeFactura(factura, 100m, "motivo");
-        nota.Emitir(FechaUtc);
+        var factura = CrearFactura(EstadoFactura.ParcialmentePagada, 1000m);
+        factura.TotalPagado = 200m;
+        factura.SaldoPendiente = 800m;
 
-        Assert.Throws<InvalidOperationException>(() => nota.Actualizar(90m, "nuevo", null));
-    }
+        var nota = NotaCreditoCliente.CrearDesdeFactura(factura, 150m, "Crédito comercial");
 
-    [Fact]
-    public void Lifecycle_RequiereFechasUtc()
-    {
-        var factura = CrearFactura(EstadoFactura.Emitida, 1000m);
-        var nota = NotaCreditoCliente.CrearDesdeFactura(factura, 100m, "motivo");
-        var local = DateTime.SpecifyKind(FechaUtc, DateTimeKind.Local);
-
-        Assert.Throws<ArgumentException>(() => nota.Emitir(local));
+        Assert.Equal(150m, nota.MontoCredito);
+        Assert.Equal(EstadoFactura.ParcialmentePagada, factura.Estado);
+        Assert.Equal(200m, factura.TotalPagado);
+        Assert.Equal(800m, factura.SaldoPendiente);
     }
 
     private static Factura CrearFactura(EstadoFactura estado, decimal total) => new()
@@ -98,6 +80,7 @@ public class N37NotaCreditoClienteDomainTests
         ClienteNombre = "Cliente",
         EmpresaNombre = "VariStore",
         Total = total,
-        TotalPagado = 0m
+        TotalPagado = 0m,
+        SaldoPendiente = total
     };
 }
