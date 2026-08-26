@@ -36,9 +36,13 @@ jobs:
           git config user.email 'actions@users.noreply.github.com'
           fail(){ echo "::error::N3.8.H publisher invariant failed: $*"; exit 41; }
 
+          refresh_desarrollo() {
+            git fetch origin '+refs/heads/Desarrollo:refs/remotes/origin/Desarrollo' --depth=1
+            git rev-parse refs/remotes/origin/Desarrollo
+          }
+
           for attempt in $(seq 1 12); do
-            git fetch origin Desarrollo --depth=1
-            BASE_HEAD="$(git rev-parse origin/Desarrollo)"
+            BASE_HEAD="$(refresh_desarrollo)"
             echo "publisher attempt=${attempt} base=${BASE_HEAD}"
             git checkout --detach "$BASE_HEAD"
             git reset --hard "$BASE_HEAD"
@@ -109,8 +113,7 @@ jobs:
             git diff --cached --check || fail "diff-check"
             git commit -m 'docs(N3.8.H): cerrar NotaDebitoCliente como N/A condicional [VAEP v3.25.1] [skip ci]'
 
-            git fetch origin Desarrollo --depth=1
-            CURRENT_HEAD="$(git rev-parse origin/Desarrollo)"
+            CURRENT_HEAD="$(refresh_desarrollo)"
             if [ "$CURRENT_HEAD" = "$BASE_HEAD" ]; then
               git push origin HEAD:Desarrollo
               exit 0
