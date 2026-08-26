@@ -2,10 +2,7 @@ using InventoryApp.API.Filters;
 using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Interfaces;
-using InventoryApp.Application.Services;
 using InventoryApp.Domain.Enums;
-using InventoryApp.Infrastructure.Persistence;
-using InventoryApp.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,20 +15,9 @@ public sealed class NotasCreditoClienteController : ControllerBase
 {
     private readonly INotaCreditoClienteService _service;
 
-    public NotasCreditoClienteController(
-        AppDbContext db,
-        IFacturaRepository facturas,
-        ICurrentUserService currentUser,
-        IUnitOfWork unitOfWork,
-        IAuditoriaService auditoria)
+    public NotasCreditoClienteController(INotaCreditoClienteService service)
     {
-        ArgumentNullException.ThrowIfNull(db);
-        _service = new NotaCreditoClienteService(
-            new NotaCreditoClienteRepository(db),
-            facturas,
-            currentUser,
-            unitOfWork,
-            auditoria);
+        _service = service ?? throw new ArgumentNullException(nameof(service));
     }
 
     [HttpGet("{id:int}")]
