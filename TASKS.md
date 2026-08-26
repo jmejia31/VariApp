@@ -127,3 +127,11 @@ Este bloque es aditivo y supersede únicamente el estado operativo stale de N3.6
 - [ ] N3.7.H documentación/certificación — cierre canónico en curso: este TASKS rollup + entrada aditiva en `CHANGELOG_AI.md`; solo después del hard verify documental y P0=0/P1=0 pasa a `LISTO`.
 
 **Promoción de N3.8 permanece bloqueada hasta N3.7.H=LISTO.**
+## ERP-N3.8 — Nota de débito de cliente — CIERRE CONDICIONAL/N/A
+
+- [x] N3.8.A preflight certificado en `034ec3305422016d6c571d0ffcf1332e3bbbe6b6`.
+- [x] N3.8.B dominio/contratos cerrado N/A con evidencia en `affb58f2b9e7d8ab25c051fed5b9f4ee5f317584`.
+- [x] N3.8.C-G cerrados N/A con evidencia en `3a89725e4a76c4d85c0c4adc04f0affa4a61e79a`.
+- [x] N3.8.H certificación canónica: `docs/CERTIFICACION_N3_8_NOTA_DEBITO_CLIENTE.md`.
+
+**ERP-N3.8 queda formalmente cerrado como N/A condicionado al requisito legal/operativo. No se implementó `NotaDebitoCliente`. Siguiente MICROTAREA dependency-valid: `N3.9.A — Cuentas por cobrar / Auditoría y preflight`.**

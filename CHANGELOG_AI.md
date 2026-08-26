@@ -575,3 +575,13 @@ Approved closure facts:
 **Cierre documental/control:** `TASKS.md` ya contiene el rollup N3.7 y esta publicación agrega únicamente este bloque a `CHANGELOG_AI.md`, preservando byte por byte todo el blob source `d53c56416ac7ac01beef761adab5172cf5297487` y sin eliminar ni reformular historia previa. Issue #782 es el control de cierre; PR #2 permanece Draft `Desarrollo → main`, sin merge. P0/P1 atribuibles conocidos al cierre: 0.
 
 **Promoción:** con esta publicación N3.7.H queda formalmente `LISTO`; el selector fail-closed puede promover `N3.8.A` y mantener N3.8.B como pipeline SAFE según dependencias.
+
+## 2026-08-26 — ERP-N3.8 Nota de débito de cliente — CIERRE CONDICIONAL/N/A
+
+**Responsable:** ChatGPT/VAEP v3.25.1 Closure Governor.
+
+**Dictamen:** N3.8.A-H se cierra para el alcance actual como N/A con evidencia porque el roadmap condiciona la Nota de débito a una necesidad legal/operativa y no existe todavía requisito autoritativo suficiente para fijar su contrato. No se afirma que `NotaDebitoCliente` haya sido implementada.
+
+**Evidencia:** A=`034ec3305422016d6c571d0ffcf1332e3bbbe6b6`; B=`affb58f2b9e7d8ab25c051fed5b9f4ee5f317584`; C-G=`3a89725e4a76c4d85c0c4adc04f0affa4a61e79a`; certificación=`docs/CERTIFICACION_N3_8_NOTA_DEBITO_CLIENTE.md`. Delta funcional=0 y P0/P1 atribuibles conocidos=0.
+
+**Reapertura:** si legislación/operación exige esta capacidad, reabrir desde N3.8.B con contrato explícito antes de dominio/persistencia/API/UI. El selector puede promover `N3.9.A`.
