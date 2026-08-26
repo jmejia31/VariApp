@@ -547,3 +547,19 @@ Cada entrada debe contener fecha, agente, objetivo, alcance, validaciones reales
 **Evidencia:** baseline funcional `960ac07ed1e96d1d2e98a51fdb5dc216fbc8d0f3`; N3.3.D/E/F/G ya estaban `LISTO` en COLA, la regresión E2E `reservation-automatic-flow.spec.ts` fue aceptada por el control VAEP y P0/P1 bloqueantes conocidos atribuibles a N3.3=0. Los fallos de workflows legacy ERP-N0 observados en paralelo no se usan como gate causal sin evidencia directa.
 
 **Documentación/control:** `docs/CERTIFICACION_N3_3_RESERVA_AUTOMATICA.md`, `docs/RUNBOOK_N3_3_RESERVA_AUTOMATICA.md` y el ADR vigente `docs/ADR_N1_8_RESERVAS_STOCK_RESERVADO_Y_OVERSELLING.md`. `TASKS.md` se reconcilia en el mismo commit atómico. Siguiente parent dependency-valid: `N3.4.A — Remisiones/entregas / Auditoría y preflight`.
+
+## 2026-08-26 — ERP-N3.6 Devoluciones de clientes — CIERRE FORMAL
+
+N3.6.A-H formally closed only as the target content being prepared for controller integration.
+
+Approved closure facts:
+- baseline functional 6c5a3164ab11a1dcdcdfa9418c61bb0165251239
+- Development #32913855654 SUCCESS
+- Acceptance #32913854936 SUCCESS
+- Fase8 #32913854958 SUCCESS
+- M13 #32913854923 SUCCESS
+- certification 4fe25e8cf656f82e3883f0585fa29358769aa48c
+- runbook d906393fc26b0073ac782721ea08cb0fa35827b5
+- TASKS rollup 6efbb72880a15bd6cf7f2d5d6bbb3d1b0d0118d7
+- P0/P1 known attributable to N3.6 = 0
+- next parent after H is N3.7.A, promotion blocked until H LISTO.
