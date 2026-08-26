@@ -31,23 +31,24 @@ jobs:
           EXPECTED_TASKS_SOURCE_BLOB: 09264b4b76eb9adf15abae038bafb2bb179333ba
           EXPECTED_CHANGELOG_SOURCE_BLOB: 4ae1376702e4ba9f2ed64930dd4dcfb150a765f9
         run: |
-          set -euxo pipefail
-          trap 'rc=$?; echo "::error::N3.8.H publisher failed rc=${rc} line=${LINENO} command=${BASH_COMMAND}"; exit ${rc}' ERR
+          set -euo pipefail
           git config user.name 'VAEP Controller'
           git config user.email 'actions@users.noreply.github.com'
+          fail(){ echo "::error::N3.8.H publisher invariant failed: $*"; exit 41; }
 
-          for attempt in 1 2 3 4; do
+          for attempt in $(seq 1 12); do
             git fetch origin Desarrollo --depth=1
             BASE_HEAD="$(git rev-parse origin/Desarrollo)"
             echo "publisher attempt=${attempt} base=${BASE_HEAD}"
             git checkout --detach "$BASE_HEAD"
+            git reset --hard "$BASE_HEAD"
+            git clean -fd
 
-            ACTUAL_TASKS_BLOB="$(git hash-object TASKS.md)"
-            ACTUAL_CHANGELOG_BLOB="$(git hash-object CHANGELOG_AI.md)"
-            echo "source TASKS=${ACTUAL_TASKS_BLOB} CHANGELOG=${ACTUAL_CHANGELOG_BLOB}"
-            test "$ACTUAL_TASKS_BLOB" = "$EXPECTED_TASKS_SOURCE_BLOB"
-            test "$ACTUAL_CHANGELOG_BLOB" = "$EXPECTED_CHANGELOG_SOURCE_BLOB"
-            test ! -e docs/CERTIFICACION_N3_8_NOTA_DEBITO_CLIENTE.md
+            TASKS_BLOB="$(git hash-object TASKS.md)"
+            CHANGELOG_BLOB="$(git hash-object CHANGELOG_AI.md)"
+            [ "$TASKS_BLOB" = "$EXPECTED_TASKS_SOURCE_BLOB" ] || fail "TASKS source ${TASKS_BLOB}"
+            [ "$CHANGELOG_BLOB" = "$EXPECTED_CHANGELOG_SOURCE_BLOB" ] || fail "CHANGELOG source ${CHANGELOG_BLOB}"
+            [ ! -e docs/CERTIFICACION_N3_8_NOTA_DEBITO_CLIENTE.md ] || fail "certification already exists"
             cp TASKS.md /tmp/TASKS.source
             cp CHANGELOG_AI.md /tmp/CHANGELOG.source
 
@@ -61,10 +62,10 @@ jobs:
           - N3.8.A preflight: `034ec3305422016d6c571d0ffcf1332e3bbbe6b6`.
           - N3.8.B dominio/contratos N/A: `affb58f2b9e7d8ab25c051fed5b9f4ee5f317584`.
           - N3.8.C-G rollup N/A: `3a89725e4a76c4d85c0c4adc04f0affa4a61e79a`.
-          - Búsqueda dirigida: no existe actualmente entidad, servicio, controller, DTO, ruta o migración `NotaDebitoCliente` ni requisito legal/operativo autoritativo suficiente para fijar lifecycle, fiscalidad, contabilidad, cardinalidad o idempotencia.
+          - No existe requisito legal/operativo autoritativo suficiente para fijar lifecycle, fiscalidad, contabilidad, cardinalidad o idempotencia de `NotaDebitoCliente`.
 
           ## DoD y seguridad
-          Delta funcional N3.8 = 0. No se modifican dominio, persistencia, API, frontend, RBAC, datos ni Producción. Por `CI_CAUSALITY_BUDGET` no se fabrica CI pesada para código inexistente. P0/P1 atribuibles conocidos bajo el requisito actual = 0.
+          Delta funcional N3.8 = 0. No se modifican dominio, persistencia, API, frontend, RBAC, datos ni Producción. P0/P1 atribuibles conocidos bajo el requisito actual = 0.
 
           ## Regla de reapertura
           Si legislación u operación exige NotaDebitoCliente en el futuro, N3.8 debe reabrirse desde dominio/contratos con requisito explícito antes de crear persistencia, API o UI.
@@ -95,20 +96,17 @@ jobs:
           **Reapertura:** si legislación/operación exige esta capacidad, reabrir desde N3.8.B con contrato explícito antes de dominio/persistencia/API/UI. El selector puede promover `N3.9.A`.
           EOF
 
-            cmp -n "$(stat -c%s /tmp/TASKS.source)" /tmp/TASKS.source TASKS.md
-            cmp -n "$(stat -c%s /tmp/CHANGELOG.source)" /tmp/CHANGELOG.source CHANGELOG_AI.md
-            git add -N docs/CERTIFICACION_N3_8_NOTA_DEBITO_CLIENTE.md
-            echo 'changed files:'
-            git diff --name-only | sort
-            echo 'numstat:'
-            git diff --numstat -- TASKS.md CHANGELOG_AI.md docs/CERTIFICACION_N3_8_NOTA_DEBITO_CLIENTE.md
-            test "$(git diff --name-only | sort)" = $'CHANGELOG_AI.md\nTASKS.md\ndocs/CERTIFICACION_N3_8_NOTA_DEBITO_CLIENTE.md'
-            test "$(git diff --numstat -- TASKS.md | cut -f2)" = "0"
-            test "$(git diff --numstat -- CHANGELOG_AI.md | cut -f2)" = "0"
-            test "$(git diff --numstat -- docs/CERTIFICACION_N3_8_NOTA_DEBITO_CLIENTE.md | cut -f2)" = "0"
-            git diff --check
+            cmp -n "$(stat -c%s /tmp/TASKS.source)" /tmp/TASKS.source TASKS.md || fail "TASKS prefix changed"
+            cmp -n "$(stat -c%s /tmp/CHANGELOG.source)" /tmp/CHANGELOG.source CHANGELOG_AI.md || fail "CHANGELOG prefix changed"
 
             git add TASKS.md CHANGELOG_AI.md docs/CERTIFICACION_N3_8_NOTA_DEBITO_CLIENTE.md
+            CHANGED="$(git diff --cached --name-only | sort)"
+            EXPECTED=$'CHANGELOG_AI.md\nTASKS.md\ndocs/CERTIFICACION_N3_8_NOTA_DEBITO_CLIENTE.md'
+            [ "$CHANGED" = "$EXPECTED" ] || fail "changed files=${CHANGED}"
+            [ "$(git diff --cached --numstat -- TASKS.md | awk '{print $2}')" = "0" ] || fail "TASKS deletions"
+            [ "$(git diff --cached --numstat -- CHANGELOG_AI.md | awk '{print $2}')" = "0" ] || fail "CHANGELOG deletions"
+            [ "$(git diff --cached --numstat -- docs/CERTIFICACION_N3_8_NOTA_DEBITO_CLIENTE.md | awk '{print $2}')" = "0" ] || fail "cert deletions"
+            git diff --cached --check || fail "diff-check"
             git commit -m 'docs(N3.8.H): cerrar NotaDebitoCliente como N/A condicional [VAEP v3.25.1] [skip ci]'
 
             git fetch origin Desarrollo --depth=1
@@ -117,11 +115,8 @@ jobs:
               git push origin HEAD:Desarrollo
               exit 0
             fi
-
-            echo "Desarrollo advanced during publish attempt ${attempt}: ${BASE_HEAD} -> ${CURRENT_HEAD}; retrying on fresh manifest-only head."
-            git reset --hard
-            git clean -fd
+            echo "Desarrollo advanced ${BASE_HEAD} -> ${CURRENT_HEAD}; retrying safely"
           done
 
-          echo 'N3.8.H publisher could not obtain a stable Desarrollo ref after four safe retries.' >&2
+          echo 'N3.8.H publisher could not obtain a stable Desarrollo ref after twelve safe retries.' >&2
           exit 42
