@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Checkout exact trigger SHA
+      - name: Checkout trigger SHA
         uses: actions/checkout@v4
         with:
           ref: ${{ github.sha }}
@@ -32,14 +32,21 @@ jobs:
           EXPECTED_CHANGELOG_SOURCE_BLOB: 4ae1376702e4ba9f2ed64930dd4dcfb150a765f9
         run: |
           set -euo pipefail
-          git fetch origin Desarrollo --depth=1
-          test "$(git rev-parse origin/Desarrollo)" = "$GITHUB_SHA"
-          test "$(git hash-object TASKS.md)" = "$EXPECTED_TASKS_SOURCE_BLOB"
-          test "$(git hash-object CHANGELOG_AI.md)" = "$EXPECTED_CHANGELOG_SOURCE_BLOB"
-          cp TASKS.md /tmp/TASKS.source
-          cp CHANGELOG_AI.md /tmp/CHANGELOG.source
+          git config user.name 'VAEP Controller'
+          git config user.email 'actions@users.noreply.github.com'
 
-          cat > docs/CERTIFICACION_N3_8_NOTA_DEBITO_CLIENTE.md <<'EOF'
+          for attempt in 1 2 3 4; do
+            git fetch origin Desarrollo --depth=1
+            BASE_HEAD="$(git rev-parse origin/Desarrollo)"
+            git checkout --detach "$BASE_HEAD"
+
+            test "$(git hash-object TASKS.md)" = "$EXPECTED_TASKS_SOURCE_BLOB"
+            test "$(git hash-object CHANGELOG_AI.md)" = "$EXPECTED_CHANGELOG_SOURCE_BLOB"
+            test ! -e docs/CERTIFICACION_N3_8_NOTA_DEBITO_CLIENTE.md
+            cp TASKS.md /tmp/TASKS.source
+            cp CHANGELOG_AI.md /tmp/CHANGELOG.source
+
+            cat > docs/CERTIFICACION_N3_8_NOTA_DEBITO_CLIENTE.md <<'EOF'
           # Certificación N3.8 — Nota de débito de cliente
 
           ## Dictamen
@@ -58,7 +65,7 @@ jobs:
           Si legislación u operación exige NotaDebitoCliente en el futuro, N3.8 debe reabrirse desde dominio/contratos con requisito explícito antes de crear persistencia, API o UI.
           EOF
 
-          cat >> TASKS.md <<'EOF'
+            cat >> TASKS.md <<'EOF'
 
           ## ERP-N3.8 — Nota de débito de cliente — CIERRE CONDICIONAL/N/A
 
@@ -70,7 +77,7 @@ jobs:
           **ERP-N3.8 queda formalmente cerrado como N/A condicionado al requisito legal/operativo. No se implementó `NotaDebitoCliente`. Siguiente MICROTAREA dependency-valid: `N3.9.A — Cuentas por cobrar / Auditoría y preflight`.**
           EOF
 
-          cat >> CHANGELOG_AI.md <<'EOF'
+            cat >> CHANGELOG_AI.md <<'EOF'
 
           ## 2026-08-26 — ERP-N3.8 Nota de débito de cliente — CIERRE CONDICIONAL/N/A
 
@@ -83,20 +90,29 @@ jobs:
           **Reapertura:** si legislación/operación exige esta capacidad, reabrir desde N3.8.B con contrato explícito antes de dominio/persistencia/API/UI. El selector puede promover `N3.9.A`.
           EOF
 
-          cmp -n "$(stat -c%s /tmp/TASKS.source)" /tmp/TASKS.source TASKS.md
-          cmp -n "$(stat -c%s /tmp/CHANGELOG.source)" /tmp/CHANGELOG.source CHANGELOG_AI.md
-          git add -N docs/CERTIFICACION_N3_8_NOTA_DEBITO_CLIENTE.md
-          test "$(git diff --name-only | sort)" = $'CHANGELOG_AI.md\nTASKS.md\ndocs/CERTIFICACION_N3_8_NOTA_DEBITO_CLIENTE.md'
-          test "$(git diff --numstat -- TASKS.md | cut -f2)" = "0"
-          test "$(git diff --numstat -- CHANGELOG_AI.md | cut -f2)" = "0"
-          test "$(git diff --numstat -- docs/CERTIFICACION_N3_8_NOTA_DEBITO_CLIENTE.md | cut -f2)" = "0"
-          git diff --check
+            cmp -n "$(stat -c%s /tmp/TASKS.source)" /tmp/TASKS.source TASKS.md
+            cmp -n "$(stat -c%s /tmp/CHANGELOG.source)" /tmp/CHANGELOG.source CHANGELOG_AI.md
+            git add -N docs/CERTIFICACION_N3_8_NOTA_DEBITO_CLIENTE.md
+            test "$(git diff --name-only | sort)" = $'CHANGELOG_AI.md\nTASKS.md\ndocs/CERTIFICACION_N3_8_NOTA_DEBITO_CLIENTE.md'
+            test "$(git diff --numstat -- TASKS.md | cut -f2)" = "0"
+            test "$(git diff --numstat -- CHANGELOG_AI.md | cut -f2)" = "0"
+            test "$(git diff --numstat -- docs/CERTIFICACION_N3_8_NOTA_DEBITO_CLIENTE.md | cut -f2)" = "0"
+            git diff --check
 
-          git config user.name 'VAEP Controller'
-          git config user.email 'actions@users.noreply.github.com'
-          git add TASKS.md CHANGELOG_AI.md docs/CERTIFICACION_N3_8_NOTA_DEBITO_CLIENTE.md
-          git commit -m 'docs(N3.8.H): cerrar NotaDebitoCliente como N/A condicional [VAEP v3.25.1] [skip ci]'
+            git add TASKS.md CHANGELOG_AI.md docs/CERTIFICACION_N3_8_NOTA_DEBITO_CLIENTE.md
+            git commit -m 'docs(N3.8.H): cerrar NotaDebitoCliente como N/A condicional [VAEP v3.25.1] [skip ci]'
 
-          git fetch origin Desarrollo --depth=1
-          test "$(git rev-parse origin/Desarrollo)" = "$GITHUB_SHA"
-          git push origin HEAD:Desarrollo
+            git fetch origin Desarrollo --depth=1
+            CURRENT_HEAD="$(git rev-parse origin/Desarrollo)"
+            if [ "$CURRENT_HEAD" = "$BASE_HEAD" ]; then
+              git push origin HEAD:Desarrollo
+              exit 0
+            fi
+
+            echo "Desarrollo advanced during publish attempt ${attempt}: ${BASE_HEAD} -> ${CURRENT_HEAD}; retrying on fresh manifest-only head."
+            git reset --hard
+            git clean -fd
+          done
+
+          echo 'N3.8.H publisher could not obtain a stable Desarrollo ref after four safe retries.' >&2
+          exit 42
