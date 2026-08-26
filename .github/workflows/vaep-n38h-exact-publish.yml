@@ -1,3 +1,4 @@
+# Triggered after workflow registration on Desarrollo; source blobs and history preservation are hard-gated below.
 name: VAEP N3.8.H Exact Closure Publisher
 
 on:
