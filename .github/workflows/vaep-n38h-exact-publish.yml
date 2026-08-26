@@ -1,4 +1,4 @@
-# Triggered after workflow registration on Desarrollo; source blobs and history preservation are hard-gated below.
+# Recovery trigger: append-only publisher; never rewrites pre-existing TASKS/CHANGELOG bytes.
 name: VAEP N3.8.H Exact Closure Publisher
 
 on:
@@ -57,7 +57,6 @@ jobs:
           ## Regla de reapertura
           Si legislación u operación exige NotaDebitoCliente en el futuro, N3.8 debe reabrirse desde dominio/contratos con requisito explícito antes de crear persistencia, API o UI.
           EOF
-          sed -i 's/^          //' docs/CERTIFICACION_N3_8_NOTA_DEBITO_CLIENTE.md
 
           cat >> TASKS.md <<'EOF'
 
@@ -70,7 +69,6 @@ jobs:
 
           **ERP-N3.8 queda formalmente cerrado como N/A condicionado al requisito legal/operativo. No se implementó `NotaDebitoCliente`. Siguiente MICROTAREA dependency-valid: `N3.9.A — Cuentas por cobrar / Auditoría y preflight`.**
           EOF
-          sed -i 's/^          //' TASKS.md
 
           cat >> CHANGELOG_AI.md <<'EOF'
 
@@ -84,7 +82,6 @@ jobs:
 
           **Reapertura:** si legislación/operación exige esta capacidad, reabrir desde N3.8.B con contrato explícito antes de dominio/persistencia/API/UI. El selector puede promover `N3.9.A`.
           EOF
-          sed -i 's/^          //' CHANGELOG_AI.md
 
           cmp -n "$(stat -c%s /tmp/TASKS.source)" /tmp/TASKS.source TASKS.md
           cmp -n "$(stat -c%s /tmp/CHANGELOG.source)" /tmp/CHANGELOG.source CHANGELOG_AI.md
