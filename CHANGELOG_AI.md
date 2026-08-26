@@ -563,3 +563,15 @@ Approved closure facts:
 - TASKS rollup 6efbb72880a15bd6cf7f2d5d6bbb3d1b0d0118d7
 - P0/P1 known attributable to N3.6 = 0
 - next parent after H is N3.7.A, promotion blocked until H LISTO.
+
+## 2026-08-26 — ERP-N3.7 Nota de crédito de cliente — CIERRE FORMAL
+
+**Responsable:** ChatGPT/VAEP v3.25.1 Closure Governor mediante QA takeover documental y hard verify history-preserving.
+
+**Objetivo/alcance:** cerrar formalmente N3.7.A-H sin reabrir código funcional ni inventar semánticas fiscales, stock, Kardex, caja o downstream no certificadas. `NotaCreditoCliente` conserva el alcance y contratos ya certificados por N3.7.A-G.
+
+**Evidencia:** N3.7.A Issue #752 `LISTO_REAL`; N3.7.B `46a250fcc0cfd1562306538375e772a94c39bea5`; N3.7.C `9810cf2e7fd0289a9374a8477a4131f3f73fef38`; N3.7.D `8bcacae8a45fe3c0072bf519610bcc1ec1203a4f`; N3.7.E `f9ef582749a79c8900741d1a40ff393039c7b287`; N3.7.F `943aa0e607af3221ed8987a0edac37a539561696`; N3.7.G Issue #781 `LISTO_REAL`. Los gates causales y P0/P1 atribuibles de esos padres quedaron certificados en sus cierres.
+
+**Cierre documental/control:** `TASKS.md` ya contiene el rollup N3.7 y esta publicación agrega únicamente este bloque a `CHANGELOG_AI.md`, preservando byte por byte todo el blob source `d53c56416ac7ac01beef761adab5172cf5297487` y sin eliminar ni reformular historia previa. Issue #782 es el control de cierre; PR #2 permanece Draft `Desarrollo → main`, sin merge. P0/P1 atribuibles conocidos al cierre: 0.
+
+**Promoción:** con esta publicación N3.7.H queda formalmente `LISTO`; el selector fail-closed puede promover `N3.8.A` y mantener N3.8.B como pipeline SAFE según dependencias.
