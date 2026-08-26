@@ -11,5 +11,8 @@ export const PEDIDOS_VENTA_ROUTES:Routes=[
  {path:'pedidos-venta/:id',canActivate:[authGuard,permisoGuard],data:{modulo:'Ventas',accion:'Ver'},loadComponent:()=>import('./pedidos-venta.components').then(m=>m.PedidoVentaDetailComponent)},
  {path:'devoluciones-clientes',canActivate:[authGuard,permisoGuard],data:{modulo:'Ventas',accion:'Ver'},loadComponent:()=>import('../ventas/devoluciones-cliente/devoluciones-cliente.components').then(m=>m.DevolucionesClienteListComponent)},
  {path:'devoluciones-clientes/nueva',canActivate:[authGuard,permisoGuard],data:{modulo:'Ventas',accion:'Crear'},loadComponent:()=>import('../ventas/devoluciones-cliente/devoluciones-cliente.components').then(m=>m.DevolucionClienteFormComponent)},
- {path:'devoluciones-clientes/:id',canActivate:[authGuard,permisoGuard],data:{modulo:'Ventas',accion:'Ver'},loadComponent:()=>import('../ventas/devoluciones-cliente/devoluciones-cliente.components').then(m=>m.DevolucionClienteDetailComponent)}
+ {path:'devoluciones-clientes/:id',canActivate:[authGuard,permisoGuard],data:{modulo:'Ventas',accion:'Ver'},loadComponent:()=>import('../ventas/devoluciones-cliente/devoluciones-cliente.components').then(m=>m.DevolucionClienteDetailComponent)},
+ {path:'notas-credito-cliente',canActivate:[authGuard,permisoGuard],data:{modulo:'Ventas',accion:'Ver'},loadComponent:()=>import('../ventas/notas-credito-cliente/notas-credito-cliente.components').then(m=>m.NotasCreditoClienteHomeComponent)},
+ {path:'notas-credito-cliente/nueva',canActivate:[authGuard,permisoGuard],data:{modulo:'Ventas',accion:'Crear'},loadComponent:()=>import('../ventas/notas-credito-cliente/notas-credito-cliente.components').then(m=>m.NotaCreditoClienteFormComponent)},
+ {path:'notas-credito-cliente/:id',canActivate:[authGuard,permisoGuard],data:{modulo:'Ventas',accion:'Ver'},loadComponent:()=>import('../ventas/notas-credito-cliente/notas-credito-cliente.components').then(m=>m.NotaCreditoClienteDetailComponent)}
 ];
