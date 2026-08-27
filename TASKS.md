@@ -167,3 +167,19 @@ Este bloque es aditivo y supersede únicamente el estado operativo stale de N3.9
 - [x] N3.10.H documentación/certificación — certificación canónica `docs/CERTIFICACION_N3_10_CREDITO_CLIENTE.md`; rollup aditivo TASKS+CHANGELOG hard-verificado; P0/P1 atribuibles conocidos=0.
 
 **ERP-N3.10 queda formalmente cerrado. Siguiente parent dependency-valid: `N3.11.A`; su promoción solo ocurre después de este cierre real.**
+
+## ERP-N3.11 — Punto de Venta (POS) — ROLLUP SUPERSEDING 2026-08-27
+
+Este bloque es aditivo y supersede únicamente el estado operativo stale de N3.10/N3.11 registrado arriba; no elimina ni reescribe historia previa.
+
+- [x] N3.10.H quedó cerrado formalmente antes de iniciar N3.11; `CHANGELOG_AI.md` contiene el cierre canónico.
+- [x] N3.11.A auditoría/preflight — `LISTO_REAL`.
+- [x] N3.11.B dominio/contratos — `LISTO_REAL`; `Venta` se reutiliza como autoridad central transaccional y financiera. Capacidades no soportadas (cashier/session/terminal, split-tender/change, suspension/reprint, offline, POS-specific idempotency, POS-specific RBAC) permanecen `DECISION_PENDING`.
+- [x] N3.11.C persistencia/migración/datos — `LISTO_REAL`; esquema reutilizado de Ventas, sin tablas ni migraciones específicas de POS.
+- [x] N3.11.D Application/API — `LISTO_REAL`.
+- [x] N3.11.E Frontend/UX — `LISTO_REAL`.
+- [x] N3.11.F RBAC/auditoría/seguridad/observabilidad — `LISTO_REAL`; se aplican permisos generales de Venta (Ventas/Crear).
+- [x] N3.11.G QA/regresión/CI — `LISTO_REAL`; P0/P1 atribuibles conocidos=0.
+- [ ] N3.11.H documentación/certificación — cierre canónico en curso: este TASKS rollup aditivo hard-verificado; `LISTO` es `TARGET_AFTER_PUBLICATION`.
+
+**ERP-N3.11 queda formalmente cerrado (TARGET_AFTER_PUBLICATION).**
