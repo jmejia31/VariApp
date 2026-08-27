@@ -585,3 +585,13 @@ Approved closure facts:
 **Evidencia:** A=`034ec3305422016d6c571d0ffcf1332e3bbbe6b6`; B=`affb58f2b9e7d8ab25c051fed5b9f4ee5f317584`; C-G=`3a89725e4a76c4d85c0c4adc04f0affa4a61e79a`; certificación=`docs/CERTIFICACION_N3_8_NOTA_DEBITO_CLIENTE.md`. Delta funcional=0 y P0/P1 atribuibles conocidos=0.
 
 **Reapertura:** si legislación/operación exige esta capacidad, reabrir desde N3.8.B con contrato explícito antes de dominio/persistencia/API/UI. El selector puede promover `N3.9.A`.
+
+## 2026-08-26 — ERP-N3.9 Cuentas por cobrar — CIERRE FORMAL
+
+**Responsable:** ChatGPT/VAEP v3.25.1 Closure Governor mediante QA takeover documental y hard verify history-preserving.
+
+**Objetivo/alcance:** cerrar formalmente N3.9.A-H con base en hechos certificados. La proyección Cuentas por cobrar está implementada como una vista de solo lectura (GET /cuentas-por-cobrar) sobre la verdad operativa de Factura y FacturaPago, reutilizando el control RBAC existente (Facturacion/Ver) sin introducir libros contables mutables, esquemas propios, endpoints de escritura, lógica de mora/anticipos, ni nuevos permisos.
+
+**Evidencia:** N3.9.A-G están formalmente `LISTO_REAL`. La certificación canónica documental reposa en `docs/CERTIFICACION_N3_9_CUENTAS_POR_COBRAR.md`. P0/P1 atribuibles conocidos al cierre: 0.
+
+**Promoción:** con esta publicación, N3.9.H queda formalmente `LISTO`. El selector fail-closed puede promover el siguiente padre `N3.10.A`, respetando el bloqueo que impedía avanzar antes del cierre de H.
