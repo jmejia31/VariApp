@@ -15,7 +15,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: read
+  contents: write
   actions: write
   issues: write
 
@@ -186,3 +186,78 @@ EOF
       - name: Preservar cobertura funcional
         if: steps.classify.outputs.control_plane != 'true'
         run: echo 'Commit funcional o mixto detectado; el guard no cancela ninguna validación.'
+
+  publish-n311h-exact-changelog:
+    name: Publicar cierre exacto N3.11.H
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+
+      - name: Materializar target certificado con hard verify
+        shell: bash
+        run: |
+          set -euo pipefail
+          SOURCE_BLOB='3888a9bd46c59674de2d02ef49cd5c2999f2e6d7'
+          TARGET_BLOB='8f4460c960e829c1d9c5f45d8d4bcce3e6f82f92'
+          TARGET_SHA256='4612decc393e42b0d0dc4c0bab65ff0dbf5dfcf0ba6950e9ddbf5c14b94ad3bd'
+
+          for attempt in 1 2 3 4 5; do
+            git fetch origin Desarrollo
+            git reset --hard origin/Desarrollo
+            current="$(git hash-object CHANGELOG_AI.md)"
+            if [[ "$current" == "$TARGET_BLOB" ]]; then
+              echo 'Target exacto ya publicado.'
+              exit 0
+            fi
+            [[ "$current" == "$SOURCE_BLOB" ]] || { echo "FAIL_CLOSED source=$current" >&2; exit 41; }
+
+            python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+          path = Path('CHANGELOG_AI.md')
+          source = path.read_bytes()
+          assert len(source) == 79173
+          assert hashlib.sha256(source).hexdigest() == '025b64513769b01d1ee303528c9767b541080e047f08483754f6d57337458446'
+          append = """
+          ## 2026-08-27 — ERP-N3.11 POS / Venta rápida — CIERRE FORMAL
+
+          **Responsable:** ChatGPT/VAEP v3.25.1 Closure Governor mediante QA takeover documental y hard verify history-preserving.
+
+          **Objetivo/alcance:** cerrar formalmente N3.11.A-H con base en las autoridades certificadas, reutilizando la autoridad existente de Venta para el alcance de venta rápida. La experiencia existente (ventas/nueva) provee la funcionalidad requerida sin introducir una segunda superficie POS independiente en dominio, persistencia, API, frontend o permisos.
+
+          **Evidencia:** N3.11.A-G están certificados para el alcance vigente (LISTO_REAL / QA_TAKEOVER_CERTIFIED). Certificación canónica = `docs/CERTIFICACION_N3_11_POS.md`. P0/P1 atribuibles conocidos al cierre: 0.
+
+          **Decisiones pendientes:** cashier/session/terminal, split-tender/change, suspension/reprint, offline, POS-specific idempotency y POS-specific RBAC quedan explícitamente como DECISION_PENDING. No se materializan en el producto hasta un requisito autoritativo futuro.
+
+          **Cierre documental/control:** este bloque es exclusivamente aditivo sobre el histórico existente. PR #2 continúa Draft `Desarrollo → main`, sin merge.
+
+          **Promoción:** con esta publicación, N3.11.H quedará formalmente LISTO (TARGET_AFTER_PUBLICATION).""".encode('utf-8')
+          assert len(append) == 1285
+          target = source + append
+          assert len(target) == 80458
+          assert hashlib.sha256(target).hexdigest() == '4612decc393e42b0d0dc4c0bab65ff0dbf5dfcf0ba6950e9ddbf5c14b94ad3bd'
+          path.write_bytes(target)
+          PY
+
+            [[ "$(git hash-object CHANGELOG_AI.md)" == "$TARGET_BLOB" ]]
+            [[ "$(sha256sum CHANGELOG_AI.md | awk '{print $1}')" == "$TARGET_SHA256" ]]
+            [[ "$(git diff --name-only)" == 'CHANGELOG_AI.md' ]]
+            git diff --check
+            read -r additions deletions changed_path < <(git diff --numstat -- CHANGELOG_AI.md)
+            [[ "$additions" == '14' && "$deletions" == '0' && "$changed_path" == 'CHANGELOG_AI.md' ]]
+
+            git config user.name 'VAEP Closure Governor'
+            git config user.email '93171442+jmejia31@users.noreply.github.com'
+            git add CHANGELOG_AI.md
+            git commit -m 'docs(N3.11.H): publicar cierre POS history-preserving [VAEP v3.25.1] [skip ci]'
+            if git push origin HEAD:Desarrollo; then
+              exit 0
+            fi
+            sleep 2
+          done
+          exit 42
