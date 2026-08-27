@@ -595,3 +595,15 @@ Approved closure facts:
 **Evidencia:** N3.9.A-G están formalmente `LISTO_REAL`. La certificación canónica documental reposa en `docs/CERTIFICACION_N3_9_CUENTAS_POR_COBRAR.md`. P0/P1 atribuibles conocidos al cierre: 0.
 
 **Promoción:** con esta publicación, N3.9.H queda formalmente `LISTO`. El selector fail-closed puede promover el siguiente padre `N3.10.A`, respetando el bloqueo que impedía avanzar antes del cierre de H.
+
+## 2026-08-27 — ERP-N3.10 Crédito del cliente — CIERRE FORMAL
+
+**Responsable:** ChatGPT/VAEP v3.25.1 Closure Governor mediante QA takeover documental y hard verify history-preserving.
+
+**Objetivo/alcance:** cerrar formalmente N3.10.A-H con base en las autoridades certificadas, manteniendo la capacidad de crédito integrada a Cliente. Este cierre no introduce una segunda autoridad comercial, motor autónomo de scoring, ledger paralelo, nuevos permisos RBAC ni efectos automáticos adicionales sobre venta, factura, stock, Kardex, caja o contabilidad.
+
+**Evidencia:** N3.10.C=`619a0ba2a53ad70fb332c9f61198eb3b022ddcc1`; N3.10.D=`3c5a2c30a3d8427d0d0764ef1d4bc4e895d4d585`; N3.10.E=`615d1a4878854bf22770b945256db39fea44e08f`; N3.10.F/G=`98b7777555cd6f7ee881edb76321cd1226ca69eb`; certificación canónica=`docs/CERTIFICACION_N3_10_CREDITO_CLIENTE.md`. Los gates causales aplicables de estas autoridades están certificados y P0/P1 atribuibles conocidos al cierre=0.
+
+**Cierre documental/control:** este bloque y el rollup paralelo de `TASKS.md` son exclusivamente aditivos. Todo el contenido histórico previo de ambos archivos debe permanecer byte-prefix intacto; PR #2 continúa Draft `Desarrollo → main`, sin merge.
+
+**Promoción:** con esta publicación `N3.10.H` queda formalmente `LISTO_REAL`; el selector fail-closed puede promover `N3.11.A` y mantener N3.11.B/C como pipeline SAFE según dependencias.

@@ -151,3 +151,19 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
 - [ ] N3.9.H documentación/certificación permanece `EN_PROGRESO` hasta reconciliar `CHANGELOG_AI.md` de forma aditiva/history-preserving, verificar checks aplicables y P0/P1=0.
 
 **Promoción de N3.10 permanece bloqueada hasta N3.9.H=LISTO.**
+
+## ERP-N3.10 — Crédito de cliente — ROLLUP SUPERSEDING 2026-08-27
+
+Este bloque es aditivo y supersede únicamente el estado operativo stale de N3.9/N3.10 registrado arriba; no elimina ni reescribe historia previa.
+
+- [x] N3.9.H quedó cerrado formalmente antes de N3.10; `CHANGELOG_AI.md` contiene el cierre canónico history-preserving.
+- [x] N3.10.A auditoría/preflight — `LISTO_REAL`.
+- [x] N3.10.B dominio/contratos — `LISTO_REAL`; la capacidad de crédito permanece integrada a Cliente y no introduce un motor autónomo de scoring ni una segunda autoridad comercial.
+- [x] N3.10.C persistencia/migración/datos — `LISTO_REAL` en `619a0ba2a53ad70fb332c9f61198eb3b022ddcc1`; Development #33068581067, Acceptance #33068581028, Fase 8 #33068581188 y M13 #33068581299 `SUCCESS`.
+- [x] N3.10.D Application/API — `LISTO_REAL` en `3c5a2c30a3d8427d0d0764ef1d4bc4e895d4d585`; Development #33073610169, Acceptance #33073610154, Fase 8 #33073610151 y M13 #33073610159 `SUCCESS`.
+- [x] N3.10.E Frontend/UX — `LISTO_REAL` en `615d1a4878854bf22770b945256db39fea44e08f`; M10 #33083576709 `SUCCESS`.
+- [x] N3.10.F RBAC/auditoría/seguridad/observabilidad — `LISTO_REAL` en `98b7777555cd6f7ee881edb76321cd1226ca69eb`; Development #33086814120, Acceptance #33086814176, Fase 8 #33086814189, M13 #33086814163 y M10 #33086818401 `SUCCESS`.
+- [x] N3.10.G QA/regresión/CI — `LISTO_REAL`, reutilizando la misma autoridad exact-head `98b7777555cd6f7ee881edb76321cd1226ca69eb` sin fabricar evidencia duplicada.
+- [x] N3.10.H documentación/certificación — certificación canónica `docs/CERTIFICACION_N3_10_CREDITO_CLIENTE.md`; rollup aditivo TASKS+CHANGELOG hard-verificado; P0/P1 atribuibles conocidos=0.
+
+**ERP-N3.10 queda formalmente cerrado. Siguiente parent dependency-valid: `N3.11.A`; su promoción solo ocurre después de este cierre real.**
