@@ -56,8 +56,7 @@ jobs:
           assert len(source) == 79173, len(source)
           assert hashlib.sha256(source).hexdigest() == '025b64513769b01d1ee303528c9767b541080e047f08483754f6d57337458446'
 
-          append = """
-          ## 2026-08-27 — ERP-N3.11 POS / Venta rápida — CIERRE FORMAL
+          append = b'\n' + """## 2026-08-27 — ERP-N3.11 POS / Venta rápida — CIERRE FORMAL
 
           **Responsable:** ChatGPT/VAEP v3.25.1 Closure Governor mediante QA takeover documental y hard verify history-preserving.
 
