@@ -85,8 +85,11 @@ public class CreditoCliente : AuditableEntity
         if (!string.Equals(Moneda, NormalizarMoneda(moneda), StringComparison.Ordinal))
             throw new InvalidOperationException("La moneda del consumo debe coincidir con la política de crédito.");
 
-        var disponibleBase = Math.Max(0m, LimiteCredito - saldoComprometido);
         var excepcion = EsExcepcionVigente(ahoraUtc) ? MontoExcepcion.GetValueOrDefault() : 0m;
+        if (BloqueadoAutomaticamente)
+            return decimal.Round(excepcion, 4, MidpointRounding.AwayFromZero);
+
+        var disponibleBase = Math.Max(0m, LimiteCredito - saldoComprometido);
         return decimal.Round(disponibleBase + excepcion, 4, MidpointRounding.AwayFromZero);
     }
 

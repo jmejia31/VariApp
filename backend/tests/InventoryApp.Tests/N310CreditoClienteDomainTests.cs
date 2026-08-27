@@ -43,10 +43,12 @@ public class N310CreditoClienteDomainTests
         credito.EvaluarBloqueoAutomatico(1000.01m, AhoraUtc);
         Assert.True(credito.BloqueadoAutomaticamente);
         Assert.Equal("LIMITE_CREDITO_EXCEDIDO", credito.MotivoBloqueo);
+        Assert.False(credito.PuedeConsumir(900m, 1m, "HNL", AhoraUtc));
 
         credito.EvaluarBloqueoAutomatico(900m, AhoraUtc.AddMinutes(1));
         Assert.False(credito.BloqueadoAutomaticamente);
         Assert.Null(credito.MotivoBloqueo);
+        Assert.True(credito.PuedeConsumir(900m, 1m, "HNL", AhoraUtc.AddMinutes(1)));
     }
 
     [Fact]
