@@ -3,23 +3,23 @@ using InventoryApp.Domain.Common;
 namespace InventoryApp.Domain.Entities;
 
 /// <summary>
-/// N3.10.B — autoridad mínima de dominio para la política de crédito comercial de un cliente.
-/// La persistencia/cardinalidad física se materializa en N3.10.C; API/RBAC/UI pertenecen a N3.10.D+.
+/// N3.10.B — configuración y estado auditable del crédito comercial de un cliente.
+/// No calcula consumo/disponible ni dispara bloqueos/alertas por una fórmula implícita:
+/// esas políticas requieren autoridad explícita en capas posteriores.
 /// </summary>
 public class CreditoCliente : AuditableEntity
 {
-    private CreditoCliente()
-    {
-    }
+    private CreditoCliente() { }
 
     public int ClienteId { get; private set; }
     public Cliente Cliente { get; private set; } = null!;
-    public string Moneda { get; private set; } = "HNL";
+    public string Moneda { get; private set; } = string.Empty;
     public decimal LimiteCredito { get; private set; }
     public int DiasCredito { get; private set; }
-    public decimal PorcentajeAlerta { get; private set; }
+    public decimal? UmbralAlertaPorcentaje { get; private set; }
     public bool BloqueadoAutomaticamente { get; private set; }
     public string? MotivoBloqueo { get; private set; }
+    public DateTime? BloqueadoUtc { get; private set; }
     public decimal? MontoExcepcion { get; private set; }
     public DateTime? ExcepcionVigenteHastaUtc { get; private set; }
     public string? ExcepcionAutorizadaPor { get; private set; }
@@ -30,19 +30,14 @@ public class CreditoCliente : AuditableEntity
         string moneda,
         decimal limiteCredito,
         int diasCredito,
-        decimal porcentajeAlerta)
+        decimal? umbralAlertaPorcentaje = null)
     {
         ArgumentNullException.ThrowIfNull(cliente);
         if (cliente.Id <= 0)
             throw new InvalidOperationException("El cliente debe estar persistido para configurar crédito.");
 
-        var credito = new CreditoCliente
-        {
-            ClienteId = cliente.Id,
-            Cliente = cliente
-        };
-
-        credito.ActualizarPolitica(moneda, limiteCredito, diasCredito, porcentajeAlerta);
+        var credito = new CreditoCliente { ClienteId = cliente.Id, Cliente = cliente };
+        credito.ActualizarPolitica(moneda, limiteCredito, diasCredito, umbralAlertaPorcentaje);
         return credito;
     }
 
@@ -50,81 +45,56 @@ public class CreditoCliente : AuditableEntity
         string moneda,
         decimal limiteCredito,
         int diasCredito,
-        decimal porcentajeAlerta)
+        decimal? umbralAlertaPorcentaje)
     {
         Moneda = NormalizarMoneda(moneda);
         if (limiteCredito < 0m)
-            throw new ArgumentOutOfRangeException(nameof(limiteCredito), "El límite de crédito no puede ser negativo.");
+            throw new ArgumentOutOfRangeException(nameof(limiteCredito));
         if (diasCredito < 0)
-            throw new ArgumentOutOfRangeException(nameof(diasCredito), "Los días de crédito no pueden ser negativos.");
-        if (porcentajeAlerta <= 0m || porcentajeAlerta > 100m)
-            throw new ArgumentOutOfRangeException(nameof(porcentajeAlerta), "El porcentaje de alerta debe estar entre 0 exclusivo y 100 inclusive.");
+            throw new ArgumentOutOfRangeException(nameof(diasCredito));
+        if (umbralAlertaPorcentaje is <= 0m or > 100m)
+            throw new ArgumentOutOfRangeException(nameof(umbralAlertaPorcentaje));
 
         LimiteCredito = decimal.Round(limiteCredito, 4, MidpointRounding.AwayFromZero);
         DiasCredito = diasCredito;
-        PorcentajeAlerta = decimal.Round(porcentajeAlerta, 4, MidpointRounding.AwayFromZero);
+        UmbralAlertaPorcentaje = umbralAlertaPorcentaje is null
+            ? null
+            : decimal.Round(umbralAlertaPorcentaje.Value, 4, MidpointRounding.AwayFromZero);
     }
 
-    public void EvaluarBloqueoAutomatico(decimal saldoComprometido, DateTime ahoraUtc)
+    /// <summary>
+    /// Registra el resultado de una evaluación automática externa ya autorizada.
+    /// No inventa aquí la fórmula que determina cuándo bloquear.
+    /// </summary>
+    public void AplicarBloqueoAutomatico(string motivo, DateTime ahoraUtc)
     {
-        ValidarSaldo(saldoComprometido);
         ValidarUtc(ahoraUtc, nameof(ahoraUtc));
+        if (string.IsNullOrWhiteSpace(motivo))
+            throw new ArgumentException("El bloqueo automático exige un motivo auditable.", nameof(motivo));
 
-        var debeBloquear = saldoComprometido > LimiteCredito;
-        BloqueadoAutomaticamente = debeBloquear;
-        MotivoBloqueo = debeBloquear ? "LIMITE_CREDITO_EXCEDIDO" : null;
-
-        if (!EsExcepcionVigente(ahoraUtc))
-            LimpiarExcepcion();
+        BloqueadoAutomaticamente = true;
+        MotivoBloqueo = motivo.Trim();
+        BloqueadoUtc = ahoraUtc;
     }
 
-    public decimal ObtenerCreditoDisponible(decimal saldoComprometido, string moneda, DateTime ahoraUtc)
+    public void LiberarBloqueoAutomatico(DateTime ahoraUtc)
     {
-        ValidarSaldo(saldoComprometido);
         ValidarUtc(ahoraUtc, nameof(ahoraUtc));
-        if (!string.Equals(Moneda, NormalizarMoneda(moneda), StringComparison.Ordinal))
-            throw new InvalidOperationException("La moneda del consumo debe coincidir con la política de crédito.");
-
-        var excepcion = EsExcepcionVigente(ahoraUtc) ? MontoExcepcion.GetValueOrDefault() : 0m;
-        if (BloqueadoAutomaticamente)
-            return decimal.Round(excepcion, 4, MidpointRounding.AwayFromZero);
-
-        var disponibleBase = Math.Max(0m, LimiteCredito - saldoComprometido);
-        return decimal.Round(disponibleBase + excepcion, 4, MidpointRounding.AwayFromZero);
+        BloqueadoAutomaticamente = false;
+        MotivoBloqueo = null;
+        BloqueadoUtc = null;
     }
 
-    public bool PuedeConsumir(decimal saldoComprometido, decimal montoSolicitado, string moneda, DateTime ahoraUtc)
-    {
-        if (montoSolicitado <= 0m)
-            throw new ArgumentOutOfRangeException(nameof(montoSolicitado), "El monto solicitado debe ser mayor que cero.");
-
-        return montoSolicitado <= ObtenerCreditoDisponible(saldoComprometido, moneda, ahoraUtc);
-    }
-
-    public bool DebeAlertar(decimal saldoComprometido)
-    {
-        ValidarSaldo(saldoComprometido);
-        if (LimiteCredito == 0m)
-            return saldoComprometido > 0m;
-
-        var utilizacion = saldoComprometido / LimiteCredito * 100m;
-        return utilizacion >= PorcentajeAlerta;
-    }
-
-    public void AutorizarExcepcion(
-        decimal monto,
-        DateTime vigenteHastaUtc,
-        string autorizadoPor,
-        DateTime ahoraUtc)
+    public void AutorizarExcepcion(decimal monto, DateTime vigenteHastaUtc, string autorizadoPor, DateTime ahoraUtc)
     {
         if (monto <= 0m)
-            throw new ArgumentOutOfRangeException(nameof(monto), "La excepción debe autorizar un monto mayor que cero.");
+            throw new ArgumentOutOfRangeException(nameof(monto));
         ValidarUtc(ahoraUtc, nameof(ahoraUtc));
         ValidarUtc(vigenteHastaUtc, nameof(vigenteHastaUtc));
         if (vigenteHastaUtc <= ahoraUtc)
-            throw new ArgumentOutOfRangeException(nameof(vigenteHastaUtc), "La vigencia de la excepción debe ser futura.");
+            throw new ArgumentOutOfRangeException(nameof(vigenteHastaUtc));
         if (string.IsNullOrWhiteSpace(autorizadoPor))
-            throw new ArgumentException("La autorización excepcional debe identificar al actor responsable.", nameof(autorizadoPor));
+            throw new ArgumentException("La autorización excepcional exige actor responsable.", nameof(autorizadoPor));
 
         MontoExcepcion = decimal.Round(monto, 4, MidpointRounding.AwayFromZero);
         ExcepcionVigenteHastaUtc = vigenteHastaUtc;
@@ -132,12 +102,13 @@ public class CreditoCliente : AuditableEntity
         ExcepcionAutorizadaUtc = ahoraUtc;
     }
 
-    public void RevocarExcepcion() => LimpiarExcepcion();
+    public bool TieneExcepcionVigente(DateTime ahoraUtc)
+    {
+        ValidarUtc(ahoraUtc, nameof(ahoraUtc));
+        return MontoExcepcion is > 0m && ExcepcionVigenteHastaUtc is not null && ExcepcionVigenteHastaUtc > ahoraUtc;
+    }
 
-    private bool EsExcepcionVigente(DateTime ahoraUtc) =>
-        MontoExcepcion is > 0m && ExcepcionVigenteHastaUtc is not null && ExcepcionVigenteHastaUtc > ahoraUtc;
-
-    private void LimpiarExcepcion()
+    public void RevocarExcepcion()
     {
         MontoExcepcion = null;
         ExcepcionVigenteHastaUtc = null;
@@ -145,22 +116,16 @@ public class CreditoCliente : AuditableEntity
         ExcepcionAutorizadaUtc = null;
     }
 
-    private static void ValidarSaldo(decimal saldoComprometido)
+    private static string NormalizarMoneda(string moneda)
     {
-        if (saldoComprometido < 0m)
-            throw new ArgumentOutOfRangeException(nameof(saldoComprometido), "El saldo comprometido no puede ser negativo.");
+        if (string.IsNullOrWhiteSpace(moneda) || moneda.Trim().Length != 3)
+            throw new ArgumentException("La moneda debe usar un código de tres caracteres.", nameof(moneda));
+        return moneda.Trim().ToUpperInvariant();
     }
 
     private static void ValidarUtc(DateTime valor, string parametro)
     {
         if (valor.Kind != DateTimeKind.Utc)
             throw new ArgumentException("La fecha debe expresarse en UTC.", parametro);
-    }
-
-    private static string NormalizarMoneda(string moneda)
-    {
-        if (string.IsNullOrWhiteSpace(moneda) || moneda.Trim().Length != 3)
-            throw new ArgumentException("La moneda debe usar un código de tres caracteres.", nameof(moneda));
-        return moneda.Trim().ToUpperInvariant();
     }
 }
