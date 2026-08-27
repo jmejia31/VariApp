@@ -56,6 +56,14 @@ public class CajaSesion : BaseEntity
         if (Id <= 0)
             throw new InvalidOperationException("La sesión debe estar persistida antes de registrar movimientos.");
 
+        if (tipo is TipoMovimientoCaja.DiferenciaSobrante or TipoMovimientoCaja.DiferenciaFaltante)
+            throw new InvalidOperationException("Las diferencias solo se registran durante el cierre de arqueo.");
+
+        if (tipo is not TipoMovimientoCaja.Ingreso
+            and not TipoMovimientoCaja.Retiro
+            and not TipoMovimientoCaja.DepositoBanco)
+            throw new InvalidOperationException("Tipo de movimiento no soportado.");
+
         var movimiento = new CajaMovimiento(Id, UsuarioId, tipo, monto, referencia);
         _movimientos.Add(movimiento);
 
@@ -70,11 +78,6 @@ public class CajaSesion : BaseEntity
             case TipoMovimientoCaja.DepositoBanco:
                 TotalDepositos += monto;
                 break;
-            case TipoMovimientoCaja.DiferenciaSobrante:
-            case TipoMovimientoCaja.DiferenciaFaltante:
-                throw new InvalidOperationException("Las diferencias solo se registran durante el cierre de arqueo.");
-            default:
-                throw new InvalidOperationException("Tipo de movimiento no soportado.");
         }
 
         FechaActualizacion = DateTime.UtcNow;
