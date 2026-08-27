@@ -3,6 +3,7 @@ using InventoryApp.Domain.Entities;
 using InventoryApp.Infrastructure.Persistence;
 using InventoryApp.Infrastructure.Persistence.Migrations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Migrations.Operations;
 using Xunit;
