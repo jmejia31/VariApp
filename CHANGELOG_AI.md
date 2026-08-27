@@ -607,3 +607,17 @@ Approved closure facts:
 **Cierre documental/control:** este bloque y el rollup paralelo de `TASKS.md` son exclusivamente aditivos. Todo el contenido histórico previo de ambos archivos debe permanecer byte-prefix intacto; PR #2 continúa Draft `Desarrollo → main`, sin merge.
 
 **Promoción:** con esta publicación `N3.10.H` queda formalmente `LISTO_REAL`; el selector fail-closed puede promover `N3.11.A` y mantener N3.11.B/C como pipeline SAFE según dependencias.
+
+## 2026-08-27 — ERP-N3.11 POS / Venta rápida — CIERRE FORMAL
+
+**Responsable:** ChatGPT/VAEP v3.25.1 Closure Governor mediante QA takeover documental y hard verify history-preserving.
+
+**Objetivo/alcance:** cerrar formalmente N3.11.A-H con base en las autoridades certificadas, reutilizando la autoridad existente de Venta para el alcance de venta rápida. La experiencia existente (ventas/nueva) provee la funcionalidad requerida sin introducir una segunda superficie POS independiente en dominio, persistencia, API, frontend o permisos.
+
+**Evidencia:** N3.11.A-G están certificados para el alcance vigente (LISTO_REAL / QA_TAKEOVER_CERTIFIED). Certificación canónica = `docs/CERTIFICACION_N3_11_POS.md`. P0/P1 atribuibles conocidos al cierre: 0.
+
+**Decisiones pendientes:** cashier/session/terminal, split-tender/change, suspension/reprint, offline, POS-specific idempotency y POS-specific RBAC quedan explícitamente como DECISION_PENDING. No se materializan en el producto hasta un requisito autoritativo futuro.
+
+**Cierre documental/control:** este bloque es exclusivamente aditivo sobre el histórico existente. PR #2 continúa Draft `Desarrollo → main`, sin merge.
+
+**Promoción:** con esta publicación, N3.11.H quedará formalmente LISTO (TARGET_AFTER_PUBLICATION).
