@@ -60,10 +60,10 @@ export class ClienteFormComponent implements OnInit {
       tipoClienteId: [null]
     });
     this.creditoForm = this.fb.group({
-      moneda: ['', [Validators.required, Validators.maxLength(3)]],
+      moneda: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(3)]],
       limiteCredito: [0, [Validators.required, Validators.min(0)]],
       diasCredito: [0, [Validators.required, Validators.min(0)]],
-      umbralAlertaPorcentaje: [null, [Validators.min(0), Validators.max(100)]]
+      umbralAlertaPorcentaje: [null, [Validators.min(0.0001), Validators.max(100)]]
     });
     this.bloqueoForm = this.fb.group({ motivo: ['', Validators.required] });
     this.excepcionForm = this.fb.group({ monto: [0, [Validators.required, Validators.min(0.01)]], vigenteHastaLocal: ['', Validators.required] });
