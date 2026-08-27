@@ -48,6 +48,7 @@ builder.Services.AddScoped<IRecepcionCompraRepository, RecepcionCompraRepository
 builder.Services.AddScoped<IFacturaProveedorRepository, FacturaProveedorRepository>();
 builder.Services.AddScoped<IReservaInventarioRepository, ReservaInventarioRepository>();
 builder.Services.AddScoped<IDevolucionClienteRepository, DevolucionClienteRepository>();
+builder.Services.AddScoped<ICreditoClienteRepository, CreditoClienteRepository>();
 builder.Services.AddScoped<INotaCreditoClienteRepository, NotaCreditoClienteRepository>();
 builder.Services.AddScoped<IPreparacionPedidoVentaRepository, PreparacionPedidoVentaRepository>();
 builder.Services.AddScoped<ITrazabilidadInventarioRepository, TrazabilidadInventarioRepository>();
@@ -100,6 +101,7 @@ builder.Services.AddScoped<IFacturaProveedorService, FacturaProveedorService>();
 builder.Services.AddScoped<IThreeWayMatchService, ThreeWayMatchService>();
 builder.Services.AddScoped<IReservaInventarioService, ReservaInventarioService>();
 builder.Services.AddScoped<IDevolucionClienteService, DevolucionClienteService>();
+builder.Services.AddScoped<ICreditoClienteService, CreditoClienteService>();
 builder.Services.AddScoped<INotaCreditoClienteService, NotaCreditoClienteService>();
 builder.Services.AddScoped<IPreparacionPedidoVentaService, PreparacionPedidoVentaService>();
 builder.Services.AddScoped<ITrazabilidadInventarioService, TrazabilidadInventarioService>();
