@@ -73,7 +73,9 @@ public sealed class N310CreditoClienteMigrationSnapshotTests
         var entity = modelBuilder.Model.FindEntityType(typeof(CreditoCliente));
         Assert.NotNull(entity);
         Assert.Equal("CreditosCliente", entity!.GetTableName());
-        Assert.Contains(entity.GetIndexes(), index => index.GetDatabaseName() == "IX_CreditosCliente_ClienteId");
+        var clienteIndex = entity.GetIndexes()
+            .Single(index => index.GetDatabaseName() == "IX_CreditosCliente_ClienteId");
+        Assert.False(clienteIndex.IsUnique);
         Assert.Contains(entity.GetForeignKeys(), fk =>
             fk.PrincipalEntityType.ClrType == typeof(Cliente) && fk.DeleteBehavior == DeleteBehavior.Restrict);
         Assert.Equal("decimal(18,4)", entity.FindProperty(nameof(CreditoCliente.LimiteCredito))!.GetColumnType());
