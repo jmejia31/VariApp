@@ -1,0 +1,72 @@
+name: VAEP One-Shot Jules Stale Session Cleanup
+
+on:
+  push:
+    branches:
+      - Desarrollo
+    paths:
+      - ".github/workflows/vaep-jules-stale-session-cleanup.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  cleanup-stale-jules-c-session:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      JULES_API_BASE: https://jules.googleapis.com/v1alpha
+      JULES_API_KEY: ${{ secrets.JULES_C_API_KEY }}
+      SESSION_RESOURCE: sessions/12703334487144617646
+      EXPECTED_TITLE: "VAEP-C VAEP-JULES-C-MANUAL-N36B-EF-GATE-QA-20260825"
+
+    steps:
+      - name: Verify exact stale session and delete it
+        shell: bash
+        run: |
+          set -euo pipefail
+          : "${JULES_API_KEY:?JULES_C_API_KEY is required}"
+
+          before="$(mktemp)"
+          code="$(curl --silent --show-error -o "$before" -w '%{http_code}' \
+            -H "x-goog-api-key: $JULES_API_KEY" \
+            "$JULES_API_BASE/$SESSION_RESOURCE")"
+
+          if [[ "$code" == "404" ]]; then
+            echo "STALE_SESSION_ALREADY_ABSENT"
+            exit 0
+          fi
+          [[ "$code" == "200" ]] || { echo "Unexpected lookup HTTP $code" >&2; exit 1; }
+
+          actual_title="$(jq -r '.title // empty' "$before")"
+          actual_state="$(jq -r '.state // "UNKNOWN"' "$before")"
+          [[ "$actual_title" == "$EXPECTED_TITLE" ]] || {
+            echo "Refusing cleanup: exact title mismatch." >&2
+            exit 2
+          }
+
+          case "$actual_state" in
+            COMPLETED|FAILED|PAUSED)
+              echo "Refusing cleanup: historical session is terminal ($actual_state)." >&2
+              exit 3
+              ;;
+          esac
+
+          delete_code="$(curl --silent --show-error -o /tmp/delete-response.json -w '%{http_code}' \
+            -X DELETE \
+            -H "x-goog-api-key: $JULES_API_KEY" \
+            "$JULES_API_BASE/$SESSION_RESOURCE")"
+          case "$delete_code" in
+            200|204) ;;
+            *) echo "Delete failed HTTP $delete_code" >&2; exit 4 ;;
+          esac
+
+          after_code="$(curl --silent --show-error -o /tmp/after.json -w '%{http_code}' \
+            -H "x-goog-api-key: $JULES_API_KEY" \
+            "$JULES_API_BASE/$SESSION_RESOURCE")"
+          [[ "$after_code" == "404" ]] || {
+            echo "Delete was not confirmed; follow-up HTTP $after_code" >&2
+            exit 5
+          }
+
+          echo "STALE_SESSION_DELETED_AND_CONFIRMED"
