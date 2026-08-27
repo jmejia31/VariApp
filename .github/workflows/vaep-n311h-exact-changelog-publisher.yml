@@ -68,7 +68,7 @@ jobs:
 
           **Cierre documental/control:** este bloque es exclusivamente aditivo sobre el histórico existente. PR #2 continúa Draft `Desarrollo → main`, sin merge.
 
-          **Promoción:** con esta publicación, N3.11.H quedará formalmente LISTO (TARGET_AFTER_PUBLICATION).""".encode('utf-8')
+          **Promoción:** con esta publicación, N3.11.H quedará formalmente LISTO (TARGET_AFTER_PUBLICATION).""".encode('utf-8') + b'\n'
 
           assert len(append) == 1285, len(append)
           target = source + append
