@@ -19,6 +19,7 @@ public class AppDbContext : DbContext
     public DbSet<Talla> Tallas => Set<Talla>();
     public DbSet<Proveedor> Proveedores => Set<Proveedor>();
     public DbSet<Cliente> Clientes => Set<Cliente>();
+    public DbSet<CreditoCliente> CreditosCliente => Set<CreditoCliente>();
     public DbSet<TipoCliente> TipoClientes => Set<TipoCliente>();
     public DbSet<Usuario> Usuarios => Set<Usuario>();
     public DbSet<RolPermiso> RolPermisos => Set<RolPermiso>();
