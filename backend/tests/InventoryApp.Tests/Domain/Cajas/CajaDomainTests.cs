@@ -50,6 +50,29 @@ public class CajaDomainTests
     }
 
     [Fact]
+    public void CajaSesion_RechazaDiferenciasSinMutarLaSesion()
+    {
+        var sesion = new CajaSesion(1, 7, 100m) { Id = 25 };
+        sesion.IniciarOperaciones();
+
+        var movimientosAntes = sesion.Movimientos.Count;
+        var ingresosAntes = sesion.TotalIngresos;
+        var retirosAntes = sesion.TotalRetiros;
+        var depositosAntes = sesion.TotalDepositos;
+
+        Assert.Throws<InvalidOperationException>(() =>
+            sesion.RegistrarMovimiento(TipoMovimientoCaja.DiferenciaSobrante, 5m, "No permitido"));
+        Assert.Throws<InvalidOperationException>(() =>
+            sesion.RegistrarMovimiento(TipoMovimientoCaja.DiferenciaFaltante, 5m, "No permitido"));
+
+        Assert.Equal(movimientosAntes, sesion.Movimientos.Count);
+        Assert.Equal(ingresosAntes, sesion.TotalIngresos);
+        Assert.Equal(retirosAntes, sesion.TotalRetiros);
+        Assert.Equal(depositosAntes, sesion.TotalDepositos);
+        Assert.Equal(EstadoCajaSesion.Operaciones, sesion.Estado);
+    }
+
+    [Fact]
     public void CajaMovimiento_ExponeSemanticaDeSignoSinMontosNegativos()
     {
         var ingreso = new CajaMovimiento(5, 7, TipoMovimientoCaja.Ingreso, 20m, "Ingreso");
