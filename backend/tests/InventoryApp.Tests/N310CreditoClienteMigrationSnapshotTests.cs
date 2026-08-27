@@ -43,6 +43,15 @@ public sealed class N310CreditoClienteMigrationSnapshotTests
     }
 
     [Fact]
+    public void AppDbContext_ExponeDbSetCreditoClienteConTipoCorrecto()
+    {
+        var property = typeof(AppDbContext).GetProperty(nameof(AppDbContext.CreditosCliente));
+
+        Assert.NotNull(property);
+        Assert.Equal(typeof(DbSet<CreditoCliente>), property!.PropertyType);
+    }
+
+    [Fact]
     public void SnapshotPart28_EstaCableadoEnSnapshotRaizYConservaContratoCreditoCliente()
     {
         var infrastructureAssembly = typeof(AppDbContext).Assembly;
