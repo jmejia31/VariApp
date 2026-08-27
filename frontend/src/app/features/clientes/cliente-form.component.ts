@@ -77,6 +77,7 @@ export class ClienteFormComponent implements OnInit {
     if (idParam) {
       this.isEdit.set(true);
       this.clienteId = Number(idParam);
+      this.deshabilitarFormulariosCredito();
       this.clienteService.getById(this.clienteId).subscribe((res) => this.form.patchValue(res.data));
       this.cargarCredito();
     }
@@ -111,28 +112,39 @@ export class ClienteFormComponent implements OnInit {
             umbralAlertaPorcentaje: actual.umbralAlertaPorcentaje
           });
         }
+        this.aplicarPermisosCredito();
         this.creditoLoading.set(false);
       },
-      error: () => { this.creditoLoading.set(false); this.snackBar.open('No se pudo cargar la política de crédito.', 'Cerrar', { duration: 5000 }); }
+      error: () => {
+        this.deshabilitarFormulariosCredito();
+        this.creditoLoading.set(false);
+        this.snackBar.open('No se pudo cargar la política de crédito.', 'Cerrar', { duration: 5000 });
+      }
     });
   }
 
   guardarCredito(): void {
-    if (!this.clienteId || this.creditoForm.invalid || this.creditoSaving()) return;
+    const puedeMutar = this.credito() ? this.puedeEditarCredito() : this.puedeCrearCredito();
+    if (!puedeMutar || !this.clienteId || this.creditoForm.invalid || this.creditoSaving()) return;
     const value = this.creditoForm.getRawValue();
     this.creditoSaving.set(true);
     const op = this.credito()
       ? this.creditoService.actualizar(this.credito()!.id, value)
       : this.creditoService.crear(this.clienteId, value);
     op.subscribe({
-      next: (res) => { this.credito.set(res.data); this.creditoSaving.set(false); this.snackBar.open('Política de crédito guardada.', 'Cerrar', { duration: 3000 }); },
+      next: (res) => {
+        this.credito.set(res.data);
+        this.aplicarPermisosCredito();
+        this.creditoSaving.set(false);
+        this.snackBar.open('Política de crédito guardada.', 'Cerrar', { duration: 3000 });
+      },
       error: (err) => { this.creditoSaving.set(false); this.snackBar.open(err.error?.message ?? 'No se pudo guardar la política de crédito.', 'Cerrar', { duration: 5000 }); }
     });
   }
 
   aplicarBloqueo(): void {
     const actual = this.credito();
-    if (!actual || this.bloqueoForm.invalid) return;
+    if (!this.puedeEditarCredito() || !actual || this.bloqueoForm.invalid) return;
     this.creditoService.bloquear(actual.id, String(this.bloqueoForm.value.motivo).trim()).subscribe({
       next: (res) => { this.credito.set(res.data); this.bloqueoForm.reset({ motivo: '' }); },
       error: (err) => this.snackBar.open(err.error?.message ?? 'No se pudo aplicar el bloqueo.', 'Cerrar', { duration: 5000 })
@@ -141,7 +153,7 @@ export class ClienteFormComponent implements OnInit {
 
   liberarBloqueo(): void {
     const actual = this.credito();
-    if (!actual) return;
+    if (!this.puedeEditarCredito() || !actual) return;
     this.creditoService.liberarBloqueo(actual.id).subscribe({
       next: (res) => this.credito.set(res.data),
       error: (err) => this.snackBar.open(err.error?.message ?? 'No se pudo liberar el bloqueo.', 'Cerrar', { duration: 5000 })
@@ -150,7 +162,7 @@ export class ClienteFormComponent implements OnInit {
 
   autorizarExcepcion(): void {
     const actual = this.credito();
-    if (!actual || this.excepcionForm.invalid) return;
+    if (!this.puedeEditarCredito() || !actual || this.excepcionForm.invalid) return;
     const value = this.excepcionForm.getRawValue();
     const vigenteHastaUtc = new Date(value.vigenteHastaLocal).toISOString();
     this.creditoService.autorizarExcepcion(actual.id, Number(value.monto), vigenteHastaUtc).subscribe({
@@ -161,10 +173,33 @@ export class ClienteFormComponent implements OnInit {
 
   revocarExcepcion(): void {
     const actual = this.credito();
-    if (!actual) return;
+    if (!this.puedeEditarCredito() || !actual) return;
     this.creditoService.revocarExcepcion(actual.id).subscribe({
       next: (res) => this.credito.set(res.data),
       error: (err) => this.snackBar.open(err.error?.message ?? 'No se pudo revocar la excepción.', 'Cerrar', { duration: 5000 })
     });
+  }
+
+  private aplicarPermisosCredito(): void {
+    const puedeMutarPolitica = this.credito() ? this.puedeEditarCredito() : this.puedeCrearCredito();
+    if (puedeMutarPolitica) {
+      this.creditoForm.enable({ emitEvent: false });
+    } else {
+      this.creditoForm.disable({ emitEvent: false });
+    }
+
+    if (this.puedeEditarCredito()) {
+      this.bloqueoForm.enable({ emitEvent: false });
+      this.excepcionForm.enable({ emitEvent: false });
+    } else {
+      this.bloqueoForm.disable({ emitEvent: false });
+      this.excepcionForm.disable({ emitEvent: false });
+    }
+  }
+
+  private deshabilitarFormulariosCredito(): void {
+    this.creditoForm.disable({ emitEvent: false });
+    this.bloqueoForm.disable({ emitEvent: false });
+    this.excepcionForm.disable({ emitEvent: false });
   }
 }
