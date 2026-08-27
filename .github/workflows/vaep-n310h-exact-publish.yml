@@ -100,3 +100,5 @@ EOF
           git fetch origin Desarrollo --depth=1
           test "$(git rev-parse origin/Desarrollo)" = "$GITHUB_SHA"
           git push origin HEAD:Desarrollo
+
+# retrigger 2026-08-27T17:12Z after manifest concurrency drain
