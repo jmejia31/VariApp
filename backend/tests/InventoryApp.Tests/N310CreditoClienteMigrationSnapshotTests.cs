@@ -3,7 +3,7 @@ using InventoryApp.Domain.Entities;
 using InventoryApp.Infrastructure.Persistence;
 using InventoryApp.Infrastructure.Persistence.Migrations;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Migrations.Operations;
 using Xunit;
@@ -53,19 +53,24 @@ public sealed class N310CreditoClienteMigrationSnapshotTests
     }
 
     [Fact]
-    public void SnapshotPart28_EstaCableadoEnSnapshotRaizYConservaContratoCreditoCliente()
+    public void SnapshotPart28_ConservaContratoCreditoClienteSinDependerDePartesLegacy()
     {
         var infrastructureAssembly = typeof(AppDbContext).Assembly;
-        var snapshotType = infrastructureAssembly.GetType(
-            "InventoryApp.Infrastructure.Migrations.AppDbContextModelSnapshot",
+        var helperType = infrastructureAssembly.GetType(
+            "InventoryApp.Infrastructure.Migrations.AppDbContextSnapshotN14D",
             throwOnError: false);
 
-        Assert.NotNull(snapshotType);
+        Assert.NotNull(helperType);
 
-        var snapshot = Activator.CreateInstance(snapshotType!, nonPublic: true) as ModelSnapshot;
-        Assert.NotNull(snapshot);
+        var applyPart28 = helperType!.GetMethod(
+            "ApplyPart28",
+            BindingFlags.Static | BindingFlags.NonPublic);
+        Assert.NotNull(applyPart28);
 
-        var entity = snapshot!.Model.FindEntityType(typeof(CreditoCliente));
+        var modelBuilder = new ModelBuilder(new ConventionSet());
+        applyPart28!.Invoke(null, new object[] { modelBuilder });
+
+        var entity = modelBuilder.Model.FindEntityType(typeof(CreditoCliente));
         Assert.NotNull(entity);
         Assert.Equal("CreditosCliente", entity!.GetTableName());
         Assert.Contains(entity.GetIndexes(), index => index.GetDatabaseName() == "IX_CreditosCliente_ClienteId");
