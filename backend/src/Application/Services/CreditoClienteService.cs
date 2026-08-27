@@ -71,7 +71,7 @@ public sealed class CreditoClienteService : ICreditoClienteService
         RequerirUsuario();
         await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
-            var credito = await _repository.GetByIdForUpdateAsync(id) ?? throw new ResourceNotFoundException($"Crédito de cliente con Id {id} no encontrado.");
+            var credito = await ObtenerParaActualizarAsync(id);
             credito.ActualizarPolitica(dto.Moneda, dto.LimiteCredito, dto.DiasCredito, dto.UmbralAlertaPorcentaje);
             _repository.Update(credito);
             await _repository.SaveChangesAsync();
@@ -86,10 +86,123 @@ public sealed class CreditoClienteService : ICreditoClienteService
         return await GetByIdAsync(id);
     }
 
+    public async Task<CreditoClienteDto> AplicarBloqueoAutomaticoAsync(int id, AplicarBloqueoCreditoClienteDto dto)
+    {
+        ArgumentNullException.ThrowIfNull(dto);
+        RequerirUsuario();
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            var credito = await ObtenerParaActualizarAsync(id);
+            try
+            {
+                credito.AplicarBloqueoAutomatico(dto.Motivo, DateTime.UtcNow);
+            }
+            catch (ArgumentException ex)
+            {
+                throw new BusinessRuleException(ex.Message);
+            }
+            _repository.Update(credito);
+            await _repository.SaveChangesAsync();
+            await _auditoria.RegistrarEstrictoAsync(
+                ModuloSistema.Clientes,
+                AccionPermiso.Editar,
+                "Bloqueo automático de crédito de cliente aplicado.",
+                credito.Id,
+                nameof(CreditoCliente),
+                valoresNuevos: new { credito.BloqueadoAutomaticamente, credito.MotivoBloqueo, credito.BloqueadoUtc });
+        });
+        return await GetByIdAsync(id);
+    }
+
+    public async Task<CreditoClienteDto> LiberarBloqueoAutomaticoAsync(int id)
+    {
+        RequerirUsuario();
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            var credito = await ObtenerParaActualizarAsync(id);
+            credito.LiberarBloqueoAutomatico(DateTime.UtcNow);
+            _repository.Update(credito);
+            await _repository.SaveChangesAsync();
+            await _auditoria.RegistrarEstrictoAsync(
+                ModuloSistema.Clientes,
+                AccionPermiso.Editar,
+                "Bloqueo automático de crédito de cliente liberado.",
+                credito.Id,
+                nameof(CreditoCliente),
+                valoresNuevos: new { credito.BloqueadoAutomaticamente, credito.MotivoBloqueo, credito.BloqueadoUtc });
+        });
+        return await GetByIdAsync(id);
+    }
+
+    public async Task<CreditoClienteDto> AutorizarExcepcionAsync(int id, AutorizarExcepcionCreditoClienteDto dto)
+    {
+        ArgumentNullException.ThrowIfNull(dto);
+        var actor = RequerirUsuarioNombre();
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            var credito = await ObtenerParaActualizarAsync(id);
+            try
+            {
+                credito.AutorizarExcepcion(dto.Monto, dto.VigenteHastaUtc, actor, DateTime.UtcNow);
+            }
+            catch (Exception ex) when (ex is ArgumentException or ArgumentOutOfRangeException)
+            {
+                throw new BusinessRuleException(ex.Message);
+            }
+            _repository.Update(credito);
+            await _repository.SaveChangesAsync();
+            await _auditoria.RegistrarEstrictoAsync(
+                ModuloSistema.Clientes,
+                AccionPermiso.Editar,
+                "Excepción de crédito de cliente autorizada.",
+                credito.Id,
+                nameof(CreditoCliente),
+                valoresNuevos: new { credito.MontoExcepcion, credito.ExcepcionVigenteHastaUtc, credito.ExcepcionAutorizadaPor, credito.ExcepcionAutorizadaUtc });
+        });
+        return await GetByIdAsync(id);
+    }
+
+    public async Task<CreditoClienteDto> RevocarExcepcionAsync(int id)
+    {
+        RequerirUsuario();
+        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+        {
+            var credito = await ObtenerParaActualizarAsync(id);
+            credito.RevocarExcepcion();
+            _repository.Update(credito);
+            await _repository.SaveChangesAsync();
+            await _auditoria.RegistrarEstrictoAsync(
+                ModuloSistema.Clientes,
+                AccionPermiso.Editar,
+                "Excepción de crédito de cliente revocada.",
+                credito.Id,
+                nameof(CreditoCliente),
+                valoresNuevos: new { credito.MontoExcepcion, credito.ExcepcionVigenteHastaUtc, credito.ExcepcionAutorizadaPor, credito.ExcepcionAutorizadaUtc });
+        });
+        return await GetByIdAsync(id);
+    }
+
+    private async Task<CreditoCliente> ObtenerParaActualizarAsync(int id)
+    {
+        if (id <= 0) throw new BusinessRuleException("El identificador de crédito debe ser mayor que cero.");
+        return await _repository.GetByIdForUpdateAsync(id)
+            ?? throw new ResourceNotFoundException($"Crédito de cliente con Id {id} no encontrado.");
+    }
+
     private void RequerirUsuario()
     {
         if (_currentUser.UsuarioId is not > 0)
             throw new ForbiddenAccessException("La operación requiere un usuario autenticado.");
+    }
+
+    private string RequerirUsuarioNombre()
+    {
+        RequerirUsuario();
+        var nombre = _currentUser.NombreCompleto?.Trim();
+        if (string.IsNullOrWhiteSpace(nombre)) nombre = _currentUser.NombreUsuario?.Trim();
+        return string.IsNullOrWhiteSpace(nombre)
+            ? _currentUser.UsuarioId!.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)
+            : nombre;
     }
 
     private static CreditoClienteDto Map(CreditoCliente x) => new()

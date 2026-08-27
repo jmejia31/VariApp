@@ -51,4 +51,36 @@ public sealed class CreditosClienteController : ControllerBase
         var actualizado = await _service.ActualizarPoliticaAsync(id, dto);
         return Ok(ApiResponse<CreditoClienteDto>.Ok(actualizado, "Política de crédito actualizada correctamente."));
     }
+
+    [HttpPost("{id:int}/bloqueo-automatico")]
+    [RequierePermiso(ModuloSistema.Clientes, AccionPermiso.Editar)]
+    public async Task<IActionResult> AplicarBloqueoAutomatico(int id, [FromBody] AplicarBloqueoCreditoClienteDto dto)
+    {
+        var actualizado = await _service.AplicarBloqueoAutomaticoAsync(id, dto);
+        return Ok(ApiResponse<CreditoClienteDto>.Ok(actualizado, "Bloqueo automático aplicado correctamente."));
+    }
+
+    [HttpDelete("{id:int}/bloqueo-automatico")]
+    [RequierePermiso(ModuloSistema.Clientes, AccionPermiso.Editar)]
+    public async Task<IActionResult> LiberarBloqueoAutomatico(int id)
+    {
+        var actualizado = await _service.LiberarBloqueoAutomaticoAsync(id);
+        return Ok(ApiResponse<CreditoClienteDto>.Ok(actualizado, "Bloqueo automático liberado correctamente."));
+    }
+
+    [HttpPost("{id:int}/excepcion")]
+    [RequierePermiso(ModuloSistema.Clientes, AccionPermiso.Editar)]
+    public async Task<IActionResult> AutorizarExcepcion(int id, [FromBody] AutorizarExcepcionCreditoClienteDto dto)
+    {
+        var actualizado = await _service.AutorizarExcepcionAsync(id, dto);
+        return Ok(ApiResponse<CreditoClienteDto>.Ok(actualizado, "Excepción de crédito autorizada correctamente."));
+    }
+
+    [HttpDelete("{id:int}/excepcion")]
+    [RequierePermiso(ModuloSistema.Clientes, AccionPermiso.Editar)]
+    public async Task<IActionResult> RevocarExcepcion(int id)
+    {
+        var actualizado = await _service.RevocarExcepcionAsync(id);
+        return Ok(ApiResponse<CreditoClienteDto>.Ok(actualizado, "Excepción de crédito revocada correctamente."));
+    }
 }

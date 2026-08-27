@@ -33,3 +33,14 @@ public sealed class UpdateCreditoClienteDto
     public int DiasCredito { get; set; }
     public decimal? UmbralAlertaPorcentaje { get; set; }
 }
+
+public sealed class AplicarBloqueoCreditoClienteDto
+{
+    public string Motivo { get; set; } = string.Empty;
+}
+
+public sealed class AutorizarExcepcionCreditoClienteDto
+{
+    public decimal Monto { get; set; }
+    public DateTime VigenteHastaUtc { get; set; }
+}
