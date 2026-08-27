@@ -135,3 +135,19 @@ Este bloque es aditivo y supersede únicamente el estado operativo stale de N3.6
 - [x] N3.8.H certificación canónica: `docs/CERTIFICACION_N3_8_NOTA_DEBITO_CLIENTE.md`.
 
 **ERP-N3.8 queda formalmente cerrado como N/A condicionado al requisito legal/operativo. No se implementó `NotaDebitoCliente`. Siguiente MICROTAREA dependency-valid: `N3.9.A — Cuentas por cobrar / Auditoría y preflight`.**
+
+## ERP-N3.9 — Cuentas por cobrar — ROLLUP 2026-08-26
+
+Este bloque es aditivo y no reescribe estados históricos anteriores.
+
+- [x] N3.9.A auditoría/preflight — `LISTO_REAL`.
+- [x] N3.9.B dominio/contratos — `LISTO_REAL`; `Factura` + `FacturaPago` permanecen autoridad y CxC es read-model, no segundo ledger.
+- [x] N3.9.C persistencia/migración/datos — `LISTO_REAL / N_A_CERTIFIED`; no se creó tabla, migración ni backfill CxC.
+- [x] N3.9.D Application/API — `LISTO_REAL` sobre `59e0c41362fe3a63765d9218a9817272ce6a7602`; GET-only `/cuentas-por-cobrar`, `[Authorize]` + `Facturacion/Ver`; Development #33019598078, Acceptance #33019598096, Fase8 #33019598185 y M13 #33019598074 `SUCCESS`.
+- [x] N3.9.E Frontend/UX — `LISTO_REAL` sobre `9b0db22c26bce42f42f97ba1e0c6124c54d86af9`; Issue #843 cerrado.
+- [x] N3.9.F RBAC/auditoría/seguridad/observabilidad — `LISTO_REAL / QA_TAKEOVER_CERTIFIED` sobre `0d621920f8ebd0a7bb3f1b3af30ffbadd0f91f9c`; Issue #851 cerrado, P0/P1=0.
+- [x] N3.9.G QA/regresión/CI — `LISTO_REAL / QA_REGRESSION_CERTIFIED`; Issue #858 cerrado, P0/P1=0.
+- [x] Certificación canónica publicada: `docs/CERTIFICACION_N3_9_CUENTAS_POR_COBRAR.md`.
+- [ ] N3.9.H documentación/certificación permanece `EN_PROGRESO` hasta reconciliar `CHANGELOG_AI.md` de forma aditiva/history-preserving, verificar checks aplicables y P0/P1=0.
+
+**Promoción de N3.10 permanece bloqueada hasta N3.9.H=LISTO.**
