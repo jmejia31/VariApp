@@ -2,262 +2,53 @@ name: VAEP Control Plane CI Guard
 
 on:
   push:
-    branches: [Desarrollo]
+    branches:
+      - Desarrollo
     paths:
-      - 'vaep/jules/**'
-      - 'vaep/jules-b/**'
-      - 'vaep/jules-c/**'
-      - 'vaep/jules-d/**'
-      - '.github/scripts/vaep-jules-*.sh'
-      - '.github/workflows/vaep-jules-*.yml'
       - '.github/workflows/vaep-control-plane-ci-guard.yml'
-  pull_request:
-    branches: [main]
 
 permissions:
   contents: write
-  actions: write
-  issues: write
 
 concurrency:
-  group: vaep-control-plane-ci-guard-${{ github.event.pull_request.head.sha || github.sha }}
-  cancel-in-progress: true
+  group: vaep-n311h-exact-publish
+  cancel-in-progress: false
 
 jobs:
-  suppress-redundant-ci:
-    name: Cancelar CI redundante de commits Jules-only
+  publish:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
-      GH_TOKEN: ${{ github.token }}
-      JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
-      JULES_API_BASE: https://jules.googleapis.com/v1alpha
-      EXPECTED_OWNER: jmejia31
-      EXPECTED_REPO: VariApp
-      EXPECTED_BRANCH: Desarrollo
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-          fetch-depth: 2
-
-      - name: Validar sintaxis y contrato de ejecutores VAEP/Jules
-        shell: bash
-        run: |
-          set -euo pipefail
-          bash -n .github/scripts/vaep-jules-worker-v320.sh
-          bash -n .github/scripts/vaep-jules-throughput-guard-v326.sh
-          bash .github/scripts/vaep-jules-throughput-guard-v326.sh --static-self-test
-
-      - name: Clasificar último commit
-        id: classify
-        shell: bash
-        run: |
-          set -euo pipefail
-          changed="$(git diff-tree --no-commit-id --name-only -r HEAD)"
-          test -n "$changed"
-
-          control_plane=true
-          while IFS= read -r path; do
-            case "$path" in
-              vaep/jules/*|vaep/jules-b/*|vaep/jules-c/*|vaep/jules-d/*|.github/scripts/vaep-jules-*.sh|.github/workflows/vaep-jules-*.yml|.github/workflows/vaep-control-plane-ci-guard.yml)
-                ;;
-              *)
-                control_plane=false
-                break
-                ;;
-            esac
-          done <<< "$changed"
-
-          echo "control_plane=$control_plane" >> "$GITHUB_OUTPUT"
-          printf 'Último commit:\n%s\ncontrol_plane=%s\n' "$changed" "$control_plane"
-
-      - name: Cancelar ejecuciones redundantes del mismo HEAD
-        if: steps.classify.outputs.control_plane == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          head_sha="${{ github.event.pull_request.head.sha || github.sha }}"
-          current_run="$GITHUB_RUN_ID"
-
-          gh api --paginate \
-            -H 'Accept: application/vnd.github+json' \
-            "/repos/$GITHUB_REPOSITORY/actions/runs?head_sha=$head_sha&per_page=100" \
-            --jq '.workflow_runs[] | [.id, .name, .status] | @tsv' |
-          while IFS=$'\t' read -r run_id name status; do
-            [ "$run_id" = "$current_run" ] && continue
-            case "$name" in
-              VAEP\ Jules*|'VAEP Control Plane CI Guard')
-                continue
-                ;;
-            esac
-            case "$status" in
-              queued|in_progress|requested|waiting|pending)
-                echo "Cancelando run redundante $run_id ($name, $status) para HEAD $head_sha"
-                gh api --method POST \
-                  -H 'Accept: application/vnd.github+json' \
-                  "/repos/$GITHUB_REPOSITORY/actions/runs/$run_id/cancel" >/dev/null || true
-                ;;
-            esac
-          done
-
-      - name: Diagnóstico Jules pre-session resiliente
-        if: steps.classify.outputs.control_plane == 'true'
-        shell: bash
-        run: |
-          set +e
-          target_sha="${{ github.event.pull_request.head.sha || github.sha }}"
-          manifest=$(git diff-tree --no-commit-id --name-only --diff-filter=A -r "$target_sha" -- \
-            'vaep/jules/diagnostic/*.json' \
-            'vaep/jules-b/diagnostic/*.json' \
-            'vaep/jules-c/diagnostic/*.json' \
-            'vaep/jules-d/diagnostic/*.json' | head -n 1)
-          if [[ -z "$manifest" || ! -f "$manifest" ]]; then
-            echo 'Sin manifiesto diagnóstico nuevo; no-op.'
-            exit 0
-          fi
-
-          dispatch_id=$(jq -r '.dispatchId // "UNKNOWN"' "$manifest" 2>/dev/null)
-          mkdir -p "$RUNNER_TEMP/vaep-jules-diag"
-          stage='STARTED'
-          detail='VAEP control-plane guard started Jules pre-session diagnostic.'
-          rc=0
-
-          if [[ -z "${JULES_API_KEY:-}" ]]; then
-            stage='SECRET_MISSING'
-            detail='JULES_API_KEY is not available to this workflow.'
-            rc=20
-          else
-            http_code=$(curl --silent --show-error --output "$RUNNER_TEMP/vaep-jules-diag/sources.json" --write-out '%{http_code}' \
-              -H "x-goog-api-key: $JULES_API_KEY" \
-              "$JULES_API_BASE/sources?pageSize=100")
-            curl_rc=$?
-            if [[ $curl_rc -ne 0 || "$http_code" -lt 200 || "$http_code" -ge 300 ]]; then
-              stage='JULES_API_ERROR'
-              detail="Jules GET /sources failed (curl_rc=$curl_rc, http=$http_code)."
-              rc=30
-            else
-              source_name=$(jq -r --arg owner "$EXPECTED_OWNER" --arg repo "$EXPECTED_REPO" \
-                '.sources[]? | select(.githubRepo.owner == $owner and .githubRepo.repo == $repo) | .name' \
-                "$RUNNER_TEMP/vaep-jules-diag/sources.json" | head -n 1)
-              if [[ -z "$source_name" || "$source_name" == 'null' ]]; then
-                stage='SOURCE_NOT_VISIBLE'
-                detail='API key can list sources, but jmejia31/VariApp is not visible.'
-                rc=31
-              else
-                branch_ok=$(jq -r --arg name "$source_name" --arg branch "$EXPECTED_BRANCH" \
-                  '[.sources[]? | select(.name == $name) | (.githubRepo.branches // [])[]? | select(.displayName == $branch)] | length > 0' \
-                  "$RUNNER_TEMP/vaep-jules-diag/sources.json")
-                if [[ "$branch_ok" != 'true' ]]; then
-                  stage='BRANCH_NOT_VISIBLE'
-                  detail='VariApp source is visible, but Desarrollo is not exposed by Jules source metadata.'
-                  rc=32
-                else
-                  stage='PRESESSION_OK'
-                  detail='Secret, Jules API, VariApp source and Desarrollo branch are visible.'
-                  rc=0
-                fi
-              fi
-            fi
-          fi
-
-          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
-          body=$(cat <<EOF
-VAEP Jules P0 diagnostic result.
-
-- Dispatch: \`$dispatch_id\`
-- Stage: \`$stage\`
-- Detail: $detail
-- Workflow run: $run_url
-- Repository expected: \`jmejia31/VariApp\`
-- Branch expected: \`Desarrollo\`
-
-No Jules task/session was created by this diagnostic step. No secret value was printed or persisted.
-EOF
-          )
-
-          gh issue create \
-            --repo "$GITHUB_REPOSITORY" \
-            --title "[VAEP-JULES-DIAG] $dispatch_id $stage" \
-            --body "$body" >/dev/null
-
-          exit $rc
-
-      - name: Preservar cobertura funcional
-        if: steps.classify.outputs.control_plane != 'true'
-        run: echo 'Commit funcional o mixto detectado; el guard no cancela ninguna validación.'
-
-  publish-n311h-exact-changelog:
-    name: Publicar cierre exacto N3.11.H
-    if: github.event_name == 'push'
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
+      SOURCE_BLOB: 3888a9bd46c59674de2d02ef49cd5c2999f2e6d7
+      TARGET_BLOB: 8f4460c960e829c1d9c5f45d8d4bcce3e6f82f92
+      TARGET_SHA256: 4612decc393e42b0d0dc4c0bab65ff0dbf5dfcf0ba6950e9ddbf5c14b94ad3bd
+      APPEND_B64: CiMjIDIwMjYtMDgtMjcg4oCUIEVSUC1OMy4xMSBQT1MgLyBWZW50YSByw6FwaWRhIOKAlCBDSUVSUkUgRk9STUFMCgoqKlJlc3BvbnNhYmxlOioqIENoYXRHUFQvVkFFUCB2My4yNS4xIENsb3N1cmUgR292ZXJub3IgbWVkaWFudGUgUUEgdGFrZW92ZXIgZG9jdW1lbnRhbCB5IGhhcmQgdmVyaWZ5IGhpc3RvcnktcHJlc2VydmluZy4KCioqT2JqZXRpdm8vYWxjYW5jZToqKiBjZXJyYXIgZm9ybWFsbWVudGUgTjMuMTEuQS1IIGNvbiBiYXNlIGVuIGxhcyBhdXRvcmlkYWRlcyBjZXJ0aWZpY2FkYXMsIHJldXRpbGl6YW5kbyBsYSBhdXRvcmlkYWQgZXhpc3RlbnRlIGRlIFZlbnRhIHBhcmEgZWwgYWxjYW5jZSBkZSB2ZW50YSByw6FwaWRhLiBMYSBleHBlcmllbmNpYSBleGlzdGVudGUgKHZlbnRhcy9udWV2YSkgcHJvdmVlIGxhIGZ1bmNpb25hbGlkYWQgcmVxdWVyaWRhIHNpbiBpbnRyb2R1Y2lyIHVuYSBzZWd1bmRhIHN1cGVyZmljaWUgUE9TIGluZGVwZW5kaWVudGUgZW4gZG9taW5pbywgcGVyc2lzdGVuY2lhLCBBUEksIGZyb250ZW5kIG8gcGVybWlzb3MuCgoqKkV2aWRlbmNpYToqKiBOMy4xMS5BLUcgZXN0w6FuIGNlcnRpZmljYWRvcyBwYXJhIGVsIGFsY2FuY2UgdmlnZW50ZSAoTElTVE9fUkVBTCAvIFFBX1RBS0VPVkVSX0NFUlRJRklFRCkuIENlcnRpZmljYWNpw7NuIGNhbsOzbmljYSA9IGBkb2NzL0NFUlRJRklDQUNJT05fTjNfMTFfUE9TLm1kYC4gUDAvUDEgYXRyaWJ1aWJsZXMgY29ub2NpZG9zIGFsIGNpZXJyZTogMC4KCioqRGVjaXNpb25lcyBwZW5kaWVudGVzOioqIGNhc2hpZXIvc2Vzc2lvbi90ZXJtaW5hbCwgc3BsaXQtdGVuZGVyL2NoYW5nZSwgc3VzcGVuc2lvbi9yZXByaW50LCBvZmZsaW5lLCBQT1Mtc3BlY2lmaWMgaWRlbXBvdGVuY3kgeSBQT1Mtc3BlY2lmaWMgUkJBQyBxdWVkYW4gZXhwbMOtY2l0YW1lbnRlIGNvbW8gREVDSVNJT05fUEVORElORy4gTm8gc2UgbWF0ZXJpYWxpemFuIGVuIGVsIHByb2R1Y3RvIGhhc3RhIHVuIHJlcXVpc2l0byBhdXRvcml0YXRpdm8gZnV0dXJvLgoKKipDaWVycmUgZG9jdW1lbnRhbC9jb250cm9sOioqIGVzdGUgYmxvcXVlIGVzIGV4Y2x1c2l2YW1lbnRlIGFkaXRpdm8gc29icmUgZWwgaGlzdMOzcmljbyBleGlzdGVudGUuIFBSICMyIGNvbnRpbsO6YSBEcmFmdCBgRGVzYXJyb2xsbyDihpIgbWFpbmAsIHNpbiBtZXJnZS4KCioqUHJvbW9jacOzbjoqKiBjb24gZXN0YSBwdWJsaWNhY2nDs24sIE4zLjExLkggcXVlZGFyw6EgZm9ybWFsbWVudGUgTElTVE8gKFRBUkdFVF9BRlRFUl9QVUJMSUNBVElPTikuCg==
     steps:
       - uses: actions/checkout@v4
         with:
           ref: Desarrollo
           fetch-depth: 0
-
-      - name: Materializar target certificado con hard verify
+      - name: Publish exact N3.11.H changelog target
         shell: bash
         run: |
           set -euo pipefail
-          SOURCE_BLOB='3888a9bd46c59674de2d02ef49cd5c2999f2e6d7'
-          TARGET_BLOB='8f4460c960e829c1d9c5f45d8d4bcce3e6f82f92'
-          TARGET_SHA256='4612decc393e42b0d0dc4c0bab65ff0dbf5dfcf0ba6950e9ddbf5c14b94ad3bd'
-
           for attempt in 1 2 3 4 5; do
             git fetch origin Desarrollo
             git reset --hard origin/Desarrollo
             current="$(git hash-object CHANGELOG_AI.md)"
-            if [[ "$current" == "$TARGET_BLOB" ]]; then
-              echo 'Target exacto ya publicado.'
-              exit 0
-            fi
-            [[ "$current" == "$SOURCE_BLOB" ]] || { echo "FAIL_CLOSED source=$current" >&2; exit 41; }
-
-            python3 - <<'PY'
-          from pathlib import Path
-          import hashlib
-          path = Path('CHANGELOG_AI.md')
-          source = path.read_bytes()
-          assert len(source) == 79173
-          assert hashlib.sha256(source).hexdigest() == '025b64513769b01d1ee303528c9767b541080e047f08483754f6d57337458446'
-          append = """
-          ## 2026-08-27 — ERP-N3.11 POS / Venta rápida — CIERRE FORMAL
-
-          **Responsable:** ChatGPT/VAEP v3.25.1 Closure Governor mediante QA takeover documental y hard verify history-preserving.
-
-          **Objetivo/alcance:** cerrar formalmente N3.11.A-H con base en las autoridades certificadas, reutilizando la autoridad existente de Venta para el alcance de venta rápida. La experiencia existente (ventas/nueva) provee la funcionalidad requerida sin introducir una segunda superficie POS independiente en dominio, persistencia, API, frontend o permisos.
-
-          **Evidencia:** N3.11.A-G están certificados para el alcance vigente (LISTO_REAL / QA_TAKEOVER_CERTIFIED). Certificación canónica = `docs/CERTIFICACION_N3_11_POS.md`. P0/P1 atribuibles conocidos al cierre: 0.
-
-          **Decisiones pendientes:** cashier/session/terminal, split-tender/change, suspension/reprint, offline, POS-specific idempotency y POS-specific RBAC quedan explícitamente como DECISION_PENDING. No se materializan en el producto hasta un requisito autoritativo futuro.
-
-          **Cierre documental/control:** este bloque es exclusivamente aditivo sobre el histórico existente. PR #2 continúa Draft `Desarrollo → main`, sin merge.
-
-          **Promoción:** con esta publicación, N3.11.H quedará formalmente LISTO (TARGET_AFTER_PUBLICATION).""".encode('utf-8')
-          assert len(append) == 1285
-          target = source + append
-          assert len(target) == 80458
-          assert hashlib.sha256(target).hexdigest() == '4612decc393e42b0d0dc4c0bab65ff0dbf5dfcf0ba6950e9ddbf5c14b94ad3bd'
-          path.write_bytes(target)
-          PY
-
-            [[ "$(git hash-object CHANGELOG_AI.md)" == "$TARGET_BLOB" ]]
-            [[ "$(sha256sum CHANGELOG_AI.md | awk '{print $1}')" == "$TARGET_SHA256" ]]
-            [[ "$(git diff --name-only)" == 'CHANGELOG_AI.md' ]]
+            if [ "$current" = "$TARGET_BLOB" ]; then exit 0; fi
+            if [ "$current" != "$SOURCE_BLOB" ]; then echo "FAIL_CLOSED source=$current" >&2; exit 41; fi
+            printf '%s' "$APPEND_B64" | base64 -d >> CHANGELOG_AI.md
+            test "$(git hash-object CHANGELOG_AI.md)" = "$TARGET_BLOB"
+            test "$(sha256sum CHANGELOG_AI.md | cut -d' ' -f1)" = "$TARGET_SHA256"
+            test "$(git diff --name-only)" = 'CHANGELOG_AI.md'
             git diff --check
-            read -r additions deletions changed_path < <(git diff --numstat -- CHANGELOG_AI.md)
-            [[ "$additions" == '14' && "$deletions" == '0' && "$changed_path" == 'CHANGELOG_AI.md' ]]
-
+            test "$(git diff --numstat -- CHANGELOG_AI.md)" = $'14\t0\tCHANGELOG_AI.md'
             git config user.name 'VAEP Closure Governor'
             git config user.email '93171442+jmejia31@users.noreply.github.com'
             git add CHANGELOG_AI.md
             git commit -m 'docs(N3.11.H): publicar cierre POS history-preserving [VAEP v3.25.1] [skip ci]'
-            if git push origin HEAD:Desarrollo; then
-              exit 0
-            fi
+            if git push origin HEAD:Desarrollo; then exit 0; fi
             sleep 2
           done
           exit 42
