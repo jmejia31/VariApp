@@ -41,9 +41,9 @@ jobs:
           ref: ${{ github.sha }}
           fetch-depth: 2
 
-      - name: Execute VAEP Jules v3.26 throughput guard over v3.25 worker
+      - name: Execute VAEP Jules v3.27 deterministic clarification guard
         shell: bash
-        run: bash .github/scripts/vaep-jules-throughput-guard-v326.sh
+        run: bash .github/scripts/vaep-jules-no-clarification-v327.sh
 
       - name: Upload Jules B result artifact
         if: always() && env.RESULT_DIR != ''
