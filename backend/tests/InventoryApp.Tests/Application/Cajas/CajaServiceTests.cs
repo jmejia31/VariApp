@@ -26,7 +26,7 @@ public sealed class CajaServiceTests
     {
         var (service, _, unitOfWork, _, _, permisos) = CrearServicio();
         permisos
-            .Setup(x => x.VerificarPermisoAsync(ModuloSistema.Caja, AccionPermiso.Crear, It.IsAny<CancellationToken>()))
+            .Setup(x => x.VerificarPermisoAsync(ModuloSistema.Caja, AccionPermiso.Crear))
             .ThrowsAsync(new ForbiddenAccessException("Sin permiso para crear Caja."));
 
         await Assert.ThrowsAsync<ForbiddenAccessException>(() =>
@@ -34,8 +34,7 @@ public sealed class CajaServiceTests
 
         permisos.Verify(x => x.VerificarPermisoAsync(
             ModuloSistema.Caja,
-            AccionPermiso.Crear,
-            It.IsAny<CancellationToken>()), Times.Once);
+            AccionPermiso.Crear), Times.Once);
         unitOfWork.Verify(x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()), Times.Never);
     }
 
@@ -50,8 +49,7 @@ public sealed class CajaServiceTests
 
         permisos.Verify(x => x.VerificarPermisoAsync(
             ModuloSistema.Caja,
-            AccionPermiso.Ver,
-            It.IsAny<CancellationToken>()), Times.Once);
+            AccionPermiso.Ver), Times.Once);
     }
 
     [Fact]
@@ -110,8 +108,7 @@ public sealed class CajaServiceTests
         unitOfWork.Verify(x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()), Times.Once);
         permisos.Verify(x => x.VerificarPermisoAsync(
             ModuloSistema.Caja,
-            AccionPermiso.Actualizar,
-            It.IsAny<CancellationToken>()), Times.Once);
+            AccionPermiso.Actualizar), Times.Once);
         auditoria.Verify(x => x.RegistrarEstrictoAsync(
             ModuloSistema.Caja,
             AccionPermiso.Actualizar,
@@ -172,8 +169,7 @@ public sealed class CajaServiceTests
         permisos
             .Setup(x => x.VerificarPermisoAsync(
                 ModuloSistema.Caja,
-                It.IsAny<AccionPermiso>(),
-                It.IsAny<CancellationToken>()))
+                It.IsAny<AccionPermiso>()))
             .Returns(Task.CompletedTask);
         auditoria
             .Setup(x => x.RegistrarEstrictoAsync(
