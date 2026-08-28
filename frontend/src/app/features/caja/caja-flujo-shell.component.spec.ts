@@ -104,7 +104,7 @@ describe('CajaFlujoShellComponent', () => {
     component.puedeOperar = true;
     component.saldoContado = 0;
     component.observacionesArqueo = '  sin efectivo  ';
-    const arqueoSpy = vi.spyOn(component.arqueoSolicitada, 'emit');
+    const arqueoSpy = vi.spyOn(component.arqueoSolicitado, 'emit');
 
     component.solicitarArqueo();
 
