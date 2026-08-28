@@ -15,10 +15,43 @@ public sealed class CajaServiceTests
     [Fact]
     public async Task CrearCajaAsync_sin_usuario_autenticado_falla_cerrado()
     {
-        var (service, _, _, _, _) = CrearServicio(autenticado: false);
+        var (service, _, _, _, _, _) = CrearServicio(autenticado: false);
 
         await Assert.ThrowsAsync<ForbiddenAccessException>(() =>
             service.CrearCajaAsync(new CrearCajaDto { Nombre = "Caja principal" }));
+    }
+
+    [Fact]
+    public async Task CrearCajaAsync_sin_permiso_crear_falla_antes_de_transaccion()
+    {
+        var (service, _, unitOfWork, _, _, permisos) = CrearServicio();
+        permisos
+            .Setup(x => x.VerificarPermisoAsync(ModuloSistema.Caja, AccionPermiso.Crear, It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new ForbiddenAccessException("Sin permiso para crear Caja."));
+
+        await Assert.ThrowsAsync<ForbiddenAccessException>(() =>
+            service.CrearCajaAsync(new CrearCajaDto { Nombre = "Caja principal" }));
+
+        permisos.Verify(x => x.VerificarPermisoAsync(
+            ModuloSistema.Caja,
+            AccionPermiso.Crear,
+            It.IsAny<CancellationToken>()), Times.Once);
+        unitOfWork.Verify(x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task GetCajaByIdAsync_exige_permiso_ver()
+    {
+        var caja = new Caja("Caja principal");
+        var (service, repository, _, _, _, permisos) = CrearServicio();
+        repository.Setup(x => x.GetCajaByIdAsync(1, false)).ReturnsAsync(caja);
+
+        await service.GetCajaByIdAsync(1);
+
+        permisos.Verify(x => x.VerificarPermisoAsync(
+            ModuloSistema.Caja,
+            AccionPermiso.Ver,
+            It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -27,7 +60,7 @@ public sealed class CajaServiceTests
         var caja = new Caja("Caja principal");
         caja.Activar();
         caja.RegistrarSesionActiva(10);
-        var (service, repository, unitOfWork, _, _) = CrearServicio();
+        var (service, repository, unitOfWork, _, _, _) = CrearServicio();
         repository.Setup(x => x.GetCajaByIdForUpdateAsync(1)).ReturnsAsync(caja);
         PrepararTransaccion(unitOfWork);
 
@@ -42,7 +75,7 @@ public sealed class CajaServiceTests
     {
         var sesion = new CajaSesion(1, 7, 100m);
         sesion.IniciarOperaciones();
-        var (service, repository, unitOfWork, _, _) = CrearServicio();
+        var (service, repository, unitOfWork, _, _, _) = CrearServicio();
         repository.Setup(x => x.GetSesionByIdForUpdateAsync(1)).ReturnsAsync(sesion);
         PrepararTransaccion(unitOfWork);
 
@@ -60,10 +93,10 @@ public sealed class CajaServiceTests
     }
 
     [Fact]
-    public async Task IniciarOperacionesAsync_usa_for_update_transaccion_y_auditoria_estricta()
+    public async Task IniciarOperacionesAsync_usa_for_update_transaccion_rbac_y_auditoria_estricta()
     {
         var sesion = new CajaSesion(1, 7, 100m);
-        var (service, repository, unitOfWork, _, auditoria) = CrearServicio();
+        var (service, repository, unitOfWork, _, auditoria, permisos) = CrearServicio();
         repository.Setup(x => x.GetSesionByIdForUpdateAsync(1)).ReturnsAsync(sesion);
         repository.Setup(x => x.UpdateSesion(It.IsAny<CajaSesion>()));
         repository.Setup(x => x.SaveChangesAsync()).ReturnsAsync(true);
@@ -75,6 +108,10 @@ public sealed class CajaServiceTests
         Assert.Equal(EstadoCajaSesion.Operaciones, resultado.Estado);
         repository.Verify(x => x.GetSesionByIdForUpdateAsync(1), Times.Once);
         unitOfWork.Verify(x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()), Times.Once);
+        permisos.Verify(x => x.VerificarPermisoAsync(
+            ModuloSistema.Caja,
+            AccionPermiso.Actualizar,
+            It.IsAny<CancellationToken>()), Times.Once);
         auditoria.Verify(x => x.RegistrarEstrictoAsync(
             ModuloSistema.Caja,
             AccionPermiso.Actualizar,
@@ -92,7 +129,7 @@ public sealed class CajaServiceTests
     public async Task IniciarOperacionesAsync_si_auditoria_estricta_falla_propaga_error()
     {
         var sesion = new CajaSesion(1, 7, 100m);
-        var (service, repository, unitOfWork, _, auditoria) = CrearServicio();
+        var (service, repository, unitOfWork, _, auditoria, _) = CrearServicio();
         repository.Setup(x => x.GetSesionByIdForUpdateAsync(1)).ReturnsAsync(sesion);
         repository.Setup(x => x.UpdateSesion(It.IsAny<CajaSesion>()));
         repository.Setup(x => x.SaveChangesAsync()).ReturnsAsync(true);
@@ -121,15 +158,23 @@ public sealed class CajaServiceTests
         Mock<ICajaRepository> Repository,
         Mock<IUnitOfWork> UnitOfWork,
         Mock<ICurrentUserService> CurrentUser,
-        Mock<IAuditoriaService> Auditoria)
+        Mock<IAuditoriaService> Auditoria,
+        Mock<IPermisoService> Permisos)
         CrearServicio(bool autenticado = true)
     {
         var repository = new Mock<ICajaRepository>(MockBehavior.Strict);
         var unitOfWork = new Mock<IUnitOfWork>(MockBehavior.Strict);
         var currentUser = new Mock<ICurrentUserService>(MockBehavior.Strict);
         var auditoria = new Mock<IAuditoriaService>(MockBehavior.Strict);
+        var permisos = new Mock<IPermisoService>(MockBehavior.Strict);
         currentUser.SetupGet(x => x.EstaAutenticado).Returns(autenticado);
         currentUser.SetupGet(x => x.UsuarioId).Returns(autenticado ? 7 : null);
+        permisos
+            .Setup(x => x.VerificarPermisoAsync(
+                ModuloSistema.Caja,
+                It.IsAny<AccionPermiso>(),
+                It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
         auditoria
             .Setup(x => x.RegistrarEstrictoAsync(
                 It.IsAny<ModuloSistema>(),
@@ -143,8 +188,13 @@ public sealed class CajaServiceTests
                 It.IsAny<string>(),
                 It.IsAny<string?>()))
             .Returns(Task.CompletedTask);
-        var service = new CajaService(repository.Object, currentUser.Object, unitOfWork.Object, auditoria.Object);
-        return (service, repository, unitOfWork, currentUser, auditoria);
+        var service = new CajaService(
+            repository.Object,
+            currentUser.Object,
+            unitOfWork.Object,
+            auditoria.Object,
+            permisos.Object);
+        return (service, repository, unitOfWork, currentUser, auditoria, permisos);
     }
 
     private static void PrepararTransaccion(Mock<IUnitOfWork> unitOfWork)
