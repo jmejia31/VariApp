@@ -71,7 +71,7 @@ public sealed class CajaServiceTests
     [Fact]
     public async Task RegistrarMovimientoAsync_diferencia_durante_operaciones_rechaza_fail_closed()
     {
-        var sesion = new CajaSesion(1, 7, 100m);
+        var sesion = new CajaSesion(1, 7, 100m) { Id = 1 };
         sesion.IniciarOperaciones();
         var (service, repository, unitOfWork, _, _, _) = CrearServicio();
         repository.Setup(x => x.GetSesionByIdForUpdateAsync(1)).ReturnsAsync(sesion);
@@ -93,7 +93,7 @@ public sealed class CajaServiceTests
     [Fact]
     public async Task IniciarOperacionesAsync_usa_for_update_transaccion_rbac_y_auditoria_estricta()
     {
-        var sesion = new CajaSesion(1, 7, 100m);
+        var sesion = new CajaSesion(1, 7, 100m) { Id = 1 };
         var (service, repository, unitOfWork, _, auditoria, permisos) = CrearServicio();
         repository.Setup(x => x.GetSesionByIdForUpdateAsync(1)).ReturnsAsync(sesion);
         repository.Setup(x => x.UpdateSesion(It.IsAny<CajaSesion>()));
@@ -125,11 +125,12 @@ public sealed class CajaServiceTests
     [Fact]
     public async Task IniciarOperacionesAsync_si_auditoria_estricta_falla_propaga_error()
     {
-        var sesion = new CajaSesion(1, 7, 100m);
+        var sesion = new CajaSesion(1, 7, 100m) { Id = 1 };
         var (service, repository, unitOfWork, _, auditoria, _) = CrearServicio();
         repository.Setup(x => x.GetSesionByIdForUpdateAsync(1)).ReturnsAsync(sesion);
         repository.Setup(x => x.UpdateSesion(It.IsAny<CajaSesion>()));
         repository.Setup(x => x.SaveChangesAsync()).ReturnsAsync(true);
+        repository.Setup(x => x.GetSesionByIdAsync(1, false)).ReturnsAsync(sesion);
         PrepararTransaccion(unitOfWork);
         auditoria.Setup(x => x.RegistrarEstrictoAsync(
                 ModuloSistema.Caja,
