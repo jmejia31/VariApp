@@ -153,11 +153,14 @@ builder.Services.AddScoped<ICargaMasivaService, CargaMasivaService>();
 builder.Services.AddScoped<IReporteAdministrativoService, ReporteAdministrativoService>();
 builder.Services.AddScoped<IInventarioConcurrencyService, InventarioConcurrencyService>();
 builder.Services.AddScoped<IInventarioAjusteService, InventarioAjusteService>();
+builder.Services.AddScoped<ICajaRepository, CajaRepository>();
+builder.Services.AddScoped<ICajaService, CajaService>();
 var jwtSecret = builder.Configuration["Jwt:Secret"] ?? throw new InvalidOperationException("Jwt:Secret no configurado.");
 var jwtIssuer = builder.Configuration["Jwt:Issuer"];
 var jwtAudience = builder.Configuration["Jwt:Audience"];
 if (jwtSecret.Contains("CHANGE_ME", StringComparison.OrdinalIgnoreCase) || Encoding.UTF8.GetByteCount(jwtSecret) < 32) throw new InvalidOperationException("Jwt:Secret debe ser un secreto real de al menos 32 bytes.");
 if (string.IsNullOrWhiteSpace(jwtIssuer) || string.IsNullOrWhiteSpace(jwtAudience)) throw new InvalidOperationException("Jwt:Issuer y Jwt:Audience son obligatorios.");
+if (!builder.Environment.IsDevelopment() && string.IsNullOrWhiteSpace(builder.Configuration["Security:TokenEncryptionKey"])) throw new InvalidOperationException("Security:TokenEncryptionKey es obligatorio fuera de Development.");
 builder.Services.AddAuthentication(options => { options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme; options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme; }).AddJwtBearer(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters { ValidateIssuer = true, ValidateAudience = true, ValidateLifetime = true, ValidateIssuerSigningKey = true, ValidIssuer = jwtIssuer, ValidAudience = jwtAudience, IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)), ClockSkew = TimeSpan.Zero };
@@ -172,7 +175,7 @@ builder.Services.AddCors(options => options.AddPolicy("FrontendPolicy", policy =
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options => { options.SwaggerDoc("v1", new OpenApiInfo { Title = "InventoryApp API", Version = "v1" }); options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme { Name = "Authorization", Type = SecuritySchemeType.Http, Scheme = "Bearer", BearerFormat = "JWT", In = ParameterLocation.Header, Description = "Ingresa: Bearer {tu token}" }); options.AddSecurityRequirement(new OpenApiSecurityRequirement { { new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" } }, Array.Empty<string>() } }); });
 var app = builder.Build();
-var forwardedHeadersOptions = new ForwardedHeadersOptions { ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto, ForwardLimit = 1 };
+var forwardedHeadersOptions = new ForwardedHeadersOptions { ForwardedHeaders = XForwardedFor | XForwardedProto, ForwardLimit = 1 };
 forwardedHeadersOptions.KnownNetworks.Clear(); forwardedHeadersOptions.KnownProxies.Clear(); app.UseForwardedHeaders(forwardedHeadersOptions);
 if (!app.Environment.IsDevelopment()) app.UseHsts();
 app.UseMiddleware<CorrelationIdMiddleware>();
