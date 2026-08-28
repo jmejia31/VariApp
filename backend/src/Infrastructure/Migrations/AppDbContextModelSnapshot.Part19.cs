@@ -53,24 +53,24 @@ namespace InventoryApp.Infrastructure.Migrations
                 .IsUnique()
                 .HasDatabaseName("UX_DevolucionesProveedor_IdempotencyKey");
 
-            devolucion.HasOne<Proveedor>()
+            devolucion.HasOne("InventoryApp.Domain.Entities.Proveedor", null)
                 .WithMany()
-                .HasForeignKey(x => x.ProveedorId)
+                .HasForeignKey("ProveedorId")
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_DevolucionesProveedor_Proveedores_ProveedorId");
-            devolucion.HasOne<OrdenCompra>()
+            devolucion.HasOne("InventoryApp.Domain.Entities.OrdenCompra", null)
                 .WithMany()
-                .HasForeignKey(x => x.OrdenCompraId)
+                .HasForeignKey("OrdenCompraId")
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_DevolucionesProveedor_OrdenesCompra_OrdenCompraId");
-            devolucion.HasOne<RecepcionCompra>()
+            devolucion.HasOne("InventoryApp.Domain.Entities.RecepcionCompra", null)
                 .WithMany()
-                .HasForeignKey(x => x.RecepcionCompraId)
+                .HasForeignKey("RecepcionCompraId")
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_DevolucionesProveedor_RecepcionesCompra_RecepcionCompraId");
-            devolucion.HasOne<FacturaProveedor>()
+            devolucion.HasOne("InventoryApp.Domain.Entities.FacturaProveedor", null)
                 .WithMany()
-                .HasForeignKey(x => x.FacturaProveedorId)
+                .HasForeignKey("FacturaProveedorId")
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_DevolucionesProveedor_FacturasProveedor_FacturaProveedorId");
 
@@ -118,34 +118,34 @@ namespace InventoryApp.Infrastructure.Migrations
             detalle.HasIndex(x => x.UbicacionAlmacenId)
                 .HasDatabaseName("IX_DevolucionProveedorDetalles_UbicacionAlmacenId");
 
-            detalle.HasOne<RecepcionCompraDetalle>()
+            detalle.HasOne("InventoryApp.Domain.Entities.RecepcionCompraDetalle", null)
                 .WithMany()
-                .HasForeignKey(x => x.RecepcionCompraDetalleId)
+                .HasForeignKey("RecepcionCompraDetalleId")
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_DevolucionProveedorDetalles_RecepcionCompraDetalles_RecepcionCompraDetalleId");
-            detalle.HasOne<OrdenCompraDetalle>()
+            detalle.HasOne("InventoryApp.Domain.Entities.OrdenCompraDetalle", null)
                 .WithMany()
-                .HasForeignKey(x => x.OrdenCompraDetalleId)
+                .HasForeignKey("OrdenCompraDetalleId")
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_DevolucionProveedorDetalles_OrdenCompraDetalles_OrdenCompraDetalleId");
-            detalle.HasOne<Producto>()
+            detalle.HasOne("InventoryApp.Domain.Entities.Producto", null)
                 .WithMany()
-                .HasForeignKey(x => x.ProductoId)
+                .HasForeignKey("ProductoId")
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_DevolucionProveedorDetalles_Productos_ProductoId");
-            detalle.HasOne<ProductoVariante>()
+            detalle.HasOne("InventoryApp.Domain.Entities.ProductoVariante", null)
                 .WithMany()
-                .HasForeignKey(x => x.ProductoVarianteId)
+                .HasForeignKey("ProductoVarianteId")
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_DevolucionProveedorDetalles_ProductoVariantes_ProductoVarianteId");
-            detalle.HasOne<Almacen>()
+            detalle.HasOne("InventoryApp.Domain.Entities.Almacen", null)
                 .WithMany()
-                .HasForeignKey(x => x.AlmacenId)
+                .HasForeignKey("AlmacenId")
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_DevolucionProveedorDetalles_Almacenes_AlmacenId");
-            detalle.HasOne<UbicacionAlmacen>()
+            detalle.HasOne("InventoryApp.Domain.Entities.UbicacionAlmacen", null)
                 .WithMany()
-                .HasForeignKey(x => x.UbicacionAlmacenId)
+                .HasForeignKey("UbicacionAlmacenId")
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_DevolucionProveedorDetalles_UbicacionesAlmacen_UbicacionAlmacenId");
         }
