@@ -3,6 +3,7 @@ using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Application.Services;
 using InventoryApp.Domain.Entities.Cajas;
+using InventoryApp.Domain.Enums;
 using InventoryApp.Domain.Enums.Cajas;
 using Moq;
 using Xunit;
@@ -14,7 +15,7 @@ public sealed class CajaServiceTests
     [Fact]
     public async Task CrearCajaAsync_sin_usuario_autenticado_falla_cerrado()
     {
-        var (service, _, _, _) = CrearServicio(autenticado: false);
+        var (service, _, _, _, _) = CrearServicio(autenticado: false);
 
         await Assert.ThrowsAsync<ForbiddenAccessException>(() =>
             service.CrearCajaAsync(new CrearCajaDto { Nombre = "Caja principal" }));
@@ -26,7 +27,7 @@ public sealed class CajaServiceTests
         var caja = new Caja("Caja principal");
         caja.Activar();
         caja.RegistrarSesionActiva(10);
-        var (service, repository, unitOfWork, _) = CrearServicio();
+        var (service, repository, unitOfWork, _, _) = CrearServicio();
         repository.Setup(x => x.GetCajaByIdForUpdateAsync(1)).ReturnsAsync(caja);
         PrepararTransaccion(unitOfWork);
 
@@ -41,7 +42,7 @@ public sealed class CajaServiceTests
     {
         var sesion = new CajaSesion(1, 7, 100m);
         sesion.IniciarOperaciones();
-        var (service, repository, unitOfWork, _) = CrearServicio();
+        var (service, repository, unitOfWork, _, _) = CrearServicio();
         repository.Setup(x => x.GetSesionByIdForUpdateAsync(1)).ReturnsAsync(sesion);
         PrepararTransaccion(unitOfWork);
 
@@ -59,10 +60,10 @@ public sealed class CajaServiceTests
     }
 
     [Fact]
-    public async Task IniciarOperacionesAsync_usa_lectura_for_update_y_transaccion()
+    public async Task IniciarOperacionesAsync_usa_for_update_transaccion_y_auditoria_estricta()
     {
         var sesion = new CajaSesion(1, 7, 100m);
-        var (service, repository, unitOfWork, _) = CrearServicio();
+        var (service, repository, unitOfWork, _, auditoria) = CrearServicio();
         repository.Setup(x => x.GetSesionByIdForUpdateAsync(1)).ReturnsAsync(sesion);
         repository.Setup(x => x.UpdateSesion(It.IsAny<CajaSesion>()));
         repository.Setup(x => x.SaveChangesAsync()).ReturnsAsync(true);
@@ -74,18 +75,76 @@ public sealed class CajaServiceTests
         Assert.Equal(EstadoCajaSesion.Operaciones, resultado.Estado);
         repository.Verify(x => x.GetSesionByIdForUpdateAsync(1), Times.Once);
         unitOfWork.Verify(x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()), Times.Once);
+        auditoria.Verify(x => x.RegistrarEstrictoAsync(
+            ModuloSistema.Caja,
+            AccionPermiso.Actualizar,
+            It.IsAny<string>(),
+            1,
+            "CajaSesion",
+            null,
+            null,
+            null,
+            "Exito",
+            null), Times.Once);
     }
 
-    private static (CajaService Service, Mock<ICajaRepository> Repository, Mock<IUnitOfWork> UnitOfWork, Mock<ICurrentUserService> CurrentUser)
+    [Fact]
+    public async Task IniciarOperacionesAsync_si_auditoria_estricta_falla_propaga_error()
+    {
+        var sesion = new CajaSesion(1, 7, 100m);
+        var (service, repository, unitOfWork, _, auditoria) = CrearServicio();
+        repository.Setup(x => x.GetSesionByIdForUpdateAsync(1)).ReturnsAsync(sesion);
+        repository.Setup(x => x.UpdateSesion(It.IsAny<CajaSesion>()));
+        repository.Setup(x => x.SaveChangesAsync()).ReturnsAsync(true);
+        PrepararTransaccion(unitOfWork);
+        auditoria.Setup(x => x.RegistrarEstrictoAsync(
+                ModuloSistema.Caja,
+                AccionPermiso.Actualizar,
+                It.IsAny<string>(),
+                1,
+                "CajaSesion",
+                null,
+                null,
+                null,
+                "Exito",
+                null))
+            .ThrowsAsync(new InvalidOperationException("auditoría no disponible"));
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => service.IniciarOperacionesAsync(1));
+
+        Assert.Equal("auditoría no disponible", ex.Message);
+        unitOfWork.Verify(x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()), Times.Once);
+    }
+
+    private static (
+        CajaService Service,
+        Mock<ICajaRepository> Repository,
+        Mock<IUnitOfWork> UnitOfWork,
+        Mock<ICurrentUserService> CurrentUser,
+        Mock<IAuditoriaService> Auditoria)
         CrearServicio(bool autenticado = true)
     {
         var repository = new Mock<ICajaRepository>(MockBehavior.Strict);
         var unitOfWork = new Mock<IUnitOfWork>(MockBehavior.Strict);
         var currentUser = new Mock<ICurrentUserService>(MockBehavior.Strict);
+        var auditoria = new Mock<IAuditoriaService>(MockBehavior.Strict);
         currentUser.SetupGet(x => x.EstaAutenticado).Returns(autenticado);
         currentUser.SetupGet(x => x.UsuarioId).Returns(autenticado ? 7 : null);
-        var service = new CajaService(repository.Object, currentUser.Object, unitOfWork.Object);
-        return (service, repository, unitOfWork, currentUser);
+        auditoria
+            .Setup(x => x.RegistrarEstrictoAsync(
+                It.IsAny<ModuloSistema>(),
+                It.IsAny<AccionPermiso>(),
+                It.IsAny<string>(),
+                It.IsAny<int?>(),
+                It.IsAny<string?>(),
+                It.IsAny<object?>(),
+                It.IsAny<object?>(),
+                It.IsAny<string?>(),
+                It.IsAny<string>(),
+                It.IsAny<string?>()))
+            .Returns(Task.CompletedTask);
+        var service = new CajaService(repository.Object, currentUser.Object, unitOfWork.Object, auditoria.Object);
+        return (service, repository, unitOfWork, currentUser, auditoria);
     }
 
     private static void PrepararTransaccion(Mock<IUnitOfWork> unitOfWork)
