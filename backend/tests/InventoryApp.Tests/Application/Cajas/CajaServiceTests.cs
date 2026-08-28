@@ -13,6 +13,52 @@ namespace InventoryApp.Tests.Application.Cajas;
 public sealed class CajaServiceTests
 {
     [Fact]
+    public async Task CrearCajaAsync_con_datos_validos_crea_persiste_y_audita_correctamente()
+    {
+        var dto = new CrearCajaDto { Nombre = "Caja Principal" };
+        var (service, repository, unitOfWork, _, auditoria, permisos) = CrearServicio();
+
+        repository
+            .Setup(x => x.AddCajaAsync(It.IsAny<Caja>()))
+            .Callback<Caja>(c => c.Id = 10)
+            .Returns(Task.CompletedTask);
+
+        repository
+            .Setup(x => x.SaveChangesAsync())
+            .ReturnsAsync(true);
+
+        var cajaPersistida = new Caja(dto.Nombre) { Id = 10 };
+        repository
+            .Setup(x => x.GetCajaByIdAsync(10, false))
+            .ReturnsAsync(cajaPersistida);
+
+        PrepararTransaccion(unitOfWork);
+
+        var result = await service.CrearCajaAsync(dto);
+
+        Assert.NotNull(result);
+        Assert.Equal(10, result.Id);
+        Assert.Equal("Caja Principal", result.Nombre);
+        Assert.Equal(EstadoCaja.Inactiva, result.Estado);
+
+        permisos.Verify(x => x.VerificarPermisoAsync(ModuloSistema.Caja, AccionPermiso.Crear), Times.Once);
+        unitOfWork.Verify(x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()), Times.Once);
+        repository.Verify(x => x.AddCajaAsync(It.Is<Caja>(c => c.Nombre == dto.Nombre)), Times.Once);
+        repository.Verify(x => x.SaveChangesAsync(), Times.Once);
+        auditoria.Verify(x => x.RegistrarEstrictoAsync(
+            ModuloSistema.Caja,
+            AccionPermiso.Crear,
+            It.Is<string>(s => s.Contains("Caja Principal")),
+            10,
+            "Caja",
+            null,
+            null,
+            null,
+            "Exito",
+            null), Times.Once);
+    }
+
+    [Fact]
     public async Task CrearCajaAsync_sin_usuario_autenticado_falla_cerrado()
     {
         var (service, _, _, _, _, _) = CrearServicio(autenticado: false);
