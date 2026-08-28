@@ -5,6 +5,7 @@ using InventoryApp.Application.Services;
 using InventoryApp.Domain.Entities.Cajas;
 using InventoryApp.Domain.Enums.Cajas;
 using Moq;
+using Xunit;
 
 namespace InventoryApp.Tests.Application.Cajas;
 
