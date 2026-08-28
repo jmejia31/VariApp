@@ -150,6 +150,11 @@ public static class CatalogoPermisosBase
             AccionPermiso.EliminarPermanente, AccionPermiso.Duplicar,
             AccionPermiso.Administrar, AccionPermiso.ConsultarHistorial
         }),
+        (ModuloSistema.Caja, new[]
+        {
+            AccionPermiso.Ver, AccionPermiso.Crear, AccionPermiso.Activar,
+            AccionPermiso.Desactivar, AccionPermiso.Actualizar, AccionPermiso.Cerrar
+        }),
         (ModuloSistema.Auditoria, new[] { AccionPermiso.Ver, AccionPermiso.Exportar }),
         (ModuloSistema.ReportesAdministrativos, new[] { AccionPermiso.Ver, AccionPermiso.Exportar, AccionPermiso.Imprimir }),
         (ModuloSistema.Configuracion, new[] { AccionPermiso.Ver, AccionPermiso.Editar, AccionPermiso.Administrar }),
