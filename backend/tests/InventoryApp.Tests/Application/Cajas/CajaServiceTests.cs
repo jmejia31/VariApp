@@ -13,6 +13,161 @@ namespace InventoryApp.Tests.Application.Cajas;
 public sealed class CajaServiceTests
 {
     [Fact]
+    public async Task ActivarCajaAsync_no_requiere_permiso_ver_tras_mutacion()
+    {
+        var caja = new Caja("Caja") { Id = 1 };
+        var (service, repository, unitOfWork, _, _, permisos) = CrearServicio();
+        permisos
+            .Setup(x => x.VerificarPermisoAsync(ModuloSistema.Caja, AccionPermiso.Ver))
+            .ThrowsAsync(new ForbiddenAccessException("El permiso Ver no debe ser requisito para devolver una mutación ya autorizada."));
+
+        repository.Setup(x => x.GetCajaByIdForUpdateAsync(1)).ReturnsAsync(caja);
+        repository.Setup(x => x.UpdateCaja(caja));
+        repository.Setup(x => x.SaveChangesAsync()).ReturnsAsync(true);
+        repository.Setup(x => x.GetCajaByIdAsync(1, false)).ReturnsAsync(caja);
+        PrepararTransaccion(unitOfWork);
+
+        await service.ActivarCajaAsync(1);
+
+        permisos.Verify(x => x.VerificarPermisoAsync(ModuloSistema.Caja, AccionPermiso.Ver), Times.Never);
+    }
+
+    [Fact]
+    public async Task DesactivarCajaAsync_no_requiere_permiso_ver_tras_mutacion()
+    {
+        var caja = new Caja("Caja") { Id = 1 };
+        var (service, repository, unitOfWork, _, _, permisos) = CrearServicio();
+        permisos
+            .Setup(x => x.VerificarPermisoAsync(ModuloSistema.Caja, AccionPermiso.Ver))
+            .ThrowsAsync(new ForbiddenAccessException("El permiso Ver no debe ser requisito para devolver una mutación ya autorizada."));
+
+        repository.Setup(x => x.GetCajaByIdForUpdateAsync(1)).ReturnsAsync(caja);
+        repository.Setup(x => x.UpdateCaja(caja));
+        repository.Setup(x => x.SaveChangesAsync()).ReturnsAsync(true);
+        repository.Setup(x => x.GetCajaByIdAsync(1, false)).ReturnsAsync(caja);
+        PrepararTransaccion(unitOfWork);
+
+        await service.DesactivarCajaAsync(1);
+
+        permisos.Verify(x => x.VerificarPermisoAsync(ModuloSistema.Caja, AccionPermiso.Ver), Times.Never);
+    }
+
+    [Fact]
+    public async Task AbrirSesionAsync_no_requiere_permiso_ver_tras_mutacion()
+    {
+        var caja = new Caja("Caja") { Id = 1 };
+        caja.Activar();
+        var sesion = new CajaSesion(1, 7, 100m) { Id = 2 };
+        var dto = new AbrirCajaSesionDto { FondoInicial = 100m };
+        var (service, repository, unitOfWork, _, _, permisos) = CrearServicio();
+        permisos
+            .Setup(x => x.VerificarPermisoAsync(ModuloSistema.Caja, AccionPermiso.Ver))
+            .ThrowsAsync(new ForbiddenAccessException("El permiso Ver no debe ser requisito para devolver una mutación ya autorizada."));
+
+        repository.Setup(x => x.GetCajaByIdForUpdateAsync(1)).ReturnsAsync(caja);
+        repository.Setup(x => x.AddSesionAsync(It.IsAny<CajaSesion>())).Callback<CajaSesion>(s => s.Id = 2).Returns(Task.CompletedTask);
+        repository.Setup(x => x.UpdateCaja(caja));
+        repository.Setup(x => x.SaveChangesAsync()).ReturnsAsync(true);
+        repository.Setup(x => x.GetSesionByIdAsync(2, false)).ReturnsAsync(sesion);
+        PrepararTransaccion(unitOfWork);
+
+        await service.AbrirSesionAsync(1, dto);
+
+        permisos.Verify(x => x.VerificarPermisoAsync(ModuloSistema.Caja, AccionPermiso.Ver), Times.Never);
+    }
+
+    [Fact]
+    public async Task IniciarOperacionesAsync_no_requiere_permiso_ver_tras_mutacion()
+    {
+        var sesion = new CajaSesion(1, 7, 100m) { Id = 1 };
+        var (service, repository, unitOfWork, _, _, permisos) = CrearServicio();
+        permisos
+            .Setup(x => x.VerificarPermisoAsync(ModuloSistema.Caja, AccionPermiso.Ver))
+            .ThrowsAsync(new ForbiddenAccessException("El permiso Ver no debe ser requisito para devolver una mutación ya autorizada."));
+
+        repository.Setup(x => x.GetSesionByIdForUpdateAsync(1)).ReturnsAsync(sesion);
+        repository.Setup(x => x.UpdateSesion(sesion));
+        repository.Setup(x => x.SaveChangesAsync()).ReturnsAsync(true);
+        repository.Setup(x => x.GetSesionByIdAsync(1, false)).ReturnsAsync(sesion);
+        PrepararTransaccion(unitOfWork);
+
+        await service.IniciarOperacionesAsync(1);
+
+        permisos.Verify(x => x.VerificarPermisoAsync(ModuloSistema.Caja, AccionPermiso.Ver), Times.Never);
+    }
+
+    [Fact]
+    public async Task RegistrarMovimientoAsync_no_requiere_permiso_ver_tras_mutacion()
+    {
+        var sesion = new CajaSesion(1, 7, 100m) { Id = 1 };
+        sesion.IniciarOperaciones();
+        var dto = new RegistrarMovimientoCajaDto { Tipo = TipoMovimientoCaja.Ingreso, Monto = 50m, Referencia = "Ingreso" };
+        var (service, repository, unitOfWork, _, _, permisos) = CrearServicio();
+        permisos
+            .Setup(x => x.VerificarPermisoAsync(ModuloSistema.Caja, AccionPermiso.Ver))
+            .ThrowsAsync(new ForbiddenAccessException("El permiso Ver no debe ser requisito para devolver una mutación ya autorizada."));
+
+        repository.Setup(x => x.GetSesionByIdForUpdateAsync(1)).ReturnsAsync(sesion);
+        repository.Setup(x => x.UpdateSesion(sesion));
+        repository.Setup(x => x.SaveChangesAsync()).ReturnsAsync(true);
+        repository.Setup(x => x.GetSesionByIdAsync(1, false)).ReturnsAsync(sesion);
+        PrepararTransaccion(unitOfWork);
+
+        await service.RegistrarMovimientoAsync(1, dto);
+
+        permisos.Verify(x => x.VerificarPermisoAsync(ModuloSistema.Caja, AccionPermiso.Ver), Times.Never);
+    }
+
+    [Fact]
+    public async Task IniciarArqueoAsync_no_requiere_permiso_ver_tras_mutacion()
+    {
+        var sesion = new CajaSesion(1, 7, 100m) { Id = 1 };
+        sesion.IniciarOperaciones();
+        var (service, repository, unitOfWork, _, _, permisos) = CrearServicio();
+        permisos
+            .Setup(x => x.VerificarPermisoAsync(ModuloSistema.Caja, AccionPermiso.Ver))
+            .ThrowsAsync(new ForbiddenAccessException("El permiso Ver no debe ser requisito para devolver una mutación ya autorizada."));
+
+        repository.Setup(x => x.GetSesionByIdForUpdateAsync(1)).ReturnsAsync(sesion);
+        repository.Setup(x => x.UpdateSesion(sesion));
+        repository.Setup(x => x.SaveChangesAsync()).ReturnsAsync(true);
+        repository.Setup(x => x.GetSesionByIdAsync(1, false)).ReturnsAsync(sesion);
+        PrepararTransaccion(unitOfWork);
+
+        await service.IniciarArqueoAsync(1);
+
+        permisos.Verify(x => x.VerificarPermisoAsync(ModuloSistema.Caja, AccionPermiso.Ver), Times.Never);
+    }
+
+    [Fact]
+    public async Task CerrarSesionAsync_no_requiere_permiso_ver_tras_mutacion()
+    {
+        var caja = new Caja("Caja") { Id = 1 };
+        caja.Activar();
+        caja.RegistrarSesionActiva(1);
+        var sesion = new CajaSesion(1, 7, 100m) { Id = 1 };
+        sesion.IniciarOperaciones();
+        sesion.IniciarArqueo();
+        var dto = new CerrarCajaSesionDto { SaldoContado = 100m, Observaciones = "Ok" };
+        var (service, repository, unitOfWork, _, _, permisos) = CrearServicio();
+        permisos
+            .Setup(x => x.VerificarPermisoAsync(ModuloSistema.Caja, AccionPermiso.Ver))
+            .ThrowsAsync(new ForbiddenAccessException("El permiso Ver no debe ser requisito para devolver una mutación ya autorizada."));
+
+        repository.Setup(x => x.GetSesionByIdForUpdateAsync(1)).ReturnsAsync(sesion);
+        repository.Setup(x => x.GetCajaByIdForUpdateAsync(1)).ReturnsAsync(caja);
+        repository.Setup(x => x.UpdateSesion(sesion));
+        repository.Setup(x => x.UpdateCaja(caja));
+        repository.Setup(x => x.SaveChangesAsync()).ReturnsAsync(true);
+        repository.Setup(x => x.GetSesionByIdAsync(1, false)).ReturnsAsync(sesion);
+        PrepararTransaccion(unitOfWork);
+
+        await service.CerrarSesionAsync(1, dto);
+
+        permisos.Verify(x => x.VerificarPermisoAsync(ModuloSistema.Caja, AccionPermiso.Ver), Times.Never);
+    }
+
+    [Fact]
     public async Task CrearCajaAsync_con_datos_validos_crea_persiste_y_audita_correctamente()
     {
         var dto = new CrearCajaDto { Nombre = "Caja Principal" };
