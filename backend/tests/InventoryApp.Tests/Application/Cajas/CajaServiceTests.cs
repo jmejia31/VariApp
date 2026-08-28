@@ -64,6 +64,7 @@ public sealed class CajaServiceTests
         var sesion = new CajaSesion(1, 7, 100m);
         var (service, repository, unitOfWork, _) = CrearServicio();
         repository.Setup(x => x.GetSesionByIdForUpdateAsync(1)).ReturnsAsync(sesion);
+        repository.Setup(x => x.UpdateSesion(It.IsAny<CajaSesion>()));
         repository.Setup(x => x.SaveChangesAsync()).ReturnsAsync(true);
         repository.Setup(x => x.GetSesionByIdAsync(1, false)).ReturnsAsync(sesion);
         PrepararTransaccion(unitOfWork);
