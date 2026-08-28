@@ -7,12 +7,12 @@ describe('N3.7.E NotaCreditoCliente route contract', () => {
     const detail = PEDIDOS_VENTA_ROUTES.find(route => route.path === 'notas-credito-cliente/:id');
 
     expect(home).toBeTruthy();
-    expect(home?.data).toEqual(jasmine.objectContaining({ modulo: 'Ventas', accion: 'Ver' }));
+    expect(home?.data).toMatchObject({ modulo: 'Ventas', accion: 'Ver' });
     expect(create).toBeTruthy();
-    expect(create?.data).toEqual(jasmine.objectContaining({ modulo: 'Ventas', accion: 'Crear' }));
+    expect(create?.data).toMatchObject({ modulo: 'Ventas', accion: 'Crear' });
     expect(detail).toBeTruthy();
-    expect(detail?.data).toEqual(jasmine.objectContaining({ modulo: 'Ventas', accion: 'Ver' }));
+    expect(detail?.data).toMatchObject({ modulo: 'Ventas', accion: 'Ver' });
 
-    expect(PEDIDOS_VENTA_ROUTES.some(route => route.path === 'notas-credito-cliente/:id/editar')).toBeFalse();
+    expect(PEDIDOS_VENTA_ROUTES.some(route => route.path === 'notas-credito-cliente/:id/editar')).toBe(false);
   });
 });
