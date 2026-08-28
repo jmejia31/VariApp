@@ -8,9 +8,10 @@ namespace InventoryApp.Application.Services;
 
 /// <summary>
 /// N4.1.D application boundary for Caja, hardened by N4.1.F with strict audit
-/// inside the same unit-of-work transaction as every business mutation.
-/// Caja-specific actions are not invented: the service reuses the authoritative
-/// generic AccionPermiso contract and ModuloSistema.Caja.
+/// inside the same unit-of-work transaction as every business mutation and
+/// fail-closed RBAC enforcement using the authoritative generic permission contract.
+/// Caja-specific actions are not invented: the service reuses AccionPermiso and
+/// ModuloSistema.Caja.
 /// </summary>
 public sealed class CajaService : ICajaService
 {
@@ -18,21 +19,25 @@ public sealed class CajaService : ICajaService
     private readonly ICurrentUserService _currentUser;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IAuditoriaService _auditoria;
+    private readonly IPermisoService _permisos;
 
     public CajaService(
         ICajaRepository repository,
         ICurrentUserService currentUser,
         IUnitOfWork unitOfWork,
-        IAuditoriaService auditoria)
+        IAuditoriaService auditoria,
+        IPermisoService permisos)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _auditoria = auditoria ?? throw new ArgumentNullException(nameof(auditoria));
+        _permisos = permisos ?? throw new ArgumentNullException(nameof(permisos));
     }
 
     public async Task<CajaDto> GetCajaByIdAsync(int id)
     {
+        await AutorizarAsync(AccionPermiso.Ver);
         ValidarId(id, "caja");
         var caja = await _repository.GetCajaByIdAsync(id)
             ?? throw new ResourceNotFoundException($"Caja con Id {id} no encontrada.");
@@ -41,6 +46,7 @@ public sealed class CajaService : ICajaService
 
     public async Task<CajaSesionDto> GetSesionByIdAsync(int id)
     {
+        await AutorizarAsync(AccionPermiso.Ver);
         ValidarId(id, "sesión de caja");
         var sesion = await _repository.GetSesionByIdAsync(id)
             ?? throw new ResourceNotFoundException($"Sesión de caja con Id {id} no encontrada.");
@@ -49,6 +55,7 @@ public sealed class CajaService : ICajaService
 
     public async Task<CajaSesionDto?> GetSesionActivaAsync(int cajaId)
     {
+        await AutorizarAsync(AccionPermiso.Ver);
         ValidarId(cajaId, "caja");
         var caja = await _repository.GetCajaByIdAsync(cajaId)
             ?? throw new ResourceNotFoundException($"Caja con Id {cajaId} no encontrada.");
@@ -60,6 +67,7 @@ public sealed class CajaService : ICajaService
     {
         ArgumentNullException.ThrowIfNull(dto);
         RequerirUsuarioId();
+        await AutorizarAsync(AccionPermiso.Crear);
         var id = 0;
         await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
@@ -88,6 +96,7 @@ public sealed class CajaService : ICajaService
     public async Task<CajaDto> ActivarCajaAsync(int id)
     {
         RequerirUsuarioId();
+        await AutorizarAsync(AccionPermiso.Activar);
         await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
             var caja = await ObtenerCajaParaActualizarAsync(id);
@@ -106,6 +115,7 @@ public sealed class CajaService : ICajaService
     public async Task<CajaDto> DesactivarCajaAsync(int id)
     {
         RequerirUsuarioId();
+        await AutorizarAsync(AccionPermiso.Desactivar);
         await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
             var caja = await ObtenerCajaParaActualizarAsync(id);
@@ -132,6 +142,7 @@ public sealed class CajaService : ICajaService
     {
         ArgumentNullException.ThrowIfNull(dto);
         var usuarioId = RequerirUsuarioId();
+        await AutorizarAsync(AccionPermiso.Crear);
         var sesionId = 0;
 
         await _unitOfWork.ExecuteInTransactionAsync(async () =>
@@ -175,6 +186,7 @@ public sealed class CajaService : ICajaService
     public async Task<CajaSesionDto> IniciarOperacionesAsync(int sesionId)
     {
         RequerirUsuarioId();
+        await AutorizarAsync(AccionPermiso.Actualizar);
         await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
             var sesion = await ObtenerSesionParaActualizarAsync(sesionId);
@@ -201,6 +213,7 @@ public sealed class CajaService : ICajaService
     {
         ArgumentNullException.ThrowIfNull(dto);
         RequerirUsuarioId();
+        await AutorizarAsync(AccionPermiso.Crear);
         await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
             var sesion = await ObtenerSesionParaActualizarAsync(sesionId);
@@ -226,6 +239,7 @@ public sealed class CajaService : ICajaService
     public async Task<CajaSesionDto> IniciarArqueoAsync(int sesionId)
     {
         RequerirUsuarioId();
+        await AutorizarAsync(AccionPermiso.Actualizar);
         await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
             var sesion = await ObtenerSesionParaActualizarAsync(sesionId);
@@ -252,6 +266,7 @@ public sealed class CajaService : ICajaService
     {
         ArgumentNullException.ThrowIfNull(dto);
         RequerirUsuarioId();
+        await AutorizarAsync(AccionPermiso.Cerrar);
         await _unitOfWork.ExecuteInTransactionAsync(async () =>
         {
             var sesion = await ObtenerSesionParaActualizarAsync(sesionId);
@@ -277,6 +292,9 @@ public sealed class CajaService : ICajaService
         });
         return await GetSesionByIdAsync(sesionId);
     }
+
+    private Task AutorizarAsync(AccionPermiso accion) =>
+        _permisos.VerificarPermisoAsync(ModuloSistema.Caja, accion);
 
     private async Task AuditarEstrictoAsync(
         AccionPermiso accion,
