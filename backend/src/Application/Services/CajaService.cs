@@ -90,7 +90,7 @@ public sealed class CajaService : ICajaService
                 caja.Id,
                 "Caja");
         });
-        return await GetCajaByIdAsync(id);
+        return await ObtenerCajaResultadoAsync(id);
     }
 
     public async Task<CajaDto> ActivarCajaAsync(int id)
@@ -109,7 +109,7 @@ public sealed class CajaService : ICajaService
                 caja.Id,
                 "Caja");
         });
-        return await GetCajaByIdAsync(id);
+        return await ObtenerCajaResultadoAsync(id);
     }
 
     public async Task<CajaDto> DesactivarCajaAsync(int id)
@@ -135,7 +135,7 @@ public sealed class CajaService : ICajaService
                 caja.Id,
                 "Caja");
         });
-        return await GetCajaByIdAsync(id);
+        return await ObtenerCajaResultadoAsync(id);
     }
 
     public async Task<CajaSesionDto> AbrirSesionAsync(int cajaId, AbrirCajaSesionDto dto)
@@ -180,7 +180,7 @@ public sealed class CajaService : ICajaService
                 "CajaSesion");
         });
 
-        return await GetSesionByIdAsync(sesionId);
+        return await ObtenerSesionResultadoAsync(sesionId);
     }
 
     public async Task<CajaSesionDto> IniciarOperacionesAsync(int sesionId)
@@ -206,7 +206,7 @@ public sealed class CajaService : ICajaService
                 sesion.Id,
                 "CajaSesion");
         });
-        return await GetSesionByIdAsync(sesionId);
+        return await ObtenerSesionResultadoAsync(sesionId);
     }
 
     public async Task<CajaSesionDto> RegistrarMovimientoAsync(int sesionId, RegistrarMovimientoCajaDto dto)
@@ -233,7 +233,7 @@ public sealed class CajaService : ICajaService
                 sesion.Id,
                 "CajaSesion");
         });
-        return await GetSesionByIdAsync(sesionId);
+        return await ObtenerSesionResultadoAsync(sesionId);
     }
 
     public async Task<CajaSesionDto> IniciarArqueoAsync(int sesionId)
@@ -259,7 +259,7 @@ public sealed class CajaService : ICajaService
                 sesion.Id,
                 "CajaSesion");
         });
-        return await GetSesionByIdAsync(sesionId);
+        return await ObtenerSesionResultadoAsync(sesionId);
     }
 
     public async Task<CajaSesionDto> CerrarSesionAsync(int sesionId, CerrarCajaSesionDto dto)
@@ -290,7 +290,7 @@ public sealed class CajaService : ICajaService
                 sesion.Id,
                 "CajaSesion");
         });
-        return await GetSesionByIdAsync(sesionId);
+        return await ObtenerSesionResultadoAsync(sesionId);
     }
 
     private Task AutorizarAsync(AccionPermiso accion) =>
@@ -308,6 +308,22 @@ public sealed class CajaService : ICajaService
             descripcion,
             referenciaId,
             entidad: entidad);
+    }
+
+    private async Task<CajaDto> ObtenerCajaResultadoAsync(int id)
+    {
+        ValidarId(id, "caja");
+        var caja = await _repository.GetCajaByIdAsync(id)
+            ?? throw new ResourceNotFoundException($"Caja con Id {id} no encontrada.");
+        return Map(caja);
+    }
+
+    private async Task<CajaSesionDto> ObtenerSesionResultadoAsync(int id)
+    {
+        ValidarId(id, "sesión de caja");
+        var sesion = await _repository.GetSesionByIdAsync(id)
+            ?? throw new ResourceNotFoundException($"Sesión de caja con Id {id} no encontrada.");
+        return Map(sesion);
     }
 
     private async Task<Caja> ObtenerCajaParaActualizarAsync(int id)
