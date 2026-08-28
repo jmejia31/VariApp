@@ -2,26 +2,33 @@ using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities.Cajas;
+using InventoryApp.Domain.Enums;
 
 namespace InventoryApp.Application.Services;
 
 /// <summary>
-/// N4.1.D application boundary for Caja. This service deliberately does not invent
-/// Caja-specific RBAC/audit mappings: those remain fail-closed until N4.1.F defines
-/// an authoritative permission/audit module. All mutations still require an
-/// authenticated user and run inside the existing unit-of-work transaction.
+/// N4.1.D application boundary for Caja, hardened by N4.1.F with strict audit
+/// inside the same unit-of-work transaction as every business mutation.
+/// Caja-specific actions are not invented: the service reuses the authoritative
+/// generic AccionPermiso contract and ModuloSistema.Caja.
 /// </summary>
 public sealed class CajaService : ICajaService
 {
     private readonly ICajaRepository _repository;
     private readonly ICurrentUserService _currentUser;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IAuditoriaService _auditoria;
 
-    public CajaService(ICajaRepository repository, ICurrentUserService currentUser, IUnitOfWork unitOfWork)
+    public CajaService(
+        ICajaRepository repository,
+        ICurrentUserService currentUser,
+        IUnitOfWork unitOfWork,
+        IAuditoriaService auditoria)
     {
         _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        _auditoria = auditoria ?? throw new ArgumentNullException(nameof(auditoria));
     }
 
     public async Task<CajaDto> GetCajaByIdAsync(int id)
@@ -69,6 +76,11 @@ public sealed class CajaService : ICajaService
             await _repository.AddCajaAsync(caja);
             await _repository.SaveChangesAsync();
             id = caja.Id;
+            await AuditarEstrictoAsync(
+                AccionPermiso.Crear,
+                $"Caja creada: {caja.Nombre}",
+                caja.Id,
+                "Caja");
         });
         return await GetCajaByIdAsync(id);
     }
@@ -82,6 +94,11 @@ public sealed class CajaService : ICajaService
             caja.Activar();
             _repository.UpdateCaja(caja);
             await _repository.SaveChangesAsync();
+            await AuditarEstrictoAsync(
+                AccionPermiso.Activar,
+                $"Caja activada: {caja.Nombre}",
+                caja.Id,
+                "Caja");
         });
         return await GetCajaByIdAsync(id);
     }
@@ -102,6 +119,11 @@ public sealed class CajaService : ICajaService
             }
             _repository.UpdateCaja(caja);
             await _repository.SaveChangesAsync();
+            await AuditarEstrictoAsync(
+                AccionPermiso.Desactivar,
+                $"Caja desactivada: {caja.Nombre}",
+                caja.Id,
+                "Caja");
         });
         return await GetCajaByIdAsync(id);
     }
@@ -140,6 +162,11 @@ public sealed class CajaService : ICajaService
             _repository.UpdateCaja(caja);
             await _repository.SaveChangesAsync();
             sesionId = sesion.Id;
+            await AuditarEstrictoAsync(
+                AccionPermiso.Crear,
+                $"Sesión de caja abierta para Caja {caja.Id}",
+                sesion.Id,
+                "CajaSesion");
         });
 
         return await GetSesionByIdAsync(sesionId);
@@ -161,6 +188,11 @@ public sealed class CajaService : ICajaService
             }
             _repository.UpdateSesion(sesion);
             await _repository.SaveChangesAsync();
+            await AuditarEstrictoAsync(
+                AccionPermiso.Actualizar,
+                $"Operaciones iniciadas en sesión de caja {sesion.Id}",
+                sesion.Id,
+                "CajaSesion");
         });
         return await GetSesionByIdAsync(sesionId);
     }
@@ -182,6 +214,11 @@ public sealed class CajaService : ICajaService
             }
             _repository.UpdateSesion(sesion);
             await _repository.SaveChangesAsync();
+            await AuditarEstrictoAsync(
+                AccionPermiso.Crear,
+                $"Movimiento registrado en sesión de caja {sesion.Id}",
+                sesion.Id,
+                "CajaSesion");
         });
         return await GetSesionByIdAsync(sesionId);
     }
@@ -202,6 +239,11 @@ public sealed class CajaService : ICajaService
             }
             _repository.UpdateSesion(sesion);
             await _repository.SaveChangesAsync();
+            await AuditarEstrictoAsync(
+                AccionPermiso.Actualizar,
+                $"Arqueo iniciado en sesión de caja {sesion.Id}",
+                sesion.Id,
+                "CajaSesion");
         });
         return await GetSesionByIdAsync(sesionId);
     }
@@ -227,8 +269,27 @@ public sealed class CajaService : ICajaService
             _repository.UpdateSesion(sesion);
             _repository.UpdateCaja(caja);
             await _repository.SaveChangesAsync();
+            await AuditarEstrictoAsync(
+                AccionPermiso.Cerrar,
+                $"Sesión de caja cerrada: {sesion.Id}",
+                sesion.Id,
+                "CajaSesion");
         });
         return await GetSesionByIdAsync(sesionId);
+    }
+
+    private async Task AuditarEstrictoAsync(
+        AccionPermiso accion,
+        string descripcion,
+        int referenciaId,
+        string entidad)
+    {
+        await _auditoria.RegistrarEstrictoAsync(
+            ModuloSistema.Caja,
+            accion,
+            descripcion,
+            referenciaId,
+            entidad: entidad);
     }
 
     private async Task<Caja> ObtenerCajaParaActualizarAsync(int id)
