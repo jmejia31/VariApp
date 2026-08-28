@@ -31,5 +31,6 @@ public enum ModuloSistema
     MetodosPago = 27,
     Sucursales = 28,
     Almacenes = 29,
-    UbicacionesAlmacen = 30
+    UbicacionesAlmacen = 30,
+    Caja = 31
 }
