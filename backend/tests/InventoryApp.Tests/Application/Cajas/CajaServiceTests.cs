@@ -17,6 +17,9 @@ public sealed class CajaServiceTests
     {
         var dto = new CrearCajaDto { Nombre = "Caja Principal" };
         var (service, repository, unitOfWork, _, auditoria, permisos) = CrearServicio();
+        permisos
+            .Setup(x => x.VerificarPermisoAsync(ModuloSistema.Caja, AccionPermiso.Ver))
+            .ThrowsAsync(new ForbiddenAccessException("El permiso Ver no debe ser requisito para devolver una creación ya autorizada."));
 
         repository
             .Setup(x => x.AddCajaAsync(It.IsAny<Caja>()))
@@ -42,6 +45,7 @@ public sealed class CajaServiceTests
         Assert.Equal(EstadoCaja.Inactiva, result.Estado);
 
         permisos.Verify(x => x.VerificarPermisoAsync(ModuloSistema.Caja, AccionPermiso.Crear), Times.Once);
+        permisos.Verify(x => x.VerificarPermisoAsync(ModuloSistema.Caja, AccionPermiso.Ver), Times.Never);
         unitOfWork.Verify(x => x.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()), Times.Once);
         repository.Verify(x => x.AddCajaAsync(It.Is<Caja>(c => c.Nombre == dto.Nombre)), Times.Once);
         repository.Verify(x => x.SaveChangesAsync(), Times.Once);
