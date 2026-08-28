@@ -54,14 +54,14 @@ namespace InventoryApp.Infrastructure.Migrations
             nota.HasIndex(x => x.FechaEmisionUtc)
                 .HasDatabaseName("IX_NotasCreditoProveedor_FechaEmisionUtc");
 
-            nota.HasOne<Proveedor>()
+            nota.HasOne("InventoryApp.Domain.Entities.Proveedor", null)
                 .WithMany()
-                .HasForeignKey(x => x.ProveedorId)
+                .HasForeignKey("ProveedorId")
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_NotasCreditoProveedor_Proveedores_ProveedorId");
-            nota.HasOne<FacturaProveedor>()
+            nota.HasOne("InventoryApp.Domain.Entities.FacturaProveedor", null)
                 .WithMany()
-                .HasForeignKey(x => x.FacturaProveedorId)
+                .HasForeignKey("FacturaProveedorId")
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_NotasCreditoProveedor_FacturasProveedor_FacturaProveedorId");
             nota.HasOne<DevolucionProveedor>()
