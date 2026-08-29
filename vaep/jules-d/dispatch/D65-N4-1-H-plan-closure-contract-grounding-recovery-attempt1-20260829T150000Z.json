@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D65-N4-1-H-plan-closure-contract-grounding-recovery-attempt1-20260829T150000Z",
+  "taskId": "N4.1.H-D65-plan-closure-contract-grounding",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "4969004471e1b2c41d9b915743e639428a4588dd",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: PLAN_EJECUCION_AUTONOMA.md",
+  "prompt": "RECOVERY SAME logical task D65 after >5m without externally correlatable Jules session plus fresh useful activity. STRICT READ_ONLY and NON-SHELL. Inspect only PLAN_EJECUCION_AUTONOMA.md using non-shell read tools. Extract only explicit rules that determine whether N4.1.H may be promoted to LISTO, including evidence, review, CI/gate and P0/P1 requirements. Do not create, modify, delete, rename, stage or restore files. Do not run tests, shell, terminal, bash, dotnet, npm or scripts. Do not claim completion or promotion. Return evidence only, no patch."
+}
