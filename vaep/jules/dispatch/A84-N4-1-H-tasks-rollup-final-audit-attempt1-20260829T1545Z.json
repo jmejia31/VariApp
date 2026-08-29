@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A84-N4-1-H-tasks-rollup-final-audit-attempt1-20260829T1545Z",
+  "taskId": "N4.1.H-A84-tasks-rollup-final-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "ba59c8c856426a958bb69f7c6c2ebbf63c23648c",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: TASKS.md",
+  "prompt": "NEW logical SAME_PARENT closure task after A83 REVIEW_PASS evidence-only. STRICT READ_ONLY and NON-SHELL. Inspect only TASKS.md with non-shell read tools. Determine whether an additive/history-preserving N4.1 Caja A-H rollup is now present and, if present, quote only the factual status/authority references; if absent, report the exact missing closure evidence. Do not edit files. Do not run shell, terminal, bash, tests, dotnet, npm, scripts or pre-commit commands. Do not claim CI PASS, P0=0, P1=0, LISTO or promotion. Return factual evidence only, two independent self-reviews and tests-not-executed."
+}
