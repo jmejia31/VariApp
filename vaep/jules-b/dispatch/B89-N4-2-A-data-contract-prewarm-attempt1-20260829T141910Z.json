@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B89-N4-2-A-data-contract-prewarm-attempt1-20260829T141910Z",
+  "taskId": "N4.2.A-B89-data-contract-prewarm",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "ec9d3216959ffd3070f5de946b500c4a1c8c3ee3",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: backend/VariStore.Api/Infrastructure/Persistence/AppDbContext.cs",
+  "prompt": "NEW logical NEXT_SAFE prewarm after B88 REVIEW_PASS evidence-only. WORK_CAN_PIPELINE__PROMOTION_CANNOT. STRICT READ_ONLY and NON-SHELL. Inspect only backend/VariStore.Api/Infrastructure/Persistence/AppDbContext.cs using non-shell read tools and identify only existing persistence conventions relevant to preparing N4.2.A. Do not create, modify, delete, rename or stage files. Do not run tests, shell, terminal, bash, dotnet, npm, scripts or mutating commands. Do not infer requirements not present in the file and do not claim N4.2.A promoted, implemented, CI PASS or LISTO. Return evidence only, no patch."
+}
