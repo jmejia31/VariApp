@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C82-N4-1-H-authority-grounded-audit-attempt1-20260829T172500Z",
+  "taskId": "N4.1.H-C82-authority-grounded-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "11fe29dad20f07908f3041bfade61bfea748208c",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: docs/VAEP_AUTHORITY.md",
+  "prompt": "STRICT_READ_ONLY / NON_SHELL. CURRENT_PARENT=N4.1.H. Inspect only docs/VAEP_AUTHORITY.md and report the exact authority constraints that govern certification, LISTO_REAL, P0/P1 evidence and N4.2 promotion while N4.1.H remains open. Do not edit files. Do not run tests, shell, grep, scripts, git, package managers or network commands. Use repository file reading only. Return evidence-only findings grounded in exact text. Scope exclusive to Jules C."
+}
