@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C71-N4-1-H-agents-governance-grounding-attempt1-20260829T131600Z",
+  "taskId": "N4.1.H-C71-agents-governance-grounding-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "4f447528e8f557ec6529eadb62feb5db49a7e69d",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: AGENTS.md",
+  "prompt": "NEW logical SAME_PARENT task after C70 terminal COMPLETED. STRICT READ_ONLY and NON-SHELL. Inspect only AGENTS.md using non-shell read tools. Do not create, modify, delete, rename or stage files. Do not run tests, shell, terminal, bash, dotnet, npm or mutating commands. Extract only explicit repository governance, review, scope and closure constraints that apply to N4.1.H. Report contradictions if explicitly present. Do not infer implementation completion, CI PASS, P0=0, P1=0 or LISTO. Return evidence only, no patch."
+}
