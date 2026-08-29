@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A77-N4-1-H-tasks-final-grounding-attempt1-20260829T134700Z",
+  "taskId": "N4.1.H-A77-tasks-final-grounding-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "1dd7dcc2d861edb3413865dee74d7a80ce29ac1f",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: TASKS.md",
+  "prompt": "NEW logical SAME_PARENT task after A76 terminal REVIEW_PASS evidence-only. STRICT READ_ONLY and NON-SHELL. Inspect only TASKS.md using non-shell read tools. Do not create, modify, delete, rename or stage files. Do not run tests, shell, terminal, bash, dotnet, npm or mutating commands. Extract the exact current N4.1 historical rollup state and propose only the minimal factual additive fields needed to reconcile N4.1.A-H history, explicitly separating already-certified authorities from pending N4.1.H. Do not infer CI PASS, P0=0, P1=0 or LISTO. Return evidence only, no patch."
+}
