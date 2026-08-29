@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A94-N4-1-H-certification-grounding-audit-attempt1-20260829T1844Z",
+  "taskId": "N4.1.H-A94-certification-grounding-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "a3b4fab86df6ad5e092aed8d552786eadfa7c3a7",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "VAEP_TRANSPORT_VERIFIED=true\nSTRICT READ_ONLY/NON_SHELL. Inspect only docs/CERTIFICACION_N4_1_CAJA.md. Verify whether every N4.1.H closure statement is grounded by an explicit repository evidence anchor and identify any stale, contradictory, or still-VALIDANDO claim. Do not modify/create/delete files; do not run shell/tests/network/git. Do not infer CI PASS, P0=0, P1=0 or LISTO. Report the minimum exact controller evidence still required. SELF_REVIEW_PASS_1/2 required."
+}
