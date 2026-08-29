@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B110-N4-1-H-authority-final-grounding-audit-20260829T2203Z",
+  "taskId": "N4.1.H-B110-authority-final-grounding-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "411fedebed03c3d16db5e87e35d245b9600c6803",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: docs/VAEP_AUTHORITY.md",
+  "prompt": "VAEP v3.25.1 SAME_PARENT NEW logical task after B109 REVIEW_PASS evidence-only. STRICT_READ_ONLY/NON_SHELL. Inspect ONLY docs/VAEP_AUTHORITY.md using repository-native read capability; DO NOT run shell, terminal commands, tests, network, git, terminal grep, or create/modify/delete any file. Produce controller-ready repository-grounded N4.1.H authority/closure audit: exact authoritative prerequisites, stale or contradictory wording, and any controller action still required before LISTO. Never infer LISTO, CI PASS, P0=0 or P1=0 and do not promote N4.2. SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 required. If any plan suggests shell/testing, refuse it and report TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY."
+}
