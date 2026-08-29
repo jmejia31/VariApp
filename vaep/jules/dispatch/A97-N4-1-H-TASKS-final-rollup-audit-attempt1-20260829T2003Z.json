@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A97-N4-1-H-TASKS-final-rollup-audit-attempt1-20260829T2003Z",
+  "taskId": "N4.1.H-A97-TASKS-final-rollup-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "64715abe4dc5e75417833c933bf07d6dda6cc20a",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: TASKS.md",
+  "prompt": "VAEP_TRANSPORT_VERIFIED=true. NEW LOGICAL TASK after A96-R2 exhausted; this is NOT R3. STRICT READ_ONLY/NON_SHELL. Inspect only TASKS.md. Do not modify/create/delete files and do not run shell/tests/network/git. Return repository-grounded evidence only for N4.1 Caja A-H historical rollup completeness: exact missing/contradictory entries or NONE. Do not infer LISTO, CI PASS, P0=0 or P1=0. Do not promote N4.2. SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 required."
+}
