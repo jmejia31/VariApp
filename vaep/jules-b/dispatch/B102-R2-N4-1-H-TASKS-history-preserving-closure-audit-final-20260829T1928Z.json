@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B102-R2-N4-1-H-TASKS-history-preserving-closure-audit-final-20260829T1928Z",
+  "taskId": "N4.1.H-B102-TASKS-history-preserving-closure-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "90ca0af2a7b98dbb2736440f39614e0f65ce34e0",
+  "taskAttempt": 2,
+  "fileScopeHint": "READ_ONLY: TASKS.md",
+  "prompt": "R2 FINAL. STRICT READ_ONLY/NON_SHELL. ATTEMPT1 was rejected because a test.sh file was created despite the read-only contract. Inspect only TASKS.md. Do not modify/create/delete files and do not run shell/tests/network/git. Return only factual evidence for the N4.1 Caja history-preserving closure rollup: what exact N4.1 facts are present, missing, stale, or unsafe to claim. Do not infer LISTO, CI PASS, P0=0 or P1=0. SELF_REVIEW_PASS_1/2 required. R3 prohibited; any defect transfers to ChatGPT/VAEP QA takeover."
+}
