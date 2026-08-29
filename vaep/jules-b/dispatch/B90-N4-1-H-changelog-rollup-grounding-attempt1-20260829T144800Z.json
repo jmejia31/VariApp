@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B90-N4-1-H-changelog-rollup-grounding-attempt1-20260829T144800Z",
+  "taskId": "N4.1.H-B90-changelog-rollup-grounding",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "d3cf3a2278142bb57af72298fd25575ee0d9ea16",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: CHANGELOG_AI.md",
+  "prompt": "NEW logical SAME_PARENT closure task after B89 terminal prewarm. STRICT READ_ONLY and NON-SHELL. Inspect only CHANGELOG_AI.md using non-shell read tools. Determine whether an explicit history-preserving N4.1 Caja closure entry exists and, if absent, report the minimum factual additive entry supported by repository evidence without editing anything. Do not create, modify, delete, rename, stage or restore files. Do not run tests, shell, terminal, bash, dotnet, npm or scripts. Do not claim CI PASS, P0=0, P1=0, LISTO or promotion. Return evidence only, no patch."
+}
