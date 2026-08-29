@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D69-N4-1-H-rollback-audit-recovery-attempt1-20260829T175500Z",
+  "taskId": "N4.1.H-D69-rollback-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "8d86119e9bc18c098e5738f3bd8246f304b775ac",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: docs/ROLLBACK_N4_1_CAJA.md",
+  "prompt": "STRICT_READ_ONLY / NON_SHELL. CURRENT_PARENT=N4.1.H. Inspect only docs/ROLLBACK_N4_1_CAJA.md. Report whether rollback evidence is complete and coherent for N4.1.H closure, including any stale SHA, missing prerequisite, or false promotion language. Do not edit files. Do not run tests, shell, grep, scripts, git, package managers or network commands. Use repository file reading only. Do not promote N4.2. Scope exclusive to Jules D."
+}
