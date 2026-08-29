@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A96-N4-1-H-runbook-final-grounding-audit-attempt1-20260829T1927Z",
+  "taskId": "N4.1.H-A96-runbook-final-grounding-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "7112d4162b6800ae3117462534ae0b984c838a2d",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: docs/RUNBOOK_N4_1_CAJA.md",
+  "prompt": "VAEP_TRANSPORT_VERIFIED=true. STRICT READ_ONLY/NON_SHELL. Inspect only docs/RUNBOOK_N4_1_CAJA.md. Do not modify/create/delete files and do not run shell/tests/network/git. Produce a factual final-grounding audit for N4.1.H: identify any remaining contradiction, stale wording, unsupported closure claim, or missing operational prerequisite in the runbook. Do not infer LISTO, CI PASS, P0=0 or P1=0. Return evidence only with SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2."
+}
