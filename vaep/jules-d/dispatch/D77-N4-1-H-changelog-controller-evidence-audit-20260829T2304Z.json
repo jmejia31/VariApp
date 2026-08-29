@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D77-N4-1-H-changelog-controller-evidence-audit-20260829T2304Z",
+  "taskId": "N4.1.H-D77-changelog-controller-evidence-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "895876b9635c2172e3496175248bffeac8786622",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: CHANGELOG_AI.md",
+  "prompt": "VAEP v3.25.1 SAME_PARENT NEW logical task after D76-R2 FINAL REVIEW_REJECT exhausted and transferred to controller QA takeover. This is NOT an R3. STRICT_READ_ONLY/NON_SHELL. Inspect ONLY CHANGELOG_AI.md using repository-native read capability; DO NOT run shell, terminal commands, tests, network, git, terminal grep/sed/cat, or create/modify/delete any file. Produce a controller-ready repository-grounded audit of exact N4.1 Caja history already present, missing additive A-H rollup facts, and claims that must remain conditional pending controller causal CI/COLA evidence. Keep functional certification SHA distinct from control-plane/manifest HEAD. Never assert LISTO, CI PASS, P0=0/P1=0 or promote N4.2 unless literally evidenced. SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 required. If any plan suggests shell/testing, refuse and report TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY."
+}
