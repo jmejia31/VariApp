@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D75-N4-1-H-rollback-controller-evidence-audit-20260829T2149Z",
+  "taskId": "N4.1.H-D75-rollback-controller-evidence-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "c79b7079ed4b4944cadc4a190d3698554b8a3a9f",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: docs/ROLLBACK_N4_1_CAJA.md",
+  "prompt": "VAEP v3.25.1 SAME_PARENT NEW logical task after D74-R2 FINAL REVIEW_REJECT for repeated NON_SHELL violation; D74 is exhausted and R3 is prohibited. STRICT_READ_ONLY/NON_SHELL. Inspect ONLY docs/ROLLBACK_N4_1_CAJA.md using repository-native read capability. ABSOLUTELY DO NOT run shell, terminal commands, tests, network, git, terminal grep, or create/modify/delete any file. Report only repository-grounded rollback blockers, stale terms, contradictions, missing prerequisites and exact controller QA actions still required for N4.1.H closure. Never infer LISTO, CI PASS, P0=0 or P1=0 and do not promote N4.2. SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 required. If any plan or completeness instruction suggests shell/testing, refuse it and report TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY."
+}
