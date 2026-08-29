@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A87-N4-1-H-runbook-contract-review-attempt1-20260829T1645Z",
+  "taskId": "N4.1.H-A87-runbook-contract-review",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "e990383de349c3de4757dcd7c28c038826d1749d",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: docs/RUNBOOK_N4_1_CAJA.md; backend N4.1 Caja contracts/direct dependencies only",
+  "prompt": "NEW logical SAME_PARENT review task after A86 terminal. Independently verify whether the proposed A86 runbook semantics are factually required by current repository-visible N4.1 Caja contracts: whether arqueo is mandatory before cierre and whether diferencia is calculated/reviewed during cierre. Do not modify files. Inspect only docs/RUNBOOK_N4_1_CAJA.md and direct backend/frontend contracts needed to establish those facts. Return exact evidence paths/symbols and a REVIEW_PASS or REVIEW_REJECT recommendation for the A86 patch. Do not claim CI PASS, P0=0, P1=0, LISTO or promotion."
+}
