@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A82-N4-1-H-TASKS-rollup-anchor-grounding-attempt1-20260829T151900Z",
+  "taskId": "N4.1.H-A82-TASKS-rollup-anchor-grounding",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "cab48de6fb21e0304edc9340fdfd07a979788def",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: TASKS.md",
+  "prompt": "STRICT READ_ONLY and NON-SHELL. Inspect only TASKS.md with non-shell read tools. Identify the exact history-preserving insertion anchor for a factual ERP-N4.1 Caja rollup and report the minimum grounded facts already evidenced in the file for N4.1.A through N4.1.H, explicitly separating LISTO_REAL children from N4.1.H still EN_PROGRESO/NO_LISTO. Do not infer CI, P0/P1, certification, or promotion beyond TASKS.md. Do not create, modify, delete, rename, stage or restore files. Do not run tests, shell, terminal, bash, dotnet, npm or scripts. Return evidence only, no patch."
+}
