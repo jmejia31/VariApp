@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D71-RECOVERY-N4-1-H-certification-final-grounding-audit-attempt1-20260829T1944Z",
+  "taskId": "N4.1.H-D71-certification-final-grounding-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "378a6ef4312fea3bef638479f5942aa7d36c4991",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "VAEP_TRANSPORT_VERIFIED=true. SAME LOGICAL TASK / SAME ATTEMPT1 transport recovery because the prior exact worker exceeded the freshness threshold without an externally correlated Jules result/session; pre-session transport does not consume the content attempt. STRICT READ_ONLY/NON_SHELL. Inspect only docs/CERTIFICACION_N4_1_CAJA.md. Do not modify/create/delete files and do not run shell/tests/network/git. Return repository-grounded evidence only: exact closure blockers, stale wording, unsupported claims, or NONE. Do not infer LISTO, CI PASS, P0=0 or P1=0. SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 required."
+}
