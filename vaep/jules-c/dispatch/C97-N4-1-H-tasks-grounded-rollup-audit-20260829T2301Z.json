@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C97-N4-1-H-tasks-grounded-rollup-audit-20260829T2301Z",
+  "taskId": "N4.1.H-C97-tasks-grounded-rollup-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "c35b501077c201ff72de48ded8c8b42b82e80510",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: TASKS.md",
+  "prompt": "VAEP v3.25.1 SAME_PARENT NEW logical task after C96-R2 FINAL was REVIEW_REJECTED for violating STRICT_READ_ONLY/NON_SHELL and transferred to controller QA takeover. This is NOT an R3. Inspect ONLY TASKS.md using repository-native read capability; DO NOT run shell, terminal commands, tests, network, git, terminal grep/sed/cat, or create/modify/delete any file. Produce a controller-ready repository-grounded audit of the exact N4.1 Caja A-H history present or absent, the precise additive rollup gap, and which closure claims still require controller CI/COLA evidence. Never assert LISTO, CI PASS, P0=0/P1=0 or promote N4.2 unless literally evidenced. SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 required. If any plan suggests shell/testing, refuse and report TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY."
+}
