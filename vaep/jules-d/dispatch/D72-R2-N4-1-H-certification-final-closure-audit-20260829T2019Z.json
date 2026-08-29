@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D72-R2-N4-1-H-certification-final-closure-audit-20260829T2019Z",
+  "taskId": "N4.1.H-D72-certification-final-closure-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "7d483e96a5a1ecb03b1ca6977447e3aff8a1e082",
+  "taskAttempt": 2,
+  "fileScopeHint": "READ_ONLY: docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "VAEP_TRANSPORT_VERIFIED=true. FINAL R2 for the SAME logical D72 task after ATTEMPT1 REVIEW_REJECTED because shell/echo and dotnet test were executed under STRICT READ_ONLY/NON_SHELL. R3 PROHIBITED. Inspect only docs/CERTIFICACION_N4_1_CAJA.md. Do not modify/create/delete files and do not run shell/tests/network/git. Return repository-grounded closure state only: whether the document explicitly remains VALIDANDO/NO LISTO, exact prerequisites remaining, and explicit P0/P1/CI/DoD conditions. Do not infer PASS from memory or uninspected files. Do not promote N4.2. SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 required. If any blocking defect remains, report it for ChatGPT/VAEP QA takeover and finish; never request R3."
+}
