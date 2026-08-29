@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C96-R2-REC1-N4-1-H-tasks-rollup-synthesis-audit-20260829T2246Z",
+  "taskId": "N4.1.H-C96-tasks-rollup-synthesis-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "65f3dfec319c4eb99ace818e41201d777ef742ec",
+  "taskAttempt": 2,
+  "fileScopeHint": "READ_ONLY: TASKS.md",
+  "prompt": "VAEP v3.25.1 SAME logical task C96 FINAL ATTEMPT2/R2 transport recovery. Previous R2 manifest was routed to the wrong worker dispatch directory before any Jules session and therefore did NOT consume an attempt. R3 IS PROHIBITED. STRICT_READ_ONLY/NON_SHELL. Inspect ONLY TASKS.md using repository-native read capability; DO NOT run shell, terminal commands, tests, network, git, grep/sed/cat via terminal, or create/modify/delete any file. Produce a controller-ready repository-grounded synthesis for N4.1.H: exact existing N4.1/Caja references, exact missing additive rollup facts for A-H, and which claims still require controller evidence from CI/COLA. Never assert LISTO, CI PASS, P0=0/P1=0, or promote N4.2 unless literally evidenced in the inspected file. SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 required. If any plan suggests shell/testing, explicitly refuse it and report TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY. If a blocking defect remains, report it for ChatGPT/VAEP controller QA takeover and finish; do not propose R3."
+}
