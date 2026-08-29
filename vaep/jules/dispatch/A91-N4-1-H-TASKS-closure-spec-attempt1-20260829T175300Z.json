@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A91-N4-1-H-TASKS-closure-spec-attempt1-20260829T175300Z",
+  "taskId": "N4.1.H-A91-TASKS-closure-spec",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "ccfeb4fe3f17fdcdb200f22665f5152ece5c45a5",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: TASKS.md",
+  "prompt": "STRICT_READ_ONLY / NON_SHELL. CURRENT_PARENT=N4.1.H. Inspect only TASKS.md. Building on the evidence that the ERP-N4.1 Caja A-H rollup is absent, produce the minimal factual additive closure specification that can be applied by the controller without deleting or rewriting history. Keep N4.1.H explicitly EN_PROGRESO/NO_LISTO unless every closure prerequisite is already evidenced in TASKS.md. Report exact insertion text and placement, but DO NOT edit. Do not run tests, shell, grep, scripts, git, package managers or network commands. Use repository file reading only. Do not promote N4.2. Scope exclusive to Jules A."
+}
