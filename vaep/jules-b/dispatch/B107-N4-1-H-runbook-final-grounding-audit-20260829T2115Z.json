@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B107-N4-1-H-runbook-final-grounding-audit-20260829T2115Z",
+  "taskId": "N4.1.H-B107-runbook-final-grounding-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "63319330b83a856175605d1561be6617063388d7",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: docs/RUNBOOK_N4_1_CAJA.md",
+  "prompt": "VAEP_TRANSPORT_VERIFIED=true. New SAME_PARENT logical task after B106 completed evidence-only. Inspect only docs/RUNBOOK_N4_1_CAJA.md under STRICT READ_ONLY/NON_SHELL. Do not modify/create/delete files and do not run shell/tests/network/git. Report only repository-grounded remaining N4.1 Caja operational closure gaps, contradictions, stale assertions, or missing prerequisites visible in this file. Never infer LISTO, CI PASS, P0=0 or P1=0. Do not promote N4.2. SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 required."
+}
