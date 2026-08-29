@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B104-N4-1-H-CHANGELOG-final-rollup-audit-attempt1-20260829T2003Z",
+  "taskId": "N4.1.H-B104-CHANGELOG-final-rollup-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "b52091ceb5d0f95478f8671b88ec527eefcfad02",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: CHANGELOG_AI.md",
+  "prompt": "VAEP_TRANSPORT_VERIFIED=true. NEW LOGICAL TASK after B103 review; not a retry. STRICT READ_ONLY/NON_SHELL. Inspect only CHANGELOG_AI.md. Do not modify/create/delete files and do not run shell/tests/network/git. Return repository-grounded evidence only for N4.1 Caja A-H historical rollup completeness: exact missing/contradictory entries or NONE. Do not infer LISTO, CI PASS, P0=0 or P1=0. Do not promote N4.2. SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 required."
+}
