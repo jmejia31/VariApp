@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C89-N4-1-H-CHANGELOG-history-preserving-closure-audit-attempt1-20260829T1904Z",
+  "taskId": "N4.1.H-C89-CHANGELOG-history-preserving-closure-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "42b6a890c3ec492c047d1a9ee0fa0e7a18181cda",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: CHANGELOG_AI.md",
+  "prompt": "VAEP_TRANSPORT_VERIFIED=true\nSTRICT READ_ONLY/NON_SHELL. Inspect only CHANGELOG_AI.md. Audit the minimum history-preserving N4.1 Caja rollup needed without claiming H or N4.2 promotion. Do not modify/create/delete files; do not run shell/tests/network/git. Do not infer CI PASS, P0=0, P1=0 or LISTO. Return exact existing anchors, contradictions, and a minimal controller-safe append that records A-G as historical facts while leaving H explicitly VALIDANDO/NO_LISTO pending controller certification. SELF_REVIEW_PASS_1/2 required."
+}
