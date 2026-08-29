@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A103-N4-1-H-changelog-grounding-audit-20260829T2218Z",
+  "taskId": "N4.1.H-A103-changelog-grounding-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "e4b5641453eb9e5d28e2194ab67e8893964a39ef",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: CHANGELOG_AI.md",
+  "prompt": "VAEP v3.25.1 SAME_PARENT NEW logical task after A102 REVIEW_PASS evidence-only. STRICT_READ_ONLY/NON_SHELL. Inspect ONLY CHANGELOG_AI.md using repository-native read capability; DO NOT run shell, terminal commands, tests, network, git, terminal grep, or create/modify/delete any file. Produce controller-ready N4.1 Caja A-H closure-history facts already present, missing additive facts, and contradictions/stale wording. Never infer LISTO, CI PASS, P0=0 or P1=0 and do not promote N4.2. SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 required. If any plan suggests shell/testing, refuse and report TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY."
+}
