@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A106-N4-1-H-runbook-closure-grounding-audit-20260829T2300Z",
+  "taskId": "N4.1.H-A106-runbook-closure-grounding-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "ce0ba95e787456d53ce6c31581a7770fa1c82e15",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: docs/RUNBOOK_N4_1_CAJA.md",
+  "prompt": "VAEP v3.25.1 SAME_PARENT NEW logical task after A105 REVIEW_PASS evidence-only. STRICT_READ_ONLY/NON_SHELL. Inspect ONLY docs/RUNBOOK_N4_1_CAJA.md using repository-native read capability; DO NOT run shell, terminal commands, tests, network, git, terminal grep/sed/cat, or create/modify/delete any file. Produce a controller-ready grounded N4.1.H closure audit focused on exact missing frontend/migration gates, restore/test-environment prerequisites, stale solution/domain wording, and any statement that could falsely imply LISTO, CI PASS, P0=0 or P1=0. Quote only repository-visible facts and separate recommendations from proven evidence. SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 required. If any plan suggests shell/testing, refuse and report TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY. Never promote N4.2."
+}
