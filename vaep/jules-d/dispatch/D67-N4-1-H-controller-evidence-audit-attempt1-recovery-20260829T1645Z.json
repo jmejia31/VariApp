@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D67-N4-1-H-controller-evidence-audit-attempt1-recovery-20260829T1645Z",
+  "taskId": "N4.1.H-D67-controller-evidence-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "14f21eaa732534487569ee012d5e5a67d68b1389",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: docs/CERTIFICACION_N4_1_CAJA.md; docs/VAEP_AUTHORITY.md; applicable N4.1 CI evidence only",
+  "prompt": "RECOVERY of SAME logical D67 task/ATTEMPT1 after stale pre-handoff workflow with no correlated result Issue/session proof. Independently audit the current controller evidence for N4.1.H: certification document, authority, and only directly applicable N4.1 CI evidence. Do not modify files. Identify exact remaining closure blockers versus non-causal/external checks. Return exact evidence and a fail-closed recommendation; do not claim CI PASS, P0=0, P1=0, LISTO or promotion unless directly proven. This recovery does not create or imply R2/R3."
+}
