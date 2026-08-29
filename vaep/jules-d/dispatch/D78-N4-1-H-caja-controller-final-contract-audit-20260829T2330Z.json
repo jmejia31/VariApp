@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D78-N4-1-H-caja-controller-final-contract-audit-20260829T2330Z",
+  "taskId": "N4.1.H-D78-caja-controller-final-contract-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "67b172e85a8c70fcf78f6323818b329eae9b082a",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: backend/VariStore.Api/Controllers/CajaController.cs",
+  "prompt": "VAEP v3.25.1 NEXT_SAFE SAME_PARENT new logical task after D77 lane-budget QA_TAKEOVER; this is NOT R3 and must not repeat the stalled CHANGELOG evidence task. STRICT_READ_ONLY/NON_SHELL. Inspect ONLY backend/VariStore.Api/Controllers/CajaController.cs using repository-native read capability; DO NOT run or plan shell, terminal commands, tests, network, git, terminal grep/sed/cat, or create/modify/delete any file. Produce a controller-ready final contract audit for N4.1.H certification linkage: Caja endpoints/actions present, authorization/audit/correlation evidence visible in this file, and any concrete mismatch against closure wording. Never assert LISTO, CI PASS, P0=0/P1=0 or promote N4.2. SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 required. If any tool/plan suggests shell/testing, refuse and report TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY."
+}
