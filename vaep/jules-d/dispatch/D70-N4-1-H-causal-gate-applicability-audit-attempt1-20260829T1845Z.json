@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D70-N4-1-H-causal-gate-applicability-audit-attempt1-20260829T1845Z",
+  "taskId": "N4.1.H-D70-causal-gate-applicability-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "0e042aeb0c92da2cf22d289e755a50f1360b8387",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: docs/VAEP_AUTHORITY.md, docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "VAEP_TRANSPORT_VERIFIED=true\nSTRICT READ_ONLY/NON_SHELL. Inspect only docs/VAEP_AUTHORITY.md and docs/CERTIFICACION_N4_1_CAJA.md. Determine which CI/gate categories are explicitly applicable to N4.1.H Caja closure, which are N/A/external, and what exact evidence is still missing to certify DoD/P0/P1 without false green. Do not modify/create/delete files; do not run shell/tests/network/git. Do not infer LISTO. Report a grounded applicability matrix and blockers only from these files. SELF_REVIEW_PASS_1/2 required."
+}
