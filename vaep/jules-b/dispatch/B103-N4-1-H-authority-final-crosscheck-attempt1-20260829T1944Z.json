@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B103-N4-1-H-authority-final-crosscheck-attempt1-20260829T1944Z",
+  "taskId": "N4.1.H-B103-authority-final-crosscheck",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "b9a2ea822548989f034a80e25049e49ec4be4152",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: docs/VAEP_AUTHORITY.md",
+  "prompt": "VAEP_TRANSPORT_VERIFIED=true. NEW LOGICAL TASK after B102 ATTEMPT2 completed; this is not R3. STRICT READ_ONLY/NON_SHELL. Inspect only docs/VAEP_AUTHORITY.md. Do not modify/create/delete files and do not run shell/tests/network/git. Return factual N4.1.H closure-relevant authority only: explicit prerequisites, prohibitions, and any contradiction with claiming LISTO/P0=0/P1=0. No inference from memory or uninspected files. Do not promote N4.2. SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 required."
+}
