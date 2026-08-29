@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D73-N4-1-H-causal-gate-applicability-audit-20260829T2044Z",
+  "taskId": "N4.1.H-D73-causal-gate-applicability-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "5d2077a53a208a07cd22caee7a5dd7896f8cbfb3",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: docs/CERTIFICACION_N4_1_CAJA.md, docs/VAEP_AUTHORITY.md",
+  "prompt": "VAEP_TRANSPORT_VERIFIED=true. NEW logical SAME_PARENT task after D72-R2 FINAL ended THROUGHPUT_STALL and transferred to controller QA takeover; D72 R3 is prohibited. Inspect only docs/CERTIFICACION_N4_1_CAJA.md and docs/VAEP_AUTHORITY.md under STRICT READ_ONLY/NON_SHELL. Do not modify/create/delete files and do not run shell/tests/network/git. Determine only repository-grounded causal gate applicability statements already documented for N4.1.H and identify contradictions or missing evidence; do not execute gates. Do not infer LISTO, CI PASS, P0=0 or P1=0. Do not promote N4.2. SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 required."
+}
