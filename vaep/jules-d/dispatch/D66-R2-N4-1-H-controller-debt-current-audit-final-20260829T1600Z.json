@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D66-R2-N4-1-H-controller-debt-current-audit-final-20260829T1600Z",
+  "taskId": "N4.1.H-D66-controller-debt-current-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "1e81e36aadf36df0af8f2ed82fe0c98ee6643539",
+  "taskAttempt": 2,
+  "fileScopeHint": "READ_ONLY: docs/qa/N4_1_H_CONTROLLER_REVIEW_20260829T1504Z.md",
+  "prompt": "R2 FINAL for the SAME logical D66 task after ATTEMPT1 violated STRICT_READ_ONLY/NON-SHELL by executing shell and dotnet test. R3 is prohibited. VAEP_TRANSPORT_VERIFIED=true. STRICT READ_ONLY and NON-SHELL. Inspect only docs/qa/N4_1_H_CONTROLLER_REVIEW_20260829T1504Z.md using non-shell read tools. Report only which recorded N4.1.H closure debts are resolved by evidence in that document and which remain unresolved. Do not edit files. Do not run shell, terminal, bash, tests, dotnet, npm, scripts, pre-commit commands, or any command execution tool. Do not claim CI PASS, P0=0, P1=0, LISTO or promotion. Return factual evidence only, SELF_REVIEW_PASS_1, SELF_REVIEW_PASS_2, and TEST_EXEMPTION=NO_CODE_CHANGES_EVIDENCE_ONLY."
+}
