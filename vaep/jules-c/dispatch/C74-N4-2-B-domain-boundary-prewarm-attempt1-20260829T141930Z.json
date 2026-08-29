@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C74-N4-2-B-domain-boundary-prewarm-attempt1-20260829T141930Z",
+  "taskId": "N4.2.B-C74-domain-boundary-prewarm",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "0c8f7410af2a0ee3ac4eb268fc39773e39a41dc8",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: frontend/src/app/app.routes.ts",
+  "prompt": "NEW logical NEXT_SAFE prewarm after C73 REVIEW_PASS evidence-only. WORK_CAN_PIPELINE__PROMOTION_CANNOT. STRICT READ_ONLY and NON-SHELL. Inspect only frontend/src/app/app.routes.ts using non-shell read tools and identify existing routing conventions or boundaries relevant to preparing N4.2.B. Do not create, modify, delete, rename or stage files. Do not run tests, shell, terminal, bash, dotnet, npm, scripts or mutating commands. Do not infer ungrounded requirements and do not claim N4.2.B promoted, implemented, CI PASS or LISTO. Return evidence only, no patch."
+}
