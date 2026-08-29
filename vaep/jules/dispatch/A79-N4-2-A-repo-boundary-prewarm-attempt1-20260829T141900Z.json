@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A79-N4-2-A-repo-boundary-prewarm-attempt1-20260829T141900Z",
+  "taskId": "N4.2.A-A79-repo-boundary-prewarm",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "f2e9f02ff88bae90fe5e4d587018e8acbb5ae67b",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: AGENTS.md",
+  "prompt": "NEW logical NEXT_SAFE prewarm after A78 throughput stall and controller QA takeover; do not redispatch redundant N4.1.H evidence. WORK_CAN_PIPELINE__PROMOTION_CANNOT. STRICT READ_ONLY and NON-SHELL. Inspect only AGENTS.md using non-shell read tools and extract repository constraints that will govern N4.2.A. Do not create, modify, delete, rename or stage files. Do not run tests, shell, terminal, bash, dotnet, npm, scripts or mutating commands. Do not claim N4.2.A started, promoted or LISTO; this is evidence-only prewarm while N4.1.H remains the closure authority. Return no patch."
+}
