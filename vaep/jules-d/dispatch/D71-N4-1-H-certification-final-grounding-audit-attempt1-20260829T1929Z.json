@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D71-N4-1-H-certification-final-grounding-audit-attempt1-20260829T1929Z",
+  "taskId": "N4.1.H-D71-certification-final-grounding-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "7acb64ff61a93f16be131d39549db241de84fc12",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "NEW LOGICAL TASK after D70-R2 exhaustion/QA takeover. STRICT READ_ONLY/NON_SHELL. Inspect only docs/CERTIFICACION_N4_1_CAJA.md. Do not modify/create/delete files and do not run shell/tests/network/git. Identify factual remaining closure blockers, stale or unsupported claims, and exact evidence still required for N4.1.H DoD/P0/P1. Do not infer LISTO or CI PASS. SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 required."
+}
