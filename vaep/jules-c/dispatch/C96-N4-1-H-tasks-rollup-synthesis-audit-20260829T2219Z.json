@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C96-N4-1-H-tasks-rollup-synthesis-audit-20260829T2219Z",
+  "taskId": "N4.1.H-C96-tasks-rollup-synthesis-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "41af917adb08c8bc8d9f3854cb545e803be778a8",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: TASKS.md",
+  "prompt": "VAEP v3.25.1 NEW logical SAME_PARENT task after C95-R2 FINAL exhausted and transferred to controller QA takeover. This is NOT an R3. STRICT_READ_ONLY/NON_SHELL. Inspect ONLY TASKS.md using repository-native read capability; DO NOT run shell, terminal commands, tests, network, git, terminal grep, or create/modify/delete any file. Produce a concise controller-ready synthesis for an additive, history-preserving N4.1 Caja A-H rollup: exact safe facts already grounded in TASKS.md, exact gaps that require controller evidence from COLA/CI, and wording that must NOT be asserted. Never infer LISTO, CI PASS, P0=0 or P1=0 and do not promote N4.2. SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 required. If any plan suggests shell/testing, refuse and report TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY."
+}
