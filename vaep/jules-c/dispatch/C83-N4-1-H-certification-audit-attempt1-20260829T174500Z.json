@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C83-N4-1-H-certification-audit-attempt1-20260829T174500Z",
+  "taskId": "N4.1.H-C83-certification-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "4b05b612364526d4d195c06cd404f54637031cb9",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "STRICT_READ_ONLY / NON_SHELL. CURRENT_PARENT=N4.1.H. Inspect only docs/CERTIFICACION_N4_1_CAJA.md. Report the exact remaining conditions for N4.1.H to become LISTO_REAL, any stale or contradictory claims, and whether P0=0/P1=0 is actually evidenced in this document. Do not edit files. Do not run tests, shell, grep, scripts, git, package managers or network commands. Use repository file reading only. Do not promote N4.2. Scope exclusive to Jules C."
+}
