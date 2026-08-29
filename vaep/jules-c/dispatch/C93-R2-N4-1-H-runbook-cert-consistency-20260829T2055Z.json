@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C93-R2-N4-1-H-runbook-cert-consistency-20260829T2055Z",
+  "taskId": "N4.1.H-C93-runbook-cert-consistency",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "0d6b26953c3c1c27f389afbddb0fca383ff3afc1",
+  "taskAttempt": 2,
+  "fileScopeHint": "READ_ONLY: docs/RUNBOOK_N4_1_CAJA.md, docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "VAEP_TRANSPORT_VERIFIED=true. R2 FINAL for SAME logical task C93 after ATTEMPT1 REVIEW_REJECT: prior session executed a dummy shell test despite STRICT READ_ONLY/NON_SHELL. R3 is prohibited. Inspect only docs/RUNBOOK_N4_1_CAJA.md and docs/CERTIFICACION_N4_1_CAJA.md. Do not modify/create/delete files and do not run shell/tests/network/git. Return only repository-grounded contradictions or missing prerequisites visible in those files. Never infer LISTO, CI PASS, P0=0 or P1=0 and do not promote N4.2. SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 required."
+}
