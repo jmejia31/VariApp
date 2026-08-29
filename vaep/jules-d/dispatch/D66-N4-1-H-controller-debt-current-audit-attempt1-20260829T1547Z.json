@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D66-N4-1-H-controller-debt-current-audit-attempt1-20260829T1547Z",
+  "taskId": "N4.1.H-D66-controller-debt-current-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "4f794abd63eb3c6432f8b27ae10a630626a779b9",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: docs/qa/N4_1_H_CONTROLLER_REVIEW_20260829T1504Z.md",
+  "prompt": "NEW logical SAME_PARENT task after D65-R2 FINAL transferred to controller QA takeover; this is NOT R3. STRICT READ_ONLY and NON-SHELL. Inspect only docs/qa/N4_1_H_CONTROLLER_REVIEW_20260829T1504Z.md with non-shell read tools. Report which recorded closure debts are already resolved by evidence in that document and which remain unresolved, without running any validation command. Do not edit files. Do not run shell, terminal, bash, tests, dotnet, npm, scripts or pre-commit commands. Do not claim CI PASS, P0=0, P1=0, LISTO or promotion. Return factual evidence only, two independent self-reviews and tests-not-executed."
+}
