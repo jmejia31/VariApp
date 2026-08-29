@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B87-N4-1-H-changelog-rollup-grounding-attempt1-20260829T134800Z",
+  "taskId": "N4.1.H-B87-changelog-rollup-grounding-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "a39e06f249b83d149d8af2e0f93ed8aa5d50c0a5",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: CHANGELOG_AI.md",
+  "prompt": "NEW logical SAME_PARENT task after B86 terminal REVIEW_PASS evidence-only. STRICT READ_ONLY and NON-SHELL. Inspect only CHANGELOG_AI.md using non-shell read tools. Do not create, modify, delete, rename or stage files. Do not run tests, shell, terminal, bash, dotnet, npm or mutating commands. Determine whether N4.1 Caja has an explicit historical closure entry and provide the exact minimal factual additive/history-preserving rollup content required for N4.1.A-G plus N4.1.H pending state. Do not infer CI PASS, P0=0, P1=0 or LISTO. Return evidence only, no patch."
+}
