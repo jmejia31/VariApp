@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D68-recovery-EstadoPedido-readonly-attempt1-20260829T172500Z",
+  "taskId": "D68-N4-2-A-EstadoPedido-readonly",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "ad2bc5096215ea0d962451a3a128763ef6a0c924",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: backend/VariStore.Api/Models/Enums/EstadoPedido.cs",
+  "prompt": "STRICT_READ_ONLY / NON_SHELL. N4.2.A PREWARM only under WORK_CAN_PIPELINE__PROMOTION_CANNOT. Inspect only backend/VariStore.Api/Models/Enums/EstadoPedido.cs and report the enum contract, values and prewarm risks. Do not edit files. Do not run tests, shell, grep, scripts, git, package managers or network commands. Use repository file reading only. Do not promote N4.2. Scope exclusive to Jules D."
+}
