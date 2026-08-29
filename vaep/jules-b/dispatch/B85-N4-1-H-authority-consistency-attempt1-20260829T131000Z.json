@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B85-N4-1-H-authority-consistency-attempt1-20260829T131000Z",
+  "taskId": "N4.1.H-B85-authority-consistency-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "ac4b42fe17c0c140b4f808c71f0fcf00d31c9a92",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: docs/VAEP_AUTHORITY.md; PLAN_EJECUCION_AUTONOMA.md",
+  "prompt": "NEW logical SAME_PARENT task after B84 REVIEW_PASS. STRICT READ_ONLY. Inspect only docs/VAEP_AUTHORITY.md and PLAN_EJECUCION_AUTONOMA.md with non-shell read tools. Do not create, modify, delete, rename or stage files. Do not run tests, shell, terminal or mutating commands. Identify only authority/closure statements directly relevant to N4.1.H documentation certification, and report any explicit contradiction with the current fail-closed rule that N4.1.H cannot be LISTO until review/DoD/causal CI/P0=0/P1=0 are proven. Return evidence only, no patch and no closure claim."
+}
