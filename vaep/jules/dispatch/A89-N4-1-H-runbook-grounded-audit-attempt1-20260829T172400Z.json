@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A89-N4-1-H-runbook-grounded-audit-attempt1-20260829T172400Z",
+  "taskId": "N4.1.H-A89-runbook-grounded-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "7f44c5a7df7c8b924e212a6e8e2dadcf4805350e",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: docs/RUNBOOK_N4_1_CAJA.md",
+  "prompt": "STRICT_READ_ONLY / NON_SHELL. CURRENT_PARENT=N4.1.H. Inspect only docs/RUNBOOK_N4_1_CAJA.md and report exact unresolved handoff, DoD, validation and evidence requirements that prevent N4.1.H promotion. Do not edit files. Do not run tests, shell, grep, scripts, git, package managers or network commands. Use repository file reading only. Return evidence-only findings grounded in exact text; distinguish repository facts from controller certification claims. Do not promote N4.2. Scope exclusive to Jules A."
+}
