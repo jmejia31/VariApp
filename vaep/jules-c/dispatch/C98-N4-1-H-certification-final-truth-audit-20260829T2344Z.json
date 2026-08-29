@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C98-N4-1-H-certification-final-truth-audit-20260829T2344Z",
+  "taskId": "N4.1.H-C98-certification-final-truth-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "1c4193bf8d3c5b55e42458b5e7d7fe7569ec4fc8",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "VAEP v3.25.1 SAME_PARENT NEW logical task after C97 ATTEMPT2 terminal; this is NOT R3 and must not repeat C97 TASKS scope. STRICT_READ_ONLY/NON_SHELL. Inspect ONLY docs/CERTIFICACION_N4_1_CAJA.md using repository-native read capability; DO NOT run or plan shell, terminal commands, tests, network, git, terminal grep/sed/cat, or create/modify/delete any file. Produce controller-ready literal truth audit: current status wording, cited authority SHAs/gates, unresolved prerequisites, and any statement that would make P0=0/P1=0 or LISTO unsafe. Never assert LISTO, CI PASS, P0=0/P1=0 or promote N4.2. SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 required. If any tool/plan suggests shell/testing, refuse and report TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY."
+}
