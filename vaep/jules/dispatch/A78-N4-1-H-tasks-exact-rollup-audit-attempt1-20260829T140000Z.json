@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A78-N4-1-H-tasks-exact-rollup-audit-attempt1-20260829T140000Z",
+  "taskId": "N4.1.H-A78-tasks-exact-rollup-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "c05abc4f906828675ffd08813dc33eaa970eec82",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: TASKS.md",
+  "prompt": "NEW logical SAME_PARENT task. STRICT READ_ONLY and NON-SHELL. Inspect only TASKS.md using non-shell read tools. Do not create, modify, delete, rename or stage files. Do not run tests, shell, terminal, bash, dotnet, npm or mutating commands. Determine the exact minimal factual additive/history-preserving N4.1 Caja rollup that can be grounded from the file itself and the current certification state; explicitly keep N4.1.H as EN_PROGRESO/VALIDANDO unless the file itself proves otherwise. Do not infer CI PASS, P0=0, P1=0 or LISTO. Return evidence and candidate text only, no patch."
+}
