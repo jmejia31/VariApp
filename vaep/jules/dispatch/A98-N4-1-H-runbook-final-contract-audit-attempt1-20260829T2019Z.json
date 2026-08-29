@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A98-N4-1-H-runbook-final-contract-audit-attempt1-20260829T2019Z",
+  "taskId": "N4.1.H-A98-runbook-final-contract-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "e42d85e5fa38ac71882b7755a8a4cef029f196ef",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: docs/RUNBOOK_N4_1_CAJA.md",
+  "prompt": "VAEP_TRANSPORT_VERIFIED=true. NEW LOGICAL TASK after A97 REVIEW_PASS; not a retry. STRICT READ_ONLY/NON_SHELL. Inspect only docs/RUNBOOK_N4_1_CAJA.md. Do not modify/create/delete files and do not run shell/tests/network/git. Return repository-grounded evidence only: exact closure prerequisites, contradictions, missing factual anchors, or NONE. Do not infer LISTO, CI PASS, P0=0 or P1=0. Do not promote N4.2. SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 required."
+}
