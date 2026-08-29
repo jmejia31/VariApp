@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B94-N4-1-H-tasks-rollup-attempt1-20260829T1629Z",
+  "taskId": "N4.1.H-B94-tasks-rollup",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "30a29dc3fc56663346adba11b970900c25cb773e",
+  "taskAttempt": 1,
+  "fileScopeHint": "WRITE_ONLY: TASKS.md",
+  "prompt": "NEW logical SAME_PARENT write task after B93 REVIEW_PASS evidence-only. Edit only TASKS.md. Add the minimal history-preserving factual rollup for ERP-N4.1 Caja required by N4.1.H, without deleting or rewriting prior history. Ground the rollup only in repository-visible facts: N4.1.A through N4.1.G are completed according to the current authoritative closure record; N4.1.H remains EN_PROGRESO/NO_LISTO pending final documentary/causal reconciliation. Do not invent CI PASS, P0=0, P1=0, LISTO or promotion. Do not touch any other file. Return minimal patch plus SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2."
+}
