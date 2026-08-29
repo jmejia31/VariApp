@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C91-RECOVERY-N4-1-H-rollback-final-grounding-audit-attempt1-20260829T1944Z",
+  "taskId": "N4.1.H-C91-rollback-final-grounding-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "7d48a0e7451301b2e861cd94e51e890d5c6ada2f",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: docs/ROLLBACK_N4_1_CAJA.md",
+  "prompt": "VAEP_TRANSPORT_VERIFIED=true. SAME LOGICAL TASK / SAME ATTEMPT1 transport recovery because the prior exact worker exceeded the freshness threshold without an externally correlated Jules result/session; pre-session transport does not consume the content attempt. STRICT READ_ONLY/NON_SHELL. Inspect only docs/ROLLBACK_N4_1_CAJA.md. Do not modify/create/delete files and do not run shell/tests/network/git. Return repository-grounded evidence only: stale wording, contradiction, missing rollback prerequisite, or NONE. Do not infer LISTO, CI PASS, P0=0 or P1=0. SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 required."
+}
