@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B95-N4-1-H-tasks-rollup-review-attempt1-20260829T1645Z",
+  "taskId": "N4.1.H-B95-tasks-rollup-review",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "b1d5e59520cdb514cba7607680246859a32e9f15",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: TASKS.md; N4.1 closure authority references only",
+  "prompt": "NEW logical SAME_PARENT review task after B94 terminal. Independently review the proposed B94 additive TASKS.md rollup for factual accuracy and history preservation against current repository-visible N4.1 authority. Do not modify files. Confirm or reject each claim, especially N4.1.A-G completion and N4.1.H EN_PROGRESO/NO_LISTO. Return exact evidence and REVIEW_PASS or REVIEW_REJECT. Do not claim CI PASS, P0=0, P1=0, LISTO or promotion."
+}
