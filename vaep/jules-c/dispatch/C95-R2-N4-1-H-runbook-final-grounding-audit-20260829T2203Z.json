@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C95-R2-N4-1-H-runbook-final-grounding-audit-20260829T2203Z",
+  "taskId": "N4.1.H-C95-runbook-final-grounding-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "4cd06bbe65b55928a72474fae2ebd7278278ff76",
+  "taskAttempt": 2,
+  "fileScopeHint": "READ_ONLY: docs/RUNBOOK_N4_1_CAJA.md",
+  "prompt": "VAEP v3.25.1 SAME logical task C95 R2 FINAL after ATTEMPT1 REVIEW_REJECT for NON_SHELL violation. R3 PROHIBITED. STRICT_READ_ONLY/NON_SHELL. Inspect ONLY docs/RUNBOOK_N4_1_CAJA.md using repository-native read capability. ABSOLUTELY DO NOT run shell, terminal commands, tests, network, git, terminal grep, or create/modify/delete any file. If any plan/tool suggests shell/testing, REFUSE it. Report only repository-grounded stale/contradictory/missing N4.1 Caja closure prerequisites and exact controller actions required before LISTO. Never infer CI PASS, P0=0 or P1=0 and do not promote N4.2. SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 required. TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY. This is ATTEMPT2 FINAL; any defect transfers to controller QA takeover, never R3."
+}
