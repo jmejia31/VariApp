@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A101-N4-1-H-changelog-controller-evidence-audit-20260829T2150Z",
+  "taskId": "N4.1.H-A101-changelog-controller-evidence-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "0ae43f38ac176393443cc47abc97e245737e96b9",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: CHANGELOG_AI.md",
+  "prompt": "VAEP v3.25.1 SAME_PARENT NEW logical task after A100 REVIEW_PASS evidence-only. STRICT_READ_ONLY/NON_SHELL. Inspect ONLY CHANGELOG_AI.md using repository-native read capability; DO NOT run shell, terminal commands, tests, network, git, terminal grep, or create/modify/delete any file. Produce a controller-ready repository-grounded N4.1 Caja closure-history audit: exact missing rollup facts, stale/contradictory entries, and additive history-preserving facts that would be safe to record only after controller validation. Never infer LISTO, CI PASS, P0=0 or P1=0 and do not promote N4.2. SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 required. If any plan or completeness instruction suggests shell/testing, refuse it and report TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY."
+}
