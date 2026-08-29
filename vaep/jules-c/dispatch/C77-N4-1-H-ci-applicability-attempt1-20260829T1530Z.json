@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C77-N4-1-H-ci-applicability-attempt1-20260829T1530Z",
+  "taskId": "N4.1.H-C77-ci-applicability",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "4a5a3ca31e3397bdfef1c304554baf70ab7b5c77",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: .github/workflows/desarrollo-ci.yml",
+  "prompt": "NEW logical SAME_PARENT task after C75 R2 exhaustion; this is NOT R3. STRICT READ_ONLY and NON-SHELL. Inspect only .github/workflows/desarrollo-ci.yml using non-shell read tools. Identify which workflow sections, if any, explicitly make Caja/N4.1.H closure causal and which are unrelated/legacy. Do not edit files. Do not run shell, terminal, bash, tests, dotnet, npm, scripts, or pre-commit commands. Do not claim global CI PASS, P0=0, P1=0, LISTO or promotion. Return evidence only with two independent self-reviews and limitations."
+}
