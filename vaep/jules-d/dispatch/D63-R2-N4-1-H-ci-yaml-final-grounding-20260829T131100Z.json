@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D63-R2-N4-1-H-ci-yaml-final-grounding-20260829T131100Z",
+  "taskId": "N4.1.H-D63-ci-yaml-final-grounding-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "2f0c9e43850fdf8c643d43270622b1edd7521f72",
+  "taskAttempt": 2,
+  "fileScopeHint": "READ_ONLY: .github/workflows/desarrollo-ci.yml",
+  "prompt": "R2 FINAL for the SAME D63 logical task after ATTEMPT1 violated STRICT_READ_ONLY by executing shell/tests. STRICT READ_ONLY and NON-SHELL. Inspect only .github/workflows/desarrollo-ci.yml using non-shell read tools. Do not create, modify, delete, rename or stage files. Do not run tests, shell, terminal, bash, dotnet, npm or any mutating command. Report only the workflow triggers/job names/conditions that are directly grounded in this YAML and whether that YAML itself establishes any causal requirement for N4.1.H documentation/certification. Do not infer Caja implementation status, CI PASS, P0=0, P1=0 or LISTO. Return evidence only, no patch. This is ATTEMPT2/R2 FINAL; R3 is prohibited."
+}
