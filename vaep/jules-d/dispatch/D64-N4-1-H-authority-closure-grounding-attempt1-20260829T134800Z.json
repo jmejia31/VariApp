@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D64-N4-1-H-authority-closure-grounding-attempt1-20260829T134800Z",
+  "taskId": "N4.1.H-D64-authority-closure-grounding-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "14ab319358aaeeb38831121b511beb4d656d5bf4",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: docs/VAEP_AUTHORITY.md",
+  "prompt": "NEW logical SAME_PARENT task after D63-R2 exhausted and transferred to controller QA takeover; this is NOT R3 and has a distinct audit scope. STRICT READ_ONLY and NON-SHELL. Inspect only docs/VAEP_AUTHORITY.md using non-shell read tools. Do not create, modify, delete, rename or stage files. Do not run tests, shell, terminal, bash, dotnet, npm or mutating commands. Extract only explicit closure/review/evidence requirements applicable to N4.1.H and identify any direct contradiction with the current certification contract if explicitly grounded. Do not infer implementation completion, CI PASS, P0=0, P1=0 or LISTO. Return evidence only, no patch."
+}
