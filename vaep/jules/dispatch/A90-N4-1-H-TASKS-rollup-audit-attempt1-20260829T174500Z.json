@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A90-N4-1-H-TASKS-rollup-audit-attempt1-20260829T174500Z",
+  "taskId": "N4.1.H-A90-TASKS-rollup-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "03ea136464593a301a64b2576d4ed8901ac1c2ac",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: TASKS.md",
+  "prompt": "STRICT_READ_ONLY / NON_SHELL. CURRENT_PARENT=N4.1.H. Inspect only TASKS.md. Determine whether the history-preserving N4.1 Caja A-H closure rollup is already present and factually coherent with N4.1.H remaining fail-closed. Report exact missing or contradictory lines and the minimal additive correction needed, but DO NOT edit. Do not run tests, shell, grep, scripts, git, package managers or network commands. Use repository file reading only. Do not promote N4.2. Scope exclusive to Jules A."
+}
