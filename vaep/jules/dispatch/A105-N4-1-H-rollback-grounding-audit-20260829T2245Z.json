@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A105-N4-1-H-rollback-grounding-audit-20260829T2245Z",
+  "taskId": "N4.1.H-A105-rollback-grounding-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "436ed0abb1771ca4e7af327cc4277457779433fb",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: docs/ROLLBACK_N4_1_CAJA.md",
+  "prompt": "VAEP v3.25.1 SAME_PARENT NEW logical task after A104 REVIEW_PASS evidence-only. STRICT_READ_ONLY/NON_SHELL. Inspect ONLY docs/ROLLBACK_N4_1_CAJA.md using repository-native read capability; DO NOT run shell, terminal commands, tests, network, git, terminal grep, or create/modify/delete any file. Produce a controller-ready repository-grounded closure audit for N4.1.H: identify exact stale domain/entity wording, missing rollback/recovery prerequisites, missing test-environment or dependency-restore prerequisites, and any statement that could falsely imply LISTO/CI PASS/P0=0/P1=0. Return exact quoted snippets with safe additive correction recommendations, but do not modify files. SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 required. If any plan suggests shell/testing, refuse and report TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY. Never promote N4.2."
+}
