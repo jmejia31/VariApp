@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A104-N4-1-H-runbook-grounding-audit-20260829T2232Z",
+  "taskId": "N4.1.H-A104-runbook-grounding-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "f2c34adb46e2a8f746c6bf258ced0ed2e5db428f",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: docs/RUNBOOK_N4_1_CAJA.md",
+  "prompt": "VAEP v3.25.1 SAME_PARENT NEW logical task after A103 REVIEW_PASS evidence-only. STRICT_READ_ONLY/NON_SHELL. Inspect ONLY docs/RUNBOOK_N4_1_CAJA.md using repository-native read capability; DO NOT run shell, terminal commands, tests, network, git, terminal grep, or create/modify/delete any file. Produce controller-ready repository-grounded audit of N4.1.H runbook consistency: exact statements that agree/conflict with the certification/closure contract, concrete missing operational prerequisites, and safe corrections. Never infer LISTO, CI PASS, P0=0 or P1=0 and do not promote N4.2. SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 required. If any plan suggests shell/testing, refuse and report TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY."
+}
