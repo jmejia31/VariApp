@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B88-N4-1-H-changelog-exact-rollup-audit-attempt1-20260829T140100Z",
+  "taskId": "N4.1.H-B88-changelog-exact-rollup-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "e1a3f4c7744a6a0881aebc03505a034dbba415b1",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: CHANGELOG_AI.md",
+  "prompt": "NEW logical SAME_PARENT task. STRICT READ_ONLY and NON-SHELL. Inspect only CHANGELOG_AI.md using non-shell read tools. Do not create, modify, delete, rename or stage files. Do not run tests, shell, terminal, bash, dotnet, npm or mutating commands. Determine the exact minimal factual additive/history-preserving N4.1 Caja rollup that is missing, keeping N4.1.H explicitly EN_PROGRESO/VALIDANDO unless the file itself proves otherwise. Do not infer CI PASS, P0=0, P1=0 or LISTO. Return evidence and candidate text only, no patch."
+}
