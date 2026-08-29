@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B96-N4-1-H-rollback-grounded-audit-attempt1-20260829T172500Z",
+  "taskId": "N4.1.H-B96-rollback-grounded-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "f2035b0aac3753715e100a71f7edf08802fa1317",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: docs/ROLLBACK_N4_1_CAJA.md",
+  "prompt": "STRICT_READ_ONLY / NON_SHELL. CURRENT_PARENT=N4.1.H. Inspect only docs/ROLLBACK_N4_1_CAJA.md and report exact rollback prerequisites, evidence gaps and contradictions relevant to closing N4.1.H. Do not edit files. Do not run tests, shell, grep, scripts, git, package managers or network commands. Use repository file reading only. Return evidence-only findings grounded in exact text. Do not promote N4.2. Scope exclusive to Jules B."
+}
