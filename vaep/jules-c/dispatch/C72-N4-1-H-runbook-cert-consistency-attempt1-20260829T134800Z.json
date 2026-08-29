@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C72-N4-1-H-runbook-cert-consistency-attempt1-20260829T134800Z",
+  "taskId": "N4.1.H-C72-runbook-cert-consistency-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "403e24b6d87502f1dbf418d04983607e89bfd843",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: docs/CERTIFICACION_N4_1_CAJA.md; docs/runbooks/**",
+  "prompt": "NEW logical SAME_PARENT task after C71 terminal REVIEW_PASS evidence-only. STRICT READ_ONLY and NON-SHELL. Inspect only docs/CERTIFICACION_N4_1_CAJA.md and directly referenced Caja runbook/rollback documentation using non-shell read tools. Do not create, modify, delete, rename or stage files. Do not run tests, shell, terminal, bash, dotnet, npm or mutating commands. Report exact consistency or contradictions between certification, runbook and rollback requirements, and identify only repository-grounded remaining documentary closure gaps. Do not infer CI PASS, P0=0, P1=0 or LISTO. Return evidence only, no patch."
+}
