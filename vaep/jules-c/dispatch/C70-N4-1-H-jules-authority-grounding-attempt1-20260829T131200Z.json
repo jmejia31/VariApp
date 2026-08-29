@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C70-N4-1-H-jules-authority-grounding-attempt1-20260829T131200Z",
+  "taskId": "N4.1.H-C70-jules-authority-grounding-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "6da4f3742d5962ca1bd459b4559a7630e3d989e8",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: docs/VAEP_JULES.md",
+  "prompt": "NEW logical SAME_PARENT task after C69 REVIEW_PASS. STRICT READ_ONLY. Inspect only docs/VAEP_JULES.md with non-shell read tools. Do not create, modify, delete, rename or stage files. Do not run tests, shell, terminal or mutating commands. Extract only explicit Jules/controller handoff, review, retry-cap, ACTIVE_REAL and no-false-LISTO rules relevant to N4.1.H closure governance. Report contradictions if explicitly present; do not infer product completion, CI PASS, P0=0, P1=0 or LISTO. Return evidence only, no patch."
+}
