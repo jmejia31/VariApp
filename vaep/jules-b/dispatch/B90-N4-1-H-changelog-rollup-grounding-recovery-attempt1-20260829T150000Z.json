@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B90-N4-1-H-changelog-rollup-grounding-recovery-attempt1-20260829T150000Z",
+  "taskId": "N4.1.H-B90-changelog-rollup-grounding",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "52d331016fd6854312f5e993f1b90382a05c80c6",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: CHANGELOG_AI.md",
+  "prompt": "RECOVERY SAME logical task B90 after >5m without externally correlatable Jules session plus fresh useful activity. STRICT READ_ONLY and NON-SHELL. Inspect only CHANGELOG_AI.md using non-shell read tools. Determine whether an explicit history-preserving N4.1 Caja closure entry exists and, if absent, report the minimum factual additive entry supported by repository evidence without editing anything. Do not create, modify, delete, rename, stage or restore files. Do not run tests, shell, terminal, bash, dotnet, npm or scripts. Do not claim CI PASS, P0=0, P1=0, LISTO or promotion. Return evidence only, no patch."
+}
