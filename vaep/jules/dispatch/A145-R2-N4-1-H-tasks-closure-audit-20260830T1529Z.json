@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A145-R2-N4-1-H-tasks-closure-audit-20260830T1529Z",
+  "taskId": "N4.1.H-A145-tasks-closure-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "cfb1f68a4a934dc99a6df6bc4c1af6325d2e441a",
+  "taskAttempt": 2,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL::TASKS.md",
+  "prompt": "R2 FINAL for the SAME logical A145 task after ATTEMPT1 REVIEW_REJECT because the artifact explicitly admitted executing wc/tail despite NON_SHELL. R3 is prohibited. STRICT_READ_ONLY and NON_SHELL. Audit only TASKS.md for current N4.1.H Caja closure evidence, exact-head causal evidence, required-current real encrypted Desarrollo M11 backup/restore drill dependency, DoD and P0=0/P1=0, and false-LISTO/stale-authority risk. Use repository-reading capabilities only. DO NOT execute shell, terminal, commands, wc, tail, grep, scripts, temp files, git mutations, tests/builds, secrets, deploy, or scope expansion. If the repository-reading output is truncated, report that limitation and fail closed instead of attempting command-line recovery. Report exact visible evidence, validations not executed, risks/recommendations, and TWO substantive independent SELF_REVIEW_PASS checks with distinct focuses and actual findings. Never promote N4.2 or infer closure from historical evidence."
+}
