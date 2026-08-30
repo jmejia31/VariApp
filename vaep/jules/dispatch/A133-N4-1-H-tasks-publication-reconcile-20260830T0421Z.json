@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A133-N4-1-H-tasks-publication-reconcile-20260830T0421Z",
+  "taskId": "N4.1.H-A133-tasks-publication-reconcile",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "b70b3e6715816477e4b4f0524d94d2c84b407d05",
+  "taskAttempt": 1,
+  "fileScopeHint": "WRITE_SCOPE:TASKS.md",
+  "prompt": "CURRENT_PARENT=N4.1.H. NEW logical SAME_PARENT task after A132 REVIEW_PASS. Work only in TASKS.md. Reconcile publication state history-preservingly: if the ERP-N4.1 Caja rollup is still absent, produce a minimal additive patch stating N4.1.H remains EN_PROGRESO/NO_LISTO, current causal certification is not green because the required-current M11 Desarrollo backup/drill is externally blocked by missing required backup configuration, and CI PASS/P0=0/P1=0/LISTO_REAL must not be inferred. If an equivalent current rollup is already present, return patch0 and report it exactly. Do not rewrite/delete history or touch any other file. No helper or temporary files. Return exact patch/base, limitations, risks, unexecuted validations, and two substantive independent self-reviews. Do not touch main, Production, branches, merge, deploy or secrets."
+}
