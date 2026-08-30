@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B140-N4-1-H-cert-full-audit-20260830T0719Z",
+  "taskId": "N4.1.H-B140-cert-full-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "1a8559cae5868afbab0a85ecc96c5b0b9720dc17",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY NON_SHELL: docs/CERTIFICACION_N4_1_CAJA.md only",
+  "prompt": "VAEP v3.25.1 CURRENT_PARENT=N4.1.H. Audit only docs/CERTIFICACION_N4_1_CAJA.md using repository-native read_file in bounded chunks if supported; fail closed if visibility remains truncated. Verify literal status, functional-authority versus control-head separation, pending gates, and any premature closure claim. STRICT_READ_ONLY/NON_SHELL: no modifications, shell, terminal, helpers, tests or temp files. Do not infer CI PASS, P0=0, P1=0, LISTO_REAL or N4.2 promotion. Report exact limitations, validations not executed, minimal controller-safe next action and two substantive SELF_REVIEW_PASS_1/2."
+}
