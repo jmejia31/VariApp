@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A167-N4-1-H-m11-backup-workflow-contract-audit-20260830T2145Z",
+  "taskId": "N4.1.H-A167-m11-backup-workflow-contract-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "b3bd122b030a38be70e012c5af6d070e7fefa9d1",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL:.github/workflows/m11-backup-desarrollo-operativo.yml",
+  "prompt": "NEW SAME_PARENT ATTEMPT1. Audita exclusivamente .github/workflows/m11-backup-desarrollo-operativo.yml mediante lectura nativa no-shell para determinar exactamente que eventos ejecutan el backup cifrado REAL M11 de Desarrollo, que condiciones pueden producir SKIPPED, que evidencia artifact/checksum/metadata genera y que prerequisitos externos bloquean ejecucion current. PROHIBIDO terminal/bash/run_in_bash_session y comandos shell equivalentes. No modificar archivos ni publicar cambios. Devuelve hallazgos grounded, limitaciones, riesgos, validaciones ejecutadas/no ejecutadas y dos auto-revisiones independientes SELF_REVIEW_PASS_1/2. COMPLETED no equivale a LISTO."
+}
