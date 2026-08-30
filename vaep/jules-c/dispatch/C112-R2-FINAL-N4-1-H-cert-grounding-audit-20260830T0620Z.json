@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C112-R2-FINAL-N4-1-H-cert-grounding-audit-20260830T0620Z",
+  "taskId": "N4.1.H-C112-cert-grounding-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "c1708446a2a1c318105ee3bb98ea53b427dbc496",
+  "taskAttempt": 2,
+  "fileScopeHint": "STRICT_READ_ONLY NON_SHELL: docs/CERTIFICACION_N4_1_CAJA.md only",
+  "prompt": "VAEP v3.25.1 R2 FINAL correction for the SAME logical task. CURRENT_PARENT=N4.1.H. Prior ATTEMPT1 is rejected because its evidence referenced a dummy test/completeness bypass under a strict NON_SHELL/no-tests contract. Re-audit docs/CERTIFICACION_N4_1_CAJA.md only with repository-native read_file. Do not execute, suggest, fabricate, or claim dummy tests, pre-commit tests, shell, terminal, echo, grep, cat, sed, python, helpers or temporary files. Determine only repository-grounded certification gaps and whether the document still correctly says VALIDANDO/NO_LISTO. Do not infer CI PASS, P0=0, P1=0, LISTO_REAL or N4.2 promotion. Report limitations and validations not executed, then provide two substantive independent SELF_REVIEW_PASS_1/2. This is ATTEMPT2 FINAL; if any blocking defect remains, report it for ChatGPT/VAEP QA takeover. R3 is prohibited."
+}
