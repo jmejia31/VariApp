@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A139-R2-N4-1-H-m11-workflow-full-audit-20260830T1324Z",
+  "taskId": "N4.1.H-A139-m11-workflow-full-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "3e77440a3d74c41876ca91516108c80d1ecc7b1c",
+  "taskAttempt": 2,
+  "fileScopeHint": "READ_ONLY:.github/workflows/m11-backup-desarrollo-operativo.yml",
+  "prompt": "STRICT_READ_ONLY and NON_SHELL. FINAL R2 for the SAME logical A139 task after ATTEMPT1 violated NON_SHELL and ended AUTO_FEEDBACK_EXHAUSTED. Audit only .github/workflows/m11-backup-desarrollo-operativo.yml using repository-reading capabilities only; no shell/commands/temp files/tests/builds/git mutations/network/deploy/secrets. Ground exactly the conditions that run or skip the real encrypted Desarrollo backup, list only non-secret prerequisite/configuration names visible in scope, and state the evidence/artifact required for genuine M11 PASS. Do not claim closure. Report limitations, unexecuted validations, exact base evidence, and two substantive independent SELF_REVIEW_PASS checks. ATTEMPT2 FINAL; R3 prohibited; blocking defect => controller QA takeover."
+}
