@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B183-N4-1-H-m11-restore-evidence-audit-20260830T2207Z",
+  "taskId": "N4.1.H-B183-m11-restore-evidence-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "c260e4484ff320792686dfdcb409585b5d353f5b",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL:scripts/m11_restore_desarrollo.sh",
+  "prompt": "NEW SAME_PARENT ATTEMPT1 after B182-R2 controller review; B182 R2 exhausted and R3 prohibited. Audit only scripts/m11_restore_desarrollo.sh using native non-shell read-only capabilities. Determine grounded restore/drill requirements and correlation to the required-current real encrypted Desarrollo backup artifact/checksum/metadata for N4.1.H fail-closed closure. If native access cannot read the file completely, state the exact limitation and do not infer invisible behavior. No file changes, no terminal/bash/shell, no secrets, no deploy, no main/Production. Return observations, limitations, validations executed/not executed, risks/recommendations, SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. COMPLETED is not LISTO."
+}
