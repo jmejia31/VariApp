@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A143-R2-N4-1-H-changelog-current-audit-20260830T1448Z",
+  "taskId": "N4.1.H-A143-changelog-current-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "949541624c34b4f93c29a94ca237281bcf750aa4",
+  "taskAttempt": 2,
+  "fileScopeHint": "READ_ONLY:CHANGELOG_AI.md",
+  "prompt": "STRICT_READ_ONLY and NON_SHELL. FINAL R2 for the same A143 logical task. ATTEMPT1 was rejected because SELF_REVIEW_PASS_1 explicitly admitted shell commands wc/sed. Use repository-reading capabilities only; no shell, terminal, commands, scripts, temp files, git mutations, tests/builds, secrets, deploy, or scope expansion. Audit only CHANGELOG_AI.md for current grounded N4.1/N4.1.H closure wording and whether it avoids claiming LISTO, CI PASS, P0=0/P1=0 while required-current real encrypted Desarrollo M11 backup/drill remains unproven. Report exact visible evidence, truncation/readability limitations, validations not executed, risks/recommendations, and TWO substantive independent SELF_REVIEW_PASS checks. If provider read truncates, fail closed and do not attempt shell-based chunking. Never promote N4.2. This is ATTEMPT2 FINAL; R3 is prohibited and any blocking defect transfers to controller QA takeover."
+}
