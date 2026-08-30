@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D111-R2-N4-1-H-m11-current-workflow-audit-20260830T1458Z",
+  "taskId": "N4.1.H-D111-m11-current-workflow-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "ca50bb6aca09fd6b4daf1955721d04652d08ae99",
+  "taskAttempt": 2,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL::.github/workflows/m11-backup-desarrollo-operativo.yml",
+  "prompt": "VAEP_TRANSPORT_EXPECTED=true. FINAL R2 for the same D111 logical task. ATTEMPT1 reached COMPLETED but failed REVIEW_FIRST because the manifest targeted nonexistent .github/workflows/m11-backup-operativo.yml. Correct target is .github/workflows/m11-backup-desarrollo-operativo.yml. STRICT_READ_ONLY and NON_SHELL. Audit only that workflow for the exact causal conditions that make the required-current real encrypted Desarrollo backup/drill execute versus skip/fail, and whether workflow semantics alone can ever prove the required artifact/drill evidence. Use repository-reading capabilities only; no shell, terminal, commands, scripts, temp files, git mutations, tests/builds, secrets, deploy, or scope expansion. Never read or expose secret values. Report exact visible evidence, limitations/truncation, validations not executed, risks/recommendations, and TWO substantive independent SELF_REVIEW_PASS checks. Never claim LISTO, CI PASS, P0=0/P1=0 or promote N4.2 without real exact-head artifact/drill evidence. This is ATTEMPT2 FINAL; R3 is prohibited and any blocking defect transfers to controller QA takeover."
+}
