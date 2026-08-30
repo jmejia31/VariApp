@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C113-N4-1-H-runbook-grounding-preflight-20260830T0635Z",
+  "taskId": "N4.1.H-C113-runbook-grounding-preflight",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "4bb76bd4d964bef8fff2cdab2009733eb6c9618b",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY NON_SHELL: docs/RUNBOOK_N4_1_CAJA.md only",
+  "prompt": "VAEP v3.25.1 NEW logical SAME_PARENT task after C112-R2 terminal review release; this is NOT R3. CURRENT_PARENT=N4.1.H. Audit docs/RUNBOOK_N4_1_CAJA.md only using repository-native read_file. Verify internal grounding and distinguish commands documented in the runbook from validations actually evidenced as executed. Identify literal inconsistencies, unsupported closure wording, missing rollback linkage, or operational gaps visible inside this file only. STRICT_READ_ONLY/NON_SHELL: no modifications, shell, terminal, echo, grep, cat, sed, python, tests, helpers or temp files. Do not infer generic CI PASS, P0=0, P1=0, LISTO_REAL or N4.2 promotion. Report limitations, validations not executed, minimal controller-safe next action, and two substantive independent SELF_REVIEW_PASS_1/2."
+}
