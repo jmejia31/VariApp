@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B172-N4-1-H-certification-m11-prerequisite-write-20260830T1800Z",
+  "taskId": "N4.1.H-B172-certification-m11-prerequisite-write",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "460b3c78e942738e3f52aabcb0ce7fb19c890bd6",
+  "taskAttempt": 1,
+  "fileScopeHint": "WRITE_SAFE_SINGLE_FILE:docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "VAEP v3.25 NEW SAME_PARENT logical task ATTEMPT1. Modify ONLY docs/CERTIFICACION_N4_1_CAJA.md. Add a precise conjunctive fail-closed promotion prerequisite: required-current real encrypted M11 Desarrollo backup evidence AND applicable restore/drill validation correlated to encrypted artifact/checksum/metadata, in addition to causal gates/DoD/P0=0/P1=0 as applicable. Preserve current NO_LISTO semantics; do NOT claim that M11 evidence exists, do NOT mark LISTO, do NOT promote N4.2, do NOT touch secrets, main, Producción, CI config, or any other file. Use only repository-native safe editing; do not create temporary repository files. Return a reviewable ChangeSet limited exactly to this file, proportional validation, limitations, and two independent substantive self-reviews."
+}
