@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D143-REC1-N4-1-H-runbook-current-audit-20260830T2337Z",
+  "taskId": "N4.1.H-D143-runbook-current-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "eeb929bc676a5675dd9eee80d80a1d2c028f3e3d",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/RUNBOOK_N4_1_CAJA.md",
+  "prompt": "STRICT_READ_ONLY_NON_SHELL. RECOVERY OF SAME LOGICAL TASK/ATTEMPT AFTER PRE-SESSION BOOTSTRAP FAILURE; ATTEMPT1 remains unconsumed. Audit only docs/RUNBOOK_N4_1_CAJA.md using native file-reading tools. Never shell/terminal/bash, never modify files, never create helpers, never ask for routine clarification. Determine only from directly visible evidence whether the runbook keeps N4.1 fail-closed, distinguishes functional SHA from VAEP control commits, and requires current causal evidence without authorizing main, Production, secrets or deploy. Explicitly assess whether required-current real encrypted Desarrollo M11 backup and applicable restore/drill correlation is proven, required, or absent in the visible text. If native reading truncates, state the exact limitation and do not infer unseen content. Return OBSERVATIONS, LIMITATIONS, VALIDATIONS EXECUTED, VALIDATIONS NOT EXECUTED, RISKS/RECOMMENDATIONS, literal TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY, and two independent substantive messages labeled exactly SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. No unsupported LISTO/CI/P0/P1 claim."
+}
