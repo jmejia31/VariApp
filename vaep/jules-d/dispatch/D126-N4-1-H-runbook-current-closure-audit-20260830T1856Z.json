@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D126-N4-1-H-runbook-current-closure-audit-20260830T1856Z",
+  "taskId": "N4.1.H-D126-runbook-current-closure-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "19ec2e59e9bbab77aa97c820c062e9dfc1d612e6",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL:docs/RUNBOOK_N4_1_CAJA.md",
+  "prompt": "VAEP v3.25 NEW SAME_PARENT logical task ATTEMPT1 after D125 REVIEW_PASS evidence-only. Audit ONLY docs/RUNBOOK_N4_1_CAJA.md using repository-native NON_SHELL inspection. Ground the current fail-closed operational closure sequence for N4.1.H: required-current M11 real encrypted Desarrollo backup, applicable restore/drill correlation to artifact/checksum/metadata, causal gates/DoD, current P0=0/P1=0 and rollback readiness. Do not execute shell, modify/create files, inspect secrets, trigger workflows/deploy, claim LISTO/CI PASS/P0=0/P1=0, or promote N4.2. If visibility truncates, report exact limitation without bypass. Return evidence-only findings, validations not executed, next safe causal target, and two independent substantive self-reviews confirming NON_SHELL compliance. TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY."
+}
