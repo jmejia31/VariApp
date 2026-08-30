@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C134-N4-1-H-n0-4-rbac-failure-audit-20260830T1620Z",
+  "taskId": "N4.1.H-C134-n0-4-rbac-failure-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "6c5d5fcbf8eb860a51e73cccfe906cef19286362",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL::.github/workflows/erp-n0-4-ci.yml",
+  "prompt": "SAME_PARENT N4.1.H. Audit only .github/workflows/erp-n0-4-ci.yml as strict read-only/non-shell evidence work. The exact-head PR check ERP-N0.4 Certificacion RBAC relacional is failing. From visible file evidence only, map the gate contract and identify the direct code/config dependency that should be inspected next; do not claim root cause unless directly evidenced. Report observations, limitations, risks, validations not executed and recommendations. No modifications, shell, temp files, N4.2 promotion or false PASS/LISTO. Provide two independent substantive self-reviews. TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY."
+}
