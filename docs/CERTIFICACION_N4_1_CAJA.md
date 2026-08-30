@@ -45,6 +45,7 @@ N4.1.H solo puede pasar a `LISTO_REAL` cuando se cumplan simultáneamente:
 3. gates causales aplicables estén verdes o clasificados N/A con evidencia;
 4. P0=0 y P1=0 reproducibles atribuibles al parent;
 5. no exista review terminal pendiente que pueda invalidar el cierre;
-6. el controller persista el cierre en COLA/CONFIG/BITACORA y ejecute selector fail-closed.
+6. el controller persista el cierre en COLA/CONFIG/BITACORA y ejecute selector fail-closed;
+7. exista evidencia obligatoria, actual y real del respaldo cifrado M11 de `Desarrollo`, junto con la validación aplicable de restauración/drill correlacionada con el artefacto cifrado, su checksum y metadatos.
 
 Hasta entonces, **N4.1.H permanece EN_PROGRESO/VALIDANDO y no se promueve N4.2.A**.
