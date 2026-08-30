@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D83-R2-N4-1-H-rollback-grounding-20260830T0219Z",
+  "taskId": "N4.1.H-D83-rollback-grounding",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "d60abeef021e0e4241e4b20199b9efff2a2b35a4",
+  "taskAttempt": 2,
+  "fileScopeHint": "STRICT_READ_ONLY NON_SHELL: docs/ROLLBACK_N4_1_CAJA.md only",
+  "prompt": "VAEP v3.25.1 D83-R2 FINAL SAME logical task after ATTEMPT1 review rejection for executing shell output (`echo -e`) under STRICT_READ_ONLY/NON_SHELL. This is ATTEMPT2 FINAL; R3 is prohibited. Exclusive scope docs/ROLLBACK_N4_1_CAJA.md only. Inspect only through non-shell repository-native reading capabilities available in Jules; do not execute bash, echo, grep, cat, sed, tests, terminal commands, scripts, helper/temp files, writes, publish/push/merge/deploy, assert CI PASS or P0=0/P1=0, or promote N4.2. Report only directly evidenced rollback facts, retaining N4.1.H EN_PROGRESO/NO_LISTO unless closure conditions are proven. Return evidence artifact with SELF_REVIEW_PASS_1, SELF_REVIEW_PASS_2, exact limitations and validations not executed."
+}
