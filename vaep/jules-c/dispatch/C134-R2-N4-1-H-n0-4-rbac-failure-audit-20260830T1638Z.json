@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C134-R2-N4-1-H-n0-4-rbac-failure-audit-20260830T1638Z",
+  "taskId": "N4.1.H-C134-n0-4-rbac-failure-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "52be1014f7ed381942d45f29c1bd5ee42ede4099",
+  "taskAttempt": 2,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL:.github/workflows/erp-n0-4-ci.yml",
+  "prompt": "FINAL R2 for SAME logical task N4.1.H-C134-n0-4-rbac-failure-audit. Strict read-only/non-shell audit only .github/workflows/erp-n0-4-ci.yml. ATTEMPT1 was rejected because SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 were only asserted as Completed rather than demonstrated as two substantive independent reviews. Re-audit only visible current workflow content and report exact trigger/gate/service/dependency evidence that is actually observable, precise truncation/visibility limits, what cannot be concluded about root cause, risks, unexecuted validations, and the next safe causal inspection target. Do not modify files, run shell, create temp files, inspect secrets, promote N4.2, or claim PASS/LISTO. AFTER evidence analysis, perform SELF_REVIEW_PASS_1 as a distinct substantive reconsideration and then SELF_REVIEW_PASS_2 separately from scratch. R2 is FINAL; unresolved defect transfers to ChatGPT/VAEP QA_TAKEOVER; never propose R3. TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY."
+}
