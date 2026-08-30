@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C127-R2-N4-1-H-runbook-full-reconcile-20260830T1327Z",
+  "taskId": "N4.1.H-C127-runbook-full-reconcile",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "a91a2a35c92a278204bcc7952f71d398ce0bad08",
+  "taskAttempt": 2,
+  "fileScopeHint": "READ_ONLY:docs/RUNBOOK_N4_1_CAJA.md",
+  "prompt": "STRICT_READ_ONLY and NON_SHELL. FINAL R2 for the SAME logical C127 task after ATTEMPT1 reached JULES_LANE_BUDGET_EXCEEDED with a real session and no patch. Audit only docs/RUNBOOK_N4_1_CAJA.md using repository-reading capabilities only; no shell/commands/temp files/tests/builds/git mutations/network/deploy/secrets. Cover the full file in bounded repository-readable ranges, determine whether it explicitly requires current M11 real encrypted Desarrollo backup/drill evidence before LISTO_REAL, identify stale/historical wording, and report only the minimal grounded correction needed once the causal gate is green. Do not modify files or claim closure. Report limitations, unexecuted validations, exact evidence and two substantive independent SELF_REVIEW_PASS checks. ATTEMPT2 FINAL; R3 prohibited; blocking defect => controller QA takeover."
+}
