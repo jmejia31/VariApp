@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D119-N4-1-H-rollback-m11-crosscheck-20260830T1706Z",
+  "taskId": "N4.1.H-D119-rollback-m11-crosscheck",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "bbbaa9691c28b4a90f6437eb19f5d6e78cd2335d",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL:docs/ROLLBACK_N4_1_CAJA.md",
+  "prompt": "VAEP_TRANSPORT_VERIFIED=true\nNEW SAME_PARENT N4.1.H logical task after D118 REVIEW_PASS evidence-only identified that the runbook lacks explicit M11 backup prerequisite wording. This is NOT a rework/R2 of D118. Strict read-only/non-shell audit only docs/ROLLBACK_N4_1_CAJA.md. Ground whether rollback/escalation documentation explicitly preserves fail-closed behavior when required-current M11 backup/drill evidence is absent or external backup configuration blocks execution; identify any stale/overclaimed statements and exact missing linkage needed for N4.1.H closure. Do not run shell, modify files, create temp files, inspect secrets, promote N4.2, or claim PASS/LISTO. Report exact observations, visibility/truncation limitations, risks, validations/tests not executed, closure evidence still missing, and next safe causal target. Perform SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 as two separate substantive reconsiderations. TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY."
+}
