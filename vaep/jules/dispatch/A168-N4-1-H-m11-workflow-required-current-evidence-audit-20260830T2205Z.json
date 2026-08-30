@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A168-N4-1-H-m11-workflow-required-current-evidence-audit-20260830T2205Z",
+  "taskId": "N4.1.H-A168-m11-workflow-required-current-evidence-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "95f1e5b9d297d262187d849e8e88c7d3c7d604a7",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL:.github/workflows/m11-backup-desarrollo-operativo.yml",
+  "prompt": "NEW SAME_PARENT ATTEMPT1 after A167-R2 controller review. Audit only .github/workflows/m11-backup-desarrollo-operativo.yml using native non-shell read-only capabilities. Determine only grounded workflow-side requirements for required-current real encrypted Desarrollo backup evidence, restore/drill correlation, artifact/checksum/metadata, and fail-closed closure. If native reading truncates content, report the exact limitation and do not infer invisible conditions. No file changes, no terminal/bash/shell, no secrets, no deploy, no main/Production. Return observations, limitations, validations executed/not executed, risks/recommendations, SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. COMPLETED is not LISTO."
+}
