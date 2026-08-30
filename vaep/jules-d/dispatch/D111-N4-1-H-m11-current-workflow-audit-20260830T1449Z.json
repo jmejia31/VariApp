@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D111-N4-1-H-m11-current-workflow-audit-20260830T1449Z",
+  "taskId": "N4.1.H-D111-m11-current-workflow-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "03279de4d7e87299568221d0fb0319b2c2debaf4",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY:.github/workflows/m11-backup-operativo.yml",
+  "prompt": "STRICT_READ_ONLY and NON_SHELL. NEW SAME_PARENT logical task after D110 terminal. Audit only .github/workflows/m11-backup-operativo.yml for the current causal conditions that make the real encrypted Desarrollo backup job run versus skip/fail, and report whether required-current backup/drill evidence can be proven from workflow semantics alone. Repository-reading capabilities only; no shell, terminal, commands, scripts, temp files, git mutations, tests/builds, secrets, deploy, or scope expansion. Never read or expose secret values. Fail closed on ambiguity or truncation. Report exact visible evidence, limitations, validations not executed, risks/recommendations, and TWO substantive independent SELF_REVIEW_PASS checks. Never claim LISTO, CI PASS, P0=0/P1=0 or promote N4.2 without real artifact/drill evidence."
+}
