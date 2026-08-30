@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D97-N4-1-H-runbook-grounded-write-20260830T0930Z",
+  "taskId": "N4.1.H-D97-runbook-grounded-write",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "c11e378466dbce8a81414db566ca08afd46ceba9",
+  "taskAttempt": 1,
+  "fileScopeHint": "WRITE_SCOPE:docs/RUNBOOK_N4_1_CAJA.md",
+  "prompt": "CURRENT_PARENT=N4.1.H. D96-REC1 REVIEW_PASS evidence-only confirmed the runbook correctly requires exact functional SHA plus applicable causal gates and forbids LISTO based only on Jules/manifest/workflow completion. Work only in docs/RUNBOOK_N4_1_CAJA.md. Reconcile the operational closure checklist additively with current evidence and make the fail-closed rule explicit: M13 exact-head failure or any unresolved causal gate blocks LISTO_REAL; noncausal/historical failures may be classified N/A only with evidence; P0/P1 and CI status must never be inferred. Preserve rollback reference and authorized test-environment requirements. Do not touch certification, rollback, CHANGELOG_AI.md, TASKS.md, code, workflows, manifests, main, Production, branches, merge, deploy or secrets. Run proportional validations only within scope and return exact patch/base, limitations, risks, unexecuted validations and two self-reviews."
+}
