@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D86-R2-N4-1-H-causal-gate-audit-20260830T0400Z",
+  "taskId": "N4.1.H-D86-causal-gate-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "d4f1520cd4430ffd65f9c23e0789ed250a9f0871",
+  "taskAttempt": 2,
+  "fileScopeHint": "STRICT_READ_ONLY NON_SHELL: docs/CERTIFICACION_N4_1_CAJA.md and docs/VAEP_AUTHORITY.md only",
+  "prompt": "VAEP v3.25.1 D86 ATTEMPT2 FINAL. ATTEMPT1 review rejected because its approved plan invoked echo -e and execution reported the output payload printed under STRICT_READ_ONLY/NON_SHELL. CURRENT_PARENT N4.1.H close-first. SAME logical causal-gate audit. Read only docs/CERTIFICACION_N4_1_CAJA.md and docs/VAEP_AUTHORITY.md using repository-native non-shell reading. Do NOT create or modify files, helpers, temp/scripts; do NOT run terminal/bash/shell/echo/grep/cat/sed/python/tests; do not publish/push/merge/deploy or touch main/Produccion/secrets. Report only grounded functional authority, explicitly open closure conditions, which claims require controller-side GitHub/CI verification, contradictions/gaps, TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY, validations not executed, limitations, SELF_REVIEW_PASS_1/2. Do not claim P0=0/P1=0, CI PASS, LISTO or N4.2 promotion. R2 FINAL; any blocking defect transfers to ChatGPT/VAEP QA takeover. R3 prohibited."
+}
