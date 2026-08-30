@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C116-N4-1-H-rollback-full-audit-20260830T0747Z",
+  "taskId": "N4.1.H-C116-rollback-full-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "50c2fecc91263726404e1acbe11d802656150106",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY NON_SHELL: docs/ROLLBACK_N4_1_CAJA.md only",
+  "prompt": "VAEP v3.25.1 CURRENT_PARENT=N4.1.H. Perform a fresh bounded repository-native audit only of docs/ROLLBACK_N4_1_CAJA.md. Determine literal rollback preconditions, procedure/command references, required evidence, and any missing or premature success/production-readiness claim. Fail closed on truncation. STRICT_READ_ONLY/NON_SHELL: no modifications, shell, terminal, helpers, tests or temp files. Never infer CI PASS, P0=0, P1=0, LISTO_REAL or N4.2 promotion. Report exact findings, limitations, validations not executed, minimal controller-safe next action and two substantive SELF_REVIEW_PASS_1/2. Evidence only; controller review mandatory."
+}
