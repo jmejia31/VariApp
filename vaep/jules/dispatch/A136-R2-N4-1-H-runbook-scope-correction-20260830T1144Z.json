@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A136-R2-N4-1-H-runbook-scope-correction-20260830T1144Z",
+  "taskId": "N4.1.H-A136-m11-doc-consistency-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "380fc947ba03aab3cd7da9370b316f249cfab5d0",
+  "taskAttempt": 2,
+  "fileScopeHint": "READ_ONLY:docs/RUNBOOK_N4_1_CAJA.md",
+  "prompt": "CURRENT_PARENT=N4.1.H. FINAL R2 correction of A136; R3 PROHIBITED. STRICT_READ_ONLY and NON_SHELL. Read ONLY docs/RUNBOOK_N4_1_CAJA.md. Do not inspect checkpoints, workflows, TASKS, certification, other repository files, external evidence, secrets, CI, branches, PRs, or Production. Do not run shell, echo, tests, create helper/temp files, or modify anything. Audit only what the visible runbook text itself states or omits about backup/drill prerequisites. Do not assert the current state of M11 or any external job because that is outside this scope. Return patch0; exact observations grounded only in this file; limitations; risks phrased conditionally; recommendations; unexecuted validations; and two substantive independent SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 covering scope, no modifications/temp files, and claims grounding. Never infer CI PASS, P0=0/P1=0 or LISTO_REAL. If the file cannot be fully read, state truncation and fail closed rather than infer missing content."
+}
