@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B162-N4-1-H-cert-current-audit-20260830T1449Z",
+  "taskId": "N4.1.H-B162-cert-current-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "cca1276b8d0da4238d9a7511fc38c1f8f0872a96",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY:docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "STRICT_READ_ONLY and NON_SHELL. NEW SAME_PARENT logical task after B161 terminal. Audit only docs/CERTIFICACION_N4_1_CAJA.md for current N4.1.H closure wording and consistency with the unresolved required-current real encrypted Desarrollo M11 backup/drill blocker. Repository-reading capabilities only; no shell, terminal, commands, scripts, temp files, git mutations, tests/builds, secrets, deploy, or scope expansion. Fail closed on truncation. Report exact visible evidence, limitations, validations not executed, risks/recommendations, and TWO substantive independent SELF_REVIEW_PASS checks. Never claim LISTO, CI PASS, P0=0/P1=0 or promote N4.2 without causal evidence."
+}
