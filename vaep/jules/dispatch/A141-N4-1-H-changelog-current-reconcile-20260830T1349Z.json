@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A141-N4-1-H-changelog-current-reconcile-20260830T1349Z",
+  "taskId": "N4.1.H-A141-changelog-current-reconcile",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "01a890afdec2911f4c5b219396240d852e712786",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY:CHANGELOG_AI.md",
+  "prompt": "STRICT_READ_ONLY and NON_SHELL. New SAME_PARENT N4.1.H evidence task after A140-REC1 terminal PASS_LIMITED patch0; this is not a retry of A140 and is not R3. Audit only CHANGELOG_AI.md using repository-reading capabilities. Identify the current N4.1.H documentation/certification status, any stale or contradictory claims versus fail-closed NO_LISTO, and the minimal later reconciliation needed after the required-current M11 real encrypted Desarrollo backup/drill succeeds. Do not edit, execute shell/commands, create temp files, run tests/builds, mutate git, access secrets, deploy, or claim LISTO/P0=0/P1=0 without direct evidence. Report exact grounded evidence, limitations, validations not executed, and two substantive independent SELF_REVIEW_PASS checks. ATTEMPT1; maximum ATTEMPT2/R2 for A141; R3 prohibited."
+}
