@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A152-N4-1-H-changelog-grounding-20260830T1707Z",
+  "taskId": "N4.1.H-A152-changelog-grounding",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "323e16928e1a2205f6a21e1e09c8bf469f32e1d8",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL:CHANGELOG_AI.md",
+  "prompt": "VAEP_TRANSPORT_VERIFIED=true\nNEW SAME_PARENT N4.1.H logical task after A151 PASS_LIMITED evidence-only transferred its truncated authority uncertainty to controller QA. This is NOT R3 and does not reuse A151 taskId. Strict read-only/non-shell audit only CHANGELOG_AI.md. Ground the freshest visible N4.1.H/M11 closure history, distinguish historical evidence from required-current evidence, and identify whether any entry legitimately proves exact-head causal gates, DoD, P0=0/P1=0 or LISTO_REAL. Do not run shell, modify files, create temp files, inspect secrets, promote N4.2, or claim PASS/LISTO. Report exact observations, visibility/truncation limitations, risks, validations/tests not executed, closure evidence still missing, and next safe causal target. Perform SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 as two separate substantive reconsiderations. TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY."
+}
