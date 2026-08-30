@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C112-R2-REC1-FINAL-N4-1-H-cert-grounding-audit-20260830T0621Z",
+  "taskId": "N4.1.H-C112-cert-grounding-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "b5c073a6444c2fcef6a1fbf785ddf5cbd44c1d92",
+  "taskAttempt": 2,
+  "fileScopeHint": "STRICT_READ_ONLY NON_SHELL: docs/CERTIFICACION_N4_1_CAJA.md only",
+  "prompt": "VAEP v3.25.1 SAME logical task/SAME ATTEMPT2 FINAL transport recovery. CURRENT_PARENT=N4.1.H. Prior content ATTEMPT1 was rejected for dummy-test/completeness-bypass evidence. Re-audit docs/CERTIFICACION_N4_1_CAJA.md only using repository-native read_file. Do not execute, suggest, fabricate, or claim tests, dummy tests, pre-commit tests, shell, terminal, echo, grep, cat, sed, python, helpers or temp files. Determine only repository-grounded certification gaps and whether the document correctly remains VALIDANDO/NO_LISTO. Do not infer CI PASS, P0=0, P1=0, LISTO_REAL or N4.2 promotion. Report limitations and validations not executed plus two substantive independent SELF_REVIEW_PASS_1/2. This is ATTEMPT2 FINAL; residual defect goes to ChatGPT/VAEP QA takeover; R3 prohibited. Prior wrong-route R2 bootstrap produced no Jules session and does not consume ATTEMPT2."
+}
