@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A166-R2-N4-1-H-tasks-m11-current-evidence-audit-20260830T2131Z",
+  "taskId": "N4.1.H-A166-tasks-m11-current-evidence-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "a25d40ad2f7bac811246177889260f6802167937",
+  "taskAttempt": 2,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL:TASKS.md",
+  "prompt": "R2 FINAL del mismo logical task A166. Audita exclusivamente TASKS.md para evidencia current de N4.1.H/M11 usando solo lectura nativa no-shell. PROHIBIDO terminal, bash, wc, sed, grep, cat, head, tail, run_in_bash_session o comandos equivalentes. Si la lectura nativa queda truncada, reporta exactamente la truncacion y no infieras contenido no visible. Devuelve evidencia reviewable sin modificar archivos ni publicar cambios. Incluye dos auto-revisiones independientes y sustantivas SELF_REVIEW_PASS_1 y SELF_REVIEW_PASS_2, indicando alcance, limitaciones, evidencia observada, validaciones ejecutadas y no ejecutadas. ATTEMPT2 es FINAL; si queda defecto bloqueante, handoff a ChatGPT/VAEP QA_TAKEOVER; R3 prohibido."
+}
