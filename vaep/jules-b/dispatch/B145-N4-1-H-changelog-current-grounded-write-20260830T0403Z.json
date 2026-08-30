@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B145-N4-1-H-changelog-current-grounded-write-20260830T0403Z",
+  "taskId": "N4.1.H-B145-changelog-current-grounded-write",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "7117c5a8adf62df78ce2fc19d8899cc1451165f4",
+  "taskAttempt": 1,
+  "fileScopeHint": "WRITE_SCOPE:CHANGELOG_AI.md",
+  "prompt": "NEW logical SAME_PARENT task after B144 ATTEMPT2 session was created and its worker later failed transport; B144 is exhausted and MUST NOT receive R3. CURRENT_PARENT=N4.1.H. Work only in CHANGELOG_AI.md. Ground a concise history-preserving current checkpoint against repository evidence. Keep N4.1.H EN_PROGRESO/NO_LISTO. Current functional candidate remains 17e79e50b0a332e9ea510efbb78dfc0b34bbae16 and current M13 is not green while required-current M11 drill freshness is unresolved. Do not claim CI PASS, P0=0/P1=0 or LISTO_REAL unless independently proven. Do not touch TASKS.md, docs, code, workflows, manifests, main, Production, branches, merge, deploy or secrets. Return exact patch/base, limitations, risks, unexecuted validations and two substantive independent self-reviews."
+}
