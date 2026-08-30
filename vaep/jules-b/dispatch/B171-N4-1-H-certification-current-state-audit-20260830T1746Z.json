@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B171-N4-1-H-certification-current-state-audit-20260830T1746Z",
+  "taskId": "N4.1.H-B171-certification-current-state-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "345c45697807003316f970d719c9f307207a5391",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL:docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "VAEP v3.25 NEW SAME_PARENT logical task ATTEMPT1. B170 completed and its single-file documentation patch passed controller review but is not yet applied. Independently audit ONLY the current repository version of docs/CERTIFICACION_N4_1_CAJA.md using non-shell repository/file inspection. Do not modify files, create temporary files, execute shell/terminal commands, inspect secrets, or assume the B170 patch has been integrated. Identify any current stale/overclaiming closure semantics around N4.1.H, M11 required-current real encrypted Desarrollo backup, applicable restore/drill evidence, exact-head causal gates, DoD and P0=0/P1=0. Distinguish current repository text from proposed/unapplied evidence. Do not claim LISTO or promote N4.2. Return evidence-only observations, exact remaining causal prerequisites, validations not executed, and two independent substantive self-reviews explicitly confirming NON_SHELL compliance. TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY."
+}
