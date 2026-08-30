@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A148-N4-1-H-n0-6-preflight-failure-audit-20260830T1615Z",
+  "taskId": "N4.1.H-A148-n0-6-preflight-failure-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "dfc63e485b92d855bd07241caab7d1262b36316e",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL::.github/workflows/erp-n0-6-preflight-ci.yml",
+  "prompt": "SAME_PARENT N4.1.H. Audit only .github/workflows/erp-n0-6-preflight-ci.yml as strict read-only/non-shell evidence work. The exact-head PR check ERP-N0.6 is currently failing. Identify, from visible file evidence only, the gate structure and the most plausible code/config dependency that must be investigated next; do not claim root cause unless directly evidenced. Report exact observations, limitations, risks, validations not executed, and recommendations. Do not modify files, run shell, create temp files, promote N4.2, or claim LISTO/PASS. Provide two independent substantive self-reviews before completion. TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY."
+}
