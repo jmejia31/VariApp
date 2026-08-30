@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C112-N4-1-H-cert-grounding-audit-20260830T0605Z",
+  "taskId": "N4.1.H-C112-cert-grounding-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "589f152a06832c44131324c1d0262b46d43d98a7",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY NON_SHELL: docs/CERTIFICACION_N4_1_CAJA.md only",
+  "prompt": "VAEP v3.25.1 NEW logical SAME_PARENT task after C111-REC1 terminal review; CURRENT_PARENT=N4.1.H. Audit docs/CERTIFICACION_N4_1_CAJA.md only with repository-native read_file. Ground every named Caja entity/type strictly from text present in this file; do not assert CajaMovimiento or any canonical code symbol unless literally present in the file. Identify closure prerequisites, stale/contradictory assertions, and exact controller-verifiable evidence still missing. STRICT_READ_ONLY/NON_SHELL: no modifications, no shell/terminal/echo/grep/cat/sed/python/tests, no helpers/temp files. Do not infer CI PASS, P0=0, P1=0, LISTO_REAL or N4.2 promotion. Report findings, limitations, validations not executed, minimal next action, and two substantive independent SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. No main/Production/branches/push/merge/deploy/secrets."
+}
