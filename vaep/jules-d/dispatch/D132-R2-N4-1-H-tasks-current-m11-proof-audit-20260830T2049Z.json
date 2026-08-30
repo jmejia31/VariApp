@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D132-R2-N4-1-H-tasks-current-m11-proof-audit-20260830T2049Z",
+  "taskId": "N4.1.H-D132-tasks-current-m11-proof-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "9f7e84b316c20323ba3a509a5885460eb110acab",
+  "taskAttempt": 2,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL:TASKS.md",
+  "prompt": "FINAL R2 for the SAME logical D132 task after controller REVIEW_REJECT. ATTEMPT1 artifact had an internal session-correlation inconsistency between result/session handoff metadata and suggested commit evidence, so the handoff was not reliable enough for closure. Inspect only TASKS.md using native non-shell access. No shell/terminal, no file modifications, no secrets, no Production/main/branches/merge/deploy. Determine only directly visible current tracking for N4.1.H and required-current M11 real encrypted Desarrollo backup plus applicable restore/drill evidence correlated to artifact, checksum and metadata. Report exact limitations/truncation, risks, validations not executed and next safe causal proof. Ensure every session/run identifier you report is internally consistent with the actual current Jules session; do not fabricate correlation. Provide two substantively independent SELF_REVIEW_PASS checks. ATTEMPT2 is FINAL; never request/propose R3."
+}
