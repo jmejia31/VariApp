@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C98-R2-N4-1-H-certification-final-truth-audit-20260830T0004Z",
+  "taskId": "N4.1.H-C98-certification-final-truth-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "b72a9f7a04ea0d4f1f8e2c9226e2f4271460c561",
+  "taskAttempt": 2,
+  "fileScopeHint": "READ_ONLY: docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "VAEP v3.25.1 SAME logical task C98 ATTEMPT2/R2 FINAL after ATTEMPT1 REVIEW_REJECT for forbidden run_in_bash_session under STRICT_READ_ONLY/NON_SHELL. Inspect ONLY docs/CERTIFICACION_N4_1_CAJA.md using repository-native read capability. ABSOLUTELY DO NOT run or plan shell, terminal commands, tests, network, git, terminal grep/sed/cat, or create/modify/delete files. Produce controller-ready literal truth evidence only: current status wording, cited authority SHAs/gates, unresolved prerequisites, and safety statements preventing false LISTO/CI PASS/P0=0/P1=0 or N4.2 promotion. SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 required. Refuse any tool/plan suggesting shell/testing and report TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY. This is ATTEMPT2 FINAL; R3 is prohibited and any remaining defect transfers to controller QA takeover."
+}
