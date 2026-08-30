@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C118-R2-REC1-N4-1-H-rollback-grounded-write-20260830T0359Z",
+  "taskId": "N4.1.H-C118-rollback-grounded-write",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "1998b6815a494224ba1cf882645b3a7580bfdcd2",
+  "taskAttempt": 2,
+  "fileScopeHint": "WRITE_SCOPE:docs/ROLLBACK_N4_1_CAJA.md",
+  "prompt": "RECOVERY SAME logical task and FINAL ATTEMPT2 after pre-session manifest JSON parse failure; bootstrap failure did not consume ATTEMPT2. CURRENT_PARENT=N4.1.H. Work only in docs/ROLLBACK_N4_1_CAJA.md. Produce a minimal history-preserving correction grounded only in directly verifiable repository contracts; do not name any entity as authoritative unless exact code evidence proves it and do not invent docker/database prerequisites. Keep N4.1.H EN_PROGRESO/NO_LISTO and preserve the prohibition on Production rollback. Do not touch other files. Return exact patch/base, evidence used, limitations, risks, unexecuted validations and two self-reviews. ATTEMPT2 is final; if evidence is insufficient, return patch0 and fail closed for controller QA takeover."
+}
