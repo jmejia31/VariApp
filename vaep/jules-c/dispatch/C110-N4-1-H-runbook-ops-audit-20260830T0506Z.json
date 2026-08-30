@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C110-N4-1-H-runbook-ops-audit-20260830T0506Z",
+  "taskId": "N4.1.H-C110-runbook-ops-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "5be6c76270abc548b0a7769bf8589722c2e1dc2b",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY NON_SHELL: docs/RUNBOOK_N4_1_CAJA.md only",
+  "prompt": "VAEP v3.25.1 C110 ATTEMPT1. NEW logical SAME_PARENT task after C109 REVIEW_PASS evidence-only/empty patch. CURRENT_PARENT N4.1.H close-first. Audit docs/RUNBOOK_N4_1_CAJA.md only using repository-native non-shell reading. Do not create or modify files/helpers/temp/scripts; do not run terminal/bash/shell/echo/grep/cat/sed/python/tests; do not publish/push/merge/deploy or touch main/Produccion/secrets. Report exact operational prerequisites that are explicitly present, contradictions/stale names/missing prerequisites only when proven from visible repository text, and a minimal controller-safe recommendation. Do not infer CI/P0/P1, LISTO, or N4.2 promotion. TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY; explicitly state validations not executed and limitations; SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2."
+}
