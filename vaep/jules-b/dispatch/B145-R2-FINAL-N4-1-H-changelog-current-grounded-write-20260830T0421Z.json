@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B145-R2-FINAL-N4-1-H-changelog-current-grounded-write-20260830T0421Z",
+  "taskId": "N4.1.H-B145-changelog-current-grounded-write",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "1c4617283682c596a467d036fab03fc25fe3126b",
+  "taskAttempt": 2,
+  "fileScopeHint": "WRITE_SCOPE:CHANGELOG_AI.md",
+  "prompt": "CURRENT_PARENT=N4.1.H. SAME logical task B145 FINAL ATTEMPT2 after ATTEMPT1 REVIEW_REJECT because the run used /tmp/CHANGELOG_AI.md while its self-review claimed no temporary files. Work only in CHANGELOG_AI.md. Produce a concise additive history-preserving N4.1.H checkpoint only if an equivalent current checkpoint is absent. Keep EN_PROGRESO/NO_LISTO; current causal certification remains blocked because the required-current M11 Desarrollo backup/drill cannot complete without required external backup configuration. Never infer CI PASS, P0=0/P1=0 or LISTO_REAL. Do not create helper or temporary files and do not touch any other file. Return exact patch/base, limitations, risks, unexecuted validations and two substantive independent self-reviews reconciling actual operations and full diff. ATTEMPT2 is final; any defect transfers to controller QA takeover; R3 prohibited. Do not touch main, Production, branches, merge, deploy or secrets."
+}
