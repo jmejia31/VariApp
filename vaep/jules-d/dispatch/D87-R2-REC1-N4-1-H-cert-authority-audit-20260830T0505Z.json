@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D87-R2-REC1-N4-1-H-cert-authority-audit-20260830T0505Z",
+  "taskId": "N4.1.H-D87-cert-authority-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "5407c73bf914e9724a1c31db20e11357b984d9da",
+  "taskAttempt": 2,
+  "fileScopeHint": "STRICT_READ_ONLY NON_SHELL: docs/CERTIFICACION_N4_1_CAJA.md and docs/VAEP_AUTHORITY.md only",
+  "prompt": "VAEP v3.25.1 D87 R2 REC1 SAME LOGICAL TASK / SAME ATTEMPT2 FINAL. Prior D87-R2 manifest had stale primaryBaseHead because a concurrent commit landed between fresh-head read and manifest commit; deterministic base mismatch is bootstrap failure before Jules session and does not consume ATTEMPT2. R3 prohibited. CURRENT_PARENT N4.1.H close-first. Read only docs/CERTIFICACION_N4_1_CAJA.md and docs/VAEP_AUTHORITY.md using repository-native non-shell reading. Do not create or modify files/helpers/temp/scripts; do not run terminal/bash/shell/echo/grep/cat/sed/python/tests; do not publish/push/merge/deploy or touch main/Produccion/secrets. Report exact closure prerequisites and certification claims requiring controller-side external verification, limitations, validations not executed, SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. Do not claim CI PASS, P0=0, P1=0, LISTO or N4.2 promotion. Any defect => controller QA takeover; no Jules R3."
+}
