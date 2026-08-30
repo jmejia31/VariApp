@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C139-N4-1-H-authority-current-closure-audit-20260830T1851Z",
+  "taskId": "N4.1.H-C139-authority-current-closure-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "b2c54f68c6f74cc174b8f425384ad2192cc4d688",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL:docs/VAEP_AUTHORITY.md",
+  "prompt": "VAEP v3.25 NEW SAME_PARENT logical task ATTEMPT1 after C138-R2 FINAL exhausted and transferred to controller QA takeover; this is not C138-R3. Audit ONLY docs/VAEP_AUTHORITY.md using repository-native NON_SHELL inspection. Determine the current authoritative fail-closed closure contract for N4.1.H: required-current M11 evidence, causal gates/DoD, P0=0/P1=0, promotion restrictions, and what evidence may or may not justify LISTO_REAL. Do not execute or attempt shell, modify/create files, inspect secrets, trigger workflows/deploy, claim LISTO/CI PASS/P0=0/P1=0, or promote N4.2. If native visibility truncates, report the exact limitation and stop rather than bypassing it. Return evidence-only findings, validations not executed, next safe causal target, and two genuinely independent substantive self-reviews explicitly confirming NON_SHELL compliance. TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY."
+}
