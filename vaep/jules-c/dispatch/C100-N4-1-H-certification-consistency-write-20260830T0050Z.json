@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C100-N4-1-H-certification-consistency-write-20260830T0050Z",
+  "taskId": "N4.1.H-C100-certification-consistency-write",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "a784b2bea0d6a827501ffa7095a15a18499bf338",
+  "taskAttempt": 1,
+  "fileScopeHint": "WRITE_ARTIFACT_ONLY: docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "VAEP v3.25.1 SAME_PARENT NEW logical task after C99-R2 FINAL terminal review; this is a NEW task, not R3. Exclusive scope docs/CERTIFICACION_N4_1_CAJA.md only. Produce a reviewable ChangeSet patch, but do not publish/push/merge/deploy. Reconcile stale Jules/QA-takeover wording and closure prerequisites history-preservingly using only facts verifiable in the current repository and current parent authority. Keep N4.1.H VALIDANDO/NO LISTO unless runbook+rollback+TASKS+CHANGELOG, applicable causal gates, P0=0/P1=0, no terminal review debt, and controller persistence are all proven. Never fabricate exact-head success or promote N4.2. Prefer repository-native inspection; no unnecessary shell/network. Perform SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 and list unexecuted validation."
+}
