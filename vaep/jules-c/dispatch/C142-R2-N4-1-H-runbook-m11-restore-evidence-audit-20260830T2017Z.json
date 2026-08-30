@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C142-R2-N4-1-H-runbook-m11-restore-evidence-audit-20260830T2017Z",
+  "taskId": "N4.1.H-C142-runbook-m11-restore-evidence-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "5b80f415b57652079d7c643d62afc970eea8bdc6",
+  "taskAttempt": 2,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL:docs/RUNBOOK_N4_1_CAJA.md",
+  "prompt": "FINAL R2 for the SAME logical N4.1.H C142 task after controller REVIEW_REJECT. Inspect only docs/RUNBOOK_N4_1_CAJA.md using native non-shell access. Absolutely do not use shell, terminal, cat, sed, grep or command execution; do not modify files, secrets, Production/main/branches, merge or deploy. Correct the prior compliance defect and stay evidence-only. Report only directly visible current M11 closure requirements/evidence, exact truncation or visibility limitations, unsupported claims, risks, tests not executed and next safe causal proof required. Before COMPLETED provide two SUBSTANTIVELY INDEPENDENT self-reviews: SELF_REVIEW_PASS_1 audits scope/authority/direct evidence/contract; SELF_REVIEW_PASS_2 independently audits tool compliance, truncation/limitations, hygiene, unexecuted validation and fail-closed conclusion. If required-current backup plus applicable restore/drill evidence is not directly proven, state N4.1.H NO_LISTO. ATTEMPT2 is FINAL; R3 is prohibited."
+}
