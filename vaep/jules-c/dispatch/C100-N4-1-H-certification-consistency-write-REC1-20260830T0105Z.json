@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C100-N4-1-H-certification-consistency-write-REC1-20260830T0105Z",
+  "taskId": "N4.1.H-C100-certification-consistency-write",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "942a3f4742fb2b83f1c0d56ed703a312e2af2203",
+  "taskAttempt": 1,
+  "fileScopeHint": "WRITE_ARTIFACT_ONLY: docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "VAEP v3.25.1 SAME logical C100 ATTEMPT1 transport/stale recovery after the exact worker remained over five minutes without a correlated Jules result issue/session or fresh useful technical activity. The original ATTEMPT1 is not counted consumed unless a real session is subsequently proven; if the original later terminalizes, quarantine duplicate ownership and REVIEW_FIRST rather than double-apply. Exclusive scope docs/CERTIFICACION_N4_1_CAJA.md only. Produce a reviewable ChangeSet patch but do not publish/push/merge/deploy. Reconcile only repository-grounded certification consistency and closure prerequisites, preserving history. Keep N4.1.H VALIDANDO/NO LISTO unless all current closure prerequisites are proven. Do not assert CI PASS, P0=0/P1=0, or promote N4.2. Avoid temporary helper files and unnecessary shell/network; resulting ChangeSet must modify only the assigned file. Perform SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 and report unexecuted validation."
+}
