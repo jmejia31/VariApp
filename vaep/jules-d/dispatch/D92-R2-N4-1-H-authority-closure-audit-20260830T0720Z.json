@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D92-R2-N4-1-H-authority-closure-audit-20260830T0720Z",
+  "taskId": "N4.1.H-D92-authority-closure-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "35324a5a090730ee671f100d7559fe44893b8c83",
+  "taskAttempt": 2,
+  "fileScopeHint": "STRICT_READ_ONLY NON_SHELL: docs/VAEP_AUTHORITY.md only",
+  "prompt": "VAEP v3.25.1 FINAL R2/ATTEMPT2 correction for D92. CURRENT_PARENT=N4.1.H. Prior ATTEMPT1 was rejected because it concluded that no prerequisites remained and that dependent work could proceed, contradicting fail-closed/PARENT_CLOSE_FIRST and the instruction not to infer LISTO_REAL. Re-audit only docs/VAEP_AUTHORITY.md using repository-native read_file. State only literal authority requirements and explicitly preserve N4.1.H NO_LISTO until grounded docs + causal gates + DoD + P0=0/P1=0 are proven. N4.2 may remain PREWARM only. STRICT_READ_ONLY/NON_SHELL: no modifications, shell, terminal, helpers, tests or temp files. Report exact limitations, validations not executed, minimal controller-safe next action and two substantive SELF_REVIEW_PASS_1/2. ATTEMPT2 FINAL: R3 prohibited; any remaining defect transfers to controller QA takeover."
+}
