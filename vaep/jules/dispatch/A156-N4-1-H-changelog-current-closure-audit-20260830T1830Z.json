@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A156-N4-1-H-changelog-current-closure-audit-20260830T1830Z",
+  "taskId": "N4.1.H-A156-changelog-current-closure-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "050c3c7af13666958e30ee5bbbbd512a26c05cda",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL:CHANGELOG_AI.md",
+  "prompt": "VAEP v3.25 NEW SAME_PARENT logical task ATTEMPT1 after A155 REVIEW_PASS_LIMITED evidence-only; this is not rework of A155 and is never R3. Audit ONLY CHANGELOG_AI.md using repository-native NON_SHELL inspection. Determine whether the current N4.1.H closure state is grounded fail-closed: required-current real encrypted M11 Desarrollo backup, applicable restore/drill correlation to artifact/checksum/metadata, causal gates/DoD, P0=0/P1=0, and no premature N4.2 promotion. Do not execute shell, modify/create files, inspect secrets, claim LISTO/CI PASS/P0=0/P1=0, or promote N4.2. If visibility truncates, state the exact limitation and do not extrapolate. Return evidence-only findings, validations not executed, next safe causal target, and two genuinely independent substantive self-reviews explicitly confirming NON_SHELL compliance. TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY."
+}
