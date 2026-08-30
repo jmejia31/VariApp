@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D85-R2-N4-1-H-certification-grounding-20260830T0321Z",
+  "taskId": "N4.1.H-D85-certification-grounding",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "d7aeb4548cf8a3599fc716a87c8589682d3f8c7b",
+  "taskAttempt": 2,
+  "fileScopeHint": "STRICT_READ_ONLY NON_SHELL: docs/CERTIFICACION_N4_1_CAJA.md only",
+  "prompt": "VAEP v3.25.1 D85 ATTEMPT2 FINAL. ATTEMPT1 was rejected because it planned/executed terminal output and dotnet test under STRICT_READ_ONLY/NON_SHELL. CURRENT_PARENT N4.1.H close-first. Exclusive scope docs/CERTIFICACION_N4_1_CAJA.md only. Use repository-native non-shell reading only. Do not execute terminal/bash/shell/echo/grep/cat/sed/tests/scripts, create helper/temp files, modify repository files, publish/push/merge/deploy, touch main/Produccion/secrets, promote N4.2, or claim unsupported CI/P0/P1. Return only grounded certification facts/contradictions/gaps, TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY, validations not executed, limitations, SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. This is R2 FINAL; if any blocking defect remains, report it for ChatGPT/VAEP QA takeover. R3 is prohibited. Preserve EN_PROGRESO/NO_LISTO unless every closure condition is independently proven."
+}
