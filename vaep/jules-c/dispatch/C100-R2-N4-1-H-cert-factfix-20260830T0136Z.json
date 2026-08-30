@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C100-R2-N4-1-H-cert-factfix-20260830T0136Z",
+  "taskId": "N4.1.H-C100-cert-factfix",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "4879a8d8814b57223ebaaf31b24e438a63f3554b",
+  "taskAttempt": 2,
+  "fileScopeHint": "WRITE_ARTIFACT_ONLY: docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "VAEP v3.25.1 C100-R2 FINAL after ATTEMPT1 REVIEW_REJECT for prohibited shell usage. Same logical task, final Jules attempt. Exclusive WRITE_ARTIFACT_ONLY/NON_SHELL scope docs/CERTIFICACION_N4_1_CAJA.md only. Re-evaluate the certification model/entity names using repository-native read/search/edit capabilities only and, only if grounded, return a one-file reviewable ChangeSet/gitPatch correcting factual names without changing closure status. ABSOLUTELY do not invoke run_in_bash_session, shell, terminal commands, tests, helper/temp files, or edit any other file. Do not publish/push/merge/deploy, assert CI PASS or P0=0/P1=0, or promote N4.2. Perform SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 and list validations not executed. If any blocking defect remains, report it for QA_TAKEOVER; never request R3."
+}
