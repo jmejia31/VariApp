@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B118-N4-1-H-certification-final-grounding-audit-20260830T0034Z",
+  "taskId": "N4.1.H-B118-certification-final-grounding-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "6be181163c68a4b57dbe8c12198c87a7291893aa",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "VAEP v3.25.1 SAME_PARENT NEW logical task after B117-R2 FINAL REVIEW_PASS evidence-only. This is NOT an R3 and must not revisit B117 logical task. STRICT_READ_ONLY/NON_SHELL. Inspect ONLY docs/CERTIFICACION_N4_1_CAJA.md using repository-native read capability. DO NOT run or plan shell, terminal commands, tests, network, git, terminal grep/sed/cat, or create/modify/delete files. Produce controller-ready literal evidence for certification readiness: exact current state, prerequisites, stale/contradictory wording, required causal evidence, and minimum history-preserving correction. Never assert LISTO, CI PASS, P0=0/P1=0 or promote N4.2. SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 required. If any tool/plan suggests shell/testing, refuse and report TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY."
+}
