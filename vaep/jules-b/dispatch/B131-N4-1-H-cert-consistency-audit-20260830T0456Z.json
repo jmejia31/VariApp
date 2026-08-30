@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B131-N4-1-H-cert-consistency-audit-20260830T0456Z",
+  "taskId": "N4.1.H-B131-cert-consistency-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "66b837516a3f2db54633a99a3ece92932c331579",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY NON_SHELL: docs/CERTIFICACION_N4_1_CAJA.md only",
+  "prompt": "VAEP v3.25.1 B131 ATTEMPT1. NEW logical SAME_PARENT task after B130 evidence-only PASS. CURRENT_PARENT N4.1.H close-first. Audit only docs/CERTIFICACION_N4_1_CAJA.md using repository-native non-shell reading. Do not create or modify files/helpers/temp/scripts; do not run terminal/bash/shell/echo/grep/cat/sed/python/tests; do not publish/push/merge/deploy or touch main/Produccion/secrets. Report exact stated status, functional authority SHA if present, explicit closure prerequisites and any internal contradiction visible in this file. Do not infer GitHub/CI/P0/P1 externally. TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY; validations not executed; limitations; SELF_REVIEW_PASS_1/2. No LISTO and no N4.2 promotion."
+}
