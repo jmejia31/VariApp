@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B178-N4-1-H-changelog-m11-evidence-audit-20260830T1957Z",
+  "taskId": "N4.1.H-B178-changelog-m11-evidence-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "1e0fa919352bef803242d172fed948a671c2e134",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL:CHANGELOG_AI.md",
+  "prompt": "NEW logical SAME_PARENT task after B177-R2 FINAL exhaustion; this is not R3. Inspect only CHANGELOG_AI.md using repository-native non-shell inspection. Identify directly visible current N4.1.H/M11 closure evidence or explicit absence, without inferring unread text. Do not use shell/terminal, modify files, touch secrets, Production, main, branches, merge or deploy. Report observations, exact truncation limitations, risks, unexecuted validations, next safe causal target, and two substantive independent SELF_REVIEW_PASS checks. Evidence-only; never claim LISTO or P0/P1=0 without direct proof."
+}
