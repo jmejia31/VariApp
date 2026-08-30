@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C142-N4-1-H-runbook-m11-restore-evidence-audit-20260830T1957Z",
+  "taskId": "N4.1.H-C142-runbook-m11-restore-evidence-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "5c68028a01224047c598f1ed57f1297a910f01bb",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL:docs/RUNBOOK_N4_1_CAJA.md",
+  "prompt": "NEW logical SAME_PARENT task for N4.1.H. Inspect only docs/RUNBOOK_N4_1_CAJA.md natively and non-shell. Determine whether it explicitly requires current M11 encrypted backup plus applicable restore/drill executor evidence and correlated artifact/checksum/metadata before closure. Report only directly visible facts and exact limitations; do not infer truncated text. No shell/terminal, file modifications, secrets, Production, main, branches, merge or deploy. Include risks, unexecuted validations, next safe causal target, and two substantive independent SELF_REVIEW_PASS checks. Evidence-only; no LISTO claim without proof."
+}
