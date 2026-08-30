@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D96-N4-1-H-runbook-current-grounding-20260830T0900Z",
+  "taskId": "N4.1.H-D96-runbook-current-grounding",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "f02e3b2ae9ae5525ef8d0657ce22b00d7ba06563",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY NON_SHELL:docs/RUNBOOK_N4_1_CAJA.md",
+  "prompt": "CURRENT_PARENT=N4.1.H. NEW logical SAME_PARENT task after D95 REVIEW_PASS evidence-only. STRICT_READ_ONLY and NON_SHELL. Audit docs/RUNBOOK_N4_1_CAJA.md only for exact current operational closure requirements, rollback/verification references, stale or premature success claims, and concrete missing evidence before LISTO_REAL. Use repository read tools only; DO NOT execute shell/bash/python/git/dotnet/npm commands and DO NOT create temporary files. Do not modify anything. Do not infer CI PASS, P0=0/P1=0, LISTO_REAL, or promote N4.2. Return grounded findings, limitations, risks, recommendations, tests not executed, validations not executed, minimal controller-safe next action, SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2."
+}
