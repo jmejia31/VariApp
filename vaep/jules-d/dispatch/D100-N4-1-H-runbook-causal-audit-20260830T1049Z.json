@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D100-N4-1-H-runbook-causal-audit-20260830T1049Z",
+  "taskId": "N4.1.H-D100-runbook-causal-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "798ecb841a3bb15c0afb5ca1c2db029d41eafba8",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY:docs/RUNBOOK_N4_1_CAJA.md",
+  "prompt": "CURRENT_PARENT=N4.1.H. NEW SAME_PARENT logical task after D99 reached terminal COMPLETED and is under controller review. Read only docs/RUNBOOK_N4_1_CAJA.md and direct causal evidence it references. Do not execute shell commands, echo, tests, create helper/temp files, or modify any file. Audit operational closure readiness and identify only current causal blockers, especially the required-current M11 Desarrollo external backup/drill prerequisite and any M13 dependency. Distinguish historical evidence. Return patch0, exact observations, limitations, risks, recommendations, unexecuted validations, and two substantive independent self-reviews. Never infer CI PASS, P0=0/P1=0 or LISTO_REAL without complete current evidence. Do not touch main, Production, branches, merge, deploy or secrets."
+}
