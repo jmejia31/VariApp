@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C135-R2-N4-1-H-m11-workflow-grounding-audit-20260830T1706Z",
+  "taskId": "N4.1.H-C135-m11-workflow-grounding-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "fad412b6923d2ba6567e21e4dfbcdc460a9538f0",
+  "taskAttempt": 2,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL:.github/workflows/m11-backup-desarrollo-operativo.yml",
+  "prompt": "VAEP_TRANSPORT_VERIFIED=true\nFINAL R2 for SAME logical task N4.1.H-C135-m11-workflow-grounding-audit. ATTEMPT1 was PASS_LIMITED because the workflow read was truncated after trigger conditions, leaving external configuration prerequisites, artifact/checksum/metadata expectations, fail-closed semantics and exact executor evidence UNPROVEN. Re-audit only .github/workflows/m11-backup-desarrollo-operativo.yml using strictly non-shell read/search methods targeted at configuration checks, backup creation, encryption, checksum/metadata, artifact publication, failure/skip behavior and conditions proving a real Desarrollo backup/drill. Do not run shell, modify files, create temp files, inspect or reveal secrets, promote N4.2, or claim PASS/LISTO. If visibility still prevents complete grounding, state the exact limitation and transfer residual uncertainty to controller QA_TAKEOVER. Report exact visible evidence, risks, validations/tests not executed, closure evidence still missing, and next safe causal target. Perform SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 as two separate substantive reconsiderations. R2 is FINAL; never propose R3. TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY."
+}
