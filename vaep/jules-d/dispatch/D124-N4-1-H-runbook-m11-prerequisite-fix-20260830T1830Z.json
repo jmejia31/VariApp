@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D124-N4-1-H-runbook-m11-prerequisite-fix-20260830T1830Z",
+  "taskId": "N4.1.H-D124-runbook-m11-prerequisite-fix",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "2abf2d526692b4198cf651cc1692c29f7a40a0a2",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/RUNBOOK_N4_1_CAJA.md",
+  "prompt": "VAEP v3.25 NEW SAME_PARENT WRITE task ATTEMPT1 after D123 REVIEW_PASS found one grounded documentary gap. Modify ONLY docs/RUNBOOK_N4_1_CAJA.md. Preserve existing fail-closed wording and add the missing N4.1.H closure prerequisite explicitly: required-current real encrypted M11 backup of Desarrollo must exist, and when restore/drill is applicable it must be correlated to the same backup artifact/checksum/metadata; absence, skip, stale evidence or external-configuration failure keeps N4.1.H NO_LISTO. Keep causal gates/DoD and P0=0/P1=0 conjunctive and explicitly preserve prohibition on premature N4.2 promotion. Do not touch workflows, scripts, secrets, main, Production or any other file; do not claim backup evidence exists, CI PASS, LISTO or P0/P1 unless directly evidenced. Run only proportional safe validations inside the assigned file scope. Before COMPLETED perform two independent substantive self-reviews covering full diff/scope, fail-closed semantics, no secret/product changes, validations and unexecuted checks. ATTEMPT1/2; at most one R2 if review finds a blocking defect; R3 prohibited."
+}
