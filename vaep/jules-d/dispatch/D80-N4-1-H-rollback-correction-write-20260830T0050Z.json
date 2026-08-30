@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D80-N4-1-H-rollback-correction-write-20260830T0050Z",
+  "taskId": "N4.1.H-D80-rollback-correction-write",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "908906f4e702ab94afd37c44ece1d7faccfbb78d",
+  "taskAttempt": 1,
+  "fileScopeHint": "WRITE_ARTIFACT_ONLY: docs/ROLLBACK_N4_1_CAJA.md",
+  "prompt": "VAEP v3.25.1 SAME_PARENT NEW logical task after D79 throughput-stall QA takeover; do not retry D79. Exclusive scope docs/ROLLBACK_N4_1_CAJA.md only. Produce a reviewable ChangeSet patch, but do not publish/push/merge/deploy. Correct only repository-grounded stale/inconsistent rollback wording and validation prerequisites for N4.1 Caja, preserving history and avoiding invented entities. Explicitly distinguish environment/dependency prerequisites from actual executed validation. Never assert LISTO, CI PASS, P0=0/P1=0 or promote N4.2. Prefer repository-native inspection; no unnecessary shell/network. Perform SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 and report validations/tests not executed."
+}
