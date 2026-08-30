@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A169-N4-1-H-m11-workflow-trigger-audit-20260830T2230Z",
+  "taskId": "N4.1.H-A169-m11-workflow-trigger-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "ebac0a840d69160fb7635956bca440fbafd06a87",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL:.github/workflows/m11-backup-desarrollo-operativo.yml",
+  "prompt": "VAEP_TRANSPORT_VERIFIED=true\nNEW SAME_PARENT ATTEMPT1 after A168 controller PASS_LIMITED. Audit only .github/workflows/m11-backup-desarrollo-operativo.yml with native non-shell read-only capabilities. Focus narrowly on visible trigger conditions and fail-closed gating for required-current real encrypted Desarrollo backup execution. If native reading truncates, report exact truncation and only visible grounded facts; do not infer unseen logic. No file changes, terminal/bash/shell, secrets, main/Production, branch, merge or deploy. Return observations, limitations, validations executed/not executed, risks/recommendations, and literal substantive SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. COMPLETED is not LISTO."
+}
