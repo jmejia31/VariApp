@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B186-N4-1-H-cert-current-audit-20260830T2318Z",
+  "taskId": "N4.1.H-B186-cert-current-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "a7f2077c8943746ccace94e57563f6e2d22eeb67",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "STRICT_READ_ONLY_NON_SHELL evidence-only audit. Inspect only docs/CERTIFICACION_N4_1_CAJA.md using native file reading; do not use terminal, shell, bash, cat, sed, wc, grep, Python, git commands, tests, writes, patches, temporary files or command-line utilities. Determine the exact current certification state for N4.1.H, identify any stale/historical evidence, unsupported LISTO/CI/P0/P1 claims, and whether required-current M11 encrypted Desarrollo backup plus applicable restore/drill artifact/checksum/metadata is explicitly present. Do not infer beyond visible evidence. Report OBSERVATIONS, LIMITATIONS, VALIDATIONS EXECUTED, VALIDATIONS NOT EXECUTED, RISKS/RECOMMENDATIONS, TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY, and two independent substantive reviews labeled exactly SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2; PASS_1 must assess scope/evidence/unsupported claims/closure authority, PASS_2 must independently assess tool compliance/truncation/risks/hygiene/unexecuted validations. Make no repository changes; return evidence only."
+}
