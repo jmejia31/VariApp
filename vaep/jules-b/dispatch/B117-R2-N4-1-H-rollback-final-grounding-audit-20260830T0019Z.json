@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B117-R2-N4-1-H-rollback-final-grounding-audit-20260830T0019Z",
+  "taskId": "N4.1.H-B117-rollback-final-grounding-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "7f9e03e649237bd4317f9ca66d8acef40ad43c8d",
+  "taskAttempt": 2,
+  "fileScopeHint": "READ_ONLY: docs/ROLLBACK_N4_1_CAJA.md",
+  "prompt": "VAEP v3.25.1 SAME logical task B117 ATTEMPT2/R2 FINAL after ATTEMPT1 REVIEW_REJECT because the activity trace used terminal sed commands despite STRICT_READ_ONLY/NON_SHELL. Inspect ONLY docs/ROLLBACK_N4_1_CAJA.md using repository-native read capability. ABSOLUTELY DO NOT run or plan shell, terminal commands, tests, network, git, grep/sed/cat, or create/modify/delete files. Produce controller-ready literal evidence for rollback readiness: prerequisites, documented rollback steps, validation/exit criteria, and concrete missing/stale wording. SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 required. Refuse any tool/plan suggesting shell/testing and report TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY. Never assert LISTO, CI PASS, P0=0/P1=0 or promote N4.2. This is ATTEMPT2 FINAL; R3 is prohibited and any remaining defect transfers to controller QA takeover."
+}
