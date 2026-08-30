@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B178-R2-N4-1-H-changelog-m11-evidence-audit-20260830T2016Z",
+  "taskId": "N4.1.H-B178-changelog-m11-evidence-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "c865254cae6654b4fc33f8ad0f2bd0c3a6cac2c8",
+  "taskAttempt": 2,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL:CHANGELOG_AI.md",
+  "prompt": "FINAL R2 for the SAME logical N4.1.H B178 task after controller REVIEW_REJECT. Inspect only CHANGELOG_AI.md natively and non-shell. Evidence-only: determine only directly visible current M11 closure evidence versus stale/historical claims; do not infer unseen/truncated content. Absolutely no shell/terminal, no file modifications, no secrets, no Production/main/branches/merge/deploy. Correct the prior review defect: before COMPLETED provide two SUBSTANTIVELY INDEPENDENT self-reviews. SELF_REVIEW_PASS_1 must audit scope, directly visible evidence, authority/closure contract and unsupported claims. SELF_REVIEW_PASS_2 must independently audit truncation/limitations, risks, unexecuted validations, workspace hygiene and fail-closed conclusion. If evidence is insufficient, state NO_LISTO and the exact next causal proof required. ATTEMPT2 is FINAL; never request/propose R3."
+}
