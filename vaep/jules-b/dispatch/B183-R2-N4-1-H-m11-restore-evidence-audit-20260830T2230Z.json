@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B183-R2-N4-1-H-m11-restore-evidence-audit-20260830T2230Z",
+  "taskId": "N4.1.H-B183-m11-restore-evidence-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "e33bf923f5c7b67f1e0a825b9844df8557655677",
+  "taskAttempt": 2,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL:scripts/m11_restore_desarrollo.sh",
+  "prompt": "VAEP_TRANSPORT_VERIFIED=true\nR2 FINAL for logical task B183 after controller REVIEW_REJECT: ATTEMPT1 omitted literal SELF_REVIEW_PASS_2. Audit only scripts/m11_restore_desarrollo.sh with native non-shell read-only capabilities. Preserve grounded truncation reporting; do not infer unseen logic. Return observations, exact limitations, validations executed/not executed, risks/recommendations and TWO INDEPENDENT SUBSTANTIVE literal sections SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 before completion. No file changes, terminal/bash/shell, secrets, main/Production, branch, merge or deploy. This is ATTEMPT2 FINAL; R3 is prohibited; any remaining blocking defect transfers to controller QA_TAKEOVER. COMPLETED is not LISTO."
+}
