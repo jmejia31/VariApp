@@ -90,4 +90,4 @@ Ante fallo funcional, autorización denegada inesperada, inconsistencia de sesi�
 
 ## Criterio de salida
 
-La operación se considera verificada únicamente cuando el flujo aplicable termina con estado consistente, permisos y auditoría comprobados, y los gates causales exigibles están verdes o explícitamente clasificados como N/A con evidencia. Este runbook no autoriza promoción, merge ni despliegue.
+La operación se considera verificada únicamente cuando el flujo aplicable termina con estado consistente, permisos y auditoría comprobados, y los gates causales exigibles están verdes o explícitamente clasificados como N/A con evidencia. Prerrequisito de cierre N4.1.H: no LISTO_REAL ni promocion N4.2 sin evidencia required-current de backup cifrado REAL M11 de Desarrollo y, cuando aplique, restore/drill correlacionado al mismo artifact/checksum/metadata. Este runbook no autoriza promoción, merge ni despliegue.
