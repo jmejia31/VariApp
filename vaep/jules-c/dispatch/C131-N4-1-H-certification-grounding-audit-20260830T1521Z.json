@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C131-N4-1-H-certification-grounding-audit-20260830T1521Z",
+  "taskId": "N4.1.H-C131-certification-grounding-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "65185232d4526a141deabc7edffb84e5fc60e265",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL::docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "NEW logical SAME_PARENT task. C129-R2 already consumed FINAL ATTEMPT2 and completed with session evidence; no C129 R3 is allowed. This C131 task is independent ATTEMPT1 and must not reuse C129 ownership. STRICT_READ_ONLY and NON_SHELL. Audit only docs/CERTIFICACION_N4_1_CAJA.md for current N4.1.H closure evidence, required-current real encrypted Desarrollo M11 backup/restore drill, exact-head causal gates, DoD, P0=0/P1=0, and stale or historical assertions that could create false LISTO. Use repository-reading capabilities only; no shell, terminal, commands, scripts, temp files, git mutations, tests/builds, secrets, deploy, or scope expansion. Report exact visible evidence, limitations/truncation, validations not executed, risks/recommendations, and TWO substantive independent SELF_REVIEW_PASS checks with distinct focuses and actual findings. Never promote N4.2 without causal evidence."
+}
