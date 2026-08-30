@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C137-R2-N4-1-H-m11-workflow-contract-audit-20260830T1800Z",
+  "taskId": "N4.1.H-C137-m11-workflow-contract-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "0b14e2590ff809eb4819651aa41f6b3d37d3bca9",
+  "taskAttempt": 2,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL:.github/workflows/m11-backup-desarrollo-operativo.yml",
+  "prompt": "VAEP v3.25 SAME logical task ATTEMPT2/R2 FINAL. ATTEMPT1 is PASS_LIMITED because file visibility was truncated before determining required evidence path, skip/green behavior, restore/drill correlation, and exact blocker. R3 is prohibited. Audit ONLY .github/workflows/m11-backup-desarrollo-operativo.yml using repository-native non-shell file/search inspection; do not execute shell/terminal commands, modify/create files, inspect secrets, claim LISTO/CI PASS/P0=0/P1=0, or promote N4.2. Read enough chunks/sections to establish: exact triggers for real backup, conditions that can cause backup job to skip while other checks are green, required external configuration presence checks without revealing values, artifact/checksum/metadata publication, restore/drill correlation if present, and exact fail-closed evidence needed by N4.1.H. If provider visibility still prevents full coverage, state exact limitation and hand residual to controller QA; do not request R3. Return evidence-only findings, validations not executed, next safe causal target, and two independent substantive self-reviews explicitly confirming NON_SHELL compliance. TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY."
+}
