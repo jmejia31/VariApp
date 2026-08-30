@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C120-REC1-N4-1-H-rollback-current-blocker-audit-20260830T1049Z",
+  "taskId": "N4.1.H-C120-rollback-current-blocker-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "e6ab7a956119609ceed29fafaaf741f93da4ca73",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY:docs/ROLLBACK_N4_1_CAJA.md",
+  "prompt": "CURRENT_PARENT=N4.1.H. RECOVERY of the same C120 logical task and same ATTEMPT1 because the prior dispatch has no correlated Jules session/result after the freshness window; bootstrap/pre-session does not consume the attempt. Read only docs/ROLLBACK_N4_1_CAJA.md and direct causal evidence it references. Do not execute shell commands, echo, tests, create helper/temp files, or modify any file. Audit rollback readiness and current causal blockers, especially the M11 Desarrollo external backup/drill prerequisite. Distinguish current from historical evidence. Return patch0, exact observations, limitations, risks, recommendations, unexecuted validations, and two substantive independent self-reviews. Never infer CI PASS, P0=0/P1=0 or LISTO_REAL without complete current evidence. Do not touch main, Production, branches, merge, deploy or secrets."
+}
