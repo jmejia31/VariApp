@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B144-R2-REC1-N4-1-H-certification-grounded-write-20260830T0359Z",
+  "taskId": "N4.1.H-B144-certification-grounded-write",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "fa75b06b33f68f28ce13799200a12f934533def1",
+  "taskAttempt": 2,
+  "fileScopeHint": "WRITE_SCOPE:docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "RECOVERY SAME logical task and FINAL ATTEMPT2 after pre-session manifest JSON parse failure; bootstrap failure did not consume ATTEMPT2. CURRENT_PARENT=N4.1.H. Work only in docs/CERTIFICACION_N4_1_CAJA.md. Reconcile history without deleting prior evidence: keep N4.1.H EN_PROGRESO/NO_LISTO and explicitly distinguish historical evidence from current causal evidence. Current functional candidate is 17e79e50b0a332e9ea510efbb78dfc0b34bbae16; current M13 is not green because required-current M11 drill freshness is failing. Never claim global CI PASS, P0=0/P1=0 or LISTO_REAL. Do not touch other files. Return exact patch/base, limitations, risks, unexecuted validations and two self-reviews. ATTEMPT2 is final; if unsafe, fail closed for controller QA takeover."
+}
