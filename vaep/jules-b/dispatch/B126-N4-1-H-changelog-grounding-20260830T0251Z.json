@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B126-N4-1-H-changelog-grounding-20260830T0251Z",
+  "taskId": "N4.1.H-B126-changelog-grounding",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "a754b5de4a26767238a87a3e43d36ea239e003af",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY NON_SHELL: CHANGELOG_AI.md only",
+  "prompt": "VAEP v3.25.1 NEW logical SAME_PARENT task B126 after B125 REVIEW_PASS evidence-only. Exclusive scope CHANGELOG_AI.md only. STRICT_READ_ONLY and NON_SHELL: use repository-native non-shell reading capabilities only; do not execute terminal/bash/echo/grep/cat/sed/tests/scripts, create helper/temp files, modify repository files, publish/push/merge/deploy, touch main/Production/secrets, assert unsupported CI/P0/P1, or promote N4.2. Audit the N4.1 Caja history-preserving changelog rollup and return only grounded missing or contradictory facts required for N4.1.H closure, retaining EN_PROGRESO/NO_LISTO unless all closure conditions are independently proven. Include SELF_REVIEW_PASS_1, SELF_REVIEW_PASS_2, limitations and validations not executed. WORK_CAN_PIPELINE__PROMOTION_CANNOT."
+}
