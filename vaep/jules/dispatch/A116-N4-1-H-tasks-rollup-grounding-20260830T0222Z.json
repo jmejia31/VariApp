@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A116-N4-1-H-tasks-rollup-grounding-20260830T0222Z",
+  "taskId": "N4.1.H-A116-tasks-rollup-grounding",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "d87561b34b52f6778a52304dc83fbe03ef8ebe48",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY NON_SHELL: TASKS.md only",
+  "prompt": "VAEP v3.25.1 NEW logical SAME_PARENT A116 after A115-REC1 REVIEW_PASS evidence-only confirmed TASKS.md lacks N4.1/N4.1.H rollup. Exclusive STRICT_READ_ONLY/NON_SHELL scope TASKS.md only. Using only non-shell repository-native reading capabilities, report the minimal grounded additive N4.1/N4.1.H rollup facts that TASKS.md would need while preserving history. Do not execute bash/grep/cat/sed/tests/terminal commands/scripts, create helper/temp files, modify files, publish/push/merge/deploy, assert CI PASS or P0=0/P1=0, or promote N4.2. Retain N4.1.H EN_PROGRESO/NO_LISTO unless all closure conditions are actually evidenced. Return evidence artifact only with SELF_REVIEW_PASS_1, SELF_REVIEW_PASS_2, exact limitations and validations not executed."
+}
