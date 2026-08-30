@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B182-N4-1-H-m11-backup-script-contract-audit-20260830T2146Z",
+  "taskId": "N4.1.H-B182-m11-backup-script-contract-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "9d21d1bffbc7ba9a9ab67945c2ab0451527b6476",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL:scripts/m11_backup_desarrollo.sh",
+  "prompt": "NEW SAME_PARENT ATTEMPT1. Audita exclusivamente scripts/m11_backup_desarrollo.sh mediante lectura nativa no-shell para determinar contrato real del backup cifrado M11: prerequisitos, artifact, checksum, metadata, aislamiento, fail-closed y condiciones necesarias para evidencia current de N4.1.H. PROHIBIDO terminal/bash/run_in_bash_session y comandos shell equivalentes. No modificar archivos ni publicar cambios. Si la lectura queda truncada, informa exactamente la limitacion sin inferir contenido no visible. Devuelve hallazgos grounded, riesgos, validaciones ejecutadas/no ejecutadas y dos auto-revisiones independientes SELF_REVIEW_PASS_1/2. COMPLETED no equivale a LISTO."
+}
