@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C121-N4-1-H-authority-current-blocker-audit-20260830T1058Z",
+  "taskId": "N4.1.H-C121-authority-current-blocker-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "68c2f4340b456d1156a1eebe94f170ac950eff19",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY:docs/VAEP_AUTHORITY.md",
+  "prompt": "CURRENT_PARENT=N4.1.H. NEW SAME_PARENT logical task after C120-REC1 completed and passed controller review only as evidence-only/patch0. Read only docs/VAEP_AUTHORITY.md and direct causal evidence it explicitly references. Do not execute shell commands, echo, tests, create helper/temp files, or modify any file. Audit only current closure authority and current causal blockers. Treat historical M11/M13 PASS claims as non-current unless corroborated by fresh exact evidence; the controller currently has fresh evidence that the required-current M11 Desarrollo backup/drill is blocked by absent external backup configuration. Return patch0, exact observations, limitations, risks, recommendations, unexecuted validations, and two substantive independent self-reviews. Never infer CI PASS, P0=0/P1=0 or LISTO_REAL without complete current evidence. Do not touch main, Production, branches, merge, deploy or secrets."
+}
