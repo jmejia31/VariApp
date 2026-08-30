@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B162-REC1-N4-1-H-cert-evidence-audit-20260830T1456Z",
+  "taskId": "N4.1.H-B162-cert-evidence-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "1af2ce84758b19bbdde8cc0a8a94d240fbb96513",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL::docs/VAEP_N4_1_CLOSURE_CERT.md",
+  "prompt": "VAEP_TRANSPORT_EXPECTED=true. SAME logical B162 task / SAME ATTEMPT1 recovery because prior B162 manifest at 2d88100a9994d37749c42dc63e554f5fb9c37caf produced no workflow/session and therefore did not consume an attempt. STRICT_READ_ONLY and NON_SHELL. Audit only docs/VAEP_N4_1_CLOSURE_CERT.md for current exact-head N4.1.H closure evidence, contradictions, missing M11 required-current real encrypted Desarrollo backup/drill proof, gate correlation, DoD and P0=0/P1=0 claims. Use repository-reading capabilities only; no shell, terminal, commands, scripts, temp files, git mutations, tests/builds, secrets, deploy, or scope expansion. Report exact visible evidence, limitations/truncation, validations not executed, risks/recommendations, and TWO substantive independent SELF_REVIEW_PASS checks. Never claim LISTO or promote N4.2 without causal exact-head evidence."
+}
