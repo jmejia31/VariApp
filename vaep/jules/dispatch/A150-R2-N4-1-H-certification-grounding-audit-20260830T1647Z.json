@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A150-R2-N4-1-H-certification-grounding-audit-20260830T1647Z",
+  "taskId": "N4.1.H-A150-certification-grounding-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "d83d093a7332d9b796d0ac5c8f586f9f1d2736b9",
+  "taskAttempt": 2,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL:docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "VAEP_TRANSPORT_VERIFIED=true\nFINAL R2 for SAME logical task N4.1.H-A150-certification-grounding-audit. ATTEMPT1 is rejected because its own self-review admits executing wc -l and git status under STRICT_READ_ONLY_NON_SHELL. Re-audit only docs/CERTIFICACION_N4_1_CAJA.md using non-shell read methods. Reconcile only visible grounded statements against current N0.6/N0.5/N0.3 evidence and the proven M11 required-current external-configuration blocker. Do not modify files, run shell, create temp files, inspect secrets, promote N4.2, or claim PASS/LISTO. Explicitly report observations, limitations, risks, validations/tests not executed, exact closure evidence still missing, and next safe target. Perform SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 as two separate substantive reconsiderations after the evidence analysis. R2 is FINAL; any remaining defect transfers to controller QA_TAKEOVER; never propose R3. TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY."
+}
