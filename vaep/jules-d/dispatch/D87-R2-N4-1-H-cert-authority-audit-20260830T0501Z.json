@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D87-R2-N4-1-H-cert-authority-audit-20260830T0501Z",
+  "taskId": "N4.1.H-D87-cert-authority-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "8c2938281b8ba5eb15dfbb93fe83814f39d3fa5d",
+  "taskAttempt": 2,
+  "fileScopeHint": "STRICT_READ_ONLY NON_SHELL: docs/CERTIFICACION_N4_1_CAJA.md and docs/VAEP_AUTHORITY.md only",
+  "prompt": "VAEP v3.25.1 D87 ATTEMPT2 FINAL. ATTEMPT1 review rejected because its plan explicitly invoked echo -e under STRICT_READ_ONLY/NON_SHELL. SAME logical task, FINAL correction; R3 prohibited. CURRENT_PARENT N4.1.H close-first. Read only docs/CERTIFICACION_N4_1_CAJA.md and docs/VAEP_AUTHORITY.md using repository-native non-shell reading. Do not create or modify files/helpers/temp/scripts; do not run terminal/bash/shell/echo/grep/cat/sed/python/tests; do not publish/push/merge/deploy or touch main/Produccion/secrets. Report exact closure prerequisites and certification claims requiring controller-side external verification, limitations, validations not executed, SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. Do not claim CI PASS, P0=0, P1=0, LISTO or N4.2 promotion. If any blocking defect remains, report it for ChatGPT/VAEP QA takeover; no Jules R3."
+}
