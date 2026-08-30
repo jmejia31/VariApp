@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A147-R2-N4-1-H-vaep-authority-closure-audit-20260830T1603Z",
+  "taskId": "N4.1.H-A147-vaep-authority-closure-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "474211b494af8e135e713d5da2c55d9c35ee1842",
+  "taskAttempt": 2,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL::docs/VAEP_AUTHORITY.md",
+  "prompt": "R2 FINAL for the SAME logical A147 task. ATTEMPT1 is REVIEW_REJECT because SELF_REVIEW_PASS_1 explicitly admits executing wc -l under NON_SHELL. This is the final Jules attempt; R3 is prohibited and any remaining defect transfers to ChatGPT/VAEP QA. STRICT_READ_ONLY and NON_SHELL. Audit only docs/VAEP_AUTHORITY.md for governing N4.1.H closure semantics: terminal worker review/rebind, no false ACTIVE/LISTO, exact-head causal evidence, ATTEMPT1+R2 maximum, controller QA takeover after R2 failure, and PREWARM/N+1 promotion blocking before parent closure. Use repository-reading capabilities only; absolutely no shell, terminal, commands, wc, grep, tail, scripts, temp files, git mutations, tests/builds, secrets, workflow dispatch, deploy, or scope expansion. If reading truncates, report it and fail closed. Report exact visible evidence, validations not executed, risks/recommendations, and TWO independent substantive SELF_REVIEW_PASS checks with different evidence findings. Never infer LISTO or promote N4.2."
+}
