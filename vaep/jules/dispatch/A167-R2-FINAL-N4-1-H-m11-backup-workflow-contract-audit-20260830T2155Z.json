@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A167-R2-FINAL-N4-1-H-m11-backup-workflow-contract-audit-20260830T2155Z",
+  "taskId": "N4.1.H-A167-m11-backup-workflow-contract-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "013e6884534c95b8ab6566355f9480eca8beddfa",
+  "taskAttempt": 2,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL:.github/workflows/m11-backup-desarrollo-operativo.yml",
+  "prompt": "R2 FINAL SAME LOGICAL TASK. Corrige exclusivamente la violacion del ATTEMPT1: PROHIBIDO terminal/bash/run_in_bash_session y cualquier comando shell equivalente, incluso para leer documentacion auxiliar. Reaudita unicamente .github/workflows/m11-backup-desarrollo-operativo.yml mediante lectura nativa no-shell. Si la lectura queda truncada, declara exactamente la limitacion y NO infieras eventos, condiciones SKIPPED, artifacts, checksums, metadata ni prerequisitos no visibles. Devuelve solo hallazgos grounded, validaciones ejecutadas/no ejecutadas, riesgos/recomendaciones y dos auto-revisiones independientes con literales SELF_REVIEW_PASS_1 y SELF_REVIEW_PASS_2. No modificar archivos ni publicar cambios. ATTEMPT2 es FINAL; si persiste cualquier defecto bloqueante, reportarlo para controller QA takeover. R3 PROHIBIDO. COMPLETED no equivale a LISTO."
+}
