@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C138-R2-N4-1-H-tasks-current-closure-audit-20260830T1830Z",
+  "taskId": "N4.1.H-C138-tasks-current-closure-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "d5825bf490070307b6385a5732dbd0d8a56eb388",
+  "taskAttempt": 2,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL:TASKS.md",
+  "prompt": "VAEP v3.25 R2 FINAL for the SAME logical C138 task after ATTEMPT1 REVIEW_REJECT because SELF_REVIEW_PASS_1/2 were only 'Completed' and therefore not substantive. Audit ONLY TASKS.md using repository-native NON_SHELL inspection. Determine whether current N4.1.H closure requirements are explicitly grounded: required-current real encrypted M11 Desarrollo backup, applicable restore/drill correlation to artifact/checksum/metadata, causal gates/DoD, P0=0/P1=0, and no premature N4.2 promotion. If direct file visibility truncates, use only repository-native non-shell targeted inspection/search methods available to you; if still limited, state the exact limitation without extrapolation. Do not execute shell, modify/create files, inspect secrets, claim LISTO/CI PASS/P0=0/P1=0, or promote N4.2. Return evidence-only findings, validations not executed, next safe causal target, and two genuinely independent substantive self-reviews explaining evidence quality and NON_SHELL compliance. ATTEMPT2/2 FINAL; R3 prohibited; any blocking review defect transfers to ChatGPT/VAEP/Vibe QA_TAKEOVER. TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY."
+}
