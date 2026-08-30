@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B162-R2-N4-1-H-cert-current-audit-20260830T1505Z",
+  "taskId": "N4.1.H-B162-cert-current-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "0e43d5031b4d52d7615ea5f8d01f82829f6a4d0e",
+  "taskAttempt": 2,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL::docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "VAEP_TRANSPORT_EXPECTED=true. SAME logical task B162, FINAL ATTEMPT2/R2. ATTEMPT1 is REVIEW_REJECT because SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 were materially duplicate rather than two substantive independent checks. STRICT_READ_ONLY and NON_SHELL are absolute. Audit only docs/CERTIFICACION_N4_1_CAJA.md for current N4.1.H closure wording, exact-head evidence, required-current real encrypted Desarrollo M11 backup/drill, DoD, P0=0/P1=0, and any wording that could permit false LISTO. Use repository-reading capabilities only; no shell, terminal, commands, scripts, temp files, git mutations, tests/builds, secrets, deploy, or scope expansion. If content is truncated, report only visible evidence and fail closed. Produce TWO genuinely independent substantive SELF_REVIEW_PASS checks: one focused on evidence/currentness/closure semantics, the other focused on scope/security/no-mutation/limitations. ATTEMPT2 is FINAL; any blocking defect transfers to controller QA. Never create/request R3 and never promote N4.2."
+}
