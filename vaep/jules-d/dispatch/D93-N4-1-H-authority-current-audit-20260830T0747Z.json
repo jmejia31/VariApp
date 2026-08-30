@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D93-N4-1-H-authority-current-audit-20260830T0747Z",
+  "taskId": "N4.1.H-D93-authority-current-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "2041f86498b38a32015152d3ffcbbe82cc5761c6",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY NON_SHELL: docs/VAEP_AUTHORITY.md only",
+  "prompt": "VAEP v3.25.1 CURRENT_PARENT=N4.1.H. New logical task after D92-R2 passed final controller review. Re-audit only docs/VAEP_AUTHORITY.md with repository-native reads for the literal PARENT_CLOSE_FIRST requirements that govern CURRENT_PARENT promotion and PREWARM successors. STRICT_READ_ONLY/NON_SHELL: no modifications, shell, terminal, helpers, tests or temp files. Preserve N4.1.H NO_LISTO unless grounded documentation + causal gates + DoD + P0=0/P1=0 are proven; N4.2 remains PREWARM only. Report exact findings, limitations, validations not executed, minimal controller-safe next action and two substantive SELF_REVIEW_PASS_1/2. Do not infer CI PASS or LISTO_REAL. Evidence only; controller review mandatory."
+}
