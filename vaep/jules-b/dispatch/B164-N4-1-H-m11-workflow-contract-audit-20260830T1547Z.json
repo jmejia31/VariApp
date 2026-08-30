@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B164-N4-1-H-m11-workflow-contract-audit-20260830T1547Z",
+  "taskId": "N4.1.H-B164-m11-workflow-contract-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "ac2d8fa60e7e3d2c17de5fe7a68e9114710a8f52",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL::.github/workflows/m11-backup-desarrollo-operativo.yml",
+  "prompt": "NEW logical SAME_PARENT task after B163-R2 FINAL PASS_LIMITED/attempt exhausted; no B163 R3. STRICT_READ_ONLY and NON_SHELL. Audit only .github/workflows/m11-backup-desarrollo-operativo.yml to state the exact conditions that cause the real encrypted Desarrollo backup job to execute versus be skipped, what executor evidence and encrypted backup/checksum/metadata artifacts are required for N4.1.H closure, and whether a green workflow with the real backup job skipped can ever satisfy that closure condition. Use repository-reading capabilities only; no shell, terminal, commands, scripts, temp files, git mutations, workflow dispatch, tests/builds, secrets, deploy, or scope expansion. Report exact visible evidence, truncation/limitations, validations not executed, risks/recommendations, and TWO independent substantive SELF_REVIEW_PASS checks with distinct findings. Never infer LISTO or promote N4.2."
+}
