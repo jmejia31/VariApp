@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C119-N4-1-H-rollback-controller-followup-20260830T0422Z",
+  "taskId": "N4.1.H-C119-rollback-controller-followup",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "4249c8bf64cae96cf5db65605cc8b3b85926d3a8",
+  "taskAttempt": 1,
+  "fileScopeHint": "WRITE_SCOPE:docs/ROLLBACK_N4_1_CAJA.md",
+  "prompt": "CURRENT_PARENT=N4.1.H. NEW logical SAME_PARENT task after C118 ATTEMPT2 exhausted by real-session lane timeout; C118 receives no R3 and is controller QA takeover. Work only in docs/ROLLBACK_N4_1_CAJA.md. Reconcile a minimal history-preserving checkpoint only if needed: rollback/certification must fail closed while required-current M11 Desarrollo backup/drill is externally blocked by missing required backup configuration; no CI PASS, P0=0/P1=0 or LISTO_REAL may be inferred from stale/historical evidence. If equivalent current language already exists, return patch0. No helper or temporary files. Do not touch any other file. Return exact patch/base, limitations, risks, unexecuted validations and two substantive independent self-reviews. Do not touch main, Production, branches, merge, deploy or secrets."
+}
