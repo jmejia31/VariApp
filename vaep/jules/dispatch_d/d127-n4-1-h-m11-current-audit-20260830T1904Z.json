@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D127-N4-1-H-m11-current-audit-20260830T1904Z",
+  "taskId": "N4.1.H-D127-m11-current-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "9549b650f83d69a7401aca1e7e5f7946b3ab3bd3",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY:.github/workflows/m11-backup-desarrollo-operativo.yml",
+  "prompt": "STRICT_READ_ONLY_NON_SHELL. Audit the current M11 Desarrollo backup workflow contract only. Determine the exact trigger conditions, external configuration prerequisites, required encrypted backup artifact/checksum/metadata evidence, and whether a restore/drill requirement can be proven from this file alone. Do not modify files. Do not run shell commands. Report evidence-only findings, explicit unproven items, and two independent substantive SELF_REVIEW_PASS checks. Never claim the real backup ran, never expose or modify secrets, and never claim N4.1.H LISTO without direct current executor evidence."
+}
