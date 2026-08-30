@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D118-N4-1-H-runbook-grounding-audit-20260830T1649Z",
+  "taskId": "N4.1.H-D118-runbook-grounding-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "24ad985b7e3721c67e02a59b00a8b92b5550a59e",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL:docs/RUNBOOK_N4_1_CAJA.md",
+  "prompt": "VAEP_TRANSPORT_VERIFIED=true\nNEW SAME_PARENT N4.1.H logical task after D117-R2 FINAL evidence-only completion; do not create D117 R3. Strict read-only/non-shell audit only docs/RUNBOOK_N4_1_CAJA.md. Identify visible operational closure steps, exact-head/CI/M11 evidence prerequisites, rollback/escalation requirements, any stale or overclaimed statements, and whether the runbook remains fail-closed for N4.1.H. Do not modify files, run shell, create temp files, inspect secrets, trigger deploy/Production, promote N4.2, or claim PASS/LISTO. Report truncation/visibility limits, risks, validations/tests not executed, exact evidence still missing, and next safe causal target. Perform two separate substantive self-reviews. TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY."
+}
