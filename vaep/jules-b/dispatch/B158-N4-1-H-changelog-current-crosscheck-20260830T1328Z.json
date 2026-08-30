@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B158-N4-1-H-changelog-current-crosscheck-20260830T1328Z",
+  "taskId": "N4.1.H-B158-changelog-current-crosscheck",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "a1c210a37ba8eb6286a96ffafc67f0dfab9328df",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY:CHANGELOG_AI.md",
+  "prompt": "STRICT_READ_ONLY and NON_SHELL. New SAME_PARENT N4.1.H evidence task after B157 terminal. Audit only CHANGELOG_AI.md with repository-reading capabilities. Determine whether the current N4.1.H Caja closure record is grounded in current evidence and explicitly preserves the unresolved required-current M11 real encrypted Desarrollo backup/drill blocker. Identify stale or contradictory wording and report the minimal correction needed later; do not edit files or claim closure. No shell/commands/temp files/tests/builds/git mutations/network/deploy/secrets. Report limitations, validations not executed, exact grounded evidence, and two substantive independent SELF_REVIEW_PASS checks. ATTEMPT1; max ATTEMPT2/R2; R3 prohibited."
+}
