@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B188-N4-1-H-cert-evidence-gap-audit-20260830T2341Z",
+  "taskId": "N4.1.H-B188-cert-evidence-gap-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "4e22e57bdf1f372380f93f5bd03aed3690103d8b",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "STRICT_READ_ONLY_NON_SHELL. NEW LOGICAL TASK after B187-R2 review pass-limited. Audit only docs/CERTIFICACION_N4_1_CAJA.md using native file-reading tools; never shell/terminal/bash, never modify files, never create helpers, never ask routine clarification. Identify only directly visible evidence gaps preventing N4.1.H LISTO_REAL, especially required-current real encrypted Desarrollo M11 backup and applicable restore/drill correlation to artifact/checksum/metadata. If native read truncates, state exact limitation and do not infer unseen content. Return OBSERVATIONS, LIMITATIONS, VALIDATIONS EXECUTED, VALIDATIONS NOT EXECUTED, RISKS/RECOMMENDATIONS, literal TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY, and two independent substantive messages labeled exactly SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. No unsupported LISTO/CI/P0/P1 claim."
+}
