@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C145-N4-1-H-rollback-m11-proof-audit-20260830T2118Z",
+  "taskId": "N4.1.H-C145-rollback-m11-proof-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "56e039d6cdaf73e0d136986f739c58581ccb0f9f",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL:docs/ROLLBACK_N4_1_CAJA.md",
+  "prompt": "VAEP_TRANSPORT_VERIFIED=true. NEW SAME_PARENT N4.1.H logical task after C144 terminal review; not a retry/R3. Inspect only docs/ROLLBACK_N4_1_CAJA.md using native non-shell access. No shell/terminal, modifications, secrets, Production/main/branches/merge/deploy. Determine only directly visible rollback prerequisites tied to required-current M11 encrypted Desarrollo backup and applicable restore/drill artifact/checksum/metadata. If native read is truncated, report exact truncation and do not infer unseen sections. PASS1 audits evidence/authority/unsupported closure claims; PASS2 independently audits tool compliance/limitations/risks/hygiene/unexecuted validations. Evidence-only; no LISTO/CI/P0/P1 claims without direct proof."
+}
