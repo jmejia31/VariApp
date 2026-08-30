@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C147-N4-1-H-runbook-m11-closure-contract-fix-20260830T2146Z",
+  "taskId": "N4.1.H-C147-runbook-m11-closure-contract-fix",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "ca5b7112b0abd03c43bdabe27cb50b2944e5c224",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/RUNBOOK_N4_1_CAJA.md",
+  "prompt": "NEW SAME_PARENT WRITE ATTEMPT1. Corrige exclusivamente docs/RUNBOOK_N4_1_CAJA.md para incorporar de forma minima, grounded y fail-closed el prerequisito de cierre N4.1.H ya confirmado: no LISTO_REAL ni promocion N4.2 sin evidencia required-current de backup cifrado REAL M11 de Desarrollo y, cuando aplique, restore/drill correlacionado al mismo artifact/checksum/metadata. No inventes ejecuciones ni declares PASS. Mantente en un solo archivo, sin tocar codigo, workflows, secrets ni Produccion. Devuelve ChangeSet reviewable, validaciones proporcionales y dos auto-revisiones independientes SELF_REVIEW_PASS_1/2. COMPLETED no equivale a integrado/LISTO."
+}
