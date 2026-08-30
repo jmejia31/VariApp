@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A129-N4-1-H-tasks-current-grounding-20260830T0848Z",
+  "taskId": "N4.1.H-A129-tasks-current-grounding",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "8f37483d38df2eee722e54321738ff822699f431",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY NON_SHELL:TASKS.md",
+  "prompt": "CURRENT_PARENT=N4.1.H. STRICT_READ_ONLY and NON_SHELL. Audit TASKS.md only for the current N4.1.H closure state, stale or premature LISTO/P0/P1/CI claims, and exact missing closure evidence. Use repository read tools only; DO NOT execute shell/bash/python/git/dotnet/npm commands and DO NOT create temporary files. Do not modify anything. Do not infer CI PASS, P0=0/P1=0, LISTO_REAL, or promote N4.2. Return exact grounded findings, limitations, validations not executed, minimal controller-safe next action, SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2."
+}
