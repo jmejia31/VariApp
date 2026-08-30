@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C150-N4-1-H-authority-current-audit-20260830T2300Z",
+  "taskId": "N4.1.H-C150-authority-current-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "4a21c9af38f47f0f799121580689b5e46dde124f",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/VAEP_AUTHORITY.md",
+  "prompt": "STRICT_READ_ONLY_NON_SHELL. This is a NEW logical task after C149-R2 exhausted; it is not R3. Audit only docs/VAEP_AUTHORITY.md with native non-shell file reading. Do not use terminal, bash, shell, cat, sed, grep, wc, Python, or command execution. Determine only what this authority file directly proves about N4.1.H closure gates, M11 required-current evidence, promotion blocking, and the rule that COMPLETED/workflow/manifest never equals LISTO. Do not infer missing N4.1.H-specific text if not present. Do not modify files. If native reads truncate, report unseen content UNPROVEN and do not bypass limits. Report observations, limitations, validations executed/not executed, risks/recommendations, TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY, and two independent substantive reviews labeled exactly SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. Never claim LISTO, CI PASS, P0=0 or P1=0 without direct causal evidence."
+}
