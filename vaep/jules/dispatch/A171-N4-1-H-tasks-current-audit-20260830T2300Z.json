@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A171-N4-1-H-tasks-current-audit-20260830T2300Z",
+  "taskId": "N4.1.H-A171-tasks-current-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "df59858739f5e2d0cc443adeaa876e04f98f17b8",
+  "taskAttempt": 1,
+  "fileScopeHint": "TASKS.md",
+  "prompt": "STRICT_READ_ONLY_NON_SHELL. Audit only TASKS.md for the current N4.1.H closure state. Use native non-shell file reading only; do not use terminal, bash, shell, cat, sed, grep, wc, Python, or command execution. Verify whether TASKS.md remains grounded in VALIDANDO/NO_LISTO, whether required-current real encrypted M11 Desarrollo backup plus applicable restore/drill correlated to artifact/checksum/metadata is still required, and whether N4.2 promotion remains blocked. Do not modify files. If native reads truncate, report unseen content UNPROVEN rather than bypassing the limit. Report observations, limitations, validations executed/not executed, risks/recommendations, TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY, and two independent substantive reviews labeled exactly SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. Never claim LISTO, CI PASS, P0=0 or P1=0 without direct evidence."
+}
