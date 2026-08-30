@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B144-N4-1-H-certification-grounded-write-20260830T0930Z",
+  "taskId": "N4.1.H-B144-certification-grounded-write",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "81380931423cfb3e54ac6b8cd7d5cd14b19119b2",
+  "taskAttempt": 1,
+  "fileScopeHint": "WRITE_SCOPE:docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "CURRENT_PARENT=N4.1.H. B143-REC2 REVIEW_PASS evidence-only confirmed the certification document remains VALIDANDO/NO_LISTO and needs complete grounded reconciliation. Work only in docs/CERTIFICACION_N4_1_CAJA.md. Reconcile it additively against current repository evidence without claiming closure: preserve N4.1.H as EN_PROGRESO/NO_LISTO; identify exact functional/documentary reference SHA if verifiable; record that M13 exact-head certification is not green while causal failures remain and that CI/P0/P1/LISTO cannot be inferred. Preserve runbook and rollback references. Do not delete history or touch CHANGELOG_AI.md, TASKS.md, other docs, code, workflows, manifests, main, Production, branches, merge, deploy or secrets. Run proportional validations that do not require expanding scope. Return exact patch/base, limitations, risks, unexecuted validations and two self-reviews."
+}
