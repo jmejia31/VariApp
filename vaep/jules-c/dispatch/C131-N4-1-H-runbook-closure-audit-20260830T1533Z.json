@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C131-N4-1-H-runbook-closure-audit-20260830T1533Z",
+  "taskId": "N4.1.H-C131-runbook-closure-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "31e2f25e51d8f304f8ff01341aee3902b9e433e5",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL::docs/RUNBOOK_N4_1_CAJA.md",
+  "prompt": "NEW logical SAME_PARENT task after C129 exhausted ATTEMPT2/2 and transferred to QA_TAKEOVER; this is not R3. STRICT_READ_ONLY and NON_SHELL. Audit only docs/RUNBOOK_N4_1_CAJA.md for current N4.1.H Caja closure readiness, especially whether the runbook correctly requires required-current real encrypted Desarrollo M11 backup/restore drill executor evidence and artifact/checksum/metadata evidence rather than historical or pull_request-only success. Use repository-reading capabilities only; no shell, terminal, commands, scripts, temp files, git mutations, tests/builds, secrets, workflow dispatch, deploy, or scope expansion. If reading is truncated, fail closed and state it. Report exact visible evidence, validations not executed, risks/recommendations, and TWO genuinely independent substantive self-reviews with distinct findings. Never infer LISTO or promote N4.2 without current causal evidence."
+}
