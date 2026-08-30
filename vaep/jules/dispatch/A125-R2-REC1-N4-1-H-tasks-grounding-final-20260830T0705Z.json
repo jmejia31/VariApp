@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A125-R2-REC1-N4-1-H-tasks-grounding-final-20260830T0705Z",
+  "taskId": "N4.1.H-A125-tasks-grounding-preflight",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "1d1aef7d1f2b0f06bce73a758730713407229f0d",
+  "taskAttempt": 2,
+  "fileScopeHint": "STRICT_READ_ONLY NON_SHELL: TASKS.md only",
+  "prompt": "VAEP v3.25.1 RECOVERY of SAME logical FINAL R2/ATTEMPT2 because the prior R2 worker exceeded 5 minutes without externally correlated Jules session + fresh useful technical activity; this is NOT R3 and does not create attempt3. CURRENT_PARENT=N4.1.H. Audit TASKS.md only using repository-native read_file exclusively. Determine whether an ERP-N4.1 Caja A-H rollup is already present; if absent, identify only the safest append-only insertion point grounded literally in TASKS.md. STRICT_READ_ONLY/NON_SHELL: absolutely no shell, terminal, run_in_bash_session, echo, grep, cat, sed, python, tests, helpers, temp files or modifications. Do not infer CI PASS, P0=0, P1=0, LISTO_REAL or N4.2 promotion. Report exact limitations, validations not executed, minimal controller-safe next action, and two substantive independent SELF_REVIEW_PASS_1/2. ATTEMPT2 FINAL: if anything blocks, report for controller QA takeover; R3 is prohibited."
+}
