@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D83-N4-1-H-rollback-grounding-20260830T0205Z",
+  "taskId": "N4.1.H-D83-rollback-grounding",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "88425fd79bc4e13454dc12512d69cd30de9c5613",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY NON_SHELL: docs/ROLLBACK_N4_1_CAJA.md only",
+  "prompt": "VAEP v3.25.1 NEW logical SAME_PARENT D83 after D80 ATTEMPT2 throughput terminal and controller QA takeover; this is not R3. Exclusive STRICT_READ_ONLY/NON_SHELL scope docs/ROLLBACK_N4_1_CAJA.md only. Verify repository-native rollback evidence and identify only the minimal grounded correction or missing closure fact, explicitly retaining N4.1.H EN_PROGRESO/NO_LISTO unless closure conditions are evidenced. Do not modify files, create helper/temp files, execute shell/tests, publish/push/merge/deploy, assert CI PASS or P0=0/P1=0, or promote N4.2. Return evidence artifact only with SELF_REVIEW_PASS_1, SELF_REVIEW_PASS_2 and validations not executed."
+}
