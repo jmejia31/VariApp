@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D85-N4-1-H-certification-grounding-20260830T0302Z",
+  "taskId": "N4.1.H-D85-certification-grounding",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "9f37c7330aff65f04ec7f5a58cd9c5f9d7d87e29",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "CURRENT_PARENT N4.1.H close-first. NEW logical task after D84-R2 exhausted; this is NOT R3. STRICT_READ_ONLY and NON_SHELL evidence task. Inspect only docs/CERTIFICACION_N4_1_CAJA.md and directly necessary repository-native evidence to identify exact certification facts, contradictions, or missing proof blocking N4.1.H closure. Do not modify files, create helper/temp files, run terminal/bash/shell/tests/scripts, publish, push, merge, deploy, touch main/Produccion/secrets, promote N4.2, or claim CI/P0/P1 without evidence. Return repository-grounded findings, validations not executed, TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY, and two independent self-reviews. Preserve EN_PROGRESO/NO_LISTO unless every closure condition is independently proven."
+}
