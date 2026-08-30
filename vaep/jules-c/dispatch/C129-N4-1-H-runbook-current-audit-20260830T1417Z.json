@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C129-N4-1-H-runbook-current-audit-20260830T1417Z",
+  "taskId": "N4.1.H-C129-runbook-current-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "c39d10407377d833524790564d1f645a34ab6191",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY:docs/RUNBOOK_N4_1_CAJA.md",
+  "prompt": "STRICT_READ_ONLY and NON_SHELL. NEW logical SAME_PARENT task after C128 terminal PASS_LIMITED; not a retry. Audit only docs/RUNBOOK_N4_1_CAJA.md for current fail-closed N4.1.H operational guidance, especially whether it treats required-current M11 real encrypted Desarrollo backup/drill as a prerequisite rather than historical evidence. Repository-reading capabilities only; no shell, terminal, commands, scripts, temp files, git mutations, tests/builds, secrets, deploy, or scope expansion. Report exact visible evidence, explicit truncation/readability limitations, validations not executed, risks/recommendations, and TWO substantive independent SELF_REVIEW_PASS checks. Fail closed on ambiguity. Never claim LISTO, CI PASS, P0=0, P1=0, or promote N4.2."
+}
