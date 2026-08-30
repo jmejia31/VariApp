@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A165-N4-1-H-tasks-current-closure-proof-audit-20260830T2109Z",
+  "taskId": "N4.1.H-A165-tasks-current-closure-proof-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "ebcaa6816bdaef3f6db45a633b5f751625427e49",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL:TASKS.md",
+  "prompt": "VAEP_TRANSPORT_VERIFIED=true\nNew SAME_PARENT N4.1.H ATTEMPT1 after A164 REVIEW_PASS_LIMITED evidence-only due native-read truncation; this is a NEW logical task, not rework. Inspect only TASKS.md using native non-shell access. No shell/terminal, no file modifications, no secrets, no Production/main/branches/merge/deploy. Determine only directly visible N4.1.H closure requirements, current M11 real encrypted Desarrollo backup plus applicable restore/drill evidence requirements, DoD/gate/P0/P1 prerequisites, and explicit fail-closed language. If native read is truncated, report exact truncation and do not infer unseen content. Provide two substantively independent labeled SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 checks: PASS1 audits evidence/authority/unsupported closure claims; PASS2 independently audits tool compliance, limitations, risks, hygiene and validations not executed. Evidence-only; never claim LISTO, CI PASS, P0=0 or P1=0 without direct causal proof."
+}
