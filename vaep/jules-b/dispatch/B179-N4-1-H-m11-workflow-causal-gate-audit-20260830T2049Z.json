@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B179-N4-1-H-m11-workflow-causal-gate-audit-20260830T2049Z",
+  "taskId": "N4.1.H-B179-m11-workflow-causal-gate-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "b290d264ee61c2429542b02e3729b5f17a501cf6",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL:.github/workflows/m11-backup-desarrollo-operativo.yml",
+  "prompt": "New SAME_PARENT N4.1.H evidence-only ATTEMPT1. Inspect only .github/workflows/m11-backup-desarrollo-operativo.yml using native non-shell access. Establish the exact causal conditions under which the real encrypted Desarrollo backup job and any restore/drill evidence execute, and distinguish workflow-level SUCCESS from the real backup job being SKIPPED. Do not use shell/terminal, modify files, access/modify secrets, touch Production/main/branches, merge or deploy. Report only directly visible facts, trigger/gate conditions, artifact/checksum/metadata evidence requirements, limitations/truncation, risks, unexecuted validations and exact next safe proof. Provide two substantively independent SELF_REVIEW_PASS checks. Evidence-only; never claim M11 current PASS without executor evidence."
+}
