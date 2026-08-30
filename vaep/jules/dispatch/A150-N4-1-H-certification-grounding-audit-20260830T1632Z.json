@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A150-N4-1-H-certification-grounding-audit-20260830T1632Z",
+  "taskId": "N4.1.H-A150-certification-grounding-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "7849586a4808822f10b0cb0c13058bc6ab58443c",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL:docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "SAME_PARENT N4.1.H. Strict read-only/non-shell audit only docs/CERTIFICACION_N4_1_CAJA.md. Reconcile the certification text against current grounded evidence already available from N0.6/N0.5/N0.3 gate investigations and the proven M11 required-current external-configuration blocker. Identify every statement that is currently supported, stale, overclaimed, missing, or still requires exact-head evidence. Do not modify files, run shell, create temp files, inspect secrets, promote N4.2, or claim PASS/LISTO. Report observations, limitations, risks, validations not executed, exact required evidence for closure, and the next safe inspection target. Perform two independent substantive self-reviews before COMPLETED. TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY."
+}
