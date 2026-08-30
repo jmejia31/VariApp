@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D89-R2-N4-1-H-authority-close-gate-audit-20260830T0549Z",
+  "taskId": "N4.1.H-D89-authority-close-gate-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "d4f5ca098f93be27b4198ef1c66db14926cc45bd",
+  "taskAttempt": 2,
+  "fileScopeHint": "STRICT_READ_ONLY NON_SHELL: docs/VAEP_AUTHORITY.md only",
+  "prompt": "VAEP v3.25.1 D89-R2 FINAL. SAME logical task after ATTEMPT1 REVIEW_REJECT because the result did not emit two substantive independent SELF_REVIEW_PASS_1/2 as required. CURRENT_PARENT N4.1.H close-first. STRICT_READ_ONLY NON_SHELL audit docs/VAEP_AUTHORITY.md only using native read_file; no bash, shell, terminal, helpers/temp files, edits, patches, branches, pushes, merges, deploys, Production, main or secrets. Extract only explicit authority rules relevant to parent-close-first, evidence/DoD, promotion, retry/review and fail-closed behavior. If N4.1.H/P0/P1 specifics are absent, report absence without inventing an authority conflict or deriving closure. Do not claim CI PASS, P0/P1=0, LISTO_REAL or N4.2 promotion. This is ATTEMPT2 FINAL; R3 prohibited. Emit two substantive independent SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 before COMPLETED and report limitations/unexecuted validations."
+}
