@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B119-N4-1-H-changelog-rollup-write-20260830T0050Z",
+  "taskId": "N4.1.H-B119-changelog-rollup-write",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "ec2d1686ca510404a8f9839fe14be7ae4654c85b",
+  "taskAttempt": 1,
+  "fileScopeHint": "WRITE_ARTIFACT_ONLY: CHANGELOG_AI.md",
+  "prompt": "VAEP v3.25.1 SAME_PARENT NEW logical task after B118 terminal review. Exclusive scope CHANGELOG_AI.md only. Produce a reviewable ChangeSet patch, but do not publish/push/merge/deploy. Add a history-preserving ERP-N4.1 Caja closure rollup using only facts verifiable from current repository authority and accepted controller state; preserve prior history and do not rewrite old failures. N4.1.H remains VALIDANDO/NO LISTO unless all closure prerequisites are proven. Never assert CI PASS, P0=0/P1=0 or promote N4.2 without exact evidence. Prefer repository-native inspection; no unnecessary shell/network. Perform SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 and report validations not executed."
+}
