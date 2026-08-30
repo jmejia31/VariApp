@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D136-N4-1-H-certification-m11-consistency-qa-20260830T2146Z",
+  "taskId": "N4.1.H-D136-certification-m11-consistency-qa",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "a56c6e65463a35c497b7b09e8ca9ec535fb82533",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL:docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "NEW SAME_PARENT ATTEMPT1. Audita exclusivamente docs/CERTIFICACION_N4_1_CAJA.md mediante lectura nativa no-shell como QA de consistencia del cierre N4.1.H. Verifica que EN_PROGRESO/NO_LISTO, M11 required-current real encrypted backup, restore/drill aplicable correlacionado a artifact/checksum/metadata, causal gates y no promocion N4.2 esten expresados sin contradicciones ni claims stale. PROHIBIDO terminal/bash/run_in_bash_session y comandos shell equivalentes. No modificar archivos ni publicar cambios. Devuelve evidencia grounded, limitaciones, riesgos, validaciones ejecutadas/no ejecutadas y dos auto-revisiones independientes SELF_REVIEW_PASS_1/2. COMPLETED no equivale a LISTO."
+}
