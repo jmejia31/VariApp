@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A132-REC1-N4-1-H-tasks-grounded-write-20260830T0356Z",
+  "taskId": "N4.1.H-A132-tasks-grounded-write",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "90149117422238a58739cd209c3b8b6408ee31b3",
+  "taskAttempt": 1,
+  "fileScopeHint": "WRITE_SCOPE:TASKS.md",
+  "prompt": "RECOVERY SAME logical task and ATTEMPT1 after pre-session manifest JSON parse failure; bootstrap failure did not consume the attempt. CURRENT_PARENT=N4.1.H. Work only in TASKS.md. Ground a concise history-preserving N4.1.H checkpoint against repository evidence. Parent remains EN_PROGRESO/NO_LISTO; current causal certification is not green while required-current M11 drill freshness is unresolved for the current functional candidate. Never claim CI PASS, P0=0/P1=0 or LISTO_REAL unless independently proven. Do not rewrite/delete historical entries and do not touch CHANGELOG_AI.md, docs, code, workflows, manifests, main, Production, branches, merge, deploy or secrets. Return exact patch/base, limitations, risks, unexecuted validations and two self-reviews."
+}
