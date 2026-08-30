@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A125-N4-1-H-tasks-grounding-preflight-20260830T0632Z",
+  "taskId": "N4.1.H-A125-tasks-grounding-preflight",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "6c191033a644d5e4d1f839983b197d11600fbea2",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY NON_SHELL: TASKS.md only",
+  "prompt": "VAEP v3.25.1 NEW logical SAME_PARENT task. CURRENT_PARENT=N4.1.H. Audit TASKS.md only with repository-native read_file. Determine whether an ERP-N4.1 Caja A-H rollup is already present; if absent, identify the exact safest append-only insertion point and report only facts literally present in TASKS.md. STRICT_READ_ONLY/NON_SHELL: no modifications, shell, terminal, echo, grep, cat, sed, python, tests, helpers or temp files. Do not infer CI PASS, P0=0, P1=0, LISTO_REAL or N4.2 promotion. Report limitations, validations not executed, minimal controller-safe next action, and two substantive independent SELF_REVIEW_PASS_1/2."
+}
