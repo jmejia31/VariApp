@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D142-R2-N4-1-H-m11-workflow-current-audit-20260830T2325Z",
+  "taskId": "N4.1.H-D142-m11-workflow-current-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "7244a127c515a7575f98463866df932e11d4d53a",
+  "taskAttempt": 2,
+  "fileScopeHint": ".github/workflows/m11-backup-desarrollo-operativo.yml",
+  "prompt": "STRICT_READ_ONLY_NON_SHELL evidence-only FINAL correction for the SAME logical D142 task. Inspect ONLY .github/workflows/m11-backup-desarrollo-operativo.yml using native file reading. The ATTEMPT1 target filename was incorrect; this corrected existing workflow path is the authoritative exclusive scope for this R2. Do not execute workflows. Do not use terminal, shell, bash, cat, sed, wc, grep, Python, git commands, tests, writes, patches, temporary files or any command-line utility. Determine the exact trigger and gating semantics for the real encrypted Desarrollo M11 backup, what artifact/checksum/metadata evidence the workflow intends to produce, under what conditions its real backup job can be skipped or not executed, and what separate applicable restore/drill proof remains necessary for N4.1.H closure. Do not read or expose secret values. Do not infer execution from workflow definition. Required final output headings: OBSERVATIONS; LIMITATIONS; VALIDATIONS EXECUTED; VALIDATIONS NOT EXECUTED; RISKS/RECOMMENDATIONS. Include the literal line TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY. Before COMPLETED, provide two materially independent reviews labeled exactly SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2: PASS_1 assesses scope, evidence, unsupported closure claims and M11 causal sufficiency; PASS_2 independently assesses tool compliance, truncation, secret hygiene, risks and unexecuted validations. Make no repository changes; return evidence only. ATTEMPT2 is FINAL; if any blocking defect remains, report it for controller QA takeover and do not request or imply R3."
+}
