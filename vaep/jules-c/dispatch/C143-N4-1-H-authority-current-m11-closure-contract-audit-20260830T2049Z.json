@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C143-N4-1-H-authority-current-m11-closure-contract-audit-20260830T2049Z",
+  "taskId": "N4.1.H-C143-authority-current-m11-closure-contract-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "76b1d999f440f1a5a2f3d77ee87f63eaf1641e0f",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL:docs/VAEP_AUTHORITY.md",
+  "prompt": "New SAME_PARENT N4.1.H ATTEMPT1 evidence-only audit. Inspect only docs/VAEP_AUTHORITY.md using native non-shell access. Determine the directly visible closure authority for required-current M11 backup/restore-drill evidence, causal gates, DoD and prohibition on false LISTO/promotion. Do not use shell/terminal, modify files, access/modify secrets, touch Production/main/branches, merge or deploy. Report exact visible requirements, any truncation/limitations, risks, validations not executed and the next safe causal proof. Provide two substantively independent SELF_REVIEW_PASS checks. Evidence-only and fail-closed."
+}
