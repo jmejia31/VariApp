@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B147-N4-1-H-certification-causal-audit-20260830T1049Z",
+  "taskId": "N4.1.H-B147-certification-causal-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "2efc1c40d0e05c7e84e702ecd607616cd889ffa7",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY:docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "CURRENT_PARENT=N4.1.H. NEW SAME_PARENT logical task after B146 reached terminal COMPLETED and is under controller review. Read only docs/CERTIFICACION_N4_1_CAJA.md and direct causal evidence it references. Do not execute shell commands, echo, tests, create helper/temp files, or modify any file. Audit only current causal closure evidence, especially M11 current backup/drill prerequisites and any M13 dependency. Distinguish current evidence from historical evidence. Return patch0, exact observations, limitations, risks, recommendations, unexecuted validations, and two substantive independent self-reviews. Never infer CI PASS, P0=0/P1=0 or LISTO_REAL without complete current evidence. Do not touch main, Production, branches, merge, deploy or secrets."
+}
