@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B165-N4-1-H-m11-backup-script-audit-20260830T1600Z",
+  "taskId": "N4.1.H-B165-m11-backup-script-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "a731d23be9d2e3e62fa26e779c469fa422fab99b",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL::scripts/m11_backup_desarrollo.sh",
+  "prompt": "NEW logical SAME_PARENT task after B164 ATTEMPT1 PASS_LIMITED evidence-only due repository-read truncation. STRICT_READ_ONLY and NON_SHELL. Audit only scripts/m11_backup_desarrollo.sh for the exact external configuration prerequisites, encrypted backup output/checksum/metadata evidence it is designed to produce, and fail-closed conditions relevant to certifying N4.1.H. Use repository-reading capabilities only; no shell, terminal, commands, scripts, temp files, git mutations, workflow dispatch, tests/builds, secrets, deploy, or scope expansion. Never reveal secret values. If reading truncates, report the limitation and fail closed. Report exact visible evidence, validations not executed, risks/recommendations, and TWO independent substantive SELF_REVIEW_PASS checks with distinct findings. Never infer LISTO or promote N4.2."
+}
