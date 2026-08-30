@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C108-N4-1-H-runbook-rollback-coherence-20260830T0353Z",
+  "taskId": "N4.1.H-C108-runbook-rollback-coherence",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "cfc27ff0caba8199e37b32442591a742c4593153",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY NON_SHELL: docs/RUNBOOK_N4_1_CAJA.md and docs/ROLLBACK_N4_1_CAJA.md only",
+  "prompt": "VAEP v3.25.1 C108 ATTEMPT1 NEW logical SAME_PARENT task after C107 REVIEW_PASS evidence-only. CURRENT_PARENT N4.1.H close-first. Verify coherence between docs/RUNBOOK_N4_1_CAJA.md and docs/ROLLBACK_N4_1_CAJA.md only: identify contradictions, missing rollback/runbook links, unsupported commands or claims, and exact minimal additive wording if a factual documentation correction is needed. STRICT_READ_ONLY/NON_SHELL: use repository-native non-shell reading only; do not create/modify helper/temp/repository files; do not run terminal/bash/shell/echo/grep/cat/sed/python/tests; no push/merge/deploy/main/Produccion/secrets/N4.2 promotion. Report TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY, validations not executed, limitations, exact visible facts, SELF_REVIEW_PASS_1/2. Never claim LISTO/P0/P1."
+}
