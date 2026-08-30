@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A151-N4-1-H-authority-closure-grounding-20260830T1659Z",
+  "taskId": "N4.1.H-A151-authority-closure-grounding",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "8a04c0243af883cddb76135fb7aedcfdeb6f79d6",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL:docs/VAEP_AUTHORITY.md",
+  "prompt": "VAEP_TRANSPORT_VERIFIED=true\nNEW SAME_PARENT N4.1.H logical task after A150-R2 FINAL transferred residual uncertainty to controller QA; this is NOT R3 and must not reuse A150 taskId. Strict read-only/non-shell audit only docs/VAEP_AUTHORITY.md. Determine from visible grounded text the current authority for N4.1.H closure, especially fail-closed requirements for exact-head causal evidence, M11 required-current evidence, DoD, P0=0/P1=0, review reconciliation, and prohibition on promoting N4.2 from preparation alone. Do not modify files, run shell, create temp files, inspect secrets, promote N4.2, or claim PASS/LISTO. Report exact observations, visibility/truncation limitations, risks, validations/tests not executed, closure evidence still missing, and next safe target. Perform SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 as two separate substantive reconsiderations. TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY."
+}
