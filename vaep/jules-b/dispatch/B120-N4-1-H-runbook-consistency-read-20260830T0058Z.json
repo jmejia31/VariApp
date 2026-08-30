@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B120-N4-1-H-runbook-consistency-read-20260830T0058Z",
+  "taskId": "N4.1.H-B120-runbook-consistency-read",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "a88dc04a0f919c5f169536853e3c2671c33648b3",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY: docs/RUNBOOK_N4_1_CAJA.md",
+  "prompt": "VAEP v3.25.1 SAME_PARENT NEW logical task after B119 terminal REVIEW_FIRST. Exclusive read-only scope docs/RUNBOOK_N4_1_CAJA.md only. Verify the runbook against current repository authority for ERP-N4.1 Caja: rollback/runbook consistency, operational commands, fail-closed behavior, audit/RBAC references, and whether any statement would falsely imply N4.1.H LISTO, CI PASS, P0=0/P1=0, or N4.2 promotion. Do not modify files; return evidence-only findings with exact repository facts and any REQUIRED correction for controller QA. Avoid shell/tests/network; use repository-native inspection. Perform SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 and report validations not executed."
+}
