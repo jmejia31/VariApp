@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A152-R2-N4-1-H-changelog-grounding-20260830T1716Z",
+  "taskId": "N4.1.H-A152-changelog-grounding",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "bef607cc720da2b7263a7d6bddd6679f4d31313a",
+  "taskAttempt": 2,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL:CHANGELOG_AI.md",
+  "prompt": "VAEP v3.25 SAME logical task ATTEMPT2/R2 FINAL. Correct ATTEMPT1 review defect: ATTEMPT1 executed shell command wc despite STRICT_READ_ONLY_NON_SHELL. R3 is prohibited. Audit only CHANGELOG_AI.md using permitted non-shell repository/file inspection. Do not execute shell/terminal commands, modify files, create temporary files, inspect secrets, promote N4.2, or claim PASS/LISTO. Ground the freshest visible N4.1.H/M11 closure history; distinguish historical evidence from required-current evidence; determine whether exact-head causal gates, DoD, P0=0/P1=0 or LISTO_REAL are actually proven. If visibility is incomplete, report the precise limitation without extrapolation. Report exact observations, risks, validations/tests not executed, closure evidence still missing, and next safe causal target. Perform SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 as two separate substantive reconsiderations, explicitly verifying NON_SHELL compliance. TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY."
+}
