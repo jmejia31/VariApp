@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C109-N4-1-H-runbook-rollback-audit-20260830T0451Z",
+  "taskId": "N4.1.H-C109-runbook-rollback-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "466e69894ebaa7fe7760897535e772038070f85d",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY NON_SHELL: docs/RUNBOOK_N4_1_CAJA.md and docs/ROLLBACK_N4_1_CAJA.md only",
+  "prompt": "VAEP v3.25.1 C109 ATTEMPT1. CURRENT_PARENT N4.1.H close-first. Audit only docs/RUNBOOK_N4_1_CAJA.md and docs/ROLLBACK_N4_1_CAJA.md with repository-native non-shell reading. Do not create or modify files/helpers/temp/scripts; do not run terminal/bash/shell/echo/grep/cat/sed/python/tests; do not publish/push/merge/deploy or touch main/Produccion/secrets. Report exact contradictions, stale names, missing operational prerequisites, or say none proven. Do not rely on memory context or truncated prior summaries. Ground every claim in visible repository text and state limitations. TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY; validations not executed; SELF_REVIEW_PASS_1/2. No CI/P0/P1/LISTO claims and no N4.2 promotion."
+}
