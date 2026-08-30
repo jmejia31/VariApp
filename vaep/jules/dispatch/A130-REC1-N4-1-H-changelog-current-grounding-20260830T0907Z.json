@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A130-REC1-N4-1-H-changelog-current-grounding-20260830T0907Z",
+  "taskId": "N4.1.H-A130-changelog-current-grounding",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "585c2c8a73d16bd7a9012d5cf5ea543cd490baf5",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY NON_SHELL:CHANGELOG_AI.md",
+  "prompt": "RECOVERY SAME logical task/ATTEMPT1 because A130 exceeded the freshness threshold with workflow guard still IN_PROGRESS and no correlated Jules result Issue/session plus fresh useful technical activity externally verifiable. No content attempt is consumed until a real Jules session exists; this is NOT R2. CURRENT_PARENT=N4.1.H. STRICT_READ_ONLY and NON_SHELL. Audit CHANGELOG_AI.md only for exact N4.1.H historical/current rollup coverage, stale or premature LISTO/P0/P1/CI claims, and concrete missing grounded closure history. Use repository read tools only; DO NOT execute shell/bash/python/git/dotnet/npm commands and DO NOT create temporary files. Do not modify anything. Do not infer CI PASS, P0=0/P1=0, LISTO_REAL, or promote N4.2. Return exact grounded findings, limitations, risks, recommendations, tests not executed, validations not executed, minimal controller-safe next action, SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2."
+}
