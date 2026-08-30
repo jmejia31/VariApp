@@ -1,0 +1,9 @@
+{
+  "dispatchId": "D97-R2-N4-1-H-runbook-grounded-write-20260830T0351Z",
+  "taskId": "N4.1.H-D97-runbook-grounded-write",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "7493f65e953d564fce4964070aa10d8b0021b708",
+  "taskAttempt": 2,
+  "fileScopeHint": "WRITE_SCOPE:docs/RUNBOOK_N4_1_CAJA.md",
+  "prompt": "FINAL R2 for the same logical task. CURRENT_PARENT=N4.1.H. ATTEMPT1 is REVIEW_REJECT because the activity created temporary files caja.diff and my_payload.txt while SELF_REVIEW_PASS_1 claimed modifications were strictly limited to the runbook, so the self-review was contradicted by evidence. Work only in docs/RUNBOOK_N4_1_CAJA.md. Produce a minimal history-preserving correction/checkpoint that states only grounded fail-closed rules: exact-head M13 or any unresolved causal gate blocks LISTO_REAL; historical/noncausal failures require explicit evidence before N/A; P0/P1 and CI must not be inferred. Do not create helper or temporary files, do not touch any other file, and do not claim validations you did not perform. Return exact patch/base, limitations, risks, unexecuted validations and two self-reviews that explicitly reconcile git status/diff. ATTEMPT2 is final; if scope cannot be kept clean, return patch0 and fail closed for controller QA takeover."
