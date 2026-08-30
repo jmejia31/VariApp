@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C122-N4-1-H-tasks-current-blocker-audit-20260830T1119Z",
+  "taskId": "N4.1.H-C122-tasks-current-blocker-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "cff3b1a49aaf410736be033f3db76c159a9d3487",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY:TASKS.md",
+  "prompt": "CURRENT_PARENT=N4.1.H. NEW SAME_PARENT logical task after C121 REVIEW_PASS evidence-only/patch0. STRICT_READ_ONLY and NON_SHELL. Read only TASKS.md and direct causal evidence explicitly referenced by that file. Do not run shell, echo, tests, create helper/temp files, modify files, branches, PRs, merges, deploys, Production or secrets. Audit whether TASKS.md contains a grounded history-preserving N4.1/N4.1.H rollup and whether any current statement conflicts with the required-current M11 Desarrollo real backup/drill blocker. Return patch0, exact observations, limitations, risks, recommendations, unexecuted validations, SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. Never infer CI PASS, P0=0/P1=0 or LISTO_REAL without complete current evidence."
+}
