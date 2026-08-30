@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B148-N4-1-H-changelog-causal-audit-20260830T1103Z",
+  "taskId": "N4.1.H-B148-changelog-causal-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "721e2854a7aaf8c681b381f51d9fdb547628a899",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY:CHANGELOG_AI.md",
+  "prompt": "CURRENT_PARENT=N4.1.H. NEW SAME_PARENT logical task after B147 completed and passed controller review as evidence-only/patch0. Read only CHANGELOG_AI.md and direct causal evidence it explicitly references. Do not execute shell commands, echo, tests, create helper/temp files, or modify any file. Audit current closure evidence versus historical claims, especially the required-current M11 Desarrollo real backup/drill blocker and dependent M13 certification. Return patch0, exact observations, limitations, risks, recommendations, unexecuted validations, and two substantive independent self-reviews. Never infer CI PASS, P0=0/P1=0 or LISTO_REAL without complete current evidence. Do not touch main, Production, branches, merge, deploy or secrets."
+}
