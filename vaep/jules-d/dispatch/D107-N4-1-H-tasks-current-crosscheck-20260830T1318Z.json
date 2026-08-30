@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D107-N4-1-H-tasks-current-crosscheck-20260830T1318Z",
+  "taskId": "N4.1.H-D107-tasks-current-crosscheck",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "533a8ef903c710ffa52663144489d8c678e3cc24",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY:TASKS.md",
+  "prompt": "STRICT_READ_ONLY and NON_SHELL. New SAME_PARENT logical task after D106 evidence-only review. Audit TASKS.md for current N4.1/N4.1.H closure evidence. Determine whether TASKS contains explicit current M11 real encrypted Desarrollo backup/drill evidence, whether any historical M11/M13 status is being used as a substitute, and what task-level evidence remains unresolved before N4.1.H can be LISTO_REAL. Do not modify files, create temp files, run shell commands, tests/builds, git mutations, network/deploy operations, read/expose secrets, or claim closure. Report grounded evidence, limitations, unexecuted validations, and two substantive independent SELF_REVIEW_PASS checks."
+}
