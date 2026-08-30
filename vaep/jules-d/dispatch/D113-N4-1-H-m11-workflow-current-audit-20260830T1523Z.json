@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D113-N4-1-H-m11-workflow-current-audit-20260830T1523Z",
+  "taskId": "N4.1.H-D113-m11-workflow-current-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "6cd7e578144a6227f25065c7ac66dc7013fe8c00",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL::.github/workflows/m11-backup-desarrollo-operativo.yml",
+  "prompt": "NEW logical SAME_PARENT task after D112 completed; this is not a retry of D112. STRICT_READ_ONLY and NON_SHELL. Audit only .github/workflows/m11-backup-desarrollo-operativo.yml to determine the exact conditions for the real encrypted Desarrollo backup job to execute, whether pull_request success may coexist with the real backup job being skipped, what external configuration is required without revealing any secret values, and what exact evidence N4.1.H must require before treating M11 backup/restore drill as current. Use repository-reading capabilities only; no shell, terminal, commands, scripts, temp files, git mutations, workflow dispatch, tests/builds, secrets, deploy, or scope expansion. Report exact visible evidence, limitations/truncation, validations not executed, risks/recommendations, and TWO substantive independent SELF_REVIEW_PASS checks with distinct focuses and actual findings. Never infer LISTO or promote N4.2 from a workflow-level SUCCESS alone."
+}
