@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B170-N4-1-H-certification-m11-failclosed-fix-20260830T1726Z",
+  "taskId": "N4.1.H-B170-certification-m11-failclosed-fix",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "46111d6fa381809f98ad335e50fb343965018cb1",
+  "taskAttempt": 1,
+  "fileScopeHint": "WRITE_SAFE_SINGLE_FILE:docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "VAEP v3.25 NEW SAME_PARENT logical task ATTEMPT1 based on B169-R2 FINAL REVIEW_PASS_LIMITED evidence; B169 exhausted ATTEMPT2 and MUST NOT receive R3. Modify ONLY docs/CERTIFICACION_N4_1_CAJA.md. Add the smallest precise fail-closed certification requirement stating that N4.1.H cannot become LISTO_REAL until required-current executor evidence demonstrates the real encrypted M11 Desarrollo backup and applicable restore/drill validation, correlated with the required encrypted backup artifact plus checksum and metadata evidence, in addition to exact-head causal gates, DoD, P0=0/P1=0 and controller reconciliation. Make clear that historical/stale SHA evidence, skipped jobs, disposable-only drills, manifest/workflow existence, or uncorrelated evidence do not satisfy this requirement. Do not replace stale reference evidence with a new unproven SHA and do not claim current M11 evidence exists, CI PASS, P0=0/P1=0 or LISTO. Preserve current VALIDANDO/NO_LISTO semantics and existing structure. Touch no other file. Do not inspect/reveal secrets, merge, deploy, push, create branches, promote N4.2, or touch main/Producción. Run proportional non-destructive validation for the documentation edit and report unexecuted validation. Perform two genuinely separate substantive self-reviews: one for factual/causal closure semantics and one for diff/scope/no-overclaim safety. Return reviewable ChangeSet only."
+}
