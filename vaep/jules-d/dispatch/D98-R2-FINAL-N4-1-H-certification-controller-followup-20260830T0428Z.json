@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D98-R2-FINAL-N4-1-H-certification-controller-followup-20260830T0428Z",
+  "taskId": "N4.1.H-D98-certification-controller-followup",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "769c2ee473c733e35bc6609de55df4d0b80f488a",
+  "taskAttempt": 2,
+  "fileScopeHint": "READ_ONLY:docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "CURRENT_PARENT=N4.1.H. SAME logical task D98 FINAL ATTEMPT2 after ATTEMPT1 REVIEW_REJECT: ATTEMPT1 executed echo despite READ_ONLY and returned SELF_REVIEW_PASS_1/2 as N/A rather than substantive independent reviews. Read only docs/CERTIFICACION_N4_1_CAJA.md and direct causal evidence referenced by it. Do not execute shell commands, echo, tests, create helper/temp files, or modify any file. Determine whether certification remains VALIDANDO/NO_LISTO given fresh M11 Desarrollo backup failure before backup creation due absent required external backup configuration. Distinguish current causal blockers from historical/noncausal failures. Return patch0, exact observations, limitations, risks, recommendations, unexecuted validations, and TWO substantive independent self-reviews that explicitly assess scope, evidence sufficiency, false-PASS risk, secrets/Production safety, and whether LISTO/P0=0/P1=0 may be inferred. Never infer CI PASS, P0=0/P1=0 or LISTO_REAL without complete current evidence. ATTEMPT2 is final; any defect transfers to controller QA takeover; R3 prohibited. Do not touch main, Production, branches, merge, deploy or secrets."
+}
