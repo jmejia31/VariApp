@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D100-R2-N4-1-H-runbook-causal-audit-20260830T1059Z",
+  "taskId": "N4.1.H-D100-runbook-causal-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "9f1403e3cd8132fe8ed5afc395217ff18470c74c",
+  "taskAttempt": 2,
+  "fileScopeHint": "READ_ONLY:docs/RUNBOOK_N4_1_CAJA.md",
+  "prompt": "CURRENT_PARENT=N4.1.H. FINAL R2 for the SAME logical task because ATTEMPT1 completed but failed controller review: it returned SELF_REVIEW_PASS_1=None and SELF_REVIEW_PASS_2=None, treated historical M11/M13 claims as current, and omitted current limitations/risks despite fresh controller evidence that the required-current M11 Desarrollo backup/drill is blocked by absent external backup configuration. Read only docs/RUNBOOK_N4_1_CAJA.md and direct causal evidence it explicitly references. Do not execute shell commands, echo, tests, create helper/temp files, or modify any file. Distinguish historical evidence from current exact evidence. Return patch0, current causal observations, limitations, risks, recommendations, unexecuted validations, plus TWO substantive independent self-reviews whose text explains what each review checked. Never infer CI PASS, P0=0/P1=0 or LISTO_REAL without complete current evidence. ATTEMPT2 IS FINAL; R3 IS PROHIBITED and any remaining defect transfers to controller QA takeover. Do not touch main, Production, branches, merge, deploy or secrets."
+}
