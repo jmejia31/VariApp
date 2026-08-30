@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C118-N4-1-H-rollback-grounded-write-20260830T0930Z",
+  "taskId": "N4.1.H-C118-rollback-grounded-write",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "f10db2d45adeb4a09d9b7a5ff8d1eb6189fcdb62",
+  "taskAttempt": 1,
+  "fileScopeHint": "WRITE_SCOPE:docs/ROLLBACK_N4_1_CAJA.md",
+  "prompt": "CURRENT_PARENT=N4.1.H. C117-REC2 REVIEW_PASS evidence-only identified rollback wording that references CajaMovimiento and direct dotnet build/test instructions requiring grounding. Work only in docs/ROLLBACK_N4_1_CAJA.md. Reconcile the document additively against current repository contracts: verify terminology and whether CajaMovimiento remains an authoritative entity reference; clarify test/database prerequisites where grounded; preserve fail-closed recovery semantics. Do not infer CI PASS, P0=0/P1=0 or LISTO_REAL and do not promote N4.2. Do not touch certification, runbook, CHANGELOG_AI.md, TASKS.md, code, workflows, manifests, main, Production, branches, merge, deploy or secrets. Run proportional validations only within scope and return exact patch/base, limitations, risks, unexecuted validations and two self-reviews."
+}
