@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A113-N4-1-H-tasks-rollup-write-20260830T0050Z",
+  "taskId": "N4.1.H-A113-tasks-rollup-write",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "e5193a969fc4eda63ea0a89844cc598c6a6ab3fc",
+  "taskAttempt": 1,
+  "fileScopeHint": "WRITE_ARTIFACT_ONLY: TASKS.md",
+  "prompt": "VAEP v3.25.1 SAME_PARENT NEW logical task after A112 terminal review. Exclusive scope TASKS.md only. Produce a reviewable ChangeSet patch, but do not publish/push/merge/deploy. Reconcile ERP-N4.1 Caja A-H history-preservingly: add only repository-grounded factual rollup that is actually supported by TASKS.md and direct in-repo closure authority. Preserve historical entries. N4.1.H must remain VALIDANDO/NO LISTO unless exact current evidence proves all closure prerequisites. Do not assert CI PASS, P0=0/P1=0 or promote N4.2. No shell/network unless proportionate and explicitly permitted by the worker authority; prefer repository-native inspection. Perform SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 and report tests not executed."
+}
