@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B146-N4-1-H-certification-current-blocker-audit-20260830T0437Z",
+  "taskId": "N4.1.H-B146-certification-current-blocker-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "0f344b02cf2487c8be6f79318c1d234f74071bb9",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY:docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "CURRENT_PARENT=N4.1.H. NEW SAME_PARENT logical task after B145-R2 FINAL REVIEW_PASS; B145 receives no R3. Read only docs/CERTIFICACION_N4_1_CAJA.md and direct causal evidence referenced by it. Do not execute shell commands, echo, tests, create helper/temp files, or modify any file. Audit whether N4.1.H must remain VALIDANDO/NO_LISTO while the required-current M11 Desarrollo external backup/drill is blocked by missing required backup configuration. Distinguish current causal blockers from historical/noncausal evidence. Return patch0, exact observations, limitations, risks, recommendations, unexecuted validations, and two substantive independent self-reviews. Never infer CI PASS, P0=0/P1=0 or LISTO_REAL without complete current evidence. Do not touch main, Production, branches, merge, deploy or secrets."
+}
