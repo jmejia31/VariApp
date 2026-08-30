@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C123-N4-1-H-tasks-rollup-presence-audit-20260830T1147Z",
+  "taskId": "N4.1.H-C123-tasks-rollup-presence-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "ff88d9ec9db2705bed1295718ea51073ad47896c",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY:TASKS.md",
+  "prompt": "CURRENT_PARENT=N4.1.H. NEW SAME_PARENT logical task after C122 REVIEW_PASS; not R3. STRICT_READ_ONLY and NON_SHELL. Read ONLY TASKS.md. Do not inspect other files, workflows, checkpoints, CI, secrets, branches, PRs or Production. Do not run shell, echo, tests, create helper/temp files or modify anything. Determine only from the visible TASKS.md whether a current history-preserving N4.1/N4.1.H rollup exists. Quote no long passages; identify section names/status facts concisely. If the file read is truncated and absence cannot be proven, explicitly say UNPROVEN instead of asserting absence. Return patch0, exact observations, limitations, conditional risks, recommendations, unexecuted validations, and two substantive independent SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. Never infer external M11 state, CI PASS, P0=0/P1=0 or LISTO_REAL."
+}
