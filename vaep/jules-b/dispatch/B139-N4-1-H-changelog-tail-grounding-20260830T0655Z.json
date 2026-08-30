@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B139-N4-1-H-changelog-tail-grounding-20260830T0655Z",
+  "taskId": "N4.1.H-B139-changelog-tail-grounding",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "2ebd264404a97457e39a3619538966450cccf0d6",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY NON_SHELL: CHANGELOG_AI.md only",
+  "prompt": "VAEP v3.25.1 NEW logical SAME_PARENT task after B138 review-pass evidence-only/patch0. CURRENT_PARENT=N4.1.H. Audit only the N4.1/Caja-relevant visible section(s) of CHANGELOG_AI.md using repository-native read_file exclusively; do not require or attempt full-file shell extraction. Determine whether a literal ERP-N4.1 Caja A-H rollup is visible and whether wording conflicts with NO_LISTO. If repository-native visibility truncates, fail closed and report that limitation only. STRICT_READ_ONLY/NON_SHELL: no modifications, shell, terminal, run_in_bash_session, echo, grep, cat, sed, python, tests, helpers or temp files. Do not infer CI PASS, P0=0, P1=0, LISTO_REAL or N4.2 promotion. Report validations not executed, minimal controller-safe next action, and two substantive independent SELF_REVIEW_PASS_1/2."
+}
