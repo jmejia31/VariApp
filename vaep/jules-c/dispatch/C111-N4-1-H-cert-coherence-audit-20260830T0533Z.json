@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C111-N4-1-H-cert-coherence-audit-20260830T0533Z",
+  "taskId": "N4.1.H-C111-cert-coherence-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "2dd7ab34a8c5f95713b3c867b61f5e80a3310679",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY NON_SHELL: docs/CERTIFICACION_N4_1_CAJA.md only",
+  "prompt": "VAEP v3.25.1 C111 ATTEMPT1. NEW logical SAME_PARENT task after C110 REVIEW_PASS evidence-only. CURRENT_PARENT N4.1.H close-first. Audit docs/CERTIFICACION_N4_1_CAJA.md only with repository-native non-shell reading. Identify exact remaining closure prerequisites, stale assertions, contradictions, or missing controller-verifiable evidence after the A121/B133/C110/D88 review wave. Do not modify files or run terminal/bash/shell/echo/grep/cat/sed/python/tests. Do not infer CI PASS, P0=0, P1=0, LISTO or N4.2 promotion. Report exact grounded snippets, limitations, validations not executed, and minimal controller-safe next action. TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY; emit SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2."
+}
