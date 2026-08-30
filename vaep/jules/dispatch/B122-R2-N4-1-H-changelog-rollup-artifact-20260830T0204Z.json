@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B122-R2-N4-1-H-changelog-rollup-artifact-20260830T0204Z",
+  "taskId": "N4.1.H-B122-changelog-rollup-artifact",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "9796d4c24171931b74ab335dbebcbb92d5d80c15",
+  "taskAttempt": 2,
+  "fileScopeHint": "STRICT_READ_ONLY NON_SHELL: CHANGELOG_AI.md only",
+  "prompt": "VAEP v3.25.1 SAME logical task B122 ATTEMPT2 FINAL after ATTEMPT1 controller REVIEW_REJECTED for out-of-scope modifications. Exclusive STRICT_READ_ONLY/NON_SHELL scope CHANGELOG_AI.md only. Re-read repository-native evidence for N4.1/N4.1.H and identify only the minimal factual additive rollup still missing. Do not modify files, create helper/temp files, execute shell/tests, publish/push/merge/deploy, assert CI PASS or P0=0/P1=0, or promote N4.2. Return evidence artifact only for controller review, with SELF_REVIEW_PASS_1, SELF_REVIEW_PASS_2 and validations not executed. This is ATTEMPT2 FINAL; R3 is prohibited and any blocking defect transfers to controller QA takeover."
+}
