@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A143-N4-1-H-changelog-current-audit-20260830T1423Z",
+  "taskId": "N4.1.H-A143-changelog-current-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "25fb84ed1316705926c34ee5d9a96b45c8dc5e6f",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY:CHANGELOG_AI.md",
+  "prompt": "STRICT_READ_ONLY and NON_SHELL. NEW logical SAME_PARENT task after A142 terminal REVIEW_PASS_LIMITED; not a retry and not R3. Audit only CHANGELOG_AI.md for current grounded N4.1/N4.1.H closure wording and whether it avoids claiming LISTO, CI PASS, P0=0/P1=0 while required-current real encrypted Desarrollo M11 backup/drill is still unproven. Use repository-reading capabilities only; no shell, terminal, commands, scripts, temp files, git mutations, tests/builds, secrets, deploy, or scope expansion. Report exact visible evidence, explicit truncation/readability limitations, validations not executed, risks/recommendations, and TWO substantive independent SELF_REVIEW_PASS checks. Fail closed on ambiguity or truncation. Never promote N4.2."
+}
