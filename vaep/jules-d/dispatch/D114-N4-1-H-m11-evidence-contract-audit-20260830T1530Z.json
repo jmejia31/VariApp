@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D114-N4-1-H-m11-evidence-contract-audit-20260830T1530Z",
+  "taskId": "N4.1.H-D114-m11-evidence-contract-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "d88689a6ff20bf6f17a47549d525a721457fce4b",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL::docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "NEW logical SAME_PARENT task after D113 REVIEW_PASS evidence-only. STRICT_READ_ONLY and NON_SHELL. Audit only docs/CERTIFICACION_N4_1_CAJA.md against the now-grounded M11 workflow contract: real encrypted Desarrollo backup requires executor evidence of the backup job plus encrypted backup/checksum/metadata artifact, and pull_request workflow SUCCESS may coexist with the real backup job being skipped. Determine whether the certification currently states those requirements accurately, whether it falsely treats historical/disposable evidence as current real backup evidence, and what exact remaining evidence is required before N4.1.H may close. Use repository-reading capabilities only; no shell, terminal, commands, scripts, temp files, git mutations, workflow dispatch, tests/builds, secrets, deploy, or scope expansion. Report exact visible evidence, truncation/limitations, validations not executed, risks/recommendations, and TWO substantive independent SELF_REVIEW_PASS checks with distinct focuses and actual findings. Never infer LISTO or promote N4.2 without required-current causal evidence."
+}
