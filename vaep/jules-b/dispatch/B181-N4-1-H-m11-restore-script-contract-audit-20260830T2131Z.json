@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B181-N4-1-H-m11-restore-script-contract-audit-20260830T2131Z",
+  "taskId": "N4.1.H-B181-m11-restore-script-contract-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "067e78be08abc810f669892b0b02b198c88924bd",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL:scripts/m11_restore_desarrollo.sh",
+  "prompt": "NEW SAME_PARENT ATTEMPT1. Audita exclusivamente scripts/m11_restore_desarrollo.sh mediante lectura nativa no-shell para identificar el contrato real de restore/drill M11 aplicable al cierre N4.1.H: precondiciones, aislamiento descartable, validaciones de checksum/metadata/artifact, fail-closed y evidencia ejecutora requerida. PROHIBIDO terminal/bash/run_in_bash_session y cualquier comando shell. No modificar archivos ni publicar cambios. Si la lectura queda truncada, reporta exactamente la limitacion y no infieras contenido no visible. Devuelve hallazgos grounded, riesgos, validaciones realmente ejecutadas y no ejecutadas, y dos auto-revisiones independientes y sustantivas SELF_REVIEW_PASS_1/2. COMPLETED no equivale a LISTO."
+}
