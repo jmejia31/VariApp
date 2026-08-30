@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A144-N4-1-H-authority-current-audit-20260830T1455Z",
+  "taskId": "N4.1.H-A144-authority-current-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "778880e4e073ea555a03b1c3fca329d25344146e",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL::docs/VAEP_AUTHORITY.md",
+  "prompt": "VAEP_TRANSPORT_EXPECTED=true. NEW SAME_PARENT logical task after A143-R2 FINAL reached 2/2 and transferred any remaining ambiguity to controller QA takeover; do NOT create A143 R3. STRICT_READ_ONLY and NON_SHELL. Audit only docs/VAEP_AUTHORITY.md for current N4.1.H closure requirements, especially exact-head evidence, M11 required-current real encrypted Desarrollo backup/drill, DoD and P0=0/P1=0, and identify any wording that could permit false LISTO. Use repository-reading capabilities only; no shell, terminal, commands, scripts, temp files, git mutations, tests/builds, secrets, deploy, or scope expansion. Report exact visible evidence, limitations/truncation, validations not executed, risks/recommendations, and TWO substantive independent SELF_REVIEW_PASS checks. Never promote N4.2. If ambiguity remains, fail closed and hand off to controller review."
+}
