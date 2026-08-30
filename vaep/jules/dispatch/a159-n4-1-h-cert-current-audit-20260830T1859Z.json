@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A159-N4-1-H-cert-current-audit-20260830T1859Z",
+  "taskId": "N4.1.H-A159-cert-current-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "bbfdeb06669582eacef5c169d858c1dac926b575",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY:docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "STRICT_READ_ONLY_NON_SHELL. Audit docs/CERTIFICACION_N4_1_CAJA.md against the current N4.1.H fail-closed closure contract. Verify whether every required-current M11 real encrypted Desarrollo backup/restore-drill evidence dependency, causal gate dependency, DoD condition, and P0/P1 condition is stated without implying evidence exists. Do not modify files. Do not run shell commands. Return evidence-only findings, explicit limitations, and two independent substantive SELF_REVIEW_PASS checks. Never claim LISTO, CI PASS, P0=0 or P1=0 without direct current evidence."
+}
