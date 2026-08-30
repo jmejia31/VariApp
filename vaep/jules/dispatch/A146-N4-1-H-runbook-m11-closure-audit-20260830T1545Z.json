@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A146-N4-1-H-runbook-m11-closure-audit-20260830T1545Z",
+  "taskId": "N4.1.H-A146-runbook-m11-closure-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "746df8fc3e9dc5c9e39593b8951cccbb0f2fc71e",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT_READ_ONLY_NON_SHELL::docs/RUNBOOK_N4_1_CAJA.md",
+  "prompt": "NEW logical SAME_PARENT task after A145-R2 FINAL REVIEW_REJECT; A145 has no R3 and is controller-QA only. STRICT_READ_ONLY and NON_SHELL. Audit only docs/RUNBOOK_N4_1_CAJA.md for current N4.1.H closure prerequisites, especially the required-current real encrypted Desarrollo M11 backup/restore drill executor evidence and artifacts, and identify any stale or false-LISTO language. Use repository-reading capabilities only. DO NOT execute shell, terminal, commands, wc, tail, grep, scripts, temp files, git mutations, tests/builds, secrets, workflow dispatch, deploy, or scope expansion. If repository reading truncates, report the limitation and fail closed. Report exact visible evidence, validations not executed, risks/recommendations, and TWO genuinely independent substantive SELF_REVIEW_PASS checks with distinct findings. Never infer LISTO or promote N4.2."
+}
