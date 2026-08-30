@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A117-R2-N4-1-H-tasks-grounding-20260830T0256Z",
+  "taskId": "N4.1.H-A117-tasks-grounding",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "aca8c26a043315c8048bb0451bb9ef2bc1f2a9ae",
+  "taskAttempt": 2,
+  "fileScopeHint": "STRICT_READ_ONLY NON_SHELL: TASKS.md only",
+  "prompt": "VAEP v3.25.1 A117 R2 FINAL. ATTEMPT1 REVIEW_REJECTED because it created all_tasks.txt in the workspace despite STRICT_READ_ONLY/NON_SHELL. This is ATTEMPT2 FINAL; R3 is prohibited. Exclusive scope TASKS.md only. Use repository-native non-shell reading capabilities only; do not execute terminal/bash/echo/grep/cat/sed/tests/scripts, create helper/temp files, modify repository files, publish/push/merge/deploy, touch main/Production/secrets, assert unsupported CI/P0/P1, or promote N4.2. Report only grounded facts needed for the N4.1.H history-preserving TASKS rollup. If N4.1.H is absent, report that exact absence and safe additive wording only when grounded by visible TASKS history; do not create helper files. Retain EN_PROGRESO/NO_LISTO. Include SELF_REVIEW_PASS_1, SELF_REVIEW_PASS_2, limitations and validations not executed. WORK_CAN_PIPELINE__PROMOTION_CANNOT."
+}
