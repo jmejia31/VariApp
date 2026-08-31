@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C182-N4-1-H-operational-workflow-config-gate-audit-20260831T1450Z",
+  "taskId": "N4.1.H-C182-operational-workflow-config-gate-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "86aa92cac2590eae0662bd4ba9ee1a63194c5ccb",
+  "taskAttempt": 1,
+  "fileScopeHint": ".github/workflows/m11-backup-desarrollo-operativo.yml",
+  "prompt": "STRICT_READ_ONLY_NON_SHELL. Audit only .github/workflows/m11-backup-desarrollo-operativo.yml. Identify the exact external configuration gate that previously prevented REAL required-current M11 backup creation, without reading or exposing secrets. Determine which non-secret condition/evidence can prove readiness, what steps are skipped on failure, and whether the workflow emits sufficient fail-closed provenance for artifact + external .sha256 + external .meta.json. Do not modify files. Report exact findings, gaps, limitations, risks, recommendations, unexecuted validations, SELF_REVIEW_PASS_1, SELF_REVIEW_PASS_2, and TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY."
+}
