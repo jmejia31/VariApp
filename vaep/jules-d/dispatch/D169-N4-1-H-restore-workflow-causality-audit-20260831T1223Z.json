@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D169-N4-1-H-restore-workflow-causality-audit-20260831T1223Z",
+  "taskId": "N4.1.H-D169-restore-workflow-causality-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "2b3de0b8e41a40a62b61e9bfe57a2120b537a278",
+  "taskAttempt": 1,
+  "fileScopeHint": ".github/workflows/m11-backup-restore-desarrollo.yml",
+  "prompt": "VAEP v3.25.1 NEW logical task ATTEMPT1 after D168 throughput-stall handoff; do not redispatch D168 redundant evidence. EXCLUSIVE READ_ONLY scope .github/workflows/m11-backup-restore-desarrollo.yml only. SAME_PARENT N4.1.H. Inspect the COMPLETE workflow; read-only shell chunking/search is allowed solely to avoid native truncation, with no file writes or workflow execution. Audit whether this restore/drill workflow can prove that it consumes the SAME required-current REAL encrypted Desarrollo operational backup artifact produced by m11-backup-desarrollo-operativo, together with matching .sha256 and matching .meta.json provenance, rather than a fixture/simulated/independent backup. Identify exact run/artifact correlation mechanisms and any fail-closed gap. Report observations, limitations, risks, recommendations and unexecuted validations. No product/file writes, workflow dispatch, database access, branches, PRs, pushes beyond manifest transport, merges, deploys, secrets, Production or main changes. Emit SELF_REVIEW_PASS_1, SELF_REVIEW_PASS_2 and TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY. Never claim ACTIVE_REAL, CI PASS, P0=0/P1=0 or N4.1.H LISTO."
+}
