@@ -87,9 +87,10 @@ namespace InventoryApp.Infrastructure.Migrations
                 b.HasOne(typeof(InventoryApp.Domain.Entities.PedidoVenta), "PedidoVenta").WithMany().HasForeignKey("PedidoVentaId")
                     .OnDelete(DeleteBehavior.Restrict).HasConstraintName("FK_ReservasInventario_PedidosVenta_PedidoVentaId");
                 // Venta is still represented by the generated N0.5 shared-type baseline in this
-                // historical snapshot. Bind the FK without a CLR navigation here so EF can build
-                // the snapshot without coercing that historical identity into the newer CLR type.
-                b.HasOne("InventoryApp.Domain.Entities.Venta").WithMany().HasForeignKey("VentaId")
+                // historical snapshot. Force the non-generic overload so the string is interpreted
+                // as the related entity type name, not as a shadow navigation name on ReservaInventario.
+                ((Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder)b)
+                    .HasOne("InventoryApp.Domain.Entities.Venta", null).WithMany().HasForeignKey("VentaId")
                     .OnDelete(DeleteBehavior.Restrict).HasConstraintName("FK_ReservasInventario_Ventas_VentaId");
                 b.Navigation("PedidoVenta");
             });
