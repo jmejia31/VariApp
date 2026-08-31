@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D172-N4-1-H-certification-operational-source-audit-20260831T1416Z",
+  "taskId": "N4.1.H-D172-certification-operational-source-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "47d928938c62e52375cf09f74bbcf92e53c7b86f",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "STRICT_READ_ONLY_NON_SHELL. Audit only docs/CERTIFICACION_N4_1_CAJA.md against the current N4.1.H fail-closed provenance contract. Verify whether it explicitly requires the backup evidence to originate from .github/workflows/m11-backup-desarrollo-operativo.yml and an exact operational run/artifact, with matching external .sha256 and .meta.json and restore/drill tied to that same artifact; identify any ambiguity that could admit disposable/fixture/PR evidence. Do not modify files. Report exact findings, gaps, limitations, risks, recommendations, unexecuted validations, SELF_REVIEW_PASS_1, SELF_REVIEW_PASS_2, and TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY."
+}
