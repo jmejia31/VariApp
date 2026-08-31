@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A198-REC1-N4-1-H-changelog-currentness-audit-20260831T1052Z",
+  "taskId": "N4.1.H-A198-changelog-currentness-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "7542dc35c5835dc9c2d55f7dbb7063f6697b7b21",
+  "taskAttempt": 1,
+  "fileScopeHint": "CHANGELOG_AI.md",
+  "prompt": "VAEP v3.25.1 RECOVERY SAME logical task / SAME ATTEMPT1 after A198 exceeded 5 minutes without a correlated Jules result session or fresh useful technical activity. Pre-session/no-result stall does NOT consume attempt. EXCLUSIVE READ_ONLY scope CHANGELOG_AI.md only. STRICT NON_SHELL native inspection only. Audit whether N4.1.H Caja documentation/certification history is additive/history-preserving and fail-closed: no stale SHA or historical entry may imply LISTO before required-current REAL encrypted Desarrollo M11 artifact + matching .sha256 + matching .meta.json + explicitly same-artifact restore/drill, EF FacturaProveedor blocker clearance, exact-head causal gates, DoD and P0=0/P1=0. Report exact gaps or UNPROVEN with native truncation boundary. No writes, shell, tests, workflows, temp files, branches, PRs, pushes, merges, deploys, secrets or Production changes. Emit separate literal SELF_REVIEW_PASS_1, SELF_REVIEW_PASS_2 and TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY. Never claim false ACTIVE_REAL, CI PASS or LISTO."
+}
