@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A176-N4-1-H-certification-current-evidence-audit-20260831T0045Z",
+  "taskId": "N4.1.H-A176-certification-current-evidence-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "b27ce28c15b4afa691b141a1af55b6aaeb367259",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "SAME_PARENT READ_ONLY NON_SHELL evidence audit. Inspect only docs/CERTIFICACION_N4_1_CAJA.md using native file-reading capabilities; do not execute shell commands and do not modify files. Verify whether certification remains fail-closed and whether it contains direct required-current execution evidence for a real encrypted M11 Desarrollo backup plus applicable restore/drill correlated to artifact/checksum/metadata. Separate requirement text, historical evidence, and current executor proof. Report exact grounded findings, limitations, P0/P1 implications, and two substantive independent reviews with exact labels SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. Never claim LISTO, CI PASS, backup execution, restore/drill execution, or promotion without direct evidence. No GitHub publication, branch, merge, deploy, secrets changes, or Production/main changes."
+}
