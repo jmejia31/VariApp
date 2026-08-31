@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C155-N4-1-H-m11-restore-script-audit-20260831T0130Z",
+  "taskId": "N4.1.H-C155-m11-restore-script-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "8c5d6ca3734f5e63e07718c52aae2c5d2642d8b6",
+  "taskAttempt": 1,
+  "fileScopeHint": "scripts/m11_restore_desarrollo.sh",
+  "prompt": "STRICT_READ_ONLY NON_SHELL SAME_PARENT audit. Inspect only scripts/m11_restore_desarrollo.sh and direct authority files required by v3.25. Determine fail-closed safeguards, environment/production exclusions, integrity/checksum/encryption expectations, restore/drill evidence emitted or consumed, and exactly what remains unproven without a real current run. Distinguish script capability from executor proof. Do not modify files or claim LISTO/CI PASS. Report grounded findings, exact limitations, P0/P1 implications, unexecuted validations, and two substantive independent SELF_REVIEW_PASS_1/2 reviews. TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY."
+}
