@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C165-N4-1-H-restore-correlation-grounding-20260831T0650Z",
+  "taskId": "N4.1.H-C165-restore-correlation-grounding",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "b3752dc68c45ac6294a1f217b5fc4b224344bb63",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/RUNBOOK_N4_1_CAJA.md",
+  "prompt": "NEW SAME_PARENT logical ATTEMPT1 after C164 completed PASS_LIMITED evidence-only due native truncation; this is not C164 R2 and C163 R3 remains prohibited. Scope EXCLUSIVE READ_ONLY: docs/RUNBOOK_N4_1_CAJA.md only. STRICT NON_SHELL native inspection only; no terminal/shell/bash/cat/head/sed/wc/tail/grep/python/scripts/commands. Audit visible runbook wording after current hardening for exact same-artifact causal correlation: required-current REAL encrypted Desarrollo operational artifact + matching .sha256 + matching .meta.json, and any restore/drill claim causally tied to that exact artifact. Historical/planned/workflow-defined/disposable CI evidence is insufficient. Do not claim execution or PASS from definitions. If native visibility truncates, report exact boundary and unseen text UNPROVEN. No repository changes, workflow/script execution, secrets access/listing, false ACTIVE/LISTO/CI PASS/P0=0/P1=0, main, Produccion, branches, merge, auto-merge, force-push or deploy. End with independent SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 confirming NON_SHELL compliance. TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY."
+}
