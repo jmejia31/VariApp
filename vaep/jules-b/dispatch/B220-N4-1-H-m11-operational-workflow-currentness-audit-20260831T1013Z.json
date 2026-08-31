@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B220-N4-1-H-m11-operational-workflow-currentness-audit-20260831T1013Z",
+  "taskId": "N4.1.H-B220-m11-operational-workflow-currentness-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "a2cb8d82bbd8896b72bfedad1c5eb192b6690fdd",
+  "taskAttempt": 1,
+  "fileScopeHint": ".github/workflows/m11-backup-desarrollo-operativo.yml",
+  "prompt": "VAEP v3.25.1 SAME_PARENT NEW logical task after B219 REVIEW_PASS_LIMITED/EVIDENCE_ONLY/patch0; B219 is terminal/reviewed, not R2. EXCLUSIVE READ_ONLY scope .github/workflows/m11-backup-desarrollo-operativo.yml. STRICT NON_SHELL native inspection only; no writes, shell, tests, workflows or temp files. Audit whether this operational workflow can establish required-current REAL encrypted Desarrollo backup evidence with external artifact + matching .sha256 + matching .meta.json and sufficient currentness/provenance for an explicitly same-artifact restore/drill; distinguish definition from execution evidence and report every unmet link UNPROVEN. Historical/disposable/workflow-definition evidence must never imply LISTO/PASS. If native visibility truncates, report exact boundary and unseen requirements UNPROVEN. Emit separate literal SELF_REVIEW_PASS_1, SELF_REVIEW_PASS_2 and TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY before COMPLETED. Never touch main/Produccion/branches/merge/auto-merge/force-push/secrets/deploy; never claim false ACTIVE/LISTO/CI PASS/P0=0/P1=0."
+}
