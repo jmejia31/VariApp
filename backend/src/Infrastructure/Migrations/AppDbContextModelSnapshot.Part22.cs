@@ -43,14 +43,14 @@ namespace InventoryApp.Infrastructure.Migrations
                 .HasForeignKey("ProveedorId")
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_EvaluacionesProveedor_Proveedores_ProveedorId");
-            evaluacion.HasOne<OrdenCompra>()
+            evaluacion.HasOne("InventoryApp.Domain.Entities.OrdenCompra", null)
                 .WithMany()
-                .HasForeignKey(x => x.OrdenCompraId)
+                .HasForeignKey("OrdenCompraId")
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_EvaluacionesProveedor_OrdenesCompra_OrdenCompraId");
-            evaluacion.HasOne<RecepcionCompra>()
+            evaluacion.HasOne("InventoryApp.Domain.Entities.RecepcionCompra", null)
                 .WithMany()
-                .HasForeignKey(x => x.RecepcionCompraId)
+                .HasForeignKey("RecepcionCompraId")
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_EvaluacionesProveedor_RecepcionesCompra_RecepcionCompraId");
         }
