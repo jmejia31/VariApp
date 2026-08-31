@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D170-N4-1-H-factura-proveedor-clearance-audit-20260831T1254Z",
+  "taskId": "N4.1.H-D170-factura-proveedor-clearance-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "771b467da12ed68bf08e279efa9ea7089cb4c8d9",
+  "taskAttempt": 1,
+  "fileScopeHint": "TASKS.md",
+  "prompt": "READ_ONLY SAME_PARENT closure-clearance audit. Inspect TASKS.md and only direct repository references needed to establish the current grounded status of the FacturaProveedor blocker relevant to N4.1.H certification. Do not modify files and do not use shell/terminal commands. Separate verified evidence from assumptions, identify any remaining exact-head validation needed before P0=0/P1=0 can be asserted, and emit SELF_REVIEW_PASS_1 plus SELF_REVIEW_PASS_2. Never promote N+1 and never claim LISTO."
+}
