@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A182-N4-1-H-authority-m11-closure-preflight-20260831T0319Z",
+  "taskId": "N4.1.H-A182-authority-m11-closure-preflight",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "c7885152d2cf59d552a952a9f9acc5824ff769a0",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/VAEP_AUTHORITY.md",
+  "prompt": "NEW logical SAME_PARENT ATTEMPT1 after A181-R2 FINAL exhausted Jules attempts and was transferred to controller QA because it explicitly admitted unauthorized shell commands under STRICT_READ_ONLY_NON_SHELL. Scope exclusively docs/VAEP_AUTHORITY.md. Perform a current authority preflight for N4.1.H closure: distinguish ACTIVE_REAL from manifest/workflow/queued/completed/terminal, require correlated session/run plus fresh useful technical activity, and verify closure cannot inherit generic M13/PR/push/CI success in place of required-current REAL encrypted Desarrollo operational backup executor evidence with artifact/checksum/metadata and applicable restore/drill evidence. STRICT native non-shell reads only; execute no terminal/shell commands of any kind. If native visibility truncates, make no change and report the exact limitation. Do not touch workflows/scripts/certification/manifests/code/tests. Do not claim LISTO, CI PASS, P0=0 or P1=0. Emit exact substantive independent SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY."
+}
