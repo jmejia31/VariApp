@@ -97,7 +97,10 @@ namespace InventoryApp.Infrastructure.Migrations
 
             modelBuilder.Entity<InventoryApp.Domain.Entities.ReservaInventarioDetalle>(b =>
             {
-                b.HasOne(typeof(InventoryApp.Domain.Entities.Almacen), "Almacen").WithMany().HasForeignKey("AlmacenId")
+                // Almacen is still represented by the historical shared-type baseline in this snapshot.
+                // Resolve by entity-type name so EF does not try to add a second CLR-backed Almacen identity.
+                ((Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder)b)
+                    .HasOne("InventoryApp.Domain.Entities.Almacen", "Almacen").WithMany().HasForeignKey("AlmacenId")
                     .OnDelete(DeleteBehavior.Restrict).IsRequired().HasConstraintName("FK_ReservaDetalles_Almacenes_AlmacenId");
                 b.HasOne(typeof(InventoryApp.Domain.Entities.ProductoVariante), "ProductoVariante").WithMany().HasForeignKey("ProductoVarianteId")
                     .OnDelete(DeleteBehavior.Restrict).IsRequired().HasConstraintName("FK_ReservaDetalles_ProductoVariantes_ProductoVarianteId");
