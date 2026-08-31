@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D161-N4-1-H-certification-current-evidence-gap-audit-20260831T0753Z",
+  "taskId": "N4.1.H-D161-certification-current-evidence-gap-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "a3d6a0c5f8dce6171d55ba6a363f6409266dd67d",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "NEW logical SAME_PARENT ATTEMPT1 after D160-R2 FINAL REVIEW_FIRST accepted the certification wording as fail-closed but left the required-current factual M11 evidence unproven; D160 is exhausted and R3 is prohibited. Scope EXCLUSIVE READ_ONLY: docs/CERTIFICACION_N4_1_CAJA.md only. STRICT NON_SHELL native inspection only. Audit the current certification document for the exact evidence gap that still blocks N4.1.H: required-current REAL encrypted Desarrollo operational artifact, matching .sha256, matching .meta.json, and restore/drill causally bound to that same artifact. Distinguish wording/claims from actual executor evidence, identify any stale SHA/run references or fail-open language, and state the minimum factual evidence needed before LISTO_REAL. No repository changes, workflow/script execution, secret access/listing or shell. If native visibility truncates, state exact boundary and unseen text UNPROVEN. End with literal independent SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 explicitly confirming NON_SHELL compliance. TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY. Never touch main/Produccion/branches/merge/auto-merge/force-push/deploy and never claim false ACTIVE/LISTO/CI PASS/P0=0/P1=0."
+}
