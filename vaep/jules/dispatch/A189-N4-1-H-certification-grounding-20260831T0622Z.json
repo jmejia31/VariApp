@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A189-N4-1-H-certification-grounding-20260831T0622Z",
+  "taskId": "N4.1.H-A189-certification-grounding",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "40cddcd204e277ca2bdbcf9ebe68be7da1eda99d",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "NEW SAME_PARENT logical ATTEMPT1 after A188 review completed PASS_LIMITED due native truncation; this is not A188 R2. Scope EXCLUSIVE READ_ONLY: docs/CERTIFICACION_N4_1_CAJA.md only. STRICT NON_SHELL native inspection only. Audit only visible grounded certification language for false M11 required-current closure. Required closure remains fresh REAL encrypted Desarrollo operational backup exact artifact + matching .sha256 + matching .meta.json and applicable restore/drill causally correlated to that same artifact. Historical, planned, workflow-defined or disposable CI evidence is insufficient. If native visibility truncates, state exact boundary and unseen text UNPROVEN. No repository changes, workflow/script execution, secrets access/listing, false ACTIVE/LISTO/CI PASS/P0=0/P1=0, main, Produccion, branches, merge, auto-merge, force-push or deploy. End with independent SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 confirming NON_SHELL compliance. TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY."
+}
