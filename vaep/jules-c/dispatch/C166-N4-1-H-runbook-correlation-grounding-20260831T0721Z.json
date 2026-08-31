@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C166-N4-1-H-runbook-correlation-grounding-20260831T0721Z",
+  "taskId": "N4.1.H-C166-runbook-correlation-grounding",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "4b9db5ba776fa991ef9b7d31bbd750e95794066d",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/RUNBOOK_N4_1_CAJA.md",
+  "prompt": "NEW SAME_PARENT logical ATTEMPT1 after C165-REC1 completed and REVIEW_FIRST confirmed the current runbook explicitly requires required-current REAL encrypted Desarrollo backup evidence, exact artifact, matching .sha256, matching .meta.json, and causal same-artifact restore/drill correlation. Scope EXCLUSIVE READ_ONLY: docs/RUNBOOK_N4_1_CAJA.md only. STRICT NON_SHELL native inspection only; no terminal/shell/bash/cat/head/sed/wc/tail/grep/python/scripts/commands. Re-audit current visible wording for regressions, ambiguity, or false closure claims; historical/planned/workflow-defined/disposable CI evidence must remain insufficient. No repository changes, workflow/script execution, secrets access/listing, false ACTIVE/LISTO/CI PASS/P0=0/P1=0, main, Produccion, branches, merge, auto-merge, force-push or deploy. End with independent SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 confirming NON_SHELL compliance. TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY."
+}
