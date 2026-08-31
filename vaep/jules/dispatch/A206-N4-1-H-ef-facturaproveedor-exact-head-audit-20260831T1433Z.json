@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A206-N4-1-H-ef-facturaproveedor-exact-head-audit-20260831T1433Z",
+  "taskId": "N4.1.H-A206-ef-facturaproveedor-exact-head-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "86398f880c24e5448933a21b0109ef5edef7beb4",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs",
+  "prompt": "STRICT_READ_ONLY_NON_SHELL. Audit only backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs for the exact-head N4.1.H EF FacturaProveedor blocker. Determine whether FacturaProveedor currently collides with a shared-type Dictionary<string,object> identity, whether the snapshot itself contains the causal defect, and what exact evidence would clear or confirm the blocker. Do not modify files. Report exact findings, gaps, limitations, risks, recommendations, unexecuted validations, SELF_REVIEW_PASS_1, SELF_REVIEW_PASS_2, and TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY."
+}
