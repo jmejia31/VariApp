@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B203-N4-1-H-tasks-current-evidence-audit-20260831T0411Z",
+  "taskId": "N4.1.H-B203-tasks-current-evidence-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "b9a230cce65498cf92f7eaa9e6ea80355b6e4e84",
+  "taskAttempt": 1,
+  "fileScopeHint": "TASKS.md",
+  "prompt": "NEW SAME_PARENT logical ATTEMPT1 after B202 completed PASS_LIMITED evidence-only due native truncation; B202 is not being retried. Scope EXCLUSIVE and READ_ONLY: TASKS.md only. STRICT NON_SHELL: use only native repository/file inspection; never invoke shell, terminal, bash, cat, head, sed, wc, tail, grep, python, scripts or commands. Audit only visible grounded task-state text for N4.1.H and M11 closure evidence. Determine whether any visible entry proves required-current REAL encrypted Desarrollo operational backup artifact + matching .sha256 + .meta.json and applicable restore/drill explicitly correlated to that same operational artifact. Historical, planned, workflow-defined or disposable CI drill evidence must not be promoted to current operational proof. If native visibility truncates, report exact limitation and classify unseen content UNPROVEN. Make no repository changes and do not run workflows/scripts or access/list secrets. No false ACTIVE, LISTO, CI PASS, P0=0 or P1=0. No main, Produccion, branches, merge, auto-merge, force-push, secrets or deploy. End with substantive independent sections named exactly SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 explicitly confirming NON_SHELL compliance, scope, evidence grounding and unexecuted validations. TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY."
+}
