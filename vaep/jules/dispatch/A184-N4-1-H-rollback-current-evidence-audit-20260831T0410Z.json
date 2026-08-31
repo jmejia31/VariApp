@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A184-N4-1-H-rollback-current-evidence-audit-20260831T0410Z",
+  "taskId": "N4.1.H-A184-rollback-current-evidence-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "fedb9d5da86d0a8ecce3bdef900a7ccf7c645793",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/ROLLBACK_N4_1_CAJA.md",
+  "prompt": "NEW SAME_PARENT logical ATTEMPT1 after A183-R2 FINAL completed PASS_LIMITED evidence-only due native truncation; A183 is exhausted and R3 is prohibited. Scope EXCLUSIVE and READ_ONLY: docs/ROLLBACK_N4_1_CAJA.md only. STRICT NON_SHELL: use only native repository/file inspection; never invoke shell, terminal, bash, cat, head, sed, wc, tail, grep, python, scripts or commands. Audit only visible grounded rollback text for fail-closed N4.1.H requirements: required-current REAL encrypted Desarrollo M11 operational backup artifact plus matching .sha256 plus .meta.json, and when applicable restore/drill explicitly correlated to that same operational artifact/checksum/metadata. Distinguish historical evidence and disposable CI drill evidence from required-current operational evidence. If native visibility truncates, report exact limitation and classify unseen content UNPROVEN; do not infer. Make no repository changes, do not run workflows/scripts, do not access/list secrets. No false ACTIVE, LISTO, CI PASS, P0=0 or P1=0. No main, Produccion, branches, merge, auto-merge, force-push, secrets or deploy. End with substantive independent sections named exactly SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 explicitly confirming NON_SHELL compliance, scope and unsupported claims. TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY."
+}
