@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D163-R2-N4-1-H-certification-m11-evidence-closure-audit-20260831T0928Z",
+  "taskId": "N4.1.H-D163-certification-m11-evidence-closure-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "5f3e71bb15dddc8f8b66c3eb37f6de628233bd19",
+  "taskAttempt": 2,
+  "fileScopeHint": "docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "FINAL R2 for SAME logical D163 after ATTEMPT1 review defect: required independent literal self-review outputs/test-exemption were not evidenced in the reviewed delivery; R3 is prohibited. Scope EXCLUSIVE READ_ONLY: docs/CERTIFICACION_N4_1_CAJA.md only. STRICT NON_SHELL native inspection only. Re-audit N4.1.H certification against required-current REAL M11 closure: encrypted operational artifact + matching .sha256 + matching .meta.json + same-artifact restore/drill + exact-head causal gates; identify stale SHA/false-pass wording precisely. No file changes, shell, tests or workflows. If visibility truncates, state exact boundary and unseen content UNPROVEN. Before COMPLETED emit two separate literal messages SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 and a separate literal TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY. ATTEMPT2 FINAL; any remaining defect transfers to controller QA, no R3. Never touch main/Produccion/branches/merge/auto-merge/force-push/secrets/deploy; never claim false ACTIVE/LISTO/CI PASS/P0=0/P1=0."
+}
