@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A180-N4-1-H-jules-authority-current-evidence-audit-20260831T0224Z",
+  "taskId": "N4.1.H-A180-jules-authority-current-evidence-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "cffdf85390bd2d2251516e1a06c3b2db7262f7a1",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/VAEP_JULES.md",
+  "prompt": "VAEP_TRANSPORT_VERIFIED=true\nNEW logical SAME_PARENT ATTEMPT1 after A179-R2 FINAL exhausted and controller-reviewed PASS_LIMITED evidence-only; A179 R3 remains prohibited. Scope exclusively docs/VAEP_JULES.md. Audit the Jules operational authority text for explicit fail-closed separation between transport/workflow/session states and ACTIVE_REAL, and between historical/generic M11 evidence versus required-current real encrypted Desarrollo backup execution evidence. ACTIVE_REAL requires correlated Jules session/run plus fresh useful technical activity; manifest/workflow/queued/completed/terminal alone never qualifies. N4.1.H closure must not inherit generic M13/push/PR success as M11 proof and must require current operational backup artifact/checksum/metadata plus applicable restore/drill evidence without inventing same-artifact equality when the disposable drill creates its own backup. Prefer evidence-only/read-only if already correct; otherwise make only the smallest single-file correction. Use native non-shell repository/file reads only; if truncated, make no change and report exact limitation. Do not touch workflows/scripts/certification/manifests/code/tests. Do not claim LISTO, CI PASS, P0=0 or P1=0. Report observations, limitations, risks, recommendations, tests not executed, and two substantive independent SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY."
+}
