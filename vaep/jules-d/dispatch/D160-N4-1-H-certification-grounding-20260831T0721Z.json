@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D160-N4-1-H-certification-grounding-20260831T0721Z",
+  "taskId": "N4.1.H-D160-certification-grounding",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "91bdcf8d72672827586ea4f4abfbc7c46f93862d",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "NEW SAME_PARENT logical ATTEMPT1 after D159-R2 FINAL completed with a blocking rollback-document wording defect and exhausted ATTEMPT2; D159 receives controller QA takeover and R3 is prohibited. This new task has a distinct exclusive scope. Scope EXCLUSIVE READ_ONLY: docs/CERTIFICACION_N4_1_CAJA.md only. STRICT NON_SHELL native inspection only; no terminal/shell/bash/cat/head/sed/wc/tail/grep/python/scripts/commands. Audit current certification wording for whether it explicitly requires required-current REAL encrypted Desarrollo operational artifact plus matching .sha256 plus matching .meta.json and causal same-artifact restore/drill correlation; historical/planned/workflow-defined/disposable CI evidence is insufficient. If native visibility truncates, report exact boundary and unseen text UNPROVEN. No repository changes, workflow/script execution, secrets access/listing, false ACTIVE/LISTO/CI PASS/P0=0/P1=0, main, Produccion, branches, merge, auto-merge, force-push or deploy. End with independent SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 confirming zero command/script execution and READ_ONLY compliance. TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY."
+}
