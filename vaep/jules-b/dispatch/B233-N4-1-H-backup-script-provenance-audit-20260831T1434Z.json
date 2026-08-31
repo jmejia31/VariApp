@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B233-N4-1-H-backup-script-provenance-audit-20260831T1434Z",
+  "taskId": "N4.1.H-B233-backup-script-provenance-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "66350c5016938ae016f607eab1fc695af8b36849",
+  "taskAttempt": 1,
+  "fileScopeHint": "scripts/m11_backup_desarrollo.sh",
+  "prompt": "STRICT_READ_ONLY_NON_SHELL. Audit only scripts/m11_backup_desarrollo.sh. Determine the exact fail-closed provenance emitted for a REAL operational Desarrollo backup: encrypted artifact naming, external .sha256, external .meta.json, environment/source metadata, commit/run correlation fields, and any condition that could allow fixture/ci/PR evidence to masquerade as required-current operational evidence. Do not modify files. Report exact findings, gaps, limitations, risks, recommendations, unexecuted validations, SELF_REVIEW_PASS_1, SELF_REVIEW_PASS_2, and TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY."
+}
