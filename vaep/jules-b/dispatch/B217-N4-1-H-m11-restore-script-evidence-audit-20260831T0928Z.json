@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B217-N4-1-H-m11-restore-script-evidence-audit-20260831T0928Z",
+  "taskId": "N4.1.H-B217-m11-restore-script-evidence-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "c4252c5a0f97b563c666aaa0c3c6174dfeae593d",
+  "taskAttempt": 1,
+  "fileScopeHint": "scripts/m11_restore_desarrollo.sh",
+  "prompt": "NEW logical SAME_PARENT ATTEMPT1 after B216 REVIEW_PASS_LIMITED/EVIDENCE_ONLY. Scope EXCLUSIVE READ_ONLY: scripts/m11_restore_desarrollo.sh only. STRICT NON_SHELL native inspection only. Audit whether restore validates the SAME encrypted operational M11 artifact and its matching .sha256/.meta.json before restore, how metadata/head/run/environment correlation is checked, and whether any fail-open/disposable-backup path could satisfy closure incorrectly. Report exact visible contract and exact missing/unproven fields. If native visibility truncates, state exact boundary and unseen content UNPROVEN. Do not modify files or run shell/tests/workflows. End with literal independent SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 and TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY. Never touch main/Produccion/branches/merge/auto-merge/force-push/secrets/deploy; never claim false ACTIVE/LISTO/CI PASS/P0=0/P1=0."
+}
