@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B103-N4-1-H-live-backend-recovery-20260831T2042Z",
+  "taskId": "N4.1.H-LIVE-BACKEND-B103",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "7cc2459155008068d82ed291ddea0f10f45da3c7",
+  "fileScopeHint": "backend/src/Domain/**; backend/src/Application/**; backend/src/Api/**; backend/tests/** excluding Infrastructure/Migrations snapshot ownership",
+  "taskAttempt": 1,
+  "prompt": "Start working immediately on CURRENT parent N4.1.H. Own backend Domain/Application/API and their tests only; explicitly exclude EF migration/snapshot files owned by Jules A. Run the current backend build and targeted tests first, identify every reproducible causal failure inside this scope, implement the minimum correct fixes, and validate contracts, RBAC, audit and data invariants. Do not ask for clarification when the repository, docs, tests or direct dependencies provide the answer. Do not touch frontend, VAEP/Jules orchestration, main, production or secrets. If this scope is already green, perform a strict current-HEAD closure audit and return concrete evidence rather than creating artificial changes. Finish with SELF_REVIEW_PASS_1, SELF_REVIEW_PASS_2 and a reviewable ChangeSet/gitPatch with exact baseCommitId."
+}
