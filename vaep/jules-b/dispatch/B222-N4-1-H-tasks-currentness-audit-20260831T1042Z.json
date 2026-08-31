@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B222-N4-1-H-tasks-currentness-audit-20260831T1042Z",
+  "taskId": "N4.1.H-B222-tasks-currentness-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "8449a82ff863bb52be1667deab5e1cf80b0de47b",
+  "taskAttempt": 1,
+  "fileScopeHint": "TASKS.md",
+  "prompt": "VAEP v3.25.1 SAME_PARENT NEW logical task after B221 REVIEW_PASS_LIMITED/EVIDENCE_ONLY due native truncation; no B221 R2 warranted. EXCLUSIVE READ_ONLY scope TASKS.md only. STRICT NON_SHELL native inspection only. Replace the lost A197 evidence audit without redispatching A197: verify N4.1.H bookkeeping remains fail-closed and does not mark Caja documentation/certification closed before required-current REAL encrypted Desarrollo M11 artifact + matching .sha256 + matching .meta.json + explicitly same-artifact restore/drill, EF FacturaProveedor blocker clearance, exact-head causal gates, DoD and P0=0/P1=0. Identify stale SHA/false LISTO/PASS wording or report UNPROVEN with exact native truncation boundary. No writes, shell, tests, workflows, temp files, branches, PRs, pushes, merges, deploys, secrets or Production changes. Emit separate literal SELF_REVIEW_PASS_1, SELF_REVIEW_PASS_2 and TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY. Never claim false ACTIVE_REAL, CI PASS or LISTO."
+}
