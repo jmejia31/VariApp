@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A183-REC1-N4-1-H-runbook-current-evidence-preflight-20260831T0334Z",
+  "taskId": "N4.1.H-A183-runbook-current-evidence-preflight",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "502c432e9ca1ad9f39cb45f66eee46f63d43bc79",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/RUNBOOK_N4_1_CAJA.md",
+  "prompt": "RECOVERY SAME logical task and SAME ATTEMPT1 after pre-session malformed-manifest transport failure; prior attempt did not create a Jules session and does not consume an attempt. Scope EXCLUSIVE and READ_ONLY: docs/RUNBOOK_N4_1_CAJA.md only. NON_SHELL: use native repository/file inspection only; no shell or terminal. Audit whether the runbook prevents false N4.1.H closure by requiring required-current REAL encrypted Desarrollo M11 operational backup artifact plus .sha256 checksum plus .meta.json metadata and, when applicable, restore/drill correlated to the same evidence. Identify stale, unsupported, ambiguous, or false closure claims and distinguish executor evidence from generic workflow, PR, or CI status. Make no repository changes. If visibility truncates, report the exact limitation. No false ACTIVE, LISTO, CI PASS, P0=0, or P1=0. No main, Produccion, branches, merge, auto-merge, force-push, secrets, or deploy. End with substantive independent SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY."
+}
