@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D103-N4-1-H-live-orchestration-recovery-20260831T2044Z",
+  "taskId": "N4.1.H-LIVE-ORCHESTRATION-D103",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "6b9f60eebbfdad59bb16c374066d5e084bcf8b35",
+  "fileScopeHint": ".github/workflows/vaep-jules-*.yml; .github/scripts/vaep-jules-*.sh; docs/VAEP_JULES.md; docs/VAEP_AUTHORITY.md only when required for Jules lifecycle correctness",
+  "taskAttempt": 1,
+  "prompt": "Start working immediately on the Jules lifecycle reliability problem affecting A/B/C/D. Own only VAEP/Jules orchestration files. Inspect the current v3.27 clarification guard, v3.26 throughput guard and v3.25 worker behavior against recent symptoms: idle lanes, FAILED, AWAITING_USER_FEEDBACK/Needs clarification, and completed sessions accumulating as Ready for review without actionable closure. Identify causal orchestration defects, implement only safe fail-closed fixes that reduce idle time and clarification stalls without bypassing review, secrets, branch controls or the two-attempt cap, and run static/self-tests available in scope. Do not touch product backend/frontend code, main, production or secrets. Do not ask for clarification when repository evidence can answer it. If current orchestration is already correct, produce a precise lifecycle audit and identify the exact external blocker rather than making speculative changes. Finish with SELF_REVIEW_PASS_1, SELF_REVIEW_PASS_2 and a reviewable ChangeSet/gitPatch with exact baseCommitId."
+}
