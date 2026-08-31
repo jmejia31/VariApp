@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A193-N4-1-H-runbook-current-evidence-gap-audit-20260831T0804Z",
+  "taskId": "N4.1.H-A193-runbook-current-evidence-gap-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "532b56a839adbe506472d5127df6e38a676a2b50",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/RUNBOOK_N4_1_CAJA.md",
+  "prompt": "NEW logical SAME_PARENT ATTEMPT1 after A192-R2 FINAL exhausted with PASS_LIMITED/NO_TARGETS_FOUND due native truncation; A192 R3 is prohibited. Scope EXCLUSIVE READ_ONLY: docs/RUNBOOK_N4_1_CAJA.md only. STRICT NON_SHELL native inspection only. Audit the runbook for the exact required-current factual evidence still needed before N4.1.H LISTO_REAL: REAL encrypted Desarrollo M11 operational artifact, matching .sha256, matching .meta.json, and an applicable restore/drill causally bound to that same artifact. Distinguish wording/planned evidence/historical evidence from current executor evidence; identify stale SHA/run references or fail-open language and state the minimum controller-verifiable evidence required. No repository changes, workflow/script execution, secret access/listing or shell. If native visibility truncates, state exact boundary and unseen text UNPROVEN. End with literal independent SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 explicitly confirming NON_SHELL compliance. TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY. Never touch main/Produccion/branches/merge/auto-merge/force-push/deploy and never claim false ACTIVE/LISTO/CI PASS/P0=0/P1=0."
+}
