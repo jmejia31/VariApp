@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D148-N4-1-H-m11-backup-script-grounding-audit-20260831T0109Z",
+  "taskId": "N4.1.H-D148-m11-backup-script-grounding-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "4d25f7cb8f3872885c3cefa657ba8b2d282ac412",
+  "taskAttempt": 1,
+  "fileScopeHint": "scripts/m11_backup_desarrollo.sh",
+  "prompt": "NEW logical SAME_PARENT READ_ONLY evidence audit after D147 REVIEW_PASS; this is ATTEMPT1, not rework. Inspect only scripts/m11_backup_desarrollo.sh using native Jules file-reading tools; do not modify files and do not use terminal/shell commands. Determine the exact backup/encryption/checksum/metadata behavior, fail-closed prerequisites, and any conditions needed to establish required-current real M11 Desarrollo backup evidence. Explicitly distinguish script capability from actual executor proof and from restore/drill correlation. Report grounded findings, limitations, P0/P1 implications, unexecuted validations, and two genuinely independent reviews labeled exactly SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. Never claim LISTO, CI PASS, backup/restore execution, or promotion without direct evidence. No GitHub publication, branch, merge, deploy, secrets, Production, or main changes."
+}
