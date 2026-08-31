@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B199-N4-1-H-certification-current-evidence-preflight-20260831T0319Z",
+  "taskId": "N4.1.H-B199-certification-current-evidence-preflight",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "3c7f946a4b113f4f731ff92a340ad65fed1c67a7",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "NEW logical SAME_PARENT ATTEMPT1 after B198 controller REVIEW_PASS_LIMITED evidence-only: B198 obeyed NON_SHELL but native visibility of rollback documentation truncated, so no patch was integrated. Scope exclusively docs/CERTIFICACION_N4_1_CAJA.md. Audit current certification wording against required-current N4.1.H closure evidence. Generic PR/M13/push/workflow/CI success, disposable backup/restore drill evidence, manifests or COMPLETED Jules sessions must not be promoted as proof of the REAL encrypted Desarrollo operational backup executor. Require explicit artifact/checksum/metadata evidence for that operational executor and applicable restore/drill evidence; do not claim same-artifact correlation unless proven. STRICT native non-shell reads only; no terminal/shell commands. If visibility truncates, make no change and report exact limitation. Do not touch workflows/scripts/rollback/runbook/manifests/code/tests. Do not claim LISTO, CI PASS, P0=0 or P1=0. Emit exact substantive independent SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY."
+}
