@@ -38,9 +38,9 @@ namespace InventoryApp.Infrastructure.Migrations
             evaluacion.HasIndex(x => new { x.ProveedorId, x.FechaRecepcionUtc })
                 .HasDatabaseName("IX_EvaluacionesProveedor_Proveedor_FechaRecepcion");
 
-            evaluacion.HasOne<Proveedor>()
+            evaluacion.HasOne("InventoryApp.Domain.Entities.Proveedor", null)
                 .WithMany()
-                .HasForeignKey(x => x.ProveedorId)
+                .HasForeignKey("ProveedorId")
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_EvaluacionesProveedor_Proveedores_ProveedorId");
             evaluacion.HasOne<OrdenCompra>()
