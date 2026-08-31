@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C103-N4-1-H-live-frontend-recovery-20260831T2043Z",
+  "taskId": "N4.1.H-LIVE-FRONTEND-C103",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "15eed3253d0e00a142f63350de6a9179e60b7b0c",
+  "fileScopeHint": "frontend/** only",
+  "taskAttempt": 1,
+  "prompt": "Start working immediately on CURRENT parent N4.1.H. Own frontend/** only. Run current Angular/Vitest/typecheck/build and the directly relevant route/component/service tests, reproduce every current failure inside this scope, implement minimum causal fixes, and preserve existing API contracts, RBAC and approved UX behavior. Do not ask for clarification when repository evidence, docs, tests or direct dependencies can answer it. Do not touch backend, migrations, VAEP/Jules orchestration, main, production or secrets. If frontend is already green at the supplied base, perform a strict current-HEAD closure audit and return exact PASS evidence instead of inventing changes. Finish with SELF_REVIEW_PASS_1, SELF_REVIEW_PASS_2 and a reviewable ChangeSet/gitPatch with exact baseCommitId."
+}
