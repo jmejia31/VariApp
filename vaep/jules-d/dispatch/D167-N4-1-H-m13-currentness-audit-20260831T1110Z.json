@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D167-N4-1-H-m13-currentness-audit-20260831T1110Z",
+  "taskId": "N4.1.H-D167-m13-currentness-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "2ae9905dac3e78b071fc6449763139f3ed8db48f",
+  "taskAttempt": 1,
+  "fileScopeHint": ".github/workflows/m13-certificacion-final.yml",
+  "prompt": "VAEP v3.25.1 SAME_PARENT NEW logical task after D166 original/recovery duplicate-safe drain. D166-REC1 found false-positive/currentness gaps: M13 trusts simulated M11 drill without strict correlation to REAL operative m11-backup-desarrollo artifact, lacks external .meta.json environment/encrypted provenance validation, and does not ground EF FacturaProveedor blocker clearance before P0_P1_ABIERTOS=0. EXCLUSIVE READ_ONLY scope .github/workflows/m13-certificacion-final.yml only. STRICT NON_SHELL native inspection only. Re-audit these exact gaps on current scope and report exact evidence/currentness boundary; no writes. No shell, tests, workflow edits, temp files, branches, PRs, pushes, merges, deploys, secrets or Production changes. Emit separate literal SELF_REVIEW_PASS_1, SELF_REVIEW_PASS_2 and TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY. Never claim false ACTIVE_REAL, CI PASS, P0=0/P1=0 or N4.1.H LISTO."
+}
