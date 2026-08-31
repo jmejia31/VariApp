@@ -30,6 +30,15 @@ namespace InventoryApp.Infrastructure.Migrations
 
     public partial class ERP_N05_PermiteCambioAuditable
     {
-        internal void ApplyTargetModelForSnapshot(ModelBuilder modelBuilder) => BuildTargetModel(modelBuilder);
+        internal void ApplyTargetModelForSnapshot(ModelBuilder modelBuilder)
+        {
+            // The generated N0.5 target model uses string entity names. When that model is
+            // reused as the baseline for the current snapshot, EF otherwise creates Venta
+            // as a shared Dictionary<string, object>. Pre-register the real CLR type so
+            // later strongly typed navigations (for example ReservaInventario.Venta)
+            // resolve to the same entity instead of colliding with a shared-type entity.
+            modelBuilder.Entity<InventoryApp.Domain.Entities.Venta>();
+            BuildTargetModel(modelBuilder);
+        }
     }
 }
