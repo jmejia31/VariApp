@@ -1,0 +1,11 @@
+{
+  "dispatchId": "D158-REC1-N4-1-H-runbook-required-current-hardening-20260831T0556Z",
+  "taskId": "N4.1.H-D158-runbook-required-current-hardening",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "f28d83ea002eeab05608335415a1881b21686325",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/RUNBOOK_N4_1_CAJA.md",
+  "prompt": "RECOVERY SAME logical task/ATTEMPT1 after D158 exceeded the freshness threshold with no externally correlated Jules result session plus fresh useful technical activity. This is a pre-terminal ownership recovery and does NOT increment or consume a second content attempt. If superseded D158 later terminalizes, report it for controller quarantine/reconciliation and do not duplicate its result. Scope EXCLUSIVE WRITE-SAFE: docs/RUNBOOK_N4_1_CAJA.md only. Inspect the current file and, only if needed, propose the smallest single-file patch that makes closure fail closed: required-current REAL encrypted Desarrollo operational M11 backup evidence must identify the exact artifact plus matching .sha256 and matching .meta.json, and any restore/drill claim must be causally correlated to that same artifact; historical/planned/workflow-defined/disposable CI evidence must not satisfy closure. Do not claim such evidence currently exists. Do not inspect or modify scripts/workflows owned by B/C. Do not run backup/restore/workflows, access/list secrets, claim false ACTIVE/LISTO/CI PASS/P0=0/P1=0, or touch main, Produccion, branches, merge, auto-merge, force-push or deploy. Return reviewable ChangeSet/gitPatch only; do not publish. Run only proportional non-destructive validation if safe. End with independent literal SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. ATTEMPT1 permits at most one R2 correction; R3 prohibited.",
+  "recoveryOf": "D158-N4-1-H-runbook-required-current-hardening-20260831T0545Z"
+}
