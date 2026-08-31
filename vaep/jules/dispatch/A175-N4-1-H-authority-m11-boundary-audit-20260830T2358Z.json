@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A175-N4-1-H-authority-m11-boundary-audit-20260830T2358Z",
+  "taskId": "N4.1.H-A175-authority-m11-boundary-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "2982585faecf47fe121dd8861359ca2793b00b95",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/VAEP_AUTHORITY.md",
+  "prompt": "SAME_PARENT READ_ONLY NON_SHELL evidence audit. Inspect only docs/VAEP_AUTHORITY.md using native file-reading capabilities; do not execute shell commands and do not modify files. Determine whether current authority text can prove or merely require the N4.1.H closure condition for a required-current real encrypted M11 Desarrollo backup plus applicable restore/drill correlated to artifact/checksum/metadata. Report exact grounded findings, gaps, limitations, P0/P1 implications, and two independent reviews with the exact labels SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. Never claim LISTO, CI PASS, backup execution, restore/drill execution, or promotion without direct evidence. No GitHub publication, branch, merge, deploy, secrets, or Production/main changes."
+}
