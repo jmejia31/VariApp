@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D157-N4-1-H-m11-restore-external-meta-hardening-20260831T0502Z",
+  "taskId": "N4.1.H-D157-m11-restore-external-meta-hardening",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "a509390290618539f177a348deb501db8ec7d35e",
+  "taskAttempt": 1,
+  "fileScopeHint": "scripts/m11_restore_desarrollo.sh",
+  "prompt": "NEW SAME_PARENT logical ATTEMPT1 after D156 COMPLETED REVIEW_PASS evidence-only. D156 found a concrete fail-closed gap: the restore script validates the external encrypted backup and .sha256 but does not explicitly validate the matching external .meta.json before decryption; metadata is only extracted from inside the payload. Scope EXCLUSIVE WRITE_SAFE_SINGLE_FILE: scripts/m11_restore_desarrollo.sh only. Implement the smallest fail-closed correction so an externally supplied required-current REAL encrypted Desarrollo backup restore/drill validates a matching external metadata file before decryption and preserves same-artifact identity through the restore report, without weakening existing checksum/internal manifest validation. Do not access/list secrets or run against real databases. Use proportional safe validation only in Jules workspace. No changes outside this one file, no main, Produccion, branches, PR, merge, auto-merge, force-push or deploy. Never claim current execution, CI PASS, P0=0/P1=0 or LISTO. Return reviewable ChangeSet/gitPatch and two independent SELF_REVIEW_PASS_1/SELF_REVIEW_PASS_2."
+}
