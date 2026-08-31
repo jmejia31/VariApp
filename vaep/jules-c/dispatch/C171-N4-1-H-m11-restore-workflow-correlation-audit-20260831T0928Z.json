@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C171-N4-1-H-m11-restore-workflow-correlation-audit-20260831T0928Z",
+  "taskId": "N4.1.H-C171-m11-restore-workflow-correlation-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "d30e12858a683a29ece38ee009efab61fedadc20",
+  "taskAttempt": 1,
+  "fileScopeHint": ".github/workflows/m11-backup-restore-desarrollo.yml",
+  "prompt": "NEW logical SAME_PARENT ATTEMPT1 after C170 REVIEW_PASS_LIMITED and duplicate REC1 reconciled. Scope EXCLUSIVE READ_ONLY: .github/workflows/m11-backup-restore-desarrollo.yml only. STRICT NON_SHELL native inspection only. Audit whether the workflow proves restore/drill against the SAME required-current operational encrypted M11 artifact, including explicit artifact/run/head input, matching .sha256/.meta.json validation, environment/prod-touch fail-closed checks and any disposable backup generation. Report exact visible correlation chain and gaps; workflow definition is not execution proof. If native visibility truncates, state exact boundary and unseen content UNPROVEN. No file changes, shell, tests or workflow execution. End with literal independent SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 and TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY. Never touch main/Produccion/branches/merge/auto-merge/force-push/secrets/deploy; never claim false ACTIVE/LISTO/CI PASS/P0=0/P1=0."
+}
