@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C177-N4-1-H-restore-script-full-audit-20260831T1223Z",
+  "taskId": "N4.1.H-C177-restore-script-full-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "06104dff4693c55afb57a83916cf37e5d241e48b",
+  "taskAttempt": 1,
+  "fileScopeHint": "scripts/m11_restore_desarrollo.sh",
+  "prompt": "VAEP v3.25.1 NEW logical task ATTEMPT1 after C176 ATTEMPT2 FINAL exhausted and transferred to controller QA; C176-R3 is permanently prohibited. EXCLUSIVE READ_ONLY scope scripts/m11_restore_desarrollo.sh only. SAME_PARENT N4.1.H. Inspect the COMPLETE script. Read-only shell chunking/search is explicitly permitted for this NEW logical task solely to avoid native truncation; do not execute restore, connect to any database, or write files. Audit whether restore fails closed on exact external encrypted artifact identity and verifies its matching .sha256 plus matching external .meta.json/provenance before destructive/useful restore steps, including environment=desarrollo, encrypted=true, productionInScope=false and causal same-artifact identity. Identify any concrete blocker to a required-current REAL Desarrollo restore/drill. Report exact findings, risks, limitations and unexecuted validations. No product/file writes, database access, workflow dispatch, branches, PRs, pushes beyond manifest transport, merges, deploys, secrets, Production or main changes. Emit SELF_REVIEW_PASS_1, SELF_REVIEW_PASS_2 and TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY. Never claim ACTIVE_REAL, CI PASS, P0=0/P1=0 or N4.1.H LISTO."
+}
