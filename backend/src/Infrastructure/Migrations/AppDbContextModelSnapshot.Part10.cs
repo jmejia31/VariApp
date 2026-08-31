@@ -12,7 +12,7 @@ namespace InventoryApp.Infrastructure.Migrations
         private static void ApplyPart10(ModelBuilder modelBuilder)
         {
             // ERP-N1.8.C — persistencia normalizada de reservas de inventario.
-            modelBuilder.Entity("InventoryApp.Domain.Entities.ReservaInventario", b =>
+            modelBuilder.Entity<InventoryApp.Domain.Entities.ReservaInventario>(b =>
             {
                 b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
                 MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
@@ -48,7 +48,7 @@ namespace InventoryApp.Infrastructure.Migrations
                 b.ToTable("ReservasInventario");
             });
 
-            modelBuilder.Entity("InventoryApp.Domain.Entities.ReservaInventarioDetalle", b =>
+            modelBuilder.Entity<InventoryApp.Domain.Entities.ReservaInventarioDetalle>(b =>
             {
                 b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
                 MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
@@ -82,7 +82,7 @@ namespace InventoryApp.Infrastructure.Migrations
                 b.ToTable("ReservaInventarioDetalles");
             });
 
-            modelBuilder.Entity("InventoryApp.Domain.Entities.ReservaInventario", b =>
+            modelBuilder.Entity<InventoryApp.Domain.Entities.ReservaInventario>(b =>
             {
                 b.HasOne(typeof(InventoryApp.Domain.Entities.PedidoVenta), "PedidoVenta").WithMany().HasForeignKey("PedidoVentaId")
                     .OnDelete(DeleteBehavior.Restrict).HasConstraintName("FK_ReservasInventario_PedidosVenta_PedidoVentaId");
@@ -92,7 +92,7 @@ namespace InventoryApp.Infrastructure.Migrations
                 b.Navigation("Venta");
             });
 
-            modelBuilder.Entity("InventoryApp.Domain.Entities.ReservaInventarioDetalle", b =>
+            modelBuilder.Entity<InventoryApp.Domain.Entities.ReservaInventarioDetalle>(b =>
             {
                 b.HasOne("InventoryApp.Domain.Entities.Almacen", "Almacen").WithMany().HasForeignKey("AlmacenId")
                     .OnDelete(DeleteBehavior.Restrict).IsRequired().HasConstraintName("FK_ReservaDetalles_Almacenes_AlmacenId");
@@ -109,7 +109,7 @@ namespace InventoryApp.Infrastructure.Migrations
                 b.Navigation("UbicacionAlmacen");
             });
 
-            modelBuilder.Entity("InventoryApp.Domain.Entities.ReservaInventario", b =>
+            modelBuilder.Entity<InventoryApp.Domain.Entities.ReservaInventario>(b =>
             {
                 b.Navigation("Detalles");
             });
