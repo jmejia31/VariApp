@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D149-N4-1-H-m13-m11-evidence-chain-audit-20260831T0130Z",
+  "taskId": "N4.1.H-D149-m13-m11-evidence-chain-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "a9c94260226406d35833bea6e6591bb4a7fca62c",
+  "taskAttempt": 1,
+  "fileScopeHint": ".github/workflows/m13-certificacion-final.yml",
+  "prompt": "STRICT_READ_ONLY NON_SHELL SAME_PARENT cross-audit. Inspect only .github/workflows/m13-certificacion-final.yml and direct authority files required by v3.25. Determine whether M13 consumes or proves a real current M11 encrypted Desarrollo backup and applicable restore/drill evidence, exactly which upstream run/job/artifact/checksum/metadata evidence is required, and where a workflow success could still be capability-only or false-positive for N4.1.H. Do not modify files and do not claim LISTO or CI PASS. Report grounded findings, limitations, P0/P1 implications, unexecuted validations, and two substantive independent SELF_REVIEW_PASS_1/2 reviews. TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY."
+}
