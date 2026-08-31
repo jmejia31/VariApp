@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B228-R2-REC2-N4-1-H-m11-external-config-contract-audit-20260831T1326Z",
+  "taskId": "N4.1.H-B228-m11-external-config-contract-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "03f1db67b411f29fdfb6ea3446ed37955ccb40bd",
+  "taskAttempt": 2,
+  "fileScopeHint": ".github/workflows/m11-backup-desarrollo-operativo.yml",
+  "prompt": "VAEP_TRANSPORT_VERIFIED=true\nBootstrap recovery for SAME logical B228 FINAL ATTEMPT2; R3 prohibited. PRIMARY_BASE_HEAD=03f1db67b411f29fdfb6ea3446ed37955ccb40bd must be the exact parent of this one-manifest commit. Earlier R2 transport manifests failed pre-session base atomicity and do not consume another attempt. READ_ONLY SAME_PARENT audit. Inspect .github/workflows/m11-backup-desarrollo-operativo.yml and direct references only. Never access, reveal, request, alter, infer, or invent secret values. Verify the non-secret external configuration gate fails closed before backup creation, list only required configuration variable NAMES and visible wiring, and identify exact required-current REAL backup evidence still missing. No modifications. No shell/terminal. Emit SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. Never claim LISTO."
+}
