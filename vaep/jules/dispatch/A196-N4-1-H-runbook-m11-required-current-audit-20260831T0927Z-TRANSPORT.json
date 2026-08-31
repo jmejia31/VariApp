@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A196-N4-1-H-runbook-m11-required-current-audit-20260831T0927Z-TRANSPORT",
+  "taskId": "N4.1.H-A196-runbook-m11-required-current-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "48a2562028afd948a6fb9dd36b01de2d92034cc6",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/RUNBOOK_N4_1_CAJA.md",
+  "prompt": "SAME logical A196 ATTEMPT1 transport correction after pre-session wrong dispatch path; ATTEMPT1 remains unconsumed. Scope EXCLUSIVE READ_ONLY: docs/RUNBOOK_N4_1_CAJA.md only. STRICT NON_SHELL native inspection only. Audit whether the closure runbook fail-closes N4.1.H on required-current REAL operational M11 evidence: exact encrypted artifact, matching .sha256, matching .meta.json, same-artifact restore/drill correlation, exact-head causal gates, and no substitution by workflow definitions/historical/disposable evidence. Report exact wording gaps or stale SHAs as findings; do not modify files or execute shell/tests/workflows. If native visibility truncates, state exact boundary and unseen content UNPROVEN. End with literal independent SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 and TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY. Never touch main/Produccion/branches/merge/auto-merge/force-push/secrets/deploy; never claim false ACTIVE/LISTO/CI PASS/P0=0/P1=0."
+}
