@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C179-REC1-N4-1-H-restore-script-same-artifact-audit-20260831T1326Z",
+  "taskId": "N4.1.H-C179-restore-script-same-artifact-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "3cc67a3a4afb467a8995243d1fae1dbe9a73e2af",
+  "taskAttempt": 1,
+  "fileScopeHint": "scripts/m11_restore_desarrollo.sh",
+  "prompt": "VAEP_TRANSPORT_VERIFIED=true\nRECOVERY SAME_LOGICAL_TASK SAME_ATTEMPT1 after pre-session ManifestGuard base race. The previous C179 transport manifest had primaryBaseHead that did not equal its real parent, so it is invalid bootstrap transport only and ATTEMPT1 was not consumed. The trusted guard must verify this recovery PRIMARY_BASE_HEAD is the exact parent of this atomic one-manifest commit.\n\nREAD_ONLY SAME_PARENT evidence task. Inspect scripts/m11_restore_desarrollo.sh completely and direct references only. Determine whether the restore contract can prove it is consuming the exact required-current REAL encrypted operational artifact and whether it validates matching external .sha256 and .meta.json provenance before/through restore. Do not modify files. Distinguish script capability from evidence that a real operational run occurred. Report exact fail-closed gaps, residual evidence required, SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. No shell/terminal commands. Never claim LISTO."
+}
