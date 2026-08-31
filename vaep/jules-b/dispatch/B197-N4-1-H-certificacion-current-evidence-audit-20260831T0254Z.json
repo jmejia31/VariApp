@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B197-N4-1-H-certificacion-current-evidence-audit-20260831T0254Z",
+  "taskId": "N4.1.H-B197-certificacion-current-evidence-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "5100e6d0ff1e04f02fc6dd746949253c086ddae9",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "VAEP_TRANSPORT_VERIFIED=true\nNEW logical SAME_PARENT ATTEMPT1 after B196 was controller-reviewed PASS_LIMITED evidence-only because native read truncation prevented a complete rollback audit; no product patch was integrated. Scope exclusively docs/CERTIFICACION_N4_1_CAJA.md. Audit current closure wording for N4.1.H fail-closed semantics: required-current REAL encrypted Desarrollo operational backup executor evidence must be proven with artifact/checksum/metadata and must remain distinct from disposable drill evidence; generic PR/push/M13/workflow success must not imply the operational backup ran. Use native non-shell reads only. If truncated, make no change and report exact limitation. Do not touch workflows/scripts/rollback/runbook/manifests/code/tests. Do not claim LISTO, CI PASS, P0=0 or P1=0. Emit two substantive independent SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY."
+}
