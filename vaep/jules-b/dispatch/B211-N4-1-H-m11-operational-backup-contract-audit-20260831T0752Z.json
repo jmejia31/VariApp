@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B211-N4-1-H-m11-operational-backup-contract-audit-20260831T0752Z",
+  "taskId": "N4.1.H-B211-m11-operational-backup-contract-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "2b305e6b27973f59bcb72d3fd8135253aa0b94dc",
+  "taskAttempt": 1,
+  "fileScopeHint": ".github/workflows/m11-backup-desarrollo-operativo.yml",
+  "prompt": "NEW logical SAME_PARENT ATTEMPT1 after B210 REVIEW_FIRST=PASS_LIMITED/EVIDENCE_ONLY established that the requested legacy path does not exist and native visibility truncated. Scope EXCLUSIVE READ_ONLY: .github/workflows/m11-backup-desarrollo-operativo.yml only. STRICT NON_SHELL native inspection only. Audit the actual operational workflow contract: determine whether it creates a required-current REAL encrypted Desarrollo backup artifact and matching .sha256 plus matching .meta.json; identify exact fail-closed prerequisites/configuration conditions without accessing or listing secret values; distinguish real operational execution/evidence from workflow definition, skipped jobs, historical artifacts, planned evidence, and disposable CI fixtures. No repository changes or workflow/script execution. If native visibility truncates, state exact boundary and unseen text UNPROVEN. End with literal independent SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 explicitly confirming NON_SHELL compliance. TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY. Never touch main/Produccion/branches/merge/auto-merge/force-push/deploy and never claim false ACTIVE/LISTO/CI PASS/P0=0/P1=0."
+}
