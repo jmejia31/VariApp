@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A202-N4-1-H-m11-real-failure-runbook-delta-audit-20260831T1247Z",
+  "taskId": "N4.1.H-A202-m11-real-failure-runbook-delta-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "976854a0eecd51df559f48c719204c993b6a5d7b",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/RUNBOOK_N4_1_CAJA.md",
+  "prompt": "READ_ONLY SAME_PARENT evidence task. Inspect docs/RUNBOOK_N4_1_CAJA.md and direct references only. Determine whether the runbook fail-closed contract correctly covers the fresh M11 REAL operational failure mode where required external configuration is absent before backup creation, without reading, exposing, changing, requesting, or inventing any secret values. Do not modify files. Report exact grounded observations, any documentation gap, what evidence is still required for required-current REAL backup + matching .sha256 + .meta.json + same-artifact restore/drill, and SELF_REVIEW_PASS_1 plus SELF_REVIEW_PASS_2. No shell/terminal commands. Never claim LISTO."
+}
