@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C181-R2-N4-1-H-restore-workflow-correlation-fix-20260831T1434Z",
+  "taskId": "N4.1.H-C181-restore-workflow-correlation-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "b386401b770c35685cb71931743bfd67955ae704",
+  "taskAttempt": 2,
+  "fileScopeHint": ".github/workflows/m11-backup-restore-desarrollo.yml",
+  "prompt": "ATTEMPT2_FINAL_NO_R3. WRITE_SAFE_SINGLE_FILE. Correct only .github/workflows/m11-backup-restore-desarrollo.yml so the workflow cannot be misrepresented as required-current REAL operational M11 evidence. Preserve its disposable CI backup/restore test purpose, but make the evidence classification explicit in workflow outputs/summary: CI_DISPOSABLE_ONLY, not operational required-current; explicitly state it does not satisfy the external operational artifact + matching .sha256 + matching .meta.json + same-artifact restore/drill closure contract. Do not add secrets, deploys, branches, PRs, merges, Production access, or external operational artifact fetching. Run proportional syntax/static validation if available in the Jules workspace. Return a reviewable patch with exact baseCommitId, findings, tests, limitations, risks, SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. This is R2 FINAL; if blocked or defective, report for controller QA takeover and do not request R3."
+}
