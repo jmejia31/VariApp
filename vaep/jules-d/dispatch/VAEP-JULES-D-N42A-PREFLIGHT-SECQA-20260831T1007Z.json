@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-D-N42A-PREFLIGHT-SECQA-20260831T1007Z",
+  "taskId": "N4.2.A.PREFLIGHT.SECQA",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "ef9836af5d2fefb47961c316622d509a3ea18f8c",
+  "taskAttempt": 1,
+  "fileScopeHint": "WRITE_SCOPE=docs/qa/N4_2_A_PREFLIGHT_SEC_QA_D.md ONLY",
+  "prompt": "Material preflight for ERP-N4 N4.2.A Bancos focused exclusively on RBAC, audit, security, observability and QA strategy. Do not promote N4.2.F/G and do not modify implementation. Inspect existing permission catalog/RBAC patterns, audit/correlation/logging/health conventions and test suites reusable for CuentaBancaria, depositos, retiros, transferencias, comisiones, intereses y conciliacion. Produce ONLY docs/qa/N4_2_A_PREFLIGHT_SEC_QA_D.md with exact permission/actions needed, audit events, threat/abuse/idempotency/concurrency risks, observability expectations, concrete test matrix and exact existing paths to reuse. Every finding must reference repository paths/symbols or NO_EXISTING_COMPONENT. No generic audit and no duplicate evidence. Two self-reviews. Artifact patch only; no push/PR/branch/merge/deploy."
+}
