@@ -52,9 +52,9 @@ namespace InventoryApp.Infrastructure.Migrations
             cuenta.HasIndex(x => new { x.Estado, x.FechaVencimientoUtc })
                 .HasDatabaseName("IX_CuentasPorPagar_Estado_Vencimiento");
 
-            cuenta.HasOne<FacturaProveedor>()
+            cuenta.HasOne("InventoryApp.Domain.Entities.FacturaProveedor", null)
                 .WithMany()
-                .HasForeignKey(x => x.FacturaProveedorId)
+                .HasForeignKey("FacturaProveedorId")
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_CuentasPorPagar_FacturasProveedor_FacturaProveedorId");
             cuenta.HasOne<Proveedor>()
