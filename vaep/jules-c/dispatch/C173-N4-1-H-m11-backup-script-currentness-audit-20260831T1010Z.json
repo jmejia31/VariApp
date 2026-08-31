@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C173-N4-1-H-m11-backup-script-currentness-audit-20260831T1010Z",
+  "taskId": "N4.1.H-C173-m11-backup-script-currentness-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "1e10441a5880c049e06dac9a388e11278c1aff3c",
+  "taskAttempt": 1,
+  "fileScopeHint": "scripts/m11_backup_desarrollo.sh",
+  "prompt": "VAEP v3.25.1 SAME_PARENT NEW logical task after C172 REVIEW_PASS_LIMITED/EVIDENCE_ONLY/patch0; C172 is terminal/reviewed, not R2. EXCLUSIVE READ_ONLY scope scripts/m11_backup_desarrollo.sh. STRICT NON_SHELL native inspection only; no writes, shell, tests, workflows or temp files. Audit whether the script itself can produce required-current REAL encrypted Desarrollo operational evidence with matching artifact + .sha256 + .meta.json and sufficient provenance/currentness for a later same-artifact restore/drill; identify exact fail-closed gaps without claiming execution occurred. Historical, disposable or workflow-definition evidence must not imply LISTO/PASS. If native visibility truncates, report exact boundary and unseen requirements UNPROVEN. Emit separate literal SELF_REVIEW_PASS_1, SELF_REVIEW_PASS_2 and TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY before COMPLETED. Never touch main/Produccion/branches/merge/auto-merge/force-push/secrets/deploy; never claim false ACTIVE/LISTO/CI PASS/P0=0/P1=0."
+}
