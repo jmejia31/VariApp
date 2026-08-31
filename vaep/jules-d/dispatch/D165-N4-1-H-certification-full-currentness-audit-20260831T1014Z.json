@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D165-N4-1-H-certification-full-currentness-audit-20260831T1014Z",
+  "taskId": "N4.1.H-D165-certification-full-currentness-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "62de98fe8535cd522b21182d802ac88fe0c9f652",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "VAEP v3.25.1 SAME_PARENT NEW logical task after D164 REVIEW_PASS evidence-only/no patch. EXCLUSIVE READ_ONLY scope docs/CERTIFICACION_N4_1_CAJA.md only. STRICT NON_SHELL native inspection only. Re-audit certification currentness against controller facts: required-current REAL encrypted M11 operational artifact + matching .sha256 + matching .meta.json + explicitly same-artifact restore/drill + exact-head causal gates + DoD + P0=0/P1=0 remain mandatory; historical/stale SHA, workflow-definition evidence, disposable CI artifacts, skipped generic CI or terminal Jules state must never imply LISTO/PASS. Identify any wording gap that could permit false closure. No file changes, shell, tests, workflows or temp files. If native visibility truncates, state exact boundary and unseen requirements UNPROVEN. Emit separate literal SELF_REVIEW_PASS_1, SELF_REVIEW_PASS_2 and TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY before COMPLETED. Never touch main/Produccion/branches/merge/auto-merge/force-push/secrets/deploy; never claim false ACTIVE/LISTO/CI PASS/P0=0/P1=0."
+}
