@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C181-N4-1-H-restore-workflow-correlation-audit-20260831T1416Z",
+  "taskId": "N4.1.H-C181-restore-workflow-correlation-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "4820ee7a1b0ecb9030eb5eca76545de400ce815b",
+  "taskAttempt": 1,
+  "fileScopeHint": ".github/workflows/m11-backup-restore-desarrollo.yml",
+  "prompt": "STRICT_READ_ONLY_NON_SHELL. Audit only .github/workflows/m11-backup-restore-desarrollo.yml. Determine whether this workflow can ever prove restore/drill of the exact required-current REAL external operational M11 backup artifact from Desarrollo, with matching external .sha256 and external .meta.json, or whether it is fixture/disposable CI evidence. Identify exact correlation identifiers and false-pass risks. Do not modify files. Report exact findings, gaps, limitations, risks, recommendations, unexecuted validations, SELF_REVIEW_PASS_1, SELF_REVIEW_PASS_2, and TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY."
+}
