@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C175-N4-1-H-restore-workflow-currentness-audit-20260831T1049Z",
+  "taskId": "N4.1.H-C175-restore-workflow-currentness-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "5400f4cb19d1b12ddc804a805be26006c6636b8e",
+  "taskAttempt": 1,
+  "fileScopeHint": ".github/workflows/m11-backup-restore-desarrollo.yml",
+  "prompt": "VAEP v3.25.1 SAME_PARENT NEW logical task after C174 ATTEMPT1 REVIEW_PASS_LIMITED/EVIDENCE_ONLY; no C174 R2 warranted because artifact changes.patch is empty and its only conclusion is UNPROVEN due to native truncation. EXCLUSIVE READ_ONLY scope .github/workflows/m11-backup-restore-desarrollo.yml only. STRICT NON_SHELL native inspection only. Audit whether this restore workflow can prove fail-closed explicitly same-artifact correlation to the required-current REAL encrypted Desarrollo M11 operational backup, including exact artifact identity, matching .sha256, matching .meta.json/provenance, and refusal on mismatch/stale/disposable CI evidence. Identify exact false-positive/currentness gaps or state UNPROVEN at the exact native truncation boundary. No writes, shell, tests, workflow edits, temp files, branches, PRs, pushes, merges, deploys, secrets or Production changes. Emit separate literal SELF_REVIEW_PASS_1, SELF_REVIEW_PASS_2 and TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY. Never claim false ACTIVE_REAL, CI PASS, P0=0/P1=0 or N4.1.H LISTO."
+}
