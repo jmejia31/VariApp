@@ -9,6 +9,7 @@ on:
       - 'backend/scripts/postcheck-erp-n0-6-c3-origen-tipado.sql'
       - 'backend/src/Infrastructure/Migrations/20260812083000_N0_6_OrigenTipadoMovimientoInventario.cs'
       - 'backend/src/Infrastructure/Migrations/20260812084900_N0_6_C3_IntegridadOrigenTipadoMovimientoInventario.cs'
+      - 'backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.Part*.cs'
       - '.github/workflows/erp-n0-6-preflight-ci.yml'
   pull_request:
     branches: [main]
@@ -18,6 +19,7 @@ on:
       - 'backend/scripts/postcheck-erp-n0-6-c3-origen-tipado.sql'
       - 'backend/src/Infrastructure/Migrations/20260812083000_N0_6_OrigenTipadoMovimientoInventario.cs'
       - 'backend/src/Infrastructure/Migrations/20260812084900_N0_6_C3_IntegridadOrigenTipadoMovimientoInventario.cs'
+      - 'backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.Part*.cs'
       - '.github/workflows/erp-n0-6-preflight-ci.yml'
   workflow_dispatch:
 
