@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A177-N4-1-H-certification-grounding-audit-20260831T0105Z",
+  "taskId": "N4.1.H-A177-certification-grounding-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "e256810f52a97817b096ecf14a2e72412d921ab9",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "SAME_PARENT READ_ONLY evidence audit for CURRENT_PARENT N4.1.H. Inspect only docs/CERTIFICACION_N4_1_CAJA.md with native Jules file-reading tools; do not modify files and do not use terminal/shell commands. Determine whether every certification assertion is grounded in current executor evidence versus merely requirement/historical text. Pay special attention to real encrypted M11 Desarrollo backup and applicable restore/drill correlation to artifact/checksum/metadata. Report exact findings, limitations, P0/P1 implications, unexecuted validations, and two genuinely independent reviews labeled exactly SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. Never claim LISTO, CI PASS, backup/restore execution, or promotion without direct evidence. No GitHub publication, branch, merge, deploy, secrets, Production, or main changes."
+}
