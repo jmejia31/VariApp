@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B216-N4-1-H-m11-backup-script-evidence-contract-20260831T0918Z",
+  "taskId": "N4.1.H-B216-m11-backup-script-evidence-contract",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "d15b6142ef8fd836db93adde63b5a05a2939922f",
+  "taskAttempt": 1,
+  "fileScopeHint": "scripts/m11_backup_desarrollo.sh",
+  "prompt": "NEW logical SAME_PARENT ATTEMPT1 after B215 REVIEW_PASS_LIMITED/EVIDENCE_ONLY. The dispatch transport commit is expected to be a single-manifest child of PRIMARY_BASE_HEAD and is not product divergence when the trusted worker guard validates it. Scope EXCLUSIVE READ_ONLY: scripts/m11_backup_desarrollo.sh only. STRICT NON_SHELL native inspection only. Ground the M11 required-current evidence contract directly in the backup script: identify the exact output variables/markers for encrypted backup artifact, matching .sha256 and matching .meta.json; verify metadata fields that can correlate environment, encryption, productionInScope/productionTouched, source head/run if present, and retention-related semantics visible in this file. Report exact missing correlation fields or fail-open gaps without modifying files or executing shell/tests/workflows. If native visibility truncates, state the exact boundary and unseen content UNPROVEN. End with literal independent SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2, plus TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY. Never touch main/Produccion/branches/merge/auto-merge/force-push/secrets/deploy and never claim false ACTIVE/LISTO/CI PASS/P0=0/P1=0."
+}
