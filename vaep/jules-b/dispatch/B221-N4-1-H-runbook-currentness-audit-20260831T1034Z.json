@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B221-N4-1-H-runbook-currentness-audit-20260831T1034Z",
+  "taskId": "N4.1.H-B221-runbook-currentness-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "484cf65b6190f35ec5b116e3275277488d9eb2e2",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/RUNBOOK_N4_1_CAJA.md",
+  "prompt": "VAEP v3.25.1 SAME_PARENT NEW logical task after B220 ATTEMPT1 was REVIEWED PASS_LIMITED/EVIDENCE_ONLY with no content defect and its result Issue was reconciled. EXCLUSIVE READ_ONLY scope docs/RUNBOOK_N4_1_CAJA.md only. STRICT NON_SHELL native inspection only. Audit whether the N4.1 Caja runbook remains fail-closed for certification currentness: it must not imply LISTO from workflow/history alone and must require required-current REAL encrypted Desarrollo M11 operational artifact, matching .sha256, matching .meta.json, explicitly same-artifact restore/drill when claimed, exact-head causal gates, DoD and P0=0/P1=0. Identify exact wording gaps, stale SHA, false PASS/LISTO, or state that requirements are UNPROVEN if native visibility truncates; report the exact visible boundary. No writes, shell, tests, workflows, temp files, branches, PRs, pushes, merges, deploys, secrets or Production changes. Before COMPLETED emit separate literal SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 plus TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY. Never claim false ACTIVE_REAL, CI PASS, P0=0/P1=0 or N4.1.H LISTO."
+}
