@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D156-N4-1-H-m11-restore-correlation-audit-20260831T0448Z",
+  "taskId": "N4.1.H-D156-m11-restore-correlation-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "887af57d8a3c644bc2d9c2778feebeb7ab577347",
+  "taskAttempt": 1,
+  "fileScopeHint": "scripts/m11_restore_desarrollo.sh",
+  "prompt": "NEW SAME_PARENT logical ATTEMPT1 after D155 completed PASS_LIMITED evidence-only due native truncation; D155 is not being retried. Scope EXCLUSIVE and READ_ONLY: scripts/m11_restore_desarrollo.sh only. STRICT NON_SHELL native inspection only; no shell/terminal/bash/cat/head/sed/wc/tail/grep/python/scripts/commands. Audit visible restore semantics for consuming and verifying an externally supplied required-current REAL encrypted Desarrollo operational M11 artifact together with matching .sha256 and .meta.json, preserving identity for same-artifact restore/drill correlation. If visibility truncates, report exact limitation and UNPROVEN unseen semantics. Do not run script/workflows or access/list secrets. No repo changes, false ACTIVE/LISTO/CI PASS/P0=0/P1=0, main, Produccion, branches, merge, auto-merge, force-push or deploy. End SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 with NON_SHELL confirmation. TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY."
+}
