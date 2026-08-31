@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A183-R2-N4-1-H-runbook-current-evidence-preflight-20260831T0352Z",
+  "taskId": "N4.1.H-A183-runbook-current-evidence-preflight",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "3ac3fd14377b62066c0d7c5840743206644df199",
+  "taskAttempt": 2,
+  "fileScopeHint": "docs/RUNBOOK_N4_1_CAJA.md",
+  "prompt": "VAEP REVIEW_FIRST correction for SAME logical task after ATTEMPT1 terminal session sessions/16207627012112032048. ATTEMPT1 is REVIEW_REJECT because the artifact explicitly admits an unauthorized shell command under STRICT_READ_ONLY/NON_SHELL and therefore cannot certify the assigned audit. This is ATTEMPT2/R2 FINAL; R3 is prohibited. Scope EXCLUSIVE and READ_ONLY: docs/RUNBOOK_N4_1_CAJA.md only. NON_SHELL HARD: use only native repository/file inspection; do not invoke shell, terminal, bash, sed, cat, wc, tail, python, scripts, or commands. Audit only visible grounded text and determine whether the runbook fail-closes N4.1.H on required-current REAL encrypted Desarrollo M11 operational backup artifact plus .sha256 plus .meta.json and explicitly applicable same-artifact restore/drill correlation. If native visibility truncates, state exact limitation and do not infer unseen content. Make no repository changes. No false ACTIVE, LISTO, CI PASS, P0=0 or P1=0. No main, Produccion, branches, merge, auto-merge, force-push, secrets or deploy. End with two substantive independent sections named exactly SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2, explicitly confirming NON_SHELL compliance, scope, evidence grounding, unsupported claims, and unexecuted validations. TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY."
+}
