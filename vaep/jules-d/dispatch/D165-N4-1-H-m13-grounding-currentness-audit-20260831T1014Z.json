@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D165-N4-1-H-m13-grounding-currentness-audit-20260831T1014Z",
+  "taskId": "N4.1.H-D165-m13-grounding-currentness-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "5f0263e7c07be1f87d494c6740dab105c25ead5a",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/FASE_M13_AUDITORIA_INTEGRAL_HARDENING_CERTIFICACION_FINAL.md",
+  "prompt": "VAEP v3.25.1 SAME_PARENT NEW logical task after D164 REVIEW_PASS_LIMITED/EVIDENCE_ONLY/patch0; D164 is terminal/reviewed, not R2. EXCLUSIVE READ_ONLY scope docs/FASE_M13_AUDITORIA_INTEGRAL_HARDENING_CERTIFICACION_FINAL.md. STRICT NON_SHELL native inspection only; no writes, shell, tests, workflows or temp files. Audit whether M13 wording can be grounded against N4.1.H current closure without treating historical/disposable/workflow-definition evidence as required-current REAL M11 proof. Required-current external encrypted artifact + matching .sha256 + matching .meta.json + same-artifact restore/drill and exact-head causal gates/DoD/P0=0/P1=0 remain mandatory until independently proven. Identify any wording that could false-promote N4.1.H, but do not claim execution occurred. If native visibility truncates, report exact boundary and unseen requirements UNPROVEN. Emit separate literal SELF_REVIEW_PASS_1, SELF_REVIEW_PASS_2 and TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY before COMPLETED. Never touch main/Produccion/branches/merge/auto-merge/force-push/secrets/deploy; never claim false ACTIVE/LISTO/CI PASS/P0=0/P1=0."
+}
