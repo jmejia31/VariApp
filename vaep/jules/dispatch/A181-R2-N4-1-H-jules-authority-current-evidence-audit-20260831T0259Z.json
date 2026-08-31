@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A181-R2-N4-1-H-jules-authority-current-evidence-audit-20260831T0259Z",
+  "taskId": "N4.1.H-A181-jules-authority-current-evidence-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "d03d52efae2c9ba43205443d4085ca6ea56210bf",
+  "taskAttempt": 2,
+  "fileScopeHint": "docs/VAEP_JULES.md",
+  "prompt": "VAEP_TRANSPORT_VERIFIED=true\nR2 FINAL for SAME logical task after mandatory REVIEW_FIRST found ATTEMPT1 noncompliant: the Jules session explicitly admitted unauthorized shell command wc -l under STRICT_READ_ONLY_NON_SHELL, and native-read truncation prevented definitive evidence reconciliation. Scope exclusively docs/VAEP_JULES.md. Re-audit current authority wording for fail-closed separation between manifest/workflow/queued/completed/terminal and ACTIVE_REAL; ACTIVE_REAL requires correlated Jules session/run plus fresh useful technical activity. Also verify N4.1.H closure requires required-current REAL encrypted Desarrollo operational backup executor evidence and does not inherit generic M13/PR/push success or disposable-drill evidence. STRICTLY native non-shell reads only: do not execute shell/terminal commands of any kind. If native visibility truncates, make no change and report exact limitation. Do not touch workflows/scripts/certification/manifests/code/tests. Do not claim LISTO, CI PASS, P0=0 or P1=0. Emit two substantive independent SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY. ATTEMPT2 FINAL; R3 PROHIBITED; if blocking defect remains, hand off to controller QA takeover."
+}
