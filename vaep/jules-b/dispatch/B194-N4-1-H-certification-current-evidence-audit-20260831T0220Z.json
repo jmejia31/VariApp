@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B194-N4-1-H-certification-current-evidence-audit-20260831T0220Z",
+  "taskId": "N4.1.H-B194-certification-current-evidence-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "941851e7569b3465e4b3039bab7a31e387e1818b",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "VAEP_TRANSPORT_VERIFIED=true\nNEW logical SAME_PARENT ATTEMPT1 after B193 original PASS_LIMITED and B193-REC1 superseded duplicate drain. Scope exclusively docs/CERTIFICACION_N4_1_CAJA.md. Reconcile the certification text against current fail-closed N4.1.H evidence: required-current closure needs a REAL encrypted Desarrollo backup executor run/artifact/checksum/metadata plus applicable restore/drill evidence explicitly correlated without inventing same-artifact equality where the disposable drill creates its own backup. Generic push/PR/M13 success, manifest existence, workflow definition, or historical evidence must not be promoted to current proof. Prefer evidence-only/read-only if the document already states this correctly; otherwise make only the smallest single-file correction. Use native non-shell repository/file reads only for evidence inspection; if native reads truncate, stop and report exact limitation. Do not modify workflows/scripts/manifests/code/tests. Do not claim LISTO, CI PASS, P0=0 or P1=0. Report observations, limitations, risks, recommendations, tests not executed, and two substantive independent SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY."
+}
