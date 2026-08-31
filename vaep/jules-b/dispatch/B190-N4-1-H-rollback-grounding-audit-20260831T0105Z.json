@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B190-N4-1-H-rollback-grounding-audit-20260831T0105Z",
+  "taskId": "N4.1.H-B190-rollback-grounding-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "e2b3b5e482afc5feaded878c5a432a516d3232e4",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/ROLLBACK_N4_1_CAJA.md",
+  "prompt": "NEW logical SAME_PARENT READ_ONLY evidence audit after B189-R2 completion; this is ATTEMPT1, not R3. Inspect only docs/ROLLBACK_N4_1_CAJA.md using native Jules file-reading tools; do not modify files and do not use terminal/shell commands. Verify whether rollback prerequisites, real encrypted M11 Desarrollo backup requirements, and applicable restore/drill correlation to artifact/checksum/metadata are stated fail-closed and distinguish requirement/capability from required-current executor proof. Report grounded findings, limitations, P0/P1 implications, unexecuted validations, and two substantive independent reviews labeled exactly SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. Never claim LISTO, CI PASS, backup/restore execution, or promotion without direct evidence. No GitHub publication, branch, merge, deploy, secrets, Production, or main changes."
+}
