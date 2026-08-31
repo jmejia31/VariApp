@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D171-N4-1-H-runbook-m11-provenance-contract-audit-20260831T1347Z",
+  "taskId": "N4.1.H-D171-runbook-m11-provenance-contract-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "a4d6ee25b867a8eae9f4c95bca92bef060024994",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/RUNBOOK_N4_1_CAJA.md",
+  "prompt": "VAEP_TRANSPORT_VERIFIED=true\nThe trusted GitHub VAEP guard must verify PRIMARY_BASE_HEAD is the exact parent of this atomic dispatch commit and that this commit changes only this single Jules manifest.\n\nNEW LOGICAL TASK after D170-R2 QA_TAKEOVER; this is NOT an R3. READ_ONLY SAME_PARENT closure task. Inspect docs/RUNBOOK_N4_1_CAJA.md completely and direct references only. Audit whether the runbook operationally requires and explains required-current REAL M11 provenance as one coherent set: encrypted Desarrollo backup artifact + matching external .sha256 + matching external .meta.json + restore/drill explicitly tied to the same artifact. Identify stale/ambiguous instructions that could permit fixture, skipped, historical, or mismatched-artifact evidence to be mistaken for closure proof. Report exact grounded gaps, risks, recommended acceptance evidence, and literal SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. STRICT NON_SHELL: no terminal/shell commands. Do not modify files. Never read, reveal, request, modify or infer secret values. Never claim LISTO, deploy, merge, touch main/Produccion, or create branches."
+}
