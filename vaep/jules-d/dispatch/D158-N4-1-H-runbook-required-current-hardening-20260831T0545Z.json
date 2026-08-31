@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D158-N4-1-H-runbook-required-current-hardening-20260831T0545Z",
+  "taskId": "N4.1.H-D158-runbook-required-current-hardening",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "99dbf06b4e0cf13801de60a877e38c06348dd61a",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/RUNBOOK_N4_1_CAJA.md",
+  "prompt": "NEW SAME_PARENT logical ATTEMPT1 after D157-R2 FINAL ended JULES_LANE_BUDGET_EXCEEDED and transferred to controller QA; D157-R3 is prohibited and this is NOT another D157 attempt. Scope EXCLUSIVE WRITE-SAFE: docs/RUNBOOK_N4_1_CAJA.md only. Inspect the current file and, only if needed, propose the smallest single-file patch that makes closure fail closed: required-current REAL encrypted Desarrollo operational M11 backup evidence must identify the exact artifact plus matching .sha256 and matching .meta.json, and any restore/drill claim must be causally correlated to that same artifact; historical/planned/workflow-defined/disposable CI evidence must not satisfy closure. Do not claim such evidence currently exists. Do not inspect or modify scripts or workflows owned by B/C. Do not run backup/restore/workflows, access/list secrets, claim false ACTIVE/LISTO/CI PASS/P0=0/P1=0, or touch main, Produccion, branches, merge, auto-merge, force-push or deploy. Return reviewable ChangeSet/gitPatch only; do not publish. Run only proportional non-destructive validation if safe. End with independent SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. ATTEMPT1 permits at most one R2 correction; R3 prohibited."
+}
