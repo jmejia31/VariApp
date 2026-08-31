@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A181-N4-1-H-jules-authority-current-evidence-audit-20260831T0244Z",
+  "taskId": "N4.1.H-A181-jules-authority-current-evidence-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "886b3bfa7702b80d00df4855ca63818ddb9a0eb1",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/VAEP_JULES.md",
+  "prompt": "VAEP_TRANSPORT_VERIFIED=true\nNEW logical SAME_PARENT ATTEMPT1 after A180 was controller-reviewed PASS_LIMITED evidence-only due native read truncation; no product patch was integrated. Scope exclusively docs/VAEP_JULES.md. Audit current authority wording for fail-closed separation between manifest/workflow/queued/completed/terminal and ACTIVE_REAL; ACTIVE_REAL requires correlated Jules session/run plus fresh useful technical activity. Also verify that N4.1.H closure requires required-current real encrypted Desarrollo backup executor evidence and does not inherit generic M13/PR/push success or disposable-drill evidence as proof of the operational backup. Use native non-shell reads only. If truncated, make no change and report the exact limitation. Do not touch workflows/scripts/certification/manifests/code/tests. Do not claim LISTO, CI PASS, P0=0 or P1=0. Emit two substantive independent SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY."
+}
