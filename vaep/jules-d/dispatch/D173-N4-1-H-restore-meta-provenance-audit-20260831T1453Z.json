@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D173-N4-1-H-restore-meta-provenance-audit-20260831T1453Z",
+  "taskId": "N4.1.H-D173-restore-meta-provenance-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "e3688b04a5c18456c17729b08ced57a00a9e93fc",
+  "taskAttempt": 1,
+  "fileScopeHint": "scripts/m11_restore_desarrollo.sh",
+  "prompt": "STRICT_READ_ONLY_NON_SHELL. Audit only scripts/m11_restore_desarrollo.sh for N4.1.H. Verify whether restore fail-closes on the matching external .sha256 and external .meta.json provenance of the exact same REAL operational encrypted M11 artifact before destructive/applicable restore steps, and whether disposable CI/fixture/simulated/unrelated evidence can be excluded. Do not modify files. Report exact findings, gaps, limitations, risks, recommendations, unexecuted validations, SELF_REVIEW_PASS_1, SELF_REVIEW_PASS_2, and TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY."
+}
