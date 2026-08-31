@@ -97,13 +97,13 @@ namespace InventoryApp.Infrastructure.Migrations
 
             modelBuilder.Entity<InventoryApp.Domain.Entities.ReservaInventarioDetalle>(b =>
             {
-                b.HasOne("InventoryApp.Domain.Entities.Almacen", "Almacen").WithMany().HasForeignKey("AlmacenId")
+                b.HasOne(typeof(InventoryApp.Domain.Entities.Almacen), "Almacen").WithMany().HasForeignKey("AlmacenId")
                     .OnDelete(DeleteBehavior.Restrict).IsRequired().HasConstraintName("FK_ReservaDetalles_Almacenes_AlmacenId");
-                b.HasOne("InventoryApp.Domain.Entities.ProductoVariante", "ProductoVariante").WithMany().HasForeignKey("ProductoVarianteId")
+                b.HasOne(typeof(InventoryApp.Domain.Entities.ProductoVariante), "ProductoVariante").WithMany().HasForeignKey("ProductoVarianteId")
                     .OnDelete(DeleteBehavior.Restrict).IsRequired().HasConstraintName("FK_ReservaDetalles_ProductoVariantes_ProductoVarianteId");
-                b.HasOne("InventoryApp.Domain.Entities.ReservaInventario", "ReservaInventario").WithMany("Detalles").HasForeignKey("ReservaInventarioId")
+                b.HasOne(typeof(InventoryApp.Domain.Entities.ReservaInventario), "ReservaInventario").WithMany("Detalles").HasForeignKey("ReservaInventarioId")
                     .OnDelete(DeleteBehavior.Cascade).IsRequired().HasConstraintName("FK_ReservaInventarioDetalles_ReservasInventario_ReservaInventarioId");
-                b.HasOne("InventoryApp.Domain.Entities.UbicacionAlmacen", "UbicacionAlmacen").WithMany()
+                b.HasOne(typeof(InventoryApp.Domain.Entities.UbicacionAlmacen), "UbicacionAlmacen").WithMany()
                     .HasForeignKey("AlmacenId", "UbicacionAlmacenId").HasPrincipalKey("AlmacenId", "Id")
                     .OnDelete(DeleteBehavior.Restrict).HasConstraintName("FK_ReservaDetalles_Ubicacion_MismoAlmacen");
                 b.Navigation("Almacen");
