@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D162-N4-1-H-m11-backup-request-checkpoint-audit-20260831T0824Z",
+  "taskId": "N4.1.H-D162-m11-backup-request-checkpoint-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "1c7c4338d4536992639c06b06702d1f1dd40ae92",
+  "taskAttempt": 1,
+  "fileScopeHint": ".github/checkpoints/m11-backup-request",
+  "prompt": "NEW logical SAME_PARENT ATTEMPT1 after D161-R2 FINAL completed evidence-only; D161 R3 is prohibited. Scope EXCLUSIVE READ_ONLY: .github/checkpoints/m11-backup-request only. STRICT NON_SHELL native inspection only. Audit whether this request checkpoint is merely a request/plan marker or contains controller-verifiable proof that the required-current REAL encrypted Desarrollo operational backup executed. Extract visible artifact/run/SHA/checksum/metadata correlation references and classify them as current evidence, historical evidence, planned evidence or UNPROVEN. Identify any stale reference or fail-open wording and state the minimum missing evidence for N4.1.H closure. Do not execute workflows/scripts, access/list secrets, modify files or use shell. If native visibility truncates, state exact boundary and unseen text UNPROVEN. End with literal independent SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 confirming NON_SHELL compliance. TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY. Never touch main/Produccion/branches/merge/auto-merge/force-push/deploy and never claim false ACTIVE/LISTO/CI PASS/P0=0/P1=0."
+}
