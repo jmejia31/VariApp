@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C170-REC1-N4-1-H-m11-restore-same-artifact-contract-20260831T0906Z",
+  "taskId": "N4.1.H-C170-m11-restore-same-artifact-contract",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "07c8faa07eacfc56b911499a3b15ea41a58fad35",
+  "taskAttempt": 1,
+  "fileScopeHint": ".github/workflows/m11-backup-restore-desarrollo.yml",
+  "prompt": "RECOVERY SAME logical task / SAME ATTEMPT1 after >5m with trusted workflow guard but no correlated Jules session plus fresh useful technical activity proven. Scope EXCLUSIVE READ_ONLY: .github/workflows/m11-backup-restore-desarrollo.yml only. STRICT NON_SHELL native inspection only. Determine whether this restore/drill consumes the exact required-current REAL operational M11 backup artifact or independently generates/uses disposable data. Extract visible artifact inputs, checksum/meta validation, run/head correlation and any fail-open condition. State the minimum exact contract change/evidence needed so N4.1.H can prove same-artifact backup->restore causality without false PASS. Do not execute workflows/scripts, access/list secrets, modify files or use shell. If native visibility truncates, state exact boundary and unseen text UNPROVEN. End with literal independent SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 confirming NON_SHELL compliance. TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY. Never touch main/Produccion/branches/merge/auto-merge/force-push/deploy; never claim false ACTIVE/LISTO/CI PASS/P0=0/P1=0."
+}
