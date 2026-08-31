@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C157-REC1-N4-1-H-m13-current-evidence-audit-20260831T0301Z",
+  "taskId": "N4.1.H-C157-m13-current-evidence-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "e76ea550d032d30ae3a47d961aa0fe9a99a01abd",
+  "taskAttempt": 1,
+  "fileScopeHint": ".github/workflows/m13-certificacion-final.yml",
+  "prompt": "VAEP_TRANSPORT_VERIFIED=true\nRECOVERY SAME logical task SAME ATTEMPT1 because the prior trusted C157 workflow exceeded 5 minutes without any correlated Jules session or useful activity evidence; per governor this is NO ACTIVE and the pre-session/transport stall does not consume ATTEMPT1. Scope exclusively .github/workflows/m13-certificacion-final.yml. Audit fail-closed current-evidence semantics for N4.1.H: M13 success must not imply that the required-current REAL encrypted Desarrollo operational backup ran, and disposable backup/restore drill success must remain distinct from operational backup executor evidence. Prefer evidence-only/read-only if already correct; otherwise return only the smallest single-file correction grounded in current workflow semantics. Do not trigger workflows, deploy, read/expose secrets, or touch m11 workflows/scripts/docs/manifests/code/tests. Validate syntax proportionally if changed. Do not claim LISTO, CI PASS, P0=0 or P1=0. Emit two substantive independent SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 and report runtime validations not executed."
+}
