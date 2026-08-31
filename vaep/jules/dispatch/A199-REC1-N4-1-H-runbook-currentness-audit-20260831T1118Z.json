@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A199-REC1-N4-1-H-runbook-currentness-audit-20260831T1118Z",
+  "taskId": "N4.1.H-A199-runbook-currentness-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "0e5da3cdc3f5b91e874c33268dafbf0a7364f027",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/RUNBOOK_N4_1_CAJA.md",
+  "prompt": "VAEP v3.25.1 SAME logical task / SAME ATTEMPT1 transport recovery for A199 after pre-session path mismatch: original manifest was under vaep/jules-a/dispatch but authoritative Jules A worker listens on vaep/jules/dispatch. EXCLUSIVE READ_ONLY scope docs/RUNBOOK_N4_1_CAJA.md only. STRICT NON_SHELL native inspection only. Audit current runbook wording for fail-closed requirements of required-current REAL encrypted Desarrollo M11 operational artifact, matching .sha256 and .meta.json provenance, explicitly same-artifact restore/drill, EF FacturaProveedor blocker clearance, exact-head causal gates, DoD and P0=0/P1=0. Identify stale/false-positive language or state UNPROVEN at exact native truncation boundary. No writes, shell, tests, workflows, temp files, branches, PRs, pushes, merges, deploys, secrets or Production changes. Emit separate literal SELF_REVIEW_PASS_1, SELF_REVIEW_PASS_2 and TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY. Never claim false ACTIVE_REAL, CI PASS or N4.1.H LISTO."
+}
