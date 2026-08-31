@@ -48,9 +48,9 @@ namespace InventoryApp.Infrastructure.Migrations
                 .WithMany()
                 .HasForeignKey(x => x.CotizacionId)
                 .OnDelete(DeleteBehavior.Restrict);
-            pedido.HasOne(x => x.Cliente)
+            pedido.HasOne("InventoryApp.Domain.Entities.Cliente", null)
                 .WithMany()
-                .HasForeignKey(x => x.ClienteId)
+                .HasForeignKey("ClienteId")
                 .OnDelete(DeleteBehavior.Restrict);
             pedido.HasMany(x => x.Detalles)
                 .WithOne(x => x.PedidoVenta)
@@ -83,13 +83,13 @@ namespace InventoryApp.Infrastructure.Migrations
             detalle.HasIndex(x => x.ProductoVarianteId)
                 .HasDatabaseName("IX_PedidoVentaDetalles_ProductoVarianteId");
 
-            detalle.HasOne(x => x.Producto)
+            detalle.HasOne("InventoryApp.Domain.Entities.Producto", null)
                 .WithMany()
-                .HasForeignKey(x => x.ProductoId)
+                .HasForeignKey("ProductoId")
                 .OnDelete(DeleteBehavior.Restrict);
-            detalle.HasOne(x => x.ProductoVariante)
+            detalle.HasOne("InventoryApp.Domain.Entities.ProductoVariante", null)
                 .WithMany()
-                .HasForeignKey(x => x.ProductoVarianteId)
+                .HasForeignKey("ProductoVarianteId")
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }
