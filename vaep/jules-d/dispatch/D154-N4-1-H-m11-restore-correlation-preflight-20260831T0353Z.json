@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D154-N4-1-H-m11-restore-correlation-preflight-20260831T0353Z",
+  "taskId": "N4.1.H-D154-m11-restore-correlation-preflight",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "3a09de80e3cca81a4bac498d429a15822f11031e",
+  "taskAttempt": 1,
+  "fileScopeHint": ".github/workflows/m11-backup-restore-desarrollo.yml",
+  "prompt": "NEW SAME_PARENT logical ATTEMPT1 after D153-R2 FINAL terminal REVIEW_PASS_LIMITED evidence-only; D153 logical task is exhausted and R3 is prohibited. This is a distinct logical audit, not a retry. Scope EXCLUSIVE and READ_ONLY: .github/workflows/m11-backup-restore-desarrollo.yml only. STRICT NON_SHELL: native repository/file inspection only; no shell or terminal. Audit the visible restore/drill workflow solely for explicit correlation semantics to the required-current REAL encrypted Desarrollo operational backup evidence: encrypted artifact identity, .sha256, .meta.json, provenance/run/head, and same-artifact restore/drill binding. Distinguish disposable/CI-generated drill inputs from the required operational artifact. If native visibility truncates, report exact limitation and classify unseen correlation UNPROVEN. Make no repository changes, do not run workflows, do not access/list secrets, and do not infer LISTO, CI PASS, P0=0 or P1=0. No main, Produccion, branches, merge, auto-merge, force-push, secrets or deploy. End with substantive independent sections named exactly SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY."
+}
