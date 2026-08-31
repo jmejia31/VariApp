@@ -57,9 +57,9 @@ namespace InventoryApp.Infrastructure.Migrations
                 .HasForeignKey("FacturaProveedorId")
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_CuentasPorPagar_FacturasProveedor_FacturaProveedorId");
-            cuenta.HasOne<Proveedor>()
+            cuenta.HasOne("InventoryApp.Domain.Entities.Proveedor", null)
                 .WithMany()
-                .HasForeignKey(x => x.ProveedorId)
+                .HasForeignKey("ProveedorId")
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_CuentasPorPagar_Proveedores_ProveedorId");
             cuenta.HasMany(x => x.Aplicaciones)
