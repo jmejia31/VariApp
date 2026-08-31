@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D152-REC1-N4-1-H-m11-doc-current-evidence-audit-20260831T0302Z",
+  "taskId": "N4.1.H-D152-m11-doc-current-evidence-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "d8e78941bb7d8f995a810ad3dd4b2a7a362e599e",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/FASE_M11_BACKUPS_RESTAURACION_DESARROLLO.md",
+  "prompt": "VAEP_TRANSPORT_VERIFIED=true\nRECOVERY SAME logical task SAME ATTEMPT1 because the prior trusted D152 workflow exceeded 5 minutes without correlated Jules session plus fresh useful technical activity; per governor this is NO ACTIVE and the pre-session/transport stall does not consume ATTEMPT1. Scope exclusively docs/FASE_M11_BACKUPS_RESTAURACION_DESARROLLO.md. Audit whether documentation clearly distinguishes required-current REAL encrypted Desarrollo operational backup executor evidence from the independent ci-disposable backup/restore drill. Require artifact/checksum/metadata evidence for the operational executor and never claim same-artifact restore correlation unless the actual same artifact is proven. Use native non-shell reads only. If truncated, make no change and report exact limitation. Do not touch workflows/scripts/certification/manifests/code/tests. Do not claim LISTO, CI PASS, P0=0 or P1=0. Emit two substantive independent SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY."
+}
