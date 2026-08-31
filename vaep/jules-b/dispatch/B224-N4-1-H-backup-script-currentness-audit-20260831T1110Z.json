@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B224-N4-1-H-backup-script-currentness-audit-20260831T1110Z",
+  "taskId": "N4.1.H-B224-backup-script-currentness-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "95ad1d175cc3be84ba1b2ad486b6718b3951ee5a",
+  "taskAttempt": 1,
+  "fileScopeHint": "scripts/m11_backup_desarrollo.sh",
+  "prompt": "VAEP v3.25.1 SAME_PARENT NEW logical task after B223 duplicate-safe terminal/recovery drain. EXCLUSIVE READ_ONLY scope scripts/m11_backup_desarrollo.sh only. STRICT NON_SHELL native inspection only. Audit whether the operational backup script produces fail-closed required-current REAL encrypted Desarrollo artifact with matching .sha256 and .meta.json provenance sufficient for explicit same-artifact restore/drill correlation; identify exact currentness/provenance gaps or state UNPROVEN at native truncation boundary. No writes, shell, tests, workflows, temp files, branches, PRs, pushes, merges, deploys, secrets or Production changes. Emit separate literal SELF_REVIEW_PASS_1, SELF_REVIEW_PASS_2 and TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY. Never claim false ACTIVE_REAL, CI PASS, P0=0/P1=0 or N4.1.H LISTO."
+}
