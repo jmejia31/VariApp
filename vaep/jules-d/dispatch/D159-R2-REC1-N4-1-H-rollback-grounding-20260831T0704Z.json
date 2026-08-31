@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D159-R2-REC1-N4-1-H-rollback-grounding-20260831T0704Z",
+  "taskId": "N4.1.H-D159-rollback-grounding",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "00839773cb5834d03b622ff1b91780f9df51a050",
+  "taskAttempt": 2,
+  "fileScopeHint": "docs/ROLLBACK_N4_1_CAJA.md",
+  "prompt": "SAME logical task / SAME FINAL ATTEMPT2 recovery for D159 after >5m without a current correlated Jules session plus fresh useful technical activity on the R2 worker. The pre-session stall does not consume or advance the attempt; this remains ATTEMPT2 FINAL and R3 is prohibited. Scope EXCLUSIVE READ_ONLY: docs/ROLLBACK_N4_1_CAJA.md only. STRICT NON_SHELL native inspection only; absolutely no terminal/shell/bash/cat/head/sed/wc/tail/grep/python/scripts/commands and no generated files. Audit only visible rollback wording for the required-current REAL encrypted Desarrollo operational artifact + matching .sha256 + matching .meta.json and causal same-artifact restore/drill requirement. Historical/planned/workflow-defined/disposable CI evidence is insufficient. If native visibility truncates, report exact boundary and unseen text UNPROVEN. No repository changes, workflow/script execution, secrets access/listing, false ACTIVE/LISTO/CI PASS/P0=0/P1=0, main, Produccion, branches, merge, auto-merge, force-push or deploy. End with two independent literal SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 explicitly confirming zero command/script execution and READ_ONLY compliance. TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY. If any blocking defect remains after this ATTEMPT2, report it for controller QA takeover; never request or perform R3."
+}
