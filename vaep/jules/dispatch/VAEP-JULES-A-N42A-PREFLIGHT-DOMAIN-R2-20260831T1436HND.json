@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-A-N42A-PREFLIGHT-DOMAIN-R2-20260831T1436HND",
+  "taskId": "N4.2.A.PREFLIGHT.DOMAIN",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "ca43f3706b42537ad672a57f504a7a5f0b87117f",
+  "taskAttempt": 2,
+  "fileScopeHint": "WRITE_SCOPE=docs/qa/N4_2_A_PREFLIGHT_DOMAIN_A.md ONLY; READ_SCOPE=backend/src/Domain/Entities/Catalogos/Banco.cs,backend/src/Infrastructure/Persistence/Configurations/BancoConfiguration.cs,backend/src/Domain/Entities/MovimientoFinanciero.cs plus direct one-hop references only",
+  "prompt": "R2 FINAL for CURRENT PREWARM N4.2.A Bancos. The prior A attempt was infrastructure-timed-out at 1080s with patchPresent=false; do not repeat a broad repository scan. Produce the missing MATERIAL domain preflight artifact docs/qa/N4_2_A_PREFLIGHT_DOMAIN_A.md only. Inspect the three explicit READ_SCOPE files and only their direct one-hop domain references. Determine: existing reusable banking/finance domain authority; exact missing aggregate/entities/value concepts for CuentaBancaria, MovimientoBancario, transferencia, comisión, interés and conciliación; invariants and state transitions; historical compatibility boundaries; explicit in-scope/out-of-scope; rollback/data-risk notes; and a concise acceptance checklist for N4.2.A. Do NOT implement product code, migrations, APIs or frontend. Do NOT ask for clarification when evidence can be derived from these files. If a named file is absent, record ABSENT as evidence and continue. Keep the artifact concise enough to finish well inside the 20-minute lane. Return a reviewable patch, exact baseCommitId, tests/not-executed statement, SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. R3+ prohibited. COMPLETED never equals LISTO."
+}
