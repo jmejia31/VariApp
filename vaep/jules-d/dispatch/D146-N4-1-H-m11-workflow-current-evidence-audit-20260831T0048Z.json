@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D146-N4-1-H-m11-workflow-current-evidence-audit-20260831T0048Z",
+  "taskId": "N4.1.H-D146-m11-workflow-current-evidence-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "0c9f12df3e19762bf567076f59643efaee8b47c6",
+  "taskAttempt": 1,
+  "fileScopeHint": ".github/workflows/m11-backup-desarrollo-operativo.yml",
+  "prompt": "SAME_PARENT READ_ONLY NON_SHELL evidence audit. Inspect only .github/workflows/m11-backup-desarrollo-operativo.yml using native file-reading capabilities; do not execute shell commands, tests, scripts, or modify files. Verify exact trigger conditions and fail-closed semantics for the real encrypted Desarrollo backup, external configuration prerequisites, artifact/checksum/metadata publication, and any restore/drill linkage. Separate workflow capability from proof of a required-current execution. Report exact grounded findings, limitations, P0/P1 implications, and two substantive independent reviews with exact labels SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. Never claim LISTO, CI PASS, backup execution, restore/drill execution, or promotion without direct evidence. No GitHub publication, branch, merge, deploy, secrets changes, or Production/main changes."
+}
