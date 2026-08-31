@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C176-N4-1-H-restore-script-currentness-audit-20260831T1110Z",
+  "taskId": "N4.1.H-C176-restore-script-currentness-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "3c67dc6052e82e0a69779a4ca90c5d74b7f13251",
+  "taskAttempt": 1,
+  "fileScopeHint": "scripts/m11_restore_desarrollo.sh",
+  "prompt": "VAEP v3.25.1 SAME_PARENT NEW logical task after C175 original/recovery duplicate-safe drain; C175 concluded UNPROVEN due native truncation. EXCLUSIVE READ_ONLY scope scripts/m11_restore_desarrollo.sh only. STRICT NON_SHELL native inspection only. Audit whether restore execution fail-closes on exact external encrypted artifact identity and validates matching .sha256 plus matching external .meta.json/provenance before/usefully during restore, sufficient to prove explicitly same-artifact required-current REAL Desarrollo drill. Identify exact false-positive/currentness gaps or state UNPROVEN at native truncation boundary. No writes, shell, tests, workflows, temp files, branches, PRs, pushes, merges, deploys, secrets or Production changes. Emit separate literal SELF_REVIEW_PASS_1, SELF_REVIEW_PASS_2 and TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY. Never claim false ACTIVE_REAL, CI PASS, P0=0/P1=0 or N4.1.H LISTO."
+}
