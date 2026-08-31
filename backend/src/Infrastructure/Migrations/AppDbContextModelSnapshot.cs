@@ -32,12 +32,11 @@ namespace InventoryApp.Infrastructure.Migrations
     {
         internal void ApplyTargetModelForSnapshot(ModelBuilder modelBuilder)
         {
-            // The generated N0.5 target model uses string entity names. When that model is
-            // reused as the baseline for the current snapshot, EF otherwise creates Venta
-            // as a shared Dictionary<string, object>. Pre-register the real CLR type so
-            // later strongly typed navigations (for example ReservaInventario.Venta)
-            // resolve to the same entity instead of colliding with a shared-type entity.
-            modelBuilder.Entity<InventoryApp.Domain.Entities.Venta>();
+            // Preserve the generated N0.5 baseline exactly as emitted. Its historical
+            // string-based entities must not be pre-bound to newer CLR types because
+            // legacy property names/types (for example Venta.Estado) do not necessarily
+            // match the current CLR member shape. Later snapshot parts reconcile new
+            // relationships explicitly without mutating this historical baseline.
             BuildTargetModel(modelBuilder);
         }
     }
