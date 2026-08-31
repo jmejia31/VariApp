@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B232-N4-1-H-operational-backup-provenance-audit-20260831T1415Z",
+  "taskId": "N4.1.H-B232-operational-backup-provenance-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "cf664dd48634768952964797fae5aa763a3e3fd7",
+  "taskAttempt": 1,
+  "fileScopeHint": ".github/workflows/m11-backup-desarrollo-operativo.yml",
+  "prompt": "STRICT_READ_ONLY_NON_SHELL. Audit only .github/workflows/m11-backup-desarrollo-operativo.yml. Determine the exact provenance contract for a required-current REAL encrypted Desarrollo operational backup: artifact naming/source, external .sha256, external .meta.json, run/correlation identifiers, artifact upload, and how fixture/PR/skipped evidence is excluded. Do not modify files. Report exact findings, gaps, limitations, risks, recommendations, unexecuted validations, SELF_REVIEW_PASS_1, SELF_REVIEW_PASS_2, and TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY."
+}
