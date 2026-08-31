@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A200-N4-1-H-certification-grounding-audit-20260831T1138Z",
+  "taskId": "N4.1.H-A200-certification-grounding-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "d32340af83a6cceebd56e53f39bcd2027843e57d",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "VAEP v3.25.1 SAME_PARENT NEW logical task after A199-REC1 REVIEW_PASS_LIMITED. EXCLUSIVE READ_ONLY scope docs/CERTIFICACION_N4_1_CAJA.md only. STRICT NON_SHELL native inspection only. Audit current certification wording for any false-positive or stale claim around required-current REAL encrypted Desarrollo M11 operational artifact, matching .sha256 and .meta.json provenance, explicitly same-artifact restore/drill, EF FacturaProveedor blocker clearance, exact-head causal gates, DoD and P0=0/P1=0. State exact visible findings and UNPROVEN at any native truncation boundary; do not infer missing content. No writes, shell, tests, workflows, temp files, branches, PRs, pushes, merges, deploys, secrets or Production changes. Emit separate literal SELF_REVIEW_PASS_1, SELF_REVIEW_PASS_2 and TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY. Never claim ACTIVE_REAL, CI PASS or N4.1.H LISTO."
+}
