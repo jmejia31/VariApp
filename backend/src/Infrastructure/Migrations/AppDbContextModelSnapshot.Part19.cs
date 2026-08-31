@@ -68,7 +68,7 @@ namespace InventoryApp.Infrastructure.Migrations
                 .HasForeignKey("RecepcionCompraId")
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_DevolucionesProveedor_RecepcionesCompra_RecepcionCompraId");
-            devolucion.HasOne<FacturaProveedor>()
+            devolucion.HasOne("InventoryApp.Domain.Entities.FacturaProveedor", null)
                 .WithMany()
                 .HasForeignKey("FacturaProveedorId")
                 .OnDelete(DeleteBehavior.Restrict)
