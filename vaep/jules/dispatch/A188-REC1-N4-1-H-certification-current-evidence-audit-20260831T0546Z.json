@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A188-REC1-N4-1-H-certification-current-evidence-audit-20260831T0546Z",
+  "taskId": "N4.1.H-A188-certification-current-evidence-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "d620c81dbc95f64a3f89703563d1dccd975f1e91",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "RECOVERY SAME logical task/ATTEMPT1 after pre-session BOOTSTRAP_TRANSPORT_FAILURE curl(35) connection reset on A188; the failed bootstrap did not consume ATTEMPT. Scope EXCLUSIVE and READ_ONLY: docs/CERTIFICACION_N4_1_CAJA.md only. STRICT NON_SHELL native inspection only; no shell/terminal/bash/cat/head/sed/wc/tail/grep/python/scripts/commands. Audit visible grounded certification text for any statement that could incorrectly imply M11 required-current closure without fresh REAL encrypted Desarrollo operational backup evidence consisting of artifact + matching .sha256 + matching .meta.json and, where restore/drill is claimed, causal correlation to that same artifact. Historical M13 wording, planned/workflow-defined/disposable CI evidence is insufficient. If native visibility truncates, state exact limitation and classify unseen text UNPROVEN. No repository changes, workflows, secret access/listing, false ACTIVE/LISTO/CI PASS/P0=0/P1=0, main, Produccion, branches, merge, auto-merge, force-push or deploy. End with independent SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 explicitly confirming NON_SHELL compliance. TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY."
+}
