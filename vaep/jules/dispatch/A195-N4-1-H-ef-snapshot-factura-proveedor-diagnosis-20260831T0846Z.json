@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A195-N4-1-H-ef-snapshot-factura-proveedor-diagnosis-20260831T0846Z",
+  "taskId": "N4.1.H-A195-ef-snapshot-factura-proveedor-diagnosis",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "7c22b836dd71fad4dd6bef51c5c6910388fd3a0f",
+  "taskAttempt": 1,
+  "fileScopeHint": "Backend/**/Migrations/**",
+  "prompt": "NEW logical SAME_PARENT ATTEMPT1 after A194 completed PASS_LIMITED evidence-only. Scope EXCLUSIVE READ_ONLY: backend migration snapshot/model files relevant to the exact-head EF has-pending-model-changes blocker involving InventoryApp.Domain.Entities.FacturaProveedor colliding with an existing shared-type Dictionary<string, object> identity, previously observed at AppDbContextModelSnapshot.Part19.cs around line 71. Diagnose the minimal causal model/snapshot mismatch and identify the exact file(s), entity identity, and safest controller correction. STRICT NON_SHELL native repository inspection only; do not execute commands/scripts/tests, do not modify files, do not access/list secrets. If native visibility truncates, report exact boundary and unseen text UNPROVEN. Do not claim the blocker is fixed. End with literal independent SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 confirming NON_SHELL compliance. TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY. Never touch main/Produccion/branches/merge/auto-merge/force-push/deploy and never claim false ACTIVE/LISTO/CI PASS/P0=0/P1=0."
+}
