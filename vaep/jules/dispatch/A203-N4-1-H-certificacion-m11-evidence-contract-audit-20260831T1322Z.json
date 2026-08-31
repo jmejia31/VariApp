@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A203-N4-1-H-certificacion-m11-evidence-contract-audit-20260831T1322Z",
+  "taskId": "N4.1.H-A203-certificacion-m11-evidence-contract-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "758c3cc405912dc3ae062c4552688851f25ac0cd",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "VAEP_TRANSPORT_VERIFIED=true\nThe trusted GitHub VAEP guard must verify PRIMARY_BASE_HEAD is the exact parent of this atomic dispatch commit and that the commit changes only this single Jules manifest.\n\nREAD_ONLY SAME_PARENT evidence task. Inspect docs/CERTIFICACION_N4_1_CAJA.md and direct references only. Determine whether certification text distinguishes disposable/fixture M11 backup evidence from required-current REAL encrypted Desarrollo backup evidence and requires causal same-artifact correlation across encrypted artifact + matching .sha256 + matching .meta.json + restore/drill. Do not modify files. Report exact grounded gaps, evidence still required, limitations, risks, recommendations, SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. No shell/terminal commands. Never claim LISTO."
+}
