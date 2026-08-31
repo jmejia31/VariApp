@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C159-N4-1-H-m11-operational-evidence-contract-preflight-20260831T0336Z",
+  "taskId": "N4.1.H-C159-m11-operational-evidence-contract-preflight",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "b55d500d447e19a6cd83dda64bb9414c33ee248f",
+  "taskAttempt": 1,
+  "fileScopeHint": ".github/workflows/m11-backup-desarrollo-operativo.yml",
+  "prompt": "NEW SAME_PARENT ATTEMPT1 after C158 REVIEW_PASS evidence-only. Scope EXCLUSIVE and READ_ONLY: .github/workflows/m11-backup-desarrollo-operativo.yml only. NON_SHELL: use native repository/file inspection only; no shell or terminal. Audit the current workflow's executor-evidence contract: identify the exact outputs and checks that prove a required-current REAL encrypted Desarrollo backup artifact, its .sha256 checksum, and .meta.json metadata; identify whether success of this workflow alone can or cannot prove restore/drill correlation to that exact evidence. Report only visible grounded facts, any blocker or ambiguity, validations executed/unexecuted, and fail-closed implications. Do not run workflows, read/list secrets, modify files, deploy, or claim LISTO, CI PASS, P0=0, or P1=0. If visibility truncates, state the exact limitation. No main, Produccion, branches, merge, auto-merge, force-push, secrets, or deploy. End with substantive independent sections named exactly SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY."
+}
