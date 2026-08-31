@@ -1,0 +1,11 @@
+{
+  "dispatchId": "B207-N4-1-H-authority-m11-closure-audit-20260831T0555Z",
+  "taskId": "N4.1.H-B207-authority-m11-closure-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "5b2131caec568cc12a48538bf984976300dfffb6",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/VAEP_AUTHORITY.md",
+  "prompt": "NEW SAME_PARENT logical ATTEMPT1 after B206-R2 FINAL terminal REVIEW_FIRST. B206-R2 is exhausted; this task is NOT B206-R3. Scope EXCLUSIVE and READ_ONLY: docs/VAEP_AUTHORITY.md only. STRICT NON_SHELL native inspection only; no shell/terminal/bash/cat/head/sed/wc/tail/grep/python/scripts/commands. Audit only visible grounded authority text that governs N4.1.H/M11 closure and determine whether any wording could permit LISTO from workflow SUCCESS, historical M13, planned evidence, or disposable CI without a required-current REAL encrypted Desarrollo operational backup artifact plus matching .sha256 and matching .meta.json and, where restore/drill is claimed, explicit causal correlation to that same artifact. If file visibility truncates, state exact limitation and classify unseen text UNPROVEN. Evidence-only; make no repository changes. No secret access/listing, workflow execution, false ACTIVE/LISTO/CI PASS/P0=0/P1=0, main, Produccion, branches, merge, auto-merge, force-push or deploy. End with independent literal SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 confirming scope and NON_SHELL compliance. TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY.",
+  "replacesExhaustedTask": "N4.1.H-B206-m11-backup-script-audit"
+}
