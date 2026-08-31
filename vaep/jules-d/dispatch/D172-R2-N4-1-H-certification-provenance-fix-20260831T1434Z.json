@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D172-R2-N4-1-H-certification-provenance-fix-20260831T1434Z",
+  "taskId": "N4.1.H-D172-certification-operational-source-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "86486d2838505254e2e5fdf4ed500c350fa44599",
+  "taskAttempt": 2,
+  "fileScopeHint": "docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "ATTEMPT2_FINAL_NO_R3. WRITE_SAFE_SINGLE_FILE. Correct only docs/CERTIFICACION_N4_1_CAJA.md to remove the ambiguity identified in ATTEMPT1. The N4.1.H promotion criterion must explicitly require evidence originating from .github/workflows/m11-backup-desarrollo-operativo.yml and an exact operational run/artifact, with the matching external .sha256 and matching external .meta.json tied to that artifact, plus restore/drill evidence explicitly tied to that same artifact. Explicitly exclude disposable CI, fixture, PR-only, skipped, simulated, or unrelated backup evidence from satisfying required-current operational M11 closure. Do not weaken any existing fail-closed requirement. No branches, PRs, merges, Production, secrets, deploys, or unrelated file changes. Return reviewable patch, exact baseCommitId, validations, limitations, risks, SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. This is R2 FINAL; on any blocking defect report for controller QA takeover and do not request R3."
+}
