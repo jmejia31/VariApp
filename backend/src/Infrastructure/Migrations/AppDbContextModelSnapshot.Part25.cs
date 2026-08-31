@@ -18,7 +18,7 @@ namespace InventoryApp.Infrastructure.Migrations
             preparacion.HasIndex(x => x.ReservaInventarioId).IsUnique().HasDatabaseName("UX_PreparacionesPedidoVenta_ReservaInventarioId");
             preparacion.HasIndex(x => x.Estado).HasDatabaseName("IX_PreparacionesPedidoVenta_Estado");
             preparacion.HasOne(x => x.PedidoVenta).WithMany().HasForeignKey(x => x.PedidoVentaId).OnDelete(DeleteBehavior.Restrict);
-            preparacion.HasOne("InventoryApp.Domain.Entities.ReservaInventario", "ReservaInventario").WithMany().HasForeignKey("ReservaInventarioId").OnDelete(DeleteBehavior.Restrict);
+            preparacion.HasOne(x => x.ReservaInventario).WithMany().HasForeignKey(x => x.ReservaInventarioId).OnDelete(DeleteBehavior.Restrict);
             preparacion.HasMany(x => x.Detalles).WithOne(x => x.PreparacionPedidoVenta).HasForeignKey(x => x.PreparacionPedidoVentaId).OnDelete(DeleteBehavior.Cascade);
 
             var detalle = modelBuilder.Entity<PreparacionPedidoVentaDetalle>();
