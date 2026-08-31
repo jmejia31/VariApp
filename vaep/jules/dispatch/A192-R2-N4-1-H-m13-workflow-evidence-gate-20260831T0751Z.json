@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A192-R2-N4-1-H-m13-workflow-evidence-gate-20260831T0751Z",
+  "taskId": "N4.1.H-A192-m13-workflow-evidence-gate",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "08e0112fb21b58b5ec16f0919a245af4bbb73ecf",
+  "taskAttempt": 2,
+  "fileScopeHint": ".github/workflows/m13-certificacion-final.yml",
+  "prompt": "VAEP REVIEW_FIRST rejected A192 ATTEMPT1 because its own artifact explicitly records shell execution (`wc -c`) despite STRICT_READ_ONLY_NON_SHELL. SAME logical task, FINAL ATTEMPT2/R2; R3 is prohibited. Scope EXCLUSIVE READ_ONLY: .github/workflows/m13-certificacion-final.yml only. STRICT NON_SHELL native inspection only: do not invoke shell, terminal, command execution, workflow execution, scripts, git CLI, or tests. Audit whether M13's closure gate requires and validates required-current REAL encrypted Desarrollo operational backup evidence: exact artifact, matching .sha256, matching .meta.json, and restore/drill causally bound to that same artifact; identify fail-open/skipped/historical/planned/disposable-CI substitutions precisely. No repository changes. If native visibility truncates, state exact boundary and unseen text UNPROVEN. End with literal independent SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 explicitly confirming NON_SHELL compliance and all unexecuted validations. TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY. Never access/list secret values; never touch main/Produccion/branches/merge/auto-merge/force-push/deploy; never claim false ACTIVE/LISTO/CI PASS/P0=0/P1=0."
+}
