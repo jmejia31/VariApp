@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B196-N4-1-H-rollback-current-evidence-audit-20260831T0245Z",
+  "taskId": "N4.1.H-B196-rollback-current-evidence-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "32843b4eac112b181ec7870fdcb21eb0cb89eb2d",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/ROLLBACK_N4_1_CAJA.md",
+  "prompt": "VAEP_TRANSPORT_VERIFIED=true\nNEW logical SAME_PARENT ATTEMPT1 after B195 was controller-reviewed PASS_LIMITED evidence-only due native read truncation; no product patch was integrated. Scope exclusively docs/ROLLBACK_N4_1_CAJA.md. Audit current rollback wording for fail-closed treatment of N4.1.H: no LISTO or rollback certification may rely on generic PR/push/M13 success, and required-current real encrypted Desarrollo backup evidence must remain distinct from disposable drill evidence. Use native non-shell reads only. If truncated, make no change and report exact limitation; do not use shell. Do not touch workflows/scripts/certification/manifests/code/tests. Do not claim LISTO, CI PASS, P0=0 or P1=0. Emit two substantive independent SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY."
+}
