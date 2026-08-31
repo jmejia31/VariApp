@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C161-N4-1-H-m11-operational-evidence-preflight-20260831T0448Z",
+  "taskId": "N4.1.H-C161-m11-operational-evidence-preflight",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "094fc9948eedde13c5b71a88fb25a37f21389e39",
+  "taskAttempt": 1,
+  "fileScopeHint": ".github/workflows/m11-backup-desarrollo-operativo.yml",
+  "prompt": "NEW SAME_PARENT logical ATTEMPT1 after C160-R2 FINAL completed PASS_LIMITED evidence-only and ATTEMPT2 is exhausted; this is C161, not C160-R3. Scope EXCLUSIVE and READ_ONLY: .github/workflows/m11-backup-desarrollo-operativo.yml only. STRICT NON_SHELL native inspection only; no shell/terminal/bash/cat/head/sed/wc/tail/grep/python/scripts/commands. Audit visible workflow semantics for whether a required-current REAL encrypted Desarrollo operational backup can produce an artifact plus matching .sha256 and .meta.json and whether executor evidence is distinguishable from definition-only or disposable CI evidence. Do not claim execution occurred. If native visibility truncates, report exact limit and mark unseen semantics UNPROVEN. No repo changes, workflow execution, secrets access/listing, false ACTIVE/LISTO/CI PASS/P0=0/P1=0, main, Produccion, branches, merge, auto-merge, force-push or deploy. End SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 with NON_SHELL confirmation. TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY."
+}
