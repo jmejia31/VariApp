@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B208-N4-1-H-operational-artifact-grounding-20260831T0650Z",
+  "taskId": "N4.1.H-B208-operational-artifact-grounding",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "b383121f644f36c903d595f4c80a55f31bf54c32",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "NEW SAME_PARENT logical ATTEMPT1 after B207 backup-workflow grounding completed PASS_LIMITED evidence-only due native truncation; this is not B207 R2. Scope EXCLUSIVE READ_ONLY: docs/CERTIFICACION_N4_1_CAJA.md only. STRICT NON_SHELL native inspection only; no terminal/shell/bash/cat/head/sed/wc/tail/grep/python/scripts/commands. Audit visible certification language for whether the exact required-current REAL encrypted Desarrollo operational artifact, matching .sha256 and matching .meta.json are evidenced or merely required/planned. Any restore/drill claim must be causally correlated to that same artifact. Historical/planned/workflow-defined/disposable CI evidence is insufficient. If native visibility truncates, report exact boundary and unseen text UNPROVEN. No repository changes, workflow/script execution, secrets access/listing, false ACTIVE/LISTO/CI PASS/P0=0/P1=0, main, Produccion, branches, merge, auto-merge, force-push or deploy. End with independent SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 confirming NON_SHELL compliance. TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY."
+}
