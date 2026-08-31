@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D155-N4-1-H-m11-restore-script-correlation-audit-20260831T0407Z",
+  "taskId": "N4.1.H-D155-m11-restore-script-correlation-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "81081d33c5aa2461cf4be8e45246b1fcc1143887",
+  "taskAttempt": 1,
+  "fileScopeHint": "scripts/m11_restore_desarrollo.sh",
+  "prompt": "NEW SAME_PARENT logical ATTEMPT1 after D154 REVIEW_PASS evidence-only. D154 proved the restore workflow uses disposable CI-generated drill evidence and does not establish correlation to the required-current REAL operational backup. Scope EXCLUSIVE and READ_ONLY: scripts/m11_restore_desarrollo.sh only. STRICT NON_SHELL: use native repository/file inspection only; never invoke shell, terminal, bash, cat, head, sed, wc, tail, grep, python, scripts or commands. Audit only visible grounded restore-script semantics for whether it can consume and verify an externally supplied REAL encrypted Desarrollo operational M11 artifact together with matching .sha256 and .meta.json, and whether it preserves/validates identity needed for same-artifact restore/drill correlation. If native visibility truncates, report the exact limitation and classify unseen semantics UNPROVEN. Make no repository changes, do not execute the script or workflows, do not access/list secrets. No false ACTIVE, LISTO, CI PASS, P0=0 or P1=0. No main, Produccion, branches, merge, auto-merge, force-push, secrets or deploy. End with substantive independent sections named exactly SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2, explicitly confirming NON_SHELL compliance. TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY."
+}
