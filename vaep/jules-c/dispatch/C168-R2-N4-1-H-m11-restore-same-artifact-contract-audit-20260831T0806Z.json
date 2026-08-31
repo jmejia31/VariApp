@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C168-R2-N4-1-H-m11-restore-same-artifact-contract-audit-20260831T0806Z",
+  "taskId": "N4.1.H-C168-m11-restore-same-artifact-contract-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "94f9f7442c5ff301f7a6658cd5c6c42f1b43067b",
+  "taskAttempt": 2,
+  "fileScopeHint": ".github/workflows/m11-backup-restore-desarrollo.yml",
+  "prompt": "R2 FINAL for SAME logical task C168 after ATTEMPT1 REVIEW_REJECT: the prior result explicitly acknowledged NON_SHELL compliance failure caused by using a shell environment. R3 is prohibited. Scope EXCLUSIVE READ_ONLY: .github/workflows/m11-backup-restore-desarrollo.yml only. STRICT NON_SHELL NATIVE inspection only: do not use terminal, shell, cat, grep, head, tail, sed, awk, wc, find, ls, git CLI, workflow/script execution, secret access/listing, or any command substitute. Audit whether restore/drill evidence is causally bound to the exact required-current REAL encrypted Desarrollo operational backup artifact and its matching .sha256 and .meta.json rather than a fixture, independently generated dump, historical artifact, skipped job, or workflow definition. Identify visible fail-open acceptance paths and exact required-current correlation conditions. If native visibility truncates, state exact boundary and unseen text UNPROVEN; do not work around truncation with shell. No repository changes. End with literal independent SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 explicitly confirming strict NON_SHELL compliance. TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY. Never touch main/Produccion/branches/merge/auto-merge/force-push/deploy and never claim false ACTIVE/LISTO/CI PASS/P0=0/P1=0."
+}
