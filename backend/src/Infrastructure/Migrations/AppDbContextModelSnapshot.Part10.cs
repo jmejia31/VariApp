@@ -23,7 +23,7 @@ namespace InventoryApp.Infrastructure.Migrations
                 b.Property<int?>("ConsumidaPorUsuarioId").HasColumnType("int");
                 b.Property<string>("CreadoPorNombreUsuario").HasMaxLength(150).HasColumnType("varchar(150)");
                 b.Property<int?>("CreadoPorUsuarioId").HasColumnType("int");
-                b.Property<int>("Estado").HasColumnType("int");
+                b.Property<InventoryApp.Domain.Enums.EstadoReservaInventario>("Estado").HasColumnType("int");
                 b.Property<int?>("ExpiradaPorUsuarioId").HasColumnType("int");
                 b.Property<DateTime>("FechaActualizacion").HasColumnType("datetime(6)");
                 b.Property<DateTime?>("FechaActivacion").HasColumnType("datetime(6)");
