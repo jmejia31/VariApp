@@ -84,7 +84,7 @@ namespace InventoryApp.Infrastructure.Migrations
 
             modelBuilder.Entity("InventoryApp.Domain.Entities.ReservaInventario", b =>
             {
-                b.HasOne("InventoryApp.Domain.Entities.PedidoVenta", "PedidoVenta").WithMany().HasForeignKey("PedidoVentaId")
+                b.HasOne(typeof(InventoryApp.Domain.Entities.PedidoVenta), "PedidoVenta").WithMany().HasForeignKey("PedidoVentaId")
                     .OnDelete(DeleteBehavior.Restrict).HasConstraintName("FK_ReservasInventario_PedidosVenta_PedidoVentaId");
                 b.HasOne("InventoryApp.Domain.Entities.Venta", "Venta").WithMany().HasForeignKey("VentaId")
                     .OnDelete(DeleteBehavior.Restrict).HasConstraintName("FK_ReservasInventario_Ventas_VentaId");
