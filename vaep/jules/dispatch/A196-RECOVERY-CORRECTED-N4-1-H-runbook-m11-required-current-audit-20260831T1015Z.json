@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A196-RECOVERY-CORRECTED-N4-1-H-runbook-m11-required-current-audit-20260831T1015Z",
+  "taskId": "N4.1.H-A196-runbook-m11-required-current-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "606c196d283af0898ed3d92cd8cb119f0afdb944",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/RUNBOOK_N4_1_CAJA.md",
+  "prompt": "VAEP v3.25.1 SAME logical A196 ATTEMPT1 recovery. The immediately previous recovery manifest suffered a concurrent primaryBaseHead race before session creation and is BOOTSTRAP_TRANSPORT_FAILURE; ATTEMPT1 remains unconsumed. EXCLUSIVE READ_ONLY scope docs/RUNBOOK_N4_1_CAJA.md only. STRICT NON_SHELL native inspection only. Re-audit whether closure remains fail-closed on required-current REAL operational M11 evidence: exact encrypted artifact, matching .sha256, matching .meta.json, explicitly same-artifact restore/drill correlation, exact-head causal gates, DoD and P0=0/P1=0; workflow definitions, historical evidence, stale SHA or disposable CI evidence must never substitute. No writes, shell, tests, workflows or temp files. If native visibility truncates, state exact boundary and unseen requirements UNPROVEN. Emit separate literal SELF_REVIEW_PASS_1, SELF_REVIEW_PASS_2 and TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY before COMPLETED. Never touch main/Produccion/branches/merge/auto-merge/force-push/secrets/deploy; never claim false ACTIVE/LISTO/CI PASS/P0=0/P1=0."
+}
