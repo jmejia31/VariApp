@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C155-R2-N4-1-H-m11-restore-script-audit-20260831T0154Z",
+  "taskId": "N4.1.H-C155-m11-restore-script-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "e116bdb5123fcea719e6aa83d9daa7e945ab5103",
+  "taskAttempt": 2,
+  "fileScopeHint": "scripts/m11_restore_desarrollo.sh",
+  "prompt": "VAEP_TRANSPORT_VERIFIED=true\nR2 FINAL corrective audit for the SAME logical task after ATTEMPT1 violated STRICT_READ_ONLY NON_SHELL by using terminal/head/sed/grep. R3 is prohibited. Inspect only scripts/m11_restore_desarrollo.sh and direct v3.25 authority files using native non-shell read tools only. If a native read truncates, report the exact visible boundary and STOP; never bypass truncation with shell/terminal commands. Determine only what can be grounded: fail-closed safeguards, environment/production exclusions, integrity/checksum/encryption expectations, restore/drill evidence emitted/consumed, and what remains unproven without a real current run. Do not modify files and do not claim LISTO/CI PASS/P0=0/P1=0. Explicitly audit tool compliance in both independent SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 and report all limitations/unexecuted validations. TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY."
+}
