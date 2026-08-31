@@ -78,8 +78,8 @@ Si no existe una operación de compensación segura, el estado persistido no pue
 ## Criterio de cierre (Closure Semantics)
 
 1. El incidente solo se considera recuperado y la certificación N4.1.H alcanzada cuando el estado funcional queda consistente, la evidencia histórica permanece intacta y todos los gates causales aplicables están verdes (DoD/P0=0/P1=0) o documentados N/A.
-2. **Requisito estricto (M11)**: el cierre fail-closed / rollback requiere **evidencia explícita, actual y real** del respaldo cifrado M11 en `Desarrollo`.
-3. **Validación de restauración**: requiere validación aplicable de restauración/drill correlacionada con el artefacto cifrado, su checksum y metadatos antes de certificar N4.1.H.
+2. **Requisito estricto (M11)**: el cierre fail-closed / rollback requiere **evidencia explícita, actual y real** del respaldo cifrado M11 en `Desarrollo`, identificando el artifact operacional exacto junto con su archivo `.sha256` coincidente y su archivo `.meta.json` coincidente.
+3. **Validación de restauración**: requiere una restauración/drill aplicable y correlacionada causalmente con **ese mismo artifact operacional exacto**, validando su `.sha256` y `.meta.json` coincidentes antes de certificar N4.1.H. Evidencia histórica, planificada, definida únicamente por workflow o producida por un backup desechable distinto no satisface este criterio.
 4. Preservar estado `NO_LISTO` hasta demostrar el cumplimiento íntegro sin excepciones. No declarar evidencia M11 actual inexistente, no marcar `LISTO` y no promover N4.2 por preparación.
 
 Este documento no concede autorización para merge, Producción o despliegue.
