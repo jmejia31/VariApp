@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C171-R2-N4-1-H-m11-restore-workflow-correlation-audit-20260831T0945Z",
+  "taskId": "N4.1.H-C171-m11-restore-workflow-correlation-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "b0e490686aa2f90013b7b439254bdf6601ee7447",
+  "taskAttempt": 2,
+  "fileScopeHint": ".github/workflows/m11-backup-restore-desarrollo.yml",
+  "prompt": "FINAL R2 for SAME logical C171. ATTEMPT1 REVIEW_REJECT because activity metadata claimed tests/pre-commit testing under STRICT NON_SHELL/no-tests contract, creating evidence contradiction even though final message said no tests. Scope EXCLUSIVE READ_ONLY: .github/workflows/m11-backup-restore-desarrollo.yml only. STRICT NON_SHELL native inspection only. Do NOT invoke tests, code review, pre-commit, shell, workflow execution, or any tool that can be described as running tests. Audit only with native read_file. Report exact native truncation boundary and mark unseen content UNPROVEN. Distinguish workflow capability from required-current execution proof and evaluate explicit same-artifact/run/head/.sha256/.meta.json correlation only to the visible boundary. Emit literal SELF_REVIEW_PASS_1, SELF_REVIEW_PASS_2, TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY, and NO_TESTS_EXECUTED_STRICT_NON_SHELL=true in the final evidence. ATTEMPT2 FINAL; remaining defect transfers to controller QA, no R3. Never modify files or touch main/Produccion/branches/merge/auto-merge/force-push/secrets/deploy; never claim false ACTIVE/LISTO/CI PASS/P0=0/P1=0."
+}
