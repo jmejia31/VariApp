@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B205-N4-1-H-cert-current-evidence-audit-20260831T0501Z",
+  "taskId": "N4.1.H-B205-cert-current-evidence-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "0d6b4b84dfb3e5ea40c61d7f0b1e5177dd17ef57",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "NEW SAME_PARENT logical ATTEMPT1 after B204 COMPLETED PASS_LIMITED evidence-only due native truncation; B204 is not being retried. Scope EXCLUSIVE and READ_ONLY: docs/CERTIFICACION_N4_1_CAJA.md only. STRICT NON_SHELL native inspection only; no shell/terminal/bash/cat/head/sed/wc/tail/grep/python/scripts/commands. Re-audit visible certification wording for fail-closed N4.1.H and explicitly distinguish required-current REAL encrypted Desarrollo operational backup artifact + matching .sha256 + matching .meta.json + applicable same-artifact restore/drill correlation from historical/planned/disposable CI evidence. If native visibility truncates, report exact limit and classify unseen content UNPROVEN. No repository changes, workflow/script execution, secrets access/listing, false ACTIVE/LISTO/CI PASS/P0=0/P1=0, main, Produccion, branches, merge, auto-merge, force-push or deploy. End SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 with NON_SHELL confirmation. TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY."
+}
