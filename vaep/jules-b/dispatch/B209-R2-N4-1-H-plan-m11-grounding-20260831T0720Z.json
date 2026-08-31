@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B209-R2-N4-1-H-plan-m11-grounding-20260831T0720Z",
+  "taskId": "N4.1.H-B209-plan-m11-grounding",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "2e63ba8f8179220384804682db48a86e31052284",
+  "taskAttempt": 2,
+  "fileScopeHint": "docs/PLAN_MAESTRO_MEJORAS_EMPRESARIALES_2026.md",
+  "prompt": "SAME logical task B209 FINAL ATTEMPT2 after ATTEMPT1 created a real Jules session (sessions/11068869819134621986) and showed useful IN_PROGRESS activity, but the trusted watcher later failed with curl exit 35 connection reset before a result artifact/Issue was produced. Because failure was post-session, ATTEMPT1 is consumed; this is FINAL ATTEMPT2 and R3 is prohibited. Scope EXCLUSIVE READ_ONLY: docs/PLAN_MAESTRO_MEJORAS_EMPRESARIALES_2026.md only. STRICT NON_SHELL native inspection only; no terminal/shell/bash/cat/head/sed/wc/tail/grep/python/scripts/commands. Audit visible M11 wording for whether it proves a required-current REAL encrypted Desarrollo operational backup artifact with matching .sha256 and .meta.json and, when restore/drill is claimed, explicit correlation to that exact artifact. Historical/planned/workflow-defined/disposable CI evidence is insufficient. If native visibility truncates, state exact boundary and unseen text UNPROVEN. No repository changes, workflow/script execution, secrets access/listing, false ACTIVE/LISTO/CI PASS/P0=0/P1=0, main, Produccion, branches, merge, auto-merge, force-push or deploy. End with independent SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 confirming NON_SHELL compliance. TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY. If a blocking defect remains, report it for controller QA takeover; never request or perform R3."
+}
