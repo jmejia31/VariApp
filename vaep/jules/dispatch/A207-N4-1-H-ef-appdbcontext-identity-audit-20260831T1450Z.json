@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A207-N4-1-H-ef-appdbcontext-identity-audit-20260831T1450Z",
+  "taskId": "N4.1.H-A207-ef-appdbcontext-identity-audit",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "3c79f573bee417dda8d076a599a1f66c89f89158",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Infrastructure/Persistence/AppDbContext.cs",
+  "prompt": "STRICT_READ_ONLY_NON_SHELL. Audit only backend/src/Infrastructure/Persistence/AppDbContext.cs and determine whether the N4.1.H FacturaProveedor EF blocker can be causally confirmed or cleared from this scope: entity registration, shared-type Dictionary<string,object> use, modelBuilder mappings, or identity collision risk. Do not modify files. Report exact findings, gaps, limitations, risks, recommendations, unexecuted validations, SELF_REVIEW_PASS_1, SELF_REVIEW_PASS_2, and TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY."
+}
