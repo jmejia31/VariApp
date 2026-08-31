@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B202-N4-1-H-certification-current-evidence-audit-20260831T0402Z",
+  "taskId": "N4.1.H-B202-certification-current-evidence-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "8872f4f50082439e98813ba06e5b6aca70fd4026",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "NEW SAME_PARENT logical ATTEMPT1 after B201 terminal REVIEW_PASS candidate patch was reviewed by controller and remains separate from this exclusive audit. Scope EXCLUSIVE and READ_ONLY: docs/CERTIFICACION_N4_1_CAJA.md only. STRICT NON_SHELL: use only native repository/file inspection; do not invoke shell, terminal, bash, sed, cat, wc, tail, python, scripts or commands. Audit only visible grounded certification text and determine whether N4.1.H fails closed unless there is required-current evidence of a REAL encrypted Desarrollo M11 operational backup artifact plus its .sha256 checksum plus .meta.json metadata and, when applicable, restore/drill evidence explicitly correlated to that same operational artifact/checksum/metadata. Distinguish disposable CI drill evidence from operational real-backup evidence. If native visibility truncates, report the exact limitation and do not infer unseen content. Make no repository changes. No false ACTIVE, LISTO, CI PASS, P0=0 or P1=0. No main, Produccion, branches, merge, auto-merge, force-push, secrets or deploy. End with substantive independent sections named exactly SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2, explicitly confirming NON_SHELL compliance, scope, evidence grounding, unsupported claims and unexecuted validations. TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY."
+}
