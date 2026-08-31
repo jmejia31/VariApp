@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D157-R2-N4-1-H-m11-restore-external-meta-hardening-20260831T0520Z",
+  "taskId": "N4.1.H-D157-m11-restore-external-meta-hardening",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "6f9587905c55fb6fc70e4311ee90b0304eca8443",
+  "taskAttempt": 2,
+  "fileScopeHint": "scripts/m11_restore_desarrollo.sh",
+  "prompt": "R2 FINAL for SAME logical D157 after ATTEMPT1 created session sessions/5690385638749522830 but hit JULES_LANE_BUDGET_EXCEEDED with no patch; ATTEMPT1 is consumed. Scope EXCLUSIVE WRITE_SAFE_SINGLE_FILE: scripts/m11_restore_desarrollo.sh only. Implement the smallest fail-closed correction so an externally supplied required-current REAL encrypted Desarrollo backup restore/drill explicitly validates the matching external .meta.json before decryption and preserves exact same-artifact identity across encrypted artifact, .sha256, .meta.json and restore report, without weakening checksum/internal manifest validation. Do not access/list secrets or run against real databases. Use proportional safe validation only in Jules workspace. No changes outside this one file; no main, Produccion, branches, PR, merge, auto-merge, force-push or deploy. Never claim current execution, CI PASS, P0=0/P1=0 or LISTO. This is ATTEMPT2 FINAL: R3 is prohibited. Return reviewable ChangeSet/gitPatch plus SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2; if still blocking, report exact controller QA takeover requirement instead of requesting another Jules attempt."
+}
