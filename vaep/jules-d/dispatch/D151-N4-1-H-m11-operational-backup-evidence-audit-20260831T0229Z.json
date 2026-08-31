@@ -1,0 +1,10 @@
+{
+  "dispatchId": "D151-N4-1-H-m11-operational-backup-evidence-audit-20260831T0229Z",
+  "taskId": "N4.1.H-D151-m11-operational-backup-evidence-audit",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "e32b384c5d508d1ab7c89199a8391c6efacde8ed",
+  "taskAttempt": 1,
+  "fileScopeHint": ".github/workflows/m11-backup-desarrollo-operativo.yml",
+  "prompt": "VAEP_TRANSPORT_VERIFIED=true\nNEW logical SAME_PARENT ATTEMPT1 after D150-R2 FINAL exhausted ATTEMPT2 and the throughput guard handed off to controller QA with remote session COMPLETED and patch absent; D150 R3 remains prohibited. Scope exclusively .github/workflows/m11-backup-desarrollo-operativo.yml. Audit the current operational REAL encrypted Desarrollo backup workflow for the evidence contract required by N4.1.H: a successful required-current executor run must produce/retain enough explicit artifact identity, checksum and metadata to be distinguishable from a disposable restore/drill backup and usable by later fail-closed certification without inventing same-artifact equality. Do NOT trigger any workflow, deploy, touch Production, read or expose secrets, or modify the restore workflow/M13/docs/scripts/manifests/code/tests. If the current workflow already emits sufficient grounded evidence, return evidence-only/read-only. If a concrete contract gap is proven and a safe correction is possible within this one file, make only the smallest fail-closed correction. Validate YAML/shell syntax proportionally if changed; report all unexecuted runtime validations. Do not claim LISTO, CI PASS, P0=0 or P1=0. Emit two substantive independent SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2."
+}
