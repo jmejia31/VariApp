@@ -1,0 +1,10 @@
+{
+  "dispatchId": "B223-N4-1-H-certification-doc-currentness-audit-20260831T1053Z",
+  "taskId": "N4.1.H-B223-certification-doc-currentness-audit",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "6ee536ecb68044fee8d5f71d21e88ea3e1e4f70c",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/CERTIFICACION_N4_1_CAJA.md",
+  "prompt": "VAEP v3.25.1 SAME_PARENT NEW logical task after B222 ATTEMPT1 REVIEW_FIRST PASS_LIMITED/EVIDENCE_ONLY: artifact changes.patch is empty, native TASKS.md inspection truncates at 1000/16659 chars, and all closure validations remain explicitly UNPROVEN; therefore no B222 R2 is warranted. EXCLUSIVE READ_ONLY scope docs/CERTIFICACION_N4_1_CAJA.md only. STRICT NON_SHELL native inspection only. Audit that certification wording remains fail-closed and does not imply LISTO/PASS from workflow history, stale SHA, disposable CI evidence, or incomplete documentation before required-current REAL encrypted Desarrollo M11 operational artifact + matching .sha256 + matching .meta.json/provenance + explicitly same-artifact restore/drill, EF FacturaProveedor blocker clearance, exact-head causal gates, DoD and P0=0/P1=0. Identify exact stale/false-positive wording or report UNPROVEN with exact native truncation boundary. No writes, shell, tests, workflows, temp files, branches, PRs, pushes, merges, deploys, secrets or Production changes. Emit separate literal SELF_REVIEW_PASS_1, SELF_REVIEW_PASS_2 and TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY. Never claim false ACTIVE_REAL, CI PASS or N4.1.H LISTO."
+}
