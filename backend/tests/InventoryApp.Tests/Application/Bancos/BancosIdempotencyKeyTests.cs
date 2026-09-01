@@ -17,7 +17,7 @@ public class BancosIdempotencyKeyTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public void Create_WithNullOrWhiteSpace_ThrowsArgumentException(string invalidKey)
+    public void Create_WithNullOrWhiteSpace_ThrowsArgumentException(string? invalidKey)
     {
         Assert.Throws<ArgumentException>(() => BancosIdempotencyKey.Create(invalidKey));
     }
