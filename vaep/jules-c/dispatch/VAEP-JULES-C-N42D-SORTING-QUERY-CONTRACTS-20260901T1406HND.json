@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-C-N42D-SORTING-QUERY-CONTRACTS-20260901T1406HND",
+  "taskId": "N4.2.D.SORTING_QUERY_CONTRACTS_PIPELINE",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "3f0fc1309719c92247cf641c48ecef4b164fa29e",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/**/*CuentaBancaria*Sort*; backend/tests/**/*CuentaBancaria*Query*; query/application contract tests only; NO production code, NO EF/migrations/data/frontend",
+  "prompt": "ZERO-IDLE NEXT_SAFE — N4.2.D safe pipeline while N4.2.C remains CURRENT_PARENT and owns promotion. Previous Jules C PAGINATION_FILTER_CONTRACTS is terminal COMPLETED and awaiting VAEP review. Move to a distinct non-duplicated scope: material sorting/query contract tests only where existing CuentaBancaria API/application seams already exist, covering deterministic sort keys/order, query boundary behavior and stable response ordering. Do NOT return to N4.2.C DATA_INTEGRITY R2; it is terminal and awaiting QA disposition. Do NOT modify production controllers, services, DTOs, EF, migrations, data scripts or frontend. Do not overlap Jules A validation, Jules B concurrency or Jules D audit/observability scopes. If no real sort/query seam exists, fail closed with exact dependency and no speculative stubs. Run the narrowest real build/tests. Return reviewable gitPatch with exact baseCommitId, evidence, limitations, SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. N4.2.D MUST NOT be promoted before N4.2.C LISTO."
+}
