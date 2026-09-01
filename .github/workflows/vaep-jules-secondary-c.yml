@@ -13,7 +13,7 @@ permissions:
   issues: write
 
 concurrency:
-  group: vaep-jules-c-secondary
+  group: vaep-jules-c-lane
   cancel-in-progress: false
 
 jobs:
