@@ -1,25 +1,20 @@
 name: VAEP Jules D Recovery Worker
 
 on:
-  push:
-    branches:
-      - Desarrollo
-    paths:
-      - "vaep/jules-d/dispatch/*.json"
-      - ".github/workflows/vaep-jules-d-recovery.yml"
+  workflow_dispatch:
 
 permissions:
   contents: read
   issues: write
 
 concurrency:
-  group: vaep-jules-d-recovery
+  group: vaep-jules-d-lane
   cancel-in-progress: false
 
 jobs:
   dispatch-jules-d-recovery:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 95
     env:
       JULES_API_BASE: https://jules.googleapis.com/v1alpha
       EXPECTED_OWNER: jmejia31
@@ -31,7 +26,7 @@ jobs:
       ISSUE_PREFIX: "[VAEP-JULES-D-RECOVERY]"
       WORKER_LABEL: Jules D
       WORKER_ID: JULES_D
-      VAEP_JULES_LANE_BUDGET_SECONDS: 1200
+      VAEP_JULES_LANE_BUDGET_SECONDS: 5400
       JULES_API_KEY: ${{ secrets.JULES_D_API_KEY }}
       GH_TOKEN: ${{ github.token }}
 
