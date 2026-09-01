@@ -55,7 +55,7 @@ jobs:
           grep -q 'productionTouched' scripts/m11_restore_desarrollo.sh
 
   backup-desarrollo:
-    name: Backup cifrado de Desarrollo real
+    name: Backup cifrado de Desarrollo real + restore/drill same-artifact
     if: >-
       ${{
         github.event_name == 'workflow_dispatch' ||
@@ -66,6 +66,19 @@ jobs:
     timeout-minutes: 30
     environment: "Desarrollo - variapp-api-desarrollo"
 
+    services:
+      mysql-m11-restore:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: m11-ci-root-only
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -pm11-ci-root-only --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=12
+
     steps:
       - name: Checkout Desarrollo
         uses: actions/checkout@v4
@@ -75,17 +88,25 @@ jobs:
       - name: Verificar configuración externa requerida
         shell: bash
         env:
-          DB_HOST: ${{ secrets.M11_DESARROLLO_DB_HOST }}
-          DB_PORT: ${{ secrets.M11_DESARROLLO_DB_PORT }}
-          DB_NAME: ${{ secrets.M11_DESARROLLO_DB_NAME }}
-          DB_USER: ${{ secrets.M11_DESARROLLO_DB_USER }}
+          DB_HOST: ${{ secrets.M11_DESARROLLO_DB_HOST || vars.M11_DESARROLLO_DB_HOST }}
+          DB_PORT: ${{ secrets.M11_DESARROLLO_DB_PORT || vars.M11_DESARROLLO_DB_PORT }}
+          DB_NAME: ${{ secrets.M11_DESARROLLO_DB_NAME || vars.M11_DESARROLLO_DB_NAME }}
+          DB_USER: ${{ secrets.M11_DESARROLLO_DB_USER || vars.M11_DESARROLLO_DB_USER }}
           DB_PASSWORD: ${{ secrets.M11_DESARROLLO_DB_PASSWORD }}
           BACKUP_PASSPHRASE: ${{ secrets.M11_BACKUP_PASSPHRASE }}
         run: |
           set -euo pipefail
+          declare -A source_names=(
+            [DB_HOST]='M11_DESARROLLO_DB_HOST (secret o variable)'
+            [DB_PORT]='M11_DESARROLLO_DB_PORT (secret o variable)'
+            [DB_NAME]='M11_DESARROLLO_DB_NAME (secret o variable)'
+            [DB_USER]='M11_DESARROLLO_DB_USER (secret o variable)'
+            [DB_PASSWORD]='M11_DESARROLLO_DB_PASSWORD (secret)'
+            [BACKUP_PASSPHRASE]='M11_BACKUP_PASSPHRASE (secret)'
+          )
           for name in DB_HOST DB_PORT DB_NAME DB_USER DB_PASSWORD BACKUP_PASSPHRASE; do
             if [ -z "${!name:-}" ]; then
-              echo "Falta el secreto requerido $name para ejecutar el backup real de Desarrollo." >&2
+              echo "Falta configuración externa requerida: ${source_names[$name]}." >&2
               exit 1
             fi
           done
@@ -95,10 +116,10 @@ jobs:
         shell: bash
         env:
           VARIAPP_ENVIRONMENT: desarrollo
-          DB_HOST: ${{ secrets.M11_DESARROLLO_DB_HOST }}
-          DB_PORT: ${{ secrets.M11_DESARROLLO_DB_PORT }}
-          DB_NAME: ${{ secrets.M11_DESARROLLO_DB_NAME }}
-          DB_USER: ${{ secrets.M11_DESARROLLO_DB_USER }}
+          DB_HOST: ${{ secrets.M11_DESARROLLO_DB_HOST || vars.M11_DESARROLLO_DB_HOST }}
+          DB_PORT: ${{ secrets.M11_DESARROLLO_DB_PORT || vars.M11_DESARROLLO_DB_PORT }}
+          DB_NAME: ${{ secrets.M11_DESARROLLO_DB_NAME || vars.M11_DESARROLLO_DB_NAME }}
+          DB_USER: ${{ secrets.M11_DESARROLLO_DB_USER || vars.M11_DESARROLLO_DB_USER }}
           DB_PASSWORD: ${{ secrets.M11_DESARROLLO_DB_PASSWORD }}
           DB_SSL_MODE: REQUIRED
           BACKUP_PASSPHRASE: ${{ secrets.M11_BACKUP_PASSPHRASE }}
@@ -122,7 +143,38 @@ jobs:
           echo "checksum_file=$checksum_file" >> "$GITHUB_OUTPUT"
           echo "metadata_file=$metadata_file" >> "$GITHUB_OUTPUT"
 
-      - name: Publicar únicamente artefactos cifrados
+      - name: Restore drill del mismo artifact en MySQL descartable
+        id: restore
+        shell: bash
+        env:
+          RESTORE_ENVIRONMENT: ci
+          TARGET_DB_HOST: 127.0.0.1
+          TARGET_DB_PORT: '3306'
+          TARGET_DB_NAME: variapp_m11_restore_drill
+          TARGET_DB_USER: root
+          TARGET_DB_PASSWORD: m11-ci-root-only
+          TARGET_DB_SSL_MODE: DISABLED
+          BACKUP_PASSPHRASE: ${{ secrets.M11_BACKUP_PASSPHRASE }}
+          BACKUP_FILE: ${{ steps.backup.outputs.backup_file }}
+          BACKUP_CHECKSUM_FILE: ${{ steps.backup.outputs.checksum_file }}
+          ALLOW_DESTRUCTIVE_RESTORE: YES_M11
+          RESTORE_FILES_DIR: ${{ runner.temp }}/m11-restored-files
+          RESTORE_REPORT_PATH: ${{ runner.temp }}/m11-restore-report.json
+        run: |
+          set -euo pipefail
+          test -s "$BACKUP_FILE"
+          test -s "$BACKUP_CHECKSUM_FILE"
+          chmod +x scripts/m11_restore_desarrollo.sh
+          scripts/m11_restore_desarrollo.sh | tee "$RUNNER_TEMP/m11-restore-operativo.log"
+          report_file="$(grep '^M11_RESTORE_REPORT=' "$RUNNER_TEMP/m11-restore-operativo.log" | cut -d= -f2-)"
+          test -s "$report_file"
+          grep -q '"checksumsVerified": true' "$report_file"
+          grep -q '"allTableRowCountsVerified": true' "$report_file"
+          grep -q '"productionTouched": false' "$report_file"
+          grep -q '"status": "SUCCESS"' "$report_file"
+          echo "restore_report=$report_file" >> "$GITHUB_OUTPUT"
+
+      - name: Publicar evidencia M11 cifrada y same-artifact drill
         uses: actions/upload-artifact@v4
         with:
           name: m11-backup-desarrollo-${{ github.run_id }}
@@ -130,5 +182,6 @@ jobs:
             ${{ steps.backup.outputs.backup_file }}
             ${{ steps.backup.outputs.checksum_file }}
             ${{ steps.backup.outputs.metadata_file }}
+            ${{ steps.restore.outputs.restore_report }}
           if-no-files-found: error
           retention-days: 14
