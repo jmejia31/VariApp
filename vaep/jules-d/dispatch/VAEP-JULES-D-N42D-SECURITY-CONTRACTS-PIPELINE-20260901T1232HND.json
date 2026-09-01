@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-D-N42D-SECURITY-CONTRACTS-PIPELINE-20260901T1232HND",
+  "taskId": "N4.2.D.SECURITY_CONTRACTS_PIPELINE",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "d03ea94453645cd92f2c892205589471fa147942",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/**/*CuentaBancaria*Security*; backend/tests/**/*CuentaBancaria*Authorization*; security/authorization contract tests only; NO production code, NO EF mapping, NO migrations/data scripts, NO application/API implementation, NO frontend",
+  "prompt": "ZERO-IDLE NEXT_SAFE handoff after N4.2.C.DB_TESTS throughput terminal #2376 transferred that original task to QA_TAKEOVER_AND_ASSIGN_NEXT_SAFE_IMMEDIATELY. Do NOT continue or redispatch DB_TESTS. While N4.2.C remains the promotion authority, pipeline only independent N4.2.D security/authorization contract tests for CuentaBancaria: prove fail-closed authentication/authorization boundaries, role/permission denial semantics, tenant/user ownership constraints where repository conventions already define them, and deterministic forbidden/unauthorized ProblemDetails behavior at the test-contract level. Do not implement production handlers/controllers/services, do not touch EF/migrations/data/frontend, and do not promote N4.2.D. If the required endpoint surface is not yet present, add only non-vacuous contract/specification tests that compile against existing abstractions or report the exact dependency; no busywork/evidence-only patch. This is a different logical task from N4.2.C.DB_TESTS; taskAttempt starts at 1/2."
+}
