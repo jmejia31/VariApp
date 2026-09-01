@@ -6,6 +6,7 @@ on:
       - Desarrollo
     paths:
       - "vaep/jules-c/dispatch/*.json"
+      - ".github/workflows/vaep-jules-secondary-c.yml"
 
 permissions:
   contents: read
