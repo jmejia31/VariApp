@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-A-N42D-VALIDATION-CONTRACTS-PATHFIX-20260901T1418HND",
+  "taskId": "N4.2.D.VALIDATION_CONTRACTS_PIPELINE",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "0ebf13706705fb45a2558cb572100e1b47da1157",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/**/*CuentaBancaria*Validation*; backend/tests/**/*CuentaBancaria*Contract*; validation/application contract tests only; NO production code, NO EF/migrations/data/frontend",
+  "prompt": "PRE_SESSION TRANSPORT PATH FIX — ZERO-IDLE NEXT_SAFE for Jules A. The previous logical dispatch N4.2.D.VALIDATION_CONTRACTS_PIPELINE was written to the invalid/non-listened path vaep/jules-a/dispatch, so it created no Jules A worker/session and DOES NOT consume the technical attempt. Canonical Jules A transport is vaep/jules/dispatch. Continue ATTEMPT=1. N4.2.D safe pipeline while N4.2.C remains CURRENT_PARENT and owns promotion. Produce material validation contract tests only where existing CuentaBancaria API/application seams already exist: required fields, malformed/invalid identifiers, monetary boundary validation, deterministic validation/error semantics. Do NOT modify production controllers, services, DTOs, EF, migrations, data scripts or frontend. Do not overlap Jules B concurrency, Jules C sorting/query or Jules D audit/observability scopes. If the required production seam does not exist, fail closed with exact dependency and no speculative stubs. Run the narrowest real build/tests. Return a reviewable gitPatch with exact baseCommitId, evidence, limitations, SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. N4.2.D MUST NOT be promoted before N4.2.C LISTO."
+}
