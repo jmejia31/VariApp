@@ -1,0 +1,7 @@
+{
+  "task_id": "VAEP-JULES-C-N41H-RECOVERY-C32-20260831T2130HND",
+  "title": "N4.1.H frontend regression closure",
+  "prompt": "PROJECT_ID=VARIAPP. Work NOW on jmejia31/VariApp branch Desarrollo at the dispatch commit HEAD. CURRENT_PARENT=N4.1.H. Exclusive scope: frontend/** only. Reproduce current Angular/Vitest/typecheck/build/regression failures relevant to N4.1.H, identify causal defects in components, routes, services, contracts and tests, implement minimum correct fixes, and run relevant frontend gates. Do not weaken tests. Do not ask for clarification when repository evidence can resolve the target. Do not touch backend, migrations, VAEP workflows, main, production or secrets. End with exact files, commands, results, residual blockers, SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. If green, certify with reproducible evidence only.",
+  "source": {"repository": "jmejia31/VariApp", "base_branch": "Desarrollo"},
+  "auto_approve_plan": true
+}
