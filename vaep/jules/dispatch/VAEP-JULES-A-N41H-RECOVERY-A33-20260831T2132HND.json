@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-A-N41H-RECOVERY-A33-20260831T2132HND",
+  "taskId": "N4.1.H-A33",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "2320859472394e26a35bfec0aa7143d6ab90db3c",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Infrastructure/Migrations/**; EF Core model/snapshot consistency directly required by N4.1.H",
+  "prompt": "CURRENT_PARENT=N4.1.H. Reproduce the current EF model/snapshot drift from PRIMARY_BASE_HEAD, identify the exact next causal mismatch after recent Venta identity corrections, implement only the minimum correct migration/model/snapshot fix inside the assigned scope, and run the relevant EF/build/tests. Do not touch frontend, VAEP workflows, main, production, secrets, or unrelated code. Do not ask for clarification when repository evidence can resolve the target. Finish with exact files, commands, results, residual blockers, SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. No speculative PASS."
+}
