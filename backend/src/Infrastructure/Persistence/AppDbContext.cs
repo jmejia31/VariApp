@@ -51,6 +51,7 @@ public class AppDbContext : DbContext
     public DbSet<Permiso> Permisos => Set<Permiso>();
     public DbSet<Cotizacion> Cotizaciones => Set<Cotizacion>();
     public DbSet<CotizacionDetalle> CotizacionDetalles => Set<CotizacionDetalle>();
+    public DbSet<InventoryApp.Domain.Entities.Bancos.CuentaBancaria> CuentasBancarias => Set<InventoryApp.Domain.Entities.Bancos.CuentaBancaria>();
     public DbSet<PreparacionPedidoVenta> PreparacionesPedidoVenta => Set<PreparacionPedidoVenta>();
     public DbSet<PreparacionPedidoVentaDetalle> PreparacionPedidoVentaDetalles => Set<PreparacionPedidoVentaDetalle>();
 
