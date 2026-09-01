@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-A-N42C-EF-MAPPING-QA-20260901T1150HND",
+  "taskId": "N4.2.C.EF_MAPPING_QA",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "c9ddb1f4ad9e13f9b5986e1af4ee1d14537121ab",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/**/CuentaBancariaConfigurationTests.cs; exactly one focused EF model/configuration QA test file; NO production code, NO migrations, NO data scripts, NO API/frontend",
+  "prompt": "N4.2.C material QA handoff for Jules A after controller review/integration. Against PRIMARY_BASE_HEAD, add one focused automated test file that certifies the current CuentaBancaria EF model metadata without modifying production code. Verify at minimum: entity maps to CuentasBancarias; BancoId FK targets Banco/Bancos with Restrict delete; NumeroCuenta max length 50; Moneda max length 3; SaldoInicial decimal(18,2); Estado remains numeric enum semantics (no string conversion); unique index BancoId+NumeroCuenta; Estado index; and the configured check constraints for BancoId > 0, SaldoInicial >= 0, Estado IN (1,2) where the provider metadata exposes them. Follow existing backend test project conventions and use the existing DbContext/provider test utilities. Do not edit migrations, model snapshots, AppDbContext, configuration, domain, services/API/frontend. If provider metadata makes a specific check-constraint assertion unsupported, test the remaining model contract and document that exact limitation rather than altering production code. Run the narrowest relevant test/build command available and return a reviewable patch with exact baseCommitId plus SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2."
+}
