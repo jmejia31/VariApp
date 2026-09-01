@@ -13,7 +13,7 @@ public sealed record BancosIdempotencyKey
         Value = value;
     }
 
-    public static BancosIdempotencyKey Create(string key)
+    public static BancosIdempotencyKey Create(string? key)
     {
         if (string.IsNullOrWhiteSpace(key))
             throw new ArgumentException("Idempotency key cannot be null, empty, or whitespace.", nameof(key));
