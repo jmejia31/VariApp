@@ -27,7 +27,12 @@ namespace InventoryApp.Infrastructure.Migrations
             credito.Property(x => x.MontoExcepcion).HasColumnType("decimal(18,4)");
 
             credito.HasIndex(x => x.ClienteId).HasDatabaseName("IX_CreditosCliente_ClienteId");
-            credito.HasOne(x => x.Cliente).WithMany().HasForeignKey(x => x.ClienteId).OnDelete(DeleteBehavior.Restrict);
+
+            // Cliente is a historical shared-type identity in this snapshot baseline.
+            // Preserve the FK by entity-type name instead of coercing the relation to the modern CLR type.
+            ((Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder)credito)
+                .HasOne("InventoryApp.Domain.Entities.Cliente", null).WithMany()
+                .HasForeignKey("ClienteId").OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
