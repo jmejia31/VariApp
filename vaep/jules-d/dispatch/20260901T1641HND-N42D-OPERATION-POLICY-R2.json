@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-D-N42D-OPERATION-POLICY-R2-20260901T1641HND",
+  "taskId": "N4.2.D.OPERATION_POLICY_CONTRACT_PIPELINE",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "754c46190bab804b69a3fd4805bd2008c1b86f6b",
+  "taskAttempt": 2,
+  "fileScopeHint": "backend/src/Application/Bancos/BancosOperationPolicy.cs; backend/tests/InventoryApp.Tests/Application/Bancos/BancosOperationPolicyTests.cs",
+  "prompt": "VAEP v3.28 R2 FINAL. REVIEW_FIRST found useful operation-policy logic in ATTEMPT1 but rejected the patch because final_changeset.diff was an out-of-scope temporary artifact and the tests used unnecessary reflection for BaseEntity.Id, which is publicly settable. Preserve only the authorized application policy and proportional tests. Exclusive files are backend/src/Application/Bancos/BancosOperationPolicy.cs and backend/tests/InventoryApp.Tests/Application/Bancos/BancosOperationPolicyTests.cs. Do not create final_changeset.diff or any other temp/evidence file. In tests assign cuenta.Id directly. Preserve fail-closed checks for active source/destination, positive amount, different accounts on transfer, matching currency, and delegate baseline validation to CuentaBancaria.ValidarOperacion without duplicating ledger semantics. Do not edit persistence, migrations, DTOs, repository interfaces, services, controllers, security, frontend, workflows or docs. Run proportional build/tests and self-review twice. Return patch only. ATTEMPT2 is FINAL; R3 prohibited. No main, Production, branches, push, merge, secrets or deploy."
+}
