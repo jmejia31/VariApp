@@ -11,7 +11,6 @@ namespace InventoryApp.Infrastructure.Migrations
     {
         private static void ApplyPart1(ModelBuilder modelBuilder)
         {
-            new ERP_N05_PermiteCambioAuditable().ApplyTargetModelForSnapshot(modelBuilder);
             modelBuilder.Entity("InventoryApp.Domain.Entities.Factura", b =>
             {
                 b.Property<string>("MetodoPagoCodigoSnapshot").HasMaxLength(50).HasColumnType("varchar(50)");
