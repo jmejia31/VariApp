@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-A-N42D-VALIDATION-CONTRACTS-20260901T1406HND",
+  "taskId": "N4.2.D.VALIDATION_CONTRACTS_PIPELINE",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "8bf3216d39cc4f4a82e4ebc03cd932bd9260e365",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/**/*CuentaBancaria*Validation*; backend/tests/**/*CuentaBancaria*Contract*; validation/application contract tests only; NO production code, NO EF/migrations/data/frontend",
+  "prompt": "ZERO-IDLE NEXT_SAFE — N4.2.D safe pipeline while N4.2.C remains CURRENT_PARENT and owns promotion. Previous Jules A N4.2.C MIGRATION_SNAPSHOT_QA is terminal COMPLETED and under VAEP review; its runtime-model test does NOT substitute the missing migration/snapshot, so do not continue or duplicate that blocker. Produce material validation contract tests only where existing CuentaBancaria API/application seams already exist: required fields, malformed/invalid identifiers, monetary boundary validation, deterministic validation/error semantics. Do NOT modify production controllers, services, DTOs, EF, migrations, data scripts or frontend. Do not overlap Jules B concurrency, Jules C sorting/query or Jules D audit/observability scopes. If the required production seam does not exist, fail closed with exact dependency and no speculative stubs. Run the narrowest real build/tests. Return a reviewable gitPatch with exact baseCommitId, evidence, limitations, SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. N4.2.D MUST NOT be promoted before N4.2.C LISTO."
+}
