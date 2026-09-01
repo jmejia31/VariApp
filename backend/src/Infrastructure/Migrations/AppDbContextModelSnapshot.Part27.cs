@@ -24,7 +24,12 @@ namespace InventoryApp.Infrastructure.Migrations
             nota.Property(x => x.Observaciones).HasMaxLength(1000);
             nota.HasIndex(x => x.FacturaId).HasDatabaseName("IX_NotasCreditoCliente_FacturaId");
             nota.HasIndex(x => x.VentaId).HasDatabaseName("IX_NotasCreditoCliente_VentaId");
-            nota.HasOne(x => x.Factura).WithMany().HasForeignKey(x => x.FacturaId).OnDelete(DeleteBehavior.Restrict);
+
+            // Factura is a historical shared-type identity in this snapshot baseline.
+            // Preserve the FK by entity-type name instead of coercing the relation to the modern CLR type.
+            ((Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder)nota)
+                .HasOne("InventoryApp.Domain.Entities.Factura", null).WithMany()
+                .HasForeignKey("FacturaId").OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
