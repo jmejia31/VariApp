@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-C-N42C-DATA-INTEGRITY-BOOTSTRAP-REC2-20260901T1201HND",
+  "taskId": "N4.2.C.DATA_INTEGRITY",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "92ad57f17cdf0f438d74c74146cef6e892ea4450",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/scripts/**/N42*CuentaBancaria*; backend/sql/**/N42*CuentaBancaria*; docs/**/N42*CuentaBancaria*data*; only concrete Desarrollo-safe data/backfill/reconciliation/rollback assets; NO EF mapping/migrations/tests/API/frontend",
+  "prompt": "N4.2.C material acceptance scope C — recover the SAME logical DATA_INTEGRITY task because prior bootstrap run 33539377684 remained >10m without correlated Jules session/useful activity. Implement only the concrete data-integrity portion needed for CuentaBancaria persistence from PRIMARY_BASE_HEAD: determine from current Desarrollo schema/data conventions whether backfill or reconciliation is required; if required produce executable idempotent Desarrollo-safe assets with preflight, reconciliation checks and rollback. If no legacy data requires backfill, prove that once from repository/migration evidence and produce only the minimal material integrity/reconciliation asset required by DoD. Do not edit EF mappings, migrations/model snapshots, tests, services/API/frontend. Never execute or target Producción and never touch secrets. Preserve Banco relational authority and MovimientoFinanciero ledger authority. Return a reviewable patch or, only if genuinely N/A, first causal proof of N/A with exact evidence and baseCommitId. Bootstrap transport without a correlated useful Jules session does not consume attempt; do not duplicate any live session."
+}
