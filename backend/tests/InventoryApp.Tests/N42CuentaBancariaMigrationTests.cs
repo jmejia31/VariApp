@@ -25,7 +25,8 @@ public class N42CuentaBancariaMigrationTests
         var foreignKey = Assert.Single(table.ForeignKeys,
             fk => fk.Name == "FK_CuentasBancarias_Bancos_BancoId");
         Assert.Equal("Bancos", foreignKey.PrincipalTable);
-        Assert.Equal("Id", Assert.Single(foreignKey.PrincipalColumns));
+        Assert.NotNull(foreignKey.PrincipalColumns);
+        Assert.Equal("Id", Assert.Single(foreignKey.PrincipalColumns!));
         Assert.Equal(ReferentialAction.Restrict, foreignKey.OnDelete);
 
         Assert.Contains(table.CheckConstraints,
