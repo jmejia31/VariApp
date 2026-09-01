@@ -49,7 +49,9 @@ namespace InventoryApp.Infrastructure.Migrations
             sesion.HasIndex(x => x.UsuarioId).HasDatabaseName("IX_CajaSesiones_UsuarioId");
             sesion.HasIndex(x => new { x.CajaId, x.Estado }).HasDatabaseName("IX_CajaSesiones_CajaId_Estado");
             sesion.HasOne<Caja>().WithMany().HasForeignKey(x => x.CajaId).OnDelete(DeleteBehavior.Restrict);
-            sesion.HasOne<Usuario>().WithMany().HasForeignKey(x => x.UsuarioId).OnDelete(DeleteBehavior.Restrict);
+            ((Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder)sesion)
+                .HasOne("InventoryApp.Domain.Entities.Usuario", null).WithMany()
+                .HasForeignKey("UsuarioId").OnDelete(DeleteBehavior.Restrict);
             sesion.HasMany(x => x.Movimientos).WithOne().HasForeignKey(x => x.CajaSesionId).OnDelete(DeleteBehavior.Cascade);
             sesion.Navigation(x => x.Movimientos).UsePropertyAccessMode(PropertyAccessMode.Field);
 
@@ -69,7 +71,9 @@ namespace InventoryApp.Infrastructure.Migrations
             movimiento.HasIndex(x => new { x.CajaSesionId, x.FechaOperacion }).HasDatabaseName("IX_CajaMovimientos_Sesion_Fecha");
             movimiento.HasIndex(x => x.UsuarioId).HasDatabaseName("IX_CajaMovimientos_UsuarioId");
             movimiento.HasIndex(x => x.Tipo).HasDatabaseName("IX_CajaMovimientos_Tipo");
-            movimiento.HasOne<Usuario>().WithMany().HasForeignKey(x => x.UsuarioId).OnDelete(DeleteBehavior.Restrict);
+            ((Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder)movimiento)
+                .HasOne("InventoryApp.Domain.Entities.Usuario", null).WithMany()
+                .HasForeignKey("UsuarioId").OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
