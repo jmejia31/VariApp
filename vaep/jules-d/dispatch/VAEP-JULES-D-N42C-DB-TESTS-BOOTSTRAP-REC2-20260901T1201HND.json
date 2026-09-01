@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-D-N42C-DB-TESTS-BOOTSTRAP-REC2-20260901T1201HND",
+  "taskId": "N4.2.C.DB_TESTS",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "37b859d695f92344dce79045e68ca3eb521b7957",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/**/*CuentaBancaria*Persistence*; backend/tests/**/*CuentaBancaria*Migration*; backend/tests/**/*Banco*Integration*; only DB/EF migration integration tests; NO production code, NO EF mapping/migration/data scripts, NO API/frontend",
+  "prompt": "N4.2.C material acceptance scope D — recover the SAME logical DB_TESTS task because prior bootstrap run 33539391315 remained >10m without correlated Jules session/useful activity. Add the minimum database/EF integration tests required to certify CuentaBancaria persistence and migration behavior from PRIMARY_BASE_HEAD. Test only material acceptance criteria: schema mapping, constraints, relationships and migration up/down or equivalent repository-supported migration history behavior, without duplicating N4.2.B pure domain tests. Follow existing MySQL/EF integration-test conventions and keep tests deterministic. Do not edit production code, EF mapping/configuration, migration files, data scripts, services/API/frontend. Do not connect to Producción. If required persistence delta is not yet present, structure tests against current contracts where possible and report the exact causal dependency rather than changing production scope. Return a reviewable material patch with exact baseCommitId and test evidence. Bootstrap transport without a correlated useful Jules session does not consume attempt; do not duplicate any live session."
+}
