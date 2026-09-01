@@ -161,9 +161,40 @@ jobs:
           fi
           test "$(docker exec -i "$c" mysql -uroot -proot inventoryapp_n06_ci --batch --skip-column-names < backend/scripts/postcheck-erp-n0-6-c3-origen-tipado.sql | tail -n 1)" = '0'
       - name: Verificar snapshot EF sin drift de modelo
+        id: ef_drift
+        continue-on-error: true
         working-directory: backend
         run: |
           dotnet ef migrations has-pending-model-changes \
             --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
             --startup-project src/API/InventoryApp.API.csproj \
             --context AppDbContext
+      - name: Capturar migration diff exacto del drift EF
+        if: steps.ef_drift.outcome == 'failure'
+        working-directory: backend
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf src/Infrastructure/Migrations/__N41H_DriftProbe .drift-probe
+          mkdir -p .drift-probe
+          dotnet ef migrations add __N41H_DriftProbe \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext \
+            --output-dir Migrations/__N41H_DriftProbe
+          git diff -- src/Infrastructure/Migrations > .drift-probe/ef-drift.patch
+          git status --short > .drift-probe/git-status.txt
+          cp -a src/Infrastructure/Migrations/__N41H_DriftProbe .drift-probe/generated-migration
+      - name: Publicar evidencia del drift EF
+        if: steps.ef_drift.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: n41h-ef-drift-probe
+          path: backend/.drift-probe
+          if-no-files-found: error
+          retention-days: 3
+      - name: Fallar si EF detectó drift
+        if: steps.ef_drift.outcome == 'failure'
+        run: |
+          echo 'EF detectó cambios pendientes; consultar artifact n41h-ef-drift-probe.' >&2
+          exit 1
