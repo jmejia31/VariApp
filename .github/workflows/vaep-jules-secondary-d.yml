@@ -1,12 +1,7 @@
-name: VAEP Jules D Trusted Secondary Worker
+name: VAEP Jules D Trusted Secondary Worker (legacy)
 
 on:
-  push:
-    branches:
-      - Desarrollo
-    paths:
-      - "vaep/jules-d/dispatch/*.json"
-      - ".github/workflows/vaep-jules-secondary-d.yml"
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -34,18 +29,15 @@ jobs:
       VAEP_JULES_LANE_BUDGET_SECONDS: 1200
       JULES_API_KEY: ${{ secrets.JULES_D_API_KEY }}
       GH_TOKEN: ${{ github.token }}
-
     steps:
       - name: Checkout dispatch commit
         uses: actions/checkout@v4
         with:
           ref: ${{ github.sha }}
           fetch-depth: 2
-
       - name: Execute VAEP Jules v3.27 deterministic clarification guard
         shell: bash
         run: bash .github/scripts/vaep-jules-no-clarification-v327.sh
-
       - name: Upload Jules D result artifact
         if: always() && env.RESULT_DIR != ''
         uses: actions/upload-artifact@v4
