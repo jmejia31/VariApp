@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-A-N42D-VALIDATION-CONTRACTS-PATH-RECOVERY-20260901T1500HND",
+  "taskId": "N4.2.D.VALIDATION_CONTRACTS_PIPELINE",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "8e70ef52e8b55ae44f9ec73f15e9791a95e37427",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/**/*CuentaBancaria*Validation*; backend/tests/**/*CuentaBancaria*Contract*; validation/application contract tests only; NO production code, NO EF/migrations/data/frontend",
+  "prompt": "TRANSPORT PATH RECOVERY v3.28. Previous A dispatch at vaep/jules-a/dispatch is non-authoritative and does not consume an attempt. Use only canonical Jules A transport vaep/jules/dispatch. N4.2.C retains promotion ownership; this is safe N4.2.D pipeline work only. Produce material validation/application contract tests where existing CuentaBancaria seams support them: required fields, malformed/invalid identifiers, monetary boundaries and deterministic validation/error semantics. Do not modify production controllers/services/DTOs, EF, migrations, data scripts or frontend. Do not overlap B concurrency, C error/ProblemDetails or D audit/observability scopes. If the production seam is absent, fail closed with exact dependency and no speculative stubs. Run narrow real build/tests and return reviewable gitPatch with exact baseCommitId, evidence, limitations, SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. COMPLETED means READY_FOR_VAEP/VALIDANDO, never automatic promotion. No branch, PR, merge, main, Produccion, secrets or deploy."
+}
