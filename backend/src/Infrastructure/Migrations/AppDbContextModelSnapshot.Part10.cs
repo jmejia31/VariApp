@@ -110,11 +110,14 @@ namespace InventoryApp.Infrastructure.Migrations
                     .OnDelete(DeleteBehavior.Restrict).IsRequired().HasConstraintName("FK_ReservaDetalles_ProductoVariantes_ProductoVarianteId");
                 b.HasOne(typeof(InventoryApp.Domain.Entities.ReservaInventario), "ReservaInventario").WithMany("Detalles").HasForeignKey("ReservaInventarioId")
                     .OnDelete(DeleteBehavior.Cascade).IsRequired().HasConstraintName("FK_ReservaInventarioDetalles_ReservasInventario_ReservaInventarioId");
-                b.HasOne(typeof(InventoryApp.Domain.Entities.UbicacionAlmacen), "UbicacionAlmacen").WithMany()
+                // UbicacionAlmacen remains represented by the historical shared-type baseline.
+                // Preserve the composite FK/principal key by entity-type name without binding the
+                // modern CLR navigation to the Dictionary-backed historical identity.
+                ((Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder)b)
+                    .HasOne("InventoryApp.Domain.Entities.UbicacionAlmacen", null).WithMany()
                     .HasForeignKey("AlmacenId", "UbicacionAlmacenId").HasPrincipalKey("AlmacenId", "Id")
                     .OnDelete(DeleteBehavior.Restrict).HasConstraintName("FK_ReservaDetalles_Ubicacion_MismoAlmacen");
                 b.Navigation("ReservaInventario");
-                b.Navigation("UbicacionAlmacen");
             });
 
             modelBuilder.Entity<InventoryApp.Domain.Entities.ReservaInventario>(b =>
