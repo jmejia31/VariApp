@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-C-N42D-API-CONTRACTS-PIPELINE-R2-20260901T1244HND",
+  "taskId": "N4.2.D.API_CONTRACTS_PIPELINE",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "85afd8fa5235a4a6d0882889d0b630082b128207",
+  "taskAttempt": 2,
+  "fileScopeHint": "backend/tests/**/*CuentaBancaria*Contract*; API contract tests only; NO production controller/service/DTO code, NO EF/migrations/data/frontend",
+  "prompt": "N4.2.D API CONTRACTS R2 — SAME logical task recovery after attempt1 session 5308322241932269441 failed despite producing a patch that incorrectly mixed production controller code with tests and introduced temporary proxy RBAC/501 placeholders. Re-read CURRENT PRIMARY_BASE_HEAD. Produce ONLY non-vacuous API contract/specification tests against existing production abstractions/routes if they already exist; do NOT add or modify controllers, services, DTOs, EF, migrations, data scripts or frontend. If the required CuentaBancaria API surface does not yet exist, fail closed with the exact dependency and no speculative production stubs. Keep tests aligned with repository conventions for authentication, authorization, ProblemDetails and route/verb contracts. Run the narrowest real test/build validation supported by the repo. Return a reviewable patch with exact baseCommitId and two independent self-reviews. This is ATTEMPT=2/R2: if it fails review or a blocker remains, ChatGPT/VAEP takes over; NEVER request or perform R3."
+}
