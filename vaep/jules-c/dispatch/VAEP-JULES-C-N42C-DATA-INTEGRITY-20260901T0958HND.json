@@ -3,7 +3,7 @@
   "taskId": "N4.2.C.DATA_INTEGRITY",
   "workerId": "JULES_C",
   "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "c3d90e8a698c9e4ca6817dd6baccd837ff900c38",
+  "primaryBaseHead": "384a1a0bc1f13443d4eb3a03c6c75673f22ddce3",
   "taskAttempt": 1,
   "fileScopeHint": "backend/scripts/**/N42*CuentaBancaria*; backend/sql/**/N42*CuentaBancaria*; docs/**/N42*CuentaBancaria*data*; only concrete Desarrollo-safe data/backfill/reconciliation/rollback assets; NO EF mapping/migrations/tests/API/frontend",
   "prompt": "N4.2.C material acceptance scope C — implement only the concrete data-integrity portion needed for CuentaBancaria persistence: determine from the existing Desarrollo schema/data conventions whether a backfill or reconciliation step is actually required, and if required produce executable, idempotent, Desarrollo-safe assets with preflight, reconciliation checks and rollback for that exact data transition. If no legacy data exists that requires backfill, prove that once from repository/migration evidence and produce only the minimal material integrity/reconciliation asset actually required by the DoD; do not manufacture evidence-only busywork. Do not edit EF mappings, migrations/model snapshots, tests, services/API/frontend. Never execute or target Producción and never touch secrets. Preserve Banco relational authority and MovimientoFinanciero ledger authority. Return a reviewable patch or, only if genuinely N/A, the first causal proof of N/A with exact searches/evidence and baseCommitId."
