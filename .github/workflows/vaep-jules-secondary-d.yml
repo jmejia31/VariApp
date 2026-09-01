@@ -1,6 +1,11 @@
-name: VAEP Jules D Trusted Secondary Worker (legacy)
+name: VAEP Jules D Trusted Secondary Worker
 
 on:
+  push:
+    branches:
+      - Desarrollo
+    paths:
+      - 'vaep/jules-d/dispatch/*.json'
   workflow_dispatch:
 
 permissions:
