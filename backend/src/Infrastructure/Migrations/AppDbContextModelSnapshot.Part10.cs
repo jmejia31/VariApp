@@ -103,14 +103,16 @@ namespace InventoryApp.Infrastructure.Migrations
                 ((Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder)b)
                     .HasOne("InventoryApp.Domain.Entities.Almacen", null).WithMany().HasForeignKey("AlmacenId")
                     .OnDelete(DeleteBehavior.Restrict).IsRequired().HasConstraintName("FK_ReservaDetalles_Almacenes_AlmacenId");
-                b.HasOne(typeof(InventoryApp.Domain.Entities.ProductoVariante), "ProductoVariante").WithMany().HasForeignKey("ProductoVarianteId")
+                // ProductoVariante is also represented by a historical shared-type identity in this
+                // snapshot. Preserve the FK without coercing that identity to the modern CLR navigation.
+                ((Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder)b)
+                    .HasOne("InventoryApp.Domain.Entities.ProductoVariante", null).WithMany().HasForeignKey("ProductoVarianteId")
                     .OnDelete(DeleteBehavior.Restrict).IsRequired().HasConstraintName("FK_ReservaDetalles_ProductoVariantes_ProductoVarianteId");
                 b.HasOne(typeof(InventoryApp.Domain.Entities.ReservaInventario), "ReservaInventario").WithMany("Detalles").HasForeignKey("ReservaInventarioId")
                     .OnDelete(DeleteBehavior.Cascade).IsRequired().HasConstraintName("FK_ReservaInventarioDetalles_ReservasInventario_ReservaInventarioId");
                 b.HasOne(typeof(InventoryApp.Domain.Entities.UbicacionAlmacen), "UbicacionAlmacen").WithMany()
                     .HasForeignKey("AlmacenId", "UbicacionAlmacenId").HasPrincipalKey("AlmacenId", "Id")
                     .OnDelete(DeleteBehavior.Restrict).HasConstraintName("FK_ReservaDetalles_Ubicacion_MismoAlmacen");
-                b.Navigation("ProductoVariante");
                 b.Navigation("ReservaInventario");
                 b.Navigation("UbicacionAlmacen");
             });
