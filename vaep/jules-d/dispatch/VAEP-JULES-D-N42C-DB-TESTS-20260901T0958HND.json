@@ -3,7 +3,7 @@
   "taskId": "N4.2.C.DB_TESTS",
   "workerId": "JULES_D",
   "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "c3d90e8a698c9e4ca6817dd6baccd837ff900c38",
+  "primaryBaseHead": "765a5f44c742ea362b80907eaf69072945fe84bb",
   "taskAttempt": 1,
   "fileScopeHint": "backend/tests/**/*CuentaBancaria*Persistence*; backend/tests/**/*CuentaBancaria*Migration*; backend/tests/**/*Banco*Integration*; only DB/EF migration integration tests; NO production code, NO EF mapping/migration/data scripts, NO API/frontend",
   "prompt": "N4.2.C material acceptance scope D — add the minimum database/EF integration tests required to certify CuentaBancaria persistence and migration behavior from PRIMARY_BASE_HEAD. Test material acceptance criteria only: schema mapping/constraints/relationships and migration up/down or equivalent repository-supported migration history behavior, with no duplication of N4.2.B pure domain tests. Follow existing MySQL/EF integration-test conventions and make tests deterministic. Do not edit production code, EF mapping/configuration, migration files, data scripts, services/API/frontend. Do not connect to Producción. If tests cannot compile safely because the required N4.2.C persistence delta is not yet present on the base, structure the tests against existing contracts where possible and report the exact causal dependency rather than changing production scope. Return a reviewable material patch with exact baseCommitId and test evidence."
