@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-A-N42C-MIGRATION-SNAPSHOT-QA-20260901T1320HND",
+  "taskId": "N4.2.C.MIGRATION_SNAPSHOT_QA",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "9afe25ccd295b1bdcdf136d86297332642f766d4",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/**/*CuentaBancaria*Migration*; backend/tests/**/*CuentaBancaria*Snapshot*; tests/QA only; NO production code, NO EF model/migrations/data/frontend",
+  "prompt": "N4.2.C CURRENT-PARENT CLOSURE QA — validate the real CuentaBancaria EF migration/model snapshot consistency on current Desarrollo. This is a material QA scope after prior EF mapping work completed. Produce ONLY non-vacuous tests/QA artifacts under backend/tests matching CuentaBancaria migration/snapshot behavior. Do NOT modify production entities, DbContext, mappings, migrations, SQL/data scripts, controllers/services/DTOs or frontend. Verify schema/mapping consistency, required columns/types/defaults/check constraints/index expectations only against existing repository truth. If no safe executable test seam exists, fail closed with exact dependency instead of creating speculative production code. Run the narrowest real build/tests supported. Return a reviewable patch with exact baseCommitId and two independent self-reviews."
+}
