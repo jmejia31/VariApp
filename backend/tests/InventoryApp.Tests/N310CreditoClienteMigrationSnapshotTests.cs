@@ -77,7 +77,7 @@ public sealed class N310CreditoClienteMigrationSnapshotTests
             .Single(index => index.GetDatabaseName() == "IX_CreditosCliente_ClienteId");
         Assert.False(clienteIndex.IsUnique);
         Assert.Contains(entity.GetForeignKeys(), fk =>
-            fk.PrincipalEntityType.ClrType == typeof(Cliente) && fk.DeleteBehavior == DeleteBehavior.Restrict);
+            fk.PrincipalEntityType.Name == typeof(Cliente).FullName && fk.DeleteBehavior == DeleteBehavior.Restrict);
         Assert.Equal("decimal(18,4)", entity.FindProperty(nameof(CreditoCliente.LimiteCredito))!.GetColumnType());
         Assert.Equal(3, entity.FindProperty(nameof(CreditoCliente.Moneda))!.GetMaxLength());
     }
