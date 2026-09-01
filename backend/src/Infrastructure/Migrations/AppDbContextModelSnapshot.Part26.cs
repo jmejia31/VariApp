@@ -33,7 +33,12 @@ namespace InventoryApp.Infrastructure.Migrations
             ((Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder)devolucion)
                 .HasOne("InventoryApp.Domain.Entities.Venta", null).WithMany()
                 .HasForeignKey("VentaId").OnDelete(DeleteBehavior.Restrict);
-            devolucion.HasOne(x => x.Factura).WithMany().HasForeignKey(x => x.FacturaId).OnDelete(DeleteBehavior.Restrict);
+
+            // Factura is also a historical shared-type identity in this snapshot baseline.
+            // Preserve the nullable FK by entity-type name instead of coercing the relation to the modern CLR type.
+            ((Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder)devolucion)
+                .HasOne("InventoryApp.Domain.Entities.Factura", null).WithMany()
+                .HasForeignKey("FacturaId").OnDelete(DeleteBehavior.Restrict);
             devolucion.HasMany(x => x.Detalles).WithOne(x => x.DevolucionCliente).HasForeignKey(x => x.DevolucionClienteId).OnDelete(DeleteBehavior.Cascade);
 
             var detalle = modelBuilder.Entity<DevolucionClienteDetalle>();
