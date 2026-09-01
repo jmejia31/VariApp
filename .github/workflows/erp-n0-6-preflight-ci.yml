@@ -185,8 +185,21 @@ jobs:
           git diff -- src/Infrastructure/Migrations > .drift-probe/ef-drift.patch
           git status --short > .drift-probe/git-status.txt
           cp -a src/Infrastructure/Migrations/__N41H_DriftProbe .drift-probe/generated-migration
+      - name: Emitir diagnóstico del drift EF en log
+        if: steps.ef_drift.outcome == 'failure'
+        working-directory: backend
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo '=== N4.1.H EF DRIFT: git status ==='
+          cat .drift-probe/git-status.txt || true
+          echo '=== N4.1.H EF DRIFT: patch ==='
+          sed -n '1,1200p' .drift-probe/ef-drift.patch || true
+          echo '=== N4.1.H EF DRIFT: generated migration ==='
+          find .drift-probe/generated-migration -maxdepth 1 -type f -name '*.cs' -print -exec sh -c 'echo "--- $1"; sed -n "1,800p" "$1"' _ {} \;
       - name: Publicar evidencia del drift EF
         if: steps.ef_drift.outcome == 'failure'
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: n41h-ef-drift-probe
@@ -196,5 +209,5 @@ jobs:
       - name: Fallar si EF detectó drift
         if: steps.ef_drift.outcome == 'failure'
         run: |
-          echo 'EF detectó cambios pendientes; consultar artifact n41h-ef-drift-probe.' >&2
+          echo 'EF detectó cambios pendientes; consultar log/artifact n41h-ef-drift-probe.' >&2
           exit 1
