@@ -27,7 +27,12 @@ namespace InventoryApp.Infrastructure.Migrations
             devolucion.HasIndex(x => x.FacturaId).HasDatabaseName("IX_DevolucionesCliente_FacturaId");
             devolucion.HasIndex(x => x.Estado).HasDatabaseName("IX_DevolucionesCliente_Estado");
             devolucion.HasIndex(x => x.IdempotencyKey).IsUnique().HasDatabaseName("UX_DevolucionesCliente_IdempotencyKey");
-            devolucion.HasOne(x => x.Venta).WithMany().HasForeignKey(x => x.VentaId).OnDelete(DeleteBehavior.Restrict);
+
+            // Venta is a historical shared-type identity in this snapshot baseline.
+            // Preserve the FK by entity-type name instead of coercing the relation to the modern CLR type.
+            ((Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder)devolucion)
+                .HasOne("InventoryApp.Domain.Entities.Venta", null).WithMany()
+                .HasForeignKey("VentaId").OnDelete(DeleteBehavior.Restrict);
             devolucion.HasOne(x => x.Factura).WithMany().HasForeignKey(x => x.FacturaId).OnDelete(DeleteBehavior.Restrict);
             devolucion.HasMany(x => x.Detalles).WithOne(x => x.DevolucionCliente).HasForeignKey(x => x.DevolucionClienteId).OnDelete(DeleteBehavior.Cascade);
 
