@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-C-N42D-QUERY-SPEC-R2-20260901T1708HND",
+  "taskId": "N4.2.D.QUERY_SPEC_CONTRACT_PIPELINE",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "c38a697855b523396ca94f55478366f682d5452c",
+  "taskAttempt": 2,
+  "fileScopeHint": "backend/src/Application/Bancos/CuentaBancariaQuery.cs; backend/src/Application/Bancos/CuentaBancariaFilter.cs; backend/tests/InventoryApp.Tests/Application/Bancos/CuentaBancariaQueryContractTests.cs",
+  "prompt": "VAEP v3.28 SAME_TASK R2 FINAL for N4.2.D query/filter contracts. ATTEMPT1 failed closed with empty patch. Implement a material canonical CuentaBancaria query/filter contract for BancoId, Estado, Moneda and safe paging/sorting inputs, with proportional contract tests. Exclusive files: backend/src/Application/Bancos/CuentaBancariaQuery.cs; backend/src/Application/Bancos/CuentaBancariaFilter.cs; backend/tests/InventoryApp.Tests/Application/Bancos/CuentaBancariaQueryContractTests.cs. Do not edit repository/service/controller/persistence/domain/DTOs/security/frontend/workflows/docs. Fail closed only if an equivalent canonical contract already exists on the exact base; otherwise produce the requested production delta. Run targeted build/tests, self-review twice, return patch only. ATTEMPT2 FINAL; R3 prohibited. No main, Production, branches, push, merge, secrets or deploy."
+}
