@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-A-N42D-REPOSITORY-CONTRACT-A1-20260901T1519HND",
+  "taskId": "N4.2.D.REPOSITORY_CONTRACT_PIPELINE",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "0fab24752e1dc2e1e4b70f823e5e4d3ea929ae76",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Application/Interfaces/Repositories/*CuentaBancaria*.cs; backend/tests/InventoryApp.Tests/Application/Bancos/*RepositoryContract*.cs",
+  "prompt": "N4.2.D BACKEND_API safe pipeline while N4.2.C remains unpromoted. Implement only the minimal application-layer repository contract required for CuentaBancaria operations/list/query, using the existing Banco/CuentaBancaria authorities and without duplicating MovimientoFinanciero ledger semantics. Exclusive scope is repository interface contract plus proportional contract tests only; do not edit persistence/migrations/controllers/services/DTOs/security/frontend/workflows/docs. Fail closed with evidence and no patch if an equivalent canonical contract already exists or if the seam cannot be defined without N4.2.C integration. No main, Production, branches, push, PR, merge, secrets or deploy. Run proportional build/tests. Return patch only and emit two independent self-review PASS markers before COMPLETED."
+}
