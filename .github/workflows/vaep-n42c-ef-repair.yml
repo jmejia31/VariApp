@@ -1,0 +1,69 @@
+name: VAEP N4.2.C EF Repair
+
+on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - '.github/workflows/vaep-n42c-ef-repair.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: vaep-n42c-ef-repair
+  cancel-in-progress: false
+
+jobs:
+  repair-generated-ef-artifacts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Restore and install EF
+        working-directory: backend
+        run: |
+          set -euo pipefail
+          dotnet restore InventoryApp.sln
+          dotnet tool install --global dotnet-ef --version 8.0.8
+      - name: Regenerate CuentaBancaria migration and snapshot
+        working-directory: backend
+        shell: bash
+        run: |
+          set -euo pipefail
+          old='src/Infrastructure/Migrations/20260901205127_N4_2_C_CuentaBancaria.cs'
+          old_designer='src/Infrastructure/Migrations/20260901205127_N4_2_C_CuentaBancaria.Designer.cs'
+          test -f "$old"
+          rm -f "$old" "$old_designer"
+          dotnet ef migrations add N4_2_C_CuentaBancaria \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext \
+            --output-dir Migrations
+          dotnet ef migrations has-pending-model-changes \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext
+          git diff --check
+          test "$(git status --short | grep -c 'AppDbContextModelSnapshot.cs')" -eq 1
+          test "$(git status --short | grep -c 'N4_2_C_CuentaBancaria.cs')" -eq 2
+          test "$(git status --short | grep -c 'N4_2_C_CuentaBancaria.Designer.cs')" -eq 1
+          git status --short
+      - name: Build backend
+        working-directory: backend
+        run: dotnet build InventoryApp.sln --no-restore --configuration Release
+      - name: Commit generated EF artifacts to Desarrollo
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add backend/src/Infrastructure/Migrations/
+          git diff --cached --check
+          git commit -m 'fix(n4.2.c): regenerate CuentaBancaria migration snapshot'
+          git push origin HEAD:Desarrollo
