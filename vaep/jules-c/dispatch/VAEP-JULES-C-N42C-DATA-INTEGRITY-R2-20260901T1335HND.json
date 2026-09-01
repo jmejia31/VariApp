@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-C-N42C-DATA-INTEGRITY-R2-20260901T1335HND",
+  "taskId": "N4.2.C.DATA_INTEGRITY",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "7f3fd66f8441a45aabc4db3e3ac9ffdc109e59ac",
+  "taskAttempt": 2,
+  "fileScopeHint": "backend/scripts/N42_CuentaBancaria_integrity.sql only; NO migrations/snapshot/DbContext/configuration/domain/API/frontend",
+  "prompt": "N4.2.C DATA_INTEGRITY R2 — final Jules attempt. ATTEMPT1 artifact was reviewed REQUIRED: it only emitted passive SELECT COUNT queries and a commented DELETE, so it did not fail closed on missing table, orphan BancoId, invalid Estado, negative SaldoInicial or duplicate BancoId+NumeroCuenta, and did not provide a safe explicit rollback/reconciliation asset. Produce exactly one material file backend/scripts/N42_CuentaBancaria_integrity.sql. It must be read-only by default, validate the existing/new CuentasBancarias schema using MySQL-compatible SQL, fail deterministically (SIGNAL or equivalent supported by project conventions) when required integrity conditions fail, verify no Banco orphans, Estado IN (1,2), SaldoInicial >=0, and no duplicate BancoId+NumeroCuenta; document that no historical relationship is invented and that backfill is N/A unless real legacy data exists. Any destructive rollback must remain explicitly guarded/non-production and must not execute by default. Do not edit migrations/snapshot/DbContext/configuration/domain/API/frontend. Run the narrowest real syntax/static validation available. Return exact baseCommitId, reviewable patch, tests and SELF_REVIEW_PASS_1/2. This is ATTEMPT=2/R2; if still blocked, report exact blocker for ChatGPT/VAEP QA_TAKEOVER; R3 prohibited."
+}
