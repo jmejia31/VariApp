@@ -6,7 +6,6 @@ on:
       - Desarrollo
     paths:
       - 'vaep/jules/dispatch/*.json'
-      - 'vaep/jules-a/dispatch/*.json'
   workflow_dispatch:
 
 permissions:
@@ -40,21 +39,16 @@ jobs:
         with:
           ref: ${{ github.sha }}
           fetch-depth: 2
-      - name: Resolve Jules A dispatch path
+      - name: Resolve Jules A canonical dispatch path
         shell: bash
         run: |
           set -euo pipefail
           canonical_count="$(git diff-tree --no-commit-id --name-only --diff-filter=A -r "$GITHUB_SHA" -- 'vaep/jules/dispatch/*.json' | sed '/^$/d' | wc -l | tr -d ' ')"
-          compatibility_count="$(git diff-tree --no-commit-id --name-only --diff-filter=A -r "$GITHUB_SHA" -- 'vaep/jules-a/dispatch/*.json' | sed '/^$/d' | wc -l | tr -d ' ')"
-          if [[ "$canonical_count" == "1" && "$compatibility_count" == "0" ]]; then
-            echo 'DISPATCH_PATH=vaep/jules/dispatch' >> "$GITHUB_ENV"
-          elif [[ "$canonical_count" == "0" && "$compatibility_count" == "1" ]]; then
-            echo '::warning::Jules A manifest arrived through compatibility path vaep/jules-a/dispatch; canonical path is vaep/jules/dispatch.'
-            echo 'DISPATCH_PATH=vaep/jules-a/dispatch' >> "$GITHUB_ENV"
-          else
-            echo "Jules A transport invariant failed: canonical=$canonical_count compatibility=$compatibility_count; expected exactly one manifest in one supported A path." >&2
+          if [[ "$canonical_count" != "1" ]]; then
+            echo "Jules A transport invariant failed: canonical=$canonical_count; expected exactly one new manifest in vaep/jules/dispatch." >&2
             exit 20
           fi
+          echo 'DISPATCH_PATH=vaep/jules/dispatch' >> "$GITHUB_ENV"
       - name: Execute VAEP Jules v3.27 deterministic clarification guard
         shell: bash
         run: bash .github/scripts/vaep-jules-no-clarification-v327.sh
