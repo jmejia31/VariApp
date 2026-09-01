@@ -1,0 +1,7 @@
+{
+  "task_id": "VAEP-JULES-A-N41H-RECOVERY-A32-20260831T2130HND",
+  "title": "N4.1.H EF snapshot causal closure",
+  "prompt": "PROJECT_ID=VARIAPP. Work NOW on jmejia31/VariApp branch Desarrollo at the dispatch commit HEAD. CURRENT_PARENT=N4.1.H. Exclusive scope: backend/src/Infrastructure/Migrations/** and EF Core model/snapshot consistency directly required by N4.1.H. Reproduce the exact current snapshot/model drift, identify the next causal mismatch after the recent Venta identity corrections, implement only the minimum correct fix, and run the relevant EF/build/tests. Do not touch frontend, VAEP workflows, main, production, secrets, or unrelated code. Do not ask for clarification when repository evidence can resolve the target. End with exact files, commands, results, residual blockers, SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. No speculative PASS.",
+  "source": {"repository": "jmejia31/VariApp", "base_branch": "Desarrollo"},
+  "auto_approve_plan": true
+}
