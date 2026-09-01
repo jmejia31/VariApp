@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-C-N42D-QUERY-SPEC-CONTRACT-A1-20260901T1520HND",
+  "taskId": "N4.2.D.QUERY_SPEC_CONTRACT_PIPELINE",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "ba101c5bd440543d6988277122a76c0a47ea33f9",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Application/Bancos/*Query*.cs; backend/src/Application/Bancos/*Filter*.cs; backend/tests/InventoryApp.Tests/Application/Bancos/*QueryContract*.cs",
+  "prompt": "N4.2.D BACKEND_API safe pipeline while N4.2.C remains unpromoted. Implement only reusable application query/filter specification contracts for CuentaBancaria list/search (BancoId, Estado, Moneda, safe paging/sorting inputs) without controller/service/persistence writes and without repeating the already completed pagination/sorting QA artifact. Material result must be canonical query/filter contract code and proportional tests, not evidence-only. Exclusive scope: Application/Bancos query/filter specification files plus query contract tests. Fail closed with no patch if equivalent canonical contracts already exist. No main, Production, branches, push, PR, merge, secrets or deploy. Run proportional build/tests. Return patch only and emit two independent self-review PASS markers before COMPLETED."
+}
