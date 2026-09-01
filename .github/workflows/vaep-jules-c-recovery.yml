@@ -8,7 +8,7 @@ permissions:
   issues: write
 
 concurrency:
-  group: vaep-jules-c-recovery
+  group: vaep-jules-c-lane
   cancel-in-progress: false
 
 jobs:
