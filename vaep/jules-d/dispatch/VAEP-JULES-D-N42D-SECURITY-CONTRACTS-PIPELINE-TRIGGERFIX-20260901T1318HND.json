@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-D-N42D-SECURITY-CONTRACTS-PIPELINE-TRIGGERFIX-20260901T1318HND",
+  "taskId": "N4.2.D.SECURITY_CONTRACTS_PIPELINE",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "6c3b9380414c9b5520e6b5badbe7b8fce0fc2137",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/**/*CuentaBancaria*Security*; backend/tests/**/*CuentaBancaria*Authorization*; security/authorization contract tests only; NO production code, NO EF/migrations/data/frontend",
+  "prompt": "TRIGGER-FIX RECOVERY for N4.2.D SECURITY CONTRACTS. The previous transport manifest could not start automatically because the Jules D secondary workflow was workflow_dispatch-only. That trigger defect is now corrected on Desarrollo; this pre-session transport failure does NOT consume the technical attempt, so ATTEMPT remains 1. Produce material security/authorization contract tests for the existing CuentaBancaria surface/abstractions only. Do NOT create or modify production controllers, services, DTOs, EF, migrations, data scripts or frontend. Reuse repository authentication/authorization conventions; test unauthorized/forbidden/allowed behavior only where a real production surface exists. If the required surface is not implemented yet, fail closed with the exact dependency and no speculative stubs. Run the narrowest real build/tests. Return a reviewable patch with exact baseCommitId and two independent self-reviews."
+}
