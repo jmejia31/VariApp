@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-A-N42C-EF-CONTEXT-20260901T1147HND",
+  "taskId": "N4.2.C.EF_CONTEXT_DBSET",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "8d88234120f85357f0eb5346f7ee1e2b4a1b12fb",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Infrastructure/Persistence/AppDbContext.cs only; add CuentaBancaria context exposure required by the already-integrated N4.2.C EF configuration; NO migrations, tests, API/frontend or other production files",
+  "prompt": "N4.2.C material follow-up after controller review integrated CuentaBancariaConfiguration. On exact PRIMARY_BASE_HEAD, modify only AppDbContext.cs to expose CuentaBancaria through the context consistently with repository conventions. Do not redesign the entity or mapping and do not touch migrations, tests, API, services, frontend, Production, main, branches or secrets. Return one reviewable material patch and proportional compile evidence."
+}
