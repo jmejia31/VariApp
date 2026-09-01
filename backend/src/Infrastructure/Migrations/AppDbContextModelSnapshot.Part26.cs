@@ -61,7 +61,12 @@ namespace InventoryApp.Infrastructure.Migrations
             detalle.Property(x => x.Resolucion).HasConversion<int>().IsRequired();
             detalle.HasIndex(x => new { x.DevolucionClienteId, x.VentaDetalleId }).IsUnique().HasDatabaseName("UX_DevolucionClienteDetalles_LineaVenta");
             detalle.HasIndex(x => x.VentaDetalleId).HasDatabaseName("IX_DevolucionClienteDetalles_VentaDetalleId");
-            detalle.HasOne<VentaDetalle>().WithMany().HasForeignKey(x => x.VentaDetalleId).OnDelete(DeleteBehavior.Restrict);
+
+            // VentaDetalle is a historical shared-type identity in this snapshot baseline.
+            // Preserve the FK by entity-type name instead of coercing the relation to the modern CLR type.
+            ((Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder)detalle)
+                .HasOne("InventoryApp.Domain.Entities.VentaDetalle", null).WithMany()
+                .HasForeignKey("VentaDetalleId").OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
