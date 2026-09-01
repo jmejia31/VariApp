@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-A-N42C-EF-MAPPING-QA-R2-20260901T1226HND",
+  "taskId": "N4.2.C.EF_MAPPING_QA",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "4edff99db0df02fc49cfc3a3106f9dd0c9b5ed66",
+  "taskAttempt": 2,
+  "fileScopeHint": "backend/tests/**/*CuentaBancaria*; only fail-closed EF/model relational verification tests; NO production code, NO migrations, NO data scripts, NO API/frontend",
+  "prompt": "N4.2.C SAME_CHILD_REWORK causal attempt 2/2. The prior EF_MAPPING_QA patch is not acceptable because relational assertions are conditional/vacuous when expected constraints are absent. Replace that behavior with deterministic fail-closed tests that prove the required CuentaBancaria EF model contract from the current exact primary base: entity mapping, Banco relationship/FK, required precision/nullability/index or constraint semantics actually owned by EF mapping, and no false PASS when metadata is missing. Do not modify production code or migrations. Keep scope exclusive to tests and return material test evidence. If a required contract belongs to the migration lane rather than EF mapping, assert only the model-owned contract and report the external blocker precisely. No R3 after this attempt."
+}
