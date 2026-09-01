@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-B-N42C-MIGRATION-R2-20260901T1158HND",
+  "taskId": "N4.2.C.MIGRATION",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "d7b5ec709d3fbf647e377959aba9d8434a8960e3",
+  "taskAttempt": 2,
+  "fileScopeHint": "backend/src/Infrastructure/Persistence/Migrations/*CuentaBancaria*; backend/src/Infrastructure/Persistence/Migrations/*N42*; matching AppDbContextModelSnapshot only if EF migration generation requires it; NO AppDbContext/configuration/domain/data scripts/tests/API/frontend",
+  "prompt": "N4.2.C MIGRATION R2 — final Jules attempt for this logical task. ATTEMPT1 session 13650187112196719644 correctly reported that the earlier base lacked CuentaBancaria EF mapping. That causal dependency has now been resolved by VAEP/ChatGPT in Desarrollo: AppDbContext registers CuentasBancarias and the existing CuentaBancariaConfiguration maps Banco FK with Restrict, NumeroCuenta/Moneda lengths, SaldoInicial decimal(18,2), numeric Estado, indexes and check constraints. Re-read the CURRENT PRIMARY_BASE_HEAD and verify those mappings before acting. Produce the concrete EF Core migration delta and matching model snapshot change required for CuentaBancaria persistence using the repository's existing migration naming/provider conventions. The migration must create only the schema implied by current mappings, be reversible, preserve Banco relational authority and MovimientoFinanciero ledger authority, and include the mapped unique/index/check/FK constraints. Do not edit AppDbContext, configuration, domain, data scripts, tests, services/API/frontend. Run the narrowest real migration/build validation supported by the repo. Return a reviewable patch with exact baseCommitId plus two independent self-reviews. This is ATTEMPT=2/R2: if a new blocker remains, report it exactly for ChatGPT/VAEP QA takeover; NEVER request or perform R3."
+}
