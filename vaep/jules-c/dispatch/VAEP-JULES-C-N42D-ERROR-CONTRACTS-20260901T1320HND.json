@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-C-N42D-ERROR-CONTRACTS-20260901T1320HND",
+  "taskId": "N4.2.D.ERROR_CONTRACTS_PIPELINE",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "a71e4ac95c62c8cdd579d4e759ea0f4d1f579e3c",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/**/*CuentaBancaria*Error*; backend/tests/**/*CuentaBancaria*ProblemDetails*; tests/contracts only; NO production controller/service/DTO/EF/migrations/data/frontend",
+  "prompt": "N4.2.D SAFE PIPELINE — after API_CONTRACTS R2 completed, move Jules C immediately to a distinct material error-contract scope. Produce ONLY non-vacuous tests/specification contracts for existing CuentaBancaria error semantics: validation/not-found/conflict/ProblemDetails/status mappings where real production abstractions/routes already exist. Do NOT modify controllers, services, DTOs, EF, migrations, data scripts or frontend. Do not duplicate Jules B idempotency/concurrency scope or Jules D security scope. If the required production surface does not exist, fail closed with exact dependency and no speculative production stubs. Run the narrowest real build/tests. Return reviewable patch with exact baseCommitId and two independent self-reviews. Promotion of N4.2.D remains blocked until N4.2.C LISTO."
+}
