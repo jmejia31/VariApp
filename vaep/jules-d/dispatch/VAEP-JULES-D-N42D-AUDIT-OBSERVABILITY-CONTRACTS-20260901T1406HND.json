@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-D-N42D-AUDIT-OBSERVABILITY-CONTRACTS-20260901T1406HND",
+  "taskId": "N4.2.D.AUDIT_OBSERVABILITY_CONTRACTS_PIPELINE",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "3fcc4dc8db0cab36e0e22c2ee491e4cd784b758a",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/**/*CuentaBancaria*Audit*; backend/tests/**/*CuentaBancaria*Observability*; audit/observability contract tests only; NO production code, NO EF/migrations/data/frontend",
+  "prompt": "ZERO-IDLE NEXT_SAFE — N4.2.D safe pipeline while N4.2.C remains CURRENT_PARENT and owns promotion. Previous Jules D SECURITY_CONTRACTS attempt1 is terminal COMPLETED and awaiting VAEP review. Move to a distinct non-duplicated scope: material audit/observability contract tests only where existing CuentaBancaria API/application seams already expose auditable or observable behavior; verify deterministic correlation/audit metadata expectations without inventing telemetry infrastructure. Do NOT return to N4.2.C DB_TESTS; that exhausted lane remains QA_TAKEOVER. Do NOT modify production controllers, services, DTOs, EF, migrations, data scripts or frontend. Do not overlap Jules A validation, Jules B concurrency or Jules C sorting/query scopes. If no real audit/observability seam exists, fail closed with exact dependency and no speculative stubs. Run the narrowest real build/tests. Return reviewable gitPatch with exact baseCommitId, evidence, limitations, SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. N4.2.D MUST NOT be promoted before N4.2.C LISTO."
+}
