@@ -204,6 +204,7 @@ jobs:
         with:
           name: n41h-ef-drift-probe
           path: backend/.drift-probe
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 3
       - name: Fallar si EF detectó drift
