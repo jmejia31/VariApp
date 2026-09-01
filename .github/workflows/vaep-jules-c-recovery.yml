@@ -1,12 +1,7 @@
 name: VAEP Jules C Recovery Worker
 
 on:
-  push:
-    branches:
-      - Desarrollo
-    paths:
-      - "vaep/jules-c/dispatch/*.json"
-      - ".github/workflows/vaep-jules-c-recovery.yml"
+  workflow_dispatch:
 
 permissions:
   contents: read
