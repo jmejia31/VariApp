@@ -5,14 +5,27 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace InventoryApp.Infrastructure.Persistence.Configurations;
 
-public class CuentaBancariaConfiguration : IEntityTypeConfiguration<CuentaBancaria>
+/// <summary>
+/// N4.2.C — persistencia de CuentaBancaria.
+/// Mantiene Banco como autoridad relacional y no introduce un ledger paralelo;
+/// MovimientoFinanciero continúa siendo la autoridad de movimientos financieros.
+/// </summary>
+public sealed class CuentaBancariaConfiguration : IEntityTypeConfiguration<CuentaBancaria>
 {
     public void Configure(EntityTypeBuilder<CuentaBancaria> builder)
     {
-        builder.ToTable("CuentasBancarias");
+        builder.ToTable("CuentasBancarias", table =>
+        {
+            table.HasCheckConstraint("CK_CuentasBancarias_BancoId", "`BancoId` > 0");
+            table.HasCheckConstraint("CK_CuentasBancarias_SaldoInicial", "`SaldoInicial` >= 0");
+            table.HasCheckConstraint("CK_CuentasBancarias_Estado", "`Estado` IN (1, 2)");
+        });
+
         builder.HasKey(x => x.Id);
 
-        builder.Property(x => x.BancoId).IsRequired();
+        builder.Property(x => x.BancoId)
+            .IsRequired();
+
         builder.HasOne<Banco>()
             .WithMany()
             .HasForeignKey(x => x.BancoId)
@@ -35,8 +48,6 @@ public class CuentaBancariaConfiguration : IEntityTypeConfiguration<CuentaBancar
             .IsRequired();
 
         builder.Property(x => x.Estado)
-            .HasConversion<string>()
-            .HasMaxLength(20)
             .IsRequired();
 
         builder.Property(x => x.CreadoPorNombreUsuario).HasMaxLength(150);
@@ -44,9 +55,11 @@ public class CuentaBancariaConfiguration : IEntityTypeConfiguration<CuentaBancar
 
         builder.HasIndex(x => x.BancoId)
             .HasDatabaseName("IX_CuentasBancarias_BancoId");
+
         builder.HasIndex(x => new { x.BancoId, x.NumeroCuenta })
             .IsUnique()
             .HasDatabaseName("UX_CuentasBancarias_BancoId_NumeroCuenta");
+
         builder.HasIndex(x => x.Estado)
             .HasDatabaseName("IX_CuentasBancarias_Estado");
     }
