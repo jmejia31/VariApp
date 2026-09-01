@@ -98,9 +98,10 @@ namespace InventoryApp.Infrastructure.Migrations
             modelBuilder.Entity<InventoryApp.Domain.Entities.ReservaInventarioDetalle>(b =>
             {
                 // Almacen is still represented by the historical shared-type baseline in this snapshot.
-                // Resolve by entity-type name so EF does not try to add a second CLR-backed Almacen identity.
+                // Preserve the FK by entity-type name without binding the CLR navigation to the
+                // Dictionary-backed historical identity.
                 ((Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder)b)
-                    .HasOne("InventoryApp.Domain.Entities.Almacen", "Almacen").WithMany().HasForeignKey("AlmacenId")
+                    .HasOne("InventoryApp.Domain.Entities.Almacen", null).WithMany().HasForeignKey("AlmacenId")
                     .OnDelete(DeleteBehavior.Restrict).IsRequired().HasConstraintName("FK_ReservaDetalles_Almacenes_AlmacenId");
                 b.HasOne(typeof(InventoryApp.Domain.Entities.ProductoVariante), "ProductoVariante").WithMany().HasForeignKey("ProductoVarianteId")
                     .OnDelete(DeleteBehavior.Restrict).IsRequired().HasConstraintName("FK_ReservaDetalles_ProductoVariantes_ProductoVarianteId");
@@ -109,7 +110,6 @@ namespace InventoryApp.Infrastructure.Migrations
                 b.HasOne(typeof(InventoryApp.Domain.Entities.UbicacionAlmacen), "UbicacionAlmacen").WithMany()
                     .HasForeignKey("AlmacenId", "UbicacionAlmacenId").HasPrincipalKey("AlmacenId", "Id")
                     .OnDelete(DeleteBehavior.Restrict).HasConstraintName("FK_ReservaDetalles_Ubicacion_MismoAlmacen");
-                b.Navigation("Almacen");
                 b.Navigation("ProductoVariante");
                 b.Navigation("ReservaInventario");
                 b.Navigation("UbicacionAlmacen");
