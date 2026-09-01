@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-C-N42D-ERROR-PROBLEMDETAILS-CONTRACTS-20260901T1450HND",
+  "taskId": "N4.2.D.ERROR_PROBLEMDETAILS_CONTRACTS_PIPELINE",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "26f65f3725f8af3a985f34172cc76a23a1c1ec27",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/**/*CuentaBancaria*Error*; backend/tests/**/*ProblemDetails*CuentaBancaria*; backend/tests/**/*CuentaBancaria*Contract*; tests/contract evidence only; NO production code, NO controllers/services/DTO changes, NO EF/migrations/data, NO frontend",
+  "prompt": "ZERO-IDLE NEXT_SAFE para Jules C. N4.2.C conserva ownership de promoción; N4.2.D solo puede trabajarse en pipeline seguro y NO debe promoverse. Trabaja únicamente contratos/pruebas de semántica de error de CuentaBancaria usando seams ya existentes: ProblemDetails determinista, códigos/status HTTP, errores de validación/autorización/not-found/conflict donde las convenciones reales del repositorio lo soporten. NO crees stubs de producción ni cambies controllers, services, DTOs, EF, migraciones, datos o frontend. NO dupliques scopes actuales: Jules A posee EF/migration/data-integrity recovery; Jules B concurrency/idempotency contracts; Jules D audit/observability contracts; los scopes previos de Jules C sorting/query y pagination/filter quedan congelados/terminales. Si la seam requerida no existe, falla cerrado con dependencia exacta y evidencia, sin código especulativo. Ejecuta las pruebas/build más estrechas reales. Devuelve gitPatch revisable con baseCommitId exacto, pruebas ejecutadas/no ejecutadas, limitaciones/riesgos y SELF_REVIEW_PASS_1 + SELF_REVIEW_PASS_2. No branch, PR, push funcional, merge, main, Producción, secrets ni deploy. COMPLETED significa READY_FOR_VAEP/VALIDANDO, nunca LISTO automático."
+}
