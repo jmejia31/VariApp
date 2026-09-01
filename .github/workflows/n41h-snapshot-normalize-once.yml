@@ -1,0 +1,67 @@
+name: N4.1.H - Snapshot normalization one-shot
+
+on:
+  push:
+    branches:
+      - Desarrollo
+    paths:
+      - .github/workflows/n41h-snapshot-normalize-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  normalize:
+    name: Apply exact-head EF canonical snapshot
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout Desarrollo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Guard exact parent
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = "e7926516508bbcde7a558ece386a229aac486d66"
+
+      - name: Download exact-head drift artifact
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          curl --fail --location \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/jmejia31/VariApp/actions/artifacts/9787255844/zip" \
+            --output "$RUNNER_TEMP/n41h-probe.zip"
+          mkdir -p "$RUNNER_TEMP/n41h-probe"
+          unzip -q "$RUNNER_TEMP/n41h-probe.zip" -d "$RUNNER_TEMP/n41h-probe"
+          test -s "$RUNNER_TEMP/n41h-probe/ef-drift.patch"
+          grep -q 'AppDbContextModelSnapshot.cs' "$RUNNER_TEMP/n41h-probe/ef-drift.patch"
+
+      - name: Apply canonical EF snapshot only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git apply "$RUNNER_TEMP/n41h-probe/ef-drift.patch"
+          git diff --check
+          git diff --name-only -- backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs | grep -qx 'backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs'
+          test "$(git diff --name-only | grep -v '^backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs$' | wc -l)" -eq 0
+
+      - name: Self-remove helper and publish material fix
+        shell: bash
+        run: |
+          set -euo pipefail
+          git rm .github/workflows/n41h-snapshot-normalize-once.yml
+          git add backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs
+          git diff --cached --check
+          test "$(git diff --cached --name-only | sort | tr '\n' ' ')" = ".github/workflows/n41h-snapshot-normalize-once.yml backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs "
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'fix(ef): normalize snapshot to canonical model [N4.1.H]'
+          git push origin HEAD:Desarrollo
