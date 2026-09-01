@@ -32,9 +32,21 @@ namespace InventoryApp.Infrastructure.Migrations
             detalle.HasIndex(new[] { nameof(PreparacionPedidoVentaDetalle.PreparacionPedidoVentaId), nameof(PreparacionPedidoVentaDetalle.ProductoVarianteId), nameof(PreparacionPedidoVentaDetalle.AlmacenId), "UbicacionNormalizada" }).IsUnique().HasDatabaseName("UX_PreparacionPedidoVentaDetalles_ClaveFisica");
             detalle.HasIndex(x => x.ProductoVarianteId).HasDatabaseName("IX_PreparacionPedidoVentaDetalles_ProductoVarianteId");
             detalle.HasIndex(x => x.AlmacenId).HasDatabaseName("IX_PreparacionPedidoVentaDetalles_AlmacenId");
-            detalle.HasOne<ProductoVariante>().WithMany().HasForeignKey(x => x.ProductoVarianteId).OnDelete(DeleteBehavior.Restrict);
-            detalle.HasOne<Almacen>().WithMany().HasForeignKey(x => x.AlmacenId).OnDelete(DeleteBehavior.Restrict);
-            detalle.HasOne<UbicacionAlmacen>().WithMany().HasForeignKey(x => new { x.AlmacenId, x.UbicacionAlmacenId }).HasPrincipalKey(x => new { x.AlmacenId, x.Id }).OnDelete(DeleteBehavior.Restrict);
+
+            // ProductoVariante, Almacen and UbicacionAlmacen are historical shared-type identities
+            // in this snapshot baseline. Preserve the foreign keys by entity-type name instead of
+            // coercing them to their modern CLR types, which would create duplicate EF identities.
+            ((Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder)detalle)
+                .HasOne("InventoryApp.Domain.Entities.ProductoVariante", null).WithMany()
+                .HasForeignKey("ProductoVarianteId").OnDelete(DeleteBehavior.Restrict);
+            ((Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder)detalle)
+                .HasOne("InventoryApp.Domain.Entities.Almacen", null).WithMany()
+                .HasForeignKey("AlmacenId").OnDelete(DeleteBehavior.Restrict);
+            ((Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder)detalle)
+                .HasOne("InventoryApp.Domain.Entities.UbicacionAlmacen", null).WithMany()
+                .HasForeignKey("AlmacenId", "UbicacionAlmacenId")
+                .HasPrincipalKey("AlmacenId", "Id")
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
