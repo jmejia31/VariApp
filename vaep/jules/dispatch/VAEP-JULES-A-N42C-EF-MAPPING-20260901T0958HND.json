@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-A-N42C-EF-MAPPING-20260901T0958HND",
+  "taskId": "N4.2.C.EF_MAPPING",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "c3d90e8a698c9e4ca6817dd6baccd837ff900c38",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Infrastructure/Persistence/**/AppDbContext*.cs; backend/src/Infrastructure/Persistence/**/Configurations/*CuentaBancaria*.cs; only directly required EF registration/configuration files; NO migrations, NO tests, NO API/frontend",
+  "prompt": "N4.2.C material acceptance scope A — implement the EF persistence mapping/context integration required for CuentaBancaria on top of PRIMARY_BASE_HEAD. Map the existing N4.2.B domain entity without redesigning it; preserve Banco as relational authority and MovimientoFinanciero as the existing financial ledger authority. Implement required table/column types, keys, relationships, precision, requiredness and safe indexes only where they belong in EF configuration/context. Do not create or edit migration files, model snapshots, backfill/rollback SQL, tests, API, services or frontend. Inspect repository conventions and direct dependencies, run proportional compile/model validation if possible, and return a reviewable material patch with exact baseCommitId. Production is forbidden. If a required mapping decision cannot be derived safely from existing contracts/conventions, report the exact causal conflict instead of inventing semantics."
+}
