@@ -1,0 +1,12 @@
+{
+  "manifestVersion": "v328",
+  "dispatchId": "20260902T0406HND-N42D-OPERATION-VALIDATION-EDGE-TESTS-A1",
+  "taskId": "N4.2.D.OPERATION_VALIDATION_EDGE_TESTS",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "b0d52c67259c71a4fb3f3d5d3729f0b6a01b92f6",
+  "taskAttempt": 1,
+  "maxAttempts": 2,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/Application/Bancos/OperacionBancariaServiceTests.cs",
+  "prompt": "Add the smallest non-duplicated tests-only coverage for real OperacionBancariaService validation edges not already covered: zero/negative monetary amounts, inactive source account, and invalid transfer destination where applicable. Inspect exact current contracts first; do not change production code and do not duplicate existing assertions. Run proportional backend tests and report exact evidence. No frontend/routes/GitHub writes from Jules/Production/main/secrets/deploy. Include SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2."
+}
