@@ -50,6 +50,17 @@ public class CuentaBancariaRepositoryTests
     }
 
     [Fact]
+    public async Task GetByIdAsync_ShouldReturnNull_WhenNotExists()
+    {
+        using var context = CreateDbContext();
+        var repository = new CuentaBancariaRepository(context);
+
+        var result = await repository.GetByIdAsync(999);
+
+        Assert.Null(result);
+    }
+
+    [Fact]
     public async Task GetAllAsync_ShouldReturnAllCuentas()
     {
         using var context = CreateDbContext();
@@ -61,6 +72,17 @@ public class CuentaBancariaRepositoryTests
         var result = await repository.GetAllAsync();
 
         Assert.Equal(2, result.Count);
+    }
+
+    [Fact]
+    public async Task GetAllAsync_ShouldReturnEmptyList_WhenNoCuentas()
+    {
+        using var context = CreateDbContext();
+        var repository = new CuentaBancariaRepository(context);
+
+        var result = await repository.GetAllAsync();
+
+        Assert.Empty(result);
     }
 
     [Fact]
@@ -81,6 +103,22 @@ public class CuentaBancariaRepositoryTests
 
         Assert.Equal(2, result.Count);
         Assert.True(result.All(c => c.Estado == EstadoCuentaBancaria.Activa));
+    }
+
+    [Fact]
+    public async Task GetActivasAsync_ShouldReturnEmptyList_WhenOnlyInactivas()
+    {
+        using var context = CreateDbContext();
+        var repository = new CuentaBancariaRepository(context);
+
+        var cuenta = new CuentaBancaria(1, "Inactiva 1", "1", "HNL");
+        cuenta.Desactivar();
+        context.CuentasBancarias.Add(cuenta);
+        await context.SaveChangesAsync();
+
+        var result = await repository.GetActivasAsync();
+
+        Assert.Empty(result);
     }
 
     [Fact]
