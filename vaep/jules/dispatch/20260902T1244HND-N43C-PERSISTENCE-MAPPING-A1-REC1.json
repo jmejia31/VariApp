@@ -1,0 +1,14 @@
+{
+  "manifestVersion": "v329",
+  "dispatchId": "20260902T1244HND-N43C-PERSISTENCE-MAPPING-A1-REC1",
+  "taskId": "N4.3.C.PERSISTENCE_MAPPING",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "33fd5f76843a67aca94479a82a4d7ca639709bc2",
+  "taskAttempt": 1,
+  "maxAttempts": 2,
+  "recoveryOf": "20260902T1231HND-N43C-PERSISTENCE-MAPPING-A1",
+  "recoveryReason": "PRE_SESSION_STALL_GE10M_NO_CORRELATED_JULES_SESSION",
+  "fileScopeHint": "backend/src/Infrastructure/**; backend/src/**/Persistence/**",
+  "prompt": "VAEP/Jules v3.29 THROUGHPUT-HARD PRE_SESSION recovery; this transport recovery does NOT consume a Jules attempt. CURRENT_PARENT=N4.3.C. Implement ONLY persistence/EF mapping for the already materialized bank-reconciliation domain: DbSets and entity configurations for ConciliacionBancaria, MovimientoEstadoCuenta and MatchConciliacion; define keys, relationships/FKs, delete behavior, lengths, required fields, unique/business indexes and audit/correlation-compatible persistence. Do NOT create migration/snapshot, controllers, services, frontend, workflow/manifest, secrets or deploy. Preserve existing historical data and do not alter unrelated mappings. Revalidate exact PRIMARY_BASE_HEAD before technical work. Run proportional backend build/model checks. Return patch artifact only with SELF_REVIEW_PASS_1 and PASS_2, full diff, git status and temp hygiene. ATTEMPT remains 1/2; no R3 exists."
+}
