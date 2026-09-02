@@ -1,0 +1,13 @@
+{
+  "manifestVersion": "v328",
+  "dispatchId": "20260902T0502HND-N42E-FORM-EDIT-MODE-TESTS-R2",
+  "taskId": "N4.2.E.FORM_EDIT_MODE_TESTS",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "d0f89885923e5d851caacd1bc71ac4c73f1f43c3",
+  "taskAttempt": 2,
+  "maxAttempts": 2,
+  "recoveryOf": "20260902T0425HND-N42E-FORM-EDIT-MODE-TESTS-A1",
+  "fileScopeHint": "frontend/src/app/features/cuentas-bancarias/cuentas-bancarias.component.spec.ts",
+  "prompt": "R2 FINAL causal after review rejection of attempt 1. The prior patch used deliberate expect.fail(MISSING_DEPENDENCY) placeholders because edit mode was not yet implemented. The dependency is now materialized in Desarrollo: CuentasBancariasComponent has puedeEditar, cuentaEnEdicion, editar(cuenta) and update flow via CuentaBancariaService.update. Replace placeholders with real, smallest tests-only coverage of the current contract: (1) editar with Finanzas/Editar populates existing cuenta values and opens edit mode; (2) without Editar permission editar is fail-closed and does not mutate edit state; (3) successful update calls service.update with the edited id and UpdateCuentaBancariaDto, exits edit mode and refreshes; (4) closing/resetting edit mode returns to a clean create state where existing test harness supports it. Do not edit production files, HTML, services, backend or routes. Inspect current spec/component first; do not duplicate existing create/validation/loading/empty-state tests. Run proportional frontend tests. No expect.fail placeholders, no skipped tests, no fake pass. Report exact evidence and SELF_REVIEW_PASS_1/2. No main/Produccion/branches/merge/auto-merge/force-push/secrets/deploy. R3 PROHIBITED; if this R2 cannot pass review, hand off to QA_TAKEOVER."
+}
