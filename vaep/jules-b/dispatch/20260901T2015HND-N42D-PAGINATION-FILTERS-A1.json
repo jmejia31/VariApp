@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-B-N42D-PAGINATION-FILTERS-A1-20260901T2015HND",
+  "taskId": "N4.2.D.PAGINATION_FILTERS",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "d2387fb9d3a84a6e102803113ff499288800674b",
+  "taskAttempt": 1,
+  "fileScopeHint": "CuentaBancaria list query/filter/pagination contract across repository+service+controller and targeted tests; exclude banking operation service files",
+  "prompt": "N4.2.D PAGINATION_FILTERS attempt1. Implement material server-side pagination/filtering for CuentaBancaria list queries only, using the current canonical repository/service/controller stack. Cover stable page/pageSize validation and useful account filters supported by the current model (for example banco/estado/moneda/search only when fields exist), deterministic ordering and targeted tests. Preserve existing CRUD semantics and authorization metadata. Do NOT touch OperacionBancariaService/IOperacionBancariaService or banking operation DTO/validator files owned by other lanes; do not implement deposito/retiro/transferencia here. No migrations/workflows/frontend. Keep the change coherent and backwards-safe where practical. Run targeted backend tests/build and return a material patch plus two independent SELF_REVIEW_PASS markers. No main, Production, branches, merge, auto-merge, force-push, secrets or deploy."
+}
