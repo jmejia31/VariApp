@@ -1,0 +1,12 @@
+{
+  "manifestVersion": "v328",
+  "dispatchId": "20260902T0422HND-N42E-FRONTEND-UPDATE-UI-R2-FINAL",
+  "taskId": "N4.2.E.FRONTEND_UPDATE_UI",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "23df5d37452da41533038eb8619452181ad7b635",
+  "taskAttempt": 2,
+  "maxAttempts": 2,
+  "fileScopeHint": "frontend/src/app/features/cuentas-bancarias/cuentas-bancarias.component.ts",
+  "prompt": "R2 FINAL causal rework of completed session 17068675654152932239 / issue #2499. The A1 artifact violated exclusive scope/hygiene by producing temporary files test.ts, test2.ts and update.py, and introduced an unused UpdateCuentaBancariaDto import. Produce a clean ChangeSet affecting ONLY frontend/src/app/features/cuentas-bancarias/cuentas-bancarias.component.ts. Implement the smallest safe CuentaBancaria edit/update interaction using the existing CuentaBancariaService.update contract and Finanzas/Editar permission; no temporary/generated files, no unused imports, no HTML/spec/service/model/backend/routes changes, no broad refactor. Preserve create/activate/deactivate behavior. Run proportional TypeScript/frontend validation and report exact evidence. This is ATTEMPT 2/2 FINAL: if any blocker remains, report it for ChatGPT/VAEP QA_TAKEOVER; NEVER R3. Include SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 including git status/full diff/temp-file hygiene."
+}
