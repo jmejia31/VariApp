@@ -1,6 +1,7 @@
 using System.Reflection;
 using InventoryApp.API.Controllers;
 using InventoryApp.API.Filters;
+using InventoryApp.Application.Bancos;
 using InventoryApp.Application.DTOs.Bancos;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Enums;
@@ -60,14 +61,16 @@ public sealed class CuentaBancariaControllerTests
     }
 
     [Fact]
-    public async Task GetAll_RetornaOkConLista()
+    public async Task GetAll_RetornaOkConPagina()
     {
-        var expected = new List<CuentaBancariaDto> { new() { Id = 1 } };
-        _serviceMock.Setup(s => s.GetAllAsync()).ReturnsAsync(expected);
-        var result = await _controller.GetAll();
+        var items = new List<CuentaBancariaDto> { new() { Id = 1 } };
+        var expected = new CuentaBancariaPage<CuentaBancariaDto>(items, 1, 10, 1);
+        var filter = new CuentaBancariaQueryFilter();
+        _serviceMock.Setup(s => s.GetAllAsync(filter)).ReturnsAsync(expected);
+        var result = await _controller.GetAll(filter);
         var okResult = Assert.IsType<OkObjectResult>(result);
         Assert.Equal(expected, okResult.Value);
-        _serviceMock.Verify(s => s.GetAllAsync(), Times.Once);
+        _serviceMock.Verify(s => s.GetAllAsync(filter), Times.Once);
     }
 
     [Fact]
