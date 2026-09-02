@@ -1,0 +1,12 @@
+{
+  "manifestVersion": "v320",
+  "dispatchId": "VAEP-JULES-D-N42E-STYLES-RESPONSIVE-A1-20260902T0014HND",
+  "taskId": "N4.2.E.FRONTEND_STYLES_RESPONSIVE",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "9583362c9ca94bb116c88ff347636a2064d9b23e",
+  "taskAttempt": 1,
+  "maxAttempts": 2,
+  "fileScopeHint": "frontend/src/app/features/cuentas-bancarias/cuentas-bancarias.component.scss only",
+  "prompt": "VAEP v3.28 new independent scope after N4.2.E.FRONTEND_ROUTE_RBAC R2 exhausted; route task is QA_TAKEOVER and R3 is prohibited. Exact base 9583362c9ca94bb116c88ff347636a2064d9b23e. Improve only cuentas-bancarias.component.scss with material responsive/readability styling for the existing component/template: toolbar/filter layout, form/table spacing, action controls, loading/empty presentation, narrow-screen behavior and overflow safety. Follow existing project conventions; do not alter semantics or invent new selectors not present in the current template unless strictly necessary and verifiable. No TS, HTML, routes, service/models, backend, workflows, other manifests, main, Produccion, branches, secrets or deploy. Run proportional frontend validation if available and return material patch plus SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2."
+}
