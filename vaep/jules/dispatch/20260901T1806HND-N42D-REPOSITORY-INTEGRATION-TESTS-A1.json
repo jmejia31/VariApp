@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-A-N42D-REPOSITORY-INTEGRATION-TESTS-A1-20260901T1806HND",
+  "taskId": "N4.2.D.REPOSITORY_INTEGRATION_TESTS",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "1e05b16ea382d90057a2149b3aea0a4900d144a6",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/Infrastructure/Repositories/*CuentaBancaria*Tests.cs",
+  "prompt": "N4.2.D BACKEND_API material follow-up. The CuentaBancaria repository contract and implementation are already integrated on Desarrollo. Add proportional repository integration/unit tests only for the CURRENT canonical int-based ICuentaBancariaRepository/CuentaBancariaRepository: GetByIdAsync, GetAllAsync, GetActivasAsync, AddAsync, Update and SaveChangesAsync, including active/inactive filtering and persistence behavior. Do not change production repository/interface/entity, migrations, services, controllers, DTOs, workflows, docs or frontend. Use existing test infrastructure/patterns. Run targeted tests/build. If a test exposes a production bug, report it causally but do not expand scope. No main, Production, branches, push, merge, secrets or deploy. Return a material patch and two independent self-review PASS markers before COMPLETED."
+}
