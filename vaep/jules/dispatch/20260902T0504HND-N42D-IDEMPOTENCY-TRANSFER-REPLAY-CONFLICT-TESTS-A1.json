@@ -1,0 +1,12 @@
+{
+  "manifestVersion": "v328",
+  "dispatchId": "20260902T0504HND-N42D-IDEMPOTENCY-TRANSFER-REPLAY-CONFLICT-TESTS-A1",
+  "taskId": "N4.2.D.IDEMPOTENCY_TRANSFER_REPLAY_CONFLICT_TESTS",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "33acdca7415d7268d9810a6bc7461b5673cb5986",
+  "taskAttempt": 1,
+  "maxAttempts": 2,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/Application/Bancos/OperacionBancariaServiceTests.cs",
+  "prompt": "CURRENT_PARENT N4.2.D. Extend the freshly certified durable idempotency semantics with the smallest non-duplicated transfer replay/conflict coverage. Modify ONLY backend/tests/InventoryApp.Tests/Application/Bancos/OperacionBancariaServiceTests.cs. Revalidate current exact base first. Add focused tests proving same idempotency key + equivalent transfer payload is a no-op/no duplicate and same key + materially different transfer payload throws the existing ConflictException contract. Reuse current mocks/helpers and existing production behavior; do not modify production code, frontend, manifests, workflow, secrets or unrelated tests. Run proportional backend tests and report exact evidence. If current HEAD already has equivalent transfer coverage, report DUPLICATE/SUPERSEDED with proof rather than forcing a delta. Include SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 with git status/full diff/temp-file hygiene."
+}
