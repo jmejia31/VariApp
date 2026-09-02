@@ -1,0 +1,13 @@
+{
+  "manifestVersion": "v329",
+  "dispatchId": "20260902T1022HND-N42H-CERTIFICATION-A1",
+  "taskId": "N4.2.H.CERTIFICATION_DOCUMENT",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "bef9eecba1c8edde0229e0725ed1c781fa35a7c1",
+  "taskAttempt": 1,
+  "maxAttempts": 2,
+  "pipelineOnly": false,
+  "fileScopeHint": "docs/CERTIFICACION_N4_2_BANCOS.md",
+  "prompt": "VAEP/Jules v3.29 THROUGHPUT-HARD. N4.2.H is CURRENT_PARENT after N4.2.F and N4.2.G LISTO_REAL. Create only docs/CERTIFICACION_N4_2_BANCOS.md as a concise canonical certification document grounded in current repository evidence. Include functional scope CuentaBancaria plus deposito/retiro/transferencia/comision/interes/conciliacion, RBAC/audit/security/correlation, exact functional baseline bef9eecba1c8edde0229e0725ed1c781fa35a7c1, applicable successful run IDs 33653456588/33653456491/33653456603/33653456623/33653456576/33653456587/33653456629, P0=0/P1=0, rollback principle and explicit no-Produccion/no-merge. Do not modify any other file. No invented PASS. SELF_REVIEW_PASS_1/2 and clean diff. No main/Produccion/new branch/merge/auto-merge/force-push/secrets/deploy."
+}
