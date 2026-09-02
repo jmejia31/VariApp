@@ -2,6 +2,7 @@ using InventoryApp.API.Filters;
 using InventoryApp.Application.DTOs.Bancos;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Enums;
+using InventoryApp.Application.Bancos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,9 +23,9 @@ public class CuentaBancariaController : ControllerBase
 
     [HttpGet]
     [RequierePermiso(ModuloSistema.Finanzas, AccionPermiso.Ver)]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll([FromQuery] CuentaBancariaQueryFilter filter)
     {
-        var result = await _service.GetAllAsync();
+        var result = await _service.GetAllAsync(filter);
         return Ok(result);
     }
 
