@@ -56,6 +56,21 @@ public class CuentaBancariaController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
 
+    [HttpPut("{id:int}")]
+    [RequierePermiso(ModuloSistema.Finanzas, AccionPermiso.Editar)]
+    public async Task<IActionResult> Update(int id, [FromBody] UpdateCuentaBancariaDto dto)
+    {
+        try
+        {
+            await _service.UpdateAsync(id, dto);
+            return NoContent();
+        }
+        catch (InvalidOperationException)
+        {
+            return CuentaNoEncontrada(id);
+        }
+    }
+
     [HttpPatch("{id:int}/activar")]
     [RequierePermiso(ModuloSistema.Finanzas, AccionPermiso.Activar)]
     public async Task<IActionResult> Activar(int id)

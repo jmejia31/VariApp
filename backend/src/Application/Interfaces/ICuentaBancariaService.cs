@@ -11,4 +11,5 @@ public interface ICuentaBancariaService
     Task<CuentaBancariaDto> AddAsync(CreateCuentaBancariaDto dto);
     Task ActivarAsync(int id);
     Task DesactivarAsync(int id);
+    Task UpdateAsync(int id, UpdateCuentaBancariaDto dto);
 }

@@ -57,6 +57,15 @@ public class CuentaBancaria : AuditableEntity
         FechaActualizacion = DateTime.UtcNow;
     }
 
+    public void UpdateNombre(string nombre)
+    {
+        if (string.IsNullOrWhiteSpace(nombre))
+            throw new ArgumentException("El nombre de la cuenta es requerido.", nameof(nombre));
+
+        Nombre = nombre.Trim();
+        FechaActualizacion = DateTime.UtcNow;
+    }
+
     /// <summary>
     /// Valida el contrato de una operación bancaria sin registrar movimientos ni
     /// duplicar el ledger. La capa de aplicación debe materializar la operación

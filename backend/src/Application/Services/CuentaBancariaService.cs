@@ -70,6 +70,16 @@ public sealed class CuentaBancariaService : ICuentaBancariaService
         await _repository.SaveChangesAsync();
     }
 
+    public async Task UpdateAsync(int id, UpdateCuentaBancariaDto dto)
+    {
+        var cuenta = await _repository.GetByIdAsync(id)
+            ?? throw new InvalidOperationException($"No se encontró la cuenta con Id {id}.");
+
+        cuenta.UpdateNombre(dto.Nombre);
+        _repository.Update(cuenta);
+        await _repository.SaveChangesAsync();
+    }
+
     private static CuentaBancariaDto MapToDto(CuentaBancaria cuenta) => new()
     {
         Id = cuenta.Id,
