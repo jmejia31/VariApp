@@ -1,0 +1,12 @@
+{
+  "manifestVersion": "v328",
+  "dispatchId": "VAEP-JULES-A-N42D-CUENTA-REPOSITORY-CONTRACT-EDGE-TESTS-A1-20260902T0223HND",
+  "taskId": "N4.2.D.CUENTA_REPOSITORY_CONTRACT_EDGE_TESTS",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "b5ab24bcb4cb4f5861e7b46902509cf3600a766d",
+  "taskAttempt": 1,
+  "maxAttempts": 2,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/Application/Bancos/CuentaBancariaRepositoryContractTests.cs only",
+  "prompt": "VAEP v3.28 NEXT_SAFE new logical task. The prior N4.2.E.FRONTEND_COMPONENT_STATE_TESTS attempt 2/2 already reached a correlated Jules COMPLETED result and its useful patch was reviewed/applied to Desarrollo; any later same-task REC3 transport is SUPERSEDED and MUST NOT be executed as another Jules attempt. This is NOT R3. VAEP transport path for Jules A is canonical vaep/jules/dispatch only. Exact base b5ab24bcb4cb4f5861e7b46902509cf3600a766d. Work ONLY in backend/tests/InventoryApp.Tests/Application/Bancos/CuentaBancariaRepositoryContractTests.cs. Review current repository contract and production repository/interface first. Add only material deterministic contract-edge assertions genuinely missing, prioritizing filter/pagination semantics, active-state filtering, and fail-closed boundaries that can be verified without changing production code. Do not duplicate existing tests. Do not modify repository/service/controller/entity/DTO/backend production files or any other tests, manifests or workflows. Run focused backend tests if supported and report exact results plus SELF_REVIEW_PASS_1/2. Do not touch main, Produccion, branches, secrets or deploy."
+}
