@@ -1,0 +1,12 @@
+{
+  "manifestVersion": "v328",
+  "dispatchId": "VAEP-JULES-A-N42E-COMPONENT-STATE-TESTS-A1-REC1-20260902T0139HND",
+  "taskId": "N4.2.E.FRONTEND_COMPONENT_STATE_TESTS",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "ded6768edd07c5533c1107ad480895ea4adb09ea",
+  "taskAttempt": 1,
+  "maxAttempts": 2,
+  "fileScopeHint": "frontend/src/app/features/cuentas-bancarias/cuentas-bancarias.component.spec.ts only",
+  "prompt": "VAEP v3.28 PRE-SESSION RECOVERY of SAME logical task N4.2.E.FRONTEND_COMPONENT_STATE_TESTS. SAME ATTEMPT1/2; recovery does not consume another content attempt. Prior dispatch VAEP-JULES-A-N42E-COMPONENT-STATE-TESTS-A1-20260902T0115HND exceeded >=10m without correlated Jules session/useful activity. Exact base ded6768edd07c5533c1107ad480895ea4adb09ea. Work ONLY in frontend/src/app/features/cuentas-bancarias/cuentas-bancarias.component.spec.ts. Add material focused tests for CURRENT CuentaBancaria component state behavior around loading/submitting/error/empty transitions using only members/service contracts that exist at this base. Do not modify production component/template/styles/service/backend/routes/manifests/workflows or any other file. Do not touch main, Produccion, branches, secrets or deploy. Run focused frontend tests/TypeScript validation if available and return a reviewable patch with SELF_REVIEW_PASS_1/2 and exact limitations."
+}
