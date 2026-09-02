@@ -1,5 +1,5 @@
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
 import { beforeEach, describe, expect, it, type Mocked, vi } from 'vitest';
@@ -17,16 +17,38 @@ type CuentaServiceMock = Mocked<
   Pick<CuentaBancariaService, 'getAll' | 'create' | 'activar' | 'desactivar'>
 >;
 type PermisosMock = Mocked<Pick<PermisosRuntimeService, 'puede'>>;
-type NavigationStateMock = Mocked<
-  Pick<ListNavigationStateService, 'restore' | 'persist' | 'clear'>
->;
+
+interface NavigationSnapshot {
+  search: string;
+  estadoFilter: EstadoCuentaBancaria | null;
+}
+
+function createNavigationStateMock() {
+  return {
+    restore: vi.fn(
+      (_scope: string, _route: ActivatedRoute, _defaults: NavigationSnapshot): NavigationSnapshot => ({
+        search: '',
+        estadoFilter: null
+      })
+    ),
+    persist: vi.fn(
+      (
+        _scope: string,
+        _route: ActivatedRoute,
+        _state: NavigationSnapshot,
+        _defaults: NavigationSnapshot
+      ): void => undefined
+    ),
+    clear: vi.fn((_scope: string): void => undefined)
+  };
+}
 
 describe('CuentasBancariasComponent', () => {
   let component: CuentasBancariasComponent;
   let fixture: ComponentFixture<CuentasBancariasComponent>;
   let cuentaService: CuentaServiceMock;
   let permisos: PermisosMock;
-  let navigationState: NavigationStateMock;
+  let navigationState: ReturnType<typeof createNavigationStateMock>;
 
   const cuentasPage: CuentaBancariaPage<CuentaBancaria> = {
     items: [
@@ -67,14 +89,7 @@ describe('CuentasBancariasComponent', () => {
       puede: vi.fn<PermisosRuntimeService['puede']>().mockReturnValue(false)
     };
 
-    navigationState = {
-      restore: vi.fn<ListNavigationStateService['restore']>().mockReturnValue({
-        search: '',
-        estadoFilter: null
-      }),
-      persist: vi.fn<ListNavigationStateService['persist']>(),
-      clear: vi.fn<ListNavigationStateService['clear']>()
-    };
+    navigationState = createNavigationStateMock();
 
     await TestBed.configureTestingModule({
       imports: [CuentasBancariasComponent, NoopAnimationsModule],
