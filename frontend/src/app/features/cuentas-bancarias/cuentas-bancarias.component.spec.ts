@@ -173,13 +173,81 @@ describe('CuentasBancariasComponent', () => {
     });
   });
 
-  it('no crea una cuenta cuando el formulario es inválido', () => {
+  it('no crea una cuenta y marca los controles como tocados cuando el formulario es inválido', () => {
     fixture.detectChanges();
 
     component.formulario.controls.nombre.setValue('');
     component.guardarCuenta();
 
+    expect(component.formulario.touched).toBe(true);
     expect(cuentaService.create).not.toHaveBeenCalled();
+  });
+
+  it('no permite envíos duplicados mientras la creación está pendiente', () => {
+    fixture.detectChanges();
+    cuentaService.getAll.mockClear();
+
+    const dto = {
+      bancoId: 1,
+      nombre: 'Cuenta Lenta',
+      numeroCuenta: '444',
+      moneda: 'HNL',
+      saldoInicial: 100
+    };
+    component.formulario.setValue(dto);
+
+    const response$ = new Subject<any>();
+    cuentaService.create.mockReturnValue(response$);
+
+    component.guardarCuenta();
+    component.guardarCuenta();
+
+    expect(cuentaService.create).toHaveBeenCalledTimes(1);
+    expect(component.submitting()).toBe(true);
+
+    response$.next({ ...dto, id: 4, estado: EstadoCuentaBancaria.Activa });
+    response$.complete();
+  });
+
+  it('restablece el estado submitting al completar la creación con éxito', () => {
+    fixture.detectChanges();
+
+    const dto = {
+      bancoId: 1,
+      nombre: 'Nueva Cuenta',
+      numeroCuenta: '999',
+      moneda: 'HNL',
+      saldoInicial: 500
+    };
+    component.formulario.setValue(dto);
+    cuentaService.create.mockReturnValue(of({ ...dto, id: 3, estado: EstadoCuentaBancaria.Activa }));
+
+    component.guardarCuenta();
+
+    expect(component.submitting()).toBe(false);
+  });
+
+  it('restablece el estado submitting cuando la creación falla', () => {
+    fixture.detectChanges();
+
+    const dto = {
+      bancoId: 1,
+      nombre: 'Cuenta Error',
+      numeroCuenta: '000',
+      moneda: 'HNL',
+      saldoInicial: 0
+    };
+    component.formulario.setValue(dto);
+
+    const error$ = new Subject<any>();
+    cuentaService.create.mockReturnValue(error$);
+
+    component.guardarCuenta();
+    expect(component.submitting()).toBe(true);
+
+    error$.error(new Error('Network Error'));
+
+    expect(component.submitting()).toBe(false);
   });
 
   it('crea una cuenta válida, resetea el formulario y recarga', () => {
