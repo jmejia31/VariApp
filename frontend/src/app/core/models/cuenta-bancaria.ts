@@ -30,6 +30,10 @@ export interface CreateCuentaBancariaDto {
   saldoInicial: number;
 }
 
+export interface UpdateCuentaBancariaDto {
+  nombre: string;
+}
+
 export interface OperacionBancariaDto {
   tipoOperacion: TipoOperacionBancaria;
   monto: number;
