@@ -1,0 +1,228 @@
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ActivatedRoute } from '@angular/router';
+import { of } from 'rxjs';
+import { beforeEach, describe, expect, it, type Mocked, vi } from 'vitest';
+import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
+import {
+  CuentaBancaria,
+  EstadoCuentaBancaria
+} from '../../core/models/cuenta-bancaria';
+import { CuentaBancariaPage } from '../../core/models/cuenta-bancaria-page';
+import { ListNavigationStateService } from '../../core/navigation/list-navigation-state.service';
+import { CuentaBancariaService } from '../../core/services/cuenta-bancaria.service';
+import { CuentasBancariasComponent } from './cuentas-bancarias.component';
+
+type CuentaServiceMock = Mocked<
+  Pick<CuentaBancariaService, 'getAll' | 'create' | 'activar' | 'desactivar'>
+>;
+type PermisosMock = Mocked<Pick<PermisosRuntimeService, 'puede'>>;
+type NavigationStateMock = Mocked<
+  Pick<ListNavigationStateService, 'restore' | 'persist' | 'clear'>
+>;
+
+describe('CuentasBancariasComponent', () => {
+  let component: CuentasBancariasComponent;
+  let fixture: ComponentFixture<CuentasBancariasComponent>;
+  let cuentaService: CuentaServiceMock;
+  let permisos: PermisosMock;
+  let navigationState: NavigationStateMock;
+
+  const cuentasPage: CuentaBancariaPage<CuentaBancaria> = {
+    items: [
+      {
+        id: 1,
+        bancoId: 1,
+        nombre: 'Cuenta HNL',
+        numeroCuenta: '123',
+        moneda: 'HNL',
+        saldoInicial: 100,
+        estado: EstadoCuentaBancaria.Activa
+      },
+      {
+        id: 2,
+        bancoId: 1,
+        nombre: 'Cuenta USD',
+        numeroCuenta: '456',
+        moneda: 'USD',
+        saldoInicial: 200,
+        estado: EstadoCuentaBancaria.Inactiva
+      }
+    ],
+    page: 1,
+    pageSize: 50,
+    totalCount: 2,
+    totalPages: 1
+  };
+
+  beforeEach(async () => {
+    cuentaService = {
+      getAll: vi.fn<CuentaBancariaService['getAll']>().mockReturnValue(of(cuentasPage)),
+      create: vi.fn<CuentaBancariaService['create']>(),
+      activar: vi.fn<CuentaBancariaService['activar']>(),
+      desactivar: vi.fn<CuentaBancariaService['desactivar']>()
+    };
+
+    permisos = {
+      puede: vi.fn<PermisosRuntimeService['puede']>().mockReturnValue(false)
+    };
+
+    navigationState = {
+      restore: vi.fn<ListNavigationStateService['restore']>().mockReturnValue({
+        search: '',
+        estadoFilter: null
+      }),
+      persist: vi.fn<ListNavigationStateService['persist']>(),
+      clear: vi.fn<ListNavigationStateService['clear']>()
+    };
+
+    await TestBed.configureTestingModule({
+      imports: [CuentasBancariasComponent, NoopAnimationsModule],
+      providers: [
+        { provide: CuentaBancariaService, useValue: cuentaService },
+        { provide: PermisosRuntimeService, useValue: permisos },
+        { provide: ListNavigationStateService, useValue: navigationState },
+        {
+          provide: ActivatedRoute,
+          useValue: { snapshot: { queryParamMap: { get: () => null } } }
+        }
+      ]
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(CuentasBancariasComponent);
+    component = fixture.componentInstance;
+  });
+
+  it('crea el componente y carga la lista paginada con contrato canónico', () => {
+    fixture.detectChanges();
+
+    expect(component).toBeTruthy();
+    expect(cuentaService.getAll).toHaveBeenCalledWith({
+      page: 1,
+      pageSize: 50,
+      searchTerm: undefined,
+      estado: undefined
+    });
+    expect(component.cuentas()).toEqual(cuentasPage.items);
+    expect(component.loading()).toBe(false);
+  });
+
+  it('inicializa RBAC usando permisos Finanzas exactos', () => {
+    permisos.puede.mockImplementation(
+      (_modulo: string, accion: string) => accion === 'Crear' || accion === 'Activar'
+    );
+
+    fixture.detectChanges();
+
+    expect(permisos.puede).toHaveBeenCalledWith('Finanzas', 'Crear');
+    expect(permisos.puede).toHaveBeenCalledWith('Finanzas', 'Activar');
+    expect(permisos.puede).toHaveBeenCalledWith('Finanzas', 'Desactivar');
+    expect(component.puedeCrear()).toBe(true);
+    expect(component.puedeActivar()).toBe(true);
+    expect(component.puedeDesactivar()).toBe(false);
+  });
+
+  it('restaura y persiste filtros de navegación al cargar', () => {
+    navigationState.restore.mockReturnValue({
+      search: 'usd',
+      estadoFilter: EstadoCuentaBancaria.Activa
+    });
+
+    fixture.detectChanges();
+
+    expect(cuentaService.getAll).toHaveBeenCalledWith({
+      page: 1,
+      pageSize: 50,
+      searchTerm: 'usd',
+      estado: EstadoCuentaBancaria.Activa
+    });
+    expect(navigationState.persist).toHaveBeenCalled();
+  });
+
+  it('limpia filtros y vuelve a cargar la lista', () => {
+    fixture.detectChanges();
+    cuentaService.getAll.mockClear();
+
+    component.search = 'algo';
+    component.estadoFilter = EstadoCuentaBancaria.Inactiva;
+    component.limpiarFiltros();
+
+    expect(navigationState.clear).toHaveBeenCalledWith('cuentas-bancarias');
+    expect(component.search).toBe('');
+    expect(component.estadoFilter).toBeNull();
+    expect(cuentaService.getAll).toHaveBeenCalledWith({
+      page: 1,
+      pageSize: 50,
+      searchTerm: undefined,
+      estado: undefined
+    });
+  });
+
+  it('no crea una cuenta cuando el formulario es inválido', () => {
+    fixture.detectChanges();
+
+    component.formulario.controls.nombre.setValue('');
+    component.guardarCuenta();
+
+    expect(cuentaService.create).not.toHaveBeenCalled();
+  });
+
+  it('crea una cuenta válida, resetea el formulario y recarga', () => {
+    fixture.detectChanges();
+    cuentaService.getAll.mockClear();
+
+    const dto = {
+      bancoId: 1,
+      nombre: 'Nueva Cuenta',
+      numeroCuenta: '999',
+      moneda: 'HNL',
+      saldoInicial: 500
+    };
+
+    component.formulario.setValue(dto);
+    cuentaService.create.mockReturnValue(
+      of({ ...dto, id: 3, estado: EstadoCuentaBancaria.Activa })
+    );
+    component.mostrarFormulario.set(true);
+
+    component.guardarCuenta();
+
+    expect(cuentaService.create).toHaveBeenCalledWith(dto);
+    expect(component.mostrarFormulario()).toBe(false);
+    expect(component.formulario.getRawValue()).toEqual({
+      bancoId: 0,
+      nombre: '',
+      numeroCuenta: '',
+      moneda: 'HNL',
+      saldoInicial: 0
+    });
+    expect(cuentaService.getAll).toHaveBeenCalledTimes(1);
+  });
+
+  it('bloquea activar/desactivar cuando RBAC no lo permite', () => {
+    fixture.detectChanges();
+    const cuenta = cuentasPage.items[0];
+
+    component.activar(cuenta);
+    component.desactivar(cuenta);
+
+    expect(cuentaService.activar).not.toHaveBeenCalled();
+    expect(cuentaService.desactivar).not.toHaveBeenCalled();
+  });
+
+  it('ejecuta activar y desactivar cuando RBAC lo permite y recarga', () => {
+    permisos.puede.mockReturnValue(true);
+    fixture.detectChanges();
+    cuentaService.getAll.mockClear();
+    cuentaService.activar.mockReturnValue(of(undefined));
+    cuentaService.desactivar.mockReturnValue(of(undefined));
+    const cuenta = cuentasPage.items[0];
+
+    component.activar(cuenta);
+    component.desactivar(cuenta);
+
+    expect(cuentaService.activar).toHaveBeenCalledWith(cuenta.id);
+    expect(cuentaService.desactivar).toHaveBeenCalledWith(cuenta.id);
+    expect(cuentaService.getAll).toHaveBeenCalledTimes(2);
+  });
+});
