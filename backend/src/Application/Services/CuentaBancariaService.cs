@@ -2,16 +2,19 @@ using InventoryApp.Application.DTOs.Bancos;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities.Bancos;
 using InventoryApp.Application.Bancos;
+using InventoryApp.Domain.Enums;
 
 namespace InventoryApp.Application.Services;
 
 public sealed class CuentaBancariaService : ICuentaBancariaService
 {
     private readonly ICuentaBancariaRepository _repository;
+    private readonly IAuditoriaService _auditoria;
 
-    public CuentaBancariaService(ICuentaBancariaRepository repository)
+    public CuentaBancariaService(ICuentaBancariaRepository repository, IAuditoriaService auditoria)
     {
         _repository = repository;
+        _auditoria = auditoria;
     }
 
     public async Task<CuentaBancariaDto?> GetByIdAsync(int id)
@@ -47,6 +50,14 @@ public sealed class CuentaBancariaService : ICuentaBancariaService
         await _repository.AddAsync(cuenta);
         await _repository.SaveChangesAsync();
 
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Finanzas,
+            AccionPermiso.Crear,
+            $"Creó la cuenta bancaria '{cuenta.Nombre}'.",
+            cuenta.Id,
+            entidad: "CuentaBancaria",
+            valoresNuevos: new { cuenta.BancoId, cuenta.Nombre, cuenta.Moneda, cuenta.SaldoInicial, cuenta.Estado });
+
         return MapToDto(cuenta);
     }
 
@@ -58,6 +69,13 @@ public sealed class CuentaBancariaService : ICuentaBancariaService
         cuenta.Activar();
         _repository.Update(cuenta);
         await _repository.SaveChangesAsync();
+
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Finanzas,
+            AccionPermiso.Activar,
+            $"Activó la cuenta bancaria '{cuenta.Nombre}'.",
+            cuenta.Id,
+            entidad: "CuentaBancaria");
     }
 
     public async Task DesactivarAsync(int id)
@@ -68,6 +86,13 @@ public sealed class CuentaBancariaService : ICuentaBancariaService
         cuenta.Desactivar();
         _repository.Update(cuenta);
         await _repository.SaveChangesAsync();
+
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Finanzas,
+            AccionPermiso.Desactivar,
+            $"Desactivó la cuenta bancaria '{cuenta.Nombre}'.",
+            cuenta.Id,
+            entidad: "CuentaBancaria");
     }
 
     public async Task UpdateAsync(int id, UpdateCuentaBancariaDto dto)
@@ -75,9 +100,19 @@ public sealed class CuentaBancariaService : ICuentaBancariaService
         var cuenta = await _repository.GetByIdAsync(id)
             ?? throw new InvalidOperationException($"No se encontró la cuenta con Id {id}.");
 
+        var nombreAnterior = cuenta.Nombre;
         cuenta.UpdateNombre(dto.Nombre);
         _repository.Update(cuenta);
         await _repository.SaveChangesAsync();
+
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Finanzas,
+            AccionPermiso.Editar,
+            $"Editó la cuenta bancaria '{cuenta.Nombre}'.",
+            cuenta.Id,
+            entidad: "CuentaBancaria",
+            valoresAnteriores: new { Nombre = nombreAnterior },
+            valoresNuevos: new { cuenta.Nombre });
     }
 
     private static CuentaBancariaDto MapToDto(CuentaBancaria cuenta) => new()
