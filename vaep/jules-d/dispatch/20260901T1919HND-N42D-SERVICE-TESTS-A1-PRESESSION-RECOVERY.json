@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-D-N42D-SERVICE-TESTS-A1-PRESESSION-RECOVERY-20260901T1919HND",
+  "taskId": "N4.2.D.APPLICATION_SERVICE_TESTS",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "5c02a39d24ae21ced94f29bb0d0405457beb1b09",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/Application/Bancos/*CuentaBancaria*Service*Tests.cs",
+  "prompt": "N4.2.D APPLICATION_SERVICE_TESTS attempt1 pre-session transport recovery. The previous dispatch produced no correlated Jules session or useful technical activity within the SLA, therefore no Jules attempt was consumed. Work against exact parent 5c02a39d24ae21ced94f29bb0d0405457beb1b09. Add focused unit tests for the CURRENT integrated CuentaBancariaService only: GetById null/found, GetAll, GetActivas, Add, Activar and Desactivar, including repository SaveChanges/Update interactions and not-found behavior. Do not modify production service/repository/controller/DTO/domain/migrations/workflows/frontend. Use canonical int-based contracts and current error behavior from Desarrollo. If tests expose a production defect, report it causally without widening scope. Run targeted tests/build and return a material patch plus two independent SELF_REVIEW_PASS markers. No main, Production, branches, merge, auto-merge, force-push, secrets or deploy."
+}
