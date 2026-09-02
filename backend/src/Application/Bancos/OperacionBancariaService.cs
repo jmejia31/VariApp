@@ -13,6 +13,7 @@ public class OperacionBancariaService : IOperacionBancariaService
     private readonly ICuentaBancariaRepository _cuentaRepo;
     private readonly IMovimientoFinancieroRepository _movimientoRepo;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IAuditoriaService? _auditoria;
 
     private sealed record ExpectedMovimiento(
         TipoMovimientoFinanciero Tipo,
@@ -25,11 +26,13 @@ public class OperacionBancariaService : IOperacionBancariaService
     public OperacionBancariaService(
         ICuentaBancariaRepository cuentaRepo,
         IMovimientoFinancieroRepository movimientoRepo,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        IAuditoriaService? auditoria = null)
     {
         _cuentaRepo = cuentaRepo;
         _movimientoRepo = movimientoRepo;
         _unitOfWork = unitOfWork;
+        _auditoria = auditoria;
     }
 
     public async Task RegistrarDepositoAsync(DepositoBancarioDto dto, int usuarioId)
@@ -67,6 +70,7 @@ public class OperacionBancariaService : IOperacionBancariaService
 
             await _movimientoRepo.AddAsync(mov);
             await _movimientoRepo.SaveChangesAsync();
+            await RegistrarAuditoriaAsync("Depósito bancario registrado.", dto.CuentaId, new { Tipo = "Deposito", dto.CuentaId, dto.Monto });
         });
     }
 
@@ -105,6 +109,7 @@ public class OperacionBancariaService : IOperacionBancariaService
 
             await _movimientoRepo.AddAsync(mov);
             await _movimientoRepo.SaveChangesAsync();
+            await RegistrarAuditoriaAsync("Retiro bancario registrado.", dto.CuentaId, new { Tipo = "Retiro", dto.CuentaId, dto.Monto });
         });
     }
 
@@ -169,6 +174,8 @@ public class OperacionBancariaService : IOperacionBancariaService
             await _movimientoRepo.AddAsync(movEgreso);
             await _movimientoRepo.AddAsync(movIngreso);
             await _movimientoRepo.SaveChangesAsync();
+            await RegistrarAuditoriaAsync("Transferencia bancaria registrada.", dto.CuentaId,
+                new { Tipo = "Transferencia", dto.CuentaId, dto.CuentaDestinoId, dto.Monto });
         });
     }
 
@@ -207,6 +214,7 @@ public class OperacionBancariaService : IOperacionBancariaService
 
             await _movimientoRepo.AddAsync(mov);
             await _movimientoRepo.SaveChangesAsync();
+            await RegistrarAuditoriaAsync("Comisión bancaria registrada.", dto.CuentaId, new { Tipo = "Comision", dto.CuentaId, dto.Monto });
         });
     }
 
@@ -245,6 +253,7 @@ public class OperacionBancariaService : IOperacionBancariaService
 
             await _movimientoRepo.AddAsync(mov);
             await _movimientoRepo.SaveChangesAsync();
+            await RegistrarAuditoriaAsync("Interés bancario registrado.", dto.CuentaId, new { Tipo = "Interes", dto.CuentaId, dto.Monto });
         });
     }
 
@@ -283,7 +292,23 @@ public class OperacionBancariaService : IOperacionBancariaService
 
             await _movimientoRepo.AddAsync(mov);
             await _movimientoRepo.SaveChangesAsync();
+            await RegistrarAuditoriaAsync("Conciliación bancaria registrada.", dto.CuentaId,
+                new { Tipo = "Conciliacion", dto.CuentaId, dto.Monto });
         });
+    }
+
+    private Task RegistrarAuditoriaAsync(string descripcion, int cuentaId, object valoresNuevos)
+    {
+        if (_auditoria is null)
+            return Task.CompletedTask;
+
+        return _auditoria.RegistrarAsync(
+            ModuloSistema.Finanzas,
+            AccionPermiso.Crear,
+            descripcion,
+            cuentaId,
+            entidad: "OperacionBancaria",
+            valoresNuevos: valoresNuevos);
     }
 
     private async Task<bool> IsReplayOrThrowConflictAsync(
