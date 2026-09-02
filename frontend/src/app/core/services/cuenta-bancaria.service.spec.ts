@@ -145,4 +145,69 @@ describe('CuentaBancariaService', () => {
     expect(req.request.body).toEqual({});
     req.flush(null);
   });
+
+  it('propaga error en getAll (list)', () => {
+    const filter: CuentaBancariaQueryFilter = { page: 1 };
+    service.getAll(filter).subscribe({
+      next: () => { throw new Error('debería haber fallado'); },
+      error: error => expect(error.status).toBe(500)
+    });
+
+    const req = httpTestingController.expectOne(request =>
+      request.url === apiUrl && request.params.get('page') === '1'
+    );
+    expect(req.request.method).toBe('GET');
+    req.flush('Internal Server Error', { status: 500, statusText: 'Server Error' });
+  });
+
+  it('propaga error en getById (get)', () => {
+    service.getById(99).subscribe({
+      next: () => { throw new Error('debería haber fallado'); },
+      error: error => expect(error.status).toBe(404)
+    });
+
+    const req = httpTestingController.expectOne(`${apiUrl}/99`);
+    expect(req.request.method).toBe('GET');
+    req.flush('Not Found', { status: 404, statusText: 'Not Found' });
+  });
+
+  it('propaga error en create', () => {
+    const dto: CreateCuentaBancariaDto = {
+      bancoId: 4,
+      nombre: 'New',
+      numeroCuenta: '000',
+      moneda: 'USD',
+      saldoInicial: 1000
+    };
+    service.create(dto).subscribe({
+      next: () => { throw new Error('debería haber fallado'); },
+      error: error => expect(error.status).toBe(400)
+    });
+
+    const req = httpTestingController.expectOne(apiUrl);
+    expect(req.request.method).toBe('POST');
+    req.flush('Bad Request', { status: 400, statusText: 'Bad Request' });
+  });
+
+  it('propaga error en activar', () => {
+    service.activar(5).subscribe({
+      next: () => { throw new Error('debería haber fallado'); },
+      error: error => expect(error.status).toBe(403)
+    });
+
+    const req = httpTestingController.expectOne(`${apiUrl}/5/activar`);
+    expect(req.request.method).toBe('PATCH');
+    req.flush('Forbidden', { status: 403, statusText: 'Forbidden' });
+  });
+
+  it('propaga error en desactivar', () => {
+    service.desactivar(6).subscribe({
+      next: () => { throw new Error('debería haber fallado'); },
+      error: error => expect(error.status).toBe(409)
+    });
+
+    const req = httpTestingController.expectOne(`${apiUrl}/6/desactivar`);
+    expect(req.request.method).toBe('PATCH');
+    req.flush('Conflict', { status: 409, statusText: 'Conflict' });
+  });
 });
