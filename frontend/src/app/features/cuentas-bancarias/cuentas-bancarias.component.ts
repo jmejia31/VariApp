@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, effect, inject, signal } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -60,6 +61,7 @@ export class CuentasBancariasComponent implements OnInit {
   readonly puedeDesactivar = signal(false);
   readonly cuentaEnEdicion = signal<CuentaBancaria | null>(null);
   readonly columnasMostradas = ['nombre', 'numeroCuenta', 'moneda', 'estado', 'acciones'];
+  readonly errorMessage = signal<string | null>(null);
 
   search = '';
   estadoFilter: EstadoCuentaBancaria | null = null;
@@ -83,6 +85,7 @@ export class CuentasBancariasComponent implements OnInit {
       if (!this.mostrarFormulario()) {
         this.cuentaEnEdicion.set(null);
         this.formulario.reset({ moneda: 'HNL', saldoInicial: 0, bancoId: 0, nombre: '', numeroCuenta: '' });
+        this.errorMessage.set(null);
       }
     }, { allowSignalWrites: true });
   }
@@ -105,6 +108,7 @@ export class CuentasBancariasComponent implements OnInit {
   }
 
   cargarCuentas(): void {
+    this.errorMessage.set(null);
     this.loading.set(true);
     const filtros: CuentaBancariaQueryFilter = {
       page: 1,
@@ -118,7 +122,10 @@ export class CuentasBancariasComponent implements OnInit {
         this.cuentas.set(res.items);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false)
+      error: (err) => {
+        this.loading.set(false);
+        this.errorMessage.set(this.extractErrorMessage(err, 'Ocurrió un error al cargar las cuentas.'));
+      }
     });
     this.persistirEstado();
   }
@@ -146,6 +153,7 @@ export class CuentasBancariasComponent implements OnInit {
     }
     if (this.submitting()) return;
 
+    this.errorMessage.set(null);
     this.submitting.set(true);
     const formValue = this.formulario.getRawValue();
     const cuentaEditada = this.cuentaEnEdicion();
@@ -161,7 +169,7 @@ export class CuentasBancariasComponent implements OnInit {
             this.formulario.reset({ moneda: 'HNL', saldoInicial: 0, bancoId: 0, nombre: '', numeroCuenta: '' });
             this.cargarCuentas();
           },
-          error: () => undefined
+          error: (err) => this.errorMessage.set(this.extractErrorMessage(err, 'Ocurrió un error al actualizar la cuenta.'))
         });
       return;
     }
@@ -175,7 +183,7 @@ export class CuentasBancariasComponent implements OnInit {
           this.formulario.reset({ moneda: 'HNL', saldoInicial: 0, bancoId: 0, nombre: '', numeroCuenta: '' });
           this.cargarCuentas();
         },
-        error: () => undefined
+        error: (err) => this.errorMessage.set(this.extractErrorMessage(err, 'Ocurrió un error al crear la cuenta.'))
       });
   }
 
@@ -194,12 +202,27 @@ export class CuentasBancariasComponent implements OnInit {
 
   activar(cuenta: CuentaBancaria): void {
     if (!this.puedeActivar()) return;
-    this.cuentaService.activar(cuenta.id).subscribe(() => this.cargarCuentas());
+    this.errorMessage.set(null);
+    this.cuentaService.activar(cuenta.id).subscribe({
+      next: () => this.cargarCuentas(),
+      error: (err) => this.errorMessage.set(this.extractErrorMessage(err, 'Ocurrió un error al activar la cuenta.'))
+    });
   }
 
   desactivar(cuenta: CuentaBancaria): void {
     if (!this.puedeDesactivar()) return;
-    this.cuentaService.desactivar(cuenta.id).subscribe(() => this.cargarCuentas());
+    this.errorMessage.set(null);
+    this.cuentaService.desactivar(cuenta.id).subscribe({
+      next: () => this.cargarCuentas(),
+      error: (err) => this.errorMessage.set(this.extractErrorMessage(err, 'Ocurrió un error al desactivar la cuenta.'))
+    });
+  }
+
+  private extractErrorMessage(err: unknown, fallback: string): string {
+    if (err instanceof HttpErrorResponse && typeof err.error?.detail === 'string' && err.error.detail.trim().length > 0) {
+      return err.error.detail.trim();
+    }
+    return fallback;
   }
 
   private persistirEstado(): void {

@@ -4,6 +4,15 @@
   margin: 0 auto;
 }
 
+.error-alert {
+  background-color: #fde8e8;
+  color: #c81e1e;
+  padding: var(--space-4, 1rem);
+  margin-bottom: var(--space-6, 1.5rem);
+  border: 1px solid #f8b4b4;
+  border-radius: var(--radius-md, 4px);
+}
+
 .header-section {
   display: flex;
   justify-content: space-between;

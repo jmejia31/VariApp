@@ -1,4 +1,8 @@
 <div class="cuentas-bancarias-container">
+  <div *ngIf="errorMessage()" class="error-alert" role="alert" aria-live="assertive">
+    {{ errorMessage() }}
+  </div>
+
   <div class="header-section">
     <h1>Cuentas Bancarias</h1>
     <button mat-raised-button color="primary" type="button" *ngIf="puedeCrear() && !cuentaEnEdicion()" (click)="mostrarFormulario.set(!mostrarFormulario())" [attr.aria-expanded]="mostrarFormulario()" aria-controls="formulario-cuenta">
