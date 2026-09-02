@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-D-N42D-OPERATION-TRANSACTION-TESTS-A1-20260901T2115HND",
+  "taskId": "N4.2.D.OPERATION_TRANSACTION_TESTS",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "27f6db728082c401e3d344ad04afc98db113002b",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/Application/Bancos/*Operacion*Transaction*Tests.cs; existing banking transaction/unit-of-work test fixtures only",
+  "prompt": "VAEP v3.28 NEXT_SAFE after #2431 COMPLETED. #2431 idempotency edge-test patch is READY_FOR_VAEP review; do not duplicate or modify BancosIdempotencyKeyTests in this task. Add material transaction-boundary tests for banking operation use cases: verify commit/rollback semantics, no partial persistence on failure, transfer atomicity and repository/unit-of-work interaction using the current application contracts. Prefer tests only; if a minimal testability seam is strictly required, keep it inside N4.2.D application scope and explain it. Do not touch pagination/filter contracts, operation-policy edge files, migrations, workflows, frontend or unrelated files. Return material patch, targeted build/tests and two SELF_REVIEW_PASS markers. Attempt 1/2. No main, Produccion, branches, merge, auto-merge, force-push, secrets or deploy."
+}
