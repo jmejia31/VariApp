@@ -49,6 +49,11 @@ public class ExceptionHandlingMiddleware
             _logger.LogWarning(ex, "Regla de negocio violada");
             await EscribirAsync(context, HttpStatusCode.BadRequest, ApiResponse<object>.Fail(ex.Message));
         }
+        catch (ArgumentException ex)
+        {
+            _logger.LogWarning(ex, "Argumento inválido en la operación");
+            await EscribirProblemaAsync(context, HttpStatusCode.BadRequest, "Solicitud inválida", ex.Message);
+        }
         catch (ForbiddenAccessException ex)
         {
             _logger.LogWarning(ex, "Acceso denegado por permisos");
