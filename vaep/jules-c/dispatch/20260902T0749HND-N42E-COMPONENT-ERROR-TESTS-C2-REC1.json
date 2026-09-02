@@ -1,0 +1,13 @@
+{
+  "manifestVersion": "v328",
+  "dispatchId": "20260902T0749HND-N42E-COMPONENT-ERROR-TESTS-C2-REC1",
+  "taskId": "N4.2.E.COMPONENT_ERROR_TESTS",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "9f696781282aa1e06206fc2c9d5dd16ca5966c9b",
+  "taskAttempt": 2,
+  "maxAttempts": 2,
+  "recoveryOf": "20260902T0733HND-N42E-COMPONENT-ERROR-TESTS-C2",
+  "fileScopeHint": "frontend/src/app/features/cuentas-bancarias/cuentas-bancarias.component.spec.ts",
+  "prompt": "PRE_SESSION RECOVERY OF R2 FINAL / ATTEMPT2 OF 2. CURRENT_PARENT N4.2.E. Prior R2 transport exceeded >=10m without correlated Jules session + useful technical activity. This is transport recovery only and does NOT consume another content attempt; no R3 exists. Revalidate exact base 9f696781282aa1e06206fc2c9d5dd16ca5966c9b first. Modify ONLY cuentas-bancarias.component.spec.ts. Add focused non-brittle coverage for load failure plus create/update failure against production behavior present at exact base; prove failures do not masquerade as success, loading/submitting settles, relevant form/edit state is preserved, and assert existing accessible error signal if exposed. Do not modify production code, HTML, SCSS, backend, manifests, workflows, secrets or deploy. Run the focused Angular/Vitest spec and include SELF_REVIEW_PASS_1/2, git status, full diff and temp hygiene. Final Jules content attempt; no R3."
+}
