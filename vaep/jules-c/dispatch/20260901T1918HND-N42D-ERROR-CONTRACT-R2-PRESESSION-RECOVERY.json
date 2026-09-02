@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-C-N42D-ERROR-CONTRACT-R2-PRESESSION-RECOVERY-20260901T1918HND",
+  "taskId": "N4.2.D.ERROR_CONTRACT",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "52b5d0c89f733b92a2757ce6d989a785cb9dc475",
+  "taskAttempt": 2,
+  "fileScopeHint": "backend/src/Application/Services/CuentaBancariaService.cs;backend/src/Application/Bancos/*Error*.cs;backend/src/Application/Bancos/*Result*.cs;backend/tests/InventoryApp.Tests/Application/Bancos/*CuentaBancaria*Service*Tests.cs;backend/tests/InventoryApp.Tests/Application/Bancos/*Error*Tests.cs",
+  "prompt": "N4.2.D ERROR_CONTRACT R2 FINAL pre-session transport recovery. The prior schema-correct R2 dispatch produced no correlated Jules session or useful technical activity within the SLA, so no Jules attempt was consumed. Work against exact parent 52b5d0c89f733b92a2757ce6d989a785cb9dc475. Produce a causal USED error/result contract at the current CuentaBancaria application-service boundary, aligned with existing VariApp API/application conventions; do not leave unused parallel abstractions. Avoid broad service-test rewrites because another lane owns application-service test coverage. Preserve repository/domain contracts. Run targeted build/tests and return a material patch plus two independent SELF_REVIEW_PASS markers. This remains ATTEMPT2/2 FINAL; R3 prohibited. No main, Production, branches, merge, auto-merge, force-push, secrets or deploy."
+}
