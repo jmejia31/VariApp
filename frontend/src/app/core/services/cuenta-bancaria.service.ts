@@ -5,6 +5,7 @@ import { environment } from '../../../environments/environment';
 import {
   CuentaBancaria,
   CreateCuentaBancariaDto,
+  UpdateCuentaBancariaDto,
   CuentaBancariaQueryFilter
 } from '../models/cuenta-bancaria';
 import { CuentaBancariaPage } from '../models/cuenta-bancaria-page';
@@ -42,6 +43,10 @@ export class CuentaBancariaService {
 
   create(dto: CreateCuentaBancariaDto): Observable<CuentaBancaria> {
     return this.http.post<CuentaBancaria>(this.apiUrl, dto);
+  }
+
+  update(id: number, dto: UpdateCuentaBancariaDto): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/${id}`, dto);
   }
 
   activar(id: number): Observable<void> {
