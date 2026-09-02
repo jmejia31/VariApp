@@ -1,0 +1,12 @@
+{
+  "manifestVersion": "v328",
+  "dispatchId": "VAEP-JULES-C-N42E-FORM-VALIDATION-R2-REC1-20260902T0138HND",
+  "taskId": "N4.2.E.FRONTEND_FORM_VALIDATION",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "bd1604676107d4864b65f04c36601e2603b464e7",
+  "taskAttempt": 2,
+  "maxAttempts": 2,
+  "fileScopeHint": "frontend/src/app/features/cuentas-bancarias/cuentas-bancarias.component.ts only",
+  "prompt": "VAEP v3.28 PRE-SESSION RECOVERY of the SAME R2 FINAL logical task N4.2.E.FRONTEND_FORM_VALIDATION. This is still ATTEMPT2/2; transport recovery does NOT consume another content attempt and R3 is prohibited. Exact base bd1604676107d4864b65f04c36601e2603b464e7. The prior R2 transport VAEP-JULES-C-N42E-FORM-VALIDATION-R2-20260902T0122HND exceeded >=10m with no correlated Jules session/useful activity. Work ONLY in frontend/src/app/features/cuentas-bancarias/cuentas-bancarias.component.ts. A1 contained useful form-state hardening but violated exclusive scope by adding patch.diff. Rework cleanly with exactly ONE changed source file and no patch.diff or generated artifacts. Preserve only material current-contract behavior: invalid form marks touched and does not submit; duplicate submission blocked; submitting state resets deterministically on success/error; surface current service errors through existing component state without inventing APIs. Keep activar/desactivar contract-faithful. Do not modify HTML/SCSS/service/backend/routes/tests/manifests/workflows or any other file. Do not touch main, Produccion, branches, secrets or deploy. Run focused TypeScript/tests if available and return SELF_REVIEW_PASS_1/2 plus exact limitations. If this R2 content fails review, ChatGPT/VAEP QA_TAKEOVER; NO R3."
+}
