@@ -1,0 +1,12 @@
+{
+  "manifestVersion": "v328",
+  "dispatchId": "VAEP-JULES-D-N42E-EMPTY-LOADING-STATES-R2-20260902T0120HND",
+  "taskId": "N4.2.E.FRONTEND_EMPTY_LOADING_STATES",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "db473c65a3ba957b8337f365554df7eaf293031b",
+  "taskAttempt": 2,
+  "maxAttempts": 2,
+  "fileScopeHint": "frontend/src/app/features/cuentas-bancarias/cuentas-bancarias.component.html only",
+  "prompt": "VAEP v3.28 R2 FINAL causal after #2466 review. Exact base db473c65a3ba957b8337f365554df7eaf293031b. Work ONLY in frontend/src/app/features/cuentas-bancarias/cuentas-bancarias.component.html. The A1 patch duplicated the loading affordance because the CURRENT template already has .loading-shade + mat-spinner while the proposed *matNoDataRow also added a second loading spinner. Correct this causally: preserve a single deterministic loading affordance and improve ONLY the true no-data/empty state materially and accessibly when loading() is false; use only imports/component members/classes that exist at base, preserve table semantics and RBAC, and do not invent APIs. Do not modify TS/SCSS/service/routes/backend/tests or any other file. Do not touch manifests/workflows, main, Produccion, branches, secrets or deploy. Run focused template/TypeScript tests if available. SELF_REVIEW_PASS_1/2 required. This is attempt 2/2; no R3."
+}
