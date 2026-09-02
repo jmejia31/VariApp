@@ -1,0 +1,13 @@
+{
+  "manifestVersion": "v328",
+  "dispatchId": "20260902T0817HND-N42E-ERROR-STATE-UX-A1-REC4",
+  "taskId": "N4.2.E.ERROR_STATE_UX",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "3568cdaccf317c154c202f0012d2f8c974dce5c5",
+  "taskAttempt": 1,
+  "maxAttempts": 2,
+  "recoveryOf": "20260902T0802HND-N42E-ERROR-STATE-UX-A1-REC3",
+  "fileScopeHint": "frontend/src/app/features/cuentas-bancarias/cuentas-bancarias.component.ts; frontend/src/app/features/cuentas-bancarias/cuentas-bancarias.component.html",
+  "prompt": "PRE_SESSION_TRANSPORT_FAILURE RECOVERY SAME LOGICAL TASK / SAME ATTEMPT1. CURRENT_PARENT N4.2.E. Dispatch 20260902T0802HND-N42E-ERROR-STATE-UX-A1-REC3 exceeded >=10m without correlated Jules session + useful technical activity; workflow/dispatch alone is not ACTIVE_REAL. This transport recovery does NOT consume ATTEMPT2. Revalidate exact base 3568cdaccf317c154c202f0012d2f8c974dce5c5 first. Modify ONLY cuentas-bancarias.component.ts and cuentas-bancarias.component.html. Add the smallest accessible user-visible error state for load/create/update/activate/deactivate failures using existing Angular patterns; clear on retry/success; preserve loading, empty, edit and RBAC behavior. If equivalent behavior already exists, return DUPLICATE/SUPERSEDED with exact proof and no product delta. No backend, API contract, styling, manifest/workflow, secret or deploy changes. Run proportional frontend validation and report SELF_REVIEW_PASS_1/2, git status, full diff and temp hygiene."
+}
