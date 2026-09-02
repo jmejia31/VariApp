@@ -1,0 +1,13 @@
+{
+  "manifestVersion": "v320",
+  "dispatchId": "VAEP-JULES-C-N42E-ROUTE-RBAC-C1-REC1-20260901T2232HND",
+  "taskId": "N4.2.E.FRONTEND_ROUTE_RBAC",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "b9e71a873cd915f682e2a514456e61fe5008a1b6",
+  "taskAttempt": 1,
+  "maxAttempts": 2,
+  "recoveryOf": "VAEP-JULES-C-N42E-FRONTEND-ROUTE-RBAC-C1",
+  "fileScopeHint": "frontend/src/app/app.routes.ts only",
+  "prompt": "VAEP v3.28 SAME logical task/SAME ATTEMPT1 pre-session recovery. Previous FRONTEND_ROUTE_RBAC worker run 33590438941 has exceeded the >=10m ACTIVE_REAL threshold without any correlated Jules Issue/session+fresh useful activity, so this recovery does NOT consume an additional content attempt. Canonical Jules C path has been verified as vaep/jules-c/dispatch/*.json. Exact base b9e71a873cd915f682e2a514456e61fe5008a1b6. Scope is exactly frontend/src/app/app.routes.ts. Add only the minimal dependency-safe route/RBAC wiring for the Bancos/CuentasBancarias frontend using existing Angular authGuard/permisoGuard and existing Finanzas permission vocabulary. Do NOT invent components that are not present on this exact base; if the feature component required by the route is absent because N4.2.E frontend feature is blocked/rejected, fail closed with zero patch and report the precise missing dependency. Do not touch services, components, package files, backend, workflows, other manifests, main, Produccion, branches, merge/auto-merge, force-push, secrets or deploy. Return exact-base evidence and SELF_REVIEW_PASS_1 + SELF_REVIEW_PASS_2. ATTEMPT remains 1/2; only one targeted R2 may exist after material review; R3 prohibited."
+}
