@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-A-N42D-API-CONTROLLER-COMPLETION-TESTS-A1-20260901T1922HND",
+  "taskId": "N4.2.D.API_CONTROLLER_COMPLETION_TESTS",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "e66cd876d9fec150f23e65bd4381126ba64f9fbd",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/API/Controllers/CuentaBancariaControllerTests.cs",
+  "prompt": "N4.2.D BACKEND_API follow-up material test scope after VAEP integrated the approved API_CONTROLLER attempt1. Work ONLY in CuentaBancariaControllerTests.cs. Complete the missing controller coverage for GetActivas, Activar and Desactivar, including service-call verification, expected HTTP results, route/verb metadata and RequierePermiso presence for every public action. Do not modify production controller/service/DTO/repository/domain/migrations/workflows/frontend. Do not duplicate already-covered GetAll/GetById/Create assertions except where a compact table-driven permission/route check is necessary. Run targeted tests/build and return a material patch plus two independent SELF_REVIEW_PASS markers. No main, Production, branches, merge, auto-merge, force-push, secrets or deploy."
+}
