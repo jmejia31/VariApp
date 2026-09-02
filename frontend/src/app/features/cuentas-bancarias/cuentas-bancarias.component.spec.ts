@@ -139,28 +139,47 @@ describe('CuentasBancariasComponent', () => {
   });
 
   it('restaura y persiste filtros de navegación al cargar', () => {
-    navigationState.restore.mockReturnValue({ search: 'usd', estadoFilter: EstadoCuentaBancaria.Activa });
+    navigationState.restore.mockReturnValue({
+      search: 'usd',
+      estadoFilter: EstadoCuentaBancaria.Activa
+    });
+
     fixture.detectChanges();
-    expect(cuentaService.getAll).toHaveBeenCalledWith({ page: 1, pageSize: 50, searchTerm: 'usd', estado: EstadoCuentaBancaria.Activa });
+
+    expect(cuentaService.getAll).toHaveBeenCalledWith({
+      page: 1,
+      pageSize: 50,
+      searchTerm: 'usd',
+      estado: EstadoCuentaBancaria.Activa
+    });
     expect(navigationState.persist).toHaveBeenCalled();
   });
 
   it('limpia filtros y vuelve a cargar la lista', () => {
     fixture.detectChanges();
     cuentaService.getAll.mockClear();
+
     component.search = 'algo';
     component.estadoFilter = EstadoCuentaBancaria.Inactiva;
     component.limpiarFiltros();
+
     expect(navigationState.clear).toHaveBeenCalledWith('cuentas-bancarias');
     expect(component.search).toBe('');
     expect(component.estadoFilter).toBeNull();
-    expect(cuentaService.getAll).toHaveBeenCalledWith({ page: 1, pageSize: 50, searchTerm: undefined, estado: undefined });
+    expect(cuentaService.getAll).toHaveBeenCalledWith({
+      page: 1,
+      pageSize: 50,
+      searchTerm: undefined,
+      estado: undefined
+    });
   });
 
   it('no crea una cuenta y marca los controles como tocados cuando el formulario es inválido', () => {
     fixture.detectChanges();
+
     component.formulario.controls.nombre.setValue('');
     component.guardarCuenta();
+
     expect(component.formulario.touched).toBe(true);
     expect(cuentaService.create).not.toHaveBeenCalled();
   });
@@ -168,58 +187,109 @@ describe('CuentasBancariasComponent', () => {
   it('no permite envíos duplicados mientras la creación está pendiente', () => {
     fixture.detectChanges();
     cuentaService.getAll.mockClear();
-    const dto = { bancoId: 1, nombre: 'Cuenta Lenta', numeroCuenta: '444', moneda: 'HNL', saldoInicial: 100 };
+
+    const dto = {
+      bancoId: 1,
+      nombre: 'Cuenta Lenta',
+      numeroCuenta: '444',
+      moneda: 'HNL',
+      saldoInicial: 100
+    };
     component.formulario.setValue(dto);
+
     const response$ = new Subject<any>();
     cuentaService.create.mockReturnValue(response$);
+
     component.guardarCuenta();
     component.guardarCuenta();
+
     expect(cuentaService.create).toHaveBeenCalledTimes(1);
     expect(component.submitting()).toBe(true);
+
     response$.next({ ...dto, id: 4, estado: EstadoCuentaBancaria.Activa });
     response$.complete();
   });
 
   it('restablece el estado submitting al completar la creación con éxito', () => {
     fixture.detectChanges();
-    const dto = { bancoId: 1, nombre: 'Nueva Cuenta', numeroCuenta: '999', moneda: 'HNL', saldoInicial: 500 };
+
+    const dto = {
+      bancoId: 1,
+      nombre: 'Nueva Cuenta',
+      numeroCuenta: '999',
+      moneda: 'HNL',
+      saldoInicial: 500
+    };
     component.formulario.setValue(dto);
     cuentaService.create.mockReturnValue(of({ ...dto, id: 3, estado: EstadoCuentaBancaria.Activa }));
+
     component.guardarCuenta();
+
     expect(component.submitting()).toBe(false);
   });
 
   it('restablece el estado submitting cuando la creación falla', () => {
     fixture.detectChanges();
-    const dto = { bancoId: 1, nombre: 'Cuenta Error', numeroCuenta: '000', moneda: 'HNL', saldoInicial: 0 };
+
+    const dto = {
+      bancoId: 1,
+      nombre: 'Cuenta Error',
+      numeroCuenta: '000',
+      moneda: 'HNL',
+      saldoInicial: 0
+    };
     component.formulario.setValue(dto);
+
     const error$ = new Subject<any>();
     cuentaService.create.mockReturnValue(error$);
+
     component.guardarCuenta();
     expect(component.submitting()).toBe(true);
+
     error$.error(new Error('Network Error'));
+
     expect(component.submitting()).toBe(false);
   });
 
   it('crea una cuenta válida, resetea el formulario y recarga', () => {
     fixture.detectChanges();
     cuentaService.getAll.mockClear();
-    const dto = { bancoId: 1, nombre: 'Nueva Cuenta', numeroCuenta: '999', moneda: 'HNL', saldoInicial: 500 };
+
+    const dto = {
+      bancoId: 1,
+      nombre: 'Nueva Cuenta',
+      numeroCuenta: '999',
+      moneda: 'HNL',
+      saldoInicial: 500
+    };
+
     component.formulario.setValue(dto);
-    cuentaService.create.mockReturnValue(of({ ...dto, id: 3, estado: EstadoCuentaBancaria.Activa }));
+    cuentaService.create.mockReturnValue(
+      of({ ...dto, id: 3, estado: EstadoCuentaBancaria.Activa })
+    );
     component.mostrarFormulario.set(true);
+
     component.guardarCuenta();
+
     expect(cuentaService.create).toHaveBeenCalledWith(dto);
     expect(component.mostrarFormulario()).toBe(false);
-    expect(component.formulario.getRawValue()).toEqual({ bancoId: 0, nombre: '', numeroCuenta: '', moneda: 'HNL', saldoInicial: 0 });
+    expect(component.formulario.getRawValue()).toEqual({
+      bancoId: 0,
+      nombre: '',
+      numeroCuenta: '',
+      moneda: 'HNL',
+      saldoInicial: 0
+    });
     expect(cuentaService.getAll).toHaveBeenCalledTimes(1);
   });
 
   it('bloquea activar/desactivar cuando RBAC no lo permite', () => {
     fixture.detectChanges();
     const cuenta = cuentasPage.items[0];
+
     component.activar(cuenta);
     component.desactivar(cuenta);
+
     expect(cuentaService.activar).not.toHaveBeenCalled();
     expect(cuentaService.desactivar).not.toHaveBeenCalled();
   });
@@ -231,8 +301,10 @@ describe('CuentasBancariasComponent', () => {
     cuentaService.activar.mockReturnValue(of(undefined));
     cuentaService.desactivar.mockReturnValue(of(undefined));
     const cuenta = cuentasPage.items[0];
+
     component.activar(cuenta);
     component.desactivar(cuenta);
+
     expect(cuentaService.activar).toHaveBeenCalledWith(cuenta.id);
     expect(cuentaService.desactivar).toHaveBeenCalledWith(cuenta.id);
     expect(cuentaService.getAll).toHaveBeenCalledTimes(2);
@@ -241,12 +313,16 @@ describe('CuentasBancariasComponent', () => {
   it('mantiene visible el estado de carga mientras getAll sigue pendiente', () => {
     const response$ = new Subject<CuentaBancariaPage<CuentaBancaria>>();
     cuentaService.getAll.mockReturnValue(response$);
+
     fixture.detectChanges();
+
     expect(component.loading()).toBe(true);
     expect(fixture.nativeElement.querySelector('.loading-shade')).not.toBeNull();
+
     response$.next(cuentasPage);
     response$.complete();
     fixture.detectChanges();
+
     expect(component.loading()).toBe(false);
     expect(fixture.nativeElement.querySelector('.loading-shade')).toBeNull();
   });
@@ -254,17 +330,24 @@ describe('CuentasBancariasComponent', () => {
   it('restablece loading cuando getAll termina con error', () => {
     const response$ = new Subject<CuentaBancariaPage<CuentaBancaria>>();
     cuentaService.getAll.mockReturnValue(response$);
+
     fixture.detectChanges();
     expect(component.loading()).toBe(true);
+
     response$.error(new Error('Network error'));
     fixture.detectChanges();
+
     expect(component.loading()).toBe(false);
     expect(fixture.nativeElement.querySelector('.loading-shade')).toBeNull();
   });
 
   it('muestra el estado vacío cuando la consulta no devuelve cuentas', () => {
-    cuentaService.getAll.mockReturnValue(of({ items: [], page: 1, pageSize: 50, totalCount: 0, totalPages: 0 }));
+    cuentaService.getAll.mockReturnValue(
+      of({ items: [], page: 1, pageSize: 50, totalCount: 0, totalPages: 0 })
+    );
+
     fixture.detectChanges();
+
     expect(component.cuentas()).toEqual([]);
     expect(fixture.nativeElement.textContent).toContain('No se encontraron cuentas bancarias.');
   });
@@ -273,18 +356,28 @@ describe('CuentasBancariasComponent', () => {
     permisos.puede.mockImplementation((_modulo, accion) => accion === 'Editar');
     fixture.detectChanges();
     const cuenta = cuentasPage.items[0];
+
     component.editar(cuenta);
+
     expect(component.puedeEditar()).toBe(true);
     expect(component.cuentaEnEdicion()).toEqual(cuenta);
     expect(component.mostrarFormulario()).toBe(true);
-    expect(component.formulario.getRawValue()).toMatchObject({ nombre: cuenta.nombre, numeroCuenta: cuenta.numeroCuenta, moneda: cuenta.moneda, saldoInicial: cuenta.saldoInicial, bancoId: cuenta.bancoId });
+    expect(component.formulario.getRawValue()).toMatchObject({
+      nombre: cuenta.nombre,
+      numeroCuenta: cuenta.numeroCuenta,
+      moneda: cuenta.moneda,
+      saldoInicial: cuenta.saldoInicial,
+      bancoId: cuenta.bancoId
+    });
   });
 
   it('rechaza abrir el modo de edición si no tiene permiso Editar', () => {
     permisos.puede.mockReturnValue(false);
     fixture.detectChanges();
     const cuenta = cuentasPage.items[0];
+
     component.editar(cuenta);
+
     expect(component.cuentaEnEdicion()).toBeNull();
     expect(component.mostrarFormulario()).toBe(false);
   });
@@ -294,15 +387,25 @@ describe('CuentasBancariasComponent', () => {
     fixture.detectChanges();
     cuentaService.getAll.mockClear();
     const cuenta = cuentasPage.items[0];
+
     component.editar(cuenta);
+
     const dto = { nombre: 'Nombre Editado' };
     component.formulario.patchValue(dto);
     cuentaService.update.mockReturnValue(of(undefined));
+
     component.guardarCuenta();
+
     expect(cuentaService.update).toHaveBeenCalledWith(cuenta.id, dto);
     expect(component.mostrarFormulario()).toBe(false);
     expect(component.cuentaEnEdicion()).toBeNull();
-    expect(component.formulario.getRawValue()).toEqual({ bancoId: 0, nombre: '', numeroCuenta: '', moneda: 'HNL', saldoInicial: 0 });
+    expect(component.formulario.getRawValue()).toEqual({
+      bancoId: 0,
+      nombre: '',
+      numeroCuenta: '',
+      moneda: 'HNL',
+      saldoInicial: 0
+    });
     expect(cuentaService.getAll).toHaveBeenCalledTimes(1);
   });
 
@@ -310,11 +413,20 @@ describe('CuentasBancariasComponent', () => {
     permisos.puede.mockImplementation((_modulo, accion) => accion === 'Editar');
     fixture.detectChanges();
     const cuenta = cuentasPage.items[0];
+
     component.editar(cuenta);
     expect(component.cuentaEnEdicion()).toEqual(cuenta);
+
     component.mostrarFormulario.set(false);
     fixture.detectChanges();
+
     expect(component.cuentaEnEdicion()).toBeNull();
-    expect(component.formulario.getRawValue()).toEqual({ bancoId: 0, nombre: '', numeroCuenta: '', moneda: 'HNL', saldoInicial: 0 });
+    expect(component.formulario.getRawValue()).toEqual({
+      bancoId: 0,
+      nombre: '',
+      numeroCuenta: '',
+      moneda: 'HNL',
+      saldoInicial: 0
+    });
   });
 });
