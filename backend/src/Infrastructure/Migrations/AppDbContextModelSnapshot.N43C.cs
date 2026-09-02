@@ -15,7 +15,7 @@ namespace InventoryApp.Infrastructure.Migrations
             var modelBuilder = new ModelBuilder();
             BuildModel(modelBuilder);
             ApplyN43CModel(modelBuilder);
-            return modelBuilder.FinalizeModel();
+            return modelBuilder.Model;
         }
 
         private static void ApplyN43CModel(ModelBuilder modelBuilder)
