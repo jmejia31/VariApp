@@ -223,4 +223,65 @@ public class OperacionBancariaServiceTests
         _mockMovimientoRepo.Verify(r => r.AddAsync(It.IsAny<MovimientoFinanciero>()), Times.Once);
         _mockMovimientoRepo.Verify(r => r.SaveChangesAsync(), Times.Once);
     }
+
+    [Fact]
+    public async Task RegistrarTransferencia_Idempotency_SameKeyAndPayload_DoesNotDuplicate()
+    {
+        const string key = "idemp-trans-same-1";
+        var dto = new TransferenciaBancariaDto { CuentaId = 1, CuentaDestinoId = 2, Monto = 300m, Referencia = "REF-3", IdempotencyKey = key };
+        var origen = CreateActiveCuenta("123");
+        var destino = CreateActiveCuenta("456");
+        typeof(CuentaBancaria).GetProperty("Id")?.SetValue(origen, 1);
+        typeof(CuentaBancaria).GetProperty("Id")?.SetValue(destino, 2);
+        _mockCuentaRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(origen);
+        _mockCuentaRepo.Setup(r => r.GetByIdAsync(2)).ReturnsAsync(destino);
+
+        var existingMovimientos = new List<MovimientoFinanciero>
+        {
+            new MovimientoFinanciero { Tipo = TipoMovimientoFinanciero.Egreso, Categoria = CategoriaMovimientoFinanciero.Otro, Concepto = "Transferencia a cuenta 456 - REF-3", Monto = 300m, ReferenciaId = 1, CreadoPorUsuarioId = 99, Descripcion = $"IdempotencyKey: {key}-Egreso" },
+            new MovimientoFinanciero { Tipo = TipoMovimientoFinanciero.Ingreso, Categoria = CategoriaMovimientoFinanciero.Otro, Concepto = "Transferencia de cuenta 123 - REF-3", Monto = 300m, ReferenciaId = 2, CreadoPorUsuarioId = 99, Descripcion = $"IdempotencyKey: {key}-Ingreso" }
+        };
+
+        _mockMovimientoRepo
+            .SetupSequence(r => r.GetByBancosIdempotencyKeyAsync(key, 99))
+            .ReturnsAsync(new List<MovimientoFinanciero>())
+            .ReturnsAsync(existingMovimientos);
+
+        await _service.RegistrarTransferenciaAsync(dto, 99);
+        await _service.RegistrarTransferenciaAsync(dto, 99);
+
+        _mockMovimientoRepo.Verify(r => r.AddAsync(It.IsAny<MovimientoFinanciero>()), Times.Exactly(2));
+        _mockMovimientoRepo.Verify(r => r.SaveChangesAsync(), Times.Once);
+    }
+
+    [Fact]
+    public async Task RegistrarTransferencia_Idempotency_SameKeyDifferentPayload_ThrowsConflictException()
+    {
+        const string key = "idemp-trans-diff-1";
+        var dto1 = new TransferenciaBancariaDto { CuentaId = 1, CuentaDestinoId = 2, Monto = 300m, Referencia = "REF-3", IdempotencyKey = key };
+        var dto2 = new TransferenciaBancariaDto { CuentaId = 1, CuentaDestinoId = 2, Monto = 400m, Referencia = "REF-4", IdempotencyKey = key };
+        var origen = CreateActiveCuenta("123");
+        var destino = CreateActiveCuenta("456");
+        typeof(CuentaBancaria).GetProperty("Id")?.SetValue(origen, 1);
+        typeof(CuentaBancaria).GetProperty("Id")?.SetValue(destino, 2);
+        _mockCuentaRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(origen);
+        _mockCuentaRepo.Setup(r => r.GetByIdAsync(2)).ReturnsAsync(destino);
+
+        var existingMovimientos = new List<MovimientoFinanciero>
+        {
+            new MovimientoFinanciero { Tipo = TipoMovimientoFinanciero.Egreso, Categoria = CategoriaMovimientoFinanciero.Otro, Concepto = "Transferencia a cuenta 456 - REF-3", Monto = 300m, ReferenciaId = 1, CreadoPorUsuarioId = 99, Descripcion = $"IdempotencyKey: {key}-Egreso" },
+            new MovimientoFinanciero { Tipo = TipoMovimientoFinanciero.Ingreso, Categoria = CategoriaMovimientoFinanciero.Otro, Concepto = "Transferencia de cuenta 123 - REF-3", Monto = 300m, ReferenciaId = 2, CreadoPorUsuarioId = 99, Descripcion = $"IdempotencyKey: {key}-Ingreso" }
+        };
+
+        _mockMovimientoRepo
+            .SetupSequence(r => r.GetByBancosIdempotencyKeyAsync(key, 99))
+            .ReturnsAsync(new List<MovimientoFinanciero>())
+            .ReturnsAsync(existingMovimientos);
+
+        await _service.RegistrarTransferenciaAsync(dto1, 99);
+        await Assert.ThrowsAsync<ConflictException>(() => _service.RegistrarTransferenciaAsync(dto2, 99));
+
+        _mockMovimientoRepo.Verify(r => r.AddAsync(It.IsAny<MovimientoFinanciero>()), Times.Exactly(2));
+        _mockMovimientoRepo.Verify(r => r.SaveChangesAsync(), Times.Once);
+    }
 }
