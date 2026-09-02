@@ -1,18 +1,21 @@
 <div class="cuentas-bancarias-container">
   <div class="header-section">
     <h1>Cuentas Bancarias</h1>
-    <button mat-raised-button color="primary" type="button" *ngIf="puedeCrear()" (click)="mostrarFormulario.set(!mostrarFormulario())" [attr.aria-expanded]="mostrarFormulario()" aria-controls="formulario-cuenta">
+    <button mat-raised-button color="primary" type="button" *ngIf="puedeCrear() && !cuentaEnEdicion()" (click)="mostrarFormulario.set(!mostrarFormulario())" [attr.aria-expanded]="mostrarFormulario()" aria-controls="formulario-cuenta">
       {{ mostrarFormulario() ? 'Cancelar' : 'Nueva Cuenta' }}
+    </button>
+    <button mat-button type="button" *ngIf="cuentaEnEdicion()" (click)="mostrarFormulario.set(false)" [attr.aria-expanded]="mostrarFormulario()" aria-controls="formulario-cuenta">
+      Cancelar edición
     </button>
   </div>
 
   <div *ngIf="mostrarFormulario()" class="form-section" id="formulario-cuenta" aria-live="polite">
-    <h2>Registrar Nueva Cuenta</h2>
-    <form [formGroup]="formulario" (ngSubmit)="guardarCuenta()" aria-label="Formulario de nueva cuenta bancaria">
+    <h2>{{ cuentaEnEdicion() ? 'Editar Cuenta' : 'Registrar Nueva Cuenta' }}</h2>
+    <form [formGroup]="formulario" (ngSubmit)="guardarCuenta()" [attr.aria-label]="cuentaEnEdicion() ? 'Formulario de edición de cuenta bancaria' : 'Formulario de nueva cuenta bancaria'">
       <div class="form-grid">
         <mat-form-field>
           <mat-label>ID de Banco</mat-label>
-          <input matInput type="number" formControlName="bancoId" aria-label="ID de Banco" />
+          <input matInput type="number" formControlName="bancoId" aria-label="ID de Banco" [readonly]="!!cuentaEnEdicion()" />
           <mat-error *ngIf="formulario.controls.bancoId.hasError('required')">Requerido</mat-error>
           <mat-error *ngIf="formulario.controls.bancoId.hasError('min')">Mínimo 1</mat-error>
         </mat-form-field>
@@ -23,22 +26,24 @@
         </mat-form-field>
         <mat-form-field>
           <mat-label>Número de Cuenta</mat-label>
-          <input matInput formControlName="numeroCuenta" aria-label="Número de la cuenta" />
+          <input matInput formControlName="numeroCuenta" aria-label="Número de la cuenta" [readonly]="!!cuentaEnEdicion()" />
           <mat-error *ngIf="formulario.controls.numeroCuenta.hasError('required')">Requerido</mat-error>
         </mat-form-field>
         <mat-form-field>
           <mat-label>Moneda</mat-label>
-          <input matInput formControlName="moneda" aria-label="Moneda" />
+          <input matInput formControlName="moneda" aria-label="Moneda" [readonly]="!!cuentaEnEdicion()" />
           <mat-error *ngIf="formulario.controls.moneda.hasError('required')">Requerido</mat-error>
         </mat-form-field>
         <mat-form-field>
           <mat-label>Saldo Inicial</mat-label>
-          <input matInput type="number" formControlName="saldoInicial" aria-label="Saldo Inicial" />
+          <input matInput type="number" formControlName="saldoInicial" aria-label="Saldo Inicial" [readonly]="!!cuentaEnEdicion()" />
           <mat-error *ngIf="formulario.controls.saldoInicial.hasError('required')">Requerido</mat-error>
           <mat-error *ngIf="formulario.controls.saldoInicial.hasError('min')">Mínimo 0</mat-error>
         </mat-form-field>
       </div>
-      <button mat-raised-button color="primary" type="submit" [disabled]="formulario.invalid">Guardar Cuenta</button>
+      <button mat-raised-button color="primary" type="submit" [disabled]="formulario.invalid || submitting()">
+        {{ cuentaEnEdicion() ? 'Guardar cambios' : 'Guardar Cuenta' }}
+      </button>
     </form>
   </div>
 
@@ -70,6 +75,7 @@
       <ng-container matColumnDef="acciones">
         <th mat-header-cell *matHeaderCellDef scope="col">Acciones</th>
         <td mat-cell *matCellDef="let element" class="acciones-cell">
+          <button mat-button type="button" *ngIf="puedeEditar()" (click)="editar(element)" [attr.aria-label]="'Editar cuenta ' + element.nombre">Editar</button>
           <button mat-button type="button" color="primary" *ngIf="puedeActivar() && element.estado === 2" (click)="activar(element)" [attr.aria-label]="'Activar cuenta ' + element.nombre">Activar</button>
           <button mat-button type="button" color="warn" *ngIf="puedeDesactivar() && element.estado === 1" (click)="desactivar(element)" [attr.aria-label]="'Desactivar cuenta ' + element.nombre">Desactivar</button>
         </td>
