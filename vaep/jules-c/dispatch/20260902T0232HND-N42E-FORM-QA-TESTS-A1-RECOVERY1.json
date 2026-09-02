@@ -1,0 +1,12 @@
+{
+  "manifestVersion": "v328",
+  "dispatchId": "VAEP-JULES-C-N42E-FORM-QA-TESTS-A1-RECOVERY1-20260902T0232HND",
+  "taskId": "N4.2.E.FRONTEND_FORM_QA_TESTS",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "bb3c161990d396856dba67486fd6d8dc4d683c83",
+  "taskAttempt": 1,
+  "maxAttempts": 2,
+  "fileScopeHint": "frontend/src/app/features/cuentas-bancarias/cuentas-bancarias.component.spec.ts only",
+  "prompt": "VAEP v3.28 SAME logical task PRE_SESSION/THROUGHPUT_STALL recovery. Original A1 dispatch b5ab24bcb4cb4f5861e7b46902509cf3600a766d crossed >=10 minutes with no correlated Jules session/result Issue, so no Jules attempt is consumed. This remains a NEW logical test task after FRONTEND_FORM_VALIDATION R2 exhausted and ChatGPT/VAEP QA_TAKEOVER; it is NOT R3. Exact recovery base bb3c161990d396856dba67486fd6d8dc4d683c83. Work ONLY in frontend/src/app/features/cuentas-bancarias/cuentas-bancarias.component.spec.ts. Review current component and existing spec first. Add deterministic tests only for the hardened form contract if missing: invalid guardarCuenta marks controls touched without create call; duplicate guardarCuenta while create observable is pending produces one create call; submitting resets after successful completion and after error. Preserve existing loading/empty/RBAC/navigation tests and do not duplicate them. Do not modify component.ts/HTML/SCSS/service/backend/routes/manifests/workflows or other files. Run focused frontend test/TypeScript validation if supported and report exact results plus SELF_REVIEW_PASS_1/2. Do not touch main, Produccion, branches, secrets or deploy."
+}
