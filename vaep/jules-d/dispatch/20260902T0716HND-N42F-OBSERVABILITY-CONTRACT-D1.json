@@ -1,0 +1,13 @@
+{
+  "manifestVersion": "v328",
+  "dispatchId": "20260902T0716HND-N42F-OBSERVABILITY-CONTRACT-D1",
+  "taskId": "N4.2.F.OBSERVABILITY_CORRELATION_TESTS",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "623e9fdb4168c4859dd0ae9db8c178cbc57db28c",
+  "taskAttempt": 1,
+  "maxAttempts": 2,
+  "pipelineOnly": true,
+  "fileScopeHint": "backend/tests/**/*CuentaBancaria*Observability*;backend/tests/**/*Correlation*;backend/tests/**/*Logging*",
+  "prompt": "NEXT_SAFE material pipeline support while CURRENT_PARENT N4.2.E remains fail-closed. Do NOT promote N4.2.F. Revalidate exact base first. Add the smallest non-duplicative test coverage for existing CuentaBancaria observability/correlation behavior: prove existing correlation/logging hooks propagate or fail closed according to current application conventions. Tests only and reuse existing infrastructure; do not invent new telemetry, modify production logging, frontend, manifests, workflows, secrets or deploy. If no applicable existing hook exists or coverage is already equivalent, return exact BLOCKER or DUPLICATE/SUPERSEDED evidence rather than busywork. Run focused tests and include SELF_REVIEW_PASS_1/2 with full diff/status/temp hygiene."
+}
