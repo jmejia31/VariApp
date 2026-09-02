@@ -1,0 +1,14 @@
+{
+  "manifestVersion": "v329",
+  "dispatchId": "20260902T1348HND-N43C-PERSISTENCE-MODEL-TESTS-B2-REC1",
+  "taskId": "N4.3.C.PERSISTENCE_MODEL_TESTS",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "d5c1208c6eb1f0e21626ffcd4da3421ba2bfe6b2",
+  "taskAttempt": 2,
+  "maxAttempts": 2,
+  "reworkOf": "20260902T1336HND-N43C-PERSISTENCE-MODEL-TESTS-B2",
+  "reworkReason": "PRE_SESSION_TRANSPORT_STALLED_GE10M_NO_SESSION_NO_USEFUL_ACTIVITY_RECOVERY_DOES_NOT_CONSUME_ATTEMPT",
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/**/N43C*Persistence*Tests.cs",
+  "prompt": "VAEP/Jules v3.29 THROUGHPUT-HARD transport recovery of the SAME causal R2 FINAL, not a new attempt. CURRENT_PARENT=N4.3.C. Implement ONLY precise EF persistence-model contract tests for bank reconciliation on exact PRIMARY_BASE_HEAD. Pin table names; CuentaBancaria FK Restrict; MovimientoEstadoCuenta FK Cascade; Match->MovimientoEstadoCuenta Cascade and Match->MovimientoFinanciero Restrict; decimal(18,2); Observaciones max 500; IdempotencyKey required max 100 and UNIQUE composite business key (ConciliacionBancariaId, IdempotencyKey), never global unique; Concepto max 250; Referencia max 100; unique Match composite (MovimientoEstadoCuentaId, MovimientoFinancieroId); relevant required fields and integer enum persistence where inspectable. Do NOT modify production mapping, migrations, services, frontend, workflow/manifest, secrets or deploy. Run targeted test/build and return reviewable patch artifact with SELF_REVIEW_PASS_1/PASS_2, full diff, git status and temp hygiene. ATTEMPT2/2 FINAL remains unchanged; if review fails, QA_TAKEOVER; NO R3."
+}
