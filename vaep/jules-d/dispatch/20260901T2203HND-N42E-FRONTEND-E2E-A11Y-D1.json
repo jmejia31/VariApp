@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-D-N42E-FRONTEND-E2E-A11Y-D1-20260901T2203HND",
+  "taskId": "N4.2.E.FRONTEND_E2E_A11Y",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "8ab9158af6221c2aecf00956565bef6086daa46f",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/e2e/n42-cuenta-bancaria.spec.ts only",
+  "prompt": "VAEP v3.28 CURRENT_PARENT N4.2.E FRONTEND/UX. Add one material Playwright E2E/accessibility test file only at the scoped path. Inspect existing Playwright patterns and the actual N4.2.E UI/client as it becomes available. Cover the CuentaBancaria happy-path navigation plus representative loading/error/accessibility and one safe operation intent without inventing selectors, routes, endpoints or backend state. Keep tests deterministic and compatible with current auth/test fixtures. Do not modify product source, configuration, workflows, backend or migrations. Return material patch, targeted Playwright/lint evidence and two SELF_REVIEW_PASS markers. Attempt 1/2; R2 only for causal rework; never R3. No main, Produccion, branches, merge, auto-merge, force-push, secrets or deploy."
+}
