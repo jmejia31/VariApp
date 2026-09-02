@@ -1,0 +1,12 @@
+{
+  "manifestVersion": "v328",
+  "dispatchId": "20260902T0650HND-N42E-RESPONSIVE-A11Y-B1",
+  "taskId": "N4.2.E.RESPONSIVE_A11Y",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "ada775778883980f0005dfb37617a320d8d29a60",
+  "taskAttempt": 1,
+  "maxAttempts": 2,
+  "fileScopeHint": "frontend/src/app/features/cuentas-bancarias/cuentas-bancarias.component.scss",
+  "prompt": "CURRENT_PARENT N4.2.E. Improve the existing cuentas-bancarias responsive/accessibility presentation with a material, minimal delta. Modify ONLY cuentas-bancarias.component.scss. Revalidate exact base first. Preserve design tokens and existing layout; ensure mobile table/actions/form/filter usability, visible keyboard focus where styling currently suppresses clarity, and no horizontal layout break beyond the intentional table scroller. Do not touch TS/HTML/backend/manifests/workflows. Run proportional frontend checks. If current SCSS already satisfies this without a meaningful delta, report DUPLICATE/SUPERSEDED with proof rather than busywork. Include SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 with git status/full diff/temp-file hygiene."
+}
