@@ -106,6 +106,30 @@ describe('CuentaBancariaService', () => {
     req.flush('Bad Request', { status: 400, statusText: 'Bad Request' });
   });
 
+  it('propaga 404 en update', () => {
+    const dto: UpdateCuentaBancariaDto = { nombre: 'Missing' };
+    service.update(404, dto).subscribe({ next: () => { throw new Error('debería haber fallado'); }, error: error => expect(error.status).toBe(404) });
+    const req = httpTestingController.expectOne(`${apiUrl}/404`);
+    expect(req.request.method).toBe('PUT');
+    req.flush('Not Found', { status: 404, statusText: 'Not Found' });
+  });
+
+  it('propaga 409 en update', () => {
+    const dto: UpdateCuentaBancariaDto = { nombre: 'Conflict' };
+    service.update(9, dto).subscribe({ next: () => { throw new Error('debería haber fallado'); }, error: error => expect(error.status).toBe(409) });
+    const req = httpTestingController.expectOne(`${apiUrl}/9`);
+    expect(req.request.method).toBe('PUT');
+    req.flush('Conflict', { status: 409, statusText: 'Conflict' });
+  });
+
+  it('propaga fallo de red en update', () => {
+    const dto: UpdateCuentaBancariaDto = { nombre: 'Network' };
+    service.update(10, dto).subscribe({ next: () => { throw new Error('debería haber fallado'); }, error: error => expect(error.status).toBe(0) });
+    const req = httpTestingController.expectOne(`${apiUrl}/10`);
+    expect(req.request.method).toBe('PUT');
+    req.error(new ProgressEvent('error'));
+  });
+
   it('activa una cuenta', () => {
     service.activar(5).subscribe();
     const req = httpTestingController.expectOne(`${apiUrl}/5/activar`);
