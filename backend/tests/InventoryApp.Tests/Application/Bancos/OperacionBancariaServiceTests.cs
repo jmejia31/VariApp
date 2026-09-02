@@ -102,4 +102,64 @@ public class OperacionBancariaServiceTests
         _mockMovimientoRepo.Verify(r => r.AddAsync(It.IsAny<MovimientoFinanciero>()), Times.Never);
         _mockMovimientoRepo.Verify(r => r.SaveChangesAsync(), Times.Never);
     }
+
+    [Fact]
+    public async Task RegistrarDeposito_ThrowsArgumentOutOfRangeException_WhenMontoIsZeroOrNegative()
+    {
+        var dto = new DepositoBancarioDto { CuentaId = 1, Monto = 0m, Referencia = "REF-1", IdempotencyKey = "key1" };
+        _mockCuentaRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(CreateActiveCuenta("123"));
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _service.RegistrarDepositoAsync(dto, 99));
+        _mockMovimientoRepo.VerifyNoOtherCalls();
+    }
+
+    [Fact]
+    public async Task RegistrarDeposito_ThrowsInvalidOperationException_WhenCuentaInactive()
+    {
+        var dto = new DepositoBancarioDto { CuentaId = 1, Monto = 500m, Referencia = "REF-1", IdempotencyKey = "key1" };
+        var origen = CreateActiveCuenta("123");
+        origen.Desactivar();
+        _mockCuentaRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(origen);
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _service.RegistrarDepositoAsync(dto, 99));
+        _mockMovimientoRepo.VerifyNoOtherCalls();
+    }
+
+    [Fact]
+    public async Task RegistrarTransferencia_ThrowsInvalidOperationException_WhenCuentaDestinoInactive()
+    {
+        var dto = new TransferenciaBancariaDto { CuentaId = 1, CuentaDestinoId = 2, Monto = 300m, Referencia = "REF-3", IdempotencyKey = "key3" };
+        var origen = CreateActiveCuenta("123");
+        var destino = CreateActiveCuenta("456");
+        destino.Desactivar();
+        typeof(CuentaBancaria).GetProperty("Id")?.SetValue(origen, 1);
+        typeof(CuentaBancaria).GetProperty("Id")?.SetValue(destino, 2);
+        _mockCuentaRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(origen);
+        _mockCuentaRepo.Setup(r => r.GetByIdAsync(2)).ReturnsAsync(destino);
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _service.RegistrarTransferenciaAsync(dto, 99));
+        _mockMovimientoRepo.VerifyNoOtherCalls();
+    }
+
+    [Fact]
+    public async Task RegistrarTransferencia_ThrowsInvalidOperationException_WhenOrigenAndDestinoAreSame()
+    {
+        var dto = new TransferenciaBancariaDto { CuentaId = 1, CuentaDestinoId = 1, Monto = 300m, Referencia = "REF-3", IdempotencyKey = "key3" };
+        var origen = CreateActiveCuenta("123");
+        typeof(CuentaBancaria).GetProperty("Id")?.SetValue(origen, 1);
+        _mockCuentaRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(origen);
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _service.RegistrarTransferenciaAsync(dto, 99));
+        _mockMovimientoRepo.VerifyNoOtherCalls();
+    }
+
+    [Fact]
+    public async Task RegistrarTransferencia_ThrowsInvalidOperationException_WhenMonedasDiffer()
+    {
+        var dto = new TransferenciaBancariaDto { CuentaId = 1, CuentaDestinoId = 2, Monto = 300m, Referencia = "REF-3", IdempotencyKey = "key3" };
+        var origen = CreateActiveCuenta("123", "HNL");
+        var destino = CreateActiveCuenta("456", "USD");
+        typeof(CuentaBancaria).GetProperty("Id")?.SetValue(origen, 1);
+        typeof(CuentaBancaria).GetProperty("Id")?.SetValue(destino, 2);
+        _mockCuentaRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(origen);
+        _mockCuentaRepo.Setup(r => r.GetByIdAsync(2)).ReturnsAsync(destino);
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _service.RegistrarTransferenciaAsync(dto, 99));
+        _mockMovimientoRepo.VerifyNoOtherCalls();
+    }
 }
