@@ -1,0 +1,12 @@
+{
+  "manifestVersion": "v320",
+  "dispatchId": "VAEP-JULES-A-N42D-API-SURFACE-REPAIR-A1-20260901T2231HND",
+  "taskId": "N4.2.D.API_SURFACE_REPAIR",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "ae3f95e61d383bc350f36cfd6bbadc0ebd77edc6",
+  "taskAttempt": 1,
+  "maxAttempts": 2,
+  "fileScopeHint": "backend/src/Application/Interfaces/ICuentaBancariaService.cs;backend/src/Application/Services/CuentaBancariaService.cs;backend/src/API/Controllers/CuentaBancariaController.cs;backend/src/API/Controllers/OperacionBancariaController.cs;backend/tests/**CuentaBancaria**;backend/tests/**OperacionBancaria** only",
+  "prompt": "VAEP v3.28 causal repair. CURRENT_PARENT is reopened N4.2.D because fresh review of N4.2.E proved the backend HTTP/application surface is incomplete. Exact base ae3f95e61d383bc350f36cfd6bbadc0ebd77edc6. ICuentaBancariaService currently exposes read/create/activate/deactivate but no update/edit operation, while CuentaBancariaController likewise has no update endpoint. IOperacionBancariaService exists with Deposito, Retiro, Transferencia, Comision, Interes and Conciliacion methods, but fresh API Controllers inspection exposes no HTTP controller for that service. Implement the smallest coherent backend repair so the real Angular client can consume edit plus all six operation intents without inventing contracts. Reuse existing DTOs, service/domain policies, permission conventions, authenticated user identity and idempotency rules already in Desarrollo. Add/modify only files genuinely required inside the stated scope and proportional backend tests. Fail closed if a required direct dependency outside scope makes the repair unsafe; report it rather than expanding scope. Do not touch frontend, migrations, workflows, manifests, main, Produccion, branches, merge/auto-merge, force-push, secrets or deploy. Return material patch, exact base, targeted tests and SELF_REVIEW_PASS_1 + SELF_REVIEW_PASS_2. ATTEMPT1/2; only one final R2 if causal review requires it; R3 prohibited."
+}
