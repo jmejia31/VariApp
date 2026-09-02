@@ -113,6 +113,20 @@ public class MovimientoFinancieroRepository : IMovimientoFinancieroRepository
             .FirstOrDefaultAsync(m => m.VentaId == ventaId && m.EsAutomatico);
     }
 
+    public async Task<List<MovimientoFinanciero>> GetByBancosIdempotencyKeyAsync(string key, int usuarioId)
+    {
+        var descripcionBase = $"IdempotencyKey: {key}";
+        return await ConMetodoPago()
+            .Where(m =>
+                m.ModuloOrigen == "Bancos" &&
+                m.CreadoPorUsuarioId == usuarioId &&
+                (m.Descripcion == descripcionBase ||
+                 m.Descripcion == descripcionBase + "-Egreso" ||
+                 m.Descripcion == descripcionBase + "-Ingreso"))
+            .OrderBy(m => m.Id)
+            .ToListAsync();
+    }
+
     public async Task<List<MovimientoFinanciero>> GetFilteredAsync(DateTime? desde, DateTime? hasta)
     {
         var alcance = await _usuarioScope.ObtenerActualAsync();
