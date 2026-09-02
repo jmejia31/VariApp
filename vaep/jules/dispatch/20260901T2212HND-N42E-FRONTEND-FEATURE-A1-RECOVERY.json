@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-A-N42E-FRONTEND-FEATURE-A1-RECOVERY-20260901T2212HND",
+  "taskId": "N4.2.E.FRONTEND_FEATURE",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "29d6b5c2ef008b84d564c61aec76f610694dad55",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/features/finanzas/cuentas-bancarias/cuentas-bancarias.component.ts;frontend/src/app/features/finanzas/cuentas-bancarias/cuentas-bancarias.component.html;frontend/src/app/features/finanzas/cuentas-bancarias/cuentas-bancarias.component.scss only",
+  "prompt": "VAEP v3.28 SLA recovery SAME logical task for N4.2.E.FRONTEND_FEATURE. Prior dispatch VAEP-JULES-A-N42E-FRONTEND-FEATURE-A1-20260901T2200HND exceeded 10 minutes without externally correlatable Jules session/activity/result, so it does not consume a Jules attempt. Continue the exact material CuentaBancaria feature UI scope only in the three scoped component files, following existing Finanzas patterns and the integrated N4.2.D API contract. Cover list/table, loading/empty/error states, pagination/filter controls, create/edit account flow and operation entry points for deposito, retiro, transferencia, comision, interes and conciliacion only as supported by current contracts. Do not invent backend contracts; inspect current DTO/API shapes. Preserve accessibility/responsive behavior. No services/models/routes/menu/tests/workflows/backend/migrations or files outside scope. Return material patch, targeted frontend checks and two SELF_REVIEW_PASS markers. Attempt remains 1/2 because no prior Jules session was evidenced/consumed; R2 only after a real attempt requiring causal rework; never R3. No main, Produccion, branches, merge, auto-merge, force-push, secrets or deploy."
+}
