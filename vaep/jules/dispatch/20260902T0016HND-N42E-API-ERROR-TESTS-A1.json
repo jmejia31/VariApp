@@ -1,0 +1,13 @@
+{
+  "manifestVersion": "v320",
+  "dispatchId": "VAEP-JULES-A-N42E-API-ERROR-TESTS-A1-20260902T0016HND",
+  "taskId": "N4.2.E.FRONTEND_API_ERROR_TESTS",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "7d05d49cf50bb46096d5a29f04e7c94cb2a4b22f",
+  "taskAttempt": 1,
+  "maxAttempts": 2,
+  "reassignedFrom": "N4.2.D.API_SURFACE_REPAIR",
+  "fileScopeHint": "frontend/src/app/core/services/cuenta-bancaria.service.spec.ts only",
+  "prompt": "VAEP v3.28 REASSIGN_NEXT_SAFE after N4.2.D.API_SURFACE_REPAIR R2 transport/recovery remained without a correlated Jules session beyond the hard SLA; that backend logical task is released to QA_TAKEOVER and no Jules R3 is permitted. Exact base 7d05d49cf50bb46096d5a29f04e7c94cb2a4b22f. Work a NEW independent task only in cuenta-bancaria.service.spec.ts: add material error-contract tests for representative HTTP failures on list/get/create/activar/desactivar, asserting errors propagate predictably and HttpTestingController has no outstanding requests. Preserve all existing successful-path tests and current service/model contracts. Do not modify service/product code, components, routes, backend, workflows, other manifests, main, Produccion, branches, secrets or deploy. Run focused frontend tests/type validation if available and return material patch plus SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2."
+}
