@@ -1,11 +1,12 @@
 using InventoryApp.Application.DTOs.Bancos;
+using InventoryApp.Application.Bancos;
 
 namespace InventoryApp.Application.Interfaces;
 
 public interface ICuentaBancariaService
 {
     Task<CuentaBancariaDto?> GetByIdAsync(int id);
-    Task<List<CuentaBancariaDto>> GetAllAsync();
+    Task<CuentaBancariaPage<CuentaBancariaDto>> GetAllAsync(CuentaBancariaQueryFilter filter);
     Task<List<CuentaBancariaDto>> GetActivasAsync();
     Task<CuentaBancariaDto> AddAsync(CreateCuentaBancariaDto dto);
     Task ActivarAsync(int id);
