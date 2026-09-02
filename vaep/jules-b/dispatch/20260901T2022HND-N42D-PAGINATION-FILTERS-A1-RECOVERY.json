@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-B-N42D-PAGINATION-FILTERS-A1-RECOVERY-20260901T2022HND",
+  "taskId": "N4.2.D.PAGINATION_FILTERS",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "7880b46cdfdaf2402a82047f886d836b81aeba5c",
+  "taskAttempt": 1,
+  "fileScopeHint": "CuentaBancaria list query/filter/pagination contract across repository+service+controller and targeted tests; exclude banking operation service files",
+  "prompt": "PRE_SESSION recovery of N4.2.D PAGINATION_FILTERS attempt1; prior manifest created no correlated Jules session and consumed no attempt. Implement stable server-side CuentaBancaria pagination/filtering on the canonical repository/service/controller stack with deterministic ordering, validation and targeted tests. Do not touch banking operation service files, error-contract QA takeover, idempotency/policy edge-test scopes, migrations/workflows/frontend. Return material patch, targeted build/tests and two SELF_REVIEW_PASS markers. No main, Production, branches, merge, auto-merge, force-push, secrets or deploy."
+}
