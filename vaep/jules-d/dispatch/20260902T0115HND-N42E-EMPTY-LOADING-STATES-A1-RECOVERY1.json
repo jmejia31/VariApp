@@ -1,0 +1,12 @@
+{
+  "manifestVersion": "v328",
+  "dispatchId": "VAEP-JULES-D-N42E-EMPTY-LOADING-STATES-A1-RECOVERY1-20260902T0115HND",
+  "taskId": "N4.2.E.FRONTEND_EMPTY_LOADING_STATES",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "973b894a7d64ce6d2ba94dc33dfdfcadd7294f5a",
+  "taskAttempt": 1,
+  "maxAttempts": 2,
+  "fileScopeHint": "frontend/src/app/features/cuentas-bancarias/cuentas-bancarias.component.html only",
+  "prompt": "VAEP v3.28 PRE_SESSION recovery SAME logical task; prior dispatch exceeded 10m without correlated Jules session/useful activity, so transport recovery does not consume a Jules attempt. Exact base 973b894a7d64ce6d2ba94dc33dfdfcadd7294f5a. Work ONLY in frontend/src/app/features/cuentas-bancarias/cuentas-bancarias.component.html. Improve current empty/loading/error presentation materially and accessibly using only component members that already exist at your base; keep table/form semantics and RBAC visibility intact. Do not invent component APIs. Do not modify TS/SCSS/service/routes/backend/tests or any other file. Do not touch manifests/workflows, main, Produccion, branches, secrets or deploy. Run focused template/TypeScript validation if available and return patch plus SELF_REVIEW_PASS_1/2 and limitations."
+}
