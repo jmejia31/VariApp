@@ -210,4 +210,15 @@ describe('CuentaBancariaService', () => {
     expect(req.request.method).toBe('PATCH');
     req.flush('Conflict', { status: 409, statusText: 'Conflict' });
   });
+
+  it('propaga un fallo de red en getAll sin convertirlo en éxito', () => {
+    service.getAll().subscribe({
+      next: () => { throw new Error('debería haber fallado'); },
+      error: error => expect(error.status).toBe(0)
+    });
+
+    const req = httpTestingController.expectOne(apiUrl);
+    expect(req.request.method).toBe('GET');
+    req.error(new ProgressEvent('error'));
+  });
 });
