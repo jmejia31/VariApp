@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-C-N42D-OPERATION-POLICY-EDGE-TESTS-A1-RECOVERY-20260901T2023HND",
+  "taskId": "N4.2.D.OPERATION_POLICY_EDGE_TESTS",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "4ece8b41283d91a2c4bdc7e52e54b8abb101c138",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/Application/Bancos/BancosOperationPolicy*; backend/src/Application/Bancos/BancosOperationPolicy.cs only if a test proves a causal defect",
+  "prompt": "PRE_SESSION recovery of NEW logical task N4.2.D OPERATION_POLICY_EDGE_TESTS attempt1; prior manifest created no correlated Jules session and consumed no attempt. ERROR_CONTRACT R2 remains exhausted/QA_TAKEOVER and MUST NOT be retried. Add material boundary tests for current BancosOperationPolicy; source edits only for a causally proven defect. Do not touch error/result abstractions, operation service, pagination/filter, idempotency scope, controller, migrations/workflows/frontend. Return material patch, targeted build/tests and two SELF_REVIEW_PASS markers. No main, Production, branches, merge, auto-merge, force-push, secrets or deploy."
+}
