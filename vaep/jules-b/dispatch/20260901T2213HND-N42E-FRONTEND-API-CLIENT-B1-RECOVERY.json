@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-B-N42E-FRONTEND-API-CLIENT-B1-RECOVERY-20260901T2213HND",
+  "taskId": "N4.2.E.FRONTEND_API_CLIENT",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "9a5d830fb6243bc111fbd790dc658e2006442e3a",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/core/services/cuenta-bancaria.service.ts;frontend/src/app/core/models/cuenta-bancaria.ts;frontend/src/app/core/models/cuenta-bancaria-page.ts only",
+  "prompt": "VAEP v3.28 SLA recovery SAME logical task for N4.2.E.FRONTEND_API_CLIENT. Prior dispatch VAEP-JULES-B-N42E-FRONTEND-API-CLIENT-B1-20260901T2201HND exceeded 10 minutes without externally correlatable Jules session/activity/result, so it does not consume a Jules attempt. Implement only the Angular CuentaBancaria API client and canonical models in the scoped files, against the exact integrated N4.2.D backend contract. Cover list/query pagination and filters plus DTOs/requests required for create/edit and deposito, retiro, transferencia, comision, interes and conciliacion. Inspect current API controller/DTO shapes; do not invent endpoints or fields. No components, routes, menu, tests, workflows, backend, migrations or unrelated files. Return material patch, targeted TypeScript/build checks and two SELF_REVIEW_PASS markers. Attempt remains 1/2 because no prior Jules session was evidenced/consumed; R2 only after a real attempt requiring causal rework; never R3. No main, Produccion, branches, merge, auto-merge, force-push, secrets or deploy."
+}
