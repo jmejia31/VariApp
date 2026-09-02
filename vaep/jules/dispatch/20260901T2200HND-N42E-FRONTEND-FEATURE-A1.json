@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-A-N42E-FRONTEND-FEATURE-A1-20260901T2200HND",
+  "taskId": "N4.2.E.FRONTEND_FEATURE",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "555b3ce4c47e62ca5d3d8e0e7788d69c5521362c",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/features/finanzas/cuentas-bancarias/cuentas-bancarias.component.ts;frontend/src/app/features/finanzas/cuentas-bancarias/cuentas-bancarias.component.html;frontend/src/app/features/finanzas/cuentas-bancarias/cuentas-bancarias.component.scss only",
+  "prompt": "VAEP v3.28 CURRENT_PARENT N4.2.E FRONTEND/UX. Implement the material CuentaBancaria feature UI only in the three scoped component files, following existing Finanzas patterns. Cover list/table, loading/empty/error states, pagination/filter controls, create/edit account flow and operation entry points for deposito, retiro, transferencia, comision, interes and conciliacion as supported by the already integrated N4.2.D API contract. Do not invent backend contracts; inspect current DTO/API shapes first. Preserve accessibility and responsive behavior. Do not touch services/models/routes/menu/tests/workflows/backend/migrations or files outside scope. Return material patch, targeted frontend checks and two SELF_REVIEW_PASS markers. Attempt 1/2; if material rework is needed controller may issue R2, never R3. No main, Produccion, branches, merge, auto-merge, force-push, secrets or deploy."
+}
