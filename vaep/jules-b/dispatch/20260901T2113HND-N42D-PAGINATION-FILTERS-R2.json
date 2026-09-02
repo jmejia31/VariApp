@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-B-N42D-PAGINATION-FILTERS-R2-20260901T2113HND",
+  "taskId": "N4.2.D.PAGINATION_FILTERS",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "383735fef0308aa8a5a70112d02cceea09bb5ba2",
+  "taskAttempt": 2,
+  "fileScopeHint": "CuentaBancaria pagination/filter integration using existing CuentaBancariaQueryFilter.cs and CuentaBancariaPage.cs across repository/service/controller + targeted existing InventoryApp.Tests only",
+  "prompt": "VAEP v3.28 SAME_CHILD_REWORK R2 FINAL. Review of #2433 found useful pagination work but it was based on stale contracts and introduced a duplicate CuentaBancariaFiltroDto/PagedResult design. PRIMARY_BASE_HEAD already contains canonical backend/src/Application/Bancos/CuentaBancariaQueryFilter.cs and CuentaBancariaPage.cs; reuse those exact types instead of creating competing pagination DTOs. Implement the missing repository/service/controller integration with deterministic ordering, bounded validation and targeted tests in the existing InventoryApp.Tests project. Preserve current 404 ProblemDetails/error contract and authorization attributes. Do not touch OperacionBancariaService, policy/idempotency edge scopes, migrations, workflows, frontend or unrelated files. Return material patch, targeted build/tests and two SELF_REVIEW_PASS markers. Attempt 2/2 FINAL; on failure controller QA_TAKEOVER, NO R3. No main, Produccion, branches, merge, auto-merge, force-push, secrets or deploy."
+}
