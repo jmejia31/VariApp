@@ -1,0 +1,14 @@
+{
+  "manifestVersion": "v329",
+  "dispatchId": "20260902T1244HND-N43C-MIGRATION-INTEGRITY-D1-REC1",
+  "taskId": "N4.3.C.MIGRATION_INTEGRITY_TESTS",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "6024816549cd28a8fd40fe14f9d08e4a8be8ee86",
+  "taskAttempt": 1,
+  "maxAttempts": 2,
+  "recoveryOf": "20260902T1231HND-N43C-MIGRATION-INTEGRITY-D1",
+  "recoveryReason": "PRE_SESSION_STALL_GE10M_NO_CORRELATED_JULES_SESSION",
+  "fileScopeHint": "backend/tests/**/Migrations/**; backend/tests/**/*Migration*.cs; scripts/**/migration*",
+  "prompt": "VAEP/Jules v3.29 THROUGHPUT-HARD PRE_SESSION recovery; this transport recovery does NOT consume a Jules attempt. CURRENT_PARENT=N4.3.C. Add ONLY migration/data-integrity verification for bank reconciliation. Validate forward migration expectations, rollback reversibility where supported, FK/index existence, historical-data preservation and non-destructive behavior using repository-standard test/preflight patterns. Tests/scripts only; do NOT edit production mappings, migration/snapshot, services/controllers/frontend/workflows/manifests/secrets/deploy. Revalidate exact PRIMARY_BASE_HEAD. No Produccion access. Run proportional tests/preflight. Return patch artifact with SELF_REVIEW_PASS_1/PASS_2, full diff, git status, temp hygiene. ATTEMPT remains 1/2; no R3 exists."
+}
