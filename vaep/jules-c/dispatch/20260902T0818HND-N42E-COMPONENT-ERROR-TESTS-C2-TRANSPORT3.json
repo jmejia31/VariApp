@@ -1,0 +1,13 @@
+{
+  "manifestVersion": "v328",
+  "dispatchId": "20260902T0818HND-N42E-COMPONENT-ERROR-TESTS-C2-TRANSPORT3",
+  "taskId": "N4.2.E.COMPONENT_ERROR_TESTS",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "8c10d346b779dd4c695d53d94ca0829a11faafd3",
+  "taskAttempt": 2,
+  "maxAttempts": 2,
+  "recoveryOf": "20260902T0802HND-N42E-COMPONENT-ERROR-TESTS-C2-REC2",
+  "fileScopeHint": "frontend/src/app/features/cuentas-bancarias/cuentas-bancarias.component.spec.ts",
+  "prompt": "PRE_SESSION_TRANSPORT_FAILURE RECOVERY OF FINAL CONTENT ATTEMPT2/2. CURRENT_PARENT N4.2.E. Dispatch 20260902T0802HND-N42E-COMPONENT-ERROR-TESTS-C2-REC2 exceeded >=10m without correlated Jules session + useful technical activity. This is transport recovery only: it does NOT create or authorize a Jules R3 and does not consume another content attempt. Revalidate exact base 8c10d346b779dd4c695d53d94ca0829a11faafd3. Modify ONLY cuentas-bancarias.component.spec.ts. Add focused non-brittle coverage for load failure plus create/update failure against production behavior at exact base; prove failures do not masquerade as success, loading/submitting settles, relevant form/edit state is preserved, and assert accessible error signal if exposed. Do not modify production code, HTML, SCSS, backend, manifests/workflows, secrets or deploy. Run focused frontend tests and include SELF_REVIEW_PASS_1/2, git status, full diff and temp hygiene. FINAL CONTENT ATTEMPT=2/2; NO R3."
+}
