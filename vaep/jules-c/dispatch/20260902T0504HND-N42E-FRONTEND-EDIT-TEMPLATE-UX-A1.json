@@ -1,0 +1,12 @@
+{
+  "manifestVersion": "v328",
+  "dispatchId": "20260902T0504HND-N42E-FRONTEND-EDIT-TEMPLATE-UX-A1",
+  "taskId": "N4.2.E.FRONTEND_EDIT_TEMPLATE_UX",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "5b897244e768e504df46cec7f273d25b561d3da6",
+  "taskAttempt": 1,
+  "maxAttempts": 2,
+  "fileScopeHint": "frontend/src/app/features/cuentas-bancarias/cuentas-bancarias.component.html",
+  "prompt": "N4.2.E pipeline only; promotion remains blocked behind CURRENT_PARENT N4.2.D. Modify ONLY frontend/src/app/features/cuentas-bancarias/cuentas-bancarias.component.html. Revalidate exact base. Align the template with the already integrated account edit flow: expose a clear edit action only when permitted, make create vs edit mode explicit to the user, preserve existing validation/loading/empty/a11y behavior, and avoid duplicating D's component-spec ownership. No TS/SCSS/spec/service/model/backend/routes/workflow/manifest changes. Run proportional Angular/template validation and report exact evidence. If the template already fully materializes this behavior, report DUPLICATE/SUPERSEDED with proof rather than forcing churn. Include SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 with git status/full diff/temp-file hygiene."
+}
