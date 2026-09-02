@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-D-N42D-AUTHORIZATION-CONTRACT-TESTS-A1-20260901T1928HND",
+  "taskId": "N4.2.D.AUTHORIZATION_CONTRACT_TESTS",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "7cfa833677a5d8ab5e8a538a573fe237fcaa91d4",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/API/Controllers/CuentaBancariaAuthorizationContractTests.cs",
+  "prompt": "N4.2.D AUTHORIZATION_CONTRACT_TESTS attempt1 after VAEP accepted and integrated the completed application-service tests. Work ONLY in a NEW dedicated CuentaBancariaAuthorizationContractTests.cs file. Verify the current CuentaBancariaController fails closed at metadata level: controller requires authentication; every public endpoint has an explicit RequierePermiso for ModuloSistema.Finanzas with the expected Ver/Crear/Activar/Desactivar action and unambiguous HTTP verb/route metadata. Do not modify the production controller or the existing CuentaBancariaControllerTests.cs because Jules A exclusively owns its completion-test follow-up. Do not touch services/DTOs/repository/domain/migrations/workflows/frontend. Run targeted tests/build and return a material patch plus two independent SELF_REVIEW_PASS markers. No main, Production, branches, merge, auto-merge, force-push, secrets or deploy."
+}
