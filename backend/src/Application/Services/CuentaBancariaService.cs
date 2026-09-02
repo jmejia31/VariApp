@@ -1,6 +1,7 @@
 using InventoryApp.Application.DTOs.Bancos;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities.Bancos;
+using InventoryApp.Application.Bancos;
 
 namespace InventoryApp.Application.Services;
 
@@ -21,10 +22,11 @@ public sealed class CuentaBancariaService : ICuentaBancariaService
         return MapToDto(cuenta);
     }
 
-    public async Task<List<CuentaBancariaDto>> GetAllAsync()
+    public async Task<CuentaBancariaPage<CuentaBancariaDto>> GetAllAsync(CuentaBancariaQueryFilter filter)
     {
-        var cuentas = await _repository.GetAllAsync();
-        return cuentas.Select(MapToDto).ToList();
+        var page = await _repository.GetAllAsync(filter);
+        var dtoItems = page.Items.Select(MapToDto).ToList();
+        return new CuentaBancariaPage<CuentaBancariaDto>(dtoItems, page.Page, page.PageSize, page.TotalCount);
     }
 
     public async Task<List<CuentaBancariaDto>> GetActivasAsync()
