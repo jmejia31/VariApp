@@ -85,7 +85,9 @@
 
       <tr class="mat-row" *matNoDataRow>
         <td class="mat-cell empty-cell" [attr.colspan]="columnasMostradas.length">
-          {{ loading() ? 'Cargando cuentas...' : 'No se encontraron cuentas bancarias.' }}
+          <div *ngIf="!loading()" role="status" aria-live="polite">
+            No se encontraron cuentas bancarias.
+          </div>
         </td>
       </tr>
     </table>
