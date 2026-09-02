@@ -1,0 +1,12 @@
+{
+  "manifestVersion": "v328",
+  "dispatchId": "VAEP-JULES-A-N42E-COMPONENT-STATE-TESTS-R2-20260902T0203HND",
+  "taskId": "N4.2.E.FRONTEND_COMPONENT_STATE_TESTS",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "f1293f17feb532ca5f380d655808c7066bbb9f63",
+  "taskAttempt": 2,
+  "maxAttempts": 2,
+  "fileScopeHint": "frontend/src/app/features/cuentas-bancarias/cuentas-bancarias.component.spec.ts only",
+  "prompt": "VAEP v3.28 REQUIRED causal R2 FINAL for N4.2.E.FRONTEND_COMPONENT_STATE_TESTS after review of Issue #2473/session 9948295864561811482. ATTEMPT1 had useful loading/error/empty coverage, but its create-error case used a synthetic synchronous subscribe throw plus try/catch rather than the current Observable contract, so that case is not accepted. Exact base f1293f17feb532ca5f380d655808c7066bbb9f63. Work ONLY in frontend/src/app/features/cuentas-bancarias/cuentas-bancarias.component.spec.ts. Preserve/add focused tests for real current-contract loading transition, getAll error resetting loading, and empty results. Do NOT add a synthetic subscribe object, try/catch error swallowing, production changes, temp scripts/files, patch.diff, or generated artifacts. If there is no production submitting/error state, do not invent one; state that limitation explicitly. Run the focused frontend test command actually supported by this repo, ensure final diff is exactly one source test file, SELF_REVIEW_PASS_1/2. R3 prohibited; if R2 fails review, QA_TAKEOVER. Do not touch main, Produccion, branches, secrets or deploy."
+}
