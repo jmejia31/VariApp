@@ -1,42 +1,22 @@
-import { expect, Page, test, APIRequestContext, APIResponse } from '@playwright/test';
+import { expect, Page, test } from '@playwright/test';
 
-const API_URL = process.env['PHASE7_API_URL'] ?? 'http://127.0.0.1:5005';
 const ADMIN_USERNAME = process.env['PHASE7_ADMIN_USERNAME'] ?? 'e2e_admin';
-const ADMIN_PASSWORD = process.env['PHASE7_ADMIN_PASSWORD'] ?? 'MISSING_SECRET_IN_ENV';
+const ADMIN_PASSWORD = process.env['PHASE7_ADMIN_PASSWORD'] ?? 'E2E.Admin#2026!';
 
-let adminToken = '';
-
-async function dataOf(response: APIResponse): Promise<any> {
-  const payload = await response.json();
-  return payload.data ?? payload.Data;
-}
-
-async function loginApi(request: APIRequestContext): Promise<string> {
-  const response = await request.post(`${API_URL}/auth/login`, {
-    data: { nombreUsuario: ADMIN_USERNAME, password: ADMIN_PASSWORD }
-  });
-
-  expect(response.status(), await response.text()).toBe(200);
-  const data = await dataOf(response);
-  expect(data?.token).toBeTruthy();
-  return data.token;
-}
-
-async function prepararSesion(page: Page, token: string): Promise<void> {
-  await page.addInitScript((t) => {
-    localStorage.setItem('inventoryapp_token', t);
-    localStorage.setItem('inventoryapp_user', 'e2e_admin');
-    localStorage.setItem('inventoryapp_rol', 'Administrador');
-  }, token);
+async function loginUi(page: Page): Promise<void> {
+  await page.goto('/login');
+  await page.locator('input[formcontrolname="nombreUsuario"]').fill(ADMIN_USERNAME);
+  await page.locator('input[formcontrolname="password"]').fill(ADMIN_PASSWORD);
+  await page.locator('button[type="submit"]').click();
+  await page.waitForURL((url) => url.pathname !== '/login', { timeout: 20_000 });
 }
 
 test.describe('Cuentas Bancarias E2E y Accesibilidad N4.2.E', () => {
-  test.beforeAll(async ({ request }) => {
-    adminToken = await loginApi(request);
+  test.beforeEach(async ({ page }) => {
+    await loginUi(page);
   });
 
   test('valida renderizado y estado de accesibilidad para interacciones clave', async ({ page }) => {
-    await prepararSesion(page, adminToken);
     await page.goto('/cuentas-bancarias');
 
     const heading = page.getByRole('heading', { name: 'Cuentas Bancarias' });
@@ -50,5 +30,7 @@ test.describe('Cuentas Bancarias E2E y Accesibilidad N4.2.E', () => {
     await expect(nuevaCuentaBtn).toHaveAttribute('aria-expanded', 'true');
     await expect(page.getByRole('heading', { name: 'Registrar Nueva Cuenta' })).toBeVisible();
     await expect(page.getByRole('textbox', { name: 'Nombre de la cuenta' })).toBeVisible();
+    await expect(page.getByRole('search', { name: 'Filtros de búsqueda' })).toBeVisible();
+    await expect(page.getByRole('table', { name: 'Tabla de cuentas bancarias' })).toBeVisible();
   });
 });
