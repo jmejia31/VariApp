@@ -1,0 +1,12 @@
+{
+  "manifestVersion": "v328",
+  "dispatchId": "20260902T0310HND-N42E-FRONTEND-CONTRACT-EXACT-HEAD-AUDIT-A1",
+  "taskId": "N4.2.E.FRONTEND_CONTRACT_EXACT_HEAD_AUDIT",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "233fe409d73d545d4b4c59a954bcdc7c1ed3b5b2",
+  "taskAttempt": 1,
+  "maxAttempts": 2,
+  "fileScopeHint": "frontend/src/app/core/models/cuenta-bancaria*.ts;frontend/src/app/core/services/cuenta-bancaria.service*.ts",
+  "prompt": "NEW LOGICAL TASK after FRONTEND_FORM_QA_TESTS was completed and integrated. Perform a material exact-HEAD audit limited to the CuentaBancaria frontend model/page/query/service contracts. Read the assigned frontend model/service files and only the direct backend API contract dependencies needed to verify them. Do not modify files. Identify concrete contract drift only: URL/verb mismatch, request DTO mismatch, pagination/filter serialization mismatch, response typing mismatch, missing safe API method that is already exposed by backend, or error-handling contract mismatch. Exclude UI component/template/routes and exclude prior completed service-test/API-error tasks. For every finding provide exact file/symbol, backend counterpart, severity, and smallest safe implementation/test follow-up. If no material drift exists, report NO_GAP with evidence. Return audit only in result artifact; no GitHub writes, Production/main/secrets/deploy. Include SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2."
+}
