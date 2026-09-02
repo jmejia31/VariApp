@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-C-N42D-ERROR-CONTRACT-R2-SCHEMA-RECOVERY-20260901T1901HND",
+  "taskId": "N4.2.D.ERROR_CONTRACT",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "d4afd03a093c87a3c90526376bcaad3039035ae7",
+  "taskAttempt": 2,
+  "fileScopeHint": "backend/src/Application/Services/CuentaBancariaService.cs;backend/src/Application/Bancos/*Error*.cs;backend/src/Application/Bancos/*Result*.cs;backend/tests/InventoryApp.Tests/Application/Bancos/*CuentaBancaria*Service*Tests.cs;backend/tests/InventoryApp.Tests/Application/Bancos/*Error*Tests.cs",
+  "prompt": "N4.2.D ERROR_CONTRACT targeted R2 FINAL. Prior R2 transport failed PRE_SESSION because its manifest schema used incompatible field names; no Jules attempt was consumed. Work against exact current Desarrollo base d4afd03a093c87a3c90526376bcaad3039035ae7. ATTEMPT1 created an isolated BancosError/BancosResult abstraction not wired to the actual CuentaBancariaService seam, so it was not accepted. Produce a causal, USED error contract at the current CuentaBancaria application-service boundary, aligned with existing VariApp API/application error conventions. Do not leave unused parallel abstractions and do not conflict with the current service tests lane: modify production service/error/result files and only focused error-contract tests, avoiding broad service-test rewrites. Preserve repository/domain contracts. Run targeted build/tests and return material patch plus two independent SELF_REVIEW_PASS markers. This is ATTEMPT2/2 FINAL; R3 prohibited. No main, Production, branches, push, merge, force-push, secrets or deploy."
+}
