@@ -1,5 +1,5 @@
 .cuentas-bancarias-container {
-  padding: 1.5rem;
+  padding: var(--space-6, 1.5rem);
   max-width: 1200px;
   margin: 0 auto;
 }
@@ -8,27 +8,30 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--space-6, 1.5rem);
+  flex-wrap: wrap;
+  gap: var(--space-4, 1rem);
 }
 
 .filters-section {
   display: flex;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  gap: var(--space-4, 1rem);
+  margin-bottom: var(--space-6, 1.5rem);
   flex-wrap: wrap;
 }
 
 .form-section {
-  margin-bottom: 2rem;
-  padding: 1.5rem;
-  background-color: #f5f5f5;
-  border-radius: 4px;
+  margin-bottom: var(--space-8, 2rem);
+  padding: var(--space-6, 1.5rem);
+  background-color: var(--color-surface, #f5f5f5);
+  border: 1px solid var(--color-border, #d9e0e8);
+  border-radius: var(--radius-md, 4px);
 }
 
 .form-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1rem;
+  gap: var(--space-4, 1rem);
 }
 
 .table-container {
@@ -36,7 +39,8 @@
   width: 100%;
   overflow-x: auto;
   box-shadow: 0 2px 4px rgb(0 0 0 / 10%);
-  border-radius: 4px;
+  border-radius: var(--radius-md, 4px);
+  -webkit-overflow-scrolling: touch;
 }
 
 table {
@@ -45,7 +49,7 @@ table {
 
 .acciones-cell {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--space-2, 0.5rem);
 }
 
 .loading-shade {
@@ -56,4 +60,11 @@ table {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+@media (max-width: 680px) {
+  .header-section {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
