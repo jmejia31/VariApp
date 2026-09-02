@@ -1,0 +1,13 @@
+{
+  "manifestVersion": "v328",
+  "dispatchId": "20260902T0749HND-N42F-AUDIT-CONTRACT-C2",
+  "taskId": "N4.2.F.AUDIT_EVENT_CONTRACT_TESTS",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "bc649b88548e66e1b5ae8725878eb69920c1e7ce",
+  "taskAttempt": 2,
+  "maxAttempts": 2,
+  "pipelineOnly": true,
+  "fileScopeHint": "backend/tests/**/*CuentaBancaria*Audit*;backend/tests/**/*Auditoria*;backend/src/**/*CuentaBancaria*;backend/src/**/*Auditoria*",
+  "prompt": "R2 FINAL causal after A1 session 13684845953762041129. A1 found CuentaBancariaService lacks IAuditoriaService/ICurrentUserService and returned an empty patch, but only ran a dummy echo. Revalidate exact current code against the repository's established audit convention: verify whether AuditableEntity, DbContext/SaveChanges interceptors, service-level RegistrarAsync calls, or another existing mechanism already provides create/update/activate/deactivate audit events. Do NOT add dummy tests and do NOT invent a new audit subsystem. If an existing applicable audit mechanism truly exists, add the smallest real non-duplicative tests proving it. If capability is genuinely absent, return EMPTY patch with exact BLOCKER evidence naming missing dependencies/mechanism and nearest established service convention. ATTEMPT=2/2: unresolved blocker => ChatGPT/VAEP QA_TAKEOVER, NEVER R3. Run focused real tests when possible and include SELF_REVIEW_PASS_1/2 plus full diff/status/temp hygiene. Do not promote N4.2.F while CURRENT_PARENT N4.2.E remains fail-closed."
+}
