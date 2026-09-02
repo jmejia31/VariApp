@@ -1,0 +1,13 @@
+{
+  "manifestVersion": "v329",
+  "dispatchId": "20260902T0954HND-N42F-OBSERVABILITY-CONTRACT-D2-RECOVERY2",
+  "taskId": "N4.2.F.OBSERVABILITY_CORRELATION_TESTS",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "3857b4722bc9ba57b1e98efa36821ef14d76dfff",
+  "taskAttempt": 2,
+  "maxAttempts": 2,
+  "pipelineOnly": false,
+  "fileScopeHint": "backend/tests/**/*CuentaBancaria*Observability*;backend/tests/**/*Correlation*;backend/tests/**/*Logging*;backend/src/**/*Middleware*;backend/src/**/*CuentaBancaria*",
+  "prompt": "VAEP/Jules v3.29 THROUGHPUT-HARD. PRE-SESSION TRANSPORT RECOVERY of the SAME ATTEMPT2/2; prior transport produced no correlated Jules session/useful activity and does NOT consume another attempt. N4.2.F is CURRENT_PARENT. Revalidate exact current code and real request-correlation/logging conventions. Do NOT add unconditional Assert.Fail tests, dummy evidence, or invent telemetry. If an existing hook truly applies, add only the smallest real non-duplicative implementation/test delta needed for N4.2.F observability/correlation DoD. If capability is absent, return EMPTY patch with exact BLOCKER evidence naming the missing production hook and nearest established convention so ChatGPT/VAEP performs QA_TAKEOVER. ATTEMPT=2/2; unresolved blocker => QA_TAKEOVER, NEVER R3. Include focused tests when real, SELF_REVIEW_PASS_1/2, full diff/status/temp hygiene. No main/Produccion/new branch/merge/auto-merge/force-push/secrets/deploy."
+}
