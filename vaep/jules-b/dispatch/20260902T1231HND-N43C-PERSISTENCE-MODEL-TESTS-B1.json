@@ -1,0 +1,12 @@
+{
+  "manifestVersion": "v329",
+  "dispatchId": "20260902T1231HND-N43C-PERSISTENCE-MODEL-TESTS-B1",
+  "taskId": "N4.3.C.PERSISTENCE_MODEL_TESTS",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "9a78cac15a42b21b503d3b504ba50b412dbe4983",
+  "taskAttempt": 1,
+  "maxAttempts": 2,
+  "fileScopeHint": "backend/tests/**/Persistence/**; backend/tests/**/*Conciliacion*.cs",
+  "prompt": "VAEP/Jules v3.29 THROUGHPUT-HARD. CURRENT_PARENT=N4.3.C. Add ONLY persistence model/contract tests for the already materialized reconciliation domain. Verify EF metadata expectations for keys, FKs/relationships, required properties, delete behavior, uniqueness/business indexes and bounded lengths for ConciliacionBancaria, MovimientoEstadoCuenta and MatchConciliacion. Tests only: do NOT edit production mappings, migration/snapshot, services/controllers/frontend/workflows/secrets/deploy. Revalidate exact PRIMARY_BASE_HEAD. Tests should expose real persistence contract defects rather than duplicate domain tests. Run proportional test/build checks. Return patch artifact with SELF_REVIEW_PASS_1/PASS_2, full diff, git status, temp hygiene. ATTEMPT1/2; no R3 exists."
+}
