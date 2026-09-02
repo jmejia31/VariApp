@@ -1,0 +1,13 @@
+{
+  "manifestVersion": "v320",
+  "dispatchId": "VAEP-JULES-D-N42E-ROUTE-RBAC-R2-20260901T2309HND",
+  "taskId": "N4.2.E.FRONTEND_ROUTE_RBAC",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "232407767e480bd7259b60a8f259b67ac4c640c6",
+  "taskAttempt": 2,
+  "maxAttempts": 2,
+  "recoveryOf": "VAEP-JULES-C-N42E-ROUTE-RBAC-C1-REC1-20260901T2232HND",
+  "fileScopeHint": "frontend/src/app/app.routes.ts only",
+  "prompt": "VAEP v3.28 CAUSAL R2 FINAL for logical task N4.2.E.FRONTEND_ROUTE_RBAC on exact base 232407767e480bd7259b60a8f259b67ac4c640c6. Prior Jules C attempt1 completed with real session but produced an empty patch, so attempt1 is consumed and lane C has moved to another scope. Implement the missing route/RBAC material now in app.routes.ts only, following existing authGuard + permisoGuard conventions. Route must target the canonical new feature path ./features/cuentas-bancarias/cuentas-bancarias.component and use Finanzas/Ver permission. Choose a simple canonical URL 'cuentas-bancarias'; do NOT invent /tesoreria prefix. Do not edit the feature component, navigation shell, service/models, backend or tests. No workflows/other manifests/main/Produccion/branches/merge/auto-merge/force-push/secrets/deploy. Return material patch and SELF_REVIEW_PASS_1 + SELF_REVIEW_PASS_2. ATTEMPT 2/2 FINAL; failure/rejection => QA_TAKEOVER, NO R3."
+}
