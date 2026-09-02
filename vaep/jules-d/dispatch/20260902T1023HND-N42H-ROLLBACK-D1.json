@@ -1,0 +1,13 @@
+{
+  "manifestVersion": "v329",
+  "dispatchId": "20260902T1023HND-N42H-ROLLBACK-D1",
+  "taskId": "N4.2.H.ROLLBACK_EVIDENCE",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "12c61a825801e31936556893a6039587249ec1b9",
+  "taskAttempt": 1,
+  "maxAttempts": 2,
+  "pipelineOnly": false,
+  "fileScopeHint": "docs/ROLLBACK_N4_2_BANCOS.md",
+  "prompt": "VAEP/Jules v3.29 THROUGHPUT-HARD. This is a NEW logical task, not continuation/R3 of prior D E2E work. Create only docs/ROLLBACK_N4_2_BANCOS.md. Document safe rollback boundaries for N4.2 Bancos in Desarrollo: application/audit changes, idempotency and migration implications, verification after rollback, and explicit prohibition on Produccion/deploy/merge. Use repository facts only; do not fabricate backups or executed production actions. SELF_REVIEW_PASS_1/2 and clean single-file diff."
+}
