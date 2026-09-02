@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, effect, inject, signal } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -14,7 +14,8 @@ import {
   CreateCuentaBancariaDto,
   CuentaBancaria,
   CuentaBancariaQueryFilter,
-  EstadoCuentaBancaria
+  EstadoCuentaBancaria,
+  UpdateCuentaBancariaDto
 } from '../../core/models/cuenta-bancaria';
 import { ListNavigationStateService } from '../../core/navigation/list-navigation-state.service';
 import { CuentaBancariaService } from '../../core/services/cuenta-bancaria.service';
@@ -54,8 +55,10 @@ export class CuentasBancariasComponent implements OnInit {
   readonly loading = signal(true);
   readonly submitting = signal(false);
   readonly puedeCrear = signal(false);
+  readonly puedeEditar = signal(false);
   readonly puedeActivar = signal(false);
   readonly puedeDesactivar = signal(false);
+  readonly cuentaEnEdicion = signal<CuentaBancaria | null>(null);
   readonly columnasMostradas = ['nombre', 'numeroCuenta', 'moneda', 'estado', 'acciones'];
 
   search = '';
@@ -76,10 +79,17 @@ export class CuentasBancariasComponent implements OnInit {
 
   constructor() {
     this.searchSubject.pipe(debounceTime(250)).subscribe(() => this.aplicarFiltros());
+    effect(() => {
+      if (!this.mostrarFormulario()) {
+        this.cuentaEnEdicion.set(null);
+        this.formulario.reset({ moneda: 'HNL', saldoInicial: 0, bancoId: 0, nombre: '', numeroCuenta: '' });
+      }
+    }, { allowSignalWrites: true });
   }
 
   ngOnInit(): void {
     this.puedeCrear.set(this.permisos.puede('Finanzas', 'Crear'));
+    this.puedeEditar.set(this.permisos.puede('Finanzas', 'Editar'));
     this.puedeActivar.set(this.permisos.puede('Finanzas', 'Activar'));
     this.puedeDesactivar.set(this.permisos.puede('Finanzas', 'Desactivar'));
 
@@ -136,8 +146,27 @@ export class CuentasBancariasComponent implements OnInit {
     }
     if (this.submitting()) return;
 
-    const dto: CreateCuentaBancariaDto = this.formulario.getRawValue();
     this.submitting.set(true);
+    const formValue = this.formulario.getRawValue();
+    const cuentaEditada = this.cuentaEnEdicion();
+
+    if (cuentaEditada) {
+      const dto: UpdateCuentaBancariaDto = { nombre: formValue.nombre };
+      this.cuentaService.update(cuentaEditada.id, dto)
+        .pipe(finalize(() => this.submitting.set(false)))
+        .subscribe({
+          next: () => {
+            this.mostrarFormulario.set(false);
+            this.cuentaEnEdicion.set(null);
+            this.formulario.reset({ moneda: 'HNL', saldoInicial: 0, bancoId: 0, nombre: '', numeroCuenta: '' });
+            this.cargarCuentas();
+          },
+          error: () => undefined
+        });
+      return;
+    }
+
+    const dto: CreateCuentaBancariaDto = formValue;
     this.cuentaService.create(dto)
       .pipe(finalize(() => this.submitting.set(false)))
       .subscribe({
@@ -148,6 +177,19 @@ export class CuentasBancariasComponent implements OnInit {
         },
         error: () => undefined
       });
+  }
+
+  editar(cuenta: CuentaBancaria): void {
+    if (!this.puedeEditar()) return;
+    this.cuentaEnEdicion.set(cuenta);
+    this.formulario.patchValue({
+      nombre: cuenta.nombre,
+      numeroCuenta: cuenta.numeroCuenta,
+      moneda: cuenta.moneda,
+      saldoInicial: cuenta.saldoInicial,
+      bancoId: cuenta.bancoId
+    });
+    this.mostrarFormulario.set(true);
   }
 
   activar(cuenta: CuentaBancaria): void {
