@@ -1,0 +1,12 @@
+{
+  "manifestVersion": "v320",
+  "dispatchId": "VAEP-JULES-B-N42E-COMPONENT-TESTS-A1-20260902T0012HND",
+  "taskId": "N4.2.E.FRONTEND_COMPONENT_TESTS",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "5923282e65c04ed2486d1a1ee763ce8f6b92fbbd",
+  "taskAttempt": 1,
+  "maxAttempts": 2,
+  "fileScopeHint": "frontend/src/app/features/cuentas-bancarias/cuentas-bancarias.component.spec.ts only",
+  "prompt": "VAEP v3.28. New independent scope after N4.2.E.FRONTEND_BASIC_FEATURE R2 exhausted and QA_TAKEOVER material was integrated. Exact base 5923282e65c04ed2486d1a1ee763ce8f6b92fbbd. Create only cuentas-bancarias.component.spec.ts with meaningful unit coverage for initialization, canonical paged list items, Crear permission, distinct Finanzas/Activar and Finanzas/Desactivar permission gates, activation/deactivation calls, and safe create behavior. Use current component/service/navigation contracts exactly; no any-casts masking contract errors. Do not modify product code, HTML, SCSS, routes, backend, workflows, other manifests, main, Produccion, branches, secrets or deploy. Run focused Angular test/type validation where available and return material patch plus SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2."
+}
