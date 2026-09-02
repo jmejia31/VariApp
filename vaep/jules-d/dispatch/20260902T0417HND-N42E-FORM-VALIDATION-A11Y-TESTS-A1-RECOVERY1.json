@@ -1,0 +1,12 @@
+{
+  "manifestVersion": "v328",
+  "dispatchId": "20260902T0417HND-N42E-FORM-VALIDATION-A11Y-TESTS-A1-RECOVERY1",
+  "taskId": "N4.2.E.FORM_VALIDATION_A11Y_TESTS",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "ccde4447eba4b05bbceab652779c6313e493534f",
+  "taskAttempt": 1,
+  "maxAttempts": 2,
+  "fileScopeHint": "frontend/src/app/features/cuentas-bancarias/cuentas-bancarias.component.spec.ts",
+  "prompt": "PRE_SESSION_TRANSPORT_RECOVERY of 20260902T0408HND-N42E-FORM-VALIDATION-A11Y-TESTS-A1 after >=10m without correlated Jules session/activity. SAME logical task; transport failure does not consume an attempt. Add the smallest non-duplicated component tests for the just-integrated CuentaBancaria form validation feedback: verify required/min error visibility after controls are touched and preserve existing accessibility/state behavior. Do not edit production HTML/TS/service/model files. Inspect the current spec first and avoid duplicating existing invalid-submit tests. Run proportional frontend tests and report exact evidence. No backend/routes/GitHub writes from Jules/Production/main/secrets/deploy. Include SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2."
+}
