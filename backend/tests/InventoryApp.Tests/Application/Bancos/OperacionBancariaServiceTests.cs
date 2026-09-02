@@ -43,6 +43,7 @@ public class OperacionBancariaServiceTests
         _mockCuentaRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(CreateActiveCuenta());
         await _service.RegistrarRetiroAsync(dto, 99);
         _mockMovimientoRepo.Verify(r => r.AddAsync(It.Is<MovimientoFinanciero>(m => m.Tipo == TipoMovimientoFinanciero.Egreso && m.Monto == 200m && m.CreadoPorUsuarioId == 99 && m.Descripcion!.Contains("key2"))), Times.Once);
+        _mockMovimientoRepo.Verify(r => r.SaveChangesAsync(), Times.Once);
     }
 
     [Fact]
@@ -58,6 +59,7 @@ public class OperacionBancariaServiceTests
         await _service.RegistrarTransferenciaAsync(dto, 99);
         _mockMovimientoRepo.Verify(r => r.AddAsync(It.Is<MovimientoFinanciero>(m => m.Tipo == TipoMovimientoFinanciero.Egreso && m.Monto == 300m && m.Descripcion!.Contains("key3-Egreso"))), Times.Once);
         _mockMovimientoRepo.Verify(r => r.AddAsync(It.Is<MovimientoFinanciero>(m => m.Tipo == TipoMovimientoFinanciero.Ingreso && m.Monto == 300m && m.Descripcion!.Contains("key3-Ingreso"))), Times.Once);
+        _mockMovimientoRepo.Verify(r => r.SaveChangesAsync(), Times.Once);
     }
 
     [Fact]
@@ -66,5 +68,38 @@ public class OperacionBancariaServiceTests
         var dto = new DepositoBancarioDto { CuentaId = 999, Monto = 500m, Referencia = "REF-1", IdempotencyKey = "key1" };
         _mockCuentaRepo.Setup(r => r.GetByIdAsync(999)).ReturnsAsync((CuentaBancaria?)null);
         await Assert.ThrowsAsync<ArgumentException>(() => _service.RegistrarDepositoAsync(dto, 99));
+        _mockMovimientoRepo.Verify(r => r.AddAsync(It.IsAny<MovimientoFinanciero>()), Times.Never);
+        _mockMovimientoRepo.Verify(r => r.SaveChangesAsync(), Times.Never);
+    }
+
+    [Fact]
+    public async Task RegistrarRetiro_ThrowsArgumentException_WhenCuentaNotFound()
+    {
+        var dto = new RetiroBancarioDto { CuentaId = 999, Monto = 200m, Referencia = "REF-2", IdempotencyKey = "key2" };
+        _mockCuentaRepo.Setup(r => r.GetByIdAsync(999)).ReturnsAsync((CuentaBancaria?)null);
+        await Assert.ThrowsAsync<ArgumentException>(() => _service.RegistrarRetiroAsync(dto, 99));
+        _mockMovimientoRepo.Verify(r => r.AddAsync(It.IsAny<MovimientoFinanciero>()), Times.Never);
+        _mockMovimientoRepo.Verify(r => r.SaveChangesAsync(), Times.Never);
+    }
+
+    [Fact]
+    public async Task RegistrarTransferencia_ThrowsArgumentException_WhenCuentaOrigenNotFound()
+    {
+        var dto = new TransferenciaBancariaDto { CuentaId = 999, CuentaDestinoId = 2, Monto = 300m, Referencia = "REF-3", IdempotencyKey = "key3" };
+        _mockCuentaRepo.Setup(r => r.GetByIdAsync(999)).ReturnsAsync((CuentaBancaria?)null);
+        await Assert.ThrowsAsync<ArgumentException>(() => _service.RegistrarTransferenciaAsync(dto, 99));
+        _mockMovimientoRepo.Verify(r => r.AddAsync(It.IsAny<MovimientoFinanciero>()), Times.Never);
+        _mockMovimientoRepo.Verify(r => r.SaveChangesAsync(), Times.Never);
+    }
+
+    [Fact]
+    public async Task RegistrarTransferencia_ThrowsArgumentException_WhenCuentaDestinoNotFound()
+    {
+        var dto = new TransferenciaBancariaDto { CuentaId = 1, CuentaDestinoId = 999, Monto = 300m, Referencia = "REF-3", IdempotencyKey = "key3" };
+        _mockCuentaRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(CreateActiveCuenta("123"));
+        _mockCuentaRepo.Setup(r => r.GetByIdAsync(999)).ReturnsAsync((CuentaBancaria?)null);
+        await Assert.ThrowsAsync<ArgumentException>(() => _service.RegistrarTransferenciaAsync(dto, 99));
+        _mockMovimientoRepo.Verify(r => r.AddAsync(It.IsAny<MovimientoFinanciero>()), Times.Never);
+        _mockMovimientoRepo.Verify(r => r.SaveChangesAsync(), Times.Never);
     }
 }
