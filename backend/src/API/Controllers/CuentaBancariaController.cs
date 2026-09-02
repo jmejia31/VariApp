@@ -12,6 +12,7 @@ namespace InventoryApp.API.Controllers;
 [Route("cuentas-bancarias")]
 public class CuentaBancariaController : ControllerBase
 {
+    private const string CuentaNoEncontradaType = "https://varistorehn.local/problems/cuenta-bancaria-no-encontrada";
     private readonly ICuentaBancariaService _service;
 
     public CuentaBancariaController(ICuentaBancariaService service)
@@ -41,7 +42,7 @@ public class CuentaBancariaController : ControllerBase
     {
         var result = await _service.GetByIdAsync(id);
         if (result == null)
-            return NotFound();
+            return CuentaNoEncontrada(id);
 
         return Ok(result);
     }
@@ -58,15 +59,35 @@ public class CuentaBancariaController : ControllerBase
     [RequierePermiso(ModuloSistema.Finanzas, AccionPermiso.Activar)]
     public async Task<IActionResult> Activar(int id)
     {
-        await _service.ActivarAsync(id);
-        return NoContent();
+        try
+        {
+            await _service.ActivarAsync(id);
+            return NoContent();
+        }
+        catch (InvalidOperationException)
+        {
+            return CuentaNoEncontrada(id);
+        }
     }
 
     [HttpPatch("{id:int}/desactivar")]
     [RequierePermiso(ModuloSistema.Finanzas, AccionPermiso.Desactivar)]
     public async Task<IActionResult> Desactivar(int id)
     {
-        await _service.DesactivarAsync(id);
-        return NoContent();
+        try
+        {
+            await _service.DesactivarAsync(id);
+            return NoContent();
+        }
+        catch (InvalidOperationException)
+        {
+            return CuentaNoEncontrada(id);
+        }
     }
+
+    private ObjectResult CuentaNoEncontrada(int id) => Problem(
+        statusCode: StatusCodes.Status404NotFound,
+        title: "Cuenta bancaria no encontrada",
+        detail: $"No existe una cuenta bancaria con Id {id}.",
+        type: CuentaNoEncontradaType);
 }
