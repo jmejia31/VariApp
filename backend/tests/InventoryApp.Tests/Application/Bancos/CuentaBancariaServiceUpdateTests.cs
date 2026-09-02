@@ -2,6 +2,7 @@ using InventoryApp.Application.DTOs.Bancos;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Application.Services;
 using InventoryApp.Domain.Entities.Bancos;
+using InventoryApp.Domain.Enums;
 using Moq;
 using Xunit;
 
@@ -10,16 +11,18 @@ namespace InventoryApp.Tests.Application.Bancos;
 public class CuentaBancariaServiceUpdateTests
 {
     private readonly Mock<ICuentaBancariaRepository> _mockRepo;
+    private readonly Mock<IAuditoriaService> _mockAuditoria;
     private readonly CuentaBancariaService _service;
 
     public CuentaBancariaServiceUpdateTests()
     {
         _mockRepo = new Mock<ICuentaBancariaRepository>();
-        _service = new CuentaBancariaService(_mockRepo.Object);
+        _mockAuditoria = new Mock<IAuditoriaService>();
+        _service = new CuentaBancariaService(_mockRepo.Object, _mockAuditoria.Object);
     }
 
     [Fact]
-    public async Task UpdateAsync_UpdatesNombre_WhenExists()
+    public async Task UpdateAsync_UpdatesNombre_AndAudits_WhenExists()
     {
         var cuenta = new CuentaBancaria(1, "Old Name", "123", "HNL", 10m);
         var originalId = cuenta.Id;
@@ -42,10 +45,14 @@ public class CuentaBancariaServiceUpdateTests
         Assert.Equal(originalEstado, cuenta.Estado);
         _mockRepo.Verify(r => r.Update(cuenta), Times.Once);
         _mockRepo.Verify(r => r.SaveChangesAsync(), Times.Once);
+        _mockAuditoria.Verify(a => a.RegistrarAsync(
+            ModuloSistema.Finanzas, AccionPermiso.Editar,
+            It.Is<string>(s => s.Contains("New Name")), It.IsAny<int?>(), "CuentaBancaria",
+            It.IsAny<object?>(), It.IsAny<object?>(), It.IsAny<string?>(), "Exito", It.IsAny<string?>()), Times.Once);
     }
 
     [Fact]
-    public async Task UpdateAsync_Throws_WhenNotExists()
+    public async Task UpdateAsync_Throws_WhenNotExists_AndDoesNotAudit()
     {
         _mockRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync((CuentaBancaria?)null);
 
@@ -54,5 +61,6 @@ public class CuentaBancariaServiceUpdateTests
 
         _mockRepo.Verify(r => r.Update(It.IsAny<CuentaBancaria>()), Times.Never);
         _mockRepo.Verify(r => r.SaveChangesAsync(), Times.Never);
+        _mockAuditoria.VerifyNoOtherCalls();
     }
 }
