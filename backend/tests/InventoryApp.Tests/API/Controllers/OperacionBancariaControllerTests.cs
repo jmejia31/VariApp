@@ -250,4 +250,52 @@ public sealed class OperacionBancariaControllerTests
         Assert.IsType<OkResult>(result);
         _serviceMock.Verify(s => s.RegistrarConciliacionAsync(dto, usuarioId), Times.Once);
     }
+
+    [Theory]
+    [InlineData(nameof(OperacionBancariaController.RegistrarDeposito), typeof(DepositoBancarioDto))]
+    [InlineData(nameof(OperacionBancariaController.RegistrarRetiro), typeof(RetiroBancarioDto))]
+    [InlineData(nameof(OperacionBancariaController.RegistrarTransferencia), typeof(TransferenciaBancariaDto))]
+    [InlineData(nameof(OperacionBancariaController.RegistrarComision), typeof(ComisionBancariaDto))]
+    [InlineData(nameof(OperacionBancariaController.RegistrarInteres), typeof(InteresBancarioDto))]
+    [InlineData(nameof(OperacionBancariaController.RegistrarConciliacion), typeof(ConciliacionBancariaDto))]
+    public async Task TodasLasAcciones_CuandoLanzaConflictException_RetornaConflict(string methodName, Type dtoType)
+    {
+        var methodInfo = typeof(OperacionBancariaController).GetMethod(methodName);
+        Assert.NotNull(methodInfo);
+        var dto = Activator.CreateInstance(dtoType);
+        const int usuarioId = 1;
+
+        _controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext
+            {
+                User = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim(ClaimTypes.NameIdentifier, usuarioId.ToString()) }, "test"))
+            }
+        };
+
+        var exceptionInstance = new InventoryApp.Application.Exceptions.ConflictException("Simulated conflict");
+
+        if (dto is DepositoBancarioDto deposito)
+            _serviceMock.Setup(s => s.RegistrarDepositoAsync(deposito, usuarioId)).ThrowsAsync(exceptionInstance);
+        else if (dto is RetiroBancarioDto retiro)
+            _serviceMock.Setup(s => s.RegistrarRetiroAsync(retiro, usuarioId)).ThrowsAsync(exceptionInstance);
+        else if (dto is TransferenciaBancariaDto transferencia)
+            _serviceMock.Setup(s => s.RegistrarTransferenciaAsync(transferencia, usuarioId)).ThrowsAsync(exceptionInstance);
+        else if (dto is ComisionBancariaDto comision)
+            _serviceMock.Setup(s => s.RegistrarComisionAsync(comision, usuarioId)).ThrowsAsync(exceptionInstance);
+        else if (dto is InteresBancarioDto interes)
+            _serviceMock.Setup(s => s.RegistrarInteresAsync(interes, usuarioId)).ThrowsAsync(exceptionInstance);
+        else if (dto is ConciliacionBancariaDto conciliacion)
+            _serviceMock.Setup(s => s.RegistrarConciliacionAsync(conciliacion, usuarioId)).ThrowsAsync(exceptionInstance);
+
+        var middleware = new InventoryApp.API.Middleware.ExceptionHandlingMiddleware(
+            _ => (Task)methodInfo!.Invoke(_controller, new[] { dto })!,
+            Mock.Of<Microsoft.Extensions.Logging.ILogger<InventoryApp.API.Middleware.ExceptionHandlingMiddleware>>());
+
+        var httpContext = new DefaultHttpContext();
+        httpContext.Response.Body = new System.IO.MemoryStream();
+        await middleware.InvokeAsync(httpContext);
+
+        Assert.Equal(StatusCodes.Status409Conflict, httpContext.Response.StatusCode);
+    }
 }
