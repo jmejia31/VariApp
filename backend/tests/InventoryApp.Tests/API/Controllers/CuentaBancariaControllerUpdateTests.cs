@@ -1,6 +1,9 @@
+using System.Reflection;
 using InventoryApp.API.Controllers;
+using InventoryApp.API.Filters;
 using InventoryApp.Application.DTOs.Bancos;
 using InventoryApp.Application.Interfaces;
+using InventoryApp.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Xunit;
@@ -22,18 +25,58 @@ public sealed class CuentaBancariaControllerUpdateTests
     public async Task Update_RetornaNoContent_LlamaAService()
     {
         var dto = new UpdateCuentaBancariaDto { Nombre = "Nuevo Nombre" };
-        var result = await _controller.Update(5, dto);
+        var id = 5;
+
+        var result = await _controller.Update(id, dto);
+
         Assert.IsType<NoContentResult>(result);
-        _serviceMock.Verify(s => s.UpdateAsync(5, dto), Times.Once);
+        _serviceMock.Verify(s => s.UpdateAsync(id, dto), Times.Once);
     }
 
     [Fact]
     public async Task Update_RetornaProblemDetails404_CuandoNoExiste()
     {
         var dto = new UpdateCuentaBancariaDto { Nombre = "Nuevo Nombre" };
-        _serviceMock.Setup(s => s.UpdateAsync(99, dto)).ThrowsAsync(new InvalidOperationException());
-        var result = await _controller.Update(99, dto);
-        var notFound = Assert.IsType<ObjectResult>(result);
-        Assert.Equal(404, notFound.StatusCode);
+        var id = 99;
+        _serviceMock.Setup(s => s.UpdateAsync(id, dto)).ThrowsAsync(new InvalidOperationException());
+
+        var result = await _controller.Update(id, dto);
+
+        var objectResult = Assert.IsType<ObjectResult>(result);
+        Assert.Equal(404, objectResult.StatusCode);
+
+        var problemDetails = Assert.IsType<ProblemDetails>(objectResult.Value);
+        Assert.Equal(404, problemDetails.Status);
+        Assert.Equal("Cuenta bancaria no encontrada", problemDetails.Title);
+        Assert.Equal($"No existe una cuenta bancaria con Id {id}.", problemDetails.Detail);
+        Assert.Equal("https://varistorehn.local/problems/cuenta-bancaria-no-encontrada", problemDetails.Type);
+    }
+
+    [Fact]
+    public void Update_TieneAtributoHttpPut_ConRutaId()
+    {
+        var methodInfo = typeof(CuentaBancariaController).GetMethod(nameof(CuentaBancariaController.Update));
+        var attribute = methodInfo?.GetCustomAttribute<HttpPutAttribute>();
+
+        Assert.NotNull(attribute);
+        Assert.Equal("{id:int}", attribute.Template);
+    }
+
+    [Fact]
+    public void Update_TieneAtributoRequierePermiso_ParaEditarFinanzas()
+    {
+        var methodInfo = typeof(CuentaBancariaController).GetMethod(nameof(CuentaBancariaController.Update));
+        var attribute = methodInfo?.GetCustomAttribute<RequierePermisoAttribute>();
+
+        Assert.NotNull(attribute);
+
+        var moduloField = typeof(RequierePermisoAttribute).GetField("_modulo", BindingFlags.NonPublic | BindingFlags.Instance);
+        var accionField = typeof(RequierePermisoAttribute).GetField("_accion", BindingFlags.NonPublic | BindingFlags.Instance);
+
+        var modulo = moduloField?.GetValue(attribute);
+        var accion = accionField?.GetValue(attribute);
+
+        Assert.Equal(ModuloSistema.Finanzas, modulo);
+        Assert.Equal(AccionPermiso.Editar, accion);
     }
 }
