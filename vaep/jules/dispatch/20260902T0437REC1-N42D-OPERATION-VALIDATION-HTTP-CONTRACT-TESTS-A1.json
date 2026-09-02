@@ -1,0 +1,12 @@
+{
+  "manifestVersion": "v328",
+  "dispatchId": "20260902T0437REC1-N42D-OPERATION-VALIDATION-HTTP-CONTRACT-TESTS-A1",
+  "taskId": "N4.2.D.OPERATION_VALIDATION_HTTP_CONTRACT_TESTS",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "d605737252956231964ffc2f0e49ae9368631661",
+  "taskAttempt": 1,
+  "maxAttempts": 2,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/Controllers/OperacionesBancariasControllerTests.cs",
+  "prompt": "PRE_SESSION recovery REC1 of the SAME logical task and SAME ATTEMPT1 from dispatch 20260902T0425HND-N42D-OPERATION-VALIDATION-HTTP-CONTRACT-TESTS-A1. The original transport exceeded 10 minutes without correlated Jules session/useful activity, so this recovery does NOT consume ATTEMPT2. Revalidate exact current base first. Add the smallest non-duplicated controller/API tests proving validation failures from banking operations map to the existing fail-closed HTTP contract without changing production code. Inspect current controller tests and production exception mapping first; cover only real uncovered validation cases and preserve RBAC/idempotency contracts. Tests-only scope. If current HEAD already materializes the requested coverage, report that precisely rather than forcing duplicate changes. Run proportional backend tests and report exact evidence. No frontend/GitHub writes from Jules/Production/main/secrets/deploy. Include SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2."
+}
