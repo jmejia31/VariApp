@@ -1,5 +1,6 @@
 using InventoryApp.Application.Bancos;
 using InventoryApp.Application.DTOs.Bancos;
+using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Entities.Bancos;
@@ -20,11 +21,29 @@ public class OperacionBancariaServiceTests
     {
         _mockUnitOfWork.Setup(u => u.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()))
             .Returns<Func<Task>>(func => func());
+        _mockMovimientoRepo
+            .Setup(r => r.GetByBancosIdempotencyKeyAsync(It.IsAny<string>(), It.IsAny<int>()))
+            .ReturnsAsync(new List<MovimientoFinanciero>());
         _service = new OperacionBancariaService(_mockCuentaRepo.Object, _mockMovimientoRepo.Object, _mockUnitOfWork.Object);
     }
 
     private static CuentaBancaria CreateActiveCuenta(string numero = "123", string moneda = "HNL") =>
         new(1, "Test Bank", numero, moneda, 1000m);
+
+    private static MovimientoFinanciero ExistingDeposito(string key, decimal monto = 500m, string referencia = "REF-1") =>
+        new()
+        {
+            Tipo = TipoMovimientoFinanciero.Ingreso,
+            Categoria = CategoriaMovimientoFinanciero.Otro,
+            Concepto = $"Depósito Bancario - {referencia}",
+            Monto = monto,
+            Estado = EstadoMovimientoFinanciero.Pagado,
+            EsAutomatico = false,
+            ModuloOrigen = "Bancos",
+            ReferenciaId = 1,
+            CreadoPorUsuarioId = 99,
+            Descripcion = $"IdempotencyKey: {key}"
+        };
 
     [Fact]
     public async Task RegistrarDeposito_CreatesIngreso_WhenValid()
@@ -109,7 +128,8 @@ public class OperacionBancariaServiceTests
         var dto = new DepositoBancarioDto { CuentaId = 1, Monto = 0m, Referencia = "REF-1", IdempotencyKey = "key1" };
         _mockCuentaRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(CreateActiveCuenta("123"));
         await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => _service.RegistrarDepositoAsync(dto, 99));
-        _mockMovimientoRepo.VerifyNoOtherCalls();
+        _mockMovimientoRepo.Verify(r => r.AddAsync(It.IsAny<MovimientoFinanciero>()), Times.Never);
+        _mockMovimientoRepo.Verify(r => r.SaveChangesAsync(), Times.Never);
     }
 
     [Fact]
@@ -120,7 +140,8 @@ public class OperacionBancariaServiceTests
         origen.Desactivar();
         _mockCuentaRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(origen);
         await Assert.ThrowsAsync<InvalidOperationException>(() => _service.RegistrarDepositoAsync(dto, 99));
-        _mockMovimientoRepo.VerifyNoOtherCalls();
+        _mockMovimientoRepo.Verify(r => r.AddAsync(It.IsAny<MovimientoFinanciero>()), Times.Never);
+        _mockMovimientoRepo.Verify(r => r.SaveChangesAsync(), Times.Never);
     }
 
     [Fact]
@@ -135,7 +156,8 @@ public class OperacionBancariaServiceTests
         _mockCuentaRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(origen);
         _mockCuentaRepo.Setup(r => r.GetByIdAsync(2)).ReturnsAsync(destino);
         await Assert.ThrowsAsync<InvalidOperationException>(() => _service.RegistrarTransferenciaAsync(dto, 99));
-        _mockMovimientoRepo.VerifyNoOtherCalls();
+        _mockMovimientoRepo.Verify(r => r.AddAsync(It.IsAny<MovimientoFinanciero>()), Times.Never);
+        _mockMovimientoRepo.Verify(r => r.SaveChangesAsync(), Times.Never);
     }
 
     [Fact]
@@ -146,7 +168,8 @@ public class OperacionBancariaServiceTests
         typeof(CuentaBancaria).GetProperty("Id")?.SetValue(origen, 1);
         _mockCuentaRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(origen);
         await Assert.ThrowsAsync<InvalidOperationException>(() => _service.RegistrarTransferenciaAsync(dto, 99));
-        _mockMovimientoRepo.VerifyNoOtherCalls();
+        _mockMovimientoRepo.Verify(r => r.AddAsync(It.IsAny<MovimientoFinanciero>()), Times.Never);
+        _mockMovimientoRepo.Verify(r => r.SaveChangesAsync(), Times.Never);
     }
 
     [Fact]
@@ -160,6 +183,44 @@ public class OperacionBancariaServiceTests
         _mockCuentaRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(origen);
         _mockCuentaRepo.Setup(r => r.GetByIdAsync(2)).ReturnsAsync(destino);
         await Assert.ThrowsAsync<InvalidOperationException>(() => _service.RegistrarTransferenciaAsync(dto, 99));
-        _mockMovimientoRepo.VerifyNoOtherCalls();
+        _mockMovimientoRepo.Verify(r => r.AddAsync(It.IsAny<MovimientoFinanciero>()), Times.Never);
+        _mockMovimientoRepo.Verify(r => r.SaveChangesAsync(), Times.Never);
+    }
+
+    [Fact]
+    public async Task RegistrarDeposito_Idempotency_SameKeyAndPayload_DoesNotDuplicate()
+    {
+        const string key = "idemp-same-1";
+        var dto = new DepositoBancarioDto { CuentaId = 1, Monto = 500m, Referencia = "REF-1", IdempotencyKey = key };
+        _mockCuentaRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(CreateActiveCuenta("123"));
+        _mockMovimientoRepo
+            .SetupSequence(r => r.GetByBancosIdempotencyKeyAsync(key, 99))
+            .ReturnsAsync(new List<MovimientoFinanciero>())
+            .ReturnsAsync(new List<MovimientoFinanciero> { ExistingDeposito(key) });
+
+        await _service.RegistrarDepositoAsync(dto, 99);
+        await _service.RegistrarDepositoAsync(dto, 99);
+
+        _mockMovimientoRepo.Verify(r => r.AddAsync(It.IsAny<MovimientoFinanciero>()), Times.Once);
+        _mockMovimientoRepo.Verify(r => r.SaveChangesAsync(), Times.Once);
+    }
+
+    [Fact]
+    public async Task RegistrarDeposito_Idempotency_SameKeyDifferentPayload_ThrowsConflictException()
+    {
+        const string key = "idemp-diff-1";
+        var dto1 = new DepositoBancarioDto { CuentaId = 1, Monto = 500m, Referencia = "REF-1", IdempotencyKey = key };
+        var dto2 = new DepositoBancarioDto { CuentaId = 1, Monto = 600m, Referencia = "REF-2", IdempotencyKey = key };
+        _mockCuentaRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(CreateActiveCuenta("123"));
+        _mockMovimientoRepo
+            .SetupSequence(r => r.GetByBancosIdempotencyKeyAsync(key, 99))
+            .ReturnsAsync(new List<MovimientoFinanciero>())
+            .ReturnsAsync(new List<MovimientoFinanciero> { ExistingDeposito(key) });
+
+        await _service.RegistrarDepositoAsync(dto1, 99);
+        await Assert.ThrowsAsync<ConflictException>(() => _service.RegistrarDepositoAsync(dto2, 99));
+
+        _mockMovimientoRepo.Verify(r => r.AddAsync(It.IsAny<MovimientoFinanciero>()), Times.Once);
+        _mockMovimientoRepo.Verify(r => r.SaveChangesAsync(), Times.Once);
     }
 }
