@@ -1,3 +1,4 @@
+using System.Reflection;
 using InventoryApp.API.Controllers;
 using InventoryApp.API.Filters;
 using InventoryApp.Application.DTOs.Bancos;
@@ -25,41 +26,70 @@ public sealed class CuentaBancariaControllerTests
     public void Controller_ExigeAutenticacionYRutaCanonica()
     {
         var type = typeof(CuentaBancariaController);
-
         Assert.Single(type.GetCustomAttributes(typeof(ApiControllerAttribute), inherit: true));
         Assert.Single(type.GetCustomAttributes(typeof(AuthorizeAttribute), inherit: true));
-
         var route = Assert.Single(type.GetCustomAttributes(typeof(RouteAttribute), inherit: true).Cast<RouteAttribute>());
         Assert.Equal("cuentas-bancarias", route.Template);
     }
 
-    [Fact]
-    public async Task GetAll_RetornaOkConLista_VerificaPermiso()
+    [Theory]
+    [InlineData(nameof(CuentaBancariaController.GetAll), typeof(HttpGetAttribute), null, AccionPermiso.Ver)]
+    [InlineData(nameof(CuentaBancariaController.GetActivas), typeof(HttpGetAttribute), "activas", AccionPermiso.Ver)]
+    [InlineData(nameof(CuentaBancariaController.GetById), typeof(HttpGetAttribute), "{id:int}", AccionPermiso.Ver)]
+    [InlineData(nameof(CuentaBancariaController.Create), typeof(HttpPostAttribute), null, AccionPermiso.Crear)]
+    [InlineData(nameof(CuentaBancariaController.Activar), typeof(HttpPatchAttribute), "{id:int}/activar", AccionPermiso.Activar)]
+    [InlineData(nameof(CuentaBancariaController.Desactivar), typeof(HttpPatchAttribute), "{id:int}/desactivar", AccionPermiso.Desactivar)]
+    public void Acciones_TienenAtributosDeRutaYPermisoCorrectos(string methodName, Type httpVerbType, string? expectedTemplate, AccionPermiso expectedPermiso)
     {
-        var expected = new List<CuentaBancariaDto> { new CuentaBancariaDto { Id = 1 } };
+        var methodInfo = typeof(CuentaBancariaController).GetMethod(methodName);
+        Assert.NotNull(methodInfo);
+        var httpAttr = methodInfo!.GetCustomAttributes(httpVerbType, inherit: false).FirstOrDefault();
+        Assert.NotNull(httpAttr);
+        if (expectedTemplate is not null)
+        {
+            var template = httpVerbType.GetProperty("Template")?.GetValue(httpAttr) as string;
+            Assert.Equal(expectedTemplate, template);
+        }
+        var permisoAttr = methodInfo.GetCustomAttributes(typeof(RequierePermisoAttribute), inherit: false).Cast<RequierePermisoAttribute>().Single();
+        var moduloField = typeof(RequierePermisoAttribute).GetField("_modulo", BindingFlags.NonPublic | BindingFlags.Instance);
+        var accionField = typeof(RequierePermisoAttribute).GetField("_accion", BindingFlags.NonPublic | BindingFlags.Instance);
+        Assert.NotNull(moduloField);
+        Assert.NotNull(accionField);
+        Assert.Equal(ModuloSistema.Finanzas, (ModuloSistema)moduloField!.GetValue(permisoAttr)!);
+        Assert.Equal(expectedPermiso, (AccionPermiso)accionField!.GetValue(permisoAttr)!);
+    }
+
+    [Fact]
+    public async Task GetAll_RetornaOkConLista()
+    {
+        var expected = new List<CuentaBancariaDto> { new() { Id = 1 } };
         _serviceMock.Setup(s => s.GetAllAsync()).ReturnsAsync(expected);
-
-        var methodInfo = typeof(CuentaBancariaController).GetMethod(nameof(CuentaBancariaController.GetAll));
-        var permisoAttr = methodInfo?.GetCustomAttributes(typeof(RequierePermisoAttribute), inherit: false)
-            .Cast<RequierePermisoAttribute>()
-            .FirstOrDefault();
-
         var result = await _controller.GetAll();
-
-        Assert.NotNull(permisoAttr);
         var okResult = Assert.IsType<OkObjectResult>(result);
         Assert.Equal(expected, okResult.Value);
         _serviceMock.Verify(s => s.GetAllAsync(), Times.Once);
     }
 
     [Fact]
-    public async Task GetById_CuandoNoExiste_RetornaNotFound()
+    public async Task GetActivas_RetornaOkConLista()
+    {
+        var expected = new List<CuentaBancariaDto> { new() { Id = 2 } };
+        _serviceMock.Setup(s => s.GetActivasAsync()).ReturnsAsync(expected);
+        var result = await _controller.GetActivas();
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        Assert.Equal(expected, okResult.Value);
+        _serviceMock.Verify(s => s.GetActivasAsync(), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetById_CuandoNoExiste_RetornaProblemDetails404()
     {
         _serviceMock.Setup(s => s.GetByIdAsync(99)).ReturnsAsync((CuentaBancariaDto?)null);
-
         var result = await _controller.GetById(99);
-
-        Assert.IsType<NotFoundResult>(result);
+        var notFound = Assert.IsType<ObjectResult>(result);
+        Assert.Equal(404, notFound.StatusCode);
+        var problem = Assert.IsType<ProblemDetails>(notFound.Value);
+        Assert.Equal("Cuenta bancaria no encontrada", problem.Title);
         _serviceMock.Verify(s => s.GetByIdAsync(99), Times.Once);
     }
 
@@ -68,9 +98,7 @@ public sealed class CuentaBancariaControllerTests
     {
         var expected = new CuentaBancariaDto { Id = 1 };
         _serviceMock.Setup(s => s.GetByIdAsync(1)).ReturnsAsync(expected);
-
         var result = await _controller.GetById(1);
-
         var okResult = Assert.IsType<OkObjectResult>(result);
         Assert.Equal(expected, okResult.Value);
         _serviceMock.Verify(s => s.GetByIdAsync(1), Times.Once);
@@ -82,13 +110,26 @@ public sealed class CuentaBancariaControllerTests
         var dto = new CreateCuentaBancariaDto { Nombre = "Test" };
         var created = new CuentaBancariaDto { Id = 10, Nombre = "Test" };
         _serviceMock.Setup(s => s.AddAsync(dto)).ReturnsAsync(created);
-
         var result = await _controller.Create(dto);
-
         var createdResult = Assert.IsType<CreatedAtActionResult>(result);
         Assert.Equal(nameof(CuentaBancariaController.GetById), createdResult.ActionName);
         Assert.Equal(10, createdResult.RouteValues?["id"]);
         Assert.Equal(created, createdResult.Value);
-        _serviceMock.Verify(s => s.AddAsync(dto), Times.Once);
+    }
+
+    [Fact]
+    public async Task Activar_RetornaNoContent_LlamaAService()
+    {
+        var result = await _controller.Activar(5);
+        Assert.IsType<NoContentResult>(result);
+        _serviceMock.Verify(s => s.ActivarAsync(5), Times.Once);
+    }
+
+    [Fact]
+    public async Task Desactivar_RetornaNoContent_LlamaAService()
+    {
+        var result = await _controller.Desactivar(5);
+        Assert.IsType<NoContentResult>(result);
+        _serviceMock.Verify(s => s.DesactivarAsync(5), Times.Once);
     }
 }
