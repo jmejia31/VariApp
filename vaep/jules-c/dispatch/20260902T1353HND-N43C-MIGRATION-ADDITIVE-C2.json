@@ -1,0 +1,14 @@
+{
+  "manifestVersion": "v329",
+  "dispatchId": "20260902T1353HND-N43C-MIGRATION-ADDITIVE-C2",
+  "taskId": "N4.3.C.MIGRATION_ADDITIVE",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "9259ab3f7229ac0e1bb46d7752d3dba944f99895",
+  "taskAttempt": 2,
+  "maxAttempts": 2,
+  "reworkOf": "20260902T1256HND-N43C-MIGRATION-ADDITIVE-C1-REC2",
+  "reworkReason": "CORRECTED_MAPPING_MATERIALIZED__REGENERATE_MIGRATION_ON_EXACT_BASE",
+  "fileScopeHint": "backend/src/Infrastructure/Persistence/Migrations/*N43C*; backend/src/Infrastructure/Persistence/Migrations/AppDbContextModelSnapshot.cs",
+  "prompt": "VAEP/Jules v3.29 THROUGHPUT-HARD causal R2 FINAL. CURRENT_PARENT=N4.3.C. Corrected persistence mapping is now materialized on exact PRIMARY_BASE_HEAD. Generate ONLY the additive EF Core migration, Designer and model snapshot required by the current bank-reconciliation model. Preserve all historical migrations/data and do not rewrite prior migrations. Required model: ConciliacionesBancarias -> CuentaBancaria FK Restrict; MovimientosEstadoCuenta -> ConciliacionBancaria FK Cascade; MatchesConciliacion -> MovimientoEstadoCuenta Cascade and MovimientoFinanciero Restrict; decimal(18,2); Observaciones max 500; IdempotencyKey required max 100 with UNIQUE composite business key (ConciliacionBancariaId, IdempotencyKey), never global; Concepto max 250; Referencia max 100; unique match composite (MovimientoEstadoCuentaId, MovimientoFinancieroId); audit-name lengths aligned with current mapping. Do NOT modify domain, production mapping, services/controllers/frontend/workflows/secrets/deploy. Run backend build, EF pending-model check and proportional provider SQL/up-down integrity checks where available. Return reviewable patch artifact with SELF_REVIEW_PASS_1/PASS_2, full diff, git status and temp hygiene. ATTEMPT2/2 FINAL; if review fails or exhausts => QA_TAKEOVER; NO R3."
+}
