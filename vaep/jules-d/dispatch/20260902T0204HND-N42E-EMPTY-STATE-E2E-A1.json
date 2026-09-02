@@ -1,0 +1,12 @@
+{
+  "manifestVersion": "v328",
+  "dispatchId": "VAEP-JULES-D-N42E-EMPTY-STATE-E2E-A1-20260902T0204HND",
+  "taskId": "N4.2.E.FRONTEND_EMPTY_STATE_E2E",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "a7dccb6fcb6563483ccefabc04eace416e0c6a0a",
+  "taskAttempt": 1,
+  "maxAttempts": 2,
+  "fileScopeHint": "frontend/e2e/cuentas-bancarias-empty-state.spec.ts only",
+  "prompt": "VAEP v3.28 NEXT SAFE handoff after successful review/integration of Jules D R2 empty/loading-state template fix. Exact base a7dccb6fcb6563483ccefabc04eace416e0c6a0a. Work ONLY in frontend/e2e/cuentas-bancarias-empty-state.spec.ts; create it only if the repo's existing Playwright structure supports that path/pattern. Add a material, deterministic E2E/accessibility contract for the current Cuentas Bancarias empty/loading behavior: existing loading spinner remains sole loading indicator; empty message is exposed only after loading completes; semantic status is accessible. Reuse existing auth/test helpers and routes only when they actually exist. If the exact scenario cannot be made deterministic from current fixtures, make no product changes and report the blocker instead of inventing APIs/data. Do not modify component TS/HTML/SCSS, services, backend, routes, manifests/workflows or any other file. Do not touch main, Produccion, branches, secrets or deploy. Run the focused Playwright validation if available and return exactly one reviewable test-file patch with SELF_REVIEW_PASS_1/2 and exact limitations."
+}
