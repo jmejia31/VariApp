@@ -22,11 +22,24 @@ public class CuentaBancariaServiceUpdateTests
     public async Task UpdateAsync_UpdatesNombre_WhenExists()
     {
         var cuenta = new CuentaBancaria(1, "Old Name", "123", "HNL", 10m);
+        var originalId = cuenta.Id;
+        var originalBancoId = cuenta.BancoId;
+        var originalNumeroCuenta = cuenta.NumeroCuenta;
+        var originalMoneda = cuenta.Moneda;
+        var originalSaldoInicial = cuenta.SaldoInicial;
+        var originalEstado = cuenta.Estado;
+
         _mockRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(cuenta);
 
         await _service.UpdateAsync(1, new UpdateCuentaBancariaDto { Nombre = "New Name" });
 
         Assert.Equal("New Name", cuenta.Nombre);
+        Assert.Equal(originalId, cuenta.Id);
+        Assert.Equal(originalBancoId, cuenta.BancoId);
+        Assert.Equal(originalNumeroCuenta, cuenta.NumeroCuenta);
+        Assert.Equal(originalMoneda, cuenta.Moneda);
+        Assert.Equal(originalSaldoInicial, cuenta.SaldoInicial);
+        Assert.Equal(originalEstado, cuenta.Estado);
         _mockRepo.Verify(r => r.Update(cuenta), Times.Once);
         _mockRepo.Verify(r => r.SaveChangesAsync(), Times.Once);
     }
@@ -38,5 +51,8 @@ public class CuentaBancariaServiceUpdateTests
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             _service.UpdateAsync(1, new UpdateCuentaBancariaDto { Nombre = "New Name" }));
+
+        _mockRepo.Verify(r => r.Update(It.IsAny<CuentaBancaria>()), Times.Never);
+        _mockRepo.Verify(r => r.SaveChangesAsync(), Times.Never);
     }
 }
