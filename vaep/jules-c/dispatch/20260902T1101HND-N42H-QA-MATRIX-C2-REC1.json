@@ -1,0 +1,13 @@
+{
+  "manifestVersion": "v329",
+  "dispatchId": "20260902T1101HND-N42H-QA-MATRIX-C2-REC1",
+  "taskId": "N4.2.H.QA_CLOSURE_MATRIX",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "0e519a9644311562c92d1aceb83f35972205100a",
+  "taskAttempt": 2,
+  "maxAttempts": 2,
+  "pipelineOnly": false,
+  "fileScopeHint": "docs/qa/N4_2_H_CLOSURE_MATRIX.md",
+  "prompt": "VAEP/Jules v3.29 THROUGHPUT-HARD — PRE-SESSION TRANSPORT RECOVERY of R2 FINAL for N4.2.H.QA_CLOSURE_MATRIX. The prior R2 dispatch 20260902T1050HND-N42H-QA-MATRIX-C2 exceeded the stalled threshold without a correlated Jules session/activity, so this is a NEW transport only and does NOT consume another attempt. REVIEW_FIRST. Create only docs/qa/N4_2_H_CLOSURE_MATRIX.md from fresh repository evidence on exact base 0e519a9644311562c92d1aceb83f35972205100a. Explicitly include existing frontend/e2e/cuentas-bancarias.spec.ts and frontend/playwright.config.ts. Do not mark any gate PASS unless directly evidenced by a terminal applicable run on the exact SHA; use PRESENT/PENDING/N/A precisely. Preserve P0=0/P1=0 and exact-head CI as mandatory closure conditions. This remains attempt 2/2 FINAL. If a blocking defect remains, report QA_TAKEOVER_REQUIRED; NO R3. No main/Produccion/new branch/merge/auto-merge/force-push/secrets/deploy. SELF_REVIEW_PASS_1/2 and clean single-file diff."
+}
