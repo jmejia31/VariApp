@@ -2,6 +2,7 @@ using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities.Bancos;
 using InventoryApp.Domain.Enums.Bancos;
 using InventoryApp.Infrastructure.Persistence;
+using InventoryApp.Application.Bancos;
 using Microsoft.EntityFrameworkCore;
 
 namespace InventoryApp.Infrastructure.Repositories;
@@ -20,9 +21,31 @@ public class CuentaBancariaRepository : ICuentaBancariaRepository
         return await _context.CuentasBancarias.FirstOrDefaultAsync(c => c.Id == id);
     }
 
-    public async Task<List<CuentaBancaria>> GetAllAsync()
+    public async Task<CuentaBancariaPage<CuentaBancaria>> GetAllAsync(CuentaBancariaQueryFilter filter)
     {
-        return await _context.CuentasBancarias.ToListAsync();
+        var query = _context.CuentasBancarias.AsQueryable();
+
+        if (filter.BancoId.HasValue)
+            query = query.Where(c => c.BancoId == filter.BancoId.Value);
+
+        if (filter.Estado.HasValue)
+            query = query.Where(c => c.Estado == filter.Estado.Value);
+
+        if (!string.IsNullOrWhiteSpace(filter.Moneda))
+            query = query.Where(c => c.Moneda == filter.Moneda);
+
+        if (!string.IsNullOrWhiteSpace(filter.SearchTerm))
+            query = query.Where(c => c.Nombre.Contains(filter.SearchTerm) || c.NumeroCuenta.Contains(filter.SearchTerm));
+
+        query = query.OrderBy(c => c.Nombre).ThenBy(c => c.Id);
+
+        var totalCount = await query.CountAsync();
+        var items = await query
+            .Skip((filter.Page - 1) * filter.PageSize)
+            .Take(filter.PageSize)
+            .ToListAsync();
+
+        return new CuentaBancariaPage<CuentaBancaria>(items, filter.Page, filter.PageSize, totalCount);
     }
 
     public async Task<List<CuentaBancaria>> GetActivasAsync()
