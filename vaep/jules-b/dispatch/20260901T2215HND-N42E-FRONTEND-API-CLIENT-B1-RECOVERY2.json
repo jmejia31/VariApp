@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-B-N42E-FRONTEND-API-CLIENT-B1-RECOVERY2-20260901T2215HND",
+  "taskId": "N4.2.E.FRONTEND_API_CLIENT",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "561a173a54e50025a81641fb113edc215b405bf9",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/core/services/cuenta-bancaria.service.ts;frontend/src/app/core/models/cuenta-bancaria.ts;frontend/src/app/core/models/cuenta-bancaria-page.ts only",
+  "prompt": "VAEP v3.28 causal PRE_SESSION recovery for SAME logical task N4.2.E.FRONTEND_API_CLIENT. The original dispatch exceeded SLA without externally correlatable Jules session/activity/result. A valid recovery run was cancelled pre-session, and a subsequent recovery manifest was committed with a primaryBaseHead that did not match its actual commit parent; neither consumes a Jules attempt. Use this new manifest as the authoritative recovery. Implement only the Angular CuentaBancaria API client and canonical models in the scoped files against the exact integrated N4.2.D backend contract. Cover pagination/filters plus create/edit and deposito, retiro, transferencia, comision, interes and conciliacion DTOs/requests only as supported by current controller/DTO shapes. Do not invent endpoints/fields. No components/routes/menu/tests/workflows/backend/migrations/unrelated files. Return material patch, targeted TypeScript/build evidence and two SELF_REVIEW_PASS markers. taskAttempt remains 1/2 because no Jules session has been evidenced/consumed. R2 only after a real attempt needing causal rework; never R3. No main, Produccion, branches, merge, auto-merge, force-push, secrets or deploy."
+}
