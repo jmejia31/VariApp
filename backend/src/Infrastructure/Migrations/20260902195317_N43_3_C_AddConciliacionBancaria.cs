@@ -1,4 +1,6 @@
 using System;
+using InventoryApp.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
@@ -6,6 +8,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace InventoryApp.Infrastructure.Migrations
 {
+    [DbContext(typeof(AppDbContext))]
+    [Migration("20260902195317_N43_3_C_AddConciliacionBancaria")]
     public partial class N43_3_C_AddConciliacionBancaria : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
