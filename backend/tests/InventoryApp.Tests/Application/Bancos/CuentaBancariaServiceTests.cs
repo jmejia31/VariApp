@@ -69,4 +69,71 @@ public class CuentaBancariaServiceTests
         _mockRepo.Verify(r => r.Update(cuenta), Times.Once);
         _mockRepo.Verify(r => r.SaveChangesAsync(), Times.Once);
     }
+
+    [Fact]
+    public async Task ActivarAsync_ThrowsInvalidOperationException_WhenNotFound()
+    {
+        _mockRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync((CuentaBancaria?)null);
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _service.ActivarAsync(1));
+
+        Assert.Equal("No se encontró la cuenta con Id 1.", exception.Message);
+    }
+
+    [Fact]
+    public async Task GetAllAsync_ReturnsListOfDto()
+    {
+        var cuentas = new List<CuentaBancaria>
+        {
+            new CuentaBancaria(1, "Test 1", "123", "HNL", 10m),
+            new CuentaBancaria(2, "Test 2", "456", "HNL", 20m)
+        };
+        _mockRepo.Setup(r => r.GetAllAsync()).ReturnsAsync(cuentas);
+
+        var result = await _service.GetAllAsync();
+
+        Assert.NotNull(result);
+        Assert.Equal(2, result.Count);
+        Assert.Equal("Test 1", result[0].Nombre);
+        Assert.Equal("Test 2", result[1].Nombre);
+    }
+
+    [Fact]
+    public async Task GetActivasAsync_ReturnsListOfDto()
+    {
+        var cuentas = new List<CuentaBancaria>
+        {
+            new CuentaBancaria(1, "Test 1", "123", "HNL", 10m)
+        };
+        _mockRepo.Setup(r => r.GetActivasAsync()).ReturnsAsync(cuentas);
+
+        var result = await _service.GetActivasAsync();
+
+        Assert.NotNull(result);
+        Assert.Single(result);
+        Assert.Equal("Test 1", result[0].Nombre);
+    }
+
+    [Fact]
+    public async Task DesactivarAsync_DeactivatesAndSaves()
+    {
+        var cuenta = new CuentaBancaria(1, "Test", "123", "HNL", 10m);
+        _mockRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(cuenta);
+
+        await _service.DesactivarAsync(1);
+
+        Assert.Equal(EstadoCuentaBancaria.Inactiva, cuenta.Estado);
+        _mockRepo.Verify(r => r.Update(cuenta), Times.Once);
+        _mockRepo.Verify(r => r.SaveChangesAsync(), Times.Once);
+    }
+
+    [Fact]
+    public async Task DesactivarAsync_ThrowsInvalidOperationException_WhenNotFound()
+    {
+        _mockRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync((CuentaBancaria?)null);
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _service.DesactivarAsync(1));
+
+        Assert.Equal("No se encontró la cuenta con Id 1.", exception.Message);
+    }
 }
