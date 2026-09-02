@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-C-N42D-OPERATION-POLICY-EDGE-TESTS-R2-20260901T2114HND",
+  "taskId": "N4.2.D.OPERATION_POLICY_EDGE_TESTS",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "463707042c652f13a3644889b06e81551b091700",
+  "taskAttempt": 2,
+  "fileScopeHint": "backend/src/Application/Bancos/BancosOperationPolicy.cs;backend/tests/InventoryApp.Tests/Application/Bancos/BancosOperationPolicyEdgeTests.cs only",
+  "prompt": "VAEP v3.28 SAME_CHILD_REWORK R2 FINAL. Review of #2432 found a valid edge-case intent but unacceptable patch hygiene/scope: patch.diff was added to the repository and the policy change had malformed indentation/structure. Produce a clean patch touching ONLY BancosOperationPolicy.cs and BancosOperationPolicyEdgeTests.cs. Preserve current behavior, add fail-closed same-account detection including same transient instance, reject destination for non-transfer operations, and cover both cases with targeted tests. Never add patch.diff, temp/evidence files or unrelated changes. Return material patch, targeted build/tests and two SELF_REVIEW_PASS markers. Attempt 2/2 FINAL; on failure controller QA_TAKEOVER, NO R3. No main, Produccion, branches, merge, auto-merge, force-push, secrets or deploy."
+}
