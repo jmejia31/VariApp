@@ -1,0 +1,12 @@
+{
+  "manifestVersion": "v320",
+  "dispatchId": "VAEP-JULES-C-N42E-API-CLIENT-TESTS-C1-20260901T2308HND",
+  "taskId": "N4.2.E.FRONTEND_API_CLIENT_TESTS",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "24cc0b51167fbcf517cfb4e0b041cab887ed5cfe",
+  "taskAttempt": 1,
+  "maxAttempts": 2,
+  "fileScopeHint": "frontend/src/app/core/services/cuenta-bancaria.service.spec.ts only",
+  "prompt": "VAEP v3.28 NEW independent material scope on exact base 24cc0b51167fbcf517cfb4e0b041cab887ed5cfe. Add focused Angular unit tests for the integrated CuentaBancariaService core ONLY: GET list with query serialization, GET activas, GET by id, POST create, PATCH activar and PATCH desactivar. Verify URL/method/body/query behavior against current service; do not invent update/operation methods still owned by N4.2.D Jules A. Touch ONLY frontend/src/app/core/services/cuenta-bancaria.service.spec.ts. No production files, routes, feature component, backend, workflows/manifests, main, Produccion, branches, merge/auto-merge, force-push, secrets or deploy. Return material patch, test evidence and SELF_REVIEW_PASS_1 + SELF_REVIEW_PASS_2."
+}
