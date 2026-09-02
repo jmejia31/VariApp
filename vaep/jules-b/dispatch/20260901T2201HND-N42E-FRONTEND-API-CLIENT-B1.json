@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-B-N42E-FRONTEND-API-CLIENT-B1-20260901T2201HND",
+  "taskId": "N4.2.E.FRONTEND_API_CLIENT",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "b5dcab4341905316d14d0ff473c1f3b1e92a756e",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/core/services/cuenta-bancaria.service.ts;frontend/src/app/core/models/cuenta-bancaria.ts;frontend/src/app/core/models/cuenta-bancaria-page.ts only",
+  "prompt": "VAEP v3.28 CURRENT_PARENT N4.2.E FRONTEND/UX. Implement only the Angular CuentaBancaria API client and canonical models in the scoped files, against the exact integrated N4.2.D backend contract. Cover list/query pagination and filters plus DTOs/requests required for create/edit and deposito, retiro, transferencia, comision, interes and conciliacion. Inspect the current API controller/DTO shapes before editing; do not invent endpoints or fields. No components, routes, menu, tests, workflows, backend, migrations or unrelated files. Return material patch, targeted TypeScript/build checks and two SELF_REVIEW_PASS markers. Attempt 1/2; R2 only if causal rework is needed; never R3. No main, Produccion, branches, merge, auto-merge, force-push, secrets or deploy."
+}
