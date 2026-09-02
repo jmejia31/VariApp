@@ -1,0 +1,13 @@
+{
+  "manifestVersion": "v329",
+  "dispatchId": "20260902T1050HND-N42H-QA-MATRIX-C2",
+  "taskId": "N4.2.H.QA_CLOSURE_MATRIX",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "e7e4a74093319e30844e14ddd0e5bc2f81a95c20",
+  "taskAttempt": 2,
+  "maxAttempts": 2,
+  "pipelineOnly": false,
+  "fileScopeHint": "docs/qa/N4_2_H_CLOSURE_MATRIX.md",
+  "prompt": "VAEP/Jules v3.29 THROUGHPUT-HARD — R2 FINAL causal for N4.2.H.QA_CLOSURE_MATRIX. REVIEW_FIRST rejected A1 because it asserted there was no E2E/Playwright coverage, but the exact Desarrollo tree contains frontend/e2e/cuentas-bancarias.spec.ts and frontend/playwright.config.ts. Create only docs/qa/N4_2_H_CLOSURE_MATRIX.md. Rebuild the closure matrix from fresh repository evidence on exact base e7e4a74093319e30844e14ddd0e5bc2f81a95c20. Explicitly include the existing CuentaBancaria Playwright E2E; do not mark a gate PASS unless directly evidenced by a terminal run on the applicable exact SHA; use PRESENT/PENDING/N/A precisely where appropriate. Preserve P0=0/P1=0 and exact-head CI as mandatory closure conditions. This is attempt 2/2 FINAL: if any blocking defect remains, report QA_TAKEOVER_REQUIRED and do not request or create R3. No main/Produccion/new branch/merge/auto-merge/force-push/secrets/deploy. SELF_REVIEW_PASS_1/2 and clean single-file diff."
+}
