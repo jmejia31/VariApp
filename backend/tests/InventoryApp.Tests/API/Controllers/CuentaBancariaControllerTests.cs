@@ -135,4 +135,28 @@ public sealed class CuentaBancariaControllerTests
         Assert.IsType<NoContentResult>(result);
         _serviceMock.Verify(s => s.DesactivarAsync(5), Times.Once);
     }
+
+    [Fact]
+    public async Task Activar_CuandoNoExiste_RetornaProblemDetails404()
+    {
+        _serviceMock.Setup(s => s.ActivarAsync(99)).ThrowsAsync(new InvalidOperationException());
+        var result = await _controller.Activar(99);
+        var notFound = Assert.IsType<ObjectResult>(result);
+        Assert.Equal(404, notFound.StatusCode);
+        var problem = Assert.IsType<ProblemDetails>(notFound.Value);
+        Assert.Equal("Cuenta bancaria no encontrada", problem.Title);
+        _serviceMock.Verify(s => s.ActivarAsync(99), Times.Once);
+    }
+
+    [Fact]
+    public async Task Desactivar_CuandoNoExiste_RetornaProblemDetails404()
+    {
+        _serviceMock.Setup(s => s.DesactivarAsync(99)).ThrowsAsync(new InvalidOperationException());
+        var result = await _controller.Desactivar(99);
+        var notFound = Assert.IsType<ObjectResult>(result);
+        Assert.Equal(404, notFound.StatusCode);
+        var problem = Assert.IsType<ProblemDetails>(notFound.Value);
+        Assert.Equal("Cuenta bancaria no encontrada", problem.Title);
+        _serviceMock.Verify(s => s.DesactivarAsync(99), Times.Once);
+    }
 }
