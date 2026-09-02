@@ -1,0 +1,12 @@
+{
+  "manifestVersion": "v328",
+  "dispatchId": "20260902T0311HND-N42E-FRONTEND-UX-TEST-GAP-EXACT-HEAD-AUDIT-A1",
+  "taskId": "N4.2.E.FRONTEND_UX_TEST_GAP_EXACT_HEAD_AUDIT",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "668533aac44048354342135df962bfed82499338",
+  "taskAttempt": 1,
+  "maxAttempts": 2,
+  "fileScopeHint": "frontend/src/app/features/cuentas-bancarias/cuentas-bancarias.component.ts;frontend/src/app/features/cuentas-bancarias/cuentas-bancarias.component.html;frontend/src/app/features/cuentas-bancarias/cuentas-bancarias.component.scss;frontend/src/app/features/cuentas-bancarias/cuentas-bancarias.component.spec.ts",
+  "prompt": "NEW LOGICAL TASK, independent from the exhausted FRONTEND_ROUTE_RBAC and prior styles/loading/form tasks. Perform a material exact-HEAD audit of the CuentaBancaria feature component/template/styles/spec only. Do not modify files. Identify remaining user-visible or automated-test gaps that are genuinely nonduplicate: accessibility semantics, validation feedback, loading/empty/error behavior, RBAC-driven control visibility, keyboard/focus behavior, responsive interaction, or component test coverage. Explicitly EXCLUDE app.routes.ts and any route/RBAC implementation because that logical task exhausted R2 and is QA_TAKEOVER only. For each finding give exact file/symbol/DOM target, severity, evidence, and a smallest safe follow-up implementation or test task. If no material gap remains, report NO_GAP with evidence. Return audit only in Jules result artifact; no GitHub writes, backend changes, Production/main/secrets/deploy. Include SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2."
+}
