@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-A-N42D-OPERATION-SERVICE-A1-RECOVERY-20260901T2021HND",
+  "taskId": "N4.2.D.OPERATION_SERVICE",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "3d1f74b3e6017da468268ce3c3ce341a8bc5375a",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Application/Bancos/OperacionBancariaService.cs;backend/src/Application/Interfaces/IOperacionBancariaService.cs;targeted tests for OperacionBancariaService only",
+  "prompt": "PRE_SESSION recovery of N4.2.D OPERATION_SERVICE attempt1; prior manifest created no correlated Jules session and consumed no attempt. Implement the material application use-case service for deposito, retiro, transferencia, comision, interes and conciliacion using current canonical banking DTOs/policy/idempotency. Preserve CuentaBancaria CRUD contracts and do not touch pagination/filter/error-contract/controller/migrations/workflows/frontend. Return material patch, targeted build/tests and two SELF_REVIEW_PASS markers. No main, Production, branches, merge, auto-merge, force-push, secrets or deploy."
+}
