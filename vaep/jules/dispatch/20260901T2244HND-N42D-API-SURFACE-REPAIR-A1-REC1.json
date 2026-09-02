@@ -1,0 +1,13 @@
+{
+  "manifestVersion": "v320",
+  "dispatchId": "VAEP-JULES-A-N42D-API-SURFACE-REPAIR-A1-REC1-20260901T2244HND",
+  "taskId": "N4.2.D.API_SURFACE_REPAIR",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "f650a9283d893dffd26ef1e4728873ff8f733ef2",
+  "taskAttempt": 1,
+  "maxAttempts": 2,
+  "recoveryOf": "VAEP-JULES-A-N42D-API-SURFACE-REPAIR-A1-20260901T2231HND",
+  "fileScopeHint": "backend/src/Application/Interfaces/ICuentaBancariaService.cs;backend/src/Application/Services/CuentaBancariaService.cs;backend/src/API/Controllers/CuentaBancariaController.cs;backend/src/API/Controllers/OperacionBancariaController.cs;backend/tests/**CuentaBancaria**;backend/tests/**OperacionBancaria** only",
+  "prompt": "VAEP v3.28 SAME logical task/SAME ATTEMPT1 pre-session recovery. The prior canonical A dispatch exceeded >=10m without any correlated Jules Issue/session+fresh useful activity, so this transport recovery does NOT consume an additional content attempt. A workflow path has been verified canonical as vaep/jules/dispatch/*.json; vaep/jules-a/dispatch remains prohibited. Exact base f650a9283d893dffd26ef1e4728873ff8f733ef2. N4.2.D is reopened because ICuentaBancariaService/CuentaBancariaController lack edit/update and IOperacionBancariaService has six operation intents but no HTTP controller. Implement the smallest coherent backend repair enabling real frontend edit plus deposito/retiro/transferencia/comision/interes/conciliacion, reusing existing DTOs/domain policies/RBAC/auth/idempotency. Scope only to the listed backend files/tests; fail closed on a required dependency outside scope instead of expanding. No frontend, migrations, workflows, other manifests, main, Produccion, branches, merge/auto-merge, force-push, secrets or deploy. Return material patch, exact-base tests and SELF_REVIEW_PASS_1 + SELF_REVIEW_PASS_2. ATTEMPT remains 1/2; only one targeted R2 may follow review; R3 prohibited."
+}
