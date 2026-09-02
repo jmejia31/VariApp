@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-B-N42D-OPERATION-DTOS-R2-20260901T1920HND",
+  "taskId": "N4.2.D.OPERATION_DTOS",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "61f099186f2775ebf0eada2c2640267dc099e3f6",
+  "taskAttempt": 2,
+  "fileScopeHint": "backend/src/Application/DTOs/Bancos/*Operacion*.cs;backend/src/Application/DTOs/Bancos/*Deposito*.cs;backend/src/Application/DTOs/Bancos/*Retiro*.cs;backend/src/Application/DTOs/Bancos/*Transferencia*.cs;backend/src/Application/DTOs/Bancos/*Comision*.cs;backend/src/Application/DTOs/Bancos/*Interes*.cs;backend/src/Application/DTOs/Bancos/*Conciliacion*.cs;backend/tests/InventoryApp.Tests/Application/Bancos/*Dto*Tests.cs",
+  "prompt": "N4.2.D OPERATION_DTOS causal R2 FINAL after VAEP review of attempt1. Attempt1 was material but did not satisfy the instruction to reuse current validation/value-type conventions: it modeled IdempotencyKey as an unconstrained raw string even though Desarrollo already contains the canonical BancosIdempotencyKey value object with normalization, length and unsafe-character validation. Rebuild the minimal DTO/request-response contracts for deposito, retiro, transferencia, comision, interes and conciliacion so idempotency is fail-closed at the application boundary using the existing BancosIdempotencyKey convention or the repository's established DTO validation pattern without inventing a parallel validation framework. Preserve int Cuenta IDs and decimal Monto semantics. Add focused contract/validation tests proving invalid/unsafe idempotency input cannot silently pass. Do not implement services/controllers/repositories, do not touch domain entities, migrations, frontend or workflows. Run targeted build/tests and return material patch plus two independent SELF_REVIEW_PASS markers. This is ATTEMPT2/2 FINAL; R3 prohibited. No main, Production, branches, merge, auto-merge, force-push, secrets or deploy."
+}
