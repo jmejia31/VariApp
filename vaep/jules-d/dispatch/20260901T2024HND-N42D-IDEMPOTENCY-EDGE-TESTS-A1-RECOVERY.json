@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-D-N42D-IDEMPOTENCY-EDGE-TESTS-A1-RECOVERY-20260901T2024HND",
+  "taskId": "N4.2.D.IDEMPOTENCY_EDGE_TESTS",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "cbf5e9138c3024e118781c60cbc923e66cb0670a",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/Application/Bancos/BancosIdempotencyKey*; backend/src/Application/Bancos/BancosIdempotencyKey.cs only if a test proves a causal defect",
+  "prompt": "PRE_SESSION recovery of N4.2.D IDEMPOTENCY_EDGE_TESTS attempt1; prior manifest created no correlated Jules session and consumed no attempt. Add material boundary tests for current BancosIdempotencyKey: normalization/validation, whitespace/empty handling, character and length boundaries, and replay/equality semantics represented by the type. Source edits only for a causally proven defect. Do not touch operation service, pagination/filter, error-contract QA takeover, policy edge-test scope, controller, migrations/workflows/frontend. Return material patch, targeted build/tests and two SELF_REVIEW_PASS markers. No main, Production, branches, merge, auto-merge, force-push, secrets or deploy."
+}
