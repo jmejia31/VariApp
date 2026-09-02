@@ -1,0 +1,14 @@
+{
+  "manifestVersion": "v329",
+  "dispatchId": "20260902T1255HND-N43C-MIGRATION-INTEGRITY-D2",
+  "taskId": "N4.3.C.MIGRATION_INTEGRITY_TESTS",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "8de083d2710614e28588fed5e6449259e5de1308",
+  "taskAttempt": 2,
+  "maxAttempts": 2,
+  "retryOf": "20260902T1231HND-N43C-MIGRATION-INTEGRITY-D1",
+  "retryReason": "ATTEMPT1_SESSION_TERMINAL_AUTO_FEEDBACK_EXHAUSTED_PATCH_FALSE",
+  "fileScopeHint": "backend/tests/**/Migrations/**; backend/tests/**/*Migration*.cs; scripts/**/migration*",
+  "prompt": "VAEP/Jules v3.29 THROUGHPUT-HARD causal R2 FINAL. CURRENT_PARENT=N4.3.C. ATTEMPT1 obtained real Jules session sessions/743436545510575870 but terminated AUTO_FEEDBACK_EXHAUSTED with patch=false after inline feedback, so this is the only allowed Jules retry. Add ONLY migration/data-integrity verification for bank reconciliation using repository-standard tests/preflight. Diagnose the attempt1 failure first; keep scope minimal and executable. Validate forward migration expectations, rollback reversibility where supported, FK/index existence, historical-data preservation and non-destructive behavior. Tests/scripts only; do NOT edit production mappings, migration/snapshot, services/controllers/frontend/workflows/manifests/secrets/deploy. Revalidate exact PRIMARY_BASE_HEAD before work. Run proportional tests/preflight and return patch artifact with SELF_REVIEW_PASS_1/PASS_2, full diff, git status, temp hygiene. This is ATTEMPT 2/2 FINAL. If blocked or review fails: QA_TAKEOVER; NO R3."
+}
