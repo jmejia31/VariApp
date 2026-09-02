@@ -1,0 +1,12 @@
+{
+  "manifestVersion": "v329",
+  "dispatchId": "20260902T1231HND-N43C-MIGRATION-ADDITIVE-C1",
+  "taskId": "N4.3.C.MIGRATION_ADDITIVE",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "a0976c60ee98c66ed513b41d235949cef28472a6",
+  "taskAttempt": 1,
+  "maxAttempts": 2,
+  "fileScopeHint": "backend/src/Infrastructure/**/Migrations/**",
+  "prompt": "VAEP/Jules v3.29 THROUGHPUT-HARD. CURRENT_PARENT=N4.3.C. Implement ONLY an additive EF migration + model snapshot delta for the already materialized bank-reconciliation persistence schema. Create reconciliation tables/columns/FKs/indexes without destructive changes or data loss; preserve historical data and existing schema. Migration must have coherent Up/Down and be compatible with the intended mappings/domain. Do NOT edit production entity mappings, services/controllers/frontend/workflows/manifests/secrets/deploy. Revalidate exact PRIMARY_BASE_HEAD. Run migration compile/script/preflight checks that do not touch Produccion. Return patch artifact with SELF_REVIEW_PASS_1/PASS_2, full diff, git status, temp hygiene. ATTEMPT1/2; no R3 exists."
+}
