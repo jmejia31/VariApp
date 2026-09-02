@@ -1,0 +1,14 @@
+{
+  "manifestVersion": "v328",
+  "dispatchId": "VAEP-JULES-A-N42E-API-ERROR-TESTS-A1-REC1-20260902T0043HND",
+  "taskId": "N4.2.E.FRONTEND_API_ERROR_TESTS",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "1ac4a32b66eb0352d00a5c70dd4d97d536aafcd8",
+  "taskAttempt": 1,
+  "maxAttempts": 2,
+  "recoveryOf": "VAEP-JULES-A-N42E-API-ERROR-TESTS-A1-20260902T0016HND",
+  "recoverySequence": 1,
+  "fileScopeHint": "frontend/src/app/core/services/cuenta-bancaria.service.spec.ts only",
+  "prompt": "VAEP v3.28 SAME-ATTEMPT1 RECOVERY for N4.2.E.FRONTEND_API_ERROR_TESTS after the original ATTEMPT1 dispatch remained without correlated Jules session/activity beyond the hard >=10 minute SLA. This recovery does NOT consume ATTEMPT2. Exact current base 1ac4a32b66eb0352d00a5c70dd4d97d536aafcd8. Work ONLY in frontend/src/app/core/services/cuenta-bancaria.service.spec.ts: add material typed error-contract tests for representative HTTP failures on current list/get/create/activar/desactivar API methods, asserting errors propagate predictably and HttpTestingController has no outstanding requests. Preserve existing success tests and CURRENT service/model contracts. Do not modify product/service code, components, routes, backend, workflows, any other manifests, main, Produccion, branches, secrets or deploy. Run focused frontend tests/type validation and return a material patch plus SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. Fail closed on any contract mismatch."
+}
