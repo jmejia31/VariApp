@@ -258,6 +258,20 @@ describe('CuentasBancariasComponent', () => {
     expect(fixture.nativeElement.querySelector('.loading-shade')).toBeNull();
   });
 
+  it('restablece loading cuando getAll termina con error', () => {
+    const response$ = new Subject<CuentaBancariaPage<CuentaBancaria>>();
+    cuentaService.getAll.mockReturnValue(response$);
+
+    fixture.detectChanges();
+    expect(component.loading()).toBe(true);
+
+    response$.error(new Error('Network error'));
+    fixture.detectChanges();
+
+    expect(component.loading()).toBe(false);
+    expect(fixture.nativeElement.querySelector('.loading-shade')).toBeNull();
+  });
+
   it('muestra el estado vacío cuando la consulta no devuelve cuentas', () => {
     cuentaService.getAll.mockReturnValue(
       of({ items: [], page: 1, pageSize: 50, totalCount: 0, totalPages: 0 })
