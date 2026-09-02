@@ -1,0 +1,12 @@
+{
+  "manifestVersion": "v328",
+  "dispatchId": "20260902T0408HND-N42E-FORM-VALIDATION-A11Y-TESTS-A1",
+  "taskId": "N4.2.E.FORM_VALIDATION_A11Y_TESTS",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "147a22e31ec224e2232e982f0a25392f2feacb8f",
+  "taskAttempt": 1,
+  "maxAttempts": 2,
+  "fileScopeHint": "frontend/src/app/features/cuentas-bancarias/cuentas-bancarias.component.spec.ts",
+  "prompt": "Add the smallest non-duplicated component tests for the just-integrated CuentaBancaria form validation feedback: verify required/min error visibility after controls are touched and preserve existing accessibility/state behavior. Do not edit production HTML/TS/service/model files. Inspect the current spec first and avoid duplicating existing invalid-submit tests. Run proportional frontend tests and report exact evidence. No backend/routes/GitHub writes from Jules/Production/main/secrets/deploy. Include SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2."
+}
