@@ -1,0 +1,12 @@
+{
+  "manifestVersion": "v328",
+  "dispatchId": "20260902T0437REC1-N42E-FORM-EDIT-MODE-TESTS-A1",
+  "taskId": "N4.2.E.FORM_EDIT_MODE_TESTS",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "4da3314e14555232e266e130380e7a210f747f4a",
+  "taskAttempt": 1,
+  "maxAttempts": 2,
+  "fileScopeHint": "frontend/src/app/features/cuentas-bancarias/cuentas-bancarias.component.spec.ts",
+  "prompt": "PRE_SESSION recovery REC1 of the SAME logical task and SAME ATTEMPT1 from dispatch 20260902T0425HND-N42E-FORM-EDIT-MODE-TESTS-A1. The original transport exceeded 10 minutes without correlated Jules session/useful activity, so this recovery does NOT consume ATTEMPT2. Revalidate exact current base first. Add the smallest non-duplicated tests-only coverage for CuentaBancaria edit-mode form behavior against the current component contract: entering edit mode populates existing values, cancel/reset returns to a clean state, and create-mode behavior remains intact where applicable. Inspect current component/spec first and do not duplicate existing invalid-submit or validation-message coverage. Do not edit production files. If current HEAD already materializes this coverage, report that precisely rather than forcing a duplicate delta. Run proportional frontend tests and report exact evidence. No backend/routes/GitHub writes from Jules/Production/main/secrets/deploy. Include SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2."
+}
