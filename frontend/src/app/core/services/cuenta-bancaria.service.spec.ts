@@ -90,6 +90,17 @@ describe('CuentaBancariaService', () => {
     req.flush(response);
   });
 
+  it('propaga error en getActivas', () => {
+    service.getActivas().subscribe({
+      next: () => { throw new Error('debería haber fallado'); },
+      error: error => expect(error.status).toBe(500)
+    });
+
+    const req = httpTestingController.expectOne(`${apiUrl}/activas`);
+    expect(req.request.method).toBe('GET');
+    req.flush('Internal Server Error', { status: 500, statusText: 'Server Error' });
+  });
+
   it('obtiene una cuenta por id', () => {
     const response: CuentaBancaria = {
       id: 3,
