@@ -1,0 +1,12 @@
+{
+  "manifestVersion": "v329",
+  "dispatchId": "20260902T1131HND-N43B-CONTRACTS-B1",
+  "taskId": "N4.3.B.CONTRACTS",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "39fc2d4284b92e10913fce28d43a7b8da69214c6",
+  "taskAttempt": 1,
+  "maxAttempts": 2,
+  "fileScopeHint": "backend/**/Dtos/**; backend/**/Contracts/**; backend/**/*ConciliacionBancaria*.cs",
+  "prompt": "VAEP/Jules v3.29 THROUGHPUT-HARD. CURRENT_PARENT=N4.3.B. Implement ONLY application/API-facing CONTRACTS and DTO shapes for bank reconciliation: statement import/register movement, candidate match/reference, difference, adjustment request/result and close/reopen result where required by the preflight. Do not implement services/controllers/EF/migrations/frontend. Do not reuse or modify the Compras three-way-match ConciliacionController contract. Keep identifiers/idempotency/audit/correlation semantics explicit and validation-safe. Revalidate exact base PRIMARY_BASE_HEAD. Run proportional compile/tests. Return patch artifact only with SELF_REVIEW_PASS_1/2, full diff, git status and temp hygiene. ATTEMPT1/2; no R3 exists."
+}
