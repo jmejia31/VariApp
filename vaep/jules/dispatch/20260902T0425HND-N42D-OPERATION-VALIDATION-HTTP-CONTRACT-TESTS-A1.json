@@ -1,0 +1,12 @@
+{
+  "manifestVersion": "v328",
+  "dispatchId": "20260902T0425HND-N42D-OPERATION-VALIDATION-HTTP-CONTRACT-TESTS-A1",
+  "taskId": "N4.2.D.OPERATION_VALIDATION_HTTP_CONTRACT_TESTS",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "45f60653eb034dc791911f3bae9bea56e1297d27",
+  "taskAttempt": 1,
+  "maxAttempts": 2,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/Controllers/OperacionesBancariasControllerTests.cs",
+  "prompt": "NEXT_SAFE after reviewed COMPLETED session 1385683271000198727 / issue #2501. Add the smallest non-duplicated controller/API tests proving validation failures from banking operations map to the existing fail-closed HTTP contract without changing production code. Inspect current controller tests and production exception mapping first; cover only real uncovered validation cases and preserve RBAC/idempotency contracts. Tests-only scope. Run proportional backend tests and report exact evidence. No frontend/GitHub writes from Jules/Production/main/secrets/deploy. Include SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2."
+}
