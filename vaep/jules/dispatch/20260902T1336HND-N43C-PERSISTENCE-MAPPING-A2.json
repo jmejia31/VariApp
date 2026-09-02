@@ -1,0 +1,14 @@
+{
+  "manifestVersion": "v329",
+  "dispatchId": "20260902T1336HND-N43C-PERSISTENCE-MAPPING-A2",
+  "taskId": "N4.3.C.PERSISTENCE_MAPPING",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "0626516fbbdd1fc82b9825152d4f6ba1d87670e2",
+  "taskAttempt": 2,
+  "maxAttempts": 2,
+  "reworkOf": "20260902T1256HND-N43C-PERSISTENCE-MAPPING-A1-REC2",
+  "reworkReason": "REVIEW_FIRST_REQUIRED_BUSINESS_UNIQUENESS_MISMATCH",
+  "fileScopeHint": "backend/src/Infrastructure/Persistence/AppDbContext.cs; backend/src/Infrastructure/Persistence/Configurations/*Conciliacion*.cs; backend/src/Infrastructure/Persistence/Configurations/MovimientoEstadoCuentaConfiguration.cs",
+  "prompt": "VAEP/Jules v3.29 THROUGHPUT-HARD causal R2 FINAL. CURRENT_PARENT=N4.3.C. Rework ONLY persistence/EF mapping for the already materialized bank-reconciliation domain on exact PRIMARY_BASE_HEAD. Preserve the useful ATTEMPT1 mapping, but make the persistence business key consistent with domain behavior: IdempotencyKey uniqueness is scoped to one ConciliacionBancaria, therefore use a UNIQUE composite index (ConciliacionBancariaId, IdempotencyKey), NOT global IdempotencyKey uniqueness. Keep enum persistence aligned with existing banking EF conventions (integer), decimal(18,2), required fields, FKs/delete behaviors, audit-name lengths and additive indexes/check constraints. Add the three DbSets only if still absent. Do NOT create migration/snapshot, services/controllers/frontend/workflows/secrets/deploy. Revalidate exact current files and avoid duplicate configuration classes. Run backend build plus proportional EF/model checks. Return reviewable patch artifact with SELF_REVIEW_PASS_1/PASS_2, full diff, git status and temp hygiene. This is ATTEMPT2/2 FINAL; if review fails, QA_TAKEOVER; NO R3."
+}
