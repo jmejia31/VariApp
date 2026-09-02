@@ -8,7 +8,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
 import { ActivatedRoute } from '@angular/router';
-import { Subject, debounceTime } from 'rxjs';
+import { Subject, debounceTime, finalize } from 'rxjs';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
 import {
   CreateCuentaBancariaDto,
@@ -52,6 +52,7 @@ export class CuentasBancariasComponent implements OnInit {
   readonly cuentas = signal<CuentaBancaria[]>([]);
   readonly mostrarFormulario = signal(false);
   readonly loading = signal(true);
+  readonly submitting = signal(false);
   readonly puedeCrear = signal(false);
   readonly puedeActivar = signal(false);
   readonly puedeDesactivar = signal(false);
@@ -129,14 +130,24 @@ export class CuentasBancariasComponent implements OnInit {
   }
 
   guardarCuenta(): void {
-    if (this.formulario.invalid) return;
+    if (this.formulario.invalid) {
+      this.formulario.markAllAsTouched();
+      return;
+    }
+    if (this.submitting()) return;
 
     const dto: CreateCuentaBancariaDto = this.formulario.getRawValue();
-    this.cuentaService.create(dto).subscribe(() => {
-      this.mostrarFormulario.set(false);
-      this.formulario.reset({ moneda: 'HNL', saldoInicial: 0, bancoId: 0, nombre: '', numeroCuenta: '' });
-      this.cargarCuentas();
-    });
+    this.submitting.set(true);
+    this.cuentaService.create(dto)
+      .pipe(finalize(() => this.submitting.set(false)))
+      .subscribe({
+        next: () => {
+          this.mostrarFormulario.set(false);
+          this.formulario.reset({ moneda: 'HNL', saldoInicial: 0, bancoId: 0, nombre: '', numeroCuenta: '' });
+          this.cargarCuentas();
+        },
+        error: () => undefined
+      });
   }
 
   activar(cuenta: CuentaBancaria): void {
