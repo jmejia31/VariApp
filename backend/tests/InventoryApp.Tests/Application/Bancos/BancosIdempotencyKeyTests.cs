@@ -23,10 +23,27 @@ public class BancosIdempotencyKeyTests
     }
 
     [Fact]
+    public void Create_WithExactMaxLength_ReturnsKey()
+    {
+        var exactLengthKey = new string('a', BancosIdempotencyKey.MaxLength);
+        var key = BancosIdempotencyKey.Create(exactLengthKey);
+        Assert.Equal(exactLengthKey, key.Value);
+    }
+
+    [Fact]
     public void Create_WithOversizedKey_ThrowsArgumentException()
     {
         var oversizedKey = new string('a', BancosIdempotencyKey.MaxLength + 1);
         Assert.Throws<ArgumentException>(() => BancosIdempotencyKey.Create(oversizedKey));
+    }
+
+    [Fact]
+    public void Create_WithPadding_NormalizesKeyLength()
+    {
+        var baseKey = new string('a', BancosIdempotencyKey.MaxLength);
+        var paddedKey = $"   {baseKey}   ";
+        var key = BancosIdempotencyKey.Create(paddedKey);
+        Assert.Equal(baseKey, key.Value);
     }
 
     [Theory]
@@ -52,5 +69,24 @@ public class BancosIdempotencyKeyTests
         Assert.NotEqual(
             BancosIdempotencyKey.Create("test-key-1"),
             BancosIdempotencyKey.Create("test-key-2"));
+    }
+
+    [Fact]
+    public void HashCodeEquality_UsesNormalizedValue()
+    {
+        var key1 = BancosIdempotencyKey.Create("  test-key-1  ");
+        var key2 = BancosIdempotencyKey.Create("test-key-1");
+
+        Assert.Equal(key1.GetHashCode(), key2.GetHashCode());
+    }
+
+    [Fact]
+    public void EqualityOperator_UsesNormalizedValue()
+    {
+        var key1 = BancosIdempotencyKey.Create("  test-key-1  ");
+        var key2 = BancosIdempotencyKey.Create("test-key-1");
+
+        Assert.True(key1 == key2);
+        Assert.False(key1 != key2);
     }
 }
