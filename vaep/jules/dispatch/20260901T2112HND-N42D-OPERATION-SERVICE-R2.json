@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-A-N42D-OPERATION-SERVICE-R2-20260901T2112HND",
+  "taskId": "N4.2.D.OPERATION_SERVICE",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "b4a1210b07ca1106f2e2a896cd2b7ecd5be79b19",
+  "taskAttempt": 2,
+  "fileScopeHint": "backend/src/Application/Bancos/OperacionBancariaService.cs;backend/src/Application/Interfaces/IOperacionBancariaService.cs;backend/tests/InventoryApp.Tests/Application/Bancos/*OperacionBancariaService* only",
+  "prompt": "VAEP v3.28 SAME_CHILD_REWORK R2 FINAL. Review of #2430 found material service work but unacceptable scope contamination: do NOT modify backend/InventoryApp.sln, do NOT create a new Application.UnitTests project, and do NOT restructure the solution. Rebase logically on PRIMARY_BASE_HEAD and implement only IOperacionBancariaService + OperacionBancariaService for deposito, retiro, transferencia, comision, interes and conciliacion using current canonical BancosOperationPolicy, BancosIdempotencyKey, repositories/unit-of-work and DTOs. Put targeted tests only under the existing backend/tests/InventoryApp.Tests project. Preserve current CuentaBancaria query/filter/page/controller contracts and do not touch migrations, workflows, frontend, error-contract QA takeover or unrelated files. Return material patch, targeted build/tests and two SELF_REVIEW_PASS markers. Attempt 2/2 FINAL; on failure controller QA_TAKEOVER, NO R3. No main, Produccion, branches, merge, auto-merge, force-push, secrets or deploy."
+}
