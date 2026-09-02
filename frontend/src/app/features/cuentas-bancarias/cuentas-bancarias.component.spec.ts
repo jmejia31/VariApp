@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { beforeEach, describe, expect, it, type Mocked, vi } from 'vitest';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
 import {
@@ -239,5 +239,33 @@ describe('CuentasBancariasComponent', () => {
     expect(cuentaService.activar).toHaveBeenCalledWith(cuenta.id);
     expect(cuentaService.desactivar).toHaveBeenCalledWith(cuenta.id);
     expect(cuentaService.getAll).toHaveBeenCalledTimes(2);
+  });
+
+  it('mantiene visible el estado de carga mientras getAll sigue pendiente', () => {
+    const response$ = new Subject<CuentaBancariaPage<CuentaBancaria>>();
+    cuentaService.getAll.mockReturnValue(response$);
+
+    fixture.detectChanges();
+
+    expect(component.loading()).toBe(true);
+    expect(fixture.nativeElement.querySelector('.loading-shade')).not.toBeNull();
+
+    response$.next(cuentasPage);
+    response$.complete();
+    fixture.detectChanges();
+
+    expect(component.loading()).toBe(false);
+    expect(fixture.nativeElement.querySelector('.loading-shade')).toBeNull();
+  });
+
+  it('muestra el estado vacío cuando la consulta no devuelve cuentas', () => {
+    cuentaService.getAll.mockReturnValue(
+      of({ items: [], page: 1, pageSize: 50, totalCount: 0, totalPages: 0 })
+    );
+
+    fixture.detectChanges();
+
+    expect(component.cuentas()).toEqual([]);
+    expect(fixture.nativeElement.textContent).toContain('No se encontraron cuentas bancarias.');
   });
 });
