@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-D-N42E-FRONTEND-E2E-A11Y-D1-RECOVERY-20260901T2214HND",
+  "taskId": "N4.2.E.FRONTEND_E2E_A11Y",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "e1c70cfde6bccb74971a2aef4d98bd8453524d49",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/e2e/n42-cuenta-bancaria.spec.ts only",
+  "prompt": "VAEP v3.28 SLA recovery SAME logical task for N4.2.E.FRONTEND_E2E_A11Y. Prior dispatch VAEP-JULES-D-N42E-FRONTEND-E2E-A11Y-D1-20260901T2203HND exceeded 10 minutes without externally correlatable Jules session/activity/result, so it does not consume a Jules attempt. Add one material Playwright E2E/accessibility test file only at the scoped path. Inspect existing Playwright patterns and actual N4.2.E UI/client as available. Cover CuentaBancaria happy-path navigation plus representative loading/error/accessibility and one safe operation intent without inventing selectors, routes, endpoints or backend state. Keep tests deterministic/current auth-fixture compatible. Do not modify product source/config/workflows/backend/migrations. Return material patch, targeted Playwright/lint evidence and two SELF_REVIEW_PASS markers. Attempt remains 1/2 because no prior Jules session was evidenced/consumed; R2 only after a real causal rework; never R3. No main, Produccion, branches, merge, auto-merge, force-push, secrets or deploy."
+}
