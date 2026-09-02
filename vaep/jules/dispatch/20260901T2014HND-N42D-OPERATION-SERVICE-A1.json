@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-A-N42D-OPERATION-SERVICE-A1-20260901T2014HND",
+  "taskId": "N4.2.D.OPERATION_SERVICE",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "ccdd3e2dfd73560be64762c20cf1bf1f311a01ff",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Application/Bancos/OperacionBancariaService.cs;backend/src/Application/Interfaces/IOperacionBancariaService.cs;targeted tests for OperacionBancariaService only",
+  "prompt": "N4.2.D OPERATION_SERVICE attempt1. Implement the material application use-case service for the already-integrated banking operation DTOs: deposito, retiro, transferencia, comision, interes and conciliacion. Preserve existing CuentaBancaria CRUD service/repository contracts; do NOT rewrite ICuentaBancariaService or CuentaBancariaService and do NOT create a parallel account repository. Reuse current BancosOperationPolicy and BancosIdempotencyKey where applicable. Scope exclusively to a dedicated operation service/interface plus its targeted tests; no controller/API edits, no pagination/filter edits, no migrations/workflows/frontend. Fail closed on invalid account/state/amount and make idempotency behavior explicit without secrets or external dependencies. Run targeted backend tests/build and return a material patch plus two independent SELF_REVIEW_PASS markers. No main, Production, branches, merge, auto-merge, force-push, secrets or deploy."
+}
