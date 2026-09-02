@@ -1,0 +1,12 @@
+{
+  "manifestVersion": "v328",
+  "dispatchId": "VAEP-JULES-D-N42E-EMPTY-LOADING-STATES-A1-20260902T0104HND",
+  "taskId": "N4.2.E.FRONTEND_EMPTY_LOADING_STATES",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "9d1696e20cb9679e31ff0d1199e263ff39e7902d",
+  "taskAttempt": 1,
+  "maxAttempts": 2,
+  "fileScopeHint": "frontend/src/app/features/cuentas-bancarias/cuentas-bancarias.component.html only",
+  "prompt": "VAEP v3.28 NEW logical safe pipeline task for N4.2.E after FRONTEND_STYLES_RESPONSIVE R2 completed and was drained; this is not R3. Exact base 9d1696e20cb9679e31ff0d1199e263ff39e7902d. Work ONLY in frontend/src/app/features/cuentas-bancarias/cuentas-bancarias.component.html. Improve current empty/loading/error presentation materially and accessibly using only component members that already exist at your base; keep table/form semantics and RBAC visibility intact. Do not invent component APIs. Do not modify TS/SCSS/service/routes/backend/tests or any other file. Do not touch manifests/workflows, main, Produccion, branches, secrets or deploy. Run focused template/TypeScript validation if available and return patch plus SELF_REVIEW_PASS_1/2 and limitations."
+}
