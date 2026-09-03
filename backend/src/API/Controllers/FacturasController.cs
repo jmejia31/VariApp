@@ -82,6 +82,7 @@ public class FacturasController : ControllerBase
     [RequierePermiso(ModuloSistema.Facturacion, AccionPermiso.Aplicar)]
     public async Task<IActionResult> RegistrarPago(int id, [FromBody] RegistrarFacturaPagoDto dto)
     {
+        var anterior = await _facturaService.GetByIdAsync(id);
         var factura = await _facturaService.RegistrarPagoAsync(id, dto, ObtenerUsuarioId(), ObtenerNombreUsuario());
         await _auditoria.RegistrarAsync(
             ModuloSistema.Facturacion,
@@ -89,7 +90,21 @@ public class FacturasController : ControllerBase
             $"Pago registrado en factura {factura.NumeroFactura}.",
             id,
             entidad: "FacturaPago",
-            valoresNuevos: new { dto.Monto, dto.MetodoPago, dto.Referencia, factura.TotalPagado, factura.SaldoPendiente });
+            valoresAnteriores: anterior is null ? null : new
+            {
+                anterior.Estado,
+                anterior.TotalPagado,
+                anterior.SaldoPendiente
+            },
+            valoresNuevos: new
+            {
+                dto.Monto,
+                dto.MetodoPago,
+                dto.Referencia,
+                factura.Estado,
+                factura.TotalPagado,
+                factura.SaldoPendiente
+            });
         return Ok(ApiResponse<FacturaDto>.Ok(factura, "Pago registrado correctamente."));
     }
 
@@ -97,6 +112,7 @@ public class FacturasController : ControllerBase
     [RequierePermiso(ModuloSistema.Facturacion, AccionPermiso.Anular)]
     public async Task<IActionResult> AnularPago(int id, int pagoId, [FromBody] AnularFacturaPagoDto dto)
     {
+        var anterior = await _facturaService.GetByIdAsync(id);
         var factura = await _facturaService.AnularPagoAsync(id, pagoId, dto, ObtenerUsuarioId(), ObtenerNombreUsuario());
         await _auditoria.RegistrarAsync(
             ModuloSistema.Facturacion,
@@ -104,7 +120,19 @@ public class FacturasController : ControllerBase
             $"Pago {pagoId} anulado en factura {factura.NumeroFactura}.",
             pagoId,
             entidad: "FacturaPago",
-            valoresNuevos: new { dto.Motivo, factura.TotalPagado, factura.SaldoPendiente });
+            valoresAnteriores: anterior is null ? null : new
+            {
+                anterior.Estado,
+                anterior.TotalPagado,
+                anterior.SaldoPendiente
+            },
+            valoresNuevos: new
+            {
+                dto.Motivo,
+                factura.Estado,
+                factura.TotalPagado,
+                factura.SaldoPendiente
+            });
         return Ok(ApiResponse<FacturaDto>.Ok(factura, "Pago anulado correctamente."));
     }
 
@@ -112,13 +140,15 @@ public class FacturasController : ControllerBase
     [RequierePermiso(ModuloSistema.Facturacion, AccionPermiso.CambiarEstado)]
     public async Task<IActionResult> CambiarEstado(int id, [FromBody] CambiarEstadoFacturaDto dto)
     {
+        var anterior = await _facturaService.GetByIdAsync(id);
         var factura = await _facturaService.CambiarEstadoAsync(id, dto, ObtenerUsuarioId(), ObtenerNombreUsuario());
         await _auditoria.RegistrarAsync(
             ModuloSistema.Facturacion,
             AccionPermiso.CambiarEstado,
-            $"Estado de factura {factura.NumeroFactura} actualizado a {factura.Estado}.",
+            $"Estado de factura {factura.NumeroFactura} actualizado de {anterior?.Estado ?? "N/D"} a {factura.Estado}.",
             id,
             entidad: "Factura",
+            valoresAnteriores: anterior is null ? null : new { anterior.Estado },
             valoresNuevos: new { factura.Estado, dto.Motivo });
         return Ok(ApiResponse<FacturaDto>.Ok(factura, "Estado actualizado correctamente."));
     }
