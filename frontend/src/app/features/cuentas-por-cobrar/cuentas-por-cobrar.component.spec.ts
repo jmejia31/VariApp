@@ -48,7 +48,8 @@ describe('CuentasPorCobrarComponent', () => {
     expect(text).toContain('Cliente QA');
     expect(text).toContain('750.00');
 
-    const hrefs = Array.from(fixture.nativeElement.querySelectorAll('a')).map((a: Element) => a.getAttribute('href'));
+    const anchors = fixture.nativeElement.querySelectorAll('a') as NodeListOf<HTMLAnchorElement>;
+    const hrefs = Array.from(anchors, (anchor) => anchor.getAttribute('href'));
     expect(hrefs).toContain('/facturas/10');
     expect(hrefs).toContain('/ventas/20');
     expect(hrefs).toContain('/facturas/10/pagos');
