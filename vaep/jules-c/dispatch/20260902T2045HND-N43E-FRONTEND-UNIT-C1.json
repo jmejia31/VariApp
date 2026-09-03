@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-C-N43E-FRONTEND-UNIT-C1-20260902T2045HND",
+  "taskId": "N4.3.E.FRONTEND_UNIT_TESTS",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "0dc3308b1061a107fd946e5f2e5150738cd097c0",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/features/cuentas-bancarias/cuentas-bancarias.component.spec.ts",
+  "prompt": "N4.3.E FRONTEND_UX current-parent closure. Extend directed Angular unit coverage for the N4.3.E bank-reconciliation UI: import/register movement flow, relation actions, permission-aware visibility/guards, loading, empty and error behavior, while preserving existing CuentaBancaria CRUD tests. Scope ONLY cuentas-bancarias.component.spec.ts. Do not edit production TS/HTML/SCSS/e2e/backend/workflows/docs. Base tests on real component/API behavior; no false coverage. No main, Production, branches, push, PR, merge, secrets or deploy. Run the directed frontend test command and report evidence. Return patch only and two independent self-review PASS markers before COMPLETED."
+}
