@@ -1,0 +1,11 @@
+{
+  "dispatchId": "VAEP-JULES-D-N45H-DOC-CERT-PREWORK-D1-20260903T1310HND",
+  "taskId": "N4.5.H.DOC_CERT_PREWORK",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "4c42788cda3265d34114e621761223eb12815622",
+  "productBaseHead": "541ec12b72912c769c6f54b8821771e509818375",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/CERTIFICACION_N4_5*, docs/RUNBOOK_N4_5*, TASKS/CHANGELOG evidence review only; no promotion",
+  "prompt": "WORK_CAN_PIPELINE__PROMOTION_CANNOT. N4.5.E remains CURRENT_PARENT. Perform material N4.5.H documentation/certification prework only: inventory the exact certification/runbook/TASKS/CHANGELOG evidence required after E/F/G complete, identify reusable N2.8 CxP authority and precise closure gaps. Do not claim N4.5.H LISTO, do not publish final closure before dependencies. Prefer evidence-only REVIEW_PASS; if a safe draft-only docs gap is genuinely needed, patch only N4.5-specific documentation and clearly mark dependency-gated. Do NOT touch product code, tests, DB, workflows, N4.5.E/F/G, main, Production, branches, merge, secrets or deploy. Two substantive SELF_REVIEW_PASS markers required."
+}
