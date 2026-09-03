@@ -1,0 +1,17 @@
+{
+  "dispatchId": "VAEP-JULES-D-N44F-AUDIT-REGRESSION-RECOVERY-20260903T0809HND",
+  "recoveryOf": "VAEP-JULES-D-N44F-AUDIT-REGRESSION-20260903T0753HND",
+  "taskId": "N4.4.F.AUDIT_REGRESSION",
+  "workerId": "JULES_D",
+  "transport": "vaep/jules-d/dispatch",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "8e40fb138ea60ae7fd6388b0dd870a12263bf208",
+  "productFixBase": "f8dc84b330ac107186f71b20f046728c313eb828",
+  "taskAttempt": 1,
+  "attemptConsumedByRecovery": false,
+  "maxAttempts": 2,
+  "r3Prohibited": true,
+  "qaTakeoverOnFailure": true,
+  "fileScopeHint": "backend/src/API/Controllers/FacturasController.cs; backend/tests/InventoryApp.Tests/API/**; backend/tests/InventoryApp.Tests/*Factura*",
+  "prompt": "RECOVERY SAME TASK / SAME ATTEMPT after >10m without correlated Jules session+useful activity. Verify f8dc84b330ac107186f71b20f046728c313eb828 captures true pre-mutation factura state before RegistrarPago/AnularPago/CambiarEstado and emits established Aplicar/Anular/CambiarEstado audit events with correct post-state. Run proportional backend/API regression; add only a proven focused test gap. Return two independent self-review PASS markers. No branches, push, PR, merge, deploy, secrets, main or Production."
+}
