@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-C-N43E-FRONTEND-UNIT-C2-20260902T2110HND",
+  "taskId": "N4.3.E.FRONTEND_UNIT_TESTS",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "187fc981f15d16d127669adda8caad3cfecefb5c",
+  "taskAttempt": 2,
+  "fileScopeHint": "frontend/src/app/features/cuentas-bancarias/cuentas-bancarias.component.spec.ts",
+  "prompt": "R2 FINAL causal for N4.3.E.FRONTEND_UNIT_TESTS after REVIEW_FAIL of C1. C1 added generic existing CRUD/error/RBAC coverage and explicitly omitted the N4.3.E reconciliation flow, so it does not satisfy this task. Implement ONLY cuentas-bancarias.component.spec.ts tests for the real N4.3.E bank reconciliation behavior expected from the companion implementation: importaciones-estado-cuenta request mapping with cuentaBancariaId/idempotencyKey/movimientos fields; matches request mapping with cuentaBancariaId/idempotencyKey/matches; Finanzas:Importar and Finanzas:Crear permission gating; invalid/empty movement rows; submitting/loading reset; success and HttpErrorResponse failure states; preserving existing CuentaBancaria CRUD. Do not add tests that intentionally fail because implementation is being completed in this same parent wave. Do not modify production files/e2e/backend/workflows/docs. Use existing TestBed/Http testing or current component mocking patterns without hardcoded secrets. Run the focused unit test if possible. Return patch only with two independent self-review PASS markers. Attempt 2/2 FINAL; no R3." 
+}
