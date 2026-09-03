@@ -1,0 +1,14 @@
+{
+  "dispatchId": "VAEP-JULES-D-N44F-AUDIT-REGRESSION-20260903T0753HND",
+  "taskId": "N4.4.F.AUDIT_REGRESSION",
+  "workerId": "JULES_D",
+  "transport": "vaep/jules-d/dispatch",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "19b2e62dfad7604b3aec4f1959d7c353b854bc00",
+  "taskAttempt": 1,
+  "maxAttempts": 2,
+  "r3Prohibited": true,
+  "qaTakeoverOnFailure": true,
+  "fileScopeHint": "backend/src/API/Controllers/FacturasController.cs; backend/tests/InventoryApp.Tests/API/**; backend/tests/InventoryApp.Tests/*Factura*",
+  "prompt": "N4.4.F AUDIT REGRESSION REVIEW. Treat f8dc84b330ac107186f71b20f046728c313eb828 as the product fix base; intervening VAEP manifests are transport-only. Verify the controller now captures true pre-mutation factura state before RegistrarPago/AnularPago/CambiarEstado, emits a single established audit event with the existing Aplicar/Anular/CambiarEstado actions, and preserves post-mutation totals/saldo/state. Run proportional backend/API tests. Add or adjust a focused regression test only if there is a real missing coverage gap; otherwise return PASS evidence. No branches, push, PR, merge, deploy, secrets, main or Production. Two independent self-review PASS markers required."
+}
