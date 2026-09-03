@@ -1,9 +1,9 @@
-import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { environment } from '../../../../environments/environment';
-import { Factura } from '../../../core/models/factura.model';
+import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+import { environment } from '../../../environments/environment';
+import { Factura } from '../../core/models/factura.model';
 import { CuentasPorCobrarComponent } from './cuentas-por-cobrar.component';
 
 describe('CuentasPorCobrarComponent', () => {
@@ -12,66 +12,68 @@ describe('CuentasPorCobrarComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [CuentasPorCobrarComponent],
-      providers: [provideHttpClient(), provideHttpClientTesting(), provideNoopAnimations()]
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])]
     }).compileComponents();
-
     http = TestBed.inject(HttpTestingController);
   });
 
   afterEach(() => http.verify());
 
-  it('carga y muestra la proyección read-only de facturas pendientes', () => {
+  it('renderiza saldo y enlaces a factura, venta y pagos desde el endpoint CxC', () => {
     const fixture = TestBed.createComponent(CuentasPorCobrarComponent);
     fixture.detectChanges();
 
     const request = http.expectOne(`${environment.apiUrl}/cuentas-por-cobrar`);
     expect(request.request.method).toBe('GET');
-
     const factura = {
+      id: 10,
+      ventaId: 20,
       numeroFactura: 'FAC-001',
+      numeroVentaOrigen: 'VEN-020',
       clienteNombre: 'Cliente QA',
-      fechaVencimiento: '2026-08-30T00:00:00Z',
+      fechaVencimiento: '2026-09-01T00:00:00Z',
       estado: 'Emitida',
+      estadoPago: 'Pendiente',
       total: 1000,
       totalPagado: 250,
       saldoPendiente: 750,
       moneda: 'HNL'
     } as unknown as Factura;
-
     request.flush({ success: true, data: [factura], message: '', errors: [] });
     fixture.detectChanges();
 
     const text = fixture.nativeElement.textContent as string;
     expect(text).toContain('FAC-001');
+    expect(text).toContain('VEN-020');
     expect(text).toContain('Cliente QA');
-    expect(text).toContain('750.00 HNL');
+    expect(text).toContain('750.00');
+
+    const hrefs = Array.from(fixture.nativeElement.querySelectorAll('a')).map((a: Element) => a.getAttribute('href'));
+    expect(hrefs).toContain('/facturas/10');
+    expect(hrefs).toContain('/ventas/20');
+    expect(hrefs).toContain('/facturas/10/pagos');
   });
 
-  it('maneja el error 403 Forbidden correctamente', () => {
+  it('falla de forma explicita ante 403 Facturacion/Ver', () => {
     const fixture = TestBed.createComponent(CuentasPorCobrarComponent);
     fixture.detectChanges();
-
     const request = http.expectOne(`${environment.apiUrl}/cuentas-por-cobrar`);
-    request.flush('Forbidden', { status: 403, statusText: 'Forbidden' });
+    request.flush({ message: 'Forbidden' }, { status: 403, statusText: 'Forbidden' });
     fixture.detectChanges();
 
-    const component = fixture.componentInstance;
-    expect(component.items().length).toBe(0);
-    expect(component.error()).toBe('No tiene permiso Facturacion/Ver para consultar esta información.');
-    const text = fixture.nativeElement.textContent as string;
-    expect(text).toContain('No tiene permiso Facturacion/Ver para consultar esta información.');
+    expect(fixture.componentInstance.cuentas()).toEqual([]);
+    expect(fixture.componentInstance.errorMessage()).toContain('Facturacion/Ver');
+    expect(fixture.nativeElement.textContent).toContain('Facturacion/Ver');
   });
 
-  it('maneja un error de contrato cuando la API responde success=false', () => {
+  it('no acepta success=false como carga valida', () => {
     const fixture = TestBed.createComponent(CuentasPorCobrarComponent);
     fixture.detectChanges();
-
     const request = http.expectOne(`${environment.apiUrl}/cuentas-por-cobrar`);
-    request.flush({ success: false, message: 'Custom API Error', data: [], errors: [] });
+    request.flush({ success: false, data: [], message: 'Contrato rechazado', errors: [] });
     fixture.detectChanges();
 
-    const component = fixture.componentInstance;
-    expect(component.items().length).toBe(0);
-    expect(component.error()).toBe('Custom API Error');
+    expect(fixture.componentInstance.cuentas()).toEqual([]);
+    expect(fixture.componentInstance.errorMessage()).toBe('Contrato rechazado');
   });
 });
