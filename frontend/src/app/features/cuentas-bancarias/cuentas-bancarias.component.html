@@ -82,6 +82,7 @@
           <button mat-button type="button" *ngIf="puedeEditar()" (click)="editar(element)" [attr.aria-label]="'Editar cuenta ' + element.nombre">Editar</button>
           <button mat-button type="button" color="primary" *ngIf="puedeActivar() && element.estado === 2" (click)="activar(element)" [attr.aria-label]="'Activar cuenta ' + element.nombre">Activar</button>
           <button mat-button type="button" color="warn" *ngIf="puedeDesactivar() && element.estado === 1" (click)="desactivar(element)" [attr.aria-label]="'Desactivar cuenta ' + element.nombre">Desactivar</button>
+          <button mat-button type="button" *ngIf="puedeImportar() || puedeCrear()" (click)="seleccionarCuentaParaConciliacion(element)" [attr.aria-label]="'Conciliar cuenta ' + element.nombre">Conciliar</button>
         </td>
       </ng-container>
       <tr mat-header-row *matHeaderRowDef="columnasMostradas"></tr>
@@ -89,4 +90,47 @@
       <tr class="mat-row" *matNoDataRow><td class="mat-cell empty-cell" [attr.colspan]="columnasMostradas.length"><div *ngIf="!loading()" role="status" aria-live="polite">No se encontraron cuentas bancarias.</div></td></tr>
     </table>
   </div>
+
+  <section *ngIf="reconSelectedAccount() as cuenta" class="form-section reconciliation-section" aria-labelledby="conciliacion-title">
+    <div class="header-section">
+      <div>
+        <h2 id="conciliacion-title">Conciliación bancaria</h2>
+        <p>Cuenta seleccionada: <strong>{{ cuenta.nombre }}</strong> · {{ cuenta.numeroCuenta }}</p>
+      </div>
+      <button mat-button type="button" (click)="reconSelectedAccount.set(null)" aria-label="Cerrar conciliación">Cerrar</button>
+    </div>
+
+    <div *ngIf="reconError()" class="error-alert" role="alert" aria-live="assertive">{{ reconError() }}</div>
+    <div *ngIf="reconSuccess()" role="status" aria-live="polite">Operación de conciliación registrada correctamente.</div>
+    <div *ngIf="reconEmpty()" role="status" aria-live="polite">La operación no contiene movimientos o coincidencias para mostrar.</div>
+    <div *ngIf="reconSubmitting()" class="loading-shade" aria-live="polite">
+      <mat-spinner diameter="32" aria-label="Procesando conciliación bancaria"></mat-spinner>
+    </div>
+
+    <form *ngIf="puedeImportar()" class="form-grid" aria-label="Importar estado de cuenta" (ngSubmit)="importarEstadoCuenta(importKey.value, [{ fechaOperacion: importFecha.value, monto: importMonto.valueAsNumber, referenciaExterna: importReferencia.value, descripcion: importDescripcion.value, identificadorExternoTransaccion: importIdentificador.value }])">
+      <mat-form-field><mat-label>Clave de idempotencia</mat-label><input matInput #importKey required aria-label="Clave de idempotencia de importación" /></mat-form-field>
+      <mat-form-field><mat-label>Fecha de operación</mat-label><input matInput #importFecha type="date" required aria-label="Fecha del movimiento importado" /></mat-form-field>
+      <mat-form-field><mat-label>Monto</mat-label><input matInput #importMonto type="number" required aria-label="Monto del movimiento importado" /></mat-form-field>
+      <mat-form-field><mat-label>Referencia externa</mat-label><input matInput #importReferencia required aria-label="Referencia externa del movimiento" /></mat-form-field>
+      <mat-form-field><mat-label>Descripción</mat-label><input matInput #importDescripcion aria-label="Descripción del movimiento" /></mat-form-field>
+      <mat-form-field><mat-label>Identificador externo</mat-label><input matInput #importIdentificador required aria-label="Identificador externo de transacción" /></mat-form-field>
+      <button mat-raised-button color="primary" type="submit" [disabled]="reconSubmitting()">Importar estado de cuenta</button>
+    </form>
+
+    <form *ngIf="puedeCrear()" class="form-grid" aria-label="Registrar coincidencia bancaria" (ngSubmit)="registrarMatches(matchKey.value, [{ movimientoInternoId: matchMovimientoId.valueAsNumber, identificadorExternoTransaccion: matchIdentificador.value }])">
+      <mat-form-field><mat-label>Clave de idempotencia</mat-label><input matInput #matchKey required aria-label="Clave de idempotencia de coincidencia" /></mat-form-field>
+      <mat-form-field><mat-label>Movimiento interno</mat-label><input matInput #matchMovimientoId type="number" required aria-label="ID de movimiento interno" /></mat-form-field>
+      <mat-form-field><mat-label>Identificador externo</mat-label><input matInput #matchIdentificador required aria-label="Identificador externo para coincidencia" /></mat-form-field>
+      <button mat-raised-button color="primary" type="submit" [disabled]="reconSubmitting()">Registrar coincidencia</button>
+    </form>
+
+    <div *ngIf="reconMovementRows().length > 0" aria-label="Movimientos importados">
+      <h3>Movimientos importados</h3>
+      <p *ngFor="let movimiento of reconMovementRows()">{{ movimiento.fechaOperacion }} · {{ movimiento.referenciaExterna }} · {{ movimiento.monto }}</p>
+    </div>
+    <div *ngIf="reconMatchRows().length > 0" aria-label="Coincidencias registradas">
+      <h3>Coincidencias registradas</h3>
+      <p *ngFor="let match of reconMatchRows()">Movimiento {{ match.movimientoInternoId }} · {{ match.identificadorExternoTransaccion }}</p>
+    </div>
+  </section>
 </div>
