@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-A-N43E-FRONTEND-LOGIC-A1-20260902T2045HND",
+  "taskId": "N4.3.E.FRONTEND_LOGIC",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "3a32b39990b25ee4208d61fefa135233a6f1191a",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/features/cuentas-bancarias/cuentas-bancarias.component.ts",
+  "prompt": "N4.3.E FRONTEND_UX current-parent closure. Implement the minimal coherent TypeScript component logic required to import/register bank-statement movements and relate them to payments, deposits, transfers and financial movements using the already-materialized N4.3.D API contracts. Preserve existing CuentaBancaria CRUD behavior. Scope ONLY cuentas-bancarias.component.ts. Include loading/error/empty state logic and permission-aware actions where existing frontend auth patterns support it. Do not edit HTML/SCSS/specs/e2e/backend/workflows/docs. No main, Production, branches, push, PR, merge, secrets or deploy. Run proportional frontend tests/build if possible. Return patch only and two independent self-review PASS markers before COMPLETED."
+}
