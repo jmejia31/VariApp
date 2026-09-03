@@ -621,3 +621,7 @@ Approved closure facts:
 **Cierre documental/control:** este bloque es exclusivamente aditivo sobre el histórico existente. PR #2 continúa Draft `Desarrollo → main`, sin merge.
 
 **Promoción:** con esta publicación, N3.11.H quedará formalmente LISTO (TARGET_AFTER_PUBLICATION).
+
+## 2026-09-03 — ERP-N4.4 Cuentas por cobrar — CIERRE DOCUMENTAL
+
+Responsable ChatGPT/VAEP v3.25 Closure Governor / Jules A; objective finalización lógica N4.4 A-G; evidence A-F LISTO_REAL and G LISTO_REAL with docs/CERTIFICACION_N4_4_CUENTAS_POR_COBRAR.md and docs/RUNBOOK_N4_4_CUENTAS_POR_COBRAR.md; closure H is NOT declared LISTO_REAL.
