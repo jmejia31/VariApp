@@ -1,0 +1,15 @@
+{
+  "dispatchId": "VAEP-JULES-B-N44F-AUDIT-R2-FINAL-20260903T0712HND",
+  "taskId": "N4.4.F.AUDIT_BOUNDARY",
+  "workerId": "JULES_B",
+  "transport": "vaep/jules-b/dispatch",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "78ac2bbbd8dfb3731329f615136bdb05ad584b26",
+  "taskAttempt": 2,
+  "maxAttempts": 2,
+  "r3Prohibited": true,
+  "qaTakeoverOnFailure": true,
+  "recoveryReason": "A1 completed with a patch but REVIEW_FIRST rejected it: CambiarEstado audit captured the old state after mutation, producing incorrect before/after evidence; audit semantics also require exact verification against current IAuditoriaService behavior. R2 FINAL must correct causally without broad refactor.",
+  "fileScopeHint": "backend/src/Application/Services/FacturaService.cs; backend/tests/InventoryApp.Tests/Factura*Audit*.cs; backend/tests/InventoryApp.Tests/FacturaMetodoPagoServiceTests.cs; backend/tests/InventoryApp.Tests/FacturaServicePagosTests.cs",
+  "prompt": "N4.4.F AUDIT R2 FINAL. On exact base, implement only the proven missing audit boundary for factura/CxC mutations. Preserve the true pre-mutation state before assigning nuevoEstado; do not emit false old/new values. Verify whether tolerant RegistrarAsync or strict RegistrarEstrictoAsync is correct under the existing transaction contract and use the repository's established pattern rather than inventing semantics. Update all constructor-based tests affected by any injected dependency, add focused audit tests, run proportional backend tests/build, and return patch/evidence with two independent self-review PASS markers. No R3. No branches, push, PR, merge, secrets, deploy, main or Production changes."
+}
