@@ -19,11 +19,16 @@ import {
 @Injectable({ providedIn: 'root' })
 export class FacturaService {
   private readonly apiUrl = `${environment.apiUrl}/facturas`;
+  private readonly cuentasPorCobrarUrl = `${environment.apiUrl}/cuentas-por-cobrar`;
 
   constructor(private http: HttpClient) {}
 
   getAll(): Observable<ApiResponse<Factura[]>> {
     return this.http.get<ApiResponse<Factura[]>>(this.apiUrl);
+  }
+
+  getCuentasPorCobrar(): Observable<ApiResponse<Factura[]>> {
+    return this.http.get<ApiResponse<Factura[]>>(this.cuentasPorCobrarUrl);
   }
 
   getById(id: number): Observable<ApiResponse<Factura>> {

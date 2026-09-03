@@ -355,6 +355,12 @@ export const routes: Routes = [
     loadComponent: () => import('./features/facturas/factura-view.component').then(m => m.FacturaViewComponent)
   },
   {
+    path: 'cuentas-por-cobrar',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Facturacion', accion: 'Ver' },
+    loadComponent: () => import('./features/cuentas-por-cobrar/cuentas-por-cobrar.component').then(m => m.CuentasPorCobrarComponent)
+  },
+  {
     path: 'finanzas',
     canActivate: [authGuard, permisoGuard],
     data: { modulo: 'Finanzas', accion: 'Ver' },
