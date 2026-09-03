@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, effect, inject, signal } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -10,6 +10,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
 import { ActivatedRoute } from '@angular/router';
 import { Subject, debounceTime, finalize } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
 import {
   CreateCuentaBancariaDto,
@@ -24,6 +25,31 @@ import { CuentaBancariaService } from '../../core/services/cuenta-bancaria.servi
 interface CuentasBancariasNavigationState {
   search: string;
   estadoFilter: EstadoCuentaBancaria | null;
+}
+
+interface ImportacionMovimientoDto {
+  fechaOperacion: string;
+  monto: number;
+  referenciaExterna: string;
+  descripcion: string;
+  identificadorExternoTransaccion: string;
+}
+
+interface ImportacionEstadoCuentaDto {
+  cuentaBancariaId: number;
+  idempotencyKey: string;
+  movimientos: ImportacionMovimientoDto[];
+}
+
+interface MatchDto {
+  movimientoInternoId: number;
+  identificadorExternoTransaccion: string;
+}
+
+interface RegistrarMatchesDto {
+  cuentaBancariaId: number;
+  idempotencyKey: string;
+  matches: MatchDto[];
 }
 
 @Component({
@@ -50,18 +76,28 @@ export class CuentasBancariasComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly navigationState = inject(ListNavigationStateService);
   private readonly searchSubject = new Subject<string>();
+  private readonly http = inject(HttpClient, { optional: true });
 
   readonly cuentas = signal<CuentaBancaria[]>([]);
   readonly mostrarFormulario = signal(false);
   readonly loading = signal(true);
   readonly submitting = signal(false);
   readonly puedeCrear = signal(false);
+  readonly puedeImportar = signal(false);
   readonly puedeEditar = signal(false);
   readonly puedeActivar = signal(false);
   readonly puedeDesactivar = signal(false);
   readonly cuentaEnEdicion = signal<CuentaBancaria | null>(null);
   readonly columnasMostradas = ['nombre', 'numeroCuenta', 'moneda', 'estado', 'acciones'];
   readonly errorMessage = signal<string | null>(null);
+  readonly reconLoading = signal(false);
+  readonly reconSubmitting = signal(false);
+  readonly reconError = signal<string | null>(null);
+  readonly reconSuccess = signal(false);
+  readonly reconEmpty = signal(false);
+  readonly reconSelectedAccount = signal<CuentaBancaria | null>(null);
+  readonly reconMovementRows = signal<ImportacionMovimientoDto[]>([]);
+  readonly reconMatchRows = signal<MatchDto[]>([]);
 
   search = '';
   estadoFilter: EstadoCuentaBancaria | null = null;
@@ -92,6 +128,7 @@ export class CuentasBancariasComponent implements OnInit {
 
   ngOnInit(): void {
     this.puedeCrear.set(this.permisos.puede('Finanzas', 'Crear'));
+    this.puedeImportar.set(this.permisos.puede('Finanzas', 'Importar'));
     this.puedeEditar.set(this.permisos.puede('Finanzas', 'Editar'));
     this.puedeActivar.set(this.permisos.puede('Finanzas', 'Activar'));
     this.puedeDesactivar.set(this.permisos.puede('Finanzas', 'Desactivar'));
@@ -216,6 +253,69 @@ export class CuentasBancariasComponent implements OnInit {
       next: () => this.cargarCuentas(),
       error: (err) => this.errorMessage.set(this.extractErrorMessage(err, 'Ocurrió un error al desactivar la cuenta.'))
     });
+  }
+
+  seleccionarCuentaParaConciliacion(cuenta: CuentaBancaria): void {
+    this.reconSelectedAccount.set(cuenta);
+    this.reconError.set(null);
+    this.reconSuccess.set(false);
+    this.reconEmpty.set(false);
+    this.reconMovementRows.set([]);
+    this.reconMatchRows.set([]);
+  }
+
+  importarEstadoCuenta(idempotencyKey: string, movimientos: ImportacionMovimientoDto[]): void {
+    if (!this.puedeImportar() || !this.http) return;
+    const cuenta = this.reconSelectedAccount();
+    if (!cuenta) return;
+
+    this.reconSubmitting.set(true);
+    this.reconError.set(null);
+    this.reconSuccess.set(false);
+
+    const dto: ImportacionEstadoCuentaDto = {
+      cuentaBancariaId: cuenta.id,
+      idempotencyKey,
+      movimientos
+    };
+
+    this.http.post<void>(`${environment.apiUrl}/conciliaciones-bancarias/importaciones-estado-cuenta`, dto)
+      .pipe(finalize(() => this.reconSubmitting.set(false)))
+      .subscribe({
+        next: () => {
+          this.reconSuccess.set(true);
+          this.reconMovementRows.set(movimientos);
+          this.reconEmpty.set(movimientos.length === 0);
+        },
+        error: (err) => this.reconError.set(this.extractErrorMessage(err, 'Error al importar estado de cuenta.'))
+      });
+  }
+
+  registrarMatches(idempotencyKey: string, matches: MatchDto[]): void {
+    if (!this.puedeCrear() || !this.http) return;
+    const cuenta = this.reconSelectedAccount();
+    if (!cuenta) return;
+
+    this.reconSubmitting.set(true);
+    this.reconError.set(null);
+    this.reconSuccess.set(false);
+
+    const dto: RegistrarMatchesDto = {
+      cuentaBancariaId: cuenta.id,
+      idempotencyKey,
+      matches
+    };
+
+    this.http.post<void>(`${environment.apiUrl}/conciliaciones-bancarias/matches`, dto)
+      .pipe(finalize(() => this.reconSubmitting.set(false)))
+      .subscribe({
+        next: () => {
+          this.reconSuccess.set(true);
+          this.reconMatchRows.set(matches);
+          this.reconEmpty.set(matches.length === 0);
+        },
+        error: (err) => this.reconError.set(this.extractErrorMessage(err, 'Error al registrar matches.'))
+      });
   }
 
   private extractErrorMessage(err: unknown, fallback: string): string {
