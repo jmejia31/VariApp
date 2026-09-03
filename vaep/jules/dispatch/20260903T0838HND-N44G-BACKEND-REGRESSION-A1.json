@@ -1,0 +1,14 @@
+{
+  "dispatchId": "VAEP-JULES-A-N44G-BACKEND-REGRESSION-A1-20260903T0838HND",
+  "taskId": "N4.4.G.BACKEND_REGRESSION_A1",
+  "workerId": "JULES_A",
+  "transport": "vaep/jules/dispatch",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "2487badc4759db4ca87d60f823c6fffd9899f0d2",
+  "taskAttempt": 1,
+  "maxAttempts": 2,
+  "r3Prohibited": true,
+  "qaTakeoverOnFailure": true,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/Factura*Tests.cs excluding backend/tests/InventoryApp.Tests/API/**",
+  "prompt": "N4.4.G BACKEND REGRESSION A1. Work only on focused factura/CxC backend regression tests outside the API test folder. Verify payment, annulment, state-change before/after behavior and saldo/estado consistency against current exact branch state. Create or adjust only test files in the declared scope; do not edit production source. Run proportional dotnet tests/build and return exact patch/evidence plus two independent self-review PASS markers. If a production blocker is proven, report REQUIRED with exact reproduction instead of broadening scope. No branches, push, PR, merge, secrets, deploy, main or Production changes."
+}
