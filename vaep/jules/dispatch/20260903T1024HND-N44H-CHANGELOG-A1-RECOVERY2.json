@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-A-N44H-CHANGELOG-A1-RECOVERY2-20260903T1024HND",
+  "taskId": "N4.4.H.DOC_CERT_CANONICAL",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "0777e1ca5b65432e2caef6e99fbf2e66b1b0b921",
+  "taskAttempt": 1,
+  "fileScopeHint": "CHANGELOG_AI.md",
+  "prompt": "RECOVERY SAME TASK / SAME ATTEMPT1 after PRE_SESSION deterministic-guard failure caused by stale base metadata; prior failure does NOT consume an attempt. CURRENT_PARENT remains N4.4.G until controller certifies LISTO_REAL. N4.4.H is NEXT_SAFE pipeline work only and MUST NOT be promoted or claimed LISTO_REAL. Perform ONLY the remaining history-preserving CHANGELOG_AI.md append for ERP-N4.4 Cuentas por cobrar. Preserve every existing byte/entry; append one factual 2026-09-03 N4.4 closure-documentation block referencing N4.4.A-F LISTO_REAL and N4.4.G only if already canonically LISTO_REAL in repository evidence; otherwise state G certification is controller-gated. Reference docs/CERTIFICACION_N4_4_CUENTAS_POR_COBRAR.md and docs/RUNBOOK_N4_4_CUENTAS_POR_COBRAR.md where they exist. Do NOT claim H LISTO_REAL. No other files. No product code, tests, workflows, DB, TASKS, N4.5, main, Production, branches, merge, secrets or deploy. Return focused append-only patch with two substantive SELF_REVIEW_PASS markers before COMPLETED."
+}
