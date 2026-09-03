@@ -1,48 +1,36 @@
 using System.Reflection;
 using InventoryApp.API.Controllers;
-using InventoryApp.Application.Common;
-using InventoryApp.Application.Interfaces;
-using InventoryApp.Application.Services;
-using Microsoft.AspNetCore.Authorization;
+using InventoryApp.API.Filters;
+using InventoryApp.Domain.Enums;
 using Xunit;
 
 namespace InventoryApp.Tests.Controllers;
 
 public class ConciliacionBancariaControllerAuthorizationTests
 {
-    private const string PermisoAdministrar = "Finanzas.ConciliacionBancaria.Administrar";
-    private const string PermisoCerrarPeriodo = "Finanzas.ConciliacionBancaria.CerrarPeriodo";
-    private const string PermisoReabrirPeriodo = "Finanzas.ConciliacionBancaria.ReabrirPeriodo";
-
-    [Fact]
-    public void MutacionesUsanPermisoAdministrar()
+    [Theory]
+    [InlineData(nameof(ConciliacionBancariaController.ImportarEstadoCuenta), AccionPermiso.Importar)]
+    [InlineData(nameof(ConciliacionBancariaController.ConciliarMovimientos), AccionPermiso.Crear)]
+    [InlineData(nameof(ConciliacionBancariaController.SolicitarAjuste), AccionPermiso.Crear)]
+    [InlineData(nameof(ConciliacionBancariaController.CerrarPeriodo), AccionPermiso.Cerrar)]
+    [InlineData(nameof(ConciliacionBancariaController.ReabrirPeriodo), AccionPermiso.Reabrir)]
+    public void OperacionesExigenPermisoFinanzas(string methodName, AccionPermiso expectedAction)
     {
-        AssertPermiso(nameof(ConciliacionBancariaController.ImportarEstadoCuenta), PermisoAdministrar);
-        AssertPermiso(nameof(ConciliacionBancariaController.ProponerMatch), PermisoAdministrar);
-        AssertPermiso(nameof(ConciliacionBancariaController.ConfirmarMatch), PermisoAdministrar);
-        AssertPermiso(nameof(ConciliacionBancariaController.DescartarMatch), PermisoAdministrar);
-        AssertPermiso(nameof(ConciliacionBancariaController.CrearAjuste), PermisoAdministrar);
-    }
-
-    [Fact]
-    public void CerrarPeriodoUsaPermisoEspecifico()
-    {
-        AssertPermiso(nameof(ConciliacionBancariaController.CerrarPeriodo), PermisoCerrarPeriodo);
-    }
-
-    [Fact]
-    public void ReabrirPeriodoUsaPermisoEspecifico()
-    {
-        AssertPermiso(nameof(ConciliacionBancariaController.ReabrirPeriodo), PermisoReabrirPeriodo);
-    }
-
-    private static void AssertPermiso(string methodName, string expectedPolicy)
-    {
-        var method = typeof(ConciliacionBancariaController).GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public);
+        var method = typeof(ConciliacionBancariaController)
+            .GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public);
         Assert.NotNull(method);
 
-        var authorize = method!.GetCustomAttribute<AuthorizeAttribute>();
-        Assert.NotNull(authorize);
-        Assert.Equal(PermisosPolicy.Prefix + expectedPolicy, authorize!.Policy);
+        var requierePermiso = method!.GetCustomAttribute<RequierePermisoAttribute>();
+        Assert.NotNull(requierePermiso);
+
+        var moduloField = typeof(RequierePermisoAttribute)
+            .GetField("_modulo", BindingFlags.Instance | BindingFlags.NonPublic);
+        var accionField = typeof(RequierePermisoAttribute)
+            .GetField("_accion", BindingFlags.Instance | BindingFlags.NonPublic);
+
+        Assert.NotNull(moduloField);
+        Assert.NotNull(accionField);
+        Assert.Equal(ModuloSistema.Finanzas, (ModuloSistema)moduloField!.GetValue(requierePermiso)!);
+        Assert.Equal(expectedAction, (AccionPermiso)accionField!.GetValue(requierePermiso)!);
     }
 }
