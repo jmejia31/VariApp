@@ -1,0 +1,14 @@
+{
+  "dispatchId": "VAEP-JULES-A-N44F-RBAC-REVIEW-20260903T0751HND",
+  "taskId": "N4.4.F.RBAC_REVIEW",
+  "workerId": "JULES_A",
+  "transport": "vaep/jules/dispatch",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "f8dc84b330ac107186f71b20f046728c313eb828",
+  "taskAttempt": 1,
+  "maxAttempts": 2,
+  "r3Prohibited": true,
+  "qaTakeoverOnFailure": true,
+  "fileScopeHint": "backend/src/API/Controllers/FacturasController.cs; backend/src/API/Controllers/CuentasPorCobrarController.cs; backend/src/API/Filters/RequierePermisoAttribute.cs; backend/tests/InventoryApp.Tests/API/**",
+  "prompt": "N4.4.F RBAC REVIEW. Review exact product base f8dc84b330ac107186f71b20f046728c313eb828 for CxC/factura authorization consistency. Verify CuentasPorCobrarController remains Facturacion/Ver; FacturasController mutation endpoints preserve Aplicar/Anular/CambiarEstado and no privilege broadening was introduced by the audit before/after fix. Run proportional security/API tests if available. Only patch a proven RBAC/security defect inside assigned scope; otherwise return PASS evidence. No branches, push, PR, merge, deploy, secrets, main or Production changes. Two independent self-review PASS markers required."
+}
