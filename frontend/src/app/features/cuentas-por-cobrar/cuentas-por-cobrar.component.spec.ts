@@ -55,7 +55,7 @@ describe('CuentasPorCobrarComponent', () => {
     expect(hrefs).toContain('/facturas/10/pagos');
   });
 
-  it('falla de forma explicita ante 403 Facturacion/Ver', () => {
+  it('falla de forma explicita ante 403 sin exponer datos', () => {
     const fixture = TestBed.createComponent(CuentasPorCobrarComponent);
     fixture.detectChanges();
     const request = http.expectOne(`${environment.apiUrl}/cuentas-por-cobrar`);
@@ -63,8 +63,8 @@ describe('CuentasPorCobrarComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.componentInstance.cuentas()).toEqual([]);
-    expect(fixture.componentInstance.errorMessage()).toContain('Facturacion/Ver');
-    expect(fixture.nativeElement.textContent).toContain('Facturacion/Ver');
+    expect(fixture.componentInstance.errorMessage()).toBe('Forbidden');
+    expect(fixture.nativeElement.textContent).toContain('Forbidden');
   });
 
   it('no acepta success=false como carga valida', () => {
