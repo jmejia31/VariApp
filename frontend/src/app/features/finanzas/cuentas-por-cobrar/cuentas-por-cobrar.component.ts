@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Component, Injectable, OnInit, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -128,10 +128,23 @@ export class CuentasPorCobrarComponent implements OnInit {
     this.loading.set(true);
     this.error.set('');
     this.service.listar().pipe(finalize(() => this.loading.set(false))).subscribe({
-      next: response => this.items.set(response.data ?? []),
-      error: () => {
+      next: response => {
+        if (!response.success) {
+          this.items.set([]);
+          this.error.set(response.message || 'Error de API desconocido');
+          return;
+        }
+        this.items.set(response.data ?? []);
+      },
+      error: (err: HttpErrorResponse) => {
         this.items.set([]);
-        this.error.set('Verifica tu conexión o permisos e inténtalo nuevamente.');
+        if (err.status === 403) {
+          this.error.set('No tiene permiso Facturacion/Ver para consultar esta información.');
+        } else if (err.status === 401) {
+          this.error.set('La sesión no está autorizada para consultar esta información.');
+        } else {
+          this.error.set('Verifica tu conexión o permisos e inténtalo nuevamente.');
+        }
       }
     });
   }
