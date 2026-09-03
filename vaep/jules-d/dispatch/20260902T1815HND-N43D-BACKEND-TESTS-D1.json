@@ -1,0 +1,12 @@
+{
+  "manifestVersion": "v329",
+  "dispatchId": "20260902T1815HND-N43D-BACKEND-TESTS-D1",
+  "taskId": "N4.3.D.BACKEND_TESTS",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "063810b2c4619f28c1f6eb26d653a48965f4b033",
+  "taskAttempt": 1,
+  "maxAttempts": 2,
+  "fileScopeHint": "backend/tests/**",
+  "prompt": "VAEP/Jules v3.29 THROUGHPUT-HARD. CURRENT_PARENT=N4.3.D. Add ONLY backend tests for bank reconciliation application/API/repository behavior on exact PRIMARY_BASE_HEAD. Scope exclusively backend/tests/**. Cover materially useful happy/error/idempotency cases for importing/registering statement movements and relating them with payments/deposits/transfers/financial movements; include pagination/filtering and HTTP/ProblemDetails behavior where existing test architecture supports it. Do NOT edit production code, migrations/snapshot, frontend, workflows, manifests, secrets or deploy. Reuse existing fixtures/helpers and avoid brittle implementation-only assertions. Run directed tests and proportional backend build. Return reviewable patch artifact with SELF_REVIEW_PASS_1/PASS_2, full diff, git status and temp hygiene. ATTEMPT1/2. COMPLETED => READY_FOR_VAEP/REVIEW_FIRST; FAILED => causal R2 only; NO R3."
+}
