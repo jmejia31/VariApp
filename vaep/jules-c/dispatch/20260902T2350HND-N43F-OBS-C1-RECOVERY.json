@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-C-N43F-OBS-C1-RECOVERY-20260902T2350HND",
+  "taskId": "N4.3.F.OBSERVABILITY",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "ed44438f30b4ce0af2c2eff76cf12d63b13f760a",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/API/**/Correlation*.cs; backend/src/API/**/Health*.cs; backend/src/Infrastructure/**/*Logging*.cs; backend/src/Infrastructure/**/*Observability*.cs; backend/tests/InventoryApp.Tests/**/*Conciliacion*Observability*Tests.cs",
+  "prompt": "N4.3.F OBSERVABILITY lane PRE-SESSION RECOVERY. The prior manifest failed transport validation before session creation, so this remains ATTEMPT1 and must not be counted as R2. Work from exact dispatch-parent base ed44438f30b4ce0af2c2eff76cf12d63b13f760a. Inspect existing correlation, structured logging, health and observability conventions first. Produce the smallest coherent reconciliation-specific delta, if any, so failures and security-relevant operations are traceable through existing correlation/logging mechanisms and health/observability remain fail-safe without logging credentials, account secrets, tokens or imported statement payloads. Reuse current middleware/telemetry patterns; do not introduce a parallel observability stack. Add narrowly scoped tests only if needed. Do not edit RBAC/policies, audit implementation, frontend, migrations, workflows, docs, main or Production. Run targeted backend build/tests. No branches, push, merge, auto-merge, force-push, secrets or deploy. Return patch/artifact plus two independent self-review PASS markers; if no code delta is justified, prove compliance with exact files/tests and avoid busywork."
+}
