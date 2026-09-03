@@ -34,7 +34,9 @@ LOG_PATHS = [
 FATAL_PATTERNS = {
     "error_no_controlado": re.compile(r"Error no controlado|Unhandled exception", re.IGNORECASE),
     "excepcion_fatal": re.compile(r"\b(FATAL|CRITICAL)\b", re.IGNORECASE),
-    "error_angular": re.compile(r"\bNG\d{4}:|ERROR in ", re.IGNORECASE),
+    # Los diagnósticos Angular NGxxxx también se emiten para WARNING (p. ej. NG8113).
+    # Solo son fatales cuando la misma línea está marcada explícitamente como ERROR.
+    "error_angular": re.compile(r"(?:\bERROR\b|✘\s*\[ERROR\]).*\bNG\d{4}:|ERROR in ", re.IGNORECASE),
     "fallo_proceso": re.compile(r"Application startup exception|Process terminated", re.IGNORECASE),
 }
 
