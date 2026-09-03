@@ -27,7 +27,8 @@ test.describe('Cuentas Bancarias E2E y Accesibilidad N4.2.E / N4.3.E', () => {
 
     await nuevaCuentaBtn.click();
 
-    await expect(nuevaCuentaBtn).toHaveAttribute('aria-expanded', 'true');
+    const cancelarBtn = page.getByRole('button', { name: 'Cancelar' });
+    await expect(cancelarBtn).toHaveAttribute('aria-expanded', 'true');
     await expect(page.getByRole('heading', { name: 'Registrar Nueva Cuenta' })).toBeVisible();
     await expect(page.getByRole('textbox', { name: 'Nombre de la cuenta' })).toBeVisible();
     await expect(page.getByRole('search', { name: 'Filtros de búsqueda' })).toBeVisible();
@@ -35,7 +36,7 @@ test.describe('Cuentas Bancarias E2E y Accesibilidad N4.2.E / N4.3.E', () => {
   });
 
   test('abre la conciliación N4.3.E y expone importación y matches sin credenciales ni bypasses', async ({ page }) => {
-    await page.route('**/api/cuentas-bancarias**', async (route) => {
+    await page.route('**/cuentas-bancarias**', async (route) => {
       if (route.request().method() !== 'GET') {
         await route.continue();
         return;
