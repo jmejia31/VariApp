@@ -1,0 +1,13 @@
+{
+  "dispatchId": "VAEP-JULES-D-N44F-SECURITY-QA-A1-RECOVERY2-20260903T0700HND",
+  "taskId": "N4.4.F.SECURITY_QA_BOUNDARY",
+  "workerId": "JULES_D",
+  "transport": "vaep/jules-d/dispatch",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "9afb748f25b2ecc319894cf55e718dc30dbad22a",
+  "taskAttempt": 1,
+  "preSessionFailureDoesNotConsumeAttempt": true,
+  "recoveryReason": "No authoritative ACTIVE_REAL session evidence after >10m from prior recovery; re-dispatch with fresh exact base, preserving A1 because no session was proven.",
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/**/*CuentasPorCobrar*; backend/tests/InventoryApp.Tests/**/*Factura*Security*; frontend/src/app/features/cuentas-por-cobrar/**/*.spec.ts",
+  "prompt": "N4.4.F SECURITY_QA current-parent recovery. Exercise unauthorized/forbidden access, Facturacion/Ver acceptance, read-only CxC behavior, safe failures and frontend permission-route consistency on the exact base without duplicating A/B/C. Materialize only a narrowly proven missing security test or fix in this exclusive scope; otherwise return grounded no-delta evidence. Run proportional tests/build and return patch/evidence plus two independent self-review PASS markers before COMPLETED. No branches, push, PR, merge, secrets, deploy, main or Production changes."
+}
