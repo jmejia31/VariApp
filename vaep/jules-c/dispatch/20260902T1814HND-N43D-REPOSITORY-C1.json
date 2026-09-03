@@ -1,0 +1,12 @@
+{
+  "manifestVersion": "v329",
+  "dispatchId": "20260902T1814HND-N43D-REPOSITORY-C1",
+  "taskId": "N4.3.D.REPOSITORY",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "54d613cf03dc399f343d04c6874947547b7021b8",
+  "taskAttempt": 1,
+  "maxAttempts": 2,
+  "fileScopeHint": "backend/src/Infrastructure/**",
+  "prompt": "VAEP/Jules v3.29 THROUGHPUT-HARD. CURRENT_PARENT=N4.3.D. Implement ONLY Infrastructure/repository persistence needed by bank reconciliation on exact PRIMARY_BASE_HEAD. Scope exclusively backend/src/Infrastructure/**. Build on N4.3.C certified schema/migrations without editing migrations or snapshot unless compilation proves an exact mapping-only defect; normally leave migration history untouched. Implement repository/query operations needed by current Application contracts for statement movements, reconciliation matching, pagination/filtering and idempotent lookup/write behavior. Do NOT edit Application, API, Domain, tests, frontend, workflows, manifests, secrets or deploy. Respect existing transaction/unit-of-work and EF patterns. Run proportional backend build/tests and ensure no pending model drift is introduced. Return reviewable patch artifact with SELF_REVIEW_PASS_1/PASS_2, full diff, git status and temp hygiene. ATTEMPT1/2. COMPLETED => READY_FOR_VAEP/REVIEW_FIRST; FAILED => causal R2 only; NO R3."
+}
