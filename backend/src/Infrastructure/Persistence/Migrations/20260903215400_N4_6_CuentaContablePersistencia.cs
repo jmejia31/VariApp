@@ -54,7 +54,6 @@ public sealed class N4_6_CuentaContablePersistencia : Migration
                 CONSTRAINT `CK_CuentasContables_Codigo` CHECK (CHAR_LENGTH(TRIM(`Codigo`)) > 0),
                 CONSTRAINT `CK_CuentasContables_Nombre` CHECK (CHAR_LENGTH(TRIM(`Nombre`)) > 0),
                 CONSTRAINT `CK_CuentasContables_Tipo` CHECK (`Tipo` BETWEEN 1 AND 6),
-                CONSTRAINT `CK_CuentasContables_NoAutopadre` CHECK (`CuentaPadreId` IS NULL OR `CuentaPadreId` <> `Id`),
                 CONSTRAINT `FK_CuentasContables_CuentasContables_CuentaPadreId`
                     FOREIGN KEY (`CuentaPadreId`) REFERENCES `CuentasContables` (`Id`) ON DELETE RESTRICT
             ) CHARACTER SET=utf8mb4 ENGINE=InnoDB;
@@ -85,7 +84,7 @@ public sealed class N4_6_CuentaContablePersistencia : Migration
                AND table_name = 'CuentasContables';
 
             INSERT INTO __N46CPostGuard (Id, Violaciones)
-            SELECT 2, CASE WHEN COUNT(*) = 4 THEN 0 ELSE 1 END
+            SELECT 2, CASE WHEN COUNT(*) = 3 THEN 0 ELSE 1 END
               FROM information_schema.table_constraints
              WHERE constraint_schema = DATABASE()
                AND table_name = 'CuentasContables'
@@ -93,8 +92,7 @@ public sealed class N4_6_CuentaContablePersistencia : Migration
                AND constraint_name IN (
                     'CK_CuentasContables_Codigo',
                     'CK_CuentasContables_Nombre',
-                    'CK_CuentasContables_Tipo',
-                    'CK_CuentasContables_NoAutopadre');
+                    'CK_CuentasContables_Tipo');
 
             INSERT INTO __N46CPostGuard (Id, Violaciones)
             SELECT 3, CASE WHEN COUNT(*) = 1 THEN 0 ELSE 1 END
