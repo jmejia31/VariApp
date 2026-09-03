@@ -155,6 +155,7 @@ builder.Services.AddScoped<IInventarioConcurrencyService, InventarioConcurrencyS
 builder.Services.AddScoped<IInventarioAjusteService, InventarioAjusteService>();
 builder.Services.AddScoped<ICajaRepository, CajaRepository>();
 builder.Services.AddScoped<ICajaService, CajaService>();
+builder.Services.AddScoped<ICuentaBancariaRepository, CuentaBancariaRepository>();
 builder.Services.AddScoped<IConciliacionBancariaRepository, ConciliacionBancariaRepository>();
 builder.Services.AddScoped<IOperacionBancariaService, InventoryApp.Application.Bancos.OperacionBancariaService>();
 builder.Services.AddScoped<IConciliacionBancariaService, ConciliacionBancariaService>();
