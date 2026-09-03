@@ -4,16 +4,26 @@ on:
   push:
     branches: [Desarrollo]
     paths:
-      - 'backend/src/**'
-      - 'backend/tests/**'
+      - 'backend/src/**/*ProductoVariante*.cs'
+      - 'backend/src/**/*TipoCatalogoProducto*.cs'
+      - 'backend/src/Infrastructure/Migrations/20260811032000_N0_3_ConsolidarProductoVariante.cs'
+      - 'backend/tests/InventoryApp.Tests/ProductoVarianteAuthorityTests.cs'
+      - 'backend/tests/InventoryApp.Tests/ProductoVarianteServiceTests.cs'
+      - 'backend/tests/InventoryApp.Tests/N03AutoridadOperativaRegressionTests.cs'
       - 'backend/scripts/*erp-n0-3*'
+      - 'backend/scripts/check-erp-n0-3-runtime.py'
       - '.github/workflows/erp-n0-3-ci.yml'
   pull_request:
     branches: [main]
     paths:
-      - 'backend/src/**'
-      - 'backend/tests/**'
+      - 'backend/src/**/*ProductoVariante*.cs'
+      - 'backend/src/**/*TipoCatalogoProducto*.cs'
+      - 'backend/src/Infrastructure/Migrations/20260811032000_N0_3_ConsolidarProductoVariante.cs'
+      - 'backend/tests/InventoryApp.Tests/ProductoVarianteAuthorityTests.cs'
+      - 'backend/tests/InventoryApp.Tests/ProductoVarianteServiceTests.cs'
+      - 'backend/tests/InventoryApp.Tests/N03AutoridadOperativaRegressionTests.cs'
       - 'backend/scripts/*erp-n0-3*'
+      - 'backend/scripts/check-erp-n0-3-runtime.py'
       - '.github/workflows/erp-n0-3-ci.yml'
   workflow_dispatch:
 

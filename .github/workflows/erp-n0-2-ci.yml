@@ -4,16 +4,22 @@ on:
   push:
     branches: [Desarrollo]
     paths:
-      - 'backend/src/**'
-      - 'backend/tests/**'
+      - 'backend/src/**/*CatalogoProducto*.cs'
+      - 'backend/src/**/*TipoCatalogoProducto*.cs'
+      - 'backend/src/Infrastructure/Migrations/20260811013917_N0_2_RetirarCatalogoProductoLegacy*.cs'
+      - 'backend/tests/InventoryApp.Tests/CatalogoProductoServiceTests.cs'
+      - 'frontend/e2e/catalogos-mantenimientos.spec.ts'
       - 'backend/scripts/preflight-erp-n0-2-catalogos-normalizados.sql'
       - 'backend/scripts/postdeploy-erp-n0-2-catalogos-normalizados.sql'
       - '.github/workflows/erp-n0-2-ci.yml'
   pull_request:
     branches: [main]
     paths:
-      - 'backend/src/**'
-      - 'backend/tests/**'
+      - 'backend/src/**/*CatalogoProducto*.cs'
+      - 'backend/src/**/*TipoCatalogoProducto*.cs'
+      - 'backend/src/Infrastructure/Migrations/20260811013917_N0_2_RetirarCatalogoProductoLegacy*.cs'
+      - 'backend/tests/InventoryApp.Tests/CatalogoProductoServiceTests.cs'
+      - 'frontend/e2e/catalogos-mantenimientos.spec.ts'
       - 'backend/scripts/preflight-erp-n0-2-catalogos-normalizados.sql'
       - 'backend/scripts/postdeploy-erp-n0-2-catalogos-normalizados.sql'
       - '.github/workflows/erp-n0-2-ci.yml'

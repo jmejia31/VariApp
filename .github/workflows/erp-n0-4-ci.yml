@@ -4,15 +4,21 @@ on:
   push:
     branches: [Desarrollo]
     paths:
-      - 'backend/src/**'
-      - 'backend/tests/**'
+      - 'backend/src/**/*RbacN04*.cs'
+      - 'backend/src/Infrastructure/Migrations/20260811174745_N0_4_ConsolidarRbacRelacional*.cs'
+      - 'backend/tests/InventoryApp.Tests/N04AdministradorSemanticaTests.cs'
+      - 'backend/tests/InventoryApp.Tests/N04CatalogoPermisosRuntimeTests.cs'
+      - 'backend/tests/InventoryApp.Tests/N04RbacRelacionalTests.cs'
       - 'backend/scripts/*erp-n0-4*'
       - '.github/workflows/erp-n0-4-ci.yml'
   pull_request:
     branches: [main]
     paths:
-      - 'backend/src/**'
-      - 'backend/tests/**'
+      - 'backend/src/**/*RbacN04*.cs'
+      - 'backend/src/Infrastructure/Migrations/20260811174745_N0_4_ConsolidarRbacRelacional*.cs'
+      - 'backend/tests/InventoryApp.Tests/N04AdministradorSemanticaTests.cs'
+      - 'backend/tests/InventoryApp.Tests/N04CatalogoPermisosRuntimeTests.cs'
+      - 'backend/tests/InventoryApp.Tests/N04RbacRelacionalTests.cs'
       - 'backend/scripts/*erp-n0-4*'
       - '.github/workflows/erp-n0-4-ci.yml'
   workflow_dispatch:

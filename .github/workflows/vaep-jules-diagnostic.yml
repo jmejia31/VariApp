@@ -6,9 +6,13 @@ on:
       - Desarrollo
     paths:
       - 'vaep/jules/diagnostic/*.json'
+      - '.github/workflows/vaep-jules-diagnostic.yml'
   pull_request:
     branches:
       - main
+    paths:
+      - 'vaep/jules/diagnostic/*.json'
+      - '.github/workflows/vaep-jules-diagnostic.yml'
   workflow_dispatch:
 
 permissions:

@@ -3,8 +3,17 @@ name: Desarrollo - Compilación y pruebas
 on:
   push:
     branches: [Desarrollo]
-    paths-ignore:
-      - 'vaep/**'
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - 'Dockerfile'
+      - 'backend/Dockerfile'
+      - 'docker-compose.yml'
+      - 'docker-compose.*'
+      - 'render.yaml'
+      - 'global.json'
+      - 'Directory.*'
+      - '.github/workflows/desarrollo-ci.yml'
   workflow_dispatch:
 
 permissions:
