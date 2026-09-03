@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-C-N44F-OBSERVABILITY-A1-RECOVERY-20260903T0621HND",
+  "taskId": "N4.4.F.OBSERVABILITY_BOUNDARY",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "b9aeb3278728d02b8f0f50ec98fe73b945667b73",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/API/**/*Health*; backend/src/API/**/*Logging*; backend/src/Infrastructure/**/*Logging*; backend/src/Infrastructure/**/*Correlation*; backend/tests/InventoryApp.Tests/**/*Observability*",
+  "prompt": "N4.4.F SEC_AUDIT current-parent observability lane. Verify that Cuentas por Cobrar and its authoritative Factura/FacturaPago dependency chain inherit canonical correlation/logging/health/error observability without a parallel telemetry path. Materialize only a real observability gap inside the exclusive logging/correlation/health/observability-test scope; do not edit permission catalogs/filters, FacturaService audit logic, frontend feature files, workflows, docs, dispatch files, main or Production. If existing cross-cutting observability already covers this read-only projection, return grounded no-delta evidence instead of busywork. Run proportional tests/build. No branches, push, PR, merge, secrets or deploy. Return patch/evidence only and two independent self-review PASS markers before COMPLETED."
+}
