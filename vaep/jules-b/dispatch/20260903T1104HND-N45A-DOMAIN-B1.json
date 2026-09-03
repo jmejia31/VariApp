@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-B-N45A-DOMAIN-B1-20260903T1104HND",
+  "taskId": "N4.5.A.PREFLIGHT_DOMAIN_AUTHORITY",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "ac740709b66a02047fc569c8a85f2a7fb277d450",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/VAEP_N4_5_A_CXP_DOMAIN_PREFLIGHT.md",
+  "prompt": "SAFE PIPELINE PREWORK ONLY; CURRENT_PARENT remains N4.4.H and MUST NOT be promoted by you. Inspect N4.5 Cuentas por pagar domain authority and direct dependencies only. Determine authoritative entities/value objects/contracts already present for supplier invoices/payables, what is reused from Compras/N2.8, actual gaps, invariants, risks, acceptance criteria and explicit out-of-scope. Materialize one factual reviewable document docs/VAEP_N4_5_A_CXP_DOMAIN_PREFLIGHT.md. No product code, persistence, API, frontend, workflow or DB edits. Do not claim N4.5.A LISTO; controller review is required. Two substantive SELF_REVIEW_PASS markers. No main/Production/branches/merge/secrets/deploy."
+}
