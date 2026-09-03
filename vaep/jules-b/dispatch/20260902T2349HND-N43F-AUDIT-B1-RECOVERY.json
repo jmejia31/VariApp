@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-B-N43F-AUDIT-B1-RECOVERY-20260902T2349HND",
+  "taskId": "N4.3.F.AUDIT",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "d89011332a4cdea9bde8d10a3d0337a51b475fd7",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Application/Services/ConciliacionBancariaService.cs; backend/src/Application/Interfaces/**/*Audit*.cs; backend/src/Infrastructure/**/*Audit*.cs; backend/tests/InventoryApp.Tests/**/*Conciliacion*Audit*Tests.cs",
+  "prompt": "N4.3.F AUDIT lane PRE-SESSION RECOVERY. The prior manifest failed transport validation before session creation, so this remains ATTEMPT1 and must not be counted as R2. Work from exact dispatch-parent base d89011332a4cdea9bde8d10a3d0337a51b475fd7. Inspect existing canonical audit infrastructure and reconciliation service behavior. Produce the smallest coherent patch needed to ensure security-relevant reconciliation actions (import/register, matching/reconciliation, adjustments and state-changing links to financial movements) emit the repository's existing audit trail with actor/action/entity/correlation context and without sensitive payload leakage. Reuse existing audit contracts; do not create a second audit subsystem. Add narrowly scoped audit tests. Do not edit controller RBAC/policies, health/observability middleware, frontend, migrations, workflows, docs, main or Production. Run targeted backend build/tests. No branches, push, merge, auto-merge, force-push, secrets or deploy. Return patch/artifact plus two independent self-review PASS markers; if existing behavior already satisfies DoD, prove it with exact evidence/tests and avoid busywork."
+}
