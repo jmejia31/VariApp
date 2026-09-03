@@ -1,0 +1,11 @@
+{
+  "dispatchId": "VAEP-JULES-B-N45F-SECURITY-PREWORK-B1-20260903T1309HND",
+  "taskId": "N4.5.F.SEC_AUDIT_PREWORK",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "d4fbcea28b16835d6f94b24423610fdbb19b7428",
+  "productBaseHead": "541ec12b72912c769c6f54b8821771e509818375",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend CxP controller/service authorization-audit-observability + focused security tests only",
+  "prompt": "WORK_CAN_PIPELINE__PROMOTION_CANNOT. N4.5.E remains CURRENT_PARENT until VAEP closes it. Perform material N4.5.F security/audit prework only: verify CxP endpoint grants, mutation permission boundaries, audit before/after evidence, correlation/logging/ProblemDetails and focused authorization/audit tests. Reuse N2.8 authority; do not duplicate audit or broaden privileges. If fully covered, return REVIEW_PASS/N_A_JUSTIFIED with concrete evidence and no patch. If a proven gap exists, produce the smallest backend security/test-only patch. Do NOT promote/close F, do not touch frontend, DB/migrations, docs, workflows, TASKS, CHANGELOG, N4.5.E/G/H, main, Production, branches, merge, secrets or deploy. Two substantive SELF_REVIEW_PASS markers required."
+}
