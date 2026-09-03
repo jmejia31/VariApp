@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-D-N44F-SECURITY-QA-A1-RECOVERY-20260903T0621HND",
+  "taskId": "N4.4.F.SECURITY_QA_BOUNDARY",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "ae7cbd66f012afb318ba18148371d3200484671a",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/**/*CuentasPorCobrar*; backend/tests/InventoryApp.Tests/**/*Factura*Security*; frontend/src/app/features/cuentas-por-cobrar/**/*.spec.ts",
+  "prompt": "N4.4.F SEC_AUDIT current-parent security/negative-QA lane. Exercise the CxC security boundary proportionally: unauthorized/forbidden access, Facturacion/Ver acceptance, no mutation through the read-only CxC endpoint, safe error behavior, and frontend permission-route consistency. Materialize only missing tests or a narrowly proven security fix inside this exclusive test scope; do not edit permission catalogs/filters, FacturaService audit logic, logging/health, production deployment, workflows, docs, dispatch files, main or Production. Do not duplicate A/B/C work. If current coverage proves the boundary with no delta, return grounded no-delta evidence. Run proportional tests/build. No branches, push, PR, merge, secrets or deploy. Return patch/evidence only and two independent self-review PASS markers before COMPLETED."
+}
