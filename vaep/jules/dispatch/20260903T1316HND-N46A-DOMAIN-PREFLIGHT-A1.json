@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-A-N46A-DOMAIN-PREFLIGHT-A1-20260903T1316HND",
+  "taskId": "N4.6.A.DOMAIN_PREFLIGHT",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "89942ca49a688e3393c175ed0156f53c5b920488",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend domain/model/accounting existing entities + docs evidence only; no implementation",
+  "prompt": "WORK_CAN_PIPELINE__PROMOTION_CANNOT. N4.5.H remains CURRENT_PARENT. Perform material N4.6.A Plan de cuentas preflight, domain/model slice only: inspect existing CuentaContable/accounting entities, enums, hierarchy rules, authority boundaries, reuse vs missing scope, risks and acceptance criteria for activo/pasivo/patrimonio/ingreso/gasto/costo. Evidence-only preferred; DO NOT implement large changes or promote N4.6.A. Do not touch persistence/migrations, frontend, shared docs closure, workflows, TASKS, CHANGELOG, N4.5.H, main, Production, branches, merge, secrets or deploy. Two substantive SELF_REVIEW_PASS markers required before COMPLETED."
+}
