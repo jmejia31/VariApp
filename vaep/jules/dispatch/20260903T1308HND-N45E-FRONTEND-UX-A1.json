@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-A-N45E-FRONTEND-UX-A1-20260903T1308HND",
+  "taskId": "N4.5.E.FRONTEND_UX_REVALIDATION",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "541ec12b72912c769c6f54b8821771e509818375",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/** cuentas por pagar / routes / permissions / focused frontend tests only",
+  "prompt": "CURRENT_PARENT=N4.5.E. Revalidate the existing CxP frontend authority from N2.8.E against N4.5 scope. Inspect canonical routes, page/component/service contracts, loading-empty-error states, permission-aware UI, responsive/accessibility and current focused tests. If existing implementation fully covers scope, return REVIEW_PASS/N_A_JUSTIFIED with concrete file/test evidence and no patch. If a real causal gap exists, make the smallest focused frontend-only patch and focused tests. Do NOT touch backend, DB, security policy files, docs, workflows, TASKS, CHANGELOG, N4.5.F/G/H, main, Production, branches, merge, secrets or deploy. Two substantive SELF_REVIEW_PASS markers required before COMPLETED. Patch artifact only; ChatGPT/VAEP integrates after review."
+}
