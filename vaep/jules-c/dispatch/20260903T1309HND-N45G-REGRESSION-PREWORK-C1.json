@@ -1,0 +1,11 @@
+{
+  "dispatchId": "VAEP-JULES-C-N45G-REGRESSION-PREWORK-C1-20260903T1309HND",
+  "taskId": "N4.5.G.REGRESSION_PREWORK",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "d934daa9516945e010ba21886a6e7fcd4e11774b",
+  "productBaseHead": "541ec12b72912c769c6f54b8821771e509818375",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/frontend focused CxP tests and CI evidence only; no product code unless test-only gap",
+  "prompt": "WORK_CAN_PIPELINE__PROMOTION_CANNOT. N4.5.E is CURRENT_PARENT. Prepare N4.5.G QA/regression evidence without promoting G: inspect existing N2.8/N4.5 CxP unit/API/RBAC/frontend regression coverage, identify exact focused commands/suites and any genuine coverage hole. Prefer evidence-only REVIEW_PASS when coverage is sufficient; if a real missing regression is proven, add only the smallest focused test patch. Do NOT modify product implementation, DB/migrations, docs, workflows, TASKS, CHANGELOG, N4.5.E/F/H, main, Production, branches, merge, secrets or deploy. Two substantive SELF_REVIEW_PASS markers required."
+}
