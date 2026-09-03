@@ -17,7 +17,6 @@ public sealed class CuentaContableConfiguration : IEntityTypeConfiguration<Cuent
             table.HasCheckConstraint("CK_CuentasContables_Codigo", "CHAR_LENGTH(TRIM(`Codigo`)) > 0");
             table.HasCheckConstraint("CK_CuentasContables_Nombre", "CHAR_LENGTH(TRIM(`Nombre`)) > 0");
             table.HasCheckConstraint("CK_CuentasContables_Tipo", "`Tipo` BETWEEN 1 AND 6");
-            table.HasCheckConstraint("CK_CuentasContables_NoAutopadre", "`CuentaPadreId` IS NULL OR `CuentaPadreId` <> `Id`");
         });
 
         builder.Property(x => x.Codigo)
