@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-A-N46C-EF-MIGRATION-A1-20260903T1547HND",
+  "taskId": "N4.6.C.EF_MIGRATION.A1",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "35d13f24a7a560dd8c0bcf9f68090f79d27e9072",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Infrastructure/Persistence/AppDbContext.cs; backend/src/Infrastructure/Persistence/Configurations/*CuentaContable*.cs; backend/src/Infrastructure/Persistence/Migrations/*CuentaContable*.cs; backend/src/Infrastructure/Persistence/Migrations/AppDbContextModelSnapshot.cs",
+  "prompt": "CURRENT_PARENT N4.6.C — Plan de cuentas — Persistencia, migración y datos. Dependency N4.6.B is LISTO_REAL; CuentaContable domain exists. Implement material EF persistence for hierarchical CuentaContable on exact base: DbSet/context registration as required by repository conventions, explicit configuration with safe lengths/required fields, self-reference CuentaPadreId -> Subcuentas with non-cascading delete appropriate for hierarchy, unique Codigo, useful parent/type/active indexes, enum persistence consistent with existing conventions, and a real EF migration + designer/snapshot alignment. Preserve historical integrity; do not seed speculative business data unless existing plan conventions require it. Run dotnet build and dotnet ef migrations has-pending-model-changes plus proportional migration validation. If unrelated model drift exists, do not absorb it; report exact blocker. Exclusive write scope is persistence/configuration/migration/snapshot for CuentaContable only. Do not touch domain/API/frontend/workflows/main/Production/secrets/deploy/branches/PR. Before COMPLETED emit SELF_REVIEW_PASS_1=PASS and SELF_REVIEW_PASS_2=PASS. Return patch only; no push/branch/PR/deploy."
+}
