@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-A-N43F-RBAC-A1-RECOVERY-20260902T2349HND",
+  "taskId": "N4.3.F.RBAC",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "46c89da0d63589aa57ec1856bd12a56fabcdb48c",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/API/Controllers/ConciliacionBancariaController.cs; backend/src/Application/Security/**; backend/src/Infrastructure/Security/**; backend/tests/InventoryApp.Tests/**/*Conciliacion*Authorization*Tests.cs",
+  "prompt": "N4.3.F RBAC lane PRE-SESSION RECOVERY. The prior manifest failed transport validation before session creation, so this remains ATTEMPT1 and must not be counted as R2. Work from exact dispatch-parent base 46c89da0d63589aa57ec1856bd12a56fabcdb48c. Inspect the current reconciliation endpoints and existing relational permission authority before editing. Produce the smallest coherent patch needed so import/register/reconcile/payment/deposit/transfer/financial-movement actions enforce the existing canonical RBAC model fail-closed, with no permission aliases, bypasses or broad-role shortcuts. Reuse existing permission catalog/policies rather than inventing a parallel authorization system. Add/adjust narrowly scoped authorization tests only within this lane. Do not edit audit implementation, observability/health/logging, frontend, migrations, workflows, docs, DI unrelated to authorization, main or Production. Run targeted backend build/tests. No branches, push, merge, auto-merge, force-push, secrets or deploy. Return patch/artifact plus two independent self-review PASS markers; if no code delta is required, prove that with exact files/tests and avoid busywork."
+}
