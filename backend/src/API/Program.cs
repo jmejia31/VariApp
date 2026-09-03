@@ -155,6 +155,8 @@ builder.Services.AddScoped<IInventarioConcurrencyService, InventarioConcurrencyS
 builder.Services.AddScoped<IInventarioAjusteService, InventarioAjusteService>();
 builder.Services.AddScoped<ICajaRepository, CajaRepository>();
 builder.Services.AddScoped<ICajaService, CajaService>();
+builder.Services.AddScoped<IConciliacionBancariaRepository, ConciliacionBancariaRepository>();
+builder.Services.AddScoped<IConciliacionBancariaService, ConciliacionBancariaService>();
 var jwtSecret = builder.Configuration["Jwt:Secret"] ?? throw new InvalidOperationException("Jwt:Secret no configurado.");
 var jwtIssuer = builder.Configuration["Jwt:Issuer"];
 var jwtAudience = builder.Configuration["Jwt:Audience"];
