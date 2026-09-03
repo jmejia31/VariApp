@@ -9,4 +9,5 @@ public interface IConciliacionBancariaService
     Task<SolicitarAjusteResponseDto> SolicitarAjusteAsync(SolicitarAjusteRequestDto request, int usuarioId, CancellationToken cancellationToken = default);
     Task<CerrarPeriodoConciliacionResponseDto> CerrarPeriodoAsync(CerrarPeriodoConciliacionRequestDto request, int usuarioId, CancellationToken cancellationToken = default);
     Task<ReabrirPeriodoConciliacionResponseDto> ReabrirPeriodoAsync(ReabrirPeriodoConciliacionRequestDto request, int usuarioId, CancellationToken cancellationToken = default);
+    Task<ConciliacionBancariaPageDto> GetConciliacionesAsync(ConciliacionBancariaFilterDto filter, CancellationToken cancellationToken = default);
 }
