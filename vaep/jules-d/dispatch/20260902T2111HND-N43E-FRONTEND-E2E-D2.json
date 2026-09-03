@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-D-N43E-FRONTEND-E2E-D2-20260902T2111HND",
+  "taskId": "N4.3.E.FRONTEND_E2E",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "2902ec25ab1fff73f666e4206a26ac46f0e38edf",
+  "taskAttempt": 2,
+  "fileScopeHint": "frontend/e2e/cuentas-bancarias.spec.ts",
+  "prompt": "R2 FINAL causal for N4.3.E.FRONTEND_E2E after REVIEW_FAIL of D1. D1 inserted an unconditional MISSING_DEPENDENCY failure and modified existing navigation/login semantics; that cannot certify a parent whose UI is being implemented in this same wave. Modify ONLY frontend/e2e/cuentas-bancarias.spec.ts to add a real fail-closed N4.3.E reconciliation scenario against the completed UI contract: reach Cuentas Bancarias after login, verify reconciliation/import controls are discoverable and accessible, verify statement movement row fields and matching controls, permission-safe disabled/hidden behavior where deterministically testable, and ensure no unconditional throw/expect.fail remains. Preserve existing N4.2.E coverage and do not weaken navigation assertions by swallowing ERR_CONNECTION_REFUSED as success. Never hardcode a real password; environment-only with an explicit non-secret fallback is allowed only if consistent with existing repository policy. No production/unit/backend/workflow/docs or review-note files. Run Playwright compile/list or focused E2E if environment permits. Return patch only with two independent self-review PASS markers. Attempt 2/2 FINAL; if dependencies truly remain absent after reproducible search, report the exact blocker in result rather than committing an unconditional failing test. No R3." 
+}
