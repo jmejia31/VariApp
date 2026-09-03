@@ -71,7 +71,7 @@ test.describe('Cuentas Bancarias E2E y Accesibilidad N4.2.E / N4.3.E', () => {
     await conciliar.click();
 
     await expect(page.getByRole('heading', { name: 'Conciliación bancaria' })).toBeVisible();
-    await expect(page.getByText('HN-E2E-7001')).toBeVisible();
+    await expect(page.getByRole('cell', { name: 'HN-E2E-7001', exact: true })).toBeVisible();
     await expect(page.getByRole('form', { name: 'Importar estado de cuenta' })).toBeVisible();
     await expect(page.getByRole('form', { name: 'Registrar coincidencia bancaria' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Importar estado de cuenta' })).toBeEnabled();
