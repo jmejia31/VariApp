@@ -214,3 +214,19 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
 - [ ] `CHANGELOG_AI.md` y checks exact-head documentales pendientes antes de `N4.4.H=LISTO_REAL`; no false LISTO.
 
 **CURRENT_PARENT=N4.4.H. CLOSABLE_NOW=NO hasta reconciliar `CHANGELOG_AI.md`, obtener gates exact-head terminales y revalidar P0=0/P1=0. `N4.5.A` permanece promotion-held aunque se permite prework seguro.**
+
+## ERP-N4.5 — Cuentas por pagar — ROLLUP 2026-09-03
+
+Este bloque es aditivo y no reescribe estados históricos anteriores.
+
+- [x] N4.5.A-G — `LISTO_REAL`: alcance CxP reconciliado mediante reutilización de la autoridad ERP-N2.8, sin duplicar dominio, subledger, persistencia, API, UI, RBAC, auditoría ni pruebas.
+- [x] Certificación canónica publicada: `docs/CERTIFICACION_N4_5_CUENTAS_POR_PAGAR.md`.
+- [x] Baseline funcional certificado: `541ec12b72912c769c6f54b8821771e509818375`; el HEAD posterior contiene únicamente documentación y manifests de coordinación VAEP/Jules.
+- [x] P0 abiertos=0; P1 abiertos=0 para el alcance A-G según la evidencia canónica revisada.
+- [ ] N4.5.H documentación/certificación permanece `EN_PROGRESO` hasta reconciliar este rollup con `CHANGELOG_AI.md`, obtener gates exact-head terminales y revalidar P0=0/P1=0.
+
+**CURRENT_PARENT=N4.5.H. CLOSABLE_NOW=NO hasta completar la reconciliación documental y los gates exact-head. `N4.6.A` permanece `PREARMED/PROMOTION_HELD`; no se promueve antes del cierre real de N4.5.H.**
+
+### Reconciliación QA append-only
+
+Este rollup supersede únicamente el estado operativo stale anterior del bloque N4.4; las menciones históricas `CURRENT_PARENT=N4.4.H` permanecen como evidencia histórica, ya no gobiernan el estado actual y no se reescribe ni elimina ninguna historia previa. El estado operativo vigente de este cierre es `CURRENT_PARENT=N4.5.H`. La certificación documental exacta corresponde al commit `fde578dd69cbfe91c054138d33404cec342093f6`; el `productBaseHead` es `541ec12b72912c769c6f54b8821771e509818375`.

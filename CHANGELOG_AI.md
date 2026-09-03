@@ -625,3 +625,9 @@ Approved closure facts:
 ## 2026-09-03 — ERP-N4.4 Cuentas por cobrar — CIERRE DOCUMENTAL
 
 Responsable ChatGPT/VAEP v3.25 Closure Governor / Jules A; objective finalización lógica N4.4 A-G; evidence A-F LISTO_REAL and G LISTO_REAL with docs/CERTIFICACION_N4_4_CUENTAS_POR_COBRAR.md and docs/RUNBOOK_N4_4_CUENTAS_POR_COBRAR.md; closure H is NOT declared LISTO_REAL.
+
+## 2026-09-03 — ERP-N4.5 Cuentas por pagar — ROLLUP DOCUMENTAL
+
+Responsable Codex local autorizado; objetivo reconciliar de forma aditiva la certificación N4.5 sin duplicar autoridad financiera ni declarar prematuramente el cierre H. N4.5.A-G quedan respaldadas por `docs/CERTIFICACION_N4_5_CUENTAS_POR_PAGAR.md`, reutilizando la autoridad ERP-N2.8 y el baseline funcional `541ec12b72912c769c6f54b8821771e509818375`. El HEAD posterior contiene únicamente documentación y manifests VAEP/Jules, sin delta productivo. N4.5.H permanece `EN_PROGRESO` hasta obtener gates exact-head terminales y revalidar P0=0/P1=0; `N4.6.A` continúa `PREARMED/PROMOTION_HELD`.
+
+Reconciliación QA append-only: este rollup supersede únicamente el estado operativo stale anterior del bloque N4.4; las menciones históricas `CURRENT_PARENT=N4.4.H` permanecen como evidencia histórica, ya no gobiernan el estado actual y no se reescribe ni elimina ninguna historia previa. El estado operativo vigente de este cierre es `CURRENT_PARENT=N4.5.H`. Certificación documental exacta: commit `fde578dd69cbfe91c054138d33404cec342093f6`; `productBaseHead=541ec12b72912c769c6f54b8821771e509818375`. N4.5.H no se declara `LISTO_REAL` en este rollup.
