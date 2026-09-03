@@ -37,7 +37,8 @@ test.describe('Cuentas Bancarias E2E y Accesibilidad N4.2.E / N4.3.E', () => {
 
   test('abre la conciliación N4.3.E y expone importación y matches sin credenciales ni bypasses', async ({ page }) => {
     await page.route('**/cuentas-bancarias**', async (route) => {
-      if (route.request().method() !== 'GET') {
+      const request = route.request();
+      if (request.method() !== 'GET' || request.resourceType() === 'document') {
         await route.continue();
         return;
       }
