@@ -1,0 +1,12 @@
+{
+  "manifestVersion": "v329",
+  "dispatchId": "20260902T1813HND-N43D-API-HTTP-B1",
+  "taskId": "N4.3.D.API_HTTP",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "b13b80400c602855966928af4321024103bbefed",
+  "taskAttempt": 1,
+  "maxAttempts": 2,
+  "fileScopeHint": "backend/src/API/**",
+  "prompt": "VAEP/Jules v3.29 THROUGHPUT-HARD. CURRENT_PARENT=N4.3.D. Implement ONLY the API/HTTP surface for bank reconciliation on exact PRIMARY_BASE_HEAD. Scope exclusively backend/src/API/**. Expose the existing/current Application capabilities for importing/registering statement movements and relating them to payments, deposits, transfers and financial movements. Follow repository conventions for routing, auth/permissions, DTO binding, validation, pagination/filter query parameters, idempotency headers/keys and RFC-compatible ProblemDetails/status codes. Do NOT edit Application, Infrastructure/repositories, Domain, tests, frontend, workflows, manifests, secrets or deploy. Do not invent duplicate business logic in controllers. Run proportional backend build/tests. Return reviewable patch artifact with SELF_REVIEW_PASS_1/PASS_2, full diff, git status and temp hygiene. ATTEMPT1/2. COMPLETED => READY_FOR_VAEP/REVIEW_FIRST; FAILED => causal R2 only; NO R3."
+}
