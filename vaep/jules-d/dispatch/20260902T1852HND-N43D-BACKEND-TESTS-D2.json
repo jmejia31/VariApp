@@ -1,0 +1,12 @@
+{
+  "manifestVersion": "v329",
+  "dispatchId": "20260902T1852HND-N43D-BACKEND-TESTS-D2",
+  "taskId": "N4.3.D.BACKEND_TESTS",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "0583f900bacc1a941e8ab1babcfb34746dcc98d2",
+  "taskAttempt": 2,
+  "maxAttempts": 2,
+  "fileScopeHint": "backend/tests/**",
+  "prompt": "VAEP/Jules v3.29 THROUGHPUT-HARD — R2 FINAL causal. CURRENT_PARENT=N4.3.D. ATTEMPT1 was rejected because it tested legacy ConciliacionController instead of the materialized N4.3.D ConciliacionBancariaController. On exact PRIMARY_BASE_HEAD=0583f900bacc1a941e8ab1babcfb34746dcc98d2, implement ONLY backend tests for the actual bank-reconciliation HTTP/Application/domain/repository contracts present on Desarrollo. Scope backend/tests/** only. Target ConciliacionBancariaController and its real route/actions/permission attributes; do not use reflection to manufacture coverage for a different controller. Add meaningful service/domain/idempotency/pagination/error and repository tests only where they compile against current contracts. No production code edits, no Application/API/Infrastructure/Domain changes, no workflows/manifests/secrets/deploy. Run backend build plus directed tests; fail closed on genuine missing dependency. Return full reviewable patch + SELF_REVIEW_PASS_1/PASS_2. ATTEMPT2/2 FINAL; failure/exhaustion => QA_TAKEOVER, NO R3."
+}
