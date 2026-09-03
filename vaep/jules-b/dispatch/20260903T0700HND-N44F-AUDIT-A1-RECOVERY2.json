@@ -1,0 +1,13 @@
+{
+  "dispatchId": "VAEP-JULES-B-N44F-AUDIT-A1-RECOVERY2-20260903T0700HND",
+  "taskId": "N4.4.F.AUDIT_BOUNDARY",
+  "workerId": "JULES_B",
+  "transport": "vaep/jules-b/dispatch",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "82216e05ec7c192433e37c29ec4fc6bf01a472ac",
+  "taskAttempt": 1,
+  "preSessionFailureDoesNotConsumeAttempt": true,
+  "recoveryReason": "No authoritative ACTIVE_REAL session evidence after >10m from prior recovery; re-dispatch with fresh exact base, preserving A1 because no session was proven.",
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/**/*CuentasPorCobrar*Audit*; backend/tests/InventoryApp.Tests/**/*Factura*Audit*",
+  "prompt": "N4.4.F AUDIT current-parent recovery. Verify CxC/Factura audit behavior on the exact base without duplicating A/C/D. Materialize only a narrowly proven missing audit test or fix in this exclusive scope; otherwise return grounded no-delta evidence. Run proportional tests/build and return patch/evidence plus two independent self-review PASS markers before COMPLETED. No branches, push, PR, merge, secrets, deploy, main or Production changes."
+}
