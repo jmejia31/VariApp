@@ -77,7 +77,6 @@ Documentación: `docs/ERP_N2_9_EVALUACION_PROVEEDORES.md`, `docs/RUNBOOK_N2_9_EV
 - [x] N3.4.F RBAC/auditoría/seguridad/observabilidad y N3.4.G QA/regresión/CI cerrados sobre el mismo HEAD funcional, con P0/P1 atribuibles conocidos=0.
 - [x] Certificación canónica: `docs/CERTIFICACION_N3_4_PREPARACION_DESPACHO.md`.
 - [x] Runbook: `docs/RUNBOOK_N3_4_PREPARACION_DESPACHO.md`.
-
 **ERP-N3.4 queda formalmente cerrado. Siguiente MICROTAREA dependency-valid: `N3.5.A — Venta/factura — Auditoría y preflight`.**
 
 ## ERP-N3.5 — Venta/factura
@@ -183,3 +182,17 @@ Este bloque es aditivo y supersede únicamente el estado operativo stale de N3.1
 - [ ] N3.11.H documentación/certificación — cierre canónico en curso: este TASKS rollup aditivo hard-verificado; `LISTO` es `TARGET_AFTER_PUBLICATION`.
 
 **ERP-N3.11 queda formalmente cerrado (TARGET_AFTER_PUBLICATION).**
+
+## ERP-N4.3 — Conciliación bancaria — ROLLUP 2026-09-03
+
+Este bloque es aditivo y no reescribe estados históricos anteriores.
+
+- [x] N4.3.A-G — DoD técnico satisfecho sobre baseline funcional certificado `ad0cf70fc6ced126de1878b61fe4ae02c8d41a01`.
+- [x] N4.3.F — RBAC/auditoría/seguridad/observabilidad reconciliado por QA takeover, sin R3.
+- [x] N4.3.H — certificación canónica publicada en `docs/CERTIFICACION_N4_3_CONCILIACION_BANCARIA.md` mediante `3d7b8c776b813c359e373780f1a1039c1baed8b1`.
+- [x] Matriz exact-head de `3d7b8c776b813c359e373780f1a1039c1baed8b1`: gates aplicables terminales `SUCCESS`; `VariApp CI=SKIPPED` excluido como PASS.
+- [x] P0 abiertos=0; P1 abiertos=0.
+- [x] `TASKS.md` reconciliado de forma aditiva/history-preserving por este rollup.
+- [ ] `CHANGELOG_AI.md` pendiente de reconciliación aditiva/history-preserving y nueva certificación exact-head; no false `LISTO_REAL`.
+
+**CURRENT_PARENT=N4.3.H. CLOSABLE_NOW=NO hasta reconciliar `CHANGELOG_AI.md` y obtener gates exact-head terminales sobre el HEAD resultante. La promoción del siguiente parent permanece bloqueada.**
