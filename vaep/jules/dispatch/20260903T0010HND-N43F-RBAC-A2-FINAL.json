@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-A-N43F-RBAC-A2-FINAL-20260903T0010HND",
+  "taskId": "N4.3.F.RBAC",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "fe1e40a4f6dd90d9df5d4e225e7b1f1f2a9f65a5",
+  "taskAttempt": 2,
+  "fileScopeHint": "backend/src/API/Controllers/ConciliacionBancariaController.cs; backend/src/Application/Security/**; backend/src/Infrastructure/Security/**; backend/tests/InventoryApp.Tests/**/*Conciliacion*Authorization*Tests.cs",
+  "prompt": "N4.3.F RBAC R2 FINAL causal after ATTEMPT1 AUTO_FEEDBACK_EXHAUSTED. Work from the exact dispatch-parent base fe1e40a4f6dd90d9df5d4e225e7b1f1f2a9f65a5. REVIEW FAILURE TO CORRECT: A1 changed ConciliarMovimientos/SolicitarAjuste from Finanzas:Crear to Finanzas:Administrar only because automated feedback assumed a controller delta was required; A1 did not prove Administrar is the canonical authority. Do NOT guess or broaden permissions and do NOT cargo-cult that A1 patch. Inspect CatalogoPermisosBase, permission enums/policies, existing reconciliation/financial-operation controller contracts and applicable authorization tests. Preserve existing permissions when they are already canonical; change code only where authority proves a real fail-closed RBAC defect. Cover import, matching/reconciliation, adjustment/registration and relevant financial-operation authorization without inventing aliases, parallel policies, bypasses or broad-role shortcuts. If no product-code delta is needed, prove it with narrowly scoped tests and exact authority references rather than busywork. Run targeted backend build/tests. Return a clean artifact with two independent SELF_REVIEW_PASS markers. This is ATTEMPT2/2 FINAL: if any blocking defect remains, report it for ChatGPT/VAEP QA_TAKEOVER; NEVER request or perform R3. No branches, push, merge, auto-merge, force-push, main/Production, secrets or deploy."
+}
