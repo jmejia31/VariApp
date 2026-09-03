@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-D-N45A-RBAC-QA-D1-CANONICAL-RECOVERY-20260903T0958HND",
+  "taskId": "N4.5.A.RBAC_QA_OBSERVABILITY_PREFLIGHT",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "56bd8294f8d54741f4e91f807f7106e1f2278c6b",
+  "taskAttempt": 1,
+  "fileScopeHint": ".github/workflows/**; backend/tests/**; frontend/e2e/**; backend/src/API/**; backend/src/Infrastructure/**Audit*; docs/**",
+  "prompt": "CANONICAL TRANSPORT RECOVERY SAME TASK / SAME ATTEMPT1. Prior Jules D N4.5.A preflight manifests were emitted under the wrong non-canonical path and therefore do not consume an attempt. SAFE PIPELINE PREWORK ONLY while N4.4.H remains CURRENT_PARENT: audit RBAC, auditability, security, observability and QA/CI coverage for cuentas por pagar integrated with compras. Map existing permissions, audit/correlation evidence, directed tests/E2E/workflows and true coverage gaps. Exclusive lane D is read-first RBAC/QA/observability evidence. Do not edit N4.4.H docs, TASKS.md, CHANGELOG_AI.md, product domain/persistence, or promote N4.5.A/N4.5.B+. Patch only a narrowly scoped preflight evidence/test artifact if clearly safe and non-overlapping; otherwise return grounded no-patch findings. No main, Production, branches, PR, merge, secrets or deploy. Emit two substantive SELF_REVIEW_PASS markers before COMPLETED."
+}
