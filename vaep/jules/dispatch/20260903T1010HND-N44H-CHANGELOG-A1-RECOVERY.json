@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-A-N44H-CHANGELOG-A1-RECOVERY-20260903T1010HND",
+  "taskId": "N4.4.H.DOC_CERT_CANONICAL",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "c83b2f41bd9b14eed21cd9a3434f39515f94cfdd",
+  "taskAttempt": 1,
+  "fileScopeHint": "CHANGELOG_AI.md",
+  "prompt": "RECOVERY SAME TASK / SAME ATTEMPT1 after prior PRE_SESSION failures. CURRENT_PARENT N4.4.H. The canonical certification and runbook now exist and TASKS.md is reconciled. Perform ONLY the remaining history-preserving CHANGELOG_AI.md append for ERP-N4.4 Cuentas por cobrar. Preserve every existing byte/entry; append one factual 2026-09-03 N4.4 closure-documentation block referencing N4.4.A-G LISTO_REAL, E=61c8445ff948912a1a3e7a2792106849064e51c7, F=2487badc4759db4ca87d60f823c6fffd9899f0d2, G=a85396b8e5d6ed579f2815cb7a193f45ed3d54e0 and run 33772443239 SUCCESS, plus docs/CERTIFICACION_N4_4_CUENTAS_POR_COBRAR.md and docs/RUNBOOK_N4_4_CUENTAS_POR_COBRAR.md. Do NOT claim H LISTO_REAL; exact-head checks and fresh P0/P1 remain controller gates. No other files. No product code, tests, workflows, DB, TASKS, N4.5, main, Production, branches, merge, secrets or deploy. Return focused append-only patch with two substantive SELF_REVIEW_PASS markers before COMPLETED."
+}
