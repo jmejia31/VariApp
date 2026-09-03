@@ -1,37 +1,34 @@
 using System.Reflection;
 using InventoryApp.Application.Interfaces;
-using InventoryApp.Application.Services;
-using Microsoft.Extensions.Logging;
+using InventoryApp.Domain.Enums;
 using Xunit;
 
 namespace InventoryApp.Tests.Services;
 
 public class ConciliacionBancariaObservabilityTests
 {
-    [Fact]
-    public void ServiceDeclaraLoggerTipado()
+    [Theory]
+    [InlineData(nameof(IAuditoriaService.RegistrarAsync))]
+    [InlineData(nameof(IAuditoriaService.RegistrarEstrictoAsync))]
+    public void AuditoriaExponeContratosDeRegistro(string methodName)
     {
-        var constructors = typeof(ConciliacionBancariaService)
-            .GetConstructors(BindingFlags.Public | BindingFlags.Instance);
+        var method = typeof(IAuditoriaService)
+            .GetMethod(methodName, BindingFlags.Public | BindingFlags.Instance);
 
-        Assert.Contains(constructors, ctor => ctor.GetParameters().Any(p =>
-            p.ParameterType == typeof(ILogger<ConciliacionBancariaService>)));
-    }
-
-    [Fact]
-    public void AuditoriaExponeRegistroDeEventosDeConciliacion()
-    {
-        var method = typeof(IAuditService).GetMethod("LogAsync", BindingFlags.Public | BindingFlags.Instance);
         Assert.NotNull(method);
+        Assert.Equal(typeof(Task), method!.ReturnType);
 
-        var parameters = method!.GetParameters();
-        Assert.Equal(7, parameters.Length);
-        Assert.Equal(typeof(string), parameters[0].ParameterType);
-        Assert.Equal(typeof(string), parameters[1].ParameterType);
+        var parameters = method.GetParameters();
+        Assert.Equal(10, parameters.Length);
+        Assert.Equal(typeof(ModuloSistema), parameters[0].ParameterType);
+        Assert.Equal(typeof(AccionPermiso), parameters[1].ParameterType);
         Assert.Equal(typeof(string), parameters[2].ParameterType);
-        Assert.Equal(typeof(string), parameters[3].ParameterType);
+        Assert.Equal(typeof(int?), parameters[3].ParameterType);
         Assert.Equal(typeof(string), parameters[4].ParameterType);
-        Assert.Equal(typeof(string), parameters[5].ParameterType);
-        Assert.Equal(typeof(CancellationToken), parameters[6].ParameterType);
+        Assert.Equal(typeof(object), parameters[5].ParameterType);
+        Assert.Equal(typeof(object), parameters[6].ParameterType);
+        Assert.Equal(typeof(string), parameters[7].ParameterType);
+        Assert.Equal(typeof(string), parameters[8].ParameterType);
+        Assert.Equal(typeof(string), parameters[9].ParameterType);
     }
 }
