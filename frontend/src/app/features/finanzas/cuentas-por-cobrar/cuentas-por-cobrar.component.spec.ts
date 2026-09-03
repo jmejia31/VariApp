@@ -46,4 +46,32 @@ describe('CuentasPorCobrarComponent', () => {
     expect(text).toContain('Cliente QA');
     expect(text).toContain('750.00 HNL');
   });
+
+  it('maneja el error 403 Forbidden correctamente', () => {
+    const fixture = TestBed.createComponent(CuentasPorCobrarComponent);
+    fixture.detectChanges();
+
+    const request = http.expectOne(`${environment.apiUrl}/cuentas-por-cobrar`);
+    request.flush('Forbidden', { status: 403, statusText: 'Forbidden' });
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance;
+    expect(component.items().length).toBe(0);
+    expect(component.error()).toBe('No tiene permiso Facturacion/Ver para consultar esta información.');
+    const text = fixture.nativeElement.textContent as string;
+    expect(text).toContain('No tiene permiso Facturacion/Ver para consultar esta información.');
+  });
+
+  it('maneja un error de contrato cuando la API responde success=false', () => {
+    const fixture = TestBed.createComponent(CuentasPorCobrarComponent);
+    fixture.detectChanges();
+
+    const request = http.expectOne(`${environment.apiUrl}/cuentas-por-cobrar`);
+    request.flush({ success: false, message: 'Custom API Error', data: [], errors: [] });
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance;
+    expect(component.items().length).toBe(0);
+    expect(component.error()).toBe('Custom API Error');
+  });
 });
