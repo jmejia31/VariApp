@@ -50,7 +50,7 @@ public class ConciliacionBancariaServiceAuditTests
         var request = new ConciliarMovimientosRequestDto
         {
             CuentaBancariaId = 9,
-            Matches = Array.Empty<MatchMovimientoRequestDto>()
+            Matches = Array.Empty<MatchConciliacionDto>()
         };
 
         await fixture.Service.ConciliarMovimientosAsync(request, 31);
