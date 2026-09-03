@@ -105,7 +105,7 @@ public static class CatalogoPermisosBase
             AccionPermiso.Ver, AccionPermiso.Crear, AccionPermiso.Editar,
             AccionPermiso.Activar, AccionPermiso.Desactivar,
             AccionPermiso.Anular, AccionPermiso.Aprobar, AccionPermiso.Exportar,
-            AccionPermiso.Imprimir, AccionPermiso.Administrar,
+            AccionPermiso.Importar, AccionPermiso.Imprimir, AccionPermiso.Administrar,
             AccionPermiso.Cerrar, AccionPermiso.Reabrir
         }),
         (ModuloSistema.Inventario, new[]
