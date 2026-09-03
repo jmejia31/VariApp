@@ -118,8 +118,8 @@ Este bloque es aditivo y supersede únicamente el estado operativo stale de N3.6
 - [x] N3.6.H quedó cerrado realmente antes de iniciar N3.7; el `CHANGELOG_AI.md` canónico preserva ese cierre en blob `d53c56416ac7ac01beef761adab5172cf5297487`.
 - [x] N3.7.A auditoría/preflight — `LISTO_REAL`, Issue #752, P0=0/P1=0.
 - [x] N3.7.B dominio/contratos — `LISTO_REAL` en `46a250fcc0cfd1562306538375e772a94c39bea5`; Development #32972568129, Acceptance #32972568251, Fase 8 #32972568127 y M13 #32972568118 en SUCCESS.
-- [x] N3.7.C persistencia/migración/datos — `LISTO_REAL` en `9810cf2e7fd0289a9374a8477a4131f3f73fef38`; Acceptance #32983744613, M13 #32983745546 y Recovery MySQL #32983743533 en SUCCESS; migración/snapshot/tests certificados.
-- [x] N3.7.D Application/API — `LISTO_REAL` en `8bcacae8a45fe3c0072bf519610bcc1ec1203a4f`; Development #32988607673, Acceptance #32988607652, Fase 8 #32988607675 y M13 #32988607632 en SUCCESS.
+- [x] N3.7.C persistencia/migración/datos — `LISTO_REAL` en `9810cf2e7fd0289a9374a8477a4131f3f73fef38`; Acceptance #32983744613, M13 #32983745546 y Recovery MySQL #32983743533 SUCCESS; migración/snapshot/tests certificados.
+- [x] N3.7.D Application/API — `LISTO_REAL` en `8bcacae8a45fe3c0072bf519610bcc1ec1203a4f`; Development #32988607673, Acceptance #32988607652, Fase 8 #32988607675 y M13 #32988607632 SUCCESS.
 - [x] N3.7.E Frontend/UX — `LISTO_REAL` en `f9ef582749a79c8900741d1a40ff393039c7b287`; M10 #32998936899 SUCCESS; Issue #770 cerrado.
 - [x] N3.7.F RBAC/auditoría/seguridad/observabilidad — `LISTO_REAL` en `943aa0e607af3221ed8987a0edac37a539561696`; M10 #33001097160 SUCCESS; Issue #776 cerrado.
 - [x] N3.7.G QA/regresión/CI — `LISTO_REAL` por rollup de regresión; Issue #781 cerrado y P0/P1 atribuibles=0.
@@ -142,7 +142,7 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
 - [x] N3.9.A auditoría/preflight — `LISTO_REAL`.
 - [x] N3.9.B dominio/contratos — `LISTO_REAL`; `Factura` + `FacturaPago` permanecen autoridad y CxC es read-model, no segundo ledger.
 - [x] N3.9.C persistencia/migración/datos — `LISTO_REAL / N_A_CERTIFIED`; no se creó tabla, migración ni backfill CxC.
-- [x] N3.9.D Application/API — `LISTO_REAL` sobre `59e0c41362fe3a63765d9218a9817272ce6a7602`; GET-only `/cuentas-por-cobrar`, `[Authorize]` + `Facturacion/Ver`; Development #33019598078, Acceptance #33019598096, Fase8 #33019598185 y M13 #33019598074 `SUCCESS`.
+- [x] N3.9.D Application/API — `LISTO_REAL` sobre `59e0c41362fe3a63765d9218a9817272ce6a7602`; GET-only `/cuentas-por-cobrar`, `[Authorize]` + `Facturacion/Ver`; Development #33019598078, Acceptance #33019598096, Fase8 #33019598185 y M13 #33019598074 SUCCESS.
 - [x] N3.9.E Frontend/UX — `LISTO_REAL` sobre `9b0db22c26bce42f42f97ba1e0c6124c54d86af9`; Issue #843 cerrado.
 - [x] N3.9.F RBAC/auditoría/seguridad/observabilidad — `LISTO_REAL / QA_TAKEOVER_CERTIFIED` sobre `0d621920f8ebd0a7bb3f1b3af30ffbadd0f91f9c`; Issue #851 cerrado, P0/P1=0.
 - [x] N3.9.G QA/regresión/CI — `LISTO_REAL / QA_REGRESSION_CERTIFIED`; Issue #858 cerrado, P0/P1=0.
@@ -158,10 +158,10 @@ Este bloque es aditivo y supersede únicamente el estado operativo stale de N3.9
 - [x] N3.9.H quedó cerrado formalmente antes de N3.10; `CHANGELOG_AI.md` contiene el cierre canónico history-preserving.
 - [x] N3.10.A auditoría/preflight — `LISTO_REAL`.
 - [x] N3.10.B dominio/contratos — `LISTO_REAL`; la capacidad de crédito permanece integrada a Cliente y no introduce un motor autónomo de scoring ni una segunda autoridad comercial.
-- [x] N3.10.C persistencia/migración/datos — `LISTO_REAL` en `619a0ba2a53ad70fb332c9f61198eb3b022ddcc1`; Development #33068581067, Acceptance #33068581028, Fase 8 #33068581188 y M13 #33068581299 `SUCCESS`.
-- [x] N3.10.D Application/API — `LISTO_REAL` en `3c5a2c30a3d8427d0d0764ef1d4bc4e895d4d585`; Development #33073610169, Acceptance #33073610154, Fase 8 #33073610151 y M13 #33073610159 `SUCCESS`.
-- [x] N3.10.E Frontend/UX — `LISTO_REAL` en `615d1a4878854bf22770b945256db39fea44e08f`; M10 #33083576709 `SUCCESS`.
-- [x] N3.10.F RBAC/auditoría/seguridad/observabilidad — `LISTO_REAL` en `98b7777555cd6f7ee881edb76321cd1226ca69eb`; Development #33086814120, Acceptance #33086814176, Fase 8 #33086814189, M13 #33086814163 y M10 #33086818401 `SUCCESS`.
+- [x] N3.10.C persistencia/migración/datos — `LISTO_REAL` en `619a0ba2a53ad70fb332c9f61198eb3b022ddcc1`; Development #33068581067, Acceptance #33068581028, Fase 8 #33068581188 y M13 #33068581299 SUCCESS.
+- [x] N3.10.D Application/API — `LISTO_REAL` en `3c5a2c30a3d8427d0d0764ef1d4bc4e895d4d585`; Development #33073610169, Acceptance #33073610154, Fase 8 #33073610151 y M13 #33073610159 SUCCESS.
+- [x] N3.10.E Frontend/UX — `LISTO_REAL` en `615d1a4878854bf22770b945256db39fea44e08f`; M10 #33083576709 SUCCESS.
+- [x] N3.10.F RBAC/auditoría/seguridad/observabilidad — `LISTO_REAL` en `98b7777555cd6f7ee881edb76321cd1226ca69eb`; Development #33086814120, Acceptance #33086814176, Fase 8 #33086814189, M13 #33086814163 y M10 #33086818401 SUCCESS.
 - [x] N3.10.G QA/regresión/CI — `LISTO_REAL`, reutilizando la misma autoridad exact-head `98b7777555cd6f7ee881edb76321cd1226ca69eb` sin fabricar evidencia duplicada.
 - [x] N3.10.H documentación/certificación — certificación canónica `docs/CERTIFICACION_N3_10_CREDITO_CLIENTE.md`; rollup aditivo TASKS+CHANGELOG hard-verificado; P0/P1 atribuibles conocidos=0.
 
@@ -196,3 +196,21 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
 - [ ] `CHANGELOG_AI.md` pendiente de reconciliación aditiva/history-preserving y nueva certificación exact-head; no false `LISTO_REAL`.
 
 **CURRENT_PARENT=N4.3.H. CLOSABLE_NOW=NO hasta reconciliar `CHANGELOG_AI.md` y obtener gates exact-head terminales sobre el HEAD resultante. La promoción del siguiente parent permanece bloqueada.**
+
+## ERP-N4.4 — Cuentas por cobrar — ROLLUP 2026-09-03
+
+Este bloque es aditivo y no reescribe estados históricos anteriores.
+
+- [x] N4.4.A — `LISTO_REAL / PREFLIGHT_CERTIFIED`; autoridad CxC preservada en `Factura + FacturaPago` ligada a `Venta`.
+- [x] N4.4.B — `LISTO_REAL / DOMAIN_NA_CERTIFIED`; no se creó dominio ni contrato CxC duplicado.
+- [x] N4.4.C — `LISTO_REAL / DB_MIG_NA_CERTIFIED`; sin schema delta, migración ni backfill CxC.
+- [x] N4.4.D — `LISTO_REAL / COVERED_EXISTING_CONTRACT`; Application/API cubiertos por contratos existentes.
+- [x] N4.4.E — `LISTO_REAL / FRONTEND_CXC` sobre `61c8445ff948912a1a3e7a2792106849064e51c7`.
+- [x] N4.4.F — `LISTO_REAL / SEC_AUDIT_CERTIFIED` sobre `2487badc4759db4ca87d60f823c6fffd9899f0d2`.
+- [x] N4.4.G — `LISTO_REAL / TEST_CI_CERTIFIED` sobre `a85396b8e5d6ed579f2815cb7a193f45ed3d54e0`; run `33772443239` SUCCESS; P0/P1=0.
+- [x] Certificación canónica publicada: `docs/CERTIFICACION_N4_4_CUENTAS_POR_COBRAR.md`.
+- [x] Runbook canónico publicado: `docs/RUNBOOK_N4_4_CUENTAS_POR_COBRAR.md`.
+- [x] `TASKS.md` reconciliado aditivamente por este rollup.
+- [ ] `CHANGELOG_AI.md` y checks exact-head documentales pendientes antes de `N4.4.H=LISTO_REAL`; no false LISTO.
+
+**CURRENT_PARENT=N4.4.H. CLOSABLE_NOW=NO hasta reconciliar `CHANGELOG_AI.md`, obtener gates exact-head terminales y revalidar P0=0/P1=0. `N4.5.A` permanece promotion-held aunque se permite prework seguro.**
