@@ -873,3 +873,19 @@ Tras superar el gate causal de implementación, el control `vaep/control/dispatc
 
 Resultado final: `MIGRATION_PHASE_7=CLOSED/PASS`; `MIGRATION_F0_F7=CLOSED/PASS`; `NEW_DISPATCH_ADMISSION=OPEN`; `MASTER_UNIQUE=PASS`; `FIVE_AUTOMATIONS=PASS`; `END_TO_END_FLOW=PASS`; `FALSE_PASS=NO`; `FALSE_LISTO=NO`; `SCOPE_LEAK=NO`.
 
+## 2026-09-04 — Remediación post-auditoría Codex
+
+Responsable: ChatGPT/VAEP sobre `Desarrollo`.
+
+La auditoría externa de Codex detectó tres deudas reales de endurecimiento: 54 manifests históricos residuales en `vaep/jules-a/dispatch/`, ambigüedad de snapshots antiguos en `TASKS.md` para parsers ingenuos y tres constantes operativas aún fuera del bloque machine-readable del MAESTRO.
+
+Se eliminó del árbol activo la ruta legacy `vaep/jules-a/dispatch/` con sus 54 JSON, preservando íntegramente Git history. `TASKS.md` ahora declara explícitamente que no es fuente machine-readable de estado vigente; `CONFIG/COLA/BITACORA` frescos siguen siendo la fuente operativa.
+
+El bloque `BEGIN_AUTOMATION_POLICY` conserva una sola instancia y pasa de 6 a 9 claves, incorporando `PARENT_STALL_NO_PROGRESS_MINUTES`, `MAX_VOLUNTARY_IDLE` y `VAEP_CHECKPOINTS`. El parser fail-closed, `vaep-jules-master.sh` y `vaep-jules-worker.sh` fueron actualizados para consumir esas claves; se retiró el literal runtime de checkpoints.
+
+Evidencia causal del hardening: `VAEP engine lightweight checks #33920294318=SUCCESS` y `VAEP Jules Diagnostic #33920294338=SUCCESS` sobre `09ee682712ba29d79d235a62415de20c308db7c9`. `VariApp CI=SKIPPED` queda excluido como PASS.
+
+El punto de Codex sobre las cinco automatizaciones era una limitación de auditoría Git-only, no una ausencia operativa: `VAEP MASTER 00/15/30/45/55` están presentes y habilitadas en el control-plane externo. La imposibilidad local de ejecutar Bash en su entorno Windows tampoco se usa como PASS; la validación causal proviene de GitHub Actions.
+
+Resultado: `CODEX_AUDIT_REMEDIATION=PASS`; `LEGACY_JULES_A_MANIFESTS=0`; `MASTER_POLICY_KEYS=9`; `TASKS_MACHINE_CURRENT_STATE=PROHIBITED`; `FIVE_AUTOMATIONS_EXTERNAL_EVIDENCE=PASS`; `FALSE_PASS=NO`.
+
