@@ -47,7 +47,7 @@ jobs:
             git config user.name 'VAEP Closure Governor'
             git config user.email '93171442+jmejia31@users.noreply.github.com'
             git add CHANGELOG_AI.md
-            git commit -m 'docs(N3.11.H): publicar cierre POS history-preserving [VAEP v3.25.1] [skip ci]'
+            git commit -m 'docs(N3.11.H): publicar cierre POS history-preserving [VAEP MASTER] [skip ci]'
             if git push origin HEAD:Desarrollo; then exit 0; fi
             sleep 2
           done
