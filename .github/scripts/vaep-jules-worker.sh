@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Compatibility filename: all four Jules lane workflows call this path.
+# Internal worker invoked only by .github/scripts/vaep-jules-master.sh.
 # Runtime semantics are governed by docs/VAEP_AUTHORITY.md (MASTER).
 readonly VAEP_JULES_PROTOCOL="MASTER"
 readonly JULES_MAX_ATTEMPTS_PER_TASK=2
