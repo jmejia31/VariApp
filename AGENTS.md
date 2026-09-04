@@ -255,3 +255,32 @@ Formato recomendado:
 ```
 
 Cada entrega debe indicar proyecto, objetivo, validaciones reales, riesgos/pendientes y SHA. Para Jules incluir `dispatchId`, `session`, `taskAttempt`, `baseCommitId`, resultado de review y decisión PASS/R2/QA_TAKEOVER.
+
+
+## 15. AntiG/Antigravity — reviewer/fixer automático
+
+AntiG/Antigravity opera como `AUTOMATED_REVIEWER_FIXER` desde el checkout local autorizado. Su ruta primaria no es competir con los Jules como quinto writer, sino consumir handoffs terminales Jules y cerrar el hueco entre `COMPLETED` y la revisión VAEP.
+
+Flujo obligatorio:
+
+```text
+JULES_COMPLETED
+-> ANTIG_REVIEW
+-> ANTIG_FIXING (solo defectos menores/medios dentro del mismo scope)
+-> READY_FOR_VAEP
+-> VAEP/controller review
+-> LISTO_REAL solo por autoridad de cierre separada
+```
+
+Reglas duras:
+
+1. AntiG nunca convierte por sí solo una tarea a `LISTO_REAL`, nunca auto-promueve COLA/BITACORA y nunca sustituye al Closure Governor.
+2. El reviewer automático parte únicamente de un handoff Jules terminal con artifact/patch trazable, task/dispatch/attempt y scope verificables.
+3. ATTEMPT=1 con defecto estructural puede terminar `RETURN_TO_JULES` para el único R2 permitido. ATTEMPT=2 con defecto estructural termina `BLOCKED_QA_TAKEOVER`; R3+ sigue prohibido.
+4. AntiG puede corregir defectos menores/medios, completar pruebas proporcionales y aplicar el patch Jules únicamente dentro del mismo write-scope. Scope leak, dependencia inválida, patch stale material, P0/P1 o cambio arquitectónico mayor fallan cerrados.
+5. El agente headless no hace `git add/commit/push/merge/rebase/reset/checkout/switch`. La publicación, cuando proceda, la realiza el wrapper local después de revalidar HEAD, working tree, scope y gates mínimos.
+6. Si `origin/Desarrollo` cambia durante la revisión, la publicación automática se detiene. Nunca se usa force-push ni rebase automático.
+7. Producción, `main`, secretos, credenciales, Vercel, dominios, certificados y bases/datos productivos permanecen prohibidos.
+8. Cada integración AntiG exitosa genera evidencia VAEP separada; `READY_FOR_VAEP` significa candidato revisado, no certificación final.
+9. El worker automático oficial vive en `scripts/antig/`; el Custom Agent de workspace vive en `.agents/agents/variapp-reviewer/agent.md`.
+10. La activación local se realiza únicamente mediante `scripts/antig/install-antig-automation.ps1`, que usa permisos finos y nunca bypass global de permisos.
