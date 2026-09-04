@@ -719,3 +719,20 @@ Validación real: `node --check` de los tres scripts, parseo del schema y `node 
 Se añadió `scripts/vaep/sync-bitacora.mjs` para payload estructurado GitHub→BITÁCORA con URL/token por entorno, HMAC opcional, timeout, tres retries e idempotency key; sin configuración queda `SKIPPED` explícito y seguro. `scripts/vaep/reconcile-status.mjs` valida exact-head, gates terminales, P0/P1, documentación, dependencias y ownership, pero devuelve únicamente `ELIGIBLE_FOR_CONTROLLER_REVIEW` con `autoPromote=false`; no habilita `SUCCESS -> LISTO_REAL`. `scripts/vaep/metrics.mjs` y `vaep/metrics/baseline.json` dejan contadores observables sin inventar baseline histórico.
 
 Se añadió el workflow liviano `.github/workflows/vaep-engine-ci.yml`, limitado a paths VAEP, con parseo de schemas, syntax checks y self-tests. La documentación canónica queda en `docs/VAEP_PERFORMANCE_HARDENING.md`; `VAEP_EXECUTION_MODE=legacy` continúa como fallback y ningún gate A-H fue eliminado.
+
+
+## 2026-09-03 — Integración AntiG Reviewer/Fixer automático
+
+Responsable: ChatGPT remoto autorizado en `Desarrollo`.
+
+Se materializó la integración repo-side de Antigravity como reviewer/fixer automático entre Jules y VAEP. Componentes: Custom Agent `.agents/agents/variapp-reviewer/agent.md`, contrato `vaep/schemas/antig-review-result.schema.json`, worker `scripts/antig/antig-review-worker.ps1`, instalador `scripts/antig/install-antig-automation.ps1`, self-test `scripts/antig/antig-self-test.ps1` y runbook `docs/ANTIGRAVITY_AUTOMATION.md`.
+
+El worker consume únicamente Issues terminales `[VAEP-JULES*] ... result`, resuelve el workflow causal, descarga su artifact, valida task/dispatch/attempt/scope, invoca Antigravity CLI headless con el agente `variapp-reviewer`, permite correcciones menores/medias dentro del mismo scope y produce exclusivamente `READY_FOR_VAEP`, `RETURN_TO_JULES`, `BLOCKED_QA_TAKEOVER` o `NO_ACTION`. `LISTO_REAL` no existe en el schema de decisión AntiG.
+
+La publicación queda separada del agente: el Custom Agent tiene prohibidos commit/push/merge/rebase/reset/checkout/switch. El wrapper solo integra cuando el checkout comenzó limpio y sincronizado, la salida estructurada reporta P0=0/P1=0, no hay blocker ni scope leak, `git diff --check` pasa y `origin/Desarrollo` conserva el exact-head inicial. Nunca se usa force-push ni rebase automático. Si el remoto cambia, falla cerrado y preserva los commits locales para reconciliación humana/controller.
+
+Gobernanza actualizada: ATTEMPT=1 con defecto estructural puede regresar al único R2; ATTEMPT=2 no vuelve a Jules y pasa a `BLOCKED_QA_TAKEOVER`; R3+ permanece prohibido. AntiG prepara `READY_FOR_VAEP`; VAEP/controller conserva la autoridad independiente de certificación.
+
+CI: `.github/workflows/vaep-engine-ci.yml` ahora incluye paths AntiG, parsea el schema estructurado y ejecuta `scripts/antig/antig-self-test.ps1 -StaticOnly`.
+
+Límite real: ChatGPT remoto no tiene shell en la PC autorizada, por lo que no puede registrar por sí mismo el Scheduled Task de Windows ni modificar `~/.gemini/antigravity-cli/settings.json`. La activación física queda reducida a una ejecución local de `scripts/antig/install-antig-automation.ps1`, que valida `agy`, GitHub auth, workspace agent, configura permisos finos, crea watermark para no reprocesar historia y registra `VariApp-AntiG-Reviewer` cada minuto. No se tocaron `main`, Producción, Vercel, secretos ni BD productiva.
