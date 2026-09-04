@@ -15,6 +15,9 @@ NUMERIC_PROTOCOL_LABELS=PROHIBITED
 BEGIN_AUTOMATION_POLICY
 PARENT_CLOSE_SLA_ROLLING_60M=3
 PARENT_MAX_DWELL_MINUTES=20
+PARENT_STALL_NO_PROGRESS_MINUTES=10
+MAX_VOLUNTARY_IDLE=0
+VAEP_CHECKPOINTS=:00,:15,:30,:45,:55
 JULES_LANE_BUDGET_SECONDS=1080
 JULES_MAX_ATTEMPTS=2
 JULES_REWORK_MAX=1
@@ -94,11 +97,11 @@ PENDIENTE|EN_PROGRESO|VALIDANDO|LISTO|BLOQUEADO|CANCELADO
 
 La política de parent-close, dwell time y SLA está gobernada por el bloque canónico `BEGIN_AUTOMATION_POLICY`:
 - `PARENT_CLOSE_FIRST=TRUE`: Cerrar CURRENT_PARENT antes de promover un sucesor dependiente.
-- Checkpoints declarados: `:00`, `:15`, `:30`, `:45`, `:55`.
+- Los checkpoints activos provienen exclusivamente de `VAEP_CHECKPOINTS` en el bloque canónico.
 - `PARENT_CLOSE_SLA_ROLLING_60M=3`: Objetivo de 3 parent microtareas en `LISTO_REAL` por ventana móvil de 60 minutos cuando sea técnicamente alcanzable.
 - `PARENT_MAX_DWELL_MINUTES=20`: Límite máximo de permanencia en un mismo parent sin progreso material.
-- `PARENT_STALL_NO_PROGRESS_MINUTES=10`: Diez minutos sin progreso obliga a failover controlado.
-- `MAX_VOLUNTARY_IDLE=0`: Lane libre recibe trabajo seguro inmediatamente.
+- `PARENT_STALL_NO_PROGRESS_MINUTES`: umbral de no-progreso definido exclusivamente en el bloque canónico; al alcanzarse obliga a failover controlado.
+- `MAX_VOLUNTARY_IDLE`: tolerancia de ociosidad voluntaria definida exclusivamente en el bloque canónico; cuando es cero, una lane libre recibe trabajo seguro inmediatamente.
 - Trayectoria orientativa: `:15 >=1`, `:30 >=2`, `:45 >=3`; `:55` corrige deuda/huecos.
 - Nunca false LISTO ni busywork.
 
