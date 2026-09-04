@@ -1,0 +1,14 @@
+{
+  "dispatchId": "VAEP-JULES-C-N47E-FRONTEND-CURRENT-C2-R2-20260904T0712HND",
+  "taskId": "N4.7.E.FRONTEND_UX",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "b71ee9fa0b014c6cd8e0f7cc8bb0d511ad98351a",
+  "taskAttempt": 2,
+  "maxAttempts": 2,
+  "correctionOf": "VAEP-JULES-C-N47E-FRONTEND-CURRENT-C2-RECOVERY-A1-20260904T0612HND",
+  "reviewedSession": "sessions/185949014460026886",
+  "reviewedArtifact": 9936594814,
+  "fileScopeHint": "frontend/src/app/app.routes.ts; frontend/src/app/core/models/asiento-contable.model.ts; frontend/src/app/features/asientos-contables/**; frontend/src/app/services/asiento-contable.service.ts; frontend/src/app/services/asiento-contable.service.spec.ts",
+  "prompt": "VAEP/Jules v3.29 THROUGHPUT-HARD CAUSAL R2 FINAL for CURRENT_PARENT=N4.7.E. ATTEMPT1 completed as session 185949014460026886 on patch base b71ee9fa0b014c6cd8e0f7cc8bb0d511ad98351a and passed API/DTO contract review, but REVIEW_FIRST rejected certification for two precise blockers: (1) the template uses *ngIf=\"loading\" while loading is an Angular Signal, so the spinner condition is a function object instead of the signal value; use loading() everywhere signal evaluation is required and inspect all template signal usages for the same class of defect; (2) the artifact did not evidence two independent terminal SELF_REVIEW_PASS_1=PASS and SELF_REVIEW_PASS_2=PASS activities. Recreate the smallest coherent N4.7.E frontend patch against the current exact base, preserving the verified backend contract: route /asientos-contables, Finanzas Ver/Crear permissions, GET filters desde/hasta/numero/pagina/tamano, GET /{id}, POST DTO fields Fecha/Concepto/Numero/DocumentoOrigenId/TipoDocumentoOrigen/Detalles and detail fields CuentaContableId/Debe/Haber/Referencia. Preserve the corrected getter-based live totals from the final ATTEMPT1 patch; do not regress to computed() without reactive dependencies. Run proportional Angular lint/build and directed component/service tests. Inspect full diff for scope and contract drift. Emit two genuinely independent self-review activities with the exact literals SELF_REVIEW_PASS_1=PASS and SELF_REVIEW_PASS_2=PASS before COMPLETED. Exclusive N4.7.E frontend scope only. Do not touch backend, EF/migrations/snapshot, workflows, docs/control-plane, main, Production, branches, merge, auto-merge, force-push, secrets or deploy. This is ATTEMPT2/2 FINAL; Jules R3 is prohibited. If any blocker remains, report it for ChatGPT/VAEP QA_TAKEOVER instead of requesting another Jules attempt. Return patch/evidence only; LISTO_REAL remains controller-owned after REVIEW_FIRST, integration and exact-head CI/P0/P1 certification."
+}
