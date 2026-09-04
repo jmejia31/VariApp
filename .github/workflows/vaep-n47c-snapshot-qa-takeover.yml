@@ -1,0 +1,85 @@
+name: VAEP N4.7.C EF Snapshot QA Takeover
+
+on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - '.github/workflows/vaep-n47c-snapshot-qa-takeover.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: vaep-n47c-snapshot-qa-takeover
+  cancel-in-progress: false
+
+jobs:
+  repair-snapshot:
+    name: Repair EF snapshot from current runtime model
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore backend
+        working-directory: backend
+        run: dotnet restore InventoryApp.sln
+
+      - name: Install EF
+        run: dotnet tool install --global dotnet-ef --version 8.0.8
+
+      - name: Generate canonical snapshot only
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd backend
+          name="__VAEP_N47C_SnapshotRepair"
+          dotnet ef migrations add "$name" \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext \
+            --output-dir Migrations
+
+          find src/Infrastructure/Migrations -maxdepth 1 -type f \
+            \( -name "*_${name}.cs" -o -name "*_${name}.Designer.cs" \) -print -delete
+
+          test -f src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs
+
+          changed="$(git status --porcelain -- src/Infrastructure/Migrations)"
+          printf '%s\n' "$changed"
+          test -n "$changed"
+          if printf '%s\n' "$changed" | grep -v 'AppDbContextModelSnapshot.cs$'; then
+            echo 'Unexpected migration files changed; refusing commit.' >&2
+            exit 1
+          fi
+
+          dotnet ef migrations has-pending-model-changes \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext
+
+      - name: Commit snapshot if base is still exact
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin Desarrollo
+          current="$(git rev-parse HEAD)"
+          remote="$(git rev-parse origin/Desarrollo)"
+          if [ "$current" != "$remote" ]; then
+            echo "Desarrollo advanced during QA takeover: current=$current remote=$remote; refusing stale push." >&2
+            exit 1
+          fi
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs
+          git diff --cached --quiet && { echo 'No snapshot delta to commit.'; exit 0; }
+          git commit -m 'fix(n4.7.c): align EF snapshot with current model [QA takeover]'
+          git push origin HEAD:Desarrollo
