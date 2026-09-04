@@ -5,6 +5,7 @@ using InventoryApp.Application.Interfaces;
 using InventoryApp.Application.Services;
 using InventoryApp.Domain.Enums;
 using InventoryApp.Infrastructure.Persistence;
+using InventoryApp.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -19,10 +20,10 @@ public sealed class AsientosContablesController : ControllerBase
     private readonly AppDbContext _db;
     private readonly IAsientoContableWriter _writer;
 
-    public AsientosContablesController(AppDbContext db, IAsientoContableWriter writer)
+    public AsientosContablesController(AppDbContext db, IAuditoriaService auditoria)
     {
         _db = db;
-        _writer = writer;
+        _writer = new AsientoContableWriter(db, auditoria);
     }
 
     [HttpGet]
