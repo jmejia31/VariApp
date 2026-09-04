@@ -64,3 +64,11 @@ Antes de habilitar la tarea local, el worker aplica estas garantías adicionales
 - handoffs inválidos se guardan en `.git/vaep-antig/quarantine/`, avanzan el watermark y no bloquean Issues posteriores;
 - fallos transitorios de red/CLI/remoto no se cuarentenan automáticamente y permanecen fail-closed para reintento seguro;
 - self-test funcional cubre contrato, rutas protegidas e aislamiento real de worktree/concurrencia.
+
+## Cierre P1 adicional — contrato causal y transacciones
+
+El hardening posterior añade comparación byte-equivalente (con normalización exclusiva CRLF/LF) entre `gitpatch.json.unidiffPatch` y `changes.patch`, además de la verificación de `baseCommitId`, identidad y ancestry. El worker detecta cambios staged, unstaged y untracked, y exige igualdad exacta de paths declarados, autorizados y staged.
+
+Los errores de handoff estructural se clasifican como `QUARANTINE` y avanzan el watermark; los fallos de transporte GitHub/CLI/red permanecen retryables y no avanzan el watermark. Tras confirmar `push`, se persiste `COMMENT_PENDING` con el `evidenceHead` confirmado antes de intentar el comentario, evitando republicaciones.
+
+El instalador captura el XML de una tarea previa. Si la tarea no existía, el rollback elimina la tarea nueva; si existía, restaura su XML original. El self-test de transacción ejercita ambos planes sin crear una tarea real. Las rutas `frontend/vercel.json` y `frontend/scripts/vercel-ignore-build.mjs` están protegidas explícitamente.

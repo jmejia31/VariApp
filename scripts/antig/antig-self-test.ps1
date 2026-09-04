@@ -69,6 +69,13 @@ foreach ($marker in @(
     "Assert-DispatchContract",
     "Assert-ResultContract",
     "Test-ProtectedPath",
+    "frontend/vercel.json",
+    "frontend/scripts/vercel-ignore-build.mjs",
+    "Select-CausalArtifact",
+    "Assert-GitPatchContract",
+    "Read-JsonOrQuarantine",
+    "Assert-RemoteAt",
+    "COMMENT_PENDING",
     "QUARANTINED_INVALID_HANDOFF",
     "staged paths differ from authorized paths",
     "READY_FOR_VAEP",
@@ -81,6 +88,10 @@ foreach ($marker in @(
 $psExe = (Get-Process -Id $PID).Path
 & $psExe -NoProfile -ExecutionPolicy Bypass -File $workerPath -ContractSelfTest
 if ($LASTEXITCODE -ne 0) { throw "AntiG contract self-test failed with exit=$LASTEXITCODE." }
+
+$installerSelfTest = Join-Path $repoRoot "scripts/antig/install-antig-automation.ps1"
+& $psExe -NoProfile -ExecutionPolicy Bypass -File $installerSelfTest -SelfTest
+if ($LASTEXITCODE -ne 0) { throw "AntiG installer transaction self-test failed with exit=$LASTEXITCODE." }
 
 # Functional concurrency/isolation test: a concurrent file in the primary checkout must
 # survive disposable review worktree creation, review edits and teardown unchanged.

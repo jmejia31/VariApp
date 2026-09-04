@@ -69,16 +69,45 @@ function Sync-And-AssertClean([string]$RepoRoot) {
 
 function Get-State([string]$StatePath) {
     if (-not (Test-Path -LiteralPath $StatePath)) {
-        return [pscustomobject]@{ lastSeenIssue = 0; updatedAt = [DateTime]::UtcNow.ToString("o") }
+        return [pscustomobject]@{ lastSeenIssue = 0; updatedAt = [DateTime]::UtcNow.ToString("o"); publications = @() }
     }
-    return (Get-Content -LiteralPath $StatePath -Raw | ConvertFrom-Json)
+    try {
+        $state = Get-Content -LiteralPath $StatePath -Raw | ConvertFrom-Json
+        if (-not ($state.PSObject.Properties.Name -contains "publications")) {
+            $state | Add-Member -NotePropertyName publications -NotePropertyValue @()
+        }
+        return $state
+    }
+    catch { throw "QUARANTINE: AntiG state JSON is invalid: $($_.Exception.Message)" }
 }
 
-function Save-State([string]$StatePath, [int]$IssueNumber) {
-    Write-JsonNoBom $StatePath ([ordered]@{
-        lastSeenIssue = $IssueNumber
-        updatedAt = [DateTime]::UtcNow.ToString("o")
-    })
+function Save-State([string]$StatePath, $State, [int]$IssueNumber = -1) {
+    if ($IssueNumber -ge 0) { $State.lastSeenIssue = $IssueNumber }
+    $State.updatedAt = [DateTime]::UtcNow.ToString("o")
+    Write-JsonNoBom $StatePath $State
+}
+
+function Add-Publication($State, [int]$IssueNumber, [string]$CodeHead, [string]$EvidenceHead, [string]$CommentBody) {
+    $existing = @($State.publications | Where-Object { [int]$_.issueNumber -eq $IssueNumber })
+    if ($existing.Count -gt 0) { return }
+    $State.publications = @($State.publications) + [pscustomobject]@{
+        issueNumber = $IssueNumber
+        codeHead = $CodeHead
+        evidenceHead = $EvidenceHead
+        commentBody = $CommentBody
+        status = "COMMENT_PENDING"
+        publishedAt = [DateTime]::UtcNow.ToString("o")
+    }
+}
+
+function Retry-PendingComments([string]$StatePath, $State) {
+    foreach ($publication in @($State.publications | Where-Object { $_.status -eq "COMMENT_PENDING" })) {
+        $comment = Invoke-Native gh @(
+            "issue","comment",[string]$publication.issueNumber,
+            "--repo",$Repository,"--body",[string]$publication.commentBody
+        ) -AllowFailure
+        if ($comment.ExitCode -eq 0) { $publication.status = "PROCESSED"; Save-State $StatePath $State }
+    }
 }
 
 function Save-Quarantine([string]$StateRoot, $Issue, [string]$Reason) {
@@ -155,7 +184,7 @@ function Test-ScopeMatch([string]$Path, [string[]]$Scopes) {
 
 function Test-ProtectedPath([string]$Path) {
     $p = ($Path -replace '\\','/').TrimStart('/')
-    $exact = @("AGENTS.md",".env",".env.local",".env.production")
+    $exact = @("AGENTS.md",".env",".env.local",".env.production","frontend/vercel.json","frontend/scripts/vercel-ignore-build.mjs")
     if ($p -in $exact) { return $true }
     foreach ($prefix in @(
         ".git/",".github/workflows/",".agents/","scripts/antig/","vaep/schemas/",
@@ -168,11 +197,30 @@ function Test-ProtectedPath([string]$Path) {
     return $false
 }
 
+function Assert-ScopesSafe([string[]]$Scopes) {
+    if ($Scopes.Count -eq 0) { throw "QUARANTINE: dispatch has no usable file scope." }
+    foreach ($scope in $Scopes) {
+        if ($scope.StartsWith('/') -or $scope -match '(^|/)\.\.(\/|$)') {
+            throw "QUARANTINE: invalid traversal/absolute file scope '$scope'."
+        }
+        foreach ($protected in @(
+            "AGENTS.md",".github/workflows/unsafe.yml",".agents/agent.md","scripts/antig/worker.ps1",
+            "vaep/schemas/dispatch.json","frontend/vercel.json","frontend/scripts/vercel-ignore-build.mjs",
+            ".env",".env.local","secrets/token.txt","Production/app.json","Produccion/app.json"
+        )) {
+            if (Test-ScopeMatch $protected @($scope)) {
+                throw "QUARANTINE: scope '$scope' includes protected path '$protected'."
+            }
+        }
+    }
+}
+
 function Get-ChangedPaths([string]$RepoRoot) {
-    $changedText = (Invoke-Native git @("-C",$RepoRoot,"diff","--name-only")).Text
+    $unstagedText = (Invoke-Native git @("-C",$RepoRoot,"diff","--name-only")).Text
+    $stagedText = (Invoke-Native git @("-C",$RepoRoot,"diff","--cached","--name-only")).Text
     $untrackedText = (Invoke-Native git @("-C",$RepoRoot,"ls-files","--others","--exclude-standard")).Text
     $all = @()
-    foreach ($text in @($changedText,$untrackedText)) {
+    foreach ($text in @($unstagedText,$stagedText,$untrackedText)) {
         if (-not [string]::IsNullOrWhiteSpace($text)) { $all += @($text -split "\r?\n") }
     }
     return @(
@@ -198,7 +246,9 @@ function Get-PatchPaths([string]$PatchPath) {
 
 function Backup-WorktreeChanges([string]$WorktreeRoot, [string]$RecoveryDir, [string]$Reason) {
     [IO.Directory]::CreateDirectory($RecoveryDir) | Out-Null
-    $patch = (Invoke-Native git @("-C",$WorktreeRoot,"diff","--binary")).Text
+    # Include both index and working-tree changes. A recovery created after explicit
+    # staging must preserve the complete delta, including staged deletions.
+    $patch = (Invoke-Native git @("-C",$WorktreeRoot,"diff","HEAD","--binary")).Text
     if (-not [string]::IsNullOrEmpty($patch)) {
         [IO.File]::WriteAllText((Join-Path $RecoveryDir "changes.patch"), $patch + [Environment]::NewLine, [Text.UTF8Encoding]::new($false))
     }
@@ -222,10 +272,63 @@ function Assert-RemoteStillAt([string]$RepoRoot, [string]$ExpectedHead) {
     return $originHead
 }
 
+function Assert-RemoteAt([string]$RepoRoot, [string]$ExpectedHead) {
+    $env:GIT_TERMINAL_PROMPT = "0"
+    $env:GCM_INTERACTIVE = "Never"
+    Invoke-Native git @("-C",$RepoRoot,"fetch","origin","--prune","--quiet") | Out-Null
+    $originHead = (Invoke-Native git @("-C",$RepoRoot,"rev-parse","origin/$Branch")).Text
+    if ($originHead -ne $ExpectedHead) { throw "FAIL_CLOSED: published evidence head was not confirmed on origin/$Branch." }
+    return $originHead
+}
+
 function Assert-BaseIsAncestor([string]$RepoRoot,[string]$BaseHead,[string]$StartHead) {
     if ($BaseHead -notmatch '^[0-9a-fA-F]{40}$') { throw "QUARANTINE: invalid primary base SHA." }
     $r = Invoke-Native git @("-C",$RepoRoot,"merge-base","--is-ancestor",$BaseHead,$StartHead) -AllowFailure
     if ($r.ExitCode -ne 0) { throw "QUARANTINE: Jules base is not an ancestor of current Desarrollo; stale/conflicting evidence." }
+}
+
+function Normalize-PatchText([string]$Text) {
+    if ($null -eq $Text) { return "" }
+    return [regex]::Replace($Text, "\r\n?", "`n")
+}
+
+function Read-JsonOrQuarantine([string]$Path, [string]$Label) {
+    try { return (Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json) }
+    catch { throw "QUARANTINE: $Label JSON invalid: $($_.Exception.Message)" }
+}
+
+function Assert-GitPatchContract($GitPatch, $Result, $Dispatch, [string]$DispatchId, [string]$TaskId, [int]$Attempt, [string]$Session, [string]$PatchPath) {
+    foreach ($required in @("baseCommitId","unidiffPatch")) {
+        if (-not ($GitPatch.PSObject.Properties.Name -contains $required)) { throw "QUARANTINE: gitpatch missing '$required'." }
+    }
+    $base = [string]$GitPatch.baseCommitId
+    if ($base -notmatch '^[0-9a-fA-F]{40}$') { throw "QUARANTINE: gitpatch baseCommitId is not SHA40." }
+    if ([string]$Result.actualPatchBase -ne $base) { throw "QUARANTINE: gitpatch baseCommitId != result.actualPatchBase." }
+    $unidiff = [string]$GitPatch.unidiffPatch
+    if ([string]::IsNullOrWhiteSpace($unidiff)) { throw "QUARANTINE: gitpatch unidiffPatch is empty." }
+    $patchText = [IO.File]::ReadAllText($PatchPath)
+    if ((Normalize-PatchText $unidiff) -ne (Normalize-PatchText $patchText)) {
+        throw "QUARANTINE: gitpatch unidiffPatch differs materially from changes.patch."
+    }
+    foreach ($pair in @(
+        @("dispatchId",$DispatchId), @("taskId",$TaskId), @("attempt",$Attempt), @("session",$Session),
+        @("workerId",[string]$Result.workerId)
+    )) {
+        $name = [string]$pair[0]
+        if ($GitPatch.PSObject.Properties.Name -contains $name -and [string]$GitPatch.$name -ne [string]$pair[1]) {
+            throw "QUARANTINE: gitpatch $name is causally inconsistent."
+        }
+    }
+}
+
+function Select-CausalArtifact($Artifacts, [string]$DispatchId, [string]$RunId) {
+    $matches = @($Artifacts | Where-Object {
+        -not $_.expired -and
+        ([string]$_.name).IndexOf($DispatchId,[StringComparison]::OrdinalIgnoreCase) -ge 0 -and
+        $null -ne $_.workflow_run -and [string]$_.workflow_run.id -eq $RunId
+    })
+    if ($matches.Count -ne 1) { throw "QUARANTINE: expected exactly one causal artifact for dispatch=$DispatchId run=$RunId; found $($matches.Count)." }
+    return $matches[0]
 }
 
 function Assert-DispatchContract($Dispatch,[string]$DispatchId,[string]$TaskId,[int]$Attempt,[string]$Session,[string]$RepoRoot,[string]$StartHead) {
@@ -243,15 +346,26 @@ function Assert-DispatchContract($Dispatch,[string]$DispatchId,[string]$TaskId,[
 
     $strict = $Dispatch.PSObject.Properties.Name -contains "schemaVersion"
     if ($strict) {
+        foreach ($required in @("schemaVersion","projectId","repository","branch","dispatchId","taskId","parentId","phase","stage","primaryBaseHead","fileScopeHint","worker","attempt","attemptConsumed","dependencies","acceptanceCriteria","tracks","session","ownership","timestamps")) {
+            if (-not ($Dispatch.PSObject.Properties.Name -contains $required)) { throw "QUARANTINE: v1.0 dispatch missing '$required'." }
+        }
         if ([string]$Dispatch.schemaVersion -ne "1.0") { throw "QUARANTINE: unsupported dispatch schemaVersion." }
         if ([string]$Dispatch.projectId -ne "VARIAPP") { throw "QUARANTINE: dispatch projectId mismatch." }
         if ([string]$Dispatch.repository -ne $Repository) { throw "QUARANTINE: dispatch repository mismatch." }
         if ([string]$Dispatch.branch -ne $Branch) { throw "QUARANTINE: dispatch branch mismatch." }
         if ([string]$Dispatch.parentId -notmatch '^N[0-9]+\.[0-9]+\.[A-H]$') { throw "QUARANTINE: invalid parentId." }
-        if ($Dispatch.PSObject.Properties.Name -contains "attemptConsumed" -and [bool]$Dispatch.attemptConsumed) { throw "QUARANTINE: dispatch attempt already consumed." }
+        if (-not $Dispatch.taskId.StartsWith(([string]$Dispatch.parentId) + ".") -and [string]$Dispatch.taskId -ne [string]$Dispatch.parentId) { throw "QUARANTINE: taskId does not belong to parentId." }
+        if ([string]$Dispatch.worker -notin @("JULES_A","JULES_B","JULES_C","JULES_D")) { throw "QUARANTINE: invalid v1.0 worker." }
+        if (-not ($Dispatch.fileScopeHint -is [System.Array]) -or @($Dispatch.acceptanceCriteria).Count -eq 0 -or @($Dispatch.tracks).Count -eq 0) { throw "QUARANTINE: v1.0 array metadata is invalid." }
+        if ([bool]$Dispatch.attemptConsumed) { throw "QUARANTINE: dispatch attempt already consumed." }
+        if (-not ($Dispatch.dependencies -is [System.Array])) { throw "QUARANTINE: dependencies must exist as an array." }
         foreach ($dep in @($Dispatch.dependencies)) {
+            if ($null -eq $dep -or [string]::IsNullOrWhiteSpace([string]$dep.taskId)) { throw "QUARANTINE: dependency metadata invalid." }
             if ([string]$dep.status -ne "SATISFIED") { throw "QUARANTINE: dispatch dependency '$($dep.taskId)' is not SATISFIED." }
         }
+        if (@($Dispatch.acceptanceCriteria).Count -eq 0 -or @($Dispatch.tracks).Count -eq 0) { throw "QUARANTINE: acceptance/tracks metadata is empty." }
+        if ($null -eq $Dispatch.session -or [string]::IsNullOrWhiteSpace([string]$Dispatch.session.sessionId) -or [string]$Dispatch.session.workerId -ne [string]$Dispatch.worker -or [string]::IsNullOrWhiteSpace([string]$Dispatch.session.correlationId)) { throw "QUARANTINE: v1.0 session metadata invalid." }
+        if ($null -eq $Dispatch.timestamps -or [string]::IsNullOrWhiteSpace([string]$Dispatch.timestamps.createdAt) -or [DateTime]::Parse([string]$Dispatch.timestamps.createdAt) -eq [DateTime]::MinValue) { throw "QUARANTINE: v1.0 timestamps invalid." }
         if ($null -eq $Dispatch.ownership -or [string]::IsNullOrWhiteSpace([string]$Dispatch.ownership.owner)) { throw "QUARANTINE: dispatch ownership missing." }
         if ([string]$Dispatch.ownership.status -notin @("AVAILABLE","RELEASED")) { throw "QUARANTINE: dispatch ownership status invalid." }
         if (@($Dispatch.ownership.scopes).Count -eq 0) { throw "QUARANTINE: dispatch ownership scopes missing." }
@@ -272,7 +386,7 @@ function Assert-DispatchContract($Dispatch,[string]$DispatchId,[string]$TaskId,[
 
     Assert-BaseIsAncestor $RepoRoot ([string]$Dispatch.primaryBaseHead) $StartHead
     $scopes = @(Normalize-Scopes $Dispatch.fileScopeHint)
-    if ($scopes.Count -eq 0) { throw "QUARANTINE: dispatch has no usable file scope." }
+    Assert-ScopesSafe $scopes
     return $scopes
 }
 
@@ -288,8 +402,12 @@ function Assert-ResultContract($Result,$Dispatch,[string]$DispatchId,[string]$Ta
     if ([string]$Result.actualPatchBase -ne $ActualPatchBase) { throw "QUARANTINE: result actualPatchBase mismatch." }
     if ($ActualPatchBase -notmatch '^[0-9a-fA-F]{40}$') { throw "QUARANTINE: invalid actualPatchBase." }
     if ([string]$Result.workerId -notin @("JULES_A","JULES_B","JULES_C","JULES_D")) { throw "QUARANTINE: invalid result workerId." }
-    if ($Dispatch.PSObject.Properties.Name -contains "workerId" -and [string]$Result.workerId -ne [string]$Dispatch.workerId) {
-        throw "QUARANTINE: worker identity mismatch between dispatch and result."
+    $dispatchWorker = if ($Dispatch.PSObject.Properties.Name -contains "worker") { [string]$Dispatch.worker } else { [string]$Dispatch.workerId }
+    if (-not [string]::IsNullOrWhiteSpace($dispatchWorker) -and [string]$Result.workerId -ne $dispatchWorker) {
+            throw "QUARANTINE: worker identity mismatch between dispatch and result."
+    }
+    foreach ($pair in @(@("projectId","VARIAPP"),@("repository",$Repository),@("branch",$Branch))) {
+        if ($Result.PSObject.Properties.Name -contains $pair[0] -and [string]$Result.($pair[0]) -ne [string]$pair[1]) { throw "QUARANTINE: result $($pair[0]) mismatch." }
     }
 }
 
@@ -323,7 +441,101 @@ function Invoke-InternalContractSelfTests([string]$RepoRoot) {
     if (-not $caught) { throw "Contract self-test failed: invalid branch was not quarantined." }
 
     if (-not (Test-ProtectedPath ".github/workflows/unsafe.yml")) { throw "Contract self-test failed: protected workflow path." }
+    if (-not (Test-ProtectedPath "frontend/vercel.json")) { throw "Contract self-test failed: Vercel config path." }
+    if (-not (Test-ProtectedPath "frontend/scripts/vercel-ignore-build.mjs")) { throw "Contract self-test failed: Vercel ignore path." }
     if (Test-ProtectedPath "backend/src/safe.cs") { throw "Contract self-test failed: safe path false-positive." }
+
+    $attempt2 = $dispatch.PSObject.Copy(); $attempt2.taskAttempt = 2
+    Assert-DispatchContract $attempt2 "TEST-DISPATCH-0001" "N9.9.A.TEST" 2 "sessions/test" $RepoRoot $head | Out-Null
+    $attempt3Caught = $false
+    try { $badAttempt = $dispatch.PSObject.Copy(); $badAttempt.taskAttempt = 3; Assert-DispatchContract $badAttempt "TEST-DISPATCH-0001" "N9.9.A.TEST" 3 "sessions/test" $RepoRoot $head | Out-Null }
+    catch { $attempt3Caught = $_.Exception.Message -like "QUARANTINE:*" }
+    if (-not $attempt3Caught) { throw "Contract self-test failed: attempt 3 was accepted." }
+
+    $strictDispatch = [pscustomobject]@{
+        schemaVersion="1.0"; projectId="VARIAPP"; repository=$Repository; branch=$Branch; dispatchId="TEST-STRICT-0001"; taskId="N9.9.A.TEST"; parentId="N9.9.A"
+        phase="PRE"; stage="A"; primaryBaseHead=$head; fileScopeHint=@("backend/src/**"); worker="JULES_A"; attempt=1; attemptConsumed=$false
+        dependencies=@([pscustomobject]@{taskId="N9.9.A.PREV";status="SATISFIED"}); acceptanceCriteria=@("contract"); tracks=@("test")
+        session=[pscustomobject]@{sessionId="sessions/test";workerId="JULES_A";correlationId="corr-test"}
+        ownership=[pscustomobject]@{owner="JulesA";status="AVAILABLE";scopes=@("backend/src/**")}
+        timestamps=[pscustomobject]@{createdAt=[DateTime]::UtcNow.ToString("o")}
+    }
+    Assert-DispatchContract $strictDispatch "TEST-STRICT-0001" "N9.9.A.TEST" 1 "sessions/test" $RepoRoot $head | Out-Null
+    $pendingCaught = $false
+    try { $pending = $strictDispatch.PSObject.Copy(); $pending.dependencies=@([pscustomobject]@{taskId="N9.9.A.PREV";status="PENDING"}); Assert-DispatchContract $pending "TEST-STRICT-0001" "N9.9.A.TEST" 1 "sessions/test" $RepoRoot $head | Out-Null }
+    catch { $pendingCaught = $_.Exception.Message -like "QUARANTINE:*" }
+    if (-not $pendingCaught) { throw "Contract self-test failed: pending dependency was accepted." }
+
+    $selfTemp = Join-Path ([IO.Path]::GetTempPath()) ("antig-contract-" + [Guid]::NewGuid().ToString("N"))
+    try {
+        [IO.Directory]::CreateDirectory($selfTemp) | Out-Null
+        foreach ($label in @("dispatch","result","gitpatch")) {
+            $malformed = Join-Path $selfTemp ("malformed-" + $label + ".json")
+            [IO.File]::WriteAllText($malformed,"{not-json",[Text.UTF8Encoding]::new($false))
+            $malformedCaught = $false
+            try { Read-JsonOrQuarantine $malformed $label | Out-Null } catch { $malformedCaught = $_.Exception.Message -like "QUARANTINE:*" }
+            if (-not $malformedCaught) { throw "Contract self-test failed: malformed $label JSON was not quarantined." }
+        }
+
+        $patchPath = Join-Path $selfTemp "changes.patch"
+        $patchText = "diff --git a/backend/src/a.cs b/backend/src/a.cs`n--- a/backend/src/a.cs`n+++ b/backend/src/a.cs`n@@`n-old`n+new`n"
+        [IO.File]::WriteAllText($patchPath,$patchText,[Text.UTF8Encoding]::new($false))
+        $gitPatch = [pscustomobject]@{baseCommitId=$head;unidiffPatch=$patchText;dispatchId="TEST-DISPATCH-0001";taskId="N9.9.A.TEST";attempt=1;session="sessions/test";workerId="JULES_A"}
+        Assert-GitPatchContract $gitPatch $result $dispatch "TEST-DISPATCH-0001" "N9.9.A.TEST" 1 "sessions/test" $patchPath
+        $mismatchCaught = $false
+        try { $different = $gitPatch.PSObject.Copy(); $different.unidiffPatch="different"; Assert-GitPatchContract $different $result $dispatch "TEST-DISPATCH-0001" "N9.9.A.TEST" 1 "sessions/test" $patchPath } catch { $mismatchCaught = $_.Exception.Message -like "QUARANTINE:*" }
+        if (-not $mismatchCaught) { throw "Contract self-test failed: patch mismatch was accepted." }
+        $baseCaught = $false
+        try { $differentBase = $gitPatch.PSObject.Copy(); $differentBase.baseCommitId=('0' * 40); Assert-GitPatchContract $differentBase $result $dispatch "TEST-DISPATCH-0001" "N9.9.A.TEST" 1 "sessions/test" $patchPath } catch { $baseCaught = $_.Exception.Message -like "QUARANTINE:*" }
+        if (-not $baseCaught) { throw "Contract self-test failed: inconsistent patch base was accepted." }
+
+        $artifact = [pscustomobject]@{name="TEST-DISPATCH-0001-artifact";expired=$false;workflow_run=[pscustomobject]@{id="77"}}
+        $ambiguousCaught = $false
+        try { Select-CausalArtifact @($artifact,$artifact) "TEST-DISPATCH-0001" "77" | Out-Null } catch { $ambiguousCaught = $_.Exception.Message -like "QUARANTINE:*" }
+        if (-not $ambiguousCaught) { throw "Contract self-test failed: ambiguous artifact was accepted." }
+
+        $state = [pscustomobject]@{publications=@()}
+        Add-Publication $state 77 $head $head "comment"
+        Add-Publication $state 77 $head $head "comment"
+        if (@($state.publications).Count -ne 1 -or $state.publications[0].status -ne "COMMENT_PENDING") { throw "Contract self-test failed: publication was not idempotent." }
+
+        $gitTemp = Join-Path $selfTemp "repo"
+        [IO.Directory]::CreateDirectory($gitTemp) | Out-Null
+        Invoke-Native git @("-C",$gitTemp,"init") | Out-Null
+        Invoke-Native git @("-C",$gitTemp,"config","user.email","antig-selftest@localhost") | Out-Null
+        Invoke-Native git @("-C",$gitTemp,"config","user.name","AntiG Self Test") | Out-Null
+        [IO.File]::WriteAllText((Join-Path $gitTemp "unstaged.txt"),"base",[Text.UTF8Encoding]::new($false))
+        Invoke-Native git @("-C",$gitTemp,"add","--","unstaged.txt") | Out-Null
+        Invoke-Native git @("-C",$gitTemp,"commit","-m","base") | Out-Null
+        [IO.File]::WriteAllText((Join-Path $gitTemp "unstaged.txt"),"changed",[Text.UTF8Encoding]::new($false))
+        [IO.File]::WriteAllText((Join-Path $gitTemp "staged.txt"),"staged",[Text.UTF8Encoding]::new($false))
+        Invoke-Native git @("-C",$gitTemp,"add","--","staged.txt") | Out-Null
+        [IO.File]::WriteAllText((Join-Path $gitTemp "untracked.txt"),"untracked",[Text.UTF8Encoding]::new($false))
+        $detected = @(Get-ChangedPaths $gitTemp)
+        if (($detected -join ',') -ne "staged.txt,unstaged.txt,untracked.txt") { throw "Contract self-test failed: staged/unstaged/untracked detection '$($detected -join ',')'." }
+        $authorized = @("staged.txt","unstaged.txt","untracked.txt")
+        Invoke-Native git (@("-C",$gitTemp,"add","--") + $authorized) | Out-Null
+        $stagedNames = @( ((Invoke-Native git @("-C",$gitTemp,"diff","--cached","--name-only")).Text -split "\r?\n") | Where-Object { $_ } | Sort-Object -Unique )
+        if (($stagedNames -join ',') -ne ($authorized -join ',')) { throw "Contract self-test failed: explicit staging mismatch '$($stagedNames -join ',')'." }
+        $recoveryDir = Join-Path $selfTemp "recovery"
+        Backup-WorktreeChanges $gitTemp $recoveryDir "staged delta preservation"
+        $recoveryPatch = Get-Content -LiteralPath (Join-Path $recoveryDir "changes.patch") -Raw
+        if ($recoveryPatch -notmatch 'staged\.txt' -or $recoveryPatch -notmatch 'unstaged\.txt') { throw "Contract self-test failed: recovery omitted staged/unstaged delta." }
+        if (-not (Test-Path -LiteralPath (Join-Path $recoveryDir "files\untracked.txt"))) { throw "Contract self-test failed: recovery omitted untracked file." }
+        $outsideCaught = $false
+        try { Assert-PathsAuthorized @("backend/src/a.cs") @("backend/tests/**") "self-test" } catch { $outsideCaught = $_.Exception.Message -like "QUARANTINE:*" }
+        if (-not $outsideCaught) { throw "Contract self-test failed: out-of-scope path was accepted." }
+
+        $statePath = Join-Path $selfTemp "state.json"
+        $state0 = [pscustomobject]@{lastSeenIssue=0;updatedAt="";publications=@()}
+        Save-State $statePath $state0
+        $stateTransient = Get-State $statePath
+        if ([int]$stateTransient.lastSeenIssue -ne 0) { throw "Contract self-test failed: transient path consumed watermark." }
+        $stateInvalid = Get-State $statePath
+        Save-State $statePath $stateInvalid 88
+        if ([int](Get-State $statePath).lastSeenIssue -ne 88) { throw "Contract self-test failed: quarantine path did not advance watermark." }
+    }
+    finally { if (Test-Path -LiteralPath $selfTemp) { Remove-Item -LiteralPath $selfTemp -Recurse -Force -ErrorAction SilentlyContinue } }
     Write-Host "ANTIG_CONTRACT_SELF_TEST=PASS" -ForegroundColor Green
 }
 
@@ -344,27 +556,31 @@ function Process-Issue($Issue, [string]$RepoRoot, [string]$StateRoot, [string]$S
 
     if ($terminal -ne "COMPLETED" -or $patchPresent -ne "true") {
         $comment = "[AntiG] REVIEW_NOT_STARTED: terminal=$terminal patchPresent=$patchPresent. No LISTO_REAL; controller review required."
-        Invoke-Native gh @("issue","comment",[string]$Issue.number,"--repo",$Repository,"--body",$comment) | Out-Null
+        $statePath = Join-Path $StateRoot "state.json"
+        $state = Get-State $statePath
+        Save-State $statePath $state ([int]$Issue.number)
+        Invoke-Native gh @("issue","comment",[string]$Issue.number,"--repo",$Repository,"--body",$comment) -AllowFailure | Out-Null
         return "PROCESSED"
     }
 
     $startHead = Sync-And-AssertClean $RepoRoot
     $runId = Match-One $runUrl '/actions/runs/(\d+)' "run id"
-    $run = (Invoke-Native gh @("api","repos/$Repository/actions/runs/$runId")).Text | ConvertFrom-Json
+    $runRaw = Invoke-Native gh @("api","repos/$Repository/actions/runs/$runId")
+    try { $run = $runRaw.Text | ConvertFrom-Json }
+    catch { throw "QUARANTINE: causal workflow run metadata is invalid: $($_.Exception.Message)" }
     if ([string]$run.head_branch -ne $Branch) { throw "QUARANTINE: causal workflow run is not on Desarrollo." }
+    if ([string]$run.id -ne $runId -or [string]$run.repository.full_name -ne $Repository) { throw "QUARANTINE: causal workflow run identity mismatch." }
 
     $jobRoot = Join-Path $StateRoot ("jobs\" + $Issue.number)
     $artifactDir = Join-Path $jobRoot "artifact"
     if (Test-Path -LiteralPath $jobRoot) { Remove-Item -LiteralPath $jobRoot -Recurse -Force }
     [IO.Directory]::CreateDirectory($artifactDir) | Out-Null
 
-    $artifactEnvelope = (Invoke-Native gh @("api","repos/$Repository/actions/runs/$runId/artifacts")).Text | ConvertFrom-Json
-    $matches = @(
-        $artifactEnvelope.artifacts |
-        Where-Object { -not $_.expired -and ([string]$_.name).IndexOf($dispatchId,[StringComparison]::OrdinalIgnoreCase) -ge 0 }
-    )
-    if ($matches.Count -ne 1) { throw "QUARANTINE: expected exactly one causal artifact for dispatch=$dispatchId run=$runId; found $($matches.Count)." }
-    $artifact = $matches[0]
+    $artifactRaw = Invoke-Native gh @("api","repos/$Repository/actions/runs/$runId/artifacts")
+    try { $artifactEnvelope = $artifactRaw.Text | ConvertFrom-Json }
+    catch { throw "QUARANTINE: causal artifact metadata is invalid: $($_.Exception.Message)" }
+    $artifact = Select-CausalArtifact $artifactEnvelope.artifacts $dispatchId $runId
+    if ($null -eq $artifact.workflow_run -or [string]$artifact.workflow_run.id -ne $runId) { throw "QUARANTINE: causal artifact is not linked to the Issue workflow run." }
 
     Invoke-Native gh @("run","download",$runId,"--repo",$Repository,"--name",[string]$artifact.name,"--dir",$artifactDir) | Out-Null
 
@@ -376,15 +592,17 @@ function Process-Issue($Issue, [string]$RepoRoot, [string]$StateRoot, [string]$S
         if (-not (Test-Path -LiteralPath $p -PathType Leaf)) { throw "QUARANTINE: causal artifact missing '$([IO.Path]::GetFileName($p))'." }
     }
 
-    $dispatch = Get-Content -LiteralPath $dispatchPath -Raw | ConvertFrom-Json
-    $result = Get-Content -LiteralPath $resultPath -Raw | ConvertFrom-Json
-    $gitPatch = Get-Content -LiteralPath $gitPatchPath -Raw | ConvertFrom-Json
+    $dispatch = Read-JsonOrQuarantine $dispatchPath "dispatch"
+    $result = Read-JsonOrQuarantine $resultPath "result"
+    $gitPatch = Read-JsonOrQuarantine $gitPatchPath "gitpatch"
     if ($null -eq $gitPatch -or [string]::IsNullOrWhiteSpace([string]$gitPatch.baseCommitId)) {
         throw "QUARANTINE: gitpatch.json missing baseCommitId."
     }
 
     $scopes = @(Assert-DispatchContract $dispatch $dispatchId $taskId $attempt $session $RepoRoot $startHead)
     Assert-ResultContract $result $dispatch $dispatchId $taskId $attempt $session ([string]$gitPatch.baseCommitId)
+    Assert-GitPatchContract $gitPatch $result $dispatch $dispatchId $taskId $attempt $session $patchPath
+    Assert-BaseIsAncestor $RepoRoot ([string]$gitPatch.baseCommitId) $startHead
 
     $parentId = if ($dispatch.PSObject.Properties.Name -contains "parentId") {
         [string]$dispatch.parentId
@@ -532,7 +750,11 @@ function Process-Issue($Issue, [string]$RepoRoot, [string]$StateRoot, [string]$S
         $published = $true
 
         $comment = "[AntiG] READY_FOR_VAEP. codeHead=$codeHead evidenceHead=$evidenceHead P0=0 P1=0. LISTO_REAL=no; VAEP/controller certification remains mandatory."
-        Invoke-Native gh @("issue","comment",[string]$Issue.number,"--repo",$Repository,"--body",$comment) | Out-Null
+        Assert-RemoteAt $RepoRoot $evidenceHead | Out-Null
+        $statePath = Join-Path $StateRoot "state.json"
+        $state = Get-State $statePath
+        Add-Publication $state ([int]$Issue.number) $codeHead $evidenceHead $comment
+        Save-State $statePath $state ([int]$Issue.number)
         return "PROCESSED"
     }
     finally {
@@ -603,24 +825,31 @@ try {
         Sync-And-AssertClean $repoRoot | Out-Null
         $statePath = Join-Path $stateRoot "state.json"
         $state = Get-State $statePath
+        Retry-PendingComments $statePath $state
         $issues = @(Get-TerminalIssues ([int]$state.lastSeenIssue))
 
         if ($issues.Count -gt 0) {
             $issue = $issues[0]
             try {
                 $result = Process-Issue $issue $repoRoot $stateRoot $schemaPath
-                if ($result -eq "PROCESSED") { Save-State $statePath ([int]$issue.number) }
+                if ($result -eq "PROCESSED") {
+                    $state = Get-State $statePath
+                    Save-State $statePath $state ([int]$issue.number)
+                }
             }
             catch {
                 $message = $_.Exception.Message
                 if ($message -like "QUARANTINE:*") {
+                    $state = Get-State $statePath
                     Save-Quarantine $stateRoot $issue ($message.Substring("QUARANTINE:".Length).Trim())
-                    Save-State $statePath ([int]$issue.number)
+                    Save-State $statePath $state ([int]$issue.number)
                     Write-Warning "Issue $($issue.number) quarantined; lane advanced."
                 }
                 else { throw }
             }
         }
+
+        Retry-PendingComments $statePath (Get-State $statePath)
 
         if ($Once) { break }
         Start-Sleep -Seconds $PollSeconds

@@ -267,3 +267,15 @@ Este rollup supersede únicamente el estado operativo stale anterior del bloque 
 - [x] Self-tests funcionales de contrato, rutas protegidas y aislamiento de worktree.
 - [x] Rollback transaccional del instalador si falla la fase mutante.
 - [ ] Activación física del Scheduled Task VariApp-AntiG-Reviewer: pendiente hasta auditoría final APROBADO_PARA_ACTIVACION y evidencia local real.
+
+## AntiG P1 hardening — cierre técnico Codex — 2026-09-04
+
+- [x] Causalidad estricta de `gitpatch.json` y `changes.patch`, incluyendo contenido unidiff, base SHA40 e identidad opcional coherente.
+- [x] Compatibilidad legacy v3.25 con guards fail-closed y validación estructurada v1.0 completa.
+- [x] Delta staged/unstaged/untracked, staging explícito e igualdad dura de paths.
+- [x] Rutas Vercel protegidas explícitamente; AntiG no puede modificar `frontend/vercel.json` ni `frontend/scripts/vercel-ignore-build.mjs`.
+- [x] Handoffs inválidos en cuarentena; errores transitorios retryables sin avance de watermark.
+- [x] Estado de publicación durable `COMMENT_PENDING` tras confirmar `evidenceHead`, con deduplicación antes de comentarios.
+- [x] Rollback del instalador restaura XML de tarea preexistente o elimina solo la tarea nueva.
+- [x] Self-tests funcionales ampliados para contrato, aislamiento, staging, paths protegidos, patch causal, watermark, idempotencia y planes de rollback.
+- [ ] Instalación física y Scheduled Task real siguen pendientes; no se ejecutan desde Codex.

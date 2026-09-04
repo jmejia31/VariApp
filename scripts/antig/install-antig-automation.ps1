@@ -3,6 +3,7 @@
 param(
     [switch]$Remove,
     [switch]$SkipAuthProbe,
+    [switch]$SelfTest,
     [string]$TaskName = "VariApp-AntiG-Reviewer"
 )
 
@@ -33,6 +34,28 @@ function Add-UniqueValues($Object,[string]$PropertyName,[string[]]$Values) {
         if ($v -notin $current) { $current += $v }
     }
     $Object.$PropertyName = $current
+}
+
+function Get-TaskRollbackMode([bool]$Existed) {
+    if ($Existed) { return "RESTORE_EXISTING_XML" }
+    return "DELETE_NEW_TASK"
+}
+
+function Test-TaskNotFound($QueryResult) {
+    if ($QueryResult.ExitCode -eq 0) { return $false }
+    $text = [string]$QueryResult.Text
+    return $text -match '(?i)(cannot find|could not find|does not exist|not found|no existe|no se encuentra|no se pudo encontrar|nombre de tarea.*inv[aá]lido)'
+}
+
+if ($SelfTest) {
+    if ((Get-TaskRollbackMode $false) -ne "DELETE_NEW_TASK") { throw "Installer self-test: absent task rollback plan invalid." }
+    if ((Get-TaskRollbackMode $true) -ne "RESTORE_EXISTING_XML") { throw "Installer self-test: existing task rollback plan invalid." }
+    $missingTask = [pscustomobject]@{ ExitCode = 1; Text = "ERROR: The system cannot find the file specified." }
+    $unknownTask = [pscustomobject]@{ ExitCode = 1; Text = "ERROR: Access is denied." }
+    if (-not (Test-TaskNotFound $missingTask)) { throw "Installer self-test: missing task was not classified as absent." }
+    if (Test-TaskNotFound $unknownTask) { throw "Installer self-test: indeterminate task query was treated as absent." }
+    Write-Host "ANTIG_INSTALLER_TRANSACTION_SELF_TEST=PASS" -ForegroundColor Green
+    exit 0
 }
 
 if ($env:OS -ne "Windows_NT") {
@@ -212,10 +235,26 @@ $statePath = Join-Path $stateRoot "state.json"
 $stateExisted = Test-Path -LiteralPath $statePath
 $stateBackup = if ($stateExisted) { [IO.File]::ReadAllBytes($statePath) } else { $null }
 
+$taskQuery = Invoke-Native schtasks.exe @("/Query","/TN",$TaskName) -AllowFailure
+if ($taskQuery.ExitCode -eq 0) {
+    $taskExisted = $true
+}
+elseif (Test-TaskNotFound $taskQuery) {
+    $taskExisted = $false
+}
+else {
+    throw "Unable to determine whether Scheduled Task '$TaskName' exists safely; installation aborted without replacing it. $($taskQuery.Text)"
+}
+$taskBackupPath = Join-Path ([IO.Path]::GetTempPath()) ("VariApp-AntiG-task-" + [Guid]::NewGuid().ToString("N") + ".xml")
+if ($taskExisted) {
+    $taskXml = Invoke-Native schtasks.exe @("/Query","/TN",$TaskName,"/XML")
+    [IO.File]::WriteAllText($taskBackupPath,$taskXml.Text + [Environment]::NewLine,[Text.UTF8Encoding]::new($false))
+}
+
 $workerPath = Join-Path $repoRoot "scripts\antig\antig-review-worker.ps1"
 $quotedWorker = '"' + $workerPath + '"'
 $taskAction = "powershell.exe -NoProfile -ExecutionPolicy Bypass -File $quotedWorker -Once"
-$taskCreated = $false
+$taskReplaced = $false
 $settingsWritten = $false
 $stateWritten = $false
 
@@ -243,15 +282,20 @@ try {
         "/RL","LIMITED",
         "/F"
     ) | Out-Null
-    $taskCreated = $true
+    $taskReplaced = $true
 
     Invoke-Native schtasks.exe @("/Query","/TN",$TaskName) | Out-Null
 }
 catch {
     $originalError = $_.Exception.Message
 
-    if ($taskCreated) {
-        Invoke-Native schtasks.exe @("/Delete","/TN",$TaskName,"/F") -AllowFailure | Out-Null
+    if ($taskReplaced) {
+        if ($taskExisted) {
+            Invoke-Native schtasks.exe @("/Create","/TN",$TaskName,"/XML",$taskBackupPath,"/F") -AllowFailure | Out-Null
+        }
+        else {
+            Invoke-Native schtasks.exe @("/Delete","/TN",$TaskName,"/F") -AllowFailure | Out-Null
+        }
     }
 
     if ($stateWritten) {
@@ -272,8 +316,11 @@ catch {
         }
     }
 
+    if (Test-Path -LiteralPath $taskBackupPath) { Remove-Item -LiteralPath $taskBackupPath -Force -ErrorAction SilentlyContinue }
     throw "AntiG installation rolled back transactionally: $originalError"
 }
+
+if (Test-Path -LiteralPath $taskBackupPath) { Remove-Item -LiteralPath $taskBackupPath -Force -ErrorAction SilentlyContinue }
 
 Write-Host ""
 Write-Host "ANTIG_AUTOMATION=INSTALLED" -ForegroundColor Green

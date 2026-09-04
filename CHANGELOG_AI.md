@@ -747,3 +747,11 @@ Se corrigieron los P1 que bloqueaban la activación local de AntiG. El worker ya
 Se añadió validación causal Issue -> workflow run -> artifact único -> dispatch -> result -> gitpatch -> changes.patch; validación de attempt/base/scope, rutas protegidas, identidad de salida AntiG y compatibilidad controlada entre manifests Jules v3.25 y el contrato estructurado v1.0. Un handoff inválido se cuarentena bajo `.git/vaep-antig/quarantine/` y consume su watermark para que no bloquee Issues posteriores; fallos transitorios continúan fail-closed sin consumo automático.
 
 El self-test ahora ejecuta pruebas funcionales del contrato y una prueba real de aislamiento con Git worktree que confirma que un archivo concurrente del checkout primario sobrevive intacto. El instalador conserva permisos finos y añade rollback transaccional de settings/estado/tarea si falla su fase mutante. La activación física continúa prohibida hasta CI del exact-head final + auditoría final independiente.
+
+## 2026-09-04 - Cierre técnico P1 AntiG [Codex]
+
+Sobre el exact-head inicial `b8905c185df2c40df6f036b1a8f082c36130d260`, se corrigieron los gaps restantes dentro de `scripts/antig/`: causalidad estricta `Issue -> run -> artifact -> dispatch -> result -> gitpatch -> changes.patch`, contrato legacy v3.25 fail-closed, contrato estructurado v1.0 completo, detección staged/unstaged/untracked y staging explícito con igualdad de paths.
+
+Se bloquearon explícitamente `frontend/vercel.json` y `frontend/scripts/vercel-ignore-build.mjs`. Handoffs estructuralmente inválidos se cuarentenan y avanzan watermark; errores transitorios de GitHub/CLI/red permanecen retryables sin consumir watermark. La publicación confirma `evidenceHead` antes de persistir `COMMENT_PENDING`, de modo que un fallo de comentario no republica el mismo patch.
+
+El instalador captura y restaura el XML de una tarea previa, o elimina únicamente una tarea nueva durante rollback. Se ampliaron self-tests funcionales de contrato, patch causal, artifacts ambiguos, staging, aislamiento, watermark/idempotencia y planes de rollback. No se instaló AntiG, no se creó Scheduled Task real y no se tocaron main, Producción, Vercel, secretos ni BD productiva.
