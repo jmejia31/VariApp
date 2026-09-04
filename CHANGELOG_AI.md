@@ -697,3 +697,11 @@ Responsable: Codex local autorizado en `Desarrollo`; cierre documental append-on
 N4.6.A-H queda `LISTO_REAL` con persistencia jerárquica EF, repositorio, API protegida, UI Angular, RBAC/auditoría y certificación en `docs/CERTIFICACION_N4_6_PLAN_CUENTAS.md`. Gates reales: Development `#33828121004`, aceptación `#33828121038`, Fase 8 `#33828121029`, M13 `#33828121086` y M10 `#33828121034`, todos `SUCCESS`; `VariApp CI` `SKIPPED` no se usa como PASS. P0/P1 atribuibles al alcance: `0/0`.
 
 La ejecución Fase 2 terminó `FAILURE` únicamente por HTTP 503 de `registry.npmjs.org` durante `npm audit`; se clasifica `EXTERNAL_INFRA`, sin evidencia de regresión causal y sin rerun artificial. No se modificaron producción, secretos, dominios, Vercel ni workflows históricos N0.2-N0.5. El siguiente parent dependency-valid es `N4.7.A`; este changeset no inicia su scope.
+
+## 2026-09-04 - VAEP hardening — Bloque 1 admission/schema
+
+Responsable: Codex local autorizado en `Desarrollo`; changeset preparado sobre el cierre N4.6 `d6ca66fd790eb3446d028f84f57bd03ccc5647bf`.
+
+Se añadió `vaep/schemas/jules-dispatch.schema.json` y el validador reutilizable `scripts/vaep/dispatch-preflight.mjs`. La admisión exige identidad VariApp, rama `Desarrollo`, task/parent/dependencias, scope protegido, base SHA existente y ancestral, ownership, sesión y attempt válido. `ADMITTED` es el único resultado que puede iniciar ATTEMPT; JSON inválido, dependencia bloqueada, duplicado, scope inválido o conflicto fallan antes del worker sin consumir ATTEMPT. Un base stale ancestral sin solapamiento devuelve `REFRESHABLE`; un stale con solapamiento material devuelve `FAIL_CLOSED`.
+
+Validación real: JSON schema parseable, `node --check` en ambos scripts y `node scripts/vaep/dispatch-preflight-self-test.mjs` con 9/9 casos PASS. No se modifican manifests históricos, código de producto, Producción ni `main`.
