@@ -43,7 +43,7 @@ jobs:
 
           ## 2026-08-26 — ERP-N3.7 Nota de crédito de cliente — CIERRE FORMAL
 
-          **Responsable:** ChatGPT/VAEP v3.25.1 Closure Governor mediante QA takeover documental y hard verify history-preserving.
+          **Responsable:** ChatGPT/VAEP MASTER Closure Governor mediante QA takeover documental y hard verify history-preserving.
 
           **Objetivo/alcance:** cerrar formalmente N3.7.A-H sin reabrir código funcional ni inventar semánticas fiscales, stock, Kardex, caja o downstream no certificadas. `NotaCreditoCliente` conserva el alcance y contratos ya certificados por N3.7.A-G.
 
@@ -67,7 +67,7 @@ jobs:
           git config user.name 'VAEP Controller'
           git config user.email 'actions@users.noreply.github.com'
           git add CHANGELOG_AI.md
-          git commit -m 'docs(N3.7.H): cerrar NotaCreditoCliente en changelog [VAEP v3.25.1] [skip ci]'
+          git commit -m 'docs(N3.7.H): cerrar NotaCreditoCliente en changelog [VAEP MASTER] [skip ci]'
 
           git fetch origin Desarrollo --depth=1
           test "$(git rev-parse origin/Desarrollo)" = "$GITHUB_SHA"
