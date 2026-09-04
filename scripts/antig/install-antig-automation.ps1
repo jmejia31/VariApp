@@ -26,7 +26,7 @@ function Invoke-Native {
 }
 
 function Add-UniqueValues($Object,[string]$PropertyName,[string[]]$Values) {
-    if (-not ($Object.PSObject.Properties.Name -contains $PropertyName)) {
+    if ($null -eq $Object.PSObject.Properties[$PropertyName]) {
         $Object | Add-Member -NotePropertyName $PropertyName -NotePropertyValue @()
     }
     $current = @($Object.$PropertyName)
@@ -131,11 +131,11 @@ else {
     $settings = [pscustomobject]@{}
 }
 
-if (-not ($settings.PSObject.Properties.Name -contains "permissions")) {
+if ($null -eq $settings.PSObject.Properties["permissions"]) {
     $settings | Add-Member -NotePropertyName permissions -NotePropertyValue ([pscustomobject]@{})
 }
 
-if (-not ($settings.permissions.PSObject.Properties.Name -contains "ask")) {
+if ($null -eq $settings.permissions.PSObject.Properties["ask"]) {
     $settings.permissions | Add-Member -NotePropertyName ask -NotePropertyValue @()
 }
 
