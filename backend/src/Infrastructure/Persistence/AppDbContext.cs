@@ -1,5 +1,6 @@
 using InventoryApp.Application.Exceptions;
 using InventoryApp.Domain.Entities;
+using InventoryApp.Domain.Entities.Contabilidad;
 using InventoryApp.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
@@ -54,6 +55,9 @@ public class AppDbContext : DbContext
     public DbSet<InventoryApp.Domain.Entities.Bancos.CuentaBancaria> CuentasBancarias => Set<InventoryApp.Domain.Entities.Bancos.CuentaBancaria>();
     public DbSet<PreparacionPedidoVenta> PreparacionesPedidoVenta => Set<PreparacionPedidoVenta>();
     public DbSet<PreparacionPedidoVentaDetalle> PreparacionPedidoVentaDetalles => Set<PreparacionPedidoVentaDetalle>();
+
+    public DbSet<AsientoContable> AsientosContables => Set<AsientoContable>();
+    public DbSet<AsientoDetalle> AsientoDetalles => Set<AsientoDetalle>();
 
     public DbSet<Descuento> Descuentos => Set<Descuento>();
     public DbSet<DescuentoProducto> DescuentoProductos => Set<DescuentoProducto>();
