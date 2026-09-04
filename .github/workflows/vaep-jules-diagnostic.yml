@@ -43,9 +43,11 @@ jobs:
             --startup-project src/API/InventoryApp.API.csproj \
             --context AppDbContext \
             --output-dir Persistence/Migrations/VAEPProbe
-      - name: Upload scaffold
+      - name: Upload scaffold and generated snapshot
         uses: actions/upload-artifact@v4
         with:
           name: vaep-ef-model-probe
-          path: backend/src/Infrastructure/Persistence/Migrations/VAEPProbe/**
+          path: |
+            backend/src/Infrastructure/Persistence/Migrations/VAEPProbe/**
+            backend/src/Infrastructure/Persistence/Migrations/**/*Snapshot.cs
           if-no-files-found: error
