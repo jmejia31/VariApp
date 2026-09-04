@@ -38,6 +38,14 @@ function Get-RepoRoot {
     return (Invoke-Native git @("-C",$candidate,"rev-parse","--show-toplevel")).Text
 }
 
+function Resolve-AgyCommand {
+    $command = Get-Command agy -ErrorAction SilentlyContinue
+    if ($null -ne $command) { return [string]$command.Source }
+    $candidate = Join-Path $env:LOCALAPPDATA "agy\bin\agy.exe"
+    if (Test-Path -LiteralPath $candidate -PathType Leaf) { return $candidate }
+    throw "Missing required command 'agy' and official fallback '$candidate' was not found."
+}
+
 function Sync-And-AssertClean([string]$RepoRoot) {
     Set-Location $RepoRoot
     $origin = (Invoke-Native git @("remote","get-url","origin")).Text
@@ -658,7 +666,7 @@ function Process-Issue($Issue, [string]$RepoRoot, [string]$StateRoot, [string]$S
         $stderrPath = Join-Path $jobRoot "agy.stderr.log"
         $agyArgs = @("-p",$prompt,"--agent","variapp-reviewer","--cwd",$reviewRoot,"--output-format","json","--json-schema",$SchemaPath,"--print-timeout","20m")
 
-        $agyOut = & agy @agyArgs 2> $stderrPath
+        $agyOut = & $script:AgyCommand @agyArgs 2> $stderrPath
         if ($LASTEXITCODE -ne 0) { throw "Antigravity headless failed. See $stderrPath" }
 
         $envelope = (($agyOut | Out-String).Trim() | ConvertFrom-Json)
@@ -794,9 +802,8 @@ try {
         exit 0
     }
 
-    foreach ($cmd in @("gh","agy")) {
-        if (-not (Get-Command $cmd -ErrorAction SilentlyContinue)) { throw "Missing required command '$cmd'." }
-    }
+    if (-not (Get-Command gh -ErrorAction SilentlyContinue)) { throw "Missing required command 'gh'." }
+    $script:AgyCommand = Resolve-AgyCommand
 
     $gitDir = (Invoke-Native git @("rev-parse","--git-dir")).Text
     if (-not [IO.Path]::IsPathRooted($gitDir)) { $gitDir = Join-Path $repoRoot $gitDir }

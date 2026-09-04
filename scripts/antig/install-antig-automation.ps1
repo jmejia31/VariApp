@@ -47,6 +47,14 @@ function Test-TaskNotFound($QueryResult) {
     return $text -match '(?i)(cannot find|could not find|does not exist|not found|no existe|no se encuentra|no se pudo encontrar|nombre de tarea.*inv[aá]lido)'
 }
 
+function Resolve-AgyCommand {
+    $command = Get-Command agy -ErrorAction SilentlyContinue
+    if ($null -ne $command) { return [string]$command.Source }
+    $candidate = Join-Path $env:LOCALAPPDATA "agy\bin\agy.exe"
+    if (Test-Path -LiteralPath $candidate -PathType Leaf) { return $candidate }
+    throw "Missing required command 'agy' and official fallback '$candidate' was not found."
+}
+
 if ($SelfTest) {
     if ((Get-TaskRollbackMode $false) -ne "DELETE_NEW_TASK") { throw "Installer self-test: absent task rollback plan invalid." }
     if ((Get-TaskRollbackMode $true) -ne "RESTORE_EXISTING_XML") { throw "Installer self-test: existing task rollback plan invalid." }
@@ -68,11 +76,12 @@ if ($Remove) {
     exit 0
 }
 
-foreach ($cmd in @("git","gh","agy","schtasks.exe")) {
+foreach ($cmd in @("git","gh","schtasks.exe")) {
     if (-not (Get-Command $cmd -ErrorAction SilentlyContinue)) {
         throw "Missing required command '$cmd'."
     }
 }
+$agyCommand = Resolve-AgyCommand
 
 $repoRoot = (Invoke-Native git @("rev-parse","--show-toplevel")).Text
 Set-Location $repoRoot
@@ -172,7 +181,7 @@ Add-UniqueValues $settings.permissions "deny" $deny
 $json = $settings | ConvertTo-Json -Depth 20
 
 if (-not $SkipAuthProbe) {
-    $probe = Invoke-Native agy @(
+    $probe = Invoke-Native -File $agyCommand -Arguments @(
         "-p","Return exactly READY. Do not use tools.",
         "--agent","variapp-reviewer",
         "--cwd",$repoRoot,

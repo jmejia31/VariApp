@@ -755,3 +755,5 @@ Sobre el exact-head inicial `b8905c185df2c40df6f036b1a8f082c36130d260`, se corri
 Se bloquearon explícitamente `frontend/vercel.json` y `frontend/scripts/vercel-ignore-build.mjs`. Handoffs estructuralmente inválidos se cuarentenan y avanzan watermark; errores transitorios de GitHub/CLI/red permanecen retryables sin consumir watermark. La publicación confirma `evidenceHead` antes de persistir `COMMENT_PENDING`, de modo que un fallo de comentario no republica el mismo patch.
 
 El instalador captura y restaura el XML de una tarea previa, o elimina únicamente una tarea nueva durante rollback. Se ampliaron self-tests funcionales de contrato, patch causal, artifacts ambiguos, staging, aislamiento, watermark/idempotencia y planes de rollback. No se instaló AntiG, no se creó Scheduled Task real y no se tocaron main, Producción, Vercel, secretos ni BD productiva.
+
+La activación local ahora resuelve `agy` desde el PATH o desde `%LOCALAPPDATA%\agy\bin\agy.exe`, evitando dependencia de un PATH interactivo no refrescado. El self-test corrige el manejo de stderr informativo de Git y evalúa el éxito únicamente mediante el exit code nativo.

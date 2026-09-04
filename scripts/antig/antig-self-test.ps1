@@ -7,8 +7,18 @@ Set-StrictMode -Version Latest
 
 function Invoke-TestGit {
     param([string]$WorkingDirectory,[string[]]$Arguments)
-    $output = & git -C $WorkingDirectory @Arguments 2>&1
-    if ($LASTEXITCODE -ne 0) {
+    $previousErrorAction = $ErrorActionPreference
+    try {
+        # Git emits informational worktree messages on stderr. Preserve them and
+        # determine success solely from the native exit code.
+        $ErrorActionPreference = "Continue"
+        $output = & git -C $WorkingDirectory @Arguments 2>&1
+        $exitCode = $LASTEXITCODE
+    }
+    finally {
+        $ErrorActionPreference = $previousErrorAction
+    }
+    if ($exitCode -ne 0) {
         throw "git -C $WorkingDirectory $($Arguments -join ' ') failed: " + (($output | Out-String).Trim())
     }
     return (($output | Out-String).Trim())
@@ -75,6 +85,7 @@ foreach ($marker in @(
     "Assert-GitPatchContract",
     "Read-JsonOrQuarantine",
     "Assert-RemoteAt",
+    "Resolve-AgyCommand",
     "COMMENT_PENDING",
     "QUARANTINED_INVALID_HANDOFF",
     "staged paths differ from authorized paths",

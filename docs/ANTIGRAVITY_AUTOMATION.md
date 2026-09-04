@@ -72,3 +72,5 @@ El hardening posterior añade comparación byte-equivalente (con normalización 
 Los errores de handoff estructural se clasifican como `QUARANTINE` y avanzan el watermark; los fallos de transporte GitHub/CLI/red permanecen retryables y no avanzan el watermark. Tras confirmar `push`, se persiste `COMMENT_PENDING` con el `evidenceHead` confirmado antes de intentar el comentario, evitando republicaciones.
 
 El instalador captura el XML de una tarea previa. Si la tarea no existía, el rollback elimina la tarea nueva; si existía, restaura su XML original. El self-test de transacción ejercita ambos planes sin crear una tarea real. Las rutas `frontend/vercel.json` y `frontend/scripts/vercel-ignore-build.mjs` están protegidas explícitamente.
+
+La activación local resuelve `agy` desde el PATH o desde la ruta oficial `%LOCALAPPDATA%\agy\bin\agy.exe`, de modo que una Scheduled Task no depende de que una terminal interactiva haya refrescado su entorno.
