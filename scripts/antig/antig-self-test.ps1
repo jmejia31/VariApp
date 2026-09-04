@@ -53,6 +53,11 @@ foreach ($path in @($workerPath,$installerPath,$PSCommandPath)) {
 }
 
 $worker = Get-Content -LiteralPath $workerPath -Raw
+$installer = Get-Content -LiteralPath $installerPath -Raw
+foreach ($marker in @("settingsBackup","stateBackup","AntiG installation rolled back transactionally","/Query")) {
+    if ($installer -notlike "*$marker*") { throw "Installer transactional guard missing: $marker" }
+}
+
 if ($worker -match 'dangerously-skip-permissions') { throw "Unsafe Antigravity permission bypass detected." }
 if ($worker -match 'git\s+@\("add","--all"\)' -or $worker -match '"add","--all"') { throw "Unsafe git add --all detected." }
 if ($worker -match '"restore","--staged","--worktree","--","\."') { throw "Unsafe whole-tree restore detected." }
@@ -114,5 +119,6 @@ finally {
     if (Test-Path -LiteralPath $tempRoot) { Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue }
 }
 
+Write-Host "ANTIG_HARDENING_REVISION=P1_CLOSED_V2" -ForegroundColor Green
 Write-Host "ANTIG_STATIC_SELF_TEST=PASS" -ForegroundColor Green
 Write-Host "ANTIG_FUNCTIONAL_ISOLATION_TEST=PASS" -ForegroundColor Green
