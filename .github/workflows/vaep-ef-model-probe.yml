@@ -1,0 +1,51 @@
+name: VAEP EF model probe
+
+on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - '.github/workflows/vaep-ef-model-probe.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  scaffold-model:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: 'Server=127.0.0.1;Port=3306;Database=vaep_model_probe;User=root;Password=root;SslMode=None;AllowPublicKeyRetrieval=True;'
+      Database__ServerVersion: '8.4.0'
+      Database__ApplyMigrationsOnStartup: 'false'
+      Jwt__Secret: 'VAEP-CI-Model-Probe-Only-Secret-32-Characters-Minimum'
+      Jwt__Issuer: 'VariApp.VAEP.Probe'
+      Jwt__Audience: 'VariApp.VAEP.Probe'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Restore and install EF
+        run: |
+          dotnet restore InventoryApp.sln
+          dotnet tool install --global dotnet-ef --version 8.0.8
+      - name: Scaffold current model probe
+        working-directory: backend
+        run: |
+          set -euo pipefail
+          dotnet ef migrations add VAEP_ModelProbe \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext \
+            --output-dir Persistence/Migrations/VAEPProbe
+          find src/Infrastructure/Persistence/Migrations -maxdepth 3 -type f -newermt '5 minutes ago' -print | sort > vaep-model-probe-files.txt
+      - name: Upload generated model only
+        uses: actions/upload-artifact@v4
+        with:
+          name: vaep-ef-model-probe
+          path: |
+            backend/src/Infrastructure/Persistence/Migrations/VAEPProbe/**
+            backend/src/Infrastructure/Persistence/Migrations/*ModelSnapshot.cs
+            backend/vaep-model-probe-files.txt
+          if-no-files-found: error
