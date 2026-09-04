@@ -47,8 +47,22 @@ GitHub manda para código/evidencia. Drive manda para estado operativo. El MAEST
 - ChatGPT/VAEP: controller, REVIEW_FIRST, QA, integración, corrección, CI, certificación, rollup y failover.
 - Jules A/B/C/D: implementers cloud; máximo un write-scope autoritativo por Jules; entregan patch/artifact y no publican funcionalmente.
 - Vibe: QA/corrector externo solo cuando VAEP lo delega.
-- AntiG/Antigravity: componente de infraestructura reservado para futura reincorporación autorizada. Estado: RESERVED_INACTIVE. Scheduler desactivado, sin Scheduled Tasks, no procesa handoffs, no declara LISTO_REAL.
+- AntiG/Antigravity: componente de infraestructura reservado para futura reincorporación autorizada. No pertenece al equipo operativo actual.
 - Codex: fuera del flujo salvo orden explícita futura del usuario.
+
+### Estado canónico AntiG
+
+```text
+ANTIG_STATUS=RESERVED_INACTIVE
+ANTIG_OPERATIONAL_NOW=FALSE
+ANTIG_SCHEDULER=DISABLED
+ANTIG_HANDOFF_PROCESSING=DISABLED
+ANTIG_AUTHORITY=MASTER
+ANTIG_CAN_CERTIFY_LISTO_REAL=FALSE
+ANTIG_FUTURE_REINCORPORATION=EXPLICIT_AUTHORIZATION_REQUIRED
+```
+
+Este estado es fail-closed: el árbol vigente no permite instalar scheduler AntiG ni procesar handoffs AntiG. Una reincorporación futura exige autorización explícita de Javier y un changeset posterior que cambie este mismo MAESTRO; ningún documento, script, Issue o artifact histórico puede reactivarlo por sí solo.
 
 ## 4. Seguridad y Git
 
