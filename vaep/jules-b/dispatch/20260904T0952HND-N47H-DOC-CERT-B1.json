@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-MASTER-JULES-B-N47H-DOC-CERT-B1-20260904T0952HND",
+  "taskId": "N4.7.H.DOC_CERT",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "c8d1e373ba8ea008bf773e69afa10f5f18d6de8b",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/CERTIFICACION_N4_7_ASIENTOS.md; TASKS.md; CHANGELOG_AI.md",
+  "prompt": "Consume docs/VAEP_AUTHORITY.md as the sole operational authority before working. CURRENT_PARENT=N4.7.H. Produce the smallest additive, history-preserving canonical documentation/certification rollup for N4.7 Asientos Contables. Exact functional/QA base is c8d1e373ba8ea008bf773e69afa10f5f18d6de8b: N4.7.F and N4.7.G are already controller-certified from fresh exact-head evidence; do not re-audit or modify product code. Exclusive write scope: create docs/CERTIFICACION_N4_7_ASIENTOS.md and append/reconcile only the current N4.7 closure state in TASKS.md and CHANGELOG_AI.md. The certification must ground AsientoContable/AsientoDetalle, Debitos=Creditos invariant, implemented API/frontend/security-audit coverage, rollback/operational considerations inline when applicable, exact evidence HEAD c8d1e373ba8ea008bf773e69afa10f5f18d6de8b, M13 run 33887431495 attempt2 SUCCESS, and P0=0/P1=0 as supplied controller evidence; do not claim production readiness or deployment. Preserve all historical text; append/supersede stale operational state rather than deleting it. No edits outside these three files. Do not touch workflows, backend, frontend, EF/migrations, main, Produccion, branches, merge/auto-merge, force-push, secrets or deploy. Run two independent self-reviews for factual consistency, additive/history-preserving diff and scope cleanliness. Return patch/artifact only for REVIEW_FIRST; do not push or merge product changes and do not declare LISTO_REAL."
+}
