@@ -856,3 +856,20 @@ Los seis componentes requeridos permanecen en el árbol. El agente está deshabi
 Los tres checkboxes históricos de activación pendiente quedaron cerrados como estado reservado: `ANTIG_CURRENT_QUEUE_ITEM=NO`.
 
 Resultado: `MIGRATION_PHASE_6=CLOSED/PASS`; `ANTIG_STATUS=RESERVED_INACTIVE`; `ANTIG_OPERATIONAL_NOW=FALSE`; `ANTIG_SCHEDULER=DISABLED`; `ANTIG_HANDOFF_PROCESSING=DISABLED`; `ANTIG_CURRENT_QUEUE_ITEM=NO`; `ANTIG_CAN_CERTIFY_LISTO_REAL=FALSE`; `FASE_7=NOT_STARTED`; `CURRENT_PARENT=N4.7.H`; `N4.8.A=HELD`; `FALSE_PASS=NO`; `FALSE_LISTO=NO`; `SCOPE_LEAK=NO`.
+
+## 2026-09-04 — Certificación final VAEP MASTER — Fases 0 a 7
+
+Responsable: ChatGPT/VAEP sobre `Desarrollo`.
+
+Se certifica el cierre integral de la migración F0-F7 hacia el MAESTRO único `docs/VAEP_AUTHORITY.md`. Durante REVIEW_FIRST final se detectó y corrigió una regresión real: el control técnico `vaep/control/dispatch-admission.json` había sido retirado porque no estaba definido por MASTER. La corrección de Fase 7 incorpora la semántica de admisión dentro del mismo MAESTRO y reintroduce el state machine como consumidor subordinado, eliminando la contradicción de autoridad.
+
+El commit de implementación `66d4ded1fca2f51854a50ca3f6a44725dc6c1ef6` dejó admisión `FROZEN` y pasó `VAEP engine lightweight checks #33917014608=SUCCESS` y `VAEP Jules Diagnostic #33917014756=SUCCESS`. El self-test cubre `NO_OP`, multi-manifest fail-closed, `FROZEN`, `OPEN`, state inválido, clave desconocida y state ausente; el rechazo `FROZEN` ocurre antes de sesión/attempt/ownership/recovery. `VariApp CI=SKIPPED` no se usa como PASS.
+
+La certificación integral revalida: un único bloque de política machine-readable; parser fail-closed sin `source`/`eval`; `MASTER_COMMIT_SHA` y `AUTOMATION_POLICY_HASH` en evidencia; runtime Jules con timeout/supersession/late-result guard; cero protocol docs versionados activos; cero manifests históricos en rutas activas; cero historical Git writers; CI de producto preservado; AntiG `RESERVED_INACTIVE`; cinco tareas `VAEP MASTER 00/15/30/45/55` enabled con telemetría reciente y prompts MASTER-bound.
+
+La cadena end-to-end real queda respaldada por el dispatch N4.7.H, Jules B run `33892158842`, artifact `9944920873`, Issue #2654, REVIEW_FIRST + CI y el cierre/handoff registrado en BITACORA/COLA. Estado operativo fresco: `N4.7.H=LISTO_REAL RE-CERTIFIED` y `CURRENT_PARENT=N4.8.A`; snapshots anteriores que todavía mostraban H held quedan superseded como historia de fase.
+
+Tras superar el gate causal de implementación, el control `vaep/control/dispatch-admission.json` se abre con `newDispatchAdmission=OPEN` para el retorno operativo. PR #2 permanece `OPEN+DRAFT`; no hubo merge, force-push ni cambio sobre main/Producción/secrets/deploy.
+
+Resultado final: `MIGRATION_PHASE_7=CLOSED/PASS`; `MIGRATION_F0_F7=CLOSED/PASS`; `NEW_DISPATCH_ADMISSION=OPEN`; `MASTER_UNIQUE=PASS`; `FIVE_AUTOMATIONS=PASS`; `END_TO_END_FLOW=PASS`; `FALSE_PASS=NO`; `FALSE_LISTO=NO`; `SCOPE_LEAK=NO`.
+

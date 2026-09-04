@@ -396,3 +396,21 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
 - [x] `CURRENT_PARENT=N4.7.H`; `N4.8.A=HELD`. Fase 6 no certifica N4.7.H ni promueve N4.8.
 
 **MIGRATION_PHASE_6=CLOSED/PASS. ANTIG_STATUS=RESERVED_INACTIVE. ANTIG_OPERATIONAL_NOW=FALSE. ANTIG_SCHEDULER=DISABLED. ANTIG_HANDOFF_PROCESSING=DISABLED. ANTIG_CURRENT_QUEUE_ITEM=NO. ANTIG_CAN_CERTIFY_LISTO_REAL=FALSE. FASE_7=NOT_STARTED. FALSE_PASS=NO. FALSE_LISTO=NO. SCOPE_LEAK=NO.**
+
+## VAEP Fase 7 — Certificación integral y retorno operativo — 2026-09-04
+
+- [x] REVIEW_FIRST de migración F0-F6 detectó una regresión concreta: el overlay de admisión de Fase 1 había sido retirado anteriormente por no estar definido en MASTER. Fase 7 lo corrigió sin crear autoridad paralela: `docs/VAEP_AUTHORITY.md` ahora define explícitamente `vaep/control/dispatch-admission.json` y `.github/scripts/vaep-jules-master.sh` lo consume fail-closed.
+- [x] Gate de implementación `66d4ded1fca2f51854a50ca3f6a44725dc6c1ef6`: `VAEP engine lightweight checks #33917014608=SUCCESS`; `VAEP Jules Diagnostic #33917014756=SUCCESS`; `VariApp CI=SKIPPED` excluido de PASS.
+- [x] Admisión probada por self-test: `NO_OP`, múltiples manifests fail-closed, `FROZEN`, `OPEN`, valor inválido, clave desconocida y state ausente. `FROZEN` rechaza antes de session/attempt/ownership/recovery y no invalida sesiones ACTIVE_REAL preexistentes.
+- [x] Política MASTER: exactamente un bloque parseable con seis claves; parser fail-closed sin `source`/`eval`; hash determinístico del bloque preservado; runtime emite `MASTER_COMMIT_SHA` + `AUTOMATION_POLICY_HASH`.
+- [x] Runtime Jules final: `NO_OP=PASS`, budget interno desde MASTER, safety-net externo 25m, timeout supersession, ownership revoke, lane release, durable evidence y late-result guard.
+- [x] Cleanup final: documentos protocolarios versionados activos=0; manifests históricos JSON en rutas activas=0; `.vaep/jules/dispatch`=0; historical publishers/writers=0; `ci.yml` conserva producto con permisos read-only y sin commit/push.
+- [x] AntiG preservado como `RESERVED_INACTIVE`: seis componentes presentes; scheduler deshabilitado; handoff processing deshabilitado; sin LISTO_REAL; reincorporación futura solo mediante autorización explícita + cambio del mismo MASTER.
+- [x] Cinco automatizaciones operativas verificadas ENABLED: `VAEP MASTER 00/15/30/45/55`; todas leen `docs/VAEP_AUTHORITY.md` y sus prompts activos no usan protocolos numéricos como autoridad. Telemetría de ejecución reciente presente en las cinco.
+- [x] Flujo end-to-end certificado con evidencia real: dispatch N4.7.H `0014e8f1...` -> Jules B run `33892158842=SUCCESS` -> artifact `9944920873` -> Issue #2654 `COMPLETED` + controller handoff -> REVIEW_FIRST/CI registrados en BITACORA -> `N4.7.H LISTO_REAL` -> handoff `N4.8.A`.
+- [x] Reconciliación de estado: COLA/BITACORA frescas prevalecen sobre snapshots de fase anteriores. `N4.7.H=LISTO_REAL RE-CERTIFIED`; `CURRENT_PARENT=N4.8.A`; A/B/C/D `ACTIVE_REAL=NO` hasta sesión+actividad útil correlacionada.
+- [x] Retorno operativo autorizado: `vaep/control/dispatch-admission.json` cambia a `OPEN` únicamente después del gate causal de implementación PASS.
+- [x] PR #2 permanece `OPEN+DRAFT`, merged=false; `main`, Producción, Vercel, secretos, dominios, certificados y BD productiva intactos.
+
+**MIGRATION_PHASE_7=CLOSED/PASS. MIGRATION_F0_F7=CLOSED/PASS. NEW_DISPATCH_ADMISSION=OPEN. MASTER_UNIQUE=PASS. POLICY_PARSE=PASS. FIVE_AUTOMATIONS=PASS. END_TO_END_FLOW=PASS. CURRENT_PARENT=N4.8.A. N4.7.H=LISTO_REAL_RECERTIFIED. FALSE_PASS=NO. FALSE_LISTO=NO. SCOPE_LEAK=NO.**
+
