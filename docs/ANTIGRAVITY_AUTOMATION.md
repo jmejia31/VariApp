@@ -22,11 +22,11 @@ El Scheduled Task VariApp-AntiG-Reviewer ejecuta el worker cada minuto. El worke
 
 ## Seguridad
 
-El worker exige repo jmejia31/VariApp, rama Desarrollo, working tree limpio, HEAD==origin/Desarrollo, artifact causal descargado desde el workflow run registrado por Jules, task/dispatch/attempt/scope válidos, salida AntiG conforme al schema, P0=0 y P1=0 para READY_FOR_VAEP, cero scope leak, git diff --check y remoto sin cambios antes de publicar.
+El worker exige repo jmejia31/VariApp, rama Desarrollo, working tree limpio, HEAD==origin/Desarrollo, artifact causal único descargado desde el workflow run registrado por Jules, identidad causal dispatch/result/patch, task/attempt/base/scope válidos, salida AntiG conforme al schema, P0=0 y P1=0 para READY_FOR_VAEP, cero scope leak, rutas protegidas fuera de alcance, git diff --check y remoto sin cambios antes de publicar.
 
-AntiG headless no recibe permiso para commit/push/merge/rebase/reset/checkout/switch. El wrapper controla publicación y un push non-fast-forward falla cerrado. No existe force-push ni rebase automático.
+AntiG headless no recibe permiso para commit/push/merge/rebase/reset/checkout/switch. Cada revisión ocurre en un Git worktree temporal y aislado creado desde el exact-head inicial; el checkout primario no se usa como superficie de edición ni se restaura globalmente. El wrapper publica únicamente los paths exactos autorizados mediante staging explícito; git add --all está prohibido. Un push non-fast-forward falla cerrado. No existe force-push ni rebase automático.
 
-El instalador agrega únicamente permisos finos necesarios para lectura/aplicación de patch y validaciones. Si la configuración global contiene ask=command(*), la activación se bloquea en vez de degradar la seguridad. Nunca se usa bypass global de permisos.
+El instalador agrega únicamente permisos finos necesarios para lectura/aplicación de patch y validaciones. Si la configuración global contiene ask=command(*), la activación se bloquea en vez de degradar la seguridad. Nunca se usa bypass global de permisos. La escritura de settings, watermark y Scheduled Task se trata como una instalación transaccional: si la fase mutante falla, el instalador restaura settings/estado y elimina la tarea creada.
 
 ## Correcciones
 
@@ -50,3 +50,17 @@ powershell -ExecutionPolicy Bypass -File scripts\antig\install-antig-automation.
 ## Autoridad
 
 READY_FOR_VAEP es un candidato revisado. AntiG no escribe LISTO_REAL, no modifica COLA/BITACORA como autoridad de cierre y no toca main, Producción, secretos, Vercel ni bases productivas.
+
+## Hardening P1 de activación
+
+Antes de habilitar la tarea local, el worker aplica estas garantías adicionales:
+
+- aislamiento por worktree temporal para preservar cualquier trabajo concurrente del checkout primario;
+- staging por lista exacta de archivos autorizados, nunca `git add --all`;
+- rutas protegidas para gobierno, workflows, agente AntiG, schemas, secretos y superficies productivas;
+- validación causal de Issue -> workflow run -> artifact único -> dispatch -> result -> gitpatch -> changes.patch;
+- compatibilidad explícita con manifests Jules v3.25 y validación estricta cuando llega el contrato estructurado v1.0;
+- base Jules obligatoriamente ancestro de Desarrollo y `git apply --check` antes de entregar el patch al reviewer;
+- handoffs inválidos se guardan en `.git/vaep-antig/quarantine/`, avanzan el watermark y no bloquean Issues posteriores;
+- fallos transitorios de red/CLI/remoto no se cuarentenan automáticamente y permanecen fail-closed para reintento seguro;
+- self-test funcional cubre contrato, rutas protegidas e aislamiento real de worktree/concurrencia.
