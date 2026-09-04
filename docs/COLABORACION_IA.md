@@ -10,6 +10,8 @@ Coordinar a Javier Mejía, Codex y ChatGPT con mínima pérdida de contexto, mí
 PROJECT_ID=VARIAPP
 REPOSITORY=jmejia31/VariApp
 BRANCH=Desarrollo
+AUTOMATION_AUTHORITY=MASTER
+MASTER_FILE=docs/VAEP_AUTHORITY.md
 ```
 
 Estas reglas pertenecen a VariApp y solo el contexto canónico de VariApp puede autorizar cambios aquí.

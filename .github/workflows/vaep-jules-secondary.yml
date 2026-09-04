@@ -19,7 +19,7 @@ concurrency:
 jobs:
   dispatch-jules:
     runs-on: ubuntu-latest
-    timeout-minutes: 95
+    timeout-minutes: 25
     env:
       JULES_API_BASE: https://jules.googleapis.com/v1alpha
       EXPECTED_OWNER: jmejia31
@@ -30,7 +30,6 @@ jobs:
       ISSUE_PREFIX: "[VAEP-JULES]"
       WORKER_LABEL: Jules A
       WORKER_ID: JULES_A
-      VAEP_JULES_LANE_BUDGET_SECONDS: 5400
       JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
       GH_TOKEN: ${{ github.token }}
     steps:

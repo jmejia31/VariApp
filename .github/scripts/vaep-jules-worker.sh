@@ -3,10 +3,26 @@ set -euo pipefail
 
 # Internal worker invoked only by .github/scripts/vaep-jules-master.sh.
 # Runtime semantics are governed by docs/VAEP_AUTHORITY.md (MASTER).
+readonly MASTER_FILE="docs/VAEP_AUTHORITY.md"
+readonly PARSER=".github/scripts/vaep-policy-parser.sh"
+
+test -f "$MASTER_FILE"
+test -f "$PARSER"
+
+while IFS='=' read -r key val; do
+  case "$key" in
+    JULES_MAX_ATTEMPTS) JULES_MAX_ATTEMPTS_PER_TASK="$val" ;;
+    JULES_REWORK_MAX) JULES_REWORK_MAX="$val" ;;
+    PARENT_CLOSE_FIRST) PARENT_CLOSE_FIRST="${val,,}" ;;
+    AUTOMATION_POLICY_HASH) AUTOMATION_POLICY_HASH="$val" ;;
+  esac
+done < <(bash "$PARSER" --env "$MASTER_FILE")
+
 readonly VAEP_JULES_PROTOCOL="MASTER"
-readonly JULES_MAX_ATTEMPTS_PER_TASK=2
-readonly JULES_REWORK_MAX=1
-readonly PARENT_CLOSE_FIRST=true
+readonly JULES_MAX_ATTEMPTS_PER_TASK
+readonly JULES_REWORK_MAX
+readonly PARENT_CLOSE_FIRST
+readonly AUTOMATION_POLICY_HASH
 readonly VAEP_CHECKPOINTS=":00,:15,:30,:45,:55"
 
 if [[ "${1:-}" == "--static-self-test" ]]; then
@@ -15,8 +31,9 @@ if [[ "${1:-}" == "--static-self-test" ]]; then
   [[ "$JULES_REWORK_MAX" -eq 1 ]]
   [[ "$PARENT_CLOSE_FIRST" == true ]]
   [[ "$VAEP_CHECKPOINTS" == ":00,:15,:30,:45,:55" ]]
-  printf '{"status":"ok","protocol":"%s","maxAttempts":%d,"r3Prohibited":true,"qaTakeoverOnR2Failure":true,"parentCloseFirst":%s,"checkpoints":"%s","networkUsed":false,"sessionCreated":false,"attemptConsumed":false}\n' \
-    "$VAEP_JULES_PROTOCOL" "$JULES_MAX_ATTEMPTS_PER_TASK" "$PARENT_CLOSE_FIRST" "$VAEP_CHECKPOINTS"
+  [[ ${#AUTOMATION_POLICY_HASH} -eq 64 ]]
+  printf '{"status":"ok","protocol":"%s","maxAttempts":%d,"r3Prohibited":true,"qaTakeoverOnR2Failure":true,"parentCloseFirst":%s,"checkpoints":"%s","policyHash":"%s","networkUsed":false,"sessionCreated":false,"attemptConsumed":false}\n' \
+    "$VAEP_JULES_PROTOCOL" "$JULES_MAX_ATTEMPTS_PER_TASK" "$PARENT_CLOSE_FIRST" "$VAEP_CHECKPOINTS" "$AUTOMATION_POLICY_HASH"
   exit 0
 fi
 

@@ -255,7 +255,7 @@ Este rollup supersede únicamente el estado operativo stale anterior del bloque 
 - [x] Schema estructurado y self-test CI agregados.
 - [x] Instalador local seguro preparado con permisos finos de Antigravity CLI; no usa bypass global de permisos.
 - [x] Gobernanza `AGENTS.md` y `docs/COLABORACION_IA.md` actualizada con ATTEMPT1/R2, QA takeover y prohibición de auto-certificación.
-- [ ] Activación física del Scheduled Task `VariApp-AntiG-Reviewer` pendiente de ejecutar una sola vez el instalador desde la PC local autorizada. Esta casilla exige evidencia local real y no puede marcarla ChatGPT remoto.
+- [ ] AntiG RESERVED_INACTIVE: activación de Scheduled Task `VariApp-AntiG-Reviewer` suspendida; AntiG permanece reservado e inactivo conforme a MAESTRO.
 
 
 ## AntiG P1 hardening — 2026-09-03
@@ -266,7 +266,7 @@ Este rollup supersede únicamente el estado operativo stale anterior del bloque 
 - [x] Cuarentena de handoffs inválidos con avance de watermark para evitar lane starvation.
 - [x] Self-tests funcionales de contrato, rutas protegidas y aislamiento de worktree.
 - [x] Rollback transaccional del instalador si falla la fase mutante.
-- [ ] Activación física del Scheduled Task VariApp-AntiG-Reviewer: pendiente hasta auditoría final APROBADO_PARA_ACTIVACION y evidencia local real.
+- [ ] AntiG RESERVED_INACTIVE: Scheduled Task `VariApp-AntiG-Reviewer` reservada e inactiva según gobernanza MASTER.
 
 ## AntiG P1 hardening — cierre técnico Codex — 2026-09-04
 
@@ -278,7 +278,7 @@ Este rollup supersede únicamente el estado operativo stale anterior del bloque 
 - [x] Estado de publicación durable `COMMENT_PENDING` tras confirmar `evidenceHead`, con deduplicación antes de comentarios.
 - [x] Rollback del instalador restaura XML de tarea preexistente o elimina solo la tarea nueva.
 - [x] Self-tests funcionales ampliados para contrato, aislamiento, staging, paths protegidos, patch causal, watermark, idempotencia y planes de rollback.
-- [ ] Instalación física y Scheduled Task real siguen pendientes; no se ejecutan desde Codex.
+- [ ] AntiG RESERVED_INACTIVE: instalación física y Scheduled Task permanecen inactivas; no se ejecutan en esta fase.
 
 ## ERP-N4.7 — Asientos Contables — ROLLUP 2026-09-04
 
@@ -301,4 +301,17 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
 - [x] `ADMISSION_BATTERY=PASS` sobre los casos aislados ya validados: `NO_OP`, `FROZEN`, `OPEN`, múltiples manifests y estados inválidos.
 - [x] `FALSE_PASS=NO`, `FALSE_LISTO=NO`, `SCOPE_LEAK=NO`.
 
-**MIGRATION_PHASE_0=CLOSED/PASS. MIGRATION_PHASE_1=CLOSED/PASS. NEW_DISPATCH_ADMISSION=FROZEN. FASE_2=NOT_STARTED.**
+**MIGRATION_PHASE_0=CLOSED/PASS. MIGRATION_PHASE_1=CLOSED/PASS. NEW_DISPATCH_ADMISSION=FROZEN. FASE_2=CLOSED/PASS. FASE_3=NOT_STARTED.**
+
+## VAEP MASTER migration — cierre F2 — 2026-09-04
+
+- [x] FASE 2 — CONSOLIDACIÓN DE POLÍTICA OPERATIVA MACHINE-READABLE: `PASS/CLOSED`.
+- [x] Bloque canónico único `BEGIN_AUTOMATION_POLICY ... END_AUTOMATION_POLICY` embebido en `docs/VAEP_AUTHORITY.md`.
+- [x] Parser fail-closed `.github/scripts/vaep-policy-parser.sh` implementado y validado (`--self-test`, missing/duplicate/unknown/invalid keys fail-closed, hash determinístico SHA-256).
+- [x] Runtime unificado: `.github/scripts/vaep-jules-master.sh` y `.github/scripts/vaep-jules-worker.sh` consumen la política vía parser dinámico; duplicación de valores eliminada.
+- [x] Workflows saneados: 8 workflows `vaep-jules-*.yml` sin redefinición de budget (safety-net `timeout-minutes: 25`).
+- [x] Consumidores activos alineados a `docs/VAEP_AUTHORITY.md` (`AUTOMATION_AUTHORITY=MASTER`): `AGENTS.md`, `docs/VAEP_JULES.md`, `PLAN_EJECUCION_AUTONOMA.md`, `PROJECT_CONTEXT.md`, `docs/COLABORACION_IA.md`, `docs/CONTEXTO_CHATGPT_VAEP.md`.
+- [x] AntiG preservado intacto como `RESERVED_INACTIVE` en documentación y componentes.
+- [x] Protocolos numéricos en superficies activas eliminados (`NUMERIC_PROTOCOL_LABELS=0`).
+- [x] Reconciliación N4.7 preservada: `CURRENT_PARENT=N4.7.H`; `N4.8.A=HELD`.
+- [x] `FALSE_PASS=NO`, `FALSE_LISTO=NO`, `SCOPE_LEAK=NO`.

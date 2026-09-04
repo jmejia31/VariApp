@@ -4,18 +4,45 @@ set -euo pipefail
 # Single operational Jules entrypoint.
 # ALL operational rules come from docs/VAEP_AUTHORITY.md.
 readonly MASTER_FILE="docs/VAEP_AUTHORITY.md"
+readonly PARSER=".github/scripts/vaep-policy-parser.sh"
 readonly WORKER=".github/scripts/vaep-jules-worker.sh"
-readonly PARENT_LISTO_TARGET_ROLLING_60=3
-readonly PARENT_MAX_DWELL_MINUTES=20
-readonly JULES_LANE_BUDGET_SECONDS="${VAEP_JULES_LANE_BUDGET_SECONDS:-1080}"
 
 test -f "$MASTER_FILE"
+test -f "$PARSER"
 test -f "$WORKER"
 
+# Safe parsing without source or eval
+while IFS='=' read -r key val; do
+  case "$key" in
+    PARENT_CLOSE_SLA_ROLLING_60M) PARENT_LISTO_TARGET_ROLLING_60="$val" ;;
+    PARENT_MAX_DWELL_MINUTES) PARENT_MAX_DWELL_MINUTES="$val" ;;
+    JULES_LANE_BUDGET_SECONDS) JULES_LANE_BUDGET_SECONDS="$val" ;;
+    JULES_MAX_ATTEMPTS) JULES_MAX_ATTEMPTS="$val" ;;
+    JULES_REWORK_MAX) JULES_REWORK_MAX="$val" ;;
+    PARENT_CLOSE_FIRST) PARENT_CLOSE_FIRST="$val" ;;
+    AUTOMATION_POLICY_HASH) AUTOMATION_POLICY_HASH="$val" ;;
+    MASTER_COMMIT_SHA) MASTER_COMMIT_SHA="$val" ;;
+  esac
+done < <(bash "$PARSER" --env "$MASTER_FILE")
+
+readonly PARENT_LISTO_TARGET_ROLLING_60
+readonly PARENT_MAX_DWELL_MINUTES
+readonly JULES_LANE_BUDGET_SECONDS
+readonly JULES_MAX_ATTEMPTS
+readonly JULES_REWORK_MAX
+readonly PARENT_CLOSE_FIRST
+readonly AUTOMATION_POLICY_HASH
+readonly MASTER_COMMIT_SHA
+
 if [[ "${1:-}" == "--static-self-test" ]]; then
+  bash "$PARSER" --self-test >/dev/null
   [[ "$PARENT_LISTO_TARGET_ROLLING_60" -eq 3 ]]
   [[ "$PARENT_MAX_DWELL_MINUTES" -eq 20 ]]
-  [[ "$JULES_LANE_BUDGET_SECONDS" -le 1200 ]]
+  [[ "$JULES_LANE_BUDGET_SECONDS" -eq 1080 ]]
+  [[ "$JULES_MAX_ATTEMPTS" -eq 2 ]]
+  [[ "$JULES_REWORK_MAX" -eq 1 ]]
+  [[ "$PARENT_CLOSE_FIRST" == "TRUE" ]]
+  [[ ${#AUTOMATION_POLICY_HASH} -eq 64 ]]
   grep -q 'AUTOMATION_AUTHORITY=MASTER' "$MASTER_FILE"
   grep -q 'NUMERIC_PROTOCOL_LABELS=PROHIBITED' "$MASTER_FILE"
 
@@ -27,6 +54,7 @@ if [[ "${1:-}" == "--static-self-test" ]]; then
     PROJECT_CONTEXT.md
     docs/CONTEXTO_CHATGPT_VAEP.md
     TASKS.md
+    .github/scripts/vaep-policy-parser.sh
     .github/scripts/vaep-jules-master.sh
     .github/scripts/vaep-jules-worker.sh
   )
@@ -41,7 +69,8 @@ if [[ "${1:-}" == "--static-self-test" ]]; then
   done
 
   bash "$WORKER" --static-self-test >/dev/null
-  printf '{"status":"ok","authority":"MASTER","masterFile":"%s","parentListoTargetRolling60":%d,"parentMaxDwellMinutes":%d,"laneBudgetSeconds":%d,"numericProtocolLabelsProhibited":true}\n'     "$MASTER_FILE" "$PARENT_LISTO_TARGET_ROLLING_60" "$PARENT_MAX_DWELL_MINUTES" "$JULES_LANE_BUDGET_SECONDS"
+  printf '{"status":"ok","authority":"MASTER","masterFile":"%s","parentListoTargetRolling60":%d,"parentMaxDwellMinutes":%d,"laneBudgetSeconds":%d,"policyHash":"%s","numericProtocolLabelsProhibited":true}\n' \
+    "$MASTER_FILE" "$PARENT_LISTO_TARGET_ROLLING_60" "$PARENT_MAX_DWELL_MINUTES" "$JULES_LANE_BUDGET_SECONDS" "$AUTOMATION_POLICY_HASH"
   exit 0
 fi
 
@@ -111,7 +140,19 @@ mkdir -p "$result_dir"
 cp "$original_manifest" "$result_dir/dispatch.json"
 : > "$result_dir/changes.patch"
 
-jq -n   --arg authority "MASTER"   --arg masterFile "$MASTER_FILE"   --arg workerId "$WORKER_ID"   --arg dispatchId "$dispatch_id"   --arg taskId "$task_id"   --arg state "JULES_LANE_BUDGET_EXCEEDED"   --argjson laneBudgetSeconds "$JULES_LANE_BUDGET_SECONDS"   --argjson parentListoTargetRolling60 "$PARENT_LISTO_TARGET_ROLLING_60"   --argjson parentMaxDwellMinutes "$PARENT_MAX_DWELL_MINUTES"   '{authority:$authority,masterFile:$masterFile,workerId:$workerId,dispatchId:$dispatchId,taskId:$taskId,state:$state,laneBudgetSeconds:$laneBudgetSeconds,parentListoTargetRolling60:$parentListoTargetRolling60,parentMaxDwellMinutes:$parentMaxDwellMinutes,patchPresent:false,controllerHandoff:"QA_TAKEOVER_AND_ASSIGN_NEXT_SAFE_IMMEDIATELY",falseListoProhibited:true,numericProtocolLabelsProhibited:true}'   > "$result_dir/result.json"
+jq -n \
+  --arg authority "MASTER" \
+  --arg masterFile "$MASTER_FILE" \
+  --arg policyHash "$AUTOMATION_POLICY_HASH" \
+  --arg workerId "$WORKER_ID" \
+  --arg dispatchId "$dispatch_id" \
+  --arg taskId "$task_id" \
+  --arg state "JULES_LANE_BUDGET_EXCEEDED" \
+  --argjson laneBudgetSeconds "$JULES_LANE_BUDGET_SECONDS" \
+  --argjson parentListoTargetRolling60 "$PARENT_LISTO_TARGET_ROLLING_60" \
+  --argjson parentMaxDwellMinutes "$PARENT_MAX_DWELL_MINUTES" \
+  '{authority:$authority,masterFile:$masterFile,policyHash:$policyHash,workerId:$workerId,dispatchId:$dispatchId,taskId:$taskId,state:$state,laneBudgetSeconds:$laneBudgetSeconds,parentListoTargetRolling60:$parentListoTargetRolling60,parentMaxDwellMinutes:$parentMaxDwellMinutes,patchPresent:false,controllerHandoff:"QA_TAKEOVER_AND_ASSIGN_NEXT_SAFE_IMMEDIATELY",falseListoProhibited:true,numericProtocolLabelsProhibited:true}' \
+  > "$result_dir/result.json"
 
 run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
 printf -v body '%s\n\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n%s\n'   "VAEP $WORKER_LABEL MASTER — lane budget exceeded."   "- Authority: `docs/VAEP_AUTHORITY.md`"   "- Worker: `$WORKER_ID`"   "- Dispatch: `$dispatch_id`"   "- Task: `$task_id`"   "- State: `JULES_LANE_BUDGET_EXCEEDED` after ${JULES_LANE_BUDGET_SECONDS}s"   "- Controller handoff: `QA_TAKEOVER_AND_ASSIGN_NEXT_SAFE_IMMEDIATELY`"   "- Workflow run: $run_url"   "Fail-closed: timeout does NOT mean LISTO. VAEP must review/recover/rebind according to the MAESTRO. Numeric protocol labels are not authority."

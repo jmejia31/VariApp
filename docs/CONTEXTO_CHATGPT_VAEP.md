@@ -5,7 +5,8 @@
 La única autoridad de reglas de automatización es:
 
 ```text
-docs/VAEP_AUTHORITY.md
+AUTOMATION_AUTHORITY=MASTER
+MASTER_FILE=docs/VAEP_AUTHORITY.md
 ```
 
 ChatGPT/VAEP y Jules A/B/C/D deben leer ese MAESTRO. No deben inferir reglas vigentes desde prompts anteriores, Issues, CHANGELOG, BITACORA, artifacts ni etiquetas numéricas históricas.
@@ -18,7 +19,7 @@ ChatGPT/VAEP y Jules A/B/C/D deben leer ese MAESTRO. No deben inferir reglas vig
 
 ## Trabajo
 
-ChatGPT/VAEP ejecuta REVIEW_FIRST, QA, integración, correcciones, CI, certificación y rollup. Jules A/B/C/D implementan scopes exclusivos y entregan patch/artifact. AntiG está fuera. Codex no participa salvo orden explícita futura del usuario.
+ChatGPT/VAEP ejecuta REVIEW_FIRST, QA, integración, correcciones, CI, certificación y rollup. Jules A/B/C/D implementan scopes exclusivos y entregan patch/artifact. AntiG queda reservado e inactivo (RESERVED_INACTIVE). Codex no participa salvo orden explícita futura del usuario.
 
 ## Cambio de reglas
 

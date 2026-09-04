@@ -3,6 +3,7 @@
 Este archivo **no define un protocolo independiente** y no contiene reglas operativas propias.
 
 ```text
+AUTOMATION_AUTHORITY=MASTER
 MASTER_FILE=docs/VAEP_AUTHORITY.md
 ```
 

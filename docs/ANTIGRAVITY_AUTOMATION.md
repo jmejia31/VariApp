@@ -1,5 +1,11 @@
 # Antigravity Automation — VariApp
 
+> [!WARNING]
+> **ESTADO: RESERVADO E INACTIVO (RESERVED_INACTIVE)**
+> AntiG no está activo operativamente, no tiene Scheduled Tasks programadas ni scheduler habilitado en esta fase.
+> La única autoridad operativa de reglas es `docs/VAEP_AUTHORITY.md` (`AUTOMATION_AUTHORITY=MASTER`).
+> Los componentes descritos en este documento se preservan intactos como capacidad técnica reservada para futura reincorporación autorizada.
+
 ## Objetivo
 
 Integrar AntiG/Antigravity como reviewer/fixer automático entre los handoffs terminales Jules y la certificación VAEP, sin convertirlo en una segunda autoridad de cierre.
@@ -59,7 +65,7 @@ Antes de habilitar la tarea local, el worker aplica estas garantías adicionales
 - staging por lista exacta de archivos autorizados, nunca `git add --all`;
 - rutas protegidas para gobierno, workflows, agente AntiG, schemas, secretos y superficies productivas;
 - validación causal de Issue -> workflow run -> artifact único -> dispatch -> result -> gitpatch -> changes.patch;
-- compatibilidad explícita con manifests Jules v3.25 y validación estricta cuando llega el contrato estructurado v1.0;
+- compatibilidad explícita con manifests Jules históricos y validación estricta cuando llega el contrato canónico;
 - base Jules obligatoriamente ancestro de Desarrollo y `git apply --check` antes de entregar el patch al reviewer;
 - handoffs inválidos se guardan en `.git/vaep-antig/quarantine/`, avanzan el watermark y no bloquean Issues posteriores;
 - fallos transitorios de red/CLI/remoto no se cuarentenan automáticamente y permanecen fail-closed para reintento seguro;

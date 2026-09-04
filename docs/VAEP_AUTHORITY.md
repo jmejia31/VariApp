@@ -11,6 +11,17 @@ MASTER_FILE=docs/VAEP_AUTHORITY.md
 NUMERIC_PROTOCOL_LABELS=PROHIBITED
 ```
 
+```text
+BEGIN_AUTOMATION_POLICY
+PARENT_CLOSE_SLA_ROLLING_60M=3
+PARENT_MAX_DWELL_MINUTES=20
+JULES_LANE_BUDGET_SECONDS=1080
+JULES_MAX_ATTEMPTS=2
+JULES_REWORK_MAX=1
+PARENT_CLOSE_FIRST=TRUE
+END_AUTOMATION_POLICY
+```
+
 ## 1. Fuente única
 
 1. ChatGPT/VAEP, Jules A/B/C/D y las cinco automatizaciones deben leer **este mismo archivo** antes de decidir reglas operativas.
@@ -36,7 +47,7 @@ GitHub manda para código/evidencia. Drive manda para estado operativo. El MAEST
 - ChatGPT/VAEP: controller, REVIEW_FIRST, QA, integración, corrección, CI, certificación, rollup y failover.
 - Jules A/B/C/D: implementers cloud; máximo un write-scope autoritativo por Jules; entregan patch/artifact y no publican funcionalmente.
 - Vibe: QA/corrector externo solo cuando VAEP lo delega.
-- AntiG/Antigravity: fuera del equipo operativo y de la automatización.
+- AntiG/Antigravity: componente de infraestructura reservado para futura reincorporación autorizada. Estado: RESERVED_INACTIVE. Scheduler desactivado, sin Scheduled Tasks, no procesa handoffs, no declara LISTO_REAL.
 - Codex: fuera del flujo salvo orden explícita futura del usuario.
 
 ## 4. Seguridad y Git
@@ -67,22 +78,15 @@ PENDIENTE|EN_PROGRESO|VALIDANDO|LISTO|BLOQUEADO|CANCELADO
 
 ## 6. Parent-close y continuidad
 
-```text
-PARENT_CLOSE_FIRST=TRUE
-CHECKPOINTS=:00,:15,:30,:45,:55
-PARENT_CLOSE_SLA_ROLLING_60M=3
-PARENT_MAX_DWELL_MINUTES=20
-PARENT_STALL_NO_PROGRESS_MINUTES=10
-MAX_VOLUNTARY_IDLE=0
-```
-
-- Cerrar CURRENT_PARENT antes de promover un sucesor dependiente.
-- Trabajo seguro N+1 puede prepararse; promoción N+1 espera prerequisitos reales.
-- Objetivo: 3 parent MICROTAREA `LISTO_REAL` por rolling 60m cuando sea técnicamente alcanzable.
-- Trayectoria: :15 >=1, :30 >=2, :45 >=3; :55 corrige deuda/huecos.
-- Si un cierre contado expira pronto, adelantar cierre sustituto real cuando exista backlog cerrable.
+La política de parent-close, dwell time y SLA está gobernada por el bloque canónico `BEGIN_AUTOMATION_POLICY`:
+- `PARENT_CLOSE_FIRST=TRUE`: Cerrar CURRENT_PARENT antes de promover un sucesor dependiente.
+- Checkpoints declarados: `:00`, `:15`, `:30`, `:45`, `:55`.
+- `PARENT_CLOSE_SLA_ROLLING_60M=3`: Objetivo de 3 parent microtareas en `LISTO_REAL` por ventana móvil de 60 minutos cuando sea técnicamente alcanzable.
+- `PARENT_MAX_DWELL_MINUTES=20`: Límite máximo de permanencia en un mismo parent sin progreso material.
+- `PARENT_STALL_NO_PROGRESS_MINUTES=10`: Diez minutos sin progreso obliga a failover controlado.
+- `MAX_VOLUNTARY_IDLE=0`: Lane libre recibe trabajo seguro inmediatamente.
+- Trayectoria orientativa: `:15 >=1`, `:30 >=2`, `:45 >=3`; `:55` corrige deuda/huecos.
 - Nunca false LISTO ni busywork.
-- Lane libre recibe trabajo material, seguro, elegible y no duplicado cuando exista.
 
 ## 7. Transporte Jules
 
@@ -99,16 +103,13 @@ Fallo pre-session de path/base/schema/transporte no consume intento de contenido
 
 ## 8. Retry cap
 
-```text
-ATTEMPT=1
-ATTEMPT=2 / R2 = única corrección Jules
-R3+ = PROHIBIDO
-```
-
-- Cambiar de Jules no reinicia attempts.
-- Work-stealing hereda attempts.
+La política de reintentos está gobernada por el bloque canónico:
+- `JULES_MAX_ATTEMPTS=2`: ATTEMPT=1 ejecución inicial, ATTEMPT=2 / R2 única y última corrección Jules.
+- `JULES_REWORK_MAX=1`: Máximo un rework dirigido.
+- R3+ está terminantemente prohibido.
+- Cambiar de Jules no reinicia attempts. Work-stealing hereda attempts.
 - ATTEMPT1 puede tener máximo un R2 dirigido.
-- R2 fallido/bloqueado => QA_TAKEOVER por VAEP; Jules pasa a otro scope material.
+- R2 fallido o bloqueado => QA_TAKEOVER por ChatGPT/VAEP; Jules pasa a otro scope material.
 - No existe R3 operativo.
 
 ## 9. REVIEW_FIRST y handoff

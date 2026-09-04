@@ -779,3 +779,16 @@ Se restauró el freeze técnico de admisión mediante `vaep/control/dispatch-adm
 La reconciliación operativa conserva `CURRENT_PARENT=N4.7.H` y `N4.8.A=HELD`. Este cierre de migración NO equivale a certificar `N4.7.H=LISTO_REAL`; no se promueve N4.8, no se consume attempt y no se abre trabajo nuevo durante el freeze.
 
 Resultado: `MIGRATION_PHASE_0=CLOSED/PASS`; `MIGRATION_PHASE_1=CLOSED/PASS`; `NEW_DISPATCH_ADMISSION=FROZEN`; `FASE_2=NOT_STARTED`; `FALSE_PASS=NO`; `FALSE_LISTO=NO`; `SCOPE_LEAK=NO`. No se modificaron `main`, Producción, secretos, dominios, Vercel ni BD productiva.
+
+## 2026-09-04 — Cierre Fase 2 de migración VAEP MASTER — Política Machine-Readable
+
+Responsable: AntiG/Antigravity (intervención puntual autorizada por Javier exclusivamente para Fase 2).
+
+Se ejecutó la consolidación de la política operativa machine-readable dentro del MAESTRO único `docs/VAEP_AUTHORITY.md` (`AUTOMATION_AUTHORITY=MASTER`):
+
+1. Bloque canónico único: Se embebió exactamente una vez el bloque estructurado delimitado por `BEGIN_AUTOMATION_POLICY` y `END_AUTOMATION_POLICY` con las 6 claves operativas autorizadas.
+2. Parser fail-closed: Se implementó `.github/scripts/vaep-policy-parser.sh` en Bash puro sin `eval` ni `source`. Valida unicidad de bloque, 6 keys requeridas, rechazo estricto fail-closed ante claves desconocidas, duplicadas, faltantes o valores inválidos. Emite flags `--env`, `--get`, `--commit-sha`, `--hash` determinístico SHA-256 (`dfebc1a87010bf57742b05dae258ae29b23c9b881e40a9700fed237498fbf599`), y cuenta con suite de validación `--self-test` pasando 100%.
+3. Deduplicación de runtime y workflows: `.github/scripts/vaep-jules-master.sh` y `.github/scripts/vaep-jules-worker.sh` consumen la política mediante el parser; se eliminaron hardcodes redundantes. En los 8 workflows `vaep-jules-*.yml` se retiraron overrides de budget conservando `timeout-minutes: 25` exclusivamente como safety-net externo.
+4. Consumidores activos alineados: `AGENTS.md`, `docs/VAEP_JULES.md`, `PLAN_EJECUCION_AUTONOMA.md`, `PROJECT_CONTEXT.md`, `docs/COLABORACION_IA.md` y `docs/CONTEXTO_CHATGPT_VAEP.md` apuntan a `docs/VAEP_AUTHORITY.md` (`AUTOMATION_AUTHORITY=MASTER`) sin duplicar reglas. AntiG queda documentado como `RESERVED_INACTIVE`.
+5. Protocolos numéricos eliminados en superficies activas (`NUMERIC_PROTOCOL_LABELS=0`).
+6. Cierre: `MIGRATION_PHASE_2=CLOSED/PASS`; `CURRENT_PARENT=N4.7.H`; `N4.8.A=HELD`; `FASE_3=NOT_STARTED`. Autorización puntual AntiG expirada; sin scheduler ni Scheduled Tasks.

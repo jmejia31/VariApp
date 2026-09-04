@@ -8,6 +8,7 @@ Este archivo es vinculante para Javier Mejía, ChatGPT/VAEP, Jules A/B/C/D, Vibe
 PROJECT_ID=VARIAPP
 REPOSITORY=jmejia31/VariApp
 BRANCH=Desarrollo
+AUTOMATION_AUTHORITY=MASTER
 MASTER_FILE=docs/VAEP_AUTHORITY.md
 ```
 
@@ -28,7 +29,7 @@ Antes de analizar, editar, ejecutar, despachar o publicar trabajo de automatizac
 - ChatGPT/VAEP: controller, QA, REVIEW_FIRST, integración, corrección, CI, certificación y failover.
 - Jules A/B/C/D: implementers cloud, un write-scope autoritativo por Jules, patch/artifact only.
 - Vibe: QA externo cuando VAEP lo delega.
-- AntiG/Antigravity: fuera del equipo operativo.
+- AntiG/Antigravity: componente de infraestructura reservado e inactivo (RESERVED_INACTIVE); fuera del equipo operativo actual.
 - Codex: fuera del flujo salvo orden explícita del usuario.
 
 ## Git y Producción

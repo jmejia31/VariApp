@@ -39,16 +39,16 @@ Consultar `PROJECT_INDEX.md` para localizar responsabilidades y su índice de de
 
 Todo changeset intencional deja evidencia en `CHANGELOG_AI.md`; `TASKS.md` cambia cuando cambia el estado operativo. Índice/arquitectura/contexto solo cambian cuando cambia la realidad que describen.
 
-## 5. VAEP v2 — ejecución autónoma integral
+## 5. VAEP — ejecución autónoma integral
 
 Protocolo: `PLAN_EJECUCION_AUTONOMA.md`.
 
-Autoridad operativa única: `docs/VAEP_AUTHORITY.md` es el MAESTRO permanente. Toda regla se edita allí mismo; no se seleccionan protocolos por etiquetas numéricas históricas. El Sheet describe estado operativo; el sistema de tareas ejecuta y GitHub/CI prueban actividad real.
+Autoridad operativa única: `docs/VAEP_AUTHORITY.md` es el MAESTRO permanente (AUTOMATION_AUTHORITY=MASTER). Toda regla se edita allí mismo; no se seleccionan protocolos por etiquetas numéricas históricas. El Sheet describe estado operativo; el sistema de tareas ejecuta y GitHub/CI prueban actividad real.
 
 Tablero operativo:
 https://docs.google.com/spreadsheets/d/19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY/edit
 
-VAEP v2 representa el **Plan Maestro ERP V5 completo** en `PLAN_MAESTRO` y lo traduce a una `COLA` granular de **778 microtareas**. El workbook también incluye `DASHBOARD`, `CONFIG`, `BITACORA` y `LEYENDA`.
+VAEP representa el **Plan Maestro ERP V5 completo** en `PLAN_MAESTRO` y lo traduce a una `COLA` granular de **778 microtareas**. El workbook también incluye `DASHBOARD`, `CONFIG`, `BITACORA` y `LEYENDA`.
 
 Cada punto funcional se divide normalmente en microtareas `PRE`, `DOMAIN`, `DB_MIG`, `BACKEND_API`, `FRONTEND_UX`, `SEC_AUDIT`, `TEST_CI` y `DOC_CERT`; si una de ellas sigue siendo grande, debe subdividirse antes de editar. El runner puede cerrar hasta 3 microtareas pequeñas por corrida, deteniéndose antes si el riesgo o alcance crecen.
 
