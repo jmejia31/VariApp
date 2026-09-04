@@ -1,0 +1,12 @@
+{
+  "dispatchId": "20260903T2257HND-N4_7_B-DOMAIN-CONTRACTS-A1-CORRECTED",
+  "taskId": "N4.7.B-domain-contracts",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "d38ecb350793acf0f0055e97e8bb0676f7f11dcd",
+  "taskAttempt": 1,
+  "transportClassification": "PRE_SESSION_PATH_CORRECTION__ATTEMPT_NOT_CONSUMED",
+  "replacesInvalidManifest": ".vaep/jules/dispatch/A74-N4-7-B-domain-contracts-attempt1-20260904T043100Z.json",
+  "fileScopeHint": "STRICT N4.7.B ONLY: backend domain/contracts for AsientoContable and AsientoDetalle; reuse CuentaContable authority; no persistence/API/UI/N4.8 automation; no main/production/secrets/deploy",
+  "prompt": "Implement ONLY N4.7.B domain and contracts on exact base d38ecb350793acf0f0055e97e8bb0676f7f11dcd in branch Desarrollo. REVIEW_FIRST existing accounting/domain conventions and reuse CuentaContable as the account authority. Add the minimum grounded AsientoContable/AsientoDetalle domain-contract surface required by the plan: balanced debit/credit invariant, valid positive monetary amounts, lifecycle/state rules only when grounded by repository authority, and relation to CuentaContable. Do NOT implement persistence/migrations, API/controllers, frontend/UI, automatic posting engine N4.8, deployment, secrets, or unrelated cleanup. Run proportional backend/unit tests and self-review. Return exact base, changed files, diff summary, tests, residual blockers, and READY_FOR_VAEP only if the scoped delta is complete. Never claim LISTO_REAL, P0=0/P1=0, or promotion authority."
+}
