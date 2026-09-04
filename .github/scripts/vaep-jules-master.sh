@@ -46,7 +46,7 @@ write_timeout_result() {
     --arg masterFile "$MASTER_FILE" \
     --arg masterCommitSha "$MASTER_COMMIT_SHA" \
     --arg policyHash "$AUTOMATION_POLICY_HASH" \
-    --arg workerId "$WORKER_ID" \
+    --arg workerId "${WORKER_ID:-JULES_A}" \
     --arg dispatchId "$dispatch_id" \
     --arg taskId "$task_id" \
     --arg session "$session_name" \
