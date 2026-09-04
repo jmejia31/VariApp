@@ -1,0 +1,12 @@
+{
+  "dispatchId": "VAEP-JULES-C-N46D-API-C1-20260903T1800HND",
+  "taskId": "N4.6.D.CONTROLLER_API",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "12542f37132dfd4488e27e197ef548af19dee337",
+  "dispatchBaseHead": "e69abb2eedc2811bf0d09ef9556b65c71b6475fa",
+  "taskAttempt": 1,
+  "r3Prohibited": true,
+  "fileScopeHint": "backend/src/Api/Controllers/*CuentaContable*.cs; backend/src/API/Controllers/*CuentaContable*.cs; backend/tests/InventoryApp.Tests/Api/Contabilidad/*CuentaContable*.cs",
+  "prompt": "N4.6.D BACKEND_API CURRENT_PARENT. Implement only the HTTP controller/API surface and proportional API tests for CuentaContable hierarchical create/list/query, consuming existing/canonical application interfaces only. Do not implement repositories/services in controller code and do not edit Jules A/B scopes. Reuse project conventions for routing, pagination/filtering, status codes and ProblemDetails; fail closed if service contracts are not available rather than inventing duplicate business logic. Do not edit Program.cs/security registrations, frontend, persistence/migrations/snapshot, workflows or docs. Run proportional backend/API tests and build. Return patch/evidence after two self-review PASS markers. No main, Produccion, branches, merge, auto-merge, force-push, secrets or deploy. ACTIVE_REAL requires a real Jules session plus useful activity; pre-session failure does not consume ATTEMPT1."
+}
