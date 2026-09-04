@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "OPEN",
+  "newDispatchAdmission": "FROZEN",
   "allowExistingActiveSessions": true,
-  "reason": "MASTER_MIGRATION_F0_F7_CERTIFIED_OPERATIONAL_RETURN",
-  "updatedAtUtc": "2026-09-04T20:38:00Z"
+  "reason": "CODEX_AUDIT_REMEDIATION_MASTER_HARDENING",
+  "updatedAtUtc": "2026-09-04T21:15:00Z"
 }
