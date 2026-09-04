@@ -16,8 +16,15 @@ function Invoke-Native {
         [string[]]$Arguments,
         [switch]$AllowFailure
     )
-    $output = & $File @Arguments 2>&1
-    $code = $LASTEXITCODE
+    $prevEap = $ErrorActionPreference
+    try {
+        $ErrorActionPreference = "Continue"
+        $output = & $File @Arguments 2>&1
+        $code = $LASTEXITCODE
+    }
+    finally {
+        $ErrorActionPreference = $prevEap
+    }
     $text = ($output | Out-String).Trim()
     if (-not $AllowFailure -and $code -ne 0) {
         throw "$File $($Arguments -join ' ') failed exit=$code" + [Environment]::NewLine + $text
@@ -44,7 +51,7 @@ function Get-TaskRollbackMode([bool]$Existed) {
 function Test-TaskNotFound($QueryResult) {
     if ($QueryResult.ExitCode -eq 0) { return $false }
     $text = [string]$QueryResult.Text
-    return $text -match '(?i)(cannot find|could not find|does not exist|not found|no existe|no se encuentra|no se pudo encontrar|nombre de tarea.*inv[aá]lido)'
+    return $text -match '(?i)(cannot find|could not find|does not exist|not found|no existe|no se encuentra|no se pudo encontrar|no puede encontrar|nombre de tarea.*inv[aá]lido)'
 }
 
 function Resolve-AgyCommand {

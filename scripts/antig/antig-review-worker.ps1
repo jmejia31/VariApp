@@ -18,8 +18,15 @@ function Invoke-Native {
         [Parameter(Mandatory=$true)][string[]]$Arguments,
         [switch]$AllowFailure
     )
-    $output = & $File @Arguments 2>&1
-    $code = $LASTEXITCODE
+    $prevEap = $ErrorActionPreference
+    try {
+        $ErrorActionPreference = "Continue"
+        $output = & $File @Arguments 2>&1
+        $code = $LASTEXITCODE
+    }
+    finally {
+        $ErrorActionPreference = $prevEap
+    }
     $text = ($output | Out-String).Trim()
     if (-not $AllowFailure -and $code -ne 0) {
         throw "$File $($Arguments -join ' ') failed with exit=$code" + [Environment]::NewLine + $text
