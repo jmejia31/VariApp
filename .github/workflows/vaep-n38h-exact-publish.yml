@@ -93,7 +93,7 @@ jobs:
 
           ## 2026-08-26 — ERP-N3.8 Nota de débito de cliente — CIERRE CONDICIONAL/N/A
 
-          **Responsable:** ChatGPT/VAEP v3.25.1 Closure Governor.
+          **Responsable:** ChatGPT/VAEP MASTER Closure Governor.
 
           **Dictamen:** N3.8.A-H se cierra para el alcance actual como N/A con evidencia porque el roadmap condiciona la Nota de débito a una necesidad legal/operativa y no existe todavía requisito autoritativo suficiente para fijar su contrato. No se afirma que `NotaDebitoCliente` haya sido implementada.
 
@@ -113,7 +113,7 @@ jobs:
             [ "$CHANGED" = "$EXPECTED" ] || fail "changed files=${CHANGED}"
             [ "$(git diff --cached --numstat -- docs/CERTIFICACION_N3_8_NOTA_DEBITO_CLIENTE.md | awk '{print $2}')" = "0" ] || fail "cert deletions"
             git diff --cached --check || fail "diff-check"
-            git commit -m 'docs(N3.8.H): cerrar NotaDebitoCliente como N/A condicional [VAEP v3.25.1] [skip ci]'
+            git commit -m 'docs(N3.8.H): cerrar NotaDebitoCliente como N/A condicional [VAEP MASTER] [skip ci]'
 
             CURRENT_HEAD="$(refresh_desarrollo)"
             if [ "$CURRENT_HEAD" = "$BASE_HEAD" ]; then
