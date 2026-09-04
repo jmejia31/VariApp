@@ -12,7 +12,7 @@ on:
       - .github/checkpoints/phase-7
 
 permissions:
-  contents: write
+  contents: read
   pull-requests: read
   actions: read
 
@@ -130,21 +130,6 @@ jobs:
 
       - name: Run backend tests
         run: dotnet test InventoryApp.sln --configuration Release --no-build --filter "Category!=Integration" --logger "trx;LogFileName=tests.trx"
-
-      - name: Commit generated migration and SQL to working branch
-        if: github.event_name == 'pull_request' && github.head_ref == 'agent/mejoras-variapp'
-        shell: bash
-        run: |
-          set -euo pipefail
-          if git status --porcelain -- src/Infrastructure/Migrations ../docs/migraciones | grep -q .; then
-            git config user.name 'github-actions[bot]'
-            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-            git add src/Infrastructure/Migrations ../docs/migraciones/004_fase6_seguridad_facturacion_perfil.sql
-            git commit -m 'Add reviewed phase 6 migration artifacts'
-            git push origin HEAD:agent/mejoras-variapp
-          else
-            echo 'No hay artefactos de migración nuevos para confirmar.'
-          fi
 
       - name: Upload backend test results
         if: always()
