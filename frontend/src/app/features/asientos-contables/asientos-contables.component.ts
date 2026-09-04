@@ -15,7 +15,7 @@ import { AsientoContableService } from '../../services/asiento-contable.service'
 import { CrearAsientoContableDto, AsientoContableDto } from '../../core/models/asiento-contable.model';
 import { CuentaContableService } from '../../services/cuenta-contable.service';
 import { CuentaContable } from '../../core/models/cuenta-contable.model';
-import { PermisosRuntimeService } from '../../core/services/permisos-runtime.service';
+import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
 
 export function asientoBalanceValidator(control: AbstractControl): ValidationErrors | null {
   const detalles = control.get('detalles') as FormArray | null;
