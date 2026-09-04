@@ -831,3 +831,17 @@ Evidencia causal del commit `e1ff079ef8645da4c1cc4bff8e9967b8d31ed954`: `VAEP en
 
 Resultado: `MIGRATION_PHASE_4=CLOSED/PASS`; `HISTORICAL_GIT_WRITERS=0`; `UNAUTHORIZED_COMMIT_PUSH_RESET=0`; `PRODUCT_CI_PRESERVED=PASS`; `FASE_5=NOT_STARTED`; `CURRENT_PARENT=N4.7.H`; `N4.8.A=HELD`; `FALSE_PASS=NO`; `FALSE_LISTO=NO`; `SCOPE_LEAK=NO`.
 
+## 2026-09-04 — Cierre Fase 5 VAEP MASTER — Cleanup documental y manifests
+
+Responsable: ChatGPT/VAEP sobre `Desarrollo`.
+
+Se completó el semantic-diff de los cuatro documentos protocolarios versionados contra `docs/VAEP_AUTHORITY.md`. Resultado: `UNIQUE_LIVE_RULES_NOT_IN_MASTER=0`. Retry cap, pre-session sin consumo de attempt, doble self-review, parent-close, zero-idle/failover, QA takeover y reglas de seguridad ya están representados por MASTER; los objetivos Sprint40/Rolling40 y labels/checkpoints numéricos de esos archivos son evidencia histórica expirada. Por ello se retiraron del árbol activo `docs/VAEP_V320_RETRY_CAP.md`, `docs/VAEP_V320_SPRINT40_QUEUE.md`, `docs/VAEP_V321_PARENT40_QUEUE.md` y `docs/VAEP_V321_PARENT_CLOSURE.md`, preservando íntegramente Git history.
+
+Antes del cleanup existían 2795 manifests JSON dentro de rutas de dispatch activas: A=780, B=693, C=656, D=663 y `.vaep/jules/dispatch`=3. Todos eran artifacts de transporte ya comprometidos/disparados. El estado vigente mantiene `N4.7.A-G=LISTO_REAL`; el único manifest N4.7.H en las rutas canónicas, `VAEP-MASTER-JULES-B-N47H-DOC-CERT-B1-20260904T0952HND`, ya produjo Jules `COMPLETED` con Issue #2654 y quedó bajo REVIEW_FIRST del controller, por lo que tampoco representa trabajo pendiente dentro del filesystem de dispatch.
+
+El commit `e34c148a06a2f054a40c790d28d7aaf01e30eedb` limpia todos los JSON históricos de las cuatro rutas canónicas, mantiene cada ruta con `.gitkeep` y elimina por completo `.vaep/jules/dispatch`. Git/Issues/artifacts conservan la evidencia histórica. La limpieza validó el comportamiento de runtime requerido: A #33913519604, B #33913519565, C #33913519551 y D #33913519538 ejecutaron `VAEP/Jules MASTER` y finalizaron SUCCESS sin artifact, confirmando `NO_OP` frente a un commit de cleanup sin manifest añadido. `VAEP engine lightweight checks #33913519654=SUCCESS` y `VAEP Jules Diagnostic #33913524944=SUCCESS`.
+
+No se utilizó `[skip ci]` como mecanismo de seguridad. Los labels protocolarios numéricos que sobrevivían únicamente dentro de prompts históricos N4.7 salieron de las rutas activas junto con esos manifests. Los próximos dispatches deben nacer desde MASTER.
+
+Resultado: `MIGRATION_PHASE_5=CLOSED/PASS`; `UNIQUE_LIVE_RULES_NOT_IN_MASTER=0`; `ACTIVE_VERSIONED_PROTOCOL_DOCS=0`; `HISTORICAL_MANIFESTS_IN_ACTIVE_PATHS=0`; `DOT_VAEP_DISPATCH=0`; `CLEANUP_TRIGGER=PASS`; `FASE_6=NOT_STARTED`; `CURRENT_PARENT=N4.7.H`; `N4.8.A=HELD`; `FALSE_PASS=NO`; `FALSE_LISTO=NO`; `SCOPE_LEAK=NO`.
+

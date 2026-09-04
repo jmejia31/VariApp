@@ -365,3 +365,23 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
 
 **MIGRATION_PHASE_4=CLOSED/PASS. HISTORICAL_GIT_WRITERS=0. UNAUTHORIZED_COMMIT_PUSH_RESET=0. PRODUCT_CI_PRESERVED=PASS. FASE_5=NOT_STARTED. CURRENT_PARENT=N4.7.H. N4.8.A=HELD. FALSE_PASS=NO. FALSE_LISTO=NO. SCOPE_LEAK=NO.**
 
+## VAEP Fase 5 — Cleanup documental y manifests — 2026-09-04
+
+- [x] Semantic-diff de `docs/VAEP_V320_RETRY_CAP.md`, `docs/VAEP_V320_SPRINT40_QUEUE.md`, `docs/VAEP_V321_PARENT40_QUEUE.md` y `docs/VAEP_V321_PARENT_CLOSURE.md` contra `docs/VAEP_AUTHORITY.md`: `UNIQUE_LIVE_RULES_NOT_IN_MASTER=0`. Las reglas aún vigentes (retry cap, pre-session no consume attempt, doble self-review, parent-close, zero-idle/failover, QA takeover y seguridad) ya están incorporadas en MASTER; Sprint40/Rolling40/version labels/checkpoints antiguos son historia expirada, no autoridad activa.
+- [x] Eliminados del árbol activo los cuatro documentos versionados; Git conserva su historia completa.
+- [x] Ledger previo de manifests activos: A=780, B=693, C=656, D=663, `.vaep/jules/dispatch`=3; total=2795.
+- [x] Clasificación: los manifests ya estaban comprometidos/disparados y por tanto son transporte consumido/histórico; `N4.7.A-G=LISTO_REAL` según estado vigente y el manifest Jules B de `N4.7.H.DOC_CERT` ya produjo terminal `COMPLETED` (Issue #2654) y quedó sujeto a REVIEW_FIRST del controller. No se conserva ningún manifest JSON histórico dentro de las rutas activas.
+- [x] Las cuatro rutas canónicas A/B/C/D se preservan con `.gitkeep`; JSON histórico en rutas activas=0.
+- [x] `.vaep/jules/dispatch` eliminado por redundancia; sus A74/A75 ya estaban explícitamente reemplazados/corregidos por rutas canónicas y A73 pertenece a N4.1 histórico.
+- [x] Limpieza disparó A/B/C/D sobre el commit `e34c148a06a2f054a40c790d28d7aaf01e30eedb`; los cuatro ejecutaron `VAEP/Jules MASTER` y terminaron SUCCESS sin artifact, validando el camino `NO_OP` para deletions/cleanup:
+  - A `33913519604=SUCCESS`
+  - B `33913519565=SUCCESS`
+  - C `33913519551=SUCCESS`
+  - D `33913519538=SUCCESS`
+- [x] Gate VAEP causal del cleanup: `VAEP engine lightweight checks #33913519654=SUCCESS`; `VAEP Jules Diagnostic #33913524944=SUCCESS`.
+- [x] No se usó `[skip ci]` para proteger la limpieza.
+- [x] Los prompts históricos N4.7 con labels numéricas salieron de las rutas activas junto con sus manifests; los próximos dispatches consumen MASTER.
+- [x] PR #2 permanece `OPEN+DRAFT`; `main`, Producción, Vercel, secretos, dominios y BD productiva intactos.
+
+**MIGRATION_PHASE_5=CLOSED/PASS. UNIQUE_LIVE_RULES_NOT_IN_MASTER=0. ACTIVE_VERSIONED_PROTOCOL_DOCS=0. HISTORICAL_MANIFESTS_IN_ACTIVE_PATHS=0. DOT_VAEP_DISPATCH=0. CLEANUP_TRIGGER=PASS. FASE_6=NOT_STARTED. CURRENT_PARENT=N4.7.H. N4.8.A=HELD. FALSE_PASS=NO. FALSE_LISTO=NO. SCOPE_LEAK=NO.**
+
