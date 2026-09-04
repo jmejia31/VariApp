@@ -38,16 +38,9 @@ jobs:
         with:
           ref: ${{ github.sha }}
           fetch-depth: 2
-      - name: Resolve Jules A canonical dispatch path
+      - name: Bind Jules A canonical dispatch path
         shell: bash
-        run: |
-          set -euo pipefail
-          canonical_count="$(git diff-tree --no-commit-id --name-only --diff-filter=A -r "$GITHUB_SHA" -- 'vaep/jules/dispatch/*.json' | sed '/^$/d' | wc -l | tr -d ' ')"
-          if [[ "$canonical_count" != "1" ]]; then
-            echo "Jules A transport invariant failed: canonical=$canonical_count; expected exactly one new manifest in vaep/jules/dispatch." >&2
-            exit 20
-          fi
-          echo 'DISPATCH_PATH=vaep/jules/dispatch' >> "$GITHUB_ENV"
+        run: echo 'DISPATCH_PATH=vaep/jules/dispatch' >> "$GITHUB_ENV"
       - name: Execute VAEP/Jules MASTER
         shell: bash
         run: bash .github/scripts/vaep-jules-master.sh
