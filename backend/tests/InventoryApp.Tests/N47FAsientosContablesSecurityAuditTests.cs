@@ -76,6 +76,6 @@ public sealed class N47FAsientosContablesSecurityAuditTests
             .GetField("_accion", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
             ?.GetValue(atributo);
         Assert.Equal(ModuloSistema.Finanzas, modulo);
-        Assert.Equal(accionEsperado: accionEsperada, actual: accion);
+        Assert.Equal(accionEsperada, accion);
     }
 }
