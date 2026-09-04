@@ -227,6 +227,22 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
 
 **CURRENT_PARENT=N4.5.H. CLOSABLE_NOW=NO hasta completar la reconciliación documental y los gates exact-head. `N4.6.A` permanece `PREARMED/PROMOTION_HELD`; no se promueve antes del cierre real de N4.5.H.**
 
+## ERP-N4.6 — Plan de cuentas jerárquico — ROLLUP DE CIERRE 2026-09-04
+
+Este rollup es append-only y supersede únicamente el estado operativo stale anterior; conserva íntegramente la historia previa.
+
+- [x] N4.6.A — `LISTO_REAL`; preflight y dependencia de N4.6.B confirmados.
+- [x] N4.6.B — `LISTO_REAL`; dominio `CuentaContable` y `TipoCuentaContable` en `2658d5b0139e85957463cb227f11ea65f42bef13`.
+- [x] N4.6.C — `LISTO_REAL`; persistencia EF/migración/snapshot certificados en `12542f37132dfd4488e27e197ef548af19dee337`.
+- [x] N4.6.D — `LISTO_REAL`; repositorio, servicio, DTOs, API jerárquica y validación de ciclos materializados en `a4392c44` y `9d649bbb`.
+- [x] N4.6.E — `LISTO_REAL`; UI `/plan-cuentas`, árbol, formularios, permisos y estados de interfaz en `9d649bbb`.
+- [x] N4.6.F — `LISTO_REAL`; autorización, RBAC, auditoría y seguridad verificadas por contratos y gates del exact-head.
+- [x] N4.6.G — `LISTO_REAL`; Development `#33828121004`, aceptación `#33828121038`, Fase 8 `#33828121029`, M13 `#33828121086` y M10 `#33828121034` en `SUCCESS`; `VariApp CI` `SKIPPED` no se cuenta como PASS.
+- [x] N4.6.H — `LISTO_REAL`; certificación canónica `docs/CERTIFICACION_N4_6_PLAN_CUENTAS.md`, operación/rollback documentados, `P0=0`, `P1=0`.
+- [x] Fase 2 queda registrada como `EXTERNAL_INFRA`: HTTP 503 de `registry.npmjs.org` durante `npm audit`; no es fallo causal del producto.
+
+**CURRENT_PARENT=N4.6.H. N4.6 queda cerrado como `LISTO_REAL`; siguiente parent dependency-valid: `N4.7.A`. Este cierre no inicia ni modifica el scope de N4.7.**
+
 ### Reconciliación QA append-only
 
 Este rollup supersede únicamente el estado operativo stale anterior del bloque N4.4; las menciones históricas `CURRENT_PARENT=N4.4.H` permanecen como evidencia histórica, ya no gobiernan el estado actual y no se reescribe ni elimina ninguna historia previa. El estado operativo vigente de este cierre es `CURRENT_PARENT=N4.5.H`. La certificación documental exacta corresponde al commit `fde578dd69cbfe91c054138d33404cec342093f6`; el `productBaseHead` es `541ec12b72912c769c6f54b8821771e509818375`.

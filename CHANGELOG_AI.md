@@ -689,3 +689,11 @@ Validación local: `dotnet test --filter FullyQualifiedName~CuentaContable` PASS
 Responsable: Codex local autorizado; se añadió la feature standalone `PlanCuentasComponent`, su modelo/servicio HTTP y la ruta protegida `/plan-cuentas`. La UI presenta el árbol completo, alta/edición, selección de padre sin descendientes cíclicos, tipo, estado, aceptación de movimientos, loading/empty/error states, responsive y navegación bajo permisos de Finanzas. La autoridad de validación permanece en el backend.
 
 Validación real: `npm.cmd run lint` PASS; `npm.cmd run build -- --configuration development` PASS. El build de producción no se pudo completar porque Angular intentó inlining de fuentes externas y el entorno rechazó la conexión; no se cambió configuración de producción ni Vercel.
+
+## 2026-09-04 02:31:00Z - Cierre N4.6 Plan de cuentas
+
+Responsable: Codex local autorizado en `Desarrollo`; cierre documental append-only sobre el exact-head funcional `9d649bbbb4279e41e8cf5b7f5f9b84c26cc362bf`.
+
+N4.6.A-H queda `LISTO_REAL` con persistencia jerárquica EF, repositorio, API protegida, UI Angular, RBAC/auditoría y certificación en `docs/CERTIFICACION_N4_6_PLAN_CUENTAS.md`. Gates reales: Development `#33828121004`, aceptación `#33828121038`, Fase 8 `#33828121029`, M13 `#33828121086` y M10 `#33828121034`, todos `SUCCESS`; `VariApp CI` `SKIPPED` no se usa como PASS. P0/P1 atribuibles al alcance: `0/0`.
+
+La ejecución Fase 2 terminó `FAILURE` únicamente por HTTP 503 de `registry.npmjs.org` durante `npm audit`; se clasifica `EXTERNAL_INFRA`, sin evidencia de regresión causal y sin rerun artificial. No se modificaron producción, secretos, dominios, Vercel ni workflows históricos N0.2-N0.5. El siguiente parent dependency-valid es `N4.7.A`; este changeset no inicia su scope.
