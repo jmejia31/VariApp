@@ -817,3 +817,17 @@ Los auxiliares stop/session-health/feedback/diagnostic fueron ligados explícita
 
 Resultado: `MIGRATION_PHASE_3=CLOSED/PASS`; `NO_OP=PASS`; `MULTI_MANIFEST_FAIL_CLOSED=PASS`; `TIMEOUT_SUPERSESSION=PASS`; `LATE_RESULT_GUARD=PASS`; `DURABLE_TIMEOUT_EVIDENCE=PASS`; `FASE_4=NOT_STARTED`; `CURRENT_PARENT=N4.7.H`; `N4.8.A=HELD`; `FALSE_PASS=NO`; `FALSE_LISTO=NO`; `SCOPE_LEAK=NO`.
 
+## 2026-09-04 — Cierre Fase 4 VAEP MASTER — Historical writers
+
+Responsable: ChatGPT/VAEP sobre `Desarrollo`.
+
+Se retiraron los siete writers históricos aprobados de Fase 4: `vaep-control-plane-ci-guard.yml`, `vaep-n36h-exact-publish.yml`, `vaep-n37h-exact-publish.yml`, `vaep-n38h-exact-publish.yml`, `vaep-n39h-exact-publish.yml`, `vaep-n310h-exact-publish.yml` y `vaep-n311h-exact-changelog-publisher.yml`. Todos contenían autoridad de escritura histórica sobre `Desarrollo` mediante `contents: write`, `git commit`, `git push` y/o `git reset --hard`.
+
+`.github/workflows/ci.yml` fue auditado por separado. Se preservaron sus jobs de backend, frontend y aceptación, sus builds/tests, MySQL temporal, Playwright y artifacts. Se redujo `permissions.contents` de `write` a `read` y se eliminó únicamente el step que publicaba migración/SQL mediante commit/push a `agent/mejoras-variapp`.
+
+Después del changeset se auditaron los 38 workflows restantes. Resultado: `contents: write=0`, `git push=0`, `git commit=0`, `git reset --hard=0`, `update-ref/force-push=0`. El CI de producto permanece presente; no se eliminó ninguna validación funcional de backend/frontend/acceptance.
+
+Evidencia causal del commit `e1ff079ef8645da4c1cc4bff8e9967b8d31ed954`: `VAEP engine lightweight checks #33912398582=SUCCESS` y `VAEP Jules Diagnostic #33912398627=SUCCESS`. `VariApp CI=SKIPPED` queda explícitamente excluido como PASS.
+
+Resultado: `MIGRATION_PHASE_4=CLOSED/PASS`; `HISTORICAL_GIT_WRITERS=0`; `UNAUTHORIZED_COMMIT_PUSH_RESET=0`; `PRODUCT_CI_PRESERVED=PASS`; `FASE_5=NOT_STARTED`; `CURRENT_PARENT=N4.7.H`; `N4.8.A=HELD`; `FALSE_PASS=NO`; `FALSE_LISTO=NO`; `SCOPE_LEAK=NO`.
+

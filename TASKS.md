@@ -346,3 +346,22 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
 
 **MIGRATION_PHASE_3=CLOSED/PASS. NO_OP=PASS. TIMEOUT_SUPERSESSION=PASS. LATE_RESULT_GUARD=PASS. DURABLE_TIMEOUT_EVIDENCE=PASS. FASE_4=NOT_STARTED. CURRENT_PARENT=N4.7.H. N4.8.A=HELD. FALSE_PASS=NO. FALSE_LISTO=NO. SCOPE_LEAK=NO.**
 
+## VAEP Fase 4 — Historical writers cleanup — 2026-09-04
+
+- [x] Eliminados los siete workflows históricos/autopublishers autorizados para retiro:
+  - `.github/workflows/vaep-control-plane-ci-guard.yml`
+  - `.github/workflows/vaep-n36h-exact-publish.yml`
+  - `.github/workflows/vaep-n37h-exact-publish.yml`
+  - `.github/workflows/vaep-n38h-exact-publish.yml`
+  - `.github/workflows/vaep-n39h-exact-publish.yml`
+  - `.github/workflows/vaep-n310h-exact-publish.yml`
+  - `.github/workflows/vaep-n311h-exact-changelog-publisher.yml`
+- [x] `.github/workflows/ci.yml` conserva backend/frontend/acceptance, artifacts y validaciones; `permissions.contents` quedó `read` y se eliminó únicamente el step que hacía `git commit` + `git push` a `agent/mejoras-variapp`.
+- [x] Auditoría exhaustiva de los 38 workflows restantes: `contents: write=0`, `git push=0`, `git commit=0`, `git reset --hard=0`, `update-ref/force-push=0`.
+- [x] `PRODUCT_CI_PRESERVED=PASS`.
+- [x] Gate causal sobre el commit de implementación `e1ff079ef8645da4c1cc4bff8e9967b8d31ed954`: `VAEP engine lightweight checks` run `33912398582` = `SUCCESS`; `VAEP Jules Diagnostic` run `33912398627` = `SUCCESS`.
+- [x] `VariApp CI=SKIPPED` no se usa como PASS.
+- [x] PR #2 permanece `OPEN+DRAFT`; `main`, Producción, Vercel, secretos, dominios y BD productiva no fueron modificados.
+
+**MIGRATION_PHASE_4=CLOSED/PASS. HISTORICAL_GIT_WRITERS=0. UNAUTHORIZED_COMMIT_PUSH_RESET=0. PRODUCT_CI_PRESERVED=PASS. FASE_5=NOT_STARTED. CURRENT_PARENT=N4.7.H. N4.8.A=HELD. FALSE_PASS=NO. FALSE_LISTO=NO. SCOPE_LEAK=NO.**
+
