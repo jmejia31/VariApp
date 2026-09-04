@@ -4,7 +4,7 @@ import { of } from 'rxjs';
 import { AsientosContablesComponent } from './asientos-contables.component';
 import { AsientoContableService } from '../../services/asiento-contable.service';
 import { CuentaContableService } from '../../services/cuenta-contable.service';
-import { PermisosRuntimeService } from '../../core/services/permisos-runtime.service';
+import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
 
 class AsientoServiceStub {
   getAll() { return of({ data: { items: [], total: 0 } }); }
@@ -44,7 +44,7 @@ describe('AsientosContablesComponent', () => {
 
   it('starts a new balanced-entry form with two details', () => {
     component.nuevoAsiento();
-    expect(component.mostrarFormulario()).toBeTrue();
+    expect(component.mostrarFormulario()).toBe(true);
     expect(component.detallesFormArray.length).toBe(2);
   });
 
@@ -54,7 +54,7 @@ describe('AsientosContablesComponent', () => {
     component.detallesFormArray.at(0).patchValue({ cuentaContableId: 1, debe: 100, haber: 0 });
     component.detallesFormArray.at(1).patchValue({ cuentaContableId: 2, debe: 0, haber: 90 });
     component.asientoForm.updateValueAndValidity();
-    expect(component.asientoForm.hasError('descuadrado')).toBeTrue();
+    expect(component.asientoForm.hasError('descuadrado')).toBe(true);
   });
 
   it('accepts a balanced asiento', () => {
@@ -63,6 +63,6 @@ describe('AsientosContablesComponent', () => {
     component.detallesFormArray.at(0).patchValue({ cuentaContableId: 1, debe: 100, haber: 0 });
     component.detallesFormArray.at(1).patchValue({ cuentaContableId: 2, debe: 0, haber: 100 });
     component.asientoForm.updateValueAndValidity();
-    expect(component.asientoForm.hasError('descuadrado')).toBeFalse();
+    expect(component.asientoForm.hasError('descuadrado')).toBe(false);
   });
 });
