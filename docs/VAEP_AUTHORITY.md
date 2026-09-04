@@ -131,7 +131,7 @@ Reglas fail-closed:
 - más de un manifest nuevo => fail-closed;
 - exactamente un manifest => el control state debe existir, tener contrato válido y `allowExistingActiveSessions=true`;
 - control ausente, malformado, con claves desconocidas o valor distinto de `FROZEN|OPEN` => fail-closed;
-- solo Fase 7/certificación integral puede dejar la admisión en `OPEN` después de validar la migración completa y sus gates causales.
+- Fase 7/certificación integral autoriza el primer retorno a `OPEN` tras la migración. Después de `MIGRATION_F0_F7=CLOSED/PASS`, un hardening posterior del control-plane puede volver de `FROZEN` a `OPEN` sin reabrir fases únicamente si el HEAD de hardening tiene `VAEP engine lightweight checks=SUCCESS` y `VAEP Jules Diagnostic=SUCCESS`, no existe regresión concreta de MASTER y PR #2 permanece OPEN+DRAFT.
 
 ## 8. Retry cap
 
