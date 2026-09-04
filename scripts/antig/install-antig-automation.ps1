@@ -112,7 +112,7 @@ if ([int]$div[0] -ne 0 -or [int]$div[1] -ne 0) {
 
 Invoke-Native gh @("auth","status") | Out-Null
 
-$agents = Invoke-Native agy @("agents")
+$agents = Invoke-Native -File $agyCommand -Arguments @("agents")
 if ($agents.Text -notmatch 'variapp-reviewer') {
     throw "Antigravity CLI did not discover workspace agent 'variapp-reviewer'. Reopen from repo root and retry."
 }
