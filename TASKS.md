@@ -4,11 +4,11 @@ Registro operativo resumido de cierres ERP certificados. La autoridad de ejecuci
 
 ## Gobierno VAEP
 
-- [x] Autoridad documental unificada en Jules v3.25 con cierre por padre y checkpoints `:00/:15/:30/:45/:55`.
-- v3.20/v3.21 quedan como historia; se conservan ATTEMPT1+R2, R3 prohibido, QA takeover y gates de evidencia.
-- [x] Worker compartido y cuatro workflows Jules alineados estáticamente con v3.25, conservando la ruta `vaep-jules-worker-v320.sh` por compatibilidad.
-- [x] Guard de throughput v3.26: objetivo `3 LISTO / rolling 60m`, dwell máximo de parent 20 min, recovery/failover sin progreso y presupuesto de lane Jules de 18 min antes de handoff al controller.
-- [x] Prueba controlada disponible: `bash .github/scripts/vaep-jules-throughput-guard-v326.sh --static-self-test`; valida guardrails sin red, secretos, sesión ni attempt.
+- [x] Autoridad operativa unificada en `docs/VAEP_AUTHORITY.md` como **MAESTRO único**.
+- [x] Las reglas se editan en la misma ruta; no se crean protocolos/documentos/scripts operativos numerados.
+- [x] Jules A/B/C/D y las cinco automatizaciones consumen el mismo MAESTRO.
+- [x] Históricos en Git/CHANGELOG/BITACORA son evidencia únicamente y no gobiernan ejecución.
+- [x] Retry, QA takeover, parent-close, ACTIVE_REAL, throughput y gates se definen exclusivamente en el MAESTRO.
 
 ## ERP-N2.2 — Orden de compra
 
