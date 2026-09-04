@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "OPEN",
+  "newDispatchAdmission": "FROZEN",
   "allowExistingActiveSessions": true,
-  "reason": "CODEX_AUDIT_REMEDIATION_COMPLETE",
+  "reason": "MASTER_FAIL_CLOSED_CODEX_DISABLED_NO_PHASE7_CERTIFICATION",
   "updatedAtUtc": "2026-09-04T21:20:00Z"
 }
