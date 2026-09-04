@@ -671,3 +671,15 @@ RCA previo: antes del ajuste, ambos proyectos reaccionaban al mismo repositorio 
 Limitación de certificación: el conector read-only no expone los campos Production Branch/Preview Tracking y todavía no existe un push legítimo posterior al cambio manual. Por ello, la configuración final se registra como verificada manualmente por el operador y respaldada por ausencia de deployments posteriores, pero la prueba natural definitiva queda pendiente del próximo push legítimo de `Desarrollo`. El resultado esperado es deployment solo en `variapp-desarrollo` cuando corresponda y ningún Preview en `varistorehn`.
 
 El estado `build-rate-limit` queda documentado como limitación previa de `variapp-desarrollo`; no se relanzó ningún workflow/deployment para intentar evadir la cuota. No se modificaron `main`, PR #2, Producción, secretos, BD, dominios, N0.2-N0.5, `frontend/vercel.json` ni `frontend/scripts/vercel-ignore-build.mjs`.
+
+## 2026-09-03 16:10:00 - N4.6.C persistencia de plan de cuentas
+
+Responsable: Codex local autorizado sobre `a85cb962`; la implementación posterior de C en `Desarrollo` fue reconciliada desde los commits concurrentes hasta `f3f92b4b`. La persistencia EF de `CuentaContable` quedó materializada con configuración jerárquica, FK restrictiva, restricciones, índices, migración compatible con MySQL 8.4 y snapshot efectivo.
+
+Evidencia local de la revisión inicial: Infrastructure/API compilaron y las pruebas dirigidas de persistencia pasaron. El controller de cierre registró posteriormente N4.6.C como `LISTO_REAL` en el handoff autoritativo de GitHub, con CI exact-head terminal y P0/P1=0; Codex no sustituye esa evidencia ni duplica el changeset concurrente.
+
+## 2026-09-03 16:35:00 - N4.6.D backend API — candidato local
+
+Responsable: Codex local autorizado; base reconciliada `f3f92b4b`. Se integró y revisó el contrato de DTO/servicio de CuentaContable y se añadió la superficie HTTP protegida de lectura jerárquica, raíces, creación y actualización bajo `ModuloSistema.Finanzas`, reutilizando el repositorio y excepciones existentes. La lectura construye el árbol desde el conjunto completo para no truncar subcuentas profundas.
+
+Validación local: `dotnet test --filter FullyQualifiedName~CuentaContable` PASS (5/5). El artifact Jules D no se integró: su review autoritativo lo rechazó por patch anidado, stubs y pruebas RBAC insuficientes. N4.6.D no se declara `LISTO_REAL` hasta completar security/QA/CI exact-head y revisión del controller; no se afirma evidencia no ejecutada.
