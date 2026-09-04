@@ -11,6 +11,58 @@ test -f "$MASTER_FILE"
 test -f "$PARSER"
 test -f "$WORKER"
 
+manifest_count_action() {
+  local count="${1:?manifest count required}"
+  case "$count" in
+    0) printf 'NO_OP\n'; return 0 ;;
+    1) printf 'ADMIT\n'; return 0 ;;
+    *) printf 'FAIL_CLOSED\n'; return 21 ;;
+  esac
+}
+
+is_active_jules_state() {
+  case "${1:-UNKNOWN}" in
+    QUEUED|PLANNING|IN_PROGRESS|AWAITING_USER_FEEDBACK|AWAITING_PLAN_APPROVAL) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+write_timeout_result() {
+  local output="${1:?output required}"
+  local dispatch_id="${2:?dispatch required}"
+  local task_id="${3:?task required}"
+  local task_attempt="${4:-0}"
+  local session_name="${5:-}"
+  local started_at="${6:-}"
+  local timed_out_at="${7:?timeout timestamp required}"
+  local stop_action="${8:-NOT_ATTEMPTED}"
+  local before_state="${9:-UNKNOWN}"
+  local after_state="${10:-UNKNOWN}"
+  local attempt_consumed=false
+  [[ -n "$session_name" ]] && attempt_consumed=true
+
+  jq -n \
+    --arg authority "MASTER" \
+    --arg masterFile "$MASTER_FILE" \
+    --arg masterCommitSha "$MASTER_COMMIT_SHA" \
+    --arg policyHash "$AUTOMATION_POLICY_HASH" \
+    --arg workerId "$WORKER_ID" \
+    --arg dispatchId "$dispatch_id" \
+    --arg taskId "$task_id" \
+    --arg session "$session_name" \
+    --arg startedAt "$started_at" \
+    --arg timedOutAt "$timed_out_at" \
+    --arg safeRemoteStopAction "$stop_action" \
+    --arg beforeState "$before_state" \
+    --arg afterState "$after_state" \
+    --argjson taskAttempt "$task_attempt" \
+    --argjson attemptConsumed "$attempt_consumed" \
+    --argjson laneBudgetSeconds "$JULES_LANE_BUDGET_SECONDS" \
+    --argjson parentListoTargetRolling60 "$PARENT_LISTO_TARGET_ROLLING_60" \
+    --argjson parentMaxDwellMinutes "$PARENT_MAX_DWELL_MINUTES" \
+    '{authority:$authority,masterFile:$masterFile,masterCommitSha:$masterCommitSha,policyHash:$policyHash,workerId:$workerId,dispatchId:$dispatchId,taskId:$taskId,taskAttempt:$taskAttempt,session:$session,state:"JULES_LANE_BUDGET_EXCEEDED",attemptConsumed:$attemptConsumed,laneBudgetSeconds:$laneBudgetSeconds,parentListoTargetRolling60:$parentListoTargetRolling60,parentMaxDwellMinutes:$parentMaxDwellMinutes,safeRemoteStopAttempted:($session!=""),safeRemoteStopAction:$safeRemoteStopAction,remoteStateBefore:$beforeState,remoteStateAfter:$afterState,ownershipRevoked:true,superseded:true,lateResultAutoIntegrationDenied:true,laneReleased:true,startedAt:$startedAt,timedOutAt:$timedOutAt,patchPresent:false,controllerHandoff:"QA_TAKEOVER_AND_ASSIGN_NEXT_SAFE_IMMEDIATELY",falseListoProhibited:true,numericProtocolLabelsProhibited:true}' > "$output"
+}
+
 # Safe parsing without source or eval. Capture parser status explicitly so
 # process-substitution cannot mask a fail-closed parser error.
 if ! policy_env="$(bash "$PARSER" --env "$MASTER_FILE")"; then
@@ -50,6 +102,19 @@ readonly MASTER_COMMIT_SHA
 
 if [[ "${1:-}" == "--static-self-test" ]]; then
   bash "$PARSER" --self-test >/dev/null
+  [[ "$(manifest_count_action 0)" == "NO_OP" ]]
+  [[ "$(manifest_count_action 1)" == "ADMIT" ]]
+  set +e
+  multi_action="$(manifest_count_action 2)"
+  multi_rc=$?
+  set -e
+  [[ "$multi_action" == "FAIL_CLOSED" && "$multi_rc" -eq 21 ]]
+  is_active_jules_state IN_PROGRESS
+  ! is_active_jules_state COMPLETED
+  phase3_tmp="$(mktemp)"
+  write_timeout_result "$phase3_tmp" "SELFTEST-DISPATCH" "N0.0.H.SELFTEST" 1 "sessions/123" "2026-01-01T00:00:00Z" "2026-01-01T00:18:00Z" "STOP_SIGNAL_SENT" "IN_PROGRESS" "IN_PROGRESS"
+  jq -e '.state=="JULES_LANE_BUDGET_EXCEEDED" and .attemptConsumed==true and .ownershipRevoked==true and .superseded==true and .lateResultAutoIntegrationDenied==true and .laneReleased==true' "$phase3_tmp" >/dev/null
+  rm -f "$phase3_tmp"
   [[ "$PARENT_LISTO_TARGET_ROLLING_60" =~ ^[1-9][0-9]*$ ]]
   [[ "$PARENT_MAX_DWELL_MINUTES" =~ ^[1-9][0-9]*$ ]]
   [[ "$JULES_LANE_BUDGET_SECONDS" =~ ^[1-9][0-9]*$ ]]
@@ -102,9 +167,15 @@ fi
 : "${WORKER_LABEL:=Jules}"
 
 mapfile -t manifests < <(git diff-tree --no-commit-id --name-only --diff-filter=A -r "$GITHUB_SHA" -- "$DISPATCH_PATH/*.json")
-if [[ ${#manifests[@]} -ne 1 ]]; then
-  printf 'VAEP MASTER transport invariant failed: expected exactly one new dispatch manifest; found %d.\n' "${#manifests[@]}" >&2
-  exit 21
+manifest_action_rc=0
+manifest_action="$(manifest_count_action "${#manifests[@]}")" || manifest_action_rc=$?
+if [[ "$manifest_action" == "NO_OP" ]]; then
+  printf 'VAEP MASTER NO_OP: no new dispatch manifest was added by %s for %s. No session, attempt, ownership or recovery was created.\n' "$GITHUB_SHA" "$DISPATCH_PATH"
+  exit 0
+fi
+if [[ "$manifest_action" != "ADMIT" ]]; then
+  printf 'VAEP MASTER transport invariant failed closed: expected at most one new dispatch manifest; found %d.\n' "${#manifests[@]}" >&2
+  exit "$manifest_action_rc"
 fi
 
 manifest="${manifests[0]}"
@@ -141,6 +212,9 @@ jq --arg transport "$transport_note" '.prompt = ($transport + "\n\n" + .prompt)'
 cat "$injected" > "$manifest"
 rm -f "$injected"
 
+runtime_state="$RUNNER_TEMP/vaep-jules-runtime-state.json"
+export VAEP_JULES_RUNTIME_STATE_FILE="$runtime_state"
+
 set +e
 timeout --foreground --signal=TERM --kill-after=30s "${JULES_LANE_BUDGET_SECONDS}s" bash "$WORKER"
 rc=$?
@@ -155,28 +229,73 @@ mkdir -p "$result_dir"
 cp "$original_manifest" "$result_dir/dispatch.json"
 : > "$result_dir/changes.patch"
 
-jq -n \
-  --arg authority "MASTER" \
-  --arg masterFile "$MASTER_FILE" \
-  --arg policyHash "$AUTOMATION_POLICY_HASH" \
-  --arg masterCommitSha "$MASTER_COMMIT_SHA" \
-  --arg workerId "$WORKER_ID" \
-  --arg dispatchId "$dispatch_id" \
-  --arg taskId "$task_id" \
-  --arg state "JULES_LANE_BUDGET_EXCEEDED" \
-  --argjson laneBudgetSeconds "$JULES_LANE_BUDGET_SECONDS" \
-  --argjson parentListoTargetRolling60 "$PARENT_LISTO_TARGET_ROLLING_60" \
-  --argjson parentMaxDwellMinutes "$PARENT_MAX_DWELL_MINUTES" \
-  '{authority:$authority,masterFile:$masterFile,masterCommitSha:$masterCommitSha,policyHash:$policyHash,workerId:$workerId,dispatchId:$dispatchId,taskId:$taskId,state:$state,laneBudgetSeconds:$laneBudgetSeconds,parentListoTargetRolling60:$parentListoTargetRolling60,parentMaxDwellMinutes:$parentMaxDwellMinutes,patchPresent:false,controllerHandoff:"QA_TAKEOVER_AND_ASSIGN_NEXT_SAFE_IMMEDIATELY",falseListoProhibited:true,numericProtocolLabelsProhibited:true}' \
-  > "$result_dir/result.json"
+session_name=""
+task_attempt=0
+started_at=""
+if [[ -f "$runtime_state" ]] && jq -e 'type == "object"' "$runtime_state" >/dev/null 2>&1; then
+  cp "$runtime_state" "$result_dir/runtime-state.json"
+  session_name="$(jq -r '.sessionName // empty' "$runtime_state")"
+  task_attempt="$(jq -r '.taskAttempt // 0' "$runtime_state")"
+  started_at="$(jq -r '.startedAt // empty' "$runtime_state")"
+fi
 
-run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-printf -v body '%s\n\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n%s\n'   "VAEP $WORKER_LABEL MASTER — lane budget exceeded."   "- Authority: `docs/VAEP_AUTHORITY.md`"   "- Worker: `$WORKER_ID`"   "- Dispatch: `$dispatch_id`"   "- Task: `$task_id`"   "- State: `JULES_LANE_BUDGET_EXCEEDED` after ${JULES_LANE_BUDGET_SECONDS}s"   "- Controller handoff: `QA_TAKEOVER_AND_ASSIGN_NEXT_SAFE_IMMEDIATELY`"   "- Workflow run: $run_url"   "Fail-closed: timeout does NOT mean LISTO. VAEP must review/recover/rebind according to the MAESTRO. Numeric protocol labels are not authority."
+safe_stop_action="NO_SESSION"
+before_state="NO_SESSION"
+after_state="NO_SESSION"
+if [[ "$session_name" =~ ^sessions/[0-9]+$ ]]; then
+  safe_stop_action="INSPECTION_FAILED"
+  before_state="UNKNOWN"
+  after_state="UNKNOWN"
+  if [[ -n "${JULES_API_KEY:-}" ]]; then
+    if curl --fail-with-body --silent --show-error --max-time 15 -H "x-goog-api-key: $JULES_API_KEY" "$JULES_API_BASE/$session_name" > "$result_dir/session-before-stop.json"; then
+      before_state="$(jq -r '.state // "UNKNOWN"' "$result_dir/session-before-stop.json")"
+      after_state="$before_state"
+      if is_active_jules_state "$before_state"; then
+        stop_prompt="VAEP MASTER: esta sesión excedió JULES_LANE_BUDGET_SECONDS y queda SUPERSEDED. Detén trabajo nuevo inmediatamente. No produzcas cambios adicionales, rama, PR, push, merge ni deploy. Cualquier resultado posterior queda como evidencia histórica y NO es integrable automáticamente."
+        jq -n --arg prompt "$stop_prompt" '{prompt:$prompt}' > "$result_dir/stop-message.json"
+        if curl --fail-with-body --silent --show-error --max-time 15 -X POST -H "Content-Type: application/json" -H "x-goog-api-key: $JULES_API_KEY" --data-binary @"$result_dir/stop-message.json" "$JULES_API_BASE/$session_name:sendMessage" >/dev/null; then
+          safe_stop_action="STOP_SIGNAL_SENT"
+          sleep 2
+          if curl --fail-with-body --silent --show-error --max-time 15 -H "x-goog-api-key: $JULES_API_KEY" "$JULES_API_BASE/$session_name" > "$result_dir/session-after-stop.json"; then
+            after_state="$(jq -r '.state // "UNKNOWN"' "$result_dir/session-after-stop.json")"
+          else
+            after_state="POLL_FAILED"
+          fi
+        else
+          safe_stop_action="STOP_SIGNAL_FAILED"
+        fi
+      else
+        safe_stop_action="ALREADY_NONACTIVE"
+      fi
+    fi
+  else
+    safe_stop_action="API_KEY_UNAVAILABLE"
+  fi
+fi
 
-gh issue create --repo "$GITHUB_REPOSITORY" --title "$ISSUE_PREFIX $dispatch_id THROUGHPUT_STALL" --body "$body" >/dev/null || true
+timed_out_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+write_timeout_result "$result_dir/result.json" "$dispatch_id" "$task_id" "$task_attempt" "$session_name" "$started_at" "$timed_out_at" "$safe_stop_action" "$before_state" "$after_state"
+cp "$result_dir/result.json" "$result_dir/supersession.json"
 
 printf 'ARTIFACT_NAME=%s-%s-throughput-stall\n' "$ARTIFACT_PREFIX" "$dispatch_id" >> "$GITHUB_ENV"
 printf 'RESULT_DIR=%s\n' "$result_dir" >> "$GITHUB_ENV"
 
-printf 'VAEP MASTER lane budget exceeded for %s (%s). Lane released for controller failover.\n' "$dispatch_id" "$task_id" >&2
+run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+issue_json="$(jq -c '.' "$result_dir/result.json")"
+printf -v body '%s\n\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n%s\n' \
+  "VAEP $WORKER_LABEL MASTER — lane budget exceeded and session superseded." \
+  "- Authority: `docs/VAEP_AUTHORITY.md`" \
+  "- MASTER commit: `$MASTER_COMMIT_SHA`" \
+  "- Policy hash: `$AUTOMATION_POLICY_HASH`" \
+  "- Worker: `$WORKER_ID`" \
+  "- Dispatch: `$dispatch_id`" \
+  "- Task: `$task_id`; attempt: `$task_attempt/$JULES_MAX_ATTEMPTS`" \
+  "- Session: `${session_name:-NO_SESSION}`" \
+  "- Stop action: `$safe_stop_action`; before: `$before_state`; after: `$after_state`" \
+  "- Workflow run: $run_url" \
+  "SUPERSEDED=true; OWNERSHIP_REVOKED=true; LANE_RELEASED=true; LATE_RESULT_AUTO_INTEGRATION_DENIED=true. Structured evidence: `$issue_json`"
+
+gh issue create --repo "$GITHUB_REPOSITORY" --title "[VAEP-JULES-SUPERSEDED] $dispatch_id" --body "$body" >/dev/null
+
+printf 'VAEP MASTER lane budget exceeded for %s (%s). Ownership revoked, session superseded and lane released for controller failover.\n' "$dispatch_id" "$task_id" >&2
 exit 124
