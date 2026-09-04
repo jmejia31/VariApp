@@ -255,7 +255,7 @@ Este rollup supersede únicamente el estado operativo stale anterior del bloque 
 - [x] Schema estructurado y self-test CI agregados.
 - [x] Instalador local seguro preparado con permisos finos de Antigravity CLI; no usa bypass global de permisos.
 - [x] Gobernanza `AGENTS.md` y `docs/COLABORACION_IA.md` actualizada con ATTEMPT1/R2, QA takeover y prohibición de auto-certificación.
-- [ ] AntiG RESERVED_INACTIVE: activación de Scheduled Task `VariApp-AntiG-Reviewer` suspendida; AntiG permanece reservado e inactivo conforme a MAESTRO.
+- [x] AntiG RESERVED_INACTIVE: no existe activación pendiente; scheduler y handoff processing permanecen deshabilitados por MASTER.
 
 
 ## AntiG P1 hardening — 2026-09-03
@@ -266,7 +266,7 @@ Este rollup supersede únicamente el estado operativo stale anterior del bloque 
 - [x] Cuarentena de handoffs inválidos con avance de watermark para evitar lane starvation.
 - [x] Self-tests funcionales de contrato, rutas protegidas y aislamiento de worktree.
 - [x] Rollback transaccional del instalador si falla la fase mutante.
-- [ ] AntiG RESERVED_INACTIVE: Scheduled Task `VariApp-AntiG-Reviewer` reservada e inactiva según gobernanza MASTER.
+- [x] AntiG RESERVED_INACTIVE: scheduler deshabilitado; no existe tarea operativa AntiG requerida por el flujo vigente.
 
 ## AntiG P1 hardening — cierre técnico Codex — 2026-09-04
 
@@ -278,7 +278,7 @@ Este rollup supersede únicamente el estado operativo stale anterior del bloque 
 - [x] Estado de publicación durable `COMMENT_PENDING` tras confirmar `evidenceHead`, con deduplicación antes de comentarios.
 - [x] Rollback del instalador restaura XML de tarea preexistente o elimina solo la tarea nueva.
 - [x] Self-tests funcionales ampliados para contrato, aislamiento, staging, paths protegidos, patch causal, watermark, idempotencia y planes de rollback.
-- [ ] AntiG RESERVED_INACTIVE: instalación física y Scheduled Task permanecen inactivas; no se ejecutan en esta fase.
+- [x] AntiG RESERVED_INACTIVE: instalación/scheduler/handoff processing están bloqueados fail-closed; futura reincorporación exige autorización explícita.
 
 ## ERP-N4.7 — Asientos Contables — ROLLUP 2026-09-04
 
@@ -385,3 +385,14 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
 
 **MIGRATION_PHASE_5=CLOSED/PASS. UNIQUE_LIVE_RULES_NOT_IN_MASTER=0. ACTIVE_VERSIONED_PROTOCOL_DOCS=0. HISTORICAL_MANIFESTS_IN_ACTIVE_PATHS=0. DOT_VAEP_DISPATCH=0. CLEANUP_TRIGGER=PASS. FASE_6=NOT_STARTED. CURRENT_PARENT=N4.7.H. N4.8.A=HELD. FALSE_PASS=NO. FALSE_LISTO=NO. SCOPE_LEAK=NO.**
 
+## VAEP Fase 6 — AntiG RESERVED_INACTIVE — 2026-09-04
+
+- [x] MASTER contiene el estado canónico AntiG completo y fail-closed.
+- [x] Preservados los seis componentes AntiG requeridos; ninguno fue eliminado.
+- [x] Agent deshabilitado como main/subagent; worker normal devuelve `NO_ACTION`; instalador no contiene ruta de creación de scheduler.
+- [x] Self-test AntiG valida componentes, MASTER, no scheduler creation, no handoff runtime, no LISTO_REAL y cero labels protocolarios numéricos activos.
+- [x] Runbook y consumidores vigentes quedaron alineados al estado reservado.
+- [x] Los tres checkboxes históricos de activación pendiente quedaron cerrados; `ANTIG_CURRENT_QUEUE_ITEM=NO`.
+- [x] `CURRENT_PARENT=N4.7.H`; `N4.8.A=HELD`. Fase 6 no certifica N4.7.H ni promueve N4.8.
+
+**MIGRATION_PHASE_6=CLOSED/PASS. ANTIG_STATUS=RESERVED_INACTIVE. ANTIG_OPERATIONAL_NOW=FALSE. ANTIG_SCHEDULER=DISABLED. ANTIG_HANDOFF_PROCESSING=DISABLED. ANTIG_CURRENT_QUEUE_ITEM=NO. ANTIG_CAN_CERTIFY_LISTO_REAL=FALSE. FASE_7=NOT_STARTED. FALSE_PASS=NO. FALSE_LISTO=NO. SCOPE_LEAK=NO.**
