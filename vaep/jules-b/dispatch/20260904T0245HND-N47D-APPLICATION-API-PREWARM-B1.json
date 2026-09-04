@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-B-N47D-APPLICATION-API-PREWARM-B1-20260904T0245HND",
+  "taskId": "N4.7.D.APPLICATION_API.PREWARM",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "e0075d937373ec25bfe8eb6905ee401de6480321",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Application/**/Asiento*.cs; backend/src/API/**/Asiento*.cs; backend/tests/**/Asiento*Tests.cs",
+  "prompt": "VAEP v3.29 THROUGHPUT_BREACH HARD. WORK_CAN_PIPELINE__PROMOTION_CANNOT. CURRENT_PARENT remains N4.7.C; N4.7.D is NEXT_SAFE prewarm only and MUST NOT be promoted or marked LISTO_REAL. Using exact base e0075d937373ec25bfe8eb6905ee401de6480321, inspect existing conventions and implement the smallest coherent N4.7.D application/service/API slice for AsientoContable/AsientoDetalle, preserving the hard invariant Debitos=Creditos, idempotency, ProblemDetails and existing domain authority. Exclusive write scope: Application/API Asiento-specific files plus directed tests only. Do not touch EF context/config/migrations/snapshot, frontend, workflows, docs/control-plane, main, Production, branches, merge, secrets or deploy. If persistence contract required from N4.7.C is not yet available, fail closed with exact missing symbol/contract and still return useful review/tests that do not fabricate interfaces. Run proportional backend build/tests; SELF_REVIEW_PASS_1=PASS and SELF_REVIEW_PASS_2=PASS before COMPLETED. Return patch only; controller review/integration required."
+}
