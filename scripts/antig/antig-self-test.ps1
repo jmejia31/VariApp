@@ -5,56 +5,52 @@ param([switch]$StaticOnly)
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
-function Invoke-TestGit {
-    param([string]$WorkingDirectory,[string[]]$Arguments)
-    $previousErrorAction = $ErrorActionPreference
-    try {
-        # Git emits informational worktree messages on stderr. Preserve them and
-        # determine success solely from the native exit code.
-        $ErrorActionPreference = "Continue"
-        $output = & git -C $WorkingDirectory @Arguments 2>&1
-        $exitCode = $LASTEXITCODE
-    }
-    finally {
-        $ErrorActionPreference = $previousErrorAction
-    }
-    if ($exitCode -ne 0) {
-        throw "git -C $WorkingDirectory $($Arguments -join ' ') failed: " + (($output | Out-String).Trim())
-    }
-    return (($output | Out-String).Trim())
-}
-
 $repoRoot = (& git rev-parse --show-toplevel 2>$null | Out-String).Trim()
 if ([string]::IsNullOrWhiteSpace($repoRoot)) { throw "Not inside a Git repository." }
 
 $required = @(
     ".agents/agents/variapp-reviewer/agent.md",
+    "docs/ANTIGRAVITY_AUTOMATION.md",
     "scripts/antig/antig-review-worker.ps1",
+    "scripts/antig/antig-self-test.ps1",
     "scripts/antig/install-antig-automation.ps1",
     "vaep/schemas/antig-review-result.schema.json",
-    "docs/ANTIGRAVITY_AUTOMATION.md"
+    "docs/VAEP_AUTHORITY.md"
 )
 foreach ($rel in $required) {
-    $path = Join-Path $repoRoot $rel
-    if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { throw "Missing $rel" }
+    if (-not (Test-Path -LiteralPath (Join-Path $repoRoot $rel) -PathType Leaf)) {
+        throw "Missing preserved AntiG component: $rel"
+    }
 }
 
-$schemaPath = Join-Path $repoRoot "vaep/schemas/antig-review-result.schema.json"
-$schema = Get-Content -LiteralPath $schemaPath -Raw | ConvertFrom-Json
-if ($schema.properties.decision.enum -notcontains "READY_FOR_VAEP") { throw "Schema missing READY_FOR_VAEP." }
-if ($schema.properties.decision.enum -contains "LISTO_REAL") { throw "AntiG schema must not allow LISTO_REAL." }
+$schema = Get-Content -LiteralPath (Join-Path $repoRoot "vaep/schemas/antig-review-result.schema.json") -Raw | ConvertFrom-Json
+if ($schema.properties.decision.enum -contains "LISTO_REAL") {
+    throw "Dormant AntiG schema must not allow LISTO_REAL."
+}
 
-$agent = Get-Content -LiteralPath (Join-Path $repoRoot ".agents/agents/variapp-reviewer/agent.md") -Raw
+$master = Get-Content -LiteralPath (Join-Path $repoRoot "docs/VAEP_AUTHORITY.md") -Raw
 foreach ($marker in @(
-    "name: variapp-reviewer",
-    "Never declare or write LISTO_REAL",
-    "Never run git add, commit, push, merge, rebase, reset, checkout or switch"
+    "ANTIG_STATUS=RESERVED_INACTIVE",
+    "ANTIG_OPERATIONAL_NOW=FALSE",
+    "ANTIG_SCHEDULER=DISABLED",
+    "ANTIG_HANDOFF_PROCESSING=DISABLED",
+    "ANTIG_AUTHORITY=MASTER",
+    "ANTIG_CAN_CERTIFY_LISTO_REAL=FALSE",
+    "ANTIG_FUTURE_REINCORPORATION=EXPLICIT_AUTHORIZATION_REQUIRED"
 )) {
-    if ($agent -notlike "*$marker*") { throw "Agent guard missing: $marker" }
+    if ($master -notlike "*$marker*") { throw "MASTER AntiG state missing: $marker" }
 }
 
+$agentPath = Join-Path $repoRoot ".agents/agents/variapp-reviewer/agent.md"
 $workerPath = Join-Path $repoRoot "scripts/antig/antig-review-worker.ps1"
 $installerPath = Join-Path $repoRoot "scripts/antig/install-antig-automation.ps1"
+$runbookPath = Join-Path $repoRoot "docs/ANTIGRAVITY_AUTOMATION.md"
+
+$agent = Get-Content -LiteralPath $agentPath -Raw
+$worker = Get-Content -LiteralPath $workerPath -Raw
+$installer = Get-Content -LiteralPath $installerPath -Raw
+$runbook = Get-Content -LiteralPath $runbookPath -Raw
+
 foreach ($path in @($workerPath,$installerPath,$PSCommandPath)) {
     $tokens = $null
     $errors = $null
@@ -62,85 +58,40 @@ foreach ($path in @($workerPath,$installerPath,$PSCommandPath)) {
     if ($errors.Count -gt 0) { throw "PowerShell syntax error in $path : $($errors[0].Message)" }
 }
 
-$worker = Get-Content -LiteralPath $workerPath -Raw
-$installer = Get-Content -LiteralPath $installerPath -Raw
-foreach ($marker in @("settingsBackup","stateBackup","AntiG installation rolled back transactionally","/Query")) {
-    if ($installer -notlike "*$marker*") { throw "Installer transactional guard missing: $marker" }
+foreach ($marker in @("RESERVED_INACTIVE","mainAgent: false","subagent: false","ANTIG_HANDOFF_PROCESSING=DISABLED","ANTIG_CAN_CERTIFY_LISTO_REAL=FALSE")) {
+    if ($agent -notlike "*$marker*") { throw "Inactive agent guard missing: $marker" }
+}
+foreach ($marker in @("RESERVED_INACTIVE","ANTIG_HANDOFF_PROCESSING=DISABLED","ANTIG_NO_ACTION=RESERVED_INACTIVE")) {
+    if ($worker -notlike "*$marker*") { throw "Inactive worker guard missing: $marker" }
+}
+foreach ($marker in @("RESERVED_INACTIVE","ANTIG_SCHEDULER=DISABLED","ANTIG_INSTALLATION_ALLOWED=FALSE","/Delete")) {
+    if ($installer -notlike "*$marker*") { throw "Inactive installer guard missing: $marker" }
+}
+foreach ($marker in @("RESERVED_INACTIVE","ANTIG_SCHEDULER=DISABLED","ANTIG_HANDOFF_PROCESSING=DISABLED","EXPLICIT_AUTHORIZATION_REQUIRED")) {
+    if ($runbook -notlike "*$marker*") { throw "Inactive runbook guard missing: $marker" }
 }
 
-if ($worker -match 'dangerously-skip-permissions') { throw "Unsafe Antigravity permission bypass detected." }
-if ($worker -match 'git\s+@\("add","--all"\)' -or $worker -match '"add","--all"') { throw "Unsafe git add --all detected." }
-if ($worker -match '"restore","--staged","--worktree","--","\."') { throw "Unsafe whole-tree restore detected." }
-
-foreach ($marker in @(
-    'origin/$Branch moved during AntiG review',
-    "worktree",
-    "--detach",
-    "Assert-DispatchContract",
-    "Assert-ResultContract",
-    "Test-ProtectedPath",
-    "frontend/vercel.json",
-    "frontend/scripts/vercel-ignore-build.mjs",
-    "Select-CausalArtifact",
-    "Assert-GitPatchContract",
-    "Read-JsonOrQuarantine",
-    "Assert-RemoteAt",
-    "Resolve-AgyCommand",
-    "COMMENT_PENDING",
-    "QUARANTINED_INVALID_HANDOFF",
-    "staged paths differ from authorized paths",
-    "READY_FOR_VAEP",
-    "LISTO_REAL=no"
-)) {
-    if ($worker -notlike "*$marker*") { throw "Worker guard missing: $marker" }
+if ($installer -match '(?i)/Create|Register-ScheduledTask|New-ScheduledTask') {
+    throw "Scheduler creation path detected while AntiG is RESERVED_INACTIVE."
 }
 
-# Functional contract tests execute the worker's real validation helpers without gh/agy/network.
+$activeAntiGText = $agent + [Environment]::NewLine + $worker + [Environment]::NewLine + $installer + [Environment]::NewLine + $runbook
+if ($activeAntiGText -match '(?i)\bv[0-9]+\.[0-9]+\b') {
+    throw "Numeric AntiG protocol/version label remains in active AntiG surfaces."
+}
+
 $psExe = (Get-Process -Id $PID).Path
-& $psExe -NoProfile -ExecutionPolicy Bypass -File $workerPath -ContractSelfTest
-if ($LASTEXITCODE -ne 0) { throw "AntiG contract self-test failed with exit=$LASTEXITCODE." }
+& $psExe -NoProfile -ExecutionPolicy Bypass -File $workerPath -SelfTest
+if ($LASTEXITCODE -ne 0) { throw "Reserved AntiG worker self-test failed." }
 
-$installerSelfTest = Join-Path $repoRoot "scripts/antig/install-antig-automation.ps1"
-& $psExe -NoProfile -ExecutionPolicy Bypass -File $installerSelfTest -SelfTest
-if ($LASTEXITCODE -ne 0) { throw "AntiG installer transaction self-test failed with exit=$LASTEXITCODE." }
+& $psExe -NoProfile -ExecutionPolicy Bypass -File $installerPath -SelfTest
+if ($LASTEXITCODE -ne 0) { throw "Reserved AntiG installer self-test failed." }
 
-# Functional concurrency/isolation test: a concurrent file in the primary checkout must
-# survive disposable review worktree creation, review edits and teardown unchanged.
-$tempRoot = Join-Path ([IO.Path]::GetTempPath()) ("antig-selftest-" + [Guid]::NewGuid().ToString("N"))
-$primary = Join-Path $tempRoot "primary"
-$review = Join-Path $tempRoot "review"
-try {
-    [IO.Directory]::CreateDirectory($primary) | Out-Null
-    Invoke-TestGit $primary @("init") | Out-Null
-    Invoke-TestGit $primary @("config","user.email","antig-selftest@localhost") | Out-Null
-    Invoke-TestGit $primary @("config","user.name","AntiG Self Test") | Out-Null
-
-    [IO.File]::WriteAllText((Join-Path $primary "tracked.txt"),"BASE",[Text.UTF8Encoding]::new($false))
-    Invoke-TestGit $primary @("add","--","tracked.txt") | Out-Null
-    Invoke-TestGit $primary @("commit","-m","base") | Out-Null
-    $base = Invoke-TestGit $primary @("rev-parse","HEAD")
-
-    Invoke-TestGit $primary @("worktree","add","--detach",$review,$base) | Out-Null
-    [IO.File]::WriteAllText((Join-Path $primary "concurrent.txt"),"DO_NOT_DELETE",[Text.UTF8Encoding]::new($false))
-    [IO.File]::WriteAllText((Join-Path $review "tracked.txt"),"REVIEW_CHANGE",[Text.UTF8Encoding]::new($false))
-
-    $reviewDelta = Invoke-TestGit $review @("diff","--name-only")
-    if ($reviewDelta -ne "tracked.txt") { throw "Isolation test: unexpected review delta '$reviewDelta'." }
-
-    Invoke-TestGit $primary @("worktree","remove","--force",$review) | Out-Null
-
-    if (-not (Test-Path -LiteralPath (Join-Path $primary "concurrent.txt"))) {
-        throw "Isolation test: concurrent primary-checkout file was removed."
-    }
-    $concurrent = Get-Content -LiteralPath (Join-Path $primary "concurrent.txt") -Raw
-    if ($concurrent -ne "DO_NOT_DELETE") { throw "Isolation test: concurrent file content changed." }
-    $tracked = Get-Content -LiteralPath (Join-Path $primary "tracked.txt") -Raw
-    if ($tracked -ne "BASE") { throw "Isolation test: primary tracked file changed." }
-}
-finally {
-    if (Test-Path -LiteralPath $tempRoot) { Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue }
-}
-
-Write-Host "ANTIG_HARDENING_REVISION=P1_CLOSED_V2" -ForegroundColor Green
-Write-Host "ANTIG_STATIC_SELF_TEST=PASS" -ForegroundColor Green
-Write-Host "ANTIG_FUNCTIONAL_ISOLATION_TEST=PASS" -ForegroundColor Green
+Write-Host "ANTIG_COMPONENTS_PRESERVED=PASS"
+Write-Host "ANTIG_STATUS=RESERVED_INACTIVE"
+Write-Host "ANTIG_OPERATIONAL_NOW=FALSE"
+Write-Host "ANTIG_SCHEDULER=DISABLED"
+Write-Host "ANTIG_HANDOFF_PROCESSING=DISABLED"
+Write-Host "ANTIG_CAN_CERTIFY_LISTO_REAL=FALSE"
+Write-Host "ANTIG_ACTIVE_NUMERIC_PROTOCOL_LABELS=0"
+Write-Host "ANTIG_RESERVED_INACTIVE_SELF_TEST=PASS"
