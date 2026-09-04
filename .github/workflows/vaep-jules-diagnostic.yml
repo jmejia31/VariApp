@@ -30,6 +30,7 @@ jobs:
         with:
           dotnet-version: '8.0.x'
       - name: Restore and install EF
+        working-directory: backend
         run: |
           dotnet restore InventoryApp.sln
           dotnet tool install --global dotnet-ef --version 8.0.8
