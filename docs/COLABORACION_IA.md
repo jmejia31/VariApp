@@ -113,3 +113,31 @@ Esto cumple trazabilidad sin generar ruido documental artificial.
 - `[skip ci]` solo para cambios administrativos/locales permitidos por `AGENTS.md`.
 
 Las reglas completas viven en `AGENTS.md`.
+
+
+## AntiG automático — Reviewer/Fixer + Preflight + VAEP
+
+AntiG/Antigravity queda especializado como `AUTOMATED_REVIEWER_FIXER`:
+
+- recibe automáticamente handoffs terminales de Jules mediante el worker local;
+- revisa artifact, patch, base SHA, attempt y scope;
+- aplica/corrige únicamente dentro del scope autorizado;
+- ejecuta build/lint/tests/E2E proporcionales cuando apliquen;
+- devuelve `RETURN_TO_JULES` solo en ATTEMPT=1 cuando el defecto exige R2;
+- devuelve `BLOCKED_QA_TAKEOVER` tras ATTEMPT=2 cuando el defecto no puede cerrarse de forma local/segura;
+- entrega `READY_FOR_VAEP` con evidencia, nunca `LISTO_REAL`;
+- puede mantener scripts/preflight/CI cuando ese sea el scope explícito, pero el reviewer de Jules no modifica gobierno/CI fuera del dispatch;
+- nunca toca `main`, Producción, secretos, Vercel, dominios ni bases productivas.
+
+Implementación canónica:
+
+```text
+.agents/agents/variapp-reviewer/agent.md
+scripts/antig/antig-review-worker.ps1
+scripts/antig/install-antig-automation.ps1
+scripts/antig/antig-self-test.ps1
+vaep/schemas/antig-review-result.schema.json
+docs/ANTIGRAVITY_AUTOMATION.md
+```
+
+El worker es fail-closed: requiere checkout limpio y sincronizado, usa mutex local, procesa un handoff por ciclo, no publica si HEAD remoto se mueve y no usa permisos globales irrestrictos.
