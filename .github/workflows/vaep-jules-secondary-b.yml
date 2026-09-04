@@ -40,9 +40,9 @@ jobs:
         with:
           ref: ${{ github.sha }}
           fetch-depth: 2
-      - name: Execute VAEP Jules v3.27 deterministic clarification guard
+      - name: Execute VAEP/Jules MASTER
         shell: bash
-        run: bash .github/scripts/vaep-jules-no-clarification-v327.sh
+        run: bash .github/scripts/vaep-jules-master.sh
       - name: Upload Jules B result artifact
         if: always() && env.RESULT_DIR != ''
         uses: actions/upload-artifact@v4
