@@ -4,6 +4,7 @@ using InventoryApp.Application.DTOs.Contabilidad;
 using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Application.Services;
+using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Enums;
 using InventoryApp.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authorization;
@@ -107,7 +108,7 @@ public sealed class AsientosContablesController : ControllerBase
         }
 
         var cuentaIds = entity.Detalles.Select(d => d.CuentaContableId).Distinct().ToList();
-        var cuentas = await _db.CuentasContables
+        var cuentas = await _db.Set<CuentaContable>()
             .Where(c => cuentaIds.Contains(c.Id))
             .ToDictionaryAsync(c => c.Id, cancellationToken);
 
