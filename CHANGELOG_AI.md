@@ -736,3 +736,14 @@ Gobernanza actualizada: ATTEMPT=1 con defecto estructural puede regresar al úni
 CI: `.github/workflows/vaep-engine-ci.yml` ahora incluye paths AntiG, parsea el schema estructurado y ejecuta `scripts/antig/antig-self-test.ps1 -StaticOnly`.
 
 Límite real: ChatGPT remoto no tiene shell en la PC autorizada, por lo que no puede registrar por sí mismo el Scheduled Task de Windows ni modificar `~/.gemini/antigravity-cli/settings.json`. La activación física queda reducida a una ejecución local de `scripts/antig/install-antig-automation.ps1`, que valida `agy`, GitHub auth, workspace agent, configura permisos finos, crea watermark para no reprocesar historia y registra `VariApp-AntiG-Reviewer` cada minuto. No se tocaron `main`, Producción, Vercel, secretos ni BD productiva.
+
+
+## 2026-09-03 — Hardening P1 AntiG posterior a auditoría Codex
+
+Responsable: ChatGPT remoto autorizado en `Desarrollo`.
+
+Se corrigieron los P1 que bloqueaban la activación local de AntiG. El worker ya no modifica ni restaura el checkout primario: crea un Git worktree temporal aislado desde el exact-head inicial y elimina únicamente ese worktree al terminar. Se eliminó `git add --all`; la publicación usa staging explícito de la lista exacta de paths autorizados y verifica que staged==delta autorizado.
+
+Se añadió validación causal Issue -> workflow run -> artifact único -> dispatch -> result -> gitpatch -> changes.patch; validación de attempt/base/scope, rutas protegidas, identidad de salida AntiG y compatibilidad controlada entre manifests Jules v3.25 y el contrato estructurado v1.0. Un handoff inválido se cuarentena bajo `.git/vaep-antig/quarantine/` y consume su watermark para que no bloquee Issues posteriores; fallos transitorios continúan fail-closed sin consumo automático.
+
+El self-test ahora ejecuta pruebas funcionales del contrato y una prueba real de aislamiento con Git worktree que confirma que un archivo concurrente del checkout primario sobrevive intacto. El instalador conserva permisos finos y añade rollback transaccional de settings/estado/tarea si falla su fase mutante. La activación física continúa prohibida hasta CI del exact-head final + auditoría final independiente.
