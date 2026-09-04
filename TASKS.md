@@ -256,3 +256,14 @@ Este rollup supersede únicamente el estado operativo stale anterior del bloque 
 - [x] Instalador local seguro preparado con permisos finos de Antigravity CLI; no usa bypass global de permisos.
 - [x] Gobernanza `AGENTS.md` y `docs/COLABORACION_IA.md` actualizada con ATTEMPT1/R2, QA takeover y prohibición de auto-certificación.
 - [ ] Activación física del Scheduled Task `VariApp-AntiG-Reviewer` pendiente de ejecutar una sola vez el instalador desde la PC local autorizada. Esta casilla exige evidencia local real y no puede marcarla ChatGPT remoto.
+
+
+## AntiG P1 hardening — 2026-09-03
+
+- [x] Aislar review/fix en Git worktree temporal para preservar trabajo concurrente del checkout primario.
+- [x] Eliminar `git add --all`; staging exacto por paths autorizados.
+- [x] Validar causalidad Issue/run/artifact/dispatch/result/gitpatch/patch, base, attempt, scope y rutas protegidas.
+- [x] Cuarentena de handoffs inválidos con avance de watermark para evitar lane starvation.
+- [x] Self-tests funcionales de contrato, rutas protegidas y aislamiento de worktree.
+- [x] Rollback transaccional del instalador si falla la fase mutante.
+- [ ] Activación física del Scheduled Task VariApp-AntiG-Reviewer: pendiente hasta auditoría final APROBADO_PARA_ACTIVACION y evidencia local real.
