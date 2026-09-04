@@ -2,6 +2,9 @@
 
 Registro operativo resumido de cierres ERP certificados. La autoridad de ejecución detallada permanece en COLA/CONFIG y el Plan Maestro.
 
+> [!IMPORTANT]
+> `TASKS.md` es historial/bitácora resumida y **NO es una fuente machine-readable de CURRENT_PARENT, NEXT_ACTION ni estado operativo vigente**. Un consumidor automático debe leer `CONFIG/COLA/BITACORA` frescos; las ocurrencias históricas de esas claves en este archivo son snapshots preservados y nunca deben seleccionarse por “primera coincidencia”.
+
 ## Gobierno VAEP
 
 - [x] Autoridad operativa unificada en `docs/VAEP_AUTHORITY.md` como **MAESTRO único**.
