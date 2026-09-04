@@ -88,8 +88,10 @@ if ($agents.Text -notmatch 'variapp-reviewer') {
 $settingsDir = Join-Path $HOME ".gemini\antigravity-cli"
 $settingsPath = Join-Path $settingsDir "settings.json"
 [IO.Directory]::CreateDirectory($settingsDir) | Out-Null
+$settingsExisted = Test-Path -LiteralPath $settingsPath
+$settingsBackup = if ($settingsExisted) { [IO.File]::ReadAllBytes($settingsPath) } else { $null }
 
-if (Test-Path -LiteralPath $settingsPath) {
+if ($settingsExisted) {
     $settings = Get-Content -LiteralPath $settingsPath -Raw | ConvertFrom-Json
 }
 else {
@@ -145,11 +147,6 @@ Add-UniqueValues $settings.permissions "allow" $allow
 Add-UniqueValues $settings.permissions "deny" $deny
 
 $json = $settings | ConvertTo-Json -Depth 20
-[IO.File]::WriteAllText(
-    $settingsPath,
-    $json + [Environment]::NewLine,
-    [Text.UTF8Encoding]::new($false)
-)
 
 if (-not $SkipAuthProbe) {
     $probe = Invoke-Native agy @(
@@ -167,8 +164,16 @@ if (-not $SkipAuthProbe) {
 
 & (Join-Path $repoRoot "scripts\antig\antig-self-test.ps1") -StaticOnly
 if ($LASTEXITCODE -ne 0) {
-    throw "AntiG static self-test failed."
+    throw "AntiG static/functional self-test failed."
 }
+
+Invoke-Native powershell.exe @(
+    "-NoProfile",
+    "-ExecutionPolicy","Bypass",
+    "-File",(Join-Path $repoRoot "scripts\antig\antig-review-worker.ps1"),
+    "-SelfTest",
+    "-Once"
+) | Out-Null
 
 $gitDir = (Invoke-Native git @("rev-parse","--git-dir")).Text
 if (-not [IO.Path]::IsPathRooted($gitDir)) {
@@ -203,33 +208,72 @@ $state = [ordered]@{
     installedFromHead = (Invoke-Native git @("rev-parse","HEAD")).Text
 }
 
-[IO.File]::WriteAllText(
-    (Join-Path $stateRoot "state.json"),
-    ($state | ConvertTo-Json -Depth 5) + [Environment]::NewLine,
-    [Text.UTF8Encoding]::new($false)
-)
+$statePath = Join-Path $stateRoot "state.json"
+$stateExisted = Test-Path -LiteralPath $statePath
+$stateBackup = if ($stateExisted) { [IO.File]::ReadAllBytes($statePath) } else { $null }
 
 $workerPath = Join-Path $repoRoot "scripts\antig\antig-review-worker.ps1"
 $quotedWorker = '"' + $workerPath + '"'
 $taskAction = "powershell.exe -NoProfile -ExecutionPolicy Bypass -File $quotedWorker -Once"
+$taskCreated = $false
+$settingsWritten = $false
+$stateWritten = $false
 
-Invoke-Native schtasks.exe @(
-    "/Create",
-    "/TN",$TaskName,
-    "/TR",$taskAction,
-    "/SC","MINUTE",
-    "/MO","1",
-    "/RL","LIMITED",
-    "/F"
-) | Out-Null
+try {
+    [IO.File]::WriteAllText(
+        $settingsPath,
+        $json + [Environment]::NewLine,
+        [Text.UTF8Encoding]::new($false)
+    )
+    $settingsWritten = $true
 
-Invoke-Native powershell.exe @(
-    "-NoProfile",
-    "-ExecutionPolicy","Bypass",
-    "-File",$workerPath,
-    "-SelfTest",
-    "-Once"
-) | Out-Null
+    [IO.File]::WriteAllText(
+        $statePath,
+        ($state | ConvertTo-Json -Depth 5) + [Environment]::NewLine,
+        [Text.UTF8Encoding]::new($false)
+    )
+    $stateWritten = $true
+
+    Invoke-Native schtasks.exe @(
+        "/Create",
+        "/TN",$TaskName,
+        "/TR",$taskAction,
+        "/SC","MINUTE",
+        "/MO","1",
+        "/RL","LIMITED",
+        "/F"
+    ) | Out-Null
+    $taskCreated = $true
+
+    Invoke-Native schtasks.exe @("/Query","/TN",$TaskName) | Out-Null
+}
+catch {
+    $originalError = $_.Exception.Message
+
+    if ($taskCreated) {
+        Invoke-Native schtasks.exe @("/Delete","/TN",$TaskName,"/F") -AllowFailure | Out-Null
+    }
+
+    if ($stateWritten) {
+        if ($stateExisted) {
+            [IO.File]::WriteAllBytes($statePath,$stateBackup)
+        }
+        elseif (Test-Path -LiteralPath $statePath) {
+            Remove-Item -LiteralPath $statePath -Force
+        }
+    }
+
+    if ($settingsWritten) {
+        if ($settingsExisted) {
+            [IO.File]::WriteAllBytes($settingsPath,$settingsBackup)
+        }
+        elseif (Test-Path -LiteralPath $settingsPath) {
+            Remove-Item -LiteralPath $settingsPath -Force
+        }
+    }
+
+    throw "AntiG installation rolled back transactionally: $originalError"
+}
 
 Write-Host ""
 Write-Host "ANTIG_AUTOMATION=INSTALLED" -ForegroundColor Green
