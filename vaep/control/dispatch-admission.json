@@ -1,6 +1,0 @@
-{
-  "newDispatchAdmission": "FROZEN",
-  "allowExistingActiveSessions": true,
-  "reason": "MASTER_MIGRATION_RECONCILIATION",
-  "updatedAtUtc": "2026-09-04T00:00:00Z"
-}
