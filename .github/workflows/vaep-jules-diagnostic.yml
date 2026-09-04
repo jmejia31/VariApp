@@ -113,17 +113,17 @@ jobs:
 
           run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
           body=$(cat <<EOF
-VAEP Jules P0 diagnostic result.
+          VAEP Jules P0 diagnostic result.
 
-- Dispatch: \`$dispatch_id\`
-- Stage: \`$stage\`
-- Detail: $detail
-- Workflow run: $run_url
-- Repository expected: \`jmejia31/VariApp\`
-- Branch expected: \`Desarrollo\`
+          - Dispatch: \`$dispatch_id\`
+          - Stage: \`$stage\`
+          - Detail: $detail
+          - Workflow run: $run_url
+          - Repository expected: \`jmejia31/VariApp\`
+          - Branch expected: \`Desarrollo\`
 
-No Jules task/session was created by this diagnostic workflow. No secret value was printed or persisted.
-EOF
+          No Jules task/session was created by this diagnostic workflow. No secret value was printed or persisted.
+          EOF
           )
 
           gh issue create \
