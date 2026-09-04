@@ -291,3 +291,14 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
 - [ ] `N4.7.H` permanece fail-closed hasta certificar los gates aplicables y P0/P1=0 del exact-head resultante de completar también `CHANGELOG_AI.md`; no false `LISTO_REAL`.
 
 **CURRENT_PARENT=N4.7.H. NEXT_ACTION=reconciliar `CHANGELOG_AI.md` aditivamente, drenar/certificar el exact-head final y solo entonces cerrar H y promover `N4.8.A`.**
+
+## VAEP MASTER migration — cierre F0/F1 — 2026-09-04
+
+- [x] FASE 0 — EXCLUSIVIDAD: `PASS/CLOSED`. `docs/VAEP_AUTHORITY.md` permanece como autoridad operativa única; ChatGPT/VAEP conserva controller/REVIEW_FIRST/QA/certificación; Codex y AntiG no tienen autoridad operativa vigente; PR #2 continúa `OPEN+DRAFT` y `main` permanece congelada.
+- [x] FASE 1 — FREEZE + RECONCILIACIÓN: `PASS/CLOSED`. El guard técnico de admisión está activo en `.github/scripts/vaep-jules-master.sh` y el estado declarativo `vaep/control/dispatch-admission.json` está en `FROZEN`.
+- [x] Admisión Fase 1: cero manifests nuevos => `NO_OP/exit 0`; más de uno => fail-closed; exactamente uno => valida control state antes de sesión/attempt/ownership/recovery; `FROZEN` rechaza nuevos dispatches sin invalidar sesiones `ACTIVE_REAL` preexistentes.
+- [x] Reconciliación N4.7 preservada: `CURRENT_PARENT=N4.7.H`; `N4.8.A=HELD`. El cierre de Fase 1 NO declara `N4.7.H=LISTO_REAL` ni promueve N4.8.
+- [x] `ADMISSION_BATTERY=PASS` sobre los casos aislados ya validados: `NO_OP`, `FROZEN`, `OPEN`, múltiples manifests y estados inválidos.
+- [x] `FALSE_PASS=NO`, `FALSE_LISTO=NO`, `SCOPE_LEAK=NO`.
+
+**MIGRATION_PHASE_0=CLOSED/PASS. MIGRATION_PHASE_1=CLOSED/PASS. NEW_DISPATCH_ADMISSION=FROZEN. FASE_2=NOT_STARTED.**
