@@ -32,6 +32,18 @@ jobs:
           ref: ${{ github.sha }}
           fetch-depth: 2
 
+      - name: Bind VAEP MASTER authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          MASTER_FILE='docs/VAEP_AUTHORITY.md'
+          PARSER='.github/scripts/vaep-policy-parser.sh'
+          test -f "$MASTER_FILE"
+          test -f "$PARSER"
+          bash "$PARSER" --validate "$MASTER_FILE" >/dev/null
+          echo "MASTER_COMMIT_SHA=$(bash "$PARSER" --commit-sha "$MASTER_FILE")" >> "$GITHUB_ENV"
+          echo "AUTOMATION_POLICY_HASH=$(bash "$PARSER" --hash "$MASTER_FILE")" >> "$GITHUB_ENV"
+
       - name: Validate stop manifest
         id: manifest
         shell: bash
