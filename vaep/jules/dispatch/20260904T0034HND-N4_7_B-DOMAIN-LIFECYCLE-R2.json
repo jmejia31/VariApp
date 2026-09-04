@@ -1,0 +1,11 @@
+{
+  "dispatchId": "20260904T0034HND-N4_7_B_DOMAIN_LIFECYCLE-R2",
+  "taskId": "N4.7.B.DOMAIN_CONTRACTS",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "08f8ab61572d81e3ef82ae26ff957dfab3086ab1",
+  "taskAttempt": 2,
+  "reason": "REVIEW_FIRST_REQUIRED: AsientoContable/AsientoDetalle materialized and invariant tests exist, but AsientoContable has no explicit lifecycle/state contract; AuditableEntity only provides audit metadata. N4.7.B DoD cannot be certified until lifecycle semantics are grounded and tested.",
+  "fileScopeHint": "ONLY N4.7.B domain/contracts and directly causal unit tests for AsientoContable/AsientoDetalle lifecycle. Do not touch persistence/migrations/API/UI/N4.8/main/production/Vercel/secrets/deploy/unrelated modules.",
+  "prompt": "R2 causal for N4.7.B only. On exact base 08f8ab61572d81e3ef82ae26ff957dfab3086ab1, inspect the authoritative accounting/domain conventions and the N4.7.A/B evidence before editing. Ground the required AsientoContable lifecycle/state semantics from existing repository contracts; do not invent states if the repository does not define them. If a repository-authoritative lifecycle exists, implement the minimal domain/contract delta and focused unit tests, preserving the current Debe/Haber invariants and CuentaContable relation. If no authoritative lifecycle can be grounded, return BLOCKED with exact evidence and do not fabricate a state model. No persistence, migration, API, UI, N4.8, main, production, Vercel, secrets or deploy. Return artifact/base/diff/scope/tests/self-review evidence; never claim LISTO_REAL."
+}
