@@ -6,6 +6,7 @@ using InventoryApp.Infrastructure.Persistence;
 using InventoryApp.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Moq;
+using Xunit;
 
 namespace InventoryApp.Tests;
 
