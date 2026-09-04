@@ -15,6 +15,9 @@ if ! policy_env="$(bash "$PARSER" --env "$MASTER_FILE")"; then
 fi
 while IFS='=' read -r key val; do
   case "$key" in
+    PARENT_STALL_NO_PROGRESS_MINUTES) PARENT_STALL_NO_PROGRESS_MINUTES="$val" ;;
+    MAX_VOLUNTARY_IDLE) MAX_VOLUNTARY_IDLE="$val" ;;
+    VAEP_CHECKPOINTS) VAEP_CHECKPOINTS="$val" ;;
     JULES_LANE_BUDGET_SECONDS) JULES_LANE_BUDGET_SECONDS="$val" ;;
     JULES_MAX_ATTEMPTS) JULES_MAX_ATTEMPTS_PER_TASK="$val" ;;
     JULES_REWORK_MAX) JULES_REWORK_MAX="$val" ;;
@@ -24,6 +27,9 @@ while IFS='=' read -r key val; do
   esac
 done <<< "$policy_env"
 
+: "${PARENT_STALL_NO_PROGRESS_MINUTES:?MASTER policy parser did not emit PARENT_STALL_NO_PROGRESS_MINUTES}"
+: "${MAX_VOLUNTARY_IDLE:?MASTER policy parser did not emit MAX_VOLUNTARY_IDLE}"
+: "${VAEP_CHECKPOINTS:?MASTER policy parser did not emit VAEP_CHECKPOINTS}"
 : "${JULES_LANE_BUDGET_SECONDS:?MASTER policy parser did not emit JULES_LANE_BUDGET_SECONDS}"
 : "${JULES_MAX_ATTEMPTS_PER_TASK:?MASTER policy parser did not emit JULES_MAX_ATTEMPTS}"
 : "${JULES_REWORK_MAX:?MASTER policy parser did not emit JULES_REWORK_MAX}"
@@ -32,13 +38,15 @@ done <<< "$policy_env"
 : "${MASTER_COMMIT_SHA:?MASTER policy parser did not emit MASTER_COMMIT_SHA}"
 
 readonly VAEP_JULES_PROTOCOL="MASTER"
+readonly PARENT_STALL_NO_PROGRESS_MINUTES
+readonly MAX_VOLUNTARY_IDLE
+readonly VAEP_CHECKPOINTS
 readonly JULES_LANE_BUDGET_SECONDS
 readonly JULES_MAX_ATTEMPTS_PER_TASK
 readonly JULES_REWORK_MAX
 readonly PARENT_CLOSE_FIRST
 readonly AUTOMATION_POLICY_HASH
 readonly MASTER_COMMIT_SHA
-readonly VAEP_CHECKPOINTS=":00,:15,:30,:45,:55"
 
 R3_PROHIBITED=false
 if (( JULES_MAX_ATTEMPTS_PER_TASK < 3 )); then
@@ -51,7 +59,9 @@ if [[ "${1:-}" == "--static-self-test" ]]; then
   [[ "$JULES_MAX_ATTEMPTS_PER_TASK" =~ ^[1-9][0-9]*$ ]]
   [[ "$JULES_REWORK_MAX" =~ ^(0|[1-9][0-9]*)$ ]]
   [[ "$PARENT_CLOSE_FIRST" == true || "$PARENT_CLOSE_FIRST" == false ]]
-  [[ "$VAEP_CHECKPOINTS" == ":00,:15,:30,:45,:55" ]]
+  [[ "$PARENT_STALL_NO_PROGRESS_MINUTES" =~ ^[1-9][0-9]*$ ]]
+  [[ "$MAX_VOLUNTARY_IDLE" =~ ^(0|[1-9][0-9]*)$ ]]
+  [[ "$VAEP_CHECKPOINTS" =~ ^:[0-5][0-9](,:[0-5][0-9])*$ ]]
   [[ ${#AUTOMATION_POLICY_HASH} -eq 64 ]]
   [[ "$MASTER_COMMIT_SHA" =~ ^[0-9a-fA-F]{40}$ ]]
   [[ "$R3_PROHIBITED" == true || "$R3_PROHIBITED" == false ]]
@@ -268,12 +278,15 @@ if [[ -z "$session_name" ]]; then
     "TASK_ATTEMPT=$task_attempt" \
     "JULES_MAX_ATTEMPTS_PER_TASK=$JULES_MAX_ATTEMPTS_PER_TASK" \
     "JULES_REWORK_MAX=$JULES_REWORK_MAX" \
+    "PARENT_STALL_NO_PROGRESS_MINUTES=$PARENT_STALL_NO_PROGRESS_MINUTES" \
+    "MAX_VOLUNTARY_IDLE=$MAX_VOLUNTARY_IDLE" \
+    "VAEP_CHECKPOINTS=$VAEP_CHECKPOINTS" \
     "FILE_SCOPE_HINT=$file_scope" \
     "" \
     "Before changing anything, read docs/VAEP_AUTHORITY.md FIRST, then the dispatch, AGENTS.md, PLAN_EJECUCION_AUTONOMA.md and docs/VAEP_JULES.md. MASTER is the only operational Jules authority." \
     "HARD RETRY RULE: this logical task allows at most $JULES_MAX_ATTEMPTS_PER_TASK attempt(s) and $JULES_REWORK_MAX rework(s), exactly as defined by MASTER. Never exceed MASTER retry limits. If the final allowed attempt still contains a blocking defect, report it exactly for ChatGPT/VAEP/Vibe QA takeover and finish your evidence." \
     "PARENT CLOSE FIRST: stay inside the assigned exclusive scope of the current parent. Preparation never promotes N+1. Dispatch, activity or COMPLETED never equals LISTO without review, causal validation and evidence." \
-    "CHECKPOINTS: the task system declares :00/:15/:30/:45 with backup :55. A declared schedule is not proof that a checkpoint ran; only executor evidence is." \
+    "CHECKPOINTS: use VAEP_CHECKPOINTS=$VAEP_CHECKPOINTS from MASTER. A declared schedule is not proof that a checkpoint ran; only executor evidence is." \
     "Work only inside your Jules cloud workspace. Never create branches, pull requests, pushes, merges, deployments, Production changes, secrets, or changes to main." \
     "Do not publish anything to GitHub. Return a reviewable ChangeSet/gitPatch with exact baseCommitId." \
     "Inspect only assigned scope and direct dependencies. If scope materially diverged from PRIMARY_BASE_HEAD and makes the task unsafe, make no changes and report the conflict." \
