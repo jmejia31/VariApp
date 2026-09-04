@@ -76,7 +76,7 @@ jobs:
           git config user.name 'VAEP Controller'
           git config user.email 'actions@users.noreply.github.com'
           git add CHANGELOG_AI.md
-          git commit -m 'docs(N3.6.H): cerrar DevolucionCliente en changelog [VAEP v3.25.1]'
+          git commit -m 'docs(N3.6.H): cerrar DevolucionCliente en changelog [VAEP MASTER]'
 
           git fetch origin Desarrollo --depth=1
           test "$(git rev-parse origin/Desarrollo)" = "$GITHUB_SHA"
