@@ -224,16 +224,15 @@ $issuesRaw = Invoke-Native gh @(
     "--json","number,title"
 )
 
-$issues = @(
-    $issuesRaw.Text |
-    ConvertFrom-Json |
-    Where-Object { $_.title -match '^\[VAEP-JULES(?:-[BCD])?\] .+ result$' }
-)
-
 $watermark = 0
-if ($issues.Count -gt 0) {
-    $numbers = @($issues | ForEach-Object { [int]$_.number })
-    $watermark = [int](($numbers | Measure-Object -Maximum).Maximum)
+$parsedIssues = $issuesRaw.Text | ConvertFrom-Json
+foreach ($item in $parsedIssues) {
+    if ($item.title -match '^\[VAEP-JULES(?:-[BCD])?\] .+ result$') {
+        $num = [int]$item.number
+        if ($num -gt $watermark) {
+            $watermark = $num
+        }
+    }
 }
 
 $state = [ordered]@{
