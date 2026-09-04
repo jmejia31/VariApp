@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-Coordinar a Javier Mejía, Codex, AntiG/Antigravity y ChatGPT con mínima pérdida de contexto, mínimo trabajo redundante, aislamiento entre proyectos y máxima trazabilidad en `Desarrollo`.
+Coordinar a Javier Mejía, Codex y ChatGPT con mínima pérdida de contexto, mínimo trabajo redundante, aislamiento entre proyectos y máxima trazabilidad en `Desarrollo`.
 
 ## Identidad de este proyecto
 
@@ -45,12 +45,6 @@ Si hay discrepancia entre memoria y repositorio real, prevalece el repositorio y
 - usa memoria canónica y evita reescaneos/relecturas innecesarias;
 - tras reconexión continúa desde Git + contexto, no reinicia diagnóstico.
 
-### AntiG / Antigravity
-
-- implementa y prueba desde el proyecto local autorizado;
-- sincroniza `Desarrollo` antes del trabajo y publica cambios trazables;
-- aplica las mismas reglas de rendimiento y memoria canónica.
-
 ### ChatGPT
 
 - arquitectura, auditoría, coordinación, revisión y cambios remotos cuando exista conexión GitHub autorizada;
@@ -59,7 +53,7 @@ Si hay discrepancia entre memoria y repositorio real, prevalece el repositorio y
 
 ## Acceso
 
-Acceso local reconocido: Javier Mejía, Codex y AntiG/Antigravity.
+Acceso local reconocido: Javier Mejía y Codex.
 
 ChatGPT y otros agentes operan remotamente solo mediante conectores GitHub autorizados, salvo ampliación explícita documentada por Javier.
 
@@ -115,29 +109,14 @@ Esto cumple trazabilidad sin generar ruido documental artificial.
 Las reglas completas viven en `AGENTS.md`.
 
 
-## AntiG automático — Reviewer/Fixer + Preflight + VAEP
+## AntiG / Antigravity — deshabilitado
 
-AntiG/Antigravity queda especializado como `AUTOMATED_REVIEWER_FIXER`:
+AntiG/Antigravity está fuera del flujo operativo y no bloquea automatizaciones, handoffs, reviews, QA ni promociones.
 
-- recibe automáticamente handoffs terminales de Jules mediante el worker local;
-- revisa artifact, patch, base SHA, attempt y scope;
-- aplica/corrige únicamente dentro del scope autorizado;
-- ejecuta build/lint/tests/E2E proporcionales cuando apliquen;
-- devuelve `RETURN_TO_JULES` solo en ATTEMPT=1 cuando el defecto exige R2;
-- devuelve `BLOCKED_QA_TAKEOVER` tras ATTEMPT=2 cuando el defecto no puede cerrarse de forma local/segura;
-- entrega `READY_FOR_VAEP` con evidencia, nunca `LISTO_REAL`;
-- puede mantener scripts/preflight/CI cuando ese sea el scope explícito, pero el reviewer de Jules no modifica gobierno/CI fuera del dispatch;
-- nunca toca `main`, Producción, secretos, Vercel, dominios ni bases productivas.
-
-Implementación canónica:
+Flujo vigente:
 
 ```text
-.agents/agents/variapp-reviewer/agent.md
-scripts/antig/antig-review-worker.ps1
-scripts/antig/install-antig-automation.ps1
-scripts/antig/antig-self-test.ps1
-vaep/schemas/antig-review-result.schema.json
-docs/ANTIGRAVITY_AUTOMATION.md
+Jules -> REVIEW-FIRST VAEP -> R2 único cuando corresponda / QA_TAKEOVER -> VAEP Controller -> LISTO_REAL
 ```
 
-El worker es fail-closed: requiere checkout limpio y sincronizado, usa mutex local, procesa un handoff por ciclo, no publica si HEAD remoto se mueve y no usa permisos globales irrestrictos.
+Los artefactos AntiG existentes permanecen únicamente como historial técnico inactivo. No se requiere `agy`, login Antigravity ni Scheduled Task para continuar VariApp.
