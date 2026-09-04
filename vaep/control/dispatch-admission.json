@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "FROZEN",
+  "newDispatchAdmission": "OPEN",
   "allowExistingActiveSessions": true,
-  "reason": "CODEX_AUDIT_REMEDIATION_MASTER_HARDENING",
-  "updatedAtUtc": "2026-09-04T21:15:00Z"
+  "reason": "CODEX_AUDIT_REMEDIATION_COMPLETE",
+  "updatedAtUtc": "2026-09-04T21:20:00Z"
 }
