@@ -5,6 +5,7 @@ set -euo pipefail
 # ALL operational rules come from docs/VAEP_AUTHORITY.md.
 readonly MASTER_FILE="docs/VAEP_AUTHORITY.md"
 readonly WORKER=".github/scripts/vaep-jules-worker.sh"
+readonly CONTROL_STATE_FILE="vaep/control/dispatch-admission.json"
 readonly PARENT_LISTO_TARGET_ROLLING_60=3
 readonly PARENT_MAX_DWELL_MINUTES=20
 readonly JULES_LANE_BUDGET_SECONDS="${VAEP_JULES_LANE_BUDGET_SECONDS:-1080}"
@@ -58,9 +59,36 @@ fi
 : "${WORKER_LABEL:=Jules}"
 
 mapfile -t manifests < <(git diff-tree --no-commit-id --name-only --diff-filter=A -r "$GITHUB_SHA" -- "$DISPATCH_PATH/*.json")
+if [[ ${#manifests[@]} -eq 0 ]]; then
+  printf 'VAEP MASTER NO_OP: no new dispatch manifest was added by %s for %s.\n' "$GITHUB_SHA" "$DISPATCH_PATH"
+  exit 0
+fi
 if [[ ${#manifests[@]} -ne 1 ]]; then
   printf 'VAEP MASTER transport invariant failed: expected exactly one new dispatch manifest; found %d.\n' "${#manifests[@]}" >&2
   exit 21
+fi
+
+if [[ ! -f "$CONTROL_STATE_FILE" ]]; then
+  printf 'VAEP MASTER admission invariant failed: missing control state file %s.\n' "$CONTROL_STATE_FILE" >&2
+  exit 25
+fi
+
+if ! jq -e '
+  type == "object" and
+  has("newDispatchAdmission") and
+  (.newDispatchAdmission | type == "string") and
+  (.newDispatchAdmission == "OPEN" or .newDispatchAdmission == "FROZEN") and
+  has("allowExistingActiveSessions") and
+  (.allowExistingActiveSessions == true)
+' "$CONTROL_STATE_FILE" >/dev/null; then
+  printf 'VAEP MASTER admission invariant failed: invalid control state file %s.\n' "$CONTROL_STATE_FILE" >&2
+  exit 25
+fi
+
+dispatch_admission="$(jq -r '.newDispatchAdmission' "$CONTROL_STATE_FILE")"
+if [[ "$dispatch_admission" == "FROZEN" ]]; then
+  printf 'VAEP MASTER rejected new dispatch: NEW_DISPATCH_ADMISSION=FROZEN; existing ACTIVE_REAL sessions remain unaffected.\n' >&2
+  exit 26
 fi
 
 manifest="${manifests[0]}"
