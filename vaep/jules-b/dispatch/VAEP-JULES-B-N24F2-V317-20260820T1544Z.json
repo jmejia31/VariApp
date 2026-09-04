@@ -1,9 +1,0 @@
-{
-  "workerId": "JULES_B",
-  "dispatchId": "VAEP-JULES-B-N24F2-V317-20260820T1544Z",
-  "taskId": "N2.4.F.2",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "a177efdcdc11151044008b0ee8cc6461c0480d9b",
-  "prompt": "VAEP v3.17 — N2.4.F.2 SAFE-NEXT. Trabaja ahora sin esperar QA/rollup de E. Scope: seguridad y permisos FRONTEND de FacturaProveedor que sean independientes del shared contract aún en reconciliación. Audita y corrige fail-closed de rutas/guards/acciones UI, PermisosRuntimeService.puede(), visibilidad de Crear/Editar/Confirmar/Anular y pruebas de permisos/E2E aisladas. NO tocar archivos funcionales E.1/E.2 bajo failover, backend, DB, manifests/workflows, package-lock ni Producción. Si una corrección necesita el contrato E aún no certificado, no escribas sobre ese contrato: deja hallazgo exacto y continúa con tests/preflight/read-only útil dentro de F.2. Auto-review, lint/build/tests proporcionales, ChangeSet/gitPatch exacto si hay writes y reporte completo de limitaciones/riesgos/tests no ejecutados. No push/PR/branch/merge/deploy. COMPLETED queda VALIDANDO. Si QA reencola un rework anterior mientras trabajas, termina esta tarea y recoge inmediatamente el rework prioritario de tu cola salvo P0 que exija contención inmediata.",
-  "fileScopeHint": "F.2 frontend security/RBAC/tests independientes; no E.1/E.2 funcional, backend ni control-plane. PROMOTION_BLOCKED_BY_E."
-}

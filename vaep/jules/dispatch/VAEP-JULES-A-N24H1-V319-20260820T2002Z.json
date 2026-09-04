@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-A-N24H1-V319-20260820T2002Z",
-  "workerId": "JULES_A",
-  "taskId": "N2.4.H.1",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "b077914db0e5770403c2224c5610b5703824eae7",
-  "fileScopeHint": "WRITE docs FacturaProveedor técnicos/OpenAPI/runbook/ADR/ERD/rollback y evidencia documental exclusiva H.1; READ N2.4/G/F y código/CI necesario; NO backend/src, frontend/src, workflows, manifests, package/lockfile, main, Producción ni secretos.",
-  "prompt": "VAEP Jules integration protocol v3.19. Read docs/VAEP_AUTHORITY.md, AGENTS.md and docs/VAEP_JULES.md first. Execute exactly N2.4.H.1, already preassigned to Jules A. Prepare the technical documentation for FacturaProveedor using only stable evidence already present in HEAD and reviewed N2.4 artifacts. G is not yet promoted: do not claim final certification, final CI PASS or final commit references that are not terminal; mark such references as pending/reconciliation-required. Update only documentation in the authorized H.1 scope (OpenAPI/runbook/ADR/ERD/rollback only when actually applicable). Preserve exact technical truth, MySQL as database authority, and current RBAC/audit contracts. Run proportional documentary validation (links/references/diff consistency), perform final self-review, report every observation/limitation/risk/recommendation and tests not executed, and return a clean ChangeSet/gitPatch with exact baseCommitId. No branch, PR, push, merge, deploy, main, Production or secrets. Finish COMPLETED unless a genuine human-only business/authorization decision exists."
-}

@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-D-N25B-R2-EVIDENCE-D3-V319-20260821T0336Z",
-  "workerId": "JULES_D",
-  "taskId": "N2.5.B.SUPPORT.EVIDENCE_D3",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "03ae59cb0089cdeac25be350f285c96c2f6f1d3b",
-  "fileScopeHint": "SUPPORT SAME PARENT N2.5.B. WRITE únicamente docs/qa/N2_5_B_R2_EVIDENCE_CROSS_REVIEW_D3.md. READ N2.2/N2.3/N2.4 entities/contracts/tests and N2.5.B R1 evidence. NO implementation/persistence/API/frontend/workflows/TASKS/CHANGELOG/vaep/** excepto este manifest/main/Producción/secrets/deploy.",
-  "prompt": "VAEP v3.19 ZERO-IDLE SUPPORT N2.5.B. Haz revisión independiente evidence-first del R1/R2 esperado. Confirma contra código real qué campos enlazan OrdenCompraDetalle, RecepcionCompraDetalle y FacturaProveedorDetalle; qué datos son snapshot; qué lifecycle/estado limita entradas válidas; y qué comparaciones son factualmente defendibles. Detecta cualquier supuesto inventado, especialmente tolerancias, FX, cardinalidad 1:1, persistencia o rutas. Entrega únicamente docs/qa/N2_5_B_R2_EVIDENCE_CROSS_REVIEW_D3.md con CONFIRMADO/NO_CONFIRMADO/REQUIRED, git diff --check, auto-review y P0/P1. No cerrar B."
-}

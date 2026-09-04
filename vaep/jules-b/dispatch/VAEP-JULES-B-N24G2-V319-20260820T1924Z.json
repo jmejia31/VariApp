@@ -1,9 +1,0 @@
-{
-  "workerId": "JULES_B",
-  "dispatchId": "VAEP-JULES-B-N24G2-V319-20260820T1924Z",
-  "taskId": "N2.4.G.2",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "8c477c318974000b000e3f907bf6733ec7aea2de",
-  "prompt": "VAEP v3.19 FOUR-JULES — N2.4.G.2 QA frontend/E2E/performance FacturaProveedor. Ejecuta AHORA aunque parent F siga VALIDANDO; promoción G espera F, ejecución segura no. Cubre formulario, detalle, lifecycle Borrador→Registrada→Anulada, permisos por acción, navegación, accesibilidad, errores y performance/consultas duplicadas. Reutiliza como referencia la evidencia E.2 revisada, pero NO copies su package-lock ni ningún archivo fuera de scope. WRITE únicamente en frontend/e2e con archivos FacturaProveedor dedicados y, si es útil, docs/qa/N2_4_G2_FRONTEND_QA.md NUEVO. No edites implementación frontend compartida mientras F valida; si encuentras bug funcional, crea una prueba reproducible y repórtalo a VAEP como P0/P1. Prohibido package.json/package-lock, backend, workflows, manifests, scripts, main/Producción, ramas, push, PR, merge o deploy. Ejecuta lint/build/tests/E2E proporcionales realmente posibles, auto-review, declara limitaciones y entrega ChangeSet/gitPatch exacto con baseCommitId. COMPLETED=READY_FOR_VAEP/VALIDANDO, no LISTO.",
-  "fileScopeHint": "WRITE_SCOPE EXCLUSIVO G.2: frontend/e2e/*factura*proveedor* QA NUEVO y opcional docs/qa/N2_4_G2_FRONTEND_QA.md; NO frontend/src mientras F valida; NO package/package-lock/backend/control-plane."
-}

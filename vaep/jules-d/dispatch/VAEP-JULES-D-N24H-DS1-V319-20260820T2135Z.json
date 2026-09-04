@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-D-N24H-DS1-V319-20260820T2135Z",
-  "workerId": "JULES_D",
-  "taskId": "N2.4.H.DS1",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "35cd6d35b7b32c65a930f5ee68774a80b062f4c6",
-  "fileScopeHint": "H SUPPORT WRITE únicamente docs/qa/N2_4_H_D_DOD_CERT_REVIEW.md y evidencia documental nueva propia; READ N2.4.H.1/H.2/H.3 evidence, Issues #82/#84, current CI/gates, TASKS/CHANGELOG/docs and direct implementation/tests needed for verification. NO backend/src, frontend/src, frontend/e2e autoritativos, migrations, workflows, package/lockfile, manifests ajenos, main, Producción ni secretos.",
-  "prompt": "VAEP Jules integration protocol v3.19 ZERO-IDLE CONTROLLED WORK-STEAL SUPPORT. Read docs/VAEP_AUTHORITY.md, AGENTS.md and docs/VAEP_JULES.md first. Your G.3 support D1 is terminal COMPLETED and no longer holds your lane. Execute N2.4.H.DS1 as independent final-DoD support for parent N2.4.H. Review H.1/H.2 and any available H.3 evidence independently; verify traceability, rollback, contracts, database/migrations, RBAC/security/audit, frontend/API behavior, CI/QA, current exact gate evidence, CHANGELOG/TASKS/documentation consistency and whether any P0/P1 remains. Do not edit H.1/H.2/H.3 authoritative files or A/C support files; write only your exclusive D support review document. Treat G as closed only after checking the causal evidence already recorded: G.1 exact-head 7e1844f1 Development/Acceptance/Fase8/M13 SUCCESS, G.2/G.3 causal reconciliations. Identify REQUIRED corrections precisely but do not perform functional implementation. Run proportional read-only checks, list every limitation/test not executed, final self-review mandatory, return a clean ChangeSet/gitPatch with exact baseCommitId and finish COMPLETED unless a genuine human-only business/authorization decision exists. No branch, PR, push, merge, deploy, main, Production or secrets."
-}

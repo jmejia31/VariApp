@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-D-N24H1-SUPPORT-FINAL-D5-V319-20260821T0124Z",
-  "workerId": "JULES_D",
-  "taskId": "N2.4.H.1.SUPPORT.FINAL.D5",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "0743c75f97fbdc4f0d281dbb2026342bc9fa7ce4",
-  "fileScopeHint": "PARENT-FIRST SUPPORT R8. WRITE únicamente docs/qa/N2_4_H1_R8_FINAL_D5.md. READ R7 review, H.1 docs/evidence, rollback/API/domain facts y CI relevante. NO editar los siete docs autoritativos de B, código, migraciones, TASKS, CHANGELOG, workflows, package/lock, manifests ajenos, main, Producción ni secretos.",
-  "prompt": "VAEP Jules v3.19 final independent support para N2.4.H.1 R8. Jules B sigue owner único. Audita la corrección de los blockers de R7: rollback target real, semántica de anulación sin reversión inventada de stock/Kardex/costeo, Down() destructivo sin DownGuard, safeguards quiescence/backup/restore/abort, y eliminación/acotación de claims genéricos MySQL/network no causales. Contrasta además route/DTO/responses/permisos y readiness-only certification para detectar regresiones. No declares cierre del parent. Entrega un único QA doc con P0/P1/REQUIRED/P2-P3 y checklist exacto de aceptación para VAEP. git diff --name-only exactamente ese archivo; git diff --check limpio; auto-review obligatorio; ChangeSet/gitPatch revisable; COMPLETED salvo decisión genuinamente humana. Sin branch/PR/push/merge/deploy/main/Producción/secrets."
-}

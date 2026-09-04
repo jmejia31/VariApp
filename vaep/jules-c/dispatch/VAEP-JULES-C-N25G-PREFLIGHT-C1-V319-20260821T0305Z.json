@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-C-N25G-PREFLIGHT-C1-V319-20260821T0305Z",
-  "workerId": "JULES_C",
-  "taskId": "N2.5.G.PREFLIGHT.C1",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "d02f0e320f571c987f31e2eeafab110e3e7d486e",
-  "fileScopeHint": "ZERO-IDLE SAFE_NEXT. WRITE únicamente docs/qa/N2_5_G_QA_CI_PREFLIGHT_C1.md. READ N2.5 A-F evidence and current unit/integration/contract/E2E/security/migration/performance CI patterns. NO implementation code, migrations, frontend, package/lock, workflows, vaep/** excepto este manifest, TASKS/CHANGELOG, main/Producción/secrets/deploy.",
-  "prompt": "VAEP v3.19 ZERO-IDLE SAFE_NEXT. Prepara N2.5.G QA/regresión/CI sin implementar ni modificar workflows. Inspecciona suites reales y evidencia N2.5 A-F disponible. Separa CONFIRMADO / PROPUESTO / DECISION_PENDIENTE. Define matriz de pruebas para Three-way match: dominio, contratos, persistencia/migración, API, RBAC, frontend/E2E, regresión y casos de discrepancia orden-recepción-factura. No inventar tests existentes ni declarar PASS sin ejecución. Identifica qué gates actuales podrían reutilizarse y qué pruebas faltarán cuando B-F estén implementados. Entrega solo docs/qa/N2_5_G_QA_CI_PREFLIGHT_C1.md; git diff --name-only exacto; git diff --check; auto-review; P0/P1/limitaciones. PROMOTION_BLOCKED_BY_N2_5_F_AND_PARENT_GATES. Sin branch/PR/push/merge/deploy/main/Producción/secrets."
-}

@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-B-N25A-XR1-V319-20260820T2131Z",
-  "workerId": "JULES_B",
-  "taskId": "N2.5.A",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "3c9728d07eb9d525fd7fc4fc1c90e16324f729d1",
-  "fileScopeHint": "SAFE_NEXT CROSS-REVIEW WRITE únicamente docs/qa/N2_5_A_CROSS_REVIEW_B.md y evidencia documental nueva propia de N2.5.A; READ Issue #83/artifact de N2.5.A, docs/VAEP*, AGENTS.md, evidencia N2.2/N2.3/N2.4, contratos OrdenCompra/Recepcion/FacturaProveedor y pruebas necesarias. NO backend/src, frontend/src, migrations, workflows, package/lockfile, manifests ajenos, main, Producción ni secretos.",
-  "prompt": "VAEP Jules integration protocol v3.19 ZERO-IDLE SAFE_NEXT CROSS-REVIEW. Read docs/VAEP_AUTHORITY.md, AGENTS.md and docs/VAEP_JULES.md first. Execute a support-only independent cross-review of N2.5.A — Three-way match preflight. Jules A already delivered N2.5.A in Issue #83/session 12309253474032508100 and VAEP review remains pending while promotion is blocked by N2.4.H. Do NOT implement N2.5.B and do NOT claim N2.5.A or N2.5 parent closure. Independently audit the preflight against current HEAD: scope/out-of-scope, existing OrdenCompra vs RecepcionCompra vs FacturaProveedor entities/contracts, identifiers/quantities/totals/taxes/currency assumptions, dependency chain, risks, rollback strategy, testing strategy, observability/security implications and exact gaps required before DOMAIN work. Detect false-PASS or stale assumptions explicitly. Report P0/P1 separately. Use only the exclusive documentation output file, run proportional read-only checks, list every limitation/test not executed, perform final self-review and return a clean ChangeSet/gitPatch with exact baseCommitId. Finish COMPLETED unless a genuine human-only business/authorization decision exists. No branch, PR, push, merge, deploy, main, Production or secrets."
-}

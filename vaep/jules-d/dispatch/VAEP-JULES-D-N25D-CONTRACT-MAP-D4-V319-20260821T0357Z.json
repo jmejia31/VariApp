@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-D-N25D-CONTRACT-MAP-D4-V319-20260821T0357Z",
-  "workerId": "JULES_D",
-  "taskId": "N2.5.D.SUPPORT.CONTRACT_MAP.D4",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "37e7d019e45ea58883a88bc487316ada226f0a13",
-  "fileScopeHint": "WRITE únicamente docs/qa/N2_5_D_CONTRACT_MAP_D4.md. READ N2.5.B commit a16dae67, D2 preflight, existing controller/service patterns. NO implementation/persistence/migrations/frontend/workflows/TASKS/CHANGELOG/other vaep files/main/Producción/secrets/deploy.",
-  "prompt": "VAEP v3.19 ZERO-IDLE support N2.5.D con PROMOTION_BLOCKED hasta N2.5.C LISTO. No repitas D2. Produce contract-map evidence-first para la futura capa aplicación/API consumiendo el contrato B ya integrado: qué inputs/outputs están confirmados por IThreeWayMatchService/DTOs, qué semánticas HTTP/rutas/RBAC siguen DECISION_PENDIENTE, y qué errores fail-closed deben preservarse sin inventar endpoint, permiso ni repository. Entrega solo docs/qa/N2_5_D_CONTRACT_MAP_D4.md, git diff --check, auto-review, P0/P1."
-}

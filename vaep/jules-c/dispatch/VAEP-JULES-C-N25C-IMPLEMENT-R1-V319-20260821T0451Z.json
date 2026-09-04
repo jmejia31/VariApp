@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-C-N25C-IMPLEMENT-R1-V319-20260821T0451Z",
-  "workerId": "JULES_C",
-  "taskId": "N2.5.C",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "7ad2acfc02c6b88872fd30e354f0c82a2c88e976",
-  "fileScopeHint": "WRITE exclusivamente persistencia/EF/migración/tests de N2.5 ThreeWayMatch bajo backend/src/Infrastructure y backend/tests, incluyendo configuración de ThreeWayMatchResult, DbContext/DbSet solo si es necesario, migración N2_5_ThreeWayMatch + snapshot asociado y tests de persistencia/migración nuevos. NO Domain/Application/API/frontend/workflows/TASKS/CHANGELOG/otros vaep/main/Producción/secrets/deploy. No FK/cardinalidad/tolerancia/FX inventada.",
-  "prompt": "VAEP v3.19 PARENT-FIRST. N2.5.B quedó LISTO por Issue #149. Implementa N2.5.C persistencia, migración y datos consumiendo el contrato autoritativo ThreeWayMatch de a16dae67 y la evidencia ya revisada B3 Issue #143, C3 Issue #144 y D5 Issue #145; NO repetir preflight. Preserva discrepancias de cabecera con OrdenCompraDetalleId=0 sin crear una FK imposible a detalle: elige el mapping mínimo coherente con patrones existentes y justifícalo en código/tests, sin convertir propuestas D5 en contrato obligatorio. Añade índices/constraints solo cuando estén respaldados por invariantes reales; no asumir 1:1 único por orden si el dominio no lo exige. Genera migración desde Desarrollo, valida historial/rollback proporcional, dotnet build/test dirigido y git diff --check. No tocar Producción ni ejecutar migración remota. Entrega patch exacto, comandos/resultados y P0/P1 reales; COMPLETED queda VALIDANDO hasta review VAEP."
-}

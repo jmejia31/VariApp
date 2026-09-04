@@ -1,7 +1,0 @@
-{
-  "task_id": "VAEP-JULES-B-N41H-RECOVERY-B32-20260831T2130HND",
-  "title": "N4.1.H backend/API closure",
-  "prompt": "PROJECT_ID=VARIAPP. Work NOW on jmejia31/VariApp branch Desarrollo at the dispatch commit HEAD. CURRENT_PARENT=N4.1.H. Exclusive scope: backend/src/Domain/**, backend/src/Application/**, backend/src/Api/** and directly corresponding backend tests; do not touch Infrastructure/Migrations. Reproduce current N4.1.H backend failures, resolve every causal defect in contracts, authorization, validation, audit behavior and tests within scope, and run the relevant build/tests. Do not ask for clarification when repository evidence can resolve the target. Do not touch frontend, VAEP workflows, main, production, secrets, or unrelated code. End with exact files, commands, results, residual blockers, SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. If green, certify with reproducible evidence only.",
-  "source": {"repository": "jmejia31/VariApp", "base_branch": "Desarrollo"},
-  "auto_approve_plan": true
-}

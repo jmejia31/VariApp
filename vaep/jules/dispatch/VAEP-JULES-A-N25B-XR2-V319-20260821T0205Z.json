@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-A-N25B-XR2-V319-20260821T0205Z",
-  "workerId": "JULES_A",
-  "taskId": "N2.5.B.SUPPORT.CROSS_REVIEW.A2",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "2fae4770501c27ca0bdf3ff2fc431f2ce640b221",
-  "fileScopeHint": "SAFE_NEXT con PROMOTION_BLOCKED_BY_N2.4.H. WRITE únicamente docs/qa/N2_5_B_CROSS_REVIEW_A2.md. READ N2.5.A evidence, Issue #111/artifact evidence, ThreeWayMatch domain/contracts/tests y dependencias N2.2/N2.3/N2.4 estrictamente necesarias. NO editar backend/frontend funcional, migraciones, csproj, workflows, package/lock, TASKS, CHANGELOG, manifests ajenos, main, Producción ni secretos.",
-  "prompt": "VAEP Jules v3.19 SAFE_NEXT bajo PARENT-FIRST/ZERO-IDLE. N2.4.H sigue bloqueado exclusivamente por H.1 Jules B R8; no existe más write-scope útil no solapado para Jules A en H. Por ello Jules A ejecuta cross-review independiente de N2.5.B sin promover ni integrar N2.5 mientras H siga abierto. Audita el artifact N2.5.B R1 de Jules C (Issue #111) contra N2.5.A, contratos reales OrdenCompra/RecepcionCompra/FacturaProveedor, invariantes ThreeWayMatch, estados/tolerancias/diferencias, tests y scope. Detecta false-PASS, P0/P1, contratos faltantes, dependencias indebidas y riesgos de integración. No modifiques código; entrega exactamente un QA doc consumible por VAEP con PASS/REQUIRED y evidencia exacta. git diff --name-only debe contener solo docs/qa/N2_5_B_CROSS_REVIEW_A2.md; git diff --check limpio; auto-review obligatorio; ChangeSet/gitPatch revisable; COMPLETED salvo decisión genuinamente humana. Sin branch/PR/push/merge/deploy/main/Producción/secrets."
-}

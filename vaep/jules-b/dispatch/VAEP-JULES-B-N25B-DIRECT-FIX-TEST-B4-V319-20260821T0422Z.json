@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-B-N25B-DIRECT-FIX-TEST-B4-V319-20260821T0422Z",
-  "workerId": "JULES_B",
-  "taskId": "N2.5.B.SUPPORT.DIRECT_FIX_TEST.B4",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "eff06356fd4f22fc3fbfa366b85070cf6d702a09",
-  "fileScopeHint": "WRITE únicamente docs/qa/N2_5_B_DIRECT_FIX_TEST_REVIEW_B4.md. READ commit a16dae67b363c1823e57db3ffab0e1f41d095b9b y tests ThreeWayMatch. NO código, csproj, migraciones, frontend, workflows, TASKS, CHANGELOG, otros vaep, main, Producción, secrets ni deploy.",
-  "prompt": "VAEP v3.19 PARENT-FIRST ZERO-IDLE. B3 ya terminal; reasignación inmediata. Verifica mediante pruebas dirigidas y lectura de código el fix directo N2.5.B a16dae67: excluir borradores/anulados según lifecycle real, aceptar solo RecepcionCompra.Recibida y FacturaProveedor.Registrada, detectar moneda distinta, OrdenCompraId inconsistente, agregación por OrdenCompraDetalleId y comparaciones exactas de cantidad/precio/descuento/impuesto. No inventar tolerancias/FX/CxP. Documenta comandos y resultados exactos; si algo no puede ejecutarse, NO EJECUTADO. Entrega un único QA doc con PASS/REQUIRED_FIX, P0/P1 y gaps reales. Cero cambios de implementación. git diff --name-only exacto + git diff --check antes de COMPLETED."
-}

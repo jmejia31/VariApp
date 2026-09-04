@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-D-N24H2-WS1-V319-20260820T2048Z",
-  "workerId": "JULES_D",
-  "taskId": "N2.4.H.2",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "b6d57cefdab8ffa29f62fc7d711f49eae5174dda",
-  "fileScopeHint": "WORK_STEAL WRITE únicamente docs/qa/certificación N2.4 FacturaProveedor nuevos o evidencia de review H.2; READ H.1/H.3, N2.4 A-G, commits/gates/código/pruebas necesarios. NO modificar backend/src, frontend/src, migrations, workflows, manifests ajenos, package/lockfile, main, Producción ni secretos.",
-  "prompt": "VAEP Jules integration protocol v3.19 ZERO-IDLE WORK-STEAL. Read docs/VAEP_AUTHORITY.md, AGENTS.md and docs/VAEP_JULES.md first. Execute exactly N2.4.H.2 — cross-review independiente de certificación FacturaProveedor. This child was previously preassigned to Jules B, but Jules B has no ACTIVE authoritative H.2 session and remains responsible for unresolved G.2 work; under the approved global work-stealing policy Jules D now becomes the sole authoritative owner of H.2. Audit independently the closure evidence for N2.4: H.1 evidence when available, rollback, contracts, RBAC/security, data/migrations, QA, CI causal and traceability. Report P0/P1 explicitly and propose only justified corrections within H.2 documentation/review scope. G may still be validating: execution is allowed now, but PROMOTION/CLOSURE of H.2 and parent H remains blocked until required G evidence is terminal and reconciled. Do not claim final certification or modify functional implementation. Never touch H.1/H.3 authoring scopes. Perform proportional documentary/evidence validation, final self-review, list observations/limitations/risks/recommendations and tests not executed, return a clean ChangeSet/gitPatch with exact baseCommitId, and finish COMPLETED unless a genuine human-only business/authorization decision exists. No branch, PR, push, merge, deploy, main, Production or secrets."
-}

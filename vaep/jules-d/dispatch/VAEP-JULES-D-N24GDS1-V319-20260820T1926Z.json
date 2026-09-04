@@ -1,9 +1,0 @@
-{
-  "workerId": "JULES_D",
-  "dispatchId": "VAEP-JULES-D-N24GDS1-V319-20260820T1926Z",
-  "taskId": "N2.4.G.DS1",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "8c477c318974000b000e3f907bf6733ec7aea2de",
-  "prompt": "VAEP v3.19 FOUR-JULES — N2.4.G.DS1 soporte QA independiente. Jules D ya está certificado y debe trabajar AHORA. Audita de forma independiente la cobertura de FacturaProveedor y los resultados de G.1/G.2/G.3: contratos, seguridad, lifecycle, idempotencia, migración, performance, accesibilidad y false-pass. WRITE exclusivamente en `docs/qa/N2_4_G_D_QA_FALSE_PASS_CROSS_REVIEW.md` y, solo si aporta evidencia distinta, un test QA NUEVO de nombre exclusivo Jules D. NO editar archivos autoritativos de A/B/C, frontend/src, backend/src, package manifests/lockfiles, workflows, control-plane existente, main/Producción. No ramas, push, PR, merge o deploy. Si detectas defecto funcional, reporta evidencia reproducible y severidad P0/P1 para resolución VAEP; no invadas scopes. Ejecuta pruebas proporcionales reales, auto-review obligatorio y entrega ChangeSet/gitPatch exacto con baseCommitId. COMPLETED=READY_FOR_VAEP/VALIDANDO, no LISTO.",
-  "fileScopeHint": "WRITE_SCOPE EXCLUSIVO G.DS1: docs/qa/N2_4_G_D_QA_FALSE_PASS_CROSS_REVIEW.md y opcional test QA NUEVO exclusivo D; READ G/F/backend/frontend; NO archivos A/B/C ni implementación compartida."
-}

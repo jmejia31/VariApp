@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-D-N24H1-SUPPORT-CERT-D3-V319-20260820T2348Z",
-  "workerId": "JULES_D",
-  "taskId": "N2.4.H.1.SUPPORT.CERT.D3",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "c0af8fd96b551116c80d565545dae4e2283ba662",
-  "fileScopeHint": "PARENT-FIRST SUPPORT H.1 R5. WRITE solo docs/qa/N2_4_H1_R5_CERT_ROLLBACK_D.md. READ H.1/R4/R5 evidence, migración N2.4, tests/gates causales, rollback/runbook y estado canónico H. NO editar siete docs de B, vaep manifests, TASKS/CHANGELOG, código, migraciones, workflows, package/lock, main, Producción ni secretos.",
-  "prompt": "VAEP Jules v3.19 PARENT-FIRST SUPPORT. Ejecuta N2.4.H.1.SUPPORT.CERT.D3. B es único owner de los siete docs H.1 R5. Audita independientemente seguridad del rollback y lenguaje de certificación: target exacto N2.3, comportamiento real de Down(), pérdida de datos N2.4, backup/export verificable, quiescencia, restore y criterio de abortar; además comprueba qué pruebas/gates tienen evidencia real y evita declarar tests ejecutados o parent cerrado sin evidencia. Revisa que CERTIFICACION H.1 pueda afirmar readiness del componente solo con alcance/evidencia exactos, dejando promoción final H/N2.4 a ChatGPT/VAEP. Reporta P0/P1/REQUIRED, evidencia exacta y limitaciones. WRITE exclusivamente docs/qa/N2_4_H1_R5_CERT_ROLLBACK_D.md; un solo archivo en diff; auto-review, ChangeSet/gitPatch limpio, COMPLETED. Sin branch/PR/push/merge/deploy/main/Producción/secrets."
-}

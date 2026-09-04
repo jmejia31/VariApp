@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-B-N25B-R2-TEST-B2-V319-20260821T0335Z",
-  "workerId": "JULES_B",
-  "taskId": "N2.5.B.SUPPORT.TEST_B2",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "8cd7d457b2ee24ebb6550416d000e44e4b826a85",
-  "fileScopeHint": "SUPPORT SAME PARENT N2.5.B. WRITE únicamente docs/qa/N2_5_B_R2_TEST_MATRIX_B2.md. READ real domain/test patterns N2.2/N2.3/N2.4 and N2.5.B R1 evidence. NO functional code, csproj, EF/migrations/API/frontend/workflows/TASKS/CHANGELOG/vaep/** excepto este manifest/main/Producción/secrets/deploy.",
-  "prompt": "VAEP v3.19 ZERO-IDLE SUPPORT N2.5.B. Produce una matriz de pruebas dirigida para validar el R2 corregido de Three-way Match SIN escribir código funcional. Casos mínimos: exact match; mismatch cantidad ordenada/recibida/facturada; múltiples recepciones parciales; múltiples facturas; precio/descuento/impuesto; moneda; líneas sin recepción; líneas sin factura; colecciones vacías; entradas nulas/invalidas según patrones reales. No inventar tolerancias/FX. Verifica qué propiedades/métodos existen realmente antes de documentar. Entrega solo docs/qa/N2_5_B_R2_TEST_MATRIX_B2.md; separa MUST/PENDING; git diff --check; auto-review; P0/P1. No false PASS."
-}

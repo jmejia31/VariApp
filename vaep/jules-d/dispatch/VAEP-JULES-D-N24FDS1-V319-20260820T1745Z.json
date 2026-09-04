@@ -1,9 +1,0 @@
-{
-  "workerId": "JULES_D",
-  "dispatchId": "VAEP-JULES-D-N24FDS1-V319-20260820T1745Z",
-  "taskId": "N2.4.F.DS1",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "9ee4c456666ad16a9f3f03ebdf2d368efb077326",
-  "prompt": "VAEP v3.19 FOUR-JULES — SUPPORT_ACTIVE_PARENT_EXCLUSIVE N2.4.F.DS1. Jules D ya está certificado y entra como soporte del parent F ya abierto, sin sustituir ni invadir F.1/F.2/F.3. Ejecuta cross-review independiente de seguridad/contratos/false-pass sobre FacturaProveedor: RBAC fail-closed, contratos API/frontend, auditoría, observabilidad, correlation/logging y evidencia de pruebas. WRITE únicamente en docs/qa/N2_4_F_D_SECURITY_CONTRACT_CROSS_REVIEW.md y, solo si es imprescindible, un test QA NUEVO de nombre/ruta exclusiva que no modifique archivos de A/B/C. READ libre sobre evidencia estable. No editar backend funcional F.1, frontend security F.2, E/G autoritativos, workflows/manifests/scripts existentes, package-lock, main/Producción. No push/PR/branch/merge/deploy. Auto-review obligatorio; enum/rollup los controla VAEP. COMPLETED=READY_FOR_VAEP/VALIDANDO, no LISTO.",
-  "fileScopeHint": "WRITE_SCOPE EXCLUSIVO: docs/qa/N2_4_F_D_SECURITY_CONTRACT_CROSS_REVIEW.md y opcional test QA NUEVO exclusivo Jules D; NO archivos A/B/C."
-}

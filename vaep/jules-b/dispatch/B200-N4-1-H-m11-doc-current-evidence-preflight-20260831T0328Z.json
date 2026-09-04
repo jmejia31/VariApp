@@ -1,9 +1,0 @@
-{
-  "dispatchId": "B200-N4-1-H-m11-doc-current-evidence-preflight-20260831T0328Z",
-  "taskId": "N4.1.H-B200-m11-doc-current-evidence-preflight",
-  "workerId": "JULES_B",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "444d32c8bf22fbe1397977fdfef84f5aa0214ccb",
-  "taskAttempt": 1,
-  "fileScopeHint": "docs/FASE_M11_BACKUPS_RESTAURACION_DESARROLLO.md",
-  "prompt": "N4.1.H SAME_PARENT evidence-only preflight. Scope EXCLUSIVE and READ_ONLY: docs/FASE_M11_BACKUPS_RESTAURACION_DESARROLLO.md only. NON_SHELL: use native repository/file inspection only; do not execute shell/terminal commands. Determine whether this document explicitly and correctly requires current Desarrollo M11 evidence for a REAL encrypted backup artifact plus its .sha256 checksum plus .meta.json metadata, and when applicable a restore/drill correlated to that same artifact/checksum/metadata; identify any stale, unsupported, ambiguous, or false closure claim that could authorize N4.1.H without required-current evidence. Quote only short exact evidence with line/context if visible, report validation as executed or unexecuted, and state closure implications fail-closed. Do not modify repository files. If native visibility is truncated, make no change and report the exact limitation. No false LISTO/ACTIVE. No main, Produccion, branches, merge/auto-merge, force-push, secrets, or deploy. End with two independent substantive sections named SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 covering scope compliance, evidence grounding, unsupported claims, and residual risk. TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY."

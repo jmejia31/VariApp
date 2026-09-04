@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-D-N25C-PREFLIGHT-R1-V319-20260820T2258Z",
-  "workerId": "JULES_D",
-  "taskId": "N2.5.C.PREFLIGHT",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "49599afbaa733799e6f995a3cdb107604bfad85e",
-  "fileScopeHint": "SAME-CHILD REWORK R1; PROMOTION_BLOCKED_BY_N2.4.H_AND_N2.5.B. WRITE únicamente docs/qa/N2_5_C_PERSISTENCE_MIGRATION_PREFLIGHT_D.md. READ current N2.5.A evidence, Issue #105 VAEP review, N2.5.B contracts/artifact and current OrdenCompra/RecepcionCompra/FacturaProveedor persistence conventions. NO TASKS.md, CHANGELOG_AI.md, backend/src writes, migrations/EF snapshot, tests, frontend, workflows, package/lock, main, Producción or secrets.",
-  "prompt": "VAEP Jules integration protocol v3.19 SAME-CHILD REWORK R1 after Issue #105. Reproduce only the useful N2.5.C persistence/migration preflight analysis into docs/qa/N2_5_C_PERSISTENCE_MIGRATION_PREFLIGHT_D.md. The previous artifact was rejected solely because it also edited TASKS.md and CHANGELOG_AI.md; those control-plane files are strictly forbidden. Separate CONFIRMED schema facts from PROVISIONAL design depending on accepted N2.5.B. Cover persistence decision, keys/indexes/FKs/history/audit, forward/backfill/postcheck/rollback, multiplicity by OrdenCompraDetalleId, duplicates, currency/tolerance evolution, destructive rollback/data-loss and idempotency. No DDL/code changes. Promotion stays blocked by N2.4.H and accepted N2.5.B. Mandatory self-review, exact single-file patch/baseCommitId, tests/checks executed/not executed, P0/P1 explicit, then COMPLETED. No branch, PR, push, merge, deploy, main, Production or secrets."
-}

@@ -1,9 +1,0 @@
-{
-  "workerId": "JULES_C",
-  "dispatchId": "VAEP-JULES-C-N24F3-V316-20260820T1516Z",
-  "taskId": "N2.4.F.3",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "9b748249aa1a065dbafa0548ae66ff499d976b88",
-  "prompt": "VAEP v3.16 SAFE-NEXT N2.4.F.3 — cross-review independiente de seguridad FacturaProveedor. E sigue VALIDANDO; por tanto este lane puede ejecutar revisión/QA segura ahora pero PROMOTION del parent F queda bloqueada hasta E certificado. Scope por defecto READ-ONLY sobre código funcional: audita RBAC, autorización fail-closed, exposición de acciones UI/API, auditoría/observabilidad esperada, rutas, permisos y posibles bypasses en FacturaProveedor comparando patrones canónicos del repo. Puedes escribir únicamente evidencia/tests/documentación causalmente aislados si el WRITE_SCOPE no invade E.1/E.2 ni F.1/F.2; si detectas defecto que exige tocar scope ajeno, repórtalo como REQUIRED con archivo/línea/impacto/recomendación y no compitas por ownership. Ejecuta pruebas proporcionales disponibles, registra no ejecutadas, auto-review y entrega artifact completo. No push/PR/branch/merge/deploy. COMPLETED queda VALIDANDO para QA VAEP.",
-  "fileScopeHint": "F.3 cross-review security read-only por defecto; writes solo tests/evidencia aislada, nunca scopes E.1/E.2/F.1/F.2. PROMOTION_BLOCKED_BY_E."
-}

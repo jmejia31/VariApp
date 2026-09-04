@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-A-N24H1-SUPPORT-API-A2-V319-20260820T2348Z",
-  "workerId": "JULES_A",
-  "taskId": "N2.4.H.1.SUPPORT.API.A2",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "073fc2eebb5c1c68af898247a14e7097efef0077",
-  "fileScopeHint": "PARENT-FIRST SUPPORT H.1 R5. WRITE solo docs/qa/N2_4_H1_R5_API_CONTRACT_A.md. READ controlador FacturasProveedor, DTOs, service interfaces/tests y evidencia H.1. NO editar siete docs de B, vaep manifests, TASKS/CHANGELOG, código, migraciones, workflows, package/lock, main, Producción ni secretos.",
-  "prompt": "VAEP Jules v3.19 PARENT-FIRST SUPPORT. Ejecuta N2.4.H.1.SUPPORT.API.A2. B es único owner autoritativo de los siete docs H.1 R5. Audita de forma independiente el contrato HTTP REAL de FacturasProveedor desde código fresco: route base exacta, verbos/paths, DTOs de entrada, tipos de respuesta, códigos status realmente retornados/esperados, permisos RequierePermiso y ausencia de DELETE. R4 de B fue rechazado porque documentó api/facturasproveedor y commands/bool que no coinciden con el controlador. Produce una matriz exacta endpoint->input->output->permission y lista cualquier P0/P1/REQUIRED que B deba corregir. No copies documentación previa sin verificar. Ejecuta solo inspección/pruebas proporcionales de solo lectura; declara pruebas no ejecutadas. WRITE exclusivamente el archivo docs/qa autorizado; git diff --name-only debe contener un solo archivo; auto-review y ChangeSet/gitPatch limpio; COMPLETED. Sin branch/PR/push/merge/deploy/main/Producción/secrets."
-}

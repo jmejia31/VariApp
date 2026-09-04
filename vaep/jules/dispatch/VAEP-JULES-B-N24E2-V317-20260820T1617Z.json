@@ -1,9 +1,0 @@
-{
-  "workerId": "JULES_B",
-  "dispatchId": "VAEP-JULES-B-N24E2-V317-20260820T1617Z",
-  "taskId": "N2.4.E.2",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "f77e743050fd2240d9839f6e778cbbc8deda3f8d",
-  "prompt": "VAEP v3.17 N2.4.E.2 Jules B. Trabaja como child independiente del padre N2.4.E sin esperar QA/rollup. El frontend funcional de FacturaProveedor ya está materializado en Desarrollo; tu responsabilidad es certificar de forma ejecutable formulario + detalle + lifecycle mediante E2E determinístico sin modificar los archivos funcionales compartidos. Crea o corrige exclusivamente frontend/e2e/factura-proveedor-form-detail.spec.ts. Debe cubrir creación/edición de Borrador, detalle, registrar, anular con motivo obligatorio, error fail-closed y uso del contrato API real `/facturas-proveedor`; mocks nunca deben interceptar navegación `document`. Reutiliza login/harness y patrones Playwright existentes; evita sleeps arbitrarios. Ejecuta la prueba dirigida y cualquier lint/typecheck proporcional posible. Si el archivo ya no requiere cambios, entrega zero-diff proof verificable. WRITE_SCOPE exclusivo: frontend/e2e/factura-proveedor-form-detail.spec.ts. Prohibido tocar modelos, servicios, componentes, rutas, backend, package-lock, workflows, manifests adicionales o temporales. Nunca push/PR/branch/merge/deploy. COMPLETED => VALIDANDO y lane B continúa a siguiente padre SAFE; cualquier defecto vuelve a esta MISMA child.",
-  "fileScopeHint": "N2.4.E.2 Jules B; E2E form/detail/lifecycle únicamente; sin solape con E.1/E.3."
-}

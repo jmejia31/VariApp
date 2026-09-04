@@ -1,8 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-N22H2-R1-20260819T1913Z",
-  "taskId": "N2.2.H.2",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "74f362faff440cf514e9c412225a1b619f1cb8ad",
-  "fileScopeHint": "docs/CERTIFICACION_N2_2_ORDEN_COMPRA.md",
-  "prompt": "VAEP v3.7 AUTO-RECOVERY of the SAME assigned child N2.2.H.2; this is not a new task and does not expand scope. The prior dispatch VAEP-JULES-N22H2-20260819T1846Z produced no verifiable session/result for more than 10 minutes. Use the same frozen logical BASE_HEAD 74f362faff440cf514e9c412225a1b619f1cb8ad and reconcile read-only against current Desarrollo before producing changes. Exclusive writable scope remains docs/CERTIFICACION_N2_2_ORDEN_COMPRA.md only. Independently cross-review that certificate against existing real N2.2 evidence and make only the minimal correction required for accurate certification. Do not modify TASKS.md, CHANGELOG_AI.md, VAEP board artifacts, application code, workflows, routes, services, tests or any other file. If asked for routine confirmation, plan approval, or whether final validation is needed and the assigned criteria are already covered, no human approval is pending: complete auto-review, report all observations/limitations/risks/recommendations/tests not run, preserve ChangeSet/gitPatch with exact baseCommitId, and finalize COMPLETED. Do not create branches or PRs, do not push/merge/deploy, do not touch main/Production, infrastructure or secrets. Return artifact only; ChatGPT/VAEP will review before any integration."
-}

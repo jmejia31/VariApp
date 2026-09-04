@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-B-N25C-MIGRATION-MATRIX-B3-V319-20260821T0355Z",
-  "workerId": "JULES_B",
-  "taskId": "N2.5.C.SUPPORT.MIGRATION_TEST_MATRIX.B3",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "cc122fe84fb2a1654205481be80ee49280ac5bef",
-  "fileScopeHint": "WRITE únicamente docs/qa/N2_5_C_MIGRATION_TEST_MATRIX_B3.md. READ N2.5.B commit a16dae67, N2.5.C C2 evidence, EF/migration patterns N2.2-N2.4. NO code/migrations/API/frontend/workflows/TASKS/CHANGELOG/other vaep files/main/Producción/secrets/deploy.",
-  "prompt": "VAEP v3.19 ZERO-IDLE support N2.5.C con PROMOTION_BLOCKED hasta N2.5.B LISTO. No repitas el preflight C2. Produce una matriz nueva de pruebas y rollback para la futura persistencia Three-way Match: qué debe preservarse, constraints/índices que solo pueden proponerse si derivan del contrato B, forward/backfill/postcheck, rollback con riesgo de pérdida, y escenarios de múltiples recepciones/facturas. Distingue CONFIRMADO/PROPUESTO/DECISION_PENDIENTE. No inventes tablas/FKs/cardinalidad. Entrega solo docs/qa/N2_5_C_MIGRATION_TEST_MATRIX_B3.md, git diff --check, auto-review, P0/P1."
-}

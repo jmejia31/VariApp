@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-B-N35H-CLOSURE-CI-B2-V325-20260825T1204Z",
-  "taskId": "N3.5.H.CLOSURE_CI.B2",
-  "workerId": "JULES_B",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "bc3756f0d7567f5a9ab0cbcd7bb27ed221b61f4b",
-  "taskAttempt": 1,
-  "fileScopeHint": "docs/qa/N35H_CAUSAL_GATE_REVIEW_B2.md",
-  "prompt": "VAEP v3.25 ZERO-IDLE SAME CURRENT_PARENT N3.5.H. Produce SOLO docs/qa/N35H_CAUSAL_GATE_REVIEW_B2.md. Read-only reconcile the already-certified functional baseline for N3.5.A-G, Issue #523/#528, and whether any causal CI is actually required for the remaining documentation-only +17/-0 append. Separate CURRENT_CONFIRMED_FACT from MISSING_EVIDENCE. Do not run or demand broad MySQL suites merely because the local sandbox lacks MySQL; legacy/non-causal failures are not blockers. Do NOT edit CHANGELOG_AI.md, TASKS.md, product, workflows or any other file. Do not claim H LISTO. NEXT_SAFE_TASK after terminal/review: N3.6.B domain-contract decision matrix revalidation, promotion-blocked until N3.6.A LISTO. Run git status --short, git diff --name-only, git diff --check; emit SELF_REVIEW_PASS_1=PASS and SELF_REVIEW_PASS_2=PASS in two independent activities. ATTEMPT1 + max R2, no R3. No push/merge/deploy/secrets."

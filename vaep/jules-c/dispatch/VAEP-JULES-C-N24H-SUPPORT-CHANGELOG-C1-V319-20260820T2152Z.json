@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-C-N24H-SUPPORT-CHANGELOG-C1-V319-20260820T2152Z",
-  "workerId": "JULES_C",
-  "taskId": "N2.4.H.SUPPORT.CHANGELOG.C1",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "a99ddfc41306f8a4158a4129bd01d7b475ea544e",
-  "fileScopeHint": "PARENT-FIRST SWARM N2.4.H. WRITE únicamente CHANGELOG_AI.md. READ N2.4 A-H evidence, Issues #82/#94/#99/#100/#101, commits/gates/current docs as needed. NO H.1 canonical docs owned by Jules B, NO TASKS.md, NO backend/src, frontend/src, frontend/e2e, migrations, workflows, package/lockfile, manifests ajenos, main, Producción ni secretos.",
-  "prompt": "VAEP Jules integration protocol v3.19 PARENT-FIRST SWARM. Read docs/VAEP_AUTHORITY.md, AGENTS.md and docs/VAEP_JULES.md first. Execute exactly N2.4.H.SUPPORT.CHANGELOG.C1. Jules B owns H.1 canonical document rework and Jules A separately prepares TASKS reconciliation; do not touch their files. Prepare a concise, evidence-grounded CHANGELOG_AI.md entry for ERP-N2.4 FacturaProveedor that records implementation intent, causal QA history, RBAC/security/lifecycle boundaries, migration/rollback evidence and current H status. Verify evidence; do not copy stale claims. Historical M13 32408536676 exposed four FacturaProveedor E2E failures and corrected M13 32411224012 passed 205/205 including six access/RBAC scenarios, but verify before citing. Do NOT state H/N2.4 formally closed unless H.1 canonical rework and VAEP final review are already demonstrably complete. If not, write the entry so the remaining closure condition is explicit and minimal. Keep diff limited to CHANGELOG_AI.md and avoid unrelated history. List P0/P1, limitations and tests not executed, perform mandatory self-review, return clean ChangeSet/gitPatch with exact baseCommitId, finish COMPLETED. No branch, PR, push, merge, deploy, main, Production or secrets."
-}

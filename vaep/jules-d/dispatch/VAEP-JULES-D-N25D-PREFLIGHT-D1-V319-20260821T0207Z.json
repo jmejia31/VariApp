@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-D-N25D-PREFLIGHT-D1-V319-20260821T0207Z",
-  "workerId": "JULES_D",
-  "taskId": "N2.5.D.PREFLIGHT.D1",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "ad93e5740ebd6ca4be610b00e3c39b739ec71dbe",
-  "fileScopeHint": "SAFE_NEXT con PROMOTION_BLOCKED_BY_N2.4.H_AND_N2.5.C. WRITE únicamente docs/qa/N2_5_D_BACKEND_API_PREFLIGHT_D1.md. READ N2.5.A/B/C evidence y patrones actuales de services/controllers/DTOs/ProblemDetails estrictamente necesarios. NO implementar backend/frontend, repositorios, migraciones, workflows, package/lock, TASKS, CHANGELOG, manifests ajenos, main, Producción ni secretos.",
-  "prompt": "VAEP Jules v3.19 SAFE_NEXT bajo PARENT-FIRST/ZERO-IDLE. Jules D queda libre tras D5; H.1 conserva owner Jules B R8 y no admite otro write-scope útil no solapado. Ejecuta preflight dirigido de N2.5.D — Aplicación, servicios y API — sin implementar ni promover mientras N2.4.H y N2.5.C sigan bloqueantes. Determina casos de uso ThreeWayMatch, repositorios/servicios/DTOs/endpoints/filtros/paginación/idempotencia/errores ProblemDetails/RBAC/auditoría requeridos, dependencias exactas del dominio/persistencia y estrategia de pruebas contract/controller/service. Contrasta con patrones reales de N2.2/N2.3/N2.4 y evita inventar rutas/DTOs. Entrega exactamente docs/qa/N2_5_D_BACKEND_API_PREFLIGHT_D1.md con alcance/fuera-de-alcance, P0/P1, riesgos, criterios de aceptación, READY_CONDITIONS y checklist ejecutable. git diff --name-only solo ese archivo; git diff --check limpio; auto-review obligatorio; ChangeSet/gitPatch revisable; COMPLETED salvo decisión genuinamente humana. Sin branch/PR/push/merge/deploy/main/Producción/secrets."
-}

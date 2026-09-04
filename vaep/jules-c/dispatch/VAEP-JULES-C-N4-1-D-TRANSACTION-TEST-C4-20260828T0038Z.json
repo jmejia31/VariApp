@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-C-N4-1-D-TRANSACTION-TEST-C4-20260828T0038Z",
-  "taskId": "N4.1.D.TRANSACTION_TEST_GROUNDING.C4",
-  "workerId": "JULES_C",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "a795332628a4d9111daf2577e00910988b17a55d",
-  "taskAttempt": 1,
-  "fileScopeHint": "docs/qa/N4_1_D_TRANSACTION_TEST_GROUNDING_C4.md",
-  "prompt": "N4.1.D same-parent SAFE evidence-only grounding. Inspect current Caja/PuntoVenta transaction/integration/test authority, repository boundaries, rollback behavior and concrete missing tests. Write ONLY docs/qa/N4_1_D_TRANSACTION_TEST_GROUNDING_C4.md. Classify OBSERVED / INFERRED / UNKNOWN; do not invent transaction semantics. Run git diff --check. Emit SELF_REVIEW_PASS_1=PASS and SELF_REVIEW_PASS_2=PASS in two independent terminal activities. No product code, workflows, vaep changes, package-lock, TASKS, CHANGELOG, main, production, deploy or secrets. NEXT_SAFE_TASK=N4.1.G QA/regression/CI evidence-only."}

@@ -1,8 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-C-N23G3-V311-20260820T0046Z",
-  "taskId": "N2.3.G.3",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "ad9442141d2669e3f9eaa957f9bddf929b63dc95",
-  "fileScopeHint": "docs/qa/N2_3_G_INDEPENDENT_REVIEW_JULES_C.md",
-  "prompt": "ROL: Programador Secundario Confiable Jules C. Primer trabajo ERP tras smoke certificado. Lee AGENTS.md, PROJECT_CONTEXT.md, TASKS.md cuando aplique y docs/VAEP_JULES.md. Trabaja sobre el MISMO padre N2.3.G bajo VAEP v3.11; no adelantes N2.3.H. FULL FLASH PERFECT y FINISH_FIRST. Ejecuta una revisión independiente de QA/CI de RecepcionCompra enfocada en seguridad/RBAC, contratos API, idempotencia/concurrencia, integridad Kardex/stock, regresión, performance razonable y evidencia CI disponible. No dupliques G.1 (frontend unit/M13) ni G.2 (revisión M13 Jules A). Inspecciona solo lo necesario y ejecuta validaciones proporcionales que no requieran cambios de infraestructura. No declares PASS de pruebas no ejecutadas. Tu única escritura autorizada es docs/qa/N2_3_G_INDEPENDENT_REVIEW_JULES_C.md con evidencia concreta, comandos/resultados, P0/P1/P2/P3, observaciones, limitaciones, recomendaciones y dictamen sobre si existe bloqueo real para cerrar G. Si encuentras un defecto funcional real, no modifiques código fuera de scope: documenta archivo/causa/reproducción para VAEP. Antes de entregar ejecuta git status --short, git diff --check y git diff --name-only. El ChangeSet final debe contener únicamente el archivo autorizado y ningún changes.patch/*.patch/*.diff/*.orig/*.rej/backups/temp. No branch, PR, push, merge, deploy, main, Producción ni secretos. Devuelve ChangeSet/gitPatch limpio con baseCommitId exacto y autoevaluación completa."
-}

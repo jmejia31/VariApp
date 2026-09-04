@@ -1,9 +1,0 @@
-{
-  "workerId": "JULES_C",
-  "dispatchId": "VAEP-JULES-C-N24F3-R1-V316-20260820T1532Z",
-  "taskId": "N2.4.F.3",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "9b748249aa1a065dbafa0548ae66ff499d976b88",
-  "prompt": "VAEP v3.16 WATCHDOG RECOVERY R1 de la MISMA N2.4.F.3. El dispatch inicial quedó STALLED >10m porque fue publicado en un commit multi-manifest incompatible con el worker v313. Este recovery corrige únicamente el trigger. E sigue en PROMOTION_GATE pendiente, pero EXECUTION_GATE permite cross-review seguro ahora. Scope por defecto READ-ONLY sobre FacturaProveedor: audita RBAC, autorización fail-closed, exposición de acciones UI/API, auditoría/observabilidad esperada, rutas, permisos y bypasses. Puedes escribir solo tests/evidencia/documentación causalmente aislados que no invadan E.1/E.2 ni F.1/F.2. Si detectas defecto en scope ajeno, reporta REQUIRED con archivo/impacto/recomendación; no compitas por ownership. Ejecuta pruebas proporcionales, registra las no ejecutadas, auto-review y entrega artifact completo. MAX_VOLUNTARY_IDLE=0. No push/PR/branch/merge/deploy. COMPLETED queda VALIDANDO/READY_FOR_VAEP y el lane debe tomar siguiente SAFE task después.",
-  "fileScopeHint": "SAME F.3; cross-review security read-only por defecto; writes solo tests/evidencia aislada; recovery single-manifest por stall de dispatch."
-}

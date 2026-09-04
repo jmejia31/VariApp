@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-A-N24H3-R1-V319-20260820T2216Z",
-  "workerId": "JULES_A",
-  "taskId": "N2.4.H.3",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "cee8a1ac234e9e0e5214b3aeaaeb8ef7fd01b48b",
-  "fileScopeHint": "PARENT-FIRST SAME-CHILD CORRECTION. WRITE únicamente docs/qa/N2_4_H3_CLOSURE_CROSS_REVIEW_A.md. READ Issues #99/#102/#103/#104, N2.4 G/H evidence, H.1/H.2 current status and direct CI evidence. NO canonical H.1 docs, TASKS.md, CHANGELOG_AI.md, backend/src, frontend/src, frontend/e2e, migrations, workflows, package/lockfile, manifests ajenos, main, Producción ni secretos.",
-  "prompt": "VAEP Jules integration protocol v3.19 PARENT-FIRST. Read docs/VAEP_AUTHORITY.md, AGENTS.md and docs/VAEP_JULES.md first. Execute the SAME N2.4.H.3 as a targeted correction of your prior cross-review. The prior H.3 artifact was useful but overclaimed definitive N2.4 closure while H.1 documentation still required rework. Produce a clean corrected docs/qa/N2_4_H3_CLOSURE_CROSS_REVIEW_A.md only. Preserve verified evidence: G.1/G.2/G.3 are reconciled LISTO; H.2 is now VAEP-reviewed LISTO; historical M13 32408536676 exposed four FacturaProveedor E2E failures and corrected M13 32411224012 passed 205/205 including six FacturaProveedor RBAC/access scenarios; targeted backend FacturaProveedor tests previously passed. Explicitly state that H.1 canonical documentation and final VAEP rollup remain the only closure conditions unless fresh evidence proves otherwise. Do not claim parent H/N2.4 LISTO yourself. Classify P0/P1, limitations and tests not executed, mandatory self-review, return clean ChangeSet/gitPatch exact baseCommitId and COMPLETED. No branch, PR, push, merge, deploy, main, Production or secrets."
-}

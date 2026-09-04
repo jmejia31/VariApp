@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-C-N24H1-SUPPORT-DOMAIN-C2-V319-20260820T2348Z",
-  "workerId": "JULES_C",
-  "taskId": "N2.4.H.1.SUPPORT.DOMAIN.C2",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "ed1b4671ca2b45ee64d0a5b549cebc18d74dbb12",
-  "fileScopeHint": "PARENT-FIRST SUPPORT H.1 R5. WRITE solo docs/qa/N2_4_H1_R5_DOMAIN_PERSISTENCE_C.md. READ FacturaProveedor dominio/service/configuration/migración/tests y siete docs H.1 cuando estén disponibles. NO editar docs de B, vaep manifests, TASKS/CHANGELOG, código, migraciones, workflows, package/lock, main, Producción ni secretos.",
-  "prompt": "VAEP Jules v3.19 PARENT-FIRST SUPPORT. Ejecuta N2.4.H.1.SUPPORT.DOMAIN.C2. B es único owner de los siete docs H.1 R5. Audita independientemente dominio y persistencia REALES: estados/transiciones y precondiciones, campos/relaciones/FKs, índices, nombres exactos de constraints si están en código/migración, unicidad ProveedorId+NumeroFactura y efecto de anulación, mutabilidad real, auditoría y cualquier afirmación financiera que aún no esté implementada. Verifica que ERD/ERP/ADR que B debe producir no inventen relaciones o guarantees. Reporta P0/P1/REQUIRED y una tabla de hechos confirmados vs no confirmados. Pruebas proporcionales de solo lectura; declara no ejecutadas. WRITE exclusivamente docs/qa/N2_4_H1_R5_DOMAIN_PERSISTENCE_C.md; un solo archivo en diff; auto-review y ChangeSet limpio; COMPLETED. Sin branch/PR/push/merge/deploy/main/Producción/secrets."
-}

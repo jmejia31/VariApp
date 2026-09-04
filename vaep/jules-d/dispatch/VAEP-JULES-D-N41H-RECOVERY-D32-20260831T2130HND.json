@@ -1,7 +1,0 @@
-{
-  "task_id": "VAEP-JULES-D-N41H-RECOVERY-D32-20260831T2130HND",
-  "title": "N4.1.H QA and closure evidence",
-  "prompt": "PROJECT_ID=VARIAPP. Work NOW on jmejia31/VariApp branch Desarrollo at the dispatch commit HEAD. CURRENT_PARENT=N4.1.H. Exclusive scope: docs/qa/**, CHANGELOG_AI.md, vaep/**, .vaep/** and review/certification evidence only. Do not modify backend/frontend functional code or migrations. Reconcile current CI, Jules artifacts, stale review state, M11 backup evidence and N4.1.H closure requirements. Produce or correct only evidence and QA artifacts needed to close the parent, fail-closed with P0/P1=0. Do not ask for clarification when repository evidence can resolve the target. End with exact files, checks, residual blockers, SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. If no actionable defect exists, COMPLETE with NO_TARGETS_FOUND evidence.",
-  "source": {"repository": "jmejia31/VariApp", "base_branch": "Desarrollo"},
-  "auto_approve_plan": true
-}

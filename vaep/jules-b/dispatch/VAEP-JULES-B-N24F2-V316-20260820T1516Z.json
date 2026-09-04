@@ -1,9 +1,0 @@
-{
-  "workerId": "JULES_B",
-  "dispatchId": "VAEP-JULES-B-N24F2-V316-20260820T1516Z",
-  "taskId": "N2.4.F.2",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "9b748249aa1a065dbafa0548ae66ff499d976b88",
-  "prompt": "VAEP v3.16 SAFE-NEXT sobre N2.4.F.2 — seguridad y permisos frontend FacturaProveedor. Jules B ya está certificado: no repetir onboarding/smoke. E sigue VALIDANDO, por lo que PROMOTION está bloqueada por E, pero EXECUTION segura está permitida. Trabaja únicamente en responsabilidades frontend de seguridad/RBAC que NO dependan de cambiar el shared contract de E.1/E.2: inspecciona rutas/guards/permisos existentes, uso de PermisosRuntimeService.puede(), fail-closed de acciones UI y cobertura de pruebas de permisos; implementa solo tests/correcciones independientes si son necesarias y no invaden E.1/E.2. Si una corrección requiere contrato E aún inestable, documenta exacto PROMOTION_BLOCKED_BY_E y sustituye por tests/preflight/read-only útil, no quedes idle. No modificar backend, DB, manifests/workflows, package-lock ni archivos E.1/E.2 bajo ownership ajeno. Auto-review completo, lint/build/tests proporcionales, evidencia exacta y ChangeSet/gitPatch si hay cambios. No push/PR/branch/merge/deploy. COMPLETED queda VALIDANDO; no declares LISTO unilateralmente.",
-  "fileScopeHint": "Scope F.2 frontend security/RBAC independiente; prohibido tocar ownership E.1/E.2; si dependencia real, preflight/tests/read-only y registrar PROMOTION_BLOCKED_BY_E."
-}

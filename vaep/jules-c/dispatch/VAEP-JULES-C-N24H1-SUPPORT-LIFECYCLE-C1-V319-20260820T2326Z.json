@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-C-N24H1-SUPPORT-LIFECYCLE-C1-V319-20260820T2326Z",
-  "workerId": "JULES_C",
-  "taskId": "N2.4.H.1.SUPPORT.LIFECYCLE.C1",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "171119c5aaed780ac7736ede0bc02d33c736a2b0",
-  "fileScopeHint": "PARENT-FIRST SUPPORT H.1 R4. WRITE solo docs/qa/N2_4_H1_R4_LIFECYCLE_SEMANTICS_C.md. READ siete docs H.1, dominio/API/DB FacturaProveedor, COLA y evidencia directa. NO editar docs H.1 de B, vaep manifests, TASKS/CHANGELOG, código, migraciones, workflows, package/lock, main, Producción ni secretos.",
-  "prompt": "VAEP Jules v3.19 PARENT-FIRST SUPPORT. Ejecuta N2.4.H.1.SUPPORT.LIFECYCLE.C1. B es único owner autoritativo de los siete docs H.1. Audita de forma independiente la semántica documental que B debe reflejar: lifecycle real Borrador->Registrada->Anulada, operaciones API existentes y ausencia de DELETE si aplica, permisos exactos Compras:Ver/Crear/Editar/Confirmar/Anular, unicidad real ProveedorId+NumeroFactura y consecuencias sobre reutilización de número tras anulación. Contrasta contra código/EF/tests; no confíes en texto previo. Reporta P0/P1/REQUIRED y cualquier afirmación que pueda inducir una operación inexistente o inconsistente. WRITE exclusivamente el único docs/qa autorizado. Auto-review, pruebas de solo lectura/proporcionales, limitaciones explícitas, ChangeSet/gitPatch limpio, COMPLETED. Sin branch/PR/push/merge/deploy/main/Producción/secrets."
-}

@@ -1,8 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-N22H2-20260819T1846Z",
-  "taskId": "N2.2.H.2",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "74f362faff440cf514e9c412225a1b619f1cb8ad",
-  "fileScopeHint": "docs/CERTIFICACION_N2_2_ORDEN_COMPRA.md",
-  "prompt": "VAEP v3.6 AUTO-RECOVERY / CURRENT SIBLING. Execute only N2.2.H.2 as Jules, sibling of ChatGPT N2.2.H.1 under parent N2.2.H. Use the frozen logical BASE_HEAD 74f362faff440cf514e9c412225a1b619f1cb8ad and reconcile read-only against current Desarrollo HEAD before producing changes. Your exclusive writable scope is docs/CERTIFICACION_N2_2_ORDEN_COMPRA.md only. Do not modify TASKS.md, CHANGELOG_AI.md, VAEP board artifacts, application code, workflows, routes, services, tests or any other file. Independently cross-review the N2.2 OrdenCompra certification against existing real evidence: functional commits already certified, current Draft PR #2 remains Desarrollo->main, CI evidence already recorded, rollback/runbook/OpenAPI/ADR/ERD only where applicable, and no P0/P1. Make only the minimal documentation correction needed for an accurate certification; do not reopen functional work already certified. Review your own diff completely and report every observation, limitation, risk, recommendation and detail-to-improve so VAEP can classify BLOCKER, REQUIRED_BEFORE_PARENT_LISTO, FOLLOW_UP_P2/P3 or NOT_APPLICABLE_JUSTIFIED. Do not create branches or PRs, do not push/merge/deploy, do not touch main/Production, infrastructure or secrets. Return ChangeSet/gitPatch artifact only with exact baseCommitId; ChatGPT/VAEP will reconcile and publish if valid."
-}

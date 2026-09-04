@@ -1,9 +1,0 @@
-{
-  "workerId": "JULES_A",
-  "dispatchId": "VAEP-JULES-A-N24F1-R1-V319-20260820T1745Z",
-  "taskId": "N2.4.F.1",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "9ee4c456666ad16a9f3f03ebdf2d368efb077326",
-  "prompt": "VAEP v3.19 — SAME_CHILD_REWORK N2.4.F.1. El intento anterior fue rechazado por scope leak: no reutilices ni borres/modifiques control-plane, workflows, scripts M11, manifests, package-lock ni archivos ajenos. Reimplementa exclusivamente RBAC, auditoría y observabilidad BACKEND de FacturaProveedor sobre el HEAD funcional indicado: autorización fail-closed para Compras Ver/Crear/Editar/Confirmar/Anular, correlation/logging sin secretos y pruebas backend dedicadas. Antes de editar, inspecciona el estado actual y evita rehacer cambios ya presentes. WRITE únicamente en backend FacturaProveedor y tests backend directamente relacionados. NO frontend, DB/migraciones salvo lectura, main/Producción, ramas, push, PR, merge o deploy. Ejecuta pruebas proporcionales, auto-review obligatorio, reporta riesgos/limitaciones y entrega ChangeSet/gitPatch exacto con baseCommitId. COMPLETED=READY_FOR_VAEP/VALIDANDO, nunca LISTO.",
-  "fileScopeHint": "WRITE_SCOPE EXCLUSIVO: backend FacturaProveedor RBAC/audit/observability + tests backend dedicados. PROHIBIDO control-plane/workflows/scripts M11/frontend/package-lock/migraciones."
-}

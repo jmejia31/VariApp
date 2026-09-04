@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-D-N24H1-SUPPORT-ROLLBACK-D2-V319-20260820T2326Z",
-  "workerId": "JULES_D",
-  "taskId": "N2.4.H.1.SUPPORT.ROLLBACK.D2",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "5bb073586003ed7c0863edb2fcb46091fe6aee15",
-  "fileScopeHint": "PARENT-FIRST SUPPORT H.1 R4. WRITE solo docs/qa/N2_4_H1_R4_ROLLBACK_SAFETY_D.md. READ migration N2.4, predecesor N2.3, siete docs H.1, runbook/rollback, COLA y evidencia directa. NO editar docs H.1 de B, vaep manifests, TASKS/CHANGELOG, código, migraciones, workflows, package/lock, main, Producción ni secretos.",
-  "prompt": "VAEP Jules v3.19 PARENT-FIRST SUPPORT. Ejecuta N2.4.H.1.SUPPORT.ROLLBACK.D2. B es único owner autoritativo de los siete docs H.1. Verifica independientemente la seguridad del rollback: cadena exacta N2.3->N2.4, target inmediato que preserve N2.3, comportamiento Down() de N2.4, tablas/datos eliminados, existencia o ausencia de DownGuard, requisitos de backup/export, quiescencia, restore, postcheck y criterios de abortar rollback. Señala como REQUIRED cualquier afirmación de 'sin data-loss', riesgo nulo o datos desechables que no esté demostrada. No cambies código/migraciones ni archivos de B. WRITE exclusivamente el único docs/qa autorizado. Auto-review, evidencia exacta, limitaciones/pruebas no ejecutadas, ChangeSet/gitPatch limpio, COMPLETED. Sin branch/PR/push/merge/deploy/main/Producción/secrets."
-}

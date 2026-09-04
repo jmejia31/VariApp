@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-C-N25B-R2-V319-20260821T0332Z",
-  "workerId": "JULES_C",
-  "taskId": "N2.5.B",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "b251c5a6d89d357c2ac5b40c1a679fe18657de20",
-  "fileScopeHint": "AUTHORITATIVE SAME-CHILD REWORK N2.5.B. WRITE únicamente backend/src/Domain/Entities/ThreeWayMatch*.cs; backend/src/Domain/Enums/ThreeWayMatch*.cs; backend/src/Domain/ValueObjects/ThreeWayMatch*.cs; backend/src/Application/DTOs/ThreeWayMatch*.cs; backend/src/Application/Interfaces/IThreeWayMatch*.cs; backend/tests/InventoryApp.Tests/*ThreeWayMatch*.cs. NO Infrastructure/EF/migrations/API/controllers/frontend/package-lock/workflows/TASKS/CHANGELOG/vaep/** excepto este manifest/main/Producción/secrets/deploy.",
-  "prompt": "VAEP v3.19 PARENT-FIRST — SAME CHILD N2.5.B R2. Rehaz el artifact R1 sobre HEAD actual, preservando solo dominio/contratos/tests válidos. REQUIRED: NO inventar política de tolerancias, FX ni porcentajes configurables: la evidencia A3/G1 mantiene tolerancias/redondeo/FX como DECISION_PENDIENTE. Hasta que exista decisión autoritativa, el contrato de N2.5.B debe ser fail-closed/exacto y no crear ThreeWayMatchConfig con porcentajes arbitrarios. Comparar por OrdenCompraDetalleId usando evidencia real N2.2/N2.3/N2.4; soportar múltiples recepciones/facturas agregando cantidades por línea; detectar cantidad/precio/descuento/impuesto/moneda únicamente con reglas confirmadas. No persistencia, repositorios, endpoints ni UI. Verifica nombres/propiedades reales del dominio antes de escribir. Ejecuta dotnet test dirigido a *ThreeWayMatch* y build/test mínimo causal que sea posible; no false PASS. Entrega ChangeSet/gitPatch exacto, git diff --name-only, git diff --check, auto-review y lista P0/P1/decisiones pendientes. COMPLETED=>VALIDANDO; no push/branch/PR/merge/deploy."
-}

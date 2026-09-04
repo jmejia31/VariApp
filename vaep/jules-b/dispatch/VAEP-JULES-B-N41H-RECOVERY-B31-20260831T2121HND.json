@@ -1,7 +1,0 @@
-{
-  "task_id": "VAEP-JULES-B-N41H-RECOVERY-B31-20260831T2121HND",
-  "title": "N4.1.H backend domain API causal closure",
-  "prompt": "PROJECT_ID=VARIAPP. You are Jules B. Work NOW on jmejia31/VariApp branch Desarrollo at current HEAD. CURRENT_PARENT=N4.1.H. Exclusive scope: backend/src/Domain/**, backend/src/Application/**, backend/src/Api/** and directly corresponding backend tests. Exclude backend/src/Infrastructure/Migrations/** so you do not overlap Jules A. Reproduce current N4.1.H backend failures from HEAD, resolve every causal defect in domain/application/API contracts, authorization, validation, audit behavior and tests within scope, and run the relevant build/tests/gates. Do not wait for clarification when repository evidence can answer it; derive targets deterministically using v3.27. Do not touch frontend, VAEP/Jules workflows, main, production, secrets, or unrelated refactors. Do not merely diagnose. End with exact changed files, test evidence, residual blockers, SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. If already green, certify with reproducible evidence and inspect the next directly dependent N4.1.H backend defect; if none exists, COMPLETE with NO_TARGETS_FOUND evidence rather than asking the user.",
-  "source": {"repository": "jmejia31/VariApp", "base_branch": "Desarrollo"},
-  "auto_approve_plan": true
-}

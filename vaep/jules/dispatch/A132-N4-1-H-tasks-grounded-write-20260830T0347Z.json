@@ -1,9 +1,0 @@
-{
-  "dispatchId": "A132-N4-1-H-tasks-grounded-write-20260830T0347Z",
-  "taskId": "N4.1.H-A132-tasks-grounded-write",
-  "workerId": "JULES_A",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "f626f793c9faa0110fcd92a883fb2aed97260707",
-  "taskAttempt": 1,
-  "fileScopeHint": "WRITE_SCOPE:TASKS.md",
-  "prompt": "CURRENT_PARENT=N4.1.H. A131 completed and its CHANGELOG patch is REVIEW_PASS but remains artifact-only. Work only in TASKS.md. Ground a concise history-preserving N4.1.H checkpoint against repository evidence. The parent must remain EN_PROGRESO/NO_LISTO; current causal certification is not green while the exact functional candidate is blocked by required-current M11 drill freshness. Never claim CI PASS, P0=0/P1=0 or LISTO_REAL unless independently proven. Do not rewrite/delete historical entries and do not touch CHANGELOG_AI.md, docs, code, workflows, manifests, main, Production, branches, merge, deploy or secrets. Return exact patch/base, limitations, risks, unexecuted validations and two self-reviews."

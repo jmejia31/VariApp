@@ -1,8 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-N23G2-R2-20260819T2230Z",
-  "taskId": "N2.3.G.2",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "e7e6187679bedb676092ac386e5e6307d83e785e",
-  "prompt": "RECOVERY R2 de la MISMA N2.3.G.2 bajo VAEP v3.10. El dispatch R1 anterior no produjo sesión/progreso verificable y queda superseded; no existe otra sesión Jules autoritativa concurrente. Rehacer exclusivamente un ChangeSet limpio para el hallazgo Kardex ya validado por review VAEP: integrar el registrador/materializador Kardex dentro del flujo RecepcionCompraService para confirmar/anular de forma transaccional y registrar DI en Program.cs cuando sea requerido. Revalidar el HEAD actual antes de editar. Ejecutar pruebas backend proporcionales y reportar autoevaluación, observaciones, riesgos y recomendaciones. Entregar solo ChangeSet/gitPatch con baseCommitId; no publicar a GitHub, no crear ramas/PR, no merge/deploy, no tocar main/Producción ni secretos. PROHIBIDO incluir changes.patch, *.patch, *.orig, backups, temporales, frontend, workflows, docs/control-plane o cualquier archivo fuera del scope. Si el hallazgo ya quedó resuelto en HEAD y no se requiere cambio, no modificar y reportar evidencia exacta.",
-  "fileScopeHint": "backend/src/API/Program.cs; backend/src/Application/Services/RecepcionCompraService.cs; un único test backend causal si es estrictamente necesario. Prohibidos frontend/**, .github/**, vaep/**, docs/**, changes.patch, *.patch, *.orig, backups y temporales."
-}

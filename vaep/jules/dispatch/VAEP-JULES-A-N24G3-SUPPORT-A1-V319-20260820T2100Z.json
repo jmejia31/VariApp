@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-A-N24G3-SUPPORT-A1-V319-20260820T2100Z",
-  "workerId": "JULES_A",
-  "taskId": "N2.4.G.3.SUPPORT.A1",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "15988782609afd9ffda6d0e4b93214702e241f3b",
-  "fileScopeHint": "SUPPORT ONLY: WRITE únicamente docs/qa/N2_4_G3_SUPPORT_A1.md; READ current FacturaProveedor E2E/security, G.3 evidence, M13/current CI and direct contracts. NO editar archivos de Jules C, frontend/e2e autoritativos, backend, package/lockfile, workflows, manifests ajenos, main, Producción ni secretos.",
-  "prompt": "VAEP Jules integration protocol v3.19 ZERO-IDLE SUPPORT for active N2.4.G.3. Read docs/VAEP_AUTHORITY.md, AGENTS.md and docs/VAEP_JULES.md. Jules C retains authoritative ownership of N2.4.G.3; you are independent support only and MUST NOT duplicate or edit C's files. Perform a focused external cross-review of the current FacturaProveedor E2E false-pass risk: compare the historical four-failure M13 evidence to the corrected current facturas-proveedor-acceso.spec.ts behavior and current causal CI evidence, inspect direct RBAC/accessibility/security coverage, and identify exact remaining P0/P1/REQUIRED/P2-P3/N-A findings. Produce only docs/qa/N2_4_G3_SUPPORT_A1.md with exact evidence and actionable recommendations C/VAEP can consume. Do not create dummy tests and do not change implementation. Run only proportional read-only checks that do not require modifying repository setup. Report every limitation and test not executed, perform final self-review, return clean ChangeSet/gitPatch with exact baseCommitId and finish COMPLETED. No branch, PR, push, merge, deploy, main, Production or secrets."
-}

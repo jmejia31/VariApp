@@ -1,9 +1,0 @@
-{
-  "workerId": "JULES_B",
-  "dispatchId": "VAEP-JULES-B-SMOKE-P0-20260819T2346Z",
-  "taskId": "JULES-B-SMOKE-P0",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "49d10c2b5fe74243bb4f5f71932f8cf710f64b88",
-  "prompt": "SMOKE CONTROLADO JULES_B. Verifica identidad jmejia31/VariApp y rama Desarrollo. No toques main, Production, secretos, workflows, código funcional ni archivos existentes. Crea únicamente en tu workspace el archivo vaep/jules-b/smoke-probe.md con una línea de evidencia JULES_B_SMOKE_OK y el taskId JULES-B-SMOKE-P0. No publiques, no hagas push, rama, PR, merge ni deploy. Ejecuta auto-review, confirma que el diff contiene exclusivamente ese archivo y entrega ChangeSet/gitPatch con baseCommitId exacto.",
-  "fileScopeHint": "WRITE_SCOPE único: vaep/jules-b/smoke-probe.md. Todo lo demás es solo lectura y no debe modificarse."
-}

@@ -1,9 +1,0 @@
-{
-  "workerId": "JULES_C",
-  "dispatchId": "VAEP-JULES-C-SMOKE-P0-20260820T0006Z",
-  "taskId": "JULES-C-SMOKE-P0",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "8deee31d90fbefc3b5637117b9112e1ddf1a74ff",
-  "fileScopeHint": "vaep/jules-c-smoke.txt únicamente; AGENTS.md y docs/VAEP_JULES.md solo lectura",
-  "prompt": "SMOKE P0 de certificación para Jules C. Lee AGENTS.md y docs/VAEP_JULES.md, confirma jmejia31/VariApp y rama Desarrollo. En tu workspace cloud crea únicamente vaep/jules-c-smoke.txt con exactamente una línea: JULES_C_SMOKE_OK. No modifiques ningún otro archivo. No crees rama, PR, push, merge, deploy ni cambios en main/Producción/secrets. Revisa tu diff, reporta observaciones y devuelve ChangeSet/gitPatch con baseCommitId exacto. No publiques nada a GitHub."
-}

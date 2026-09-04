@@ -1,9 +1,0 @@
-{
-  "workerId": "JULES_B",
-  "dispatchId": "VAEP-JULES-B-N24F2-R2-V319-20260820T1745Z",
-  "taskId": "N2.4.F.2",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "9ee4c456666ad16a9f3f03ebdf2d368efb077326",
-  "prompt": "VAEP v3.19 — SAME_CHILD_REWORK N2.4.F.2. Los intentos previos agotaron auto-feedback sin patch; reintenta desde cero sobre el estado funcional actual y produce evidencia concreta. Implementa/audita exclusivamente seguridad y permisos FRONTEND de FacturaProveedor: gating UI con PermisosRuntimeService.puede(), acciones Ver/Crear/Editar/Confirmar/Anular coherentes con backend, errores fail-closed y pruebas E2E/security dedicadas cuando sean aplicables. Antes de editar inspecciona los archivos actuales y conserva los cambios funcionales ya integrados. WRITE solo frontend FacturaProveedor security/permissions/E2E; NO backend, DB, workflows, manifests, scripts, package-lock, main/Producción, ramas, push, PR, merge o deploy. Si todo ya está correcto, agrega únicamente prueba/evidencia útil dentro del scope en lugar de churn artificial. Ejecuta pruebas proporcionales, auto-review obligatorio y entrega ChangeSet/gitPatch exacto con baseCommitId. COMPLETED=READY_FOR_VAEP/VALIDANDO, no LISTO.",
-  "fileScopeHint": "WRITE_SCOPE EXCLUSIVO: frontend FacturaProveedor security/permissions y frontend/e2e FacturaProveedor dedicado; NO backend/control-plane/package-lock."
-}

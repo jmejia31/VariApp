@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-D-N24H1-SUPPORT-CERT-D4-V319-20260821T0051Z",
-  "workerId": "JULES_D",
-  "taskId": "N2.4.H.1.SUPPORT.CERT.D4",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "7c1e1508cd4f663d31d4dcad729072e0d493b901",
-  "fileScopeHint": "PARENT-FIRST SUPPORT ONLY. WRITE únicamente docs/qa/N2_4_H1_R7_CERT_ROLLBACK_D4.md. READ migration/rollback/runbook/certificación/tests/gates y siete docs H.1. NO tocar docs canónicos H.1, vaep/** ajeno, TASKS, CHANGELOG, código, workflows, package/lock, main, Producción ni secretos.",
-  "prompt": "VAEP Jules v3.19 support independiente para N2.4.H.1 R7. Jules B conserva ownership autoritativo de los siete docs H.1. Audita exclusivamente readiness/certificación/rollback: confirma la frontera de migración inmediata N2.3->N2.4, comportamiento real de Down(), riesgo de pérdida de datos N2.4, requisitos de quiescencia+backup/export+restore/abort, ausencia/presencia real de DownGuard, y cada claim de tests/CI/gates que aparezca en los docs. Cualquier claim sin ID/evidencia exacta debe quedar marcado NO EVIDENCIADO/NO EJECUTADO; rechaza recomendaciones de retry transaccional genérico. Produce únicamente docs/qa/N2_4_H1_R7_CERT_ROLLBACK_D4.md con P0/P1/REQUIRED/P2-P3/N-A y criterio explícito de si R7 sería closure-ready desde tu scope, sin autoridad para cerrar H. Devuelve ChangeSet/gitPatch lógico pero NO escribas .patch adicionales. Antes de COMPLETED git diff --name-only debe contener exclusivamente tu archivo QA y git diff --check limpio. Sin branch/PR/push/merge/deploy/main/Producción/secrets."
-}

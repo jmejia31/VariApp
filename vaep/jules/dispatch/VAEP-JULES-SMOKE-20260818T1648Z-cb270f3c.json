@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-SMOKE-20260818T1648Z-cb270f3c",
-  "taskId": "VAEP-JULES-SMOKE",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "cb270f3ccf138a520e09455e23088cfc32483e7c",
-  "fileScopeHint": "vaep/jules/smoke/**",
-  "prompt": "SMOKE TEST ONLY. Create exactly one new text file under vaep/jules/smoke/ named VAEP-JULES-SMOKE-20260818T1648Z.txt containing a short line confirming PROJECT_ID=VARIAPP, REPOSITORY=jmejia31/VariApp and BRANCH=Desarrollo. Do not modify any existing file. Do not create a branch, pull request, merge, push, deployment, production change or secret. Run only lightweight validation needed to ensure the patch contains exactly that one new file. Return a reviewable ChangeSet/gitPatch; this patch will NOT be applied to the repository.",
-  "createdAt": "2026-08-18T16:48:00Z"
-}

@@ -1,8 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-N23E2-20260819T1632Z",
-  "taskId": "N2.3.E.2",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "81e27250db606187413069e1faae384f930d9d86",
-  "prompt": "Implementa exclusivamente N2.3.E.2 — Recepción frontend — Formulario, detalle y UX de diferencias. Contexto: N2.3.D está LISTO; este hijo es paralelo a N2.3.E.1 de ChatGPT. Tu scope es SOLO los componentes standalone de formulario/detalle para RecepcionCompra. Debes cubrir recepción total/parcial/múltiple contra orden de compra, cantidades recibidas por línea, daños, faltantes y sobrantes, validaciones visibles y accesibles, loading/error/empty states aplicables, responsive y accesibilidad. NO toques app.routes.ts, app.component.ts, services/recepcion-compra.service.ts, shell/listado ni archivos del carril ChatGPT. Antes de editar lee AGENTS.md y docs/VAEP_JULES.md. Base obligatoria Desarrollo@81e27250db606187413069e1faae384f930d9d86. Si el scope real requiere modificar archivos reservados a ChatGPT o detectas divergencia material, no hagas cambios y reporta conflicto. Trabaja solo en tu VM Jules; no crees rama, PR, merge, push, deploy, cambios a main/Producción ni secretos. Ejecuta lint/build/pruebas proporcionales que puedas sin ocultar fallos. Resultado esperado: ChangeSet/gitPatch revisable, sin publicación funcional.",
-  "fileScopeHint": "frontend/src/app/features/recepciones-compra/recepcion-compra-form.component.ts; frontend/src/app/features/recepciones-compra/recepcion-compra-detail.component.ts; pruebas específicas de esos componentes; NO frontend/src/app/app.routes.ts; NO frontend/src/app/app.component.ts; NO frontend/src/app/services/recepcion-compra.service.ts; NO shell/listado"
-}

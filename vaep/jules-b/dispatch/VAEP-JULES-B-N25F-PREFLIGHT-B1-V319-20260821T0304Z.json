@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-B-N25F-PREFLIGHT-B1-V319-20260821T0304Z",
-  "workerId": "JULES_B",
-  "taskId": "N2.5.F.PREFLIGHT.B1",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "052303e3d7d922a39169b8c96281b4a598523e3e",
-  "fileScopeHint": "ZERO-IDLE SAFE_NEXT. WRITE únicamente docs/qa/N2_5_F_SECURITY_AUDIT_PREFLIGHT_B1.md. READ N2.5 A-E evidence, RBAC/audit/logging/health patterns N2.2/N2.3/N2.4. NO implementation code, migrations, frontend, package/lock, workflows, vaep/** excepto este manifest, TASKS/CHANGELOG, main/Producción/secrets/deploy.",
-  "prompt": "VAEP v3.19 ZERO-IDLE SAFE_NEXT. H.1 queda fuera de Jules definitivamente. Prepara N2.5.F RBAC/auditoría/seguridad/observabilidad sin implementar. Inspecciona permisos relacionales existentes, auditoría, correlation/logging/health y evidencia N2.5 disponible. Separa CONFIRMADO / PROPUESTO / DECISION_PENDIENTE. No inventar nuevos permisos/acciones, rutas, eventos, métricas ni health checks como hechos. Define matriz mínima de riesgos, criterios fail-closed, auditoría necesaria, logging sin secretos y pruebas de autorización/observabilidad para Three-way match. Entrega solo docs/qa/N2_5_F_SECURITY_AUDIT_PREFLIGHT_B1.md; git diff --name-only exacto; git diff --check; auto-review; P0/P1/limitaciones. PROMOTION_BLOCKED_BY_N2_5_E_AND_PARENT_GATES. Sin branch/PR/push/merge/deploy/main/Producción/secrets."
-}

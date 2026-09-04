@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-C-N25B-DIRECT-FIX-DOMAIN-C4-V319-20260821T0422Z",
-  "workerId": "JULES_C",
-  "taskId": "N2.5.B.SUPPORT.DIRECT_FIX_DOMAIN_REVIEW.C4",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "102cd3c5cf1f89cb49ce1abf8e5a694d62fdc83c",
-  "fileScopeHint": "WRITE únicamente docs/qa/N2_5_B_DIRECT_FIX_DOMAIN_REVIEW_C4.md. READ commit a16dae67b363c1823e57db3ffab0e1f41d095b9b, entidades/contratos ThreeWayMatch, OrdenCompra, RecepcionCompra y FacturaProveedor. NO código, persistencia, migraciones, frontend, workflows, TASKS, CHANGELOG, otros vaep, main, Producción, secrets ni deploy.",
-  "prompt": "VAEP v3.19 PARENT-FIRST ZERO-IDLE. C3 ya terminal; reasignación inmediata. Audita invariantes y contrato del fix directo N2.5.B a16dae67 contra dominio real: estados elegibles Recibida/Registrada, pertenencia a la misma OrdenCompraId, OrdenCompraDetalleId como pivote, agregación multi-recepción/multi-factura, comparaciones exactas de cantidad/precio/descuento/impuesto y discrepancia de moneda. Distingue HECHO vs PROPUESTA; no inventar tolerancias, FX, CxP, DTOs ni repositorios. Entrega un único QA doc con PASS/REQUIRED_FIX, P0/P1 y gaps; ninguna implementación. git diff --name-only exacto + git diff --check antes de COMPLETED."
-}

@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-A-N25A-V319-20260820T2042Z",
-  "workerId": "JULES_A",
-  "taskId": "N2.5.A",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "7e1844f1b026f4e4239d2b9923adbd8936b03e1a",
-  "fileScopeHint": "WRITE únicamente evidencia/preflight técnico nuevo de N2.5 Three-way match en docs/qa y/o documentación técnica N2.5; READ OrdenCompra/RecepcionCompra/FacturaProveedor, contratos, DB, API, frontend y pruebas directas necesarias. NO implementar dominio/backend/frontend/migraciones de N2.5; NO tocar N2.4 H.2/H.3, workflows, manifests ajenos, package/lockfile, main, Producción ni secretos.",
-  "prompt": "VAEP Jules integration protocol v3.19 ZERO-IDLE SAFE_NEXT. Read docs/VAEP_AUTHORITY.md, AGENTS.md and docs/VAEP_JULES.md first. Execute exactly N2.5.A — Three-way match auditoría y preflight. This execution is intentionally allowed ahead of promotion to eliminate idle time, but PROMOTION IS BLOCKED until N2.4.H is LISTO; do not claim N2.5.A LISTO for promotion and do not start N2.5.B. Confirm the real current state and boundaries for comparing OrdenCompra vs RecepcionCompra vs FacturaProveedor and generating difference alerts. Produce a rigorous preflight: current entities/endpoints/components, exact dependencies, invariants, gaps, risks, acceptance criteria, rollback strategy and proportional test plan. Inspect only direct dependencies; do not implement large changes and do not modify functional N2.5 code. If useful, create/update only a new scoped docs/qa N2.5.A evidence file. Preserve current MySQL/RBAC/audit architecture and never infer unavailable evidence. Perform final self-review, report observations/limitations/risks/recommendations and every test not executed, return a clean ChangeSet/gitPatch with exact baseCommitId, and finish COMPLETED unless a genuine human-only business/authorization decision exists. No branch, PR, push, merge, deploy, main, Production or secrets."
-}

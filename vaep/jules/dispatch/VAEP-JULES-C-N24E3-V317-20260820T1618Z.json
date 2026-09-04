@@ -1,9 +1,0 @@
-{
-  "workerId": "JULES_C",
-  "dispatchId": "VAEP-JULES-C-N24E3-V317-20260820T1618Z",
-  "taskId": "N2.4.E.3",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "17480829df6c9e7b4c1a5fb26233f093624f6690",
-  "prompt": "VAEP v3.17 N2.4.E.3 Jules C. Child independiente del padre N2.4.E. Trabaja en seguridad/RBAC/accesibilidad/performance E2E de FacturaProveedor sin modificar implementación compartida ni el spec de E.2. Crea o corrige exclusivamente frontend/e2e/factura-proveedor-accessibility-rbac.spec.ts. Debe cubrir no autenticado -> login, autenticado sin Compras:Ver -> acceso denegado, visibilidad de acciones según Compras:Crear/Editar/Confirmar/Anular, errores accesibles, navegación por rutas reales y una comprobación ligera de no generar consultas duplicadas al cargar/listar. Usa login/harness existente; mocks deben hacer fallback para `resourceType() === 'document'`; sin sleeps arbitrarios. Ejecuta prueba dirigida y validaciones proporcionales. Si HEAD ya satisface todo y no hace falta archivo nuevo, entrega zero-diff proof verificable. WRITE_SCOPE exclusivo: frontend/e2e/factura-proveedor-accessibility-rbac.spec.ts. Prohibido tocar modelos, servicios, componentes, rutas, backend, package-lock, workflows, manifests adicionales, el spec E.2 o temporales. Nunca push/PR/branch/merge/deploy. COMPLETED => VALIDANDO y lane C continúa a siguiente padre SAFE; cualquier defecto vuelve a esta MISMA child.",
-  "fileScopeHint": "N2.4.E.3 Jules C; E2E RBAC/accessibility/performance ligero únicamente; sin solape con E.1/E.2."
-}

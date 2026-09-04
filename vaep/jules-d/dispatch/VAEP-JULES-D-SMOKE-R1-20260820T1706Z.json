@@ -1,9 +1,0 @@
-{
-  "workerId": "JULES_D",
-  "dispatchId": "VAEP-JULES-D-SMOKE-R1-20260820T1706Z",
-  "taskId": "JULES-D-SMOKE-R1",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "b50527fb3daadec824dbe803eb20422c2243e31f",
-  "prompt": "SMOKE CONTROLADO JULES_D v3.19. Verifica identidad jmejia31/VariApp y rama Desarrollo. Lee AGENTS.md y docs/VAEP_JULES.md. No toques main, Produccion, secretos, workflows, codigo funcional ni archivos existentes. Crea unicamente en tu workspace el archivo vaep/jules-d/smoke-probe-r1.md con una linea de evidencia JULES_D_SMOKE_OK_R1 y el taskId JULES-D-SMOKE-R1. No publiques, no hagas push, rama, PR, merge ni deploy. Ejecuta auto-review completo, confirma que el diff final contiene exclusivamente ese archivo y entrega ChangeSet/gitPatch con baseCommitId exacto. Si surge una pregunta rutinaria, sigue el alcance autorizado y finaliza sin solicitar confirmacion humana.",
-  "fileScopeHint": "WRITE_SCOPE unico: vaep/jules-d/smoke-probe-r1.md. Todo lo demas es solo lectura y no debe modificarse."
-}

@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-C-N24H1-SUPPORT-ANNUL-C4-V319-20260821T0124Z",
-  "workerId": "JULES_C",
-  "taskId": "N2.4.H.1.SUPPORT.ANNUL.C4",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "327c40f7c0721968f0bfa0b95c7bdd29711794de",
-  "fileScopeHint": "PARENT-FIRST SUPPORT R8. WRITE únicamente docs/qa/N2_4_H1_R8_ANNUL_C4.md. READ FacturaProveedor domain/service/controller/tests y docs H.1 necesarias. NO editar los siete docs autoritativos de B, backend/frontend funcional, migraciones, TASKS, CHANGELOG, workflows, package/lock, manifests ajenos, main, Producción ni secretos.",
-  "prompt": "VAEP Jules v3.19 support exclusivo para N2.4.H.1 R8. Jules B conserva ownership autoritativo. Verifica de forma independiente el segundo error REQUIRED de R7: FacturaProveedor.Anular() debe contrastarse con código fresco; confirmar si únicamente cambia estado/auditoría y que N2.4 documental NO revierte stock, Kardex, costeo ni cantidades retenidas salvo evidencia directa contraria. Verifica lifecycle Borrador->Registrada->Anulada, permisos y semántica de unicidad ProveedorId+NumeroFactura si son relevantes. No inventes efectos laterales. Entrega un único QA doc con FINDINGS P0/P1/REQUIRED/P2-P3 y redacción exacta recomendada para ERP_N2_4_FACTURA_PROVEEDOR.md. git diff --name-only debe contener exactamente ese archivo; git diff --check limpio; auto-review obligatorio; ChangeSet/gitPatch revisable; COMPLETED salvo decisión genuinamente humana. Sin branch/PR/push/merge/deploy/main/Producción/secrets."
-}

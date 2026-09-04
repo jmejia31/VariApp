@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-A-N25B-DIRECT-FIX-REVIEW-A6-V319-20260821T0422Z",
-  "workerId": "JULES_A",
-  "taskId": "N2.5.B.SUPPORT.DIRECT_FIX_CLOSURE_REVIEW.A6",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "dc9a20d0669e7a6fcbcfeb16f6011c04c6deac45",
-  "fileScopeHint": "WRITE únicamente docs/qa/N2_5_B_DIRECT_FIX_CLOSURE_REVIEW_A6.md. READ commit a16dae67b363c1823e57db3ffab0e1f41d095b9b, ThreeWayMatch domain/contracts/tests y evidencia CI fresca. NO código, migraciones, frontend, workflows, TASKS, CHANGELOG, otros vaep, main, Producción, secrets ni deploy.",
-  "prompt": "VAEP v3.19 PARENT-FIRST ZERO-IDLE. Recovery/supersede A5 sin sesión visible. Revisa de forma independiente el fix directo N2.5.B en a16dae67: solo RecepcionCompra.Recibida y FacturaProveedor.Registrada cuentan como evidencia; validar OrdenCompraId común, agregación por OrdenCompraDetalleId, cantidad/precio/descuento/impuesto exactos y discrepancia de moneda OC/factura. No inventar tolerancias, FX, CxP ni contratos no implementados. Ejecuta pruebas dirigidas si son proporcionales y reporta IDs/comandos/resultados exactos o NO EJECUTADO. Entrega PASS o REQUIRED_FIX con P0/P1 y recomendaciones; la promoción a LISTO es exclusiva de ChatGPT/VAEP. Solo el QA file autorizado; git diff --name-only exacto y git diff --check limpio antes de COMPLETED."
-}

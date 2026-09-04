@@ -1,8 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-N23G2-20260819T2020Z",
-  "taskId": "N2.3.G.2",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "cb3484ea748f2bd0620f74d1eb5c3698b6c076f4",
-  "prompt": "Realiza un cross-review independiente y exhaustivo de QA/CI para N2.3 RecepcionCompra sobre el BASE_HEAD congelado. Evalua cobertura de seguridad/RBAC, contratos API, persistencia/migraciones, recepciones total/parcial/multiple, diferencias (danada/faltante/sobrante), confirmacion/anulacion, idempotencia/concurrencia, regresion y performance. Identifica brechas P0/P1 reales y entrega evidencia concreta. No dupliques N2.3.G.1: ChatGPT es propietario exclusivo de la infraestructura de unit tests frontend, angular.json, package.json/package-lock.json, tsconfig.spec.json y specs unitarios RecepcionCompra. Si no existe una brecha material fuera del scope de G.1, no hagas cambios y reporta cero P0/P1 con justificacion. Si existe una brecha real, propone un ChangeSet/gitPatch minimo y aislado solo dentro del scope permitido; no publiques a GitHub.",
-  "fileScopeHint": "Cross-review QA/CI independiente. NO tocar frontend/angular.json, frontend/package.json, frontend/package-lock.json, frontend/tsconfig.spec.json ni frontend/src/app/features/recepciones-compra/**/*.spec.ts (propiedad G.1 ChatGPT). Preferir revisión/evidencia o test gap aislado fuera de esos archivos; no backend productivo salvo hallazgo P0/P1 causal claramente demostrado y reportado antes de patch."
-}

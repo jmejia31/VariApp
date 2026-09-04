@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-A-N24H1-SUPPORT-API-A3-V319-20260821T0050Z",
-  "workerId": "JULES_A",
-  "taskId": "N2.4.H.1.SUPPORT.API.A3",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "69c260d80c25f9075ecfc759fc08198620ed1c2d",
-  "fileScopeHint": "PARENT-FIRST SUPPORT ONLY. WRITE únicamente docs/qa/N2_4_H1_R7_API_CONTRACT_A3.md. READ controller/DTO/service/domain/tests y los siete docs H.1 actuales. NO tocar docs canónicos H.1, vaep/** ajeno, TASKS, CHANGELOG, código, migraciones, workflows, package/lock, main, Producción ni secretos.",
-  "prompt": "VAEP Jules v3.19 support independiente para N2.4.H.1 R7. Jules B conserva ownership autoritativo de los siete docs H.1. Tu trabajo es producir un único archivo QA con la matriz contractual exacta que R7 debe respetar: route base, métodos/paths, DTOs de request, ApiResponse/DTOs de salida, permisos, ausencia de DELETE, lifecycle y cualquier discrepancia factual actual entre docs H.1 del HEAD y código fuente. Verifica directamente FacturasProveedorController, DTOs, interfaces/servicio y pruebas relevantes; no confíes en artifacts previos. Clasifica hallazgos P0/P1/REQUIRED/P2-P3/N-A. No edites los docs de B ni intentes cerrar H. Reporta pruebas/comandos de solo lectura y limitaciones. Devuelve ChangeSet/gitPatch lógico pero NO generes archivos .patch adicionales. Antes de COMPLETED git diff --name-only debe contener exclusivamente docs/qa/N2_4_H1_R7_API_CONTRACT_A3.md y git diff --check limpio. Sin branch/PR/push/merge/deploy/main/Producción/secrets."
-}

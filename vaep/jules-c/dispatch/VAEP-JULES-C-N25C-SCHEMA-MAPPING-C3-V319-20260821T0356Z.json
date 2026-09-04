@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-C-N25C-SCHEMA-MAPPING-C3-V319-20260821T0356Z",
-  "workerId": "JULES_C",
-  "taskId": "N2.5.C.SUPPORT.SCHEMA_MAPPING.C3",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "c41f3e0644dcf81003c6f63eb5f9d73dc23b1039",
-  "fileScopeHint": "WRITE únicamente docs/qa/N2_5_C_SCHEMA_MAPPING_C3.md. READ commit a16dae67, N2.5.C C2 evidence, current EF mappings/migrations N2.2-N2.4. NO implementation/migrations/API/frontend/workflows/TASKS/CHANGELOG/other vaep files/main/Producción/secrets/deploy.",
-  "prompt": "VAEP v3.19 ZERO-IDLE support N2.5.C con PROMOTION_BLOCKED hasta B pase review/CI. No repitas C2. Deriva un schema-mapping evidence-first para persistencia futura: separa qué datos del resultado ThreeWayMatch son calculados vs qué eventualmente requeriría persistencia; identifica claves reales disponibles y riesgos de duplicar fuentes de verdad. No inventes entidad persistente, FK, 1:1, tabla o índice como hecho. Entrega solo docs/qa/N2_5_C_SCHEMA_MAPPING_C3.md con CONFIRMADO/PROPUESTO/DECISION_PENDIENTE, git diff --check, auto-review y P0/P1."
-}

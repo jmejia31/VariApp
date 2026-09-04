@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-C-N25C-DESIGN-C1-V319-20260821T0206Z",
-  "workerId": "JULES_C",
-  "taskId": "N2.5.C.SUPPORT.PERSISTENCE_DESIGN.C1",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "d665159a2693086ccd6e60a6befc772bd994e673",
-  "fileScopeHint": "SAFE_NEXT con PROMOTION_BLOCKED_BY_N2.4.H_AND_N2.5.B_INTEGRATION. WRITE únicamente docs/qa/N2_5_C_PERSISTENCE_DESIGN_C1.md. READ N2.5.C preflight Issue #109, N2.5.B R1 evidence, DbContext/migrations/contracts relacionados estrictamente necesarios. NO crear/modificar migraciones, backend/frontend funcional, snapshot, csproj, workflows, package/lock, TASKS, CHANGELOG, manifests ajenos, main, Producción ni secretos.",
-  "prompt": "VAEP Jules v3.19 SAFE_NEXT bajo PARENT-FIRST/ZERO-IDLE. Jules C queda libre tras cerrar support H.1 C4; H.1 conserva owner Jules B R8 y no admite otro write-scope útil para C. Ejecuta preparación técnica de N2.5.C sin implementar ni promover mientras N2.4.H y la integración N2.5.B sigan bloqueantes. Partiendo del preflight N2.5.C Issue #109 y del dominio ThreeWayMatch R1 Issue #111, diseña la persistencia/migración exacta: entidades/ownership EF, tablas/columnas/FK/índices/constraints/precision, snapshot esperado, estrategia de migración y rollback, preservación histórica, backfill si aplica, idempotencia y pruebas requeridas. Contrasta con patrones reales N2.2/N2.3/N2.4; no inventes DDL ni nombres sin evidencia. Entrega exactamente docs/qa/N2_5_C_PERSISTENCE_DESIGN_C1.md con P0/P1/REQUIRED/READY_CONDITIONS y checklist ejecutable para la implementación posterior. git diff --name-only solo ese archivo; git diff --check limpio; auto-review obligatorio; ChangeSet/gitPatch revisable; COMPLETED salvo decisión genuinamente humana. Sin branch/PR/push/merge/deploy/main/Producción/secrets."
-}

@@ -1,9 +1,0 @@
-{
-  "workerId": "JULES_A",
-  "dispatchId": "VAEP-JULES-A-N24E1-R5-V317-20260820T1616Z",
-  "taskId": "N2.4.E.1",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "bee4873691851d5803bdc13d37583df50ab2166e",
-  "prompt": "VAEP v3.17 SAME-CHILD REWORK de N2.4.E.1. Este recovery sustituye el resultado FAILED del R4 sin abrir tarea nueva ni ampliar scope. Revalida HEAD bee4873691851d5803bdc13d37583df50ab2166e y entrega evidencia verificable. Objetivos obligatorios: (1) FacturaProveedorService debe usar `${environment.apiUrl}/facturas-proveedor`, nunca `/api`; (2) paginación debe usar `ApiResponse<PagedResult<FacturaProveedor>>` y `totalCount`; (3) rutas/RBAC deben permanecer bajo la arquitectura canónica actual de FacturaProveedor y usar PermisosRuntimeService.puede(); (4) no duplicar modelos/servicios/componentes ya materializados en HEAD. Si HEAD ya satisface el child, entregar zero-diff proof con archivos/contratos revisados y pruebas ejecutadas; si existe un defecto real de E.1, producir ChangeSet/gitPatch mínimo sobre el BASE exacto. WRITE_SCOPE exclusivo: frontend/src/app/app.routes.ts; frontend/src/app/core/models/factura-proveedor.model.ts; frontend/src/app/services/factura-proveedor.service.ts; frontend/src/app/features/compras/facturas-proveedor/facturas-proveedor.components.ts. Prohibido package-lock, form/detail fuera del archivo canónico actual, backend, workflows, manifests adicionales, temporales y cualquier archivo fuera de scope. Ejecuta auto-review, git diff/status, typecheck/lint/build/tests proporcionales. Nunca push/PR/branch/merge/deploy. COMPLETED => VALIDANDO y lane A debe continuar a siguiente padre SAFE sin esperar QA/CI/rollup; cualquier defecto de QA vuelve a esta MISMA child en cola.",
-  "fileScopeHint": "N2.4.E.1 Jules A R5 v3.17; single-manifest; same-child rework; zero-diff proof permitido si HEAD ya satisface el alcance."
-}

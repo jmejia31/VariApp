@@ -1,9 +1,0 @@
-{
-  "workerId": "JULES_C",
-  "dispatchId": "VAEP-JULES-C-N24F3-V317-20260820T1545Z",
-  "taskId": "N2.4.F.3",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "5052d57769a0ad1f801c2a596924f2e253da74d1",
-  "prompt": "VAEP v3.17 — N2.4.F.3 SAFE-NEXT. Ejecuta cross-review independiente de seguridad FacturaProveedor sin esperar cierre E. Revisa autorización fail-closed, rutas, permisos, posibles bypasses, auditoría/observabilidad esperada y coherencia frontend/backend. READ-ONLY por defecto sobre código funcional; puedes escribir únicamente tests/evidencia/documentación QA causalmente aislada que no invada E.1/E.2, F.1 o F.2. Si detectas defecto en scope ajeno, reporta REQUIRED con archivo/línea/impacto/corrección propuesta y no compitas por ownership. Ejecuta pruebas proporcionales, auto-review y evidencia completa. No push/PR/branch/merge/deploy ni cambios a manifests/workflows/main/Producción. COMPLETED queda VALIDANDO. Si QA reencola una corrección anterior mientras trabajas, termina esta tarea actual y recoge inmediatamente ese rework prioritario de tu cola salvo P0 que requiera contención inmediata.",
-  "fileScopeHint": "F.3 cross-review seguridad read-only por defecto; writes solo tests/docs/qa aislados; nunca E.1/E.2/F.1/F.2. PROMOTION_BLOCKED_BY_E."
-}

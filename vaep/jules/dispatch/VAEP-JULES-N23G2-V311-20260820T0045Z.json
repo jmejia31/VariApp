@@ -1,8 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-N23G2-V311-20260820T0045Z",
-  "taskId": "N2.3.G.2",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "ad9442141d2669e3f9eaa957f9bddf929b63dc95",
-  "fileScopeHint": "docs/qa/N2_3_G_M13_REVIEW_JULES_A.md",
-  "prompt": "ROL: Programador Secundario Confiable Jules A. Lee AGENTS.md, PROJECT_CONTEXT.md, TASKS.md cuando aplique y docs/VAEP_JULES.md. Esta es una revalidación final del MISMO N2.3.G bajo VAEP v3.11, no una tarea futura. Trabaja FULL FLASH PERFECT y FINISH_FIRST. Revisa de forma independiente el estado de QA/M13 de RecepcionCompra tras la cancelación de Playwright del run 32316198327 y los commits posteriores de control-plane. Compara el HEAD funcional ddaa5bd7e1fb65ef9e7a50832e7eb178efc3a1a8 con PRIMARY_BASE_HEAD ad9442141d2669e3f9eaa957f9bddf929b63dc95 para confirmar si la divergencia es solo control-plane o si existe impacto funcional. Inspecciona jobs, código y pruebas relevantes; no declares PASS de nada no ejecutado. No toques código funcional. Tu única escritura autorizada es docs/qa/N2_3_G_M13_REVIEW_JULES_A.md con evidencia exacta: runs/jobs revisados, estado de Playwright/M13, riesgos P0/P1/P2/P3, observaciones, limitaciones y recomendación de cierre o corrección. Si detectas un defecto funcional real, NO lo corrijas fuera de scope: documenta ubicación/causa para VAEP. Antes de entregar ejecuta git status --short, git diff --check y git diff --name-only; el ChangeSet final debe contener únicamente el archivo autorizado y ningún changes.patch/*.patch/*.diff/backups. No branch, PR, push, merge, deploy, main, Producción ni secretos. Devuelve ChangeSet/gitPatch limpio con baseCommitId exacto y autoevaluación completa." 
-}

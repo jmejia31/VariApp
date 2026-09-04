@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-A-N25B-XR3-V319-20260821T0231Z",
-  "workerId": "JULES_A",
-  "taskId": "N2.5.B.SUPPORT.CROSS_REVIEW.A3",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "8c4b2744f3d9199170d497839ff8e1bc4234bce9",
-  "fileScopeHint": "SAFE_NEXT/PARENT-FIRST fallback. WRITE únicamente docs/qa/N2_5_B_CROSS_REVIEW_A3.md. CERO otros archivos, especialmente vaep/**. READ Issue #111/artifact evidence, N2.5.A evidence y contratos reales N2.2/N2.3/N2.4.",
-  "prompt": "VAEP v3.19 ZERO-IDLE. XR2 Issue #131 se rechaza por scope leak: borró manifests vaep/** y además trató la ausencia del artifact en el base como P0. Ejecuta XR3 sin modificar ningún manifest ni código. El artifact de Jules C N2.5.B Issue #111 existe como evidencia externa y ya tuvo REVIEW PASS previo; audítalo conceptualmente contra contratos reales del repo y documenta únicamente hallazgos verificables. NO exijas que el patch de Issue #111 esté integrado en PRIMARY_BASE_HEAD para poder hacer cross-review; trabaja con evidencia/artifact disponible y código base real. Distingue hechos del repo vs propuesta N2.5.B. Entrega solo docs/qa/N2_5_B_CROSS_REVIEW_A3.md con PASS/REQUIRED, riesgos, dependencias y criterios de integración. No inventar P0 por ausencia de integración, no implementar. git diff --name-only exactamente ese archivo; git diff --check; auto-review; sin branch/PR/push/merge/deploy/main/Producción/secrets. PROMOTION_BLOCKED_BY_N2.4.H."
-}

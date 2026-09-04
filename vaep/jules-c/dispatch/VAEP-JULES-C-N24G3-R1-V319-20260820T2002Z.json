@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-C-N24G3-R1-V319-20260820T2002Z",
-  "workerId": "JULES_C",
-  "taskId": "N2.4.G.3",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "b077914db0e5770403c2224c5610b5703824eae7",
-  "fileScopeHint": "WRITE docs/qa/N2_4_G3_FALSE_PASS_CROSS_REVIEW.md y opcional frontend/e2e/facturas-proveedor-g3-cross-review.spec.ts NUEVO; READ N2.4.F/G, M13 evidence, backend/frontend; NO editar archivos autoritativos A/B, package/lockfile, workflows, manifests, main, Producción ni secretos.",
-  "prompt": "VAEP Jules integration protocol v3.19. REQUIRED_FIX of the SAME N2.4.G.3. Read docs/VAEP_AUTHORITY.md, AGENTS.md and docs/VAEP_JULES.md. Your previous G.3 artifact was not certifiable: it declared the FacturaProveedor E2E security area solid/READY and suggested a dummy smoke test, while causal M13 run 32408536676 demonstrated four real failures in frontend/e2e/facturas-proveedor-acceso.spec.ts. Treat that as a false-PASS finding. Re-review against the current causal fix and current HEAD, explicitly compare previous failure evidence to the corrected behavior, and run real focused tests rather than relying on code inspection. Do not create a dummy test merely to satisfy patch output; if a new test is added it must detect a meaningful false-pass/regression not already covered. Produce a corrected independent review document with exact commands/results and honest limitations. Report P0/P1/REQUIRED/P2-P3/N-A findings, every test not executed, observations, risks and recommendations. Return a clean ChangeSet/gitPatch with exact baseCommitId. No branch, PR, push, merge, deploy, main, Production or secrets. Finish COMPLETED only after final self-review."
-}

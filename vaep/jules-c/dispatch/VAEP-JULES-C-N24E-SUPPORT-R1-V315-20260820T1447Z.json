@@ -1,9 +1,0 @@
-{
-  "workerId": "JULES_C",
-  "dispatchId": "VAEP-JULES-C-N24E-SUPPORT-R1-V315-20260820T1447Z",
-  "taskId": "N2.4.E.SUPPORT.C",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "236fb12cec6eb62dcea293965a0328e46a3dae79",
-  "prompt": "SUPPORT_SAME_PARENT NO-ROLLUP para N2.4.E mientras E.1 R2 materializa el shared contract. No continúes ni modifiques el form/detail E.2 funcional y no invadas el WRITE_SCOPE de Jules A. Realiza cross-review independiente de los contratos FacturaProveedor actuales: backend controller/DTOs, shared ApiResponse/PagedResult, permisos Compras Ver/Crear/Editar/Confirmar/Anular, convencion features/compras, rutas, accesibilidad y riesgos de integración de list/form/detail. Busca defectos P0/P1/P2, duplicaciones, métodos RBAC inexistentes, URLs/paginación incorrectas y necesidades de pruebas. Puedes leer todo lo estrictamente necesario, pero tu único WRITE_SCOPE es `docs/qa/N2_4_E_SUPPORT_JULES_C.md`. No cambies código funcional, tests, package-lock, workflows ni manifests. Documenta evidencia exacta con paths/símbolos, recomendaciones accionables y qué debe validar E.2 recovery después de E.1. Auto-review del reporte, no false PASS, no publicación/push/PR/branch/merge/deploy. Entrega ChangeSet/gitPatch limpio y finaliza sin preguntas rutinarias. Esta tarea es soporte no-rollup: NO marca E.2 ni parent E como LISTO.",
-  "fileScopeHint": "WRITE_SCOPE único: docs/qa/N2_4_E_SUPPORT_JULES_C.md. Todo código es READ_ONLY. NON_ROLLUP SUPPORT_SAME_PARENT."
-}

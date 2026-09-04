@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-D-N25H-PREFLIGHT-D1-V319-20260821T0306Z",
-  "workerId": "JULES_D",
-  "taskId": "N2.5.H.PREFLIGHT.D1",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "aed7171257dbd1285f73ba47a3e0fbbd82c37f70",
-  "fileScopeHint": "ZERO-IDLE SAFE_NEXT. WRITE únicamente docs/qa/N2_5_H_DOC_CERT_PREFLIGHT_D1.md. READ N2.5 A-G evidence and current canonical docs/TASKS/CHANGELOG/rollback/runbook/OpenAPI/ADR/ERD patterns. NO implementation code, migrations, frontend, package/lock, workflows, vaep/** excepto este manifest, TASKS/CHANGELOG writes, main/Producción/secrets/deploy.",
-  "prompt": "VAEP v3.19 ZERO-IDLE SAFE_NEXT. Prepara N2.5.H documentación/certificación sin cerrar nada ni escribir documentos canónicos todavía. Inspecciona evidencia real N2.5 A-G disponible y patrones de cierre N2.2/N2.3/N2.4. Separa CONFIRMADO / PROPUESTO / DECISION_PENDIENTE. Define checklist de documentación canónica necesaria, rollback/runbook/OpenAPI/ADR/ERD cuando aplique, evidencias mínimas de CI/DoD, reconciliación TASKS/CHANGELOG y criterios de cero P0/P1. No declarar N2.5 LISTO ni inventar SHA/gates. Entrega solo docs/qa/N2_5_H_DOC_CERT_PREFLIGHT_D1.md; git diff --name-only exacto; git diff --check; auto-review; P0/P1/limitaciones. PROMOTION_BLOCKED_BY_N2_5_G_AND_PARENT_GATES. Sin branch/PR/push/merge/deploy/main/Producción/secrets."
-}

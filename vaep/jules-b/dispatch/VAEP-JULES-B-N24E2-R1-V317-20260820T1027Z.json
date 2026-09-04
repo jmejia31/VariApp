@@ -1,9 +1,0 @@
-{
-  "workerId": "JULES_B",
-  "dispatchId": "VAEP-JULES-B-N24E2-R1-V317-20260820T1027Z",
-  "taskId": "N2.4.E.2",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "e485f122e5e959c1f1e507d0ddeb7ba3d8f79a67",
-  "prompt": "VAEP v3.17 SAME-CHILD RECOVERY N2.4.E.2. El dispatch previo 17480829 quedó en la ruta incorrecta vaep/jules/dispatch y no pertenece al lane Jules B; no reutilizarlo como sesión. Trabaja sobre el frontend FacturaProveedor ya materializado en Desarrollo. Tu responsabilidad es certificar de forma ejecutable formulario + detalle + lifecycle mediante E2E determinístico sin modificar archivos funcionales compartidos. Crea o corrige exclusivamente frontend/e2e/factura-proveedor-form-detail.spec.ts. Cubre creación/edición de Borrador, detalle, registrar, anular con motivo obligatorio, error fail-closed y contrato API real /facturas-proveedor; mocks no deben interceptar navegación document. Reutiliza login/harness y patrones Playwright existentes; sin sleeps arbitrarios. Ejecuta prueba dirigida y validaciones proporcionales. Si HEAD ya satisface todo y no requiere cambio, entrega zero-diff proof verificable. WRITE_SCOPE exclusivo: frontend/e2e/factura-proveedor-form-detail.spec.ts. Prohibido tocar modelos, servicios, componentes, rutas, backend, package-lock, workflows, manifests adicionales o temporales. Nunca push/PR/branch/merge/deploy. COMPLETED => VALIDANDO; cualquier defecto QA vuelve a esta MISMA child.",
-  "fileScopeHint": "N2.4.E.2 Jules B R1 v3.17; E2E form/detail/lifecycle único; recovery por ruta de dispatch previa incorrecta."
-}

@@ -1,9 +1,0 @@
-{
-  "workerId": "JULES_C",
-  "dispatchId": "VAEP-JULES-C-N24G3-V319-20260820T1745Z",
-  "taskId": "N2.4.G.3",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "9ee4c456666ad16a9f3f03ebdf2d368efb077326",
-  "prompt": "VAEP v3.19 ZERO-IDLE — NEXT_SAFE_CHILD N2.4.G.3. E.3 ya entregó evidencia y tu lane queda libre; G puede ejecutarse aunque su promoción dependa de F. Realiza cross-review independiente de cobertura y false-pass de FacturaProveedor. Audita evidencia actual de G.1/G.2 cuando exista, suites backend/frontend/contract/E2E/security/performance, gaps de cobertura y CI causal. Mantén scope independiente: preferir tests nuevos de QA, documentación técnica de hallazgos o correcciones exclusivas que no solapen F.1/F.2 ni archivos autoritativos A/B. No declarar PASS no ejecutado. Si G.1/G.2 aún no tienen artefactos, crea preflight/tests de cobertura seguros y documenta PROMOTION_BLOCKED_BY_F_CERT. NO backend funcional de F.1, NO frontend security de F.2, NO control-plane, main/Producción, ramas, push, PR, merge o deploy. Auto-review y evidencia causal obligatorios; COMPLETED=VALIDANDO/READY_FOR_VAEP.",
-  "fileScopeHint": "WRITE_SCOPE EXCLUSIVO: tests QA/cross-review FacturaProveedor nuevos y/o docs/qa N2.4.G.3; no tocar scopes F.1/F.2 ni archivos funcionales autoritativos A/B."
-}

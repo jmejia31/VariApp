@@ -1,9 +1,0 @@
-{
-  "workerId": "JULES_A",
-  "dispatchId": "VAEP-JULES-A-N24E1-R2-V315-20260820T1446Z",
-  "taskId": "N2.4.E.1",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "935f9ab958aad5f720b656082a153ee9375bca85",
-  "prompt": "RECOVERY R2 DE LA MISMA N2.4.E.1. No abras tarea nueva ni amplíes scope. Revisa Issue #43 y corrige exactamente los REQUIRED pendientes sobre el frontend FacturaProveedor: (1) FacturaProveedorService debe usar `${environment.apiUrl}/facturas-proveedor`, SIN `/api`; el backend autoritativo usa Route(\"facturas-proveedor\"). (2) listado/paginacion debe usar el contrato compartido `ApiResponse<PagedResult<FacturaProveedor>>`; `PagedResult` expone items,page,pageSize,totalCount,totalPages; no inventes `{items,total}` y usa `totalCount`. Conserva arquitectura canonica `frontend/src/app/features/compras/facturas-proveedor`, `PermisosRuntimeService.puede()`, rutas aprobadas y shared model/service. WRITE_SCOPE solo los cuatro archivos del R1: frontend/src/app/app.routes.ts; frontend/src/app/core/models/factura-proveedor.model.ts; frontend/src/app/services/factura-proveedor.service.ts; frontend/src/app/features/compras/facturas-proveedor/list/facturas-proveedor-list.component.ts. Prohibido package-lock, form/detail, backend, workflows, archivos temporales o cambios fuera de scope. Ejecuta auto-review completo, typecheck/lint/build y pruebas proporcionales disponibles. Reporta cualquier limitacion; nunca declares PASS no ejecutado. No publiques ni hagas push/PR/branch/merge/deploy. Entrega ChangeSet/gitPatch limpio con baseCommitId exacto y finaliza sin pedir confirmacion rutinaria.",
-  "fileScopeHint": "WRITE_SCOPE exclusivo: frontend/src/app/app.routes.ts; frontend/src/app/core/models/factura-proveedor.model.ts; frontend/src/app/services/factura-proveedor.service.ts; frontend/src/app/features/compras/facturas-proveedor/list/facturas-proveedor-list.component.ts. Nada mas."
-}

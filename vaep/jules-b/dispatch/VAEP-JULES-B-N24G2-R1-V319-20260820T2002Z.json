@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-B-N24G2-R1-V319-20260820T2002Z",
-  "workerId": "JULES_B",
-  "taskId": "N2.4.G.2",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "b077914db0e5770403c2224c5610b5703824eae7",
-  "fileScopeHint": "WRITE frontend/e2e FacturaProveedor QA/performance/accessibility/security y docs/qa/N2_4_G2_FRONTEND_QA.md; NO frontend/package.json, frontend/package-lock.json, backend, workflows, manifests, main, Producción ni secretos.",
-  "prompt": "VAEP Jules integration protocol v3.19. SAME-CHILD RECOVERY of N2.4.G.2; do not create a different task. Read docs/VAEP_AUTHORITY.md, AGENTS.md and docs/VAEP_JULES.md. The previous G.2 dispatch produced no verifiable terminal result. Work against the current FacturaProveedor frontend/E2E state, including the causal fix that prevents Playwright route mocks from intercepting document navigation. Run focused real lint/build/E2E/accessibility/performance/security validations applicable to FacturaProveedor. If a test is wrong or false-passing, correct it within the authorized E2E scope. Never touch package.json or package-lock.json. Produce docs/qa/N2_4_G2_FRONTEND_QA.md with exact commands/results, failures, limitations and performance/accessibility coverage; do not claim PASS for anything not executed. Final self-review must report observations/limitations/risks/recommendations and tests not executed. Return a clean ChangeSet/gitPatch with exact baseCommitId and finish COMPLETED. No branch, PR, push, merge, deploy, main, Production or secrets."
-}

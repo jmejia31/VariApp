@@ -1,7 +1,0 @@
-{
-  "task_id": "VAEP-JULES-D-N41H-RECOVERY-D31-20260831T2121HND",
-  "title": "N4.1.H CI review backlog and closure",
-  "prompt": "PROJECT_ID=VARIAPP. You are Jules D. Work NOW on jmejia31/VariApp branch Desarrollo at current HEAD. CURRENT_PARENT=N4.1.H. Exclusive scope: .github/workflows/**, .github/scripts/**, vaep/**, .vaep/**, .jules/**, CHANGELOG_AI.md and N4.1.H closure/certification documentation only. Do NOT modify frontend or backend functional code or migrations. Inspect current CI/gates and the accumulated Jules Ready-for-review/Failed/Needs-clarification delivery pattern. Resolve orchestration defects, stale/duplicate dispatch state, reviewability gaps and closure evidence that prevent N4.1.H from reaching a clean terminal state. Preserve fail-closed behavior, lane separation A/B/C/D, secrets, Desarrollo-only policy, PR #2 draft, no main merge and no production. Do not wait for clarification when repository evidence can answer it; use v3.27 deterministic fallback. Implement safe fixes, validate workflows/scripts statically where possible, and produce exact evidence. End with exact changed files, tests/checks, residual blockers, SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. If no actionable defect exists, COMPLETE with NO_TARGETS_FOUND evidence rather than asking the user.",
-  "source": {"repository": "jmejia31/VariApp", "base_branch": "Desarrollo"},
-  "auto_approve_plan": true
-}

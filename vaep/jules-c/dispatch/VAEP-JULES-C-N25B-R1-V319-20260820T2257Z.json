@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-C-N25B-R1-V319-20260820T2257Z",
-  "workerId": "JULES_C",
-  "taskId": "N2.5.B",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "fa1df743ea92645429d2c05cd7201bd8038099a9",
-  "fileScopeHint": "SAME-CHILD REWORK R1; PROMOTION_BLOCKED_BY_N2.4.H. WRITE únicamente backend/src/Domain/Entities/*ThreeWayMatch*.cs, backend/src/Domain/Enums/*ThreeWayMatch*.cs, backend/src/Domain/ValueObjects/*ThreeWayMatch*.cs, backend/src/Application/DTOs/*ThreeWayMatch*.cs, backend/src/Application/Interfaces/*ThreeWayMatch*.cs y backend/tests/InventoryApp.Tests/*ThreeWayMatch*.cs. NO InventoryApp.Tests.csproj, Infrastructure/EF/migrations/API/controllers/services/frontend/workflows/package/lock/main/Producción/secrets.",
-  "prompt": "VAEP Jules integration protocol v3.19 SAME-CHILD REWORK R1 after Issue #106. Reproduce the valid N2.5.B Three-way match domain/contracts work from the prior artifact but remove the out-of-scope InventoryApp.Tests.csproj modification. The repository test project already uses normal SDK-style inclusion unless fresh evidence proves otherwise; do not edit project files. Keep aggregation by OrdenCompraDetalleId across N recepciones and N facturas, explicit quantity/price/discount/tax/currency discrepancies, no invented tolerance/exchange business rules, no EF/API/frontend. Tests may be added only as *ThreeWayMatch*.cs. Promotion remains blocked by N2.4.H. Run proportional tests available, record not-executed limitations, P0/P1 explicit, mandatory self-review, exact clean scope/baseCommitId, then COMPLETED. No branch, PR, push, merge, deploy, main, Production or secrets."
-}

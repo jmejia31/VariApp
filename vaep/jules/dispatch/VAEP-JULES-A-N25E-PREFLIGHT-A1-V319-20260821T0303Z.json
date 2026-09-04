@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-A-N25E-PREFLIGHT-A1-V319-20260821T0303Z",
-  "workerId": "JULES_A",
-  "taskId": "N2.5.E.PREFLIGHT.A1",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "eaf387012d4f35ababd00ad81506511e27d96eac",
-  "fileScopeHint": "ZERO-IDLE SAFE_NEXT. WRITE únicamente docs/qa/N2_5_E_FRONTEND_UX_PREFLIGHT_A1.md. READ N2.5 A-D evidence, current Angular routes/services/components/RBAC patterns and existing N2.2/N2.3/N2.4 UX. NO implementation code, package/lock, workflows, vaep/** excepto este manifest, TASKS/CHANGELOG, main/Producción/secrets/deploy.",
-  "prompt": "VAEP v3.19 ZERO-IDLE SAFE_NEXT. N2.4.H.1 ya es ChatGPT/VAEP-only y está LISTO; parent H y N2.5.A están bajo cierre directo ChatGPT/VAEP. Prepara N2.5.E Frontend/UX sin implementar. Inspecciona patrones reales Angular y evidencia N2.5 A-D disponible. Separa CONFIRMADO / PROPUESTO / DECISION_PENDIENTE. Define superficies UI necesarias para Three-way match, rutas, estados loading/vacío/error, permisos UI, accesibilidad, responsive y estrategia de pruebas, sin inventar contratos backend aún no aceptados. Si un endpoint/DTO/RBAC no existe, marcar propuesta/dependencia, no hecho. Entrega solo docs/qa/N2_5_E_FRONTEND_UX_PREFLIGHT_A1.md; git diff --name-only exacto; git diff --check; auto-review; P0/P1/limitaciones. PROMOTION_BLOCKED_BY_N2_5_D_AND_PARENT_GATES. Sin branch/PR/push/merge/deploy/main/Producción/secrets."
-}

@@ -1,7 +1,0 @@
-{
-  "task_id": "VAEP-JULES-C-N41H-RECOVERY-C31-20260831T2121HND",
-  "title": "N4.1.H frontend regression causal closure",
-  "prompt": "PROJECT_ID=VARIAPP. You are Jules C. Work NOW on jmejia31/VariApp branch Desarrollo at current HEAD. CURRENT_PARENT=N4.1.H. Exclusive scope: frontend/** only. Reproduce the current Angular/Vitest/typecheck/build/regression failures relevant to N4.1.H from HEAD, identify causal defects in components, routes, services, contracts and tests, implement the minimum correct fixes, and execute relevant frontend gates. Do not wait for clarification when repository evidence can answer it; derive targets deterministically using v3.27. Do not touch backend, migrations, VAEP/Jules workflows, main, production, secrets, or unrelated refactors. Do not weaken tests to force green. End with exact changed files, commands/tests, pass/fail evidence, residual blockers, SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. If already green, certify it reproducibly and inspect the next directly dependent N4.1.H frontend defect; if none exists, COMPLETE with NO_TARGETS_FOUND evidence rather than asking the user.",
-  "source": {"repository": "jmejia31/VariApp", "base_branch": "Desarrollo"},
-  "auto_approve_plan": true
-}

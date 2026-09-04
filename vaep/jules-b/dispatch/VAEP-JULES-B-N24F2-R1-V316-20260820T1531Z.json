@@ -1,9 +1,0 @@
-{
-  "workerId": "JULES_B",
-  "dispatchId": "VAEP-JULES-B-N24F2-R1-V316-20260820T1531Z",
-  "taskId": "N2.4.F.2",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "9b748249aa1a065dbafa0548ae66ff499d976b88",
-  "prompt": "VAEP v3.16 WATCHDOG RECOVERY R1 de la MISMA N2.4.F.2. El dispatch inicial quedó STALLED >10m porque fue publicado en un commit multi-manifest incompatible con el worker v313. Este recovery corrige solo el disparo, no cambia tarea ni scope. E sigue en PROMOTION_GATE pendiente, pero EXECUTION_GATE permite trabajo seguro independiente. Audita/corrige exclusivamente seguridad y permisos frontend FacturaProveedor que no dependan de modificar los contratos compartidos E.1/E.2: rutas/guards, PermisosRuntimeService.puede(), acciones fail-closed, cobertura negativa y E2E/RBAC proporcional. No tocar backend, DB, package-lock, workflows/manifests ni archivos bajo ownership E.1/E.2. Si una corrección depende realmente de E, sustituye por preflight/tests/read-only útil y documenta PROMOTION_BLOCKED_BY_E; MAX_VOLUNTARY_IDLE=0. Auto-review, pruebas proporcionales y evidencia exacta. No push/PR/branch/merge/deploy. COMPLETED queda VALIDANDO/READY_FOR_VAEP y el lane debe tomar siguiente SAFE task después.",
-  "fileScopeHint": "SAME F.2; frontend security/RBAC independiente; writes solo scope F.2, nunca E.1/E.2; recovery single-manifest por stall de dispatch."
-}

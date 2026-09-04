@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-D-N25B-DIRECT-FIX-PERSIST-D5-V319-20260821T0422Z",
-  "workerId": "JULES_D",
-  "taskId": "N2.5.B.SUPPORT.DIRECT_FIX_PERSISTENCE_REVIEW.D5",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "d0a1d8118fad758a040f672310f44bddb725a429",
-  "fileScopeHint": "WRITE únicamente docs/qa/N2_5_B_DIRECT_FIX_PERSISTENCE_REVIEW_D5.md. READ commit a16dae67b363c1823e57db3ffab0e1f41d095b9b, contratos ThreeWayMatch, mapeos EF existentes y evidencia B3/C3 de N2.5.C. NO implementación, migraciones, DB changes, frontend, workflows, TASKS, CHANGELOG, otros vaep, main, Producción, secrets ni deploy.",
-  "prompt": "VAEP v3.19 PARENT-FIRST ZERO-IDLE. D4 no mostró resultado terminal dentro de SLA y se supersede por esta recuperación. Revisa si el contrato N2.5.B directo a16dae67 es persistible sin contradicciones con el modelo actual y con B3/C3 ya terminales: claves/relaciones reales, OrdenCompraDetalleId como pivote, lifecycle elegible, moneda y snapshots. Señala qué persistencia/índices/migración serán REQUIRED vs PROPUESTA para N2.5.C, sin implementar nada y sin inventar FKs/cardinalidades. Entrega un único QA doc con PASS/REQUIRED_FIX, P0/P1, riesgos y handoff preciso a N2.5.C. git diff --name-only exacto + git diff --check antes de COMPLETED."
-}

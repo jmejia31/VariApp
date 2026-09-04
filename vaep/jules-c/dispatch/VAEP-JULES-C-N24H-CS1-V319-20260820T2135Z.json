@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-C-N24H-CS1-V319-20260820T2135Z",
-  "workerId": "JULES_C",
-  "taskId": "N2.4.H.CS1",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "35cd6d35b7b32c65a930f5ee68774a80b062f4c6",
-  "fileScopeHint": "H SUPPORT WRITE únicamente docs/qa/N2_4_H_C_DOC_TRACEABILITY_REVIEW.md y evidencia documental nueva propia; READ N2.4.H.1 artifact/Issue #82, docs FacturaProveedor, OpenAPI/runbook/ADR/ERD/rollback, N2.4 G evidence and current code/tests as needed. NO backend/src, frontend/src, frontend/e2e autoritativos, migrations, workflows, package/lockfile, manifests ajenos, main, Producción ni secretos.",
-  "prompt": "VAEP Jules integration protocol v3.19 ZERO-IDLE CONTROLLED WORK-STEAL SUPPORT. Read docs/VAEP_AUTHORITY.md, AGENTS.md and docs/VAEP_JULES.md first. Your former N2.4.G.3 recovery is terminal/superseded and MUST NOT be resumed; G.3 is already LISTO by VAEP causal reconciliation. Execute N2.4.H.CS1 as independent support to accelerate parent N2.4.H. Audit the completed H.1 documentation artifact (Issue #82/session 13016064238978047248) and the current repository for exact technical traceability of FacturaProveedor: OpenAPI/contracts, runbook/rollback, ADR/ERD/database/migration references, RBAC/security/audit evidence, commits/gates and any stale or missing references. Do not modify the H.1 artifact or A's H.3 file; write only your exclusive review document. Classify findings P0/P1/REQUIRED/P2-P3/N-A, distinguish missing documentation from already-proven implementation, and never declare PASS without evidence. Run proportional read-only checks, list every limitation/test not executed, perform final self-review, return a clean ChangeSet/gitPatch with exact baseCommitId and finish COMPLETED unless a genuine human-only business/authorization decision exists. No branch, PR, push, merge, deploy, main, Production or secrets."
-}

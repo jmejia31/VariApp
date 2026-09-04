@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-A-N24H1-SUPPORT-SCOPE-A1-V319-20260820T2321Z",
-  "workerId": "JULES_A",
-  "taskId": "N2.4.H.1.SUPPORT.SCOPE.A1",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "7c108c51bed0da7be9a8708cea3c15d92c06ec85",
-  "fileScopeHint": "PARENT-FIRST SUPPORT H.1 R4. WRITE solo docs/qa/N2_4_H1_R4_SCOPE_INTEGRITY_A.md. READ Issue #112/R3 artifact, siete docs H.1, manifests actuales, COLA y evidencia directa. NO editar los siete docs de B, vaep manifests, TASKS/CHANGELOG, código, migraciones, workflows, package/lock, main, Producción ni secretos.",
-  "prompt": "VAEP Jules v3.19 PARENT-FIRST SUPPORT. Ejecuta N2.4.H.1.SUPPORT.SCOPE.A1. B es único owner autoritativo de los siete docs H.1. Audita independientemente por qué R3 contaminó el patch con eliminaciones de manifests y produce un checklist de integrabilidad para R4: patch debe contener exactamente los siete docs autorizados, base reconciliable, cero vaep/**/TASKS/CHANGELOG/código fuera de scope, estado canónico no sobrepromovido y pruebas no ejecutadas explícitas. Revisa contenido de R3 solo para señalar P0/P1/REQUIRED, incluyendo cualquier afirmación de rollback/data-loss insegura. No modifiques archivos de B. Devuelve un único docs/qa, auto-review, ChangeSet/gitPatch limpio y COMPLETED. Sin branch/PR/push/merge/deploy/main/Producción/secrets."
-}

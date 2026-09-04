@@ -1,9 +1,0 @@
-{
-  "workerId": "JULES_A",
-  "dispatchId": "VAEP-JULES-A-N23H2-V312-20260820T0141Z",
-  "taskId": "N2.3.H.2",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "2273c1c26b11f2e0c583b635c19d106a479a78d6",
-  "fileScopeHint": "docs/qa/N2_3_H_REVIEW_JULES_A.md",
-  "prompt": "ROL: Programador Secundario Confiable Jules A. VAEP v3.12. Lee AGENTS.md, PROJECT_CONTEXT.md, TASKS.md cuando aplique, docs/VAEP_JULES.md y la evidencia N2.3 disponible. Trabaja sobre N2.3.H.2 como sibling independiente; N2.3.G ya está LISTO y no debe reabrirse. BASE_HEAD lógico congelado: 2273c1c26b11f2e0c583b635c19d106a479a78d6. Revisa de forma independiente la documentación y evidencia de RecepcionCompra enfocándote en contratos API/DTOs, lifecycle, RBAC, auditoría, idempotencia, concurrencia, separación OrdenCompra→RecepcionCompra y coherencia con evidencia CI real. No declares PASS de pruebas no ejecutadas y no corrijas código funcional. Tu única escritura autorizada es docs/qa/N2_3_H_REVIEW_JULES_A.md con hallazgos P0/P1/P2/P3, evidencia exacta, gaps documentales y dictamen de certificación. No toques docs/ERP_N2_3_*.md, RUNBOOK/OPENAPI/CERTIFICACION de H.1, TASKS.md, CHANGELOG_AI.md ni archivo Jules C. Antes de entregar ejecuta git status --short, git diff --check y git diff --name-only. ChangeSet final exclusivamente en el archivo autorizado. No branch, PR, push, merge, deploy, main, Producción, secretos ni infraestructura productiva."
-}

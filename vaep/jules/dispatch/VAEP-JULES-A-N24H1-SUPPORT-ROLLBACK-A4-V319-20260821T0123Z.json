@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-A-N24H1-SUPPORT-ROLLBACK-A4-V319-20260821T0123Z",
-  "workerId": "JULES_A",
-  "taskId": "N2.4.H.1.SUPPORT.ROLLBACK.A4",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "7ad442fe21d447bfcbfae40d5c0ed9e799d2c17b",
-  "fileScopeHint": "PARENT-FIRST SUPPORT R8. WRITE únicamente docs/qa/N2_4_H1_R8_ROLLBACK_A4.md. READ rollback/runbook H.1, migration chain N2.3->N2.4 y evidencia directa necesaria. NO editar los siete docs autoritativos de B, código, migraciones, TASKS, CHANGELOG, workflows, package/lock, manifests ajenos, main, Producción ni secretos.",
-  "prompt": "VAEP Jules v3.19 support exclusivo para N2.4.H.1 R8. Jules B conserva ownership autoritativo. Verifica de forma independiente el error REQUIRED de R7: el rollback debe apuntar al predecesor real inmediato 20260819143000_N2_3_RecepcionCompraOrigenKardex, después de 20260819105500_N2_3_RecepcionCompraPersistencia, antes de 20260820082500_N2_4_FacturaProveedorPersistencia. Verifica el Down() real: elimina FacturaProveedorDetalles y FacturasProveedor, preserva N2.3 pero destruye datos N2.4; no existe DownGuard salvo prueba directa. Define evidencia exacta de quiescencia, backup/export verificable, restore criteria y abort fail-closed. No inventes comandos, estados ni PASS. Entrega un único QA doc con FINDINGS P0/P1/REQUIRED/P2-P3, referencias exactas y recomendación consumible por B/VAEP. git diff --name-only debe contener exactamente ese archivo; git diff --check limpio; auto-review obligatorio; ChangeSet/gitPatch revisable; COMPLETED salvo decisión genuinamente humana. Sin branch/PR/push/merge/deploy/main/Producción/secrets."
-}

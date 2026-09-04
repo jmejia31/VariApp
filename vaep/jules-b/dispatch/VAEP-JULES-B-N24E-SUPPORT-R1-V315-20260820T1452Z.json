@@ -1,9 +1,0 @@
-{
-  "workerId": "JULES_B",
-  "dispatchId": "VAEP-JULES-B-N24E-SUPPORT-R1-V315-20260820T1452Z",
-  "taskId": "N2.4.E.SUPPORT.B",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "40658f9156f668df71e3d8e029f574d00a0ed40e",
-  "prompt": "JULES B YA CERTIFICADO POR SMOKE R1. Ejecuta SUPPORT_SAME_PARENT NO-ROLLUP de N2.4.E sin invadir E.1 Jules A ni E.2 Jules C. Audita de forma independiente seguridad/RBAC/accesibilidad/contratos y plan de pruebas de FacturaProveedor sobre el estado actual: permisos Compras Ver/Crear/Editar/Confirmar/Anular, `PermisosRuntimeService.puede()`, URL del controller `facturas-proveedor`, ApiResponse/PagedResult, consistencia de rutas y navegación, estados permitidos y controles de error. Busca P0/P1/P2 y riesgos de integración. Código funcional y tests son READ_ONLY. Tu único WRITE_SCOPE es `docs/qa/N2_4_E_SUPPORT_JULES_B.md`. Documenta paths/símbolos/evidencia exacta, checklist accionable para la integración de E.1/E.2 y pruebas que ChatGPT QA debe certificar. Auto-review obligatorio; no false PASS; no preguntas rutinarias; no push/PR/branch/merge/deploy. Entrega ChangeSet/gitPatch limpio. Esta tarea es soporte no-rollup y NO marca E ni E.1/E.2 como LISTO.",
-  "fileScopeHint": "WRITE_SCOPE único: docs/qa/N2_4_E_SUPPORT_JULES_B.md. Todo código y tests READ_ONLY. NON_ROLLUP SUPPORT_SAME_PARENT."
-}

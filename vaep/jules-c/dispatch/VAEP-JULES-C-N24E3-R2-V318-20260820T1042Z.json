@@ -1,9 +1,0 @@
-{
-  "workerId": "JULES_C",
-  "dispatchId": "VAEP-JULES-C-N24E3-R2-V318-20260820T1042Z",
-  "taskId": "N2.4.E.3",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "8e39bfe8eee988e7214bb06f1f87010426cb02c1",
-  "prompt": "VAEP v3.18 SAME-CHILD RECOVERY R2 N2.4.E.3. El recovery R1 98cbbc7e/VAEP-JULES-C-N24E3-R1-V317-20260820T1028Z excedió 10 minutos sin Issue terminal ni session/actividad útil correlacionada en el control-plane, por lo que queda STALLED/SUPERSEDED para ownership y NO debe ejecutarse en paralelo si aparece tarde. Trabaja exclusivamente el E2E RBAC/accesibilidad/performance ligero de FacturaProveedor en frontend/e2e/factura-proveedor-accessibility-rbac.spec.ts. Verifica no autenticado->login; autenticado sin Compras:Ver->acceso denegado; visibilidad/acciones según Compras:Crear/Editar/Confirmar/Anular; errores accesibles; navegación por rutas reales; ausencia de consultas duplicadas en carga/listado. Usa harness/login existente, mocks determinísticos con fallback para resourceType() === 'document', sin sleeps arbitrarios. Ejecuta prueba dirigida y validaciones proporcionales. Si HEAD ya satisface el alcance, entrega zero-diff proof verificable. WRITE_SCOPE ÚNICO: frontend/e2e/factura-proveedor-accessibility-rbac.spec.ts. Prohibido tocar implementación compartida, modelos, servicios, componentes, rutas, backend, package-lock, workflows, otros specs, manifests o temporales. Auto-review obligatorio. Nunca push/PR/branch/merge/deploy. COMPLETED=>VALIDANDO; cualquier defecto QA vuelve a esta MISMA child. Al terminar, Jules C libera lane y toma N2.4.G.3 safe-next sin esperar QA global, sujeto a promoción bloqueada por F.",
-  "fileScopeHint": "N2.4.E.3 Jules C R2 v3.18; WRITE exclusivo frontend/e2e/factura-proveedor-accessibility-rbac.spec.ts; same-child recovery por bootstrap stalled; NEXT=N2.4.G.3"
-}

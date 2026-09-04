@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-D-N25D-PREFLIGHT-R2-V319-20260821T0233Z",
-  "workerId": "JULES_D",
-  "taskId": "N2.5.D.PREFLIGHT.D2",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "fa18d29871da668020efc451b80ee75bd8595d10",
-  "fileScopeHint": "SAFE_NEXT. WRITE únicamente docs/qa/N2_5_D_BACKEND_API_PREFLIGHT_D2.md. READ N2.5.A/B/C evidence y patrones reales API/Application/RBAC N2.2/N2.3/N2.4. NO código/migraciones/frontend/vaep/TASKS/CHANGELOG.",
-  "prompt": "VAEP v3.19 ZERO-IDLE SAFE_NEXT. D1 Issue #128 scope limpio pero REQUIRED_FIX factual: exige DownGuard inexistente y propone rutas/RBAC/servicios no confirmados. Produce D2 estrictamente basado en evidencia. Separa CONFIRMADO / PROPUESTO / DECISIÓN_PENDIENTE. No exigir DownGuard; si N2.5.C crea tablas con datos, rollback debe reconocer data-loss y usar controles operativos definidos por evidencia. No fijar `/api/compras/conciliacion` ni permisos financieros específicos como contrato; documentar que ruta y AccionPermiso deben decidirse/alinearse con patrón real antes de implementación. No inventar IThreeWayMatchService/repositories como hechos; marcarlos propuesta cuando corresponda. Contrastar Controller/Service/ProblemDetails/paginación/RBAC reales. Definir criterios y tests para futura implementación sin promover N2.5.D. Solo docs/qa/N2_5_D_BACKEND_API_PREFLIGHT_D2.md; git diff --name-only exacto; git diff --check; auto-review. PROMOTION_BLOCKED_BY_N2.4.H_AND_N2.5.C."
-}

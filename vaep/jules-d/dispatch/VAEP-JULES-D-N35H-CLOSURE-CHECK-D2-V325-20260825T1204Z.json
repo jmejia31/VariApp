@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-D-N35H-CLOSURE-CHECK-D2-V325-20260825T1204Z",
-  "taskId": "N3.5.H.CLOSURE_CHECK.D2",
-  "workerId": "JULES_D",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "1bc9107c5d377f7a06351ab147649279da6b929d",
-  "taskAttempt": 1,
-  "fileScopeHint": "docs/qa/N35H_CLOSURE_CHECKLIST_D2.md",
-  "prompt": "VAEP v3.25 ZERO-IDLE SAME CURRENT_PARENT N3.5.H. Produce SOLO docs/qa/N35H_CLOSURE_CHECKLIST_D2.md. Read-only verify closure prerequisites A-G LISTO, Issue #523/#528 disposition, TASKS/CHANGELOG relationship, P0/P1 known state, and exact post-append reconciliation required before H can become LISTO. Do not assume builds/tests; cite only observed repository/control facts. Do NOT edit CHANGELOG_AI.md, TASKS.md, product, workflows or any other file. WORK_CAN_PIPELINE__PROMOTION_CANNOT: safe N3.6 prewarm is allowed, promotion is not. NEXT_SAFE_TASK after terminal/review: N3.6.D API/security preflight re-evaluation only after N3.6.A-C authority, otherwise read-only N3.6.A support. Run git status --short, git diff --name-only, git diff --check and emit SELF_REVIEW_PASS_1=PASS and SELF_REVIEW_PASS_2=PASS in two independent activities. ATTEMPT1 + max R2; R3+ prohibited. No push/merge/deploy/secrets."

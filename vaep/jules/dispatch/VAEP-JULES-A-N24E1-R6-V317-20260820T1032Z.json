@@ -1,9 +1,0 @@
-{
-  "workerId": "JULES_A",
-  "dispatchId": "VAEP-JULES-A-N24E1-R6-V317-20260820T1032Z",
-  "taskId": "N2.4.E.1",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "98cbbc7e6d1aad8cb358c753f0dc60e980182c90",
-  "prompt": "VAEP v3.17 SAME-CHILD RECOVERY N2.4.E.1 R6 por BOOTSTRAP_STALLED del R5: no existe Issue/sesión correlacionada tras >10 minutos. No abrir tarea nueva ni ampliar scope. El árbol funcional de FacturaProveedor está materializado desde bee4873691851d5803bdc13d37583df50ab2166e y 98cbbc7e solo agrega manifests control-plane. Revalida los contratos actuales: FacturaProveedorService usa `${environment.apiUrl}/facturas-proveedor`; getPaged devuelve ApiResponse<PagedResult<FacturaProveedor>>; listado usa data.items/data.totalCount; arquitectura canónica y PermisosRuntimeService.puede(). Si HEAD satisface E.1, entrega zero-diff proof verificable con archivos revisados y pruebas; si hay defecto real, ChangeSet mínimo únicamente dentro del WRITE_SCOPE. WRITE_SCOPE exclusivo: frontend/src/app/app.routes.ts; frontend/src/app/core/models/factura-proveedor.model.ts; frontend/src/app/services/factura-proveedor.service.ts; frontend/src/app/features/compras/facturas-proveedor/facturas-proveedor.components.ts. Prohibido package-lock, backend, workflows, manifests adicionales, temporales y cualquier archivo fuera de scope. Ejecuta auto-review, status/diff, typecheck/lint/build/tests proporcionales. Nunca push/PR/branch/merge/deploy. COMPLETED => VALIDANDO; lane A continúa SAFE-NEXT sin esperar QA; cualquier defecto QA vuelve a esta MISMA child.",
-  "fileScopeHint": "N2.4.E.1 Jules A R6 v3.17; same-child bootstrap recovery; zero-diff proof esperado si HEAD sigue correcto."
-}

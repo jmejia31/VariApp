@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-B-N4-1-D-API-DI-RBAC-B5-20260828T0038Z",
-  "taskId": "N4.1.D.API_DI_RBAC_GROUNDING.B5",
-  "workerId": "JULES_B",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "74cfa722dc148cd7af779d6014192caf43a5a67a",
-  "taskAttempt": 1,
-  "fileScopeHint": "docs/qa/N4_1_D_API_DI_RBAC_GROUNDING_B5.md",
-  "prompt": "N4.1.D same-parent SAFE evidence-only grounding. Inspect current Caja/PuntoVenta API/controller/DI/RBAC authority, HTTP surfaces, permission names and missing wiring. Write ONLY docs/qa/N4_1_D_API_DI_RBAC_GROUNDING_B5.md. Classify OBSERVED / INFERRED / UNKNOWN and do not invent permissions/endpoints. Run git diff --check. Emit SELF_REVIEW_PASS_1=PASS and SELF_REVIEW_PASS_2=PASS in two independent terminal activities. No product code, workflows, vaep changes, package-lock, TASKS, CHANGELOG, main, production, deploy or secrets. NEXT_SAFE_TASK=N4.1.F security/audit/observability evidence-only."}

@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-C-N25C-DESIGN-R2-V319-20260821T0232Z",
-  "workerId": "JULES_C",
-  "taskId": "N2.5.C.SUPPORT.PERSISTENCE_DESIGN.C2",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "4bdb16c8c10bbace1190f3f7a73f34fffa038476",
-  "fileScopeHint": "SAFE_NEXT. WRITE únicamente docs/qa/N2_5_C_PERSISTENCE_DESIGN_C2.md. READ N2.5.B Issue #111 artifact/evidence, preflight Issue #109 y patrones EF N2.2/N2.3/N2.4. NO código/migraciones/snapshot/csproj/vaep/TASKS/CHANGELOG.",
-  "prompt": "VAEP v3.19 ZERO-IDLE SAFE_NEXT. C1 Issue #129 scope limpio pero diseño no aceptable como autoridad: inventa entidad/FKs/tabla intermedia sin evidencia y llama seguro a DropTable pese a data-loss. Produce C2 como DISEÑO CONDICIONAL, no implementación. Parte de contratos reales del artifact N2.5.B Issue #111 y del repo, separando CONFIRMADO / PROPUESTO / DECISIÓN_PENDIENTE. No inventes relaciones directas a RecepcionCompraDetalle/FacturaProveedorDetalle si dominio no las define. No fijes 1:1 ni índice único sin invariante confirmada. Rollback de cualquier tabla nueva con datos NO es 'seguro': documentar data-loss y exigir quiescencia+backup/restore/abort fail-closed si aplica. No exigir todas las FK Restrict como P0 salvo evidencia; justificar delete behavior por cada relación. Precisión decimal solo si deriva de dominio/contratos reales. Entrega checklist ejecutable para futura N2.5.C, decisiones abiertas y pruebas, sin DDL ni nombres definitivos inventados. Solo docs/qa/N2_5_C_PERSISTENCE_DESIGN_C2.md; git diff --name-only exacto; git diff --check; auto-review. PROMOTION_BLOCKED_BY_N2.4.H_AND_N2.5.B_INTEGRATION."
-}

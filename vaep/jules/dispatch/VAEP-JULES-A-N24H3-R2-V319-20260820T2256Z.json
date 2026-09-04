@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-A-N24H3-R2-V319-20260820T2256Z",
-  "workerId": "JULES_A",
-  "taskId": "N2.4.H.3",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "1e70923dc9b7e9c7cba49f975410191a375f40ca",
-  "fileScopeHint": "PARENT-FIRST SAME-CHILD REWORK R2. WRITE únicamente docs/qa/N2_4_H3_CLOSURE_CROSS_REVIEW_A.md. READ Issue #108 VAEP review, COLA fresca N2.4.H.1/H.2/H.3, H.1/H.2 evidence and current causal CI. NO H.1 canonical docs, TASKS.md, CHANGELOG_AI.md, backend/src, frontend/src, migrations, workflows, package/lockfile, main, Producción ni secretos.",
-  "prompt": "VAEP Jules integration protocol v3.19 PARENT-FIRST SAME-CHILD REWORK R2. Execute exactly N2.4.H.3 correction after VAEP review Issue #108. Keep a single-file patch at docs/qa/N2_4_H3_CLOSURE_CROSS_REVIEW_A.md. Replace stale promotion claims with authoritative fresh state: H.1=VALIDANDO/rework, H.2=VALIDANDO pending VAEP reconciliation, H.3=VALIDANDO until this artifact passes review; N2.4.H and N2.4 are not LISTO and external VAEP rollup remains mandatory. Do not assert G/H child statuses unless verified from fresh COLA during the session; if historical CI is cited, label it historical/causal evidence rather than promotion authority. Preserve valid M13 evidence and zero-P0/P1 observation only as evidence. State tests not rerun in this doc-only correction. Mandatory self-review, exact scope, clean ChangeSet/gitPatch exact/reconciliable baseCommitId, then COMPLETED. No branch, PR, push, merge, deploy, main, Production or secrets."
-}

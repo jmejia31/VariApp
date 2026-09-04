@@ -1,9 +1,0 @@
-{
-  "workerId": "JULES_A",
-  "dispatchId": "VAEP-JULES-A-N24F1-V317-20260820T1543Z",
-  "taskId": "N2.4.F.1",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "6f7b9e8468f2a5c14460df6721295cf8432fb0dd",
-  "prompt": "VAEP v3.17 — N2.4.F.1 SAFE-NEXT. E sigue en QA/failover, pero v3.17 permite ejecución segura del siguiente parent mientras la promoción queda bloqueada. Implementa exclusivamente RBAC, auditoría y observabilidad BACKEND de FacturaProveedor: autorización fail-closed por acciones Compras Ver/Crear/Editar/Confirmar/Anular, auditoría/correlation/logging sin secretos, pruebas dirigidas de autorización y observabilidad, y correcciones necesarias dentro de este scope. NO tocar frontend, E.1/E.2, DB/migraciones salvo lectura, manifests/workflows/package-lock, main/Producción. Si detectas dependencia real con E frontend, trabaja en backend/tests independientes y documenta PROMOTION_BLOCKED_BY_E; no quedes idle. Auto-review obligatorio, ejecutar pruebas proporcionales, reportar riesgos/limitaciones/tests no ejecutados y entregar ChangeSet/gitPatch exacto con baseCommitId. No push/PR/branch/merge/deploy. COMPLETED significa READY_FOR_VAEP/VALIDANDO, no LISTO. Si QA posterior reencola una corrección de una tarea anterior, termina primero esta tarea actual y recoge inmediatamente el rework prioritario de tu cola salvo P0 que requiera contención inmediata.",
-  "fileScopeHint": "WRITE_SCOPE exclusivo backend FacturaProveedor RBAC/audit/observability + tests relacionados; no frontend/E.1/E.2/control-plane. PROMOTION_BLOCKED_BY_E."
-}

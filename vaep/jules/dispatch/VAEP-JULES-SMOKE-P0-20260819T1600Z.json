@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-SMOKE-P0-20260819T1600Z",
-  "taskId": "JULES-SMOKE-P0",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "cb212560e3d5c0249d03a764b20bf9225091c1a0",
-  "fileScopeHint": "vaep/jules/smoke-probe.md",
-  "prompt": "Smoke P0 inocuo del bridge VAEP↔Jules. En tu workspace cloud, crea o actualiza únicamente vaep/jules/smoke-probe.md con una línea breve que identifique este dispatch. No toques ningún otro archivo funcional. No crees rama, PR, push, merge, deployment, cambio de Producción, secreto ni modificación de main. Ejecuta validación proporcional del archivo y entrega exclusivamente un ChangeSet/gitPatch revisable con baseCommitId; no publiques nada a GitHub.",
-  "createdAt": "2026-08-19T16:00:00Z"
-}

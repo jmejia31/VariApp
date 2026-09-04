@@ -1,9 +1,0 @@
-{
-  "workerId": "JULES_C",
-  "dispatchId": "VAEP-JULES-C-N24G3-V319-20260820T1925Z",
-  "taskId": "N2.4.G.3",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "8c477c318974000b000e3f907bf6733ec7aea2de",
-  "prompt": "VAEP v3.19 FOUR-JULES — N2.4.G.3 cross-review independiente de cobertura y false-pass FacturaProveedor. Las sesiones E.3 antiguas están SUPERSEDED/CERRADAS; NO las retomes. Ejecuta AHORA G.3 aunque F siga VALIDANDO; promoción G espera F, ejecución de cross-review segura no. Audita G.1/G.2 y la cobertura actual: permisos, rutas, lifecycle, contratos API, idempotencia, migración, accesibilidad, performance, queries duplicadas y posibles false PASS. WRITE únicamente en docs/qa/N2_4_G3_FALSE_PASS_CROSS_REVIEW.md y, solo si es imprescindible, un test QA NUEVO exclusivo `frontend/e2e/facturas-proveedor-g3-cross-review.spec.ts` que no modifique archivos de A/B/F. NO frontend/src, backend/src, package-lock, workflows, manifests, scripts, main/Producción, ramas, push, PR, merge o deploy. Si detectas bug funcional, documenta evidencia reproducible/P0-P1 para VAEP; no invadas scopes. Ejecuta pruebas proporcionales reales, auto-review y entrega ChangeSet/gitPatch exacto con baseCommitId. COMPLETED=READY_FOR_VAEP/VALIDANDO, no LISTO.",
-  "fileScopeHint": "WRITE_SCOPE EXCLUSIVO G.3: docs/qa/N2_4_G3_FALSE_PASS_CROSS_REVIEW.md y opcional frontend/e2e/facturas-proveedor-g3-cross-review.spec.ts NUEVO; READ G/F/backend/frontend. NO archivos A/B ni implementación compartida."
-}

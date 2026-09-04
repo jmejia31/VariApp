@@ -1,9 +1,0 @@
-{
-  "workerId": "JULES_A",
-  "dispatchId": "VAEP-JULES-A-N24E1-R4-V316-20260820T1530Z",
-  "taskId": "N2.4.E.1",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "9b748249aa1a065dbafa0548ae66ff499d976b88",
-  "prompt": "VAEP v3.16 WATCHDOG RECOVERY R4 de la MISMA N2.4.E.1. El dispatch R3 quedó STALLED >10m porque fue publicado junto con otros manifests en un commit multi-file incompatible con el worker v313, que exige exactamente un manifest nuevo y exactamente un archivo cambiado por commit. No abras tarea nueva ni amplíes scope. Revalida el HEAD funcional 9b748249 y corrige/demuestra exactamente: (1) FacturaProveedorService usa `${environment.apiUrl}/facturas-proveedor`, sin `/api`; (2) listado/paginación usa `ApiResponse<PagedResult<FacturaProveedor>>` y `totalCount`, nunca `{items,total}`. Mantén arquitectura canónica frontend/src/app/features/compras/facturas-proveedor y PermisosRuntimeService.puede(). WRITE_SCOPE exclusivo: frontend/src/app/app.routes.ts; frontend/src/app/core/models/factura-proveedor.model.ts; frontend/src/app/services/factura-proveedor.service.ts; frontend/src/app/features/compras/facturas-proveedor/list/facturas-proveedor-list.component.ts. Prohibido package-lock, form/detail, backend, workflows, temporales y cualquier archivo fuera de scope. Ejecuta auto-review, git diff/status, typecheck/lint/build/tests proporcionales. Si HEAD ya contiene ambos fixes, entrega evidencia verificable; si requiere cambios, ChangeSet/gitPatch con baseCommitId exacto. Nunca push/PR/branch/merge/deploy. COMPLETED queda VALIDANDO/READY_FOR_VAEP y tu lane debe continuar luego a siguiente SAFE task.",
-  "fileScopeHint": "RECOVERY SAME E.1; write scope exclusivo cuatro archivos frontend; causa de stall corregida mediante single-manifest commit; no N+1 funcional hasta liberar lane."
-}

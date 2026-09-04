@@ -1,9 +1,0 @@
-{
-  "dispatchId": "A183-N4-1-H-runbook-current-evidence-preflight-20260831T0333Z",
-  "taskId": "N4.1.H-A183-runbook-current-evidence-preflight",
-  "workerId": "JULES_A",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "f9d73475c2584588798ca0f88248f82b21039ba4",
-  "taskAttempt": 1,
-  "fileScopeHint": "docs/RUNBOOK_N4_1_CAJA.md",
-  "prompt": "NEW SAME_PARENT ATTEMPT1 after A182 REVIEW_PASS_LIMITED evidence-only due native truncation; no R2 was required. Scope EXCLUSIVE and READ_ONLY: docs/RUNBOOK_N4_1_CAJA.md only. NON_SHELL: use native repository/file inspection only; no shell/terminal. Audit whether the runbook prevents false N4.1.H closure by requiring required-current REAL encrypted Desarrollo M11 operational backup artifact plus .sha256 checksum plus .meta.json metadata, and when applicable restore/drill correlated to the same evidence. Identify stale/unsupported/ambiguous closure claims and distinguish executor evidence from generic workflow/PR/CI status. Make no repository changes. If visibility truncates, report the exact limitation. No false ACTIVE/LISTO/CI PASS/P0=0/P1=0. No main, Produccion, branches, merge/auto-merge, force-push, secrets, or deploy. End with substantive independent SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. TEST_EXEMPTION=DOC_SINGLE_FILE_OR_EVIDENCE_ONLY."

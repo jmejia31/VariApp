@@ -1,9 +1,0 @@
-{
-  "dispatchId": "B144-R2-N4-1-H-certification-grounded-write-20260830T0350Z",
-  "taskId": "N4.1.H-B144-certification-grounded-write",
-  "workerId": "JULES_B",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "af88e6f35d4b63921f214a8f49127f87ee05ed36",
-  "taskAttempt": 2,
-  "fileScopeHint": "WRITE_SCOPE:docs/CERTIFICACION_N4_1_CAJA.md",
-  "prompt": "FINAL R2 for the same logical task. CURRENT_PARENT=N4.1.H. Your ATTEMPT1 patch was not accepted because it ambiguously attached a current causal-failure statement to the historical SHA a1522d589940e87e6ca48dd8adf32d309cce2fb3 instead of identifying the current functional candidate. Work only in docs/CERTIFICACION_N4_1_CAJA.md. Reconcile history without deleting prior evidence: keep N4.1.H EN_PROGRESO/NO_LISTO and explicitly distinguish historical evidence from current causal evidence. Current functional candidate to ground is 17e79e50b0a332e9ea510efbb78dfc0b34bbae16; current M13 is not green because the required-current M11 drill freshness gate is failing. Never claim global CI PASS, P0=0/P1=0 or LISTO_REAL. Do not touch other files. Return exact patch/base, limitations, risks, unexecuted validations and two self-reviews. ATTEMPT2 is final; if unsafe, fail closed for controller QA takeover."

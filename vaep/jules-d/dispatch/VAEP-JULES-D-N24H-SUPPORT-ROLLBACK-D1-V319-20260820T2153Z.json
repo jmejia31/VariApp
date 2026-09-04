@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-D-N24H-SUPPORT-ROLLBACK-D1-V319-20260820T2153Z",
-  "workerId": "JULES_D",
-  "taskId": "N2.4.H.SUPPORT.ROLLBACK.D1",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "f4d2b5cd1c835fa81a22c16b1da5f3857b5d4caa",
-  "fileScopeHint": "PARENT-FIRST SWARM N2.4.H. WRITE únicamente docs/qa/N2_4_H_ROLLBACK_MIGRATION_VERIFICATION_D.md. READ H.1 docs/rework evidence, migration chain N2.3/N2.4, N2.4 migration Up/Down, pre/postchecks and direct CI evidence. NO canonical H.1 docs owned by Jules B, NO TASKS.md, NO CHANGELOG_AI.md, NO backend/src, frontend/src, frontend/e2e, migrations, workflows, package/lockfile, manifests ajenos, main, Producción ni secretos.",
-  "prompt": "VAEP Jules integration protocol v3.19 PARENT-FIRST SWARM. Read docs/VAEP_AUTHORITY.md, AGENTS.md and docs/VAEP_JULES.md first. Execute exactly N2.4.H.SUPPORT.ROLLBACK.D1 as independent evidence for the blocking H.1 rework. Jules B owns canonical H.1 documentation; do not edit it. Verify the real migration sequence around N2.3 and N2.4, especially 20260819105500_N2_3_RecepcionCompraPersistencia, 20260819143000_N2_3_RecepcionCompraOrigenKardex and 20260820082500_N2_4_FacturaProveedorPersistencia. Inspect the actual N2.4 migration Down(), snapshot/guards/prechecks/postchecks and any relevant CI evidence. Determine the narrow rollback/recovery boundary that preserves N2.3 and unrelated history; explicitly reject any broad downgrade to July if unsafe. Document backup/quiescence/data-loss caveats, restore/fallback, verification steps, limitations and whether a true migration rollback is safe or a restore/recovery path is preferred. Do not claim MySQL-real or CI execution unless exact evidence supports it. Classify P0/P1/REQUIRED findings for VAEP/B, run proportional read-only checks, perform mandatory self-review, return clean ChangeSet/gitPatch with exact baseCommitId, finish COMPLETED. No branch, PR, push, merge, deploy, main, Production or secrets."
-}

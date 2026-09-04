@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-A-N35H-CLOSURE-GUARD-A2-V325-20260825T1204Z",
-  "taskId": "N3.5.H.CLOSURE_GUARD.A2",
-  "workerId": "JULES_A",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "49badbf819d23d6b70e522513a50bcbed24cd41e",
-  "taskAttempt": 1,
-  "fileScopeHint": "docs/qa/N35H_CHANGELOG_CLOSURE_GUARD_A2.md",
-  "prompt": "VAEP v3.25 ZERO-IDLE SAME CURRENT_PARENT N3.5.H. Produce SOLO docs/qa/N35H_CHANGELOG_CLOSURE_GUARD_A2.md. Read-only verify the restored CHANGELOG_AI.md blob/history and the approved Issue #528 closure hunk. CURRENT_CONFIRMED_FACT only: expected integration is exactly +17/-0 and must not modify any historical line. Do NOT edit CHANGELOG_AI.md, TASKS.md, product code, workflows, manifests or any other file. Record exact current blob/SHA if observable, exact closure text anchor, hard-verify criteria, and why whole-file reconstruction is unsafe. Do not claim N3.5.H LISTO. NEXT_SAFE_TASK after terminal/review: N3.6.A independent preflight reconciliation/support against docs/ERP_N3_6_DEVOLUCIONES_CLIENTE_PREFLIGHT.md, promotion-blocked until H LISTO. Run git status --short, git diff --name-only, git diff --check and emit SELF_REVIEW_PASS_1=PASS and SELF_REVIEW_PASS_2=PASS in two independent activities. ATTEMPT1 + max R2; R3+ prohibited. No branch/PR/push/merge/deploy/secrets. Return exact ChangeSet/gitPatch."

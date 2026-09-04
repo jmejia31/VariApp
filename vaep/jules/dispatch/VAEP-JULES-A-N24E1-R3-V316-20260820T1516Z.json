@@ -1,9 +1,0 @@
-{
-  "workerId": "JULES_A",
-  "dispatchId": "VAEP-JULES-A-N24E1-R3-V316-20260820T1516Z",
-  "taskId": "N2.4.E.1",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "9b748249aa1a065dbafa0548ae66ff499d976b88",
-  "prompt": "VAEP v3.16 TARGETED RECOVERY R3 DE LA MISMA N2.4.E.1. Issue #51 confirmó EVIDENCE_MISMATCH: la sesión R2 terminó COMPLETED pero artifact oficial tenía patchPresent=false y actualPatchBase vacío. No abras tarea nueva ni amplíes scope. Revalida el HEAD funcional 9b748249 y los cuatro archivos autorizados. Corrige o demuestra con evidencia verificable exactamente: (1) FacturaProveedorService usa `${environment.apiUrl}/facturas-proveedor`, SIN `/api`; (2) listado/paginación usa `ApiResponse<PagedResult<FacturaProveedor>>` y `totalCount`, nunca contrato local `{items,total}`. Mantén arquitectura canónica frontend/src/app/features/compras/facturas-proveedor, PermisosRuntimeService.puede(), rutas y shared model/service existentes. WRITE_SCOPE exclusivo: frontend/src/app/app.routes.ts; frontend/src/app/core/models/factura-proveedor.model.ts; frontend/src/app/services/factura-proveedor.service.ts; frontend/src/app/features/compras/facturas-proveedor/list/facturas-proveedor-list.component.ts. Prohibido package-lock, form/detail, backend, workflows, temporales y cualquier archivo fuera de scope. Ejecuta auto-review, git diff/status, typecheck/lint/build y tests proporcionales. Si HEAD ya contiene ambos fixes, entrega prueba zero-diff verificable citando contenido exacto de archivos y tests; si requiere cambios, ChangeSet/gitPatch NO VACÍO con baseCommitId exacto. Nunca push/PR/branch/merge/deploy. Finaliza sin confirmación rutinaria. Al COMPLETED tu entrega queda VALIDANDO y VAEP liberará tu lane inmediatamente al siguiente SAFE scope bajo v3.16.",
-  "fileScopeHint": "WRITE_SCOPE exclusivo cuatro archivos E.1; evidence mismatch R2; base 9b748249; ChangeSet no vacío si cambia algo o zero-diff proof verificable."
-}

@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-D-N24GDS2-V319-20260820T2002Z",
-  "workerId": "JULES_D",
-  "taskId": "N2.4.G.DS2",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "b077914db0e5770403c2224c5610b5703824eae7",
-  "fileScopeHint": "WRITE solo docs/qa/N2_4_G_D_M13_REVALIDATION.md y opcional frontend/e2e/facturas-proveedor-gd-m13-revalidation.spec.ts NUEVO; READ F/G/M13 evidence/backend/frontend; NO editar archivos A/B/C, package/lockfile, workflows, manifests, main, Producción ni secretos.",
-  "prompt": "VAEP Jules integration protocol v3.19. Execute exactly support task N2.4.G.DS2. Read docs/VAEP_AUTHORITY.md, AGENTS.md and docs/VAEP_JULES.md. Independently revalidate the FacturaProveedor E2E/M13 defect that previously produced four failures, then compare the current causal route-mock fix with the failure mechanism. Run focused real tests available in scope and inspect current M13 evidence; detect false-PASS, navigation interception, RBAC visibility, accessibility/performance gaps and any regression risk. Write only the exclusive D evidence document and, only if technically valuable, a NEW exclusive E2E regression test that catches a distinct failure mode; do not modify A/B/C files. Report exact commands/results, observations, limitations, risks, recommendations and every test not executed. Return a clean ChangeSet/gitPatch with exact baseCommitId, final self-review and COMPLETED. No branch, PR, push, merge, deploy, main, Production or secrets."
-}

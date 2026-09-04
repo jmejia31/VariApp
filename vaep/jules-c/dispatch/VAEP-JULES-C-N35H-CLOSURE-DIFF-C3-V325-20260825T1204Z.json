@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-C-N35H-CLOSURE-DIFF-C3-V325-20260825T1204Z",
-  "taskId": "N3.5.H.CLOSURE_DIFF.C3",
-  "workerId": "JULES_C",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "1da593dba9ddeadc6b6aa549cb12cc786b545ebc",
-  "taskAttempt": 1,
-  "fileScopeHint": "docs/qa/N35H_CHANGELOG_DIFF_ORACLE_C3.md",
-  "prompt": "VAEP v3.25 ZERO-IDLE SAME CURRENT_PARENT N3.5.H. Produce SOLO docs/qa/N35H_CHANGELOG_DIFF_ORACLE_C3.md. Read-only derive an exact diff oracle for the approved #528 append: current CHANGELOG_AI.md blob, insertion anchor, expected lines/additions/deletions and hard verification commands proving exactly +17/-0 and no historical modifications. Do NOT edit CHANGELOG_AI.md or any existing file. Do not invent migrations/idempotency or hypothetical blockers. Do not claim H LISTO. NEXT_SAFE_TASK after terminal/review: N3.6.C persistence/schema parity review using existing prewarm #529 as evidence, promotion-blocked until A/B LISTO. Run git status --short, git diff --name-only, git diff --check; emit SELF_REVIEW_PASS_1=PASS and SELF_REVIEW_PASS_2=PASS in separate activities. ATTEMPT1 + max R2, R3+ prohibited. No push/merge/deploy/secrets."

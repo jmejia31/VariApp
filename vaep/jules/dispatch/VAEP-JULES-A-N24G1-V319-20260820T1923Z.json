@@ -1,9 +1,0 @@
-{
-  "workerId": "JULES_A",
-  "dispatchId": "VAEP-JULES-A-N24G1-V319-20260820T1923Z",
-  "taskId": "N2.4.G.1",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "8c477c318974000b000e3f907bf6733ec7aea2de",
-  "prompt": "VAEP v3.19 FOUR-JULES — N2.4.G.1 QA backend/contratos/migración FacturaProveedor. Ejecuta AHORA aunque parent F siga en VALIDANDO; la promoción de G espera certificación F, pero la ejecución QA segura no. Audita y amplía pruebas unitarias/integración/contrato/migración/performance aplicables de FacturaProveedor y detecta false-pass. Inspecciona el backend actual y los tests existentes. WRITE preferente y exclusivo en backend/tests/InventoryApp.Tests para archivos FacturaProveedor y/o un documento QA NUEVO exclusivo de G.1. Mientras F siga bajo certificación VAEP, NO edites backend/src ni archivos funcionales F.1; si detectas un defecto real en implementación, crea prueba reproducible y repórtalo como P0/P1 para que VAEP lo reconcilie. NO frontend, package-lock, workflows, manifests, scripts, main/Producción, ramas, push, PR, merge o deploy. Ejecuta pruebas proporcionales reales, auto-review obligatorio, reporta pruebas no ejecutadas y entrega ChangeSet/gitPatch exacto con baseCommitId. COMPLETED=READY_FOR_VAEP/VALIDANDO, nunca LISTO.",
-  "fileScopeHint": "WRITE_SCOPE EXCLUSIVO G.1: backend/tests/InventoryApp.Tests/*FacturaProveedor* y opcional docs/qa/N2_4_G1_BACKEND_QA.md NUEVO. READ backend FacturaProveedor. NO backend/src mientras F valida; NO frontend/control-plane/package-lock."
-}
