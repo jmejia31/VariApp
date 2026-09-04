@@ -427,6 +427,77 @@ namespace InventoryApp.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("InventoryApp.Domain.Entities.Bancos.ConciliacionBancaria", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ActualizadoPorNombreUsuario")
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)");
+
+                    b.Property<int?>("ActualizadoPorUsuarioId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CreadoPorNombreUsuario")
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)");
+
+                    b.Property<int?>("CreadoPorUsuarioId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CuentaBancariaId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Estado")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("FechaActualizacion")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("FechaFin")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("FechaInicio")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Observaciones")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<decimal>("SaldoFinalBanco")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("SaldoInicialBanco")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CuentaBancariaId")
+                        .HasDatabaseName("IX_ConciliacionesBancarias_CuentaBancariaId");
+
+                    b.HasIndex("Estado")
+                        .HasDatabaseName("IX_ConciliacionesBancarias_Estado");
+
+                    b.HasIndex("CuentaBancariaId", "FechaInicio", "FechaFin")
+                        .HasDatabaseName("IX_ConciliacionesBancarias_Cuenta_Periodo");
+
+                    b.ToTable("ConciliacionesBancarias", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_ConciliacionesBancarias_CuentaBancariaId", "`CuentaBancariaId` > 0");
+
+                            t.HasCheckConstraint("CK_ConciliacionesBancarias_SaldoFinalBanco", "`SaldoFinalBanco` >= 0");
+
+                            t.HasCheckConstraint("CK_ConciliacionesBancarias_SaldoInicialBanco", "`SaldoInicialBanco` >= 0");
+                        });
+                });
+
             modelBuilder.Entity("InventoryApp.Domain.Entities.Bancos.CuentaBancaria", b =>
                 {
                     b.Property<int>("Id")
@@ -498,6 +569,143 @@ namespace InventoryApp.Infrastructure.Migrations
                             t.HasCheckConstraint("CK_CuentasBancarias_Estado", "`Estado` IN (1, 2)");
 
                             t.HasCheckConstraint("CK_CuentasBancarias_SaldoInicial", "`SaldoInicial` >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("InventoryApp.Domain.Entities.Bancos.MatchConciliacion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ActualizadoPorNombreUsuario")
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)");
+
+                    b.Property<int?>("ActualizadoPorUsuarioId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CreadoPorNombreUsuario")
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)");
+
+                    b.Property<int?>("CreadoPorUsuarioId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("FechaActualizacion")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<decimal>("MontoAplicado")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("MovimientoEstadoCuentaId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MovimientoFinancieroId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TipoMatch")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MovimientoFinancieroId")
+                        .HasDatabaseName("IX_MatchesConciliacion_MovimientoFinancieroId");
+
+                    b.HasIndex("MovimientoEstadoCuentaId", "MovimientoFinancieroId")
+                        .IsUnique()
+                        .HasDatabaseName("UX_MatchesConciliacion_MovimientoEstadoCuenta_MovimientoFinanciero");
+
+                    b.ToTable("MatchesConciliacion", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_MatchesConciliacion_MontoAplicado", "`MontoAplicado` > 0");
+
+                            t.HasCheckConstraint("CK_MatchesConciliacion_MovimientoEstadoCuentaId", "`MovimientoEstadoCuentaId` > 0");
+
+                            t.HasCheckConstraint("CK_MatchesConciliacion_MovimientoFinancieroId", "`MovimientoFinancieroId` > 0");
+                        });
+                });
+
+            modelBuilder.Entity("InventoryApp.Domain.Entities.Bancos.MovimientoEstadoCuenta", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ActualizadoPorNombreUsuario")
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)");
+
+                    b.Property<int?>("ActualizadoPorUsuarioId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Concepto")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("varchar(250)");
+
+                    b.Property<int>("ConciliacionBancariaId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CreadoPorNombreUsuario")
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)");
+
+                    b.Property<int?>("CreadoPorUsuarioId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Estado")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("FechaActualizacion")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("FechaMovimiento")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("IdempotencyKey")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<decimal>("Monto")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Referencia")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<int>("Tipo")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Estado")
+                        .HasDatabaseName("IX_MovimientosEstadoCuenta_Estado");
+
+                    b.HasIndex("ConciliacionBancariaId", "FechaMovimiento")
+                        .HasDatabaseName("IX_MovimientosEstadoCuenta_Conciliacion_Fecha");
+
+                    b.HasIndex("ConciliacionBancariaId", "IdempotencyKey")
+                        .IsUnique()
+                        .HasDatabaseName("UX_MovimientosEstadoCuenta_Conciliacion_IdempotencyKey");
+
+                    b.ToTable("MovimientosEstadoCuenta", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_MovimientosEstadoCuenta_ConciliacionBancariaId", "`ConciliacionBancariaId` > 0");
+
+                            t.HasCheckConstraint("CK_MovimientosEstadoCuenta_Monto", "`Monto` > 0");
                         });
                 });
 
@@ -1854,6 +2062,133 @@ namespace InventoryApp.Infrastructure.Migrations
                         });
                 });
 
+            modelBuilder.Entity("InventoryApp.Domain.Entities.Contabilidad.AsientoContable", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ActualizadoPorNombreUsuario")
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)");
+
+                    b.Property<int?>("ActualizadoPorUsuarioId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Concepto")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<string>("CreadoPorNombreUsuario")
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)");
+
+                    b.Property<int?>("CreadoPorUsuarioId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("DocumentoOrigenId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Fecha")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("FechaActualizacion")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Numero")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("TipoDocumentoOrigen")
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Fecha")
+                        .HasDatabaseName("IX_AsientosContables_Fecha");
+
+                    b.HasIndex("Numero")
+                        .IsUnique()
+                        .HasDatabaseName("UX_AsientosContables_Numero");
+
+                    b.HasIndex("TipoDocumentoOrigen", "DocumentoOrigenId")
+                        .HasDatabaseName("IX_AsientosContables_Origen");
+
+                    b.ToTable("AsientosContables", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_AsientosContables_Concepto", "CHAR_LENGTH(TRIM(`Concepto`)) > 0");
+                        });
+                });
+
+            modelBuilder.Entity("InventoryApp.Domain.Entities.Contabilidad.AsientoDetalle", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ActualizadoPorNombreUsuario")
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)");
+
+                    b.Property<int?>("ActualizadoPorUsuarioId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AsientoContableId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CreadoPorNombreUsuario")
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)");
+
+                    b.Property<int?>("CreadoPorUsuarioId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CuentaContableId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Debe")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("FechaActualizacion")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<decimal>("Haber")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Referencia")
+                        .HasMaxLength(250)
+                        .HasColumnType("varchar(250)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AsientoContableId")
+                        .HasDatabaseName("IX_AsientoDetalles_AsientoContableId");
+
+                    b.HasIndex("CuentaContableId")
+                        .HasDatabaseName("IX_AsientoDetalles_CuentaContableId");
+
+                    b.ToTable("AsientoDetalles", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_AsientoDetalles_MontosNoNegativos", "`Debe` >= 0 AND `Haber` >= 0");
+
+                            t.HasCheckConstraint("CK_AsientoDetalles_UnSoloLado", "((`Debe` > 0 AND `Haber` = 0) OR (`Haber` > 0 AND `Debe` = 0))");
+                        });
+                });
+
             modelBuilder.Entity("InventoryApp.Domain.Entities.ConteoInventario", b =>
                 {
                     b.Property<int>("Id")
@@ -2499,6 +2834,86 @@ namespace InventoryApp.Infrastructure.Migrations
                             t.HasCheckConstraint("CK_CreditosCliente_MontoExcepcion", "`MontoExcepcion` IS NULL OR `MontoExcepcion` > 0");
 
                             t.HasCheckConstraint("CK_CreditosCliente_UmbralAlerta", "`UmbralAlertaPorcentaje` IS NULL OR (`UmbralAlertaPorcentaje` > 0 AND `UmbralAlertaPorcentaje` <= 100)");
+                        });
+                });
+
+            modelBuilder.Entity("InventoryApp.Domain.Entities.CuentaContable", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("AceptaMovimientos")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("Activa")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("ActualizadoPorNombreUsuario")
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)");
+
+                    b.Property<int?>("ActualizadoPorUsuarioId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Codigo")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("CreadoPorNombreUsuario")
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)");
+
+                    b.Property<int?>("CreadoPorUsuarioId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("CuentaPadreId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Descripcion")
+                        .HasMaxLength(1000)
+                        .HasColumnType("varchar(1000)");
+
+                    b.Property<DateTime>("FechaActualizacion")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
+
+                    b.Property<int>("Tipo")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Codigo")
+                        .IsUnique()
+                        .HasDatabaseName("UX_CuentasContables_Codigo");
+
+                    b.HasIndex("CuentaPadreId")
+                        .HasDatabaseName("IX_CuentasContables_CuentaPadreId");
+
+                    b.HasIndex("Tipo", "Activa")
+                        .HasDatabaseName("IX_CuentasContables_Tipo_Activa");
+
+                    b.ToTable("CuentasContables", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_CuentasContables_Codigo", "CHAR_LENGTH(TRIM(`Codigo`)) > 0");
+
+                            t.HasCheckConstraint("CK_CuentasContables_Nombre", "CHAR_LENGTH(TRIM(`Nombre`)) > 0");
+
+                            t.HasCheckConstraint("CK_CuentasContables_Tipo", "`Tipo` BETWEEN 1 AND 6");
                         });
                 });
 
@@ -8507,12 +8922,49 @@ namespace InventoryApp.Infrastructure.Migrations
                         .HasConstraintName("FK_AsignacionesCosto_Capa_MismaVariante");
                 });
 
+            modelBuilder.Entity("InventoryApp.Domain.Entities.Bancos.ConciliacionBancaria", b =>
+                {
+                    b.HasOne("InventoryApp.Domain.Entities.Bancos.CuentaBancaria", "CuentaBancaria")
+                        .WithMany()
+                        .HasForeignKey("CuentaBancariaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CuentaBancaria");
+                });
+
             modelBuilder.Entity("InventoryApp.Domain.Entities.Bancos.CuentaBancaria", b =>
                 {
                     b.HasOne("InventoryApp.Domain.Entities.Catalogos.Banco", null)
                         .WithMany()
                         .HasForeignKey("BancoId")
                         .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("InventoryApp.Domain.Entities.Bancos.MatchConciliacion", b =>
+                {
+                    b.HasOne("InventoryApp.Domain.Entities.Bancos.MovimientoEstadoCuenta", "MovimientoEstadoCuenta")
+                        .WithMany("Matches")
+                        .HasForeignKey("MovimientoEstadoCuentaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("InventoryApp.Domain.Entities.MovimientoFinanciero", null)
+                        .WithMany()
+                        .HasForeignKey("MovimientoFinancieroId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("MovimientoEstadoCuenta");
+                });
+
+            modelBuilder.Entity("InventoryApp.Domain.Entities.Bancos.MovimientoEstadoCuenta", b =>
+                {
+                    b.HasOne("InventoryApp.Domain.Entities.Bancos.ConciliacionBancaria", null)
+                        .WithMany("Movimientos")
+                        .HasForeignKey("ConciliacionBancariaId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
@@ -8743,6 +9195,25 @@ namespace InventoryApp.Infrastructure.Migrations
                     b.Navigation("UbicacionAlmacen");
                 });
 
+            modelBuilder.Entity("InventoryApp.Domain.Entities.Contabilidad.AsientoDetalle", b =>
+                {
+                    b.HasOne("InventoryApp.Domain.Entities.Contabilidad.AsientoContable", "AsientoContable")
+                        .WithMany("Detalles")
+                        .HasForeignKey("AsientoContableId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("InventoryApp.Domain.Entities.CuentaContable", "CuentaContable")
+                        .WithMany()
+                        .HasForeignKey("CuentaContableId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("AsientoContable");
+
+                    b.Navigation("CuentaContable");
+                });
+
             modelBuilder.Entity("InventoryApp.Domain.Entities.ConteoInventario", b =>
                 {
                     b.HasOne("InventoryApp.Domain.Entities.Almacen", "Almacen")
@@ -8876,6 +9347,16 @@ namespace InventoryApp.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Cliente");
+                });
+
+            modelBuilder.Entity("InventoryApp.Domain.Entities.CuentaContable", b =>
+                {
+                    b.HasOne("InventoryApp.Domain.Entities.CuentaContable", "CuentaPadre")
+                        .WithMany("Subcuentas")
+                        .HasForeignKey("CuentaPadreId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CuentaPadre");
                 });
 
             modelBuilder.Entity("InventoryApp.Domain.Entities.CuentaPorPagar", b =>
@@ -10225,6 +10706,16 @@ namespace InventoryApp.Infrastructure.Migrations
                     b.Navigation("Detalles");
                 });
 
+            modelBuilder.Entity("InventoryApp.Domain.Entities.Bancos.ConciliacionBancaria", b =>
+                {
+                    b.Navigation("Movimientos");
+                });
+
+            modelBuilder.Entity("InventoryApp.Domain.Entities.Bancos.MovimientoEstadoCuenta", b =>
+                {
+                    b.Navigation("Matches");
+                });
+
             modelBuilder.Entity("InventoryApp.Domain.Entities.Cajas.CajaSesion", b =>
                 {
                     b.Navigation("Movimientos");
@@ -10257,6 +10748,11 @@ namespace InventoryApp.Infrastructure.Migrations
                     b.Navigation("Detalles");
                 });
 
+            modelBuilder.Entity("InventoryApp.Domain.Entities.Contabilidad.AsientoContable", b =>
+                {
+                    b.Navigation("Detalles");
+                });
+
             modelBuilder.Entity("InventoryApp.Domain.Entities.ConteoInventario", b =>
                 {
                     b.Navigation("Detalles");
@@ -10265,6 +10761,11 @@ namespace InventoryApp.Infrastructure.Migrations
             modelBuilder.Entity("InventoryApp.Domain.Entities.Cotizacion", b =>
                 {
                     b.Navigation("Detalles");
+                });
+
+            modelBuilder.Entity("InventoryApp.Domain.Entities.CuentaContable", b =>
+                {
+                    b.Navigation("Subcuentas");
                 });
 
             modelBuilder.Entity("InventoryApp.Domain.Entities.CuentaPorPagar", b =>
