@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-D-N47F-SECURITY-PREWARM-D2-20260904T0550HND",
+  "taskId": "N4.7.F.SEC_AUDIT.PREWARM",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "2659f810cafe8e0f32c5283fca59cdde2352c5bb",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/API/**; backend/src/Application/**; backend/tests/**/Contabilidad/**",
+  "prompt": "VAEP/Jules v3.29 THROUGHPUT-HARD. WORK_CAN_PIPELINE__PROMOTION_CANNOT. CURRENT_PARENT=N4.7.E; N4.7.F is NEXT_SAFE prewarm only and remains dependency-gated until E LISTO_REAL. Exact base 2659f810cafe8e0f32c5283fca59cdde2352c5bb. Review the materialized N4.7.D Asientos API/application contract and prepare the smallest exclusive N4.7.F security/audit slice that is independent of unfinished frontend: RBAC authorization, audit/security/correlation/logging/observability behavior and directed tests applicable to AsientoContable/AsientoDetalle. Do not alter frontend, EF/migrations/snapshot, workflows, docs/control-plane, main, Production, branches, merge, auto-merge, force-push, secrets or deploy. Do not duplicate existing controls; inspect first and return N/A with grounded evidence if already satisfied. Run proportional backend tests. SELF_REVIEW_PASS_1=PASS and SELF_REVIEW_PASS_2=PASS before COMPLETED. Return patch/evidence only; no LISTO_REAL or promotion authority."
+}
