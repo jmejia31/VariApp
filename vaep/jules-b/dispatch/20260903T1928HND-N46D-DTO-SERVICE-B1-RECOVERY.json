@@ -1,0 +1,13 @@
+{
+  "dispatchId": "VAEP-JULES-B-N46D-DTO-SERVICE-B1-RECOVERY-20260903T1928HND",
+  "taskId": "N4.6.D.DTO_APPLICATION_SERVICE",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "ba3ff704c6070ce191d220c03b01a8a19de519a7",
+  "dispatchBaseHead": "ba3ff704c6070ce191d220c03b01a8a19de519a7",
+  "taskAttempt": 1,
+  "preSessionFailureDoesNotConsumeAttempt": true,
+  "r3Prohibited": true,
+  "fileScopeHint": "backend/src/Application/DTOs/*CuentaContable*.cs; backend/src/Application/Interfaces/Services/*CuentaContable*.cs; backend/src/Application/Services/*CuentaContable*.cs; backend/tests/InventoryApp.Tests/Application/Contabilidad/*Service*.cs",
+  "prompt": "N4.6.D BACKEND_API CURRENT_PARENT recovery SAME TASK/SAME A1 after >10m without correlated Jules session. Base is exact current Desarrollo. Implement only DTOs/contracts and application service/use-cases for CuentaContable hierarchical create/list/query using the certified N4.6.B/C domain/EF authority and the repository contract already integrated by Jules A. Validate non-empty Codigo/Nombre, Tipo 1..6, CuentaPadre existence/hierarchy and conflict semantics without duplicating DB constraints. Reuse existing service-result/exception/pagination conventions; do not invent a parallel architecture. Do not edit repository implementations, controllers, Program.cs/security, frontend, migrations/snapshot, workflows or docs. Run proportional backend build/tests and return an actual source patch, not a patch-file artifact. Two self-review PASS markers required. No main, Produccion, branches, merge, auto-merge, force-push, secrets or deploy. ACTIVE_REAL requires session+useful activity."
+}
