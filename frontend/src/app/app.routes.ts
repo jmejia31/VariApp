@@ -361,6 +361,12 @@ export const routes: Routes = [
     loadComponent: () => import('./features/cuentas-por-cobrar/cuentas-por-cobrar.component').then(m => m.CuentasPorCobrarComponent)
   },
   {
+    path: 'asientos-contables',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Finanzas', accion: 'Ver' },
+    loadComponent: () => import('./features/asientos-contables/asientos-contables.component').then(m => m.AsientosContablesComponent)
+  },
+  {
     path: 'finanzas',
     canActivate: [authGuard, permisoGuard],
     data: { modulo: 'Finanzas', accion: 'Ver' },
