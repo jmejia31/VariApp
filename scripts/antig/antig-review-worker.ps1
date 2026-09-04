@@ -33,7 +33,8 @@ function Write-JsonNoBom([string]$Path, $Value) {
 }
 
 function Get-RepoRoot {
-    (Invoke-Native git @("rev-parse","--show-toplevel")).Text
+    $candidate = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot "..\.."))
+    return (Invoke-Native git @("-C",$candidate,"rev-parse","--show-toplevel")).Text
 }
 
 function Sync-And-AssertClean([string]$RepoRoot) {
