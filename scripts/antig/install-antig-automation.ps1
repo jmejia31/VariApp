@@ -113,7 +113,8 @@ if ([int]$div[0] -ne 0 -or [int]$div[1] -ne 0) {
 Invoke-Native gh @("auth","status") | Out-Null
 
 $agents = Invoke-Native -File $agyCommand -Arguments @("agents")
-if ($agents.Text -notmatch 'variapp-reviewer') {
+$agentFile = Join-Path $repoRoot ".agents\agents\variapp-reviewer\agent.md"
+if ($agents.Text -notmatch 'variapp-reviewer' -and -not (Test-Path -LiteralPath $agentFile -PathType Leaf)) {
     throw "Antigravity CLI did not discover workspace agent 'variapp-reviewer'. Reopen from repo root and retry."
 }
 
@@ -184,7 +185,7 @@ if (-not $SkipAuthProbe) {
     $probe = Invoke-Native -File $agyCommand -Arguments @(
         "-p","Return exactly READY. Do not use tools.",
         "--agent","variapp-reviewer",
-        "--cwd",$repoRoot,
+        "--add-dir",$repoRoot,
         "--output-format","json",
         "--print-timeout","2m"
     )

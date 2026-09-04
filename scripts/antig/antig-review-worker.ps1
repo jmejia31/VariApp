@@ -664,7 +664,7 @@ function Process-Issue($Issue, [string]$RepoRoot, [string]$StateRoot, [string]$S
         )
         $prompt = $promptLines -join [Environment]::NewLine
         $stderrPath = Join-Path $jobRoot "agy.stderr.log"
-        $agyArgs = @("-p",$prompt,"--agent","variapp-reviewer","--cwd",$reviewRoot,"--output-format","json","--json-schema",$SchemaPath,"--print-timeout","20m")
+        $agyArgs = @("-p",$prompt,"--agent","variapp-reviewer","--add-dir",$reviewRoot,"--output-format","json","--json-schema",$SchemaPath,"--print-timeout","20m")
 
         $agyOut = & $script:AgyCommand @agyArgs 2> $stderrPath
         if ($LASTEXITCODE -ne 0) { throw "Antigravity headless failed. See $stderrPath" }
