@@ -76,7 +76,7 @@ Documentación: `docs/ERP_N2_9_EVALUACION_PROVEEDORES.md`, `docs/RUNBOOK_N2_9_EV
 - [x] Frontend/UX N3.4.E certificado sobre `a167434880eab07c3b08ca651ae9309da964c23b` con M13 `#32809392404` SUCCESS.
 - [x] N3.4.F RBAC/auditoría/seguridad/observabilidad y N3.4.G QA/regresión/CI cerrados sobre el mismo HEAD funcional, con P0/P1 atribuibles conocidos=0.
 - [x] Certificación canónica: `docs/CERTIFICACION_N3_4_PREPARACION_DESPACHO.md`.
-- [x] Runbook: `docs/RUNBOOK_N3_4_PREPARACION_DESPACHO.md`.
+- [x] Runbook canónico publicado: `docs/RUNBOOK_N3_4_PREPARACION_DESPACHO.md`.
 **ERP-N3.4 queda formalmente cerrado. Siguiente MICROTAREA dependency-valid: `N3.5.A — Venta/factura — Auditoría y preflight`.**
 
 ## ERP-N3.5 — Venta/factura
@@ -279,3 +279,15 @@ Este rollup supersede únicamente el estado operativo stale anterior del bloque 
 - [x] Rollback del instalador restaura XML de tarea preexistente o elimina solo la tarea nueva.
 - [x] Self-tests funcionales ampliados para contrato, aislamiento, staging, paths protegidos, patch causal, watermark, idempotencia y planes de rollback.
 - [ ] Instalación física y Scheduled Task real siguen pendientes; no se ejecutan desde Codex.
+
+## ERP-N4.7 — Asientos Contables — ROLLUP 2026-09-04
+
+Este bloque es aditivo y no reescribe estados históricos anteriores.
+
+- [x] N4.7.A-G — `LISTO_REAL`; baseline funcional certificado `c8d1e373ba8ea008bf773e69afa10f5f18d6de8b`.
+- [x] Certificación canónica de H publicada y REVIEW_FIRST aprobada: `docs/CERTIFICACION_N4_7_ASIENTOS.md`.
+- [x] Exact-head documental previo `6986874048985e4746d21e23254479b391220445`: gates aplicables terminales `SUCCESS`; `VariApp CI=SKIPPED` excluido como PASS; P0=0/P1=0.
+- [x] `TASKS.md` reconciliado de forma aditiva/history-preserving por este rollup.
+- [ ] `N4.7.H` permanece fail-closed hasta certificar los gates aplicables y P0/P1=0 del exact-head resultante de completar también `CHANGELOG_AI.md`; no false `LISTO_REAL`.
+
+**CURRENT_PARENT=N4.7.H. NEXT_ACTION=reconciliar `CHANGELOG_AI.md` aditivamente, drenar/certificar el exact-head final y solo entonces cerrar H y promover `N4.8.A`.**
