@@ -255,7 +255,7 @@ Este rollup supersede únicamente el estado operativo stale anterior del bloque 
 - [x] Schema estructurado y self-test CI agregados.
 - [x] Instalador local seguro preparado con permisos finos de Antigravity CLI; no usa bypass global de permisos.
 - [x] Gobernanza `AGENTS.md` y `docs/COLABORACION_IA.md` actualizada con ATTEMPT1/R2, QA takeover y prohibición de auto-certificación.
-- [ ] Activación física del Scheduled Task `VariApp-AntiG-Reviewer` pendiente de ejecutar una sola vez el instalador desde la PC local autorizada. Esta casilla exige evidencia local real y no puede marcarla ChatGPT remoto.
+- AntiG `RESERVED_INACTIVE`: la activación física del Scheduled Task `VariApp-AntiG-Reviewer` queda reservada para autorización explícita futura; no se instala ni se registra en esta fase.
 
 
 ## AntiG P1 hardening — 2026-09-03
@@ -266,7 +266,7 @@ Este rollup supersede únicamente el estado operativo stale anterior del bloque 
 - [x] Cuarentena de handoffs inválidos con avance de watermark para evitar lane starvation.
 - [x] Self-tests funcionales de contrato, rutas protegidas y aislamiento de worktree.
 - [x] Rollback transaccional del instalador si falla la fase mutante.
-- [ ] Activación física del Scheduled Task VariApp-AntiG-Reviewer: pendiente hasta auditoría final APROBADO_PARA_ACTIVACION y evidencia local real.
+- AntiG `RESERVED_INACTIVE`: la activación física del Scheduled Task `VariApp-AntiG-Reviewer` queda reservada hasta autorización explícita futura y evidencia local real; no es una acción pendiente del controller.
 
 ## AntiG P1 hardening — cierre técnico Codex — 2026-09-04
 
@@ -278,7 +278,7 @@ Este rollup supersede únicamente el estado operativo stale anterior del bloque 
 - [x] Estado de publicación durable `COMMENT_PENDING` tras confirmar `evidenceHead`, con deduplicación antes de comentarios.
 - [x] Rollback del instalador restaura XML de tarea preexistente o elimina solo la tarea nueva.
 - [x] Self-tests funcionales ampliados para contrato, aislamiento, staging, paths protegidos, patch causal, watermark, idempotencia y planes de rollback.
-- [ ] Instalación física y Scheduled Task real siguen pendientes; no se ejecutan desde Codex.
+- AntiG `RESERVED_INACTIVE`: instalación física y Scheduled Task real permanecen reservados; no se ejecutan desde Codex en esta fase.
 
 ## ERP-N4.7 — Asientos Contables — ROLLUP 2026-09-04
 
@@ -290,4 +290,12 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
 - [x] `TASKS.md` reconciliado de forma aditiva/history-preserving por este rollup.
 - [ ] `N4.7.H` permanece fail-closed hasta certificar los gates aplicables y P0/P1=0 del exact-head resultante de completar también `CHANGELOG_AI.md`; no false `LISTO_REAL`.
 
-**CURRENT_PARENT=N4.7.H. NEXT_ACTION=reconciliar `CHANGELOG_AI.md` aditivamente, drenar/certificar el exact-head final y solo entonces cerrar H y promover `N4.8.A`.**
+**CURRENT_PARENT=N4.7.H. CURRENT_WORK=N4.7.H exact-head certification remains pending applicable terminal gates. NEXT_SAFE=drain existing terminal evidence only; no new dispatch/attempt/ownership/recovery while admission is FROZEN. N4.8.A remains held.**
+
+## VAEP Fase 1 - Freeze de admision y handoff - 2026-09-04
+
+- [x] Reconciliacion registrada contra el HEAD remoto base `4420b688464f60885b4d4805ec8d2dd392e9030a`.
+- [x] `CURRENT_PARENT=N4.7.H`.
+- [x] `CURRENT_WORK=N4.7.H` en certificacion exact-head; no se declara `LISTO_REAL` sin gates terminales, evidencia causal y P0/P1=0.
+- [x] `NEXT_SAFE=drain existing terminal evidence only`; no se crean dispatches, attempts, ownership ni recoveries mientras el estado de admision permanece `FROZEN`.
+- [x] Los rollups historicos anteriores permanecen intactos y no gobiernan la ejecucion actual.
