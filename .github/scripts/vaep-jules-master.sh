@@ -99,6 +99,9 @@ while IFS='=' read -r key val; do
   case "$key" in
     PARENT_CLOSE_SLA_ROLLING_60M) PARENT_LISTO_TARGET_ROLLING_60="$val" ;;
     PARENT_MAX_DWELL_MINUTES) PARENT_MAX_DWELL_MINUTES="$val" ;;
+    PARENT_STALL_NO_PROGRESS_MINUTES) PARENT_STALL_NO_PROGRESS_MINUTES="$val" ;;
+    MAX_VOLUNTARY_IDLE) MAX_VOLUNTARY_IDLE="$val" ;;
+    VAEP_CHECKPOINTS) VAEP_CHECKPOINTS="$val" ;;
     JULES_LANE_BUDGET_SECONDS) JULES_LANE_BUDGET_SECONDS="$val" ;;
     JULES_MAX_ATTEMPTS) JULES_MAX_ATTEMPTS="$val" ;;
     JULES_REWORK_MAX) JULES_REWORK_MAX="$val" ;;
@@ -110,6 +113,9 @@ done <<< "$policy_env"
 
 : "${PARENT_LISTO_TARGET_ROLLING_60:?MASTER policy parser did not emit PARENT_CLOSE_SLA_ROLLING_60M}"
 : "${PARENT_MAX_DWELL_MINUTES:?MASTER policy parser did not emit PARENT_MAX_DWELL_MINUTES}"
+: "${PARENT_STALL_NO_PROGRESS_MINUTES:?MASTER policy parser did not emit PARENT_STALL_NO_PROGRESS_MINUTES}"
+: "${MAX_VOLUNTARY_IDLE:?MASTER policy parser did not emit MAX_VOLUNTARY_IDLE}"
+: "${VAEP_CHECKPOINTS:?MASTER policy parser did not emit VAEP_CHECKPOINTS}"
 : "${JULES_LANE_BUDGET_SECONDS:?MASTER policy parser did not emit JULES_LANE_BUDGET_SECONDS}"
 : "${JULES_MAX_ATTEMPTS:?MASTER policy parser did not emit JULES_MAX_ATTEMPTS}"
 : "${JULES_REWORK_MAX:?MASTER policy parser did not emit JULES_REWORK_MAX}"
@@ -119,6 +125,9 @@ done <<< "$policy_env"
 
 readonly PARENT_LISTO_TARGET_ROLLING_60
 readonly PARENT_MAX_DWELL_MINUTES
+readonly PARENT_STALL_NO_PROGRESS_MINUTES
+readonly MAX_VOLUNTARY_IDLE
+readonly VAEP_CHECKPOINTS
 readonly JULES_LANE_BUDGET_SECONDS
 readonly JULES_MAX_ATTEMPTS
 readonly JULES_REWORK_MAX
@@ -165,6 +174,9 @@ if [[ "${1:-}" == "--static-self-test" ]]; then
   rm -f "$phase3_tmp"
   [[ "$PARENT_LISTO_TARGET_ROLLING_60" =~ ^[1-9][0-9]*$ ]]
   [[ "$PARENT_MAX_DWELL_MINUTES" =~ ^[1-9][0-9]*$ ]]
+  [[ "$PARENT_STALL_NO_PROGRESS_MINUTES" =~ ^[1-9][0-9]*$ ]]
+  [[ "$MAX_VOLUNTARY_IDLE" =~ ^(0|[1-9][0-9]*)$ ]]
+  [[ "$VAEP_CHECKPOINTS" =~ ^:[0-5][0-9](,:[0-5][0-9])*$ ]]
   [[ "$JULES_LANE_BUDGET_SECONDS" =~ ^[1-9][0-9]*$ ]]
   [[ "$JULES_MAX_ATTEMPTS" =~ ^[1-9][0-9]*$ ]]
   [[ "$JULES_REWORK_MAX" =~ ^(0|[1-9][0-9]*)$ ]]
@@ -197,8 +209,8 @@ if [[ "${1:-}" == "--static-self-test" ]]; then
   done
 
   bash "$WORKER" --static-self-test >/dev/null
-  printf '{"status":"ok","authority":"MASTER","masterFile":"%s","parentListoTargetRolling60":%d,"parentMaxDwellMinutes":%d,"laneBudgetSeconds":%d,"policyHash":"%s","numericProtocolLabelsProhibited":true}\n' \
-    "$MASTER_FILE" "$PARENT_LISTO_TARGET_ROLLING_60" "$PARENT_MAX_DWELL_MINUTES" "$JULES_LANE_BUDGET_SECONDS" "$AUTOMATION_POLICY_HASH"
+  printf '{"status":"ok","authority":"MASTER","masterFile":"%s","parentListoTargetRolling60":%d,"parentMaxDwellMinutes":%d,"parentStallNoProgressMinutes":%d,"maxVoluntaryIdle":%d,"checkpoints":"%s","laneBudgetSeconds":%d,"policyHash":"%s","numericProtocolLabelsProhibited":true}\n' \
+    "$MASTER_FILE" "$PARENT_LISTO_TARGET_ROLLING_60" "$PARENT_MAX_DWELL_MINUTES" "$PARENT_STALL_NO_PROGRESS_MINUTES" "$MAX_VOLUNTARY_IDLE" "$VAEP_CHECKPOINTS" "$JULES_LANE_BUDGET_SECONDS" "$AUTOMATION_POLICY_HASH"
   exit 0
 fi
 
