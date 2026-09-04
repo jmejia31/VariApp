@@ -767,3 +767,15 @@ La activación local ahora resuelve `agy` desde el PATH o desde `%LOCALAPPDATA%\
 **Evidencia previa al rollup:** N4.7.F `LISTO_REAL @09:49 -06`, N4.7.G `LISTO_REAL @09:50 -06`; REVIEW_FIRST del certificado canónico PASS; exact-head documental previo `6986874048985e4746d21e23254479b391220445` con gates aplicables terminales SUCCESS; `VariApp CI=SKIPPED` excluido; P0=0/P1=0.
 
 **Control fail-closed:** este changeset completa exclusivamente el rollup documental `TASKS.md` + `CHANGELOG_AI.md`. `N4.7.H` no se declara `LISTO_REAL` por este texto: permanece pendiente de gates aplicables terminales y revalidación P0/P1=0 sobre el exact-head resultante del rollup. Solo después VAEP puede cerrar H y promover `N4.8.A`. No se modifica `main`, Producción, secretos, deploy, ramas ni PR #2.
+
+## 2026-09-04 — Cierre Fase 0 y Fase 1 de migración VAEP MASTER
+
+Responsable: ChatGPT/VAEP sobre `Desarrollo`.
+
+Se cerraron formalmente las fases de migración `FASE 0 — EXCLUSIVIDAD` y `FASE 1 — FREEZE + RECONCILIACIÓN`. La autoridad operativa continúa en `docs/VAEP_AUTHORITY.md`; ChatGPT/VAEP conserva controller/REVIEW_FIRST/QA/certificación. No se otorgó autoridad operativa a Codex ni AntiG.
+
+Se restauró el freeze técnico de admisión mediante `vaep/control/dispatch-admission.json` con `newDispatchAdmission=FROZEN` y el guard correspondiente en `.github/scripts/vaep-jules-master.sh`. El runtime trata cero manifests nuevos como `NO_OP`, falla cerrado con múltiples manifests, valida el control state antes de crear sesión/attempt/ownership/recovery y bloquea nuevos dispatches cuando la admisión está congelada. La batería aislada previamente ejecutada para `NO_OP/FROZEN/OPEN/MULTI/INVALID` permanece `PASS`.
+
+La reconciliación operativa conserva `CURRENT_PARENT=N4.7.H` y `N4.8.A=HELD`. Este cierre de migración NO equivale a certificar `N4.7.H=LISTO_REAL`; no se promueve N4.8, no se consume attempt y no se abre trabajo nuevo durante el freeze.
+
+Resultado: `MIGRATION_PHASE_0=CLOSED/PASS`; `MIGRATION_PHASE_1=CLOSED/PASS`; `NEW_DISPATCH_ADMISSION=FROZEN`; `FASE_2=NOT_STARTED`; `FALSE_PASS=NO`; `FALSE_LISTO=NO`; `SCOPE_LEAK=NO`. No se modificaron `main`, Producción, secretos, dominios, Vercel ni BD productiva.
