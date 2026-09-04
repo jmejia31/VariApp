@@ -1,69 +1,103 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Single operational entrypoint. Rules come only from docs/VAEP_AUTHORITY.md.
+# Single operational Jules entrypoint.
+# ALL operational rules come from docs/VAEP_AUTHORITY.md.
 readonly MASTER_FILE="docs/VAEP_AUTHORITY.md"
-readonly WORKER_TEMPLATE=".github/scripts/vaep-jules-worker-template.sh"
-readonly GUARD_TEMPLATE=".github/scripts/vaep-jules-throughput-template.sh"
+readonly WORKER=".github/scripts/vaep-jules-worker.sh"
+readonly PARENT_LISTO_TARGET_ROLLING_60=3
+readonly PARENT_MAX_DWELL_MINUTES=20
+readonly JULES_LANE_BUDGET_SECONDS="${VAEP_JULES_LANE_BUDGET_SECONDS:-1080}"
 
 test -f "$MASTER_FILE"
-test -f "$WORKER_TEMPLATE"
-test -f "$GUARD_TEMPLATE"
-
-: "${RUNNER_TEMP:=${TMPDIR:-/tmp}}"
-tmp="$RUNNER_TEMP/vaep-jules-master-${GITHUB_RUN_ID:-local}-$$"
-mkdir -p "$tmp"
-trap 'rm -rf "$tmp"' EXIT
-worker="$tmp/worker.sh"
-guard="$tmp/guard.sh"
-cp "$WORKER_TEMPLATE" "$worker"
-cp "$GUARD_TEMPLATE" "$guard"
-
-python3 - "$worker" "$guard" <<'PY'
-from pathlib import Path
-import sys
-
-worker=Path(sys.argv[1])
-guard=Path(sys.argv[2])
-
-w=worker.read_text(encoding="utf-8")
-for old in ("v3.25","v3.26","v3.27","v3.28","v3.29","V3.25_CURRENT","VAEP_V4_6_KEYED_MUTEX_HARD_EXECUTION"):
-    w=w.replace(old,"MASTER")
-lines=w.splitlines()
-replacement=r'''routine_prompt="VAEP/Jules MASTER deterministic clarification recovery. Read docs/VAEP_AUTHORITY.md as the only operational rule source. Continue autonomously inside the SAME assigned exclusive scope; do not wait for a human when missing input can be derived from the dispatch, repository, tests, direct dependencies or visible session evidence. ORIGINAL_ASSIGNED_MICROTASK: $user_prompt FILE_SCOPE_HINT=$file_scope. If routine targets were not enumerated, derive a bounded reproducible set from the assigned scope/direct dependencies. If no valid target exists after a reproducible search, report NO_TARGETS_FOUND with exact searches/paths, produce allowed evidence, complete both self-reviews and finish. Ask for human input only for a true business decision, explicit authorization, secret/credential, destructive action, or external resource that cannot be safely inferred. Never invent endpoints, permissions, URLs, facts or requirements. TASK_ATTEMPT=$task_attempt; maximum attempts=2; R2 final; R3+ prohibited. Do not expand scope or promote N+1. COMPLETED never equals LISTO. Preserve a reviewable ChangeSet/gitPatch with exact baseCommitId, causal evidence, limitations and tests not executed."'''
-count=0
-for i,line in enumerate(lines):
-    if line.startswith("routine_prompt="):
-        lines[i]=replacement
-        count+=1
-if count != 1:
-    raise SystemExit(f"MASTER expected one routine_prompt, found {count}")
-worker.write_text("\n".join(lines)+"\n",encoding="utf-8")
-
-g=guard.read_text(encoding="utf-8")
-for old in ("v3.25","v3.26","v3.27","v3.28","v3.29","V3.25_CURRENT"):
-    g=g.replace(old,"MASTER")
-for line in g.splitlines():
-    if line.startswith('readonly INNER_WORKER='):
-        old=line
-        break
-else:
-    raise SystemExit("MASTER INNER_WORKER invariant failed")
-g=g.replace(old,f'readonly INNER_WORKER="{worker}"',1)
-g=g.replace('readonly DELETE_ORPHANED_REMOTE_SESSION_ON_TIMEOUT=true',
-            'readonly DELETE_ORPHANED_REMOTE_SESSION_ON_TIMEOUT=false',1)
-g=g.replace('[[ "$DELETE_ORPHANED_REMOTE_SESSION_ON_TIMEOUT" == true ]]',
-            '[[ "$DELETE_ORPHANED_REMOTE_SESSION_ON_TIMEOUT" == false ]]',1)
-g=g.replace('"deleteOrphanedRemoteSessionOnTimeout":true',
-            '"deleteOrphanedRemoteSessionOnTimeout":false',1)
-guard.write_text(g,encoding="utf-8")
-PY
-
-chmod +x "$worker" "$guard"
+test -f "$WORKER"
 
 if [[ "${1:-}" == "--static-self-test" ]]; then
-  bash "$guard" --static-self-test
+  [[ "$PARENT_LISTO_TARGET_ROLLING_60" -eq 3 ]]
+  [[ "$PARENT_MAX_DWELL_MINUTES" -eq 20 ]]
+  [[ "$JULES_LANE_BUDGET_SECONDS" -le 1200 ]]
+  grep -q 'AUTOMATION_AUTHORITY=MASTER' "$MASTER_FILE"
+  grep -q 'NUMERIC_PROTOCOL_LABELS=PROHIBITED' "$MASTER_FILE"
+  bash "$WORKER" --static-self-test >/dev/null
+  printf '{"status":"ok","authority":"MASTER","masterFile":"%s","parentListoTargetRolling60":%d,"parentMaxDwellMinutes":%d,"laneBudgetSeconds":%d,"numericProtocolLabelsProhibited":true}\n'     "$MASTER_FILE" "$PARENT_LISTO_TARGET_ROLLING_60" "$PARENT_MAX_DWELL_MINUTES" "$JULES_LANE_BUDGET_SECONDS"
   exit 0
 fi
 
-exec bash "$guard"
+: "${DISPATCH_PATH:?DISPATCH_PATH is required}"
+: "${GITHUB_SHA:?GITHUB_SHA is required}"
+: "${GITHUB_REPOSITORY:?GITHUB_REPOSITORY is required}"
+: "${GITHUB_RUN_ID:?GITHUB_RUN_ID is required}"
+: "${GITHUB_SERVER_URL:=https://github.com}"
+: "${RUNNER_TEMP:?RUNNER_TEMP is required}"
+: "${GITHUB_ENV:?GITHUB_ENV is required}"
+: "${ISSUE_PREFIX:=[VAEP-JULES]}"
+: "${ARTIFACT_PREFIX:=vaep-jules}"
+: "${WORKER_ID:=JULES_A}"
+: "${WORKER_LABEL:=Jules}"
+
+mapfile -t manifests < <(git diff-tree --no-commit-id --name-only --diff-filter=A -r "$GITHUB_SHA" -- "$DISPATCH_PATH/*.json")
+if [[ ${#manifests[@]} -ne 1 ]]; then
+  printf 'VAEP MASTER transport invariant failed: expected exactly one new dispatch manifest; found %d.\n' "${#manifests[@]}" >&2
+  exit 21
+fi
+
+manifest="${manifests[0]}"
+dispatch_id="$(jq -r '.dispatchId // "UNKNOWN"' "$manifest")"
+task_id="$(jq -r '.taskId // "UNKNOWN"' "$manifest")"
+primary_base="$(jq -r '.primaryBaseHead // empty' "$manifest")"
+
+mapfile -t changed_files < <(git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA")
+if [[ ${#changed_files[@]} -ne 1 || "${changed_files[0]}" != "$manifest" ]]; then
+  printf 'VAEP MASTER transport invariant failed: dispatch commit must change exactly one file (%s).\n' "$manifest" >&2
+  exit 22
+fi
+
+if [[ ! "$primary_base" =~ ^[0-9a-fA-F]{40}$ ]]; then
+  printf 'VAEP MASTER transport invariant failed: invalid PRIMARY_BASE_HEAD in %s.\n' "$manifest" >&2
+  exit 23
+fi
+
+dispatch_parent="$(git rev-parse "${GITHUB_SHA}^")"
+if [[ "${primary_base,,}" != "${dispatch_parent,,}" ]]; then
+  printf 'VAEP MASTER transport invariant failed: PRIMARY_BASE_HEAD %s is not dispatch parent %s.\n' "$primary_base" "$dispatch_parent" >&2
+  exit 24
+fi
+
+original_manifest="$RUNNER_TEMP/vaep-jules-original-dispatch.json"
+cp "$manifest" "$original_manifest"
+
+transport_note="VAEP_MASTER_TRANSPORT_VERIFIED=true
+MASTER_FILE=docs/VAEP_AUTHORITY.md
+The trusted GitHub VAEP MASTER verified PRIMARY_BASE_HEAD=$primary_base as the exact parent of atomic dispatch commit GITHUB_SHA=$GITHUB_SHA and verified that the dispatch commit changes only $manifest. The transport-only child commit is expected and is not product-scope divergence. Read docs/VAEP_AUTHORITY.md as the only operational rule source. Ignore numeric protocol labels from historical evidence."
+
+injected="$RUNNER_TEMP/vaep-jules-master-dispatch.json"
+jq --arg transport "$transport_note" '.prompt = ($transport + "\n\n" + .prompt)' "$manifest" > "$injected"
+cat "$injected" > "$manifest"
+rm -f "$injected"
+
+set +e
+timeout --foreground --signal=TERM --kill-after=30s "${JULES_LANE_BUDGET_SECONDS}s" bash "$WORKER"
+rc=$?
+set -e
+
+if [[ "$rc" -ne 124 && "$rc" -ne 137 && "$rc" -ne 143 ]]; then
+  exit "$rc"
+fi
+
+result_dir="$RUNNER_TEMP/vaep-jules-master-timeout"
+mkdir -p "$result_dir"
+cp "$original_manifest" "$result_dir/dispatch.json"
+: > "$result_dir/changes.patch"
+
+jq -n   --arg authority "MASTER"   --arg masterFile "$MASTER_FILE"   --arg workerId "$WORKER_ID"   --arg dispatchId "$dispatch_id"   --arg taskId "$task_id"   --arg state "JULES_LANE_BUDGET_EXCEEDED"   --argjson laneBudgetSeconds "$JULES_LANE_BUDGET_SECONDS"   --argjson parentListoTargetRolling60 "$PARENT_LISTO_TARGET_ROLLING_60"   --argjson parentMaxDwellMinutes "$PARENT_MAX_DWELL_MINUTES"   '{authority:$authority,masterFile:$masterFile,workerId:$workerId,dispatchId:$dispatchId,taskId:$taskId,state:$state,laneBudgetSeconds:$laneBudgetSeconds,parentListoTargetRolling60:$parentListoTargetRolling60,parentMaxDwellMinutes:$parentMaxDwellMinutes,patchPresent:false,controllerHandoff:"QA_TAKEOVER_AND_ASSIGN_NEXT_SAFE_IMMEDIATELY",falseListoProhibited:true,numericProtocolLabelsProhibited:true}'   > "$result_dir/result.json"
+
+run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+printf -v body '%s\n\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n%s\n'   "VAEP $WORKER_LABEL MASTER — lane budget exceeded."   "- Authority: `docs/VAEP_AUTHORITY.md`"   "- Worker: `$WORKER_ID`"   "- Dispatch: `$dispatch_id`"   "- Task: `$task_id`"   "- State: `JULES_LANE_BUDGET_EXCEEDED` after ${JULES_LANE_BUDGET_SECONDS}s"   "- Controller handoff: `QA_TAKEOVER_AND_ASSIGN_NEXT_SAFE_IMMEDIATELY`"   "- Workflow run: $run_url"   "Fail-closed: timeout does NOT mean LISTO. VAEP must review/recover/rebind according to the MAESTRO. Numeric protocol labels are not authority."
+
+gh issue create --repo "$GITHUB_REPOSITORY" --title "$ISSUE_PREFIX $dispatch_id THROUGHPUT_STALL" --body "$body" >/dev/null || true
+
+printf 'ARTIFACT_NAME=%s-%s-throughput-stall\n' "$ARTIFACT_PREFIX" "$dispatch_id" >> "$GITHUB_ENV"
+printf 'RESULT_DIR=%s\n' "$result_dir" >> "$GITHUB_ENV"
+
+printf 'VAEP MASTER lane budget exceeded for %s (%s). Lane released for controller failover.\n' "$dispatch_id" "$task_id" >&2
+exit 124
