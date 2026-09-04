@@ -129,7 +129,7 @@ jobs:
           issue="$(jq -r '.issueNumber' "$manifest")"
           body="$RUNNER_TEMP/vaep-health/comment.md"
           {
-            echo '## VAEP v3.22 session health'
+            echo '## VAEP MASTER session health'
             echo
             echo '| Lane | Session | State | Activities | ACTIVE_VERIFIED |'
             echo '|---|---|---|---:|---|'
