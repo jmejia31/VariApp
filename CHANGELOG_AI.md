@@ -767,15 +767,3 @@ La activación local ahora resuelve `agy` desde el PATH o desde `%LOCALAPPDATA%\
 **Evidencia previa al rollup:** N4.7.F `LISTO_REAL @09:49 -06`, N4.7.G `LISTO_REAL @09:50 -06`; REVIEW_FIRST del certificado canónico PASS; exact-head documental previo `6986874048985e4746d21e23254479b391220445` con gates aplicables terminales SUCCESS; `VariApp CI=SKIPPED` excluido; P0=0/P1=0.
 
 **Control fail-closed:** este changeset completa exclusivamente el rollup documental `TASKS.md` + `CHANGELOG_AI.md`. `N4.7.H` no se declara `LISTO_REAL` por este texto: permanece pendiente de gates aplicables terminales y revalidación P0/P1=0 sobre el exact-head resultante del rollup. Solo después VAEP puede cerrar H y promover `N4.8.A`. No se modifica `main`, Producción, secretos, deploy, ramas ni PR #2.
-
-## 2026-09-04 - Fase 1 - Freeze de admisión y handoff a ChatGPT/VAEP
-
-Responsable: Codex bajo control de ChatGPT/VAEP en `Desarrollo`.
-
-Reconciliación append-only contra el HEAD remoto base `4420b688464f60885b4d4805ec8d2dd392e9030a`. No se reescribe ni reformula historia previa y `CHANGELOG_AI.md` continúa siendo evidencia, no autoridad operativa.
-
-Se implementó el freeze técnico de admisión en `.github/scripts/vaep-jules-master.sh` mediante `vaep/control/dispatch-admission.json`. El guard procesa primero los manifests nuevos: cero produce `NO_OP`/exit 0; más de uno falla cerrado; exactamente uno valida el estado antes de sesión, attempt, ownership o recovery. `newDispatchAdmission=FROZEN` rechaza el dispatch y no afecta sesiones `ACTIVE_REAL` existentes.
-
-Evidencia de batería aislada: `NO_OP=PASS`, `FROZEN=PASS`, `OPEN=PASS`, `MULTI_MANIFEST=PASS` e `INVALID_CONTROL_STATE_TESTS=PASS`. Los fixtures, stubs y clones temporales no forman parte del changeset.
-
-Estado reconciliado: `CURRENT_PARENT=N4.7.H`; `N4.7.H` continúa fail-closed y no se promueve `N4.8.A` sin gates exact-head terminales, evidencia causal y P0/P1=0. AntiG permanece `RESERVED_INACTIVE`, sin scheduler ni ejecución. PR #2 continúa `OPEN+DRAFT`; no se modifican `main`, Producción, secretos ni despliegues.
