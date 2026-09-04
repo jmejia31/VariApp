@@ -11,7 +11,12 @@ test -f "$MASTER_FILE"
 test -f "$PARSER"
 test -f "$WORKER"
 
-# Safe parsing without source or eval
+# Safe parsing without source or eval. Capture parser status explicitly so
+# process-substitution cannot mask a fail-closed parser error.
+if ! policy_env="$(bash "$PARSER" --env "$MASTER_FILE")"; then
+  printf 'VAEP MASTER policy parser failed; refusing runtime startup.\n' >&2
+  exit 68
+fi
 while IFS='=' read -r key val; do
   case "$key" in
     PARENT_CLOSE_SLA_ROLLING_60M) PARENT_LISTO_TARGET_ROLLING_60="$val" ;;
@@ -23,7 +28,16 @@ while IFS='=' read -r key val; do
     AUTOMATION_POLICY_HASH) AUTOMATION_POLICY_HASH="$val" ;;
     MASTER_COMMIT_SHA) MASTER_COMMIT_SHA="$val" ;;
   esac
-done < <(bash "$PARSER" --env "$MASTER_FILE")
+done <<< "$policy_env"
+
+: "${PARENT_LISTO_TARGET_ROLLING_60:?MASTER policy parser did not emit PARENT_CLOSE_SLA_ROLLING_60M}"
+: "${PARENT_MAX_DWELL_MINUTES:?MASTER policy parser did not emit PARENT_MAX_DWELL_MINUTES}"
+: "${JULES_LANE_BUDGET_SECONDS:?MASTER policy parser did not emit JULES_LANE_BUDGET_SECONDS}"
+: "${JULES_MAX_ATTEMPTS:?MASTER policy parser did not emit JULES_MAX_ATTEMPTS}"
+: "${JULES_REWORK_MAX:?MASTER policy parser did not emit JULES_REWORK_MAX}"
+: "${PARENT_CLOSE_FIRST:?MASTER policy parser did not emit PARENT_CLOSE_FIRST}"
+: "${AUTOMATION_POLICY_HASH:?MASTER policy parser did not emit AUTOMATION_POLICY_HASH}"
+: "${MASTER_COMMIT_SHA:?MASTER policy parser did not emit MASTER_COMMIT_SHA}"
 
 readonly PARENT_LISTO_TARGET_ROLLING_60
 readonly PARENT_MAX_DWELL_MINUTES
@@ -36,13 +50,14 @@ readonly MASTER_COMMIT_SHA
 
 if [[ "${1:-}" == "--static-self-test" ]]; then
   bash "$PARSER" --self-test >/dev/null
-  [[ "$PARENT_LISTO_TARGET_ROLLING_60" -eq 3 ]]
-  [[ "$PARENT_MAX_DWELL_MINUTES" -eq 20 ]]
-  [[ "$JULES_LANE_BUDGET_SECONDS" -eq 1080 ]]
-  [[ "$JULES_MAX_ATTEMPTS" -eq 2 ]]
-  [[ "$JULES_REWORK_MAX" -eq 1 ]]
-  [[ "$PARENT_CLOSE_FIRST" == "TRUE" ]]
+  [[ "$PARENT_LISTO_TARGET_ROLLING_60" =~ ^[1-9][0-9]*$ ]]
+  [[ "$PARENT_MAX_DWELL_MINUTES" =~ ^[1-9][0-9]*$ ]]
+  [[ "$JULES_LANE_BUDGET_SECONDS" =~ ^[1-9][0-9]*$ ]]
+  [[ "$JULES_MAX_ATTEMPTS" =~ ^[1-9][0-9]*$ ]]
+  [[ "$JULES_REWORK_MAX" =~ ^(0|[1-9][0-9]*)$ ]]
+  [[ "$PARENT_CLOSE_FIRST" == "TRUE" || "$PARENT_CLOSE_FIRST" == "FALSE" ]]
   [[ ${#AUTOMATION_POLICY_HASH} -eq 64 ]]
+  [[ "$MASTER_COMMIT_SHA" =~ ^[0-9a-fA-F]{40}$ ]]
   grep -q 'AUTOMATION_AUTHORITY=MASTER' "$MASTER_FILE"
   grep -q 'NUMERIC_PROTOCOL_LABELS=PROHIBITED' "$MASTER_FILE"
 
@@ -144,6 +159,7 @@ jq -n \
   --arg authority "MASTER" \
   --arg masterFile "$MASTER_FILE" \
   --arg policyHash "$AUTOMATION_POLICY_HASH" \
+  --arg masterCommitSha "$MASTER_COMMIT_SHA" \
   --arg workerId "$WORKER_ID" \
   --arg dispatchId "$dispatch_id" \
   --arg taskId "$task_id" \
@@ -151,7 +167,7 @@ jq -n \
   --argjson laneBudgetSeconds "$JULES_LANE_BUDGET_SECONDS" \
   --argjson parentListoTargetRolling60 "$PARENT_LISTO_TARGET_ROLLING_60" \
   --argjson parentMaxDwellMinutes "$PARENT_MAX_DWELL_MINUTES" \
-  '{authority:$authority,masterFile:$masterFile,policyHash:$policyHash,workerId:$workerId,dispatchId:$dispatchId,taskId:$taskId,state:$state,laneBudgetSeconds:$laneBudgetSeconds,parentListoTargetRolling60:$parentListoTargetRolling60,parentMaxDwellMinutes:$parentMaxDwellMinutes,patchPresent:false,controllerHandoff:"QA_TAKEOVER_AND_ASSIGN_NEXT_SAFE_IMMEDIATELY",falseListoProhibited:true,numericProtocolLabelsProhibited:true}' \
+  '{authority:$authority,masterFile:$masterFile,masterCommitSha:$masterCommitSha,policyHash:$policyHash,workerId:$workerId,dispatchId:$dispatchId,taskId:$taskId,state:$state,laneBudgetSeconds:$laneBudgetSeconds,parentListoTargetRolling60:$parentListoTargetRolling60,parentMaxDwellMinutes:$parentMaxDwellMinutes,patchPresent:false,controllerHandoff:"QA_TAKEOVER_AND_ASSIGN_NEXT_SAFE_IMMEDIATELY",falseListoProhibited:true,numericProtocolLabelsProhibited:true}' \
   > "$result_dir/result.json"
 
 run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"

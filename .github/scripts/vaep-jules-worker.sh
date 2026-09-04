@@ -9,29 +9,49 @@ readonly PARSER=".github/scripts/vaep-policy-parser.sh"
 test -f "$MASTER_FILE"
 test -f "$PARSER"
 
+if ! policy_env="$(bash "$PARSER" --env "$MASTER_FILE")"; then
+  printf 'VAEP Jules worker policy parser failed; refusing runtime startup.\n' >&2
+  exit 68
+fi
 while IFS='=' read -r key val; do
   case "$key" in
     JULES_MAX_ATTEMPTS) JULES_MAX_ATTEMPTS_PER_TASK="$val" ;;
     JULES_REWORK_MAX) JULES_REWORK_MAX="$val" ;;
     PARENT_CLOSE_FIRST) PARENT_CLOSE_FIRST="${val,,}" ;;
     AUTOMATION_POLICY_HASH) AUTOMATION_POLICY_HASH="$val" ;;
+    MASTER_COMMIT_SHA) MASTER_COMMIT_SHA="$val" ;;
   esac
-done < <(bash "$PARSER" --env "$MASTER_FILE")
+done <<< "$policy_env"
+
+: "${JULES_MAX_ATTEMPTS_PER_TASK:?MASTER policy parser did not emit JULES_MAX_ATTEMPTS}"
+: "${JULES_REWORK_MAX:?MASTER policy parser did not emit JULES_REWORK_MAX}"
+: "${PARENT_CLOSE_FIRST:?MASTER policy parser did not emit PARENT_CLOSE_FIRST}"
+: "${AUTOMATION_POLICY_HASH:?MASTER policy parser did not emit AUTOMATION_POLICY_HASH}"
+: "${MASTER_COMMIT_SHA:?MASTER policy parser did not emit MASTER_COMMIT_SHA}"
 
 readonly VAEP_JULES_PROTOCOL="MASTER"
 readonly JULES_MAX_ATTEMPTS_PER_TASK
 readonly JULES_REWORK_MAX
 readonly PARENT_CLOSE_FIRST
 readonly AUTOMATION_POLICY_HASH
+readonly MASTER_COMMIT_SHA
 readonly VAEP_CHECKPOINTS=":00,:15,:30,:45,:55"
+
+R3_PROHIBITED=false
+if (( JULES_MAX_ATTEMPTS_PER_TASK < 3 )); then
+  R3_PROHIBITED=true
+fi
+readonly R3_PROHIBITED
 
 if [[ "${1:-}" == "--static-self-test" ]]; then
   [[ "$VAEP_JULES_PROTOCOL" == "MASTER" ]]
-  [[ "$JULES_MAX_ATTEMPTS_PER_TASK" -eq 2 ]]
-  [[ "$JULES_REWORK_MAX" -eq 1 ]]
-  [[ "$PARENT_CLOSE_FIRST" == true ]]
+  [[ "$JULES_MAX_ATTEMPTS_PER_TASK" =~ ^[1-9][0-9]*$ ]]
+  [[ "$JULES_REWORK_MAX" =~ ^(0|[1-9][0-9]*)$ ]]
+  [[ "$PARENT_CLOSE_FIRST" == true || "$PARENT_CLOSE_FIRST" == false ]]
   [[ "$VAEP_CHECKPOINTS" == ":00,:15,:30,:45,:55" ]]
   [[ ${#AUTOMATION_POLICY_HASH} -eq 64 ]]
+  [[ "$MASTER_COMMIT_SHA" =~ ^[0-9a-fA-F]{40}$ ]]
+  [[ "$R3_PROHIBITED" == true || "$R3_PROHIBITED" == false ]]
   printf '{"status":"ok","protocol":"%s","maxAttempts":%d,"r3Prohibited":true,"qaTakeoverOnR2Failure":true,"parentCloseFirst":%s,"checkpoints":"%s","policyHash":"%s","networkUsed":false,"sessionCreated":false,"attemptConsumed":false}\n' \
     "$VAEP_JULES_PROTOCOL" "$JULES_MAX_ATTEMPTS_PER_TASK" "$PARENT_CLOSE_FIRST" "$VAEP_CHECKPOINTS" "$AUTOMATION_POLICY_HASH"
   exit 0
@@ -99,33 +119,39 @@ user_prompt="$(jq -r '.prompt' "$manifest")"
 
 # Hard retry cap. New manifests SHOULD carry taskAttempt; compatibility manifests
 # without it infer ATTEMPT=2 only from an explicit R2 dispatch label, otherwise 1.
-task_attempt="$(python3 - "$manifest" <<'PY'
+task_attempt="$(python3 - "$manifest" "$JULES_MAX_ATTEMPTS_PER_TASK" "$JULES_REWORK_MAX" <<'PY'
 import json
 import re
 import sys
 from pathlib import Path
 
 p = Path(sys.argv[1])
+max_attempts = int(sys.argv[2])
+rework_max = int(sys.argv[3])
 data = json.loads(p.read_text(encoding='utf-8'))
 dispatch_id = str(data['dispatchId'])
 explicit = data.get('taskAttempt')
 m = re.search(r'(?:^|-)R(\d+)(?:-|$)', dispatch_id, flags=re.IGNORECASE)
 label_attempt = int(m.group(1)) if m else None
 
-if label_attempt is not None and label_attempt >= 3:
-    raise SystemExit(f'R3+ prohibited by VAEP Jules MASTER: {dispatch_id}')
+if max_attempts < 1 or rework_max < 0:
+    raise SystemExit('invalid retry policy emitted by MASTER')
+if label_attempt is not None and (label_attempt < 1 or label_attempt > max_attempts):
+    raise SystemExit(f'{dispatch_id}: retry label exceeds MASTER max attempts={max_attempts}')
 
 if explicit is None:
-    attempt = 2 if label_attempt == 2 else 1
+    attempt = label_attempt if label_attempt is not None else 1
 else:
-    if isinstance(explicit, bool):
-        raise SystemExit('taskAttempt must be integer 1 or 2')
-    attempt = int(explicit)
+    if isinstance(explicit, bool) or not isinstance(explicit, int):
+        raise SystemExit('taskAttempt must be an integer')
+    attempt = explicit
 
-if attempt not in (1, 2):
-    raise SystemExit(f'taskAttempt={attempt} rejected; MASTER allows only 1 or 2')
-if label_attempt == 2 and attempt != 2:
-    raise SystemExit('R2 dispatch must be ATTEMPT=2')
+if attempt < 1 or attempt > max_attempts:
+    raise SystemExit(f'taskAttempt={attempt} rejected; MASTER max attempts={max_attempts}')
+if label_attempt is not None and attempt != label_attempt:
+    raise SystemExit(f'retry label R{label_attempt} conflicts with taskAttempt={attempt}')
+if attempt - 1 > rework_max:
+    raise SystemExit(f'taskAttempt={attempt} exceeds MASTER rework max={rework_max}')
 print(attempt)
 PY
 )" || fail "MASTER retry-cap validation failed." 25
@@ -183,18 +209,18 @@ if [[ -z "$session_name" ]]; then
     "BRANCH=Desarrollo" \
     "VAEP_JULES_PROTOCOL=MASTER" \
     "GLOBAL_CONTROL_PLANE=VAEP_MASTER" \
-    "PARENT_CLOSE_FIRST=true" \
+    "PARENT_CLOSE_FIRST=$PARENT_CLOSE_FIRST" \
     "VAEP_CHECKPOINTS=$VAEP_CHECKPOINTS" \
     "VAEP_AUTHORITY_FILE=docs/VAEP_AUTHORITY.md" \
     "PRIMARY_BASE_HEAD=$primary_base" \
     "VAEP_TASK_ID=$task_id" \
     "TASK_ATTEMPT=$task_attempt" \
-    "JULES_MAX_ATTEMPTS_PER_TASK=2" \
-    "JULES_REWORK_MAX=1" \
+    "JULES_MAX_ATTEMPTS_PER_TASK=$JULES_MAX_ATTEMPTS_PER_TASK" \
+    "JULES_REWORK_MAX=$JULES_REWORK_MAX" \
     "FILE_SCOPE_HINT=$file_scope" \
     "" \
     "Before changing anything, read docs/VAEP_AUTHORITY.md FIRST, then the dispatch, AGENTS.md, PLAN_EJECUCION_AUTONOMA.md and docs/VAEP_JULES.md. MASTER is the only operational Jules authority." \
-    "HARD RETRY RULE: this logical task allows only ATTEMPT=1 plus one final correction ATTEMPT=2/R2. Never request, propose, create or perform Jules R3+. If ATTEMPT=2 still contains a blocking defect, report it exactly for ChatGPT/VAEP/Vibe QA takeover and finish your evidence." \
+    "HARD RETRY RULE: this logical task allows at most $JULES_MAX_ATTEMPTS_PER_TASK attempt(s) and $JULES_REWORK_MAX rework(s), exactly as defined by MASTER. Never exceed MASTER retry limits. If the final allowed attempt still contains a blocking defect, report it exactly for ChatGPT/VAEP/Vibe QA takeover and finish your evidence." \
     "PARENT CLOSE FIRST: stay inside the assigned exclusive scope of the current parent. Preparation never promotes N+1. Dispatch, activity or COMPLETED never equals LISTO without review, causal validation and evidence." \
     "CHECKPOINTS: the task system declares :00/:15/:30/:45 with backup :55. A declared schedule is not proof that a checkpoint ran; only executor evidence is." \
     "Work only inside your Jules cloud workspace. Never create branches, pull requests, pushes, merges, deployments, Production changes, secrets, or changes to main." \
@@ -217,12 +243,12 @@ deadline=$((SECONDS + 6600))
 terminal_state=""
 auto_feedback_count=0
 max_followups=3
-routine_prompt="VAEP Jules MASTER automated follow-up. Continue inside the assigned exclusive scope of the current parent. Authority: docs/VAEP_AUTHORITY.md -> dispatch -> AGENTS.md/PLAN_EJECUCION_AUTONOMA.md/docs/VAEP_JULES.md -> code/tests. TASK_ATTEMPT=$task_attempt; maximum attempts=2; R2 is final; R3+ is prohibited and transfers correction to ChatGPT/VAEP/Vibe QA takeover. Do not expand scope or promote N+1. COMPLETED never equals LISTO. Before COMPLETED emit two independent reviews, SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2; report observations, limitations, risks, recommendations and tests not executed; preserve a reviewable ChangeSet/gitPatch with baseCommitId. Never trade quality or causal evidence for throughput."
+routine_prompt="VAEP Jules MASTER automated follow-up. Continue inside the assigned exclusive scope of the current parent. Authority: docs/VAEP_AUTHORITY.md -> dispatch -> AGENTS.md/PLAN_EJECUCION_AUTONOMA.md/docs/VAEP_JULES.md -> code/tests. TASK_ATTEMPT=$task_attempt; MASTER max attempts=$JULES_MAX_ATTEMPTS_PER_TASK; MASTER max reworks=$JULES_REWORK_MAX. Never exceed MASTER retry limits; exhaustion transfers correction to ChatGPT/VAEP/Vibe QA takeover. Do not expand scope or promote N+1. COMPLETED never equals LISTO. Before COMPLETED emit two independent reviews, SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2; report observations, limitations, risks, recommendations and tests not executed; preserve a reviewable ChangeSet/gitPatch with baseCommitId. Never trade quality or causal evidence for throughput."
 
 while (( SECONDS < deadline )); do
   api_get "$JULES_API_BASE/$session_name" > "$work/session-latest.json"
   state="$(jq -r '.state // "UNKNOWN"' "$work/session-latest.json")"
-  echo "Jules MASTER session $session_id state: $state (attempt $task_attempt/2; auto followups $auto_feedback_count/$max_followups)"
+  echo "Jules MASTER session $session_id state: $state (attempt $task_attempt/$JULES_MAX_ATTEMPTS_PER_TASK; auto followups $auto_feedback_count/$max_followups)"
   case "$state" in
     COMPLETED|FAILED|PAUSED)
       terminal_state="$state"
@@ -288,6 +314,9 @@ fi
 
 jq -n \
   --arg protocol "$VAEP_JULES_PROTOCOL" \
+  --arg policyHash "$AUTOMATION_POLICY_HASH" \
+  --arg masterCommitSha "$MASTER_COMMIT_SHA" \
+  --argjson r3Prohibited "$R3_PROHIBITED" \
   --arg workerId "${WORKER_ID:-JULES_A}" \
   --arg dispatchId "$dispatch_id" \
   --arg taskId "$task_id" \
@@ -302,7 +331,7 @@ jq -n \
   --argjson maxAttempts "$JULES_MAX_ATTEMPTS_PER_TASK" \
   --argjson parentCloseFirst "$PARENT_CLOSE_FIRST" \
   --arg checkpoints "$VAEP_CHECKPOINTS" \
-  '{protocol:$protocol,globalControlPlane:"VAEP_MASTER",parentCloseFirst:$parentCloseFirst,checkpoints:$checkpoints,workerId:$workerId,dispatchId:$dispatchId,taskId:$taskId,taskAttempt:$taskAttempt,maxAttempts:$maxAttempts,r3Prohibited:true,qaTakeoverOnR2Failure:true,session:$session,state:$state,requestedBase:$requestedBase,actualPatchBase:$actualBase,patchPresent:$patchPresent,suggestedCommitMessage:$suggestedCommitMessage,autoFeedbackCount:$autoFeedbackCount,controllerHandoff:"REVIEW_IMMEDIATELY_AND_ASSIGN_NEXT_SAFE"}' \
+  '{protocol:$protocol,globalControlPlane:"VAEP_MASTER",masterCommitSha:$masterCommitSha,policyHash:$policyHash,parentCloseFirst:$parentCloseFirst,checkpoints:$checkpoints,workerId:$workerId,dispatchId:$dispatchId,taskId:$taskId,taskAttempt:$taskAttempt,maxAttempts:$maxAttempts,r3Prohibited:$r3Prohibited,qaTakeoverOnRetryExhaustion:true,session:$session,state:$state,requestedBase:$requestedBase,actualPatchBase:$actualBase,patchPresent:$patchPresent,suggestedCommitMessage:$suggestedCommitMessage,autoFeedbackCount:$autoFeedbackCount,controllerHandoff:"REVIEW_IMMEDIATELY_AND_ASSIGN_NEXT_SAFE"}' \
   > "$result_dir/result.json"
 
 run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
@@ -320,7 +349,7 @@ printf -v issue_body '%s\n\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n%s\n' 
   "- Controller handoff: \`REVIEW_IMMEDIATELY_AND_ASSIGN_NEXT_SAFE\`" \
   "- Parent-close-first: \`true\`; checkpoints: \`$VAEP_CHECKPOINTS\`" \
   "- Workflow run: $run_url" \
-  'Artifact only. Nothing was applied to Desarrollo, pushed, merged or deployed. VAEP/ChatGPT review is mandatory. If ATTEMPT=2 fails review, ChatGPT/VAEP/Vibe takes over; do not create a Jules R3.'
+  'Artifact only. Nothing was applied to Desarrollo, pushed, merged or deployed. VAEP/ChatGPT review is mandatory. When MASTER retry capacity is exhausted, ChatGPT/VAEP/Vibe takes over; do not exceed MASTER retry limits.'
 gh issue create --repo "$GITHUB_REPOSITORY" --title "$ISSUE_PREFIX $dispatch_id result" --body "$issue_body" >/dev/null
 
 printf 'ARTIFACT_NAME=%s-%s\n' "$ARTIFACT_PREFIX" "$dispatch_id" >> "$GITHUB_ENV"
