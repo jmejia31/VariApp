@@ -1,0 +1,6 @@
+{
+  "newDispatchAdmission": "FROZEN",
+  "allowExistingActiveSessions": true,
+  "reason": "MASTER_MIGRATION_FINAL_CERTIFICATION_IN_PROGRESS",
+  "updatedAtUtc": "2026-09-04T20:35:00Z"
+}

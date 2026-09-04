@@ -6,6 +6,7 @@ set -euo pipefail
 readonly MASTER_FILE="docs/VAEP_AUTHORITY.md"
 readonly PARSER=".github/scripts/vaep-policy-parser.sh"
 readonly WORKER=".github/scripts/vaep-jules-worker.sh"
+readonly CONTROL_STATE_FILE="vaep/control/dispatch-admission.json"
 
 test -f "$MASTER_FILE"
 test -f "$PARSER"
@@ -17,6 +18,31 @@ manifest_count_action() {
     0) printf 'NO_OP\n'; return 0 ;;
     1) printf 'ADMIT\n'; return 0 ;;
     *) printf 'FAIL_CLOSED\n'; return 21 ;;
+  esac
+}
+
+admission_state_action() {
+  local state_file="${1:?admission state file required}"
+  if [[ ! -f "$state_file" ]]; then
+    printf 'INVALID\n'
+    return 72
+  fi
+  if ! jq -e '
+    type == "object" and
+    ((keys | sort) == ["allowExistingActiveSessions","newDispatchAdmission","reason","updatedAtUtc"]) and
+    (.newDispatchAdmission == "FROZEN" or .newDispatchAdmission == "OPEN") and
+    (.allowExistingActiveSessions == true) and
+    (.reason | type == "string" and length > 0) and
+    (.updatedAtUtc | type == "string" and length > 0)
+  ' "$state_file" >/dev/null 2>&1; then
+    printf 'INVALID\n'
+    return 72
+  fi
+
+  case "$(jq -r '.newDispatchAdmission' "$state_file")" in
+    OPEN) printf 'OPEN\n'; return 0 ;;
+    FROZEN) printf 'FROZEN\n'; return 75 ;;
+    *) printf 'INVALID\n'; return 72 ;;
   esac
 }
 
@@ -109,6 +135,28 @@ if [[ "${1:-}" == "--static-self-test" ]]; then
   multi_rc=$?
   set -e
   [[ "$multi_action" == "FAIL_CLOSED" && "$multi_rc" -eq 21 ]]
+
+  admission_tmp="$(mktemp -d)"
+  jq -n '{newDispatchAdmission:"FROZEN",allowExistingActiveSessions:true,reason:"SELFTEST",updatedAtUtc:"2026-01-01T00:00:00Z"}' > "$admission_tmp/frozen.json"
+  jq -n '{newDispatchAdmission:"OPEN",allowExistingActiveSessions:true,reason:"SELFTEST",updatedAtUtc:"2026-01-01T00:00:00Z"}' > "$admission_tmp/open.json"
+  jq -n '{newDispatchAdmission:"BROKEN",allowExistingActiveSessions:true,reason:"SELFTEST",updatedAtUtc:"2026-01-01T00:00:00Z"}' > "$admission_tmp/invalid.json"
+  jq -n '{newDispatchAdmission:"OPEN",allowExistingActiveSessions:true,reason:"SELFTEST",updatedAtUtc:"2026-01-01T00:00:00Z",extra:"NO"}' > "$admission_tmp/unknown-key.json"
+
+  set +e
+  frozen_action="$(admission_state_action "$admission_tmp/frozen.json")"; frozen_rc=$?
+  open_action="$(admission_state_action "$admission_tmp/open.json")"; open_rc=$?
+  invalid_action="$(admission_state_action "$admission_tmp/invalid.json")"; invalid_rc=$?
+  unknown_action="$(admission_state_action "$admission_tmp/unknown-key.json")"; unknown_rc=$?
+  missing_action="$(admission_state_action "$admission_tmp/missing.json")"; missing_rc=$?
+  set -e
+
+  [[ "$frozen_action" == "FROZEN" && "$frozen_rc" -eq 75 ]]
+  [[ "$open_action" == "OPEN" && "$open_rc" -eq 0 ]]
+  [[ "$invalid_action" == "INVALID" && "$invalid_rc" -eq 72 ]]
+  [[ "$unknown_action" == "INVALID" && "$unknown_rc" -eq 72 ]]
+  [[ "$missing_action" == "INVALID" && "$missing_rc" -eq 72 ]]
+  rm -rf "$admission_tmp"
+
   is_active_jules_state IN_PROGRESS
   ! is_active_jules_state COMPLETED
   phase3_tmp="$(mktemp)"
@@ -176,6 +224,17 @@ fi
 if [[ "$manifest_action" != "ADMIT" ]]; then
   printf 'VAEP MASTER transport invariant failed closed: expected at most one new dispatch manifest; found %d.\n' "${#manifests[@]}" >&2
   exit "$manifest_action_rc"
+fi
+
+admission_rc=0
+admission_action="$(admission_state_action "$CONTROL_STATE_FILE")" || admission_rc=$?
+if [[ "$admission_action" == "FROZEN" ]]; then
+  printf 'VAEP MASTER admission FROZEN: rejecting new dispatch before session, attempt, ownership or recovery. Existing ACTIVE_REAL sessions remain unaffected.\n' >&2
+  exit "$admission_rc"
+fi
+if [[ "$admission_action" != "OPEN" ]]; then
+  printf 'VAEP MASTER admission state invalid or unavailable; refusing new dispatch fail-closed.\n' >&2
+  exit "$admission_rc"
 fi
 
 manifest="${manifests[0]}"

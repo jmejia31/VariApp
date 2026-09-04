@@ -115,6 +115,21 @@ Dispatch válido: un commit, exactamente un manifest nuevo, worker correcto, `ex
 
 Fallo pre-session de path/base/schema/transporte no consume intento de contenido.
 
+### Admisión de nuevos dispatches
+
+El estado machine-readable de admisión vive en `vaep/control/dispatch-admission.json` y está subordinado a este MAESTRO. Solo se permiten dos estados:
+
+- `FROZEN`: un commit con exactamente un manifest nuevo se rechaza antes de crear sesión, consumir attempt, reservar ownership o iniciar recovery. Sesiones `ACTIVE_REAL` ya existentes no se invalidan.
+- `OPEN`: el manifest continúa por el transporte Jules normal.
+
+Reglas fail-closed:
+
+- cero manifests nuevos => `NO_OP/exit 0`, sin consultar ni consumir admisión;
+- más de un manifest nuevo => fail-closed;
+- exactamente un manifest => el control state debe existir, tener contrato válido y `allowExistingActiveSessions=true`;
+- control ausente, malformado, con claves desconocidas o valor distinto de `FROZEN|OPEN` => fail-closed;
+- solo Fase 7/certificación integral puede dejar la admisión en `OPEN` después de validar la migración completa y sus gates causales.
+
 ## 8. Retry cap
 
 La política de reintentos está gobernada por el bloque canónico:
