@@ -61,7 +61,7 @@ Documentación: `docs/ERP_N2_9_EVALUACION_PROVEEDORES.md`, `docs/RUNBOOK_N2_9_EV
 
 - [x] N3.3.A-G completados y certificados en COLA.
 - [x] La confirmación de PedidoVenta reutiliza `ReservaInventario` y la autoridad física `ExistenciaVariante`; no crea una segunda autoridad cuantitativa ni inventa selección automática de almacén/ubicación.
-- [x] N3.3.H documentación/certificación publicada mediante paquete atómico VAEP v3.25.
+- [x] N3.3.H documentación/certificación publicada mediante paquete atómico VAEP bajo el MAESTRO operativo.
 - [x] Certificación: `docs/CERTIFICACION_N3_3_RESERVA_AUTOMATICA.md`.
 - [x] Runbook: `docs/RUNBOOK_N3_3_RESERVA_AUTOMATICA.md`.
 - [x] ADR de autoridad reutilizado: `docs/ADR_N1_8_RESERVAS_STOCK_RESERVADO_Y_OVERSELLING.md`.
@@ -271,7 +271,7 @@ Este rollup supersede únicamente el estado operativo stale anterior del bloque 
 ## AntiG P1 hardening — cierre técnico Codex — 2026-09-04
 
 - [x] Causalidad estricta de `gitpatch.json` y `changes.patch`, incluyendo contenido unidiff, base SHA40 e identidad opcional coherente.
-- [x] Compatibilidad legacy v3.25 con guards fail-closed y validación estructurada v1.0 completa.
+- [x] Compatibilidad histórica reconciliada; guards fail-closed y validación estructurada completas bajo el MAESTRO.
 - [x] Delta staged/unstaged/untracked, staging explícito e igualdad dura de paths.
 - [x] Rutas Vercel protegidas explícitamente; AntiG no puede modificar `frontend/vercel.json` ni `frontend/scripts/vercel-ignore-build.mjs`.
 - [x] Handoffs inválidos en cuarentena; errores transitorios retryables sin avance de watermark.
