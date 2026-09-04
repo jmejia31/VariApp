@@ -21,6 +21,7 @@ public class ProductoRepository : IProductoRepository
             .Include(p => p.Variantes.Where(v => !v.Eliminado)).ThenInclude(v => v.Modelo)
             .Include(p => p.Variantes.Where(v => !v.Eliminado)).ThenInclude(v => v.Color)
             .Include(p => p.Variantes.Where(v => !v.Eliminado)).ThenInclude(v => v.Talla)
+            .Include(p => p.Variantes.Where(v => !v.Eliminado)).ThenInclude(v => v.Imagenes)
             .AsSplitQuery();
 
     public Task<Producto?> GetByIdAsync(int id) => ConIncludes().FirstOrDefaultAsync(p => p.Id == id);

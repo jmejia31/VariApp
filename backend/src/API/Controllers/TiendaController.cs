@@ -59,6 +59,36 @@ public sealed class TiendaController : ControllerBase
                 Orden = imagen.Orden,
                 EsPrincipal = imagen.EsPrincipal
             })
+            .ToList(),
+        Modelos = producto.Variantes
+            .Where(v => v.Activo)
+            .GroupBy(v => new { v.ModeloId, v.ModeloNombre, v.MarcaNombre })
+            .OrderBy(g => g.Key.ModeloNombre)
+            .Select(g =>
+            {
+                var imagenesEspecificas = g.SelectMany(v => v.Imagenes)
+                    .Where(i => !string.IsNullOrWhiteSpace(i.Url))
+                    .OrderBy(i => i.Orden)
+                    .Select(i => new ProductoImagenPublicaDto { Url = i.Url, Orden = i.Orden, EsPrincipal = i.EsPrincipal })
+                    .ToList();
+                var imagenes = (imagenesEspecificas.Count > 0 ? imagenesEspecificas : producto.Imagenes
+                        .OrderBy(i => i.Orden)
+                        .Select(i => new ProductoImagenPublicaDto { Url = i.Url, Orden = i.Orden, EsPrincipal = i.EsPrincipal }))
+                    .GroupBy(i => i.Url)
+                    .Select(g => g.First())
+                    .ToList();
+
+                return new ModeloCatalogoPublicoDto
+                {
+                    ModeloId = g.Key.ModeloId,
+                    ModeloNombre = g.Key.ModeloNombre,
+                    MarcaNombre = g.Key.MarcaNombre,
+                    Precio = g.Where(v => v.Precio > 0).Select(v => v.Precio).DefaultIfEmpty().Min(),
+                    CantidadDisponible = g.Sum(v => v.Cantidad),
+                    EstaAgotado = g.All(v => v.Cantidad <= 0),
+                    Imagenes = imagenes
+                };
+            })
             .ToList()
     };
 }

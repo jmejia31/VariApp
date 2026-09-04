@@ -16,6 +16,17 @@ export interface ProductoCatalogoPublico {
   estaAgotado: boolean;
   imagenPrincipalUrl?: string;
   imagenes: Array<{ url: string; orden: number; esPrincipal: boolean }>;
+  modelos: Array<ModeloCatalogoPublico>;
+}
+
+export interface ModeloCatalogoPublico {
+  modeloId?: number;
+  modeloNombre?: string;
+  marcaNombre?: string;
+  precio: number;
+  cantidadDisponible: number;
+  estaAgotado: boolean;
+  imagenes: Array<{ url: string; orden: number; esPrincipal: boolean }>;
 }
 
 @Injectable({ providedIn: 'root' })

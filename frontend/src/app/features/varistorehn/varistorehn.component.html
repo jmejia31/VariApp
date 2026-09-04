@@ -16,20 +16,52 @@
   </nav>
 
   <header id="inicio" class="hero">
-    <div class="hero-content">
-      <p class="eyebrow">{{ identidad.config().eslogan || 'PREMIUM LIFESTYLE' }}</p>
-      <h1>Estilo que define tu <span>esencia</span></h1>
-      <p>{{ identidad.config().descripcionSistema || 'Descubre nuestra colección exclusiva de productos.' }}</p>
-      <a class="primary-button" href="#tienda">Ver colección</a>
+    <div class="hero-banner hero-banner-main">
+      <div class="hero-content">
+        <p class="eyebrow">{{ identidad.config().eslogan || 'LO MEJOR PARA TI' }}</p>
+        <h1>Encuentra lo que necesitas <span>en un solo lugar</span></h1>
+        <p>{{ identidad.config().descripcionSistema || 'Productos seleccionados para tu hogar, oficina y estilo de vida.' }}</p>
+        <a class="primary-button" href="#tienda">Ver productos</a>
+      </div>
+    </div>
+    <div class="hero-banner hero-banner-side">
+      <p class="eyebrow">COMPRA FÁCIL</p>
+      <strong>Productos reales,<br>precios actualizados</strong>
+      <span>Consulta disponibilidad y elige tu modelo.</span>
     </div>
   </header>
 
   <main>
     <section id="tienda" class="products-section">
       <div class="section-header">
-        <p>COLECCIÓN</p>
-        <h2>Nuestros productos exclusivos</h2>
+        <p>CATEGORÍAS</p>
+        <h2>Compra por categoría</h2>
         <span></span>
+      </div>
+
+      <div class="category-strip" aria-label="Categorías de productos">
+        @for (categoria of categorias(); track categoria) {
+          <button type="button" class="category-tile" [class.active]="categoriaActiva() === categoria" (click)="seleccionarCategoria(categoria)">
+            <span class="category-image">
+              @if (categoria === 'Todas') {
+                <span class="category-initial">★</span>
+              } @else if (imagenCategoria(categoria)) {
+                <img [src]="imagenCategoria(categoria)" [alt]="categoria">
+              } @else {
+                <span class="category-initial">{{ categoria.charAt(0) }}</span>
+              }
+            </span>
+            <strong>{{ categoria }}</strong>
+          </button>
+        }
+      </div>
+
+      <div class="catalog-heading">
+        <div>
+          <p class="eyebrow">{{ categoriaActiva() }}</p>
+          <h2>Productos destacados</h2>
+        </div>
+        <span>{{ productosVisibles().length }} productos</span>
       </div>
 
       @if (cargando()) {
@@ -41,32 +73,42 @@
       }
 
       <div class="product-grid">
-        @for (producto of productos(); track producto.id) {
-          <article class="product-card">
+        @for (producto of productosVisibles(); track producto.id) {
+          <article class="product-card" role="button" tabindex="0" (click)="abrirDetalle(producto)" (keydown.enter)="abrirDetalle(producto)" [attr.aria-label]="'Ver detalle de ' + producto.nombre">
             <div class="product-image">
-              @if (producto.imagenes.length > 0) {
-                <img [src]="producto.imagenes[indiceImagen(producto.id)]" [alt]="producto.nombre">
-                @if (producto.imagenes.length > 1) {
-                  <button class="gallery-button previous" type="button" (click)="moverImagen(producto, -1)" aria-label="Imagen anterior">‹</button>
-                  <button class="gallery-button next" type="button" (click)="moverImagen(producto, 1)" aria-label="Imagen siguiente">›</button>
+              @if (producto.modelos.length > 1) {
+                <label class="model-selector">Modelo
+                  <select [value]="claveModelo(producto)" (click)="$event.stopPropagation()" (change)="seleccionarModelo(producto, $any($event.target).value)">
+                    @for (modelo of producto.modelos; track modelo.clave) {
+                      <option [value]="modelo.clave">{{ modelo.nombre }}</option>
+                    }
+                  </select>
+                </label>
+              }
+              @if (imagenesVisibles(producto).length > 0) {
+                <img [src]="imagenesVisibles(producto)[indiceImagen(producto.id)]" [alt]="producto.nombre + (modeloSeleccionado(producto)?.nombre ? ' · ' + modeloSeleccionado(producto)?.nombre : '')">
+                @if (imagenesVisibles(producto).length > 1) {
+                  <button class="gallery-button previous" type="button" (click)="$event.stopPropagation(); moverImagen(producto, -1)" aria-label="Imagen anterior">‹</button>
+                  <button class="gallery-button next" type="button" (click)="$event.stopPropagation(); moverImagen(producto, 1)" aria-label="Imagen siguiente">›</button>
                   <div class="dots">
-                    @for (imagen of producto.imagenes; track imagen; let indice = $index) {
-                      <button type="button" [class.active]="indiceImagen(producto.id) === indice" (click)="mostrarImagen(producto.id, indice)" [attr.aria-label]="'Mostrar imagen ' + (indice + 1)"></button>
+                    @for (imagen of imagenesVisibles(producto); track imagen; let indice = $index) {
+                      <button type="button" [class.active]="indiceImagen(producto.id) === indice" (click)="$event.stopPropagation(); mostrarImagen(producto.id, indice)" [attr.aria-label]="'Mostrar imagen ' + (indice + 1)"></button>
                     }
                   </div>
                 }
               } @else {
                 <div class="image-placeholder" aria-hidden="true">{{ producto.nombre.charAt(0) }}</div>
               }
-              @if (!producto.disponible) { <span class="sold-out">Agotado</span> }
+              @if (!(modeloSeleccionado(producto)?.disponible ?? producto.disponible)) { <span class="sold-out">Agotado</span> }
             </div>
             <div class="product-info">
-              <p class="category">{{ producto.categoria }}</p>
+              <p class="category">{{ producto.categoria }} @if (modeloSeleccionado(producto)?.marca) { · {{ modeloSeleccionado(producto)?.marca }} }</p>
               <h3>{{ producto.nombre }}</h3>
+              @if (modeloSeleccionado(producto)?.nombre) { <p class="model-name">Modelo: {{ modeloSeleccionado(producto)?.nombre }}</p> }
               <p class="description">{{ producto.descripcion }}</p>
               <div class="product-footer">
-                <strong>L {{ producto.precio | number:'1.2-2' }}</strong>
-                <button type="button" (click)="agregar(producto)" [disabled]="!producto.disponible" [attr.aria-label]="'Agregar ' + producto.nombre">+</button>
+                <strong>L {{ (modeloSeleccionado(producto)?.precio || producto.precio) | number:'1.2-2' }}</strong>
+                <button type="button" (click)="$event.stopPropagation(); agregar(productoSeleccionado(producto))" [disabled]="!(modeloSeleccionado(producto)?.disponible ?? producto.disponible)" [attr.aria-label]="'Agregar ' + producto.nombre">+</button>
               </div>
             </div>
           </article>
@@ -118,5 +160,39 @@
         <button class="primary-button" type="button" (click)="realizarPedido()" [disabled]="carrito().length === 0">Realizar pedido por WhatsApp</button>
       </div>
     </aside>
+  }
+
+  @if (productoDetalle(); as detalle) {
+    <div class="detail-backdrop" role="presentation" (click)="cerrarDetalle()">
+      <section class="product-detail" role="dialog" aria-modal="true" [attr.aria-label]="'Detalle de ' + detalle.nombre" (click)="$event.stopPropagation()">
+        <button class="detail-close" type="button" (click)="cerrarDetalle()" aria-label="Cerrar detalle">×</button>
+        <div class="detail-gallery">
+          @if (imagenesVisibles(detalle).length > 0) {
+            <img [src]="imagenesVisibles(detalle)[indiceImagen(detalle.id)]" [alt]="detalle.nombre">
+            @if (imagenesVisibles(detalle).length > 1) {
+              <button class="gallery-button previous" type="button" (click)="moverImagen(detalle, -1)" aria-label="Imagen anterior">‹</button>
+              <button class="gallery-button next" type="button" (click)="moverImagen(detalle, 1)" aria-label="Imagen siguiente">›</button>
+            }
+          } @else {
+            <div class="image-placeholder" aria-hidden="true">{{ detalle.nombre.charAt(0) }}</div>
+          }
+        </div>
+        <div class="detail-content">
+          <p class="category">{{ detalle.categoria }} @if (modeloSeleccionado(detalle)?.marca) { · {{ modeloSeleccionado(detalle)?.marca }} }</p>
+          <h2>{{ detalle.nombre }}</h2>
+          @if (modeloSeleccionado(detalle)?.nombre) { <p class="model-name">Modelo: {{ modeloSeleccionado(detalle)?.nombre }}</p> }
+          @if (detalle.modelos.length > 1) {
+            <label class="detail-model-selector">Selecciona el modelo
+              <select [value]="claveModelo(detalle)" (change)="seleccionarModelo(detalle, $any($event.target).value)">
+                @for (modelo of detalle.modelos; track modelo.clave) { <option [value]="modelo.clave">{{ modelo.nombre }}</option> }
+              </select>
+            </label>
+          }
+          <p class="detail-description">{{ detalle.descripcion || 'Descripción no disponible.' }}</p>
+          <strong class="detail-price">L {{ (modeloSeleccionado(detalle)?.precio || detalle.precio) | number:'1.2-2' }}</strong>
+          <button class="primary-button detail-add" type="button" (click)="agregar(productoSeleccionado(detalle))" [disabled]="!(modeloSeleccionado(detalle)?.disponible ?? detalle.disponible)">Agregar al carrito</button>
+        </div>
+      </section>
+    </div>
   }
 </div>

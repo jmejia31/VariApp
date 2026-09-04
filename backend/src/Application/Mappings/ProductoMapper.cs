@@ -112,6 +112,14 @@ public static class ProductoMapper
                 TieneStockBajo = v.TieneStockBajo,
                 EstaAgotada = v.EstaAgotada,
                 EstadoInventario = v.EstaAgotada ? "Agotada" : v.TieneStockBajo ? "Stock bajo" : "Disponible",
+                Imagenes = v.Imagenes.OrderBy(i => i.Orden).Select(i => new ProductoImagenDto
+                {
+                    Id = i.Id,
+                    Url = i.Url,
+                    Orden = i.Orden,
+                    EsPrincipal = i.EsPrincipal,
+                    ProductoVarianteId = v.Id
+                }).ToList(),
                 FechaCreacion = v.FechaCreacion,
                 FechaActualizacion = v.FechaActualizacion
             }).ToList(),

@@ -26,6 +26,7 @@ public class ProductoVarianteDto
     public bool TieneStockBajo { get; set; }
     public bool EstaAgotada { get; set; }
     public string EstadoInventario { get; set; } = string.Empty;
+    public List<ProductoImagenDto> Imagenes { get; set; } = new();
     public DateTime FechaCreacion { get; set; }
     public DateTime FechaActualizacion { get; set; }
 }

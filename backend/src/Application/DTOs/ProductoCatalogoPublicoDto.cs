@@ -17,6 +17,7 @@ public sealed class ProductoCatalogoPublicoDto
     public bool EstaAgotado { get; init; }
     public string? ImagenPrincipalUrl { get; init; }
     public List<ProductoImagenPublicaDto> Imagenes { get; init; } = new();
+    public List<ModeloCatalogoPublicoDto> Modelos { get; init; } = new();
 }
 
 public sealed class ProductoImagenPublicaDto
@@ -24,4 +25,15 @@ public sealed class ProductoImagenPublicaDto
     public string Url { get; init; } = string.Empty;
     public int Orden { get; init; }
     public bool EsPrincipal { get; init; }
+}
+
+public sealed class ModeloCatalogoPublicoDto
+{
+    public int? ModeloId { get; init; }
+    public string? ModeloNombre { get; init; }
+    public string? MarcaNombre { get; init; }
+    public decimal Precio { get; init; }
+    public int CantidadDisponible { get; init; }
+    public bool EstaAgotado { get; init; }
+    public List<ProductoImagenPublicaDto> Imagenes { get; init; } = new();
 }

@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { EmpresaIdentidadService } from '../../services/empresa-identidad.service';
-import { ProductoCatalogoPublico, VaristorehnService } from './varistorehn.service';
+import { ModeloCatalogoPublico, ProductoCatalogoPublico, VaristorehnService } from './varistorehn.service';
 
 interface ProductoTienda {
   id: number;
@@ -9,6 +9,16 @@ interface ProductoTienda {
   precio: number;
   descripcion: string;
   categoria: string;
+  imagenes: string[];
+  modelos: ModeloTienda[];
+  disponible: boolean;
+}
+
+interface ModeloTienda {
+  clave: string;
+  nombre: string;
+  marca: string;
+  precio: number;
   imagenes: string[];
   disponible: boolean;
 }
@@ -33,7 +43,14 @@ export class VaristorehnComponent implements OnInit {
   readonly errorCatalogo = signal('');
   readonly carrito = signal<ItemCarrito[]>(this.leerCarrito());
   readonly carritoAbierto = signal(false);
+  readonly productoDetalle = signal<ProductoTienda | null>(null);
   readonly imagenActiva = signal<Record<number, number>>({});
+  readonly modeloActivo = signal<Record<number, string>>({});
+  readonly categoriaActiva = signal('Todas');
+  readonly categorias = computed(() => ['Todas', ...new Set(this.productos().map((producto) => producto.categoria).filter(Boolean))]);
+  readonly productosVisibles = computed(() => this.categoriaActiva() === 'Todas'
+    ? this.productos()
+    : this.productos().filter((producto) => producto.categoria === this.categoriaActiva()));
 
   ngOnInit(): void {
     this.varistorehnService.obtenerProductos().subscribe({
@@ -57,6 +74,22 @@ export class VaristorehnComponent implements OnInit {
     return this.carrito().reduce((total, item) => total + item.precio * item.unidades, 0);
   }
 
+  seleccionarCategoria(categoria: string): void {
+    this.categoriaActiva.set(categoria);
+  }
+
+  abrirDetalle(producto: ProductoTienda): void {
+    this.productoDetalle.set(producto);
+  }
+
+  cerrarDetalle(): void {
+    this.productoDetalle.set(null);
+  }
+
+  imagenCategoria(categoria: string): string | null {
+    return this.productos().find((producto) => producto.categoria === categoria)?.imagenes[0] ?? null;
+  }
+
   agregar(producto: ProductoTienda): void {
     if (!producto.disponible) return;
     const items = [...this.carrito()];
@@ -78,13 +111,44 @@ export class VaristorehnComponent implements OnInit {
     this.imagenActiva.update((estado) => ({ ...estado, [productoId]: indice }));
   }
 
+  claveModelo(producto: ProductoTienda): string {
+    return this.modeloActivo()[producto.id] || producto.modelos[0]?.clave || 'base';
+  }
+
+  modeloSeleccionado(producto: ProductoTienda): ModeloTienda | null {
+    const clave = this.claveModelo(producto);
+    return producto.modelos.find(modelo => modelo.clave === clave) ?? null;
+  }
+
+  seleccionarModelo(producto: ProductoTienda, clave: string): void {
+    this.modeloActivo.update((estado) => ({ ...estado, [producto.id]: clave }));
+    this.mostrarImagen(producto.id, 0);
+  }
+
+  imagenesVisibles(producto: ProductoTienda): string[] {
+    return this.modeloSeleccionado(producto)?.imagenes ?? producto.imagenes;
+  }
+
+  productoSeleccionado(producto: ProductoTienda): ProductoTienda {
+    const modelo = this.modeloSeleccionado(producto);
+    if (!modelo) return producto;
+    return {
+      ...producto,
+      nombre: modelo.nombre ? `${producto.nombre} · ${modelo.nombre}` : producto.nombre,
+      precio: modelo.precio || producto.precio,
+      imagenes: modelo.imagenes,
+      disponible: modelo.disponible
+    };
+  }
+
   indiceImagen(productoId: number): number {
     return this.imagenActiva()[productoId] || 0;
   }
 
   moverImagen(producto: ProductoTienda, cambio: number): void {
+    const imagenes = this.imagenesVisibles(producto);
     const actual = this.indiceImagen(producto.id);
-    const siguiente = (actual + cambio + producto.imagenes.length) % producto.imagenes.length;
+    const siguiente = (actual + cambio + imagenes.length) % imagenes.length;
     this.mostrarImagen(producto.id, siguiente);
   }
 
@@ -111,6 +175,18 @@ export class VaristorehnComponent implements OnInit {
       .map((imagen) => imagen.url);
     if (imagenes.length === 0 && producto.imagenPrincipalUrl) imagenes.push(producto.imagenPrincipalUrl);
 
+    const modelos = (producto.modelos ?? []).map((modelo) => {
+      const imagenesModelo = modelo.imagenes.map((imagen) => imagen.url).filter(Boolean);
+      return {
+        clave: modelo.modeloId == null ? 'base' : String(modelo.modeloId),
+        nombre: modelo.modeloNombre || 'Modelo general',
+        marca: modelo.marcaNombre || producto.marcaNombre || '',
+        precio: modelo.precio,
+        imagenes: imagenesModelo.length > 0 ? imagenesModelo : imagenes,
+        disponible: !modelo.estaAgotado && modelo.cantidadDisponible > 0
+      };
+    });
+
     return {
       id: producto.id,
       nombre: producto.nombre,
@@ -118,6 +194,7 @@ export class VaristorehnComponent implements OnInit {
       descripcion: producto.descripcion || `${producto.marcaNombre || ''} ${producto.modeloNombre || ''}`.trim(),
       categoria: producto.categoriaNombre || 'Colección',
       imagenes,
+      modelos,
       disponible: !producto.estaAgotado && producto.cantidadDisponible > 0
     };
   }
