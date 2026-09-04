@@ -35,7 +35,7 @@ Consultar `PROJECT_INDEX.md` para localizar responsabilidades y su índice de de
 
 ## 4. Gobierno colaborativo
 
-`AGENTS.md` es vinculante. Cada sesión comienza verificando identidad del proyecto y leyendo únicamente contexto/tareas/changelog necesarios. **No releer archivos ya documentados a menos que hayan cambiado.** ChatGPT trabaja remotamente mediante conectores autorizados; Javier/Codex/AntiG pueden operar el checkout local autorizado.
+`AGENTS.md` es vinculante. Cada sesión comienza verificando identidad del proyecto y leyendo únicamente contexto/tareas/changelog necesarios. **No releer archivos ya documentados a menos que hayan cambiado.** ChatGPT trabaja remotamente mediante conectores autorizados. Javier puede operar el checkout local autorizado; Codex solo participa por orden explícita y AntiG permanece `RESERVED_INACTIVE`, sin scheduler ni procesamiento de handoffs hasta una reincorporación futura expresamente autorizada.
 
 Todo changeset intencional deja evidencia en `CHANGELOG_AI.md`; `TASKS.md` cambia cuando cambia el estado operativo. Índice/arquitectura/contexto solo cambian cuando cambia la realidad que describen.
 
