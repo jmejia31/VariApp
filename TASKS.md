@@ -417,3 +417,15 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
 
 **MIGRATION_PHASE_7=CLOSED/PASS. MIGRATION_F0_F7=CLOSED/PASS. NEW_DISPATCH_ADMISSION=OPEN. MASTER_UNIQUE=PASS. POLICY_PARSE=PASS. FIVE_AUTOMATIONS=PASS. END_TO_END_FLOW=PASS. CURRENT_PARENT=N4.8.A. N4.7.H=LISTO_REAL_RECERTIFIED. FALSE_PASS=NO. FALSE_LISTO=NO. SCOPE_LEAK=NO.**
 
+## Auditoría Codex post-migración — remediación 2026-09-04
+
+- [x] Eliminado `vaep/jules-a/dispatch/`: 54 manifests históricos residuales retirados del árbol activo; historia preservada por Git.
+- [x] `TASKS.md` marcado explícitamente como historial/no machine-readable para `CURRENT_PARENT`, `NEXT_ACTION` y estado operativo; consumidores deben leer `CONFIG/COLA/BITACORA` frescos.
+- [x] Constantes restantes movidas al bloque machine-readable del MAESTRO: `PARENT_STALL_NO_PROGRESS_MINUTES`, `MAX_VOLUNTARY_IDLE`, `VAEP_CHECKPOINTS`.
+- [x] Parser ampliado fail-closed y master/worker actualizados para consumir esas claves; se eliminó el literal runtime de checkpoints.
+- [x] Gate exact-head de hardening `09ee682712ba29d79d235a62415de20c308db7c9`: `VAEP engine lightweight checks #33920294318=SUCCESS`; `VAEP Jules Diagnostic #33920294338=SUCCESS`; `VariApp CI=SKIPPED` no se usa como PASS.
+- [x] Existencia/habilitación de `VAEP MASTER 00/15/30/45/55` verificada externamente en el control-plane de automatizaciones; no depende de que existan cinco cron equivalentes en Git.
+- [x] La limitación local de Bash reportada por Codex es de su entorno Windows y no se usa como PASS; la validación causal se tomó de GitHub Actions.
+
+**CODEX_AUDIT_REMEDIATION=PASS. LEGACY_JULES_A_MANIFESTS=0. MASTER_POLICY_KEYS=9. TASKS_MACHINE_CURRENT_STATE=PROHIBITED. FIVE_AUTOMATIONS_EXTERNAL_EVIDENCE=PASS. FALSE_PASS=NO.**
+
