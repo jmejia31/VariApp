@@ -705,3 +705,11 @@ Responsable: Codex local autorizado en `Desarrollo`; changeset preparado sobre e
 Se añadió `vaep/schemas/jules-dispatch.schema.json` y el validador reutilizable `scripts/vaep/dispatch-preflight.mjs`. La admisión exige identidad VariApp, rama `Desarrollo`, task/parent/dependencias, scope protegido, base SHA existente y ancestral, ownership, sesión y attempt válido. `ADMITTED` es el único resultado que puede iniciar ATTEMPT; JSON inválido, dependencia bloqueada, duplicado, scope inválido o conflicto fallan antes del worker sin consumir ATTEMPT. Un base stale ancestral sin solapamiento devuelve `REFRESHABLE`; un stale con solapamiento material devuelve `FAIL_CLOSED`.
 
 Validación real: JSON schema parseable, `node --check` en ambos scripts y `node scripts/vaep/dispatch-preflight-self-test.mjs` con 9/9 casos PASS. No se modifican manifests históricos, código de producto, Producción ni `main`.
+
+## 2026-09-04 - VAEP hardening — Bloque 2 evidence/bundles
+
+Se añadió el schema de fragmentos `vaep/schemas/evidence-fragment.schema.json`, la política de escritura aislada en `vaep/evidence/fragments/`, el agregador `scripts/vaep/aggregate-evidence.mjs` y el planificador `scripts/vaep/bundles.mjs`. Los fragmentos son por task/dispatch; Jules ya no necesita editar `CHANGELOG_AI.md`. El agregador valida evidencia, estado terminal, SHA y P0/P1, ordena de forma determinística, detecta duplicados/colisiones, ofrece `--check`, `--dry-run` y `--apply`, y usa escritura temporal seguida de rename; una repetición con el mismo digest es no-op. El agregador solo deja evidencia para revisión y nunca marca `LISTO_REAL`.
+
+El modo `bundled` agrupa los gates existentes como `CORE=A-D`, `UI_RBAC=E-F` y `E2E_CERT=G-H`, manteniendo cada gate visible y reteniendo los siguientes ante fallo de dependencia. `VAEP_EXECUTION_MODE=legacy` continúa disponible y es el fallback inicial. No se eliminaron filas A-H ni se generaron commits prewarm/filler.
+
+Validación real: `node --check` de los tres scripts, parseo del schema y `node scripts/vaep/block2-self-test.mjs` con 6/6 casos PASS, incluyendo dry-run, apply, idempotencia, tres bundles, retención C/D tras fallo B y fallback legacy.
