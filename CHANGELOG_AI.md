@@ -845,3 +845,14 @@ No se utilizó `[skip ci]` como mecanismo de seguridad. Los labels protocolarios
 
 Resultado: `MIGRATION_PHASE_5=CLOSED/PASS`; `UNIQUE_LIVE_RULES_NOT_IN_MASTER=0`; `ACTIVE_VERSIONED_PROTOCOL_DOCS=0`; `HISTORICAL_MANIFESTS_IN_ACTIVE_PATHS=0`; `DOT_VAEP_DISPATCH=0`; `CLEANUP_TRIGGER=PASS`; `FASE_6=NOT_STARTED`; `CURRENT_PARENT=N4.7.H`; `N4.8.A=HELD`; `FALSE_PASS=NO`; `FALSE_LISTO=NO`; `SCOPE_LEAK=NO`.
 
+## 2026-09-04 — Cierre Fase 6 VAEP MASTER — AntiG RESERVED_INACTIVE
+
+Responsable: ChatGPT/VAEP sobre `Desarrollo`.
+
+Se formalizó técnicamente el estado reservado de AntiG sin eliminar su infraestructura. MASTER contiene `ANTIG_STATUS=RESERVED_INACTIVE`, `ANTIG_OPERATIONAL_NOW=FALSE`, `ANTIG_SCHEDULER=DISABLED`, `ANTIG_HANDOFF_PROCESSING=DISABLED`, `ANTIG_AUTHORITY=MASTER`, `ANTIG_CAN_CERTIFY_LISTO_REAL=FALSE` y `ANTIG_FUTURE_REINCORPORATION=EXPLICIT_AUTHORIZATION_REQUIRED`.
+
+Los seis componentes requeridos permanecen en el árbol. El agente está deshabilitado para uso operativo; el worker es un shim fail-closed que no consume handoffs; el instalador no contiene una ruta de creación de scheduler y solo conserva self-test + eliminación de tarea heredada. El schema permanece como contrato técnico dormido y no permite `LISTO_REAL`. El runbook describe únicamente el estado vigente y la reincorporación futura autorizada.
+
+Los tres checkboxes históricos de activación pendiente quedaron cerrados como estado reservado: `ANTIG_CURRENT_QUEUE_ITEM=NO`.
+
+Resultado: `MIGRATION_PHASE_6=CLOSED/PASS`; `ANTIG_STATUS=RESERVED_INACTIVE`; `ANTIG_OPERATIONAL_NOW=FALSE`; `ANTIG_SCHEDULER=DISABLED`; `ANTIG_HANDOFF_PROCESSING=DISABLED`; `ANTIG_CURRENT_QUEUE_ITEM=NO`; `ANTIG_CAN_CERTIFY_LISTO_REAL=FALSE`; `FASE_7=NOT_STARTED`; `CURRENT_PARENT=N4.7.H`; `N4.8.A=HELD`; `FALSE_PASS=NO`; `FALSE_LISTO=NO`; `SCOPE_LEAK=NO`.
