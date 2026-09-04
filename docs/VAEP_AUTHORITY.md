@@ -131,6 +131,10 @@ Dos auto-revisiones independientes son obligatorias antes de COMPLETED válido.
 - >=10m sin progreso: recovery o reassign sin duplicar ownership.
 - Terminal sin review: drenar inmediatamente.
 - R2 agotado: QA_TAKEOVER.
+- Al exceder `JULES_LANE_BUDGET_SECONDS`, el runtime intenta una señal de detención remota únicamente mediante una operación Jules ya soportada; no inventa endpoints ni depende de detener físicamente la sesión para continuar.
+- Un timeout revoca ownership local, marca la sesión `STALLED/SUPERSEDED`, libera la lane y entrega control a QA_TAKEOVER/NEXT_SAFE.
+- Todo resultado tardío de una sesión `SUPERSEDED` es evidencia histórica únicamente y queda bloqueado de integración automática.
+- La evidencia de timeout/supersession debe conservar `MASTER_COMMIT_SHA` y `AUTOMATION_POLICY_HASH` junto con worker/dispatch/task/attempt/session y estados antes/después.
 - No dejar lane esperando review/CI si existe NEXT_SAFE material.
 
 ## 11. CI y cierre
