@@ -328,3 +328,21 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
 
 **MIGRATION_PHASE_2=CLOSED/PASS. RUNTIME_POLICY_DUPLICATES=0. PARSER_FAIL_CLOSED=PASS. MASTER_SHA_POLICY_HASH_EVIDENCE=PASS. FASE_3=NOT_STARTED. CURRENT_PARENT=N4.7.H. N4.8.A=HELD.**
 
+## VAEP Fase 3 — Runtime Jules hardening — 2026-09-04
+
+- [x] `POLICY_SOURCE=MASTER`; `JULES_LANE_BUDGET_SECONDS`, retry cap y rework se consumen desde `docs/VAEP_AUTHORITY.md`.
+- [x] `5400_OVERRIDES=0`; A/B/C/D + recoveries conservan `timeout-minutes: 25` únicamente como safety-net externo.
+- [x] `NO_OP=PASS`: cero manifests nuevos produce exit 0 sin sesión, attempt, ownership ni recovery.
+- [x] `MULTI_MANIFEST_FAIL_CLOSED=PASS`.
+- [x] El worker persiste estado de runtime antes y después de crear/reusar sesión con worker/dispatch/task/attempt/session/base/MASTER SHA/policy hash.
+- [x] Timeout: señal segura best-effort usando operación Jules ya soportada; no se inventa endpoint de cancelación.
+- [x] Timeout revoca ownership, marca `SUPERSEDED`, bloquea late-result automatic integration, libera lane y entrega `QA_TAKEOVER_AND_ASSIGN_NEXT_SAFE_IMMEDIATELY`.
+- [x] Supersession queda durable en artifact estructurado + Issue `[VAEP-JULES-SUPERSEDED]`; el worker consulta ese ledger antes de iniciar/reanudar y antes de publicar resultado.
+- [x] Auxiliares stop/session-health/feedback/diagnostic quedaron MASTER-bound y sin writer de producto/LISTO_REAL.
+- [x] Se corrigió el YAML heredoc preexistente de `vaep-jules-diagnostic.yml`; el workflow volvió a crear jobs y el run PR `33911803009` terminó `SUCCESS`.
+- [x] Gate runtime causal: `VAEP engine lightweight checks` push `33911698939` = `SUCCESS` sobre `b130d044497af09ad81ed33ec4e182bad1a8769f`; cambio posterior `8310372f...` es únicamente reparación del workflow diagnóstico y su check propio quedó SUCCESS.
+- [x] `VariApp CI=SKIPPED` no se usa como PASS.
+- [x] PR #2 permanece `OPEN+DRAFT`; `main`, Producción, Vercel, secretos, dominios y BD productiva intactos.
+
+**MIGRATION_PHASE_3=CLOSED/PASS. NO_OP=PASS. TIMEOUT_SUPERSESSION=PASS. LATE_RESULT_GUARD=PASS. DURABLE_TIMEOUT_EVIDENCE=PASS. FASE_4=NOT_STARTED. CURRENT_PARENT=N4.7.H. N4.8.A=HELD. FALSE_PASS=NO. FALSE_LISTO=NO. SCOPE_LEAK=NO.**
+

@@ -803,3 +803,17 @@ La evidencia causal del exact-head de código corregido es `VAEP engine lightwei
 
 Cierre corregido: `MIGRATION_PHASE_2=CLOSED/PASS`; `RUNTIME_POLICY_DUPLICATES=0`; `POLICY_BLOCK_COUNT=1`; `PARSER_FAIL_CLOSED=PASS`; `MASTER_SHA_POLICY_HASH_EVIDENCE=PASS`; `ACTIVE_NUMERIC_PROTOCOL_AUTHORITIES=0`; `FASE_3=NOT_STARTED`; `CURRENT_PARENT=N4.7.H`; `N4.8.A=HELD`; `FALSE_PASS=NO`; `FALSE_LISTO=NO`; `SCOPE_LEAK=NO`.
 
+## 2026-09-04 — Cierre Fase 3 VAEP MASTER — Runtime Jules
+
+Responsable: ChatGPT/VAEP sobre `Desarrollo`.
+
+Se implementó el hardening aprobado del runtime Jules A/B/C/D. `.github/scripts/vaep-jules-master.sh` ahora clasifica cero manifests como `NO_OP/exit 0` sin crear sesión/attempt/ownership/recovery y conserva fail-closed para múltiples manifests. El presupuesto interno permanece gobernado exclusivamente por `JULES_LANE_BUDGET_SECONDS` desde MASTER; los ocho workflows A/B/C/D + recovery mantienen `timeout-minutes: 25` únicamente como safety-net externo y no contienen overrides 5400/1080.
+
+El worker persiste estado causal de la sesión antes y después de adquirir sesión Jules. Al timeout, MASTER intenta una señal de detención mediante la operación Jules ya conocida `:sendMessage`; no se inventa un endpoint de cancelación. Independientemente del resultado remoto, el timeout revoca ownership local, marca la sesión `SUPERSEDED`, libera la lane, produce evidence JSON con `MASTER_COMMIT_SHA` + `AUTOMATION_POLICY_HASH`, crea un Issue durable `[VAEP-JULES-SUPERSEDED]` y deriva a `QA_TAKEOVER_AND_ASSIGN_NEXT_SAFE_IMMEDIATELY`.
+
+El worker consulta el ledger de supersession antes de crear/reanudar sesión y nuevamente antes de publicar un resultado. Un resultado tardío superseded se convierte en `LATE_RESULT_SUPERSEDED`, queda `lateResultAutoIntegrationDenied=true` y no puede terminar como COMPLETED integrable.
+
+Los auxiliares stop/session-health/feedback/diagnostic fueron ligados explícitamente a MASTER. Se corrigió además el heredoc YAML inválido preexistente de `.github/workflows/vaep-jules-diagnostic.yml`; el run PR `33911803009` volvió a ejecutar job y terminó SUCCESS. El gate causal del runtime `VAEP engine lightweight checks` push `33911698939` terminó SUCCESS con Validate VAEP/Jules MASTER y todos los VAEP self-tests en SUCCESS. `VariApp CI=SKIPPED` queda excluido como PASS.
+
+Resultado: `MIGRATION_PHASE_3=CLOSED/PASS`; `NO_OP=PASS`; `MULTI_MANIFEST_FAIL_CLOSED=PASS`; `TIMEOUT_SUPERSESSION=PASS`; `LATE_RESULT_GUARD=PASS`; `DURABLE_TIMEOUT_EVIDENCE=PASS`; `FASE_4=NOT_STARTED`; `CURRENT_PARENT=N4.7.H`; `N4.8.A=HELD`; `FALSE_PASS=NO`; `FALSE_LISTO=NO`; `SCOPE_LEAK=NO`.
+
