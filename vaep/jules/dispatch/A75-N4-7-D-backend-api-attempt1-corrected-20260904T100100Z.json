@@ -1,0 +1,10 @@
+{
+  "dispatchId": "A75-N4-7-D-backend-api-attempt1-corrected-20260904T100100Z",
+  "taskId": "N4.7.D-backend-api",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "94b7ceea8ba677a619df07028acb1d92cb544e05",
+  "taskAttempt": 1,
+  "fileScopeHint": "STRICT N4.7.D ONLY: backend application/services/API for AsientoContable and AsientoDetalle; reuse certified N4.7.B/C domain+persistence; no frontend/UI/N4.8 automatic posting engine/main/production/secrets/deploy",
+  "prompt": "Implement ONLY N4.7.D application, services and API for accounting entries on exact base 94b7ceea8ba677a619df07028acb1d92cb544e05 in branch Desarrollo. REVIEW_FIRST the certified N4.7.B domain contracts and N4.7.C EF persistence/migrations. Add the minimum grounded repositories/application services/use-cases/DTOs/API endpoints/ProblemDetails/pagination-filtering/idempotency that are actually required by repository conventions and the N4.7 plan for AsientoContable/AsientoDetalle, preserving the balanced debit=credit invariant and CuentaContable authority. Do NOT touch frontend/UI, N4.8 automatic posting, main, production, secrets, deployment, or unrelated cleanup. Avoid duplicate writers and reuse existing implementations if present. Run proportional backend/unit/integration tests and self-review. Return exact base, changed files, diff summary, tests, residual blockers, and READY_FOR_VAEP only if the scoped delta is complete. Never claim LISTO_REAL, P0=0/P1=0, or promotion authority."
+}
