@@ -1,4 +1,4 @@
-name: VAEP EF Model Recovery Probe
+name: VAEP Jules Diagnostic
 
 on:
   push:
@@ -6,48 +6,117 @@ on:
       - Desarrollo
     paths:
       - 'vaep/jules/diagnostic/*.json'
+      - '.github/workflows/vaep-jules-diagnostic.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'vaep/jules/diagnostic/*.json'
+      - '.github/workflows/vaep-jules-diagnostic.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
+  issues: write
 
 jobs:
-  ef-model-probe:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 15
+  diagnose-jules:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
     env:
-      ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__DefaultConnection: 'Server=127.0.0.1;Port=3306;Database=vaep_model_probe;User=root;Password=root;SslMode=None;AllowPublicKeyRetrieval=True;'
-      Database__ServerVersion: '8.4.0'
-      Database__ApplyMigrationsOnStartup: 'false'
-      Jwt__Secret: 'VAEP-CI-Model-Probe-Only-Secret-32-Characters-Minimum'
-      Jwt__Issuer: 'VariApp.VAEP.Probe'
-      Jwt__Audience: 'VariApp.VAEP.Probe'
+      JULES_API_BASE: https://jules.googleapis.com/v1alpha
+      EXPECTED_OWNER: jmejia31
+      EXPECTED_REPO: VariApp
+      EXPECTED_BRANCH: Desarrollo
+      JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
+      GH_TOKEN: ${{ github.token }}
     steps:
-      - name: Checkout
+      - name: Checkout diagnostic commit
         uses: actions/checkout@v4
-      - name: Setup dotnet
-        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
-      - name: Restore and install EF
-        working-directory: backend
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 2
+
+      - name: Diagnose Jules pre-session integration
+        shell: bash
         run: |
-          dotnet restore InventoryApp.sln
-          dotnet tool install --global dotnet-ef --version 8.0.8
-      - name: Scaffold current model
-        working-directory: backend
-        run: |
-          set -euo pipefail
-          dotnet ef migrations add VAEP_ModelProbe \
-            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
-            --startup-project src/API/InventoryApp.API.csproj \
-            --context AppDbContext \
-            --output-dir Persistence/Migrations/VAEPProbe
-      - name: Upload scaffold and generated snapshot
-        uses: actions/upload-artifact@v4
-        with:
-          name: vaep-ef-model-probe
-          path: |
-            backend/src/Infrastructure/Persistence/Migrations/VAEPProbe/**
-            backend/src/Infrastructure/Persistence/Migrations/**/*Snapshot.cs
-          if-no-files-found: error
+          set +e
+          mkdir -p "$RUNNER_TEMP/vaep-jules-diag"
+
+          target_sha="${{ github.event.pull_request.head.sha || github.sha }}"
+          manifest=$(git diff-tree --no-commit-id --name-only --diff-filter=A -r "$target_sha" -- 'vaep/jules/diagnostic/*.json' | head -n 1)
+          if [[ -z "$manifest" || ! -f "$manifest" ]]; then
+            echo "El último commit no agrega un manifiesto diagnóstico Jules; salida no-op."
+            exit 0
+          fi
+
+          dispatch_id=$(jq -r '.dispatchId // "UNKNOWN"' "$manifest" 2>/dev/null)
+          stage='STARTED'
+          detail='GitHub Actions diagnostic job started.'
+          rc=0
+
+          if [[ -z "${JULES_API_KEY:-}" ]]; then
+            stage='SECRET_MISSING'
+            detail='JULES_API_KEY is not available to this workflow.'
+            rc=20
+          else
+            stage='SECRET_PRESENT'
+            detail='JULES_API_KEY is available to this workflow; value was not exposed.'
+
+            http_code=$(curl --silent --show-error --output "$RUNNER_TEMP/vaep-jules-diag/sources.json" --write-out '%{http_code}' \
+              -H "x-goog-api-key: $JULES_API_KEY" \
+              "$JULES_API_BASE/sources?pageSize=100")
+            curl_rc=$?
+
+            if [[ $curl_rc -ne 0 || "$http_code" -lt 200 || "$http_code" -ge 300 ]]; then
+              stage='JULES_API_ERROR'
+              detail="Jules GET /sources failed (curl_rc=$curl_rc, http=$http_code)."
+              rc=30
+            else
+              source_name=$(jq -r --arg owner "$EXPECTED_OWNER" --arg repo "$EXPECTED_REPO" \
+                '.sources[]? | select(.githubRepo.owner == $owner and .githubRepo.repo == $repo) | .name' \
+                "$RUNNER_TEMP/vaep-jules-diag/sources.json" | head -n 1)
+
+              if [[ -z "$source_name" || "$source_name" == 'null' ]]; then
+                stage='SOURCE_NOT_VISIBLE'
+                detail='API key is valid enough to list sources, but jmejia31/VariApp is not visible.'
+                rc=31
+              else
+                branch_ok=$(jq -r --arg name "$source_name" --arg branch "$EXPECTED_BRANCH" \
+                  '[.sources[]? | select(.name == $name) | (.githubRepo.branches // [])[]? | select(.displayName == $branch)] | length > 0' \
+                  "$RUNNER_TEMP/vaep-jules-diag/sources.json")
+
+                if [[ "$branch_ok" != 'true' ]]; then
+                  stage='BRANCH_NOT_VISIBLE'
+                  detail='VariApp source is visible, but Desarrollo is not exposed by the Jules source metadata.'
+                  rc=32
+                else
+                  stage='PRESESSION_OK'
+                  detail='Secret, Jules API, VariApp source and Desarrollo branch are all visible. Failure is after pre-session validation.'
+                  rc=0
+                fi
+              fi
+            fi
+          fi
+
+          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          body=$(cat <<EOF
+VAEP Jules P0 diagnostic result.
+
+- Dispatch: \`$dispatch_id\`
+- Stage: \`$stage\`
+- Detail: $detail
+- Workflow run: $run_url
+- Repository expected: \`jmejia31/VariApp\`
+- Branch expected: \`Desarrollo\`
+
+No Jules task/session was created by this diagnostic workflow. No secret value was printed or persisted.
+EOF
+          )
+
+          gh issue create \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "[VAEP-JULES-DIAG] $dispatch_id $stage" \
+            --body "$body" >/dev/null
+
+          exit $rc
