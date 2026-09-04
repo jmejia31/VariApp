@@ -1,6 +1,6 @@
 # Reglas obligatorias de colaboración — VariApp
 
-Este archivo es vinculante para Javier Mejía, Codex, AntiG/Antigravity, ChatGPT, Vibe, Jules A/B/C/D y cualquier agente autorizado.
+Este archivo es vinculante para Javier Mejía, Codex, ChatGPT, Vibe, Jules A/B/C/D y cualquier agente autorizado.
 
 ## 0. Gate obligatorio de identidad
 
@@ -12,7 +12,7 @@ REPOSITORY=jmejia31/VariApp
 BRANCH=Desarrollo
 ```
 
-Con acceso local, Javier/Codex/AntiG ejecutan:
+Con acceso local, Javier/Codex ejecutan:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts\iniciar-sesion-ia.ps1
@@ -65,12 +65,11 @@ GitHub es autoridad técnica/evidencia; Drive es control operativo.
 
 - Javier: propietario, prioridades y autorizaciones finales.
 - Codex: implementación/pruebas desde checkout local autorizado.
-- AntiG/Antigravity: implementación/pruebas desde checkout local autorizado.
 - ChatGPT/VAEP: control plane, QA, arquitectura, reconciliación, integración, publicación remota autorizada, CI, certificación y failover.
 - Vibe: QA/corrector externo autorizado cuando VAEP delega `QA_TAKEOVER`.
 - Jules A/B/C/D: implementers autónomos confiables en workspace cloud, máximo un write-scope autoritativo por cuenta; entregan `ChangeSet/gitPatch` y nunca publican directamente.
 
-Solo Javier/Codex/AntiG se consideran con acceso local al checkout de la PC. ChatGPT/Vibe/Jules no deben afirmar acceso local por tener conectores remotos.
+Solo Javier/Codex se consideran con acceso local al checkout de la PC. ChatGPT/Vibe/Jules no deben afirmar acceso local por tener conectores remotos.
 
 ## 3. Git y Producción — reglas inviolables
 
@@ -257,30 +256,25 @@ Formato recomendado:
 Cada entrega debe indicar proyecto, objetivo, validaciones reales, riesgos/pendientes y SHA. Para Jules incluir `dispatchId`, `session`, `taskAttempt`, `baseCommitId`, resultado de review y decisión PASS/R2/QA_TAKEOVER.
 
 
-## 15. AntiG/Antigravity — reviewer/fixer automático
+## 15. AntiG/Antigravity — fuera del flujo operativo
 
-AntiG/Antigravity opera como `AUTOMATED_REVIEWER_FIXER` desde el checkout local autorizado. Su ruta primaria no es competir con los Jules como quinto writer, sino consumir handoffs terminales Jules y cerrar el hueco entre `COMPLETED` y la revisión VAEP.
+AntiG/Antigravity queda **deshabilitado y fuera de la automatización operativa de VariApp**. Sus scripts, agente y documentos pueden conservarse únicamente como historial técnico, pero no son gate, dependencia, reviewer obligatorio ni requisito de promoción.
 
-Flujo obligatorio:
+Flujo operativo vigente:
 
 ```text
 JULES_COMPLETED
--> ANTIG_REVIEW
--> ANTIG_FIXING (solo defectos menores/medios dentro del mismo scope)
--> READY_FOR_VAEP
--> VAEP/controller review
--> LISTO_REAL solo por autoridad de cierre separada
+-> REVIEW_FIRST_VAEP
+-> R2_JULES (solo ATTEMPT=1 cuando corresponda) | QA_TAKEOVER (Codex/ChatGPT/Vibe)
+-> VAEP_CONTROLLER
+-> LISTO_REAL
 ```
 
-Reglas duras:
+Reglas:
 
-1. AntiG nunca convierte por sí solo una tarea a `LISTO_REAL`, nunca auto-promueve COLA/BITACORA y nunca sustituye al Closure Governor.
-2. El reviewer automático parte únicamente de un handoff Jules terminal con artifact/patch trazable, task/dispatch/attempt y scope verificables.
-3. ATTEMPT=1 con defecto estructural puede terminar `RETURN_TO_JULES` para el único R2 permitido. ATTEMPT=2 con defecto estructural termina `BLOCKED_QA_TAKEOVER`; R3+ sigue prohibido.
-4. AntiG puede corregir defectos menores/medios, completar pruebas proporcionales y aplicar el patch Jules únicamente dentro del mismo write-scope. Scope leak, dependencia inválida, patch stale material, P0/P1 o cambio arquitectónico mayor fallan cerrados.
-5. El agente headless no hace `git add/commit/push/merge/rebase/reset/checkout/switch`. La revisión/corrección ocurre en un Git worktree temporal aislado; el checkout primario no es superficie de edición. La publicación, cuando proceda, la realiza el wrapper local después de revalidar HEAD, scope y gates mínimos, con staging explícito únicamente de paths autorizados; `git add --all` está prohibido.
-6. Si `origin/Desarrollo` cambia durante la revisión, la publicación automática se detiene. Nunca se usa force-push ni rebase automático. Un handoff causal inválido se cuarentena y avanza el watermark para no bloquear la cola; un fallo transitorio de red/CLI permanece fail-closed y no se consume.
-7. Producción, `main`, secretos, credenciales, Vercel, dominios, certificados y bases/datos productivos permanecen prohibidos.
-8. Cada integración AntiG exitosa genera evidencia VAEP separada; `READY_FOR_VAEP` significa candidato revisado, no certificación final.
-9. El worker automático oficial vive en `scripts/antig/`; el Custom Agent de workspace vive en `.agents/agents/variapp-reviewer/agent.md`.
-10. La activación local se realiza únicamente mediante `scripts/antig/install-antig-automation.ps1`, que usa permisos finos y nunca bypass global de permisos.
+1. Ninguna tarea, parent, lane, checkpoint o promoción espera a AntiG.
+2. No se requiere `agy`, autenticación Antigravity ni Scheduled Task para operar VariApp.
+3. `scripts/antig/`, `.agents/agents/variapp-reviewer/`, `vaep/schemas/antig-review-result.schema.json` y `docs/ANTIGRAVITY_AUTOMATION.md` quedan como artefactos históricos/inactivos salvo autorización futura expresa.
+4. VAEP/controller conserva REVIEW-FIRST, QA, integración, evidencia y cierre.
+5. `LISTO_REAL` sigue siendo autoridad exclusiva del VAEP Controller.
+6. `main`, Producción, secretos, Vercel, dominios, certificados y datos productivos permanecen protegidos.
