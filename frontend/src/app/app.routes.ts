@@ -367,6 +367,12 @@ export const routes: Routes = [
     loadComponent: () => import('./features/finanzas/finanzas.component').then(m => m.FinanzasComponent)
   },
   {
+    path: 'plan-cuentas',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Finanzas', accion: 'Ver' },
+    loadComponent: () => import('./features/plan-cuentas/plan-cuentas.component').then(m => m.PlanCuentasComponent)
+  },
+  {
     path: 'cuentas-bancarias',
     canActivate: [authGuard, permisoGuard],
     data: { modulo: 'Finanzas', accion: 'Ver' },

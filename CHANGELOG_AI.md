@@ -683,3 +683,9 @@ Evidencia local de la revisión inicial: Infrastructure/API compilaron y las pru
 Responsable: Codex local autorizado; base reconciliada `f3f92b4b`. Se integró y revisó el contrato de DTO/servicio de CuentaContable y se añadió la superficie HTTP protegida de lectura jerárquica, raíces, creación y actualización bajo `ModuloSistema.Finanzas`, reutilizando el repositorio y excepciones existentes. La lectura construye el árbol desde el conjunto completo para no truncar subcuentas profundas.
 
 Validación local: `dotnet test --filter FullyQualifiedName~CuentaContable` PASS (5/5). El artifact Jules D no se integró: su review autoritativo lo rechazó por patch anidado, stubs y pruebas RBAC insuficientes. N4.6.D no se declara `LISTO_REAL` hasta completar security/QA/CI exact-head y revisión del controller; no se afirma evidencia no ejecutada.
+
+## 2026-09-03 17:20:00 - N4.6.E frontend del plan de cuentas
+
+Responsable: Codex local autorizado; se añadió la feature standalone `PlanCuentasComponent`, su modelo/servicio HTTP y la ruta protegida `/plan-cuentas`. La UI presenta el árbol completo, alta/edición, selección de padre sin descendientes cíclicos, tipo, estado, aceptación de movimientos, loading/empty/error states, responsive y navegación bajo permisos de Finanzas. La autoridad de validación permanece en el backend.
+
+Validación real: `npm.cmd run lint` PASS; `npm.cmd run build -- --configuration development` PASS. El build de producción no se pudo completar porque Angular intentó inlining de fuentes externas y el entorno rechazó la conexión; no se cambió configuración de producción ni Vercel.

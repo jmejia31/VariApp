@@ -10,10 +10,12 @@ namespace InventoryApp.Application.Services;
 public sealed class CuentaContableService : ICuentaContableService
 {
     private readonly ICuentaContableRepository _repository;
+    private readonly IAuditoriaService _auditoria;
 
-    public CuentaContableService(ICuentaContableRepository repository)
+    public CuentaContableService(ICuentaContableRepository repository, IAuditoriaService auditoria)
     {
         _repository = repository;
+        _auditoria = auditoria;
     }
 
     public async Task<CuentaContableDto?> GetByIdAsync(int id)
@@ -51,6 +53,13 @@ public sealed class CuentaContableService : ICuentaContableService
 
         await _repository.AddAsync(cuenta);
         await _repository.SaveChangesAsync();
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Finanzas,
+            AccionPermiso.Crear,
+            $"Creó la cuenta contable '{cuenta.Nombre}'.",
+            cuenta.Id,
+            entidad: "CuentaContable",
+            valoresNuevos: new { cuenta.Codigo, cuenta.Nombre, cuenta.Tipo, cuenta.CuentaPadreId, cuenta.Activa, cuenta.AceptaMovimientos });
         return MapToDto(cuenta);
     }
 
@@ -77,6 +86,13 @@ public sealed class CuentaContableService : ICuentaContableService
         cuenta.Activa = dto.Activa;
         _repository.Update(cuenta);
         await _repository.SaveChangesAsync();
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Finanzas,
+            AccionPermiso.Editar,
+            $"Editó la cuenta contable '{cuenta.Nombre}'.",
+            cuenta.Id,
+            entidad: "CuentaContable",
+            valoresNuevos: new { cuenta.Codigo, cuenta.Nombre, cuenta.Tipo, cuenta.CuentaPadreId, cuenta.Activa, cuenta.AceptaMovimientos });
         return MapToDto(cuenta);
     }
 
@@ -91,6 +107,20 @@ public sealed class CuentaContableService : ICuentaContableService
             ?? throw new ResourceNotFoundException("La cuenta padre no existe.");
         if (parent.Tipo != type)
             throw new BusinessRuleException("El tipo de la subcuenta debe coincidir con el tipo de la cuenta padre.");
+
+        var accounts = (await _repository.GetAllAsync()).ToDictionary(account => account.Id);
+        var visited = new HashSet<int>();
+        var currentId = parent.Id;
+        while (accounts.TryGetValue(currentId, out var current))
+        {
+            if (!visited.Add(currentId))
+                throw new BusinessRuleException("La jerarquía contable existente contiene un ciclo.");
+            if (selfId == currentId)
+                throw new BusinessRuleException("No se puede mover una cuenta debajo de una de sus subcuentas.");
+            if (current.CuentaPadreId is not int nextId)
+                break;
+            currentId = nextId;
+        }
         return parent;
     }
 
