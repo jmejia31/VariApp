@@ -246,3 +246,13 @@ Este rollup es append-only y supersede únicamente el estado operativo stale ant
 ### Reconciliación QA append-only
 
 Este rollup supersede únicamente el estado operativo stale anterior del bloque N4.4; las menciones históricas `CURRENT_PARENT=N4.4.H` permanecen como evidencia histórica, ya no gobiernan el estado actual y no se reescribe ni elimina ninguna historia previa. El estado operativo vigente de este cierre es `CURRENT_PARENT=N4.5.H`. La certificación documental exacta corresponde al commit `fde578dd69cbfe91c054138d33404cec342093f6`; el `productBaseHead` es `541ec12b72912c769c6f54b8821771e509818375`.
+
+
+## Integración AntiG — Reviewer/Fixer automático — 2026-09-03
+
+- [x] Custom Agent de workspace `variapp-reviewer` definido con gobierno VariApp y separación `READY_FOR_VAEP != LISTO_REAL`.
+- [x] Worker automático Jules -> AntiG -> VAEP implementado fail-closed con mutex, watermark, artifact causal, scope guard y publicación sin force/rebase.
+- [x] Schema estructurado y self-test CI agregados.
+- [x] Instalador local seguro preparado con permisos finos de Antigravity CLI; no usa bypass global de permisos.
+- [x] Gobernanza `AGENTS.md` y `docs/COLABORACION_IA.md` actualizada con ATTEMPT1/R2, QA takeover y prohibición de auto-certificación.
+- [ ] Activación física del Scheduled Task `VariApp-AntiG-Reviewer` pendiente de ejecutar una sola vez el instalador desde la PC local autorizada. Esta casilla exige evidencia local real y no puede marcarla ChatGPT remoto.
