@@ -19,7 +19,7 @@ ChatGPT/VAEP y Jules A/B/C/D deben leer ese MAESTRO. No deben inferir reglas vig
 
 ## Trabajo
 
-ChatGPT/VAEP ejecuta REVIEW_FIRST, QA, integración, correcciones, CI, certificación y rollup. Jules A/B/C/D implementan scopes exclusivos y entregan patch/artifact. AntiG queda reservado e inactivo (RESERVED_INACTIVE). Codex no participa salvo orden explícita futura del usuario.
+ChatGPT/VAEP ejecuta REVIEW_FIRST, QA, integración, correcciones, CI, certificación y rollup. Jules A/B/C/D implementan scopes exclusivos y entregan patch/artifact. AntiG queda `RESERVED_INACTIVE`: scheduler deshabilitado, handoff processing deshabilitado y sin autoridad LISTO_REAL; solo puede reincorporarse con autorización explícita futura. Codex no participa salvo orden explícita futura del usuario.
 
 ## Cambio de reglas
 
