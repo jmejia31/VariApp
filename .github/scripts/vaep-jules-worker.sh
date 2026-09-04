@@ -15,6 +15,7 @@ if ! policy_env="$(bash "$PARSER" --env "$MASTER_FILE")"; then
 fi
 while IFS='=' read -r key val; do
   case "$key" in
+    JULES_LANE_BUDGET_SECONDS) JULES_LANE_BUDGET_SECONDS="$val" ;;
     JULES_MAX_ATTEMPTS) JULES_MAX_ATTEMPTS_PER_TASK="$val" ;;
     JULES_REWORK_MAX) JULES_REWORK_MAX="$val" ;;
     PARENT_CLOSE_FIRST) PARENT_CLOSE_FIRST="${val,,}" ;;
@@ -23,6 +24,7 @@ while IFS='=' read -r key val; do
   esac
 done <<< "$policy_env"
 
+: "${JULES_LANE_BUDGET_SECONDS:?MASTER policy parser did not emit JULES_LANE_BUDGET_SECONDS}"
 : "${JULES_MAX_ATTEMPTS_PER_TASK:?MASTER policy parser did not emit JULES_MAX_ATTEMPTS}"
 : "${JULES_REWORK_MAX:?MASTER policy parser did not emit JULES_REWORK_MAX}"
 : "${PARENT_CLOSE_FIRST:?MASTER policy parser did not emit PARENT_CLOSE_FIRST}"
@@ -30,6 +32,7 @@ done <<< "$policy_env"
 : "${MASTER_COMMIT_SHA:?MASTER policy parser did not emit MASTER_COMMIT_SHA}"
 
 readonly VAEP_JULES_PROTOCOL="MASTER"
+readonly JULES_LANE_BUDGET_SECONDS
 readonly JULES_MAX_ATTEMPTS_PER_TASK
 readonly JULES_REWORK_MAX
 readonly PARENT_CLOSE_FIRST
@@ -52,8 +55,8 @@ if [[ "${1:-}" == "--static-self-test" ]]; then
   [[ ${#AUTOMATION_POLICY_HASH} -eq 64 ]]
   [[ "$MASTER_COMMIT_SHA" =~ ^[0-9a-fA-F]{40}$ ]]
   [[ "$R3_PROHIBITED" == true || "$R3_PROHIBITED" == false ]]
-  printf '{"status":"ok","protocol":"%s","maxAttempts":%d,"r3Prohibited":true,"qaTakeoverOnR2Failure":true,"parentCloseFirst":%s,"checkpoints":"%s","policyHash":"%s","networkUsed":false,"sessionCreated":false,"attemptConsumed":false}\n' \
-    "$VAEP_JULES_PROTOCOL" "$JULES_MAX_ATTEMPTS_PER_TASK" "$PARENT_CLOSE_FIRST" "$VAEP_CHECKPOINTS" "$AUTOMATION_POLICY_HASH"
+  printf '{"status":"ok","protocol":"%s","laneBudgetSeconds":%d,"maxAttempts":%d,"r3Prohibited":%s,"qaTakeoverOnRetryExhaustion":true,"parentCloseFirst":%s,"checkpoints":"%s","policyHash":"%s","networkUsed":false,"sessionCreated":false,"attemptConsumed":false}\n' \
+    "$VAEP_JULES_PROTOCOL" "$JULES_LANE_BUDGET_SECONDS" "$JULES_MAX_ATTEMPTS_PER_TASK" "$R3_PROHIBITED" "$PARENT_CLOSE_FIRST" "$VAEP_CHECKPOINTS" "$AUTOMATION_POLICY_HASH"
   exit 0
 fi
 
@@ -74,12 +77,46 @@ fi
 : "${GITHUB_RUN_ID:?GITHUB_RUN_ID is required}"
 : "${GITHUB_SERVER_URL:=https://github.com}"
 : "${RUNNER_TEMP:?RUNNER_TEMP is required}"
+: "${VAEP_JULES_RUNTIME_STATE_FILE:=$RUNNER_TEMP/vaep-jules-runtime-state.json}"
 
 work="$RUNNER_TEMP/vaep-jules-master"
 result_dir="$work/result"
 mkdir -p "$result_dir"
 
 fail() { echo "$*" >&2; exit "${2:-1}"; }
+
+dispatch_is_superseded() {
+  local target_dispatch="${1:?dispatch required}"
+  local issues_json
+  if ! issues_json="$(gh issue list --repo "$GITHUB_REPOSITORY" --state all --search "$target_dispatch in:title" --limit 100 --json title 2>/dev/null)"; then
+    return 2
+  fi
+  jq -e --arg title "[VAEP-JULES-SUPERSEDED] $target_dispatch" 'any(.[]; .title == $title)' <<< "$issues_json" >/dev/null
+}
+
+write_runtime_state() {
+  local phase="${1:?phase required}"
+  local session_name="${2:-}"
+  local attempt_consumed=false
+  [[ -n "$session_name" ]] && attempt_consumed=true
+  local tmp="${VAEP_JULES_RUNTIME_STATE_FILE}.tmp"
+  jq -n \
+    --arg authority "MASTER" \
+    --arg masterCommitSha "$MASTER_COMMIT_SHA" \
+    --arg policyHash "$AUTOMATION_POLICY_HASH" \
+    --arg workerId "${WORKER_ID:-JULES_A}" \
+    --arg dispatchId "$dispatch_id" \
+    --arg taskId "$task_id" \
+    --arg phase "$phase" \
+    --arg sessionName "$session_name" \
+    --arg primaryBaseHead "$primary_base" \
+    --arg startedAt "$runtime_started_at" \
+    --argjson taskAttempt "$task_attempt" \
+    --argjson attemptConsumed "$attempt_consumed" \
+    '{authority:$authority,masterCommitSha:$masterCommitSha,policyHash:$policyHash,workerId:$workerId,dispatchId:$dispatchId,taskId:$taskId,taskAttempt:$taskAttempt,phase:$phase,sessionName:$sessionName,primaryBaseHead:$primaryBaseHead,attemptConsumed:$attemptConsumed,startedAt:$startedAt}' > "$tmp"
+  mv "$tmp" "$VAEP_JULES_RUNTIME_STATE_FILE"
+}
+
 api_get() { curl --fail-with-body --silent --show-error -H "x-goog-api-key: $JULES_API_KEY" "$1"; }
 api_post_json() {
   local url="$1" body_file="$2"
@@ -155,6 +192,20 @@ if attempt - 1 > rework_max:
 print(attempt)
 PY
 )" || fail "MASTER retry-cap validation failed." 25
+
+runtime_started_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+write_runtime_state "PRE_SESSION" ""
+
+set +e
+dispatch_is_superseded "$dispatch_id"
+superseded_rc=$?
+set -e
+if [[ "$superseded_rc" -eq 0 ]]; then
+  fail "LATE_RESULT_GUARD: dispatch $dispatch_id is SUPERSEDED and cannot resume or create a Jules session." 26
+fi
+if [[ "$superseded_rc" -eq 2 ]]; then
+  fail "LATE_RESULT_GUARD: unable to verify supersession ledger for $dispatch_id; refusing runtime startup." 27
+fi
 
 page_token=""
 source_name=""
@@ -238,8 +289,9 @@ if [[ -z "$session_name" ]]; then
 fi
 [[ -n "$session_name" ]] || fail "Jules did not return a session resource." 44
 session_id="${session_name#sessions/}"
+write_runtime_state "SESSION_ACTIVE" "$session_name"
 
-deadline=$((SECONDS + 6600))
+deadline=$((SECONDS + JULES_LANE_BUDGET_SECONDS))
 terminal_state=""
 auto_feedback_count=0
 max_followups=3
@@ -276,7 +328,11 @@ while (( SECONDS < deadline )); do
       ;;
   esac
 done
-[[ -n "$terminal_state" ]] || terminal_state="WORKFLOW_TIMEOUT"
+if [[ -z "$terminal_state" ]]; then
+  write_runtime_state "LANE_BUDGET_EXCEEDED" "$session_name"
+  exit 124
+fi
+write_runtime_state "TERMINAL_$terminal_state" "$session_name"
 
 printf '{"activities":[]}\n' > "$result_dir/activities.json"
 page_token=""
@@ -300,6 +356,16 @@ done
 
 if [[ -f "$work/session-latest.json" ]]; then cp "$work/session-latest.json" "$result_dir/session.json"; else api_get "$JULES_API_BASE/$session_name" > "$result_dir/session.json"; fi
 cp "$manifest" "$result_dir/dispatch.json"
+
+set +e
+dispatch_is_superseded "$dispatch_id"
+late_guard_rc=$?
+set -e
+if [[ "$late_guard_rc" -eq 0 ]]; then
+  terminal_state="LATE_RESULT_SUPERSEDED"
+elif [[ "$late_guard_rc" -eq 2 ]]; then
+  fail "LATE_RESULT_GUARD: unable to verify supersession ledger before result publication; refusing publication." 63
+fi
 jq '[.activities[]? as $a | $a.artifacts[]? | .changeSet?.gitPatch? | select(. != null) | {createTime:($a.createTime // ""),patch:.}] | sort_by(.createTime) | last | .patch // null' "$result_dir/activities.json" > "$result_dir/gitpatch.json"
 patch_present="$(jq -r 'type == "object"' "$result_dir/gitpatch.json")"
 actual_base=""
@@ -330,8 +396,9 @@ jq -n \
   --argjson taskAttempt "$task_attempt" \
   --argjson maxAttempts "$JULES_MAX_ATTEMPTS_PER_TASK" \
   --argjson parentCloseFirst "$PARENT_CLOSE_FIRST" \
+  --argjson laneBudgetSeconds "$JULES_LANE_BUDGET_SECONDS" \
   --arg checkpoints "$VAEP_CHECKPOINTS" \
-  '{protocol:$protocol,globalControlPlane:"VAEP_MASTER",masterCommitSha:$masterCommitSha,policyHash:$policyHash,parentCloseFirst:$parentCloseFirst,checkpoints:$checkpoints,workerId:$workerId,dispatchId:$dispatchId,taskId:$taskId,taskAttempt:$taskAttempt,maxAttempts:$maxAttempts,r3Prohibited:$r3Prohibited,qaTakeoverOnRetryExhaustion:true,session:$session,state:$state,requestedBase:$requestedBase,actualPatchBase:$actualBase,patchPresent:$patchPresent,suggestedCommitMessage:$suggestedCommitMessage,autoFeedbackCount:$autoFeedbackCount,controllerHandoff:"REVIEW_IMMEDIATELY_AND_ASSIGN_NEXT_SAFE"}' \
+  '{protocol:$protocol,globalControlPlane:"VAEP_MASTER",masterCommitSha:$masterCommitSha,policyHash:$policyHash,parentCloseFirst:$parentCloseFirst,checkpoints:$checkpoints,laneBudgetSeconds:$laneBudgetSeconds,workerId:$workerId,dispatchId:$dispatchId,taskId:$taskId,taskAttempt:$taskAttempt,maxAttempts:$maxAttempts,r3Prohibited:$r3Prohibited,qaTakeoverOnRetryExhaustion:true,session:$session,state:$state,requestedBase:$requestedBase,actualPatchBase:$actualBase,patchPresent:$patchPresent,superseded:($state=="LATE_RESULT_SUPERSEDED"),lateResultAutoIntegrationDenied:($state=="LATE_RESULT_SUPERSEDED"),suggestedCommitMessage:$suggestedCommitMessage,autoFeedbackCount:$autoFeedbackCount,controllerHandoff:(if $state=="LATE_RESULT_SUPERSEDED" then "LATE_RESULT_EVIDENCE_ONLY" else "REVIEW_IMMEDIATELY_AND_ASSIGN_NEXT_SAFE" end)}' \
   > "$result_dir/result.json"
 
 run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
@@ -341,13 +408,13 @@ printf -v issue_body '%s\n\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n%s\n' 
   "- Worker: \`${WORKER_ID:-JULES_A}\`" \
   "- Dispatch: \`$dispatch_id\`" \
   "- Task: \`$task_id\`" \
-  "- Task attempt: \`$task_attempt/2\`; Jules R3+ is PROHIBITED" \
+  "- Task attempt: \`$task_attempt/$JULES_MAX_ATTEMPTS_PER_TASK\`; Jules R3+ is PROHIBITED" \
   "- Jules session: \`$session_name\`" \
   "- Terminal state: \`$terminal_state\`" \
   "- Inline auto-feedback count: \`$auto_feedback_count\`" \
   "- Patch present: \`$patch_present\`; patch base: \`$actual_base\`" \
   "- Controller handoff: \`REVIEW_IMMEDIATELY_AND_ASSIGN_NEXT_SAFE\`" \
-  "- Parent-close-first: \`true\`; checkpoints: \`$VAEP_CHECKPOINTS\`" \
+  "- Parent-close-first: \`$PARENT_CLOSE_FIRST\`; checkpoints: \`$VAEP_CHECKPOINTS\`" \
   "- Workflow run: $run_url" \
   'Artifact only. Nothing was applied to Desarrollo, pushed, merged or deployed. VAEP/ChatGPT review is mandatory. When MASTER retry capacity is exhausted, ChatGPT/VAEP/Vibe takes over; do not exceed MASTER retry limits.'
 gh issue create --repo "$GITHUB_REPOSITORY" --title "$ISSUE_PREFIX $dispatch_id result" --body "$issue_body" >/dev/null
