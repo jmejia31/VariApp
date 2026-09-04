@@ -315,3 +315,16 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
 - [x] Protocolos numéricos en superficies activas eliminados (`NUMERIC_PROTOCOL_LABELS=0`).
 - [x] Reconciliación N4.7 preservada: `CURRENT_PARENT=N4.7.H`; `N4.8.A=HELD`.
 - [x] `FALSE_PASS=NO`, `FALSE_LISTO=NO`, `SCOPE_LEAK=NO`.
+
+## VAEP Fase 2 — corrección final REVIEW_FIRST — 2026-09-04
+
+- [x] REVIEW_FIRST detectó dos gaps reales posteriores al handoff AntiG: el worker todavía repetía límites de retry como literales en prompts/validación y master/worker podían ocultar el exit code del parser mediante process substitution.
+- [x] Corregido en `dd518b608f0404f249a6315b10793da1c500226c`: master/worker capturan y validan explícitamente el exit status del parser; cualquier fallo del parser aborta startup fail-closed.
+- [x] Eliminados los literales runtime restantes de `JULES_MAX_ATTEMPTS`, `JULES_REWORK_MAX`, SLA/dwell/budget en self-tests y prompts; retry validation consume valores emitidos por MASTER.
+- [x] `result.json` de worker y timeout incorpora `MASTER_COMMIT_SHA` + `AUTOMATION_POLICY_HASH`.
+- [x] Ocho workflows Jules permanecen sin overrides `5400/1080`; `timeout-minutes: 25` queda únicamente como safety-net externo.
+- [x] `VAEP engine lightweight checks` exact-head de la corrección: run `33909740182` = `SUCCESS`. `VariApp CI=SKIPPED` no se usa como PASS.
+- [x] PR #2 permanece `OPEN+DRAFT`; `main`, Producción, Vercel, secretos, dominios y BD productiva no fueron modificados.
+
+**MIGRATION_PHASE_2=CLOSED/PASS. RUNTIME_POLICY_DUPLICATES=0. PARSER_FAIL_CLOSED=PASS. MASTER_SHA_POLICY_HASH_EVIDENCE=PASS. FASE_3=NOT_STARTED. CURRENT_PARENT=N4.7.H. N4.8.A=HELD.**
+

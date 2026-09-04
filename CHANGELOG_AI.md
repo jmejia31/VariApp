@@ -792,3 +792,14 @@ Se ejecutó la consolidación de la política operativa machine-readable dentro 
 4. Consumidores activos alineados: `AGENTS.md`, `docs/VAEP_JULES.md`, `PLAN_EJECUCION_AUTONOMA.md`, `PROJECT_CONTEXT.md`, `docs/COLABORACION_IA.md` y `docs/CONTEXTO_CHATGPT_VAEP.md` apuntan a `docs/VAEP_AUTHORITY.md` (`AUTOMATION_AUTHORITY=MASTER`) sin duplicar reglas. AntiG queda documentado como `RESERVED_INACTIVE`.
 5. Protocolos numéricos eliminados en superficies activas (`NUMERIC_PROTOCOL_LABELS=0`).
 6. Cierre: `MIGRATION_PHASE_2=CLOSED/PASS`; `CURRENT_PARENT=N4.7.H`; `N4.8.A=HELD`; `FASE_3=NOT_STARTED`. Autorización puntual AntiG expirada; sin scheduler ni Scheduled Tasks.
+
+## 2026-09-04 — Corrección final de cierre Fase 2 VAEP MASTER
+
+REVIEW_FIRST posterior al handoff AntiG detectó que la primera publicación de Fase 2 aún conservaba dos defectos de consolidación: `.github/scripts/vaep-jules-worker.sh` repetía límites de retry como literales en prompts y validación, y master/worker consumían `--env` mediante process substitution sin propagar de forma explícita el exit status del parser. Por ello, la afirmación inicial `RUNTIME_POLICY_DUPLICATES=0` no se tomó como evidencia suficiente hasta corregir ambos puntos.
+
+El commit `dd518b608f0404f249a6315b10793da1c500226c` elimina esos gaps sin ampliar scope: master/worker capturan primero la salida del parser y abortan fail-closed si este falla; los self-tests dejan de duplicar los valores canónicos; retry validation, prompts, logs e Issues consumen `JULES_MAX_ATTEMPTS`/`JULES_REWORK_MAX` desde MASTER; los artifacts/resultados incluyen `MASTER_COMMIT_SHA` y `AUTOMATION_POLICY_HASH`.
+
+La evidencia causal del exact-head de código corregido es `VAEP engine lightweight checks #33909740182 = SUCCESS`. `VariApp CI=SKIPPED` queda explícitamente excluido como PASS. Los ocho workflows Jules continúan sin overrides de budget y conservan solo `timeout-minutes: 25` como safety-net externo.
+
+Cierre corregido: `MIGRATION_PHASE_2=CLOSED/PASS`; `RUNTIME_POLICY_DUPLICATES=0`; `POLICY_BLOCK_COUNT=1`; `PARSER_FAIL_CLOSED=PASS`; `MASTER_SHA_POLICY_HASH_EVIDENCE=PASS`; `ACTIVE_NUMERIC_PROTOCOL_AUTHORITIES=0`; `FASE_3=NOT_STARTED`; `CURRENT_PARENT=N4.7.H`; `N4.8.A=HELD`; `FALSE_PASS=NO`; `FALSE_LISTO=NO`; `SCOPE_LEAK=NO`.
+
