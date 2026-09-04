@@ -111,14 +111,14 @@ Esto cumple trazabilidad sin generar ruido documental artificial.
 Las reglas completas viven en `AGENTS.md`.
 
 
-## AntiG / Antigravity — deshabilitado
+## AntiG / Antigravity — RESERVED_INACTIVE
 
-AntiG/Antigravity está fuera del flujo operativo y no bloquea automatizaciones, handoffs, reviews, QA ni promociones.
+AntiG/Antigravity está fuera del flujo operativo actual y no bloquea automatizaciones, handoffs, reviews, QA ni promociones. El estado exacto lo gobierna únicamente `docs/VAEP_AUTHORITY.md`.
 
 Flujo vigente:
 
 ```text
-Jules -> REVIEW-FIRST VAEP -> R2 único cuando corresponda / QA_TAKEOVER -> VAEP Controller -> LISTO_REAL
+Jules -> REVIEW_FIRST VAEP -> R2 único cuando corresponda / QA_TAKEOVER -> VAEP Controller -> LISTO_REAL
 ```
 
-Los artefactos AntiG existentes permanecen únicamente como historial técnico inactivo. No se requiere `agy`, login Antigravity ni Scheduled Task para continuar VariApp.
+Los componentes AntiG se conservan como capacidad técnica reservada, pero el runtime vigente no procesa handoffs y el instalador vigente no puede crear scheduler. No se requiere Antigravity CLI ni Scheduled Task para continuar VariApp. Una reincorporación futura requiere autorización explícita de Javier y un changeset que modifique el MAESTRO.
