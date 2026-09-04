@@ -232,7 +232,8 @@ $issues = @(
 
 $watermark = 0
 if ($issues.Count -gt 0) {
-    $watermark = [int](($issues | Measure-Object -Property number -Maximum).Maximum)
+    $numbers = @($issues | ForEach-Object { [int]$_.number })
+    $watermark = [int](($numbers | Measure-Object -Maximum).Maximum)
 }
 
 $state = [ordered]@{
