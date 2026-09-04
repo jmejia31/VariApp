@@ -41,7 +41,7 @@ foreach ($path in @($workerPath,$installerPath,$PSCommandPath)) {
 
 $worker = Get-Content -LiteralPath $workerPath -Raw
 if ($worker -match 'dangerously-skip-permissions') { throw "Unsafe Antigravity permission bypass detected." }
-foreach ($marker in @("origin/$Branch moved during AntiG review","SCOPE_LEAK","READY_FOR_VAEP","LISTO_REAL=no")) {
+foreach ($marker in @('origin/$Branch moved during AntiG review',"SCOPE_LEAK","READY_FOR_VAEP","LISTO_REAL=no")) {
     if ($worker -notlike "*$marker*") { throw "Worker guard missing: $marker" }
 }
 
