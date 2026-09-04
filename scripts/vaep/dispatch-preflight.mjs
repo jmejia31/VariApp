@@ -38,6 +38,7 @@ function matches(scope, file) {
 function validateShape(manifest) {
   const errors = [];
   if (!manifest || typeof manifest !== 'object' || Array.isArray(manifest)) return ['manifest must be an object'];
+  for (const key of Object.keys(manifest)) if (!REQUIRED.includes(key)) errors.push(`unknown field: ${key}`);
   for (const key of REQUIRED) if (!(key in manifest)) errors.push(`missing required field: ${key}`);
   if (errors.length) return errors;
   if (manifest.schemaVersion !== '1.0') errors.push('schemaVersion must be 1.0');
@@ -47,6 +48,10 @@ function validateShape(manifest) {
   if (!/^[A-Za-z0-9][A-Za-z0-9._:-]{7,127}$/.test(manifest.dispatchId)) errors.push('dispatchId is invalid');
   if (!/^N\d+\.\d+\.[A-H](\.[A-Za-z0-9._-]+)*$/.test(manifest.taskId)) errors.push('taskId is invalid');
   if (!/^N\d+\.\d+\.[A-H]$/.test(manifest.parentId)) errors.push('parentId is invalid');
+  if (!manifest.taskId.startsWith(`${manifest.parentId}.`) && manifest.taskId !== manifest.parentId) errors.push('taskId must belong to parentId');
+  if (!['PRE', 'DOMAIN', 'DB_MIG', 'BACKEND_API', 'FRONTEND_UX', 'SEC_AUDIT', 'TEST_CI', 'DOC_CERT'].includes(manifest.phase)) errors.push('phase is invalid');
+  if (!['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'].includes(manifest.stage)) errors.push('stage is invalid');
+  if (!['JULES_A', 'JULES_B', 'JULES_C', 'JULES_D', 'CODEX', 'CHATGPT_VAEP'].includes(manifest.worker)) errors.push('worker is invalid');
   if (!/^[0-9a-f]{40}$/.test(manifest.primaryBaseHead)) errors.push('primaryBaseHead must be a full lowercase SHA');
   if (!Array.isArray(manifest.fileScopeHint) || manifest.fileScopeHint.length === 0) errors.push('fileScopeHint must be a non-empty array');
   for (const scope of manifest.fileScopeHint ?? []) {
@@ -60,7 +65,10 @@ function validateShape(manifest) {
   if (!['AVAILABLE', 'RELEASED'].includes(manifest.ownership?.status)) errors.push('ownership must be AVAILABLE or RELEASED');
   if (!manifest.ownership?.owner || !Array.isArray(manifest.ownership?.scopes) || !manifest.ownership.scopes.length) errors.push('ownership metadata is incomplete');
   if (!manifest.timestamps?.createdAt || Number.isNaN(Date.parse(manifest.timestamps.createdAt))) errors.push('timestamps.createdAt must be ISO date-time');
-  for (const dependency of manifest.dependencies ?? []) if (dependency.status !== 'SATISFIED') errors.push(`dependency blocked: ${dependency.taskId}`);
+  for (const dependency of manifest.dependencies ?? []) {
+    if (!dependency || typeof dependency !== 'object' || !dependency.taskId || !['SATISFIED', 'BLOCKED', 'PENDING'].includes(dependency.status)) errors.push('dependency shape is invalid');
+    else if (dependency.status !== 'SATISFIED') errors.push(`dependency blocked: ${dependency.taskId}`);
+  }
   return errors;
 }
 

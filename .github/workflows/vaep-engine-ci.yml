@@ -1,0 +1,35 @@
+name: VAEP engine lightweight checks
+
+on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - 'vaep/**'
+      - 'scripts/vaep/**'
+      - '.github/workflows/vaep-engine-ci.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'vaep/**'
+      - 'scripts/vaep/**'
+      - '.github/workflows/vaep-engine-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Validate JSON schemas
+        run: node -e "for (const f of ['vaep/schemas/jules-dispatch.schema.json','vaep/schemas/evidence-fragment.schema.json','vaep/metrics/baseline.json']) JSON.parse(require('fs').readFileSync(f)); console.log('schemas valid')"
+      - name: Validate VAEP scripts
+        run: node --check scripts/vaep/dispatch-preflight.mjs && node --check scripts/vaep/aggregate-evidence.mjs && node --check scripts/vaep/bundles.mjs && node --check scripts/vaep/sync-bitacora.mjs && node --check scripts/vaep/reconcile-status.mjs && node --check scripts/vaep/metrics.mjs
+      - name: Run VAEP self-tests
+        run: node scripts/vaep/dispatch-preflight-self-test.mjs && node scripts/vaep/block2-self-test.mjs && node scripts/vaep/block3-self-test.mjs

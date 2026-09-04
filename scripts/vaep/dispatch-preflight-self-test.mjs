@@ -19,6 +19,7 @@ const cases = [
   ['malformed JSON', run('{').outcome === 'PRE_DISPATCH_INVALID'],
   ['wrong branch', run({ ...common, branch: 'main' }).outcome === 'PRE_DISPATCH_INVALID'],
   ['missing field', run({ ...common, taskId: undefined }).outcome === 'PRE_DISPATCH_INVALID'],
+  ['unknown field', run({ ...common, unexpected: true }).outcome === 'PRE_DISPATCH_INVALID'],
   ['dependency blocked', run({ ...common, dependencies: [{ taskId: 'N4.6.H', status: 'BLOCKED' }] }).outcome === 'PRE_DISPATCH_INVALID'],
   ['duplicate dispatch', run(common, ['--registry', write('registry.json', [common.dispatchId])]).outcome === 'PRE_DISPATCH_INVALID'],
   ['invalid file scope', run({ ...common, fileScopeHint: ['../main'] }).outcome === 'PRE_DISPATCH_INVALID'],

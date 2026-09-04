@@ -713,3 +713,9 @@ Se añadió el schema de fragmentos `vaep/schemas/evidence-fragment.schema.json`
 El modo `bundled` agrupa los gates existentes como `CORE=A-D`, `UI_RBAC=E-F` y `E2E_CERT=G-H`, manteniendo cada gate visible y reteniendo los siguientes ante fallo de dependencia. `VAEP_EXECUTION_MODE=legacy` continúa disponible y es el fallback inicial. No se eliminaron filas A-H ni se generaron commits prewarm/filler.
 
 Validación real: `node --check` de los tres scripts, parseo del schema y `node scripts/vaep/block2-self-test.mjs` con 6/6 casos PASS, incluyendo dry-run, apply, idempotencia, tres bundles, retención C/D tras fallo B y fallback legacy.
+
+## 2026-09-04 - VAEP hardening — Bloque 3 sync/reconcile/metrics
+
+Se añadió `scripts/vaep/sync-bitacora.mjs` para payload estructurado GitHub→BITÁCORA con URL/token por entorno, HMAC opcional, timeout, tres retries e idempotency key; sin configuración queda `SKIPPED` explícito y seguro. `scripts/vaep/reconcile-status.mjs` valida exact-head, gates terminales, P0/P1, documentación, dependencias y ownership, pero devuelve únicamente `ELIGIBLE_FOR_CONTROLLER_REVIEW` con `autoPromote=false`; no habilita `SUCCESS -> LISTO_REAL`. `scripts/vaep/metrics.mjs` y `vaep/metrics/baseline.json` dejan contadores observables sin inventar baseline histórico.
+
+Se añadió el workflow liviano `.github/workflows/vaep-engine-ci.yml`, limitado a paths VAEP, con parseo de schemas, syntax checks y self-tests. La documentación canónica queda en `docs/VAEP_PERFORMANCE_HARDENING.md`; `VAEP_EXECUTION_MODE=legacy` continúa como fallback y ningún gate A-H fue eliminado.
