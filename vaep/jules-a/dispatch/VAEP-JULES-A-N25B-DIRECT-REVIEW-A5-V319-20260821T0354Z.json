@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-A-N25B-DIRECT-REVIEW-A5-V319-20260821T0354Z",
-  "workerId": "JULES_A",
-  "taskId": "N2.5.B.SUPPORT.DIRECT_FIX_REVIEW.A5",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "a16dae67b363c1823e57db3ffab0e1f41d095b9b",
-  "fileScopeHint": "WRITE únicamente docs/qa/N2_5_B_VAEP_DIRECT_FIX_REVIEW_A5.md. READ commit a16dae67 y dominio N2.2/N2.3/N2.4. NO implementation/migrations/API/frontend/workflows/TASKS/CHANGELOG/other vaep files/main/Producción/secrets/deploy.",
-  "prompt": "VAEP v3.19 REVIEW-FIRST del fix directo ChatGPT/VAEP N2.5.B en commit a16dae67. Verifica específicamente: solo RecepcionCompra.Recibida y FacturaProveedor.Registrada cuentan; Borrador/Anulada no cuentan; todas las evidencias pertenecen a la misma OrdenCompraId; moneda se compara exacta case-insensitive entre OC y facturas registradas; cantidades agregan múltiples recepciones/facturas por OrdenCompraDetalleId; precio/descuento/impuesto permanecen exactos sin tolerancias/FX inventados. Revisa tests añadidos y detecta compile/API-contract risks. Entrega solo el QA doc, git diff --check, auto-review, P0/P1. No modificar código ni cerrar B por tu cuenta."
-}

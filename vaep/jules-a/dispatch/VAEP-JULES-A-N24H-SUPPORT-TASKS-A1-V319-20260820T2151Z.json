@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-A-N24H-SUPPORT-TASKS-A1-V319-20260820T2151Z",
-  "workerId": "JULES_A",
-  "taskId": "N2.4.H.SUPPORT.TASKS.A1",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "5b2a19f948948717efae00c4bbc12c9996eb0e86",
-  "fileScopeHint": "PARENT-FIRST SWARM N2.4.H. WRITE únicamente TASKS.md. READ N2.4 H evidence, Issues #82/#99/#100/#101, current N2.4 implementation/docs and direct CI evidence as needed. NO canonical H.1 docs owned by Jules B, NO CHANGELOG_AI.md, NO backend/src, frontend/src, frontend/e2e, migrations, workflows, package/lockfile, manifests ajenos, main, Producción ni secretos.",
-  "prompt": "VAEP Jules integration protocol v3.19 PARENT-FIRST SWARM. Read docs/VAEP_AUTHORITY.md, AGENTS.md and docs/VAEP_JULES.md first. Execute exactly N2.4.H.SUPPORT.TASKS.A1. Jules B is the sole owner of N2.4.H.1 canonical documentation rework; do not touch B files. Prepare an evidence-grounded TASKS.md reconciliation for N2.4 FacturaProveedor so the eventual H/N2.4 closure can be applied quickly after H.1 review. Verify current N2.4 A-G/H evidence rather than copying stale status. Preserve evidence that G is LISTO, H.2/H.3/support reviews are delivered/reviewed, and H.1 is still under targeted rework unless fresh repository evidence proves otherwise. Do NOT mark H or N2.4 definitively closed unless the required H.1 material and VAEP review are already verifiably complete in the current evidence. Keep the diff minimal and limited to TASKS.md; do not rewrite unrelated history. Explicitly identify what final checkbox/status transition remains conditional on H.1 acceptance. Run read-only checks proportional to the doc update, list limitations and P0/P1, perform mandatory self-review, return a clean ChangeSet/gitPatch with exact baseCommitId, and finish COMPLETED. No branch, PR, push, merge, deploy, main, Production or secrets."
-}

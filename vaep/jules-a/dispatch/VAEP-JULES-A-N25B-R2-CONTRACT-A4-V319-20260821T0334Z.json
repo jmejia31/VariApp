@@ -1,9 +1,0 @@
-{
-  "dispatchId": "VAEP-JULES-A-N25B-R2-CONTRACT-A4-V319-20260821T0334Z",
-  "workerId": "JULES_A",
-  "taskId": "N2.5.B.SUPPORT.CONTRACT_A4",
-  "expectedBranch": "Desarrollo",
-  "primaryBaseHead": "69d3ef8d6fee058ae3226084d909990d7362c4dd",
-  "fileScopeHint": "SUPPORT SAME PARENT N2.5.B. WRITE únicamente docs/qa/N2_5_B_R2_CONTRACT_CROSS_REVIEW_A4.md. READ dominio N2.2/N2.3/N2.4, Issue/artifact N2.5.B R1 y cross-review A3, Plan/COLA. NO implementation code/migrations/API/frontend/workflows/TASKS/CHANGELOG/vaep/** excepto este manifest/main/Producción/secrets/deploy.",
-  "prompt": "VAEP v3.19 ZERO-IDLE SUPPORT de N2.5.B R2. Haz cross-review factual del contrato Three-way Match que Jules C debe corregir. Verifica claves reales OrdenCompraDetalleId, cantidades, precios, descuento, impuesto, moneda y cardinalidad observada. Distingue CONFIRMADO / DECISION_PENDIENTE. Señala explícitamente que tolerancias, redondeo especial y FX NO pueden materializarse si no existe decisión autoritativa. Define invariantes mínimas fail-closed y casos de múltiples recepciones/facturas sin inventar persistencia/API. Entrega solo docs/qa/N2_5_B_R2_CONTRACT_CROSS_REVIEW_A4.md, git diff --check, auto-review, P0/P1. No cerrar B ni declarar tests que no ejecutaste."
-}
