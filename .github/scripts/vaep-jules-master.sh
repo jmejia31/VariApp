@@ -3,8 +3,8 @@ set -euo pipefail
 
 # Single operational entrypoint. Rules come only from docs/VAEP_AUTHORITY.md.
 readonly MASTER_FILE="docs/VAEP_AUTHORITY.md"
-readonly WORKER_TEMPLATE=".github/scripts/vaep-jules-worker-v320.sh"
-readonly GUARD_TEMPLATE=".github/scripts/vaep-jules-throughput-guard-v326.sh"
+readonly WORKER_TEMPLATE=".github/scripts/vaep-jules-worker-template.sh"
+readonly GUARD_TEMPLATE=".github/scripts/vaep-jules-throughput-template.sh"
 
 test -f "$MASTER_FILE"
 test -f "$WORKER_TEMPLATE"
