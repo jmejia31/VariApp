@@ -18,6 +18,28 @@ if [[ "${1:-}" == "--static-self-test" ]]; then
   [[ "$JULES_LANE_BUDGET_SECONDS" -le 1200 ]]
   grep -q 'AUTOMATION_AUTHORITY=MASTER' "$MASTER_FILE"
   grep -q 'NUMERIC_PROTOCOL_LABELS=PROHIBITED' "$MASTER_FILE"
+
+  active_files=(
+    AGENTS.md
+    docs/VAEP_AUTHORITY.md
+    docs/VAEP_JULES.md
+    PLAN_EJECUCION_AUTONOMA.md
+    PROJECT_CONTEXT.md
+    docs/CONTEXTO_CHATGPT_VAEP.md
+    TASKS.md
+    .github/scripts/vaep-jules-master.sh
+    .github/scripts/vaep-jules-worker.sh
+  )
+  while IFS= read -r f; do active_files+=("$f"); done < <(find .github/workflows -maxdepth 1 -type f -name 'vaep-*.yml' -print | sort)
+
+  for f in "${active_files[@]}"; do
+    [[ -f "$f" ]] || continue
+    if grep -Eq '[vV][0-9]+(\.[0-9]+)+' "$f"; then
+      printf 'VAEP MASTER invariant failed: numeric protocol label found in active source %s.\n' "$f" >&2
+      exit 70
+    fi
+  done
+
   bash "$WORKER" --static-self-test >/dev/null
   printf '{"status":"ok","authority":"MASTER","masterFile":"%s","parentListoTargetRolling60":%d,"parentMaxDwellMinutes":%d,"laneBudgetSeconds":%d,"numericProtocolLabelsProhibited":true}\n'     "$MASTER_FILE" "$PARENT_LISTO_TARGET_ROLLING_60" "$PARENT_MAX_DWELL_MINUTES" "$JULES_LANE_BUDGET_SECONDS"
   exit 0
