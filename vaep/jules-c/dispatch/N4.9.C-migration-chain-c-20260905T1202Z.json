@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.C-MIGRATION-CHAIN-C-20260905T1202Z",
+  "taskId": "N4.9.C.SUPPORT.MIGRATION_CHAIN",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "11653664014f72d3cd4b220876e3302fb894dafa",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N49CMigrationChainTests.cs only; read-only review of backend/src/Infrastructure/Migrations/** and backend/src/Infrastructure/Persistence/Migrations/**",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.9.C DB_MIG. Own a test-only migration-chain verification slice. Read-only inspect the migration assembly/history around `20260905061000_N4_8_C_ConfiguracionContable` and `20260905093000_N4_9_PeriodoContablePersistencia`. Add ONLY `backend/tests/InventoryApp.Tests/N49CMigrationChainTests.cs` with non-duplicative checks that both migration IDs are discoverable/ordered by the Infrastructure migration assembly and that the N4.9 migration is additive/reversible for PeriodosContables without attempting to recreate ConfiguracionesContables. Do not edit migrations, snapshot, configurations, application/API/frontend or csproj. Run focused tests/build and two independent self-reviews. Do not branch/PR/push/merge/deploy; do not touch main/Produccion/secrets/credentials/domains/certificates/production data. Return patch/artifact for VAEP REVIEW_FIRST."
+}
