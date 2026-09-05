@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.D-API-CONTRACT-RECOVERY-C-20260905T1605Z",
+  "taskId": "N4.9.D.SUPPORT.API_CONTRACT",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N49DPeriodoContableApiContractTests.cs only; no production code, migrations, workflows or manifests",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.9.D. FUNCTIONAL_HEAD=99bbf984f3854e42b3b7a2a11d49c8967d0358f8. This is transport recovery before any prior C session and is not R3. Add focused HTTP/API contract tests for PeriodoContable list/get/create/close, status codes and ProblemDetails/error semantics against the already integrated implementation. Do not change production code. Run focused backend tests plus two independent self-reviews. Do not branch/PR/push/merge/deploy; return patch/artifact for VAEP REVIEW_FIRST.",
+  "primaryBaseHead": "cb91ad77d771ef3f74cd12a26b2f24371b62ca0e"
+}
