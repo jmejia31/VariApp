@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.8.F-IDEMPOTENCY-RACE-C-20260905T0404Z",
+  "taskId": "N4.8.F.SUPPORT.IDEMPOTENCY_RACE",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "3efb0b0d817c35fbff7115f0f2658ba4da9cfbaa",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N48FContabilizacionIdempotencyRaceTests.cs; READ_ONLY review of current idempotency/event processing code and tests; no writes outside this single new test file; no A/B/D scopes",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.8.F. NEXT_SAFE after your idempotency support completed. Perform a read-only cross-review focused on duplicate-event and concurrent-retry behavior of automatic accounting. Prove that repeated equivalent submissions cannot generate inconsistent duplicate accounting effects and that any existing idempotency contract fails closed. Your ONLY authorized write is a new non-duplicative test file `backend/tests/InventoryApp.Tests/N48FContabilizacionIdempotencyRaceTests.cs`; do not modify functional code. If current coverage already fully proves the contract, return precise evidence without a patch. Run focused tests/build and two independent self-reviews. No branch/PR/push/merge/deploy; do not touch main/Produccion/secrets/credentials/domains/certificates/production data. Return artifact for VAEP REVIEW_FIRST."
+}
