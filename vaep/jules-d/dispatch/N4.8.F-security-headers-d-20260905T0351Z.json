@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.8.F-SECURITY-HEADERS-D-20260905T0351Z",
+  "taskId": "N4.8.F.SUPPORT.SECURITY_HEADERS",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "0b28eb55ddec8648e56bd4389d94ccd94d367579",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N48FAccountingHttpSecurityHeadersTests.cs; READ_ONLY inspection of Program.cs/middleware/controller response pipeline; no observability/health/RBAC/audit/EF functional changes",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. You are Jules D on a NEW SAFE SUPPORT task after the prior observability R2 exhausted; this is NOT R3. CURRENT_PARENT=N4.8.F SEC_AUDIT. Audit HTTP response security for the accounting path: relevant security headers/middleware behavior, no stack/internal metadata leakage on failures, and consistent hardened response behavior for accounting endpoints. Your only authorized write is backend/tests/InventoryApp.Tests/N48FAccountingHttpSecurityHeadersTests.cs for non-duplicative focused regression coverage. Program.cs, middleware and controller code are READ_ONLY; if a real defect is found, report it precisely for VAEP QA_TAKEOVER instead of modifying prior observability scope. Run focused backend tests/build and two independent self-reviews. No branch/PR/push/merge/deploy; no main/Produccion/secrets/credentials/domains/certificates/production data. Return artifact/patch for REVIEW_FIRST."
+}
