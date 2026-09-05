@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.G-E2E-SECURITY-D-ATTEMPT1-20260905T2330Z",
+  "taskId": "N4.9.G.E2E_SECURITY_REGRESSION",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "37f51feefc402b27ce926bcdaaa042e4456a94cd",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/e2e/periodos-contables-regression.spec.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first; it is the only operational authority. Work only on jmejia31/VariApp branch Desarrollo. CURRENT_PARENT=N4.9.G. FUNCTIONAL_HEAD=37f51feefc402b27ce926bcdaaa042e4456a94cd; later vaep-only commits are CONTROL_PLANE_HEAD_EQUIVALENT. Add a separate deterministic Playwright regression spec for Periodos contables focused on authorization/security-visible behavior and critical user regression: authorized navigation, forbidden/unauthorized behavior where test harness supports it, create-open-close happy path, invalid repeat close protection, filters/pagination and absence of secret/error leakage in UI. Own ONLY frontend/e2e/periodos-contables-regression.spec.ts. Do not edit existing periodos-contables.spec.ts, production frontend/backend, CI, main, Produccion, secrets, deploy, branches, PR merge or force-push. Run narrow Playwright tests if supported. Return material patch, changed files, validation, self-review twice and risks; no status-only response."
+}
