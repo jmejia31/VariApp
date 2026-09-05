@@ -39,8 +39,20 @@ public class N49CMigrationChainTests
     {
         var n49Migration = new N4_9_PeriodoContablePersistencia();
 
-        var upOperations = n49Migration.UpOperations;
-        var downOperations = n49Migration.DownOperations;
+        var upMethod = typeof(N4_9_PeriodoContablePersistencia).GetMethod("Up", BindingFlags.Instance | BindingFlags.NonPublic);
+        var downMethod = typeof(N4_9_PeriodoContablePersistencia).GetMethod("Down", BindingFlags.Instance | BindingFlags.NonPublic);
+
+        Assert.NotNull(upMethod);
+        Assert.NotNull(downMethod);
+
+        var mbUp = new MigrationBuilder("Microsoft.EntityFrameworkCore.MySql");
+        upMethod.Invoke(n49Migration, new object[] { mbUp });
+
+        var mbDown = new MigrationBuilder("Microsoft.EntityFrameworkCore.MySql");
+        downMethod.Invoke(n49Migration, new object[] { mbDown });
+
+        var upOperations = mbUp.Operations;
+        var downOperations = mbDown.Operations;
 
         var createTableOp = upOperations
             .OfType<CreateTableOperation>()
