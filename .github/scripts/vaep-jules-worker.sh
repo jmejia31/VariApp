@@ -70,7 +70,20 @@ if [[ "${1:-}" == "--static-self-test" ]]; then
   exit 0
 fi
 
+if [[ "${1:-}" == "--runtime-preflight" ]]; then
+  if ! command -v jq >/dev/null 2>&1; then
+    printf 'VAEP Jules worker prerequisite missing: jq is required for runtime JSON handling. Install jq and ensure it is on PATH.\n' >&2
+    exit 69
+  fi
+  printf '{"status":"ok","runtime":"jq","worker":"Jules","networkUsed":false,"sessionCreated":false,"attemptConsumed":false}\n'
+  exit 0
+fi
+
 : "${JULES_API_KEY:?Jules API key is required}"
+if ! command -v jq >/dev/null 2>&1; then
+  printf 'VAEP Jules worker prerequisite missing: jq is required for runtime JSON handling. Install jq and ensure it is on PATH.\n' >&2
+  exit 69
+fi
 : "${JULES_API_BASE:=https://jules.googleapis.com/v1alpha}"
 : "${EXPECTED_OWNER:=jmejia31}"
 : "${EXPECTED_REPO:=VariApp}"

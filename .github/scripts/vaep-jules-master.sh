@@ -12,6 +12,13 @@ test -f "$MASTER_FILE"
 test -f "$PARSER"
 test -f "$WORKER"
 
+require_jq() {
+  if ! command -v jq >/dev/null 2>&1; then
+    printf 'VAEP MASTER prerequisite missing: jq is required for dispatch admission and JSON evidence. Install jq and ensure it is on PATH.\n' >&2
+    return 69
+  fi
+}
+
 manifest_count_action() {
   local count="${1:?manifest count required}"
   case "$count" in
@@ -136,6 +143,29 @@ readonly AUTOMATION_POLICY_HASH
 readonly MASTER_COMMIT_SHA
 
 if [[ "${1:-}" == "--static-self-test" ]]; then
+  # Static mode must not require runtime JSON tooling or invoke runtime paths.
+  bash "$PARSER" --self-test >/dev/null
+  [[ "$PARENT_LISTO_TARGET_ROLLING_60" =~ ^[1-9][0-9]*$ ]]
+  [[ "$PARENT_MAX_DWELL_MINUTES" =~ ^[1-9][0-9]*$ ]]
+  [[ "$PARENT_STALL_NO_PROGRESS_MINUTES" =~ ^[1-9][0-9]*$ ]]
+  [[ "$MAX_VOLUNTARY_IDLE" =~ ^(0|[1-9][0-9]*)$ ]]
+  [[ "$VAEP_CHECKPOINTS" =~ ^:[0-5][0-9](,:[0-5][0-9])*$ ]]
+  [[ "$JULES_LANE_BUDGET_SECONDS" =~ ^[1-9][0-9]*$ ]]
+  [[ "$JULES_MAX_ATTEMPTS" =~ ^[1-9][0-9]*$ ]]
+  [[ "$JULES_REWORK_MAX" =~ ^(0|[1-9][0-9]*)$ ]]
+  [[ "$PARENT_CLOSE_FIRST" == "TRUE" || "$PARENT_CLOSE_FIRST" == "FALSE" ]]
+  [[ ${#AUTOMATION_POLICY_HASH} -eq 64 ]]
+  [[ "$MASTER_COMMIT_SHA" =~ ^[0-9a-fA-F]{40}$ ]]
+  grep -q 'AUTOMATION_AUTHORITY=MASTER' "$MASTER_FILE"
+  grep -q 'NUMERIC_PROTOCOL_LABELS=PROHIBITED' "$MASTER_FILE"
+  bash "$WORKER" --static-self-test >/dev/null
+  printf '{"status":"ok","authority":"MASTER","staticOnly":true,"jqRuntimeRequired":true,"masterFile":"%s","policyHash":"%s","networkUsed":false,"sessionCreated":false,"attemptConsumed":false}\n' \
+    "$MASTER_FILE" "$AUTOMATION_POLICY_HASH"
+  exit 0
+fi
+
+if [[ "${1:-}" == "--self-test" ]]; then
+  require_jq
   bash "$PARSER" --self-test >/dev/null
   [[ "$(manifest_count_action 0)" == "NO_OP" ]]
   [[ "$(manifest_count_action 1)" == "ADMIT" ]]
@@ -208,11 +238,14 @@ if [[ "${1:-}" == "--static-self-test" ]]; then
     fi
   done
 
+  bash "$WORKER" --runtime-preflight >/dev/null
   bash "$WORKER" --static-self-test >/dev/null
   printf '{"status":"ok","authority":"MASTER","masterFile":"%s","parentListoTargetRolling60":%d,"parentMaxDwellMinutes":%d,"parentStallNoProgressMinutes":%d,"maxVoluntaryIdle":%d,"checkpoints":"%s","laneBudgetSeconds":%d,"policyHash":"%s","numericProtocolLabelsProhibited":true}\n' \
     "$MASTER_FILE" "$PARENT_LISTO_TARGET_ROLLING_60" "$PARENT_MAX_DWELL_MINUTES" "$PARENT_STALL_NO_PROGRESS_MINUTES" "$MAX_VOLUNTARY_IDLE" "$VAEP_CHECKPOINTS" "$JULES_LANE_BUDGET_SECONDS" "$AUTOMATION_POLICY_HASH"
   exit 0
 fi
+
+require_jq
 
 : "${DISPATCH_PATH:?DISPATCH_PATH is required}"
 : "${GITHUB_SHA:?GITHUB_SHA is required}"

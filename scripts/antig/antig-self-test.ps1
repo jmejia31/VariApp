@@ -61,11 +61,23 @@ foreach ($path in @($workerPath,$installerPath,$PSCommandPath)) {
 foreach ($marker in @("RESERVED_INACTIVE","mainAgent: false","subagent: false","ANTIG_HANDOFF_PROCESSING=DISABLED","ANTIG_CAN_CERTIFY_LISTO_REAL=FALSE")) {
     if ($agent -notlike "*$marker*") { throw "Inactive agent guard missing: $marker" }
 }
-foreach ($marker in @("RESERVED_INACTIVE","ANTIG_HANDOFF_PROCESSING=DISABLED","ANTIG_NO_ACTION=RESERVED_INACTIVE")) {
+foreach ($marker in @("RESERVED_INACTIVE","ANTIG_NO_ACTION=RESERVED_INACTIVE")) {
     if ($worker -notlike "*$marker*") { throw "Inactive worker guard missing: $marker" }
 }
-foreach ($marker in @("RESERVED_INACTIVE","ANTIG_SCHEDULER=DISABLED","ANTIG_INSTALLATION_ALLOWED=FALSE","/Delete")) {
+if ($worker -notmatch '(?m)^\s*\$script:AntiGHandoffProcessing\s*=\s*"DISABLED"\s*$') {
+    throw "Inactive worker guard assignment missing: AntiGHandoffProcessing=DISABLED"
+}
+if ($worker -notmatch '(?m)^\s*Write-Host\s+"ANTIG_HANDOFF_PROCESSING=\$script:AntiGHandoffProcessing"\s*$') {
+    throw "Inactive worker guard emission missing: ANTIG_HANDOFF_PROCESSING=<state>"
+}
+foreach ($marker in @("RESERVED_INACTIVE","ANTIG_INSTALLATION_ALLOWED=FALSE","/Delete")) {
     if ($installer -notlike "*$marker*") { throw "Inactive installer guard missing: $marker" }
+}
+if ($installer -notmatch '(?m)^\s*\$script:AntiGScheduler\s*=\s*"DISABLED"\s*$') {
+    throw "Inactive installer guard assignment missing: AntiGScheduler=DISABLED"
+}
+if ($installer -notmatch '(?m)^\s*Write-Host\s+"ANTIG_SCHEDULER=\$script:AntiGScheduler"\s*$') {
+    throw "Inactive installer guard emission missing: ANTIG_SCHEDULER=<state>"
 }
 foreach ($marker in @("RESERVED_INACTIVE","ANTIG_SCHEDULER=DISABLED","ANTIG_HANDOFF_PROCESSING=DISABLED","EXPLICIT_AUTHORIZATION_REQUIRED")) {
     if ($runbook -notlike "*$marker*") { throw "Inactive runbook guard missing: $marker" }
@@ -73,6 +85,11 @@ foreach ($marker in @("RESERVED_INACTIVE","ANTIG_SCHEDULER=DISABLED","ANTIG_HAND
 
 if ($installer -match '(?i)/Create|Register-ScheduledTask|New-ScheduledTask') {
     throw "Scheduler creation path detected while AntiG is RESERVED_INACTIVE."
+}
+
+if ($StaticOnly) {
+    Write-Host "ANTIG_STATIC_ONLY=PASS"
+    exit 0
 }
 
 $activeAntiGText = $agent + [Environment]::NewLine + $worker + [Environment]::NewLine + $installer + [Environment]::NewLine + $runbook
