@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.D-DTO-SERVICE-CONTRACT-A-20260905T1441Z",
+  "taskId": "N4.9.D.SUPPORT.DTO_SERVICE_CONTRACT",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "b9c16f764e5b4def3cd9b2e2911a93856e42cbdc",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Application/DTOs/Contabilidad/PeriodoContableDtos.cs; backend/src/Application/Interfaces/IPeriodoContableService.cs; no Infrastructure/API/frontend/migrations/snapshot/workflows",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT remains N4.9.C in certification; this is WORK_CAN_PIPELINE__PROMOTION_CANNOT support for next N4.9.D. Own only application contracts that are safe independent of persistence certification. Inspect current PeriodoContable domain and existing Application DTO/service interface conventions. Create bounded DTOs for querying/creating/closing accounting periods and an IPeriodoContableService contract that preserves fail-closed Abierto→Cerrado lifecycle and explicit retroactive authorization semantics. No implementation, no controller, no repository, no DI, no migration/snapshot, no frontend. Keep contracts minimal and consistent with existing ProblemDetails/service patterns. Run dotnet build and any focused compile/static checks available; perform two independent self-reviews. Do not branch/PR/push/merge/deploy; do not touch main/Produccion/secrets. Return patch/artifact for VAEP REVIEW_FIRST. Mark promotion blocked by N4.9.C LISTO_REAL."
+}
