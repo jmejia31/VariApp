@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.E-FRONTEND-DATA-CLIENT-A-ATTEMPT1-CORRECTED-20260905T1858Z",
+  "taskId": "N4.9.E.FRONTEND_DATA_CLIENT",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "f4ea4719f025d6cc41b1824bbe81e2ed58937b6d",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/core/models/periodo-contable.model.ts; frontend/src/app/core/services/periodo-contable.service.ts; frontend/src/app/core/services/periodo-contable.service.spec.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first; it is the only operational authority. Work only on jmejia31/VariApp branch Desarrollo. FUNCTIONAL_HEAD is d514b4354efeabbc914383399a521725b6441c5a; later vaep-only commits are CONTROL_PLANE_HEAD_EQUIVALENT and are not product divergence. Implement the Angular PeriodoContable data contract and HTTP client against the already-certified N4.9.D backend. Own ONLY: frontend/src/app/core/models/periodo-contable.model.ts, frontend/src/app/core/services/periodo-contable.service.ts, frontend/src/app/core/services/periodo-contable.service.spec.ts. Support the real paginated/filter GET contract plus create and close endpoints; preserve HTTP ProblemDetails 400/404/409 for UI handling. Derive endpoint names and payloads from current backend code, never invent them. Add focused unit tests for URLs/query params/create/close. Do not touch frontend features, app.routes.ts, e2e, backend, main, Produccion, secrets, deploy, branches, PR merge, force-push, or files owned by other lanes. Validate with the applicable frontend unit tests and npm run build. Return material patch, changed files, validations and risks; no status-only response."
+}
