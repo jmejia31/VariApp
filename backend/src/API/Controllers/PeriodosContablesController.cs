@@ -1,8 +1,8 @@
+using InventoryApp.API.Filters;
 using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs.Contabilidad;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Enums;
-using InventoryApp.Infrastructure.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
