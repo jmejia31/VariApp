@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.8.F-TELEMETRY-REDACTION-D-20260905T0404Z",
+  "taskId": "N4.8.F.SUPPORT.TELEMETRY_REDACTION",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "c9f886c7e90a9fbd0e72accd0b32b0041d51ccb0",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N48FContabilizacionTelemetryRedactionTests.cs; READ_ONLY review of logging/correlation/security headers and observability code; no writes outside this single new test file; no A/B/C scopes",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.8.F. NEXT_SAFE after your HTTP-security support completed. Perform a read-only security/observability cross-review focused on correlation/logging telemetry redaction for the accounting endpoint: correlation remains traceable while secrets, credentials, tokens and sensitive request details are not leaked into logs/errors/headers. Your ONLY authorized write is a new non-duplicative test file `backend/tests/InventoryApp.Tests/N48FContabilizacionTelemetryRedactionTests.cs`; do not modify middleware, Program.cs or functional code. If current coverage already fully proves the requirement, return precise evidence without a patch. Run focused tests/build and two independent self-reviews. No branch/PR/push/merge/deploy; do not touch main/Produccion/secrets/credentials/domains/certificates/production data. Return artifact for VAEP REVIEW_FIRST."
+}
