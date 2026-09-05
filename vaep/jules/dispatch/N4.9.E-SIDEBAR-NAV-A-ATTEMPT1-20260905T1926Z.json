@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.E-SIDEBAR-NAV-A-ATTEMPT1-20260905T1926Z",
+  "taskId": "N4.9.E.SIDEBAR_NAV",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "45a0deb80ead2311b6249e349e46195836534371",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/app.component.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first; it is the only operational authority. Work only on jmejia31/VariApp branch Desarrollo. FUNCTIONAL_HEAD is 45a0deb80ead2311b6249e349e46195836534371; this manifest commit is CONTROL_PLANE_HEAD_EQUIVALENT and must not be treated as a new functional base. N4.9.E REVIEW_FIRST found the Periodos contables feature has no discoverable sidebar entry. Add the minimal navigation entry in frontend/src/app/app.component.ts using the existing Configuracion permission pattern and repository conventions, targeting the route expected as /periodos-contables. Own ONLY app.component.ts. Do not edit app.routes.ts, periodos-contables feature/model/service/spec/e2e, backend, main, Produccion, secrets, deploy, branches, PR merge or force-push. Do not invent a new permission module; use existing Configuracion/Ver semantics. Return material patch, changed files, validation and risks; no status-only response."
+}
