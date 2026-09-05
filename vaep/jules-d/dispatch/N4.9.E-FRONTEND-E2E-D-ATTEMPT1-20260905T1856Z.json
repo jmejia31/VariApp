@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 3,
+  "taskId": "N4.9.E_ATTEMPT1_FRONTEND_E2E",
+  "attemptId": "N4.9.E-FRONTEND-E2E-D-ATTEMPT1-20260905T1856Z",
+  "title": "N4.9.E ATTEMPT1 — E2E UX de periodos contables",
+  "priority": "P0",
+  "projectId": "N4.9",
+  "primaryRepo": "jmejia31/VariApp",
+  "primaryBranch": "Desarrollo",
+  "primaryBaseHead": "ea39fafd70e6bdb44fcf48cb63949a894edaa99c",
+  "requiredBaseHead": "d514b4354efeabbc914383399a521725b6441c5a",
+  "rebaseRequiredOnHeadChange": false,
+  "readableRepos": ["jmejia31/VariApp", "jmejia31/VariApp-MCP", "jmejia31/VAAP"],
+  "editableRepos": ["jmejia31/VariApp"],
+  "objective": "Crear cobertura Playwright focalizada para los flujos UX de Periodos contables sobre el contrato backend certificado, sin editar implementación frontend de otras lanes.",
+  "inScope": [
+    "frontend/e2e/periodos-contables.spec.ts"
+  ],
+  "outOfScope": [
+    "frontend/src/app/**",
+    "backend/**",
+    "frontend/playwright.config.ts",
+    "vaep/** excepto resultado de lane"
+  ],
+  "acceptance": [
+    "Cubrir navegación autorizada al feature, listado paginado/filtrado y estados loading/empty/error observables.",
+    "Cubrir creación válida y conflicto 409 con feedback accionable.",
+    "Cubrir cierre Abierto->Cerrado con confirmación y prevención de acción inválida sobre Cerrado.",
+    "Usar patrones reales de los E2E existentes y mocks/intercepts sólo si el repositorio ya los usa; no inventar backend alternativo.",
+    "El spec debe ser determinista y limitarse a N4.9.E."
+  ],
+  "requiredValidations": [
+    "cd frontend && npx playwright test e2e/periodos-contables.spec.ts"
+  ],
+  "implementationRules": [
+    "Leer docs/VAEP_AUTHORITY.md primero.",
+    "Desarrollo only; no main/Produccion/secrets/deploy.",
+    "Ownership exclusivo del nuevo spec E2E; no editar implementación de A/B/C.",
+    "FUNCTIONAL_HEAD=d514b4354efeabbc914383399a521725b6441c5a; commits vaep-only posteriores son control-plane equivalent.",
+    "Si ejecución aislada depende de feature/ruta aún no integrados, producir el test contract-first y reportar la dependencia exacta; no ampliar scope."
+  ],
+  "expectedOutput": {"format": "unified_diff", "mustIncludeChangedFiles": true, "mustIncludeValidations": true, "mustIncludeRisks": true},
+  "ownership": {"files": ["frontend/e2e/periodos-contables.spec.ts"]},
+  "lease": {"minutes": 30},
+  "createdAt": "2026-09-05T18:56:00Z",
+  "createdBy": "ChatGPT",
+  "authority": "docs/VAEP_AUTHORITY.md",
+  "lane": "D",
+  "attempt": 1
+}
