@@ -22,6 +22,11 @@
     </button>
   </div>
 
+  <app-evento-contable-panel
+    *ngIf="!mostrarFormulario() && puedeCrearAsiento()"
+    (contabilizado)="cargarAsientos()">
+  </app-evento-contable-panel>
+
   <div *ngIf="loading()" style="display: flex; justify-content: center; padding: 2rem;">
     <mat-spinner diameter="40"></mat-spinner>
   </div>
