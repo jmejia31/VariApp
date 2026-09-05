@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { of } from 'rxjs';
 import { AsientosContablesComponent } from './asientos-contables.component';
@@ -27,6 +28,7 @@ describe('AsientosContablesComponent', () => {
     await TestBed.configureTestingModule({
       imports: [AsientosContablesComponent, NoopAnimationsModule],
       providers: [
+        provideHttpClient(),
         { provide: AsientoContableService, useClass: AsientoServiceStub },
         { provide: CuentaContableService, useClass: CuentaServiceStub },
         { provide: PermisosRuntimeService, useClass: PermisosRuntimeStub }
