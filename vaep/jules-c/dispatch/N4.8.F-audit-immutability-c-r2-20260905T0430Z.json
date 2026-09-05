@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.8.F-AUDIT-IMMUTABILITY-C-R2-20260905T0430Z",
+  "taskId": "N4.8.F.SUPPORT.AUDIT_IMMUTABILITY",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "b2d7cb7b5472b8f974a0c418c07004a3cb48adaa",
+  "taskAttempt": 2,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N48FAccountingAuditImmutabilityTests.cs only; audit implementation READ_ONLY; no A/B/D scopes",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.8.F SEC_AUDIT. REVIEW_FIRST of ATTEMPT1 found the patch structurally useful but invalid for completion because the mandatory two independent self-reviews were not actually emitted in activity evidence. This is the single and final R2 for the same logical task. Revalidate the proposed audit-immutability regression tests against current Desarrollo and change only backend/tests/InventoryApp.Tests/N48FAccountingAuditImmutabilityTests.cs if still valid and non-duplicative. Run the focused test/build. Before COMPLETED, explicitly emit two substantive independent agent messages containing SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2, each reviewing scope, diff, contracts, security/audit semantics, tests and unexecuted validations. No plan.md or temporary files. Functional implementation remains READ_ONLY. No branch/PR/push/merge/deploy; no main/Produccion/secrets/credentials/domains/certificates/production data."
+}
