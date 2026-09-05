@@ -158,7 +158,11 @@ public static class CatalogoPermisosBase
         }),
         (ModuloSistema.Auditoria, new[] { AccionPermiso.Ver, AccionPermiso.Exportar }),
         (ModuloSistema.ReportesAdministrativos, new[] { AccionPermiso.Ver, AccionPermiso.Exportar, AccionPermiso.Imprimir }),
-        (ModuloSistema.Configuracion, new[] { AccionPermiso.Ver, AccionPermiso.Editar, AccionPermiso.Administrar }),
+        (ModuloSistema.Configuracion, new[]
+        {
+            AccionPermiso.Ver, AccionPermiso.Crear, AccionPermiso.Editar,
+            AccionPermiso.Administrar, AccionPermiso.Cerrar
+        }),
         (ModuloSistema.Descuentos, new[]
         {
             AccionPermiso.Ver, AccionPermiso.Crear, AccionPermiso.Editar,
