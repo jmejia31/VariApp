@@ -16,6 +16,7 @@ import { CrearAsientoContableDto, AsientoContableDto } from '../../core/models/a
 import { CuentaContableService } from '../../services/cuenta-contable.service';
 import { CuentaContable } from '../../core/models/cuenta-contable.model';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
+import { EventoContablePanelComponent } from './evento-contable-panel.component';
 
 export function asientoBalanceValidator(control: AbstractControl): ValidationErrors | null {
   const detalles = control.get('detalles') as FormArray | null;
@@ -45,7 +46,8 @@ export function asientoBalanceValidator(control: AbstractControl): ValidationErr
   imports: [
     CommonModule, FormsModule, ReactiveFormsModule, MatFormFieldModule,
     MatInputModule, MatSelectModule, MatButtonModule, MatIconModule,
-    MatProgressSpinnerModule, MatTableModule, MatSnackBarModule
+    MatProgressSpinnerModule, MatTableModule, MatSnackBarModule,
+    EventoContablePanelComponent
   ],
   templateUrl: './asientos-contables.component.html',
   styleUrl: './asientos-contables.component.scss'
