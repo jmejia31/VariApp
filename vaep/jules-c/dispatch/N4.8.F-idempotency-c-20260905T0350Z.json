@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.8.F-IDEMPOTENCY-C-20260905T0350Z",
+  "taskId": "N4.8.F.SUPPORT.IDEMPOTENCY",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "e1aba0537910d1c759edbd9f1a9f723346039af6",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N48FContabilizacionIdempotencySecurityTests.cs; READ_ONLY inspection of ContabilizacionService.cs and AsientoContableWriter.cs; no functional/audit/RBAC/EF/observability changes",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.8.F SEC_AUDIT. Jules C completed its audit-trail R2 and is free; take this NEW SAFE SUPPORT scope. Cross-check idempotent replay/security behavior for automatic accounting events: repeated same event must not create duplicate accounting/audit side effects, concurrent/retry paths must remain fail-closed, and error handling must not leak sensitive data. Your only authorized write is backend/tests/InventoryApp.Tests/N48FContabilizacionIdempotencySecurityTests.cs for non-duplicative focused coverage. ContabilizacionService.cs and AsientoContableWriter.cs are READ_ONLY; any real defect is reported for VAEP QA_TAKEOVER, not fixed out-of-scope. Run focused backend tests/build and two independent self-reviews. No branch/PR/push/merge/deploy; no main/Produccion/secrets/credentials/domains/certificates/production data. Return artifact/patch for REVIEW_FIRST."
+}

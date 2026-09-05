@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.8.A-PREFLIGHT-20260904T2046Z",
+  "taskId": "N4.8.A",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "a00b048e973af97a19eec6a999469d8142967c7a",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/**; TASKS.md; CHANGELOG_AI.md; read-only inspection of Backend/** and Frontend/** as needed; no product implementation",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first and obey it as the only operational authority. Execute N4.8.A only: technical preflight for the automatic accounting engine. Inspect the current N4.7 accounting implementation and produce a precise preflight deliverable identifying the exact integration/hook points, dependencies, invariants, transaction/idempotency/concurrency/security risks actually supported by the code, and the safe implementation boundaries for the next dependency-valid task. Do not implement N4.8 engine/product behavior. Preserve history; only update TASKS.md or CHANGELOG_AI.md if the task DoD requires an append-only handoff/certification record. Run two independent self-reviews before COMPLETED. Report files inspected/changed, validations run, risks, and anything not executed. Do not create branch/PR/push/merge/deploy; do not touch main, Produccion, secrets, credentials, domains, certificates, production data or production infrastructure. Return patch/artifact for VAEP REVIEW_FIRST."
+}

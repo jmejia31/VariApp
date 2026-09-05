@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.C-EF-SNAPSHOT-A-ATTEMPT2-R2-20260905T1218Z",
+  "taskId": "N4.9.C",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "ca2abe108022a316360c94709e2a33dcdd8a5604",
+  "taskAttempt": 2,
+  "fileScopeHint": "backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs; backend/src/Infrastructure/Migrations/20260905093000_N4_9_PeriodoContablePersistencia.cs only if strictly required for exact EF reconciliation; no application/API/frontend files",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first and obey it as the only authority. RECOVERY R2 FINAL for CURRENT_PARENT=N4.9.C. ATTEMPT1 workflow 33964862034 exceeded the no-progress recovery threshold without a verifiable terminal artifact, so its ownership is superseded locally; any late result is evidence-only. Reproduce exact-head EF drift. Reconcile canonical AppDbContextModelSnapshot to the current AppDbContext model so ConfiguracionesContables and PeriodosContables are represented exactly and `dotnet ef migrations has-pending-model-changes` is clean. Do not create duplicate tables/migrations, destructive operations, data backfill or unrelated model churn. Modify the N4.9 migration only if strictly required for metadata consistency. Validate restore/build, focused tests and pending-model-changes. Perform two independent self-reviews. This is ATTEMPT2/R2: no R3; any remaining defect goes to QA_TAKEOVER. Do not branch/PR/push/merge/deploy; do not touch main/Produccion/secrets/credentials/domains/certificates/production data. Return patch/artifact for VAEP REVIEW_FIRST."
+}

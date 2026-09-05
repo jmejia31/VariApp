@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.8.F-AUTHZ-POLICY-DRIFT-B-20260905T0419Z",
+  "taskId": "N4.8.F.SUPPORT.AUTHZ_POLICY_DRIFT",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "64024169c98756f08b1998c5c2d9b964eab5fd2c",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N48FAuthorizationPolicyDriftTests.cs only; authorization/controller implementation READ_ONLY; no A/C/D scopes",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.8.F SEC_AUDIT. Your prior negative-API task is terminal and this is a distinct NEXT_SAFE scope. Audit authorization-policy drift for accounting endpoints: required Finanzas/Crear or equivalent policy mapping, fail-closed unauthenticated/unauthorized behavior, and accidental policy omission on accounting write surfaces. Your only authorized write is backend/tests/InventoryApp.Tests/N48FAuthorizationPolicyDriftTests.cs and only if a non-duplicative regression test materially closes a demonstrated gap. Production authorization/controller code is READ_ONLY; report any real defect for VAEP QA_TAKEOVER. Run focused tests/build and explicitly provide two independent self-reviews. No branch/PR/push/merge/deploy; no main/Produccion/secrets/credentials/domains/certificates/production data."
+}

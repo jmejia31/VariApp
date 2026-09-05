@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.C-MODEL-CONTRACT-B-ATTEMPT2-R2-20260905T1402Z",
+  "taskId": "N4.9.C.SUPPORT.MODEL_CONTRACT",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "4bca88670dfa8594e612d0897818f0ef643ca14a",
+  "taskAttempt": 2,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N49CAccountingPersistenceModelTests.cs only; read-only inspection of ConfiguracionContableConfiguration.cs, PeriodoContableConfiguration.cs, AppDbContext.cs, migrations and snapshot",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. This is the FINAL R2 for task N4.9.C.SUPPORT.MODEL_CONTRACT; R3 is prohibited. ATTEMPT1 was rejected because the handoff did not prove the two mandatory independent self-reviews. Rework ONLY backend/tests/InventoryApp.Tests/N49CAccountingPersistenceModelTests.cs if technically necessary; otherwise preserve the patch and produce complete evidence. Verify both ConfiguracionContable and PeriodoContable persistence contracts against the current model, including table names, unique indexes, PeriodoContable checks, ConfiguracionContable restricted account FKs/default Activo, and no destructive/cascade behavior beyond contract. Do not edit model/configurations/migrations/snapshot/API/frontend/csproj. Run focused tests/build where possible and explicitly perform TWO independent self-reviews with findings. Do not branch/PR/push/merge/deploy; do not touch main/Produccion/secrets/credentials/domains/certificates/production data. Return patch/artifact for VAEP REVIEW_FIRST."
+}

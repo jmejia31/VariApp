@@ -7,6 +7,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { PermisoService } from '../../services/permiso.service';
 import { RolService } from '../../services/rol.service';
@@ -18,7 +19,8 @@ import { Rol } from '../../core/models/rol.model';
   standalone: true,
   imports: [
     CommonModule, FormsModule, MatCheckboxModule, MatButtonModule,
-    MatProgressSpinnerModule, MatFormFieldModule, MatInputModule, MatSelectModule
+    MatProgressSpinnerModule, MatFormFieldModule, MatInputModule, MatSelectModule,
+    MatIconModule
   ],
   templateUrl: './permisos-matrix.component.html',
   styleUrl: './permisos-matrix.component.scss'
@@ -35,6 +37,37 @@ export class PermisosMatrixComponent implements OnInit {
   readonly modulos = computed(() => [...new Set(this.items().map((i) => i.modulo))]);
   readonly rolSeleccionado = computed(() => this.roles().find((r) => r.id === this.rolSeleccionadoId()) ?? null);
 
+  private readonly etiquetasModulos: Record<string, string> = {
+    Categorias: 'Categorías',
+    Facturacion: 'Facturación',
+    MovimientosInventario: 'Movimientos de inventario',
+    Auditoria: 'Auditoría',
+    Configuracion: 'Configuración'
+  };
+
+  private readonly etiquetasAcciones: Record<string, string> = {
+    Ver: 'Ver',
+    Crear: 'Crear',
+    Editar: 'Editar',
+    Actualizar: 'Actualizar',
+    Activar: 'Activar',
+    Desactivar: 'Desactivar',
+    Confirmar: 'Confirmar',
+    Anular: 'Anular',
+    Exportar: 'Exportar',
+    Imprimir: 'Imprimir',
+    Compartir: 'Compartir',
+    Administrar: 'Administrar',
+    Aplicar: 'Aplicar',
+    Duplicar: 'Duplicar',
+    EliminarLogico: 'Eliminar lógicamente',
+    EliminarPermanente: 'Eliminar permanentemente',
+    ConsultarHistorial: 'Consultar historial',
+    AsignarRol: 'Asignar rol',
+    RestablecerContrasena: 'Restablecer contraseña',
+    CambiarEstado: 'Cambiar estado'
+  };
+
   constructor(
     private permisoService: PermisoService,
     private rolService: RolService,
@@ -45,8 +78,6 @@ export class PermisosMatrixComponent implements OnInit {
     this.loadingRoles.set(true);
     this.rolService.getAll().subscribe({
       next: (res) => {
-        // La matriz solo tiene sentido para roles NO administradores: el rol
-        // administrador siempre tiene acceso total y no depende de estas filas.
         const seleccionables = res.data.filter((r) => !r.esAdministrador);
         this.roles.set(seleccionables);
         this.loadingRoles.set(false);
@@ -81,7 +112,17 @@ export class PermisosMatrixComponent implements OnInit {
   modulosFiltrados(): string[] {
     const filtro = this.filtroModulo().trim().toLowerCase();
     if (!filtro) return this.modulos();
-    return this.modulos().filter((m) => m.toLowerCase().includes(filtro));
+    return this.modulos().filter((modulo) =>
+      modulo.toLowerCase().includes(filtro) ||
+      this.nombreModulo(modulo).toLowerCase().includes(filtro));
+  }
+
+  nombreModulo(modulo: string): string {
+    return this.etiquetasModulos[modulo] ?? this.separarPalabras(modulo);
+  }
+
+  nombreAccion(accion: string): string {
+    return this.etiquetasAcciones[accion] ?? this.separarPalabras(accion);
   }
 
   toggle(item: PermisoMatrizItem): void {
@@ -98,7 +139,7 @@ export class PermisosMatrixComponent implements OnInit {
         this.items.set(res.data ?? []);
         this.saving.set(false);
         this.snackBar.open(
-          'Matriz de permisos actualizada. Los usuarios con este rol deben volver a iniciar sesión para verla reflejada.',
+          'Matriz actualizada. Las siguientes solicitudes de los usuarios con este rol usarán estos permisos.',
           'Cerrar', { duration: 6000 });
       },
       error: (err) => {
@@ -106,5 +147,9 @@ export class PermisosMatrixComponent implements OnInit {
         this.snackBar.open(err.error?.message ?? 'No se pudo actualizar la matriz.', 'Cerrar', { duration: 5000 });
       }
     });
+  }
+
+  private separarPalabras(valor: string): string {
+    return valor.replace(/([a-záéíóúñ])([A-ZÁÉÍÓÚÑ])/g, '$1 $2');
   }
 }

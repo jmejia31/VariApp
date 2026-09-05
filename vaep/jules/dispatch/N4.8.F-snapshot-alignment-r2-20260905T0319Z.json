@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.8.F-SNAPSHOT-ALIGN-R2-20260905T0319Z",
+  "taskId": "N4.8.F",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "3e9103867f631ef18f6c71464eee0df700918218",
+  "taskAttempt": 2,
+  "fileScopeHint": "backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs; backend/src/Infrastructure/Persistence/Migrations/20260905061000_N4_8_C_ConfiguracionContable.cs; backend/src/Infrastructure/Persistence/Configurations/**; backend/src/Domain/**/ConfiguracionContable*.cs; no unrelated product changes",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. MASTER RECOVERY R2 for N4.8.F after the prior dispatch was superseded for >10m without verifiable session/useful activity. Work from the exact requested base and only the EF snapshot/model metadata scope. Reproduce `dotnet ef migrations has-pending-model-changes`; align ConfiguracionContable into the canonical AppDbContextModelSnapshot without duplicating the already-existing reversible migration or widening into unrelated model deltas. If unrelated pending model deltas exist, report and stop rather than expanding scope. Run restore/build/focused tests/has-pending-model-changes and two independent self-reviews. Do not branch/PR/push/merge/deploy; do not touch main/Produccion/secrets/credentials/domains/certificates/production data. Return patch/artifact for VAEP REVIEW_FIRST. This is attempt 2/2; no R3."
+}

@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.D-IDEMPOTENCY-GUARD-B-20260905T1713Z",
+  "taskId": "N4.9.D.CLOSURE.IDEMPOTENCY_GUARD",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "primaryBaseHead": "757ff895012fd2bc67922b8210035416b0a33b46",
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/PeriodoContableIdempotencyTests.cs only; test-only, no production/frontend/migrations/workflows/manifests",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.9.D. Add a focused test-only guard in a new PeriodoContableIdempotencyTests.cs that establishes the exact idempotency expectations applicable to create/close for the current PeriodoContable backend contract without modifying production code. Reuse existing test conventions and avoid duplicating unrelated coverage. Run the focused test suite/build and two independent self-reviews. If current behavior cannot satisfy a defensible idempotency contract, return REQUIRED with the precise failing behavior rather than weakening the test. Do not branch, PR, merge, deploy, touch main/Produccion/secrets or edit vaep control files. Return terminal artifact for VAEP REVIEW_FIRST."
+}

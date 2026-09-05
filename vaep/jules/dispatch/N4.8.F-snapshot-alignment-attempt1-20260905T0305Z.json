@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.8.F-SNAPSHOT-ALIGN-20260905T0305Z",
+  "taskId": "N4.8.F",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "4258d328f544e219e7ccbf27f5a1f07f35cdebb4",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs; backend/src/Infrastructure/Persistence/Migrations/20260905061000_N4_8_C_ConfiguracionContable.cs; backend/src/Infrastructure/Persistence/Configurations/**; backend/src/Domain/**/ConfiguracionContable*.cs; no unrelated product changes",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first and obey it as the only operational authority. QA/CI correction for CURRENT_PARENT N4.8.F: exact-head 4258d328f544e219e7ccbf27f5a1f07f35cdebb4 has multiple applicable failures whose failing step is EF snapshot consistency. Reproduce `dotnet ef migrations has-pending-model-changes` and identify the complete model delta. Evidence already shows the N4.8.C manual migration 20260905061000_N4_8_C_ConfiguracionContable exists while the canonical AppDbContextModelSnapshot does not contain ConfiguracionContable. Correct only the causal EF snapshot/migration metadata drift, preserving the already-applied reversible migration and avoiding any duplicate table/data migration. If additional unrelated pending model deltas exist, stop and report them rather than widening scope. Run restore/build/tests plus has-pending-model-changes and two independent self-reviews. Do not create branch/PR/push/merge/deploy; do not touch main, Produccion, secrets, credentials, domains, certificates, production data or production infrastructure. Return patch/artifact for VAEP REVIEW_FIRST."
+}

@@ -13,6 +13,9 @@ public class FacturaDetalleConfiguration : IEntityTypeConfiguration<FacturaDetal
         builder.Property(d => d.ProductoMarca).IsRequired().HasMaxLength(100);
         builder.Property(d => d.ProductoModelo).IsRequired().HasMaxLength(100);
         builder.Property(d => d.ProductoCodigo).HasMaxLength(50);
+        builder.Property(d => d.VarianteColor).HasMaxLength(100);
+        builder.Property(d => d.VarianteTalla).HasMaxLength(100);
+        builder.Property(d => d.VarianteSku).HasMaxLength(80);
         builder.Property(d => d.PrecioUnitario).HasColumnType("decimal(18,2)");
         builder.Property(d => d.Descuento).HasColumnType("decimal(18,2)");
         builder.Property(d => d.Subtotal).HasColumnType("decimal(18,2)");

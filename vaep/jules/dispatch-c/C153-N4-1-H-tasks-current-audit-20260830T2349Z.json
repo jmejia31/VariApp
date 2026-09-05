@@ -1,0 +1,10 @@
+{
+  "dispatchId": "C153-N4-1-H-tasks-current-audit-20260830T2349Z",
+  "taskId": "N4.1.H-C153-tasks-current-audit",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "33be7bd92660bc678ad4c6c60034376640dea809",
+  "taskAttempt": 1,
+  "fileScopeHint": "TASKS.md",
+  "prompt": "VAEP_TRANSPORT_VERIFIED=true. STRICT_READ_ONLY_NON_SHELL. Audit only TASKS.md using native file-reading tools; never shell/terminal/bash, never modify files, never create helpers. Determine only from directly visible evidence whether N4.1/N4.1.H contains an explicit current closure rollup and whether any wording can falsely imply LISTO while required-current M11 real encrypted Desarrollo backup and applicable restore/drill evidence remain absent. If native reading truncates, report exact truncation and infer nothing unseen. Return OBSERVATIONS, LIMITATIONS, VALIDATIONS EXECUTED, VALIDATIONS NOT EXECUTED, RISKS/RECOMMENDATIONS, literal TEST_EXEMPTION=STRICT_READ_ONLY_EVIDENCE_ONLY, plus two separate substantive messages labeled exactly SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. No unsupported closure claim. New logical task ATTEMPT1."
+}

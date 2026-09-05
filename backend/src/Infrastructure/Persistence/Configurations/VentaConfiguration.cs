@@ -18,10 +18,20 @@ public class VentaConfiguration : IEntityTypeConfiguration<Venta>
         builder.Property(v => v.ClienteDireccion).HasMaxLength(300);
         builder.Property(v => v.Notas).HasMaxLength(1000);
         builder.Property(v => v.MotivoAnulacion).HasMaxLength(500);
+        builder.Property(v => v.CostoEnvioNombreSnapshot).HasMaxLength(150);
+        builder.Property(v => v.CostoEnvioDepartamentoSnapshot).HasMaxLength(120);
+        builder.Property(v => v.CostoEnvioCiudadSnapshot).HasMaxLength(120);
+        builder.Property(v => v.CostoEnvioZonaSnapshot).HasMaxLength(150);
+        builder.Property(v => v.CostoEnvioModalidadSnapshot).HasMaxLength(80);
+        builder.Property(v => v.MotivoExoneracionEnvio).HasMaxLength(500);
 
+        builder.Property(v => v.ImporteBruto).HasColumnType("decimal(18,2)");
+        builder.Property(v => v.ImporteProductos).HasColumnType("decimal(18,2)");
         builder.Property(v => v.Subtotal).HasColumnType("decimal(18,2)");
         builder.Property(v => v.Descuento).HasColumnType("decimal(18,2)");
         builder.Property(v => v.Impuesto).HasColumnType("decimal(18,2)");
+        builder.Property(v => v.CostoEnvio).HasColumnType("decimal(18,2)");
+        builder.Property(v => v.CostoEnvioMontoSnapshot).HasColumnType("decimal(18,2)");
         builder.Property(v => v.Total).HasColumnType("decimal(18,2)");
         builder.Property(v => v.CostoTotal).HasColumnType("decimal(18,2)");
         builder.Property(v => v.UtilidadBruta).HasColumnType("decimal(18,2)");
@@ -29,6 +39,16 @@ public class VentaConfiguration : IEntityTypeConfiguration<Venta>
         builder.Property(v => v.Estado).HasConversion<string>().HasMaxLength(20);
         builder.Property(v => v.EstadoPago).HasConversion<string>().HasMaxLength(20);
         builder.Property(v => v.MetodoPago).HasConversion<string>().HasMaxLength(20);
+        builder.Property(v => v.Eliminado).HasDefaultValue(false);
+        builder.HasIndex(v => v.Eliminado);
+        builder.HasIndex(v => v.MetodoPagoId)
+            .HasDatabaseName("IX_Ventas_MetodoPagoId");
+        builder.HasQueryFilter(v => !v.Eliminado);
+
+        builder.HasOne(v => v.MetodoPagoCatalogo)
+            .WithMany()
+            .HasForeignKey(v => v.MetodoPagoId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasMany(v => v.Detalles)
             .WithOne(d => d.Venta)
@@ -45,9 +65,11 @@ public class VentaConfiguration : IEntityTypeConfiguration<Venta>
             .HasForeignKey(i => i.VentaId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        // Venta y Factura son documentos históricos. Una eliminación física
+        // accidental de la venta nunca debe propagar la eliminación de factura.
         builder.HasOne(v => v.Factura)
             .WithOne(f => f.Venta)
             .HasForeignKey<Factura>(f => f.VentaId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

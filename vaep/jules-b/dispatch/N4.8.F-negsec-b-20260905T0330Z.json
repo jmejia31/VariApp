@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.8.F-NEGSEC-B-20260905T0330Z",
+  "taskId": "N4.8.F.SUPPORT",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "7a3072e09e79f2d53316a8c1523b577a094ce8b2",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N48FContabilizacionNegativeSecurityRegressionTests.cs; READ_ONLY review of ContabilizacionController.cs and permission infrastructure; no functional code writes; no EF/audit/observability files",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. NEXT_SAFE after B RBAC R2 session completed with useful activity. Stay productive while VAEP reviews prior evidence. Perform a read-only negative-security regression review of POST /contabilizacion/eventos: unauthenticated, authenticated without Finanzas/Crear permission, wrong permission/action combinations, and no privilege bypass. Your ONLY authorized write is a new isolated test file `backend/tests/InventoryApp.Tests/N48FContabilizacionNegativeSecurityRegressionTests.cs` if it adds non-duplicative coverage. Do not modify ContabilizacionController.cs or any functional code. Do not touch EF snapshot/migrations, audit writer/service, correlation middleware/Program.cs, secrets or unrelated files. Run focused tests/build and two independent self-reviews. No branch/PR/push/merge/deploy; no main/Produccion. Return patch/artifact for VAEP REVIEW_FIRST."
+}

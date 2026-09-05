@@ -1,0 +1,294 @@
+name: M11 - Backup y restauración en Desarrollo
+
+on:
+  push:
+    branches:
+      - Desarrollo
+    paths:
+      - scripts/m11_backup_desarrollo.sh
+      - scripts/m11_restore_desarrollo.sh
+      - .github/workflows/m11-backup-restore-desarrollo.yml
+      - backend/src/Infrastructure/Migrations/**
+      - docs/FASE_M11_BACKUPS_RESTAURACION_DESARROLLO.md
+  pull_request:
+    branches:
+      - main
+    paths:
+      - scripts/m11_backup_desarrollo.sh
+      - scripts/m11_restore_desarrollo.sh
+      - .github/workflows/m11-backup-restore-desarrollo.yml
+      - backend/src/Infrastructure/Migrations/**
+      - docs/FASE_M11_BACKUPS_RESTAURACION_DESARROLLO.md
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: m11-backup-restore-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backup-restore-drill:
+    name: Backup cifrado y restore MySQL descartable
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: inventoryapp_m11_source
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=12
+
+    env:
+      ASPNETCORE_ENVIRONMENT: Development
+      PORT: '5005'
+      ConnectionStrings__DefaultConnection: 'Server=127.0.0.1;Port=3306;Database=inventoryapp_m11_source;User=root;Password=root;SslMode=None;AllowPublicKeyRetrieval=True;'
+      Database__ServerVersion: '8.4.0'
+      Database__ApplyMigrationsOnStartup: 'true'
+      Jwt__Secret: 'M11-CI-Only-Secret-With-More-Than-32-Characters-2026'
+      Jwt__Issuer: 'InventoryApp.API'
+      Jwt__Audience: 'InventoryApp.Frontend'
+      Jwt__ExpiraMinutos: '120'
+      Security__LoginRateLimitPerMinute: '300'
+      SeedAdmin__Username: 'm11_restore_admin'
+      SeedAdmin__Password: 'M11.Restore#2026!'
+      Cors__AllowedOrigins__0: 'http://127.0.0.1:4200'
+      AppSettings__BackendPublicUrl: 'https://preview.variapp.invalid'
+      AppSettings__LogoPublicUrl: 'https://variapp-desarrollo.vercel.app/assets/varistorehn-logo.png'
+      Cloudinary__CloudName: 'ci-not-used'
+      Cloudinary__ApiKey: 'ci-not-used'
+      Cloudinary__ApiSecret: 'ci-not-used'
+      M11_CI_PASSPHRASE: 'M11-CI-Disposable-Backup-Key-2026-Only'
+
+    steps:
+      - name: Checkout Desarrollo
+        uses: actions/checkout@v4
+
+      - name: Configurar .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+          cache: true
+          cache-dependency-path: backend/**/*.csproj
+
+      - name: Restaurar herramientas y preparar MySQL estricto
+        working-directory: backend
+        shell: bash
+        run: |
+          set -euo pipefail
+          dotnet restore InventoryApp.sln
+          dotnet tool install --global dotnet-ef --version 8.0.8
+          mysql_container="${{ job.services.mysql.id }}"
+          docker exec "$mysql_container" mysql -uroot -proot -e "SET GLOBAL sql_require_primary_key=ON;"
+          test "$(docker exec "$mysql_container" mysql -uroot -proot -Nse "SELECT @@GLOBAL.sql_require_primary_key;")" = 1
+
+      - name: Crear esquema fuente completo
+        working-directory: backend
+        run: |
+          dotnet ef database update \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext
+
+      - name: Sembrar registros y referencias de activos M11
+        shell: bash
+        run: |
+          set -euo pipefail
+          export MYSQL_PWD=root
+          mysql --protocol=TCP -h 127.0.0.1 -P 3306 -uroot inventoryapp_m11_source <<'SQL'
+          INSERT INTO Productos
+            (Nombre, Marca, Modelo, TipoInventario, Cantidad, Costo, Precio, UmbralStockBajo,
+             Activo, Eliminado, FechaCreacion, FechaActualizacion)
+          VALUES
+            ('Producto Sentinel M11', 'Marca M11', 'Modelo M11', 0, 0, 125.5000, 199.9900, 5,
+             1, 0, UTC_TIMESTAMP(6), UTC_TIMESTAMP(6));
+          SET @producto_id = LAST_INSERT_ID();
+
+          INSERT INTO ProductoImagenes
+            (ProductoId, ProductoVarianteId, Url, PublicId, Orden, EsPrincipal, FechaCreacion)
+          VALUES
+            (@producto_id, NULL, 'https://assets.invalid/m11/producto-sentinel.webp',
+             'desarrollo/m11/producto-sentinel', 0, 1, UTC_TIMESTAMP(6));
+
+          INSERT INTO Compras
+            (NumeroCompra, Fecha, ProveedorNombre, Estado, EstadoPago, MetodoPago,
+             Subtotal, Descuento, Impuesto, Total, Eliminado, FechaCreacion, FechaActualizacion)
+          VALUES
+            ('M11-BACKUP-001', UTC_TIMESTAMP(6), 'Proveedor Sentinel M11', 0, 0, 0,
+             100.0000, 0.0000, 0.0000, 100.0000, 0, UTC_TIMESTAMP(6), UTC_TIMESTAMP(6));
+          SET @compra_id = LAST_INSERT_ID();
+
+          INSERT INTO CompraDocumentos
+            (CompraId, NombreOriginal, ContentType, SizeBytes, Url, PublicId, ResourceType,
+             Eliminado, FechaCreacion)
+          VALUES
+            (@compra_id, 'factura-m11.pdf', 'application/pdf', 3210,
+             'https://assets.invalid/m11/factura-sentinel.pdf',
+             'desarrollo/m11/factura-sentinel', 'raw', 0, UTC_TIMESTAMP(6));
+          SQL
+          unset MYSQL_PWD
+
+      - name: Probar retención aislada
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/m11-backups"
+          touch "$RUNNER_TEMP/m11-backups/variapp-desarrollo-20000101T000000Z.tar.gz.gpg"
+          touch "$RUNNER_TEMP/m11-backups/variapp-desarrollo-20000101T000000Z.tar.gz.gpg.sha256"
+          touch "$RUNNER_TEMP/m11-backups/variapp-desarrollo-20000101T000000Z.meta.json"
+          touch "$RUNNER_TEMP/m11-backups/NO_ELIMINAR.txt"
+          touch -d '30 days ago' "$RUNNER_TEMP/m11-backups/variapp-desarrollo-20000101T000000Z.tar.gz.gpg" \
+            "$RUNNER_TEMP/m11-backups/variapp-desarrollo-20000101T000000Z.tar.gz.gpg.sha256" \
+            "$RUNNER_TEMP/m11-backups/variapp-desarrollo-20000101T000000Z.meta.json"
+
+      - name: Ejecutar backup M11 cifrado
+        id: backup
+        shell: bash
+        env:
+          VARIAPP_ENVIRONMENT: ci
+          DB_HOST: 127.0.0.1
+          DB_PORT: '3306'
+          DB_NAME: inventoryapp_m11_source
+          DB_USER: root
+          DB_PASSWORD: root
+          BACKUP_PASSPHRASE: ${{ env.M11_CI_PASSPHRASE }}
+          OUTPUT_DIR: ${{ runner.temp }}/m11-backups
+          RETENTION_DAYS: '14'
+          BACKUP_LABEL: desarrollo
+        run: |
+          set -euo pipefail
+          chmod +x scripts/m11_backup_desarrollo.sh scripts/m11_restore_desarrollo.sh
+          scripts/m11_backup_desarrollo.sh | tee "$RUNNER_TEMP/m11-backup.log"
+          backup_file="$(grep '^M11_BACKUP_FILE=' "$RUNNER_TEMP/m11-backup.log" | cut -d= -f2-)"
+          checksum_file="$(grep '^M11_BACKUP_SHA256=' "$RUNNER_TEMP/m11-backup.log" | cut -d= -f2-)"
+          metadata_file="$(grep '^M11_BACKUP_METADATA=' "$RUNNER_TEMP/m11-backup.log" | cut -d= -f2-)"
+          test -s "$backup_file"
+          test -s "$checksum_file"
+          test -s "$metadata_file"
+          test ! -e "$RUNNER_TEMP/m11-backups/variapp-desarrollo-20000101T000000Z.tar.gz.gpg"
+          test -e "$RUNNER_TEMP/m11-backups/NO_ELIMINAR.txt"
+          test "$(stat -c '%a' "$backup_file")" = 600
+          echo "backup_file=$backup_file" >> "$GITHUB_OUTPUT"
+          echo "checksum_file=$checksum_file" >> "$GITHUB_OUTPUT"
+          echo "metadata_file=$metadata_file" >> "$GITHUB_OUTPUT"
+
+      - name: Confirmar que solo persiste material cifrado
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -z "$(find "$RUNNER_TEMP/m11-backups" -maxdepth 1 -type f \( -name '*.sql' -o -name '*.tar.gz' \) -print -quit)"
+          grep -q '"encrypted": true' "${{ steps.backup.outputs.metadata_file }}"
+          grep -q '"productionInScope": false' "${{ steps.backup.outputs.metadata_file }}"
+
+      - name: Restaurar en base descartable y validar integridad
+        id: restore
+        shell: bash
+        env:
+          RESTORE_ENVIRONMENT: ci
+          TARGET_DB_HOST: 127.0.0.1
+          TARGET_DB_PORT: '3306'
+          TARGET_DB_NAME: inventoryapp_m11_restore
+          TARGET_DB_USER: root
+          TARGET_DB_PASSWORD: root
+          BACKUP_PASSPHRASE: ${{ env.M11_CI_PASSPHRASE }}
+          BACKUP_FILE: ${{ steps.backup.outputs.backup_file }}
+          BACKUP_CHECKSUM_FILE: ${{ steps.backup.outputs.checksum_file }}
+          ALLOW_DESTRUCTIVE_RESTORE: YES_M11
+          RESTORE_FILES_DIR: ${{ runner.temp }}/m11-restored-files
+          RESTORE_REPORT_PATH: ${{ runner.temp }}/m11-restore-report.json
+        run: |
+          set -euo pipefail
+          scripts/m11_restore_desarrollo.sh | tee "$RUNNER_TEMP/m11-restore.log"
+          test -s "$RUNNER_TEMP/m11-restore-report.json"
+          grep -q '"status": "SUCCESS"' "$RUNNER_TEMP/m11-restore-report.json"
+          grep -q '"productionTouched": false' "$RUNNER_TEMP/m11-restore-report.json"
+          grep -q 'desarrollo/m11/producto-sentinel' "$RUNNER_TEMP/m11-restored-files/references/producto-imagenes.tsv"
+          grep -q 'desarrollo/m11/factura-sentinel' "$RUNNER_TEMP/m11-restored-files/references/compra-documentos.tsv"
+
+      - name: Verificar datos sentinel tras restore
+        shell: bash
+        run: |
+          set -euo pipefail
+          export MYSQL_PWD=root
+          test "$(mysql --protocol=TCP -h 127.0.0.1 -P 3306 -uroot inventoryapp_m11_restore -Nse "SELECT COUNT(*) FROM Productos WHERE Nombre='Producto Sentinel M11';")" = 1
+          test "$(mysql --protocol=TCP -h 127.0.0.1 -P 3306 -uroot inventoryapp_m11_restore -Nse "SELECT COUNT(*) FROM ProductoImagenes WHERE PublicId='desarrollo/m11/producto-sentinel';")" = 1
+          test "$(mysql --protocol=TCP -h 127.0.0.1 -P 3306 -uroot inventoryapp_m11_restore -Nse "SELECT COUNT(*) FROM CompraDocumentos WHERE PublicId='desarrollo/m11/factura-sentinel';")" = 1
+          unset MYSQL_PWD
+
+      - name: Arrancar API contra restore descartable
+        working-directory: backend
+        shell: bash
+        env:
+          ConnectionStrings__DefaultConnection: 'Server=127.0.0.1;Port=3306;Database=inventoryapp_m11_restore;User=root;Password=root;SslMode=None;AllowPublicKeyRetrieval=True;'
+        run: |
+          set -euo pipefail
+          dotnet build InventoryApp.sln --configuration Release --no-restore
+          nohup dotnet run \
+            --project src/API/InventoryApp.API.csproj \
+            --configuration Release \
+            --no-build \
+            --no-launch-profile \
+            > "$RUNNER_TEMP/m11-restored-api.log" 2>&1 &
+          echo $! > "$RUNNER_TEMP/m11-restored-api.pid"
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:5005/health > /dev/null && \
+               curl --fail --silent http://127.0.0.1:5005/health/ready > /dev/null; then
+              echo 'API restaurada M11 saludable.'
+              exit 0
+            fi
+            if ! kill -0 "$(cat "$RUNNER_TEMP/m11-restored-api.pid")" 2>/dev/null; then
+              cat "$RUNNER_TEMP/m11-restored-api.log" >&2 || true
+              exit 1
+            fi
+            sleep 2
+          done
+          cat "$RUNNER_TEMP/m11-restored-api.log" >&2 || true
+          exit 1
+
+      - name: Validar protecciones fail-closed
+        shell: bash
+        run: |
+          set -euo pipefail
+          if VARIAPP_ENVIRONMENT=produccion \
+             DB_HOST=127.0.0.1 DB_PORT=3306 DB_NAME=varistorehn_produccion DB_USER=root DB_PASSWORD=root \
+             BACKUP_PASSPHRASE="$M11_CI_PASSPHRASE" \
+             scripts/m11_backup_desarrollo.sh > /dev/null 2>&1; then
+            echo 'El backup no bloqueó Producción.' >&2
+            exit 1
+          fi
+
+          if RESTORE_ENVIRONMENT=desarrollo-descartable \
+             TARGET_DB_HOST=127.0.0.1 TARGET_DB_PORT=3306 TARGET_DB_NAME=varistorehn_desarrollo \
+             TARGET_DB_USER=root TARGET_DB_PASSWORD=root BACKUP_PASSPHRASE="$M11_CI_PASSPHRASE" \
+             BACKUP_FILE="${{ steps.backup.outputs.backup_file }}" \
+             BACKUP_CHECKSUM_FILE="${{ steps.backup.outputs.checksum_file }}" \
+             ALLOW_DESTRUCTIVE_RESTORE=YES_M11 \
+             scripts/m11_restore_desarrollo.sh > /dev/null 2>&1; then
+            echo 'El restore permitió un destino no descartable.' >&2
+            exit 1
+          fi
+
+      - name: Publicar evidencia M11 cifrada y reporte de restore
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m11-backup-restore-desarrollo
+          path: |
+            ${{ runner.temp }}/m11-backups/*.tar.gz.gpg
+            ${{ runner.temp }}/m11-backups/*.tar.gz.gpg.sha256
+            ${{ runner.temp }}/m11-backups/*.meta.json
+            ${{ runner.temp }}/m11-restore-report.json
+            ${{ runner.temp }}/m11-backup.log
+            ${{ runner.temp }}/m11-restore.log
+            ${{ runner.temp }}/m11-restored-api.log
+          if-no-files-found: warn
+          retention-days: 14

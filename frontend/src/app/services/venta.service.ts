@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { ApiResponse, PagedRequest, PagedResult } from '../core/models/api-response.model';
+import { ProductoEscaneadoVenta } from '../core/models/producto.model';
 import { ResultadoCalculo, Venta, VentaDetalleInput, VentaFormValue } from '../core/models/venta.model';
 
 @Injectable({ providedIn: 'root' })
@@ -21,6 +22,18 @@ export class VentaService {
 
   getById(id: number): Observable<ApiResponse<Venta>> {
     return this.http.get<ApiResponse<Venta>>(`${this.apiUrl}/${id}`);
+  }
+
+  buscarProductoPorCodigo(codigo: string): Observable<ApiResponse<ProductoEscaneadoVenta>> {
+    const params = new HttpParams().set('codigo', codigo);
+    return this.http.get<ApiResponse<ProductoEscaneadoVenta>>(`${this.apiUrl}/productos/por-codigo`, { params });
+  }
+
+  buscarProductos(termino: string, limite = 30): Observable<ApiResponse<ProductoEscaneadoVenta[]>> {
+    const params = new HttpParams()
+      .set('termino', termino)
+      .set('limite', Math.max(1, Math.min(limite, 30)));
+    return this.http.get<ApiResponse<ProductoEscaneadoVenta[]>>(`${this.apiUrl}/productos/buscar`, { params });
   }
 
   create(value: VentaFormValue): Observable<ApiResponse<Venta>> {
@@ -43,10 +56,21 @@ export class VentaService {
     return this.http.delete<ApiResponse<object>>(`${this.apiUrl}/${id}`);
   }
 
-  /** Vista previa: calcula descuentos/impuestos reales sin guardar nada. */
-  calcular(clienteId: number | null, codigoPromocional: string | null, detalles: VentaDetalleInput[]): Observable<ApiResponse<ResultadoCalculo>> {
+  calcular(
+    clienteId: number | null,
+    codigoPromocional: string | null,
+    detalles: VentaDetalleInput[],
+    costoEnvioId?: number | null,
+    envioExonerado = false,
+    motivoExoneracionEnvio?: string | null
+  ): Observable<ApiResponse<ResultadoCalculo>> {
     return this.http.post<ApiResponse<ResultadoCalculo>>(`${this.apiUrl}/calcular`, {
-      clienteId, codigoPromocional, detalles
+      clienteId,
+      codigoPromocional,
+      costoEnvioId,
+      envioExonerado,
+      motivoExoneracionEnvio,
+      detalles
     });
   }
 }

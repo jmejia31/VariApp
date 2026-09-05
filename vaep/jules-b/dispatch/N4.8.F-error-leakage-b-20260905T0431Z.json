@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.8.F-ERROR-LEAKAGE-B-20260905T0431Z",
+  "taskId": "N4.8.F.SUPPORT.ERROR_LEAKAGE",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "4827f8723c3293af2be102220337b8848c7c02ac",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N48FAccountingErrorLeakageTests.cs only; production implementation READ_ONLY; no A/C/D scopes",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.8.F SEC_AUDIT. Your AUTHZ_POLICY_DRIFT task is terminal and its approved test delta has been integrated by VAEP. This is a distinct NEXT_SAFE scope. Audit accounting API failure surfaces for accidental exception/stack/implementation-detail leakage and fail-closed error behavior using existing contracts. Your only authorized write is backend/tests/InventoryApp.Tests/N48FAccountingErrorLeakageTests.cs and only if focused non-duplicative regression coverage is materially justified. Production controllers/middleware/services are READ_ONLY; report any real defect for VAEP QA_TAKEOVER. Run focused tests/build and emit two substantive independent self-reviews before COMPLETED. No plan.md/temp files. No branch/PR/push/merge/deploy; no main/Produccion/secrets/credentials/domains/certificates/production data."
+}

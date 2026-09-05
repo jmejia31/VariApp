@@ -1,0 +1,9 @@
+{
+  "dispatchId": "20260904T0224HND-N4_7_C-EF-SNAPSHOT-CAPTURE",
+  "parent": "N4.7.C",
+  "purpose": "QA_TAKEOVER capture EF-generated snapshot for pending-model drift repair",
+  "baseSha": "6982778eb43d64c2782c52a6afa58e3f2d2d5f90",
+  "classification": "DIAGNOSTIC_ONLY_NOT_JULES_ATTEMPT",
+  "nonProduction": true,
+  "noDeployment": true
+}

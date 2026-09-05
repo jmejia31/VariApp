@@ -1,0 +1,1 @@
+Canonical VAEP/Jules dispatch route. Runtime consumes only newly added *.json manifests; historical manifests remain in Git history.

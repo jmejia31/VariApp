@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.8.F-NEGATIVE-API-B-20260905T0403Z",
+  "taskId": "N4.8.F.SUPPORT.NEGATIVE_API",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "adf95e72d454e4f5800fb6053a90171be52e6774",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N48FContabilizacionApiNegativeContractTests.cs; READ_ONLY review of ContabilizacionController.cs and existing API contract tests; no writes outside this single new test file; no A/C/D scopes",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.8.F. NEXT_SAFE after your API-contract support completed. Perform a read-only cross-review of POST /contabilizacion/eventos negative API behavior: malformed/invalid request contract, permission-denied surface, stable status/response semantics, and no sensitive error leakage. Your ONLY authorized write is a new non-duplicative test file `backend/tests/InventoryApp.Tests/N48FContabilizacionApiNegativeContractTests.cs`; do not modify controller or functional code. If existing coverage already proves the contract fully, create no patch and report evidence precisely rather than busywork. Run focused tests/build and two independent self-reviews. No branch/PR/push/merge/deploy; do not touch main/Produccion/secrets/credentials/domains/certificates/production data. Return artifact for VAEP REVIEW_FIRST."
+}

@@ -7,17 +7,22 @@ const RUTAS_PROTEGIDAS = [
   { ruta: '/productos', modulo: 'Productos', accion: 'Ver' },
   { ruta: '/categorias', modulo: 'Categorias', accion: 'Ver' },
   { ruta: '/compras', modulo: 'Compras', accion: 'Ver' },
+  { ruta: '/facturas-proveedor', modulo: 'Compras', accion: 'Ver' },
   { ruta: '/proveedores', modulo: 'Proveedores', accion: 'Ver' },
   { ruta: '/ventas', modulo: 'Ventas', accion: 'Ver' },
   { ruta: '/clientes', modulo: 'Clientes', accion: 'Ver' },
   { ruta: '/finanzas', modulo: 'Finanzas', accion: 'Ver' },
-  { ruta: '/movimientos', modulo: 'MovimientosInventario', accion: 'Ver' },
+  { ruta: '/plan-cuentas', modulo: 'Finanzas', accion: 'Ver' },
+  { ruta: '/inventario/movimientos', modulo: 'MovimientosInventario', accion: 'Ver' },
+  { ruta: '/inventario/transferencias', modulo: 'MovimientosInventario', accion: 'Ver' },
+  { ruta: '/inventario/ajustes', modulo: 'Inventario', accion: 'Ver' },
+  { ruta: '/cargas-masivas', modulo: 'CargasMasivas', accion: 'Ver' },
   { ruta: '/usuarios', modulo: 'Usuarios', accion: 'Ver' },
   { ruta: '/roles', modulo: 'Roles', accion: 'Ver' },
   { ruta: '/descuentos', modulo: 'Descuentos', accion: 'Ver' },
   { ruta: '/impuestos', modulo: 'Impuestos', accion: 'Ver' },
   { ruta: '/permisos', modulo: 'Permisos', accion: 'Administrar' },
-  { ruta: '/auditoria', modulo: 'Auditoria', accion: 'Ver' },
+  { ruta: '/auditoria', modulo: 'Auditoria', accion: 'Ver', soloAdministrador: true },
   { ruta: '/configuracion', modulo: 'Configuracion', accion: 'Ver' }
 ] as const;
 
@@ -62,6 +67,8 @@ export class PermisosRuntimeService {
 
   rutaInicialPermitida(): string | null {
     if (this._esAdministrador()) return '/dashboard';
-    return RUTAS_PROTEGIDAS.find(item => this.puede(item.modulo, item.accion))?.ruta ?? null;
+    return RUTAS_PROTEGIDAS.find(item =>
+      !('soloAdministrador' in item) && this.puede(item.modulo, item.accion)
+    )?.ruta ?? null;
   }
 }

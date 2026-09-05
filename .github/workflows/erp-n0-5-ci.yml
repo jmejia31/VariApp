@@ -1,0 +1,284 @@
+name: ERP-N0.5 - Certificación MetodoPago histórico
+
+on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - 'backend/src/**/*MetodoPago*.cs'
+      - 'backend/src/**/*CompraMetodoPagoResolver*.cs'
+      - 'backend/src/Infrastructure/Migrations/*N0_5*.cs'
+      - 'backend/src/Infrastructure/Migrations/*ERP_N05*.cs'
+      - 'backend/tests/InventoryApp.Tests/*MetodoPago*.cs'
+      - 'backend/tests/InventoryApp.Tests/CompraMetodoPagoResolverTests.cs'
+      - 'backend/scripts/*erp-n0-5*'
+      - 'frontend/e2e/n0-5-metodos-pago-regresion.spec.ts'
+      - '.github/workflows/erp-n0-5-ci.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'backend/src/**/*MetodoPago*.cs'
+      - 'backend/src/**/*CompraMetodoPagoResolver*.cs'
+      - 'backend/src/Infrastructure/Migrations/*N0_5*.cs'
+      - 'backend/src/Infrastructure/Migrations/*ERP_N05*.cs'
+      - 'backend/tests/InventoryApp.Tests/*MetodoPago*.cs'
+      - 'backend/tests/InventoryApp.Tests/CompraMetodoPagoResolverTests.cs'
+      - 'backend/scripts/*erp-n0-5*'
+      - 'frontend/e2e/n0-5-metodos-pago-regresion.spec.ts'
+      - '.github/workflows/erp-n0-5-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: erp-n0-5-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  metodo-pago-historico:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: inventoryapp_n05_ci
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -proot"
+          --health-interval=10s --health-timeout=5s --health-retries=12
+    env:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: Server=127.0.0.1;Port=3306;Database=inventoryapp_n05_ci;User=root;Password=root;SslMode=None;AllowPublicKeyRetrieval=True;
+      Database__ServerVersion: 8.4.0
+      Database__ApplyMigrationsOnStartup: 'false'
+      Jwt__Secret: ERP-N0-5-CI-Only-Secret-With-More-Than-32-Characters-2026
+      Jwt__Issuer: VariApp.CI
+      Jwt__Audience: VariApp.CI.Frontend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restaurar, compilar y probar backend
+        working-directory: backend
+        run: |
+          dotnet restore InventoryApp.sln
+          dotnet build InventoryApp.sln -c Release --no-restore -warnaserror
+          dotnet test InventoryApp.sln -c Release --no-build --filter "Category!=Integration"
+
+      - name: Instalar EF
+        run: dotnet tool install --global dotnet-ef --version 8.0.8
+
+      - name: Crear esquema base relacional N0.5
+        working-directory: backend
+        run: |
+          dotnet ef database update 20260812022343_N0_5_MetodoPagoRelacionalBase \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext
+
+      - name: Sembrar historia representativa y desacoplar Id de enum
+        shell: bash
+        run: |
+          set -euo pipefail
+          c="${{ job.services.mysql.id }}"
+          docker exec "$c" mysql -uroot -proot inventoryapp_n05_ci -e "
+            INSERT INTO MetodosPago
+              (Codigo,Nombre,Tipo,Activo,RequiereReferencia,RequiereBanco,PermiteCambio,Orden,Metadata,Eliminado,FechaCreacion,FechaActualizacion)
+            VALUES
+              ('ChequeExterno','Cheque externo','Externo',1,0,0,0,5,'{\"ci\":true}',0,UTC_TIMESTAMP(6),UTC_TIMESTAMP(6));
+
+            INSERT INTO Ventas
+              (Id,NumeroVenta,Fecha,ClienteNombre,Estado,EstadoPago,MetodoPago,
+               ImporteBruto,ImporteProductos,Subtotal,Descuento,Impuesto,CostoEnvio,
+               EnvioExonerado,Total,CostoTotal,UtilidadBruta,Eliminado,FechaCreacion,FechaActualizacion)
+            VALUES
+              (9501,'N05-V-1',UTC_TIMESTAMP(6),'N05 Cliente 1','Confirmada','Pagado','Efectivo',100,100,100,0,0,0,0,100,60,40,0,UTC_TIMESTAMP(6),UTC_TIMESTAMP(6)),
+              (9502,'N05-V-2',UTC_TIMESTAMP(6),'N05 Cliente 2','Confirmada','Pagado','Transferencia',100,100,100,0,0,0,0,100,60,40,0,UTC_TIMESTAMP(6),UTC_TIMESTAMP(6)),
+              (9503,'N05-V-3',UTC_TIMESTAMP(6),'N05 Cliente 3','Confirmada','Pagado','Tarjeta',100,100,100,0,0,0,0,100,60,40,0,UTC_TIMESTAMP(6),UTC_TIMESTAMP(6)),
+              (9504,'N05-V-4',UTC_TIMESTAMP(6),'N05 Cliente 4','Confirmada','Pagado','Otro',100,100,100,0,0,0,0,100,60,40,0,UTC_TIMESTAMP(6),UTC_TIMESTAMP(6));
+
+            INSERT INTO Facturas
+              (Id,VentaId,NumeroFactura,FechaEmision,Estado,Moneda,EmpresaNombre,ClienteNombre,
+               VendedorUsuarioId,VendedorNombreUsuario,ImporteBruto,Subtotal,Descuento,Impuesto,
+               CostoEnvio,EnvioExonerado,Total,TotalPagado,SaldoPendiente)
+            VALUES
+              (9511,9501,'N05-F-1',UTC_TIMESTAMP(6),'Emitida','HNL','VariApp CI','N05 Cliente 1',1,'n05.ci',100,100,0,0,0,0,100,100,0),
+              (9512,9502,'N05-F-2',UTC_TIMESTAMP(6),'Emitida','HNL','VariApp CI','N05 Cliente 2',1,'n05.ci',100,100,0,0,0,0,100,100,0),
+              (9513,9503,'N05-F-3',UTC_TIMESTAMP(6),'Emitida','HNL','VariApp CI','N05 Cliente 3',1,'n05.ci',100,100,0,0,0,0,100,100,0),
+              (9514,9504,'N05-F-4',UTC_TIMESTAMP(6),'Emitida','HNL','VariApp CI','N05 Cliente 4',1,'n05.ci',100,100,0,0,0,0,100,100,0);
+
+            INSERT INTO FacturaPagos
+              (Id,FacturaId,FechaPago,Monto,MetodoPago,Anulado,FechaCreacion,FechaActualizacion)
+            VALUES
+              (9521,9511,UTC_TIMESTAMP(6),100,1,0,UTC_TIMESTAMP(6),UTC_TIMESTAMP(6)),
+              (9522,9512,UTC_TIMESTAMP(6),100,2,0,UTC_TIMESTAMP(6),UTC_TIMESTAMP(6)),
+              (9523,9513,UTC_TIMESTAMP(6),100,3,0,UTC_TIMESTAMP(6),UTC_TIMESTAMP(6)),
+              (9524,9514,UTC_TIMESTAMP(6),100,4,0,UTC_TIMESTAMP(6),UTC_TIMESTAMP(6));
+
+            INSERT INTO MovimientosFinancieros
+              (Id,Fecha,Tipo,Categoria,Concepto,Monto,Estado,MetodoPago,MetodoPagoId,EsAutomatico,ModuloOrigen)
+            VALUES
+              (9531,UTC_TIMESTAMP(6),'Ingreso','Venta','N05 Efectivo',100,'Pagado','Efectivo',NULL,0,'Manual'),
+              (9532,UTC_TIMESTAMP(6),'Ingreso','Venta','N05 Transferencia',100,'Pagado','Transferencia',NULL,0,'Manual'),
+              (9533,UTC_TIMESTAMP(6),'Ingreso','Venta','N05 Tarjeta',100,'Pagado','Tarjeta',NULL,0,'Manual'),
+              (9534,UTC_TIMESTAMP(6),'Ingreso','Venta','N05 Otro',100,'Pagado','Otro',NULL,0,'Manual'),
+              (9535,UTC_TIMESTAMP(6),'Ajuste','Ajuste','N05 sin método',0,'Pagado',NULL,NULL,0,'Manual');
+          "
+
+      - name: Probar fail-closed con valor legacy desconocido
+        shell: bash
+        run: |
+          set -euo pipefail
+          c="${{ job.services.mysql.id }}"
+          docker exec "$c" mysql -uroot -proot inventoryapp_n05_ci -e "
+            INSERT INTO MovimientosFinancieros
+              (Id,Fecha,Tipo,Categoria,Concepto,Monto,Estado,MetodoPago,MetodoPagoId,EsAutomatico,ModuloOrigen)
+            VALUES
+              (9599,UTC_TIMESTAMP(6),'Ajuste','Otro','N05 dato inválido',0,'Pagado','Cheque',NULL,0,'Manual');
+          "
+
+          resultado="$(docker exec -i "$c" mysql -uroot -proot inventoryapp_n05_ci --batch --skip-column-names < backend/scripts/preflight-erp-n0-5-metodo-pago.sql | tail -n 1)"
+          test "$resultado" -gt 0
+
+          if (
+            cd backend
+            dotnet ef database update 20260812023600_N0_5_BackfillMetodoPagoHistorico \
+              --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+              --startup-project src/API/InventoryApp.API.csproj \
+              --context AppDbContext
+          ); then
+            echo 'N0.5 debía bloquear un método legacy desconocido.' >&2
+            exit 1
+          fi
+
+          test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n05_ci -Nse "SELECT COUNT(*) FROM __EFMigrationsHistory WHERE MigrationId='20260812023600_N0_5_BackfillMetodoPagoHistorico';")" = '0'
+          test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n05_ci -Nse "SELECT COUNT(*) FROM MetodosPago WHERE Codigo IN ('Efectivo','Transferencia','Tarjeta','Otro');")" = '0'
+          test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n05_ci -Nse "SELECT COUNT(*) FROM Ventas WHERE MetodoPagoId IS NOT NULL;")" = '0'
+          test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n05_ci -Nse "SELECT COUNT(*) FROM FacturaPagos WHERE MetodoPagoId IS NOT NULL;")" = '0'
+          test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n05_ci -Nse "SELECT COUNT(*) FROM MovimientosFinancieros WHERE MetodoPagoId IS NOT NULL;")" = '0'
+
+          docker exec "$c" mysql -uroot -proot inventoryapp_n05_ci -e "DELETE FROM MovimientosFinancieros WHERE Id=9599;"
+
+      - name: Preflight N0.5 válido
+        shell: bash
+        run: |
+          set -euo pipefail
+          c="${{ job.services.mysql.id }}"
+          resultado="$(docker exec -i "$c" mysql -uroot -proot inventoryapp_n05_ci --batch --skip-column-names < backend/scripts/preflight-erp-n0-5-metodo-pago.sql | tail -n 1)"
+          test "$resultado" = '0'
+
+      - name: Aplicar backfill histórico N0.5 exacto
+        working-directory: backend
+        run: |
+          dotnet ef database update 20260812023600_N0_5_BackfillMetodoPagoHistorico \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext
+
+      - name: Verificar aislamiento, postcheck y preservación 1 a 1
+        shell: bash
+        run: |
+          set -euo pipefail
+          c="${{ job.services.mysql.id }}"
+          base='20260812022343_N0_5_MetodoPagoRelacionalBase'
+          backfill='20260812023600_N0_5_BackfillMetodoPagoHistorico'
+
+          test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n05_ci -Nse "SELECT COUNT(*) FROM __EFMigrationsHistory WHERE MigrationId='${base}';")" = '1'
+          test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n05_ci -Nse "SELECT COUNT(*) FROM __EFMigrationsHistory WHERE MigrationId='${backfill}';")" = '1'
+          test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n05_ci -Nse "SELECT COUNT(*) FROM __EFMigrationsHistory WHERE MigrationId > '${backfill}';")" = '0'
+
+          resultado="$(docker exec -i "$c" mysql -uroot -proot inventoryapp_n05_ci --batch --skip-column-names < backend/scripts/postdeploy-erp-n0-5-metodo-pago.sql | tail -n 1)"
+          test "$resultado" = '0'
+
+          test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n05_ci -Nse "SELECT COUNT(*) FROM MetodosPago WHERE Codigo='ChequeExterno' AND Id=1;")" = '1'
+          test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n05_ci -Nse "SELECT COUNT(*) FROM MetodosPago WHERE (Codigo='Efectivo' AND Id=1) OR (Codigo='Transferencia' AND Id=2) OR (Codigo='Tarjeta' AND Id=3) OR (Codigo='Otro' AND Id=4);")" = '0'
+
+          test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n05_ci -Nse "
+            SELECT COUNT(*) FROM Ventas v JOIN MetodosPago mp ON mp.Id=v.MetodoPagoId
+             WHERE v.Id BETWEEN 9501 AND 9504
+               AND ((v.Id=9501 AND BINARY v.MetodoPago=BINARY 'Efectivo' AND BINARY mp.Codigo=BINARY 'Efectivo')
+                 OR (v.Id=9502 AND BINARY v.MetodoPago=BINARY 'Transferencia' AND BINARY mp.Codigo=BINARY 'Transferencia')
+                 OR (v.Id=9503 AND BINARY v.MetodoPago=BINARY 'Tarjeta' AND BINARY mp.Codigo=BINARY 'Tarjeta')
+                 OR (v.Id=9504 AND BINARY v.MetodoPago=BINARY 'Otro' AND BINARY mp.Codigo=BINARY 'Otro'));" )" = '4'
+
+          test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n05_ci -Nse "
+            SELECT COUNT(*) FROM FacturaPagos fp JOIN MetodosPago mp ON mp.Id=fp.MetodoPagoId
+             WHERE fp.Id BETWEEN 9521 AND 9524
+               AND ((fp.MetodoPago=1 AND BINARY mp.Codigo=BINARY 'Efectivo')
+                 OR (fp.MetodoPago=2 AND BINARY mp.Codigo=BINARY 'Transferencia')
+                 OR (fp.MetodoPago=3 AND BINARY mp.Codigo=BINARY 'Tarjeta')
+                 OR (fp.MetodoPago=4 AND BINARY mp.Codigo=BINARY 'Otro'));" )" = '4'
+
+          test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n05_ci -Nse "
+            SELECT COUNT(*) FROM MovimientosFinancieros mf JOIN MetodosPago mp ON mp.Id=mf.MetodoPagoId
+             WHERE mf.Id BETWEEN 9531 AND 9534 AND BINARY mf.MetodoPago=BINARY mp.Codigo;" )" = '4'
+          test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n05_ci -Nse "SELECT COUNT(*) FROM MovimientosFinancieros WHERE Id=9535 AND MetodoPago IS NULL AND MetodoPagoId IS NULL;")" = '1'
+
+      - name: Snapshot EF consistente
+        working-directory: backend
+        run: |
+          dotnet ef migrations has-pending-model-changes \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext
+
+      - name: Configurar Node.js para regresión frontend N0.5
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('frontend/package-lock.json') }}
+
+      - name: Instalar frontend y Chromium
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run lint
+          npm run build:prod
+          npx playwright install --with-deps chromium
+
+      - name: Iniciar Angular para regresión N0.5
+        shell: bash
+        run: |
+          set -euo pipefail
+          nohup npm --prefix frontend start -- --host 127.0.0.1 --port 4200 > frontend/n0-5-frontend.log 2>&1 &
+          echo $! > frontend/n0-5-frontend.pid
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:4200/login > /dev/null; then
+              echo 'Angular N0.5 listo.'
+              exit 0
+            fi
+            sleep 2
+          done
+          cat frontend/n0-5-frontend.log >&2 || true
+          exit 1
+
+      - name: Ejecutar regresión frontend/E2E N0.5
+        working-directory: frontend
+        env:
+          PLAYWRIGHT_TEST_BASE_URL: http://127.0.0.1:4200
+        run: npx playwright test e2e/n0-5-metodos-pago-regresion.spec.ts --config=playwright.config.ts
+
+      - name: Publicar evidencia E2E N0.5
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: erp-n0-5-e2e
+          path: |
+            frontend/n0-5-frontend.log
+            frontend/playwright-report/
+            frontend/test-results/
+          if-no-files-found: ignore
+          retention-days: 14

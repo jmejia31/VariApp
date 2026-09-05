@@ -1,182 +1,189 @@
-# InventoryApp - Sistema de Gestion de Inventario
+# VariApp — ERP para la operación de VariStorehn
 
-Aplicacion web ligera para administrar productos, categorias, usuarios, compras, stock, valores de inventario y fotos de productos. No es un ERP; esta enfocada en inventario simple con acceso protegido por login.
+VariApp es una aplicación web para administrar productos, variantes, inventario, compras, ventas, clientes, proveedores, facturación, finanzas, usuarios, roles, permisos, auditoría y reportes, con evolución planificada hacia un ERP empresarial completo.
+
+La factura actual se considera comprobante comercial interno mientras no exista habilitación fiscal SAR/CAI aplicable.
+
+## Memoria canónica del proyecto
+
+Para evitar reanalizar el repositorio en cada sesión, el equipo debe usar:
+
+1. `AGENTS.md` — reglas obligatorias.
+2. `PROJECT_CONTEXT.md` — contexto técnico principal.
+3. `TASKS.md` — pendientes.
+4. `PROJECT_INDEX.md` — mapa del repositorio.
+5. `ARCHITECTURE.md` — arquitectura/patrones.
+6. `CHANGELOG_AI.md` — bitácora colaborativa.
+
+No volver a recorrer todo el repositorio ni releer archivos documentados si no cambiaron.
 
 ## Stack
 
-- Frontend: Angular 20, Standalone Components, Signals, Angular Material
-- Backend: ASP.NET Core 8 Web API
-- Arquitectura backend: Clean Architecture por capas `Domain`, `Application`, `Infrastructure`, `API`
-- Base de datos: MySQL + Entity Framework Core + migraciones
-- Autenticacion: JWT + BCrypt
-- Imagenes: Cloudinary
+- Frontend: Angular 20, standalone components, Signals, Angular Material.
+- Backend: ASP.NET Core 8 Web API.
+- Capas backend: Domain, Application, Infrastructure, API.
+- Datos: MySQL + EF Core 8/Pomelo.
+- Seguridad: JWT, BCrypt, RBAC relacional.
+- Medios: Cloudinary.
+- PDF: QuestPDF.
+- Correo: SMTP.
+- E2E: Playwright/Chromium.
+- Infraestructura: Vercel, Render, Aiven y Cloudinary.
 
-## Estado local actual
+## Funcionalidad principal
 
-El proyecto ya fue restaurado, compilado y probado localmente.
+- productos y variantes;
+- color, talla, marca y modelo;
+- categorías;
+- inventario y movimientos;
+- compras/proveedores;
+- ventas/clientes;
+- facturación/pagos;
+- descuentos, impuestos y costos de envío;
+- finanzas;
+- usuarios, roles y permisos;
+- auditoría;
+- cargas masivas y reportes administrativos;
+- perfil/configuración visual/empresa.
 
-- Backend build: OK
-- Backend tests: OK, 35 pruebas
-- Frontend build: OK
-- MySQL local de desarrollo: `127.0.0.1:3307`
-- API local: `http://localhost:5005`
-- Frontend local: `http://localhost:4200`
+## Arquitectura
 
-Usuario inicial:
-
-- Usuario: `admin`
-- Password: `Admin123!`
-
-Cambia esta contrasena antes de produccion.
-
-## Arranque local
-
-### Arranque rápido desde VS Code
-
-Se añadió una tarea para levantar backend y frontend con un solo comando desde VS Code:
-
-1. Abre la Paleta de comandos.
-2. Ejecuta "Tasks: Run Task".
-3. Selecciona "start:variapp".
-
-La tarea inicia:
-- Backend en http://localhost:5005
-- Frontend en http://localhost:4200
-
-### 1. MySQL local
-
-El proyecto usa el MySQL de Laragon en puerto `3307`, separado del servicio Windows `MySQL80`.
-
-```powershell
-powershell -ExecutionPolicy Bypass -File backend\scripts\start-variapp-mysql.ps1
-```
-
-Este script prepara:
-
-- Base de datos `inventoryapp`
-- Usuario MySQL `VariApp`
-- Permisos sobre la base
-- Connection string en `dotnet user-secrets`
-
-Para detenerlo:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File backend\scripts\stop-variapp-mysql.ps1
-```
-
-### 2. Backend
-
-```powershell
-cd backend\src\API
-$env:ASPNETCORE_URLS="http://localhost:5005"
-$env:ASPNETCORE_ENVIRONMENT="Development"
-dotnet run --no-build
-```
-
-Swagger queda disponible en:
+Backend:
 
 ```text
-http://localhost:5005/swagger
+Domain <- Application <- Infrastructure
+                    ^
+                    |
+                   API (composition root / HTTP)
 ```
 
-### 3. Frontend
-
-```powershell
-cd frontend
-npm start
-```
-
-La app queda disponible en:
+Flujo típico:
 
 ```text
-http://localhost:4200
+Angular -> API -> Application Service -> Repository -> EF Core -> MySQL
 ```
 
-## Permisos y acceso real
+Ver `ARCHITECTURE.md` para detalles y `PROJECT_INDEX.md` para localizar componentes.
 
-El sistema ya aplica permisos de forma real en los controladores y en la UI:
+## Preparación local
 
-- Backend: los endpoints sensibles verifican permisos antes de ejecutar acciones clave.
-- Frontend: las rutas de creación/edición y los botones de acciones se ocultan o bloquean según el permiso del usuario.
-- Administrador: conserva acceso completo.
+El acceso local reconocido corresponde únicamente a Javier Mejía, Codex y AntiG/Antigravity, salvo cambio explícito documentado por Javier.
 
-## Comandos de verificacion
+```powershell
+git fetch origin
+git switch Desarrollo
+git pull --rebase origin Desarrollo
+```
 
 Backend:
 
 ```powershell
 cd backend
-dotnet build
-dotnet test
+dotnet restore InventoryApp.sln
+dotnet build InventoryApp.sln
 ```
 
 Frontend:
 
 ```powershell
 cd frontend
-npm install
-npm run build
+npm ci
+npm start
 ```
 
-Migraciones:
+## Configuración
+
+Nunca guardar secretos reales en Git. Configurar mediante variables/secret stores del entorno:
+
+```text
+ConnectionStrings__DefaultConnection
+Database__ServerVersion
+Jwt__Secret
+Jwt__Issuer
+Jwt__Audience
+Cloudinary__CloudName
+Cloudinary__ApiKey
+Cloudinary__ApiSecret
+Smtp__Host
+Smtp__UsuarioSmtp
+Smtp__PasswordSmtp
+SeedAdmin__Username
+SeedAdmin__Password
+Database__ApplyMigrationsOnStartup
+```
+
+La lista anterior es orientativa; consultar configuración del módulo afectado en lugar de releer toda la infraestructura.
+
+## Migraciones
+
+- versionadas con EF Core;
+- revisar `Up()` y operaciones destructivas;
+- preferir transición aditiva/expand-and-contract;
+- no aplicar migraciones en Producción sin autorización expresa, respaldo y validación;
+- no ejecutar simultáneamente dos mecanismos de aplicación de la misma migración.
+
+## Validación
+
+La validación es proporcional al cambio, según `AGENTS.md`.
+
+Comandos globales disponibles cuando el alcance lo justifique:
 
 ```powershell
 cd backend
-dotnet ef database update -p src\Infrastructure -s src\API
+dotnet build InventoryApp.sln --configuration Release
+dotnet test InventoryApp.sln --configuration Release
 ```
 
-## Secretos locales
+```powershell
+cd frontend
+npm ci
+npm run build:prod
+```
 
-Los valores reales no deben guardarse en `appsettings.json` ni en el README.
+```powershell
+cd frontend
+npx playwright test --config=playwright.config.ts
+```
 
-Este proyecto usa `dotnet user-secrets` para:
-
-- `ConnectionStrings:DefaultConnection`
-- `Jwt:Secret`
-- `Cloudinary:CloudName`
-- `Cloudinary:ApiKey`
-- `Cloudinary:ApiSecret`
-
-Archivos locales ignorados:
-
-- `.dotnet_cli_home/`
-- `.mysql-data/`
-
-## Despliegue recomendado
-
-Para acceso desde cualquier computadora:
-
-- Backend: Render o Railway
-- Frontend: Vercel o Netlify
-- Base de datos: Railway MySQL o Aiven
-- Imagenes: Cloudinary
-- Codigo fuente: GitHub
-
-Flujo recomendado:
-
-1. Subir el proyecto a GitHub.
-2. Crear base MySQL cloud.
-3. Configurar variables de entorno del backend.
-4. Desplegar API en Render/Railway.
-5. Configurar `environment.prod.ts` con la URL real de la API.
-6. Desplegar frontend en Vercel/Netlify.
-7. Agregar el dominio final del frontend a `Cors:AllowedOrigins`.
+No mantener números fijos de pruebas como estado permanente en este README; consultar CI/commit vigente.
 
 ## Estructura
 
 ```text
 backend/
   src/
-    Domain/          Entidades
-    Application/     DTOs, interfaces, servicios, validadores
-    Infrastructure/  EF Core, repositorios, JWT, Cloudinary
-    API/             Controladores, middleware, configuracion
+    Domain/
+    Application/
+    Infrastructure/
+    API/
   tests/
-    InventoryApp.Tests/
-
 frontend/
+  e2e/
   src/app/
-    core/            auth, guards, interceptors, models
-    features/        login, dashboard, productos, categorias, compras, usuarios
-    services/        clientes HTTP hacia API
+    core/
+    features/
+    services/
+docs/
+.github/workflows/
+scripts/
 ```
+
+## Flujo de publicación
+
+1. Trabajar **únicamente en `Desarrollo`**.
+2. No crear ramas adicionales sin autorización expresa.
+3. Mantener el PR `Desarrollo -> main` en borrador.
+4. Ejecutar validación proporcional y CI cuando aplique.
+5. No tocar Producción.
+6. Fusionar a `main` únicamente cuando Javier Mejía lo autorice expresamente.
+
+## Colaboración eficiente
+
+- fuente base: `PROJECT_CONTEXT.md`;
+- no reindexar todo el repo por cada solicitud;
+- no releer archivos sin cambios;
+- tras reconexión, recuperar estado con `PROJECT_CONTEXT.md`, `TASKS.md` y Git;
+- analizar archivo objetivo + dependencias directas;
+- detener la exploración cuando el objetivo esté cumplido.
+
+Reglas completas: `AGENTS.md` y `docs/COLABORACION_IA.md`.

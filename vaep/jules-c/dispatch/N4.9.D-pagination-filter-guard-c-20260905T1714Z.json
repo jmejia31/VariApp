@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.D-PAGINATION-FILTER-GUARD-C-20260905T1714Z",
+  "taskId": "N4.9.D.CLOSURE.PAGINATION_FILTER_GUARD",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "primaryBaseHead": "a9b913e608278af1d1100b35ca8a9160b7a5f0c8",
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/PeriodoContablePaginationFilterTests.cs only; test-only, no production/frontend/migrations/workflows/manifests",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.9.D. Add a focused test-only guard in a new PeriodoContablePaginationFilterTests.cs for the COLA DoD: deterministic pagination plus useful PeriodoContable filters (at minimum state/date-range semantics consistent with existing project conventions). Do not modify production code. Make tests express externally meaningful behavior and stable ordering/bounds, not implementation details. Run focused tests/build and two independent self-reviews. If the current implementation lacks the contract, return REQUIRED with exact evidence rather than weakening expectations. Do not branch, PR, merge, deploy, touch main/Produccion/secrets or edit vaep control files. Return terminal artifact for VAEP REVIEW_FIRST."
+}

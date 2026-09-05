@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.C-ROLLBACK-SAFETY-D-20260905T1203Z",
+  "taskId": "N4.9.C.SUPPORT.ROLLBACK_SAFETY",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "532189918383a2e5222ba5b53e9d02b35134595c",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N49CPeriodoContableMigrationSafetyTests.cs only; read-only review of PeriodoContable migration/configuration; no snapshot/migration edits",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.9.C DB_MIG. Own a test-only rollback/safety slice. Read-only inspect `20260905093000_N4_9_PeriodoContablePersistencia.cs`, PeriodoContableConfiguration and entity contract. Add ONLY `backend/tests/InventoryApp.Tests/N49CPeriodoContableMigrationSafetyTests.cs` to prove the migration/configuration contract is fail-closed and reversible: expected table/index/check-constraint metadata exists, Down removes only PeriodosContables, no ConfiguracionesContables mutation, no destructive unrelated operation, and period range/state/closure invariants stay aligned. Do not edit migration, snapshot, configurations, app/API/frontend or csproj. Run focused tests/build and two independent self-reviews. Do not branch/PR/push/merge/deploy; do not touch main/Produccion/secrets/credentials/domains/certificates/production data. Return patch/artifact for VAEP REVIEW_FIRST."
+}

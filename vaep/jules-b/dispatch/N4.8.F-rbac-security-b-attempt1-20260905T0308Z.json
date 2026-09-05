@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.8.F-RBAC-SECURITY-B-20260905T0308Z",
+  "taskId": "N4.8.F",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "0bf2a56da66dcd84f549db7fc6cbdb75475f7b38",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/API/Controllers/ContabilizacionController.cs; backend/tests/InventoryApp.Tests/N48FContabilizacionRbacSecurityTests.cs; no migration/snapshot/audit-service/observability files; no unrelated product changes",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first and obey it as the only operational authority. CURRENT_PARENT=N4.8.F SEC_AUDIT. Own only the RBAC/security slice for the automatic accounting endpoint. Review the exact current ContabilizacionController and permission filter behavior. Materially close any demonstrated security gap for POST /contabilizacion/eventos while preserving the existing contract: authenticated only, relational permission ModuloSistema.Finanzas + AccionPermiso.Crear, no AllowAnonymous/bypass, no secret exposure, stable route/response semantics. Add focused tests in N48FContabilizacionRbacSecurityTests.cs that prove authorization/permission attributes and fail-closed contract; change ContabilizacionController.cs only if the review demonstrates a real gap. Do not touch EF snapshot/migrations (owned by Jules A), audit persistence/service (reserved other lane), correlation middleware/health/Program.cs (reserved other lanes). Run focused backend tests/build and two independent self-reviews. Do not create branch/PR/push/merge/deploy; do not touch main, Produccion, secrets, credentials, domains, certificates, production data or infrastructure. Return patch/artifact for VAEP REVIEW_FIRST."
+}

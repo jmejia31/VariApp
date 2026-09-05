@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-D-N45A-RBAC-QA-PREFLIGHT-D1-20260903T0932HND",
+  "taskId": "N4.5.A.RBAC_QA_OBSERVABILITY_PREFLIGHT",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "a85396b8e5d6ed579f2815cb7a193f45ed3d54e0",
+  "taskAttempt": 1,
+  "fileScopeHint": ".github/workflows/**; backend/tests/**; frontend/e2e/**; backend/src/API/**; backend/src/Infrastructure/**Audit*; docs/**",
+  "prompt": "SAFE PIPELINE PREWORK ONLY for next dependency-valid parent N4.5.A CxP preflight while N4.4.H remains CURRENT_PARENT. Audit RBAC, auditability, security, observability and QA/CI coverage for cuentas por pagar integrated with compras. Map existing permissions, audit/correlation evidence, directed tests/E2E/workflows and any true coverage gaps. Exclusive lane D is read-first RBAC/QA/observability evidence; do not edit backend domain/persistence, frontend product surfaces, TASKS/CHANGELOG or N4.4.H docs, do not implement N4.5.B+ and do not promote N4.5.A. Patch only a narrowly scoped preflight evidence/test artifact if clearly safe and non-overlapping; otherwise return grounded no-patch findings. No main, Production, branches, PR, merge, secrets or deploy. Emit two independent substantive SELF_REVIEW_PASS markers before COMPLETED."
+}

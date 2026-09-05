@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.8.F-HEALTH-FAILCLOSED-D-20260905T0419Z",
+  "taskId": "N4.8.F.SUPPORT.HEALTH_FAILCLOSED",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "7ac891048b5a7cde5b43eedc86e46331c25282cc",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N48FAccountingHealthFailClosedTests.cs only; health/telemetry implementation READ_ONLY; no A/B/C scopes",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.8.F SEC_AUDIT. Your prior telemetry-redaction task is terminal and this is a distinct NEXT_SAFE scope. Audit fail-closed health/observability behavior around accounting: health or diagnostics must not expose sensitive accounting payloads/credentials/stack details and degraded dependencies must not be misreported as healthy where the existing architecture supports that distinction. Your only authorized write is backend/tests/InventoryApp.Tests/N48FAccountingHealthFailClosedTests.cs and only for a material non-duplicative regression gap. Health/telemetry implementation is READ_ONLY; report any real product defect for VAEP QA_TAKEOVER. Run focused tests/build and explicitly provide two independent self-reviews. No branch/PR/push/merge/deploy; no main/Produccion/secrets/credentials/domains/certificates/production data."
+}

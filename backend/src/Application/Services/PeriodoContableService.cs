@@ -1,0 +1,83 @@
+using InventoryApp.Application.DTOs.Contabilidad;
+using InventoryApp.Application.Interfaces;
+using InventoryApp.Domain.Entities.Contabilidad;
+using InventoryApp.Domain.Enums;
+
+namespace InventoryApp.Application.Services;
+
+public sealed class PeriodoContableService : IPeriodoContableService
+{
+    private readonly IPeriodoContableRepository _repository;
+    private readonly IAuditoriaService _auditoria;
+
+    public PeriodoContableService(IPeriodoContableRepository repository, IAuditoriaService auditoria)
+    {
+        _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+        _auditoria = auditoria ?? throw new ArgumentNullException(nameof(auditoria));
+    }
+
+    public async Task<List<PeriodoContableDto>> GetAllAsync() =>
+        (await _repository.GetAllAsync()).Select(Map).ToList();
+
+    public async Task<PeriodoContableDto?> GetByIdAsync(int id)
+    {
+        var periodo = await _repository.GetByIdAsync(id);
+        return periodo is null ? null : Map(periodo);
+    }
+
+    public async Task<PeriodoContableDto> CreateAsync(CrearPeriodoContableDto dto)
+    {
+        ArgumentNullException.ThrowIfNull(dto);
+        var inicio = NormalizeUtc(dto.FechaInicio, nameof(dto.FechaInicio));
+        var fin = NormalizeUtc(dto.FechaFin, nameof(dto.FechaFin));
+
+        if (await _repository.HasOverlappingPeriodAsync(inicio, fin))
+            throw new InvalidOperationException("El período contable se superpone con un período existente.");
+
+        var periodo = new PeriodoContable(inicio, fin);
+        await _repository.AddAsync(periodo);
+        await _repository.SaveChangesAsync();
+        await _auditoria.RegistrarAsync(ModuloSistema.Configuracion, AccionPermiso.Crear,
+            "Crear período contable", periodo.Id, "PeriodoContable",
+            valoresNuevos: new { periodo.FechaInicio, periodo.FechaFin, periodo.Estado });
+        return Map(periodo);
+    }
+
+    public async Task CerrarAsync(int id)
+    {
+        var periodo = await _repository.GetByIdAsync(id, tracking: true)
+            ?? throw new KeyNotFoundException($"No se encontró el período contable con ID {id}.");
+        var anterior = new { periodo.Estado, periodo.CerradoEnUtc };
+        periodo.Cerrar(DateTime.UtcNow);
+        _repository.Update(periodo);
+        await _repository.SaveChangesAsync();
+        await _auditoria.RegistrarAsync(ModuloSistema.Configuracion, AccionPermiso.Cerrar,
+            "Cerrar período contable", periodo.Id, "PeriodoContable",
+            valoresAnteriores: anterior,
+            valoresNuevos: new { periodo.Estado, periodo.CerradoEnUtc });
+    }
+
+    public async Task ValidarOperacionAsync(DateTime fechaOperacion, bool autorizadoCambioRetroactivo = false)
+    {
+        var fecha = NormalizeUtc(fechaOperacion, nameof(fechaOperacion));
+        var periodo = await _repository.GetByDateAsync(fecha)
+            ?? throw new InvalidOperationException("No existe un período contable configurado para la fecha de la operación.");
+        periodo.ValidarCambio(fecha, autorizadoCambioRetroactivo);
+    }
+
+    private static DateTime NormalizeUtc(DateTime value, string paramName) => value.Kind switch
+    {
+        DateTimeKind.Utc => value,
+        DateTimeKind.Local => value.ToUniversalTime(),
+        _ => throw new ArgumentException("La fecha debe incluir zona horaria explícita.", paramName)
+    };
+
+    private static PeriodoContableDto Map(PeriodoContable p) => new()
+    {
+        Id = p.Id,
+        FechaInicio = p.FechaInicio,
+        FechaFin = p.FechaFin,
+        Estado = p.Estado,
+        CerradoEnUtc = p.CerradoEnUtc
+    };
+}

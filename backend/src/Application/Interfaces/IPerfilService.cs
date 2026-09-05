@@ -2,13 +2,13 @@ using InventoryApp.Application.DTOs;
 
 namespace InventoryApp.Application.Interfaces;
 
-/// Autogestión del propio usuario autenticado: ver/editar su nombre, cambiar
-/// su propia contraseña. Deliberadamente separado de IUsuarioService (que
-/// administra a OTROS usuarios y requiere permisos de Usuarios) — aquí solo
-/// se requiere estar autenticado, cada quien gestiona su propia cuenta.
+/// Autogestión del propio usuario autenticado. Está separada de la
+/// administración de terceros y no depende de permisos de módulo.
 public interface IPerfilService
 {
     Task<PerfilDto> GetPerfilAsync();
     Task<PerfilDto> ActualizarPerfilAsync(ActualizarPerfilDto dto);
+    Task<PerfilDto> ActualizarFotoAsync(ActualizarFotoPerfilDto dto);
+    Task<PerfilDto> EliminarFotoAsync();
     Task CambiarPasswordAsync(CambiarPasswordPropiaDto dto);
 }

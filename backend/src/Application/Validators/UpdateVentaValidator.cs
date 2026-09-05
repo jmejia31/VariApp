@@ -15,7 +15,13 @@ public class UpdateVentaValidator : AbstractValidator<UpdateVentaDto>
         {
             detalle.RuleFor(d => d.ProductoId).GreaterThan(0);
             detalle.RuleFor(d => d.Cantidad).GreaterThan(0);
-            detalle.RuleFor(d => d.PrecioUnitario).GreaterThan(0);
+            detalle.RuleFor(d => d.PrecioUnitario)
+                .GreaterThan(0)
+                .Must(TieneMaximoDosDecimales)
+                .WithMessage("El precio unitario admite como máximo 2 decimales.");
         });
     }
+
+    private static bool TieneMaximoDosDecimales(decimal valor) =>
+        Math.Round(valor, 2, MidpointRounding.AwayFromZero) == valor;
 }

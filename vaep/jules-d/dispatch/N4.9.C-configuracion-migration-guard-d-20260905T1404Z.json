@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.C-CONFIGURACION-MIGRATION-GUARD-D-20260905T1404Z",
+  "taskId": "N4.9.C.SUPPORT.CONFIGURACION_MIGRATION_GUARD",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "c80e1d13ca8eb011199604203c341c72e8f52f1b",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N49CConfiguracionContableMigrationGuardTests.cs only; read-only inspection of ConfiguracionContable EF configuration, current migrations and snapshot",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.9.C is blocked by controller QA_TAKEOVER restoring/regenerating the canonical EF snapshot/migration chain. Own a DISTINCT test-only guard focused only on ConfiguracionContable migration coverage. Add ONLY backend/tests/InventoryApp.Tests/N49CConfiguracionContableMigrationGuardTests.cs. Verify that the canonical migration chain materializes the ConfiguracionesContables table and its contractually required keys/indexes/defaults without destructive operations; fail clearly while the migration is absent or inconsistent. Do not edit migrations, snapshot, model, configurations, API, frontend or csproj. Run focused test/build if possible and perform two independent self-reviews. Do not branch/PR/push/merge/deploy; do not touch main/Produccion/secrets/credentials/domains/certificates/production data. Return patch/artifact for VAEP REVIEW_FIRST."
+}

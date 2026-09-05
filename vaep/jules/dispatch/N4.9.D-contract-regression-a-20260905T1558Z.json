@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.D-CONTRACT-REGRESSION-A-20260905T1558Z",
+  "taskId": "N4.9.D.SUPPORT.CONTRACT_REGRESSION",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N49DPeriodoContableServiceContractTests.cs only; no production code, migrations, workflows or manifests",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.9.D. FUNCTIONAL_HEAD=99bbf984f3854e42b3b7a2a11d49c8967d0358f8. This is a distinct test-only support scope, not a retry of any prior Jules task. Add focused service-contract regression tests for PeriodoContable create/get/list/close semantics and retroactive-change authorization behavior against the already integrated backend API. Do not change production code. Run focused backend tests plus two independent self-reviews. Do not branch/PR/push/merge/deploy; return patch/artifact for VAEP REVIEW_FIRST.",
+  "primaryBaseHead": "99bbf984f3854e42b3b7a2a11d49c8967d0358f8"
+}
