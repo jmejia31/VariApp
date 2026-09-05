@@ -1,3 +1,4 @@
+using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs.Contabilidad;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities.Contabilidad;
@@ -16,8 +17,17 @@ public sealed class PeriodoContableService : IPeriodoContableService
         _auditoria = auditoria ?? throw new ArgumentNullException(nameof(auditoria));
     }
 
-    public async Task<List<PeriodoContableDto>> GetAllAsync() =>
-        (await _repository.GetAllAsync()).Select(Map).ToList();
+    public async Task<PagedResult<PeriodoContableDto>> GetPagedAsync(PeriodoContableQueryDto filter)
+    {
+        var result = await _repository.GetPagedAsync(filter);
+        return new PagedResult<PeriodoContableDto>
+        {
+            Items = result.Items.Select(Map).ToList(),
+            Page = result.Page,
+            PageSize = result.PageSize,
+            TotalCount = result.TotalCount
+        };
+    }
 
     public async Task<PeriodoContableDto?> GetByIdAsync(int id)
     {

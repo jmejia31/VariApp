@@ -1,3 +1,5 @@
+using InventoryApp.Application.Common;
+using InventoryApp.Application.DTOs.Contabilidad;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities.Contabilidad;
 using InventoryApp.Infrastructure.Persistence;
@@ -38,8 +40,35 @@ public sealed class PeriodoContableRepository : IPeriodoContableRepository
             p => (excludeId == null || p.Id != excludeId) && p.FechaInicio <= fechaFin && p.FechaFin >= fechaInicio,
             cancellationToken);
 
-    public Task<List<PeriodoContable>> GetAllAsync(CancellationToken cancellationToken = default) =>
-        _context.PeriodosContables.OrderByDescending(p => p.FechaInicio).AsNoTracking().ToListAsync(cancellationToken);
+    public async Task<PagedResult<PeriodoContable>> GetPagedAsync(PeriodoContableQueryDto filter, CancellationToken cancellationToken = default)
+    {
+        var query = _context.PeriodosContables.AsNoTracking();
+
+        if (filter.FechaDesde.HasValue)
+            query = query.Where(p => p.FechaInicio >= filter.FechaDesde.Value);
+
+        if (filter.FechaHasta.HasValue)
+            query = query.Where(p => p.FechaFin <= filter.FechaHasta.Value);
+
+        if (filter.Estado.HasValue)
+            query = query.Where(p => p.Estado == filter.Estado.Value);
+
+        query = query.OrderByDescending(p => p.FechaInicio);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+        var items = await query
+            .Skip((filter.Page - 1) * filter.PageSize)
+            .Take(filter.PageSize)
+            .ToListAsync(cancellationToken);
+
+        return new PagedResult<PeriodoContable>
+        {
+            Items = items,
+            Page = filter.Page,
+            PageSize = filter.PageSize,
+            TotalCount = totalCount
+        };
+    }
 
     public Task AddAsync(PeriodoContable periodo, CancellationToken cancellationToken = default) =>
         _context.PeriodosContables.AddAsync(periodo, cancellationToken).AsTask();
