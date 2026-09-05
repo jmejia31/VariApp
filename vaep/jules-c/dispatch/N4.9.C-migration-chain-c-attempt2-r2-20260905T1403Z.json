@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.C-MIGRATION-CHAIN-C-ATTEMPT2-R2-20260905T1403Z",
+  "taskId": "N4.9.C.SUPPORT.MIGRATION_CHAIN",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "12d8fc6c46581c767aff1bc18db1b950c2c94ce9",
+  "taskAttempt": 2,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N49CMigrationChainTests.cs only; read-only inspection of backend/src/Infrastructure/Migrations and accounting EF configurations",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. This is the FINAL R2 for N4.9.C.SUPPORT.MIGRATION_CHAIN; R3 is prohibited. ATTEMPT1 was REVIEW_REQUIRED because its patch relied on an unsuitable UpOperations/DownOperations surface and lacked adequate compile proof. Rework ONLY backend/tests/InventoryApp.Tests/N49CMigrationChainTests.cs so the test compiles against the repository's actual EF migration types and validates the N4.8->N4.9 accounting migration chain without editing migrations/snapshot/model/configurations. Cover ordering/presence and non-destructive intent using stable reflection/source-level mechanisms available in the test project; do not couple to inaccessible APIs. Run focused tests/build where possible and perform two independent self-reviews. Do not branch/PR/push/merge/deploy; do not touch main/Produccion/secrets/credentials/domains/certificates/production data. Return patch/artifact for VAEP REVIEW_FIRST."
+}
