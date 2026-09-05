@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.E-FRONTEND-FEATURE-B-ATTEMPT2-R2-20260905T1927Z",
+  "taskId": "N4.9.E.FRONTEND_FEATURE",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "45a0deb80ead2311b6249e349e46195836534371",
+  "taskAttempt": 2,
+  "fileScopeHint": "frontend/src/app/features/periodos-contables/periodos-contables.component.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first; it is the only operational authority. Work only on jmejia31/VariApp branch Desarrollo. FUNCTIONAL_HEAD is 45a0deb80ead2311b6249e349e46195836534371; later vaep-only commits are CONTROL_PLANE_HEAD_EQUIVALENT. This is R2 and FINAL Jules attempt for task N4.9.E.FRONTEND_FEATURE; no R3. REVIEW_FIRST found a concrete missed DoD from R1: cerrar(periodo) calls the close service immediately even though R1 explicitly required close confirmation. Make the smallest robust correction so an authorized user must explicitly confirm before the close mutation executes, cancellation performs no mutation, existing mutation lock and Cerrado protection remain intact, and repository UX/accessibility patterns are respected. Own ONLY periodos-contables.component.ts. Do not touch app.routes.ts, app.component.ts, core model/service, e2e, backend, main, Produccion, secrets, deploy, branches, PR merge or force-push. Validate as far as possible and report exact evidence. Return material patch, changed files, validation and risks; no status-only response."
+}
