@@ -106,6 +106,6 @@ test.describe('Períodos contables E2E N4.9.E', () => {
 
     await expect(page.getByRole('columnheader', { name: 'Rango' })).toBeVisible();
     await expect(page.getByRole('columnheader', { name: 'Estado' })).toBeVisible();
-    await expect(page.getByText('Abierto', { exact: true })).toBeVisible();
+    await expect(page.getByRole('cell', { name: 'Abierto', exact: true })).toBeVisible();
   });
 });
