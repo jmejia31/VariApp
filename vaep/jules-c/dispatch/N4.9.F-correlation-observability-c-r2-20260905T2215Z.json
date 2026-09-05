@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.F-CORRELATION-OBSERVABILITY-C-ATTEMPT2-R2-20260905T2215Z",
+  "taskId": "N4.9.F.CORRELATION_OBSERVABILITY",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "1dfa50d5f306c411d8c9b4884eeeb4331eb2964c",
+  "taskAttempt": 2,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N49FPeriodoContableObservabilityTests.cs",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first; it is the only operational authority. Work only on jmejia31/VariApp branch Desarrollo. CURRENT_PARENT=N4.9.F. This is the single and final R2 for logical task N4.9.F.CORRELATION_OBSERVABILITY; R3 is prohibited. REVIEW_FIRST of ATTEMPT1 found scope violation because the returned patch added test_plan.md and test_plan.txt outside the exclusive scope. Return a clean material patch owning ONLY backend/tests/InventoryApp.Tests/N49FPeriodoContableObservabilityTests.cs; do not add, modify or delete any other file. Preserve the intended focused observability/correlation coverage: PeriodosContables remains under existing authorization/RBAC, correlation-id and error-handling pipeline without sensitive-data leakage. Remove unnecessary/useless usings and ensure the exact test file compiles against current contracts. Run the targeted test/project and report exact result, two independent SELF_REVIEW_PASS entries, risks and unexecuted validation. Do not touch production code, main, Produccion, secrets, deploy, branches, PR merge, auto-merge or force-push. Do not publish functional changes; return ChangeSet/gitPatch only."
+}
