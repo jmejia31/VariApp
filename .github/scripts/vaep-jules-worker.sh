@@ -108,6 +108,13 @@ mkdir -p "$result_dir"
 
 fail() { echo "$*" >&2; exit "${2:-1}"; }
 
+readonly JULES_API_CONNECT_TIMEOUT_SECONDS="${JULES_API_CONNECT_TIMEOUT_SECONDS:-10}"
+readonly JULES_API_MAX_TIME_SECONDS="${JULES_API_MAX_TIME_SECONDS:-45}"
+
+jules_curl() {
+  curl --connect-timeout "$JULES_API_CONNECT_TIMEOUT_SECONDS" --max-time "$JULES_API_MAX_TIME_SECONDS" "$@"
+}
+
 dispatch_is_superseded() {
   local target_dispatch="${1:?dispatch required}"
   local issues_json
@@ -140,14 +147,14 @@ write_runtime_state() {
   mv "$tmp" "$VAEP_JULES_RUNTIME_STATE_FILE"
 }
 
-api_get() { curl --fail-with-body --silent --show-error -H "x-goog-api-key: $JULES_API_KEY" "$1"; }
+api_get() { jules_curl --fail-with-body --silent --show-error -H "x-goog-api-key: $JULES_API_KEY" "$1"; }
 api_post_json() {
   local url="$1" body_file="$2"
-  curl --fail-with-body --silent --show-error -X POST -H "Content-Type: application/json" -H "x-goog-api-key: $JULES_API_KEY" --data-binary @"$body_file" "$url"
+  jules_curl --fail-with-body --silent --show-error -X POST -H "Content-Type: application/json" -H "x-goog-api-key: $JULES_API_KEY" --data-binary @"$body_file" "$url"
 }
 api_post_empty() {
   local url="$1"
-  curl --fail-with-body --silent --show-error -X POST -H "Content-Type: application/json" -H "x-goog-api-key: $JULES_API_KEY" "$url"
+  jules_curl --fail-with-body --silent --show-error -X POST -H "Content-Type: application/json" -H "x-goog-api-key: $JULES_API_KEY" "$url"
 }
 
 # Atomic dispatch invariant: one new manifest, one changed file, one worker.
@@ -237,7 +244,7 @@ for page in $(seq 1 50); do
   args=(--fail-with-body --silent --show-error --get -H "x-goog-api-key: $JULES_API_KEY" --data-urlencode "pageSize=100")
   [[ -z "$page_token" ]] || args+=(--data-urlencode "pageToken=$page_token")
   response="$work/sources-$page.json"
-  curl "${args[@]}" "$JULES_API_BASE/sources" > "$response"
+  jules_curl "${args[@]}" "$JULES_API_BASE/sources" > "$response"
   source_name="$(jq -r --arg owner "$EXPECTED_OWNER" --arg repo "$EXPECTED_REPO" '[.sources[]? | select(.githubRepo.owner == $owner and .githubRepo.repo == $repo)] | first | .name // empty' "$response")"
   if [[ -n "$source_name" ]]; then
     jq -e --arg name "$source_name" --arg branch "$EXPECTED_BRANCH" '[.sources[]? | select(.name == $name)] | first | (.githubRepo.branches // []) | any(.displayName == $branch)' "$response" >/dev/null || fail "Desarrollo is not visible in Jules source." 31
@@ -261,7 +268,7 @@ for page in $(seq 1 50); do
   args=(--fail-with-body --silent --show-error --get -H "x-goog-api-key: $JULES_API_KEY" --data-urlencode "pageSize=100")
   [[ -z "$page_token" ]] || args+=(--data-urlencode "pageToken=$page_token")
   response="$work/sessions-$page.json"
-  curl "${args[@]}" "$JULES_API_BASE/sessions" > "$response"
+  jules_curl "${args[@]}" "$JULES_API_BASE/sessions" > "$response"
   session_name="$(jq -r --arg title "$title" '[.sessions[]? | select(.title == $title)] | first | .name // empty' "$response")"
   [[ -z "$session_name" ]] || break
   next_token="$(jq -r '.nextPageToken // empty' "$response")"
@@ -368,7 +375,7 @@ for page in $(seq 1 100); do
   args=(--fail-with-body --silent --show-error --get -H "x-goog-api-key: $JULES_API_KEY" --data-urlencode "pageSize=100")
   [[ -z "$page_token" ]] || args+=(--data-urlencode "pageToken=$page_token")
   response="$work/activities-$page.json"
-  curl "${args[@]}" "$JULES_API_BASE/$session_name/activities" > "$response"
+  jules_curl "${args[@]}" "$JULES_API_BASE/$session_name/activities" > "$response"
   jq -s '{activities: ((.[0].activities // []) + (.[1].activities // []))}' "$result_dir/activities.json" "$response" > "$result_dir/activities.next.json"
   mv "$result_dir/activities.next.json" "$result_dir/activities.json"
   next_token="$(jq -r '.nextPageToken // empty' "$response")"
