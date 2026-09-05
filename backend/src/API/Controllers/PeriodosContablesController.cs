@@ -30,7 +30,7 @@ public sealed class PeriodosContablesController : ControllerBase
     public async Task<IActionResult> GetById(int id)
     {
         var result = await _service.GetByIdAsync(id);
-        return result is null ? NotFound(ApiResponse.Fail("Período contable no encontrado.")) : Ok(ApiResponse<PeriodoContableDto>.Ok(result));
+        return result is null ? NotFound(ApiResponse<object>.Fail("Período contable no encontrado.")) : Ok(ApiResponse<PeriodoContableDto>.Ok(result));
     }
 
     [HttpPost]
@@ -46,6 +46,6 @@ public sealed class PeriodosContablesController : ControllerBase
     public async Task<IActionResult> Cerrar(int id)
     {
         await _service.CerrarAsync(id);
-        return Ok(ApiResponse.Ok("Período contable cerrado correctamente."));
+        return Ok(ApiResponse<object>.Ok(new { }, "Período contable cerrado correctamente."));
     }
 }
