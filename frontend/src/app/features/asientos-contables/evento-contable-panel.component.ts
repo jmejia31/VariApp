@@ -162,7 +162,7 @@ export class EventoContablePanelComponent {
       monto: Number(raw.monto),
       referencia: (raw.referencia ?? '').trim()
     };
-    if (raw.costo !== null && raw.costo !== undefined && raw.costo !== '') dto.costo = Number(raw.costo);
+    if (raw.costo != null) dto.costo = Number(raw.costo);
 
     this.guardando.set(true);
     this.form.disable();
