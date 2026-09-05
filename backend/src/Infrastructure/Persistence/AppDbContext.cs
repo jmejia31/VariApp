@@ -58,6 +58,7 @@ public class AppDbContext : DbContext
 
     public DbSet<AsientoContable> AsientosContables => Set<AsientoContable>();
     public DbSet<AsientoDetalle> AsientoDetalles => Set<AsientoDetalle>();
+    public DbSet<PeriodoContable> PeriodosContables => Set<PeriodoContable>();
 
     public DbSet<Descuento> Descuentos => Set<Descuento>();
     public DbSet<DescuentoProducto> DescuentoProductos => Set<DescuentoProducto>();
@@ -262,7 +263,7 @@ public class AppDbContext : DbContext
                 var varianteEntry = ChangeTracker.Entries<ProductoVariante>()
                     .SingleOrDefault(e => e.Entity.Id == grupoVariante.Key)
                     ?? throw new BusinessRuleException(
-                        $"No se pudo restaurar la valoración de la variante {grupoVariante.Key}.");
+                        $"No se pudo restaurar la valoración anterior de la variante {grupoVariante.Key}.");
 
                 var cantidadEsperadaTrasAnular = snapshot.StockVarianteAnteriorSnapshot!.Value;
                 if (varianteEntry.Entity.Cantidad != cantidadEsperadaTrasAnular)
