@@ -172,9 +172,12 @@ Dos auto-revisiones independientes son obligatorias antes de COMPLETED válido.
 ## 11. CI y cierre
 
 - Proteger causalidad de Development/Acceptance/Fase8/M13/Recovery cuando apliquen.
-- No mover HEAD con un manifest si invalidaría evidencia causal crítica activa.
-- Durante freeze, ejecutar trabajo compatible.
-- Fallo causal interno se corrige; ruido externo no se convierte en blocker falso.
+- `HEAD_FREEZE_CAUSAL` existe únicamente cuando el HEAD funcional/integración que VAEP está certificando tiene al menos un gate crítico causal en estado `queued` o `in_progress`.
+- Un workflow legacy de otro módulo, un gate global no relacionado, Vercel/deploy no aplicable, CI de otro HEAD o CI disparado únicamente por `vaep/**`/manifests/control-plane **no** constituye freeze y no puede dejar lanes Jules voluntariamente idle.
+- Aplicar `CONTROL_PLANE_HEAD_EQUIVALENCE` a commits manifest/control-plane: conservar como `FUNCTIONAL_HEAD` el último HEAD funcional/integración y permitir handoffs Jules mientras no se invalide evidencia causal crítica.
+- No mover HEAD con un manifest si invalidaría evidencia causal crítica activa del `FUNCTIONAL_HEAD`.
+- Durante un freeze causal real, ejecutar trabajo compatible y drenar REVIEW_FIRST/QA_TAKEOVER; al quedar terminal el gate, recalcular freeze desde cero.
+- Fallo causal interno se corrige; ruido externo o fallo no causal se registra pero no se convierte en blocker falso ni serializa el CURRENT_PARENT.
 - Cierre requiere DoD real, gates/CI aplicables terminales y P0/P1=0.
 
 ## 12. Las cinco automatizaciones
