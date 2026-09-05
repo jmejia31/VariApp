@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.D-RETROACTIVE-AUTH-GUARD-D-20260905T1715Z",
+  "taskId": "N4.9.D.CLOSURE.RETROACTIVE_AUTH_GUARD",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "primaryBaseHead": "6fc46dd6b11e5df629d09571546459fbe9baf384",
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/PeriodoContableRetroactivePolicyTests.cs only; test-only, no production/frontend/migrations/workflows/manifests",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.9.D. Add a focused test-only guard in a new PeriodoContableRetroactivePolicyTests.cs proving that operations in a closed accounting period are rejected unless explicit retroactive authorization is supplied, and that the allowed path is explicit rather than implicit. Do not modify production code. Reuse existing test conventions. Run focused tests/build and two independent self-reviews. If current behavior fails, return REQUIRED with exact causal evidence; do not weaken the policy. Do not branch, PR, merge, deploy, touch main/Produccion/secrets or edit vaep control files. Return terminal artifact for VAEP REVIEW_FIRST."
+}
