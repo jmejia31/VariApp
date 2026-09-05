@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.D-PERMISSION-CATALOG-QA-A-20260905T1602Z",
+  "taskId": "N4.9.D.QA.PERMISSION_CATALOG",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "99bbf984f3854e42b3b7a2a11d49c8967d0358f8",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Domain|Application|Infrastructure path that defines CatalogoPermisosBase and focused permission catalog tests only; no PeriodosContables controller/service/repository changes, no migrations/snapshot/frontend/workflows/vaep control-plane edits",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.9.D. FUNCTIONAL_HEAD=99bbf984f3854e42b3b7a2a11d49c8967d0358f8. Exact functional-head CI has a causal terminal backend-test failure: InventoryApp.Tests.N04CatalogoPermisosRuntimeTests.AtributosRuntime_SoloExigenPermisosPresentesEnCatalogoBase reports runtime-required permissions Configuracion:Crear (PeriodosContablesController.Create) and Configuracion:Cerrar (PeriodosContablesController.Cerrar) are not seedable/grantable from CatalogoPermisosBase. Produce the minimal canonical fix in the permission catalog using existing conventions, preserving current authorization semantics. Add or adjust only focused catalog tests if necessary. Do not broaden permissions beyond these required entries. Do not modify PeriodosContables controller/service/repository, migrations/snapshot, frontend, workflows, manifests, main, Produccion, secrets or deploy. Run the targeted N04CatalogoPermisosRuntimeTests and backend Release build if budget permits; perform two independent self-reviews. Return patch/artifact for VAEP REVIEW_FIRST. No branch/PR/push/merge/deploy."
+}
