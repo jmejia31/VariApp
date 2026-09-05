@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.E-FRONTEND-SERVICE-A-20260905T1522Z",
+  "taskId": "N4.9.E.SUPPORT.FRONTEND_SERVICE",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/core/services/periodo-contable.service.ts only, plus exact supporting frontend model import if already present; no components/routes/backend/workflows",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT remains N4.9.D; this is WORK_CAN_PIPELINE__PROMOTION_CANNOT safe work for N4.9.E. Implement only the Angular service adapter for PeriodoContable using the current integrated backend contract conventions and the existing N4.9.E frontend model artifact if available. Support list/get/create/close calls, typed responses, and existing error/HTTP conventions. Do not edit components/routes/backend/migrations/workflows/manifests. Run focused TypeScript/lint tests available and two independent self-reviews. Do not branch/PR/push/merge/deploy; return patch/artifact for VAEP REVIEW_FIRST.",
+  "primaryBaseHead": "a6544122890429b75890152c55d14da6ef2a412e"
+}
