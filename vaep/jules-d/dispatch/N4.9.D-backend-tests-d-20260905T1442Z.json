@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.D-BACKEND-TESTS-D-20260905T1442Z",
+  "taskId": "N4.9.D.BACKEND_TEST_GUARDS",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "7933d465f398cdd13e3378fff9be8cf8af8fc8a6",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests only; new PeriodoContable N4.9.D tests/guards only; do not edit src, migrations/snapshot, frontend or workflows",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.9.D. Own a distinct test-only slice for PeriodoContable BACKEND_API. Add focused tests covering create/list/get/close lifecycle, Abierto->Cerrado, idempotent/duplicate close behavior where contractually appropriate, unauthorized retroactive-change rejection and HTTP/application error semantics without modifying production source. Scope exclusively backend/tests/InventoryApp.Tests files newly required for N4.9.D. Do not edit src, migrations/snapshot, frontend, workflows, secrets or manifests. Run focused tests/build if possible and perform two independent self-reviews. Do not branch/PR/push/merge/deploy; return patch/artifact for VAEP REVIEW_FIRST."
+}
