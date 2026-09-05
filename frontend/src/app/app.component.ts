@@ -117,6 +117,7 @@ import { SessionActivityService } from './core/auth/session-activity.service';
             }
             @if (permisosRuntime.puede('Configuracion', 'Ver')) {
               <a routerLink="/configuracion" routerLinkActive="active" ariaCurrentWhenActive="page"><mat-icon>settings</mat-icon> Configuración</a>
+              <a routerLink="/periodos-contables" routerLinkActive="active" ariaCurrentWhenActive="page"><mat-icon>calendar_month</mat-icon> Periodos contables</a>
             }
           </nav>
         </aside>
