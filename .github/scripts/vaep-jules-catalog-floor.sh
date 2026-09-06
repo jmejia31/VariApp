@@ -13,10 +13,10 @@ command -v gh >/dev/null 2>&1 || exit 2
 command -v jq >/dev/null 2>&1 || exit 2
 
 case "$WORKER_ID" in
-  JULES_A) DISPATCH_PATH="vaep/jules/dispatch"; LANE=A; TEST_ROOT="backend/tests/InventoryApp.Tests"; EXT="cs" ;;
-  JULES_B) DISPATCH_PATH="vaep/jules-b/dispatch"; LANE=B; TEST_ROOT="backend/tests/InventoryApp.Tests"; EXT="cs" ;;
-  JULES_C) DISPATCH_PATH="vaep/jules-c/dispatch"; LANE=C; TEST_ROOT="frontend/e2e"; EXT="ts" ;;
-  JULES_D) DISPATCH_PATH="vaep/jules-d/dispatch"; LANE=D; TEST_ROOT="backend/tests/InventoryApp.Tests"; EXT="cs" ;;
+  JULES_A) DISPATCH_PATH="vaep/jules/dispatch"; LANE=A; TEST_ROOT="backend/tests/InventoryApp.Tests" ;;
+  JULES_B) DISPATCH_PATH="vaep/jules-b/dispatch"; LANE=B; TEST_ROOT="backend/tests/InventoryApp.Tests" ;;
+  JULES_C) DISPATCH_PATH="vaep/jules-c/dispatch"; LANE=C; TEST_ROOT="frontend/e2e" ;;
+  JULES_D) DISPATCH_PATH="vaep/jules-d/dispatch"; LANE=D; TEST_ROOT="backend/tests/InventoryApp.Tests" ;;
   *) echo "CATALOG_FLOOR_ERROR=unknown_worker worker=$WORKER_ID" >&2; exit 2 ;;
 esac
 
@@ -53,7 +53,7 @@ count_unused(){
 
 regenerate_lane(){
   local json="$1" max n facet scope task dispatch prompt entries='[]' i=0
-  max="$(jq '[.lanes[][]?.taskId | capture("N4\\.10\\.A\\.(?<n>[0-9]+)")?.n | tonumber] | max // 134' <<<"$json")"
+  max="$(jq '[.lanes[][]?.taskId | try (capture("N4\\.10\\.A\\.(?<n>[0-9]+)").n | tonumber) catch empty] | max // 134' <<<"$json")"
   for facet in "${facets[@]}"; do
     i=$((i+1)); n=$((max+i)); scope="$(build_scope "$facet" "$n")"
     task="N4.10.A.${n}.${facet}_TESTS"
@@ -65,7 +65,7 @@ regenerate_lane(){
 }
 
 commit_catalog(){
-  local content="$1" head base tree blob newtree commit rc
+  local content="$1" head base tree blob newtree commit rc unused
   for _ in $(seq 1 8); do
     head="$(head_sha)"
     content="$(api "repos/$GITHUB_REPOSITORY/contents/$CATALOG?ref=$BRANCH" --jq '.content' | tr -d '\n' | base64 -d)"
