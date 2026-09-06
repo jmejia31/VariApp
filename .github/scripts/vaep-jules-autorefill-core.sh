@@ -185,7 +185,7 @@ select_next_entry() {
 }
 
 dispatch_internal_manifest_run() {
-  local workflow commit runs run_id status
+  local commit="${1:?manifest_commit_required}" workflow runs run_id status
   workflow="$(lane_workflow_file)"
 
   # Commits created from a workflow with its GITHUB_TOKEN do not recursively
@@ -247,7 +247,7 @@ create_atomic_manifest_commit() {
       # Internal GITHUB_TOKEN commits cannot recursively trigger Actions.
       # Explicitly dispatch exactly one NEXT run and never fail CURRENT if GitHub
       # telemetry is delayed.
-      dispatch_internal_manifest_run "$(lane_workflow_file)" "$commit" || true
+      dispatch_internal_manifest_run "$commit" || true
       return 0
     fi
     echo "AUTOREFILL_RETRY worker=$WORKER_ID dispatch=$dispatch attempt=$attempt reason=head_race"
