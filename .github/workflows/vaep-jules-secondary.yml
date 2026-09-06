@@ -44,6 +44,7 @@ jobs:
         run: echo 'DISPATCH_PATH=vaep/jules/dispatch' >> "$GITHUB_ENV"
       - name: Reserve NEXT Jules A lane
         shell: bash
+        continue-on-error: true
         run: bash .github/scripts/vaep-jules-autorefill.sh
       - name: Execute VAEP/Jules MASTER
         shell: bash
