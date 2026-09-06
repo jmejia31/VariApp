@@ -255,244 +255,196 @@
     ],
     "JULES_B": [
       {
-        "dispatchId": "N4-10-A-375-QUERY_COUNT_PARITY-TESTS-B-AUTO",
-        "taskId": "N4.10.A.375.QUERY_COUNT_PARITY_TESTS",
+        "dispatchId": "N4-10-A-471-QUERY_COUNT_PARITY-TESTS-B-AUTO",
+        "taskId": "N4.10.A.471.QUERY_COUNT_PARITY_TESTS",
         "workerId": "JULES_B",
         "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYCOUNTPARITY375Tests.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYCOUNTPARITY375Tests.cs. Add a focused regression for the current behavior identified by QUERY_COUNT_PARITY; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYCOUNTPARITY471Tests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYCOUNTPARITY471Tests.cs. Add a focused regression for the current behavior identified by QUERY_COUNT_PARITY; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-376-PAGINATION_LAST_PAGE-TESTS-B-AUTO",
-        "taskId": "N4.10.A.376.PAGINATION_LAST_PAGE_TESTS",
+        "dispatchId": "N4-10-A-472-PAGINATION_LAST_PAGE-TESTS-B-AUTO",
+        "taskId": "N4.10.A.472.PAGINATION_LAST_PAGE_TESTS",
         "workerId": "JULES_B",
         "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportPAGINATIONLASTPAGE376Tests.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportPAGINATIONLASTPAGE376Tests.cs. Add a focused regression for the current behavior identified by PAGINATION_LAST_PAGE; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportPAGINATIONLASTPAGE472Tests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportPAGINATIONLASTPAGE472Tests.cs. Add a focused regression for the current behavior identified by PAGINATION_LAST_PAGE; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-377-DATE_RANGE_INVERSION-TESTS-B-AUTO",
-        "taskId": "N4.10.A.377.DATE_RANGE_INVERSION_TESTS",
+        "dispatchId": "N4-10-A-473-DATE_RANGE_INVERSION-TESTS-B-AUTO",
+        "taskId": "N4.10.A.473.DATE_RANGE_INVERSION_TESTS",
         "workerId": "JULES_B",
         "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportDATERANGEINVERSION377Tests.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportDATERANGEINVERSION377Tests.cs. Add a focused regression for the current behavior identified by DATE_RANGE_INVERSION; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportDATERANGEINVERSION473Tests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportDATERANGEINVERSION473Tests.cs. Add a focused regression for the current behavior identified by DATE_RANGE_INVERSION; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-378-QUERY_WHITESPACE_FILTER-TESTS-B-AUTO",
-        "taskId": "N4.10.A.378.QUERY_WHITESPACE_FILTER_TESTS",
+        "dispatchId": "N4-10-A-474-QUERY_WHITESPACE_FILTER-TESTS-B-AUTO",
+        "taskId": "N4.10.A.474.QUERY_WHITESPACE_FILTER_TESTS",
         "workerId": "JULES_B",
         "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYWHITESPACEFILTER378Tests.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYWHITESPACEFILTER378Tests.cs. Add a focused regression for the current behavior identified by QUERY_WHITESPACE_FILTER; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYWHITESPACEFILTER474Tests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYWHITESPACEFILTER474Tests.cs. Add a focused regression for the current behavior identified by QUERY_WHITESPACE_FILTER; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-379-QUERY_CASE_FILTER-TESTS-B-AUTO",
-        "taskId": "N4.10.A.379.QUERY_CASE_FILTER_TESTS",
+        "dispatchId": "N4-10-A-475-QUERY_CASE_FILTER-TESTS-B-AUTO",
+        "taskId": "N4.10.A.475.QUERY_CASE_FILTER_TESTS",
         "workerId": "JULES_B",
         "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYCASEFILTER379Tests.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYCASEFILTER379Tests.cs. Add a focused regression for the current behavior identified by QUERY_CASE_FILTER; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYCASEFILTER475Tests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYCASEFILTER475Tests.cs. Add a focused regression for the current behavior identified by QUERY_CASE_FILTER; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-380-MYSQL_DATE_BOUNDARY-TESTS-B-AUTO",
-        "taskId": "N4.10.A.380.MYSQL_DATE_BOUNDARY_TESTS",
+        "dispatchId": "N4-10-A-476-MYSQL_DATE_BOUNDARY-TESTS-B-AUTO",
+        "taskId": "N4.10.A.476.MYSQL_DATE_BOUNDARY_TESTS",
         "workerId": "JULES_B",
         "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportMYSQLDATEBOUNDARY380Tests.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportMYSQLDATEBOUNDARY380Tests.cs. Add a focused regression for the current behavior identified by MYSQL_DATE_BOUNDARY; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportMYSQLDATEBOUNDARY476Tests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportMYSQLDATEBOUNDARY476Tests.cs. Add a focused regression for the current behavior identified by MYSQL_DATE_BOUNDARY; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-381-QUERY_TIE_ORDER-TESTS-B-AUTO",
-        "taskId": "N4.10.A.381.QUERY_TIE_ORDER_TESTS",
+        "dispatchId": "N4-10-A-477-QUERY_TIE_ORDER-TESTS-B-AUTO",
+        "taskId": "N4.10.A.477.QUERY_TIE_ORDER_TESTS",
         "workerId": "JULES_B",
         "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYTIEORDER381Tests.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYTIEORDER381Tests.cs. Add a focused regression for the current behavior identified by QUERY_TIE_ORDER; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYTIEORDER477Tests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYTIEORDER477Tests.cs. Add a focused regression for the current behavior identified by QUERY_TIE_ORDER; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-382-CANCELLATION_PROPAGATION-TESTS-B-AUTO",
-        "taskId": "N4.10.A.382.CANCELLATION_PROPAGATION_TESTS",
+        "dispatchId": "N4-10-A-478-CANCELLATION_PROPAGATION-TESTS-B-AUTO",
+        "taskId": "N4.10.A.478.CANCELLATION_PROPAGATION_TESTS",
         "workerId": "JULES_B",
         "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportCANCELLATIONPROPAGATION382Tests.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportCANCELLATIONPROPAGATION382Tests.cs. Add a focused regression for the current behavior identified by CANCELLATION_PROPAGATION; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportCANCELLATIONPROPAGATION478Tests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportCANCELLATIONPROPAGATION478Tests.cs. Add a focused regression for the current behavior identified by CANCELLATION_PROPAGATION; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-383-READ_ONLY_QUERY-TESTS-B-AUTO",
-        "taskId": "N4.10.A.383.READ_ONLY_QUERY_TESTS",
+        "dispatchId": "N4-10-A-479-READ_ONLY_QUERY-TESTS-B-AUTO",
+        "taskId": "N4.10.A.479.READ_ONLY_QUERY_TESTS",
         "workerId": "JULES_B",
         "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportREADONLYQUERY383Tests.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportREADONLYQUERY383Tests.cs. Add a focused regression for the current behavior identified by READ_ONLY_QUERY; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportREADONLYQUERY479Tests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportREADONLYQUERY479Tests.cs. Add a focused regression for the current behavior identified by READ_ONLY_QUERY; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-384-MULTI_FILTER_COMPOSITION-TESTS-B-AUTO",
-        "taskId": "N4.10.A.384.MULTI_FILTER_COMPOSITION_TESTS",
+        "dispatchId": "N4-10-A-480-MULTI_FILTER_COMPOSITION-TESTS-B-AUTO",
+        "taskId": "N4.10.A.480.MULTI_FILTER_COMPOSITION_TESTS",
         "workerId": "JULES_B",
         "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportMULTIFILTERCOMPOSITION384Tests.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportMULTIFILTERCOMPOSITION384Tests.cs. Add a focused regression for the current behavior identified by MULTI_FILTER_COMPOSITION; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportMULTIFILTERCOMPOSITION480Tests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportMULTIFILTERCOMPOSITION480Tests.cs. Add a focused regression for the current behavior identified by MULTI_FILTER_COMPOSITION; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-385-NO_MATCH_PAGINATION-TESTS-B-AUTO",
-        "taskId": "N4.10.A.385.NO_MATCH_PAGINATION_TESTS",
+        "dispatchId": "N4-10-A-481-NO_MATCH_PAGINATION-TESTS-B-AUTO",
+        "taskId": "N4.10.A.481.NO_MATCH_PAGINATION_TESTS",
         "workerId": "JULES_B",
         "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportNOMATCHPAGINATION385Tests.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportNOMATCHPAGINATION385Tests.cs. Add a focused regression for the current behavior identified by NO_MATCH_PAGINATION; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportNOMATCHPAGINATION481Tests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportNOMATCHPAGINATION481Tests.cs. Add a focused regression for the current behavior identified by NO_MATCH_PAGINATION; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-386-OUT_OF_RANGE_PAGE-TESTS-B-AUTO",
-        "taskId": "N4.10.A.386.OUT_OF_RANGE_PAGE_TESTS",
+        "dispatchId": "N4-10-A-482-OUT_OF_RANGE_PAGE-TESTS-B-AUTO",
+        "taskId": "N4.10.A.482.OUT_OF_RANGE_PAGE_TESTS",
         "workerId": "JULES_B",
         "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportOUTOFRANGEPAGE386Tests.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportOUTOFRANGEPAGE386Tests.cs. Add a focused regression for the current behavior identified by OUT_OF_RANGE_PAGE; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportOUTOFRANGEPAGE482Tests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportOUTOFRANGEPAGE482Tests.cs. Add a focused regression for the current behavior identified by OUT_OF_RANGE_PAGE; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-387-PAGE_SIZE_BOUNDARY-TESTS-B-AUTO",
-        "taskId": "N4.10.A.387.PAGE_SIZE_BOUNDARY_TESTS",
+        "dispatchId": "N4-10-A-483-PAGE_SIZE_BOUNDARY-TESTS-B-AUTO",
+        "taskId": "N4.10.A.483.PAGE_SIZE_BOUNDARY_TESTS",
         "workerId": "JULES_B",
         "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportPAGESIZEBOUNDARY387Tests.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportPAGESIZEBOUNDARY387Tests.cs. Add a focused regression for the current behavior identified by PAGE_SIZE_BOUNDARY; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportPAGESIZEBOUNDARY483Tests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportPAGESIZEBOUNDARY483Tests.cs. Add a focused regression for the current behavior identified by PAGE_SIZE_BOUNDARY; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-388-QUERY_PROJECTION_NULL-TESTS-B-AUTO",
-        "taskId": "N4.10.A.388.QUERY_PROJECTION_NULL_TESTS",
+        "dispatchId": "N4-10-A-484-QUERY_PROJECTION_NULL-TESTS-B-AUTO",
+        "taskId": "N4.10.A.484.QUERY_PROJECTION_NULL_TESTS",
         "workerId": "JULES_B",
         "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYPROJECTIONNULL388Tests.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYPROJECTIONNULL388Tests.cs. Add a focused regression for the current behavior identified by QUERY_PROJECTION_NULL; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYPROJECTIONNULL484Tests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYPROJECTIONNULL484Tests.cs. Add a focused regression for the current behavior identified by QUERY_PROJECTION_NULL; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-389-MYSQL_DECIMAL_PARITY-TESTS-B-AUTO",
-        "taskId": "N4.10.A.389.MYSQL_DECIMAL_PARITY_TESTS",
+        "dispatchId": "N4-10-A-485-MYSQL_DECIMAL_PARITY-TESTS-B-AUTO",
+        "taskId": "N4.10.A.485.MYSQL_DECIMAL_PARITY_TESTS",
         "workerId": "JULES_B",
         "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportMYSQLDECIMALPARITY389Tests.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportMYSQLDECIMALPARITY389Tests.cs. Add a focused regression for the current behavior identified by MYSQL_DECIMAL_PARITY; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportMYSQLDECIMALPARITY485Tests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportMYSQLDECIMALPARITY485Tests.cs. Add a focused regression for the current behavior identified by MYSQL_DECIMAL_PARITY; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-390-TRANSACTION_READ_CONSISTENCY-TESTS-B-AUTO",
-        "taskId": "N4.10.A.390.TRANSACTION_READ_CONSISTENCY_TESTS",
+        "dispatchId": "N4-10-A-486-TRANSACTION_READ_CONSISTENCY-TESTS-B-AUTO",
+        "taskId": "N4.10.A.486.TRANSACTION_READ_CONSISTENCY_TESTS",
         "workerId": "JULES_B",
         "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportTRANSACTIONREADCONSISTENCY390Tests.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportTRANSACTIONREADCONSISTENCY390Tests.cs. Add a focused regression for the current behavior identified by TRANSACTION_READ_CONSISTENCY; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportTRANSACTIONREADCONSISTENCY486Tests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportTRANSACTIONREADCONSISTENCY486Tests.cs. Add a focused regression for the current behavior identified by TRANSACTION_READ_CONSISTENCY; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-391-QUERY_DUPLICATE_ROW-TESTS-B-AUTO",
-        "taskId": "N4.10.A.391.QUERY_DUPLICATE_ROW_TESTS",
+        "dispatchId": "N4-10-A-487-QUERY_DUPLICATE_ROW-TESTS-B-AUTO",
+        "taskId": "N4.10.A.487.QUERY_DUPLICATE_ROW_TESTS",
         "workerId": "JULES_B",
         "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYDUPLICATEROW391Tests.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYDUPLICATEROW391Tests.cs. Add a focused regression for the current behavior identified by QUERY_DUPLICATE_ROW; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYDUPLICATEROW487Tests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYDUPLICATEROW487Tests.cs. Add a focused regression for the current behavior identified by QUERY_DUPLICATE_ROW; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-392-QUERY_PERIOD_STATUS-TESTS-B-AUTO",
-        "taskId": "N4.10.A.392.QUERY_PERIOD_STATUS_TESTS",
+        "dispatchId": "N4-10-A-488-QUERY_PERIOD_STATUS-TESTS-B-AUTO",
+        "taskId": "N4.10.A.488.QUERY_PERIOD_STATUS_TESTS",
         "workerId": "JULES_B",
         "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYPERIODSTATUS392Tests.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYPERIODSTATUS392Tests.cs. Add a focused regression for the current behavior identified by QUERY_PERIOD_STATUS; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYPERIODSTATUS488Tests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYPERIODSTATUS488Tests.cs. Add a focused regression for the current behavior identified by QUERY_PERIOD_STATUS; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-393-QUERY_EMPTY_FILTER-TESTS-B-AUTO",
-        "taskId": "N4.10.A.393.QUERY_EMPTY_FILTER_TESTS",
+        "dispatchId": "N4-10-A-489-QUERY_EMPTY_FILTER-TESTS-B-AUTO",
+        "taskId": "N4.10.A.489.QUERY_EMPTY_FILTER_TESTS",
         "workerId": "JULES_B",
         "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYEMPTYFILTER393Tests.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYEMPTYFILTER393Tests.cs. Add a focused regression for the current behavior identified by QUERY_EMPTY_FILTER; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYEMPTYFILTER489Tests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYEMPTYFILTER489Tests.cs. Add a focused regression for the current behavior identified by QUERY_EMPTY_FILTER; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-394-QUERY_COMBINED_SORT-TESTS-B-AUTO",
-        "taskId": "N4.10.A.394.QUERY_COMBINED_SORT_TESTS",
+        "dispatchId": "N4-10-A-490-QUERY_COMBINED_SORT-TESTS-B-AUTO",
+        "taskId": "N4.10.A.490.QUERY_COMBINED_SORT_TESTS",
         "workerId": "JULES_B",
         "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYCOMBINEDSORT394Tests.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYCOMBINEDSORT394Tests.cs. Add a focused regression for the current behavior identified by QUERY_COMBINED_SORT; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYCOMBINEDSORT490Tests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYCOMBINEDSORT490Tests.cs. Add a focused regression for the current behavior identified by QUERY_COMBINED_SORT; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-395-MYSQL_NULL_MAPPING-TESTS-B-AUTO",
-        "taskId": "N4.10.A.395.MYSQL_NULL_MAPPING_TESTS",
+        "dispatchId": "N4-10-A-491-MYSQL_NULL_MAPPING-TESTS-B-AUTO",
+        "taskId": "N4.10.A.491.MYSQL_NULL_MAPPING_TESTS",
         "workerId": "JULES_B",
         "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportMYSQLNULLMAPPING395Tests.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportMYSQLNULLMAPPING395Tests.cs. Add a focused regression for the current behavior identified by MYSQL_NULL_MAPPING; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportMYSQLNULLMAPPING491Tests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportMYSQLNULLMAPPING491Tests.cs. Add a focused regression for the current behavior identified by MYSQL_NULL_MAPPING; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-396-QUERY_RANGE_EXACT_EDGE-TESTS-B-AUTO",
-        "taskId": "N4.10.A.396.QUERY_RANGE_EXACT_EDGE_TESTS",
+        "dispatchId": "N4-10-A-492-QUERY_RANGE_EXACT_EDGE-TESTS-B-AUTO",
+        "taskId": "N4.10.A.492.QUERY_RANGE_EXACT_EDGE_TESTS",
         "workerId": "JULES_B",
         "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYRANGEEXACTEDGE396Tests.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYRANGEEXACTEDGE396Tests.cs. Add a focused regression for the current behavior identified by QUERY_RANGE_EXACT_EDGE; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYRANGEEXACTEDGE492Tests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYRANGEEXACTEDGE492Tests.cs. Add a focused regression for the current behavior identified by QUERY_RANGE_EXACT_EDGE; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-397-PAGINATION_STABILITY-TESTS-B-AUTO",
-        "taskId": "N4.10.A.397.PAGINATION_STABILITY_TESTS",
+        "dispatchId": "N4-10-A-493-PAGINATION_STABILITY-TESTS-B-AUTO",
+        "taskId": "N4.10.A.493.PAGINATION_STABILITY_TESTS",
         "workerId": "JULES_B",
         "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportPAGINATIONSTABILITY397Tests.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportPAGINATIONSTABILITY397Tests.cs. Add a focused regression for the current behavior identified by PAGINATION_STABILITY; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportPAGINATIONSTABILITY493Tests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportPAGINATIONSTABILITY493Tests.cs. Add a focused regression for the current behavior identified by PAGINATION_STABILITY; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-398-QUERY_ERROR_CONTRACT-TESTS-B-AUTO",
-        "taskId": "N4.10.A.398.QUERY_ERROR_CONTRACT_TESTS",
+        "dispatchId": "N4-10-A-494-QUERY_ERROR_CONTRACT-TESTS-B-AUTO",
+        "taskId": "N4.10.A.494.QUERY_ERROR_CONTRACT_TESTS",
         "workerId": "JULES_B",
         "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYERRORCONTRACT398Tests.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYERRORCONTRACT398Tests.cs. Add a focused regression for the current behavior identified by QUERY_ERROR_CONTRACT; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
-      },
-      {
-        "dispatchId": "N4-10-A-411-AUDIT-EXPORT-NEWEST-FIRST-ORDER-TESTS-B-UNIQUE",
-        "taskId": "N4.10.A.411.AUDIT_EXPORT_NEWEST_FIRST_ORDER_TESTS",
-        "workerId": "JULES_B",
-        "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AAuditExportNewestFirstOrderTests.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. UNIQUE material closure-support work for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AAuditExportNewestFirstOrderTests.cs. Test existing auditoria export ordering is Fecha descending before the 50,000-row cap. Reuse current implementation/contracts only; no production behavior changes. Run proportional focused tests/build when possible and perform TWO independent self-reviews. No workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
-      },
-      {
-        "dispatchId": "N4-10-A-412-USER-EXPORT-COLUMN-CONTRACT-TESTS-B-UNIQUE",
-        "taskId": "N4.10.A.412.USER_EXPORT_COLUMN_CONTRACT_TESTS",
-        "workerId": "JULES_B",
-        "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AUserExportColumnContractTests.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. UNIQUE material closure-support work for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AUserExportColumnContractTests.cs. Test the existing usuarios export header/order and core field mapping for CSV/XLSX without changing production. Reuse current implementation/contracts only; no production behavior changes. Run proportional focused tests/build when possible and perform TWO independent self-reviews. No workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
-      },
-      {
-        "dispatchId": "N4-10-A-413-ROLE-EXPORT-COLUMN-CONTRACT-TESTS-B-UNIQUE",
-        "taskId": "N4.10.A.413.ROLE_EXPORT_COLUMN_CONTRACT_TESTS",
-        "workerId": "JULES_B",
-        "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410ARoleExportColumnContractTests.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. UNIQUE material closure-support work for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410ARoleExportColumnContractTests.cs. Test the existing roles export header/order and field mapping, including coverage/privilege/detail fields. Reuse current implementation/contracts only; no production behavior changes. Run proportional focused tests/build when possible and perform TWO independent self-reviews. No workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
-      },
-      {
-        "dispatchId": "N4-10-A-414-AUDIT-EXPORT-COLUMN-CONTRACT-TESTS-B-UNIQUE",
-        "taskId": "N4.10.A.414.AUDIT_EXPORT_COLUMN_CONTRACT_TESTS",
-        "workerId": "JULES_B",
-        "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AAuditExportColumnContractTests.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. UNIQUE material closure-support work for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AAuditExportColumnContractTests.cs. Test the existing auditoria export header/order and mapped fields, including masked IP and correlation ID. Reuse current implementation/contracts only; no production behavior changes. Run proportional focused tests/build when possible and perform TWO independent self-reviews. No workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
-      },
-      {
-        "dispatchId": "N4-10-A-415-INVALID-REPORT-TYPE-FAIL-CLOSED-TESTS-B-UNIQUE",
-        "taskId": "N4.10.A.415.INVALID_REPORT_TYPE_FAIL_CLOSED_TESTS",
-        "workerId": "JULES_B",
-        "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AInvalidReportTypeFailClosedTests.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. UNIQUE material closure-support work for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AInvalidReportTypeFailClosedTests.cs. Test ExportarAsync rejects unsupported report types with the existing BusinessRuleException contract. Reuse current implementation/contracts only; no production behavior changes. Run proportional focused tests/build when possible and perform TWO independent self-reviews. No workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
-      },
-      {
-        "dispatchId": "N4-10-A-416-INVALID-EXPORT-FORMAT-FAIL-CLOSED-TESTS-B-UNIQUE",
-        "taskId": "N4.10.A.416.INVALID_EXPORT_FORMAT_FAIL_CLOSED_TESTS",
-        "workerId": "JULES_B",
-        "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AInvalidExportFormatFailClosedTests.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. UNIQUE material closure-support work for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AInvalidExportFormatFailClosedTests.cs. Test ExportarAsync rejects formats other than csv/xlsx using the existing fail-closed business rule. Reuse current implementation/contracts only; no production behavior changes. Run proportional focused tests/build when possible and perform TWO independent self-reviews. No workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYERRORCONTRACT494Tests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYERRORCONTRACT494Tests.cs. Add a focused regression for the current behavior identified by QUERY_ERROR_CONTRACT; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       }
     ],
     "JULES_C": [
@@ -932,7 +884,7 @@
       }
     ]
   },
-  "generatedAt": "2026-09-06T13:19:02Z",
+  "generatedAt": "2026-09-06T15:17:26Z",
   "currentParent": "N4.10.A",
   "regenerationReason": "BACKLOG_UNIQUE_ONLY_REPLENISH"
 }
