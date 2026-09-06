@@ -5,27 +5,35 @@ readonly UNIQUE_REGISTRY="vaep/control/jules-completed-semantic-facets.json"
 readonly CATALOG="vaep/control/jules-autorefill-catalog.json"
 
 # A terminal hook may be running from an older manifest checkout while the
-# control-plane has already advanced. Never let stale autorefill logic create a
-# semantically duplicated task under a new numeric id. Compare the local
-# controller inputs with the current Desarrollo versions; if any differ, leave
-# refill to a fresh run/watchdog instead of publishing from stale logic.
+# control-plane has already advanced. Logic changes remain fail-closed, but
+# data-only catalog/registry changes are refreshed from current Desarrollo so
+# a terminal Jules can reserve NEXT in the SAME run instead of waiting for a
+# watchdog checkpoint.
 if git remote get-url origin >/dev/null 2>&1; then
   git fetch --quiet origin Desarrollo || true
   if git rev-parse --verify origin/Desarrollo >/dev/null 2>&1; then
-    stale=0
+    stale_logic=0
     for path in \
+      .github/scripts/vaep-jules-autorefill.sh \
       .github/scripts/vaep-jules-autorefill-core.sh \
-      .github/scripts/vaep-jules-catalog-floor.sh \
+      .github/scripts/vaep-jules-catalog-floor.sh; do
+      if ! git diff --quiet HEAD origin/Desarrollo -- "$path"; then
+        stale_logic=1
+        echo "AUTOREFILL_WAIT=STALE_LOGIC path=$path action=FRESH_WATCHDOG_REFILL"
+      fi
+    done
+    if (( stale_logic != 0 )); then
+      exit 0
+    fi
+
+    for path in \
       vaep/control/jules-autorefill-catalog.json \
       vaep/control/jules-completed-semantic-facets.json; do
       if ! git diff --quiet HEAD origin/Desarrollo -- "$path"; then
-        stale=1
-        echo "AUTOREFILL_WAIT=STALE_CONTROL_PLANE path=$path action=FRESH_WATCHDOG_REFILL"
+        git checkout --quiet origin/Desarrollo -- "$path"
+        echo "AUTOREFILL_REFRESHED_CONTROL_DATA path=$path source=origin/Desarrollo"
       fi
     done
-    if (( stale != 0 )); then
-      exit 0
-    fi
   fi
 fi
 

@@ -1,9 +1,9 @@
 {
-  "version": 4,
+  "version": 5,
   "authority": "docs/VAEP_AUTHORITY.md",
   "currentParent": "N4.10.D",
-  "generatedAt": "2026-09-06T16:24:00Z",
-  "regenerationReason": "ATOMIC_HANDOFF_N4.10.B_LISTO__N4.10.C_NO_CODE_PERSISTENCE_AUDIT_LISTO__PROMOTE_N4.10.D",
+  "generatedAt": "2026-09-06T19:25:00Z",
+  "regenerationReason": "N4.10.D_QA_TAKEOVER__N4.10.E_DEPENDENCY_SAFE_PREWORK__ZERO_IDLE_RECOVERY",
   "policy": {
     "branch": "Desarrollo",
     "queueDepthTarget": 2,
@@ -15,74 +15,74 @@
   "lanes": {
     "JULES_A": [
       {
-        "dispatchId": "N4-10-D-1-FINANCIAL-STATEMENT-SERVICE-IMPLEMENTATION-A-MATERIAL",
-        "taskId": "N4.10.D.1.FINANCIAL_STATEMENT_SERVICE_IMPLEMENTATION",
+        "dispatchId": "N4-10-E-5-FINANCIAL-STATEMENT-STYLES-A-MATERIAL",
+        "taskId": "N4.10.E.5.FINANCIAL_STATEMENT_STYLES",
         "workerId": "JULES_A",
         "taskAttempt": 1,
-        "fileScopeHint": "backend/src/Infrastructure/Services/EstadoFinancieroService.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.D. Own ONLY backend/src/Infrastructure/Services/EstadoFinancieroService.cs. Implement IEstadoFinancieroService as read-only projections over existing CuentaContable/AsientoContable/AsientoDetalle/PeriodoContable persistence. Support the six approved TipoEstadoFinanciero values without persisting report snapshots. Respect date/period filters, decimal precision, deterministic ordering and CancellationToken. Reuse existing accounting invariants. TWO self-reviews. No workflow/manifest/dependency/main/production/merge/deploy changes."
+        "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.component.scss only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. NEXT_SAFE_PREWORK for N4.10.E only; CURRENT_PARENT remains N4.10.D and this task MUST NOT promote/close E. Own ONLY frontend/src/app/features/estados-financieros/estados-financieros.component.scss. Create responsive, accessible, theme-compatible styling for the approved financial-statement UI contract: filter controls, loading/error/empty states, result heading, horizontally safe statement table, totals emphasis, narrow-screen layout and visible focus behavior without hard-coding product colors where project CSS variables exist. Follow existing report/asiento patterns. No TS/HTML/routes/service/model/backend/workflow/manifest changes. TWO independent self-reviews."
       },
       {
-        "dispatchId": "N4-10-D-5-FINANCIAL-STATEMENT-SERVICE-TESTS-A-MATERIAL",
-        "taskId": "N4.10.D.5.FINANCIAL_STATEMENT_SERVICE_TESTS",
+        "dispatchId": "N4-10-E-9-FINANCIAL-STATEMENT-NAVIGATION-A-MATERIAL",
+        "taskId": "N4.10.E.9.FINANCIAL_STATEMENT_NAVIGATION",
         "workerId": "JULES_A",
         "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410DEstadoFinancieroServiceTests.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.D. Own ONLY backend/tests/InventoryApp.Tests/N410DEstadoFinancieroServiceTests.cs. Add focused tests for aggregation, deterministic ordering, date/period boundaries, debit-credit netting, empty result and cancellation against the implemented service. No production edits. TWO self-reviews. No main/production/merge/deploy changes."
+        "fileScopeHint": "frontend/src/app/app.component.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. NEXT_SAFE_PREWORK for N4.10.E only; CURRENT_PARENT remains N4.10.D. Own ONLY frontend/src/app/app.component.ts. Add exactly one permission-gated Finanzas navigation entry for /estados-financieros using existing sidebar patterns and an appropriate Material icon. Do not refactor the shell or alter unrelated navigation. TWO independent self-reviews. No route/component/service/model/backend/workflow/manifest changes."
       }
     ],
     "JULES_B": [
       {
-        "dispatchId": "N4-10-D-2-FINANCIAL-STATEMENT-FILTER-VALIDATION-B-MATERIAL",
-        "taskId": "N4.10.D.2.FINANCIAL_STATEMENT_FILTER_VALIDATION",
+        "dispatchId": "N4-10-E-6-FINANCIAL-STATEMENT-SERVICE-TESTS-B-MATERIAL",
+        "taskId": "N4.10.E.6.FINANCIAL_STATEMENT_SERVICE_TESTS",
         "workerId": "JULES_B",
         "taskAttempt": 1,
-        "fileScopeHint": "backend/src/Application/Services/EstadoFinancieroFiltroValidator.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.D. Own ONLY backend/src/Application/Services/EstadoFinancieroFiltroValidator.cs. Implement focused validation for EstadoFinancieroFiltroDto: valid date ranges, compatible period/date semantics and deterministic normalization only where justified by current contracts. No persistence/controller edits. TWO self-reviews. No workflow/manifest/dependency/main/production/merge/deploy changes."
+        "fileScopeHint": "frontend/src/app/services/estado-financiero.service.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. NEXT_SAFE_PREWORK for N4.10.E only; CURRENT_PARENT remains N4.10.D. Own ONLY frontend/src/app/services/estado-financiero.service.spec.ts. Add HttpClient tests for the approved EstadoFinancieroService contract: GET /estados-financieros/{tipo}; periodoContableId-only; fechaDesde+fechaHasta; omission of undefined params; ApiResponse<EstadoFinanciero> passthrough; no mutation/export behavior. Follow asiento-contable.service.spec.ts patterns. It is acceptable that the target service is still an unintegrated sibling artifact; do not modify it. TWO independent self-reviews."
       },
       {
-        "dispatchId": "N4-10-D-6-FINANCIAL-STATEMENT-FILTER-VALIDATION-TESTS-B-MATERIAL",
-        "taskId": "N4.10.D.6.FINANCIAL_STATEMENT_FILTER_VALIDATION_TESTS",
+        "dispatchId": "N4-10-E-10-FINANCIAL-STATEMENT-MODEL-TESTS-B-MATERIAL",
+        "taskId": "N4.10.E.10.FINANCIAL_STATEMENT_MODEL_TESTS",
         "workerId": "JULES_B",
         "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410DEstadoFinancieroFiltroValidatorTests.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.D. Own ONLY backend/tests/InventoryApp.Tests/N410DEstadoFinancieroFiltroValidatorTests.cs. Test valid/invalid range boundaries and period/date compatibility for the approved validator. No production edits. TWO self-reviews. No main/production/merge/deploy changes."
+        "fileScopeHint": "frontend/src/app/core/models/estado-financiero.model.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. NEXT_SAFE_PREWORK for N4.10.E only; CURRENT_PARENT remains N4.10.D. Own ONLY frontend/src/app/core/models/estado-financiero.model.spec.ts. Add focused runtime/contract tests for the six TipoEstadoFinanciero numeric values and representative typed payload shape without inventing fields or changing production models. TWO independent self-reviews. No other files."
       }
     ],
     "JULES_C": [
       {
-        "dispatchId": "N4-10-D-3-FINANCIAL-STATEMENT-API-C-MATERIAL",
-        "taskId": "N4.10.D.3.FINANCIAL_STATEMENT_API",
+        "dispatchId": "N4-10-E-7-FINANCIAL-STATEMENT-COMPONENT-TESTS-C-MATERIAL",
+        "taskId": "N4.10.E.7.FINANCIAL_STATEMENT_COMPONENT_TESTS",
         "workerId": "JULES_C",
         "taskAttempt": 1,
-        "fileScopeHint": "backend/src/API/Controllers/EstadosFinancierosController.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.D. Own ONLY backend/src/API/Controllers/EstadosFinancierosController.cs. Add read-only API endpoint(s) over IEstadoFinancieroService using existing API conventions, auth/error handling and CancellationToken. No persistence/service implementation/Program edits. TWO self-reviews. No workflow/manifest/dependency/main/production/merge/deploy changes."
+        "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.component.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. NEXT_SAFE_PREWORK for N4.10.E only; CURRENT_PARENT remains N4.10.D. Own ONLY frontend/src/app/features/estados-financieros/estados-financieros.component.spec.ts. Add focused component tests using current standalone/TestBed patterns for creation, mutually exclusive period vs date filters, incomplete/reversed range rejection, loading/error/result behavior and service invocation with the approved filter. Do not alter production files. TWO independent self-reviews."
       },
       {
-        "dispatchId": "N4-10-D-7-FINANCIAL-STATEMENT-API-TESTS-C-MATERIAL",
-        "taskId": "N4.10.D.7.FINANCIAL_STATEMENT_API_TESTS",
+        "dispatchId": "N4-10-E-11-FINANCIAL-STATEMENT-A11Y-TESTS-C-MATERIAL",
+        "taskId": "N4.10.E.11.FINANCIAL_STATEMENT_A11Y_TESTS",
         "workerId": "JULES_C",
         "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410DEstadosFinancierosControllerTests.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.D. Own ONLY backend/tests/InventoryApp.Tests/N410DEstadosFinancierosControllerTests.cs. Add focused API contract tests for supported statement kind, filter binding, cancellation and invalid-request ProblemDetails semantics. No production edits. TWO self-reviews. No main/production/merge/deploy changes."
+        "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.a11y.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. NEXT_SAFE_PREWORK for N4.10.E only; CURRENT_PARENT remains N4.10.D. Own ONLY frontend/src/app/features/estados-financieros/estados-financieros.a11y.spec.ts. Add accessibility-oriented component tests for an h1/clear page name, labelled filter controls, announced loading/error state, keyboard-reachable generate action and table semantics for rendered results using existing Angular testing capabilities only. Do not introduce dependencies. TWO independent self-reviews."
       }
     ],
     "JULES_D": [
       {
-        "dispatchId": "N4-10-D-4-FINANCIAL-STATEMENT-DI-WIRING-D-MATERIAL",
-        "taskId": "N4.10.D.4.FINANCIAL_STATEMENT_DI_WIRING",
+        "dispatchId": "N4-10-E-8-FINANCIAL-STATEMENT-ROUTE-D-MATERIAL",
+        "taskId": "N4.10.E.8.FINANCIAL_STATEMENT_ROUTE",
         "workerId": "JULES_D",
         "taskAttempt": 1,
-        "fileScopeHint": "backend/src/API/Program.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.D. Own ONLY backend/src/API/Program.cs. Register IEstadoFinancieroService to EstadoFinancieroService using the existing DI pattern, with no unrelated Program.cs refactor. Verify namespaces/compile compatibility. TWO self-reviews. No workflow/manifest/dependency/main/production/merge/deploy changes."
+        "fileScopeHint": "frontend/src/app/app.routes.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. NEXT_SAFE_PREWORK for N4.10.E only; CURRENT_PARENT remains N4.10.D. Own ONLY frontend/src/app/app.routes.ts. Add one /estados-financieros route using existing authGuard + permisoGuard conventions, data modulo Finanzas accion Ver, and lazy load EstadosFinancierosComponent from the approved feature path. Do not alter unrelated routes/imports. TWO independent self-reviews."
       },
       {
-        "dispatchId": "N4-10-D-8-FINANCIAL-STATEMENT-DI-CONTRACT-TESTS-D-MATERIAL",
-        "taskId": "N4.10.D.8.FINANCIAL_STATEMENT_DI_CONTRACT_TESTS",
+        "dispatchId": "N4-10-E-12-FINANCIAL-STATEMENT-INTEGRATION-TESTS-D-MATERIAL",
+        "taskId": "N4.10.E.12.FINANCIAL_STATEMENT_INTEGRATION_TESTS",
         "workerId": "JULES_D",
         "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410DEstadoFinancieroDiContractTests.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.D. Own ONLY backend/tests/InventoryApp.Tests/N410DEstadoFinancieroDiContractTests.cs. Add focused DI resolution/registration contract tests for IEstadoFinancieroService after wiring exists. No production edits. TWO self-reviews. No main/production/merge/deploy changes."
+        "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.integration.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. NEXT_SAFE_PREWORK for N4.10.E only; CURRENT_PARENT remains N4.10.D. Own ONLY frontend/src/app/features/estados-financieros/estados-financieros.integration.spec.ts. Add focused frontend integration tests that wire the standalone EstadosFinancierosComponent with HttpClientTestingModule and verify a generated statement request renders representative line/totals data plus error response behavior. No production edits or new dependencies. TWO independent self-reviews."
       }
     ]
   }
