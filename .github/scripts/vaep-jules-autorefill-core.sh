@@ -49,10 +49,14 @@ lane_workflow_file() {
 }
 
 other_live_lane_run_exists() {
-  local name runs count current_id
+  local name workflow runs count current_id
   name="$(lane_workflow_name)"
+  workflow="$(lane_workflow_file)"
   current_id="${GITHUB_RUN_ID:-0}"
-  runs="$(api "repos/$GITHUB_REPOSITORY/actions/runs?branch=$BRANCH&per_page=100")"
+  # Query the lane workflow directly. The repository-wide first 100 runs can be
+  # saturated by CI fan-out and omit an older queued NEXT, which would let a
+  # terminal hook dispatch a newer run and GitHub concurrency cancel the real NEXT.
+  runs="$(api "repos/$GITHUB_REPOSITORY/actions/workflows/$workflow/runs?branch=$BRANCH&per_page=30")"
   count="$(jq --arg name "$name" --argjson current "$current_id" '
     [.workflow_runs[]?
       | select(.name==$name)
