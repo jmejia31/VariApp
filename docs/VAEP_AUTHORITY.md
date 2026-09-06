@@ -23,6 +23,9 @@ MAX_VOLUNTARY_IDLE=0
 JULES_QUEUE_DEPTH_TARGET=2
 JULES_CURRENT_RUN_REQUIRED=TRUE
 JULES_NEXT_SAFE_PREARMED_REQUIRED=TRUE
+JULES_NEXT_RUN_RESERVED_REQUIRED=TRUE
+LANE_REFILL_DEADLINE_SECONDS=90
+SCHEDULED_RUN_LANE_REFILL_BEFORE_REVIEW=TRUE
 JULES_TERMINAL_HANDOFF_SAME_RUN=TRUE
 NO_MANIFEST_DURING_HEAD_FREEZE_CAUSAL=TRUE
 PREARM_BEFORE_CAUSAL_CI=TRUE
@@ -119,7 +122,11 @@ La política de parent-close, dwell time y SLA está gobernada por el bloque can
 - `CLOSURE_CHAIN_SAME_RUN=TRUE`: tras cerrar un padre, promover el siguiente dependency-valid y evaluar/cerrar inmediatamente todo padre ya pretrabajado/certificable en la MISMA corrida, repitiendo hasta `ROLLING60>=3` o hasta encontrar un blocker técnico causal exacto.
 - Mantener Jules productivos en paralelo: lanes ya reservadas continúan; una lane libre recibe NEXT_SAFE material, pero ningún refill evidence-only puede retrasar un cierre ya certificable.
 - `JULES_CURRENT_RUN_REQUIRED=TRUE` + `JULES_NEXT_SAFE_PREARMED_REQUIRED=TRUE`: cada lane debe conservar trabajo actual y siguiente trabajo seguro prearmado cuando exista backlog material elegible.
-- `JULES_QUEUE_DEPTH_TARGET=2`: objetivo mínimo por lane = CURRENT + NEXT_SAFE; terminal CURRENT debe liberar ownership y activar el siguiente en la misma corrida.
+- `JULES_QUEUE_DEPTH_TARGET=2`: objetivo mínimo por lane = CURRENT + NEXT_SAFE.
+- `JULES_NEXT_RUN_RESERVED_REQUIRED=TRUE`: NEXT_SAFE no cuenta como continuidad real hasta que exista un workflow Jules correlacionado en estado `pending|queued|in_progress` reservado para esa lane, salvo `HEAD_FREEZE_CAUSAL` real. Un archivo/row/manifiesto sin run no satisface zero-idle.
+- `LANE_REFILL_DEADLINE_SECONDS=90`: cada checkpoint debe resolver primero lanes libres o sin NEXT_RUN_RESERVED; no puede gastar más de este presupuesto en reconciliación/review antes de reservar trabajo real cuando existe SAFE_WORK.
+- `SCHEDULED_RUN_LANE_REFILL_BEFORE_REVIEW=TRUE`: la primera acción material de :00/:15/:30/:45/:55, después del preflight mínimo, es reservar CURRENT/NEXT run de A/B/C/D. REVIEW/CI/certificación se drenan detrás.
+- Terminal CURRENT debe liberar ownership y permitir que el NEXT_RUN_RESERVED arranque por la propia concurrencia del workflow, sin esperar otro checkpoint.
 - `PREARM_BEFORE_CAUSAL_CI=TRUE`: el NEXT_SAFE que requiera manifest/commit debe prepararse antes de iniciar la ventana de CI causal del FUNCTIONAL_HEAD siempre que sea técnicamente posible.
 - `NO_MANIFEST_DURING_HEAD_FREEZE_CAUSAL=TRUE`: una vez exista HEAD_FREEZE_CAUSAL, está prohibido mover Desarrollo con manifests/control-plane que puedan cancelar/superseder gates del FUNCTIONAL_HEAD. Durante ese freeze, Jules continúan sobre runs ya reservados, work seguro no-head-moving y la cola declarativa; el siguiente manifest se publica inmediatamente al liberar el freeze.
 - Nunca false LISTO ni busywork.
@@ -226,11 +233,12 @@ Dos auto-revisiones independientes son obligatorias antes de COMPLETED válido.
 Todas consumen **este MAESTRO**. Ninguna mantiene reglas por etiqueta numérica.
 
 Orden mínimo obligatorio de cada checkpoint:
-1. reconciliar CURRENT_PARENT/estado monotónico con evidencia fresca y calcular `ROLLING60/DEFICIT`;
-2. si `ROLLING60<3`, ejecutar **CLOSURE_DEBT_FASTPATH**: drenar terminales/REVIEW_FIRST/QA_TAKEOVER del camino crítico y cerrar CURRENT_PARENT inmediatamente si ya es certificable; no crear soporte/evidencia redundante;
-3. mantener **LANE_REFILL_CONTINUITY** A/B/C/D en paralelo usando runs/sesiones y NEXT_SAFE físicas; verificar transporte/run de cada dispatch sin retrasar un cierre certificable;
-4. después de cada `LISTO_REAL`, promover y evaluar el siguiente parent en la misma corrida; encadenar cierres hasta recuperar `ROLLING60>=3` o documentar blocker causal exacto;
-5. persistir BITACORA con `LANE_REFILL_RESULT A/B/C/D`, `ROLLING60`, `DEFICIT`, `CLOSURE_DEBT_MODE`, `REVIEW_BACKLOG` y `NEXT_CLOSE_TARGET`.
+1. preflight mínimo: HEAD/FUNCTIONAL_HEAD/CURRENT_PARENT + `ROLLING60/DEFICIT` + estado A/B/C/D;
+2. dentro de `LANE_REFILL_DEADLINE_SECONDS`, ejecutar **LANE_REFILL_HARD_FIRST**: toda lane sin CURRENT válido o sin NEXT_RUN_RESERVED y con SAFE_WORK debe recibir/reservar un workflow Jules real. No se inicia review largo, CI global ni auditoría antes de esto;
+3. si `ROLLING60<3`, ejecutar **CLOSURE_DEBT_FASTPATH**: drenar terminales/REVIEW_FIRST/QA_TAKEOVER del camino crítico y cerrar CURRENT_PARENT inmediatamente si ya es certificable; no crear soporte/evidencia redundante;
+4. mantener **LANE_REFILL_CONTINUITY** A/B/C/D usando runs/sesiones y NEXT_SAFE físicas; verificar transporte/run de cada dispatch sin retrasar un cierre certificable;
+5. después de cada `LISTO_REAL`, promover y evaluar el siguiente parent en la misma corrida; encadenar cierres hasta recuperar `ROLLING60>=3` o documentar blocker causal exacto;
+6. persistir BITACORA con `LANE_REFILL_RESULT A/B/C/D`, `ROLLING60`, `DEFICIT`, `CLOSURE_DEBT_MODE`, `REVIEW_BACKLOG` y `NEXT_CLOSE_TARGET`.
 
 Una corrida con `ROLLING60<3` y un parent certificable no puede terminar sin cerrar ese parent. Una corrida con lane libre + NEXT_SAFE segura tampoco puede terminar en status-only, review-only o CI-wait-only.
 
