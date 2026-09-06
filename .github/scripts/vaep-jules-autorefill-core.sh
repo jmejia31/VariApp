@@ -180,7 +180,7 @@ select_next_entry() {
       printf '%s\n' "$entry"
       return 0
     fi
-  done < <(jq -c --arg w "$WORKER_ID" '.lanes[$w][]? | select((.dispatchEligible // true) == true)' "$CATALOG")
+  done < <(jq -c --arg w "$WORKER_ID" '.lanes[$w][]? | select((.dispatchEligible != false))' "$CATALOG")
   return 1
 }
 

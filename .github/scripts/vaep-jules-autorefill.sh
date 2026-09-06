@@ -47,12 +47,12 @@ filter_dependency_safe_parent() {
   local parent tmp before after
   parent="$(jq -r '.currentParent // empty' "$CATALOG")"
   [[ -n "$parent" ]] || return 0
-  before="$(jq '[.lanes[][]? | select((.dispatchEligible // true) == true)] | length' "$CATALOG")"
+  before="$(jq '[.lanes[][]? | select((.dispatchEligible != false))] | length' "$CATALOG")"
   tmp="$(mktemp)"
   jq --arg parent "$parent" '
     .lanes |= with_entries(
       .value |= map(
-        if ((.dispatchEligible // true) == true) and ((.plannedParent // $parent) != $parent)
+        if ((.dispatchEligible != false)) and ((.plannedParent // $parent) != $parent)
         then .dispatchEligible = false
         else .
         end
@@ -60,7 +60,7 @@ filter_dependency_safe_parent() {
     )
   ' "$CATALOG" > "$tmp"
   mv "$tmp" "$CATALOG"
-  after="$(jq '[.lanes[][]? | select((.dispatchEligible // true) == true)] | length' "$CATALOG")"
+  after="$(jq '[.lanes[][]? | select((.dispatchEligible != false))] | length' "$CATALOG")"
   if (( after < before )); then
     echo "AUTOREFILL_PARENT_GUARD current_parent=$parent blocked_future_parent_entries=$((before-after))"
   fi

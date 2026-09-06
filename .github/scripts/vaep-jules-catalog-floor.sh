@@ -36,7 +36,7 @@ while IFS=$'\t' read -r dispatch eligible; do
       eligible_unused=$((eligible_unused+1))
     fi
   fi
-done < <(jq -r --arg w "$WORKER_ID" '.lanes[$w][]? | [(.dispatchId // ""), ((.dispatchEligible // true)|tostring)] | @tsv' "$CATALOG")
+done < <(jq -r --arg w "$WORKER_ID" '.lanes[$w][]? | [(.dispatchId // ""), ((.dispatchEligible != false)|tostring)] | @tsv' "$CATALOG")
 
 if (( programmed_unused <= FLOOR )); then
   echo "CATALOG_PROGRAMMED_LOW worker=$WORKER_ID programmed_unused=$programmed_unused target=$TARGET floor=$FLOOR action=CONTROLLER_REPLENISH_TO_TARGET"
