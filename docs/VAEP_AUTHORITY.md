@@ -14,6 +14,10 @@ NUMERIC_PROTOCOL_LABELS=PROHIBITED
 ```text
 BEGIN_AUTOMATION_POLICY
 PARENT_CLOSE_SLA_ROLLING_60M=3
+PARENT_CLOSE_SLA_ROLLING_24H=72
+JULES_TASKS_TARGET_ROLLING_24H_PER_WORKER=100
+JULES_TASKS_TARGET_ROLLING_24H_TOTAL=400
+JULES_REFILL_MAX_GAP_MINUTES=5
 PARENT_MAX_DWELL_MINUTES=20
 PARENT_STALL_NO_PROGRESS_MINUTES=10
 CLOSURE_REVIEW_MAX_LATENCY_MINUTES=2
@@ -29,7 +33,7 @@ SCHEDULED_RUN_LANE_REFILL_BEFORE_REVIEW=TRUE
 JULES_TERMINAL_HANDOFF_SAME_RUN=TRUE
 NO_MANIFEST_DURING_HEAD_FREEZE_CAUSAL=TRUE
 PREARM_BEFORE_CAUSAL_CI=TRUE
-VAEP_CHECKPOINTS=:00,:15,:30,:45,:55
+VAEP_CHECKPOINTS=:00,:05,:10,:15,:20,:25,:30,:35,:40,:45,:50,:55
 JULES_LANE_BUDGET_SECONDS=1080
 JULES_MAX_ATTEMPTS=2
 JULES_REWORK_MAX=1
@@ -39,7 +43,7 @@ END_AUTOMATION_POLICY
 
 ## 1. Fuente única
 
-1. ChatGPT/VAEP, Jules A/B/C/D y las cinco automatizaciones deben leer **este mismo archivo** antes de decidir reglas operativas.
+1. ChatGPT/VAEP, Jules A/B/C/D y todas las automatizaciones activas deben leer **este mismo archivo** antes de decidir reglas operativas.
 2. Cuando una regla cambia, **se modifica este archivo en el mismo lugar**. No se crea una copia, revisión numerada, protocolo paralelo ni documento `*-vX*`.
 3. Git conserva el historial; no se crean fuentes operativas duplicadas para conservar reglas anteriores.
 4. `CHANGELOG_AI.md`, `BITACORA`, Issues, artifacts, prompts anteriores y commits pueden contener etiquetas históricas; son **evidencia**, nunca autoridad ejecutable.
@@ -110,11 +114,15 @@ PENDIENTE|EN_PROGRESO|VALIDANDO|LISTO|BLOQUEADO|CANCELADO
 La política de parent-close, dwell time y SLA está gobernada por el bloque canónico `BEGIN_AUTOMATION_POLICY`:
 - `PARENT_CLOSE_FIRST=TRUE`: Cerrar CURRENT_PARENT antes de promover un sucesor dependiente.
 - Los checkpoints activos provienen exclusivamente de `VAEP_CHECKPOINTS` en el bloque canónico.
-- `PARENT_CLOSE_SLA_ROLLING_60M=3`: Objetivo de 3 parent microtareas en `LISTO_REAL` por ventana móvil de 60 minutos cuando sea técnicamente alcanzable.
+- `PARENT_CLOSE_SLA_ROLLING_60M=3`: mínimo operativo de 3 padres en `LISTO_REAL` por ventana móvil de 60 minutos.
+- `PARENT_CLOSE_SLA_ROLLING_24H=72`: objetivo contractual de 72 padres `LISTO_REAL` por ventana móvil de 24 horas; el contador de 24h no reemplaza el gate de 3/h, ambos deben cumplirse.
+- `JULES_TASKS_TARGET_ROLLING_24H_PER_WORKER=100`: objetivo de 100 tareas Jules terminales útiles por cada worker A/B/C/D en 24h, sin contar busywork, dispatch fallido, NO_OP ni sesión sin actividad útil.
+- `JULES_TASKS_TARGET_ROLLING_24H_TOTAL=400`: objetivo agregado de 400 tareas Jules útiles/24h entre A/B/C/D.
+- `JULES_REFILL_MAX_GAP_MINUTES=5`: ningún checkpoint de refill puede quedar separado por más de 5 minutos; CURRENT + NEXT_RUN_RESERVED debe reponerse antes de consumir la reserva cuando exista SAFE_WORK.
 - `PARENT_MAX_DWELL_MINUTES=20`: Límite máximo de permanencia en un mismo parent sin progreso material.
 - `PARENT_STALL_NO_PROGRESS_MINUTES`: umbral de no-progreso definido exclusivamente en el bloque canónico; al alcanzarse obliga a failover controlado.
 - `MAX_VOLUNTARY_IDLE`: tolerancia de ociosidad voluntaria definida exclusivamente en el bloque canónico; cuando es cero, una lane libre recibe trabajo seguro inmediatamente.
-- Trayectoria obligatoria de recuperación cuando sea técnicamente alcanzable: `:15 >=1`, `:30 >=2`, `:45 >=3`; `:55` corrige deuda/huecos.
+- Trayectoria de recuperación: cada checkpoint de 5 minutos corrige lanes/colas primero; `:15 >=1`, `:30 >=2`, `:45 >=3` sigue siendo el mínimo de cierre dentro de cada hora y `:55` corrige cualquier deuda antes del rollover.
 - `CLOSURE_REVIEW_MAX_LATENCY_MINUTES=2`: un terminal `READY_FOR_VAEP` que pueda decidir el cierre no puede permanecer esperando revisión administrativa más allá de este objetivo; REVIEW_FIRST/QA_TAKEOVER se drena inmediatamente.
 - `CLOSURE_DEBT_TRIGGER_LT=3`: si `ROLLING60<3`, entra CLOSURE_DEBT_FASTPATH. VAEP debe intentar cerrar CURRENT_PARENT con evidencia ya existente ANTES de crear trabajo support/evidence-only adicional para ese mismo padre.
 - En CLOSURE_DEBT_FASTPATH, si el padre ya cumple DoD + gates aplicables terminales + P0=0/P1=0, se declara `LISTO_REAL` inmediatamente; no se espera otro checkpoint, otro Jules ni documentación redundante.
@@ -220,25 +228,33 @@ Dos auto-revisiones independientes son obligatorias antes de COMPLETED válido.
 - Cierre requiere DoD real, gates/CI aplicables terminales y P0/P1=0.
 - Estado de cierre es monotónico: una tarea/padre con evidencia canónica `LISTO`/`LISTO_REAL` no puede volver a `EN_PROGRESO`/`PENDIENTE` por una fila stale. Si COLA contradice BITACORA/GitHub/certificación fresca, reconciliar COLA; reabrir solo con evidencia nueva explícita de defecto causal que invalide el cierre.
 
-## 12. Las cinco automatizaciones
+## 12. Checkpoints de automatización cada 5 minutos
 
 ```text
 :00 PRIMARY
+:05 REFILL
+:10 REFILL
 :15 RECOVERY/CLOSURE
+:20 REFILL
+:25 REFILL
 :30 REVIEW/CERT/CLOSE/HANDOFF
+:35 REFILL
+:40 REFILL
 :45 WATCHDOG/CLOSURE
+:50 REFILL
 :55 BACKUP/CORRECTOR
 ```
 
 Todas consumen **este MAESTRO**. Ninguna mantiene reglas por etiqueta numérica.
 
 Orden mínimo obligatorio de cada checkpoint:
-1. preflight mínimo: HEAD/FUNCTIONAL_HEAD/CURRENT_PARENT + `ROLLING60/DEFICIT` + estado A/B/C/D;
+1. preflight mínimo: HEAD/FUNCTIONAL_HEAD/CURRENT_PARENT + `ROLLING60/DEFICIT` + `ROLLING24H_PARENT` + `JULES24H_A/B/C/D/TOTAL` + estado A/B/C/D;
 2. dentro de `LANE_REFILL_DEADLINE_SECONDS`, ejecutar **LANE_REFILL_HARD_FIRST**: toda lane sin CURRENT válido o sin NEXT_RUN_RESERVED y con SAFE_WORK debe recibir/reservar un workflow Jules real. No se inicia review largo, CI global ni auditoría antes de esto;
 3. si `ROLLING60<3`, ejecutar **CLOSURE_DEBT_FASTPATH**: drenar terminales/REVIEW_FIRST/QA_TAKEOVER del camino crítico y cerrar CURRENT_PARENT inmediatamente si ya es certificable; no crear soporte/evidencia redundante;
 4. mantener **LANE_REFILL_CONTINUITY** A/B/C/D usando runs/sesiones y NEXT_SAFE físicas; verificar transporte/run de cada dispatch sin retrasar un cierre certificable;
 5. después de cada `LISTO_REAL`, promover y evaluar el siguiente parent en la misma corrida; encadenar cierres hasta recuperar `ROLLING60>=3` o documentar blocker causal exacto;
-6. persistir BITACORA con `LANE_REFILL_RESULT A/B/C/D`, `ROLLING60`, `DEFICIT`, `CLOSURE_DEBT_MODE`, `REVIEW_BACKLOG` y `NEXT_CLOSE_TARGET`.
+6. persistir BITACORA con `LANE_REFILL_RESULT A/B/C/D`, `ROLLING60`, `DEFICIT`, `ROLLING24H_PARENT`, `JULES24H_A/B/C/D/TOTAL`, `JULES24H_DEFICIT_A/B/C/D`, `CLOSURE_DEBT_MODE`, `REVIEW_BACKLOG` y `NEXT_CLOSE_TARGET`.
+7. Si cualquier Jules está por debajo de la trayectoria proporcional de 100/24h y existe SAFE_WORK, refill gana prioridad sobre soporte administrativo; si padres están por debajo de 72/24h o 3/60m, REVIEW/CERT/CLOSE gana prioridad sobre evidencia redundante.
 
 Una corrida con `ROLLING60<3` y un parent certificable no puede terminar sin cerrar ese parent. Una corrida con lane libre + NEXT_SAFE segura tampoco puede terminar en status-only, review-only o CI-wait-only.
 
