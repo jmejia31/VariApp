@@ -18,6 +18,7 @@ import { EstadoFinancieroService } from '../../services/estado-financiero.servic
 export class EstadosFinancierosComponent {
   private readonly fb = inject(FormBuilder);
   private readonly service = inject(EstadoFinancieroService);
+  private readonly genericGenerationError = 'No fue posible generar el estado financiero. Intente nuevamente.';
 
   readonly tipos = [
     [TipoEstadoFinanciero.BalanceGeneral, 'Balance general'],
@@ -79,13 +80,15 @@ export class EstadosFinancierosComponent {
       .subscribe({
         next: response => {
           if (!response.success || !response.data) {
-            this.error = response.message || 'No fue posible generar el estado financiero.';
+            // Security boundary: API messages may contain internal validation,
+            // exception or infrastructure details. Never render them directly.
+            this.error = this.genericGenerationError;
             return;
           }
           this.resultado = response.data;
         },
         error: () => {
-          this.error = 'No fue posible generar el estado financiero. Intente nuevamente.';
+          this.error = this.genericGenerationError;
         },
       });
   }
