@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.10.A-ACCOUNTING-DATA-SOURCE-A-20260906T0345Z",
+  "taskId": "N4.10.A.12.ACCOUNTING_DATA_SOURCE_CONTRACT_TESTS",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AAccountingDataSourceContractTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT remains N4.9.H closure debt; this is dependency-safe concurrent N4.10.A material support only and does NOT promote N4.10. Own ONLY backend/tests/InventoryApp.Tests/N410AAccountingDataSourceContractTests.cs. Add focused contract/regression tests for financial-report data sources using CURRENT repository accounting abstractions: CuentaContable, AsientoContable/Detalle, PeriodoContable and existing reporting mechanisms. Verify deterministic aggregation inputs, account classification availability and exclusion/handling of invalid or unavailable ledger data only where current code supports it. If a required reporting contract is absent, encode truthful reusable invariants where possible and report the exact missing contract; never invent PASS. No production/workflow/docs/manifest changes. Run focused tests/build when possible and perform TWO distinct self-reviews. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "09bcb09f1025739658a3bdb3eeecb856638b0e45"
+}
