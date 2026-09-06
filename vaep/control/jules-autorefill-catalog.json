@@ -401,196 +401,196 @@
     ],
     "JULES_C": [
       {
-        "dispatchId": "N4-10-A-41-FINANCIAL_REPORT_FILTER_INTERACTION_E2E-C-AUTO",
-        "taskId": "N4.10.A.41.FINANCIAL_REPORT_FILTER_INTERACTION_E2E",
+        "dispatchId": "N4-10-A-135-FILTER_RESET-TESTS-C-AUTO",
+        "taskId": "N4.10.A.135.FILTER_RESET_TESTS",
         "workerId": "JULES_C",
         "taskAttempt": 1,
-        "fileScopeHint": "frontend/e2e/n4-10-financial-report-filter-interactions.spec.ts only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY frontend/e2e/n4-10-financial-report-filter-interactions.spec.ts. Add focused Playwright coverage for current financial-report filter interactions and visible result updates using existing routes/components only. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "frontend/e2e/n4-10-financial-report-filter-reset-135.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY frontend/e2e/n4-10-financial-report-filter-reset-135.spec.ts. Add a focused regression for the current behavior identified by FILTER_RESET; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-45-FINANCIAL_REPORT_DATE_RANGE_UI_E2E-C-AUTO",
-        "taskId": "N4.10.A.45.FINANCIAL_REPORT_DATE_RANGE_UI_E2E",
+        "dispatchId": "N4-10-A-136-PAGINATION_KEYBOARD-TESTS-C-AUTO",
+        "taskId": "N4.10.A.136.PAGINATION_KEYBOARD_TESTS",
         "workerId": "JULES_C",
         "taskAttempt": 1,
-        "fileScopeHint": "frontend/e2e/n4-10-financial-report-date-range.spec.ts only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY frontend/e2e/n4-10-financial-report-date-range.spec.ts. Add focused Playwright coverage for current report date-range UI behavior, including valid boundaries and truthful invalid-range handling using existing controls only. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "frontend/e2e/n4-10-financial-report-pagination-keyboard-136.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY frontend/e2e/n4-10-financial-report-pagination-keyboard-136.spec.ts. Add a focused regression for the current behavior identified by PAGINATION_KEYBOARD; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-49-FINANCIAL_REPORT_PERMISSION_STATE_E2E-C-AUTO",
-        "taskId": "N4.10.A.49.FINANCIAL_REPORT_PERMISSION_STATE_E2E",
+        "dispatchId": "N4-10-A-137-EMPTY_STATE_A11Y-TESTS-C-AUTO",
+        "taskId": "N4.10.A.137.EMPTY_STATE_A11Y_TESTS",
         "workerId": "JULES_C",
         "taskAttempt": 1,
-        "fileScopeHint": "frontend/e2e/n4-10-financial-report-permission-state.spec.ts only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY frontend/e2e/n4-10-financial-report-permission-state.spec.ts. Add focused Playwright coverage for current financial-report unauthorized/forbidden UI state and navigation behavior, reusing existing RBAC surfaces. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "frontend/e2e/n4-10-financial-report-empty-state-a11y-137.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY frontend/e2e/n4-10-financial-report-empty-state-a11y-137.spec.ts. Add a focused regression for the current behavior identified by EMPTY_STATE_A11Y; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-53-FINANCIAL_REPORT_RETRY_RECOVERY_E2E-C-AUTO",
-        "taskId": "N4.10.A.53.FINANCIAL_REPORT_RETRY_RECOVERY_E2E",
+        "dispatchId": "N4-10-A-138-EXPORT_ANNOUNCEMENT-TESTS-C-AUTO",
+        "taskId": "N4.10.A.138.EXPORT_ANNOUNCEMENT_TESTS",
         "workerId": "JULES_C",
         "taskAttempt": 1,
-        "fileScopeHint": "frontend/e2e/n4-10-financial-report-retry-recovery.spec.ts only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY frontend/e2e/n4-10-financial-report-retry-recovery.spec.ts. Add focused Playwright coverage for current recoverable report error/retry behavior where the UI already exposes retry or refresh. Do not create missing UI. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "frontend/e2e/n4-10-financial-report-export-announcement-138.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY frontend/e2e/n4-10-financial-report-export-announcement-138.spec.ts. Add a focused regression for the current behavior identified by EXPORT_ANNOUNCEMENT; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-57-FINANCIAL_REPORT_EXPORT_AFFORDANCE_E2E-C-AUTO",
-        "taskId": "N4.10.A.57.FINANCIAL_REPORT_EXPORT_AFFORDANCE_E2E",
+        "dispatchId": "N4-10-A-139-FILTER_FOCUS_RETURN-TESTS-C-AUTO",
+        "taskId": "N4.10.A.139.FILTER_FOCUS_RETURN_TESTS",
         "workerId": "JULES_C",
         "taskAttempt": 1,
-        "fileScopeHint": "frontend/e2e/n4-10-financial-report-export-affordance.spec.ts only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY frontend/e2e/n4-10-financial-report-export-affordance.spec.ts. Add focused Playwright coverage for current report export controls/affordances and permission visibility, without asserting file formats not exposed by the UI. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "frontend/e2e/n4-10-financial-report-filter-focus-return-139.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY frontend/e2e/n4-10-financial-report-filter-focus-return-139.spec.ts. Add a focused regression for the current behavior identified by FILTER_FOCUS_RETURN; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-61-FINANCIAL_REPORT_KEYBOARD_NAV_E2E-C-AUTO",
-        "taskId": "N4.10.A.61.FINANCIAL_REPORT_KEYBOARD_NAV_E2E",
+        "dispatchId": "N4-10-A-140-PAGE_CHANGE_STATE-TESTS-C-AUTO",
+        "taskId": "N4.10.A.140.PAGE_CHANGE_STATE_TESTS",
         "workerId": "JULES_C",
         "taskAttempt": 1,
-        "fileScopeHint": "frontend/e2e/n4-10-financial-report-keyboard-navigation.spec.ts only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY frontend/e2e/n4-10-financial-report-keyboard-navigation.spec.ts. Add focused Playwright keyboard-navigation regression for current financial-report controls, filters, tables, and actionable elements. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "frontend/e2e/n4-10-financial-report-page-change-state-140.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY frontend/e2e/n4-10-financial-report-page-change-state-140.spec.ts. Add a focused regression for the current behavior identified by PAGE_CHANGE_STATE; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-65-FINANCIAL_REPORT_NO_DATA_STATE_E2E-C-AUTO",
-        "taskId": "N4.10.A.65.FINANCIAL_REPORT_NO_DATA_STATE_E2E",
+        "dispatchId": "N4-10-A-141-DATE_FILTER_KEYBOARD-TESTS-C-AUTO",
+        "taskId": "N4.10.A.141.DATE_FILTER_KEYBOARD_TESTS",
         "workerId": "JULES_C",
         "taskAttempt": 1,
-        "fileScopeHint": "frontend/e2e/n4-10-financial-report-no-data-state.spec.ts only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY frontend/e2e/n4-10-financial-report-no-data-state.spec.ts. Add focused Playwright coverage for current no-data/empty result state, ensuring clear stable UI and no stale rows from prior results. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "frontend/e2e/n4-10-financial-report-date-filter-keyboard-141.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY frontend/e2e/n4-10-financial-report-date-filter-keyboard-141.spec.ts. Add a focused regression for the current behavior identified by DATE_FILTER_KEYBOARD; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-69-FINANCIAL_REPORT_STALE_RESPONSE_GUARD_E2E-C-AUTO",
-        "taskId": "N4.10.A.69.FINANCIAL_REPORT_STALE_RESPONSE_GUARD_E2E",
+        "dispatchId": "N4-10-A-142-SORT_A11Y_STATE-TESTS-C-AUTO",
+        "taskId": "N4.10.A.142.SORT_A11Y_STATE_TESTS",
         "workerId": "JULES_C",
         "taskAttempt": 1,
-        "fileScopeHint": "frontend/e2e/n4-10-financial-report-stale-response-guard.spec.ts only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY frontend/e2e/n4-10-financial-report-stale-response-guard.spec.ts. Add focused Playwright regression for rapid current filter/range changes so stale responses do not visibly overwrite newer selections where the current UI/service supports this behavior. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "frontend/e2e/n4-10-financial-report-sort-a11y-state-142.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY frontend/e2e/n4-10-financial-report-sort-a11y-state-142.spec.ts. Add a focused regression for the current behavior identified by SORT_A11Y_STATE; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-73-FINANCIAL_REPORT_TABLE_SEMANTICS_E2E-C-AUTO",
-        "taskId": "N4.10.A.73.FINANCIAL_REPORT_TABLE_SEMANTICS_E2E",
+        "dispatchId": "N4-10-A-143-REFRESH_STATE-TESTS-C-AUTO",
+        "taskId": "N4.10.A.143.REFRESH_STATE_TESTS",
         "workerId": "JULES_C",
         "taskAttempt": 1,
-        "fileScopeHint": "frontend/e2e/n4-10-financial-report-table-semantics.spec.ts only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY frontend/e2e/n4-10-financial-report-table-semantics.spec.ts. Add focused Playwright accessibility/semantic assertions for current financial-report tables, headers, labels, and empty/loading states without modifying production UI. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "frontend/e2e/n4-10-financial-report-refresh-state-143.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY frontend/e2e/n4-10-financial-report-refresh-state-143.spec.ts. Add a focused regression for the current behavior identified by REFRESH_STATE; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-77-FINANCIAL_REPORT_REFRESH_CONSISTENCY_E2E-C-AUTO",
-        "taskId": "N4.10.A.77.FINANCIAL_REPORT_REFRESH_CONSISTENCY_E2E",
+        "dispatchId": "N4-10-A-144-NO_RESULTS_RECOVERY-TESTS-C-AUTO",
+        "taskId": "N4.10.A.144.NO_RESULTS_RECOVERY_TESTS",
         "workerId": "JULES_C",
         "taskAttempt": 1,
-        "fileScopeHint": "frontend/e2e/n4-10-financial-report-refresh-consistency.spec.ts only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY frontend/e2e/n4-10-financial-report-refresh-consistency.spec.ts. Add focused Playwright regression for repeated refresh/reload on current financial-report surfaces, ensuring no duplicate rows or stale visible state. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "frontend/e2e/n4-10-financial-report-no-results-recovery-144.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY frontend/e2e/n4-10-financial-report-no-results-recovery-144.spec.ts. Add a focused regression for the current behavior identified by NO_RESULTS_RECOVERY; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-81-FINANCIAL_REPORT_EMPTY_TO_DATA_E2E-C-AUTO",
-        "taskId": "N4.10.A.81.FINANCIAL_REPORT_EMPTY_TO_DATA_E2E",
+        "dispatchId": "N4-10-A-145-EXPORT_FILTER_PARITY-TESTS-C-AUTO",
+        "taskId": "N4.10.A.145.EXPORT_FILTER_PARITY_TESTS",
         "workerId": "JULES_C",
         "taskAttempt": 1,
-        "fileScopeHint": "frontend/e2e/n4-10-financial-report-empty-to-data.spec.ts only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY frontend/e2e/n4-10-financial-report-empty-to-data.spec.ts. Add Playwright regression for current transition from empty result to populated result after changing existing filters. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "frontend/e2e/n4-10-financial-report-export-filter-parity-145.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY frontend/e2e/n4-10-financial-report-export-filter-parity-145.spec.ts. Add a focused regression for the current behavior identified by EXPORT_FILTER_PARITY; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-85-FINANCIAL_REPORT_DATA_TO_EMPTY_E2E-C-AUTO",
-        "taskId": "N4.10.A.85.FINANCIAL_REPORT_DATA_TO_EMPTY_E2E",
+        "dispatchId": "N4-10-A-146-PAGINATION_A11Y-TESTS-C-AUTO",
+        "taskId": "N4.10.A.146.PAGINATION_A11Y_TESTS",
         "workerId": "JULES_C",
         "taskAttempt": 1,
-        "fileScopeHint": "frontend/e2e/n4-10-financial-report-data-to-empty.spec.ts only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY frontend/e2e/n4-10-financial-report-data-to-empty.spec.ts. Add Playwright regression for current transition from populated result to empty result without stale rows. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "frontend/e2e/n4-10-financial-report-pagination-a11y-146.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY frontend/e2e/n4-10-financial-report-pagination-a11y-146.spec.ts. Add a focused regression for the current behavior identified by PAGINATION_A11Y; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-89-FINANCIAL_REPORT_FILTER_RESET_E2E-C-AUTO",
-        "taskId": "N4.10.A.89.FINANCIAL_REPORT_FILTER_RESET_E2E",
+        "dispatchId": "N4-10-A-147-TABLE_HEADER_A11Y-TESTS-C-AUTO",
+        "taskId": "N4.10.A.147.TABLE_HEADER_A11Y_TESTS",
         "workerId": "JULES_C",
         "taskAttempt": 1,
-        "fileScopeHint": "frontend/e2e/n4-10-financial-report-filter-reset.spec.ts only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY frontend/e2e/n4-10-financial-report-filter-reset.spec.ts. Add Playwright coverage for current report filter reset/clear behavior if exposed; do not create missing controls. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "frontend/e2e/n4-10-financial-report-table-header-a11y-147.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY frontend/e2e/n4-10-financial-report-table-header-a11y-147.spec.ts. Add a focused regression for the current behavior identified by TABLE_HEADER_A11Y; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-93-FINANCIAL_REPORT_ROUTE_GUARD_E2E-C-AUTO",
-        "taskId": "N4.10.A.93.FINANCIAL_REPORT_ROUTE_GUARD_E2E",
+        "dispatchId": "N4-10-A-148-LOADING_STATE-TESTS-C-AUTO",
+        "taskId": "N4.10.A.148.LOADING_STATE_TESTS",
         "workerId": "JULES_C",
         "taskAttempt": 1,
-        "fileScopeHint": "frontend/e2e/n4-10-financial-report-route-guard.spec.ts only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY frontend/e2e/n4-10-financial-report-route-guard.spec.ts. Add Playwright coverage for current report route access guard behavior using existing permissions/routes. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "frontend/e2e/n4-10-financial-report-loading-state-148.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY frontend/e2e/n4-10-financial-report-loading-state-148.spec.ts. Add a focused regression for the current behavior identified by LOADING_STATE; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-97-FINANCIAL_REPORT_TABLE_EMPTY_SEMANTICS_E2E-C-AUTO",
-        "taskId": "N4.10.A.97.FINANCIAL_REPORT_TABLE_EMPTY_SEMANTICS_E2E",
+        "dispatchId": "N4-10-A-149-ERROR_RECOVERY-TESTS-C-AUTO",
+        "taskId": "N4.10.A.149.ERROR_RECOVERY_TESTS",
         "workerId": "JULES_C",
         "taskAttempt": 1,
-        "fileScopeHint": "frontend/e2e/n4-10-financial-report-table-empty-semantics.spec.ts only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY frontend/e2e/n4-10-financial-report-table-empty-semantics.spec.ts. Add Playwright accessibility/semantic assertions for current empty report table/state. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "frontend/e2e/n4-10-financial-report-error-recovery-149.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY frontend/e2e/n4-10-financial-report-error-recovery-149.spec.ts. Add a focused regression for the current behavior identified by ERROR_RECOVERY; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-101-FINANCIAL_REPORT_SORT_INTERACTION_E2E-C-AUTO",
-        "taskId": "N4.10.A.101.FINANCIAL_REPORT_SORT_INTERACTION_E2E",
+        "dispatchId": "N4-10-A-150-RANGE_EDGE-TESTS-C-AUTO",
+        "taskId": "N4.10.A.150.RANGE_EDGE_TESTS",
         "workerId": "JULES_C",
         "taskAttempt": 1,
-        "fileScopeHint": "frontend/e2e/n4-10-financial-report-sort-interaction.spec.ts only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY frontend/e2e/n4-10-financial-report-sort-interaction.spec.ts. Add Playwright coverage for current visible sort interaction where the report UI already exposes sorting. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "frontend/e2e/n4-10-financial-report-range-edge-150.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY frontend/e2e/n4-10-financial-report-range-edge-150.spec.ts. Add a focused regression for the current behavior identified by RANGE_EDGE; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-105-FINANCIAL_REPORT_PAGINATION_E2E-C-AUTO",
-        "taskId": "N4.10.A.105.FINANCIAL_REPORT_PAGINATION_E2E",
+        "dispatchId": "N4-10-A-151-REPEATED_SORT-TESTS-C-AUTO",
+        "taskId": "N4.10.A.151.REPEATED_SORT_TESTS",
         "workerId": "JULES_C",
         "taskAttempt": 1,
-        "fileScopeHint": "frontend/e2e/n4-10-financial-report-pagination.spec.ts only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY frontend/e2e/n4-10-financial-report-pagination.spec.ts. Add Playwright coverage for current report pagination controls where present, including stable page transitions. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "frontend/e2e/n4-10-financial-report-repeated-sort-151.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY frontend/e2e/n4-10-financial-report-repeated-sort-151.spec.ts. Add a focused regression for the current behavior identified by REPEATED_SORT; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-109-FINANCIAL_REPORT_LOADING_ACCESSIBILITY_E2E-C-AUTO",
-        "taskId": "N4.10.A.109.FINANCIAL_REPORT_LOADING_ACCESSIBILITY_E2E",
+        "dispatchId": "N4-10-A-152-FILTER_CLEAR_KEYBOARD-TESTS-C-AUTO",
+        "taskId": "N4.10.A.152.FILTER_CLEAR_KEYBOARD_TESTS",
         "workerId": "JULES_C",
         "taskAttempt": 1,
-        "fileScopeHint": "frontend/e2e/n4-10-financial-report-loading-accessibility.spec.ts only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY frontend/e2e/n4-10-financial-report-loading-accessibility.spec.ts. Add Playwright assertions for accessible current loading/progress state without production UI changes. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "frontend/e2e/n4-10-financial-report-filter-clear-keyboard-152.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY frontend/e2e/n4-10-financial-report-filter-clear-keyboard-152.spec.ts. Add a focused regression for the current behavior identified by FILTER_CLEAR_KEYBOARD; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-113-FINANCIAL_REPORT_ERROR_ACCESSIBILITY_E2E-C-AUTO",
-        "taskId": "N4.10.A.113.FINANCIAL_REPORT_ERROR_ACCESSIBILITY_E2E",
+        "dispatchId": "N4-10-A-153-RESPONSIVE_TABLE-TESTS-C-AUTO",
+        "taskId": "N4.10.A.153.RESPONSIVE_TABLE_TESTS",
         "workerId": "JULES_C",
         "taskAttempt": 1,
-        "fileScopeHint": "frontend/e2e/n4-10-financial-report-error-accessibility.spec.ts only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY frontend/e2e/n4-10-financial-report-error-accessibility.spec.ts. Add Playwright assertions for accessible current error state and actionable recovery where present. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "frontend/e2e/n4-10-financial-report-responsive-table-153.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY frontend/e2e/n4-10-financial-report-responsive-table-153.spec.ts. Add a focused regression for the current behavior identified by RESPONSIVE_TABLE; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-117-FINANCIAL_REPORT_FILTER_KEYBOARD_E2E-C-AUTO",
-        "taskId": "N4.10.A.117.FINANCIAL_REPORT_FILTER_KEYBOARD_E2E",
+        "dispatchId": "N4-10-A-154-ZERO_TOTAL_DISPLAY-TESTS-C-AUTO",
+        "taskId": "N4.10.A.154.ZERO_TOTAL_DISPLAY_TESTS",
         "workerId": "JULES_C",
         "taskAttempt": 1,
-        "fileScopeHint": "frontend/e2e/n4-10-financial-report-filter-keyboard.spec.ts only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY frontend/e2e/n4-10-financial-report-filter-keyboard.spec.ts. Add Playwright keyboard interaction coverage for existing report filter controls. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "frontend/e2e/n4-10-financial-report-zero-total-display-154.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY frontend/e2e/n4-10-financial-report-zero-total-display-154.spec.ts. Add a focused regression for the current behavior identified by ZERO_TOTAL_DISPLAY; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-121-FINANCIAL_REPORT_FOCUS_RECOVERY_E2E-C-AUTO",
-        "taskId": "N4.10.A.121.FINANCIAL_REPORT_FOCUS_RECOVERY_E2E",
+        "dispatchId": "N4-10-A-155-NEGATIVE_AMOUNT_DISPLAY-TESTS-C-AUTO",
+        "taskId": "N4.10.A.155.NEGATIVE_AMOUNT_DISPLAY_TESTS",
         "workerId": "JULES_C",
         "taskAttempt": 1,
-        "fileScopeHint": "frontend/e2e/n4-10-financial-report-focus-recovery.spec.ts only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY frontend/e2e/n4-10-financial-report-focus-recovery.spec.ts. Add Playwright regression for sensible focus behavior after current report refresh/error recovery where existing UI supports it. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "frontend/e2e/n4-10-financial-report-negative-amount-display-155.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY frontend/e2e/n4-10-financial-report-negative-amount-display-155.spec.ts. Add a focused regression for the current behavior identified by NEGATIVE_AMOUNT_DISPLAY; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-125-FINANCIAL_REPORT_UNAUTHORIZED_NAV_E2E-C-AUTO",
-        "taskId": "N4.10.A.125.FINANCIAL_REPORT_UNAUTHORIZED_NAV_E2E",
+        "dispatchId": "N4-10-A-156-DECIMAL_DISPLAY-TESTS-C-AUTO",
+        "taskId": "N4.10.A.156.DECIMAL_DISPLAY_TESTS",
         "workerId": "JULES_C",
         "taskAttempt": 1,
-        "fileScopeHint": "frontend/e2e/n4-10-financial-report-unauthorized-navigation.spec.ts only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY frontend/e2e/n4-10-financial-report-unauthorized-navigation.spec.ts. Add Playwright coverage for unauthorized navigation into current report route and truthful redirect/denial behavior. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "frontend/e2e/n4-10-financial-report-decimal-display-156.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY frontend/e2e/n4-10-financial-report-decimal-display-156.spec.ts. Add a focused regression for the current behavior identified by DECIMAL_DISPLAY; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-129-FINANCIAL_REPORT_REPEAT_FILTER_E2E-C-AUTO",
-        "taskId": "N4.10.A.129.FINANCIAL_REPORT_REPEAT_FILTER_E2E",
+        "dispatchId": "N4-10-A-157-BACK_FORWARD_STATE-TESTS-C-AUTO",
+        "taskId": "N4.10.A.157.BACK_FORWARD_STATE_TESTS",
         "workerId": "JULES_C",
         "taskAttempt": 1,
-        "fileScopeHint": "frontend/e2e/n4-10-financial-report-repeat-filter.spec.ts only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY frontend/e2e/n4-10-financial-report-repeat-filter.spec.ts. Add Playwright regression for applying the same existing filter repeatedly without duplicated visible rows or unstable state. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "frontend/e2e/n4-10-financial-report-back-forward-state-157.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY frontend/e2e/n4-10-financial-report-back-forward-state-157.spec.ts. Add a focused regression for the current behavior identified by BACK_FORWARD_STATE; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       },
       {
-        "dispatchId": "N4-10-A-133-FINANCIAL_REPORT_REFRESH_EMPTY_E2E-C-AUTO",
-        "taskId": "N4.10.A.133.FINANCIAL_REPORT_REFRESH_EMPTY_E2E",
+        "dispatchId": "N4-10-A-158-RELOAD_FILTER_STATE-TESTS-C-AUTO",
+        "taskId": "N4.10.A.158.RELOAD_FILTER_STATE_TESTS",
         "workerId": "JULES_C",
         "taskAttempt": 1,
-        "fileScopeHint": "frontend/e2e/n4-10-financial-report-refresh-empty.spec.ts only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY frontend/e2e/n4-10-financial-report-refresh-empty.spec.ts. Add Playwright regression for refresh while current result set is empty, ensuring state remains truthful and stable. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+        "fileScopeHint": "frontend/e2e/n4-10-financial-report-reload-filter-state-158.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY frontend/e2e/n4-10-financial-report-reload-filter-state-158.spec.ts. Add a focused regression for the current behavior identified by RELOAD_FILTER_STATE; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       }
     ],
     "JULES_D": [
@@ -787,5 +787,8 @@
         "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportErrorProblemDetailsTests.cs. Add focused tests for current ProblemDetails/error response shape where existing report endpoints use it, including no sensitive leakage. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       }
     ]
-  }
+  },
+  "generatedAt": "2026-09-06T09:25:43Z",
+  "currentParent": "N4.10.A",
+  "regenerationReason": "BACKLOG_HARD_FLOOR_REPLENISH"
 }
