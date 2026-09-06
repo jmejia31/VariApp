@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-A-405-REPORT-DEFAULT-30-DAY-PERIOD-TESTS-A-RESERVE",
+  "taskId": "N4.10.A.405.REPORT_DEFAULT_30_DAY_PERIOD_TESTS",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AReportDefault30DayPeriodTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. UNIQUE material closure-support work for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AReportDefault30DayPeriodTests.cs. Test the existing default period contract in ReporteAdministrativoService: omitted Desde/Hasta resolves to today and the previous 29 days, with deterministic end-of-day Hasta. Reuse current implementation/contracts only; no production behavior changes. Run proportional focused tests/build when possible and perform TWO independent self-reviews. No workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "ad42c5ea1686d4e19caedfbcf00805e28b91cdc4"
+}
