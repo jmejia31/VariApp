@@ -29,19 +29,31 @@ if git remote get-url origin >/dev/null 2>&1; then
   fi
 fi
 
-# Durable semantic dedupe guard. A task number/dispatch/session is not identity:
-# CURRENT_PARENT + semantic facet is. Remove already-completed facets from the
-# local catalog view before any selector can reserve them again. This prevents
-# regenerated numeric IDs from becoming DUPLICATE_EVIDENCE_ONLY work.
+# Durable semantic dedupe guard. Task number/dispatch/session is not identity:
+# CURRENT_PARENT + semantic facet is. The parent comes from the live catalog;
+# never hard-code a previous parent in this guard.
 filter_completed_facets() {
   [[ -f "$UNIQUE_REGISTRY" && -f "$CATALOG" ]] || return 0
-  local tmp before after
+  local tmp before after parent registry_parent
+  parent="$(jq -r '.currentParent // empty' "$CATALOG")"
+  registry_parent="$(jq -r '.currentParent // empty' "$UNIQUE_REGISTRY")"
+  [[ -n "$parent" ]] || return 0
+
+  # A registry for a different parent is historical evidence only and must not
+  # suppress unique work in the newly promoted parent.
+  if [[ -n "$registry_parent" && "$registry_parent" != "$parent" ]]; then
+    echo "AUTOREFILL_UNIQUE_GUARD registry_parent=$registry_parent current_parent=$parent action=IGNORE_HISTORICAL_REGISTRY"
+    return 0
+  fi
+
   before="$(jq '[.lanes[][]?] | length' "$CATALOG")"
   tmp="$(mktemp)"
-  jq --slurpfile done "$UNIQUE_REGISTRY" '
+  jq --arg parent "$parent" --slurpfile done "$UNIQUE_REGISTRY" '
     def facet:
-      (.taskId // "")
-      | try capture("^N4\\.10\\.A\\.[0-9]+\\.(?<f>.*)_TESTS$").f catch "";
+      (.taskId // "") as $task
+      | if ($task | startswith($parent + ".")) then
+          ($task | ltrimstr($parent + ".") | split(".") | .[1:] | join(".") | sub("_TESTS$"; ""))
+        else "" end;
     .lanes |= with_entries(
       .key as $lane
       | .value |= map(
@@ -54,7 +66,7 @@ filter_completed_facets() {
   ' "$CATALOG" > "$tmp"
   mv "$tmp" "$CATALOG"
   after="$(jq '[.lanes[][]?] | length' "$CATALOG")"
-  echo "AUTOREFILL_UNIQUE_GUARD removed=$((before-after)) registry=$UNIQUE_REGISTRY"
+  echo "AUTOREFILL_UNIQUE_GUARD removed=$((before-after)) parent=$parent registry=$UNIQUE_REGISTRY"
 }
 
 filter_completed_facets
