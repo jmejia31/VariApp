@@ -1,0 +1,12 @@
+{
+  "dispatchId": "N4-10-A-43-FINANCIAL_REPORT_AMOUNT_SIGN_INVARIANTS-A-AUTO-TRANSPORT-RECOVERY",
+  "taskId": "N4.10.A.43.FINANCIAL_REPORT_AMOUNT_SIGN_INVARIANTS",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportAmountSignInvariantTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. TRANSPORT RECOVERY of the SAME material task after the prior autorefill manifest produced no real Jules workflow; this does NOT consume another content attempt. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportAmountSignInvariantTests.cs. Add focused backend tests for amount sign invariants already implied by current accounting/reporting behavior: positive, zero, credit/negative where supported, aggregation sign preservation, and no silent sign inversion. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "dd9bf63a0b6aa15bac1cc6520216395f6589c008",
+  "transportRecoveryOf": "N4-10-A-43-FINANCIAL_REPORT_AMOUNT_SIGN_INVARIANTS-A-AUTO",
+  "contentAttemptConsumed": false
+}
