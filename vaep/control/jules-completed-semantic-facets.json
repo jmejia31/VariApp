@@ -1,27 +1,12 @@
 {
-  "schemaVersion": 1,
-  "currentParent": "N4.10.A",
+  "version": 2,
+  "currentParent": "N4.10.B",
   "identityRule": "CURRENT_PARENT + semanticFacet",
-  "source": "VAEP ledger REVIEW_FIRST dedupe reconciliation",
+  "updatedAt": "2026-09-06T15:37:00Z",
   "lanes": {
-    "JULES_A": [
-      "ROUNDING_CONSERVATION",
-      "CLOSED_PERIOD_READ_STABILITY",
-      "WAREHOUSE_GROUP_TOTALS",
-      "ACCOUNT_GROUP_TOTALS"
-    ],
-    "JULES_B": [
-      "QUERY_COUNT_PARITY",
-      "DATE_RANGE_INVERSION",
-      "QUERY_CASE_FILTER"
-    ],
-    "JULES_C": [
-      "FILTER_RESET"
-    ],
-    "JULES_D": [
-      "EXPORT_FILENAME_SANITIZATION",
-      "UNAUTHORIZED_QUERY",
-      "UNAUTHORIZED_EXPORT"
-    ]
+    "JULES_A": [],
+    "JULES_B": [],
+    "JULES_C": [],
+    "JULES_D": []
   }
 }
