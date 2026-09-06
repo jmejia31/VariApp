@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.G-SECURITY-OBSERVABILITY-GAP-MATRIX-D-20260906T0131Z",
+  "taskId": "N4.9.G.SECURITY_OBSERVABILITY_GAP_MATRIX",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/qa/N4_9_G_SECURITY_OBSERVABILITY_GAP_MATRIX.md only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.9.G. Own ONLY docs/qa/N4_9_G_SECURITY_OBSERVABILITY_GAP_MATRIX.md. Cross-review the already-implemented PeriodoContable security, RBAC, audit and observability regression evidence. Build a gap matrix with exact repository/test/CI references where observable, distinguish confirmed evidence from missing proof, and never invent PASS. Do not modify production code, tests, workflows, manifests, main, Produccion, secrets or deploy. Perform two genuinely independent self-reviews before COMPLETED and return a material artifact for VAEP REVIEW_FIRST.",
+  "primaryBaseHead": "9dd983f43864e05892ae1b79a0b0ee2b84a63a40"
+}
