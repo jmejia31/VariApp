@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   issues: write
 
 concurrency:
@@ -50,3 +50,7 @@ jobs:
           path: ${{ env.RESULT_DIR }}
           if-no-files-found: error
           retention-days: 14
+      - name: Auto-refill Jules B lane
+        if: always()
+        shell: bash
+        run: bash .github/scripts/vaep-jules-autorefill.sh
