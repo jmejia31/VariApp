@@ -160,6 +160,9 @@ builder.Services.AddScoped<ICuentaBancariaRepository, CuentaBancariaRepository>(
 builder.Services.AddScoped<ICuentaBancariaService, CuentaBancariaService>();
 builder.Services.AddScoped<ICuentaContableRepository, CuentaContableRepository>();
 builder.Services.AddScoped<ICuentaContableService, CuentaContableService>();
+builder.Services.AddScoped<IPeriodoContableRepository, PeriodoContableRepository>();
+builder.Services.AddScoped<IPeriodoContableService, PeriodoContableService>();
+builder.Services.AddScoped<IEstadoFinancieroService, EstadoFinancieroService>();
 builder.Services.AddScoped<IConciliacionBancariaRepository, ConciliacionBancariaRepository>();
 builder.Services.AddScoped<IOperacionBancariaService, InventoryApp.Application.Bancos.OperacionBancariaService>();
 builder.Services.AddScoped<IConciliacionBancariaService, ConciliacionBancariaService>();
