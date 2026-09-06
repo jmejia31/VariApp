@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.G-CONCURRENCY-REGRESSION-B-20260906T0035Z",
+  "taskId": "N4.9.G.CONCURRENCY_REGRESSION",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N49GPeriodoContableConcurrencyRegressionTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.9.G. Your previous migration regression was completed and integrated; this is a NEW distinct scope. Add ONLY backend/tests/InventoryApp.Tests/N49GPeriodoContableConcurrencyRegressionTests.cs. Cover concurrent/duplicate period creation or close behavior as supported by current service/repository contracts, deterministic conflict handling, no silent overwrite, and idempotent-safe outcomes without changing production code. Do not edit migrations/snapshot, frontend, workflows, manifests, main, Produccion, secrets or deploy. Run focused dotnet tests/build and two independent self-reviews. Return material patch/artifact for VAEP REVIEW_FIRST.",
+  "primaryBaseHead": "23f6b9e59f4de2a2831c4246a0d71d48c450d22d"
+}
