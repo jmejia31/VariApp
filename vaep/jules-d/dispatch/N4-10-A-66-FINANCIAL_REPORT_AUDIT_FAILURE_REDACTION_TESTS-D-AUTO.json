@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-A-66-FINANCIAL_REPORT_AUDIT_FAILURE_REDACTION_TESTS-D-AUTO",
+  "taskId": "N4.10.A.66.FINANCIAL_REPORT_AUDIT_FAILURE_REDACTION_TESTS",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportAuditFailureRedactionTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportAuditFailureRedactionTests.cs. Add focused backend tests that failure-path audit/error records preserve useful context while redacting sensitive values according to current behavior. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "ef84c83774ec81ccc653d81925089ae78cb0be54"
+}
