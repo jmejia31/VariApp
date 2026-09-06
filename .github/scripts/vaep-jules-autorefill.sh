@@ -30,6 +30,29 @@ current_head() {
   api "repos/$GITHUB_REPOSITORY/git/ref/heads/$BRANCH" --jq '.object.sha'
 }
 
+lane_workflow_name() {
+  case "$WORKER_ID" in
+    JULES_A) printf '%s\n' "VAEP Jules A Trusted Secondary Worker" ;;
+    JULES_B) printf '%s\n' "VAEP Jules B Trusted Secondary Worker" ;;
+    JULES_C) printf '%s\n' "VAEP Jules C Trusted Secondary Worker" ;;
+    JULES_D) printf '%s\n' "VAEP Jules D Trusted Secondary Worker" ;;
+  esac
+}
+
+other_live_lane_run_exists() {
+  local name runs count current_id
+  name="$(lane_workflow_name)"
+  current_id="${GITHUB_RUN_ID:-0}"
+  runs="$(api "repos/$GITHUB_REPOSITORY/actions/runs?branch=$BRANCH&per_page=100")"
+  count="$(jq --arg name "$name" --argjson current "$current_id" '
+    [.workflow_runs[]?
+      | select(.name==$name)
+      | select(.id != $current)
+      | select(.status=="queued" or .status=="in_progress" or .status=="pending")
+    ] | length' <<<"$runs")"
+  (( count > 0 ))
+}
+
 admission_open() {
   local payload
   if ! payload="$(api "repos/$GITHUB_REPOSITORY/contents/$ADMISSION_PATH?ref=$BRANCH" 2>/dev/null)"; then
@@ -151,6 +174,11 @@ create_atomic_manifest_commit() {
 main() {
   if ! admission_open; then
     echo "AUTOREFILL_WAIT=dispatch_admission_not_open worker=$WORKER_ID"
+    exit 0
+  fi
+
+  if other_live_lane_run_exists; then
+    echo "AUTOREFILL_RESERVE_EXISTS worker=$WORKER_ID action=no_new_manifest"
     exit 0
   fi
 
