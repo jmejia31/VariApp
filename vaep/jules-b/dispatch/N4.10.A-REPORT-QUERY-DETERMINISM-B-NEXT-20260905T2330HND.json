@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.10.A-REPORT-QUERY-DETERMINISM-B-NEXT-20260905T2330HND",
+  "taskId": "N4.10.A.28.FINANCIAL_REPORT_QUERY_DETERMINISM_TESTS",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportQueryDeterminismTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. NEXT_RUN_RESERVED material work for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportQueryDeterminismTests.cs. Add focused tests that equivalent current accounting/report query inputs produce stable deterministic results regardless of harmless ordering, while date/period boundaries remain explicit. Reuse current code only; do not invent report APIs. Run focused tests/build when possible; TWO distinct self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "6b5436b7e335a9312316b8d36a9e5fd875bb62f8"
+}
