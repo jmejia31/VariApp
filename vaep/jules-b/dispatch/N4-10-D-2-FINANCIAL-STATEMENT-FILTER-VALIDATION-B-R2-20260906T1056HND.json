@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-D-2-FINANCIAL-STATEMENT-FILTER-VALIDATION-B-R2-20260906T1056HND",
+  "taskId": "N4.10.D.2.FINANCIAL_STATEMENT_FILTER_VALIDATION",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 2,
+  "fileScopeHint": "backend/src/Application/Services/EstadoFinancieroFiltroValidator.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. R2 FINAL for the SAME N4.10.D.2 task after worker-bootstrap failure before Jules execution. Own ONLY backend/src/Application/Services/EstadoFinancieroFiltroValidator.cs. Implement validation for approved EstadoFinancieroFiltroDto using current accounting period/date semantics only: required/optional fields, valid ranges, period/date consistency and fail-closed unsupported combinations. Do not invent filters/APIs. Run focused build/tests where possible and perform TWO independent self-reviews. No controller/DI/migration/frontend/workflow/manifest/main/production/merge/deploy changes.",
+  "primaryBaseHead": "63f99bf3753db8e99f1e6f2f19c3011122992ae6"
+}
