@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-A-330-DEBIT_CREDIT_NETTING-TESTS-A-AUTO",
+  "taskId": "N4.10.A.330.DEBIT_CREDIT_NETTING_TESTS",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportDEBITCREDITNETTING330Tests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportDEBITCREDITNETTING330Tests.cs. Add a focused regression for the current behavior identified by DEBIT_CREDIT_NETTING; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "a185126bd1a5a448702c75710622e6fb53206aff"
+}
