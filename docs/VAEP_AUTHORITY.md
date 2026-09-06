@@ -122,7 +122,7 @@ La política de parent-close, dwell time y SLA está gobernada por el bloque can
 - `PARENT_MAX_DWELL_MINUTES=20`: Límite máximo de permanencia en un mismo parent sin progreso material.
 - `PARENT_STALL_NO_PROGRESS_MINUTES`: umbral de no-progreso definido exclusivamente en el bloque canónico; al alcanzarse obliga a failover controlado.
 - `MAX_VOLUNTARY_IDLE`: tolerancia de ociosidad voluntaria definida exclusivamente en el bloque canónico; cuando es cero, una lane libre recibe trabajo seguro inmediatamente.
-- Trayectoria de recuperación: cada checkpoint de 5 minutos corrige lanes/colas primero; `:15 >=1`, `:30 >=2`, `:45 >=3` sigue siendo el mínimo de cierre dentro de cada hora y `:55` corrige cualquier deuda antes del rollover.
+- Trayectoria de recuperación: los cinco checkpoints activos `:00/:12/:24/:36/:48` corrigen lanes/colas primero y luego drenan deuda de cierre. El único SLA horario canónico es `PARENT_CLOSE_SLA_ROLLING_60M=3`; ningún checkpoint histórico `:05/:10/:15/:20/:25/:30/:35/:40/:45/:50/:55` es operativo.
 - `CLOSURE_REVIEW_MAX_LATENCY_MINUTES=2`: un terminal `READY_FOR_VAEP` que pueda decidir el cierre no puede permanecer esperando revisión administrativa más allá de este objetivo; REVIEW_FIRST/QA_TAKEOVER se drena inmediatamente.
 - `CLOSURE_DEBT_TRIGGER_LT=3`: si `ROLLING60<3`, entra CLOSURE_DEBT_FASTPATH. VAEP debe intentar cerrar CURRENT_PARENT con evidencia ya existente ANTES de crear trabajo support/evidence-only adicional para ese mismo padre.
 - En CLOSURE_DEBT_FASTPATH, si el padre ya cumple DoD + gates aplicables terminales + P0=0/P1=0, se declara `LISTO_REAL` inmediatamente; no se espera otro checkpoint, otro Jules ni documentación redundante.
@@ -133,7 +133,7 @@ La política de parent-close, dwell time y SLA está gobernada por el bloque can
 - `JULES_QUEUE_DEPTH_TARGET=2`: objetivo mínimo por lane = CURRENT + NEXT_SAFE.
 - `JULES_NEXT_RUN_RESERVED_REQUIRED=TRUE`: NEXT_SAFE no cuenta como continuidad real hasta que exista un workflow Jules correlacionado en estado `pending|queued|in_progress` reservado para esa lane, salvo `HEAD_FREEZE_CAUSAL` real. Un archivo/row/manifiesto sin run no satisface zero-idle.
 - `LANE_REFILL_DEADLINE_SECONDS=90`: cada checkpoint debe resolver primero lanes libres o sin NEXT_RUN_RESERVED; no puede gastar más de este presupuesto en reconciliación/review antes de reservar trabajo real cuando existe SAFE_WORK.
-- `SCHEDULED_RUN_LANE_REFILL_BEFORE_REVIEW=TRUE`: la primera acción material de :00/:15/:30/:45/:55, después del preflight mínimo, es reservar CURRENT/NEXT run de A/B/C/D. REVIEW/CI/certificación se drenan detrás.
+- `SCHEDULED_RUN_LANE_REFILL_BEFORE_REVIEW=TRUE`: la primera acción material de `:00/:12/:24/:36/:48`, después del preflight mínimo, es reservar CURRENT/NEXT run de A/B/C/D. REVIEW/CI/certificación se drenan detrás.
 - Terminal CURRENT debe liberar ownership y permitir que el NEXT_RUN_RESERVED arranque por la propia concurrencia del workflow, sin esperar otro checkpoint.
 - `PREARM_BEFORE_CAUSAL_CI=TRUE`: el NEXT_SAFE que requiera manifest/commit debe prepararse antes de iniciar la ventana de CI causal del FUNCTIONAL_HEAD siempre que sea técnicamente posible.
 - `NO_MANIFEST_DURING_HEAD_FREEZE_CAUSAL=TRUE`: una vez exista HEAD_FREEZE_CAUSAL, está prohibido mover Desarrollo con manifests/control-plane que puedan cancelar/superseder gates del FUNCTIONAL_HEAD. Durante ese freeze, Jules continúan sobre runs ya reservados, work seguro no-head-moving y la cola declarativa; el siguiente manifest se publica inmediatamente al liberar el freeze.
@@ -228,22 +228,17 @@ Dos auto-revisiones independientes son obligatorias antes de COMPLETED válido.
 - Cierre requiere DoD real, gates/CI aplicables terminales y P0/P1=0.
 - Estado de cierre es monotónico: una tarea/padre con evidencia canónica `LISTO`/`LISTO_REAL` no puede volver a `EN_PROGRESO`/`PENDIENTE` por una fila stale. Si COLA contradice BITACORA/GitHub/certificación fresca, reconciliar COLA; reabrir solo con evidencia nueva explícita de defecto causal que invalide el cierre.
 
-## 12. Checkpoints de automatización cada 5 minutos
+## 12. Checkpoints de automatización activos
 
 ```text
-:00 PRIMARY
-:05 REFILL
-:10 REFILL
-:15 RECOVERY/CLOSURE
-:20 REFILL
-:25 REFILL
-:30 REVIEW/CERT/CLOSE/HANDOFF
-:35 REFILL
-:40 REFILL
-:45 WATCHDOG/CLOSURE
-:50 REFILL
-:55 BACKUP/CORRECTOR
+:00 PRIMARY / DAILY THROUGHPUT
+:12 RECOVERY / CLOSURE
+:24 REVIEW / CERT / CLOSE
+:36 WATCHDOG / CLOSURE
+:48 DEBT CORRECTOR
 ```
+
+Estos son los únicos cinco checkpoints programados. Cualquier referencia histórica a `:05/:10/:15/:20/:25/:30/:35/:40/:45/:50/:55` queda explícitamente superseded y no es ejecutable.
 
 Todas consumen **este MAESTRO**. Ninguna mantiene reglas por etiqueta numérica.
 
