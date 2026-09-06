@@ -45,13 +45,20 @@ task_number(){
   sed -n 's/^N4\.10\.A\.\([0-9][0-9]*\)\..*$/\1/p' <<<"$1"
 }
 
+task_facet(){
+  sed -n 's/^N4\.10\.A\.[0-9][0-9]*\.\(.*\)_TESTS$/\1/p' <<<"$1"
+}
+
 count_unused(){
-  local json="$1" listing used=0 total dispatch task n
+  local json="$1" listing used=0 total dispatch task n facet
   listing="$(api "repos/$GITHUB_REPOSITORY/contents/$DISPATCH_PATH?ref=$BRANCH" 2>/dev/null || printf '[]')"
   total="$(jq --arg w "$WORKER_ID" '.lanes[$w] | length' <<<"$json")"
   while IFS=$'\t' read -r dispatch task; do
     n="$(task_number "$task")"
-    if jq -e --arg f "$dispatch.json" '.[]? | select(.name==$f)' <<<"$listing" >/dev/null; then
+    facet="$(task_facet "$task")"
+    if [[ -n "$facet" ]] && jq -e --arg needle "-$facet-TESTS-" '.[]? | select((.name // "") | contains($needle))' <<<"$listing" >/dev/null; then
+      used=$((used+1))
+    elif jq -e --arg f "$dispatch.json" '.[]? | select(.name==$f)' <<<"$listing" >/dev/null; then
       used=$((used+1))
     elif [[ -n "$n" ]] && jq -e --arg prefix "N4-10-A-$n-" '.[]? | select((.name // "") | startswith($prefix))' <<<"$listing" >/dev/null; then
       # Different dispatchId, same material task identity (for example PREARM/recovery).
@@ -63,16 +70,35 @@ count_unused(){
 }
 
 regenerate_lane(){
-  local json="$1" max n facet scope task dispatch prompt entries='[]' i=0
+  local json="$1" max n facet scope task dispatch prompt entries='[]' i=0 listing existing_facets='|'
+  listing="$(api "repos/$GITHUB_REPOSITORY/contents/$DISPATCH_PATH?ref=$BRANCH" 2>/dev/null || printf '[]')"
+
+  while IFS= read -r name; do
+    for facet in "${facets[@]}"; do
+      if [[ "$name" == *-"$facet"-TESTS-* ]]; then
+        existing_facets="${existing_facets}${facet}|"
+      fi
+    done
+  done < <(jq -r '.[].name // empty' <<<"$listing")
+
   max="$(jq '[.lanes[][]?.taskId | try (capture("N4\\.10\\.A\\.(?<n>[0-9]+)").n | tonumber) catch empty] | max // 134' <<<"$json")"
   for facet in "${facets[@]}"; do
+    if [[ "$existing_facets" == *"|${facet}|"* ]]; then
+      continue
+    fi
     i=$((i+1)); n=$((max+i)); scope="$(build_scope "$facet" "$n")"
     task="N4.10.A.${n}.${facet}_TESTS"
     dispatch="N4-10-A-${n}-${facet}-TESTS-${LANE}-AUTO"
     prompt="Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY ${scope}. Add a focused regression for the current behavior identified by ${facet}; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
     entries="$(jq --arg d "$dispatch" --arg t "$task" --arg w "$WORKER_ID" --arg s "$scope only" --arg p "$prompt" '. + [{dispatchId:$d,taskId:$t,workerId:$w,taskAttempt:1,fileScopeHint:$s,prompt:$p}]' <<<"$entries")"
   done
-  jq --arg w "$WORKER_ID" --argjson e "$entries" --arg now "$(date -u +%Y-%m-%dT%H:%M:%SZ)" '.lanes[$w]=$e | .generatedAt=$now | .currentParent="N4.10.A" | .regenerationReason="BACKLOG_HARD_FLOOR_REPLENISH"' <<<"$json"
+
+  if [[ "$(jq 'length' <<<"$entries")" -eq 0 ]]; then
+    echo "CATALOG_UNIQUE_EXHAUSTED worker=$WORKER_ID parent=N4.10.A action=CLOSE_OR_NEW_MATERIAL_SCOPE" >&2
+    return 42
+  fi
+
+  jq --arg w "$WORKER_ID" --argjson e "$entries" --arg now "$(date -u +%Y-%m-%dT%H:%M:%SZ)" '.lanes[$w]=$e | .generatedAt=$now | .currentParent="N4.10.A" | .regenerationReason="BACKLOG_UNIQUE_ONLY_REPLENISH"' <<<"$json"
 }
 
 commit_catalog(){
@@ -87,7 +113,17 @@ commit_catalog(){
       echo "CATALOG_FLOOR_OK worker=$WORKER_ID unused=$unused post_dispatch_min=$((unused-1))"
       return 0
     fi
-    content="$(regenerate_lane "$content")"
+    set +e
+    regenerated="$(regenerate_lane "$content")"
+    regen_rc=$?
+    set -e
+    if (( regen_rc == 42 )); then
+      echo "CATALOG_FLOOR_BLOCKED worker=$WORKER_ID reason=UNIQUE_WORK_EXHAUSTED action=CLOSURE_FIRST"
+      return 0
+    elif (( regen_rc != 0 )); then
+      return "$regen_rc"
+    fi
+    content="$regenerated"
     blob="$(jq -n --arg content "$content" '{content:$content,encoding:"utf-8"}' | api "repos/$GITHUB_REPOSITORY/git/blobs" --method POST --input - --jq '.sha')"
     base="$(api "repos/$GITHUB_REPOSITORY/git/commits/$head")"
     tree="$(jq -r '.tree.sha' <<<"$base")"
