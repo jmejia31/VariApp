@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-G-3-COMP-REG-C",
+  "taskId": "N4.10.G.3.COMPONENT_REGRESSION",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.regression-c.spec.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. After N4.10.F LISTO, add component regression for validation/request/result transitions. No main/production/merge/deploy/workflow/manifest changes. TWO self-reviews.",
+  "primaryBaseHead": "0f93b9577cfc3e519a58c32ba9410b0fcf61e8bf"
+}
