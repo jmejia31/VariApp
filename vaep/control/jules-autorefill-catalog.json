@@ -203,6 +203,54 @@
         "taskAttempt": 1,
         "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportAGGREGATEDETERMINISM350Tests.cs only",
         "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportAGGREGATEDETERMINISM350Tests.cs. Add a focused regression for the current behavior identified by AGGREGATE_DETERMINISM; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-405-REPORT-DEFAULT-30-DAY-PERIOD-TESTS-A-UNIQUE",
+        "taskId": "N4.10.A.405.REPORT_DEFAULT_30_DAY_PERIOD_TESTS",
+        "workerId": "JULES_A",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AReportDefault30DayPeriodTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. UNIQUE material closure-support work for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AReportDefault30DayPeriodTests.cs. Test the existing default period contract in ReporteAdministrativoService: omitted Desde/Hasta resolves to today and the previous 29 days, with deterministic end-of-day Hasta. Reuse current implementation/contracts only; no production behavior changes. Run proportional focused tests/build when possible and perform TWO independent self-reviews. No workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-406-REPORT-SUMMARY-USER-COUNTS-TESTS-A-UNIQUE",
+        "taskId": "N4.10.A.406.REPORT_SUMMARY_USER_COUNTS_TESTS",
+        "workerId": "JULES_A",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AReportSummaryUserCountsTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. UNIQUE material closure-support work for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AReportSummaryUserCountsTests.cs. Test current ResumenAdministrativoDto user counters: total, active, blocked, deleted and privileged derive from existing Usuario/Rol/permission state without double counting. Reuse current implementation/contracts only; no production behavior changes. Run proportional focused tests/build when possible and perform TWO independent self-reviews. No workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-407-REPORT-SUMMARY-ROLE-COUNTS-TESTS-A-UNIQUE",
+        "taskId": "N4.10.A.407.REPORT_SUMMARY_ROLE_COUNTS_TESTS",
+        "workerId": "JULES_A",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AReportSummaryRoleCountsTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. UNIQUE material closure-support work for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AReportSummaryRoleCountsTests.cs. Test current summary role counters: total, active, without permissions and without users, using existing role state semantics. Reuse current implementation/contracts only; no production behavior changes. Run proportional focused tests/build when possible and perform TWO independent self-reviews. No workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-408-REPORT-SUMMARY-AUDIT-TOTAL-PARITY-TESTS-A-UNIQUE",
+        "taskId": "N4.10.A.408.REPORT_SUMMARY_AUDIT_TOTAL_PARITY_TESTS",
+        "workerId": "JULES_A",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AReportSummaryAuditTotalParityTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. UNIQUE material closure-support work for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AReportSummaryAuditTotalParityTests.cs. Test that summary audit totals/exitosos/rechazados/error mirror the existing ObtenerResumenAuditoriaAsync result for the same normalized period. Reuse current implementation/contracts only; no production behavior changes. Run proportional focused tests/build when possible and perform TWO independent self-reviews. No workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-409-REPORT-ALERT-BLOCKED-USER-TESTS-A-UNIQUE",
+        "taskId": "N4.10.A.409.REPORT_ALERT_BLOCKED_USER_TESTS",
+        "workerId": "JULES_A",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AReportAlertBlockedUserTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. UNIQUE material closure-support work for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AReportAlertBlockedUserTests.cs. Test current USUARIOS_BLOQUEADOS alert generation and quantity using existing AgregarAlertas behavior. Reuse current implementation/contracts only; no production behavior changes. Run proportional focused tests/build when possible and perform TWO independent self-reviews. No workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-410-REPORT-ALERT-ROLE-GAP-TESTS-A-UNIQUE",
+        "taskId": "N4.10.A.410.REPORT_ALERT_ROLE_GAP_TESTS",
+        "workerId": "JULES_A",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AReportAlertRoleGapTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. UNIQUE material closure-support work for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AReportAlertRoleGapTests.cs. Test current ROLES_SIN_PERMISOS and ROLES_SIN_USUARIOS alert quantities using existing role configuration semantics. Reuse current implementation/contracts only; no production behavior changes. Run proportional focused tests/build when possible and perform TWO independent self-reviews. No workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       }
     ],
     "JULES_B": [
@@ -397,6 +445,54 @@
         "taskAttempt": 1,
         "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYERRORCONTRACT398Tests.cs only",
         "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYERRORCONTRACT398Tests.cs. Add a focused regression for the current behavior identified by QUERY_ERROR_CONTRACT; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-411-AUDIT-EXPORT-NEWEST-FIRST-ORDER-TESTS-B-UNIQUE",
+        "taskId": "N4.10.A.411.AUDIT_EXPORT_NEWEST_FIRST_ORDER_TESTS",
+        "workerId": "JULES_B",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AAuditExportNewestFirstOrderTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. UNIQUE material closure-support work for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AAuditExportNewestFirstOrderTests.cs. Test existing auditoria export ordering is Fecha descending before the 50,000-row cap. Reuse current implementation/contracts only; no production behavior changes. Run proportional focused tests/build when possible and perform TWO independent self-reviews. No workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-412-USER-EXPORT-COLUMN-CONTRACT-TESTS-B-UNIQUE",
+        "taskId": "N4.10.A.412.USER_EXPORT_COLUMN_CONTRACT_TESTS",
+        "workerId": "JULES_B",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AUserExportColumnContractTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. UNIQUE material closure-support work for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AUserExportColumnContractTests.cs. Test the existing usuarios export header/order and core field mapping for CSV/XLSX without changing production. Reuse current implementation/contracts only; no production behavior changes. Run proportional focused tests/build when possible and perform TWO independent self-reviews. No workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-413-ROLE-EXPORT-COLUMN-CONTRACT-TESTS-B-UNIQUE",
+        "taskId": "N4.10.A.413.ROLE_EXPORT_COLUMN_CONTRACT_TESTS",
+        "workerId": "JULES_B",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410ARoleExportColumnContractTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. UNIQUE material closure-support work for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410ARoleExportColumnContractTests.cs. Test the existing roles export header/order and field mapping, including coverage/privilege/detail fields. Reuse current implementation/contracts only; no production behavior changes. Run proportional focused tests/build when possible and perform TWO independent self-reviews. No workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-414-AUDIT-EXPORT-COLUMN-CONTRACT-TESTS-B-UNIQUE",
+        "taskId": "N4.10.A.414.AUDIT_EXPORT_COLUMN_CONTRACT_TESTS",
+        "workerId": "JULES_B",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AAuditExportColumnContractTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. UNIQUE material closure-support work for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AAuditExportColumnContractTests.cs. Test the existing auditoria export header/order and mapped fields, including masked IP and correlation ID. Reuse current implementation/contracts only; no production behavior changes. Run proportional focused tests/build when possible and perform TWO independent self-reviews. No workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-415-INVALID-REPORT-TYPE-FAIL-CLOSED-TESTS-B-UNIQUE",
+        "taskId": "N4.10.A.415.INVALID_REPORT_TYPE_FAIL_CLOSED_TESTS",
+        "workerId": "JULES_B",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AInvalidReportTypeFailClosedTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. UNIQUE material closure-support work for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AInvalidReportTypeFailClosedTests.cs. Test ExportarAsync rejects unsupported report types with the existing BusinessRuleException contract. Reuse current implementation/contracts only; no production behavior changes. Run proportional focused tests/build when possible and perform TWO independent self-reviews. No workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-416-INVALID-EXPORT-FORMAT-FAIL-CLOSED-TESTS-B-UNIQUE",
+        "taskId": "N4.10.A.416.INVALID_EXPORT_FORMAT_FAIL_CLOSED_TESTS",
+        "workerId": "JULES_B",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AInvalidExportFormatFailClosedTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. UNIQUE material closure-support work for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AInvalidExportFormatFailClosedTests.cs. Test ExportarAsync rejects formats other than csv/xlsx using the existing fail-closed business rule. Reuse current implementation/contracts only; no production behavior changes. Run proportional focused tests/build when possible and perform TWO independent self-reviews. No workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       }
     ],
     "JULES_C": [
@@ -591,6 +687,54 @@
         "taskAttempt": 1,
         "fileScopeHint": "frontend/e2e/n4-10-financial-report-reload-filter-state-422.spec.ts only",
         "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY frontend/e2e/n4-10-financial-report-reload-filter-state-422.spec.ts. Add a focused regression for the current behavior identified by RELOAD_FILTER_STATE; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-417-REPORT-PERIOD-EMPTY-INPUT-UI-TESTS-C-UNIQUE",
+        "taskId": "N4.10.A.417.REPORT_PERIOD_EMPTY_INPUT_UI_TESTS",
+        "workerId": "JULES_C",
+        "taskAttempt": 1,
+        "fileScopeHint": "frontend/src/app/features/reportes-administrativos/reportes-administrativos-period-empty.contract.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. UNIQUE material closure-support work for N4.10.A. Own ONLY frontend/src/app/features/reportes-administrativos/reportes-administrativos-period-empty.contract.spec.ts. Test current component validation rejects missing desde/hasta and sets the existing error text without issuing report requests. Reuse current implementation/contracts only; no production behavior changes. Run proportional focused tests/build when possible and perform TWO independent self-reviews. No workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-418-REPORT-PERIOD-REVERSED-UI-TESTS-C-UNIQUE",
+        "taskId": "N4.10.A.418.REPORT_PERIOD_REVERSED_UI_TESTS",
+        "workerId": "JULES_C",
+        "taskAttempt": 1,
+        "fileScopeHint": "frontend/src/app/features/reportes-administrativos/reportes-administrativos-period-reversed.contract.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. UNIQUE material closure-support work for N4.10.A. Own ONLY frontend/src/app/features/reportes-administrativos/reportes-administrativos-period-reversed.contract.spec.ts. Test current component validation rejects desde>hasta and does not issue report requests. Reuse current implementation/contracts only; no production behavior changes. Run proportional focused tests/build when possible and perform TWO independent self-reviews. No workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-419-REPORT-LOAD-FORKJOIN-ATOMICITY-TESTS-C-UNIQUE",
+        "taskId": "N4.10.A.419.REPORT_LOAD_FORKJOIN_ATOMICITY_TESTS",
+        "workerId": "JULES_C",
+        "taskAttempt": 1,
+        "fileScopeHint": "frontend/src/app/features/reportes-administrativos/reportes-administrativos-load.contract.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. UNIQUE material closure-support work for N4.10.A. Own ONLY frontend/src/app/features/reportes-administrativos/reportes-administrativos-load.contract.spec.ts. Test current cargar() forkJoin behavior updates all report signals together on success and clears loading. Reuse current implementation/contracts only; no production behavior changes. Run proportional focused tests/build when possible and perform TWO independent self-reviews. No workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-420-REPORT-LOAD-ERROR-STATE-TESTS-C-UNIQUE",
+        "taskId": "N4.10.A.420.REPORT_LOAD_ERROR_STATE_TESTS",
+        "workerId": "JULES_C",
+        "taskAttempt": 1,
+        "fileScopeHint": "frontend/src/app/features/reportes-administrativos/reportes-administrativos-load-error.contract.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. UNIQUE material closure-support work for N4.10.A. Own ONLY frontend/src/app/features/reportes-administrativos/reportes-administrativos-load-error.contract.spec.ts. Test current cargar() error path sets the existing fallback/server error and clears loading without fabricating data. Reuse current implementation/contracts only; no production behavior changes. Run proportional focused tests/build when possible and perform TWO independent self-reviews. No workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-421-REPORT-EXPORT-PROGRESS-STATE-TESTS-C-UNIQUE",
+        "taskId": "N4.10.A.421.REPORT_EXPORT_PROGRESS_STATE_TESTS",
+        "workerId": "JULES_C",
+        "taskAttempt": 1,
+        "fileScopeHint": "frontend/src/app/features/reportes-administrativos/reportes-administrativos-export-progress.contract.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. UNIQUE material closure-support work for N4.10.A. Own ONLY frontend/src/app/features/reportes-administrativos/reportes-administrativos-export-progress.contract.spec.ts. Test current exporting signal lifecycle for successful export and object URL cleanup behavior. Reuse current implementation/contracts only; no production behavior changes. Run proportional focused tests/build when possible and perform TWO independent self-reviews. No workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-422-REPORT-ROLE-EXPANSION-TOGGLE-TESTS-C-UNIQUE",
+        "taskId": "N4.10.A.422.REPORT_ROLE_EXPANSION_TOGGLE_TESTS",
+        "workerId": "JULES_C",
+        "taskAttempt": 1,
+        "fileScopeHint": "frontend/src/app/features/reportes-administrativos/reportes-administrativos-role-toggle.contract.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. UNIQUE material closure-support work for N4.10.A. Own ONLY frontend/src/app/features/reportes-administrativos/reportes-administrativos-role-toggle.contract.spec.ts. Test current toggleRol behavior expands one role, collapses the same role, and switches deterministically to another role. Reuse current implementation/contracts only; no production behavior changes. Run proportional focused tests/build when possible and perform TWO independent self-reviews. No workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       }
     ],
     "JULES_D": [
@@ -785,10 +929,58 @@
         "taskAttempt": 1,
         "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportERRORSTATUSCONSISTENCY446Tests.cs only",
         "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportERRORSTATUSCONSISTENCY446Tests.cs. Add a focused regression for the current behavior identified by ERROR_STATUS_CONSISTENCY; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-423-REPORT-SUMMARY-ADMIN-ONLY-TESTS-D-UNIQUE",
+        "taskId": "N4.10.A.423.REPORT_SUMMARY_ADMIN_ONLY_TESTS",
+        "workerId": "JULES_D",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AReportSummaryAdminOnlyTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. UNIQUE material closure-support work for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AReportSummaryAdminOnlyTests.cs. Test the existing Resumen controller path returns Forbid for authenticated non-admin users even when the module permission is otherwise present. Reuse current implementation/contracts only; no production behavior changes. Run proportional focused tests/build when possible and perform TWO independent self-reviews. No workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-424-REPORT-USERS-ADMIN-ONLY-TESTS-D-UNIQUE",
+        "taskId": "N4.10.A.424.REPORT_USERS_ADMIN_ONLY_TESTS",
+        "workerId": "JULES_D",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AReportUsersAdminOnlyTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. UNIQUE material closure-support work for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AReportUsersAdminOnlyTests.cs. Test the existing UsuariosAccesos controller path returns Forbid for non-admin users. Reuse current implementation/contracts only; no production behavior changes. Run proportional focused tests/build when possible and perform TWO independent self-reviews. No workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-425-REPORT-ROLES-ADMIN-ONLY-TESTS-D-UNIQUE",
+        "taskId": "N4.10.A.425.REPORT_ROLES_ADMIN_ONLY_TESTS",
+        "workerId": "JULES_D",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AReportRolesAdminOnlyTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. UNIQUE material closure-support work for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AReportRolesAdminOnlyTests.cs. Test the existing RolesPermisos controller path returns Forbid for non-admin users. Reuse current implementation/contracts only; no production behavior changes. Run proportional focused tests/build when possible and perform TWO independent self-reviews. No workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-426-REPORT-AUDIT-ADMIN-ONLY-TESTS-D-UNIQUE",
+        "taskId": "N4.10.A.426.REPORT_AUDIT_ADMIN_ONLY_TESTS",
+        "workerId": "JULES_D",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AReportAuditAdminOnlyTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. UNIQUE material closure-support work for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AReportAuditAdminOnlyTests.cs. Test the existing AuditoriaResumen controller path returns Forbid for non-admin users. Reuse current implementation/contracts only; no production behavior changes. Run proportional focused tests/build when possible and perform TWO independent self-reviews. No workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-427-REPORT-EXPORT-ADMIN-ONLY-TESTS-D-UNIQUE",
+        "taskId": "N4.10.A.427.REPORT_EXPORT_ADMIN_ONLY_TESTS",
+        "workerId": "JULES_D",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AReportExportAdminOnlyTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. UNIQUE material closure-support work for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AReportExportAdminOnlyTests.cs. Test the existing Exportar controller path returns Forbid for non-admin users before export/audit side effects. Reuse current implementation/contracts only; no production behavior changes. Run proportional focused tests/build when possible and perform TWO independent self-reviews. No workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-428-AUDIT-IP-MASKING-CONTRACT-TESTS-D-UNIQUE",
+        "taskId": "N4.10.A.428.AUDIT_IP_MASKING_CONTRACT_TESTS",
+        "workerId": "JULES_D",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AAuditIpMaskingContractTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. UNIQUE material closure-support work for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AAuditIpMaskingContractTests.cs. Test current auditoria export IP masking contract for IPv4, IPv6 and invalid/blank IP values through observable export output. Reuse current implementation/contracts only; no production behavior changes. Run proportional focused tests/build when possible and perform TWO independent self-reviews. No workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
       }
     ]
   },
-  "generatedAt": "2026-09-06T12:13:36Z",
+  "generatedAt": "2026-09-06T12:24:38.042Z",
   "currentParent": "N4.10.A",
-  "regenerationReason": "BACKLOG_UNIQUE_ONLY_REPLENISH"
+  "regenerationReason": "UNIQUE_CLOSURE_SUPPORT_BACKLOG"
 }
