@@ -17,7 +17,7 @@ PARENT_CLOSE_SLA_ROLLING_60M=3
 PARENT_CLOSE_SLA_ROLLING_24H=72
 JULES_TASKS_TARGET_ROLLING_24H_PER_WORKER=100
 JULES_TASKS_TARGET_ROLLING_24H_TOTAL=400
-JULES_REFILL_MAX_GAP_MINUTES=5
+JULES_REFILL_MAX_GAP_MINUTES=12
 PARENT_MAX_DWELL_MINUTES=20
 PARENT_STALL_NO_PROGRESS_MINUTES=10
 CLOSURE_REVIEW_MAX_LATENCY_MINUTES=2
@@ -33,7 +33,7 @@ SCHEDULED_RUN_LANE_REFILL_BEFORE_REVIEW=TRUE
 JULES_TERMINAL_HANDOFF_SAME_RUN=TRUE
 NO_MANIFEST_DURING_HEAD_FREEZE_CAUSAL=TRUE
 PREARM_BEFORE_CAUSAL_CI=TRUE
-VAEP_CHECKPOINTS=:00,:05,:10,:15,:20,:25,:30,:35,:40,:45,:50,:55
+VAEP_CHECKPOINTS=:00,:12,:24,:36,:48
 JULES_LANE_BUDGET_SECONDS=1080
 JULES_MAX_ATTEMPTS=2
 JULES_REWORK_MAX=1
@@ -118,7 +118,7 @@ La política de parent-close, dwell time y SLA está gobernada por el bloque can
 - `PARENT_CLOSE_SLA_ROLLING_24H=72`: objetivo contractual de 72 padres `LISTO_REAL` por ventana móvil de 24 horas; el contador de 24h no reemplaza el gate de 3/h, ambos deben cumplirse.
 - `JULES_TASKS_TARGET_ROLLING_24H_PER_WORKER=100`: objetivo de 100 tareas Jules terminales útiles por cada worker A/B/C/D en 24h, sin contar busywork, dispatch fallido, NO_OP ni sesión sin actividad útil.
 - `JULES_TASKS_TARGET_ROLLING_24H_TOTAL=400`: objetivo agregado de 400 tareas Jules útiles/24h entre A/B/C/D.
-- `JULES_REFILL_MAX_GAP_MINUTES=5`: ningún checkpoint de refill puede quedar separado por más de 5 minutos; CURRENT + NEXT_RUN_RESERVED debe reponerse antes de consumir la reserva cuando exista SAFE_WORK.
+- `JULES_REFILL_MAX_GAP_MINUTES=12`: las cinco automatizaciones reconciliadoras se distribuyen uniformemente cada 12 minutos (:00/:12/:24/:36/:48). Este valor NO permite ociosidad de 12 minutos: la continuidad se garantiza con CURRENT_RUN + NEXT_RUN_RESERVED real, y al consumirse la reserva el siguiente checkpoint debe reponerla.
 - `PARENT_MAX_DWELL_MINUTES=20`: Límite máximo de permanencia en un mismo parent sin progreso material.
 - `PARENT_STALL_NO_PROGRESS_MINUTES`: umbral de no-progreso definido exclusivamente en el bloque canónico; al alcanzarse obliga a failover controlado.
 - `MAX_VOLUNTARY_IDLE`: tolerancia de ociosidad voluntaria definida exclusivamente en el bloque canónico; cuando es cero, una lane libre recibe trabajo seguro inmediatamente.
