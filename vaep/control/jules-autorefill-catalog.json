@@ -1,0 +1,341 @@
+{
+  "version": 1,
+  "authority": "docs/VAEP_AUTHORITY.md",
+  "policy": {
+    "purpose": "event-driven Jules lane refill",
+    "noBusywork": true,
+    "artifactOnly": true,
+    "branch": "Desarrollo",
+    "stopWhenCatalogExhausted": true
+  },
+  "lanes": {
+    "JULES_A": [
+      {
+        "dispatchId": "N4-10-A-39-FINANCIAL_REPORT_PERIOD_TRANSITION_TESTS-A-AUTO",
+        "taskId": "N4.10.A.39.FINANCIAL_REPORT_PERIOD_TRANSITION_TESTS",
+        "workerId": "JULES_A",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportPeriodTransitionTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportPeriodTransitionTests.cs. Add focused backend tests for period transitions already supported by current financial-report/accounting code: month end, year end, adjacent periods, and deterministic inclusive boundaries. Reuse existing contracts only; do not invent report APIs or production behavior. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-43-FINANCIAL_REPORT_AMOUNT_SIGN_INVARIANTS-A-AUTO",
+        "taskId": "N4.10.A.43.FINANCIAL_REPORT_AMOUNT_SIGN_INVARIANTS",
+        "workerId": "JULES_A",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportAmountSignInvariantTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportAmountSignInvariantTests.cs. Add focused backend tests for amount sign invariants already implied by current accounting/reporting behavior: positive, zero, credit/negative where supported, aggregation sign preservation, and no silent sign inversion. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-47-FINANCIAL_REPORT_LEDGER_RECONCILIATION_TESTS-A-AUTO",
+        "taskId": "N4.10.A.47.FINANCIAL_REPORT_LEDGER_RECONCILIATION_TESTS",
+        "workerId": "JULES_A",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportLedgerReconciliationTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportLedgerReconciliationTests.cs. Add focused backend tests that current report/accounting aggregates reconcile with the ledger/source entities already used by the implementation, without inventing new data sources or APIs. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-51-FINANCIAL_REPORT_NULLABILITY_CONTRACT_TESTS-A-AUTO",
+        "taskId": "N4.10.A.51.FINANCIAL_REPORT_NULLABILITY_CONTRACT_TESTS",
+        "workerId": "JULES_A",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportNullabilityContractTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportNullabilityContractTests.cs. Add focused backend tests for nullability/optional-field behavior in current report DTOs/services, covering truthful defaults, missing optional values, and no fabricated values. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-55-FINANCIAL_REPORT_FILTER_NORMALIZATION_TESTS-A-AUTO",
+        "taskId": "N4.10.A.55.FINANCIAL_REPORT_FILTER_NORMALIZATION_TESTS",
+        "workerId": "JULES_A",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportFilterNormalizationTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportFilterNormalizationTests.cs. Add focused backend tests for normalization of current report filters: whitespace/casing where applicable, empty optional filters, equivalent inputs, and stable deterministic results. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-59-FINANCIAL_REPORT_AGGREGATION_ORDER_TESTS-A-AUTO",
+        "taskId": "N4.10.A.59.FINANCIAL_REPORT_AGGREGATION_ORDER_TESTS",
+        "workerId": "JULES_A",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportAggregationOrderTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportAggregationOrderTests.cs. Add focused backend tests proving current financial-report aggregations are order-independent where business semantics require it and preserve explicit ordering where the implementation defines one. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-63-FINANCIAL_REPORT_LARGE_INPUT_BOUNDARY_TESTS-A-AUTO",
+        "taskId": "N4.10.A.63.FINANCIAL_REPORT_LARGE_INPUT_BOUNDARY_TESTS",
+        "workerId": "JULES_A",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportLargeInputBoundaryTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportLargeInputBoundaryTests.cs. Add proportional backend tests for large but realistic current report/accounting input sets, checking deterministic totals and boundary behavior without performance claims not measured. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-67-FINANCIAL_REPORT_PROJECTION_CONTRACT_TESTS-A-AUTO",
+        "taskId": "N4.10.A.67.FINANCIAL_REPORT_PROJECTION_CONTRACT_TESTS",
+        "workerId": "JULES_A",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportProjectionContractTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportProjectionContractTests.cs. Add focused backend tests for current report projection/DTO mapping contracts: required fields, stable values, and no accidental domain leakage. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-71-FINANCIAL_REPORT_DUPLICATE_INPUT_GUARD_TESTS-A-AUTO",
+        "taskId": "N4.10.A.71.FINANCIAL_REPORT_DUPLICATE_INPUT_GUARD_TESTS",
+        "workerId": "JULES_A",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportDuplicateInputGuardTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportDuplicateInputGuardTests.cs. Add focused backend regression tests for duplicate input/source rows where current implementation has deduplication or idempotency semantics; otherwise capture the exact current behavior without inventing rules. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-75-FINANCIAL_REPORT_TOTAL_CONSISTENCY_TESTS-A-AUTO",
+        "taskId": "N4.10.A.75.FINANCIAL_REPORT_TOTAL_CONSISTENCY_TESTS",
+        "workerId": "JULES_A",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportTotalConsistencyTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportTotalConsistencyTests.cs. Add focused backend tests checking subtotal/total consistency across current financial-report outputs and source aggregates, using only existing implementation contracts. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      }
+    ],
+    "JULES_B": [
+      {
+        "dispatchId": "N4-10-A-40-FINANCIAL_REPORT_QUERY_FILTER_COMPOSITION_TESTS-B-AUTO",
+        "taskId": "N4.10.A.40.FINANCIAL_REPORT_QUERY_FILTER_COMPOSITION_TESTS",
+        "workerId": "JULES_B",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportQueryFilterCompositionTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportQueryFilterCompositionTests.cs. Add focused backend tests for composition of current report query filters, including combinations of date/range/status/type filters that already exist. Do not invent query parameters. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-44-FINANCIAL_REPORT_DATE_NORMALIZATION_TESTS-B-AUTO",
+        "taskId": "N4.10.A.44.FINANCIAL_REPORT_DATE_NORMALIZATION_TESTS",
+        "workerId": "JULES_B",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportDateNormalizationTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportDateNormalizationTests.cs. Add focused backend tests for date normalization and deterministic boundary handling already implemented by current reporting/accounting code. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-48-FINANCIAL_REPORT_STABLE_ORDERING_TESTS-B-AUTO",
+        "taskId": "N4.10.A.48.FINANCIAL_REPORT_STABLE_ORDERING_TESTS",
+        "workerId": "JULES_B",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportStableOrderingTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportStableOrderingTests.cs. Add focused backend tests for stable ordering of current financial-report query results, including tie cases using existing sort semantics only. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-52-FINANCIAL_REPORT_EMPTY_DATA_QUERY_TESTS-B-AUTO",
+        "taskId": "N4.10.A.52.FINANCIAL_REPORT_EMPTY_DATA_QUERY_TESTS",
+        "workerId": "JULES_B",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportEmptyDataQueryTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportEmptyDataQueryTests.cs. Add focused backend tests for empty/no-match query results and truthful zero/empty responses in current financial-report code. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-56-FINANCIAL_REPORT_PERMISSION_BOUNDARY_TESTS-B-AUTO",
+        "taskId": "N4.10.A.56.FINANCIAL_REPORT_PERMISSION_BOUNDARY_TESTS",
+        "workerId": "JULES_B",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportPermissionBoundaryTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportPermissionBoundaryTests.cs. Add focused backend tests for permission boundaries already exposed by current financial-report endpoints/services. Reuse existing permission names and policies only. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-60-FINANCIAL_REPORT_CANCELLATION_BEHAVIOR_TESTS-B-AUTO",
+        "taskId": "N4.10.A.60.FINANCIAL_REPORT_CANCELLATION_BEHAVIOR_TESTS",
+        "workerId": "JULES_B",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportCancellationBehaviorTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportCancellationBehaviorTests.cs. Add focused backend tests for cancellation-token propagation/behavior in current report query/service paths where cancellation is already supported; do not introduce new production behavior. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-64-FINANCIAL_REPORT_QUERY_PROJECTION_TESTS-B-AUTO",
+        "taskId": "N4.10.A.64.FINANCIAL_REPORT_QUERY_PROJECTION_TESTS",
+        "workerId": "JULES_B",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportQueryProjectionTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportQueryProjectionTests.cs. Add focused backend tests for current query-to-DTO projection fields and deterministic mapping, avoiding duplicate coverage from other lanes. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-68-FINANCIAL_REPORT_QUERY_BOUNDARY_REGRESSION-B-AUTO",
+        "taskId": "N4.10.A.68.FINANCIAL_REPORT_QUERY_BOUNDARY_REGRESSION",
+        "workerId": "JULES_B",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportQueryBoundaryRegressionTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportQueryBoundaryRegressionTests.cs. Add focused backend regression tests for combined query boundaries: first/last item, exact date endpoints, and current pagination/sort contracts where supported. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-72-FINANCIAL_REPORT_INVALID_FILTER_TESTS-B-AUTO",
+        "taskId": "N4.10.A.72.FINANCIAL_REPORT_INVALID_FILTER_TESTS",
+        "workerId": "JULES_B",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportInvalidFilterTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportInvalidFilterTests.cs. Add focused backend tests for invalid current filter combinations and fail-closed validation behavior, using only existing validators/contracts. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-76-FINANCIAL_REPORT_REPEAT_QUERY_CONSISTENCY_TESTS-B-AUTO",
+        "taskId": "N4.10.A.76.FINANCIAL_REPORT_REPEAT_QUERY_CONSISTENCY_TESTS",
+        "workerId": "JULES_B",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportRepeatQueryConsistencyTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportRepeatQueryConsistencyTests.cs. Add focused backend tests proving repeated equivalent report queries return consistent values against unchanged in-memory/test data, without making caching assumptions. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      }
+    ],
+    "JULES_C": [
+      {
+        "dispatchId": "N4-10-A-41-FINANCIAL_REPORT_FILTER_INTERACTION_E2E-C-AUTO",
+        "taskId": "N4.10.A.41.FINANCIAL_REPORT_FILTER_INTERACTION_E2E",
+        "workerId": "JULES_C",
+        "taskAttempt": 1,
+        "fileScopeHint": "frontend/e2e/n4-10-financial-report-filter-interactions.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY frontend/e2e/n4-10-financial-report-filter-interactions.spec.ts. Add focused Playwright coverage for current financial-report filter interactions and visible result updates using existing routes/components only. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-45-FINANCIAL_REPORT_DATE_RANGE_UI_E2E-C-AUTO",
+        "taskId": "N4.10.A.45.FINANCIAL_REPORT_DATE_RANGE_UI_E2E",
+        "workerId": "JULES_C",
+        "taskAttempt": 1,
+        "fileScopeHint": "frontend/e2e/n4-10-financial-report-date-range.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY frontend/e2e/n4-10-financial-report-date-range.spec.ts. Add focused Playwright coverage for current report date-range UI behavior, including valid boundaries and truthful invalid-range handling using existing controls only. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-49-FINANCIAL_REPORT_PERMISSION_STATE_E2E-C-AUTO",
+        "taskId": "N4.10.A.49.FINANCIAL_REPORT_PERMISSION_STATE_E2E",
+        "workerId": "JULES_C",
+        "taskAttempt": 1,
+        "fileScopeHint": "frontend/e2e/n4-10-financial-report-permission-state.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY frontend/e2e/n4-10-financial-report-permission-state.spec.ts. Add focused Playwright coverage for current financial-report unauthorized/forbidden UI state and navigation behavior, reusing existing RBAC surfaces. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-53-FINANCIAL_REPORT_RETRY_RECOVERY_E2E-C-AUTO",
+        "taskId": "N4.10.A.53.FINANCIAL_REPORT_RETRY_RECOVERY_E2E",
+        "workerId": "JULES_C",
+        "taskAttempt": 1,
+        "fileScopeHint": "frontend/e2e/n4-10-financial-report-retry-recovery.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY frontend/e2e/n4-10-financial-report-retry-recovery.spec.ts. Add focused Playwright coverage for current recoverable report error/retry behavior where the UI already exposes retry or refresh. Do not create missing UI. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-57-FINANCIAL_REPORT_EXPORT_AFFORDANCE_E2E-C-AUTO",
+        "taskId": "N4.10.A.57.FINANCIAL_REPORT_EXPORT_AFFORDANCE_E2E",
+        "workerId": "JULES_C",
+        "taskAttempt": 1,
+        "fileScopeHint": "frontend/e2e/n4-10-financial-report-export-affordance.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY frontend/e2e/n4-10-financial-report-export-affordance.spec.ts. Add focused Playwright coverage for current report export controls/affordances and permission visibility, without asserting file formats not exposed by the UI. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-61-FINANCIAL_REPORT_KEYBOARD_NAV_E2E-C-AUTO",
+        "taskId": "N4.10.A.61.FINANCIAL_REPORT_KEYBOARD_NAV_E2E",
+        "workerId": "JULES_C",
+        "taskAttempt": 1,
+        "fileScopeHint": "frontend/e2e/n4-10-financial-report-keyboard-navigation.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY frontend/e2e/n4-10-financial-report-keyboard-navigation.spec.ts. Add focused Playwright keyboard-navigation regression for current financial-report controls, filters, tables, and actionable elements. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-65-FINANCIAL_REPORT_NO_DATA_STATE_E2E-C-AUTO",
+        "taskId": "N4.10.A.65.FINANCIAL_REPORT_NO_DATA_STATE_E2E",
+        "workerId": "JULES_C",
+        "taskAttempt": 1,
+        "fileScopeHint": "frontend/e2e/n4-10-financial-report-no-data-state.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY frontend/e2e/n4-10-financial-report-no-data-state.spec.ts. Add focused Playwright coverage for current no-data/empty result state, ensuring clear stable UI and no stale rows from prior results. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-69-FINANCIAL_REPORT_STALE_RESPONSE_GUARD_E2E-C-AUTO",
+        "taskId": "N4.10.A.69.FINANCIAL_REPORT_STALE_RESPONSE_GUARD_E2E",
+        "workerId": "JULES_C",
+        "taskAttempt": 1,
+        "fileScopeHint": "frontend/e2e/n4-10-financial-report-stale-response-guard.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY frontend/e2e/n4-10-financial-report-stale-response-guard.spec.ts. Add focused Playwright regression for rapid current filter/range changes so stale responses do not visibly overwrite newer selections where the current UI/service supports this behavior. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-73-FINANCIAL_REPORT_TABLE_SEMANTICS_E2E-C-AUTO",
+        "taskId": "N4.10.A.73.FINANCIAL_REPORT_TABLE_SEMANTICS_E2E",
+        "workerId": "JULES_C",
+        "taskAttempt": 1,
+        "fileScopeHint": "frontend/e2e/n4-10-financial-report-table-semantics.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY frontend/e2e/n4-10-financial-report-table-semantics.spec.ts. Add focused Playwright accessibility/semantic assertions for current financial-report tables, headers, labels, and empty/loading states without modifying production UI. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-77-FINANCIAL_REPORT_REFRESH_CONSISTENCY_E2E-C-AUTO",
+        "taskId": "N4.10.A.77.FINANCIAL_REPORT_REFRESH_CONSISTENCY_E2E",
+        "workerId": "JULES_C",
+        "taskAttempt": 1,
+        "fileScopeHint": "frontend/e2e/n4-10-financial-report-refresh-consistency.spec.ts only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY frontend/e2e/n4-10-financial-report-refresh-consistency.spec.ts. Add focused Playwright regression for repeated refresh/reload on current financial-report surfaces, ensuring no duplicate rows or stale visible state. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      }
+    ],
+    "JULES_D": [
+      {
+        "dispatchId": "N4-10-A-42-FINANCIAL_REPORT_AUDIT_METADATA_TESTS-D-AUTO",
+        "taskId": "N4.10.A.42.FINANCIAL_REPORT_AUDIT_METADATA_TESTS",
+        "workerId": "JULES_D",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportAuditMetadataTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportAuditMetadataTests.cs. Add focused backend tests for audit metadata already emitted by current financial-report/accounting operations: operation identity, correlation/trace fields where present, actor context where present, and no fabricated metadata. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-46-FINANCIAL_REPORT_UNAUTHORIZED_EXPORT_TESTS-D-AUTO",
+        "taskId": "N4.10.A.46.FINANCIAL_REPORT_UNAUTHORIZED_EXPORT_TESTS",
+        "workerId": "JULES_D",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportUnauthorizedExportTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportUnauthorizedExportTests.cs. Add focused backend negative tests for unauthorized current report export/access paths, using existing permissions and endpoints only. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-50-FINANCIAL_REPORT_SENSITIVE_FIELD_REDACTION_TESTS-D-AUTO",
+        "taskId": "N4.10.A.50.FINANCIAL_REPORT_SENSITIVE_FIELD_REDACTION_TESTS",
+        "workerId": "JULES_D",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportSensitiveFieldRedactionTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportSensitiveFieldRedactionTests.cs. Add focused backend tests that current audit/log/error surfaces around report operations do not expose sensitive values already classified by the implementation. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-54-FINANCIAL_REPORT_FAILURE_TRACEABILITY_TESTS-D-AUTO",
+        "taskId": "N4.10.A.54.FINANCIAL_REPORT_FAILURE_TRACEABILITY_TESTS",
+        "workerId": "JULES_D",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportFailureTraceabilityTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportFailureTraceabilityTests.cs. Add focused backend tests for traceability of current report failure paths: useful correlation/operation context without sensitive leakage. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-58-FINANCIAL_REPORT_AUTHZ_MATRIX_TESTS-D-AUTO",
+        "taskId": "N4.10.A.58.FINANCIAL_REPORT_AUTHZ_MATRIX_TESTS",
+        "workerId": "JULES_D",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportAuthorizationMatrixTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportAuthorizationMatrixTests.cs. Add focused backend tests for the current financial-report permission matrix, reusing only permission constants/policies that already exist. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-62-FINANCIAL_REPORT_MALFORMED_INPUT_SECURITY_TESTS-D-AUTO",
+        "taskId": "N4.10.A.62.FINANCIAL_REPORT_MALFORMED_INPUT_SECURITY_TESTS",
+        "workerId": "JULES_D",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportMalformedInputSecurityTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportMalformedInputSecurityTests.cs. Add focused backend security regression tests for malformed current report inputs and fail-closed validation/error responses without inventing endpoints. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-66-FINANCIAL_REPORT_AUDIT_FAILURE_REDACTION_TESTS-D-AUTO",
+        "taskId": "N4.10.A.66.FINANCIAL_REPORT_AUDIT_FAILURE_REDACTION_TESTS",
+        "workerId": "JULES_D",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportAuditFailureRedactionTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportAuditFailureRedactionTests.cs. Add focused backend tests that failure-path audit/error records preserve useful context while redacting sensitive values according to current behavior. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-70-FINANCIAL_REPORT_PERMISSION_REGRESSION_TESTS-D-AUTO",
+        "taskId": "N4.10.A.70.FINANCIAL_REPORT_PERMISSION_REGRESSION_TESTS",
+        "workerId": "JULES_D",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportPermissionRegressionTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportPermissionRegressionTests.cs. Add focused backend regression tests that current report permissions are consistently enforced across equivalent read/export operations where both exist. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-74-FINANCIAL_REPORT_ERROR_PAYLOAD_SECURITY_TESTS-D-AUTO",
+        "taskId": "N4.10.A.74.FINANCIAL_REPORT_ERROR_PAYLOAD_SECURITY_TESTS",
+        "workerId": "JULES_D",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportErrorPayloadSecurityTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportErrorPayloadSecurityTests.cs. Add focused backend tests for current report error payloads: fail closed, stable status/problem contract where present, and no stack trace or sensitive field leakage. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      },
+      {
+        "dispatchId": "N4-10-A-78-FINANCIAL_REPORT_AUDIT_EVENT_CONSISTENCY_TESTS-D-AUTO",
+        "taskId": "N4.10.A.78.FINANCIAL_REPORT_AUDIT_EVENT_CONSISTENCY_TESTS",
+        "workerId": "JULES_D",
+        "taskAttempt": 1,
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportAuditEventConsistencyTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportAuditEventConsistencyTests.cs. Add focused backend tests that equivalent current financial-report operations emit consistent audit event shape/metadata where auditing is already implemented. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy."
+      }
+    ]
+  }
+}
