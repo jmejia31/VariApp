@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-F-1-SECURITY-UI-A-INCIDENT-RECOVERY",
+  "taskId": "N4.10.F.1.SECURITY_UI_TESTS",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.security-ui.spec.ts only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.F. Own ONLY frontend/src/app/features/estados-financieros/estados-financieros.security-ui.spec.ts. Verify UI permission denial, hidden actions and non-disclosure of sensitive error details against current implementation. Run proportional tests and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "4a14f7e9505911a3ffcd0f28ef8d32361d429c09"
+}
