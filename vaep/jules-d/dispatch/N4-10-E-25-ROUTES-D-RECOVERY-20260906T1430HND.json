@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-E-25-ROUTES-D-RECOVERY-20260906T1430HND",
+  "taskId": "N4.10.E.25.ROUTE_TESTS",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/estados-financieros.routes.spec.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. Add route contract tests for /estados-financieros, authGuard, permisoGuard and Finanzas/Ver metadata. Production routes are read-only. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews. RECOVERY: prior controller dispatch failed before Execute VAEP/Jules MASTER because catalog-floor syntax failed; no Jules attempt was consumed.",
+  "primaryBaseHead": "ca67f90e9b2210d167524e161973a9cdcbc34781"
+}

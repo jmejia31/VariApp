@@ -27,13 +27,8 @@ api(){ gh api "$@"; }
 listing="$(api "repos/$GITHUB_REPOSITORY/contents/$DISPATCH_PATH?ref=$BRANCH" 2>/dev/null || printf '[]')"
 programmed_unused=0
 eligible_unused=0
-while IFS=
 
-# Deliberately no automatic catalog regeneration here.
-# Generic facet recycling caused duplicate evidence and parent-close starvation.
-# The controller replenishes only material work for the CURRENT_PARENT or closes/promotes it.
-exit 0
-\t' read -r dispatch eligible; do
+while IFS=$'\t' read -r dispatch eligible; do
   [[ -n "$dispatch" ]] || continue
   if ! jq -e --arg f "$dispatch.json" '.[]? | select(.name==$f)' <<<"$listing" >/dev/null; then
     programmed_unused=$((programmed_unused+1))
@@ -55,7 +50,4 @@ else
   echo "CATALOG_ELIGIBLE_OK worker=$WORKER_ID eligible_unused=$eligible_unused min=$ELIGIBLE_MIN"
 fi
 
-# Deliberately no automatic catalog regeneration here.
-# Generic facet recycling caused duplicate evidence and parent-close starvation.
-# The controller replenishes only material work for the CURRENT_PARENT or closes/promotes it.
 exit 0
