@@ -3,8 +3,9 @@ set -euo pipefail
 
 readonly BRANCH="Desarrollo"
 readonly CATALOG="vaep/control/jules-autorefill-catalog.json"
-readonly TARGET=2
-readonly FLOOR=1
+readonly TARGET=12
+readonly FLOOR=4
+readonly ELIGIBLE_MIN=2
 
 : "${GITHUB_REPOSITORY:?GITHUB_REPOSITORY required}"
 : "${GH_TOKEN:?GH_TOKEN required}"
@@ -24,18 +25,34 @@ esac
 api(){ gh api "$@"; }
 
 listing="$(api "repos/$GITHUB_REPOSITORY/contents/$DISPATCH_PATH?ref=$BRANCH" 2>/dev/null || printf '[]')"
-unused=0
-while IFS= read -r dispatch; do
+programmed_unused=0
+eligible_unused=0
+while IFS=
+
+# Deliberately no automatic catalog regeneration here.
+# Generic facet recycling caused duplicate evidence and parent-close starvation.
+# The controller replenishes only material work for the CURRENT_PARENT or closes/promotes it.
+exit 0
+\t' read -r dispatch eligible; do
   [[ -n "$dispatch" ]] || continue
   if ! jq -e --arg f "$dispatch.json" '.[]? | select(.name==$f)' <<<"$listing" >/dev/null; then
-    unused=$((unused+1))
+    programmed_unused=$((programmed_unused+1))
+    if [[ "$eligible" == "true" ]]; then
+      eligible_unused=$((eligible_unused+1))
+    fi
   fi
-done < <(jq -r --arg w "$WORKER_ID" '.lanes[$w][]?.dispatchId // empty' "$CATALOG")
+done < <(jq -r --arg w "$WORKER_ID" '.lanes[$w][]? | [(.dispatchId // ""), ((.dispatchEligible // true)|tostring)] | @tsv' "$CATALOG")
 
-if (( unused <= FLOOR )); then
-  echo "CATALOG_FLOOR_LOW worker=$WORKER_ID unused=$unused target=$TARGET action=CONTROLLER_REPLENISH_OR_CLOSE_PARENT"
+if (( programmed_unused <= FLOOR )); then
+  echo "CATALOG_PROGRAMMED_LOW worker=$WORKER_ID programmed_unused=$programmed_unused target=$TARGET floor=$FLOOR action=CONTROLLER_REPLENISH_TO_TARGET"
 else
-  echo "CATALOG_FLOOR_OK worker=$WORKER_ID unused=$unused target=$TARGET"
+  echo "CATALOG_PROGRAMMED_OK worker=$WORKER_ID programmed_unused=$programmed_unused target=$TARGET floor=$FLOOR"
+fi
+
+if (( eligible_unused < ELIGIBLE_MIN )); then
+  echo "CATALOG_ELIGIBLE_LOW worker=$WORKER_ID eligible_unused=$eligible_unused min=$ELIGIBLE_MIN action=ACTIVATE_SAFE_WORK_OR_CLOSE_PROMOTE"
+else
+  echo "CATALOG_ELIGIBLE_OK worker=$WORKER_ID eligible_unused=$eligible_unused min=$ELIGIBLE_MIN"
 fi
 
 # Deliberately no automatic catalog regeneration here.

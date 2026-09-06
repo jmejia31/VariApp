@@ -1,88 +1,508 @@
 {
-  "version": 5,
+  "version": 6,
   "authority": "docs/VAEP_AUTHORITY.md",
   "currentParent": "N4.10.D",
-  "generatedAt": "2026-09-06T19:25:00Z",
-  "regenerationReason": "N4.10.D_QA_TAKEOVER__N4.10.E_DEPENDENCY_SAFE_PREWORK__ZERO_IDLE_RECOVERY",
+  "generatedAt": "2026-09-06T19:50:00Z",
+  "regenerationReason": "FIX_PROGRAMMED_BACKLOG_12_PER_WORKER__LIVE_QUEUE_REMAINS_2",
   "policy": {
     "branch": "Desarrollo",
-    "queueDepthTarget": 2,
+    "liveQueueDepthTarget": 2,
+    "programmedBacklogTargetPerWorker": 12,
+    "programmedBacklogRefillFloorPerWorker": 4,
+    "programmedBacklogTargetTotal": 48,
+    "dispatchEligibleMinPerWorker": 2,
     "genericFloorRegeneration": false,
     "noBusywork": true,
     "semanticIdentity": "CURRENT_PARENT + material scope/semantic facet",
-    "stopWhenCatalogExhausted": true
+    "stopWhenEligibleWorkExhausted": true
   },
   "lanes": {
     "JULES_A": [
       {
-        "dispatchId": "N4-10-E-5-FINANCIAL-STATEMENT-STYLES-A-MATERIAL",
-        "taskId": "N4.10.E.5.FINANCIAL_STATEMENT_STYLES",
+        "dispatchId": "N4-10-E-13-KEYBOARD-A",
+        "taskId": "N4.10.E.13.KEYBOARD_NAVIGATION_TESTS",
         "workerId": "JULES_A",
         "taskAttempt": 1,
-        "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.component.scss only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. NEXT_SAFE_PREWORK for N4.10.E only; CURRENT_PARENT remains N4.10.D and this task MUST NOT promote/close E. Own ONLY frontend/src/app/features/estados-financieros/estados-financieros.component.scss. Create responsive, accessible, theme-compatible styling for the approved financial-statement UI contract: filter controls, loading/error/empty states, result heading, horizontally safe statement table, totals emphasis, narrow-screen layout and visible focus behavior without hard-coding product colors where project CSS variables exist. Follow existing report/asiento patterns. No TS/HTML/routes/service/model/backend/workflow/manifest changes. TWO independent self-reviews."
+        "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.keyboard.spec.ts",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. Add focused keyboard-navigation tests for financial-statement filters, generate action and result table. Production files are read-only. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.E",
+        "dispatchEligible": true
       },
       {
-        "dispatchId": "N4-10-E-9-FINANCIAL-STATEMENT-NAVIGATION-A-MATERIAL",
-        "taskId": "N4.10.E.9.FINANCIAL_STATEMENT_NAVIGATION",
+        "dispatchId": "N4-10-E-14-EMPTY-A",
+        "taskId": "N4.10.E.14.EMPTY_STATE_TESTS",
         "workerId": "JULES_A",
         "taskAttempt": 1,
-        "fileScopeHint": "frontend/src/app/app.component.ts only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. NEXT_SAFE_PREWORK for N4.10.E only; CURRENT_PARENT remains N4.10.D. Own ONLY frontend/src/app/app.component.ts. Add exactly one permission-gated Finanzas navigation entry for /estados-financieros using existing sidebar patterns and an appropriate Material icon. Do not refactor the shell or alter unrelated navigation. TWO independent self-reviews. No route/component/service/model/backend/workflow/manifest changes."
+        "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.empty-state.spec.ts",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. Add focused empty-state tests for no-result statements, initial state and retryable error recovery. Production files are read-only. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.E",
+        "dispatchEligible": true
+      },
+      {
+        "dispatchId": "N4-10-E-15-TABLE-SEMANTICS-A",
+        "taskId": "N4.10.E.15.TABLE_SEMANTICS_TESTS",
+        "workerId": "JULES_A",
+        "taskAttempt": 1,
+        "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.table-semantics.spec.ts",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. Add focused tests for result table headers, line ordering presentation and totals emphasis without changing production files. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.E",
+        "dispatchEligible": true
+      },
+      {
+        "dispatchId": "N4-10-E-16-FILTER-STATE-A",
+        "taskId": "N4.10.E.16.FILTER_STATE_TESTS",
+        "workerId": "JULES_A",
+        "taskAttempt": 1,
+        "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.filter-state.spec.ts",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. Add focused tests proving period/date filter modes stay mutually exclusive and state resets deterministically. Production files are read-only. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.E",
+        "dispatchEligible": true
+      },
+      {
+        "dispatchId": "N4-10-F-1-SECURITY-UI-A",
+        "taskId": "N4.10.F.1.SECURITY_UI_TESTS",
+        "workerId": "JULES_A",
+        "taskAttempt": 1,
+        "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.security-ui.spec.ts",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. When N4.10.E is LISTO, add UI security-state tests for permission denial, hidden actions and non-disclosure of sensitive error details. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.F",
+        "dispatchEligible": false
+      },
+      {
+        "dispatchId": "N4-10-F-5-NAV-PERM-A",
+        "taskId": "N4.10.F.5.NAV_PERMISSION_TESTS",
+        "workerId": "JULES_A",
+        "taskAttempt": 1,
+        "fileScopeHint": "frontend/src/app/app.component.finanzas-nav.spec.ts",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. When N4.10.E is LISTO, test that financial-statements navigation is visible only with Finanzas/Ver permission. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.F",
+        "dispatchEligible": false
+      },
+      {
+        "dispatchId": "N4-10-G-1-COMP-REG-A",
+        "taskId": "N4.10.G.1.COMPONENT_REGRESSION",
+        "workerId": "JULES_A",
+        "taskAttempt": 1,
+        "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.regression-a.spec.ts",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. When N4.10.F is LISTO, add regression coverage for core component happy path and stable rendering contract. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.G",
+        "dispatchEligible": false
+      },
+      {
+        "dispatchId": "N4-10-G-5-PERF-A",
+        "taskId": "N4.10.G.5.RENDER_PERFORMANCE",
+        "workerId": "JULES_A",
+        "taskAttempt": 1,
+        "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.performance.spec.ts",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. When N4.10.F is LISTO, add proportional frontend performance regression tests for rendering a representative statement dataset without new dependencies. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.G",
+        "dispatchEligible": false
+      },
+      {
+        "dispatchId": "N4-10-H-1-FRONTEND-DOC-A",
+        "taskId": "N4.10.H.1.FRONTEND_DOCUMENTATION",
+        "workerId": "JULES_A",
+        "taskAttempt": 1,
+        "fileScopeHint": "docs/N4.10_ESTADOS_FINANCIEROS_FRONTEND.md",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. When N4.10.G is LISTO, document the delivered frontend behavior, filters, result states and supported statement types from real code/evidence. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.H",
+        "dispatchEligible": false
+      },
+      {
+        "dispatchId": "N4-10-H-5-A11Y-DOC-A",
+        "taskId": "N4.10.H.5.ACCESSIBILITY_DOCUMENTATION",
+        "workerId": "JULES_A",
+        "taskAttempt": 1,
+        "fileScopeHint": "docs/N4.10_ESTADOS_FINANCIEROS_ACCESSIBILITY.md",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. When N4.10.G is LISTO, document verified accessibility behavior and test evidence only; no invented PASS claims. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.H",
+        "dispatchEligible": false
+      },
+      {
+        "dispatchId": "N4-10-H-9-RUNBOOK-A",
+        "taskId": "N4.10.H.9.FRONTEND_RUNBOOK",
+        "workerId": "JULES_A",
+        "taskAttempt": 1,
+        "fileScopeHint": "docs/N4.10_ESTADOS_FINANCIEROS_RUNBOOK.md",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. When N4.10.G is LISTO, create the operator/developer runbook for financial-statements frontend diagnostics and rollback boundaries. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.H",
+        "dispatchEligible": false
+      },
+      {
+        "dispatchId": "N4-10-H-13-QA-EVIDENCE-A",
+        "taskId": "N4.10.H.13.QA_EVIDENCE_INDEX",
+        "workerId": "JULES_A",
+        "taskAttempt": 1,
+        "fileScopeHint": "docs/N4.10_ESTADOS_FINANCIEROS_QA_EVIDENCE.md",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. When N4.10.G is LISTO, create an evidence index referencing only real tests/runs/artifacts; do not fabricate certification. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.H",
+        "dispatchEligible": false
       }
     ],
     "JULES_B": [
       {
-        "dispatchId": "N4-10-E-6-FINANCIAL-STATEMENT-SERVICE-TESTS-B-MATERIAL",
-        "taskId": "N4.10.E.6.FINANCIAL_STATEMENT_SERVICE_TESTS",
+        "dispatchId": "N4-10-E-17-QUERY-B",
+        "taskId": "N4.10.E.17.SERVICE_QUERY_TESTS",
         "workerId": "JULES_B",
         "taskAttempt": 1,
-        "fileScopeHint": "frontend/src/app/services/estado-financiero.service.spec.ts only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. NEXT_SAFE_PREWORK for N4.10.E only; CURRENT_PARENT remains N4.10.D. Own ONLY frontend/src/app/services/estado-financiero.service.spec.ts. Add HttpClient tests for the approved EstadoFinancieroService contract: GET /estados-financieros/{tipo}; periodoContableId-only; fechaDesde+fechaHasta; omission of undefined params; ApiResponse<EstadoFinanciero> passthrough; no mutation/export behavior. Follow asiento-contable.service.spec.ts patterns. It is acceptable that the target service is still an unintegrated sibling artifact; do not modify it. TWO independent self-reviews."
+        "fileScopeHint": "frontend/src/app/services/estado-financiero.query.spec.ts",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. Add HttpClient query-shape tests for each valid filter mode and omission of undefined query parameters. Production files are read-only. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.E",
+        "dispatchEligible": true
       },
       {
-        "dispatchId": "N4-10-E-10-FINANCIAL-STATEMENT-MODEL-TESTS-B-MATERIAL",
-        "taskId": "N4.10.E.10.FINANCIAL_STATEMENT_MODEL_TESTS",
+        "dispatchId": "N4-10-E-18-ERROR-B",
+        "taskId": "N4.10.E.18.SERVICE_ERROR_TESTS",
         "workerId": "JULES_B",
         "taskAttempt": 1,
-        "fileScopeHint": "frontend/src/app/core/models/estado-financiero.model.spec.ts only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. NEXT_SAFE_PREWORK for N4.10.E only; CURRENT_PARENT remains N4.10.D. Own ONLY frontend/src/app/core/models/estado-financiero.model.spec.ts. Add focused runtime/contract tests for the six TipoEstadoFinanciero numeric values and representative typed payload shape without inventing fields or changing production models. TWO independent self-reviews. No other files."
+        "fileScopeHint": "frontend/src/app/services/estado-financiero.error.spec.ts",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. Add service-level tests for typed API error propagation and cancellation behavior using existing Angular testing utilities. Production files are read-only. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.E",
+        "dispatchEligible": true
+      },
+      {
+        "dispatchId": "N4-10-E-19-MODEL-CONTRACT-B",
+        "taskId": "N4.10.E.19.MODEL_CONTRACT_TESTS",
+        "workerId": "JULES_B",
+        "taskAttempt": 1,
+        "fileScopeHint": "frontend/src/app/core/models/estado-financiero.contract.spec.ts",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. Add model contract tests for six statement kinds, line/totals shape and numeric decimal semantics without changing the production model. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.E",
+        "dispatchEligible": true
+      },
+      {
+        "dispatchId": "N4-10-E-20-SERIAL-B",
+        "taskId": "N4.10.E.20.MODEL_SERIALIZATION_TESTS",
+        "workerId": "JULES_B",
+        "taskAttempt": 1,
+        "fileScopeHint": "frontend/src/app/core/models/estado-financiero.serialization.spec.ts",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. Add representative JSON-shape compatibility tests for EstadoFinanciero payloads and camelCase field expectations. Production files are read-only. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.E",
+        "dispatchEligible": true
+      },
+      {
+        "dispatchId": "N4-10-F-2-AUTH-B",
+        "taskId": "N4.10.F.2.SERVICE_AUTH_TESTS",
+        "workerId": "JULES_B",
+        "taskAttempt": 1,
+        "fileScopeHint": "frontend/src/app/services/estado-financiero.auth.spec.ts",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. When N4.10.E is LISTO, add service authorization/error tests for 401/403 handling without leaking backend details. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.F",
+        "dispatchEligible": false
+      },
+      {
+        "dispatchId": "N4-10-F-6-REDACTION-B",
+        "taskId": "N4.10.F.6.CLIENT_ERROR_REDACTION",
+        "workerId": "JULES_B",
+        "taskAttempt": 1,
+        "fileScopeHint": "frontend/src/app/services/estado-financiero.redaction.spec.ts",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. When N4.10.E is LISTO, test client-side redaction/normalization of sensitive server error content according to current project patterns. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.F",
+        "dispatchEligible": false
+      },
+      {
+        "dispatchId": "N4-10-G-2-SERVICE-REG-B",
+        "taskId": "N4.10.G.2.SERVICE_REGRESSION",
+        "workerId": "JULES_B",
+        "taskAttempt": 1,
+        "fileScopeHint": "frontend/src/app/services/estado-financiero.regression.spec.ts",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. When N4.10.F is LISTO, add consolidated service regression coverage for supported statement kinds and filter combinations. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.G",
+        "dispatchEligible": false
+      },
+      {
+        "dispatchId": "N4-10-G-6-QUERY-EDGE-B",
+        "taskId": "N4.10.G.6.QUERY_EDGE_CASES",
+        "workerId": "JULES_B",
+        "taskAttempt": 1,
+        "fileScopeHint": "frontend/src/app/services/estado-financiero.query-edge.spec.ts",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. When N4.10.F is LISTO, test date boundaries, zero/positive IDs and deterministic query serialization edge cases. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.G",
+        "dispatchEligible": false
+      },
+      {
+        "dispatchId": "N4-10-H-2-API-DOC-B",
+        "taskId": "N4.10.H.2.FRONTEND_API_CONTRACT_DOC",
+        "workerId": "JULES_B",
+        "taskAttempt": 1,
+        "fileScopeHint": "docs/N4.10_ESTADOS_FINANCIEROS_FRONTEND_API.md",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. When N4.10.G is LISTO, document the verified frontend/API contract and examples from real code only. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.H",
+        "dispatchEligible": false
+      },
+      {
+        "dispatchId": "N4-10-H-6-TROUBLE-B",
+        "taskId": "N4.10.H.6.TROUBLESHOOTING",
+        "workerId": "JULES_B",
+        "taskAttempt": 1,
+        "fileScopeHint": "docs/N4.10_ESTADOS_FINANCIEROS_TROUBLESHOOTING.md",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. When N4.10.G is LISTO, document common failure modes, validation errors and diagnostics supported by real behavior. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.H",
+        "dispatchEligible": false
+      },
+      {
+        "dispatchId": "N4-10-H-10-FILTER-MATRIX-B",
+        "taskId": "N4.10.H.10.FILTER_MATRIX",
+        "workerId": "JULES_B",
+        "taskAttempt": 1,
+        "fileScopeHint": "docs/N4.10_ESTADOS_FINANCIEROS_FILTER_MATRIX.md",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. When N4.10.G is LISTO, document the accepted/rejected filter combinations and their evidence. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.H",
+        "dispatchEligible": false
+      },
+      {
+        "dispatchId": "N4-10-H-14-RELEASE-B",
+        "taskId": "N4.10.H.14.RELEASE_NOTES_INPUT",
+        "workerId": "JULES_B",
+        "taskAttempt": 1,
+        "fileScopeHint": "docs/N4.10_ESTADOS_FINANCIEROS_RELEASE_NOTES.md",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. When N4.10.G is LISTO, prepare factual release-note input for this point without declaring deployment or production release. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.H",
+        "dispatchEligible": false
       }
     ],
     "JULES_C": [
       {
-        "dispatchId": "N4-10-E-7-FINANCIAL-STATEMENT-COMPONENT-TESTS-C-MATERIAL",
-        "taskId": "N4.10.E.7.FINANCIAL_STATEMENT_COMPONENT_TESTS",
+        "dispatchId": "N4-10-E-21-LOADING-C",
+        "taskId": "N4.10.E.21.LOADING_STATE_TESTS",
         "workerId": "JULES_C",
         "taskAttempt": 1,
-        "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.component.spec.ts only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. NEXT_SAFE_PREWORK for N4.10.E only; CURRENT_PARENT remains N4.10.D. Own ONLY frontend/src/app/features/estados-financieros/estados-financieros.component.spec.ts. Add focused component tests using current standalone/TestBed patterns for creation, mutually exclusive period vs date filters, incomplete/reversed range rejection, loading/error/result behavior and service invocation with the approved filter. Do not alter production files. TWO independent self-reviews."
+        "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.loading.spec.ts",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. Add focused loading-state tests including disabled duplicate generation and eventual result/error transition. Production files are read-only. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.E",
+        "dispatchEligible": true
       },
       {
-        "dispatchId": "N4-10-E-11-FINANCIAL-STATEMENT-A11Y-TESTS-C-MATERIAL",
-        "taskId": "N4.10.E.11.FINANCIAL_STATEMENT_A11Y_TESTS",
+        "dispatchId": "N4-10-E-22-VALID-C",
+        "taskId": "N4.10.E.22.VALIDATION_TESTS",
         "workerId": "JULES_C",
         "taskAttempt": 1,
-        "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.a11y.spec.ts only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. NEXT_SAFE_PREWORK for N4.10.E only; CURRENT_PARENT remains N4.10.D. Own ONLY frontend/src/app/features/estados-financieros/estados-financieros.a11y.spec.ts. Add accessibility-oriented component tests for an h1/clear page name, labelled filter controls, announced loading/error state, keyboard-reachable generate action and table semantics for rendered results using existing Angular testing capabilities only. Do not introduce dependencies. TWO independent self-reviews."
+        "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.validation.spec.ts",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. Add focused validation tests for incomplete/reversed dates and incompatible period/date combinations. Production files are read-only. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.E",
+        "dispatchEligible": true
+      },
+      {
+        "dispatchId": "N4-10-E-23-RESULT-C",
+        "taskId": "N4.10.E.23.RESULT_RENDER_TESTS",
+        "workerId": "JULES_C",
+        "taskAttempt": 1,
+        "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.result-render.spec.ts",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. Add result rendering tests for heading, period, lines and totals using representative data. Production files are read-only. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.E",
+        "dispatchEligible": true
+      },
+      {
+        "dispatchId": "N4-10-E-24-INTERACTION-C",
+        "taskId": "N4.10.E.24.INTERACTION_TESTS",
+        "workerId": "JULES_C",
+        "taskAttempt": 1,
+        "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.interaction.spec.ts",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. Add interaction tests for switching statement type and regenerating with preserved valid filter state. Production files are read-only. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.E",
+        "dispatchEligible": true
+      },
+      {
+        "dispatchId": "N4-10-F-3-SENSITIVE-C",
+        "taskId": "N4.10.F.3.SENSITIVE_ERROR_UI_TESTS",
+        "workerId": "JULES_C",
+        "taskAttempt": 1,
+        "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.error-redaction.spec.ts",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. When N4.10.E is LISTO, verify UI errors never expose stack traces/internal server detail. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.F",
+        "dispatchEligible": false
+      },
+      {
+        "dispatchId": "N4-10-F-7-PERMISSION-C",
+        "taskId": "N4.10.F.7.PERMISSION_STATE_TESTS",
+        "workerId": "JULES_C",
+        "taskAttempt": 1,
+        "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.permission.spec.ts",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. When N4.10.E is LISTO, add permission-state component tests consistent with project runtime authorization patterns. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.F",
+        "dispatchEligible": false
+      },
+      {
+        "dispatchId": "N4-10-G-3-COMP-REG-C",
+        "taskId": "N4.10.G.3.COMPONENT_REGRESSION",
+        "workerId": "JULES_C",
+        "taskAttempt": 1,
+        "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.regression-c.spec.ts",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. When N4.10.F is LISTO, add consolidated component regression for validation, request and result transitions. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.G",
+        "dispatchEligible": false
+      },
+      {
+        "dispatchId": "N4-10-G-7-A11Y-REG-C",
+        "taskId": "N4.10.G.7.A11Y_REGRESSION",
+        "workerId": "JULES_C",
+        "taskAttempt": 1,
+        "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.a11y-regression.spec.ts",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. When N4.10.F is LISTO, add accessibility regression coverage for labels, focus order, announcements and table semantics. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.G",
+        "dispatchEligible": false
+      },
+      {
+        "dispatchId": "N4-10-H-3-UX-ACCEPT-C",
+        "taskId": "N4.10.H.3.UX_ACCEPTANCE_DOC",
+        "workerId": "JULES_C",
+        "taskAttempt": 1,
+        "fileScopeHint": "docs/N4.10_ESTADOS_FINANCIEROS_UX_ACCEPTANCE.md",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. When N4.10.G is LISTO, document UX acceptance criteria mapped to real implementation/tests. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.H",
+        "dispatchEligible": false
+      },
+      {
+        "dispatchId": "N4-10-H-7-A11Y-MATRIX-C",
+        "taskId": "N4.10.H.7.A11Y_MATRIX",
+        "workerId": "JULES_C",
+        "taskAttempt": 1,
+        "fileScopeHint": "docs/N4.10_ESTADOS_FINANCIEROS_A11Y_MATRIX.md",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. When N4.10.G is LISTO, map accessibility requirements to concrete evidence; no invented PASS. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.H",
+        "dispatchEligible": false
+      },
+      {
+        "dispatchId": "N4-10-H-11-TEST-MATRIX-C",
+        "taskId": "N4.10.H.11.TEST_MATRIX",
+        "workerId": "JULES_C",
+        "taskAttempt": 1,
+        "fileScopeHint": "docs/N4.10_ESTADOS_FINANCIEROS_TEST_MATRIX.md",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. When N4.10.G is LISTO, consolidate frontend test coverage by behavior and source file. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.H",
+        "dispatchEligible": false
+      },
+      {
+        "dispatchId": "N4-10-H-15-COVERAGE-C",
+        "taskId": "N4.10.H.15.COVERAGE_EVIDENCE",
+        "workerId": "JULES_C",
+        "taskAttempt": 1,
+        "fileScopeHint": "docs/N4.10_ESTADOS_FINANCIEROS_COVERAGE_EVIDENCE.md",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. When N4.10.G is LISTO, record real test/coverage evidence and gaps without fabricating percentages. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.H",
+        "dispatchEligible": false
       }
     ],
     "JULES_D": [
       {
-        "dispatchId": "N4-10-E-8-FINANCIAL-STATEMENT-ROUTE-D-MATERIAL",
-        "taskId": "N4.10.E.8.FINANCIAL_STATEMENT_ROUTE",
+        "dispatchId": "N4-10-E-25-ROUTES-D",
+        "taskId": "N4.10.E.25.ROUTE_TESTS",
         "workerId": "JULES_D",
         "taskAttempt": 1,
-        "fileScopeHint": "frontend/src/app/app.routes.ts only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. NEXT_SAFE_PREWORK for N4.10.E only; CURRENT_PARENT remains N4.10.D. Own ONLY frontend/src/app/app.routes.ts. Add one /estados-financieros route using existing authGuard + permisoGuard conventions, data modulo Finanzas accion Ver, and lazy load EstadosFinancierosComponent from the approved feature path. Do not alter unrelated routes/imports. TWO independent self-reviews."
+        "fileScopeHint": "frontend/src/app/estados-financieros.routes.spec.ts",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. Add route contract tests for /estados-financieros, authGuard, permisoGuard and Finanzas/Ver metadata. Production routes are read-only. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.E",
+        "dispatchEligible": true
       },
       {
-        "dispatchId": "N4-10-E-12-FINANCIAL-STATEMENT-INTEGRATION-TESTS-D-MATERIAL",
-        "taskId": "N4.10.E.12.FINANCIAL_STATEMENT_INTEGRATION_TESTS",
+        "dispatchId": "N4-10-E-26-INT-ERROR-D",
+        "taskId": "N4.10.E.26.INTEGRATION_ERROR_TESTS",
         "workerId": "JULES_D",
         "taskAttempt": 1,
-        "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.integration.spec.ts only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. NEXT_SAFE_PREWORK for N4.10.E only; CURRENT_PARENT remains N4.10.D. Own ONLY frontend/src/app/features/estados-financieros/estados-financieros.integration.spec.ts. Add focused frontend integration tests that wire the standalone EstadosFinancierosComponent with HttpClientTestingModule and verify a generated statement request renders representative line/totals data plus error response behavior. No production edits or new dependencies. TWO independent self-reviews."
+        "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.integration-error.spec.ts",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. Add integration tests for backend error response to stable user-facing error state using HttpTestingController. Production files are read-only. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.E",
+        "dispatchEligible": true
+      },
+      {
+        "dispatchId": "N4-10-E-27-INT-PERIOD-D",
+        "taskId": "N4.10.E.27.INTEGRATION_PERIOD_TESTS",
+        "workerId": "JULES_D",
+        "taskAttempt": 1,
+        "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.integration-period.spec.ts",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. Add integration tests for period-based request/response rendering path. Production files are read-only. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.E",
+        "dispatchEligible": true
+      },
+      {
+        "dispatchId": "N4-10-E-28-INT-DATE-D",
+        "taskId": "N4.10.E.28.INTEGRATION_DATE_RANGE_TESTS",
+        "workerId": "JULES_D",
+        "taskAttempt": 1,
+        "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.integration-date-range.spec.ts",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. Add integration tests for date-range request/response rendering path including boundary dates. Production files are read-only. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.E",
+        "dispatchEligible": true
+      },
+      {
+        "dispatchId": "N4-10-F-4-ROUTE-GUARD-D",
+        "taskId": "N4.10.F.4.ROUTE_GUARD_TESTS",
+        "workerId": "JULES_D",
+        "taskAttempt": 1,
+        "fileScopeHint": "frontend/src/app/estados-financieros.route-guard.spec.ts",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. When N4.10.E is LISTO, test denial/allow behavior of route guards for Finanzas/Ver. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.F",
+        "dispatchEligible": false
+      },
+      {
+        "dispatchId": "N4-10-F-8-NAV-GUARD-D",
+        "taskId": "N4.10.F.8.NAV_GUARD_INTEGRATION",
+        "workerId": "JULES_D",
+        "taskAttempt": 1,
+        "fileScopeHint": "frontend/src/app/estados-financieros.nav-guard.spec.ts",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. When N4.10.E is LISTO, test navigation availability against permission runtime state without modifying production shell. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.F",
+        "dispatchEligible": false
+      },
+      {
+        "dispatchId": "N4-10-G-4-INTEGRATION-REG-D",
+        "taskId": "N4.10.G.4.INTEGRATION_REGRESSION",
+        "workerId": "JULES_D",
+        "taskAttempt": 1,
+        "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.integration-regression.spec.ts",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. When N4.10.F is LISTO, add end-to-end-style Angular integration regression across filters, request and render behavior using existing test stack. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.G",
+        "dispatchEligible": false
+      },
+      {
+        "dispatchId": "N4-10-G-8-ROUTE-REG-D",
+        "taskId": "N4.10.G.8.ROUTE_REGRESSION",
+        "workerId": "JULES_D",
+        "taskAttempt": 1,
+        "fileScopeHint": "frontend/src/app/estados-financieros.route-regression.spec.ts",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. When N4.10.F is LISTO, add route regression coverage for lazy component path and permission metadata. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.G",
+        "dispatchEligible": false
+      },
+      {
+        "dispatchId": "N4-10-H-4-SECURITY-DOC-D",
+        "taskId": "N4.10.H.4.FRONTEND_SECURITY_DOC",
+        "workerId": "JULES_D",
+        "taskAttempt": 1,
+        "fileScopeHint": "docs/N4.10_ESTADOS_FINANCIEROS_SECURITY.md",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. When N4.10.G is LISTO, document verified frontend security/permission boundaries and evidence. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.H",
+        "dispatchEligible": false
+      },
+      {
+        "dispatchId": "N4-10-H-8-INTEGRATION-MATRIX-D",
+        "taskId": "N4.10.H.8.INTEGRATION_MATRIX",
+        "workerId": "JULES_D",
+        "taskAttempt": 1,
+        "fileScopeHint": "docs/N4.10_ESTADOS_FINANCIEROS_INTEGRATION_MATRIX.md",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. When N4.10.G is LISTO, map frontend integration scenarios to real tests/runs. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.H",
+        "dispatchEligible": false
+      },
+      {
+        "dispatchId": "N4-10-H-12-ROLLBACK-D",
+        "taskId": "N4.10.H.12.FRONTEND_ROLLBACK",
+        "workerId": "JULES_D",
+        "taskAttempt": 1,
+        "fileScopeHint": "docs/N4.10_ESTADOS_FINANCIEROS_ROLLBACK.md",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. When N4.10.G is LISTO, document scoped frontend rollback boundaries and verification steps; no production action. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.H",
+        "dispatchEligible": false
+      },
+      {
+        "dispatchId": "N4-10-H-16-CERT-CHECK-D",
+        "taskId": "N4.10.H.16.CERTIFICATION_CHECKLIST",
+        "workerId": "JULES_D",
+        "taskAttempt": 1,
+        "fileScopeHint": "docs/N4.10_ESTADOS_FINANCIEROS_CERT_CHECKLIST.md",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. When N4.10.G is LISTO, prepare a factual certification checklist with unresolved gaps visible; do not declare LISTO_REAL. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+        "plannedParent": "N4.10.H",
+        "dispatchEligible": false
       }
     ]
   }
