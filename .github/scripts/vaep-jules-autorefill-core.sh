@@ -126,14 +126,26 @@ task_number() {
   sed -n 's/^N4\.10\.A\.\([0-9][0-9]*\)\..*$/\1/p' <<<"$1"
 }
 
+task_facet() {
+  sed -n 's/^N4\.10\.A\.[0-9][0-9]*\.\(.*\)_TESTS$/\1/p' <<<"$1"
+}
+
 select_next_entry() {
-  local entry dispatch task path n listing
+  local entry dispatch task path n facet listing
   listing="$(api "repos/$GITHUB_REPOSITORY/contents/$DISPATCH_PATH?ref=$BRANCH" 2>/dev/null || printf '[]')"
   while IFS= read -r entry; do
     dispatch="$(jq -r '.dispatchId' <<<"$entry")"
     task="$(jq -r '.taskId' <<<"$entry")"
     path="$DISPATCH_PATH/$dispatch.json"
     n="$(task_number "$task")"
+    facet="$(task_facet "$task")"
+
+    # Semantic identity is stronger than task number. A regenerated catalog may
+    # assign a new number/file to the same behavior; that is still duplicate work.
+    if [[ -n "$facet" ]] && jq -e --arg needle "-$facet-TESTS-" '.[]? | select((.name // "") | contains($needle))' <<<"$listing" >/dev/null; then
+      echo "AUTOREFILL_SKIP_SEMANTIC_DUPLICATE worker=$WORKER_ID task=$task facet=$facet" >&2
+      continue
+    fi
 
     # A PREARM/recovery may legitimately use a different dispatchId for the same
     # material task. Treat any manifest for that N4.10.A task number in this lane
