@@ -1,6 +1,7 @@
 using InventoryApp.API.Controllers;
 using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs.Contabilidad;
+using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Application.Services;
 using InventoryApp.Domain.Entities.Contabilidad;
@@ -75,7 +76,7 @@ public sealed class N49GPeriodoContableApiServiceRegressionTests
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
-        var error = await Assert.ThrowsAsync<InvalidOperationException>(() => service.CreateAsync(input));
+        var error = await Assert.ThrowsAsync<ConflictException>(() => service.CreateAsync(input));
 
         Assert.Equal("El período contable se superpone con un período existente.", error.Message);
         repository.Verify(x => x.AddAsync(It.IsAny<PeriodoContable>(), It.IsAny<CancellationToken>()), Times.Never);
