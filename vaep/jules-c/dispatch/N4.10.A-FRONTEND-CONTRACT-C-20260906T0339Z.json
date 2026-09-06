@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.10.A-FRONTEND-CONTRACT-C-20260906T0339Z",
+  "taskId": "N4.10.A.10.FRONTEND_FINANCIAL_REPORT_CONTRACT_TESTS",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/services/reportes-financieros.contract.spec.ts only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT remains N4.9.H closure debt; this is dependency-safe concurrent N4.10.A material support only and does NOT promote N4.10. Own ONLY frontend/src/app/services/reportes-financieros.contract.spec.ts. Add focused contract tests for the CURRENT financial-report frontend integration surface: request parameters for report type/date range/export, stable response/error handling, and no silent authorization bypass. If the service/surface does not yet exist, do not fabricate it or production code; produce only truthful tests against reusable current mechanisms or return an exact blocker/gap. No production/workflow/docs/manifest changes. Run focused tests/build when possible and perform TWO distinct self-reviews. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "9bcff6173638831381bde90e6ab26623fbaf11ef"
+}
