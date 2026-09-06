@@ -75,6 +75,21 @@ admission_open() {
   jq -e '.newDispatchAdmission=="OPEN" and .allowExistingActiveSessions==true' <<<"$decoded" >/dev/null
 }
 
+canonical_parent_matches_checkout() {
+  local payload decoded remote_parent
+  if ! payload="$(api "repos/$GITHUB_REPOSITORY/contents/$CATALOG?ref=$BRANCH" 2>/dev/null)"; then
+    echo "AUTOREFILL_WAIT=canonical_catalog_unavailable worker=$WORKER_ID"
+    return 1
+  fi
+  decoded="$(jq -r '.content' <<<"$payload" | tr -d '\n' | base64 -d)"
+  remote_parent="$(jq -r '.currentParent // empty' <<<"$decoded")"
+  if [[ -z "$remote_parent" || "$remote_parent" != "$CURRENT_PARENT" ]]; then
+    echo "AUTOREFILL_WAIT=STALE_PARENT worker=$WORKER_ID checkout_parent=$CURRENT_PARENT canonical_parent=${remote_parent:-MISSING} action=FRESH_WATCHDOG_RECOVERY"
+    return 1
+  fi
+  return 0
+}
+
 is_control_plane_path() {
   case "$1" in
     vaep/jules/dispatch/*.json|vaep/jules-b/dispatch/*.json|vaep/jules-c/dispatch/*.json|vaep/jules-d/dispatch/*.json|vaep/control/*|docs/VAEP_AUTHORITY.md|.github/scripts/vaep-*|.github/workflows/vaep-*)
@@ -155,13 +170,22 @@ completed_semantic_facets() {
 }
 
 select_next_entry() {
-  local entry dispatch task path n facet listing completed_facets prefix
+  local entry dispatch task path n facet listing completed_facets prefix planned
   listing="$(api "repos/$GITHUB_REPOSITORY/contents/$DISPATCH_PATH?ref=$BRANCH" 2>/dev/null || printf '[]')"
   completed_facets="$(completed_semantic_facets)"
   while IFS= read -r entry; do
     dispatch="$(jq -r '.dispatchId' <<<"$entry")"
     task="$(jq -r '.taskId' <<<"$entry")"
+    planned="$(jq -r '.plannedParent // empty' <<<"$entry")"
     path="$DISPATCH_PATH/$dispatch.json"
+
+    # Fail closed in core as well as wrapper. A stale/direct caller must never
+    # use dispatchEligible to advance beyond the canonical CURRENT_PARENT.
+    if [[ -z "$planned" || "$planned" != "$CURRENT_PARENT" || "$task" != "$CURRENT_PARENT."* ]]; then
+      echo "AUTOREFILL_SKIP_PARENT_MISMATCH worker=$WORKER_ID task=$task planned_parent=${planned:-MISSING} current_parent=$CURRENT_PARENT" >&2
+      continue
+    fi
+
     n="$(task_number "$task")"
     facet="$(task_facet "$task")"
 
@@ -192,7 +216,7 @@ dispatch_internal_manifest_run() {
   # trigger GitHub Actions push workflows. Therefore an internally-created NEXT
   # manifest needs exactly one explicit workflow_dispatch. This is not a second
   # run: no push-run can exist for this internal commit.
-  api "repos/$GITHUB_REPOSITORY/actions/workflows/$workflow/dispatches"     --method POST -f ref="$BRANCH" >/dev/null
+  api "repos/$GITHUB_REPOSITORY/actions/workflows/$workflow/dispatches" --method POST -f ref="$BRANCH" >/dev/null
 
   for _ in $(seq 1 15); do
     runs="$(api "repos/$GITHUB_REPOSITORY/actions/workflows/$workflow/runs?branch=$BRANCH&event=workflow_dispatch&per_page=20")"
@@ -260,6 +284,9 @@ create_atomic_manifest_commit() {
 main() {
   if ! admission_open; then
     echo "AUTOREFILL_WAIT=dispatch_admission_not_open worker=$WORKER_ID"
+    exit 0
+  fi
+  if ! canonical_parent_matches_checkout; then
     exit 0
   fi
   if other_live_lane_run_exists; then
