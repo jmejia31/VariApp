@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using InventoryApp.API.Controllers;
 using InventoryApp.API.Filters;
+using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Application.Services;
 using InventoryApp.Domain.Entities.Contabilidad;
@@ -54,7 +55,7 @@ public sealed class N49FPeriodoContableSecurityRegressionTests
     }
 
     [Fact]
-    public async Task CerrarAsync_MissingPeriodo_ThrowsKeyNotFoundException()
+    public async Task CerrarAsync_MissingPeriodo_ThrowsResourceNotFoundException()
     {
         var repoMock = new Mock<IPeriodoContableRepository>();
         repoMock.Setup(r => r.GetByIdAsync(It.IsAny<int>(), true, default)).ReturnsAsync((PeriodoContable?)null);
@@ -62,12 +63,12 @@ public sealed class N49FPeriodoContableSecurityRegressionTests
 
         var service = new PeriodoContableService(repoMock.Object, auditoriaMock.Object);
 
-        var ex = await Assert.ThrowsAsync<KeyNotFoundException>(() => service.CerrarAsync(999));
+        var ex = await Assert.ThrowsAsync<ResourceNotFoundException>(() => service.CerrarAsync(999));
         Assert.Equal("No se encontró el período contable con ID 999.", ex.Message);
     }
 
     [Fact]
-    public async Task CerrarAsync_AlreadyClosed_ThrowsInvalidOperationException()
+    public async Task CerrarAsync_AlreadyClosed_ThrowsConflictException()
     {
         var periodo = new PeriodoContable(DateTime.UtcNow, DateTime.UtcNow.AddDays(30));
         periodo.Cerrar(DateTime.UtcNow);
@@ -78,7 +79,7 @@ public sealed class N49FPeriodoContableSecurityRegressionTests
 
         var service = new PeriodoContableService(repoMock.Object, auditoriaMock.Object);
 
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => service.CerrarAsync(1));
+        var ex = await Assert.ThrowsAsync<ConflictException>(() => service.CerrarAsync(1));
         Assert.Equal("El período contable ya está cerrado.", ex.Message);
     }
 

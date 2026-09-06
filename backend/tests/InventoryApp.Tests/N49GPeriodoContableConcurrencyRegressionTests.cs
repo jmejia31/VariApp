@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using InventoryApp.Application.DTOs.Contabilidad;
+using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Application.Services;
 using InventoryApp.Domain.Entities.Contabilidad;
@@ -27,7 +28,7 @@ public class N49GPeriodoContableConcurrencyRegressionTests
     }
 
     [Fact]
-    public async Task CerrarAsync_WhenAlreadyClosed_ThrowsInvalidOperationException_AndPreservesOriginalState()
+    public async Task CerrarAsync_WhenAlreadyClosed_ThrowsConflictException_AndPreservesOriginalState()
     {
         // Arrange
         var periodo = new PeriodoContable(new DateTime(2023, 1, 1, 0, 0, 0, DateTimeKind.Utc), new DateTime(2023, 1, 31, 23, 59, 59, DateTimeKind.Utc));
@@ -41,7 +42,7 @@ public class N49GPeriodoContableConcurrencyRegressionTests
             .ReturnsAsync(periodo);
 
         // Act & Assert
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => _service.CerrarAsync(1));
+        var ex = await Assert.ThrowsAsync<ConflictException>(() => _service.CerrarAsync(1));
         Assert.Equal("El período contable ya está cerrado.", ex.Message);
 
         Assert.Equal(EstadoPeriodoContable.Cerrado, periodo.Estado);
