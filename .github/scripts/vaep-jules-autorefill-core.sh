@@ -122,11 +122,25 @@ path_exists_on_branch() {
   api "repos/$GITHUB_REPOSITORY/contents/$path?ref=$BRANCH" >/dev/null 2>&1
 }
 
+task_number() {
+  sed -n 's/^N4\.10\.A\.\([0-9][0-9]*\)\..*$/\1/p' <<<"$1"
+}
+
 select_next_entry() {
-  local entry dispatch path
+  local entry dispatch task path n listing
+  listing="$(api "repos/$GITHUB_REPOSITORY/contents/$DISPATCH_PATH?ref=$BRANCH" 2>/dev/null || printf '[]')"
   while IFS= read -r entry; do
     dispatch="$(jq -r '.dispatchId' <<<"$entry")"
+    task="$(jq -r '.taskId' <<<"$entry")"
     path="$DISPATCH_PATH/$dispatch.json"
+    n="$(task_number "$task")"
+
+    # A PREARM/recovery may legitimately use a different dispatchId for the same
+    # material task. Treat any manifest for that N4.10.A task number in this lane
+    # as consumed so autorefill never creates duplicate ownership/scope.
+    if [[ -n "$n" ]] && jq -e --arg prefix "N4-10-A-$n-" '.[]? | select((.name // "") | startswith($prefix))' <<<"$listing" >/dev/null; then
+      continue
+    fi
     if ! path_exists_on_branch "$path"; then
       printf '%s\n' "$entry"
       return 0
