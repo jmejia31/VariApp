@@ -16,7 +16,16 @@ BEGIN_AUTOMATION_POLICY
 PARENT_CLOSE_SLA_ROLLING_60M=3
 PARENT_MAX_DWELL_MINUTES=20
 PARENT_STALL_NO_PROGRESS_MINUTES=10
+CLOSURE_REVIEW_MAX_LATENCY_MINUTES=2
+CLOSURE_DEBT_TRIGGER_LT=3
+CLOSURE_CHAIN_SAME_RUN=TRUE
 MAX_VOLUNTARY_IDLE=0
+JULES_QUEUE_DEPTH_TARGET=2
+JULES_CURRENT_RUN_REQUIRED=TRUE
+JULES_NEXT_SAFE_PREARMED_REQUIRED=TRUE
+JULES_TERMINAL_HANDOFF_SAME_RUN=TRUE
+NO_MANIFEST_DURING_HEAD_FREEZE_CAUSAL=TRUE
+PREARM_BEFORE_CAUSAL_CI=TRUE
 VAEP_CHECKPOINTS=:00,:15,:30,:45,:55
 JULES_LANE_BUDGET_SECONDS=1080
 JULES_MAX_ATTEMPTS=2
@@ -109,6 +118,10 @@ La política de parent-close, dwell time y SLA está gobernada por el bloque can
 - Si falta exactamente un gap material, solo se trabaja ese gap. Está prohibido inflar REVIEW_BACKLOG con evidencia redundante mientras exista un camino de cierre más corto.
 - `CLOSURE_CHAIN_SAME_RUN=TRUE`: tras cerrar un padre, promover el siguiente dependency-valid y evaluar/cerrar inmediatamente todo padre ya pretrabajado/certificable en la MISMA corrida, repitiendo hasta `ROLLING60>=3` o hasta encontrar un blocker técnico causal exacto.
 - Mantener Jules productivos en paralelo: lanes ya reservadas continúan; una lane libre recibe NEXT_SAFE material, pero ningún refill evidence-only puede retrasar un cierre ya certificable.
+- `JULES_CURRENT_RUN_REQUIRED=TRUE` + `JULES_NEXT_SAFE_PREARMED_REQUIRED=TRUE`: cada lane debe conservar trabajo actual y siguiente trabajo seguro prearmado cuando exista backlog material elegible.
+- `JULES_QUEUE_DEPTH_TARGET=2`: objetivo mínimo por lane = CURRENT + NEXT_SAFE; terminal CURRENT debe liberar ownership y activar el siguiente en la misma corrida.
+- `PREARM_BEFORE_CAUSAL_CI=TRUE`: el NEXT_SAFE que requiera manifest/commit debe prepararse antes de iniciar la ventana de CI causal del FUNCTIONAL_HEAD siempre que sea técnicamente posible.
+- `NO_MANIFEST_DURING_HEAD_FREEZE_CAUSAL=TRUE`: una vez exista HEAD_FREEZE_CAUSAL, está prohibido mover Desarrollo con manifests/control-plane que puedan cancelar/superseder gates del FUNCTIONAL_HEAD. Durante ese freeze, Jules continúan sobre runs ya reservados, work seguro no-head-moving y la cola declarativa; el siguiente manifest se publica inmediatamente al liberar el freeze.
 - Nunca false LISTO ni busywork.
 
 ## 7. Transporte Jules
@@ -194,7 +207,8 @@ Dos auto-revisiones independientes son obligatorias antes de COMPLETED válido.
 - Un workflow legacy de otro módulo, un gate global no relacionado, Vercel/deploy no aplicable, CI de otro HEAD o CI disparado únicamente por `vaep/**`/manifests/control-plane **no** constituye freeze y no puede dejar lanes Jules voluntariamente idle.
 - Aplicar `CONTROL_PLANE_HEAD_EQUIVALENCE` a commits manifest/control-plane: conservar como `FUNCTIONAL_HEAD` el último HEAD funcional/integración y permitir handoffs Jules mientras no se invalide evidencia causal crítica.
 - No mover HEAD con un manifest si invalidaría evidencia causal crítica activa del `FUNCTIONAL_HEAD`.
-- Durante un freeze causal real, ejecutar trabajo compatible y drenar REVIEW_FIRST/QA_TAKEOVER; al quedar terminal el gate, recalcular freeze desde cero.
+- Con `NO_MANIFEST_DURING_HEAD_FREEZE_CAUSAL=TRUE`, cualquier intento de dispatch que requiera commit durante freeze se mantiene PREARMED/WAITING_CAUSAL_GATE y NO se publica hasta que el gate crítico quede terminal. Esto evita HEAD churn y cancelaciones de CI.
+- Durante un freeze causal real, ejecutar trabajo compatible y drenar REVIEW_FIRST/QA_TAKEOVER; al quedar terminal el gate, recalcular freeze desde cero y publicar inmediatamente el NEXT_SAFE pendiente si sigue siendo válido.
 - Fallo causal interno se corrige; ruido externo o fallo no causal se registra pero no se convierte en blocker falso ni serializa el CURRENT_PARENT.
 - Cierre requiere DoD real, gates/CI aplicables terminales y P0/P1=0.
 - Estado de cierre es monotónico: una tarea/padre con evidencia canónica `LISTO`/`LISTO_REAL` no puede volver a `EN_PROGRESO`/`PENDIENTE` por una fila stale. Si COLA contradice BITACORA/GitHub/certificación fresca, reconciliar COLA; reabrir solo con evidencia nueva explícita de defecto causal que invalide el cierre.
