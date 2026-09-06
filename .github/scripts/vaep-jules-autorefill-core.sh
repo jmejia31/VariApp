@@ -184,22 +184,21 @@ select_next_entry() {
   return 1
 }
 
-dispatch_lane_workflow() {
-  local workflow started runs run_id status
+observe_manifest_push_run() {
+  local workflow="$1" commit="$2" runs run_id status event
   workflow="$(lane_workflow_file)"
-  started="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-  api "repos/$GITHUB_REPOSITORY/actions/workflows/$workflow/dispatches" --method POST -f ref="$BRANCH" >/dev/null
-  for _ in $(seq 1 12); do
-    runs="$(api "repos/$GITHUB_REPOSITORY/actions/workflows/$workflow/runs?branch=$BRANCH&event=workflow_dispatch&per_page=10")"
-    run_id="$(jq -r --arg started "$started" '[.workflow_runs[]? | select(.created_at >= $started)] | sort_by(.created_at) | reverse | .[0].id // empty' <<<"$runs")"
+  for _ in $(seq 1 15); do
+    runs="$(api "repos/$GITHUB_REPOSITORY/actions/workflows/$workflow/runs?branch=$BRANCH&per_page=20")"
+    run_id="$(jq -r --arg sha "$commit" '[.workflow_runs[]? | select(.head_sha==$sha and .event=="push")] | sort_by(.created_at) | reverse | .[0].id // empty' <<<"$runs")"
     if [[ -n "$run_id" ]]; then
       status="$(jq -r --argjson id "$run_id" '.workflow_runs[]? | select(.id==$id) | .status' <<<"$runs")"
-      echo "AUTOREFILL_WORKFLOW_DISPATCHED worker=$WORKER_ID workflow=$workflow run_id=$run_id status=$status"
+      event="$(jq -r --argjson id "$run_id" '.workflow_runs[]? | select(.id==$id) | .event' <<<"$runs")"
+      echo "AUTOREFILL_PUSH_RUN_OBSERVED worker=$WORKER_ID workflow=$workflow run_id=$run_id status=$status event=$event commit=$commit"
       return 0
     fi
     sleep 2
   done
-  echo "AUTOREFILL_ERROR=workflow_dispatch_not_observed worker=$WORKER_ID workflow=$workflow" >&2
+  echo "AUTOREFILL_ERROR=push_run_not_observed worker=$WORKER_ID workflow=$workflow commit=$commit" >&2
   return 4
 }
 
@@ -232,7 +231,10 @@ create_atomic_manifest_commit() {
     set -e
     if [[ "$rc" -eq 0 ]]; then
       echo "AUTOREFILL_RESERVED worker=$WORKER_ID dispatch=$dispatch task=$task commit=$commit base=$head"
-      dispatch_lane_workflow
+      # The manifest commit itself triggers exactly one worker via the workflow's
+      # push:path filter. Never issue workflow_dispatch here: a second trigger can
+      # replace the single pending slot in GitHub concurrency and supersede work.
+      observe_manifest_push_run "$(lane_workflow_file)" "$commit"
       return 0
     fi
     echo "AUTOREFILL_RETRY worker=$WORKER_ID dispatch=$dispatch attempt=$attempt reason=head_race"
