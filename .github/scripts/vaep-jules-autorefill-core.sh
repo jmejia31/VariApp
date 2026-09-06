@@ -184,22 +184,35 @@ select_next_entry() {
   return 1
 }
 
-observe_manifest_push_run() {
-  local workflow="$1" commit="$2" runs run_id status event
+dispatch_internal_manifest_run() {
+  local workflow commit runs run_id status
   workflow="$(lane_workflow_file)"
+
+  # Commits created from a workflow with its GITHUB_TOKEN do not recursively
+  # trigger GitHub Actions push workflows. Therefore an internally-created NEXT
+  # manifest needs exactly one explicit workflow_dispatch. This is not a second
+  # run: no push-run can exist for this internal commit.
+  api "repos/$GITHUB_REPOSITORY/actions/workflows/$workflow/dispatches"     --method POST -f ref="$BRANCH" >/dev/null
+
   for _ in $(seq 1 15); do
-    runs="$(api "repos/$GITHUB_REPOSITORY/actions/workflows/$workflow/runs?branch=$BRANCH&per_page=20")"
-    run_id="$(jq -r --arg sha "$commit" '[.workflow_runs[]? | select(.head_sha==$sha and .event=="push")] | sort_by(.created_at) | reverse | .[0].id // empty' <<<"$runs")"
+    runs="$(api "repos/$GITHUB_REPOSITORY/actions/workflows/$workflow/runs?branch=$BRANCH&event=workflow_dispatch&per_page=20")"
+    run_id="$(jq -r --arg sha "$commit" '
+      [.workflow_runs[]?
+       | select(.event=="workflow_dispatch")
+       | select(.head_sha==$sha or .head_branch=="Desarrollo")
+      ] | sort_by(.created_at) | reverse | .[0].id // empty' <<<"$runs")"
     if [[ -n "$run_id" ]]; then
       status="$(jq -r --argjson id "$run_id" '.workflow_runs[]? | select(.id==$id) | .status' <<<"$runs")"
-      event="$(jq -r --argjson id "$run_id" '.workflow_runs[]? | select(.id==$id) | .event' <<<"$runs")"
-      echo "AUTOREFILL_PUSH_RUN_OBSERVED worker=$WORKER_ID workflow=$workflow run_id=$run_id status=$status event=$event commit=$commit"
+      echo "AUTOREFILL_INTERNAL_RUN_DISPATCHED worker=$WORKER_ID workflow=$workflow run_id=$run_id status=$status manifest_commit=$commit"
       return 0
     fi
     sleep 2
   done
-  echo "AUTOREFILL_ERROR=push_run_not_observed worker=$WORKER_ID workflow=$workflow commit=$commit" >&2
-  return 4
+
+  # Reservation exists even if GitHub is slow to surface the run. Never fail the
+  # CURRENT task because NEXT telemetry is delayed; watchdog/recovery will verify.
+  echo "AUTOREFILL_WARN=workflow_dispatch_not_observed worker=$WORKER_ID workflow=$workflow manifest_commit=$commit action=DO_NOT_FAIL_CURRENT" >&2
+  return 0
 }
 
 create_atomic_manifest_commit() {
@@ -231,10 +244,10 @@ create_atomic_manifest_commit() {
     set -e
     if [[ "$rc" -eq 0 ]]; then
       echo "AUTOREFILL_RESERVED worker=$WORKER_ID dispatch=$dispatch task=$task commit=$commit base=$head"
-      # The manifest commit itself triggers exactly one worker via the workflow's
-      # push:path filter. Never issue workflow_dispatch here: a second trigger can
-      # replace the single pending slot in GitHub concurrency and supersede work.
-      observe_manifest_push_run "$(lane_workflow_file)" "$commit"
+      # Internal GITHUB_TOKEN commits cannot recursively trigger Actions.
+      # Explicitly dispatch exactly one NEXT run and never fail CURRENT if GitHub
+      # telemetry is delayed.
+      dispatch_internal_manifest_run "$(lane_workflow_file)" "$commit" || true
       return 0
     fi
     echo "AUTOREFILL_RETRY worker=$WORKER_ID dispatch=$dispatch attempt=$attempt reason=head_race"
