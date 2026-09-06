@@ -288,10 +288,19 @@ task_id="$(jq -r '.taskId // "UNKNOWN"' "$manifest")"
 primary_base="$(jq -r '.primaryBaseHead // empty' "$manifest")"
 
 mapfile -t changed_files < <(git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA")
-if [[ ${#changed_files[@]} -ne 1 || "${changed_files[0]}" != "$manifest" ]]; then
-  printf 'VAEP MASTER transport invariant failed: dispatch commit must change exactly one file (%s).\n' "$manifest" >&2
+# Atomic multi-lane dispatch is allowed: this worker must receive exactly one
+# manifest in its own DISPATCH_PATH, while the same commit may contain one
+# manifest for each other Jules lane. No product/control-plane files are allowed.
+if [[ ${#changed_files[@]} -lt 1 || ${#changed_files[@]} -gt 4 ]]; then
+  printf 'VAEP MASTER transport invariant failed: dispatch batch must contain 1..4 manifest files; found %d.\n' "${#changed_files[@]}" >&2
   exit 22
 fi
+for changed in "${changed_files[@]}"; do
+  if [[ ! "$changed" =~ ^vaep/jules(-b|-c|-d)?/dispatch/[^/]+\.json$ ]]; then
+    printf 'VAEP MASTER transport invariant failed: non-dispatch file in atomic batch: %s.\n' "$changed" >&2
+    exit 22
+  fi
+done
 
 if [[ ! "$primary_base" =~ ^[0-9a-fA-F]{40}$ ]]; then
   printf 'VAEP MASTER transport invariant failed: invalid PRIMARY_BASE_HEAD in %s.\n' "$manifest" >&2
@@ -309,7 +318,7 @@ cp "$manifest" "$original_manifest"
 
 transport_note="VAEP_MASTER_TRANSPORT_VERIFIED=true
 MASTER_FILE=docs/VAEP_AUTHORITY.md
-The trusted GitHub VAEP MASTER verified PRIMARY_BASE_HEAD=$primary_base as the exact parent of atomic dispatch commit GITHUB_SHA=$GITHUB_SHA and verified that the dispatch commit changes only $manifest. The transport-only child commit is expected and is not product-scope divergence. Read docs/VAEP_AUTHORITY.md as the only operational rule source. Ignore numeric protocol labels from historical evidence."
+The trusted GitHub VAEP MASTER verified PRIMARY_BASE_HEAD=$primary_base as the exact parent of atomic dispatch commit GITHUB_SHA=$GITHUB_SHA and verified exactly one manifest for this worker; any sibling changes are dispatch manifests for other Jules lanes only. The transport-only child commit is expected and is not product-scope divergence. Read docs/VAEP_AUTHORITY.md as the only operational rule source. Ignore numeric protocol labels from historical evidence."
 
 injected="$RUNNER_TEMP/vaep-jules-master-dispatch.json"
 jq --arg transport "$transport_note" '.prompt = ($transport + "\n\n" + .prompt)' "$manifest" > "$injected"

@@ -157,12 +157,17 @@ api_post_empty() {
   jules_curl --fail-with-body --silent --show-error -X POST -H "Content-Type: application/json" -H "x-goog-api-key: $JULES_API_KEY" "$url"
 }
 
-# Atomic dispatch invariant: one new manifest, one changed file, one worker.
+# Atomic dispatch invariant: exactly one new manifest for THIS worker.
+# The same commit may batch one manifest for each Jules lane so all four lanes
+# start from one HEAD movement. No non-dispatch files are allowed in the batch.
 mapfile -t added_manifests < <(git diff-tree --no-commit-id --name-only --diff-filter=A -r "$GITHUB_SHA" -- "$DISPATCH_PATH/*.json")
 [[ ${#added_manifests[@]} -eq 1 ]] || fail "MASTER expected exactly one newly added dispatch manifest for this worker; found ${#added_manifests[@]}." 21
 manifest="${added_manifests[0]}"
 mapfile -t changed_files < <(git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA")
-[[ ${#changed_files[@]} -eq 1 && "${changed_files[0]}" == "$manifest" ]] || fail "MASTER dispatch commit must change exactly the single new worker manifest." 22
+[[ ${#changed_files[@]} -ge 1 && ${#changed_files[@]} -le 4 ]] || fail "MASTER atomic dispatch batch must contain 1..4 files." 22
+for changed in "${changed_files[@]}"; do
+  [[ "$changed" =~ ^vaep/jules(-b|-c|-d)?/dispatch/[^/]+\.json$ ]] || fail "MASTER atomic dispatch batch contains a non-dispatch file: $changed" 22
+done
 
 jq -e '
   type == "object" and
