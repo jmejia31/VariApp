@@ -1,5 +1,6 @@
 using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs.Contabilidad;
+using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities.Contabilidad;
 using InventoryApp.Domain.Enums;
@@ -42,7 +43,7 @@ public sealed class PeriodoContableService : IPeriodoContableService
         var fin = NormalizeUtc(dto.FechaFin, nameof(dto.FechaFin));
 
         if (await _repository.HasOverlappingPeriodAsync(inicio, fin))
-            throw new InvalidOperationException("El período contable se superpone con un período existente.");
+            throw new ConflictException("El período contable se superpone con un período existente.");
 
         var periodo = new PeriodoContable(inicio, fin);
         await _repository.AddAsync(periodo);
@@ -56,9 +57,18 @@ public sealed class PeriodoContableService : IPeriodoContableService
     public async Task CerrarAsync(int id)
     {
         var periodo = await _repository.GetByIdAsync(id, tracking: true)
-            ?? throw new KeyNotFoundException($"No se encontró el período contable con ID {id}.");
+            ?? throw new ResourceNotFoundException($"No se encontró el período contable con ID {id}.");
         var anterior = new { periodo.Estado, periodo.CerradoEnUtc };
-        periodo.Cerrar(DateTime.UtcNow);
+
+        try
+        {
+            periodo.Cerrar(DateTime.UtcNow);
+        }
+        catch (InvalidOperationException ex)
+        {
+            throw new ConflictException(ex.Message);
+        }
+
         _repository.Update(periodo);
         await _repository.SaveChangesAsync();
         await _auditoria.RegistrarAsync(ModuloSistema.Configuracion, AccionPermiso.Cerrar,
