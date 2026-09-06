@@ -70,8 +70,10 @@ commit_catalog(){
     head="$(head_sha)"
     content="$(api "repos/$GITHUB_REPOSITORY/contents/$CATALOG?ref=$BRANCH" --jq '.content' | tr -d '\n' | base64 -d)"
     unused="$(count_unused "$content")"
-    if (( unused >= FLOOR )); then
-      echo "CATALOG_FLOOR_OK worker=$WORKER_ID unused=$unused"
+    # The wrapper consumes one catalog entry immediately after this guard.
+    # Require > FLOOR before handoff so post-dispatch UNUSED never falls below FLOOR.
+    if (( unused > FLOOR )); then
+      echo "CATALOG_FLOOR_OK worker=$WORKER_ID unused=$unused post_dispatch_min=$((unused-1))"
       return 0
     fi
     content="$(regenerate_lane "$content")"
@@ -96,8 +98,10 @@ commit_catalog(){
 
 current="$(api "repos/$GITHUB_REPOSITORY/contents/$CATALOG?ref=$BRANCH" --jq '.content' | tr -d '\n' | base64 -d)"
 unused="$(count_unused "$current")"
-if (( unused < FLOOR )); then
+# Because autorefill-core consumes one entry immediately after this script,
+# replenish at the boundary too: UNUSED=20 must not be allowed to become 19.
+if (( unused <= FLOOR )); then
   commit_catalog "$current"
 else
-  echo "CATALOG_FLOOR_OK worker=$WORKER_ID unused=$unused"
+  echo "CATALOG_FLOOR_OK worker=$WORKER_ID unused=$unused post_dispatch_min=$((unused-1))"
 fi
