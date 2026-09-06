@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.10.A-REPORT-NAV-C-20260905T2329HND",
+  "taskId": "N4.10.A.25.FINANCIAL_REPORT_NAVIGATION_REGRESSION",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/e2e/n4-10-financial-report-navigation.spec.ts only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. Continue material N4.10.A financial-report groundwork without promoting a blocked parent. Own ONLY frontend/e2e/n4-10-financial-report-navigation.spec.ts. Add a focused Playwright regression against CURRENT reporting/accounting navigation surfaces already present in the repo: authorized navigation to available report/accounting views, stable loading/empty states, and no false access for unauthorized users where current fixtures support it. Do not create production UI or invent routes. If the financial-report surface is not yet present, test only reusable current reporting/accounting routes and state the exact missing route/surface in assertions/comments without fake PASS. Perform TWO distinct self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "492ce964335b91206bdbd1360984e46f3341742d"
+}
