@@ -21,6 +21,8 @@ case "$WORKER_ID" in
   *) echo "AUTOREFILL_ERROR=unknown_worker worker=$WORKER_ID" >&2; exit 2 ;;
 esac
 readonly DISPATCH_PATH
+readonly CURRENT_PARENT="$(jq -r '.currentParent // empty' "$CATALOG")"
+[[ -n "$CURRENT_PARENT" ]] || { echo "AUTOREFILL_ERROR=current_parent_missing" >&2; exit 2; }
 
 api() {
   gh api "$@"
@@ -53,9 +55,6 @@ other_live_lane_run_exists() {
   name="$(lane_workflow_name)"
   workflow="$(lane_workflow_file)"
   current_id="${GITHUB_RUN_ID:-0}"
-  # Query the lane workflow directly. The repository-wide first 100 runs can be
-  # saturated by CI fan-out and omit an older queued NEXT, which would let a
-  # terminal hook dispatch a newer run and GitHub concurrency cancel the real NEXT.
   runs="$(api "repos/$GITHUB_REPOSITORY/actions/workflows/$workflow/runs?branch=$BRANCH&per_page=30")"
   count="$(jq --arg name "$name" --argjson current "$current_id" '
     [.workflow_runs[]?
@@ -67,12 +66,11 @@ other_live_lane_run_exists() {
 }
 
 admission_open() {
-  local payload
+  local payload decoded
   if ! payload="$(api "repos/$GITHUB_REPOSITORY/contents/$ADMISSION_PATH?ref=$BRANCH" 2>/dev/null)"; then
     echo "AUTOREFILL_WAIT=admission_unavailable"
     return 1
   fi
-  local decoded
   decoded="$(jq -r '.content' <<<"$payload" | tr -d '\n' | base64 -d)"
   jq -e '.newDispatchAdmission=="OPEN" and .allowExistingActiveSessions==true' <<<"$decoded" >/dev/null
 }
@@ -97,7 +95,6 @@ functional_head() {
         break
       fi
     done < <(jq -r '.files[]?.filename' <<<"$commit")
-
     if [[ "$all_control" == false ]]; then
       printf '%s\n' "$sha"
       return 0
@@ -127,29 +124,38 @@ path_exists_on_branch() {
 }
 
 task_number() {
-  sed -n 's/^N4\.10\.A\.\([0-9][0-9]*\)\..*$/\1/p' <<<"$1"
+  local task="$1" parent_re
+  parent_re="${CURRENT_PARENT//./\\.}"
+  sed -n "s/^${parent_re}\.\([0-9][0-9]*\)\..*$/\\1/p" <<<"$task"
 }
 
 task_facet() {
-  sed -n 's/^N4\.10\.A\.[0-9][0-9]*\.\(.*\)_TESTS$/\1/p' <<<"$1"
+  local task="$1" prefix
+  prefix="${CURRENT_PARENT}."
+  [[ "$task" == "$prefix"* ]] || return 0
+  task="${task#${prefix}}"
+  task="${task#*.}"
+  printf '%s\n' "$task"
 }
 
 completed_semantic_facets() {
   local page payload
   for page in 1 2 3; do
     payload="$(api "repos/$GITHUB_REPOSITORY/issues?state=all&per_page=100&page=$page&sort=updated&direction=desc")"
-    jq -r '
+    jq -r --arg parent "$CURRENT_PARENT" '
       .[]?
       | (.body // "") as $b
       | select($b | contains("- Terminal state: `COMPLETED`"))
       | select($b | contains("- Patch present: `true`"))
-      | try ($b | capture("- Task: `N4\\.10\\.A\\.[0-9]+\\.(?<stem>[^\`]+)\`").stem | sub("_TESTS$"; "")) catch empty
+      | ($b | split("\n")[]? | select(startswith("- Task: `")) | sub("^- Task: `"; "") | sub("`.*$"; "")) as $task
+      | select($task | startswith($parent + "."))
+      | ($task | sub("^" + ($parent | gsub("\\."; "\\\\.")) + "\\.[0-9]+\\."; ""))
     ' <<<"$payload"
   done | sort -u
 }
 
 select_next_entry() {
-  local entry dispatch task path n facet listing completed_facets
+  local entry dispatch task path n facet listing completed_facets prefix
   listing="$(api "repos/$GITHUB_REPOSITORY/contents/$DISPATCH_PATH?ref=$BRANCH" 2>/dev/null || printf '[]')"
   completed_facets="$(completed_semantic_facets)"
   while IFS= read -r entry; do
@@ -159,18 +165,16 @@ select_next_entry() {
     n="$(task_number "$task")"
     facet="$(task_facet "$task")"
 
-    # Semantic identity is stronger than task number. A regenerated catalog may
-    # assign a new number/file to the same behavior; that is still duplicate work.
     if [[ -n "$facet" ]] && grep -Fxq "$facet" <<<"$completed_facets"; then
       echo "AUTOREFILL_SKIP_SEMANTIC_DUPLICATE worker=$WORKER_ID task=$task facet=$facet prior=COMPLETED_PATCH_TRUE" >&2
       continue
     fi
 
-    # A PREARM/recovery may legitimately use a different dispatchId for the same
-    # material task. Treat any manifest for that N4.10.A task number in this lane
-    # as consumed so autorefill never creates duplicate ownership/scope.
-    if [[ -n "$n" ]] && jq -e --arg prefix "N4-10-A-$n-" '.[]? | select((.name // "") | startswith($prefix))' <<<"$listing" >/dev/null; then
-      continue
+    if [[ -n "$n" ]]; then
+      prefix="$(tr '.' '-' <<<"$CURRENT_PARENT")-$n-"
+      if jq -e --arg prefix "$prefix" '.[]? | select((.name // "") | startswith($prefix))' <<<"$listing" >/dev/null; then
+        continue
+      fi
     fi
     if ! path_exists_on_branch "$path"; then
       printf '%s\n' "$entry"
@@ -184,11 +188,7 @@ dispatch_lane_workflow() {
   local workflow started runs run_id status
   workflow="$(lane_workflow_file)"
   started="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-
-  api "repos/$GITHUB_REPOSITORY/actions/workflows/$workflow/dispatches" \
-    --method POST \
-    -f ref="$BRANCH" >/dev/null
-
+  api "repos/$GITHUB_REPOSITORY/actions/workflows/$workflow/dispatches" --method POST -f ref="$BRANCH" >/dev/null
   for _ in $(seq 1 12); do
     runs="$(api "repos/$GITHUB_REPOSITORY/actions/workflows/$workflow/runs?branch=$BRANCH&event=workflow_dispatch&per_page=10")"
     run_id="$(jq -r --arg started "$started" '[.workflow_runs[]? | select(.created_at >= $started)] | sort_by(.created_at) | reverse | .[0].id // empty' <<<"$runs")"
@@ -199,13 +199,12 @@ dispatch_lane_workflow() {
     fi
     sleep 2
   done
-
   echo "AUTOREFILL_ERROR=workflow_dispatch_not_observed worker=$WORKER_ID workflow=$workflow" >&2
   return 4
 }
 
 create_atomic_manifest_commit() {
-  local entry="$1" dispatch task scope prompt path head base_commit base_tree manifest blob tree commit payload rc
+  local entry="$1" dispatch task scope prompt path head base_commit base_tree manifest blob tree commit rc
   dispatch="$(jq -r '.dispatchId' <<<"$entry")"
   task="$(jq -r '.taskId' <<<"$entry")"
   scope="$(jq -r '.fileScopeHint' <<<"$entry")"
@@ -217,40 +216,20 @@ create_atomic_manifest_commit() {
       echo "AUTOREFILL_ALREADY_RESERVED worker=$WORKER_ID dispatch=$dispatch"
       return 0
     fi
-
     head="$(current_head)"
     if causal_freeze_active "$head"; then
       return 0
     fi
-
-    manifest="$(jq -n \
-      --arg dispatchId "$dispatch" \
-      --arg taskId "$task" \
-      --arg workerId "$WORKER_ID" \
-      --arg expectedBranch "$BRANCH" \
-      --arg fileScopeHint "$scope" \
-      --arg prompt "$prompt" \
-      --arg primaryBaseHead "$head" \
-      '{dispatchId:$dispatchId,taskId:$taskId,workerId:$workerId,expectedBranch:$expectedBranch,taskAttempt:1,fileScopeHint:$fileScopeHint,prompt:$prompt,primaryBaseHead:$primaryBaseHead}')"
-
-    blob="$(jq -n --arg content "$manifest" '{content:$content,encoding:"utf-8"}' | \
-      api "repos/$GITHUB_REPOSITORY/git/blobs" --method POST --input - --jq '.sha')"
+    manifest="$(jq -n --arg dispatchId "$dispatch" --arg taskId "$task" --arg workerId "$WORKER_ID" --arg expectedBranch "$BRANCH" --arg fileScopeHint "$scope" --arg prompt "$prompt" --arg primaryBaseHead "$head" '{dispatchId:$dispatchId,taskId:$taskId,workerId:$workerId,expectedBranch:$expectedBranch,taskAttempt:1,fileScopeHint:$fileScopeHint,prompt:$prompt,primaryBaseHead:$primaryBaseHead}')"
+    blob="$(jq -n --arg content "$manifest" '{content:$content,encoding:"utf-8"}' | api "repos/$GITHUB_REPOSITORY/git/blobs" --method POST --input - --jq '.sha')"
     base_commit="$(api "repos/$GITHUB_REPOSITORY/git/commits/$head")"
     base_tree="$(jq -r '.tree.sha' <<<"$base_commit")"
-    tree="$(jq -n --arg base "$base_tree" --arg path "$path" --arg sha "$blob" \
-      '{base_tree:$base,tree:[{path:$path,mode:"100644",type:"blob",sha:$sha}]}' | \
-      api "repos/$GITHUB_REPOSITORY/git/trees" --method POST --input - --jq '.sha')"
-    commit="$(jq -n --arg message "chore(vaep): autorefill $WORKER_ID $task" --arg tree "$tree" --arg parent "$head" \
-      '{message:$message,tree:$tree,parents:[$parent]}' | \
-      api "repos/$GITHUB_REPOSITORY/git/commits" --method POST --input - --jq '.sha')"
-
-    payload="$(jq -n --arg sha "$commit" '{sha:$sha,force:false}')"
+    tree="$(jq -n --arg base "$base_tree" --arg path "$path" --arg sha "$blob" '{base_tree:$base,tree:[{path:$path,mode:"100644",type:"blob",sha:$sha}]}' | api "repos/$GITHUB_REPOSITORY/git/trees" --method POST --input - --jq '.sha')"
+    commit="$(jq -n --arg message "chore(vaep): autorefill $WORKER_ID $task" --arg tree "$tree" --arg parent "$head" '{message:$message,tree:$tree,parents:[$parent]}' | api "repos/$GITHUB_REPOSITORY/git/commits" --method POST --input - --jq '.sha')"
     set +e
-    jq -n --arg sha "$commit" '{sha:$sha,force:false}' | \
-      api "repos/$GITHUB_REPOSITORY/git/refs/heads/$BRANCH" --method PATCH --input - >/dev/null 2>&1
+    jq -n --arg sha "$commit" '{sha:$sha,force:false}' | api "repos/$GITHUB_REPOSITORY/git/refs/heads/$BRANCH" --method PATCH --input - >/dev/null 2>&1
     rc=$?
     set -e
-
     if [[ "$rc" -eq 0 ]]; then
       echo "AUTOREFILL_RESERVED worker=$WORKER_ID dispatch=$dispatch task=$task commit=$commit base=$head"
       dispatch_lane_workflow
@@ -259,7 +238,6 @@ create_atomic_manifest_commit() {
     echo "AUTOREFILL_RETRY worker=$WORKER_ID dispatch=$dispatch attempt=$attempt reason=head_race"
     sleep 1
   done
-
   echo "AUTOREFILL_ERROR=head_race_exhausted worker=$WORKER_ID dispatch=$dispatch" >&2
   return 3
 }
@@ -269,23 +247,19 @@ main() {
     echo "AUTOREFILL_WAIT=dispatch_admission_not_open worker=$WORKER_ID"
     exit 0
   fi
-
   if other_live_lane_run_exists; then
     echo "AUTOREFILL_RESERVE_EXISTS worker=$WORKER_ID action=no_new_manifest"
     exit 0
   fi
-
   local head entry
   head="$(current_head)"
   if causal_freeze_active "$head"; then
     exit 0
   fi
-
   if ! entry="$(select_next_entry)"; then
-    echo "AUTOREFILL_NO_SAFE_NEXT worker=$WORKER_ID catalog_exhausted=true"
+    echo "AUTOREFILL_NO_SAFE_NEXT worker=$WORKER_ID catalog_exhausted=true current_parent=$CURRENT_PARENT"
     exit 0
   fi
-
   create_atomic_manifest_commit "$entry"
 }
 
