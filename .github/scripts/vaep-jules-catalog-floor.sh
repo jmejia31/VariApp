@@ -41,13 +41,24 @@ build_scope(){
   fi
 }
 
+task_number(){
+  sed -n 's/^N4\.10\.A\.\([0-9][0-9]*\)\..*$/\1/p' <<<"$1"
+}
+
 count_unused(){
-  local json="$1" listing used=0 total dispatch
+  local json="$1" listing used=0 total dispatch task n
   listing="$(api "repos/$GITHUB_REPOSITORY/contents/$DISPATCH_PATH?ref=$BRANCH" 2>/dev/null || printf '[]')"
   total="$(jq --arg w "$WORKER_ID" '.lanes[$w] | length' <<<"$json")"
-  while IFS= read -r dispatch; do
-    jq -e --arg f "$dispatch.json" '.[]? | select(.name==$f)' <<<"$listing" >/dev/null && used=$((used+1))
-  done < <(jq -r --arg w "$WORKER_ID" '.lanes[$w][]?.dispatchId' <<<"$json")
+  while IFS=$'\t' read -r dispatch task; do
+    n="$(task_number "$task")"
+    if jq -e --arg f "$dispatch.json" '.[]? | select(.name==$f)' <<<"$listing" >/dev/null; then
+      used=$((used+1))
+    elif [[ -n "$n" ]] && jq -e --arg prefix "N4-10-A-$n-" '.[]? | select((.name // "") | startswith($prefix))' <<<"$listing" >/dev/null; then
+      # Different dispatchId, same material task identity (for example PREARM/recovery).
+      # Count it as consumed so the hard-floor metric cannot hide duplicate ownership.
+      used=$((used+1))
+    fi
+  done < <(jq -r --arg w "$WORKER_ID" '.lanes[$w][]? | [.dispatchId,.taskId] | @tsv' <<<"$json")
   printf '%s' "$((total-used))"
 }
 
