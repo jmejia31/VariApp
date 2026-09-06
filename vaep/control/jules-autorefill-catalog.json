@@ -1,9 +1,9 @@
 {
-  "version": 3,
+  "version": 4,
   "authority": "docs/VAEP_AUTHORITY.md",
-  "currentParent": "N4.10.B",
-  "generatedAt": "2026-09-06T15:37:00Z",
-  "regenerationReason": "ATOMIC_HANDOFF_FROM_N4.10.A_TO_N4.10.B__SMALL_MATERIAL_QUEUE",
+  "currentParent": "N4.10.D",
+  "generatedAt": "2026-09-06T16:24:00Z",
+  "regenerationReason": "ATOMIC_HANDOFF_N4.10.B_LISTO__N4.10.C_NO_CODE_PERSISTENCE_AUDIT_LISTO__PROMOTE_N4.10.D",
   "policy": {
     "branch": "Desarrollo",
     "queueDepthTarget": 2,
@@ -15,74 +15,74 @@
   "lanes": {
     "JULES_A": [
       {
-        "dispatchId": "N4-10-B-1-FINANCIAL-STATEMENT-KIND-CONTRACT-A-MATERIAL",
-        "taskId": "N4.10.B.1.FINANCIAL_STATEMENT_KIND_CONTRACT",
+        "dispatchId": "N4-10-D-1-FINANCIAL-STATEMENT-SERVICE-IMPLEMENTATION-A-MATERIAL",
+        "taskId": "N4.10.D.1.FINANCIAL_STATEMENT_SERVICE_IMPLEMENTATION",
         "workerId": "JULES_A",
         "taskAttempt": 1,
-        "fileScopeHint": "backend/src/Domain/Enums/TipoEstadoFinanciero.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.B (Estados financieros — Dominio y contratos). Own ONLY backend/src/Domain/Enums/TipoEstadoFinanciero.cs. Create the minimum domain enum/contract for the statement families required by the Plan Rector: Balance General, Estado de Resultados, Balance de Comprobación, Libro Diario, Libro Mayor and Flujo de Efectivo when applicable. Keep it additive and compile-oriented. Inspect existing CuentaContable/AsientoContable/AsientoDetalle/MovimientoFinanciero/PeriodoContable contracts first; reuse existing naming/types and do not invent unrelated APIs. Perform TWO independent self-reviews. No workflow/manifest/dependency/main/production/merge/deploy changes."
+        "fileScopeHint": "backend/src/Infrastructure/Services/EstadoFinancieroService.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.D. Own ONLY backend/src/Infrastructure/Services/EstadoFinancieroService.cs. Implement IEstadoFinancieroService as read-only projections over existing CuentaContable/AsientoContable/AsientoDetalle/PeriodoContable persistence. Support the six approved TipoEstadoFinanciero values without persisting report snapshots. Respect date/period filters, decimal precision, deterministic ordering and CancellationToken. Reuse existing accounting invariants. TWO self-reviews. No workflow/manifest/dependency/main/production/merge/deploy changes."
       },
       {
-        "dispatchId": "N4-10-B-5-FINANCIAL-STATEMENT-KIND-CONTRACT-TESTS-A-MATERIAL",
-        "taskId": "N4.10.B.5.FINANCIAL_STATEMENT_KIND_CONTRACT_TESTS",
+        "dispatchId": "N4-10-D-5-FINANCIAL-STATEMENT-SERVICE-TESTS-A-MATERIAL",
+        "taskId": "N4.10.D.5.FINANCIAL_STATEMENT_SERVICE_TESTS",
         "workerId": "JULES_A",
         "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410BFinancialStatementKindContractTests.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.B (Estados financieros — Dominio y contratos). Own ONLY backend/tests/InventoryApp.Tests/N410BFinancialStatementKindContractTests.cs. Add focused contract tests for the approved TipoEstadoFinanciero values and stable serialization/naming once the domain enum exists; do not alter production files. Inspect existing CuentaContable/AsientoContable/AsientoDetalle/MovimientoFinanciero/PeriodoContable contracts first; reuse existing naming/types and do not invent unrelated APIs. Perform TWO independent self-reviews. No workflow/manifest/dependency/main/production/merge/deploy changes."
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410DEstadoFinancieroServiceTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.D. Own ONLY backend/tests/InventoryApp.Tests/N410DEstadoFinancieroServiceTests.cs. Add focused tests for aggregation, deterministic ordering, date/period boundaries, debit-credit netting, empty result and cancellation against the implemented service. No production edits. TWO self-reviews. No main/production/merge/deploy changes."
       }
     ],
     "JULES_B": [
       {
-        "dispatchId": "N4-10-B-2-FINANCIAL-STATEMENT-FILTER-CONTRACT-B-MATERIAL",
-        "taskId": "N4.10.B.2.FINANCIAL_STATEMENT_FILTER_CONTRACT",
+        "dispatchId": "N4-10-D-2-FINANCIAL-STATEMENT-FILTER-VALIDATION-B-MATERIAL",
+        "taskId": "N4.10.D.2.FINANCIAL_STATEMENT_FILTER_VALIDATION",
         "workerId": "JULES_B",
         "taskAttempt": 1,
-        "fileScopeHint": "backend/src/Application/DTOs/Contabilidad/EstadoFinancieroFiltroDto.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.B (Estados financieros — Dominio y contratos). Own ONLY backend/src/Application/DTOs/Contabilidad/EstadoFinancieroFiltroDto.cs. Define the minimum filter contract grounded in existing PeriodoContable/date/accounting primitives. Keep only fields justified by current code and Plan Rector; no speculative filters. Inspect existing CuentaContable/AsientoContable/AsientoDetalle/MovimientoFinanciero/PeriodoContable contracts first; reuse existing naming/types and do not invent unrelated APIs. Perform TWO independent self-reviews. No workflow/manifest/dependency/main/production/merge/deploy changes."
+        "fileScopeHint": "backend/src/Application/Services/EstadoFinancieroFiltroValidator.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.D. Own ONLY backend/src/Application/Services/EstadoFinancieroFiltroValidator.cs. Implement focused validation for EstadoFinancieroFiltroDto: valid date ranges, compatible period/date semantics and deterministic normalization only where justified by current contracts. No persistence/controller edits. TWO self-reviews. No workflow/manifest/dependency/main/production/merge/deploy changes."
       },
       {
-        "dispatchId": "N4-10-B-6-FINANCIAL-STATEMENT-FILTER-CONTRACT-TESTS-B-MATERIAL",
-        "taskId": "N4.10.B.6.FINANCIAL_STATEMENT_FILTER_CONTRACT_TESTS",
+        "dispatchId": "N4-10-D-6-FINANCIAL-STATEMENT-FILTER-VALIDATION-TESTS-B-MATERIAL",
+        "taskId": "N4.10.D.6.FINANCIAL_STATEMENT_FILTER_VALIDATION_TESTS",
         "workerId": "JULES_B",
         "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410BFinancialStatementFilterContractTests.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.B (Estados financieros — Dominio y contratos). Own ONLY backend/tests/InventoryApp.Tests/N410BFinancialStatementFilterContractTests.cs. Add focused contract tests for the approved filter DTO: required/optional semantics, period/date consistency and deterministic defaults only where explicitly implemented. Inspect existing CuentaContable/AsientoContable/AsientoDetalle/MovimientoFinanciero/PeriodoContable contracts first; reuse existing naming/types and do not invent unrelated APIs. Perform TWO independent self-reviews. No workflow/manifest/dependency/main/production/merge/deploy changes."
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410DEstadoFinancieroFiltroValidatorTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.D. Own ONLY backend/tests/InventoryApp.Tests/N410DEstadoFinancieroFiltroValidatorTests.cs. Test valid/invalid range boundaries and period/date compatibility for the approved validator. No production edits. TWO self-reviews. No main/production/merge/deploy changes."
       }
     ],
     "JULES_C": [
       {
-        "dispatchId": "N4-10-B-3-FINANCIAL-STATEMENT-RESULT-DTOS-C-MATERIAL",
-        "taskId": "N4.10.B.3.FINANCIAL_STATEMENT_RESULT_DTOS",
+        "dispatchId": "N4-10-D-3-FINANCIAL-STATEMENT-API-C-MATERIAL",
+        "taskId": "N4.10.D.3.FINANCIAL_STATEMENT_API",
         "workerId": "JULES_C",
         "taskAttempt": 1,
-        "fileScopeHint": "backend/src/Application/DTOs/Contabilidad/EstadoFinancieroDtos.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.B (Estados financieros — Dominio y contratos). Own ONLY backend/src/Application/DTOs/Contabilidad/EstadoFinancieroDtos.cs. Define minimal result DTO contracts for statement header/line/totals that can represent the required statements without embedding persistence entities. Preserve decimal precision and account identity. Inspect existing CuentaContable/AsientoContable/AsientoDetalle/MovimientoFinanciero/PeriodoContable contracts first; reuse existing naming/types and do not invent unrelated APIs. Perform TWO independent self-reviews. No workflow/manifest/dependency/main/production/merge/deploy changes."
+        "fileScopeHint": "backend/src/API/Controllers/EstadosFinancierosController.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.D. Own ONLY backend/src/API/Controllers/EstadosFinancierosController.cs. Add read-only API endpoint(s) over IEstadoFinancieroService using existing API conventions, auth/error handling and CancellationToken. No persistence/service implementation/Program edits. TWO self-reviews. No workflow/manifest/dependency/main/production/merge/deploy changes."
       },
       {
-        "dispatchId": "N4-10-B-7-FINANCIAL-STATEMENT-DTO-CONTRACT-TESTS-C-MATERIAL",
-        "taskId": "N4.10.B.7.FINANCIAL_STATEMENT_DTO_CONTRACT_TESTS",
+        "dispatchId": "N4-10-D-7-FINANCIAL-STATEMENT-API-TESTS-C-MATERIAL",
+        "taskId": "N4.10.D.7.FINANCIAL_STATEMENT_API_TESTS",
         "workerId": "JULES_C",
         "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410BFinancialStatementDtoContractTests.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.B (Estados financieros — Dominio y contratos). Own ONLY backend/tests/InventoryApp.Tests/N410BFinancialStatementDtoContractTests.cs. Add focused DTO contract tests for stable required fields, decimal totals and no accidental persistence/audit payload leakage. Inspect existing CuentaContable/AsientoContable/AsientoDetalle/MovimientoFinanciero/PeriodoContable contracts first; reuse existing naming/types and do not invent unrelated APIs. Perform TWO independent self-reviews. No workflow/manifest/dependency/main/production/merge/deploy changes."
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410DEstadosFinancierosControllerTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.D. Own ONLY backend/tests/InventoryApp.Tests/N410DEstadosFinancierosControllerTests.cs. Add focused API contract tests for supported statement kind, filter binding, cancellation and invalid-request ProblemDetails semantics. No production edits. TWO self-reviews. No main/production/merge/deploy changes."
       }
     ],
     "JULES_D": [
       {
-        "dispatchId": "N4-10-B-4-FINANCIAL-STATEMENT-SERVICE-CONTRACT-D-MATERIAL",
-        "taskId": "N4.10.B.4.FINANCIAL_STATEMENT_SERVICE_CONTRACT",
+        "dispatchId": "N4-10-D-4-FINANCIAL-STATEMENT-DI-WIRING-D-MATERIAL",
+        "taskId": "N4.10.D.4.FINANCIAL_STATEMENT_DI_WIRING",
         "workerId": "JULES_D",
         "taskAttempt": 1,
-        "fileScopeHint": "backend/src/Application/Interfaces/IEstadoFinancieroService.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.B (Estados financieros — Dominio y contratos). Own ONLY backend/src/Application/Interfaces/IEstadoFinancieroService.cs. Define the application service interface only, using the approved filter/result contracts and CancellationToken. No implementation, controller or persistence changes in this task. Inspect existing CuentaContable/AsientoContable/AsientoDetalle/MovimientoFinanciero/PeriodoContable contracts first; reuse existing naming/types and do not invent unrelated APIs. Perform TWO independent self-reviews. No workflow/manifest/dependency/main/production/merge/deploy changes."
+        "fileScopeHint": "backend/src/API/Program.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.D. Own ONLY backend/src/API/Program.cs. Register IEstadoFinancieroService to EstadoFinancieroService using the existing DI pattern, with no unrelated Program.cs refactor. Verify namespaces/compile compatibility. TWO self-reviews. No workflow/manifest/dependency/main/production/merge/deploy changes."
       },
       {
-        "dispatchId": "N4-10-B-8-FINANCIAL-STATEMENT-SERVICE-CONTRACT-TESTS-D-MATERIAL",
-        "taskId": "N4.10.B.8.FINANCIAL_STATEMENT_SERVICE_CONTRACT_TESTS",
+        "dispatchId": "N4-10-D-8-FINANCIAL-STATEMENT-DI-CONTRACT-TESTS-D-MATERIAL",
+        "taskId": "N4.10.D.8.FINANCIAL_STATEMENT_DI_CONTRACT_TESTS",
         "workerId": "JULES_D",
         "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410BFinancialStatementServiceContractTests.cs only",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.B (Estados financieros — Dominio y contratos). Own ONLY backend/tests/InventoryApp.Tests/N410BFinancialStatementServiceContractTests.cs. Add reflection/contract tests for the approved service interface signatures, cancellation support and statement coverage; no production changes. Inspect existing CuentaContable/AsientoContable/AsientoDetalle/MovimientoFinanciero/PeriodoContable contracts first; reuse existing naming/types and do not invent unrelated APIs. Perform TWO independent self-reviews. No workflow/manifest/dependency/main/production/merge/deploy changes."
+        "fileScopeHint": "backend/tests/InventoryApp.Tests/N410DEstadoFinancieroDiContractTests.cs only",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.D. Own ONLY backend/tests/InventoryApp.Tests/N410DEstadoFinancieroDiContractTests.cs. Add focused DI resolution/registration contract tests for IEstadoFinancieroService after wiring exists. No production edits. TWO self-reviews. No main/production/merge/deploy changes."
       }
     ]
   }
