@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-A-382-CANCELLATION_PROPAGATION-TESTS-B-AUTO",
+  "taskId": "N4.10.A.382.CANCELLATION_PROPAGATION_TESTS",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportCANCELLATIONPROPAGATION382Tests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportCANCELLATIONPROPAGATION382Tests.cs. Add a focused regression for the current behavior identified by CANCELLATION_PROPAGATION; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "57f795cad2f394e8afffef3b632f7df8ba13d774"
+}
