@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-A-381-QUERY_TIE_ORDER-TESTS-B-AUTO",
+  "taskId": "N4.10.A.381.QUERY_TIE_ORDER_TESTS",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYTIEORDER381Tests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportQUERYTIEORDER381Tests.cs. Add a focused regression for the current behavior identified by QUERY_TIE_ORDER; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "afa0027eaf0a5d698b00c8202f7401a996249ce7"
+}
