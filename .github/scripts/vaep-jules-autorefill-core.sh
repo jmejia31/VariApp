@@ -130,9 +130,24 @@ task_facet() {
   sed -n 's/^N4\.10\.A\.[0-9][0-9]*\.\(.*\)_TESTS$/\1/p' <<<"$1"
 }
 
+completed_semantic_facets() {
+  local page payload
+  for page in 1 2 3; do
+    payload="$(api "repos/$GITHUB_REPOSITORY/issues?state=all&per_page=100&page=$page&sort=updated&direction=desc")"
+    jq -r '
+      .[]?
+      | (.body // "") as $b
+      | select($b | contains("- Terminal state: `COMPLETED`"))
+      | select($b | contains("- Patch present: `true`"))
+      | try ($b | capture("- Task: `N4\\.10\\.A\\.[0-9]+\\.(?<stem>[^\`]+)\`").stem | sub("_TESTS$"; "")) catch empty
+    ' <<<"$payload"
+  done | sort -u
+}
+
 select_next_entry() {
-  local entry dispatch task path n facet listing
+  local entry dispatch task path n facet listing completed_facets
   listing="$(api "repos/$GITHUB_REPOSITORY/contents/$DISPATCH_PATH?ref=$BRANCH" 2>/dev/null || printf '[]')"
+  completed_facets="$(completed_semantic_facets)"
   while IFS= read -r entry; do
     dispatch="$(jq -r '.dispatchId' <<<"$entry")"
     task="$(jq -r '.taskId' <<<"$entry")"
@@ -142,8 +157,8 @@ select_next_entry() {
 
     # Semantic identity is stronger than task number. A regenerated catalog may
     # assign a new number/file to the same behavior; that is still duplicate work.
-    if [[ -n "$facet" ]] && jq -e --arg needle "-$facet-TESTS-" '.[]? | select((.name // "") | contains($needle))' <<<"$listing" >/dev/null; then
-      echo "AUTOREFILL_SKIP_SEMANTIC_DUPLICATE worker=$WORKER_ID task=$task facet=$facet" >&2
+    if [[ -n "$facet" ]] && grep -Fxq "$facet" <<<"$completed_facets"; then
+      echo "AUTOREFILL_SKIP_SEMANTIC_DUPLICATE worker=$WORKER_ID task=$task facet=$facet prior=COMPLETED_PATCH_TRUE" >&2
       continue
     fi
 
