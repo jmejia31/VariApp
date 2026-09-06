@@ -148,12 +148,17 @@ La política de reintentos está gobernada por el bloque canónico:
 
 Al terminal Jules:
 
-1. `VALIDANDO/READY_FOR_VAEP`;
-2. revisar artifact/base/diff/scope/tests/self-review/riesgos/no ejecutados;
-3. PASS => integrar solo delta aprobado sobre HEAD vigente + CI causal;
-4. REQUIRED en ATTEMPT1 => R2 único;
-5. REQUIRED en ATTEMPT2 => QA_TAKEOVER;
-6. reasignar lane a NEXT_SAFE cuando exista.
+1. marcar inmediatamente `VALIDANDO/READY_FOR_VAEP` y congelar el ownership del scope entregado;
+2. liberar inmediatamente la lane Jules;
+3. si existe NEXT_SAFE material, dependency-valid, no solapado y prearmado, despacharlo **antes de esperar REVIEW/CI/rollup**; `MAX_VOLUNTARY_IDLE=0` prevalece sobre espera administrativa;
+4. VAEP/ChatGPT inicia REVIEW_FIRST del artifact/base/diff/scope/tests/self-review/riesgos/no ejecutados en paralelo detrás de producción;
+5. PASS => integrar solo delta aprobado sobre HEAD vigente + CI causal;
+6. REQUIRED en ATTEMPT1 => R2 único del scope entregado solo si sigue siendo material y no compite con el NEXT_SAFE;
+7. REQUIRED en ATTEMPT2 => QA_TAKEOVER; el Jules permanece en otro scope seguro, nunca esperando el takeover.
+
+`REVIEW_FIRST` significa que todo resultado terminal entra primero a la cola de revisión de VAEP; **no** significa que el Jules deba esperar a que esa revisión termine.
+
+Mantener `QUEUE_DEPTH_TARGET>=2` por Jules cuando exista roadmap seguro: una tarea autoritativa actual + al menos una NEXT_SAFE física prearmada en COLA con agente, scope exclusivo, dependencia real y estado canónico.
 
 Dos auto-revisiones independientes son obligatorias antes de COMPLETED válido.
 
@@ -168,6 +173,9 @@ Dos auto-revisiones independientes son obligatorias antes de COMPLETED válido.
 - Todo resultado tardío de una sesión `SUPERSEDED` es evidencia histórica únicamente y queda bloqueado de integración automática.
 - La evidencia de timeout/supersession debe conservar `MASTER_COMMIT_SHA` y `AUTOMATION_POLICY_HASH` junto con worker/dispatch/task/attempt/session y estados antes/después.
 - No dejar lane esperando review/CI si existe NEXT_SAFE material.
+- Si una lane terminal queda libre y existe NEXT_SAFE, el refill debe ocurrir en la misma corrida que detecta el terminal; esperar al siguiente checkpoint es incumplimiento de continuidad.
+- Antes de CADA manifest Jules, releer HEAD y usar ese SHA exacto como `primaryBaseHead`; después de publicar un manifest, releer HEAD antes de construir el siguiente. Nunca reutilizar el mismo base para varias lanes cuando cada manifest mueve Desarrollo.
+- Un fallo de transporte pre-session por `primaryBaseHead`/ruta/trigger no consume content attempt: recuperar la MISMA tarea con un manifest nuevo sobre el parent inmediato y verificar que aparezca run correlacionado.
 
 ## 11. CI y cierre
 
@@ -179,6 +187,7 @@ Dos auto-revisiones independientes son obligatorias antes de COMPLETED válido.
 - Durante un freeze causal real, ejecutar trabajo compatible y drenar REVIEW_FIRST/QA_TAKEOVER; al quedar terminal el gate, recalcular freeze desde cero.
 - Fallo causal interno se corrige; ruido externo o fallo no causal se registra pero no se convierte en blocker falso ni serializa el CURRENT_PARENT.
 - Cierre requiere DoD real, gates/CI aplicables terminales y P0/P1=0.
+- Estado de cierre es monotónico: una tarea/padre con evidencia canónica `LISTO`/`LISTO_REAL` no puede volver a `EN_PROGRESO`/`PENDIENTE` por una fila stale. Si COLA contradice BITACORA/GitHub/certificación fresca, reconciliar COLA; reabrir solo con evidencia nueva explícita de defecto causal que invalide el cierre.
 
 ## 12. Las cinco automatizaciones
 
@@ -191,6 +200,15 @@ Dos auto-revisiones independientes son obligatorias antes de COMPLETED válido.
 ```
 
 Todas consumen **este MAESTRO**. Ninguna mantiene reglas por etiqueta numérica.
+
+Orden mínimo obligatorio de cada checkpoint:
+1. reconciliar CURRENT_PARENT/estado monotónico con evidencia fresca;
+2. ejecutar **LANE_REFILL_FIRST** A/B/C/D usando runs/sesiones y NEXT_SAFE físicas;
+3. verificar transporte/run de cada dispatch;
+4. solo después drenar REVIEW_FIRST/QA_TAKEOVER/CI/cierre;
+5. persistir BITACORA con `LANE_REFILL_RESULT A/B/C/D`.
+
+Una corrida con lane libre + NEXT_SAFE segura no puede terminar en status-only, review-only o CI-wait-only.
 
 ## 13. Cambio del MAESTRO
 
