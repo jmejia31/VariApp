@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-G-4-INTEGRATION-REG-D",
+  "taskId": "N4.10.G.4.INTEGRATION_REGRESSION",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.integration-regression.spec.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. After N4.10.F LISTO, add Angular integration regression across filters/request/render. No main/production/merge/deploy/workflow/manifest changes. TWO self-reviews.",
+  "primaryBaseHead": "5c7a802c0147fa67fb0ed51da500557f5ca6c91e"
+}
