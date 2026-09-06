@@ -22,7 +22,16 @@ readonly ALLOWED_KEYS=(
   "PARENT_CLOSE_SLA_ROLLING_60M"
   "PARENT_MAX_DWELL_MINUTES"
   "PARENT_STALL_NO_PROGRESS_MINUTES"
+  "CLOSURE_REVIEW_MAX_LATENCY_MINUTES"
+  "CLOSURE_DEBT_TRIGGER_LT"
+  "CLOSURE_CHAIN_SAME_RUN"
   "MAX_VOLUNTARY_IDLE"
+  "JULES_QUEUE_DEPTH_TARGET"
+  "JULES_CURRENT_RUN_REQUIRED"
+  "JULES_NEXT_SAFE_PREARMED_REQUIRED"
+  "JULES_TERMINAL_HANDOFF_SAME_RUN"
+  "NO_MANIFEST_DURING_HEAD_FREEZE_CAUSAL"
+  "PREARM_BEFORE_CAUSAL_CI"
   "VAEP_CHECKPOINTS"
   "JULES_LANE_BUDGET_SECONDS"
   "JULES_MAX_ATTEMPTS"
@@ -101,7 +110,7 @@ parse_policy_block() {
 
       # Validate values strictly
       case "$key" in
-        PARENT_CLOSE_SLA_ROLLING_60M|PARENT_MAX_DWELL_MINUTES|PARENT_STALL_NO_PROGRESS_MINUTES|JULES_LANE_BUDGET_SECONDS|JULES_MAX_ATTEMPTS)
+        PARENT_CLOSE_SLA_ROLLING_60M|PARENT_MAX_DWELL_MINUTES|PARENT_STALL_NO_PROGRESS_MINUTES|CLOSURE_REVIEW_MAX_LATENCY_MINUTES|CLOSURE_DEBT_TRIGGER_LT|JULES_QUEUE_DEPTH_TARGET|JULES_LANE_BUDGET_SECONDS|JULES_MAX_ATTEMPTS)
           if [[ ! "$val" =~ ^[1-9][0-9]*$ ]]; then
             fail "invalid positive integer value for $key: '$val'"
           fi
@@ -116,7 +125,7 @@ parse_policy_block() {
             fail "invalid checkpoint list for $key: '$val'"
           fi
           ;;
-        PARENT_CLOSE_FIRST)
+        CLOSURE_CHAIN_SAME_RUN|JULES_CURRENT_RUN_REQUIRED|JULES_NEXT_SAFE_PREARMED_REQUIRED|JULES_TERMINAL_HANDOFF_SAME_RUN|NO_MANIFEST_DURING_HEAD_FREEZE_CAUSAL|PREARM_BEFORE_CAUSAL_CI|PARENT_CLOSE_FIRST)
           if [[ "$val" != "TRUE" && "$val" != "FALSE" ]]; then
             fail "invalid boolean value for $key (must be TRUE or FALSE): '$val'"
           fi
@@ -364,7 +373,7 @@ main() {
       printf '{\n'
       for k in "${ALLOWED_KEYS[@]}"; do
         local val="${POLICY_MAP[$k]}"
-        if [[ "$k" == "PARENT_CLOSE_FIRST" ]]; then
+        if [[ "$k" =~ ^(CLOSURE_CHAIN_SAME_RUN|JULES_CURRENT_RUN_REQUIRED|JULES_NEXT_SAFE_PREARMED_REQUIRED|JULES_TERMINAL_HANDOFF_SAME_RUN|NO_MANIFEST_DURING_HEAD_FREEZE_CAUSAL|PREARM_BEFORE_CAUSAL_CI|PARENT_CLOSE_FIRST)$ ]]; then
           local bool_val="true"
           [[ "$val" == "FALSE" ]] && bool_val="false"
           printf '  "%s": %s,\n' "$k" "$bool_val"
