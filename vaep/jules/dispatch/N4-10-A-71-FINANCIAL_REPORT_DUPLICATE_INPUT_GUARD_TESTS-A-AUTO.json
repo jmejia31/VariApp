@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-A-71-FINANCIAL_REPORT_DUPLICATE_INPUT_GUARD_TESTS-A-AUTO",
+  "taskId": "N4.10.A.71.FINANCIAL_REPORT_DUPLICATE_INPUT_GUARD_TESTS",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportDuplicateInputGuardTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportDuplicateInputGuardTests.cs. Add focused backend regression tests for duplicate input/source rows where current implementation has deduplication or idempotency semantics; otherwise capture the exact current behavior without inventing rules. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "a98c65e944ef04aed5e7791cea04f2258c0db701"
+}
