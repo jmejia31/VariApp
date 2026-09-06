@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-E-2-FINANCIAL-STATEMENT-FRONTEND-SERVICE-B-NEXTSAFE-20260906T1305HND",
+  "taskId": "N4.10.E.2.FINANCIAL_STATEMENT_FRONTEND_SERVICE",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/services/estado-financiero.service.ts only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. NEXT_SAFE_PREWORK for N4.10.E only; CURRENT_PARENT remains N4.10.D and this task MUST NOT promote/close E. Own ONLY frontend/src/app/services/estado-financiero.service.ts. Implement an Angular injectable service for the approved financial-statement API contract at /estados-financieros/{tipo}; use HttpClient/HttpParams/environment/ApiResponse conventions already present. Accept either periodoContableId OR fechaDesde+fechaHasta, omit undefined params, and return Observable<ApiResponse<EstadoFinanciero>> using the approved frontend model import path. Do not invent export endpoints or mutation APIs. Run proportional TypeScript validation if possible and perform TWO independent self-reviews. No model/component/route/backend/workflow/manifest/main/production/merge/deploy changes.",
+  "primaryBaseHead": "19416d16304cc05f578a4e51987e9c70230a2ba3"
+}
