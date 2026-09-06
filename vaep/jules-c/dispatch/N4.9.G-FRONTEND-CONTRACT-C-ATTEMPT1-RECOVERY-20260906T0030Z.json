@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.G-FRONTEND-CONTRACT-C-ATTEMPT1-RECOVERY-20260906T0030Z",
+  "taskId": "N4.9.G.FRONTEND_CONTRACT_REGRESSION",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/features/periodos-contables/periodos-contables.component.spec.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.9.G. This is transport recovery only: prior C manifest never produced a correlated run/session because primaryBaseHead did not equal its dispatch commit parent; content attempt was not consumed. Add ONLY frontend/src/app/features/periodos-contables/periodos-contables.component.spec.ts. Cover loading/empty/error, pagination/filtering, permission-sensitive create/close controls, close confirmation/cancel, conflict feedback and accessible state rendering. Do not edit production component/routes, backend, E2E, CI, workflows, main, Produccion, secrets or deploy. Run narrow Angular tests/typecheck and two independent self-reviews. Return material patch/artifact for VAEP REVIEW_FIRST.",
+  "primaryBaseHead": "c85690ab826c69ba82b581dcc32d2f7214b0ab79"
+}
