@@ -16,6 +16,9 @@ BEGIN_AUTOMATION_POLICY
 PARENT_CLOSE_SLA_ROLLING_60M=3
 PARENT_MAX_DWELL_MINUTES=20
 PARENT_STALL_NO_PROGRESS_MINUTES=10
+CLOSURE_REVIEW_MAX_LATENCY_MINUTES=2
+CLOSURE_DEBT_TRIGGER_LT=3
+CLOSURE_CHAIN_SAME_RUN=TRUE
 MAX_VOLUNTARY_IDLE=0
 VAEP_CHECKPOINTS=:00,:15,:30,:45,:55
 JULES_LANE_BUDGET_SECONDS=1080
@@ -102,7 +105,13 @@ La política de parent-close, dwell time y SLA está gobernada por el bloque can
 - `PARENT_MAX_DWELL_MINUTES=20`: Límite máximo de permanencia en un mismo parent sin progreso material.
 - `PARENT_STALL_NO_PROGRESS_MINUTES`: umbral de no-progreso definido exclusivamente en el bloque canónico; al alcanzarse obliga a failover controlado.
 - `MAX_VOLUNTARY_IDLE`: tolerancia de ociosidad voluntaria definida exclusivamente en el bloque canónico; cuando es cero, una lane libre recibe trabajo seguro inmediatamente.
-- Trayectoria orientativa: `:15 >=1`, `:30 >=2`, `:45 >=3`; `:55` corrige deuda/huecos.
+- Trayectoria obligatoria de recuperación cuando sea técnicamente alcanzable: `:15 >=1`, `:30 >=2`, `:45 >=3`; `:55` corrige deuda/huecos.
+- `CLOSURE_REVIEW_MAX_LATENCY_MINUTES=2`: un terminal `READY_FOR_VAEP` que pueda decidir el cierre no puede permanecer esperando revisión administrativa más allá de este objetivo; REVIEW_FIRST/QA_TAKEOVER se drena inmediatamente.
+- `CLOSURE_DEBT_TRIGGER_LT=3`: si `ROLLING60<3`, entra CLOSURE_DEBT_FASTPATH. VAEP debe intentar cerrar CURRENT_PARENT con evidencia ya existente ANTES de crear trabajo support/evidence-only adicional para ese mismo padre.
+- En CLOSURE_DEBT_FASTPATH, si el padre ya cumple DoD + gates aplicables terminales + P0=0/P1=0, se declara `LISTO_REAL` inmediatamente; no se espera otro checkpoint, otro Jules ni documentación redundante.
+- Si falta exactamente un gap material, solo se trabaja ese gap. Está prohibido inflar REVIEW_BACKLOG con evidencia redundante mientras exista un camino de cierre más corto.
+- `CLOSURE_CHAIN_SAME_RUN=TRUE`: tras cerrar un padre, promover el siguiente dependency-valid y evaluar/cerrar inmediatamente todo padre ya pretrabajado/certificable en la MISMA corrida, repitiendo hasta `ROLLING60>=3` o hasta encontrar un blocker técnico causal exacto.
+- Mantener Jules productivos en paralelo: lanes ya reservadas continúan; una lane libre recibe NEXT_SAFE material, pero ningún refill evidence-only puede retrasar un cierre ya certificable.
 - Nunca false LISTO ni busywork.
 
 ## 7. Transporte Jules
@@ -202,13 +211,13 @@ Dos auto-revisiones independientes son obligatorias antes de COMPLETED válido.
 Todas consumen **este MAESTRO**. Ninguna mantiene reglas por etiqueta numérica.
 
 Orden mínimo obligatorio de cada checkpoint:
-1. reconciliar CURRENT_PARENT/estado monotónico con evidencia fresca;
-2. ejecutar **LANE_REFILL_FIRST** A/B/C/D usando runs/sesiones y NEXT_SAFE físicas;
-3. verificar transporte/run de cada dispatch;
-4. solo después drenar REVIEW_FIRST/QA_TAKEOVER/CI/cierre;
-5. persistir BITACORA con `LANE_REFILL_RESULT A/B/C/D`.
+1. reconciliar CURRENT_PARENT/estado monotónico con evidencia fresca y calcular `ROLLING60/DEFICIT`;
+2. si `ROLLING60<3`, ejecutar **CLOSURE_DEBT_FASTPATH**: drenar terminales/REVIEW_FIRST/QA_TAKEOVER del camino crítico y cerrar CURRENT_PARENT inmediatamente si ya es certificable; no crear soporte/evidencia redundante;
+3. mantener **LANE_REFILL_CONTINUITY** A/B/C/D en paralelo usando runs/sesiones y NEXT_SAFE físicas; verificar transporte/run de cada dispatch sin retrasar un cierre certificable;
+4. después de cada `LISTO_REAL`, promover y evaluar el siguiente parent en la misma corrida; encadenar cierres hasta recuperar `ROLLING60>=3` o documentar blocker causal exacto;
+5. persistir BITACORA con `LANE_REFILL_RESULT A/B/C/D`, `ROLLING60`, `DEFICIT`, `CLOSURE_DEBT_MODE`, `REVIEW_BACKLOG` y `NEXT_CLOSE_TARGET`.
 
-Una corrida con lane libre + NEXT_SAFE segura no puede terminar en status-only, review-only o CI-wait-only.
+Una corrida con `ROLLING60<3` y un parent certificable no puede terminar sin cerrar ese parent. Una corrida con lane libre + NEXT_SAFE segura tampoco puede terminar en status-only, review-only o CI-wait-only.
 
 ## 13. Cambio del MAESTRO
 
