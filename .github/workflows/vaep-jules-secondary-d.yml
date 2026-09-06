@@ -40,6 +40,9 @@ jobs:
         with:
           ref: ${{ github.sha }}
           fetch-depth: 2
+      - name: Reserve NEXT Jules D lane
+        shell: bash
+        run: bash .github/scripts/vaep-jules-autorefill.sh
       - name: Execute VAEP/Jules MASTER
         shell: bash
         run: bash .github/scripts/vaep-jules-master.sh
