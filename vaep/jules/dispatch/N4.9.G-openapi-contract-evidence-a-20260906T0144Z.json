@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.G-OPENAPI-CONTRACT-EVIDENCE-A-20260906T0144Z",
+  "taskId": "N4.9.G.OPENAPI_CONTRACT_EVIDENCE",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/qa/N4_9_G_OPENAPI_CONTRACT_EVIDENCE.md only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.9.G. Own ONLY docs/qa/N4_9_G_OPENAPI_CONTRACT_EVIDENCE.md. Produce a concise cross-review of PeriodoContable OpenAPI/API contract evidence using exact repository and CI references for list/get/create/close, pagination/filtering, response/error contracts, RBAC-sensitive responses and cancellation where observable. Do not change production code, tests, migrations, workflows, manifests, main, Produccion, secrets or deploy. Explicitly flag gaps rather than inventing PASS. Perform two genuinely independent self-reviews before COMPLETED and return the artifact for VAEP REVIEW_FIRST.",
+  "primaryBaseHead": "0e7dcd095cfe6675353b939973760f8b97a3d9c1"
+}
