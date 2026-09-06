@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-A-903-FILTER_FOCUS_RESTORE-TESTS-C-AUTO",
+  "taskId": "N4.10.A.903.FILTER_FOCUS_RESTORE_TESTS",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/features/reports/financial-report-filter-focus-restore903.spec.ts only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. UNIQUE material NEXT_SAFE for N4.10.A. Own ONLY frontend/src/app/features/reports/financial-report-filter-focus-restore903.spec.ts. Add a focused regression characterizing the existing financial-report filter focus behavior after a filter action/re-render; assert only behavior already exposed by current components and do not invent UI or production behavior. This semantic facet is FILTER_FOCUS_RESTORE and must not duplicate PAGE_CHANGE_STATE or generic accessibility coverage. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "0cf1dd6380cf4f7394fb7f8c8d43be13e58f789c"
+}
