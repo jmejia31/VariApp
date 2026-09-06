@@ -42,6 +42,9 @@ jobs:
       - name: Bind Jules A canonical dispatch path
         shell: bash
         run: echo 'DISPATCH_PATH=vaep/jules/dispatch' >> "$GITHUB_ENV"
+      - name: Reserve NEXT Jules A lane
+        shell: bash
+        run: bash .github/scripts/vaep-jules-autorefill.sh
       - name: Execute VAEP/Jules MASTER
         shell: bash
         run: bash .github/scripts/vaep-jules-master.sh
