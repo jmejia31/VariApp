@@ -166,6 +166,10 @@ Al terminal Jules:
 
 Mantener `QUEUE_DEPTH_TARGET>=2` por Jules cuando exista roadmap seguro: una tarea autoritativa actual + al menos una NEXT_SAFE física prearmada en COLA con agente, scope exclusivo, dependencia real y estado canónico.
 
+- **PREARM_BEFORE_TERMINAL obligatorio**: no esperar a que una lane quede libre para crear NEXT_SAFE. Si el worker tiene CURRENT válido y existe trabajo material seguro posterior, debe existir también un NEXT_SAFE físico ya materializado/reservable antes del terminal. Objetivo operativo por lane: `CURRENT_RUN + NEXT_SAFE_PREARMED`. Al terminalizar CURRENT, el siguiente run debe poder arrancar sin esperar otro checkpoint.
+- Si no existe NEXT_SAFE material seguro, registrar explícitamente `NO_SAFE_NEXT`; está prohibido simular cola con busywork/evidence-only redundante.
+- Los checkpoints deben reparar cualquier lane con `CURRENT` pero sin `NEXT_SAFE_PREARMED` cuando exista backlog elegible, incluso si CURRENT sigue `IN_PROGRESS`.
+
 Dos auto-revisiones independientes son obligatorias antes de COMPLETED válido.
 
 ## 10. Watchdog
