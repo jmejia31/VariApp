@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-B-4-FINANCIAL-STATEMENT-SERVICE-CONTRACT-D-MATERIAL",
+  "taskId": "N4.10.B.4.FINANCIAL_STATEMENT_SERVICE_CONTRACT",
+  "workerId": "JULES_D",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Application/Interfaces/IEstadoFinancieroService.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.B (Estados financieros — Dominio y contratos). Own ONLY backend/src/Application/Interfaces/IEstadoFinancieroService.cs. Define the application service interface only, using the approved filter/result contracts and CancellationToken. No implementation, controller or persistence changes in this task. Inspect existing CuentaContable/AsientoContable/AsientoDetalle/MovimientoFinanciero/PeriodoContable contracts first; reuse existing naming/types and do not invent unrelated APIs. Perform TWO independent self-reviews. No workflow/manifest/dependency/main/production/merge/deploy changes.",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "aac9da3a7b8fd16b06c78276e3bc236302f70ea2"
+}
