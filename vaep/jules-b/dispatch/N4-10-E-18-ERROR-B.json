@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-E-18-ERROR-B",
+  "taskId": "N4.10.E.18.SERVICE_ERROR_TESTS",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/services/estado-financiero.error.spec.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. Add service-level tests for typed API error propagation and cancellation behavior using existing Angular testing utilities. Production files are read-only. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+  "primaryBaseHead": "59eeec80c2e8a45124ecdd09ceef4c8d090de8a5"
+}
