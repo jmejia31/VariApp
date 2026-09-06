@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.G-CI-PROVENANCE-EVIDENCE-B-R2-20260906T0146Z",
+  "taskId": "N4.9.G.CI_PROVENANCE_EVIDENCE",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 2,
+  "fileScopeHint": "docs/qa/N4_9_G_CI_PROVENANCE_EVIDENCE.md only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. Final R2, no R3. Prior evidence became stale and incorrectly said CI/controller/migration evidence was unavailable. Rebuild the document from CURRENT repo/GitHub-grounded facts only. Write ONLY docs/qa/N4_9_G_CI_PROVENANCE_EVIDENCE.md. Include exact current functional/control-plane heads, terminal causal CI evidence that is actually observable, PeriodosContablesController existence, migration/snapshot evidence, rollback risks, and explicit remaining gaps. Do not invent PASS. Perform TWO genuinely independent self-reviews as separate reasoning passes with distinct checklists/findings, not marker echoes. No other files. Return material patch/artifact.",
+  "primaryBaseHead": "0c7f4dcdec767fa8a2f405d3d5434309dc0c0e29"
+}
