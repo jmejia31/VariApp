@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-A-212-MYSQL_DATE_BOUNDARY-TESTS-B-AUTO",
+  "taskId": "N4.10.A.212.MYSQL_DATE_BOUNDARY_TESTS",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportMYSQLDATEBOUNDARY212Tests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportMYSQLDATEBOUNDARY212Tests.cs. Add a focused regression for the current behavior identified by MYSQL_DATE_BOUNDARY; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "ed9d5745a0ed235f69298880bff99e63cf67f03e"
+}
