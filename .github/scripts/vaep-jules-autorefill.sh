@@ -37,6 +37,35 @@ if git remote get-url origin >/dev/null 2>&1; then
   fi
 fi
 
+# Dependency-safe parent guard. dispatchEligible alone is insufficient: a
+# stale/misprogrammed catalog must never dispatch work belonging to a future
+# parent while currentParent is still open. This guard is local/fail-closed;
+# it does not mutate the canonical catalog and therefore cannot create a
+# control-plane race from a terminal worker checkout.
+filter_dependency_safe_parent() {
+  [[ -f "$CATALOG" ]] || return 0
+  local parent tmp before after
+  parent="$(jq -r '.currentParent // empty' "$CATALOG")"
+  [[ -n "$parent" ]] || return 0
+  before="$(jq '[.lanes[][]? | select((.dispatchEligible // true) == true)] | length' "$CATALOG")"
+  tmp="$(mktemp)"
+  jq --arg parent "$parent" '
+    .lanes |= with_entries(
+      .value |= map(
+        if ((.dispatchEligible // true) == true) and ((.plannedParent // $parent) != $parent)
+        then .dispatchEligible = false
+        else .
+        end
+      )
+    )
+  ' "$CATALOG" > "$tmp"
+  mv "$tmp" "$CATALOG"
+  after="$(jq '[.lanes[][]? | select((.dispatchEligible // true) == true)] | length' "$CATALOG")"
+  if (( after < before )); then
+    echo "AUTOREFILL_PARENT_GUARD current_parent=$parent blocked_future_parent_entries=$((before-after))"
+  fi
+}
+
 # Durable semantic dedupe guard. Task number/dispatch/session is not identity:
 # CURRENT_PARENT + semantic facet is. The parent comes from the live catalog;
 # never hard-code a previous parent in this guard.
@@ -77,10 +106,12 @@ filter_completed_facets() {
   echo "AUTOREFILL_UNIQUE_GUARD removed=$((before-after)) parent=$parent registry=$UNIQUE_REGISTRY"
 }
 
+filter_dependency_safe_parent
 filter_completed_facets
 bash .github/scripts/vaep-jules-catalog-floor.sh
 # catalog-floor may publish a refreshed remote catalog; the current checkout is
-# intentionally not mutated by that commit. Re-apply the local semantic guard
-# before core selection so this run cannot reserve a completed facet.
+# intentionally not mutated by that commit. Re-apply guards before core
+# selection so this run cannot reserve a future-parent or completed facet.
+filter_dependency_safe_parent
 filter_completed_facets
 exec bash .github/scripts/vaep-jules-autorefill-core.sh
