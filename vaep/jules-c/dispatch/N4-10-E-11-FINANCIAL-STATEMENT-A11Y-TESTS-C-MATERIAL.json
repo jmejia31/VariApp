@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-E-11-FINANCIAL-STATEMENT-A11Y-TESTS-C-MATERIAL",
+  "taskId": "N4.10.E.11.FINANCIAL_STATEMENT_A11Y_TESTS",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.a11y.spec.ts only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. NEXT_SAFE_PREWORK for N4.10.E only; CURRENT_PARENT remains N4.10.D. Own ONLY frontend/src/app/features/estados-financieros/estados-financieros.a11y.spec.ts. Add accessibility-oriented component tests for an h1/clear page name, labelled filter controls, announced loading/error state, keyboard-reachable generate action and table semantics for rendered results using existing Angular testing capabilities only. Do not introduce dependencies. TWO independent self-reviews.",
+  "primaryBaseHead": "bb61a0fe9f6037537c3133f174ecd907e115e412"
+}
