@@ -49,14 +49,29 @@ task_facet(){
   sed -n 's/^N4\.10\.A\.[0-9][0-9]*\.\(.*\)_TESTS$/\1/p' <<<"$1"
 }
 
+completed_semantic_facets(){
+  local page payload
+  for page in 1 2 3; do
+    payload="$(api "repos/$GITHUB_REPOSITORY/issues?state=all&per_page=100&page=$page&sort=updated&direction=desc")"
+    jq -r '
+      .[]?
+      | (.body // "") as $b
+      | select($b | contains("- Terminal state: `COMPLETED`"))
+      | select($b | contains("- Patch present: `true`"))
+      | try ($b | capture("- Task: `N4\\.10\\.A\\.[0-9]+\\.(?<stem>[^\`]+)\`").stem | sub("_TESTS$"; "")) catch empty
+    ' <<<"$payload"
+  done | sort -u
+}
+
 count_unused(){
-  local json="$1" listing used=0 total dispatch task n facet
+  local json="$1" listing used=0 total dispatch task n facet completed_facets
   listing="$(api "repos/$GITHUB_REPOSITORY/contents/$DISPATCH_PATH?ref=$BRANCH" 2>/dev/null || printf '[]')"
+  completed_facets="$(completed_semantic_facets)"
   total="$(jq --arg w "$WORKER_ID" '.lanes[$w] | length' <<<"$json")"
   while IFS=$'\t' read -r dispatch task; do
     n="$(task_number "$task")"
     facet="$(task_facet "$task")"
-    if [[ -n "$facet" ]] && jq -e --arg needle "-$facet-TESTS-" '.[]? | select((.name // "") | contains($needle))' <<<"$listing" >/dev/null; then
+    if [[ -n "$facet" ]] && grep -Fxq "$facet" <<<"$completed_facets"; then
       used=$((used+1))
     elif jq -e --arg f "$dispatch.json" '.[]? | select(.name==$f)' <<<"$listing" >/dev/null; then
       used=$((used+1))
@@ -70,20 +85,12 @@ count_unused(){
 }
 
 regenerate_lane(){
-  local json="$1" max n facet scope task dispatch prompt entries='[]' i=0 listing existing_facets='|'
-  listing="$(api "repos/$GITHUB_REPOSITORY/contents/$DISPATCH_PATH?ref=$BRANCH" 2>/dev/null || printf '[]')"
-
-  while IFS= read -r name; do
-    for facet in "${facets[@]}"; do
-      if [[ "$name" == *-"$facet"-TESTS-* ]]; then
-        existing_facets="${existing_facets}${facet}|"
-      fi
-    done
-  done < <(jq -r '.[].name // empty' <<<"$listing")
+  local json="$1" max n facet scope task dispatch prompt entries='[]' i=0 completed_facets
+  completed_facets="$(completed_semantic_facets)"
 
   max="$(jq '[.lanes[][]?.taskId | try (capture("N4\\.10\\.A\\.(?<n>[0-9]+)").n | tonumber) catch empty] | max // 134' <<<"$json")"
   for facet in "${facets[@]}"; do
-    if [[ "$existing_facets" == *"|${facet}|"* ]]; then
+    if grep -Fxq "$facet" <<<"$completed_facets"; then
       continue
     fi
     i=$((i+1)); n=$((max+i)); scope="$(build_scope "$facet" "$n")"
