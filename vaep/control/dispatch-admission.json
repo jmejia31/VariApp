@@ -1,6 +1,6 @@
 {
   "newDispatchAdmission": "OPEN",
   "allowExistingActiveSessions": true,
-  "reason": "N4.10.G is CURRENT_PARENT and dependency-valid; only plannedParent=N4.10.G may dispatch. Recovered canonical admission schema after Jules MASTER exit 72.",
-  "updatedAtUtc": "2026-09-07T05:57:00Z"
+  "reason": "N4.10.G LISTO_REAL; N4.10.H promoted dependency-valid; only plannedParent=N4.10.H may dispatch.",
+  "updatedAtUtc": "2026-09-07T08:48:00Z"
 }
