@@ -6,5 +6,5 @@
   "taskAttempt": 1,
   "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.regression-a.spec.ts",
   "prompt": "Read docs/VAEP_AUTHORITY.md first. After N4.10.F LISTO, add regression coverage for core component happy path and stable rendering. No main/production/merge/deploy/workflow/manifest changes. TWO self-reviews.",
-  "primaryBaseHead": "8368ea9a2793a03f9800ada5b6a6f17c88b02f6a"
+  "primaryBaseHead": "144ea5a9e967560bc22d41f64abe88ad0ce175d2"
 }
