@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-11-B-2-CONTRACT-B",
+  "taskId": "N4.11.B.2.DTO_ENUM_CONTRACTS",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Application/DTOs/Contabilidad/CentroCostoDtos.cs",
+  "prompt": "Read docs/VAEP_AUTHORITY.md and docs/N4.11_CENTROS_COSTO_PREFLIGHT.md first. CURRENT_PARENT=N4.11.B. Implement focused CentroCosto DTO/enum contracts only. Keep type semantics explicit and compatible with future persistence; do not invent dependencies not present in the repository. No persistence/API/frontend/main/production/deploy/workflow/manifest changes. TWO independent self-reviews and a reviewable gitPatch are mandatory.",
+  "primaryBaseHead": "97878873e1eb72faf1caf864957e96e27b95987f"
+}
