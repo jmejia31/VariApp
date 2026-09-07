@@ -1,6 +1,16 @@
 {
-  "newDispatchAdmission": "OPEN",
-  "allowExistingActiveSessions": true,
-  "reason": "INCIDENT_RESOLVED__DISPATCH_ELIGIBLE_BOOLEAN_FIXED__M13_SUCCESS__CURRENT_PARENT_N4_10_F__ZERO_IDLE_RECOVERY",
-  "updatedAtUtc": "2026-09-07T00:07:30Z"
+  "schemaVersion": "1.0",
+  "state": "OPEN",
+  "reason": "N4.10.F LISTO_REAL; N4.10.G promoted dependency-valid; only plannedParent=N4.10.G may dispatch",
+  "incident": null,
+  "currentParent": "N4.10.G",
+  "updatedAtUtc": "2026-09-07T05:02:19Z",
+  "policy": {
+    "allowExistingSessionsToFinish": true,
+    "allowNewDispatch": true,
+    "allowManifestCreation": true,
+    "allowReserveNext": true,
+    "requiredPlannedParent": "N4.10.G",
+    "requiredCatalogCurrentParent": "N4.10.G"
+  }
 }
