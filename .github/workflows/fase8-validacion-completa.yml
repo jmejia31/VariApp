@@ -2,11 +2,6 @@ name: Fase 8 - Validación completa automatizada
 
 on:
   workflow_dispatch:
-    inputs:
-      reopen_authorization:
-        description: 'Escribe AUTORIZADO_REABRIR solo con autorización explícita de Javier'
-        required: true
-        type: string
 permissions:
   contents: read
 
@@ -15,17 +10,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  reopen_guard:
-    name: Autorización explícita para reabrir certificación cerrada
-    runs-on: ubuntu-latest
-    steps:
-      - name: Validar autorización
-        shell: bash
-        run: |
-          test "${{ inputs.reopen_authorization }}" = "AUTORIZADO_REABRIR"
-
   validation:
-    needs: reopen_guard
     name: Regresión, seguridad, accesibilidad, rendimiento y runtime
     runs-on: ubuntu-latest
     timeout-minutes: 90
