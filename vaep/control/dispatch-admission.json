@@ -1,6 +1,6 @@
 {
   "newDispatchAdmission": "OPEN",
   "allowExistingActiveSessions": true,
-  "reason": "N4.10.G/H LISTO_REAL; N4.11.A promoted dependency-valid; only plannedParent=N4.11.A may dispatch.",
-  "updatedAtUtc": "2026-09-07T14:08:00Z"
+  "reason": "N4.11.A LISTO_REAL by directed preflight; N4.11.B promoted. Only plannedParent=N4.11.B may dispatch.",
+  "updatedAtUtc": "2026-09-07T14:40:00Z"
 }

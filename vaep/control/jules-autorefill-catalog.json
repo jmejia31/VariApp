@@ -1,9 +1,9 @@
 {
-  "version": 12,
+  "version": 13,
   "authority": "docs/VAEP_AUTHORITY.md",
-  "currentParent": "N4.11.A",
-  "generatedAt": "2026-09-07T14:08:00Z",
-  "regenerationReason": "CLOSURE_HANDOFF__N4_10_G_AND_H_LISTO_REAL__PROMOTE_N4_11_A",
+  "currentParent": "N4.11.B",
+  "generatedAt": "2026-09-07T14:40:00Z",
+  "regenerationReason": "N4_11_A_LISTO_REAL_QA_TAKEOVER__PROMOTE_N4_11_B",
   "policy": {
     "branch": "Desarrollo",
     "liveQueueDepthTarget": 2,
@@ -46,7 +46,7 @@
         "fileScopeHint": "docs/N4.11_CENTROS_COSTO_PREFLIGHT_ARCHITECTURE.md",
         "prompt": "After N4.10.H is LISTO and N4.11.A is promoted, inventory current CentroCosto-related architecture, entities, routes and dependencies without broad rescans. Evidence only; no production changes.",
         "plannedParent": "N4.11.A",
-        "dispatchEligible": true
+        "dispatchEligible": false
       },
       {
         "dispatchId": "N4-11-B-1-ENTITY-A",
@@ -56,7 +56,7 @@
         "fileScopeHint": "backend/src/Domain/Entities/Contabilidad/CentroCosto.cs",
         "prompt": "After N4.11.A is LISTO and N4.11.B is promoted, implement focused CentroCosto entity invariants and lifecycle contract for sucursal/departamento/proyecto/unidad de negocio.",
         "plannedParent": "N4.11.B",
-        "dispatchEligible": false
+        "dispatchEligible": true
       },
       {
         "dispatchId": "N4-11-C-1-SCHEMA-A",
@@ -168,7 +168,7 @@
         "fileScopeHint": "docs/N4.11_CENTROS_COSTO_DEPENDENCIES.md",
         "prompt": "After N4.10.H is LISTO and N4.11.A is promoted, map CentroCosto dependencies and integration boundaries from current code.",
         "plannedParent": "N4.11.A",
-        "dispatchEligible": true
+        "dispatchEligible": false
       },
       {
         "dispatchId": "N4-11-B-2-CONTRACT-B",
@@ -178,7 +178,7 @@
         "fileScopeHint": "backend/src/Application/DTOs/Contabilidad/CentroCostoDtos.cs",
         "prompt": "After N4.11.A is LISTO and N4.11.B is promoted, implement focused DTO/enum contracts for CentroCosto.",
         "plannedParent": "N4.11.B",
-        "dispatchEligible": false
+        "dispatchEligible": true
       },
       {
         "dispatchId": "N4-11-C-2-MIG-B",
@@ -290,7 +290,7 @@
         "fileScopeHint": "docs/N4.11_CENTROS_COSTO_RISKS.md",
         "prompt": "After N4.10.H is LISTO and N4.11.A is promoted, map CentroCosto risks, acceptance criteria and test strategy.",
         "plannedParent": "N4.11.A",
-        "dispatchEligible": true
+        "dispatchEligible": false
       },
       {
         "dispatchId": "N4-11-B-3-VALID-C",
@@ -300,7 +300,7 @@
         "fileScopeHint": "backend/src/Application/Validators/CentroCostoValidator.cs",
         "prompt": "After N4.11.A is LISTO and N4.11.B is promoted, implement focused CentroCosto validation rules.",
         "plannedParent": "N4.11.B",
-        "dispatchEligible": false
+        "dispatchEligible": true
       },
       {
         "dispatchId": "N4-11-C-3-BACKFILL-C",
@@ -432,7 +432,7 @@
         "fileScopeHint": "docs/N4.11_CENTROS_COSTO_ROLLBACK_PREFLIGHT.md",
         "prompt": "After N4.10.H is LISTO and N4.11.A is promoted, define CentroCosto rollback/preflight boundaries from current architecture.",
         "plannedParent": "N4.11.A",
-        "dispatchEligible": true
+        "dispatchEligible": false
       },
       {
         "dispatchId": "N4-11-B-4-REPO-D",
@@ -442,7 +442,7 @@
         "fileScopeHint": "backend/src/Application/Interfaces/ICentroCostoRepository.cs",
         "prompt": "After N4.11.A is LISTO and N4.11.B is promoted, implement focused CentroCosto repository contract.",
         "plannedParent": "N4.11.B",
-        "dispatchEligible": false
+        "dispatchEligible": true
       },
       {
         "dispatchId": "N4-11-C-4-INDEX-D",
