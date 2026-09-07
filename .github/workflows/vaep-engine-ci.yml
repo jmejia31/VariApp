@@ -12,6 +12,10 @@ on:
       - 'scripts/antig/antig-self-test.ps1'
       - 'docs/VAEP_AUTHORITY.md'
       - 'AGENTS.md'
+      - 'backend/**'
+      - 'frontend/**'
+      - 'CHANGELOG_AI.md'
+      - 'TASKS.md'
   pull_request:
     branches: [main]
     paths:
@@ -23,6 +27,10 @@ on:
       - 'scripts/antig/antig-self-test.ps1'
       - 'docs/VAEP_AUTHORITY.md'
       - 'AGENTS.md'
+      - 'backend/**'
+      - 'frontend/**'
+      - 'CHANGELOG_AI.md'
+      - 'TASKS.md'
   workflow_dispatch:
 
 permissions:
@@ -42,7 +50,7 @@ jobs:
       - name: Validate JSON schemas
         run: node -e "for (const f of ['vaep/schemas/jules-dispatch.schema.json','vaep/schemas/evidence-fragment.schema.json','vaep/metrics/baseline.json']) JSON.parse(require('fs').readFileSync(f)); console.log('schemas valid')"
       - name: Validate VAEP scripts
-        run: node --check scripts/vaep/dispatch-preflight.mjs && node --check scripts/vaep/aggregate-evidence.mjs && node --check scripts/vaep/bundles.mjs && node --check scripts/vaep/sync-bitacora.mjs && node --check scripts/vaep/reconcile-status.mjs && node --check scripts/vaep/metrics.mjs
+        run: node --check scripts/vaep/dispatch-preflight.mjs && node --check scripts/vaep/aggregate-evidence.mjs && node --check scripts/vaep/bundles.mjs && node --check scripts/vaep/sync-bitacora.mjs && node --check scripts/vaep/reconcile-status.mjs && node --check scripts/vaep/metrics.mjs && python3 -m py_compile scripts/vaep/jules_integration_metrics.py
       - name: Validate Bash syntax
         run: bash -n .github/scripts/vaep-policy-parser.sh .github/scripts/vaep-jules-master.sh .github/scripts/vaep-jules-worker.sh
       - name: Validate parser fail-closed self-test
@@ -56,5 +64,11 @@ jobs:
         run: bash .github/scripts/vaep-jules-worker.sh --runtime-preflight
       - name: Run VAEP/Jules MASTER runtime self-test
         run: bash .github/scripts/vaep-jules-master.sh --self-test
+      - name: Validate Jules integration receipt contract
+        run: python3 scripts/vaep/jules_integration_metrics.py --self-test
+      - name: Validate HEAD integration receipt
+        run: python3 scripts/vaep/jules_integration_metrics.py --validate-head HEAD
+      - name: Report useful Jules throughput rolling 24h
+        run: python3 scripts/vaep/jules_integration_metrics.py --rolling-hours 24
       - name: Run VAEP self-tests
         run: node scripts/vaep/dispatch-preflight-self-test.mjs && node scripts/vaep/block2-self-test.mjs && node scripts/vaep/block3-self-test.mjs

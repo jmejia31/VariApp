@@ -9,6 +9,6 @@ function main() {
   if (!Array.isArray(events)) { console.error('events must be an array'); process.exitCode = 2; return; }
   const totals = Object.fromEntries(FIELDS.map((field) => [field, 0]));
   for (const event of events) for (const field of FIELDS) if (Number.isFinite(event[field])) totals[field] += event[field];
-  console.log(JSON.stringify({ schemaVersion: '1.0', measuredEvents: events.length, totals }, null, 2));
+  console.log(JSON.stringify({ schemaVersion: '1.1', measuredEvents: events.length, totals, productivityKpi: { authority: 'scripts/vaep/jules_integration_metrics.py', countedStage: 'INTEGRATED', legacyEventsCountAsProductivity: false, rule: 'Only validated integration commits with REVIEW_ACCEPTED and INTEGRATED receipts count as useful Jules throughput.' } }, null, 2));
 }
 main();

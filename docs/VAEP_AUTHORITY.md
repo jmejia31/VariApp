@@ -120,8 +120,8 @@ La política de parent-close, dwell time y SLA está gobernada por el bloque can
 - Los checkpoints activos provienen exclusivamente de `VAEP_CHECKPOINTS` en el bloque canónico.
 - `PARENT_CLOSE_SLA_ROLLING_60M=3`: mínimo operativo de 3 padres en `LISTO_REAL` por ventana móvil de 60 minutos.
 - `PARENT_CLOSE_SLA_ROLLING_24H=72`: objetivo contractual de 72 padres `LISTO_REAL` por ventana móvil de 24 horas; el contador de 24h no reemplaza el gate de 3/h, ambos deben cumplirse.
-- `JULES_TASKS_TARGET_ROLLING_24H_PER_WORKER=100`: objetivo de 100 tareas Jules terminales útiles por cada worker A/B/C/D en 24h, sin contar busywork, dispatch fallido, NO_OP ni sesión sin actividad útil.
-- `JULES_TASKS_TARGET_ROLLING_24H_TOTAL=400`: objetivo agregado de 400 tareas Jules útiles/24h entre A/B/C/D.
+- `JULES_TASKS_TARGET_ROLLING_24H_PER_WORKER=100`: objetivo de 100 tareas Jules realmente integradas por cada worker A/B/C/D en 24h. Solo cuenta un commit de integración con receipt VAEP válido, REVIEW_ACCEPTED e INTEGRATED; no cuentan busywork, dispatch, manifest, autorefill, reserva, workflow verde, sesión creada ni SESSION_COMPLETED por sí solos.
+- `JULES_TASKS_TARGET_ROLLING_24H_TOTAL=400`: objetivo agregado de 400 tareas Jules validadas como INTEGRATED en 24h entre A/B/C/D; la fuente de verdad del KPI es `scripts/vaep/jules_integration_metrics.py --rolling-hours 24`.
 - **TASK_IDENTITY_UNIQUE**: para métricas y autorefill, una tarea Jules útil se identifica por `CURRENT_PARENT + identidad funcional/semantic facet`, no por número correlativo, dispatchId, filename ni sessionId. Renumerar la misma prueba/comportamiento NO crea trabajo nuevo.
 - Si una identidad funcional ya tuvo resultado `COMPLETED` + `patchPresent=true` + sesión útil, cualquier ejecución posterior equivalente se clasifica `DUPLICATE_EVIDENCE_ONLY`, no integra automáticamente y **NO CUENTA** en `TASKS_24H` ni en el objetivo de 100 por Jules.
 - Un manifest/run `SUPERSEDED` antes de sesión útil no consume la identidad funcional y puede recuperarse; dedupe no debe impedir un recovery legítimo.
@@ -212,6 +212,26 @@ Al terminal Jules:
 5. PASS => integrar solo delta aprobado sobre HEAD vigente + CI causal;
 6. REQUIRED en ATTEMPT1 => R2 único del scope entregado solo si sigue siendo material y no compite con el NEXT_SAFE;
 7. REQUIRED en ATTEMPT2 => QA_TAKEOVER; el Jules permanece en otro scope seguro, nunca esperando el takeover.
+8. PASS de REVIEW_FIRST no basta para productividad: la integración funcional debe publicarse en un commit exclusivo de un solo dispatch (`ONE_INTEGRATION_COMMIT_ONE_DISPATCH=TRUE`) y ese commit debe llevar este receipt inmutable:
+   - `VAEP-Dispatch: <dispatchId>`
+   - `VAEP-Task: <taskId>`
+   - `VAEP-Worker: JULES_A|JULES_B|JULES_C|JULES_D`
+   - `VAEP-Session: sessions/<id>`
+   - `VAEP-Task-Attempt: 1|2`
+   - `VAEP-Dispatch-Manifest: <ruta exacta del manifest>`
+   - `VAEP-Patch-SHA256: <sha256 real del patch revisado>`
+   - `VAEP-Patch-Base: <primaryBaseHead del manifest>`
+   - `VAEP-Review: ACCEPTED`
+   - `VAEP-Review-Evidence: <artifact/tests/review verificable>`
+   - `VAEP-Scope-Decision: PASS`
+   - `VAEP-Reviewed-Files: <lista ; separada exactamente igual al diff del commit>`
+   - `VAEP-Tests: <evidencia real o NOT_APPLICABLE:<razón>>`
+   - `VAEP-P0: 0`
+   - `VAEP-P1: 0`
+   - `VAEP-Integrated: TRUE`
+   - `VAEP-Integration-Branch: Desarrollo`
+9. `scripts/vaep/jules_integration_metrics.py` valida el receipt contra el manifest y el diff real. Receipt inválido => CI failure y **NO CUENTA**. Receipt válido => emite `VAEP_METRIC stage=REVIEW_ACCEPTED` y `VAEP_METRIC stage=INTEGRATED`.
+10. KPI canónico: solamente `INTEGRATED` validado cuenta como productividad Jules. `TRIGGERED`, `MANIFEST_ACCEPTED`, `SESSION_CREATED`, `SESSION_COMPLETED`, `PATCH_PRESENT` y `SELF_REVIEW_COMPLETE` son etapas diagnósticas, nunca throughput final.
 
 `REVIEW_FIRST` significa que todo resultado terminal entra primero a la cola de revisión de VAEP; **no** significa que el Jules deba esperar a que esa revisión termine.
 
