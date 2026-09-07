@@ -47,7 +47,7 @@ jobs:
           grep -q "CONTROL_PLANE_BASE_EQUIVALENCE" docs/VAEP_AUTHORITY.md
           grep -q "write_base_equivalence" .github/scripts/vaep-jules-worker.sh
           grep -q -- "--base-equivalence" .github/scripts/vaep-jules-worker.sh
-          grep -q "recoverable_base_mismatch_entry" .github/scripts/vaep-jules-autorefill-core.sh
+          grep -q "recoverable_attempt1_entry" .github/scripts/vaep-jules-autorefill-core.sh
       - name: Validate recovery exact-manifest contract
         run: |
           for wf in .github/workflows/vaep-jules-{a,b,c,d}-recovery.yml; do

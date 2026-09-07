@@ -189,8 +189,8 @@ completed_semantic_facets() {
   done | sort -u
 }
 
-recoverable_base_mismatch_entry() {
-  local listing issues entry dispatch task path manifest requested actual r2_prefix
+recoverable_attempt1_entry() {
+  local listing issues entry dispatch task path manifest requested actual r2_prefix reason r2_prompt
   listing="$(api "repos/$GITHUB_REPOSITORY/contents/$DISPATCH_PATH?ref=$BRANCH" 2>/dev/null || printf '[]')"
   issues="$(api "repos/$GITHUB_REPOSITORY/issues?state=all&per_page=100&sort=updated&direction=desc" 2>/dev/null || printf '[]')"
   while IFS= read -r entry; do
@@ -212,9 +212,16 @@ recoverable_base_mismatch_entry() {
        | sub(".*patch base: `"; "") | sub("`.*$"; "")]
       | last // ""
     ' <<<"$issues")"
-    [[ "$actual" =~ ^[0-9a-fA-F]{40}$ && "$actual" != "$requested" ]] || continue
+    reason=""
+    if [[ "$actual" =~ ^[0-9a-fA-F]{40}$ && "$actual" != "$requested" ]]; then
+      reason="PATCH_BASE_CONTROL_PLANE_DIVERGENCE actual=$actual requested=$requested"
+    elif jq -e --arg dispatch "$dispatch" 'any(.[]?; ((.title // "") == ("[VAEP-JULES-SUPERSEDED] " + $dispatch)) and (((.body // "") | contains("JULES_LANE_BUDGET_EXCEEDED")) and ((.body // "") | contains("- Task: ")) and ((.body // "") | contains("attempt: 1/"))))' <<<"$issues" >/dev/null; then
+      reason="JULES_LANE_BUDGET_EXCEEDED attempt=1"
+    else
+      continue
+    fi
 
-    r2_prompt="$(printf '%s\n\nR2 RCA: the previous attempt produced a patch based on %s while its immutable manifest base was %s. Re-run the same material scope from the current Desarrollo checkout; do not expand scope, touch control-plane files, or claim integration.' "$(jq -r '.prompt' <<<"$entry")" "$actual" "$requested")"
+    r2_prompt="$(printf '%s\n\nR2 RCA: %s. Re-run the same material scope from the current Desarrollo checkout; do not expand scope, touch control-plane files, or claim integration.' "$(jq -r '.prompt' <<<"$entry")" "$reason")"
     jq -n \
       --arg dispatchId "$dispatch-R2-$(date -u +%Y%m%dT%H%M%SZ)-$$" \
       --arg taskId "$task" \
@@ -371,8 +378,8 @@ main() {
     exit 0
   fi
   if ! entry="$(select_next_entry)"; then
-    if entry="$(recoverable_base_mismatch_entry)"; then
-      echo "AUTOREFILL_R2_RCA_CONFIRMED worker=$WORKER_ID reason=PATCH_BASE_CONTROL_PLANE_DIVERGENCE task=$(jq -r '.taskId' <<<"$entry") attempt=2"
+    if entry="$(recoverable_attempt1_entry)"; then
+      echo "AUTOREFILL_R2_RCA_CONFIRMED worker=$WORKER_ID task=$(jq -r '.taskId' <<<"$entry") attempt=2"
     else
       echo "AUTOREFILL_NO_SAFE_NEXT worker=$WORKER_ID catalog_exhausted=true current_parent=$CURRENT_PARENT" >&2
       exit 78
