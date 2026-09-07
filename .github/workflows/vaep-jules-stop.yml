@@ -125,7 +125,14 @@ jobs:
             "$RUNNER_TEMP/vaep-jules-stop/session-before.json" >/dev/null
 
           before_state="$(jq -r '.state // "UNKNOWN"' "$RUNNER_TEMP/vaep-jules-stop/session-before.json")"
+          curl --connect-timeout 10 --max-time 45 --fail-with-body --silent --show-error --get \
+            -H "x-goog-api-key: $selected_key" \
+            --data-urlencode 'pageSize=100' \
+            "$JULES_API_BASE/$SESSION_NAME/activities" \
+            > "$RUNNER_TEMP/vaep-jules-stop/activities-before.json"
+          last_useful_event="$(jq -c '(.activities // []) | sort_by(.createTime // "") | last // {}' "$RUNNER_TEMP/vaep-jules-stop/activities-before.json")"
           action="NOOP"
+          stop_attempt_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
           case "$before_state" in
             QUEUED|PLANNING|IN_PROGRESS|AWAITING_USER_FEEDBACK|AWAITING_PLAN_APPROVAL)
@@ -156,7 +163,24 @@ jobs:
             -H "x-goog-api-key: $selected_key" \
             "$JULES_API_BASE/$SESSION_NAME" \
             > "$RUNNER_TEMP/vaep-jules-stop/session-after.json"
-          printf 'after_state=%s\n' "$(jq -r '.state // "UNKNOWN"' "$RUNNER_TEMP/vaep-jules-stop/session-after.json")" >> "$GITHUB_OUTPUT"
+          after_state="$(jq -r '.state // "UNKNOWN"' "$RUNNER_TEMP/vaep-jules-stop/session-after.json")"
+          case "$after_state" in
+            QUEUED|PLANNING|IN_PROGRESS|AWAITING_USER_FEEDBACK|AWAITING_PLAN_APPROVAL)
+              recovery_decision="QUARANTINED_REMOTE_ACTIVE_NO_DUPLICATE"
+              ;;
+            PAUSED|COMPLETED|FAILED)
+              recovery_decision="REMOTE_TERMINAL_RCA_REQUIRED_BEFORE_RECOVERY"
+              ;;
+            *)
+              recovery_decision="FAIL_CLOSED_NO_RECOVERY_UNKNOWN_REMOTE_STATE"
+              ;;
+          esac
+          {
+            printf 'after_state=%s\n' "$after_state"
+            printf 'last_useful_event=%s\n' "$last_useful_event"
+            printf 'stop_attempt_at=%s\n' "$stop_attempt_at"
+            printf 'recovery_decision=%s\n' "$recovery_decision"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Register stop evidence
         if: always()
@@ -169,6 +193,9 @@ jobs:
           BEFORE_STATE: ${{ steps.stop.outputs.before_state }}
           ACTION: ${{ steps.stop.outputs.action }}
           AFTER_STATE: ${{ steps.stop.outputs.after_state }}
+          LAST_USEFUL_EVENT: ${{ steps.stop.outputs.last_useful_event }}
+          STOP_ATTEMPT_AT: ${{ steps.stop.outputs.stop_attempt_at }}
+          RECOVERY_DECISION: ${{ steps.stop.outputs.recovery_decision }}
         run: |
           set -euo pipefail
           stop_id="${STOP_ID:-UNKNOWN}"
@@ -178,15 +205,21 @@ jobs:
           before_state="${BEFORE_STATE:-UNKNOWN}"
           action="${ACTION:-UNKNOWN}"
           after_state="${AFTER_STATE:-UNKNOWN}"
+          last_useful_event="${LAST_USEFUL_EVENT:-{}}"
+          stop_attempt_at="${STOP_ATTEMPT_AT:-UNKNOWN}"
+          recovery_decision="${RECOVERY_DECISION:-FAIL_CLOSED_NO_RECOVERY}"
           run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
 
-          printf -v body '%s\n\n%s\n%s\n%s\n%s\n%s\n%s\n' \
+          printf -v body '%s\n\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n' \
             'VAEP Jules superseded-session stop evidence.' \
             "- Stop: \`$stop_id\`" \
             "- Dispatch: \`$dispatch_id\`" \
             "- Task: \`$task_id\`" \
             "- Session: \`$session_name\`" \
             "- Before: \`$before_state\`; action: \`$action\`; after: \`$after_state\`" \
+            "- Last useful event: \`$last_useful_event\`" \
+            "- Stop attempt: \`$stop_attempt_at\`; stop result: \`$after_state\`" \
+            "- Recovery decision: \`$recovery_decision\`" \
             "- Workflow run: $run_url"
 
           gh issue create \
