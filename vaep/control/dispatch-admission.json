@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "CLOSED",
+  "newDispatchAdmission": "OPEN",
   "allowExistingActiveSessions": true,
-  "reason": "INCIDENT_PARENT_MISMATCH__CURRENT_PARENT_N4_10_F__FUTURE_N4_10_G_AUTOREFILL_OBSERVED__QA_TAKEOVER",
-  "updatedAtUtc": "2026-09-06T23:14:30Z"
+  "reason": "INCIDENT_RESOLVED__DISPATCH_ELIGIBLE_BOOLEAN_FIXED__M13_SUCCESS__CURRENT_PARENT_N4_10_F__ZERO_IDLE_RECOVERY",
+  "updatedAtUtc": "2026-09-07T00:07:30Z"
 }
