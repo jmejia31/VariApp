@@ -42,6 +42,12 @@ jobs:
           grep -q "AUTOREFILL_WAIT=REVIEW_FIRST_REQUIRED" .github/scripts/vaep-jules-autorefill.sh
           grep -q "NO_POST_TERMINAL_REFILL" .github/scripts/vaep-jules-autorefill.sh
           ! grep -q "CONTINUE_TO_CORE" .github/scripts/vaep-jules-autorefill.sh
+      - name: Validate control-plane base equivalence guard
+        run: |
+          grep -q "CONTROL_PLANE_BASE_EQUIVALENCE" docs/VAEP_AUTHORITY.md
+          grep -q "write_base_equivalence" .github/scripts/vaep-jules-worker.sh
+          grep -q -- "--base-equivalence" .github/scripts/vaep-jules-worker.sh
+          grep -q "recoverable_base_mismatch_entry" .github/scripts/vaep-jules-autorefill-core.sh
       - name: Validate recovery exact-manifest contract
         run: |
           for wf in .github/workflows/vaep-jules-{a,b,c,d}-recovery.yml; do

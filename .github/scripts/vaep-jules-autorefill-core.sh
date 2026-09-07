@@ -181,11 +181,52 @@ completed_semantic_facets() {
       | (.body // "") as $b
       | select($b | contains("- Terminal state: `COMPLETED`"))
       | select($b | contains("- Patch present: `true`"))
+      | select($b | contains("- Ready for VAEP: `true`"))
       | ($b | split("\n")[]? | select(startswith("- Task: `")) | sub("^- Task: `"; "") | sub("`.*$"; "")) as $task
       | select($task | startswith($parent + "."))
       | ($task | sub("^" + ($parent | gsub("\\."; "\\\\.")) + "\\.[0-9]+\\."; ""))
     ' <<<"$payload"
   done | sort -u
+}
+
+recoverable_base_mismatch_entry() {
+  local listing issues entry dispatch task path manifest requested actual r2_prefix
+  listing="$(api "repos/$GITHUB_REPOSITORY/contents/$DISPATCH_PATH?ref=$BRANCH" 2>/dev/null || printf '[]')"
+  issues="$(api "repos/$GITHUB_REPOSITORY/issues?state=all&per_page=100&sort=updated&direction=desc" 2>/dev/null || printf '[]')"
+  while IFS= read -r entry; do
+    dispatch="$(jq -r '.dispatchId' <<<"$entry")"
+    task="$(jq -r '.taskId' <<<"$entry")"
+    path="$DISPATCH_PATH/$dispatch.json"
+    path_exists_on_branch "$path" || continue
+    r2_prefix="$dispatch-R2-"
+    jq -e --arg prefix "$r2_prefix" 'any(.[]?; (.name // "") | startswith($prefix))' <<<"$listing" >/dev/null && continue
+
+    manifest="$(api "repos/$GITHUB_REPOSITORY/contents/$path?ref=$BRANCH" 2>/dev/null | jq -r '.content' | tr -d '\n' | base64 -d 2>/dev/null || true)"
+    requested="$(jq -r '.primaryBaseHead // empty' <<<"$manifest")"
+    [[ "$requested" =~ ^[0-9a-fA-F]{40}$ ]] || continue
+    actual="$(jq -r --arg dispatch "$dispatch" '
+      [.[]? | select((.title // "") | contains($dispatch)) | (.body // "")
+       | select(contains("- Ready for VAEP: `false`"))
+       | split("\n")[]
+       | select(test("^- Patch present: `true`; patch base: `"))
+       | sub(".*patch base: `"; "") | sub("`.*$"; "")]
+      | last // ""
+    ' <<<"$issues")"
+    [[ "$actual" =~ ^[0-9a-fA-F]{40}$ && "$actual" != "$requested" ]] || continue
+
+    r2_prompt="$(printf '%s\n\nR2 RCA: the previous attempt produced a patch based on %s while its immutable manifest base was %s. Re-run the same material scope from the current Desarrollo checkout; do not expand scope, touch control-plane files, or claim integration.' "$(jq -r '.prompt' <<<"$entry")" "$actual" "$requested")"
+    jq -n \
+      --arg dispatchId "$dispatch-R2-$(date -u +%Y%m%dT%H%M%SZ)-$$" \
+      --arg taskId "$task" \
+      --arg workerId "$WORKER_ID" \
+      --arg expectedBranch "$BRANCH" \
+      --arg fileScopeHint "$(jq -r '.fileScopeHint' <<<"$entry")" \
+      --arg prompt "$r2_prompt" \
+      --arg primaryBaseHead "$requested" \
+      '{dispatchId:$dispatchId,taskId:$taskId,workerId:$workerId,expectedBranch:$expectedBranch,taskAttempt:2,fileScopeHint:$fileScopeHint,prompt:$prompt,primaryBaseHead:$primaryBaseHead}'
+    return 0
+  done < <(jq -c --arg w "$WORKER_ID" '.lanes[$w][]? | select((.dispatchEligible != false))' "$CATALOG")
+  return 1
 }
 
 select_next_entry() {
@@ -257,11 +298,12 @@ dispatch_internal_manifest_run() {
   return 0
 }
 create_atomic_manifest_commit() {
-  local entry="$1" dispatch task scope prompt path head base_commit base_tree manifest blob tree commit rc
+  local entry="$1" dispatch task scope prompt path head base_commit base_tree manifest blob tree commit rc task_attempt
   dispatch="$(jq -r '.dispatchId' <<<"$entry")"
   task="$(jq -r '.taskId' <<<"$entry")"
   scope="$(jq -r '.fileScopeHint' <<<"$entry")"
   prompt="$(jq -r '.prompt' <<<"$entry")"
+  task_attempt="$(jq -r '.taskAttempt // 1' <<<"$entry")"
   path="$DISPATCH_PATH/$dispatch.json"
 
   for attempt in $(seq 1 8); do
@@ -277,7 +319,7 @@ create_atomic_manifest_commit() {
     if causal_freeze_active "$head"; then
       return 0
     fi
-    manifest="$(jq -n --arg dispatchId "$dispatch" --arg taskId "$task" --arg workerId "$WORKER_ID" --arg expectedBranch "$BRANCH" --arg fileScopeHint "$scope" --arg prompt "$prompt" --arg primaryBaseHead "$head" '{dispatchId:$dispatchId,taskId:$taskId,workerId:$workerId,expectedBranch:$expectedBranch,taskAttempt:1,fileScopeHint:$fileScopeHint,prompt:$prompt,primaryBaseHead:$primaryBaseHead}')"
+    manifest="$(jq -n --arg dispatchId "$dispatch" --arg taskId "$task" --arg workerId "$WORKER_ID" --arg expectedBranch "$BRANCH" --arg fileScopeHint "$scope" --arg prompt "$prompt" --arg primaryBaseHead "$head" --argjson taskAttempt "$task_attempt" '{dispatchId:$dispatchId,taskId:$taskId,workerId:$workerId,expectedBranch:$expectedBranch,taskAttempt:$taskAttempt,fileScopeHint:$fileScopeHint,prompt:$prompt,primaryBaseHead:$primaryBaseHead}')"
     blob="$(jq -n --arg content "$manifest" '{content:$content,encoding:"utf-8"}' | api "repos/$GITHUB_REPOSITORY/git/blobs" --method POST --input - --jq '.sha')"
     base_commit="$(api "repos/$GITHUB_REPOSITORY/git/commits/$head")"
     base_tree="$(jq -r '.tree.sha' <<<"$base_commit")"
@@ -329,8 +371,12 @@ main() {
     exit 0
   fi
   if ! entry="$(select_next_entry)"; then
-    echo "AUTOREFILL_NO_SAFE_NEXT worker=$WORKER_ID catalog_exhausted=true current_parent=$CURRENT_PARENT" >&2
-    exit 78
+    if entry="$(recoverable_base_mismatch_entry)"; then
+      echo "AUTOREFILL_R2_RCA_CONFIRMED worker=$WORKER_ID reason=PATCH_BASE_CONTROL_PLANE_DIVERGENCE task=$(jq -r '.taskId' <<<"$entry") attempt=2"
+    else
+      echo "AUTOREFILL_NO_SAFE_NEXT worker=$WORKER_ID catalog_exhausted=true current_parent=$CURRENT_PARENT" >&2
+      exit 78
+    fi
   fi
   create_atomic_manifest_commit "$entry"
 }

@@ -167,6 +167,48 @@ api_post_empty() {
   jules_curl --fail-with-body --silent --show-error -X POST -H "Content-Type: application/json" -H "x-goog-api-key: $JULES_API_KEY" "$url"
 }
 
+write_base_equivalence() {
+  local output="$1" comparison
+  if [[ "$actual_base" == "$primary_base" ]]; then
+    jq -n --arg requested "$primary_base" --arg actual "$actual_base" \
+      '{ok:true,requested:$requested,actual:$actual,controlPlaneOnly:false,relation:"EXACT"}' > "$output"
+    return 0
+  fi
+
+  # Jules accepts a branch, not a commit pin. A lane can therefore report a
+  # later base after another immutable manifest/control-plane commit lands on
+  # Desarrollo. Accept that drift only when GitHub proves that every commit
+  # between the manifest base and the patch base is control-plane-only.
+  if ! comparison="$(gh api "repos/$GITHUB_REPOSITORY/compare/${primary_base}...${actual_base}" 2>/dev/null)"; then
+    jq -n --arg requested "$primary_base" --arg actual "$actual_base" \
+      '{ok:false,requested:$requested,actual:$actual,controlPlaneOnly:false,relation:"UNVERIFIED"}' > "$output"
+    return 0
+  fi
+
+  if jq -e '
+    def control_plane_path:
+      startswith("vaep/") or
+      startswith(".github/scripts/vaep-") or
+      startswith(".github/workflows/vaep-") or
+      . == "docs/VAEP_AUTHORITY.md" or
+      . == "AGENTS.md" or
+      . == "PLAN_EJECUCION_AUTONOMA.md" or
+      . == "PROJECT_CONTEXT.md" or
+      . == "TASKS.md";
+    (.status == "ahead") and
+    ((.ahead_by // 0) > 0) and
+    ((.files // []) | length > 0) and
+    all(.files[]?; (.filename | control_plane_path))
+  ' <<<"$comparison" >/dev/null; then
+    jq -n --arg requested "$primary_base" --arg actual "$actual_base" \
+      --argjson commits "$(jq '(.commits // []) | length' <<<"$comparison")" \
+      '{ok:true,requested:$requested,actual:$actual,controlPlaneOnly:true,relation:"CONTROL_PLANE_DESCENDANT",commits:$commits}' > "$output"
+  else
+    jq -n --arg requested "$primary_base" --arg actual "$actual_base" \
+      '{ok:false,requested:$requested,actual:$actual,controlPlaneOnly:false,relation:"FUNCTIONAL_DRIFT_OR_UNVERIFIED"}' > "$output"
+  fi
+}
+
 # Atomic dispatch invariant: exactly one new manifest for THIS worker.
 # The same commit may batch one manifest for each Jules lane so all four lanes
 # start from one HEAD movement. No non-dispatch files are allowed in the batch.
@@ -476,18 +518,22 @@ jq '[.activities[]? as $a | $a.artifacts[]? | .changeSet?.gitPatch? | select(. !
 patch_present="$(jq -r 'type == "object"' "$result_dir/gitpatch.json")"
 actual_base=""
 suggested=""
+base_equivalence="$work/base-equivalence.json"
 if [[ "$patch_present" == true ]]; then
   actual_base="$(jq -r '.baseCommitId // ""' "$result_dir/gitpatch.json")"
   suggested="$(jq -r '.suggestedCommitMessage // ""' "$result_dir/gitpatch.json")"
   jq -r '.unidiffPatch // ""' "$result_dir/gitpatch.json" > "$result_dir/changes.patch"
+  write_base_equivalence "$base_equivalence"
 else
   : > "$result_dir/changes.patch"
+  jq -n --arg requested "$primary_base" --arg actual "" \
+    '{ok:false,requested:$requested,actual:$actual,controlPlaneOnly:false,relation:"PATCH_BASE_MISSING"}' > "$base_equivalence"
 fi
 terminal_contract_valid=false
 ready_for_vaep=false
 if [[ "$terminal_state" == "COMPLETED" ]]; then
   set +e
-  python3 "$RUNTIME_CONTRACT" --validate-terminal "$manifest" "$result_dir/gitpatch.json" "$result_dir/activities.json" > "$result_dir/terminal-contract.json"
+  python3 "$RUNTIME_CONTRACT" --validate-terminal "$manifest" "$result_dir/gitpatch.json" "$result_dir/activities.json" --base-equivalence "$base_equivalence" > "$result_dir/terminal-contract.json"
   terminal_contract_rc=$?
   set -e
   if [[ "$terminal_contract_rc" -eq 0 ]]; then
@@ -508,9 +554,10 @@ jq -n \
   --arg manifestPath "$manifest" \
   --arg workflowRunId "$GITHUB_RUN_ID" \
   --arg sessionName "$session_name" \
+  --argjson baseEquivalence "$(cat "$base_equivalence")" \
   --argjson patchPresent "$patch_present" \
   --argjson readyForVaep "$ready_for_vaep" \
-  '{dispatchCommitSha:$dispatchCommitSha,manifestPath:$manifestPath,workflowRunId:$workflowRunId,sessionName:$sessionName,manifestAcceptedAt:$manifestAcceptedAt,sessionCreatedAt:$sessionCreatedAt,firstInProgressAt:$firstInProgressAt,lastActivityAt:$lastActivityAt,finalStateAt:$finalStateAt,finalState:$finalState,patchPresent:$patchPresent,readyForVaep:$readyForVaep,handoffState:(if $readyForVaep then "READY_FOR_VAEP" else "NOT_READY_FOR_VAEP" end),reviewResult:"PENDING_REVIEW_FIRST",integrationResult:"NOT_INTEGRATED",correlationComplete:true}' > "$result_dir/lifecycle.json"
+  '{dispatchCommitSha:$dispatchCommitSha,manifestPath:$manifestPath,workflowRunId:$workflowRunId,sessionName:$sessionName,manifestAcceptedAt:$manifestAcceptedAt,sessionCreatedAt:$sessionCreatedAt,firstInProgressAt:$firstInProgressAt,lastActivityAt:$lastActivityAt,finalStateAt:$finalStateAt,finalState:$finalState,patchPresent:$patchPresent,baseEquivalence:$baseEquivalence,readyForVaep:$readyForVaep,handoffState:(if $readyForVaep then "READY_FOR_VAEP" else "NOT_READY_FOR_VAEP" end),reviewResult:"PENDING_REVIEW_FIRST",integrationResult:"NOT_INTEGRATED",correlationComplete:true}' > "$result_dir/lifecycle.json"
 
 jq -n \
   --arg protocol "$VAEP_JULES_PROTOCOL" \
@@ -524,6 +571,7 @@ jq -n \
   --arg state "$terminal_state" \
   --arg requestedBase "$primary_base" \
   --arg actualBase "$actual_base" \
+  --argjson baseEquivalence "$(cat "$base_equivalence")" \
   --arg suggestedCommitMessage "$suggested" \
   --arg feedbackQuestion "$feedback_question" \
   --arg dispatchCommitSha "$DISPATCH_SHA" \
@@ -539,7 +587,7 @@ jq -n \
   --argjson parentCloseFirst "$PARENT_CLOSE_FIRST" \
   --argjson laneBudgetSeconds "$JULES_LANE_BUDGET_SECONDS" \
   --arg checkpoints "$VAEP_CHECKPOINTS" \
-  '{protocol:$protocol,globalControlPlane:"VAEP_MASTER",masterCommitSha:$masterCommitSha,policyHash:$policyHash,parentCloseFirst:$parentCloseFirst,checkpoints:$checkpoints,laneBudgetSeconds:$laneBudgetSeconds,workerId:$workerId,dispatchId:$dispatchId,taskId:$taskId,taskAttempt:$taskAttempt,maxAttempts:$maxAttempts,r3Prohibited:$r3Prohibited,qaTakeoverOnRetryExhaustion:true,session:$session,state:$state,requestedBase:$requestedBase,actualPatchBase:$actualBase,patchPresent:$patchPresent,selfReviewPass1:$selfReviewPass1,selfReviewPass2:$selfReviewPass2,feedbackQuestion:$feedbackQuestion,triggered:true,manifestAccepted:true,sessionCreated:true,sessionCompleted:($state=="COMPLETED"),terminalContractArtifact:"terminal-contract.json",lifecycleArtifact:"lifecycle.json",reviewAccepted:false,integrated:false,integrationReceiptRequired:true,integrationReceiptMode:"COMMIT_TRAILERS",productivityCountedStage:"INTEGRATED",superseded:($state=="LATE_RESULT_SUPERSEDED"),lateResultAutoIntegrationDenied:($state=="LATE_RESULT_SUPERSEDED"),suggestedCommitMessage:$suggestedCommitMessage,autoFeedbackCount:$autoFeedbackCount,dispatchCommitSha:$dispatchCommitSha,manifestPath:$manifestPath,workflowRunId:$workflowRunId,readyForVaep:$readyForVaep,handoffState:(if $readyForVaep then "READY_FOR_VAEP" else "NOT_READY_FOR_VAEP" end),correlationComplete:true,controllerHandoff:(if $state=="LATE_RESULT_SUPERSEDED" then "LATE_RESULT_EVIDENCE_ONLY" elif $state=="AWAITING_USER_FEEDBACK_QA_TAKEOVER" then "QA_TAKEOVER_FEEDBACK_REQUIRED" elif $readyForVaep then "READY_FOR_VAEP_REVIEW_FIRST_REQUIRED_NO_REFILL" else "QA_CLASSIFICATION_REQUIRED_NO_REFILL" end)}' \
+  '{protocol:$protocol,globalControlPlane:"VAEP_MASTER",masterCommitSha:$masterCommitSha,policyHash:$policyHash,parentCloseFirst:$parentCloseFirst,checkpoints:$checkpoints,laneBudgetSeconds:$laneBudgetSeconds,workerId:$workerId,dispatchId:$dispatchId,taskId:$taskId,taskAttempt:$taskAttempt,maxAttempts:$maxAttempts,r3Prohibited:$r3Prohibited,qaTakeoverOnRetryExhaustion:true,session:$session,state:$state,requestedBase:$requestedBase,actualPatchBase:$actualBase,baseEquivalence:$baseEquivalence,patchPresent:$patchPresent,selfReviewPass1:$selfReviewPass1,selfReviewPass2:$selfReviewPass2,feedbackQuestion:$feedbackQuestion,triggered:true,manifestAccepted:true,sessionCreated:true,sessionCompleted:($state=="COMPLETED"),terminalContractArtifact:"terminal-contract.json",lifecycleArtifact:"lifecycle.json",reviewAccepted:false,integrated:false,integrationReceiptRequired:true,integrationReceiptMode:"COMMIT_TRAILERS",productivityCountedStage:"INTEGRATED",superseded:($state=="LATE_RESULT_SUPERSEDED"),lateResultAutoIntegrationDenied:($state=="LATE_RESULT_SUPERSEDED"),suggestedCommitMessage:$suggestedCommitMessage,autoFeedbackCount:$autoFeedbackCount,dispatchCommitSha:$dispatchCommitSha,manifestPath:$manifestPath,workflowRunId:$workflowRunId,readyForVaep:$readyForVaep,handoffState:(if $readyForVaep then "READY_FOR_VAEP" else "NOT_READY_FOR_VAEP" end),correlationComplete:true,controllerHandoff:(if $state=="LATE_RESULT_SUPERSEDED" then "LATE_RESULT_EVIDENCE_ONLY" elif $state=="AWAITING_USER_FEEDBACK_QA_TAKEOVER" then "QA_TAKEOVER_FEEDBACK_REQUIRED" elif $readyForVaep then "READY_FOR_VAEP_REVIEW_FIRST_REQUIRED_NO_REFILL" else "QA_CLASSIFICATION_REQUIRED_NO_REFILL" end)}' \
   > "$result_dir/result.json"
 
 run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
@@ -573,7 +621,12 @@ fi
 printf 'VAEP_METRIC stage=SESSION_COMPLETED value=true session=%s\n' "$session_name"
 [[ "$patch_present" == true ]] || fail "Jules completed without ChangeSet/gitPatch." 51
 printf 'VAEP_METRIC stage=PATCH_PRESENT value=true session=%s\n' "$session_name"
-[[ "$actual_base" == "$primary_base" ]] || fail "Jules patch rejected: baseCommitId does not equal immutable primaryBaseHead." 54
+if [[ "$actual_base" != "$primary_base" ]]; then
+  jq -e --arg requested "$primary_base" --arg actual "$actual_base" \
+    '.ok == true and .requested == $requested and .actual == $actual and .controlPlaneOnly == true' \
+    "$base_equivalence" >/dev/null || fail "Jules patch rejected: baseCommitId is not primaryBaseHead and the intervening history is not proven control-plane-only." 54
+  printf 'VAEP_METRIC stage=BASE_EQUIVALENCE value=CONTROL_PLANE_DESCENDANT requested=%s actual=%s\n' "$primary_base" "$actual_base"
+fi
 [[ "$self_review_pass_1" == true && "$self_review_pass_2" == true ]] || fail "Jules patch rejected before REVIEW_FIRST: missing SELF_REVIEW_PASS_1/SELF_REVIEW_PASS_2 evidence." 53
 printf 'VAEP_METRIC stage=SELF_REVIEW_COMPLETE value=true session=%s\n' "$session_name"
 if [[ "$terminal_contract_valid" != true ]]; then

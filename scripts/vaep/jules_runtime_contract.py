@@ -86,13 +86,20 @@ def patch_files(unidiff):
                 out.append(p)
     return out
 
-def validate_terminal(manifest, patch, activities_text):
+def validate_terminal(manifest, patch, activities_text, base_equivalence=None):
     errors=[]
     if not isinstance(patch,dict):
         return {"ok":False,"errors":["patch absent"],"changedFiles":[]}
     requested=str(manifest.get("primaryBaseHead",""))
     actual=str(patch.get("baseCommitId",""))
-    if actual!=requested:
+    equivalent = bool(
+        isinstance(base_equivalence, dict)
+        and base_equivalence.get("ok") is True
+        and base_equivalence.get("requested") == requested
+        and base_equivalence.get("actual") == actual
+        and base_equivalence.get("controlPlaneOnly") is True
+    )
+    if actual!=requested and not equivalent:
         errors.append("patch base does not equal primaryBaseHead")
     unidiff=str(patch.get("unidiffPatch",""))
     if not unidiff.strip():
@@ -113,6 +120,7 @@ def validate_terminal(manifest, patch, activities_text):
     if not re.search(r"TESTS_EXECUTED\s*[:=]",activities_text,re.I):
         errors.append("TESTS_EXECUTED evidence missing")
     return {"ok":not errors,"errors":errors,"changedFiles":changed,"requestedBase":requested,"actualBase":actual,
+            "baseEquivalent": actual==requested or equivalent,
             "artifactGenerated":True,"reviewFirstRequired":True}
 
 def run_self_test():
@@ -137,7 +145,10 @@ def run_self_test():
     case("timeout","JULES_LANE_BUDGET_EXCEEDED"!="SUCCESS")
     case("no_op",transport_action([])=="INVALID_TRIGGER")
     case("patch_absent",not validate_terminal(current,None,"SELF_REVIEW_PASS_1 SELF_REVIEW_PASS_2 TESTS_EXECUTED: ok")["ok"])
-    ok=all(x["pass"] for x in results) and len(results)==10
+    equivalent_patch={"baseCommitId":"a"*40,"unidiffPatch":"+++ b/x.cs\n@@\n+ok\n"}
+    equivalent_evidence={"ok":True,"requested":"b"*40,"actual":"a"*40,"controlPlaneOnly":True}
+    case("control_plane_base_equivalence",validate_terminal(current,equivalent_patch,"SELF_REVIEW_PASS_1 SELF_REVIEW_PASS_2 TESTS_EXECUTED: ok",equivalent_evidence)["ok"])
+    ok=all(x["pass"] for x in results) and len(results)==11
     print(json.dumps({"status":"PASS" if ok else "FAIL","cases":results},indent=2))
     return 0 if ok else 1
 
@@ -146,6 +157,7 @@ def main():
     ap.add_argument("--self-test",action="store_true")
     ap.add_argument("--check-active-duplicate",nargs=4,metavar=("MANIFEST","DISPATCH_DIR","SESSIONS","PREFIX"))
     ap.add_argument("--validate-terminal",nargs=3,metavar=("MANIFEST","PATCH","ACTIVITIES"))
+    ap.add_argument("--base-equivalence",metavar="EVIDENCE")
     args=ap.parse_args()
     if args.self_test:
         return run_self_test()
@@ -160,7 +172,13 @@ def main():
             patch=load(patch_path)
         except Exception:
             patch=None
-        result=validate_terminal(load(manifest),patch,Path(activities).read_text(encoding="utf-8"))
+        evidence=None
+        if args.base_equivalence:
+            try:
+                evidence=load(args.base_equivalence)
+            except Exception:
+                evidence=None
+        result=validate_terminal(load(manifest),patch,Path(activities).read_text(encoding="utf-8"),evidence)
         print(json.dumps(result,indent=2))
         return 0 if result["ok"] else 54
     ap.error("select a mode")
