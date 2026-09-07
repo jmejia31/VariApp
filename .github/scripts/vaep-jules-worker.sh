@@ -543,7 +543,7 @@ jq -n \
   > "$result_dir/result.json"
 
 run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-printf -v issue_body '%s\n\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n%s\n' \
+printf -v issue_body '%s\n\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n%s\n' \
   "VAEP $WORKER_LABEL MASTER result and controller handoff signal." \
   "- Protocol: \`MASTER\`; global control-plane: \`MASTER\`" \
   "- Worker: \`${WORKER_ID:-JULES_A}\`" \
