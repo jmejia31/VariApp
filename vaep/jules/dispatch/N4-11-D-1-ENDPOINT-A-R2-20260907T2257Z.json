@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-11-D-1-ENDPOINT-A-R2-20260907T2257Z",
+  "taskId": "N4.11.D.1.API_ENDPOINT_CONTRACT",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 2,
+  "fileScopeHint": "backend/src/API/Controllers/CentrosCostoController.cs plus focused controller tests only if required; no control-plane/workflows/migrations/frontend",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. Final R2 for N4.11.D.1 API_ENDPOINT_CONTRACT; never R3. ATTEMPT1 produced a useful endpoint patch from a base divergent from its immutable manifest, so REVIEW_FIRST rejected integration. Re-run the same material scope from the exact current Desarrollo checkout: implement the minimal CentroCosto REST controller contract using current application contracts, existing authorization/error conventions and cancellation. Do not expand scope or touch control-plane/workflows/migrations/frontend. Run focused build/tests and two self-reviews. Do not branch/PR/push/merge/deploy; return patch/artifact for VAEP REVIEW_FIRST.",
+  "primaryBaseHead": "ac33b04a51c1ecc5e4260ea6ff59a5b307031ae5"
+}
