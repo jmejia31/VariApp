@@ -171,8 +171,10 @@ Invariantes P0/P1 de entrega y productividad:
 - `IMMUTABLE_MANIFEST=TRUE`: todo intento usa un archivo NUEVO; modificar, renombrar, borrar o reutilizar un manifest histórico es `INVALID_REDISPATCH` y falla antes de reservar NEXT o crear sesión.
 - `ONE_ATTEMPT_ONE_MANIFEST_ONE_DISPATCH_ID=TRUE`: ATTEMPT1 y R2 usan `dispatchId` y filename nuevos e inmutables; filename = `<dispatchId>.json`.
 - Pipeline obligatorio: `TRIGGERED -> MANIFEST_ACCEPTED -> SESSION_CREATED -> SESSION_COMPLETED -> PATCH_PRESENT -> SELF_REVIEW_COMPLETE -> REVIEW_ACCEPTED -> INTEGRATED`. Solo el último estado realmente alcanzado cuenta; `COMPLETED` solo no es integración.
-- `AWAITING_USER_FEEDBACK` no recibe follow-ups genéricos repetidos: capturar la pregunta expuesta por Jules y transferir a QA_TAKEOVER. Si la API no expone la pregunta, registrar la ausencia explícitamente.
+- `AWAITING_USER_FEEDBACK` no recibe follow-ups genéricos repetidos: capturar la pregunta real expuesta por Jules, emitir como máximo una respuesta específica ligada a `taskId + dispatchId + primaryBaseHead + taskAttempt + fileScopeHint`, y si la pregunta persiste transferir a `QA_TAKEOVER`. Si la API no expone la pregunta, registrar la ausencia explícitamente y transferir directamente a QA.
 - `PARENT_STALL_NO_PROGRESS_MINUTES` se aplica a progreso observable de estado/timestamp/actividad y puede cortar antes de `JULES_LANE_BUDGET_SECONDS`; stall revoca ownership y pasa a QA_TAKEOVER.
+- Antes de crear una sesión, el worker enumera sesiones remotas y bloquea cualquier sesión existente del mismo `taskId` todavía activa, incluyendo otro `dispatchId`, base o intento. El guard registra `taskId + dispatchId + primaryBaseHead + taskAttempt + session + state`; reusar un manifest cuyo dispatch ya tuvo sesión se clasifica fail-closed.
+- Un `COMPLETED` entregable exige ChangeSet/gitPatch no vacío, `baseCommitId == primaryBaseHead`, anclaje al `fileScopeHint`, ausencia de cambios al control-plane, marcador `TESTS_EXECUTED`, `SELF_REVIEW_PASS_1` y `SELF_REVIEW_PASS_2`. El artifact `lifecycle.json` conserva aceptación del manifest, creación de sesión, primer IN_PROGRESS, última actividad, terminal, patch, review e integración.
 
 
 ### Admisión de nuevos dispatches
