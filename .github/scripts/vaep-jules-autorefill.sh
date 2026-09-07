@@ -3,6 +3,7 @@ set -euo pipefail
 
 readonly UNIQUE_REGISTRY="vaep/control/jules-completed-semantic-facets.json"
 readonly CATALOG="vaep/control/jules-autorefill-catalog.json"
+readonly BRANCH="Desarrollo"
 
 post_terminal=0
 if [[ "${1:-}" == "--post-terminal" ]]; then
@@ -13,7 +14,8 @@ if [[ "${1:-}" == "--post-terminal" ]]; then
   phase="$(jq -r '.phase // empty' "$state_file")"
   case "$phase" in
     TERMINAL_*|STALL_NO_PROGRESS|LANE_BUDGET_EXCEEDED)
-      echo "AUTOREFILL_POST_TERMINAL_CONFIRMED phase=$phase action=RESERVE_NEXT_SAFE" >&2
+      echo "AUTOREFILL_WAIT=REVIEW_FIRST_REQUIRED phase=$phase action=NO_POST_TERMINAL_REFILL" >&2
+      exit 81
       ;;
     *)
       echo "AUTOREFILL_POST_TERMINAL_REJECT phase=${phase:-MISSING} reason=session_not_terminal" >&2
@@ -53,6 +55,56 @@ if git remote get-url origin >/dev/null 2>&1; then
       fi
     done
   fi
+fi
+
+api() {
+  gh api "$@"
+}
+
+review_first_debt_exists() {
+  local current_parent issues commits integrated_json count
+  [[ -f "$CATALOG" ]] || return 1
+  current_parent="$(jq -r '.currentParent // empty' "$CATALOG")"
+  [[ -n "$current_parent" ]] || return 1
+  [[ -n "${GITHUB_REPOSITORY:-}" && -n "${WORKER_ID:-}" && -n "${GH_TOKEN:-}" ]] || return 1
+
+  issues="$(api "repos/$GITHUB_REPOSITORY/issues?state=open&per_page=100&sort=updated&direction=desc")"
+  commits="$(api "repos/$GITHUB_REPOSITORY/commits?sha=$BRANCH&per_page=100")"
+  integrated_json="$(jq -c '
+    [.[]?
+      | (.commit.message // "" | split("\n")) as $lines
+      | select($lines | index("VAEP-Review: ACCEPTED"))
+      | select($lines | index("VAEP-Integrated: true"))
+      | ($lines[]? | select(startswith("VAEP-Dispatch: ")) | sub("^VAEP-Dispatch: "; ""))
+    ] | unique
+  ' <<<"$commits")"
+
+  count="$(jq --arg worker "$WORKER_ID" --arg parent "$current_parent" --argjson integrated "$integrated_json" '
+    [.[]?
+      | (.body // "") as $b
+      | ($b | split("\n")[]? | select(startswith("- Worker: `")) | sub("^- Worker: `"; "") | sub("`.*$"; "")) as $issue_worker
+      | ($b | split("\n")[]? | select(startswith("- Task: `")) | sub("^- Task: `"; "") | sub("`.*$"; "")) as $task
+      | ($b | split("\n")[]? | select(startswith("- Dispatch: `")) | sub("^- Dispatch: `"; "") | sub("`.*$"; "")) as $dispatch
+      | select($issue_worker == $worker)
+      | select($task | startswith($parent + "."))
+      | select($b | contains("- Terminal state: `COMPLETED`"))
+      | select($b | contains("- Patch present: `true`"))
+      | select(($integrated | index($dispatch)) | not)
+    ] | length
+  ' <<<"$issues")"
+
+  if (( count > 0 )); then
+    echo "AUTOREFILL_WAIT=REVIEW_FIRST_REQUIRED worker=$WORKER_ID current_parent=$current_parent pending_review_results=$count"
+    return 0
+  fi
+  return 1
+}
+
+# REVIEW_FIRST is a hard gate for every refill path, not just the terminal hook.
+# A completed patch must be classified and integrated/rejected before a lane can
+# consume or replace its pre-reserved NEXT_SAFE.
+if review_first_debt_exists; then
+  exit 81
 fi
 
 # Dependency-safe parent guard. dispatchEligible alone is insufficient: a
@@ -132,7 +184,4 @@ bash .github/scripts/vaep-jules-catalog-floor.sh
 # selection so this run cannot reserve a future-parent or completed facet.
 filter_dependency_safe_parent
 filter_completed_facets
-if (( post_terminal == 1 )); then
-  echo "AUTOREFILL_MODE=POST_TERMINAL action=CONTINUE_TO_CORE"
-fi
 exec bash .github/scripts/vaep-jules-autorefill-core.sh
