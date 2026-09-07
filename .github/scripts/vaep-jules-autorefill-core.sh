@@ -65,6 +65,40 @@ other_live_lane_run_exists() {
   (( count > 0 ))
 }
 
+
+review_first_debt_exists() {
+  local issues commits integrated_json count
+  issues="$(api "repos/$GITHUB_REPOSITORY/issues?state=open&per_page=100&sort=updated&direction=desc")"
+  commits="$(api "repos/$GITHUB_REPOSITORY/commits?sha=$BRANCH&per_page=100")"
+  integrated_json="$(jq -c '
+    [.[]?
+      | (.commit.message // "" | split("\n")) as $lines
+      | select($lines | index("VAEP-Review: ACCEPTED"))
+      | select($lines | index("VAEP-Integrated: true"))
+      | ($lines[]? | select(startswith("VAEP-Dispatch: ")) | sub("^VAEP-Dispatch: "; ""))
+    ] | unique
+  ' <<<"$commits")"
+
+  count="$(jq --arg worker "$WORKER_ID" --arg parent "$CURRENT_PARENT" --argjson integrated "$integrated_json" '
+    [.[]?
+      | (.body // "") as $b
+      | ($b | split("\n")[]? | select(startswith("- Worker: `")) | sub("^- Worker: `"; "") | sub("`.*$"; "")) as $issue_worker
+      | ($b | split("\n")[]? | select(startswith("- Task: `")) | sub("^- Task: `"; "") | sub("`.*$"; "")) as $task
+      | ($b | split("\n")[]? | select(startswith("- Dispatch: `")) | sub("^- Dispatch: `"; "") | sub("`.*$"; "")) as $dispatch
+      | select($issue_worker == $worker)
+      | select($task | startswith($parent + "."))
+      | select($b | contains("- Terminal state: `COMPLETED`"))
+      | select($b | contains("- Patch present: `true`"))
+      | select(($integrated | index($dispatch)) | not)
+    ] | length
+  ' <<<"$issues")"
+  if (( count > 0 )); then
+    echo "AUTOREFILL_WAIT=REVIEW_FIRST_REQUIRED worker=$WORKER_ID current_parent=$CURRENT_PARENT pending_review_results=$count"
+    return 0
+  fi
+  return 1
+}
+
 admission_open() {
   local payload decoded
   if ! payload="$(api "repos/$GITHUB_REPOSITORY/contents/$ADMISSION_PATH?ref=$BRANCH" 2>/dev/null)"; then
@@ -306,6 +340,9 @@ main() {
   fi
   if ! canonical_parent_matches_checkout; then
     exit 0
+  fi
+  if review_first_debt_exists; then
+    exit 81
   fi
   if other_live_lane_run_exists; then
     echo "AUTOREFILL_RESERVE_EXISTS worker=$WORKER_ID action=no_new_manifest"
