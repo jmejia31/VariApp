@@ -1,12 +1,12 @@
 name: M13 - Auditoría integral y certificación final
 
 on:
-  push:
-    branches: [Desarrollo]
-    paths-ignore:
-      - 'vaep/**'
   workflow_dispatch:
-
+    inputs:
+      reopen_authorization:
+        description: 'Escribe AUTORIZADO_REABRIR solo con autorización explícita de Javier'
+        required: true
+        type: string
 permissions:
   contents: read
   actions: read
@@ -16,7 +16,17 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  reopen_guard:
+    name: Autorización explícita para reabrir certificación cerrada
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validar autorización
+        shell: bash
+        run: |
+          test "${{ inputs.reopen_authorization }}" = "AUTORIZADO_REABRIR"
+
   audit:
+    needs: reopen_guard
     name: Secretos, higiene y dependencias
     runs-on: ubuntu-latest
     timeout-minutes: 25
@@ -71,6 +81,7 @@ jobs:
           retention-days: 30
 
   backend_database:
+    needs: reopen_guard
     name: Backend, MySQL, migraciones, snapshot y upgrade
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -247,6 +258,7 @@ jobs:
           retention-days: 30
 
   frontend:
+    needs: reopen_guard
     name: Frontend TypeScript, lint y producción
     runs-on: ubuntu-latest
     timeout-minutes: 25
@@ -266,6 +278,7 @@ jobs:
           npm run build:prod
 
   runtime_e2e:
+    needs: reopen_guard
     name: Runtime, seguridad HTTP y Playwright integral
     runs-on: ubuntu-latest
     timeout-minutes: 100
@@ -426,6 +439,7 @@ jobs:
           retention-days: 30
 
   infra_backup:
+    needs: reopen_guard
     name: Docker, aislamiento y backup certificado vigente
     runs-on: ubuntu-latest
     timeout-minutes: 25
@@ -466,6 +480,7 @@ jobs:
           retention-days: 30
 
   certify:
+    needs: reopen_guard
     name: Dictamen automatizado M13
     if: always()
     needs: [audit, backend_database, frontend, runtime_e2e, infra_backup]

@@ -279,3 +279,9 @@ Cuando Javier cambie una regla:
 5. Git/CHANGELOG registran historia sin convertirse en autoridad.
 
 **Regla absoluta: una sola fuente operativa, un solo MAESTRO, sin selección por etiquetas numéricas.**
+
+## Certificaciones cerradas — no reapertura automática
+
+- Fase 8 y M13 son certificaciones cerradas. No pueden dispararse por `push`, `pull_request`, timers, autorefill, commits de Jules ni cambios ordinarios en Desarrollo.
+- Su única vía de reejecución es `workflow_dispatch` con autorización explícita del propietario y el token textual `AUTORIZADO_REABRIR`.
+- Ejecutar nuevamente una certificación cerrada sin esa autorización se considera incidente de control-plane, no avance.
