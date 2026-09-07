@@ -6,5 +6,5 @@
   "taskAttempt": 1,
   "fileScopeHint": "frontend/src/app/services/estado-financiero.regression.spec.ts",
   "prompt": "Read docs/VAEP_AUTHORITY.md first. After N4.10.F LISTO, add consolidated service regression coverage. No main/production/merge/deploy/workflow/manifest changes. TWO self-reviews.",
-  "primaryBaseHead": "3c111526215c0fb65a14794cb96f4f7097a976e2"
+  "primaryBaseHead": "ddbf5afbdbd087b5e0e4c9e82de222adc97ab5aa"
 }
