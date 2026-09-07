@@ -279,8 +279,6 @@ if [[ "${1:-}" == "--self-test" ]]; then
     fi
   done
 
-  [[ "$(grep -c -- '^write_timeout_result() {
-  [[ "$(grep -c -- '^manifest_transport_action() {
   ! grep -q -- 'manifest_count_action' "$0"
   bash "$WORKER" --runtime-preflight >/dev/null
   bash "$WORKER" --static-self-test >/dev/null
