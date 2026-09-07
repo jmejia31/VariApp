@@ -39,13 +39,13 @@ while IFS=$'\t' read -r dispatch eligible; do
 done < <(jq -r --arg w "$WORKER_ID" '.lanes[$w][]? | [(.dispatchId // ""), ((.dispatchEligible != false)|tostring)] | @tsv' "$CATALOG")
 
 if (( programmed_unused <= FLOOR )); then
-  echo "CATALOG_PROGRAMMED_LOW worker=$WORKER_ID programmed_unused=$programmed_unused target=$TARGET floor=$FLOOR action=CONTROLLER_REPLENISH_TO_TARGET"
+  echo "CATALOG_PROGRAMMED_LOW worker=$WORKER_ID programmed_unused=$programmed_unused target=$TARGET floor=$FLOOR action=OBSERVE_ONLY_NO_GENERIC_REGENERATION"
 else
   echo "CATALOG_PROGRAMMED_OK worker=$WORKER_ID programmed_unused=$programmed_unused target=$TARGET floor=$FLOOR"
 fi
 
 if (( eligible_unused < ELIGIBLE_MIN )); then
-  echo "CATALOG_ELIGIBLE_LOW worker=$WORKER_ID eligible_unused=$eligible_unused min=$ELIGIBLE_MIN action=ACTIVATE_SAFE_WORK_OR_CLOSE_PROMOTE"
+  echo "CATALOG_ELIGIBLE_LOW worker=$WORKER_ID eligible_unused=$eligible_unused min=$ELIGIBLE_MIN action=OBSERVE_ONLY_CLOSE_PROMOTE_OR_ROADMAP_SCOPE"
 else
   echo "CATALOG_ELIGIBLE_OK worker=$WORKER_ID eligible_unused=$eligible_unused min=$ELIGIBLE_MIN"
 fi
