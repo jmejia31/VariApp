@@ -54,7 +54,10 @@ other_live_lane_run_exists() {
   local name workflow runs count current_id
   name="$(lane_workflow_name)"
   workflow="$(lane_workflow_file)"
-  current_id="${GITHUB_RUN_ID:-0}"
+  # A scheduled controller has its own GITHUB_RUN_ID, which is not a Jules
+  # lane run and must not be treated as CURRENT. Lane workflows explicitly
+  # provide VAEP_LANE_RUN_ID so the same guard works for both callers.
+  current_id="${VAEP_LANE_RUN_ID:-0}"
   runs="$(api "repos/$GITHUB_REPOSITORY/actions/workflows/$workflow/runs?branch=$BRANCH&per_page=30")"
   count="$(jq --arg name "$name" --argjson current "$current_id" '
     [.workflow_runs[]?
@@ -62,7 +65,15 @@ other_live_lane_run_exists() {
       | select(.id != $current)
       | select(.status=="queued" or .status=="in_progress" or .status=="pending")
     ] | length' <<<"$runs")"
-  (( count > 0 ))
+  if [[ "$current_id" == "0" ]]; then
+    # Controller context: one live run is CURRENT and one additional live run
+    # is the maximum NEXT reservation. A third run would supersede pending
+    # work and is forbidden.
+    (( count > 1 ))
+  else
+    # Lane context: the caller is CURRENT; any other live run is NEXT.
+    (( count > 0 ))
+  fi
 }
 
 

@@ -142,14 +142,16 @@ main() {
 
   emit_role_observation "$checkpoint"
   emit_preflight "$checkpoint"
-  [[ "$checkpoint" != ':24' ]] || emit_review_observation
-  [[ "$checkpoint" != ':36' ]] || emit_watchdog_observation
 
   for worker_arg in "${workers[@]}"; do
     if ! run_lane_refill "$worker_arg" "$checkpoint"; then
       rc=1
     fi
   done
+  # Review and watchdog are intentionally observed after lane refill. They
+  # must never consume the refill deadline when a safe CURRENT/NEXT is absent.
+  [[ "$checkpoint" != ':24' ]] || emit_review_observation
+  [[ "$checkpoint" != ':36' ]] || emit_watchdog_observation
   exit "$rc"
 }
 
