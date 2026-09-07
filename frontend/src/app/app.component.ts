@@ -83,6 +83,7 @@ import { SessionActivityService } from './core/auth/session-activity.service';
             @if (permisosRuntime.puede('Finanzas', 'Ver')) {
               <a routerLink="/finanzas" routerLinkActive="active" ariaCurrentWhenActive="page"><mat-icon>account_balance_wallet</mat-icon> Finanzas</a>
               <a routerLink="/plan-cuentas" routerLinkActive="active" ariaCurrentWhenActive="page"><mat-icon>account_tree</mat-icon> Plan de cuentas</a>
+              <a routerLink="/estados-financieros" routerLinkActive="active" ariaCurrentWhenActive="page"><mat-icon>assessment</mat-icon> Estados financieros</a>
             }
             @if (permisosRuntime.puede('MovimientosInventario', 'Ver')) {
               <a routerLink="/inventario/movimientos" routerLinkActive="active" ariaCurrentWhenActive="page"><mat-icon>sync_alt</mat-icon> Movimientos</a>
