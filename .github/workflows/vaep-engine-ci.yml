@@ -23,7 +23,7 @@ jobs:
       - name: Validate JSON schemas
         run: node -e "for (const f of ['vaep/schemas/jules-dispatch.schema.json','vaep/schemas/evidence-fragment.schema.json','vaep/metrics/baseline.json']) JSON.parse(require('fs').readFileSync(f)); console.log('schemas valid')"
       - name: Validate VAEP scripts
-        run: node --check scripts/vaep/dispatch-preflight.mjs && node --check scripts/vaep/aggregate-evidence.mjs && node --check scripts/vaep/bundles.mjs && node --check scripts/vaep/sync-bitacora.mjs && node --check scripts/vaep/reconcile-status.mjs && node --check scripts/vaep/metrics.mjs && python3 -m py_compile scripts/vaep/jules_integration_metrics.py
+        run: node --check scripts/vaep/dispatch-preflight.mjs && node --check scripts/vaep/aggregate-evidence.mjs && node --check scripts/vaep/bundles.mjs && node --check scripts/vaep/sync-bitacora.mjs && node --check scripts/vaep/reconcile-status.mjs && node --check scripts/vaep/metrics.mjs && python3 -m py_compile scripts/vaep/jules_integration_metrics.py scripts/vaep/jules_runtime_contract.py
       - name: Validate Bash syntax
         run: bash -n .github/scripts/vaep-policy-parser.sh .github/scripts/vaep-jules-master.sh .github/scripts/vaep-jules-worker.sh
       - name: Validate parser fail-closed self-test
@@ -37,6 +37,10 @@ jobs:
         run: bash .github/scripts/vaep-jules-worker.sh --runtime-preflight
       - name: Run VAEP/Jules MASTER runtime self-test
         run: bash .github/scripts/vaep-jules-master.sh --self-test
+      - name: Validate Jules synthetic dispatch matrix
+        run: python3 scripts/vaep/jules_runtime_contract.py --self-test
+      - name: Validate operational KPI evaluator
+        run: node scripts/vaep/metrics.mjs --self-test
       - name: Validate Jules integration receipt contract
         run: python3 scripts/vaep/jules_integration_metrics.py --self-test
       - name: Validate HEAD integration receipt
