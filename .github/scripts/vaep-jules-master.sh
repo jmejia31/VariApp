@@ -279,9 +279,9 @@ if [[ "${1:-}" == "--self-test" ]]; then
     fi
   done
 
-  [[ "$(grep -c -- 'write_timeout_result() {' "$0")" -eq 1 ]]
-  [[ "$(grep -c -- 'manifest_transport_action() {' "$0")" -eq 1 ]]
-  ! grep -q -- 'manifest_count_action' "$0"
+  [[ "$(grep -c '^write_timeout_result() {' "$0")" -eq 1 ]]
+  [[ "$(grep -c '^manifest_transport_action() {' "$0")" -eq 1 ]]
+  ! grep -q '^manifest_count_action() {' "$0"
   bash "$WORKER" --runtime-preflight >/dev/null
   bash "$WORKER" --static-self-test >/dev/null
   printf '{"status":"ok","authority":"MASTER","masterFile":"%s","parentListoTargetRolling60":%d,"parentMaxDwellMinutes":%d,"parentStallNoProgressMinutes":%d,"maxVoluntaryIdle":%d,"checkpoints":"%s","laneBudgetSeconds":%d,"policyHash":"%s","numericProtocolLabelsProhibited":true}\n' \
