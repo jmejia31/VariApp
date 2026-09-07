@@ -52,6 +52,10 @@ export class EstadosFinancierosComponent {
   }
 
   generar(): void {
+    if (this.loading) {
+      return;
+    }
+
     this.error = '';
     this.resultado = null;
     const value = this.form.getRawValue();
