@@ -36,22 +36,34 @@ manifest_transport_action() {
 VALIDATED_MANIFEST=""
 validate_dispatch_transport() {
   local sha="${1:?dispatch sha required}"
-  local action rc=0 status path row
-  local -a manifests=() own_non_added=() batch_changes=()
-  mapfile -t manifests < <(git diff-tree --no-commit-id --name-only --diff-filter=A -r "$sha" -- "$DISPATCH_PATH/*.json")
+  local action rc=0 changed
+  local -a own_added=() own_non_added=() changed_files=() added_batch=()
+  mapfile -t own_added < <(git diff-tree --no-commit-id --name-only --diff-filter=A -r "$sha" -- "$DISPATCH_PATH/*.json")
   mapfile -t own_non_added < <(git diff-tree --no-commit-id --name-only --diff-filter=MDRCTUXB -r "$sha" -- "$DISPATCH_PATH/*.json")
-  action="$(manifest_transport_action "${#manifests[@]}" "${#own_non_added[@]}")" || rc=$?
+  action="$(manifest_transport_action "${#own_added[@]}" "${#own_non_added[@]}")" || rc=$?
   if [[ "$action" != "ADMIT" ]]; then
-    printf 'VAEP MASTER transport rejected: action=%s added=%d non_added=%d worker_path=%s. Every attempt requires a NEW immutable manifest and NEW dispatchId.\n' "$action" "${#manifests[@]}" "${#own_non_added[@]}" "$DISPATCH_PATH" >&2
+    printf 'VAEP MASTER transport rejected: action=%s added=%d non_added=%d worker_path=%s. Every attempt requires a NEW immutable manifest and NEW dispatchId.\n' "$action" "${#own_added[@]}" "${#own_non_added[@]}" "$DISPATCH_PATH" >&2
     return "$rc"
   fi
-  mapfile -t batch_changes < <(git diff-tree --no-commit-id --name-status -r "$sha")
-  if [[ ${#batch_changes[@]} -lt 1 || ${#batch_changes[@]} -gt 4 ]]; then
-    printf 'VAEP MASTER transport invariant failed: dispatch batch must contain 1..4 ADDED manifest files; found %d changes.\n' "${#batch_changes[@]}" >&2
+  mapfile -t changed_files < <(git diff-tree --no-commit-id --name-only -r "$sha")
+  mapfile -t added_batch < <(git diff-tree --no-commit-id --name-only --diff-filter=A -r "$sha")
+  if [[ ${#changed_files[@]} -ne ${#added_batch[@]} ]]; then
+    printf 'VAEP MASTER INVALID_REDISPATCH: dispatch commit is not append-only; changed=%d added=%d.\n' "${#changed_files[@]}" "${#added_batch[@]}" >&2
+    return 65
+  fi
+  if [[ ${#changed_files[@]} -lt 1 || ${#changed_files[@]} -gt 4 ]]; then
+    printf 'VAEP MASTER transport invariant failed: dispatch batch must contain 1..4 ADDED manifest files; found %d.\n' "${#changed_files[@]}" >&2
     return 22
   fi
-  for row in "${batch_changes[@]}"; do
-    status="${row%%
+  for changed in "${changed_files[@]}"; do
+    if [[ ! "$changed" =~ ^vaep/jules(-b|-c|-d)?/dispatch/[^/]+\.json$ ]]; then
+      printf 'VAEP MASTER transport invariant failed: non-dispatch file in atomic batch: %s.\n' "$changed" >&2
+      return 22
+    fi
+  done
+  VALIDATED_MANIFEST="${own_added[0]}"
+  printf 'VAEP_METRIC stage=MANIFEST_ACCEPTED value=true dispatch_sha=%s worker=%s manifest=%s\n' "$sha" "${WORKER_ID:-UNKNOWN}" "$VALIDATED_MANIFEST"
+}
 admission_state_action() {
   local state_file="${1:?admission state file required}"
   if [[ ! -f "$state_file" ]]; then
@@ -267,9 +279,9 @@ if [[ "${1:-}" == "--self-test" ]]; then
     fi
   done
 
-  [[ "$(grep -c '^if \[\[ "${1:-}" == "--self-test" \]\]' "$0")" -eq 1 ]]
-  [[ "$(grep -c '^write_timeout_result() {' "$0")" -eq 1 ]]
-  ! grep -q 'manifest_count_action' "$0"
+  [[ "$(grep -c -- 'write_timeout_result() {' "$0")" -eq 1 ]]
+  [[ "$(grep -c -- 'manifest_transport_action() {' "$0")" -eq 1 ]]
+  ! grep -q -- 'manifest_count_action' "$0"
   bash "$WORKER" --runtime-preflight >/dev/null
   bash "$WORKER" --static-self-test >/dev/null
   printf '{"status":"ok","authority":"MASTER","masterFile":"%s","parentListoTargetRolling60":%d,"parentMaxDwellMinutes":%d,"parentStallNoProgressMinutes":%d,"maxVoluntaryIdle":%d,"checkpoints":"%s","laneBudgetSeconds":%d,"policyHash":"%s","numericProtocolLabelsProhibited":true}\n' \
@@ -314,7 +326,7 @@ dispatch_id="$(jq -r '.dispatchId // "UNKNOWN"' "$manifest")"
 task_id="$(jq -r '.taskId // "UNKNOWN"' "$manifest")"
 primary_base="$(jq -r '.primaryBaseHead // empty' "$manifest")"
 
-# Atomic append-only batch shape was already verified by validate_dispatch_transport.
+# Append-only atomic batch already verified by validate_dispatch_transport.
 if [[ ! "$primary_base" =~ ^[0-9a-fA-F]{40}$ ]]; then
   printf 'VAEP MASTER transport invariant failed: invalid PRIMARY_BASE_HEAD in %s.\n' "$manifest" >&2
   exit 23
