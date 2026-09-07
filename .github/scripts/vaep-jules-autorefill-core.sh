@@ -72,7 +72,14 @@ admission_open() {
     return 1
   fi
   decoded="$(jq -r '.content' <<<"$payload" | tr -d '\n' | base64 -d)"
-  jq -e '.newDispatchAdmission=="OPEN" and .allowExistingActiveSessions==true' <<<"$decoded" >/dev/null
+  jq -e '
+    type=="object" and
+    ((keys|sort)==["allowExistingActiveSessions","newDispatchAdmission","reason","updatedAtUtc"]) and
+    (.newDispatchAdmission=="OPEN") and
+    (.allowExistingActiveSessions==true) and
+    (.reason|type=="string" and length>0) and
+    (.updatedAtUtc|type=="string" and length>0)
+  ' <<<"$decoded" >/dev/null
 }
 
 canonical_parent_matches_checkout() {
@@ -212,6 +219,11 @@ dispatch_internal_manifest_run() {
   local commit="${1:?manifest_commit_required}" workflow runs run_id status before_ids request
   workflow="$(lane_workflow_file)"
 
+  if ! admission_open; then
+    echo "AUTOREFILL_WAIT=dispatch_admission_not_open worker=$WORKER_ID stage=before_workflow_dispatch manifest_commit=$commit" >&2
+    return 79
+  fi
+
   # GITHUB_TOKEN commits do not recursively trigger push workflows.
   # Pass the exact immutable manifest commit as workflow input and correlate by a newly-created run ID.
   before_ids="$(api "repos/$GITHUB_REPOSITORY/actions/workflows/$workflow/runs?event=workflow_dispatch&per_page=30" --jq '[.workflow_runs[]?.id]')"
@@ -241,6 +253,10 @@ create_atomic_manifest_commit() {
   path="$DISPATCH_PATH/$dispatch.json"
 
   for attempt in $(seq 1 8); do
+    if ! admission_open; then
+      echo "AUTOREFILL_WAIT=dispatch_admission_not_open worker=$WORKER_ID stage=before_manifest_build" >&2
+      return 79
+    fi
     if path_exists_on_branch "$path"; then
       echo "AUTOREFILL_ALREADY_RESERVED worker=$WORKER_ID dispatch=$dispatch"
       return 0
@@ -255,6 +271,15 @@ create_atomic_manifest_commit() {
     base_tree="$(jq -r '.tree.sha' <<<"$base_commit")"
     tree="$(jq -n --arg base "$base_tree" --arg path "$path" --arg sha "$blob" '{base_tree:$base,tree:[{path:$path,mode:"100644",type:"blob",sha:$sha}]}' | api "repos/$GITHUB_REPOSITORY/git/trees" --method POST --input - --jq '.sha')"
     commit="$(jq -n --arg message "chore(vaep): autorefill $WORKER_ID $task" --arg tree "$tree" --arg parent "$head" '{message:$message,tree:$tree,parents:[$parent]}' | api "repos/$GITHUB_REPOSITORY/git/commits" --method POST --input - --jq '.sha')"
+    if ! admission_open; then
+      echo "AUTOREFILL_ABORT=dispatch_admission_not_open worker=$WORKER_ID stage=before_publish orphan_commit=$commit action=DO_NOT_UPDATE_BRANCH" >&2
+      return 79
+    fi
+    if [[ "$(current_head)" != "$head" ]]; then
+      echo "AUTOREFILL_RETRY worker=$WORKER_ID dispatch=$dispatch attempt=$attempt reason=head_changed_before_publish"
+      sleep 1
+      continue
+    fi
     set +e
     jq -n --arg sha "$commit" '{sha:$sha,force:false}' | api "repos/$GITHUB_REPOSITORY/git/refs/heads/$BRANCH" --method PATCH --input - >/dev/null 2>&1
     rc=$?

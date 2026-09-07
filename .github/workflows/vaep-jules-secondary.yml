@@ -70,4 +70,4 @@ jobs:
         if: always()
         shell: bash
         continue-on-error: true
-        run: bash .github/scripts/vaep-jules-autorefill.sh
+        run: bash .github/scripts/vaep-jules-autorefill.sh --post-terminal

@@ -4,6 +4,22 @@ set -euo pipefail
 readonly UNIQUE_REGISTRY="vaep/control/jules-completed-semantic-facets.json"
 readonly CATALOG="vaep/control/jules-autorefill-catalog.json"
 
+if [[ "${1:-}" == "--post-terminal" ]]; then
+  : "${RUNNER_TEMP:?RUNNER_TEMP required for post-terminal refill}"
+  state_file="$RUNNER_TEMP/vaep-jules-runtime-state.json"
+  [[ -f "$state_file" ]] || { echo "AUTOREFILL_POST_TERMINAL_REJECT reason=runtime_state_missing" >&2; exit 80; }
+  phase="$(jq -r '.phase // empty' "$state_file")"
+  case "$phase" in
+    TERMINAL_*|STALL_NO_PROGRESS|LANE_BUDGET_EXCEEDED)
+      echo "AUTOREFILL_POST_TERMINAL_ADMIT phase=$phase"
+      ;;
+    *)
+      echo "AUTOREFILL_POST_TERMINAL_REJECT phase=${phase:-MISSING} reason=session_not_terminal" >&2
+      exit 80
+      ;;
+  esac
+fi
+
 # A terminal hook may be running from an older manifest checkout while the
 # control-plane has already advanced. Logic changes remain fail-closed, but
 # data-only catalog/registry changes are refreshed from current Desarrollo so
