@@ -1,9 +1,9 @@
 {
-  "version": 11,
+  "version": 12,
   "authority": "docs/VAEP_AUTHORITY.md",
-  "currentParent": "N4.10.H",
-  "generatedAt": "2026-09-07T11:40:00Z",
-  "regenerationReason": "INCIDENT_RECOVERY__H_CATALOG_EXHAUSTED__RESTORE_12_PER_WORKER__PREPROGRAM_N4_11_FAIL_CLOSED",
+  "currentParent": "N4.11.A",
+  "generatedAt": "2026-09-07T14:08:00Z",
+  "regenerationReason": "CLOSURE_HANDOFF__N4_10_G_AND_H_LISTO_REAL__PROMOTE_N4_11_A",
   "policy": {
     "branch": "Desarrollo",
     "liveQueueDepthTarget": 2,
@@ -26,7 +26,7 @@
         "fileScopeHint": "docs/N4.10_ESTADOS_FINANCIEROS_RUNBOOK.md",
         "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.H. Create the factual operator/developer frontend runbook for estados financieros: diagnostics, safe rollback boundaries, known failure modes and verification commands from current code/evidence only. No invented PASS claims. No main/production/merge/deploy/workflow/manifest changes. TWO self-reviews.",
         "plannedParent": "N4.10.H",
-        "dispatchEligible": true
+        "dispatchEligible": false
       },
       {
         "dispatchId": "N4-10-H-13-QA-EVIDENCE-A",
@@ -36,7 +36,7 @@
         "fileScopeHint": "docs/N4.10_ESTADOS_FINANCIEROS_QA_EVIDENCE.md",
         "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.H. Build a QA evidence index for N4.10 referencing only real commits/tests/runs/artifacts and unresolved gaps. Do not certify LISTO. No main/production/merge/deploy/workflow/manifest changes. TWO self-reviews.",
         "plannedParent": "N4.10.H",
-        "dispatchEligible": true
+        "dispatchEligible": false
       },
       {
         "dispatchId": "N4-11-A-1-ARCH-A",
@@ -46,7 +46,7 @@
         "fileScopeHint": "docs/N4.11_CENTROS_COSTO_PREFLIGHT_ARCHITECTURE.md",
         "prompt": "After N4.10.H is LISTO and N4.11.A is promoted, inventory current CentroCosto-related architecture, entities, routes and dependencies without broad rescans. Evidence only; no production changes.",
         "plannedParent": "N4.11.A",
-        "dispatchEligible": false
+        "dispatchEligible": true
       },
       {
         "dispatchId": "N4-11-B-1-ENTITY-A",
@@ -148,7 +148,7 @@
         "fileScopeHint": "docs/N4.10_ESTADOS_FINANCIEROS_FILTER_MATRIX.md",
         "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.H. Document accepted/rejected period/date filter combinations against current backend/frontend validators and tests, citing real evidence only. TWO self-reviews.",
         "plannedParent": "N4.10.H",
-        "dispatchEligible": true
+        "dispatchEligible": false
       },
       {
         "dispatchId": "N4-10-H-14-RELEASE-B",
@@ -158,7 +158,7 @@
         "fileScopeHint": "docs/N4.10_ESTADOS_FINANCIEROS_RELEASE_NOTES.md",
         "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.H. Prepare factual release-note input for N4.10 without deployment or certification claims; include implemented six statements, filter modes, RBAC/error-redaction boundaries and known limitations. TWO self-reviews.",
         "plannedParent": "N4.10.H",
-        "dispatchEligible": true
+        "dispatchEligible": false
       },
       {
         "dispatchId": "N4-11-A-2-DEPS-B",
@@ -168,7 +168,7 @@
         "fileScopeHint": "docs/N4.11_CENTROS_COSTO_DEPENDENCIES.md",
         "prompt": "After N4.10.H is LISTO and N4.11.A is promoted, map CentroCosto dependencies and integration boundaries from current code.",
         "plannedParent": "N4.11.A",
-        "dispatchEligible": false
+        "dispatchEligible": true
       },
       {
         "dispatchId": "N4-11-B-2-CONTRACT-B",
@@ -270,7 +270,7 @@
         "fileScopeHint": "docs/N4.10_ESTADOS_FINANCIEROS_TEST_MATRIX.md",
         "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.H. Consolidate N4.10 test coverage by behavior/source: backend, frontend, RBAC, redaction, regression and known gaps. Reference only real tests/runs. TWO self-reviews.",
         "plannedParent": "N4.10.H",
-        "dispatchEligible": true
+        "dispatchEligible": false
       },
       {
         "dispatchId": "N4-10-H-15-COVERAGE-C",
@@ -280,7 +280,7 @@
         "fileScopeHint": "docs/N4.10_ESTADOS_FINANCIEROS_COVERAGE_EVIDENCE.md",
         "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.H. Record factual coverage evidence and unresolved gaps without inventing percentages or PASS claims. TWO self-reviews.",
         "plannedParent": "N4.10.H",
-        "dispatchEligible": true
+        "dispatchEligible": false
       },
       {
         "dispatchId": "N4-11-A-3-RISKS-C",
@@ -290,7 +290,7 @@
         "fileScopeHint": "docs/N4.11_CENTROS_COSTO_RISKS.md",
         "prompt": "After N4.10.H is LISTO and N4.11.A is promoted, map CentroCosto risks, acceptance criteria and test strategy.",
         "plannedParent": "N4.11.A",
-        "dispatchEligible": false
+        "dispatchEligible": true
       },
       {
         "dispatchId": "N4-11-B-3-VALID-C",
@@ -392,7 +392,7 @@
         "fileScopeHint": "docs/N4.10_ESTADOS_FINANCIEROS_SECURITY.md",
         "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.H. R2 after lane-budget timeout with patchPresent=false. Produce factual security/RBAC/error-redaction documentation from current code/evidence. No invented PASS. TWO self-reviews.",
         "plannedParent": "N4.10.H",
-        "dispatchEligible": true
+        "dispatchEligible": false
       },
       {
         "dispatchId": "N4-10-H-8-INTEGRATION-MATRIX-D-R2",
@@ -402,7 +402,7 @@
         "fileScopeHint": "docs/N4.10_ESTADOS_FINANCIEROS_INTEGRATION_MATRIX.md",
         "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.H. R2 after lane-budget timeout with patchPresent=false. Map backend/frontend/filter/RBAC integration scenarios to real code/tests. No invented PASS. TWO self-reviews.",
         "plannedParent": "N4.10.H",
-        "dispatchEligible": true
+        "dispatchEligible": false
       },
       {
         "dispatchId": "N4-10-H-12-ROLLBACK-D",
@@ -412,7 +412,7 @@
         "fileScopeHint": "docs/N4.10_ESTADOS_FINANCIEROS_ROLLBACK.md",
         "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.H. Document scoped rollback boundaries and post-rollback verification for N4.10 without production execution. TWO self-reviews.",
         "plannedParent": "N4.10.H",
-        "dispatchEligible": true
+        "dispatchEligible": false
       },
       {
         "dispatchId": "N4-10-H-16-CERT-CHECK-D",
@@ -422,7 +422,7 @@
         "fileScopeHint": "docs/N4.10_ESTADOS_FINANCIEROS_CERT_CHECKLIST.md",
         "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.H. Build factual certification checklist showing satisfied evidence and unresolved gaps; do not declare LISTO. TWO self-reviews.",
         "plannedParent": "N4.10.H",
-        "dispatchEligible": true
+        "dispatchEligible": false
       },
       {
         "dispatchId": "N4-11-A-4-ROLLBACK-D",
@@ -432,7 +432,7 @@
         "fileScopeHint": "docs/N4.11_CENTROS_COSTO_ROLLBACK_PREFLIGHT.md",
         "prompt": "After N4.10.H is LISTO and N4.11.A is promoted, define CentroCosto rollback/preflight boundaries from current architecture.",
         "plannedParent": "N4.11.A",
-        "dispatchEligible": false
+        "dispatchEligible": true
       },
       {
         "dispatchId": "N4-11-B-4-REPO-D",
