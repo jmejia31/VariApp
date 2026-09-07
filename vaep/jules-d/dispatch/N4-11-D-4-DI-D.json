@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-11-D-4-DI-D",
+  "taskId": "N4.11.D.4.DI_WIRING",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N411DCentroCostoDiTests.cs",
+  "prompt": "After N4.11.C LISTO, verify CentroCosto DI/controller wiring fail-closed.",
+  "primaryBaseHead": "e18e77bd8dc735b1afada56378731bf28fc57373"
+}
