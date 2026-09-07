@@ -397,16 +397,16 @@ run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
 issue_json="$(jq -c '.' "$result_dir/result.json")"
 printf -v body '%s\n\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n%s\n' \
   "VAEP $WORKER_LABEL MASTER — lane budget exceeded and session superseded." \
-  "- Authority: `docs/VAEP_AUTHORITY.md`" \
-  "- MASTER commit: `$MASTER_COMMIT_SHA`" \
-  "- Policy hash: `$AUTOMATION_POLICY_HASH`" \
-  "- Worker: `$WORKER_ID`" \
-  "- Dispatch: `$dispatch_id`" \
-  "- Task: `$task_id`; attempt: `$task_attempt/$JULES_MAX_ATTEMPTS`" \
-  "- Session: `${session_name:-NO_SESSION}`" \
-  "- Stop action: `$safe_stop_action`; before: `$before_state`; after: `$after_state`" \
+  "- Authority: docs/VAEP_AUTHORITY.md" \
+  "- MASTER commit: $MASTER_COMMIT_SHA" \
+  "- Policy hash: $AUTOMATION_POLICY_HASH" \
+  "- Worker: $WORKER_ID" \
+  "- Dispatch: $dispatch_id" \
+  "- Task: $task_id; attempt: $task_attempt/$JULES_MAX_ATTEMPTS" \
+  "- Session: ${session_name:-NO_SESSION}" \
+  "- Stop action: $safe_stop_action; before: $before_state; after: $after_state" \
   "- Workflow run: $run_url" \
-  "SUPERSEDED=true; OWNERSHIP_REVOKED=true; LANE_RELEASED=true; LATE_RESULT_AUTO_INTEGRATION_DENIED=true. Structured evidence: `$issue_json`"
+  "SUPERSEDED=true; OWNERSHIP_REVOKED=true; LANE_RELEASED=true; LATE_RESULT_AUTO_INTEGRATION_DENIED=true. Structured evidence: $issue_json"
 
 gh issue create --repo "$GITHUB_REPOSITORY" --title "[VAEP-JULES-SUPERSEDED] $dispatch_id" --body "$body" >/dev/null
 
