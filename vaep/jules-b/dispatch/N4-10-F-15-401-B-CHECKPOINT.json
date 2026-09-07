@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-F-15-401-B-CHECKPOINT",
+  "taskId": "N4.10.F.15.SERVICE_401_SANITIZATION_TESTS",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/services/estado-financiero.unauthorized.spec.ts only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.F. Test EstadoFinancieroService sanitizes 401 responses and never exposes raw server detail. Own ONLY frontend/src/app/services/estado-financiero.unauthorized.spec.ts. Production files read-only. Run proportional tests and TWO independent self-reviews. No main/production/merge/deploy/workflow/manifest changes.",
+  "primaryBaseHead": "aca355c8caf4b22128f917db7ae9e4ed08dfb62b"
+}

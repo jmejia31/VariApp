@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-F-23-AUTH-ATTR-D-CHECKPOINT",
+  "taskId": "N4.10.F.23.CONTROLLER_AUTH_ATTRIBUTE_TESTS",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410FEstadosFinancierosAuthorizationAttributeTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.F. Add reflection/contract tests proving EstadosFinancierosController has Authorize and Finanzas/Ver requirement. Own ONLY backend/tests/InventoryApp.Tests/N410FEstadosFinancierosAuthorizationAttributeTests.cs. Production files read-only. Run proportional tests/build and TWO independent self-reviews. No main/production/merge/deploy/workflow/manifest changes.",
+  "primaryBaseHead": "aca355c8caf4b22128f917db7ae9e4ed08dfb62b"
+}
