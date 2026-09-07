@@ -484,12 +484,16 @@ else
   : > "$result_dir/changes.patch"
 fi
 terminal_contract_valid=false
+ready_for_vaep=false
 if [[ "$terminal_state" == "COMPLETED" ]]; then
   set +e
   python3 "$RUNTIME_CONTRACT" --validate-terminal "$manifest" "$result_dir/gitpatch.json" "$result_dir/activities.json" > "$result_dir/terminal-contract.json"
   terminal_contract_rc=$?
   set -e
-  [[ "$terminal_contract_rc" -eq 0 ]] && terminal_contract_valid=true
+  if [[ "$terminal_contract_rc" -eq 0 ]]; then
+    terminal_contract_valid=true
+    ready_for_vaep=true
+  fi
 else
   jq -n --arg state "$terminal_state" '{ok:false,skipped:true,reason:"terminal state is not COMPLETED",state:$state}' > "$result_dir/terminal-contract.json"
 fi
@@ -500,8 +504,13 @@ jq -n \
   --arg lastActivityAt "$last_activity_at" \
   --arg finalStateAt "$final_state_at" \
   --arg finalState "$terminal_state" \
+  --arg dispatchCommitSha "$DISPATCH_SHA" \
+  --arg manifestPath "$manifest" \
+  --arg workflowRunId "$GITHUB_RUN_ID" \
+  --arg sessionName "$session_name" \
   --argjson patchPresent "$patch_present" \
-  '{manifestAcceptedAt:$manifestAcceptedAt,sessionCreatedAt:$sessionCreatedAt,firstInProgressAt:$firstInProgressAt,lastActivityAt:$lastActivityAt,finalStateAt:$finalStateAt,finalState:$finalState,patchPresent:$patchPresent,reviewResult:"PENDING_REVIEW_FIRST",integrationResult:"NOT_INTEGRATED"}' > "$result_dir/lifecycle.json"
+  --argjson readyForVaep "$ready_for_vaep" \
+  '{dispatchCommitSha:$dispatchCommitSha,manifestPath:$manifestPath,workflowRunId:$workflowRunId,sessionName:$sessionName,manifestAcceptedAt:$manifestAcceptedAt,sessionCreatedAt:$sessionCreatedAt,firstInProgressAt:$firstInProgressAt,lastActivityAt:$lastActivityAt,finalStateAt:$finalStateAt,finalState:$finalState,patchPresent:$patchPresent,readyForVaep:$readyForVaep,handoffState:(if $readyForVaep then "READY_FOR_VAEP" else "NOT_READY_FOR_VAEP" end),reviewResult:"PENDING_REVIEW_FIRST",integrationResult:"NOT_INTEGRATED",correlationComplete:true}' > "$result_dir/lifecycle.json"
 
 jq -n \
   --arg protocol "$VAEP_JULES_PROTOCOL" \
@@ -517,6 +526,10 @@ jq -n \
   --arg actualBase "$actual_base" \
   --arg suggestedCommitMessage "$suggested" \
   --arg feedbackQuestion "$feedback_question" \
+  --arg dispatchCommitSha "$DISPATCH_SHA" \
+  --arg manifestPath "$manifest" \
+  --arg workflowRunId "$GITHUB_RUN_ID" \
+  --argjson readyForVaep "$ready_for_vaep" \
   --argjson selfReviewPass1 "$self_review_pass_1" \
   --argjson selfReviewPass2 "$self_review_pass_2" \
   --argjson patchPresent "$patch_present" \
@@ -526,7 +539,7 @@ jq -n \
   --argjson parentCloseFirst "$PARENT_CLOSE_FIRST" \
   --argjson laneBudgetSeconds "$JULES_LANE_BUDGET_SECONDS" \
   --arg checkpoints "$VAEP_CHECKPOINTS" \
-  '{protocol:$protocol,globalControlPlane:"VAEP_MASTER",masterCommitSha:$masterCommitSha,policyHash:$policyHash,parentCloseFirst:$parentCloseFirst,checkpoints:$checkpoints,laneBudgetSeconds:$laneBudgetSeconds,workerId:$workerId,dispatchId:$dispatchId,taskId:$taskId,taskAttempt:$taskAttempt,maxAttempts:$maxAttempts,r3Prohibited:$r3Prohibited,qaTakeoverOnRetryExhaustion:true,session:$session,state:$state,requestedBase:$requestedBase,actualPatchBase:$actualBase,patchPresent:$patchPresent,selfReviewPass1:$selfReviewPass1,selfReviewPass2:$selfReviewPass2,feedbackQuestion:$feedbackQuestion,triggered:true,manifestAccepted:true,sessionCreated:true,sessionCompleted:($state=="COMPLETED"),terminalContractArtifact:"terminal-contract.json",lifecycleArtifact:"lifecycle.json",reviewAccepted:false,integrated:false,integrationReceiptRequired:true,integrationReceiptMode:"COMMIT_TRAILERS",productivityCountedStage:"INTEGRATED",superseded:($state=="LATE_RESULT_SUPERSEDED"),lateResultAutoIntegrationDenied:($state=="LATE_RESULT_SUPERSEDED"),suggestedCommitMessage:$suggestedCommitMessage,autoFeedbackCount:$autoFeedbackCount,controllerHandoff:(if $state=="LATE_RESULT_SUPERSEDED" then "LATE_RESULT_EVIDENCE_ONLY" elif $state=="AWAITING_USER_FEEDBACK_QA_TAKEOVER" then "QA_TAKEOVER_FEEDBACK_REQUIRED" else "REVIEW_IMMEDIATELY_AND_ASSIGN_NEXT_SAFE" end)}' \
+  '{protocol:$protocol,globalControlPlane:"VAEP_MASTER",masterCommitSha:$masterCommitSha,policyHash:$policyHash,parentCloseFirst:$parentCloseFirst,checkpoints:$checkpoints,laneBudgetSeconds:$laneBudgetSeconds,workerId:$workerId,dispatchId:$dispatchId,taskId:$taskId,taskAttempt:$taskAttempt,maxAttempts:$maxAttempts,r3Prohibited:$r3Prohibited,qaTakeoverOnRetryExhaustion:true,session:$session,state:$state,requestedBase:$requestedBase,actualPatchBase:$actualBase,patchPresent:$patchPresent,selfReviewPass1:$selfReviewPass1,selfReviewPass2:$selfReviewPass2,feedbackQuestion:$feedbackQuestion,triggered:true,manifestAccepted:true,sessionCreated:true,sessionCompleted:($state=="COMPLETED"),terminalContractArtifact:"terminal-contract.json",lifecycleArtifact:"lifecycle.json",reviewAccepted:false,integrated:false,integrationReceiptRequired:true,integrationReceiptMode:"COMMIT_TRAILERS",productivityCountedStage:"INTEGRATED",superseded:($state=="LATE_RESULT_SUPERSEDED"),lateResultAutoIntegrationDenied:($state=="LATE_RESULT_SUPERSEDED"),suggestedCommitMessage:$suggestedCommitMessage,autoFeedbackCount:$autoFeedbackCount,dispatchCommitSha:$dispatchCommitSha,manifestPath:$manifestPath,workflowRunId:$workflowRunId,readyForVaep:$readyForVaep,handoffState:(if $readyForVaep then "READY_FOR_VAEP" else "NOT_READY_FOR_VAEP" end),correlationComplete:true,controllerHandoff:(if $state=="LATE_RESULT_SUPERSEDED" then "LATE_RESULT_EVIDENCE_ONLY" elif $state=="AWAITING_USER_FEEDBACK_QA_TAKEOVER" then "QA_TAKEOVER_FEEDBACK_REQUIRED" elif $readyForVaep then "READY_FOR_VAEP_REVIEW_FIRST_REQUIRED_NO_REFILL" else "QA_CLASSIFICATION_REQUIRED_NO_REFILL" end)}' \
   > "$result_dir/result.json"
 
 run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
@@ -541,7 +554,10 @@ printf -v issue_body '%s\n\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n%s\n' 
   "- Terminal state: \`$terminal_state\`" \
   "- Inline auto-feedback count: \`$auto_feedback_count\`" \
   "- Patch present: \`$patch_present\`; patch base: \`$actual_base\`" \
-  "- Controller handoff: \`REVIEW_IMMEDIATELY_AND_ASSIGN_NEXT_SAFE\`" \
+  "- Ready for VAEP: \`$ready_for_vaep\`; review status: \`PENDING_REVIEW_FIRST\`" \
+  "- Dispatch commit: \`$DISPATCH_SHA\`; manifest: \`$manifest\`" \
+  "- Workflow run ID: \`$GITHUB_RUN_ID\`; correlation complete: \`true\`" \
+  "- Controller handoff: \`$(if [[ "$ready_for_vaep" == true ]]; then printf READY_FOR_VAEP_REVIEW_FIRST_REQUIRED_NO_REFILL; else printf QA_CLASSIFICATION_REQUIRED_NO_REFILL; fi)\`" \
   "- Parent-close-first: \`$PARENT_CLOSE_FIRST\`; checkpoints: \`$VAEP_CHECKPOINTS\`" \
   "- Workflow run: $run_url" \
   'Artifact only. Nothing was applied to Desarrollo, pushed, merged or deployed. VAEP/ChatGPT review is mandatory. When MASTER retry capacity is exhausted, ChatGPT/VAEP/Vibe takes over; do not exceed MASTER retry limits.'
@@ -565,3 +581,4 @@ if [[ "$terminal_contract_valid" != true ]]; then
   fail "Jules COMPLETED rejected by terminal contract: scope/tests/base/artifact evidence incomplete." 55
 fi
 printf 'VAEP_METRIC stage=TERMINAL_CONTRACT_VALID value=true session=%s base=%s\n' "$session_name" "$actual_base"
+printf 'VAEP_METRIC stage=READY_FOR_VAEP value=true session=%s dispatch_commit=%s workflow_run_id=%s\n' "$session_name" "$DISPATCH_SHA" "$GITHUB_RUN_ID"
