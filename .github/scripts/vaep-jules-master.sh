@@ -279,7 +279,7 @@ if [[ "${1:-}" == "--self-test" ]]; then
     fi
   done
 
-  ! grep -q -- 'manifest_count_action' "$0"
+  ! grep -q -- 'manifest_''count_action' "$0"
   bash "$WORKER" --runtime-preflight >/dev/null
   bash "$WORKER" --static-self-test >/dev/null
   printf '{"status":"ok","authority":"MASTER","masterFile":"%s","parentListoTargetRolling60":%d,"parentMaxDwellMinutes":%d,"parentStallNoProgressMinutes":%d,"maxVoluntaryIdle":%d,"checkpoints":"%s","laneBudgetSeconds":%d,"policyHash":"%s","numericProtocolLabelsProhibited":true}\n' \
