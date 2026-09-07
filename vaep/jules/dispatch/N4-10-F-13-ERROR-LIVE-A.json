@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-F-13-ERROR-LIVE-A",
+  "taskId": "N4.10.F.13.ERROR_LIVE_REGION_TESTS",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.error-live.spec.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.F. Add accessibility/security tests that sanitized errors are announced via role=alert without internal details. Production files read-only. Run proportional tests and TWO self-reviews.",
+  "primaryBaseHead": "36aee56793f34573db7d8dceabf93e81e929677f"
+}
