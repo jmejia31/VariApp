@@ -56,7 +56,7 @@ jobs:
           grep -q "review_first_debt_exists" .github/scripts/vaep-jules-autorefill.sh
           grep -q "AUTOREFILL_WAIT=REVIEW_FIRST_REQUIRED" .github/scripts/vaep-jules-autorefill.sh
           grep -q "other_live_lane_run_exists" .github/scripts/vaep-jules-autorefill-core.sh
-          grep -q "VAEP_LANE_RUN_ID" .github/scripts/vaep-jules-secondary.yml
+          grep -q "VAEP_LANE_RUN_ID" .github/workflows/vaep-jules-secondary.yml
       - name: Validate scheduled checkpoint controller
         run: |
           test "$(grep -c "cron:" .github/workflows/vaep-checkpoints.yml)" -eq 5
