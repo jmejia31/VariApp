@@ -4,15 +4,16 @@ set -euo pipefail
 readonly UNIQUE_REGISTRY="vaep/control/jules-completed-semantic-facets.json"
 readonly CATALOG="vaep/control/jules-autorefill-catalog.json"
 
+post_terminal=0
 if [[ "${1:-}" == "--post-terminal" ]]; then
+  post_terminal=1
   : "${RUNNER_TEMP:?RUNNER_TEMP required for post-terminal refill}"
   state_file="$RUNNER_TEMP/vaep-jules-runtime-state.json"
   [[ -f "$state_file" ]] || { echo "AUTOREFILL_POST_TERMINAL_REJECT reason=runtime_state_missing" >&2; exit 80; }
   phase="$(jq -r '.phase // empty' "$state_file")"
   case "$phase" in
     TERMINAL_*|STALL_NO_PROGRESS|LANE_BUDGET_EXCEEDED)
-      echo "AUTOREFILL_WAIT=REVIEW_FIRST_REQUIRED phase=$phase action=NO_POST_TERMINAL_REFILL" >&2
-      exit 81
+      echo "AUTOREFILL_POST_TERMINAL_CONFIRMED phase=$phase action=RESERVE_NEXT_SAFE" >&2
       ;;
     *)
       echo "AUTOREFILL_POST_TERMINAL_REJECT phase=${phase:-MISSING} reason=session_not_terminal" >&2
@@ -131,4 +132,7 @@ bash .github/scripts/vaep-jules-catalog-floor.sh
 # selection so this run cannot reserve a future-parent or completed facet.
 filter_dependency_safe_parent
 filter_completed_facets
+if (( post_terminal == 1 )); then
+  echo "AUTOREFILL_MODE=POST_TERMINAL action=CONTINUE_TO_CORE"
+fi
 exec bash .github/scripts/vaep-jules-autorefill-core.sh
