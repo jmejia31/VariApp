@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-F-16-403-B-RECOVERY",
+  "taskId": "N4.10.F.16.SERVICE_403_SANITIZATION_TESTS",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/services/estado-financiero.forbidden.spec.ts only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.F. Test EstadoFinancieroService sanitizes 403 responses into stable user-safe errors. Own ONLY frontend/src/app/services/estado-financiero.forbidden.spec.ts. Production files read-only. Run proportional tests and TWO independent self-reviews. No main/production/merge/deploy/workflow/manifest changes.",
+  "primaryBaseHead": "a26d1bf8542a5d51e8da9966a3c8d9ba30c53224"
+}

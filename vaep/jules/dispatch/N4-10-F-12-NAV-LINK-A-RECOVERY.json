@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-F-12-NAV-LINK-A-RECOVERY",
+  "taskId": "N4.10.F.12.NAV_LINK_PERMISSION_TESTS",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/app.component.estados-financieros-nav.spec.ts only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.F. Test Estados financieros navigation visibility is gated by Finanzas/Ver and hidden without permission. Own ONLY frontend/src/app/app.component.estados-financieros-nav.spec.ts. Production files read-only. Run proportional tests and TWO independent self-reviews. No main/production/merge/deploy/workflow/manifest changes.",
+  "primaryBaseHead": "a26d1bf8542a5d51e8da9966a3c8d9ba30c53224"
+}
