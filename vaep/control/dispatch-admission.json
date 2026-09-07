@@ -1,16 +1,6 @@
 {
-  "schemaVersion": "1.0",
-  "state": "OPEN",
-  "reason": "N4.10.F LISTO_REAL; N4.10.G promoted dependency-valid; only plannedParent=N4.10.G may dispatch",
-  "incident": null,
-  "currentParent": "N4.10.G",
-  "updatedAtUtc": "2026-09-07T05:02:19Z",
-  "policy": {
-    "allowExistingSessionsToFinish": true,
-    "allowNewDispatch": true,
-    "allowManifestCreation": true,
-    "allowReserveNext": true,
-    "requiredPlannedParent": "N4.10.G",
-    "requiredCatalogCurrentParent": "N4.10.G"
-  }
+  "newDispatchAdmission": "OPEN",
+  "allowExistingActiveSessions": true,
+  "reason": "N4.10.G is CURRENT_PARENT and dependency-valid; only plannedParent=N4.10.G may dispatch. Recovered canonical admission schema after Jules MASTER exit 72.",
+  "updatedAtUtc": "2026-09-07T05:57:00Z"
 }
