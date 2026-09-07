@@ -33,7 +33,7 @@ describe('EstadoFinancieroService 403 sanitization', () => {
       { status: 403, statusText: 'Forbidden' },
     );
 
-    expect(receivedError).toEqual(jasmine.any(Error));
+    expect(receivedError).toBeInstanceOf(Error);
     expect((receivedError as Error).message).toBe(
       'No fue posible generar el estado financiero. Intente nuevamente.',
     );

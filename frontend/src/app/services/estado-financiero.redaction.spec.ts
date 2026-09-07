@@ -30,7 +30,7 @@ describe('EstadoFinancieroService redaction', () => {
       { status: 500, statusText: 'Internal Server Error' },
     );
 
-    expect(receivedError).toEqual(jasmine.any(Error));
+    expect(receivedError).toBeInstanceOf(Error);
     expect((receivedError as Error).message).toBe('No fue posible generar el estado financiero. Intente nuevamente.');
     expect((receivedError as Error).message).not.toContain('ORA-00942');
     expect((receivedError as Error).message).not.toContain('FINANZAS_SECRET');
