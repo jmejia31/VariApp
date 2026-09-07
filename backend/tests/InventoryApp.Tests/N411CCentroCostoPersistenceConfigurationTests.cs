@@ -63,7 +63,7 @@ public class N411CCentroCostoPersistenceConfigurationTests
         var entity = BuildModel().FindEntityType(typeof(CentroCosto));
         Assert.NotNull(entity);
 
-        var checks = entity!.GetCheckConstraints().ToDictionary(x => x.Name, x => x.Sql);
+        var checks = entity!.GetCheckConstraints().ToDictionary(x => x.Name!, x => x.Sql);
 
         Assert.Contains("CK_CentrosCosto_Tipo", checks.Keys);
         Assert.Contains("CK_CentrosCosto_Asociacion", checks.Keys);
