@@ -175,6 +175,11 @@ Invariantes P0/P1 de entrega y productividad:
 - `PARENT_STALL_NO_PROGRESS_MINUTES` se aplica a progreso observable de estado/timestamp/actividad y puede cortar antes de `JULES_LANE_BUDGET_SECONDS`; stall revoca ownership y pasa a QA_TAKEOVER.
 - Antes de crear una sesión, el worker enumera sesiones remotas y bloquea cualquier sesión existente del mismo `taskId` todavía activa, incluyendo otro `dispatchId`, base o intento. El guard registra `taskId + dispatchId + primaryBaseHead + taskAttempt + session + state`; reusar un manifest cuyo dispatch ya tuvo sesión se clasifica fail-closed.
 - Un `COMPLETED` entregable exige ChangeSet/gitPatch no vacío, `baseCommitId == primaryBaseHead`, anclaje al `fileScopeHint`, ausencia de cambios al control-plane, marcador `TESTS_EXECUTED`, `SELF_REVIEW_PASS_1` y `SELF_REVIEW_PASS_2`. El artifact `lifecycle.json` conserva aceptación del manifest, creación de sesión, primer IN_PROGRESS, última actividad, terminal, patch, review e integración.
+- Cuando ese contrato terminal pasa, el handoff explícito es `READY_FOR_VAEP`; hasta que exista REVIEW_FIRST/clasificación causal, el autorefill post-terminal queda bloqueado. Un NEXT_SAFE pre-reservado puede existir, pero no se crea un reemplazo adicional por terminalización.
+- Toda corrida Jules debe conservar correlación `dispatchCommitSha -> manifestPath -> workflowRunId -> sessionName`; si falta un eslabón no es ACTIVE_REAL ni productividad.
+- Recovery manual exige `manifest_commit` exacto y `--transport-preflight` del manifest inmutable antes de crear o reusar sesión.
+- Si un stop de una sesión SUPERSEDED deja el estado remoto activo, la lane queda `QUARANTINED_REMOTE_ACTIVE_NO_DUPLICATE`; ningún recovery equivalente puede nacer hasta estado remoto terminal y RCA causal.
+- Los checkpoints tienen responsabilidades distintas: `:00` despacho material/correlación; `:12` RCA-recovery/cierre; `:24` REVIEW_FIRST/certificación/integración; `:36` stall-watchdog/cierre; `:48` deuda material priorizando cierre/review/QA antes que refill. Floor/target de catálogo son observabilidad, nunca obligación de fabricar tareas.
 
 
 ### Admisión de nuevos dispatches
