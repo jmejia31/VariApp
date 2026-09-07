@@ -3,36 +3,9 @@ name: VAEP engine lightweight checks
 on:
   push:
     branches: [Desarrollo]
-    paths:
-      - 'vaep/**'
-      - 'scripts/vaep/**'
-      - '.github/workflows/vaep-engine-ci.yml'
-      - '.github/scripts/vaep-jules-master.sh'
-      - '.github/scripts/vaep-jules-worker.sh'
-      - 'scripts/antig/antig-self-test.ps1'
-      - 'docs/VAEP_AUTHORITY.md'
-      - 'AGENTS.md'
-      - 'backend/**'
-      - 'frontend/**'
-      - 'CHANGELOG_AI.md'
-      - 'TASKS.md'
   pull_request:
     branches: [main]
-    paths:
-      - 'vaep/**'
-      - 'scripts/vaep/**'
-      - '.github/workflows/vaep-engine-ci.yml'
-      - '.github/scripts/vaep-jules-master.sh'
-      - '.github/scripts/vaep-jules-worker.sh'
-      - 'scripts/antig/antig-self-test.ps1'
-      - 'docs/VAEP_AUTHORITY.md'
-      - 'AGENTS.md'
-      - 'backend/**'
-      - 'frontend/**'
-      - 'CHANGELOG_AI.md'
-      - 'TASKS.md'
   workflow_dispatch:
-
 permissions:
   contents: read
 
