@@ -1,6 +1,7 @@
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities;
+using InventoryApp.Domain.Enums;
 using InventoryApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,9 +23,25 @@ public class AuditoriaRepository : IAuditoriaRepository
     {
         var query = _context.RegistrosAuditoria.AsQueryable();
 
-        if (filtro.UsuarioId.HasValue) query = query.Where(r => r.UsuarioId == filtro.UsuarioId.Value);
-        if (!string.IsNullOrWhiteSpace(filtro.Modulo)) query = query.Where(r => r.Modulo.ToString() == filtro.Modulo);
-        if (!string.IsNullOrWhiteSpace(filtro.Accion)) query = query.Where(r => r.Accion.ToString() == filtro.Accion);
+        if (filtro.UsuarioId.HasValue)
+            query = query.Where(r => r.UsuarioId == filtro.UsuarioId.Value);
+
+        if (!string.IsNullOrWhiteSpace(filtro.Modulo))
+        {
+            if (Enum.TryParse<ModuloSistema>(filtro.Modulo.Trim(), true, out var modulo))
+                query = query.Where(r => r.Modulo == modulo);
+            else
+                query = query.Where(_ => false);
+        }
+
+        if (!string.IsNullOrWhiteSpace(filtro.Accion))
+        {
+            if (Enum.TryParse<AccionPermiso>(filtro.Accion.Trim(), true, out var accion))
+                query = query.Where(r => r.Accion == accion);
+            else
+                query = query.Where(_ => false);
+        }
+
         if (!string.IsNullOrWhiteSpace(filtro.Entidad)) query = query.Where(r => r.Entidad == filtro.Entidad);
         if (filtro.ReferenciaId.HasValue) query = query.Where(r => r.ReferenciaId == filtro.ReferenciaId.Value);
         if (!string.IsNullOrWhiteSpace(filtro.Resultado)) query = query.Where(r => r.Resultado == filtro.Resultado);

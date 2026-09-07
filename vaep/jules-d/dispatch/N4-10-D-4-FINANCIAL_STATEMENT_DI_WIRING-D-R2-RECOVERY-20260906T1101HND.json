@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-D-4-FINANCIAL_STATEMENT_DI_WIRING-D-R2-RECOVERY-20260906T1101HND",
+  "taskId": "N4.10.D.4.FINANCIAL_STATEMENT_DI_WIRING",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 2,
+  "fileScopeHint": "backend/src/API/Program.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. R2 FINAL recovery for the SAME N4.10.D.4.FINANCIAL_STATEMENT_DI_WIRING task. Prior R2 transport failed before Jules session creation, so this remains the same final Jules attempt, not R3. Own ONLY backend/src/API/Program.cs. Add the minimum DI registration required for approved IEstadoFinancieroService implementation following existing conventions. Do not alter unrelated registrations/middleware/secrets/infrastructure/controller/production config. Run focused build/tests when possible and perform TWO independent self-reviews. No workflow/manifest/main/production/merge/deploy changes.",
+  "primaryBaseHead": "607966e3b3c72014e563c7f154b71f7d81da0e7a"
+}

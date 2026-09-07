@@ -1,9 +1,14 @@
 export interface VentaDetalle {
   id: number;
   productoId: number;
+  productoVarianteId?: number;
   productoNombre: string;
   productoMarca: string;
   productoModelo: string;
+  productoColor?: string;
+  productoTalla?: string;
+  productoSku?: string;
+  productoImagenPrincipalUrl?: string;
   cantidad: number;
   precioUnitario: number;
   subtotal: number;
@@ -22,6 +27,7 @@ export interface DescuentoAplicado {
 export interface ImpuestoAplicado {
   impuestoId: number;
   nombre: string;
+  codigo?: string;
   tasa: number;
   baseImponible: number;
   monto: number;
@@ -29,11 +35,21 @@ export interface ImpuestoAplicado {
 }
 
 export interface ResultadoCalculo {
+  importeBruto: number;
+  importeProductos?: number;
   subtotal: number;
+  subtotalNeto?: number;
   descuentosAplicados: DescuentoAplicado[];
   totalDescuento: number;
   impuestosAplicados: ImpuestoAplicado[];
   totalImpuesto: number;
+  impuestoIncluido: number;
+  impuestoAdicional: number;
+  costoEnvioId?: number;
+  costoEnvioNombre?: string;
+  costoEnvio?: number;
+  envioExonerado?: boolean;
+  motivoExoneracionEnvio?: string;
   total: number;
 }
 
@@ -48,10 +64,17 @@ export interface Venta {
   clienteDireccion?: string;
   estado: 'Borrador' | 'Confirmada' | 'Anulada';
   estadoPago: 'Pendiente' | 'Pagado' | 'Parcial';
-  metodoPago: 'Efectivo' | 'Transferencia' | 'Tarjeta' | 'Otro';
+  metodoPago: string;
+  importeBruto: number;
+  importeProductos: number;
   subtotal: number;
   descuento: number;
   impuesto: number;
+  costoEnvio: number;
+  costoEnvioId?: number;
+  costoEnvioNombre?: string;
+  envioExonerado: boolean;
+  motivoExoneracionEnvio?: string;
   total: number;
   costoTotal: number;
   utilidadBruta: number;
@@ -72,6 +95,7 @@ export interface Venta {
 
 export interface VentaDetalleInput {
   productoId: number;
+  productoVarianteId?: number | null;
   cantidad: number;
   precioUnitario: number;
 }
@@ -84,10 +108,12 @@ export interface VentaFormValue {
   clienteDireccion?: string;
   metodoPago: string;
   estadoPago: string;
-  /** Se envían en 0 por compatibilidad; el backend los ignora y recalcula. */
   descuento: number;
   impuesto: number;
   codigoPromocional?: string;
+  costoEnvioId?: number;
+  envioExonerado: boolean;
+  motivoExoneracionEnvio?: string;
   notas?: string;
   detalles: VentaDetalleInput[];
 }

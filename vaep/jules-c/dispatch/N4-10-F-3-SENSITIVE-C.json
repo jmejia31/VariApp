@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-F-3-SENSITIVE-C",
+  "taskId": "N4.10.F.3.SENSITIVE_ERROR_UI_TESTS",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.error-redaction.spec.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. When N4.10.E is LISTO, verify UI errors never expose stack traces/internal server detail. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+  "primaryBaseHead": "f51a9c9a11815595fecd2b8977379f60963a8b2e"
+}

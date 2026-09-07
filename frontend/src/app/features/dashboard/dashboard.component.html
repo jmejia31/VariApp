@@ -1,164 +1,84 @@
 @if (loading()) {
-  <div class="loading"><mat-spinner></mat-spinner></div>
+  <div class="loading" aria-live="polite"><mat-spinner></mat-spinner><span class="sr-only">Cargando Dashboard...</span></div>
 } @else if (resumen(); as r) {
-  <section class="dashboard-shell">
-    <div class="dashboard-title">
+  <section class="dashboard-shell" aria-labelledby="dashboard-title">
+    <header class="dashboard-title">
       <div>
-        <p class="eyebrow">Panel principal</p>
-        <h1>Dashboard</h1>
+        <p class="eyebrow">{{ esAdministrador() ? 'Panel principal' : 'Resumen personal' }}</p>
+        <h1 id="dashboard-title">{{ esAdministrador() ? 'Dashboard administrativo' : 'Mi actividad' }}</h1>
       </div>
-      <a routerLink="/ventas" class="quick-link">Ver ventas</a>
+      @if (puedeVerVentas()) {
+        <a routerLink="/ventas" class="quick-link">Ver ventas <mat-icon>arrow_forward</mat-icon></a>
+      }
+    </header>
+
+    <div class="metric-grid" aria-label="Indicadores principales">
+      <article class="metric-card accent-orange"><div><span>L. {{ r.ingresosDelMes | number:'1.2-2' }}</span><p>{{ esAdministrador() ? 'Ingresos del mes' : 'Mis ingresos del mes' }}</p></div><mat-icon aria-hidden="true">bar_chart</mat-icon><footer>{{ esAdministrador() ? 'Ventas registradas' : 'Mis ventas registradas' }}: {{ r.ventasDelMes }}</footer></article>
+      <article class="metric-card accent-green"><div><span>{{ r.totalUnidades | number }}</span><p>Unidades en inventario físico</p></div><mat-icon aria-hidden="true">inventory_2</mat-icon><footer>Productos registrados: {{ r.totalProductos }}</footer></article>
+      <article class="metric-card accent-red"><div><span>{{ r.productosStockBajo.length }}</span><p>Productos agotados</p></div><mat-icon aria-hidden="true">production_quantity_limits</mat-icon><footer>Productos con existencia igual a cero</footer></article>
+      @if (esAdministrador()) {
+        <article class="metric-card accent-cyan"><div><span>L. {{ r.utilidadBruta | number:'1.2-2' }}</span><p>Utilidad bruta</p></div><mat-icon aria-hidden="true">trending_up</mat-icon><footer>Balance operativo: L. {{ r.balanceOperativo | number:'1.2-2' }}</footer></article>
+      }
     </div>
 
-    <div class="metric-grid">
-      <article class="metric-card accent-orange">
-        <div>
-          <span>L. {{ r.ingresosDelMes | number:'1.2-2' }}</span>
-          <p>Ingresos del mes</p>
-        </div>
-        <mat-icon>bar_chart</mat-icon>
-        <footer>Ventas registradas: {{ r.ventasDelMes }}</footer>
-      </article>
+    @if (esAdministrador()) {
+      <div class="metric-grid" aria-label="Separación de inventario por destino">
+        <article class="metric-card accent-green"><div><span>{{ r.totalUnidadesMercaderia | number }}</span><p>Mercadería vendible</p></div><mat-icon aria-hidden="true">storefront</mat-icon><footer>{{ r.totalProductosMercaderia }} productos · Costo L. {{ r.valorInventarioCostoMercaderia | number:'1.2-2' }}</footer></article>
+        <article class="metric-card accent-orange"><div><span>{{ r.totalUnidadesInsumosAdministrativos | number }}</span><p>Insumos administrativos</p></div><mat-icon aria-hidden="true">inventory</mat-icon><footer>{{ r.totalProductosInsumosAdministrativos }} productos · Costo L. {{ r.valorInventarioCostoInsumosAdministrativos | number:'1.2-2' }}</footer></article>
+        <article class="metric-card accent-cyan"><div><span>L. {{ r.valorPotencialVentaMercaderia | number:'1.2-2' }}</span><p>Potencial de venta</p></div><mat-icon aria-hidden="true">payments</mat-icon><footer>Solo mercadería; los insumos internos no se valorizan como venta.</footer></article>
+      </div>
+    }
 
-      <article class="metric-card accent-green">
-        <div>
-          <span>{{ r.totalUnidades | number }}</span>
-          <p>Unidades en inventario</p>
-        </div>
-        <mat-icon>inventory_2</mat-icon>
-        <footer>Productos activos: {{ r.totalProductos }}</footer>
-      </article>
-
-      <article class="metric-card accent-red">
-        <div>
-          <span>{{ r.productosStockBajo.length }}</span>
-          <p>Alertas de stock bajo</p>
-        </div>
-        <mat-icon>event_busy</mat-icon>
-        <footer>Revisar reposición</footer>
-      </article>
-
-      <article class="metric-card accent-cyan">
-        <div>
-          <span>L. {{ r.utilidadBruta | number:'1.2-2' }}</span>
-          <p>Utilidad bruta</p>
-        </div>
-        <mat-icon>download</mat-icon>
-        <footer>Balance: L. {{ r.balanceOperativo | number:'1.2-2' }}</footer>
-      </article>
-    </div>
+    <article class="card automation-card" aria-labelledby="automation-title">
+      <div class="panel-heading">
+        <div><h2 id="automation-title">Asistente operativo</h2><p>Recordatorios M12 calculados con reglas deterministas. Ninguna sugerencia modifica datos automáticamente.</p></div>
+        @if (automatizacion(); as a) { <span class="automation-version">{{ a.versionReglas }}</span> }
+      </div>
+      @if (loadingAutomatizacion()) {
+        <div class="loading"><mat-spinner diameter="28"></mat-spinner></div>
+      } @else if (automatizacion(); as a) {
+        @if (a.sugerencias.length === 0) {
+          <p class="empty"><mat-icon>task_alt</mat-icon> No hay recordatorios operativos pendientes.</p>
+        } @else {
+          <div class="automation-grid">
+            @for (item of a.sugerencias; track item.codigo) {
+              <a [routerLink]="item.ruta" class="automation-item" [attr.data-severity]="item.severidad.toLowerCase()">
+                <mat-icon aria-hidden="true">{{ iconoSugerencia(item.modulo) }}</mat-icon>
+                <span><strong>{{ item.titulo }}</strong><small>{{ item.modulo }} · {{ item.detalle }}</small></span>
+                <b>{{ item.cantidad }}</b>
+              </a>
+            }
+          </div>
+        }
+      }
+    </article>
 
     <div class="dashboard-grid">
       <article class="card analytics-card">
-        <div class="panel-heading">
-          <div>
-            <h2>Actividad comercial</h2>
-            <p>Ventas y compras recientes tomadas de la base de datos.</p>
-          </div>
-          <div class="panel-tools">
-            <mat-icon>open_in_full</mat-icon>
-            <mat-icon>remove</mat-icon>
-          </div>
-        </div>
-
-        <div class="chart-legend">
-          <span><i class="venta"></i> Ventas</span>
-          <span><i class="compra"></i> Compras</span>
-        </div>
-
-        <div class="combo-chart">
-          @for (v of ventasRecientes(r); track v.numeroVenta) {
-            <div class="chart-column">
-              <div class="bars">
-                <span class="bar venta" [style.height.%]="barraPorcentaje(v.total, r)"></span>
-              </div>
-              <small>{{ v.fecha | date:'dd/MM' }}</small>
-            </div>
-          }
-          @for (c of comprasRecientes(r); track c.numeroCompra) {
-            <div class="chart-column">
-              <div class="bars">
-                <span class="bar compra" [style.height.%]="barraPorcentaje(c.total, r)"></span>
-              </div>
-              <small>{{ c.fecha | date:'dd/MM' }}</small>
-            </div>
-          }
+        <div class="panel-heading"><div><h2>{{ esAdministrador() ? 'Actividad comercial' : 'Mi actividad comercial' }}</h2><p>{{ esAdministrador() ? 'Ventas y compras recientes obtenidas de la base de datos.' : 'Únicamente las ventas registradas por tu usuario.' }}</p></div></div>
+        <div class="chart-legend" aria-hidden="true"><span><i class="venta"></i> Ventas</span>@if (esAdministrador()) { <span><i class="compra"></i> Compras</span> }</div>
+        <div class="combo-chart" role="img" [attr.aria-label]="esAdministrador() ? 'Gráfico de ventas y compras recientes' : 'Gráfico de mis ventas recientes'">
+          @for (v of ventasRecientes(r); track v.numeroVenta) { <div class="chart-column" [title]="'Venta ' + v.numeroVenta + ': L. ' + v.total"><div class="bars" aria-hidden="true"><span class="bar venta" [style.height.%]="barraPorcentaje(v.total, r)"></span></div><small>{{ v.fecha | date:'dd/MM' }}</small></div> }
+          @for (c of comprasRecientes(r); track c.numeroCompra) { <div class="chart-column" [title]="'Compra ' + c.numeroCompra + ': L. ' + c.total"><div class="bars" aria-hidden="true"><span class="bar compra" [style.height.%]="barraPorcentaje(c.total, r)"></span></div><small>{{ c.fecha | date:'dd/MM' }}</small></div> }
         </div>
       </article>
 
-      <aside class="performance-card">
-        <div class="mini-bars">
-          @for (p of r.productosStockBajo.slice(0, 5); track p.id) {
-            <span [style.height.%]="porcentaje(p.cantidad, p.umbralStockBajo || 1)"></span>
-          }
-        </div>
-        <p>Stock bajo</p>
-        <strong>{{ r.productosStockBajo.length }}</strong>
-        <span>productos requieren atención</span>
-      </aside>
+      <aside class="performance-card" aria-label="Resumen de productos agotados"><div class="mini-bars" aria-hidden="true">@for (p of r.productosStockBajo.slice(0, 5); track p.id) { <span class="agotado-bar"></span> }</div><p>Agotados</p><strong>{{ r.productosStockBajo.length }}</strong><span>productos requieren reposición</span></aside>
 
       <article class="card table-card">
-        <div class="panel-heading">
-          <h2>Últimas ventas</h2>
-          <a routerLink="/ventas">Ver todas</a>
-        </div>
-        @if (r.ultimasVentas.length === 0) {
-          <p class="empty">Aún no hay ventas registradas.</p>
-        } @else {
-          <table>
-            <thead><tr><th>#</th><th>Cliente</th><th>Total</th><th>Estado</th></tr></thead>
-            <tbody>
-              @for (v of r.ultimasVentas; track v.numeroVenta) {
-                <tr>
-                  <td>{{ v.numeroVenta }}</td>
-                  <td>{{ v.clienteNombre }}</td>
-                  <td>L. {{ v.total | number:'1.2-2' }}</td>
-                  <td>{{ v.estado }}</td>
-                </tr>
-              }
-            </tbody>
-          </table>
+        <div class="panel-heading"><h2>{{ esAdministrador() ? 'Últimas ventas' : 'Mis últimas ventas' }}</h2>@if (puedeVerVentas()) { <a routerLink="/ventas">Ver todas</a> }</div>
+        @if (r.ultimasVentas.length === 0) { <p class="empty">Aún no hay ventas registradas.</p> } @else {
+          <table><caption class="sr-only">Últimas ventas registradas</caption><thead><tr><th scope="col">Número</th><th scope="col">Cliente</th><th scope="col">Total</th><th scope="col">Estado</th></tr></thead><tbody>@for (v of r.ultimasVentas; track v.numeroVenta) { <tr><td>{{ v.numeroVenta }}</td><td>{{ v.clienteNombre }}</td><td>L. {{ v.total | number:'1.2-2' }}</td><td>{{ v.estado }}</td></tr> }</tbody></table>
         }
       </article>
 
-      <article class="card donut-card">
-        <div class="panel-heading">
-          <h2>Operación del mes</h2>
-        </div>
-        <div class="donut" [style.background]="donutBackground(r)"></div>
-        <div class="donut-stats">
-          <div><strong>{{ porcentaje(r.ventasDelMes, totalOperativo(r)) }}%</strong><span>Ventas</span></div>
-          <div><strong>{{ porcentaje(r.comprasDelMes, totalOperativo(r)) }}%</strong><span>Compras</span></div>
-          <div><strong>{{ porcentaje(r.productosStockBajo.length, totalOperativo(r)) }}%</strong><span>Alertas</span></div>
-        </div>
-      </article>
+      <article class="card donut-card"><div class="panel-heading"><h2>{{ esAdministrador() ? 'Operación del mes' : 'Mi operación del mes' }}</h2></div><div class="donut" role="img" [attr.aria-label]="'Ventas ' + porcentaje(r.ventasDelMes, totalOperativo(r)) + ' por ciento; agotados ' + porcentaje(r.productosStockBajo.length, totalOperativo(r)) + ' por ciento'" [style.background]="donutBackground(r)"></div><div class="donut-stats"><div><strong>{{ porcentaje(r.ventasDelMes, totalOperativo(r)) }}%</strong><span>Ventas</span></div>@if (esAdministrador()) { <div><strong>{{ porcentaje(r.comprasDelMes, totalOperativo(r)) }}%</strong><span>Compras</span></div> }<div><strong>{{ porcentaje(r.productosStockBajo.length, totalOperativo(r)) }}%</strong><span>Agotados</span></div></div></article>
 
-      <article class="card list-card">
-        <div class="panel-heading">
-          <h2>Productos críticos</h2>
-          <a routerLink="/productos">Inventario</a>
-        </div>
-        @if (r.productosStockBajo.length === 0) {
-          <p class="empty">No hay productos con stock bajo.</p>
-        } @else {
-          <ul>
-            @for (p of r.productosStockBajo; track p.id) {
-              <li>
-                <span>{{ p.nombre }} · {{ p.marca }} {{ p.modelo }}</span>
-                <strong>{{ p.cantidad }} und.</strong>
-              </li>
-            }
-          </ul>
-        }
-      </article>
+      <article class="card list-card"><div class="panel-heading"><h2>Productos agotados</h2>@if (puedeVerProductos()) { <a routerLink="/productos">Inventario</a> }</div>@if (r.productosStockBajo.length === 0) { <p class="empty">No hay productos agotados.</p> } @else { <ul>@for (p of r.productosStockBajo; track p.id) { <li><span>{{ p.nombre }} · {{ p.marca }} {{ p.modelo }}</span><strong>Agotado</strong></li> }</ul> }</article>
 
-      <article class="card audit-card">
-        <h2>Auditoría reciente</h2>
-        <div><span>Última venta</span><strong>{{ r.ultimaVentaPor || 'Sin registro' }}</strong></div>
-        <div><span>Última compra</span><strong>{{ r.ultimaCompraPor || 'Sin registro' }}</strong></div>
-        <div><span>Última revisión financiera</span><strong>{{ r.ultimaRevisionFinancieraPor || 'Sin registro' }}</strong></div>
-        <div><span>Último producto</span><strong>{{ r.ultimoProductoRegistradoPor || 'Sin registro' }}</strong></div>
-      </article>
+      @if (esAdministrador()) {
+        <article class="card audit-card"><h2>Auditoría reciente</h2><div><span>Última venta</span><strong>{{ r.ultimaVentaPor || 'Sin registro' }}</strong></div><div><span>Última compra</span><strong>{{ r.ultimaCompraPor || 'Sin registro' }}</strong></div><div><span>Última revisión financiera</span><strong>{{ r.ultimaRevisionFinancieraPor || 'Sin registro' }}</strong></div><div><span>Último producto</span><strong>{{ r.ultimoProductoRegistradoPor || 'Sin registro' }}</strong></div></article>
+      }
     </div>
   </section>
 }

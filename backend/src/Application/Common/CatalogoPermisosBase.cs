@@ -2,74 +2,135 @@ using InventoryApp.Domain.Enums;
 
 namespace InventoryApp.Application.Common;
 
-/// Única fuente de verdad de qué combinaciones Módulo/Acción son válidas en el
-/// sistema (sección 7 del prompt). Se usa para: sembrar el catálogo de Permiso,
-/// precargar la matriz por defecto de un rol nuevo, y validar la UI de matriz.
-/// No todos los módulos tienen todas las acciones — cada módulo declara
-/// solamente las que tienen sentido para él.
+/// <summary>
+/// Define el catálogo de permisos de sistema que debe existir en base de datos.
+/// No autoriza solicitudes: la autorización efectiva depende exclusivamente de
+/// RolPermiso -> Permiso persistidos.
+/// </summary>
 public static class CatalogoPermisosBase
 {
+    private static readonly AccionPermiso[] AccionesMantenimiento =
+    {
+        AccionPermiso.Ver,
+        AccionPermiso.Crear,
+        AccionPermiso.Editar,
+        AccionPermiso.Activar,
+        AccionPermiso.Desactivar,
+        AccionPermiso.EliminarLogico
+    };
+
+    public static readonly AccionPermiso[] AccionesRbacRequeridas =
+    {
+        AccionPermiso.Ver,
+        AccionPermiso.Crear,
+        AccionPermiso.Editar,
+        AccionPermiso.EliminarLogico,
+        AccionPermiso.Confirmar,
+        AccionPermiso.Anular,
+        AccionPermiso.Aprobar,
+        AccionPermiso.Rechazar,
+        AccionPermiso.Imprimir,
+        AccionPermiso.Exportar,
+        AccionPermiso.Importar,
+        AccionPermiso.Administrar,
+        AccionPermiso.Cerrar,
+        AccionPermiso.Reabrir
+    };
+
     public static readonly (ModuloSistema Modulo, AccionPermiso[] Acciones)[] Definicion =
     {
         (ModuloSistema.Dashboard, new[] { AccionPermiso.Ver }),
-
         (ModuloSistema.Productos, new[]
         {
             AccionPermiso.Ver, AccionPermiso.Crear, AccionPermiso.Editar, AccionPermiso.Actualizar,
             AccionPermiso.Activar, AccionPermiso.Desactivar, AccionPermiso.EliminarLogico,
             AccionPermiso.EliminarPermanente, AccionPermiso.Exportar, AccionPermiso.Duplicar
         }),
-
         (ModuloSistema.Categorias, new[]
         {
             AccionPermiso.Ver, AccionPermiso.Crear, AccionPermiso.Editar,
             AccionPermiso.Activar, AccionPermiso.Desactivar, AccionPermiso.EliminarLogico,
             AccionPermiso.EliminarPermanente
         }),
-
+        (ModuloSistema.Colores, AccionesMantenimiento),
+        (ModuloSistema.Tallas, AccionesMantenimiento),
+        (ModuloSistema.Marcas, AccionesMantenimiento),
+        (ModuloSistema.Modelos, AccionesMantenimiento),
+        (ModuloSistema.MetodosPago, AccionesMantenimiento),
+        (ModuloSistema.Sucursales, AccionesMantenimiento),
+        (ModuloSistema.Almacenes, AccionesMantenimiento),
+        (ModuloSistema.UbicacionesAlmacen, AccionesMantenimiento),
         (ModuloSistema.Clientes, new[]
         {
             AccionPermiso.Ver, AccionPermiso.Crear, AccionPermiso.Editar,
             AccionPermiso.Activar, AccionPermiso.Desactivar, AccionPermiso.EliminarLogico,
             AccionPermiso.EliminarPermanente, AccionPermiso.ConsultarHistorial
         }),
-
+        (ModuloSistema.TiposClientes, new[]
+        {
+            AccionPermiso.Ver, AccionPermiso.Crear, AccionPermiso.Editar,
+            AccionPermiso.Activar, AccionPermiso.Desactivar, AccionPermiso.EliminarLogico,
+            AccionPermiso.ConsultarHistorial
+        }),
         (ModuloSistema.Proveedores, new[]
         {
             AccionPermiso.Ver, AccionPermiso.Crear, AccionPermiso.Editar,
             AccionPermiso.Activar, AccionPermiso.Desactivar, AccionPermiso.EliminarLogico,
             AccionPermiso.EliminarPermanente, AccionPermiso.ConsultarHistorial
         }),
-
         (ModuloSistema.Compras, new[]
         {
             AccionPermiso.Ver, AccionPermiso.Crear, AccionPermiso.Editar,
-            AccionPermiso.Confirmar, AccionPermiso.Anular, AccionPermiso.Exportar,
-            AccionPermiso.Imprimir, AccionPermiso.ConsultarHistorial
+            AccionPermiso.Confirmar, AccionPermiso.Anular, AccionPermiso.Aprobar, AccionPermiso.Rechazar,
+            AccionPermiso.Cerrar, AccionPermiso.Reabrir, AccionPermiso.EliminarLogico,
+            AccionPermiso.Exportar, AccionPermiso.Imprimir, AccionPermiso.ConsultarHistorial
         }),
-
         (ModuloSistema.Ventas, new[]
         {
             AccionPermiso.Ver, AccionPermiso.Crear, AccionPermiso.Editar,
-            AccionPermiso.Confirmar, AccionPermiso.Anular, AccionPermiso.Exportar,
-            AccionPermiso.Imprimir, AccionPermiso.ConsultarHistorial
+            AccionPermiso.Confirmar, AccionPermiso.Anular, AccionPermiso.Aprobar, AccionPermiso.Rechazar,
+            AccionPermiso.Cerrar, AccionPermiso.Reabrir, AccionPermiso.EliminarLogico,
+            AccionPermiso.EliminarPermanente, AccionPermiso.Duplicar,
+            AccionPermiso.Exportar, AccionPermiso.Imprimir, AccionPermiso.ConsultarHistorial,
+            AccionPermiso.ExonerarEnvio
         }),
-
         (ModuloSistema.Facturacion, new[]
         {
-            AccionPermiso.Ver, AccionPermiso.Exportar, AccionPermiso.Imprimir, AccionPermiso.Compartir
+            AccionPermiso.Ver, AccionPermiso.Exportar, AccionPermiso.Imprimir,
+            AccionPermiso.Compartir, AccionPermiso.Administrar, AccionPermiso.Aplicar,
+            AccionPermiso.Anular, AccionPermiso.CambiarEstado
         }),
-
         (ModuloSistema.Finanzas, new[]
         {
             AccionPermiso.Ver, AccionPermiso.Crear, AccionPermiso.Editar,
-            AccionPermiso.Anular, AccionPermiso.Exportar, AccionPermiso.Administrar
+            AccionPermiso.Activar, AccionPermiso.Desactivar,
+            AccionPermiso.Anular, AccionPermiso.Aprobar, AccionPermiso.Exportar,
+            AccionPermiso.Importar, AccionPermiso.Imprimir, AccionPermiso.Administrar,
+            AccionPermiso.Cerrar, AccionPermiso.Reabrir
         }),
-
-        (ModuloSistema.Inventario, new[] { AccionPermiso.Ver, AccionPermiso.Exportar }),
-
-        (ModuloSistema.MovimientosInventario, new[] { AccionPermiso.Ver, AccionPermiso.Exportar }),
-
+        (ModuloSistema.Inventario, new[]
+        {
+            AccionPermiso.Ver, AccionPermiso.Crear, AccionPermiso.Editar,
+            AccionPermiso.Confirmar, AccionPermiso.Anular, AccionPermiso.Exportar
+        }),
+        (ModuloSistema.MovimientosInventario, new[]
+        {
+            AccionPermiso.Ver, AccionPermiso.Crear, AccionPermiso.Editar,
+            AccionPermiso.Confirmar, AccionPermiso.Anular, AccionPermiso.Aprobar,
+            AccionPermiso.Cerrar, AccionPermiso.CambiarEstado, AccionPermiso.Exportar
+        }),
+        (ModuloSistema.InsumosAdministrativos, new[]
+        {
+            AccionPermiso.Ver, AccionPermiso.Crear, AccionPermiso.Editar,
+            AccionPermiso.Activar, AccionPermiso.Desactivar, AccionPermiso.EliminarLogico,
+            AccionPermiso.AjustarStock, AccionPermiso.RegistrarConsumo,
+            AccionPermiso.ConsultarHistorial, AccionPermiso.Exportar
+        }),
+        (ModuloSistema.CargasMasivas, new[]
+        {
+            AccionPermiso.Ver, AccionPermiso.Importar, AccionPermiso.Confirmar,
+            AccionPermiso.Exportar, AccionPermiso.ConsultarHistorial
+        }),
         (ModuloSistema.Usuarios, new[]
         {
             AccionPermiso.Ver, AccionPermiso.Crear, AccionPermiso.Editar,
@@ -77,25 +138,31 @@ public static class CatalogoPermisosBase
             AccionPermiso.RestablecerContrasena, AccionPermiso.CambiarEstado,
             AccionPermiso.EliminarLogico
         }),
-
         (ModuloSistema.Roles, new[]
         {
             AccionPermiso.Ver, AccionPermiso.Crear, AccionPermiso.Editar,
             AccionPermiso.Activar, AccionPermiso.Desactivar, AccionPermiso.EliminarLogico,
             AccionPermiso.EliminarPermanente, AccionPermiso.Duplicar, AccionPermiso.ConsultarHistorial
         }),
-
         (ModuloSistema.Permisos, new[]
         {
             AccionPermiso.Ver, AccionPermiso.Crear, AccionPermiso.Editar,
             AccionPermiso.Activar, AccionPermiso.Desactivar, AccionPermiso.EliminarLogico,
-            AccionPermiso.EliminarPermanente, AccionPermiso.Administrar, AccionPermiso.ConsultarHistorial
+            AccionPermiso.EliminarPermanente, AccionPermiso.Duplicar,
+            AccionPermiso.Administrar, AccionPermiso.ConsultarHistorial
         }),
-
+        (ModuloSistema.Caja, new[]
+        {
+            AccionPermiso.Ver, AccionPermiso.Crear, AccionPermiso.Activar,
+            AccionPermiso.Desactivar, AccionPermiso.Actualizar, AccionPermiso.Cerrar
+        }),
         (ModuloSistema.Auditoria, new[] { AccionPermiso.Ver, AccionPermiso.Exportar }),
-
-        (ModuloSistema.Configuracion, new[] { AccionPermiso.Ver, AccionPermiso.Editar, AccionPermiso.Administrar }),
-
+        (ModuloSistema.ReportesAdministrativos, new[] { AccionPermiso.Ver, AccionPermiso.Exportar, AccionPermiso.Imprimir }),
+        (ModuloSistema.Configuracion, new[]
+        {
+            AccionPermiso.Ver, AccionPermiso.Crear, AccionPermiso.Editar,
+            AccionPermiso.Administrar, AccionPermiso.Cerrar
+        }),
         (ModuloSistema.Descuentos, new[]
         {
             AccionPermiso.Ver, AccionPermiso.Crear, AccionPermiso.Editar,
@@ -103,16 +170,17 @@ public static class CatalogoPermisosBase
             AccionPermiso.EliminarPermanente, AccionPermiso.Duplicar, AccionPermiso.Aplicar,
             AccionPermiso.ConsultarHistorial
         }),
-
         (ModuloSistema.Impuestos, new[]
         {
             AccionPermiso.Ver, AccionPermiso.Crear, AccionPermiso.Editar,
             AccionPermiso.Activar, AccionPermiso.Desactivar, AccionPermiso.EliminarLogico,
             AccionPermiso.EliminarPermanente, AccionPermiso.Duplicar, AccionPermiso.Aplicar,
             AccionPermiso.ConsultarHistorial
-        }),
+        })
     };
 
-    /// Los roles no administrativos dependen exclusivamente de su matriz persistida.
+    public static readonly (ModuloSistema Modulo, AccionPermiso Accion)[] NuevosPermisosAdministrador =
+        Definicion.SelectMany(d => d.Acciones.Select(a => (d.Modulo, a))).ToArray();
+
     public static readonly (ModuloSistema Modulo, AccionPermiso Accion)[] DefaultVendedor = { };
 }

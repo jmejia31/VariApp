@@ -52,10 +52,17 @@ public class FinanzasResumenDto
 {
     public decimal IngresosTotales { get; set; }
     public decimal EgresosTotales { get; set; }
+    public decimal GastosOperativos { get; set; }
     public decimal UtilidadBruta { get; set; }
+    public decimal MargenUtilidadBruta { get; set; }
     public decimal UtilidadNeta { get; set; }
     public decimal ValorInventarioCosto { get; set; }
+    public decimal ValorInventarioCostoMercaderia { get; set; }
+    public decimal ValorInventarioCostoInsumosAdministrativos { get; set; }
     public decimal ValorPotencialVenta { get; set; }
+    public decimal ValorPotencialVentaMercaderia { get; set; }
+    public decimal UtilidadInventarioPotencial { get; set; }
+    public decimal MargenInventarioPotencial { get; set; }
     public decimal CuentasPorCobrar { get; set; }
     public decimal CuentasPorPagar { get; set; }
     public decimal BalanceOperativo { get; set; }

@@ -6,10 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace InventoryApp.API.Controllers;
 
-/// Autogestión del usuario autenticado (ver su perfil, editar su nombre,
-/// cambiar su propia contraseña). Deliberadamente solo requiere [Authorize]
-/// — no un permiso de módulo — porque cualquier usuario válido puede
-/// gestionar su propia cuenta, sin importar su rol.
+/// Autogestión exclusiva del usuario autenticado. No depende de permisos de
+/// administración porque nunca recibe un UsuarioId externo: todas las acciones
+/// se resuelven desde la identidad del JWT actual.
 [ApiController]
 [Authorize]
 [Route("perfil")]
@@ -23,6 +22,7 @@ public class PerfilController : ControllerBase
     }
 
     [HttpGet]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public async Task<IActionResult> Get()
     {
         var perfil = await _service.GetPerfilAsync();
@@ -33,7 +33,25 @@ public class PerfilController : ControllerBase
     public async Task<IActionResult> Update([FromBody] ActualizarPerfilDto dto)
     {
         var actualizado = await _service.ActualizarPerfilAsync(dto);
-        return Ok(ApiResponse<PerfilDto>.Ok(actualizado, "Perfil actualizado correctamente."));
+        return Ok(ApiResponse<PerfilDto>.Ok(
+            actualizado,
+            "Perfil actualizado correctamente. El nuevo usuario se utilizará en el próximo inicio de sesión."));
+    }
+
+    [HttpPut("foto")]
+    [Consumes("multipart/form-data")]
+    [RequestSizeLimit(5 * 1024 * 1024)]
+    public async Task<IActionResult> ActualizarFoto([FromForm] ActualizarFotoPerfilDto dto)
+    {
+        var actualizado = await _service.ActualizarFotoAsync(dto);
+        return Ok(ApiResponse<PerfilDto>.Ok(actualizado, "Fotografía de perfil actualizada correctamente."));
+    }
+
+    [HttpDelete("foto")]
+    public async Task<IActionResult> EliminarFoto()
+    {
+        var actualizado = await _service.EliminarFotoAsync();
+        return Ok(ApiResponse<PerfilDto>.Ok(actualizado, "Fotografía de perfil eliminada correctamente."));
     }
 
     [HttpPut("password")]

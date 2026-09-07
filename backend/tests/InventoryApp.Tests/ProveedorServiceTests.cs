@@ -1,5 +1,4 @@
 using InventoryApp.Application.DTOs;
-using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Application.Services;
 using InventoryApp.Domain.Entities;
@@ -24,12 +23,15 @@ public class ProveedorServiceTests
     }
 
     [Fact]
-    public async Task CreateAsync_Nombre_Duplicado_Lanza_Excepcion()
+    public async Task CreateAsync_Nombre_Duplicado_Es_Permitido()
     {
         _repoMock.Setup(r => r.ExisteNombreAsync("Tech Import SA", null)).ReturnsAsync(true);
+        _repoMock.Setup(r => r.AddAsync(It.IsAny<Proveedor>())).Returns(Task.CompletedTask);
+        _repoMock.Setup(r => r.SaveChangesAsync()).ReturnsAsync(true);
 
-        await Assert.ThrowsAsync<BusinessRuleException>(() =>
-            _service.CreateAsync(new CreateProveedorDto { Nombre = "Tech Import SA" }));
+        await _service.CreateAsync(new CreateProveedorDto { Nombre = "Tech Import SA" });
+
+        _repoMock.Verify(r => r.AddAsync(It.Is<Proveedor>(p => p.Nombre == "Tech Import SA")), Times.Once);
     }
 
     [Fact]

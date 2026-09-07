@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.D-PAGINATION-FILTER-CORE-A-20260905T1712Z",
+  "taskId": "N4.9.D.CLOSURE.PAGINATION_FILTER_CORE",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "primaryBaseHead": "c91b6df3be4cb9ed8bdbc5b6c82f02b1598fd915",
+  "fileScopeHint": "Only N4.9.D PeriodoContable backend query path: DTO/query contract, IPeriodoContableRepository, PeriodoContableRepository, IPeriodoContableService, PeriodoContableService, PeriodosContablesController as strictly required for pagination/filtering; no frontend/migrations/workflows/manifests",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.9.D. REVIEW_FIRST found GET /periodos-contables currently returns the full list and does not satisfy the COLA DoD requiring pagination/filtros strictly for this point. Implement a minimal coherent paginated/filterable query contract for PeriodoContable using existing project conventions. Preserve RBAC, ProblemDetails, audit behavior, create/close semantics and retroactive authorization. Add focused tests only when needed within this scope. Run backend build and focused tests plus two independent self-reviews. Do not branch, PR, merge, deploy, touch main/Produccion/secrets or edit vaep control files. Return terminal patch/artifact for VAEP REVIEW_FIRST."
+}

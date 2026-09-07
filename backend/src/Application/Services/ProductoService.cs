@@ -18,19 +18,22 @@ public class ProductoService : IProductoService
     private readonly IImageStorageService _imageStorage;
     private readonly ICurrentUserService _currentUser;
     private readonly IAuditoriaService _auditoria;
+    private readonly ICatalogoProductoService? _catalogoService;
 
     public ProductoService(
         IProductoRepository repository,
         ICategoriaRepository categoriaRepository,
         IImageStorageService imageStorage,
         ICurrentUserService currentUser,
-        IAuditoriaService auditoria)
+        IAuditoriaService auditoria,
+        ICatalogoProductoService? catalogoService = null)
     {
         _repository = repository;
         _categoriaRepository = categoriaRepository;
         _imageStorage = imageStorage;
         _currentUser = currentUser;
         _auditoria = auditoria;
+        _catalogoService = catalogoService;
     }
 
     public async Task<ProductoDto?> GetByIdAsync(int id)
@@ -53,40 +56,32 @@ public class ProductoService : IProductoService
 
     public async Task<ProductoDto> CreateAsync(CreateProductoDto dto)
     {
+        ValidarTipoInventario(dto.TipoInventario);
         var imagenes = dto.Imagenes ?? new List<Microsoft.AspNetCore.Http.IFormFile>();
         if (imagenes.Count > MaxImagenes)
-            throw new BusinessRuleException($"Un producto puede tener máximo {MaxImagenes} fotos.");
+            throw new BusinessRuleException($"Un producto puede tener máximo {MaxImagenes} fotos generales.");
         ValidarImagenes(imagenes);
 
-        if (dto.CategoriaId.HasValue)
-        {
-            var categoria = await _categoriaRepository.GetByIdAsync(dto.CategoriaId.Value);
-            if (categoria is null)
-                throw new BusinessRuleException("La categoría seleccionada no existe.");
-            if (!categoria.Activa)
-                throw new BusinessRuleException("La categoría seleccionada está inactiva.");
-        }
+        await ValidarCategoriaAsync(dto.CategoriaId, exigirActiva: true);
 
         var producto = new Producto
         {
-            Nombre = dto.Nombre,
-            Marca = dto.Marca,
-            Modelo = dto.Modelo,
-            Descripcion = dto.Descripcion,
-            Cantidad = dto.Cantidad,
-            Costo = dto.Costo,
-            Precio = dto.Precio,
-            UmbralStockBajo = dto.UmbralStockBajo,
+            Nombre = dto.Nombre.Trim(),
+            Descripcion = string.IsNullOrWhiteSpace(dto.Descripcion) ? null : dto.Descripcion.Trim(),
+            TipoInventario = dto.TipoInventario,
             CategoriaId = dto.CategoriaId,
+            Activo = true,
+            Eliminado = false,
             CreadoPorUsuarioId = _currentUser.UsuarioId,
             CreadoPorNombreUsuario = _currentUser.NombreUsuario
         };
 
-        for (int i = 0; i < imagenes.Count; i++)
+        for (var i = 0; i < imagenes.Count; i++)
         {
             var (url, publicId) = await _imageStorage.UploadAsync(imagenes[i]);
             producto.Imagenes.Add(new ProductoImagen
             {
+                ProductoVarianteId = null,
                 Url = url,
                 PublicId = publicId,
                 Orden = i,
@@ -99,126 +94,155 @@ public class ProductoService : IProductoService
         await _repository.AddAsync(producto);
         await _repository.SaveChangesAsync();
 
-        await _auditoria.RegistrarAsync(ModuloSistema.Productos, AccionPermiso.Crear,
-            $"Producto creado: {producto.Nombre}.", producto.Id, entidad: "Producto",
-            valoresNuevos: new { producto.Nombre, producto.Marca, producto.Modelo, producto.Cantidad, producto.Costo, producto.Precio, Imagenes = producto.Imagenes.Count });
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Productos,
+            AccionPermiso.Crear,
+            $"Producto creado: {producto.Nombre}.",
+            producto.Id,
+            entidad: "Producto",
+            valoresNuevos: new
+            {
+                producto.Nombre,
+                producto.TipoInventario,
+                producto.CategoriaId,
+                ImagenesGenerales = producto.Imagenes.Count(i => i.ProductoVarianteId == null)
+            });
 
-        return ProductoMapper.ToDto(producto);
+        return await GetByIdAsync(producto.Id) ?? ProductoMapper.ToDto(producto);
     }
 
     public async Task<ProductoDto?> UpdateAsync(int id, UpdateProductoDto dto)
     {
         var producto = await _repository.GetByIdAsync(id);
         if (producto is null) return null;
+        var imagenesGenerales = producto.Imagenes.Where(i => i.ProductoVarianteId == null).ToList();
 
         var valoresAnteriores = new
         {
             producto.Nombre,
-            producto.Marca,
-            producto.Modelo,
+            producto.TipoInventario,
             producto.Descripcion,
-            producto.Cantidad,
-            producto.Costo,
-            producto.Precio,
-            producto.UmbralStockBajo,
             producto.CategoriaId,
-            Imagenes = producto.Imagenes.Count,
+            Imagenes = imagenesGenerales.Count,
             ImagenPrincipalId = producto.ImagenPrincipal?.Id
         };
 
-        if (dto.CategoriaId.HasValue)
-        {
-            var categoria = await _categoriaRepository.GetByIdAsync(dto.CategoriaId.Value);
-            if (categoria is null)
-                throw new BusinessRuleException("La categoría seleccionada no existe.");
-        }
+        await ValidarCategoriaAsync(dto.CategoriaId, exigirActiva: false);
 
-        producto.Nombre = dto.Nombre;
-        producto.Marca = dto.Marca;
-        producto.Modelo = dto.Modelo;
-        producto.Descripcion = dto.Descripcion;
-        producto.Cantidad = dto.Cantidad;
-        producto.Costo = dto.Costo;
-        producto.Precio = dto.Precio;
-        producto.UmbralStockBajo = dto.UmbralStockBajo;
+        if (dto.TipoInventario.HasValue)
+        {
+            ValidarTipoInventario(dto.TipoInventario.Value);
+            producto.TipoInventario = dto.TipoInventario.Value;
+        }
+        producto.Nombre = dto.Nombre.Trim();
+        producto.Descripcion = string.IsNullOrWhiteSpace(dto.Descripcion) ? null : dto.Descripcion.Trim();
         producto.CategoriaId = dto.CategoriaId;
         producto.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
         producto.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
         producto.FechaActualizacion = DateTime.UtcNow;
 
-        // 1) Eliminar imágenes marcadas
         if (dto.ImagenesAEliminarIds is { Count: > 0 })
         {
-            var aEliminar = producto.Imagenes.Where(i => dto.ImagenesAEliminarIds.Contains(i.Id)).ToList();
-            foreach (var img in aEliminar)
+            var aEliminar = imagenesGenerales
+                .Where(i => dto.ImagenesAEliminarIds.Contains(i.Id))
+                .ToList();
+            foreach (var imagen in aEliminar)
             {
-                await _imageStorage.DeleteAsync(img.PublicId);
-                producto.Imagenes.Remove(img);
+                await _imageStorage.DeleteAsync(imagen.PublicId);
+                producto.Imagenes.Remove(imagen);
+                imagenesGenerales.Remove(imagen);
             }
         }
 
-        // 2) Validar límite antes de agregar nuevas
         var nuevas = dto.ImagenesNuevas ?? new List<Microsoft.AspNetCore.Http.IFormFile>();
-        if (producto.Imagenes.Count + nuevas.Count > MaxImagenes)
+        if (imagenesGenerales.Count + nuevas.Count > MaxImagenes)
             throw new BusinessRuleException(
-                $"Un producto puede tener máximo {MaxImagenes} fotos ({producto.Imagenes.Count} existentes + {nuevas.Count} nuevas excede el límite).");
+                $"Un producto puede tener máximo {MaxImagenes} fotos generales ({imagenesGenerales.Count} existentes + {nuevas.Count} nuevas excede el límite).");
         ValidarImagenes(nuevas);
 
-        // 3) Agregar nuevas imágenes
-        var siguienteOrden = producto.Imagenes.Count == 0 ? 0 : producto.Imagenes.Max(i => i.Orden) + 1;
-        var yaTienePrincipal = producto.Imagenes.Any(i => i.EsPrincipal);
+        var siguienteOrden = imagenesGenerales.Count == 0
+            ? 0
+            : imagenesGenerales.Max(i => i.Orden) + 1;
+        var yaTienePrincipal = imagenesGenerales.Any(i => i.EsPrincipal);
 
         foreach (var archivo in nuevas)
         {
             var (url, publicId) = await _imageStorage.UploadAsync(archivo);
-            producto.Imagenes.Add(new ProductoImagen
+            var imagen = new ProductoImagen
             {
+                ProductoVarianteId = null,
                 Url = url,
                 PublicId = publicId,
                 Orden = siguienteOrden++,
-                EsPrincipal = !yaTienePrincipal && producto.Imagenes.Count == 0,
+                EsPrincipal = !yaTienePrincipal && imagenesGenerales.Count == 0,
                 CreadoPorUsuarioId = _currentUser.UsuarioId,
                 CreadoPorNombreUsuario = _currentUser.NombreUsuario
-            });
+            };
+            producto.Imagenes.Add(imagen);
+            imagenesGenerales.Add(imagen);
             yaTienePrincipal = true;
         }
 
-        // 4) Cambiar imagen principal si se solicitó
         if (dto.ImagenPrincipalId.HasValue)
         {
-            var nuevaPrincipal = producto.Imagenes.FirstOrDefault(i => i.Id == dto.ImagenPrincipalId.Value);
+            var nuevaPrincipal = imagenesGenerales
+                .FirstOrDefault(i => i.Id == dto.ImagenPrincipalId.Value);
             if (nuevaPrincipal is null)
-                throw new BusinessRuleException("La imagen indicada como principal no pertenece a este producto.");
+                throw new BusinessRuleException("La imagen indicada como principal no pertenece a la galería general de este producto.");
 
-            foreach (var img in producto.Imagenes) img.EsPrincipal = false;
+            foreach (var imagen in imagenesGenerales)
+                imagen.EsPrincipal = false;
             nuevaPrincipal.EsPrincipal = true;
         }
-        else if (producto.Imagenes.Count > 0 && !producto.Imagenes.Any(i => i.EsPrincipal))
+        else if (imagenesGenerales.Count > 0 && !imagenesGenerales.Any(i => i.EsPrincipal))
         {
-            // Garantizar que siempre haya una principal si quedan imágenes
-            producto.Imagenes.OrderBy(i => i.Orden).First().EsPrincipal = true;
+            imagenesGenerales.OrderBy(i => i.Orden).First().EsPrincipal = true;
         }
 
-        _repository.Update(producto);
         await _repository.SaveChangesAsync();
 
-        await _auditoria.RegistrarAsync(ModuloSistema.Productos, AccionPermiso.Editar,
-            $"Producto actualizado: {producto.Nombre}.", producto.Id, entidad: "Producto",
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Productos,
+            AccionPermiso.Editar,
+            $"Producto actualizado: {producto.Nombre}.",
+            producto.Id,
+            entidad: "Producto",
             valoresAnteriores: valoresAnteriores,
             valoresNuevos: new
             {
                 producto.Nombre,
-                producto.Marca,
-                producto.Modelo,
+                producto.TipoInventario,
                 producto.Descripcion,
-                producto.Cantidad,
-                producto.Costo,
-                producto.Precio,
-                producto.UmbralStockBajo,
                 producto.CategoriaId,
-                Imagenes = producto.Imagenes.Count,
+                Imagenes = imagenesGenerales.Count,
                 ImagenPrincipalId = producto.ImagenPrincipal?.Id
             });
+
+        return await GetByIdAsync(producto.Id) ?? ProductoMapper.ToDto(producto);
+    }
+
+    public async Task<ProductoDto?> CambiarEstadoAsync(int id, bool activo)
+    {
+        var producto = await _repository.GetByIdAsync(id);
+        if (producto is null) return null;
+        if (producto.Activo == activo) return ProductoMapper.ToDto(producto);
+
+        var estadoAnterior = producto.Activo;
+        producto.Activo = activo;
+        producto.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
+        producto.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
+        producto.FechaActualizacion = DateTime.UtcNow;
+
+        await _repository.SaveChangesAsync();
+
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Productos,
+            activo ? AccionPermiso.Activar : AccionPermiso.Desactivar,
+            $"Producto {(activo ? "activado" : "desactivado")}: {producto.Nombre}.",
+            producto.Id,
+            entidad: "Producto",
+            valoresAnteriores: new { Activo = estadoAnterior },
+            valoresNuevos: new { producto.Activo });
 
         return ProductoMapper.ToDto(producto);
     }
@@ -228,28 +252,95 @@ public class ProductoService : IProductoService
         var producto = await _repository.GetByIdAsync(id);
         if (producto is null) return false;
 
-        foreach (var imagen in producto.Imagenes)
-            await _imageStorage.DeleteAsync(imagen.PublicId);
+        var valoresAnteriores = new
+        {
+            producto.Nombre,
+            producto.Marca,
+            producto.Modelo,
+            producto.Activo,
+            producto.Eliminado,
+            ImagenesGenerales = producto.Imagenes.Count(i => i.ProductoVarianteId == null),
+            ImagenesVariantes = producto.Imagenes.Count(i => i.ProductoVarianteId != null)
+        };
 
-        var valoresAnteriores = new { producto.Nombre, producto.Marca, producto.Modelo, Imagenes = producto.Imagenes.Count };
-        _repository.Remove(producto);
+        producto.Activo = false;
+        producto.Eliminado = true;
+        producto.FechaEliminacion = DateTime.UtcNow;
+        producto.EliminadoPorUsuarioId = _currentUser.UsuarioId;
+        producto.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
+        producto.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
+        producto.FechaActualizacion = DateTime.UtcNow;
+
         var guardado = await _repository.SaveChangesAsync();
         if (guardado)
         {
-            await _auditoria.RegistrarAsync(ModuloSistema.Productos, AccionPermiso.Eliminar,
-                $"Producto eliminado: {producto.Nombre}.", id, entidad: "Producto",
-                valoresAnteriores: valoresAnteriores);
+            await _auditoria.RegistrarAsync(
+                ModuloSistema.Productos,
+                AccionPermiso.EliminarLogico,
+                $"Producto eliminado lógicamente: {producto.Nombre}.",
+                id,
+                entidad: "Producto",
+                valoresAnteriores: valoresAnteriores,
+                valoresNuevos: new
+                {
+                    producto.Activo,
+                    producto.Eliminado,
+                    producto.FechaEliminacion
+                });
         }
 
         return guardado;
     }
 
+    private async Task ValidarCategoriaAsync(int? categoriaId, bool exigirActiva)
+    {
+        if (!categoriaId.HasValue) return;
+        var categoria = await _categoriaRepository.GetByIdAsync(categoriaId.Value);
+        if (categoria is null)
+            throw new BusinessRuleException("La categoría seleccionada no existe.");
+        if (exigirActiva && !categoria.Activa)
+            throw new BusinessRuleException("La categoría seleccionada está inactiva.");
+    }
+
+    private async Task ValidarCatalogosAsync(int? colorId, int? tallaId, int? marcaId, int? modeloId)
+    {
+        if (_catalogoService is not null)
+            await _catalogoService.ValidarSeleccionProductoAsync(colorId, tallaId, marcaId, modeloId);
+    }
+
+    private async Task<(string Marca, string Modelo)> ResolverMarcaModeloAsync(
+        int? marcaId,
+        int? modeloId,
+        string? marcaLegada,
+        string? modeloLegado)
+    {
+        var marca = marcaLegada?.Trim() ?? string.Empty;
+        var modelo = modeloLegado?.Trim() ?? string.Empty;
+
+        if (_catalogoService is not null && marcaId.HasValue)
+        {
+            var catalogoMarca = await _catalogoService.GetByIdAsync(TipoCatalogoProducto.Marca, marcaId.Value);
+            if (catalogoMarca is not null) marca = catalogoMarca.Nombre;
+        }
+
+        if (_catalogoService is not null && modeloId.HasValue)
+        {
+            var catalogoModelo = await _catalogoService.GetByIdAsync(TipoCatalogoProducto.Modelo, modeloId.Value);
+            if (catalogoModelo is not null) modelo = catalogoModelo.Nombre;
+        }
+
+        return (marca, modelo);
+    }
+
+    private static void ValidarTipoInventario(TipoInventario tipoInventario)
+    {
+        if (!Enum.IsDefined(tipoInventario))
+            throw new BusinessRuleException("El tipo de inventario indicado no es válido.");
+    }
+
     private static void ValidarImagenes(IEnumerable<Microsoft.AspNetCore.Http.IFormFile> imagenes)
     {
         if (imagenes.Any(imagen => !ImagenValidationHelper.EsImagenValida(imagen)))
-        {
             throw new BusinessRuleException("Solo se permiten imágenes JPG, PNG o WebP de hasta 5 MB.");
-        }
     }
-
 }

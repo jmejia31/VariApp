@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.G-MYSQL-MIGRATION-B-ATTEMPT1-20260905T2330Z",
+  "taskId": "N4.9.G.MYSQL_MIGRATION_REGRESSION",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "37f51feefc402b27ce926bcdaaa042e4456a94cd",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N49GPeriodoContableMigrationRegressionTests.cs",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first; it is the only operational authority. Work only on jmejia31/VariApp branch Desarrollo. CURRENT_PARENT=N4.9.G. FUNCTIONAL_HEAD=37f51feefc402b27ce926bcdaaa042e4456a94cd; later vaep-only commits are CONTROL_PLANE_HEAD_EQUIVALENT. Add focused integration/migration regression coverage for PeriodoContable persistence invariants: schema/model compatibility, unique/required constraints relevant to periods, state persistence across close, and upgrade/idempotency behavior that can be validated without modifying migrations. Own ONLY backend/tests/InventoryApp.Tests/N49GPeriodoContableMigrationRegressionTests.cs. Do not edit production code, migrations/snapshot, frontend, CI, main, Produccion, secrets, deploy, branches, PR merge or force-push. Run narrow applicable tests/build. Return material patch, changed files, validation, self-review twice and risks; no status-only response."
+}

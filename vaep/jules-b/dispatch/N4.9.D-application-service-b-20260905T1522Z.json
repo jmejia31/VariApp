@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.D-APPLICATION-SERVICE-B-20260905T1522Z",
+  "taskId": "N4.9.D.APPLICATION_SERVICE",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Application/Services/PeriodoContableService.cs only; no repository/controller/DTO/domain/migrations/frontend/workflows",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.9.D. Implement only PeriodoContableService against the already integrated IPeriodoContableService/IPeriodoContableRepository contracts. Preserve fail-closed lifecycle Abierto->Cerrado, explicit authorization for retroactive mutation, UTC timestamps, cancellation tokens, and repository transaction/concurrency conventions. No controller/DTO/repository/domain/migration/frontend edits. Run dotnet build and focused tests if available; two independent self-reviews. Do not branch/PR/push/merge/deploy; return patch/artifact for VAEP REVIEW_FIRST.",
+  "primaryBaseHead": "f2ba5ad59f0b283480577fdb4fa5cbc1427ca0c8"
+}

@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-F-17-5XX-B",
+  "taskId": "N4.10.F.17.SERVICE_5XX_REDACTION_TESTS",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/services/estado-financiero.server-error-redaction.spec.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.F. Add 5xx redaction tests rejecting stack traces, SQL/internal exception text and request internals. Production files read-only. Run proportional tests and TWO self-reviews.",
+  "primaryBaseHead": "7472ec349caeb82a28ef5fb2a54d8e168caffcea"
+}

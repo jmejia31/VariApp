@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.10.A-PERMISSION-CONTRACT-B-RESERVED-20260906T0506Z",
+  "taskId": "N4.10.A.22.FINANCIAL_REPORT_PERMISSION_CONTRACT_TESTS",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportPermissionContractTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. This is NEXT_SAFE after the prior Jules B lane-budget release. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportPermissionContractTests.cs. Add material read-only tests for the existing financial-report authorization/permission contract, covering allowed and denied behavior only where the current API/service contract already supports it. Do not alter production code, manifests, workflows or docs. Do not invent endpoints or permissions; if the contract is absent, return the exact blocker rather than false PASS. Two distinct self-reviews; no push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "83b0065137e158b0d81b3e6090e09b6f613d819a"
+}

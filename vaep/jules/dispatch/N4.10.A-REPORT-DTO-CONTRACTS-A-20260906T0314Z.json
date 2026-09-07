@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.10.A-REPORT-DTO-CONTRACTS-A-20260906T0314Z",
+  "taskId": "N4.10.A.5.REPORT_DTO_CONTRACTS",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Application/DTOs/ReportesFinancieros/** only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.A. Build the material Application-layer DTO contract foundation for financial reports, based on the completed N4.10.A preflight findings and CURRENT repository state. Write ONLY under backend/src/Application/DTOs/ReportesFinancieros/**. Define strongly typed DTOs for Balance General, Estado de Resultados, Balance de Comprobacion, Libro Mayor, Libro Diario and Flujo de Efectivo with explicit period/date bounds, hierarchical lines/totals, normal-balance semantics and no persistence/UI/controller changes. Reuse existing conventions. Add no speculative domain fields outside DTOs. Run focused build/tests if available, perform TWO distinct self-reviews, report residual gaps, no push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "bdec83f22b9b8b70b3504534260f0f9b81b74a47"
+}

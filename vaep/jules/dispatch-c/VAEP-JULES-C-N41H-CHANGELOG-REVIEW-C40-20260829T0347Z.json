@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-C-N41H-CHANGELOG-REVIEW-C40-20260829T0347Z",
+  "taskId": "N4.1.H.CHANGELOG_REVIEW_C40",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "6d49804e5dc84a68960b12872ce6c529ed840f66",
+  "taskAttempt": 1,
+  "fileScopeHint": "READ_ONLY_SCOPE: CHANGELOG_AI.md, TASKS.md, and C39 handoff evidence only; no file modifications",
+  "prompt": "N4.1.H remains CURRENT_PARENT and NO_LISTO. C39 is terminal COMPLETED with Jules session 16545902785601606610 and must be REVIEW_FIRST, not treated ACTIVE. Perform a new logical read-only audit limited to CHANGELOG_AI.md, TASKS.md, and the factual C39 handoff evidence. Determine whether N4.1.H closure history is complete, non-duplicative, and consistent with functional authority a1522d589940e87e6ca48dd8adf32d309cce2fb3. Identify only factual documentation gaps or contradictions; do not modify files. Do not overlap A54 runbook, B54 certification, or D46 CI/API audit. Report grounded P0/P1, checks performed, limitations, SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. No branch, push, PR, merge, deploy, secrets, main or Production changes."
+}

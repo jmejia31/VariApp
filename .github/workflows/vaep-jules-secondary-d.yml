@@ -1,0 +1,61 @@
+name: VAEP Jules D Trusted Secondary Worker
+
+on:
+  push:
+    branches:
+      - Desarrollo
+    paths:
+      - 'vaep/jules-d/dispatch/*.json'
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: write
+  issues: write
+
+concurrency:
+  group: vaep-jules-d-lane
+  cancel-in-progress: false
+
+jobs:
+  dispatch-jules-d:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      JULES_API_BASE: https://jules.googleapis.com/v1alpha
+      EXPECTED_OWNER: jmejia31
+      EXPECTED_REPO: VariApp
+      EXPECTED_BRANCH: Desarrollo
+      DISPATCH_PATH: vaep/jules-d/dispatch
+      SESSION_TITLE_PREFIX: "VAEP-D "
+      ARTIFACT_PREFIX: vaep-jules-d
+      ISSUE_PREFIX: "[VAEP-JULES-D]"
+      WORKER_LABEL: Jules D
+      WORKER_ID: JULES_D
+      JULES_API_KEY: ${{ secrets.JULES_D_API_KEY }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout dispatch commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+      - name: Reserve NEXT Jules D lane
+        shell: bash
+        continue-on-error: true
+        run: bash .github/scripts/vaep-jules-autorefill.sh
+      - name: Execute VAEP/Jules MASTER
+        shell: bash
+        run: bash .github/scripts/vaep-jules-master.sh
+      - name: Upload Jules D result artifact
+        if: always() && env.RESULT_DIR != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ env.RESULT_DIR }}
+          if-no-files-found: error
+          retention-days: 14
+      - name: Auto-refill Jules D lane
+        if: always()
+        shell: bash
+        run: bash .github/scripts/vaep-jules-autorefill.sh

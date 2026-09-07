@@ -1,0 +1,50 @@
+name: VAEP Jules B Recovery Worker
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: vaep-jules-b-lane
+  cancel-in-progress: false
+
+jobs:
+  dispatch-jules-b-recovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      JULES_API_BASE: https://jules.googleapis.com/v1alpha
+      EXPECTED_OWNER: jmejia31
+      EXPECTED_REPO: VariApp
+      EXPECTED_BRANCH: Desarrollo
+      DISPATCH_PATH: vaep/jules-b/dispatch
+      SESSION_TITLE_PREFIX: "VAEP-B "
+      ARTIFACT_PREFIX: vaep-jules-b-recovery
+      ISSUE_PREFIX: "[VAEP-JULES-B-RECOVERY]"
+      WORKER_LABEL: Jules B
+      WORKER_ID: JULES_B
+      JULES_API_KEY: ${{ secrets.JULES_B_API_KEY }}
+      GH_TOKEN: ${{ github.token }}
+
+    steps:
+      - name: Checkout recovery commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+
+      - name: Execute VAEP/Jules MASTER
+        shell: bash
+        run: bash .github/scripts/vaep-jules-master.sh
+
+      - name: Upload Jules B recovery result artifact
+        if: always() && env.RESULT_DIR != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ env.RESULT_DIR }}
+          if-no-files-found: error
+          retention-days: 14

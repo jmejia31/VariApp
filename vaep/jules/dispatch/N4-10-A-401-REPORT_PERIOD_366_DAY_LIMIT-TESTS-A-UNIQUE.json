@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-A-401-REPORT_PERIOD_366_DAY_LIMIT-TESTS-A-UNIQUE",
+  "taskId": "N4.10.A.401.REPORT_PERIOD_366_DAY_LIMIT_TESTS",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AReportPeriod366DayLimitTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. UNIQUE material closure-support work for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AReportPeriod366DayLimitTests.cs. Add focused tests against the existing ReporteAdministrativoService period normalization contract: exactly 366 days is accepted, >366 days is rejected, inclusive Hasta end-of-day behavior remains deterministic, and reversed ranges fail closed. Reuse current code/contracts only; no production changes. Run focused tests/build when possible and perform TWO independent self-reviews. No workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "fb6ef33e4f39c57945cf93970fa052d81fef8e03"
+}

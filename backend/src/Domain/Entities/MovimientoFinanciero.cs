@@ -12,7 +12,12 @@ public class MovimientoFinanciero
     public string? Descripcion { get; set; }
     public decimal Monto { get; set; }
     public EstadoMovimientoFinanciero Estado { get; set; } = EstadoMovimientoFinanciero.Pagado;
+
+    // Compatibilidad ERP-N0: el enum nullable sigue siendo leído/escrito por los
+    // servicios actuales hasta migrarlos al catálogo relacional.
     public MetodoPago? MetodoPago { get; set; }
+    public int? MetodoPagoId { get; set; }
+    public InventoryApp.Domain.Entities.Catalogos.MetodoPago? MetodoPagoCatalogo { get; set; }
 
     public bool EsAutomatico { get; set; }
     /// "Compra" | "Venta" | "Factura" | "Reversion" | "Manual"

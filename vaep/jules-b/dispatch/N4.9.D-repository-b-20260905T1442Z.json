@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.D-REPOSITORY-B-20260905T1442Z",
+  "taskId": "N4.9.D.SUPPORT.REPOSITORY",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "69745f2de077e66e708e7b7c1822e53f40c6f566",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Application/Interfaces/IPeriodoContableRepository.cs; backend/src/Infrastructure/Repositories/PeriodoContableRepository.cs; no DTO/service/controller/DI/frontend/migrations/snapshot/workflows",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT N4.9.C is still being certified; this is safe pipeline work for N4.9.D with PROMOTION_BLOCKED_BY_N4.9.C. Own only the repository boundary and implementation for PeriodoContable, using the already materialized domain entity/AppDbContext. Follow existing repository conventions, async cancellation, deterministic range/state queries, and fail-closed write behavior. Do not implement service/controller/DTOs/DI/frontend and do not touch migration/snapshot. Keep the surface minimal and avoid duplicating an existing generic repository if one already satisfies the requirement; if so, produce only the smallest necessary specialized contract/implementation. Run dotnet build and focused tests/static validation; two independent self-reviews. Do not branch/PR/push/merge/deploy; no main/Produccion/secrets. Return patch/artifact for VAEP REVIEW_FIRST."
+}

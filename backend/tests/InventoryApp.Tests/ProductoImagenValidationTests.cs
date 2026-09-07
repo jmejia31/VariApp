@@ -10,12 +10,15 @@ public class ProductoImagenValidationTests
 {
     private readonly CreateProductoValidator _validator = new();
 
-    private static IFormFile CrearImagenFalsa(string contentType = "image/jpeg", long tamanoBytes = 1024)
+    private static IFormFile CrearImagenFalsa(
+        string contentType = "image/jpeg",
+        long tamanoBytes = 1024,
+        string fileName = "foto.jpg")
     {
         var mock = new Mock<IFormFile>();
         mock.Setup(f => f.ContentType).Returns(contentType);
         mock.Setup(f => f.Length).Returns(tamanoBytes);
-        mock.Setup(f => f.FileName).Returns("foto.jpg");
+        mock.Setup(f => f.FileName).Returns(fileName);
         return mock.Object;
     }
 
@@ -59,9 +62,33 @@ public class ProductoImagenValidationTests
     }
 
     [Fact]
-    public void Imagen_Muy_Pesada_Es_Rechazada()
+    public void Extension_No_Permitida_Es_Rechazada()
     {
-        var imagenes = new List<IFormFile> { CrearImagenFalsa(tamanoBytes: 10 * 1024 * 1024) };
+        var imagenes = new List<IFormFile> { CrearImagenFalsa(fileName: "foto.exe") };
+        var resultado = _validator.Validate(DtoBase(imagenes));
+
+        Assert.False(resultado.IsValid);
+    }
+
+    [Fact]
+    public void Imagen_De_10Mb_Exactos_Es_Valida_En_Prevalidacion()
+    {
+        var imagenes = new List<IFormFile>
+        {
+            CrearImagenFalsa(tamanoBytes: ImagenValidationHelper.MaxBytesPorImagen)
+        };
+        var resultado = _validator.Validate(DtoBase(imagenes));
+
+        Assert.True(resultado.IsValid);
+    }
+
+    [Fact]
+    public void Imagen_Mayor_A_10Mb_Es_Rechazada()
+    {
+        var imagenes = new List<IFormFile>
+        {
+            CrearImagenFalsa(tamanoBytes: ImagenValidationHelper.MaxBytesPorImagen + 1)
+        };
         var resultado = _validator.Validate(DtoBase(imagenes));
 
         Assert.False(resultado.IsValid);

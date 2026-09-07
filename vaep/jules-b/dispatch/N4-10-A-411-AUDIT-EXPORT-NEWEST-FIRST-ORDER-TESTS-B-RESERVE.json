@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-A-411-AUDIT-EXPORT-NEWEST-FIRST-ORDER-TESTS-B-RESERVE",
+  "taskId": "N4.10.A.411.AUDIT_EXPORT_NEWEST_FIRST_ORDER_TESTS",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AAuditExportNewestFirstOrderTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. UNIQUE material closure-support work for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AAuditExportNewestFirstOrderTests.cs. Test existing auditoria export ordering is Fecha descending before the 50,000-row cap. Reuse current implementation/contracts only; no production behavior changes. Run proportional focused tests/build when possible and perform TWO independent self-reviews. No workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "c680746eddfea61b05706d55c313f40ae30e9240"
+}

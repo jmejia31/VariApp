@@ -14,6 +14,6 @@ export interface RegistroAuditoria {
   ip?: string;
   userAgent?: string;
   correlationId?: string;
-  resultado: 'Exito' | 'Error';
+  resultado: 'Exito' | 'Error' | 'Rechazado' | 'Denegado';
   error?: string;
 }

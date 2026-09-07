@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-A-279-ROUNDING_CONSERVATION-TESTS-A-PREARM",
+  "taskId": "N4.10.A.279.ROUNDING_CONSERVATION_TESTS",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportROUNDINGCONSERVATION279Tests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportROUNDINGCONSERVATION279Tests.cs. Add a focused regression for the current behavior identified by ROUNDING_CONSERVATION; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "0b608dd9d0e41f57289bd95b37b31a8e744e4b66"
+}

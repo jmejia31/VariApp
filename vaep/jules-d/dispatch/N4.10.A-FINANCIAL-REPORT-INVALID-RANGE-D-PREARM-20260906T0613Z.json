@@ -1,0 +1,10 @@
+{
+  "dispatchId":"N4.10.A-FINANCIAL-REPORT-INVALID-RANGE-D-PREARM-20260906T0613Z",
+  "taskId":"N4.10.A.38.FINANCIAL_REPORT_INVALID_RANGE_TESTS",
+  "workerId":"JULES_D",
+  "expectedBranch":"Desarrollo",
+  "taskAttempt":1,
+  "fileScopeHint":"backend/tests/InventoryApp.Tests/N410AFinancialReportInvalidRangeTests.cs only",
+  "prompt":"Read docs/VAEP_AUTHORITY.md first. Material NEXT_SAFE for N4.10.A. Own only backend/tests/InventoryApp.Tests/N410AFinancialReportInvalidRangeTests.cs. Add focused regression tests for current validation/error behavior when financial-report date/filter ranges are invalid. Assert only behavior implemented today; do not invent APIs or change production code. Avoid overlap with date/sorting/paging/decimal/precision/data-source/empty-result/RBAC/audit tasks. Run focused tests/build when possible and perform TWO independent self-reviews. No docs/workflows/manifests/dependencies/production changes; no push/PR/branch/merge/deploy.",
+  "primaryBaseHead":"237cf4e53efb734f8d503f92d2ce6869a981d9f2"
+}

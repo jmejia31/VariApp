@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.G-SECURITY-AUDIT-EVIDENCE-MATRIX-D-20260906T0115Z",
+  "taskId": "N4.9.G.SECURITY_AUDIT_EVIDENCE_MATRIX",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/qa/N4_9_G_SECURITY_AUDIT_EVIDENCE_MATRIX.md only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.9.G. This is physical NEXT_SAFE row N4.9.G.8 and a NEW distinct scope after terminal N4.9.G.4. Create ONLY docs/qa/N4_9_G_SECURITY_AUDIT_EVIDENCE_MATRIX.md. Build a concise evidence matrix for current PeriodoContable RBAC, audit, security and observability coverage using exact repo/test/CI references, identify concrete uncovered risks if any, and make no production-code changes. Do not edit backend/frontend production code, migrations, workflows, manifests other than this dispatch, main, Produccion, secrets or deploy. Perform two independent self-reviews and return a material artifact for VAEP REVIEW_FIRST. No promotion or closure claims.",
+  "primaryBaseHead": "3bf568673ef14754a3edf5ecf743e4417ebb3517"
+}

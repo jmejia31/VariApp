@@ -1,9 +1,19 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { permisoGuard } from './core/guards/permiso.guard';
+import { AJUSTES_INVENTARIO_ROUTES } from './features/inventario/ajustes.routes';
+import { FACTURAS_PROVEEDOR_ROUTES } from './features/compras/facturas-proveedor/facturas-proveedor.routes';
+import { PEDIDOS_VENTA_ROUTES } from './features/pedidos-venta/pedidos-venta.routes';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+  {
+    path: '',
+    loadComponent: () => import('./features/varistorehn/varistorehn.component').then(m => m.VaristorehnComponent)
+  },
+  {
+    path: 'varistorehn',
+    loadComponent: () => import('./features/varistorehn/varistorehn.component').then(m => m.VaristorehnComponent)
+  },
   {
     path: 'login',
     loadComponent: () => import('./features/login/login.component').then(m => m.LoginComponent)
@@ -33,6 +43,12 @@ export const routes: Routes = [
     loadComponent: () => import('./features/productos/producto-form.component').then(m => m.ProductoFormComponent)
   },
   {
+    path: 'productos/:id/variantes',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Productos', accion: 'Editar' },
+    loadComponent: () => import('./features/productos/producto-variantes.component').then(m => m.ProductoVariantesComponent)
+  },
+  {
     path: 'productos/:id',
     canActivate: [authGuard, permisoGuard],
     data: { modulo: 'Productos', accion: 'Ver' },
@@ -55,6 +71,54 @@ export const routes: Routes = [
     canActivate: [authGuard, permisoGuard],
     data: { modulo: 'Categorias', accion: 'Editar' },
     loadComponent: () => import('./features/categorias/categoria-form.component').then(m => m.CategoriaFormComponent)
+  },
+  {
+    path: 'sucursales',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Sucursales', accion: 'Ver' },
+    loadComponent: () => import('./features/sucursales/sucursales-list.component').then(m => m.SucursalesListComponent)
+  },
+  {
+    path: 'sucursales/nueva',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Sucursales', accion: 'Crear' },
+    loadComponent: () => import('./features/sucursales/sucursal-form.component').then(m => m.SucursalFormComponent)
+  },
+  {
+    path: 'sucursales/:id/editar',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Sucursales', accion: 'Editar' },
+    loadComponent: () => import('./features/sucursales/sucursal-form.component').then(m => m.SucursalFormComponent)
+  },
+  {
+    path: 'colores',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Colores', accion: 'Ver', tipo: 'Color', titulo: 'Colores', singular: 'Color', icono: 'palette' },
+    loadComponent: () => import('./features/catalogos-producto/catalogo-producto-list.component').then(m => m.CatalogoProductoListComponent)
+  },
+  {
+    path: 'tallas',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Tallas', accion: 'Ver', tipo: 'Talla', titulo: 'Tallas', singular: 'Talla', icono: 'straighten' },
+    loadComponent: () => import('./features/catalogos-producto/catalogo-producto-list.component').then(m => m.CatalogoProductoListComponent)
+  },
+  {
+    path: 'marcas',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Marcas', accion: 'Ver', tipo: 'Marca', titulo: 'Marcas', singular: 'Marca', icono: 'branding_watermark' },
+    loadComponent: () => import('./features/catalogos-producto/catalogo-producto-list.component').then(m => m.CatalogoProductoListComponent)
+  },
+  {
+    path: 'modelos',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Modelos', accion: 'Ver', tipo: 'Modelo', titulo: 'Modelos', singular: 'Modelo', icono: 'devices' },
+    loadComponent: () => import('./features/catalogos-producto/catalogo-producto-list.component').then(m => m.CatalogoProductoListComponent)
+  },
+  {
+    path: 'metodos-pago',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'MetodosPago', accion: 'Ver' },
+    loadComponent: () => import('./features/metodos-pago/metodos-pago.component').then(m => m.MetodosPagoComponent)
   },
   {
     path: 'proveedores',
@@ -93,10 +157,34 @@ export const routes: Routes = [
     loadComponent: () => import('./features/clientes/cliente-form.component').then(m => m.ClienteFormComponent)
   },
   {
+    path: 'tipo-clientes',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'TiposClientes', accion: 'Ver' },
+    loadComponent: () => import('./features/tipo-clientes/tipo-clientes-list.component').then(m => m.TipoClientesListComponent)
+  },
+  {
+    path: 'tipo-clientes/nuevo',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'TiposClientes', accion: 'Crear' },
+    loadComponent: () => import('./features/tipo-clientes/tipo-cliente-form.component').then(m => m.TipoClienteFormComponent)
+  },
+  {
+    path: 'tipo-clientes/:id/editar',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'TiposClientes', accion: 'Editar' },
+    loadComponent: () => import('./features/tipo-clientes/tipo-cliente-form.component').then(m => m.TipoClienteFormComponent)
+  },
+  {
     path: 'usuarios',
     canActivate: [authGuard, permisoGuard],
     data: { modulo: 'Usuarios', accion: 'Ver' },
     loadComponent: () => import('./features/usuarios/usuarios.component').then(m => m.UsuariosComponent)
+  },
+  {
+    path: 'usuarios/:id/editar',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Usuarios', accion: 'Editar' },
+    loadComponent: () => import('./features/usuarios/usuario-form.component').then(m => m.UsuarioFormComponent)
   },
   {
     path: 'usuarios/:id',
@@ -165,10 +253,46 @@ export const routes: Routes = [
     loadComponent: () => import('./features/impuestos/impuesto-form.component').then(m => m.ImpuestoFormComponent)
   },
   {
+    path: 'costos-envio',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Facturacion', accion: 'Administrar' },
+    loadComponent: () => import('./features/costos-envio/costos-envio.component').then(m => m.CostosEnvioComponent)
+  },
+  {
+    path: 'cargas-masivas',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'CargasMasivas', accion: 'Ver' },
+    loadComponent: () => import('./features/cargas-masivas/cargas-masivas.component').then(m => m.CargasMasivasComponent)
+  },
+  {
     path: 'auditoria',
     canActivate: [authGuard, permisoGuard],
     data: { modulo: 'Auditoria', accion: 'Ver' },
     loadComponent: () => import('./features/auditoria/auditoria-list.component').then(m => m.AuditoriaListComponent)
+  },
+  {
+    path: 'solicitudes-compra',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Compras', accion: 'Ver' },
+    loadComponent: () => import('./features/solicitudes-compra/solicitudes-compra-shell.component').then(m => m.SolicitudesCompraShellComponent)
+  },
+  {
+    path: 'ordenes-compra',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Compras', accion: 'Ver' },
+    loadComponent: () => import('./features/ordenes-compra/ordenes-compra-shell.component').then(m => m.OrdenesCompraShellComponent)
+  },
+  {
+    path: 'ordenes-compra/nueva',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Compras', accion: 'Crear' },
+    loadComponent: () => import('./features/ordenes-compra/orden-compra-form.component').then(m => m.OrdenCompraFormComponent)
+  },
+  {
+    path: 'ordenes-compra/:id/editar',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Compras', accion: 'Editar' },
+    loadComponent: () => import('./features/ordenes-compra/orden-compra-form.component').then(m => m.OrdenCompraFormComponent)
   },
   {
     path: 'compras',
@@ -183,16 +307,16 @@ export const routes: Routes = [
     loadComponent: () => import('./features/compras/compra-form.component').then(m => m.CompraFormComponent)
   },
   {
-    path: 'compras/:id',
-    canActivate: [authGuard, permisoGuard],
-    data: { modulo: 'Compras', accion: 'Ver' },
-    loadComponent: () => import('./features/compras/compra-detail.component').then(m => m.CompraDetailComponent)
-  },
-  {
     path: 'compras/:id/editar',
     canActivate: [authGuard, permisoGuard],
     data: { modulo: 'Compras', accion: 'Editar' },
     loadComponent: () => import('./features/compras/compra-form.component').then(m => m.CompraFormComponent)
+  },
+  {
+    path: 'compras/:id',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Compras', accion: 'Ver' },
+    loadComponent: () => import('./features/compras/compra-detail.component').then(m => m.CompraDetailComponent)
   },
   {
     path: 'ventas',
@@ -207,16 +331,22 @@ export const routes: Routes = [
     loadComponent: () => import('./features/ventas/venta-form.component').then(m => m.VentaFormComponent)
   },
   {
+    path: 'ventas/:id/editar',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Ventas', accion: 'Editar' },
+    loadComponent: () => import('./features/ventas/venta-form.component').then(m => m.VentaFormComponent)
+  },
+  {
     path: 'ventas/:id',
     canActivate: [authGuard, permisoGuard],
     data: { modulo: 'Ventas', accion: 'Ver' },
     loadComponent: () => import('./features/ventas/venta-detail.component').then(m => m.VentaDetailComponent)
   },
   {
-    path: 'ventas/:id/editar',
+    path: 'facturas/:id/pagos',
     canActivate: [authGuard, permisoGuard],
-    data: { modulo: 'Ventas', accion: 'Editar' },
-    loadComponent: () => import('./features/ventas/venta-form.component').then(m => m.VentaFormComponent)
+    data: { modulo: 'Facturacion', accion: 'Aplicar' },
+    loadComponent: () => import('./features/facturas/factura-pagos.component').then(m => m.FacturaPagosComponent)
   },
   {
     path: 'facturas/:id',
@@ -225,17 +355,50 @@ export const routes: Routes = [
     loadComponent: () => import('./features/facturas/factura-view.component').then(m => m.FacturaViewComponent)
   },
   {
+    path: 'cuentas-por-cobrar',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Facturacion', accion: 'Ver' },
+    loadComponent: () => import('./features/cuentas-por-cobrar/cuentas-por-cobrar.component').then(m => m.CuentasPorCobrarComponent)
+  },
+  {
+    path: 'asientos-contables',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Finanzas', accion: 'Ver' },
+    loadComponent: () => import('./features/asientos-contables/asientos-contables.component').then(m => m.AsientosContablesComponent)
+  },
+  {
     path: 'finanzas',
     canActivate: [authGuard, permisoGuard],
     data: { modulo: 'Finanzas', accion: 'Ver' },
     loadComponent: () => import('./features/finanzas/finanzas.component').then(m => m.FinanzasComponent)
   },
   {
+    path: 'plan-cuentas',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Finanzas', accion: 'Ver' },
+    loadComponent: () => import('./features/plan-cuentas/plan-cuentas.component').then(m => m.PlanCuentasComponent)
+  },
+  {
+    path: 'cuentas-bancarias',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Finanzas', accion: 'Ver' },
+    loadComponent: () => import('./features/cuentas-bancarias/cuentas-bancarias.component').then(m => m.CuentasBancariasComponent)
+  },
+  {
     path: 'inventario/movimientos',
     canActivate: [authGuard, permisoGuard],
-    data: { modulo: 'Inventario', accion: 'Ver' },
+    data: { modulo: 'MovimientosInventario', accion: 'Ver' },
     loadComponent: () => import('./features/inventario/movimientos-list.component').then(m => m.MovimientosListComponent)
   },
+  {
+    path: 'inventario/costeo',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'MovimientosInventario', accion: 'Ver' },
+    loadComponent: () => import('./features/inventario/costeo-inventario.component').then(m => m.CosteoInventarioComponent)
+  },
+  ...AJUSTES_INVENTARIO_ROUTES,
+  ...FACTURAS_PROVEEDOR_ROUTES,
+  ...PEDIDOS_VENTA_ROUTES,
   {
     path: 'configuracion',
     canActivate: [authGuard, permisoGuard],
@@ -243,11 +406,15 @@ export const routes: Routes = [
     loadComponent: () => import('./features/configuracion/configuracion.component').then(m => m.ConfiguracionComponent)
   },
   {
-    // Autogestión: cualquier usuario autenticado administra su propia cuenta,
-    // sin importar su rol o permisos de módulo.
+    path: 'periodos-contables',
+    canActivate: [authGuard, permisoGuard],
+    data: { modulo: 'Configuracion', accion: 'Ver' },
+    loadComponent: () => import('./features/periodos-contables/periodos-contables.component').then(m => m.PeriodosContablesComponent)
+  },
+  {
     path: 'perfil',
     canActivate: [authGuard],
     loadComponent: () => import('./features/perfil/perfil.component').then(m => m.PerfilComponent)
   },
-  { path: '**', redirectTo: 'dashboard' }
+  { path: '**', redirectTo: '' }
 ];

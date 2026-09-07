@@ -46,16 +46,20 @@ public class ProveedorService : IProveedorService
     public async Task<ProveedorDto> CreateAsync(CreateProveedorDto dto)
     {
         var nombre = dto.Nombre.Trim();
-        if (await _repository.ExisteNombreAsync(nombre))
-            throw new BusinessRuleException($"Ya existe un proveedor con el nombre '{nombre}'.");
+        if (string.IsNullOrWhiteSpace(nombre))
+            throw new BusinessRuleException("El nombre del proveedor es obligatorio.");
+
+        var documento = Limpiar(dto.Documento);
+        if (documento is not null && await _repository.ExisteDocumentoAsync(documento))
+            throw new BusinessRuleException($"Ya existe un proveedor con el documento '{documento}'.");
 
         var proveedor = new Proveedor
         {
             Nombre = nombre,
-            Telefono = dto.Telefono,
-            Documento = dto.Documento,
-            Correo = dto.Correo,
-            Direccion = dto.Direccion,
+            Telefono = Limpiar(dto.Telefono),
+            Documento = documento,
+            Correo = Limpiar(dto.Correo),
+            Direccion = Limpiar(dto.Direccion),
             Activo = true,
             CreadoPorUsuarioId = _currentUser.UsuarioId,
             CreadoPorNombreUsuario = _currentUser.NombreUsuario
@@ -74,15 +78,18 @@ public class ProveedorService : IProveedorService
         if (proveedor is null) return null;
 
         var nombre = dto.Nombre.Trim();
-        if (await _repository.ExisteNombreAsync(nombre, id))
-            throw new BusinessRuleException($"Ya existe un proveedor con el nombre '{nombre}'.");
+        if (string.IsNullOrWhiteSpace(nombre))
+            throw new BusinessRuleException("El nombre del proveedor es obligatorio.");
+
+        var documento = Limpiar(dto.Documento);
+        if (documento is not null && await _repository.ExisteDocumentoAsync(documento, id))
+            throw new BusinessRuleException($"Ya existe otro proveedor con el documento '{documento}'.");
 
         proveedor.Nombre = nombre;
-        proveedor.Telefono = dto.Telefono;
-        proveedor.Documento = dto.Documento;
-        proveedor.Correo = dto.Correo;
-        proveedor.Direccion = dto.Direccion;
-        proveedor.Activo = dto.Activo;
+        proveedor.Telefono = Limpiar(dto.Telefono);
+        proveedor.Documento = documento;
+        proveedor.Correo = Limpiar(dto.Correo);
+        proveedor.Direccion = Limpiar(dto.Direccion);
         proveedor.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
         proveedor.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
         proveedor.FechaActualizacion = DateTime.UtcNow;
@@ -92,6 +99,28 @@ public class ProveedorService : IProveedorService
         await _auditoria.RegistrarAsync(ModuloSistema.Proveedores, AccionPermiso.Editar, $"Proveedor actualizado: {proveedor.Nombre}", proveedor.Id);
 
         return ToDto(proveedor);
+    }
+
+    public async Task<ProveedorDto?> CambiarEstadoAsync(int id, bool activo)
+    {
+        var proveedor = await _repository.GetByIdAsync(id);
+        if (proveedor is null) return null;
+        if (proveedor.Activo == activo) return ToDto(proveedor, incluirCompras: false);
+
+        proveedor.Activo = activo;
+        proveedor.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
+        proveedor.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
+        proveedor.FechaActualizacion = DateTime.UtcNow;
+
+        _repository.Update(proveedor);
+        await _repository.SaveChangesAsync();
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Proveedores,
+            activo ? AccionPermiso.Activar : AccionPermiso.Desactivar,
+            $"Proveedor {(activo ? "activado" : "desactivado")}: {proveedor.Nombre}",
+            proveedor.Id);
+
+        return ToDto(proveedor, incluirCompras: false);
     }
 
     public async Task<bool> DeleteAsync(int id)
@@ -110,6 +139,8 @@ public class ProveedorService : IProveedorService
             await _auditoria.RegistrarAsync(ModuloSistema.Proveedores, AccionPermiso.EliminarLogico, $"Proveedor desactivado como eliminación lógica: {proveedor.Nombre}", id);
         return eliminado;
     }
+
+    private static string? Limpiar(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 
     private static ProveedorDto ToDto(Proveedor p, bool incluirCompras = true) => new()
     {

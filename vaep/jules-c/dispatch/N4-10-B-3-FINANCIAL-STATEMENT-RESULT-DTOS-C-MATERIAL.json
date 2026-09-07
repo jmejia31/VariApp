@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-B-3-FINANCIAL-STATEMENT-RESULT-DTOS-C-MATERIAL",
+  "taskId": "N4.10.B.3.FINANCIAL_STATEMENT_RESULT_DTOS",
+  "workerId": "JULES_C",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Application/DTOs/Contabilidad/EstadoFinancieroDtos.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.B (Estados financieros — Dominio y contratos). Own ONLY backend/src/Application/DTOs/Contabilidad/EstadoFinancieroDtos.cs. Define minimal result DTO contracts for statement header/line/totals that can represent the required statements without embedding persistence entities. Preserve decimal precision and account identity. Inspect existing CuentaContable/AsientoContable/AsientoDetalle/MovimientoFinanciero/PeriodoContable contracts first; reuse existing naming/types and do not invent unrelated APIs. Perform TWO independent self-reviews. No workflow/manifest/dependency/main/production/merge/deploy changes.",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "99843b3340980a34a0415ccd210b50b923d49068"
+}

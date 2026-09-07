@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-F-22-STALE-C",
+  "taskId": "N4.10.F.22.STALE_RESULT_CLEARING_TESTS",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.stale-result-security.spec.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.F. Prove a failed/denied subsequent request clears prior statement data before presenting the error. Production files read-only. Run proportional tests and TWO self-reviews.",
+  "primaryBaseHead": "b9c534245d4b4beb5790d11c7e42672eb3a55c48"
+}

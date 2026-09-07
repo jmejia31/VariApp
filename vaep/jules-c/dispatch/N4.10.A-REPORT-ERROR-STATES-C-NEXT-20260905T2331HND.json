@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.10.A-REPORT-ERROR-STATES-C-NEXT-20260905T2331HND",
+  "taskId": "N4.10.A.29.FINANCIAL_REPORT_ERROR_STATE_REGRESSION",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/e2e/n4-10-financial-report-error-states.spec.ts only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. NEXT_RUN_RESERVED material work for N4.10.A. Own ONLY frontend/e2e/n4-10-financial-report-error-states.spec.ts. Add focused Playwright regression for CURRENT reporting/accounting UI error and empty states: unavailable data, unauthorized access, invalid range/input handling, and stable recovery/navigation where existing routes support it. Do not create production UI or invent routes. Keep assertions truthful to current surfaces. Perform TWO distinct self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "238069b9718a7bdefd727763613d84280f91b61a"
+}

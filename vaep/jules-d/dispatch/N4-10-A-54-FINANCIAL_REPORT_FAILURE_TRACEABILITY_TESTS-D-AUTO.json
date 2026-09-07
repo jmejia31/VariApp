@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-A-54-FINANCIAL_REPORT_FAILURE_TRACEABILITY_TESTS-D-AUTO",
+  "taskId": "N4.10.A.54.FINANCIAL_REPORT_FAILURE_TRACEABILITY_TESTS",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportFailureTraceabilityTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportFailureTraceabilityTests.cs. Add focused backend tests for traceability of current report failure paths: useful correlation/operation context without sensitive leakage. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "f5843f3376a350da0cc42664dff4f661734e0de7"
+}

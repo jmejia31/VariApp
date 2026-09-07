@@ -26,6 +26,46 @@ public class ProductoImagenPrincipalTests
     }
 
     [Fact]
+    public void ImagenPrincipal_Ignora_La_Principal_De_Una_Variante()
+    {
+        var producto = new Producto();
+        producto.Imagenes.Add(new ProductoImagen
+        {
+            Id = 1,
+            ProductoVarianteId = 20,
+            Orden = 0,
+            EsPrincipal = true,
+            Url = "variante.jpg"
+        });
+        producto.Imagenes.Add(new ProductoImagen
+        {
+            Id = 2,
+            ProductoVarianteId = null,
+            Orden = 1,
+            EsPrincipal = true,
+            Url = "general.jpg"
+        });
+
+        Assert.Equal("general.jpg", producto.ImagenPrincipal?.Url);
+    }
+
+    [Fact]
+    public void ImagenPrincipal_Es_Null_Si_Solo_Hay_Imagenes_De_Variantes()
+    {
+        var producto = new Producto();
+        producto.Imagenes.Add(new ProductoImagen
+        {
+            Id = 1,
+            ProductoVarianteId = 20,
+            Orden = 0,
+            EsPrincipal = true,
+            Url = "variante.jpg"
+        });
+
+        Assert.Null(producto.ImagenPrincipal);
+    }
+
+    [Fact]
     public void ImagenPrincipal_Es_Null_Sin_Imagenes()
     {
         var producto = new Producto();

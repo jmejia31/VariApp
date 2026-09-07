@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-D-5-FINANCIAL_STATEMENT_SERVICE_TESTS-A-R1-RECOVERY-20260906T1131HND",
+  "taskId": "N4.10.D.5.FINANCIAL_STATEMENT_SERVICE_TESTS",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410DEstadoFinancieroServiceTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. Recovery of SAME N4.10.D.5.FINANCIAL_STATEMENT_SERVICE_TESTS; prior manifest never produced a Jules workflow/session, so attempt 1 was not consumed. Own ONLY backend/tests/InventoryApp.Tests/N410DEstadoFinancieroServiceTests.cs. Add focused tests for the approved EstadoFinancieroService behavior and current accounting contracts. Cover supported statement families, decimal precision, cancellation and fail-closed unsupported combinations. No production changes. Run proportional focused tests/build and perform TWO independent self-reviews. No workflow/manifest/main/production/merge/deploy changes.",
+  "primaryBaseHead": "c7ae244dc7bf1c5feeaf0c763bcf08fc27b633f5"
+}

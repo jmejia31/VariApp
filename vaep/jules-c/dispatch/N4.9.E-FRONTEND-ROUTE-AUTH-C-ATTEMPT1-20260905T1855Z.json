@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 3,
+  "taskId": "N4.9.E_ATTEMPT1_FRONTEND_ROUTE_AUTH",
+  "attemptId": "N4.9.E-FRONTEND-ROUTE-AUTH-C-ATTEMPT1-20260905T1855Z",
+  "title": "N4.9.E ATTEMPT1 — ruta y autorización UX de periodos contables",
+  "priority": "P0",
+  "projectId": "N4.9",
+  "primaryRepo": "jmejia31/VariApp",
+  "primaryBranch": "Desarrollo",
+  "primaryBaseHead": "afc1428719b7ec9658aee8ea99de4d68192430b9",
+  "requiredBaseHead": "d514b4354efeabbc914383399a521725b6441c5a",
+  "rebaseRequiredOnHeadChange": false,
+  "readableRepos": ["jmejia31/VariApp", "jmejia31/VariApp-MCP", "jmejia31/VAAP"],
+  "editableRepos": ["jmejia31/VariApp"],
+  "objective": "Integrar el feature Periodos contables en el routing Angular y aplicar los patrones de permiso existentes sin modificar el feature ni el cliente core.",
+  "inScope": [
+    "frontend/src/app/app.routes.ts"
+  ],
+  "outOfScope": [
+    "frontend/src/app/core/**",
+    "frontend/src/app/features/periodos-contables/**",
+    "frontend/e2e/**",
+    "backend/**",
+    "vaep/** excepto resultado de lane"
+  ],
+  "acceptance": [
+    "Agregar una ruta coherente con la navegación/configuración contable existente para PeriodosContablesComponent.",
+    "Aplicar auth/permiso guard usando exactamente permisos runtime ya existentes y permisos Configuracion certificados por N4.9.D; no inventar claims.",
+    "No degradar rutas existentes ni alterar redirects no relacionados.",
+    "Lazy/standalone loading debe seguir el patrón real de app.routes.ts y compilar una vez integrado el feature B."
+  ],
+  "requiredValidations": [
+    "cd frontend && npm run build"
+  ],
+  "implementationRules": [
+    "Leer docs/VAEP_AUTHORITY.md primero.",
+    "Desarrollo only; no main/Produccion/secrets/deploy.",
+    "Ownership exclusivo de frontend/src/app/app.routes.ts; no editar archivos de otras lanes.",
+    "Revisar permiso.guard.ts y permisos-runtime.service.ts sólo como lectura.",
+    "FUNCTIONAL_HEAD=d514b4354efeabbc914383399a521725b6441c5a; commits vaep-only posteriores son control-plane equivalent.",
+    "Si el build aislado falla únicamente porque feature B aún no está integrado, reportar esa dependencia exacta sin ampliar scope."
+  ],
+  "expectedOutput": {"format": "unified_diff", "mustIncludeChangedFiles": true, "mustIncludeValidations": true, "mustIncludeRisks": true},
+  "ownership": {"files": ["frontend/src/app/app.routes.ts"]},
+  "lease": {"minutes": 30},
+  "createdAt": "2026-09-05T18:55:00Z",
+  "createdBy": "ChatGPT",
+  "authority": "docs/VAEP_AUTHORITY.md",
+  "lane": "C",
+  "attempt": 1
+}

@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-A-402-AUDIT_EXPORT_50000_ROW_CAP-TESTS-B-UNIQUE",
+  "taskId": "N4.10.A.402.AUDIT_EXPORT_50000_ROW_CAP_TESTS",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AAuditExport50000RowCapTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. UNIQUE material closure-support work for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AAuditExport50000RowCapTests.cs. Add focused tests for the existing ReporteAdministrativoService audit export contract proving the current Take(50000) cap is enforced deterministically, ordering remains newest-first, and no extra rows leak beyond the cap. Reuse current implementation/contracts only; no production changes. Run focused tests/build when possible and perform TWO independent self-reviews. No workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "417343bb32e677335616329e4147c5c48a59620b"
+}

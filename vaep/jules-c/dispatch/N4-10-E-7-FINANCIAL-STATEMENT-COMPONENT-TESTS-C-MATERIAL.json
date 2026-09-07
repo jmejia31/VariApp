@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-E-7-FINANCIAL-STATEMENT-COMPONENT-TESTS-C-MATERIAL",
+  "taskId": "N4.10.E.7.FINANCIAL_STATEMENT_COMPONENT_TESTS",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.component.spec.ts only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. NEXT_SAFE_PREWORK for N4.10.E only; CURRENT_PARENT remains N4.10.D. Own ONLY frontend/src/app/features/estados-financieros/estados-financieros.component.spec.ts. Add focused component tests using current standalone/TestBed patterns for creation, mutually exclusive period vs date filters, incomplete/reversed range rejection, loading/error/result behavior and service invocation with the approved filter. Do not alter production files. TWO independent self-reviews.",
+  "primaryBaseHead": "e6e367f17e5bfb03def27f51fa6b1f0c35b94281"
+}

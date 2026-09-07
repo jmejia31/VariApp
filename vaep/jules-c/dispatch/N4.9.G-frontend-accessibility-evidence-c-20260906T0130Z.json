@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.G-FRONTEND-ACCESSIBILITY-EVIDENCE-C-20260906T0130Z",
+  "taskId": "N4.9.G.FRONTEND_ACCESSIBILITY_EVIDENCE",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/qa/N4_9_G_FRONTEND_ACCESSIBILITY_EVIDENCE.md only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.9.G. Own ONLY docs/qa/N4_9_G_FRONTEND_ACCESSIBILITY_EVIDENCE.md. Build an evidence matrix for the PeriodoContable frontend accessibility and negative-path regression surface already implemented. Cite exact component/spec/E2E/CI evidence where observable, separate confirmed coverage from gaps, and never invent PASS. Do not modify production code, tests, workflows, manifests, main, Produccion, secrets or deploy. Perform two independent self-reviews before COMPLETED and return a material artifact for VAEP REVIEW_FIRST.",
+  "primaryBaseHead": "3d8e38842a74578db8e2e1a8e564fdde1d423c55"
+}

@@ -21,6 +21,13 @@ export interface DashboardResumen {
   totalUnidades: number;
   valorTotalInventario: number;
   valorPotencialVenta: number;
+  totalProductosMercaderia: number;
+  totalProductosInsumosAdministrativos: number;
+  totalUnidadesMercaderia: number;
+  totalUnidadesInsumosAdministrativos: number;
+  valorInventarioCostoMercaderia: number;
+  valorInventarioCostoInsumosAdministrativos: number;
+  valorPotencialVentaMercaderia: number;
   productosStockBajo: Producto[];
   ultimosAgregados: Producto[];
 

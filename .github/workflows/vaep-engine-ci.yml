@@ -1,0 +1,60 @@
+name: VAEP engine lightweight checks
+
+on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - 'vaep/**'
+      - 'scripts/vaep/**'
+      - '.github/workflows/vaep-engine-ci.yml'
+      - '.github/scripts/vaep-jules-master.sh'
+      - '.github/scripts/vaep-jules-worker.sh'
+      - 'scripts/antig/antig-self-test.ps1'
+      - 'docs/VAEP_AUTHORITY.md'
+      - 'AGENTS.md'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'vaep/**'
+      - 'scripts/vaep/**'
+      - '.github/workflows/vaep-engine-ci.yml'
+      - '.github/scripts/vaep-jules-master.sh'
+      - '.github/scripts/vaep-jules-worker.sh'
+      - 'scripts/antig/antig-self-test.ps1'
+      - 'docs/VAEP_AUTHORITY.md'
+      - 'AGENTS.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Validate JSON schemas
+        run: node -e "for (const f of ['vaep/schemas/jules-dispatch.schema.json','vaep/schemas/evidence-fragment.schema.json','vaep/metrics/baseline.json']) JSON.parse(require('fs').readFileSync(f)); console.log('schemas valid')"
+      - name: Validate VAEP scripts
+        run: node --check scripts/vaep/dispatch-preflight.mjs && node --check scripts/vaep/aggregate-evidence.mjs && node --check scripts/vaep/bundles.mjs && node --check scripts/vaep/sync-bitacora.mjs && node --check scripts/vaep/reconcile-status.mjs && node --check scripts/vaep/metrics.mjs
+      - name: Validate Bash syntax
+        run: bash -n .github/scripts/vaep-policy-parser.sh .github/scripts/vaep-jules-master.sh .github/scripts/vaep-jules-worker.sh
+      - name: Validate parser fail-closed self-test
+        run: bash .github/scripts/vaep-policy-parser.sh --self-test
+      - name: Validate AntiG StaticOnly
+        shell: pwsh
+        run: ./scripts/antig/antig-self-test.ps1 -StaticOnly
+      - name: Validate VAEP/Jules MASTER
+        run: bash .github/scripts/vaep-jules-master.sh --static-self-test
+      - name: Validate VAEP/Jules worker runtime jq preflight
+        run: bash .github/scripts/vaep-jules-worker.sh --runtime-preflight
+      - name: Run VAEP/Jules MASTER runtime self-test
+        run: bash .github/scripts/vaep-jules-master.sh --self-test
+      - name: Run VAEP self-tests
+        run: node scripts/vaep/dispatch-preflight-self-test.mjs && node scripts/vaep/block2-self-test.mjs && node scripts/vaep/block3-self-test.mjs

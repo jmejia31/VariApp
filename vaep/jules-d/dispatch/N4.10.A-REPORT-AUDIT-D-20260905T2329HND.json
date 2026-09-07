@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.10.A-REPORT-AUDIT-D-20260905T2329HND",
+  "taskId": "N4.10.A.26.FINANCIAL_REPORT_AUTHORIZATION_AUDIT",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportAuthorizationAuditTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. Continue material N4.10.A financial-report groundwork without promoting a blocked parent. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportAuthorizationAuditTests.cs. Add focused authorization/audit contract tests against CURRENT reporting/accounting controllers/services: authenticated access, required permission enforcement, forbidden-path behavior, and auditable operation expectations where current infrastructure exposes them. Do not invent endpoints/permissions/audit APIs. If a contract is absent, capture the exact gap truthfully rather than fabricating implementation or PASS. Run focused tests/build when possible and perform TWO distinct self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "ba705ec60461e1f95f6867cd2f5f44f3bb3a7e47"
+}

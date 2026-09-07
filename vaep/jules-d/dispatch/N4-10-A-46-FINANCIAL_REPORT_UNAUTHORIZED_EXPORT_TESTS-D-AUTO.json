@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-A-46-FINANCIAL_REPORT_UNAUTHORIZED_EXPORT_TESTS-D-AUTO",
+  "taskId": "N4.10.A.46.FINANCIAL_REPORT_UNAUTHORIZED_EXPORT_TESTS",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportUnauthorizedExportTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportUnauthorizedExportTests.cs. Add focused backend negative tests for unauthorized current report export/access paths, using existing permissions and endpoints only. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "3372fc23157fbd922c7ea10c4cc0df253ac8de69"
+}

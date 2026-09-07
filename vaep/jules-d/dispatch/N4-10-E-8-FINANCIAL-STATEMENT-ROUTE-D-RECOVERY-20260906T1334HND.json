@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-E-8-FINANCIAL-STATEMENT-ROUTE-D-RECOVERY-20260906T1334HND",
+  "taskId": "N4.10.E.8.FINANCIAL_STATEMENT_ROUTE",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/app.routes.ts only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. NEXT_SAFE_PREWORK for N4.10.E only; CURRENT_PARENT remains N4.10.D. This is recovery of a controller-skipped dispatch; no prior Jules attempt was consumed. Own ONLY frontend/src/app/app.routes.ts. Add exactly one /estados-financieros route using authGuard + permisoGuard, data modulo Finanzas accion Ver and lazy load of EstadosFinancierosComponent. Do not alter unrelated routes/imports. TWO self-reviews.",
+  "primaryBaseHead": "ccf39f8e7e5d8329a674c0025da8b1aef1bde38c"
+}

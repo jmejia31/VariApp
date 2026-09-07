@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-E-5-FINANCIAL-STATEMENT-STYLES-A-MATERIAL",
+  "taskId": "N4.10.E.5.FINANCIAL_STATEMENT_STYLES",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.component.scss only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. NEXT_SAFE_PREWORK for N4.10.E only; CURRENT_PARENT remains N4.10.D and this task MUST NOT promote/close E. Own ONLY frontend/src/app/features/estados-financieros/estados-financieros.component.scss. Create responsive, accessible, theme-compatible styling for the approved financial-statement UI contract: filter controls, loading/error/empty states, result heading, horizontally safe statement table, totals emphasis, narrow-screen layout and visible focus behavior without hard-coding product colors where project CSS variables exist. Follow existing report/asiento patterns. No TS/HTML/routes/service/model/backend/workflow/manifest changes. TWO independent self-reviews.",
+  "primaryBaseHead": "e6e367f17e5bfb03def27f51fa6b1f0c35b94281"
+}

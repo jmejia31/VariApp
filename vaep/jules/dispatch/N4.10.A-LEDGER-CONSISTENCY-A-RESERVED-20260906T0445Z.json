@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.10.A-LEDGER-CONSISTENCY-A-RESERVED-20260906T0445Z",
+  "taskId": "N4.10.A.20.FINANCIAL_REPORT_LEDGER_CONSISTENCY_TESTS",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportLedgerConsistencyTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. This is NEXT_RUN_RESERVED behind the current Jules A run and must remain dependency-safe while CURRENT_PARENT=N4.9.H. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportLedgerConsistencyTests.cs. Add material read-only tests that verify current financial-report/accounting query contracts derive consistent debit/credit totals and report balances from the existing ledger/data-source behavior where supported. Do not invent missing endpoints or production code; report an exact missing contract instead of false PASS. No docs/workflows/manifests/production changes. Two distinct self-reviews; no push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "5a95ea35062360522d151618f124fb6f3ea7e980"
+}

@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-A-49-FINANCIAL_REPORT_PERMISSION_STATE_E2E-C-AUTO",
+  "taskId": "N4.10.A.49.FINANCIAL_REPORT_PERMISSION_STATE_E2E",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/e2e/n4-10-financial-report-permission-state.spec.ts only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY frontend/e2e/n4-10-financial-report-permission-state.spec.ts. Add focused Playwright coverage for current financial-report unauthorized/forbidden UI state and navigation behavior, reusing existing RBAC surfaces. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "5b009e3eedeb7d2bb2302bb8e2988e0e2a5043f9"
+}

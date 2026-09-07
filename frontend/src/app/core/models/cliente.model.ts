@@ -8,6 +8,9 @@ export interface Cliente {
   activo: boolean;
   totalVentas: number;
   totalVendido: number;
+  tipoClienteId: number;
+  tipoClienteNombre: string;
+  tipoClienteColorHex: string;
   creadoPorNombreUsuario?: string;
   fechaCreacion: string;
 }
@@ -18,5 +21,6 @@ export interface ClienteFormValue {
   identidadORTN?: string;
   correo?: string;
   direccion?: string;
+  tipoClienteId?: number;
   activo?: boolean;
 }

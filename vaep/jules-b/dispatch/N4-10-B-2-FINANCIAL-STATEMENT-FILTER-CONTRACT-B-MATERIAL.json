@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-B-2-FINANCIAL-STATEMENT-FILTER-CONTRACT-B-MATERIAL",
+  "taskId": "N4.10.B.2.FINANCIAL_STATEMENT_FILTER_CONTRACT",
+  "workerId": "JULES_B",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Application/DTOs/Contabilidad/EstadoFinancieroFiltroDto.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.B (Estados financieros — Dominio y contratos). Own ONLY backend/src/Application/DTOs/Contabilidad/EstadoFinancieroFiltroDto.cs. Define the minimum filter contract grounded in existing PeriodoContable/date/accounting primitives. Keep only fields justified by current code and Plan Rector; no speculative filters. Inspect existing CuentaContable/AsientoContable/AsientoDetalle/MovimientoFinanciero/PeriodoContable contracts first; reuse existing naming/types and do not invent unrelated APIs. Perform TWO independent self-reviews. No workflow/manifest/dependency/main/production/merge/deploy changes.",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "d679296ad08c737de3f7d489a3516653e71b37d8"
+}

@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-F-4-ROUTE-GUARD-D",
+  "taskId": "N4.10.F.4.ROUTE_GUARD_TESTS",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/estados-financieros.route-guard.spec.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. When N4.10.E is LISTO, test denial/allow behavior of route guards for Finanzas/Ver. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+  "primaryBaseHead": "44cbf60d44bd7f6abf79f61a0eb4c77b653417ab"
+}

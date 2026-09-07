@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.D-PAGINATION-FILTER-GUARD-C-ATTEMPT2-R2-20260905T1804Z",
+  "taskId": "N4.9.D.CLOSURE.PAGINATION_FILTER_GUARD",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 2,
+  "primaryBaseHead": "bf2e6c309258d96d8d026ab77438f9943a55f7bf",
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/PeriodoContablePaginationFilterTests.cs only; test-only, no production/frontend/migrations/workflows/manifests",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.9.D. This is the unique R2/ATTEMPT2 for the same PAGINATION_FILTER_GUARD task. ATTEMPT1 returned REQUIRED because pagination contracts were absent; they are now materialized on FUNCTIONAL_HEAD=bf2e6c309258d96d8d026ab77438f9943a55f7bf through the reviewed pagination/filter integration. Add only backend/tests/InventoryApp.Tests/PeriodoContablePaginationFilterTests.cs. Validate deterministic pagination plus useful PeriodoContable filters, at minimum state and date-range semantics, against the current canonical implementation. Do not modify production code. Run focused tests/build and two independent self-reviews. If any blocking defect remains, return REQUIRED with exact evidence for QA_TAKEOVER; there is NO R3. Do not branch, PR, merge, deploy, touch main/Produccion/secrets or edit vaep control files. Return terminal artifact for VAEP REVIEW_FIRST."
+}

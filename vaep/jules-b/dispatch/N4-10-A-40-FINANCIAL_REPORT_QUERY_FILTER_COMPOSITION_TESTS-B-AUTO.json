@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-A-40-FINANCIAL_REPORT_QUERY_FILTER_COMPOSITION_TESTS-B-AUTO",
+  "taskId": "N4.10.A.40.FINANCIAL_REPORT_QUERY_FILTER_COMPOSITION_TESTS",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportQueryFilterCompositionTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportQueryFilterCompositionTests.cs. Add focused backend tests for composition of current report query filters, including combinations of date/range/status/type filters that already exist. Do not invent query parameters. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "cdda1ffe8f0337016db15b0e045d273635c7311e"
+}

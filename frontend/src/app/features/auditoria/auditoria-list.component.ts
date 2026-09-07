@@ -10,13 +10,15 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuditoriaService } from '../../services/auditoria.service';
 import { RegistroAuditoria } from '../../core/models/auditoria.model';
+import { ReportesAdministrativosComponent } from '../reportes-administrativos/reportes-administrativos.component';
 
 @Component({
   selector: 'app-auditoria-list',
   standalone: true,
   imports: [
     CommonModule, FormsModule, MatFormFieldModule, MatSelectModule, MatInputModule,
-    MatIconModule, MatButtonModule, MatPaginatorModule, MatProgressSpinnerModule
+    MatIconModule, MatButtonModule, MatPaginatorModule, MatProgressSpinnerModule,
+    ReportesAdministrativosComponent
   ],
   templateUrl: './auditoria-list.component.html',
   styleUrl: './auditoria-list.component.scss'
@@ -40,13 +42,14 @@ export class AuditoriaListComponent implements OnInit, OnDestroy {
   readonly modulos = [
     'Dashboard', 'Productos', 'Categorias', 'Compras', 'Ventas', 'Facturacion', 'Finanzas',
     'Inventario', 'MovimientosInventario', 'Proveedores', 'Clientes', 'Usuarios', 'Roles',
-    'Permisos', 'Auditoria', 'Configuracion', 'Descuentos', 'Impuestos'
+    'Permisos', 'Auditoria', 'ReportesAdministrativos', 'Configuracion', 'Descuentos', 'Impuestos',
+    'Colores', 'Tallas', 'Marcas', 'Modelos', 'CargasMasivas'
   ];
   readonly acciones = [
     'Ver', 'Crear', 'Editar', 'Actualizar', 'Activar', 'Desactivar', 'EliminarLogico',
     'EliminarPermanente', 'Confirmar', 'Anular', 'Aprobar', 'Rechazar', 'Exportar', 'Imprimir',
     'Administrar', 'AsignarRol', 'RestablecerContrasena', 'CambiarEstado', 'ConsultarHistorial',
-    'Aplicar', 'Duplicar'
+    'Aplicar', 'Duplicar', 'Compartir'
   ];
 
   constructor(private auditoriaService: AuditoriaService) {}

@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-D-1-FINANCIAL-STATEMENT-SERVICE-IMPLEMENTATION-A-R2-20260906T1056HND",
+  "taskId": "N4.10.D.1.FINANCIAL_STATEMENT_SERVICE_IMPLEMENTATION",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 2,
+  "fileScopeHint": "backend/src/Infrastructure/Services/EstadoFinancieroService.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. R2 FINAL for the SAME N4.10.D.1 task after worker-bootstrap failure before Jules execution. Own ONLY backend/src/Infrastructure/Services/EstadoFinancieroService.cs. Implement the approved financial statement service using existing N4.10.B contracts and current accounting repositories/entities only. Cover approved TipoEstadoFinanciero families, preserve decimal precision, honor CancellationToken, fail closed on unsupported combinations, run focused build/tests where possible, and perform TWO independent self-reviews. No controller/DI/migrations/frontend/workflow/manifest/main/production/merge/deploy changes.",
+  "primaryBaseHead": "63f99bf3753db8e99f1e6f2f19c3011122992ae6"
+}

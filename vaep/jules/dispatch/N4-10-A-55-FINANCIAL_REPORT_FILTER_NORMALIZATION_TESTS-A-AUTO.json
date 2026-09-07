@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-A-55-FINANCIAL_REPORT_FILTER_NORMALIZATION_TESTS-A-AUTO",
+  "taskId": "N4.10.A.55.FINANCIAL_REPORT_FILTER_NORMALIZATION_TESTS",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportFilterNormalizationTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportFilterNormalizationTests.cs. Add focused backend tests for normalization of current report filters: whitespace/casing where applicable, empty optional filters, equivalent inputs, and stable deterministic results. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "975cffbb0701187444e6556d67ec38f1cdd454cb"
+}

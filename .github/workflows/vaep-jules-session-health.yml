@@ -1,0 +1,168 @@
+name: VAEP Jules Session Health
+
+on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - 'vaep/health/*.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: vaep-jules-session-health-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  health:
+    name: Verificar session + actividad A B C D
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      JULES_API_BASE: https://jules.googleapis.com/v1alpha
+      JULES_A_API_KEY: ${{ secrets.JULES_API_KEY }}
+      JULES_B_API_KEY: ${{ secrets.JULES_B_API_KEY }}
+      JULES_C_API_KEY: ${{ secrets.JULES_C_API_KEY }}
+      JULES_D_API_KEY: ${{ secrets.JULES_D_API_KEY }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+
+      - name: Cargar manifiesto health único
+        id: manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t manifests < <(git diff-tree --no-commit-id --name-only --diff-filter=A -r "$GITHUB_SHA" -- 'vaep/health/*.json')
+          test "${#manifests[@]}" -eq 1
+          manifest="${manifests[0]}"
+          jq -e '
+            (.issueNumber | type == "number") and
+            (.A.dispatchId | type == "string") and
+            (.B.dispatchId | type == "string") and
+            (.C.dispatchId | type == "string") and
+            (.D.dispatchId | type == "string")
+          ' "$manifest" >/dev/null
+          echo "manifest=$manifest" >> "$GITHUB_OUTPUT"
+
+      - name: Bind VAEP MASTER authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          MASTER_FILE='docs/VAEP_AUTHORITY.md'
+          PARSER='.github/scripts/vaep-policy-parser.sh'
+          test -f "$MASTER_FILE"
+          test -f "$PARSER"
+          bash "$PARSER" --validate "$MASTER_FILE" >/dev/null
+          echo "MASTER_COMMIT_SHA=$(bash "$PARSER" --commit-sha "$MASTER_FILE")" >> "$GITHUB_ENV"
+          echo "AUTOMATION_POLICY_HASH=$(bash "$PARSER" --hash "$MASTER_FILE")" >> "$GITHUB_ENV"
+
+      - name: Consultar sesiones Jules sin crear ni modificar sesiones
+        shell: bash
+        run: |
+          set -euo pipefail
+          manifest='${{ steps.manifest.outputs.manifest }}'
+          mkdir -p "$RUNNER_TEMP/vaep-health"
+          printf '{"workers":{}}\n' > "$RUNNER_TEMP/vaep-health/health.json"
+
+          check_worker() {
+            local worker="$1" key="$2" prefix="$3"
+            local dispatch title session_name state activity_count last_activity active
+            dispatch="$(jq -r --arg w "$worker" '.[$w].dispatchId' "$manifest")"
+            title="${prefix}${dispatch}"
+            session_name=""
+            page_token=""
+
+            for page in $(seq 1 50); do
+              response="$RUNNER_TEMP/vaep-health/${worker}-sessions-${page}.json"
+              args=(--fail-with-body --silent --show-error --get -H "x-goog-api-key: $key" --data-urlencode 'pageSize=100')
+              [ -z "$page_token" ] || args+=(--data-urlencode "pageToken=$page_token")
+              curl "${args[@]}" "$JULES_API_BASE/sessions" > "$response"
+              session_name="$(jq -r --arg title "$title" '[.sessions[]? | select(.title == $title)] | first | .name // empty' "$response")"
+              [ -z "$session_name" ] || break
+              page_token="$(jq -r '.nextPageToken // empty' "$response")"
+              [ -n "$page_token" ] || break
+            done
+
+            state='NO_SESSION'
+            activity_count=0
+            last_activity=''
+            active=false
+            if [ -n "$session_name" ]; then
+              curl --fail-with-body --silent --show-error \
+                -H "x-goog-api-key: $key" \
+                "$JULES_API_BASE/$session_name" > "$RUNNER_TEMP/vaep-health/${worker}-session.json"
+              state="$(jq -r '.state // "UNKNOWN"' "$RUNNER_TEMP/vaep-health/${worker}-session.json")"
+              curl --fail-with-body --silent --show-error --get \
+                -H "x-goog-api-key: $key" \
+                --data-urlencode 'pageSize=100' \
+                "$JULES_API_BASE/$session_name/activities" > "$RUNNER_TEMP/vaep-health/${worker}-activities.json"
+              activity_count="$(jq -r '(.activities // []) | length' "$RUNNER_TEMP/vaep-health/${worker}-activities.json")"
+              last_activity="$(jq -c '(.activities // []) | last // {}' "$RUNNER_TEMP/vaep-health/${worker}-activities.json")"
+              case "$state" in
+                PLANNING|IN_PROGRESS)
+                  if [ "$activity_count" -gt 0 ]; then active=true; fi
+                  ;;
+              esac
+            fi
+
+            tmp="$RUNNER_TEMP/vaep-health/health.next.json"
+            jq \
+              --arg w "$worker" \
+              --arg dispatch "$dispatch" \
+              --arg session "$session_name" \
+              --arg state "$state" \
+              --argjson activityCount "$activity_count" \
+              --arg lastActivity "$last_activity" \
+              --argjson active "$active" \
+              '.workers[$w] = {dispatchId:$dispatch,session:$session,state:$state,activityCount:$activityCount,lastActivity:$lastActivity,activeVerified:$active}' \
+              "$RUNNER_TEMP/vaep-health/health.json" > "$tmp"
+            mv "$tmp" "$RUNNER_TEMP/vaep-health/health.json"
+          }
+
+          test -n "$JULES_A_API_KEY" && check_worker A "$JULES_A_API_KEY" 'VAEP '
+          test -n "$JULES_B_API_KEY" && check_worker B "$JULES_B_API_KEY" 'VAEP-B '
+          test -n "$JULES_C_API_KEY" && check_worker C "$JULES_C_API_KEY" 'VAEP-C '
+          test -n "$JULES_D_API_KEY" && check_worker D "$JULES_D_API_KEY" 'VAEP-D '
+
+          cat "$RUNNER_TEMP/vaep-health/health.json"
+
+      - name: Persistir health en Issue de control
+        shell: bash
+        run: |
+          set -euo pipefail
+          manifest='${{ steps.manifest.outputs.manifest }}'
+          health="$RUNNER_TEMP/vaep-health/health.json"
+          issue="$(jq -r '.issueNumber' "$manifest")"
+          body="$RUNNER_TEMP/vaep-health/comment.md"
+          {
+            echo '## VAEP MASTER session health'
+            echo
+            echo '| Lane | Session | State | Activities | ACTIVE_VERIFIED |'
+            echo '|---|---|---|---:|---|'
+            for w in A B C D; do
+              session="$(jq -r --arg w "$w" '.workers[$w].session // ""' "$health")"
+              state="$(jq -r --arg w "$w" '.workers[$w].state // "UNKNOWN"' "$health")"
+              count="$(jq -r --arg w "$w" '.workers[$w].activityCount // 0' "$health")"
+              active="$(jq -r --arg w "$w" '.workers[$w].activeVerified // false' "$health")"
+              [ -n "$session" ] || session='—'
+              echo "| $w | $session | $state | $count | $active |"
+            done
+            echo
+            echo "Health SHA: \`$GITHUB_SHA\`. This probe is read-only against Jules sessions; it creates no Jules session and prints no secret."
+          } > "$body"
+          gh issue comment "$issue" --repo "$GITHUB_REPOSITORY" --body-file "$body"
+
+      - name: Publicar health artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vaep-jules-session-health
+          path: ${{ runner.temp }}/vaep-health/health.json
+          if-no-files-found: error
+          retention-days: 7

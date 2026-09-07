@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-A-41-FINANCIAL_REPORT_FILTER_INTERACTION_E2E-C-AUTO",
+  "taskId": "N4.10.A.41.FINANCIAL_REPORT_FILTER_INTERACTION_E2E",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/e2e/n4-10-financial-report-filter-interactions.spec.ts only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY frontend/e2e/n4-10-financial-report-filter-interactions.spec.ts. Add focused Playwright coverage for current financial-report filter interactions and visible result updates using existing routes/components only. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "2dc882e62bf3311eb87563b647e3d1328d5e6a74"
+}

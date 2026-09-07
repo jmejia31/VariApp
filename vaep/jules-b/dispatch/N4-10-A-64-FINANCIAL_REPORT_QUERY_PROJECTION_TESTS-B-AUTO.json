@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-A-64-FINANCIAL_REPORT_QUERY_PROJECTION_TESTS-B-AUTO",
+  "taskId": "N4.10.A.64.FINANCIAL_REPORT_QUERY_PROJECTION_TESTS",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportQueryProjectionTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportQueryProjectionTests.cs. Add focused backend tests for current query-to-DTO projection fields and deterministic mapping, avoiding duplicate coverage from other lanes. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "5507be67a344ec438fa72459ed7d7495032ffce5"
+}

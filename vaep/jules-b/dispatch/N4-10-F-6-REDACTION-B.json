@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-F-6-REDACTION-B",
+  "taskId": "N4.10.F.6.CLIENT_ERROR_REDACTION",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/services/estado-financiero.redaction.spec.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. When N4.10.E is LISTO, test client-side redaction/normalization of sensitive server error content according to current project patterns. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+  "primaryBaseHead": "5f584b58499941e2b4efb96d3e919b83af09c56b"
+}

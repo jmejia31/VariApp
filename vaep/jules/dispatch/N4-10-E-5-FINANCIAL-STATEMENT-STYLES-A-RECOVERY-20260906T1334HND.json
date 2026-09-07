@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-E-5-FINANCIAL-STATEMENT-STYLES-A-RECOVERY-20260906T1334HND",
+  "taskId": "N4.10.E.5.FINANCIAL_STATEMENT_STYLES",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.component.scss only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. NEXT_SAFE_PREWORK for N4.10.E only; CURRENT_PARENT remains N4.10.D. This is recovery of a controller-skipped dispatch; no prior Jules attempt was consumed. Own ONLY frontend/src/app/features/estados-financieros/estados-financieros.component.scss. Create responsive, accessible, theme-compatible styling for the approved financial-statement UI: filter controls, loading/error/empty states, result/table/totals, narrow screens and visible focus. Follow existing report/asiento patterns. No TS/HTML/routes/service/model/backend/workflow/manifest changes. TWO self-reviews.",
+  "primaryBaseHead": "ccf39f8e7e5d8329a674c0025da8b1aef1bde38c"
+}

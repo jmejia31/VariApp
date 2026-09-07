@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-A-403-REPORT_CLIENT_FILTER_CASEFOLD-TESTS-C-UNIQUE",
+  "taskId": "N4.10.A.403.REPORT_CLIENT_FILTER_CASEFOLD_TESTS",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/features/reportes-administrativos/reportes-administrativos-filter.contract.spec.ts only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. UNIQUE material closure-support work for N4.10.A. Own ONLY frontend/src/app/features/reportes-administrativos/reportes-administrativos-filter.contract.spec.ts. Add focused unit/contract tests for the existing ReportesAdministrativosComponent client-side filters: trim + locale lowercase behavior, usuario/nombreCompleto/rol/estadoAcceso matching, role/nivelPrivilegio/estadoConfiguracion matching, empty filter returns full set, and repeated filtering does not mutate source arrays. No production UI changes. Run proportional frontend tests/build and TWO independent self-reviews. No workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "f8341cbc506272dd05cccfebc80dbba94f6cd6f9"
+}

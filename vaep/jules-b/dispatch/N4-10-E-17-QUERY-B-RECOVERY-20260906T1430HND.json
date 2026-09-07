@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-E-17-QUERY-B-RECOVERY-20260906T1430HND",
+  "taskId": "N4.10.E.17.SERVICE_QUERY_TESTS",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/services/estado-financiero.query.spec.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. Add HttpClient query-shape tests for each valid filter mode and omission of undefined query parameters. Production files are read-only. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews. RECOVERY: prior controller dispatch failed before Execute VAEP/Jules MASTER because catalog-floor syntax failed; no Jules attempt was consumed.",
+  "primaryBaseHead": "ca67f90e9b2210d167524e161973a9cdcbc34781"
+}

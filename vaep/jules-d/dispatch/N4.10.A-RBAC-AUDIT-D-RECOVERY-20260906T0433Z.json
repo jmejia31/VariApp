@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.10.A-RBAC-AUDIT-D-RECOVERY-20260906T0433Z",
+  "taskId": "N4.10.A.15.FINANCIAL_REPORT_RBAC_AUDIT_TESTS",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportRbacAuditTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. TRANSPORT RECOVERY of the same pre-session task; prior dispatch failed before session because the MASTER parser rejected a newly added policy key, so this does not consume a content attempt. CURRENT_PARENT remains N4.9.H closure debt; this is dependency-safe concurrent N4.10.A material support only and does NOT promote N4.10. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportRbacAuditTests.cs. Add focused security/audit contract tests using CURRENT accounting/reporting mechanisms: permission enforcement for report/export-like operations, no authorization bypass, and auditable access/failure behavior where current services/controllers support it. Do not invent missing endpoints or production code. If a dedicated financial-report endpoint is absent, test the reusable current RBAC/audit invariants and report the exact missing contract. No production/workflow/docs/manifest changes. Run focused tests/build when possible and perform TWO distinct self-reviews. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "7bfb557a42954de1f87311d76e2cb5789d48580f"
+}

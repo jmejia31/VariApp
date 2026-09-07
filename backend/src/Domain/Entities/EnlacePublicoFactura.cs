@@ -1,17 +1,22 @@
 namespace InventoryApp.Domain.Entities;
 
-/// Enlace público y temporal para acceder al PDF de una factura SIN el JWT
-/// del usuario (necesario porque WhatsApp/el destinatario del correo no
-/// tiene sesión en el sistema). Sección 14 del prompt: "obtener un enlace
-/// accesible y autorizado" — autorizado no significa "requiere login", sino
-/// "válido, con expiración, trazable a quién lo generó y para qué factura".
-/// No sustituye la autenticación normal del sistema: es un mecanismo
-/// deliberadamente distinto y más restringido (de un solo documento,
-/// expira, queda auditado).
+/// Enlace público y temporal para acceder al PDF de una factura sin JWT.
+///
+/// La propiedad Token conserva su nombre por compatibilidad con la tabla
+/// existente, pero almacena exclusivamente el hash SHA-256 del token. El valor
+/// secreto completo solo se entrega una vez al crear el enlace y nunca se
+/// persiste, registra en auditoría ni devuelve en consultas posteriores.
+///
+/// La revocación se representa adelantando FechaExpiracion; de esta forma se
+/// mantiene el historial sin agregar eliminaciones físicas ni romper registros
+/// productivos existentes.
 public class EnlacePublicoFactura
 {
     public int Id { get; set; }
+
+    /// Hash SHA-256 hexadecimal del token público. Nunca contiene el token real.
     public string Token { get; set; } = string.Empty;
+
     public int FacturaId { get; set; }
 
     public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;

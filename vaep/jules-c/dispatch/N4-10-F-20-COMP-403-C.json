@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-F-20-COMP-403-C",
+  "taskId": "N4.10.F.20.COMPONENT_403_STATE_TESTS",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.forbidden.spec.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.F. Verify component 403 state is non-sensitive and does not render prior financial results. Production files read-only. Run proportional tests and TWO self-reviews.",
+  "primaryBaseHead": "49c7a220471679ee117bfc2c6356e14e117cda56"
+}

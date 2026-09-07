@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-E-9-FINANCIAL-STATEMENT-NAVIGATION-A-MATERIAL",
+  "taskId": "N4.10.E.9.FINANCIAL_STATEMENT_NAVIGATION",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/app.component.ts only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. NEXT_SAFE_PREWORK for N4.10.E only; CURRENT_PARENT remains N4.10.D. Own ONLY frontend/src/app/app.component.ts. Add exactly one permission-gated Finanzas navigation entry for /estados-financieros using existing sidebar patterns and an appropriate Material icon. Do not refactor the shell or alter unrelated navigation. TWO independent self-reviews. No route/component/service/model/backend/workflow/manifest changes.",
+  "primaryBaseHead": "d6f1889b2b463ec255aaab9c928016effc7dd951"
+}

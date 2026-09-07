@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-A-417-REPORT-PERIOD-EMPTY-INPUT-UI-TESTS-C-RESERVE",
+  "taskId": "N4.10.A.417.REPORT_PERIOD_EMPTY_INPUT_UI_TESTS",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/features/reportes-administrativos/reportes-administrativos-period-empty.contract.spec.ts only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. UNIQUE material closure-support work for N4.10.A. Own ONLY frontend/src/app/features/reportes-administrativos/reportes-administrativos-period-empty.contract.spec.ts. Test current component validation rejects missing desde/hasta and sets the existing error text without issuing report requests. Reuse current implementation/contracts only; no production behavior changes. Run proportional focused tests/build when possible and perform TWO independent self-reviews. No workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "3aee66f82daa499ae74352378e2f87f448b77f94"
+}

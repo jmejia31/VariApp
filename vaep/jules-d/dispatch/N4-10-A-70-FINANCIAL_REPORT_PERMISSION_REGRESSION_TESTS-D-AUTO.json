@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-A-70-FINANCIAL_REPORT_PERMISSION_REGRESSION_TESTS-D-AUTO",
+  "taskId": "N4.10.A.70.FINANCIAL_REPORT_PERMISSION_REGRESSION_TESTS",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportPermissionRegressionTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportPermissionRegressionTests.cs. Add focused backend regression tests that current report permissions are consistently enforced across equivalent read/export operations where both exist. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "b35697037445a3920aa0ff3de5c732e9b063082d"
+}

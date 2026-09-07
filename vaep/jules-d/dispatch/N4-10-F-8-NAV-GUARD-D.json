@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-F-8-NAV-GUARD-D",
+  "taskId": "N4.10.F.8.NAV_GUARD_INTEGRATION",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/estados-financieros.nav-guard.spec.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. When N4.10.E is LISTO, test navigation availability against permission runtime state without modifying production shell. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+  "primaryBaseHead": "8d14fe0490901c5f7070921cecd66f640a7cc05a"
+}

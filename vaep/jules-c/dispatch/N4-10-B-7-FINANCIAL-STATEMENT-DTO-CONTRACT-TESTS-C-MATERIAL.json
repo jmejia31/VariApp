@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-B-7-FINANCIAL-STATEMENT-DTO-CONTRACT-TESTS-C-MATERIAL",
+  "taskId": "N4.10.B.7.FINANCIAL_STATEMENT_DTO_CONTRACT_TESTS",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410BFinancialStatementDtoContractTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.B (Estados financieros — Dominio y contratos). Own ONLY backend/tests/InventoryApp.Tests/N410BFinancialStatementDtoContractTests.cs. Add focused DTO contract tests for stable required fields, decimal totals and no accidental persistence/audit payload leakage. Inspect existing CuentaContable/AsientoContable/AsientoDetalle/MovimientoFinanciero/PeriodoContable contracts first; reuse existing naming/types and do not invent unrelated APIs. Perform TWO independent self-reviews. No workflow/manifest/dependency/main/production/merge/deploy changes.",
+  "primaryBaseHead": "8ac065cba76088d369ddbe5e89d822a91094f3b9"
+}

@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-D-N45A-RBAC-QA-D1-RECOVERY-20260903T0944HND",
+  "taskId": "N4.5.A.RBAC_QA_OBSERVABILITY_PREFLIGHT",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "2d6a6cccebd0da7af44cee2fc7471e5e9b3a24b3",
+  "taskAttempt": 1,
+  "fileScopeHint": ".github/workflows/**; backend/tests/**; frontend/e2e/**; backend/src/API/**; backend/src/Infrastructure/**Audit*; docs/**",
+  "prompt": "TRANSPORT RECOVERY SAME ATTEMPT: prior multi-manifest commit did not create a Jules D session. SAFE PIPELINE PREWORK ONLY for next dependency-valid parent N4.5.A CxP while N4.4.H remains CURRENT_PARENT. Audit RBAC, auditability, security, observability and QA/CI coverage for cuentas por pagar integrated with compras. Map existing permissions, audit/correlation evidence, directed tests/E2E/workflows and any true coverage gaps. Exclusive lane D is read-first RBAC/QA/observability evidence; do not edit backend domain/persistence, frontend product surfaces, TASKS/CHANGELOG or N4.4.H docs; do not implement N4.5.B+ or promote N4.5.A. Patch only a narrowly scoped preflight evidence/test artifact if clearly safe and non-overlapping; otherwise return grounded no-patch findings. No main, Production, branches, PR, merge, secrets or deploy. Emit two substantive SELF_REVIEW_PASS markers before COMPLETED."
+}

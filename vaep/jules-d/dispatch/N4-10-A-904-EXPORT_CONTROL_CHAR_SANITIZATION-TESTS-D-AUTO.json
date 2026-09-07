@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-A-904-EXPORT_CONTROL_CHAR_SANITIZATION-TESTS-D-AUTO",
+  "taskId": "N4.10.A.904.EXPORT_CONTROL_CHAR_SANITIZATION_TESTS",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportEXPORTCONTROLCHARS904Tests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. UNIQUE material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportEXPORTCONTROLCHARS904Tests.cs. Add a focused regression characterizing the existing financial-report export behavior when source text contains control characters; assert only current sanitization/export behavior and do not invent APIs, new security policy, or production behavior. This semantic facet is EXPORT_CONTROL_CHAR_SANITIZATION and must not duplicate EXPORT_FILENAME_SANITIZATION or SENSITIVE_ERROR_REDACTION. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "f437cd48959454761a8c1c989bd6756addcb21cf"
+}

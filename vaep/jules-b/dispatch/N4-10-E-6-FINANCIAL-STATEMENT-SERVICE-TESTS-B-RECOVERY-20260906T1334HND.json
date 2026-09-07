@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-E-6-FINANCIAL-STATEMENT-SERVICE-TESTS-B-RECOVERY-20260906T1334HND",
+  "taskId": "N4.10.E.6.FINANCIAL_STATEMENT_SERVICE_TESTS",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/services/estado-financiero.service.spec.ts only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. NEXT_SAFE_PREWORK for N4.10.E only; CURRENT_PARENT remains N4.10.D. This is recovery of a controller-skipped dispatch; no prior Jules attempt was consumed. Own ONLY frontend/src/app/services/estado-financiero.service.spec.ts. Add HttpClient tests for GET /estados-financieros/{tipo}, periodoContableId, fechaDesde+fechaHasta, omission of undefined params and ApiResponse<EstadoFinanciero> passthrough. Follow asiento-contable.service.spec.ts patterns. No production edits/new dependencies. TWO self-reviews.",
+  "primaryBaseHead": "ccf39f8e7e5d8329a674c0025da8b1aef1bde38c"
+}

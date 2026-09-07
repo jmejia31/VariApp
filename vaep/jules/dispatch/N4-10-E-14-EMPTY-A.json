@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-E-14-EMPTY-A",
+  "taskId": "N4.10.E.14.EMPTY_STATE_TESTS",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.empty-state.spec.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. Add focused empty-state tests for no-result statements, initial state and retryable error recovery. Production files are read-only. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+  "primaryBaseHead": "ab9fec1ae9a310556118d2fb13decbb1ac1c5b1a"
+}

@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.G-BACKEND-EVIDENCE-CROSSREVIEW-A-20260906T0128Z",
+  "taskId": "N4.9.G.BACKEND_EVIDENCE_CROSSREVIEW",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/qa/N4_9_G_BACKEND_EVIDENCE_CROSSREVIEW.md only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.9.G. Own ONLY docs/qa/N4_9_G_BACKEND_EVIDENCE_CROSSREVIEW.md. Produce a concise evidence cross-review for the already-implemented PeriodoContable backend regression surface: cite exact tests/code/CI evidence for create/list/get/close behavior, pagination/filtering, authorization-sensitive failures, cancellation/error propagation, concurrency/idempotency where observable, and explicitly flag gaps rather than inventing PASS. Do not modify production code, tests, migrations, workflows, manifests, main, Produccion, secrets or deploy. Perform two independent self-reviews before COMPLETED and return a material artifact for VAEP REVIEW_FIRST.",
+  "primaryBaseHead": "3899a893d125c4163cff13201b10ee74047e4779"
+}

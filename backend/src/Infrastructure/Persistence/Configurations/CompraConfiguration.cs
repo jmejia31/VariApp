@@ -26,6 +26,17 @@ public class CompraConfiguration : IEntityTypeConfiguration<Compra>
         builder.Property(c => c.Estado).HasConversion<string>().HasMaxLength(20);
         builder.Property(c => c.EstadoPago).HasConversion<string>().HasMaxLength(20);
         builder.Property(c => c.MetodoPago).HasConversion<string>().HasMaxLength(20);
+        builder.Property(c => c.Eliminado).HasDefaultValue(false);
+        builder.HasIndex(c => c.Eliminado);
+        builder.HasIndex(c => c.MetodoPagoId)
+            .HasDatabaseName("IX_Compras_MetodoPagoId");
+        builder.HasQueryFilter(c => !c.Eliminado);
+
+        builder.HasOne(c => c.MetodoPagoCatalogo)
+            .WithMany()
+            .HasForeignKey(c => c.MetodoPagoId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_Compras_MetodosPago_MetodoPagoId");
 
         builder.HasMany(c => c.Detalles)
             .WithOne(d => d.Compra)

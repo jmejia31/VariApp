@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.G-ACCESSIBILITY-REGRESSION-C-20260906T0036Z",
+  "taskId": "N4.9.G.ACCESSIBILITY_FRONTEND_REGRESSION",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/features/periodos-contables/periodos-contables.accessibility.spec.ts only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.9.G. Your previous component-spec attempt timed out and its old ownership is revoked; DO NOT retry or touch that file. Own a NEW distinct scope: add ONLY frontend/src/app/features/periodos-contables/periodos-contables.accessibility.spec.ts. Verify accessible names/roles, keyboard-reachable create/close controls, disabled/permission-hidden controls, loading/error/empty state announcements or equivalent accessible semantics supported by the current component, and stable rendering under filter/pagination state. Do not edit production component/routes, backend, E2E, workflows, manifests, main, Produccion, secrets or deploy. Run narrow Angular tests/typecheck and two independent self-reviews. Return material patch/artifact for VAEP REVIEW_FIRST.",
+  "primaryBaseHead": "cf6d1dea557a67e546ffe1d372c5450f9890e76e"
+}

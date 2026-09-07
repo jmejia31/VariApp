@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-A-59-FINANCIAL_REPORT_AGGREGATION_ORDER_TESTS-A-AUTO",
+  "taskId": "N4.10.A.59.FINANCIAL_REPORT_AGGREGATION_ORDER_TESTS",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportAggregationOrderTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportAggregationOrderTests.cs. Add focused backend tests proving current financial-report aggregations are order-independent where business semantics require it and preserve explicit ordering where the implementation defines one. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "204dfef456042b6f3514fe636f403d90eb84dbab"
+}
