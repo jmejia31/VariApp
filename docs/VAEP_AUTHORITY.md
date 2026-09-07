@@ -167,6 +167,14 @@ Dispatch válido: un commit, exactamente un manifest nuevo, worker correcto, `ex
 
 Fallo pre-session de path/base/schema/transporte no consume intento de contenido.
 
+Invariantes P0/P1 de entrega y productividad:
+- `IMMUTABLE_MANIFEST=TRUE`: todo intento usa un archivo NUEVO; modificar, renombrar, borrar o reutilizar un manifest histórico es `INVALID_REDISPATCH` y falla antes de reservar NEXT o crear sesión.
+- `ONE_ATTEMPT_ONE_MANIFEST_ONE_DISPATCH_ID=TRUE`: ATTEMPT1 y R2 usan `dispatchId` y filename nuevos e inmutables; filename = `<dispatchId>.json`.
+- Pipeline obligatorio: `TRIGGERED -> MANIFEST_ACCEPTED -> SESSION_CREATED -> SESSION_COMPLETED -> PATCH_PRESENT -> SELF_REVIEW_COMPLETE -> REVIEW_ACCEPTED -> INTEGRATED`. Solo el último estado realmente alcanzado cuenta; `COMPLETED` solo no es integración.
+- `AWAITING_USER_FEEDBACK` no recibe follow-ups genéricos repetidos: capturar la pregunta expuesta por Jules y transferir a QA_TAKEOVER. Si la API no expone la pregunta, registrar la ausencia explícitamente.
+- `PARENT_STALL_NO_PROGRESS_MINUTES` se aplica a progreso observable de estado/timestamp/actividad y puede cortar antes de `JULES_LANE_BUDGET_SECONDS`; stall revoca ownership y pasa a QA_TAKEOVER.
+
+
 ### Admisión de nuevos dispatches
 
 El estado machine-readable de admisión vive en `vaep/control/dispatch-admission.json` y está subordinado a este MAESTRO. Solo se permiten dos estados:
@@ -176,7 +184,7 @@ El estado machine-readable de admisión vive en `vaep/control/dispatch-admission
 
 Reglas fail-closed:
 
-- cero manifests nuevos => `NO_OP/exit 0`, sin consultar ni consumir admisión;
+- cero manifests nuevos en un workflow Jules => `INVALID_TRIGGER` y fallo explícito; nunca SUCCESS/NO_OP. Un workflow Jules válido exige exactamente un manifest NUEVO para su lane;
 - más de un manifest nuevo => fail-closed;
 - exactamente un manifest => el control state debe existir, tener contrato válido y `allowExistingActiveSessions=true`;
 - control ausente, malformado, con claves desconocidas o valor distinto de `FROZEN|OPEN` => fail-closed;

@@ -209,36 +209,29 @@ select_next_entry() {
 }
 
 dispatch_internal_manifest_run() {
-  local commit="${1:?manifest_commit_required}" workflow runs run_id status
+  local commit="${1:?manifest_commit_required}" workflow runs run_id status before_ids request
   workflow="$(lane_workflow_file)"
 
-  # Commits created from a workflow with its GITHUB_TOKEN do not recursively
-  # trigger GitHub Actions push workflows. Therefore an internally-created NEXT
-  # manifest needs exactly one explicit workflow_dispatch. This is not a second
-  # run: no push-run can exist for this internal commit.
-  api "repos/$GITHUB_REPOSITORY/actions/workflows/$workflow/dispatches" --method POST -f ref="$BRANCH" >/dev/null
+  # GITHUB_TOKEN commits do not recursively trigger push workflows.
+  # Pass the exact immutable manifest commit as workflow input and correlate by a newly-created run ID.
+  before_ids="$(api "repos/$GITHUB_REPOSITORY/actions/workflows/$workflow/runs?event=workflow_dispatch&per_page=30" --jq '[.workflow_runs[]?.id]')"
+  request="$(jq -n --arg ref "$BRANCH" --arg commit "$commit" '{ref:$ref,inputs:{manifest_commit:$commit}}')"
+  api "repos/$GITHUB_REPOSITORY/actions/workflows/$workflow/dispatches" --method POST --input - <<<"$request" >/dev/null
 
   for _ in $(seq 1 15); do
-    runs="$(api "repos/$GITHUB_REPOSITORY/actions/workflows/$workflow/runs?branch=$BRANCH&event=workflow_dispatch&per_page=20")"
-    run_id="$(jq -r --arg sha "$commit" '
-      [.workflow_runs[]?
-       | select(.event=="workflow_dispatch")
-       | select(.head_sha==$sha or .head_branch=="Desarrollo")
-      ] | sort_by(.created_at) | reverse | .[0].id // empty' <<<"$runs")"
+    runs="$(api "repos/$GITHUB_REPOSITORY/actions/workflows/$workflow/runs?event=workflow_dispatch&per_page=30")"
+    run_id="$(jq -r --argjson before "$before_ids" '[.workflow_runs[]? | select(.event=="workflow_dispatch") | select(.id as $id | ($before | index($id) | not))] | sort_by(.created_at) | reverse | .[0].id // empty' <<<"$runs")"
     if [[ -n "$run_id" ]]; then
       status="$(jq -r --argjson id "$run_id" '.workflow_runs[]? | select(.id==$id) | .status' <<<"$runs")"
-      echo "AUTOREFILL_INTERNAL_RUN_DISPATCHED worker=$WORKER_ID workflow=$workflow run_id=$run_id status=$status manifest_commit=$commit"
+      echo "AUTOREFILL_INTERNAL_RUN_DISPATCHED worker=$WORKER_ID workflow=$workflow run_id=$run_id status=$status manifest_commit=$commit exact_manifest_input=true"
       return 0
     fi
     sleep 2
   done
 
-  # Reservation exists even if GitHub is slow to surface the run. Never fail the
-  # CURRENT task because NEXT telemetry is delayed; watchdog/recovery will verify.
   echo "AUTOREFILL_WARN=workflow_dispatch_not_observed worker=$WORKER_ID workflow=$workflow manifest_commit=$commit action=DO_NOT_FAIL_CURRENT" >&2
   return 0
 }
-
 create_atomic_manifest_commit() {
   local entry="$1" dispatch task scope prompt path head base_commit base_tree manifest blob tree commit rc
   dispatch="$(jq -r '.dispatchId' <<<"$entry")"
@@ -283,8 +276,8 @@ create_atomic_manifest_commit() {
 
 main() {
   if ! admission_open; then
-    echo "AUTOREFILL_WAIT=dispatch_admission_not_open worker=$WORKER_ID"
-    exit 0
+    echo "AUTOREFILL_WAIT=dispatch_admission_not_open worker=$WORKER_ID" >&2
+    exit 79
   fi
   if ! canonical_parent_matches_checkout; then
     exit 0
@@ -299,8 +292,8 @@ main() {
     exit 0
   fi
   if ! entry="$(select_next_entry)"; then
-    echo "AUTOREFILL_NO_SAFE_NEXT worker=$WORKER_ID catalog_exhausted=true current_parent=$CURRENT_PARENT"
-    exit 0
+    echo "AUTOREFILL_NO_SAFE_NEXT worker=$WORKER_ID catalog_exhausted=true current_parent=$CURRENT_PARENT" >&2
+    exit 78
   fi
   create_atomic_manifest_commit "$entry"
 }

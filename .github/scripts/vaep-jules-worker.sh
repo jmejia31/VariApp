@@ -96,6 +96,7 @@ fi
 : "${WORKER_ID:=}"
 : "${GH_TOKEN:?GH_TOKEN is required}"
 : "${GITHUB_SHA:?GITHUB_SHA is required}"
+readonly DISPATCH_SHA="${VAEP_DISPATCH_SHA:-$GITHUB_SHA}"
 : "${GITHUB_REPOSITORY:?GITHUB_REPOSITORY is required}"
 : "${GITHUB_RUN_ID:?GITHUB_RUN_ID is required}"
 : "${GITHUB_SERVER_URL:=https://github.com}"
@@ -160,10 +161,10 @@ api_post_empty() {
 # Atomic dispatch invariant: exactly one new manifest for THIS worker.
 # The same commit may batch one manifest for each Jules lane so all four lanes
 # start from one HEAD movement. No non-dispatch files are allowed in the batch.
-mapfile -t added_manifests < <(git diff-tree --no-commit-id --name-only --diff-filter=A -r "$GITHUB_SHA" -- "$DISPATCH_PATH/*.json")
+mapfile -t added_manifests < <(git diff-tree --no-commit-id --name-only --diff-filter=A -r "$DISPATCH_SHA" -- "$DISPATCH_PATH/*.json")
 [[ ${#added_manifests[@]} -eq 1 ]] || fail "MASTER expected exactly one newly added dispatch manifest for this worker; found ${#added_manifests[@]}." 21
 manifest="${added_manifests[0]}"
-mapfile -t changed_files < <(git diff-tree --no-commit-id --name-only -r "$GITHUB_SHA")
+mapfile -t changed_files < <(git diff-tree --no-commit-id --name-only -r "$DISPATCH_SHA")
 [[ ${#changed_files[@]} -ge 1 && ${#changed_files[@]} -le 4 ]] || fail "MASTER atomic dispatch batch must contain 1..4 files." 22
 for changed in "${changed_files[@]}"; do
   [[ "$changed" =~ ^vaep/jules(-b|-c|-d)?/dispatch/[^/]+\.json$ ]] || fail "MASTER atomic dispatch batch contains a non-dispatch file: $changed" 22
@@ -188,6 +189,9 @@ task_id="$(jq -r '.taskId' "$manifest")"
 primary_base="$(jq -r '.primaryBaseHead' "$manifest")"
 file_scope="$(jq -r '.fileScopeHint' "$manifest")"
 user_prompt="$(jq -r '.prompt' "$manifest")"
+expected_manifest_name="$dispatch_id.json"
+[[ "$(basename "$manifest")" == "$expected_manifest_name" ]] || fail "INVALID_REDISPATCH: manifest filename must equal dispatchId.json and remain immutable." 28
+printf 'VAEP_METRIC stage=MANIFEST_ACCEPTED value=true worker=%s dispatch=%s task=%s\n' "${WORKER_ID:-JULES_A}" "$dispatch_id" "$task_id"
 
 # Hard retry cap. New manifests SHOULD carry taskAttempt; compatibility manifests
 # without it infer ATTEMPT=2 only from an explicit R2 dispatch label, otherwise 1.
@@ -326,19 +330,43 @@ if [[ -z "$session_name" ]]; then
   session_name="$(jq -r '.name // empty' "$work/session-created.json")"
 fi
 [[ -n "$session_name" ]] || fail "Jules did not return a session resource." 44
+printf 'VAEP_METRIC stage=SESSION_CREATED value=true worker=%s dispatch=%s session=%s\n' "${WORKER_ID:-JULES_A}" "$dispatch_id" "$session_name"
 session_id="${session_name#sessions/}"
 write_runtime_state "SESSION_ACTIVE" "$session_name"
 
 deadline=$((SECONDS + JULES_LANE_BUDGET_SECONDS))
+stall_seconds=$((PARENT_STALL_NO_PROGRESS_MINUTES * 60))
+last_progress_seconds=$SECONDS
+last_progress_state=""
+last_progress_signal=""
+last_activity_signal=""
 terminal_state=""
+feedback_question=""
 auto_feedback_count=0
-max_followups=3
+max_followups=1
 routine_prompt="VAEP Jules MASTER automated follow-up. Continue inside the assigned exclusive scope of the current parent. Authority: docs/VAEP_AUTHORITY.md -> dispatch -> AGENTS.md/PLAN_EJECUCION_AUTONOMA.md/docs/VAEP_JULES.md -> code/tests. TASK_ATTEMPT=$task_attempt; MASTER max attempts=$JULES_MAX_ATTEMPTS_PER_TASK; MASTER max reworks=$JULES_REWORK_MAX. Never exceed MASTER retry limits; exhaustion transfers correction to ChatGPT/VAEP/Vibe QA takeover. Do not expand scope or promote N+1. COMPLETED never equals LISTO. Before COMPLETED emit two independent reviews, SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2; report observations, limitations, risks, recommendations and tests not executed; preserve a reviewable ChangeSet/gitPatch with baseCommitId. Never trade quality or causal evidence for throughput."
 
 while (( SECONDS < deadline )); do
   api_get "$JULES_API_BASE/$session_name" > "$work/session-latest.json"
   state="$(jq -r '.state // "UNKNOWN"' "$work/session-latest.json")"
   echo "Jules MASTER session $session_id state: $state (attempt $task_attempt/$JULES_MAX_ATTEMPTS_PER_TASK; auto followups $auto_feedback_count/$max_followups)"
+  progress_signal="$(jq -r '[.updateTime // .update_time // .lastActivityTime // .lastUpdateTime // ""] | join("|")' "$work/session-latest.json")"
+  activity_signal=""
+  if api_get "$JULES_API_BASE/$session_name/activities?pageSize=20" > "$work/activity-progress.json" 2>/dev/null; then
+    activity_signal="$(jq -r '[.activities[]?.createTime // empty] | sort | last // ""' "$work/activity-progress.json")"
+  fi
+  if [[ "$state" != "$last_progress_state" || ( -n "$progress_signal" && "$progress_signal" != "$last_progress_signal" ) || ( -n "$activity_signal" && "$activity_signal" != "$last_activity_signal" ) ]]; then
+    last_progress_seconds=$SECONDS
+    last_progress_state="$state"
+    last_progress_signal="$progress_signal"
+    last_activity_signal="$activity_signal"
+    printf 'VAEP_METRIC stage=SESSION_PROGRESS value=true session=%s state=%s activity=%s\n' "$session_name" "$state" "${activity_signal:-NONE}"
+  fi
+  if [[ "$state" =~ ^(QUEUED|PLANNING|IN_PROGRESS)$ ]] && (( SECONDS - last_progress_seconds >= stall_seconds )); then
+    printf 'VAEP_METRIC stage=STALL_DETECTED value=true session=%s state=%s no_progress_seconds=%d\n' "$session_name" "$state" "$((SECONDS-last_progress_seconds))" >&2
+    write_runtime_state "STALL_NO_PROGRESS" "$session_name"
+    exit 125
+  fi
   case "$state" in
     COMPLETED|FAILED|PAUSED)
       terminal_state="$state"
@@ -351,11 +379,11 @@ while (( SECONDS < deadline )); do
       sleep 10
       ;;
     AWAITING_USER_FEEDBACK)
-      if (( auto_feedback_count >= max_followups )); then terminal_state="AUTO_FEEDBACK_EXHAUSTED"; break; fi
-      jq -n --arg prompt "$routine_prompt" '{prompt:$prompt}' > "$work/inline-feedback.json"
-      api_post_json "$JULES_API_BASE/$session_name:sendMessage" "$work/inline-feedback.json" >/dev/null
-      auto_feedback_count=$((auto_feedback_count + 1))
-      sleep 10
+      feedback_question="$(jq -r '[.. | objects | (.question? // .userQuestion? // .feedbackQuestion? // .clarificationQuestion? // empty) | select(type=="string" and length>0)] | last // ""' "$work/session-latest.json")"
+      [[ -n "$feedback_question" ]] || feedback_question="QUESTION_NOT_EXPOSED_BY_JULES_SESSION_API"
+      printf 'VAEP_METRIC stage=AWAITING_USER_FEEDBACK value=true session=%s question=%q action=QA_TAKEOVER\n' "$session_name" "$feedback_question" >&2
+      terminal_state="AWAITING_USER_FEEDBACK_QA_TAKEOVER"
+      break
       ;;
     QUEUED|PLANNING|IN_PROGRESS)
       sleep 30
@@ -394,6 +422,10 @@ done
 
 if [[ -f "$work/session-latest.json" ]]; then cp "$work/session-latest.json" "$result_dir/session.json"; else api_get "$JULES_API_BASE/$session_name" > "$result_dir/session.json"; fi
 cp "$manifest" "$result_dir/dispatch.json"
+self_review_pass_1=false
+self_review_pass_2=false
+grep -q 'SELF_REVIEW_PASS_1' "$result_dir/activities.json" && self_review_pass_1=true
+grep -q 'SELF_REVIEW_PASS_2' "$result_dir/activities.json" && self_review_pass_2=true
 
 set +e
 dispatch_is_superseded "$dispatch_id"
@@ -429,6 +461,9 @@ jq -n \
   --arg requestedBase "$primary_base" \
   --arg actualBase "$actual_base" \
   --arg suggestedCommitMessage "$suggested" \
+  --arg feedbackQuestion "$feedback_question" \
+  --argjson selfReviewPass1 "$self_review_pass_1" \
+  --argjson selfReviewPass2 "$self_review_pass_2" \
   --argjson patchPresent "$patch_present" \
   --argjson autoFeedbackCount "$auto_feedback_count" \
   --argjson taskAttempt "$task_attempt" \
@@ -436,7 +471,7 @@ jq -n \
   --argjson parentCloseFirst "$PARENT_CLOSE_FIRST" \
   --argjson laneBudgetSeconds "$JULES_LANE_BUDGET_SECONDS" \
   --arg checkpoints "$VAEP_CHECKPOINTS" \
-  '{protocol:$protocol,globalControlPlane:"VAEP_MASTER",masterCommitSha:$masterCommitSha,policyHash:$policyHash,parentCloseFirst:$parentCloseFirst,checkpoints:$checkpoints,laneBudgetSeconds:$laneBudgetSeconds,workerId:$workerId,dispatchId:$dispatchId,taskId:$taskId,taskAttempt:$taskAttempt,maxAttempts:$maxAttempts,r3Prohibited:$r3Prohibited,qaTakeoverOnRetryExhaustion:true,session:$session,state:$state,requestedBase:$requestedBase,actualPatchBase:$actualBase,patchPresent:$patchPresent,superseded:($state=="LATE_RESULT_SUPERSEDED"),lateResultAutoIntegrationDenied:($state=="LATE_RESULT_SUPERSEDED"),suggestedCommitMessage:$suggestedCommitMessage,autoFeedbackCount:$autoFeedbackCount,controllerHandoff:(if $state=="LATE_RESULT_SUPERSEDED" then "LATE_RESULT_EVIDENCE_ONLY" else "REVIEW_IMMEDIATELY_AND_ASSIGN_NEXT_SAFE" end)}' \
+  '{protocol:$protocol,globalControlPlane:"VAEP_MASTER",masterCommitSha:$masterCommitSha,policyHash:$policyHash,parentCloseFirst:$parentCloseFirst,checkpoints:$checkpoints,laneBudgetSeconds:$laneBudgetSeconds,workerId:$workerId,dispatchId:$dispatchId,taskId:$taskId,taskAttempt:$taskAttempt,maxAttempts:$maxAttempts,r3Prohibited:$r3Prohibited,qaTakeoverOnRetryExhaustion:true,session:$session,state:$state,requestedBase:$requestedBase,actualPatchBase:$actualBase,patchPresent:$patchPresent,selfReviewPass1:$selfReviewPass1,selfReviewPass2:$selfReviewPass2,feedbackQuestion:$feedbackQuestion,triggered:true,manifestAccepted:true,sessionCreated:true,sessionCompleted:($state=="COMPLETED"),reviewAccepted:false,integrated:false,superseded:($state=="LATE_RESULT_SUPERSEDED"),lateResultAutoIntegrationDenied:($state=="LATE_RESULT_SUPERSEDED"),suggestedCommitMessage:$suggestedCommitMessage,autoFeedbackCount:$autoFeedbackCount,controllerHandoff:(if $state=="LATE_RESULT_SUPERSEDED" then "LATE_RESULT_EVIDENCE_ONLY" elif $state=="AWAITING_USER_FEEDBACK_QA_TAKEOVER" then "QA_TAKEOVER_FEEDBACK_REQUIRED" else "REVIEW_IMMEDIATELY_AND_ASSIGN_NEXT_SAFE" end)}' \
   > "$result_dir/result.json"
 
 run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
@@ -460,5 +495,12 @@ gh issue create --repo "$GITHUB_REPOSITORY" --title "$ISSUE_PREFIX $dispatch_id 
 printf 'ARTIFACT_NAME=%s-%s\n' "$ARTIFACT_PREFIX" "$dispatch_id" >> "$GITHUB_ENV"
 printf 'RESULT_DIR=%s\n' "$result_dir" >> "$GITHUB_ENV"
 
+if [[ "$terminal_state" == "AWAITING_USER_FEEDBACK_QA_TAKEOVER" ]]; then
+  fail "Jules requested user feedback; question captured and ownership transferred to QA_TAKEOVER: $feedback_question" 52
+fi
 [[ "$terminal_state" == COMPLETED ]] || fail "Jules did not complete successfully: $terminal_state" 50
+printf 'VAEP_METRIC stage=SESSION_COMPLETED value=true session=%s\n' "$session_name"
 [[ "$patch_present" == true ]] || fail "Jules completed without ChangeSet/gitPatch." 51
+printf 'VAEP_METRIC stage=PATCH_PRESENT value=true session=%s\n' "$session_name"
+[[ "$self_review_pass_1" == true && "$self_review_pass_2" == true ]] || fail "Jules patch rejected before REVIEW_FIRST: missing SELF_REVIEW_PASS_1/SELF_REVIEW_PASS_2 evidence." 53
+printf 'VAEP_METRIC stage=SELF_REVIEW_COMPLETE value=true session=%s\n' "$session_name"
