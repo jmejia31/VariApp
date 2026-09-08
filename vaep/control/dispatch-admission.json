@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "OPEN",
+  "newDispatchAdmission": "FROZEN",
   "allowExistingActiveSessions": true,
-  "reason": "VAEP automatic verified closure: N4.11.G LISTO_REAL; N4.11.H is the only dependency-valid CURRENT_PARENT. Exact gates and P0/P1 were validated by the closure governor.",
-  "updatedAtUtc": "2026-09-08T15:36:14Z"
+  "reason": "WATCHDOG :36 containment: JULES_A/B/C CURRENT runs exceeded the 1080s lane budget while still remotely in_progress; no supported remote stop operation is exposed by the connected controller. Ownership is revoked locally, late auto-integration is denied, and no equivalent recovery/R2/R3 may be dispatched until each remote run is terminal and REVIEW_FIRST/QA_TAKEOVER resolves it. CURRENT_PARENT remains N4.11.H.",
+  "updatedAtUtc": "2026-09-08T16:36:45Z"
 }
