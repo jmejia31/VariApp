@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-11-H-5-RUNBOOK-A",
+  "taskId": "N4.11.H.5.FRONTEND_RUNBOOK",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/N4.11_CENTROS_COSTO_RUNBOOK.md",
+  "prompt": "After N4.11.G LISTO_REAL, create factual CentroCosto frontend diagnostics/rollback runbook; Desarrollo only; two self-reviews.",
+  "primaryBaseHead": "0423f56e829991e65739341dc999f4fb2b9fef96"
+}
