@@ -40,6 +40,7 @@ import { ReporteAdministrativoService } from '../../services/reporte-administrat
 })
 export class ReportesAdministrativosComponent implements OnInit {
   private readonly service = inject(ReporteAdministrativoService);
+  private latestLoadId = 0;
 
   readonly loading = signal(true);
   readonly exporting = signal<string | null>(null);
@@ -65,16 +66,28 @@ export class ReportesAdministrativosComponent implements OnInit {
 
   cargar(): void {
     if (!this.periodoValido()) return;
+
+    const loadId = ++this.latestLoadId;
+    const requestedDesde = this.desde;
+    const requestedHasta = this.hasta;
+
     this.loading.set(true);
     this.error.set(null);
 
     forkJoin({
-      resumen: this.service.getResumen(this.desde, this.hasta),
+      resumen: this.service.getResumen(requestedDesde, requestedHasta),
       usuarios: this.service.getUsuariosAccesos(),
       roles: this.service.getRolesPermisos(),
-      auditoria: this.service.getAuditoriaResumen(this.desde, this.hasta)
+      auditoria: this.service.getAuditoriaResumen(requestedDesde, requestedHasta)
     }).subscribe({
       next: ({ resumen, usuarios, roles, auditoria }) => {
+        if (loadId !== this.latestLoadId) return;
+
+        if (this.desde !== requestedDesde || this.hasta !== requestedHasta) {
+          this.cargar();
+          return;
+        }
+
         this.resumen.set(resumen.data);
         this.usuarios.set(usuarios.data);
         this.roles.set(roles.data);
@@ -82,6 +95,13 @@ export class ReportesAdministrativosComponent implements OnInit {
         this.loading.set(false);
       },
       error: (err) => {
+        if (loadId !== this.latestLoadId) return;
+
+        if (this.desde !== requestedDesde || this.hasta !== requestedHasta) {
+          this.cargar();
+          return;
+        }
+
         this.error.set(err.error?.message ?? 'No fue posible cargar los reportes administrativos.');
         this.loading.set(false);
       }
