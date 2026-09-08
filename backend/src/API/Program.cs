@@ -38,6 +38,7 @@ builder.Services.AddScoped<IProductoRepository, ProductoRepository>();
 builder.Services.AddScoped<IProductoVarianteRepository, ProductoVarianteRepository>();
 builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
 builder.Services.AddScoped<ISucursalRepository, SucursalRepository>();
+builder.Services.AddScoped<ICentroCostoRepository, CentroCostoRepository>();
 builder.Services.AddScoped<IAlmacenRepository, AlmacenRepository>();
 builder.Services.AddScoped<IUbicacionAlmacenRepository, UbicacionAlmacenRepository>();
 builder.Services.AddScoped<IExistenciaVarianteRepository, ExistenciaVarianteRepository>();
@@ -84,6 +85,7 @@ builder.Services.AddScoped<IProductoVarianteImagenService, ProductoVarianteImage
 builder.Services.AddScoped<IProductoEscanerService, ProductoEscanerService>();
 builder.Services.AddScoped<ICategoriaService, CategoriaService>();
 builder.Services.AddScoped<ISucursalService, SucursalService>();
+builder.Services.AddScoped<ICentroCostoService, CentroCostoService>();
 builder.Services.AddScoped<IAlmacenService, AlmacenService>();
 builder.Services.AddScoped<IUbicacionAlmacenService, UbicacionAlmacenService>();
 builder.Services.AddScoped<IExistenciaVarianteService, ExistenciaVarianteService>();
