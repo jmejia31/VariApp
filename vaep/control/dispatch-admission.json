@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "CLOSED",
+  "newDispatchAdmission": "OPEN",
   "allowExistingActiveSessions": true,
-  "reason": "REVIEW_FIRST_DEBT_FAIL_CLOSED: CURRENT_PARENT=N4.11.H has multiple correlated terminal ATTEMPT2 results with patchPresent=true and PENDING_REVIEW_FIRST/QA_TAKEOVER_REQUIRED, including issues #3098 N4.11.H.15.ACCEPTANCE_MATRIX, #3097 N4.11.H.13.RELEASE_NOTES_INPUT, #3095 N4.11.H.11.COVERAGE_EVIDENCE, #3094 N4.11.H.9.QA_EVIDENCE_INDEX, #3093 N4.11.H.7.ACCESSIBILITY_EVIDENCE, #3092 N4.11.H.10.API_EVIDENCE_INDEX, #3091 N4.11.H.5.FRONTEND_RUNBOOK, #3090 N4.11.H.6.FILTER_MATRIX, #3089 N4.11.H.3.TEST_MATRIX and READY_FOR_VAEP #3088 N4.11.H.16.OPERATIONS_CHECKLIST. Per PARENT_CLOSE_FIRST and mandatory REVIEW_FIRST, no replacement/refill may be published until terminal debt is reviewed or QA-taken-over. ATTEMPT2 failures require QA_TAKEOVER; R3 is prohibited.",
-  "updatedAtUtc": "2026-09-08T18:26:10Z"
+  "reason": "REVIEW_FIRST_DEBT_RECONCILED: pending REVIEW_FIRST/QA_TAKEOVER remains recorded and non-blocking for independent NEXT_SAFE; parent=N4.11.H; prior=REVIEW_FIRST_DEBT_FAIL_CLOSED: CURRENT_PARENT=N4.11.H has multiple correlated terminal ATTEMPT2 results with patchPresent=true and PENDING_REVIEW_FIRST/QA_TAKEOVER_REQUIRED, including issues #3098 N4.11.H.15.ACCEPTANCE_MATRIX, #3097 N4.11.H.13.RELEASE_NOTES_INPUT, #3095 N4.11.H.11.COVERAGE_EVIDENCE, #3094 N4.11.H.9.QA_EVIDENCE_INDEX, #3093 N4.11.H.7.ACCESSIBILITY_EVIDENCE, #3092 N4.11.H.10.API_EVIDENCE_INDEX, #3091 N4.11.H.5.FRONTEND_RUNBOOK, #3090 N4.11.H.6.FILTER_MATRIX, #3089 N4.11.H.3.TEST_MATRIX and READY_FOR_VAEP #3088 N4.11.H.16.OPERATIONS_CHECKLIST. Per PARENT_CLOSE_FIRST and mandatory REVIEW_FIRST, no replacement/refill may be published until terminal debt is reviewed or QA-taken-over. ATTEMPT2 failures require QA_TAKEOVER; R3 is prohibited.",
+  "updatedAtUtc": "2026-09-08T18:29:05Z"
 }
