@@ -13,9 +13,10 @@ on:
   workflow_run:
     workflows:
       - 'VAEP engine lightweight checks'
-      - 'Desarrollo - Compilación y pruebas'
-      - 'Desarrollo - aceptación funcional integral'
-      - 'Desarrollo - recuperación de migración MySQL parcial'
+    # The engine is the single causal gate for this controller. The functional
+    # workflows remain required checks, but listening to all of them creates
+    # one controller run per successful workflow for the same HEAD. Schedules
+    # continue to reconcile after those workflows finish.
     types: [completed]
   workflow_dispatch:
     inputs:
