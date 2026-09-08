@@ -28,7 +28,7 @@ is_control_plane_path() {
     # change the functional product head. Keep this list broad enough that a
     # Chat B/VAEP onboarding or review-only commit cannot manufacture a new
     # causal head that has no product CI attached to it.
-    AGENTS.md|README.md|CHANGELOG_AI.md|PLAN_EJECUCION_AUTONOMA.md|PROJECT_CONTEXT.md|*.md|docs/*|vaep/jules/dispatch/*.json|vaep/jules-b/dispatch/*.json|vaep/jules-c/dispatch/*.json|vaep/jules-d/dispatch/*.json|vaep/control/*|vaep/evidence/*|scripts/vaep/*|.github/scripts/vaep-*|.github/workflows/vaep-*|.github/workflows/catalogos-aceptacion.yml)
+    AGENTS.md|README.md|CHANGELOG_AI.md|PLAN_EJECUCION_AUTONOMA.md|PROJECT_CONTEXT.md|*.md|docs/*|docs/N4.11_CENTROS_COSTO_*.md|vaep/jules/dispatch/*.json|vaep/jules-b/dispatch/*.json|vaep/jules-c/dispatch/*.json|vaep/jules-d/dispatch/*.json|vaep/control/*|vaep/evidence/*|scripts/vaep/*|.github/scripts/vaep-*|.github/workflows/vaep-*|.github/workflows/catalogos-aceptacion.yml)
       return 0 ;;
     *) return 1 ;;
   esac
