@@ -39,6 +39,12 @@ class TerminalHandoffTests(unittest.TestCase):
                  "body": "- Dispatch: D-R2\n- Task: N4.11.E.3.UX; attempt: 2/2\n- Worker: JULES_C\n- Session: sessions/1"}
         self.assertEqual(pending_items([issue], {"D-R2": manifest}, "N4.11.E", "JULES_C", set())[0]["action"], "QA_TAKEOVER_REQUIRED")
 
+    def test_malformed_manifest_cannot_break_identity_audit(self):
+        manifest = {"taskId": "N4.11.E.3.UX"}
+        issue = {"number": 12, "state": "open", "user": {"login": "github-actions[bot]"},
+                 "body": "- Dispatch: `D-R2`\n- Task: `N4.11.E.3.UX`\n- Worker: `JULES_C`"}
+        self.assertEqual(pending_items([issue], {}, "N4.11.E", "JULES_C", set()), [])
+
 
 if __name__ == "__main__":
     unittest.main()

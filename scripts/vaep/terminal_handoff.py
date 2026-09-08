@@ -91,10 +91,15 @@ def audit(worker, output):
     issues = [issue for page in json.loads(raw) for issue in page]
     catalog = json.loads(Path("vaep/control/jules-autorefill-catalog.json").read_text(encoding="utf-8"))
     manifests = {}
+    malformed_manifests = []
     for directory in ("jules", "jules-b", "jules-c", "jules-d"):
         for path in Path(f"vaep/{directory}/dispatch").glob("*.json"):
             m = json.loads(path.read_text(encoding="utf-8"))
-            manifests[m["dispatchId"]] = m
+            dispatch_id = m.get("dispatchId")
+            if not dispatch_id:
+                malformed_manifests.append(str(path))
+                continue
+            manifests[dispatch_id] = m
     # Only validated receipts resolve integration debt. Open Issues alone are
     # not a reason to ask for a second review of already integrated work.
     hashes = subprocess.check_output(["git", "log", "--format=%H", "--grep=^VAEP-Dispatch:", "HEAD"], text=True)
@@ -105,6 +110,7 @@ def audit(worker, output):
             integrated.add(receipt["trailers"]["Dispatch"])
     items = pending_items(issues, manifests, catalog["currentParent"], worker, integrated)
     report = dict(currentParent=catalog["currentParent"], workerId=worker, pending=items,
+                  malformedManifests=malformed_manifests,
                   status="REVIEW_EXECUTOR_NOT_CONFIGURED" if items else "NO_PENDING_TERMINAL_REVIEW",
                   reviewExecuted=False, integrationExecuted=False)
     Path(output).write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
@@ -114,6 +120,8 @@ def audit(worker, output):
         # failure. Keep it visible and fail-closed: this audit never refills
         # or integrates work.
         print("::warning::REVIEW_EXECUTOR_NOT_CONFIGURED: terminal work requires VAEP review/QA; see handoff artifact.")
+    if malformed_manifests:
+        print(f"::warning::MALFORMED_MANIFESTS_IGNORED: {len(malformed_manifests)} manifest(s) without dispatchId.")
     return 0
 
 
