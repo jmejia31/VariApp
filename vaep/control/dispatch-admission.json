@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "FROZEN",
+  "newDispatchAdmission": "OPEN",
   "allowExistingActiveSessions": true,
-  "reason": "FROZEN_GATE_N4_CURRENT_PARENT__N4.11.H_LISTO_REAL__PHASE_CERTIFICATION_REQUIRED__NO_JULES_DISPATCH",
-  "updatedAtUtc": "2026-09-08T21:36:00Z"
+  "reason": "VERIFIED_ROADMAP_PROMOTION__GATE-N4__N5.1.A",
+  "updatedAtUtc": "2026-09-08T21:59:04Z"
 }

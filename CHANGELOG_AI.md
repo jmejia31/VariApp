@@ -903,3 +903,12 @@ El punto de Codex sobre las cinco automatizaciones era una limitación de audito
 
 Resultado: `CODEX_AUDIT_REMEDIATION=PASS`; `LEGACY_JULES_A_MANIFESTS=0`; `MASTER_POLICY_KEYS=9`; `TASKS_MACHINE_CURRENT_STATE=PROHIBITED`; `FIVE_AUTOMATIONS_EXTERNAL_EVIDENCE=PASS`; `FALSE_PASS=NO`.
 
+
+
+## VAEP dependency-safe closure reconciliation
+
+Controller: CHATGPT_BUSINESS / canonical checkpoint.
+Validated parent: `GATE-N4`; successor: `N5.1.A`.
+Base: `560f51596734900edf7fcba73235cda5b96922c7`. Existing closure receipt and exact-head causal gates validated.
+Selector uses explicit roadmap dependencies; no lexical ordering or gate bypass.
+Admission transition is guarded; no production, merge or secret changes.
