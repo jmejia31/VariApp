@@ -22,24 +22,13 @@ import { ReporteAdministrativoService } from '../../services/reporte-administrat
 @Component({
   selector: 'app-reportes-administrativos',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    MatButtonModule,
-    MatChipsModule,
-    MatFormFieldModule,
-    MatIconModule,
-    MatInputModule,
-    MatProgressSpinnerModule,
-    MatTableModule,
-    MatTabsModule,
-    MatTooltipModule
-  ],
+  imports: [CommonModule, FormsModule, MatButtonModule, MatChipsModule, MatFormFieldModule, MatIconModule, MatInputModule, MatProgressSpinnerModule, MatTableModule, MatTabsModule, MatTooltipModule],
   templateUrl: './reportes-administrativos.component.html',
   styleUrl: './reportes-administrativos.component.scss'
 })
 export class ReportesAdministrativosComponent implements OnInit {
   private readonly service = inject(ReporteAdministrativoService);
+  private latestLoadId = 0;
 
   readonly loading = signal(true);
   readonly exporting = signal<string | null>(null);
@@ -59,22 +48,29 @@ export class ReportesAdministrativosComponent implements OnInit {
   readonly columnasRoles = ['rol', 'usuarios', 'permisos', 'cobertura', 'privilegio', 'estado', 'detalle'];
   readonly columnasActividad = ['modulo', 'total', 'exitosos', 'rechazados', 'errores'];
 
-  ngOnInit(): void {
-    this.cargar();
-  }
+  ngOnInit(): void { this.cargar(); }
 
   cargar(): void {
     if (!this.periodoValido()) return;
+
+    const loadId = ++this.latestLoadId;
+    const requestedDesde = this.desde;
+    const requestedHasta = this.hasta;
     this.loading.set(true);
     this.error.set(null);
 
     forkJoin({
-      resumen: this.service.getResumen(this.desde, this.hasta),
+      resumen: this.service.getResumen(requestedDesde, requestedHasta),
       usuarios: this.service.getUsuariosAccesos(),
       roles: this.service.getRolesPermisos(),
-      auditoria: this.service.getAuditoriaResumen(this.desde, this.hasta)
+      auditoria: this.service.getAuditoriaResumen(requestedDesde, requestedHasta)
     }).subscribe({
       next: ({ resumen, usuarios, roles, auditoria }) => {
+        if (loadId !== this.latestLoadId) return;
+        if (requestedDesde !== this.desde || requestedHasta !== this.hasta) {
+          this.cargar();
+          return;
+        }
         this.resumen.set(resumen.data);
         this.usuarios.set(usuarios.data);
         this.roles.set(roles.data);
@@ -82,6 +78,11 @@ export class ReportesAdministrativosComponent implements OnInit {
         this.loading.set(false);
       },
       error: (err) => {
+        if (loadId !== this.latestLoadId) return;
+        if (requestedDesde !== this.desde || requestedHasta !== this.hasta) {
+          this.cargar();
+          return;
+        }
         this.error.set(err.error?.message ?? 'No fue posible cargar los reportes administrativos.');
         this.loading.set(false);
       }
@@ -91,34 +92,22 @@ export class ReportesAdministrativosComponent implements OnInit {
   usuariosFiltrados(): UsuarioAccesoReporte[] {
     const termino = this.filtroUsuarios.trim().toLocaleLowerCase();
     if (!termino) return this.usuarios();
-    return this.usuarios().filter(item =>
-      item.nombreUsuario.toLocaleLowerCase().includes(termino) ||
-      item.nombreCompleto.toLocaleLowerCase().includes(termino) ||
-      item.rol.toLocaleLowerCase().includes(termino) ||
-      item.estadoAcceso.toLocaleLowerCase().includes(termino)
-    );
+    return this.usuarios().filter(item => item.nombreUsuario.toLocaleLowerCase().includes(termino) || item.nombreCompleto.toLocaleLowerCase().includes(termino) || item.rol.toLocaleLowerCase().includes(termino) || item.estadoAcceso.toLocaleLowerCase().includes(termino));
   }
 
   rolesFiltrados(): RolPermisosReporte[] {
     const termino = this.filtroRoles.trim().toLocaleLowerCase();
     if (!termino) return this.roles();
-    return this.roles().filter(item =>
-      item.rol.toLocaleLowerCase().includes(termino) ||
-      item.nivelPrivilegio.toLocaleLowerCase().includes(termino) ||
-      item.estadoConfiguracion.toLocaleLowerCase().includes(termino)
-    );
+    return this.roles().filter(item => item.rol.toLocaleLowerCase().includes(termino) || item.nivelPrivilegio.toLocaleLowerCase().includes(termino) || item.estadoConfiguracion.toLocaleLowerCase().includes(termino));
   }
 
-  toggleRol(id: number): void {
-    this.rolExpandido.set(this.rolExpandido() === id ? null : id);
-  }
+  toggleRol(id: number): void { this.rolExpandido.set(this.rolExpandido() === id ? null : id); }
 
   exportar(tipo: 'usuarios' | 'roles' | 'auditoria', formato: 'csv' | 'xlsx'): void {
     if (!this.periodoValido()) return;
     const clave = `${tipo}-${formato}`;
     this.exporting.set(clave);
     this.error.set(null);
-
     this.service.exportar(tipo, formato, this.desde, this.hasta).subscribe({
       next: blob => {
         const url = URL.createObjectURL(blob);
@@ -136,10 +125,7 @@ export class ReportesAdministrativosComponent implements OnInit {
     });
   }
 
-  porcentaje(valor: number, total: number): number {
-    if (total <= 0) return 0;
-    return Math.round(valor * 100 / total);
-  }
+  porcentaje(valor: number, total: number): number { return total <= 0 ? 0 : Math.round(valor * 100 / total); }
 
   claseEstado(valor: string): string {
     const normalizado = valor.toLocaleLowerCase();
@@ -149,14 +135,8 @@ export class ReportesAdministrativosComponent implements OnInit {
   }
 
   private periodoValido(): boolean {
-    if (!this.desde || !this.hasta) {
-      this.error.set('Debes seleccionar las fechas desde y hasta.');
-      return false;
-    }
-    if (this.desde > this.hasta) {
-      this.error.set('La fecha desde no puede ser posterior a la fecha hasta.');
-      return false;
-    }
+    if (!this.desde || !this.hasta) { this.error.set('Debes seleccionar las fechas desde y hasta.'); return false; }
+    if (this.desde > this.hasta) { this.error.set('La fecha desde no puede ser posterior a la fecha hasta.'); return false; }
     return true;
   }
 
