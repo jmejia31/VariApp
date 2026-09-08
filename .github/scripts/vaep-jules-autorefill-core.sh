@@ -32,6 +32,93 @@ current_head() {
   api "repos/$GITHUB_REPOSITORY/git/ref/heads/$BRANCH" --jq '.object.sha'
 }
 
+jules_api_key() {
+  if [[ -n "${JULES_API_KEY:-}" ]]; then
+    printf '%s\n' "$JULES_API_KEY"
+    return 0
+  fi
+  case "$WORKER_ID" in
+    JULES_A) printf '%s\n' "${JULES_A_API_KEY:-}" ;;
+    JULES_B) printf '%s\n' "${JULES_B_API_KEY:-}" ;;
+    JULES_C) printf '%s\n' "${JULES_C_API_KEY:-}" ;;
+    JULES_D) printf '%s\n' "${JULES_D_API_KEY:-}" ;;
+  esac
+}
+
+remote_session_state() {
+  local session="$1" key payload
+  key="$(jules_api_key)"
+  [[ -n "$key" ]] || return 2
+  payload="$(curl --connect-timeout 10 --max-time 20 --fail-with-body --silent --show-error \
+    -H "x-goog-api-key: $key" \
+    "${JULES_API_BASE:-https://jules.googleapis.com/v1alpha}/$session")" || return 2
+  jq -er '.state | strings | select(length > 0)' <<<"$payload"
+}
+
+session_for_dispatch() {
+  local dispatch="$1" issues="$2"
+  jq -r --arg dispatch "$dispatch" '
+    [ .[]?
+      | select((.title // "") | contains($dispatch))
+      | (.body // "")
+      | scan("sessions/[0-9]+")
+    ] | last // empty
+  ' <<<"$issues"
+}
+
+remote_recovery_guard() {
+  local dispatch="$1" issues="$2" session state
+  session="$(session_for_dispatch "$dispatch" "$issues")"
+  if [[ -z "$session" ]]; then
+    echo "AUTOREFILL_WAIT=REMOTE_SESSION_NOT_FOUND worker=$WORKER_ID dispatch=$dispatch action=NO_RECOVERY" >&2
+    return 1
+  fi
+  if ! state="$(remote_session_state "$session")"; then
+    echo "AUTOREFILL_WAIT=REMOTE_SESSION_STATE_UNAVAILABLE worker=$WORKER_ID dispatch=$dispatch session=$session action=NO_RECOVERY" >&2
+    return 1
+  fi
+  case "$state" in
+    QUEUED|PLANNING|IN_PROGRESS|AWAITING_USER_FEEDBACK|AWAITING_PLAN_APPROVAL)
+      echo "AUTOREFILL_WAIT=QUARANTINED_REMOTE_ACTIVE_NO_DUPLICATE worker=$WORKER_ID dispatch=$dispatch session=$session state=$state action=WAIT_TERMINAL_RCA" >&2
+      return 1
+      ;;
+    COMPLETED|FAILED|PAUSED)
+      echo "AUTOREFILL_REMOTE_SESSION_TERMINAL worker=$WORKER_ID dispatch=$dispatch session=$session state=$state action=RCA_ALLOWED" >&2
+      return 0
+      ;;
+    *)
+      echo "AUTOREFILL_WAIT=REMOTE_SESSION_STATE_UNKNOWN worker=$WORKER_ID dispatch=$dispatch session=$session state=$state action=NO_RECOVERY" >&2
+      return 1
+      ;;
+  esac
+}
+
+failed_r2_pre_session_transport() {
+  local dispatch="$1" listing="$2" issues="$3" path r2_dispatch r2_commit runs failed_run
+  while IFS= read -r path; do
+    [[ -n "$path" ]] || continue
+    r2_dispatch="${path##*/}"
+    r2_dispatch="${r2_dispatch%.json}"
+    if jq -e --arg dispatch "$r2_dispatch" 'any(.[]?; (.title // "") | contains($dispatch))' <<<"$issues" >/dev/null; then
+      continue
+    fi
+    r2_commit="$(api "repos/$GITHUB_REPOSITORY/commits?path=$path&sha=$BRANCH&per_page=1" --jq '.[0].sha // empty' 2>/dev/null || true)"
+    [[ "$r2_commit" =~ ^[0-9a-fA-F]{40}$ ]] || continue
+    runs="$(api "repos/$GITHUB_REPOSITORY/actions/workflows/$(lane_workflow_file)/runs?event=workflow_dispatch&branch=$BRANCH&per_page=100" 2>/dev/null || printf '{}')"
+    failed_run="$(jq -r --arg sha "$r2_commit" '
+      [.workflow_runs[]?
+       | select(.event=="workflow_dispatch" and .head_sha==$sha)
+       | select(.status=="completed" and .conclusion=="failure")]
+      | sort_by(.created_at) | last | .id // empty
+    ' <<<"$runs")"
+    if [[ -n "$failed_run" ]]; then
+      printf '%s\t%s\t%s\t%s\n' "$path" "$r2_dispatch" "$r2_commit" "$failed_run"
+      return 0
+    fi
+  done < <(jq -r --arg prefix "$dispatch-R2-" '.[]? | .name | select(startswith($prefix)) | select(endswith(".json"))' <<<"$listing")
+  return 1
+}
+
 lane_workflow_name() {
   case "$WORKER_ID" in
     JULES_A) printf '%s\n' "VAEP Jules A Trusted Secondary Worker" ;;
@@ -191,6 +278,7 @@ completed_semantic_facets() {
 
 recoverable_attempt1_entry() {
   local listing issues entry dispatch task path manifest requested actual r2_prefix reason r2_prompt
+  local transport_candidate transport_path transport_dispatch transport_commit transport_run
   listing="$(api "repos/$GITHUB_REPOSITORY/contents/$DISPATCH_PATH?ref=$BRANCH" 2>/dev/null || printf '[]')"
   issues="$(api "repos/$GITHUB_REPOSITORY/issues?state=all&per_page=100&sort=updated&direction=desc" 2>/dev/null || printf '[]')"
   while IFS= read -r entry; do
@@ -198,34 +286,51 @@ recoverable_attempt1_entry() {
     task="$(jq -r '.taskId' <<<"$entry")"
     path="$DISPATCH_PATH/$dispatch.json"
     path_exists_on_branch "$path" || continue
-    r2_prefix="$dispatch-R2-"
-    jq -e --arg prefix "$r2_prefix" 'any(.[]?; (.name // "") | startswith($prefix))' <<<"$listing" >/dev/null && continue
-
     manifest="$(api "repos/$GITHUB_REPOSITORY/contents/$path?ref=$BRANCH" 2>/dev/null | jq -r '.content' | tr -d '\n' | base64 -d 2>/dev/null || true)"
     requested="$(jq -r '.primaryBaseHead // empty' <<<"$manifest")"
     [[ "$requested" =~ ^[0-9a-fA-F]{40}$ ]] || continue
-    actual="$(jq -r --arg dispatch "$dispatch" '
-      [.[]? | select((.title // "") | contains($dispatch)) | (.body // "")
-       | select(contains("- Ready for VAEP: `false`"))
-       | split("\n")[]
-       | select(test("^- Patch present: `true`; patch base: `"))
-       | sub(".*patch base: `"; "") | sub("`.*$"; "")]
-      | last // ""
-    ' <<<"$issues")"
-    reason=""
-    if [[ "$actual" =~ ^[0-9a-fA-F]{40}$ && "$actual" != "$requested" ]]; then
-      reason="PATCH_BASE_CONTROL_PLANE_DIVERGENCE actual=$actual requested=$requested"
-    elif jq -e --arg dispatch "$dispatch" 'any(.[]?; ((.title // "") == ("[VAEP-JULES-SUPERSEDED] " + $dispatch)) and (((.body // "") | contains("JULES_LANE_BUDGET_EXCEEDED")) and ((.body // "") | contains("- Task: ")) and ((.body // "") | contains("attempt: 1/"))))' <<<"$issues" >/dev/null; then
-      reason="JULES_LANE_BUDGET_EXCEEDED attempt=1"
-    elif jq -e --arg dispatch "$dispatch" 'any(.[]?; ((.title // "") | contains($dispatch)) and ((.body // "") | test("Terminal state: `FAILED`|Terminal state=FAILED")) and ((.body // "") | test("Patch present: `false`|patchPresent=false")) and ((.body // "") | contains("attempt: 1/")) and ((.title // "") | startswith("[VAEP-JULES-SUPERSEDED]") | not))' <<<"$issues" >/dev/null; then
-      reason="JULES_CONTENT_FAILED_PATCH_ABSENT attempt=1"
-    else
+    r2_prefix="$dispatch-R2-"
+
+    transport_candidate=""
+    if transport_candidate="$(failed_r2_pre_session_transport "$dispatch" "$listing" "$issues")"; then
+      IFS=$'\t' read -r transport_path transport_dispatch transport_commit transport_run <<<"$transport_candidate"
+      if jq -e --arg prefix "$dispatch-R2-TRANSPORT-" 'any(.[]?; (.name // "") | startswith($prefix))' <<<"$listing" >/dev/null; then
+        echo "AUTOREFILL_WAIT=R2_TRANSPORT_REPLACEMENT_ALREADY_RESERVED worker=$WORKER_ID dispatch=$dispatch action=NO_R3" >&2
+        continue
+      fi
+      if ! remote_recovery_guard "$dispatch" "$issues"; then
+        continue
+      fi
+      reason="R2_PRE_SESSION_TRANSPORT_FAILURE r2_dispatch=$transport_dispatch r2_commit=$transport_commit r2_run=$transport_run"
+    elif jq -e --arg prefix "$r2_prefix" 'any(.[]?; (.name // "") | startswith($prefix))' <<<"$listing" >/dev/null; then
       continue
+    else
+      actual="$(jq -r --arg dispatch "$dispatch" '
+        [.[]? | select((.title // "") | contains($dispatch)) | (.body // "")
+         | select(contains("- Ready for VAEP: `false`"))
+         | split("\n")[]
+         | select(test("^- Patch present: `true`; patch base: `"))
+         | sub(".*patch base: `"; "") | sub("`.*$"; "")]
+        | last // ""
+      ' <<<"$issues")"
+      reason=""
+      if [[ "$actual" =~ ^[0-9a-fA-F]{40}$ && "$actual" != "$requested" ]]; then
+        reason="PATCH_BASE_CONTROL_PLANE_DIVERGENCE actual=$actual requested=$requested"
+      elif jq -e --arg dispatch "$dispatch" 'any(.[]?; ((.title // "") == ("[VAEP-JULES-SUPERSEDED] " + $dispatch)) and (((.body // "") | contains("JULES_LANE_BUDGET_EXCEEDED")) and ((.body // "") | contains("- Task: ")) and ((.body // "") | contains("attempt: 1/"))))' <<<"$issues" >/dev/null; then
+        reason="JULES_LANE_BUDGET_EXCEEDED attempt=1"
+      elif jq -e --arg dispatch "$dispatch" 'any(.[]?; ((.title // "") | contains($dispatch)) and ((.body // "") | test("Terminal state: `FAILED`|Terminal state=FAILED")) and ((.body // "") | test("Patch present: `false`|patchPresent=false")) and ((.body // "") | contains("attempt: 1/")) and ((.title // "") | startswith("[VAEP-JULES-SUPERSEDED]") | not))' <<<"$issues" >/dev/null; then
+        reason="JULES_CONTENT_FAILED_PATCH_ABSENT attempt=1"
+      else
+        continue
+      fi
+      if ! remote_recovery_guard "$dispatch" "$issues"; then
+        continue
+      fi
     fi
 
     r2_prompt="$(printf '%s\n\nR2 RCA: %s. Re-run the same material scope from the current Desarrollo checkout; do not expand scope, touch control-plane files, or claim integration.' "$(jq -r '.prompt' <<<"$entry")" "$reason")"
     jq -n \
-      --arg dispatchId "$dispatch-R2-$(date -u +%Y%m%dT%H%M%SZ)-$$" \
+      --arg dispatchId "$dispatch-R2-$(if [[ -n "$transport_candidate" ]]; then printf 'TRANSPORT-'; fi)$(date -u +%Y%m%dT%H%M%SZ)-$$" \
       --arg taskId "$task" \
       --arg workerId "$WORKER_ID" \
       --arg expectedBranch "$BRANCH" \

@@ -49,6 +49,11 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       VAEP_CHECKPOINT: ${{ inputs.checkpoint || github.event.schedule || ':00' }}
       WORKER_ID: ${{ matrix.worker }}
+      JULES_API_BASE: https://jules.googleapis.com/v1alpha
+      JULES_A_API_KEY: ${{ secrets.JULES_API_KEY }}
+      JULES_B_API_KEY: ${{ secrets.JULES_B_API_KEY }}
+      JULES_C_API_KEY: ${{ secrets.JULES_C_API_KEY }}
+      JULES_D_API_KEY: ${{ secrets.JULES_D_API_KEY }}
     steps:
       - name: Checkout Desarrollo
         uses: actions/checkout@v4

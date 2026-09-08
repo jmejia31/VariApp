@@ -59,6 +59,9 @@ jobs:
           grep -q "catalogos-aceptacion.yml/runs?branch" .github/scripts/vaep-parent-close.sh
           grep -q "migration-recovery-desarrollo.yml/runs?branch" .github/scripts/vaep-parent-close.sh
           grep -q "JULES_CONTENT_FAILED_PATCH_ABSENT" .github/scripts/vaep-jules-autorefill-core.sh
+          grep -q "QUARANTINED_REMOTE_ACTIVE_NO_DUPLICATE" .github/scripts/vaep-jules-autorefill-core.sh
+          grep -q "REMOTE_SESSION_STATE_UNAVAILABLE" .github/scripts/vaep-jules-autorefill-core.sh
+          grep -q "R2_PRE_SESSION_TRANSPORT_FAILURE" .github/scripts/vaep-jules-autorefill-core.sh
       - name: Validate recovery exact-manifest contract
         run: |
           for wf in .github/workflows/vaep-jules-{a,b,c,d}-recovery.yml; do
@@ -87,6 +90,10 @@ jobs:
           grep -q "VAEP engine lightweight checks" .github/workflows/vaep-checkpoints.yml
           grep -q "github.event.workflow_run.conclusion == 'success'" .github/workflows/vaep-checkpoints.yml
           grep -q "github.event.workflow_run.event == 'push'" .github/workflows/vaep-checkpoints.yml
+          grep -q "JULES_A_API_KEY:" .github/workflows/vaep-checkpoints.yml
+          grep -q "JULES_B_API_KEY:" .github/workflows/vaep-checkpoints.yml
+          grep -q "JULES_C_API_KEY:" .github/workflows/vaep-checkpoints.yml
+          grep -q "JULES_D_API_KEY:" .github/workflows/vaep-checkpoints.yml
           grep -q "VAEP_CHECKPOINTS=:00,:12,:24,:36,:48" docs/VAEP_AUTHORITY.md
           bash .github/scripts/vaep-checkpoint.sh --self-test
           bash .github/scripts/vaep-parent-close.sh --self-test
