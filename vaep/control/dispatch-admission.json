@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "OPEN",
+  "newDispatchAdmission": "CLOSED",
   "allowExistingActiveSessions": true,
-  "reason": "CONTROL_PLANE_RECONCILED: N4.11.F is LISTO_REAL; N4.11.G is the only dependency-valid CURRENT_PARENT. Catalog v16 and admission were reconciled together; N4.11.G.1 is fail-closed as superseded by QA takeover 80ce8d6b1dc5ebf48dfec4ec4fd08aef9b8a8a01.",
-  "updatedAtUtc": "2026-09-08T09:58:00Z"
+  "reason": "INCIDENT_REVIEW_FIRST_DEBT: N4.11.G terminal results exist with PENDING_REVIEW_FIRST, and autorefill published replacement/R2 work before REVIEW_FIRST completed. Fail-closed against additional manifests while VAEP drains review/QA takeover and reconciles lane ownership.",
+  "updatedAtUtc": "2026-09-08T10:59:30Z"
 }
