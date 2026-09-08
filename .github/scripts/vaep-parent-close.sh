@@ -24,7 +24,11 @@ current_head() {
 
 is_control_plane_path() {
   case "$1" in
-    vaep/jules/dispatch/*.json|vaep/jules-b/dispatch/*.json|vaep/jules-c/dispatch/*.json|vaep/jules-d/dispatch/*.json|vaep/control/*|vaep/evidence/*|docs/VAEP_AUTHORITY.md|docs/N4.11_CENTROS_COSTO_*.md|scripts/vaep/*|.github/scripts/vaep-*|.github/workflows/vaep-*|.github/workflows/catalogos-aceptacion.yml)
+    # Operational policy, evidence, runbooks and controller metadata do not
+    # change the functional product head. Keep this list broad enough that a
+    # Chat B/VAEP onboarding or review-only commit cannot manufacture a new
+    # causal head that has no product CI attached to it.
+    AGENTS.md|README.md|CHANGELOG_AI.md|PLAN_EJECUCION_AUTONOMA.md|PROJECT_CONTEXT.md|*.md|docs/*|vaep/jules/dispatch/*.json|vaep/jules-b/dispatch/*.json|vaep/jules-c/dispatch/*.json|vaep/jules-d/dispatch/*.json|vaep/control/*|vaep/evidence/*|scripts/vaep/*|.github/scripts/vaep-*|.github/workflows/vaep-*|.github/workflows/catalogos-aceptacion.yml)
       return 0 ;;
     *) return 1 ;;
   esac
@@ -212,6 +216,20 @@ main() {
 
 if [[ "${1:-}" == "--self-test" ]]; then
   [[ -f "$MASTER_FILE" && -f "$PARSER" ]] || exit 2
+  for control_path in \
+    AGENTS.md README.md CHANGELOG_AI.md PLAN_EJECUCION_AUTONOMA.md \
+    PROJECT_CONTEXT.md docs/VAEP_AUTHORITY.md docs/CONTEXTO_CHATGPT_VAEP.md \
+    docs/N4.11_CENTROS_COSTO_FRONTEND.md vaep/control/dispatch-admission.json \
+    scripts/vaep/terminal_handoff.py .github/workflows/vaep-checkpoints.yml; do
+    is_control_plane_path "$control_path" || {
+      echo "VAEP_PARENT_CLOSE_SELF_TEST=FAIL missing_control_path=$control_path" >&2
+      exit 2
+    }
+  done
+  if is_control_plane_path backend/src/API/Program.cs; then
+    echo 'VAEP_PARENT_CLOSE_SELF_TEST=FAIL product_path_classified_as_control_plane' >&2
+    exit 2
+  fi
   echo 'VAEP_PARENT_CLOSE_SELF_TEST=PASS'
   exit 0
 fi
