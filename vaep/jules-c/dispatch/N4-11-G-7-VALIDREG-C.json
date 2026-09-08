@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-11-G-7-VALIDREG-C",
+  "taskId": "N4.11.G.7.VALIDATION_REGRESSION",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N411GCentrosCostoValidationRegressionTests.cs",
+  "prompt": "Add CentroCosto validation regression coverage; Desarrollo only; two self-reviews.",
+  "primaryBaseHead": "5dd47eac6ca75ad5e5ec5408d7bde64ca392085f"
+}
