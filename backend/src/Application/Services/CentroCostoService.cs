@@ -2,6 +2,7 @@ using InventoryApp.Application.DTOs.Contabilidad;
 using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities.Contabilidad;
+using InventoryApp.Domain.Enums;
 
 namespace InventoryApp.Application.Services;
 
@@ -10,11 +11,16 @@ public sealed class CentroCostoService : ICentroCostoService
     private const int TamanoPaginaMaximo = 100;
     private readonly ICentroCostoRepository _repository;
     private readonly ICurrentUserService _currentUser;
+    private readonly IAuditoriaService _auditoria;
 
-    public CentroCostoService(ICentroCostoRepository repository, ICurrentUserService currentUser)
+    public CentroCostoService(
+        ICentroCostoRepository repository,
+        ICurrentUserService currentUser,
+        IAuditoriaService auditoria)
     {
         _repository = repository;
         _currentUser = currentUser;
+        _auditoria = auditoria;
     }
 
     public async Task<(List<CentroCostoDto> Items, int Total)> BuscarAsync(string? termino, TipoCentroCosto? tipo, int? sucursalId, bool? activo, int pagina, int tamanoPagina)
@@ -57,6 +63,15 @@ public sealed class CentroCostoService : ICentroCostoService
         await _repository.AddAsync(entity);
         if (!await _repository.SaveChangesAsync())
             throw new BusinessRuleException("No fue posible guardar el centro de costo.");
+
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Finanzas,
+            AccionPermiso.Crear,
+            $"Centro de costo creado: {entity.Codigo} - {entity.Nombre}",
+            entity.Id,
+            entidad: nameof(CentroCosto),
+            valoresNuevos: new { entity.Codigo, entity.Nombre, entity.Tipo, entity.SucursalId, entity.Activo });
+
         return ToDto(entity);
     }
 
@@ -64,6 +79,16 @@ public sealed class CentroCostoService : ICentroCostoService
     {
         var entity = await _repository.GetByIdAsync(id);
         if (entity is null) return null;
+
+        var anteriores = new
+        {
+            entity.Codigo,
+            entity.Nombre,
+            entity.Descripcion,
+            entity.Tipo,
+            entity.SucursalId,
+            entity.Activo
+        };
 
         var codigo = NormalizarCodigo(dto.Codigo);
         if (await _repository.ExisteCodigoAsync(codigo, id))
@@ -81,7 +106,18 @@ public sealed class CentroCostoService : ICentroCostoService
         entity.FechaActualizacion = DateTime.UtcNow;
 
         _repository.Update(entity);
-        await _repository.SaveChangesAsync();
+        if (!await _repository.SaveChangesAsync())
+            throw new BusinessRuleException("No fue posible actualizar el centro de costo.");
+
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Finanzas,
+            AccionPermiso.Editar,
+            $"Centro de costo actualizado: {entity.Codigo} - {entity.Nombre}",
+            entity.Id,
+            entidad: nameof(CentroCosto),
+            valoresAnteriores: anteriores,
+            valoresNuevos: new { entity.Codigo, entity.Nombre, entity.Descripcion, entity.Tipo, entity.SucursalId, entity.Activo });
+
         return ToDto(entity);
     }
 
@@ -95,7 +131,17 @@ public sealed class CentroCostoService : ICentroCostoService
         entity.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
         entity.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
         _repository.Update(entity);
-        await _repository.SaveChangesAsync();
+        if (!await _repository.SaveChangesAsync())
+            throw new BusinessRuleException("No fue posible cambiar el estado del centro de costo.");
+
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Finanzas,
+            activo ? AccionPermiso.Activar : AccionPermiso.Desactivar,
+            $"Centro de costo {(activo ? "activado" : "desactivado")}: {entity.Codigo} - {entity.Nombre}",
+            entity.Id,
+            entidad: nameof(CentroCosto),
+            valoresNuevos: new { entity.Activo });
+
         return ToDto(entity);
     }
 
@@ -103,11 +149,23 @@ public sealed class CentroCostoService : ICentroCostoService
     {
         var entity = await _repository.GetByIdAsync(id);
         if (entity is null) return false;
+
         entity.MarcarEliminado(_currentUser.UsuarioId);
         entity.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
         entity.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
         _repository.Update(entity);
-        return await _repository.SaveChangesAsync();
+        var eliminado = await _repository.SaveChangesAsync();
+        if (!eliminado) return false;
+
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Finanzas,
+            AccionPermiso.EliminarLogico,
+            $"Centro de costo eliminado lógicamente: {entity.Codigo} - {entity.Nombre}",
+            entity.Id,
+            entidad: nameof(CentroCosto),
+            valoresNuevos: new { entity.Activo, entity.Eliminado, entity.FechaEliminacion, entity.EliminadoPorUsuarioId });
+
+        return true;
     }
 
     private static void ValidarAsociacion(TipoCentroCosto tipo, int? sucursalId)
