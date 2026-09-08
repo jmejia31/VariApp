@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "CLOSED",
+  "newDispatchAdmission": "OPEN",
   "allowExistingActiveSessions": true,
-  "reason": "REVIEW_FIRST_DEBT_FAIL_CLOSED: CURRENT_PARENT=N4.11.H has correlated terminal ATTEMPT2 results requiring mandatory VAEP review/takeover before replacement work. Issue #3086 N4.11.H.12.CERTIFICATION_CHECKLIST is COMPLETED + patchPresent=true + READY_FOR_VAEP + PENDING_REVIEW_FIRST (workflowRunId=34251963116, session=sessions/4370637438388084713). Issue #3085 N4.11.H.2.API_DOCUMENTATION is ATTEMPT2 + patchPresent=true + PENDING_REVIEW_FIRST with controllerHandoff=QA_TAKEOVER_REQUIRED. A new N4.11.H.9 manifest was published after this terminal debt existed; admission is therefore closed immediately to prevent further replacement/third work until REVIEW_FIRST/QA_TAKEOVER reconciles ownership. No R3 authorized; PARENT_CLOSE_FIRST remains mandatory.",
-  "updatedAtUtc": "2026-09-08T17:29:55Z"
+  "reason": "REVIEW_FIRST_DEBT_RECONCILED: pending REVIEW_FIRST/QA_TAKEOVER remains recorded and non-blocking for independent NEXT_SAFE; parent=N4.11.H; prior=REVIEW_FIRST_DEBT_FAIL_CLOSED: CURRENT_PARENT=N4.11.H has correlated terminal ATTEMPT2 results requiring mandatory VAEP review/takeover before replacement work. Issue #3086 N4.11.H.12.CERTIFICATION_CHECKLIST is COMPLETED + patchPresent=true + READY_FOR_VAEP + PENDING_REVIEW_FIRST (workflowRunId=34251963116, session=sessions/4370637438388084713). Issue #3085 N4.11.H.2.API_DOCUMENTATION is ATTEMPT2 + patchPresent=true + PENDING_REVIEW_FIRST with controllerHandoff=QA_TAKEOVER_REQUIRED. A new N4.11.H.9 manifest was published after this terminal debt existed; admission is therefore closed immediately to prevent further replacement/third work until REVIEW_FIRST/QA_TAKEOVER reconciles ownership. No R3 authorized; PARENT_CLOSE_FIRST remains mandatory.",
+  "updatedAtUtc": "2026-09-08T17:35:36Z"
 }
