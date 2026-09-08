@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "OPEN",
+  "newDispatchAdmission": "CLOSED",
   "allowExistingActiveSessions": true,
-  "reason": "VAEP automatic verified closure: N4.11.F LISTO_REAL; N4.11.G is the only dependency-valid CURRENT_PARENT. Exact gates and P0/P1 were validated by the closure governor.",
-  "updatedAtUtc": "2026-09-08T09:09:23Z"
+  "reason": "BLOCKED_CONTROL_PLANE_PARENT_MISMATCH: N4.11.F is already LISTO_REAL and N4.11.G is dependency-valid, but jules-autorefill-catalog.json still declares N4.11.F. Canonical promotion is blocked by FUNCTIONAL_HEAD_MISMATCH after QA takeover 80ce8d6b1dc5ebf48dfec4ec4fd08aef9b8a8a01. No manifests until catalog and admission are atomically reconciled.",
+  "updatedAtUtc": "2026-09-08T09:24:37Z"
 }
