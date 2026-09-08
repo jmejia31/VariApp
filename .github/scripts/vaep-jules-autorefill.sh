@@ -14,8 +14,10 @@ if [[ "${1:-}" == "--post-terminal" ]]; then
   phase="$(jq -r '.phase // empty' "$state_file")"
   case "$phase" in
     TERMINAL_*|STALL_NO_PROGRESS|LANE_BUDGET_EXCEEDED)
-      echo "AUTOREFILL_WAIT=REVIEW_FIRST_REQUIRED phase=$phase action=NO_POST_TERMINAL_REFILL" >&2
-      exit 81
+      # REVIEW_FIRST owns the completed artifact, but it must not hold the
+      # lane. MASTER explicitly requires terminal handoff in the same run:
+      # release CURRENT, reserve NEXT_SAFE, and let VAEP review in parallel.
+      echo "AUTOREFILL_TERMINAL_HANDOFF phase=$phase action=CONTINUE_TO_CORE_REVIEW_FIRST_IN_PARALLEL" >&2
       ;;
     *)
       echo "AUTOREFILL_POST_TERMINAL_REJECT phase=${phase:-MISSING} reason=session_not_terminal" >&2
@@ -27,8 +29,10 @@ fi
 # A terminal hook may be running from an older manifest checkout while the
 # control-plane has already advanced. Logic changes remain fail-closed, but
 # data-only catalog/registry changes are refreshed from current Desarrollo for
-# non-terminal reservation paths. Post-terminal refill is intentionally held
-# until REVIEW_FIRST/classification resolves the previous result.
+# non-terminal reservation paths. A terminal result remains REVIEW_FIRST-owned
+# and is never auto-integrated by
+# this script. That review boundary is independent from lane continuity: if a
+# material NEXT_SAFE exists, reserve it immediately in the same workflow.
 if git remote get-url origin >/dev/null 2>&1; then
   git fetch --quiet origin Desarrollo || true
   if git rev-parse --verify origin/Desarrollo >/dev/null 2>&1; then

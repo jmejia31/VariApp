@@ -81,16 +81,21 @@ run_lane_refill() {
     78) echo "VAEP_CHECKPOINT_LANE_RESULT worker=$worker result=NO_SAFE_NEXT" ;;
     79) echo "VAEP_CHECKPOINT_LANE_RESULT worker=$worker result=WAIT_DISPATCH_ADMISSION" ;;
     80|81) echo "VAEP_CHECKPOINT_LANE_RESULT worker=$worker result=WAIT_RUNTIME_STATE rc=$rc" ;;
+    82) echo "VAEP_CHECKPOINT_LANE_RESULT worker=$worker result=WAIT_CAUSAL_CI" ;;
     *) echo "VAEP_CHECKPOINT_LANE_RESULT worker=$worker result=ERROR rc=$rc" >&2; return "$rc" ;;
   esac
 }
 
 emit_review_observation() {
-  local issues ready
+  local issues ready terminal_patch terminal_blocked
   issues="$(api "repos/$GITHUB_REPOSITORY/issues?state=open&per_page=100&sort=updated&direction=desc")"
   ready="$(jq '[.[]? | (.body // "") | select(contains("READY_FOR_VAEP"))] | length' <<<"$issues")"
+  terminal_patch="$(jq '[.[]? | (.body // "") | select(contains("Terminal state: `COMPLETED`")) | select(contains("Patch present: `true`"))] | length' <<<"$issues")"
+  terminal_blocked="$(jq '[.[]? | (.body // "") | select(contains("QA_CLASSIFICATION_REQUIRED_NO_REFILL") or contains("READY_FOR_VAEP_REVIEW_FIRST_REQUIRED_NO_REFILL"))] | length' <<<"$issues")"
   echo "VAEP_CHECKPOINT_REVIEW_BACKLOG=$ready"
-  echo 'VAEP_CHECKPOINT_REVIEW_AUTHORITY=VAEP_ONLY action=OBSERVE_NO_AUTOINTEGRATION'
+  echo "VAEP_CHECKPOINT_TERMINAL_PATCH_RESULTS=$terminal_patch"
+  echo "VAEP_CHECKPOINT_TERMINAL_BLOCKED_RESULTS=$terminal_blocked"
+  echo 'VAEP_CHECKPOINT_REVIEW_AUTHORITY=VAEP_ONLY action=REVIEW_FIRST_REQUIRED_NO_AUTOINTEGRATION'
 }
 
 emit_watchdog_observation() {
@@ -148,6 +153,7 @@ main() {
       rc=1
     fi
   done
+  echo "VAEP_CHECKPOINT_EXECUTION=COMPLETE checkpoint=$checkpoint worker_count=${#workers[@]}"
   # Review and watchdog are intentionally observed after lane refill. They
   # must never consume the refill deadline when a safe CURRENT/NEXT is absent.
   [[ "$checkpoint" != ':24' ]] || emit_review_observation

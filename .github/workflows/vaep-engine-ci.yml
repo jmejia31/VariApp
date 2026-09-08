@@ -37,17 +37,19 @@ jobs:
         run: bash .github/scripts/vaep-jules-worker.sh --runtime-preflight
       - name: Run VAEP/Jules MASTER runtime self-test
         run: bash .github/scripts/vaep-jules-master.sh --self-test
-      - name: Validate post-terminal refill waits for REVIEW_FIRST
+      - name: Validate post-terminal refill preserves REVIEW_FIRST and refills in parallel
         run: |
-          grep -q "AUTOREFILL_WAIT=REVIEW_FIRST_REQUIRED" .github/scripts/vaep-jules-autorefill.sh
-          grep -q "NO_POST_TERMINAL_REFILL" .github/scripts/vaep-jules-autorefill.sh
-          ! grep -q "CONTINUE_TO_CORE" .github/scripts/vaep-jules-autorefill.sh
+          grep -q "AUTOREFILL_TERMINAL_HANDOFF" .github/scripts/vaep-jules-autorefill.sh
+          grep -q "CONTINUE_TO_CORE_REVIEW_FIRST_IN_PARALLEL" .github/scripts/vaep-jules-autorefill.sh
+          grep -q "reviewResult:\"PENDING_REVIEW_FIRST\"" .github/scripts/vaep-jules-worker.sh
+          ! grep -q "NO_POST_TERMINAL_REFILL" .github/scripts/vaep-jules-autorefill.sh
       - name: Validate control-plane base equivalence guard
         run: |
           grep -q "CONTROL_PLANE_BASE_EQUIVALENCE" docs/VAEP_AUTHORITY.md
           grep -q "write_base_equivalence" .github/scripts/vaep-jules-worker.sh
           grep -q -- "--base-equivalence" .github/scripts/vaep-jules-worker.sh
           grep -q "recoverable_attempt1_entry" .github/scripts/vaep-jules-autorefill-core.sh
+          grep -q "WAIT_CAUSAL_CI" .github/scripts/vaep-checkpoint.sh
       - name: Validate recovery exact-manifest contract
         run: |
           for wf in .github/workflows/vaep-jules-{a,b,c,d}-recovery.yml; do

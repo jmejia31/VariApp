@@ -324,7 +324,7 @@ create_atomic_manifest_commit() {
     fi
     head="$(current_head)"
     if causal_freeze_active "$head"; then
-      return 0
+      return 82
     fi
     manifest="$(jq -n --arg dispatchId "$dispatch" --arg taskId "$task" --arg workerId "$WORKER_ID" --arg expectedBranch "$BRANCH" --arg fileScopeHint "$scope" --arg prompt "$prompt" --arg primaryBaseHead "$head" --argjson taskAttempt "$task_attempt" '{dispatchId:$dispatchId,taskId:$taskId,workerId:$workerId,expectedBranch:$expectedBranch,taskAttempt:$taskAttempt,fileScopeHint:$fileScopeHint,prompt:$prompt,primaryBaseHead:$primaryBaseHead}')"
     blob="$(jq -n --arg content "$manifest" '{content:$content,encoding:"utf-8"}' | api "repos/$GITHUB_REPOSITORY/git/blobs" --method POST --input - --jq '.sha')"
@@ -375,7 +375,8 @@ main() {
   local head entry
   head="$(current_head)"
   if causal_freeze_active "$head"; then
-    exit 0
+    echo "AUTOREFILL_WAIT=HEAD_FREEZE_CAUSAL worker=$WORKER_ID action=WAIT_CAUSAL_GATE" >&2
+    exit 82
   fi
   if ! entry="$(select_next_entry)"; then
     if entry="$(recoverable_attempt1_entry)"; then
