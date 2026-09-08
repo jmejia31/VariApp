@@ -1,9 +1,9 @@
 {
   "version": 15,
   "authority": "docs/VAEP_AUTHORITY.md",
-  "currentParent": "N4.11.E",
-  "generatedAt": "2026-09-08T01:39:53Z",
-  "regenerationReason": "AUTOMATIC_PARENT_CLOSE__N4.11.D_LISTO_REAL__N4.11.E_CURRENT",
+  "currentParent": "N4.11.F",
+  "generatedAt": "2026-09-08T07:06:29Z",
+  "regenerationReason": "AUTOMATIC_PARENT_CLOSE__N4.11.E_LISTO_REAL__N4.11.F_CURRENT",
   "policy": {
     "branch": "Desarrollo",
     "liveQueueDepthTarget": 2,
@@ -66,7 +66,7 @@
         "fileScopeHint": "frontend/src/app/features/centros-costo/centros-costo.component.ts",
         "prompt": "After N4.11.D LISTO, implement CentroCosto component shell and deterministic UI states.",
         "plannedParent": "N4.11.E",
-        "dispatchEligible": true
+        "dispatchEligible": false
       },
       {
         "dispatchId": "N4-11-F-1-UI-PERM-A",
@@ -76,7 +76,7 @@
         "fileScopeHint": "frontend/src/app/features/centros-costo/centros-costo.permission.spec.ts",
         "prompt": "After N4.11.E LISTO, add CentroCosto UI permission-contract tests.",
         "plannedParent": "N4.11.F",
-        "dispatchEligible": false
+        "dispatchEligible": true
       },
       {
         "dispatchId": "N4-11-G-1-COMP-TEST-A",
@@ -188,7 +188,7 @@
         "fileScopeHint": "frontend/src/app/services/centro-costo.service.ts",
         "prompt": "After N4.11.D LISTO, implement CentroCosto HTTP service using current API conventions.",
         "plannedParent": "N4.11.E",
-        "dispatchEligible": true
+        "dispatchEligible": false
       },
       {
         "dispatchId": "N4-11-F-2-API-AUTH-B",
@@ -198,7 +198,7 @@
         "fileScopeHint": "backend/tests/InventoryApp.Tests/N411FCentrosCostoAuthorizationTests.cs",
         "prompt": "After N4.11.E LISTO, add CentroCosto API authorization contract tests.",
         "plannedParent": "N4.11.F",
-        "dispatchEligible": false
+        "dispatchEligible": true
       },
       {
         "dispatchId": "N4-11-G-2-SERVICE-TEST-B",
@@ -310,7 +310,7 @@
         "fileScopeHint": "frontend/src/app/features/centros-costo/centros-costo.component.html",
         "prompt": "After N4.11.D LISTO, implement accessible CentroCosto form/table states.",
         "plannedParent": "N4.11.E",
-        "dispatchEligible": true
+        "dispatchEligible": false
       },
       {
         "dispatchId": "N4-11-F-3-AUDIT-C",
@@ -320,7 +320,7 @@
         "fileScopeHint": "backend/tests/InventoryApp.Tests/N411FCentrosCostoAuditTests.cs",
         "prompt": "After N4.11.E LISTO, add CentroCosto audit/correlation contract tests.",
         "plannedParent": "N4.11.F",
-        "dispatchEligible": false
+        "dispatchEligible": true
       },
       {
         "dispatchId": "N4-11-G-3-E2E-C",
@@ -432,7 +432,7 @@
         "fileScopeHint": "frontend/src/app/app.routes.centros-costo.spec.ts",
         "prompt": "After N4.11.D LISTO, add CentroCosto protected route/navigation contract.",
         "plannedParent": "N4.11.E",
-        "dispatchEligible": true
+        "dispatchEligible": false
       },
       {
         "dispatchId": "N4-11-F-4-OBS-D",
@@ -442,7 +442,7 @@
         "fileScopeHint": "backend/tests/InventoryApp.Tests/N411FCentrosCostoSecurityObservabilityTests.cs",
         "prompt": "After N4.11.E LISTO, add security/observability contract tests.",
         "plannedParent": "N4.11.F",
-        "dispatchEligible": false
+        "dispatchEligible": true
       },
       {
         "dispatchId": "N4-11-G-4-INTEG-D",
