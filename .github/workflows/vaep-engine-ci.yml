@@ -61,8 +61,8 @@ jobs:
       - name: Validate review-first and lane-continuity contract
         run: |
           grep -q "READY_FOR_VAEP_REVIEW_FIRST_REQUIRED_NO_REFILL" .github/scripts/vaep-jules-worker.sh
-          grep -q "AUTOREFILL_WAIT=REVIEW_FIRST_REQUIRED" .github/scripts/vaep-jules-autorefill.sh
           ! grep -q "review_first_debt_exists" .github/scripts/vaep-jules-autorefill.sh
+          grep -q "CONTINUE_TO_CORE_REVIEW_FIRST_IN_PARALLEL" .github/scripts/vaep-jules-autorefill.sh
           grep -q "PREARM_BEFORE_TERMINAL" docs/VAEP_AUTHORITY.md
           grep -q "other_live_lane_run_exists" .github/scripts/vaep-jules-autorefill-core.sh
           grep -q "VAEP_LANE_RUN_ID" .github/workflows/vaep-jules-secondary.yml
