@@ -1,4 +1,5 @@
 using System;
+using InventoryApp.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
@@ -13,6 +14,7 @@ namespace InventoryApp.Infrastructure.Migrations
         private IModel CreateN43CModel()
         {
             var modelBuilder = new ModelBuilder();
+            modelBuilder.Entity<Sucursal>();
             BuildModel(modelBuilder);
             ApplyN43CModel(modelBuilder);
             ApplyN46CModel(modelBuilder);
