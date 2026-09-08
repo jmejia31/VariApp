@@ -590,6 +590,7 @@ jq -n \
   '{protocol:$protocol,globalControlPlane:"VAEP_MASTER",masterCommitSha:$masterCommitSha,policyHash:$policyHash,parentCloseFirst:$parentCloseFirst,checkpoints:$checkpoints,laneBudgetSeconds:$laneBudgetSeconds,workerId:$workerId,dispatchId:$dispatchId,taskId:$taskId,taskAttempt:$taskAttempt,maxAttempts:$maxAttempts,r3Prohibited:$r3Prohibited,qaTakeoverOnRetryExhaustion:true,session:$session,state:$state,requestedBase:$requestedBase,actualPatchBase:$actualBase,baseEquivalence:$baseEquivalence,patchPresent:$patchPresent,selfReviewPass1:$selfReviewPass1,selfReviewPass2:$selfReviewPass2,feedbackQuestion:$feedbackQuestion,triggered:true,manifestAccepted:true,sessionCreated:true,sessionCompleted:($state=="COMPLETED"),terminalContractArtifact:"terminal-contract.json",lifecycleArtifact:"lifecycle.json",reviewAccepted:false,integrated:false,integrationReceiptRequired:true,integrationReceiptMode:"COMMIT_TRAILERS",productivityCountedStage:"INTEGRATED",superseded:($state=="LATE_RESULT_SUPERSEDED"),lateResultAutoIntegrationDenied:($state=="LATE_RESULT_SUPERSEDED"),suggestedCommitMessage:$suggestedCommitMessage,autoFeedbackCount:$autoFeedbackCount,dispatchCommitSha:$dispatchCommitSha,manifestPath:$manifestPath,workflowRunId:$workflowRunId,readyForVaep:$readyForVaep,handoffState:(if $readyForVaep then "READY_FOR_VAEP" else "NOT_READY_FOR_VAEP" end),correlationComplete:true,controllerHandoff:(if $state=="LATE_RESULT_SUPERSEDED" then "LATE_RESULT_EVIDENCE_ONLY" elif $state=="AWAITING_USER_FEEDBACK_QA_TAKEOVER" then "QA_TAKEOVER_FEEDBACK_REQUIRED" elif $readyForVaep then "READY_FOR_VAEP_REVIEW_FIRST_REQUIRED_NO_REFILL" else "QA_CLASSIFICATION_REQUIRED_NO_REFILL" end)}' \
   > "$result_dir/result.json"
 
+controller_handoff="$(python3 scripts/vaep/terminal_handoff.py --annotate "$result_dir")"
 run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
 printf -v issue_body '%s\n\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n%s\n' \
   "VAEP $WORKER_LABEL MASTER result and controller handoff signal." \
@@ -605,7 +606,7 @@ printf -v issue_body '%s\n\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n
   "- Ready for VAEP: \`$ready_for_vaep\`; review status: \`PENDING_REVIEW_FIRST\`" \
   "- Dispatch commit: \`$DISPATCH_SHA\`; manifest: \`$manifest\`" \
   "- Workflow run ID: \`$GITHUB_RUN_ID\`; correlation complete: \`true\`" \
-  "- Controller handoff: \`$(if [[ "$ready_for_vaep" == true ]]; then printf READY_FOR_VAEP_REVIEW_FIRST_REQUIRED_NO_REFILL; else printf QA_CLASSIFICATION_REQUIRED_NO_REFILL; fi)\`" \
+  "- Controller handoff: \`$controller_handoff\`; correction owner: CHATGPT_VAEP; takeover executed: false" \
   "- Parent-close-first: \`$PARENT_CLOSE_FIRST\`; checkpoints: \`$VAEP_CHECKPOINTS\`" \
   "- Workflow run: $run_url" \
   'Artifact only. Nothing was applied to Desarrollo, pushed, merged or deployed. VAEP/ChatGPT review is mandatory. When MASTER retry capacity is exhausted, ChatGPT/VAEP/Vibe takes over; do not exceed MASTER retry limits.'

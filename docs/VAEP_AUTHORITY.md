@@ -175,7 +175,7 @@ Invariantes P0/P1 de entrega y productividad:
 - `PARENT_STALL_NO_PROGRESS_MINUTES` se aplica a progreso observable de estado/timestamp/actividad y puede cortar antes de `JULES_LANE_BUDGET_SECONDS`; stall revoca ownership y pasa a QA_TAKEOVER.
 - Antes de crear una sesión, el worker enumera sesiones remotas y bloquea cualquier sesión existente del mismo `taskId` todavía activa, incluyendo otro `dispatchId`, base o intento. El guard registra `taskId + dispatchId + primaryBaseHead + taskAttempt + session + state`; reusar un manifest cuyo dispatch ya tuvo sesión se clasifica fail-closed.
 - Un `COMPLETED` entregable exige ChangeSet/gitPatch no vacío, `baseCommitId == primaryBaseHead` o una equivalencia verificable de descendiente exclusivamente control-plane, anclaje al `fileScopeHint`, ausencia de cambios al control-plane, marcador `TESTS_EXECUTED`, `SELF_REVIEW_PASS_1` y `SELF_REVIEW_PASS_2`. La equivalencia solo es válida cuando GitHub compara ambos SHA y demuestra que todos los commits intermedios pertenecen a manifests/control-plane canónico; cualquier cambio funcional, historia no verificable o deriva fuera de esa lista falla cerrado. El artifact `lifecycle.json` conserva aceptación del manifest, creación de sesión, primer IN_PROGRESS, última actividad, terminal, patch, relación de base, review e integración.
-- Cuando ese contrato terminal pasa, el handoff explícito es `READY_FOR_VAEP`; hasta que exista REVIEW_FIRST/clasificación causal, el autorefill post-terminal queda bloqueado. Un NEXT_SAFE pre-reservado puede existir, pero no se crea un reemplazo adicional por terminalización.
+- Cuando ese contrato terminal pasa, el handoff explícito es `READY_FOR_VAEP`; su scope entregado espera REVIEW_FIRST. La lane puede reservar otro NEXT_SAFE material, independiente y no solapado conforme a las secciones 6 y 9. Revisar el artifact y mantener continuidad son obligaciones separadas.
 - Toda corrida Jules debe conservar correlación `dispatchCommitSha -> manifestPath -> workflowRunId -> sessionName`; si falta un eslabón no es ACTIVE_REAL ni productividad.
 - Recovery manual exige `manifest_commit` exacto y `--transport-preflight` del manifest inmutable antes de crear o reusar sesión.
 - Si un stop de una sesión SUPERSEDED deja el estado remoto activo, la lane queda `QUARANTINED_REMOTE_ACTIVE_NO_DUPLICATE`; ningún recovery equivalente puede nacer hasta estado remoto terminal y RCA causal.
@@ -207,6 +207,10 @@ La política de reintentos está gobernada por el bloque canónico:
 - ATTEMPT1 puede tener máximo un R2 dirigido.
 - R2 fallido o bloqueado => QA_TAKEOVER por ChatGPT/VAEP; Jules pasa a otro scope material.
 - No existe R3 operativo.
+
+Al agotar R2, el runtime emite `QA_TAKEOVER_REQUIRED` con causa, taskId, dispatchId, sesión, base y artifact; el responsable es ChatGPT/VAEP. Emitir ese handoff no significa que el takeover haya sido ejecutado. Un R2 válido pasa a `READY_FOR_VAEP`, sin otro intento por falta de revisión. Fallos de evidencia se revisan primero desde el artifact disponible, sin volver a implementar por defecto. El objetivo de 100 integraciones por worker no es evidencia de cuota disponible del proveedor ni autoriza fabricar trabajo o reiniciar intentos. Se conservan dos intentos de contenido por tarea para priorizar trabajo útil.
+
+Cada checkpoint reconcilia deuda terminal después del refill. Si no hay ejecutor conectado de REVIEW_FIRST/QA, debe persistir las tareas afectadas y declarar `REVIEW_EXECUTOR_NOT_CONFIGURED`; contar Issues o registrar ownership no certifica operación completa. La corrección e integración requieren un ejecutor real autorizado con acceso al repositorio, artifacts y pruebas. La comprobación de deuda no despacha sesiones Jules ni integra parches.
 
 ## 9. REVIEW_FIRST y handoff
 

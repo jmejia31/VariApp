@@ -60,8 +60,21 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: Desarrollo
-          fetch-depth: 2
+          fetch-depth: 0
 
       - name: Execute canonical VAEP checkpoint
         shell: bash
         run: bash .github/scripts/vaep-checkpoint.sh --checkpoint "$VAEP_CHECKPOINT" --worker "$WORKER_ID"
+
+      - name: Reconcile terminal review and exhausted attempts
+        if: always()
+        run: python3 scripts/vaep/terminal_handoff.py --audit "$WORKER_ID" --output "$RUNNER_TEMP/terminal-handoff.json"
+
+      - name: Preserve terminal handoff evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: terminal-handoff-${{ matrix.worker }}
+          path: ${{ runner.temp }}/terminal-handoff.json
+          if-no-files-found: error
+          retention-days: 14
