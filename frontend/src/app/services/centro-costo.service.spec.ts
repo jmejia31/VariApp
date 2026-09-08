@@ -1,10 +1,10 @@
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { environment } from '../../environments/environment';
-import { TipoCentroCosto } from '../core/models/centro-costo.model';
+import { CreateCentroCostoDto, TipoCentroCosto, UpdateCentroCostoDto } from '../core/models/centro-costo.model';
 import { CentroCostoService } from './centro-costo.service';
 
-describe('N4.11.E CentroCostoService contract', () => {
+describe('N4.11.G CentroCostoService contract', () => {
   let service: CentroCostoService;
   let httpMock: HttpTestingController;
 
@@ -15,6 +15,20 @@ describe('N4.11.E CentroCostoService contract', () => {
   });
 
   afterEach(() => httpMock.verify());
+
+  it('uses the canonical activos endpoint', () => {
+    service.getActivos().subscribe();
+    const req = httpMock.expectOne(`${environment.apiUrl}/centros-costo/activos`);
+    expect(req.request.method).toBe('GET');
+    req.flush({ data: [] });
+  });
+
+  it('uses the canonical detail endpoint', () => {
+    service.getById(17).subscribe();
+    const req = httpMock.expectOne(`${environment.apiUrl}/centros-costo/17`);
+    expect(req.request.method).toBe('GET');
+    req.flush({ data: { id: 17 } });
+  });
 
   it('serializes search filters and pagination without dropping false values', () => {
     service.buscar({
@@ -35,6 +49,39 @@ describe('N4.11.E CentroCostoService contract', () => {
     expect(req.request.params.get('pagina')).toBe('2');
     expect(req.request.params.get('tamanoPagina')).toBe('25');
     req.flush({ data: { items: [], total: 0, pagina: 2, tamanoPagina: 25 } });
+  });
+
+  it('posts the create payload to the canonical collection endpoint', () => {
+    const payload: CreateCentroCostoDto = {
+      codigo: 'CC-17',
+      nombre: 'Centro 17',
+      descripcion: 'Contrato create',
+      tipo: TipoCentroCosto.Departamento,
+      sucursalId: null
+    };
+
+    service.create(payload).subscribe();
+    const req = httpMock.expectOne(`${environment.apiUrl}/centros-costo`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual(payload);
+    req.flush({ data: { id: 17, ...payload, activo: true } });
+  });
+
+  it('puts the update payload to the canonical detail endpoint', () => {
+    const payload: UpdateCentroCostoDto = {
+      codigo: 'CC-18',
+      nombre: 'Centro 18',
+      descripcion: null,
+      tipo: TipoCentroCosto.Proyecto,
+      sucursalId: null,
+      activo: false
+    };
+
+    service.update(18, payload).subscribe();
+    const req = httpMock.expectOne(`${environment.apiUrl}/centros-costo/18`);
+    expect(req.request.method).toBe('PUT');
+    expect(req.request.body).toEqual(payload);
+    req.flush({ data: { id: 18, ...payload } });
   });
 
   it('uses the canonical activate/deactivate endpoints', () => {
