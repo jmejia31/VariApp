@@ -91,6 +91,7 @@ jobs:
           test "$(grep -c "^      - '" .github/workflows/vaep-checkpoints.yml)" -eq 1
           grep -q "github.event.workflow_run.conclusion == 'success'" .github/workflows/vaep-checkpoints.yml
           grep -q "github.event.workflow_run.event == 'push'" .github/workflows/vaep-checkpoints.yml
+          grep -q "github.event.workflow_run.name == 'VAEP engine lightweight checks'" .github/workflows/vaep-checkpoints.yml
           grep -q "JULES_A_API_KEY:" .github/workflows/vaep-checkpoints.yml
           grep -q "JULES_B_API_KEY:" .github/workflows/vaep-checkpoints.yml
           grep -q "JULES_C_API_KEY:" .github/workflows/vaep-checkpoints.yml
