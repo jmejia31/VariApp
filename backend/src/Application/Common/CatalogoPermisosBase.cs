@@ -103,7 +103,7 @@ public static class CatalogoPermisosBase
         (ModuloSistema.Finanzas, new[]
         {
             AccionPermiso.Ver, AccionPermiso.Crear, AccionPermiso.Editar,
-            AccionPermiso.Activar, AccionPermiso.Desactivar,
+            AccionPermiso.Activar, AccionPermiso.Desactivar, AccionPermiso.EliminarLogico,
             AccionPermiso.Anular, AccionPermiso.Aprobar, AccionPermiso.Exportar,
             AccionPermiso.Importar, AccionPermiso.Imprimir, AccionPermiso.Administrar,
             AccionPermiso.Cerrar, AccionPermiso.Reabrir
