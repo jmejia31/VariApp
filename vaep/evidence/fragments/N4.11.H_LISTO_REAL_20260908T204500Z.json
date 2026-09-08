@@ -4,14 +4,14 @@
   "decision": "LISTO_REAL",
   "review": "PASS",
   "reviewMode": "QA_TAKEOVER_EVIDENCE_ONLY",
-  "functionalHead": "b30b949e258e0b5e0476dcbe91419c006b739d39",
+  "functionalHead": "8e204fe41de967f3445cda571a0e72648b1bc748",
   "combinedStatus": "SUCCESS",
   "causalGates": "TERMINAL_SUCCESS_APPLICABLE",
   "causalRuns": {
-    "desarrollo-ci.yml": 34242471748,
-    "catalogos-aceptacion.yml": 34242471747,
-    "vaep-engine-ci.yml": 34276302672,
-    "vaep-jules-diagnostic.yml": 34276307001
+    "desarrollo-ci.yml": 34248659106,
+    "catalogos-aceptacion.yml": 34248659087,
+    "vaep-engine-ci.yml": 34248667099,
+    "vaep-jules-diagnostic.yml": 34248666643
   },
   "p0Open": 0,
   "p1Open": 0,
