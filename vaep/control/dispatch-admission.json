@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "CLOSED",
+  "newDispatchAdmission": "OPEN",
   "allowExistingActiveSessions": true,
-  "reason": "HEAD_FREEZE_CAUSAL_AFTER_QA_TAKEOVER: CURRENT_PARENT=N4.11.H terminal REVIEW_FIRST debt listed in the prior fail-closed state has been materially drained by direct QA_TAKEOVER coverage in Desarrollo, including H.15 acceptance matrix, H.13 release notes, H.14 contract summary, H.11 coverage evidence, H.9 QA evidence, H.7 accessibility evidence, H.10 API evidence, H.6 filter matrix, H.3 test matrix, plus existing H.5 runbook and H.16 operations takeover. Admission remains CLOSED until causal checks for the resulting functional HEAD are terminal and ownership/P0-P1 closure gates are reconciled. R3 remains prohibited.",
-  "updatedAtUtc": "2026-09-08T18:40:00Z"
+  "reason": "RECONCILED_NO_PUSH_CAUSAL_FREEZE: CURRENT_PARENT=N4.11.H; exact functional-head causal workflows have no queued/in_progress Desarrollo push runs. Pull-request/global checks and QA evidence commits are non-blocking for independent SAFE_WORK. REVIEW_FIRST/QA_TAKEOVER debt remains recorded and is not auto-integrated. R3 remains prohibited.",
+  "updatedAtUtc": "2026-09-08T18:50:00Z"
 }

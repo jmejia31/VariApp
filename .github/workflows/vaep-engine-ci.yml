@@ -3,6 +3,12 @@ name: VAEP engine lightweight checks
 on:
   push:
     branches: [Desarrollo]
+    paths:
+      - '.github/scripts/vaep-*.sh'
+      - '.github/workflows/vaep-*.yml'
+      - 'scripts/vaep/**'
+      - 'vaep/**'
+      - 'docs/VAEP_AUTHORITY.md'
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -108,6 +114,13 @@ jobs:
           grep -q "expected_state" .github/scripts/vaep-checkpoint.sh
           bash .github/scripts/vaep-checkpoint.sh --self-test
           bash .github/scripts/vaep-parent-close.sh --self-test
+      - name: Validate admission and functional-head starvation guards
+        run: |
+          jq -e '(.newDispatchAdmission == "OPEN" or .newDispatchAdmission == "FROZEN") and .allowExistingActiveSessions == true' vaep/control/dispatch-admission.json
+          grep -q 'docs/N4.11_CENTROS_COSTO_\*\.md' .github/scripts/vaep-jules-autorefill-core.sh
+          grep -q 'docs/N4.11_CENTROS_COSTO_\*\.md' .github/scripts/vaep-parent-close.sh
+          grep -q "paths:" .github/workflows/vaep-engine-ci.yml
+          grep -q "docs/VAEP_AUTHORITY.md" .github/workflows/vaep-engine-ci.yml
       - name: Validate Jules synthetic dispatch matrix
         run: python3 scripts/vaep/jules_runtime_contract.py --self-test
       - name: Validate evidence-gap handoff does not create R2
