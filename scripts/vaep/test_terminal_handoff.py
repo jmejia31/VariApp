@@ -128,9 +128,8 @@ class TerminalHandoffTests(unittest.TestCase):
         original_dir = terminal_handoff.REVIEW_RECEIPT_DIR
         with tempfile.TemporaryDirectory() as root:
             terminal_handoff.REVIEW_RECEIPT_DIR = Path(root)
-            Path(root, "h1.md").write_text("QA evidence", encoding="utf-8")
-            receipt["tasks"][0]["fileScopeHint"] = "h1.md"
-            receipt["tasks"][0]["evidencePath"] = "h1.md"
+            receipt["tasks"][0]["fileScopeHint"] = "docs/VAEP_AUTHORITY.md"
+            receipt["tasks"][0]["evidencePath"] = "docs/VAEP_AUTHORITY.md"
             Path(root, "review.json").write_text(json.dumps(receipt), encoding="utf-8")
             dispatches, tasks, receipts = accepted_review_items("N4.11.H")
         terminal_handoff.REVIEW_RECEIPT_DIR = original_dir
