@@ -1,9 +1,9 @@
 {
-  "version": 19,
+  "version": 20,
   "authority": "docs/VAEP_AUTHORITY.md",
   "currentParent": "N5.1.B",
-  "generatedAt": "2026-09-08T22:29:30Z",
-  "regenerationReason": "QA_TAKEOVER_PARENT_CLOSE__N5.1.A_LISTO_REAL__N5.1.B_CURRENT_UNSCOPED",
+  "generatedAt": "2026-09-08T22:52:00Z",
+  "regenerationReason": "N5.1.B_SAFE_SCOPE_DERIVED_FROM_CERTIFIED_N5.1.A_PREFLIGHT__NO_BUSYWORK",
   "lastClosedParent": "N5.1.A",
   "closureReceipts": {
     "N4.11.H": "vaep/evidence/fragments/N4.11.H_LISTO_REAL_20260908T204500Z.json",
@@ -41,7 +41,7 @@
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
     "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
-    "sourceRanges": ["COLA!A391:T399", "COLA!A796:T796", "PLAN_MAESTRO!A51:L52"],
+    "sourceRanges": ["COLA!A391:T399", "PLAN_MAESTRO!A51:L52"],
     "note": "Derived dependency order, not lexical ID order or COLA physical row order. Source remains the live Plan/COLA; future scopes require directed preparation.",
     "nodes": [
       {"id":"N4.11.H","order":0,"type":"MICROTAREA","dependencies":["N4.11.G"],"phaseGate":"GATE-N3"},
@@ -57,7 +57,19 @@
     ]
   },
   "lanes": {
-    "JULES_A": [],
+    "JULES_A": [
+      {
+        "dispatchId": "N5-1-B-1-DOMAIN-CONTRACT-DECISION-A",
+        "taskId": "N5.1.B.1.DOMAIN_CONTRACT_DECISION",
+        "workerId": "JULES_A",
+        "taskAttempt": 1,
+        "plannedParent": "N5.1.B",
+        "readyForDispatch": true,
+        "dispatchEligible": true,
+        "fileScopeHint": "docs/N5.1_REPORTES_DOMAIN_CONTRACT_DECISION.md",
+        "prompt": "Read docs/VAEP_AUTHORITY.md, PROJECT_INDEX.md and all four docs/N5.1_REPORTES_PREFLIGHT_*.md first. This is N5.1.B (Dominio y contratos), whose canonical COLA scope explicitly permits documenting N/A with evidence when domain changes do not apply. Inspect the exact current Desarrollo code for existing report interfaces, DTOs, services and authorization contracts. Decide whether the independent report center actually requires a new domain model or domain contract at this stage. The certified preflight says existing specialized contracts should be reused and a new facade/interface must not be invented without a concrete cross-domain use case. Write only docs/N5.1_REPORTES_DOMAIN_CONTRACT_DECISION.md. If no new domain contract is materially required, document N/A with exact file/symbol evidence, invariants that remain owned by existing services, and acceptance constraints for N5.1.C/D. If a new domain contract is genuinely required, do NOT implement it in this task: document the concrete blocker, exact proposed seam and why existing contracts cannot express the approved use case so VAEP can subdivide safely. Do not modify product code, DB, RBAC grants, control-plane, manifests, secrets, main or production. Deliver a nonempty patch against primaryBaseHead; record TESTS_EXECUTED honestly (including inspection-only/not-run reasons) and two genuinely separate SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 checks. Never claim CI, integration or LISTO_REAL not performed."
+      }
+    ],
     "JULES_B": [],
     "JULES_C": [],
     "JULES_D": []
