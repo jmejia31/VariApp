@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "CLOSED",
+  "newDispatchAdmission": "OPEN",
   "allowExistingActiveSessions": true,
-  "reason": "INCIDENT_REVIEW_FIRST_DEBT: N4.11.G terminal results exist with PENDING_REVIEW_FIRST, and autorefill published replacement/R2 work before REVIEW_FIRST completed. Fail-closed against additional manifests while VAEP drains review/QA takeover and reconciles lane ownership.",
-  "updatedAtUtc": "2026-09-08T10:59:30Z"
+  "reason": "REVIEW_FIRST_DEBT_DRAINED: N4.11.G terminal Jules incidents are closed with ownership revoked where applicable; ATTEMPT2 no-patch paths were converted to QA_TAKEOVER and the subsequent CentroCosto accessibility/service/permission gaps were corrected on Desarrollo through 6ef9ac0b63ee2792fa1aa97ad01248a83ecb5bf8. No open N4.11.G issues remain. Admission reopened for CURRENT_PARENT N4.11.G only; PARENT_CLOSE_FIRST, dedupe, CURRENT+NEXT_SAFE, no-R3 and HEAD_FREEZE_CAUSAL remain mandatory.",
+  "updatedAtUtc": "2026-09-08T13:26:46Z"
 }
