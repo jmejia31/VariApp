@@ -132,12 +132,44 @@ filter_completed_facets() {
   echo "AUTOREFILL_UNIQUE_GUARD removed=$((before-after)) parent=$parent registry=$UNIQUE_REGISTRY"
 }
 
+# REVIEW_FIRST debt is never a content retry. Fail closed before the core sees
+# a candidate whose attempt-1 terminal result is explicitly classified as an
+# evidence gap. The worker output uses backticked `1/2`; match structurally
+# instead of relying on the old literal "attempt: 1/" substring. This guard is
+# deliberately duplicated outside the recovery core so stale or malformed
+# recovery classification cannot manufacture R2 work from review-only debt.
+filter_evidence_gap_review_debt() {
+  [[ -f "$CATALOG" ]] || return 0
+  local issues tmp before after blocked
+  issues="$(api "repos/$GITHUB_REPOSITORY/issues?state=all&per_page=100&sort=updated&direction=desc" 2>/dev/null || printf '[]')"
+  blocked="$(jq -r '
+    .[]?
+    | (.body // "") as $b
+    | select($b | contains("Terminal contract classification: `EVIDENCE_GAP_REVIEW_REQUIRED`"))
+    | select($b | test("(?m)^- Task attempt: `1/[0-9]+`$|attempt: `?1/[0-9]+`?"))
+    | ($b | split("\n")[]? | select(startswith("- Dispatch: `")) | sub("^- Dispatch: `"; "") | sub("`.*$"; ""))
+  ' <<<"$issues" | sort -u)"
+  [[ -n "$blocked" ]] || return 0
+  before="$(jq '[.lanes[][]? | select(.dispatchEligible != false)] | length' "$CATALOG")"
+  tmp="$(mktemp)"
+  jq --arg blocked "$blocked" '
+    ($blocked | split("\n") | map(select(length > 0))) as $ids
+    | .lanes |= with_entries(.value |= map(if (.dispatchId as $d | $ids | index($d)) then .dispatchEligible=false else . end))
+  ' "$CATALOG" > "$tmp"
+  mv "$tmp" "$CATALOG"
+  after="$(jq '[.lanes[][]? | select(.dispatchEligible != false)] | length' "$CATALOG")"
+  echo "AUTOREFILL_REVIEW_DEBT_GUARD blocked=$((before-after)) action=NO_R2_REVIEW_OR_QA"
+}
+
 filter_dependency_safe_parent
 filter_completed_facets
+filter_evidence_gap_review_debt
 bash .github/scripts/vaep-jules-catalog-floor.sh
 # catalog-floor may publish a refreshed remote catalog; the current checkout is
 # intentionally not mutated by that commit. Re-apply guards before core
-# selection so this run cannot reserve a future-parent or completed facet.
+# selection so this run cannot reserve a future-parent, completed facet or
+# REVIEW_FIRST-only debt.
 filter_dependency_safe_parent
 filter_completed_facets
+filter_evidence_gap_review_debt
 exec bash .github/scripts/vaep-jules-autorefill-core.sh
