@@ -15,6 +15,7 @@ def resolve(question, task_id, scope, root="."):
     evidence = []
     for candidate in dict.fromkeys(candidates):
         hits = []
+        lookup = candidate.lstrip("/")
         for path in base.rglob("*"):
             if not path.is_file() or ".git" in path.parts or "node_modules" in path.parts:
                 continue
@@ -22,7 +23,7 @@ def resolve(question, task_id, scope, root="."):
                 content = path.read_text(encoding="utf-8", errors="ignore")
             except OSError:
                 continue
-            if candidate in content:
+            if candidate in content or lookup in content:
                 hits.append(str(path).replace("\\", "/"))
         if hits:
             evidence.append((candidate, sorted(hits)[:5]))
