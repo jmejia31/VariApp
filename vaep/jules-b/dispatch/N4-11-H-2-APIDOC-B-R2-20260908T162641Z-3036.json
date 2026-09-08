@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-11-H-2-APIDOC-B-R2-20260908T162641Z-3036",
+  "taskId": "N4.11.H.2.API_DOCUMENTATION",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 2,
+  "fileScopeHint": "docs/N4.11_CENTROS_COSTO_API.md",
+  "prompt": "After N4.11.G LISTO_REAL, document verified CentroCosto API contract; Desarrollo only; two self-reviews.\n\nR2 RCA: JULES_LANE_BUDGET_EXCEEDED attempt=1. Re-run the same material scope from the current Desarrollo checkout; do not expand scope, touch control-plane files, or claim integration.",
+  "primaryBaseHead": "122c00e6cf9aff39dee6067c71d18d1628f5e21e"
+}
