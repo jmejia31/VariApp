@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-11-H-2-APIDOC-B",
+  "taskId": "N4.11.H.2.API_DOCUMENTATION",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/N4.11_CENTROS_COSTO_API.md",
+  "prompt": "After N4.11.G LISTO_REAL, document verified CentroCosto API contract; Desarrollo only; two self-reviews.",
+  "primaryBaseHead": "b4a39b1099c7f2ad3c288caf0794cd12647fb715"
+}
