@@ -2,6 +2,7 @@ import { FormBuilder } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
+import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
 import { TipoCentroCosto } from '../../core/models/centro-costo.model';
 import { CentroCostoService } from '../../services/centro-costo.service';
 import { CentrosCostoComponent } from './centros-costo.component';
@@ -15,6 +16,7 @@ describe('N4.11.E CentrosCostoComponent deterministic states', () => {
     delete: vi.fn()
   };
   const snack = { open: vi.fn() };
+  const permisosRuntime = { puede: vi.fn(() => true) };
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -22,7 +24,8 @@ describe('N4.11.E CentrosCostoComponent deterministic states', () => {
       providers: [
         FormBuilder,
         { provide: CentroCostoService, useValue: service },
-        { provide: MatSnackBar, useValue: snack }
+        { provide: MatSnackBar, useValue: snack },
+        { provide: PermisosRuntimeService, useValue: permisosRuntime }
       ]
     });
   });
@@ -55,6 +58,7 @@ describe('N4.11.E CentrosCostoComponent deterministic states', () => {
 
   it('rejects Sucursal submissions without a sucursalId before calling the API', () => {
     const component = createComponent();
+    component.puedeCrear.set(true);
     component.nuevo();
     component.form.patchValue({
       codigo: 'CC-01',
