@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "OPEN",
+  "newDispatchAdmission": "CLOSED",
   "allowExistingActiveSessions": true,
-  "reason": "WATCHDOG_RECONCILED: no live GitHub Jules run and all current-parent remote sessions terminal; parent=N4.11.H; prior=WATCHDOG :36 containment: JULES_A/B/C CURRENT runs exceeded the 1080s lane budget while still remotely in_progress; no supported remote stop operation is exposed by the connected controller. Ownership is revoked locally, late auto-integration is denied, and no equivalent recovery/R2/R3 may be dispatched until each remote run is terminal and REVIEW_FIRST/QA_TAKEOVER resolves it. CURRENT_PARENT remains N4.11.H.",
-  "updatedAtUtc": "2026-09-08T17:25:49Z"
+  "reason": "REVIEW_FIRST_DEBT_FAIL_CLOSED: CURRENT_PARENT=N4.11.H has correlated terminal ATTEMPT2 results requiring mandatory VAEP review/takeover before replacement work. Issue #3086 N4.11.H.12.CERTIFICATION_CHECKLIST is COMPLETED + patchPresent=true + READY_FOR_VAEP + PENDING_REVIEW_FIRST (workflowRunId=34251963116, session=sessions/4370637438388084713). Issue #3085 N4.11.H.2.API_DOCUMENTATION is ATTEMPT2 + patchPresent=true + PENDING_REVIEW_FIRST with controllerHandoff=QA_TAKEOVER_REQUIRED. A new N4.11.H.9 manifest was published after this terminal debt existed; admission is therefore closed immediately to prevent further replacement/third work until REVIEW_FIRST/QA_TAKEOVER reconciles ownership. No R3 authorized; PARENT_CLOSE_FIRST remains mandatory.",
+  "updatedAtUtc": "2026-09-08T17:29:55Z"
 }
