@@ -53,6 +53,9 @@ jobs:
           grep -q "vaep/evidence/\*" .github/scripts/vaep-jules-autorefill-core.sh
           grep -q "vaep/evidence/\*" .github/scripts/vaep-parent-close.sh
           grep -q "MASTER_TIMEOUT_HANDOFF" .github/scripts/vaep-jules-master.sh
+          grep -q "desarrollo-ci.yml/runs?branch" .github/scripts/vaep-parent-close.sh
+          grep -q "catalogos-aceptacion.yml/runs?branch" .github/scripts/vaep-parent-close.sh
+          grep -q "migration-recovery-desarrollo.yml/runs?branch" .github/scripts/vaep-parent-close.sh
       - name: Validate recovery exact-manifest contract
         run: |
           for wf in .github/workflows/vaep-jules-{a,b,c,d}-recovery.yml; do

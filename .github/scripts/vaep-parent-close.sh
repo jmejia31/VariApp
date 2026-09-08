@@ -77,13 +77,25 @@ latest_valid_fragment() {
 }
 
 critical_gates_ok() {
-  local functional="$1" runs
-  runs="$(api "repos/$GITHUB_REPOSITORY/actions/runs?branch=$BRANCH&per_page=100")"
-  jq -e --arg sha "$functional" '
-    ([.workflow_runs[]? | select(.head_sha == $sha) | select(.name | test("Desarrollo.*Compil"; "i"))] | any(.[]; .conclusion == "success")) and
-    ([.workflow_runs[]? | select(.head_sha == $sha) | select(.name | test("Desarrollo.*acept"; "i"))] | any(.[]; .conclusion == "success")) and
-    ([.workflow_runs[]? | select(.head_sha == $sha) | select(.status == "queued" or .status == "in_progress") | select(.name | test("Desarrollo.*(Compil|acept|recuper|migration)"; "i"))] | length == 0)
-  ' <<<"$runs" >/dev/null
+  local functional="$1" build acceptance recovery
+  # The repository-wide Actions listing is capped at the newest 100 runs and
+  # can omit an otherwise valid causal gate. Query each canonical workflow by
+  # exact functional HEAD instead of relying on that truncated aggregate.
+  build="$(api "repos/$GITHUB_REPOSITORY/actions/workflows/desarrollo-ci.yml/runs?branch=$BRANCH&head_sha=$functional&per_page=10")"
+  acceptance="$(api "repos/$GITHUB_REPOSITORY/actions/workflows/catalogos-aceptacion.yml/runs?branch=$BRANCH&head_sha=$functional&per_page=10")"
+  recovery="$(api "repos/$GITHUB_REPOSITORY/actions/workflows/migration-recovery-desarrollo.yml/runs?branch=$BRANCH&head_sha=$functional&per_page=10")"
+  jq -e '
+    ([.workflow_runs[]? | select(.conclusion == "success")] | length > 0) and
+    ([.workflow_runs[]? | select(.status == "queued" or .status == "in_progress" or .status == "pending")] | length == 0)
+  ' <<<"$build" >/dev/null &&
+    jq -e '
+      ([.workflow_runs[]? | select(.conclusion == "success")] | length > 0) and
+      ([.workflow_runs[]? | select(.status == "queued" or .status == "in_progress" or .status == "pending")] | length == 0)
+    ' <<<"$acceptance" >/dev/null &&
+    jq -e '
+      ([.workflow_runs[]? | select(.conclusion == "success")] | length > 0) and
+      ([.workflow_runs[]? | select(.status == "queued" or .status == "in_progress" or .status == "pending")] | length == 0)
+    ' <<<"$recovery" >/dev/null
 }
 
 live_jules_runs() {
