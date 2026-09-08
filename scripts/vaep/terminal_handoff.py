@@ -89,8 +89,10 @@ def pending_items(issues, manifests, parent, worker, integrated):
 def audit(worker, output):
     from jules_integration_metrics import inspect_commit
     repo = os.environ["GITHUB_REPOSITORY"]
+    # Terminal result Issues can be closed administratively before REVIEW_FIRST.
+    # Query all states so closure never erases an unresolved handoff.
     raw = subprocess.check_output(["gh", "api", "--paginate", "--slurp",
-        f"repos/{repo}/issues?state=open&per_page=100"], text=True, encoding="utf-8")
+        f"repos/{repo}/issues?state=all&per_page=100"], text=True, encoding="utf-8")
     issues = [issue for page in json.loads(raw) for issue in page]
     catalog = json.loads(Path("vaep/control/jules-autorefill-catalog.json").read_text(encoding="utf-8"))
     manifests = {}

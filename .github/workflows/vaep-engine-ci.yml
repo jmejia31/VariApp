@@ -115,6 +115,7 @@ jobs:
           grep -q 'REVIEW_EXECUTOR_NOT_CONFIGURED' scripts/vaep/terminal_handoff.py
           grep -q 'QA_TAKEOVER_REQUIRED' scripts/vaep/terminal_handoff.py
           grep -q 'state=all' .github/scripts/vaep-checkpoint.sh
+          grep -q 'state=all' scripts/vaep/terminal_handoff.py
       - name: Validate operational KPI evaluator
         run: node scripts/vaep/metrics.mjs --self-test
       - name: Validate Jules integration receipt contract
