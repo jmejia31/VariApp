@@ -58,6 +58,8 @@ jobs:
           grep -q "desarrollo-ci.yml/runs?branch" .github/scripts/vaep-parent-close.sh
           grep -q "catalogos-aceptacion.yml/runs?branch" .github/scripts/vaep-parent-close.sh
           grep -q "migration-recovery-desarrollo.yml/runs?branch" .github/scripts/vaep-parent-close.sh
+          grep -q "migration_gate_applicable" .github/scripts/vaep-parent-close.sh
+          grep -q "VAEP_CLOSE_MIGRATION_GATE=NOT_APPLICABLE" .github/scripts/vaep-parent-close.sh
           grep -q "JULES_CONTENT_FAILED_PATCH_ABSENT" .github/scripts/vaep-jules-autorefill-core.sh
           grep -q "QUARANTINED_REMOTE_ACTIVE_NO_DUPLICATE" .github/scripts/vaep-jules-autorefill-core.sh
           grep -q "REMOTE_SESSION_STATE_UNAVAILABLE" .github/scripts/vaep-jules-autorefill-core.sh
@@ -112,6 +114,7 @@ jobs:
           grep -q 'terminal_handoff.py --audit' .github/workflows/vaep-checkpoints.yml
           grep -q 'REVIEW_EXECUTOR_NOT_CONFIGURED' scripts/vaep/terminal_handoff.py
           grep -q 'QA_TAKEOVER_REQUIRED' scripts/vaep/terminal_handoff.py
+          grep -q 'state=all' .github/scripts/vaep-checkpoint.sh
       - name: Validate operational KPI evaluator
         run: node scripts/vaep/metrics.mjs --self-test
       - name: Validate Jules integration receipt contract

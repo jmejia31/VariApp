@@ -88,11 +88,12 @@ run_lane_refill() {
 }
 
 emit_review_observation() {
-  local issues ready terminal_patch terminal_blocked
-  issues="$(api "repos/$GITHUB_REPOSITORY/issues?state=open&per_page=100&sort=updated&direction=desc")"
-  ready="$(jq '[.[]? | (.body // "") | select(contains("READY_FOR_VAEP"))] | length' <<<"$issues")"
-  terminal_patch="$(jq '[.[]? | (.body // "") | select(contains("Terminal state: `COMPLETED`")) | select(contains("Patch present: `true`"))] | length' <<<"$issues")"
-  terminal_blocked="$(jq '[.[]? | (.body // "") | select(contains("QA_CLASSIFICATION_REQUIRED_NO_REFILL") or contains("READY_FOR_VAEP_REVIEW_FIRST_REQUIRED_NO_REFILL"))] | length' <<<"$issues")"
+  local issues current_parent ready terminal_patch terminal_blocked
+  issues="$(api "repos/$GITHUB_REPOSITORY/issues?state=all&per_page=100&sort=updated&direction=desc")"
+  current_parent="$(jq -r '.currentParent // empty' "$CATALOG")"
+  ready="$(jq --arg parent "$current_parent" '[.[]? | (.body // "") as $b | select($b | contains("READY_FOR_VAEP")) | select($b | test("- Task: `" + $parent + "\\."))] | length' <<<"$issues")"
+  terminal_patch="$(jq --arg parent "$current_parent" '[.[]? | (.body // "") as $b | select($b | contains("Terminal state: `COMPLETED`")) | select($b | contains("Patch present: `true`")) | select($b | test("- Task: `" + $parent + "\\."))] | length' <<<"$issues")"
+  terminal_blocked="$(jq --arg parent "$current_parent" '[.[]? | (.body // "") as $b | select($b | test("QA_CLASSIFICATION_REQUIRED_NO_REFILL|READY_FOR_VAEP_REVIEW_FIRST_REQUIRED_NO_REFILL")) | select($b | test("- Task: `" + $parent + "\\."))] | length' <<<"$issues")"
   echo "VAEP_CHECKPOINT_REVIEW_BACKLOG=$ready"
   echo "VAEP_CHECKPOINT_TERMINAL_PATCH_RESULTS=$terminal_patch"
   echo "VAEP_CHECKPOINT_TERMINAL_BLOCKED_RESULTS=$terminal_blocked"

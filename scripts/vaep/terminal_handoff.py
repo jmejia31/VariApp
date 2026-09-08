@@ -48,7 +48,10 @@ def field(body, name):
 def pending_items(issues, manifests, parent, worker, integrated):
     pending = {}
     for issue in issues:
-        if issue.get("state") != "open" or issue.get("user", {}).get("login") != "github-actions[bot]":
+        # A terminal Jules issue may be closed administratively before VAEP
+        # review. Closing the Issue does not satisfy REVIEW_FIRST and must not
+        # erase the handoff from the durable review queue.
+        if issue.get("user", {}).get("login") != "github-actions[bot]":
             continue
         body = issue.get("body") or ""
         dispatch = field(body, "Dispatch")

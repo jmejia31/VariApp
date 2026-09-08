@@ -91,11 +91,28 @@ critical_gates_ok() {
     jq -e '
       ([.workflow_runs[]? | select(.conclusion == "success")] | length > 0) and
       ([.workflow_runs[]? | select(.status == "queued" or .status == "in_progress" or .status == "pending")] | length == 0)
-    ' <<<"$acceptance" >/dev/null &&
+  ' <<<"$acceptance" >/dev/null || return 1
+
+  if migration_gate_applicable "$functional"; then
     jq -e '
       ([.workflow_runs[]? | select(.conclusion == "success")] | length > 0) and
       ([.workflow_runs[]? | select(.status == "queued" or .status == "in_progress" or .status == "pending")] | length == 0)
-    ' <<<"$recovery" >/dev/null
+    ' <<<"$recovery" >/dev/null || return 1
+    echo "VAEP_CLOSE_MIGRATION_GATE=REQUIRED functional_head=$functional"
+  else
+    echo "VAEP_CLOSE_MIGRATION_GATE=NOT_APPLICABLE functional_head=$functional"
+  fi
+}
+
+migration_gate_applicable() {
+  local functional="$1" commit
+  commit="$(api "repos/$GITHUB_REPOSITORY/commits/$functional")"
+  jq -e '
+    any(.files[]?.filename;
+      startswith("backend/src/Infrastructure/Migrations/") or
+      . == "backend/src/API/Program.cs" or
+      . == ".github/workflows/migration-recovery-desarrollo.yml")
+  ' <<<"$commit" >/dev/null
 }
 
 live_jules_runs() {

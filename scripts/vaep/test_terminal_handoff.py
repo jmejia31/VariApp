@@ -28,7 +28,7 @@ class TerminalHandoffTests(unittest.TestCase):
         self.assertEqual(run()[0]["action"], "QA_TAKEOVER_REQUIRED")
         self.assertEqual(run(integrated={"D-R2"}), [])
         self.assertEqual(run(parent="N4.11.F"), [])
-        self.assertEqual(run(dict(issue, state="closed")), [])
+        self.assertEqual(run(dict(issue, state="closed"))[0]["action"], "QA_TAKEOVER_REQUIRED")
         self.assertEqual(run(dict(issue, user={"login": "unknown"})), [])
         self.assertEqual(run(dict(issue, body=issue["body"].replace("`2/2`", "`1/2`"))), [])
 
@@ -44,6 +44,27 @@ class TerminalHandoffTests(unittest.TestCase):
         issue = {"number": 12, "state": "open", "user": {"login": "github-actions[bot]"},
                  "body": "- Dispatch: `D-R2`\n- Task: `N4.11.E.3.UX`\n- Worker: `JULES_C`"}
         self.assertEqual(pending_items([issue], {}, "N4.11.E", "JULES_C", set()), [])
+
+    def test_closed_terminal_issue_remains_review_debt_until_receipt(self):
+        manifest = {"dispatchId": "D", "taskId": "N4.11.G.2.SERVICE", "workerId": "JULES_B", "taskAttempt": 2}
+        issue = {
+            "number": 13,
+            "state": "closed",
+            "user": {"login": "github-actions[bot]"},
+            "body": "\n".join([
+                "- Dispatch: `D`",
+                "- Task: `N4.11.G.2.SERVICE`",
+                "- Worker: `JULES_B`",
+                "- Task attempt: `2/2`",
+                "- Jules session: `sessions/2`",
+                "- Terminal state: `COMPLETED`",
+                "- Ready for VAEP: `false`",
+                "- Patch present: `true`",
+            ]),
+        }
+        pending = pending_items([issue], {"D": manifest}, "N4.11.G", "JULES_B", set())
+        self.assertEqual(pending[0]["action"], "QA_TAKEOVER_REQUIRED")
+        self.assertEqual(pending_items([issue], {"D": manifest}, "N4.11.G", "JULES_B", {"D"}), [])
 
 
 if __name__ == "__main__":
