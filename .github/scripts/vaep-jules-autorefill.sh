@@ -5,21 +5,19 @@ readonly UNIQUE_REGISTRY="vaep/control/jules-completed-semantic-facets.json"
 readonly CATALOG="vaep/control/jules-autorefill-catalog.json"
 readonly BRANCH="Desarrollo"
 
-post_terminal=0
 if [[ "${1:-}" == "--post-terminal" ]]; then
-  post_terminal=1
   : "${RUNNER_TEMP:?RUNNER_TEMP required for post-terminal refill}"
   state_file="$RUNNER_TEMP/vaep-jules-runtime-state.json"
   [[ -f "$state_file" ]] || { echo "AUTOREFILL_POST_TERMINAL_REJECT reason=runtime_state_missing" >&2; exit 80; }
   phase="$(jq -r '.phase // empty' "$state_file")"
   case "$phase" in
     TERMINAL_*|STALL_NO_PROGRESS|LANE_BUDGET_EXCEEDED)
-      # MASTER is REVIEW_FIRST-gated: once CURRENT terminalizes, do not publish
-      # or promote replacement work until VAEP has reviewed/classified that
-      # terminal result. NEXT_SAFE may remain reserved, but post-terminal
-      # autorefill must stop here.
-      echo "AUTOREFILL_TERMINAL_HANDOFF phase=$phase action=BLOCK_PENDING_REVIEW_FIRST" >&2
-      exit 0
+      # REVIEW_FIRST owns the delivered scope, not the lane. The MASTER
+      # requires review/QA to run in parallel while the terminal workflow
+      # releases ownership and replenishes CURRENT + NEXT_SAFE material.
+      # The core still enforces admission, active-run depth, immutable
+      # manifests, semantic dedupe and the R2/R3 limits.
+      echo "AUTOREFILL_TERMINAL_HANDOFF phase=$phase action=CONTINUE_LANE_REFILL_REVIEW_FIRST_IN_PARALLEL" >&2
       ;;
     *)
       echo "AUTOREFILL_POST_TERMINAL_REJECT phase=${phase:-MISSING} reason=session_not_terminal" >&2

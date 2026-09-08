@@ -72,9 +72,35 @@ jobs:
 
       - name: Preserve terminal handoff evidence
         if: always()
+        id: terminal_handoff_artifact
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: terminal-handoff-${{ matrix.worker }}
           path: ${{ runner.temp }}/terminal-handoff.json
           if-no-files-found: error
           retention-days: 14
+
+      - name: Retry terminal handoff evidence upload after transient artifact failure
+        if: always() && steps.terminal_handoff_artifact.outcome == 'failure'
+        id: terminal_handoff_artifact_retry
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: terminal-handoff-${{ matrix.worker }}-retry-${{ github.run_id }}
+          path: ${{ runner.temp }}/terminal-handoff.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Verify terminal handoff evidence was preserved
+        if: always()
+        shell: bash
+        env:
+          FIRST_UPLOAD: ${{ steps.terminal_handoff_artifact.outcome }}
+          RETRY_UPLOAD: ${{ steps.terminal_handoff_artifact_retry.outcome }}
+        run: |
+          set -euo pipefail
+          if [[ "$FIRST_UPLOAD" != "success" && "$RETRY_UPLOAD" != "success" ]]; then
+            echo "Neither terminal handoff artifact upload succeeded." >&2
+            exit 1
+          fi

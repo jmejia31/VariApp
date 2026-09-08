@@ -37,12 +37,12 @@ jobs:
         run: bash .github/scripts/vaep-jules-worker.sh --runtime-preflight
       - name: Run VAEP/Jules MASTER runtime self-test
         run: bash .github/scripts/vaep-jules-master.sh --self-test
-      - name: Validate post-terminal refill preserves REVIEW_FIRST fail-closed
+      - name: Validate post-terminal refill preserves REVIEW_FIRST and lane continuity
         run: |
           grep -q "AUTOREFILL_TERMINAL_HANDOFF" .github/scripts/vaep-jules-autorefill.sh
-          grep -q "BLOCK_PENDING_REVIEW_FIRST" .github/scripts/vaep-jules-autorefill.sh
+          grep -q "CONTINUE_LANE_REFILL_REVIEW_FIRST_IN_PARALLEL" .github/scripts/vaep-jules-autorefill.sh
+          ! grep -q "action=BLOCK_PENDING_REVIEW_FIRST" .github/scripts/vaep-jules-autorefill.sh
           grep -q "reviewResult:\"PENDING_REVIEW_FIRST\"" .github/scripts/vaep-jules-worker.sh
-          ! grep -q "CONTINUE_TO_CORE_REVIEW_FIRST_IN_PARALLEL" .github/scripts/vaep-jules-autorefill.sh
       - name: Validate control-plane base equivalence guard
         run: |
           grep -q "CONTROL_PLANE_BASE_EQUIVALENCE" docs/VAEP_AUTHORITY.md
@@ -82,8 +82,8 @@ jobs:
         run: |
           grep -q "READY_FOR_VAEP_REVIEW_FIRST_REQUIRED_NO_REFILL" .github/scripts/vaep-jules-worker.sh
           ! grep -q "review_first_debt_exists" .github/scripts/vaep-jules-autorefill.sh
-          grep -q "BLOCK_PENDING_REVIEW_FIRST" .github/scripts/vaep-jules-autorefill.sh
-          ! grep -q "CONTINUE_TO_CORE_REVIEW_FIRST_IN_PARALLEL" .github/scripts/vaep-jules-autorefill.sh
+          grep -q "CONTINUE_LANE_REFILL_REVIEW_FIRST_IN_PARALLEL" .github/scripts/vaep-jules-autorefill.sh
+          ! grep -q "action=BLOCK_PENDING_REVIEW_FIRST" .github/scripts/vaep-jules-autorefill.sh
           grep -q "PREARM_BEFORE_TERMINAL" docs/VAEP_AUTHORITY.md
           grep -q "other_live_lane_run_exists" .github/scripts/vaep-jules-autorefill-core.sh
           grep -q "VAEP_LANE_RUN_ID" .github/workflows/vaep-jules-secondary.yml
@@ -101,6 +101,9 @@ jobs:
           grep -q "JULES_C_API_KEY:" .github/workflows/vaep-checkpoints.yml
           grep -q "JULES_D_API_KEY:" .github/workflows/vaep-checkpoints.yml
           grep -q "VAEP_CHECKPOINTS=:00,:12,:24,:36,:48" docs/VAEP_AUTHORITY.md
+          grep -q "reconcile_watchdog_admission" .github/scripts/vaep-checkpoint.sh
+          grep -q "remote_watchdog_sessions_terminal" .github/scripts/vaep-checkpoint.sh
+          grep -q "WATCHDOG_RECONCILED" .github/scripts/vaep-checkpoint.sh
           bash .github/scripts/vaep-checkpoint.sh --self-test
           bash .github/scripts/vaep-parent-close.sh --self-test
       - name: Validate Jules synthetic dispatch matrix
