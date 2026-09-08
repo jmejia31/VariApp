@@ -330,7 +330,7 @@ run_lane_refill() {
   printf '%s\n' "$output"
   case "$rc" in
     0) echo "VAEP_CHECKPOINT_LANE_RESULT worker=$worker result=RESERVED_OR_ALREADY_SAFE" ;;
-    78) echo "VAEP_CHECKPOINT_LANE_RESULT worker=$worker result=NO_SAFE_NEXT" ;;
+    78) echo "VAEP_CHECKPOINT_LANE_RESULT worker=$worker result=UNIQUE_WORK_EXHAUSTED" ;;
     79) echo "VAEP_CHECKPOINT_LANE_RESULT worker=$worker result=WAIT_DISPATCH_ADMISSION" ;;
     80|81) echo "VAEP_CHECKPOINT_LANE_RESULT worker=$worker result=WAIT_RUNTIME_STATE rc=$rc" ;;
     82) echo "VAEP_CHECKPOINT_LANE_RESULT worker=$worker result=WAIT_CAUSAL_CI" ;;

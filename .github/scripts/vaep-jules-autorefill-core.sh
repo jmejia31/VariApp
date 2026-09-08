@@ -496,7 +496,8 @@ main() {
     if entry="$(recoverable_attempt1_entry)"; then
       echo "AUTOREFILL_R2_RCA_CONFIRMED worker=$WORKER_ID task=$(jq -r '.taskId' <<<"$entry") attempt=2"
     else
-      echo "AUTOREFILL_NO_SAFE_NEXT worker=$WORKER_ID catalog_exhausted=true current_parent=$CURRENT_PARENT" >&2
+      echo "AUTOREFILL_UNIQUE_WORK_EXHAUSTED worker=$WORKER_ID current_parent=$CURRENT_PARENT action=CLOSURE_OR_NEW_ROADMAP" >&2
+      echo "AUTOREFILL_NO_SAFE_NEXT worker=$WORKER_ID catalog_exhausted=true current_parent=$CURRENT_PARENT reason=UNIQUE_WORK_EXHAUSTED" >&2
       exit 78
     fi
   fi

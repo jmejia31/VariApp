@@ -121,6 +121,10 @@ jobs:
           grep -q 'docs/N4.11_CENTROS_COSTO_\*\.md' .github/scripts/vaep-parent-close.sh
           grep -q "paths:" .github/workflows/vaep-engine-ci.yml
           grep -q "docs/VAEP_AUTHORITY.md" .github/workflows/vaep-engine-ci.yml
+      - name: Validate unique-work exhaustion is explicit
+        run: |
+          grep -q 'AUTOREFILL_UNIQUE_WORK_EXHAUSTED' .github/scripts/vaep-jules-autorefill-core.sh
+          grep -q 'result=UNIQUE_WORK_EXHAUSTED' .github/scripts/vaep-checkpoint.sh
       - name: Validate Jules synthetic dispatch matrix
         run: python3 scripts/vaep/jules_runtime_contract.py --self-test
       - name: Validate evidence-gap handoff does not create R2
