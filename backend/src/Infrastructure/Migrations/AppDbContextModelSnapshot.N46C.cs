@@ -106,26 +106,26 @@ namespace InventoryApp.Infrastructure.Migrations
                 b.Navigation("Subcuentas");
             });
 
-            modelBuilder.Entity("InventoryApp.Domain.Entities.Contabilidad.CentroCosto", b =>
+            modelBuilder.Entity<CentroCosto>(b =>
             {
-                b.Property<int>("Id")
+                b.Property(x => x.Id)
                     .ValueGeneratedOnAdd()
                     .HasColumnType("int");
-                MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property(x => x.Id));
 
-                b.Property<bool>("Activo")
+                b.Property(x => x.Activo)
                     .ValueGeneratedOnAdd()
                     .HasColumnType("tinyint(1)")
                     .HasDefaultValue(true);
 
-                b.Property<string>("ActualizadoPorNombreUsuario")
+                b.Property(x => x.ActualizadoPorNombreUsuario)
                     .HasMaxLength(150)
                     .HasColumnType("varchar(150)");
 
-                b.Property<int?>("ActualizadoPorUsuarioId")
+                b.Property(x => x.ActualizadoPorUsuarioId)
                     .HasColumnType("int");
 
-                b.Property<string>("Codigo")
+                b.Property(x => x.Codigo)
                     .IsRequired()
                     .HasMaxLength(40)
                     .HasColumnType("varchar(40)");
@@ -136,55 +136,55 @@ namespace InventoryApp.Infrastructure.Migrations
                     .HasColumnType("varchar(40)")
                     .HasComputedColumnSql("IF(Eliminado = 0, UPPER(TRIM(Codigo)), NULL)", true);
 
-                b.Property<string>("CreadoPorNombreUsuario")
+                b.Property(x => x.CreadoPorNombreUsuario)
                     .HasMaxLength(150)
                     .HasColumnType("varchar(150)");
 
-                b.Property<int?>("CreadoPorUsuarioId")
+                b.Property(x => x.CreadoPorUsuarioId)
                     .HasColumnType("int");
 
-                b.Property<string>("Descripcion")
+                b.Property(x => x.Descripcion)
                     .HasMaxLength(500)
                     .HasColumnType("varchar(500)");
 
-                b.Property<bool>("Eliminado")
+                b.Property(x => x.Eliminado)
                     .ValueGeneratedOnAdd()
                     .HasColumnType("tinyint(1)")
                     .HasDefaultValue(false);
 
-                b.Property<int?>("EliminadoPorUsuarioId")
+                b.Property(x => x.EliminadoPorUsuarioId)
                     .HasColumnType("int");
 
-                b.Property<DateTime>("FechaActualizacion")
+                b.Property(x => x.FechaActualizacion)
                     .HasColumnType("datetime(6)");
 
-                b.Property<DateTime>("FechaCreacion")
+                b.Property(x => x.FechaCreacion)
                     .HasColumnType("datetime(6)");
 
-                b.Property<DateTime?>("FechaEliminacion")
+                b.Property(x => x.FechaEliminacion)
                     .HasColumnType("datetime(6)");
 
-                b.Property<string>("Nombre")
+                b.Property(x => x.Nombre)
                     .IsRequired()
                     .HasMaxLength(150)
                     .HasColumnType("varchar(150)");
 
-                b.Property<int?>("SucursalId")
+                b.Property(x => x.SucursalId)
                     .HasColumnType("int");
 
-                b.Property<int>("Tipo")
+                b.Property(x => x.Tipo)
                     .HasColumnType("int");
 
-                b.HasKey("Id");
+                b.HasKey(x => x.Id);
 
                 b.HasIndex("CodigoActivoUnico")
                     .IsUnique()
                     .HasDatabaseName("UX_CentrosCosto_Codigo_Activo");
 
-                b.HasIndex("SucursalId")
+                b.HasIndex(x => x.SucursalId)
                     .HasDatabaseName("IX_CentrosCosto_SucursalId");
 
-                b.HasIndex("Tipo", "Activo", "Eliminado")
+                b.HasIndex(x => new { x.Tipo, x.Activo, x.Eliminado })
                     .HasDatabaseName("IX_CentrosCosto_Tipo_Estado");
 
                 b.ToTable("CentrosCosto", null, t =>
@@ -192,20 +192,16 @@ namespace InventoryApp.Infrastructure.Migrations
                     t.HasCheckConstraint("CK_CentrosCosto_Tipo", "`Tipo` IN (1, 2, 3, 4)");
                     t.HasCheckConstraint("CK_CentrosCosto_Asociacion", "(`Tipo` = 1 AND `SucursalId` IS NOT NULL) OR (`Tipo` <> 1 AND `SucursalId` IS NULL)");
                 });
-            });
 
-            modelBuilder.Entity("InventoryApp.Domain.Entities.Contabilidad.CentroCosto", b =>
-            {
-                b.HasOne("InventoryApp.Domain.Entities.Sucursal", "Sucursal")
+                b.HasQueryFilter(x => !x.Eliminado);
+
+                b.HasOne(x => x.Sucursal)
                     .WithMany()
-                    .HasForeignKey("SucursalId")
+                    .HasForeignKey(x => x.SucursalId)
                     .OnDelete(DeleteBehavior.Restrict);
 
-                b.Navigation("Sucursal");
+                b.Navigation(x => x.Sucursal);
             });
-
-            modelBuilder.Entity<CentroCosto>()
-                .HasQueryFilter(x => !x.Eliminado);
         }
     }
 }
