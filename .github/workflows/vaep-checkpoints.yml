@@ -13,10 +13,10 @@ on:
   workflow_run:
     workflows:
       - 'VAEP engine lightweight checks'
-    # The engine is the single causal gate for this controller. The functional
-    # workflows remain required checks, but listening to all of them creates
-    # one controller run per successful workflow for the same HEAD. Schedules
-    # continue to reconcile after those workflows finish.
+      - 'Desarrollo - Compilación y pruebas'
+    # Reconcile after the engine or the canonical Desarrollo gate succeeds.
+    # This closes the gap where a causal gate finished after the engine and
+    # the controller otherwise waited for the next scheduled checkpoint.
     types: [completed]
   workflow_dispatch:
     inputs:
@@ -37,7 +37,15 @@ concurrency:
 
 jobs:
   checkpoint:
-    if: github.event_name != 'workflow_run' || (github.event.workflow_run.name == 'VAEP engine lightweight checks' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'Desarrollo')
+    if: >-
+      github.event_name != 'workflow_run' ||
+      (
+        (github.event.workflow_run.name == 'VAEP engine lightweight checks' ||
+         github.event.workflow_run.name == 'Desarrollo - Compilación y pruebas') &&
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.event == 'push' &&
+        github.event.workflow_run.head_branch == 'Desarrollo'
+      )
     name: ${{ matrix.worker }} ${{ inputs.checkpoint || github.event.schedule || ':00' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
