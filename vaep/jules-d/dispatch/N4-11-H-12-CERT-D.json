@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-11-H-12-CERT-D",
+  "taskId": "N4.11.H.12.CERTIFICATION_CHECKLIST",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/N4.11_CENTROS_COSTO_CERT_CHECKLIST.md",
+  "prompt": "After N4.11.G LISTO_REAL, build factual certification checklist without declaring LISTO; Desarrollo only; two self-reviews.",
+  "primaryBaseHead": "7c84b574759f8692ade54e3ebe748df4ee05f0ce"
+}
