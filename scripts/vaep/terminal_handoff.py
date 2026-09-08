@@ -28,8 +28,6 @@ def decision(state, ready, attempt, maximum, session, evidence_gap_only=False):
     if ready and state == "COMPLETED":
         return "READY_FOR_VAEP"
     if evidence_gap_only and state == "COMPLETED":
-        # The patch/base/scope contract passed; only Jules' evidence markers
-        # are missing. This is a review/QA handoff, never a content retry.
         return "QA_TAKEOVER_REQUIRED" if attempt >= maximum else "EVIDENCE_GAP_REVIEW_REQUIRED"
     if attempt >= maximum or "QA_TAKEOVER" in state:
         return "QA_TAKEOVER_REQUIRED"
@@ -68,14 +66,33 @@ def field(body, name):
     return value.split("`")[1] if value.startswith("`") else value.split(";")[0].strip()
 
 
-def accepted_review_items(parent):
-    """Load only explicit, task-correlated QA receipts.
+def _receipt_dispatch(item):
+    dispatch = item.get("dispatchId") or item.get("latestDispatchId")
+    return dispatch if isinstance(dispatch, str) else ""
 
-    A receipt can clear REVIEW_FIRST debt for an evidence-only takeover when
-    it names the exact task and dispatch and states that no Jules patch was
-    integrated.  Merely having a document, a closed Issue, or an authorized
-    reviewer is never enough to clear the queue.
+
+def _receipt_scope(item):
+    evidence_path = item.get("evidencePath")
+    scope = item.get("fileScopeHint") or evidence_path
+    if not isinstance(evidence_path, str) or not isinstance(scope, str):
+        return "", ""
+    return evidence_path, scope
+
+
+def _receipt_integration_not_required(item):
+    """Accept canonical field or the older direct-takeover receipt spelling.
+
+    Compatibility never turns a Jules integration claim into review evidence:
+    the legacy form is accepted only when the item explicitly says the Jules
+    patch was not integrated and QA takeover evidence was accepted.
     """
+    if "integrationRequired" in item:
+        return item.get("integrationRequired") is False
+    return item.get("julesPatchIntegrated") is False
+
+
+def accepted_review_items(parent):
+    """Load only explicit, task-correlated QA receipts."""
     reviewed_dispatches = set()
     reviewed_tasks = set()
     receipts = []
@@ -101,18 +118,16 @@ def accepted_review_items(parent):
                 continue
             if (item.get("review") != "PASS"
                     or item.get("qaTakeoverEvidenceAccepted") is not True
-                    or item.get("integrationRequired") is not False):
+                    or not _receipt_integration_not_required(item)):
                 continue
-            evidence_path = item.get("evidencePath")
-            scope = item.get("fileScopeHint")
-            if (not isinstance(evidence_path, str)
-                    or not isinstance(scope, str)
+            evidence_path, scope = _receipt_scope(item)
+            if (not evidence_path
                     or evidence_path != scope
                     or not Path(scope).is_file()):
                 continue
-            dispatch = item.get("dispatchId")
+            dispatch = _receipt_dispatch(item)
             task = item.get("taskId")
-            if not isinstance(dispatch, str) or not dispatch:
+            if not dispatch:
                 continue
             if not isinstance(task, str) or not task.startswith(parent + "."):
                 continue
@@ -130,9 +145,6 @@ def pending_items(issues, manifests, parent, worker, integrated,
     reviewed_tasks = reviewed_tasks or set()
     pending = {}
     for issue in issues:
-        # A terminal Jules issue may be closed administratively before VAEP
-        # review. Closing the Issue does not satisfy REVIEW_FIRST and must not
-        # erase the handoff from the durable review queue.
         if issue.get("user", {}).get("login") != "github-actions[bot]":
             continue
         body = issue.get("body") or ""
@@ -163,10 +175,10 @@ def pending_items(issues, manifests, parent, worker, integrated,
         if action not in {"READY_FOR_VAEP", "EVIDENCE_GAP_REVIEW_REQUIRED", "QA_TAKEOVER_REQUIRED", "RCA_REQUIRED_BEFORE_R2"}:
             continue
         item = dict(dispatchId=dispatch, taskId=manifest["taskId"], workerId=worker,
-                                 issue=issue["number"], session=session, taskAttempt=attempt,
-                                 action=action, correctionOwner="CHATGPT_VAEP",
-                                 authorizedReviewExecutors=list(REVIEW_EXECUTORS),
-                                 takeoverExecuted=False)
+                    issue=issue["number"], session=session, taskAttempt=attempt,
+                    action=action, correctionOwner="CHATGPT_VAEP",
+                    authorizedReviewExecutors=list(REVIEW_EXECUTORS),
+                    takeoverExecuted=False)
         previous = pending.get(manifest["taskId"])
         if previous is None or (attempt, item["issue"]) > (previous["taskAttempt"], previous["issue"]):
             pending[manifest["taskId"]] = item
@@ -176,8 +188,6 @@ def pending_items(issues, manifests, parent, worker, integrated,
 def audit(worker, output):
     from jules_integration_metrics import inspect_commit
     repo = os.environ["GITHUB_REPOSITORY"]
-    # Terminal result Issues can be closed administratively before REVIEW_FIRST.
-    # Query all states so closure never erases an unresolved handoff.
     raw = subprocess.check_output(["gh", "api", "--paginate", "--slurp",
         f"repos/{repo}/issues?state=all&per_page=100"], text=True, encoding="utf-8")
     issues = [issue for page in json.loads(raw) for issue in page]
@@ -194,14 +204,9 @@ def audit(worker, output):
                 if str(m.get("taskId", "")).startswith(current_parent + "."):
                     malformed_manifests.append(str(path))
                 else:
-                    # Old manifests remain visible for forensic traceability,
-                    # but must not turn every current-parent checkpoint into a
-                    # warning or a false operational failure.
                     historical_malformed_manifests.append(str(path))
                 continue
             manifests[dispatch_id] = m
-    # Only validated receipts resolve integration debt. Open Issues alone are
-    # not a reason to ask for a second review of already integrated work.
     hashes = subprocess.check_output(["git", "log", "--format=%H", "--grep=^VAEP-Dispatch:", "HEAD"], text=True)
     integrated = set()
     for sha in hashes.splitlines():
@@ -223,9 +228,6 @@ def audit(worker, output):
     Path(output).write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(report))
     if items:
-        # Pending review is an expected business state, not a scheduler
-        # failure. Keep it visible and fail-closed: this audit never refills
-        # or integrates work.
         print("::warning::REVIEW_EXECUTOR_NOT_CONFIGURED: terminal work requires VAEP review/QA; see handoff artifact.")
     if malformed_manifests:
         print(f"::warning::MALFORMED_MANIFESTS_IGNORED: {len(malformed_manifests)} manifest(s) without dispatchId.")
