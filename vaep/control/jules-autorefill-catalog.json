@@ -1,24 +1,29 @@
 {
-  "version": 18,
+  "version": 19,
   "authority": "docs/VAEP_AUTHORITY.md",
-  "currentParent": "N5.1.A",
-  "generatedAt": "2026-09-08T21:59:04Z",
-  "regenerationReason": "AUTOMATIC_PARENT_CLOSE__GATE-N4_LISTO_REAL__N5.1.A_CURRENT",
-  "lastClosedParent": "GATE-N4",
+  "currentParent": "N5.1.B",
+  "generatedAt": "2026-09-08T22:29:30Z",
+  "regenerationReason": "QA_TAKEOVER_PARENT_CLOSE__N5.1.A_LISTO_REAL__N5.1.B_CURRENT_UNSCOPED",
+  "lastClosedParent": "N5.1.A",
   "closureReceipts": {
     "N4.11.H": "vaep/evidence/fragments/N4.11.H_LISTO_REAL_20260908T204500Z.json",
-    "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json"
+    "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
+    "N5.1.A": "vaep/evidence/fragments/N5.1.A_LISTO_REAL_20260908T222930Z.json"
   },
   "retiredCatalogs": [
     {
       "commit": "0852a028d2eb6a16e7f352e293f30418cbb9a1b3",
       "path": "vaep/control/jules-autorefill-catalog.json",
       "blob": "2a1662930b6cda3fd41545fc41ef9f72760cedad",
-      "parents": [
-        "N4.11.G",
-        "N4.11.H"
-      ],
+      "parents": ["N4.11.G", "N4.11.H"],
       "reason": "Certified closed; immutable manifests and reviewed evidence retained in Git; no work discarded."
+    },
+    {
+      "commit": "f08544218cd57e8b4420e6595e632a719907d44a",
+      "path": "vaep/control/jules-autorefill-catalog.json",
+      "blob": "5d0f0c8a51236f74d1c4b8c423dfb1664f766e50",
+      "parents": ["N5.1.A"],
+      "reason": "N5.1.A certified LISTO_REAL after REVIEW_FIRST and QA_TAKEOVER; no N5.1.B lane scope fabricated."
     }
   ],
   "policy": {
@@ -36,167 +41,26 @@
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
     "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
-    "sourceRanges": [
-      "COLA!A391:T399",
-      "COLA!A796:T796",
-      "PLAN_MAESTRO!A51:L52"
-    ],
+    "sourceRanges": ["COLA!A391:T399", "COLA!A796:T796", "PLAN_MAESTRO!A51:L52"],
     "note": "Derived dependency order, not lexical ID order or COLA physical row order. Source remains the live Plan/COLA; future scopes require directed preparation.",
     "nodes": [
-      {
-        "id": "N4.11.H",
-        "order": 0,
-        "type": "MICROTAREA",
-        "dependencies": [
-          "N4.11.G"
-        ],
-        "phaseGate": "GATE-N3"
-      },
-      {
-        "id": "GATE-N4",
-        "order": 1,
-        "type": "GATE_FASE",
-        "dependencies": [
-          "N4.1.H",
-          "N4.2.H",
-          "N4.3.H",
-          "N4.4.H",
-          "N4.5.H",
-          "N4.6.H",
-          "N4.7.H",
-          "N4.8.H",
-          "N4.9.H",
-          "N4.10.H",
-          "N4.11.H"
-        ]
-      },
-      {
-        "id": "N5.1.A",
-        "order": 2,
-        "type": "MICROTAREA",
-        "dependencies": [
-          "GATE-N4"
-        ],
-        "phaseGate": "GATE-N4"
-      },
-      {
-        "id": "N5.1.B",
-        "order": 3,
-        "type": "MICROTAREA",
-        "dependencies": [
-          "N5.1.A"
-        ],
-        "phaseGate": "GATE-N4"
-      },
-      {
-        "id": "N5.1.C",
-        "order": 4,
-        "type": "MICROTAREA",
-        "dependencies": [
-          "N5.1.B"
-        ],
-        "phaseGate": "GATE-N4"
-      },
-      {
-        "id": "N5.1.D",
-        "order": 5,
-        "type": "MICROTAREA",
-        "dependencies": [
-          "N5.1.C"
-        ],
-        "phaseGate": "GATE-N4"
-      },
-      {
-        "id": "N5.1.E",
-        "order": 6,
-        "type": "MICROTAREA",
-        "dependencies": [
-          "N5.1.D"
-        ],
-        "phaseGate": "GATE-N4"
-      },
-      {
-        "id": "N5.1.F",
-        "order": 7,
-        "type": "MICROTAREA",
-        "dependencies": [
-          "N5.1.E"
-        ],
-        "phaseGate": "GATE-N4"
-      },
-      {
-        "id": "N5.1.G",
-        "order": 8,
-        "type": "MICROTAREA",
-        "dependencies": [
-          "N5.1.F"
-        ],
-        "phaseGate": "GATE-N4"
-      },
-      {
-        "id": "N5.1.H",
-        "order": 9,
-        "type": "MICROTAREA",
-        "dependencies": [
-          "N5.1.G"
-        ],
-        "phaseGate": "GATE-N4"
-      }
+      {"id":"N4.11.H","order":0,"type":"MICROTAREA","dependencies":["N4.11.G"],"phaseGate":"GATE-N3"},
+      {"id":"GATE-N4","order":1,"type":"GATE_FASE","dependencies":["N4.1.H","N4.2.H","N4.3.H","N4.4.H","N4.5.H","N4.6.H","N4.7.H","N4.8.H","N4.9.H","N4.10.H","N4.11.H"]},
+      {"id":"N5.1.A","order":2,"type":"MICROTAREA","dependencies":["GATE-N4"],"phaseGate":"GATE-N4"},
+      {"id":"N5.1.B","order":3,"type":"MICROTAREA","dependencies":["N5.1.A"],"phaseGate":"GATE-N4"},
+      {"id":"N5.1.C","order":4,"type":"MICROTAREA","dependencies":["N5.1.B"],"phaseGate":"GATE-N4"},
+      {"id":"N5.1.D","order":5,"type":"MICROTAREA","dependencies":["N5.1.C"],"phaseGate":"GATE-N4"},
+      {"id":"N5.1.E","order":6,"type":"MICROTAREA","dependencies":["N5.1.D"],"phaseGate":"GATE-N4"},
+      {"id":"N5.1.F","order":7,"type":"MICROTAREA","dependencies":["N5.1.E"],"phaseGate":"GATE-N4"},
+      {"id":"N5.1.G","order":8,"type":"MICROTAREA","dependencies":["N5.1.F"],"phaseGate":"GATE-N4"},
+      {"id":"N5.1.H","order":9,"type":"MICROTAREA","dependencies":["N5.1.G"],"phaseGate":"GATE-N4"}
     ]
   },
   "lanes": {
-    "JULES_A": [
-      {
-        "dispatchId": "N5-1-A-1-ARCH-REUSE-A",
-        "taskId": "N5.1.A.1.ARCHITECTURE_REUSE",
-        "workerId": "JULES_A",
-        "taskAttempt": 1,
-        "plannedParent": "N5.1.A",
-        "readyForDispatch": true,
-        "dispatchEligible": true,
-        "fileScopeHint": "docs/N5.1_REPORTES_PREFLIGHT_ARCHITECTURE.md",
-        "prompt": "Read docs/VAEP_AUTHORITY.md and PROJECT_INDEX.md first. N5.1.A is only a preflight for an independent report center. Inspect the existing ReporteAdministrativo/EstadoFinanciero services and their actual API consumers. Produce a concrete reuse/boundary decision with exact file/symbol references, existing behavior, minimal future seams and explicit out-of-scope items. Write only docs/N5.1_REPORTES_PREFLIGHT_ARCHITECTURE.md. Do not implement N5.1.B or change product/control-plane/roadmap, branches, secrets or production. Deliver a nonempty patch against primaryBaseHead, record TESTS_EXECUTED honestly (including not-run reasons), and two genuinely separate SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 checks. Never claim CI, closure or integration not performed."
-      }
-    ],
-    "JULES_B": [
-      {
-        "dispatchId": "N5-1-A-2-DATA-BOUNDARIES-B",
-        "taskId": "N5.1.A.2.DATA_QUERY_BOUNDARIES",
-        "workerId": "JULES_B",
-        "taskAttempt": 1,
-        "plannedParent": "N5.1.A",
-        "readyForDispatch": true,
-        "dispatchEligible": true,
-        "fileScopeHint": "docs/N5.1_REPORTES_PREFLIGHT_DATOS.md",
-        "prompt": "Read docs/VAEP_AUTHORITY.md and PROJECT_INDEX.md first. For N5.1.A preflight, inspect existing reporting repositories/queries, AppDbContext and relevant report DTOs. Document authoritative data sources, existing filters/pagination, transaction boundaries and evidenced performance risks for the independent report center. Identify reuse versus gaps without inventing schema, business metrics or benchmark numbers. Write only docs/N5.1_REPORTES_PREFLIGHT_DATOS.md. No product changes, migrations, next-parent implementation, control-plane writes or production. Deliver a nonempty patch against primaryBaseHead with honest TESTS_EXECUTED and separate SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. Never claim closure or integration."
-      }
-    ],
-    "JULES_C": [
-      {
-        "dispatchId": "N5-1-A-3-UI-RBAC-C",
-        "taskId": "N5.1.A.3.UI_AUTHORIZATION_INVENTORY",
-        "workerId": "JULES_C",
-        "taskAttempt": 1,
-        "plannedParent": "N5.1.A",
-        "readyForDispatch": true,
-        "dispatchEligible": true,
-        "fileScopeHint": "docs/N5.1_REPORTES_PREFLIGHT_UI_RBAC.md",
-        "prompt": "Read docs/VAEP_AUTHORITY.md and PROJECT_INDEX.md first. For N5.1.A, inspect actual report-related Angular routes, menu, services, auth guards and matching backend endpoint permissions. Produce a concrete navigation/permission inventory and minimal acceptance constraints for a future independent report center. Distinguish existing behavior from proposal; frontend hiding is not authorization. Write only docs/N5.1_REPORTES_PREFLIGHT_UI_RBAC.md. Do not modify UI, API, role grants, control-plane, production or later parent code. Deliver nonempty patch against primaryBaseHead; honest TESTS_EXECUTED; two independent SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2; no false LISTO/integration."
-      }
-    ],
-    "JULES_D": [
-      {
-        "dispatchId": "N5-1-A-4-QA-ROLLBACK-D",
-        "taskId": "N5.1.A.4.ACCEPTANCE_ROLLBACK_PREFLIGHT",
-        "workerId": "JULES_D",
-        "taskAttempt": 1,
-        "plannedParent": "N5.1.A",
-        "readyForDispatch": true,
-        "dispatchEligible": true,
-        "fileScopeHint": "docs/N5.1_REPORTES_PREFLIGHT_QA.md",
-        "prompt": "Read docs/VAEP_AUTHORITY.md and PROJECT_INDEX.md first. Inspect existing reporting tests and CI entrypoints for N5.1.A. Produce an executable acceptance matrix for the future independent report center: authorized/unauthorized, valid/invalid filters, empty/error/loading, historical integrity, non-regression and rollback boundaries. Anchor each proposed check to actual existing files or explicitly label a gap. Write only docs/N5.1_REPORTES_PREFLIGHT_QA.md. No new product/tests/control-plane code, migrations, dispatches, production or invented results. Deliver nonempty patch against primaryBaseHead, exact TESTS_EXECUTED or not-run reasons, and separate SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. No closure/integration claim."
-      }
-    ]
+    "JULES_A": [],
+    "JULES_B": [],
+    "JULES_C": [],
+    "JULES_D": []
   },
   "lastClosureFunctionalHead": "8e204fe41de967f3445cda571a0e72648b1bc748"
 }
