@@ -86,6 +86,7 @@ jobs:
           grep -q "workflow_run:" .github/workflows/vaep-checkpoints.yml
           grep -q "VAEP engine lightweight checks" .github/workflows/vaep-checkpoints.yml
           grep -q "github.event.workflow_run.conclusion == 'success'" .github/workflows/vaep-checkpoints.yml
+          grep -q "github.event.workflow_run.event == 'push'" .github/workflows/vaep-checkpoints.yml
           grep -q "VAEP_CHECKPOINTS=:00,:12,:24,:36,:48" docs/VAEP_AUTHORITY.md
           bash .github/scripts/vaep-checkpoint.sh --self-test
           bash .github/scripts/vaep-parent-close.sh --self-test
