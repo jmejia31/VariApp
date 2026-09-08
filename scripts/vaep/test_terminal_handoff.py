@@ -1,5 +1,5 @@
 import unittest
-from terminal_handoff import decision, pending_items
+from terminal_handoff import decision, pending_items, REVIEW_EXECUTORS
 
 
 class TerminalHandoffTests(unittest.TestCase):
@@ -74,6 +74,7 @@ class TerminalHandoffTests(unittest.TestCase):
         }
         pending = pending_items([issue], {"D": manifest}, "N4.11.G", "JULES_B", set())
         self.assertEqual(pending[0]["action"], "QA_TAKEOVER_REQUIRED")
+        self.assertEqual(pending[0]["authorizedReviewExecutors"], list(REVIEW_EXECUTORS))
         self.assertEqual(pending_items([issue], {"D": manifest}, "N4.11.G", "JULES_B", {"D"}), [])
 
     def test_issue_with_only_evidence_gap_is_review_not_r2(self):

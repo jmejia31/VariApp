@@ -617,7 +617,7 @@ printf -v issue_body '%s\n\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n
   "- Terminal contract classification: \`$terminal_classification\`; evidence gaps: \`${terminal_evidence_gaps:-none}\`" \
   "- Dispatch commit: \`$DISPATCH_SHA\`; manifest: \`$manifest\`" \
   "- Workflow run ID: \`$GITHUB_RUN_ID\`; correlation complete: \`true\`" \
-  "- Controller handoff: \`$controller_handoff\`; correction owner: CHATGPT_VAEP; takeover executed: false" \
+  "- Controller handoff: \`$controller_handoff\`; authorized review executors: CHATGPT_VAEP, CHATGPT_BUSINESS; correction owner: CHATGPT_VAEP; takeover executed: false" \
   "- Parent-close-first: \`$PARENT_CLOSE_FIRST\`; checkpoints: \`$VAEP_CHECKPOINTS\`" \
   "- Workflow run: $run_url" \
   'Artifact only. Nothing was applied to Desarrollo, pushed, merged or deployed. VAEP/ChatGPT review is mandatory. When MASTER retry capacity is exhausted, ChatGPT/VAEP/Vibe takes over; do not exceed MASTER retry limits.'

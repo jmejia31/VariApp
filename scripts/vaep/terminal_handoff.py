@@ -7,6 +7,17 @@ from pathlib import Path
 import re
 import subprocess
 
+REVIEW_EXECUTORS = ("CHATGPT_VAEP", "CHATGPT_BUSINESS")
+
+
+def review_executor_metadata():
+    """Return authorized reviewers without claiming either one executed review."""
+    return {
+        "authorizedReviewExecutors": list(REVIEW_EXECUTORS),
+        "reviewExecutionRequired": True,
+        "reviewExecuted": False,
+    }
+
 
 def decision(state, ready, attempt, maximum, session, evidence_gap_only=False):
     if state == "LATE_RESULT_SUPERSEDED":
@@ -37,11 +48,13 @@ def annotate(directory):
                   terminalClassification=contract.get("classification", "NOT_EVALUATED"),
                   evidenceGapOnly=evidence_gap_only,
                   nextLaneAction="REFILL_ONLY_DEPENDENCY_SAFE_NON_OVERLAPPING_SCOPE")
+    result.update(review_executor_metadata())
     (path / "result.json").write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
     lifecycle = json.loads((path / "lifecycle.json").read_text(encoding="utf-8"))
     lifecycle.update(controllerHandoff=handoff, correctionOwner="CHATGPT_VAEP", takeoverExecuted=False,
                      terminalClassification=contract.get("classification", "NOT_EVALUATED"),
                      evidenceGapOnly=evidence_gap_only)
+    lifecycle.update(review_executor_metadata())
     (path / "lifecycle.json").write_text(json.dumps(lifecycle, indent=2) + "\n", encoding="utf-8")
     print(handoff)
 
@@ -89,7 +102,9 @@ def pending_items(issues, manifests, parent, worker, integrated):
             continue
         item = dict(dispatchId=dispatch, taskId=manifest["taskId"], workerId=worker,
                                  issue=issue["number"], session=session, taskAttempt=attempt,
-                                 action=action, correctionOwner="CHATGPT_VAEP", takeoverExecuted=False)
+                                 action=action, correctionOwner="CHATGPT_VAEP",
+                                 authorizedReviewExecutors=list(REVIEW_EXECUTORS),
+                                 takeoverExecuted=False)
         previous = pending.get(manifest["taskId"])
         if previous is None or (attempt, item["issue"]) > (previous["taskAttempt"], previous["issue"]):
             pending[manifest["taskId"]] = item
@@ -136,7 +151,9 @@ def audit(worker, output):
                   malformedManifests=malformed_manifests,
                   historicalMalformedManifests=historical_malformed_manifests,
                   status="REVIEW_EXECUTOR_NOT_CONFIGURED" if items else "NO_PENDING_TERMINAL_REVIEW",
-                  reviewExecuted=False, integrationExecuted=False)
+                  reviewExecuted=False, integrationExecuted=False,
+                  reviewExecutionRequired=bool(items),
+                  authorizedReviewExecutors=list(REVIEW_EXECUTORS))
     Path(output).write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(report))
     if items:
