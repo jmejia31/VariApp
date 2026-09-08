@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "OPEN",
+  "newDispatchAdmission": "FROZEN",
   "allowExistingActiveSessions": true,
-  "reason": "REVIEW_FIRST_DEBT_DRAINED: N4.11.G terminal Jules incidents are closed with ownership revoked where applicable; ATTEMPT2 no-patch paths were converted to QA_TAKEOVER and the subsequent CentroCosto accessibility/service/permission gaps were corrected on Desarrollo through 6ef9ac0b63ee2792fa1aa97ad01248a83ecb5bf8. No open N4.11.G issues remain. Admission reopened for CURRENT_PARENT N4.11.G only; PARENT_CLOSE_FIRST, dedupe, CURRENT+NEXT_SAFE, no-R3 and HEAD_FREEZE_CAUSAL remain mandatory.",
-  "updatedAtUtc": "2026-09-08T13:26:46Z"
+  "reason": "QUARANTINED_REMOTE_ACTIVE: JULES_B CURRENT_PARENT N4.11.G.6.API_CONTRACT_TESTS dispatch N4-11-G-6-API-CONTRACT-B-R2-TRANSPORT-20260908T133114Z-4225, workflowRunId=34232481145, dispatchCommitSha=938fbeafc43ff9353ab8dd69fa8e275abb9f47ce crossed the >=10m STALLED threshold with Execute VAEP/Jules MASTER still in_progress and no terminal receipt/Issue available for REVIEW_FIRST. No supported remote-cancel/stop action is exposed to this controller, so ownership is treated fail-closed and no equivalent recovery/R3/refill may be published while the remote workflow remains active. Existing active sessions may finish evidence-only as required; PARENT_CLOSE_FIRST remains mandatory.",
+  "updatedAtUtc": "2026-09-08T13:41:46Z"
 }
