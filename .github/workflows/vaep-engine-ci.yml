@@ -62,6 +62,7 @@ jobs:
           grep -q "QUARANTINED_REMOTE_ACTIVE_NO_DUPLICATE" .github/scripts/vaep-jules-autorefill-core.sh
           grep -q "REMOTE_SESSION_STATE_UNAVAILABLE" .github/scripts/vaep-jules-autorefill-core.sh
           grep -q "R2_PRE_SESSION_TRANSPORT_FAILURE" .github/scripts/vaep-jules-autorefill-core.sh
+          grep -q 'select(.event=="push")' .github/scripts/vaep-jules-autorefill-core.sh
       - name: Validate recovery exact-manifest contract
         run: |
           for wf in .github/workflows/vaep-jules-{a,b,c,d}-recovery.yml; do

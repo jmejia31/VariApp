@@ -232,7 +232,10 @@ causal_freeze_active() {
   local head="$1" functional runs count
   functional="$(functional_head "$head")"
   runs="$(api "repos/$GITHUB_REPOSITORY/actions/runs?branch=$BRANCH&per_page=100")"
-  count="$(jq --arg sha "$functional" '[.workflow_runs[]? | select(.head_sha==$sha) | select(.status=="queued" or .status=="in_progress") | select(.name | test("Development|Acceptance|Fase ?8|M13|Recovery";"i"))] | length' <<<"$runs")"
+  # Pull-request checks can reuse the same head SHA but are not gates for the
+  # Desarrollo control plane. Only push executions on the target branch may
+  # freeze dispatch admission; otherwise unrelated PR queues can starve lanes.
+  count="$(jq --arg sha "$functional" '[.workflow_runs[]? | select(.head_sha==$sha) | select(.event=="push") | select(.status=="queued" or .status=="in_progress") | select(.name | test("Development|Acceptance|Fase ?8|M13|Recovery";"i"))] | length' <<<"$runs")"
   if (( count > 0 )); then
     echo "AUTOREFILL_WAIT=HEAD_FREEZE_CAUSAL functional_head=$functional active_critical=$count"
     return 0
