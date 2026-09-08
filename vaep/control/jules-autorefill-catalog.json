@@ -1,9 +1,9 @@
 {
-  "version": 15,
+  "version": 16,
   "authority": "docs/VAEP_AUTHORITY.md",
-  "currentParent": "N4.11.F",
-  "generatedAt": "2026-09-08T07:06:29Z",
-  "regenerationReason": "AUTOMATIC_PARENT_CLOSE__N4.11.E_LISTO_REAL__N4.11.F_CURRENT",
+  "currentParent": "N4.11.G",
+  "generatedAt": "2026-09-08T09:58:00Z",
+  "regenerationReason": "CONTROL_PLANE_RECONCILIATION__N4.11.F_LISTO_REAL__N4.11.G_CURRENT",
   "policy": {
     "branch": "Desarrollo",
     "liveQueueDepthTarget": 2,
@@ -19,74 +19,15 @@
   "lanes": {
     "JULES_A": [
       {
-        "dispatchId": "N4-11-B-1-ENTITY-A",
-        "taskId": "N4.11.B.1.ENTITY_INVARIANTS",
-        "workerId": "JULES_A",
-        "taskAttempt": 1,
-        "fileScopeHint": "backend/src/Domain/Entities/Contabilidad/CentroCosto.cs",
-        "prompt": "Implement focused CentroCosto entity invariants and lifecycle contract from current architecture; Desarrollo only; two self-reviews.",
-        "plannedParent": "N4.11.B",
-        "dispatchEligible": false
-      },
-      {
-        "dispatchId": "N4-11-B-5-ENTITY-TEST-A",
-        "taskId": "N4.11.B.5.ENTITY_CONTRACT_TESTS",
-        "workerId": "JULES_A",
-        "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N411BCentroCostoEntityTests.cs",
-        "prompt": "Add focused tests for CentroCosto entity invariants/lifecycle; no persistence/API scope; two self-reviews.",
-        "plannedParent": "N4.11.B",
-        "dispatchEligible": false
-      },
-      {
-        "dispatchId": "N4-11-C-1-SCHEMA-A",
-        "taskId": "N4.11.C.1.SCHEMA_CONTRACT",
-        "workerId": "JULES_A",
-        "taskAttempt": 1,
-        "fileScopeHint": "backend/src/Infrastructure/Persistence/Configurations/CentroCostoConfiguration.cs",
-        "prompt": "After N4.11.B LISTO, implement focused EF schema constraints for CentroCosto.",
-        "plannedParent": "N4.11.C",
-        "dispatchEligible": false
-      },
-      {
-        "dispatchId": "N4-11-D-1-ENDPOINT-A",
-        "taskId": "N4.11.D.1.API_ENDPOINT_CONTRACT",
-        "workerId": "JULES_A",
-        "taskAttempt": 1,
-        "fileScopeHint": "backend/src/API/Controllers/CentrosCostoController.cs",
-        "prompt": "After N4.11.C LISTO, implement scoped CentroCosto REST endpoint contract.",
-        "plannedParent": "N4.11.D",
-        "dispatchEligible": false
-      },
-      {
-        "dispatchId": "N4-11-E-1-COMPONENT-A",
-        "taskId": "N4.11.E.1.FRONTEND_COMPONENT",
-        "workerId": "JULES_A",
-        "taskAttempt": 1,
-        "fileScopeHint": "frontend/src/app/features/centros-costo/centros-costo.component.ts",
-        "prompt": "After N4.11.D LISTO, implement CentroCosto component shell and deterministic UI states.",
-        "plannedParent": "N4.11.E",
-        "dispatchEligible": false
-      },
-      {
-        "dispatchId": "N4-11-F-1-UI-PERM-A",
-        "taskId": "N4.11.F.1.UI_PERMISSION_CONTRACT",
-        "workerId": "JULES_A",
-        "taskAttempt": 1,
-        "fileScopeHint": "frontend/src/app/features/centros-costo/centros-costo.permission.spec.ts",
-        "prompt": "After N4.11.E LISTO, add CentroCosto UI permission-contract tests.",
-        "plannedParent": "N4.11.F",
-        "dispatchEligible": true
-      },
-      {
         "dispatchId": "N4-11-G-1-COMP-TEST-A",
         "taskId": "N4.11.G.1.COMPONENT_REGRESSION",
         "workerId": "JULES_A",
         "taskAttempt": 1,
         "fileScopeHint": "frontend/src/app/features/centros-costo/centros-costo.component.spec.ts",
-        "prompt": "After N4.11.F LISTO, add focused CentroCosto component regression.",
+        "prompt": "Add focused CentroCosto component regression after N4.11.F LISTO_REAL.",
         "plannedParent": "N4.11.G",
-        "dispatchEligible": false
+        "dispatchEligible": false,
+        "reason": "SUPERSEDED_BY_QA_TAKEOVER_80ce8d6b1dc5ebf48dfec4ec4fd08aef9b8a8a01"
       },
       {
         "dispatchId": "N4-11-G-5-A11Y-A",
@@ -94,121 +35,21 @@
         "workerId": "JULES_A",
         "taskAttempt": 1,
         "fileScopeHint": "frontend/src/app/features/centros-costo/centros-costo.a11y.spec.ts",
-        "prompt": "After N4.11.F LISTO, add accessibility regression for CentroCosto form/table states.",
+        "prompt": "Add accessibility regression for CentroCosto form/table states; Desarrollo only; two self-reviews.",
         "plannedParent": "N4.11.G",
-        "dispatchEligible": false
-      },
-      {
-        "dispatchId": "N4-11-H-1-FRONTDOC-A",
-        "taskId": "N4.11.H.1.FRONTEND_DOCUMENTATION",
-        "workerId": "JULES_A",
-        "taskAttempt": 1,
-        "fileScopeHint": "docs/N4.11_CENTROS_COSTO_FRONTEND.md",
-        "prompt": "After N4.11.G LISTO, document verified CentroCosto frontend behavior/evidence.",
-        "plannedParent": "N4.11.H",
-        "dispatchEligible": false
-      },
-      {
-        "dispatchId": "N4-11-H-5-RUNBOOK-A",
-        "taskId": "N4.11.H.5.FRONTEND_RUNBOOK",
-        "workerId": "JULES_A",
-        "taskAttempt": 1,
-        "fileScopeHint": "docs/N4.11_CENTROS_COSTO_RUNBOOK.md",
-        "prompt": "After N4.11.G LISTO, create factual CentroCosto frontend diagnostics/rollback runbook.",
-        "plannedParent": "N4.11.H",
-        "dispatchEligible": false
-      },
-      {
-        "dispatchId": "N4-11-H-9-QA-A",
-        "taskId": "N4.11.H.9.QA_EVIDENCE_INDEX",
-        "workerId": "JULES_A",
-        "taskAttempt": 1,
-        "fileScopeHint": "docs/N4.11_CENTROS_COSTO_QA_EVIDENCE.md",
-        "prompt": "After N4.11.G LISTO, index only verified CentroCosto QA evidence and unresolved gaps.",
-        "plannedParent": "N4.11.H",
-        "dispatchEligible": false
-      },
-      {
-        "dispatchId": "N4-11-H-13-RELEASE-A",
-        "taskId": "N4.11.H.13.RELEASE_NOTES_INPUT",
-        "workerId": "JULES_A",
-        "taskAttempt": 1,
-        "fileScopeHint": "docs/N4.11_CENTROS_COSTO_RELEASE_NOTES.md",
-        "prompt": "After N4.11.G LISTO, prepare factual release-note input without deploy/certification claims.",
-        "plannedParent": "N4.11.H",
-        "dispatchEligible": false
+        "dispatchEligible": true
       }
     ],
     "JULES_B": [
-      {
-        "dispatchId": "N4-11-B-2-CONTRACT-B",
-        "taskId": "N4.11.B.2.DTO_ENUM_CONTRACTS",
-        "workerId": "JULES_B",
-        "taskAttempt": 1,
-        "fileScopeHint": "backend/src/Application/DTOs/Contabilidad/CentroCostoDtos.cs",
-        "prompt": "Implement focused CentroCosto DTO/enum contracts; Desarrollo only; two self-reviews.",
-        "plannedParent": "N4.11.B",
-        "dispatchEligible": false
-      },
-      {
-        "dispatchId": "N4-11-B-6-CONTRACT-TEST-B",
-        "taskId": "N4.11.B.6.DTO_CONTRACT_TESTS",
-        "workerId": "JULES_B",
-        "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N411BCentroCostoDtoContractTests.cs",
-        "prompt": "Add focused DTO/enum contract tests for CentroCosto; two self-reviews.",
-        "plannedParent": "N4.11.B",
-        "dispatchEligible": false
-      },
-      {
-        "dispatchId": "N4-11-C-2-MIG-B",
-        "taskId": "N4.11.C.2.MIGRATION_ROLLBACK",
-        "workerId": "JULES_B",
-        "taskAttempt": 1,
-        "fileScopeHint": "backend/src/Infrastructure/Migrations",
-        "prompt": "After N4.11.B LISTO, implement scoped CentroCosto migration plus rollback-safe constraints.",
-        "plannedParent": "N4.11.C",
-        "dispatchEligible": false
-      },
-      {
-        "dispatchId": "N4-11-D-2-SERVICE-B",
-        "taskId": "N4.11.D.2.APPLICATION_SERVICE",
-        "workerId": "JULES_B",
-        "taskAttempt": 1,
-        "fileScopeHint": "backend/src/Application/Services/CentroCostoService.cs",
-        "prompt": "After N4.11.C LISTO, implement focused CentroCosto application service/query behavior.",
-        "plannedParent": "N4.11.D",
-        "dispatchEligible": false
-      },
-      {
-        "dispatchId": "N4-11-E-2-HTTP-B",
-        "taskId": "N4.11.E.2.FRONTEND_SERVICE",
-        "workerId": "JULES_B",
-        "taskAttempt": 1,
-        "fileScopeHint": "frontend/src/app/services/centro-costo.service.ts",
-        "prompt": "After N4.11.D LISTO, implement CentroCosto HTTP service using current API conventions.",
-        "plannedParent": "N4.11.E",
-        "dispatchEligible": false
-      },
-      {
-        "dispatchId": "N4-11-F-2-API-AUTH-B",
-        "taskId": "N4.11.F.2.API_AUTHORIZATION",
-        "workerId": "JULES_B",
-        "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N411FCentrosCostoAuthorizationTests.cs",
-        "prompt": "After N4.11.E LISTO, add CentroCosto API authorization contract tests.",
-        "plannedParent": "N4.11.F",
-        "dispatchEligible": true
-      },
       {
         "dispatchId": "N4-11-G-2-SERVICE-TEST-B",
         "taskId": "N4.11.G.2.SERVICE_REGRESSION",
         "workerId": "JULES_B",
         "taskAttempt": 1,
         "fileScopeHint": "frontend/src/app/services/centro-costo.service.spec.ts",
-        "prompt": "After N4.11.F LISTO, add focused CentroCosto frontend service regression.",
+        "prompt": "Add focused CentroCosto frontend service regression; Desarrollo only; two self-reviews.",
         "plannedParent": "N4.11.G",
-        "dispatchEligible": false
+        "dispatchEligible": true
       },
       {
         "dispatchId": "N4-11-G-6-API-CONTRACT-B",
@@ -216,121 +57,21 @@
         "workerId": "JULES_B",
         "taskAttempt": 1,
         "fileScopeHint": "backend/tests/InventoryApp.Tests/N411GCentrosCostoApiContractTests.cs",
-        "prompt": "After N4.11.F LISTO, add CentroCosto API contract regression tests.",
+        "prompt": "Add CentroCosto API contract regression tests; Desarrollo only; two self-reviews.",
         "plannedParent": "N4.11.G",
-        "dispatchEligible": false
-      },
-      {
-        "dispatchId": "N4-11-H-2-APIDOC-B",
-        "taskId": "N4.11.H.2.API_DOCUMENTATION",
-        "workerId": "JULES_B",
-        "taskAttempt": 1,
-        "fileScopeHint": "docs/N4.11_CENTROS_COSTO_API.md",
-        "prompt": "After N4.11.G LISTO, document verified CentroCosto API contract.",
-        "plannedParent": "N4.11.H",
-        "dispatchEligible": false
-      },
-      {
-        "dispatchId": "N4-11-H-6-FILTERDOC-B",
-        "taskId": "N4.11.H.6.FILTER_MATRIX",
-        "workerId": "JULES_B",
-        "taskAttempt": 1,
-        "fileScopeHint": "docs/N4.11_CENTROS_COSTO_FILTER_MATRIX.md",
-        "prompt": "After N4.11.G LISTO, document verified CentroCosto query/filter matrix.",
-        "plannedParent": "N4.11.H",
-        "dispatchEligible": false
-      },
-      {
-        "dispatchId": "N4-11-H-10-APIEVID-B",
-        "taskId": "N4.11.H.10.API_EVIDENCE_INDEX",
-        "workerId": "JULES_B",
-        "taskAttempt": 1,
-        "fileScopeHint": "docs/N4.11_CENTROS_COSTO_API_EVIDENCE.md",
-        "prompt": "After N4.11.G LISTO, consolidate verified API evidence only.",
-        "plannedParent": "N4.11.H",
-        "dispatchEligible": false
-      },
-      {
-        "dispatchId": "N4-11-H-14-CONTRACTDOC-B",
-        "taskId": "N4.11.H.14.CONTRACT_SUMMARY",
-        "workerId": "JULES_B",
-        "taskAttempt": 1,
-        "fileScopeHint": "docs/N4.11_CENTROS_COSTO_CONTRACT_SUMMARY.md",
-        "prompt": "After N4.11.G LISTO, summarize verified public contracts without deployment claims.",
-        "plannedParent": "N4.11.H",
-        "dispatchEligible": false
+        "dispatchEligible": true
       }
     ],
     "JULES_C": [
-      {
-        "dispatchId": "N4-11-B-3-VALID-C",
-        "taskId": "N4.11.B.3.DOMAIN_VALIDATION",
-        "workerId": "JULES_C",
-        "taskAttempt": 1,
-        "fileScopeHint": "backend/src/Application/Validators/CentroCostoValidator.cs",
-        "prompt": "Implement focused CentroCosto validation rules; Desarrollo only; two self-reviews.",
-        "plannedParent": "N4.11.B",
-        "dispatchEligible": false
-      },
-      {
-        "dispatchId": "N4-11-B-7-VALID-TEST-C",
-        "taskId": "N4.11.B.7.DOMAIN_VALIDATION_TESTS",
-        "workerId": "JULES_C",
-        "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N411BCentroCostoValidationTests.cs",
-        "prompt": "Add focused tests for CentroCosto domain/application validation rules; two self-reviews.",
-        "plannedParent": "N4.11.B",
-        "dispatchEligible": false
-      },
-      {
-        "dispatchId": "N4-11-C-3-BACKFILL-C",
-        "taskId": "N4.11.C.3.DATA_RECONCILIATION",
-        "workerId": "JULES_C",
-        "taskAttempt": 1,
-        "fileScopeHint": "docs/N4.11_CENTROS_COSTO_DATA_RECONCILIATION.md",
-        "prompt": "After N4.11.B LISTO, define/verify scoped migration reconciliation and backfill evidence.",
-        "plannedParent": "N4.11.C",
-        "dispatchEligible": false
-      },
-      {
-        "dispatchId": "N4-11-D-3-ERRORS-C",
-        "taskId": "N4.11.D.3.ERROR_VALIDATION_CONTRACT",
-        "workerId": "JULES_C",
-        "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N411DCentrosCostoValidationTests.cs",
-        "prompt": "After N4.11.C LISTO, add focused validation/error API contract tests.",
-        "plannedParent": "N4.11.D",
-        "dispatchEligible": false
-      },
-      {
-        "dispatchId": "N4-11-E-3-A11Y-C",
-        "taskId": "N4.11.E.3.ACCESSIBLE_UX",
-        "workerId": "JULES_C",
-        "taskAttempt": 1,
-        "fileScopeHint": "frontend/src/app/features/centros-costo/centros-costo.component.html",
-        "prompt": "After N4.11.D LISTO, implement accessible CentroCosto form/table states.",
-        "plannedParent": "N4.11.E",
-        "dispatchEligible": false
-      },
-      {
-        "dispatchId": "N4-11-F-3-AUDIT-C",
-        "taskId": "N4.11.F.3.AUDIT_CORRELATION",
-        "workerId": "JULES_C",
-        "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N411FCentrosCostoAuditTests.cs",
-        "prompt": "After N4.11.E LISTO, add CentroCosto audit/correlation contract tests.",
-        "plannedParent": "N4.11.F",
-        "dispatchEligible": true
-      },
       {
         "dispatchId": "N4-11-G-3-E2E-C",
         "taskId": "N4.11.G.3.E2E_REGRESSION",
         "workerId": "JULES_C",
         "taskAttempt": 1,
         "fileScopeHint": "frontend/e2e/centros-costo.spec.ts",
-        "prompt": "After N4.11.F LISTO, add scoped CentroCosto end-to-end regression.",
+        "prompt": "Add scoped CentroCosto end-to-end regression; Desarrollo only; two self-reviews.",
         "plannedParent": "N4.11.G",
-        "dispatchEligible": false
+        "dispatchEligible": true
       },
       {
         "dispatchId": "N4-11-G-7-VALIDREG-C",
@@ -338,121 +79,21 @@
         "workerId": "JULES_C",
         "taskAttempt": 1,
         "fileScopeHint": "backend/tests/InventoryApp.Tests/N411GCentrosCostoValidationRegressionTests.cs",
-        "prompt": "After N4.11.F LISTO, add CentroCosto validation regression coverage.",
+        "prompt": "Add CentroCosto validation regression coverage; Desarrollo only; two self-reviews.",
         "plannedParent": "N4.11.G",
-        "dispatchEligible": false
-      },
-      {
-        "dispatchId": "N4-11-H-3-TESTDOC-C",
-        "taskId": "N4.11.H.3.TEST_MATRIX",
-        "workerId": "JULES_C",
-        "taskAttempt": 1,
-        "fileScopeHint": "docs/N4.11_CENTROS_COSTO_TEST_MATRIX.md",
-        "prompt": "After N4.11.G LISTO, consolidate real CentroCosto test evidence.",
-        "plannedParent": "N4.11.H",
-        "dispatchEligible": false
-      },
-      {
-        "dispatchId": "N4-11-H-7-A11YDOC-C",
-        "taskId": "N4.11.H.7.ACCESSIBILITY_EVIDENCE",
-        "workerId": "JULES_C",
-        "taskAttempt": 1,
-        "fileScopeHint": "docs/N4.11_CENTROS_COSTO_ACCESSIBILITY.md",
-        "prompt": "After N4.11.G LISTO, document verified CentroCosto accessibility evidence.",
-        "plannedParent": "N4.11.H",
-        "dispatchEligible": false
-      },
-      {
-        "dispatchId": "N4-11-H-11-COVERAGE-C",
-        "taskId": "N4.11.H.11.COVERAGE_EVIDENCE",
-        "workerId": "JULES_C",
-        "taskAttempt": 1,
-        "fileScopeHint": "docs/N4.11_CENTROS_COSTO_COVERAGE_EVIDENCE.md",
-        "prompt": "After N4.11.G LISTO, record factual coverage evidence and unresolved gaps.",
-        "plannedParent": "N4.11.H",
-        "dispatchEligible": false
-      },
-      {
-        "dispatchId": "N4-11-H-15-ACCEPT-C",
-        "taskId": "N4.11.H.15.ACCEPTANCE_MATRIX",
-        "workerId": "JULES_C",
-        "taskAttempt": 1,
-        "fileScopeHint": "docs/N4.11_CENTROS_COSTO_ACCEPTANCE_MATRIX.md",
-        "prompt": "After N4.11.G LISTO, map DoD acceptance criteria to verified evidence.",
-        "plannedParent": "N4.11.H",
-        "dispatchEligible": false
+        "dispatchEligible": true
       }
     ],
     "JULES_D": [
-      {
-        "dispatchId": "N4-11-B-4-REPO-D",
-        "taskId": "N4.11.B.4.REPOSITORY_CONTRACT",
-        "workerId": "JULES_D",
-        "taskAttempt": 1,
-        "fileScopeHint": "backend/src/Application/Interfaces/ICentroCostoRepository.cs",
-        "prompt": "Implement focused CentroCosto repository contract; Desarrollo only; two self-reviews.",
-        "plannedParent": "N4.11.B",
-        "dispatchEligible": false
-      },
-      {
-        "dispatchId": "N4-11-B-8-REPO-TEST-D",
-        "taskId": "N4.11.B.8.REPOSITORY_CONTRACT_TESTS",
-        "workerId": "JULES_D",
-        "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N411BCentroCostoRepositoryContractTests.cs",
-        "prompt": "Add focused repository-contract tests without persistence migration scope; two self-reviews.",
-        "plannedParent": "N4.11.B",
-        "dispatchEligible": false
-      },
-      {
-        "dispatchId": "N4-11-C-4-INDEX-D",
-        "taskId": "N4.11.C.4.CONSTRAINT_INDEX_TESTS",
-        "workerId": "JULES_D",
-        "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N411CCentroCostoPersistenceContractTests.cs",
-        "prompt": "After N4.11.B LISTO, add constraints/index persistence contract tests.",
-        "plannedParent": "N4.11.C",
-        "dispatchEligible": false
-      },
-      {
-        "dispatchId": "N4-11-D-4-DI-D",
-        "taskId": "N4.11.D.4.DI_WIRING",
-        "workerId": "JULES_D",
-        "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N411DCentroCostoDiTests.cs",
-        "prompt": "After N4.11.C LISTO, verify CentroCosto DI/controller wiring fail-closed.",
-        "plannedParent": "N4.11.D",
-        "dispatchEligible": false
-      },
-      {
-        "dispatchId": "N4-11-E-4-ROUTE-D",
-        "taskId": "N4.11.E.4.ROUTE_NAVIGATION",
-        "workerId": "JULES_D",
-        "taskAttempt": 1,
-        "fileScopeHint": "frontend/src/app/app.routes.centros-costo.spec.ts",
-        "prompt": "After N4.11.D LISTO, add CentroCosto protected route/navigation contract.",
-        "plannedParent": "N4.11.E",
-        "dispatchEligible": false
-      },
-      {
-        "dispatchId": "N4-11-F-4-OBS-D",
-        "taskId": "N4.11.F.4.SECURITY_OBSERVABILITY",
-        "workerId": "JULES_D",
-        "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N411FCentrosCostoSecurityObservabilityTests.cs",
-        "prompt": "After N4.11.E LISTO, add security/observability contract tests.",
-        "plannedParent": "N4.11.F",
-        "dispatchEligible": true
-      },
       {
         "dispatchId": "N4-11-G-4-INTEG-D",
         "taskId": "N4.11.G.4.INTEGRATION_REGRESSION",
         "workerId": "JULES_D",
         "taskAttempt": 1,
         "fileScopeHint": "backend/tests/InventoryApp.Tests/N411GCentrosCostoIntegrationTests.cs",
-        "prompt": "After N4.11.F LISTO, add scoped backend integration regression.",
+        "prompt": "Add scoped backend integration regression; Desarrollo only; two self-reviews.",
         "plannedParent": "N4.11.G",
-        "dispatchEligible": false
+        "dispatchEligible": true
       },
       {
         "dispatchId": "N4-11-G-8-ROUTE-D",
@@ -460,49 +101,9 @@
         "workerId": "JULES_D",
         "taskAttempt": 1,
         "fileScopeHint": "frontend/src/app/app.routes.centros-costo.spec.ts",
-        "prompt": "After N4.11.F LISTO, extend protected-route regression for CentroCosto.",
+        "prompt": "Extend protected-route regression for CentroCosto; Desarrollo only; two self-reviews.",
         "plannedParent": "N4.11.G",
-        "dispatchEligible": false
-      },
-      {
-        "dispatchId": "N4-11-H-4-SEC-DOC-D",
-        "taskId": "N4.11.H.4.SECURITY_DOCUMENTATION",
-        "workerId": "JULES_D",
-        "taskAttempt": 1,
-        "fileScopeHint": "docs/N4.11_CENTROS_COSTO_SECURITY.md",
-        "prompt": "After N4.11.G LISTO, document verified RBAC/security boundaries.",
-        "plannedParent": "N4.11.H",
-        "dispatchEligible": false
-      },
-      {
-        "dispatchId": "N4-11-H-8-ROLLBACK-D",
-        "taskId": "N4.11.H.8.ROLLBACK_RUNBOOK",
-        "workerId": "JULES_D",
-        "taskAttempt": 1,
-        "fileScopeHint": "docs/N4.11_CENTROS_COSTO_ROLLBACK.md",
-        "prompt": "After N4.11.G LISTO, document scoped rollback boundaries and verification.",
-        "plannedParent": "N4.11.H",
-        "dispatchEligible": false
-      },
-      {
-        "dispatchId": "N4-11-H-12-CERT-D",
-        "taskId": "N4.11.H.12.CERTIFICATION_CHECKLIST",
-        "workerId": "JULES_D",
-        "taskAttempt": 1,
-        "fileScopeHint": "docs/N4.11_CENTROS_COSTO_CERT_CHECKLIST.md",
-        "prompt": "After N4.11.G LISTO, build factual certification checklist without declaring LISTO.",
-        "plannedParent": "N4.11.H",
-        "dispatchEligible": false
-      },
-      {
-        "dispatchId": "N4-11-H-16-OPS-D",
-        "taskId": "N4.11.H.16.OPERATIONS_CHECKLIST",
-        "workerId": "JULES_D",
-        "taskAttempt": 1,
-        "fileScopeHint": "docs/N4.11_CENTROS_COSTO_OPERATIONS.md",
-        "prompt": "After N4.11.G LISTO, document verified operational checks without deploy actions.",
-        "plannedParent": "N4.11.H",
-        "dispatchEligible": false
+        "dispatchEligible": true
       }
     ]
   }
