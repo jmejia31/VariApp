@@ -58,6 +58,7 @@ jobs:
           grep -q "desarrollo-ci.yml/runs?branch" .github/scripts/vaep-parent-close.sh
           grep -q "catalogos-aceptacion.yml/runs?branch" .github/scripts/vaep-parent-close.sh
           grep -q "migration-recovery-desarrollo.yml/runs?branch" .github/scripts/vaep-parent-close.sh
+          grep -q "JULES_CONTENT_FAILED_PATCH_ABSENT" .github/scripts/vaep-jules-autorefill-core.sh
       - name: Validate recovery exact-manifest contract
         run: |
           for wf in .github/workflows/vaep-jules-{a,b,c,d}-recovery.yml; do

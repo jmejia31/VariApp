@@ -217,6 +217,8 @@ recoverable_attempt1_entry() {
       reason="PATCH_BASE_CONTROL_PLANE_DIVERGENCE actual=$actual requested=$requested"
     elif jq -e --arg dispatch "$dispatch" 'any(.[]?; ((.title // "") == ("[VAEP-JULES-SUPERSEDED] " + $dispatch)) and (((.body // "") | contains("JULES_LANE_BUDGET_EXCEEDED")) and ((.body // "") | contains("- Task: ")) and ((.body // "") | contains("attempt: 1/"))))' <<<"$issues" >/dev/null; then
       reason="JULES_LANE_BUDGET_EXCEEDED attempt=1"
+    elif jq -e --arg dispatch "$dispatch" 'any(.[]?; ((.title // "") | contains($dispatch)) and ((.body // "") | test("Terminal state: `FAILED`|Terminal state=FAILED")) and ((.body // "") | test("Patch present: `false`|patchPresent=false")) and ((.body // "") | contains("attempt: 1/")) and ((.title // "") | startswith("[VAEP-JULES-SUPERSEDED]") | not))' <<<"$issues" >/dev/null; then
+      reason="JULES_CONTENT_FAILED_PATCH_ABSENT attempt=1"
     else
       continue
     fi
