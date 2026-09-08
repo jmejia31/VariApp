@@ -24,7 +24,7 @@ current_head() {
 
 is_control_plane_path() {
   case "$1" in
-    vaep/jules/dispatch/*.json|vaep/jules-b/dispatch/*.json|vaep/jules-c/dispatch/*.json|vaep/jules-d/dispatch/*.json|vaep/control/*|vaep/evidence/*|docs/VAEP_AUTHORITY.md|.github/scripts/vaep-*|.github/workflows/vaep-*)
+    vaep/jules/dispatch/*.json|vaep/jules-b/dispatch/*.json|vaep/jules-c/dispatch/*.json|vaep/jules-d/dispatch/*.json|vaep/control/*|vaep/evidence/*|docs/VAEP_AUTHORITY.md|scripts/vaep/*|.github/scripts/vaep-*|.github/workflows/vaep-*)
       return 0 ;;
     *) return 1 ;;
   esac
