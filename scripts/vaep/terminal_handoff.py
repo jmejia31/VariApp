@@ -97,12 +97,20 @@ def audit(worker, output):
     catalog = json.loads(Path("vaep/control/jules-autorefill-catalog.json").read_text(encoding="utf-8"))
     manifests = {}
     malformed_manifests = []
+    historical_malformed_manifests = []
+    current_parent = catalog["currentParent"]
     for directory in ("jules", "jules-b", "jules-c", "jules-d"):
         for path in Path(f"vaep/{directory}/dispatch").glob("*.json"):
             m = json.loads(path.read_text(encoding="utf-8"))
             dispatch_id = m.get("dispatchId")
             if not dispatch_id:
-                malformed_manifests.append(str(path))
+                if str(m.get("taskId", "")).startswith(current_parent + "."):
+                    malformed_manifests.append(str(path))
+                else:
+                    # Old manifests remain visible for forensic traceability,
+                    # but must not turn every current-parent checkpoint into a
+                    # warning or a false operational failure.
+                    historical_malformed_manifests.append(str(path))
                 continue
             manifests[dispatch_id] = m
     # Only validated receipts resolve integration debt. Open Issues alone are
@@ -114,8 +122,9 @@ def audit(worker, output):
         if receipt["receipt"] and not receipt["errors"]:
             integrated.add(receipt["trailers"]["Dispatch"])
     items = pending_items(issues, manifests, catalog["currentParent"], worker, integrated)
-    report = dict(currentParent=catalog["currentParent"], workerId=worker, pending=items,
+    report = dict(currentParent=current_parent, workerId=worker, pending=items,
                   malformedManifests=malformed_manifests,
+                  historicalMalformedManifests=historical_malformed_manifests,
                   status="REVIEW_EXECUTOR_NOT_CONFIGURED" if items else "NO_PENDING_TERMINAL_REVIEW",
                   reviewExecuted=False, integrationExecuted=False)
     Path(output).write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
