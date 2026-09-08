@@ -146,6 +146,26 @@ jobs:
           grep -q 'state=all' scripts/vaep/terminal_handoff.py
           grep -q 'scripts/vaep/\*' .github/scripts/vaep-parent-close.sh
           grep -q 'catalogos-aceptacion.yml' .github/scripts/vaep-parent-close.sh
+      - name: Validate explicit QA review receipt contract
+        run: |
+          jq -e '
+            .authority == "docs/VAEP_AUTHORITY.md"
+            and .parent == "N4.11.H"
+            and .review == "PASS"
+            and .reviewExecuted == true
+            and (.tasks | length) == 16
+            and ([.tasks[] | select(.integrationRequired == false and .julesIntegrationClaimed == false and .qaTakeoverEvidenceAccepted == true)] | length) == 16
+          ' vaep/evidence/reviews/N4.11.H_REVIEW_FIRST_20260908T204500Z.json
+          jq -e '
+            .authority == "docs/VAEP_AUTHORITY.md"
+            and .parent == "N4.11.H"
+            and .decision == "LISTO_REAL"
+            and .review == "PASS"
+            and (.functionalHead | test("^[0-9a-f]{40}$"))
+            and .p0Open == 0 and .p1Open == 0
+            and .julesIntegrationClaimed == false
+          ' vaep/evidence/fragments/N4.11.H_LISTO_REAL_20260908T204500Z.json
+          grep -q 'accepted_review_items' scripts/vaep/terminal_handoff.py
       - name: Validate operational KPI evaluator
         run: node scripts/vaep/metrics.mjs --self-test
       - name: Validate Jules integration receipt contract

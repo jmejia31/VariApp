@@ -8,6 +8,7 @@ import re
 import subprocess
 
 REVIEW_EXECUTORS = ("CHATGPT_VAEP", "CHATGPT_BUSINESS")
+REVIEW_RECEIPT_DIR = Path("vaep/evidence/reviews")
 
 
 def review_executor_metadata():
@@ -67,7 +68,66 @@ def field(body, name):
     return value.split("`")[1] if value.startswith("`") else value.split(";")[0].strip()
 
 
-def pending_items(issues, manifests, parent, worker, integrated):
+def accepted_review_items(parent):
+    """Load only explicit, task-correlated QA receipts.
+
+    A receipt can clear REVIEW_FIRST debt for an evidence-only takeover when
+    it names the exact task and dispatch and states that no Jules patch was
+    integrated.  Merely having a document, a closed Issue, or an authorized
+    reviewer is never enough to clear the queue.
+    """
+    reviewed_dispatches = set()
+    reviewed_tasks = set()
+    receipts = []
+    if not REVIEW_RECEIPT_DIR.is_dir():
+        return reviewed_dispatches, reviewed_tasks, receipts
+
+    for path in sorted(REVIEW_RECEIPT_DIR.glob("*.json")):
+        try:
+            receipt = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if not isinstance(receipt, dict):
+            continue
+        if (receipt.get("authority") != "docs/VAEP_AUTHORITY.md"
+                or receipt.get("parent") != parent
+                or receipt.get("review") != "PASS"
+                or receipt.get("reviewExecuted") is not True):
+            continue
+
+        accepted = 0
+        for item in receipt.get("tasks", []):
+            if not isinstance(item, dict):
+                continue
+            if (item.get("review") != "PASS"
+                    or item.get("qaTakeoverEvidenceAccepted") is not True
+                    or item.get("integrationRequired") is not False):
+                continue
+            evidence_path = item.get("evidencePath")
+            scope = item.get("fileScopeHint")
+            if (not isinstance(evidence_path, str)
+                    or not isinstance(scope, str)
+                    or evidence_path != scope
+                    or not Path(scope).is_file()):
+                continue
+            dispatch = item.get("dispatchId")
+            task = item.get("taskId")
+            if not isinstance(dispatch, str) or not dispatch:
+                continue
+            if not isinstance(task, str) or not task.startswith(parent + "."):
+                continue
+            reviewed_dispatches.add(dispatch)
+            reviewed_tasks.add(task)
+            accepted += 1
+        if accepted:
+            receipts.append(str(path))
+    return reviewed_dispatches, reviewed_tasks, receipts
+
+
+def pending_items(issues, manifests, parent, worker, integrated,
+                  reviewed_dispatches=None, reviewed_tasks=None):
+    reviewed_dispatches = reviewed_dispatches or set()
+    reviewed_tasks = reviewed_tasks or set()
     pending = {}
     for issue in issues:
         # A terminal Jules issue may be closed administratively before VAEP
@@ -83,6 +143,8 @@ def pending_items(issues, manifests, parent, worker, integrated):
         if manifest.get("workerId") != worker or not manifest.get("taskId", "").startswith(parent + "."):
             continue
         if field(body, "Task") != manifest["taskId"] or field(body, "Worker") != worker:
+            continue
+        if dispatch in reviewed_dispatches or manifest["taskId"] in reviewed_tasks:
             continue
         state = field(body, "Terminal state")
         session = field(body, "Jules session") or field(body, "Session")
@@ -146,13 +208,17 @@ def audit(worker, output):
         receipt = inspect_commit(sha)
         if receipt["receipt"] and not receipt["errors"]:
             integrated.add(receipt["trailers"]["Dispatch"])
-    items = pending_items(issues, manifests, catalog["currentParent"], worker, integrated)
+    reviewed_dispatches, reviewed_tasks, review_receipts = accepted_review_items(catalog["currentParent"])
+    items = pending_items(issues, manifests, catalog["currentParent"], worker, integrated,
+                          reviewed_dispatches, reviewed_tasks)
     report = dict(currentParent=current_parent, workerId=worker, pending=items,
                   malformedManifests=malformed_manifests,
                   historicalMalformedManifests=historical_malformed_manifests,
                   status="REVIEW_EXECUTOR_NOT_CONFIGURED" if items else "NO_PENDING_TERMINAL_REVIEW",
-                  reviewExecuted=False, integrationExecuted=False,
+                  reviewExecuted=bool(reviewed_tasks), integrationExecuted=False,
                   reviewExecutionRequired=bool(items),
+                  reviewReceipts=review_receipts,
+                  reviewedTaskCount=len(reviewed_tasks),
                   authorizedReviewExecutors=list(REVIEW_EXECUTORS))
     Path(output).write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(report))

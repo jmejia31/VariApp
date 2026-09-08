@@ -1,5 +1,10 @@
+import json
+from pathlib import Path
+import tempfile
 import unittest
-from terminal_handoff import decision, pending_items, REVIEW_EXECUTORS
+
+import terminal_handoff
+from terminal_handoff import accepted_review_items, decision, pending_items, REVIEW_EXECUTORS
 
 
 class TerminalHandoffTests(unittest.TestCase):
@@ -96,6 +101,40 @@ class TerminalHandoffTests(unittest.TestCase):
         }
         pending = pending_items([issue], {"E": manifest}, "N4.11.G", "JULES_D", set())
         self.assertEqual(pending[0]["action"], "EVIDENCE_GAP_REVIEW_REQUIRED")
+
+    def test_explicit_qa_receipt_clears_only_correlated_evidence_task(self):
+        receipt = {
+            "authority": "docs/VAEP_AUTHORITY.md",
+            "parent": "N4.11.H",
+            "review": "PASS",
+            "reviewExecuted": True,
+            "tasks": [
+                {
+                    "taskId": "N4.11.H.1.FRONTEND_DOCUMENTATION",
+                    "dispatchId": "H1-R2",
+                    "review": "PASS",
+                    "qaTakeoverEvidenceAccepted": True,
+                    "integrationRequired": False,
+                },
+                {
+                    "taskId": "N4.11.H.2.API_DOCUMENTATION",
+                    "dispatchId": "H2-R2",
+                    "review": "PASS",
+                    "qaTakeoverEvidenceAccepted": True,
+                    "integrationRequired": True,
+                },
+            ],
+        }
+        original_dir = terminal_handoff.REVIEW_RECEIPT_DIR
+        with tempfile.TemporaryDirectory() as root:
+            terminal_handoff.REVIEW_RECEIPT_DIR = Path(root)
+            Path(root, "review.json").write_text(json.dumps(receipt), encoding="utf-8")
+            dispatches, tasks, receipts = accepted_review_items("N4.11.H")
+        terminal_handoff.REVIEW_RECEIPT_DIR = original_dir
+
+        self.assertEqual(dispatches, {"H1-R2"})
+        self.assertEqual(tasks, {"N4.11.H.1.FRONTEND_DOCUMENTATION"})
+        self.assertEqual(len(receipts), 1)
 
 
 if __name__ == "__main__":
