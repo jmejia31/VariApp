@@ -1,5 +1,4 @@
 using System;
-using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Entities.Contabilidad;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
@@ -196,12 +195,12 @@ namespace InventoryApp.Infrastructure.Migrations
 
                 b.HasQueryFilter(x => !x.Eliminado);
 
-                b.HasOne<Sucursal>(x => x.Sucursal)
+                b.HasOne("InventoryApp.Domain.Entities.Sucursal", "Sucursal")
                     .WithMany()
-                    .HasForeignKey(x => x.SucursalId)
+                    .HasForeignKey("SucursalId")
                     .OnDelete(DeleteBehavior.Restrict);
 
-                b.Navigation(x => x.Sucursal);
+                b.Navigation("Sucursal");
             });
         }
     }
