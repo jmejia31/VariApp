@@ -124,7 +124,7 @@ export class ReportesAdministrativosComponent implements OnInit {
         const url = URL.createObjectURL(blob);
         const enlace = document.createElement('a');
         enlace.href = url;
-        enlace.download = `${tipo}-${this.desde}-${this.hasta}.${formato)`;
+        enlace.download = `${tipo}-${this.desde}-${this.hasta}.${formato}`;
         enlace.click();
         URL.revokeObjectURL(url);
         this.exporting.set(null);
