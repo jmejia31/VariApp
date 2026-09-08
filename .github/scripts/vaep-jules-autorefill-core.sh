@@ -99,10 +99,11 @@ failed_r2_pre_session_transport() {
     [[ -n "$path" ]] || continue
     r2_dispatch="${path##*/}"
     r2_dispatch="${r2_dispatch%.json}"
+    path="$DISPATCH_PATH/$path"
     if jq -e --arg dispatch "$r2_dispatch" 'any(.[]?; (.title // "") | contains($dispatch))' <<<"$issues" >/dev/null; then
       continue
     fi
-    r2_commit="$(api "repos/$GITHUB_REPOSITORY/commits?path=$path&sha=$BRANCH&per_page=1" --jq '.[0].sha // empty' 2>/dev/null || true)"
+    r2_commit="$(api "repos/$GITHUB_REPOSITORY/commits?path=$path&sha=$BRANCH&per_page=1" --jq '.[0].sha // empty' 2>/dev/null | tr -d '\r' || true)"
     [[ "$r2_commit" =~ ^[0-9a-fA-F]{40}$ ]] || continue
     runs="$(api "repos/$GITHUB_REPOSITORY/actions/workflows/$(lane_workflow_file)/runs?event=workflow_dispatch&branch=$BRANCH&per_page=100" 2>/dev/null || printf '{}')"
     failed_run="$(jq -r --arg sha "$r2_commit" '
@@ -110,12 +111,12 @@ failed_r2_pre_session_transport() {
        | select(.event=="workflow_dispatch" and .head_sha==$sha)
        | select(.status=="completed" and .conclusion=="failure")]
       | sort_by(.created_at) | last | .id // empty
-    ' <<<"$runs")"
+    ' <<<"$runs" | tr -d '\r')"
     if [[ -n "$failed_run" ]]; then
       printf '%s\t%s\t%s\t%s\n' "$path" "$r2_dispatch" "$r2_commit" "$failed_run"
       return 0
     fi
-  done < <(jq -r --arg prefix "$dispatch-R2-" '.[]? | .name | select(startswith($prefix)) | select(endswith(".json"))' <<<"$listing")
+  done < <(jq -r --arg prefix "$dispatch-R2-" '.[]? | .name | select(startswith($prefix)) | select(endswith(".json"))' <<<"$listing" | tr -d '\r')
   return 1
 }
 
