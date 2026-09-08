@@ -5,56 +5,44 @@ readonly MASTER_FILE="docs/VAEP_AUTHORITY.md"
 readonly PARSER=".github/scripts/vaep-policy-parser.sh"
 readonly CATALOG="vaep/control/jules-autorefill-catalog.json"
 readonly ADMISSION="vaep/control/dispatch-admission.json"
+readonly TRANSITION="scripts/vaep/parent_transition.py"
 readonly BRANCH="Desarrollo"
 
 require_runtime() {
   : "${GITHUB_REPOSITORY:?GITHUB_REPOSITORY required}"
   : "${GH_TOKEN:?GH_TOKEN required}"
-  command -v gh >/dev/null 2>&1 || { echo 'VAEP_CLOSE_ERROR=gh_missing' >&2; exit 2; }
-  command -v jq >/dev/null 2>&1 || { echo 'VAEP_CLOSE_ERROR=jq_missing' >&2; exit 2; }
+  [[ "$GITHUB_REPOSITORY" == "jmejia31/VariApp" ]] || { echo 'VAEP_CLOSE_ERROR=wrong_repository' >&2; exit 2; }
+  for tool in gh jq python3 git; do
+    command -v "$tool" >/dev/null 2>&1 || { echo "VAEP_CLOSE_ERROR=${tool}_missing" >&2; exit 2; }
+  done
 }
 
-api() {
-  gh api "$@"
-}
-
-current_head() {
-  api "repos/$GITHUB_REPOSITORY/git/ref/heads/$BRANCH" --jq '.object.sha'
-}
+api() { gh api "$@"; }
+current_head() { api "repos/$GITHUB_REPOSITORY/git/ref/heads/$BRANCH" --jq '.object.sha'; }
 
 is_control_plane_path() {
   case "$1" in
-    # Operational policy, evidence, runbooks and controller metadata do not
-    # change the functional product head. Keep this list broad enough that a
-    # Chat B/VAEP onboarding or review-only commit cannot manufacture a new
-    # causal head that has no product CI attached to it.
-    AGENTS.md|README.md|CHANGELOG_AI.md|PLAN_EJECUCION_AUTONOMA.md|PROJECT_CONTEXT.md|*.md|docs/*|docs/N4.11_CENTROS_COSTO_*.md|vaep/jules/dispatch/*.json|vaep/jules-b/dispatch/*.json|vaep/jules-c/dispatch/*.json|vaep/jules-d/dispatch/*.json|vaep/control/*|vaep/evidence/*|scripts/vaep/*|.github/scripts/vaep-*|.github/workflows/vaep-*|.github/workflows/catalogos-aceptacion.yml)
-      return 0 ;;
+    AGENTS.md|README.md|CHANGELOG_AI.md|PLAN_EJECUCION_AUTONOMA.md|PROJECT_CONTEXT.md|*.md|docs/*|docs/N4.11_CENTROS_COSTO_*.md|vaep/jules/dispatch/*.json|vaep/jules-b/dispatch/*.json|vaep/jules-c/dispatch/*.json|vaep/jules-d/dispatch/*.json|vaep/control/*|vaep/evidence/*|scripts/vaep/*|.github/scripts/vaep-*|.github/workflows/vaep-*|.github/workflows/catalogos-aceptacion.yml) return 0 ;;
     *) return 1 ;;
   esac
 }
 
 functional_head() {
-  local sha="$1" commit parent all_control path
-  for _ in $(seq 1 60); do
-    commit="$(api "repos/$GITHUB_REPOSITORY/commits/$sha")"
+  local head="$1" sha paths all_control path
+  # The checkpoint has a full fetch. Inspect verified local Git objects instead
+  # of exhausting the API after a long run of evidence-only commits.
+  git cat-file -e "$head^{commit}" || return 1
+  while IFS= read -r sha; do
+    paths="$(git diff-tree --root --no-commit-id --name-only -r --first-parent -m "$sha")" || return 1
     all_control=true
     while IFS= read -r path; do
       [[ -n "$path" ]] || continue
-      if ! is_control_plane_path "$path"; then
-        all_control=false
-        break
-      fi
-    done < <(jq -r '.files[]?.filename' <<<"$commit")
-    if [[ "$all_control" == false ]]; then
-      printf '%s\n' "$sha"
-      return 0
-    fi
-    parent="$(jq -r '.parents[0].sha // empty' <<<"$commit")"
-    [[ -n "$parent" ]] || break
-    sha="$parent"
-  done
-  printf '%s\n' "$1"
+      if ! is_control_plane_path "$path"; then all_control=false; break; fi
+    done <<<"$paths"
+    if [[ "$all_control" == false ]]; then printf '%s\n' "$sha"; return 0; fi
+  done < <(git rev-list --first-parent --max-count=1000 "$head")
+  echo 'VAEP_CLOSE_ERROR=functional_head_not_proven_within_bound' >&2
+  return 1
 }
 
 latest_valid_fragment() {
@@ -62,46 +50,36 @@ latest_valid_fragment() {
   while IFS= read -r file; do
     [[ -f "$file" ]] || continue
     if jq -e --arg parent "$parent" '
-      type == "object" and
-      .authority == "docs/VAEP_AUTHORITY.md" and
-      .parent == $parent and
-      .decision == "LISTO_REAL" and
+      type == "object" and .authority == "docs/VAEP_AUTHORITY.md" and
+      .parent == $parent and .decision == "LISTO_REAL" and
       (.functionalHead | type == "string" and test("^[0-9a-fA-F]{40}$")) and
-      .review == "PASS" and
-      .combinedStatus == "SUCCESS" and
+      .review == "PASS" and .combinedStatus == "SUCCESS" and
       .causalGates == "TERMINAL_SUCCESS_APPLICABLE" and
       .p0Open == 0 and .p1Open == 0 and
       .productionTouched == false and .mergePerformed == false
-    ' "$file" >/dev/null; then
-      printf '%s\n' "$file"
-      return 0
-    fi
-  done < <(find vaep/evidence/fragments -maxdepth 1 -type f -name "${parent}_LISTO_REAL_*.json" -printf '%T@ %p\n' 2>/dev/null | sort -rn | cut -d' ' -f2-)
+    ' "$file" >/dev/null; then printf '%s\n' "$file"; return 0; fi
+  done < <(find vaep/evidence/fragments -maxdepth 1 -type f -name "${parent}_LISTO_REAL_*.json" -print 2>/dev/null | sort -r)
   return 1
+}
+
+latest_push_success() {
+  local head="$1"
+  jq -e --arg head "$head" '
+    [.workflow_runs[]? | select(.head_sha == $head and .head_branch == "Desarrollo" and .event == "push")]
+    | sort_by(.created_at, .id) | last
+    | .status == "completed" and .conclusion == "success"
+  ' >/dev/null
 }
 
 critical_gates_ok() {
   local functional="$1" build acceptance recovery
-  # The repository-wide Actions listing is capped at the newest 100 runs and
-  # can omit an otherwise valid causal gate. Query each canonical workflow by
-  # exact functional HEAD instead of relying on that truncated aggregate.
-  build="$(api "repos/$GITHUB_REPOSITORY/actions/workflows/desarrollo-ci.yml/runs?branch=$BRANCH&head_sha=$functional&per_page=10")"
-  acceptance="$(api "repos/$GITHUB_REPOSITORY/actions/workflows/catalogos-aceptacion.yml/runs?branch=$BRANCH&head_sha=$functional&per_page=10")"
-  recovery="$(api "repos/$GITHUB_REPOSITORY/actions/workflows/migration-recovery-desarrollo.yml/runs?branch=$BRANCH&head_sha=$functional&per_page=10")"
-  jq -e '
-    ([.workflow_runs[]? | select(.conclusion == "success")] | length > 0) and
-    ([.workflow_runs[]? | select(.status == "queued" or .status == "in_progress" or .status == "pending")] | length == 0)
-  ' <<<"$build" >/dev/null &&
-    jq -e '
-      ([.workflow_runs[]? | select(.conclusion == "success")] | length > 0) and
-      ([.workflow_runs[]? | select(.status == "queued" or .status == "in_progress" or .status == "pending")] | length == 0)
-  ' <<<"$acceptance" >/dev/null || return 1
-
+  build="$(api "repos/$GITHUB_REPOSITORY/actions/workflows/desarrollo-ci.yml/runs?branch=$BRANCH&head_sha=$functional&event=push&per_page=10")" || return 1
+  acceptance="$(api "repos/$GITHUB_REPOSITORY/actions/workflows/catalogos-aceptacion.yml/runs?branch=$BRANCH&head_sha=$functional&event=push&per_page=10")" || return 1
+  latest_push_success "$functional" <<<"$build" || return 1
+  latest_push_success "$functional" <<<"$acceptance" || return 1
   if migration_gate_applicable "$functional"; then
-    jq -e '
-      ([.workflow_runs[]? | select(.conclusion == "success")] | length > 0) and
-      ([.workflow_runs[]? | select(.status == "queued" or .status == "in_progress" or .status == "pending")] | length == 0)
-    ' <<<"$recovery" >/dev/null || return 1
+    recovery="$(api "repos/$GITHUB_REPOSITORY/actions/workflows/migration-recovery-desarrollo.yml/runs?branch=$BRANCH&head_sha=$functional&event=push&per_page=10")" || return 1
+    latest_push_success "$functional" <<<"$recovery" || return 1
     echo "VAEP_CLOSE_MIGRATION_GATE=REQUIRED functional_head=$functional"
   else
     echo "VAEP_CLOSE_MIGRATION_GATE=NOT_APPLICABLE functional_head=$functional"
@@ -110,128 +88,119 @@ critical_gates_ok() {
 
 migration_gate_applicable() {
   local functional="$1" commit
-  commit="$(api "repos/$GITHUB_REPOSITORY/commits/$functional")"
-  jq -e '
-    any(.files[]?.filename;
-      startswith("backend/src/Infrastructure/Migrations/") or
-      . == "backend/src/API/Program.cs" or
-      . == ".github/workflows/migration-recovery-desarrollo.yml")
-  ' <<<"$commit" >/dev/null
+  commit="$(api "repos/$GITHUB_REPOSITORY/commits/$functional")" || return 0
+  jq -e 'any(.files[]?.filename;
+    startswith("backend/src/Infrastructure/Migrations/") or
+    startswith("backend/src/Infrastructure/Persistence/Migrations/") or
+    . == "backend/src/API/Program.cs" or
+    . == ".github/workflows/migration-recovery-desarrollo.yml")' <<<"$commit" >/dev/null
 }
 
 live_jules_runs() {
-  local runs
-  runs="$(api "repos/$GITHUB_REPOSITORY/actions/runs?branch=$BRANCH&per_page=100")"
-  jq '[.workflow_runs[]? | select(.name | test("^VAEP Jules [ABCD] Trusted Secondary Worker$")) | select(.status == "queued" or .status == "in_progress" or .status == "pending")] | length' <<<"$runs"
+  local workflow runs count total=0
+  # Filter server-side: unrelated CI fan-out cannot hide an older live worker.
+  for workflow in vaep-jules-secondary.yml vaep-jules-secondary-b.yml vaep-jules-secondary-c.yml vaep-jules-secondary-d.yml; do
+    for state in queued in_progress pending waiting requested; do
+      runs="$(api "repos/$GITHUB_REPOSITORY/actions/workflows/$workflow/runs?branch=$BRANCH&status=$state&per_page=1")" || return 1
+      count="$(jq -er '.total_count | numbers' <<<"$runs")" || return 1
+      total=$((total + count))
+    done
+  done
+  printf '%s\n' "$total"
 }
 
-remote_catalog() {
-  api "repos/$GITHUB_REPOSITORY/contents/$CATALOG?ref=$BRANCH" | jq -r '.content' | tr -d '\n' | base64 -d
-}
-
-remote_admission() {
-  api "repos/$GITHUB_REPOSITORY/contents/$ADMISSION?ref=$BRANCH" | jq -r '.content' | tr -d '\n' | base64 -d
+hardening_gates_ok() {
+  local head="$1" workflow runs pr
+  for workflow in vaep-engine-ci.yml vaep-jules-diagnostic.yml; do
+    runs="$(api "repos/$GITHUB_REPOSITORY/actions/workflows/$workflow/runs?branch=$BRANCH&head_sha=$head&per_page=10")" || return 1
+    jq -e --arg head "$head" '[.workflow_runs[]? | select(.head_sha == $head and .head_branch == "Desarrollo")]
+      | sort_by(.created_at, .id) | last | .status == "completed" and .conclusion == "success"' <<<"$runs" >/dev/null || return 1
+  done
+  pr="$(api "repos/$GITHUB_REPOSITORY/pulls/2")" || return 1
+  jq -e '.state == "open" and .draft == true and .merged == false and .head.ref == "Desarrollo" and .base.ref == "main"' <<<"$pr" >/dev/null
 }
 
 next_parent() {
-  local current candidate
-  current="$(jq -r '.currentParent' "$CATALOG")"
-  while IFS= read -r candidate; do
-    [[ "$candidate" > "$current" ]] || continue
-    printf '%s\n' "$candidate"
-    return 0
-  done < <(jq -r '.lanes[][]? | .plannedParent // empty' "$CATALOG" | sort -u | sort -V)
-  return 1
+  python3 "$TRANSITION" select --catalog "$CATALOG"
 }
 
 publish_promotion() {
-  local expected_head="$1" catalog_file="$2" admission_file="$3" catalog_blob admission_blob base_commit base_tree tree commit
-  catalog_blob="$(jq -n --arg content "$(<"$catalog_file")" '{content:$content,encoding:"utf-8"}')"
-  admission_blob="$(jq -n --arg content "$(<"$admission_file")" '{content:$content,encoding:"utf-8"}')"
-  catalog_sha="$(api "repos/$GITHUB_REPOSITORY/git/blobs" --method POST --input - <<<"$catalog_blob" --jq '.sha')"
-  admission_sha="$(api "repos/$GITHUB_REPOSITORY/git/blobs" --method POST --input - <<<"$admission_blob" --jq '.sha')"
-  base_commit="$(api "repos/$GITHUB_REPOSITORY/git/commits/$expected_head")"
-  base_tree="$(jq -r '.tree.sha' <<<"$base_commit")"
-  tree="$(jq -n --arg base "$base_tree" --arg c "$catalog_sha" --arg a "$admission_sha" '{base_tree:$base,tree:[{path:"vaep/control/jules-autorefill-catalog.json",mode:"100644",type:"blob",sha:$c},{path:"vaep/control/dispatch-admission.json",mode:"100644",type:"blob",sha:$a}]}' | api "repos/$GITHUB_REPOSITORY/git/trees" --method POST --input - --jq '.sha')"
-  commit="$(jq -n --arg tree "$tree" --arg parent "$expected_head" '{message:"chore(vaep): close current parent and advance automation",tree:$tree,parents:[$parent]}' | api "repos/$GITHUB_REPOSITORY/git/commits" --method POST --input - --jq '.sha')"
+  local expected_head="$1" catalog_file="$2" admission_file="$3" parent="$4" next="$5"
+  local catalog_sha admission_sha log_sha base_tree tree commit
+  [[ "$(current_head)" == "$expected_head" ]] || { echo 'VAEP_PARENT_PROMOTION_DEFERRED=HEAD_CHANGED'; return 0; }
+  catalog_sha="$(jq -n --rawfile content "$catalog_file" '{content:$content,encoding:"utf-8"}' | api "repos/$GITHUB_REPOSITORY/git/blobs" --method POST --input - --jq '.sha')"
+  admission_sha="$(jq -n --rawfile content "$admission_file" '{content:$content,encoding:"utf-8"}' | api "repos/$GITHUB_REPOSITORY/git/blobs" --method POST --input - --jq '.sha')"
+  # Preserve the complete existing changelog bytes, then append this transition.
+  log_sha="$(api "repos/$GITHUB_REPOSITORY/contents/CHANGELOG_AI.md?ref=$expected_head" | python3 -c '
+import base64,json,sys
+record=json.load(sys.stdin)
+old=base64.b64decode(record["content"])
+entry=("\n\n## VAEP dependency-safe closure reconciliation\n\n"
+       + "Controller: CHATGPT_BUSINESS / canonical checkpoint.\n"
+       + "Validated parent: `"+sys.argv[1]+"`; successor: `"+(sys.argv[2] or "NONE")+"`.\n"
+       + "Base: `"+sys.argv[3]+"`. Existing closure receipt and exact-head causal gates validated.\n"
+       + "Selector uses explicit roadmap dependencies; no lexical ordering or gate bypass.\n"
+       + "Admission transition is guarded; no production, merge or secret changes.\n")
+json.dump({"encoding":"base64","content":base64.b64encode(old+entry.encode()).decode()},sys.stdout)
+' "$parent" "$next" "$expected_head" | api "repos/$GITHUB_REPOSITORY/git/blobs" --method POST --input - --jq '.sha')"
+  base_tree="$(api "repos/$GITHUB_REPOSITORY/git/commits/$expected_head" --jq '.tree.sha')"
+  tree="$(jq -n --arg base "$base_tree" --arg c "$catalog_sha" --arg a "$admission_sha" --arg l "$log_sha" \
+    '{base_tree:$base,tree:[{path:"vaep/control/jules-autorefill-catalog.json",mode:"100644",type:"blob",sha:$c},{path:"vaep/control/dispatch-admission.json",mode:"100644",type:"blob",sha:$a},{path:"CHANGELOG_AI.md",mode:"100644",type:"blob",sha:$l}]}' \
+    | api "repos/$GITHUB_REPOSITORY/git/trees" --method POST --input - --jq '.sha')"
+  commit="$(jq -n --arg tree "$tree" --arg parent "$expected_head" \
+    '{message:"fix(vaep): reconcile certified closure and dependency-safe successor",tree:$tree,parents:[$parent]}' \
+    | api "repos/$GITHUB_REPOSITORY/git/commits" --method POST --input - --jq '.sha')"
+  [[ "$(current_head)" == "$expected_head" ]] || { echo 'VAEP_PARENT_PROMOTION_DEFERRED=HEAD_CHANGED'; return 0; }
   if jq -n --arg sha "$commit" '{sha:$sha,force:false}' | api "repos/$GITHUB_REPOSITORY/git/refs/heads/$BRANCH" --method PATCH --input - >/dev/null 2>&1; then
-    echo "VAEP_PARENT_PROMOTED=true commit=$commit"
-    return 0
+    # Refresh the local inputs used by the checkpoint's immediate refill.
+    cp "$catalog_file" "$CATALOG"
+    cp "$admission_file" "$ADMISSION"
+    if [[ -n "$next" ]]; then echo "VAEP_PARENT_PROMOTED=true commit=$commit current_parent=$next";
+    else echo "VAEP_PARENT_CLOSED_NO_SUCCESSOR=true commit=$commit parent=$parent"; fi
+  else
+    echo "VAEP_PARENT_PROMOTION_DEFERRED=REF_RACE commit=$commit"
   fi
-  echo "VAEP_PARENT_PROMOTION_RACE=true commit=$commit action=REFRESH_AND_CONTINUE"
-  return 0
 }
 
 main() {
-  local parent next fragment head functional remote_parent now live
+  local parent next fragment head functional live now prepared
   local tmp_catalog="" tmp_admission=""
   require_runtime
-  [[ -f "$MASTER_FILE" && -f "$PARSER" && -f "$CATALOG" && -f "$ADMISSION" ]] || { echo 'VAEP_CLOSE=BLOCKED reason=control_files_missing'; return 0; }
+  [[ -f "$MASTER_FILE" && -f "$PARSER" && -f "$CATALOG" && -f "$ADMISSION" && -f "$TRANSITION" ]] || { echo 'VAEP_CLOSE=BLOCKED reason=control_files_missing'; return 0; }
   [[ "$(bash "$PARSER" --get PARENT_CLOSE_FIRST "$MASTER_FILE")" == "TRUE" ]] || { echo 'VAEP_CLOSE=BLOCKED reason=master_parent_close_policy'; return 0; }
-  parent="$(jq -r '.currentParent // empty' "$CATALOG")"
-  [[ -n "$parent" ]] || { echo 'VAEP_CLOSE=BLOCKED reason=current_parent_missing'; return 0; }
-  fragment="$(latest_valid_fragment "$parent" || true)"
-  if [[ -z "$fragment" ]]; then
-    echo "VAEP_CLOSE=BLOCKED current_parent=$parent reason=LISTO_REAL_EVIDENCE_MISSING"
-    return 0
-  fi
   head="$(current_head)"
-  functional="$(functional_head "$head")"
-  if [[ "$(jq -r '.functionalHead' "$fragment")" != "$functional" ]]; then
-    echo "VAEP_CLOSE=BLOCKED current_parent=$parent reason=FUNCTIONAL_HEAD_MISMATCH fragment=$(jq -r '.functionalHead' "$fragment") actual=$functional"
-    return 0
-  fi
-  if ! critical_gates_ok "$functional"; then
-    echo "VAEP_CLOSE=BLOCKED current_parent=$parent reason=CAUSAL_GATES_NOT_TERMINAL_OR_SUCCESS functional_head=$functional"
-    return 0
-  fi
-  live="$(live_jules_runs)"
-  if (( live > 0 )); then
-    echo "VAEP_CLOSE=BLOCKED current_parent=$parent reason=LIVE_JULES_RUNS count=$live"
-    return 0
-  fi
-  next="$(next_parent || true)"
-  if [[ -z "$next" ]]; then
-    echo "VAEP_CLOSE=BLOCKED current_parent=$parent reason=NEXT_PARENT_MISSING"
-    return 0
-  fi
-  remote_parent="$(remote_catalog | jq -r '.currentParent // empty')"
-  if [[ "$remote_parent" != "$parent" ]]; then
-    echo "VAEP_PARENT_PROMOTION_ALREADY_PRESENT=true current_parent=$remote_parent expected_parent=$parent"
-    return 0
+  [[ "$(git rev-parse HEAD)" == "$head" ]] || { echo 'VAEP_CLOSE=BLOCKED reason=LOCAL_SNAPSHOT_STALE'; return 0; }
+  parent="$(jq -r '.currentParent // empty' "$CATALOG")"
+  fragment="$(latest_valid_fragment "$parent" || true)"
+  [[ -n "$fragment" ]] || { echo "VAEP_CLOSE=BLOCKED current_parent=$parent reason=LISTO_REAL_EVIDENCE_MISSING"; return 0; }
+  functional="$(functional_head "$head")" || { echo 'VAEP_CLOSE=BLOCKED reason=FUNCTIONAL_HEAD_UNPROVEN'; return 0; }
+  [[ "$(jq -r '.functionalHead' "$fragment")" == "$functional" ]] || { echo "VAEP_CLOSE=BLOCKED current_parent=$parent reason=FUNCTIONAL_HEAD_MISMATCH"; return 0; }
+  critical_gates_ok "$functional" || { echo "VAEP_CLOSE=BLOCKED current_parent=$parent reason=CAUSAL_GATES_NOT_TERMINAL_OR_SUCCESS"; return 0; }
+  live="$(live_jules_runs)" || { echo 'VAEP_CLOSE=BLOCKED reason=LIVE_JULES_UNPROVEN'; return 0; }
+  (( live == 0 )) || { echo "VAEP_CLOSE=BLOCKED reason=LIVE_JULES_RUNS count=$live"; return 0; }
+  # Publishing control changes before their own CI finishes could cancel gates.
+  hardening_gates_ok "$head" || { echo 'VAEP_CLOSE=BLOCKED reason=HARDENING_GATES_PENDING'; return 0; }
+  if ! next="$(next_parent)"; then echo 'VAEP_CLOSE=BLOCKED reason=ROADMAP_DEPENDENCIES_NOT_READY'; return 0; fi
+  if [[ -z "$next" ]] && jq -e --arg p "$parent" --arg f "$fragment" '.closureReceipts[$p] == $f' "$CATALOG" >/dev/null; then
+    echo "VAEP_PARENT_CLOSED=true parent=$parent promotion=NEXT_PARENT_MISSING"; return 0
   fi
   now="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-  tmp_catalog="$(mktemp)"
-  tmp_admission="$(mktemp)"
+  prepared="$(python3 "$TRANSITION" prepare --catalog "$CATALOG" --admission "$ADMISSION" --receipt "$fragment" --functional "$functional" --now "$now" --hardening-ok)" || { echo 'VAEP_CLOSE=BLOCKED reason=TRANSITION_INVALID'; return 0; }
+  tmp_catalog="$(mktemp)"; tmp_admission="$(mktemp)"
   trap 'rm -f "${tmp_catalog:-}" "${tmp_admission:-}"' EXIT
-  jq --arg next "$next" --arg now "$now" --arg parent "$parent" '
-    .currentParent=$next |
-    .generatedAt=$now |
-    .regenerationReason=("AUTOMATIC_PARENT_CLOSE__" + $parent + "_LISTO_REAL__" + $next + "_CURRENT") |
-    .lanes |= with_entries(.value |= map(if (.plannedParent // "") == $next then .dispatchEligible=true else .dispatchEligible=false end))
-  ' "$CATALOG" > "$tmp_catalog"
-  jq --arg now "$now" --arg parent "$parent" --arg next "$next" '.reason=("VAEP automatic verified closure: " + $parent + " LISTO_REAL; " + $next + " is the only dependency-valid CURRENT_PARENT. Exact gates and P0/P1 were validated by the closure governor.") | .updatedAtUtc=$now' "$ADMISSION" > "$tmp_admission"
-  publish_promotion "$head" "$tmp_catalog" "$tmp_admission"
+  jq '.catalog' <<<"$prepared" > "$tmp_catalog"
+  jq '.admission' <<<"$prepared" > "$tmp_admission"
+  publish_promotion "$head" "$tmp_catalog" "$tmp_admission" "$parent" "$next"
 }
 
 if [[ "${1:-}" == "--self-test" ]]; then
-  [[ -f "$MASTER_FILE" && -f "$PARSER" ]] || exit 2
-  for control_path in \
-    AGENTS.md README.md CHANGELOG_AI.md PLAN_EJECUCION_AUTONOMA.md \
-    PROJECT_CONTEXT.md docs/VAEP_AUTHORITY.md docs/CONTEXTO_CHATGPT_VAEP.md \
-    docs/N4.11_CENTROS_COSTO_FRONTEND.md vaep/control/dispatch-admission.json \
-    scripts/vaep/terminal_handoff.py .github/workflows/vaep-checkpoints.yml; do
-    is_control_plane_path "$control_path" || {
-      echo "VAEP_PARENT_CLOSE_SELF_TEST=FAIL missing_control_path=$control_path" >&2
-      exit 2
-    }
+  [[ -f "$MASTER_FILE" && -f "$PARSER" && -f "$TRANSITION" ]] || exit 2
+  for control_path in AGENTS.md README.md CHANGELOG_AI.md PLAN_EJECUCION_AUTONOMA.md PROJECT_CONTEXT.md docs/VAEP_AUTHORITY.md docs/CONTEXTO_CHATGPT_VAEP.md docs/N4.11_CENTROS_COSTO_FRONTEND.md vaep/control/dispatch-admission.json scripts/vaep/terminal_handoff.py .github/workflows/vaep-checkpoints.yml; do
+    is_control_plane_path "$control_path" || exit 2
   done
-  if is_control_plane_path backend/src/API/Program.cs; then
-    echo 'VAEP_PARENT_CLOSE_SELF_TEST=FAIL product_path_classified_as_control_plane' >&2
-    exit 2
-  fi
+  if is_control_plane_path backend/src/API/Program.cs; then exit 2; fi
+  python3 -m unittest discover -s scripts/vaep -p 'test_parent*.py'
   echo 'VAEP_PARENT_CLOSE_SELF_TEST=PASS'
   exit 0
 fi
-
 main "$@"

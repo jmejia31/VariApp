@@ -1,286 +1,35 @@
 {
-  "version": 17,
+  "version": 18,
   "authority": "docs/VAEP_AUTHORITY.md",
-  "currentParent": "N4.11.H",
-  "generatedAt": "2026-09-08T15:36:14Z",
-  "regenerationReason": "AUTOMATIC_PARENT_CLOSE__N4.11.G_LISTO_REAL__N4.11.H_CURRENT",
-  "policy": {
-    "branch": "Desarrollo",
-    "liveQueueDepthTarget": 2,
-    "programmedBacklogTargetPerWorker": 12,
-    "programmedBacklogRefillFloorPerWorker": 4,
-    "programmedBacklogTargetTotal": 48,
-    "dispatchEligibleMinPerWorker": 2,
-    "genericFloorRegeneration": false,
-    "noBusywork": true,
-    "semanticIdentity": "CURRENT_PARENT + material scope/semantic facet",
-    "stopWhenEligibleWorkExhausted": true
+  "currentParent": "GATE-N4",
+  "generatedAt": "2026-09-08T21:51:00Z",
+  "regenerationReason": "RECONCILE_WITH_LIVE_COLA_GATE_N4__PREARM_N5_1_A_ONLY__NO_DISPATCH_BEFORE_GATE_CERTIFICATION",
+  "lastClosedParent": "N4.11.H",
+  "closureReceipts": {"N4.11.H": "vaep/evidence/fragments/N4.11.H_LISTO_REAL_20260908T204500Z.json"},
+  "retiredCatalogs": [{"commit": "0852a028d2eb6a16e7f352e293f30418cbb9a1b3", "path": "vaep/control/jules-autorefill-catalog.json", "blob": "2a1662930b6cda3fd41545fc41ef9f72760cedad", "parents": ["N4.11.G", "N4.11.H"], "reason": "Certified closed; immutable manifests and reviewed evidence retained in Git; no work discarded."}],
+  "policy": {"branch": "Desarrollo", "liveQueueDepthTarget": 2, "programmedBacklogTargetPerWorker": 12, "programmedBacklogRefillFloorPerWorker": 4, "programmedBacklogTargetTotal": 48, "dispatchEligibleMinPerWorker": 2, "genericFloorRegeneration": false, "noBusywork": true, "semanticIdentity": "CURRENT_PARENT + material scope/semantic facet", "stopWhenEligibleWorkExhausted": true},
+  "roadmap": {
+    "authority": "docs/VAEP_AUTHORITY.md",
+    "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
+    "sourceRanges": ["COLA!A391:T399", "COLA!A796:T796", "PLAN_MAESTRO!A51:L52"],
+    "note": "Derived dependency order, not lexical ID order or COLA physical row order. Source remains the live Plan/COLA; future scopes require directed preparation.",
+    "nodes": [
+      {"id": "N4.11.H", "order": 0, "type": "MICROTAREA", "dependencies": ["N4.11.G"], "phaseGate": "GATE-N3"},
+      {"id": "GATE-N4", "order": 1, "type": "GATE_FASE", "dependencies": ["N4.1.H", "N4.2.H", "N4.3.H", "N4.4.H", "N4.5.H", "N4.6.H", "N4.7.H", "N4.8.H", "N4.9.H", "N4.10.H", "N4.11.H"]},
+      {"id": "N5.1.A", "order": 2, "type": "MICROTAREA", "dependencies": ["GATE-N4"], "phaseGate": "GATE-N4"},
+      {"id": "N5.1.B", "order": 3, "type": "MICROTAREA", "dependencies": ["N5.1.A"], "phaseGate": "GATE-N4"},
+      {"id": "N5.1.C", "order": 4, "type": "MICROTAREA", "dependencies": ["N5.1.B"], "phaseGate": "GATE-N4"},
+      {"id": "N5.1.D", "order": 5, "type": "MICROTAREA", "dependencies": ["N5.1.C"], "phaseGate": "GATE-N4"},
+      {"id": "N5.1.E", "order": 6, "type": "MICROTAREA", "dependencies": ["N5.1.D"], "phaseGate": "GATE-N4"},
+      {"id": "N5.1.F", "order": 7, "type": "MICROTAREA", "dependencies": ["N5.1.E"], "phaseGate": "GATE-N4"},
+      {"id": "N5.1.G", "order": 8, "type": "MICROTAREA", "dependencies": ["N5.1.F"], "phaseGate": "GATE-N4"},
+      {"id": "N5.1.H", "order": 9, "type": "MICROTAREA", "dependencies": ["N5.1.G"], "phaseGate": "GATE-N4"}
+    ]
   },
   "lanes": {
-    "JULES_A": [
-      {
-        "dispatchId": "N4-11-G-1-COMP-TEST-A",
-        "taskId": "N4.11.G.1.COMPONENT_REGRESSION",
-        "workerId": "JULES_A",
-        "taskAttempt": 1,
-        "fileScopeHint": "frontend/src/app/features/centros-costo/centros-costo.component.spec.ts",
-        "prompt": "Add focused CentroCosto component regression after N4.11.F LISTO_REAL.",
-        "plannedParent": "N4.11.G",
-        "dispatchEligible": false,
-        "reason": "SUPERSEDED_BY_QA_TAKEOVER_80ce8d6b1dc5ebf48dfec4ec4fd08aef9b8a8a01"
-      },
-      {
-        "dispatchId": "N4-11-G-5-A11Y-A",
-        "taskId": "N4.11.G.5.ACCESSIBILITY_REGRESSION",
-        "workerId": "JULES_A",
-        "taskAttempt": 1,
-        "fileScopeHint": "frontend/src/app/features/centros-costo/centros-costo.a11y.spec.ts",
-        "prompt": "Add accessibility regression for CentroCosto form/table states; Desarrollo only; two self-reviews.",
-        "plannedParent": "N4.11.G",
-        "dispatchEligible": false
-      },
-      {
-        "dispatchId": "N4-11-H-1-FRONTDOC-A",
-        "taskId": "N4.11.H.1.FRONTEND_DOCUMENTATION",
-        "workerId": "JULES_A",
-        "taskAttempt": 1,
-        "fileScopeHint": "docs/N4.11_CENTROS_COSTO_FRONTEND.md",
-        "prompt": "After N4.11.G LISTO_REAL, document verified CentroCosto frontend behavior/evidence; Desarrollo only; two self-reviews.",
-        "plannedParent": "N4.11.H",
-        "dispatchEligible": true,
-        "reason": "PREPROGRAMMED_UNTIL_N4.11.G_LISTO_REAL"
-      },
-      {
-        "dispatchId": "N4-11-H-5-RUNBOOK-A",
-        "taskId": "N4.11.H.5.FRONTEND_RUNBOOK",
-        "workerId": "JULES_A",
-        "taskAttempt": 1,
-        "fileScopeHint": "docs/N4.11_CENTROS_COSTO_RUNBOOK.md",
-        "prompt": "After N4.11.G LISTO_REAL, create factual CentroCosto frontend diagnostics/rollback runbook; Desarrollo only; two self-reviews.",
-        "plannedParent": "N4.11.H",
-        "dispatchEligible": true,
-        "reason": "PREPROGRAMMED_UNTIL_N4.11.G_LISTO_REAL"
-      },
-      {
-        "dispatchId": "N4-11-H-9-QA-A",
-        "taskId": "N4.11.H.9.QA_EVIDENCE_INDEX",
-        "workerId": "JULES_A",
-        "taskAttempt": 1,
-        "fileScopeHint": "docs/N4.11_CENTROS_COSTO_QA_EVIDENCE.md",
-        "prompt": "After N4.11.G LISTO_REAL, index only verified CentroCosto QA evidence and unresolved gaps; Desarrollo only; two self-reviews.",
-        "plannedParent": "N4.11.H",
-        "dispatchEligible": true,
-        "reason": "PREPROGRAMMED_UNTIL_N4.11.G_LISTO_REAL"
-      },
-      {
-        "dispatchId": "N4-11-H-13-RELEASE-A",
-        "taskId": "N4.11.H.13.RELEASE_NOTES_INPUT",
-        "workerId": "JULES_A",
-        "taskAttempt": 1,
-        "fileScopeHint": "docs/N4.11_CENTROS_COSTO_RELEASE_NOTES.md",
-        "prompt": "After N4.11.G LISTO_REAL, prepare factual release-note input without deploy/certification claims; Desarrollo only; two self-reviews.",
-        "plannedParent": "N4.11.H",
-        "dispatchEligible": true,
-        "reason": "PREPROGRAMMED_UNTIL_N4.11.G_LISTO_REAL"
-      }
-    ],
-    "JULES_B": [
-      {
-        "dispatchId": "N4-11-G-2-SERVICE-TEST-B",
-        "taskId": "N4.11.G.2.SERVICE_REGRESSION",
-        "workerId": "JULES_B",
-        "taskAttempt": 1,
-        "fileScopeHint": "frontend/src/app/services/centro-costo.service.spec.ts",
-        "prompt": "Add focused CentroCosto frontend service regression; Desarrollo only; two self-reviews.",
-        "plannedParent": "N4.11.G",
-        "dispatchEligible": false
-      },
-      {
-        "dispatchId": "N4-11-G-6-API-CONTRACT-B",
-        "taskId": "N4.11.G.6.API_CONTRACT_TESTS",
-        "workerId": "JULES_B",
-        "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N411GCentrosCostoApiContractTests.cs",
-        "prompt": "Add CentroCosto API contract regression tests; Desarrollo only; two self-reviews.",
-        "plannedParent": "N4.11.G",
-        "dispatchEligible": false
-      },
-      {
-        "dispatchId": "N4-11-H-2-APIDOC-B",
-        "taskId": "N4.11.H.2.API_DOCUMENTATION",
-        "workerId": "JULES_B",
-        "taskAttempt": 1,
-        "fileScopeHint": "docs/N4.11_CENTROS_COSTO_API.md",
-        "prompt": "After N4.11.G LISTO_REAL, document verified CentroCosto API contract; Desarrollo only; two self-reviews.",
-        "plannedParent": "N4.11.H",
-        "dispatchEligible": true,
-        "reason": "PREPROGRAMMED_UNTIL_N4.11.G_LISTO_REAL"
-      },
-      {
-        "dispatchId": "N4-11-H-6-FILTERDOC-B",
-        "taskId": "N4.11.H.6.FILTER_MATRIX",
-        "workerId": "JULES_B",
-        "taskAttempt": 1,
-        "fileScopeHint": "docs/N4.11_CENTROS_COSTO_FILTER_MATRIX.md",
-        "prompt": "After N4.11.G LISTO_REAL, document verified CentroCosto query/filter matrix; Desarrollo only; two self-reviews.",
-        "plannedParent": "N4.11.H",
-        "dispatchEligible": true,
-        "reason": "PREPROGRAMMED_UNTIL_N4.11.G_LISTO_REAL"
-      },
-      {
-        "dispatchId": "N4-11-H-10-APIEVID-B",
-        "taskId": "N4.11.H.10.API_EVIDENCE_INDEX",
-        "workerId": "JULES_B",
-        "taskAttempt": 1,
-        "fileScopeHint": "docs/N4.11_CENTROS_COSTO_API_EVIDENCE.md",
-        "prompt": "After N4.11.G LISTO_REAL, consolidate verified API evidence only; Desarrollo only; two self-reviews.",
-        "plannedParent": "N4.11.H",
-        "dispatchEligible": true,
-        "reason": "PREPROGRAMMED_UNTIL_N4.11.G_LISTO_REAL"
-      },
-      {
-        "dispatchId": "N4-11-H-14-CONTRACTDOC-B",
-        "taskId": "N4.11.H.14.CONTRACT_SUMMARY",
-        "workerId": "JULES_B",
-        "taskAttempt": 1,
-        "fileScopeHint": "docs/N4.11_CENTROS_COSTO_CONTRACT_SUMMARY.md",
-        "prompt": "After N4.11.G LISTO_REAL, summarize verified public contracts without deployment claims; Desarrollo only; two self-reviews.",
-        "plannedParent": "N4.11.H",
-        "dispatchEligible": true,
-        "reason": "PREPROGRAMMED_UNTIL_N4.11.G_LISTO_REAL"
-      }
-    ],
-    "JULES_C": [
-      {
-        "dispatchId": "N4-11-G-3-E2E-C",
-        "taskId": "N4.11.G.3.E2E_REGRESSION",
-        "workerId": "JULES_C",
-        "taskAttempt": 1,
-        "fileScopeHint": "frontend/e2e/centros-costo.spec.ts",
-        "prompt": "Add scoped CentroCosto end-to-end regression; Desarrollo only; two self-reviews.",
-        "plannedParent": "N4.11.G",
-        "dispatchEligible": false
-      },
-      {
-        "dispatchId": "N4-11-G-7-VALIDREG-C",
-        "taskId": "N4.11.G.7.VALIDATION_REGRESSION",
-        "workerId": "JULES_C",
-        "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N411GCentrosCostoValidationRegressionTests.cs",
-        "prompt": "Add CentroCosto validation regression coverage; Desarrollo only; two self-reviews.",
-        "plannedParent": "N4.11.G",
-        "dispatchEligible": false
-      },
-      {
-        "dispatchId": "N4-11-H-3-TESTDOC-C",
-        "taskId": "N4.11.H.3.TEST_MATRIX",
-        "workerId": "JULES_C",
-        "taskAttempt": 1,
-        "fileScopeHint": "docs/N4.11_CENTROS_COSTO_TEST_MATRIX.md",
-        "prompt": "After N4.11.G LISTO_REAL, consolidate real CentroCosto test evidence; Desarrollo only; two self-reviews.",
-        "plannedParent": "N4.11.H",
-        "dispatchEligible": true,
-        "reason": "PREPROGRAMMED_UNTIL_N4.11.G_LISTO_REAL"
-      },
-      {
-        "dispatchId": "N4-11-H-7-A11YDOC-C",
-        "taskId": "N4.11.H.7.ACCESSIBILITY_EVIDENCE",
-        "workerId": "JULES_C",
-        "taskAttempt": 1,
-        "fileScopeHint": "docs/N4.11_CENTROS_COSTO_ACCESSIBILITY.md",
-        "prompt": "After N4.11.G LISTO_REAL, document verified CentroCosto accessibility evidence; Desarrollo only; two self-reviews.",
-        "plannedParent": "N4.11.H",
-        "dispatchEligible": true,
-        "reason": "PREPROGRAMMED_UNTIL_N4.11.G_LISTO_REAL"
-      },
-      {
-        "dispatchId": "N4-11-H-11-COVERAGE-C",
-        "taskId": "N4.11.H.11.COVERAGE_EVIDENCE",
-        "workerId": "JULES_C",
-        "taskAttempt": 1,
-        "fileScopeHint": "docs/N4.11_CENTROS_COSTO_COVERAGE_EVIDENCE.md",
-        "prompt": "After N4.11.G LISTO_REAL, record factual coverage evidence and unresolved gaps; Desarrollo only; two self-reviews.",
-        "plannedParent": "N4.11.H",
-        "dispatchEligible": true,
-        "reason": "PREPROGRAMMED_UNTIL_N4.11.G_LISTO_REAL"
-      },
-      {
-        "dispatchId": "N4-11-H-15-ACCEPT-C",
-        "taskId": "N4.11.H.15.ACCEPTANCE_MATRIX",
-        "workerId": "JULES_C",
-        "taskAttempt": 1,
-        "fileScopeHint": "docs/N4.11_CENTROS_COSTO_ACCEPTANCE_MATRIX.md",
-        "prompt": "After N4.11.G LISTO_REAL, map DoD acceptance criteria to verified evidence; Desarrollo only; two self-reviews.",
-        "plannedParent": "N4.11.H",
-        "dispatchEligible": true,
-        "reason": "PREPROGRAMMED_UNTIL_N4.11.G_LISTO_REAL"
-      }
-    ],
-    "JULES_D": [
-      {
-        "dispatchId": "N4-11-G-4-INTEG-D",
-        "taskId": "N4.11.G.4.INTEGRATION_REGRESSION",
-        "workerId": "JULES_D",
-        "taskAttempt": 1,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/N411GCentrosCostoIntegrationTests.cs",
-        "prompt": "Add scoped backend integration regression; Desarrollo only; two self-reviews.",
-        "plannedParent": "N4.11.G",
-        "dispatchEligible": false
-      },
-      {
-        "dispatchId": "N4-11-G-8-ROUTE-D",
-        "taskId": "N4.11.G.8.ROUTE_REGRESSION",
-        "workerId": "JULES_D",
-        "taskAttempt": 1,
-        "fileScopeHint": "frontend/src/app/app.routes.centros-costo.spec.ts",
-        "prompt": "Extend protected-route regression for CentroCosto; Desarrollo only; two self-reviews.",
-        "plannedParent": "N4.11.G",
-        "dispatchEligible": false
-      },
-      {
-        "dispatchId": "N4-11-H-4-SEC-DOC-D",
-        "taskId": "N4.11.H.4.SECURITY_DOCUMENTATION",
-        "workerId": "JULES_D",
-        "taskAttempt": 1,
-        "fileScopeHint": "docs/N4.11_CENTROS_COSTO_SECURITY.md",
-        "prompt": "After N4.11.G LISTO_REAL, document verified RBAC/security boundaries; Desarrollo only; two self-reviews.",
-        "plannedParent": "N4.11.H",
-        "dispatchEligible": true,
-        "reason": "PREPROGRAMMED_UNTIL_N4.11.G_LISTO_REAL"
-      },
-      {
-        "dispatchId": "N4-11-H-8-ROLLBACK-D",
-        "taskId": "N4.11.H.8.ROLLBACK_RUNBOOK",
-        "workerId": "JULES_D",
-        "taskAttempt": 1,
-        "fileScopeHint": "docs/N4.11_CENTROS_COSTO_ROLLBACK.md",
-        "prompt": "After N4.11.G LISTO_REAL, document scoped rollback boundaries and verification; Desarrollo only; two self-reviews.",
-        "plannedParent": "N4.11.H",
-        "dispatchEligible": true,
-        "reason": "PREPROGRAMMED_UNTIL_N4.11.G_LISTO_REAL"
-      },
-      {
-        "dispatchId": "N4-11-H-12-CERT-D",
-        "taskId": "N4.11.H.12.CERTIFICATION_CHECKLIST",
-        "workerId": "JULES_D",
-        "taskAttempt": 1,
-        "fileScopeHint": "docs/N4.11_CENTROS_COSTO_CERT_CHECKLIST.md",
-        "prompt": "After N4.11.G LISTO_REAL, build factual certification checklist without declaring LISTO; Desarrollo only; two self-reviews.",
-        "plannedParent": "N4.11.H",
-        "dispatchEligible": true,
-        "reason": "PREPROGRAMMED_UNTIL_N4.11.G_LISTO_REAL"
-      },
-      {
-        "dispatchId": "N4-11-H-16-OPS-D",
-        "taskId": "N4.11.H.16.OPERATIONS_CHECKLIST",
-        "workerId": "JULES_D",
-        "taskAttempt": 1,
-        "fileScopeHint": "docs/N4.11_CENTROS_COSTO_OPERATIONS.md",
-        "prompt": "After N4.11.G LISTO_REAL, document verified operational checks without deploy actions; Desarrollo only; two self-reviews.",
-        "plannedParent": "N4.11.H",
-        "dispatchEligible": true,
-        "reason": "PREPROGRAMMED_UNTIL_N4.11.G_LISTO_REAL"
-      }
-    ]
+    "JULES_A": [{"dispatchId": "N5-1-A-1-ARCH-REUSE-A", "taskId": "N5.1.A.1.ARCHITECTURE_REUSE", "workerId": "JULES_A", "taskAttempt": 1, "plannedParent": "N5.1.A", "readyForDispatch": true, "dispatchEligible": false, "fileScopeHint": "docs/N5.1_REPORTES_PREFLIGHT_ARCHITECTURE.md", "prompt": "Read docs/VAEP_AUTHORITY.md and PROJECT_INDEX.md first. N5.1.A is only a preflight for an independent report center. Inspect the existing ReporteAdministrativo/EstadoFinanciero services and their actual API consumers. Produce a concrete reuse/boundary decision with exact file/symbol references, existing behavior, minimal future seams and explicit out-of-scope items. Write only docs/N5.1_REPORTES_PREFLIGHT_ARCHITECTURE.md. Do not implement N5.1.B or change product/control-plane/roadmap, branches, secrets or production. Deliver a nonempty patch against primaryBaseHead, record TESTS_EXECUTED honestly (including not-run reasons), and two genuinely separate SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 checks. Never claim CI, closure or integration not performed."}],
+    "JULES_B": [{"dispatchId": "N5-1-A-2-DATA-BOUNDARIES-B", "taskId": "N5.1.A.2.DATA_QUERY_BOUNDARIES", "workerId": "JULES_B", "taskAttempt": 1, "plannedParent": "N5.1.A", "readyForDispatch": true, "dispatchEligible": false, "fileScopeHint": "docs/N5.1_REPORTES_PREFLIGHT_DATOS.md", "prompt": "Read docs/VAEP_AUTHORITY.md and PROJECT_INDEX.md first. For N5.1.A preflight, inspect existing reporting repositories/queries, AppDbContext and relevant report DTOs. Document authoritative data sources, existing filters/pagination, transaction boundaries and evidenced performance risks for the independent report center. Identify reuse versus gaps without inventing schema, business metrics or benchmark numbers. Write only docs/N5.1_REPORTES_PREFLIGHT_DATOS.md. No product changes, migrations, next-parent implementation, control-plane writes or production. Deliver a nonempty patch against primaryBaseHead with honest TESTS_EXECUTED and separate SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. Never claim closure or integration."}],
+    "JULES_C": [{"dispatchId": "N5-1-A-3-UI-RBAC-C", "taskId": "N5.1.A.3.UI_AUTHORIZATION_INVENTORY", "workerId": "JULES_C", "taskAttempt": 1, "plannedParent": "N5.1.A", "readyForDispatch": true, "dispatchEligible": false, "fileScopeHint": "docs/N5.1_REPORTES_PREFLIGHT_UI_RBAC.md", "prompt": "Read docs/VAEP_AUTHORITY.md and PROJECT_INDEX.md first. For N5.1.A, inspect actual report-related Angular routes, menu, services, auth guards and matching backend endpoint permissions. Produce a concrete navigation/permission inventory and minimal acceptance constraints for a future independent report center. Distinguish existing behavior from proposal; frontend hiding is not authorization. Write only docs/N5.1_REPORTES_PREFLIGHT_UI_RBAC.md. Do not modify UI, API, role grants, control-plane, production or later parent code. Deliver nonempty patch against primaryBaseHead; honest TESTS_EXECUTED; two independent SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2; no false LISTO/integration."}],
+    "JULES_D": [{"dispatchId": "N5-1-A-4-QA-ROLLBACK-D", "taskId": "N5.1.A.4.ACCEPTANCE_ROLLBACK_PREFLIGHT", "workerId": "JULES_D", "taskAttempt": 1, "plannedParent": "N5.1.A", "readyForDispatch": true, "dispatchEligible": false, "fileScopeHint": "docs/N5.1_REPORTES_PREFLIGHT_QA.md", "prompt": "Read docs/VAEP_AUTHORITY.md and PROJECT_INDEX.md first. Inspect existing reporting tests and CI entrypoints for N5.1.A. Produce an executable acceptance matrix for the future independent report center: authorized/unauthorized, valid/invalid filters, empty/error/loading, historical integrity, non-regression and rollback boundaries. Anchor each proposed check to actual existing files or explicitly label a gap. Write only docs/N5.1_REPORTES_PREFLIGHT_QA.md. No new product/tests/control-plane code, migrations, dispatches, production or invented results. Deliver nonempty patch against primaryBaseHead, exact TESTS_EXECUTED or not-run reasons, and separate SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. No closure/integration claim."}]
   }
 }
