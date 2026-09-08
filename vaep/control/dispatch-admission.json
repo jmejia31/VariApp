@@ -1,6 +1,6 @@
 {
   "newDispatchAdmission": "CLOSED",
   "allowExistingActiveSessions": true,
-  "reason": "REVIEW_FIRST_DEBT_FAIL_CLOSED: CURRENT_PARENT=N4.11.H still has unresolved correlated terminal ATTEMPT2 debt requiring REVIEW_FIRST/QA_TAKEOVER, including #3098 N4.11.H.15.ACCEPTANCE_MATRIX and #3097 N4.11.H.13.RELEASE_NOTES_INPUT; #3096 N4.11.H.14.CONTRACT_SUMMARY is ATTEMPT2 LANE_BUDGET_EXCEEDED with patchPresent=false and requires QA_TAKEOVER. Per PARENT_CLOSE_FIRST, no replacement/refill may be published until this terminal debt is materially resolved. R3 is prohibited.",
-  "updatedAtUtc": "2026-09-08T18:35:00Z"
+  "reason": "HEAD_FREEZE_CAUSAL_AFTER_QA_TAKEOVER: CURRENT_PARENT=N4.11.H terminal REVIEW_FIRST debt listed in the prior fail-closed state has been materially drained by direct QA_TAKEOVER coverage in Desarrollo, including H.15 acceptance matrix, H.13 release notes, H.14 contract summary, H.11 coverage evidence, H.9 QA evidence, H.7 accessibility evidence, H.10 API evidence, H.6 filter matrix, H.3 test matrix, plus existing H.5 runbook and H.16 operations takeover. Admission remains CLOSED until causal checks for the resulting functional HEAD are terminal and ownership/P0-P1 closure gates are reconciled. R3 remains prohibited.",
+  "updatedAtUtc": "2026-09-08T18:40:00Z"
 }
