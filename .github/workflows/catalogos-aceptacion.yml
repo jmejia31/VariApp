@@ -204,6 +204,7 @@ jobs:
         run: |
           npx playwright test \
             e2e/catalogos-mantenimientos.spec.ts \
+            e2e/centros-costo.spec.ts \
             e2e/productos-filtros.spec.ts \
             e2e/fase3-interfaz.spec.ts \
             e2e/fase4-responsive.spec.ts \
