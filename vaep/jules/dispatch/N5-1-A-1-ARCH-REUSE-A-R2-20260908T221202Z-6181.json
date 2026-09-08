@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-1-A-1-ARCH-REUSE-A-R2-20260908T221202Z-6181",
+  "taskId": "N5.1.A.1.ARCHITECTURE_REUSE",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 2,
+  "fileScopeHint": "docs/N5.1_REPORTES_PREFLIGHT_ARCHITECTURE.md",
+  "prompt": "Read docs/VAEP_AUTHORITY.md and PROJECT_INDEX.md first. N5.1.A is only a preflight for an independent report center. Inspect the existing ReporteAdministrativo/EstadoFinanciero services and their actual API consumers. Produce a concrete reuse/boundary decision with exact file/symbol references, existing behavior, minimal future seams and explicit out-of-scope items. Write only docs/N5.1_REPORTES_PREFLIGHT_ARCHITECTURE.md. Do not implement N5.1.B or change product/control-plane/roadmap, branches, secrets or production. Deliver a nonempty patch against primaryBaseHead, record TESTS_EXECUTED honestly (including not-run reasons), and two genuinely separate SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 checks. Never claim CI, closure or integration not performed.\n\nR2 RCA: PATCH_BASE_CONTROL_PLANE_DIVERGENCE actual=b14406d0b76c5f959d124bae375a2e05b171a0a7 requested=43a1e498c0c418d414f00399c92ad774718a03f8. Re-run the same material scope from the current Desarrollo checkout; do not expand scope, touch control-plane files, or claim integration.",
+  "primaryBaseHead": "53f9d2ee06147c07d41ba04f2d22f9ed4b15707b"
+}
