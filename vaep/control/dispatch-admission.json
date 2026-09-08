@@ -1,6 +1,6 @@
 {
   "newDispatchAdmission": "OPEN",
   "allowExistingActiveSessions": true,
-  "reason": "RECONCILED_REMOTE_TERMINAL: prior JULES_B quarantine workflowRunId=34232481145 is terminal failure; no live quarantined session or open current-parent terminal issue remains. Admission reopened for CURRENT_PARENT N4.11.G. PARENT_CLOSE_FIRST, causal push-gate freeze, exact manifest correlation, CURRENT+NEXT_SAFE, no-R3 and REVIEW_FIRST remain mandatory.",
-  "updatedAtUtc": "2026-09-08T14:08:00Z"
+  "reason": "VAEP automatic verified closure: N4.11.G LISTO_REAL; N4.11.H is the only dependency-valid CURRENT_PARENT. Exact gates and P0/P1 were validated by the closure governor.",
+  "updatedAtUtc": "2026-09-08T15:36:14Z"
 }

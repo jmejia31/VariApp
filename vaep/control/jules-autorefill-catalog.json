@@ -1,9 +1,9 @@
 {
   "version": 17,
   "authority": "docs/VAEP_AUTHORITY.md",
-  "currentParent": "N4.11.G",
-  "generatedAt": "2026-09-08T15:00:00Z",
-  "regenerationReason": "CONTROL_PLANE_RECONCILIATION__N4.11.F_LISTO_REAL__N4.11.G_CURRENT__RESTORE_N4.11.H_PROGRAMMED_BACKLOG",
+  "currentParent": "N4.11.H",
+  "generatedAt": "2026-09-08T15:36:14Z",
+  "regenerationReason": "AUTOMATIC_PARENT_CLOSE__N4.11.G_LISTO_REAL__N4.11.H_CURRENT",
   "policy": {
     "branch": "Desarrollo",
     "liveQueueDepthTarget": 2,
@@ -37,7 +37,7 @@
         "fileScopeHint": "frontend/src/app/features/centros-costo/centros-costo.a11y.spec.ts",
         "prompt": "Add accessibility regression for CentroCosto form/table states; Desarrollo only; two self-reviews.",
         "plannedParent": "N4.11.G",
-        "dispatchEligible": true
+        "dispatchEligible": false
       },
       {
         "dispatchId": "N4-11-H-1-FRONTDOC-A",
@@ -47,7 +47,7 @@
         "fileScopeHint": "docs/N4.11_CENTROS_COSTO_FRONTEND.md",
         "prompt": "After N4.11.G LISTO_REAL, document verified CentroCosto frontend behavior/evidence; Desarrollo only; two self-reviews.",
         "plannedParent": "N4.11.H",
-        "dispatchEligible": false,
+        "dispatchEligible": true,
         "reason": "PREPROGRAMMED_UNTIL_N4.11.G_LISTO_REAL"
       },
       {
@@ -58,7 +58,7 @@
         "fileScopeHint": "docs/N4.11_CENTROS_COSTO_RUNBOOK.md",
         "prompt": "After N4.11.G LISTO_REAL, create factual CentroCosto frontend diagnostics/rollback runbook; Desarrollo only; two self-reviews.",
         "plannedParent": "N4.11.H",
-        "dispatchEligible": false,
+        "dispatchEligible": true,
         "reason": "PREPROGRAMMED_UNTIL_N4.11.G_LISTO_REAL"
       },
       {
@@ -69,7 +69,7 @@
         "fileScopeHint": "docs/N4.11_CENTROS_COSTO_QA_EVIDENCE.md",
         "prompt": "After N4.11.G LISTO_REAL, index only verified CentroCosto QA evidence and unresolved gaps; Desarrollo only; two self-reviews.",
         "plannedParent": "N4.11.H",
-        "dispatchEligible": false,
+        "dispatchEligible": true,
         "reason": "PREPROGRAMMED_UNTIL_N4.11.G_LISTO_REAL"
       },
       {
@@ -80,7 +80,7 @@
         "fileScopeHint": "docs/N4.11_CENTROS_COSTO_RELEASE_NOTES.md",
         "prompt": "After N4.11.G LISTO_REAL, prepare factual release-note input without deploy/certification claims; Desarrollo only; two self-reviews.",
         "plannedParent": "N4.11.H",
-        "dispatchEligible": false,
+        "dispatchEligible": true,
         "reason": "PREPROGRAMMED_UNTIL_N4.11.G_LISTO_REAL"
       }
     ],
@@ -93,7 +93,7 @@
         "fileScopeHint": "frontend/src/app/services/centro-costo.service.spec.ts",
         "prompt": "Add focused CentroCosto frontend service regression; Desarrollo only; two self-reviews.",
         "plannedParent": "N4.11.G",
-        "dispatchEligible": true
+        "dispatchEligible": false
       },
       {
         "dispatchId": "N4-11-G-6-API-CONTRACT-B",
@@ -103,7 +103,7 @@
         "fileScopeHint": "backend/tests/InventoryApp.Tests/N411GCentrosCostoApiContractTests.cs",
         "prompt": "Add CentroCosto API contract regression tests; Desarrollo only; two self-reviews.",
         "plannedParent": "N4.11.G",
-        "dispatchEligible": true
+        "dispatchEligible": false
       },
       {
         "dispatchId": "N4-11-H-2-APIDOC-B",
@@ -113,7 +113,7 @@
         "fileScopeHint": "docs/N4.11_CENTROS_COSTO_API.md",
         "prompt": "After N4.11.G LISTO_REAL, document verified CentroCosto API contract; Desarrollo only; two self-reviews.",
         "plannedParent": "N4.11.H",
-        "dispatchEligible": false,
+        "dispatchEligible": true,
         "reason": "PREPROGRAMMED_UNTIL_N4.11.G_LISTO_REAL"
       },
       {
@@ -124,7 +124,7 @@
         "fileScopeHint": "docs/N4.11_CENTROS_COSTO_FILTER_MATRIX.md",
         "prompt": "After N4.11.G LISTO_REAL, document verified CentroCosto query/filter matrix; Desarrollo only; two self-reviews.",
         "plannedParent": "N4.11.H",
-        "dispatchEligible": false,
+        "dispatchEligible": true,
         "reason": "PREPROGRAMMED_UNTIL_N4.11.G_LISTO_REAL"
       },
       {
@@ -135,7 +135,7 @@
         "fileScopeHint": "docs/N4.11_CENTROS_COSTO_API_EVIDENCE.md",
         "prompt": "After N4.11.G LISTO_REAL, consolidate verified API evidence only; Desarrollo only; two self-reviews.",
         "plannedParent": "N4.11.H",
-        "dispatchEligible": false,
+        "dispatchEligible": true,
         "reason": "PREPROGRAMMED_UNTIL_N4.11.G_LISTO_REAL"
       },
       {
@@ -146,7 +146,7 @@
         "fileScopeHint": "docs/N4.11_CENTROS_COSTO_CONTRACT_SUMMARY.md",
         "prompt": "After N4.11.G LISTO_REAL, summarize verified public contracts without deployment claims; Desarrollo only; two self-reviews.",
         "plannedParent": "N4.11.H",
-        "dispatchEligible": false,
+        "dispatchEligible": true,
         "reason": "PREPROGRAMMED_UNTIL_N4.11.G_LISTO_REAL"
       }
     ],
@@ -159,7 +159,7 @@
         "fileScopeHint": "frontend/e2e/centros-costo.spec.ts",
         "prompt": "Add scoped CentroCosto end-to-end regression; Desarrollo only; two self-reviews.",
         "plannedParent": "N4.11.G",
-        "dispatchEligible": true
+        "dispatchEligible": false
       },
       {
         "dispatchId": "N4-11-G-7-VALIDREG-C",
@@ -169,7 +169,7 @@
         "fileScopeHint": "backend/tests/InventoryApp.Tests/N411GCentrosCostoValidationRegressionTests.cs",
         "prompt": "Add CentroCosto validation regression coverage; Desarrollo only; two self-reviews.",
         "plannedParent": "N4.11.G",
-        "dispatchEligible": true
+        "dispatchEligible": false
       },
       {
         "dispatchId": "N4-11-H-3-TESTDOC-C",
@@ -179,7 +179,7 @@
         "fileScopeHint": "docs/N4.11_CENTROS_COSTO_TEST_MATRIX.md",
         "prompt": "After N4.11.G LISTO_REAL, consolidate real CentroCosto test evidence; Desarrollo only; two self-reviews.",
         "plannedParent": "N4.11.H",
-        "dispatchEligible": false,
+        "dispatchEligible": true,
         "reason": "PREPROGRAMMED_UNTIL_N4.11.G_LISTO_REAL"
       },
       {
@@ -190,7 +190,7 @@
         "fileScopeHint": "docs/N4.11_CENTROS_COSTO_ACCESSIBILITY.md",
         "prompt": "After N4.11.G LISTO_REAL, document verified CentroCosto accessibility evidence; Desarrollo only; two self-reviews.",
         "plannedParent": "N4.11.H",
-        "dispatchEligible": false,
+        "dispatchEligible": true,
         "reason": "PREPROGRAMMED_UNTIL_N4.11.G_LISTO_REAL"
       },
       {
@@ -201,7 +201,7 @@
         "fileScopeHint": "docs/N4.11_CENTROS_COSTO_COVERAGE_EVIDENCE.md",
         "prompt": "After N4.11.G LISTO_REAL, record factual coverage evidence and unresolved gaps; Desarrollo only; two self-reviews.",
         "plannedParent": "N4.11.H",
-        "dispatchEligible": false,
+        "dispatchEligible": true,
         "reason": "PREPROGRAMMED_UNTIL_N4.11.G_LISTO_REAL"
       },
       {
@@ -212,7 +212,7 @@
         "fileScopeHint": "docs/N4.11_CENTROS_COSTO_ACCEPTANCE_MATRIX.md",
         "prompt": "After N4.11.G LISTO_REAL, map DoD acceptance criteria to verified evidence; Desarrollo only; two self-reviews.",
         "plannedParent": "N4.11.H",
-        "dispatchEligible": false,
+        "dispatchEligible": true,
         "reason": "PREPROGRAMMED_UNTIL_N4.11.G_LISTO_REAL"
       }
     ],
@@ -225,7 +225,7 @@
         "fileScopeHint": "backend/tests/InventoryApp.Tests/N411GCentrosCostoIntegrationTests.cs",
         "prompt": "Add scoped backend integration regression; Desarrollo only; two self-reviews.",
         "plannedParent": "N4.11.G",
-        "dispatchEligible": true
+        "dispatchEligible": false
       },
       {
         "dispatchId": "N4-11-G-8-ROUTE-D",
@@ -235,7 +235,7 @@
         "fileScopeHint": "frontend/src/app/app.routes.centros-costo.spec.ts",
         "prompt": "Extend protected-route regression for CentroCosto; Desarrollo only; two self-reviews.",
         "plannedParent": "N4.11.G",
-        "dispatchEligible": true
+        "dispatchEligible": false
       },
       {
         "dispatchId": "N4-11-H-4-SEC-DOC-D",
@@ -245,7 +245,7 @@
         "fileScopeHint": "docs/N4.11_CENTROS_COSTO_SECURITY.md",
         "prompt": "After N4.11.G LISTO_REAL, document verified RBAC/security boundaries; Desarrollo only; two self-reviews.",
         "plannedParent": "N4.11.H",
-        "dispatchEligible": false,
+        "dispatchEligible": true,
         "reason": "PREPROGRAMMED_UNTIL_N4.11.G_LISTO_REAL"
       },
       {
@@ -256,7 +256,7 @@
         "fileScopeHint": "docs/N4.11_CENTROS_COSTO_ROLLBACK.md",
         "prompt": "After N4.11.G LISTO_REAL, document scoped rollback boundaries and verification; Desarrollo only; two self-reviews.",
         "plannedParent": "N4.11.H",
-        "dispatchEligible": false,
+        "dispatchEligible": true,
         "reason": "PREPROGRAMMED_UNTIL_N4.11.G_LISTO_REAL"
       },
       {
@@ -267,7 +267,7 @@
         "fileScopeHint": "docs/N4.11_CENTROS_COSTO_CERT_CHECKLIST.md",
         "prompt": "After N4.11.G LISTO_REAL, build factual certification checklist without declaring LISTO; Desarrollo only; two self-reviews.",
         "plannedParent": "N4.11.H",
-        "dispatchEligible": false,
+        "dispatchEligible": true,
         "reason": "PREPROGRAMMED_UNTIL_N4.11.G_LISTO_REAL"
       },
       {
@@ -278,7 +278,7 @@
         "fileScopeHint": "docs/N4.11_CENTROS_COSTO_OPERATIONS.md",
         "prompt": "After N4.11.G LISTO_REAL, document verified operational checks without deploy actions; Desarrollo only; two self-reviews.",
         "plannedParent": "N4.11.H",
-        "dispatchEligible": false,
+        "dispatchEligible": true,
         "reason": "PREPROGRAMMED_UNTIL_N4.11.G_LISTO_REAL"
       }
     ]
