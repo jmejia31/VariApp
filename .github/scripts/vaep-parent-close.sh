@@ -142,7 +142,8 @@ publish_promotion() {
 }
 
 main() {
-  local parent next fragment head functional remote_parent now tmp_catalog tmp_admission live
+  local parent next fragment head functional remote_parent now live
+  local tmp_catalog="" tmp_admission=""
   require_runtime
   [[ -f "$MASTER_FILE" && -f "$PARSER" && -f "$CATALOG" && -f "$ADMISSION" ]] || { echo 'VAEP_CLOSE=BLOCKED reason=control_files_missing'; return 0; }
   [[ "$(bash "$PARSER" --get PARENT_CLOSE_FIRST "$MASTER_FILE")" == "TRUE" ]] || { echo 'VAEP_CLOSE=BLOCKED reason=master_parent_close_policy'; return 0; }
@@ -181,7 +182,7 @@ main() {
   now="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
   tmp_catalog="$(mktemp)"
   tmp_admission="$(mktemp)"
-  trap 'rm -f "$tmp_catalog" "$tmp_admission"' EXIT
+  trap 'rm -f "${tmp_catalog:-}" "${tmp_admission:-}"' EXIT
   jq --arg next "$next" --arg now "$now" --arg parent "$parent" '
     .currentParent=$next |
     .generatedAt=$now |
