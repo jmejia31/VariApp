@@ -37,12 +37,12 @@ jobs:
         run: bash .github/scripts/vaep-jules-worker.sh --runtime-preflight
       - name: Run VAEP/Jules MASTER runtime self-test
         run: bash .github/scripts/vaep-jules-master.sh --self-test
-      - name: Validate post-terminal refill preserves REVIEW_FIRST and refills in parallel
+      - name: Validate post-terminal refill preserves REVIEW_FIRST fail-closed
         run: |
           grep -q "AUTOREFILL_TERMINAL_HANDOFF" .github/scripts/vaep-jules-autorefill.sh
-          grep -q "CONTINUE_TO_CORE_REVIEW_FIRST_IN_PARALLEL" .github/scripts/vaep-jules-autorefill.sh
+          grep -q "BLOCK_PENDING_REVIEW_FIRST" .github/scripts/vaep-jules-autorefill.sh
           grep -q "reviewResult:\"PENDING_REVIEW_FIRST\"" .github/scripts/vaep-jules-worker.sh
-          ! grep -q "NO_POST_TERMINAL_REFILL" .github/scripts/vaep-jules-autorefill.sh
+          ! grep -q "CONTINUE_TO_CORE_REVIEW_FIRST_IN_PARALLEL" .github/scripts/vaep-jules-autorefill.sh
       - name: Validate control-plane base equivalence guard
         run: |
           grep -q "CONTROL_PLANE_BASE_EQUIVALENCE" docs/VAEP_AUTHORITY.md
@@ -79,7 +79,8 @@ jobs:
         run: |
           grep -q "READY_FOR_VAEP_REVIEW_FIRST_REQUIRED_NO_REFILL" .github/scripts/vaep-jules-worker.sh
           ! grep -q "review_first_debt_exists" .github/scripts/vaep-jules-autorefill.sh
-          grep -q "CONTINUE_TO_CORE_REVIEW_FIRST_IN_PARALLEL" .github/scripts/vaep-jules-autorefill.sh
+          grep -q "BLOCK_PENDING_REVIEW_FIRST" .github/scripts/vaep-jules-autorefill.sh
+          ! grep -q "CONTINUE_TO_CORE_REVIEW_FIRST_IN_PARALLEL" .github/scripts/vaep-jules-autorefill.sh
           grep -q "PREARM_BEFORE_TERMINAL" docs/VAEP_AUTHORITY.md
           grep -q "other_live_lane_run_exists" .github/scripts/vaep-jules-autorefill-core.sh
           grep -q "VAEP_LANE_RUN_ID" .github/workflows/vaep-jules-secondary.yml
