@@ -1,6 +1,6 @@
 {
   "newDispatchAdmission": "OPEN",
   "allowExistingActiveSessions": true,
-  "reason": "N4.11.C LISTO_REAL by VAEP review/certification on functionalHead cdea1c5b8bfd1ec1720bdb6b2eb8712ed8143720 with applicable causal gates terminal and P0/P1=0; N4.11.D promoted as the only dependency-valid CURRENT_PARENT. Only plannedParent=N4.11.D may dispatch.",
-  "updatedAtUtc": "2026-09-07T20:23:30Z"
+  "reason": "VAEP automatic verified closure: N4.11.D LISTO_REAL; N4.11.E is the only dependency-valid CURRENT_PARENT. Exact gates and P0/P1 were validated by the closure governor.",
+  "updatedAtUtc": "2026-09-08T01:39:53Z"
 }
