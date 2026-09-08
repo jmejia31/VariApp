@@ -4,6 +4,7 @@ set -euo pipefail
 readonly MASTER_FILE="docs/VAEP_AUTHORITY.md"
 readonly PARSER=".github/scripts/vaep-policy-parser.sh"
 readonly AUTOREFILL=".github/scripts/vaep-jules-autorefill.sh"
+readonly PARENT_CLOSE=".github/scripts/vaep-parent-close.sh"
 readonly CATALOG="vaep/control/jules-autorefill-catalog.json"
 readonly BRANCH="Desarrollo"
 readonly WORKERS=(JULES_A JULES_B JULES_C JULES_D)
@@ -138,6 +139,7 @@ main() {
   [[ -n "${GITHUB_REPOSITORY:-}" ]] || fail 'GITHUB_REPOSITORY_missing'
   [[ -n "${GH_TOKEN:-}" ]] || fail 'GH_TOKEN_missing'
   [[ -f "$CATALOG" ]] || fail 'catalog_missing'
+  [[ -f "$PARENT_CLOSE" ]] || fail 'parent_close_governor_missing'
 
   case "$worker" in
     '') workers=("${WORKERS[@]}" ) ;;
@@ -153,7 +155,37 @@ main() {
       rc=1
     fi
   done
-  echo "VAEP_CHECKPOINT_EXECUTION=COMPLETE checkpoint=$checkpoint worker_count=${#workers[@]}"
+  # A lane refill can legitimately find no safe work when the current parent
+  # is exhausted. In that case the same checkpoint must attempt the canonical
+  # closure/promotion path before ending status-only. The governor is strictly
+  # evidence- and gate-driven; it never invents LISTO_REAL or integrates an
+  # unreviewed Jules artifact.
+  local closure_output closure_rc closure_promoted=0
+  set +e
+  closure_output="$(GITHUB_REPOSITORY="$GITHUB_REPOSITORY" GH_TOKEN="$GH_TOKEN" bash "$PARENT_CLOSE" 2>&1)"
+  closure_rc=$?
+  set -e
+  printf '%s\n' "$closure_output"
+  if (( closure_rc != 0 )); then
+    echo "VAEP_CHECKPOINT_CLOSURE_RESULT=ERROR rc=$closure_rc" >&2
+    rc=1
+  elif grep -Eq 'VAEP_PARENT_(PROMOTED|PROMOTION_ALREADY_PRESENT|PROMOTION_RACE)=true' <<<"$closure_output"; then
+    closure_promoted=1
+    echo "VAEP_CHECKPOINT_CLOSURE_RESULT=ADVANCE_DETECTED checkpoint=$checkpoint"
+  else
+    echo "VAEP_CHECKPOINT_CLOSURE_RESULT=NO_ADVANCE checkpoint=$checkpoint"
+  fi
+
+  if (( closure_promoted != 0 )); then
+    echo "VAEP_CHECKPOINT_CONTINUITY_RETRY=AFTER_PARENT_ADVANCE checkpoint=$checkpoint"
+    for worker_arg in "${workers[@]}"; do
+      if ! run_lane_refill "$worker_arg" "$checkpoint"; then
+        rc=1
+      fi
+    done
+  fi
+
+  echo "VAEP_CHECKPOINT_EXECUTION=COMPLETE checkpoint=$checkpoint worker_count=${#workers[@]} closure_promoted=$closure_promoted"
   # Review and watchdog are intentionally observed after lane refill. They
   # must never consume the refill deadline when a safe CURRENT/NEXT is absent.
   [[ "$checkpoint" != ':24' ]] || emit_review_observation

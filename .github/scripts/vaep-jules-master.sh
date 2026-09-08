@@ -383,6 +383,18 @@ if [[ "$rc" -eq 125 || "$runtime_phase" == "STALL_NO_PROGRESS" ]]; then
   timeout_result_state="JULES_STALL_NO_PROGRESS"
 fi
 
+# `timeout` terminates the worker outside its polling loop. In that path the
+# worker may have left runtime-state at SESSION_ACTIVE even though MASTER has
+# already revoked the lane and is producing the supersession artifact. Update
+# the shared state before the post-terminal hook reads it; otherwise the hook
+# rejects a valid timeout handoff and the lane remains without NEXT_SAFE.
+if [[ -f "$runtime_state" ]] && [[ "$runtime_phase" == "SESSION_ACTIVE" || -z "$runtime_phase" ]]; then
+  jq --arg phase "${timeout_result_state/JULES_/}" --arg at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+    '.phase=$phase | .terminalAt=$at | .lastUsefulEvent="MASTER_TIMEOUT_HANDOFF"' \
+    "$runtime_state" > "$runtime_state.next"
+  mv "$runtime_state.next" "$runtime_state"
+fi
+
 safe_stop_action="NO_SESSION"
 before_state="NO_SESSION"
 after_state="NO_SESSION"

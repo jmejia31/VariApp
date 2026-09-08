@@ -12,6 +12,7 @@ on:
   # released freeze does not add another avoidable idle interval.
   workflow_run:
     workflows:
+      - 'VAEP engine lightweight checks'
       - 'Desarrollo - Compilación y pruebas'
       - 'Desarrollo - aceptación funcional integral'
       - 'Desarrollo - recuperación de migración MySQL parcial'
@@ -36,7 +37,7 @@ concurrency:
 jobs:
   checkpoint:
     if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'Desarrollo')
-    name: ${{ matrix.worker }} ${{ inputs.checkpoint || github.event.schedule }}
+    name: ${{ matrix.worker }} ${{ inputs.checkpoint || github.event.schedule || ':00' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     strategy:

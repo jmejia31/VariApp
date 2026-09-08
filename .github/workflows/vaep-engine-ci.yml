@@ -25,7 +25,7 @@ jobs:
       - name: Validate VAEP scripts
         run: node --check scripts/vaep/dispatch-preflight.mjs && node --check scripts/vaep/aggregate-evidence.mjs && node --check scripts/vaep/bundles.mjs && node --check scripts/vaep/sync-bitacora.mjs && node --check scripts/vaep/reconcile-status.mjs && node --check scripts/vaep/metrics.mjs && python3 -m py_compile scripts/vaep/jules_integration_metrics.py scripts/vaep/jules_runtime_contract.py
       - name: Validate Bash syntax
-        run: bash -n .github/scripts/vaep-policy-parser.sh .github/scripts/vaep-jules-master.sh .github/scripts/vaep-jules-worker.sh .github/scripts/vaep-jules-autorefill.sh .github/scripts/vaep-jules-autorefill-core.sh .github/scripts/vaep-jules-catalog-floor.sh .github/scripts/vaep-checkpoint.sh
+        run: bash -n .github/scripts/vaep-policy-parser.sh .github/scripts/vaep-jules-master.sh .github/scripts/vaep-jules-worker.sh .github/scripts/vaep-jules-autorefill.sh .github/scripts/vaep-jules-autorefill-core.sh .github/scripts/vaep-jules-catalog-floor.sh .github/scripts/vaep-parent-close.sh .github/scripts/vaep-checkpoint.sh
       - name: Validate parser fail-closed self-test
         run: bash .github/scripts/vaep-policy-parser.sh --self-test
       - name: Validate AntiG StaticOnly
@@ -50,6 +50,9 @@ jobs:
           grep -q -- "--base-equivalence" .github/scripts/vaep-jules-worker.sh
           grep -q "recoverable_attempt1_entry" .github/scripts/vaep-jules-autorefill-core.sh
           grep -q "WAIT_CAUSAL_CI" .github/scripts/vaep-checkpoint.sh
+          grep -q "vaep/evidence/\*" .github/scripts/vaep-jules-autorefill-core.sh
+          grep -q "vaep/evidence/\*" .github/scripts/vaep-parent-close.sh
+          grep -q "MASTER_TIMEOUT_HANDOFF" .github/scripts/vaep-jules-master.sh
       - name: Validate recovery exact-manifest contract
         run: |
           for wf in .github/workflows/vaep-jules-{a,b,c,d}-recovery.yml; do
@@ -70,9 +73,11 @@ jobs:
         run: |
           test "$(grep -c "cron:" .github/workflows/vaep-checkpoints.yml)" -eq 5
           grep -q "workflow_run:" .github/workflows/vaep-checkpoints.yml
+          grep -q "VAEP engine lightweight checks" .github/workflows/vaep-checkpoints.yml
           grep -q "github.event.workflow_run.conclusion == 'success'" .github/workflows/vaep-checkpoints.yml
           grep -q "VAEP_CHECKPOINTS=:00,:12,:24,:36,:48" docs/VAEP_AUTHORITY.md
           bash .github/scripts/vaep-checkpoint.sh --self-test
+          bash .github/scripts/vaep-parent-close.sh --self-test
       - name: Validate Jules synthetic dispatch matrix
         run: python3 scripts/vaep/jules_runtime_contract.py --self-test
       - name: Validate operational KPI evaluator
