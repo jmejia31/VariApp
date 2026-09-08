@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "OPEN",
+  "newDispatchAdmission": "CLOSED",
   "allowExistingActiveSessions": true,
-  "reason": "RECONCILED_NO_PUSH_CAUSAL_FREEZE: CURRENT_PARENT=N4.11.H; exact functional-head causal workflows have no queued/in_progress Desarrollo push runs. Pull-request/global checks and QA evidence commits are non-blocking for independent SAFE_WORK. REVIEW_FIRST/QA_TAKEOVER debt remains recorded and is not auto-integrated. R3 remains prohibited.",
-  "updatedAtUtc": "2026-09-08T18:50:00Z"
+  "reason": "PENDING_REVIEW_FIRST_N4.11.H",
+  "updatedAtUtc": "2026-09-08T19:26:47Z"
 }
