@@ -69,6 +69,8 @@ jobs:
       - name: Validate scheduled checkpoint controller
         run: |
           test "$(grep -c "cron:" .github/workflows/vaep-checkpoints.yml)" -eq 5
+          grep -q "workflow_run:" .github/workflows/vaep-checkpoints.yml
+          grep -q "github.event.workflow_run.conclusion == 'success'" .github/workflows/vaep-checkpoints.yml
           grep -q "VAEP_CHECKPOINTS=:00,:12,:24,:36,:48" docs/VAEP_AUTHORITY.md
           bash .github/scripts/vaep-checkpoint.sh --self-test
       - name: Validate Jules synthetic dispatch matrix
