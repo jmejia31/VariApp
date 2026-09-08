@@ -169,31 +169,33 @@ hardening_gates_ok() {
 }
 
 publish_reconciled_admission() {
-  local expected_head="$1" parent="$2" prior_reason="$3" payload decoded current_head now open_json
+  local expected_head="$1" parent="$2" prior_reason="$3" expected_state="${4:-FROZEN}" reconciliation_reason="${5:-}" commit_message="${6:-chore(vaep): reopen admission after watchdog reconciliation}" payload decoded current_head current_state now open_json
   local admission_blob base_commit base_tree tree commit rc
 
   payload="$(api "repos/$GITHUB_REPOSITORY/contents/$ADMISSION?ref=$BRANCH" 2>/dev/null)" || return 1
   decoded="$(jq -r '.content' <<<"$payload" | tr -d '\n' | base64 -d 2>/dev/null)" || return 1
-  if [[ "$(jq -r '.newDispatchAdmission // empty' <<<"$decoded")" != "FROZEN" ]]; then
+  current_state="$(jq -r '.newDispatchAdmission // empty' <<<"$decoded")"
+  if [[ "$current_state" == "OPEN" ]]; then
     printf '%s\n' "$decoded"
     return 0
   fi
+  [[ "$current_state" == "$expected_state" ]] || return 2
   current_head="$(api "repos/$GITHUB_REPOSITORY/git/ref/heads/$BRANCH" --jq '.object.sha' 2>/dev/null)" || return 1
   [[ "$current_head" == "$expected_head" ]] || return 2
   now="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  [[ -n "$reconciliation_reason" ]] || reconciliation_reason="WATCHDOG_RECONCILED: no live GitHub Jules run and all current-parent remote sessions terminal; parent=$parent; prior=$prior_reason"
   open_json="$(jq -n \
     --arg now "$now" \
-    --arg parent "$parent" \
-    --arg prior "$prior_reason" \
-    '{newDispatchAdmission:"OPEN",allowExistingActiveSessions:true,reason:("WATCHDOG_RECONCILED: no live GitHub Jules run and all current-parent remote sessions terminal; parent=" + $parent + "; prior=" + $prior),updatedAtUtc:$now}')"
+    --arg reason "$reconciliation_reason" \
+    '{newDispatchAdmission:"OPEN",allowExistingActiveSessions:true,reason:$reason,updatedAtUtc:$now}')"
   admission_blob="$(jq -n --arg content "$open_json" '{content:$content,encoding:"utf-8"}' | api "repos/$GITHUB_REPOSITORY/git/blobs" --method POST --input - --jq '.sha')" || return 1
   base_commit="$(api "repos/$GITHUB_REPOSITORY/git/commits/$expected_head" 2>/dev/null)" || return 1
   base_tree="$(jq -r '.tree.sha' <<<"$base_commit")"
   tree="$(jq -n --arg base "$base_tree" --arg admission "$admission_blob" \
     '{base_tree:$base,tree:[{path:"vaep/control/dispatch-admission.json",mode:"100644",type:"blob",sha:$admission}]}' \
     | api "repos/$GITHUB_REPOSITORY/git/trees" --method POST --input - --jq '.sha')" || return 1
-  commit="$(jq -n --arg tree "$tree" --arg parent "$expected_head" \
-    '{message:"chore(vaep): reopen admission after watchdog reconciliation",tree:$tree,parents:[$parent]}' \
+  commit="$(jq -n --arg message "$commit_message" --arg tree "$tree" --arg parent "$expected_head" \
+    '{message:$message,tree:$tree,parents:[$parent]}' \
     | api "repos/$GITHUB_REPOSITORY/git/commits" --method POST --input - --jq '.sha')" || return 1
   set +e
   jq -n --arg sha "$commit" '{sha:$sha,force:false}' \
@@ -224,6 +226,41 @@ reconcile_watchdog_admission() {
     return 0
   fi
   reason="$(jq -r '.reason // empty' <<<"$decoded")"
+  if [[ "$state" == "CLOSED" && "$reason" == REVIEW_FIRST_DEBT_FAIL_CLOSED* ]]; then
+    parent="$(jq -r '.currentParent // empty' "$CATALOG")"
+    [[ -n "$parent" ]] || {
+      echo 'VAEP_ADMISSION_RECONCILE=WAIT reason=current_parent_missing' >&2
+      return 0
+    }
+    head="$(api "repos/$GITHUB_REPOSITORY/git/ref/heads/$BRANCH" --jq '.object.sha' 2>/dev/null)" || {
+      echo 'VAEP_ADMISSION_RECONCILE=WAIT reason=head_unavailable' >&2
+      return 0
+    }
+    if ! hardening_gates_ok "$head"; then
+      return 0
+    fi
+    if local_admission="$(publish_reconciled_admission \
+      "$head" "$parent" "$reason" "CLOSED" \
+      "REVIEW_FIRST_DEBT_RECONCILED: pending REVIEW_FIRST/QA_TAKEOVER remains recorded and non-blocking for independent NEXT_SAFE; parent=$parent; prior=$reason" \
+      "fix(vaep): normalize review debt admission state")"; then
+      printf '%s\n' "$local_admission" > "$ADMISSION"
+      echo "VAEP_ADMISSION_RECONCILE=OPEN reason=review_first_debt_non_blocking parent=$parent head=$head"
+    else
+      rc=$?
+      if (( rc == 2 )); then
+        refreshed="$(api "repos/$GITHUB_REPOSITORY/contents/$ADMISSION?ref=$BRANCH" --jq '.content' 2>/dev/null | tr -d '\n' | base64 -d 2>/dev/null || true)"
+        if [[ "$(jq -r '.newDispatchAdmission // empty' <<<"$refreshed")" == "OPEN" ]]; then
+          printf '%s\n' "$refreshed" > "$ADMISSION"
+          echo 'VAEP_ADMISSION_RECONCILE=OPEN reason=concurrent_review_debt_reconciler'
+        else
+          echo 'VAEP_ADMISSION_RECONCILE=WAIT reason=review_debt_publish_race' >&2
+        fi
+      else
+        echo "VAEP_ADMISSION_RECONCILE=WAIT reason=review_debt_publish_failed rc=$rc" >&2
+      fi
+    fi
+    return 0
+  fi
   if [[ "$state" != "FROZEN" ]] || ! is_watchdog_freeze_reason "$reason"; then
     echo "VAEP_ADMISSION_RECONCILE=WAIT reason=non_watchdog_freeze state=$state" >&2
     return 0
@@ -335,6 +372,8 @@ run_self_test() {
   grep -q 'hardening_gates_ok' "$0"
   grep -q 'vaep-engine-ci.yml' "$0"
   grep -q 'vaep-jules-diagnostic.yml' "$0"
+  grep -q 'REVIEW_FIRST_DEBT_RECONCILED' "$0"
+  grep -q 'expected_state' "$0"
   echo 'VAEP_CHECKPOINT_SELF_TEST=PASS'
 }
 

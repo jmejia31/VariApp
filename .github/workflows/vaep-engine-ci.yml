@@ -104,6 +104,8 @@ jobs:
           grep -q "reconcile_watchdog_admission" .github/scripts/vaep-checkpoint.sh
           grep -q "remote_watchdog_sessions_terminal" .github/scripts/vaep-checkpoint.sh
           grep -q "WATCHDOG_RECONCILED" .github/scripts/vaep-checkpoint.sh
+          grep -q "REVIEW_FIRST_DEBT_RECONCILED" .github/scripts/vaep-checkpoint.sh
+          grep -q "expected_state" .github/scripts/vaep-checkpoint.sh
           bash .github/scripts/vaep-checkpoint.sh --self-test
           bash .github/scripts/vaep-parent-close.sh --self-test
       - name: Validate Jules synthetic dispatch matrix
