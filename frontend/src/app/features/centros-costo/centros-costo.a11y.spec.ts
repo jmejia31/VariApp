@@ -60,7 +60,10 @@ describe('N4.11.G CentroCosto accessibility regression', () => {
         sucursalId: null,
         sucursalCodigo: null,
         sucursalNombre: null,
-        activo: true
+        activo: true,
+        eliminado: false,
+        fechaCreacion: '2026-09-08T00:00:00Z',
+        fechaActualizacion: '2026-09-08T00:00:00Z'
       }
     ]);
     fixture.detectChanges();
