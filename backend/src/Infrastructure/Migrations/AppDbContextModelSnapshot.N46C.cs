@@ -1,4 +1,5 @@
 using System;
+using InventoryApp.Domain.Entities.Contabilidad;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
@@ -202,6 +203,9 @@ namespace InventoryApp.Infrastructure.Migrations
 
                 b.Navigation("Sucursal");
             });
+
+            modelBuilder.Entity<CentroCosto>()
+                .HasQueryFilter(x => !x.Eliminado);
         }
     }
 }
