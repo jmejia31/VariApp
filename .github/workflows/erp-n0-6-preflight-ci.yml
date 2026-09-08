@@ -16,7 +16,7 @@ on:
     paths:
       - 'backend/scripts/preflight-erp-n0-6-origen-movimiento-inventario.sql'
       - 'backend/scripts/validar-erp-n0-6-c2-backfill.sql'
-      - 'backend/scripts/postcheck-erp-n0-6-c3-origen-tipado-movimiento-inventario.sql'
+      - 'backend/scripts/postcheck-erp-n0-6-c3-origen-tipado.sql'
       - 'backend/src/Infrastructure/Migrations/20260812083000_N0_6_OrigenTipadoMovimientoInventario.cs'
       - 'backend/src/Infrastructure/Migrations/20260812084900_N0_6_C3_IntegridadOrigenTipadoMovimientoInventario.cs'
       - 'backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.Part*.cs'
