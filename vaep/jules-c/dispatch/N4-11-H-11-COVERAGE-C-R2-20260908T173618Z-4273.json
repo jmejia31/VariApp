@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-11-H-11-COVERAGE-C-R2-20260908T173618Z-4273",
+  "taskId": "N4.11.H.11.COVERAGE_EVIDENCE",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 2,
+  "fileScopeHint": "docs/N4.11_CENTROS_COSTO_COVERAGE_EVIDENCE.md",
+  "prompt": "After N4.11.G LISTO_REAL, record factual coverage evidence and unresolved gaps; Desarrollo only; two self-reviews.\n\nR2 RCA: JULES_LANE_BUDGET_EXCEEDED attempt=1. Re-run the same material scope from the current Desarrollo checkout; do not expand scope, touch control-plane files, or claim integration.",
+  "primaryBaseHead": "1a256cf6fb602b928871930586f7bf0b63e872a0"
+}
