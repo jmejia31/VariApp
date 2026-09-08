@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "FROZEN",
+  "newDispatchAdmission": "OPEN",
   "allowExistingActiveSessions": true,
-  "reason": "N5.1.A_LISTO_REAL__N5.1.B_CURRENT__NO_SAFE_LANE_SCOPE_PREPARED__NO_NEW_DISPATCH",
-  "updatedAtUtc": "2026-09-08T22:30:00Z"
+  "reason": "N5.1.B_SAFE_MATERIAL_SCOPE_PREPARED_FROM_CERTIFIED_PREFLIGHT__AUTOMATED_DISPATCH_ALLOWED",
+  "updatedAtUtc": "2026-09-08T22:53:00Z"
 }
