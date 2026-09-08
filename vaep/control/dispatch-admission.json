@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "CLOSED",
+  "newDispatchAdmission": "FROZEN",
   "allowExistingActiveSessions": true,
   "reason": "PENDING_REVIEW_FIRST_N5.1.A__QA_TAKEOVER_REQUIRED__NO_NEW_DISPATCH_UNTIL_DRAINED",
-  "updatedAtUtc": "2026-09-08T22:22:33Z"
+  "updatedAtUtc": "2026-09-08T22:25:16Z"
 }
