@@ -106,6 +106,9 @@ jobs:
       - name: Validate terminal ownership and retry exhaustion
         run: |
           python3 -m unittest discover -s scripts/vaep -p test_terminal_handoff.py
+          python3 -m unittest discover -s scripts/vaep -p test_clarification_resolver.py
+          grep -q 'clarification_resolver.py' .github/scripts/vaep-jules-worker.sh
+          ! grep -q 'VAEP specific clarification for TASK_ID=' .github/scripts/vaep-jules-worker.sh
           grep -q 'terminal_handoff.py --audit' .github/workflows/vaep-checkpoints.yml
           grep -q 'REVIEW_EXECUTOR_NOT_CONFIGURED' scripts/vaep/terminal_handoff.py
           grep -q 'QA_TAKEOVER_REQUIRED' scripts/vaep/terminal_handoff.py

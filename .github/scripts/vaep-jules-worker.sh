@@ -450,12 +450,20 @@ while (( SECONDS < deadline )); do
         break
       fi
       if (( auto_feedback_count < max_followups )); then
-        feedback_answer="VAEP specific clarification for TASK_ID=$task_id DISPATCH_ID=$dispatch_id ATTEMPT=$task_attempt PRIMARY_BASE_HEAD=$primary_base FILE_SCOPE_HINT=$file_scope. Your exact question was: $feedback_question. Resolve it from repository evidence at PRIMARY_BASE_HEAD and direct dependencies only; do not invent entities, contracts, fields or behavior. If the repository still does not contain enough evidence, ask again with the exact unresolved fact and make no unsafe/out-of-scope change."
-        jq -n --arg prompt "$feedback_answer" '{prompt:$prompt}' > "$work/feedback-answer.json"
-        api_post_json "$JULES_API_BASE/$session_name:sendMessage" "$work/feedback-answer.json" >/dev/null
-        auto_feedback_count=$((auto_feedback_count + 1))
-        printf 'VAEP_METRIC stage=AWAITING_USER_FEEDBACK value=true session=%s question=%q action=SPECIFIC_RESPONSE response_count=%d\n' "$session_name" "$feedback_question" "$auto_feedback_count"
-        sleep 20
+        clarification_json="$(python3 scripts/vaep/clarification_resolver.py --question "$feedback_question" --task "$task_id" --scope "$file_scope" --root .)"
+        clarification_action="$(jq -r '.action' <<<"$clarification_json")"
+        if [[ "$clarification_action" == "RESPOND_SPECIFIC" ]]; then
+          feedback_answer="$(jq -r '.answer' <<<"$clarification_json")"
+          jq -n --arg prompt "$feedback_answer" '{prompt:$prompt}' > "$work/feedback-answer.json"
+          api_post_json "$JULES_API_BASE/$session_name:sendMessage" "$work/feedback-answer.json" >/dev/null
+          auto_feedback_count=$((auto_feedback_count + 1))
+          printf 'VAEP_METRIC stage=AWAITING_USER_FEEDBACK value=true session=%s question=%q action=SPECIFIC_RESPONSE response_count=%d evidence=%s\n' "$session_name" "$feedback_question" "$auto_feedback_count" "$(jq -c '.evidence' <<<"$clarification_json")"
+          sleep 20
+        else
+          printf 'VAEP_METRIC stage=AWAITING_USER_FEEDBACK value=true session=%s question=%q action=QA_TAKEOVER reason=%s\n' "$session_name" "$feedback_question" "$(jq -r '.reason' <<<"$clarification_json")" >&2
+          terminal_state="AWAITING_USER_FEEDBACK_QA_TAKEOVER"
+          break
+        fi
       else
         printf 'VAEP_METRIC stage=AWAITING_USER_FEEDBACK value=true session=%s question=%q action=QA_TAKEOVER reason=question_persisted\n' "$session_name" "$feedback_question" >&2
         terminal_state="AWAITING_USER_FEEDBACK_QA_TAKEOVER"
