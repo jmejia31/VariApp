@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-11-H-6-FILTERDOC-B",
+  "taskId": "N4.11.H.6.FILTER_MATRIX",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/N4.11_CENTROS_COSTO_FILTER_MATRIX.md",
+  "prompt": "After N4.11.G LISTO_REAL, document verified CentroCosto query/filter matrix; Desarrollo only; two self-reviews.",
+  "primaryBaseHead": "81873e0ad998e56c5625d8ec98f28d522ca66006"
+}
