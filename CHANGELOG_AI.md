@@ -912,3 +912,12 @@ Validated parent: `GATE-N4`; successor: `N5.1.A`.
 Base: `560f51596734900edf7fcba73235cda5b96922c7`. Existing closure receipt and exact-head causal gates validated.
 Selector uses explicit roadmap dependencies; no lexical ordering or gate bypass.
 Admission transition is guarded; no production, merge or secret changes.
+
+
+## VAEP dependency-safe closure reconciliation
+
+Controller: CHATGPT_BUSINESS / canonical checkpoint.
+Validated parent: `N5.1.B`; successor: `N5.1.C`.
+Base: `936eb5d16eb6bde8afdfc9087aa0e10f44984088`. Existing closure receipt and exact-head causal gates validated.
+Selector uses explicit roadmap dependencies; no lexical ordering or gate bypass.
+Admission transition is guarded; no production, merge or secret changes.

@@ -1,6 +1,6 @@
 {
   "newDispatchAdmission": "OPEN",
   "allowExistingActiveSessions": true,
-  "reason": "N5.1.B_SAFE_MATERIAL_SCOPE_PREPARED_FROM_CERTIFIED_PREFLIGHT__AUTOMATED_DISPATCH_ALLOWED",
-  "updatedAtUtc": "2026-09-08T22:53:00Z"
+  "reason": "VERIFIED_ROADMAP_PROMOTION__N5.1.B__N5.1.C",
+  "updatedAtUtc": "2026-09-08T23:15:23Z"
 }
