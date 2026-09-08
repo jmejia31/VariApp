@@ -16,7 +16,7 @@ on:
     paths:
       - 'backend/scripts/preflight-erp-n0-6-origen-movimiento-inventario.sql'
       - 'backend/scripts/validar-erp-n0-6-c2-backfill.sql'
-      - 'backend/scripts/postcheck-erp-n0-6-c3-origen-tipado.sql'
+      - 'backend/scripts/postcheck-erp-n0-6-c3-origen-tipado-movimiento-inventario.sql'
       - 'backend/src/Infrastructure/Migrations/20260812083000_N0_6_OrigenTipadoMovimientoInventario.cs'
       - 'backend/src/Infrastructure/Migrations/20260812084900_N0_6_C3_IntegridadOrigenTipadoMovimientoInventario.cs'
       - 'backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.Part*.cs'
@@ -171,34 +171,45 @@ jobs:
             --context AppDbContext
       - name: Capturar migration diff exacto del drift EF
         if: steps.ef_drift.outcome == 'failure'
+        continue-on-error: true
         working-directory: backend
         shell: bash
         run: |
-          set -euo pipefail
+          set -uo pipefail
           rm -rf src/Infrastructure/Migrations/__N41H_DriftProbe .drift-probe
           mkdir -p .drift-probe
+          set +e
           dotnet ef migrations add __N41H_DriftProbe \
             --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
             --startup-project src/API/InventoryApp.API.csproj \
             --context AppDbContext \
-            --output-dir Migrations/__N41H_DriftProbe
-          git diff -- src/Infrastructure/Migrations > .drift-probe/ef-drift.patch
-          git status --short > .drift-probe/git-status.txt
-          cp -a src/Infrastructure/Migrations/__N41H_DriftProbe .drift-probe/generated-migration
+            --output-dir Migrations/__N41H_DriftProbe \
+            > .drift-probe/generate.log 2>&1
+          probe_status=$?
+          set -e
+          printf '%s\n' "$probe_status" > .drift-probe/generate-exit-code.txt
+          git diff -- src/Infrastructure/Migrations > .drift-probe/ef-drift.patch || true
+          git status --short > .drift-probe/git-status.txt || true
+          if [ -d src/Infrastructure/Migrations/__N41H_DriftProbe ]; then
+            cp -a src/Infrastructure/Migrations/__N41H_DriftProbe .drift-probe/generated-migration
+          fi
+          exit 0
       - name: Emitir diagnóstico del drift EF en log
-        if: steps.ef_drift.outcome == 'failure'
+        if: always() && steps.ef_drift.outcome == 'failure'
         working-directory: backend
         shell: bash
         run: |
           set -euo pipefail
+          echo '=== N4.1.H EF DRIFT: generator ==='
+          cat .drift-probe/generate.log || true
           echo '=== N4.1.H EF DRIFT: git status ==='
           cat .drift-probe/git-status.txt || true
           echo '=== N4.1.H EF DRIFT: patch ==='
           sed -n '1,1200p' .drift-probe/ef-drift.patch || true
           echo '=== N4.1.H EF DRIFT: generated migration ==='
-          find .drift-probe/generated-migration -maxdepth 1 -type f -name '*.cs' -print -exec sh -c 'echo "--- $1"; sed -n "1,800p" "$1"' _ {} \;
+          find .drift-probe/generated-migration -maxdepth 1 -type f -name '*.cs' -print -exec sh -c 'echo "--- $1"; sed -n "1,800p" "$1"' _ {} \; 2>/dev/null || true
       - name: Publicar evidencia del drift EF
-        if: steps.ef_drift.outcome == 'failure'
+        if: always() && steps.ef_drift.outcome == 'failure'
         continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
@@ -208,7 +219,7 @@ jobs:
           if-no-files-found: error
           retention-days: 3
       - name: Fallar si EF detectó drift
-        if: steps.ef_drift.outcome == 'failure'
+        if: always() && steps.ef_drift.outcome == 'failure'
         run: |
           echo 'EF detectó cambios pendientes; consultar log/artifact n41h-ef-drift-probe.' >&2
           exit 1
