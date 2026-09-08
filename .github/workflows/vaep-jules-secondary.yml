@@ -55,7 +55,15 @@ jobs:
       - name: Reserve NEXT Jules A lane
         shell: bash
         continue-on-error: true
-        run: bash .github/scripts/vaep-jules-autorefill.sh
+        run: |
+          set +e
+          bash .github/scripts/vaep-jules-autorefill.sh
+          rc=$?
+          set -e
+          case "$rc" in
+            0|78|79|80|81|82) exit 0 ;;
+            *) exit "$rc" ;;
+          esac
       - name: Execute VAEP/Jules MASTER
         shell: bash
         run: bash .github/scripts/vaep-jules-master.sh
@@ -71,4 +79,12 @@ jobs:
         if: always()
         shell: bash
         continue-on-error: true
-        run: bash .github/scripts/vaep-jules-autorefill.sh --post-terminal
+        run: |
+          set +e
+          bash .github/scripts/vaep-jules-autorefill.sh --post-terminal
+          rc=$?
+          set -e
+          case "$rc" in
+            0|78|79|80|81|82) exit 0 ;;
+            *) exit "$rc" ;;
+          esac

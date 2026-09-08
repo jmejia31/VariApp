@@ -67,6 +67,11 @@ jobs:
             grep -q "VAEP_DISPATCH_SHA:" "$wf"
             grep -q -- "--transport-preflight" "$wf"
           done
+      - name: Validate expected autorefill control outcomes
+        run: |
+          for wf in .github/workflows/vaep-jules-secondary{,-b,-c,-d}.yml; do
+            test "$(grep -c '0|78|79|80|81|82' "$wf")" -eq 2
+          done
       - name: Validate review-first and lane-continuity contract
         run: |
           grep -q "READY_FOR_VAEP_REVIEW_FIRST_REQUIRED_NO_REFILL" .github/scripts/vaep-jules-worker.sh
