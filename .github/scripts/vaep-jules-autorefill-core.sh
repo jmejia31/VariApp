@@ -318,7 +318,10 @@ recoverable_attempt1_entry() {
         | last // ""
       ' <<<"$issues")"
       reason=""
-      if [[ "$actual" =~ ^[0-9a-fA-F]{40}$ && "$actual" != "$requested" ]]; then
+      if jq -e --arg dispatch "$dispatch" 'any(.[]?; ((.title // "") | contains($dispatch)) and ((.body // "") | contains("- Terminal contract classification: `EVIDENCE_GAP_REVIEW_REQUIRED`")) and ((.body // "") | contains("attempt: 1/")))' <<<"$issues" >/dev/null; then
+        echo "AUTOREFILL_WAIT=EVIDENCE_GAP_REVIEW_REQUIRED worker=$WORKER_ID dispatch=$dispatch action=NO_R2_REVIEW_OR_QA" >&2
+        continue
+      elif [[ "$actual" =~ ^[0-9a-fA-F]{40}$ && "$actual" != "$requested" ]]; then
         reason="PATCH_BASE_CONTROL_PLANE_DIVERGENCE actual=$actual requested=$requested"
       elif jq -e --arg dispatch "$dispatch" 'any(.[]?; ((.title // "") == ("[VAEP-JULES-SUPERSEDED] " + $dispatch)) and (((.body // "") | contains("JULES_LANE_BUDGET_EXCEEDED")) and ((.body // "") | contains("- Task: ")) and ((.body // "") | contains("attempt: 1/"))))' <<<"$issues" >/dev/null; then
         reason="JULES_LANE_BUDGET_EXCEEDED attempt=1"

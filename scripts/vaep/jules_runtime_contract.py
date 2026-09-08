@@ -8,6 +8,11 @@ ACTIVE_STATES={"QUEUED","PLANNING","IN_PROGRESS","AWAITING_USER_FEEDBACK","AWAIT
 TERMINAL_STATES={"COMPLETED","FAILED","PAUSED","CANCELLED","CANCELED"}
 CONTROL_PLANE_PREFIXES=("vaep/",".github/")
 CONTROL_PLANE_EXACT={"docs/VAEP_AUTHORITY.md","AGENTS.md","PLAN_EJECUCION_AUTONOMA.md","PROJECT_CONTEXT.md","TASKS.md"}
+EVIDENCE_ONLY_ERRORS={
+    "SELF_REVIEW_PASS_1 missing",
+    "SELF_REVIEW_PASS_2 missing",
+    "TESTS_EXECUTED evidence missing",
+}
 
 def load(path):
     return json.loads(Path(path).read_text(encoding="utf-8"))
@@ -86,6 +91,17 @@ def patch_files(unidiff):
                 out.append(p)
     return out
 
+def classify_errors(errors):
+    evidence_errors=[error for error in errors if error in EVIDENCE_ONLY_ERRORS]
+    material_errors=[error for error in errors if error not in EVIDENCE_ONLY_ERRORS]
+    if not errors:
+        classification="READY_FOR_VAEP"
+    elif not material_errors:
+        classification="EVIDENCE_GAP_REVIEW_REQUIRED"
+    else:
+        classification="MATERIAL_CONTRACT_FAILURE"
+    return classification,evidence_errors,material_errors
+
 def validate_terminal(manifest, patch, activities_text, base_equivalence=None):
     errors=[]
     if not isinstance(patch,dict):
@@ -119,9 +135,12 @@ def validate_terminal(manifest, patch, activities_text, base_equivalence=None):
         errors.append("SELF_REVIEW_PASS_2 missing")
     if not re.search(r"TESTS_EXECUTED\s*[:=]",activities_text,re.I):
         errors.append("TESTS_EXECUTED evidence missing")
+    classification,evidence_errors,material_errors=classify_errors(errors)
     return {"ok":not errors,"errors":errors,"changedFiles":changed,"requestedBase":requested,"actualBase":actual,
             "baseEquivalent": actual==requested or equivalent,
-            "artifactGenerated":True,"reviewFirstRequired":True}
+            "artifactGenerated":True,"reviewFirstRequired":True,
+            "classification":classification,"evidenceErrors":evidence_errors,
+            "materialErrors":material_errors}
 
 def run_self_test():
     results=[]
@@ -145,10 +164,12 @@ def run_self_test():
     case("timeout","JULES_LANE_BUDGET_EXCEEDED"!="SUCCESS")
     case("no_op",transport_action([])=="INVALID_TRIGGER")
     case("patch_absent",not validate_terminal(current,None,"SELF_REVIEW_PASS_1 SELF_REVIEW_PASS_2 TESTS_EXECUTED: ok")["ok"])
+    evidence_gap=validate_terminal(current,{"baseCommitId":"b"*40,"unidiffPatch":"+++ b/x.cs\n@@\n+ok\n"},"activities without required markers")
+    case("evidence_gap_is_not_material_failure",evidence_gap["classification"]=="EVIDENCE_GAP_REVIEW_REQUIRED" and not evidence_gap["materialErrors"])
     equivalent_patch={"baseCommitId":"a"*40,"unidiffPatch":"+++ b/x.cs\n@@\n+ok\n"}
     equivalent_evidence={"ok":True,"requested":"b"*40,"actual":"a"*40,"controlPlaneOnly":True}
     case("control_plane_base_equivalence",validate_terminal(current,equivalent_patch,"SELF_REVIEW_PASS_1 SELF_REVIEW_PASS_2 TESTS_EXECUTED: ok",equivalent_evidence)["ok"])
-    ok=all(x["pass"] for x in results) and len(results)==11
+    ok=all(x["pass"] for x in results) and len(results)==12
     print(json.dumps({"status":"PASS" if ok else "FAIL","cases":results},indent=2))
     return 0 if ok else 1
 

@@ -110,6 +110,12 @@ jobs:
           bash .github/scripts/vaep-parent-close.sh --self-test
       - name: Validate Jules synthetic dispatch matrix
         run: python3 scripts/vaep/jules_runtime_contract.py --self-test
+      - name: Validate evidence-gap handoff does not create R2
+        run: |
+          grep -q "EVIDENCE_GAP_REVIEW_REQUIRED" scripts/vaep/jules_runtime_contract.py
+          grep -q "EVIDENCE_GAP_REVIEW_REQUIRED" scripts/vaep/terminal_handoff.py
+          grep -q "Terminal contract classification" .github/scripts/vaep-jules-worker.sh
+          grep -q "NO_R2_REVIEW_OR_QA" .github/scripts/vaep-jules-autorefill-core.sh
       - name: Validate terminal ownership and retry exhaustion
         run: |
           python3 -m unittest discover -s scripts/vaep -p test_terminal_handoff.py

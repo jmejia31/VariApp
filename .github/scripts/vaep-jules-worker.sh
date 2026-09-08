@@ -599,6 +599,8 @@ jq -n \
   > "$result_dir/result.json"
 
 controller_handoff="$(python3 scripts/vaep/terminal_handoff.py --annotate "$result_dir")"
+terminal_classification="$(jq -r '.classification // "NOT_EVALUATED"' "$result_dir/terminal-contract.json")"
+terminal_evidence_gaps="$(jq -r '(.evidenceErrors // []) | join("; ")' "$result_dir/terminal-contract.json")"
 run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
 printf -v issue_body '%s\n\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n%s\n' \
   "VAEP $WORKER_LABEL MASTER result and controller handoff signal." \
@@ -612,6 +614,7 @@ printf -v issue_body '%s\n\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n
   "- Inline auto-feedback count: \`$auto_feedback_count\`" \
   "- Patch present: \`$patch_present\`; patch base: \`$actual_base\`" \
   "- Ready for VAEP: \`$ready_for_vaep\`; review status: \`PENDING_REVIEW_FIRST\`" \
+  "- Terminal contract classification: \`$terminal_classification\`; evidence gaps: \`${terminal_evidence_gaps:-none}\`" \
   "- Dispatch commit: \`$DISPATCH_SHA\`; manifest: \`$manifest\`" \
   "- Workflow run ID: \`$GITHUB_RUN_ID\`; correlation complete: \`true\`" \
   "- Controller handoff: \`$controller_handoff\`; correction owner: CHATGPT_VAEP; takeover executed: false" \

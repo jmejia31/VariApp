@@ -154,6 +154,8 @@ La política de parent-close, dwell time y SLA está gobernada por el bloque can
 - `NO_MANIFEST_DURING_HEAD_FREEZE_CAUSAL=TRUE`: una vez exista HEAD_FREEZE_CAUSAL, está prohibido mover Desarrollo con manifests/control-plane que puedan cancelar/superseder gates del FUNCTIONAL_HEAD. Durante ese freeze, Jules continúan sobre runs ya reservados, work seguro no-head-moving y la cola declarativa; el siguiente manifest se publica inmediatamente al liberar el freeze.
 - Nunca false LISTO ni busywork.
 
+- **EVIDENCE_GAP_NO_R2**: si un patch no vacio demuestra base, scope y ausencia de cambios al control-plane, pero solo faltan los marcadores `SELF_REVIEW_PASS_1`, `SELF_REVIEW_PASS_2` o `TESTS_EXECUTED`, el contrato terminal sigue invalido y no puede marcar `READY_FOR_VAEP`; el handoff pasa directamente a `EVIDENCE_GAP_REVIEW_REQUIRED` (o `QA_TAKEOVER_REQUIRED` al agotar el intento). No se consume un intento adicional de contenido ni se crea R2/R3 para reimplementar el mismo scope.
+
 ## 7. Transporte Jules
 
 ```text

@@ -8,13 +8,17 @@ import re
 import subprocess
 
 
-def decision(state, ready, attempt, maximum, session):
+def decision(state, ready, attempt, maximum, session, evidence_gap_only=False):
     if state == "LATE_RESULT_SUPERSEDED":
         return "LATE_RESULT_EVIDENCE_ONLY"
     if not session:
         return "PRE_SESSION_RCA_REQUIRED"
     if ready and state == "COMPLETED":
         return "READY_FOR_VAEP"
+    if evidence_gap_only and state == "COMPLETED":
+        # The patch/base/scope contract passed; only Jules' evidence markers
+        # are missing. This is a review/QA handoff, never a content retry.
+        return "QA_TAKEOVER_REQUIRED" if attempt >= maximum else "EVIDENCE_GAP_REVIEW_REQUIRED"
     if attempt >= maximum or "QA_TAKEOVER" in state:
         return "QA_TAKEOVER_REQUIRED"
     return "RCA_REQUIRED_BEFORE_R2"
@@ -24,15 +28,20 @@ def annotate(directory):
     path = Path(directory)
     result = json.loads((path / "result.json").read_text(encoding="utf-8"))
     contract = json.loads((path / "terminal-contract.json").read_text(encoding="utf-8"))
+    evidence_gap_only = contract.get("classification") == "EVIDENCE_GAP_REVIEW_REQUIRED"
     handoff = decision(result["state"], result["readyForVaep"], result["taskAttempt"],
-                       result["maxAttempts"], result.get("session"))
+                       result["maxAttempts"], result.get("session"), evidence_gap_only)
     result.update(controllerHandoff=handoff, correctionOwner="CHATGPT_VAEP",
                   takeoverExecuted=False, retryBudgetExhausted=result["taskAttempt"] >= result["maxAttempts"],
                   rejectionReasons=contract.get("errors", [contract.get("reason")] if contract.get("reason") else []),
+                  terminalClassification=contract.get("classification", "NOT_EVALUATED"),
+                  evidenceGapOnly=evidence_gap_only,
                   nextLaneAction="REFILL_ONLY_DEPENDENCY_SAFE_NON_OVERLAPPING_SCOPE")
     (path / "result.json").write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
     lifecycle = json.loads((path / "lifecycle.json").read_text(encoding="utf-8"))
-    lifecycle.update(controllerHandoff=handoff, correctionOwner="CHATGPT_VAEP", takeoverExecuted=False)
+    lifecycle.update(controllerHandoff=handoff, correctionOwner="CHATGPT_VAEP", takeoverExecuted=False,
+                     terminalClassification=contract.get("classification", "NOT_EVALUATED"),
+                     evidenceGapOnly=evidence_gap_only)
     (path / "lifecycle.json").write_text(json.dumps(lifecycle, indent=2) + "\n", encoding="utf-8")
     print(handoff)
 
@@ -64,6 +73,7 @@ def pending_items(issues, manifests, parent, worker, integrated):
             continue
         state = field(body, "Terminal state")
         session = field(body, "Jules session") or field(body, "Session")
+        evidence_gap_only = field(body, "Terminal contract classification") == "EVIDENCE_GAP_REVIEW_REQUIRED"
         attempt_text = field(body, "Task attempt")
         if issue.get("title") == "[VAEP-JULES-SUPERSEDED] " + dispatch:
             state = "SUPERSEDED_QA_TAKEOVER"
@@ -74,8 +84,8 @@ def pending_items(issues, manifests, parent, worker, integrated):
         attempt, maximum = map(int, attempt_text.split("/"))
         if attempt != manifest.get("taskAttempt", 1):
             continue
-        action = decision(state, field(body, "Ready for VAEP") == "true", attempt, maximum, session)
-        if action not in {"READY_FOR_VAEP", "QA_TAKEOVER_REQUIRED", "RCA_REQUIRED_BEFORE_R2"}:
+        action = decision(state, field(body, "Ready for VAEP") == "true", attempt, maximum, session, evidence_gap_only)
+        if action not in {"READY_FOR_VAEP", "EVIDENCE_GAP_REVIEW_REQUIRED", "QA_TAKEOVER_REQUIRED", "RCA_REQUIRED_BEFORE_R2"}:
             continue
         item = dict(dispatchId=dispatch, taskId=manifest["taskId"], workerId=worker,
                                  issue=issue["number"], session=session, taskAttempt=attempt,

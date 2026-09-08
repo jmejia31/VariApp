@@ -10,6 +10,16 @@ class TerminalHandoffTests(unittest.TestCase):
     def test_completed_second_attempt_still_requires_review(self):
         self.assertEqual(decision("COMPLETED", True, 2, 2, "sessions/1"), "READY_FOR_VAEP")
 
+    def test_evidence_gap_goes_to_review_without_r2(self):
+        self.assertEqual(
+            decision("COMPLETED", False, 1, 2, "sessions/1", True),
+            "EVIDENCE_GAP_REVIEW_REQUIRED",
+        )
+        self.assertEqual(
+            decision("COMPLETED", False, 2, 2, "sessions/1", True),
+            "QA_TAKEOVER_REQUIRED",
+        )
+
     def test_pre_session_does_not_consume_content_retry(self):
         self.assertEqual(decision("FAILED", False, 2, 2, ""), "PRE_SESSION_RCA_REQUIRED")
 
@@ -65,6 +75,26 @@ class TerminalHandoffTests(unittest.TestCase):
         pending = pending_items([issue], {"D": manifest}, "N4.11.G", "JULES_B", set())
         self.assertEqual(pending[0]["action"], "QA_TAKEOVER_REQUIRED")
         self.assertEqual(pending_items([issue], {"D": manifest}, "N4.11.G", "JULES_B", {"D"}), [])
+
+    def test_issue_with_only_evidence_gap_is_review_not_r2(self):
+        manifest = {"dispatchId": "E", "taskId": "N4.11.G.4.DOC", "workerId": "JULES_D", "taskAttempt": 1}
+        issue = {
+            "number": 14,
+            "state": "open",
+            "user": {"login": "github-actions[bot]"},
+            "body": "\n".join([
+                "- Dispatch: `E`",
+                "- Task: `N4.11.G.4.DOC`",
+                "- Worker: `JULES_D`",
+                "- Task attempt: `1/2`",
+                "- Jules session: `sessions/3`",
+                "- Terminal state: `COMPLETED`",
+                "- Ready for VAEP: `false`",
+                "- Terminal contract classification: `EVIDENCE_GAP_REVIEW_REQUIRED`",
+            ]),
+        }
+        pending = pending_items([issue], {"E": manifest}, "N4.11.G", "JULES_D", set())
+        self.assertEqual(pending[0]["action"], "EVIDENCE_GAP_REVIEW_REQUIRED")
 
 
 if __name__ == "__main__":
