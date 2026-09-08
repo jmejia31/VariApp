@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-Coordinar a Javier Mejía, Codex y ChatGPT con mínima pérdida de contexto, mínimo trabajo redundante, aislamiento entre proyectos y máxima trazabilidad en `Desarrollo`.
+Coordinar a Javier Mejía, Codex, ChatGPT y Chat B (ChatGPT Business) con mínima pérdida de contexto, mínimo trabajo redundante, aislamiento entre proyectos y máxima trazabilidad en `Desarrollo`.
 
 ## Identidad de este proyecto
 
@@ -53,11 +53,18 @@ Si hay discrepancia entre memoria y repositorio real, prevalece el repositorio y
 - no tiene acceso al filesystem local de la PC por defecto;
 - no afirma cambios locales si solo actuó sobre GitHub.
 
+### Chat B (ChatGPT Business)
+
+- colaborador full-access par de ChatGPT/VAEP para controller, REVIEW_FIRST, QA, corrección, integración, CI, certificación, rollup y failover;
+- opera en `Desarrollo` y consume `docs/VAEP_AUTHORITY.md` como autoridad única;
+- no es una quinta lane Jules, no publica por fuera del flujo ni puede declarar `LISTO_REAL` sin evidencia completa del MAESTRO;
+- cualquier acceso de plataforma adicional requiere una cuenta/email real y una concesión verificable; este registro no inventa credenciales ni permisos externos.
+
 ## Acceso
 
 Acceso local reconocido: Javier Mejía y Codex.
 
-ChatGPT y otros agentes operan remotamente solo mediante conectores GitHub autorizados, salvo ampliación explícita documentada por Javier.
+ChatGPT, Chat B y otros agentes operan remotamente solo mediante conectores GitHub autorizados, salvo ampliación explícita documentada por Javier.
 
 ## Memoria compartida
 

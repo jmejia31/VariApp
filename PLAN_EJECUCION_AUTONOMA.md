@@ -10,6 +10,7 @@
 - PR #2: OPEN + DRAFT
 - AUTOMATION_AUTHORITY: `MASTER`
 - MASTER_FILE: `docs/VAEP_AUTHORITY.md`
+- Equipo de control/QA: `ChatGPT/VAEP + Chat B (ChatGPT Business)` con alcance full-access dentro de `Desarrollo`, sin quinta lane Jules.
 - Plan rector: https://docs.google.com/document/d/1rWGOP_Z64kM4Q2NZbrTvge3ReqJkJ_vJmhByogbPbR8/edit
 - Tablero: https://docs.google.com/spreadsheets/d/19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY/edit
 

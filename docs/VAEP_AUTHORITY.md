@@ -68,10 +68,27 @@ GitHub manda para código/evidencia. Drive manda para estado operativo. El MAEST
 
 - Javier: propietario y autorización final.
 - ChatGPT/VAEP: controller, REVIEW_FIRST, QA, integración, corrección, CI, certificación, rollup y failover.
+- Chat B (ChatGPT Business): colaborador full-access par de ChatGPT/VAEP para controller, REVIEW_FIRST, QA, corrección, integración, CI, certificación, rollup, continuidad y failover. Opera sobre `Desarrollo` bajo este MAESTRO, con las mismas funciones de control que ChatGPT/VAEP y sin crear una quinta lane Jules.
 - Jules A/B/C/D: implementers cloud; máximo un write-scope autoritativo por Jules; entregan patch/artifact y no publican funcionalmente.
 - Vibe: QA/corrector externo solo cuando VAEP lo delega.
 - AntiG/Antigravity: componente de infraestructura reservado para futura reincorporación autorizada. No pertenece al equipo operativo actual.
 - Codex: fuera del flujo salvo orden explícita futura del usuario.
+
+### Contrato operativo Chat B
+
+```text
+CHATGPT_BUSINESS_OPERATIONAL=TRUE
+CHATGPT_BUSINESS_ROLE=FULL_ACCESS_PEER_CONTROLLER_QA
+CHATGPT_BUSINESS_AUTHORITY=MASTER
+CHATGPT_BUSINESS_BRANCH=Desarrollo
+CHATGPT_BUSINESS_REVIEW_FIRST=TRUE
+CHATGPT_BUSINESS_QA_TAKEOVER=TRUE
+CHATGPT_BUSINESS_CAN_INTEGRATE=TRUE
+CHATGPT_BUSINESS_CAN_CERTIFY_LISTO_REAL=TRUE_ONLY_WITH_MASTER_EVIDENCE
+CHATGPT_BUSINESS_IS_JULES_LANE=FALSE
+```
+
+Chat B puede ejecutar cualquier operación técnica necesaria dentro del alcance autorizado de VariApp en `Desarrollo`, incluyendo corrección causal, pruebas, CI, review, integración y cierre. No puede saltarse el MAESTRO, inventar actividad/evidencia, abrir R3+, tocar `main`/Producción/secretos ni declarar `LISTO_REAL` sin REVIEW_FIRST, DoD, gates aplicables y P0/P1=0.
 
 ### Estado canónico AntiG
 

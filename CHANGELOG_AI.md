@@ -1,8 +1,22 @@
 # CHANGELOG_AI — VariApp
 
-Bitácora colaborativa de cambios realizados por Javier Mejía, Codex, AntiG/Antigravity, ChatGPT y futuros agentes autorizados.
+Bitácora colaborativa de cambios realizados por Javier Mejía, Codex, AntiG/Antigravity, ChatGPT, Chat B (ChatGPT Business) y futuros agentes autorizados.
 
 No reemplaza `git log`: registra intención, alcance, validaciones y handoff. Todo changeset intencional debe incluir una entrada breve; no modificar otros colaborativos si su contenido no cambió.
+
+## 2026-09-08 — Chat B + reconciliación canónica de estado VAEP
+
+**Responsable:** Codex, por orden explícita del propietario.
+
+**Equipo:** se incorporó Chat B (ChatGPT Business) como peer controller/QA full-access dentro de `Desarrollo`, con REVIEW_FIRST, QA_TAKEOVER, corrección, integración, CI, certificación, rollup y failover bajo `docs/VAEP_AUTHORITY.md`. No es una quinta lane Jules y no puede saltar gates, crear R3+, tocar `main`/Producción/secretos ni falsear evidencia.
+
+**Repositorio:** se actualizó el MAESTRO y los documentos colaborativos para que Chat B consuma la misma autoridad única. El remoto avanzó concurrentemente a `0d0ba5e9` con `dispatch-admission=CLOSED`; se corrigió a `FROZEN`, el único valor contractual válido para contención por REVIEW_FIRST pendiente, conservando `allowExistingActiveSessions=true`.
+
+**Drive compartido:** se reconciliaron CONFIG, DASHBOARD, COLA, PLAN_MAESTRO, TAREAS_PROGRAMADAS, EJECUCION_MANUAL y LEYENDA. El estado vigente es `CURRENT_PARENT=N4.11.H`, `FUNCTIONAL_HEAD=b30b949e`, `HEAD=5ed9b3d6` como descendiente de control-plane, `dispatch-admission=FROZEN`, `N4.11.B–G=LISTO_REAL` con evidencia, y `N4.11.H=VALIDANDO` por REVIEW_FIRST/QA_TAKEOVER pendiente. No se despachó ningún Jules manual ni se fabricó backlog.
+
+**Documento rector compartido:** se añadió un bloque de vigencia al inicio de `Plan Maestro ERP V5 — VariApp — FUENTE RECTORA VAEP`, con chip nativo de fecha y precedencia explícita del MAESTRO versionado sobre contenido histórico.
+
+**Verificación:** readback de todas las celdas objetivo, readback nativo del documento (incluido `dateElement` y estilos), `git diff --check`, rama default GitHub `Desarrollo`, `main` sin cambios. Pendiente externo: no se concedió una cuenta GitHub/Drive adicional porque no existe un email/login verificable de Chat B; el rol operativo quedó registrado sin inventar credenciales.
 
 ## 2026-08-25 — ERP-N3.5 Venta/factura — CIERRE FORMAL
 

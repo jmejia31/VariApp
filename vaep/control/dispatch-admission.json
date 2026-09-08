@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "CLOSED",
+  "newDispatchAdmission": "FROZEN",
   "allowExistingActiveSessions": true,
-  "reason": "PENDING_REVIEW_FIRST_N4.11.H",
-  "updatedAtUtc": "2026-09-08T19:26:47Z"
+  "reason": "FROZEN_PENDING_REVIEW_FIRST_N4.11.H__NO_NEW_DISPATCH__EXISTING_ACTIVE_SESSIONS_ALLOWED",
+  "updatedAtUtc": "2026-09-08T19:42:42Z"
 }

@@ -9,7 +9,7 @@ AUTOMATION_AUTHORITY=MASTER
 MASTER_FILE=docs/VAEP_AUTHORITY.md
 ```
 
-ChatGPT/VAEP y Jules A/B/C/D deben leer ese MAESTRO. No deben inferir reglas vigentes desde prompts anteriores, Issues, CHANGELOG, BITACORA, artifacts ni etiquetas numéricas históricas.
+ChatGPT/VAEP, Chat B (ChatGPT Business) y Jules A/B/C/D deben leer ese MAESTRO. No deben inferir reglas vigentes desde prompts anteriores, Issues, CHANGELOG, BITACORA, artifacts ni etiquetas numéricas históricas.
 
 ## Fuentes de estado
 
@@ -19,7 +19,7 @@ ChatGPT/VAEP y Jules A/B/C/D deben leer ese MAESTRO. No deben inferir reglas vig
 
 ## Trabajo
 
-ChatGPT/VAEP ejecuta REVIEW_FIRST, QA, integración, correcciones, CI, certificación y rollup. Jules A/B/C/D implementan scopes exclusivos y entregan patch/artifact. AntiG queda `RESERVED_INACTIVE`: scheduler deshabilitado, handoff processing deshabilitado y sin autoridad LISTO_REAL; solo puede reincorporarse con autorización explícita futura. Codex no participa salvo orden explícita futura del usuario.
+ChatGPT/VAEP y Chat B (ChatGPT Business) ejecutan REVIEW_FIRST, QA, integración, correcciones, CI, certificación, rollup y failover con alcance equivalente de control dentro de `Desarrollo`. Jules A/B/C/D implementan scopes exclusivos y entregan patch/artifact. Chat B no es una quinta lane Jules y no puede omitir ningún gate del MAESTRO. AntiG queda `RESERVED_INACTIVE`: scheduler deshabilitado, handoff processing deshabilitado y sin autoridad LISTO_REAL; solo puede reincorporarse con autorización explícita futura. Codex no participa salvo orden explícita futura del usuario.
 
 ## Cambio de reglas
 

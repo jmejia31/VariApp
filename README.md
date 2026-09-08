@@ -67,7 +67,7 @@ Ver `ARCHITECTURE.md` para detalles y `PROJECT_INDEX.md` para localizar componen
 
 ## Preparación local
 
-El acceso local reconocido corresponde únicamente a Javier Mejía, Codex y AntiG/Antigravity, salvo cambio explícito documentado por Javier.
+El acceso local reconocido corresponde únicamente a Javier Mejía, Codex y AntiG/Antigravity. ChatGPT/VAEP y Chat B (ChatGPT Business) operan como controladores/QA remotos full-access sobre `Desarrollo`, bajo el MAESTRO, salvo cambio explícito documentado por Javier.
 
 ```powershell
 git fetch origin
