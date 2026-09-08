@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-11-G-3-E2E-C-R2-20260908T101933Z-3225",
+  "taskId": "N4.11.G.3.E2E_REGRESSION",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 2,
+  "fileScopeHint": "frontend/e2e/centros-costo.spec.ts",
+  "prompt": "Add scoped CentroCosto end-to-end regression; Desarrollo only; two self-reviews.\n\nR2 RCA: PATCH_BASE_CONTROL_PLANE_DIVERGENCE actual=f9648a0e83574a6af5a705f2f618133dc76d1ee4 requested=aa696fbdd40d38c45223eeb9f8ecdbf555e4411d. Re-run the same material scope from the current Desarrollo checkout; do not expand scope, touch control-plane files, or claim integration.",
+  "primaryBaseHead": "f7496272eeee536f91398ca35c086f4699b4bdbd"
+}
