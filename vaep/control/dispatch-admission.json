@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "FROZEN",
+  "newDispatchAdmission": "OPEN",
   "allowExistingActiveSessions": true,
-  "reason": "WATCHDOG :36 containment: JULES_A/B/C CURRENT runs exceeded the 1080s lane budget while still remotely in_progress; no supported remote stop operation is exposed by the connected controller. Ownership is revoked locally, late auto-integration is denied, and no equivalent recovery/R2/R3 may be dispatched until each remote run is terminal and REVIEW_FIRST/QA_TAKEOVER resolves it. CURRENT_PARENT remains N4.11.H.",
-  "updatedAtUtc": "2026-09-08T16:36:45Z"
+  "reason": "WATCHDOG_RECONCILED: no live GitHub Jules run and all current-parent remote sessions terminal; parent=N4.11.H; prior=WATCHDOG :36 containment: JULES_A/B/C CURRENT runs exceeded the 1080s lane budget while still remotely in_progress; no supported remote stop operation is exposed by the connected controller. Ownership is revoked locally, late auto-integration is denied, and no equivalent recovery/R2/R3 may be dispatched until each remote run is terminal and REVIEW_FIRST/QA_TAKEOVER resolves it. CURRENT_PARENT remains N4.11.H.",
+  "updatedAtUtc": "2026-09-08T17:25:49Z"
 }
