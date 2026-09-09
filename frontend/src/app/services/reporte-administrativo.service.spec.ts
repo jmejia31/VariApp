@@ -34,8 +34,8 @@ describe('N5.1.E.2 ReporteAdministrativoService regression coverage', () => {
     service.getResumen().subscribe();
 
     const req = httpMock.expectOne(`${environment.apiUrl}/reportes-administrativos/resumen`);
-    expect(req.request.params.has('desde')).toBeFalse();
-    expect(req.request.params.has('hasta')).toBeFalse();
+    expect(req.request.params.has('desde')).toBe(false);
+    expect(req.request.params.has('hasta')).toBe(false);
     req.flush({ success: true, data: {} });
   });
 
