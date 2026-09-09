@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "FROZEN",
-  "allowExistingActiveSessions": false,
-  "reason": "N5.2.H_CURRENT__DOC_CERT_CLOSURE_DEBT_FASTPATH__ZERO_SAFE_JULES_SCOPES__NO_BUSYWORK",
-  "updatedAtUtc": "2026-09-09T21:16:45Z"
+  "newDispatchAdmission": "OPEN",
+  "allowExistingActiveSessions": true,
+  "reason": "VERIFIED_ROADMAP_PROMOTION__N5.2.H__N5.3.A__SIX_EXCLUSIVE_PREFLIGHT_SCOPES_READY",
+  "updatedAtUtc": "2026-09-09T21:23:30Z"
 }
