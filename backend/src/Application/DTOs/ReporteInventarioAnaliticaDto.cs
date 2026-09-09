@@ -15,10 +15,10 @@ public sealed class ReporteInventarioKardexFiltroDto : ReporteInventarioFiltroBa
 
 public sealed class ReporteInventarioValorizacionResumenDto
 {
-    public decimal ValorInventarioCosto { get; set; }
-    public decimal ValorInventarioCostoMercaderia { get; set; }
-    public decimal ValorInventarioCostoInsumosAdministrativos { get; set; }
-    public decimal ValorPotencialVentaMercaderia { get; set; }
+    public decimal? ValorInventarioCosto { get; set; }
+    public decimal? ValorInventarioCostoMercaderia { get; set; }
+    public decimal? ValorInventarioCostoInsumosAdministrativos { get; set; }
+    public decimal? ValorPotencialVentaMercaderia { get; set; }
 }
 
 public enum TipoReporteStockHealth
