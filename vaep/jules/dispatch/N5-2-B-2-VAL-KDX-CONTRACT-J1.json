@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-2-B-2-VAL-KDX-CONTRACT-J1",
+  "taskId": "N5.2.B.2.VALUATION_KARDEX_DOMAIN_CONTRACT_DECISION",
+  "workerId": "J1",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/N5.2_REPORTES_INVENTARIO_DOMAIN_CONTRACT_VALORIZACION_KARDEX.md",
+  "prompt": "Read docs/VAEP_AUTHORITY.md and accepted N5.2.A evidence first. Resolve only valuation/kardex domain-contract decisions: authoritative movement chronology, deterministic ordering, cost projection authority, legacy null-location handling, filter invariants and DTO/domain boundaries. Inspect current domain/application contracts; make only the minimum coherent contract change if truly required, otherwise document N/A with exact evidence. Do not duplicate cross-report envelope synthesis owned by J2 or RBAC owned by J6. Desarrollo only; two self-reviews; no production/secrets.",
+  "primaryBaseHead": "3ef5f4367d9dd38e04ab121cb75efddd33529060"
+}
