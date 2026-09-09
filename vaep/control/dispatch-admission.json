@@ -1,6 +1,6 @@
 {
   "newDispatchAdmission": "OPEN",
   "allowExistingActiveSessions": true,
-  "reason": "VERIFIED_ROADMAP_PROMOTION__N5.1.H__N5.2.A",
-  "updatedAtUtc": "2026-09-09T12:54:53Z"
+  "reason": "N5.2.A_CURRENT__SIX_NON_OVERLAPPING_WRITE_SCOPES_READY__NO_FALSE_ACTIVE",
+  "updatedAtUtc": "2026-09-09T13:05:00Z"
 }
