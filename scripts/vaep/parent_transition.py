@@ -16,20 +16,42 @@ SHA40 = re.compile(r"[0-9a-fA-F]{40}")
 STATES = {"FROZEN", "OPEN"}
 
 
-def valid_closure(receipt, parent):
-    return (isinstance(receipt, dict)
-            and receipt.get("authority") == MASTER
-            and receipt.get("parent") == parent
-            and receipt.get("decision") == "LISTO_REAL"
-            and isinstance(receipt.get("functionalHead"), str)
-            and SHA40.fullmatch(receipt["functionalHead"]) is not None
+def receipt_parent(receipt):
+    if not isinstance(receipt, dict):
+        return None
+    return receipt.get("parent") or receipt.get("parentId")
+
+
+def _legacy_closure_contract(receipt):
+    return (receipt.get("decision") == "LISTO_REAL"
             and receipt.get("review") == "PASS"
             and receipt.get("combinedStatus") == "SUCCESS"
             and receipt.get("causalGates") == "TERMINAL_SUCCESS_APPLICABLE"
-            and type(receipt.get("p0Open")) is int and receipt["p0Open"] == 0
-            and type(receipt.get("p1Open")) is int and receipt["p1Open"] == 0
             and receipt.get("productionTouched") is False
             and receipt.get("mergePerformed") is False)
+
+
+def _current_closure_contract(receipt):
+    gates = receipt.get("causalGates")
+    return (receipt.get("state") == "LISTO_REAL"
+            and isinstance(receipt.get("review"), dict)
+            and bool(receipt["review"].get("mode"))
+            and receipt.get("headRevalidated") is True
+            and isinstance(gates, list) and len(gates) > 0
+            and all(isinstance(gate, dict) and gate.get("conclusion") == "success" for gate in gates)
+            and receipt.get("mainTouched") is False
+            and receipt.get("prMerged") is False)
+
+
+def valid_closure(receipt, parent):
+    return (isinstance(receipt, dict)
+            and receipt.get("authority") == MASTER
+            and receipt_parent(receipt) == parent
+            and isinstance(receipt.get("functionalHead"), str)
+            and SHA40.fullmatch(receipt["functionalHead"]) is not None
+            and type(receipt.get("p0Open")) is int and receipt["p0Open"] == 0
+            and type(receipt.get("p1Open")) is int and receipt["p1Open"] == 0
+            and (_legacy_closure_contract(receipt) or _current_closure_contract(receipt)))
 
 
 def read_closures(directory):
@@ -39,9 +61,9 @@ def read_closures(directory):
             receipt = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, ValueError):
             continue
-        if isinstance(receipt, dict) and valid_closure(receipt, receipt.get("parent")):
-            if isinstance(receipt.get("parent"), str) and receipt["parent"]:
-                closed.add(receipt["parent"])
+        parent = receipt_parent(receipt)
+        if isinstance(parent, str) and parent and valid_closure(receipt, parent):
+            closed.add(parent)
     return closed
 
 
@@ -98,8 +120,27 @@ def choose_next(catalog, closed):
     return candidate["id"]
 
 
+def promotion_freeze_permitted(reason, current):
+    if not isinstance(reason, str):
+        return False
+    legacy_prefixes = (
+        "FROZEN_GATE_N4_CURRENT_PARENT__",
+        "FROZEN_N4.11.H_REVIEW_DEBT_RECONCILED_NEXT_PARENT_MISSING_",
+        "FROZEN_NEXT_PARENT_MISSING_NO_SAFE_WORK",
+        "FROZEN_PHASE_GATE_REQUIRED__",
+        "FROZEN_PROMOTION_HARDENING_OR_SAFE_WORK_REQUIRED__",
+    )
+    if reason.startswith(legacy_prefixes):
+        return True
+    return (reason.startswith(current + "_")
+            and "LISTO_REAL_CERTIFICATION_AND_PARENT_PROMOTION_IN_PROGRESS" in reason
+            and reason.endswith("NO_NEW_DISPATCH"))
+
+
 def transition(catalog, admission, closed, receipt_path, functional, now, hardening_ok=False):
-    if admission.get("newDispatchAdmission") not in STATES or admission.get("allowExistingActiveSessions") is not True:
+    state = admission.get("newDispatchAdmission")
+    allow_active = admission.get("allowExistingActiveSessions")
+    if state not in STATES or type(allow_active) is not bool:
         raise ValueError("INVALID_ADMISSION_CONTRACT")
     current = catalog.get("currentParent")
     target = choose_next(catalog, closed)
@@ -110,10 +151,8 @@ def transition(catalog, admission, closed, receipt_path, functional, now, harden
     result["generatedAt"] = now
     if target is None:
         result["regenerationReason"] = "CURRENT_PARENT_CERTIFIED__NEXT_PARENT_MISSING"
-        access.update(newDispatchAdmission="FROZEN", updatedAtUtc=now)
-        if admission["newDispatchAdmission"] == "OPEN" or str(admission.get("reason", "")).startswith((
-                "FROZEN_GATE_N4_CURRENT_PARENT__", "FROZEN_N4.11.H_REVIEW_DEBT_RECONCILED_NEXT_PARENT_MISSING_",
-                "FROZEN_NEXT_PARENT_MISSING_NO_SAFE_WORK", "FROZEN_PHASE_GATE_REQUIRED__")):
+        access.update(newDispatchAdmission="FROZEN", allowExistingActiveSessions=False, updatedAtUtc=now)
+        if state == "OPEN" or promotion_freeze_permitted(str(admission.get("reason", "")), current):
             access["reason"] = "FROZEN_NEXT_PARENT_MISSING_NO_SAFE_WORK"
         for tasks in result.get("lanes", {}).values():
             for task in tasks:
@@ -133,22 +172,25 @@ def transition(catalog, admission, closed, receipt_path, functional, now, harden
             task["dispatchEligible"] = enabled
             material += int(enabled)
     reason = admission.get("reason", "")
-    # Only an explicitly recognized, reconciled roadmap freeze can be reopened.
-    permitted = isinstance(reason, str) and reason.startswith((
-        "FROZEN_GATE_N4_CURRENT_PARENT__", "FROZEN_N4.11.H_REVIEW_DEBT_RECONCILED_NEXT_PARENT_MISSING_",
-        "FROZEN_NEXT_PARENT_MISSING_NO_SAFE_WORK", "FROZEN_PHASE_GATE_REQUIRED__"))
+    # A certification/promotion freeze is controller-owned and may reopen only
+    # after this function is called with a valid closure, safe successor and
+    # exact-head hardening gates. Manual/security freezes remain untouched.
+    permitted = promotion_freeze_permitted(reason, current)
     opened = (node["type"] == "MICROTAREA" and material > 0 and hardening_ok
-              and (admission["newDispatchAdmission"] == "OPEN" or permitted))
+              and (state == "OPEN" or permitted))
     access.update(updatedAtUtc=now)
     if opened:
-        access.update(newDispatchAdmission="OPEN", reason="VERIFIED_ROADMAP_PROMOTION__" + current + "__" + target)
-    elif admission["newDispatchAdmission"] == "FROZEN" and not permitted:
+        access.update(newDispatchAdmission="OPEN", allowExistingActiveSessions=True,
+                      reason="VERIFIED_ROADMAP_PROMOTION__" + current + "__" + target)
+    elif state == "FROZEN" and not permitted:
         # Preserve a manual/security freeze reason; future runs must not mistake it
         # for a roadmap freeze that they are permitted to clear.
         pass
     else:
-        access.update(newDispatchAdmission="FROZEN", reason=("FROZEN_PHASE_GATE_REQUIRED__" + target
-                      if node["type"] == "GATE_FASE" else "FROZEN_PROMOTION_HARDENING_OR_SAFE_WORK_REQUIRED__" + target))
+        access.update(newDispatchAdmission="FROZEN", allowExistingActiveSessions=False,
+                      reason=("FROZEN_PHASE_GATE_REQUIRED__" + target
+                              if node["type"] == "GATE_FASE"
+                              else "FROZEN_PROMOTION_HARDENING_OR_SAFE_WORK_REQUIRED__" + target))
     return result, access
 
 
@@ -174,7 +216,7 @@ def main():
         if not all([args.admission, args.receipt, args.functional, args.now]):
             raise ValueError("PREPARE_ARGUMENTS_MISSING")
         receipt = json.loads(Path(args.receipt).read_text(encoding="utf-8"))
-        if not valid_closure(receipt, catalog.get("currentParent")) or receipt["functionalHead"] != args.functional:
+        if not valid_closure(receipt, catalog.get("currentParent")) or receipt.get("functionalHead") != args.functional:
             raise ValueError("CURRENT_CLOSURE_RECEIPT_MISMATCH")
         admission = json.loads(Path(args.admission).read_text(encoding="utf-8"))
         result, access = transition(catalog, admission, closed, args.receipt, args.functional, args.now, args.hardening_ok)
