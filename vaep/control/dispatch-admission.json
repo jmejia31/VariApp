@@ -1,6 +1,6 @@
 {
   "newDispatchAdmission": "FROZEN",
-  "allowExistingActiveSessions": true,
-  "reason": "N5.3.A_ALL_SIX_SCOPES_MATERIALIZED__J1_J2_J3_REVIEW_ACCEPTED__J4_J5_J6_R2_IN_FLIGHT__REVIEW_FIRST_PENDING__NO_DUPLICATE_DISPATCH",
-  "updatedAtUtc": "2026-09-09T21:44:48Z"
+  "allowExistingActiveSessions": false,
+  "reason": "N5.3.A_ALL_SIX_PREFLIGHT_FACETS_REVIEW_FIRST_ACCEPTED__EXACT_HEAD_CAUSAL_GATES_PENDING__NO_DUPLICATE_DISPATCH",
+  "updatedAtUtc": "2026-09-09T21:50:05Z"
 }
