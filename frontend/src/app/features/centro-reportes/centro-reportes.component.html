@@ -1,0 +1,28 @@
+<section class="centro-reportes" aria-labelledby="centro-reportes-title">
+  <header class="centro-reportes__header">
+    <div>
+      <p class="centro-reportes__eyebrow">Reportes</p>
+      <h1 id="centro-reportes-title">Centro de Reportes</h1>
+      <p>Accede a las capacidades administrativas y financieras existentes sin duplicar lógica ni relajar sus permisos.</p>
+    </div>
+  </header>
+
+  @if (tieneReportesDisponibles()) {
+    <nav class="centro-reportes__nav" aria-label="Tipos de reportes disponibles">
+      @if (puedeVerFinancieros()) {
+        <a routerLink="financieros" routerLinkActive="active" ariaCurrentWhenActive="page">Estados financieros</a>
+      }
+      @if (puedeVerAdministrativos()) {
+        <a routerLink="administrativos" routerLinkActive="active" ariaCurrentWhenActive="page">Reportes administrativos</a>
+      }
+    </nav>
+
+    <div class="centro-reportes__content">
+      <router-outlet></router-outlet>
+    </div>
+  } @else {
+    <div class="centro-reportes__empty" role="status">
+      No tienes reportes habilitados para tu matriz actual de permisos.
+    </div>
+  }
+</section>
