@@ -1,39 +1,46 @@
-name: VAEP J6 Readiness
-
+name: VAEP J6 Trusted Worker
 on:
+  push:
+    branches: [Desarrollo]
+    paths: ['vaep/j6/dispatch/*.json']
   workflow_dispatch:
-
-permissions:
-  contents: read
-
-concurrency:
-  group: vaep-j6-readiness
-  cancel-in-progress: false
-
+    inputs:
+      manifest_commit: {description: 'Exact immutable manifest commit created by VAEP autorefill', required: false, type: string}
+permissions: {actions: write, contents: write, issues: write}
+concurrency: {group: vaep-j6-lane, cancel-in-progress: false}
 jobs:
-  readiness:
+  dispatch-jules:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 25
     env:
       JULES_API_BASE: https://jules.googleapis.com/v1alpha
-      JULES_API_KEY: ${{ secrets.JULES_J6_API_KEY }}
       EXPECTED_OWNER: jmejia31
       EXPECTED_REPO: VariApp
       EXPECTED_BRANCH: Desarrollo
+      DISPATCH_PATH: vaep/j6/dispatch
+      SESSION_TITLE_PREFIX: "VAEP-J6 "
+      ARTIFACT_PREFIX: vaep-j6
+      ISSUE_PREFIX: "[VAEP-J6]"
+      WORKER_LABEL: J6
       WORKER_ID: J6
+      JULES_API_KEY: ${{ secrets.JULES_J6_API_KEY }}
+      GH_TOKEN: ${{ github.token }}
+      VAEP_DISPATCH_SHA: ${{ inputs.manifest_commit || github.sha }}
+      VAEP_LANE_RUN_ID: ${{ github.run_id }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: Desarrollo
-          fetch-depth: 1
-      - name: Validate prepared registry
-        run: python3 scripts/vaep/j1_j6_registry_check.py
-      - name: Read-only Jules source readiness
-        shell: bash
-        run: |
-          set -euo pipefail
-          test -n "$JULES_API_KEY"
-          response="$(mktemp)"
-          curl --connect-timeout 10 --max-time 45 --fail-with-body --silent --show-error -H "x-goog-api-key: $JULES_API_KEY" "$JULES_API_BASE/sources?pageSize=100" > "$response"
-          jq -e --arg owner "$EXPECTED_OWNER" --arg repo "$EXPECTED_REPO" --arg branch "$EXPECTED_BRANCH" '[.sources[]? | select(.githubRepo.owner == $owner and .githubRepo.repo == $repo)] | first as $s | ($s != null) and (($s.githubRepo.branches // []) | any(.displayName == $branch))' "$response" >/dev/null
-          echo "J6_READINESS_OK"
+        with: {ref: '${{ inputs.manifest_commit || github.sha }}', fetch-depth: 2}
+      - run: bash .github/scripts/vaep-jules-master.sh --transport-preflight
+      - name: Reserve NEXT J6 lane
+        continue-on-error: true
+        run: 'set +e; bash .github/scripts/vaep-jules-autorefill.sh; rc=$?; set -e; case "$rc" in 0|78|79|80|81|82) exit 0;; *) exit "$rc";; esac'
+      - name: Execute VAEP/Jules MASTER
+        run: bash .github/scripts/vaep-jules-master.sh
+      - name: Upload J6 result artifact
+        if: always() && env.RESULT_DIR != ''
+        uses: actions/upload-artifact@v4
+        with: {name: '${{ env.ARTIFACT_NAME }}', path: '${{ env.RESULT_DIR }}', if-no-files-found: error, retention-days: 14}
+      - name: Auto-refill J6 lane
+        if: always()
+        continue-on-error: true
+        run: 'set +e; bash .github/scripts/vaep-jules-autorefill.sh --post-terminal; rc=$?; set -e; case "$rc" in 0|78|79|80|81|82) exit 0;; *) exit "$rc";; esac'
