@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-2-E-6-REPORT-CENTER-NAV-RBAC-A11Y-J6",
+  "taskId": "N5.2.E.6.REPORT_CENTER_NAV_RBAC_A11Y",
+  "workerId": "J6",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/features/centro-reportes/centro-reportes.component.ts;frontend/src/app/features/centro-reportes/centro-reportes.component.html;frontend/src/app/features/centro-reportes/centro-reportes.component.scss;frontend/src/app/app.routes.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md and N5.2 report UI/RBAC preflight first. Integrate the inventory report entry points into CentroReportes/navigation and runtime permission visibility with keyboard, responsive and accessibility treatment only. Do not implement report query logic, facet tables or shared filter primitives. Minimum coherent code plus applicable frontend tests; two self-reviews; Desarrollo only; no Production, secrets or PR merge.",
+  "primaryBaseHead": "64419533abe435552cf34decf5eeb55746da319e"
+}
