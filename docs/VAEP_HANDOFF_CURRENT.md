@@ -5,46 +5,50 @@
 ## Estado vigente
 
 - Repo: `jmejia31/VariApp`; rama operativa: `Desarrollo`.
-- `lastClosedParent=N5.2.A`; recibo: `vaep/evidence/fragments/N5.2.A_LISTO_REAL_20260909T1439Z.json`.
-- `CURRENT_PARENT=N5.2.B` — Reportes de inventario / Dominio y contratos.
-- Admission: `OPEN`, `allowExistingActiveSessions=true`.
+- `lastClosedParent=N5.2.B`; recibo: `vaep/evidence/fragments/N5.2.B_LISTO_REAL_20260909T1530Z.json`.
+- `CURRENT_PARENT=N5.2.C` — Reportes de inventario / Persistencia, consultas, migración y aislamiento.
+- Admission: `OPEN`, `allowExistingActiveSessions=true`, razón `VERIFIED_ROADMAP_PROMOTION__N5.2.B__N5.2.C`.
 - Catálogo vivo único: `vaep/control/jules-autorefill-catalog.json`; no tiene número de versión operativo.
-- `N5.2.C` está prearmado y dependency-gated hasta `N5.2.B LISTO_REAL`.
-- `main` permanece en `85b4e02814823e9671803c23798a6ff0bf05c8f6`; Producción/secrets quedan fuera de alcance; PR #2 no se mergea desde VAEP.
+- N5.2.C tiene seis facetas materiales `dispatchEligible=true`, una por J1–J6, deduplicadas por `CURRENT_PARENT + material semantic facet`.
+- Los seis manifests N5.2.C fueron materializados y se observó transporte Trusted Worker iniciado; esto no se convierte por sí solo en `ACTIVE_REAL`, que exige correlación de sesión/ejecución Jules conforme al MAESTRO.
+- `N5.2.D` es el sucesor de roadmap, pero el catálogo vigente reporta `nextParentParallelMaterialScopes=0`; no fabricar NEXT/busywork hasta tener scopes materiales source-backed y dependency-valid.
+- `main` debe permanecer en `85b4e02814823e9671803c23798a6ff0bf05c8f6`; Producción/secrets quedan fuera de alcance; PR #2 no se mergea desde VAEP.
 
-## Cierre certificado N5.2.A
+## Cierre certificado N5.2.B
 
-N5.2.A cerró únicamente como auditoría/preflight. Las seis facetas materiales quedaron presentes y aceptadas mediante REVIEW_FIRST/QA_TAKEOVER, sin afirmar implementación o tests runtime inexistentes:
+N5.2.B cerró como dominio/contratos sólo después de REVIEW_FIRST real de las seis facetas materiales, deduplicación semántica, DoD contractual, gates causales aplicables y P0/P1=0. No se usó la implementación futura N5.2.C+ como prerequisito circular.
 
 | Lane | Faceta aceptada | Evidencia / review |
 |---|---|---|
-| J1 | `N5.2.A.2.VALUATION_KARDEX_PREFLIGHT` | `docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_VALORIZACION_KARDEX.md` · `956e7467...` |
-| J2 | `N5.2.A.3.STOCK_ANALYTICS_PREFLIGHT` | `docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_STOCK_ANALYTICS.md` · integración `4694ee44...` + corrección `f98a0092...` |
-| J3 | `N5.2.A.4.RECONCILIATION_OPERATIONS_PREFLIGHT` | `docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_RECONCILIACION_OPERATIVA.md` · `0efbc8a0...` |
-| J4 | `N5.2.A.5.ARCH_API_UI_TOPOLOGY_PREFLIGHT` | `docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_ARCH_API_UI.md` · R2 aceptado `bd491099...` · no R3 |
-| J5 | `N5.2.A.1.REPORTES_INVENTARIO_PREFLIGHT_QA` | `docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_QA.md` · `92a37336...` |
-| J6 | `N5.2.A.6.RBAC_AUDIT_SCOPE_PREFLIGHT` | `docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_RBAC_AUDIT.md` · `85f73b38...` |
+| J1 | `N5.2.B.2.VALUATION_KARDEX_DOMAIN_CONTRACT_DECISION` | `docs/N5.2_REPORTES_INVENTARIO_DOMAIN_CONTRACT_VALORIZACION_KARDEX.md` · `6d5847db...` · artifact `10110572275` |
+| J2 | `N5.2.B.1.INVENTORY_REPORT_DOMAIN_CONTRACTS` | `docs/N5.2_REPORTES_INVENTARIO_DOMAIN_CONTRACTS.md` · `e9d3f742...` · artifact `10110597206` |
+| J3 | `N5.2.B.3.RECONCILIATION_DOMAIN_CONTRACT_DECISION` | `docs/N5.2_REPORTES_INVENTARIO_DOMAIN_CONTRACT_RECONCILIACION.md` · `3e9cc5b9...` · artifact `10110539596` |
+| J4 | `N5.2.B.4.REPORT_EXTENSION_BOUNDARY_CONTRACT` | `docs/N5.2_REPORTES_INVENTARIO_DOMAIN_CONTRACT_EXTENSION_BOUNDARY.md` · `7de65446...` · artifact `10110316361` |
+| J5 | `N5.2.B.5.DOMAIN_CONTRACT_ACCEPTANCE_MATRIX` | `docs/N5.2_REPORTES_INVENTARIO_DOMAIN_CONTRACT_ACCEPTANCE.md` · `2e088a43...` · artifact `10110415780` |
+| J6 | `N5.2.B.6.RBAC_SCOPE_DOMAIN_CONTRACT_DECISION` | `docs/N5.2_REPORTES_INVENTARIO_DOMAIN_CONTRACT_RBAC_SCOPE.md` · `40cbc0f9...` · artifact `10110429577` |
 
-Functional/certification evidence head: `2f21f9b470cb4895ec7e8ef655d435a5ea406222`. En ese SHA fueron `success`: `VAEP catalog throughput guard` run `34364425069`, `VAEP engine lightweight checks` run `34364425052` y `VAEP Jules Diagnostic` run `34364425315`. `VariApp CI` quedó `skipped` y no se contó como PASS. Los commits posteriores al functional head antes del receipt fueron sólo control-plane/authorization; no alteraron la evidencia material N5.2.A. Parent P0=0/P1=0 para el scope preflight.
+Functional head causal: `1b8291b2527f7a338a6457e90ee69fb5dbf5d1f3`. En ese SHA fueron `success`: Backend Release y pruebas run `34368960829`, Cuentas por Cobrar integration run `34368967699`, `validate-material-swarm` run `34368967730` y `VAEP Jules runtime diagnostic` run `34368967863`. El hardening posterior de control-plane quedó separado de los gates funcionales y no se usó para sustituir causalidad. P0=0/P1=0 para el parent; no busywork; no R3.
 
-## CURRENT_PARENT N5.2.B — seis scopes materiales
+El receipt `N5.2.B_LISTO_REAL_20260909T1530Z.json` fue seguido por transición canónica en la misma cadena: `CURRENT_PARENT=N5.2.C`, admission segura `OPEN` y cierre registrado en catálogo/control-plane.
 
-Cada lane tiene una faceta de dominio/contratos no solapada. Ninguna debe auto-certificarse y ninguna debe redefinir la autoridad de otra lane.
+## CURRENT_PARENT N5.2.C — seis scopes materiales
+
+Cada lane tiene una faceta no solapada de persistencia/consulta/seguridad derivada de contratos aceptados N5.2.B. ATTEMPT1+R2 máximo; R3 prohibido; no Production.
 
 | Lane | Task actual | Scope |
 |---|---|---|
-| J1 | `N5.2.B.2.VALUATION_KARDEX_DOMAIN_CONTRACT_DECISION` | cronología/kardex, costo, legacy y filtros |
-| J2 | `N5.2.B.1.INVENTORY_REPORT_DOMAIN_CONTRACTS` | envelope común de filtros/paginación/orden/result metadata |
-| J3 | `N5.2.B.3.RECONCILIATION_DOMAIN_CONTRACT_DECISION` | diferencias, transferencias, conteos, correlación y ubicación |
-| J4 | `N5.2.B.4.REPORT_EXTENSION_BOUNDARY_CONTRACT` | seams/DTO ownership y límites de extensión sin adelantar API/UI |
-| J5 | `N5.2.B.5.DOMAIN_CONTRACT_ACCEPTANCE_MATRIX` | invariantes, edge cases, compatibilidad, testabilidad y P0/P1 |
-| J6 | `N5.2.B.6.RBAC_SCOPE_DOMAIN_CONTRACT_DECISION` | permisos, costo sensible, scoping físico, auditoría y límites |
+| J1 | `N5.2.C.2.VALUATION_KARDEX_PERSISTENCE_PLAN` | persistencia/índices/consulta para valorización y kardex |
+| J2 | `N5.2.C.1.REPORT_QUERY_PERSISTENCE_PLAN` | persistencia, índices y query plan del envelope común |
+| J3 | `N5.2.C.3.RECONCILIATION_PERSISTENCE_PLAN` | persistencia/migración/índices para reconciliación |
+| J4 | `N5.2.C.4.MIGRATION_ROLLBACK_TOPOLOGY` | topología de migración, backfill, reconciliación y rollback |
+| J5 | `N5.2.C.5.PERSISTENCE_RECONCILIATION_QA_PLAN` | preflight/postcheck, reconciliación, rollback y P0/P1 |
+| J6 | `N5.2.C.6.SECURITY_PERSISTENCE_REQUIREMENTS` | persistencia de auditoría/seguridad, retención y aislamiento |
 
-Para cada scope: inspeccionar primero el dominio/código real; hacer el cambio mínimo coherente sólo si es necesario. Si no aplica cambio de código, documentar N/A con evidencia exacta. Dos self-reviews, TESTS_EXECUTED explícito, ATTEMPT1+R2 máximo, R3 prohibido. No busywork.
+Manifests vigentes materializados: J2 `c7886520...`, J4 `fba81a44...`, J3 `d93d9263...`, J5 `be8bcd6c...`, J6 `0a0b72ae...`, J1 `7cb6b487...`. La existencia de manifest o workflow no equivale a aceptación ni a `LISTO_REAL`; cada resultado terminal vuelve a REVIEW_FIRST.
 
-## NEXT_SAFE N5.2.C
+## NEXT_SAFE N5.2.D
 
-Hay una faceta de persistencia prearmada por J1–J6, todas `dispatchEligible=false` hasta que N5.2.B sea LISTO_REAL. No publicarlas antes de cerrar B. El catálogo sigue siendo backlog programado; no confundir tarea declarada con ACTIVE_REAL o run reservado.
+`N5.2.D` es el siguiente nodo del roadmap después de N5.2.C, pero no tiene scopes paralelos materiales prearmados en el catálogo vigente. Mantener dependency-gated y no inventar trabajo para alcanzar un floor de concurrencia. Sólo regenerar/prearmar desde evidencia fresca del Plan/COLA y después de que N5.2.C sea certificable.
 
 ## ALEX
 
@@ -58,7 +62,7 @@ Existe autorización explícita del propietario en `vaep/control/alex-owner-auth
 2. Verificar continuidad CURRENT/NEXT_REAL sin superseder runs sanos.
 3. REVIEW_FIRST inmediato de cada terminal; integrar sólo delta material aceptado.
 4. Aplicar semantic dedupe `CURRENT_PARENT + material facet`; no crear variantes nominales.
-5. Cuando N5.2.B cumpla DoD + gates aplicables + P0/P1=0, emitir receipt y promover N5.2.C en la misma corrida.
+5. Cuando N5.2.C cumpla DoD + gates aplicables + P0/P1=0, emitir receipt y promover el siguiente dependency-valid en la misma corrida; no adelantar N5.2.D sin evidencia material.
 
 ### Codex
 
