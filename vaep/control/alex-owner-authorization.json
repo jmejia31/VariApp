@@ -1,0 +1,21 @@
+{
+  "authority": "OWNER_EXPLICIT_DIRECTIVE",
+  "owner": "Javier Mejia",
+  "recordedAtUtc": "2026-09-09T14:36:00Z",
+  "branch": "Desarrollo",
+  "component": "ALEX",
+  "authorization": "AUTHORIZED_NOW",
+  "scope": "VAEP control-plane material backlog planning, semantic dedupe, candidate scope generation, starvation detection, and automatic wake/refill support for canonical Jules J1-J6.",
+  "constraints": [
+    "ALEX is not a Jules lane",
+    "ALEX cannot certify LISTO_REAL",
+    "ALEX cannot bypass REVIEW_FIRST",
+    "ALEX cannot touch main or Production",
+    "ALEX cannot create R3+",
+    "ALEX cannot invent busywork or duplicate semantic task identities",
+    "ALEX must preserve one authoritative write owner per scope",
+    "ALEX may use automatic event/watchdog mechanisms but not manual workflow dispatch as the normal execution path"
+  ],
+  "source": "Explicit owner instruction in VariApp project conversation: ALEX is authorized to work now.",
+  "status": "ACTIVE_AUTHORIZATION"
+}
