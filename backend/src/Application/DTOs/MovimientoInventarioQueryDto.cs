@@ -4,6 +4,12 @@ namespace InventoryApp.Application.DTOs;
 
 public sealed class MovimientoInventarioQueryDto : PagedRequest
 {
+    public MovimientoInventarioQueryDto()
+    {
+        SortBy = "Fecha";
+        SortDirection = "desc";
+    }
+
     public int? ProductoId { get; set; }
     public int? ProductoVarianteId { get; set; }
     public int? AlmacenId { get; set; }
