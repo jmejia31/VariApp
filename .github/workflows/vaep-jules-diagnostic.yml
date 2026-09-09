@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - Desarrollo
-    paths:
-      - 'vaep/jules/diagnostic/*.json'
-      - '.github/workflows/vaep-jules-diagnostic.yml'
   pull_request:
     branches:
       - main
@@ -57,12 +54,14 @@ jobs:
 
           target_sha="${{ github.event.pull_request.head.sha || github.sha }}"
           manifest=$(git diff-tree --no-commit-id --name-only --diff-filter=A -r "$target_sha" -- 'vaep/jules/diagnostic/*.json' | head -n 1)
-          if [[ -z "$manifest" || ! -f "$manifest" ]]; then
-            echo "El último commit no agrega un manifiesto diagnóstico Jules; salida no-op."
-            exit 0
+          has_manifest=false
+          if [[ -n "$manifest" && -f "$manifest" ]]; then
+            has_manifest=true
+            dispatch_id=$(jq -r '.dispatchId // "UNKNOWN"' "$manifest" 2>/dev/null)
+          else
+            dispatch_id="EXACT-HEAD-${target_sha:0:12}"
           fi
 
-          dispatch_id=$(jq -r '.dispatchId // "UNKNOWN"' "$manifest" 2>/dev/null)
           stage='STARTED'
           detail='GitHub Actions diagnostic job started.'
           rc=0
@@ -104,15 +103,21 @@ jobs:
                   rc=32
                 else
                   stage='PRESESSION_OK'
-                  detail='Secret, Jules API, VariApp source and Desarrollo branch are all visible. Failure is after pre-session validation.'
+                  detail='Secret, Jules API, VariApp source and Desarrollo branch are all visible.'
                   rc=0
                 fi
               fi
             fi
           fi
 
-          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
-          body=$(cat <<EOF
+          echo "VAEP_JULES_DIAGNOSTIC_STAGE=$stage"
+          echo "VAEP_JULES_DIAGNOSTIC_TARGET=$target_sha"
+          echo "VAEP_JULES_DIAGNOSTIC_MANIFEST=$has_manifest"
+          printf '### VAEP Jules Diagnostic\n- Target: `%s`\n- Stage: `%s`\n- Manifest-driven: `%s`\n' "$target_sha" "$stage" "$has_manifest" >> "$GITHUB_STEP_SUMMARY"
+
+          if [[ "$has_manifest" == true || $rc -ne 0 ]]; then
+            run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+            body=$(cat <<EOF
           VAEP Jules P0 diagnostic result.
 
           - Dispatch: \`$dispatch_id\`
@@ -124,11 +129,12 @@ jobs:
 
           No Jules task/session was created by this diagnostic workflow. No secret value was printed or persisted.
           EOF
-          )
+            )
 
-          gh issue create \
-            --repo "$GITHUB_REPOSITORY" \
-            --title "[VAEP-JULES-DIAG] $dispatch_id $stage" \
-            --body "$body" >/dev/null
+            gh issue create \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "[VAEP-JULES-DIAG] $dispatch_id $stage" \
+              --body "$body" >/dev/null
+          fi
 
           exit $rc
