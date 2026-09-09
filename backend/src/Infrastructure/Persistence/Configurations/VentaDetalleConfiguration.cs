@@ -23,6 +23,8 @@ public class VentaDetalleConfiguration : IEntityTypeConfiguration<VentaDetalle>
         builder.Property(d => d.ProductoTallaSnapshot).HasMaxLength(100);
         builder.Property(d => d.ProductoSkuSnapshot).HasMaxLength(80);
 
+        builder.HasIndex(d => d.ProductoId)
+            .HasDatabaseName("IX_VentaDetalles_ProductoId");
         builder.HasOne(d => d.Producto)
             .WithMany()
             .HasForeignKey(d => d.ProductoId)
