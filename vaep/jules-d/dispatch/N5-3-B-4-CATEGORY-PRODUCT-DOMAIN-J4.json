@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-3-B-4-CATEGORY-PRODUCT-DOMAIN-J4",
+  "taskId": "N5.3.B.4.CATEGORY_PRODUCT_DOMAIN",
+  "workerId": "J4",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Application/DTOs/ReporteVentasFiltroDto.CategoriaProducto.cs",
+  "prompt": "Use docs/VAEP_AUTHORITY.md, original COLA N5.3.B and accepted N5.3.A preflight. Implement only category/product dimension contracts in backend/src/Application/DTOs/ReporteVentasFiltroDto.CategoriaProducto.cs as a partial sales-report filter facet. Preserve the documented historical-category caveat; do not claim category snapshots that do not exist. No API/repository/frontend or other facet edits. Run proportional backend compile/tests and two self-reviews. Desarrollo only; no main/Production/secrets/PR merge.",
+  "primaryBaseHead": "2adf393814f724282a607ef1687ca1b5c25243fe"
+}
