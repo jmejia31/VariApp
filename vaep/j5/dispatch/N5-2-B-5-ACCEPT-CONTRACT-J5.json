@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-2-B-5-ACCEPT-CONTRACT-J5",
+  "taskId": "N5.2.B.5.DOMAIN_CONTRACT_ACCEPTANCE_MATRIX",
+  "workerId": "J5",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/N5.2_REPORTES_INVENTARIO_DOMAIN_CONTRACT_ACCEPTANCE.md",
+  "prompt": "Read docs/VAEP_AUTHORITY.md and all accepted N5.2.A preflight evidence. Build the independent acceptance matrix for N5.2.B domain/contracts: invariants, edge cases, testability, backward compatibility and exact gaps that block promotion. Do not duplicate or self-certify other lanes; correct only evidence/contract defects causally. Two self-reviews; no production/secrets; P0/P1 explicit.",
+  "primaryBaseHead": "5a4bcffe5d27ebae32fbe37af775ef9d0f3959d5"
+}
