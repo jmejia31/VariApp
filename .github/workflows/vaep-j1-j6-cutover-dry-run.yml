@@ -1,0 +1,56 @@
+name: VAEP J1-J6 Cutover Dry Run
+
+on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - 'scripts/vaep/j1_j6_cutover.py'
+      - '.github/workflows/vaep-j1-j6-cutover-dry-run.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dry-run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+      - name: Apply cutover in disposable workspace
+        run: python3 scripts/vaep/j1_j6_cutover.py
+      - name: Validate generated JSON and Python
+        run: |
+          python3 -m py_compile scripts/vaep/j1_j6_registry_check.py scripts/vaep/j1_j6_cutover.py scripts/vaep/jules_integration_metrics.py scripts/vaep/terminal_handoff.py
+          python3 scripts/vaep/j1_j6_registry_check.py
+          python3 - <<'PY'
+          import json
+          for p in ['vaep/control/jules-workers.json','vaep/control/jules-autorefill-catalog.json','vaep/control/jules-completed-semantic-facets.json','vaep/schemas/jules-dispatch.schema.json']:
+              json.load(open(p, encoding='utf-8'))
+          print('CUTOVER_JSON_VALID=PASS')
+          PY
+      - name: Validate generated Bash and JS syntax
+        run: |
+          bash -n .github/scripts/vaep-policy-parser.sh .github/scripts/vaep-jules-master.sh .github/scripts/vaep-jules-worker.sh .github/scripts/vaep-jules-autorefill.sh .github/scripts/vaep-jules-autorefill-core.sh .github/scripts/vaep-jules-catalog-floor.sh .github/scripts/vaep-parent-close.sh .github/scripts/vaep-checkpoint.sh
+          node --check scripts/vaep/dispatch-preflight.mjs
+      - name: Validate MASTER parser and static worker contract
+        run: |
+          bash .github/scripts/vaep-policy-parser.sh --validate docs/VAEP_AUTHORITY.md
+          bash .github/scripts/vaep-jules-master.sh --static-self-test
+      - name: Validate workflow cutover invariants
+        run: |
+          for i in 1 2 3 4 5 6; do
+            grep -q "WORKER_ID: J$i" ".github/workflows/vaep-jules-j$i.yml"
+            grep -q 'Execute VAEP/Jules MASTER' ".github/workflows/vaep-jules-j$i.yml"
+          done
+          grep -q 'worker: \[J1, J2, J3, J4, J5, J6\]' .github/workflows/vaep-checkpoints.yml
+          grep -q 'cutoverEnabled' vaep/control/jules-workers.json
+          ! grep -q 'push:' .github/workflows/vaep-jules-secondary.yml
+          ! grep -q 'push:' .github/workflows/vaep-jules-secondary-b.yml
+          ! grep -q 'push:' .github/workflows/vaep-jules-secondary-c.yml
+          ! grep -q 'push:' .github/workflows/vaep-jules-secondary-d.yml
+      - name: Show cutover diff summary only
+        run: git diff --stat && git diff --check
