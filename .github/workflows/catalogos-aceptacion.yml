@@ -213,6 +213,7 @@ jobs:
             e2e/fase5-imagenes.spec.ts \
             e2e/fase6-facturacion-impresion.spec.ts \
             e2e/fase6-reportes-administrativos.spec.ts \
+            e2e/n5-1-reportes-period-validation.spec.ts \
             e2e/fase7-validacion-integral.spec.ts \
             e2e/fase8-validacion-completa.spec.ts \
             e2e/fase7-correo.spec.ts \
