@@ -1,0 +1,39 @@
+name: VAEP J5 Readiness
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vaep-j5-readiness
+  cancel-in-progress: false
+
+jobs:
+  readiness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      JULES_API_BASE: https://jules.googleapis.com/v1alpha
+      JULES_API_KEY: ${{ secrets.JULES_J5_API_KEY }}
+      EXPECTED_OWNER: jmejia31
+      EXPECTED_REPO: VariApp
+      EXPECTED_BRANCH: Desarrollo
+      WORKER_ID: J5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 1
+      - name: Validate prepared registry
+        run: python3 scripts/vaep/j1_j6_registry_check.py
+      - name: Read-only Jules source readiness
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$JULES_API_KEY"
+          response="$(mktemp)"
+          curl --connect-timeout 10 --max-time 45 --fail-with-body --silent --show-error -H "x-goog-api-key: $JULES_API_KEY" "$JULES_API_BASE/sources?pageSize=100" > "$response"
+          jq -e --arg owner "$EXPECTED_OWNER" --arg repo "$EXPECTED_REPO" --arg branch "$EXPECTED_BRANCH" '[.sources[]? | select(.githubRepo.owner == $owner and .githubRepo.repo == $repo)] | first as $s | ($s != null) and (($s.githubRepo.branches // []) | any(.displayName == $branch))' "$response" >/dev/null
+          echo "J5_READINESS_OK"
