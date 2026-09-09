@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "OPEN",
+  "newDispatchAdmission": "FROZEN",
   "allowExistingActiveSessions": true,
-  "reason": "N5.2.A_CURRENT__SIX_NON_OVERLAPPING_WRITE_SCOPES_READY__NO_FALSE_ACTIVE",
-  "updatedAtUtc": "2026-09-09T13:05:00Z"
+  "reason": "N5.2.A_J4_STALLED__QUARANTINED_REMOTE_ACTIVE_NO_DUPLICATE__STOP_OPERATION_UNAVAILABLE_IN_CONTROLLER_CONNECTOR",
+  "updatedAtUtc": "2026-09-09T13:36:00Z"
 }
