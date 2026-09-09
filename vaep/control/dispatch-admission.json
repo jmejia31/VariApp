@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "OPEN",
+  "newDispatchAdmission": "FROZEN",
   "allowExistingActiveSessions": true,
-  "reason": "VERIFIED_ROADMAP_PROMOTION__N5.2.F__N5.2.G",
-  "updatedAtUtc": "2026-09-09T20:13:00Z"
+  "reason": "N5.2.G_TERMINAL_HANDOFFS__REVIEW_FIRST_QA_TAKEOVER_IN_PROGRESS__NO_DUPLICATE_DISPATCH",
+  "updatedAtUtc": "2026-09-09T20:44:30Z"
 }
