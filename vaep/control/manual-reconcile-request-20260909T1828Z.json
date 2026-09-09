@@ -1,0 +1,15 @@
+{
+  "requestedAt": "2026-09-09T18:28:00Z",
+  "requestedBy": "CHATGPT_VAEP",
+  "reason": "USER_REPORTED_ZERO_PRODUCTIVE_JULES_AND_MISSED_CHECKPOINT_EXECUTIONS",
+  "action": "RECONCILE_J1_J6_AND_REFILL_OR_QA_TAKEOVER",
+  "currentParent": "N5.2.D",
+  "requirements": [
+    "Do not count AWAITING_USER_FEEDBACK or AWAITING_PLAN_APPROVAL as ACTIVE_REAL",
+    "Resolve generic plan/proceed confirmations automatically when scope is already authorized",
+    "Review all terminal handoffs before refill",
+    "If attempt 2/2 is exhausted, CHATGPT_VAEP performs QA takeover; do not create R3",
+    "Dispatch only source-backed, non-overlapping, dependency-safe work",
+    "If no safe work exists for a lane, mark it explicitly IDLE_NO_SAFE_MATERIAL rather than false ACTIVE"
+  ]
+}
