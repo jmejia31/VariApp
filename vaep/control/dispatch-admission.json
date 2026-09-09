@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "OPEN",
+  "newDispatchAdmission": "FROZEN",
   "allowExistingActiveSessions": true,
-  "reason": "VERIFIED_ROADMAP_PROMOTION__N5.2.C__N5.2.D__FIVE_ALEX_MATERIAL_SCOPES__J6_NO_BUSYWORK",
-  "updatedAtUtc": "2026-09-09T16:46:00Z"
+  "reason": "N5.2.D_ALL_FIVE_MATERIAL_SCOPES_MATERIALIZED__REVIEW_FIRST_AND_EXACT_HEAD_GATES_PENDING__NO_DUPLICATE_DISPATCH",
+  "updatedAtUtc": "2026-09-09T17:57:00Z"
 }
