@@ -41,6 +41,10 @@ public class VentaConfiguration : IEntityTypeConfiguration<Venta>
         builder.Property(v => v.MetodoPago).HasConversion<string>().HasMaxLength(20);
         builder.Property(v => v.Eliminado).HasDefaultValue(false);
         builder.HasIndex(v => v.Eliminado);
+        builder.HasIndex(v => v.Fecha)
+            .HasDatabaseName("IX_Ventas_Fecha");
+        builder.HasIndex(v => v.CreadoPorUsuarioId)
+            .HasDatabaseName("IX_Ventas_CreadoPorUsuarioId");
         builder.HasIndex(v => v.MetodoPagoId)
             .HasDatabaseName("IX_Ventas_MetodoPagoId");
         builder.HasQueryFilter(v => !v.Eliminado);
