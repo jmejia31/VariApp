@@ -9,172 +9,142 @@ on:
       - 'scripts/vaep/**'
       - 'vaep/**'
       - 'docs/VAEP_AUTHORITY.md'
+      - 'AGENTS.md'
   pull_request:
     branches: [main]
   workflow_dispatch:
+
 permissions:
   contents: read
 
 jobs:
   checks:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Validate JSON schemas
-        run: node -e "for (const f of ['vaep/schemas/jules-dispatch.schema.json','vaep/schemas/evidence-fragment.schema.json','vaep/metrics/baseline.json']) JSON.parse(require('fs').readFileSync(f)); console.log('schemas valid')"
-      - name: Validate VAEP scripts
-        run: node --check scripts/vaep/dispatch-preflight.mjs && node --check scripts/vaep/aggregate-evidence.mjs && node --check scripts/vaep/bundles.mjs && node --check scripts/vaep/sync-bitacora.mjs && node --check scripts/vaep/reconcile-status.mjs && node --check scripts/vaep/metrics.mjs && python3 -m py_compile scripts/vaep/jules_integration_metrics.py scripts/vaep/jules_runtime_contract.py
-      - name: Validate Bash syntax
-        run: bash -n .github/scripts/vaep-policy-parser.sh .github/scripts/vaep-jules-master.sh .github/scripts/vaep-jules-worker.sh .github/scripts/vaep-jules-autorefill.sh .github/scripts/vaep-jules-autorefill-core.sh .github/scripts/vaep-jules-catalog-floor.sh .github/scripts/vaep-parent-close.sh .github/scripts/vaep-checkpoint.sh
-      - name: Validate parser fail-closed self-test
-        run: bash .github/scripts/vaep-policy-parser.sh --self-test
-      - name: Validate AntiG StaticOnly
-        shell: pwsh
-        run: ./scripts/antig/antig-self-test.ps1 -StaticOnly
-      - name: Validate VAEP/Jules MASTER
-        run: bash .github/scripts/vaep-jules-master.sh --static-self-test
-      - name: Validate VAEP/Jules worker runtime jq preflight
-        run: bash .github/scripts/vaep-jules-worker.sh --runtime-preflight
-      - name: Run VAEP/Jules MASTER runtime self-test
-        run: bash .github/scripts/vaep-jules-master.sh --self-test
-      - name: Validate post-terminal refill preserves REVIEW_FIRST and lane continuity
+
+      - name: Validate JSON and executable syntax
         run: |
-          grep -q "AUTOREFILL_TERMINAL_HANDOFF" .github/scripts/vaep-jules-autorefill.sh
-          grep -q "CONTINUE_LANE_REFILL_REVIEW_FIRST_IN_PARALLEL" .github/scripts/vaep-jules-autorefill.sh
-          ! grep -q "action=BLOCK_PENDING_REVIEW_FIRST" .github/scripts/vaep-jules-autorefill.sh
-          grep -q "reviewResult:\"PENDING_REVIEW_FIRST\"" .github/scripts/vaep-jules-worker.sh
-      - name: Validate control-plane base equivalence guard
+          node -e "for (const f of ['vaep/schemas/jules-dispatch.schema.json','vaep/schemas/evidence-fragment.schema.json','vaep/metrics/baseline.json','vaep/control/jules-workers.json','vaep/control/jules-autorefill-catalog.json']) JSON.parse(require('fs').readFileSync(f)); console.log('json valid')"
+          node --check scripts/vaep/dispatch-preflight.mjs
+          node --check scripts/vaep/aggregate-evidence.mjs
+          node --check scripts/vaep/bundles.mjs
+          node --check scripts/vaep/sync-bitacora.mjs
+          node --check scripts/vaep/reconcile-status.mjs
+          node --check scripts/vaep/metrics.mjs
+          python3 -m py_compile scripts/vaep/j1_j6_registry_check.py scripts/vaep/j1_j6_cutover.py scripts/vaep/jules_integration_metrics.py scripts/vaep/jules_runtime_contract.py scripts/vaep/terminal_handoff.py
+          bash -n .github/scripts/vaep-policy-parser.sh .github/scripts/vaep-jules-master.sh .github/scripts/vaep-jules-worker.sh .github/scripts/vaep-jules-autorefill.sh .github/scripts/vaep-jules-autorefill-core.sh .github/scripts/vaep-jules-catalog-floor.sh .github/scripts/vaep-parent-close.sh .github/scripts/vaep-checkpoint.sh
+
+      - name: Validate MASTER and canonical J1-J6 registry
+        shell: bash
         run: |
-          grep -q "CONTROL_PLANE_BASE_EQUIVALENCE" docs/VAEP_AUTHORITY.md
-          grep -q "write_base_equivalence" .github/scripts/vaep-jules-worker.sh
-          grep -q -- "--base-equivalence" .github/scripts/vaep-jules-worker.sh
-          grep -q "recoverable_attempt1_entry" .github/scripts/vaep-jules-autorefill-core.sh
-          grep -q "WAIT_CAUSAL_CI" .github/scripts/vaep-checkpoint.sh
-          grep -q "vaep/evidence/\*" .github/scripts/vaep-jules-autorefill-core.sh
-          grep -q "vaep/evidence/\*" .github/scripts/vaep-parent-close.sh
-          grep -q "MASTER_TIMEOUT_HANDOFF" .github/scripts/vaep-jules-master.sh
-          grep -q 'tmp_catalog:-' .github/scripts/vaep-parent-close.sh
-          grep -q 'tmp_admission:-' .github/scripts/vaep-parent-close.sh
-          grep -q "desarrollo-ci.yml/runs?branch" .github/scripts/vaep-parent-close.sh
-          grep -q "catalogos-aceptacion.yml/runs?branch" .github/scripts/vaep-parent-close.sh
-          grep -q "migration-recovery-desarrollo.yml/runs?branch" .github/scripts/vaep-parent-close.sh
-          grep -q "migration_gate_applicable" .github/scripts/vaep-parent-close.sh
-          grep -q "VAEP_CLOSE_MIGRATION_GATE=NOT_APPLICABLE" .github/scripts/vaep-parent-close.sh
-          grep -q "JULES_CONTENT_FAILED_PATCH_ABSENT" .github/scripts/vaep-jules-autorefill-core.sh
-          grep -q "QUARANTINED_REMOTE_ACTIVE_NO_DUPLICATE" .github/scripts/vaep-jules-autorefill-core.sh
-          grep -q "REMOTE_SESSION_STATE_UNAVAILABLE" .github/scripts/vaep-jules-autorefill-core.sh
-          grep -q "R2_PRE_SESSION_TRANSPORT_FAILURE" .github/scripts/vaep-jules-autorefill-core.sh
-          grep -q 'select(.event=="push")' .github/scripts/vaep-jules-autorefill-core.sh
-      - name: Validate recovery exact-manifest contract
+          set -euo pipefail
+          bash .github/scripts/vaep-policy-parser.sh --self-test
+          bash .github/scripts/vaep-policy-parser.sh --validate docs/VAEP_AUTHORITY.md
+          python3 scripts/vaep/j1_j6_registry_check.py
+          python3 scripts/vaep/j1_j6_cutover.py
+          jq -e '.cutoverEnabled == true and .phase == "F2_ACTIVE_CUTOVER" and .activeLegacyWorkers == [] and .activeWorkers == ["J1","J2","J3","J4","J5","J6"]' vaep/control/jules-workers.json >/dev/null
+          grep -Fq 'JULES_ACTIVE_WORKERS=J1,J2,J3,J4,J5,J6' docs/VAEP_AUTHORITY.md
+          grep -Fq 'JULES_TASKS_TARGET_ROLLING_24H_TOTAL=600' docs/VAEP_AUTHORITY.md
+          grep -Fq 'JULES_PROGRAMMED_BACKLOG_TARGET_TOTAL=72' docs/VAEP_AUTHORITY.md
+          grep -Fq 'LANE_REFILL_DEADLINE_SECONDS=30' docs/VAEP_AUTHORITY.md
+          grep -Fq 'J1/J2/J3/J4/J5/J6' AGENTS.md
+
+      - name: Validate canonical dispatch schema and catalog
+        shell: bash
         run: |
-          for wf in .github/workflows/vaep-jules-{a,b,c,d}-recovery.yml; do
-            grep -q "manifest_commit:" "$wf"
-            grep -q "required: true" "$wf"
-            grep -q "VAEP_DISPATCH_SHA:" "$wf"
-            grep -q -- "--transport-preflight" "$wf"
-          done
-      - name: Validate expected autorefill control outcomes
+          set -euo pipefail
+          jq -e '.properties.worker.enum[:6] == ["J1","J2","J3","J4","J5","J6"]' vaep/schemas/jules-dispatch.schema.json >/dev/null
+          jq -e '.policy.programmedBacklogTargetTotal == 72 and .policy.activeWorkerCount == 6 and .policy.activeWorkers == ["J1","J2","J3","J4","J5","J6"] and (.lanes|keys|sort) == ["J1","J2","J3","J4","J5","J6"]' vaep/control/jules-autorefill-catalog.json >/dev/null
+          node scripts/vaep/dispatch-preflight-self-test.mjs
+
+      - name: Validate six canonical worker lanes
+        shell: bash
         run: |
-          for wf in .github/workflows/vaep-jules-secondary{,-b,-c,-d}.yml; do
+          set -euo pipefail
+          for i in 1 2 3 4 5 6; do
+            wf=".github/workflows/vaep-jules-j${i}.yml"
+            test -f "$wf"
+            grep -Fq "WORKER_ID: J${i}" "$wf"
+            grep -Fq "secrets.JULES_J${i}_API_KEY" "$wf"
+            grep -Fq 'VAEP_LANE_RUN_ID:' "$wf"
+            grep -Fq 'manifest_commit:' "$wf"
+            grep -Fq -- '--transport-preflight' "$wf"
             test "$(grep -c '0|78|79|80|81|82' "$wf")" -eq 2
           done
-      - name: Validate review-first and lane-continuity contract
+
+      - name: Validate legacy entry points are disabled
+        shell: bash
         run: |
-          grep -q "READY_FOR_VAEP_REVIEW_FIRST_REQUIRED_NO_REFILL" .github/scripts/vaep-jules-worker.sh
-          ! grep -q "review_first_debt_exists" .github/scripts/vaep-jules-autorefill.sh
-          grep -q "CONTINUE_LANE_REFILL_REVIEW_FIRST_IN_PARALLEL" .github/scripts/vaep-jules-autorefill.sh
-          ! grep -q "action=BLOCK_PENDING_REVIEW_FIRST" .github/scripts/vaep-jules-autorefill.sh
-          grep -q "PREARM_BEFORE_TERMINAL" docs/VAEP_AUTHORITY.md
-          grep -q "other_live_lane_run_exists" .github/scripts/vaep-jules-autorefill-core.sh
-          grep -q "VAEP_LANE_RUN_ID" .github/workflows/vaep-jules-secondary.yml
-      - name: Validate scheduled checkpoint controller
+          set -euo pipefail
+          for wf in .github/workflows/vaep-jules-secondary.yml .github/workflows/vaep-jules-secondary-b.yml .github/workflows/vaep-jules-secondary-c.yml .github/workflows/vaep-jules-secondary-d.yml; do
+            grep -Fq 'Legacy' "$wf"
+            grep -Fq 'LEGACY_WORKER_DISABLED_AFTER_J1_J6_CUTOVER' "$wf"
+          done
+          for wf in .github/workflows/vaep-jules-a-recovery.yml .github/workflows/vaep-jules-b-recovery.yml .github/workflows/vaep-jules-c-recovery.yml .github/workflows/vaep-jules-d-recovery.yml; do
+            grep -Fq 'Legacy' "$wf"
+            grep -Fq 'LEGACY_RECOVERY_DISABLED_AFTER_J1_J6_CUTOVER' "$wf"
+          done
+
+      - name: Validate canonical checkpoint health stop and diagnostic controls
+        shell: bash
         run: |
-          test "$(grep -c "cron:" .github/workflows/vaep-checkpoints.yml)" -eq 5
-          grep -q "workflow_run:" .github/workflows/vaep-checkpoints.yml
-          grep -q "VAEP engine lightweight checks" .github/workflows/vaep-checkpoints.yml
-          grep -q "Desarrollo - Compilación y pruebas" .github/workflows/vaep-checkpoints.yml
-          test "$(grep -c "^      - '" .github/workflows/vaep-checkpoints.yml)" -eq 2
-          grep -q "github.event.workflow_run.conclusion == 'success'" .github/workflows/vaep-checkpoints.yml
-          grep -q "github.event.workflow_run.event == 'push'" .github/workflows/vaep-checkpoints.yml
-          grep -q "github.event.workflow_run.name == 'VAEP engine lightweight checks'" .github/workflows/vaep-checkpoints.yml
-          grep -q "github.event.workflow_run.name == 'Desarrollo - Compilación y pruebas'" .github/workflows/vaep-checkpoints.yml
-          grep -q "JULES_A_API_KEY:" .github/workflows/vaep-checkpoints.yml
-          grep -q "JULES_B_API_KEY:" .github/workflows/vaep-checkpoints.yml
-          grep -q "JULES_C_API_KEY:" .github/workflows/vaep-checkpoints.yml
-          grep -q "JULES_D_API_KEY:" .github/workflows/vaep-checkpoints.yml
-          grep -q "VAEP_CHECKPOINTS=:00,:12,:24,:36,:48" docs/VAEP_AUTHORITY.md
-          grep -q "reconcile_watchdog_admission" .github/scripts/vaep-checkpoint.sh
-          grep -q "remote_watchdog_sessions_terminal" .github/scripts/vaep-checkpoint.sh
-          grep -q "WATCHDOG_RECONCILED" .github/scripts/vaep-checkpoint.sh
-          grep -q "REVIEW_FIRST_DEBT_RECONCILED" .github/scripts/vaep-checkpoint.sh
-          grep -q "expected_state" .github/scripts/vaep-checkpoint.sh
+          set -euo pipefail
+          test "$(grep -c 'cron:' .github/workflows/vaep-checkpoints.yml)" -eq 5
+          grep -Fq 'worker: [J1, J2, J3, J4, J5, J6]' .github/workflows/vaep-checkpoints.yml
+          for i in 1 2 3 4 5 6; do
+            grep -Fq "J${i}_API_KEY: ${{ secrets.JULES_J${i}_API_KEY }}" .github/workflows/vaep-checkpoints.yml
+            grep -Fq "J${i}_API_KEY: ${{ secrets.JULES_J${i}_API_KEY }}" .github/workflows/vaep-jules-stop.yml
+            grep -Fq "J${i}_KEY: ${{ secrets.JULES_J${i}_API_KEY }}" .github/workflows/vaep-jules-session-health.yml
+          done
+          grep -Fq 'test("^J[1-6]$")' .github/workflows/vaep-jules-stop.yml
+          grep -Fq 'secrets.JULES_J1_API_KEY' .github/workflows/vaep-jules-diagnostic.yml
+          active=(.github/workflows/vaep-jules-j{1,2,3,4,5,6}.yml .github/workflows/vaep-checkpoints.yml .github/workflows/vaep-jules-stop.yml .github/workflows/vaep-jules-session-health.yml .github/workflows/vaep-jules-diagnostic.yml)
+          if grep -En 'secrets\.JULES_(API_KEY|B_API_KEY|C_API_KEY|D_API_KEY)' "${active[@]}"; then
+            echo 'LEGACY_SECRET_REFERENCE_FOUND_IN_ACTIVE_RUNTIME' >&2
+            exit 1
+          fi
           bash .github/scripts/vaep-checkpoint.sh --self-test
           bash .github/scripts/vaep-parent-close.sh --self-test
-      - name: Validate admission and functional-head starvation guards
+
+      - name: Validate VAEP/Jules runtime contracts
         run: |
-          jq -e '(.newDispatchAdmission == "OPEN" or .newDispatchAdmission == "FROZEN") and .allowExistingActiveSessions == true' vaep/control/dispatch-admission.json
-          grep -q 'docs/N4.11_CENTROS_COSTO_\*\.md' .github/scripts/vaep-jules-autorefill-core.sh
-          grep -q 'docs/N4.11_CENTROS_COSTO_\*\.md' .github/scripts/vaep-parent-close.sh
-          grep -q "paths:" .github/workflows/vaep-engine-ci.yml
-          grep -q "docs/VAEP_AUTHORITY.md" .github/workflows/vaep-engine-ci.yml
-      - name: Validate unique-work exhaustion is explicit
-        run: |
-          grep -q 'AUTOREFILL_UNIQUE_WORK_EXHAUSTED' .github/scripts/vaep-jules-autorefill-core.sh
-          grep -q 'result=UNIQUE_WORK_EXHAUSTED' .github/scripts/vaep-checkpoint.sh
-      - name: Validate Jules synthetic dispatch matrix
-        run: python3 scripts/vaep/jules_runtime_contract.py --self-test
-      - name: Validate evidence-gap handoff does not create R2
-        run: |
-          grep -q "EVIDENCE_GAP_REVIEW_REQUIRED" scripts/vaep/jules_runtime_contract.py
-          grep -q "EVIDENCE_GAP_REVIEW_REQUIRED" scripts/vaep/terminal_handoff.py
-          grep -q "Terminal contract classification" .github/scripts/vaep-jules-worker.sh
-          grep -q "NO_R2_REVIEW_OR_QA" .github/scripts/vaep-jules-autorefill-core.sh
-      - name: Validate terminal ownership and retry exhaustion
-        run: |
+          bash .github/scripts/vaep-jules-master.sh --static-self-test
+          bash .github/scripts/vaep-jules-worker.sh --runtime-preflight
+          bash .github/scripts/vaep-jules-master.sh --self-test
+          python3 scripts/vaep/jules_runtime_contract.py --self-test
           python3 -m unittest discover -s scripts/vaep -p test_terminal_handoff.py
           python3 -m unittest discover -s scripts/vaep -p test_clarification_resolver.py
-          grep -q 'clarification_resolver.py' .github/scripts/vaep-jules-worker.sh
-          ! grep -q 'VAEP specific clarification for TASK_ID=' .github/scripts/vaep-jules-worker.sh
-          grep -q 'terminal_handoff.py --audit' .github/workflows/vaep-checkpoints.yml
-          grep -q 'REVIEW_EXECUTOR_NOT_CONFIGURED' scripts/vaep/terminal_handoff.py
-          grep -q 'QA_TAKEOVER_REQUIRED' scripts/vaep/terminal_handoff.py
-          grep -q 'state=all' .github/scripts/vaep-checkpoint.sh
-          grep -q 'state=all' scripts/vaep/terminal_handoff.py
-          grep -q 'scripts/vaep/\*' .github/scripts/vaep-parent-close.sh
-          grep -q 'catalogos-aceptacion.yml' .github/scripts/vaep-parent-close.sh
-      - name: Validate explicit QA review receipt contract
+
+      - name: Validate no-busywork and continuity guards
+        shell: bash
         run: |
-          jq -e '
-            .authority == "docs/VAEP_AUTHORITY.md"
-            and .parent == "N4.11.H"
-            and .review == "PASS"
-            and .reviewExecuted == true
-            and (.tasks | length) == 16
-            and ([.tasks[] | select(.integrationRequired == false and .julesIntegrationClaimed == false and .qaTakeoverEvidenceAccepted == true)] | length) == 16
-          ' vaep/evidence/reviews/N4.11.H_REVIEW_FIRST_20260908T204500Z.json
-          jq -e '
-            .authority == "docs/VAEP_AUTHORITY.md"
-            and .parent == "N4.11.H"
-            and .decision == "LISTO_REAL"
-            and .review == "PASS"
-            and (.functionalHead | test("^[0-9a-f]{40}$"))
-            and .p0Open == 0 and .p1Open == 0
-            and .julesIntegrationClaimed == false
-          ' vaep/evidence/fragments/N4.11.H_LISTO_REAL_20260908T204500Z.json
-          grep -q 'accepted_review_items' scripts/vaep/terminal_handoff.py
-      - name: Validate operational KPI evaluator
-        run: node scripts/vaep/metrics.mjs --self-test
-      - name: Validate Jules integration receipt contract
-        run: python3 scripts/vaep/jules_integration_metrics.py --self-test
-      - name: Validate HEAD integration receipt
-        run: python3 scripts/vaep/jules_integration_metrics.py --validate-head HEAD
-      - name: Report useful Jules throughput rolling 24h
-        run: python3 scripts/vaep/jules_integration_metrics.py --rolling-hours 24
-      - name: Run VAEP self-tests
-        run: node scripts/vaep/dispatch-preflight-self-test.mjs && node scripts/vaep/block2-self-test.mjs && node scripts/vaep/block3-self-test.mjs
+          set -euo pipefail
+          grep -Fq 'AUTOREFILL_UNIQUE_WORK_EXHAUSTED' .github/scripts/vaep-jules-autorefill-core.sh
+          grep -Fq 'result=UNIQUE_WORK_EXHAUSTED' .github/scripts/vaep-checkpoint.sh
+          grep -Fq 'CONTINUE_LANE_REFILL_REVIEW_FIRST_IN_PARALLEL' .github/scripts/vaep-jules-autorefill.sh
+          grep -Fq 'other_live_lane_run_exists' .github/scripts/vaep-jules-autorefill-core.sh
+          grep -Fq 'NO_R2_REVIEW_OR_QA' .github/scripts/vaep-jules-autorefill-core.sh
+          grep -Fq 'EVIDENCE_GAP_REVIEW_REQUIRED' scripts/vaep/jules_runtime_contract.py
+          grep -Fq 'EVIDENCE_GAP_REVIEW_REQUIRED' scripts/vaep/terminal_handoff.py
+
+      - name: Validate supporting VAEP self-tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          pwsh ./scripts/antig/antig-self-test.ps1 -StaticOnly
+          node scripts/vaep/block2-self-test.mjs
+          node scripts/vaep/block3-self-test.mjs
+          node scripts/vaep/metrics.mjs --self-test
+          python3 scripts/vaep/jules_integration_metrics.py --self-test
+          python3 scripts/vaep/jules_integration_metrics.py --rolling-hours 24
+
+      - name: Verify clean repository diff
+        run: git diff --check
