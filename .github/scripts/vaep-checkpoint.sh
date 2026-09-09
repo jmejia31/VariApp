@@ -305,7 +305,7 @@ reconcile_watchdog_admission() {
         echo 'VAEP_ADMISSION_RECONCILE=WAIT reason=publish_race' >&2
       fi
     else
-      echo "VAEP_ADMISSION_RECONCILE=WAIT reason=publish_failed rc=$rc" >&2
+      echo 'VAEP_ADMISSION_RECONCILE=WAIT reason=publish_failed' >&2
     fi
   fi
   return 0
@@ -355,7 +355,7 @@ emit_review_observation() {
 
 emit_watchdog_observation() {
   local active
-  active="$(api "repos/$GITHUB_REPOSITORY/actions/runs?branch=$BRANCH&per_page=100" | jq '[.workflow_runs[]? | select((.name | test("VAEP Jules [ABCD] Trusted Secondary Worker")) and (.status=="queued" or .status=="in_progress" or .status=="pending"))] | length')"
+  active="$(api "repos/$GITHUB_REPOSITORY/actions/runs?branch=$BRANCH&per_page=100" | jq '[.workflow_runs[]? | select((.name | test("^VAEP J[1-6] Trusted Worker$")) and (.status=="queued" or .status=="in_progress" or .status=="pending"))] | length')"
   echo "VAEP_CHECKPOINT_LIVE_JULES_RUNS=$active"
   echo 'VAEP_CHECKPOINT_WATCHDOG_AUTHORITY=LANE_RUNTIME action=NO_DUPLICATE_STOP'
 }
@@ -376,6 +376,7 @@ run_self_test() {
   grep -q 'vaep-jules-diagnostic.yml' "$0"
   grep -q 'REVIEW_FIRST_DEBT_RECONCILED' "$0"
   grep -q 'expected_state' "$0"
+  grep -q 'J1|J2|J3|J4|J5|J6' "$0"
   echo 'VAEP_CHECKPOINT_SELF_TEST=PASS'
 }
 
@@ -407,7 +408,7 @@ main() {
 
   case "$worker" in
     '') workers=("${WORKERS[@]}" ) ;;
-    JULES_A|JULES_B|JULES_C|JULES_D) workers=("$worker") ;;
+    J1|J2|J3|J4|J5|J6) workers=("$worker") ;;
     *) fail "invalid_worker=$worker" ;;
   esac
 
@@ -420,11 +421,6 @@ main() {
       rc=1
     fi
   done
-  # A lane refill can legitimately find no safe work when the current parent
-  # is exhausted. In that case the same checkpoint must attempt the canonical
-  # closure/promotion path before ending status-only. The governor is strictly
-  # evidence- and gate-driven; it never invents LISTO_REAL or integrates an
-  # unreviewed Jules artifact.
   local closure_output closure_rc closure_promoted=0
   set +e
   closure_output="$(GITHUB_REPOSITORY="$GITHUB_REPOSITORY" GH_TOKEN="$GH_TOKEN" bash "$PARENT_CLOSE" 2>&1)"
@@ -451,8 +447,6 @@ main() {
   fi
 
   echo "VAEP_CHECKPOINT_EXECUTION=COMPLETE checkpoint=$checkpoint worker_count=${#workers[@]} closure_promoted=$closure_promoted"
-  # Review and watchdog are intentionally observed after lane refill. They
-  # must never consume the refill deadline when a safe CURRENT/NEXT is absent.
   [[ "$checkpoint" != ':24' ]] || emit_review_observation
   [[ "$checkpoint" != ':36' ]] || emit_watchdog_observation
   exit "$rc"
