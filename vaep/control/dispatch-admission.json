@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "FROZEN",
-  "allowExistingActiveSessions": false,
-  "reason": "N5.3.B_SYNC_BARRIER_PENDING__SIX_MATERIAL_DOMAIN_SCOPES_PREPARED__NO_DISPATCH_BEFORE_ATOMIC_QUEUE_TRANSITION",
-  "updatedAtUtc": "2026-09-09T22:03:30Z"
+  "newDispatchAdmission": "OPEN",
+  "allowExistingActiveSessions": true,
+  "reason": "N5.3.A_LISTO_REAL__N5.3.B_CURRENT__ATOMIC_SHEET_TRANSITION_VERIFIED__SIX_MATERIAL_DOMAIN_SCOPES_READY",
+  "updatedAtUtc": "2026-09-09T22:04:20Z"
 }
