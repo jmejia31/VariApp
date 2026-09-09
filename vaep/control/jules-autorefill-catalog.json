@@ -1,8 +1,8 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
   "currentParent": "N5.3.B",
-  "generatedAt": "2026-09-09T22:00:43Z",
-  "regenerationReason": "AUTOMATIC_PARENT_CLOSE__N5.3.A_LISTO_REAL__N5.3.B_CURRENT",
+  "generatedAt": "2026-09-09T22:01:30Z",
+  "regenerationReason": "N5.3.A_LISTO_REAL__N5.3.B_PROMOTED__SIX_ROADMAP_DERIVED_DOMAIN_SCOPES_PREPARED__SYNC_BARRIER_PENDING",
   "lastClosedParent": "N5.3.A",
   "closureReceipts": {
     "N4.11.H": "vaep/evidence/fragments/N4.11.H_LISTO_REAL_20260908T204500Z.json",
@@ -40,20 +40,13 @@
     "requireDistinctWriteScopesWhenParallel": true,
     "lowParallelismAction": "EXPLAIN_OR_SUBDIVIDE_MATERIAL_SCOPE__NO_BUSYWORK",
     "activeWorkerCount": 6,
-    "activeWorkers": [
-      "J1",
-      "J2",
-      "J3",
-      "J4",
-      "J5",
-      "J6"
-    ]
+    "activeWorkers": ["J1", "J2", "J3", "J4", "J5", "J6"]
   },
   "throughputPlan": {
     "mode": "MATERIAL_SWARM_FIRST",
     "currentParent": "N5.3.B",
-    "currentParentMaterialScopeCount": 0,
-    "currentParentReason": "N5.3.A is LISTO_REAL. N5.3.B is dependency-valid with 0 material scope(s); no additional busywork is fabricated.",
+    "currentParentMaterialScopeCount": 6,
+    "currentParentReason": "N5.3.A is LISTO_REAL. Original COLA N5.3.B DOMAIN is dependency-valid; ALEX prearmed six semantic dimension facets and they are materialized as six exclusive partial-contract files. Dispatch remains held only for the mandatory Sheet atomic transition/sync barrier.",
     "nextParent": "N5.3.C",
     "nextParentParallelMaterialScopes": 0,
     "nextParentScopesNonOverlapping": true,
@@ -62,172 +55,26 @@
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
     "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
-    "sourceRanges": [
-      "COLA!A408:T415",
-      "PLAN_MAESTRO!A53:L55"
-    ],
-    "note": "Dependency order derived from live Plan/COLA. N5.3.A is LISTO_REAL; N5.3.B is current. Next roadmap node in this catalog is N5.3.C.",
+    "sourceRanges": ["COLA!A408:T415", "PLAN_MAESTRO!A53:L55"],
+    "note": "Dependency order derived from original PLAN_MAESTRO/COLA. N5.3.A is LISTO_REAL; N5.3.B is current. N5.3.C remains dependency-gated until B closes.",
     "nodes": [
-      {
-        "id": "N5.3.A",
-        "order": 18,
-        "type": "MICROTAREA",
-        "dependencies": [
-          "N5.1.H",
-          "GATE-N4"
-        ],
-        "phaseGate": "GATE-N4"
-      },
-      {
-        "id": "N5.3.B",
-        "order": 19,
-        "type": "MICROTAREA",
-        "dependencies": [
-          "N5.3.A"
-        ],
-        "phaseGate": "GATE-N4"
-      },
-      {
-        "id": "N5.3.C",
-        "order": 20,
-        "type": "MICROTAREA",
-        "dependencies": [
-          "N5.3.B"
-        ],
-        "phaseGate": "GATE-N4"
-      },
-      {
-        "id": "N5.3.D",
-        "order": 21,
-        "type": "MICROTAREA",
-        "dependencies": [
-          "N5.3.C"
-        ],
-        "phaseGate": "GATE-N4"
-      },
-      {
-        "id": "N5.3.E",
-        "order": 22,
-        "type": "MICROTAREA",
-        "dependencies": [
-          "N5.3.D"
-        ],
-        "phaseGate": "GATE-N4"
-      },
-      {
-        "id": "N5.3.F",
-        "order": 23,
-        "type": "MICROTAREA",
-        "dependencies": [
-          "N5.3.E"
-        ],
-        "phaseGate": "GATE-N4"
-      },
-      {
-        "id": "N5.3.G",
-        "order": 24,
-        "type": "MICROTAREA",
-        "dependencies": [
-          "N5.3.F"
-        ],
-        "phaseGate": "GATE-N4"
-      },
-      {
-        "id": "N5.3.H",
-        "order": 25,
-        "type": "MICROTAREA",
-        "dependencies": [
-          "N5.3.G"
-        ],
-        "phaseGate": "GATE-N4"
-      }
+      {"id":"N5.3.A","order":18,"type":"MICROTAREA","dependencies":["N5.1.H","GATE-N4"],"phaseGate":"GATE-N4"},
+      {"id":"N5.3.B","order":19,"type":"MICROTAREA","dependencies":["N5.3.A"],"phaseGate":"GATE-N4"},
+      {"id":"N5.3.C","order":20,"type":"MICROTAREA","dependencies":["N5.3.B"],"phaseGate":"GATE-N4"},
+      {"id":"N5.3.D","order":21,"type":"MICROTAREA","dependencies":["N5.3.C"],"phaseGate":"GATE-N4"},
+      {"id":"N5.3.E","order":22,"type":"MICROTAREA","dependencies":["N5.3.D"],"phaseGate":"GATE-N4"},
+      {"id":"N5.3.F","order":23,"type":"MICROTAREA","dependencies":["N5.3.E"],"phaseGate":"GATE-N4"},
+      {"id":"N5.3.G","order":24,"type":"MICROTAREA","dependencies":["N5.3.F"],"phaseGate":"GATE-N4"},
+      {"id":"N5.3.H","order":25,"type":"MICROTAREA","dependencies":["N5.3.G"],"phaseGate":"GATE-N4"}
     ]
   },
   "lanes": {
-    "J1": [
-      {
-        "dispatchId": "N5-3-A-1-BACKEND-DATA-PREFLIGHT-J1",
-        "taskId": "N5.3.A.1.BACKEND_DATA_PREFLIGHT",
-        "workerId": "J1",
-        "taskAttempt": 1,
-        "plannedParent": "N5.3.A",
-        "readyForDispatch": true,
-        "dispatchEligible": false,
-        "fileScopeHint": "docs/qa/N5_3_A_BACKEND_DATA_PREFLIGHT.md",
-        "prompt": "Read docs/VAEP_AUTHORITY.md and original COLA N5.3.A. Inspect backend sales/reporting data sources, entities, query paths and filter dimensions for period/user/client/branch/category/product/variant/brand/model/color/size. Write only docs/qa/N5_3_A_BACKEND_DATA_PREFLIGHT.md with evidence, gaps, dependencies, risks and acceptance implications. Source inspection is read-only; do not implement N5.3.B+ work. Desarrollo only; no Production, secrets or PR merge.",
-        "reason": "CLOSED_BY_N5.3.A_LISTO_REAL_RECEIPT"
-      }
-    ],
-    "J2": [
-      {
-        "dispatchId": "N5-3-A-2-API-CONTRACT-PREFLIGHT-J2",
-        "taskId": "N5.3.A.2.API_CONTRACT_PREFLIGHT",
-        "workerId": "J2",
-        "taskAttempt": 1,
-        "plannedParent": "N5.3.A",
-        "readyForDispatch": true,
-        "dispatchEligible": false,
-        "fileScopeHint": "docs/qa/N5_3_A_API_CONTRACT_PREFLIGHT.md",
-        "prompt": "Read docs/VAEP_AUTHORITY.md and original COLA N5.3.A. Inspect existing sales/report HTTP endpoints, DTO/filter/pagination/error/export contracts and identify exact affected API surfaces for the requested reporting dimensions. Write only docs/qa/N5_3_A_API_CONTRACT_PREFLIGHT.md. Do not change controllers/contracts yet; no overlap with other evidence files. Desarrollo only; no Production, secrets or PR merge.",
-        "reason": "CLOSED_BY_N5.3.A_LISTO_REAL_RECEIPT"
-      }
-    ],
-    "J3": [
-      {
-        "dispatchId": "N5-3-A-3-FRONTEND-UX-PREFLIGHT-J3",
-        "taskId": "N5.3.A.3.FRONTEND_UX_PREFLIGHT",
-        "workerId": "J3",
-        "taskAttempt": 1,
-        "plannedParent": "N5.3.A",
-        "readyForDispatch": true,
-        "dispatchEligible": false,
-        "fileScopeHint": "docs/qa/N5_3_A_FRONTEND_UX_PREFLIGHT.md",
-        "prompt": "Read docs/VAEP_AUTHORITY.md and original COLA N5.3.A. Inspect current frontend sales/report routes, report-center/navigation, components, filters, tables, export/loading/error/empty/responsive/a11y behavior relevant to sales reports. Write only docs/qa/N5_3_A_FRONTEND_UX_PREFLIGHT.md. Source inspection read-only; do not implement N5.3.E. Desarrollo only; no Production, secrets or PR merge.",
-        "reason": "CLOSED_BY_N5.3.A_LISTO_REAL_RECEIPT"
-      }
-    ],
-    "J4": [
-      {
-        "dispatchId": "N5-3-A-4-SECURITY-RBAC-PREFLIGHT-J4",
-        "taskId": "N5.3.A.4.SECURITY_RBAC_PREFLIGHT",
-        "workerId": "J4",
-        "taskAttempt": 1,
-        "plannedParent": "N5.3.A",
-        "readyForDispatch": true,
-        "dispatchEligible": false,
-        "fileScopeHint": "docs/qa/N5_3_A_SECURITY_RBAC_PREFLIGHT.md",
-        "prompt": "Read docs/VAEP_AUTHORITY.md and original COLA N5.3.A. Inspect relational permissions, row/branch scope, finance-sensitive fields, audit/correlation/security boundaries for sales reporting. Identify fail-closed risks and exact acceptance/security gates. Write only docs/qa/N5_3_A_SECURITY_RBAC_PREFLIGHT.md; no implementation or privilege expansion. Desarrollo only; no Production, secrets or PR merge.",
-        "reason": "CLOSED_BY_N5.3.A_LISTO_REAL_RECEIPT"
-      }
-    ],
-    "J5": [
-      {
-        "dispatchId": "N5-3-A-5-TEST-CI-PREFLIGHT-J5",
-        "taskId": "N5.3.A.5.TEST_CI_PREFLIGHT",
-        "workerId": "J5",
-        "taskAttempt": 1,
-        "plannedParent": "N5.3.A",
-        "readyForDispatch": true,
-        "dispatchEligible": false,
-        "fileScopeHint": "docs/qa/N5_3_A_TEST_CI_PREFLIGHT.md",
-        "prompt": "Read docs/VAEP_AUTHORITY.md and original COLA N5.3.A. Inspect existing sales-report unit/integration/contract/E2E/security/performance regression coverage and causal CI workflows. Produce a directed acceptance/test matrix without duplicating existing evidence. Write only docs/qa/N5_3_A_TEST_CI_PREFLIGHT.md; do not add tests yet. Desarrollo only; no Production, secrets or PR merge.",
-        "reason": "CLOSED_BY_N5.3.A_LISTO_REAL_RECEIPT"
-      }
-    ],
-    "J6": [
-      {
-        "dispatchId": "N5-3-A-6-INTEGRATION-ROLLBACK-PREFLIGHT-J6",
-        "taskId": "N5.3.A.6.INTEGRATION_ROLLBACK_PREFLIGHT",
-        "workerId": "J6",
-        "taskAttempt": 1,
-        "plannedParent": "N5.3.A",
-        "readyForDispatch": true,
-        "dispatchEligible": false,
-        "fileScopeHint": "docs/qa/N5_3_A_INTEGRATION_ROLLBACK_PREFLIGHT.md",
-        "prompt": "Read docs/VAEP_AUTHORITY.md and original COLA N5.3.A. Reconcile cross-layer dependencies, integration risks, in/out scope, rollback strategy, migration applicability, observability and parent-level DoD for sales reports. Write only docs/qa/N5_3_A_INTEGRATION_ROLLBACK_PREFLIGHT.md and explicitly flag blockers/owners; do not implement later-phase work. Desarrollo only; no Production, secrets or PR merge.",
-        "reason": "CLOSED_BY_N5.3.A_LISTO_REAL_RECEIPT"
-      }
-    ]
+    "J1": [{"dispatchId":"N5-3-B-1-PERIOD-TIME-DOMAIN-J1","taskId":"N5.3.B.1.PERIOD_TIME_DOMAIN","workerId":"J1","taskAttempt":1,"plannedParent":"N5.3.B","readyForDispatch":true,"dispatchEligible":false,"fileScopeHint":"backend/src/Application/DTOs/ReporteVentasFiltroDto.Periodo.cs","prompt":"Use only docs/VAEP_AUTHORITY.md plus original COLA N5.3.B and accepted N5.3.A backend/data preflight. Implement the period/time-range part of the N5.3.B sales-report domain contract as the sole writer of backend/src/Application/DTOs/ReporteVentasFiltroDto.Periodo.cs. Follow existing Application DTO/PagedRequest conventions. Define explicit Desde/Hasta date-time filter semantics suitable for later server-side validation; do not implement persistence/API/service/frontend. Keep the type composable as a partial sales-report filter contract. Run proportional backend compile/tests and two self-reviews. Desarrollo only; no main/Production/secrets/PR merge.","reason":"PREPARED_CURRENT_PARENT__SYNC_BARRIER_PENDING"}],
+    "J2": [{"dispatchId":"N5-3-B-2-USER-SELLER-DOMAIN-J2","taskId":"N5.3.B.2.USER_SELLER_DOMAIN","workerId":"J2","taskAttempt":1,"plannedParent":"N5.3.B","readyForDispatch":true,"dispatchEligible":false,"fileScopeHint":"backend/src/Application/DTOs/ReporteVentasFiltroDto.Usuario.cs","prompt":"Use only docs/VAEP_AUTHORITY.md plus original COLA N5.3.B and accepted N5.3.A preflight. Implement only the user/seller dimension contract in backend/src/Application/DTOs/ReporteVentasFiltroDto.Usuario.cs as a partial ReporteVentasFiltroDto facet. Preserve the fail-closed authorization invariant: a filter field never grants scope and later query code must still use IUsuarioScopeService. Do not touch controllers/repositories/security permissions or other facet files. Run proportional backend compile/tests and two self-reviews. Desarrollo only; no main/Production/secrets/PR merge.","reason":"PREPARED_CURRENT_PARENT__SYNC_BARRIER_PENDING"}],
+    "J3": [{"dispatchId":"N5-3-B-3-CLIENT-BRANCH-DOMAIN-J3","taskId":"N5.3.B.3.CLIENT_BRANCH_DOMAIN","workerId":"J3","taskAttempt":1,"plannedParent":"N5.3.B","readyForDispatch":true,"dispatchEligible":false,"fileScopeHint":"backend/src/Application/DTOs/ReporteVentasFiltroDto.ClienteSucursal.cs","prompt":"Use docs/VAEP_AUTHORITY.md, original COLA N5.3.B and accepted N5.3.A preflight. Implement only client/branch filter contracts in backend/src/Application/DTOs/ReporteVentasFiltroDto.ClienteSucursal.cs as a partial sales-report filter facet. Represent ClienteId/SucursalId without inventing a Venta.SucursalId ownership model; branch attribution is later resolved from sale detail/warehouse evidence. Do not touch query implementation or other facet files. Run proportional backend compile/tests and two self-reviews. Desarrollo only; no main/Production/secrets/PR merge.","reason":"PREPARED_CURRENT_PARENT__SYNC_BARRIER_PENDING"}],
+    "J4": [{"dispatchId":"N5-3-B-4-CATEGORY-PRODUCT-DOMAIN-J4","taskId":"N5.3.B.4.CATEGORY_PRODUCT_DOMAIN","workerId":"J4","taskAttempt":1,"plannedParent":"N5.3.B","readyForDispatch":true,"dispatchEligible":false,"fileScopeHint":"backend/src/Application/DTOs/ReporteVentasFiltroDto.CategoriaProducto.cs","prompt":"Use docs/VAEP_AUTHORITY.md, original COLA N5.3.B and accepted N5.3.A preflight. Implement only category/product dimension contracts in backend/src/Application/DTOs/ReporteVentasFiltroDto.CategoriaProducto.cs as a partial sales-report filter facet. Preserve the documented historical-category caveat; do not claim category snapshots that do not exist. No API/repository/frontend or other facet edits. Run proportional backend compile/tests and two self-reviews. Desarrollo only; no main/Production/secrets/PR merge.","reason":"PREPARED_CURRENT_PARENT__SYNC_BARRIER_PENDING"}],
+    "J5": [{"dispatchId":"N5-3-B-5-VARIANT-BRAND-MODEL-DOMAIN-J5","taskId":"N5.3.B.5.VARIANT_BRAND_MODEL_DOMAIN","workerId":"J5","taskAttempt":1,"plannedParent":"N5.3.B","readyForDispatch":true,"dispatchEligible":false,"fileScopeHint":"backend/src/Application/DTOs/ReporteVentasFiltroDto.VarianteMarcaModelo.cs","prompt":"Use docs/VAEP_AUTHORITY.md, original COLA N5.3.B and accepted N5.3.A preflight. Implement only variant/brand/model filter contracts in backend/src/Application/DTOs/ReporteVentasFiltroDto.VarianteMarcaModelo.cs as a partial sales-report filter facet. Keep master-identity filters distinct from historical snapshot display semantics; do not silently redefine history. No persistence/API/frontend or other facet edits. Run proportional backend compile/tests and two self-reviews. Desarrollo only; no main/Production/secrets/PR merge.","reason":"PREPARED_CURRENT_PARENT__SYNC_BARRIER_PENDING"}],
+    "J6": [{"dispatchId":"N5-3-B-6-COLOR-SIZE-DOMAIN-J6","taskId":"N5.3.B.6.COLOR_SIZE_DOMAIN","workerId":"J6","taskAttempt":1,"plannedParent":"N5.3.B","readyForDispatch":true,"dispatchEligible":false,"fileScopeHint":"backend/src/Application/DTOs/ReporteVentasFiltroDto.ColorTalla.cs","prompt":"Use docs/VAEP_AUTHORITY.md, original COLA N5.3.B and accepted N5.3.A preflight. Implement only color/size filter contracts in backend/src/Application/DTOs/ReporteVentasFiltroDto.ColorTalla.cs as a partial sales-report filter facet. Preserve historical snapshot versus current-master semantics; no persistence/API/frontend or other facet edits. Run proportional backend compile/tests and two self-reviews. Desarrollo only; no main/Production/secrets/PR merge.","reason":"PREPARED_CURRENT_PARENT__SYNC_BARRIER_PENDING"}]
   },
   "lastClosureFunctionalHead": "cb7729bb55a52d181293cbf5e7885abff32bd39f"
 }
