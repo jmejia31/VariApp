@@ -6,5 +6,5 @@
   "taskAttempt": 1,
   "fileScopeHint": "backend/src/Application/DTOs/ReporteVentasFiltroDto.VarianteMarcaModelo.cs",
   "prompt": "Use docs/VAEP_AUTHORITY.md, original COLA N5.3.B and accepted N5.3.A preflight. Implement only variant/brand/model filter contracts in backend/src/Application/DTOs/ReporteVentasFiltroDto.VarianteMarcaModelo.cs as a partial sales-report filter facet. Keep master-identity filters distinct from historical snapshot display semantics; do not silently redefine history. No persistence/API/frontend or other facet edits. Run proportional backend compile/tests and two self-reviews. Desarrollo only; no main/Production/secrets/PR merge.",
-  "primaryBaseHead": "2adf393814f724282a607ef1687ca1b5c25243fe"
+  "primaryBaseHead": "d105ba76a1d52ac461428693f88b7cd780dfd789"
 }
