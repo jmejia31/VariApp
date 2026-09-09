@@ -67,4 +67,20 @@ public sealed class ReportesInventarioStockHealthSecurityContractTests
         Assert.True(filtro.Hasta.HasValue);
         Assert.Equal(TimeSpan.FromDays(30), filtro.Hasta.Value - filtro.Desde.Value);
     }
+
+    [Fact]
+    public void QueryRules_RechazanSortFueraDeAllowlist()
+    {
+        var filtro = new ReporteInventarioStockHealthFiltroDto
+        {
+            Dias = 30,
+            SortBy = "CostoUnitario",
+            SortDirection = "desc"
+        };
+
+        var error = ReporteInventarioQueryRules.ValidateStockHealth(filtro);
+
+        Assert.NotNull(error);
+        Assert.Contains("SortBy no permitido", error);
+    }
 }
