@@ -1,31 +1,37 @@
 # VAEP HANDOFF CURRENT
 
-Authority: `docs/VAEP_AUTHORITY.md` is the only operational master. Always reread live `Desarrollo`, `vaep/control/jules-autorefill-catalog.json`, `vaep/control/dispatch-admission.json`, and the original Plan Maestro spreadsheet before acting.
+Authority: `docs/VAEP_AUTHORITY.md` is the only operational master. Always reread live `Desarrollo`, `vaep/control/jules-autorefill-catalog.json`, `vaep/control/dispatch-admission.json`, result evidence, and the original Plan Maestro spreadsheet before acting. Historical labels/issues are evidence only, never authority.
 
 ## Current parent
 
 - Last closed parent: `N5.2.C`, certified `LISTO_REAL` by `vaep/evidence/fragments/N5.2.C_LISTO_REAL_20260909T1642Z.json`.
 - CURRENT_PARENT: `N5.2.D`.
-- Admission: `OPEN`; existing active sessions allowed.
-- Admission reason: `VERIFIED_ROADMAP_PROMOTION__N5.2.C__N5.2.D__FIVE_ALEX_MATERIAL_SCOPES__J6_NO_BUSYWORK`.
-- Next roadmap node: `N5.2.E`, dependency-gated and not eligible until `N5.2.D` is genuinely `LISTO_REAL`.
+- Controller correction baseline reviewed: `a42b2f4cdbb75e1bb4bcdc980720ac75fa3a9811` (`fix(n5.2.d): preserve Kardex default Fecha desc`). Reread live HEAD before every action.
+- Admission: `FROZEN`; existing already-active sessions may finish only if they still own valid work.
+- Admission reason: `N5.2.D_ALL_FIVE_MATERIAL_SCOPES_MATERIALIZED__REVIEW_FIRST_AND_EXACT_HEAD_GATES_PENDING__NO_DUPLICATE_DISPATCH`.
+- This freeze is causal, not stale: it prevents duplicate dispatch while controller REVIEW_FIRST/exact-head certification debt is still open.
+- Next roadmap node: `N5.2.E`, dependency-gated and not dispatch-eligible until `N5.2.D` is genuinely `LISTO_REAL`.
 
-## Material continuity
+## P0 continuity / QA takeover
 
-ALEX reconciled exactly five source-backed, non-overlapping material scopes for `N5.2.D`; no safe sixth scope exists for J6 and no busywork may be fabricated:
+No lane below is `ACTIVE_REAL` merely because a Jules session or GitHub workflow exists. The latest N5.2.D Jules ownership was reconciled as follows:
 
-- J1 — `N5.2.D.1.VALUATION_BACKEND_API`
-- J2 — `N5.2.D.2.KARDEX_BACKEND_API`
-- J3 — `N5.2.D.3.STOCK_HEALTH_BACKEND_API`
-- J4 — `N5.2.D.4.RECONCILIATION_BACKEND_API`
-- J5 — `N5.2.D.5.COMMON_API_SHELL`
-- J6 — no safe material scope for the current parent; remain idle unless a new source-backed non-overlapping scope becomes dependency-valid.
+- J1 — `N5.2.D.1.VALUATION_BACKEND_API`: ATTEMPT1 reached `AWAITING_USER_FEEDBACK_QA_TAKEOVER` on a generic proceed/plan confirmation. MASTER authorizes autonomous resolution of that confirmation. The stale remote session received a stop signal and is quarantined; controller ownership is `CHATGPT_VAEP`. Valuation implementation/corrections and authorization/cost-censorship tests are present in `Desarrollo`. `REVIEW_FIRST`/exact-head acceptance remains required.
+- J2 — `N5.2.D.2.KARDEX_BACKEND_API`: R2 is terminal `COMPLETED` with `PENDING_REVIEW_FIRST` / `QA_TAKEOVER_REQUIRED`; attempt budget is exhausted, so R3 is prohibited. `CHATGPT_VAEP` performed the correction path in `Desarrollo`, including canonical history permission, explicit physical scope, deterministic `(Fecha,Id)` ordering/tie-break behavior and tests. Final `REVIEW_FIRST`/exact-head acceptance remains required.
+- J3 — `N5.2.D.3.STOCK_HEALTH_BACKEND_API`: R2 exceeded the lane budget and was superseded with ownership revoked; late Jules results cannot auto-integrate and R3 is prohibited. `CHATGPT_VAEP` implemented/activated the stock-health QA takeover path in `Desarrollo`, including physical-scope/bounded-query protections. Final `REVIEW_FIRST`/exact-head acceptance remains required.
+- J4 — `N5.2.D.4.RECONCILIATION_BACKEND_API`: R2 exceeded the lane budget and was superseded with ownership revoked; late Jules results cannot auto-integrate and R3 is prohibited. `CHATGPT_VAEP` implemented/activated the reconciliation QA takeover path in `Desarrollo`, including physical-scope/bounded-query protections. Final `REVIEW_FIRST`/exact-head acceptance remains required.
+- J5 — `N5.2.D.5.COMMON_API_SHELL`: R2 exceeded the lane budget and was superseded with ownership revoked; late Jules results cannot auto-integrate and R3 is prohibited. `CHATGPT_VAEP` owns the common-shell takeover; bounded/open-ended query validation and related tests are materialized in `Desarrollo`. Final `REVIEW_FIRST`/exact-head acceptance remains required.
+- J6 — `IDLE_NO_SAFE_MATERIAL` for N5.2.D. No source-backed, non-overlapping sixth D scope exists; do not fabricate busywork.
 
-Runtime is volatile and must be reread, never inferred from this file. During the latest PRIMARY reconciliation: J1 was rematerialized with a fresh immutable ATTEMPT1 after an `INVALID_REDISPATCH` transport rejection that did not consume R2; J2, J3 and J5 reached their permitted R2 after causal attempt-1 failures; duplicate non-executing R2 reservations for J2 and J3 were removed. J4 ATTEMPT1 eventually became terminal after the GitHub poller had exceeded its budget; the canonical post-terminal autorefill then materialized R2 `N5-2-D-4-RECON-API-J4-R2-20260909T171752Z-4627` and its `dispatch-jules` worker entered runtime. A second non-executing J4 R2 reservation (`...171758Z-2019`) was removed, preserving exactly one R2 and the R3 prohibition. A manifest, queued job, or historical label is not `ACTIVE_REAL`; require runtime evidence.
+Historical result issues that still contain `takeoverExecuted=false`, `QA_TAKEOVER_REQUIRED`, `PENDING_REVIEW_FIRST`, or superseded remote state are immutable evidence of the handoff trigger. They do not grant Jules renewed ownership and must not cause R3. The controller correction commits above are the current takeover execution evidence; certification still requires live exact-head REVIEW_FIRST/gates.
+
+## ALEX / next-safe material
+
+ALEX has already reconciled six source-backed, semantically distinct, non-overlapping `N5.2.E FRONTEND_UX` scopes from the original PLAN_MAESTRO/COLA/roadmap, one for J1-J6. They are prearmed with `readyForDispatch=true` but `dispatchEligible=false` until N5.2.D closes. This satisfies backlog-floor planning without OBSERVE_ONLY and without filler/12-per-lane busywork.
 
 ## Close-first rule
 
-`N5.2.D` is not closed merely because work was dispatched. Every terminal Jules delivery must enter `REVIEW_FIRST` immediately, then correction/integration where applicable, DoD, causal gates, exact-head revalidation, and parent-level P0/P1=0. Do not certify or promote while R2/review/integration debt remains. If and only if `N5.2.D` becomes `LISTO_REAL`, promote the next dependency-valid node in the same run and refill real material work without waiting for another checkpoint.
+`N5.2.D` is **not** `PASS` or `LISTO_REAL` yet. Controller code materialization is not certification. Keep admission fail-closed against duplicate D dispatch until all five material facets have accepted `REVIEW_FIRST`, applicable exact-head checks are terminal-success, parent-level P0/P1 are zero, and a valid closure receipt is emitted. Only then promote `N5.2.E` and refill same-run.
 
 ## Guardrails
 
