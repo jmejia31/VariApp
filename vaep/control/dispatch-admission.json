@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "FROZEN",
-  "allowExistingActiveSessions": false,
-  "reason": "N5.1.H_REVIEW_COMPLETE__QA_TAKEOVER_MATERIALIZED__LISTO_REAL_CERTIFICATION_AND_PARENT_PROMOTION_IN_PROGRESS__NO_NEW_DISPATCH",
-  "updatedAtUtc": "2026-09-09T11:45:00Z"
+  "newDispatchAdmission": "OPEN",
+  "allowExistingActiveSessions": true,
+  "reason": "VERIFIED_ROADMAP_PROMOTION__N5.1.H__N5.2.A",
+  "updatedAtUtc": "2026-09-09T12:54:53Z"
 }
