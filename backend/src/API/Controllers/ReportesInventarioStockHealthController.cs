@@ -16,12 +16,14 @@ namespace InventoryApp.API.Controllers;
 public sealed class ReportesInventarioStockHealthController : ControllerBase
 {
     private readonly ReporteInventarioService _reportes;
+    private readonly IUsuarioScopeService _usuarioScope;
 
     public ReportesInventarioStockHealthController(
         AppDbContext context,
         IUsuarioScopeService usuarioScope)
     {
         _reportes = new ReporteInventarioService(context, usuarioScope);
+        _usuarioScope = usuarioScope;
     }
 
     [HttpGet]
@@ -33,6 +35,9 @@ public sealed class ReportesInventarioStockHealthController : ControllerBase
         var error = ReporteInventarioQueryRules.ValidateStockHealth(filtro);
         if (error is not null)
             return BadRequest(ApiResponse<object>.Fail("Consulta de stock-health inválida.", new() { error }));
+
+        if (!await ReporteInventarioScopeGuard.CanUseExplicitPhysicalScopeAsync(filtro, _usuarioScope))
+            return Forbid();
 
         var resultado = await _reportes.ObtenerStockHealthAsync(filtro, cancellationToken);
         return Ok(ApiResponse<PagedResult<ReporteInventarioStockHealthDto>>.Ok(resultado));
