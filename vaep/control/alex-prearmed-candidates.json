@@ -3,67 +3,71 @@
   "engine": "ALEX",
   "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
   "sourceSheet": "COLA",
-  "sourceRowKey": "N5.2.D",
-  "generatedFromHead": "12d45f380300acb3735edeef5c54df09b0b9e850",
-  "currentParent": "N5.2.C",
-  "targetParent": "N5.2.D",
-  "targetDependency": "N5.2.C",
+  "sourceRowKey": "N5.2.E",
+  "generatedFromHead": "9df32f97c811bda3e444b0e991839c186efb70a7",
+  "currentParent": "N5.2.D",
+  "targetParent": "N5.2.E",
+  "targetDependency": "N5.2.D",
   "dependencyState": "GATED",
   "dispatchEligible": false,
   "policy": "ROADMAP_DERIVED__DEPENDENCY_SAFE__SEMANTIC_DEDUPE_ONLY",
   "busyworkAllowed": false,
-  "note": "N5.2.D is real pending BACKEND_API work from the canonical Sheet, but it remains non-eligible until N5.2.C is LISTO_REAL. Five distinct material candidates are prearmed; no sixth candidate is fabricated merely to fill J6 or reach a numeric backlog target.",
+  "note": "N5.2.E is canonical FRONTEND_UX work from COLA. Six material, non-overlapping frontend facets are prearmed from the accepted N5.2 report topology and the five N5.2.D APIs; none is dispatch-eligible until N5.2.D is genuinely LISTO_REAL. No work is fabricated to reach the numeric backlog target.",
   "candidates": [
     {
-      "candidateId": "N5.2.D.CAND.VALUATION_BACKEND_API",
+      "candidateId": "N5.2.E.CAND.VALUATION_FRONTEND_UX",
       "suggestedLane": "J1",
       "dispatchEligible": false,
-      "dependencyGate": "N5.2.C_LISTO_REAL",
-      "materialScope": "Implement the valuation inventory-report application/repository/API slice only, preserving N5.2.B valuation contracts and N5.2.C persistence decisions.",
-      "scopeExcludes": ["kardex", "stock-health", "reconciliation", "common-api-shell"],
-      "semanticDedupeKey": "N5.2.D|VALUATION|BACKEND_API"
+      "dependencyGate": "N5.2.D_LISTO_REAL",
+      "materialScope": "Implement only the inventory valuation report frontend view and API client binding, including loading/empty/error states and cost visibility consistent with the accepted RBAC contract.",
+      "scopeExcludes": ["kardex-ui", "stock-health-ui", "reconciliation-ui", "common-filter-shell", "navigation-rbac"],
+      "semanticDedupeKey": "N5.2.E|VALUATION|FRONTEND_UX"
     },
     {
-      "candidateId": "N5.2.D.CAND.KARDEX_BACKEND_API",
+      "candidateId": "N5.2.E.CAND.KARDEX_FRONTEND_UX",
       "suggestedLane": "J2",
       "dispatchEligible": false,
-      "dependencyGate": "N5.2.C_LISTO_REAL",
-      "materialScope": "Implement the Kardex/movement-history inventory-report application/repository/API slice only, including deterministic pagination and accepted history semantics.",
-      "scopeExcludes": ["valuation", "stock-health", "reconciliation", "common-api-shell"],
-      "semanticDedupeKey": "N5.2.D|KARDEX|BACKEND_API"
+      "dependencyGate": "N5.2.D_LISTO_REAL",
+      "materialScope": "Implement only the Kardex report frontend table/filter/pagination experience consuming the bounded server-side API; do not reimplement movement semantics in the browser.",
+      "scopeExcludes": ["valuation-ui", "stock-health-ui", "reconciliation-ui", "common-filter-shell", "navigation-rbac"],
+      "semanticDedupeKey": "N5.2.E|KARDEX|FRONTEND_UX"
     },
     {
-      "candidateId": "N5.2.D.CAND.STOCK_HEALTH_BACKEND_API",
+      "candidateId": "N5.2.E.CAND.STOCK_HEALTH_FRONTEND_UX",
       "suggestedLane": "J3",
       "dispatchEligible": false,
-      "dependencyGate": "N5.2.C_LISTO_REAL",
-      "materialScope": "Implement the stock-health analytical slice only: rotation, low/out-of-stock, no-movement and aging queries/API as one coherent read-model family.",
-      "scopeExcludes": ["valuation", "kardex", "reconciliation", "common-api-shell"],
-      "semanticDedupeKey": "N5.2.D|STOCK_HEALTH|BACKEND_API"
+      "dependencyGate": "N5.2.D_LISTO_REAL",
+      "materialScope": "Implement only the stock-health report family UI for rotation, low/out-of-stock, no-movement and aging, consuming server-side results and preserving bounded filters.",
+      "scopeExcludes": ["valuation-ui", "kardex-ui", "reconciliation-ui", "common-filter-shell", "navigation-rbac"],
+      "semanticDedupeKey": "N5.2.E|STOCK_HEALTH|FRONTEND_UX"
     },
     {
-      "candidateId": "N5.2.D.CAND.RECONCILIATION_BACKEND_API",
+      "candidateId": "N5.2.E.CAND.RECONCILIATION_FRONTEND_UX",
       "suggestedLane": "J4",
       "dispatchEligible": false,
-      "dependencyGate": "N5.2.C_LISTO_REAL",
-      "materialScope": "Implement the consolidated reconciliation analytical slice only, using the accepted Conteo/Transferencia/Ajuste mappings, traceability and server-side paging without a parallel ledger.",
-      "scopeExcludes": ["valuation", "kardex", "stock-health", "common-api-shell"],
-      "semanticDedupeKey": "N5.2.D|RECONCILIATION|BACKEND_API"
+      "dependencyGate": "N5.2.D_LISTO_REAL",
+      "materialScope": "Implement only the reconciliation report UI for Conteo/Transferencia/Ajuste projections with paging, traceability fields and finance-field redaction respected.",
+      "scopeExcludes": ["valuation-ui", "kardex-ui", "stock-health-ui", "common-filter-shell", "navigation-rbac"],
+      "semanticDedupeKey": "N5.2.E|RECONCILIATION|FRONTEND_UX"
     },
     {
-      "candidateId": "N5.2.D.CAND.COMMON_API_SHELL",
+      "candidateId": "N5.2.E.CAND.COMMON_FILTER_UX",
       "suggestedLane": "J5",
       "dispatchEligible": false,
-      "dependencyGate": "N5.2.C_LISTO_REAL",
-      "materialScope": "Implement only the common inventory-report API/application shell required by all facets: common request envelope binding, ProblemDetails/error translation, bounded-query validation and DI/controller wiring. Do not implement facet query logic.",
-      "scopeExcludes": ["valuation-query-logic", "kardex-query-logic", "stock-health-query-logic", "reconciliation-query-logic"],
-      "semanticDedupeKey": "N5.2.D|COMMON_API_SHELL|BACKEND_API"
+      "dependencyGate": "N5.2.D_LISTO_REAL",
+      "materialScope": "Implement only reusable inventory-report filter/paging/loading/empty/error UI primitives shared by the report facets, without owning facet-specific tables or calculations.",
+      "scopeExcludes": ["valuation-table", "kardex-table", "stock-health-table", "reconciliation-table", "navigation-rbac"],
+      "semanticDedupeKey": "N5.2.E|COMMON_FILTER_SHELL|FRONTEND_UX"
+    },
+    {
+      "candidateId": "N5.2.E.CAND.REPORT_CENTER_NAV_RBAC_A11Y",
+      "suggestedLane": "J6",
+      "dispatchEligible": false,
+      "dependencyGate": "N5.2.D_LISTO_REAL",
+      "materialScope": "Integrate inventory reports into CentroReportes navigation and runtime permission visibility, with keyboard/responsive/accessibility treatment only; do not own report query logic or facet tables.",
+      "scopeExcludes": ["valuation-query", "kardex-query", "stock-health-query", "reconciliation-query", "common-filter-implementation"],
+      "semanticDedupeKey": "N5.2.E|REPORT_CENTER_NAV_RBAC_A11Y|FRONTEND_UX"
     }
   ],
-  "unassignedLanes": [
-    {
-      "workerId": "J6",
-      "reason": "NO_SIXTH_NON_OVERLAPPING_MATERIAL_SCOPE_DERIVED_WITH_SUFFICIENT_CONFIDENCE__NO_BUSYWORK"
-    }
-  ]
+  "unassignedLanes": []
 }
