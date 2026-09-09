@@ -5,83 +5,83 @@
 ## Corte de control sincronizado
 
 - Repo: `jmejia31/VariApp`; rama operativa: `Desarrollo`.
-- Baseline de control de este corte: `f98a0092a6d4ca8f39f54331035179a089d7253e` (`docs(n5.2): correct stock analytics review semantics`). Después de leer este archivo, volver a consultar el HEAD vivo.
+- Baseline material previo a este handoff: `0efbc8a0e5c7e7b0fb744a63d2f10a707e5f7736` (`docs(vaep): accept N5.2.A J3 reconciliation preflight after review`). Después de leer este archivo, volver a consultar el HEAD vivo.
 - `lastClosedParent=N5.1.H`; recibo: `vaep/evidence/fragments/N5.1.H_LISTO_REAL_20260909T1236Z.json`.
 - `CURRENT_PARENT=N5.2.A` — Reportes de inventario / auditoría y preflight.
-- Admission: `FROZEN`, `allowExistingActiveSessions=true`, razón `N5.2.A_J4_STALLED__QUARANTINED_REMOTE_ACTIVE_NO_DUPLICATE__STOP_OPERATION_UNAVAILABLE_IN_CONTROLLER_CONNECTOR` desde `70565279bc5e395ef07f2a5aed02e5d31fbabdc4`. No abrir ni duplicar J4 hasta revalidar el blocker.
-- `N5.2.A` sigue `PENDIENTE`: no declarar `LISTO_REAL`, no promover `N5.2.B` y no inferir PASS por dispatch, commit o workflow aislado. Requiere las seis entregas materiales reconciliadas, REVIEW_FIRST, gates causales/DoD y P0/P1=0.
+- Admission: `OPEN`, `allowExistingActiveSessions=true`. El blocker J4 fue resuelto sin R3: materialización R2, REVIEW_FIRST aceptado y reapertura en `0897595b0fcbbffa5ec962266776c4fdc7742c1c`.
+- `N5.2.A` sigue `PENDIENTE`: no declarar `LISTO_REAL` ni promover `N5.2.B`. Faltan entregas materiales J1/J5/J6 y luego síntesis/reconciliación, gates causales exact-head y P0/P1=0 del parent.
 - `main`, Producción, secrets y PR #2 quedan fuera de alcance; PR #2 no se mergea desde VAEP.
 
-## Delta material y deuda corregida
+## Delta material aceptado
 
-- J3 fue rechazado en REVIEW_FIRST por defectos factuales/de prueba y pasó a QA_TAKEOVER en vez de rebind genérico. Delta integrado: `6c5ca463cabdf79335123fb05e2c109173cc6668` (`docs(N5.2.A): QA takeover J3 reconciliation preflight`) → `docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_RECONCILIACION_OPERATIVA.md`. La corrección usa terminología real (`DiferenciaSnapshot`) y conserva gaps/limitaciones explícitos.
-- J2 ya materializó `docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_STOCK_ANALYTICS.md`. Integración revisada: `4694ee44334f07f55f0594cff505b38e3897896e`; el controller detectó después una semántica causal imprecisa sobre `ProductoRepository.GetStockBajoAsync()` y la corrigió en `f98a0092a6d4ca8f39f54331035179a089d7253e`. El documento deja explícita la coexistencia entre autoridad física `ExistenciaVariante` y superficie legacy `ProductoVariante.Cantidad`.
-- Transporte J1–J6 endurecido: `7b33ca82b446afe5e6c190fc66f807421bd06ded` acepta rutas canónicas J5/J6 y `3e46b387ef2d680a53bbfd1a48e79a462f1a27a8` repara semántica de timeout terminal. `.github/scripts/vaep-jules-master.sh` acepta `vaep/(jules|jules-b|jules-c|jules-d|j5|j6)/dispatch/*.json`.
-- Recoveries pre-sesión materializados sin consumir intento Jules: J1 `82385dae67ad244ab5b5868f5c110aa821ff984c`; J2 `8103ee241a9d696f22bd44a5fe6194cd14424716`; J5 `8b86f05c76b7e4c8b9e1b60ae68a35f8c38f2df2`; J6 `c5f885fb732ccc6d140188c67fa82e509dc35036`; J4 `82484b0628f0fa30a7fc9882a580d6c004b37e38` con `vaep/jules-d/dispatch/N5-2-A-5-ARCH-J4-RECOVERY1.json`.
-- J4 no recibió un segundo recovery: el controller lo puso en cuarentena y congeló admission en `70565279bc5e395ef07f2a5aed02e5d31fbabdc4` para evitar duplicación mientras el estado remoto aparecía activo/stalled y el conector no exponía stop de esa sesión. Revalidar el estado real antes de cualquier siguiente acción.
-- Una recovery manifest/dispatch NO prueba `ACTIVE_REAL`. Antes de afirmar ACTIVE, terminal, reviewable o intento consumido, comprobar workflow/session evidence vivo.
+- J2 `N5.2.A.3.STOCK_ANALYTICS_PREFLIGHT`: `docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_STOCK_ANALYTICS.md`, integración `4694ee44334f07f55f0594cff505b38e3897896e` y corrección REVIEW_FIRST `f98a0092a6d4ca8f39f54331035179a089d7253e`. Mantener explícita la semántica dual `ExistenciaVariante` vs superficie legacy `ProductoVariante.Cantidad`.
+- J3 `N5.2.A.4.RECONCILIATION_OPERATIONS_PREFLIGHT`: QA_TAKEOVER materializado en `6c5ca463cabdf79335123fb05e2c109173cc6668`; REVIEW_FIRST del controller aceptado en `0efbc8a0e5c7e7b0fb744a63d2f10a707e5f7736`. La revisión revalidó `DiferenciaSnapshot` y la regla real de `TransferenciaInventarioDetalle.RecepcionCerrada`; P0/P1 del scope documental `0/0`. Esto no certifica el parent.
+- J4 `N5.2.A.5.ARCH_API_UI_TOPOLOGY_PREFLIGHT`: el stall/quarantine previo fue resuelto materialmente; `docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_ARCH_API_UI.md` quedó revisado/aceptado en `bd491099f2260cd9b1e8888bd803756eb45cdc69` y admission fue reabierto en `0897595b0fcbbffa5ec962266776c4fdc7742c1c`. No lanzar R3.
+- Transporte J1/J5/J6 ya tiene recovery pre-sesión sin consumo de intento Jules, pero **dispatch/recovery no equivale a ACTIVE_REAL ni entrega**. Sus archivos esperados siguen ausentes al baseline de este handoff.
 
 ## Seis scopes materiales de N5.2.A
 
-| Lane | Task | Entrega material esperada | Estado cierto al baseline |
+| Lane | Task | Entrega material esperada | Estado cierto |
 |---|---|---|---|
-| J1 | `N5.2.A.2.VALUATION_KARDEX_PREFLIGHT` | `docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_VALORIZACION_KARDEX.md` | recovery despachado; archivo no existe al corte |
-| J2 | `N5.2.A.3.STOCK_ANALYTICS_PREFLIGHT` | `docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_STOCK_ANALYTICS.md` | materializado, integrado y corregido por REVIEW_FIRST; preservar deuda semántica explícita |
-| J3 | `N5.2.A.4.RECONCILIATION_OPERATIONS_PREFLIGHT` | `docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_RECONCILIACION_OPERATIVA.md` | QA_TAKEOVER integrado; pendiente reconciliación/cierre causal del parent |
-| J4 | `N5.2.A.5.ARCH_API_UI_TOPOLOGY_PREFLIGHT` | `docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_ARCH_API_UI.md` | quarantined/stalled signal; archivo no existe al corte; no duplicar recovery |
-| J5 | `N5.2.A.1.REPORTES_INVENTARIO_PREFLIGHT_QA` | `docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_QA.md` | recovery despachado; archivo no existe al corte |
-| J6 | `N5.2.A.6.RBAC_AUDIT_SCOPE_PREFLIGHT` | `docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_RBAC_AUDIT.md` | recovery despachado; archivo no existe al corte |
+| J1 | `N5.2.A.2.VALUATION_KARDEX_PREFLIGHT` | `docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_VALORIZACION_KARDEX.md` | recovery despachado; entrega aún no materializada |
+| J2 | `N5.2.A.3.STOCK_ANALYTICS_PREFLIGHT` | `docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_STOCK_ANALYTICS.md` | materializado + REVIEW_FIRST corregido/aceptado |
+| J3 | `N5.2.A.4.RECONCILIATION_OPERATIONS_PREFLIGHT` | `docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_RECONCILIACION_OPERATIVA.md` | QA_TAKEOVER + REVIEW_FIRST aceptado |
+| J4 | `N5.2.A.5.ARCH_API_UI_TOPOLOGY_PREFLIGHT` | `docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_ARCH_API_UI.md` | R2 materializado + REVIEW_FIRST aceptado; blocker resuelto |
+| J5 | `N5.2.A.1.REPORTES_INVENTARIO_PREFLIGHT_QA` | `docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_QA.md` | recovery despachado; síntesis aún no materializada |
+| J6 | `N5.2.A.6.RBAC_AUDIT_SCOPE_PREFLIGHT` | `docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_RBAC_AUDIT.md` | recovery despachado; entrega aún no materializada |
 
-Al corte existen 2/6 documentos materiales (J2 y J3); faltan J1, J4, J5 y J6. No rellenar capacidad ociosa con busywork ni duplicar scopes. ATTEMPT1+R2 máximo; R3 prohibido. Dos waves sin delta material => circuit breaker/QA_TAKEOVER, no rebind genérico.
+Al baseline existen 3/6 entregas materiales aceptables (J2, J3, J4). Faltan J1, J5 y J6. No rellenar capacidad ociosa con busywork ni duplicar scopes. ATTEMPT1+R2 máximo; R3 prohibido. Dos waves sin delta material => circuit breaker/QA_TAKEOVER, no rebind genérico.
+
+## Estado de gates
+
+- Sobre el HEAD `0897595b0fcbbffa5ec962266776c4fdc7742c1c`, `VAEP catalog throughput guard`, `VAEP engine lightweight checks` y `VAEP Jules Diagnostic` finalizaron `success`; `VariApp CI` quedó `skipped` y por tanto no se usa como PASS causal.
+- Los commits posteriores de REVIEW_FIRST/handoff requieren nueva verificación exact-head antes de cualquier certificación del parent.
+- Nunca convertir nombre coincidente, `skipped`, `action_required`, run de otro SHA o ausencia de jobs en `PASS`.
 
 ## Qué debe mirar cada colaborador
 
 ### ChatGPT / Chat / VAEP
 
-1. Leer `docs/VAEP_AUTHORITY.md` → este handoff → HEAD vivo → `vaep/control/jules-autorefill-catalog.json` → `vaep/control/dispatch-admission.json` → Plan Maestro.
-2. Resolver blockers causales/materiales; no limitarse a reportar estado ni usar telemetría stale.
-3. Mientras admission esté `FROZEN`, diagnosticar primero J4 y preservar sesiones sanas; no crear otro J4 ni usar el freeze como excusa para inventar trabajo.
-4. Drenar REVIEW_FIRST de cada entrega terminal y comprobar DoD/gates/P0-P1 antes de cualquier `LISTO_REAL`.
-5. Tras cierre real de N5.2.A, materializar en la misma transición la promoción dependency-safe a N5.2.B y refill material, nunca antes.
+1. Leer `docs/VAEP_AUTHORITY.md` → este handoff → HEAD vivo → catálogo → admission → Plan Maestro.
+2. Drenar las tres entregas faltantes J1/J5/J6 sin duplicar trabajo sano; si una lane pierde owner/session real o agota dos waves sin valor, aplicar circuit breaker/QA_TAKEOVER según autoridad.
+3. REVIEW_FIRST de toda entrega terminal; J2/J3/J4 ya tienen revisión aceptada y no deben reabrirse sin contradicción material nueva.
+4. Sólo cuando existan las seis evidencias reconciliadas: verificar DoD/gates del HEAD exacto, P0/P1=0, emitir recibo N5.2.A y promover N5.2.B en la misma transición.
 
 ### Codex
 
-- Partir de HEAD exacto, no de memoria ni de un snapshot viejo.
-- Auditar los documentos J2/J3 ya integrados contra código real, y los futuros J1/J4/J5/J6 contra sus contratos, tests y causalidad de gates.
-- En J2 comprobar especialmente la semántica dual `ExistenciaVariante` vs `ProductoVariante.Cantidad` y no reintroducir la afirmación corregida.
-- Buscar contradicciones factual/domain/API, regresiones y P0/P1; proponer/corregir sólo deuda causal dentro de `Desarrollo`.
+- Partir de HEAD exacto, no de memoria ni snapshot viejo.
+- Auditar J2/J3/J4 aceptados sólo si aparece evidencia contradictoria nueva; concentrar revisión material en J1/J5/J6 cuando aterricen.
+- En J2 preservar autoridad física `ExistenciaVariante`; en J3 preservar snapshots/reglas reales; en J4 preservar seams sin redefinir dominio/seguridad.
 - No tocar `main`, Producción, secrets ni mergear PR #2. Codex no declara por sí solo `LISTO_REAL`.
 
 ### Antigravity / AntiG
 
-- Auditoría independiente de arquitectura, automation debt, stale state, transport/session evidence y no-duplicación.
-- Prioridad inmediata: comprobar si la cuarentena J4 sigue causalmente válida, si hay evidencia remote/session terminal/stalled y qué condición exacta permite descongelar admission sin duplicar scope.
-- Puede identificar causal blockers y señalar inconsistencias para takeover/controller; no inventar actividad, no duplicar un lane Jules sano y no declarar `LISTO_REAL`.
-- Priorizar hechos reproducibles: HEAD exacto, archivos existentes, manifests, run/session evidence y Plan Maestro.
+- Auditar stale state, transport/session evidence, no-duplicación y causalidad de gates.
+- La cuarentena J4 ya no es blocker vigente; no reabrirla por telemetría vieja. Buscar blockers nuevos sólo con evidencia fresca.
+- No inventar actividad ni declarar `LISTO_REAL`.
 
 ### Jules J1–J6
 
 - Ejecutar únicamente la identidad/scope del manifest vigente de su lane; dos self-reviews.
 - No escribir el archivo de otro lane ni redefinir semántica que ese lane posee.
-- J4: no lanzar un recovery adicional mientras siga la cuarentena; primero demostrar estado terminal/stalled y seguir la decisión del controller.
-- No main/Producción/secrets; no busywork; no R3.
-- Una sesión o commit sólo se considera aceptable después de REVIEW_FIRST del controller.
+- J4 no necesita R3; J2/J3/J4 ya están integrados/revisados.
+- J1/J5/J6 deben producir sus entregas materiales faltantes; una sesión o commit se acepta sólo después de REVIEW_FIRST.
+- No `main`/Producción/secrets; no busywork; no R3.
 
-## Orden exacto de inspección/cierre de N5.2.A
+## Orden de cierre de N5.2.A
 
-1. Confirmar HEAD vivo y admission; si sigue `FROZEN`, resolver/revalidar primero la cuarentena J4.
-2. Confirmar evidencia real de session/terminal para J1, J4, J5 y J6; no usar el dispatch como sustituto.
-3. Materializar/revisar J1, J4, J5 y J6; preservar J2 corregido y J3 QA_TAKEOVER.
-4. REVIEW_FIRST por entrega: exactitud factual, no-duplicación, tests/evidencia, dos self-reviews y scope.
-5. Reconciliar los seis documentos en la síntesis J5 sin borrar gaps reales ni sobreescribir la semántica corregida de J2.
-6. Ejecutar/verificar gates causales aplicables al HEAD exacto; `skipped`, `action_required`, nombre coincidente o run de otro SHA no equivalen a PASS.
-7. Confirmar P0=0 y P1=0 y emitir recibo sólo si el DoD real está satisfecho.
-8. Sólo entonces cerrar N5.2.A y promover N5.2.B dependency-safe; sincronizar catálogo, admission, Plan Maestro, telemetría y este handoff.
+1. Confirmar HEAD vivo y admission `OPEN`.
+2. Confirmar session/terminal real de J1/J5/J6; recovery manifest no sustituye evidencia.
+3. Materializar/revisar J1 y J6; después reconciliar la síntesis J5 contra J1–J4/J6 y gaps reales.
+4. REVIEW_FIRST por entrega, sin reabrir scopes ya aceptados salvo contradicción material.
+5. Ejecutar/verificar gates causales aplicables al HEAD exacto.
+6. Confirmar P0=0 y P1=0 del parent y emitir recibo sólo si el DoD real está satisfecho.
+7. Sólo entonces cerrar N5.2.A, promover N5.2.B dependency-safe, abrir/refill material y sincronizar catálogo, admission, Plan Maestro, telemetría y este handoff.
 
 ## Compartidos que deben permanecer sincronizados
 
-- Git: `docs/VAEP_AUTHORITY.md`, este `docs/VAEP_HANDOFF_CURRENT.md`, `vaep/control/jules-autorefill-catalog.json`, `vaep/control/dispatch-admission.json`, manifests/evidence y HEAD de `Desarrollo`.
+- Git: `docs/VAEP_AUTHORITY.md`, este handoff, catálogo, admission, manifests/evidence y HEAD de `Desarrollo`.
 - Plan Maestro: `DASHBOARD`, `CONFIG`, `COLA`, `TAREAS_PROGRAMADAS`, `CONTROL_TOWER`, `WORKERS`, `AUTOMATIZACIONES` y `BITACORA` cuando aplique.
-- Las cinco tareas externas canónicas de ChatGPT deben seguir únicas y habilitadas en `:00/:12/:24/:36/:48`; comprobar el sistema de Tareas antes de recrearlas.
+- Las cinco tareas externas canónicas de ChatGPT deben seguir únicas y habilitadas; comprobar el sistema de Tareas antes de recrearlas.
 
-Si Git y el Plan discrepan, no elegir el dato más conveniente: reconciliar contra autoridad, evidencia causal y HEAD vivo, dejar rastro explícito y corregir el shared state antes de continuar.
+Si Git y el Plan discrepan, reconciliar contra autoridad, evidencia causal y HEAD vivo; no escoger el dato más conveniente ni dejar telemetría stale como si fuera estado real.
