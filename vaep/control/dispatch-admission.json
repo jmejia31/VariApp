@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "OPEN",
+  "newDispatchAdmission": "FROZEN",
   "allowExistingActiveSessions": true,
-  "reason": "N5.3.A_LISTO_REAL__N5.3.B_CURRENT__ATOMIC_SHEET_TRANSITION_VERIFIED__SIX_MATERIAL_DOMAIN_SCOPES_READY",
-  "updatedAtUtc": "2026-09-09T22:04:20Z"
+  "reason": "N5.3.B_CURRENT__READY_FOR_VAEP_QA_TAKEOVER_AND_EXACT_HEAD_CI_PENDING__REVIEW_FIRST_BEFORE_REFILL__NO_DUPLICATE_DISPATCH",
+  "updatedAtUtc": "2026-09-09T22:24:00Z"
 }
