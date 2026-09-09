@@ -5,13 +5,16 @@
   "role": "VAEP_MATERIAL_BACKLOG_PLANNER_AND_WATCHDOG",
   "operational": true,
   "runtimeState": "ACTIVE_REAL",
+  "deepRefillState": "ACTIVE_ROADMAP_GENERATION_REQUESTS",
+  "deepRefillPolicy": "ROADMAP_DERIVED__DEPENDENCY_SAFE__SEMANTIC_DEDUPE_ONLY",
   "runtimeEvidence": {
     "workflow": "VAEP ALEX Material Planner",
-    "runId": 34367736131,
-    "runNumber": 6,
+    "runId": 34372114115,
+    "runNumber": 12,
     "branch": "Desarrollo",
     "conclusion": "success",
-    "verifiedAtUtc": "2026-09-09T15:04:18Z"
+    "verifiedAtUtc": "2026-09-09T15:49:10Z",
+    "verifiedBehavior": "ALEX_ROADMAP_GENERATION_REQUEST + ALEX_MATERIAL_GENERATION_REQUEST"
   },
   "isJulesLane": false,
   "canWriteProductCode": false,
@@ -19,7 +22,7 @@
   "canBypassReviewFirst": false,
   "canDispatchManualWorkflows": false,
   "executionModel": "EVENT_DRIVEN_ANALYSIS_PLUS_5_MINUTE_WATCHDOG",
-  "purpose": "Generate and reconcile material task candidates, detect backlog starvation, deduplicate semantic work, and support automatic refill of J1-J6 without inventing busywork.",
+  "purpose": "Generate and reconcile roadmap-derived material task candidates, detect backlog starvation, deduplicate semantic work, and support dependency-safe automatic refill planning for J1-J6 without inventing busywork.",
   "capabilities": [
     {"id":"A16","name":"Backend Builder","pool":"ALEX","mode":"ACTIVE_REAL","status":"ACTIVE","outputType":"TASK_CANDIDATE","function":"Generate backend material scope candidates","guard":"MATERIAL_ONLY"},
     {"id":"A17","name":"Frontend Builder","pool":"ALEX","mode":"ACTIVE_REAL","status":"ACTIVE","outputType":"TASK_CANDIDATE","function":"Generate frontend material scope candidates","guard":"MATERIAL_ONLY"},
@@ -30,6 +33,6 @@
     {"id":"A22","name":"E2E/Regression Builder","pool":"ALEX","mode":"ACTIVE_REAL","status":"ACTIVE","outputType":"TEST_CANDIDATE","function":"Generate E2E/regression candidates","guard":"PRESERVE_REGRESSIONS"},
     {"id":"A23","name":"Perf/A11y/Resilience","pool":"ALEX","mode":"ACTIVE_REAL","status":"ACTIVE","outputType":"QUALITY_CANDIDATE","function":"Generate performance/accessibility/resilience candidates","guard":"MATERIAL_ONLY"},
     {"id":"A24","name":"Docs/Release Builder","pool":"ALEX","mode":"ACTIVE_REAL","status":"ACTIVE","outputType":"DOC_CANDIDATE","function":"Generate necessary active documentation/release candidates","guard":"NO_FALSE_CLAIMS"},
-    {"id":"A25","name":"Backlog/Dedupe Planner","pool":"ALEX","mode":"ACTIVE_REAL","status":"ACTIVE","outputType":"BACKLOG_PLAN","function":"Maintain material backlog signal and semantic dedupe","guard":"TASK_IDENTITY_UNIQUE_NO_BUSYWORK"}
+    {"id":"A25","name":"Backlog/Dedupe Planner","pool":"ALEX","mode":"ACTIVE_REAL","status":"ACTIVE","outputType":"BACKLOG_PLAN","function":"Maintain roadmap-derived material backlog signal, generation requests and semantic dedupe","guard":"TASK_IDENTITY_UNIQUE_NO_BUSYWORK"}
   ]
 }
