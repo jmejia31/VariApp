@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "FROZEN",
+  "newDispatchAdmission": "OPEN",
   "allowExistingActiveSessions": true,
-  "reason": "N5.1.F_CAUSAL_CI_REPAIR_VALIDATION__NO_NEW_DISPATCH",
-  "updatedAtUtc": "2026-09-09T05:40:00Z"
+  "reason": "N5.1.F_CAUSAL_CI_REPAIR_VALIDATED__RUN_34320959636_SUCCESS__J1_J6_CHECKPOINTS_PASS",
+  "updatedAtUtc": "2026-09-09T07:22:00Z"
 }
