@@ -1,79 +1,71 @@
-name: VAEP J1-J6 Cutover Dry Run
+name: VAEP J1-J6 Cutover Verification
 
 on:
   push:
-    branches:
-      - Desarrollo
+    branches: [Desarrollo]
+    paths:
+      - 'docs/VAEP_AUTHORITY.md'
+      - 'AGENTS.md'
+      - 'vaep/control/jules-workers.json'
+      - 'vaep/control/jules-autorefill-catalog.json'
+      - '.github/scripts/vaep-*.sh'
+      - '.github/workflows/vaep-jules-j*.yml'
+      - '.github/workflows/vaep-checkpoints.yml'
+      - '.github/workflows/vaep-jules-stop.yml'
+      - '.github/workflows/vaep-jules-session-health.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: vaep-j1-j6-cutover-dry-run
+  group: vaep-j1-j6-cutover-verification
   cancel-in-progress: true
 
 jobs:
-  dry-run:
+  verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
         with:
           ref: Desarrollo
-          fetch-depth: 0
-      - name: Normalize deterministic transformer assertions
+          fetch-depth: 1
+
+      - name: Verify canonical active control plane
         shell: bash
         run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          p = Path('scripts/vaep/j1_j6_cutover.py')
-          t = p.read_text(encoding='utf-8')
-          replacements = {
-              "t = must_replace(t, 'JULES_TASKS_TARGET_ROLLING_24H_TOTAL=400', 'JULES_TASKS_TARGET_ROLLING_24H_TOTAL=600', count=1)":
-              "t = must_replace(t, 'JULES_TASKS_TARGET_ROLLING_24H_TOTAL=400', 'JULES_TASKS_TARGET_ROLLING_24H_TOTAL=600', count=2)",
-              "t = must_replace(t, 'LANE_REFILL_DEADLINE_SECONDS=90', 'LANE_REFILL_DEADLINE_SECONDS=30', count=1)":
-              "t = must_replace(t, 'LANE_REFILL_DEADLINE_SECONDS=90', 'LANE_REFILL_DEADLINE_SECONDS=30', count=2)",
-          }
-          for old, new in replacements.items():
-              if t.count(old) != 1:
-                  raise SystemExit(f'CUTOVER_TRANSFORMER_NORMALIZATION_ASSERT expected=1 actual={t.count(old)} old={old}')
-              t = t.replace(old, new)
-          p.write_text(t, encoding='utf-8')
-          print('CUTOVER_TRANSFORMER_NORMALIZATION=PASS')
-          PY
-      - name: Apply cutover in disposable workspace
-        run: python3 scripts/vaep/j1_j6_cutover.py
-      - name: Validate generated JSON and Python
-        run: |
-          python3 -m py_compile scripts/vaep/j1_j6_registry_check.py scripts/vaep/j1_j6_cutover.py scripts/vaep/jules_integration_metrics.py scripts/vaep/terminal_handoff.py
+          set -euo pipefail
           python3 scripts/vaep/j1_j6_registry_check.py
-          python3 - <<'PY'
-          import json
-          for p in ['vaep/control/jules-workers.json','vaep/control/jules-autorefill-catalog.json','vaep/control/jules-completed-semantic-facets.json','vaep/schemas/jules-dispatch.schema.json']:
-              json.load(open(p, encoding='utf-8'))
-          print('CUTOVER_JSON_VALID=PASS')
-          PY
-      - name: Validate generated Bash and JS syntax
+          python3 scripts/vaep/j1_j6_cutover.py
+          bash .github/scripts/vaep-policy-parser.sh --validate docs/VAEP_AUTHORITY.md
+          jq -e '.cutoverEnabled == true and .phase == "F2_ACTIVE_CUTOVER" and .activeLegacyWorkers == [] and .activeWorkers == ["J1","J2","J3","J4","J5","J6"]' vaep/control/jules-workers.json >/dev/null
+          jq -e '.policy.activeWorkerCount == 6 and .policy.programmedBacklogTargetTotal == 72 and (.lanes|keys|sort) == ["J1","J2","J3","J4","J5","J6"]' vaep/control/jules-autorefill-catalog.json >/dev/null
+          grep -Fq 'JULES_TASKS_TARGET_ROLLING_24H_TOTAL=600' docs/VAEP_AUTHORITY.md
+          grep -Fq 'JULES_PROGRAMMED_BACKLOG_TARGET_TOTAL=72' docs/VAEP_AUTHORITY.md
+          grep -Fq 'LANE_REFILL_DEADLINE_SECONDS=30' docs/VAEP_AUTHORITY.md
+
+      - name: Verify six canonical workflow lanes and legacy isolation
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in 1 2 3 4 5 6; do
+            wf=".github/workflows/vaep-jules-j${i}.yml"
+            grep -Fq "WORKER_ID: J${i}" "$wf"
+            grep -Fq "secrets.JULES_J${i}_API_KEY" "$wf"
+          done
+          for wf in .github/workflows/vaep-jules-secondary.yml .github/workflows/vaep-jules-secondary-b.yml .github/workflows/vaep-jules-secondary-c.yml .github/workflows/vaep-jules-secondary-d.yml; do
+            grep -Fq 'LEGACY_WORKER_DISABLED_AFTER_J1_J6_CUTOVER' "$wf"
+          done
+          active=(.github/workflows/vaep-jules-j{1,2,3,4,5,6}.yml .github/workflows/vaep-checkpoints.yml .github/workflows/vaep-jules-stop.yml .github/workflows/vaep-jules-session-health.yml .github/workflows/vaep-jules-diagnostic.yml)
+          if grep -En 'secrets\.JULES_(API_KEY|B_API_KEY|C_API_KEY|D_API_KEY)' "${active[@]}"; then
+            echo 'LEGACY_SECRET_REFERENCE_FOUND_IN_ACTIVE_RUNTIME' >&2
+            exit 1
+          fi
+
+      - name: Verify syntax
         run: |
           bash -n .github/scripts/vaep-policy-parser.sh .github/scripts/vaep-jules-master.sh .github/scripts/vaep-jules-worker.sh .github/scripts/vaep-jules-autorefill.sh .github/scripts/vaep-jules-autorefill-core.sh .github/scripts/vaep-jules-catalog-floor.sh .github/scripts/vaep-parent-close.sh .github/scripts/vaep-checkpoint.sh
           node --check scripts/vaep/dispatch-preflight.mjs
-      - name: Validate MASTER parser and static worker contract
-        run: |
-          bash .github/scripts/vaep-policy-parser.sh --validate docs/VAEP_AUTHORITY.md
-          bash .github/scripts/vaep-jules-master.sh --static-self-test
-      - name: Validate workflow cutover invariants
-        run: |
-          for i in 1 2 3 4 5 6; do
-            grep -q "WORKER_ID: J$i" ".github/workflows/vaep-jules-j$i.yml"
-            grep -q 'Execute VAEP/Jules MASTER' ".github/workflows/vaep-jules-j$i.yml"
-          done
-          grep -q 'worker: \[J1, J2, J3, J4, J5, J6\]' .github/workflows/vaep-checkpoints.yml
-          ! grep -q 'push:' .github/workflows/vaep-jules-secondary.yml
-          ! grep -q 'push:' .github/workflows/vaep-jules-secondary-b.yml
-          ! grep -q 'push:' .github/workflows/vaep-jules-secondary-c.yml
-          ! grep -q 'push:' .github/workflows/vaep-jules-secondary-d.yml
-      - name: Show cutover diff summary only
-        run: |
-          git diff --stat
+          python3 -m py_compile scripts/vaep/j1_j6_registry_check.py scripts/vaep/j1_j6_cutover.py scripts/vaep/jules_runtime_contract.py scripts/vaep/jules_integration_metrics.py scripts/vaep/terminal_handoff.py
           git diff --check
