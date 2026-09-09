@@ -4,6 +4,15 @@
   "engine": "ALEX",
   "role": "VAEP_MATERIAL_BACKLOG_PLANNER_AND_WATCHDOG",
   "operational": true,
+  "runtimeState": "ACTIVE_REAL",
+  "runtimeEvidence": {
+    "workflow": "VAEP ALEX Material Planner",
+    "runId": 34367736131,
+    "runNumber": 6,
+    "branch": "Desarrollo",
+    "conclusion": "success",
+    "verifiedAtUtc": "2026-09-09T15:04:18Z"
+  },
   "isJulesLane": false,
   "canWriteProductCode": false,
   "canCertifyListoReal": false,
@@ -12,15 +21,15 @@
   "executionModel": "EVENT_DRIVEN_ANALYSIS_PLUS_5_MINUTE_WATCHDOG",
   "purpose": "Generate and reconcile material task candidates, detect backlog starvation, deduplicate semantic work, and support automatic refill of J1-J6 without inventing busywork.",
   "capabilities": [
-    {"id":"A16","name":"Backend Builder","pool":"ALEX","mode":"CANDIDATE","status":"ACTIVE","function":"Generate backend material scope candidates","guard":"MATERIAL_ONLY"},
-    {"id":"A17","name":"Frontend Builder","pool":"ALEX","mode":"CANDIDATE","status":"ACTIVE","function":"Generate frontend material scope candidates","guard":"MATERIAL_ONLY"},
-    {"id":"A18","name":"Data/DB Builder","pool":"ALEX","mode":"CANDIDATE","status":"ACTIVE","function":"Generate data/model/migration candidates","guard":"NO_PRODUCTION_DB"},
-    {"id":"A19","name":"API/Integration Builder","pool":"ALEX","mode":"CANDIDATE","status":"ACTIVE","function":"Generate API/integration candidates","guard":"SCOPE_ISOLATION"},
-    {"id":"A20","name":"Security/RBAC Builder","pool":"ALEX","mode":"CANDIDATE","status":"ACTIVE","function":"Generate security/RBAC candidates","guard":"NO_PRIVILEGE_EXPANSION"},
-    {"id":"A21","name":"Unit/Contract Test Builder","pool":"ALEX","mode":"CANDIDATE","status":"ACTIVE","function":"Generate unit/contract test candidates","guard":"NO_DUPLICATE_EVIDENCE"},
-    {"id":"A22","name":"E2E/Regression Builder","pool":"ALEX","mode":"CANDIDATE","status":"ACTIVE","function":"Generate E2E/regression candidates","guard":"PRESERVE_REGRESSIONS"},
-    {"id":"A23","name":"Perf/A11y/Resilience","pool":"ALEX","mode":"CANDIDATE","status":"ACTIVE","function":"Generate performance/accessibility/resilience candidates","guard":"MATERIAL_ONLY"},
-    {"id":"A24","name":"Docs/Release Builder","pool":"ALEX","mode":"CANDIDATE","status":"ACTIVE","function":"Generate necessary active documentation/release candidates","guard":"NO_FALSE_CLAIMS"},
-    {"id":"A25","name":"Backlog/Dedupe Planner","pool":"ALEX","mode":"PLAN_WATCH","status":"ACTIVE","function":"Maintain material backlog signal and semantic dedupe","guard":"TASK_IDENTITY_UNIQUE_NO_BUSYWORK"}
+    {"id":"A16","name":"Backend Builder","pool":"ALEX","mode":"ACTIVE_REAL","status":"ACTIVE","outputType":"TASK_CANDIDATE","function":"Generate backend material scope candidates","guard":"MATERIAL_ONLY"},
+    {"id":"A17","name":"Frontend Builder","pool":"ALEX","mode":"ACTIVE_REAL","status":"ACTIVE","outputType":"TASK_CANDIDATE","function":"Generate frontend material scope candidates","guard":"MATERIAL_ONLY"},
+    {"id":"A18","name":"Data/DB Builder","pool":"ALEX","mode":"ACTIVE_REAL","status":"ACTIVE","outputType":"TASK_CANDIDATE","function":"Generate data/model/migration candidates","guard":"NO_PRODUCTION_DB"},
+    {"id":"A19","name":"API/Integration Builder","pool":"ALEX","mode":"ACTIVE_REAL","status":"ACTIVE","outputType":"TASK_CANDIDATE","function":"Generate API/integration candidates","guard":"SCOPE_ISOLATION"},
+    {"id":"A20","name":"Security/RBAC Builder","pool":"ALEX","mode":"ACTIVE_REAL","status":"ACTIVE","outputType":"TASK_CANDIDATE","function":"Generate security/RBAC candidates","guard":"NO_PRIVILEGE_EXPANSION"},
+    {"id":"A21","name":"Unit/Contract Test Builder","pool":"ALEX","mode":"ACTIVE_REAL","status":"ACTIVE","outputType":"TEST_CANDIDATE","function":"Generate unit/contract test candidates","guard":"NO_DUPLICATE_EVIDENCE"},
+    {"id":"A22","name":"E2E/Regression Builder","pool":"ALEX","mode":"ACTIVE_REAL","status":"ACTIVE","outputType":"TEST_CANDIDATE","function":"Generate E2E/regression candidates","guard":"PRESERVE_REGRESSIONS"},
+    {"id":"A23","name":"Perf/A11y/Resilience","pool":"ALEX","mode":"ACTIVE_REAL","status":"ACTIVE","outputType":"QUALITY_CANDIDATE","function":"Generate performance/accessibility/resilience candidates","guard":"MATERIAL_ONLY"},
+    {"id":"A24","name":"Docs/Release Builder","pool":"ALEX","mode":"ACTIVE_REAL","status":"ACTIVE","outputType":"DOC_CANDIDATE","function":"Generate necessary active documentation/release candidates","guard":"NO_FALSE_CLAIMS"},
+    {"id":"A25","name":"Backlog/Dedupe Planner","pool":"ALEX","mode":"ACTIVE_REAL","status":"ACTIVE","outputType":"BACKLOG_PLAN","function":"Maintain material backlog signal and semantic dedupe","guard":"TASK_IDENTITY_UNIQUE_NO_BUSYWORK"}
   ]
 }
