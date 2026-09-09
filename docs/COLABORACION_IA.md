@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-Coordinar a Javier Mejía, Codex, ChatGPT y Chat B (ChatGPT Business) con mínima pérdida de contexto, mínimo trabajo redundante, aislamiento entre proyectos y máxima trazabilidad en `Desarrollo`.
+Coordinar a Javier Mejía, Codex, ChatGPT, Chat B (ChatGPT Business), Jules J1–J6 y componentes reservados con mínima pérdida de contexto, mínimo trabajo redundante, aislamiento entre proyectos y máxima trazabilidad en `Desarrollo`.
 
 ## Identidad de este proyecto
 
@@ -22,15 +22,15 @@ Antes de escribir:
 
 1. confirmar identidad del proyecto/repo/rama;
 2. leer `AGENTS.md`;
-3. leer `PROJECT_CONTEXT.md`;
-4. leer `TASKS.md`;
-5. leer la última entrada relevante de `CHANGELOG_AI.md`;
+3. leer `docs/VAEP_AUTHORITY.md`;
+4. leer `docs/VAEP_HANDOFF_CURRENT.md`;
+5. leer `PROJECT_CONTEXT.md` y `PROJECT_INDEX.md` solo en lo necesario;
 6. revisar únicamente commits nuevos desde el handoff conocido;
 7. abrir solo archivos objetivo/dependencias directas.
 
 Localmente, ejecutar `scripts/iniciar-sesion-ia.ps1`. Remotamente, realizar la verificación equivalente mediante GitHub.
 
-Si hay discrepancia entre memoria y repositorio real, prevalece el repositorio y el agente no escribe hasta resolverla.
+Si hay discrepancia entre memoria y repositorio real, prevalece el MAESTRO + estado fresco de GitHub/Plan Maestro y el agente no debe implementar sobre estado stale.
 
 ## Equipo
 
@@ -42,48 +42,53 @@ Si hay discrepancia entre memoria y repositorio real, prevalece el repositorio y
 
 ### Codex
 
-- implementa y prueba desde el proyecto local autorizado;
-- trabaja sobre `Desarrollo`;
-- usa memoria canónica y evita reescaneos/relecturas innecesarias;
-- tras reconexión continúa desde Git + contexto, no reinicia diagnóstico.
+- está fuera del flujo operativo vigente salvo orden explícita de Javier;
+- si se reincorpora, trabaja únicamente en `Desarrollo` bajo `docs/VAEP_AUTHORITY.md`;
+- debe leer `docs/VAEP_HANDOFF_CURRENT.md` y Git antes de actuar para no repetir diagnóstico ni scopes ya cerrados.
 
-### ChatGPT
+### ChatGPT / VAEP
 
-- arquitectura, auditoría, coordinación, revisión y cambios remotos cuando exista conexión GitHub autorizada;
-- no tiene acceso al filesystem local de la PC por defecto;
-- no afirma cambios locales si solo actuó sobre GitHub.
+- controller, arquitectura, auditoría, coordinación, REVIEW_FIRST, QA, integración, corrección, CI y certificación cuando exista conexión autorizada;
+- no afirma actividad, PASS, CI ni LISTO sin evidencia real.
 
 ### Chat B (ChatGPT Business)
 
 - colaborador full-access par de ChatGPT/VAEP para controller, REVIEW_FIRST, QA, corrección, integración, CI, certificación, rollup y failover;
 - opera en `Desarrollo` y consume `docs/VAEP_AUTHORITY.md` como autoridad única;
-- no es una quinta lane Jules, no publica por fuera del flujo ni puede declarar `LISTO_REAL` sin evidencia completa del MAESTRO;
-- cualquier acceso de plataforma adicional requiere una cuenta/email real y una concesión verificable; este registro no inventa credenciales ni permisos externos.
+- no es una lane Jules, no publica por fuera del flujo ni puede declarar `LISTO_REAL` sin evidencia completa del MAESTRO.
+
+### Jules J1–J6
+
+- seis lanes cloud canónicas;
+- un write-scope material exclusivo por worker;
+- patch/artifact only; sin autoridad de merge, Producción ni LISTO_REAL.
 
 ## Acceso
 
-Acceso local reconocido: Javier Mejía y Codex.
-
-ChatGPT, Chat B y otros agentes operan remotamente solo mediante conectores GitHub autorizados, salvo ampliación explícita documentada por Javier.
+Acceso local reconocido: Javier Mejía y Codex. ChatGPT, Chat B y otros agentes operan remotamente solo mediante conectores autorizados, salvo ampliación explícita documentada por Javier.
 
 ## Memoria compartida
 
+- `docs/VAEP_AUTHORITY.md` — autoridad operativa única.
+- `docs/VAEP_HANDOFF_CURRENT.md` — delta reciente y qué verificar al retomar.
 - `PROJECT_CONTEXT.md` — contexto técnico e identidad.
 - `PROJECT_INDEX.md` — mapa de carpetas.
 - `ARCHITECTURE.md` — patrones y fronteras.
-- `TASKS.md` — pendientes.
-- `CHANGELOG_AI.md` — evidencia/handoff.
+- `TASKS.md` — historial/pendientes resumidos; no fuente machine-readable de estado fresco.
+- `CHANGELOG_AI.md` — evidencia/handoff histórico.
 
 ## Evidencia por cambio
 
-Cada changeset debe actualizar `CHANGELOG_AI.md`. `TASKS.md` se actualiza si cambia el estado operativo. Contexto/arquitectura/índice y documentos colaborativos solo se modifican si su contenido realmente cambió.
+Cada changeset debe dejar evidencia en Git y sincronizar el Plan Maestro cuando cambie estado. Los documentos colaborativos se modifican cuando su contenido realmente cambió; el handoff actual debe decir qué cambió, qué quedó pendiente y dónde verificarlo.
 
-Esto cumple trazabilidad sin generar ruido documental artificial.
+## Handoff operativo actual
+
+El snapshot compartido vigente está en `docs/VAEP_HANDOFF_CURRENT.md`. Todo colaborador debe verificar ahí el último cierre, el `CURRENT_PARENT`, la admisión y los scopes materiales antes de iniciar trabajo. Si el handoff difiere del catálogo o del Plan Maestro, el catálogo + evidencia + Plan fresco prevalecen y el handoff se corrige.
 
 ## Flujo eficiente
 
 1. gate de proyecto;
-2. leer memoria canónica;
+2. leer MAESTRO + handoff;
 3. localizar módulo con `PROJECT_INDEX.md`;
 4. revisar solo objetivo + dependencias directas;
 5. implementar mínimo cambio correcto;
@@ -101,7 +106,6 @@ Esto cumple trazabilidad sin generar ruido documental artificial.
 - Usar búsquedas dirigidas por símbolo/ruta.
 - Abrir únicamente documento de fase/punto necesario.
 - Finalizar al completar objetivo + validaciones.
-- Preguntar decisiones de negocio reales en lugar de escanear módulos no relacionados.
 
 ## Git, CI y Producción
 
@@ -112,11 +116,9 @@ Esto cumple trazabilidad sin generar ruido documental artificial.
 - no auto-merge;
 - Producción congelada;
 - no secretos;
-- no migraciones productivas sin autorización;
-- `[skip ci]` solo para cambios administrativos/locales permitidos por `AGENTS.md`.
+- no migraciones productivas sin autorización.
 
-Las reglas completas viven en `AGENTS.md`.
-
+Las reglas completas viven en `AGENTS.md` y `docs/VAEP_AUTHORITY.md`.
 
 ## AntiG / Antigravity — RESERVED_INACTIVE
 
@@ -125,7 +127,7 @@ AntiG/Antigravity está fuera del flujo operativo actual y no bloquea automatiza
 Flujo vigente:
 
 ```text
-Jules -> REVIEW_FIRST VAEP -> R2 único cuando corresponda / QA_TAKEOVER -> VAEP Controller -> LISTO_REAL
+Jules J1–J6 -> REVIEW_FIRST VAEP -> R2 único cuando corresponda / QA_TAKEOVER -> VAEP Controller -> LISTO_REAL
 ```
 
-Los componentes AntiG se conservan como capacidad técnica reservada, pero el runtime vigente no procesa handoffs y el instalador vigente no puede crear scheduler. No se requiere Antigravity CLI ni Scheduled Task para continuar VariApp. Una reincorporación futura requiere autorización explícita de Javier y un changeset que modifique el MAESTRO.
+Los componentes AntiG se conservan como capacidad técnica reservada, pero el runtime vigente no procesa handoffs y el instalador vigente no puede crear scheduler. Una reincorporación futura requiere autorización explícita de Javier y un changeset que modifique el MAESTRO.
