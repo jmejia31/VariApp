@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "FROZEN",
-  "allowExistingActiveSessions": false,
-  "reason": "N5.3.C_CURRENT__SOURCE_BACKED_MATERIAL_SCOPES_NOT_YET_VERIFIED__NO_BUSYWORK__NO_DUPLICATE_DISPATCH",
-  "updatedAtUtc": "2026-09-09T22:45:43Z"
+  "newDispatchAdmission": "OPEN",
+  "allowExistingActiveSessions": true,
+  "reason": "N5.3.C_SOURCE_VERIFIED_TWO_NONOVERLAPPING_INDEX_MODEL_SCOPES__J1_J2_DISPATCH__MIGRATION_FOLLOWUP_GATED",
+  "updatedAtUtc": "2026-09-09T22:48:30Z"
 }
