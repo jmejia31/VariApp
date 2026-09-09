@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "OPEN",
+  "newDispatchAdmission": "FROZEN",
   "allowExistingActiveSessions": true,
-  "reason": "N5.2.A_LISTO_REAL__N5.2.B_PROMOTED__SIX_MATERIAL_CONTRACT_SCOPES_READY__N5.2.C_PREARMED",
-  "updatedAtUtc": "2026-09-09T14:42:30Z"
+  "reason": "N5.2.B_ALL_MATERIAL_SCOPES_DRAINED__CLOSURE_RECONCILIATION__NO_NEW_DISPATCH",
+  "updatedAtUtc": "2026-09-09T15:21:00Z"
 }
