@@ -161,8 +161,7 @@ def transform_master() -> None:
         '- J1/J2/J3/J4: implementers cloud CODE. J5: QA/security/regression con fallback CODE. J6: integration/recovery con fallback CODE/QA. Los seis conservan máximo un write-scope autoritativo por ejecución; entregan patch/artifact y no publican funcionalmente.',
         count=1)
     marker = '- Codex: fuera del flujo salvo orden explícita futura del usuario.\n'
-    contract = '''- Codex: fuera del flujo salvo orden explícita futura del usuario.\n\n### Workers Jules canónicos\n\n```text\nJULES_ACTIVE_WORKERS=J1,J2,J3,J4,J5,J6\nJULES_ACTIVE_WORKER_COUNT=6\nJULES_WORKER_REGISTRY=vaep/control/jules-workers.json\nJ1_ROLE=CODE_CORE\nJ2_ROLE=CODE_BACKEND_DATA\nJ3_ROLE=CODE_FRONTEND\nJ4_ROLE=CODE_INFRA_INTEGRATIONS\nJ5_ROLE=QA_SECURITY_REGRESSION__FALLBACK_CODE\nJ6_ROLE=INTEGRATION_RECOVERY__FALLBACK_CODE_QA\nJULES_QUEUE_DEPTH_PER_WORKER=2\nJULES_MAX_LIVE_RUNS_TOTAL=12\n```
-\nLos IDs operativos nuevos son exclusivamente `J1..J6`. `JULES_A..JULES_D` pueden aparecer únicamente como evidencia histórica o para terminar una sesión ya iniciada antes del cutover; no son IDs válidos para nuevos dispatches. J3 y J4 pueden usar temporalmente una referencia de credencial legacy validada mientras se rota el secret nominal nuevo; esto no reactiva la identidad legacy.\n'''
+    contract = '''- Codex: fuera del flujo salvo orden explícita futura del usuario.\n\n### Workers Jules canónicos\n\n```text\nJULES_ACTIVE_WORKERS=J1,J2,J3,J4,J5,J6\nJULES_ACTIVE_WORKER_COUNT=6\nJULES_WORKER_REGISTRY=vaep/control/jules-workers.json\nJ1_ROLE=CODE_CORE\nJ2_ROLE=CODE_BACKEND_DATA\nJ3_ROLE=CODE_FRONTEND\nJ4_ROLE=CODE_INFRA_INTEGRATIONS\nJ5_ROLE=QA_SECURITY_REGRESSION__FALLBACK_CODE\nJ6_ROLE=INTEGRATION_RECOVERY__FALLBACK_CODE_QA\nJULES_QUEUE_DEPTH_PER_WORKER=2\nJULES_MAX_LIVE_RUNS_TOTAL=12\n```\n\nLos IDs operativos nuevos son exclusivamente `J1..J6`. `JULES_A..JULES_D` pueden aparecer únicamente como evidencia histórica o para terminar una sesión ya iniciada antes del cutover; no son IDs válidos para nuevos dispatches. J3 y J4 usan exclusivamente sus secretos nominales `JULES_J3_API_KEY` y `JULES_J4_API_KEY`; no existe fallback ni referencia temporal de credenciales legacy para estos workers.\n'''
     t = must_replace(t, marker, contract, count=1)
     t = t.replace('Jules A/B/C/D', 'J1/J2/J3/J4/J5/J6')
     t = t.replace('A/B/C/D', 'J1/J2/J3/J4/J5/J6')
@@ -216,18 +215,15 @@ def transform_registry() -> None:
         worker['enabled'] = True
         worker['workflow'] = workflow_map[wid]
         worker['dispatchPath'] = dispatch_map[wid]
+        worker['secretName'] = f'JULES_{wid}_API_KEY'
         worker['credentialMigrationPending'] = False
         worker['desiredSecretName'] = f'JULES_{wid}_API_KEY'
-    data['workers']['J3']['secretName'] = 'JULES_C_API_KEY'
-    data['workers']['J3']['credentialMigrationPending'] = True
-    data['workers']['J4']['secretName'] = 'JULES_D_API_KEY'
-    data['workers']['J4']['credentialMigrationPending'] = True
     p.write_text(json.dumps(data, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
 
 
 def transform_registry_checker() -> None:
     p = 'scripts/vaep/j1_j6_registry_check.py'
-    write(p, '''#!/usr/bin/env python3\nimport json\nfrom pathlib import Path\n\np = Path("vaep/control/jules-workers.json")\nd = json.loads(p.read_text(encoding="utf-8"))\nexpected = [f"J{i}" for i in range(1, 7)]\nassert d["phase"] == "F2_ACTIVE_CUTOVER"\nassert d["cutoverEnabled"] is True\nassert d["activeWorkers"] == expected\nassert d["activeLegacyWorkers"] == []\nassert sorted(d["workers"]) == expected\nfor wid in expected:\n    w = d["workers"][wid]\n    assert w["enabled"] is True\n    assert w["queueDepthTarget"] == 2\n    assert w["programmedBacklogTarget"] == 12\n    assert w["programmedBacklogRefillFloor"] == 4\n    assert w["maxAttempts"] == 2\n    assert w["reworkMax"] == 1\nassert d["workers"]["J1"]["secretName"] == "JULES_J1_API_KEY"\nassert d["workers"]["J2"]["secretName"] == "JULES_J2_API_KEY"\nassert d["workers"]["J3"]["secretName"] == "JULES_C_API_KEY"\nassert d["workers"]["J3"]["credentialMigrationPending"] is True\nassert d["workers"]["J4"]["secretName"] == "JULES_D_API_KEY"\nassert d["workers"]["J4"]["credentialMigrationPending"] is True\nassert d["workers"]["J5"]["secretName"] == "JULES_J5_API_KEY"\nassert d["workers"]["J6"]["secretName"] == "JULES_J6_API_KEY"\nprint("J1_J6_REGISTRY_ACTIVE_OK")\n''')
+    write(p, '''#!/usr/bin/env python3\nimport json\nfrom pathlib import Path\n\np = Path("vaep/control/jules-workers.json")\nd = json.loads(p.read_text(encoding="utf-8"))\nexpected = [f"J{i}" for i in range(1, 7)]\nassert d["phase"] == "F2_ACTIVE_CUTOVER"\nassert d["cutoverEnabled"] is True\nassert d["activeWorkers"] == expected\nassert d["activeLegacyWorkers"] == []\nassert sorted(d["workers"]) == expected\nfor wid in expected:\n    w = d["workers"][wid]\n    assert w["enabled"] is True\n    assert w["queueDepthTarget"] == 2\n    assert w["programmedBacklogTarget"] == 12\n    assert w["programmedBacklogRefillFloor"] == 4\n    assert w["maxAttempts"] == 2\n    assert w["reworkMax"] == 1\n    assert w["secretName"] == f"JULES_{wid}_API_KEY"\n    assert w["desiredSecretName"] == f"JULES_{wid}_API_KEY"\n    assert w["credentialMigrationPending"] is False\nprint("J1_J6_REGISTRY_ACTIVE_OK")\n''')
 
 
 def transform_schema_and_preflight() -> None:
@@ -245,8 +241,8 @@ def transform_primary_workflows() -> None:
     workers = {
         'J1': ('vaep/jules/dispatch', 'JULES_J1_API_KEY'),
         'J2': ('vaep/jules-b/dispatch', 'JULES_J2_API_KEY'),
-        'J3': ('vaep/jules-c/dispatch', 'JULES_C_API_KEY'),
-        'J4': ('vaep/jules-d/dispatch', 'JULES_D_API_KEY'),
+        'J3': ('vaep/jules-c/dispatch', 'JULES_J3_API_KEY'),
+        'J4': ('vaep/jules-d/dispatch', 'JULES_J4_API_KEY'),
         'J5': ('vaep/j5/dispatch', 'JULES_J5_API_KEY'),
         'J6': ('vaep/j6/dispatch', 'JULES_J6_API_KEY'),
     }
@@ -334,7 +330,7 @@ def transform_checkpoint_workflow() -> None:
     t = read(p)
     t = must_replace(t, 'worker: [JULES_A, JULES_B, JULES_C, JULES_D]', 'worker: [J1, J2, J3, J4, J5, J6]', count=1)
     old = '''      JULES_A_API_KEY: ${{ secrets.JULES_API_KEY }}\n      JULES_B_API_KEY: ${{ secrets.JULES_B_API_KEY }}\n      JULES_C_API_KEY: ${{ secrets.JULES_C_API_KEY }}\n      JULES_D_API_KEY: ${{ secrets.JULES_D_API_KEY }}'''
-    new = '''      J1_API_KEY: ${{ secrets.JULES_J1_API_KEY }}\n      J2_API_KEY: ${{ secrets.JULES_J2_API_KEY }}\n      J3_API_KEY: ${{ secrets.JULES_C_API_KEY }}\n      J4_API_KEY: ${{ secrets.JULES_D_API_KEY }}\n      J5_API_KEY: ${{ secrets.JULES_J5_API_KEY }}\n      J6_API_KEY: ${{ secrets.JULES_J6_API_KEY }}\n      JULES_A_API_KEY: ${{ secrets.JULES_API_KEY }}\n      JULES_B_API_KEY: ${{ secrets.JULES_B_API_KEY }}\n      JULES_C_API_KEY: ${{ secrets.JULES_C_API_KEY }}\n      JULES_D_API_KEY: ${{ secrets.JULES_D_API_KEY }}'''
+    new = '''      J1_API_KEY: ${{ secrets.JULES_J1_API_KEY }}\n      J2_API_KEY: ${{ secrets.JULES_J2_API_KEY }}\n      J3_API_KEY: ${{ secrets.JULES_J3_API_KEY }}\n      J4_API_KEY: ${{ secrets.JULES_J4_API_KEY }}\n      J5_API_KEY: ${{ secrets.JULES_J5_API_KEY }}\n      J6_API_KEY: ${{ secrets.JULES_J6_API_KEY }}\n      JULES_A_API_KEY: ${{ secrets.JULES_API_KEY }}\n      JULES_B_API_KEY: ${{ secrets.JULES_B_API_KEY }}\n      JULES_C_API_KEY: ${{ secrets.JULES_C_API_KEY }}\n      JULES_D_API_KEY: ${{ secrets.JULES_D_API_KEY }}'''
     t = must_replace(t, old, new, count=1)
     write(p, t)
 
@@ -377,7 +373,7 @@ def transform_stop_workflow() -> None:
     p = '.github/workflows/vaep-jules-stop.yml'
     t = read(p)
     old_env = '''      JULES_A_API_KEY: ${{ secrets.JULES_API_KEY }}\n      JULES_B_API_KEY: ${{ secrets.JULES_B_API_KEY }}\n      JULES_C_API_KEY: ${{ secrets.JULES_C_API_KEY }}\n      JULES_D_API_KEY: ${{ secrets.JULES_D_API_KEY }}'''
-    new_env = '''      J1_API_KEY: ${{ secrets.JULES_J1_API_KEY }}\n      J2_API_KEY: ${{ secrets.JULES_J2_API_KEY }}\n      J3_API_KEY: ${{ secrets.JULES_C_API_KEY }}\n      J4_API_KEY: ${{ secrets.JULES_D_API_KEY }}\n      J5_API_KEY: ${{ secrets.JULES_J5_API_KEY }}\n      J6_API_KEY: ${{ secrets.JULES_J6_API_KEY }}\n      JULES_A_API_KEY: ${{ secrets.JULES_API_KEY }}\n      JULES_B_API_KEY: ${{ secrets.JULES_B_API_KEY }}\n      JULES_C_API_KEY: ${{ secrets.JULES_C_API_KEY }}\n      JULES_D_API_KEY: ${{ secrets.JULES_D_API_KEY }}'''
+    new_env = '''      J1_API_KEY: ${{ secrets.JULES_J1_API_KEY }}\n      J2_API_KEY: ${{ secrets.JULES_J2_API_KEY }}\n      J3_API_KEY: ${{ secrets.JULES_J3_API_KEY }}\n      J4_API_KEY: ${{ secrets.JULES_J4_API_KEY }}\n      J5_API_KEY: ${{ secrets.JULES_J5_API_KEY }}\n      J6_API_KEY: ${{ secrets.JULES_J6_API_KEY }}\n      JULES_A_API_KEY: ${{ secrets.JULES_API_KEY }}\n      JULES_B_API_KEY: ${{ secrets.JULES_B_API_KEY }}\n      JULES_C_API_KEY: ${{ secrets.JULES_C_API_KEY }}\n      JULES_D_API_KEY: ${{ secrets.JULES_D_API_KEY }}'''
     t = must_replace(t, old_env, new_env, count=1)
     t = t.replace('((.workerId // "JULES_A") | type == "string" and test("^JULES_[ABCD]$"))', '((.workerId // "") | type == "string" and test("^(J[1-6]|JULES_[ABCD])$"))')
     t = t.replace("printf 'worker_id=%s\\n' \"$(jq -r '.workerId // \\\"JULES_A\\\"' \"$manifest\")\"", "printf 'worker_id=%s\\n' \"$(jq -r '.workerId // \\\"\\\"' \"$manifest\")\"")
@@ -442,15 +438,30 @@ def final_assertions() -> None:
     registry = json.loads(read('vaep/control/jules-workers.json'))
     assert registry['cutoverEnabled'] is True
     assert registry['activeWorkers'] == [f'J{i}' for i in range(1,7)]
+    for i in range(1, 7):
+        worker = registry['workers'][f'J{i}']
+        assert worker['secretName'] == f'JULES_J{i}_API_KEY'
+        assert worker['desiredSecretName'] == f'JULES_J{i}_API_KEY'
+        assert worker['credentialMigrationPending'] is False
     master = read('docs/VAEP_AUTHORITY.md')
     for needle in ['JULES_TASKS_TARGET_ROLLING_24H_TOTAL=600','JULES_PROGRAMMED_BACKLOG_TARGET_TOTAL=72','LANE_REFILL_DEADLINE_SECONDS=30','JULES_ACTIVE_WORKERS=J1,J2,J3,J4,J5,J6']:
         assert needle in master, needle
+    assert 'J3 y J4 usan exclusivamente sus secretos nominales' in master
     schema = json.loads(read('vaep/schemas/jules-dispatch.schema.json'))
     assert schema['properties']['worker']['enum'][:6] == [f'J{i}' for i in range(1,7)]
     for i in range(1,7):
         wf = read(f'.github/workflows/vaep-jules-j{i}.yml')
         assert f'WORKER_ID: J{i}' in wf
         assert 'Execute VAEP/Jules MASTER' in wf
+        assert f'secrets.JULES_J{i}_API_KEY' in wf
+    assert 'secrets.JULES_C_API_KEY' not in read('.github/workflows/vaep-jules-j3.yml')
+    assert 'secrets.JULES_D_API_KEY' not in read('.github/workflows/vaep-jules-j4.yml')
+    checkpoints = read('.github/workflows/vaep-checkpoints.yml')
+    assert 'J3_API_KEY: ${{ secrets.JULES_J3_API_KEY }}' in checkpoints
+    assert 'J4_API_KEY: ${{ secrets.JULES_J4_API_KEY }}' in checkpoints
+    stop = read('.github/workflows/vaep-jules-stop.yml')
+    assert 'J3_API_KEY: ${{ secrets.JULES_J3_API_KEY }}' in stop
+    assert 'J4_API_KEY: ${{ secrets.JULES_J4_API_KEY }}' in stop
     cat = json.loads(read('vaep/control/jules-autorefill-catalog.json'))
     assert all(f'J{i}' in cat['lanes'] for i in range(1,7))
     assert not any(k.startswith('JULES_') for k in cat['lanes'])
