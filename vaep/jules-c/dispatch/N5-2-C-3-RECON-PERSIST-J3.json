@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-2-C-3-RECON-PERSIST-J3",
+  "taskId": "N5.2.C.3.RECONCILIATION_PERSISTENCE_PLAN",
+  "workerId": "J3",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/N5.2_REPORTES_INVENTARIO_PERSISTENCE_RECONCILIACION.md",
+  "prompt": "Only after N5.2.B LISTO_REAL, map persistence/migration/index needs for reconciliation reporting from accepted domain contracts. No Production execution; rollback explicit.",
+  "primaryBaseHead": "fba81a44ef91fa1f5be27fc51078cbf6e8c2c938"
+}
