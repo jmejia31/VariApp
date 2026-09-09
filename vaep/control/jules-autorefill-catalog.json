@@ -1,8 +1,8 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
   "currentParent": "N5.3.C",
-  "generatedAt": "2026-09-09T22:48:00Z",
-  "regenerationReason": "ALEX_SOURCE_VERIFIED__N5.3.C_TWO_NONOVERLAPPING_INDEX_MODEL_SCOPES__NO_BUSYWORK",
+  "generatedAt": "2026-09-09T23:17:00Z",
+  "regenerationReason": "ALEX_POST_REVIEW__N5.3.C_SINGLE_WRITER_MIGRATION_SCOPE__NO_BUSYWORK",
   "lastClosedParent": "N5.3.B",
   "closureReceipts": {
     "N4.11.H": "vaep/evidence/fragments/N4.11.H_LISTO_REAL_20260908T204500Z.json",
@@ -46,18 +46,18 @@
   "throughputPlan": {
     "mode": "MATERIAL_SWARM_FIRST",
     "currentParent": "N5.3.C",
-    "currentParentMaterialScopeCount": 2,
-    "currentParentReason": "N5.3.B is LISTO_REAL. Source verification against original COLA plus accepted N5.3.A backend/data preflight found two non-overlapping persistence-model scopes: Venta reporting indexes and VentaDetalle reporting-join indexes. Almacen.SucursalId and Productos.CategoriaId already have persisted indexes, so no filler facets are fabricated. Migration generation remains a single-writer follow-up after both model scopes settle.",
+    "currentParentMaterialScopeCount": 1,
+    "currentParentReason": "J1 report-index model facet was REVIEW_FIRST resolved by CHATGPT_VAEP with a narrow VentaConfiguration delta; J2 was REVIEW_FIRST accepted no-change because required VentaDetalle join identities are already indexed. The only remaining source-backed material scope is single-writer EF migration/model-snapshot reconciliation for the accepted J1 model delta.",
     "nextParent": "N5.3.D",
     "nextParentParallelMaterialScopes": 0,
     "nextParentScopesNonOverlapping": true,
-    "laneRefill": "POST_TERMINAL_REVIEW_FIRST__THEN_SINGLE_WRITER_MIGRATION_RECONCILIATION"
+    "laneRefill": "J6_SINGLE_WRITER_MIGRATION__THEN_REVIEW_FIRST_DOD_GATES_PARENT_CLOSE"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
     "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
     "sourceRanges": ["COLA!A408:T415", "PLAN_MAESTRO!A53:L55"],
-    "note": "Dependency order derived from original PLAN_MAESTRO/COLA. N5.3.B is LISTO_REAL; N5.3.C is current. Two source-backed non-overlapping persistence model scopes are eligible. N5.3.D remains dependency-gated until C closes. No numerical backlog target authorizes filler.",
+    "note": "Dependency order derived from original PLAN_MAESTRO/COLA. N5.3.C remains current. J1/J2 persistence-model facets are reviewed; the current real material scope is a single-writer migration/snapshot reconciliation. N5.3.D remains dependency-gated until C closes. No numerical backlog target authorizes filler.",
     "nodes": [
       {"id":"N5.3.A","order":18,"type":"MICROTAREA","dependencies":["N5.1.H","GATE-N4"],"phaseGate":"GATE-N4"},
       {"id":"N5.3.B","order":19,"type":"MICROTAREA","dependencies":["N5.3.A"],"phaseGate":"GATE-N4"},
@@ -77,11 +77,11 @@
         "workerId": "J1",
         "taskAttempt": 1,
         "plannedParent": "N5.3.C",
-        "readyForDispatch": true,
-        "dispatchEligible": true,
+        "readyForDispatch": false,
+        "dispatchEligible": false,
         "fileScopeHint": "backend/src/Infrastructure/Persistence/Configurations/VentaConfiguration.cs",
-        "prompt": "Use only docs/VAEP_AUTHORITY.md, original COLA N5.3.C, accepted N5.3.A backend/data preflight, and current N5.3.B filter contracts. As sole writer of backend/src/Infrastructure/Persistence/Configurations/VentaConfiguration.cs, verify persistence/index support for the source-backed sales-report filters on period, authorized user/seller and client. Inspect current migrations/model snapshot first and add only necessary non-duplicative EF indexes justified by those query dimensions; do not add fields, change report semantics, implement repository/API/frontend, or generate a migration in this scope. Preserve row-scope fail-closed semantics. Run proportional backend build/tests and two self-reviews. Desarrollo only; no main/Production/secrets/PR merge.",
-        "reason": "CURRENT_PARENT__SOURCE_VERIFIED_MATERIAL_SCOPE__VENTA_INDEX_MODEL"
+        "prompt": "Resolved by CHATGPT_VAEP REVIEW_FIRST/QA takeover; do not redispatch.",
+        "reason": "REVIEW_FIRST_ACCEPTED__CHATGPT_VAEP_DIRECT_CORRECTION__NO_REDUPLICATION"
       }
     ],
     "J2": [
@@ -91,17 +91,30 @@
         "workerId": "J2",
         "taskAttempt": 1,
         "plannedParent": "N5.3.C",
-        "readyForDispatch": true,
-        "dispatchEligible": true,
+        "readyForDispatch": false,
+        "dispatchEligible": false,
         "fileScopeHint": "backend/src/Infrastructure/Persistence/Configurations/VentaDetalleConfiguration.cs",
-        "prompt": "Use only docs/VAEP_AUTHORITY.md, original COLA N5.3.C, accepted N5.3.A backend/data preflight, and current N5.3.B filter contracts. As sole writer of backend/src/Infrastructure/Persistence/Configurations/VentaDetalleConfiguration.cs, verify persistence/index support for source-backed report joins/filter identities VentaId, ProductoId, ProductoVarianteId and AlmacenId. Inspect current migrations/model snapshot first and add only necessary non-duplicative EF indexes/composites justified by report query paths. Do not invent category snapshots, alter historical semantics, add fields, implement query/API/frontend, or generate a migration in this scope. Run proportional backend build/tests and two self-reviews. Desarrollo only; no main/Production/secrets/PR merge.",
-        "reason": "CURRENT_PARENT__SOURCE_VERIFIED_MATERIAL_SCOPE__VENTA_DETAIL_INDEX_MODEL"
+        "prompt": "Resolved by CHATGPT_VAEP REVIEW_FIRST as no-change existing-index coverage; do not redispatch.",
+        "reason": "REVIEW_FIRST_ACCEPTED__NO_CHANGE_REQUIRED__NO_REDUPLICATION"
       }
     ],
     "J3": [],
     "J4": [],
     "J5": [],
-    "J6": []
+    "J6": [
+      {
+        "dispatchId": "N5-3-C-3-REPORT-INDEX-MIGRATION-J6",
+        "taskId": "N5.3.C.3.REPORT_INDEX_MIGRATION",
+        "workerId": "J6",
+        "taskAttempt": 1,
+        "plannedParent": "N5.3.C",
+        "readyForDispatch": true,
+        "dispatchEligible": true,
+        "fileScopeHint": "backend/src/Infrastructure/Migrations/",
+        "prompt": "Use only docs/VAEP_AUTHORITY.md, original COLA N5.3.C, current Desarrollo and the REVIEW_FIRST accepted persistence-model state. As sole migration writer, reconcile the accepted VentaConfiguration report-index model delta into an EF Core migration and current model snapshot using the repository's canonical DbContext/migration tooling. Do not alter domain fields, report/API/frontend semantics, VentaDetalleConfiguration, historical migrations, Production DB, secrets or main. First verify the effective model diff so existing physical/index history is not duplicated; migration must contain only genuinely missing index operations (notably seller/user support if Fecha already exists physically). Run proportional migration/model validation and backend build/tests that do not touch Production, plus two self-reviews. Desarrollo only; no PR #2 merge.",
+        "reason": "CURRENT_PARENT__POST_REVIEW_SINGLE_WRITER_MIGRATION_RECONCILIATION"
+      }
+    ]
   },
   "lastClosureFunctionalHead": "c4918489d6c4bdd2ed15cd030c73e7c2fb18f2e9"
 }
