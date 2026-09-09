@@ -6,5 +6,5 @@
   "taskAttempt": 1,
   "fileScopeHint": "backend/src/Application/DTOs/ReporteVentasFiltroDto.Periodo.cs",
   "prompt": "Use only docs/VAEP_AUTHORITY.md plus original COLA N5.3.B and accepted N5.3.A backend/data preflight. Implement the period/time-range part of the N5.3.B sales-report domain contract as the sole writer of backend/src/Application/DTOs/ReporteVentasFiltroDto.Periodo.cs. Follow existing Application DTO/PagedRequest conventions. Define explicit Desde/Hasta date-time filter semantics suitable for later server-side validation; do not implement persistence/API/service/frontend. Keep the type composable as a partial sales-report filter contract. Run proportional backend compile/tests and two self-reviews. Desarrollo only; no main/Production/secrets/PR merge.",
-  "primaryBaseHead": "2adf393814f724282a607ef1687ca1b5c25243fe"
+  "primaryBaseHead": "4ecdebcd5567ec3016e69506b766372a89627307"
 }
