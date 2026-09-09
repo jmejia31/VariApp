@@ -19,6 +19,7 @@ permissions:
 
 jobs:
   checks:
+    name: VAEP engine
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
@@ -39,18 +40,17 @@ jobs:
           node --check scripts/vaep/sync-bitacora.mjs
           node --check scripts/vaep/reconcile-status.mjs
           node --check scripts/vaep/metrics.mjs
-          python3 -m py_compile scripts/vaep/j1_j6_registry_check.py scripts/vaep/j1_j6_cutover.py scripts/vaep/jules_integration_metrics.py scripts/vaep/jules_runtime_contract.py scripts/vaep/terminal_handoff.py
+          python3 -m py_compile scripts/vaep/jules_registry_check.py scripts/vaep/jules_integration_metrics.py scripts/vaep/jules_runtime_contract.py scripts/vaep/terminal_handoff.py
           bash -n .github/scripts/vaep-policy-parser.sh .github/scripts/vaep-jules-master.sh .github/scripts/vaep-jules-worker.sh .github/scripts/vaep-jules-autorefill.sh .github/scripts/vaep-jules-autorefill-core.sh .github/scripts/vaep-jules-catalog-floor.sh .github/scripts/vaep-parent-close.sh .github/scripts/vaep-checkpoint.sh
 
-      - name: Validate MASTER and canonical J1-J6 registry
+      - name: Validate MASTER and final canonical J1-J6 registry
         shell: bash
         run: |
           set -euo pipefail
           bash .github/scripts/vaep-policy-parser.sh --self-test
           bash .github/scripts/vaep-policy-parser.sh --validate docs/VAEP_AUTHORITY.md
-          python3 scripts/vaep/j1_j6_registry_check.py
-          python3 scripts/vaep/j1_j6_cutover.py
-          jq -e '.cutoverEnabled == true and .phase == "F2_ACTIVE_CUTOVER" and .activeLegacyWorkers == [] and .activeWorkers == ["J1","J2","J3","J4","J5","J6"]' vaep/control/jules-workers.json >/dev/null
+          python3 scripts/vaep/jules_registry_check.py
+          jq -e '.cutoverEnabled == true and .phase == "F3_FINAL_CERTIFIED" and .runtimeMode == "CANONICAL_J1_J6" and .legacyRuntimeEnabled == false and .activeLegacyWorkers == [] and .activeWorkers == ["J1","J2","J3","J4","J5","J6"]' vaep/control/jules-workers.json >/dev/null
           grep -Fq 'JULES_ACTIVE_WORKERS=J1,J2,J3,J4,J5,J6' docs/VAEP_AUTHORITY.md
           grep -Fq 'JULES_TASKS_TARGET_ROLLING_24H_TOTAL=600' docs/VAEP_AUTHORITY.md
           grep -Fq 'JULES_PROGRAMMED_BACKLOG_TARGET_TOTAL=72' docs/VAEP_AUTHORITY.md
@@ -80,17 +80,38 @@ jobs:
             test "$(grep -c '0|78|79|80|81|82' "$wf")" -eq 2
           done
 
-      - name: Validate legacy entry points are disabled
+      - name: Validate F3 cleanup and zero legacy runtime secret references
         shell: bash
         run: |
           set -euo pipefail
-          for wf in .github/workflows/vaep-jules-secondary.yml .github/workflows/vaep-jules-secondary-b.yml .github/workflows/vaep-jules-secondary-c.yml .github/workflows/vaep-jules-secondary-d.yml; do
-            grep -Fq 'Legacy' "$wf"
-            grep -Fq 'LEGACY_WORKER_DISABLED_AFTER_J1_J6_CUTOVER' "$wf"
+          removed=(
+            docs/VAEP_J1_J6_PREPARATION.md
+            scripts/vaep/j1_j6_cutover.py
+            scripts/vaep/j1_j6_registry_check.py
+            .github/workflows/vaep-j1-j6-cutover-apply.yml
+            .github/workflows/vaep-j1-j6-cutover-dry-run.yml
+            .github/workflows/vaep-j1-j6-readiness-gate.yml
+            .github/workflows/vaep-j3-j4-legacy-readiness.yml
+            .github/workflows/vaep-j5-j6-canary.yml
+            .github/workflows/vaep-jules-secondary.yml
+            .github/workflows/vaep-jules-secondary-b.yml
+            .github/workflows/vaep-jules-secondary-c.yml
+            .github/workflows/vaep-jules-secondary-d.yml
+            .github/workflows/vaep-jules-a-recovery.yml
+            .github/workflows/vaep-jules-b-recovery.yml
+            .github/workflows/vaep-jules-c-recovery.yml
+            .github/workflows/vaep-jules-d-recovery.yml
+          )
+          for path in "${removed[@]}"; do
+            test ! -e "$path" || { echo "F3_REMOVAL_FAILED=$path" >&2; exit 1; }
           done
-          for wf in .github/workflows/vaep-jules-a-recovery.yml .github/workflows/vaep-jules-b-recovery.yml .github/workflows/vaep-jules-c-recovery.yml .github/workflows/vaep-jules-d-recovery.yml; do
-            grep -Fq 'Legacy' "$wf"
-            grep -Fq 'LEGACY_RECOVERY_DISABLED_AFTER_J1_J6_CUTOVER' "$wf"
+          if grep -R -En 'secrets\.JULES_(API_KEY|B_API_KEY|C_API_KEY|D_API_KEY)' .github/workflows; then
+            echo 'LEGACY_SECRET_REFERENCE_FOUND_IN_WORKFLOW_RUNTIME' >&2
+            exit 1
+          fi
+          grep -Fq 'workerId' .github/workflows/vaep-jules-feedback.yml
+          for i in 1 2 3 4 5 6; do
+            grep -Fq "JULES_J${i}_API_KEY" .github/workflows/vaep-jules-feedback.yml
           done
 
       - name: Validate canonical checkpoint health stop and diagnostic controls
@@ -109,11 +130,6 @@ jobs:
           done
           grep -Fq 'test("^J[1-6]$")' .github/workflows/vaep-jules-stop.yml
           grep -Fq 'secrets.JULES_J1_API_KEY' .github/workflows/vaep-jules-diagnostic.yml
-          active=(.github/workflows/vaep-jules-j{1,2,3,4,5,6}.yml .github/workflows/vaep-checkpoints.yml .github/workflows/vaep-jules-stop.yml .github/workflows/vaep-jules-session-health.yml .github/workflows/vaep-jules-diagnostic.yml)
-          if grep -En 'secrets\.JULES_(API_KEY|B_API_KEY|C_API_KEY|D_API_KEY)' "${active[@]}"; then
-            echo 'LEGACY_SECRET_REFERENCE_FOUND_IN_ACTIVE_RUNTIME' >&2
-            exit 1
-          fi
           bash .github/scripts/vaep-checkpoint.sh --self-test
           bash .github/scripts/vaep-parent-close.sh --self-test
 

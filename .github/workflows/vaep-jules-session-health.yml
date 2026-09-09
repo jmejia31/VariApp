@@ -33,8 +33,8 @@ jobs:
           ref: Desarrollo
           fetch-depth: 1
 
-      - name: Validate active canonical registry
-        run: python3 scripts/vaep/j1_j6_registry_check.py
+      - name: Validate final canonical registry
+        run: python3 scripts/vaep/jules_registry_check.py
 
       - name: Read-only canonical Jules health
         shell: bash

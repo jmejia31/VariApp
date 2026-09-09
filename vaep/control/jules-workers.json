@@ -1,11 +1,21 @@
 {
-  "schemaVersion": "1.0",
+  "schemaVersion": "2.0",
   "projectId": "VARIAPP",
   "repository": "jmejia31/VariApp",
   "branch": "Desarrollo",
-  "phase": "F2_ACTIVE_CUTOVER",
+  "phase": "F3_FINAL_CERTIFIED",
+  "runtimeMode": "CANONICAL_J1_J6",
+  "cutoverEnabled": true,
+  "legacyRuntimeEnabled": false,
   "activeLegacyWorkers": [],
-  "preparedWorkers": [
+  "historicalAliasMode": "READ_ONLY_NORMALIZATION",
+  "legacyAliases": {
+    "JULES_A": "J1",
+    "JULES_B": "J2",
+    "JULES_C": "J3",
+    "JULES_D": "J4"
+  },
+  "activeWorkers": [
     "J1",
     "J2",
     "J3",
@@ -13,13 +23,6 @@
     "J5",
     "J6"
   ],
-  "legacyAliases": {
-    "JULES_A": "J1",
-    "JULES_B": "J2",
-    "JULES_C": "J3",
-    "JULES_D": "J4"
-  },
-  "cutoverEnabled": true,
   "workers": {
     "J1": {
       "preferredRole": "CODE_CORE",
@@ -32,9 +35,7 @@
       "programmedBacklogRefillFloor": 4,
       "maxAttempts": 2,
       "reworkMax": 1,
-      "dispatchPath": "vaep/jules/dispatch",
-      "credentialMigrationPending": false,
-      "desiredSecretName": "JULES_J1_API_KEY"
+      "dispatchPath": "vaep/jules/dispatch"
     },
     "J2": {
       "preferredRole": "CODE_BACKEND_DATA",
@@ -47,9 +48,7 @@
       "programmedBacklogRefillFloor": 4,
       "maxAttempts": 2,
       "reworkMax": 1,
-      "dispatchPath": "vaep/jules-b/dispatch",
-      "credentialMigrationPending": false,
-      "desiredSecretName": "JULES_J2_API_KEY"
+      "dispatchPath": "vaep/jules-b/dispatch"
     },
     "J3": {
       "preferredRole": "CODE_FRONTEND",
@@ -62,9 +61,7 @@
       "programmedBacklogRefillFloor": 4,
       "maxAttempts": 2,
       "reworkMax": 1,
-      "dispatchPath": "vaep/jules-c/dispatch",
-      "credentialMigrationPending": false,
-      "desiredSecretName": "JULES_J3_API_KEY"
+      "dispatchPath": "vaep/jules-c/dispatch"
     },
     "J4": {
       "preferredRole": "CODE_INFRA_INTEGRATIONS",
@@ -77,9 +74,7 @@
       "programmedBacklogRefillFloor": 4,
       "maxAttempts": 2,
       "reworkMax": 1,
-      "dispatchPath": "vaep/jules-d/dispatch",
-      "credentialMigrationPending": false,
-      "desiredSecretName": "JULES_J4_API_KEY"
+      "dispatchPath": "vaep/jules-d/dispatch"
     },
     "J5": {
       "preferredRole": "QA_SECURITY_REGRESSION",
@@ -92,9 +87,7 @@
       "programmedBacklogRefillFloor": 4,
       "maxAttempts": 2,
       "reworkMax": 1,
-      "dispatchPath": "vaep/j5/dispatch",
-      "credentialMigrationPending": false,
-      "desiredSecretName": "JULES_J5_API_KEY"
+      "dispatchPath": "vaep/j5/dispatch"
     },
     "J6": {
       "preferredRole": "INTEGRATION_RECOVERY",
@@ -107,17 +100,7 @@
       "programmedBacklogRefillFloor": 4,
       "maxAttempts": 2,
       "reworkMax": 1,
-      "dispatchPath": "vaep/j6/dispatch",
-      "credentialMigrationPending": false,
-      "desiredSecretName": "JULES_J6_API_KEY"
+      "dispatchPath": "vaep/j6/dispatch"
     }
-  },
-  "activeWorkers": [
-    "J1",
-    "J2",
-    "J3",
-    "J4",
-    "J5",
-    "J6"
-  ]
+  }
 }

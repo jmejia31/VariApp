@@ -22,7 +22,12 @@ jobs:
     env:
       JULES_API_BASE: https://jules.googleapis.com/v1alpha
       EXPECTED_BRANCH: Desarrollo
-      JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
+      J1_KEY: ${{ secrets.JULES_J1_API_KEY }}
+      J2_KEY: ${{ secrets.JULES_J2_API_KEY }}
+      J3_KEY: ${{ secrets.JULES_J3_API_KEY }}
+      J4_KEY: ${{ secrets.JULES_J4_API_KEY }}
+      J5_KEY: ${{ secrets.JULES_J5_API_KEY }}
+      J6_KEY: ${{ secrets.JULES_J6_API_KEY }}
       GH_TOKEN: ${{ github.token }}
 
     steps:
@@ -44,7 +49,7 @@ jobs:
           echo "MASTER_COMMIT_SHA=$(bash "$PARSER" --commit-sha "$MASTER_FILE")" >> "$GITHUB_ENV"
           echo "AUTOMATION_POLICY_HASH=$(bash "$PARSER" --hash "$MASTER_FILE")" >> "$GITHUB_ENV"
 
-      - name: Validate feedback manifest
+      - name: Validate canonical feedback manifest
         id: manifest
         shell: bash
         run: |
@@ -59,6 +64,7 @@ jobs:
           dispatch_id=""
           task_id=""
           session_name=""
+          worker_id=""
 
           if [[ ${#added_manifests[@]} -eq 1 ]]; then
             manifest_candidate="${added_manifests[0]}"
@@ -66,6 +72,7 @@ jobs:
             dispatch_id="$(jq -r '.dispatchId // empty' "$manifest_candidate" 2>/dev/null)"
             task_id="$(jq -r '.taskId // empty' "$manifest_candidate" 2>/dev/null)"
             session_name="$(jq -r '.sessionName // empty' "$manifest_candidate" 2>/dev/null)"
+            worker_id="$(jq -r '.workerId // empty' "$manifest_candidate" 2>/dev/null)"
           fi
 
           {
@@ -74,14 +81,10 @@ jobs:
             printf 'dispatch_id=%s\n' "$dispatch_id"
             printf 'task_id=%s\n' "$task_id"
             printf 'session_name=%s\n' "$session_name"
+            printf 'worker_id=%s\n' "$worker_id"
           } >> "$GITHUB_OUTPUT"
 
           set -euo pipefail
-
-          if [[ -z "${JULES_API_KEY:-}" ]]; then
-            echo "JULES_API_KEY is not configured." >&2
-            exit 20
-          fi
 
           if [[ ${#added_manifests[@]} -ne 1 ]]; then
             echo "Expected exactly one newly added Jules feedback manifest; found ${#added_manifests[@]}." >&2
@@ -104,10 +107,22 @@ jobs:
             (.feedbackId | type == "string" and test("^[A-Za-z0-9_.-]+$")) and
             (.dispatchId | type == "string" and test("^[A-Za-z0-9_.-]+$")) and
             (.taskId | type == "string" and test("^[A-Za-z0-9_.-]+$")) and
+            (.workerId | type == "string" and test("^J[1-6]$")) and
             (.sessionName | type == "string" and test("^sessions/[0-9]+$")) and
             (.expectedBranch == "Desarrollo") and
             (.prompt | type == "string" and length > 0 and length <= 8000)
           ' "$manifest" >/dev/null
+
+          worker_id="$(jq -r '.workerId' "$manifest")"
+          case "$worker_id" in
+            J1) test -n "${J1_KEY:-}" ;;
+            J2) test -n "${J2_KEY:-}" ;;
+            J3) test -n "${J3_KEY:-}" ;;
+            J4) test -n "${J4_KEY:-}" ;;
+            J5) test -n "${J5_KEY:-}" ;;
+            J6) test -n "${J6_KEY:-}" ;;
+            *) exit 23 ;;
+          esac
 
           printf 'manifest=%s\n' "$manifest" >> "$GITHUB_OUTPUT"
 
@@ -118,17 +133,27 @@ jobs:
           MANIFEST_PATH: ${{ steps.manifest.outputs.manifest }}
           DISPATCH_ID: ${{ steps.manifest.outputs.dispatch_id }}
           SESSION_NAME: ${{ steps.manifest.outputs.session_name }}
+          WORKER_ID: ${{ steps.manifest.outputs.worker_id }}
         run: |
           set -euo pipefail
+          case "$WORKER_ID" in
+            J1) key="$J1_KEY" ;;
+            J2) key="$J2_KEY" ;;
+            J3) key="$J3_KEY" ;;
+            J4) key="$J4_KEY" ;;
+            J5) key="$J5_KEY" ;;
+            J6) key="$J6_KEY" ;;
+            *) exit 29 ;;
+          esac
 
           mkdir -p "$RUNNER_TEMP/vaep-jules-feedback"
 
           curl --fail-with-body --silent --show-error \
-            -H "x-goog-api-key: $JULES_API_KEY" \
+            -H "x-goog-api-key: $key" \
             "$JULES_API_BASE/$SESSION_NAME" \
             > "$RUNNER_TEMP/vaep-jules-feedback/session-before.json"
 
-          expected_title="VAEP ${DISPATCH_ID}"
+          expected_title="VAEP-${WORKER_ID} ${DISPATCH_ID}"
           jq -e \
             --arg title "$expected_title" \
             --arg branch "$EXPECTED_BRANCH" \
@@ -137,7 +162,7 @@ jobs:
               .sourceContext.githubRepoContext.startingBranch == $branch
             ' \
             "$RUNNER_TEMP/vaep-jules-feedback/session-before.json" >/dev/null || {
-              echo "Session identity/branch does not match the requested VariApp dispatch." >&2
+              echo "Session identity/branch does not match the requested canonical VariApp dispatch." >&2
               exit 30
             }
 
@@ -165,13 +190,23 @@ jobs:
         shell: bash
         env:
           SESSION_NAME: ${{ steps.manifest.outputs.session_name }}
+          WORKER_ID: ${{ steps.manifest.outputs.worker_id }}
         run: |
           set -euo pipefail
+          case "$WORKER_ID" in
+            J1) key="$J1_KEY" ;;
+            J2) key="$J2_KEY" ;;
+            J3) key="$J3_KEY" ;;
+            J4) key="$J4_KEY" ;;
+            J5) key="$J5_KEY" ;;
+            J6) key="$J6_KEY" ;;
+            *) exit 32 ;;
+          esac
 
           curl --fail-with-body --silent --show-error \
             -X POST \
             -H "Content-Type: application/json" \
-            -H "x-goog-api-key: $JULES_API_KEY" \
+            -H "x-goog-api-key: $key" \
             "$JULES_API_BASE/$SESSION_NAME:approvePlan" \
             >/dev/null
 
@@ -181,8 +216,18 @@ jobs:
         env:
           MANIFEST_PATH: ${{ steps.manifest.outputs.manifest }}
           SESSION_NAME: ${{ steps.manifest.outputs.session_name }}
+          WORKER_ID: ${{ steps.manifest.outputs.worker_id }}
         run: |
           set -euo pipefail
+          case "$WORKER_ID" in
+            J1) key="$J1_KEY" ;;
+            J2) key="$J2_KEY" ;;
+            J3) key="$J3_KEY" ;;
+            J4) key="$J4_KEY" ;;
+            J5) key="$J5_KEY" ;;
+            J6) key="$J6_KEY" ;;
+            *) exit 33 ;;
+          esac
 
           prompt="$(jq -r '.prompt' "$MANIFEST_PATH")"
           jq -n --arg prompt "$prompt" '{prompt:$prompt}' \
@@ -191,7 +236,7 @@ jobs:
           curl --fail-with-body --silent --show-error \
             -X POST \
             -H "Content-Type: application/json" \
-            -H "x-goog-api-key: $JULES_API_KEY" \
+            -H "x-goog-api-key: $key" \
             --data-binary @"$RUNNER_TEMP/vaep-jules-feedback/send-message.json" \
             "$JULES_API_BASE/$SESSION_NAME:sendMessage" \
             >/dev/null
@@ -203,15 +248,25 @@ jobs:
         env:
           SESSION_NAME: ${{ steps.manifest.outputs.session_name }}
           BEFORE_STATE: ${{ steps.session.outputs.before_state }}
+          WORKER_ID: ${{ steps.manifest.outputs.worker_id }}
         run: |
           set -euo pipefail
+          case "$WORKER_ID" in
+            J1) key="$J1_KEY" ;;
+            J2) key="$J2_KEY" ;;
+            J3) key="$J3_KEY" ;;
+            J4) key="$J4_KEY" ;;
+            J5) key="$J5_KEY" ;;
+            J6) key="$J6_KEY" ;;
+            *) exit 34 ;;
+          esac
 
           deadline=$((SECONDS + 300))
           after_state="$BEFORE_STATE"
 
           while (( SECONDS < deadline )); do
             curl --fail-with-body --silent --show-error \
-              -H "x-goog-api-key: $JULES_API_KEY" \
+              -H "x-goog-api-key: $key" \
               "$JULES_API_BASE/$SESSION_NAME" \
               > "$RUNNER_TEMP/vaep-jules-feedback/session-after.json"
 
@@ -253,6 +308,7 @@ jobs:
           DISPATCH_ID: ${{ steps.manifest.outputs.dispatch_id }}
           TASK_ID: ${{ steps.manifest.outputs.task_id }}
           SESSION_NAME: ${{ steps.manifest.outputs.session_name }}
+          WORKER_ID: ${{ steps.manifest.outputs.worker_id }}
           BEFORE_STATE: ${{ steps.session.outputs.before_state }}
           ACTION: ${{ steps.session.outputs.action }}
           AFTER_STATE: ${{ steps.confirm.outputs.after_state }}
@@ -263,13 +319,15 @@ jobs:
           dispatch_id="${DISPATCH_ID:-UNKNOWN}"
           task_id="${TASK_ID:-UNKNOWN}"
           session_name="${SESSION_NAME:-UNKNOWN}"
+          worker_id="${WORKER_ID:-UNKNOWN}"
           before_state="${BEFORE_STATE:-UNKNOWN}"
           action="${ACTION:-UNKNOWN}"
           after_state="${AFTER_STATE:-NOT_POLLED}"
           run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
 
-          printf -v body '%s\n\n%s\n%s\n%s\n%s\n%s\n%s\n' \
+          printf -v body '%s\n\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n' \
             'VAEP Jules automated feedback relay.' \
+            "- Worker: \`$worker_id\`" \
             "- Feedback: \`$feedback_id\`" \
             "- Dispatch: \`$dispatch_id\`" \
             "- Task: \`$task_id\`" \

@@ -1,5 +1,0 @@
-name: VAEP Legacy Jules B Recovery Disabled
-on: {workflow_dispatch: {}}
-permissions: {contents: read}
-jobs:
-  disabled: {runs-on: ubuntu-latest, steps: [{run: 'echo LEGACY_RECOVERY_DISABLED_AFTER_J1_J6_CUTOVER=B; exit 1'}]}

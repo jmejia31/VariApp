@@ -1,8 +1,0 @@
-name: VAEP Legacy Jules A Disabled
-on: {workflow_dispatch: {}}
-permissions: {contents: read}
-jobs:
-  disabled:
-    runs-on: ubuntu-latest
-    steps:
-      - run: 'echo LEGACY_WORKER_DISABLED_AFTER_J1_J6_CUTOVER=Jules_A; exit 1'
