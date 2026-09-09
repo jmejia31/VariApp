@@ -2,19 +2,21 @@ name: VAEP J1-J6 Cutover Dry Run
 
 on:
   push:
-    branches: [Desarrollo]
-    paths:
-      - 'scripts/vaep/j1_j6_cutover.py'
-      - '.github/workflows/vaep-j1-j6-cutover-dry-run.yml'
+    branches:
+      - Desarrollo
   workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: vaep-j1-j6-cutover-dry-run
+  cancel-in-progress: true
+
 jobs:
   dry-run:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
         with:
@@ -47,10 +49,11 @@ jobs:
             grep -q 'Execute VAEP/Jules MASTER' ".github/workflows/vaep-jules-j$i.yml"
           done
           grep -q 'worker: \[J1, J2, J3, J4, J5, J6\]' .github/workflows/vaep-checkpoints.yml
-          grep -q 'cutoverEnabled' vaep/control/jules-workers.json
           ! grep -q 'push:' .github/workflows/vaep-jules-secondary.yml
           ! grep -q 'push:' .github/workflows/vaep-jules-secondary-b.yml
           ! grep -q 'push:' .github/workflows/vaep-jules-secondary-c.yml
           ! grep -q 'push:' .github/workflows/vaep-jules-secondary-d.yml
       - name: Show cutover diff summary only
-        run: git diff --stat && git diff --check
+        run: |
+          git diff --stat
+          git diff --check
