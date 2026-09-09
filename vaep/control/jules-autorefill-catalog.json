@@ -1,8 +1,8 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
   "currentParent": "N5.2.D",
-  "generatedAt": "2026-09-09T16:45:00Z",
-  "regenerationReason": "AUTOMATIC_PARENT_CLOSE__N5.2.C_LISTO_REAL__N5.2.D_CURRENT__ALEX_SOURCE_BACKED_MATERIALIZATION",
+  "generatedAt": "2026-09-09T17:56:00Z",
+  "regenerationReason": "ALEX_BACKLOG_FLOOR__PREARM_N5.2.E_FRONTEND_UX__DEPENDENCY_GATED",
   "lastClosedParent": "N5.2.C",
   "closureReceipts": {
     "N4.11.H": "vaep/evidence/fragments/N4.11.H_LISTO_REAL_20260908T204500Z.json",
@@ -40,9 +40,9 @@
     "mode": "MATERIAL_SWARM_FIRST",
     "currentParent": "N5.2.D",
     "currentParentMaterialScopeCount": 5,
-    "currentParentReason": "N5.2.C is LISTO_REAL. ALEX derived five distinct N5.2.D BACKEND_API scopes from the canonical COLA/roadmap. J6 is intentionally unassigned because no sixth non-overlapping material scope is supported with sufficient confidence; no busywork is fabricated.",
+    "currentParentReason": "N5.2.C is LISTO_REAL. Five N5.2.D BACKEND_API scopes were dispatched and are now under controller QA takeover/REVIEW_FIRST; J6 had no safe sixth D scope and no busywork was fabricated.",
     "nextParent": "N5.2.E",
-    "nextParentParallelMaterialScopes": 0,
+    "nextParentParallelMaterialScopes": 6,
     "nextParentScopesNonOverlapping": true,
     "laneRefill": "POST_TERMINAL_AUTOREFILL_PLUS_CANONICAL_CHECKPOINTS"
   },
@@ -50,7 +50,7 @@
     "authority": "docs/VAEP_AUTHORITY.md",
     "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
     "sourceRanges": ["COLA!A400:T408", "PLAN_MAESTRO!A53:L54"],
-    "note": "Dependency order derived from the canonical Plan/COLA. N5.2.C is LISTO_REAL; N5.2.D is current. N5.2.E remains dependency-gated until N5.2.D closes.",
+    "note": "Dependency order derived from the canonical Plan/COLA. N5.2.D is current. Six source-backed N5.2.E FRONTEND_UX facets are prearmed but remain dependency-gated until N5.2.D closes LISTO_REAL.",
     "nodes": [
       {"id":"N5.2.D","order":13,"type":"MICROTAREA","dependencies":["N5.2.C"],"phaseGate":"GATE-N4"},
       {"id":"N5.2.E","order":14,"type":"MICROTAREA","dependencies":["N5.2.D"],"phaseGate":"GATE-N4"},
@@ -73,6 +73,18 @@
         "fileScopeHint": "backend/src/Application/ReportesInventario/Valorizacion/**;backend/src/Infrastructure/ReportesInventario/Valorizacion/**;backend/src/API/Controllers/ReportesInventarioValorizacionController.cs",
         "prompt": "Read docs/VAEP_AUTHORITY.md, the accepted N5.2.B valuation/kardex contract and N5.2.C valuation persistence decision first. Implement only the valuation inventory-report application/repository/API slice, preserving authoritative cost/history semantics, physical scope and bounded server-side queries. Do not implement kardex, stock-health, reconciliation or common-shell ownership. Minimum coherent code plus applicable tests; two self-reviews; Desarrollo only; no Production, secrets or PR merge.",
         "reason": "CURRENT_PARENT__N5.2.C_LISTO_REAL__ALEX_SOURCE_BACKED_MATERIAL_SCOPE"
+      },
+      {
+        "dispatchId": "N5-2-E-1-VALUATION-UI-J1",
+        "taskId": "N5.2.E.1.VALUATION_FRONTEND_UX",
+        "workerId": "J1",
+        "taskAttempt": 1,
+        "plannedParent": "N5.2.E",
+        "readyForDispatch": true,
+        "dispatchEligible": false,
+        "fileScopeHint": "frontend/src/app/features/reportes-inventario/valorizacion/**;frontend/src/app/core/services/reporte-inventario-valorizacion.service.ts",
+        "prompt": "Read docs/VAEP_AUTHORITY.md, N5.2 report contracts and the completed N5.2.D valuation API before editing. Implement only the inventory valuation report frontend view/client binding, including loading/empty/error states and finance-aware visibility. Do not own Kardex, stock-health, reconciliation, shared filter shell or report-center navigation. Minimum coherent code plus applicable frontend tests; two self-reviews; Desarrollo only; no Production, secrets or PR merge.",
+        "reason": "FUTURE_PARENT_PREARMED__DEPENDENCY_GATE_N5.2.D_LISTO_REAL__NOT_DISPATCH_ELIGIBLE"
       }
     ],
     "J2": [
@@ -87,6 +99,18 @@
         "fileScopeHint": "backend/src/Application/ReportesInventario/Kardex/**;backend/src/Infrastructure/ReportesInventario/Kardex/**;backend/src/API/Controllers/ReportesInventarioKardexController.cs",
         "prompt": "Read docs/VAEP_AUTHORITY.md and accepted N5.2.B/N5.2.C Kardex decisions first. Implement only Kardex/movement-history application/repository/API, including deterministic (Fecha,Id) ordering, bounded server-side pagination and accepted legacy/history semantics. Do not implement valuation, stock-health, reconciliation or common shell. Minimum coherent code plus applicable tests; two self-reviews; Desarrollo only; no Production, secrets or PR merge.",
         "reason": "CURRENT_PARENT__N5.2.C_LISTO_REAL__ALEX_SOURCE_BACKED_MATERIAL_SCOPE"
+      },
+      {
+        "dispatchId": "N5-2-E-2-KARDEX-UI-J2",
+        "taskId": "N5.2.E.2.KARDEX_FRONTEND_UX",
+        "workerId": "J2",
+        "taskAttempt": 1,
+        "plannedParent": "N5.2.E",
+        "readyForDispatch": true,
+        "dispatchEligible": false,
+        "fileScopeHint": "frontend/src/app/features/reportes-inventario/kardex/**;frontend/src/app/core/services/reporte-inventario-kardex.service.ts",
+        "prompt": "Read docs/VAEP_AUTHORITY.md and the completed N5.2.D Kardex API first. Implement only the Kardex report frontend table/filter/pagination experience, consuming server-side pagination and never rebuilding movement semantics in the browser. Do not own other report facets or shared navigation. Minimum coherent code plus applicable frontend tests; two self-reviews; Desarrollo only; no Production, secrets or PR merge.",
+        "reason": "FUTURE_PARENT_PREARMED__DEPENDENCY_GATE_N5.2.D_LISTO_REAL__NOT_DISPATCH_ELIGIBLE"
       }
     ],
     "J3": [
@@ -101,6 +125,18 @@
         "fileScopeHint": "backend/src/Application/ReportesInventario/StockHealth/**;backend/src/Infrastructure/ReportesInventario/StockHealth/**;backend/src/API/Controllers/ReportesInventarioStockHealthController.cs",
         "prompt": "Read docs/VAEP_AUTHORITY.md and accepted N5.2 report contracts/persistence plan first. Implement only the stock-health analytical read-model family: rotation, low/out-of-stock, no-movement and aging queries/API, with bounded filters and no duplicated ledger. Do not implement valuation, kardex, reconciliation or common-shell ownership. Minimum coherent code plus applicable tests; two self-reviews; Desarrollo only; no Production, secrets or PR merge.",
         "reason": "CURRENT_PARENT__N5.2.C_LISTO_REAL__ALEX_SOURCE_BACKED_MATERIAL_SCOPE"
+      },
+      {
+        "dispatchId": "N5-2-E-3-STOCK-HEALTH-UI-J3",
+        "taskId": "N5.2.E.3.STOCK_HEALTH_FRONTEND_UX",
+        "workerId": "J3",
+        "taskAttempt": 1,
+        "plannedParent": "N5.2.E",
+        "readyForDispatch": true,
+        "dispatchEligible": false,
+        "fileScopeHint": "frontend/src/app/features/reportes-inventario/stock-health/**;frontend/src/app/core/services/reporte-inventario-stock-health.service.ts",
+        "prompt": "Read docs/VAEP_AUTHORITY.md and the completed N5.2.D stock-health API first. Implement only the frontend family for rotation, low/out-of-stock, no-movement and aging with bounded filters and server-side results. Do not own other report facets or shared shell/navigation. Minimum coherent code plus applicable frontend tests; two self-reviews; Desarrollo only; no Production, secrets or PR merge.",
+        "reason": "FUTURE_PARENT_PREARMED__DEPENDENCY_GATE_N5.2.D_LISTO_REAL__NOT_DISPATCH_ELIGIBLE"
       }
     ],
     "J4": [
@@ -115,6 +151,18 @@
         "fileScopeHint": "backend/src/Application/ReportesInventario/Reconciliacion/**;backend/src/Infrastructure/ReportesInventario/Reconciliacion/**;backend/src/API/Controllers/ReportesInventarioReconciliacionController.cs",
         "prompt": "Read docs/VAEP_AUTHORITY.md and accepted N5.2.B reconciliation plus N5.2.C persistence decisions first. Implement only the consolidated reconciliation analytical slice using accepted Conteo/Transferencia/Ajuste mappings, traceability and server-side paging without a parallel ledger. Do not implement valuation, kardex, stock-health or common shell. Minimum coherent code plus applicable tests; two self-reviews; Desarrollo only; no Production, secrets or PR merge.",
         "reason": "CURRENT_PARENT__N5.2.C_LISTO_REAL__ALEX_SOURCE_BACKED_MATERIAL_SCOPE"
+      },
+      {
+        "dispatchId": "N5-2-E-4-RECON-UI-J4",
+        "taskId": "N5.2.E.4.RECONCILIATION_FRONTEND_UX",
+        "workerId": "J4",
+        "taskAttempt": 1,
+        "plannedParent": "N5.2.E",
+        "readyForDispatch": true,
+        "dispatchEligible": false,
+        "fileScopeHint": "frontend/src/app/features/reportes-inventario/reconciliacion/**;frontend/src/app/core/services/reporte-inventario-reconciliacion.service.ts",
+        "prompt": "Read docs/VAEP_AUTHORITY.md and the completed N5.2.D reconciliation API first. Implement only the Conteo/Transferencia/Ajuste reconciliation report UI with server paging, traceability fields and finance-field redaction respected. Do not own other report facets or shared navigation. Minimum coherent code plus applicable frontend tests; two self-reviews; Desarrollo only; no Production, secrets or PR merge.",
+        "reason": "FUTURE_PARENT_PREARMED__DEPENDENCY_GATE_N5.2.D_LISTO_REAL__NOT_DISPATCH_ELIGIBLE"
       }
     ],
     "J5": [
@@ -129,9 +177,34 @@
         "fileScopeHint": "backend/src/Application/ReportesInventario/Common/**;backend/src/API/Controllers/ReportesInventarioController.cs",
         "prompt": "Read docs/VAEP_AUTHORITY.md and accepted common N5.2 contracts first. Implement only the common inventory-report API/application shell required by the material facets: request-envelope binding, bounded-query validation, ProblemDetails/error translation and DI/controller wiring. Do not implement valuation, Kardex, stock-health or reconciliation query logic. Minimum coherent code plus applicable tests; two self-reviews; Desarrollo only; no Production, secrets or PR merge.",
         "reason": "CURRENT_PARENT__N5.2.C_LISTO_REAL__ALEX_SOURCE_BACKED_MATERIAL_SCOPE"
+      },
+      {
+        "dispatchId": "N5-2-E-5-COMMON-FILTER-UI-J5",
+        "taskId": "N5.2.E.5.COMMON_FILTER_FRONTEND_UX",
+        "workerId": "J5",
+        "taskAttempt": 1,
+        "plannedParent": "N5.2.E",
+        "readyForDispatch": true,
+        "dispatchEligible": false,
+        "fileScopeHint": "frontend/src/app/features/reportes-inventario/shared/**;frontend/src/app/core/models/reporte-inventario.models.ts",
+        "prompt": "Read docs/VAEP_AUTHORITY.md and the accepted N5.2 common request envelope first. Implement only reusable frontend inventory-report filters/paging/loading/empty/error primitives and common typed models. Do not own facet-specific tables/query semantics or report-center navigation. Minimum coherent code plus applicable frontend tests; two self-reviews; Desarrollo only; no Production, secrets or PR merge.",
+        "reason": "FUTURE_PARENT_PREARMED__DEPENDENCY_GATE_N5.2.D_LISTO_REAL__NOT_DISPATCH_ELIGIBLE"
       }
     ],
-    "J6": []
+    "J6": [
+      {
+        "dispatchId": "N5-2-E-6-REPORT-CENTER-NAV-RBAC-A11Y-J6",
+        "taskId": "N5.2.E.6.REPORT_CENTER_NAV_RBAC_A11Y",
+        "workerId": "J6",
+        "taskAttempt": 1,
+        "plannedParent": "N5.2.E",
+        "readyForDispatch": true,
+        "dispatchEligible": false,
+        "fileScopeHint": "frontend/src/app/features/centro-reportes/centro-reportes.component.ts;frontend/src/app/features/centro-reportes/centro-reportes.component.html;frontend/src/app/features/centro-reportes/centro-reportes.component.scss;frontend/src/app/app.routes.ts",
+        "prompt": "Read docs/VAEP_AUTHORITY.md and N5.2 report UI/RBAC preflight first. Integrate the inventory report entry points into CentroReportes/navigation and runtime permission visibility with keyboard, responsive and accessibility treatment only. Do not implement report query logic, facet tables or shared filter primitives. Minimum coherent code plus applicable frontend tests; two self-reviews; Desarrollo only; no Production, secrets or PR merge.",
+        "reason": "FUTURE_PARENT_PREARMED__DEPENDENCY_GATE_N5.2.D_LISTO_REAL__NOT_DISPATCH_ELIGIBLE"
+      }
+    ]
   },
   "lastClosureFunctionalHead": "1b8291b2527f7a338a6457e90ee69fb5dbf5d1f3"
 }
