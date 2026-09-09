@@ -59,6 +59,41 @@ public sealed class ReportesInventarioAuthorizationContractTests
     }
 
     [Fact]
+    public void QueryRules_SinPeriodo_NormalizaVentanaHistoricaAcotada()
+    {
+        var filtro = new ReporteInventarioKardexFiltroDto
+        {
+            SortBy = "Fecha",
+            SortDirection = "desc"
+        };
+
+        var error = ReporteInventarioQueryRules.Validate(filtro, "Fecha");
+
+        Assert.Null(error);
+        Assert.True(filtro.Desde.HasValue);
+        Assert.True(filtro.Hasta.HasValue);
+        Assert.Equal(
+            TimeSpan.FromDays(ReporteInventarioQueryRules.MaxHistoricalDays),
+            filtro.Hasta.Value - filtro.Desde.Value);
+    }
+
+    [Fact]
+    public void QueryRules_DesdeAbiertoMayorAlLimite_FallaCerrado()
+    {
+        var filtro = new ReporteInventarioKardexFiltroDto
+        {
+            Desde = DateTime.UtcNow.AddDays(-(ReporteInventarioQueryRules.MaxHistoricalDays + 2)),
+            SortBy = "Fecha",
+            SortDirection = "desc"
+        };
+
+        var error = ReporteInventarioQueryRules.Validate(filtro, "Fecha");
+
+        Assert.NotNull(error);
+        Assert.Contains("366", error);
+    }
+
+    [Fact]
     public void QueryRules_RechazaDireccionYSortNoPermitidos()
     {
         var direccion = new ReporteInventarioKardexFiltroDto { SortBy = "Fecha", SortDirection = "sideways" };
@@ -81,6 +116,24 @@ public sealed class ReportesInventarioAuthorizationContractTests
         var error = ReporteInventarioQueryRules.ValidateStockHealth(filtro);
         Assert.NotNull(error);
         Assert.Contains("Dias", error);
+    }
+
+    [Fact]
+    public void QueryRules_StockHealthSinPeriodo_NormalizaConDiasSolicitados()
+    {
+        var filtro = new ReporteInventarioStockHealthFiltroDto
+        {
+            Dias = 30,
+            SortBy = "Fecha",
+            SortDirection = "desc"
+        };
+
+        var error = ReporteInventarioQueryRules.ValidateStockHealth(filtro);
+
+        Assert.Null(error);
+        Assert.True(filtro.Desde.HasValue);
+        Assert.True(filtro.Hasta.HasValue);
+        Assert.Equal(TimeSpan.FromDays(30), filtro.Hasta.Value - filtro.Desde.Value);
     }
 
     [Fact]
