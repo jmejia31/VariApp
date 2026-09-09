@@ -1,6 +1,6 @@
 {
   "newDispatchAdmission": "FROZEN",
-  "allowExistingActiveSessions": true,
-  "reason": "N5.3.B_CURRENT__READY_FOR_VAEP_QA_TAKEOVER_AND_EXACT_HEAD_CI_PENDING__REVIEW_FIRST_BEFORE_REFILL__NO_DUPLICATE_DISPATCH",
-  "updatedAtUtc": "2026-09-09T22:24:00Z"
+  "allowExistingActiveSessions": false,
+  "reason": "N5.3.C_CURRENT__SOURCE_BACKED_MATERIAL_SCOPES_NOT_YET_VERIFIED__NO_BUSYWORK__NO_DUPLICATE_DISPATCH",
+  "updatedAtUtc": "2026-09-09T22:45:43Z"
 }
