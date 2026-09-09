@@ -227,7 +227,10 @@ public sealed class ReporteInventarioService : IReporteInventarioService
         if (!requested.HasValue || requested == OrigenReconciliacionInventario.Ajuste)
         {
             var source = _context.Set<AjusteInventarioDetalle>().AsNoTracking()
-                .Where(d => d.AjusteInventario.Estado == EstadoAjusteInventario.Confirmado && d.TieneSnapshotConfirmacion);
+                .Where(d => d.AjusteInventario.Estado == EstadoAjusteInventario.Confirmado &&
+                            d.CantidadAnteriorSnapshot.HasValue &&
+                            d.CantidadNuevaSnapshot.HasValue &&
+                            d.CostoUnitarioSnapshot.HasValue);
             if (!alcance.EsAdministrador) source = source.Where(d => d.AjusteInventario.CreadoPorUsuarioId == alcance.UsuarioId);
             source = ApplyAjusteFilters(source, filtro);
             total += await source.CountAsync(cancellationToken);
