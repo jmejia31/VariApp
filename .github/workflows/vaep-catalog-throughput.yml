@@ -65,8 +65,11 @@ jobs:
           expected = plan.get('nextParentParallelMaterialScopes')
           if not isinstance(next_parent, str) or not next_parent.strip():
               raise SystemExit('next-parent throughput plan missing')
-          if not isinstance(expected, int) or isinstance(expected, bool) or not 1 <= expected <= 6:
-              raise SystemExit('next-parent material scope count must be an integer from 1 to 6')
+          # Zero is valid when the source-backed roadmap has not yielded safe
+          # successor scopes yet. Forcing 1..6 here would contradict noBusywork
+          # and dependency gating by requiring fabricated NEXT work.
+          if not isinstance(expected, int) or isinstance(expected, bool) or not 0 <= expected <= 6:
+              raise SystemExit('next-parent material scope count must be an integer from 0 to 6')
           if expected < 6 and policy.get('lowParallelismAction') != 'EXPLAIN_OR_SUBDIVIDE_MATERIAL_SCOPE__NO_BUSYWORK':
               raise SystemExit('lower material parallelism requires explicit no-busywork policy')
 
