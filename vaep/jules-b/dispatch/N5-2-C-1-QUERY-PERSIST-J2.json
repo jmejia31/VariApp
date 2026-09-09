@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-2-C-1-QUERY-PERSIST-J2",
+  "taskId": "N5.2.C.1.REPORT_QUERY_PERSISTENCE_PLAN",
+  "workerId": "J2",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/N5.2_REPORTES_INVENTARIO_PERSISTENCE_QUERY_PLAN.md",
+  "prompt": "Only after N5.2.B LISTO_REAL, map persistence/index/query requirements for the accepted common report contracts. No Production execution; migration and rollback evidence required.",
+  "primaryBaseHead": "7ec110e3423cceb26a72cfded0bf446cd38e5fb4"
+}
