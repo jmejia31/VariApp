@@ -96,8 +96,25 @@ public sealed class ReportesInventarioReconciliacionSecurityContractTests
         auditoria.VerifyAll();
     }
 
+    [Fact]
+    public async Task ScopeFisicoExplicitoSinScopeResuelto_FallaCerrado()
+    {
+        var filtro = new ReporteInventarioReconciliacionFiltroDto { AlmacenId = 7 };
+
+        var permitido = await ReporteInventarioScopeGuard.CanUseExplicitPhysicalScopeAsync(
+            filtro,
+            new NullScopeService());
+
+        Assert.False(permitido);
+    }
+
     private static AppDbContext CreateContext() => new(
         new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options);
+
+    private sealed class NullScopeService : IUsuarioScopeService
+    {
+        public Task<UsuarioScopeActual?> ObtenerActualAsync() => Task.FromResult<UsuarioScopeActual?>(null);
+    }
 }
