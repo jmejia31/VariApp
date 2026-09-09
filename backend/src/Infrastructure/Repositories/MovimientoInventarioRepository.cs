@@ -145,7 +145,11 @@ public class MovimientoInventarioRepository : IMovimientoInventarioRepository
         if (filter.Desde.HasValue) query = query.Where(m => m.Fecha >= filter.Desde.Value);
         if (filter.Hasta.HasValue) query = query.Where(m => m.Fecha <= filter.Hasta.Value);
         var totalCount = await query.CountAsync();
-        var items = await query.OrderByDescending(m => m.Fecha).ThenByDescending(m => m.Id).Skip((filter.Page - 1) * filter.PageSize).Take(filter.PageSize).ToListAsync();
+        var ascending = string.Equals(filter.SortDirection, "asc", StringComparison.OrdinalIgnoreCase);
+        var ordered = ascending
+            ? query.OrderBy(m => m.Fecha).ThenBy(m => m.Id)
+            : query.OrderByDescending(m => m.Fecha).ThenByDescending(m => m.Id);
+        var items = await ordered.Skip((filter.Page - 1) * filter.PageSize).Take(filter.PageSize).ToListAsync();
         return (items, totalCount);
     }
 
