@@ -1,15 +1,15 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
-  "currentParent": "N5.2.G",
-  "generatedAt": "2026-09-09T20:13:00Z",
-  "regenerationReason": "AUTOMATIC_PARENT_CLOSE__N5.2.F_LISTO_REAL__N5.2.G_CURRENT",
-  "lastClosedParent": "N5.2.F",
+  "currentParent": "N5.2.H",
+  "generatedAt": "2026-09-09T21:16:30Z",
+  "regenerationReason": "AUTOMATIC_PARENT_CLOSE__N5.2.G_LISTO_REAL__N5.2.H_CURRENT__ZERO_SAFE_JULES_SCOPES",
+  "lastClosedParent": "N5.2.G",
   "closureReceipts": {
     "N4.11.H": "vaep/evidence/fragments/N4.11.H_LISTO_REAL_20260908T204500Z.json",
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
     "N5.1.A": "vaep/evidence/fragments/N5.1.A_LISTO_REAL_20260908T222930Z.json",
     "N5.1.B": "vaep/evidence/fragments/N5.1.B_LISTO_REAL_20260908T231300Z.json",
-    "N5.1.C": "vaep/evidence/fragments/N5.1.C_LISTO_REAL_20260909T003400Z.json",
+    "N5.1.C": "vaep/evidence/fragments/N5.1.C_LISTO_REAL_20260909T1642Z.json",
     "N5.1.D": "vaep/evidence/fragments/N5.1.D_LISTO_REAL_20260909T013600Z.json",
     "N5.1.E": "vaep/evidence/fragments/N5.1.E_LISTO_REAL_20260909T0422Z.json",
     "N5.1.F": "vaep/evidence/fragments/N5.1.F_LISTO_REAL_20260909T0737Z.json",
@@ -20,7 +20,8 @@
     "N5.2.C": "vaep/evidence/fragments/N5.2.C_LISTO_REAL_20260909T1642Z.json",
     "N5.2.D": "vaep/evidence/fragments/N5.2.D_LISTO_REAL_20260909T1841Z.json",
     "N5.2.E": "vaep/evidence/fragments/N5.2.E_LISTO_REAL_20260909T1922Z.json",
-    "N5.2.F": "vaep/evidence/fragments/N5.2.F_LISTO_REAL_20260909T2012Z.json"
+    "N5.2.F": "vaep/evidence/fragments/N5.2.F_LISTO_REAL_20260909T2012Z.json",
+    "N5.2.G": "vaep/evidence/fragments/N5.2.G_LISTO_REAL_20260909T2116Z.json"
   },
   "policy": {
     "branch": "Desarrollo",
@@ -41,10 +42,10 @@
   },
   "throughputPlan": {
     "mode": "MATERIAL_SWARM_FIRST",
-    "currentParent": "N5.2.G",
-    "currentParentMaterialScopeCount": 6,
-    "currentParentReason": "N5.2.F is LISTO_REAL after REVIEW_FIRST, direct QA takeover, causal backend gates and P0/P1=0. Six source-backed non-overlapping N5.2.G TEST_CI scopes are now dependency-valid and dispatch-eligible for J1-J6.",
-    "nextParent": "N5.2.H",
+    "currentParent": "N5.2.H",
+    "currentParentMaterialScopeCount": 0,
+    "currentParentReason": "N5.2.G is LISTO_REAL after REVIEW_FIRST, direct QA takeover, causal functional/control gates and P0/P1=0. Canonical N5.2.H documentation/certification is now dependency-valid but has zero safe source-backed parallel Jules scopes; controller closure work must not be fabricated into per-lane busywork.",
+    "nextParent": "N5.3.A",
     "nextParentParallelMaterialScopes": 0,
     "nextParentScopesNonOverlapping": true,
     "laneRefill": "POST_TERMINAL_AUTOREFILL_PLUS_CANONICAL_CHECKPOINTS"
@@ -53,7 +54,7 @@
     "authority": "docs/VAEP_AUTHORITY.md",
     "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
     "sourceRanges": ["COLA!A400:T408", "PLAN_MAESTRO!A53:L54"],
-    "note": "Dependency order derived from canonical PLAN_MAESTRO/COLA. N5.2.F is LISTO_REAL and N5.2.G is current. Six G TEST_CI facets are source-backed, non-overlapping and eligible now. N5.2.H remains dependency-gated and is not fabricated into per-lane busywork without fresh source-backed material decomposition.",
+    "note": "Dependency order derived from canonical PLAN_MAESTRO/COLA. N5.2.G is LISTO_REAL and N5.2.H is current for documentation/certification closure. H has no safe source-backed Jules decomposition, so no filler is dispatched. N5.3.A remains successor/prearmed only and must not become CURRENT until H is LISTO_REAL.",
     "nodes": [
       {"id":"N5.2.D","order":13,"type":"MICROTAREA","dependencies":["N5.2.C"],"phaseGate":"GATE-N4"},
       {"id":"N5.2.E","order":14,"type":"MICROTAREA","dependencies":["N5.2.D"],"phaseGate":"GATE-N4"},
@@ -66,28 +67,28 @@
   "lanes": {
     "J1": [
       {"dispatchId":"N5-2-F-1-VALUATION-SEC-J1","taskId":"N5.2.F.1.VALUATION_RBAC_AUDIT_SECURITY","workerId":"J1","taskAttempt":1,"plannedParent":"N5.2.F","readyForDispatch":true,"dispatchEligible":false,"fileScopeHint":"backend/src/API/Controllers/ReportesInventarioValorizacionController.cs;backend/tests/InventoryApp.Tests/API/Controllers/ReportesInventarioValorizacionSecurityContractTests.cs","prompt":"Read docs/VAEP_AUTHORITY.md and canonical COLA N5.2.F. Harden only valuation-report RBAC, finance-field censorship, audit/security behavior and directed security contracts. Do not own Kardex, stock-health, reconciliation, common shell or navigation. Desarrollo only; no Production, secrets or PR merge; tests plus two self-reviews.","reason":"CLOSED_BY_N5.2.F_LISTO_REAL_RECEIPT"},
-      {"dispatchId":"N5-2-G-1-VALUATION-TEST-J1","taskId":"N5.2.G.1.VALUATION_TEST_CI","workerId":"J1","taskAttempt":1,"plannedParent":"N5.2.G","readyForDispatch":true,"dispatchEligible":true,"fileScopeHint":"backend/tests/InventoryApp.Tests/API/Controllers/ReportesInventarioValorizacion*Tests.cs","prompt":"Read docs/VAEP_AUTHORITY.md and canonical COLA N5.2.G. Own only valuation report unit/contract/security regression coverage and CI evidence required by canonical N5.2.G. Do not change other report facets or fabricate tests. Desarrollo only; no Production, secrets or PR merge.","reason":"CURRENT_PARENT__DEPENDENCIES_CLOSED__MATERIAL_SCOPE"}
+      {"dispatchId":"N5-2-G-1-VALUATION-TEST-J1","taskId":"N5.2.G.1.VALUATION_TEST_CI","workerId":"J1","taskAttempt":1,"plannedParent":"N5.2.G","readyForDispatch":true,"dispatchEligible":false,"fileScopeHint":"backend/tests/InventoryApp.Tests/API/Controllers/ReportesInventarioValorizacion*Tests.cs","prompt":"Read docs/VAEP_AUTHORITY.md and canonical COLA N5.2.G. Own only valuation report unit/contract/security regression coverage and CI evidence required by canonical N5.2.G. Do not change other report facets or fabricate tests. Desarrollo only; no Production, secrets or PR merge.","reason":"CLOSED_BY_N5.2.G_LISTO_REAL_RECEIPT"}
     ],
     "J2": [
       {"dispatchId":"N5-2-F-2-KARDEX-SEC-J2","taskId":"N5.2.F.2.KARDEX_RBAC_AUDIT_SECURITY","workerId":"J2","taskAttempt":1,"plannedParent":"N5.2.F","readyForDispatch":true,"dispatchEligible":false,"fileScopeHint":"backend/src/API/Controllers/ReportesInventarioKardexController.cs;backend/tests/InventoryApp.Tests/API/Controllers/ReportesInventarioKardexSecurityContractTests.cs","prompt":"Read docs/VAEP_AUTHORITY.md and canonical COLA N5.2.F. Harden only Kardex RBAC, audit/correlation/security behavior and directed security contracts while preserving canonical movement/history semantics. Desarrollo only; no Production, secrets or PR merge; tests plus two self-reviews.","reason":"CLOSED_BY_N5.2.F_LISTO_REAL_RECEIPT"},
-      {"dispatchId":"N5-2-G-2-KARDEX-TEST-J2","taskId":"N5.2.G.2.KARDEX_TEST_CI","workerId":"J2","taskAttempt":1,"plannedParent":"N5.2.G","readyForDispatch":true,"dispatchEligible":true,"fileScopeHint":"backend/tests/InventoryApp.Tests/API/Controllers/ReportesInventarioKardex*Tests.cs","prompt":"Read docs/VAEP_AUTHORITY.md and canonical COLA N5.2.G. Own only Kardex unit/contract/security regression coverage and CI evidence required by canonical N5.2.G. Preserve movement semantics and avoid overlap with other facets. Desarrollo only; no Production, secrets or PR merge.","reason":"CURRENT_PARENT__DEPENDENCIES_CLOSED__MATERIAL_SCOPE"}
+      {"dispatchId":"N5-2-G-2-KARDEX-TEST-J2","taskId":"N5.2.G.2.KARDEX_TEST_CI","workerId":"J2","taskAttempt":1,"plannedParent":"N5.2.G","readyForDispatch":true,"dispatchEligible":false,"fileScopeHint":"backend/tests/InventoryApp.Tests/API/Controllers/ReportesInventarioKardex*Tests.cs","prompt":"Read docs/VAEP_AUTHORITY.md and canonical COLA N5.2.G. Own only Kardex unit/contract/security regression coverage and CI evidence required by canonical N5.2.G. Preserve movement semantics and avoid overlap with other facets. Desarrollo only; no Production, secrets or PR merge.","reason":"CLOSED_BY_N5.2.G_LISTO_REAL_RECEIPT"}
     ],
     "J3": [
       {"dispatchId":"N5-2-F-3-STOCK-HEALTH-SEC-J3","taskId":"N5.2.F.3.STOCK_HEALTH_RBAC_AUDIT_SECURITY","workerId":"J3","taskAttempt":1,"plannedParent":"N5.2.F","readyForDispatch":true,"dispatchEligible":false,"fileScopeHint":"backend/src/API/Controllers/ReportesInventarioStockHealthController.cs;backend/tests/InventoryApp.Tests/API/Controllers/ReportesInventarioStockHealthSecurityContractTests.cs","prompt":"Read docs/VAEP_AUTHORITY.md and canonical COLA N5.2.F. Harden only stock-health report RBAC, bounded-query security, audit/correlation behavior and directed security contracts. Desarrollo only; no Production, secrets or PR merge; tests plus two self-reviews.","reason":"CLOSED_BY_N5.2.F_LISTO_REAL_RECEIPT"},
-      {"dispatchId":"N5-2-G-3-STOCK-HEALTH-TEST-J3","taskId":"N5.2.G.3.STOCK_HEALTH_TEST_CI","workerId":"J3","taskAttempt":1,"plannedParent":"N5.2.G","readyForDispatch":true,"dispatchEligible":true,"fileScopeHint":"backend/tests/InventoryApp.Tests/API/Controllers/ReportesInventarioStockHealth*Tests.cs","prompt":"Read docs/VAEP_AUTHORITY.md and canonical COLA N5.2.G. Own only stock-health bounded-query, regression and performance-oriented test coverage required by canonical N5.2.G. Do not own other facets. Desarrollo only; no Production, secrets or PR merge.","reason":"CURRENT_PARENT__DEPENDENCIES_CLOSED__MATERIAL_SCOPE"}
+      {"dispatchId":"N5-2-G-3-STOCK-HEALTH-TEST-J3","taskId":"N5.2.G.3.STOCK_HEALTH_TEST_CI","workerId":"J3","taskAttempt":1,"plannedParent":"N5.2.G","readyForDispatch":true,"dispatchEligible":false,"fileScopeHint":"backend/tests/InventoryApp.Tests/API/Controllers/ReportesInventarioStockHealth*Tests.cs","prompt":"Read docs/VAEP_AUTHORITY.md and canonical COLA N5.2.G. Own only stock-health bounded-query, regression and performance-oriented test coverage required by canonical N5.2.G. Do not own other facets. Desarrollo only; no Production, secrets or PR merge.","reason":"CLOSED_BY_N5.2.G_LISTO_REAL_RECEIPT"}
     ],
     "J4": [
       {"dispatchId":"N5-2-F-4-RECON-SEC-J4","taskId":"N5.2.F.4.RECONCILIATION_RBAC_AUDIT_SECURITY","workerId":"J4","taskAttempt":1,"plannedParent":"N5.2.F","readyForDispatch":true,"dispatchEligible":false,"fileScopeHint":"backend/src/API/Controllers/ReportesInventarioReconciliacionController.cs;backend/tests/InventoryApp.Tests/API/Controllers/ReportesInventarioReconciliacionSecurityContractTests.cs","prompt":"Read docs/VAEP_AUTHORITY.md and canonical COLA N5.2.F. Harden only reconciliation report RBAC, traceability/audit, bounded-query security and directed contracts. Desarrollo only; no Production, secrets or PR merge; tests plus two self-reviews.","reason":"CLOSED_BY_N5.2.F_LISTO_REAL_RECEIPT"},
-      {"dispatchId":"N5-2-G-4-RECON-TEST-J4","taskId":"N5.2.G.4.RECONCILIATION_TEST_CI","workerId":"J4","taskAttempt":1,"plannedParent":"N5.2.G","readyForDispatch":true,"dispatchEligible":true,"fileScopeHint":"backend/tests/InventoryApp.Tests/API/Controllers/ReportesInventarioReconciliacion*Tests.cs","prompt":"Read docs/VAEP_AUTHORITY.md and canonical COLA N5.2.G. Own only reconciliation traceability/audit/contract regression coverage required by canonical N5.2.G. Do not own other facets. Desarrollo only; no Production, secrets or PR merge.","reason":"CURRENT_PARENT__DEPENDENCIES_CLOSED__MATERIAL_SCOPE"}
+      {"dispatchId":"N5-2-G-4-RECON-TEST-J4","taskId":"N5.2.G.4.RECONCILIATION_TEST_CI","workerId":"J4","taskAttempt":1,"plannedParent":"N5.2.G","readyForDispatch":true,"dispatchEligible":false,"fileScopeHint":"backend/tests/InventoryApp.Tests/API/Controllers/ReportesInventarioReconciliacion*Tests.cs","prompt":"Read docs/VAEP_AUTHORITY.md and canonical COLA N5.2.G. Own only reconciliation traceability/audit/contract regression coverage required by canonical N5.2.G. Do not own other facets. Desarrollo only; no Production, secrets or PR merge.","reason":"CLOSED_BY_N5.2.G_LISTO_REAL_RECEIPT"}
     ],
     "J5": [
       {"dispatchId":"N5-2-F-5-COMMON-SHELL-SEC-J5","taskId":"N5.2.F.5.COMMON_SHELL_SECURITY_OBSERVABILITY","workerId":"J5","taskAttempt":1,"plannedParent":"N5.2.F","readyForDispatch":true,"dispatchEligible":false,"fileScopeHint":"backend/src/API/Controllers/ReportesInventarioController.cs;backend/tests/InventoryApp.Tests/API/Controllers/ReportesInventarioCommonSecurityContractTests.cs","prompt":"Read docs/VAEP_AUTHORITY.md and canonical COLA N5.2.F. Harden only the common inventory-report API shell for fail-closed request security, correlation/observability and directed security contracts. Do not change facet query semantics. Desarrollo only; no Production, secrets or PR merge; tests plus two self-reviews.","reason":"CLOSED_BY_N5.2.F_LISTO_REAL_RECEIPT"},
-      {"dispatchId":"N5-2-G-5-FRONTEND-INTEGRATION-TEST-J5","taskId":"N5.2.G.5.FRONTEND_INTEGRATION_TEST_CI","workerId":"J5","taskAttempt":1,"plannedParent":"N5.2.G","readyForDispatch":true,"dispatchEligible":true,"fileScopeHint":"frontend/src/app/features/reportes-inventario/**/*.spec.ts;frontend/src/app/features/centro-reportes/*.spec.ts","prompt":"Read docs/VAEP_AUTHORITY.md and canonical COLA N5.2.G. Own only inventory-report frontend integration/accessibility regression tests required by canonical N5.2.G, without changing production query semantics. Desarrollo only; no Production, secrets or PR merge.","reason":"CURRENT_PARENT__DEPENDENCIES_CLOSED__MATERIAL_SCOPE"}
+      {"dispatchId":"N5-2-G-5-FRONTEND-INTEGRATION-TEST-J5","taskId":"N5.2.G.5.FRONTEND_INTEGRATION_TEST_CI","workerId":"J5","taskAttempt":1,"plannedParent":"N5.2.G","readyForDispatch":true,"dispatchEligible":false,"fileScopeHint":"frontend/src/app/features/reportes-inventario/**/*.spec.ts;frontend/src/app/features/centro-reportes/*.spec.ts","prompt":"Read docs/VAEP_AUTHORITY.md and canonical COLA N5.2.G. Own only inventory-report frontend integration/accessibility regression tests required by canonical N5.2.G, without changing production query semantics. Desarrollo only; no Production, secrets or PR merge.","reason":"CLOSED_BY_N5.2.G_LISTO_REAL_RECEIPT"}
     ],
     "J6": [
       {"dispatchId":"N5-2-F-6-AUTH-MATRIX-SEC-J6","taskId":"N5.2.F.6.CROSS_REPORT_AUTH_AUDIT_MATRIX","workerId":"J6","taskAttempt":1,"plannedParent":"N5.2.F","readyForDispatch":true,"dispatchEligible":false,"fileScopeHint":"backend/tests/InventoryApp.Tests/API/Controllers/ReportesInventarioAuthorizationContractTests.cs","prompt":"Read docs/VAEP_AUTHORITY.md and canonical COLA N5.2.F. Own only the cross-report authorization/audit negative matrix proving anonymous/unauthorized requests fail closed and finance-sensitive behavior remains protected across N5.2 report families. Do not edit facet controllers owned by J1-J5. Desarrollo only; no Production, secrets or PR merge; tests plus two self-reviews.","reason":"CLOSED_BY_N5.2.F_LISTO_REAL_RECEIPT"},
-      {"dispatchId":"N5-2-G-6-E2E-CI-MATRIX-J6","taskId":"N5.2.G.6.CROSS_REPORT_E2E_CI_MATRIX","workerId":"J6","taskAttempt":1,"plannedParent":"N5.2.G","readyForDispatch":true,"dispatchEligible":true,"fileScopeHint":"frontend/e2e/**/*reporte*;backend/tests/InventoryApp.Tests/API/Controllers/ReportesInventarioAuthorizationContractTests.cs","prompt":"Read docs/VAEP_AUTHORITY.md and canonical COLA N5.2.G. Own only cross-report E2E/security CI matrix coverage required by canonical N5.2.G; do not duplicate facet unit tests. Desarrollo only; no Production, secrets or PR merge.","reason":"CURRENT_PARENT__DEPENDENCIES_CLOSED__MATERIAL_SCOPE"}
+      {"dispatchId":"N5-2-G-6-E2E-CI-MATRIX-J6","taskId":"N5.2.G.6.CROSS_REPORT_E2E_CI_MATRIX","workerId":"J6","taskAttempt":1,"plannedParent":"N5.2.G","readyForDispatch":true,"dispatchEligible":false,"fileScopeHint":"frontend/e2e/**/*reporte*;backend/tests/InventoryApp.Tests/API/Controllers/ReportesInventarioAuthorizationContractTests.cs","prompt":"Read docs/VAEP_AUTHORITY.md and canonical COLA N5.2.G. Own only cross-report E2E/security CI matrix coverage required by canonical N5.2.G; do not duplicate facet unit tests. Desarrollo only; no Production, secrets or PR merge.","reason":"CLOSED_BY_N5.2.G_LISTO_REAL_RECEIPT"}
     ]
   },
-  "lastClosureFunctionalHead": "46805c24adfd3163baa17590bb1bc7ccee148c44"
+  "lastClosureFunctionalHead": "cb7729bb55a52d181293cbf5e7885abff32bd39f"
 }
