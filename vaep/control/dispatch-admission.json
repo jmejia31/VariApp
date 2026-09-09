@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "OPEN",
+  "newDispatchAdmission": "FROZEN",
   "allowExistingActiveSessions": true,
-  "reason": "N5.2.E_LISTO_REAL__N5.2.F_PROMOTED__SIX_MATERIAL_SEC_AUDIT_SCOPES_READY__N5.2.G_PREARMED",
-  "updatedAtUtc": "2026-09-09T19:22:00Z"
+  "reason": "N5.2.F_J6_BOOTSTRAP_STALLED_AFTER_PRE_SESSION_TRANSPORT_RECOVERY__NO_CORRELATED_TRUSTED_WORKER_RUN__NO_DUPLICATE_DISPATCH",
+  "updatedAtUtc": "2026-09-09T19:38:00Z"
 }
