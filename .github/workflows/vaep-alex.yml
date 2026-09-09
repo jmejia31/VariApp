@@ -20,8 +20,6 @@ on:
       - 'VAEP J5 Trusted Worker'
       - 'VAEP J6 Trusted Worker'
     types: [completed]
-  schedule:
-    - cron: '*/5 * * * *'
 
 permissions:
   actions: write
