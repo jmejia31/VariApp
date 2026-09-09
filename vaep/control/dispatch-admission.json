@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "FROZEN",
+  "newDispatchAdmission": "OPEN",
   "allowExistingActiveSessions": true,
-  "reason": "N5.2.E_ALL_SIX_MATERIAL_SCOPES_DISPATCHED__REVIEW_FIRST_REQUIRED_BEFORE_ANY_REFILL__NO_DUPLICATE_DISPATCH",
-  "updatedAtUtc": "2026-09-09T18:49:00Z"
+  "reason": "N5.2.E_J5_ATTEMPT1_MANIFEST_TRANSPORT_NOT_STARTED__ONE_SHOT_TRANSPORT_RECOVERY_ONLY__NO_OTHER_REFILL",
+  "updatedAtUtc": "2026-09-09T18:58:00Z"
 }
