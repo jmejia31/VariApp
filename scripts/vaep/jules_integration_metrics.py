@@ -20,12 +20,13 @@ REQUIRED = {
     "Review", "Review-Evidence", "Scope-Decision", "Reviewed-Files",
     "Tests", "P0", "P1", "Integrated", "Integration-Branch"
 }
-# A REVIEW_FIRST / QA-takeover commit may carry Dispatch/Task/Worker metadata
-# without claiming to be an integration receipt. Treat a commit as receipt
-# intent only when it carries at least one strong integration-only field. Once
-# intent exists, the complete REQUIRED contract is still validated fail-closed.
+# A REVIEW_FIRST / QA-takeover commit may carry Dispatch/Task/Worker/Session
+# metadata to identify the source Jules work without claiming to be an
+# integration receipt. Treat a commit as receipt intent only when it carries
+# at least one explicit integration-only field beyond Session. Once intent
+# exists, the complete REQUIRED contract is still validated fail-closed.
 STRONG_INTEGRATION_INTENT = {
-    "Session", "Dispatch-Manifest", "Patch-SHA256", "Patch-Base",
+    "Dispatch-Manifest", "Patch-SHA256", "Patch-Base",
     "Integrated", "Integration-Branch"
 }
 
@@ -246,15 +247,16 @@ def self_test():
         "Dispatch":"N5-2-B-1-DOMAIN-J2",
         "Task":"N5.2.B.1.INVENTORY_REPORT_DOMAIN_CONTRACTS",
         "Worker":"J2",
+        "Session":"sessions/123456",
         "Review":"PASS",
         "Takeover":"CHATGPT_VAEP",
         "Artifact":"10110597206"
     }
     if has_integration_receipt_intent(review_only):
-        print("SELFTEST_REVIEW_METADATA_MISCLASSIFIED_AS_RECEIPT")
+        print("SELFTEST_REVIEW_SESSION_METADATA_MISCLASSIFIED_AS_RECEIPT")
         return 1
     malformed_intent = dict(review_only)
-    malformed_intent["Session"] = "sessions/123456"
+    malformed_intent["Integrated"] = "TRUE"
     if not has_integration_receipt_intent(malformed_intent):
         print("SELFTEST_MALFORMED_RECEIPT_INTENT_MISSED")
         return 1
