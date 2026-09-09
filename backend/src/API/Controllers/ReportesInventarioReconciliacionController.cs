@@ -18,15 +18,18 @@ public sealed class ReportesInventarioReconciliacionController : ControllerBase
     private readonly ReporteInventarioService _reportes;
     private readonly IUsuarioScopeService _usuarioScope;
     private readonly IPermisoService _permisos;
+    private readonly IAuditoriaService _auditoria;
 
     public ReportesInventarioReconciliacionController(
         AppDbContext context,
         IUsuarioScopeService usuarioScope,
-        IPermisoService permisos)
+        IPermisoService permisos,
+        IAuditoriaService auditoria)
     {
         _reportes = new ReporteInventarioService(context, usuarioScope);
         _usuarioScope = usuarioScope;
         _permisos = permisos;
+        _auditoria = auditoria;
     }
 
     [HttpGet]
@@ -43,7 +46,8 @@ public sealed class ReportesInventarioReconciliacionController : ControllerBase
             return Forbid();
 
         var resultado = await _reportes.ObtenerReporteReconciliacionAsync(filtro, cancellationToken);
-        if (!await _permisos.TienePermisoAsync(ModuloSistema.Finanzas, AccionPermiso.Ver))
+        var puedeVerFinanzas = await _permisos.TienePermisoAsync(ModuloSistema.Finanzas, AccionPermiso.Ver);
+        if (!puedeVerFinanzas)
         {
             foreach (var row in resultado.Items)
             {
@@ -51,6 +55,27 @@ public sealed class ReportesInventarioReconciliacionController : ControllerBase
                 row.ImpactoCosto = null;
             }
         }
+
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Inventario,
+            AccionPermiso.Ver,
+            puedeVerFinanzas
+                ? "Consulta autorizada de reconciliación de inventario."
+                : "Consulta de reconciliación de inventario con campos financieros censurados.",
+            entidad: "ReporteInventarioReconciliacion",
+            valoresNuevos: new
+            {
+                filtro.ProductoId,
+                filtro.ProductoVarianteId,
+                filtro.AlmacenId,
+                filtro.UbicacionAlmacenId,
+                filtro.SucursalId,
+                filtro.Desde,
+                filtro.Hasta,
+                filtro.Page,
+                filtro.PageSize,
+                FinanzasCensuradas = !puedeVerFinanzas
+            });
 
         return Ok(ApiResponse<PagedResult<ReporteInventarioReconciliacionDto>>.Ok(resultado));
     }
