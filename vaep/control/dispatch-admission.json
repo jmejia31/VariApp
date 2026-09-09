@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "FROZEN",
+  "newDispatchAdmission": "OPEN",
   "allowExistingActiveSessions": true,
-  "reason": "N5.2.E_ALL_SIX_MATERIAL_SCOPES_DISPATCHED__J5_ATTEMPT1_TRANSPORT_RECOVERED__REVIEW_FIRST_REQUIRED_BEFORE_REFILL__NO_DUPLICATE_DISPATCH",
-  "updatedAtUtc": "2026-09-09T18:58:30Z"
+  "reason": "N5.2.E_LISTO_REAL__N5.2.F_PROMOTED__SIX_MATERIAL_SEC_AUDIT_SCOPES_READY__N5.2.G_PREARMED",
+  "updatedAtUtc": "2026-09-09T19:22:00Z"
 }

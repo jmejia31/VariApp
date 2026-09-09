@@ -3,71 +3,23 @@
   "engine": "ALEX",
   "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
   "sourceSheet": "COLA",
-  "sourceRowKey": "N5.2.E",
-  "generatedFromHead": "9df32f97c811bda3e444b0e991839c186efb70a7",
-  "currentParent": "N5.2.D",
-  "targetParent": "N5.2.E",
-  "targetDependency": "N5.2.D",
+  "sourceRowKey": "N5.2.G",
+  "generatedFromHead": "52f9aae3de4a9cd057f07add8d362c6511b091cb",
+  "currentParent": "N5.2.F",
+  "targetParent": "N5.2.G",
+  "targetDependency": "N5.2.F",
   "dependencyState": "GATED",
   "dispatchEligible": false,
   "policy": "ROADMAP_DERIVED__DEPENDENCY_SAFE__SEMANTIC_DEDUPE_ONLY",
   "busyworkAllowed": false,
-  "note": "N5.2.E is canonical FRONTEND_UX work from COLA. Six material, non-overlapping frontend facets are prearmed from the accepted N5.2 report topology and the five N5.2.D APIs; none is dispatch-eligible until N5.2.D is genuinely LISTO_REAL. No work is fabricated to reach the numeric backlog target.",
+  "note": "N5.2.G is canonical TEST_CI work from COLA. Six non-overlapping test/CI facets are prearmed from the real N5.2 report topology because programmed backlog is below floor. They remain ineligible until N5.2.F is genuinely LISTO_REAL; no work is fabricated to reach 12 per lane.",
   "candidates": [
-    {
-      "candidateId": "N5.2.E.CAND.VALUATION_FRONTEND_UX",
-      "suggestedLane": "J1",
-      "dispatchEligible": false,
-      "dependencyGate": "N5.2.D_LISTO_REAL",
-      "materialScope": "Implement only the inventory valuation report frontend view and API client binding, including loading/empty/error states and cost visibility consistent with the accepted RBAC contract.",
-      "scopeExcludes": ["kardex-ui", "stock-health-ui", "reconciliation-ui", "common-filter-shell", "navigation-rbac"],
-      "semanticDedupeKey": "N5.2.E|VALUATION|FRONTEND_UX"
-    },
-    {
-      "candidateId": "N5.2.E.CAND.KARDEX_FRONTEND_UX",
-      "suggestedLane": "J2",
-      "dispatchEligible": false,
-      "dependencyGate": "N5.2.D_LISTO_REAL",
-      "materialScope": "Implement only the Kardex report frontend table/filter/pagination experience consuming the bounded server-side API; do not reimplement movement semantics in the browser.",
-      "scopeExcludes": ["valuation-ui", "stock-health-ui", "reconciliation-ui", "common-filter-shell", "navigation-rbac"],
-      "semanticDedupeKey": "N5.2.E|KARDEX|FRONTEND_UX"
-    },
-    {
-      "candidateId": "N5.2.E.CAND.STOCK_HEALTH_FRONTEND_UX",
-      "suggestedLane": "J3",
-      "dispatchEligible": false,
-      "dependencyGate": "N5.2.D_LISTO_REAL",
-      "materialScope": "Implement only the stock-health report family UI for rotation, low/out-of-stock, no-movement and aging, consuming server-side results and preserving bounded filters.",
-      "scopeExcludes": ["valuation-ui", "kardex-ui", "reconciliation-ui", "common-filter-shell", "navigation-rbac"],
-      "semanticDedupeKey": "N5.2.E|STOCK_HEALTH|FRONTEND_UX"
-    },
-    {
-      "candidateId": "N5.2.E.CAND.RECONCILIATION_FRONTEND_UX",
-      "suggestedLane": "J4",
-      "dispatchEligible": false,
-      "dependencyGate": "N5.2.D_LISTO_REAL",
-      "materialScope": "Implement only the reconciliation report UI for Conteo/Transferencia/Ajuste projections with paging, traceability fields and finance-field redaction respected.",
-      "scopeExcludes": ["valuation-ui", "kardex-ui", "stock-health-ui", "common-filter-shell", "navigation-rbac"],
-      "semanticDedupeKey": "N5.2.E|RECONCILIATION|FRONTEND_UX"
-    },
-    {
-      "candidateId": "N5.2.E.CAND.COMMON_FILTER_UX",
-      "suggestedLane": "J5",
-      "dispatchEligible": false,
-      "dependencyGate": "N5.2.D_LISTO_REAL",
-      "materialScope": "Implement only reusable inventory-report filter/paging/loading/empty/error UI primitives shared by the report facets, without owning facet-specific tables or calculations.",
-      "scopeExcludes": ["valuation-table", "kardex-table", "stock-health-table", "reconciliation-table", "navigation-rbac"],
-      "semanticDedupeKey": "N5.2.E|COMMON_FILTER_SHELL|FRONTEND_UX"
-    },
-    {
-      "candidateId": "N5.2.E.CAND.REPORT_CENTER_NAV_RBAC_A11Y",
-      "suggestedLane": "J6",
-      "dispatchEligible": false,
-      "dependencyGate": "N5.2.D_LISTO_REAL",
-      "materialScope": "Integrate inventory reports into CentroReportes navigation and runtime permission visibility, with keyboard/responsive/accessibility treatment only; do not own report query logic or facet tables.",
-      "scopeExcludes": ["valuation-query", "kardex-query", "stock-health-query", "reconciliation-query", "common-filter-implementation"],
-      "semanticDedupeKey": "N5.2.E|REPORT_CENTER_NAV_RBAC_A11Y|FRONTEND_UX"
-    }
+    {"candidateId":"N5.2.G.CAND.VALUATION_TEST_CI","suggestedLane":"J1","dispatchEligible":false,"dependencyGate":"N5.2.F_LISTO_REAL","materialScope":"Valuation unit/contract/security regression and CI evidence only.","semanticDedupeKey":"N5.2.G|VALUATION|TEST_CI"},
+    {"candidateId":"N5.2.G.CAND.KARDEX_TEST_CI","suggestedLane":"J2","dispatchEligible":false,"dependencyGate":"N5.2.F_LISTO_REAL","materialScope":"Kardex unit/contract/security regression and CI evidence only.","semanticDedupeKey":"N5.2.G|KARDEX|TEST_CI"},
+    {"candidateId":"N5.2.G.CAND.STOCK_HEALTH_TEST_CI","suggestedLane":"J3","dispatchEligible":false,"dependencyGate":"N5.2.F_LISTO_REAL","materialScope":"Stock-health boundary/regression/performance-oriented test coverage only.","semanticDedupeKey":"N5.2.G|STOCK_HEALTH|TEST_CI"},
+    {"candidateId":"N5.2.G.CAND.RECONCILIATION_TEST_CI","suggestedLane":"J4","dispatchEligible":false,"dependencyGate":"N5.2.F_LISTO_REAL","materialScope":"Reconciliation traceability/audit/contract regression coverage only.","semanticDedupeKey":"N5.2.G|RECONCILIATION|TEST_CI"},
+    {"candidateId":"N5.2.G.CAND.FRONTEND_INTEGRATION_TEST_CI","suggestedLane":"J5","dispatchEligible":false,"dependencyGate":"N5.2.F_LISTO_REAL","materialScope":"Inventory-report frontend integration/accessibility regression coverage only.","semanticDedupeKey":"N5.2.G|FRONTEND_INTEGRATION|TEST_CI"},
+    {"candidateId":"N5.2.G.CAND.CROSS_REPORT_E2E_CI","suggestedLane":"J6","dispatchEligible":false,"dependencyGate":"N5.2.F_LISTO_REAL","materialScope":"Cross-report E2E/security CI matrix only.","semanticDedupeKey":"N5.2.G|CROSS_REPORT_E2E|TEST_CI"}
   ],
   "unassignedLanes": []
 }
