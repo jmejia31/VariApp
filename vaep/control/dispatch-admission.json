@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "OPEN",
-  "allowExistingActiveSessions": true,
-  "reason": "N5.1.G_LISTO_REAL__N5.1.H_DEPENDENCY_VALID__TWO_MATERIAL_SCOPES_ADMITTED",
-  "updatedAtUtc": "2026-09-09T10:31:37Z"
+  "newDispatchAdmission": "FROZEN",
+  "allowExistingActiveSessions": false,
+  "reason": "N5.1.H_REVIEW_COMPLETE__QA_TAKEOVER_MATERIALIZED__LISTO_REAL_CERTIFICATION_AND_PARENT_PROMOTION_IN_PROGRESS__NO_NEW_DISPATCH",
+  "updatedAtUtc": "2026-09-09T11:45:00Z"
 }
