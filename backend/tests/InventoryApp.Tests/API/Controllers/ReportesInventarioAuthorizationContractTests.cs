@@ -4,10 +4,17 @@ using InventoryApp.API.Controllers;
 using InventoryApp.API.Filters;
 using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs;
+using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Abstractions;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.DependencyInjection;
+using Moq;
 using Xunit;
 
 namespace InventoryApp.Tests.API.Controllers;
@@ -42,6 +49,57 @@ public sealed class ReportesInventarioAuthorizationContractTests
     [Fact]
     public void Reconciliacion_RequiereInventarioVer()
         => AssertPermission(typeof(ReportesInventarioReconciliacionController), nameof(ReportesInventarioReconciliacionController.Get), ModuloSistema.Inventario, AccionPermiso.Ver);
+
+    [Fact]
+    public async Task Reportes_SinPermiso_FallanCerradoAntesDeEjecutarAccion()
+    {
+        var matrix = new (Type Controller, string Method, ModuloSistema Module, AccionPermiso Action)[]
+        {
+            (typeof(ReportesInventarioValorizacionController), nameof(ReportesInventarioValorizacionController.GetResumen), ModuloSistema.Inventario, AccionPermiso.Ver),
+            (typeof(ReportesInventarioKardexController), nameof(ReportesInventarioKardexController.Get), ModuloSistema.MovimientosInventario, AccionPermiso.ConsultarHistorial),
+            (typeof(ReportesInventarioStockHealthController), nameof(ReportesInventarioStockHealthController.Get), ModuloSistema.Inventario, AccionPermiso.Ver),
+            (typeof(ReportesInventarioReconciliacionController), nameof(ReportesInventarioReconciliacionController.Get), ModuloSistema.Inventario, AccionPermiso.Ver)
+        };
+
+        foreach (var entry in matrix)
+        {
+            var method = entry.Controller.GetMethod(entry.Method);
+            Assert.NotNull(method);
+            var filter = method.GetCustomAttribute<RequierePermisoAttribute>();
+            Assert.NotNull(filter);
+
+            var permisos = new Mock<IPermisoService>(MockBehavior.Strict);
+            permisos
+                .Setup(service => service.VerificarPermisoAsync(entry.Module, entry.Action))
+                .ThrowsAsync(new ForbiddenAccessException("denegado"));
+
+            using var services = new ServiceCollection()
+                .AddSingleton(permisos.Object)
+                .BuildServiceProvider();
+            var httpContext = new DefaultHttpContext { RequestServices = services };
+            var actionContext = new ActionContext(httpContext, new RouteData(), new ActionDescriptor());
+            var executingContext = new ActionExecutingContext(
+                actionContext,
+                new List<IFilterMetadata>(),
+                new Dictionary<string, object?>(),
+                new object());
+
+            var nextCalled = false;
+            ActionExecutionDelegate next = () =>
+            {
+                nextCalled = true;
+                return Task.FromResult(new ActionExecutedContext(
+                    actionContext,
+                    new List<IFilterMetadata>(),
+                    new object()));
+            };
+
+            await Assert.ThrowsAsync<ForbiddenAccessException>(
+                () => filter.OnActionExecutionAsync(executingContext, next));
+            Assert.False(nextCalled);
+            permisos.VerifyAll();
+        }
+    }
 
     [Fact]
     public void QueryRules_RechazaVentanaMayorA366Dias()
