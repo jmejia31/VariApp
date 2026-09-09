@@ -6,5 +6,5 @@
   "taskAttempt": 1,
   "fileScopeHint": "backend/src/Application/DTOs/ReporteVentasFiltroDto.ClienteSucursal.cs",
   "prompt": "Use docs/VAEP_AUTHORITY.md, original COLA N5.3.B and accepted N5.3.A preflight. Implement only client/branch filter contracts in backend/src/Application/DTOs/ReporteVentasFiltroDto.ClienteSucursal.cs as a partial sales-report filter facet. Represent ClienteId/SucursalId without inventing a Venta.SucursalId ownership model; branch attribution is later resolved from sale detail/warehouse evidence. Do not touch query implementation or other facet files. Run proportional backend compile/tests and two self-reviews. Desarrollo only; no main/Production/secrets/PR merge.",
-  "primaryBaseHead": "2adf393814f724282a607ef1687ca1b5c25243fe"
+  "primaryBaseHead": "16b98b20c27204cd301d609bdd00d44c3a4d33fc"
 }
