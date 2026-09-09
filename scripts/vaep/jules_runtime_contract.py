@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import fnmatch
 import json
 import re
 from pathlib import Path
@@ -91,6 +92,23 @@ def patch_files(unidiff):
                 out.append(p)
     return out
 
+def scope_entries(value):
+    return [entry.strip().replace("\\", "/")
+            for entry in re.split(r"[;,]", str(value or "")) if entry.strip()]
+
+def path_matches_scope(path, scope):
+    path=path.replace("\\", "/")
+    scope=scope.strip().replace("\\", "/")
+    if not scope:
+        return False
+    if scope.endswith("/**"):
+        prefix=scope[:-3].rstrip("/")
+        return path==prefix or path.startswith(prefix+"/")
+    if any(token in scope for token in ("*", "?", "[")):
+        return fnmatch.fnmatchcase(path, scope)
+    scope=scope.rstrip("/")
+    return path==scope or path.startswith(scope+"/")
+
 def classify_errors(errors):
     evidence_errors=[error for error in errors if error in EVIDENCE_ONLY_ERRORS]
     material_errors=[error for error in errors if error not in EVIDENCE_ONLY_ERRORS]
@@ -123,8 +141,8 @@ def validate_terminal(manifest, patch, activities_text, base_equivalence=None):
     changed=patch_files(unidiff)
     if not changed:
         errors.append("patch has no changed files")
-    hint=str(manifest.get("fileScopeHint","")).rstrip("/")
-    if hint and not any(p==hint or p.startswith(hint+"/") for p in changed):
+    scopes=scope_entries(manifest.get("fileScopeHint",""))
+    if scopes and not any(path_matches_scope(path, scope) for path in changed for scope in scopes):
         errors.append("patch does not touch fileScopeHint")
     prohibited=[p for p in changed if p in CONTROL_PLANE_EXACT or p.startswith(CONTROL_PLANE_PREFIXES)]
     if prohibited:
@@ -170,7 +188,10 @@ def run_self_test():
     equivalent_patch={"baseCommitId":"a"*40,"unidiffPatch":"+++ b/x.cs\n@@\n+ok\n"}
     equivalent_evidence={"ok":True,"requested":"b"*40,"actual":"a"*40,"controlPlaneOnly":True}
     case("control_plane_base_equivalence",validate_terminal(current,equivalent_patch,"SELF_REVIEW_PASS_1 SELF_REVIEW_PASS_2 TESTS_EXECUTED: ok",equivalent_evidence)["ok"])
-    ok=all(x["pass"] for x in results) and len(results)==13
+    multi_scope=dict(current, fileScopeHint="backend/App/**;backend/API/Controller.cs")
+    multi_patch={"baseCommitId":"b"*40,"unidiffPatch":"+++ b/backend/API/Controller.cs\n@@\n+ok\n"}
+    case("multi_scope_hint",validate_terminal(multi_scope,multi_patch,"SELF_REVIEW_PASS_1 SELF_REVIEW_PASS_2 TESTS_EXECUTED: ok")["ok"])
+    ok=all(x["pass"] for x in results) and len(results)==14
     print(json.dumps({"status":"PASS" if ok else "FAIL","cases":results},indent=2))
     return 0 if ok else 1
 
