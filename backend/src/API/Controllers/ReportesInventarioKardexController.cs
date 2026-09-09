@@ -16,15 +16,18 @@ public sealed class ReportesInventarioKardexController : ControllerBase
     private readonly IMovimientoInventarioService _movimientos;
     private readonly IAlmacenRepository _almacenes;
     private readonly IUsuarioScopeService _usuarioScope;
+    private readonly IAuditoriaService _auditoria;
 
     public ReportesInventarioKardexController(
         IMovimientoInventarioService movimientos,
         IAlmacenRepository almacenes,
-        IUsuarioScopeService usuarioScope)
+        IUsuarioScopeService usuarioScope,
+        IAuditoriaService auditoria)
     {
         _movimientos = movimientos;
         _almacenes = almacenes;
         _usuarioScope = usuarioScope;
+        _auditoria = auditoria;
     }
 
     [HttpGet]
@@ -70,6 +73,30 @@ public sealed class ReportesInventarioKardexController : ControllerBase
         };
 
         var resultado = await _movimientos.GetPagedAsync(query);
+
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.MovimientosInventario,
+            AccionPermiso.ConsultarHistorial,
+            "Consulta de Kardex de inventario.",
+            entidad: "KardexInventario",
+            valoresNuevos: new
+            {
+                filtro.ProductoId,
+                filtro.ProductoVarianteId,
+                filtro.AlmacenId,
+                filtro.UbicacionAlmacenId,
+                filtro.SucursalId,
+                filtro.Tipo,
+                filtro.Causa,
+                filtro.CorrelationId,
+                filtro.OrigenTipo,
+                filtro.OrigenId,
+                filtro.Desde,
+                filtro.Hasta,
+                filtro.Page,
+                filtro.PageSize
+            });
+
         return Ok(ApiResponse<PagedResult<MovimientoInventarioDto>>.Ok(resultado));
     }
 }
