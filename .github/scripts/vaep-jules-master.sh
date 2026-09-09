@@ -56,7 +56,7 @@ validate_dispatch_transport() {
     return 22
   fi
   for changed in "${changed_files[@]}"; do
-    if [[ ! "$changed" =~ ^vaep/jules(-b|-c|-d)?/dispatch/[^/]+\.json$ ]]; then
+    if [[ ! "$changed" =~ ^vaep/(jules(-b|-c|-d)?|j5|j6)/dispatch/[^/]+\.json$ ]]; then
       printf 'VAEP MASTER transport invariant failed: non-dispatch file in atomic batch: %s.\n' "$changed" >&2
       return 22
     fi
@@ -131,7 +131,7 @@ write_timeout_result() {
     --argjson laneBudgetSeconds "$JULES_LANE_BUDGET_SECONDS" \
     --argjson parentListoTargetRolling60 "$PARENT_LISTO_TARGET_ROLLING_60" \
     --argjson parentMaxDwellMinutes "$PARENT_MAX_DWELL_MINUTES" \
-    '{authority:$authority,masterFile:$masterFile,masterCommitSha:$masterCommitSha,policyHash:$policyHash,workerId:$workerId,dispatchId:$dispatchId,taskId:$taskId,taskAttempt:$taskAttempt,session:$session,state:$resultState,attemptConsumed:$attemptConsumed,laneBudgetSeconds:$laneBudgetSeconds,parentListoTargetRolling60:$parentListoTargetRolling60,parentMaxDwellMinutes:$parentMaxDwellMinutes,safeRemoteStopAttempted:($session!=""),safeRemoteStopAction:$safeRemoteStopAction,remoteStateBefore:$beforeState,remoteStateAfter:$afterState,ownershipRevoked:true,superseded:true,lateResultAutoIntegrationDenied:true,laneReleased:true,startedAt:$startedAt,timedOutAt:$timedOutAt,patchPresent:false,controllerHandoff:"QA_TAKEOVER_AND_ASSIGN_NEXT_SAFE_IMMEDIATELY",falseListoProhibited:true,numericProtocolLabelsProhibited:true}' > "$output"
+    '{authority:$authority,masterFile:$masterFile,masterCommitSha:$masterCommitSha,policyHash:$policyHash,workerId:$workerId,dispatchId:$dispatchId,taskId:$taskId,taskAttempt:$taskAttempt,session:$session,state:$resultState,attemptConsumed:$attemptConsumed,laneBudgetSeconds:$laneBudgetSeconds,parentListoTargetRolling60:$parentListoTargetRolling60,parentMaxDwellMinutes:$parentMaxDwellMinutes,safeRemoteStopAttempted:($session!=""),safeRemoteStopAction:$safeRemoteStopAction,remoteStateBefore:$beforeState,remoteStateAfter:$afterState,ownershipRevoked:true,superseded:true,lateResultAutoIntegrationDenied:true,laneReleased:true,startedAt:$startedAt,timedOutAt:$timedOut_at,patchPresent:false,controllerHandoff:"QA_TAKEOVER_AND_ASSIGN_NEXT_SAFE_IMMEDIATELY",falseListoProhibited:true,numericProtocolLabelsProhibited:true}' > "$output"
 }
 
 # Safe parsing without source or eval. Capture parser status explicitly so
@@ -357,7 +357,6 @@ set +e
 timeout --foreground --signal=TERM --kill-after=30s "${JULES_LANE_BUDGET_SECONDS}s" bash "$WORKER"
 rc=$?
 set -e
-
 if [[ "$rc" -ne 124 && "$rc" -ne 125 && "$rc" -ne 137 && "$rc" -ne 143 ]]; then
   exit "$rc"
 fi
