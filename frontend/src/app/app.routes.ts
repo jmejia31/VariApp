@@ -70,12 +70,15 @@ export const routes: Routes = [
   { path: 'finanzas', canActivate: [authGuard, permisoGuard], data: { modulo: 'Finanzas', accion: 'Ver' }, loadComponent: () => import('./features/finanzas/finanzas.component').then(m => m.FinanzasComponent) },
   { path: 'estados-financieros', canActivate: [authGuard, permisoGuard], data: { modulo: 'Finanzas', accion: 'Ver' }, loadComponent: () => import('./features/estados-financieros/estados-financieros.component').then(m => m.EstadosFinancierosComponent) },
   {
-    path: 'centro-reportes',
-    canActivate: [authGuard],
+    path: 'centro-reportes', canActivate: [authGuard],
     loadComponent: () => import('./features/centro-reportes/centro-reportes.component').then(m => m.CentroReportesComponent),
     children: [
       { path: 'financieros', canActivate: [permisoGuard], data: { modulo: 'Finanzas', accion: 'Ver' }, loadComponent: () => import('./features/estados-financieros/estados-financieros.component').then(m => m.EstadosFinancierosComponent) },
-      { path: 'administrativos', canActivate: [permisoGuard], data: { modulo: 'ReportesAdministrativos', accion: 'Ver' }, loadComponent: () => import('./features/reportes-administrativos/reportes-administrativos.component').then(m => m.ReportesAdministrativosComponent) }
+      { path: 'administrativos', canActivate: [permisoGuard], data: { modulo: 'ReportesAdministrativos', accion: 'Ver' }, loadComponent: () => import('./features/reportes-administrativos/reportes-administrativos.component').then(m => m.ReportesAdministrativosComponent) },
+      { path: 'inventario/valorizacion', canActivate: [permisoGuard], data: { modulo: 'Inventario', accion: 'Ver' }, loadComponent: () => import('./features/reportes-inventario/valorizacion/valorizacion.component').then(m => m.ValorizacionComponent) },
+      { path: 'inventario/kardex', canActivate: [permisoGuard], data: { modulo: 'MovimientosInventario', accion: 'ConsultarHistorial' }, loadComponent: () => import('./features/reportes-inventario/kardex/kardex.component').then(m => m.KardexComponent) },
+      { path: 'inventario/stock-health', canActivate: [permisoGuard], data: { modulo: 'Inventario', accion: 'Ver' }, loadComponent: () => import('./features/reportes-inventario/stock-health/stock-health.component').then(m => m.StockHealthComponent) },
+      { path: 'inventario/reconciliacion', canActivate: [permisoGuard], data: { modulo: 'Inventario', accion: 'Ver' }, loadComponent: () => import('./features/reportes-inventario/reconciliacion/reconciliacion.component').then(m => m.ReconciliacionComponent) }
     ]
   },
   { path: 'plan-cuentas', canActivate: [authGuard, permisoGuard], data: { modulo: 'Finanzas', accion: 'Ver' }, loadComponent: () => import('./features/plan-cuentas/plan-cuentas.component').then(m => m.PlanCuentasComponent) },
