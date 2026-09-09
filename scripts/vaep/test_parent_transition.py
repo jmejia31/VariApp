@@ -127,12 +127,18 @@ class ParentTransitionTests(unittest.TestCase):
         self.assertEqual(c["currentParent"], "GATE-N4")
         self.assertEqual(a["newDispatchAdmission"], "FROZEN")
         self.assertFalse(c["lanes"]["JULES_A"][0]["dispatchEligible"])
+        self.assertEqual(c["throughputPlan"]["currentParent"], "GATE-N4")
 
     def test_reopen_only_after_hardening_and_material_work(self):
         c, a = transition(catalog("GATE-N4"), access(), {"GATE-N4"}, "r.json", "a"*40, "now", True)
         self.assertEqual(c["currentParent"], "N5.1.A")
         self.assertEqual(a["newDispatchAdmission"], "OPEN")
         self.assertTrue(c["lanes"]["JULES_A"][0]["dispatchEligible"])
+        self.assertEqual(c["lanes"]["JULES_A"][0]["reason"], "CURRENT_PARENT__DEPENDENCIES_CLOSED__MATERIAL_SCOPE")
+        self.assertEqual(c["throughputPlan"]["currentParent"], "N5.1.A")
+        self.assertEqual(c["throughputPlan"]["currentParentMaterialScopeCount"], 1)
+        self.assertEqual(c["throughputPlan"]["nextParent"], "N5.1.B")
+        self.assertIn("N5.1.A is current", c["roadmap"]["note"])
 
     def test_hardening_not_passed_keeps_frozen(self):
         _, a = transition(catalog("GATE-N4"), access(), {"GATE-N4"}, "r.json", "a"*40, "now")
@@ -161,6 +167,9 @@ class ParentTransitionTests(unittest.TestCase):
         self.assertEqual(c2["lastClosedParent"], "N5.1.B")
         self.assertEqual(c2["closureReceipts"]["N5.1.B"], "real-receipt.json")
         self.assertEqual(a["newDispatchAdmission"], "FROZEN")
+        self.assertEqual(c2["throughputPlan"]["currentParent"], "N5.1.B")
+        self.assertEqual(c2["throughputPlan"]["currentParentMaterialScopeCount"], 0)
+        self.assertIsNone(c2["throughputPlan"]["nextParent"])
 
     def test_inputs_are_not_mutated(self):
         c, a = catalog(), access()
