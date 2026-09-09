@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-2-C-6-SEC-PERSIST-J6",
+  "taskId": "N5.2.C.6.SECURITY_PERSISTENCE_REQUIREMENTS",
+  "workerId": "J6",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/N5.2_REPORTES_INVENTARIO_PERSISTENCE_SECURITY.md",
+  "prompt": "Only after N5.2.B LISTO_REAL, map audit/security persistence requirements, retention and isolation tests. No Production execution; no privilege expansion.",
+  "primaryBaseHead": "be8bcd6c8369c03aaadb3820cf2a5832af915ff5"
+}
