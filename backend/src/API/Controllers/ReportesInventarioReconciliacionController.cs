@@ -16,6 +16,7 @@ namespace InventoryApp.API.Controllers;
 public sealed class ReportesInventarioReconciliacionController : ControllerBase
 {
     private readonly ReporteInventarioService _reportes;
+    private readonly IUsuarioScopeService _usuarioScope;
     private readonly IPermisoService _permisos;
 
     public ReportesInventarioReconciliacionController(
@@ -24,6 +25,7 @@ public sealed class ReportesInventarioReconciliacionController : ControllerBase
         IPermisoService permisos)
     {
         _reportes = new ReporteInventarioService(context, usuarioScope);
+        _usuarioScope = usuarioScope;
         _permisos = permisos;
     }
 
@@ -36,6 +38,9 @@ public sealed class ReportesInventarioReconciliacionController : ControllerBase
         var error = ReporteInventarioQueryRules.Validate(filtro, "Fecha");
         if (error is not null)
             return BadRequest(ApiResponse<object>.Fail("Consulta de reconciliación inválida.", new() { error }));
+
+        if (!await ReporteInventarioScopeGuard.CanUseExplicitPhysicalScopeAsync(filtro, _usuarioScope))
+            return Forbid();
 
         var resultado = await _reportes.ObtenerReporteReconciliacionAsync(filtro, cancellationToken);
         if (!await _permisos.TienePermisoAsync(ModuloSistema.Finanzas, AccionPermiso.Ver))
