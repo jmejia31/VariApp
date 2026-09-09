@@ -22,7 +22,7 @@ def transport_action(statuses):
         return "INVALID_TRIGGER"
     if any(s!="A" for s in statuses):
         return "INVALID_REDISPATCH"
-    if not 1 <= len(statuses) <= 4:
+    if not 1 <= len(statuses) <= 6:
         return "FAIL_CLOSED"
     return "ADMIT"
 
@@ -147,17 +147,18 @@ def run_self_test():
     def case(name,cond):
         results.append({"name":name,"pass":bool(cond)})
     case("manifest_added",transport_action(["A"])=="ADMIT")
+    case("six_manifest_batch",transport_action(["A"]*6)=="ADMIT")
     case("manifest_modified",transport_action(["M"])=="INVALID_REDISPATCH")
-    current={"dispatchId":"TASK-R2","taskId":"N1.X","workerId":"JULES_A","taskAttempt":2,"primaryBaseHead":"b"*40,"fileScopeHint":"x.cs"}
-    case("manifest_duplicate",not check_active_duplicate(current,"/nonexistent",{"sessions":[{"title":"VAEP TASK-R2","name":"sessions/1","state":"IN_PROGRESS"}]},"VAEP ")["ok"])
-    case("r2_valid",check_active_duplicate(current,"/nonexistent",{"sessions":[{"title":"VAEP TASK-R1","name":"sessions/2","state":"COMPLETED"}]},"VAEP ")["ok"])
-    case("r2_duplicate",not check_active_duplicate(current,"/nonexistent",{"sessions":[{"title":"VAEP TASK-R2","name":"sessions/3","state":"IN_PROGRESS"}]},"VAEP ")["ok"])
+    current={"dispatchId":"TASK-R2","taskId":"N1.X","workerId":"J1","taskAttempt":2,"primaryBaseHead":"b"*40,"fileScopeHint":"x.cs"}
+    case("manifest_duplicate",not check_active_duplicate(current,"/nonexistent",{"sessions":[{"title":"VAEP-J1 TASK-R2","name":"sessions/1","state":"IN_PROGRESS"}]},"VAEP-J1 ")["ok"])
+    case("r2_valid",check_active_duplicate(current,"/nonexistent",{"sessions":[{"title":"VAEP-J1 TASK-R1","name":"sessions/2","state":"COMPLETED"}]},"VAEP-J1 ")["ok"])
+    case("r2_duplicate",not check_active_duplicate(current,"/nonexistent",{"sessions":[{"title":"VAEP-J1 TASK-R2","name":"sessions/3","state":"IN_PROGRESS"}]},"VAEP-J1 ")["ok"])
     case("admission_closed",admission_action({"newDispatchAdmission":"FROZEN","allowExistingActiveSessions":True,"reason":"x","updatedAtUtc":"x"})=="FROZEN")
-    prior={"dispatchId":"TASK-R1","taskId":"N1.X","workerId":"JULES_A","taskAttempt":1,"primaryBaseHead":"a"*40}
+    prior={"dispatchId":"TASK-R1","taskId":"N1.X","workerId":"J1","taskAttempt":1,"primaryBaseHead":"a"*40}
     tmp=Path(".vaep-runtime-selftest-manifests"); tmp.mkdir(exist_ok=True)
     (tmp/"TASK-R1.json").write_text(json.dumps(prior),encoding="utf-8")
     try:
-        case("session_active",not check_active_duplicate(current,str(tmp),{"sessions":[{"title":"VAEP TASK-R1","name":"sessions/4","state":"IN_PROGRESS"}]},"VAEP ")["ok"])
+        case("session_active",not check_active_duplicate(current,str(tmp),{"sessions":[{"title":"VAEP-J1 TASK-R1","name":"sessions/4","state":"IN_PROGRESS"}]},"VAEP-J1 ")["ok"])
     finally:
         for p in tmp.glob("*"): p.unlink()
         tmp.rmdir()
@@ -169,7 +170,7 @@ def run_self_test():
     equivalent_patch={"baseCommitId":"a"*40,"unidiffPatch":"+++ b/x.cs\n@@\n+ok\n"}
     equivalent_evidence={"ok":True,"requested":"b"*40,"actual":"a"*40,"controlPlaneOnly":True}
     case("control_plane_base_equivalence",validate_terminal(current,equivalent_patch,"SELF_REVIEW_PASS_1 SELF_REVIEW_PASS_2 TESTS_EXECUTED: ok",equivalent_evidence)["ok"])
-    ok=all(x["pass"] for x in results) and len(results)==12
+    ok=all(x["pass"] for x in results) and len(results)==13
     print(json.dumps({"status":"PASS" if ok else "FAIL","cases":results},indent=2))
     return 0 if ok else 1
 
