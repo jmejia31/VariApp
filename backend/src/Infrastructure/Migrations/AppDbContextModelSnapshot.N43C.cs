@@ -18,6 +18,7 @@ namespace InventoryApp.Infrastructure.Migrations
             BuildModel(modelBuilder);
             ApplyN43CModel(modelBuilder);
             ApplyN46CModel(modelBuilder);
+            ApplyN53CModel(modelBuilder);
             return (IModel)modelBuilder.Model;
         }
 
