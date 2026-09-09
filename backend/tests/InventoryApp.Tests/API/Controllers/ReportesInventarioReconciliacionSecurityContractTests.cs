@@ -77,7 +77,7 @@ public sealed class ReportesInventarioReconciliacionSecurityContractTests
                 null,
                 It.IsAny<object>(),
                 null,
-                null,
+                "Exito",
                 null))
             .Returns(Task.CompletedTask);
 
