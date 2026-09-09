@@ -1,0 +1,88 @@
+name: VAEP catalog throughput guard
+
+on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - 'vaep/control/jules-autorefill-catalog.json'
+      - '.github/workflows/vaep-catalog-throughput.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'vaep/control/jules-autorefill-catalog.json'
+      - '.github/workflows/vaep-catalog-throughput.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate-material-swarm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate material parallelism contract
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path('vaep/control/jules-autorefill-catalog.json')
+          catalog = json.loads(path.read_text(encoding='utf-8'))
+
+          if catalog.get('authority') != 'docs/VAEP_AUTHORITY.md':
+              raise SystemExit('catalog authority mismatch')
+
+          lanes = catalog.get('lanes')
+          if set(lanes or {}) != {'JULES_A', 'JULES_B', 'JULES_C', 'JULES_D'}:
+              raise SystemExit('all four Jules lanes must be represented')
+
+          tasks = [task for lane in lanes.values() for task in lane]
+          task_ids = [task.get('taskId') for task in tasks]
+          dispatch_ids = [task.get('dispatchId') for task in tasks]
+          if len(task_ids) != len(set(task_ids)) or len(dispatch_ids) != len(set(dispatch_ids)):
+              raise SystemExit('TASK_IDENTITY_UNIQUE violated')
+
+          current = catalog.get('currentParent')
+          for task in tasks:
+              if task.get('dispatchEligible') is True and task.get('plannedParent') != current:
+                  raise SystemExit('future-parent task is dispatchEligible')
+
+          plan = catalog.get('throughputPlan') or {}
+          next_parent = plan.get('nextParent')
+          expected = plan.get('nextParentParallelMaterialScopes')
+          if not isinstance(next_parent, str) or expected != 4:
+              raise SystemExit('four-lane next-parent throughput plan missing')
+
+          planned = [task for task in tasks if task.get('plannedParent') == next_parent and task.get('readyForDispatch') is True]
+          workers = {task.get('workerId') for task in planned}
+          if len(planned) != expected or workers != {'JULES_A', 'JULES_B', 'JULES_C', 'JULES_D'}:
+              raise SystemExit('next parent is not prearmed one material task per Jules lane')
+
+          scopes = []
+          for task in planned:
+              raw = task.get('fileScopeHint')
+              if not isinstance(raw, str) or not raw.strip():
+                  raise SystemExit('material task missing FILE_SCOPE_HINT')
+              if not isinstance(task.get('prompt'), str) or not task['prompt'].strip():
+                  raise SystemExit('material task missing prompt')
+              for token in raw.split(';'):
+                  token = token.strip()
+                  if token:
+                      scopes.append((task['taskId'], token.rstrip('*').rstrip('/')))
+
+          for index, (left_task, left) in enumerate(scopes):
+              for right_task, right in scopes[index + 1:]:
+                  if left_task == right_task:
+                      continue
+                  if left == right or left.startswith(right + '/') or right.startswith(left + '/'):
+                      raise SystemExit(f'overlapping parallel write scopes: {left_task}:{left} vs {right_task}:{right}')
+
+          if catalog.get('policy', {}).get('noBusywork') is not True:
+              raise SystemExit('noBusywork must remain true')
+          if catalog.get('policy', {}).get('requireDistinctWriteScopesWhenParallel') is not True:
+              raise SystemExit('parallel distinct-write-scope guard missing')
+
+          print(f'VAEP_THROUGHPUT_GUARD=PASS current={current} next={next_parent} parallel_scopes={expected}')
+          PY
