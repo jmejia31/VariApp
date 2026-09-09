@@ -12,7 +12,9 @@ readonly ELIGIBLE_MIN=2
 : "${WORKER_ID:?WORKER_ID required}"
 command -v gh >/dev/null 2>&1 || exit 2
 command -v jq >/dev/null 2>&1 || exit 2
+command -v python3 >/dev/null 2>&1 || exit 2
 test -f "$CATALOG" || { echo "CATALOG_FLOOR_ERROR=catalog_missing" >&2; exit 2; }
+test -f scripts/vaep/alex_backlog_planner.py || { echo "CATALOG_FLOOR_ERROR=alex_planner_missing" >&2; exit 2; }
 
 case "$WORKER_ID" in
   J1) DISPATCH_PATH="vaep/jules/dispatch" ;;
@@ -47,16 +49,39 @@ while IFS=$'\t' read -r dispatch eligible; do
   fi
 done < <(jq -r --arg w "$WORKER_ID" '.lanes[$w][]? | [(.dispatchId // ""), ((.dispatchEligible != false)|tostring)] | @tsv' "$CATALOG")
 
+request_alex_generation() {
+  local runtime_file request deficit eligible_deficit parents expansion_required
+  runtime_file="${RUNNER_TEMP:-/tmp}/alex-floor-${WORKER_ID}-${GITHUB_RUN_ID:-local}.json"
+  python3 scripts/vaep/alex_backlog_planner.py --output "$runtime_file" >/dev/null
+  request="$(jq -c --arg w "$WORKER_ID" '.generationRequests[]? | select(.workerId==$w)' "$runtime_file" | head -n 1)"
+  if [[ -z "$request" ]]; then
+    echo "CATALOG_FLOOR_ERROR=alex_generation_request_missing worker=$WORKER_ID programmed_unused=$programmed_unused eligible_unused=$eligible_unused" >&2
+    return 2
+  fi
+  deficit="$(jq -r '.programmedDeficit' <<<"$request")"
+  eligible_deficit="$(jq -r '.eligibleDeficit' <<<"$request")"
+  parents="$(jq -r '[.candidateParents[].parentId] | join(",")' <<<"$request")"
+  expansion_required="$(jq -r '.requiresRoadmapExpansion' <<<"$request")"
+  echo "ALEX_MATERIAL_GENERATION_REQUEST worker=$WORKER_ID programmed_deficit=$deficit eligible_deficit=$eligible_deficit candidate_parents=${parents:-NONE} roadmap_expansion_required=$expansion_required action=MATERIALIZE_ROADMAP_DERIVED_SCOPES_DEPENDENCY_GATED"
+}
+
+low=0
 if (( programmed_unused <= FLOOR )); then
-  echo "CATALOG_PROGRAMMED_LOW worker=$WORKER_ID programmed_unused=$programmed_unused target=$TARGET floor=$FLOOR action=OBSERVE_ONLY_NO_GENERIC_REGENERATION"
+  low=1
+  echo "CATALOG_PROGRAMMED_LOW worker=$WORKER_ID programmed_unused=$programmed_unused target=$TARGET floor=$FLOOR action=ALEX_ROADMAP_GENERATION_REQUEST"
 else
   echo "CATALOG_PROGRAMMED_OK worker=$WORKER_ID programmed_unused=$programmed_unused target=$TARGET floor=$FLOOR"
 fi
 
 if (( eligible_unused < ELIGIBLE_MIN )); then
-  echo "CATALOG_ELIGIBLE_LOW worker=$WORKER_ID eligible_unused=$eligible_unused min=$ELIGIBLE_MIN action=OBSERVE_ONLY_CLOSE_PROMOTE_OR_ROADMAP_SCOPE"
+  low=1
+  echo "CATALOG_ELIGIBLE_LOW worker=$WORKER_ID eligible_unused=$eligible_unused min=$ELIGIBLE_MIN action=ALEX_DEPENDENCY_SAFE_SCOPE_REQUEST"
 else
   echo "CATALOG_ELIGIBLE_OK worker=$WORKER_ID eligible_unused=$eligible_unused min=$ELIGIBLE_MIN"
+fi
+
+if (( low != 0 )); then
+  request_alex_generation
 fi
 
 exit 0
