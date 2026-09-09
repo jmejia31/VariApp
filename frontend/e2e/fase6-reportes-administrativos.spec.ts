@@ -208,7 +208,24 @@ test.describe('Fase 6 — permisos, auditoría y reportes administrativos', () =
     }
   });
 
-  test('interfaz muestra reportes y bitácora sin desbordamiento', async ({ page }) => {
+  test('centro de reportes soporta navegación directa y conserva el contrato administrativo', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await loginUi(page);
+
+    await page.goto('/centro-reportes');
+    await expect(page.getByRole('heading', { name: 'Centro de Reportes' })).toBeVisible();
+    await expect(page.getByRole('navigation', { name: 'Tipos de reportes disponibles' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Reportes administrativos' })).toBeVisible();
+
+    await page.getByRole('link', { name: 'Reportes administrativos' }).click();
+    await expect(page).toHaveURL(/\/centro-reportes\/administrativos$/);
+    await expect(page.getByRole('heading', { name: 'Centro de Reportes' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Reportes administrativos' })).toBeVisible();
+    await expect(page.getByText('Usuarios habilitados')).toBeVisible();
+    await noHorizontalOverflow(page);
+  });
+
+  test('interfaz legacy de auditoría mantiene reportes y bitácora sin desbordamiento', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 1000 });
     await loginUi(page);
     await page.goto('/auditoria');
