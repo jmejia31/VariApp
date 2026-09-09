@@ -85,6 +85,9 @@ import { SessionActivityService } from './core/auth/session-activity.service';
               <a routerLink="/plan-cuentas" routerLinkActive="active" ariaCurrentWhenActive="page"><mat-icon>account_tree</mat-icon> Plan de cuentas</a>
               <a routerLink="/estados-financieros" routerLinkActive="active" ariaCurrentWhenActive="page"><mat-icon>assessment</mat-icon> Estados financieros</a>
             }
+            @if (permisosRuntime.puede('Finanzas', 'Ver') || (permisosRuntime.esAdministrador() && permisosRuntime.puede('ReportesAdministrativos', 'Ver'))) {
+              <a routerLink="/centro-reportes" routerLinkActive="active" ariaCurrentWhenActive="page"><mat-icon>analytics</mat-icon> Centro de reportes</a>
+            }
             @if (permisosRuntime.puede('MovimientosInventario', 'Ver')) {
               <a routerLink="/inventario/movimientos" routerLinkActive="active" ariaCurrentWhenActive="page"><mat-icon>sync_alt</mat-icon> Movimientos</a>
               <a routerLink="/inventario/transferencias" routerLinkActive="active" ariaCurrentWhenActive="page"><mat-icon>swap_horiz</mat-icon> Transferencias</a>
