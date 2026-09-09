@@ -1,6 +1,6 @@
 {
   "newDispatchAdmission": "FROZEN",
-  "allowExistingActiveSessions": true,
-  "reason": "N5.2.G_QA_TAKEOVERS_RECONCILED__EXACT_HEAD_CI_AND_CLOSURE_GATES_PENDING__NO_DUPLICATE_DISPATCH",
-  "updatedAtUtc": "2026-09-09T20:52:00Z"
+  "allowExistingActiveSessions": false,
+  "reason": "N5.2.H_CURRENT__DOC_CERT_CLOSURE_DEBT_FASTPATH__ZERO_SAFE_JULES_SCOPES__NO_BUSYWORK",
+  "updatedAtUtc": "2026-09-09T21:16:45Z"
 }
