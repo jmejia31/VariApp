@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-1-F-1-SEC-C",
+  "taskId": "N5.1.F.1.RBAC_SECURITY_ALIGNMENT",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/N5.1_REPORTES_SECURITY_ALIGNMENT.md",
+  "prompt": "Read docs/VAEP_AUTHORITY.md and accepted N5.1 evidence first. Audit implemented route/shell against backend ReportesAdministrativos and financial authorization. Record exact authorized/unauthorized paths, audit expectations, logging/correlation and concrete gaps. Do not expand privileges. Documentation only; include two self-reviews.",
+  "primaryBaseHead": "4288788467e5b5f2948799f077791369c5f67a04"
+}
