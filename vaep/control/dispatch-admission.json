@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "OPEN",
+  "newDispatchAdmission": "FROZEN",
   "allowExistingActiveSessions": true,
-  "reason": "N5.2.A_J4_R2_COMPLETED_REVIEWED_AND_INTEGRATED__NO_R3__CONTINUE_MATERIAL_SCOPE_DRAIN",
-  "updatedAtUtc": "2026-09-09T14:00:41Z"
+  "reason": "N5.2.A_ALL_MATERIAL_SCOPES_DRAINED__CLOSURE_RECONCILIATION__NO_NEW_DISPATCH",
+  "updatedAtUtc": "2026-09-09T14:35:00Z"
 }
