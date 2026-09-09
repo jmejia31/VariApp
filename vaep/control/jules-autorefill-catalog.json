@@ -1,16 +1,17 @@
 {
-  "version": 22,
+  "version": 23,
   "authority": "docs/VAEP_AUTHORITY.md",
-  "currentParent": "N5.1.D",
-  "generatedAt": "2026-09-09T01:18:15Z",
-  "regenerationReason": "CHAT_B_THROUGHPUT_HARDENING__N5.1.E_FOUR_LANE_SWARM_PREARMED",
-  "lastClosedParent": "N5.1.C",
+  "currentParent": "N5.1.E",
+  "generatedAt": "2026-09-09T01:36:00Z",
+  "regenerationReason": "N5.1.D_LISTO_REAL__PROMOTE_N5.1.E_FOUR_LANE_SWARM",
+  "lastClosedParent": "N5.1.D",
   "closureReceipts": {
     "N4.11.H": "vaep/evidence/fragments/N4.11.H_LISTO_REAL_20260908T204500Z.json",
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
     "N5.1.A": "vaep/evidence/fragments/N5.1.A_LISTO_REAL_20260908T222930Z.json",
     "N5.1.B": "vaep/evidence/fragments/N5.1.B_LISTO_REAL_20260908T231300Z.json",
-    "N5.1.C": "vaep/evidence/fragments/N5.1.C_LISTO_REAL_20260909T003400Z.json"
+    "N5.1.C": "vaep/evidence/fragments/N5.1.C_LISTO_REAL_20260909T003400Z.json",
+    "N5.1.D": "vaep/evidence/fragments/N5.1.D_LISTO_REAL_20260909T013600Z.json"
   },
   "retiredCatalogs": [
     {
@@ -52,11 +53,11 @@
   },
   "throughputPlan": {
     "mode": "MATERIAL_SWARM_FIRST",
-    "currentParent": "N5.1.D",
-    "currentParentMaterialScopeCount": 1,
-    "currentParentReason": "Accepted N5.1.D evidence proves no new Application/API seam; close the parent instead of fabricating work.",
-    "nextParent": "N5.1.E",
-    "nextParentParallelMaterialScopes": 4,
+    "currentParent": "N5.1.E",
+    "currentParentMaterialScopeCount": 4,
+    "currentParentReason": "N5.1.D is LISTO_REAL. N5.1.E is dependency-valid and has four prearmed, non-overlapping material scopes with distinct write ownership.",
+    "nextParent": "N5.1.F",
+    "nextParentParallelMaterialScopes": 1,
     "nextParentScopesNonOverlapping": true,
     "laneRefill": "POST_TERMINAL_AUTOREFILL_PLUS_CANONICAL_CHECKPOINTS"
   },
@@ -64,7 +65,7 @@
     "authority": "docs/VAEP_AUTHORITY.md",
     "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
     "sourceRanges": ["COLA!A391:T399", "PLAN_MAESTRO!A51:L52"],
-    "note": "Dependency order derived from live Plan/COLA. N5.1.E is prearmed as a four-lane material swarm; future parents remain dependency-gated.",
+    "note": "Dependency order derived from live Plan/COLA. N5.1.E is active as a four-lane material swarm; future parents remain dependency-gated.",
     "nodes": [
       {"id":"N4.11.H","order":0,"type":"MICROTAREA","dependencies":["N4.11.G"],"phaseGate":"GATE-N3"},
       {"id":"GATE-N4","order":1,"type":"GATE_FASE","dependencies":["N4.1.H","N4.2.H","N4.3.H","N4.4.H","N4.5.H","N4.6.H","N4.7.H","N4.8.H","N4.9.H","N4.10.H","N4.11.H"]},
@@ -89,7 +90,7 @@
         "readyForDispatch": true,
         "dispatchEligible": false,
         "fileScopeHint": "docs/N5.1_REPORTES_APPLICATION_API_DECISION.md",
-        "prompt": "Read docs/VAEP_AUTHORITY.md, PROJECT_INDEX.md and accepted N5.1.A/B/C evidence first. Preserve main/Production/secrets. This task is already terminal-reviewed and integrated; do not redispatch it. It remains only as current-parent lineage until N5.1.D closes."
+        "prompt": "Read docs/VAEP_AUTHORITY.md, PROJECT_INDEX.md and accepted N5.1.A/B/C evidence first. Preserve main/Production/secrets. This task is already terminal-reviewed and integrated; do not redispatch it. It remains only as closed-parent lineage."
       },
       {
         "dispatchId": "N5-1-E-1-SHELL-ROUTE-A",
@@ -98,7 +99,7 @@
         "taskAttempt": 1,
         "plannedParent": "N5.1.E",
         "readyForDispatch": true,
-        "dispatchEligible": false,
+        "dispatchEligible": true,
         "fileScopeHint": "frontend/src/app/features/centro-reportes/**;frontend/src/app/app.routes.ts",
         "prompt": "Read docs/VAEP_AUTHORITY.md, PROJECT_INDEX.md and accepted N5.1.A-D evidence first. Preserve main/Production/secrets. Implement the independent Centro de Reportes standalone feature shell and its route as one atomic self-contained scope. Reuse ReporteAdministrativoService and EstadoFinancieroService; do not duplicate report algorithms or add backend endpoints. Route protection must use the existing auth/permission guards and the accepted authorization contract. Own only frontend/src/app/features/centro-reportes/** and frontend/src/app/app.routes.ts. Do not edit app.component.ts or service spec files owned by other lanes. Cover loading, empty, error and accessibility states where the shell owns them. Run targeted frontend tests/type checks and two independent self-reviews."
       },
@@ -122,7 +123,7 @@
         "taskAttempt": 1,
         "plannedParent": "N5.1.E",
         "readyForDispatch": true,
-        "dispatchEligible": false,
+        "dispatchEligible": true,
         "fileScopeHint": "frontend/src/app/services/reporte-administrativo.service.spec.ts",
         "prompt": "Read docs/VAEP_AUTHORITY.md and accepted N5.1.A-D evidence first. Preserve main/Production/secrets. Add focused regression coverage for the existing ReporteAdministrativoService in exactly frontend/src/app/services/reporte-administrativo.service.spec.ts. Verify endpoint composition, optional desde/hasta parameters, users/roles/audit calls, export format parameter and blob response behavior without editing production service code. This is material support for the independent report center and must remain fully independent from the shell/route/navigation writers. Run the targeted frontend test and two independent self-reviews."
       },
@@ -146,7 +147,7 @@
         "taskAttempt": 1,
         "plannedParent": "N5.1.E",
         "readyForDispatch": true,
-        "dispatchEligible": false,
+        "dispatchEligible": true,
         "fileScopeHint": "frontend/src/app/app.component.ts",
         "prompt": "Read docs/VAEP_AUTHORITY.md and accepted N5.1.A-D evidence first. Preserve main/Production/secrets. Add the Centro de Reportes navigation entry using the accepted authorization contract and existing runtime permission helpers. Menu visibility is UX, never backend authorization. Own only frontend/src/app/app.component.ts; preserve Auditoria and unrelated menu behavior. Do not edit routes, shell files or service specs owned by other lanes. Run targeted frontend checks and two independent self-reviews."
       },
@@ -170,7 +171,7 @@
         "taskAttempt": 1,
         "plannedParent": "N5.1.E",
         "readyForDispatch": true,
-        "dispatchEligible": false,
+        "dispatchEligible": true,
         "fileScopeHint": "frontend/src/app/services/estado-financiero.service.spec.ts",
         "prompt": "Read docs/VAEP_AUTHORITY.md and accepted N5.1.A-D evidence first. Preserve main/Production/secrets. Add focused regression coverage for EstadoFinancieroService in exactly frontend/src/app/services/estado-financiero.service.spec.ts. Verify endpoint/type composition, periodoContableId and date parameter handling, omission of absent filters, and the generic redacted error boundary. Do not edit production service code or existing forbidden/redaction specs. This scope is independent from shell/route/navigation. Run the targeted frontend test and two independent self-reviews."
       },
