@@ -15,13 +15,16 @@ public sealed class ReportesInventarioKardexController : ControllerBase
 {
     private readonly IMovimientoInventarioService _movimientos;
     private readonly IAlmacenRepository _almacenes;
+    private readonly IUsuarioScopeService _usuarioScope;
 
     public ReportesInventarioKardexController(
         IMovimientoInventarioService movimientos,
-        IAlmacenRepository almacenes)
+        IAlmacenRepository almacenes,
+        IUsuarioScopeService usuarioScope)
     {
         _movimientos = movimientos;
         _almacenes = almacenes;
+        _usuarioScope = usuarioScope;
     }
 
     [HttpGet]
@@ -31,6 +34,9 @@ public sealed class ReportesInventarioKardexController : ControllerBase
         var error = ReporteInventarioQueryRules.Validate(filtro, "Fecha");
         if (error is not null)
             return BadRequest(ApiResponse<object>.Fail("Consulta de Kardex inválida.", new() { error }));
+
+        if (!await ReporteInventarioScopeGuard.CanUseExplicitPhysicalScopeAsync(filtro, _usuarioScope))
+            return Forbid();
 
         if (filtro.SucursalId.HasValue)
         {
