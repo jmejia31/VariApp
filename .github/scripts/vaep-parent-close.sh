@@ -50,13 +50,27 @@ latest_valid_fragment() {
   while IFS= read -r file; do
     [[ -f "$file" ]] || continue
     if jq -e --arg parent "$parent" '
+      def parent_id: (.parent // .parentId // "");
+      def legacy_contract:
+        .decision == "LISTO_REAL" and
+        .review == "PASS" and
+        .combinedStatus == "SUCCESS" and
+        .causalGates == "TERMINAL_SUCCESS_APPLICABLE" and
+        .productionTouched == false and .mergePerformed == false;
+      def current_contract:
+        .state == "LISTO_REAL" and
+        (.review | type == "object") and
+        (.review.mode | type == "string" and length > 0) and
+        .headRevalidated == true and
+        (.causalGates | type == "array" and length > 0) and
+        all(.causalGates[]; type == "object" and .conclusion == "success") and
+        .mainTouched == false and .prMerged == false;
       type == "object" and .authority == "docs/VAEP_AUTHORITY.md" and
-      .parent == $parent and .decision == "LISTO_REAL" and
+      parent_id == $parent and
       (.functionalHead | type == "string" and test("^[0-9a-fA-F]{40}$")) and
-      .review == "PASS" and .combinedStatus == "SUCCESS" and
-      .causalGates == "TERMINAL_SUCCESS_APPLICABLE" and
-      .p0Open == 0 and .p1Open == 0 and
-      .productionTouched == false and .mergePerformed == false
+      (.p0Open | type == "number") and .p0Open == 0 and
+      (.p1Open | type == "number") and .p1Open == 0 and
+      (legacy_contract or current_contract)
     ' "$file" >/dev/null; then printf '%s\n' "$file"; return 0; fi
   done < <(find vaep/evidence/fragments -maxdepth 1 -type f -name "${parent}_LISTO_REAL_*.json" -print 2>/dev/null | sort -r)
   return 1
@@ -98,8 +112,9 @@ migration_gate_applicable() {
 
 live_jules_runs() {
   local workflow runs count total=0
-  # Filter server-side: unrelated CI fan-out cannot hide an older live worker.
-  for workflow in vaep-jules-secondary.yml vaep-jules-secondary-b.yml vaep-jules-secondary-c.yml vaep-jules-secondary-d.yml; do
+  # Canonical runtime is J1-J6. A parent must never promote while any trusted
+  # worker lane is still queued/running, regardless of legacy A-D history.
+  for workflow in vaep-jules-j1.yml vaep-jules-j2.yml vaep-jules-j3.yml vaep-jules-j4.yml vaep-jules-j5.yml vaep-jules-j6.yml; do
     for state in queued in_progress pending waiting requested; do
       runs="$(api "repos/$GITHUB_REPOSITORY/actions/workflows/$workflow/runs?branch=$BRANCH&status=$state&per_page=1")" || return 1
       count="$(jq -er '.total_count | numbers' <<<"$runs")" || return 1
