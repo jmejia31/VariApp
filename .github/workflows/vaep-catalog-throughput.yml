@@ -34,9 +34,10 @@ jobs:
           if catalog.get('authority') != 'docs/VAEP_AUTHORITY.md':
               raise SystemExit('catalog authority mismatch')
 
+          canonical = {'J1','J2','J3','J4','J5','J6'}
           lanes = catalog.get('lanes')
-          if set(lanes or {}) != {'JULES_A', 'JULES_B', 'JULES_C', 'JULES_D'}:
-              raise SystemExit('all four Jules lanes must be represented')
+          if set(lanes or {}) != canonical:
+              raise SystemExit('all six canonical Jules lanes must be represented')
 
           tasks = [task for lane in lanes.values() for task in lane]
           task_ids = [task.get('taskId') for task in tasks]
@@ -54,22 +55,26 @@ jobs:
               raise SystemExit('noBusywork must remain true')
           if policy.get('requireDistinctWriteScopesWhenParallel') is not True:
               raise SystemExit('parallel distinct-write-scope guard missing')
+          if policy.get('activeWorkerCount') != 6 or policy.get('activeWorkers') != ['J1','J2','J3','J4','J5','J6']:
+              raise SystemExit('canonical six-worker policy mismatch')
+          if policy.get('programmedBacklogTargetTotal') != 72:
+              raise SystemExit('programmed backlog total must be 72')
 
           plan = catalog.get('throughputPlan') or {}
           next_parent = plan.get('nextParent')
           expected = plan.get('nextParentParallelMaterialScopes')
           if not isinstance(next_parent, str) or not next_parent.strip():
               raise SystemExit('next-parent throughput plan missing')
-          if not isinstance(expected, int) or isinstance(expected, bool) or not 1 <= expected <= 4:
-              raise SystemExit('next-parent material scope count must be an integer from 1 to 4')
-          if expected < 4 and policy.get('lowParallelismAction') != 'EXPLAIN_OR_SUBDIVIDE_MATERIAL_SCOPE__NO_BUSYWORK':
+          if not isinstance(expected, int) or isinstance(expected, bool) or not 1 <= expected <= 6:
+              raise SystemExit('next-parent material scope count must be an integer from 1 to 6')
+          if expected < 6 and policy.get('lowParallelismAction') != 'EXPLAIN_OR_SUBDIVIDE_MATERIAL_SCOPE__NO_BUSYWORK':
               raise SystemExit('lower material parallelism requires explicit no-busywork policy')
 
           planned = [task for task in tasks if task.get('plannedParent') == next_parent and task.get('readyForDispatch') is True]
           workers = {task.get('workerId') for task in planned}
           if len(planned) != expected or len(workers) != expected:
               raise SystemExit('next parent prearmed material scope count/worker ownership mismatch')
-          if not workers.issubset({'JULES_A', 'JULES_B', 'JULES_C', 'JULES_D'}):
+          if not workers.issubset(canonical):
               raise SystemExit('next parent references an unknown Jules lane')
 
           scopes = []
