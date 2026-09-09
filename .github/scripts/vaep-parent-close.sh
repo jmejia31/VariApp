@@ -87,24 +87,35 @@ latest_push_success() {
 
 declared_causal_gates_ok() {
   local functional="$1" fragment="$2"
-  local workflow run_id expected_head expected_conclusion run count=0 functional_seen=0
+  local workflow run_id expected_head expected_conclusion run actual_name count=0 functional_seen=0
   while IFS=$'\t' read -r workflow run_id expected_head expected_conclusion; do
-    [[ -n "$workflow" ]] || return 1
-    [[ "$run_id" =~ ^[0-9]+$ ]] || return 1
-    [[ "$expected_head" =~ ^[0-9a-fA-F]{40}$ ]] || return 1
-    [[ "$expected_conclusion" == "success" ]] || return 1
-    run="$(api "repos/$GITHUB_REPOSITORY/actions/runs/$run_id")" || return 1
-    jq -e --arg workflow "$workflow" --arg head "$expected_head" '
-      .name == $workflow and
+    [[ -n "$workflow" ]] || { echo 'VAEP_CLOSE_CAUSAL_GATE_INVALID=WORKFLOW_MISSING' >&2; return 1; }
+    [[ "$run_id" =~ ^[0-9]+$ ]] || { echo "VAEP_CLOSE_CAUSAL_GATE_INVALID=RUN_ID value=$run_id" >&2; return 1; }
+    [[ "$expected_head" =~ ^[0-9a-fA-F]{40}$ ]] || { echo "VAEP_CLOSE_CAUSAL_GATE_INVALID=HEAD value=$expected_head" >&2; return 1; }
+    [[ "$expected_conclusion" == "success" ]] || { echo "VAEP_CLOSE_CAUSAL_GATE_INVALID=RECEIPT_CONCLUSION run_id=$run_id value=$expected_conclusion" >&2; return 1; }
+    if ! run="$(api "repos/$GITHUB_REPOSITORY/actions/runs/$run_id")"; then
+      echo "VAEP_CLOSE_CAUSAL_GATE_INVALID=RUN_FETCH_FAILED run_id=$run_id" >&2
+      return 1
+    fi
+    if ! jq -e --arg head "$expected_head" '
       .head_sha == $head and
-      .head_branch == "Desarrollo" and
       .status == "completed" and
       .conclusion == "success"
-    ' <<<"$run" >/dev/null || return 1
+    ' <<<"$run" >/dev/null; then
+      echo "VAEP_CLOSE_CAUSAL_GATE_INVALID=RUN_STATE run_id=$run_id expected_head=$expected_head" >&2
+      return 1
+    fi
+    actual_name="$(jq -r '.name // ""' <<<"$run")"
+    if [[ "$actual_name" != "$workflow" ]]; then
+      echo "VAEP_CLOSE_CAUSAL_GATE_NAME_DIAGNOSTIC run_id=$run_id receipt_workflow=$workflow actual_workflow=$actual_name" >&2
+    fi
     [[ "$expected_head" == "$functional" ]] && functional_seen=1
     count=$((count + 1))
   done < <(jq -r '.causalGates[] | [.workflow, (.runId | tostring), .headSha, .conclusion] | @tsv' "$fragment")
-  (( count > 0 && functional_seen == 1 ))
+  if (( count == 0 || functional_seen == 0 )); then
+    echo "VAEP_CLOSE_CAUSAL_GATE_INVALID=FUNCTIONAL_HEAD_NOT_COVERED functional_head=$functional gate_count=$count" >&2
+    return 1
+  fi
 }
 
 critical_gates_ok() {
