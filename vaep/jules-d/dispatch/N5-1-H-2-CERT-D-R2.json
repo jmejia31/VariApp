@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-1-H-2-CERT-D-R2",
+  "taskId": "N5.1.H.2.CERTIFICATION_CHECKLIST",
+  "workerId": "J4",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 2,
+  "fileScopeHint": "docs/N5.1_CENTRO_REPORTES_CERT_CHECKLIST.md",
+  "prompt": "Read docs/VAEP_AUTHORITY.md and the exact N5.1.G LISTO_REAL receipt first. REVIEW_FIRST rejected ATTEMPT1 because the final certification checklist omitted residual item C4_NOT_ISOLATED while claiming to carry the N5.1.G residual debt. Produce a corrected checklist whose unresolved/non-blocking residual list reconciles exactly with vaep/evidence/fragments/N5.1.G_LISTO_REAL_20260909T1031Z.json, including C4_NOT_ISOLATED, without inventing PASS, CI, vulnerabilities, policy or production facts not directly supported by accepted evidence. Preserve the documented causal gate, P0/P1 status, rollback/production untouched constraints, and explicitly do not self-certify LISTO_REAL. Documentation only; include TESTS_EXECUTED plus SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2. This is ATTEMPT2; if content fails again, QA_TAKEOVER is mandatory and R3 is prohibited.",
+  "primaryBaseHead": "63475ffa6b3ce26741ffb15e7290638bba264a6b"
+}
