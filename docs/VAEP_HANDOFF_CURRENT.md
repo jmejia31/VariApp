@@ -21,7 +21,7 @@ ALEX reconciled exactly five source-backed, non-overlapping material scopes for 
 - J5 — `N5.2.D.5.COMMON_API_SHELL`
 - J6 — no safe material scope for the current parent; remain idle unless a new source-backed non-overlapping scope becomes dependency-valid.
 
-Runtime is volatile and must be reread, never inferred from this file. During the latest PRIMARY reconciliation: J1 was rematerialized with a fresh immutable ATTEMPT1 after an `INVALID_REDISPATCH` transport rejection that did not consume R2; J2, J3 and J5 reached their permitted R2 after causal attempt-1 failures; J4 attempt 1 hit `JULES_LANE_BUDGET_EXCEEDED` and a fresh immutable R2 was materialized; R3 remains prohibited. Duplicate non-executing R2 reservations found for J2 and J3 were removed. A manifest, queued job, or historical label is not `ACTIVE_REAL`; require runtime evidence.
+Runtime is volatile and must be reread, never inferred from this file. During the latest PRIMARY reconciliation: J1 was rematerialized with a fresh immutable ATTEMPT1 after an `INVALID_REDISPATCH` transport rejection that did not consume R2; J2, J3 and J5 reached their permitted R2 after causal attempt-1 failures; duplicate non-executing R2 reservations for J2 and J3 were removed. J4's GitHub worker exceeded its polling budget and released controller ownership, but a fresh R2 was correctly blocked by `ACTIVE_SESSION_GUARD` because the original Jules provider session `sessions/6349675869588649558` still reported `IN_PROGRESS`; the non-executing J4 R2 manifest was therefore removed and J4 remains ATTEMPT1 provider-active. R3 remains prohibited. A manifest, queued job, or historical label is not `ACTIVE_REAL`; require runtime evidence.
 
 ## Close-first rule
 
