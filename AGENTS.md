@@ -14,6 +14,8 @@ MASTER_FILE=docs/VAEP_AUTHORITY.md
 
 Antes de analizar, editar, ejecutar, despachar o publicar trabajo de automatización, leer `docs/VAEP_AUTHORITY.md`.
 
+Para continuidad entre ChatGPT, Chat B, Codex, AntiG y Jules, leer además `docs/VAEP_HANDOFF_CURRENT.md`. Ese archivo es un handoff informativo de qué cambió y qué inspeccionar; nunca sustituye al MAESTRO ni al estado fresco de GitHub/Plan Maestro.
+
 ## Autoridad única
 
 - `docs/VAEP_AUTHORITY.md` es el **MAESTRO operativo único**.
@@ -27,11 +29,11 @@ Antes de analizar, editar, ejecutar, despachar o publicar trabajo de automatizac
 
 - Javier: propietario.
 - ChatGPT/VAEP: controller, QA, REVIEW_FIRST, integración, corrección, CI, certificación y failover.
-- Chat B (ChatGPT Business): colaborador full-access par de ChatGPT/VAEP; puede ejecutar controller, QA, REVIEW_FIRST, corrección, integración, CI, certificación y failover en `Desarrollo`, siempre bajo `docs/VAEP_AUTHORITY.md`. No es una quinta lane Jules ni puede saltarse los gates del MAESTRO.
+- Chat B (ChatGPT Business): colaborador full-access par de ChatGPT/VAEP; puede ejecutar controller, QA, REVIEW_FIRST, corrección, integración, CI, certificación y failover en `Desarrollo`, siempre bajo `docs/VAEP_AUTHORITY.md`. No es una lane Jules ni puede saltarse los gates del MAESTRO.
 - J1/J2/J3/J4/J5/J6: implementers cloud, un write-scope autoritativo por Jules, patch/artifact only.
 - Vibe: QA externo cuando VAEP lo delega.
 - AntiG/Antigravity: componente de infraestructura reservado e inactivo (`RESERVED_INACTIVE`); fuera del equipo operativo actual. Su estado exacto se toma del MAESTRO: no scheduler, no handoff processing, no LISTO_REAL y reincorporación futura solo con autorización explícita.
-- Codex: fuera del flujo salvo orden explícita del usuario.
+- Codex: fuera del flujo operativo salvo orden explícita del usuario; puede leer el handoff para saber qué cambió y dónde verificarlo.
 
 ## Git y Producción
 
