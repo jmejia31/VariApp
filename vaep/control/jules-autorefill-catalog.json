@@ -1,15 +1,16 @@
 {
   "version": 21,
   "authority": "docs/VAEP_AUTHORITY.md",
-  "currentParent": "N5.1.C",
-  "generatedAt": "2026-09-08T23:15:23Z",
-  "regenerationReason": "AUTOMATIC_PARENT_CLOSE__N5.1.B_LISTO_REAL__N5.1.C_CURRENT",
-  "lastClosedParent": "N5.1.B",
+  "currentParent": "N5.1.D",
+  "generatedAt": "2026-09-09T00:39:44Z",
+  "regenerationReason": "AUTOMATIC_PARENT_CLOSE__N5.1.C_LISTO_REAL__N5.1.D_CURRENT",
+  "lastClosedParent": "N5.1.C",
   "closureReceipts": {
     "N4.11.H": "vaep/evidence/fragments/N4.11.H_LISTO_REAL_20260908T204500Z.json",
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
     "N5.1.A": "vaep/evidence/fragments/N5.1.A_LISTO_REAL_20260908T222930Z.json",
-    "N5.1.B": "vaep/evidence/fragments/N5.1.B_LISTO_REAL_20260908T231300Z.json"
+    "N5.1.B": "vaep/evidence/fragments/N5.1.B_LISTO_REAL_20260908T231300Z.json",
+    "N5.1.C": "vaep/evidence/fragments/N5.1.C_LISTO_REAL_20260909T003400Z.json"
   },
   "retiredCatalogs": [
     {
@@ -174,7 +175,7 @@
         "taskAttempt": 1,
         "plannedParent": "N5.1.D",
         "readyForDispatch": true,
-        "dispatchEligible": false,
+        "dispatchEligible": true,
         "fileScopeHint": "docs/N5.1_REPORTES_APPLICATION_API_DECISION.md",
         "prompt": "Read docs/VAEP_AUTHORITY.md, PROJECT_INDEX.md and the accepted N5.1.A preflight evidence first. Preserve main/Production/secrets. Work only in the declared FILE_SCOPE_HINT and do not expand scope. Using accepted B/C decisions, determine whether the independent center requires any new Application/API seam. Prefer reuse of existing report endpoints/services when sufficient. If no new backend endpoint is needed, record a grounded N/A with exact existing contracts and regression requirements. If a real gap exists, specify the minimal future code scope precisely; do not invent a facade. Documentation only for this decision task."
       },
@@ -209,7 +210,7 @@
         "taskAttempt": 1,
         "plannedParent": "N5.1.C",
         "readyForDispatch": true,
-        "dispatchEligible": true,
+        "dispatchEligible": false,
         "fileScopeHint": "docs/N5.1_REPORTES_PERSISTENCE_DECISION.md",
         "prompt": "Read docs/VAEP_AUTHORITY.md, PROJECT_INDEX.md and the accepted N5.1.A preflight evidence first. Preserve main/Production/secrets. Work only in the declared FILE_SCOPE_HINT and do not expand scope. Evaluate persistence/migration applicability from the accepted N5.1.B contracts. If the center only composes existing read contracts, prove N/A for new schema/migration and document rollback boundary. If a material persistence gap is actually required, document the exact minimal schema/migration need rather than implementing beyond the decision scope. Include directed repository inspection evidence and two self-reviews."
       },
@@ -268,7 +269,7 @@
         "taskAttempt": 1,
         "plannedParent": "N5.1.C",
         "readyForDispatch": true,
-        "dispatchEligible": true,
+        "dispatchEligible": false,
         "fileScopeHint": "docs/N5.1_REPORTES_HISTORICAL_DATA_BOUNDARY.md",
         "prompt": "Read docs/VAEP_AUTHORITY.md, PROJECT_INDEX.md and the accepted N5.1.A preflight evidence first. Preserve main/Production/secrets. Work only in the declared FILE_SCOPE_HINT and do not expand scope. Define historical-data integrity boundaries for report composition using existing snapshots/contracts. Identify which report families may rely on current master data versus transactional snapshots and which cases remain N/A. Do not invent schema or claim tests not run. Documentation only; include two independent self-reviews."
       },
