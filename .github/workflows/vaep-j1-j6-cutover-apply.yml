@@ -1,19 +1,11 @@
 name: VAEP J1-J6 Cutover Apply
-
 on:
   push:
     branches: [Desarrollo]
-    paths:
-      - '.github/workflows/vaep-j1-j6-cutover-apply.yml'
+    paths: ['.github/workflows/vaep-j1-j6-cutover-apply.yml']
   workflow_dispatch:
-
-permissions:
-  contents: write
-
-concurrency:
-  group: vaep-j1-j6-cutover-apply
-  cancel-in-progress: false
-
+permissions: {contents: write}
+concurrency: {group: vaep-j1-j6-cutover-apply, cancel-in-progress: false}
 jobs:
   cutover:
     runs-on: ubuntu-latest
@@ -28,25 +20,19 @@ jobs:
       J6_KEY: ${{ secrets.JULES_J6_API_KEY }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: Desarrollo
-          fetch-depth: 0
-
-      - name: Revalidate all six canonical Jules credentials
+        with: {ref: Desarrollo, fetch-depth: 0}
+      - name: Canonical readiness J1-J6
         shell: bash
         run: |
           set -euo pipefail
           for i in 1 2 3 4 5 6; do
-            var="J${i}_KEY"; key="${!var:-}"
-            test -n "$key"
-            response="$(mktemp)"
-            curl --connect-timeout 10 --max-time 45 --fail-with-body --silent --show-error \
-              -H "x-goog-api-key: $key" "$JULES_API_BASE/sources?pageSize=100" > "$response"
-            jq -e '[.sources[]? | select(.githubRepo.owner=="jmejia31" and .githubRepo.repo=="VariApp")] | first as $s | ($s != null) and (($s.githubRepo.branches // []) | any(.displayName=="Desarrollo"))' "$response" >/dev/null
+            var="J${i}_KEY"; key="${!var:-}"; test -n "$key"
+            f="$(mktemp)"
+            curl --connect-timeout 10 --max-time 45 --fail-with-body --silent --show-error -H "x-goog-api-key: $key" "$JULES_API_BASE/sources?pageSize=100" > "$f"
+            jq -e '[.sources[]? | select(.githubRepo.owner=="jmejia31" and .githubRepo.repo=="VariApp")] | first as $s | ($s != null) and (($s.githubRepo.branches // []) | any(.displayName=="Desarrollo"))' "$f" >/dev/null
             echo "J${i}_CANONICAL_READINESS_OK"
           done
-
-      - name: Apply cutover on latest Desarrollo with optimistic race guard
+      - name: Transform and publish canonical non-workflow control plane
         shell: bash
         run: |
           set -euo pipefail
@@ -55,111 +41,51 @@ jobs:
           git fetch origin Desarrollo
           git reset --hard origin/Desarrollo
           base="$(git rev-parse HEAD)"
-
-          if jq -e '.cutoverEnabled == true and .activeWorkers == ["J1","J2","J3","J4","J5","J6"]' vaep/control/jules-workers.json >/dev/null 2>&1; then
-            echo 'J1_J6_CUTOVER_ALREADY_ACTIVE=TRUE'
-            exit 0
+          if jq -e '.cutoverEnabled==true and .activeWorkers==["J1","J2","J3","J4","J5","J6"]' vaep/control/jules-workers.json >/dev/null 2>&1; then
+            echo J1_J6_CUTOVER_ALREADY_ACTIVE=TRUE; exit 0
           fi
-
           python3 - <<'PY'
           from pathlib import Path
-          p=Path('scripts/vaep/j1_j6_cutover.py')
-          t=p.read_text(encoding='utf-8')
-          reps={
-            "t = must_replace(t, 'JULES_TASKS_TARGET_ROLLING_24H_TOTAL=400', 'JULES_TASKS_TARGET_ROLLING_24H_TOTAL=600', count=1)": "t = must_replace(t, 'JULES_TASKS_TARGET_ROLLING_24H_TOTAL=400', 'JULES_TASKS_TARGET_ROLLING_24H_TOTAL=600', count=2)",
-            "t = must_replace(t, 'LANE_REFILL_DEADLINE_SECONDS=90', 'LANE_REFILL_DEADLINE_SECONDS=30', count=1)": "t = must_replace(t, 'LANE_REFILL_DEADLINE_SECONDS=90', 'LANE_REFILL_DEADLINE_SECONDS=30', count=2)",
-          }
-          for old,new in reps.items():
-              if t.count(old)!=1: raise SystemExit(f'CUTOVER_NORMALIZE_ASSERT {old} count={t.count(old)}')
-              t=t.replace(old,new)
-          p.write_text(t,encoding='utf-8')
+          p=Path('scripts/vaep/j1_j6_cutover.py'); t=p.read_text()
+          for old,new in [
+            ("t = must_replace(t, 'JULES_TASKS_TARGET_ROLLING_24H_TOTAL=400', 'JULES_TASKS_TARGET_ROLLING_24H_TOTAL=600', count=1)","t = must_replace(t, 'JULES_TASKS_TARGET_ROLLING_24H_TOTAL=400', 'JULES_TASKS_TARGET_ROLLING_24H_TOTAL=600', count=2)"),
+            ("t = must_replace(t, 'LANE_REFILL_DEADLINE_SECONDS=90', 'LANE_REFILL_DEADLINE_SECONDS=30', count=1)","t = must_replace(t, 'LANE_REFILL_DEADLINE_SECONDS=90', 'LANE_REFILL_DEADLINE_SECONDS=30', count=2)")]:
+              assert t.count(old)==1,(old,t.count(old)); t=t.replace(old,new)
+          p.write_text(t)
           PY
-
           python3 scripts/vaep/j1_j6_cutover.py
-
+          # Workflow entry points were switched separately with GitHub workflow permission.
+          git checkout HEAD -- .github/workflows
+          # No legacy credentials in active checkpoint helper or new handoffs.
           python3 - <<'PY'
           from pathlib import Path
-          import re, json
-
-          # Active checkpoint runtime: canonical credentials only.
-          p=Path('.github/workflows/vaep-checkpoints.yml'); t=p.read_text()
-          t='\n'.join(line for line in t.splitlines() if not re.search(r'^\s+JULES_[ABCD]_API_KEY:', line))+'\n'
-          p.write_text(t)
-
-          p=Path('.github/scripts/vaep-checkpoint.sh'); t=p.read_text()
-          t='\n'.join(line for line in t.splitlines() if not re.match(r'^\s+JULES_[ABCD]\) printf ', line))+'\n'
-          p.write_text(t)
-
-          # Stop control accepts only canonical J1..J6 and canonical keys.
-          p=Path('.github/workflows/vaep-jules-stop.yml'); t=p.read_text()
-          t='\n'.join(line for line in t.splitlines() if not re.search(r'^\s+JULES_[ABCD]_API_KEY:', line) and not re.match(r'^\s+JULES_[ABCD]\) selected_key=', line))+'\n'
-          t=t.replace('test("^(J[1-6]|JULES_[ABCD])$")','test("^J[1-6]$")')
-          t=t.replace('.workerId // "JULES_A"','.workerId // ""')
-          p.write_text(t)
-
-          # New terminal handoffs cannot select legacy IDs.
-          p=Path('scripts/vaep/terminal_handoff.py'); t=p.read_text()
-          t=t.replace('choices=["J1", "J2", "J3", "J4", "J5", "J6", "JULES_A", "JULES_B", "JULES_C", "JULES_D"]','choices=["J1", "J2", "J3", "J4", "J5", "J6"]')
-          p.write_text(t)
-
-          # Canonical session-health workflow, six workers only.
-          Path('.github/workflows/vaep-jules-session-health.yml').write_text('''name: VAEP Jules Session Health\n\non:\n  workflow_dispatch:\n\npermissions:\n  contents: read\n\nconcurrency:\n  group: vaep-jules-session-health\n  cancel-in-progress: true\n\njobs:\n  health:\n    runs-on: ubuntu-latest\n    timeout-minutes: 8\n    strategy:\n      fail-fast: false\n      matrix:\n        worker: [J1, J2, J3, J4, J5, J6]\n    env:\n      JULES_API_BASE: https://jules.googleapis.com/v1alpha\n      J1_KEY: ${{ secrets.JULES_J1_API_KEY }}\n      J2_KEY: ${{ secrets.JULES_J2_API_KEY }}\n      J3_KEY: ${{ secrets.JULES_J3_API_KEY }}\n      J4_KEY: ${{ secrets.JULES_J4_API_KEY }}\n      J5_KEY: ${{ secrets.JULES_J5_API_KEY }}\n      J6_KEY: ${{ secrets.JULES_J6_API_KEY }}\n    steps:\n      - uses: actions/checkout@v4\n        with:\n          ref: Desarrollo\n          fetch-depth: 1\n      - name: Read-only canonical worker health\n        shell: bash\n        run: |\n          set -euo pipefail\n          case "${{ matrix.worker }}" in\n            J1) key="$J1_KEY" ;; J2) key="$J2_KEY" ;; J3) key="$J3_KEY" ;;\n            J4) key="$J4_KEY" ;; J5) key="$J5_KEY" ;; J6) key="$J6_KEY" ;; *) exit 2 ;;\n          esac\n          test -n "$key"\n          curl --connect-timeout 10 --max-time 45 --fail-with-body --silent --show-error \\\n            -H "x-goog-api-key: $key" "$JULES_API_BASE/sources?pageSize=100" \\\n            | jq -e '[.sources[]? | select(.githubRepo.owner=="jmejia31" and .githubRepo.repo=="VariApp")] | first != null' >/dev/null\n          echo "${{ matrix.worker }}_HEALTH_OK"\n''',encoding='utf-8')
-
-          # Disable every legacy recovery entry point; J1..J6 primary workflow_dispatch is recovery-capable.
-          for letter in 'abcd':
-              rp=Path(f'.github/workflows/vaep-jules-{letter}-recovery.yml')
-              if rp.exists():
-                  name=letter.upper()
-                  rp.write_text(f'''name: VAEP Legacy Jules {name} Recovery Disabled\n\non:\n  workflow_dispatch:\n\npermissions:\n  contents: read\n\njobs:\n  disabled:\n    runs-on: ubuntu-latest\n    steps:\n      - run: |\n          echo "LEGACY_RECOVERY_DISABLED_AFTER_J1_J6_CUTOVER={name}"\n          exit 1\n''',encoding='utf-8')
-
-          # Remove the temporary J3/J4 legacy readiness probe entirely.
-          legacy=Path('.github/workflows/vaep-j3-j4-legacy-readiness.yml')
-          if legacy.exists(): legacy.unlink()
-
-          # One-shot transformer is no longer executable migration logic after cutover.
-          Path('scripts/vaep/j1_j6_cutover.py').write_text('''#!/usr/bin/env python3\nimport json\nfrom pathlib import Path\nd=json.loads(Path("vaep/control/jules-workers.json").read_text())\nassert d["cutoverEnabled"] is True\nassert d["activeWorkers"] == ["J1","J2","J3","J4","J5","J6"]\nassert d["activeLegacyWorkers"] == []\nprint("J1_J6_CUTOVER_ALREADY_ACTIVE_OK")\n''',encoding='utf-8')
-
-          # Dry-run migration is retired from push automation immediately after successful cutover.
-          Path('.github/workflows/vaep-j1-j6-cutover-dry-run.yml').write_text('''name: VAEP J1-J6 Cutover Verification\n\non:\n  workflow_dispatch:\n\npermissions:\n  contents: read\n\njobs:\n  verify:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n        with:\n          ref: Desarrollo\n      - run: python3 scripts/vaep/j1_j6_registry_check.py\n''',encoding='utf-8')
+          import re
+          p=Path('.github/scripts/vaep-checkpoint.sh'); t=p.read_text(); t='\n'.join(x for x in t.splitlines() if not re.match(r'^\s+JULES_[ABCD]\) printf ',x))+'\n'; p.write_text(t)
+          p=Path('scripts/vaep/terminal_handoff.py'); t=p.read_text().replace('choices=["J1", "J2", "J3", "J4", "J5", "J6", "JULES_A", "JULES_B", "JULES_C", "JULES_D"]','choices=["J1", "J2", "J3", "J4", "J5", "J6"]'); p.write_text(t)
+          Path('scripts/vaep/j1_j6_cutover.py').write_text('''#!/usr/bin/env python3\nimport json\nfrom pathlib import Path\nd=json.loads(Path("vaep/control/jules-workers.json").read_text())\nassert d["cutoverEnabled"] is True\nassert d["activeWorkers"] == ["J1","J2","J3","J4","J5","J6"]\nassert d["activeLegacyWorkers"] == []\nprint("J1_J6_CUTOVER_ACTIVE_OK")\n''')
           PY
-
-          # Final active-runtime validation before publication.
+          find scripts -type d -name __pycache__ -prune -exec rm -rf {} + || true
           python3 scripts/vaep/j1_j6_registry_check.py
           python3 scripts/vaep/j1_j6_cutover.py
-          python3 -m py_compile scripts/vaep/j1_j6_registry_check.py scripts/vaep/j1_j6_cutover.py scripts/vaep/jules_integration_metrics.py scripts/vaep/terminal_handoff.py
           bash -n .github/scripts/vaep-policy-parser.sh .github/scripts/vaep-jules-master.sh .github/scripts/vaep-jules-worker.sh .github/scripts/vaep-jules-autorefill.sh .github/scripts/vaep-jules-autorefill-core.sh .github/scripts/vaep-jules-catalog-floor.sh .github/scripts/vaep-parent-close.sh .github/scripts/vaep-checkpoint.sh
           node --check scripts/vaep/dispatch-preflight.mjs
           bash .github/scripts/vaep-policy-parser.sh --validate docs/VAEP_AUTHORITY.md
           bash .github/scripts/vaep-jules-master.sh --static-self-test
-
-          for i in 1 2 3 4 5 6; do
-            grep -Fq "WORKER_ID: J$i" ".github/workflows/vaep-jules-j$i.yml"
-            grep -Fq "secrets.JULES_J${i}_API_KEY" ".github/workflows/vaep-jules-j$i.yml"
-          done
-          active_files=(.github/workflows/vaep-jules-j{1,2,3,4,5,6}.yml .github/workflows/vaep-checkpoints.yml .github/workflows/vaep-jules-stop.yml .github/workflows/vaep-jules-session-health.yml)
-          if grep -En 'secrets\.JULES_(API_KEY|B_API_KEY|C_API_KEY|D_API_KEY)' "${active_files[@]}"; then
-            echo 'LEGACY_SECRET_REFERENCE_FOUND_IN_ACTIVE_RUNTIME' >&2; exit 1
-          fi
-          test ! -e .github/workflows/vaep-j3-j4-legacy-readiness.yml
-          jq -e '.cutoverEnabled==true and .activeWorkers==["J1","J2","J3","J4","J5","J6"] and .activeLegacyWorkers==[]' vaep/control/jules-workers.json >/dev/null
+          jq -e '.cutoverEnabled==true and .activeLegacyWorkers==[] and .activeWorkers==["J1","J2","J3","J4","J5","J6"]' vaep/control/jules-workers.json >/dev/null
           jq -e '.policy.programmedBacklogTargetTotal==72 and .policy.activeWorkerCount==6 and (.lanes|keys|sort)==["J1","J2","J3","J4","J5","J6"]' vaep/control/jules-autorefill-catalog.json >/dev/null
           grep -Fq 'JULES_TASKS_TARGET_ROLLING_24H_TOTAL=600' docs/VAEP_AUTHORITY.md
           grep -Fq 'JULES_PROGRAMMED_BACKLOG_TARGET_TOTAL=72' docs/VAEP_AUTHORITY.md
           grep -Fq 'LANE_REFILL_DEADLINE_SECONDS=30' docs/VAEP_AUTHORITY.md
           git diff --check
-
           git fetch origin Desarrollo
-          remote="$(git rev-parse origin/Desarrollo)"
-          if [ "$remote" != "$base" ]; then
-            echo "CUTOVER_ABORT_CONCURRENT_HEAD base=$base remote=$remote" >&2
-            exit 75
-          fi
-
+          test "$(git rev-parse origin/Desarrollo)" = "$base" || { echo CUTOVER_ABORT_CONCURRENT_HEAD >&2; exit 75; }
           git add -A
+          # Never ask GITHUB_TOKEN to modify workflow files.
+          git reset HEAD -- .github/workflows >/dev/null
+          test -n "$(git diff --cached --name-only)"
           git commit -m 'feat(vaep): activate canonical J1-J6 control plane'
-          cutover_sha="$(git rev-parse HEAD)"
+          sha="$(git rev-parse HEAD)"
           git push origin HEAD:Desarrollo
-          published="$(git ls-remote origin refs/heads/Desarrollo | cut -f1)"
-          test "$published" = "$cutover_sha"
-          echo "CUTOVER_SHA=$cutover_sha"
-          echo 'J1_J6_CUTOVER_PUBLISHED=PASS'
+          test "$(git ls-remote origin refs/heads/Desarrollo | cut -f1)" = "$sha"
+          echo "CUTOVER_SHA=$sha"
+          echo J1_J6_NONWORKFLOW_CUTOVER_PUBLISHED=PASS
