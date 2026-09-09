@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Reflection;
 using InventoryApp.API.Controllers;
 using InventoryApp.API.Filters;
@@ -196,6 +197,9 @@ public sealed class ReportesInventarioAuthorizationContractTests
 
         Assert.Equal(expectedModule, (ModuloSistema?)moduloField.GetValue(permiso));
         Assert.Equal(expectedAction, (AccionPermiso?)accionField.GetValue(permiso));
+
+        var definicion = Assert.Single(CatalogoPermisosBase.Definicion.Where(item => item.Modulo == expectedModule));
+        Assert.Contains(expectedAction, definicion.Acciones);
     }
 
     private sealed class FakeScopeService : IUsuarioScopeService
