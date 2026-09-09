@@ -1,0 +1,58 @@
+import { TestBed } from '@angular/core/testing';
+import { of, throwError } from 'rxjs';
+import { PermisosRuntimeService } from '../../../core/auth/permisos-runtime.service';
+import { ReporteInventarioValorizacionService } from '../../../core/services/reporte-inventario-valorizacion.service';
+import { ValorizacionComponent } from './valorizacion.component';
+
+describe('ValorizacionComponent N5.2.G', () => {
+  const permisos = jasmine.createSpyObj<PermisosRuntimeService>('PermisosRuntimeService', ['puede']);
+  const service = jasmine.createSpyObj<ReporteInventarioValorizacionService>('ReporteInventarioValorizacionService', ['getResumen']);
+
+  beforeEach(async () => {
+    permisos.puede.calls.reset();
+    service.getResumen.calls.reset();
+    await TestBed.configureTestingModule({
+      imports: [ValorizacionComponent],
+      providers: [
+        { provide: PermisosRuntimeService, useValue: permisos },
+        { provide: ReporteInventarioValorizacionService, useValue: service }
+      ]
+    }).compileComponents();
+  });
+
+  it('expone heading accesible y censura importes cuando Finanzas.Ver no está permitido', () => {
+    permisos.puede.and.returnValue(false);
+    service.getResumen.and.returnValue(of({
+      success: true,
+      data: {
+        valorInventarioCosto: null,
+        valorInventarioCostoMercaderia: null,
+        valorInventarioCostoInsumosAdministrativos: null,
+        valorPotencialVentaMercaderia: null
+      }
+    } as any));
+
+    const fixture = TestBed.createComponent(ValorizacionComponent);
+    fixture.detectChanges();
+
+    const element: HTMLElement = fixture.nativeElement;
+    const section = element.querySelector('section[aria-labelledby="valorizacion-title"]');
+    expect(section).not.toBeNull();
+    expect(element.querySelector('#valorizacion-title')?.textContent).toContain('Valorización de inventario');
+    expect(element.textContent).toContain('importes financieros están ocultos por permisos');
+    expect(element.textContent).not.toContain('Costo total');
+  });
+
+  it('renderiza el estado de error como role alert para recuperación accesible', () => {
+    permisos.puede.and.returnValue(true);
+    service.getResumen.and.returnValue(throwError(() => new Error('network')));
+
+    const fixture = TestBed.createComponent(ValorizacionComponent);
+    fixture.detectChanges();
+
+    const alert = fixture.nativeElement.querySelector('[role="alert"]') as HTMLElement;
+    expect(alert).not.toBeNull();
+    expect(alert.textContent).toContain('No se pudo cargar la valorización.');
+    expect(alert.querySelector('button')?.textContent).toContain('Reintentar');
+  });
+});
