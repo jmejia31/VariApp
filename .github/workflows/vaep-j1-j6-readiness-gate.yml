@@ -6,8 +6,15 @@ on:
       - Desarrollo
     paths:
       - '.github/workflows/vaep-j1-j6-readiness-gate.yml'
+      - '.github/workflows/vaep-jules-j1.yml'
+      - '.github/workflows/vaep-jules-j2.yml'
+      - '.github/workflows/vaep-jules-j3.yml'
+      - '.github/workflows/vaep-jules-j4.yml'
+      - '.github/workflows/vaep-jules-j5.yml'
+      - '.github/workflows/vaep-jules-j6.yml'
       - 'vaep/control/jules-workers.json'
       - 'scripts/vaep/j1_j6_registry_check.py'
+      - 'scripts/vaep/j1_j6_cutover.py'
   workflow_dispatch:
 
 permissions:
@@ -26,7 +33,7 @@ jobs:
         with:
           ref: Desarrollo
           fetch-depth: 1
-      - name: Validate prepared registry
+      - name: Validate canonical J1-J6 registry
         run: python3 scripts/vaep/j1_j6_registry_check.py
 
   readiness:
@@ -53,7 +60,7 @@ jobs:
         with:
           ref: Desarrollo
           fetch-depth: 1
-      - name: Validate read-only Jules access
+      - name: Validate read-only Jules access using final worker secret only
         shell: bash
         run: |
           set -euo pipefail
