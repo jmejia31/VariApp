@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "OPEN",
+  "newDispatchAdmission": "FROZEN",
   "allowExistingActiveSessions": true,
-  "reason": "N5.2.D_LISTO_REAL__N5.2.E_PROMOTED__SIX_SOURCE_BACKED_SCOPES_ELIGIBLE__J1_J6_REFILL_NOW",
-  "updatedAtUtc": "2026-09-09T18:42:00Z"
+  "reason": "N5.2.E_ALL_SIX_MATERIAL_SCOPES_DISPATCHED__REVIEW_FIRST_REQUIRED_BEFORE_ANY_REFILL__NO_DUPLICATE_DISPATCH",
+  "updatedAtUtc": "2026-09-09T18:49:00Z"
 }
