@@ -26,13 +26,20 @@ esac
 
 api(){ gh api "$@"; }
 
-listing="$(api "repos/$GITHUB_REPOSITORY/contents/$DISPATCH_PATH?ref=$BRANCH" 2>/dev/null || printf '[]')"
+listing_raw="$(api "repos/$GITHUB_REPOSITORY/contents/$DISPATCH_PATH?ref=$BRANCH" 2>/dev/null || true)"
+if jq -e 'type == "array"' <<<"${listing_raw:-null}" >/dev/null 2>&1; then
+  listing="$listing_raw"
+else
+  # An unmaterialized dispatch directory is a valid empty queue, not malformed
+  # JSON. This is expected for a canonical worker that has never received work.
+  listing='[]'
+fi
 programmed_unused=0
 eligible_unused=0
 
 while IFS=$'\t' read -r dispatch eligible; do
   [[ -n "$dispatch" ]] || continue
-  if ! jq -e --arg f "$dispatch.json" '.[]? | select(.name==$f)' <<<"$listing" >/dev/null; then
+  if ! jq -e --arg f "$dispatch.json" '.[]? | select(type == "object" and .name==$f)' <<<"$listing" >/dev/null; then
     programmed_unused=$((programmed_unused+1))
     if [[ "$eligible" == "true" ]]; then
       eligible_unused=$((eligible_unused+1))
