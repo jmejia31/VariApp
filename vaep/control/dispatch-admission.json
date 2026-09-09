@@ -1,6 +1,6 @@
 {
   "newDispatchAdmission": "FROZEN",
   "allowExistingActiveSessions": true,
-  "reason": "PARENT_MISMATCH__N5.1.C_LISTO_REAL__PROMOTE_N5.1.D_REQUIRED__NO_NEW_DISPATCH",
-  "updatedAtUtc": "2026-09-09T00:36:00Z"
+  "reason": "FROZEN_NEXT_PARENT_MISSING_NO_SAFE_WORK__PARENT_MISMATCH__N5.1.C_LISTO_REAL__PROMOTE_N5.1.D_REQUIRED__NO_NEW_DISPATCH",
+  "updatedAtUtc": "2026-09-09T00:37:00Z"
 }
