@@ -1,59 +1,32 @@
-# VAEP handoff actual — VariApp
+# VAEP HANDOFF CURRENT
 
-> Estado operativo actual, no archivo histórico. La única autoridad normativa es `docs/VAEP_AUTHORITY.md`. Antes de actuar se debe releer el HEAD vivo de `Desarrollo`, `vaep/control/jules-autorefill-catalog.json`, `vaep/control/dispatch-admission.json` y el Plan Maestro original. Git y `BITACORA` conservan historia; este archivo conserva sólo el handoff vigente.
+Authority: `docs/VAEP_AUTHORITY.md` is the only operational master. Always reread live `Desarrollo`, `vaep/control/jules-autorefill-catalog.json`, `vaep/control/dispatch-admission.json`, and the original Plan Maestro spreadsheet before acting.
 
-## Estado vigente
+## Current parent
 
-- Repo: `jmejia31/VariApp`; rama operativa: `Desarrollo`.
-- `lastClosedParent=N5.2.B`; receipt: `vaep/evidence/fragments/N5.2.B_LISTO_REAL_20260909T1530Z.json`.
-- `CURRENT_PARENT=N5.2.C` — Reportes de inventario / Persistencia, migración y datos.
-- Admission: `OPEN`; razón `VERIFIED_ROADMAP_PROMOTION__N5.2.B__N5.2.C`; sesiones existentes permitidas.
-- N5.2.C tiene seis scopes materiales no solapados, uno por J1–J6. Transporte/workflow no se convierte automáticamente en `ACTIVE_REAL`; cada terminal vuelve a `REVIEW_FIRST`.
-- `NEXT_PARENT=N5.2.D`, dependency-gated por N5.2.C. El catálogo vigente no tiene material N5.2.D ya prearmado; ALEX puede emitir solicitudes de generación roadmap-derived, pero no inventa scopes ni los vuelve elegibles antes de dependencias.
-- `main`, Producción, secrets, deploy y merge de PR #2 quedan fuera del flujo VAEP.
+- Last closed parent: `N5.2.C`, certified `LISTO_REAL` by `vaep/evidence/fragments/N5.2.C_LISTO_REAL_20260909T1642Z.json`.
+- CURRENT_PARENT: `N5.2.D`.
+- Admission: `OPEN`; existing active sessions allowed.
+- Admission reason: `VERIFIED_ROADMAP_PROMOTION__N5.2.C__N5.2.D__FIVE_ALEX_MATERIAL_SCOPES__J6_NO_BUSYWORK`.
+- Next roadmap node: `N5.2.E`, dependency-gated and not eligible until `N5.2.D` is genuinely `LISTO_REAL`.
 
-## J1–J6 actuales
+## Material continuity
 
-| Lane | Task actual |
-|---|---|
-| J1 | `N5.2.C.2.VALUATION_KARDEX_PERSISTENCE_PLAN` |
-| J2 | `N5.2.C.1.REPORT_QUERY_PERSISTENCE_PLAN` |
-| J3 | `N5.2.C.3.RECONCILIATION_PERSISTENCE_PLAN` |
-| J4 | `N5.2.C.4.MIGRATION_ROLLBACK_TOPOLOGY` |
-| J5 | `N5.2.C.5.PERSISTENCE_RECONCILIATION_QA_PLAN` |
-| J6 | `N5.2.C.6.SECURITY_PERSISTENCE_REQUIREMENTS` |
+ALEX reconciled exactly five source-backed, non-overlapping material scopes for `N5.2.D`; no safe sixth scope exists for J6 and no busywork may be fabricated:
 
-Regla operacional: terminal → `REVIEW_FIRST` inmediato → corrección/integración/DoD/gates → refill same-run si admission y dependencias lo permiten. `COMPLETED` Jules no equivale a `LISTO_REAL`. ATTEMPT1+R2 máximo; R3 prohibido.
+- J1 — `N5.2.D.1.VALUATION_BACKEND_API`
+- J2 — `N5.2.D.2.KARDEX_BACKEND_API`
+- J3 — `N5.2.D.3.STOCK_HEALTH_BACKEND_API`
+- J4 — `N5.2.D.4.RECONCILIATION_BACKEND_API`
+- J5 — `N5.2.D.5.COMMON_API_SHELL`
+- J6 — no safe material scope for the current parent; remain idle unless a new source-backed non-overlapping scope becomes dependency-valid.
 
-## ALEX
+Runtime is volatile and must be reread, never inferred from this file. During the latest PRIMARY reconciliation: J1 was rematerialized with a fresh immutable ATTEMPT1 after an `INVALID_REDISPATCH` transport rejection that did not consume R2; J2, J3 and J5 reached their permitted R2 after causal attempt-1 failures; J4 attempt 1 hit `JULES_LANE_BUDGET_EXCEEDED` and a fresh immutable R2 was materialized; R3 remains prohibited. Duplicate non-executing R2 reservations found for J2 and J3 were removed. A manifest, queued job, or historical label is not `ACTIVE_REAL`; require runtime evidence.
 
-- Autorización: `AUTHORIZED_NOW` / `ACTIVE_AUTHORIZATION` en `vaep/control/alex-owner-authorization.json`.
-- Runtime: `ACTIVE_REAL`; A16–A25 = `ACTIVE_REAL / ACTIVE` en `vaep/control/alex-capabilities.json`.
-- Evidencia deep-refill verificada: `VAEP ALEX Material Planner` run #12, ID `34372114115`, `success`.
-- El run #12 verificó en runtime `ALEX_ROADMAP_GENERATION_REQUEST` y `ALEX_MATERIAL_GENERATION_REQUEST` cuando una lane cayó bajo floor/minimum.
-- Deep refill: `ACTIVE_ROADMAP_GENERATION_REQUESTS`.
-- Política: `ROADMAP_DERIVED__DEPENDENCY_SAFE__SEMANTIC_DEDUPE_ONLY`.
-- Target: 12 scopes programados por lane; floor 4; mínimo elegible 2. Son objetivos de continuidad, no permiso para fabricar busywork.
-- ALEX no es Jules lane, no escribe código de producto, no certifica `LISTO_REAL`, no omite `REVIEW_FIRST`, no salta dependencias y no usa regeneración genérica.
+## Close-first rule
 
-## Próximo paso N5.2.D
+`N5.2.D` is not closed merely because work was dispatched. Every terminal Jules delivery must enter `REVIEW_FIRST` immediately, then correction/integration where applicable, DoD, causal gates, exact-head revalidation, and parent-level P0/P1=0. Do not certify or promote while R2/review/integration debt remains. If and only if `N5.2.D` becomes `LISTO_REAL`, promote the next dependency-valid node in the same run and refill real material work without waiting for another checkpoint.
 
-ALEX puede producir solicitudes deterministas de candidatos para N5.2.D y posteriores desde el roadmap/Plan/COLA vigente. Esos candidatos deben ser material-only, semánticamente únicos, con write scopes exclusivos y dependency-gated. Mientras N5.2.C no sea `LISTO_REAL`, un scope futuro no puede convertirse en dispatch elegible por conveniencia.
+## Guardrails
 
-## Plan Maestro original
-
-El archivo original `VariApp — PLAN MAESTRO DE AUTOMATIZACIONES` debe contener sólo hojas operativas útiles: `DASHBOARD`, `COLA`, `PLAN_MAESTRO`, `CONFIG`, `BITACORA`, `LEYENDA`, `TAREAS_PROGRAMADAS`, `CONTROL_TOWER`, `WORKERS`, `AUTOMATIZACIONES`. `EJECUCION_MANUAL` fue retirada y no debe recrearse.
-
-Las hojas operativas son current-state y se actualizan por clave/ID; los valores stale se sobrescriben o eliminan. `BITACORA` es la única hoja append-only de historia. En `TAREAS_PROGRAMADAS`, cada tarea se localiza por `AUTOMATION_ID` y sólo se actualizan sus campos dinámicos; identidad, cadencia, objetivo y guardrails se preservan.
-
-## Cinco tareas ChatGPT canónicas
-
-- `:00` Primary
-- `:12` Recovery
-- `:24` Review
-- `:36` Watchdog
-- `:48` Debt
-
-Las cinco deben releer el estado vivo, mantener terminal → REVIEW_FIRST → refill same-run, activar ALEX roadmap-refill cuando haya material seguro y sincronizar el Plan Maestro por UPSERT sin reintroducir identidades/cadencias retiradas ni snapshots stale.
-
-Si Git y Drive discrepan, reconciliar contra `docs/VAEP_AUTHORITY.md` + evidencia causal + HEAD vivo. Nunca escoger el dato más conveniente ni convertir manifest, dispatch, workflow verde o telemetría stale en PASS/ACTIVE_REAL/LISTO_REAL.
+Work only on `Desarrollo`. Do not touch `main`, Producción or secrets, and do not merge PR #2. Maximum ATTEMPT1 + R2; no R3. Do not create work to satisfy lane-count targets. Use PLAN_MAESTRO/COLA/roadmap as source-backed planning inputs with semantic dedupe, non-overlapping scopes and dependency gates. Google Sheets is synchronized current-state telemetry; `BITACORA` alone is append-only history. Do not recreate `EJECUCION_MANUAL` or retired identities/cadences. A16–A25 are ACTIVE only with runtime evidence.
