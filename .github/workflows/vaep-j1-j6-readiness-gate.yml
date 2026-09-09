@@ -35,6 +35,27 @@ jobs:
           fetch-depth: 1
       - name: Validate canonical J1-J6 registry
         run: python3 scripts/vaep/j1_j6_registry_check.py
+      - name: Enforce canonical credential references only
+        shell: bash
+        run: |
+          set -euo pipefail
+          files=(
+            .github/workflows/vaep-j1-j6-readiness-gate.yml
+            .github/workflows/vaep-jules-j1.yml
+            .github/workflows/vaep-jules-j2.yml
+            .github/workflows/vaep-jules-j3.yml
+            .github/workflows/vaep-jules-j4.yml
+            .github/workflows/vaep-jules-j5.yml
+            .github/workflows/vaep-jules-j6.yml
+          )
+          for i in 1 2 3 4 5 6; do
+            grep -Fq 'secrets.JULES_J'"$i"'_API_KEY' ".github/workflows/vaep-jules-j${i}.yml"
+          done
+          if grep -En 'secrets\.JULES_(API_KEY|B_API_KEY|C_API_KEY|D_API_KEY)' "${files[@]}"; then
+            echo 'LEGACY_CREDENTIAL_REFERENCE_FORBIDDEN_IN_CANONICAL_J1_J6' >&2
+            exit 1
+          fi
+          echo 'J1_J6_CANONICAL_CREDENTIAL_CONTRACT_OK'
 
   readiness:
     needs: validate-registry
