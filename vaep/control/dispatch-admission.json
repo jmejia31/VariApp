@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "FROZEN",
+  "newDispatchAdmission": "OPEN",
   "allowExistingActiveSessions": true,
-  "reason": "N5.1.F_REVIEWED_AND_CI_VALIDATED__CANONICAL_CLOSURE_PROMOTION_IN_PROGRESS__NO_NEW_DISPATCH",
-  "updatedAtUtc": "2026-09-09T07:37:00Z"
+  "reason": "N5.1.F_LISTO_REAL__N5.1.G_CURRENT__TWO_MATERIAL_SCOPES_ADMITTED",
+  "updatedAtUtc": "2026-09-09T07:38:00Z"
 }
