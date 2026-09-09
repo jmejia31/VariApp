@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "OPEN",
+  "newDispatchAdmission": "FROZEN",
   "allowExistingActiveSessions": true,
-  "reason": "N5.1.D_LISTO_REAL__N5.1.E_CURRENT__FOUR_MATERIAL_SCOPES_ADMITTED",
-  "updatedAtUtc": "2026-09-09T01:36:00Z"
+  "reason": "N5.1.E_PENDING_REVIEW_FIRST_AND_QA_TAKEOVER__NO_NEW_DISPATCH",
+  "updatedAtUtc": "2026-09-09T02:22:20Z"
 }
