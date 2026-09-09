@@ -1,16 +1,17 @@
 import { TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
+import { vi } from 'vitest';
 import { PermisosRuntimeService } from '../../../core/auth/permisos-runtime.service';
 import { ReporteInventarioValorizacionService } from '../../../core/services/reporte-inventario-valorizacion.service';
 import { ValorizacionComponent } from './valorizacion.component';
 
 describe('ValorizacionComponent N5.2.G', () => {
-  const permisos = jasmine.createSpyObj<PermisosRuntimeService>('PermisosRuntimeService', ['puede']);
-  const service = jasmine.createSpyObj<ReporteInventarioValorizacionService>('ReporteInventarioValorizacionService', ['getResumen']);
+  const permisos = { puede: vi.fn() } as unknown as PermisosRuntimeService;
+  const service = { getResumen: vi.fn() } as unknown as ReporteInventarioValorizacionService;
 
   beforeEach(async () => {
-    permisos.puede.calls.reset();
-    service.getResumen.calls.reset();
+    vi.mocked(permisos.puede).mockReset();
+    vi.mocked(service.getResumen).mockReset();
     await TestBed.configureTestingModule({
       imports: [ValorizacionComponent],
       providers: [
@@ -21,8 +22,8 @@ describe('ValorizacionComponent N5.2.G', () => {
   });
 
   it('expone heading accesible y censura importes cuando Finanzas.Ver no está permitido', () => {
-    permisos.puede.and.returnValue(false);
-    service.getResumen.and.returnValue(of({
+    vi.mocked(permisos.puede).mockReturnValue(false);
+    vi.mocked(service.getResumen).mockReturnValue(of({
       success: true,
       data: {
         valorInventarioCosto: null,
@@ -44,8 +45,8 @@ describe('ValorizacionComponent N5.2.G', () => {
   });
 
   it('renderiza el estado de error como role alert para recuperación accesible', () => {
-    permisos.puede.and.returnValue(true);
-    service.getResumen.and.returnValue(throwError(() => new Error('network')));
+    vi.mocked(permisos.puede).mockReturnValue(true);
+    vi.mocked(service.getResumen).mockReturnValue(throwError(() => new Error('network')));
 
     const fixture = TestBed.createComponent(ValorizacionComponent);
     fixture.detectChanges();
