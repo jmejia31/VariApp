@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "FROZEN",
+  "newDispatchAdmission": "OPEN",
   "allowExistingActiveSessions": true,
-  "reason": "N5.1.E_QA_TAKEOVER_RESOLVED__PENDING_EXACT_HEAD_CAUSAL_GATES_AND_P0_P1__NO_NEW_DISPATCH",
-  "updatedAtUtc": "2026-09-09T03:56:00Z"
+  "reason": "N5.1.E_LISTO_REAL__N5.1.F_PROMOTED_CANONICALLY__PARENT_CLOSE_FIRST_PRESERVED",
+  "updatedAtUtc": "2026-09-09T04:27:00Z"
 }
