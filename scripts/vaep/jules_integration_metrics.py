@@ -20,6 +20,14 @@ REQUIRED = {
     "Review", "Review-Evidence", "Scope-Decision", "Reviewed-Files",
     "Tests", "P0", "P1", "Integrated", "Integration-Branch"
 }
+# A REVIEW_FIRST / QA-takeover commit may carry Dispatch/Task/Worker metadata
+# without claiming to be an integration receipt. Treat a commit as receipt
+# intent only when it carries at least one strong integration-only field. Once
+# intent exists, the complete REQUIRED contract is still validated fail-closed.
+STRONG_INTEGRATION_INTENT = {
+    "Session", "Dispatch-Manifest", "Patch-SHA256", "Patch-Base",
+    "Integrated", "Integration-Branch"
+}
 
 def git(*args):
     return subprocess.check_output(["git", *args], text=True, stderr=subprocess.STDOUT).strip()
@@ -39,6 +47,9 @@ def parse_trailers(message):
 
 def split_semicolon(value):
     return [item.strip() for item in value.split(";") if item.strip()]
+
+def has_integration_receipt_intent(trailers):
+    return "Dispatch" in trailers and bool(set(trailers) & STRONG_INTEGRATION_INTENT)
 
 def validate_contract(trailers, duplicates, manifest, changed_files):
     errors = []
@@ -106,7 +117,7 @@ def validate_contract(trailers, duplicates, manifest, changed_files):
 def inspect_commit(sha):
     message = git("show", "-s", "--format=%B", sha)
     trailers, duplicates = parse_trailers(message)
-    if "Dispatch" not in trailers:
+    if not has_integration_receipt_intent(trailers):
         return {"receipt": False, "sha": sha}
 
     manifest_path = trailers.get("Dispatch-Manifest", "")
@@ -138,7 +149,7 @@ def print_valid_metrics(result):
 def validate_head(sha):
     result = inspect_commit(sha)
     if not result["receipt"]:
-        print(json.dumps({"status":"NO_INTEGRATION_RECEIPT","commit":sha,"countsAsUsefulThroughput":False,"reason":"ordinary commit; no VAEP-Dispatch trailer"}, indent=2))
+        print(json.dumps({"status":"NO_INTEGRATION_RECEIPT","commit":sha,"countsAsUsefulThroughput":False,"reason":"ordinary/review commit; no integration-receipt intent"}, indent=2))
         return 0
     if result["errors"]:
         print(json.dumps({"status":"INVALID_INTEGRATION_RECEIPT","commit":sha,"countsAsUsefulThroughput":False,"errors":result["errors"]}, indent=2))
@@ -191,7 +202,7 @@ def rolling(hours):
         "totalTarget24h":total_target if hours == 24 else None,
         "deficitByWorker":per_deficit,
         "totalDeficit":max(0,total_target-len(valid)) if hours == 24 and total_target is not None else None,
-        "excludedFromProductivity":["dispatch commits","manifests","autorefill","reservations","workflow success without session","SESSION_COMPLETED without validated integration"],
+        "excludedFromProductivity":["dispatch commits","manifests","autorefill","reservations","workflow success without session","SESSION_COMPLETED without validated integration","REVIEW_FIRST/QA takeover metadata without integration-receipt intent"],
         "integrations":[{"commit":item["sha"],"dispatchId":item["trailers"]["Dispatch"],"taskId":item["trailers"]["Task"],"worker":item["trailers"]["Worker"],"session":item["trailers"]["Session"]} for item in valid]
     }
     print(json.dumps(payload, indent=2))
@@ -223,13 +234,36 @@ def self_test():
     if errors:
         print("SELFTEST_VALID_RECEIPT_FAILED=" + json.dumps(errors))
         return 1
+    if not has_integration_receipt_intent(trailers):
+        print("SELFTEST_VALID_RECEIPT_INTENT_MISSED")
+        return 1
     bad = dict(trailers)
     bad["Review"] = "REQUIRED"
     if not validate_contract(bad, [], manifest, ["backend/src/Domain/Entities/Contabilidad/CentroCosto.cs"]):
         print("SELFTEST_INVALID_REVIEW_ACCEPTED")
         return 1
+    review_only = {
+        "Dispatch":"N5-2-B-1-DOMAIN-J2",
+        "Task":"N5.2.B.1.INVENTORY_REPORT_DOMAIN_CONTRACTS",
+        "Worker":"J2",
+        "Review":"PASS",
+        "Takeover":"CHATGPT_VAEP",
+        "Artifact":"10110597206"
+    }
+    if has_integration_receipt_intent(review_only):
+        print("SELFTEST_REVIEW_METADATA_MISCLASSIFIED_AS_RECEIPT")
+        return 1
+    malformed_intent = dict(review_only)
+    malformed_intent["Session"] = "sessions/123456"
+    if not has_integration_receipt_intent(malformed_intent):
+        print("SELFTEST_MALFORMED_RECEIPT_INTENT_MISSED")
+        return 1
+    if not validate_contract(malformed_intent, [], None, ["docs/example.md"]):
+        print("SELFTEST_MALFORMED_RECEIPT_NOT_REJECTED")
+        return 1
     print("JULES_INTEGRATION_RECEIPT_SELFTEST=PASS")
     print("PRODUCTIVITY_KPI_INTEGRATED_ONLY=PASS")
+    print("REVIEW_METADATA_EXCLUDED_FROM_INTEGRATION_RECEIPTS=PASS")
     return 0
 
 def main():
