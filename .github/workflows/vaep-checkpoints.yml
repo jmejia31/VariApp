@@ -1,8 +1,110 @@
-name: VAEP Checkpoints Paused For J1-J6 Cutover
-on: {workflow_dispatch: {}}
-permissions: {contents: read}
+name: VAEP scheduled checkpoints
+
+on:
+  schedule:
+    - cron: '0 * * * *'
+    - cron: '12 * * * *'
+    - cron: '24 * * * *'
+    - cron: '36 * * * *'
+    - cron: '48 * * * *'
+  workflow_run:
+    workflows:
+      - 'VAEP engine lightweight checks'
+      - 'Desarrollo - Compilación y pruebas'
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      checkpoint:
+        description: 'Canonical checkpoint to execute'
+        required: true
+        type: choice
+        options: [':00', ':12', ':24', ':36', ':48']
+
+permissions:
+  actions: write
+  contents: write
+  issues: read
+
+concurrency:
+  group: vaep-checkpoint-controller
+  cancel-in-progress: false
+
 jobs:
-  paused:
+  checkpoint:
+    if: >-
+      github.event_name != 'workflow_run' ||
+      (
+        (github.event.workflow_run.name == 'VAEP engine lightweight checks' ||
+         github.event.workflow_run.name == 'Desarrollo - Compilación y pruebas') &&
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.event == 'push' &&
+        github.event.workflow_run.head_branch == 'Desarrollo'
+      )
+    name: ${{ matrix.worker }} ${{ inputs.checkpoint || github.event.schedule || ':00' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        worker: [J1, J2, J3, J4, J5, J6]
+    env:
+      GITHUB_REPOSITORY: ${{ github.repository }}
+      GH_TOKEN: ${{ github.token }}
+      VAEP_CHECKPOINT: ${{ inputs.checkpoint || github.event.schedule || ':00' }}
+      WORKER_ID: ${{ matrix.worker }}
+      JULES_API_BASE: https://jules.googleapis.com/v1alpha
+      J1_API_KEY: ${{ secrets.JULES_J1_API_KEY }}
+      J2_API_KEY: ${{ secrets.JULES_J2_API_KEY }}
+      J3_API_KEY: ${{ secrets.JULES_J3_API_KEY }}
+      J4_API_KEY: ${{ secrets.JULES_J4_API_KEY }}
+      J5_API_KEY: ${{ secrets.JULES_J5_API_KEY }}
+      J6_API_KEY: ${{ secrets.JULES_J6_API_KEY }}
     steps:
-      - run: 'echo CHECKPOINTS_PAUSED_DURING_ATOMIC_J1_J6_CUTOVER; exit 0'
+      - name: Checkout Desarrollo
+        uses: actions/checkout@v4
+        with:
+          ref: Desarrollo
+          fetch-depth: 0
+
+      - name: Execute canonical VAEP checkpoint
+        shell: bash
+        run: bash .github/scripts/vaep-checkpoint.sh --checkpoint "$VAEP_CHECKPOINT" --worker "$WORKER_ID"
+
+      - name: Reconcile terminal review and exhausted attempts
+        if: always()
+        run: python3 scripts/vaep/terminal_handoff.py --audit "$WORKER_ID" --output "$RUNNER_TEMP/terminal-handoff.json"
+
+      - name: Preserve terminal handoff evidence
+        if: always()
+        id: terminal_handoff_artifact
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: terminal-handoff-${{ matrix.worker }}
+          path: ${{ runner.temp }}/terminal-handoff.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Retry terminal handoff evidence upload after transient artifact failure
+        if: always() && steps.terminal_handoff_artifact.outcome == 'failure'
+        id: terminal_handoff_artifact_retry
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: terminal-handoff-${{ matrix.worker }}-retry-${{ github.run_id }}
+          path: ${{ runner.temp }}/terminal-handoff.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Verify terminal handoff evidence was preserved
+        if: always()
+        shell: bash
+        env:
+          FIRST_UPLOAD: ${{ steps.terminal_handoff_artifact.outcome }}
+          RETRY_UPLOAD: ${{ steps.terminal_handoff_artifact_retry.outcome }}
+        run: |
+          set -euo pipefail
+          if [[ "$FIRST_UPLOAD" != "success" && "$RETRY_UPLOAD" != "success" ]]; then
+            echo "Neither terminal handoff artifact upload succeeded." >&2
+            exit 1
+          fi
