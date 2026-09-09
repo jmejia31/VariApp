@@ -25,7 +25,7 @@ public sealed class ReportesInventarioKardexController : ControllerBase
     }
 
     [HttpGet]
-    [RequierePermiso(ModuloSistema.MovimientosInventario, AccionPermiso.ConsultarHistorial)]
+    [RequierePermiso(ModuloSistema.MovimientosInventario, AccionPermiso.Ver)]
     public async Task<IActionResult> Get([FromQuery] ReporteInventarioKardexFiltroDto filtro)
     {
         var error = ReporteInventarioQueryRules.Validate(filtro, "Fecha");
