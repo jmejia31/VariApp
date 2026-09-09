@@ -1,6 +1,8 @@
 using System.Reflection;
 using InventoryApp.API.Controllers;
 using InventoryApp.API.Filters;
+using InventoryApp.Application.Common;
+using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
