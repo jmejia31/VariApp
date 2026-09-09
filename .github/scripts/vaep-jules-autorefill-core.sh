@@ -4,6 +4,7 @@ set -euo pipefail
 readonly BRANCH="Desarrollo"
 readonly CATALOG="vaep/control/jules-autorefill-catalog.json"
 readonly ADMISSION_PATH="vaep/control/dispatch-admission.json"
+readonly ATTEMPT1_BODY_RE='(?m)^- Task attempt: `1/[0-9]+`(?:;.*)?$|; attempt: `?1/[0-9]+`?(?:$|[^0-9])'
 
 : "${GITHUB_REPOSITORY:?GITHUB_REPOSITORY required}"
 : "${GH_TOKEN:?GH_TOKEN required}"
@@ -318,14 +319,14 @@ recoverable_attempt1_entry() {
         | last // ""
       ' <<<"$issues")"
       reason=""
-      if jq -e --arg dispatch "$dispatch" 'any(.[]?; ((.title // "") | contains($dispatch)) and ((.body // "") | contains("- Terminal contract classification: `EVIDENCE_GAP_REVIEW_REQUIRED`")) and ((.body // "") | contains("attempt: 1/")))' <<<"$issues" >/dev/null; then
+      if jq -e --arg dispatch "$dispatch" --arg attempt1Re "$ATTEMPT1_BODY_RE" 'any(.[]?; ((.title // "") | contains($dispatch)) and ((.body // "") | contains("- Terminal contract classification: `EVIDENCE_GAP_REVIEW_REQUIRED`")) and ((.body // "") | test($attempt1Re)))' <<<"$issues" >/dev/null; then
         echo "AUTOREFILL_WAIT=EVIDENCE_GAP_REVIEW_REQUIRED worker=$WORKER_ID dispatch=$dispatch action=NO_R2_REVIEW_OR_QA" >&2
         continue
       elif [[ "$actual" =~ ^[0-9a-fA-F]{40}$ && "$actual" != "$requested" ]]; then
         reason="PATCH_BASE_CONTROL_PLANE_DIVERGENCE actual=$actual requested=$requested"
-      elif jq -e --arg dispatch "$dispatch" 'any(.[]?; ((.title // "") == ("[VAEP-JULES-SUPERSEDED] " + $dispatch)) and (((.body // "") | contains("JULES_LANE_BUDGET_EXCEEDED")) and ((.body // "") | contains("- Task: ")) and ((.body // "") | contains("attempt: 1/"))))' <<<"$issues" >/dev/null; then
+      elif jq -e --arg dispatch "$dispatch" --arg attempt1Re "$ATTEMPT1_BODY_RE" 'any(.[]?; ((.title // "") == ("[VAEP-JULES-SUPERSEDED] " + $dispatch)) and (((.body // "") | contains("JULES_LANE_BUDGET_EXCEEDED")) and ((.body // "") | contains("- Task: ")) and ((.body // "") | test($attempt1Re))))' <<<"$issues" >/dev/null; then
         reason="JULES_LANE_BUDGET_EXCEEDED attempt=1"
-      elif jq -e --arg dispatch "$dispatch" 'any(.[]?; ((.title // "") | contains($dispatch)) and ((.body // "") | test("Terminal state: `FAILED`|Terminal state=FAILED")) and ((.body // "") | test("Patch present: `false`|patchPresent=false")) and ((.body // "") | contains("attempt: 1/")) and ((.title // "") | startswith("[VAEP-JULES-SUPERSEDED]") | not))' <<<"$issues" >/dev/null; then
+      elif jq -e --arg dispatch "$dispatch" --arg attempt1Re "$ATTEMPT1_BODY_RE" 'any(.[]?; ((.title // "") | contains($dispatch)) and ((.body // "") | test("Terminal state: `FAILED`|Terminal state=FAILED")) and ((.body // "") | test("Patch present: `false`|patchPresent=false")) and ((.body // "") | test($attempt1Re)) and ((.title // "") | startswith("[VAEP-JULES-SUPERSEDED]") | not))' <<<"$issues" >/dev/null; then
         reason="JULES_CONTENT_FAILED_PATCH_ABSENT attempt=1"
       else
         continue
