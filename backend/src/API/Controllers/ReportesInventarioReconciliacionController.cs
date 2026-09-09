@@ -3,6 +3,8 @@ using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Enums;
+using InventoryApp.Infrastructure.Persistence;
+using InventoryApp.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,14 +15,15 @@ namespace InventoryApp.API.Controllers;
 [Route("inventario/reportes/reconciliacion")]
 public sealed class ReportesInventarioReconciliacionController : ControllerBase
 {
-    private readonly IReporteInventarioService _reportes;
+    private readonly ReporteInventarioService _reportes;
     private readonly IPermisoService _permisos;
 
     public ReportesInventarioReconciliacionController(
-        IReporteInventarioService reportes,
+        AppDbContext context,
+        IUsuarioScopeService usuarioScope,
         IPermisoService permisos)
     {
-        _reportes = reportes;
+        _reportes = new ReporteInventarioService(context, usuarioScope);
         _permisos = permisos;
     }
 
