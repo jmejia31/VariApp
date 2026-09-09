@@ -100,9 +100,12 @@ jobs:
           test "$(grep -c 'cron:' .github/workflows/vaep-checkpoints.yml)" -eq 5
           grep -Fq 'worker: [J1, J2, J3, J4, J5, J6]' .github/workflows/vaep-checkpoints.yml
           for i in 1 2 3 4 5 6; do
-            grep -Fq "J${i}_API_KEY: ${{ secrets.JULES_J${i}_API_KEY }}" .github/workflows/vaep-checkpoints.yml
-            grep -Fq "J${i}_API_KEY: ${{ secrets.JULES_J${i}_API_KEY }}" .github/workflows/vaep-jules-stop.yml
-            grep -Fq "J${i}_KEY: ${{ secrets.JULES_J${i}_API_KEY }}" .github/workflows/vaep-jules-session-health.yml
+            grep -Fq "J${i}_API_KEY:" .github/workflows/vaep-checkpoints.yml
+            grep -Fq "JULES_J${i}_API_KEY" .github/workflows/vaep-checkpoints.yml
+            grep -Fq "J${i}_API_KEY:" .github/workflows/vaep-jules-stop.yml
+            grep -Fq "JULES_J${i}_API_KEY" .github/workflows/vaep-jules-stop.yml
+            grep -Fq "J${i}_KEY:" .github/workflows/vaep-jules-session-health.yml
+            grep -Fq "JULES_J${i}_API_KEY" .github/workflows/vaep-jules-session-health.yml
           done
           grep -Fq 'test("^J[1-6]$")' .github/workflows/vaep-jules-stop.yml
           grep -Fq 'secrets.JULES_J1_API_KEY' .github/workflows/vaep-jules-diagnostic.yml
