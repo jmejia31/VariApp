@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-1-H-2-CERT-D",
+  "taskId": "N5.1.H.2.CERTIFICATION_CHECKLIST",
+  "workerId": "J4",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/N5.1_CENTRO_REPORTES_CERT_CHECKLIST.md",
+  "prompt": "Read docs/VAEP_AUTHORITY.md and accepted N5.1 evidence first. Build the final evidence checklist for controller certification: DoD, applicable gates, exact tests, P0/P1, rollback and production untouched. Carry unresolved non-P0/P1 gaps explicitly; do not self-certify the parent. Only VAEP may declare LISTO_REAL after REVIEW_FIRST and causal gates. Documentation only; include two self-reviews.",
+  "primaryBaseHead": "627544940752d1148ca1e032d3fe44328c07ae0c"
+}
