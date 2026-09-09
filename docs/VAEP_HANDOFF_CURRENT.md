@@ -1,54 +1,81 @@
 # VAEP handoff actual — VariApp
 
-> Handoff informativo compartido. La autoridad de reglas sigue siendo `docs/VAEP_AUTHORITY.md`; el estado fresco se verifica en GitHub `Desarrollo` + Plan Maestro. Este archivo existe para que ChatGPT, Chat B, Codex autorizado y cualquier colaborador futuro sepan qué cambió y qué deben inspeccionar antes de actuar.
+> Handoff operativo compartido para ChatGPT/Chat, Codex, Antigravity, Jules J1–J6 y cualquier colaborador. La autoridad normativa sigue siendo `docs/VAEP_AUTHORITY.md`; el estado fresco siempre se confirma contra GitHub `Desarrollo` y el Plan Maestro antes de actuar. No usar este archivo como sustituto de evidencia causal.
 
-## Qué cambió
+## Corte de control sincronizado
 
-- `N5.1.H` ya estaba certificado `LISTO_REAL`, pero el parent-close estaba consumiendo evidencia incompatible y el control plane quedó congelado.
-- Se normalizó el recibo canónico `vaep/evidence/fragments/N5.1.H_LISTO_REAL_20260909T1236Z.json` sin crear una nueva afirmación de cierre. Cambio causal: `45f8e9e3da51470cfd4e1b742ee2eba55b8b3bcf`.
-- GitHub Actions materializó la reconciliación: `lastClosedParent=N5.1.H`, `CURRENT_PARENT=N5.2.A` y admission `OPEN`; transición: `4a6dfa7a59d46afcd9589a380d07eee4f61cc42c`.
-- El catálogo se corrigió para dejar de describir N5.1.H, ampliar el roadmap real de N5.2 y abastecer seis write-scopes materiales de preflight en J1–J6.
-- `.github/scripts/vaep-parent-close.sh` fue corregido para validar los `runId/headSha` causales declarados en el recibo en vez de exigir un workflow hardcodeado que podía ser no aplicable. Hardening: `3fa2015aad49d7bcdf80dc74c98012362beafb6c` y `efff38fcefe5d7f06cc4e1dcbd5f22234ad8ae56`.
-- `scripts/vaep/parent_transition.py` fue endurecido para mantener coherentes `currentParent`, `throughputPlan`, roadmap note y razones de lane en promociones futuras; las pruebas de transición fueron ampliadas.
-- Se recrearon y habilitaron las cinco tareas externas canónicas de ChatGPT en `America/Tegucigalpa`: `:00`, `:12`, `:24`, `:36`, `:48`. No crear duplicados; verificar el sistema de Tareas antes de reemplazarlas.
+- Repo: `jmejia31/VariApp`; rama operativa: `Desarrollo`.
+- Baseline de control antes de este handoff: `82484b0628f0fa30a7fc9882a580d6c004b37e38` (`chore(vaep): recover J4 N5.2.A transport`). Después de leer este archivo, volver a consultar el HEAD vivo.
+- `lastClosedParent=N5.1.H`; recibo: `vaep/evidence/fragments/N5.1.H_LISTO_REAL_20260909T1236Z.json`.
+- `CURRENT_PARENT=N5.2.A` — Reportes de inventario / auditoría y preflight.
+- Admission: `OPEN`, con razón `N5.2.A_CURRENT__SIX_NON_OVERLAPPING_WRITE_SCOPES_READY__NO_FALSE_ACTIVE`.
+- `N5.2.A` sigue `PENDIENTE`: no declarar `LISTO_REAL`, no promover `N5.2.B` y no inferir PASS por dispatch, commit o workflow aislado. Requiere seis entregas materiales reconciliadas, REVIEW_FIRST, gates causales/DoD y P0/P1=0.
+- `main`, Producción, secrets y PR #2 quedan fuera de alcance; PR #2 no se mergea desde VAEP.
 
-## CURRENT_PARENT y qué buscar
+## Delta material y deuda corregida
 
-`CURRENT_PARENT=N5.2.A — Reportes de inventario / Auditoría y preflight`
+- J3 fue rechazado en REVIEW_FIRST por defectos factuales/de prueba y pasó a QA_TAKEOVER en vez de rebind genérico. Delta integrado: `6c5ca463cabdf79335123fb05e2c109173cc6668` (`docs(N5.2.A): QA takeover J3 reconciliation preflight`) → `docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_RECONCILIACION_OPERATIVA.md`. La corrección usa terminología real (`DiferenciaSnapshot`) y conserva gaps/limitaciones explícitos.
+- Transporte J1–J6 endurecido: `7b33ca82b446afe5e6c190fc66f807421bd06ded` acepta rutas canónicas J5/J6 y `3e46b387ef2d680a53bbfd1a48e79a462f1a27a8` repara semántica de timeout terminal. `.github/scripts/vaep-jules-master.sh` acepta `vaep/(jules|jules-b|jules-c|jules-d|j5|j6)/dispatch/*.json`.
+- Recoveries pre-sesión materializados sin consumir intento Jules: J1 `82385dae67ad244ab5b5868f5c110aa821ff984c`; J2 `8103ee241a9d696f22bd44a5fe6194cd14424716`; J5 `8b86f05c76b7e4c8b9e1b60ae68a35f8c38f2df2`; J6 `c5f885fb732ccc6d140188c67fa82e509dc35036`; J4 `82484b0628f0fa30a7fc9882a580d6c004b37e38` con `vaep/jules-d/dispatch/N5-2-A-5-ARCH-J4-RECOVERY1.json`.
+- Una recovery manifest/dispatch NO prueba `ACTIVE_REAL`. Antes de afirmar ACTIVE, terminal, reviewable o consumido, comprobar workflow/session evidence vivo.
 
-- J1 `N5.2.A.2.VALUATION_KARDEX_PREFLIGHT` → `docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_VALORIZACION_KARDEX.md`
-- J2 `N5.2.A.3.STOCK_ANALYTICS_PREFLIGHT` → `docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_STOCK_ANALYTICS.md`
-- J3 `N5.2.A.4.RECONCILIATION_OPERATIONS_PREFLIGHT` → `docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_RECONCILIACION_OPERATIVA.md`
-- J4 `N5.2.A.5.ARCH_API_UI_TOPOLOGY_PREFLIGHT` → `docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_ARCH_API_UI.md`
-- J5 `N5.2.A.1.REPORTES_INVENTARIO_PREFLIGHT_QA` → `docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_QA.md`
-- J6 `N5.2.A.6.RBAC_AUDIT_SCOPE_PREFLIGHT` → `docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_RBAC_AUDIT.md`
+## Seis scopes materiales de N5.2.A
 
-`dispatchEligible=true` no equivale por sí solo a `ACTIVE_REAL`; sesión/actividad debe probarse antes de afirmarla. No redispatchar una identidad ya activa/terminal sin comprobar el registro y las sesiones reales.
+| Lane | Task | Entrega material esperada | Estado cierto al baseline |
+|---|---|---|---|
+| J1 | `N5.2.A.2.VALUATION_KARDEX_PREFLIGHT` | `docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_VALORIZACION_KARDEX.md` | recovery despachado; archivo aún no materializado |
+| J2 | `N5.2.A.3.STOCK_ANALYTICS_PREFLIGHT` | `docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_STOCK_ANALYTICS.md` | recovery despachado; archivo aún no materializado |
+| J3 | `N5.2.A.4.RECONCILIATION_OPERATIONS_PREFLIGHT` | `docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_RECONCILIACION_OPERATIVA.md` | QA_TAKEOVER integrado; pendiente REVIEW_FIRST/cierre causal del parent |
+| J4 | `N5.2.A.5.ARCH_API_UI_TOPOLOGY_PREFLIGHT` | `docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_ARCH_API_UI.md` | recovery despachado; archivo aún no materializado al baseline |
+| J5 | `N5.2.A.1.REPORTES_INVENTARIO_PREFLIGHT_QA` | `docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_QA.md` | recovery despachado; archivo aún no materializado |
+| J6 | `N5.2.A.6.RBAC_AUDIT_SCOPE_PREFLIGHT` | `docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_RBAC_AUDIT.md` | recovery despachado; archivo aún no materializado |
 
-## Evidencia causal de N5.1.H
+No rellenar capacidad ociosa con busywork ni duplicar scopes. ATTEMPT1+R2 máximo; R3 prohibido. Dos waves sin delta material => circuit breaker/QA_TAKEOVER, no rebind genérico.
 
-- Functional HEAD: `65406f48f071367a368e75b32f82fda3fc915f5b`.
-- `Desarrollo - aceptación funcional integral`: run `34339662570`, `SUCCESS`, Playwright `100/100`.
-- El recibo normalizado contiene además gates de hardening exact-head con `runId/headSha`; consumir esos IDs exactos, no inferir PASS por nombre o por una corrida distinta.
-- P0 abiertos: 0. P1 abiertos: 0.
-- Los gaps B4, C1–C4, D1–D2, E4–E5 siguen explícitos como deuda no-P0/P1; no convertirlos silenciosamente en PASS.
+## Qué debe mirar cada colaborador
 
-## Qué verificar al retomar
+### ChatGPT / Chat / VAEP
 
-1. Leer `docs/VAEP_AUTHORITY.md` y este handoff.
-2. Reconsultar HEAD vivo de `Desarrollo`; ninguna SHA escrita aquí es un HEAD eterno.
-3. Confirmar `currentParent`, `lastClosedParent`, `closureReceipts`, `throughputPlan` y lanes en `vaep/control/jules-autorefill-catalog.json`.
-4. Confirmar `vaep/control/dispatch-admission.json`; si está `FROZEN`, leer la razón exacta antes de despachar.
-5. Revisar solo los scopes materiales del parent vivo y dependencias directas; no reabrir N5.1.H ni redispatchar identidades cerradas.
-6. REVIEW_FIRST sobre entregas terminales; R2 máximo cuando aplique; R3 prohibido. Dos waves sin delta material => circuit breaker/QA_TAKEOVER, no rebind genérico.
-7. Para CI usar siempre HEAD exacto. `action_required`, `skipped` o un workflow no aplicable no equivalen a PASS; usar los gates causales definidos por el recibo/DoD.
-8. Reconciliar `DASHBOARD`, `CONFIG`, `COLA`, `TAREAS_PROGRAMADAS` y `CONTROL_TOWER` del Plan Maestro con GitHub; no trabajar desde telemetría vieja.
-9. Verificar que las cinco tareas externas sigan habilitadas y no duplicadas: `:00/:12/:24/:36/:48`.
-10. Mantener `main`, Producción, secrets y PR #2 sin merge intactos.
+1. Leer `docs/VAEP_AUTHORITY.md` → este handoff → HEAD vivo → `vaep/control/jules-autorefill-catalog.json` → `vaep/control/dispatch-admission.json` → Plan Maestro.
+2. Resolver blockers causales/materiales; no limitarse a reportar estado ni usar telemetría stale.
+3. Drenar REVIEW_FIRST de cada entrega terminal y comprobar DoD/gates/P0-P1 antes de cualquier `LISTO_REAL`.
+4. Tras cierre real de N5.2.A, materializar en la misma transición la promoción dependency-safe a N5.2.B y refill material, nunca antes.
 
-## Roles
+### Codex
 
-- ChatGPT/VAEP y Chat B: controller/REVIEW_FIRST/QA/corrección/certificación.
-- Jules J1–J6: scopes exclusivos y materiales.
-- Codex: fuera del flujo salvo orden explícita; si vuelve, empieza por este handoff + Git fresco.
-- AntiG/Antigravity: `RESERVED_INACTIVE`, sin scheduler/handoff processing/LISTO_REAL; puede leer este handoff, no ejecutar.
+- Partir de HEAD exacto, no de memoria ni de un snapshot viejo.
+- Auditar diffs, contratos, tests y causalidad de gates contra los seis scopes y el DoD de N5.2.A.
+- Buscar contradicciones factual/domain/API, regresiones y P0/P1; proponer/corregir sólo deuda causal dentro de `Desarrollo`.
+- No tocar `main`, Producción, secrets ni mergear PR #2. Codex no declara por sí solo `LISTO_REAL`.
+
+### Antigravity / AntiG
+
+- Auditoría independiente de arquitectura, automation debt, stale state, transport/session evidence y no-duplicación.
+- Puede identificar causal blockers y señalar inconsistencias para takeover/controller; no inventar actividad, no duplicar un lane Jules sano y no declarar `LISTO_REAL`.
+- Priorizar hechos reproducibles: HEAD exacto, archivos existentes, manifests, run/session evidence y Plan Maestro.
+
+### Jules J1–J6
+
+- Ejecutar únicamente la identidad/scope del manifest vigente de su lane; dos self-reviews.
+- No escribir el archivo de otro lane ni redefinir semántica que ese lane posee.
+- No main/Producción/secrets; no busywork; no R3.
+- Una sesión o commit sólo se considera aceptable después de REVIEW_FIRST del controller.
+
+## Orden exacto de inspección/cierre de N5.2.A
+
+1. Confirmar HEAD vivo y admission.
+2. Confirmar evidencia real de session/terminal para J1, J2, J4, J5 y J6; no usar el dispatch como sustituto.
+3. Verificar/materializar los cinco documentos faltantes y preservar el J3 QA_TAKEOVER integrado.
+4. REVIEW_FIRST por entrega: exactitud factual, no-duplicación, tests/evidencia, dos self-reviews y scope.
+5. Reconciliar los seis documentos en la síntesis J5 sin borrar gaps reales.
+6. Ejecutar/verificar gates causales aplicables al HEAD exacto; `skipped`, `action_required`, nombre coincidente o run de otro SHA no equivalen a PASS.
+7. Confirmar P0=0 y P1=0 y emitir recibo sólo si el DoD real está satisfecho.
+8. Sólo entonces cerrar N5.2.A y promover N5.2.B dependency-safe; sincronizar catálogo, admission, Plan Maestro, telemetría y este handoff.
+
+## Compartidos que deben permanecer sincronizados
+
+- Git: `docs/VAEP_AUTHORITY.md`, este `docs/VAEP_HANDOFF_CURRENT.md`, `vaep/control/jules-autorefill-catalog.json`, `vaep/control/dispatch-admission.json`, manifests/evidence y HEAD de `Desarrollo`.
+- Plan Maestro: `DASHBOARD`, `CONFIG`, `COLA`, `TAREAS_PROGRAMADAS`, `CONTROL_TOWER`, `WORKERS`, `AUTOMATIZACIONES` y `BITACORA` cuando aplique.
+- Las cinco tareas externas canónicas de ChatGPT deben seguir únicas y habilitadas en `:00/:12/:24/:36/:48`; comprobar el sistema de Tareas antes de recrearlas.
+
+Si Git y el Plan discrepan, no elegir el dato más conveniente: reconciliar contra autoridad, evidencia causal y HEAD vivo, dejar rastro explícito y corregir el shared state antes de continuar.
