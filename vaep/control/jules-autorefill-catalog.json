@@ -1,9 +1,9 @@
 {
-  "version": 21,
+  "version": 22,
   "authority": "docs/VAEP_AUTHORITY.md",
   "currentParent": "N5.1.D",
-  "generatedAt": "2026-09-09T00:39:44Z",
-  "regenerationReason": "AUTOMATIC_PARENT_CLOSE__N5.1.C_LISTO_REAL__N5.1.D_CURRENT",
+  "generatedAt": "2026-09-09T01:18:15Z",
+  "regenerationReason": "CHAT_B_THROUGHPUT_HARDENING__N5.1.E_FOUR_LANE_SWARM_PREARMED",
   "lastClosedParent": "N5.1.C",
   "closureReceipts": {
     "N4.11.H": "vaep/evidence/fragments/N4.11.H_LISTO_REAL_20260908T204500Z.json",
@@ -17,20 +17,22 @@
       "commit": "0852a028d2eb6a16e7f352e293f30418cbb9a1b3",
       "path": "vaep/control/jules-autorefill-catalog.json",
       "blob": "2a1662930b6cda3fd41545fc41ef9f72760cedad",
-      "parents": [
-        "N4.11.G",
-        "N4.11.H"
-      ],
+      "parents": ["N4.11.G", "N4.11.H"],
       "reason": "Certified closed; immutable manifests and reviewed evidence retained in Git; no work discarded."
     },
     {
       "commit": "f08544218cd57e8b4420e6595e632a719907d44a",
       "path": "vaep/control/jules-autorefill-catalog.json",
       "blob": "5d0f0c8a51236f74d1c4b8c423dfb1664f766e50",
-      "parents": [
-        "N5.1.A"
-      ],
+      "parents": ["N5.1.A"],
       "reason": "N5.1.A certified LISTO_REAL after REVIEW_FIRST and QA_TAKEOVER; no N5.1.B lane scope fabricated."
+    },
+    {
+      "commit": "3dace32c316effaa6b35923bb844de0aaf21e821",
+      "path": "vaep/control/jules-autorefill-catalog.json",
+      "blob": "243515cf267ac134559a0b3ac15d0482fa80b687",
+      "parents": ["N5.1.B", "N5.1.C", "N5.1.D"],
+      "reason": "Superseded by throughput-hardening catalog. Closed evidence remains immutable; N5.1.D semantics unchanged; N5.1.E receives four distinct material scopes."
     }
   ],
   "policy": {
@@ -43,131 +45,41 @@
     "genericFloorRegeneration": false,
     "noBusywork": true,
     "semanticIdentity": "CURRENT_PARENT + material scope/semantic facet",
-    "stopWhenEligibleWorkExhausted": true
+    "stopWhenEligibleWorkExhausted": true,
+    "materialParallelismTargetPerParent": 4,
+    "requireDistinctWriteScopesWhenParallel": true,
+    "lowParallelismAction": "EXPLAIN_OR_SUBDIVIDE_MATERIAL_SCOPE__NO_BUSYWORK"
+  },
+  "throughputPlan": {
+    "mode": "MATERIAL_SWARM_FIRST",
+    "currentParent": "N5.1.D",
+    "currentParentMaterialScopeCount": 1,
+    "currentParentReason": "Accepted N5.1.D evidence proves no new Application/API seam; close the parent instead of fabricating work.",
+    "nextParent": "N5.1.E",
+    "nextParentParallelMaterialScopes": 4,
+    "nextParentScopesNonOverlapping": true,
+    "laneRefill": "POST_TERMINAL_AUTOREFILL_PLUS_CANONICAL_CHECKPOINTS"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
     "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
-    "sourceRanges": [
-      "COLA!A391:T399",
-      "PLAN_MAESTRO!A51:L52"
-    ],
-    "note": "Derived dependency order from live Plan/COLA. Current B scope remains controller-prepared; C-H scopes are prearmed but dispatchEligible=false until dependency-valid promotion.",
+    "sourceRanges": ["COLA!A391:T399", "PLAN_MAESTRO!A51:L52"],
+    "note": "Dependency order derived from live Plan/COLA. N5.1.E is prearmed as a four-lane material swarm; future parents remain dependency-gated.",
     "nodes": [
-      {
-        "id": "N4.11.H",
-        "order": 0,
-        "type": "MICROTAREA",
-        "dependencies": [
-          "N4.11.G"
-        ],
-        "phaseGate": "GATE-N3"
-      },
-      {
-        "id": "GATE-N4",
-        "order": 1,
-        "type": "GATE_FASE",
-        "dependencies": [
-          "N4.1.H",
-          "N4.2.H",
-          "N4.3.H",
-          "N4.4.H",
-          "N4.5.H",
-          "N4.6.H",
-          "N4.7.H",
-          "N4.8.H",
-          "N4.9.H",
-          "N4.10.H",
-          "N4.11.H"
-        ]
-      },
-      {
-        "id": "N5.1.A",
-        "order": 2,
-        "type": "MICROTAREA",
-        "dependencies": [
-          "GATE-N4"
-        ],
-        "phaseGate": "GATE-N4"
-      },
-      {
-        "id": "N5.1.B",
-        "order": 3,
-        "type": "MICROTAREA",
-        "dependencies": [
-          "N5.1.A"
-        ],
-        "phaseGate": "GATE-N4"
-      },
-      {
-        "id": "N5.1.C",
-        "order": 4,
-        "type": "MICROTAREA",
-        "dependencies": [
-          "N5.1.B"
-        ],
-        "phaseGate": "GATE-N4"
-      },
-      {
-        "id": "N5.1.D",
-        "order": 5,
-        "type": "MICROTAREA",
-        "dependencies": [
-          "N5.1.C"
-        ],
-        "phaseGate": "GATE-N4"
-      },
-      {
-        "id": "N5.1.E",
-        "order": 6,
-        "type": "MICROTAREA",
-        "dependencies": [
-          "N5.1.D"
-        ],
-        "phaseGate": "GATE-N4"
-      },
-      {
-        "id": "N5.1.F",
-        "order": 7,
-        "type": "MICROTAREA",
-        "dependencies": [
-          "N5.1.E"
-        ],
-        "phaseGate": "GATE-N4"
-      },
-      {
-        "id": "N5.1.G",
-        "order": 8,
-        "type": "MICROTAREA",
-        "dependencies": [
-          "N5.1.F"
-        ],
-        "phaseGate": "GATE-N4"
-      },
-      {
-        "id": "N5.1.H",
-        "order": 9,
-        "type": "MICROTAREA",
-        "dependencies": [
-          "N5.1.G"
-        ],
-        "phaseGate": "GATE-N4"
-      }
+      {"id":"N4.11.H","order":0,"type":"MICROTAREA","dependencies":["N4.11.G"],"phaseGate":"GATE-N3"},
+      {"id":"GATE-N4","order":1,"type":"GATE_FASE","dependencies":["N4.1.H","N4.2.H","N4.3.H","N4.4.H","N4.5.H","N4.6.H","N4.7.H","N4.8.H","N4.9.H","N4.10.H","N4.11.H"]},
+      {"id":"N5.1.A","order":2,"type":"MICROTAREA","dependencies":["GATE-N4"],"phaseGate":"GATE-N4"},
+      {"id":"N5.1.B","order":3,"type":"MICROTAREA","dependencies":["N5.1.A"],"phaseGate":"GATE-N4"},
+      {"id":"N5.1.C","order":4,"type":"MICROTAREA","dependencies":["N5.1.B"],"phaseGate":"GATE-N4"},
+      {"id":"N5.1.D","order":5,"type":"MICROTAREA","dependencies":["N5.1.C"],"phaseGate":"GATE-N4"},
+      {"id":"N5.1.E","order":6,"type":"MICROTAREA","dependencies":["N5.1.D"],"phaseGate":"GATE-N4"},
+      {"id":"N5.1.F","order":7,"type":"MICROTAREA","dependencies":["N5.1.E"],"phaseGate":"GATE-N4"},
+      {"id":"N5.1.G","order":8,"type":"MICROTAREA","dependencies":["N5.1.F"],"phaseGate":"GATE-N4"},
+      {"id":"N5.1.H","order":9,"type":"MICROTAREA","dependencies":["N5.1.G"],"phaseGate":"GATE-N4"}
     ]
   },
   "lanes": {
     "JULES_A": [
-      {
-        "dispatchId": "N5-1-B-1-DOMAIN-CONTRACT-DECISION-A",
-        "taskId": "N5.1.B.1.DOMAIN_CONTRACT_DECISION",
-        "workerId": "JULES_A",
-        "taskAttempt": 1,
-        "plannedParent": "N5.1.B",
-        "readyForDispatch": true,
-        "dispatchEligible": false,
-        "fileScopeHint": "docs/N5.1_REPORTES_DOMAIN_CONTRACT_DECISION.md",
-        "prompt": "Read docs/VAEP_AUTHORITY.md, PROJECT_INDEX.md and all four docs/N5.1_REPORTES_PREFLIGHT_*.md first. This is N5.1.B (Dominio y contratos), whose canonical COLA scope explicitly permits documenting N/A with evidence when domain changes do not apply. Inspect the exact current Desarrollo code for existing report interfaces, DTOs, services and authorization contracts. Decide whether the independent report center actually requires a new domain model or domain contract at this stage. The certified preflight says existing specialized contracts should be reused and a new facade/interface must not be invented without a concrete cross-domain use case. Write only docs/N5.1_REPORTES_DOMAIN_CONTRACT_DECISION.md. If no new domain contract is materially required, document N/A with exact file/symbol evidence, invariants that remain owned by existing services, and acceptance constraints for N5.1.C/D. If a new domain contract is genuinely required, do NOT implement it in this task: document the concrete blocker, exact proposed seam and why existing contracts cannot express the approved use case so VAEP can subdivide safely. Do not modify product code, DB, RBAC grants, control-plane, manifests, secrets, main or production. Deliver a nonempty patch against primaryBaseHead; record TESTS_EXECUTED honestly (including inspection-only/not-run reasons) and two genuinely separate SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 checks. Never claim CI, integration or LISTO_REAL not performed."
-      },
       {
         "dispatchId": "N5-1-D-1-APP-API-A",
         "taskId": "N5.1.D.1.APPLICATION_API_COMPOSITION_DECISION",
@@ -175,20 +87,20 @@
         "taskAttempt": 1,
         "plannedParent": "N5.1.D",
         "readyForDispatch": true,
-        "dispatchEligible": true,
+        "dispatchEligible": false,
         "fileScopeHint": "docs/N5.1_REPORTES_APPLICATION_API_DECISION.md",
-        "prompt": "Read docs/VAEP_AUTHORITY.md, PROJECT_INDEX.md and the accepted N5.1.A preflight evidence first. Preserve main/Production/secrets. Work only in the declared FILE_SCOPE_HINT and do not expand scope. Using accepted B/C decisions, determine whether the independent center requires any new Application/API seam. Prefer reuse of existing report endpoints/services when sufficient. If no new backend endpoint is needed, record a grounded N/A with exact existing contracts and regression requirements. If a real gap exists, specify the minimal future code scope precisely; do not invent a facade. Documentation only for this decision task."
+        "prompt": "Read docs/VAEP_AUTHORITY.md, PROJECT_INDEX.md and accepted N5.1.A/B/C evidence first. Preserve main/Production/secrets. This task is already terminal-reviewed and integrated; do not redispatch it. It remains only as current-parent lineage until N5.1.D closes."
       },
       {
-        "dispatchId": "N5-1-E-1-SHELL-A",
-        "taskId": "N5.1.E.1.INDEPENDENT_REPORT_CENTER_SHELL",
+        "dispatchId": "N5-1-E-1-SHELL-ROUTE-A",
+        "taskId": "N5.1.E.1.INDEPENDENT_REPORT_CENTER_SHELL_ROUTE",
         "workerId": "JULES_A",
         "taskAttempt": 1,
         "plannedParent": "N5.1.E",
         "readyForDispatch": true,
         "dispatchEligible": false,
-        "fileScopeHint": "frontend/src/app/features/centro-reportes/",
-        "prompt": "Read docs/VAEP_AUTHORITY.md, PROJECT_INDEX.md and the accepted N5.1.A preflight evidence first. Preserve main/Production/secrets. Work only in the declared FILE_SCOPE_HINT and do not expand scope. Implement the independent Centro de Reportes feature shell using standalone Angular patterns already present. Compose/link existing reporting capabilities; do not duplicate report algorithms or weaken authorization. Keep changes under this new feature directory only. Cover loading/empty/error/accessibility where the shell owns them. Run targeted frontend checks and two independent self-reviews."
+        "fileScopeHint": "frontend/src/app/features/centro-reportes/**;frontend/src/app/app.routes.ts",
+        "prompt": "Read docs/VAEP_AUTHORITY.md, PROJECT_INDEX.md and accepted N5.1.A-D evidence first. Preserve main/Production/secrets. Implement the independent Centro de Reportes standalone feature shell and its route as one atomic self-contained scope. Reuse ReporteAdministrativoService and EstadoFinancieroService; do not duplicate report algorithms or add backend endpoints. Route protection must use the existing auth/permission guards and the accepted authorization contract. Own only frontend/src/app/features/centro-reportes/** and frontend/src/app/app.routes.ts. Do not edit app.component.ts or service spec files owned by other lanes. Cover loading, empty, error and accessibility states where the shell owns them. Run targeted frontend tests/type checks and two independent self-reviews."
       },
       {
         "dispatchId": "N5-1-H-1-DOC-A",
@@ -199,31 +111,20 @@
         "readyForDispatch": true,
         "dispatchEligible": false,
         "fileScopeHint": "docs/N5.1_CENTRO_REPORTES_RUNBOOK.md",
-        "prompt": "Read docs/VAEP_AUTHORITY.md, PROJECT_INDEX.md and the accepted N5.1.A preflight evidence first. Preserve main/Production/secrets. Work only in the declared FILE_SCOPE_HINT and do not expand scope. Produce the Centro de Reportes runbook/release documentation from the accepted implementation and QA evidence: scope, permissions, routes, rollback and known limits. Do not claim LISTO_REAL or CI you did not execute. Documentation only; include two self-reviews."
+        "prompt": "Read docs/VAEP_AUTHORITY.md and accepted N5.1 evidence first. Produce the Centro de Reportes runbook/release documentation from accepted implementation and QA evidence: scope, permissions, routes, rollback and known limits. Do not claim LISTO_REAL or CI not executed. Documentation only; include two self-reviews."
       }
     ],
     "JULES_B": [
       {
-        "dispatchId": "N5-1-C-1-PERSISTENCE-B",
-        "taskId": "N5.1.C.1.PERSISTENCE_APPLICABILITY",
-        "workerId": "JULES_B",
-        "taskAttempt": 1,
-        "plannedParent": "N5.1.C",
-        "readyForDispatch": true,
-        "dispatchEligible": false,
-        "fileScopeHint": "docs/N5.1_REPORTES_PERSISTENCE_DECISION.md",
-        "prompt": "Read docs/VAEP_AUTHORITY.md, PROJECT_INDEX.md and the accepted N5.1.A preflight evidence first. Preserve main/Production/secrets. Work only in the declared FILE_SCOPE_HINT and do not expand scope. Evaluate persistence/migration applicability from the accepted N5.1.B contracts. If the center only composes existing read contracts, prove N/A for new schema/migration and document rollback boundary. If a material persistence gap is actually required, document the exact minimal schema/migration need rather than implementing beyond the decision scope. Include directed repository inspection evidence and two self-reviews."
-      },
-      {
-        "dispatchId": "N5-1-E-2-ROUTE-B",
-        "taskId": "N5.1.E.2.INDEPENDENT_REPORT_CENTER_ROUTE",
+        "dispatchId": "N5-1-E-2-REPORT-SERVICE-TEST-B",
+        "taskId": "N5.1.E.2.REPORT_SERVICE_REGRESSION",
         "workerId": "JULES_B",
         "taskAttempt": 1,
         "plannedParent": "N5.1.E",
         "readyForDispatch": true,
         "dispatchEligible": false,
-        "fileScopeHint": "frontend/src/app/app.routes.ts",
-        "prompt": "Read docs/VAEP_AUTHORITY.md, PROJECT_INDEX.md and the accepted N5.1.A preflight evidence first. Preserve main/Production/secrets. Work only in the declared FILE_SCOPE_HINT and do not expand scope. Add the independent report-center route only after the feature shell exists, using authGuard + permisoGuard and the exact accepted N5.1.B authorization contract. Do not change unrelated routes or permissions. Run targeted TypeScript/lint checks where available and two independent self-reviews."
+        "fileScopeHint": "frontend/src/app/services/reporte-administrativo.service.spec.ts",
+        "prompt": "Read docs/VAEP_AUTHORITY.md and accepted N5.1.A-D evidence first. Preserve main/Production/secrets. Add focused regression coverage for the existing ReporteAdministrativoService in exactly frontend/src/app/services/reporte-administrativo.service.spec.ts. Verify endpoint composition, optional desde/hasta parameters, users/roles/audit calls, export format parameter and blob response behavior without editing production service code. This is material support for the independent report center and must remain fully independent from the shell/route/navigation writers. Run the targeted frontend test and two independent self-reviews."
       },
       {
         "dispatchId": "N5-1-G-2-QA-B",
@@ -234,7 +135,7 @@
         "readyForDispatch": true,
         "dispatchEligible": false,
         "fileScopeHint": "docs/N5.1_REPORTES_ACCEPTANCE_EVIDENCE.md",
-        "prompt": "Read docs/VAEP_AUTHORITY.md, PROJECT_INDEX.md and the accepted N5.1.A preflight evidence first. Preserve main/Production/secrets. Work only in the declared FILE_SCOPE_HINT and do not expand scope. Reconcile the N5.1.A QA preflight matrix against the implemented exact HEAD. Mark each scenario PASS/N/A/BLOCKED only with actual test/code evidence, list commands and results, and keep unresolved gaps explicit. No product changes in this task. Include two independent self-reviews."
+        "prompt": "Read docs/VAEP_AUTHORITY.md and accepted N5.1 evidence first. Reconcile the N5.1.A QA preflight matrix against implemented exact HEAD. Mark each scenario PASS/N/A/BLOCKED only with actual evidence, list commands/results, and keep unresolved gaps explicit. No product changes; include two self-reviews."
       }
     ],
     "JULES_C": [
@@ -247,7 +148,7 @@
         "readyForDispatch": true,
         "dispatchEligible": false,
         "fileScopeHint": "frontend/src/app/app.component.ts",
-        "prompt": "Read docs/VAEP_AUTHORITY.md, PROJECT_INDEX.md and the accepted N5.1.A preflight evidence first. Preserve main/Production/secrets. Work only in the declared FILE_SCOPE_HINT and do not expand scope. Add navigation entry for Centro de Reportes using the accepted authorization contract and existing runtime permission helpers. Menu visibility is UX, never backend authorization. Preserve Auditoria navigation and unrelated menu behavior. Run targeted frontend checks and two independent self-reviews."
+        "prompt": "Read docs/VAEP_AUTHORITY.md and accepted N5.1.A-D evidence first. Preserve main/Production/secrets. Add the Centro de Reportes navigation entry using the accepted authorization contract and existing runtime permission helpers. Menu visibility is UX, never backend authorization. Own only frontend/src/app/app.component.ts; preserve Auditoria and unrelated menu behavior. Do not edit routes, shell files or service specs owned by other lanes. Run targeted frontend checks and two independent self-reviews."
       },
       {
         "dispatchId": "N5-1-F-1-SEC-C",
@@ -258,20 +159,20 @@
         "readyForDispatch": true,
         "dispatchEligible": false,
         "fileScopeHint": "docs/N5.1_REPORTES_SECURITY_ALIGNMENT.md",
-        "prompt": "Read docs/VAEP_AUTHORITY.md, PROJECT_INDEX.md and the accepted N5.1.A preflight evidence first. Preserve main/Production/secrets. Work only in the declared FILE_SCOPE_HINT and do not expand scope. Audit the implemented route/shell against backend ReportesAdministrativos and financial authorization. Record exact authorized/unauthorized paths, audit expectations, logging/correlation and any concrete gap. Do not expand privileges. If code correction is required, identify exact file/scope for a separate bounded correction rather than editing outside this documentation task. Include two independent self-reviews."
+        "prompt": "Read docs/VAEP_AUTHORITY.md and accepted N5.1 evidence first. Audit implemented route/shell against backend ReportesAdministrativos and financial authorization. Record exact authorized/unauthorized paths, audit expectations, logging/correlation and concrete gaps. Do not expand privileges. Documentation only; include two self-reviews."
       }
     ],
     "JULES_D": [
       {
-        "dispatchId": "N5-1-C-2-HISTORY-D",
-        "taskId": "N5.1.C.2.HISTORICAL_DATA_BOUNDARY",
+        "dispatchId": "N5-1-E-4-FIN-SERVICE-TEST-D",
+        "taskId": "N5.1.E.4.FINANCIAL_SERVICE_REGRESSION",
         "workerId": "JULES_D",
         "taskAttempt": 1,
-        "plannedParent": "N5.1.C",
+        "plannedParent": "N5.1.E",
         "readyForDispatch": true,
         "dispatchEligible": false,
-        "fileScopeHint": "docs/N5.1_REPORTES_HISTORICAL_DATA_BOUNDARY.md",
-        "prompt": "Read docs/VAEP_AUTHORITY.md, PROJECT_INDEX.md and the accepted N5.1.A preflight evidence first. Preserve main/Production/secrets. Work only in the declared FILE_SCOPE_HINT and do not expand scope. Define historical-data integrity boundaries for report composition using existing snapshots/contracts. Identify which report families may rely on current master data versus transactional snapshots and which cases remain N/A. Do not invent schema or claim tests not run. Documentation only; include two independent self-reviews."
+        "fileScopeHint": "frontend/src/app/services/estado-financiero.service.spec.ts",
+        "prompt": "Read docs/VAEP_AUTHORITY.md and accepted N5.1.A-D evidence first. Preserve main/Production/secrets. Add focused regression coverage for EstadoFinancieroService in exactly frontend/src/app/services/estado-financiero.service.spec.ts. Verify endpoint/type composition, periodoContableId and date parameter handling, omission of absent filters, and the generic redacted error boundary. Do not edit production service code or existing forbidden/redaction specs. This scope is independent from shell/route/navigation. Run the targeted frontend test and two independent self-reviews."
       },
       {
         "dispatchId": "N5-1-G-1-E2E-D",
@@ -282,7 +183,7 @@
         "readyForDispatch": true,
         "dispatchEligible": false,
         "fileScopeHint": "frontend/e2e/fase6-reportes-administrativos.spec.ts",
-        "prompt": "Read docs/VAEP_AUTHORITY.md, PROJECT_INDEX.md and the accepted N5.1.A preflight evidence first. Preserve main/Production/secrets. Work only in the declared FILE_SCOPE_HINT and do not expand scope. Extend the existing report-admin E2E suite to cover the independent report-center route and preserved authorization contract without deleting existing regression coverage. Include direct navigation, allowed/forbidden cases that are feasible with existing fixtures, and stale-response non-regression where applicable. Do not weaken expectations to make tests pass. Run the targeted Playwright test or document an exact environmental blocker, plus two self-reviews."
+        "prompt": "Read docs/VAEP_AUTHORITY.md and accepted N5.1 evidence first. Extend the existing report-admin E2E suite for the independent report-center route and preserved authorization contract without deleting regression coverage. Include direct navigation, allowed/forbidden cases feasible with fixtures, and stale-response non-regression where applicable. Do not weaken expectations. Run targeted Playwright or document an exact environmental blocker, plus two self-reviews."
       },
       {
         "dispatchId": "N5-1-H-2-CERT-D",
@@ -293,7 +194,7 @@
         "readyForDispatch": true,
         "dispatchEligible": false,
         "fileScopeHint": "docs/N5.1_CENTRO_REPORTES_CERT_CHECKLIST.md",
-        "prompt": "Read docs/VAEP_AUTHORITY.md, PROJECT_INDEX.md and the accepted N5.1.A preflight evidence first. Preserve main/Production/secrets. Work only in the declared FILE_SCOPE_HINT and do not expand scope. Build the final evidence checklist for controller certification: DoD, applicable T0-T12, exact test/gate evidence, P0/P1, rollback and production untouched. Do not self-certify the parent; only VAEP may declare LISTO_REAL after REVIEW_FIRST and causal gates. Documentation only; include two self-reviews."
+        "prompt": "Read docs/VAEP_AUTHORITY.md and accepted N5.1 evidence first. Build the final evidence checklist for controller certification: DoD, applicable gates, exact tests, P0/P1, rollback and production untouched. Do not self-certify the parent; only VAEP may declare LISTO_REAL after REVIEW_FIRST and causal gates. Documentation only; include two self-reviews."
       }
     ]
   },
