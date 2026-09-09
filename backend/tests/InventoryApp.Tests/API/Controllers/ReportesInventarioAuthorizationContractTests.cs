@@ -3,6 +3,7 @@ using InventoryApp.API.Controllers;
 using InventoryApp.API.Filters;
 using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs;
+using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -82,6 +83,50 @@ public sealed class ReportesInventarioAuthorizationContractTests
         Assert.Contains("Dias", error);
     }
 
+    [Fact]
+    public async Task ScopeGuard_SinFiltroFisico_ConservaScopeServerSideExistente()
+    {
+        var filtro = new ReporteInventarioStockHealthFiltroDto();
+        var permitido = await ReporteInventarioScopeGuard.CanUseExplicitPhysicalScopeAsync(
+            filtro,
+            new FakeScopeService(null));
+
+        Assert.True(permitido);
+    }
+
+    [Fact]
+    public async Task ScopeGuard_FiltroFisicoExplicito_NoAdmin_FallaCerrado()
+    {
+        var filtro = new ReporteInventarioStockHealthFiltroDto { AlmacenId = 7 };
+        var permitido = await ReporteInventarioScopeGuard.CanUseExplicitPhysicalScopeAsync(
+            filtro,
+            new FakeScopeService(new UsuarioScopeActual(41, 3, "Operador", false)));
+
+        Assert.False(permitido);
+    }
+
+    [Fact]
+    public async Task ScopeGuard_FiltroFisicoExplicito_Admin_Permitido()
+    {
+        var filtro = new ReporteInventarioReconciliacionFiltroDto { SucursalId = 2 };
+        var permitido = await ReporteInventarioScopeGuard.CanUseExplicitPhysicalScopeAsync(
+            filtro,
+            new FakeScopeService(new UsuarioScopeActual(1, 1, "Administrador", true)));
+
+        Assert.True(permitido);
+    }
+
+    [Fact]
+    public async Task ScopeGuard_FiltroFisicoExplicito_ScopeNoResuelto_FallaCerrado()
+    {
+        var filtro = new ReporteInventarioKardexFiltroDto { UbicacionAlmacenId = 9 };
+        var permitido = await ReporteInventarioScopeGuard.CanUseExplicitPhysicalScopeAsync(
+            filtro,
+            new FakeScopeService(null));
+
+        Assert.False(permitido);
+    }
+
     private static void AssertPermission(Type controllerType, string methodName, ModuloSistema expectedModule, AccionPermiso expectedAction)
     {
         var method = controllerType.GetMethod(methodName);
@@ -98,5 +143,14 @@ public sealed class ReportesInventarioAuthorizationContractTests
 
         Assert.Equal(expectedModule, (ModuloSistema?)moduloField.GetValue(permiso));
         Assert.Equal(expectedAction, (AccionPermiso?)accionField.GetValue(permiso));
+    }
+
+    private sealed class FakeScopeService : IUsuarioScopeService
+    {
+        private readonly UsuarioScopeActual? _scope;
+
+        public FakeScopeService(UsuarioScopeActual? scope) => _scope = scope;
+
+        public Task<UsuarioScopeActual?> ObtenerActualAsync() => Task.FromResult(_scope);
     }
 }
