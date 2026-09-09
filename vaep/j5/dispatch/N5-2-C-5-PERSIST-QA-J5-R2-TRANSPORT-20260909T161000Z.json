@@ -1,0 +1,12 @@
+{
+  "dispatchId": "N5-2-C-5-PERSIST-QA-J5-R2-TRANSPORT-20260909T161000Z",
+  "taskId": "N5.2.C.5.PERSISTENCE_RECONCILIATION_QA_PLAN",
+  "workerId": "J5",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 2,
+  "recoveryOf": "vaep/j5/dispatch/N5-2-C-5-PERSIST-QA-J5-R2.json",
+  "recoveryReason": "R2_MATERIALIZED_BUT_NO_TRUSTED_WORKER_DISPATCH_OBSERVED__TRANSPORT_RETRY_SAME_TASK_ATTEMPT_ONLY",
+  "fileScopeHint": "docs/N5.2_REPORTES_INVENTARIO_PERSISTENCE_QA_PLAN.md",
+  "prompt": "Transport retry of the already-authorized final R2 for N5.2.C.5. Stay on the exact same QA/reconciliation persistence scope and reconcile any usable ATTEMPT1/R2 material. Satisfy the mandatory evidence gaps truthfully: record TESTS_EXECUTED with actual commands/results and two independent SELF_REVIEW passes. Do not expand scope, create additional task attempts, touch control-plane files, main, Produccion, secrets, deploy or merge PR #2. This remains taskAttempt2; R3 is prohibited.",
+  "primaryBaseHead": "21a90f098dcd68ba3daf278a6a598275426a909b"
+}
