@@ -1,18 +1,19 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { vi } from 'vitest';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
 import { CentroReportesComponent } from './centro-reportes.component';
 
 describe('CentroReportesComponent N5.2.G QA takeover', () => {
-  const permisos = jasmine.createSpyObj<PermisosRuntimeService>(
-    'PermisosRuntimeService',
-    ['puede', 'esAdministrador']
-  );
+  const permisos = {
+    puede: vi.fn(),
+    esAdministrador: vi.fn()
+  } as unknown as PermisosRuntimeService;
 
   beforeEach(async () => {
-    permisos.puede.calls.reset();
-    permisos.esAdministrador.calls.reset();
-    permisos.esAdministrador.and.returnValue(false);
+    vi.mocked(permisos.puede).mockReset();
+    vi.mocked(permisos.esAdministrador).mockReset();
+    vi.mocked(permisos.esAdministrador).mockReturnValue(false);
 
     await TestBed.configureTestingModule({
       imports: [CentroReportesComponent],
@@ -24,7 +25,7 @@ describe('CentroReportesComponent N5.2.G QA takeover', () => {
   });
 
   it('expone navegación accesible de inventario sólo para permisos autorizados', () => {
-    permisos.puede.and.callFake((modulo: string, accion: string) =>
+    vi.mocked(permisos.puede).mockImplementation((modulo: string, accion: string) =>
       (modulo === 'Inventario' && accion === 'Ver') ||
       (modulo === 'MovimientosInventario' && accion === 'ConsultarHistorial')
     );
@@ -50,8 +51,8 @@ describe('CentroReportesComponent N5.2.G QA takeover', () => {
   });
 
   it('mantiene fail-closed la superficie cuando no existe ningún reporte autorizado', () => {
-    permisos.puede.and.returnValue(false);
-    permisos.esAdministrador.and.returnValue(false);
+    vi.mocked(permisos.puede).mockReturnValue(false);
+    vi.mocked(permisos.esAdministrador).mockReturnValue(false);
 
     const fixture = TestBed.createComponent(CentroReportesComponent);
     fixture.detectChanges();
@@ -64,8 +65,8 @@ describe('CentroReportesComponent N5.2.G QA takeover', () => {
   });
 
   it('no expone reportes administrativos sólo por rol administrador sin permiso relacional', () => {
-    permisos.esAdministrador.and.returnValue(true);
-    permisos.puede.and.returnValue(false);
+    vi.mocked(permisos.esAdministrador).mockReturnValue(true);
+    vi.mocked(permisos.puede).mockReturnValue(false);
 
     const fixture = TestBed.createComponent(CentroReportesComponent);
     fixture.detectChanges();
