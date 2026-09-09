@@ -1,0 +1,69 @@
+{
+  "authority": "docs/VAEP_AUTHORITY.md",
+  "engine": "ALEX",
+  "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
+  "sourceSheet": "COLA",
+  "sourceRowKey": "N5.2.D",
+  "generatedFromHead": "12d45f380300acb3735edeef5c54df09b0b9e850",
+  "currentParent": "N5.2.C",
+  "targetParent": "N5.2.D",
+  "targetDependency": "N5.2.C",
+  "dependencyState": "GATED",
+  "dispatchEligible": false,
+  "policy": "ROADMAP_DERIVED__DEPENDENCY_SAFE__SEMANTIC_DEDUPE_ONLY",
+  "busyworkAllowed": false,
+  "note": "N5.2.D is real pending BACKEND_API work from the canonical Sheet, but it remains non-eligible until N5.2.C is LISTO_REAL. Five distinct material candidates are prearmed; no sixth candidate is fabricated merely to fill J6 or reach a numeric backlog target.",
+  "candidates": [
+    {
+      "candidateId": "N5.2.D.CAND.VALUATION_BACKEND_API",
+      "suggestedLane": "J1",
+      "dispatchEligible": false,
+      "dependencyGate": "N5.2.C_LISTO_REAL",
+      "materialScope": "Implement the valuation inventory-report application/repository/API slice only, preserving N5.2.B valuation contracts and N5.2.C persistence decisions.",
+      "scopeExcludes": ["kardex", "stock-health", "reconciliation", "common-api-shell"],
+      "semanticDedupeKey": "N5.2.D|VALUATION|BACKEND_API"
+    },
+    {
+      "candidateId": "N5.2.D.CAND.KARDEX_BACKEND_API",
+      "suggestedLane": "J2",
+      "dispatchEligible": false,
+      "dependencyGate": "N5.2.C_LISTO_REAL",
+      "materialScope": "Implement the Kardex/movement-history inventory-report application/repository/API slice only, including deterministic pagination and accepted history semantics.",
+      "scopeExcludes": ["valuation", "stock-health", "reconciliation", "common-api-shell"],
+      "semanticDedupeKey": "N5.2.D|KARDEX|BACKEND_API"
+    },
+    {
+      "candidateId": "N5.2.D.CAND.STOCK_HEALTH_BACKEND_API",
+      "suggestedLane": "J3",
+      "dispatchEligible": false,
+      "dependencyGate": "N5.2.C_LISTO_REAL",
+      "materialScope": "Implement the stock-health analytical slice only: rotation, low/out-of-stock, no-movement and aging queries/API as one coherent read-model family.",
+      "scopeExcludes": ["valuation", "kardex", "reconciliation", "common-api-shell"],
+      "semanticDedupeKey": "N5.2.D|STOCK_HEALTH|BACKEND_API"
+    },
+    {
+      "candidateId": "N5.2.D.CAND.RECONCILIATION_BACKEND_API",
+      "suggestedLane": "J4",
+      "dispatchEligible": false,
+      "dependencyGate": "N5.2.C_LISTO_REAL",
+      "materialScope": "Implement the consolidated reconciliation analytical slice only, using the accepted Conteo/Transferencia/Ajuste mappings, traceability and server-side paging without a parallel ledger.",
+      "scopeExcludes": ["valuation", "kardex", "stock-health", "common-api-shell"],
+      "semanticDedupeKey": "N5.2.D|RECONCILIATION|BACKEND_API"
+    },
+    {
+      "candidateId": "N5.2.D.CAND.COMMON_API_SHELL",
+      "suggestedLane": "J5",
+      "dispatchEligible": false,
+      "dependencyGate": "N5.2.C_LISTO_REAL",
+      "materialScope": "Implement only the common inventory-report API/application shell required by all facets: common request envelope binding, ProblemDetails/error translation, bounded-query validation and DI/controller wiring. Do not implement facet query logic.",
+      "scopeExcludes": ["valuation-query-logic", "kardex-query-logic", "stock-health-query-logic", "reconciliation-query-logic"],
+      "semanticDedupeKey": "N5.2.D|COMMON_API_SHELL|BACKEND_API"
+    }
+  ],
+  "unassignedLanes": [
+    {
+      "workerId": "J6",
+      "reason": "NO_SIXTH_NON_OVERLAPPING_MATERIAL_SCOPE_DERIVED_WITH_SUFFICIENT_CONFIDENCE__NO_BUSYWORK"
+    }
+  ]
+}
