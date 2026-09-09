@@ -1,9 +1,9 @@
 {
-  "version": 27,
+  "version": 28,
   "authority": "docs/VAEP_AUTHORITY.md",
   "currentParent": "N5.2.A",
-  "generatedAt": "2026-09-09T13:04:30Z",
-  "regenerationReason": "DEBT_CORRECTOR__N5.1.H_CLOSED__N5.2.A_SIX_LANE_MATERIAL_PREFLIGHT",
+  "generatedAt": "2026-09-09T13:12:00Z",
+  "regenerationReason": "DEBT_CORRECTOR__N5.2.A_SIX_LANE_SWARM__PREARM_N5.2.B_GUARD_FIX",
   "lastClosedParent": "N5.1.H",
   "closureReceipts": {
     "N4.11.H": "vaep/evidence/fragments/N4.11.H_LISTO_REAL_20260908T204500Z.json",
@@ -23,18 +23,57 @@
     {"commit":"3dace32c316effaa6b35923bb844de0aaf21e821","path":"vaep/control/jules-autorefill-catalog.json","blob":"243515cf267ac134559a0b3ac15d0482fa80b687","parents":["N5.1.B","N5.1.C","N5.1.D"],"reason":"Superseded by throughput-hardening catalog. Closed evidence remains immutable; N5.1.D semantics unchanged; N5.1.E receives four distinct material scopes."}
   ],
   "policy": {
-    "branch":"Desarrollo","liveQueueDepthTarget":2,"programmedBacklogTargetPerWorker":12,"programmedBacklogRefillFloorPerWorker":4,"programmedBacklogTargetTotal":72,"dispatchEligibleMinPerWorker":2,"genericFloorRegeneration":false,"noBusywork":true,"semanticIdentity":"CURRENT_PARENT + material scope/semantic facet","stopWhenEligibleWorkExhausted":true,"materialParallelismTargetPerParent":6,"requireDistinctWriteScopesWhenParallel":true,"lowParallelismAction":"EXPLAIN_OR_SUBDIVIDE_MATERIAL_SCOPE__NO_BUSYWORK","activeWorkerCount":6,"activeWorkers":["J1","J2","J3","J4","J5","J6"]
+    "branch":"Desarrollo",
+    "liveQueueDepthTarget":2,
+    "programmedBacklogTargetPerWorker":12,
+    "programmedBacklogRefillFloorPerWorker":4,
+    "programmedBacklogTargetTotal":72,
+    "dispatchEligibleMinPerWorker":2,
+    "genericFloorRegeneration":false,
+    "noBusywork":true,
+    "semanticIdentity":"CURRENT_PARENT + material scope/semantic facet",
+    "stopWhenEligibleWorkExhausted":true,
+    "materialParallelismTargetPerParent":6,
+    "requireDistinctWriteScopesWhenParallel":true,
+    "lowParallelismAction":"EXPLAIN_OR_SUBDIVIDE_MATERIAL_SCOPE__NO_BUSYWORK",
+    "activeWorkerCount":6,
+    "activeWorkers":["J1","J2","J3","J4","J5","J6"]
   },
   "throughputPlan": {
-    "mode":"MATERIAL_SWARM_FIRST","currentParent":"N5.2.A","currentParentMaterialScopeCount":6,"currentParentReason":"N5.1.H is LISTO_REAL. N5.2.A is dependency-valid; COLA explicitly permits subdivision before editing, and its broad inventory-report preflight is split into six distinct write scopes. J5 keeps the already-manifested broad synthesis identity while J1/J2/J3/J4/J6 provide focused evidence supplements.","nextParent":"N5.2.B","nextParentParallelMaterialScopes":1,"nextParentScopesNonOverlapping":true,"laneRefill":"POST_TERMINAL_AUTOREFILL_PLUS_CANONICAL_CHECKPOINTS"
+    "mode":"MATERIAL_SWARM_FIRST",
+    "currentParent":"N5.2.A",
+    "currentParentMaterialScopeCount":6,
+    "currentParentReason":"N5.1.H is LISTO_REAL. N5.2.A is dependency-valid; COLA explicitly permits subdivision before editing, and its broad inventory-report preflight is split into six distinct write scopes. J5 keeps the already-manifested broad synthesis identity while J1/J2/J3/J4/J6 provide focused evidence supplements.",
+    "nextParent":"N5.2.B",
+    "nextParentParallelMaterialScopes":1,
+    "nextParentScopesNonOverlapping":true,
+    "laneRefill":"POST_TERMINAL_AUTOREFILL_PLUS_CANONICAL_CHECKPOINTS"
   },
   "roadmap": {
-    "authority":"docs/VAEP_AUTHORITY.md","sourceSpreadsheetId":"19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY","sourceRanges":["COLA!A399:T408","PLAN_MAESTRO!A52:L54"],"note":"Dependency order derived from live Plan/COLA. N5.1.H is LISTO_REAL; N5.2.A is current. N5.2.B-H remain dependency-gated behind N5.2.A and each preceding microtask; N5.3.A remains a later roadmap item.",
+    "authority":"docs/VAEP_AUTHORITY.md",
+    "sourceSpreadsheetId":"19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
+    "sourceRanges":["COLA!A399:T408","PLAN_MAESTRO!A52:L54"],
+    "note":"Dependency order derived from live Plan/COLA. N5.1.H is LISTO_REAL; N5.2.A is current. N5.2.B-H remain dependency-gated behind N5.2.A and each preceding microtask; N5.3.A remains a later roadmap item.",
     "nodes":[
       {"id":"N4.11.H","order":0,"type":"MICROTAREA","dependencies":["N4.11.G"],"phaseGate":"GATE-N3"},
       {"id":"GATE-N4","order":1,"type":"GATE_FASE","dependencies":["N4.1.H","N4.2.H","N4.3.H","N4.4.H","N4.5.H","N4.6.H","N4.7.H","N4.8.H","N4.9.H","N4.10.H","N4.11.H"]},
-      {"id":"N5.1.A","order":2,"type":"MICROTAREA","dependencies":["GATE-N4"],"phaseGate":"GATE-N4"},{"id":"N5.1.B","order":3,"type":"MICROTAREA","dependencies":["N5.1.A"],"phaseGate":"GATE-N4"},{"id":"N5.1.C","order":4,"type":"MICROTAREA","dependencies":["N5.1.B"],"phaseGate":"GATE-N4"},{"id":"N5.1.D","order":5,"type":"MICROTAREA","dependencies":["N5.1.C"],"phaseGate":"GATE-N4"},{"id":"N5.1.E","order":6,"type":"MICROTAREA","dependencies":["N5.1.D"],"phaseGate":"GATE-N4"},{"id":"N5.1.F","order":7,"type":"MICROTAREA","dependencies":["N5.1.E"],"phaseGate":"GATE-N4"},{"id":"N5.1.G","order":8,"type":"MICROTAREA","dependencies":["N5.1.F"],"phaseGate":"GATE-N4"},{"id":"N5.1.H","order":9,"type":"MICROTAREA","dependencies":["N5.1.G"],"phaseGate":"GATE-N4"},
-      {"id":"N5.2.A","order":10,"type":"MICROTAREA","dependencies":["N5.1.H","GATE-N4"],"phaseGate":"GATE-N4"},{"id":"N5.2.B","order":11,"type":"MICROTAREA","dependencies":["N5.2.A"],"phaseGate":"GATE-N4"},{"id":"N5.2.C","order":12,"type":"MICROTAREA","dependencies":["N5.2.B"],"phaseGate":"GATE-N4"},{"id":"N5.2.D","order":13,"type":"MICROTAREA","dependencies":["N5.2.C"],"phaseGate":"GATE-N4"},{"id":"N5.2.E","order":14,"type":"MICROTAREA","dependencies":["N5.2.D"],"phaseGate":"GATE-N4"},{"id":"N5.2.F","order":15,"type":"MICROTAREA","dependencies":["N5.2.E"],"phaseGate":"GATE-N4"},{"id":"N5.2.G","order":16,"type":"MICROTAREA","dependencies":["N5.2.F"],"phaseGate":"GATE-N4"},{"id":"N5.2.H","order":17,"type":"MICROTAREA","dependencies":["N5.2.G"],"phaseGate":"GATE-N4"},{"id":"N5.3.A","order":18,"type":"MICROTAREA","dependencies":["N5.1.H","GATE-N4"],"phaseGate":"GATE-N4"}
+      {"id":"N5.1.A","order":2,"type":"MICROTAREA","dependencies":["GATE-N4"],"phaseGate":"GATE-N4"},
+      {"id":"N5.1.B","order":3,"type":"MICROTAREA","dependencies":["N5.1.A"],"phaseGate":"GATE-N4"},
+      {"id":"N5.1.C","order":4,"type":"MICROTAREA","dependencies":["N5.1.B"],"phaseGate":"GATE-N4"},
+      {"id":"N5.1.D","order":5,"type":"MICROTAREA","dependencies":["N5.1.C"],"phaseGate":"GATE-N4"},
+      {"id":"N5.1.E","order":6,"type":"MICROTAREA","dependencies":["N5.1.D"],"phaseGate":"GATE-N4"},
+      {"id":"N5.1.F","order":7,"type":"MICROTAREA","dependencies":["N5.1.E"],"phaseGate":"GATE-N4"},
+      {"id":"N5.1.G","order":8,"type":"MICROTAREA","dependencies":["N5.1.F"],"phaseGate":"GATE-N4"},
+      {"id":"N5.1.H","order":9,"type":"MICROTAREA","dependencies":["N5.1.G"],"phaseGate":"GATE-N4"},
+      {"id":"N5.2.A","order":10,"type":"MICROTAREA","dependencies":["N5.1.H","GATE-N4"],"phaseGate":"GATE-N4"},
+      {"id":"N5.2.B","order":11,"type":"MICROTAREA","dependencies":["N5.2.A"],"phaseGate":"GATE-N4"},
+      {"id":"N5.2.C","order":12,"type":"MICROTAREA","dependencies":["N5.2.B"],"phaseGate":"GATE-N4"},
+      {"id":"N5.2.D","order":13,"type":"MICROTAREA","dependencies":["N5.2.C"],"phaseGate":"GATE-N4"},
+      {"id":"N5.2.E","order":14,"type":"MICROTAREA","dependencies":["N5.2.D"],"phaseGate":"GATE-N4"},
+      {"id":"N5.2.F","order":15,"type":"MICROTAREA","dependencies":["N5.2.E"],"phaseGate":"GATE-N4"},
+      {"id":"N5.2.G","order":16,"type":"MICROTAREA","dependencies":["N5.2.F"],"phaseGate":"GATE-N4"},
+      {"id":"N5.2.H","order":17,"type":"MICROTAREA","dependencies":["N5.2.G"],"phaseGate":"GATE-N4"},
+      {"id":"N5.3.A","order":18,"type":"MICROTAREA","dependencies":["N5.1.H","GATE-N4"],"phaseGate":"GATE-N4"}
     ]
   },
   "lanes": {
@@ -45,19 +84,28 @@
       {"dispatchId":"N5-2-A-2-VAL-KDX-J1","taskId":"N5.2.A.2.VALUATION_KARDEX_PREFLIGHT","workerId":"J1","taskAttempt":1,"plannedParent":"N5.2.A","readyForDispatch":true,"dispatchEligible":true,"fileScopeHint":"docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_VALORIZACION_KARDEX.md","prompt":"Read docs/VAEP_AUTHORITY.md, PROJECT_INDEX.md and live N5.2 Plan/COLA. Produce a focused evidence supplement for valuation and kardex only: authoritative quantity/cost fields, movement sources, filters, historical boundaries, reusable endpoints/services/components and gaps. J5 owns the broad preflight/QA synthesis; do not write its file. Documentation-only preflight, no large implementation, no production/secrets/global rescan, exclusive write scope, two self-reviews."}
     ],
     "J2":[
-      {"dispatchId":"N5-1-E-2-REPORT-SERVICE-TEST-B","taskId":"N5.1.E.2.REPORT_SERVICE_REGRESSION","workerId":"J2","taskAttempt":1,"plannedParent":"N5.1.E","readyForDispatch":true,"dispatchEligible":false,"fileScopeHint":"frontend/src/app/services/reporte-administrativo.service.spec.ts","prompt":"Closed by N5.1.E LISTO_REAL receipt. Historical lineage only; do not redispatch."},{"dispatchId":"N5-1-G-2-QA-B","taskId":"N5.1.G.2.ACCEPTANCE_MATRIX_RECONCILIATION","workerId":"J2","taskAttempt":1,"plannedParent":"N5.1.G","readyForDispatch":true,"dispatchEligible":false,"reason":"CLOSED_BY_N5.1.G_LISTO_REAL_RECEIPT","fileScopeHint":"docs/N5.1_REPORTES_ACCEPTANCE_EVIDENCE.md","prompt":"Closed by N5.1.G LISTO_REAL receipt after QA_TAKEOVER and exact-head causal CI. Historical lineage only; do not redispatch."},
-      {"dispatchId":"N5-2-A-3-STOCK-J2","taskId":"N5.2.A.3.STOCK_ANALYTICS_PREFLIGHT","workerId":"J2","taskAttempt":1,"plannedParent":"N5.2.A","readyForDispatch":true,"dispatchEligible":true,"fileScopeHint":"docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_STOCK_ANALYTICS.md","prompt":"Read docs/VAEP_AUTHORITY.md and live N5.2 Plan/COLA. Produce a focused evidence supplement for rotation, low/out-of-stock, no-movement and aging only: fields, time windows, thresholds, branch/warehouse dimensions, reusable queries/endpoints and gaps. J5 owns broad synthesis; do not write its file or duplicate J1/J3/J4/J6. Documentation-only preflight, no large implementation/production/secrets, two self-reviews."}
+      {"dispatchId":"N5-1-E-2-REPORT-SERVICE-TEST-B","taskId":"N5.1.E.2.REPORT_SERVICE_REGRESSION","workerId":"J2","taskAttempt":1,"plannedParent":"N5.1.E","readyForDispatch":true,"dispatchEligible":false,"fileScopeHint":"frontend/src/app/services/reporte-administrativo.service.spec.ts","prompt":"Closed by N5.1.E LISTO_REAL receipt. Historical lineage only; do not redispatch."},
+      {"dispatchId":"N5-1-G-2-QA-B","taskId":"N5.1.G.2.ACCEPTANCE_MATRIX_RECONCILIATION","workerId":"J2","taskAttempt":1,"plannedParent":"N5.1.G","readyForDispatch":true,"dispatchEligible":false,"reason":"CLOSED_BY_N5.1.G_LISTO_REAL_RECEIPT","fileScopeHint":"docs/N5.1_REPORTES_ACCEPTANCE_EVIDENCE.md","prompt":"Closed by N5.1.G LISTO_REAL receipt after QA_TAKEOVER and exact-head causal CI. Historical lineage only; do not redispatch."},
+      {"dispatchId":"N5-2-A-3-STOCK-J2","taskId":"N5.2.A.3.STOCK_ANALYTICS_PREFLIGHT","workerId":"J2","taskAttempt":1,"plannedParent":"N5.2.A","readyForDispatch":true,"dispatchEligible":true,"fileScopeHint":"docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_STOCK_ANALYTICS.md","prompt":"Read docs/VAEP_AUTHORITY.md and live N5.2 Plan/COLA. Produce a focused evidence supplement for rotation, low/out-of-stock, no-movement and aging only: fields, time windows, thresholds, branch/warehouse dimensions, reusable queries/endpoints and gaps. J5 owns broad synthesis; do not write its file or duplicate J1/J3/J4/J6. Documentation-only preflight, no large implementation/production/secrets, two self-reviews."},
+      {"dispatchId":"N5-2-B-1-DOMAIN-J2","taskId":"N5.2.B.1.INVENTORY_REPORT_DOMAIN_CONTRACTS","workerId":"J2","taskAttempt":1,"plannedParent":"N5.2.B","readyForDispatch":true,"dispatchEligible":false,"reason":"PREARMED__WAIT_N5.2.A_LISTO_REAL","fileScopeHint":"docs/N5.2_REPORTES_INVENTARIO_DOMAIN_CONTRACTS.md","prompt":"Only after N5.2.A is LISTO_REAL, read its accepted preflight evidence and define the minimum domain/contract decision for N5.2 inventory reports. Reuse existing inventory authority; do not create a second stock authority, do not implement persistence/UI ahead of dependencies, and do not touch production/secrets. Documentation/contract scope only with two self-reviews. This task remains dependency-gated until controller promotion."}
     ],
     "J3":[
-      {"dispatchId":"N5-1-E-3-NAV-C","taskId":"N5.1.E.3.REPORT_CENTER_NAVIGATION","workerId":"J3","taskAttempt":1,"plannedParent":"N5.1.E","readyForDispatch":true,"dispatchEligible":false,"fileScopeHint":"frontend/src/app/app.component.ts","prompt":"Closed by N5.1.E LISTO_REAL receipt. Historical lineage only; do not redispatch."},{"dispatchId":"N5-1-F-1-SEC-C","taskId":"N5.1.F.1.RBAC_SECURITY_ALIGNMENT","workerId":"J3","taskAttempt":1,"plannedParent":"N5.1.F","readyForDispatch":true,"dispatchEligible":false,"fileScopeHint":"docs/N5.1_REPORTES_SECURITY_ALIGNMENT.md","prompt":"Closed by N5.1.F LISTO_REAL receipt after REVIEW_FIRST and QA_TAKEOVER. Historical lineage only; do not redispatch."},
+      {"dispatchId":"N5-1-E-3-NAV-C","taskId":"N5.1.E.3.REPORT_CENTER_NAVIGATION","workerId":"J3","taskAttempt":1,"plannedParent":"N5.1.E","readyForDispatch":true,"dispatchEligible":false,"fileScopeHint":"frontend/src/app/app.component.ts","prompt":"Closed by N5.1.E LISTO_REAL receipt. Historical lineage only; do not redispatch."},
+      {"dispatchId":"N5-1-F-1-SEC-C","taskId":"N5.1.F.1.RBAC_SECURITY_ALIGNMENT","workerId":"J3","taskAttempt":1,"plannedParent":"N5.1.F","readyForDispatch":true,"dispatchEligible":false,"fileScopeHint":"docs/N5.1_REPORTES_SECURITY_ALIGNMENT.md","prompt":"Closed by N5.1.F LISTO_REAL receipt after REVIEW_FIRST and QA_TAKEOVER. Historical lineage only; do not redispatch."},
       {"dispatchId":"N5-2-A-4-RECON-J3","taskId":"N5.2.A.4.RECONCILIATION_OPERATIONS_PREFLIGHT","workerId":"J3","taskAttempt":1,"plannedParent":"N5.2.A","readyForDispatch":true,"dispatchEligible":true,"fileScopeHint":"docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_RECONCILIACION_OPERATIVA.md","prompt":"Read docs/VAEP_AUTHORITY.md and live N5.2 Plan/COLA. Produce a focused evidence supplement for inventory differences, transfers and physical counts only: source entities/events, reconciliation rules, audit trail, location boundaries, existing APIs/UI and missing contracts. J5 owns broad synthesis; do not write its file. Preflight evidence only, no large implementation/production/secrets, exclusive write scope, two self-reviews."}
     ],
     "J4":[
-      {"dispatchId":"N5-1-E-4-FIN-SERVICE-TEST-D","taskId":"N5.1.E.4.FINANCIAL_SERVICE_REGRESSION","workerId":"J4","taskAttempt":1,"plannedParent":"N5.1.E","readyForDispatch":true,"dispatchEligible":false,"fileScopeHint":"frontend/src/app/services/estado-financiero.service.spec.ts","prompt":"Closed by N5.1.E LISTO_REAL receipt. Historical lineage only; do not redispatch."},{"dispatchId":"N5-1-G-1-E2E-D","taskId":"N5.1.G.1.REPORT_CENTER_E2E_REGRESSION","workerId":"J4","taskAttempt":1,"plannedParent":"N5.1.G","readyForDispatch":true,"dispatchEligible":false,"reason":"CLOSED_BY_N5.1.G_LISTO_REAL_RECEIPT","fileScopeHint":"frontend/e2e/fase6-reportes-administrativos.spec.ts","prompt":"Closed by N5.1.G LISTO_REAL receipt after QA_TAKEOVER and exact-head causal CI. Historical lineage only; do not redispatch."},{"dispatchId":"N5-1-H-2-CERT-D","taskId":"N5.1.H.2.CERTIFICATION_CHECKLIST","workerId":"J4","taskAttempt":1,"plannedParent":"N5.1.H","readyForDispatch":true,"dispatchEligible":false,"reason":"CLOSED_BY_N5.1.H_LISTO_REAL_RECEIPT","fileScopeHint":"docs/N5.1_CENTRO_REPORTES_CERT_CHECKLIST.md","prompt":"Closed by N5.1.H LISTO_REAL receipt. Historical lineage only; do not redispatch."},
+      {"dispatchId":"N5-1-E-4-FIN-SERVICE-TEST-D","taskId":"N5.1.E.4.FINANCIAL_SERVICE_REGRESSION","workerId":"J4","taskAttempt":1,"plannedParent":"N5.1.E","readyForDispatch":true,"dispatchEligible":false,"fileScopeHint":"frontend/src/app/services/estado-financiero.service.spec.ts","prompt":"Closed by N5.1.E LISTO_REAL receipt. Historical lineage only; do not redispatch."},
+      {"dispatchId":"N5-1-G-1-E2E-D","taskId":"N5.1.G.1.REPORT_CENTER_E2E_REGRESSION","workerId":"J4","taskAttempt":1,"plannedParent":"N5.1.G","readyForDispatch":true,"dispatchEligible":false,"reason":"CLOSED_BY_N5.1.G_LISTO_REAL_RECEIPT","fileScopeHint":"frontend/e2e/fase6-reportes-administrativos.spec.ts","prompt":"Closed by N5.1.G LISTO_REAL receipt after QA_TAKEOVER and exact-head causal CI. Historical lineage only; do not redispatch."},
+      {"dispatchId":"N5-1-H-2-CERT-D","taskId":"N5.1.H.2.CERTIFICATION_CHECKLIST","workerId":"J4","taskAttempt":1,"plannedParent":"N5.1.H","readyForDispatch":true,"dispatchEligible":false,"reason":"CLOSED_BY_N5.1.H_LISTO_REAL_RECEIPT","fileScopeHint":"docs/N5.1_CENTRO_REPORTES_CERT_CHECKLIST.md","prompt":"Closed by N5.1.H LISTO_REAL receipt. Historical lineage only; do not redispatch."},
       {"dispatchId":"N5-2-A-5-ARCH-J4","taskId":"N5.2.A.5.ARCH_API_UI_TOPOLOGY_PREFLIGHT","workerId":"J4","taskAttempt":1,"plannedParent":"N5.2.A","readyForDispatch":true,"dispatchEligible":true,"fileScopeHint":"docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_ARCH_API_UI.md","prompt":"Read docs/VAEP_AUTHORITY.md, PROJECT_INDEX.md and live N5.2 Plan/COLA. Map only cross-layer topology needed by inventory reports: existing domain/services/controllers/DTOs/routes/components/report-center reuse, dependency boundaries and extension points. Do not redefine J1/J2/J3 business semantics or J6 security. J5 owns broad synthesis; do not write its file. Documentation-only preflight, no large changes/production/secrets, two self-reviews."}
     ],
-    "J5":[{"dispatchId":"N5-2-A-1-PREFLIGHT-J5","taskId":"N5.2.A.1.REPORTES_INVENTARIO_PREFLIGHT_QA","workerId":"J5","taskAttempt":1,"plannedParent":"N5.2.A","readyForDispatch":true,"dispatchEligible":true,"reason":"CURRENT_PARENT__DEPENDENCIES_CLOSED__MATERIAL_SCOPE_DISPATCHED","fileScopeHint":"docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_QA.md","prompt":"After N5.1.H LISTO_REAL, inspect the real current state for N5.2 inventory reporting: valuation, kardex, rotation, low/out stock, no movement, differences, transfers, counts and aging. Document scope/out-of-scope, affected entities/endpoints/components, dependencies, risks, acceptance, rollback and testing. Do not make large implementation changes or perform an unnecessary global rescan. Desarrollo only; include two self-reviews."}],
-    "J6":[{"dispatchId":"N5-2-A-6-RBAC-J6","taskId":"N5.2.A.6.RBAC_AUDIT_SCOPE_PREFLIGHT","workerId":"J6","taskAttempt":1,"plannedParent":"N5.2.A","readyForDispatch":true,"dispatchEligible":true,"fileScopeHint":"docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_RBAC_AUDIT.md","prompt":"Read docs/VAEP_AUTHORITY.md and live N5.2 Plan/COLA. Produce a focused evidence supplement for permissions, auditability, tenant/sucursal/almacen scoping, sensitive inventory/cost visibility, observability and security risks only. Identify reusable guards/policies and gaps without feature code. J5 owns broad synthesis; do not write its file. No production/secrets, exclusive write scope, two self-reviews."}]
+    "J5":[
+      {"dispatchId":"N5-2-A-1-PREFLIGHT-J5","taskId":"N5.2.A.1.REPORTES_INVENTARIO_PREFLIGHT_QA","workerId":"J5","taskAttempt":1,"plannedParent":"N5.2.A","readyForDispatch":true,"dispatchEligible":true,"reason":"CURRENT_PARENT__DEPENDENCIES_CLOSED__MATERIAL_SCOPE_DISPATCHED","fileScopeHint":"docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_QA.md","prompt":"After N5.1.H LISTO_REAL, inspect the real current state for N5.2 inventory reporting: valuation, kardex, rotation, low/out stock, no movement, differences, transfers, counts and aging. Document scope/out-of-scope, affected entities/endpoints/components, dependencies, risks, acceptance, rollback and testing. Do not make large implementation changes or perform an unnecessary global rescan. Desarrollo only; include two self-reviews."}
+    ],
+    "J6":[
+      {"dispatchId":"N5-2-A-6-RBAC-J6","taskId":"N5.2.A.6.RBAC_AUDIT_SCOPE_PREFLIGHT","workerId":"J6","taskAttempt":1,"plannedParent":"N5.2.A","readyForDispatch":true,"dispatchEligible":true,"fileScopeHint":"docs/N5.2_REPORTES_INVENTARIO_PREFLIGHT_RBAC_AUDIT.md","prompt":"Read docs/VAEP_AUTHORITY.md and live N5.2 Plan/COLA. Produce a focused evidence supplement for permissions, auditability, tenant/sucursal/almacen scoping, sensitive inventory/cost visibility, observability and security risks only. Identify reusable guards/policies and gaps without feature code. J5 owns broad synthesis; do not write its file. No production/secrets, exclusive write scope, two self-reviews."}
+    ]
   },
   "lastClosureFunctionalHead":"65406f48f071367a368e75b32f82fda3fc915f5b"
 }
