@@ -15,13 +15,16 @@ public sealed class ReportesInventarioValorizacionController : ControllerBase
 {
     private readonly IFinanzasService _finanzas;
     private readonly IPermisoService _permisos;
+    private readonly IAuditoriaService _auditoria;
 
     public ReportesInventarioValorizacionController(
         IFinanzasService finanzas,
-        IPermisoService permisos)
+        IPermisoService permisos,
+        IAuditoriaService auditoria)
     {
         _finanzas = finanzas;
         _permisos = permisos;
+        _auditoria = auditoria;
     }
 
     [HttpGet("resumen")]
@@ -30,6 +33,13 @@ public sealed class ReportesInventarioValorizacionController : ControllerBase
     {
         if (!await _permisos.TienePermisoAsync(ModuloSistema.Finanzas, AccionPermiso.Ver))
         {
+            await _auditoria.RegistrarAsync(
+                ModuloSistema.Inventario,
+                AccionPermiso.Ver,
+                "Consulta de valorización de inventario con campos financieros censurados.",
+                entidad: "ReporteInventarioValorizacion",
+                resultado: "Censurado");
+
             return Ok(ApiResponse<ReporteInventarioValorizacionResumenDto>.Ok(
                 new ReporteInventarioValorizacionResumenDto()));
         }
@@ -43,6 +53,12 @@ public sealed class ReportesInventarioValorizacionController : ControllerBase
             ValorInventarioCostoInsumosAdministrativos = resumen.ValorInventarioCostoInsumosAdministrativos,
             ValorPotencialVentaMercaderia = resumen.ValorPotencialVentaMercaderia
         };
+
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Inventario,
+            AccionPermiso.Ver,
+            "Consulta autorizada de valorización de inventario.",
+            entidad: "ReporteInventarioValorizacion");
 
         return Ok(ApiResponse<ReporteInventarioValorizacionResumenDto>.Ok(resultado));
     }
