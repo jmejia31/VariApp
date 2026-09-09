@@ -28,7 +28,12 @@ public sealed class ReportesInventarioValorizacionController : ControllerBase
     [RequierePermiso(ModuloSistema.Inventario, AccionPermiso.Ver)]
     public async Task<IActionResult> GetResumen()
     {
-        await _permisos.VerificarPermisoAsync(ModuloSistema.Finanzas, AccionPermiso.Ver);
+        if (!await _permisos.TienePermisoAsync(ModuloSistema.Finanzas, AccionPermiso.Ver))
+        {
+            return Ok(ApiResponse<ReporteInventarioValorizacionResumenDto>.Ok(
+                new ReporteInventarioValorizacionResumenDto()));
+        }
+
         var resumen = await _finanzas.GetResumenAsync();
 
         var resultado = new ReporteInventarioValorizacionResumenDto
