@@ -1,5 +1,4 @@
 {
-  "version": 28,
   "authority": "docs/VAEP_AUTHORITY.md",
   "currentParent": "N5.2.A",
   "generatedAt": "2026-09-09T13:12:00Z",
@@ -17,11 +16,6 @@
     "N5.1.G": "vaep/evidence/fragments/N5.1.G_LISTO_REAL_20260909T1031Z.json",
     "N5.1.H": "vaep/evidence/fragments/N5.1.H_LISTO_REAL_20260909T1236Z.json"
   },
-  "retiredCatalogs": [
-    {"commit":"0852a028d2eb6a16e7f352e293f30418cbb9a1b3","path":"vaep/control/jules-autorefill-catalog.json","blob":"2a1662930b6cda3fd41545fc41ef9f72760cedad","parents":["N4.11.G","N4.11.H"],"reason":"Certified closed; immutable manifests and reviewed evidence retained in Git; no work discarded."},
-    {"commit":"f08544218cd57e8b4420e6595e632a719907d44a","path":"vaep/control/jules-autorefill-catalog.json","blob":"5d0f0c8a51236f74d1c4b8c423dfb1664f766e50","parents":["N5.1.A"],"reason":"N5.1.A certified LISTO_REAL after REVIEW_FIRST and QA_TAKEOVER; no N5.1.B lane scope fabricated."},
-    {"commit":"3dace32c316effaa6b35923bb844de0aaf21e821","path":"vaep/control/jules-autorefill-catalog.json","blob":"243515cf267ac134559a0b3ac15d0482fa80b687","parents":["N5.1.B","N5.1.C","N5.1.D"],"reason":"Superseded by throughput-hardening catalog. Closed evidence remains immutable; N5.1.D semantics unchanged; N5.1.E receives four distinct material scopes."}
-  ],
   "policy": {
     "branch":"Desarrollo",
     "liveQueueDepthTarget":2,
