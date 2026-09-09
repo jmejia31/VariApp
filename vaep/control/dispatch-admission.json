@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "FROZEN",
-  "allowExistingActiveSessions": false,
-  "reason": "N5.2.F_REVIEW_FIRST_ACCEPTED_AFTER_QA_TAKEOVER__EXACT_FUNCTIONAL_HEAD_CAUSAL_GATES_AND_P0_P1_REVALIDATION_PENDING__NO_NEW_DISPATCH__NO_R3",
-  "updatedAtUtc": "2026-09-09T20:03:00Z"
+  "newDispatchAdmission": "OPEN",
+  "allowExistingActiveSessions": true,
+  "reason": "VERIFIED_ROADMAP_PROMOTION__N5.2.F__N5.2.G",
+  "updatedAtUtc": "2026-09-09T20:13:00Z"
 }
