@@ -51,12 +51,25 @@ jobs:
             ("t = must_replace(t, 'JULES_TASKS_TARGET_ROLLING_24H_TOTAL=400', 'JULES_TASKS_TARGET_ROLLING_24H_TOTAL=600', count=1)","t = must_replace(t, 'JULES_TASKS_TARGET_ROLLING_24H_TOTAL=400', 'JULES_TASKS_TARGET_ROLLING_24H_TOTAL=600', count=2)"),
             ("t = must_replace(t, 'LANE_REFILL_DEADLINE_SECONDS=90', 'LANE_REFILL_DEADLINE_SECONDS=30', count=1)","t = must_replace(t, 'LANE_REFILL_DEADLINE_SECONDS=90', 'LANE_REFILL_DEADLINE_SECONDS=30', count=2)")]:
               assert t.count(old)==1,(old,t.count(old)); t=t.replace(old,new)
+          # Workflow entry points were already switched/paused through the GitHub
+          # workflow-authorized path. The transformer must therefore mutate only
+          # non-workflow control-plane files in this run.
+          for call in [
+            'transform_primary_workflows()',
+            'transform_checkpoint_workflow()',
+            'transform_stop_workflow()',
+            'transform_engine_ci()',
+            'final_assertions()',
+          ]:
+              marker=f'    {call}\n'
+              assert t.count(marker)==1,(call,t.count(marker))
+              t=t.replace(marker,'')
           p.write_text(t)
           PY
           python3 scripts/vaep/j1_j6_cutover.py
-          # Workflow entry points were switched separately with GitHub workflow permission.
+          # Workflow entry points are published separately with workflow permission.
           git checkout HEAD -- .github/workflows
-          # No legacy credentials in active checkpoint helper or new handoffs.
+          # New active helpers cannot retain legacy runtime credential selection.
           python3 - <<'PY'
           from pathlib import Path
           import re
