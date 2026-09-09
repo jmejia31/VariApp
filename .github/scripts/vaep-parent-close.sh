@@ -85,12 +85,42 @@ latest_push_success() {
   ' >/dev/null
 }
 
+declared_causal_gates_ok() {
+  local functional="$1" fragment="$2"
+  local workflow run_id expected_head expected_conclusion run count=0 functional_seen=0
+  while IFS=$'\t' read -r workflow run_id expected_head expected_conclusion; do
+    [[ -n "$workflow" ]] || return 1
+    [[ "$run_id" =~ ^[0-9]+$ ]] || return 1
+    [[ "$expected_head" =~ ^[0-9a-fA-F]{40}$ ]] || return 1
+    [[ "$expected_conclusion" == "success" ]] || return 1
+    run="$(api "repos/$GITHUB_REPOSITORY/actions/runs/$run_id")" || return 1
+    jq -e --arg workflow "$workflow" --arg head "$expected_head" '
+      .name == $workflow and
+      .head_sha == $head and
+      .head_branch == "Desarrollo" and
+      .status == "completed" and
+      .conclusion == "success"
+    ' <<<"$run" >/dev/null || return 1
+    [[ "$expected_head" == "$functional" ]] && functional_seen=1
+    count=$((count + 1))
+  done < <(jq -r '.causalGates[] | [.workflow, (.runId | tostring), .headSha, .conclusion] | @tsv' "$fragment")
+  (( count > 0 && functional_seen == 1 ))
+}
+
 critical_gates_ok() {
-  local functional="$1" build acceptance recovery
-  build="$(api "repos/$GITHUB_REPOSITORY/actions/workflows/desarrollo-ci.yml/runs?branch=$BRANCH&head_sha=$functional&event=push&per_page=10")" || return 1
-  acceptance="$(api "repos/$GITHUB_REPOSITORY/actions/workflows/catalogos-aceptacion.yml/runs?branch=$BRANCH&head_sha=$functional&event=push&per_page=10")" || return 1
-  latest_push_success "$functional" <<<"$build" || return 1
-  latest_push_success "$functional" <<<"$acceptance" || return 1
+  local functional="$1" fragment="$2" build acceptance recovery
+  if jq -e '.causalGates | type == "array" and length > 0' "$fragment" >/dev/null; then
+    declared_causal_gates_ok "$functional" "$fragment" || return 1
+    echo "VAEP_CLOSE_CAUSAL_GATES=DECLARED_RECEIPT_VERIFIED functional_head=$functional"
+  else
+    # Backward-compatible fallback for legacy receipts that predate explicit
+    # run IDs/head SHAs. New receipts must use the declared causal-gate path.
+    build="$(api "repos/$GITHUB_REPOSITORY/actions/workflows/desarrollo-ci.yml/runs?branch=$BRANCH&head_sha=$functional&event=push&per_page=10")" || return 1
+    acceptance="$(api "repos/$GITHUB_REPOSITORY/actions/workflows/catalogos-aceptacion.yml/runs?branch=$BRANCH&head_sha=$functional&event=push&per_page=10")" || return 1
+    latest_push_success "$functional" <<<"$build" || return 1
+    latest_push_success "$functional" <<<"$acceptance" || return 1
+    echo "VAEP_CLOSE_CAUSAL_GATES=LEGACY_FALLBACK_VERIFIED functional_head=$functional"
+  fi
   if migration_gate_applicable "$functional"; then
     recovery="$(api "repos/$GITHUB_REPOSITORY/actions/workflows/migration-recovery-desarrollo.yml/runs?branch=$BRANCH&head_sha=$functional&event=push&per_page=10")" || return 1
     latest_push_success "$functional" <<<"$recovery" || return 1
@@ -190,7 +220,7 @@ main() {
   [[ -n "$fragment" ]] || { echo "VAEP_CLOSE=BLOCKED current_parent=$parent reason=LISTO_REAL_EVIDENCE_MISSING"; return 0; }
   functional="$(functional_head "$head")" || { echo 'VAEP_CLOSE=BLOCKED reason=FUNCTIONAL_HEAD_UNPROVEN'; return 0; }
   [[ "$(jq -r '.functionalHead' "$fragment")" == "$functional" ]] || { echo "VAEP_CLOSE=BLOCKED current_parent=$parent reason=FUNCTIONAL_HEAD_MISMATCH"; return 0; }
-  critical_gates_ok "$functional" || { echo "VAEP_CLOSE=BLOCKED current_parent=$parent reason=CAUSAL_GATES_NOT_TERMINAL_OR_SUCCESS"; return 0; }
+  critical_gates_ok "$functional" "$fragment" || { echo "VAEP_CLOSE=BLOCKED current_parent=$parent reason=CAUSAL_GATES_NOT_TERMINAL_OR_SUCCESS"; return 0; }
   live="$(live_jules_runs)" || { echo 'VAEP_CLOSE=BLOCKED reason=LIVE_JULES_UNPROVEN'; return 0; }
   (( live == 0 )) || { echo "VAEP_CLOSE=BLOCKED reason=LIVE_JULES_RUNS count=$live"; return 0; }
   # Publishing control changes before their own CI finishes could cancel gates.
