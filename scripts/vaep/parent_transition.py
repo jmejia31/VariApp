@@ -120,6 +120,61 @@ def choose_next(catalog, closed):
     return candidate["id"]
 
 
+def _roadmap_successor(catalog, parent):
+    nodes = roadmap_nodes(catalog)
+    if parent not in nodes:
+        return None
+    later = [n for n in nodes.values() if n["order"] > nodes[parent]["order"]]
+    if not later:
+        return None
+    return min(later, key=lambda n: n["order"])["id"]
+
+
+def _material_scope_count(catalog, parent):
+    if not parent:
+        return 0
+    count = 0
+    for tasks in catalog.get("lanes", {}).values():
+        for task in tasks:
+            if (task.get("plannedParent") == parent
+                    and task.get("readyForDispatch") is True
+                    and isinstance(task.get("fileScopeHint"), str) and task["fileScopeHint"].strip()
+                    and isinstance(task.get("prompt"), str) and task["prompt"].strip()):
+                count += 1
+    return count
+
+
+def _sync_operational_metadata(result, closed_parent, current_parent, current_material):
+    next_parent = _roadmap_successor(result, current_parent) if current_parent else None
+    next_material = _material_scope_count(result, next_parent)
+    plan = result.setdefault("throughputPlan", {})
+    plan.update(
+        mode=plan.get("mode", "MATERIAL_SWARM_FIRST"),
+        currentParent=current_parent,
+        currentParentMaterialScopeCount=current_material,
+        currentParentReason=(
+            f"{closed_parent} is LISTO_REAL. {current_parent} is dependency-valid with "
+            f"{current_material} material scope(s); no additional busywork is fabricated."
+            if current_parent else
+            f"{closed_parent} is LISTO_REAL and no successor exists in the current source-backed roadmap."
+        ),
+        nextParent=next_parent,
+        nextParentParallelMaterialScopes=next_material,
+        nextParentScopesNonOverlapping=True,
+        laneRefill=plan.get("laneRefill", "POST_TERMINAL_AUTOREFILL_PLUS_CANONICAL_CHECKPOINTS"),
+    )
+    roadmap = result.get("roadmap")
+    if isinstance(roadmap, dict):
+        if current_parent:
+            suffix = (f" Next roadmap node in this catalog is {next_parent}." if next_parent
+                      else " This catalog excerpt has no successor; extend only from fresh Plan/COLA evidence.")
+            roadmap["note"] = (f"Dependency order derived from live Plan/COLA. {closed_parent} is LISTO_REAL; "
+                               f"{current_parent} is current.{suffix}")
+        else:
+            roadmap["note"] = (f"Dependency order derived from live Plan/COLA. {closed_parent} is LISTO_REAL; "
+                               "no successor exists in the current source-backed roadmap.")
+
+
 def promotion_freeze_permitted(reason, current):
     if not isinstance(reason, str):
         return False
@@ -157,6 +212,9 @@ def transition(catalog, admission, closed, receipt_path, functional, now, harden
         for tasks in result.get("lanes", {}).values():
             for task in tasks:
                 task["dispatchEligible"] = False
+                if task.get("plannedParent") == current:
+                    task["reason"] = "CLOSED_BY_" + current + "_LISTO_REAL_RECEIPT"
+        _sync_operational_metadata(result, current, current, 0)
         return result, access
     node = roadmap_nodes(catalog)[target]
     result["currentParent"] = target
@@ -170,7 +228,12 @@ def transition(catalog, admission, closed, receipt_path, functional, now, harden
                        and isinstance(task.get("fileScopeHint"), str) and bool(task["fileScopeHint"].strip())
                        and isinstance(task.get("prompt"), str) and bool(task["prompt"].strip()))
             task["dispatchEligible"] = enabled
+            if enabled:
+                task["reason"] = "CURRENT_PARENT__DEPENDENCIES_CLOSED__MATERIAL_SCOPE"
+            elif task.get("plannedParent") == current:
+                task["reason"] = "CLOSED_BY_" + current + "_LISTO_REAL_RECEIPT"
             material += int(enabled)
+    _sync_operational_metadata(result, current, target, material)
     reason = admission.get("reason", "")
     # A certification/promotion freeze is controller-owned and may reopen only
     # after this function is called with a valid closure, safe successor and
