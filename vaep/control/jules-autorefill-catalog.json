@@ -1,8 +1,8 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
   "currentParent": "N5.3.C",
-  "generatedAt": "2026-09-09T23:45:00Z",
-  "regenerationReason": "WATCHDOG_QA_TAKEOVER__N5.3.C_MATERIAL_DRAINED__N5.3.D_SOURCE_BACKED_PREARM",
+  "generatedAt": "2026-09-09T23:52:00Z",
+  "regenerationReason": "WATCHDOG_QA_TAKEOVER__N5.3.C_MATERIAL_DRAINED__N5.3.D_SOURCE_BACKED_PREARM__READY_WAVE_RECONCILED",
   "lastClosedParent": "N5.3.B",
   "closureReceipts": {
     "N4.11.H": "vaep/evidence/fragments/N4.11.H_LISTO_REAL_20260908T204500Z.json",
@@ -49,15 +49,15 @@
     "currentParentMaterialScopeCount": 0,
     "currentParentReason": "N5.3.C material implementation is drained under REVIEW_FIRST/QA takeover. J1 and J2 persistence-model corrections are controller-owned and reviewed; J6 migration/snapshot single-writer transport stalled without observable Jules activity and was taken over directly by CHATGPT_VAEP. Exact-head CI/DoD remains closure debt; no additional N5.3.C dispatch is safe.",
     "nextParent": "N5.3.D",
-    "nextParentParallelMaterialScopes": 6,
+    "nextParentParallelMaterialScopes": 2,
     "nextParentScopesNonOverlapping": true,
-    "laneRefill": "CLOSURE_DEBT_FIRST__N5.3.D_PREARMED_DEPENDENCY_GATED__ENABLE_READY_WAVE_AFTER_N5.3.C_LISTO_REAL"
+    "laneRefill": "CLOSURE_DEBT_FIRST__N5.3.D_SIX_TOTAL_PREARMED__READY_WAVE_TWO__ENABLE_AFTER_N5.3.C_LISTO_REAL"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
     "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
     "sourceRanges": ["COLA!A408:T415", "PLAN_MAESTRO!A53:L55", "docs/qa/N5_3_A_API_CONTRACT_PREFLIGHT.md", "docs/qa/N5_3_A_BACKEND_DATA_PREFLIGHT.md"],
-    "note": "Dependency order is source-backed by the original Plan/COLA. N5.3.C remains current until exact-head gates close. N5.3.D backend/API material is prearmed from accepted N5.3.A preflight as an internal dependency DAG: result contracts and query rules are the first ready wave; service/controller/tests remain sibling-dependency-gated. No filler or nominal renumbering is used.",
+    "note": "Dependency order is source-backed by the original Plan/COLA. N5.3.C remains current until exact-head gates close. N5.3.D has six total prearmed material scopes in an internal dependency DAG; only D.1 and D.2 form the initial ready wave, while D.3-D.6 remain sibling-dependency-gated. No filler or nominal renumbering is used.",
     "nodes": [
       {"id":"N5.3.A","order":18,"type":"MICROTAREA","dependencies":["N5.1.H","GATE-N4"],"phaseGate":"GATE-N4"},
       {"id":"N5.3.B","order":19,"type":"MICROTAREA","dependencies":["N5.3.A"],"phaseGate":"GATE-N4"},
