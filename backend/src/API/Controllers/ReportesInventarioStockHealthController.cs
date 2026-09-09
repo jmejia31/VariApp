@@ -3,6 +3,8 @@ using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Enums;
+using InventoryApp.Infrastructure.Persistence;
+using InventoryApp.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,11 +15,13 @@ namespace InventoryApp.API.Controllers;
 [Route("inventario/reportes/stock-health")]
 public sealed class ReportesInventarioStockHealthController : ControllerBase
 {
-    private readonly IReporteInventarioService _reportes;
+    private readonly ReporteInventarioService _reportes;
 
-    public ReportesInventarioStockHealthController(IReporteInventarioService reportes)
+    public ReportesInventarioStockHealthController(
+        AppDbContext context,
+        IUsuarioScopeService usuarioScope)
     {
-        _reportes = reportes;
+        _reportes = new ReporteInventarioService(context, usuarioScope);
     }
 
     [HttpGet]
