@@ -16,7 +16,7 @@ BEGIN_AUTOMATION_POLICY
 PARENT_CLOSE_SLA_ROLLING_60M=3
 PARENT_CLOSE_SLA_ROLLING_24H=72
 JULES_TASKS_TARGET_ROLLING_24H_PER_WORKER=100
-JULES_TASKS_TARGET_ROLLING_24H_TOTAL=400
+JULES_TASKS_TARGET_ROLLING_24H_TOTAL=600
 JULES_REFILL_MAX_GAP_MINUTES=12
 PARENT_MAX_DWELL_MINUTES=20
 PARENT_STALL_NO_PROGRESS_MINUTES=10
@@ -27,12 +27,12 @@ MAX_VOLUNTARY_IDLE=0
 JULES_QUEUE_DEPTH_TARGET=2
 JULES_PROGRAMMED_BACKLOG_TARGET_PER_WORKER=12
 JULES_PROGRAMMED_BACKLOG_REFILL_FLOOR_PER_WORKER=4
-JULES_PROGRAMMED_BACKLOG_TARGET_TOTAL=48
+JULES_PROGRAMMED_BACKLOG_TARGET_TOTAL=72
 JULES_DISPATCH_ELIGIBLE_MIN_PER_WORKER=2
 JULES_CURRENT_RUN_REQUIRED=TRUE
 JULES_NEXT_SAFE_PREARMED_REQUIRED=TRUE
 JULES_NEXT_RUN_RESERVED_REQUIRED=TRUE
-LANE_REFILL_DEADLINE_SECONDS=90
+LANE_REFILL_DEADLINE_SECONDS=30
 SCHEDULED_RUN_LANE_REFILL_BEFORE_REVIEW=TRUE
 JULES_TERMINAL_HANDOFF_SAME_RUN=TRUE
 NO_MANIFEST_DURING_HEAD_FREEZE_CAUSAL=TRUE
@@ -47,7 +47,7 @@ END_AUTOMATION_POLICY
 
 ## 1. Fuente única
 
-1. ChatGPT/VAEP, Jules A/B/C/D y todas las automatizaciones activas deben leer **este mismo archivo** antes de decidir reglas operativas.
+1. ChatGPT/VAEP, J1/J2/J3/J4/J5/J6 y todas las automatizaciones activas deben leer **este mismo archivo** antes de decidir reglas operativas.
 2. Cuando una regla cambia, **se modifica este archivo en el mismo lugar**. No se crea una copia, revisión numerada, protocolo paralelo ni documento `*-vX*`.
 3. Git conserva el historial; no se crean fuentes operativas duplicadas para conservar reglas anteriores.
 4. `CHANGELOG_AI.md`, `BITACORA`, Issues, artifacts, prompts anteriores y commits pueden contener etiquetas históricas; son **evidencia**, nunca autoridad ejecutable.
@@ -69,10 +69,28 @@ GitHub manda para código/evidencia. Drive manda para estado operativo. El MAEST
 - Javier: propietario y autorización final.
 - ChatGPT/VAEP: controller, REVIEW_FIRST, QA, integración, corrección, CI, certificación, rollup y failover.
 - Chat B (ChatGPT Business): colaborador full-access par de ChatGPT/VAEP para controller, REVIEW_FIRST, QA, corrección, integración, CI, certificación, rollup, continuidad y failover. Opera sobre `Desarrollo` bajo este MAESTRO, con las mismas funciones de control que ChatGPT/VAEP y sin crear una quinta lane Jules.
-- Jules A/B/C/D: implementers cloud; máximo un write-scope autoritativo por Jules; entregan patch/artifact y no publican funcionalmente.
+- J1/J2/J3/J4: implementers cloud CODE. J5: QA/security/regression con fallback CODE. J6: integration/recovery con fallback CODE/QA. Los seis conservan máximo un write-scope autoritativo por ejecución; entregan patch/artifact y no publican funcionalmente.
 - Vibe: QA/corrector externo solo cuando VAEP lo delega.
 - AntiG/Antigravity: componente de infraestructura reservado para futura reincorporación autorizada. No pertenece al equipo operativo actual.
 - Codex: fuera del flujo salvo orden explícita futura del usuario.
+
+### Workers Jules canónicos
+
+```text
+JULES_ACTIVE_WORKERS=J1,J2,J3,J4,J5,J6
+JULES_ACTIVE_WORKER_COUNT=6
+JULES_WORKER_REGISTRY=vaep/control/jules-workers.json
+J1_ROLE=CODE_CORE
+J2_ROLE=CODE_BACKEND_DATA
+J3_ROLE=CODE_FRONTEND
+J4_ROLE=CODE_INFRA_INTEGRATIONS
+J5_ROLE=QA_SECURITY_REGRESSION__FALLBACK_CODE
+J6_ROLE=INTEGRATION_RECOVERY__FALLBACK_CODE_QA
+JULES_QUEUE_DEPTH_PER_WORKER=2
+JULES_MAX_LIVE_RUNS_TOTAL=12
+```
+
+Los IDs operativos nuevos son exclusivamente `J1..J6`. `JULES_A..JULES_D` pueden aparecer únicamente como evidencia histórica o para terminar una sesión ya iniciada antes del cutover; no son IDs válidos para nuevos dispatches. J3 y J4 usan exclusivamente sus secretos nominales `JULES_J3_API_KEY` y `JULES_J4_API_KEY`; no existe fallback ni referencia temporal de credenciales legacy para estos workers.
 
 ### Contrato operativo Chat B
 
@@ -137,8 +155,8 @@ La política de parent-close, dwell time y SLA está gobernada por el bloque can
 - Los checkpoints activos provienen exclusivamente de `VAEP_CHECKPOINTS` en el bloque canónico.
 - `PARENT_CLOSE_SLA_ROLLING_60M=3`: mínimo operativo de 3 padres en `LISTO_REAL` por ventana móvil de 60 minutos.
 - `PARENT_CLOSE_SLA_ROLLING_24H=72`: objetivo contractual de 72 padres `LISTO_REAL` por ventana móvil de 24 horas; el contador de 24h no reemplaza el gate de 3/h, ambos deben cumplirse.
-- `JULES_TASKS_TARGET_ROLLING_24H_PER_WORKER=100`: objetivo de 100 tareas Jules realmente integradas por cada worker A/B/C/D en 24h. Solo cuenta un commit de integración con receipt VAEP válido, REVIEW_ACCEPTED e INTEGRATED; no cuentan busywork, dispatch, manifest, autorefill, reserva, workflow verde, sesión creada ni SESSION_COMPLETED por sí solos.
-- `JULES_TASKS_TARGET_ROLLING_24H_TOTAL=400`: objetivo agregado de 400 tareas Jules validadas como INTEGRATED en 24h entre A/B/C/D; la fuente de verdad del KPI es `scripts/vaep/jules_integration_metrics.py --rolling-hours 24`.
+- `JULES_TASKS_TARGET_ROLLING_24H_PER_WORKER=100`: objetivo de 100 tareas Jules realmente integradas por cada worker J1/J2/J3/J4/J5/J6 en 24h. Solo cuenta un commit de integración con receipt VAEP válido, REVIEW_ACCEPTED e INTEGRATED; no cuentan busywork, dispatch, manifest, autorefill, reserva, workflow verde, sesión creada ni SESSION_COMPLETED por sí solos.
+- `JULES_TASKS_TARGET_ROLLING_24H_TOTAL=600`: objetivo agregado de 600 tareas Jules validadas como INTEGRATED en 24h entre J1/J2/J3/J4/J5/J6; la fuente de verdad del KPI es `scripts/vaep/jules_integration_metrics.py --rolling-hours 24`.
 - **TASK_IDENTITY_UNIQUE**: para métricas y autorefill, una tarea Jules útil se identifica por `CURRENT_PARENT + identidad funcional/semantic facet`, no por número correlativo, dispatchId, filename ni sessionId. Renumerar la misma prueba/comportamiento NO crea trabajo nuevo.
 - Si una identidad funcional ya tuvo resultado `COMPLETED` + `patchPresent=true` + sesión útil, cualquier ejecución posterior equivalente se clasifica `DUPLICATE_EVIDENCE_ONLY`, no integra automáticamente y **NO CUENTA** en `TASKS_24H` ni en el objetivo de 100 por Jules.
 - Un manifest/run `SUPERSEDED` antes de sesión útil no consume la identidad funcional y puede recuperarse; dedupe no debe impedir un recovery legítimo.
@@ -159,12 +177,12 @@ La política de parent-close, dwell time y SLA está gobernada por el bloque can
 - `NO_SUPERSEDE_PENDING=TRUE`: si ya existe un run de la misma lane en `pending|queued|in_progress` distinto del CURRENT, cualquier fuente de dispatch (timer, autorefill, manual recovery) debe NO-OP. GitHub concurrency mantiene un único pending; publicar otro puede supersederlo y está prohibido.
 - `ONE_MANIFEST_ONE_RUN=TRUE`: un manifest se publica en un único commit y produce exactamente un run. Un commit externo/manual sobre `Desarrollo` usa exclusivamente `push:path`; un commit interno creado con `GITHUB_TOKEN` (que no dispara Actions recursivamente) usa exactamente un `workflow_dispatch` correlacionado por `manifest_commit=<SHA exacto>`. Está prohibido combinar ambos mecanismos para el mismo manifest.
 - `CANCELLED_RUN_POLICY=FAILURE_TO_PREVENT`: una cancelación/supersession causada por VAEP, timer o control-plane es incidente operativo, no throughput. Debe corregirse la causa antes de generar más trabajo en esa lane. Sólo una cancelación externa/usuario explícita puede quedar fuera de esta clasificación.
-- **CONTINUIDAD PRIMARIA EVENT-DRIVEN**: cada workflow Jules A/B/C/D ejecuta `.github/scripts/vaep-jules-autorefill.sh` al terminar su corrida (también después de timeout/fallo de lane) y reserva el siguiente NEXT_SAFE material desde `vaep/control/jules-autorefill-catalog.json`. Los checkpoints horarios son watchdog/recovery; NO son el mecanismo primario de handoff.
+- **CONTINUIDAD PRIMARIA EVENT-DRIVEN**: cada workflow J1/J2/J3/J4/J5/J6 ejecuta `.github/scripts/vaep-jules-autorefill.sh` al terminar su corrida (también después de timeout/fallo de lane) y reserva el siguiente NEXT_SAFE material desde `vaep/control/jules-autorefill-catalog.json`. Los checkpoints horarios son watchdog/recovery; NO son el mecanismo primario de handoff.
 - El autorefill debe crear exactamente un manifest nuevo, con `primaryBaseHead` igual al padre real del commit, respetar `dispatch-admission=OPEN`, no duplicar scopes/dispatches y detenerse ante `HEAD_FREEZE_CAUSAL` real. La admisión se valida antes de construir, inmediatamente antes de publicar el ref y antes de emitir el run interno; si se cierra durante la carrera, el commit Git huérfano no se publica. Una actualización concurrente de HEAD obliga a reintentar contra el nuevo padre, nunca a publicar una base stale.
-- El catálogo de autorefill es BACKLOG PROGRAMADO, separado de la cola viva. Debe mantener `JULES_PROGRAMMED_BACKLOG_TARGET_PER_WORKER=12` tareas materiales por Jules (48 agregadas), con reposición obligatoria cuando las no consumidas bajen de 4 por worker. Solo las entradas `dispatchEligible=true` pueden convertirse en runs; las futuras pueden quedar `dispatchEligible=false` hasta que sus dependencias sean válidas. La cola viva sigue limitada por `JULES_QUEUE_DEPTH_TARGET=2` (`CURRENT + NEXT`). La regeneración genérica de facetas está PROHIBIDA: el controller repone únicamente scopes genuinos/únicos del roadmap; nunca recicla una identidad completada, renumera la misma prueba ni fabrica busywork.
+- El catálogo de autorefill es BACKLOG PROGRAMADO, separado de la cola viva. Debe mantener `JULES_PROGRAMMED_BACKLOG_TARGET_PER_WORKER=12` tareas materiales por Jules (72 agregadas), con reposición obligatoria cuando las no consumidas bajen de 4 por worker. Solo las entradas `dispatchEligible=true` pueden convertirse en runs; las futuras pueden quedar `dispatchEligible=false` hasta que sus dependencias sean válidas. La cola viva sigue limitada por `JULES_QUEUE_DEPTH_TARGET=2` (`CURRENT + NEXT`). La regeneración genérica de facetas está PROHIBIDA: el controller repone únicamente scopes genuinos/únicos del roadmap; nunca recicla una identidad completada, renumera la misma prueba ni fabrica busywork.
 - `JULES_NEXT_RUN_RESERVED_REQUIRED=TRUE`: NEXT_SAFE no cuenta como continuidad real hasta que exista un workflow Jules correlacionado en estado `pending|queued|in_progress` reservado para esa lane, salvo `HEAD_FREEZE_CAUSAL` real. Un archivo/row/manifiesto sin run no satisface zero-idle.
-- `LANE_REFILL_DEADLINE_SECONDS=90`: cada checkpoint debe resolver primero lanes libres o sin NEXT_RUN_RESERVED; no puede gastar más de este presupuesto en reconciliación/review antes de reservar trabajo real cuando existe SAFE_WORK.
-- `SCHEDULED_RUN_LANE_REFILL_BEFORE_REVIEW=TRUE`: la primera acción material de `:00/:12/:24/:36/:48`, después del preflight mínimo, es reservar CURRENT/NEXT run de A/B/C/D. REVIEW/CI/certificación se drenan detrás.
+- `LANE_REFILL_DEADLINE_SECONDS=30`: cada checkpoint debe resolver primero lanes libres o sin NEXT_RUN_RESERVED; no puede gastar más de este presupuesto en reconciliación/review antes de reservar trabajo real cuando existe SAFE_WORK.
+- `SCHEDULED_RUN_LANE_REFILL_BEFORE_REVIEW=TRUE`: la primera acción material de `:00/:12/:24/:36/:48`, después del preflight mínimo, es reservar CURRENT/NEXT run de J1/J2/J3/J4/J5/J6. REVIEW/CI/certificación se drenan detrás.
 - Terminal CURRENT debe liberar ownership y permitir que el NEXT_RUN_RESERVED arranque por la propia concurrencia del workflow, sin esperar otro checkpoint.
 - Cuando el CURRENT terminaliza y consume la reserva existente, el mismo workflow debe ejecutar AUTOREFILL **solo después de que el runtime state confirme terminal/stall/timeout**; entonces debe dejar un nuevo run `pending|queued|in_progress` siempre que exista SAFE_WORK y no haya freeze causal. Un fallo previo a sesión/admisión/transport no autoriza post-terminal refill. Esperar al siguiente checkpoint teniendo catálogo material disponible es incumplimiento.
 - `PREARM_BEFORE_CAUSAL_CI=TRUE`: el NEXT_SAFE que requiera manifest/commit debe prepararse antes de iniciar la ventana de CI causal del FUNCTIONAL_HEAD siempre que sea técnicamente posible.
@@ -176,10 +194,12 @@ La política de parent-close, dwell time y SLA está gobernada por el bloque can
 ## 7. Transporte Jules
 
 ```text
-A: vaep/jules/dispatch/*.json
-B: vaep/jules-b/dispatch/*.json
-C: vaep/jules-c/dispatch/*.json
-D: vaep/jules-d/dispatch/*.json
+J1: vaep/jules/dispatch/*.json
+J2: vaep/jules-b/dispatch/*.json
+J3: vaep/jules-c/dispatch/*.json
+J4: vaep/jules-d/dispatch/*.json
+J5: vaep/j5/dispatch/*.json
+J6: vaep/j6/dispatch/*.json
 ```
 
 Dispatch válido: un commit, exactamente un manifest nuevo, worker correcto, `expectedBranch=Desarrollo`, `primaryBaseHead` SHA40 del padre exacto, `taskAttempt` 1 o 2, scope y prompt no vacíos.
@@ -316,12 +336,12 @@ Estos son los únicos cinco checkpoints programados. Cualquier referencia histó
 Todas consumen **este MAESTRO**. Ninguna mantiene reglas por etiqueta numérica.
 
 Orden mínimo obligatorio de cada checkpoint:
-1. preflight mínimo: HEAD/FUNCTIONAL_HEAD/CURRENT_PARENT + `ROLLING60/DEFICIT` + `ROLLING24H_PARENT` + `JULES24H_A/B/C/D/TOTAL` + estado A/B/C/D;
+1. preflight mínimo: HEAD/FUNCTIONAL_HEAD/CURRENT_PARENT + `ROLLING60/DEFICIT` + `ROLLING24H_PARENT` + `JULES24H_J1/J2/J3/J4/J5/J6/TOTAL` + estado J1/J2/J3/J4/J5/J6;
 2. dentro de `LANE_REFILL_DEADLINE_SECONDS`, ejecutar **LANE_REFILL_HARD_FIRST**: toda lane sin CURRENT válido o sin NEXT_RUN_RESERVED y con SAFE_WORK debe recibir/reservar un workflow Jules real. No se inicia review largo, CI global ni auditoría antes de esto;
 3. si `ROLLING60<3`, ejecutar **CLOSURE_DEBT_FASTPATH**: drenar terminales/REVIEW_FIRST/QA_TAKEOVER del camino crítico y cerrar CURRENT_PARENT inmediatamente si ya es certificable; no crear soporte/evidencia redundante;
-4. mantener **LANE_REFILL_CONTINUITY** A/B/C/D usando runs/sesiones y NEXT_SAFE físicas; verificar transporte/run de cada dispatch sin retrasar un cierre certificable;
+4. mantener **LANE_REFILL_CONTINUITY** J1/J2/J3/J4/J5/J6 usando runs/sesiones y NEXT_SAFE físicas; verificar transporte/run de cada dispatch sin retrasar un cierre certificable;
 5. después de cada `LISTO_REAL`, promover y evaluar el siguiente parent en la misma corrida; encadenar cierres hasta recuperar `ROLLING60>=3` o documentar blocker causal exacto;
-6. persistir BITACORA con `LANE_REFILL_RESULT A/B/C/D`, `ROLLING60`, `DEFICIT`, `ROLLING24H_PARENT`, `JULES24H_A/B/C/D/TOTAL`, `JULES24H_DEFICIT_A/B/C/D`, `CLOSURE_DEBT_MODE`, `REVIEW_BACKLOG` y `NEXT_CLOSE_TARGET`.
+6. persistir BITACORA con `LANE_REFILL_RESULT J1/J2/J3/J4/J5/J6`, `ROLLING60`, `DEFICIT`, `ROLLING24H_PARENT`, `JULES24H_J1/J2/J3/J4/J5/J6/TOTAL`, `JULES24H_DEFICIT_J1/J2/J3/J4/J5/J6`, `CLOSURE_DEBT_MODE`, `REVIEW_BACKLOG` y `NEXT_CLOSE_TARGET`.
 7. Si cualquier Jules está por debajo de la trayectoria proporcional de 100/24h y existe SAFE_WORK, refill gana prioridad sobre soporte administrativo; si padres están por debajo de 72/24h o 3/60m, REVIEW/CERT/CLOSE gana prioridad sobre evidencia redundante.
 
 Una corrida con `ROLLING60<3` y un parent certificable no puede terminar sin cerrar ese parent. Una corrida con lane libre + NEXT_SAFE segura tampoco puede terminar en status-only, review-only o CI-wait-only.

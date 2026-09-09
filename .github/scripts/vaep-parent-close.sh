@@ -22,7 +22,7 @@ current_head() { api "repos/$GITHUB_REPOSITORY/git/ref/heads/$BRANCH" --jq '.obj
 
 is_control_plane_path() {
   case "$1" in
-    AGENTS.md|README.md|CHANGELOG_AI.md|PLAN_EJECUCION_AUTONOMA.md|PROJECT_CONTEXT.md|*.md|docs/*|docs/N4.11_CENTROS_COSTO_*.md|vaep/jules/dispatch/*.json|vaep/jules-b/dispatch/*.json|vaep/jules-c/dispatch/*.json|vaep/jules-d/dispatch/*.json|vaep/control/*|vaep/evidence/*|scripts/vaep/*|.github/scripts/vaep-*|.github/workflows/vaep-*|.github/workflows/catalogos-aceptacion.yml) return 0 ;;
+    AGENTS.md|README.md|CHANGELOG_AI.md|PLAN_EJECUCION_AUTONOMA.md|PROJECT_CONTEXT.md|*.md|docs/*|docs/N4.11_CENTROS_COSTO_*.md|vaep/jules/dispatch/*.json|vaep/jules-b/dispatch/*.json|vaep/jules-c/dispatch/*.json|vaep/jules-d/dispatch/*.json|vaep/j5/dispatch/*.json|vaep/j6/dispatch/*.json|vaep/control/*|vaep/evidence/*|scripts/vaep/*|.github/scripts/vaep-*|.github/workflows/vaep-*|.github/workflows/catalogos-aceptacion.yml) return 0 ;;
     *) return 1 ;;
   esac
 }

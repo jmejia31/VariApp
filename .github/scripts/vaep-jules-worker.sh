@@ -144,7 +144,7 @@ write_runtime_state() {
     --arg authority "MASTER" \
     --arg masterCommitSha "$MASTER_COMMIT_SHA" \
     --arg policyHash "$AUTOMATION_POLICY_HASH" \
-    --arg workerId "${WORKER_ID:-JULES_A}" \
+    --arg workerId "${WORKER_ID:-UNKNOWN}" \
     --arg dispatchId "$dispatch_id" \
     --arg taskId "$task_id" \
     --arg phase "$phase" \
@@ -210,15 +210,15 @@ write_base_equivalence() {
 }
 
 # Atomic dispatch invariant: exactly one new manifest for THIS worker.
-# The same commit may batch one manifest for each Jules lane so all four lanes
+# The same commit may batch one manifest for each Jules lane so all six lanes
 # start from one HEAD movement. No non-dispatch files are allowed in the batch.
 mapfile -t added_manifests < <(git diff-tree --no-commit-id --name-only --diff-filter=A -r "$DISPATCH_SHA" -- "$DISPATCH_PATH/*.json")
 [[ ${#added_manifests[@]} -eq 1 ]] || fail "MASTER expected exactly one newly added dispatch manifest for this worker; found ${#added_manifests[@]}." 21
 manifest="${added_manifests[0]}"
 mapfile -t changed_files < <(git diff-tree --no-commit-id --name-only -r "$DISPATCH_SHA")
-[[ ${#changed_files[@]} -ge 1 && ${#changed_files[@]} -le 4 ]] || fail "MASTER atomic dispatch batch must contain 1..4 files." 22
+[[ ${#changed_files[@]} -ge 1 && ${#changed_files[@]} -le 6 ]] || fail "MASTER atomic dispatch batch must contain 1..6 files." 22
 for changed in "${changed_files[@]}"; do
-  [[ "$changed" =~ ^vaep/jules(-b|-c|-d)?/dispatch/[^/]+\.json$ ]] || fail "MASTER atomic dispatch batch contains a non-dispatch file: $changed" 22
+  [[ "$changed" =~ ^(vaep/jules/dispatch|vaep/jules-b/dispatch|vaep/jules-c/dispatch|vaep/jules-d/dispatch|vaep/j5/dispatch|vaep/j6/dispatch)/[^/]+\.json$ ]] || fail "MASTER atomic dispatch batch contains a non-dispatch file: $changed" 22
 done
 
 jq -e '
@@ -242,7 +242,7 @@ file_scope="$(jq -r '.fileScopeHint' "$manifest")"
 user_prompt="$(jq -r '.prompt' "$manifest")"
 expected_manifest_name="$dispatch_id.json"
 [[ "$(basename "$manifest")" == "$expected_manifest_name" ]] || fail "INVALID_REDISPATCH: manifest filename must equal dispatchId.json and remain immutable." 28
-printf 'VAEP_METRIC stage=MANIFEST_ACCEPTED value=true worker=%s dispatch=%s task=%s\n' "${WORKER_ID:-JULES_A}" "$dispatch_id" "$task_id"
+printf 'VAEP_METRIC stage=MANIFEST_ACCEPTED value=true worker=%s dispatch=%s task=%s\n' "${WORKER_ID:-UNKNOWN}" "$dispatch_id" "$task_id"
 manifest_accepted_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
 # Hard retry cap. New manifests SHOULD carry taskAttempt; compatibility manifests
@@ -348,13 +348,13 @@ if [[ "$duplicate_guard_rc" -ne 0 ]]; then
   cat "$work/duplicate-session-guard.json" >&2
   fail "ACTIVE_SESSION_GUARD: duplicate/equivalent Jules session blocks new dispatch." 45
 fi
-printf 'VAEP_METRIC stage=ACTIVE_SESSION_GUARD value=PASS worker=%s dispatch=%s task=%s base=%s attempt=%s\n' "${WORKER_ID:-JULES_A}" "$dispatch_id" "$task_id" "$primary_base" "$task_attempt"
+printf 'VAEP_METRIC stage=ACTIVE_SESSION_GUARD value=PASS worker=%s dispatch=%s task=%s base=%s attempt=%s\n' "${WORKER_ID:-UNKNOWN}" "$dispatch_id" "$task_id" "$primary_base" "$task_attempt"
 session_name=""
 prompt_file="$work/prompt.txt"
 printf '%s\n' \
   "You are $WORKER_LABEL, an autonomous trusted implementer of the VariApp VAEP team." \
   "PROJECT_ID=VARIAPP" \
-  "WORKER_ID=${WORKER_ID:-JULES_A}" \
+  "WORKER_ID=${WORKER_ID:-UNKNOWN}" \
   "REPOSITORY=jmejia31/VariApp" \
   "BRANCH=Desarrollo" \
   "VAEP_JULES_PROTOCOL=MASTER" \
@@ -387,7 +387,7 @@ jq -n --arg prompt "$(cat "$prompt_file")" --arg title "$title" --arg source "$s
 api_post_json "$JULES_API_BASE/sessions" "$work/create-session.json" > "$work/session-created.json"
 session_name="$(jq -r '.name // empty' "$work/session-created.json")"
 [[ -n "$session_name" ]] || fail "Jules did not return a session resource." 44
-printf 'VAEP_METRIC stage=SESSION_CREATED value=true worker=%s dispatch=%s session=%s\n' "${WORKER_ID:-JULES_A}" "$dispatch_id" "$session_name"
+printf 'VAEP_METRIC stage=SESSION_CREATED value=true worker=%s dispatch=%s session=%s\n' "${WORKER_ID:-UNKNOWN}" "$dispatch_id" "$session_name"
 session_created_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 session_id="${session_name#sessions/}"
 write_runtime_state "SESSION_ACTIVE" "$session_name"
@@ -572,7 +572,7 @@ jq -n \
   --arg policyHash "$AUTOMATION_POLICY_HASH" \
   --arg masterCommitSha "$MASTER_COMMIT_SHA" \
   --argjson r3Prohibited "$R3_PROHIBITED" \
-  --arg workerId "${WORKER_ID:-JULES_A}" \
+  --arg workerId "${WORKER_ID:-UNKNOWN}" \
   --arg dispatchId "$dispatch_id" \
   --arg taskId "$task_id" \
   --arg session "$session_name" \
@@ -605,7 +605,7 @@ run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
 printf -v issue_body '%s\n\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n%s\n' \
   "VAEP $WORKER_LABEL MASTER result and controller handoff signal." \
   "- Protocol: \`MASTER\`; global control-plane: \`MASTER\`" \
-  "- Worker: \`${WORKER_ID:-JULES_A}\`" \
+  "- Worker: \`${WORKER_ID:-UNKNOWN}\`" \
   "- Dispatch: \`$dispatch_id\`" \
   "- Task: \`$task_id\`" \
   "- Task attempt: \`$task_attempt/$JULES_MAX_ATTEMPTS_PER_TASK\`; Jules R3+ is PROHIBITED" \

@@ -15,10 +15,12 @@ command -v jq >/dev/null 2>&1 || { echo "AUTOREFILL_ERROR=jq_missing" >&2; exit 
 test -f "$CATALOG" || { echo "AUTOREFILL_ERROR=catalog_missing" >&2; exit 2; }
 
 case "$WORKER_ID" in
-  JULES_A) DISPATCH_PATH="vaep/jules/dispatch" ;;
-  JULES_B) DISPATCH_PATH="vaep/jules-b/dispatch" ;;
-  JULES_C) DISPATCH_PATH="vaep/jules-c/dispatch" ;;
-  JULES_D) DISPATCH_PATH="vaep/jules-d/dispatch" ;;
+  J1) DISPATCH_PATH="vaep/jules/dispatch" ;;
+  J2) DISPATCH_PATH="vaep/jules-b/dispatch" ;;
+  J3) DISPATCH_PATH="vaep/jules-c/dispatch" ;;
+  J4) DISPATCH_PATH="vaep/jules-d/dispatch" ;;
+  J5) DISPATCH_PATH="vaep/j5/dispatch" ;;
+  J6) DISPATCH_PATH="vaep/j6/dispatch" ;;
   *) echo "AUTOREFILL_ERROR=unknown_worker worker=$WORKER_ID" >&2; exit 2 ;;
 esac
 readonly DISPATCH_PATH
@@ -39,10 +41,12 @@ jules_api_key() {
     return 0
   fi
   case "$WORKER_ID" in
-    JULES_A) printf '%s\n' "${JULES_A_API_KEY:-}" ;;
-    JULES_B) printf '%s\n' "${JULES_B_API_KEY:-}" ;;
-    JULES_C) printf '%s\n' "${JULES_C_API_KEY:-}" ;;
-    JULES_D) printf '%s\n' "${JULES_D_API_KEY:-}" ;;
+    J1) printf '%s\n' "${J1_API_KEY:-}" ;;
+    J2) printf '%s\n' "${J2_API_KEY:-}" ;;
+    J3) printf '%s\n' "${J3_API_KEY:-}" ;;
+    J4) printf '%s\n' "${J4_API_KEY:-}" ;;
+    J5) printf '%s\n' "${J5_API_KEY:-}" ;;
+    J6) printf '%s\n' "${J6_API_KEY:-}" ;;
   esac
 }
 
@@ -123,19 +127,23 @@ failed_r2_pre_session_transport() {
 
 lane_workflow_name() {
   case "$WORKER_ID" in
-    JULES_A) printf '%s\n' "VAEP Jules A Trusted Secondary Worker" ;;
-    JULES_B) printf '%s\n' "VAEP Jules B Trusted Secondary Worker" ;;
-    JULES_C) printf '%s\n' "VAEP Jules C Trusted Secondary Worker" ;;
-    JULES_D) printf '%s\n' "VAEP Jules D Trusted Secondary Worker" ;;
+    J1) printf '%s\n' "VAEP J1 Trusted Worker" ;;
+    J2) printf '%s\n' "VAEP J2 Trusted Worker" ;;
+    J3) printf '%s\n' "VAEP J3 Trusted Worker" ;;
+    J4) printf '%s\n' "VAEP J4 Trusted Worker" ;;
+    J5) printf '%s\n' "VAEP J5 Trusted Worker" ;;
+    J6) printf '%s\n' "VAEP J6 Trusted Worker" ;;
   esac
 }
 
 lane_workflow_file() {
   case "$WORKER_ID" in
-    JULES_A) printf '%s\n' "vaep-jules-secondary.yml" ;;
-    JULES_B) printf '%s\n' "vaep-jules-secondary-b.yml" ;;
-    JULES_C) printf '%s\n' "vaep-jules-secondary-c.yml" ;;
-    JULES_D) printf '%s\n' "vaep-jules-secondary-d.yml" ;;
+    J1) printf '%s\n' "vaep-jules-j1.yml" ;;
+    J2) printf '%s\n' "vaep-jules-j2.yml" ;;
+    J3) printf '%s\n' "vaep-jules-j3.yml" ;;
+    J4) printf '%s\n' "vaep-jules-j4.yml" ;;
+    J5) printf '%s\n' "vaep-jules-j5.yml" ;;
+    J6) printf '%s\n' "vaep-jules-j6.yml" ;;
   esac
 }
 
@@ -200,7 +208,7 @@ canonical_parent_matches_checkout() {
 
 is_control_plane_path() {
   case "$1" in
-    vaep/jules/dispatch/*.json|vaep/jules-b/dispatch/*.json|vaep/jules-c/dispatch/*.json|vaep/jules-d/dispatch/*.json|vaep/control/*|vaep/evidence/*|docs/VAEP_AUTHORITY.md|docs/N4.11_CENTROS_COSTO_*.md|.github/scripts/vaep-*|.github/workflows/vaep-*)
+    vaep/jules/dispatch/*.json|vaep/jules-b/dispatch/*.json|vaep/jules-c/dispatch/*.json|vaep/jules-d/dispatch/*.json|vaep/j5/dispatch/*.json|vaep/j6/dispatch/*.json|vaep/control/*|vaep/evidence/*|docs/VAEP_AUTHORITY.md|docs/N4.11_CENTROS_COSTO_*.md|.github/scripts/vaep-*|.github/workflows/vaep-*)
       return 0 ;;
     *) return 1 ;;
   esac

@@ -11,7 +11,9 @@ TRAILER_RE = re.compile(r"^VAEP-([A-Za-z0-9-]+):\s*(.*?)\s*$")
 SHA40_RE = re.compile(r"^[0-9a-f]{40}$")
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 SESSION_RE = re.compile(r"^sessions/[0-9]+$")
-WORKERS = {"JULES_A", "JULES_B", "JULES_C", "JULES_D"}
+ACTIVE_WORKERS = {"J1", "J2", "J3", "J4", "J5", "J6"}
+LEGACY_ALIASES = {"JULES_A":"J1", "JULES_B":"J2", "JULES_C":"J3", "JULES_D":"J4"}
+WORKERS = ACTIVE_WORKERS | set(LEGACY_ALIASES)
 REQUIRED = {
     "Dispatch", "Task", "Worker", "Session", "Task-Attempt",
     "Dispatch-Manifest", "Patch-SHA256", "Patch-Base",
@@ -49,7 +51,7 @@ def validate_contract(trailers, duplicates, manifest, changed_files):
         return errors
 
     if trailers["Worker"] not in WORKERS:
-        errors.append("Worker must be JULES_A/B/C/D")
+        errors.append("Worker must be J1..J6 (legacy A-D accepted only for historical receipts)")
     if trailers["Review"] != "ACCEPTED":
         errors.append("Review must be ACCEPTED")
     if trailers["Scope-Decision"] != "PASS":
@@ -84,7 +86,7 @@ def validate_contract(trailers, duplicates, manifest, changed_files):
         errors.append("Reviewed-Files contains duplicates")
     if set(reviewed_files) != set(changed_files):
         errors.append("Reviewed-Files must exactly match integration commit changed files")
-    if any(re.match(r"^vaep/jules(-b|-c|-d)?/dispatch/", path) for path in changed_files):
+    if any(re.match(r"^(?:vaep/jules(?:-b|-c|-d)?/dispatch|vaep/j[56]/dispatch)/", path) for path in changed_files):
         errors.append("integration commit cannot add/modify Jules dispatch manifests")
 
     if manifest is not None:
@@ -111,7 +113,7 @@ def inspect_commit(sha):
     manifest = None
     load_error = None
     if manifest_path:
-        if not re.match(r"^vaep/jules(-b|-c|-d)?/dispatch/[^/]+\.json$", manifest_path):
+        if not re.match(r"^(?:vaep/jules(?:-b|-c|-d)?/dispatch|vaep/j[56]/dispatch)/[^/]+\.json$", manifest_path):
             load_error = "Dispatch-Manifest path is not a Jules dispatch manifest"
         else:
             try:
@@ -174,17 +176,17 @@ def rolling(hours):
         print(json.dumps({"status":"INVALID_RECEIPTS_PRESENT","rollingHours":hours,"invalid":invalid,"countsAsUsefulThroughput":False}, indent=2))
         return 2
 
-    by_worker = Counter(item["trailers"]["Worker"] for item in valid)
+    by_worker = Counter(LEGACY_ALIASES.get(item["trailers"]["Worker"], item["trailers"]["Worker"]) for item in valid)
     per_target, total_target = read_targets()
     per_deficit = {}
     if hours == 24 and per_target is not None:
-        per_deficit = {worker:max(0, per_target-by_worker.get(worker,0)) for worker in sorted(WORKERS)}
+        per_deficit = {worker:max(0, per_target-by_worker.get(worker,0)) for worker in sorted(ACTIVE_WORKERS)}
     payload = {
         "status":"OK",
         "rollingHours":hours,
         "productivityAuthority":"VALIDATED_INTEGRATED_COMMITS_ONLY",
         "integratedTasks":len(valid),
-        "byWorker":{worker:by_worker.get(worker,0) for worker in sorted(WORKERS)},
+        "byWorker":{worker:by_worker.get(worker,0) for worker in sorted(ACTIVE_WORKERS)},
         "perWorkerTarget24h":per_target if hours == 24 else None,
         "totalTarget24h":total_target if hours == 24 else None,
         "deficitByWorker":per_deficit,

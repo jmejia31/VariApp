@@ -5,6 +5,17 @@ readonly UNIQUE_REGISTRY="vaep/control/jules-completed-semantic-facets.json"
 readonly CATALOG="vaep/control/jules-autorefill-catalog.json"
 readonly BRANCH="Desarrollo"
 
+# J1-J6 cutover guard: a legacy lane may finish an already-created session,
+# but it must never publish/refill new legacy work after cutover.
+if [[ -f vaep/control/jules-workers.json ]] && jq -e '.cutoverEnabled == true' vaep/control/jules-workers.json >/dev/null 2>&1; then
+  case "${WORKER_ID:-}" in
+    JULES_A|JULES_B|JULES_C|JULES_D)
+      echo "AUTOREFILL_LEGACY_NOOP worker=${WORKER_ID} reason=J1_J6_CUTOVER_ACTIVE"
+      exit 0
+      ;;
+  esac
+fi
+
 if [[ "${1:-}" == "--post-terminal" ]]; then
   : "${RUNNER_TEMP:?RUNNER_TEMP required for post-terminal refill}"
   state_file="$RUNNER_TEMP/vaep-jules-runtime-state.json"

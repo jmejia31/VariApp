@@ -15,10 +15,12 @@ command -v jq >/dev/null 2>&1 || exit 2
 test -f "$CATALOG" || { echo "CATALOG_FLOOR_ERROR=catalog_missing" >&2; exit 2; }
 
 case "$WORKER_ID" in
-  JULES_A) DISPATCH_PATH="vaep/jules/dispatch" ;;
-  JULES_B) DISPATCH_PATH="vaep/jules-b/dispatch" ;;
-  JULES_C) DISPATCH_PATH="vaep/jules-c/dispatch" ;;
-  JULES_D) DISPATCH_PATH="vaep/jules-d/dispatch" ;;
+  J1) DISPATCH_PATH="vaep/jules/dispatch" ;;
+  J2) DISPATCH_PATH="vaep/jules-b/dispatch" ;;
+  J3) DISPATCH_PATH="vaep/jules-c/dispatch" ;;
+  J4) DISPATCH_PATH="vaep/jules-d/dispatch" ;;
+  J5) DISPATCH_PATH="vaep/j5/dispatch" ;;
+  J6) DISPATCH_PATH="vaep/j6/dispatch" ;;
   *) echo "CATALOG_FLOOR_ERROR=unknown_worker worker=$WORKER_ID" >&2; exit 2 ;;
 esac
 

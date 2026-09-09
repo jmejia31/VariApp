@@ -1,23 +1,24 @@
 #!/usr/bin/env python3
 import json
-import pathlib
+from pathlib import Path
 
-P = pathlib.Path("vaep/control/jules-workers.json")
-data = json.loads(P.read_text())
+p = Path("vaep/control/jules-workers.json")
+d = json.loads(p.read_text(encoding="utf-8"))
 expected = [f"J{i}" for i in range(1, 7)]
-
-assert data["preparedWorkers"] == expected
-assert data["cutoverEnabled"] is False
-assert data["activeLegacyWorkers"] == ["JULES_A", "JULES_B", "JULES_C", "JULES_D"]
-
-for worker in expected:
-    config = data["workers"][worker]
-    assert config["enabled"] is False
-    assert config["secretName"] == f"JULES_{worker}_API_KEY"
-    assert config["queueDepthTarget"] == 2
-    assert config["programmedBacklogTarget"] == 12
-    assert config["programmedBacklogRefillFloor"] == 4
-    assert config["maxAttempts"] == 2
-    assert config["reworkMax"] == 1
-
-print("J1_J6_REGISTRY_PREPARED_OK")
+assert d["phase"] == "F2_ACTIVE_CUTOVER"
+assert d["cutoverEnabled"] is True
+assert d["activeWorkers"] == expected
+assert d["activeLegacyWorkers"] == []
+assert sorted(d["workers"]) == expected
+for wid in expected:
+    w = d["workers"][wid]
+    assert w["enabled"] is True
+    assert w["queueDepthTarget"] == 2
+    assert w["programmedBacklogTarget"] == 12
+    assert w["programmedBacklogRefillFloor"] == 4
+    assert w["maxAttempts"] == 2
+    assert w["reworkMax"] == 1
+    assert w["secretName"] == f"JULES_{wid}_API_KEY"
+    assert w["desiredSecretName"] == f"JULES_{wid}_API_KEY"
+    assert w["credentialMigrationPending"] is False
+print("J1_J6_REGISTRY_ACTIVE_OK")

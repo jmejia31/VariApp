@@ -8,7 +8,7 @@ readonly PARENT_CLOSE=".github/scripts/vaep-parent-close.sh"
 readonly CATALOG="vaep/control/jules-autorefill-catalog.json"
 readonly ADMISSION="vaep/control/dispatch-admission.json"
 readonly BRANCH="Desarrollo"
-readonly WORKERS=(JULES_A JULES_B JULES_C JULES_D)
+readonly WORKERS=(J1 J2 J3 J4 J5 J6)
 
 fail() {
   echo "VAEP_CHECKPOINT_ERROR=$1" >&2
@@ -17,7 +17,7 @@ fail() {
 
 usage() {
   cat <<'EOF'
-usage: vaep-checkpoint.sh --checkpoint :00|:12|:24|:36|:48 [--worker JULES_A|JULES_B|JULES_C|JULES_D]
+usage: vaep-checkpoint.sh --checkpoint :00|:12|:24|:36|:48 [--worker J1|J2|J3|J4|J5|J6]
        vaep-checkpoint.sh --self-test
 EOF
 }
@@ -65,10 +65,12 @@ is_watchdog_freeze_reason() {
 
 jules_api_key_for_worker() {
   case "${1:-}" in
-    JULES_A) printf '%s\n' "${JULES_A_API_KEY:-${JULES_API_KEY:-}}" ;;
-    JULES_B) printf '%s\n' "${JULES_B_API_KEY:-${JULES_API_KEY:-}}" ;;
-    JULES_C) printf '%s\n' "${JULES_C_API_KEY:-${JULES_API_KEY:-}}" ;;
-    JULES_D) printf '%s\n' "${JULES_D_API_KEY:-${JULES_API_KEY:-}}" ;;
+    J1) printf '%s\n' "${J1_API_KEY:-}" ;;
+    J2) printf '%s\n' "${J2_API_KEY:-}" ;;
+    J3) printf '%s\n' "${J3_API_KEY:-}" ;;
+    J4) printf '%s\n' "${J4_API_KEY:-}" ;;
+    J5) printf '%s\n' "${J5_API_KEY:-}" ;;
+    J6) printf '%s\n' "${J6_API_KEY:-}" ;;
     *) printf '\n' ;;
   esac
 }
@@ -88,7 +90,7 @@ remote_watchdog_sessions_terminal() {
     .[]?
     | (.body // "") as $body
     | select(($body | contains("CURRENT_PARENT=" + $parent)) or ($body | contains("- Task: `" + $parent + ".")))
-    | (try ($body | capture("- Worker: `(?<worker>JULES_[ABCD])`").worker) catch "") as $worker
+    | (try ($body | capture("- Worker: `(?<worker>J[1-6]|JULES_[ABCD])`").worker) catch "") as $worker
     | ([$body | scan("sessions/[0-9]+")] | last // "") as $session
     | select($worker != "" and $session != "")
     | [$worker, $session]
@@ -270,7 +272,7 @@ reconcile_watchdog_admission() {
     echo 'VAEP_ADMISSION_RECONCILE=WAIT reason=current_parent_missing' >&2
     return 0
   }
-  live="$(api "repos/$GITHUB_REPOSITORY/actions/runs?branch=$BRANCH&per_page=100" 2>/dev/null | jq '[.workflow_runs[]? | select(.name | test("^VAEP Jules [ABCD] Trusted Secondary Worker$")) | select(.status=="queued" or .status=="in_progress" or .status=="pending")] | length' 2>/dev/null)" || live=-1
+  live="$(api "repos/$GITHUB_REPOSITORY/actions/runs?branch=$BRANCH&per_page=100" 2>/dev/null | jq '[.workflow_runs[]? | select(.name | test("^VAEP J[1-6] Trusted Worker$")) | select(.status=="queued" or .status=="in_progress" or .status=="pending")] | length' 2>/dev/null)" || live=-1
   if (( live < 0 )); then
     echo 'VAEP_ADMISSION_RECONCILE=WAIT reason=live_runs_unavailable' >&2
     return 0

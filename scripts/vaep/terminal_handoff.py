@@ -237,7 +237,7 @@ def audit(worker, output):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--annotate")
-    parser.add_argument("--audit", choices=["JULES_A", "JULES_B", "JULES_C", "JULES_D"])
+    parser.add_argument("--audit", choices=["J1", "J2", "J3", "J4", "J5", "J6"])
     parser.add_argument("--output", default="terminal-handoff.json")
     args = parser.parse_args()
     if args.annotate:

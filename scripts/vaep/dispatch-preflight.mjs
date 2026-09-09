@@ -51,7 +51,7 @@ function validateShape(manifest) {
   if (!manifest.taskId.startsWith(`${manifest.parentId}.`) && manifest.taskId !== manifest.parentId) errors.push('taskId must belong to parentId');
   if (!['PRE', 'DOMAIN', 'DB_MIG', 'BACKEND_API', 'FRONTEND_UX', 'SEC_AUDIT', 'TEST_CI', 'DOC_CERT'].includes(manifest.phase)) errors.push('phase is invalid');
   if (!['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'].includes(manifest.stage)) errors.push('stage is invalid');
-  if (!['JULES_A', 'JULES_B', 'JULES_C', 'JULES_D', 'CODEX', 'CHATGPT_VAEP'].includes(manifest.worker)) errors.push('worker is invalid');
+  if (!['J1', 'J2', 'J3', 'J4', 'J5', 'J6', 'CODEX', 'CHATGPT_VAEP'].includes(manifest.worker)) errors.push('worker is invalid');
   if (!/^[0-9a-f]{40}$/.test(manifest.primaryBaseHead)) errors.push('primaryBaseHead must be a full lowercase SHA');
   if (!Array.isArray(manifest.fileScopeHint) || manifest.fileScopeHint.length === 0) errors.push('fileScopeHint must be a non-empty array');
   for (const scope of manifest.fileScopeHint ?? []) {

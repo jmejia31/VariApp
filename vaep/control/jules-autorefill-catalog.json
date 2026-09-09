@@ -15,24 +15,60 @@
     "N5.1.E": "vaep/evidence/fragments/N5.1.E_LISTO_REAL_20260909T0422Z.json"
   },
   "retiredCatalogs": [
-    {"commit":"0852a028d2eb6a16e7f352e293f30418cbb9a1b3","path":"vaep/control/jules-autorefill-catalog.json","blob":"2a1662930b6cda3fd41545fc41ef9f72760cedad","parents":["N4.11.G","N4.11.H"],"reason":"Certified closed; immutable manifests and reviewed evidence retained in Git; no work discarded."},
-    {"commit":"f08544218cd57e8b4420e6595e632a719907d44a","path":"vaep/control/jules-autorefill-catalog.json","blob":"5d0f0c8a51236f74d1c4b8c423dfb1664f766e50","parents":["N5.1.A"],"reason":"N5.1.A certified LISTO_REAL after REVIEW_FIRST and QA_TAKEOVER; no N5.1.B lane scope fabricated."},
-    {"commit":"3dace32c316effaa6b35923bb844de0aaf21e821","path":"vaep/control/jules-autorefill-catalog.json","blob":"243515cf267ac134559a0b3ac15d0482fa80b687","parents":["N5.1.B","N5.1.C","N5.1.D"],"reason":"Superseded by throughput-hardening catalog. Closed evidence remains immutable; N5.1.D semantics unchanged; N5.1.E receives four distinct material scopes."}
+    {
+      "commit": "0852a028d2eb6a16e7f352e293f30418cbb9a1b3",
+      "path": "vaep/control/jules-autorefill-catalog.json",
+      "blob": "2a1662930b6cda3fd41545fc41ef9f72760cedad",
+      "parents": [
+        "N4.11.G",
+        "N4.11.H"
+      ],
+      "reason": "Certified closed; immutable manifests and reviewed evidence retained in Git; no work discarded."
+    },
+    {
+      "commit": "f08544218cd57e8b4420e6595e632a719907d44a",
+      "path": "vaep/control/jules-autorefill-catalog.json",
+      "blob": "5d0f0c8a51236f74d1c4b8c423dfb1664f766e50",
+      "parents": [
+        "N5.1.A"
+      ],
+      "reason": "N5.1.A certified LISTO_REAL after REVIEW_FIRST and QA_TAKEOVER; no N5.1.B lane scope fabricated."
+    },
+    {
+      "commit": "3dace32c316effaa6b35923bb844de0aaf21e821",
+      "path": "vaep/control/jules-autorefill-catalog.json",
+      "blob": "243515cf267ac134559a0b3ac15d0482fa80b687",
+      "parents": [
+        "N5.1.B",
+        "N5.1.C",
+        "N5.1.D"
+      ],
+      "reason": "Superseded by throughput-hardening catalog. Closed evidence remains immutable; N5.1.D semantics unchanged; N5.1.E receives four distinct material scopes."
+    }
   ],
   "policy": {
     "branch": "Desarrollo",
     "liveQueueDepthTarget": 2,
     "programmedBacklogTargetPerWorker": 12,
     "programmedBacklogRefillFloorPerWorker": 4,
-    "programmedBacklogTargetTotal": 48,
+    "programmedBacklogTargetTotal": 72,
     "dispatchEligibleMinPerWorker": 2,
     "genericFloorRegeneration": false,
     "noBusywork": true,
     "semanticIdentity": "CURRENT_PARENT + material scope/semantic facet",
     "stopWhenEligibleWorkExhausted": true,
-    "materialParallelismTargetPerParent": 4,
+    "materialParallelismTargetPerParent": 6,
     "requireDistinctWriteScopesWhenParallel": true,
-    "lowParallelismAction": "EXPLAIN_OR_SUBDIVIDE_MATERIAL_SCOPE__NO_BUSYWORK"
+    "lowParallelismAction": "EXPLAIN_OR_SUBDIVIDE_MATERIAL_SCOPE__NO_BUSYWORK",
+    "activeWorkerCount": 6,
+    "activeWorkers": [
+      "J1",
+      "J2",
+      "J3",
+      "J4",
+      "J5",
+      "J6"
+    ]
   },
   "throughputPlan": {
     "mode": "MATERIAL_SWARM_FIRST",
@@ -47,40 +83,234 @@
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
     "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
-    "sourceRanges": ["COLA!A391:T399", "PLAN_MAESTRO!A51:L52"],
+    "sourceRanges": [
+      "COLA!A391:T399",
+      "PLAN_MAESTRO!A51:L52"
+    ],
     "note": "Dependency order derived from live Plan/COLA. N5.1.F is active after canonical N5.1.E closure; future parents remain dependency-gated.",
     "nodes": [
-      {"id":"N4.11.H","order":0,"type":"MICROTAREA","dependencies":["N4.11.G"],"phaseGate":"GATE-N3"},
-      {"id":"GATE-N4","order":1,"type":"GATE_FASE","dependencies":["N4.1.H","N4.2.H","N4.3.H","N4.4.H","N4.5.H","N4.6.H","N4.7.H","N4.8.H","N4.9.H","N4.10.H","N4.11.H"]},
-      {"id":"N5.1.A","order":2,"type":"MICROTAREA","dependencies":["GATE-N4"],"phaseGate":"GATE-N4"},
-      {"id":"N5.1.B","order":3,"type":"MICROTAREA","dependencies":["N5.1.A"],"phaseGate":"GATE-N4"},
-      {"id":"N5.1.C","order":4,"type":"MICROTAREA","dependencies":["N5.1.B"],"phaseGate":"GATE-N4"},
-      {"id":"N5.1.D","order":5,"type":"MICROTAREA","dependencies":["N5.1.C"],"phaseGate":"GATE-N4"},
-      {"id":"N5.1.E","order":6,"type":"MICROTAREA","dependencies":["N5.1.D"],"phaseGate":"GATE-N4"},
-      {"id":"N5.1.F","order":7,"type":"MICROTAREA","dependencies":["N5.1.E"],"phaseGate":"GATE-N4"},
-      {"id":"N5.1.G","order":8,"type":"MICROTAREA","dependencies":["N5.1.F"],"phaseGate":"GATE-N4"},
-      {"id":"N5.1.H","order":9,"type":"MICROTAREA","dependencies":["N5.1.G"],"phaseGate":"GATE-N4"}
+      {
+        "id": "N4.11.H",
+        "order": 0,
+        "type": "MICROTAREA",
+        "dependencies": [
+          "N4.11.G"
+        ],
+        "phaseGate": "GATE-N3"
+      },
+      {
+        "id": "GATE-N4",
+        "order": 1,
+        "type": "GATE_FASE",
+        "dependencies": [
+          "N4.1.H",
+          "N4.2.H",
+          "N4.3.H",
+          "N4.4.H",
+          "N4.5.H",
+          "N4.6.H",
+          "N4.7.H",
+          "N4.8.H",
+          "N4.9.H",
+          "N4.10.H",
+          "N4.11.H"
+        ]
+      },
+      {
+        "id": "N5.1.A",
+        "order": 2,
+        "type": "MICROTAREA",
+        "dependencies": [
+          "GATE-N4"
+        ],
+        "phaseGate": "GATE-N4"
+      },
+      {
+        "id": "N5.1.B",
+        "order": 3,
+        "type": "MICROTAREA",
+        "dependencies": [
+          "N5.1.A"
+        ],
+        "phaseGate": "GATE-N4"
+      },
+      {
+        "id": "N5.1.C",
+        "order": 4,
+        "type": "MICROTAREA",
+        "dependencies": [
+          "N5.1.B"
+        ],
+        "phaseGate": "GATE-N4"
+      },
+      {
+        "id": "N5.1.D",
+        "order": 5,
+        "type": "MICROTAREA",
+        "dependencies": [
+          "N5.1.C"
+        ],
+        "phaseGate": "GATE-N4"
+      },
+      {
+        "id": "N5.1.E",
+        "order": 6,
+        "type": "MICROTAREA",
+        "dependencies": [
+          "N5.1.D"
+        ],
+        "phaseGate": "GATE-N4"
+      },
+      {
+        "id": "N5.1.F",
+        "order": 7,
+        "type": "MICROTAREA",
+        "dependencies": [
+          "N5.1.E"
+        ],
+        "phaseGate": "GATE-N4"
+      },
+      {
+        "id": "N5.1.G",
+        "order": 8,
+        "type": "MICROTAREA",
+        "dependencies": [
+          "N5.1.F"
+        ],
+        "phaseGate": "GATE-N4"
+      },
+      {
+        "id": "N5.1.H",
+        "order": 9,
+        "type": "MICROTAREA",
+        "dependencies": [
+          "N5.1.G"
+        ],
+        "phaseGate": "GATE-N4"
+      }
     ]
   },
   "lanes": {
-    "JULES_A": [
-      {"dispatchId":"N5-1-D-1-APP-API-A","taskId":"N5.1.D.1.APPLICATION_API_COMPOSITION_DECISION","workerId":"JULES_A","taskAttempt":1,"plannedParent":"N5.1.D","readyForDispatch":true,"dispatchEligible":false,"fileScopeHint":"docs/N5.1_REPORTES_APPLICATION_API_DECISION.md","prompt":"Read docs/VAEP_AUTHORITY.md, PROJECT_INDEX.md and accepted N5.1.A/B/C evidence first. Preserve main/Production/secrets. This task is already terminal-reviewed and integrated; do not redispatch it. It remains only as closed-parent lineage."},
-      {"dispatchId":"N5-1-E-1-SHELL-ROUTE-A","taskId":"N5.1.E.1.INDEPENDENT_REPORT_CENTER_SHELL_ROUTE","workerId":"JULES_A","taskAttempt":1,"plannedParent":"N5.1.E","readyForDispatch":true,"dispatchEligible":false,"fileScopeHint":"frontend/src/app/features/centro-reportes/**;frontend/src/app/app.routes.ts","prompt":"Closed by N5.1.E LISTO_REAL receipt. Historical lineage only; do not redispatch."},
-      {"dispatchId":"N5-1-H-1-DOC-A","taskId":"N5.1.H.1.DOCUMENTATION_RELEASE","workerId":"JULES_A","taskAttempt":1,"plannedParent":"N5.1.H","readyForDispatch":true,"dispatchEligible":false,"fileScopeHint":"docs/N5.1_CENTRO_REPORTES_RUNBOOK.md","prompt":"Read docs/VAEP_AUTHORITY.md and accepted N5.1 evidence first. Produce the Centro de Reportes runbook/release documentation from accepted implementation and QA evidence: scope, permissions, routes, rollback and known limits. Do not claim LISTO_REAL or CI not executed. Documentation only; include two self-reviews."}
+    "J1": [
+      {
+        "dispatchId": "N5-1-D-1-APP-API-A",
+        "taskId": "N5.1.D.1.APPLICATION_API_COMPOSITION_DECISION",
+        "workerId": "J1",
+        "taskAttempt": 1,
+        "plannedParent": "N5.1.D",
+        "readyForDispatch": true,
+        "dispatchEligible": false,
+        "fileScopeHint": "docs/N5.1_REPORTES_APPLICATION_API_DECISION.md",
+        "prompt": "Read docs/VAEP_AUTHORITY.md, PROJECT_INDEX.md and accepted N5.1.A/B/C evidence first. Preserve main/Production/secrets. This task is already terminal-reviewed and integrated; do not redispatch it. It remains only as closed-parent lineage."
+      },
+      {
+        "dispatchId": "N5-1-E-1-SHELL-ROUTE-A",
+        "taskId": "N5.1.E.1.INDEPENDENT_REPORT_CENTER_SHELL_ROUTE",
+        "workerId": "J1",
+        "taskAttempt": 1,
+        "plannedParent": "N5.1.E",
+        "readyForDispatch": true,
+        "dispatchEligible": false,
+        "fileScopeHint": "frontend/src/app/features/centro-reportes/**;frontend/src/app/app.routes.ts",
+        "prompt": "Closed by N5.1.E LISTO_REAL receipt. Historical lineage only; do not redispatch."
+      },
+      {
+        "dispatchId": "N5-1-H-1-DOC-A",
+        "taskId": "N5.1.H.1.DOCUMENTATION_RELEASE",
+        "workerId": "J1",
+        "taskAttempt": 1,
+        "plannedParent": "N5.1.H",
+        "readyForDispatch": true,
+        "dispatchEligible": false,
+        "fileScopeHint": "docs/N5.1_CENTRO_REPORTES_RUNBOOK.md",
+        "prompt": "Read docs/VAEP_AUTHORITY.md and accepted N5.1 evidence first. Produce the Centro de Reportes runbook/release documentation from accepted implementation and QA evidence: scope, permissions, routes, rollback and known limits. Do not claim LISTO_REAL or CI not executed. Documentation only; include two self-reviews."
+      }
     ],
-    "JULES_B": [
-      {"dispatchId":"N5-1-E-2-REPORT-SERVICE-TEST-B","taskId":"N5.1.E.2.REPORT_SERVICE_REGRESSION","workerId":"JULES_B","taskAttempt":1,"plannedParent":"N5.1.E","readyForDispatch":true,"dispatchEligible":false,"fileScopeHint":"frontend/src/app/services/reporte-administrativo.service.spec.ts","prompt":"Closed by N5.1.E LISTO_REAL receipt. Historical lineage only; do not redispatch."},
-      {"dispatchId":"N5-1-G-2-QA-B","taskId":"N5.1.G.2.ACCEPTANCE_MATRIX_RECONCILIATION","workerId":"JULES_B","taskAttempt":1,"plannedParent":"N5.1.G","readyForDispatch":true,"dispatchEligible":false,"fileScopeHint":"docs/N5.1_REPORTES_ACCEPTANCE_EVIDENCE.md","prompt":"Read docs/VAEP_AUTHORITY.md and accepted N5.1 evidence first. Reconcile the N5.1.A QA preflight matrix against implemented exact HEAD. Mark each scenario PASS/N/A/BLOCKED only with actual evidence, list commands/results, and keep unresolved gaps explicit. No product changes; include two self-reviews."}
+    "J2": [
+      {
+        "dispatchId": "N5-1-E-2-REPORT-SERVICE-TEST-B",
+        "taskId": "N5.1.E.2.REPORT_SERVICE_REGRESSION",
+        "workerId": "J2",
+        "taskAttempt": 1,
+        "plannedParent": "N5.1.E",
+        "readyForDispatch": true,
+        "dispatchEligible": false,
+        "fileScopeHint": "frontend/src/app/services/reporte-administrativo.service.spec.ts",
+        "prompt": "Closed by N5.1.E LISTO_REAL receipt. Historical lineage only; do not redispatch."
+      },
+      {
+        "dispatchId": "N5-1-G-2-QA-B",
+        "taskId": "N5.1.G.2.ACCEPTANCE_MATRIX_RECONCILIATION",
+        "workerId": "J2",
+        "taskAttempt": 1,
+        "plannedParent": "N5.1.G",
+        "readyForDispatch": true,
+        "dispatchEligible": false,
+        "fileScopeHint": "docs/N5.1_REPORTES_ACCEPTANCE_EVIDENCE.md",
+        "prompt": "Read docs/VAEP_AUTHORITY.md and accepted N5.1 evidence first. Reconcile the N5.1.A QA preflight matrix against implemented exact HEAD. Mark each scenario PASS/N/A/BLOCKED only with actual evidence, list commands/results, and keep unresolved gaps explicit. No product changes; include two self-reviews."
+      }
     ],
-    "JULES_C": [
-      {"dispatchId":"N5-1-E-3-NAV-C","taskId":"N5.1.E.3.REPORT_CENTER_NAVIGATION","workerId":"JULES_C","taskAttempt":1,"plannedParent":"N5.1.E","readyForDispatch":true,"dispatchEligible":false,"fileScopeHint":"frontend/src/app/app.component.ts","prompt":"Closed by N5.1.E LISTO_REAL receipt. Historical lineage only; do not redispatch."},
-      {"dispatchId":"N5-1-F-1-SEC-C","taskId":"N5.1.F.1.RBAC_SECURITY_ALIGNMENT","workerId":"JULES_C","taskAttempt":1,"plannedParent":"N5.1.F","readyForDispatch":true,"dispatchEligible":true,"fileScopeHint":"docs/N5.1_REPORTES_SECURITY_ALIGNMENT.md","prompt":"Read docs/VAEP_AUTHORITY.md and accepted N5.1 evidence first. Audit implemented route/shell against backend ReportesAdministrativos and financial authorization. Record exact authorized/unauthorized paths, audit expectations, logging/correlation and concrete gaps. Do not expand privileges. Documentation only; include two self-reviews."}
+    "J3": [
+      {
+        "dispatchId": "N5-1-E-3-NAV-C",
+        "taskId": "N5.1.E.3.REPORT_CENTER_NAVIGATION",
+        "workerId": "J3",
+        "taskAttempt": 1,
+        "plannedParent": "N5.1.E",
+        "readyForDispatch": true,
+        "dispatchEligible": false,
+        "fileScopeHint": "frontend/src/app/app.component.ts",
+        "prompt": "Closed by N5.1.E LISTO_REAL receipt. Historical lineage only; do not redispatch."
+      },
+      {
+        "dispatchId": "N5-1-F-1-SEC-C",
+        "taskId": "N5.1.F.1.RBAC_SECURITY_ALIGNMENT",
+        "workerId": "J3",
+        "taskAttempt": 1,
+        "plannedParent": "N5.1.F",
+        "readyForDispatch": true,
+        "dispatchEligible": true,
+        "fileScopeHint": "docs/N5.1_REPORTES_SECURITY_ALIGNMENT.md",
+        "prompt": "Read docs/VAEP_AUTHORITY.md and accepted N5.1 evidence first. Audit implemented route/shell against backend ReportesAdministrativos and financial authorization. Record exact authorized/unauthorized paths, audit expectations, logging/correlation and concrete gaps. Do not expand privileges. Documentation only; include two self-reviews."
+      }
     ],
-    "JULES_D": [
-      {"dispatchId":"N5-1-E-4-FIN-SERVICE-TEST-D","taskId":"N5.1.E.4.FINANCIAL_SERVICE_REGRESSION","workerId":"JULES_D","taskAttempt":1,"plannedParent":"N5.1.E","readyForDispatch":true,"dispatchEligible":false,"fileScopeHint":"frontend/src/app/services/estado-financiero.service.spec.ts","prompt":"Closed by N5.1.E LISTO_REAL receipt. Historical lineage only; do not redispatch."},
-      {"dispatchId":"N5-1-G-1-E2E-D","taskId":"N5.1.G.1.REPORT_CENTER_E2E_REGRESSION","workerId":"JULES_D","taskAttempt":1,"plannedParent":"N5.1.G","readyForDispatch":true,"dispatchEligible":false,"fileScopeHint":"frontend/e2e/fase6-reportes-administrativos.spec.ts","prompt":"Read docs/VAEP_AUTHORITY.md and accepted N5.1 evidence first. Extend the existing report-admin E2E suite for the independent report-center route and preserved authorization contract without deleting regression coverage. Include direct navigation, allowed/forbidden cases feasible with fixtures, and stale-response non-regression where applicable. Do not weaken expectations. Run targeted Playwright or document an exact environmental blocker, plus two self-reviews."},
-      {"dispatchId":"N5-1-H-2-CERT-D","taskId":"N5.1.H.2.CERTIFICATION_CHECKLIST","workerId":"JULES_D","taskAttempt":1,"plannedParent":"N5.1.H","readyForDispatch":true,"dispatchEligible":false,"fileScopeHint":"docs/N5.1_CENTRO_REPORTES_CERT_CHECKLIST.md","prompt":"Read docs/VAEP_AUTHORITY.md and accepted N5.1 evidence first. Build the final evidence checklist for controller certification: DoD, applicable gates, exact tests, P0/P1, rollback and production untouched. Do not self-certify the parent; only VAEP may declare LISTO_REAL after REVIEW_FIRST and causal gates. Documentation only; include two self-reviews."}
-    ]
+    "J4": [
+      {
+        "dispatchId": "N5-1-E-4-FIN-SERVICE-TEST-D",
+        "taskId": "N5.1.E.4.FINANCIAL_SERVICE_REGRESSION",
+        "workerId": "J4",
+        "taskAttempt": 1,
+        "plannedParent": "N5.1.E",
+        "readyForDispatch": true,
+        "dispatchEligible": false,
+        "fileScopeHint": "frontend/src/app/services/estado-financiero.service.spec.ts",
+        "prompt": "Closed by N5.1.E LISTO_REAL receipt. Historical lineage only; do not redispatch."
+      },
+      {
+        "dispatchId": "N5-1-G-1-E2E-D",
+        "taskId": "N5.1.G.1.REPORT_CENTER_E2E_REGRESSION",
+        "workerId": "J4",
+        "taskAttempt": 1,
+        "plannedParent": "N5.1.G",
+        "readyForDispatch": true,
+        "dispatchEligible": false,
+        "fileScopeHint": "frontend/e2e/fase6-reportes-administrativos.spec.ts",
+        "prompt": "Read docs/VAEP_AUTHORITY.md and accepted N5.1 evidence first. Extend the existing report-admin E2E suite for the independent report-center route and preserved authorization contract without deleting regression coverage. Include direct navigation, allowed/forbidden cases feasible with fixtures, and stale-response non-regression where applicable. Do not weaken expectations. Run targeted Playwright or document an exact environmental blocker, plus two self-reviews."
+      },
+      {
+        "dispatchId": "N5-1-H-2-CERT-D",
+        "taskId": "N5.1.H.2.CERTIFICATION_CHECKLIST",
+        "workerId": "J4",
+        "taskAttempt": 1,
+        "plannedParent": "N5.1.H",
+        "readyForDispatch": true,
+        "dispatchEligible": false,
+        "fileScopeHint": "docs/N5.1_CENTRO_REPORTES_CERT_CHECKLIST.md",
+        "prompt": "Read docs/VAEP_AUTHORITY.md and accepted N5.1 evidence first. Build the final evidence checklist for controller certification: DoD, applicable gates, exact tests, P0/P1, rollback and production untouched. Do not self-certify the parent; only VAEP may declare LISTO_REAL after REVIEW_FIRST and causal gates. Documentation only; include two self-reviews."
+      }
+    ],
+    "J5": [],
+    "J6": []
   },
   "lastClosureFunctionalHead": "1238e065b5aedbb56c33a410436825ae4da77e1a"
 }

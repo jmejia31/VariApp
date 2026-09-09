@@ -4,9 +4,11 @@
   "identityRule": "CURRENT_PARENT + semanticFacet",
   "updatedAt": "2026-09-07T20:57:40Z",
   "lanes": {
-    "JULES_A": [],
-    "JULES_B": [],
-    "JULES_C": [],
-    "JULES_D": []
+    "J1": [],
+    "J2": [],
+    "J3": [],
+    "J4": [],
+    "J5": [],
+    "J6": []
   }
 }
