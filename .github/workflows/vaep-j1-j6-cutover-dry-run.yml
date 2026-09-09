@@ -22,18 +22,24 @@ jobs:
         with:
           ref: Desarrollo
           fetch-depth: 0
-      - name: Normalize deterministic transformer assertion
+      - name: Normalize deterministic transformer assertions
         shell: bash
         run: |
           python3 - <<'PY'
           from pathlib import Path
           p = Path('scripts/vaep/j1_j6_cutover.py')
           t = p.read_text(encoding='utf-8')
-          old = "t = must_replace(t, 'JULES_TASKS_TARGET_ROLLING_24H_TOTAL=400', 'JULES_TASKS_TARGET_ROLLING_24H_TOTAL=600', count=1)"
-          new = "t = must_replace(t, 'JULES_TASKS_TARGET_ROLLING_24H_TOTAL=400', 'JULES_TASKS_TARGET_ROLLING_24H_TOTAL=600', count=2)"
-          if t.count(old) != 1:
-              raise SystemExit(f'CUTOVER_TRANSFORMER_NORMALIZATION_ASSERT expected=1 actual={t.count(old)}')
-          p.write_text(t.replace(old, new), encoding='utf-8')
+          replacements = {
+              "t = must_replace(t, 'JULES_TASKS_TARGET_ROLLING_24H_TOTAL=400', 'JULES_TASKS_TARGET_ROLLING_24H_TOTAL=600', count=1)":
+              "t = must_replace(t, 'JULES_TASKS_TARGET_ROLLING_24H_TOTAL=400', 'JULES_TASKS_TARGET_ROLLING_24H_TOTAL=600', count=2)",
+              "t = must_replace(t, 'LANE_REFILL_DEADLINE_SECONDS=90', 'LANE_REFILL_DEADLINE_SECONDS=30', count=1)":
+              "t = must_replace(t, 'LANE_REFILL_DEADLINE_SECONDS=90', 'LANE_REFILL_DEADLINE_SECONDS=30', count=2)",
+          }
+          for old, new in replacements.items():
+              if t.count(old) != 1:
+                  raise SystemExit(f'CUTOVER_TRANSFORMER_NORMALIZATION_ASSERT expected=1 actual={t.count(old)} old={old}')
+              t = t.replace(old, new)
+          p.write_text(t, encoding='utf-8')
           print('CUTOVER_TRANSFORMER_NORMALIZATION=PASS')
           PY
       - name: Apply cutover in disposable workspace
