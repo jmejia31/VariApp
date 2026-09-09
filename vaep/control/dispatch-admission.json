@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "FROZEN",
+  "newDispatchAdmission": "OPEN",
   "allowExistingActiveSessions": true,
-  "reason": "N5.1.G_QA_TAKEOVER_MATERIALIZED__CAUSAL_VALIDATION_PENDING__NO_NEW_DISPATCH",
-  "updatedAtUtc": "2026-09-09T08:28:00Z"
+  "reason": "N5.1.G_LISTO_REAL__N5.1.H_DEPENDENCY_VALID__TWO_MATERIAL_SCOPES_ADMITTED",
+  "updatedAtUtc": "2026-09-09T10:31:37Z"
 }
