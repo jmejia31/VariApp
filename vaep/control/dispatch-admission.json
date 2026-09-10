@@ -1,6 +1,6 @@
 {
   "newDispatchAdmission": "OPEN",
   "allowExistingActiveSessions": true,
-  "reason": "GLOBAL_FREEZE_PROHIBITED__CHECKPOINT_AUTO_REOPEN__prior_state=FROZEN__LANE_LEVEL_QUARANTINE_REVIEW_FIRST_ONLY",
-  "updatedAtUtc": "2026-09-10T00:55:20Z"
+  "reason": "OPEN_ONLY_INVARIANT__TASK_LANE_GATES_ONLY__GLOBAL_NON_OPEN_STATE_PROHIBITED",
+  "updatedAtUtc": "2026-09-10T01:11:00Z"
 }
