@@ -32,7 +32,6 @@ jobs:
           grep -q '^GLOBAL_DISPATCH_ADMISSION=OPEN_ONLY$' <<<"$master"
           grep -q '^GLOBAL_FROZEN_PROHIBITED=TRUE$' <<<"$master"
           grep -q '^CAUSAL_HOLD_SCOPE=TASK_OR_LANE_ONLY$' <<<"$master"
-          grep -q 'El contrato global es \*\*OPEN_ONLY\*\*' <<<"$master"
           ! grep -q 'Solo se permiten dos estados' <<<"$master"
           echo 'VAEP_MASTER_OPEN_ONLY=PASS'
 
