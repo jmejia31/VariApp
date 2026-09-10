@@ -63,7 +63,7 @@ test.describe('VariStoreHn Fase 2 — categorías públicas', () => {
     await expect(page.locator('app-varistorehn-header .skip-link')).toHaveAttribute('href', '#contenido-categorias');
     await expect(page.locator('app-varistorehn-header').getByRole('link', { name: 'Categorías', exact: true }).first())
       .toHaveAttribute('href', '/varistorehn/categorias');
-    await expect(page.getByText(/Modo demostración:/)).toContainText('fixtures de vista previa');
+    await expect(page.locator('.demo-note')).toContainText('fixtures de vista previa');
 
     const target = page.getByRole('link', { name: 'Explorar categoría Computadoras', exact: true });
     const alto = await target.evaluate(element => Math.round(element.getBoundingClientRect().height));
