@@ -7,12 +7,24 @@
   "ownership": {
     "originalWorker": "J2",
     "controller": "CHATGPT_VAEP",
-    "takeoverEvidence": "vaep/evidence/reviews/N5.8.D.1_J2_STALL_TAKEOVER_20260910T1409Z.json",
+    "timingInvalidHistoricalReceipt": "vaep/evidence/reviews/N5.8.D.1_J2_STALL_TAKEOVER_20260910T1409Z.json",
+    "authoritativeRca": "vaep/evidence/reviews/N5.8.D.1_J2_OBSERVATION_GAP_RCA_20260910T1423Z.json",
+    "effectiveTransferAtUtc": "2026-09-10T14:16:54Z",
+    "effectiveTransferBasis": "MASTER_TERMINAL_SUPERSESSION_AFTER_LANE_BUDGET_EXHAUSTION",
     "transferExecuted": true,
-    "lateResultPolicy": "EVIDENCE_ONLY__NO_AUTOMATIC_INTEGRATION"
+    "lateResultPolicy": "EVIDENCE_ONLY__NO_AUTOMATIC_INTEGRATION",
+    "j2TerminalPatchPresent": false
+  },
+  "processReconciliation": {
+    "recoveryCodeCommit": "742b77eee4c52e4959bb5a1e3a0a853386898954",
+    "recoveryCodeCommitPrecededEffectiveTransfer": true,
+    "processViolationAcknowledged": true,
+    "duplicatePatchIntegrated": false,
+    "materialRevalidatedAfterEffectiveTransfer": true,
+    "disposition": "PRESERVE_MATERIAL__DO_NOT_REOPEN_J2__ENFORCE_CORRELATED_SESSION_EVIDENCE_FOR_FUTURE_TAKEOVER"
   },
   "functionalHead": "e8ba8885f15ae0a53a2f6a02427e4694ab9672d5",
-  "controlPlaneHeadObserved": "83827bb3e6b8b7d2af6f0cba3ae8ae4b91d9263f",
+  "controlPlaneHeadObserved": "6954d83f9bd9b704cb33381726ac434524c55fa7",
   "recoveryCommits": [
     "742b77eee4c52e4959bb5a1e3a0a853386898954",
     "62ec8ef467ec43491cbb0a09e18c74627ca13a72",
@@ -44,7 +56,7 @@
     "P0": 0,
     "P1": 0,
     "reviewAccepted": true,
-    "reviewOutcome": "ACCEPTED_GATES_PENDING"
+    "reviewOutcome": "ACCEPTED_GATES_PENDING__OWNERSHIP_RCA_RECONCILED"
   },
   "gates": {
     "status": "PENDING",
