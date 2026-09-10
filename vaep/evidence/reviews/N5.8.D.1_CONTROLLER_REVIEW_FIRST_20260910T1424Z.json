@@ -24,7 +24,7 @@
     "disposition": "PRESERVE_MATERIAL__DO_NOT_REOPEN_J2__ENFORCE_CORRELATED_SESSION_EVIDENCE_FOR_FUTURE_TAKEOVER"
   },
   "functionalHead": "e8ba8885f15ae0a53a2f6a02427e4694ab9672d5",
-  "controlPlaneHeadObserved": "6954d83f9bd9b704cb33381726ac434524c55fa7",
+  "controlPlaneHeadObserved": "058a897abeca260fdb66c74e9a9f33e67c58ffa3",
   "recoveryCommits": [
     "742b77eee4c52e4959bb5a1e3a0a853386898954",
     "62ec8ef467ec43491cbb0a09e18c74627ca13a72",
@@ -56,13 +56,19 @@
     "P0": 0,
     "P1": 0,
     "reviewAccepted": true,
-    "reviewOutcome": "ACCEPTED_GATES_PENDING__OWNERSHIP_RCA_RECONCILED"
+    "reviewOutcome": "ACCEPTED__OWNERSHIP_RCA_RECONCILED__EXACT_HEAD_GATE_PASS"
   },
   "gates": {
-    "status": "PENDING",
+    "status": "PASS",
     "exactFunctionalHead": "e8ba8885f15ae0a53a2f6a02427e4694ab9672d5",
-    "listoReal": false,
-    "note": "REVIEW_FIRST acceptance unlocks D2 verification, but N5.8.D cannot be certified until applicable exact-head gates are valid."
+    "requiredGate": "Backend Release y pruebas",
+    "workflowRunId": 34488330181,
+    "checkRunId": 102908813664,
+    "conclusion": "success",
+    "completedAtUtc": "2026-09-10T14:23:52Z",
+    "facetCertified": true,
+    "parentListoReal": false,
+    "note": "The proportional backend gate completed successfully on the exact functional head. Deployment/Vercel status is non-causal and out of scope for this Desarrollo-only parent closure."
   },
-  "next": "VERIFY_D2_EXPORT_API_CONTRACT__DRAIN_EXACT_HEAD_GATES__CERTIFY_D_IF_VALID"
+  "next": "D2_SOURCE_VERIFIED__DRAIN_PARENT_DOD__CERTIFY_N5.8.D_IF_VALID"
 }
