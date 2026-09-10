@@ -1,8 +1,8 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
   "currentParent": "N6.1.E",
-  "generatedAt": "2026-09-10T19:09:30Z",
-  "regenerationReason": "N6.1.D_LISTO_REAL__N6.1.E_PROMOTED_DEPENDENCY_VALID__J1_LATE_RESULT_EVIDENCE_ONLY__ROLLING60_2_OF_3__NO_FILLER",
+  "generatedAt": "2026-09-10T19:12:34Z",
+  "regenerationReason": "SUPERVISOR_24__N6.1.E_CURRENT__ROLLING60_2_OF_3__PREARM_N1_N2_N3__NO_FILLER",
   "lastClosedParent": "N6.1.D",
   "closureReceipts": {
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
@@ -85,7 +85,7 @@
     {"parent": "N6.1.C", "logicalTaskId": "N6.1.C.1.TENANT_EMPRESA_PERSISTENCE_MIGRATION", "worker": "J2", "runId": 34509825518, "dispatch": "N6-1-C-1-TENANT-EMPRESA-PERSISTENCE-MIGRATION-J2-A1", "terminal": "INVALID_TRANSPORT_WRONG_J1_PATH", "lateResultPolicy": "EVIDENCE_ONLY__NO_CONTENT_ATTEMPT_CONSUMED", "r2Used": false, "r3Used": false},
     {"parent": "N6.1.C", "logicalTaskId": "N6.1.C.1.TENANT_EMPRESA_PERSISTENCE_MIGRATION", "worker": "J2", "runId": 34510154471, "dispatch": "N6-1-C-1-TENANT-EMPRESA-PERSISTENCE-MIGRATION-J2-A1-TX1", "terminal": "FAILED__SUPERSEDED_CONTROLLER_TAKEOVER", "lateResultPolicy": "EVIDENCE_ONLY__NO_AUTOMATIC_INTEGRATION", "r2Used": false, "r3Used": false},
     {"parent": "N6.1.D", "logicalTaskId": "N6.1.D.1.TENANT_EMPRESA_APPLICATION_API", "worker": "J1", "runId": 34515629991, "dispatch": "N6-1-D-1-TENANT-EMPRESA-APPLICATION-API-J1-A1", "terminal": "INVALID_PRESESSION_PRIMARY_BASE_HEAD_MISMATCH", "lateResultPolicy": "EVIDENCE_ONLY__NO_CONTENT_ATTEMPT_CONSUMED", "r2Used": false, "r3Used": false},
-    {"parent": "N6.1.D", "logicalTaskId": "N6.1.D.1.TENANT_EMPRESA_APPLICATION_API", "worker": "J1", "runId": 34516056282, "dispatch": "N6-1-D-1-TENANT-EMPRESA-APPLICATION-API-J1-A1-TX1", "terminal": "INVALID_PRESESSION_PRIMARY_BASE_HEAD_MISMATCH", "lateResultPolicy": "EVIDENCE_ONLY__NO_CONTENT_ATTEMPT_CONSUMED", "r2Used": false, "r3Used": false},
+    {"parent": "N6.1.D", "logicalTaskId": "N6.1.D.1.TENANT_EMPRESA_APPLICATION_API", "worker": "J1", "runId": 34516056282, "dispatch": "N6-1-D-1-TENANT-EMPRESA-APPLICATION-API-J1-A1-TX1", "terminal": "INVALID_PRESESSION_PRIMARY_BASE_HEAD_MISMATCH", "lateResultPolicy": "EVIDENCE_ONLY__NO_CONTENT_ATTEMPT_CONSUMED", "r2Used": false,"r3Used": false},
     {"parent": "N6.1.D", "logicalTaskId": "N6.1.D.1.TENANT_EMPRESA_APPLICATION_API", "worker": "J1", "runId": 34516285525, "dispatch": "N6-1-D-1-TENANT-EMPRESA-APPLICATION-API-J1-A1-TX2", "terminal": "INVALID_PRESESSION_JULES_API_HTTP_400", "lateResultPolicy": "EVIDENCE_ONLY__NO_SESSION_CREATED__NO_CONTENT_ATTEMPT_CONSUMED", "r2Used": false, "r3Used": false},
     {"parent": "N6.1.D", "logicalTaskId": "N6.1.D.1.TENANT_EMPRESA_APPLICATION_API", "worker": "J1", "runId": 34516541490, "dispatch": "N6-1-D-1-TENANT-EMPRESA-APPLICATION-API-J1-A1-TXAPI1", "terminal": "FAILED__SUPERSEDED_BY_CHATGPT_VAEP_AFTER_STALL", "artifactId": 10168633468, "lateResultPolicy": "EVIDENCE_ONLY__NO_AUTOMATIC_INTEGRATION", "r2Used": false, "r3Used": false}
   ],
@@ -93,7 +93,8 @@
     {"parent": "N6.1.D", "taskId": "N6.1.D.1.TENANT_EMPRESA_APPLICATION_API", "state": "LISTO_REAL__SUPERSEDED_J1_EVIDENCE_ONLY", "dependency": "N6.1.C_LISTO_REAL", "worker": "J1", "runId": 34516541490, "materialization": "TENANT_EMPRESA_APPLICATION_API__ROADMAP_DERIVED__NO_FILLER"},
     {"parent": "N6.1.E", "state": "READY_CURRENT", "dependency": "N6.1.D_LISTO_REAL", "materialization": "TENANT_EMPRESA_FRONTEND_UX__ROADMAP_DERIVED__NO_FILLER"},
     {"parent": "N6.1.F", "state": "READY_DEPENDENCY_GATED", "dependency": "N6.1.E_LISTO_REAL", "materialization": "TENANT_EMPRESA_SEC_AUDIT__ROADMAP_DERIVED__NO_FILLER"},
-    {"parent": "N6.1.G", "state": "READY_DEPENDENCY_GATED", "dependency": "N6.1.F_LISTO_REAL", "materialization": "TENANT_EMPRESA_QA_REGRESSION__ROADMAP_DERIVED__NO_FILLER"}
+    {"parent": "N6.1.G", "state": "READY_DEPENDENCY_GATED", "dependency": "N6.1.F_LISTO_REAL", "materialization": "TENANT_EMPRESA_QA_REGRESSION__ROADMAP_DERIVED__NO_FILLER"},
+    {"parent": "N6.1.H", "state": "READY_DEPENDENCY_GATED", "dependency": "N6.1.G_LISTO_REAL", "materialization": "TENANT_EMPRESA_DOC_CERT__ROADMAP_DERIVED__NO_FILLER"}
   ],
   "lanes": {
     "J1": [],
