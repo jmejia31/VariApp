@@ -51,31 +51,45 @@ public sealed class ReporteInventarioService : IReporteInventarioService
         if (!alcance.EsAdministrador)
             movimientos = movimientos.Where(m => m.CreadoPorUsuarioId == alcance.UsuarioId);
 
-        var query = existencias.Select(e => new StockHealthRaw
-        {
-            ProductoVarianteId = e.ProductoVarianteId,
-            ProductoId = e.ProductoVariante.ProductoId,
-            ProductoNombre = e.ProductoVariante.Producto.Nombre,
-            Sku = e.ProductoVariante.Sku,
-            AlmacenId = e.AlmacenId,
-            AlmacenNombre = e.Almacen.Nombre,
-            UbicacionAlmacenId = e.UbicacionAlmacenId,
-            UbicacionNombre = e.UbicacionAlmacen != null ? e.UbicacionAlmacen.Nombre : null,
-            StockDisponible = e.StockDisponible,
-            StockMinimo = e.StockMinimo,
-            UltimoMovimientoUtc = movimientos
-                .Where(m => m.ProductoVarianteId == e.ProductoVarianteId &&
-                            m.AlmacenId == e.AlmacenId &&
-                            m.UbicacionAlmacenId == e.UbicacionAlmacenId)
-                .Max(m => (DateTime?)m.Fecha),
-            UnidadesSalidaPeriodo = movimientos
-                .Where(m => m.ProductoVarianteId == e.ProductoVarianteId &&
-                            m.AlmacenId == e.AlmacenId &&
-                            m.UbicacionAlmacenId == e.UbicacionAlmacenId &&
-                            m.Tipo == TipoMovimientoInventario.Salida &&
-                            m.Fecha >= desde && m.Fecha <= hasta)
-                .Sum(m => (int?)m.Cantidad) ?? 0
-        });
+        // Aggregate the movement stream once and join the compact read shape back to stock.
+        // This removes the two correlated scans that were executed for every existence row
+        // while preserving the public DTO/filter/sort contract.
+        var movimientoStats = movimientos
+            .GroupBy(m => new { m.ProductoVarianteId, m.AlmacenId, m.UbicacionAlmacenId })
+            .Select(g => new
+            {
+                g.Key.ProductoVarianteId,
+                g.Key.AlmacenId,
+                g.Key.UbicacionAlmacenId,
+                UltimoMovimientoUtc = g.Max(m => (DateTime?)m.Fecha),
+                UnidadesSalidaPeriodo = g
+                    .Where(m => m.Tipo == TipoMovimientoInventario.Salida &&
+                                m.Fecha >= desde && m.Fecha <= hasta)
+                    .Sum(m => (int?)m.Cantidad) ?? 0
+            });
+
+        var query =
+            from e in existencias
+            join stats in movimientoStats
+                on new { e.ProductoVarianteId, e.AlmacenId, e.UbicacionAlmacenId }
+                equals new { stats.ProductoVarianteId, stats.AlmacenId, stats.UbicacionAlmacenId }
+                into statsJoin
+            from stats in statsJoin.DefaultIfEmpty()
+            select new StockHealthRaw
+            {
+                ProductoVarianteId = e.ProductoVarianteId,
+                ProductoId = e.ProductoVariante.ProductoId,
+                ProductoNombre = e.ProductoVariante.Producto.Nombre,
+                Sku = e.ProductoVariante.Sku,
+                AlmacenId = e.AlmacenId,
+                AlmacenNombre = e.Almacen.Nombre,
+                UbicacionAlmacenId = e.UbicacionAlmacenId,
+                UbicacionNombre = e.UbicacionAlmacen != null ? e.UbicacionAlmacen.Nombre : null,
+                StockDisponible = e.StockDisponible,
+                StockMinimo = e.StockMinimo,
+                UltimoMovimientoUtc = stats == null ? null : stats.UltimoMovimientoUtc,
+                UnidadesSalidaPeriodo = stats == null ? 0 : stats.UnidadesSalidaPeriodo
+            };
 
         query = filtro.TipoReporte switch
         {
