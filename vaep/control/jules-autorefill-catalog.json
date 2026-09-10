@@ -1,9 +1,9 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
-  "currentParent": "N5.5.H",
-  "generatedAt": "2026-09-10T10:31:00Z",
-  "regenerationReason": "N5.5.G_LISTO_REAL__PROMOTE_N5.5.H__DOC_CERT_CONTROLLER_FASTPATH__PREARM_N5.6.A_N5.6.B_N5.6.C__NO_FILLER",
-  "lastClosedParent": "N5.5.G",
+  "currentParent": "N5.6.B",
+  "generatedAt": "2026-09-10T10:33:00Z",
+  "regenerationReason": "N5.5.H_AND_N5.6.A_LISTO_REAL__ORDER_REPAIR__PROMOTE_N5.6.B__DERIVE_DOMAIN_CONTRACTS_FROM_PREFLIGHT__PREARM_C_D_E__NO_FILLER",
+  "lastClosedParent": "N5.6.A",
   "closureReceipts": {
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
     "N5.1.H": "vaep/evidence/fragments/N5.1.H_LISTO_REAL_20260909T1236Z.json",
@@ -30,7 +30,9 @@
     "N5.5.D": "vaep/evidence/fragments/N5.5.D_LISTO_REAL_20260910T0845Z.json",
     "N5.5.E": "vaep/evidence/fragments/N5.5.E_LISTO_REAL_20260910T0956Z.json",
     "N5.5.F": "vaep/evidence/fragments/N5.5.F_LISTO_REAL_20260910T1028Z.json",
-    "N5.5.G": "vaep/evidence/fragments/N5.5.G_LISTO_REAL_20260910T1029Z.json"
+    "N5.5.G": "vaep/evidence/fragments/N5.5.G_LISTO_REAL_20260910T1029Z.json",
+    "N5.5.H": "vaep/evidence/fragments/N5.5.H_LISTO_REAL_20260910T1030Z.json",
+    "N5.6.A": "vaep/evidence/fragments/N5.6.A_LISTO_REAL_20260910T1031Z.json"
   },
   "policy": {
     "branch": "Desarrollo",
@@ -50,46 +52,32 @@
   },
   "throughputPlan": {
     "mode": "PARENT_CLOSE_FIRST",
-    "currentParent": "N5.5.H",
+    "currentParent": "N5.6.B",
     "currentParentMaterialScopeCount": 0,
-    "currentParentReason": "N5.5.G is LISTO_REAL with QA/regression/CI evidence accepted. N5.5.H is the ordered documentation/certification parent; its remaining work is controller-owned canonical evidence synthesis and certification from already accepted N5.5 artifacts, not a new overlapping Jules implementation scope.",
-    "nextParent": "N5.6.A",
+    "currentParentReason": "N5.6.A preflight is LISTO_REAL and authorizes only source-backed finance-report domain/contracts derived from existing Finanzas/CxC/CxP authorities. Material facets are being derived from live source before dispatch; no bank, tax, reconciliation or accounting semantics may be invented.",
+    "nextParent": "N5.6.C",
     "nextParentParallelMaterialScopes": 0,
     "nextParentScopesNonOverlapping": true,
-    "laneRefill": "DOC_CERT_CONTROLLER_FASTPATH__NO_DUPLICATE_DISPATCH__PREARM_N5.6.A_N5.6.B_N5.6.C"
+    "laneRefill": "DERIVE_N5.6.B_FROM_LIVE_SOURCE__THEN_DISPATCH_ONLY_DISTINCT_MATERIAL_SCOPE__PREARM_C_D_E"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
     "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
-    "sourceRanges": [
-      "COLA!A430:T433",
-      "PLAN_MAESTRO",
-      "vaep/evidence/fragments/N5.5.F_LISTO_REAL_20260910T1028Z.json",
-      "vaep/evidence/fragments/N5.5.G_LISTO_REAL_20260910T1029Z.json",
-      "vaep/evidence/reviews/N5.5.F_REVIEW_FIRST_FINAL_20260910T1027Z.json",
-      "backend/tests/InventoryApp.Tests/API/Controllers/ReportesComprasContractTests.cs"
-    ],
-    "note": "N5.5.G is LISTO_REAL. N5.5.H is promoted for canonical documentation/certification closure from accepted purchase-report evidence. N5.6.A/B/C are prearmed dependency-gated; no filler or early implementation.",
+    "sourceRanges": ["COLA!A432:T436","PLAN_MAESTRO","docs/VAEP_N5_6_FINANCE_REPORTS_PREFLIGHT.md","vaep/evidence/fragments/N5.6.A_LISTO_REAL_20260910T1031Z.json"],
+    "note": "N5.5.H and N5.6.A are LISTO_REAL. N5.6.B is the first dependency-valid unfinished parent. C/D/E are prearmed dependency-gated; no early dispatch or filler.",
     "nodes": [
-      {"id":"N5.5.G","order":40,"type":"MICROTAREA","dependencies":["N5.5.F"],"phaseGate":"GATE-N4"},
-      {"id":"N5.5.H","order":41,"type":"MICROTAREA","dependencies":["N5.5.G"],"phaseGate":"GATE-N4"},
       {"id":"N5.6.A","order":42,"type":"MICROTAREA","dependencies":["N5.1.H","GATE-N4"],"phaseGate":"GATE-N4"},
       {"id":"N5.6.B","order":43,"type":"MICROTAREA","dependencies":["N5.6.A"],"phaseGate":"GATE-N4"},
-      {"id":"N5.6.C","order":44,"type":"MICROTAREA","dependencies":["N5.6.B"],"phaseGate":"GATE-N4"}
+      {"id":"N5.6.C","order":44,"type":"MICROTAREA","dependencies":["N5.6.B"],"phaseGate":"GATE-N4"},
+      {"id":"N5.6.D","order":45,"type":"MICROTAREA","dependencies":["N5.6.C"],"phaseGate":"GATE-N4"},
+      {"id":"N5.6.E","order":46,"type":"MICROTAREA","dependencies":["N5.6.D"],"phaseGate":"GATE-N4"}
     ]
   },
   "prearmedRoadmap": [
-    {"parent":"N5.6.A","state":"READY_DEPENDENCY_GATED","dependency":"N5.5.H_LISTO_REAL__ORDERED_SUCCESSOR","materialization":"FINANCE_REPORTS_PREFLIGHT_ONLY_FROM_COLA_PLAN_MAESTRO_AND_LIVE_SOURCE_SURFACES__NO_LARGE_IMPLEMENTATION__NO_FILLER"},
-    {"parent":"N5.6.B","state":"READY_DEPENDENCY_GATED","dependency":"N5.6.A_LISTO_REAL","materialization":"FINANCE_REPORTS_DOMAIN_CONTRACTS_DERIVE_ONLY_AFTER_PREFLIGHT__NO_FILLER"},
-    {"parent":"N5.6.C","state":"READY_DEPENDENCY_GATED","dependency":"N5.6.B_LISTO_REAL","materialization":"FINANCE_REPORTS_DB_PERSISTENCE_DERIVE_ONLY_AFTER_DOMAIN_CONTRACTS__NO_FILLER"}
+    {"parent":"N5.6.C","state":"READY_DEPENDENCY_GATED","dependency":"N5.6.B_LISTO_REAL","materialization":"PERSISTENCE_ONLY_IF_DOMAIN_REVIEW_PROVES_MATERIAL_NEED__OTHERWISE_EVIDENCE_NA"},
+    {"parent":"N5.6.D","state":"READY_DEPENDENCY_GATED","dependency":"N5.6.C_LISTO_REAL","materialization":"FINANCE_REPORT_APPLICATION_API_FROM_ACCEPTED_CONTRACTS_ONLY__NO_FILLER"},
+    {"parent":"N5.6.E","state":"READY_DEPENDENCY_GATED","dependency":"N5.6.D_LISTO_REAL","materialization":"FINANCE_REPORT_FRONTEND_UX_FROM_ACCEPTED_API_ONLY__NO_FILLER"}
   ],
-  "lanes": {
-    "J1": [],
-    "J2": [],
-    "J3": [],
-    "J4": [],
-    "J5": [],
-    "J6": []
-  },
+  "lanes": {"J1":[],"J2":[],"J3":[],"J4":[],"J5":[],"J6":[]},
   "lastClosureFunctionalHead": "8b06b3d6181bad54a867eddb849c08b6f41eab63"
 }
