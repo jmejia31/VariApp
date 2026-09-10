@@ -5,19 +5,22 @@
   "taskId": "N5.9.H.1.REPORT_PERFORMANCE_DOCUMENTATION_CERTIFICATION",
   "branch": "Desarrollo",
   "reviewType": "REVIEW_FIRST",
-  "reviewedAtUtc": "2026-09-10T17:10:00Z",
+  "reviewedAtUtc": "2026-09-10T17:14:00Z",
   "owner": "CHATGPT_VAEP_CONTROLLER",
   "originWorker": "J2",
   "taskAttempt": 1,
   "originRunId": 34504728963,
-  "originSessionId": null,
-  "recoveryDisposition": "CONTROLLER_TAKEOVER_AFTER_STALL__DIRECT_REVIEW__NO_R2_R3",
-  "takeoverEvidence": "vaep/evidence/reviews/N5.9.H.1_J2_STALL_TAKEOVER_20260910T1705Z.json",
-  "lateJulesResultPolicy": "EVIDENCE_ONLY__NO_AUTOMATIC_INTEGRATION",
+  "originSessionId": "17579219390606663782",
+  "workerTerminalState": "LATE_RESULT_SUPERSEDED",
+  "workerPatchPresent": true,
+  "workerTerminalContractOk": false,
+  "workerPatchDisposition": "EVIDENCE_ONLY__NO_AUTOMATIC_INTEGRATION",
+  "ownershipReconciliation": "vaep/evidence/reviews/N5.9.H.1_J2_OWNERSHIP_RECONCILIATION_20260910T1714Z.json",
+  "recoveryDisposition": "POST_TERMINAL_INVALID_RESULT__CONTROLLER_DIRECT_FINALIZATION__NO_R2_R3",
+  "takeoverCausality": "INITIAL_1705_STALL_TRIGGER_PREMATURE_IN_HINDSIGHT__SESSION_USEFUL_ACTIVITY_CONTINUED_TO_170634Z__CORRECTED_BY_OWNERSHIP_RECONCILIATION",
   "functionalHead": "aafe94255e1eff9e3687c1716bb238393b1822f6",
   "documentationHead": "0cd237ce95029a1afde7515d4444ca0b51ba742b",
-  "controlPlaneHeadAtReview": "5e213a7f787b6c7e8338c8fd27ecf5af5672e265",
-  "decision": "ACCEPTED",
+  "decision": "ACCEPTED_AFTER_POST_TERMINAL_CAUSAL_RECONCILIATION",
   "findings": {"P0": 0, "P1": 0},
   "scopeReviewed": [
     "docs/N5.9_REPORT_PERFORMANCE_CERTIFICATION.md",
@@ -28,7 +31,8 @@
     "vaep/evidence/fragments/N5.9.D_LISTO_REAL_20260910T1643Z.json",
     "vaep/evidence/fragments/N5.9.E_LISTO_REAL_20260910T1645Z.json",
     "vaep/evidence/fragments/N5.9.F_LISTO_REAL_20260910T1646Z.json",
-    "vaep/evidence/fragments/N5.9.G_LISTO_REAL_20260910T1647Z.json"
+    "vaep/evidence/fragments/N5.9.G_LISTO_REAL_20260910T1647Z.json",
+    "artifact:10163919469"
   ],
   "acceptance": {
     "documentationMatchesImplementedHotspot": true,
@@ -37,11 +41,13 @@
     "rollbackBoundedAndNonProduction": true,
     "unsupportedQuantifiedPerformanceClaimsAbsent": true,
     "gateN5NotSelfCertified": true,
-    "newFunctionalDelta": false
+    "newFunctionalDelta": false,
+    "lateWorkerPatchNotIntegrated": true,
+    "monitoringDriftRecorded": true
   },
   "selfReviews": [
-    {"name": "ACCURACY_AND_EVIDENCE_REVIEW", "result": "PASS", "note": "Claims cross-checked against implementation/review and N5.9.E-G receipts; no unsupported benchmark claim."},
-    {"name": "SCOPE_SECURITY_AND_ROLLBACK_REVIEW", "result": "PASS", "note": "Documentation-only recovery; no app/schema/workflow/package/auth/main/Produccion/secrets/PR2 change; rollback bounded to Desarrollo."}
+    {"name": "ACCURACY_AND_EVIDENCE_REVIEW", "result": "PASS", "note": "Claims cross-checked against implementation, child receipts and the terminal J2 artifact; hidden session activity is explicitly reconciled instead of preserving a false stall premise."},
+    {"name": "SCOPE_SECURITY_AND_ROLLBACK_REVIEW", "result": "PASS", "note": "Documentation-only controller finalization after invalid/superseded worker terminal; no app/schema/workflow/package/auth/main/Produccion/secrets/PR2 change; no R2/R3."}
   ],
   "applicableGates": [
     {"name": "DOCUMENTATION_STATIC_REVIEW", "head": "0cd237ce95029a1afde7515d4444ca0b51ba742b", "status": "completed", "conclusion": "success"},
@@ -49,7 +55,7 @@
     {"name": "unit-frontend", "head": "aafe94255e1eff9e3687c1716bb238393b1822f6", "status": "completed", "conclusion": "success"},
     {"name": "Frontend produccion", "head": "aafe94255e1eff9e3687c1716bb238393b1822f6", "status": "completed", "conclusion": "success"}
   ],
-  "causalGateAssessment": "PASS__H_DOCUMENTATION_ONLY__DOCUMENTATION_HEAD_REVIEWED__N5.9_FUNCTIONAL_GATES_TERMINAL_ON_EXACT_FUNCTIONAL_HEAD",
+  "causalGateAssessment": "PASS__H_DOCUMENTATION_ONLY__CONTROLLER_DOC_REVIEWED_AFTER_INVALID_WORKER_TERMINAL__N5.9_FUNCTIONAL_GATES_TERMINAL_ON_EXACT_FUNCTIONAL_HEAD",
   "security": {"mainUntouched": true, "productionUntouched": true, "secretsUntouched": true, "pr2NotMerged": true},
-  "nextAction": "CERTIFY_N5.9.H_LISTO_REAL__PROMOTE_GATE_N5__CLOSURE_CHAIN_SAME_RUN"
+  "nextAction": "KEEP_N5.9.H_LISTO_REAL__REVIEW_GATE_N5__CERTIFY__PROMOTE_N6.1.A_SAME_RUN"
 }
