@@ -26,7 +26,6 @@ import { IconoTiendaComponent } from './varistorehn.visual';
 })
 export class VaristorehnHeaderComponent {
   readonly identidad = inject(EmpresaIdentidadService);
-  readonly rutas = VARISTOREHN_PATHS;
 
   @Input() busqueda = '';
   @Input() categorias: readonly string[] = [];
@@ -90,9 +89,10 @@ export class VaristorehnHeaderComponent {
 
   cerrarMenuMovil(devolverFoco = false): void {
     const dialogo = this.menuMovil?.nativeElement;
+    const estabaAbierto = Boolean(dialogo?.open || this.menuAbierto());
     if (dialogo?.open) dialogo.close();
     this.menuAbierto.set(false);
-    if (devolverFoco) queueMicrotask(() => this.botonMenu?.nativeElement.focus());
+    if (devolverFoco && estabaAbierto) queueMicrotask(() => this.botonMenu?.nativeElement.focus());
   }
 
   cerrarDesdeFondo(evento: MouseEvent): void {
