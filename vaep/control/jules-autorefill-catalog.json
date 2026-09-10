@@ -1,9 +1,9 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
-  "currentParent": "N5.8.G",
-  "generatedAt": "2026-09-10T15:30:20Z",
-  "regenerationReason": "N5.8.F_LISTO_REAL__N5.8.G_CURRENT__G1_J6_RUN_34494960155_TRANSPORT_STALLED_GE10M_NO_CORRELATED_SESSION_OR_USEFUL_ACTIVITY__OWNERSHIP_TRANSFERRED_TO_CHATGPT_VAEP__LATE_J6_RESULT_EVIDENCE_ONLY__H_N5.9A_N5.9B_PREARMED__NO_FILLER",
-  "lastClosedParent": "N5.8.F",
+  "currentParent": "N5.9.A",
+  "generatedAt": "2026-09-10T15:50:00Z",
+  "regenerationReason": "N5.8.G_AND_N5.8.H_LISTO_REAL__N5.9.A_CURRENT__REPORT_PERFORMANCE_PREFLIGHT_CONTROLLER_READY__N5.9B_N5.9C_N5.9D_PREARMED_DEPENDENCY_GATED__NO_FILLER",
+  "lastClosedParent": "N5.8.H",
   "closureReceipts": {
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
     "N5.1.H": "vaep/evidence/fragments/N5.1.H_LISTO_REAL_20260909T1236Z.json",
@@ -18,7 +18,9 @@
     "N5.8.C": "vaep/evidence/fragments/N5.8.C_LISTO_REAL_20260910T1353Z.json",
     "N5.8.D": "vaep/evidence/fragments/N5.8.D_LISTO_REAL_20260910T1431Z.json",
     "N5.8.E": "vaep/evidence/fragments/N5.8.E_LISTO_REAL_20260910T1504Z.json",
-    "N5.8.F": "vaep/evidence/fragments/N5.8.F_LISTO_REAL_20260910T1518Z.json"
+    "N5.8.F": "vaep/evidence/fragments/N5.8.F_LISTO_REAL_20260910T1518Z.json",
+    "N5.8.G": "vaep/evidence/fragments/N5.8.G_LISTO_REAL_20260910T1548Z.json",
+    "N5.8.H": "vaep/evidence/fragments/N5.8.H_LISTO_REAL_20260910T1549Z.json"
   },
   "policy": {
     "branch": "Desarrollo",
@@ -36,37 +38,33 @@
   },
   "throughputPlan": {
     "mode": "PARENT_CLOSE_FIRST",
-    "currentParent": "N5.8.G",
+    "currentParent": "N5.9.A",
     "currentParentMaterialScopeCount": 1,
-    "currentParentReason": "N5.8 preflight defines one coherent QA/regression/CI scope. The canonical J6 transport exceeded 10 minutes without correlated sessionId or useful activity evidence, so FIRST_DETECTOR ownership transferred to CHATGPT_VAEP; late J6 output is evidence-only.",
-    "nextParent": "N5.8.H",
+    "currentParentReason": "N5.9.A is the live roadmap PRE microtask: directed audit/preflight for report performance. It must establish current report query architecture, affected surfaces, risks, acceptance, rollback and tests before any material implementation.",
+    "nextParent": "N5.9.B",
     "nextParentParallelMaterialScopes": 1,
     "nextParentScopesNonOverlapping": true,
-    "laneRefill": "CHATGPT_VAEP_DIRECT_FIX_G1__REVIEW_FIRST__EXACT_HEAD_GATES__CLOSE_G__PROMOTE_H__H_N5.9A_N5.9B_GATED__NO_FILLER"
+    "laneRefill": "CHATGPT_VAEP_DIRECT_PREFLIGHT_N5.9.A__REVIEW_FIRST__CLOSE_IF_DOD_VALID__PROMOTE_B__B_C_D_PREARMED_GATED__NO_FILLER"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
     "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
-    "sourceRanges": ["COLA!A448:T462", "PLAN_MAESTRO", "docs/VAEP_N5_8_EXPORTACIONES_PREFLIGHT.md"],
-    "note": "N5.8.G is current after F LISTO_REAL. Its single source-backed QA/regression scope is under CHATGPT_VAEP takeover after transport stall; H and N5.9.A/B remain dependency/order-gated; no evidence-only filler is authorized.",
+    "sourceRanges": ["COLA!A455:T463", "PLAN_MAESTRO"],
+    "note": "N5.9.A is current after the certified N5.8.H closure. N5.9.B/C/D are live COLA-derived successors and remain dependency-gated; no filler is authorized.",
     "nodes": [
-      {"id": "N5.8.A", "order": 58, "dependencies": ["N5.7.H"]},
-      {"id": "N5.8.B", "order": 59, "dependencies": ["N5.8.A"]},
-      {"id": "N5.8.C", "order": 60, "dependencies": ["N5.8.B"]},
-      {"id": "N5.8.D", "order": 61, "dependencies": ["N5.8.C"]},
-      {"id": "N5.8.E", "order": 62, "dependencies": ["N5.8.D"]},
-      {"id": "N5.8.F", "order": 63, "dependencies": ["N5.8.E"]},
       {"id": "N5.8.G", "order": 64, "dependencies": ["N5.8.F"]},
       {"id": "N5.8.H", "order": 65, "dependencies": ["N5.8.G"]},
       {"id": "N5.9.A", "order": 66, "dependencies": ["N5.8.H"]},
-      {"id": "N5.9.B", "order": 67, "dependencies": ["N5.9.A"]}
+      {"id": "N5.9.B", "order": 67, "dependencies": ["N5.9.A"]},
+      {"id": "N5.9.C", "order": 68, "dependencies": ["N5.9.B"]},
+      {"id": "N5.9.D", "order": 69, "dependencies": ["N5.9.C"]}
     ]
   },
   "prearmedRoadmap": [
-    {"parent": "N5.8.G", "taskId": "N5.8.G.1.EXPORT_QA_REGRESSION_CI", "state": "CONTROLLER_TAKEOVER_IN_PROGRESS__TRANSPORT_STALLED__LATE_J6_RESULT_EVIDENCE_ONLY", "dependency": "N5.8.F_LISTO_REAL", "worker": "CHATGPT_VAEP", "taskAttempt": 1, "manifest": "vaep/j6/dispatch/N5-8-G-1-EXPORT-QA-REGRESSION-CI-J6.json", "originalRunId": 34494960155, "takeoverExecuted": true, "materialization": "EXTEND_EXISTING_REPORT_ADMIN_E2E_WITH_PDF_VALID_BYTES_INVALID_FORMAT_FAIL_CLOSED_AND_EXPORT_RBAC_DENIAL__PRESERVE_CSV_XLSX__NO_FILLER"},
-    {"parent": "N5.8.H", "state": "READY_DEPENDENCY_GATED", "dependency": "N5.8.G_LISTO_REAL", "materialization": "EXPORTS_DOCUMENTATION_CERTIFICATION__ROADMAP_DERIVED__NO_FILLER"},
-    {"parent": "N5.9.A", "state": "READY_ORDER_GATED", "dependency": "N5.8.H_LISTO_REAL", "materialization": "REPORT_PERFORMANCE_PREFLIGHT__ROADMAP_DERIVED__NO_FILLER"},
-    {"parent": "N5.9.B", "state": "READY_DEPENDENCY_GATED", "dependency": "N5.9.A_LISTO_REAL", "materialization": "REPORT_PERFORMANCE_DOMAIN_CONTRACTS__ROADMAP_DERIVED__NO_FILLER"}
+    {"parent": "N5.9.A", "taskId": "N5.9.A.1.REPORT_PERFORMANCE_PREFLIGHT", "state": "CONTROLLER_READY", "dependency": "N5.8.H_LISTO_REAL", "worker": "CHATGPT_VAEP", "taskAttempt": 1, "materialization": "DIRECTED_REPORT_QUERY_ARCHITECTURE_AND_PERFORMANCE_PREFLIGHT__NO_LARGE_IMPLEMENTATION__NO_FILLER"},
+    {"parent": "N5.9.B", "state": "READY_DEPENDENCY_GATED", "dependency": "N5.9.A_LISTO_REAL", "materialization": "REPORT_PERFORMANCE_DOMAIN_CONTRACTS__ROADMAP_DERIVED__NO_FILLER"},
+    {"parent": "N5.9.C", "state": "READY_DEPENDENCY_GATED", "dependency": "N5.9.B_LISTO_REAL", "materialization": "REPORT_PERFORMANCE_PERSISTENCE_MIGRATION_DATA__ROADMAP_DERIVED__NO_FILLER"},
+    {"parent": "N5.9.D", "state": "READY_DEPENDENCY_GATED", "dependency": "N5.9.C_LISTO_REAL", "materialization": "REPORT_PERFORMANCE_BACKEND_API__ROADMAP_DERIVED__NO_FILLER"}
   ],
   "lanes": {
     "J1": [],
@@ -74,7 +72,7 @@
     "J3": [],
     "J4": [],
     "J5": [],
-    "J6": [{"taskId": "N5.8.G.1.EXPORT_QA_REGRESSION_CI", "state": "OWNERSHIP_TRANSFERRED_TO_CHATGPT_VAEP__LATE_RESULT_EVIDENCE_ONLY", "taskAttempt": 1, "runId": 34494960155}]
+    "J6": []
   },
-  "lastClosureFunctionalHead": "591721dc019857714a667adbdef6960f6d7e5fe2"
+  "lastClosureFunctionalHead": "9907f10f55e6ab2c4b024e495555ccad7817007b"
 }
