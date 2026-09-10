@@ -74,6 +74,24 @@ api() {
   gh api "$@"
 }
 
+# Fetch the issue feed defensively. GitHub can occasionally return a non-array
+# error payload during a transient API failure/rate event. Passing that object
+# into jq '.[]? | .body' caused the terminal autorefill hook to crash. Retry
+# bounded reads and fail closed if the provider response is not the expected
+# issue array; never infer recovery/R2 eligibility from malformed telemetry.
+fetch_issues_array() {
+  local endpoint payload attempt
+  endpoint="repos/$GITHUB_REPOSITORY/issues?state=all&per_page=100&sort=updated&direction=desc"
+  for attempt in 1 2 3; do
+    if payload="$(api "$endpoint" 2>/dev/null)" && jq -e 'type == "array"' <<<"$payload" >/dev/null 2>&1; then
+      printf '%s\n' "$payload"
+      return 0
+    fi
+    sleep 1
+  done
+  return 1
+}
+
 # Dependency-safe parent guard. dispatchEligible alone is insufficient: a
 # stale/misprogrammed catalog must never dispatch work belonging to a future
 # parent while currentParent is still open. This guard is local/fail-closed;
@@ -152,10 +170,14 @@ filter_completed_facets() {
 filter_evidence_gap_review_debt() {
   [[ -f "$CATALOG" ]] || return 0
   local issues tmp before after blocked
-  issues="$(api "repos/$GITHUB_REPOSITORY/issues?state=all&per_page=100&sort=updated&direction=desc" 2>/dev/null || printf '[]')"
+  if ! issues="$(fetch_issues_array)"; then
+    echo "AUTOREFILL_WAIT=ISSUES_FEED_UNAVAILABLE_OR_MALFORMED action=FAIL_CLOSED_NO_DISPATCH" >&2
+    exit 0
+  fi
   blocked="$(jq -r '
     .[]?
-    | (.body // "") as $b
+    | select(type == "object")
+    | (.body? // "") as $b
     | select($b | contains("Terminal contract classification: `EVIDENCE_GAP_REVIEW_REQUIRED`"))
     | select($b | test("(?m)^- Task attempt: `1/[0-9]+`$|attempt: `?1/[0-9]+`?"))
     | ($b | split("\n")[]? | select(startswith("- Dispatch: `")) | sub("^- Dispatch: `"; "") | sub("`.*$"; ""))
