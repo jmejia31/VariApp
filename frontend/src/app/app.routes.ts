@@ -80,6 +80,7 @@ export const routes: Routes = [
       { path: 'inventario/stock-health', canActivate: [permisoGuard], data: { modulo: 'Inventario', accion: 'Ver' }, loadComponent: () => import('./features/reportes-inventario/stock-health/stock-health.component').then(m => m.StockHealthComponent) },
       { path: 'inventario/reconciliacion', canActivate: [permisoGuard], data: { modulo: 'Inventario', accion: 'Ver' }, loadComponent: () => import('./features/reportes-inventario/reconciliacion/reconciliacion.component').then(m => m.ReconciliacionComponent) },
       { path: 'ventas', canActivate: [permisoGuard], data: { modulo: 'Ventas', accion: 'Ver' }, loadComponent: () => import('./features/reportes-ventas/reportes-ventas.component').then(m => m.ReportesVentasComponent) },
+      { path: 'compras', canActivate: [permisoGuard], data: { modulo: 'Compras', accion: 'Ver' }, loadComponent: () => import('./features/reportes-compras/reportes-compras.component').then(m => m.ReportesComprasComponent) },
       { path: 'rentabilidad', canActivate: [permisoGuard], data: { modulo: 'Ventas', accion: 'Ver' }, loadComponent: () => import('./features/rentabilidad/rentabilidad.component').then(m => m.RentabilidadComponent) }
     ]
   },
