@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   enforce-open-only:
-    name: Enforce OPEN-only global admission
+    name: Enforce canonical OPEN-only admission
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
@@ -24,112 +24,54 @@ jobs:
       ADMISSION_PATH: vaep/control/dispatch-admission.json
       MASTER_PATH: docs/VAEP_AUTHORITY.md
     steps:
-      - name: Enforce OPEN state and MASTER invariant
+      - name: Verify canonical authority
         shell: bash
         run: |
           set -euo pipefail
-
-          enforce_admission() {
-            local attempt payload sha decoded state allow now reason fixed encoded
-            for attempt in 1 2 3 4 5; do
-              payload="$(gh api "repos/$REPO/contents/$ADMISSION_PATH?ref=$BRANCH")"
-              sha="$(jq -r '.sha' <<<"$payload")"
-              decoded="$(jq -r '.content' <<<"$payload" | tr -d '\n' | base64 -d)"
-              state="$(jq -r '.newDispatchAdmission // "INVALID"' <<<"$decoded" 2>/dev/null || printf 'INVALID')"
-              allow="$(jq -r '.allowExistingActiveSessions // false' <<<"$decoded" 2>/dev/null || printf 'false')"
-              if [[ "$state" == "OPEN" && "$allow" == "true" ]]; then
-                echo "VAEP_GLOBAL_ADMISSION=OPEN"
-                return 0
-              fi
-              now="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-              reason="GLOBAL_FROZEN_PROHIBITED__AUTO_REOPEN__prior_state=${state}__TASK_LANE_QUARANTINE_REVIEW_FIRST_ONLY"
-              fixed="$(jq -n --arg now "$now" --arg reason "$reason" '{newDispatchAdmission:"OPEN",allowExistingActiveSessions:true,reason:$reason,updatedAtUtc:$now}')"
-              encoded="$(printf '%s\n' "$fixed" | base64 -w0)"
-              if jq -n --arg message "fix(vaep): auto-reopen prohibited global admission state" --arg content "$encoded" --arg sha "$sha" --arg branch "$BRANCH" '{message:$message,content:$content,sha:$sha,branch:$branch}' \
-                | gh api "repos/$REPO/contents/$ADMISSION_PATH" --method PUT --input - >/dev/null 2>&1; then
-                echo "VAEP_GLOBAL_ADMISSION=REPAIRED prior=$state current=OPEN"
-                return 0
-              fi
-              sleep "$attempt"
-            done
-            return 1
-          }
-
-          enforce_master() {
-            local attempt payload sha encoded
-            for attempt in 1 2 3 4 5; do
-              payload="$(gh api "repos/$REPO/contents/$MASTER_PATH?ref=$BRANCH")"
-              sha="$(jq -r '.sha' <<<"$payload")"
-              jq -r '.content' <<<"$payload" | tr -d '\n' | base64 -d > master.md
-              python3 - <<'PY'
-          from pathlib import Path
-          p = Path('master.md')
-          s = p.read_text(encoding='utf-8')
-
-          if 'GLOBAL_DISPATCH_ADMISSION=OPEN_ONLY' not in s:
-              marker = 'PREARM_BEFORE_CAUSAL_CI=TRUE\n'
-              replacement = (
-                  marker
-                  + 'GLOBAL_DISPATCH_ADMISSION=OPEN_ONLY\n'
-                  + 'GLOBAL_FROZEN_PROHIBITED=TRUE\n'
-                  + 'CAUSAL_HOLD_SCOPE=TASK_OR_LANE_ONLY\n'
-              )
-              if marker not in s:
-                  raise SystemExit('MASTER_POLICY_MARKER_MISSING')
-              s = s.replace(marker, replacement, 1)
-
-          old = '''El estado machine-readable de admisión vive en `vaep/control/dispatch-admission.json` y está subordinado a este MAESTRO. Solo se permiten dos estados:
-
-- `FROZEN`: un commit con exactamente un manifest nuevo se rechaza antes de crear sesión, consumir attempt, reservar ownership o iniciar recovery. Sesiones `ACTIVE_REAL` ya existentes no se invalidan.
-- `OPEN`: el manifest continúa por el transporte Jules normal.
-'''
-          new = '''El estado machine-readable de admisión vive en `vaep/control/dispatch-admission.json` y está subordinado a este MAESTRO. El contrato global es **OPEN_ONLY**:
-
-- `OPEN`: único estado global válido; mantiene disponibles las lanes independientes que tengan trabajo material elegible.
-- `FROZEN` y `CLOSED`: **PROHIBIDOS como estados globales**. Un watchdog, stall, deuda REVIEW_FIRST, hardening pendiente o causal gate nunca puede cerrar toda la fábrica.
-- `HEAD_FREEZE_CAUSAL` significa exclusivamente que la tarea/lane afectada queda `dispatchEligible=false`, prearmada o en cuarentena/REVIEW_FIRST hasta satisfacer su gate. No autoriza cambiar `newDispatchAdmission` fuera de `OPEN` ni bloquear lanes independientes.
-'''
-          if old in s:
-              s = s.replace(old, new, 1)
-          elif 'El contrato global es **OPEN_ONLY**' not in s:
-              raise SystemExit('MASTER_ADMISSION_SECTION_MISSING')
-
-          s = s.replace(
-              '- control ausente, malformado, con claves desconocidas o valor distinto de `FROZEN|OPEN` => fail-closed;',
-              '- control ausente, malformado, con claves desconocidas o valor distinto de `OPEN` => fail-closed; `FROZEN`/`CLOSED` son violaciones del invariante y deben normalizarse a `OPEN` antes de despachar;'
-          )
-          s = s.replace(
-              '- Fase 7/certificación integral autoriza el primer retorno a `OPEN` tras la migración. Después de `MIGRATION_F0_F7=CLOSED/PASS`, un hardening posterior del control-plane puede volver de `FROZEN` a `OPEN` sin reabrir fases únicamente si el HEAD de hardening tiene `VAEP engine lightweight checks=SUCCESS` y `VAEP Jules Diagnostic=SUCCESS`, no existe regresión concreta de MASTER y PR #2 permanece OPEN+DRAFT.',
-              '- Las referencias históricas a `FROZEN` quedan como evidencia de migración, no como estado ejecutable. Los hardening/causal gates se expresan a nivel de tarea/lane (`dispatchEligible=false`, cuarentena o REVIEW_FIRST) mientras el admission global permanece `OPEN`.'
-          )
-          p.write_text(s, encoding='utf-8')
-          PY
-
-              if cmp -s master.md <(jq -r '.content' <<<"$payload" | tr -d '\n' | base64 -d); then
-                echo "VAEP_MASTER_OPEN_ONLY=ALREADY"
-                return 0
-              fi
-              encoded="$(base64 -w0 master.md)"
-              if jq -n --arg message "fix(vaep): make global admission OPEN-only in MASTER" --arg content "$encoded" --arg sha "$sha" --arg branch "$BRANCH" '{message:$message,content:$content,sha:$sha,branch:$branch}' \
-                | gh api "repos/$REPO/contents/$MASTER_PATH" --method PUT --input - >/dev/null 2>&1; then
-                echo "VAEP_MASTER_OPEN_ONLY=UPDATED"
-                return 0
-              fi
-              sleep "$attempt"
-            done
-            return 1
-          }
-
-          enforce_admission
-          enforce_master
-          enforce_admission
-
-          admission="$(gh api "repos/$REPO/contents/$ADMISSION_PATH?ref=$BRANCH" --jq '.content' | tr -d '\n' | base64 -d)"
-          jq -e '.newDispatchAdmission=="OPEN" and .allowExistingActiveSessions==true' <<<"$admission" >/dev/null
           master="$(gh api "repos/$REPO/contents/$MASTER_PATH?ref=$BRANCH" --jq '.content' | tr -d '\n' | base64 -d)"
           grep -q '^GLOBAL_DISPATCH_ADMISSION=OPEN_ONLY$' <<<"$master"
           grep -q '^GLOBAL_FROZEN_PROHIBITED=TRUE$' <<<"$master"
           grep -q '^CAUSAL_HOLD_SCOPE=TASK_OR_LANE_ONLY$' <<<"$master"
           grep -q 'El contrato global es \*\*OPEN_ONLY\*\*' <<<"$master"
           ! grep -q 'Solo se permiten dos estados' <<<"$master"
-          echo 'VAEP_OPEN_ONLY_INVARIANT=PASS'
+          echo 'VAEP_MASTER_OPEN_ONLY=PASS'
+
+      - name: Repair any non-OPEN global admission state
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3 4 5; do
+            payload="$(gh api "repos/$REPO/contents/$ADMISSION_PATH?ref=$BRANCH")"
+            sha="$(jq -r '.sha' <<<"$payload")"
+            decoded="$(jq -r '.content' <<<"$payload" | tr -d '\n' | base64 -d)"
+            if jq -e '
+              type=="object" and
+              ((keys|sort)==["allowExistingActiveSessions","newDispatchAdmission","reason","updatedAtUtc"]) and
+              .newDispatchAdmission=="OPEN" and
+              .allowExistingActiveSessions==true and
+              (.reason|type=="string" and length>0) and
+              (.updatedAtUtc|type=="string" and length>0)
+            ' <<<"$decoded" >/dev/null 2>&1; then
+              echo 'VAEP_GLOBAL_ADMISSION=OPEN'
+              exit 0
+            fi
+
+            now="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            fixed="$(jq -n --arg now "$now" '{newDispatchAdmission:"OPEN",allowExistingActiveSessions:true,reason:"OPEN_ONLY_INVARIANT_REPAIR__TASK_LANE_GATES_ONLY",updatedAtUtc:$now}')"
+            encoded="$(printf '%s\n' "$fixed" | base64 -w0)"
+            if jq -n \
+              --arg message "fix(vaep): repair non-open global admission state" \
+              --arg content "$encoded" \
+              --arg sha "$sha" \
+              --arg branch "$BRANCH" \
+              '{message:$message,content:$content,sha:$sha,branch:$branch}' \
+              | gh api "repos/$REPO/contents/$ADMISSION_PATH" --method PUT --input - >/dev/null 2>&1; then
+              echo 'VAEP_GLOBAL_ADMISSION=REPAIRED_TO_OPEN'
+              exit 0
+            fi
+            sleep "$attempt"
+          done
+
+          admission="$(gh api "repos/$REPO/contents/$ADMISSION_PATH?ref=$BRANCH" --jq '.content' | tr -d '\n' | base64 -d)"
+          jq -e '.newDispatchAdmission=="OPEN" and .allowExistingActiveSessions==true' <<<"$admission" >/dev/null
+          echo 'VAEP_GLOBAL_ADMISSION=OPEN_AFTER_RACE'
