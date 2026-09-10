@@ -86,6 +86,7 @@ public class AppDbContext : DbContext
 
     public DbSet<CargaMasiva> CargasMasivas => Set<CargaMasiva>();
     public DbSet<CargaMasivaError> CargaMasivaErrores => Set<CargaMasivaError>();
+    public DbSet<DashboardKpiConfiguracion> DashboardKpiConfiguraciones => Set<DashboardKpiConfiguracion>();
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
