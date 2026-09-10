@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-9-H-1-REPORT-PERFORMANCE-DOC-CERT-J2",
+  "taskId": "N5.9.H.1.REPORT_PERFORMANCE_DOCUMENTATION_CERTIFICATION",
+  "workerId": "J2",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/N5.9_REPORT_PERFORMANCE_CERTIFICATION.md,CHANGELOG_AI.md,TASKS.md",
+  "prompt": "Use only docs/VAEP_AUTHORITY.md, live Desarrollo, and the N5.9 evidence already committed in vaep/evidence. Execute exactly N5.9.H documentation/certification as one bounded documentation changeset. Create docs/N5.9_REPORT_PERFORMANCE_CERTIFICATION.md summarizing the certified N5.9 report-performance work, especially Stock Health grouped movement aggregation, preserved owner scoping/API semantics, exact functional head aafe94255e1eff9e3687c1716bb238393b1822f6, and the accepted REVIEW_FIRST/LISTO_REAL evidence for N5.9.D through N5.9.G. Update CHANGELOG_AI.md with a concise 2026-09-10 N5.9 closure entry and TASKS.md with a concise ERP-N5.9 closure section/status. Do not modify application code, schemas, migrations, workflows, packages, main, Produccion, secrets or PR#2. Do not claim GATE-N5 closed; N5.9.H is the scope. Preserve existing collaborative history. Run proportional documentation checks such as git diff --check/targeted reference verification and perform two independent self-reviews. Return PATCH_PRESENT and terminal evidence; if the source evidence is inconsistent, stop and report the exact gap instead of fabricating certification.",
+  "primaryBaseHead": "a326b00c67479295b1ce702fe664efc79d5eeb87"
+}
