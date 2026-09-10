@@ -20,14 +20,17 @@ REQUIRED = {
     "Review", "Review-Evidence", "Scope-Decision", "Reviewed-Files",
     "Tests", "P0", "P1", "Integrated", "Integration-Branch"
 }
+QUARANTINE_PATH = Path("vaep/control/jules-integration-receipt-quarantine.json")
+QUARANTINE_POLICY = "INVALID_RECEIPT_NO_COUNT_FORWARD_RECONCILIATION_NO_HISTORY_REWRITE"
 # A REVIEW_FIRST / QA-takeover commit may carry Dispatch/Task/Worker/Session
 # metadata to identify the source Jules work without claiming to be an
 # integration receipt. Canonical receipt intent is signalled by immutable
 # integration fields or the exact canonical `VAEP-Integrated: TRUE` token.
 # Older controller metadata used lowercase `true`; that spelling is not the
-# canonical receipt token from VAEP_AUTHORITY and must remain evidence-only.
+# canonical receipt token from VAEP_AUTHORITY and remains evidence-only.
 # Once canonical intent exists, the complete REQUIRED contract is validated
-# fail-closed.
+# fail-closed unless the exact historical commit has been explicitly reviewed
+# and quarantined as zero-throughput evidence without rewriting Git history.
 STRONG_INTEGRATION_INTENT = {
     "Dispatch-Manifest", "Patch-SHA256", "Patch-Base", "Integration-Branch"
 }
@@ -146,6 +149,74 @@ def inspect_commit(sha):
         errors.append(load_error)
     return {"receipt": True, "sha": sha, "trailers": trailers, "changedFiles": changed_files, "errors": errors}
 
+def validate_quarantine_payload(payload, verify_closure=True):
+    errors = []
+    if not isinstance(payload, dict):
+        return ["quarantine root must be object"]
+    if payload.get("authority") != "docs/VAEP_AUTHORITY.md":
+        errors.append("quarantine authority must be docs/VAEP_AUTHORITY.md")
+    if payload.get("policy") != QUARANTINE_POLICY:
+        errors.append("quarantine policy mismatch")
+    entries = payload.get("entries")
+    if not isinstance(entries, list):
+        return errors + ["quarantine entries must be array"]
+    seen = set()
+    for index, entry in enumerate(entries):
+        prefix = f"entry[{index}]"
+        if not isinstance(entry, dict):
+            errors.append(prefix + " must be object")
+            continue
+        sha = entry.get("commit")
+        parent = entry.get("parent")
+        task_id = entry.get("taskId")
+        closure_path = entry.get("closureReceipt")
+        if not isinstance(sha, str) or not SHA40_RE.fullmatch(sha):
+            errors.append(prefix + " commit must be lowercase SHA40")
+        elif sha in seen:
+            errors.append(prefix + " duplicate commit")
+        else:
+            seen.add(sha)
+        if not isinstance(parent, str) or not parent:
+            errors.append(prefix + " parent required")
+        if not isinstance(task_id, str) or not task_id.startswith(str(parent) + "."):
+            errors.append(prefix + " taskId must belong to parent")
+        if entry.get("disposition") != "QUARANTINED_NO_PRODUCTIVITY":
+            errors.append(prefix + " disposition mismatch")
+        if entry.get("countsAsUsefulThroughput") is not False:
+            errors.append(prefix + " must not count as throughput")
+        if not isinstance(entry.get("reason"), str) or not entry["reason"].strip():
+            errors.append(prefix + " reason required")
+        if not isinstance(closure_path, str) or not re.fullmatch(r"vaep/evidence/fragments/[^/]+_LISTO_REAL_[^/]+\.json", closure_path):
+            errors.append(prefix + " closureReceipt must be LISTO_REAL fragment")
+        elif verify_closure:
+            try:
+                closure = json.loads(Path(closure_path).read_text(encoding="utf-8"))
+            except (OSError, ValueError) as exc:
+                errors.append(prefix + " closureReceipt unreadable: " + str(exc))
+            else:
+                closure_parent = closure.get("parent") or closure.get("parentId")
+                if closure.get("authority") != "docs/VAEP_AUTHORITY.md" or closure_parent != parent:
+                    errors.append(prefix + " closureReceipt authority/parent mismatch")
+                if closure.get("state") != "LISTO_REAL" and closure.get("decision") != "LISTO_REAL":
+                    errors.append(prefix + " closureReceipt is not LISTO_REAL")
+                p0 = closure.get("p0", closure.get("p0Open"))
+                p1 = closure.get("p1", closure.get("p1Open"))
+                if p0 != 0 or p1 != 0:
+                    errors.append(prefix + " closureReceipt must have P0/P1=0")
+    return errors
+
+def load_quarantine():
+    if not QUARANTINE_PATH.exists():
+        return {}, []
+    try:
+        payload = json.loads(QUARANTINE_PATH.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        return {}, ["cannot load quarantine: " + str(exc)]
+    errors = validate_quarantine_payload(payload, verify_closure=True)
+    if errors:
+        return {}, errors
+    return {entry["commit"]: entry for entry in payload["entries"]}, []
+
 def print_valid_metrics(result):
     t = result["trailers"]
     print("VAEP_METRIC stage=REVIEW_ACCEPTED value=true worker={} dispatch={} task={} session={} integration_commit={}".format(
@@ -173,15 +244,33 @@ def read_targets():
     return (int(per.group(1)) if per else None, int(total.group(1)) if total else None)
 
 def rolling(hours):
+    quarantine, quarantine_errors = load_quarantine()
+    if quarantine_errors:
+        print(json.dumps({"status":"INVALID_QUARANTINE_CONTROL","errors":quarantine_errors,"countsAsUsefulThroughput":False}, indent=2))
+        return 2
+
     hashes_text = git("rev-list", "--since={} hours ago".format(hours), "HEAD")
     hashes = [line for line in hashes_text.splitlines() if line.strip()]
-    valid, invalid, seen_dispatch = [], [], set()
+    valid, invalid, quarantined, seen_dispatch = [], [], [], set()
     for sha in hashes:
         result = inspect_commit(sha)
         if not result["receipt"]:
             continue
         if result["errors"]:
+            if sha in quarantine:
+                quarantined.append({
+                    "commit": sha,
+                    "parent": quarantine[sha]["parent"],
+                    "taskId": quarantine[sha]["taskId"],
+                    "disposition": quarantine[sha]["disposition"],
+                    "countsAsUsefulThroughput": False,
+                    "receiptErrors": result["errors"]
+                })
+                continue
             invalid.append({"commit":sha,"errors":result["errors"]})
+            continue
+        if sha in quarantine:
+            invalid.append({"commit":sha,"errors":["valid integration receipt must not be quarantined"]})
             continue
         dispatch = result["trailers"]["Dispatch"]
         if dispatch in seen_dispatch:
@@ -191,7 +280,7 @@ def rolling(hours):
         valid.append(result)
 
     if invalid:
-        print(json.dumps({"status":"INVALID_RECEIPTS_PRESENT","rollingHours":hours,"invalid":invalid,"countsAsUsefulThroughput":False}, indent=2))
+        print(json.dumps({"status":"INVALID_RECEIPTS_PRESENT","rollingHours":hours,"invalid":invalid,"quarantinedInvalidReceipts":quarantined,"countsAsUsefulThroughput":False}, indent=2))
         return 2
 
     by_worker = Counter(LEGACY_ALIASES.get(item["trailers"]["Worker"], item["trailers"]["Worker"]) for item in valid)
@@ -209,7 +298,8 @@ def rolling(hours):
         "totalTarget24h":total_target if hours == 24 else None,
         "deficitByWorker":per_deficit,
         "totalDeficit":max(0,total_target-len(valid)) if hours == 24 and total_target is not None else None,
-        "excludedFromProductivity":["dispatch commits","manifests","autorefill","reservations","workflow success without session","SESSION_COMPLETED without validated integration","REVIEW_FIRST/QA takeover metadata without canonical integration-receipt intent"],
+        "quarantinedInvalidReceipts":quarantined,
+        "excludedFromProductivity":["dispatch commits","manifests","autorefill","reservations","workflow success without session","SESSION_COMPLETED without validated integration","REVIEW_FIRST/QA takeover metadata without canonical integration-receipt intent","explicitly reviewed invalid historical receipts quarantined with LISTO_REAL evidence and zero throughput"],
         "integrations":[{"commit":item["sha"],"dispatchId":item["trailers"]["Dispatch"],"taskId":item["trailers"]["Task"],"worker":item["trailers"]["Worker"],"session":item["trailers"]["Session"]} for item in valid]
     }
     print(json.dumps(payload, indent=2))
@@ -274,10 +364,32 @@ def self_test():
     if not validate_contract(malformed_intent, [], None, ["docs/example.md"]):
         print("SELFTEST_MALFORMED_RECEIPT_NOT_REJECTED")
         return 1
+    quarantine_fixture = {
+        "authority": "docs/VAEP_AUTHORITY.md",
+        "policy": QUARANTINE_POLICY,
+        "entries": [{
+            "commit": "c" * 40,
+            "parent": "N5.4.E",
+            "taskId": "N5.4.E.1.TEST",
+            "disposition": "QUARANTINED_NO_PRODUCTIVITY",
+            "countsAsUsefulThroughput": False,
+            "closureReceipt": "vaep/evidence/fragments/N5.4.E_LISTO_REAL_TEST.json",
+            "reason": "fixture"
+        }]
+    }
+    quarantine_errors = validate_quarantine_payload(quarantine_fixture, verify_closure=False)
+    if quarantine_errors:
+        print("SELFTEST_QUARANTINE_VALID_FAILED=" + json.dumps(quarantine_errors))
+        return 1
+    quarantine_fixture["entries"][0]["countsAsUsefulThroughput"] = True
+    if not validate_quarantine_payload(quarantine_fixture, verify_closure=False):
+        print("SELFTEST_QUARANTINE_THROUGHPUT_OVERRIDE_ACCEPTED")
+        return 1
     print("JULES_INTEGRATION_RECEIPT_SELFTEST=PASS")
     print("PRODUCTIVITY_KPI_INTEGRATED_ONLY=PASS")
     print("REVIEW_METADATA_EXCLUDED_FROM_INTEGRATION_RECEIPTS=PASS")
     print("LOWERCASE_LEGACY_CONTROLLER_METADATA_EXCLUDED=PASS")
+    print("INVALID_RECEIPT_QUARANTINE_NO_COUNT=PASS")
     return 0
 
 def main():
