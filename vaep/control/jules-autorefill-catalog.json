@@ -1,9 +1,9 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
-  "currentParent": "N5.6.F",
-  "generatedAt": "2026-09-10T10:56:00Z",
-  "regenerationReason": "N5.6.E_LISTO_REAL__ATOMIC_PROMOTION_N5.6.F__EXISTING_FINANCE_RBAC_SECURITY_REVIEW_FIRST__PREARM_G_H_N5.7.A__NO_FILLER",
-  "lastClosedParent": "N5.6.E",
+  "currentParent": "N5.7.A",
+  "generatedAt": "2026-09-10T10:59:00Z",
+  "regenerationReason": "N5.6.H_LISTO_REAL__ATOMIC_PROMOTION_N5.7.A__DASHBOARD_EXECUTIVE_PREFLIGHT__SOURCE_BACKED_ONLY__NO_FILLER",
+  "lastClosedParent": "N5.6.H",
   "closureReceipts": {
     "GATE-N4":"vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
     "N5.1.H":"vaep/evidence/fragments/N5.1.H_LISTO_REAL_20260909T1236Z.json",
@@ -22,12 +22,15 @@
     "N5.6.B":"vaep/evidence/fragments/N5.6.B_LISTO_REAL_20260910T1050Z.json",
     "N5.6.C":"vaep/evidence/fragments/N5.6.C_LISTO_REAL_20260910T1052Z.json",
     "N5.6.D":"vaep/evidence/fragments/N5.6.D_LISTO_REAL_20260910T1054Z.json",
-    "N5.6.E":"vaep/evidence/fragments/N5.6.E_LISTO_REAL_20260910T1055Z.json"
+    "N5.6.E":"vaep/evidence/fragments/N5.6.E_LISTO_REAL_20260910T1055Z.json",
+    "N5.6.F":"vaep/evidence/fragments/N5.6.F_LISTO_REAL_20260910T1056Z.json",
+    "N5.6.G":"vaep/evidence/fragments/N5.6.G_LISTO_REAL_20260910T1057Z.json",
+    "N5.6.H":"vaep/evidence/fragments/N5.6.H_LISTO_REAL_20260910T1058Z.json"
   },
   "policy":{"branch":"Desarrollo","liveQueueDepthTarget":2,"genericFloorRegeneration":false,"noBusywork":true,"semanticIdentity":"CURRENT_PARENT + material scope/semantic facet","stopWhenEligibleWorkExhausted":true,"materialParallelismTargetPerParent":6,"requireDistinctWriteScopesWhenParallel":true,"activeWorkerCount":6,"activeWorkers":["J1","J2","J3","J4","J5","J6"]},
-  "throughputPlan":{"mode":"PARENT_CLOSE_FIRST","currentParent":"N5.6.F","currentParentMaterialScopeCount":0,"currentParentReason":"N5.6.E is LISTO_REAL. Existing finance flow is protected by controller [Authorize], Finanzas/Ver permission on reads, stricter Crear/Anular permissions on writes, administrator-only financial revisions and service row-scope enforcement. F enters REVIEW_FIRST before any mutation; no speculative security work is authorized.","nextParent":"N5.6.G","nextParentParallelMaterialScopes":0,"nextParentScopesNonOverlapping":true,"laneRefill":"F_EXISTING_RBAC_SECURITY_REVIEW_FIRST__PREARM_G_H_N5.7.A__NO_FILLER"},
-  "roadmap":{"authority":"docs/VAEP_AUTHORITY.md","sourceSpreadsheetId":"19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY","sourceRanges":["COLA!A436:T440","PLAN_MAESTRO","docs/VAEP_N5_6_FINANCE_REPORTS_PREFLIGHT.md","vaep/evidence/fragments/N5.6.E_LISTO_REAL_20260910T1055Z.json","backend/src/API/Controllers/FinanzasController.cs","backend/src/Application/Services/FinanzasService.cs"],"nodes":[{"id":"N5.6.F","order":47,"dependencies":["N5.6.E"]},{"id":"N5.6.G","order":48,"dependencies":["N5.6.F"]},{"id":"N5.6.H","order":49,"dependencies":["N5.6.G"]},{"id":"N5.7.A","order":50,"dependencies":["N5.2.H","N5.3.H","N5.4.H","N5.5.H","N5.6.H"]}]},
-  "prearmedRoadmap":[{"parent":"N5.6.G","state":"READY_DEPENDENCY_GATED","dependency":"N5.6.F_LISTO_REAL","materialization":"FINANCE_REPORT_QA_REGRESSION_CI_FROM_ACCEPTED_FLOW_ONLY__NO_FILLER"},{"parent":"N5.6.H","state":"READY_DEPENDENCY_GATED","dependency":"N5.6.G_LISTO_REAL","materialization":"FINANCE_REPORT_DOCUMENTATION_CERTIFICATION_FROM_ACCEPTED_FLOW_ONLY__NO_FILLER"},{"parent":"N5.7.A","state":"READY_DEPENDENCY_GATED","dependency":"N5.6.H_LISTO_REAL_AND_PRIOR_REPORT_FAMILIES","materialization":"DASHBOARD_EXECUTIVE_PREFLIGHT__ROADMAP_SOURCE_BACKED__NO_FILLER"}],
+  "throughputPlan":{"mode":"PARENT_CLOSE_FIRST","currentParent":"N5.7.A","currentParentMaterialScopeCount":0,"currentParentReason":"N5.6.H is LISTO_REAL and the receipt declares N5.7.A dependency-valid. N5.7.A enters source-backed executive-dashboard preflight; no speculative manifests are authorized until materially unique scopes are established from the roadmap/source evidence.","nextParent":null,"nextParentParallelMaterialScopes":0,"nextParentScopesNonOverlapping":true,"laneRefill":"N5.7.A_PREFLIGHT__SOURCE_BACKED_ONLY__NO_FILLER__NO_DUPLICATE_OWNERSHIP"},
+  "roadmap":{"authority":"docs/VAEP_AUTHORITY.md","sourceSpreadsheetId":"19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY","sourceRanges":["PLAN_MAESTRO","vaep/evidence/fragments/N5.6.H_LISTO_REAL_20260910T1058Z.json"],"nodes":[{"id":"N5.7.A","order":50,"dependencies":["N5.2.H","N5.3.H","N5.4.H","N5.5.H","N5.6.H"]}]},
+  "prearmedRoadmap":[],
   "lanes":{"J1":[],"J2":[],"J3":[],"J4":[],"J5":[],"J6":[]},
   "lastClosureFunctionalHead":"8b06b3d6181bad54a867eddb849c08b6f41eab63"
 }
