@@ -1,9 +1,9 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
-  "currentParent": "N5.9.A",
-  "generatedAt": "2026-09-10T15:50:00Z",
-  "regenerationReason": "N5.8.G_AND_N5.8.H_LISTO_REAL__N5.9.A_CURRENT__REPORT_PERFORMANCE_PREFLIGHT_CONTROLLER_READY__N5.9B_N5.9C_N5.9D_PREARMED_DEPENDENCY_GATED__NO_FILLER",
-  "lastClosedParent": "N5.8.H",
+  "currentParent": "N5.9.B",
+  "generatedAt": "2026-09-10T15:57:00Z",
+  "regenerationReason": "N5.9.A_LISTO_REAL__N5.9.B_CURRENT_DOMAIN_CONTRACT_DECISION__N5.9C_N5.9D_N5.9E_PREARMED_DEPENDENCY_GATED__NO_FILLER",
+  "lastClosedParent": "N5.9.A",
   "closureReceipts": {
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
     "N5.1.H": "vaep/evidence/fragments/N5.1.H_LISTO_REAL_20260909T1236Z.json",
@@ -20,7 +20,8 @@
     "N5.8.E": "vaep/evidence/fragments/N5.8.E_LISTO_REAL_20260910T1504Z.json",
     "N5.8.F": "vaep/evidence/fragments/N5.8.F_LISTO_REAL_20260910T1518Z.json",
     "N5.8.G": "vaep/evidence/fragments/N5.8.G_LISTO_REAL_20260910T1548Z.json",
-    "N5.8.H": "vaep/evidence/fragments/N5.8.H_LISTO_REAL_20260910T1549Z.json"
+    "N5.8.H": "vaep/evidence/fragments/N5.8.H_LISTO_REAL_20260910T1549Z.json",
+    "N5.9.A": "vaep/evidence/fragments/N5.9.A_LISTO_REAL_20260910T1556Z.json"
   },
   "policy": {
     "branch": "Desarrollo",
@@ -38,33 +39,32 @@
   },
   "throughputPlan": {
     "mode": "PARENT_CLOSE_FIRST",
-    "currentParent": "N5.9.A",
+    "currentParent": "N5.9.B",
     "currentParentMaterialScopeCount": 1,
-    "currentParentReason": "N5.9.A is the live roadmap PRE microtask: directed audit/preflight for report performance. It must establish current report query architecture, affected surfaces, risks, acceptance, rollback and tests before any material implementation.",
-    "nextParent": "N5.9.B",
+    "currentParentReason": "N5.9.B must decide whether report-performance work requires new domain invariants/contracts. The N5.9.A preflight indicates performance belongs to query/persistence/application seams unless a concrete contract gap is proven; avoid artificial domain objects.",
+    "nextParent": "N5.9.C",
     "nextParentParallelMaterialScopes": 1,
     "nextParentScopesNonOverlapping": true,
-    "laneRefill": "CHATGPT_VAEP_DIRECT_PREFLIGHT_N5.9.A__REVIEW_FIRST__CLOSE_IF_DOD_VALID__PROMOTE_B__B_C_D_PREARMED_GATED__NO_FILLER"
+    "laneRefill": "CHATGPT_VAEP_DIRECT_DOMAIN_CONTRACT_DECISION_N5.9.B__REVIEW_FIRST__CLOSE_IF_NA_EVIDENCED__PROMOTE_C__C_D_E_PREARMED_GATED__NO_FILLER"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
     "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
-    "sourceRanges": ["COLA!A455:T463", "PLAN_MAESTRO"],
-    "note": "N5.9.A is current after the certified N5.8.H closure. N5.9.B/C/D are live COLA-derived successors and remain dependency-gated; no filler is authorized.",
+    "sourceRanges": ["COLA!A456:T463", "PLAN_MAESTRO"],
+    "note": "N5.9.B is current after certified N5.9.A. N5.9.C/D/E are roadmap-derived successors and remain dependency-gated; no filler is authorized.",
     "nodes": [
-      {"id": "N5.8.G", "order": 64, "dependencies": ["N5.8.F"]},
-      {"id": "N5.8.H", "order": 65, "dependencies": ["N5.8.G"]},
       {"id": "N5.9.A", "order": 66, "dependencies": ["N5.8.H"]},
       {"id": "N5.9.B", "order": 67, "dependencies": ["N5.9.A"]},
       {"id": "N5.9.C", "order": 68, "dependencies": ["N5.9.B"]},
-      {"id": "N5.9.D", "order": 69, "dependencies": ["N5.9.C"]}
+      {"id": "N5.9.D", "order": 69, "dependencies": ["N5.9.C"]},
+      {"id": "N5.9.E", "order": 70, "dependencies": ["N5.9.D"]}
     ]
   },
   "prearmedRoadmap": [
-    {"parent": "N5.9.A", "taskId": "N5.9.A.1.REPORT_PERFORMANCE_PREFLIGHT", "state": "CONTROLLER_READY", "dependency": "N5.8.H_LISTO_REAL", "worker": "CHATGPT_VAEP", "taskAttempt": 1, "materialization": "DIRECTED_REPORT_QUERY_ARCHITECTURE_AND_PERFORMANCE_PREFLIGHT__NO_LARGE_IMPLEMENTATION__NO_FILLER"},
-    {"parent": "N5.9.B", "state": "READY_DEPENDENCY_GATED", "dependency": "N5.9.A_LISTO_REAL", "materialization": "REPORT_PERFORMANCE_DOMAIN_CONTRACTS__ROADMAP_DERIVED__NO_FILLER"},
+    {"parent": "N5.9.B", "taskId": "N5.9.B.1.REPORT_PERFORMANCE_DOMAIN_CONTRACT_DECISION", "state": "CONTROLLER_READY", "dependency": "N5.9.A_LISTO_REAL", "worker": "CHATGPT_VAEP", "taskAttempt": 1, "materialization": "DOMAIN_CONTRACT_APPLICABILITY_DECISION__ROADMAP_DERIVED__NO_FILLER"},
     {"parent": "N5.9.C", "state": "READY_DEPENDENCY_GATED", "dependency": "N5.9.B_LISTO_REAL", "materialization": "REPORT_PERFORMANCE_PERSISTENCE_MIGRATION_DATA__ROADMAP_DERIVED__NO_FILLER"},
-    {"parent": "N5.9.D", "state": "READY_DEPENDENCY_GATED", "dependency": "N5.9.C_LISTO_REAL", "materialization": "REPORT_PERFORMANCE_BACKEND_API__ROADMAP_DERIVED__NO_FILLER"}
+    {"parent": "N5.9.D", "state": "READY_DEPENDENCY_GATED", "dependency": "N5.9.C_LISTO_REAL", "materialization": "REPORT_PERFORMANCE_BACKEND_API__ROADMAP_DERIVED__NO_FILLER"},
+    {"parent": "N5.9.E", "state": "READY_DEPENDENCY_GATED", "dependency": "N5.9.D_LISTO_REAL", "materialization": "REPORT_PERFORMANCE_FRONTEND_UX__ROADMAP_DERIVED__NO_FILLER"}
   ],
   "lanes": {
     "J1": [],
@@ -74,5 +74,5 @@
     "J5": [],
     "J6": []
   },
-  "lastClosureFunctionalHead": "9907f10f55e6ab2c4b024e495555ccad7817007b"
+  "lastClosureFunctionalHead": "3ba74cbe598249849d264bf840a780c4b00cf0e3"
 }
