@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "OPEN",
-  "allowExistingActiveSessions": true,
-  "reason": "OPEN_ONLY_INVARIANT_REPAIR__TASK_LANE_GATES_ONLY",
-  "updatedAtUtc": "2026-09-10T15:32:42Z"
+  "newDispatchAdmission":"OPEN",
+  "allowExistingActiveSessions":true,
+  "reason":"OPEN_ONLY__N6.1.A_CONTROLLER_PREFLIGHT_CURRENT__N6.1.B_C_D_DEPENDENCY_GATED__NO_FILLER",
+  "updatedAtUtc":"2026-09-10T17:16:30Z"
 }
