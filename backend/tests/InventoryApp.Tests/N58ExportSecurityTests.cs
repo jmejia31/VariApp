@@ -6,6 +6,7 @@ using InventoryApp.Application.DTOs;
 using InventoryApp.Domain.Enums;
 using InventoryApp.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
+using Xunit;
 
 namespace InventoryApp.Tests;
 
