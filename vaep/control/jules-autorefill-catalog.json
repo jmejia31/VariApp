@@ -1,9 +1,9 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
-  "currentParent": "N5.9.D",
-  "generatedAt": "2026-09-10T16:18:45Z",
-  "regenerationReason": "N5.9.C_LISTO_REAL__N5.9.D_J1_RUN_34501096438_EXECUTING_FRESH__E_F_G_H_PREARMED_DEPENDENCY_GATED__NO_FILLER__NO_DUPLICATE_WRITER",
-  "lastClosedParent": "N5.9.C",
+  "currentParent": "N5.9.H",
+  "generatedAt": "2026-09-10T16:47:24Z",
+  "regenerationReason": "RECONCILE_CERTIFIED_D_E_F_G__PROMOTE_H__QUARANTINE_WRONG_J2_DISPATCH_PATH_PRE_SESSION__GATE_N5_N6_1_N6_2_PREARMED_DEPENDENCY_GATED__NO_FILLER",
+  "lastClosedParent": "N5.9.G",
   "closureReceipts": {
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
     "N5.1.H": "vaep/evidence/fragments/N5.1.H_LISTO_REAL_20260909T1236Z.json",
@@ -23,7 +23,11 @@
     "N5.8.H": "vaep/evidence/fragments/N5.8.H_LISTO_REAL_20260910T1549Z.json",
     "N5.9.A": "vaep/evidence/fragments/N5.9.A_LISTO_REAL_20260910T1556Z.json",
     "N5.9.B": "vaep/evidence/fragments/N5.9.B_LISTO_REAL_20260910T1559Z.json",
-    "N5.9.C": "vaep/evidence/fragments/N5.9.C_LISTO_REAL_20260910T1617Z.json"
+    "N5.9.C": "vaep/evidence/fragments/N5.9.C_LISTO_REAL_20260910T1617Z.json",
+    "N5.9.D": "vaep/evidence/fragments/N5.9.D_LISTO_REAL_20260910T1643Z.json",
+    "N5.9.E": "vaep/evidence/fragments/N5.9.E_LISTO_REAL_20260910T1645Z.json",
+    "N5.9.F": "vaep/evidence/fragments/N5.9.F_LISTO_REAL_20260910T1646Z.json",
+    "N5.9.G": "vaep/evidence/fragments/N5.9.G_LISTO_REAL_20260910T1647Z.json"
   },
   "policy": {
     "branch": "Desarrollo",
@@ -41,43 +45,40 @@
   },
   "throughputPlan": {
     "mode": "PARENT_CLOSE_FIRST",
-    "currentParent": "N5.9.D",
+    "currentParent": "N5.9.H",
     "currentParentMaterialScopeCount": 1,
-    "currentParentReason": "N5.9.C is LISTO_REAL. N5.9.D is the first dependency-valid unfinished parent and has one source-backed Stock Health application/query optimization scope. J1 owns exactly one live run; E-H remain dependency-gated and filler is prohibited.",
-    "nextParent": "N5.9.E",
+    "currentParentReason": "N5.9.G is LISTO_REAL. N5.9.H is the first dependency-valid unfinished parent. Its documentation/certification scope is material, but the first J2 manifest was written under the J1 transport path and is pre-session invalid; recovery must use the canonical J2 path without consuming a content attempt.",
+    "nextParent": "GATE-N5",
     "nextParentParallelMaterialScopes": 0,
     "nextParentScopesNonOverlapping": true,
     "currentRun": {
-      "worker": "J1",
-      "taskId": "N5.9.D.1.REPORT_PERFORMANCE_STOCK_HEALTH_QUERY_OPTIMIZATION",
-      "manifestCommit": "a5385440244111ded88aff6645f5dd6ada0d2fec",
-      "runId": 34501096438,
-      "jobId": 102951785125,
-      "executeStartedAtUtc": "2026-09-10T16:17:17Z",
-      "state": "TRANSPORT_EXECUTING__SESSION_ACTIVITY_NOT_YET_PROVEN",
-      "activeReal": false
+      "worker": "J2",
+      "taskId": "N5.9.H.1.REPORT_PERFORMANCE_DOCUMENTATION_CERTIFICATION",
+      "manifestCommit": "5e06210242051aca36829f908aed8c7fcaf3855c",
+      "manifestPath": "vaep/jules/dispatch/N5-9-H-1-REPORT-PERFORMANCE-DOC-CERT-J2.json",
+      "state": "PRE_SESSION_TRANSPORT_INVALID__WRONG_WORKER_PATH__RECOVERY_REQUIRED",
+      "activeReal": false,
+      "attemptConsumed": false
     },
     "nextRunReserved": {
-      "parent": "N5.9.E",
+      "parent": "GATE-N5",
       "state": "DEPENDENCY_GATED_RESERVED",
-      "dependency": "N5.9.D_LISTO_REAL",
-      "materialization": "REPORT_PERFORMANCE_FRONTEND_UX__ROADMAP_DERIVED__NO_FILLER"
+      "dependency": "N5.9.H_LISTO_REAL",
+      "materialization": "ERP_N5_FORMAL_GATE__ROADMAP_DERIVED__NO_FILLER"
     },
-    "laneRefill": "ON_D_TERMINAL_VALID_REVIEW_FIRST_EXACT_HEAD_GATES_CLOSE_D_PROMOTE_E_AND_CONTINUE_CLOSURE_CHAIN_SAME_RUN__NO_DUPLICATE_J1"
+    "laneRefill": "RECOVER_H_J2_PRE_SESSION_TRANSPORT_TO_CANONICAL_J2_PATH__REVIEW_FIRST_ON_TERMINAL__EXACT_HEAD_GATES__CLOSE_H__PROMOTE_GATE_N5_SAME_RUN"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
     "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
-    "sourceRanges": ["COLA!A457:T463", "PLAN_MAESTRO"],
-    "note": "N5.9.D is current after certified N5.9.C. N5.9.E through N5.9.H are roadmap-derived successors, prearmed only as dependency-gated material work.",
+    "sourceRanges": ["COLA!A459:Z464", "COLA!A797:Z797", "PLAN_MAESTRO!A55:M68"],
+    "note": "N5.9.H is current after certified N5.9.G. GATE-N5 is the mandatory next parent. N6.1 and N6.2 remain dependency-gated behind GATE-N5 and N6.1 respectively.",
     "nodes": [
-      {"id":"N5.9.B","order":67,"dependencies":["N5.9.A"]},
-      {"id":"N5.9.C","order":68,"dependencies":["N5.9.B"]},
-      {"id":"N5.9.D","order":69,"dependencies":["N5.9.C"]},
-      {"id":"N5.9.E","order":70,"dependencies":["N5.9.D"]},
-      {"id":"N5.9.F","order":71,"dependencies":["N5.9.E"]},
       {"id":"N5.9.G","order":72,"dependencies":["N5.9.F"]},
-      {"id":"N5.9.H","order":73,"dependencies":["N5.9.G"]}
+      {"id":"N5.9.H","order":73,"dependencies":["N5.9.G"]},
+      {"id":"GATE-N5","order":857,"dependencies":["N5.1.H","N5.2.H","N5.3.H","N5.4.H","N5.5.H","N5.6.H","N5.7.H","N5.8.H","N5.9.H"]},
+      {"id":"N6.1","order":60,"dependencies":["GATE-N5"]},
+      {"id":"N6.2","order":61,"dependencies":["N6.1"]}
     ]
   },
   "recoveredRuns": [
@@ -88,22 +89,30 @@
       "runId": 34499260559,
       "takeoverEvidence": "vaep/evidence/reviews/N5.9.C.1_J2_STALL_TAKEOVER_20260910T1613Z.json",
       "lateResultPolicy": "EVIDENCE_ONLY__NO_AUTOMATIC_INTEGRATION"
+    },
+    {
+      "parent": "N5.9.D",
+      "taskId": "N5.9.D.1.REPORT_PERFORMANCE_STOCK_HEALTH_QUERY_BUDGETS",
+      "worker": "J1",
+      "runId": 34501096438,
+      "ownershipReconciliation": "vaep/evidence/reviews/N5.9.D.1_J1_OWNERSHIP_RECONCILIATION_20260910T1637Z.json",
+      "priorTakeover": "SUPERSEDED_INVALID",
+      "lateResultPolicy": "EVIDENCE_ONLY_AFTER_CONTROLLER_WRITE_INTERLEAVE"
     }
   ],
   "prearmedRoadmap": [
-    {"parent":"N5.9.D","taskId":"N5.9.D.1.REPORT_PERFORMANCE_STOCK_HEALTH_QUERY_OPTIMIZATION","state":"CURRENT_RUN","dependency":"N5.9.C_LISTO_REAL","worker":"J1","taskAttempt":1,"runId":34501096438,"sessionId":null,"activeReal":false,"materialization":"STOCK_HEALTH_GROUPED_READ_QUERY_OPTIMIZATION__ONE_FILE__NO_FILLER"},
-    {"parent":"N5.9.E","state":"READY_DEPENDENCY_GATED","dependency":"N5.9.D_LISTO_REAL","materialization":"REPORT_PERFORMANCE_FRONTEND_UX__ROADMAP_DERIVED__NO_FILLER"},
-    {"parent":"N5.9.F","state":"READY_DEPENDENCY_GATED","dependency":"N5.9.E_LISTO_REAL","materialization":"REPORT_PERFORMANCE_SECURITY_OBSERVABILITY__ROADMAP_DERIVED__NO_FILLER"},
-    {"parent":"N5.9.G","state":"READY_DEPENDENCY_GATED","dependency":"N5.9.F_LISTO_REAL","materialization":"REPORT_PERFORMANCE_QA_REGRESSION_CI__ROADMAP_DERIVED__NO_FILLER"},
-    {"parent":"N5.9.H","state":"READY_DEPENDENCY_GATED","dependency":"N5.9.G_LISTO_REAL","materialization":"REPORT_PERFORMANCE_DOCUMENTATION_CERTIFICATION__ROADMAP_DERIVED__NO_FILLER"}
+    {"parent":"N5.9.H","taskId":"N5.9.H.1.REPORT_PERFORMANCE_DOCUMENTATION_CERTIFICATION","state":"RECOVERY_REQUIRED_PRE_SESSION","dependency":"N5.9.G_LISTO_REAL","worker":"J2","taskAttempt":1,"activeReal":false,"materialization":"REPORT_PERFORMANCE_DOCUMENTATION_CERTIFICATION__CANONICAL_J2_TRANSPORT_RECOVERY__NO_FILLER"},
+    {"parent":"GATE-N5","state":"READY_DEPENDENCY_GATED","dependency":"N5.9.H_LISTO_REAL","materialization":"ERP_N5_FORMAL_GATE__ROADMAP_DERIVED__NO_FILLER"},
+    {"parent":"N6.1.A","state":"READY_DEPENDENCY_GATED","dependency":"GATE-N5_LISTO_REAL","materialization":"TENANT_EMPRESA_PREFLIGHT__ROADMAP_DERIVED__NO_FILLER"},
+    {"parent":"N6.1.B","state":"READY_DEPENDENCY_GATED","dependency":"N6.1.A_LISTO_REAL","materialization":"TENANT_EMPRESA_DOMAIN_CONTRACTS__ROADMAP_DERIVED__NO_FILLER"}
   ],
   "lanes": {
-    "J1": [{"taskId":"N5.9.D.1.REPORT_PERFORMANCE_STOCK_HEALTH_QUERY_OPTIMIZATION","state":"TRANSPORT_EXECUTING__NOT_ACTIVE_REAL_UNTIL_SESSION_PLUS_USEFUL_ACTIVITY","runId":34501096438,"jobId":102951785125,"taskAttempt":1}],
-    "J2": [],
+    "J1": [],
+    "J2": [{"taskId":"N5.9.H.1.REPORT_PERFORMANCE_DOCUMENTATION_CERTIFICATION","workerId":"J2","plannedParent":"N5.9.H","state":"RECOVERY_REQUIRED_PRE_SESSION_WRONG_PATH","taskAttempt":1,"activeReal":false,"readyForDispatch":true,"dispatchEligible":true,"fileScopeHint":"docs/N5.9_REPORT_PERFORMANCE_CERTIFICATION.md;CHANGELOG_AI.md;TASKS.md","prompt":"Recover the N5.9.H documentation/certification scope through the canonical J2 transport path. Preserve the already-certified N5.9 evidence, do not claim GATE-N5, and return a bounded documentation-only patch with proportional checks and two independent self-reviews."}],
     "J3": [],
     "J4": [],
     "J5": [],
     "J6": []
   },
-  "lastClosureFunctionalHead": "ecfd6b7381052db9c9d573fb52eaf1444426616e"
+  "lastClosureFunctionalHead": "aafe94255e1eff9e3687c1716bb238393b1822f6"
 }
