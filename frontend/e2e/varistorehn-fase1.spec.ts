@@ -101,13 +101,19 @@ test.describe('VariStoreHn Fase 1 — navegación y header', () => {
     await expect(page.getByRole('status').filter({ hasText: '14 productos encontrados' })).toBeVisible();
   });
 
-  test('tablet: WhatsApp configurado sigue accesible desde la cabecera', async ({ page }) => {
+  test('tablet: WhatsApp permanece accesible y sin overflow en toda la franja previa al menú móvil', async ({ page }) => {
     await page.setViewportSize({ width: 900, height: 900 });
     await prepararTienda(page);
     await esperarCatalogo(page);
 
     const header = page.locator('app-varistorehn-header');
-    await expect(header.getByRole('link', { name: 'Contactar por WhatsApp' })).toBeVisible();
+    for (const width of [1120, 900, 761]) {
+      await page.setViewportSize({ width, height: 900 });
+      await expect(header.getByRole('link', { name: 'Contactar por WhatsApp' })).toBeVisible();
+      await expect(header.getByRole('button', { name: 'Abrir navegación' })).toBeHidden();
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+      expect(overflow, `overflow horizontal a ${width}px`).toBeLessThanOrEqual(0);
+    }
   });
 
   test('móvil: drawer modal, foco, Escape, categoría, modo de compra y reflow funcionan', async ({ page }) => {
@@ -158,8 +164,9 @@ test.describe('VariStoreHn Fase 1 — navegación y header', () => {
     });
     expect(targetAudit.every(item => item.height >= 44)).toBe(true);
 
-    for (const width of [390, 320]) {
+    for (const width of [760, 390, 320]) {
       await page.setViewportSize({ width, height: 844 });
+      await expect(header.getByRole('button', { name: 'Abrir navegación' })).toBeVisible();
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
       expect(overflow, `overflow horizontal a ${width}px`).toBeLessThanOrEqual(0);
     }
