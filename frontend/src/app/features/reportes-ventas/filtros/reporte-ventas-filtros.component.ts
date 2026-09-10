@@ -21,6 +21,18 @@ export interface ReporteVentasFiltroOpciones {
   tallas?: ReporteVentasFiltroOpcion[];
 }
 
+type ReporteVentasSelectorControl =
+  | 'vendedorId'
+  | 'clienteId'
+  | 'sucursalId'
+  | 'categoriaId'
+  | 'productoId'
+  | 'varianteId'
+  | 'marcaId'
+  | 'modeloId'
+  | 'colorId'
+  | 'tallaId';
+
 @Component({
   selector: 'app-reporte-ventas-filtros',
   standalone: true,
@@ -96,7 +108,7 @@ export class ReporteVentasFiltrosComponent {
     pageSize: [20, [Validators.required, Validators.min(1), Validators.max(100)]],
   });
 
-  get selectores(): Array<{ label: string; control: keyof typeof this.form.controls; options: ReporteVentasFiltroOpcion[] }> {
+  get selectores(): Array<{ label: string; control: ReporteVentasSelectorControl; options: ReporteVentasFiltroOpcion[] }> {
     return [
       { label: 'Vendedor', control: 'vendedorId', options: this.opciones.vendedores ?? [] },
       { label: 'Cliente', control: 'clienteId', options: this.opciones.clientes ?? [] },
