@@ -99,10 +99,7 @@ export class VaristorehnCategoriasComponent implements OnInit {
       this.aviso.set('La categoría seleccionada ya no está disponible.');
       return;
     }
-    void this.router.navigate(['/varistorehn'], {
-      queryParams: { categoria: categoria.slug },
-      fragment: 'catalogo'
-    });
+    void this.router.navigateByUrl(VARISTOREHN_PATHS.categoria(categoria.slug));
   }
 
   abrirCarrito(): void {
@@ -110,7 +107,7 @@ export class VaristorehnCategoriasComponent implements OnInit {
   }
 
   rutaExplorar(categoria: CategoriaTienda): string {
-    return `${VARISTOREHN_PATHS.inicio}?categoria=${encodeURIComponent(categoria.slug)}#catalogo`;
+    return VARISTOREHN_PATHS.categoria(categoria.slug);
   }
 
   textoCantidad(categoria: CategoriaTienda): string {
