@@ -1,4 +1,5 @@
 using InventoryApp.Domain.Entities;
+using Xunit;
 
 namespace InventoryApp.Tests;
 
