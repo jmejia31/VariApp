@@ -60,7 +60,7 @@
   "prearmedRoadmap": [
     {"parent": "N5.8.D", "taskId": "N5.8.D.1.EXPORT_PDF_SERVICE", "state": "READY", "dependency": "N5.8.C_LISTO_REAL", "worker": "J2", "materialization": "EXTEND_EXISTING_REPORTE_ADMINISTRATIVO_EXPORT_SERVICE_TO_REAL_PDF_WITH_DIRECTED_TESTS"},
     {"parent": "N5.8.D", "taskId": "N5.8.D.2.EXPORT_API_CONTRACT", "state": "NEXT_SAFE_DEPENDENCY_GATED", "dependency": "N5.8.D.1_REVIEW_FIRST_ACCEPTED", "worker": "J3", "materialization": "VERIFY_OR_ADJUST_EXISTING_EXPORT_HTTP_CONTRACT_CONTENT_TYPE_FILENAME_AND_FAIL_CLOSED_BEHAVIOR"},
-    {"parent": "N5.8.E", "state": "READY_DEPENDENCY_GATED", "dependency": "N5.8.D_LISTO_REAL", "materialization": "EXPORTS_FRONTEND_UX__ROADMAP_DERIVED"},
+    {"parent": "N5.8.E", "state": "READY_DEPENDENCY_GATED", "dependency": "N5.8.D_LISTO_REAL", "materialization": "EXPORTS_FRONTEND_UX__ROADMAP_DERIVED__NO_FILLER"},
     {"parent": "N5.8.F", "state": "READY_DEPENDENCY_GATED", "dependency": "N5.8.E_LISTO_REAL", "materialization": "EXPORTS_RBAC_AUDIT_SECURITY_OBSERVABILITY__ROADMAP_DERIVED"},
     {"parent": "N5.8.G", "state": "READY_DEPENDENCY_GATED", "dependency": "N5.8.F_LISTO_REAL", "materialization": "EXPORTS_QA_REGRESSION_CI__ROADMAP_DERIVED"}
   ],
