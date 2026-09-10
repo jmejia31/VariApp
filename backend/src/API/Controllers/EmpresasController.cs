@@ -64,11 +64,11 @@ public sealed class EmpresasController : ControllerBase
     }
 
     [HttpPatch("{id:int}/activar")]
-    [RequierePermiso(ModuloSistema.Configuracion, AccionPermiso.Editar)]
+    [RequierePermiso(ModuloSistema.Configuracion, AccionPermiso.Activar)]
     public Task<IActionResult> Activar(int id, CancellationToken cancellationToken) => CambiarEstado(id, true, cancellationToken);
 
     [HttpPatch("{id:int}/desactivar")]
-    [RequierePermiso(ModuloSistema.Configuracion, AccionPermiso.Editar)]
+    [RequierePermiso(ModuloSistema.Configuracion, AccionPermiso.Desactivar)]
     public Task<IActionResult> Desactivar(int id, CancellationToken cancellationToken) => CambiarEstado(id, false, cancellationToken);
 
     private async Task<IActionResult> CambiarEstado(int id, bool activa, CancellationToken cancellationToken)
