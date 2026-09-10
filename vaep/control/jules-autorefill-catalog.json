@@ -1,8 +1,8 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
   "currentParent": "N5.3.F",
-  "generatedAt": "2026-09-10T03:34:00Z",
-  "regenerationReason": "N5.3.F.1_TRUSTED_TRANSPORT_IN_PROGRESS__RESERVE_ONLY__NO_DUPLICATE",
+  "generatedAt": "2026-09-10T03:50:00Z",
+  "regenerationReason": "N5.3.F.1_CONTROLLER_TAKEOVER_REVIEW_ACCEPTED__F2_J2_MANIFEST_PUBLISHED",
   "lastClosedParent": "N5.3.E",
   "closureReceipts": {
     "N4.11.H": "vaep/evidence/fragments/N4.11.H_LISTO_REAL_20260908T204500Z.json",
@@ -50,17 +50,17 @@
     "mode": "MATERIAL_SWARM_FIRST",
     "currentParent": "N5.3.F",
     "currentParentMaterialScopeCount": 2,
-    "currentParentReason": "N5.3.E is LISTO_REAL. F1 is reserved on trusted J1 transport run 34433650814; ACTIVE_REAL remains false until correlated sessionId plus useful fresh activity is proven. F2 remains dependency-gated on F1 REVIEW_FIRST. No filler exists for J3-J6.",
+    "currentParentReason": "N5.3.E is LISTO_REAL. F1 controller takeover is REVIEW_FIRST accepted on exact recovery head 265afeba with backend Release build/tests green. F2 J2 manifest is published in the same transition and must be verified through workflow run -> sessionId/activity before ACTIVE_REAL. No filler exists for J3-J6.",
     "nextParent": "N5.3.G",
     "nextParentParallelMaterialScopes": 0,
     "nextParentScopesNonOverlapping": true,
-    "laneRefill": "F1_RESERVED__VERIFY_SESSION_ACTIVITY__REVIEW_FIRST__THEN_F2__NO_DUPLICATE__NO_FILLER"
+    "laneRefill": "F1_REVIEW_ACCEPTED__F2_MANIFEST_PUBLISHED__VERIFY_TRUSTED_RUN_SESSION_ACTIVITY__NO_DUPLICATE__NO_FILLER"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
     "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
     "sourceRanges": ["COLA!A410:T416", "PLAN_MAESTRO!A53:L55", "vaep/control/alex-prearmed-candidates.json", "backend/src/API/Controllers/ReportesVentasController.cs", "backend/src/API/Controllers/ReportesInventarioController.cs"],
-    "note": "N5.3.F is the first dependency-valid unclosed parent. N5.3.G remains gated on F LISTO_REAL. Only the two live ALEX source-backed F scopes are materialized; no generic backlog regeneration or filler.",
+    "note": "N5.3.F is the first dependency-valid unclosed parent. F1 is REVIEW_FIRST accepted after direct recovery; F2 is the only remaining material facet and is being dispatched to J2. N5.3.G remains gated on F LISTO_REAL. No generic backlog regeneration or filler.",
     "nodes": [
       {"id":"N5.3.A","order":18,"type":"MICROTAREA","dependencies":["N5.1.H","GATE-N4"],"phaseGate":"GATE-N4"},
       {"id":"N5.3.B","order":19,"type":"MICROTAREA","dependencies":["N5.3.A"],"phaseGate":"GATE-N4"},
@@ -82,10 +82,13 @@
       "readyForDispatch": false,
       "dispatchEligible": false,
       "fileScopeHint": "backend/src/API/Controllers/ReportesVentasController.cs",
-      "prompt": "Trusted pre-session transport recovery is in progress. Do not redispatch while run 34433650814 is valid. ACTIVE_REAL requires correlated sessionId plus useful fresh Jules activity.",
-      "reason": "TRUSTED_TRANSPORT_IN_PROGRESS__RESERVED__ACTIVE_REAL_NOT_YET_PROVEN",
+      "prompt": "Controller takeover completed and REVIEW_FIRST accepted. The stalled J1 run is evidence-only; do not integrate a late result or redispatch this semantic facet.",
+      "reason": "CONTROLLER_TAKEOVER_REVIEW_FIRST_ACCEPTED__LATE_J1_EVIDENCE_ONLY",
       "workflowRunId": 34433650814,
-      "activeReal": false
+      "activeReal": false,
+      "reviewAccepted": true,
+      "controllerTakeoverCommit": "265afeba494921b09ae4b79defca35365fa5258c",
+      "reviewReceipt": "vaep/evidence/fragments/N5.3.F.1_REVIEW_FIRST_20260910T0350Z.json"
     }],
     "J2": [{
       "dispatchId": "N5-3-F-2-SALES-REPORT-SECURITY-AUDIT-TESTS-J2",
@@ -95,10 +98,12 @@
       "plannedParent": "N5.3.F",
       "readyForDispatch": false,
       "dispatchEligible": false,
-      "dependencyGate": "N5.3.F.1.SALES_REPORT_AUDIT_CORRELATION_REVIEW_FIRST",
       "fileScopeHint": "backend/tests/InventoryApp.Tests/API/Controllers/ReportesVentasContractTests.cs",
-      "prompt": "After N5.3.F.1 REVIEW_FIRST is accepted, add focused authorization, anti-scope-forgery and audit/correlation contract coverage for sales report endpoints only. Reuse the existing production implementation; no production code changes in this scope. Keep tests proportional, preserve branch/safety constraints, and perform two self-reviews before terminal handoff.",
-      "reason": "DEPENDENCY_GATED__F1_REVIEW_FIRST"
+      "prompt": "F1 REVIEW_FIRST accepted. Manifest published for focused authorization, anti-scope-forgery and audit/correlation contract coverage. Verify trusted run/session/activity before ACTIVE_REAL; no production code changes.",
+      "reason": "F1_REVIEW_ACCEPTED__MANIFEST_PUBLISHED_AWAITING_TRUSTED_RUN",
+      "manifestPath": "vaep/jules-b/dispatch/N5-3-F-2-SALES-REPORT-SECURITY-AUDIT-TESTS-J2.json",
+      "primaryBaseHead": "265afeba494921b09ae4b79defca35365fa5258c",
+      "activeReal": false
     }],
     "J3": [],
     "J4": [],
