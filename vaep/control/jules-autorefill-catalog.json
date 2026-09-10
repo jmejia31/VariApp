@@ -1,8 +1,8 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
   "currentParent": "N5.4.E",
-  "generatedAt": "2026-09-10T06:27:00Z",
-  "regenerationReason": "N5.4.D_LISTO_REAL__PROMOTE_N5.4.E__PARENT_CLOSE_FIRST__NO_BUSYWORK",
+  "generatedAt": "2026-09-10T06:30:00Z",
+  "regenerationReason": "N5.4.D_LISTO_REAL__N5.4.E_SOURCE_BACKED_FRONTEND_SCOPES_MATERIALIZED__WORK_CONSERVING",
   "lastClosedParent": "N5.4.D",
   "closureReceipts": {
     "N4.11.H": "vaep/evidence/fragments/N4.11.H_LISTO_REAL_20260908T204500Z.json",
@@ -41,18 +41,27 @@
   "throughputPlan": {
     "mode": "PARENT_CLOSE_FIRST",
     "currentParent": "N5.4.E",
-    "currentParentMaterialScopeCount": 0,
-    "currentParentReason": "N5.4.D is LISTO_REAL. N5.4.E is promoted as CURRENT_PARENT. No Jules scope is admitted until exact frontend/UX scopes are derived from the accepted N5.4.D API contract; inventing generic work is prohibited.",
+    "currentParentMaterialScopeCount": 6,
+    "currentParentReason": "N5.4.D is LISTO_REAL. Six distinct frontend/UX scopes were derived from the accepted absolute-profitability API contract and the existing sales-report frontend architecture. Percentage margin and synthetic header-discount allocation remain explicitly out of scope until a source-backed downstream contract exists.",
     "nextParent": "N5.4.F",
     "nextParentParallelMaterialScopes": 0,
     "nextParentScopesNonOverlapping": true,
-    "laneRefill": "DERIVE_N5.4.E_FRONTEND_UX_SCOPES_FROM_ACCEPTED_N5.4.D_API_CONTRACT__NO_FILLER__NO_FUTURE_PARENT"
+    "laneRefill": "DISPATCH_E1_E5_DEPENDENCY_VALID__E6_SIBLING_GATED__PREARM_F_G_H__NO_FILLER"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
     "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
-    "sourceRanges": ["COLA!A418:T422", "PLAN_MAESTRO", "docs/qa/N5_4_B_ABSOLUTE_PROFITABILITY_CONTRACT.md", "docs/qa/N5_4_B_MARGIN_PERCENT_CONTRACT.md", "docs/qa/N5_4_B_GROUPING_IDENTITY_CONTRACT.md", "docs/qa/N5_4_B_DISCOUNT_ALLOCATION_CONTRACT.md", "docs/qa/N5_4_B_SHIPPING_COST_CONTRACT.md", "docs/qa/N5_4_B_DISCLOSURE_SCOPE_CONTRACT.md", "docs/qa/N5_4_C_PERSISTENCE_MIGRATION_DECISION.md"],
-    "note": "N5.4.D is LISTO_REAL. N5.4.E is current and must derive only source-backed frontend/UX scopes from the accepted profitability API contract. N5.4.F and N5.4.G remain ordered dependency-gated successors.",
+    "sourceRanges": [
+      "COLA!A418:T423",
+      "PLAN_MAESTRO",
+      "backend/src/Application/DTOs/ReporteRentabilidadDto.cs",
+      "backend/src/API/Controllers/RentabilidadVentasController.cs",
+      "frontend/src/app/core/models/reporte-ventas.models.ts",
+      "frontend/src/app/core/services/reporte-ventas.service.ts",
+      "frontend/src/app/features/reportes-ventas/**",
+      "frontend/src/app/app.routes.ts"
+    ],
+    "note": "N5.4.D is LISTO_REAL. N5.4.E is current. E1-E5 are independent source-backed frontend scopes that compile without depending on each other; E6 page/route integration remains sibling-gated until E1-E5 REVIEW_FIRST acceptance. N5.4.F/G/H are dependency-gated prearms.",
     "nodes": [
       {"id": "N5.4.A", "order": 26, "type": "MICROTAREA", "dependencies": ["N5.1.H", "GATE-N4"], "phaseGate": "GATE-N4"},
       {"id": "N5.4.B", "order": 27, "type": "MICROTAREA", "dependencies": ["N5.4.A"], "phaseGate": "GATE-N4"},
@@ -60,20 +69,100 @@
       {"id": "N5.4.D", "order": 29, "type": "MICROTAREA", "dependencies": ["N5.4.C"], "phaseGate": "GATE-N4"},
       {"id": "N5.4.E", "order": 30, "type": "MICROTAREA", "dependencies": ["N5.4.D"], "phaseGate": "GATE-N4"},
       {"id": "N5.4.F", "order": 31, "type": "MICROTAREA", "dependencies": ["N5.4.E"], "phaseGate": "GATE-N4"},
-      {"id": "N5.4.G", "order": 32, "type": "MICROTAREA", "dependencies": ["N5.4.F"], "phaseGate": "GATE-N4"}
+      {"id": "N5.4.G", "order": 32, "type": "MICROTAREA", "dependencies": ["N5.4.F"], "phaseGate": "GATE-N4"},
+      {"id": "N5.4.H", "order": 33, "type": "MICROTAREA", "dependencies": ["N5.4.G"], "phaseGate": "GATE-N4"}
     ]
   },
   "prearmedRoadmap": [
     {"parent": "N5.4.F", "state": "READY_DEPENDENCY_GATED", "dependency": "N5.4.E_LISTO_REAL", "materialization": "DERIVE_SECURITY_AUDIT_SCOPES_FROM_ACCEPTED_N5.4.E_AND_D_CONTRACTS__NO_FILLER"},
-    {"parent": "N5.4.G", "state": "READY_DEPENDENCY_GATED", "dependency": "N5.4.F_LISTO_REAL", "materialization": "DERIVE_QA_CI_SCOPES_FROM_ACCEPTED_N5.4.D_E_F_CHANGES__NO_FILLER"}
+    {"parent": "N5.4.G", "state": "READY_DEPENDENCY_GATED", "dependency": "N5.4.F_LISTO_REAL", "materialization": "DERIVE_QA_CI_SCOPES_FROM_ACCEPTED_N5.4.D_E_F_CHANGES__NO_FILLER"},
+    {"parent": "N5.4.H", "state": "READY_DEPENDENCY_GATED", "dependency": "N5.4.G_LISTO_REAL", "materialization": "DERIVE_DOC_CERT_SCOPE_FROM_ACCEPTED_N5.4_D_E_F_G_EVIDENCE__NO_FILLER"}
   ],
   "lanes": {
-    "J1": [],
-    "J2": [],
-    "J3": [],
-    "J4": [],
-    "J5": [],
-    "J6": []
+    "J1": [
+      {
+        "dispatchId": "N5-4-E-1-PROFITABILITY-FRONTEND-CONTRACT-SERVICE-J1",
+        "taskId": "N5.4.E.1.PROFITABILITY_FRONTEND_CONTRACT_SERVICE",
+        "workerId": "J1",
+        "taskAttempt": 1,
+        "plannedParent": "N5.4.E",
+        "readyForDispatch": true,
+        "dispatchEligible": true,
+        "fileScopeHint": "frontend/src/app/core/models/reporte-rentabilidad.models.ts;frontend/src/app/core/services/reporte-rentabilidad.service.ts",
+        "prompt": "Create the typed frontend profitability DTO/grouping contract and HTTP service for the accepted N5.4.D endpoints /ventas/rentabilidad/{vendedores|clientes|productos|categorias}. Reuse ReporteVentasFiltroDto for query filters. Expose only Venta, Costo, UtilidadBruta, IncluyeDescuentoEncabezadoEnUtilidad and Semantica exactly as backend source-backed fields; do not invent margin percentage or allocate header discounts. No route or UI component changes.",
+        "reason": "N5.4.D_LISTO_REAL__SOURCE_BACKED_API_CONTRACT"
+      }
+    ],
+    "J2": [
+      {
+        "dispatchId": "N5-4-E-2-PROFITABILITY-FILTERS-J2",
+        "taskId": "N5.4.E.2.PROFITABILITY_FILTERS",
+        "workerId": "J2",
+        "taskAttempt": 1,
+        "plannedParent": "N5.4.E",
+        "readyForDispatch": true,
+        "dispatchEligible": true,
+        "fileScopeHint": "frontend/src/app/features/rentabilidad/filtros/**",
+        "prompt": "Create a standalone accessible profitability filters component under features/rentabilidad/filtros using the existing ReporteVentasFiltroDto contract. Support the source-backed date and sales dimensions already accepted by backend query rules, emit immutable filter changes, and handle disabled/loading states. No HTTP, route, page-shell, grouping-selector, result-table or backend changes.",
+        "reason": "EXISTING_REPORTE_VENTAS_FILTER_CONTRACT__INDEPENDENT_UI_SCOPE"
+      }
+    ],
+    "J3": [
+      {
+        "dispatchId": "N5-4-E-3-PROFITABILITY-GROUPING-SELECTOR-J3",
+        "taskId": "N5.4.E.3.PROFITABILITY_GROUPING_SELECTOR",
+        "workerId": "J3",
+        "taskAttempt": 1,
+        "plannedParent": "N5.4.E",
+        "readyForDispatch": true,
+        "dispatchEligible": true,
+        "fileScopeHint": "frontend/src/app/features/rentabilidad/agrupacion/**",
+        "prompt": "Create a standalone accessible grouping selector for exactly Vendedor, Cliente, Producto and Categoria, matching the four accepted N5.4.D API endpoints. Emit a stable grouping value; no HTTP, filters, page-shell, result-table, routing or backend changes. Do not add unsupported grouping dimensions.",
+        "reason": "FOUR_ACCEPTED_API_GROUPINGS__INDEPENDENT_UI_SCOPE"
+      }
+    ],
+    "J4": [
+      {
+        "dispatchId": "N5-4-E-4-PROFITABILITY-RESULT-TABLE-J4",
+        "taskId": "N5.4.E.4.PROFITABILITY_RESULT_TABLE",
+        "workerId": "J4",
+        "taskAttempt": 1,
+        "plannedParent": "N5.4.E",
+        "readyForDispatch": true,
+        "dispatchEligible": true,
+        "fileScopeHint": "frontend/src/app/features/rentabilidad/tabla/**",
+        "prompt": "Create a standalone responsive accessible profitability results table component. Its input shape must be structurally compatible with the accepted DTO fields AgrupacionId, Agrupacion, Nombre, Venta, Costo, UtilidadBruta, IncluyeDescuentoEncabezadoEnUtilidad and Semantica. Include loading/empty/error-safe presentation but do not calculate or display margin percentage and do not fabricate header-discount allocation. No HTTP, route or backend changes.",
+        "reason": "ACCEPTED_ABSOLUTE_PROFITABILITY_DTO__INDEPENDENT_PRESENTATION_SCOPE"
+      }
+    ],
+    "J5": [
+      {
+        "dispatchId": "N5-4-E-5-PROFITABILITY-DISCLOSURE-UX-J5",
+        "taskId": "N5.4.E.5.PROFITABILITY_DISCLOSURE_UX",
+        "workerId": "J5",
+        "taskAttempt": 1,
+        "plannedParent": "N5.4.E",
+        "readyForDispatch": true,
+        "dispatchEligible": true,
+        "fileScopeHint": "frontend/src/app/features/rentabilidad/disclosure/**",
+        "prompt": "Create a focused accessible disclosure/status component for profitability semantics. Clearly communicate the backend-provided Semantica and whether header discount is included, without inventing financial claims. Explicitly avoid exposing margin percentage while its denominator contract remains unresolved. No HTTP, page-shell, route, result-table or backend changes.",
+        "reason": "N5.4.D_EXPLICIT_NON_INVENTION_GATES__UX_DISCLOSURE_SCOPE"
+      }
+    ],
+    "J6": [
+      {
+        "dispatchId": "N5-4-E-6-PROFITABILITY-PAGE-ROUTE-TESTS-J6",
+        "taskId": "N5.4.E.6.PROFITABILITY_PAGE_ROUTE_TESTS",
+        "workerId": "J6",
+        "taskAttempt": 1,
+        "plannedParent": "N5.4.E",
+        "readyForDispatch": false,
+        "dispatchEligible": false,
+        "fileScopeHint": "frontend/src/app/features/rentabilidad/rentabilidad.component.ts;frontend/src/app/features/rentabilidad/rentabilidad.component.html;frontend/src/app/features/rentabilidad/rentabilidad.component.scss;frontend/src/app/features/rentabilidad/rentabilidad.component.spec.ts;frontend/src/app/app.routes.ts;frontend/src/app/app.routes.rentabilidad.spec.ts",
+        "prompt": "After E1-E5 are REVIEW_FIRST accepted, compose the profitability page from those accepted components/service, add the guarded report route using Ventas/Ver permission, and add focused route/page tests. Preserve loading/empty/error/accessibility behavior and the explicit no-margin-percentage/no-synthetic-discount contract. No backend changes.",
+        "reason": "SIBLING_GATED_BY_E1_E5_REVIEW_FIRST"
+      }
+    ]
   },
   "lastClosureFunctionalHead": "68344eed4d7f8d6fa80abc2eaa074919e61bff90"
 }
