@@ -1,0 +1,56 @@
+{
+  "authority": "docs/VAEP_AUTHORITY.md",
+  "parent": "N5.8.D",
+  "taskId": "N5.8.D.1.EXPORT_PDF_SERVICE",
+  "reviewType": "REVIEW_FIRST",
+  "reviewedAtUtc": "2026-09-10T14:24:00Z",
+  "ownership": {
+    "originalWorker": "J2",
+    "controller": "CHATGPT_VAEP",
+    "takeoverEvidence": "vaep/evidence/reviews/N5.8.D.1_J2_STALL_TAKEOVER_20260910T1409Z.json",
+    "transferExecuted": true,
+    "lateResultPolicy": "EVIDENCE_ONLY__NO_AUTOMATIC_INTEGRATION"
+  },
+  "functionalHead": "e8ba8885f15ae0a53a2f6a02427e4694ab9672d5",
+  "controlPlaneHeadObserved": "83827bb3e6b8b7d2af6f0cba3ae8ae4b91d9263f",
+  "recoveryCommits": [
+    "742b77eee4c52e4959bb5a1e3a0a853386898954",
+    "62ec8ef467ec43491cbb0a09e18c74627ca13a72",
+    "e8ba8885f15ae0a53a2f6a02427e4694ab9672d5"
+  ],
+  "reviewedFiles": [
+    "backend/src/Infrastructure/Services/ReporteAdministrativoService.cs",
+    "backend/tests/InventoryApp.Tests/N58DExportPdfServiceTests.cs"
+  ],
+  "contract": {
+    "formatsClosed": ["csv", "xlsx", "pdf"],
+    "pdfImplementation": "QuestPDF backend generation",
+    "pdfContentType": "application/pdf",
+    "filenameExtension": ".pdf",
+    "unknownFormatsFailClosed": true,
+    "existingCsvXlsxPathsPreserved": true,
+    "existingFiltersAndDataPathsPreserved": true,
+    "newPersistenceIntroduced": false,
+    "frontendChanged": false,
+    "controllerChangedByD1": false
+  },
+  "directedTests": {
+    "file": "backend/tests/InventoryApp.Tests/N58DExportPdfServiceTests.cs",
+    "coversPdfSignatureContentTypeFilename": true,
+    "coversUnknownFormatFailClosed": true,
+    "compileImportFirstDetectorFix": "e8ba8885f15ae0a53a2f6a02427e4694ab9672d5"
+  },
+  "findings": {
+    "P0": 0,
+    "P1": 0,
+    "reviewAccepted": true,
+    "reviewOutcome": "ACCEPTED_GATES_PENDING"
+  },
+  "gates": {
+    "status": "PENDING",
+    "exactFunctionalHead": "e8ba8885f15ae0a53a2f6a02427e4694ab9672d5",
+    "listoReal": false,
+    "note": "REVIEW_FIRST acceptance unlocks D2 verification, but N5.8.D cannot be certified until applicable exact-head gates are valid."
+  },
+  "next": "VERIFY_D2_EXPORT_API_CONTRACT__DRAIN_EXACT_HEAD_GATES__CERTIFY_D_IF_VALID"
+}
