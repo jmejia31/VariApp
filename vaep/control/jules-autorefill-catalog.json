@@ -1,9 +1,9 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
-  "currentParent": "N5.5.B",
-  "generatedAt": "2026-09-10T08:06:00Z",
-  "regenerationReason": "N5.5.A_LISTO_REAL__PROMOTE_N5.5.B__DOMAIN_CONTRACT_FASTPATH",
-  "lastClosedParent": "N5.5.A",
+  "currentParent": "N5.5.C",
+  "generatedAt": "2026-09-10T08:08:00Z",
+  "regenerationReason": "N5.5.B_LISTO_REAL__PROMOTE_N5.5.C__PERSISTENCE_VERIFICATION_FASTPATH__NO_FILLER",
+  "lastClosedParent": "N5.5.B",
   "closureReceipts": {
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
     "N5.1.H": "vaep/evidence/fragments/N5.1.H_LISTO_REAL_20260909T1236Z.json",
@@ -24,7 +24,8 @@
     "N5.4.F": "vaep/evidence/fragments/N5.4.F_LISTO_REAL_20260910T0754Z.json",
     "N5.4.G": "vaep/evidence/fragments/N5.4.G_LISTO_REAL_20260910T0758Z.json",
     "N5.4.H": "vaep/evidence/fragments/N5.4.H_LISTO_REAL_20260910T0800Z.json",
-    "N5.5.A": "vaep/evidence/fragments/N5.5.A_LISTO_REAL_20260910T0803Z.json"
+    "N5.5.A": "vaep/evidence/fragments/N5.5.A_LISTO_REAL_20260910T0803Z.json",
+    "N5.5.B": "vaep/evidence/fragments/N5.5.B_LISTO_REAL_20260910T0807Z.json"
   },
   "policy": {
     "branch": "Desarrollo",
@@ -44,19 +45,19 @@
   },
   "throughputPlan": {
     "mode": "PARENT_CLOSE_FIRST",
-    "currentParent": "N5.5.B",
+    "currentParent": "N5.5.C",
     "currentParentMaterialScopeCount": 1,
-    "currentParentReason": "N5.5.A is LISTO_REAL. B must decide the read-model/domain-contract boundary without inventing a new persistent aggregate, KPI scoring or unsupported price-variation formula.",
-    "nextParent": "N5.5.C",
+    "currentParentReason": "N5.5.B is LISTO_REAL and explicitly concludes no new domain aggregate is required. N5.5.C must now verify whether existing persisted purchase/order/receipt/invoice/return/evaluation authorities fully support the accepted read contract; if yes, close migration as N/A rather than creating schema busywork.",
+    "nextParent": "N5.5.D",
     "nextParentParallelMaterialScopes": 0,
     "nextParentScopesNonOverlapping": true,
-    "laneRefill": "CONTROLLER_DOMAIN_CONTRACT_N5.5.B__PREARM_C_D_E__NO_FILLER"
+    "laneRefill": "CONTROLLER_VERIFY_EXISTING_PERSISTENCE_N5.5.C__PREARM_D_E__NO_FILLER"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
     "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
-    "sourceRanges": ["COLA!A424:T432", "docs/qa/N5_5_A_PURCHASE_REPORT_PREFLIGHT.md", "PLAN_MAESTRO"],
-    "note": "B is a bounded contract decision. C/D/E remain dependency-gated until B LISTO_REAL; no downstream implementation is dispatched early.",
+    "sourceRanges": ["COLA!A424:T432", "docs/qa/N5_5_A_PURCHASE_REPORT_PREFLIGHT.md", "docs/qa/N5_5_B_REPORTES_COMPRAS_CONTRATO.md", "PLAN_MAESTRO"],
+    "note": "A/B are LISTO_REAL. C is the bounded persistence/migration decision. D/E remain dependency-gated; no downstream implementation is dispatched early.",
     "nodes": [
       {"id":"N5.5.A","order":34,"type":"MICROTAREA","dependencies":["N5.1.H","GATE-N4"],"phaseGate":"GATE-N4"},
       {"id":"N5.5.B","order":35,"type":"MICROTAREA","dependencies":["N5.5.A"],"phaseGate":"GATE-N4"},
@@ -66,10 +67,9 @@
     ]
   },
   "prearmedRoadmap": [
-    {"parent":"N5.5.C","state":"READY_DEPENDENCY_GATED","dependency":"N5.5.B_LISTO_REAL","materialization":"VERIFY_EXISTING_PERSISTENCE_SUPPORTS_ACCEPTED_READ_CONTRACT__NO_FILLER"},
     {"parent":"N5.5.D","state":"READY_DEPENDENCY_GATED","dependency":"N5.5.C_LISTO_REAL","materialization":"IMPLEMENT_PURCHASE_REPORT_QUERY_API_FROM_ACCEPTED_CONTRACT__NO_FILLER"},
     {"parent":"N5.5.E","state":"READY_DEPENDENCY_GATED","dependency":"N5.5.D_LISTO_REAL","materialization":"IMPLEMENT_FRONTEND_ONLY_AFTER_API_ACCEPTED__NO_FILLER"}
   ],
   "lanes": {"J1":[],"J2":[],"J3":[],"J4":[],"J5":[],"J6":[]},
-  "lastClosureFunctionalHead": "df5eca6fa7ccd66f06031a050141ac247dcffec4"
+  "lastClosureFunctionalHead": "244fdcc2d1f5df28630bcdde92955c76becb37ea"
 }
