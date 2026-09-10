@@ -9,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { finalize } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
@@ -35,7 +36,8 @@ type EstadoFiltro = 'todas' | 'activas' | 'inactivas';
     MatIconModule,
     MatInputModule,
     MatProgressSpinnerModule,
-    MatSelectModule
+    MatSelectModule,
+    MatTooltipModule
   ],
   template: `
     <section class="card empresa-card" aria-labelledby="empresa-admin-title">
@@ -86,23 +88,15 @@ type EstadoFiltro = 'todas' | 'activas' | 'inactivas';
                   <td><span class="status" [class.inactive]="!empresa.activa">{{ empresa.activa ? 'Activa' : 'Inactiva' }}</span></td>
                   <td>{{ empresa.fechaActualizacion | date:'dd/MM/yyyy HH:mm' }}</td>
                   <td class="actions">
-                    <button mat-icon-button type="button" (click)="ver(empresa.id)" aria-label="Ver empresa" matTooltip="Ver empresa">
-                      <mat-icon>visibility</mat-icon>
-                    </button>
+                    <button mat-icon-button type="button" (click)="ver(empresa.id)" aria-label="Ver empresa" matTooltip="Ver empresa"><mat-icon>visibility</mat-icon></button>
                     @if (puedeEditar()) {
-                      <button mat-icon-button type="button" (click)="editar(empresa)" aria-label="Editar empresa" matTooltip="Editar empresa">
-                        <mat-icon>edit</mat-icon>
-                      </button>
+                      <button mat-icon-button type="button" (click)="editar(empresa)" aria-label="Editar empresa" matTooltip="Editar empresa"><mat-icon>edit</mat-icon></button>
                     }
                     @if (empresa.activa && puedeDesactivar()) {
-                      <button mat-icon-button type="button" (click)="cambiarActivo(empresa, false)" [disabled]="operandoId() === empresa.id" aria-label="Desactivar empresa" matTooltip="Desactivar empresa">
-                        <mat-icon>toggle_off</mat-icon>
-                      </button>
+                      <button mat-icon-button type="button" (click)="cambiarActivo(empresa, false)" [disabled]="operandoId() === empresa.id" aria-label="Desactivar empresa" matTooltip="Desactivar empresa"><mat-icon>toggle_off</mat-icon></button>
                     }
                     @if (!empresa.activa && puedeActivar()) {
-                      <button mat-icon-button type="button" (click)="cambiarActivo(empresa, true)" [disabled]="operandoId() === empresa.id" aria-label="Activar empresa" matTooltip="Activar empresa">
-                        <mat-icon>toggle_on</mat-icon>
-                      </button>
+                      <button mat-icon-button type="button" (click)="cambiarActivo(empresa, true)" [disabled]="operandoId() === empresa.id" aria-label="Activar empresa" matTooltip="Activar empresa"><mat-icon>toggle_on</mat-icon></button>
                     }
                   </td>
                 </tr>
