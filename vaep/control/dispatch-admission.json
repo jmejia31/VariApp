@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "FROZEN",
+  "newDispatchAdmission": "OPEN",
   "allowExistingActiveSessions": true,
-  "reason": "N5.4.E_E1_E5_REVIEW_ACCEPTED__E6_J6_CURRENT_RUN__PARENT_CLOSE_FIRST__NO_NEW_DISPATCH",
-  "updatedAtUtc": "2026-09-10T07:06:00Z"
+  "reason": "OPEN_ONLY_CHECKPOINT_REPAIR__TASK_LANE_GATES_ONLY",
+  "updatedAtUtc": "2026-09-10T07:08:02Z"
 }
