@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Classify terminal work without creating sessions or claiming a review occurred."""
+"""Classify terminal work as immediate recovery debt without creating sessions or claiming review execution."""
 import argparse
 import json
 import os
@@ -9,6 +9,7 @@ import subprocess
 
 REVIEW_EXECUTORS = ("CHATGPT_VAEP", "CHATGPT_BUSINESS")
 REVIEW_RECEIPT_DIR = Path("vaep/evidence/reviews")
+ACTIVE_RECOVERY_SLOTS = (":00", ":05", ":12", ":17", ":24", ":29", ":36", ":41", ":48", ":53")
 
 
 def review_executor_metadata():
@@ -17,6 +18,34 @@ def review_executor_metadata():
         "authorizedReviewExecutors": list(REVIEW_EXECUTORS),
         "reviewExecutionRequired": True,
         "reviewExecuted": False,
+    }
+
+
+def recovery_metadata(action, attempt, maximum):
+    """Describe the mandatory recovery route without pretending it already ran."""
+    if action == "READY_FOR_VAEP":
+        route = "REVIEW_FIRST_AND_INTEGRATE_SAME_RUN"
+    elif action == "EVIDENCE_GAP_REVIEW_REQUIRED":
+        route = "CONTROLLER_REVIEW_OR_BOUNDED_DIRECT_FIX_SAME_RUN_NO_CONTENT_R2_BY_DEFAULT"
+    elif action == "RCA_REQUIRED_BEFORE_R2":
+        route = "R2_SAME_OR_CROSS_LANE_IF_MATERIAL_REWORK_REQUIRED"
+    elif action == "QA_TAKEOVER_REQUIRED":
+        route = "CONTROLLER_TAKEOVER_CORRECT_TEST_REVIEW_INTEGRATE_SAME_RUN"
+    elif action == "PRE_SESSION_RCA_REQUIRED":
+        route = "TRANSPORT_RECOVERY_SAME_TASK_NO_CONTENT_ATTEMPT_CONSUMED"
+    else:
+        route = "FORENSIC_EVIDENCE_ONLY"
+    return {
+        "recoveryDisposition": "RECOVERY_REQUIRED_NOT_REJECTED" if action not in {"READY_FOR_VAEP", "LATE_RESULT_EVIDENCE_ONLY"} else action,
+        "recoveryRoute": route,
+        "firstDetectorOwnsRecovery": True,
+        "noRejectQueue": True,
+        "sameRunRecoveryRequired": action != "LATE_RESULT_EVIDENCE_ONLY",
+        "crossLaneR2Allowed": True,
+        "attemptsDoNotResetOnWorkerChange": True,
+        "secondAttemptControllerTakeoverRequired": attempt >= maximum and action != "READY_FOR_VAEP",
+        "recoveryUnblockDependentsSameRun": True,
+        "activeRecoverySlots": list(ACTIVE_RECOVERY_SLOTS),
     }
 
 
@@ -41,19 +70,23 @@ def annotate(directory):
     evidence_gap_only = contract.get("classification") == "EVIDENCE_GAP_REVIEW_REQUIRED"
     handoff = decision(result["state"], result["readyForVaep"], result["taskAttempt"],
                        result["maxAttempts"], result.get("session"), evidence_gap_only)
-    result.update(controllerHandoff=handoff, correctionOwner="CHATGPT_VAEP",
+    reasons = contract.get("errors", [contract.get("reason")] if contract.get("reason") else [])
+    result.update(controllerHandoff=handoff, correctionOwner="FIRST_DETECTOR_CONTROLLER",
                   takeoverExecuted=False, retryBudgetExhausted=result["taskAttempt"] >= result["maxAttempts"],
-                  rejectionReasons=contract.get("errors", [contract.get("reason")] if contract.get("reason") else []),
+                  rejectionReasons=reasons,
+                  recoveryReasons=reasons,
                   terminalClassification=contract.get("classification", "NOT_EVALUATED"),
                   evidenceGapOnly=evidence_gap_only,
-                  nextLaneAction="REFILL_ONLY_DEPENDENCY_SAFE_NON_OVERLAPPING_SCOPE")
+                  nextLaneAction="RECOVER_DEFECT_IF_DETECTED__UNBLOCK_DEPENDENTS__REFILL_DEPENDENCY_SAFE")
     result.update(review_executor_metadata())
+    result.update(recovery_metadata(handoff, result["taskAttempt"], result["maxAttempts"]))
     (path / "result.json").write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
     lifecycle = json.loads((path / "lifecycle.json").read_text(encoding="utf-8"))
-    lifecycle.update(controllerHandoff=handoff, correctionOwner="CHATGPT_VAEP", takeoverExecuted=False,
+    lifecycle.update(controllerHandoff=handoff, correctionOwner="FIRST_DETECTOR_CONTROLLER", takeoverExecuted=False,
                      terminalClassification=contract.get("classification", "NOT_EVALUATED"),
                      evidenceGapOnly=evidence_gap_only)
     lifecycle.update(review_executor_metadata())
+    lifecycle.update(recovery_metadata(handoff, result["taskAttempt"], result["maxAttempts"]))
     (path / "lifecycle.json").write_text(json.dumps(lifecycle, indent=2) + "\n", encoding="utf-8")
     print(handoff)
 
@@ -176,9 +209,10 @@ def pending_items(issues, manifests, parent, worker, integrated,
             continue
         item = dict(dispatchId=dispatch, taskId=manifest["taskId"], workerId=worker,
                     issue=issue["number"], session=session, taskAttempt=attempt,
-                    action=action, correctionOwner="CHATGPT_VAEP",
+                    action=action, correctionOwner="FIRST_DETECTOR_CONTROLLER",
                     authorizedReviewExecutors=list(REVIEW_EXECUTORS),
                     takeoverExecuted=False)
+        item.update(recovery_metadata(action, attempt, maximum))
         previous = pending.get(manifest["taskId"])
         if previous is None or (attempt, item["issue"]) > (previous["taskAttempt"], previous["issue"]):
             pending[manifest["taskId"]] = item
@@ -219,16 +253,22 @@ def audit(worker, output):
     report = dict(currentParent=current_parent, workerId=worker, pending=items,
                   malformedManifests=malformed_manifests,
                   historicalMalformedManifests=historical_malformed_manifests,
-                  status="REVIEW_EXECUTOR_NOT_CONFIGURED" if items else "NO_PENDING_TERMINAL_REVIEW",
+                  status="RECOVERY_ACTION_REQUIRED" if items else "NO_PENDING_TERMINAL_REVIEW",
                   reviewExecuted=bool(reviewed_tasks), integrationExecuted=False,
                   reviewExecutionRequired=bool(items),
+                  sameRunRecoveryRequired=bool(items),
+                  firstDetectorOwnsRecovery=True,
+                  noRejectQueue=True,
+                  crossLaneR2Allowed=True,
+                  recoveryUnblockDependentsSameRun=True,
+                  activeRecoverySlots=list(ACTIVE_RECOVERY_SLOTS),
                   reviewReceipts=review_receipts,
                   reviewedTaskCount=len(reviewed_tasks),
                   authorizedReviewExecutors=list(REVIEW_EXECUTORS))
     Path(output).write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(report))
     if items:
-        print("::warning::REVIEW_EXECUTOR_NOT_CONFIGURED: terminal work requires VAEP review/QA; see handoff artifact.")
+        print("::warning::RECOVERY_ACTION_REQUIRED: terminal work must be owned and resolved same-run by the first active controller; see handoff artifact.")
     if malformed_manifests:
         print(f"::warning::MALFORMED_MANIFESTS_IGNORED: {len(malformed_manifests)} manifest(s) without dispatchId.")
     return 0
