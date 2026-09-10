@@ -2,15 +2,46 @@ name: Fase 8 - Validación completa automatizada
 
 on:
   workflow_dispatch:
+    inputs:
+      authorization:
+        description: 'Autorización explícita del propietario: AUTORIZADO_REABRIR'
+        required: true
+        type: string
 permissions:
   contents: read
 
 concurrency:
   group: fase8-validacion-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
+  authorize:
+    name: Autorizar reapertura cerrada
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Exigir propietario, Desarrollo y token literal
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REPOSITORY: ${{ github.repository }}
+          OWNER: ${{ github.repository_owner }}
+          ACTOR: ${{ github.actor }}
+          TRIGGERING_ACTOR: ${{ github.triggering_actor }}
+          TARGET_REF: ${{ github.ref }}
+          AUTHORIZATION: ${{ inputs.authorization }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$EVENT_NAME" = workflow_dispatch
+          test "$REPOSITORY" = jmejia31/VariApp
+          test "$TARGET_REF" = refs/heads/Desarrollo
+          test "$ACTOR" = "$OWNER"
+          test "$TRIGGERING_ACTOR" = "$OWNER"
+          test "$AUTHORIZATION" = AUTORIZADO_REABRIR
+          echo 'REOPEN_AUTHORIZATION=PASS'
+
   validation:
+    needs: authorize
     name: Regresión, seguridad, accesibilidad, rendimiento y runtime
     runs-on: ubuntu-latest
     timeout-minutes: 90

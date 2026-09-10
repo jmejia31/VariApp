@@ -2,16 +2,47 @@ name: M13 - Auditoría integral y certificación final
 
 on:
   workflow_dispatch:
+    inputs:
+      authorization:
+        description: 'Autorización explícita del propietario: AUTORIZADO_REABRIR'
+        required: true
+        type: string
 permissions:
   contents: read
   actions: read
 
 concurrency:
   group: m13-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
+  authorize:
+    name: Autorizar reapertura cerrada
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Exigir propietario, Desarrollo y token literal
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REPOSITORY: ${{ github.repository }}
+          OWNER: ${{ github.repository_owner }}
+          ACTOR: ${{ github.actor }}
+          TRIGGERING_ACTOR: ${{ github.triggering_actor }}
+          TARGET_REF: ${{ github.ref }}
+          AUTHORIZATION: ${{ inputs.authorization }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$EVENT_NAME" = workflow_dispatch
+          test "$REPOSITORY" = jmejia31/VariApp
+          test "$TARGET_REF" = refs/heads/Desarrollo
+          test "$ACTOR" = "$OWNER"
+          test "$TRIGGERING_ACTOR" = "$OWNER"
+          test "$AUTHORIZATION" = AUTORIZADO_REABRIR
+          echo 'REOPEN_AUTHORIZATION=PASS'
+
   audit:
+    needs: authorize
     name: Secretos, higiene y dependencias
     runs-on: ubuntu-latest
     timeout-minutes: 25
@@ -66,6 +97,7 @@ jobs:
           retention-days: 30
 
   backend_database:
+    needs: authorize
     name: Backend, MySQL, migraciones, snapshot y upgrade
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -242,6 +274,7 @@ jobs:
           retention-days: 30
 
   frontend:
+    needs: authorize
     name: Frontend TypeScript, lint y producción
     runs-on: ubuntu-latest
     timeout-minutes: 25
@@ -261,6 +294,7 @@ jobs:
           npm run build:prod
 
   runtime_e2e:
+    needs: authorize
     name: Runtime, seguridad HTTP y Playwright integral
     runs-on: ubuntu-latest
     timeout-minutes: 100
@@ -421,6 +455,7 @@ jobs:
           retention-days: 30
 
   infra_backup:
+    needs: authorize
     name: Docker, aislamiento y backup certificado vigente
     runs-on: ubuntu-latest
     timeout-minutes: 25
@@ -462,8 +497,8 @@ jobs:
 
   certify:
     name: Dictamen automatizado M13
-    if: always()
-    needs: [audit, backend_database, frontend, runtime_e2e, infra_backup]
+    if: ${{ always() && needs.authorize.result == 'success' }}
+    needs: [authorize, audit, backend_database, frontend, runtime_e2e, infra_backup]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

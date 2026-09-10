@@ -379,3 +379,37 @@ Cuando Javier cambie una regla:
 - Fase 8 y M13 son certificaciones cerradas. No pueden dispararse por `push`, `pull_request`, timers, autorefill, commits de Jules ni cambios ordinarios en Desarrollo.
 - Su única vía de reejecución es `workflow_dispatch` con autorización explícita del propietario y el token textual `AUTORIZADO_REABRIR`.
 - Ejecutar nuevamente una certificación cerrada sin esa autorización se considera incidente de control-plane, no avance.
+
+
+## Reconciliación de estado y telemetría
+
+- CONFIG/COLA/WORKERS son fuentes de estado del Sheet; CONTROL_TOWER y DASHBOARD
+  son vistas derivadas mediante fórmulas. No sobrescribir sus fórmulas con snapshots.
+- Tras una promoción Git y antes de terminar cualquiera de las diez tareas, leer
+  HEAD, catálogo, receipt y Sheet frescos. Aplicar en un único batch de Sheets los
+  cambios de CONFIG, filas COLA afectadas y WORKERS. Conservar cierres certificados;
+  no inferir cierre por orden alfabético, estado de workflow o campo de catálogo solo.
+- Generar y comprobar el estado con `scripts/vaep/state_sync.py`. Este programa es
+  un verificador/generador local, no un cliente autenticado de Sheets. El controller
+  aplica el batch mediante su conexión Drive ya autorizada y verifica el readback.
+- Un commit Git no confirma sincronización externa. Si falta acceso o falla el
+  batch, registrar SYNC_PENDING/FAILED con SHA y causa; nunca declarar SYNCED.
+  No cerrar admisión global ni redisparar tareas por deuda de sincronización.
+- Releer HEAD y las celdas destino inmediatamente antes del batch. Si cambiaron,
+  reconstruir desde las fuentes frescas; después del batch releer ambos. Un avance
+  concurrente exige nueva reconciliación, nunca escribir de nuevo el snapshot viejo.
+  Google Sheets no ofrece CAS por celda en este flujo: el readback detecta carreras,
+  no las convierte en una transacción distribuida con GitHub.
+- CURRENT_HEAD identifica el SHA observado. LAST_SYNC es la hora UTC del batch
+  confirmado. LAST_EXECUTION_AT viene sólo del scheduler/runtime y no se actualiza
+  al editar la fila. LAST_SUPERVISION_AT es una supervisión material evidenciada,
+  no la mera consulta de last_run_time. UNKNOWN no se reemplaza por NOW().
+- TAREAS_PROGRAMADAS mantiene identidad, cadencia y objetivos. La columna F es
+  última ejecución del scheduler (no implica éxito); J/K son parent/head de la
+  observación sincronizada; L indica fuente y límites. La telemetría separada de
+  sync/supervisión se mantiene por AUTOMATION_ID en sus columnas adicionales.
+- WORKERS conserva sourceParent/sourceHead/observedAt y evidencia correlacionada.
+  Estado de un parent anterior se marca STALE__NOT_ACTIVE_REAL y no asigna ownership.
+- ALEX: autorización, última ejecución observada y estado material verificado son
+  campos distintos. Un run antiguo exitoso no constituye runtime vigente ni prueba
+  periodicidad de cinco minutos. Sólo documentar triggers verificados.
