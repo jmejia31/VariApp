@@ -1,0 +1,14 @@
+{
+  "dispatchId": "N5-8-G-1-EXPORT-QA-REGRESSION-CI-J5-R2",
+  "taskId": "N5.8.G.1.EXPORT_QA_REGRESSION_CI",
+  "semanticFacet": "EXPORT_QA_REGRESSION_CI",
+  "workerId": "J5",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 2,
+  "recoveryOf": "vaep/j6/dispatch/N5-8-G-1-EXPORT-QA-REGRESSION-CI-J6.json",
+  "recoveryReason": "ATTEMPT1_TRANSPORT_STALLED_AT_GE10M_WITHOUT_OBSERVABLE_CORRELATED_SESSION_AND_USEFUL_ACTIVITY__OWNERSHIP_TRANSFERRED_TO_CONTROLLER__MATERIAL_REWORK_REQUIRED",
+  "primaryBaseHead": "53243a39e17111e17afa47bf25204f9bde1cd26f",
+  "fileScopeHint": "frontend/e2e/fase6-reportes-administrativos.spec.ts",
+  "prompt": "R2 final Jules content attempt for N5.8.G.1 only. Read docs/VAEP_AUTHORITY.md and docs/VAEP_N5_8_EXPORTACIONES_PREFLIGHT.md. The original J6 ATTEMPT1 transport is superseded and any late result is evidence-only; do not interact with that session. On live Desarrollo, extend only frontend/e2e/fase6-reportes-administrativos.spec.ts unless a demonstrated test-only prerequisite is unavoidable. Preserve existing CSV/XLSX assertions; add PDF export acceptance with application/pdf and real %PDF bytes; add fail-closed invalid-format API coverage; add explicit insufficient-permission/non-admin denial for the export endpoint. Reuse existing setup and source-backed report surface; no production feature changes, new datasets, persistence, privilege expansion, filler, branches, main, Produccion, secrets, deploys or PR merge. Run proportional validation, provide TESTS_EXECUTED evidence and two distinct self-review passes, return terminal patch for REVIEW_FIRST with P0=0/P1=0 if supported. This is ATTEMPT2/2: no R3.",
+  "acceptance": "Existing CSV/XLSX regression remains intact; PDF export is asserted as application/pdf with real %PDF bytes; unsupported format fails closed; limited/non-admin export request is denied; no production scope expansion; two self-reviews and proportional tests recorded; patch/evidence ready for REVIEW_FIRST; P0=0; P1=0."
+}
