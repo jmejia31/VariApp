@@ -16,13 +16,15 @@ import { CAMPOS_TEMA, TemaVisual } from '../../core/models/tema-visual.model';
 import { EmpresaConfiguracion } from '../../core/models/empresa-configuracion.model';
 import { AppAlertService } from '../../shared/alerts/app-alert.service';
 import { AutomatizacionConfiguracionCardComponent } from './automatizacion-configuracion-card.component';
+import { EmpresaAdministracionCardComponent } from './empresa-administracion-card.component';
 
 @Component({
   selector: 'app-configuracion',
   standalone: true,
   imports: [
     CommonModule, ReactiveFormsModule, FormsModule, MatFormFieldModule, MatInputModule,
-    MatButtonModule, MatIconModule, MatProgressSpinnerModule, AutomatizacionConfiguracionCardComponent
+    MatButtonModule, MatIconModule, MatProgressSpinnerModule, AutomatizacionConfiguracionCardComponent,
+    EmpresaAdministracionCardComponent
   ],
   templateUrl: './configuracion.component.html',
   styleUrl: './configuracion.component.scss'
