@@ -27,6 +27,9 @@ readonly ALLOWED_KEYS=(
   "JULES_TERMINAL_HANDOFF_SAME_RUN"
   "NO_MANIFEST_DURING_HEAD_FREEZE_CAUSAL"
   "PREARM_BEFORE_CAUSAL_CI"
+  "GLOBAL_DISPATCH_ADMISSION"
+  "GLOBAL_FROZEN_PROHIBITED"
+  "CAUSAL_HOLD_SCOPE"
   "VAEP_CHECKPOINTS"
   "JULES_LANE_BUDGET_SECONDS"
   "JULES_MAX_ATTEMPTS"
@@ -41,7 +44,14 @@ fail() {
 
 is_boolean_key() {
   case "$1" in
-    CLOSURE_CHAIN_SAME_RUN|JULES_CURRENT_RUN_REQUIRED|JULES_NEXT_SAFE_PREARMED_REQUIRED|JULES_NEXT_RUN_RESERVED_REQUIRED|SCHEDULED_RUN_LANE_REFILL_BEFORE_REVIEW|JULES_TERMINAL_HANDOFF_SAME_RUN|NO_MANIFEST_DURING_HEAD_FREEZE_CAUSAL|PREARM_BEFORE_CAUSAL_CI|PARENT_CLOSE_FIRST) return 0 ;;
+    CLOSURE_CHAIN_SAME_RUN|JULES_CURRENT_RUN_REQUIRED|JULES_NEXT_SAFE_PREARMED_REQUIRED|JULES_NEXT_RUN_RESERVED_REQUIRED|SCHEDULED_RUN_LANE_REFILL_BEFORE_REVIEW|JULES_TERMINAL_HANDOFF_SAME_RUN|NO_MANIFEST_DURING_HEAD_FREEZE_CAUSAL|PREARM_BEFORE_CAUSAL_CI|GLOBAL_FROZEN_PROHIBITED|PARENT_CLOSE_FIRST) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+is_string_key() {
+  case "$1" in
+    VAEP_CHECKPOINTS|GLOBAL_DISPATCH_ADMISSION|CAUSAL_HOLD_SCOPE) return 0 ;;
     *) return 1 ;;
   esac
 }
@@ -82,6 +92,10 @@ parse_policy_block() {
         [[ "$val" =~ ^(0|[1-9][0-9]*)$ ]] || fail "invalid non-negative integer value for $key: '$val'" ;;
       VAEP_CHECKPOINTS)
         [[ "$val" =~ ^:[0-5][0-9](,:[0-5][0-9])*$ ]] || fail "invalid checkpoint list for $key: '$val'" ;;
+      GLOBAL_DISPATCH_ADMISSION)
+        [[ "$val" == "OPEN_ONLY" ]] || fail "invalid value for $key (must be OPEN_ONLY): '$val'" ;;
+      CAUSAL_HOLD_SCOPE)
+        [[ "$val" == "TASK_OR_LANE_ONLY" ]] || fail "invalid value for $key (must be TASK_OR_LANE_ONLY): '$val'" ;;
       *)
         if is_boolean_key "$key"; then
           [[ "$val" == "TRUE" || "$val" == "FALSE" ]] || fail "invalid boolean value for $key (must be TRUE or FALSE): '$val'"
@@ -171,7 +185,7 @@ main() {
         if is_boolean_key "$key"; then
           [[ "$val" == "TRUE" ]] && val=true || val=false
           printf '  "%s": %s' "$key" "$val"
-        elif [[ "$key" == "VAEP_CHECKPOINTS" ]]; then
+        elif is_string_key "$key"; then
           printf '  "%s": "%s"' "$key" "$val"
         else
           printf '  "%s": %d' "$key" "$val"
