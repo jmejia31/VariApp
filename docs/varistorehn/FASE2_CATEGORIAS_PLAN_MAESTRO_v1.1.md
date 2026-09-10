@@ -2,11 +2,13 @@
 
 ## Estado
 
-**CANDIDATA A CIERRE tras reauditoría.** La omisión arquitectónica detectada después del primer cierre ya fue corregida en la rama `chatgpt/varistorehn-fase2-categoria-canonica`: la experiencia pública dispone ahora de una ruta canónica por categoría, el listado navega hacia ella y existe regresión estática + navegador real para impedir volver al atajo del home.
+**COMPLETADA / REAUDITADA.** La omisión arquitectónica detectada después del primer cierre fue corregida, integrada en `Desarrollo` y revalidada sobre el commit exacto resultante.
 
-La fase se marcará como **COMPLETADA / REAUDITADA** únicamente después de integrar el PR en `Desarrollo` y repetir la regresión sobre el commit resultante.
+PR de cierre reaudidado: #3336.
+Commit integrado: `fc12bf9437ba1825d3007e620064fdd84557ac4d`.
+Regresión post-merge Fase 2: run `34536591699` — **success**.
 
-## Alcance de Fase 2
+## Alcance certificado
 
 - `/varistorehn/categorias` pública y sin guards administrativos;
 - `VaristorehnCategoriasComponent` reutilizando el header público;
@@ -15,47 +17,59 @@ La fase se marcará como **COMPLETADA / REAUDITADA** únicamente después de int
 - `cantidadProductos = null` preservado como desconocido;
 - sin fallback silencioso de API real a fixtures;
 - categorías del home obtenidas desde la fuente pública dedicada, no inferidas desde texto de productos;
-- continuidad de búsqueda y resumen del carrito;
 - `/varistorehn/categoria/:slug` pública y sin guards administrativos;
-- página `VaristorehnCategoriaComponent` que consume `GET /tienda/categorias/{slug}`;
-- URL corregida mediante `replaceUrl` cuando el backend devuelve un slug canónico diferente al solicitado;
+- página `VaristorehnCategoriaComponent` consumiendo `GET /tienda/categorias/{slug}`;
+- URL corregida con `replaceUrl` cuando el backend devuelve un slug canónico distinto;
 - estados `loading | error | not-found | success` en la página canónica;
-- errores reales no se sustituyen por datos de demostración;
+- categoría inexistente o inactiva representada como no encontrada, sin fabricar fixtures;
 - tarjetas de `/varistorehn/categorias` enlazadas mediante `VARISTOREHN_PATHS.categoria(slug)`;
-- continuidad al catálogo actual mediante `?categoria=<slug>#catalogo`, sin activar prematuramente `/varistorehn/productos`;
-- identidad, búsqueda, WhatsApp, resumen del carrito y tokens visuales compartidos con el resto de la tienda.
+- continuidad de identidad, búsqueda, WhatsApp y resumen del carrito;
+- continuidad al catálogo actual mediante `?categoria=<slug>#catalogo`, sin adelantar `/varistorehn/productos` de Fase 3;
+- estilos gobernados por tokens del tema del sistema y objetivos táctiles de al menos 44 px.
 
-## Gap de reauditoría — resolución
+## Gap de reauditoría — resuelto
 
-La discrepancia original era verificable dentro del propio código: `VARISTOREHN_PATHS.categoria(slug)` y `VaristorehnService.obtenerCategoriaPorSlug(slug)` ya existían, pero `app.routes.ts` solo había activado `/varistorehn/categorias` y las tarjetas navegaban directamente a `?categoria=<slug>#catalogo`.
+La discrepancia original era verificable dentro del código: `VARISTOREHN_PATHS.categoria(slug)` y `VaristorehnService.obtenerCategoriaPorSlug(slug)` ya existían, pero `app.routes.ts` no activaba la ruta y las tarjetas regresaban al home con `?categoria=<slug>#catalogo`.
 
-- [x] activar `/varistorehn/categoria/:slug` en `app.routes.ts`;
-- [x] crear una página pública de categoría por slug que consume `GET /tienda/categorias/{slug}`;
-- [x] usar el slug canónico devuelto por backend y corregir URL si el prefijo cambia;
-- [x] cambiar las tarjetas de `/varistorehn/categorias` para navegar a `VARISTOREHN_PATHS.categoria(slug)`;
-- [x] representar categoría inexistente/inactiva como estado no encontrado, sin fallback demo;
-- [x] mantener búsqueda/header/carrito y tema del sistema en la página de categoría;
-- [x] ofrecer continuidad al catálogo actual sin activar todavía `/varistorehn/productos`;
-- [x] añadir pruebas estáticas y Playwright de la nueva ruta;
-- [x] revalidar Fase 1 y la página de listado de categorías;
-- [x] lint/TypeScript + build producción + Playwright verdes en la rama candidata;
-- [ ] integrar y revalidar sobre `Desarrollo`.
+- [x] activar `/varistorehn/categoria/:slug`;
+- [x] crear página pública por slug;
+- [x] consumir el endpoint canónico y manejar cambio de slug;
+- [x] cambiar tarjetas al enlace canónico;
+- [x] representar loading/error/not-found/success sin fallback silencioso;
+- [x] mantener header, búsqueda, carrito e identidad/tema;
+- [x] no activar todavía `/varistorehn/productos`;
+- [x] ampliar guardas estáticas y Playwright;
+- [x] revalidar Fase 1 + listado Fase 2;
+- [x] lint/TypeScript + build producción + E2E verdes;
+- [x] integrar y revalidar post-merge en `Desarrollo`.
 
-## Evidencia de la rama reauditoria
+## Evidencia ejecutable
 
-HEAD funcional certificado antes de este cambio documental: `0d406d20454311ad8fa82d629fb4d4be4b4a643f`.
+### Rama de reauditoría
 
-GitHub Actions run `34535758631`: **success**.
+HEAD funcional: `0d406d20454311ad8fa82d629fb4d4be4b4a643f`.
+Run `34535758631`: **success**.
 
-El gate ejecutó en ese SHA:
+- TypeScript/lint: success;
+- guardia Fase 1: success;
+- guardia Fase 2: success;
+- build de producción: success;
+- Playwright Fase 1: **4/4**;
+- Playwright Fase 2: **8/8**.
 
-- `npm ci`: success;
-- TypeScript + lint general: success;
-- guardia estática Fase 1: success;
-- guardia estática Fase 2: success, incluyendo listado, ruta canónica, estados, navegación y separación administrativa;
-- `npm run build:prod`: success;
-- Playwright Fase 1: **4/4 success**;
-- Playwright Fase 2: **8/8 success**.
+### PR #3336
+
+HEAD: `8b8e279dca411988b67918ad68a3bab8bb925158`.
+
+- run Fase 2 `34536153026`: **success**;
+- run independiente Fase 1 `34536152956`: **success**.
+
+### Post-merge exacto
+
+Commit: `fc12bf9437ba1825d3007e620064fdd84557ac4d`.
+Run Fase 2 `34536591699`: **success**.
+
+El job post-merge aprobó instalación, lint/guardas estáticas, build de producción, servidor Angular, regresión Fase 1, Playwright Fase 2 y publicación de evidencia.
 
 Los ocho escenarios de Fase 2 cubren:
 
@@ -66,35 +80,25 @@ Los ocho escenarios de Fase 2 cubren:
 5. continuidad búsqueda → categoría canónica → catálogo filtrado → carrito;
 6. consumo por slug y corrección de URL al slug canónico devuelto por backend;
 7. categoría inexistente como `not-found` sin fixture inventado;
-8. error de la categoría por slug manteniendo el fallo real.
+8. error de categoría por slug manteniendo el fallo real.
 
-Durante el primer intento del hardening, la guardia de calidad detectó `outline: none` en la nueva hoja de estilos y bloqueó el pipeline antes del build. La regla fue corregida eliminando esa supresión de foco y el HEAD funcional posterior quedó verde. Este fallo previo se conserva como evidencia de que la guardia realmente está protegiendo accesibilidad y no solo comprobando presencia de archivos.
+Durante el hardening inicial, la guardia de calidad bloqueó correctamente una versión que contenía `outline: none`; se eliminó la supresión de foco antes de certificar el HEAD verde.
 
 ## Concurrencia
 
-La rama se creó desde `9e9336c02973f31a8de0b56b26420b0e93af882d`. Mientras se trabajó la fase, `Desarrollo` avanzó con trabajo VAEP de otros agentes. La comparación previa al PR debe volver a ejecutarse y cualquier integración se hará únicamente si esos cambios no pisan los archivos de VariStoreHn de esta fase.
+La integración se realizó mediante PR aislado. Antes del merge, `Desarrollo` solo había avanzado en documentación VAEP ajena a VariStoreHn, sin solapamiento con los archivos de esta fase. El merge se ejecutó con SHA de cabeza esperado para evitar integrar una revisión distinta de la validada.
 
 ## Límite de fase
 
-Fase 2 sigue sin activar:
+Permanecen fuera de Fase 2:
 
 - `/varistorehn/productos` como catálogo independiente: Fase 3;
 - detalle de producto por slug: Fase 4;
 - store global/persistente del carrito: Fase 5;
 - checkout/pedido real: Fase 6.
 
-## Evidencia histórica válida
+## Observación transversal
 
-La implementación inicial del listado pasó:
+La instalación de dependencias reporta vulnerabilidades preexistentes del repositorio. No se atribuyen a la implementación de Fase 2 y deben mantenerse como deuda de seguridad transversal separada.
 
-- rama candidata run `34530528076` — success;
-- gate de PR run `34530901540` — success;
-- post-merge run `34531637269` — success;
-- Playwright Fase 1: 4/4;
-- Playwright Fase 2 inicial: 5/5.
-
-Esa evidencia probaba el listado y sus estados, pero no la URL canónica omitida. La reauditoría actual añade la cobertura que faltaba.
-
-## Gate de cierre reaudidado
-
-La fase solo vuelve a `COMPLETADA` cuando el PR de esta reauditoría sea mergeable, sus checks sean verdes y exista una regresión verde sobre el commit integrado en `Desarrollo`. Hasta entonces este documento conserva el estado de candidata a cierre.
+**Conclusión:** Fase 2 recertificada con ruta canónica por categoría, estados reales, regresión estática, navegador real y validación exacta post-merge.
