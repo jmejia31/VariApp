@@ -1,9 +1,6 @@
 /**
- * Contratos canónicos del escaparate público de VariStoreHn.
- *
- * Los tipos *CatalogoPublico representan la frontera HTTP actual.
- * Los tipos *Tienda representan el modelo normalizado que consumen las páginas públicas.
- * Mantener estos contratos independientes de componentes Angular y de modelos administrativos.
+ * Contratos canonicos del escaparate publico de VariStoreHn.
+ * Independientes de componentes Angular y de modelos administrativos.
  */
 export interface ImagenCatalogo {
   url: string;
@@ -15,25 +12,42 @@ export interface ModeloCatalogoPublico {
   modeloId?: number;
   modeloNombre?: string;
   marcaNombre?: string;
+  sku?: string | null;
   precio: number;
   cantidadDisponible: number;
   estaAgotado: boolean;
   imagenes: ImagenCatalogo[];
 }
 
+/** Frontera HTTP publica. Los campos comerciales reservados no se inventan. */
 export interface ProductoCatalogoPublico {
   id: number;
+  slug?: string;
   nombre: string;
   descripcion?: string;
+  categoriaId?: number | null;
   categoriaNombre?: string;
   marcaNombre?: string;
   modeloNombre?: string;
   precio: number;
+  precioOferta?: number | null;
   cantidadDisponible: number;
   estaAgotado: boolean;
+  sku?: string | null;
+  activo?: boolean;
+  esDestacado?: boolean;
+  fechaCreacion?: string;
   imagenPrincipalUrl?: string;
   imagenes: ImagenCatalogo[];
   modelos: ModeloCatalogoPublico[];
+}
+
+export interface CategoriaCatalogoPublico {
+  id: number;
+  slug: string;
+  nombre: string;
+  descripcion?: string | null;
+  totalProductos: number;
 }
 
 export interface ModeloTienda {
@@ -41,34 +55,43 @@ export interface ModeloTienda {
   modeloId: number | null;
   nombre: string;
   marca: string;
+  sku: string;
   precio: number;
   stock: number;
   disponible: boolean;
   imagenes: string[];
 }
 
-/** Modelo normalizado actual. Slug/promoción se añadirán al cerrar el contrato backend de Fase 0. */
+/** Modelo unico que deben consumir todas las paginas publicas de producto. */
 export interface ProductoTienda {
   id: number;
+  slug: string;
   nombre: string;
   descripcion: string;
+  categoriaId: number | null;
   categoria: string;
   marca: string;
+  sku: string;
   precio: number;
+  precioOferta: number | null;
+  stock: number;
   disponible: boolean;
+  activo: boolean;
+  destacado: boolean;
+  fechaCreacion: string | null;
   imagenes: string[];
   modelos: ModeloTienda[];
   ilustracion?: string;
 }
 
-/** Contrato objetivo para navegación pública; no debe rellenarse con slugs efímeros en el navegador. */
+/** Modelo unico que deben consumir todas las paginas publicas de categoria. */
 export interface CategoriaTienda {
   id: number;
   nombre: string;
   slug: string;
   descripcion: string;
   imagenUrl?: string;
-  cantidadProductos?: number;
+  cantidadProductos: number;
 }
 
 export interface ItemCarrito {
@@ -103,3 +126,4 @@ export interface FiltrosCatalogo {
 
 export type EstadoConsultaPublica = 'loading' | 'empty' | 'error' | 'success';
 export type EstadoDisponibilidad = 'available' | 'lowStock' | 'outOfStock';
+export type EstadoPromocion = 'none' | 'active' | 'expired';
