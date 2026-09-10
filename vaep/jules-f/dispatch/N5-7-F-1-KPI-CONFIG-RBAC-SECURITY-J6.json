@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-7-F-1-KPI-CONFIG-RBAC-SECURITY-J6",
+  "taskId": "N5.7.F.1.KPI_CONFIG_RBAC_SECURITY",
+  "workerId": "J6",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/DashboardKpiConfiguracionSecurityTests.cs;backend/tests/InventoryApp.Tests/DashboardKpiConfiguracionOwnershipTests.cs",
+  "prompt": "Read docs/VAEP_AUTHORITY.md as the sole operational authority. Implement N5.7.F RBAC/ownership/audit/security verification only after N5.7.E is LISTO_REAL. Add source-backed tests that prove a user cannot read/write another user's KPI configuration, role visibility does not broaden existing dashboard access, unknown metric keys fail closed, and auditable ownership rules remain enforced. No Production, secrets, main, PR #2 merge, arbitrary formulas, or unrelated security changes.",
+  "primaryBaseHead": "8265136111950faf0952a2a1ad05e2977ddeb140"
+}
