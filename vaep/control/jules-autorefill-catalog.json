@@ -1,8 +1,8 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
   "currentParent": "N5.3.E",
-  "generatedAt": "2026-09-10T03:00:20Z",
-  "regenerationReason": "REVIEW_P0_RECONCILE__E1_E4_REVIEW_ACCEPTED__E5_TAKEOVER_GATES_PENDING__E6_GATED",
+  "generatedAt": "2026-09-10T03:06:20Z",
+  "regenerationReason": "REVIEW_P0_RECONCILE__E1_E5_REVIEW_ACCEPTED__E6_UNLOCKED_MATERIAL",
   "lastClosedParent": "N5.3.D",
   "closureReceipts": {
     "N4.11.H": "vaep/evidence/fragments/N4.11.H_LISTO_REAL_20260908T204500Z.json",
@@ -49,11 +49,11 @@
     "mode": "MATERIAL_SWARM_FIRST",
     "currentParent": "N5.3.E",
     "currentParentMaterialScopeCount": 1,
-    "currentParentReason": "E1-E4 are REVIEW_FIRST accepted. E5 transport stalled and CHATGPT_VAEP takeover is integrated but exact-head gates are pending. E6 remains sibling-gated until E5 REVIEW_FIRST acceptance.",
+    "currentParentReason": "E1-E5 are REVIEW_FIRST accepted. E6 is now the sole dependency-valid material scope and must be dispatched exactly once.",
     "nextParent": "N5.3.F",
     "nextParentParallelMaterialScopes": 0,
     "nextParentScopesNonOverlapping": true,
-    "laneRefill": "E5_EXACT_HEAD_GATES__THEN_E6__NO_DUPLICATE__NO_FILLER"
+    "laneRefill": "E6_DISPATCH__THEN_REVIEW_FIRST_AND_CLOSE__NO_DUPLICATE__NO_FILLER"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
@@ -72,24 +72,12 @@
     ]
   },
   "lanes": {
-    "J1": [
-      {"dispatchId":"N5-3-E-1-SALES-REPORT-FRONTEND-MODELS-J1","taskId":"N5.3.E.1.SALES_REPORT_FRONTEND_MODELS","workerId":"J1","taskAttempt":1,"plannedParent":"N5.3.E","readyForDispatch":false,"dispatchEligible":false,"fileScopeHint":"frontend/src/app/core/models/reporte-ventas.models.ts","prompt":"REVIEW_FIRST accepted; do not redispatch.","reason":"REVIEW_FIRST_ACCEPTED","reviewFirstState":"MATERIAL_ACCEPTED_GATES_VERIFIED","takeoverExecuted":false,"resultIssue":3232}
-    ],
-    "J2": [
-      {"dispatchId":"N5-3-E-2-SALES-REPORT-FRONTEND-SERVICE-J2","taskId":"N5.3.E.2.SALES_REPORT_FRONTEND_SERVICE","workerId":"J2","taskAttempt":1,"plannedParent":"N5.3.E","readyForDispatch":false,"dispatchEligible":false,"fileScopeHint":"frontend/src/app/core/services/reporte-ventas.service.ts","prompt":"CHATGPT_VAEP QA takeover and REVIEW_FIRST accepted; superseded transport is evidence-only; do not redispatch.","reason":"REVIEW_FIRST_ACCEPTED_QA_TAKEOVER","reviewFirstState":"MATERIAL_ACCEPTED_GATES_VERIFIED","takeoverExecuted":true,"supersededTransportRunId":34429866992,"lateIntegrationDenied":true}
-    ],
-    "J3": [
-      {"dispatchId":"N5-3-E-3-SALES-REPORT-FILTERS-COMPONENT-J3","taskId":"N5.3.E.3.SALES_REPORT_FILTERS_COMPONENT","workerId":"J3","taskAttempt":1,"plannedParent":"N5.3.E","readyForDispatch":false,"dispatchEligible":false,"fileScopeHint":"frontend/src/app/features/reportes-ventas/filtros/**","prompt":"CHATGPT_VAEP QA takeover and REVIEW_FIRST accepted; superseded transport is evidence-only; do not redispatch.","reason":"REVIEW_FIRST_ACCEPTED_QA_TAKEOVER","reviewFirstState":"MATERIAL_ACCEPTED_GATES_VERIFIED","takeoverExecuted":true,"supersededTransportRunId":34429876116,"lateIntegrationDenied":true}
-    ],
-    "J4": [
-      {"dispatchId":"N5-3-E-4-SALES-REPORT-SUMMARY-COMPONENT-J4","taskId":"N5.3.E.4.SALES_REPORT_SUMMARY_COMPONENT","workerId":"J4","taskAttempt":1,"plannedParent":"N5.3.E","readyForDispatch":false,"dispatchEligible":false,"fileScopeHint":"frontend/src/app/features/reportes-ventas/resumen/**","prompt":"REVIEW_FIRST accepted; do not redispatch.","reason":"REVIEW_FIRST_ACCEPTED","reviewFirstState":"MATERIAL_ACCEPTED","takeoverExecuted":false,"resultIssue":3238,"workflowRunId":34430728752,"sessionId":"sessions/17056774481712006617","activeReal":false}
-    ],
-    "J5": [
-      {"dispatchId":"N5-3-E-5-SALES-REPORT-DETAIL-COMPONENT-J5","taskId":"N5.3.E.5.SALES_REPORT_DETAIL_COMPONENT","workerId":"J5","taskAttempt":1,"plannedParent":"N5.3.E","readyForDispatch":false,"dispatchEligible":false,"fileScopeHint":"frontend/src/app/features/reportes-ventas/detalle/**","prompt":"CHATGPT_VAEP takeover correction integrated; exact-head gates pending before REVIEW_FIRST acceptance.","reason":"QA_TAKEOVER_CORRECTION_AWAITING_EXACT_HEAD_GATES","reviewFirstState":"CORRECTION_APPLIED_GATES_PENDING","takeoverExecuted":true,"supersededTransportRunId":34430736925,"lateIntegrationDenied":true,"resultIssue":3239,"activeReal":false}
-    ],
-    "J6": [
-      {"dispatchId":"N5-3-E-6-SALES-REPORT-PAGE-ROUTE-TESTS-J6","taskId":"N5.3.E.6.SALES_REPORT_PAGE_ROUTE_TESTS","workerId":"J6","taskAttempt":1,"plannedParent":"N5.3.E","readyForDispatch":false,"dispatchEligible":false,"fileScopeHint":"frontend/src/app/features/reportes-ventas/reportes-ventas.component.ts;frontend/src/app/features/reportes-ventas/reportes-ventas.component.html;frontend/src/app/features/reportes-ventas/reportes-ventas.component.scss;frontend/src/app/app.routes.ts;frontend/src/app/app.routes.reportes-ventas.spec.ts","prompt":"After E2-E5 REVIEW_FIRST accepted, compose the sales-report page shell, add centro-reportes/ventas guarded by Ventas/Ver, and focused route regression coverage; no backend or child duplication.","reason":"SIBLING_GATE_E2_E5_REVIEW_FIRST"}
-    ]
+    "J1": [{"dispatchId":"N5-3-E-1-SALES-REPORT-FRONTEND-MODELS-J1","taskId":"N5.3.E.1.SALES_REPORT_FRONTEND_MODELS","workerId":"J1","taskAttempt":1,"plannedParent":"N5.3.E","readyForDispatch":false,"dispatchEligible":false,"fileScopeHint":"frontend/src/app/core/models/reporte-ventas.models.ts","prompt":"REVIEW_FIRST accepted; do not redispatch.","reason":"REVIEW_FIRST_ACCEPTED","reviewFirstState":"MATERIAL_ACCEPTED_GATES_VERIFIED","takeoverExecuted":false,"resultIssue":3232}],
+    "J2": [{"dispatchId":"N5-3-E-2-SALES-REPORT-FRONTEND-SERVICE-J2","taskId":"N5.3.E.2.SALES_REPORT_FRONTEND_SERVICE","workerId":"J2","taskAttempt":1,"plannedParent":"N5.3.E","readyForDispatch":false,"dispatchEligible":false,"fileScopeHint":"frontend/src/app/core/services/reporte-ventas.service.ts","prompt":"CHATGPT_VAEP QA takeover and REVIEW_FIRST accepted; superseded transport is evidence-only; do not redispatch.","reason":"REVIEW_FIRST_ACCEPTED_QA_TAKEOVER","reviewFirstState":"MATERIAL_ACCEPTED_GATES_VERIFIED","takeoverExecuted":true,"supersededTransportRunId":34429866992,"lateIntegrationDenied":true}],
+    "J3": [{"dispatchId":"N5-3-E-3-SALES-REPORT-FILTERS-COMPONENT-J3","taskId":"N5.3.E.3.SALES_REPORT_FILTERS_COMPONENT","workerId":"J3","taskAttempt":1,"plannedParent":"N5.3.E","readyForDispatch":false,"dispatchEligible":false,"fileScopeHint":"frontend/src/app/features/reportes-ventas/filtros/**","prompt":"CHATGPT_VAEP QA takeover and REVIEW_FIRST accepted; superseded transport is evidence-only; do not redispatch.","reason":"REVIEW_FIRST_ACCEPTED_QA_TAKEOVER","reviewFirstState":"MATERIAL_ACCEPTED_GATES_VERIFIED","takeoverExecuted":true,"supersededTransportRunId":34429876116,"lateIntegrationDenied":true}],
+    "J4": [{"dispatchId":"N5-3-E-4-SALES-REPORT-SUMMARY-COMPONENT-J4","taskId":"N5.3.E.4.SALES_REPORT_SUMMARY_COMPONENT","workerId":"J4","taskAttempt":1,"plannedParent":"N5.3.E","readyForDispatch":false,"dispatchEligible":false,"fileScopeHint":"frontend/src/app/features/reportes-ventas/resumen/**","prompt":"REVIEW_FIRST accepted; do not redispatch.","reason":"REVIEW_FIRST_ACCEPTED","reviewFirstState":"MATERIAL_ACCEPTED_GATES_VERIFIED","takeoverExecuted":false,"resultIssue":3238,"workflowRunId":34430728752,"sessionId":"sessions/17056774481712006617","activeReal":false}],
+    "J5": [{"dispatchId":"N5-3-E-5-SALES-REPORT-DETAIL-COMPONENT-J5","taskId":"N5.3.E.5.SALES_REPORT_DETAIL_COMPONENT","workerId":"J5","taskAttempt":1,"plannedParent":"N5.3.E","readyForDispatch":false,"dispatchEligible":false,"fileScopeHint":"frontend/src/app/features/reportes-ventas/detalle/**","prompt":"REVIEW_FIRST accepted after CHATGPT_VAEP takeover and exact functional-head gates; do not redispatch.","reason":"REVIEW_FIRST_ACCEPTED_QA_TAKEOVER","reviewFirstState":"MATERIAL_ACCEPTED_GATES_VERIFIED","takeoverExecuted":true,"supersededTransportRunId":34430736925,"lateIntegrationDenied":true,"resultIssue":3239,"activeReal":false}],
+    "J6": [{"dispatchId":"N5-3-E-6-SALES-REPORT-PAGE-ROUTE-TESTS-J6","taskId":"N5.3.E.6.SALES_REPORT_PAGE_ROUTE_TESTS","workerId":"J6","taskAttempt":1,"plannedParent":"N5.3.E","readyForDispatch":true,"dispatchEligible":true,"fileScopeHint":"frontend/src/app/features/reportes-ventas/reportes-ventas.component.ts;frontend/src/app/features/reportes-ventas/reportes-ventas.component.html;frontend/src/app/features/reportes-ventas/reportes-ventas.component.scss;frontend/src/app/app.routes.ts;frontend/src/app/app.routes.reportes-ventas.spec.ts","prompt":"Compose the sales-report page shell from accepted E2-E5 siblings, add centro-reportes/ventas guarded by Ventas/Ver, and focused route regression coverage. Preserve loading/error/empty behavior; no backend or child-component duplication. Desarrollo only.","reason":"CURRENT_PARENT__SIBLINGS_REVIEW_FIRST_ACCEPTED__MATERIAL_SCOPE"}]
   },
   "lastClosureFunctionalHead": "9278bc3bd8479366667a1cef11d3bb90f4a86637"
 }
