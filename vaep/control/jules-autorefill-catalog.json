@@ -1,9 +1,9 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
-  "currentParent": "N5.4.D",
-  "generatedAt": "2026-09-10T06:15:00Z",
-  "regenerationReason": "N5.4.D_D1_CONTROLLER_TAKEOVER_IMPLEMENTED__RECOVERY1_SUPERSEDED__REVIEW_FIRST_REQUIRED__NO_DUPLICATE_WRITER",
-  "lastClosedParent": "N5.4.C",
+  "currentParent": "N5.4.E",
+  "generatedAt": "2026-09-10T06:27:00Z",
+  "regenerationReason": "N5.4.D_LISTO_REAL__PROMOTE_N5.4.E__PARENT_CLOSE_FIRST__NO_BUSYWORK",
+  "lastClosedParent": "N5.4.D",
   "closureReceipts": {
     "N4.11.H": "vaep/evidence/fragments/N4.11.H_LISTO_REAL_20260908T204500Z.json",
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
@@ -19,7 +19,8 @@
     "N5.3.H": "vaep/evidence/fragments/N5.3.H_LISTO_REAL_20260910T0420Z.json",
     "N5.4.A": "vaep/evidence/fragments/N5.4.A_LISTO_REAL_20260910T0447Z.json",
     "N5.4.B": "vaep/evidence/fragments/N5.4.B_LISTO_REAL_20260910T0520Z.json",
-    "N5.4.C": "vaep/evidence/fragments/N5.4.C_LISTO_REAL_20260910T0544Z.json"
+    "N5.4.C": "vaep/evidence/fragments/N5.4.C_LISTO_REAL_20260910T0544Z.json",
+    "N5.4.D": "vaep/evidence/fragments/N5.4.D_LISTO_REAL_20260910T0626Z.json"
   },
   "policy": {
     "branch": "Desarrollo",
@@ -39,19 +40,19 @@
   },
   "throughputPlan": {
     "mode": "PARENT_CLOSE_FIRST",
-    "currentParent": "N5.4.D",
+    "currentParent": "N5.4.E",
     "currentParentMaterialScopeCount": 0,
-    "currentParentReason": "D1 is materially implemented by CHATGPT_VAEP after a valid transport-stall ownership transfer. RECOVERY1 was created later and is superseded/non-authoritative. No duplicate writer is eligible while REVIEW_FIRST and applicable exact-head gates are drained.",
-    "nextParent": "N5.4.E",
+    "currentParentReason": "N5.4.D is LISTO_REAL. N5.4.E is promoted as CURRENT_PARENT. No Jules scope is admitted until exact frontend/UX scopes are derived from the accepted N5.4.D API contract; inventing generic work is prohibited.",
+    "nextParent": "N5.4.F",
     "nextParentParallelMaterialScopes": 0,
     "nextParentScopesNonOverlapping": true,
-    "laneRefill": "CLOSURE_DEBT_FASTPATH__REVIEW_FIRST_D1__NO_DUPLICATE_DISPATCH__PROMOTE_E_ONLY_AFTER_D_LISTO_REAL"
+    "laneRefill": "DERIVE_N5.4.E_FRONTEND_UX_SCOPES_FROM_ACCEPTED_N5.4.D_API_CONTRACT__NO_FILLER__NO_FUTURE_PARENT"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
     "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
     "sourceRanges": ["COLA!A418:T422", "PLAN_MAESTRO", "docs/qa/N5_4_B_ABSOLUTE_PROFITABILITY_CONTRACT.md", "docs/qa/N5_4_B_MARGIN_PERCENT_CONTRACT.md", "docs/qa/N5_4_B_GROUPING_IDENTITY_CONTRACT.md", "docs/qa/N5_4_B_DISCOUNT_ALLOCATION_CONTRACT.md", "docs/qa/N5_4_B_SHIPPING_COST_CONTRACT.md", "docs/qa/N5_4_B_DISCLOSURE_SCOPE_CONTRACT.md", "docs/qa/N5_4_C_PERSISTENCE_MIGRATION_DECISION.md"],
-    "note": "N5.4.C is LISTO_REAL. N5.4.D is current and in REVIEW_FIRST/closure debt after controller takeover of its only material implementation scope. N5.4.E, N5.4.F and N5.4.G remain ordered dependency-gated successors.",
+    "note": "N5.4.D is LISTO_REAL. N5.4.E is current and must derive only source-backed frontend/UX scopes from the accepted profitability API contract. N5.4.F and N5.4.G remain ordered dependency-gated successors.",
     "nodes": [
       {"id": "N5.4.A", "order": 26, "type": "MICROTAREA", "dependencies": ["N5.1.H", "GATE-N4"], "phaseGate": "GATE-N4"},
       {"id": "N5.4.B", "order": 27, "type": "MICROTAREA", "dependencies": ["N5.4.A"], "phaseGate": "GATE-N4"},
@@ -63,30 +64,16 @@
     ]
   },
   "prearmedRoadmap": [
-    {"parent": "N5.4.E", "state": "READY_DEPENDENCY_GATED", "dependency": "N5.4.D_LISTO_REAL", "materialization": "DERIVE_FRONTEND_UX_SCOPES_FROM_ACCEPTED_N5.4.D_API_CONTRACT__NO_FILLER"},
     {"parent": "N5.4.F", "state": "READY_DEPENDENCY_GATED", "dependency": "N5.4.E_LISTO_REAL", "materialization": "DERIVE_SECURITY_AUDIT_SCOPES_FROM_ACCEPTED_N5.4.E_AND_D_CONTRACTS__NO_FILLER"},
     {"parent": "N5.4.G", "state": "READY_DEPENDENCY_GATED", "dependency": "N5.4.F_LISTO_REAL", "materialization": "DERIVE_QA_CI_SCOPES_FROM_ACCEPTED_N5.4.D_E_F_CHANGES__NO_FILLER"}
   ],
   "lanes": {
-    "J1": [
-      {
-        "dispatchId": "N5-4-D-1-ABSOLUTE-PROFITABILITY-QUERY-API-J1",
-        "taskId": "N5.4.D.1.ABSOLUTE_PROFITABILITY_QUERY_API",
-        "workerId": "J1",
-        "taskAttempt": 1,
-        "plannedParent": "N5.4.D",
-        "readyForDispatch": false,
-        "dispatchEligible": false,
-        "fileScopeHint": "backend/src/Application/DTOs/ReporteRentabilidadDto.cs;backend/src/Application/Interfaces/IRentabilidadVentasService.cs;backend/src/Infrastructure/Services/RentabilidadVentasService.cs;backend/src/API/Controllers/RentabilidadVentasController.cs;backend/src/API/Program.cs;backend/tests/InventoryApp.Tests/Infrastructure/Services/RentabilidadVentasServiceTests.cs",
-        "prompt": "Implement the source-backed absolute profitability query/API slice exactly as authorized by the matching immutable dispatch manifest. Preserve unresolved percentage and header-discount allocation semantics as explicit gates.",
-        "reason": "CONTROLLER_TAKEOVER_IMPLEMENTED__RECOVERY1_SUPERSEDED__PENDING_REVIEW_FIRST__NO_DUPLICATE_WRITER"
-      }
-    ],
+    "J1": [],
     "J2": [],
     "J3": [],
     "J4": [],
     "J5": [],
     "J6": []
   },
-  "lastClosureFunctionalHead": "baf93a6789082b4e7a04c8420753f58c9fb6710d"
+  "lastClosureFunctionalHead": "68344eed4d7f8d6fa80abc2eaa074919e61bff90"
 }
