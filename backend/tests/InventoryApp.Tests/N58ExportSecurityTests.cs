@@ -54,7 +54,9 @@ public sealed class N58ExportSecurityTests
         using var workbook = new XLWorkbook(stream);
         var cell = workbook.Worksheet("Reporte").Cell(2, 1);
 
-        Assert.Equal("'=1+1", cell.GetString());
+        Assert.False(cell.HasFormula);
+        Assert.Equal(XLDataType.Text, cell.DataType);
+        Assert.Equal("=1+1", cell.GetString());
         Assert.Equal("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", file.ContentType);
         Assert.Equal("roles-permisos.xlsx", file.NombreArchivo);
     }
