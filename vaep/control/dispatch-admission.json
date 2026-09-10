@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "OPEN",
-  "allowExistingActiveSessions": true,
-  "reason": "OPEN_ONLY__N5.3.F_CURRENT__F1_CONTROLLER_TAKEOVER_REVIEW_ACCEPTED__F2_J2_MANIFEST_PUBLISHED__NO_FILLER_J3_J6",
-  "updatedAtUtc": "2026-09-10T03:50:00Z"
+  "newDispatchAdmission": "FROZEN",
+  "allowExistingActiveSessions": false,
+  "reason": "FROZEN_N5.3.G_CONTROLLER_QA_CI_CURRENT__NO_JULES_DISPATCH__N5.3.H_DEPENDENCY_GATED",
+  "updatedAtUtc": "2026-09-10T04:12:30Z"
 }
