@@ -65,21 +65,29 @@ jobs:
           expected = plan.get('nextParentParallelMaterialScopes')
           if not isinstance(next_parent, str) or not next_parent.strip():
               raise SystemExit('next-parent throughput plan missing')
-          # Zero is valid when the source-backed roadmap has not yielded safe
-          # successor scopes yet. Forcing 1..6 here would contradict noBusywork
-          # and dependency gating by requiring fabricated NEXT work.
           if not isinstance(expected, int) or isinstance(expected, bool) or not 0 <= expected <= 6:
               raise SystemExit('next-parent material scope count must be an integer from 0 to 6')
-          # The canonical no-busywork invariant above is the executable policy.
-          # Do not require a duplicate optional lowParallelismAction field when
-          # the source-backed successor count is legitimately below six.
 
           planned = [task for task in tasks if task.get('plannedParent') == next_parent and task.get('readyForDispatch') is True]
           workers = {task.get('workerId') for task in planned}
-          if len(planned) != expected or len(workers) != expected:
-              raise SystemExit('next parent prearmed material scope count/worker ownership mismatch')
-          if not workers.issubset(canonical):
-              raise SystemExit('next parent references an unknown Jules lane')
+          metadata_prearmed = [item for item in (catalog.get('prearmedRoadmap') or [])
+                              if item.get('parent') == next_parent
+                              and item.get('state') in {'READY_DEPENDENCY_GATED','READY_ORDER_DEPENDENCY_GATED'}
+                              and isinstance(item.get('materialization'), str)
+                              and item.get('materialization').strip()
+                              and 'NO_FILLER' in item.get('materialization')]
+
+          # A future parent may be prearmed without prematurely reserving a Jules
+          # write-scope. Physical lane ownership is required when such tasks have
+          # already been materialized. Otherwise one source-backed dependency-gated
+          # roadmap prearm is valid for a single-scope next parent and preserves the
+          # one-writer/taskId invariant until the dependency actually opens.
+          metadata_only = not planned and expected == 1 and len(metadata_prearmed) == 1
+          if not metadata_only:
+              if len(planned) != expected or len(workers) != expected:
+                  raise SystemExit('next parent prearmed material scope count/worker ownership mismatch')
+              if not workers.issubset(canonical):
+                  raise SystemExit('next parent references an unknown Jules lane')
 
           scopes = []
           for task in planned:
@@ -100,5 +108,6 @@ jobs:
                   if left == right or left.startswith(right + '/') or right.startswith(left + '/'):
                       raise SystemExit(f'overlapping parallel write scopes: {left_task}:{left} vs {right_task}:{right}')
 
-          print(f'VAEP_THROUGHPUT_GUARD=PASS current={current} next={next_parent} parallel_scopes={expected}')
+          mode = 'metadata_dependency_gated' if metadata_only else 'physical_lane_prearm'
+          print(f'VAEP_THROUGHPUT_GUARD=PASS current={current} next={next_parent} parallel_scopes={expected} mode={mode}')
           PY
