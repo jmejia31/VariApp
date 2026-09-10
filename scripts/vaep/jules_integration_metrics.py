@@ -22,12 +22,14 @@ REQUIRED = {
 }
 # A REVIEW_FIRST / QA-takeover commit may carry Dispatch/Task/Worker/Session
 # metadata to identify the source Jules work without claiming to be an
-# integration receipt. Treat a commit as receipt intent only when it carries
-# at least one explicit integration-only field beyond Session. Once intent
-# exists, the complete REQUIRED contract is still validated fail-closed.
+# integration receipt. Canonical receipt intent is signalled by immutable
+# integration fields or the exact canonical `VAEP-Integrated: TRUE` token.
+# Older controller metadata used lowercase `true`; that spelling is not the
+# canonical receipt token from VAEP_AUTHORITY and must remain evidence-only.
+# Once canonical intent exists, the complete REQUIRED contract is validated
+# fail-closed.
 STRONG_INTEGRATION_INTENT = {
-    "Dispatch-Manifest", "Patch-SHA256", "Patch-Base",
-    "Integrated", "Integration-Branch"
+    "Dispatch-Manifest", "Patch-SHA256", "Patch-Base", "Integration-Branch"
 }
 
 def git(*args):
@@ -50,7 +52,11 @@ def split_semicolon(value):
     return [item.strip() for item in value.split(";") if item.strip()]
 
 def has_integration_receipt_intent(trailers):
-    return "Dispatch" in trailers and bool(set(trailers) & STRONG_INTEGRATION_INTENT)
+    if "Dispatch" not in trailers:
+        return False
+    if set(trailers) & STRONG_INTEGRATION_INTENT:
+        return True
+    return trailers.get("Integrated") == "TRUE"
 
 def validate_contract(trailers, duplicates, manifest, changed_files):
     errors = []
@@ -203,7 +209,7 @@ def rolling(hours):
         "totalTarget24h":total_target if hours == 24 else None,
         "deficitByWorker":per_deficit,
         "totalDeficit":max(0,total_target-len(valid)) if hours == 24 and total_target is not None else None,
-        "excludedFromProductivity":["dispatch commits","manifests","autorefill","reservations","workflow success without session","SESSION_COMPLETED without validated integration","REVIEW_FIRST/QA takeover metadata without integration-receipt intent"],
+        "excludedFromProductivity":["dispatch commits","manifests","autorefill","reservations","workflow success without session","SESSION_COMPLETED without validated integration","REVIEW_FIRST/QA takeover metadata without canonical integration-receipt intent"],
         "integrations":[{"commit":item["sha"],"dispatchId":item["trailers"]["Dispatch"],"taskId":item["trailers"]["Task"],"worker":item["trailers"]["Worker"],"session":item["trailers"]["Session"]} for item in valid]
     }
     print(json.dumps(payload, indent=2))
@@ -255,6 +261,11 @@ def self_test():
     if has_integration_receipt_intent(review_only):
         print("SELFTEST_REVIEW_SESSION_METADATA_MISCLASSIFIED_AS_RECEIPT")
         return 1
+    legacy_controller_metadata = dict(review_only)
+    legacy_controller_metadata["Integrated"] = "true"
+    if has_integration_receipt_intent(legacy_controller_metadata):
+        print("SELFTEST_LOWERCASE_CONTROLLER_METADATA_MISCLASSIFIED_AS_RECEIPT")
+        return 1
     malformed_intent = dict(review_only)
     malformed_intent["Integrated"] = "TRUE"
     if not has_integration_receipt_intent(malformed_intent):
@@ -266,6 +277,7 @@ def self_test():
     print("JULES_INTEGRATION_RECEIPT_SELFTEST=PASS")
     print("PRODUCTIVITY_KPI_INTEGRATED_ONLY=PASS")
     print("REVIEW_METADATA_EXCLUDED_FROM_INTEGRATION_RECEIPTS=PASS")
+    print("LOWERCASE_LEGACY_CONTROLLER_METADATA_EXCLUDED=PASS")
     return 0
 
 def main():
