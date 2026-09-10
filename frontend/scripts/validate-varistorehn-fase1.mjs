@@ -14,7 +14,8 @@ const [
   storefrontTs,
   storefrontHtml,
   storefrontScss,
-  storefrontResponsiveScss
+  storefrontResponsiveScss,
+  appRoutes
 ] = await Promise.all([
   read('varistorehn-header.component.ts'),
   read('varistorehn-header.component.html'),
@@ -22,7 +23,8 @@ const [
   read('varistorehn.component.ts'),
   read('varistorehn.component.html'),
   read('varistorehn.component.scss'),
-  read('varistorehn.responsive.scss')
+  read('varistorehn.responsive.scss'),
+  readFile(path.join(frontendDir, 'src/app/app.routes.ts'), 'utf8')
 ]);
 
 const failures = [];
@@ -40,11 +42,23 @@ expect(headerHtml.includes('{{ totalUnidades }}'), 'El contador visual del carri
 expect(headerHtml.includes('enlaceWhatsapp()'), 'Debe existir una acción secundaria de WhatsApp cuando esté configurada.');
 expect(headerScss.includes('min-height: 44px'), 'Los controles móviles deben conservar objetivos táctiles de al menos 44px.');
 expect(!/#[0-9a-f]{3,8}\b/i.test(headerScss), 'El header no debe introducir colores hexadecimales fuera del tema.');
+
+const searchButtonRule = headerScss.match(/\.search-box button\s*\{([^}]*)\}/s)?.[1] ?? '';
+expect(searchButtonRule.includes('width: var(--target-min, 44px)'), 'El botón de búsqueda debe garantizar al menos 44px de ancho sin depender del tipo de puntero.');
+expect(searchButtonRule.includes('height: var(--target-min, 44px)'), 'El botón de búsqueda debe garantizar al menos 44px de alto.');
+
 expect(storefrontTs.includes('VaristorehnHeaderComponent'), 'El escaparate debe importar el header público reutilizable.');
 expect(storefrontHtml.includes('<app-varistorehn-header'), 'El escaparate debe delegar su cabecera al componente público.');
 expect(!storefrontHtml.includes('<header class="store-header">'), 'La cabecera monolítica anterior debe dejar de vivir en el escaparate.');
 expect(storefrontHtml.includes('(busquedaActualizada)="buscar($event)"'), 'La búsqueda del header debe seguir filtrando el catálogo actual.');
 expect(storefrontHtml.includes('(carritoSolicitado)="abrirCarrito()"'), 'El carrito del header debe abrir el estado real existente.');
+
+const publicStoreRoute = appRoutes.match(/\{\s*path:\s*'varistorehn'\s*,[\s\S]*?\},/)?.[0] ?? '';
+expect(Boolean(publicStoreRoute), 'Debe existir la ruta pública /varistorehn.');
+expect(publicStoreRoute.includes('VaristorehnComponent'), 'La ruta /varistorehn debe cargar el escaparate público.');
+expect(!publicStoreRoute.includes('canActivate'), 'La ruta pública /varistorehn no debe incorporar guards administrativos.');
+expect(!publicStoreRoute.includes('authGuard'), 'La ruta pública /varistorehn no debe depender de authGuard.');
+expect(!publicStoreRoute.includes('permisoGuard'), 'La ruta pública /varistorehn no debe depender de permisoGuard.');
 
 const staleHeaderSelectors = [
   '.skip-link',
@@ -84,4 +98,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.info('Fase 1 — navegación/header: guardas estáticas aprobadas, incluida la extracción completa de estilos.');
+console.info('Fase 1 — navegación/header: guardas estáticas aprobadas, incluida ruta pública, targets y extracción completa de estilos.');
