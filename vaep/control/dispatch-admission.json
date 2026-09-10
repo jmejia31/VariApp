@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "FROZEN",
-  "allowExistingActiveSessions": false,
-  "reason": "FROZEN_N5.3.G_CONTROLLER_QA_CI_CURRENT__NO_JULES_DISPATCH__N5.3.H_DEPENDENCY_GATED",
-  "updatedAtUtc": "2026-09-10T04:12:30Z"
+  "newDispatchAdmission": "OPEN",
+  "allowExistingActiveSessions": true,
+  "reason": "OPEN_ONLY_INVARIANT_REPAIR__TASK_LANE_GATES_ONLY",
+  "updatedAtUtc": "2026-09-10T04:13:14Z"
 }
