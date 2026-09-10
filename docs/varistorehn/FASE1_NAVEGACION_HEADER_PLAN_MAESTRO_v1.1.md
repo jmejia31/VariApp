@@ -110,7 +110,7 @@ También existió una ejecución verde previa (`34519342478`) antes del pulido f
 
 ## Concurrencia
 
-La rama se creó desde `dde80b13e6fd9e361a6ca2e5bc074a8734bb0d2b`. Durante el desarrollo, `Desarrollo` recibió cuatro commits adicionales; la comparación confirmó que esos cambios afectan archivos de control/evidencia VAEP y no los archivos de VariStoreHn modificados por esta fase. El PR permanece mergeable.
+La rama se creó desde `dde80b13e6fd9e361a6ca2e5bc074a8734bb0d2b`. Durante el desarrollo, `Desarrollo` recibió commits adicionales; la comparación confirmó que esos cambios afectan archivos de control/evidencia VAEP y no los archivos de VariStoreHn modificados por esta fase. El PR permanece mergeable.
 
 ## Definition of Done
 
