@@ -1,72 +1,28 @@
 /** Pure catalog/cart rules: deliberately independent of Angular and the backend. */
-export interface ImagenCatalogo { url: string; orden: number; esPrincipal: boolean; }
-export interface ModeloCatalogoPublico {
-  modeloId?: number;
-  modeloNombre?: string;
-  marcaNombre?: string;
-  precio: number;
-  cantidadDisponible: number;
-  estaAgotado: boolean;
-  imagenes: ImagenCatalogo[];
-}
-export interface ProductoCatalogoPublico {
-  id: number;
-  nombre: string;
-  descripcion?: string;
-  categoriaNombre?: string;
-  marcaNombre?: string;
-  modeloNombre?: string;
-  precio: number;
-  cantidadDisponible: number;
-  estaAgotado: boolean;
-  imagenPrincipalUrl?: string;
-  imagenes: ImagenCatalogo[];
-  modelos: ModeloCatalogoPublico[];
-}
-export interface ModeloTienda {
-  clave: string;
-  modeloId: number | null;
-  nombre: string;
-  marca: string;
-  precio: number;
-  stock: number;
-  disponible: boolean;
-  imagenes: string[];
-}
-export interface ProductoTienda {
-  id: number;
-  nombre: string;
-  descripcion: string;
-  categoria: string;
-  marca: string;
-  precio: number;
-  disponible: boolean;
-  imagenes: string[];
-  modelos: ModeloTienda[];
-  ilustracion?: string;
-}
-export interface ItemCarrito {
-  clave: string;
-  productoId: number;
-  modeloClave: string;
-  modeloId: number | null;
-  nombre: string;
-  modelo: string;
-  precio: number;
-  stock: number;
-  unidades: number;
-  imagen: string;
-  ilustracion: string;
-}
-export interface ReferenciaCarrito { productoId: number; modeloClave: string; unidades: number; }
-export type OrdenCatalogo = 'destacados' | 'precio-asc' | 'precio-desc' | 'nombre';
-export interface FiltrosCatalogo {
-  busqueda: string;
-  categoria: string;
-  soloDisponibles: boolean;
-  precioMaximo: number | null;
-  orden: OrdenCatalogo;
-}
+import type {
+  FiltrosCatalogo,
+  ImagenCatalogo,
+  ItemCarrito,
+  ModeloTienda,
+  ProductoCatalogoPublico,
+  ProductoTienda,
+  ReferenciaCarrito
+} from './varistorehn.models';
+
+export type {
+  CategoriaTienda,
+  EstadoConsultaPublica,
+  EstadoDisponibilidad,
+  FiltrosCatalogo,
+  ImagenCatalogo,
+  ItemCarrito,
+  ModeloCatalogoPublico,
+  ModeloTienda,
+  OrdenCatalogo,
+  ProductoCatalogoPublico,
+  ProductoTienda,
+  ReferenciaCarrito
+} from './varistorehn.models';
 
 export function normalizarTexto(valor: string): string {
   return valor.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('es').trim();
