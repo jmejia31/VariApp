@@ -1,0 +1,69 @@
+name: VAEP N6.1.C EF Generate
+
+on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - '.github/workflows/vaep-n61c-ef-generate.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Restore backend
+        run: dotnet restore InventoryApp.sln
+      - name: Install EF tool
+        run: dotnet tool install --global dotnet-ef --version 8.0.8
+      - name: Generate N6.1.C migration and canonical snapshot
+        run: |
+          set -euo pipefail
+          dotnet ef migrations add N6_1_C_TenantEmpresaPersistence \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext \
+            --output-dir Migrations
+          generated="$(ls src/Infrastructure/Migrations/*N6_1_C_TenantEmpresaPersistence.cs | grep -v Designer | head -n 1)"
+          designer="$(ls src/Infrastructure/Migrations/*N6_1_C_TenantEmpresaPersistence.Designer.cs | head -n 1)"
+          test -n "$generated"
+          test -n "$designer"
+          grep -q 'CreateTable' "$generated"
+          grep -q 'Empresas' "$generated"
+          grep -q 'CK_Empresas_Nombre_NoVacio' "$generated"
+          grep -q 'IX_Empresas_Activa_Nombre' "$generated"
+          grep -q 'InventoryApp.Domain.Entities.Empresa' src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs
+          grep -q 'Empresas' src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs
+      - name: Verify model is snapshot-aligned
+        run: |
+          set -euo pipefail
+          dotnet build InventoryApp.sln --configuration Release
+          dotnet ef migrations has-pending-model-changes \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext
+      - name: Publish generated migration and snapshot only
+        run: |
+          set -euo pipefail
+          git config user.name 'VAEP Controller'
+          git config user.email 'actions@users.noreply.github.com'
+          git add src/Infrastructure/Migrations/*N6_1_C_TenantEmpresaPersistence*.cs \
+                  src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs
+          cached="$(git diff --cached --name-only)"
+          printf '%s\n' "$cached"
+          test "$(printf '%s\n' "$cached" | sed '/^$/d' | wc -l | tr -d ' ')" = '3'
+          printf '%s\n' "$cached" | grep -Eq 'N6_1_C_TenantEmpresaPersistence\.cs$'
+          printf '%s\n' "$cached" | grep -Eq 'N6_1_C_TenantEmpresaPersistence\.Designer\.cs$'
+          printf '%s\n' "$cached" | grep -Eq 'AppDbContextModelSnapshot\.cs$'
+          git commit -m 'fix(n6.1.c): generate Empresa migration and snapshot'
+          git push origin HEAD:Desarrollo
