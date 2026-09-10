@@ -5,6 +5,6 @@
   "expectedBranch": "Desarrollo",
   "taskAttempt": 1,
   "fileScopeHint": "frontend/src/app/features/reportes-compras/disclosure/**",
-  "prompt": "Create a focused accessible purchase-report disclosure/state component for loading, empty and error states plus source-backed interpretation notes. Clearly distinguish ordered vs invoiced currency and explain that price variation is absent when currencies are incompatible; present receipt/return/evaluation values as persisted facts. Do not invent FX, percentages, SLA, ranking or composite supplier score. No HTTP, filters, table, page shell, route or backend changes.",
-  "primaryBaseHead": "61febfc38dea1c75e71da26f9be97e818b17b138"
+  "prompt": "Use only docs/VAEP_AUTHORITY.md, live Desarrollo and the accepted N5.5.D purchase-report contract. Create a focused accessible purchase-report disclosure/state component for loading, empty and error states plus source-backed interpretation notes. Clearly distinguish ordered vs invoiced currency and explain that price variation is absent when currencies are incompatible; present receipt/return/evaluation values as persisted facts. Do not invent FX, percentages, SLA, ranking or composite supplier score. Do not implement HTTP, filters, table, page shell, route or backend. Run proportional frontend tests/lint/build as applicable, perform two independent self-reviews and return patch/artifact only. Never touch main, Produccion, secrets or merge PR #2.",
+  "primaryBaseHead": "ef8fa177e696e979a8c7d9cf19ccb585f0cd5896"
 }
