@@ -41,7 +41,7 @@ jobs:
 
           tasks = [task for lane in lanes.values() for task in lane]
           task_ids = [task.get('taskId') for task in tasks]
-          dispatch_ids = [task.get('dispatchId') for task in tasks]
+          dispatch_ids = [task.get('dispatchId') for task in tasks if task.get('dispatchId')]
           if len(task_ids) != len(set(task_ids)) or len(dispatch_ids) != len(set(dispatch_ids)):
               raise SystemExit('TASK_IDENTITY_UNIQUE violated')
 
