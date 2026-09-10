@@ -101,6 +101,102 @@ test.describe('VariStoreHn Fase 1 — navegación y header', () => {
     await expect(page.getByRole('status').filter({ hasText: '14 productos encontrados' })).toBeVisible();
   });
 
+  test('desktop: la navegación opera también sobre productos obtenidos del endpoint público', async ({ page }) => {
+    await page.setViewportSize({ width: 1366, height: 900 });
+    let peticionesCatalogo = 0;
+
+    await page.route('http://localhost:5005/tienda/productos**', async route => {
+      peticionesCatalogo += 1;
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({
+          success: true,
+          data: {
+            items: [
+              {
+                id: 701,
+                slug: 'teclado-http-audit-701',
+                nombre: 'Teclado HTTP Audit',
+                descripcion: 'Producto servido por la API pública de auditoría.',
+                categoriaId: 71,
+                categoriaNombre: 'Periféricos',
+                marcaNombre: 'Audit',
+                modeloNombre: 'Base',
+                precio: 1250,
+                precioOferta: null,
+                cantidadDisponible: 4,
+                estaAgotado: false,
+                sku: 'AUD-701',
+                activo: true,
+                esDestacado: false,
+                fechaCreacion: '2026-09-10T00:00:00Z',
+                imagenPrincipalUrl: null,
+                imagenes: [],
+                modelos: []
+              },
+              {
+                id: 702,
+                slug: 'audifonos-http-audit-702',
+                nombre: 'Audífonos HTTP Audit',
+                descripcion: 'Segundo producto servido por la API pública.',
+                categoriaId: 72,
+                categoriaNombre: 'Audio',
+                marcaNombre: 'Audit',
+                modeloNombre: 'Base',
+                precio: 990,
+                precioOferta: null,
+                cantidadDisponible: 3,
+                estaAgotado: false,
+                sku: 'AUD-702',
+                activo: true,
+                esDestacado: false,
+                fechaCreacion: '2026-09-10T00:00:00Z',
+                imagenPrincipalUrl: null,
+                imagenes: [],
+                modelos: []
+              }
+            ],
+            page: 1,
+            pageSize: 96,
+            totalCount: 2
+          }
+        })
+      });
+    });
+
+    await prepararTienda(page);
+    await page.getByRole('button', { name: 'Base de datos' }).click();
+    await expect(page.getByRole('status').filter({ hasText: '2 productos encontrados' })).toBeVisible();
+    expect(peticionesCatalogo).toBe(1);
+    await expect(page.locator('article.product-card')).toHaveCount(2);
+    await expect(page.locator('article.product-card')).not.toContainText('Laptop Pro 14');
+
+    const header = page.locator('app-varistorehn-header');
+    const search = header.getByRole('searchbox', { name: 'Buscar productos, marcas o modelos' });
+    await search.fill('Audífonos HTTP');
+    await expect(page.getByRole('status').filter({ hasText: '1 productos encontrados' })).toBeVisible();
+    await expect(page.locator('article.product-card')).toHaveCount(1);
+    await expect(page.locator('article.product-card')).toContainText('Audífonos HTTP Audit');
+
+    await search.fill('');
+    const audio = header.locator('nav.store-nav').getByRole('button', { name: 'Audio', exact: true });
+    await audio.click();
+    await expect(audio).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('#catalog-title')).toHaveText('Audio');
+    await expect(page.getByRole('status').filter({ hasText: '1 productos encontrados' })).toBeVisible();
+
+    await header.locator('nav.store-nav').getByRole('button', { name: /Todas/ }).click();
+    const teclado = page.locator('article.product-card').filter({ hasText: 'Teclado HTTP Audit' });
+    await teclado.getByRole('button', { name: 'Agregar Teclado HTTP Audit' }).click();
+    const carrito = page.locator('dialog.cart-dialog');
+    await expect(carrito).toBeVisible();
+    await carrito.getByRole('button', { name: 'Cerrar carrito' }).click();
+    await expect(header.getByRole('button', { name: 'Abrir carrito con 1 unidades' })).toBeVisible();
+    await expect(header.locator('.cart-copy small')).toContainText('1,250');
+  });
+
   test('tablet: WhatsApp permanece accesible y sin overflow en toda la franja previa al menú móvil', async ({ page }) => {
     await page.setViewportSize({ width: 900, height: 900 });
     await prepararTienda(page);
@@ -162,7 +258,7 @@ test.describe('VariStoreHn Fase 1 — navegación y header', () => {
         return { selector, width: Math.round(rect.width), height: Math.round(rect.height) };
       });
     });
-    expect(targetAudit.every(item => item.height >= 44)).toBe(true);
+    expect(targetAudit.every(item => item.width >= 44 && item.height >= 44), JSON.stringify(targetAudit)).toBe(true);
 
     for (const width of [760, 390, 320]) {
       await page.setViewportSize({ width, height: 844 });
