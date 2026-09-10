@@ -7,6 +7,7 @@
     "build": "ng build",
     "build:prod": "ng build --configuration production",
     "lint": "tsc --noEmit -p tsconfig.app.json && node scripts/lint-quality.mjs && node scripts/validate-scanner-2c4.mjs && node scripts/validate-varistorehn-fase1.mjs",
+    "test:e2e:varistorehn-fase1": "playwright test e2e/varistorehn-fase1.spec.ts --config=playwright.config.ts",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
