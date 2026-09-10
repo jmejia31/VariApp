@@ -1,9 +1,9 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
-  "currentParent": "N6.1.E",
-  "generatedAt": "2026-09-10T19:12:34Z",
-  "regenerationReason": "SUPERVISOR_24__N6.1.E_CURRENT__ROLLING60_2_OF_3__PREARM_N1_N2_N3__NO_FILLER",
-  "lastClosedParent": "N6.1.D",
+  "currentParent": "N6.1.F",
+  "generatedAt": "2026-09-10T19:42:00Z",
+  "regenerationReason": "WATCHDOG_36__N6.1.E_LISTO_REAL__PROMOTE_N6.1.F__PARENT_CLOSE_FIRST__NO_FILLER",
+  "lastClosedParent": "N6.1.E",
   "closureReceipts": {
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
     "N5.1.H": "vaep/evidence/fragments/N5.1.H_LISTO_REAL_20260909T1236Z.json",
@@ -26,7 +26,8 @@
     "N6.1.A": "vaep/evidence/fragments/N6.1.A_LISTO_REAL_20260910T1718Z.json",
     "N6.1.B": "vaep/evidence/fragments/N6.1.B_LISTO_REAL_20260910T1736Z.json",
     "N6.1.C": "vaep/evidence/fragments/N6.1.C_LISTO_REAL_20260910T1837Z.json",
-    "N6.1.D": "vaep/evidence/fragments/N6.1.D_LISTO_REAL_20260910T1907Z.json"
+    "N6.1.D": "vaep/evidence/fragments/N6.1.D_LISTO_REAL_20260910T1907Z.json",
+    "N6.1.E": "vaep/evidence/fragments/N6.1.E_LISTO_REAL_20260910T1939Z.json"
   },
   "policy": {
     "branch": "Desarrollo",
@@ -44,20 +45,20 @@
   },
   "throughputPlan": {
     "mode": "PARENT_CLOSE_FIRST",
-    "currentParent": "N6.1.E",
+    "currentParent": "N6.1.F",
     "currentParentMaterialScopeCount": 1,
-    "currentParentReason": "N6.1.D is LISTO_REAL. N6.1.E is now the first dependency-valid unfinished frontend/UX facet; F/G remain dependency-gated.",
-    "nextParent": "N6.1.F",
+    "currentParentReason": "N6.1.E is LISTO_REAL. N6.1.F is now the first dependency-valid unfinished security/audit facet; G/H remain dependency-gated.",
+    "nextParent": "N6.1.G",
     "nextParentParallelMaterialScopes": 1,
     "nextParentScopesNonOverlapping": true,
     "currentRun": null,
     "nextRunReserved": {
-      "parent": "N6.1.F",
+      "parent": "N6.1.G",
       "state": "DEPENDENCY_GATED_RESERVED",
-      "dependency": "N6.1.E_LISTO_REAL",
-      "materialization": "TENANT_EMPRESA_SEC_AUDIT__ROADMAP_DERIVED__NO_FILLER"
+      "dependency": "N6.1.F_LISTO_REAL",
+      "materialization": "TENANT_EMPRESA_QA_REGRESSION__ROADMAP_DERIVED__NO_FILLER"
     },
-    "laneRefill": "E1_READY_FOR_MATERIAL_DISPATCH__RECHECK_HEAD_ADMISSION_AND_LANES_BEFORE_MANIFEST"
+    "laneRefill": "F1_READY_FOR_MATERIAL_DISPATCH__RECHECK_HEAD_ADMISSION_AND_LANES_BEFORE_MANIFEST"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
@@ -91,8 +92,8 @@
   ],
   "prearmedRoadmap": [
     {"parent": "N6.1.D", "taskId": "N6.1.D.1.TENANT_EMPRESA_APPLICATION_API", "state": "LISTO_REAL__SUPERSEDED_J1_EVIDENCE_ONLY", "dependency": "N6.1.C_LISTO_REAL", "worker": "J1", "runId": 34516541490, "materialization": "TENANT_EMPRESA_APPLICATION_API__ROADMAP_DERIVED__NO_FILLER"},
-    {"parent": "N6.1.E", "state": "READY_CURRENT", "dependency": "N6.1.D_LISTO_REAL", "materialization": "TENANT_EMPRESA_FRONTEND_UX__ROADMAP_DERIVED__NO_FILLER"},
-    {"parent": "N6.1.F", "state": "READY_DEPENDENCY_GATED", "dependency": "N6.1.E_LISTO_REAL", "materialization": "TENANT_EMPRESA_SEC_AUDIT__ROADMAP_DERIVED__NO_FILLER"},
+    {"parent": "N6.1.E", "taskId": "N6.1.E.1.TENANT_EMPRESA_FRONTEND_UX", "state": "LISTO_REAL__CONTROLLER_RECOVERY_REVIEWED", "dependency": "N6.1.D_LISTO_REAL", "worker": "J4", "runId": 34518866113, "materialization": "TENANT_EMPRESA_FRONTEND_UX__ROADMAP_DERIVED__NO_FILLER"},
+    {"parent": "N6.1.F", "state": "READY_CURRENT", "dependency": "N6.1.E_LISTO_REAL", "materialization": "TENANT_EMPRESA_SEC_AUDIT__ROADMAP_DERIVED__NO_FILLER"},
     {"parent": "N6.1.G", "state": "READY_DEPENDENCY_GATED", "dependency": "N6.1.F_LISTO_REAL", "materialization": "TENANT_EMPRESA_QA_REGRESSION__ROADMAP_DERIVED__NO_FILLER"},
     {"parent": "N6.1.H", "state": "READY_DEPENDENCY_GATED", "dependency": "N6.1.G_LISTO_REAL", "materialization": "TENANT_EMPRESA_DOC_CERT__ROADMAP_DERIVED__NO_FILLER"}
   ],
@@ -104,7 +105,7 @@
     "J5": [],
     "J6": []
   },
-  "rolling60CertifiedParents": ["N6.1.C", "N6.1.D"],
-  "rolling60Count": 2,
-  "lastClosureFunctionalHead": "34a1dfce31bfdf50ef8ee2d44ec0e2bfb4bf6d67"
+  "rolling60CertifiedParents": ["N6.1.C", "N6.1.D", "N6.1.E"],
+  "rolling60Count": 3,
+  "lastClosureFunctionalHead": "3c955298c912e67435fefe5f6903a5d074d72f54"
 }
