@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "OPEN",
+  "newDispatchAdmission": "FROZEN",
   "allowExistingActiveSessions": true,
-  "reason": "N5.3.D_D3_REVIEW_FIRST_AND_CAUSAL_BACKEND_GATE_ACCEPTED__D4_MATERIAL_SCOPE_READY__NO_DUPLICATE_DISPATCH",
-  "updatedAtUtc": "2026-09-10T00:46:20Z"
+  "reason": "N5.3.D_D4_ATTEMPT1_RESERVED_AND_WORKER_ACTIVE__REVIEW_FIRST_REQUIRED_BEFORE_D5_OR_ANY_REFILL__NO_DUPLICATE_DISPATCH",
+  "updatedAtUtc": "2026-09-10T00:48:00Z"
 }
