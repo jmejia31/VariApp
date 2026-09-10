@@ -11,6 +11,14 @@
   "transportStalled": true,
   "supersededWorkflowRunId": 34419904763,
   "supersessionIssue": 3224,
+  "supersessionArtifactId": 10130981808,
+  "lateSession": "sessions/16766802904759478683",
+  "lateSessionStateAtStop": "IN_PROGRESS",
+  "safeRemoteStopAttempted": true,
+  "safeRemoteStopAction": "STOP_SIGNAL_SENT",
+  "attemptConsumedByStalledWorker": true,
+  "latePatchPresent": false,
+  "lateResultAutoIntegrationDenied": true,
   "functionalCommit": "52d119331c17b3d4be9a5c07535f89321cc154c4",
   "validationHead": "52d119331c17b3d4be9a5c07535f89321cc154c4",
   "validation": {
@@ -34,5 +42,6 @@
   "productionTouched": false,
   "secretsTouched": false,
   "pr2Merged": false,
-  "recordedAtUtc": "2026-09-10T00:26:02Z"
+  "recordedAtUtc": "2026-09-10T00:26:02Z",
+  "reconciledAtUtc": "2026-09-10T00:30:03Z"
 }
