@@ -1,9 +1,15 @@
+using System.Reflection;
 using InventoryApp.API.Controllers;
+using InventoryApp.API.Filters;
+using InventoryApp.API.Middleware;
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Application.Services;
 using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Enums;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit;
 
@@ -41,6 +47,40 @@ public sealed class N61FEmpresaSecurityAuditTests
         var parameter = Assert.Single(constructor.GetParameters());
 
         Assert.Equal(typeof(IEmpresaService), parameter.ParameterType);
+    }
+
+    [Fact]
+    public void EmpresasController_IsFailClosed()
+    {
+        var controllerType = typeof(EmpresasController);
+
+        Assert.NotNull(controllerType.GetCustomAttribute<AuthorizeAttribute>());
+        Assert.Empty(controllerType.GetCustomAttributes<AllowAnonymousAttribute>());
+    }
+
+    [Theory]
+    [InlineData(nameof(EmpresasController.List), AccionPermiso.Ver)]
+    [InlineData(nameof(EmpresasController.GetById), AccionPermiso.Ver)]
+    [InlineData(nameof(EmpresasController.Create), AccionPermiso.Crear)]
+    [InlineData(nameof(EmpresasController.Update), AccionPermiso.Editar)]
+    [InlineData(nameof(EmpresasController.Activar), AccionPermiso.Activar)]
+    [InlineData(nameof(EmpresasController.Desactivar), AccionPermiso.Desactivar)]
+    public void EmpresaActions_RequireExactConfiguracionPermission(string methodName, AccionPermiso expectedAction)
+    {
+        var method = typeof(EmpresasController).GetMethod(methodName);
+        Assert.NotNull(method);
+        Assert.Empty(method!.GetCustomAttributes<AllowAnonymousAttribute>());
+
+        var permiso = method.GetCustomAttribute<RequierePermisoAttribute>();
+        Assert.NotNull(permiso);
+
+        var moduloField = typeof(RequierePermisoAttribute).GetField("_modulo", BindingFlags.NonPublic | BindingFlags.Instance);
+        var accionField = typeof(RequierePermisoAttribute).GetField("_accion", BindingFlags.NonPublic | BindingFlags.Instance);
+        Assert.NotNull(moduloField);
+        Assert.NotNull(accionField);
+
+        Assert.Equal(ModuloSistema.Configuracion, (ModuloSistema)moduloField!.GetValue(permiso)!);
+        Assert.Equal(expectedAction, (AccionPermiso)accionField!.GetValue(permiso)!);
     }
 
     [Fact]
@@ -129,5 +169,28 @@ public sealed class N61FEmpresaSecurityAuditTests
             It.IsAny<string?>(),
             It.IsAny<string>(),
             It.IsAny<string?>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ExistingCorrelationMiddleware_PropagatesEmpresaRequestCorrelation()
+    {
+        const string correlationId = "n61f-empresa-security-001";
+        string? observed = null;
+        var context = new DefaultHttpContext();
+        context.Request.Headers[CorrelationIdMiddleware.HeaderName] = correlationId;
+
+        var middleware = new CorrelationIdMiddleware(
+            ctx =>
+            {
+                observed = ctx.TraceIdentifier;
+                return Task.CompletedTask;
+            },
+            NullLogger<CorrelationIdMiddleware>.Instance);
+
+        await middleware.InvokeAsync(context);
+
+        Assert.Equal(correlationId, observed);
+        Assert.Equal(correlationId, context.Items[CorrelationIdMiddleware.ItemKey]);
+        Assert.Equal(correlationId, context.Response.Headers[CorrelationIdMiddleware.HeaderName].ToString());
     }
 }
