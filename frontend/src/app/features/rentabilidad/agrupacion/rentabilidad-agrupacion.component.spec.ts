@@ -41,4 +41,13 @@ describe('RentabilidadAgrupacionComponent', () => {
     component.disabled = false;
     expect(component.agrupacionControl.enabled).toBeTrue();
   });
+
+  it('does not emit a programmatic selection while disabled', () => {
+    let emitted: RentabilidadAgrupacion | undefined;
+    component.valueChange.subscribe(value => emitted = value);
+    component.disabled = true;
+    component.agrupacionControl.setValue('cliente', { emitEvent: false });
+    component.onSelectionChange();
+    expect(emitted).toBeUndefined();
+  });
 });

@@ -62,6 +62,9 @@ export class RentabilidadAgrupacionComponent {
   readonly agrupacionControl = new FormControl<RentabilidadAgrupacion>('vendedor', { nonNullable: true });
 
   onSelectionChange(): void {
+    if (this.agrupacionControl.disabled) {
+      return;
+    }
     this.valueChange.emit(this.agrupacionControl.value);
   }
 }
