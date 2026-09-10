@@ -37,6 +37,9 @@ SCHEDULED_RUN_LANE_REFILL_BEFORE_REVIEW=TRUE
 JULES_TERMINAL_HANDOFF_SAME_RUN=TRUE
 NO_MANIFEST_DURING_HEAD_FREEZE_CAUSAL=TRUE
 PREARM_BEFORE_CAUSAL_CI=TRUE
+GLOBAL_DISPATCH_ADMISSION=OPEN_ONLY
+GLOBAL_FROZEN_PROHIBITED=TRUE
+CAUSAL_HOLD_SCOPE=TASK_OR_LANE_ONLY
 VAEP_CHECKPOINTS=:00,:12,:24,:36,:48
 JULES_LANE_BUDGET_SECONDS=1080
 JULES_MAX_ATTEMPTS=2
@@ -53,6 +56,7 @@ END_AUTOMATION_POLICY
 4. `CHANGELOG_AI.md`, `BITACORA`, Issues, artifacts, prompts anteriores y commits pueden contener etiquetas históricas; son **evidencia**, nunca autoridad ejecutable.
 5. Si una fuente histórica contradice este MAESTRO, gana este MAESTRO.
 6. Ningún worker puede elegir reglas por número, fecha o etiqueta histórica.
+7. **Ninguna referencia histórica a estados globales de admisión distintos de `OPEN` puede ser interpretada por código, workflows, agentes o controladores como una instrucción vigente.** El historial Git permanece inmutable como evidencia; la ejecución solo acepta la política actual `OPEN_ONLY`.
 
 ## 2. Precedencia
 
@@ -152,6 +156,7 @@ PENDIENTE|EN_PROGRESO|VALIDANDO|LISTO|BLOQUEADO|CANCELADO
 
 La política de parent-close, dwell time y SLA está gobernada por el bloque canónico `BEGIN_AUTOMATION_POLICY`:
 - `PARENT_CLOSE_FIRST=TRUE`: Cerrar CURRENT_PARENT antes de promover un sucesor dependiente.
+- **GLOBAL_FROZEN_PROHIBITED**: ningún workflow, checkpoint, watchdog, controller, takeover, review gate, hardening ni transición de parent puede escribir `newDispatchAdmission` distinto de `OPEN`. Todo bloqueo causal se aplica exclusivamente a la tarea/lane afectada; nunca a la fábrica completa.
 - Los checkpoints activos provienen exclusivamente de `VAEP_CHECKPOINTS` en el bloque canónico.
 - `PARENT_CLOSE_SLA_ROLLING_60M=3`: mínimo operativo de 3 padres en `LISTO_REAL` por ventana móvil de 60 minutos.
 - `PARENT_CLOSE_SLA_ROLLING_24H=72`: objetivo contractual de 72 padres `LISTO_REAL` por ventana móvil de 24 horas; el contador de 24h no reemplaza el gate de 3/h, ambos deben cumplirse.
@@ -178,15 +183,15 @@ La política de parent-close, dwell time y SLA está gobernada por el bloque can
 - `ONE_MANIFEST_ONE_RUN=TRUE`: un manifest se publica en un único commit y produce exactamente un run. Un commit externo/manual sobre `Desarrollo` usa exclusivamente `push:path`; un commit interno creado con `GITHUB_TOKEN` (que no dispara Actions recursivamente) usa exactamente un `workflow_dispatch` correlacionado por `manifest_commit=<SHA exacto>`. Está prohibido combinar ambos mecanismos para el mismo manifest.
 - `CANCELLED_RUN_POLICY=FAILURE_TO_PREVENT`: una cancelación/supersession causada por VAEP, timer o control-plane es incidente operativo, no throughput. Debe corregirse la causa antes de generar más trabajo en esa lane. Sólo una cancelación externa/usuario explícita puede quedar fuera de esta clasificación.
 - **CONTINUIDAD PRIMARIA EVENT-DRIVEN**: cada workflow J1/J2/J3/J4/J5/J6 ejecuta `.github/scripts/vaep-jules-autorefill.sh` al terminar su corrida (también después de timeout/fallo de lane) y reserva el siguiente NEXT_SAFE material desde `vaep/control/jules-autorefill-catalog.json`. Los checkpoints horarios son watchdog/recovery; NO son el mecanismo primario de handoff.
-- El autorefill debe crear exactamente un manifest nuevo, con `primaryBaseHead` igual al padre real del commit, respetar `dispatch-admission=OPEN`, no duplicar scopes/dispatches y detenerse ante `HEAD_FREEZE_CAUSAL` real. La admisión se valida antes de construir, inmediatamente antes de publicar el ref y antes de emitir el run interno; si se cierra durante la carrera, el commit Git huérfano no se publica. Una actualización concurrente de HEAD obliga a reintentar contra el nuevo padre, nunca a publicar una base stale.
+- El autorefill debe crear exactamente un manifest nuevo, con `primaryBaseHead` igual al padre real del commit, respetar `dispatch-admission=OPEN`, no duplicar scopes/dispatches y detenerse ante `HEAD_FREEZE_CAUSAL` real. La admisión se valida antes de construir, inmediatamente antes de publicar el ref y antes de emitir el run interno; cualquier valor global distinto de `OPEN` es una violación de invariante que debe normalizarse antes del dispatch, sin cerrar lanes independientes. Una actualización concurrente de HEAD obliga a reintentar contra el nuevo padre, nunca a publicar una base stale.
 - El catálogo de autorefill es BACKLOG PROGRAMADO, separado de la cola viva. Debe mantener `JULES_PROGRAMMED_BACKLOG_TARGET_PER_WORKER=12` tareas materiales por Jules (72 agregadas), con reposición obligatoria cuando las no consumidas bajen de 4 por worker. Solo las entradas `dispatchEligible=true` pueden convertirse en runs; las futuras pueden quedar `dispatchEligible=false` hasta que sus dependencias sean válidas. La cola viva sigue limitada por `JULES_QUEUE_DEPTH_TARGET=2` (`CURRENT + NEXT`). La regeneración genérica de facetas está PROHIBIDA: el controller repone únicamente scopes genuinos/únicos del roadmap; nunca recicla una identidad completada, renumera la misma prueba ni fabrica busywork.
 - `JULES_NEXT_RUN_RESERVED_REQUIRED=TRUE`: NEXT_SAFE no cuenta como continuidad real hasta que exista un workflow Jules correlacionado en estado `pending|queued|in_progress` reservado para esa lane, salvo `HEAD_FREEZE_CAUSAL` real. Un archivo/row/manifiesto sin run no satisface zero-idle.
 - `LANE_REFILL_DEADLINE_SECONDS=30`: cada checkpoint debe resolver primero lanes libres o sin NEXT_RUN_RESERVED; no puede gastar más de este presupuesto en reconciliación/review antes de reservar trabajo real cuando existe SAFE_WORK.
 - `SCHEDULED_RUN_LANE_REFILL_BEFORE_REVIEW=TRUE`: la primera acción material de `:00/:12/:24/:36/:48`, después del preflight mínimo, es reservar CURRENT/NEXT run de J1/J2/J3/J4/J5/J6. REVIEW/CI/certificación se drenan detrás.
 - Terminal CURRENT debe liberar ownership y permitir que el NEXT_RUN_RESERVED arranque por la propia concurrencia del workflow, sin esperar otro checkpoint.
-- Cuando el CURRENT terminaliza y consume la reserva existente, el mismo workflow debe ejecutar AUTOREFILL **solo después de que el runtime state confirme terminal/stall/timeout**; entonces debe dejar un nuevo run `pending|queued|in_progress` siempre que exista SAFE_WORK y no haya freeze causal. Un fallo previo a sesión/admisión/transport no autoriza post-terminal refill. Esperar al siguiente checkpoint teniendo catálogo material disponible es incumplimiento.
+- Cuando el CURRENT terminaliza y consume la reserva existente, el mismo workflow debe ejecutar AUTOREFILL **solo después de que el runtime state confirme terminal/stall/timeout**; entonces debe dejar un nuevo run `pending|queued|in_progress` siempre que exista SAFE_WORK y no haya hold causal de la tarea/lane. Un fallo previo a sesión/admisión/transport no autoriza post-terminal refill. Esperar al siguiente checkpoint teniendo catálogo material disponible es incumplimiento.
 - `PREARM_BEFORE_CAUSAL_CI=TRUE`: el NEXT_SAFE que requiera manifest/commit debe prepararse antes de iniciar la ventana de CI causal del FUNCTIONAL_HEAD siempre que sea técnicamente posible.
-- `NO_MANIFEST_DURING_HEAD_FREEZE_CAUSAL=TRUE`: una vez exista HEAD_FREEZE_CAUSAL, está prohibido mover Desarrollo con manifests/control-plane que puedan cancelar/superseder gates del FUNCTIONAL_HEAD. Durante ese freeze, Jules continúan sobre runs ya reservados, work seguro no-head-moving y la cola declarativa; el siguiente manifest se publica inmediatamente al liberar el freeze.
+- `NO_MANIFEST_DURING_HEAD_FREEZE_CAUSAL=TRUE`: `HEAD_FREEZE_CAUSAL` es un **hold técnico local al scope/lane**, nunca un estado de admisión global. Una vez exista, está prohibido mover Desarrollo con manifests/control-plane que puedan cancelar/superseder gates del FUNCTIONAL_HEAD. Durante ese hold, Jules continúan sobre runs ya reservados, work seguro no-head-moving y la cola declarativa; el siguiente manifest se publica inmediatamente al liberar el hold.
 - Nunca false LISTO ni busywork.
 
 - **EVIDENCE_GAP_NO_R2**: si un patch no vacio demuestra base, scope y ausencia de cambios al control-plane, pero solo faltan los marcadores `SELF_REVIEW_PASS_1`, `SELF_REVIEW_PASS_2` o `TESTS_EXECUTED`, el contrato terminal sigue invalido y no puede marcar `READY_FOR_VAEP`; el handoff pasa directamente a `EVIDENCE_GAP_REVIEW_REQUIRED` (o `QA_TAKEOVER_REQUIRED` al agotar el intento). No se consume un intento adicional de contenido ni se crea R2/R3 para reimplementar el mismo scope.
@@ -220,21 +225,22 @@ Invariantes P0/P1 de entrega y productividad:
 - Si un stop de una sesión SUPERSEDED deja el estado remoto activo, la lane queda `QUARANTINED_REMOTE_ACTIVE_NO_DUPLICATE`; ningún recovery equivalente puede nacer hasta estado remoto terminal y RCA causal.
 - Los checkpoints tienen responsabilidades distintas: `:00` despacho material/correlación; `:12` RCA-recovery/cierre; `:24` REVIEW_FIRST/certificación/integración; `:36` stall-watchdog/cierre; `:48` deuda material priorizando cierre/review/QA antes que refill. Floor/target de catálogo son observabilidad, nunca obligación de fabricar tareas.
 
-
 ### Admisión de nuevos dispatches
 
-El estado machine-readable de admisión vive en `vaep/control/dispatch-admission.json` y está subordinado a este MAESTRO. Solo se permiten dos estados:
+El estado machine-readable de admisión vive en `vaep/control/dispatch-admission.json` y está subordinado a este MAESTRO. El contrato global es **OPEN_ONLY**:
 
-- `FROZEN`: un commit con exactamente un manifest nuevo se rechaza antes de crear sesión, consumir attempt, reservar ownership o iniciar recovery. Sesiones `ACTIVE_REAL` ya existentes no se invalidan.
-- `OPEN`: el manifest continúa por el transporte Jules normal.
+- `OPEN`: único estado global válido. Mantiene disponibles todas las lanes independientes que tengan trabajo material elegible.
+- Cualquier valor global distinto de `OPEN` es **INVÁLIDO y PROHIBIDO**. Watchdog, stall, REVIEW_FIRST, hardening, causal gate, parent transition y takeover jamás pueden cerrar la fábrica global.
+- Un bloqueo técnico se expresa exclusivamente como `dispatchEligible=false`, `WAITING_CAUSAL_GATE`, cuarentena, REVIEW_FIRST/QA_TAKEOVER o equivalente en la tarea/lane afectada. No modifica la admisión global.
+- Ninguna referencia de Git history, CHANGELOG, BITACORA, receipt, manifest, Issue, artifact, prompt o documento histórico puede habilitar un estado global distinto de `OPEN`.
 
 Reglas fail-closed:
 
 - cero manifests nuevos en un workflow Jules => `INVALID_TRIGGER` y fallo explícito; nunca SUCCESS/NO_OP. Un workflow Jules válido exige exactamente un manifest NUEVO para su lane;
 - más de un manifest nuevo => fail-closed;
 - exactamente un manifest => el control state debe existir, tener contrato válido y `allowExistingActiveSessions=true`;
-- control ausente, malformado, con claves desconocidas o valor distinto de `FROZEN|OPEN` => fail-closed;
-- Fase 7/certificación integral autoriza el primer retorno a `OPEN` tras la migración. Después de `MIGRATION_F0_F7=CLOSED/PASS`, un hardening posterior del control-plane puede volver de `FROZEN` a `OPEN` sin reabrir fases únicamente si el HEAD de hardening tiene `VAEP engine lightweight checks=SUCCESS` y `VAEP Jules Diagnostic=SUCCESS`, no existe regresión concreta de MASTER y PR #2 permanece OPEN+DRAFT.
+- control ausente, malformado, con claves desconocidas o valor distinto de `OPEN` => violación de invariante; el controller/checkpoint lo normaliza a `OPEN` antes de despachar y conserva cualquier restricción causal en la tarea/lane;
+- toda automatización activa debe validar `GLOBAL_DISPATCH_ADMISSION=OPEN_ONLY` y `GLOBAL_FROZEN_PROHIBITED=TRUE` antes de iniciar refill o transición de parent.
 
 ## 8. Retry cap
 
@@ -311,12 +317,12 @@ Dos auto-revisiones independientes son obligatorias antes de COMPLETED válido.
 ## 11. CI y cierre
 
 - Proteger causalidad de Development/Acceptance/Fase8/M13/Recovery cuando apliquen.
-- `HEAD_FREEZE_CAUSAL` existe únicamente cuando el HEAD funcional/integración que VAEP está certificando tiene al menos un gate crítico causal en estado `queued` o `in_progress`.
-- Un workflow legacy de otro módulo, un gate global no relacionado, Vercel/deploy no aplicable, CI de otro HEAD o CI disparado únicamente por `vaep/**`/manifests/control-plane **no** constituye freeze y no puede dejar lanes Jules voluntariamente idle.
+- `HEAD_FREEZE_CAUSAL` existe únicamente cuando el HEAD funcional/integración que VAEP está certificando tiene al menos un gate crítico causal en estado `queued` o `in_progress`; es un hold local de publicación para la tarea/lane relacionada y **no modifica la admisión global `OPEN`**.
+- Un workflow legacy de otro módulo, un gate global no relacionado, Vercel/deploy no aplicable, CI de otro HEAD o CI disparado únicamente por `vaep/**`/manifests/control-plane **no** constituye hold causal y no puede dejar lanes Jules voluntariamente idle.
 - Aplicar `CONTROL_PLANE_HEAD_EQUIVALENCE` a commits manifest/control-plane: conservar como `FUNCTIONAL_HEAD` el último HEAD funcional/integración y permitir handoffs Jules mientras no se invalide evidencia causal crítica.
 - No mover HEAD con un manifest si invalidaría evidencia causal crítica activa del `FUNCTIONAL_HEAD`.
-- Con `NO_MANIFEST_DURING_HEAD_FREEZE_CAUSAL=TRUE`, cualquier intento de dispatch que requiera commit durante freeze se mantiene PREARMED/WAITING_CAUSAL_GATE y NO se publica hasta que el gate crítico quede terminal. Esto evita HEAD churn y cancelaciones de CI.
-- Durante un freeze causal real, ejecutar trabajo compatible y drenar REVIEW_FIRST/QA_TAKEOVER; al quedar terminal el gate, recalcular freeze desde cero y publicar inmediatamente el NEXT_SAFE pendiente si sigue siendo válido.
+- Con `NO_MANIFEST_DURING_HEAD_FREEZE_CAUSAL=TRUE`, cualquier intento de dispatch que requiera commit durante el hold causal se mantiene PREARMED/WAITING_CAUSAL_GATE y NO se publica hasta que el gate crítico quede terminal. Esto evita HEAD churn y cancelaciones de CI, sin cambiar el admission global de `OPEN`.
+- Durante un hold causal real, ejecutar trabajo compatible y drenar REVIEW_FIRST/QA_TAKEOVER; al quedar terminal el gate, recalcular el hold desde cero y publicar inmediatamente el NEXT_SAFE pendiente si sigue siendo válido.
 - Fallo causal interno se corrige; ruido externo o fallo no causal se registra pero no se convierte en blocker falso ni serializa el CURRENT_PARENT.
 - Cierre requiere DoD real, gates/CI aplicables terminales y P0/P1=0.
 - Estado de cierre es monotónico: una tarea/padre con evidencia canónica `LISTO`/`LISTO_REAL` no puede volver a `EN_PROGRESO`/`PENDIENTE` por una fila stale. Si COLA contradice BITACORA/GitHub/certificación fresca, reconciliar COLA; reabrir solo con evidencia nueva explícita de defecto causal que invalide el cierre.
