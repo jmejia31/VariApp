@@ -1,0 +1,49 @@
+{
+  "authority": "docs/VAEP_AUTHORITY.md",
+  "parent": "N5.3.D",
+  "taskId": "N5.3.D.6.SALES_REPORT_API_CONTRACT_TESTS",
+  "workerId": "J6",
+  "taskAttempt": 1,
+  "transportRunId": 34425542214,
+  "transportJobId": 102709872402,
+  "transportStartedAtUtc": "2026-09-10T01:27:23Z",
+  "lastUsefulTransportEventAtUtc": "2026-09-10T01:27:39Z",
+  "watchdogObservedAtUtc": "2026-09-10T01:37:33Z",
+  "watchdogClassification": "TRANSPORT_STALLED",
+  "correlatedSessionIdObserved": false,
+  "freshUsefulJulesActivityObserved": false,
+  "resultIssueObserved": false,
+  "resultArtifactObserved": false,
+  "ownershipRevoked": true,
+  "superseded": true,
+  "lateIntegrationDenied": true,
+  "takeoverExecuted": true,
+  "takeoverActor": "CHATGPT_VAEP",
+  "takeoverCommit": "d0b0fddcacc2ebab65bb81a68ccc1dadb1ee9795",
+  "requestedScope": [
+    "backend/tests/InventoryApp.Tests/API/Controllers/ReportesVentasContractTests.cs"
+  ],
+  "changedFiles": [
+    "backend/tests/InventoryApp.Tests/API/Controllers/ReportesVentasContractTests.cs"
+  ],
+  "reviewFirst": {
+    "state": "PENDING_EXACT_HEAD_CI",
+    "scopeBounded": true,
+    "noProductionCodeChanged": true,
+    "testsAdded": [
+      "controller authentication/route/permission contract",
+      "inverted date-range rejection before service call",
+      "non-admin forged seller scope cannot expand row access",
+      "branch filter through VentaDetalle.Almacen.SucursalId with durable snapshot/null legacy identity projection"
+    ]
+  },
+  "remoteTransportStateAtTakeover": "in_progress",
+  "remoteTransportDisposition": "QUARANTINED_EVIDENCE_ONLY__DO_NOT_INTEGRATE_LATE_OUTPUT_WITHOUT_FRESH_REVIEW",
+  "r2Created": false,
+  "r3Created": false,
+  "parentDecision": "NOT_LISTO_REAL__EXACT_HEAD_CAUSAL_GATES_PENDING",
+  "mainTouched": false,
+  "productionTouched": false,
+  "secretsTouched": false,
+  "pr2Merged": false
+}
