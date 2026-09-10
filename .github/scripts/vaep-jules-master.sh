@@ -64,7 +64,6 @@ validate_dispatch_transport() {
   VALIDATED_MANIFEST="${own_added[0]}"
   printf 'VAEP_METRIC stage=MANIFEST_ACCEPTED value=true dispatch_sha=%s worker=%s manifest=%s\n' "$sha" "${WORKER_ID:-UNKNOWN}" "$VALIDATED_MANIFEST"
 }
-
 admission_state_action() {
   local state_file="${1:?admission state file required}"
   if [[ ! -f "$state_file" ]]; then
@@ -74,7 +73,7 @@ admission_state_action() {
   if ! jq -e '
     type == "object" and
     ((keys | sort) == ["allowExistingActiveSessions","newDispatchAdmission","reason","updatedAtUtc"]) and
-    (.newDispatchAdmission == "OPEN") and
+    (.newDispatchAdmission == "FROZEN" or .newDispatchAdmission == "OPEN") and
     (.allowExistingActiveSessions == true) and
     (.reason | type == "string" and length > 0) and
     (.updatedAtUtc | type == "string" and length > 0)
@@ -83,8 +82,11 @@ admission_state_action() {
     return 72
   fi
 
-  printf 'OPEN\n'
-  return 0
+  case "$(jq -r '.newDispatchAdmission' "$state_file")" in
+    OPEN) printf 'OPEN\n'; return 0 ;;
+    FROZEN) printf 'FROZEN\n'; return 75 ;;
+    *) printf 'INVALID\n'; return 72 ;;
+  esac
 }
 
 is_active_jules_state() {
@@ -228,7 +230,7 @@ if [[ "${1:-}" == "--self-test" ]]; then
   missing_action="$(admission_state_action "$admission_tmp/missing.json")"; missing_rc=$?
   set -e
 
-  [[ "$frozen_action" == "INVALID" && "$frozen_rc" -eq 72 ]]
+  [[ "$frozen_action" == "FROZEN" && "$frozen_rc" -eq 75 ]]
   [[ "$open_action" == "OPEN" && "$open_rc" -eq 0 ]]
   [[ "$invalid_action" == "INVALID" && "$invalid_rc" -eq 72 ]]
   [[ "$unknown_action" == "INVALID" && "$unknown_rc" -eq 72 ]]
@@ -282,7 +284,7 @@ if [[ "${1:-}" == "--self-test" ]]; then
   ! grep -q '^manifest_count_action() {' "$0"
   bash "$WORKER" --runtime-preflight >/dev/null
   bash "$WORKER" --static-self-test >/dev/null
-  printf '{"status":"ok","authority":"MASTER","masterFile":"%s","parentListoTargetRolling60":%d,"parentMaxDwellMinutes":%d,"parentStallNoProgressMinutes":%d,"maxVoluntaryIdle":%d,"checkpoints":"%s","laneBudgetSeconds":%d,"policyHash":"%s","numericProtocolLabelsProhibited":true,"globalFrozenProhibited":true}\n' \
+  printf '{"status":"ok","authority":"MASTER","masterFile":"%s","parentListoTargetRolling60":%d,"parentMaxDwellMinutes":%d,"parentStallNoProgressMinutes":%d,"maxVoluntaryIdle":%d,"checkpoints":"%s","laneBudgetSeconds":%d,"policyHash":"%s","numericProtocolLabelsProhibited":true}\n' \
     "$MASTER_FILE" "$PARENT_LISTO_TARGET_ROLLING_60" "$PARENT_MAX_DWELL_MINUTES" "$PARENT_STALL_NO_PROGRESS_MINUTES" "$MAX_VOLUNTARY_IDLE" "$VAEP_CHECKPOINTS" "$JULES_LANE_BUDGET_SECONDS" "$AUTOMATION_POLICY_HASH"
   exit 0
 fi
@@ -311,8 +313,12 @@ if [[ "${1:-}" == "--transport-preflight" ]]; then
 fi
 admission_rc=0
 admission_action="$(admission_state_action "$CONTROL_STATE_FILE")" || admission_rc=$?
+if [[ "$admission_action" == "FROZEN" ]]; then
+  printf 'VAEP MASTER admission FROZEN: rejecting new dispatch before session, attempt, ownership or recovery. Existing ACTIVE_REAL sessions remain unaffected.\n' >&2
+  exit "$admission_rc"
+fi
 if [[ "$admission_action" != "OPEN" ]]; then
-  printf 'VAEP MASTER admission invariant violation: global admission must be OPEN. FROZEN is prohibited; safety blocks belong to lane/task quarantine or REVIEW_FIRST. Refusing this dispatch until the controller guard restores OPEN.\n' >&2
+  printf 'VAEP MASTER admission state invalid or unavailable; refusing new dispatch fail-closed.\n' >&2
   exit "$admission_rc"
 fi
 
