@@ -1,9 +1,9 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
-  "currentParent": "N5.8.E",
-  "generatedAt": "2026-09-10T14:41:30Z",
-  "regenerationReason": "N5.8.D_LISTO_REAL__N5.8.E_E1_J4_CANONICAL_RUN_IN_PROGRESS__F_G_H_PREARMED_DEPENDENCY_GATED__NO_FILLER__NO_DUPLICATE_WRITER",
-  "lastClosedParent": "N5.8.D",
+  "currentParent": "N5.8.F",
+  "generatedAt": "2026-09-10T15:05:00Z",
+  "regenerationReason": "N5.8.E_LISTO_REAL__N5.8.F_PROMOTED__SINGLE_SOURCE_BACKED_SECURITY_SCOPE__G_H_DEPENDENCY_GATED__NO_FILLER",
+  "lastClosedParent": "N5.8.E",
   "closureReceipts": {
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
     "N5.1.H": "vaep/evidence/fragments/N5.1.H_LISTO_REAL_20260909T1236Z.json",
@@ -16,7 +16,8 @@
     "N5.8.A": "vaep/evidence/fragments/N5.8.A_LISTO_REAL_20260910T1328Z.json",
     "N5.8.B": "vaep/evidence/fragments/N5.8.B_LISTO_REAL_20260910T1349Z.json",
     "N5.8.C": "vaep/evidence/fragments/N5.8.C_LISTO_REAL_20260910T1353Z.json",
-    "N5.8.D": "vaep/evidence/fragments/N5.8.D_LISTO_REAL_20260910T1431Z.json"
+    "N5.8.D": "vaep/evidence/fragments/N5.8.D_LISTO_REAL_20260910T1431Z.json",
+    "N5.8.E": "vaep/evidence/fragments/N5.8.E_LISTO_REAL_20260910T1504Z.json"
   },
   "policy": {
     "branch": "Desarrollo",
@@ -34,19 +35,19 @@
   },
   "throughputPlan": {
     "mode": "PARENT_CLOSE_FIRST",
-    "currentParent": "N5.8.E",
+    "currentParent": "N5.8.F",
     "currentParentMaterialScopeCount": 1,
-    "currentParentReason": "Live Desarrollo source preflight found one coherent frontend/UX PDF gap in the existing administrative report surface; no additional independent E scopes are source-backed.",
-    "nextParent": "N5.8.F",
+    "currentParentReason": "N5.8 preflight authorizes one coherent RBAC/audit/security verification scope for exports; no independent additional F scopes are source-backed.",
+    "nextParent": "N5.8.G",
     "nextParentParallelMaterialScopes": 1,
     "nextParentScopesNonOverlapping": true,
-    "laneRefill": "E1_J4_RUN34490158736_IN_PROGRESS__NO_TAKEOVER_LT_10M__ON_VALID_TERMINAL_REVIEW_FIRST__EXACT_HEAD_FRONTEND_GATES__CLOSE_E__PROMOTE_F__NO_FILLER"
+    "laneRefill": "N5.8.F_SECURITY_SCOPE_READY_FOR_SINGLE_CANONICAL_WRITER__G_H_DEPENDENCY_GATED__NO_FILLER"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
     "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
     "sourceRanges": ["COLA!A448:T456", "PLAN_MAESTRO", "docs/VAEP_N5_8_EXPORTACIONES_PREFLIGHT.md"],
-    "note": "N5.8.E is current after D LISTO_REAL. E1/J4 is the single material frontend/UX PDF gap and has one canonical writer/run. F/G/H remain dependency-gated and prearmed; no evidence-only filler is authorized.",
+    "note": "N5.8.F is current after E LISTO_REAL. F has one source-backed RBAC/audit/security scope. G/H remain dependency-gated; no evidence-only filler is authorized.",
     "nodes": [
       {"id": "N5.8.A", "order": 58, "dependencies": ["N5.7.H"]},
       {"id": "N5.8.B", "order": 59, "dependencies": ["N5.8.A"]},
@@ -59,8 +60,7 @@
     ]
   },
   "prearmedRoadmap": [
-    {"parent": "N5.8.E", "taskId": "N5.8.E.1.EXPORT_FRONTEND_UX", "state": "RUN_IN_PROGRESS", "dependency": "N5.8.D_LISTO_REAL", "worker": "J4", "taskAttempt": 1, "dispatchId": "N5-8-E-1-EXPORT-FRONTEND-UX-J4", "manifestCommit": "0ee11f8451c11a1a437bfd472e8fc79d18fe3669", "workflowRunId": 34490158736, "materialization": "EXTEND_EXISTING_REPORTES_ADMINISTRATIVOS_UI_AND_FRONTEND_SERVICE_FROM_CSV_XLSX_TO_CSV_XLSX_PDF__PRESERVE_EXISTING_SCOPE_LOADING_ERROR_DOWNLOAD__NO_FILLER"},
-    {"parent": "N5.8.F", "state": "READY_DEPENDENCY_GATED", "dependency": "N5.8.E_LISTO_REAL", "materialization": "EXPORTS_RBAC_AUDIT_SECURITY_OBSERVABILITY__ROADMAP_DERIVED__NO_FILLER"},
+    {"parent": "N5.8.F", "taskId": "N5.8.F.1.EXPORT_RBAC_AUDIT_SECURITY", "state": "READY_FOR_DISPATCH", "dependency": "N5.8.E_LISTO_REAL", "worker": "J5", "taskAttempt": 1, "materialization": "VERIFY_EXPORT_PERMISSION_ADMIN_SCOPE_AUDIT_FORMULA_INJECTION_PDF_NO_REMOTE_RESOURCES_SAFE_FILENAME_AND_CONTENT_TYPE__NO_FILLER"},
     {"parent": "N5.8.G", "state": "READY_DEPENDENCY_GATED", "dependency": "N5.8.F_LISTO_REAL", "materialization": "EXPORTS_QA_REGRESSION_CI__ROADMAP_DERIVED__NO_FILLER"},
     {"parent": "N5.8.H", "state": "READY_DEPENDENCY_GATED", "dependency": "N5.8.G_LISTO_REAL", "materialization": "EXPORTS_DOCUMENTATION_CERTIFICATION__ROADMAP_DERIVED__NO_FILLER"}
   ],
@@ -68,9 +68,9 @@
     "J1": [],
     "J2": [],
     "J3": [],
-    "J4": [{"taskId": "N5.8.E.1.EXPORT_FRONTEND_UX", "state": "RUN_IN_PROGRESS", "taskAttempt": 1, "dispatchId": "N5-8-E-1-EXPORT-FRONTEND-UX-J4", "workflowRunId": 34490158736}],
-    "J5": [],
+    "J4": [],
+    "J5": [{"taskId": "N5.8.F.1.EXPORT_RBAC_AUDIT_SECURITY", "state": "READY_FOR_DISPATCH", "taskAttempt": 1}],
     "J6": []
   },
-  "lastClosureFunctionalHead": "e8ba8885f15ae0a53a2f6a02427e4694ab9672d5"
+  "lastClosureFunctionalHead": "6c78ed429879fbe5a5fdcaf5075610a0679ee210"
 }
