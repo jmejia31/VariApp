@@ -1,9 +1,9 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
-  "currentParent": "N5.9.C",
-  "generatedAt": "2026-09-10T16:04:00Z",
-  "regenerationReason": "N5.9.C_CURRENT_RUN_34499260559__J2_TRANSPORT_EXECUTING_SESSION_ACTIVITY_NOT_YET_PROVEN__N5.9D_E_F_G_H_PREARMED_DEPENDENCY_GATED__NO_FILLER",
-  "lastClosedParent": "N5.9.B",
+  "currentParent": "N5.9.D",
+  "generatedAt": "2026-09-10T16:17:30Z",
+  "regenerationReason": "ATOMIC_QUEUE_TRANSITION__N5.9.C_LISTO_REAL__N5.9.D_CURRENT__SINGLE_MATERIAL_STOCK_HEALTH_QUERY_RESHAPE__N5.9.E_F_G_H_PREARMED_DEPENDENCY_GATED__NO_FILLER",
+  "lastClosedParent": "N5.9.C",
   "closureReceipts": {
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
     "N5.1.H": "vaep/evidence/fragments/N5.1.H_LISTO_REAL_20260909T1236Z.json",
@@ -22,7 +22,8 @@
     "N5.8.G": "vaep/evidence/fragments/N5.8.G_LISTO_REAL_20260910T1548Z.json",
     "N5.8.H": "vaep/evidence/fragments/N5.8.H_LISTO_REAL_20260910T1549Z.json",
     "N5.9.A": "vaep/evidence/fragments/N5.9.A_LISTO_REAL_20260910T1556Z.json",
-    "N5.9.B": "vaep/evidence/fragments/N5.9.B_LISTO_REAL_20260910T1559Z.json"
+    "N5.9.B": "vaep/evidence/fragments/N5.9.B_LISTO_REAL_20260910T1559Z.json",
+    "N5.9.C": "vaep/evidence/fragments/N5.9.C_LISTO_REAL_20260910T1617Z.json"
   },
   "policy": {
     "branch": "Desarrollo",
@@ -40,21 +41,21 @@
   },
   "throughputPlan": {
     "mode": "PARENT_CLOSE_FIRST",
-    "currentParent": "N5.9.C",
+    "currentParent": "N5.9.D",
     "currentParentMaterialScopeCount": 1,
-    "currentParentReason": "N5.9.C is the only dependency-valid material stage. J2 owns its single persistence/index audit via one canonical manifest/run; do not duplicate while the fresh transport is executing. Successors remain dependency-gated.",
-    "nextParent": "N5.9.D",
-    "nextParentParallelMaterialScopes": 1,
+    "currentParentReason": "N5.9.C is LISTO_REAL. N5.9.D is now the first dependency-valid unfinished parent and has one source-backed application/query optimization scope. E-H remain dependency-gated; no filler is permitted.",
+    "nextParent": "N5.9.E",
+    "nextParentParallelMaterialScopes": 0,
     "nextParentScopesNonOverlapping": true,
-    "currentRun": {"worker":"J2","taskId":"N5.9.C.1.REPORT_PERFORMANCE_PERSISTENCE_SQL_INDEX_AUDIT","manifestCommit":"5887767efe7e6f139b5ca8581902d0341d80de75","runId":34499260559,"jobId":102945591722,"transportStartedAtUtc":"2026-09-10T16:01:43Z","executeStartedAtUtc":"2026-09-10T16:01:48Z","state":"TRANSPORT_EXECUTING__SESSION_ACTIVITY_NOT_YET_PROVEN","activeReal":false},
-    "nextRunReserved": {"parent":"N5.9.D","state":"DEPENDENCY_GATED_RESERVED","dependency":"N5.9.C_LISTO_REAL","materialization":"REPORT_PERFORMANCE_BACKEND_API__ROADMAP_DERIVED__NO_FILLER"},
-    "laneRefill": "ON_C_TERMINAL_VALID_REVIEW_FIRST_EXACT_HEAD_GATES_CLOSE_C_PROMOTE_D_AND_REFILL_SAME_RUN__NO_DUPLICATE_J2"
+    "currentRun": null,
+    "nextRunReserved": {"parent":"N5.9.D","state":"READY_FOR_DISPATCH","dependency":"N5.9.C_LISTO_REAL","materialization":"STOCK_HEALTH_APPLICATION_QUERY_RESHAPE__REPORT_PERFORMANCE_BACKEND_API__ROADMAP_DERIVED__NO_FILLER"},
+    "laneRefill": "DISPATCH_N5.9.D_SINGLE_WRITER_NOW__ON_TERMINAL_REVIEW_FIRST_EXACT_HEAD_GATES_CLOSE_D_PROMOTE_E_AND_CONTINUE_CLOSURE_CHAIN_SAME_RUN"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
     "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
     "sourceRanges": ["COLA!A457:T463", "PLAN_MAESTRO"],
-    "note": "N5.9.C is current after certified N5.9.B. N5.9.D through N5.9.H are roadmap-derived successors, prearmed only as dependency-gated material work.",
+    "note": "N5.9.D is current after certified N5.9.C. N5.9.E through N5.9.H are roadmap-derived successors, prearmed only as dependency-gated material work.",
     "nodes": [
       {"id":"N5.9.B","order":67,"dependencies":["N5.9.A"]},
       {"id":"N5.9.C","order":68,"dependencies":["N5.9.B"]},
@@ -66,8 +67,7 @@
     ]
   },
   "prearmedRoadmap": [
-    {"parent":"N5.9.C","taskId":"N5.9.C.1.REPORT_PERFORMANCE_PERSISTENCE_SQL_INDEX_AUDIT","state":"CURRENT_RUN","dependency":"N5.9.B_LISTO_REAL","worker":"J2","taskAttempt":1,"runId":34499260559,"sessionId":null,"activeReal":false,"materialization":"DIRECTED_EF_SQL_INDEX_AUDIT_AND_MINIMAL_REVERSIBLE_PERSISTENCE_OPTIMIZATION__NO_FILLER"},
-    {"parent":"N5.9.D","state":"READY_DEPENDENCY_GATED","dependency":"N5.9.C_LISTO_REAL","materialization":"REPORT_PERFORMANCE_BACKEND_API__ROADMAP_DERIVED__NO_FILLER"},
+    {"parent":"N5.9.D","taskId":"N5.9.D.1.STOCK_HEALTH_QUERY_RESHAPE","state":"READY_FOR_DISPATCH","dependency":"N5.9.C_LISTO_REAL","worker":"J1","taskAttempt":1,"sessionId":null,"activeReal":false,"materialization":"RESHAPE_STOCK_HEALTH_MOVEMENT_AGGREGATES_TO_REMOVE_CORRELATED_PER_EXISTENCE_SUBQUERIES_WHILE_PRESERVING_SEMANTICS_SCOPE_PAGINATION__NO_FILLER"},
     {"parent":"N5.9.E","state":"READY_DEPENDENCY_GATED","dependency":"N5.9.D_LISTO_REAL","materialization":"REPORT_PERFORMANCE_FRONTEND_UX__ROADMAP_DERIVED__NO_FILLER"},
     {"parent":"N5.9.F","state":"READY_DEPENDENCY_GATED","dependency":"N5.9.E_LISTO_REAL","materialization":"REPORT_PERFORMANCE_SECURITY_OBSERVABILITY__ROADMAP_DERIVED__NO_FILLER"},
     {"parent":"N5.9.G","state":"READY_DEPENDENCY_GATED","dependency":"N5.9.F_LISTO_REAL","materialization":"REPORT_PERFORMANCE_QA_REGRESSION_CI__ROADMAP_DERIVED__NO_FILLER"},
@@ -75,11 +75,11 @@
   ],
   "lanes": {
     "J1": [],
-    "J2": [{"taskId":"N5.9.C.1.REPORT_PERFORMANCE_PERSISTENCE_SQL_INDEX_AUDIT","state":"TRANSPORT_EXECUTING__NOT_ACTIVE_REAL_UNTIL_SESSION_PLUS_USEFUL_ACTIVITY","runId":34499260559,"jobId":102945591722,"taskAttempt":1}],
+    "J2": [],
     "J3": [],
     "J4": [],
     "J5": [],
     "J6": []
   },
-  "lastClosureFunctionalHead": "f4b678ed02a4049a3bddcd9a5f789e1087fcd3e2"
+  "lastClosureFunctionalHead": "ecfd6b7381052db9c9d573fb52eaf1444426616e"
 }
