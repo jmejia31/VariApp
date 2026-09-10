@@ -1,4 +1,4 @@
-name: VAEP N5.7.C canonical EF snapshot repair probe
+name: VAEP N5.7.C effective EF snapshot exact-head gate
 
 on:
   push:
@@ -6,6 +6,12 @@ on:
       - Desarrollo
     paths:
       - .github/workflows/vaep-n57c-snapshot-repair-probe.yml
+      - backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.N43C.cs
+      - backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.N57C.cs
+      - backend/src/Infrastructure/Migrations/20260910113300_N5_7_C_DashboardKpiConfiguraciones.cs
+      - backend/src/Infrastructure/Persistence/AppDbContext.cs
+      - backend/src/Infrastructure/Persistence/Configurations/DashboardKpiConfiguracionConfiguration.cs
+      - backend/src/Domain/Entities/DashboardKpiConfiguracion.cs
 
 permissions:
   contents: read
@@ -16,8 +22,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  generate-snapshot:
-    name: Generate canonical AppDbContext snapshot artifact
+  verify-effective-snapshot:
+    name: Verify N5.7.C effective EF snapshot exact head
     runs-on: ubuntu-latest
     timeout-minutes: 20
     defaults:
@@ -45,43 +51,22 @@ jobs:
       - name: Build exact head
         run: dotnet build InventoryApp.sln --configuration Release --no-restore
 
-      - name: Probe pending model changes
-        id: pending
-        continue-on-error: true
-        shell: bash
-        run: |
-          set -o pipefail
-          dotnet ef migrations has-pending-model-changes \
-            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
-            --startup-project src/API/InventoryApp.API.csproj \
-            --context AppDbContext 2>&1 | tee vaep-n57c-pending-model.log
-
-      - name: Generate design-time snapshot in ephemeral workspace
+      - name: Verify effective snapshot has no pending model changes
         shell: bash
         run: |
           set -euo pipefail
-          dotnet ef migrations add VaepN57CSnapshotProbe \
+          dotnet ef migrations has-pending-model-changes \
             --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
             --startup-project src/API/InventoryApp.API.csproj \
-            --context AppDbContext \
-            --output-dir Migrations/VAEPProbe \
-            --no-build
-          test -s src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs
-          grep -q 'DashboardKpiConfiguracion' src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs
-          git diff -- src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs > vaep-n57c-snapshot.diff
-          cp src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs vaep-n57c-AppDbContextModelSnapshot.cs
-          find src/Infrastructure/Migrations/VAEPProbe -maxdepth 1 -type f -print > vaep-n57c-generated-files.txt
+            --context AppDbContext 2>&1 | tee vaep-n57c-exact-head-model-gate.log
+          grep -q 'DashboardKpiConfiguracion' src/Infrastructure/Migrations/AppDbContextModelSnapshot.N57C.cs
+          grep -q 'ApplyN57CModel(modelBuilder);' src/Infrastructure/Migrations/AppDbContextModelSnapshot.N43C.cs
 
-      - name: Upload design-time evidence
+      - name: Upload exact-head evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: vaep-n57c-canonical-snapshot-probe
-          path: |
-            backend/vaep-n57c-pending-model.log
-            backend/vaep-n57c-snapshot.diff
-            backend/vaep-n57c-AppDbContextModelSnapshot.cs
-            backend/vaep-n57c-generated-files.txt
-            backend/src/Infrastructure/Migrations/VAEPProbe/
+          name: vaep-n57c-exact-head-model-gate
+          path: backend/vaep-n57c-exact-head-model-gate.log
           if-no-files-found: warn
           retention-days: 2
