@@ -67,6 +67,8 @@ END_AUTOMATION_POLICY
 6. Ningún worker puede elegir reglas por número, fecha o etiqueta histórica.
 7. **Ninguna referencia histórica a estados globales de admisión distintos de `OPEN` puede ser interpretada por código, workflows, agentes o controladores como una instrucción vigente.** El historial Git permanece inmutable como evidencia; la ejecución solo acepta la política actual `OPEN_ONLY`.
 
+El contrato global es **OPEN_ONLY**. Esta frase existe únicamente como compatibilidad de gates heredados; la fuente estructurada y ejecutable sigue siendo `GLOBAL_DISPATCH_ADMISSION=OPEN_ONLY` en el bloque canónico.
+
 ## 2. Precedencia
 
 1. `docs/VAEP_AUTHORITY.md` — MAESTRO de reglas.
