@@ -16,31 +16,31 @@ import { ReporteVentasResumenDto } from '../../../core/models/reporte-ventas.mod
         <div class="grid">
           <div class="kpi">
             <span class="label">Importe Bruto</span>
-            <span class="value">{{ resumen.importeBruto | currency }}</span>
+            <span class="value">{{ resumen.importeBruto | currency:'HNL':'symbol-narrow':'1.2-2' }}</span>
           </div>
           <div class="kpi">
             <span class="label">Subtotal</span>
-            <span class="value">{{ resumen.subtotal | currency }}</span>
+            <span class="value">{{ resumen.subtotal | currency:'HNL':'symbol-narrow':'1.2-2' }}</span>
           </div>
           <div class="kpi">
             <span class="label">Descuento</span>
-            <span class="value text-danger">{{ resumen.descuento | currency }}</span>
+            <span class="value text-danger">{{ resumen.descuento | currency:'HNL':'symbol-narrow':'1.2-2' }}</span>
           </div>
           <div class="kpi">
             <span class="label">Impuesto</span>
-            <span class="value">{{ resumen.impuesto | currency }}</span>
+            <span class="value">{{ resumen.impuesto | currency:'HNL':'symbol-narrow':'1.2-2' }}</span>
           </div>
           <div class="kpi highlight">
             <span class="label">Total</span>
-            <span class="value">{{ resumen.total | currency }}</span>
+            <span class="value">{{ resumen.total | currency:'HNL':'symbol-narrow':'1.2-2' }}</span>
           </div>
           <div class="kpi">
             <span class="label">Costo Total</span>
-            <span class="value">{{ resumen.costoTotal | currency }}</span>
+            <span class="value">{{ resumen.costoTotal | currency:'HNL':'symbol-narrow':'1.2-2' }}</span>
           </div>
           <div class="kpi success">
             <span class="label">Utilidad Bruta</span>
-            <span class="value">{{ resumen.utilidadBruta | currency }}</span>
+            <span class="value">{{ resumen.utilidadBruta | currency:'HNL':'symbol-narrow':'1.2-2' }}</span>
           </div>
         </div>
       } @else {
