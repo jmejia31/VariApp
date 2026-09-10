@@ -2,10 +2,7 @@ using InventoryApp.API.Filters;
 using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Interfaces;
-using InventoryApp.Application.Services;
 using InventoryApp.Domain.Enums;
-using InventoryApp.Infrastructure.Persistence;
-using InventoryApp.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,11 +15,9 @@ public sealed class EmpresasController : ControllerBase
 {
     private readonly IEmpresaService _service;
 
-    public EmpresasController(AppDbContext context, ICurrentUserService currentUser)
+    public EmpresasController(IEmpresaService service)
     {
-        // N6.1.D keeps the new root isolated from the global DI surface until the
-        // security/audit parent N6.1.F reviews its final registration policy.
-        _service = new EmpresaService(new EmpresaRepository(context), currentUser);
+        _service = service;
     }
 
     [HttpGet]
