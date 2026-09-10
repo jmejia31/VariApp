@@ -1,8 +1,8 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
   "currentParent": "N5.3.D",
-  "generatedAt": "2026-09-10T00:04:30Z",
-  "regenerationReason": "AUTOMATIC_PARENT_CLOSE__N5.3.C_LISTO_REAL__N5.3.D_CURRENT",
+  "generatedAt": "2026-09-10T00:27:20Z",
+  "regenerationReason": "N5.3.D_D1_D2_REVIEW_ACCEPTED__ENABLE_D3_ONLY",
   "lastClosedParent": "N5.3.C",
   "closureReceipts": {
     "N4.11.H": "vaep/evidence/fragments/N4.11.H_LISTO_REAL_20260908T204500Z.json",
@@ -54,12 +54,12 @@
   "throughputPlan": {
     "mode": "MATERIAL_SWARM_FIRST",
     "currentParent": "N5.3.D",
-    "currentParentMaterialScopeCount": 2,
-    "currentParentReason": "N5.3.C is LISTO_REAL. N5.3.D is dependency-valid with 2 material scope(s); no additional busywork is fabricated.",
+    "currentParentMaterialScopeCount": 1,
+    "currentParentReason": "N5.3.D.1 and N5.3.D.2 are REVIEW_FIRST accepted after CHATGPT_VAEP takeover. N5.3.D.3 is now the only dependency-valid material scope; D4-D6 remain sibling-gated. No additional busywork is fabricated.",
     "nextParent": "N5.3.E",
     "nextParentParallelMaterialScopes": 0,
     "nextParentScopesNonOverlapping": true,
-    "laneRefill": "CLOSURE_DEBT_FIRST__N5.3.D_SIX_TOTAL_PREARMED__READY_WAVE_TWO__ENABLE_AFTER_N5.3.C_LISTO_REAL"
+    "laneRefill": "REVIEW_FIRST_CHAIN__D1_D2_ACCEPTED__D3_READY_ONLY__D4_D6_GATED"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
@@ -167,11 +167,11 @@
         "workerId": "J1",
         "taskAttempt": 1,
         "plannedParent": "N5.3.D",
-        "readyForDispatch": true,
-        "dispatchEligible": true,
+        "readyForDispatch": false,
+        "dispatchEligible": false,
         "fileScopeHint": "backend/src/Application/DTOs/ReporteVentasResultadoDto.cs",
-        "prompt": "Use only docs/VAEP_AUTHORITY.md plus accepted N5.3.A/N5.3.B contracts. Define bounded sales-report summary/detail result DTOs for gross/net/discount/tax/cost/margin and historical display dimensions. Do not implement queries, controllers, exports, security changes or persistence. Preserve explicit historical snapshot semantics and nullable legacy identities. Run proportional compile/tests and two self-reviews. Desarrollo only; no main/Production/secrets/PR #2 merge.",
-        "reason": "CURRENT_PARENT__DEPENDENCIES_CLOSED__MATERIAL_SCOPE"
+        "prompt": "Resolved by CHATGPT_VAEP QA takeover and REVIEW_FIRST; do not redispatch. Late Jules output is forensic-only.",
+        "reason": "REVIEW_FIRST_ACCEPTED__QA_TAKEOVER__NO_REDISPATCH"
       }
     ],
     "J2": [
@@ -193,11 +193,11 @@
         "workerId": "J2",
         "taskAttempt": 1,
         "plannedParent": "N5.3.D",
-        "readyForDispatch": true,
-        "dispatchEligible": true,
+        "readyForDispatch": false,
+        "dispatchEligible": false,
         "fileScopeHint": "backend/src/Application/Common/ReporteVentasQueryRules.cs",
-        "prompt": "Use only docs/VAEP_AUTHORITY.md and accepted N5.3.A/N5.3.B contracts. Implement pure bounded query/filter validation rules for period, paging and explicit historical/current dimension semantics without touching DB queries, controllers, exports or RBAC policy. Fail closed on invalid ranges; do not invent Sucursal-at-header semantics. Run proportional tests and two self-reviews. Desarrollo only.",
-        "reason": "CURRENT_PARENT__DEPENDENCIES_CLOSED__MATERIAL_SCOPE"
+        "prompt": "Resolved by CHATGPT_VAEP QA takeover and REVIEW_FIRST; do not redispatch. Any late Jules output is forensic-only.",
+        "reason": "REVIEW_FIRST_ACCEPTED__QA_TAKEOVER__NO_REDISPATCH"
       }
     ],
     "J3": [
@@ -207,11 +207,11 @@
         "workerId": "J3",
         "taskAttempt": 1,
         "plannedParent": "N5.3.D",
-        "readyForDispatch": false,
-        "dispatchEligible": false,
+        "readyForDispatch": true,
+        "dispatchEligible": true,
         "fileScopeHint": "backend/src/Application/Interfaces/IReporteVentasService.cs",
         "prompt": "After N5.3.D.1 result contracts are REVIEW_FIRST accepted, define the narrow sales-report service contract for summary and paged detail using ReporteVentasFiltroDto and accepted result DTOs. No implementation, controller, persistence, export or security changes. Desarrollo only.",
-        "reason": "NEXT_PARENT_PREARM__MATERIAL__SIBLING_DEPENDENCY_N5.3.D.1"
+        "reason": "CURRENT_PARENT__D1_REVIEW_FIRST_ACCEPTED__MATERIAL_SCOPE"
       }
     ],
     "J4": [
