@@ -4,6 +4,7 @@ set -euo pipefail
 readonly UNIQUE_REGISTRY="vaep/control/jules-completed-semantic-facets.json"
 readonly CATALOG="vaep/control/jules-autorefill-catalog.json"
 readonly BRANCH="Desarrollo"
+readonly ISSUES_CACHE="${RUNNER_TEMP:-/tmp}/vaep-issues-${GITHUB_RUN_ID:-local}.json"
 
 # J1-J6 cutover guard: a legacy lane may finish an already-created session,
 # but it must never publish/refill new legacy work after cutover.
@@ -23,11 +24,6 @@ if [[ "${1:-}" == "--post-terminal" ]]; then
   phase="$(jq -r '.phase // empty' "$state_file")"
   case "$phase" in
     TERMINAL_*|STALL_NO_PROGRESS|LANE_BUDGET_EXCEEDED)
-      # REVIEW_FIRST owns the delivered scope, not the lane. The MASTER
-      # requires review/QA to run in parallel while the terminal workflow
-      # releases ownership and replenishes CURRENT + NEXT_SAFE material.
-      # The core still enforces admission, active-run depth, immutable
-      # manifests, semantic dedupe and the R2/R3 limits.
       echo "AUTOREFILL_TERMINAL_HANDOFF phase=$phase action=CONTINUE_LANE_REFILL_REVIEW_FIRST_IN_PARALLEL" >&2
       ;;
     *)
@@ -37,11 +33,7 @@ if [[ "${1:-}" == "--post-terminal" ]]; then
   esac
 fi
 
-# A terminal hook may be running from an older manifest checkout while the
-# control-plane has already advanced. Logic changes remain fail-closed. For
-# non-terminal reservation paths, data-only catalog/registry changes may be
-# refreshed from current Desarrollo. Terminal hooks already exited above and
-# can never reserve or publish replacement work before REVIEW_FIRST.
+# Refresh control data from current Desarrollo, but never run stale logic.
 if git remote get-url origin >/dev/null 2>&1; then
   git fetch --quiet origin Desarrollo || true
   if git rev-parse --verify origin/Desarrollo >/dev/null 2>&1; then
@@ -74,16 +66,31 @@ api() {
   gh api "$@"
 }
 
-# Fetch the issue feed defensively. GitHub can occasionally return a non-array
-# error payload during a transient API failure/rate event. Passing that object
-# into jq '.[]? | .body' caused the terminal autorefill hook to crash. Retry
-# bounded reads and fail closed if the provider response is not the expected
-# issue array; never infer recovery/R2 eligibility from malformed telemetry.
+worker_has_current_material() {
+  [[ -f "$CATALOG" ]] || return 1
+  jq -e --arg w "${WORKER_ID:-}" '
+    (.currentParent // "") as $parent
+    | ($parent | length) > 0 and
+      any(.lanes[$w][]?;
+        (.dispatchEligible != false) and
+        ((.plannedParent // "") == $parent) and
+        ((.taskId // "") | startswith($parent + ".")))
+  ' "$CATALOG" >/dev/null 2>&1
+}
+
+# Read the live issue window at most once per controller run. All six lanes
+# share RUNNER_TEMP in the single checkpoint job, so this cache eliminates the
+# previous repeated issue-feed scans without weakening the fail-closed guard.
 fetch_issues_array() {
   local endpoint payload attempt
+  if [[ -s "$ISSUES_CACHE" ]] && jq -e 'type == "array"' "$ISSUES_CACHE" >/dev/null 2>&1; then
+    cat "$ISSUES_CACHE"
+    return 0
+  fi
   endpoint="repos/$GITHUB_REPOSITORY/issues?state=all&per_page=100&sort=updated&direction=desc"
   for attempt in 1 2 3; do
     if payload="$(api "$endpoint" 2>/dev/null)" && jq -e 'type == "array"' <<<"$payload" >/dev/null 2>&1; then
+      printf '%s\n' "$payload" > "$ISSUES_CACHE"
       printf '%s\n' "$payload"
       return 0
     fi
@@ -94,9 +101,7 @@ fetch_issues_array() {
 
 # Dependency-safe parent guard. dispatchEligible alone is insufficient: a
 # stale/misprogrammed catalog must never dispatch work belonging to a future
-# parent while currentParent is still open. This guard is local/fail-closed;
-# it does not mutate the canonical catalog and therefore cannot create a
-# control-plane race from a terminal worker checkout.
+# parent while currentParent is still open.
 filter_dependency_safe_parent() {
   [[ -f "$CATALOG" ]] || return 0
   local parent tmp before after
@@ -122,8 +127,7 @@ filter_dependency_safe_parent() {
 }
 
 # Durable semantic dedupe guard. Task number/dispatch/session is not identity:
-# CURRENT_PARENT + semantic facet is. The parent comes from the live catalog;
-# never hard-code a previous parent in this guard.
+# CURRENT_PARENT + semantic facet is.
 filter_completed_facets() {
   [[ -f "$UNIQUE_REGISTRY" && -f "$CATALOG" ]] || return 0
   local tmp before after parent registry_parent
@@ -131,8 +135,6 @@ filter_completed_facets() {
   registry_parent="$(jq -r '.currentParent // empty' "$UNIQUE_REGISTRY")"
   [[ -n "$parent" ]] || return 0
 
-  # A registry for a different parent is historical evidence only and must not
-  # suppress unique work in the newly promoted parent.
   if [[ -n "$registry_parent" && "$registry_parent" != "$parent" ]]; then
     echo "AUTOREFILL_UNIQUE_GUARD registry_parent=$registry_parent current_parent=$parent action=IGNORE_HISTORICAL_REGISTRY"
     return 0
@@ -161,15 +163,13 @@ filter_completed_facets() {
   echo "AUTOREFILL_UNIQUE_GUARD removed=$((before-after)) parent=$parent registry=$UNIQUE_REGISTRY"
 }
 
-# REVIEW_FIRST debt is never a content retry. Fail closed before the core sees
-# a candidate whose attempt-1 terminal result is explicitly classified as an
-# evidence gap. The worker output uses backticked `1/2`; match structurally
-# instead of relying on the old literal "attempt: 1/" substring. This guard is
-# deliberately duplicated outside the recovery core so stale or malformed
-# recovery classification cannot manufacture R2 work from review-only debt.
+# REVIEW_FIRST debt is never a content retry.
 filter_evidence_gap_review_debt() {
   [[ -f "$CATALOG" ]] || return 0
   local issues tmp before after blocked
+  if ! worker_has_current_material; then
+    return 0
+  fi
   if ! issues="$(fetch_issues_array)"; then
     echo "AUTOREFILL_WAIT=ISSUES_FEED_UNAVAILABLE_OR_MALFORMED action=FAIL_CLOSED_NO_DISPATCH" >&2
     exit 0
@@ -196,13 +196,31 @@ filter_evidence_gap_review_debt() {
 
 filter_dependency_safe_parent
 filter_completed_facets
+
+# Most checkpoint lanes are intentionally idle when the CURRENT_PARENT has a
+# single material facet. Stop locally before any REST API calls instead of
+# making every idle lane query admission, actions, commits and issues.
+if ! worker_has_current_material; then
+  echo "AUTOREFILL_UNIQUE_WORK_EXHAUSTED worker=${WORKER_ID:-MISSING} current_parent=$(jq -r '.currentParent // "MISSING"' "$CATALOG") action=LOCAL_NO_API_IDLE_LANE" >&2
+  exit 78
+fi
+
 filter_evidence_gap_review_debt
+if ! worker_has_current_material; then
+  echo "AUTOREFILL_NO_SAFE_NEXT worker=${WORKER_ID:-MISSING} reason=REVIEW_FIRST_DEBT_GUARD" >&2
+  exit 78
+fi
+
 bash .github/scripts/vaep-jules-catalog-floor.sh
-# catalog-floor may publish a refreshed remote catalog; the current checkout is
-# intentionally not mutated by that commit. Re-apply guards before core
-# selection so this run cannot reserve a future-parent, completed facet or
-# REVIEW_FIRST-only debt.
+# catalog-floor may publish a refreshed remote catalog; re-apply guards before
+# core selection so no future-parent/completed/review-only facet can run.
 filter_dependency_safe_parent
 filter_completed_facets
 filter_evidence_gap_review_debt
+
+if ! worker_has_current_material; then
+  echo "AUTOREFILL_UNIQUE_WORK_EXHAUSTED worker=${WORKER_ID:-MISSING} current_parent=$(jq -r '.currentParent // "MISSING"' "$CATALOG") action=POST_GUARD_NO_API_IDLE_LANE" >&2
+  exit 78
+fi
+
 exec bash .github/scripts/vaep-jules-autorefill-core.sh
