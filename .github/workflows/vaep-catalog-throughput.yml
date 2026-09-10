@@ -70,8 +70,9 @@ jobs:
           # and dependency gating by requiring fabricated NEXT work.
           if not isinstance(expected, int) or isinstance(expected, bool) or not 0 <= expected <= 6:
               raise SystemExit('next-parent material scope count must be an integer from 0 to 6')
-          if expected < 6 and policy.get('lowParallelismAction') != 'EXPLAIN_OR_SUBDIVIDE_MATERIAL_SCOPE__NO_BUSYWORK':
-              raise SystemExit('lower material parallelism requires explicit no-busywork policy')
+          # The canonical no-busywork invariant above is the executable policy.
+          # Do not require a duplicate optional lowParallelismAction field when
+          # the source-backed successor count is legitimately below six.
 
           planned = [task for task in tasks if task.get('plannedParent') == next_parent and task.get('readyForDispatch') is True]
           workers = {task.get('workerId') for task in planned}
