@@ -63,6 +63,16 @@ admission_is_open_only() {
 
 ensure_open_only_admission() {
   local attempt payload sha decoded now fixed encoded refreshed
+
+  # The workflow has a dedicated admission job before the checkpoint. Once
+  # that job has passed, trust the just-checked-out canonical OPEN_ONLY file
+  # instead of spending another 5x API repair loop in every controller pass.
+  # If the checkout is not valid, fall back to the remote repair path below.
+  if [[ "${VAEP_OPEN_ONLY_PREFLIGHT_VERIFIED:-false}" == "true" ]] && admission_is_open_only < "$ADMISSION"; then
+    echo 'VAEP_ADMISSION_INVARIANT=OPEN_PREFLIGHT_REUSED'
+    return 0
+  fi
+
   for attempt in 1 2 3 4 5; do
     payload="$(api "repos/$GITHUB_REPOSITORY/contents/$ADMISSION?ref=$BRANCH" 2>/dev/null)" || {
       sleep "$attempt"
@@ -108,9 +118,14 @@ ensure_open_only_admission() {
 
 emit_preflight() {
   local checkpoint="$1" head catalog_parent admission
-  head="$(api "repos/$GITHUB_REPOSITORY/git/ref/heads/$BRANCH" --jq '.object.sha')"
   catalog_parent="$(jq -r '.currentParent // "MISSING"' "$CATALOG")"
-  admission="$(api "repos/$GITHUB_REPOSITORY/contents/$ADMISSION?ref=$BRANCH" --jq '.content' | tr -d '\n' | base64 -d | jq -r '.newDispatchAdmission // "MISSING"')"
+  if [[ "${VAEP_OPEN_ONLY_PREFLIGHT_VERIFIED:-false}" == "true" ]] && admission_is_open_only < "$ADMISSION"; then
+    head="$(git rev-parse HEAD)"
+    admission="OPEN"
+  else
+    head="$(api "repos/$GITHUB_REPOSITORY/git/ref/heads/$BRANCH" --jq '.object.sha')"
+    admission="$(api "repos/$GITHUB_REPOSITORY/contents/$ADMISSION?ref=$BRANCH" --jq '.content' | tr -d '\n' | base64 -d | jq -r '.newDispatchAdmission // "MISSING"')"
+  fi
   [[ "$admission" == "OPEN" ]] || fail "global_admission_invariant_violation"
   printf 'VAEP_CHECKPOINT=%s\n' "$checkpoint"
   printf 'VAEP_CHECKPOINT_HEAD=%s\n' "$head"
