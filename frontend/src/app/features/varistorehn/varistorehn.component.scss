@@ -34,7 +34,7 @@ h1, h2, h3 { color: var(--color-heading); }
 .brand strong { display: block; font-size: 1.05rem; letter-spacing: -.03em; }
 .brand small { display: block; margin-top: 4px; color: var(--color-text-muted); font-size: .64rem; }
 .search-box { flex: 1; max-width: 650px; display: flex; align-items: center; gap: 10px; min-width: 0; padding: 6px 6px 6px 16px; border: 1px solid var(--store-line); border-radius: var(--radius); background: var(--color-bg); color: var(--color-text-muted); }
-.search-box input { width: 100%; min-width: 0; padding: 9px 0; border: 0; outline: 0; background: transparent; color: var(--color-text); }
+.search-box input { width: 100%; min-width: 0; padding: 9px 0; border: 0; background: transparent; color: var(--color-text); }
 .search-box button { width: 42px; height: 38px; display: grid; place-items: center; border: 0; border-radius: calc(var(--radius) * .7); background: var(--color-button); color: var(--color-on-primary); }
 .cart-trigger { margin-left: auto; display: flex; align-items: center; gap: 13px; border: 0; background: transparent; text-align: left; font-size: .76rem; font-weight: 700; }
 .cart-trigger small { display: block; margin-top: 4px; color: var(--color-text-muted); font-weight: 500; }
@@ -129,7 +129,7 @@ select { padding: 9px 10px; border: 1px solid var(--store-line); border-radius: 
 .check input { accent-color: var(--color-primary); }
 .price-field { display: flex; align-items: center; padding: 0 8px; border: 1px solid var(--store-line); border-radius: calc(var(--radius) * .55); }
 .price-field span { color: var(--color-text-muted); font-size: .65rem; }
-.price-field input { width: 100%; padding: 9px 5px; border: 0; outline: 0; background: transparent; font-size: .68rem; }
+.price-field input { width: 100%; padding: 9px 5px; border: 0; background: transparent; font-size: .68rem; }
 .catalog-toolbar { min-height: 40px; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
 .catalog-toolbar p { color: var(--color-text-muted); font-size: .7rem; }
 .catalog-toolbar label { margin-left: auto; display: flex; align-items: center; gap: 8px; color: var(--color-text-muted); font-size: .66rem; }
