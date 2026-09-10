@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "FROZEN",
-  "allowExistingActiveSessions": false,
-  "reason": "N5.3.C_ALL_MATERIAL_SCOPES_REVIEWED_OR_QA_TAKEOVER_MATERIALIZED__EXACT_HEAD_DOD_AND_CAUSAL_GATES_PENDING__NO_DUPLICATE_DISPATCH",
-  "updatedAtUtc": "2026-09-10T00:04:30Z"
+  "newDispatchAdmission": "OPEN",
+  "allowExistingActiveSessions": true,
+  "reason": "VERIFIED_ROADMAP_PROMOTION__N5.3.C__N5.3.D__INITIAL_READY_WAVE_D1_D2",
+  "updatedAtUtc": "2026-09-10T00:05:00Z"
 }
