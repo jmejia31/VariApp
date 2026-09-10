@@ -32,7 +32,7 @@ export const routes: Routes = [
   { path: 'clientes', canActivate: [authGuard, permisoGuard], data: { modulo: 'Clientes', accion: 'Ver' }, loadComponent: () => import('./features/clientes/clientes-list.component').then(m => m.ClientesListComponent) },
   { path: 'clientes/nuevo', canActivate: [authGuard, permisoGuard], data: { modulo: 'Clientes', accion: 'Crear' }, loadComponent: () => import('./features/clientes/cliente-form.component').then(m => m.ClienteFormComponent) },
   { path: 'clientes/:id/editar', canActivate: [authGuard, permisoGuard], data: { modulo: 'Clientes', accion: 'Editar' }, loadComponent: () => import('./features/clientes/cliente-form.component').then(m => m.ClienteFormComponent) },
-  { path: 'tipo-clientes', canActivate: [authGuard, permisoGuard], data: { modulo: 'TiposClientes', accion: 'Ver' }, loadComponent: () => import('./features/tipo-clientes/tipo-clientes-list.component').then(m => m.TipoClientesListComponent) },
+  { path: 'tipo-clientes', canActivate: [authGuard, permisoGuard], data: { modulo: 'TiposClientes', accion: 'Ver' }, loadComponent: () => import('./features/tipo-clientes/tipo-clientes-list.component').then(m => m.TiposClientesListComponent) },
   { path: 'tipo-clientes/nuevo', canActivate: [authGuard, permisoGuard], data: { modulo: 'TiposClientes', accion: 'Crear' }, loadComponent: () => import('./features/tipo-clientes/tipo-cliente-form.component').then(m => m.TipoClienteFormComponent) },
   { path: 'tipo-clientes/:id/editar', canActivate: [authGuard, permisoGuard], data: { modulo: 'TiposClientes', accion: 'Editar' }, loadComponent: () => import('./features/tipo-clientes/tipo-cliente-form.component').then(m => m.TipoClienteFormComponent) },
   { path: 'usuarios', canActivate: [authGuard, permisoGuard], data: { modulo: 'Usuarios', accion: 'Ver' }, loadComponent: () => import('./features/usuarios/usuarios.component').then(m => m.UsuariosComponent) },
@@ -79,7 +79,8 @@ export const routes: Routes = [
       { path: 'inventario/kardex', canActivate: [permisoGuard], data: { modulo: 'MovimientosInventario', accion: 'ConsultarHistorial' }, loadComponent: () => import('./features/reportes-inventario/kardex/kardex.component').then(m => m.KardexComponent) },
       { path: 'inventario/stock-health', canActivate: [permisoGuard], data: { modulo: 'Inventario', accion: 'Ver' }, loadComponent: () => import('./features/reportes-inventario/stock-health/stock-health.component').then(m => m.StockHealthComponent) },
       { path: 'inventario/reconciliacion', canActivate: [permisoGuard], data: { modulo: 'Inventario', accion: 'Ver' }, loadComponent: () => import('./features/reportes-inventario/reconciliacion/reconciliacion.component').then(m => m.ReconciliacionComponent) },
-      { path: 'ventas', canActivate: [permisoGuard], data: { modulo: 'Ventas', accion: 'Ver' }, loadComponent: () => import('./features/reportes-ventas/reportes-ventas.component').then(m => m.ReportesVentasComponent) }
+      { path: 'ventas', canActivate: [permisoGuard], data: { modulo: 'Ventas', accion: 'Ver' }, loadComponent: () => import('./features/reportes-ventas/reportes-ventas.component').then(m => m.ReportesVentasComponent) },
+      { path: 'rentabilidad', canActivate: [permisoGuard], data: { modulo: 'Ventas', accion: 'Ver' }, loadComponent: () => import('./features/rentabilidad/rentabilidad.component').then(m => m.RentabilidadComponent) }
     ]
   },
   { path: 'plan-cuentas', canActivate: [authGuard, permisoGuard], data: { modulo: 'Finanzas', accion: 'Ver' }, loadComponent: () => import('./features/plan-cuentas/plan-cuentas.component').then(m => m.PlanCuentasComponent) },
