@@ -3,9 +3,9 @@ import { Injectable, inject } from '@angular/core';
 import { EMPTY, Observable, expand, map, reduce, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ApiResponse, PagedResult } from '../../core/models/api-response.model';
-import { ProductoCatalogoPublico, ReferenciaCarrito } from './varistorehn.catalog';
+import { ProductoCatalogoPublico, ReferenciaCarrito } from './varistorehn.models';
 
-export type { ModeloCatalogoPublico, ProductoCatalogoPublico } from './varistorehn.catalog';
+export type { ModeloCatalogoPublico, ProductoCatalogoPublico } from './varistorehn.models';
 
 @Injectable({ providedIn: 'root' })
 export class VaristorehnService {
