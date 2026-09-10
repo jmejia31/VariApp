@@ -64,7 +64,7 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
   color: var(--color-text-muted);
 }
 .search-box:focus-within { border-color: var(--color-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 12%, transparent); }
-.search-box input { width: 100%; min-width: 0; padding: 9px 0; border: 0; outline: 0; background: transparent; color: var(--color-text); }
+.search-box input { width: 100%; min-width: 0; padding: 9px 0; border: 0; background: transparent; color: var(--color-text); }
 .search-box input::placeholder { color: var(--color-text-muted); }
 .search-box button { width: 42px; height: 38px; flex: 0 0 42px; display: grid; place-items: center; border: 0; border-radius: calc(var(--radius) * .7); background: var(--color-button); color: var(--color-on-primary); }
 
