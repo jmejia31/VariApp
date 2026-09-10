@@ -1,6 +1,6 @@
 {
   "newDispatchAdmission": "OPEN",
   "allowExistingActiveSessions": true,
-  "reason": "OPEN_ONLY__N5.5.D_CURRENT__N5.5.C_LISTO_REAL__D1_J2_ONE_MANIFEST_ONE_RUN__E_F_G_PREARMED_DEPENDENCY_GATED",
-  "updatedAtUtc": "2026-09-10T08:13:31Z"
+  "reason": "N5.5.D_LISTO_REAL__N5.5.E_PROMOTED__E1_E5_MATERIAL_SCOPES_READY__E6_SIBLING_GATED__F_G_H_PREARMED",
+  "updatedAtUtc": "2026-09-10T08:49:45Z"
 }
