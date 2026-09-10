@@ -1,61 +1,111 @@
 # VariStoreHn — Fase 0: Diagnóstico y base técnica
 
-Documento de trabajo iniciado desde el Plan Maestro de Mejoras v1.1.
+Fuente de autoridad: **Plan Maestro de Mejoras de VariStoreHn v1.1**.
 
 ## Objetivo
-Asegurar que la tienda pública, los datos y las rutas estén preparados antes de rediseñar pantallas.
+Asegurar que la tienda pública, los datos y las rutas estén preparados antes de rediseñar pantallas. Esta fase no adelanta estética fina, banners, animaciones ni páginas de fases posteriores.
 
-## Estado de la fase
-**En desarrollo.** El escaparate actual ya consume un endpoint público/anónimo y tiene reglas puras reutilizables de catálogo/carrito, pero todavía concentra home, catálogo, detalle, carrito y checkout en un único componente. El detalle principal usa `dialog`, por lo que la arquitectura actual no debe arrastrarse a Fase 4.
+## Estado
+**Implementación de base completada; validación CI en curso.** La fase solo se marcará cerrada cuando backend, pruebas, lint y build de producción estén verdes y el PR esté actualizado contra `Desarrollo` sin conflictos materiales.
 
-## Definition of Done
-- [ ] Existe un modelo único de producto y categoría usado por todas las páginas públicas.
-- [x] Las rutas públicas objetivo están definidas en este documento.
+## Definition of Done del Plan Maestro
+- [x] Existe un modelo único de producto y categoría para las páginas públicas.
+- [x] Las rutas públicas objetivo están definidas y centralizadas.
 - [x] Está identificado qué código actual se conserva, qué se refactoriza y qué se elimina.
-- [x] La fuente pública actual no requiere componentes administrativos ni endpoints administrativos para leer el catálogo.
+- [x] La tienda pública no depende de componentes ni endpoints exclusivamente administrativos.
 
-## Inventario actual
+## 1. Mapa de componentes y responsabilidades
 
 ### Frontend — conservar
-- `frontend/src/app/features/varistorehn/varistorehn.catalog.ts`: conservar las reglas puras de normalización, stock, filtros, totales y restauración segura del carrito. Separar posteriormente los contratos de transporte de los modelos públicos canónicos.
-- `frontend/src/app/features/varistorehn/varistorehn.service.ts`: conservar como frontera HTTP de la tienda pública. Extenderla con categorías y producto por slug cuando el backend lo soporte.
-- `frontend/src/app/features/varistorehn/varistorehn.visual.ts`: conservar solo ilustraciones/iconos realmente reutilizables por el layout público.
-- `frontend/src/app/features/varistorehn/varistorehn.config.ts`: conservar configuración de integración y flags no visuales; los controles de preview nunca deben formar parte de producción.
+- `varistorehn.models.ts`: contratos canónicos del escaparate. Ninguna página pública debe crear modelos alternativos de producto/categoría.
+- `varistorehn.catalog.ts`: reglas puras de normalización, disponibilidad, filtros, carrito, restauración y fixtures demo.
+- `varistorehn.service.ts`: única frontera HTTP del escaparate para catálogo, producto por slug, categorías y categoría por slug.
+- `varistorehn.paths.ts`: única fuente de construcción de URLs públicas canónicas.
+- `varistorehn.visual.ts`: ilustraciones/iconos propios reutilizables.
+- `varistorehn.config.ts`: flags técnicos de integración; no define colores ni identidad empresarial.
+- `EmpresaIdentidadService`: identidad/configuración empresarial compartida. La tienda no duplica nombre, logo, WhatsApp, moneda ni tema.
 
-### Frontend — refactorizar
-- `frontend/src/app/features/varistorehn/varistorehn.component.ts`: actualmente concentra carga de catálogo, filtros, detalle, carrito, persistencia, WhatsApp y tarjeta. Dividir progresivamente en layout público + páginas + estado/servicios compartidos.
-- `frontend/src/app/features/varistorehn/varistorehn.component.html`: separar home, catálogo, detalle y carrito. El `dialog` de producto no puede seguir siendo la experiencia principal del detalle.
-- `frontend/src/app/features/varistorehn/varistorehn.component.scss` y `varistorehn.responsive.scss`: conservar tokens/reglas útiles, pero mover estilos con su componente durante las fases 1–6.
-- `frontend/src/app/app.routes.ts`: mantener rutas administrativas existentes, pero encapsular el árbol público bajo `/varistorehn` y usar rutas hijas con slugs.
+### Frontend — refactorizar en fases siguientes
+- `varistorehn.component.ts/.html`: hoy concentran home, catálogo, filtros, detalle, carrito y acciones de cierre. Se dividirán por páginas conforme avance el roadmap.
+- `varistorehn.component.scss` y `varistorehn.responsive.scss`: conservar reglas/tokens útiles y mover estilos junto a cada componente público.
+- `app.routes.ts`: conservar administración existente; las páginas públicas nuevas usarán el prefijo `/varistorehn` y `VARISTOREHN_PATHS`.
 
-### Backend — conservar
-- `backend/src/API/Controllers/TiendaController.cs`: ya es `[AllowAnonymous]`, usa `/tienda` y proyecta solo datos seguros para escaparate.
-- `backend/src/Application/DTOs/ProductoCatalogoPublicoDto.cs`: conservar como DTO público de transporte, ampliándolo únicamente con campos comerciales necesarios.
+### Reemplazar/eliminar durante el roadmap
+- El `dialog` como detalle comercial principal: se elimina en Fase 4 y se sustituye por `/varistorehn/producto/:slug`.
+- Categorías inferidas solo desde texto: Fase 2 consumirá el contrato público de categorías.
+- Estado/persistencia de carrito dentro de una página: Fase 5 lo moverá a una única frontera compartida.
+- Datos demo como posible sustituto silencioso del backend: prohibido. Son únicamente preview/fixture fuera de producción.
 
-### Eliminar/reemplazar durante el roadmap
-- Detalle comercial principal basado en `dialog`/modal: reemplazar por `/varistorehn/producto/:slug` en Fase 4.
-- Categorías derivadas únicamente desde `categoriaNombre` del catálogo: reemplazar por contrato de categoría pública con `id`, `name`, `slug` y metadatos mínimos.
-- Lógica central de carrito dentro del componente de página: migrarla a un único store/servicio compartido antes de cerrar Fase 5.
-- Datos demo mezclados con el flujo real: mantenerlos solo como fixture/preview no productivo, aislados del contrato real.
+## 2. Modelo de datos público canónico
 
-## Estado de contratos de datos
+### Producto HTTP (`ProductoCatalogoPublicoDto` / `ProductoCatalogoPublico`)
+Contrato preparado desde Fase 0 para crecer sin rehacer páginas:
+- `id`
+- `slug`
+- `nombre`
+- `descripcion`
+- `categoriaId`
+- `categoriaNombre`
+- `marcaNombre`
+- `modeloNombre`
+- `precio`
+- `precioOferta` (nulo mientras la fuente real no implemente promociones)
+- `cantidadDisponible`
+- `estaAgotado`
+- `sku` (solo cuando puede determinarse sin ambigüedad desde la fuente real)
+- `activo`
+- `esDestacado` (false mientras no exista regla persistida de destacados)
+- `fechaCreacion`
+- `imagenPrincipalUrl`
+- `imagenes[]`
+- `modelos[]`
 
-### Contrato público existente de producto
-Hoy expone: `id`, nombre, descripción, categoría por nombre, marca/modelo, precio, cantidad disponible, agotado, imagen principal, imágenes y modelos/variantes. Es una buena base segura, pero no cubre todavía todo el modelo objetivo del Plan Maestro.
+### Producto normalizado de tienda (`ProductoTienda`)
+Es el modelo que deben consumir las páginas públicas: identidad, slug, categoría, SKU, precio normal/oferta, stock, disponibilidad, estado activo, destacado, fecha, imágenes y modelos. Los componentes no deben volver a mapear DTO administrativos.
 
-### Brechas respecto al modelo objetivo
-Pendientes de decidir/implementar antes de depender de ellos en páginas públicas:
-- `slug` estable y único de producto.
-- `categoryId` y `categorySlug` en la proyección pública.
-- contrato público de categoría; hoy no existe dentro de `TiendaController`.
-- `sku`/código público si el negocio decide exponerlo.
-- `salePrice` y vigencia/regla de promoción; no deben inferirse en distintas pantallas.
-- `isFeatured` para destacados dinámicos.
-- fecha de creación pública o equivalente si se necesita ordenar por recientes.
+### Categoría pública
+`CategoriaCatalogoPublicoDto` y `CategoriaTienda` definen:
+- `id`
+- `slug`
+- `nombre`
+- `descripcion`
+- `totalProductos` / `cantidadProductos`
+- imagen opcional reservada para cuando exista fuente real
 
-**Regla:** no inventar estos campos en el frontend. Deben provenir de una única fuente de verdad del backend o derivarse mediante una regla central explícita y estable.
+### Regla para campos aún no existentes en negocio
+No inventar datos. `precioOferta` permanece nulo y `esDestacado=false` hasta que Fase 9/operación real defina una fuente de verdad. El contrato ya reserva esos campos para evitar romper páginas futuras.
 
-## Rutas públicas objetivo
+## 3. Estrategia de slugs
+
+Los slugs públicos se generan exclusivamente en backend mediante `PublicSlug` con formato legible `texto-normalizado-{id}`.
+
+Ejemplos:
+- `Cámara Wi-Fi`, id 21 -> `camara-wi-fi-21`
+- `Audio y Vídeo`, id 4 -> `audio-y-video-4`
+
+El **id final es la identidad durable**. El backend resuelve la entidad por ese id y devuelve siempre el slug canónico actual. Esto evita depender únicamente del nombre y permite que un enlace con un prefijo antiguo siga resolviendo el recurso si el nombre comercial cambia. No se requiere migración de base de datos ni se introduce una segunda fuente de identidad.
+
+## 4. API pública confirmada
+
+Controlador: `TiendaController`, `[AllowAnonymous]`, prefijo `/tienda`.
+
+Endpoints de Fase 0:
+- `GET /tienda/productos`
+- `GET /tienda/productos/{slug}`
+- `GET /tienda/categorias`
+- `GET /tienda/categorias/{slug}`
+
+Reglas:
+- catálogo fuerza `Activo=true` y elimina scope de usuario;
+- producto inexistente o inactivo responde 404;
+- categoría inexistente o inactiva responde 404;
+- DTO público no expone costo, auditoría ni información reservada;
+- los datos provienen de `IProductoService`/`ICategoriaService`, no de controladores administrativos;
+- SKU solo se expone cuando el grupo público no es ambiguo.
+
+## 5. Rutas públicas objetivo
+
+Centralizadas en `varistorehn.paths.ts`:
 - `/varistorehn`
 - `/varistorehn/productos`
 - `/varistorehn/categorias`
@@ -66,36 +116,85 @@ Pendientes de decidir/implementar antes de depender de ellos en páginas públic
 - `/varistorehn/checkout`
 - `/varistorehn/pedido/:id`
 
-### Estado actual de rutas
-Actualmente `app.routes.ts` expone `/` y `/varistorehn` al mismo componente monolítico. Las rutas administrativas permanecen fuera del prefijo público y protegidas por guards. No existen aún las rutas públicas hijas del Plan Maestro.
+Fase 0 define y protege el contrato de URLs. Las rutas se activarán al existir su página en la fase correspondiente; no se publican placeholders rotos solo para aparentar avance.
 
-## Fuente de datos confirmada
-El frontend usa `GET {apiUrl}/tienda/productos`. `TiendaController` fuerza productos activos, elimina scope de usuario y devuelve una proyección pública. Esto permite mantener separada la lectura del escaparate respecto de `/productos` y otros endpoints administrativos.
+## 6. Separación público / administrativo
 
-## Estados transversales
-Toda consulta/página pública debe contemplar explícitamente:
-- `loading`
-- `empty`
-- `error`
-- `available`
-- `outOfStock`
-- `promotion`
+### Público
+- `/` y `/varistorehn` cargan el escaparate.
+- Datos de catálogo usan `/tienda/*` anónimo y DTO públicos.
+- Modelos públicos viven dentro de la feature VariStoreHn.
 
-El componente actual ya modela carga/error/disponibilidad en parte; estos estados deben trasladarse a los nuevos componentes sin duplicar reglas.
+### Administrativo
+- `/productos`, `/categorias`, `/ventas`, etc. siguen fuera de `/varistorehn`.
+- Conservan `authGuard`, `permisoGuard` y contratos administrativos.
+- Ningún componente administrativo se importa en `VaristorehnComponent`.
 
-## Backlog técnico para cerrar Fase 0
-1. Definir los modelos canónicos públicos de `Producto`, `Categoria`, `Precio/Promocion` y `Disponibilidad`, separados de los DTO HTTP.
-2. Definir estrategia de slug estable y unicidad en backend para producto y categoría; evitar slugs efímeros generados solo desde el nombre en el navegador.
-3. Diseñar el árbol `varistorehn.routes.ts` y el layout público que usarán Fases 1–6, sin implementar todavía estética fina.
-4. Añadir/ajustar endpoints públicos mínimos: categorías y producto por slug; decidir si catálogo soportará filtros server-side o seguirá cargando el conjunto completo durante el MVP.
-5. Extraer la persistencia/estado de carrito del componente monolítico hacia una única frontera reutilizable antes de construir la página `/carrito`.
-6. Mantener pruebas de seguridad del endpoint público y añadir pruebas para slug, producto inexistente/inactivo y categoría vacía cuando existan los contratos.
-7. Verificar que producción no renderiza controles de preview ni datos de ejemplo.
+**Regla permanente:** la evolución de la tienda no reutilizará pantallas CRUD de administración como experiencia de compra.
 
-## Orden inmediato de implementación
-- **0A Contratos y slugs:** cerrar modelo y fuente de verdad.
-- **0B Rutas/layout público:** preparar separación de páginas.
-- **0C Estado compartido:** preparar catálogo/carrito reutilizable.
-- **0D Pruebas/DoD:** validar seguridad, rutas y estados.
+## 7. Estados transversales obligatorios
 
-Después de 0D se inicia Fase 1 (navegación pública y header). No se adelanta Fase 4 con un modal nuevo ni se construyen banners/animaciones como prioridad.
+Contratos definidos:
+- consulta: `loading | empty | error | success`
+- disponibilidad: `available | lowStock | outOfStock`
+- promoción: `none | active | expired`
+
+Cada página futura debe representar explícitamente sus estados relevantes. Ninguna llamada puede sustituir un error de datos reales por fixtures demo de forma silenciosa.
+
+## 8. Datos demo y producción
+
+`VARISTOREHN_CONFIGURACION` establece:
+- producción: `utilizarDatosBaseDatos=true`;
+- controles de preview: `false` en producción;
+- demo: disponible únicamente fuera de producción;
+- checkout de tarjeta: no se finge; permanece deshabilitado hasta existir endpoint real y orígenes autorizados.
+
+El carrito demo y el carrito de base de datos utilizan claves de almacenamiento separadas.
+
+## 9. Identidad visual y configuración del sistema
+
+Fase 0 no introduce paleta paralela. VariStoreHn conserva los tokens globales (`--color-*`, radios y demás variables del sistema) y la identidad empresarial central. Los colores configurados por el sistema/base de datos continúan siendo la autoridad visual. ACOSA es exclusivamente referencia de capacidades y flujo.
+
+## 10. Deuda técnica inicial registrada
+
+No bloquea Fase 0 cuando está explícitamente asignada a su fase correcta:
+- Fase 1: extraer layout/header público y navegación móvil.
+- Fase 2: página de categorías y consumo visual de `CategoriaTienda`.
+- Fase 3: grid de catálogo como página independiente y ordenamiento definido por roadmap.
+- Fase 4: eliminar detalle principal en modal y usar producto por slug.
+- Fase 5: extraer estado único de carrito del componente actual.
+- Fase 6: checkout/pedido real; WhatsApp puede cerrar el MVP.
+- Fase 9: persistencia/reglas reales de promociones y destacados si negocio las requiere.
+
+No se considera deuda de Fase 0 la implementación visual de páginas que el Plan Maestro asigna expresamente a fases posteriores.
+
+## 11. Pruebas de aceptación de Fase 0
+
+Backend incluye pruebas para:
+- controlador público anónimo y rutas esperadas;
+- slug legible con acentos y resolución por id estable;
+- listado que excluye inactivos;
+- contrato comercial (slug, categoría, SKU, precio, estado);
+- producto por slug y slug canónico;
+- producto inválido/inactivo -> 404;
+- categorías públicas activas;
+- categoría por slug e inactiva -> 404.
+
+Validación de rama requerida antes del cierre:
+- `dotnet restore`
+- `dotnet build --configuration Release`
+- `dotnet test --configuration Release --filter Category!=Integration`
+- `npm ci`
+- `npm run lint`
+- `npm run build:prod`
+
+## 12. Gate para iniciar Fase 1
+
+Fase 1 puede iniciar únicamente cuando:
+1. la validación anterior esté verde;
+2. la rama esté alineada con `Desarrollo` sin conflictos materiales;
+3. este documento tenga evidencia del resultado final;
+4. el PR de Fase 0 esté listo para revisión/integración;
+5. no quede ningún checkbox del DoD de Fase 0 sin cumplir.
+
+Hasta entonces el estado oficial continúa siendo **Fase 0 en validación**.
