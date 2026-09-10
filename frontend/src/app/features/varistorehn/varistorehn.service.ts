@@ -3,21 +3,26 @@ import { Injectable, inject } from '@angular/core';
 import { EMPTY, Observable, expand, map, reduce, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ApiResponse, PagedResult } from '../../core/models/api-response.model';
-import { ProductoCatalogoPublico, ReferenciaCarrito } from './varistorehn.models';
+import { CategoriaCatalogoPublico, ProductoCatalogoPublico, ReferenciaCarrito } from './varistorehn.models';
 
-export type { ModeloCatalogoPublico, ProductoCatalogoPublico } from './varistorehn.models';
+export type {
+  CategoriaCatalogoPublico,
+  ModeloCatalogoPublico,
+  ProductoCatalogoPublico
+} from './varistorehn.models';
 
 @Injectable({ providedIn: 'root' })
 export class VaristorehnService {
   private readonly http = inject(HttpClient);
-  private readonly url = `${environment.apiUrl}/tienda/productos`;
+  private readonly urlProductos = `${environment.apiUrl}/tienda/productos`;
+  private readonly urlCategorias = `${environment.apiUrl}/tienda/categorias`;
 
   obtenerProductos(page = 1, pageSize = 48): Observable<ApiResponse<PagedResult<ProductoCatalogoPublico>>> {
     const params = new HttpParams().set('page', page).set('pageSize', pageSize);
-    return this.http.get<ApiResponse<PagedResult<ProductoCatalogoPublico>>>(this.url, { params });
+    return this.http.get<ApiResponse<PagedResult<ProductoCatalogoPublico>>>(this.urlProductos, { params });
   }
 
-  /** Read every API page so search/categories never silently stop at item 48. */
+  /** Lee todas las paginas para que busqueda/categorias no se corten silenciosamente. */
   obtenerCatalogo(): Observable<ProductoCatalogoPublico[]> {
     const leer = (pagina: number) => this.obtenerProductos(pagina, 96).pipe(map(res => {
       const datos = res.data;
@@ -39,6 +44,35 @@ export class VaristorehnService {
     );
   }
 
+  obtenerProductoPorSlug(slug: string): Observable<ProductoCatalogoPublico> {
+    const seguro = this.slugSeguro(slug);
+    if (!seguro) return throwError(() => new Error('Slug de producto no válido.'));
+    return this.http.get<ApiResponse<ProductoCatalogoPublico>>(`${this.urlProductos}/${encodeURIComponent(seguro)}`).pipe(
+      map(res => {
+        if (!res.success || !res.data) throw new Error('Producto no encontrado.');
+        return res.data;
+      })
+    );
+  }
+
+  obtenerCategorias(): Observable<CategoriaCatalogoPublico[]> {
+    return this.http.get<ApiResponse<CategoriaCatalogoPublico[]>>(this.urlCategorias).pipe(map(res => {
+      if (!res.success || !Array.isArray(res.data)) throw new Error('Respuesta de categorías no válida.');
+      return res.data;
+    }));
+  }
+
+  obtenerCategoriaPorSlug(slug: string): Observable<CategoriaCatalogoPublico> {
+    const seguro = this.slugSeguro(slug);
+    if (!seguro) return throwError(() => new Error('Slug de categoría no válido.'));
+    return this.http.get<ApiResponse<CategoriaCatalogoPublico>>(`${this.urlCategorias}/${encodeURIComponent(seguro)}`).pipe(
+      map(res => {
+        if (!res.success || !res.data) throw new Error('Categoría no encontrada.');
+        return res.data;
+      })
+    );
+  }
+
   /** Integration boundary only: a server must reprice, validate stock and create the payment session. */
   crearCheckoutTarjeta(endpoint: string, items: ReferenciaCarrito[], idempotencyKey: string): Observable<string> {
     if (!/^\/[a-zA-Z0-9/_-]+$/.test(endpoint) || endpoint.startsWith('//')) {
@@ -50,5 +84,10 @@ export class VaristorehnService {
       if (!res.success || typeof res.data?.checkoutUrl !== 'string') throw new Error('No se pudo iniciar el pago.');
       return res.data.checkoutUrl;
     }));
+  }
+
+  private slugSeguro(slug: string): string {
+    const valor = slug.trim();
+    return valor.length > 0 && valor.length <= 180 && /^[a-zA-Z0-9áéíóúüñÁÉÍÓÚÜÑ-]+$/.test(valor) ? valor : '';
   }
 }
