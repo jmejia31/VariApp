@@ -219,18 +219,77 @@ def pending_items(issues, manifests, parent, worker, integrated,
     return sorted(pending.values(), key=lambda item: item["issue"])
 
 
+def _write_report(output, report):
+    Path(output).write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    print(json.dumps(report))
+
+
+def _idle_worker_report(current_parent, worker):
+    return dict(currentParent=current_parent, workerId=worker, pending=[],
+                malformedManifests=[], historicalMalformedManifests=[],
+                status="NO_CURRENT_PARENT_WORK", reviewExecuted=False,
+                integrationExecuted=False, reviewExecutionRequired=False,
+                sameRunRecoveryRequired=False, firstDetectorOwnsRecovery=True,
+                noRejectQueue=True, crossLaneR2Allowed=True,
+                recoveryUnblockDependentsSameRun=True,
+                activeRecoverySlots=list(ACTIVE_RECOVERY_SLOTS),
+                reviewReceipts=[], reviewedTaskCount=0,
+                authorizedReviewExecutors=list(REVIEW_EXECUTORS),
+                githubApiAuditSkipped=True)
+
+
+def _deferred_api_report(current_parent, worker, error):
+    return dict(currentParent=current_parent, workerId=worker, pending=[],
+                malformedManifests=[], historicalMalformedManifests=[],
+                status="AUDIT_DEFERRED_GITHUB_API_UNAVAILABLE",
+                degraded=True, apiError=error[-500:],
+                reviewExecuted=False, integrationExecuted=False,
+                reviewExecutionRequired=False, sameRunRecoveryRequired=False,
+                firstDetectorOwnsRecovery=True, noRejectQueue=True,
+                crossLaneR2Allowed=True, recoveryUnblockDependentsSameRun=True,
+                activeRecoverySlots=list(ACTIVE_RECOVERY_SLOTS),
+                reviewReceipts=[], reviewedTaskCount=0,
+                authorizedReviewExecutors=list(REVIEW_EXECUTORS))
+
+
 def audit(worker, output):
     from jules_integration_metrics import inspect_commit
     repo = os.environ["GITHUB_REPOSITORY"]
-    raw = subprocess.check_output(["gh", "api", "--paginate", "--slurp",
-        f"repos/{repo}/issues?state=all&per_page=100"], text=True, encoding="utf-8")
-    issues = [issue for page in json.loads(raw) for issue in page]
     catalog = json.loads(Path("vaep/control/jules-autorefill-catalog.json").read_text(encoding="utf-8"))
+    current_parent = catalog["currentParent"]
+
+    # Do not consume GitHub API budget for lanes that cannot possibly own a
+    # terminal result for the current parent. Historical and NEXT_SAFE entries
+    # are evidence only until their parent becomes current.
+    worker_entries = [entry for entry in catalog.get("lanes", {}).get(worker, [])
+                      if entry.get("plannedParent") == current_parent
+                      and not str(entry.get("status", "")).startswith("HISTORICAL")]
+    if not worker_entries:
+        report = _idle_worker_report(current_parent, worker)
+        _write_report(output, report)
+        return 0
+
+    # Terminal issues are created/updated by the worker that just ran. Reading
+    # only the latest 100 is sufficient for the live parent and avoids the old
+    # unbounded --paginate scan that exhausted the installation API budget.
+    try:
+        completed = subprocess.run(
+            ["gh", "api", f"repos/{repo}/issues?state=all&per_page=100&sort=updated&direction=desc"],
+            text=True, encoding="utf-8", capture_output=True, check=True)
+        issues = json.loads(completed.stdout)
+        if not isinstance(issues, list):
+            raise ValueError("issues endpoint returned a non-array payload")
+    except (subprocess.CalledProcessError, json.JSONDecodeError, ValueError) as exc:
+        detail = getattr(exc, "stderr", "") or str(exc)
+        report = _deferred_api_report(current_parent, worker, detail)
+        _write_report(output, report)
+        print("::warning::TERMINAL_HANDOFF_AUDIT_DEFERRED: GitHub API unavailable/rate-limited; no state was fabricated and the next controller pass must retry.")
+        return 0
+
     manifests = {}
     malformed_manifests = []
     historical_malformed_manifests = []
-    current_parent = catalog["currentParent"]
-    for directory in ("jules", "jules-b", "jules-c", "jules-d"):
+    for directory in ("jules", "jules-b", "jules-c", "jules-d", "j5", "j6"):
         for path in Path(f"vaep/{directory}/dispatch").glob("*.json"):
             m = json.loads(path.read_text(encoding="utf-8"))
             dispatch_id = m.get("dispatchId")
@@ -247,8 +306,8 @@ def audit(worker, output):
         receipt = inspect_commit(sha)
         if receipt["receipt"] and not receipt["errors"]:
             integrated.add(receipt["trailers"]["Dispatch"])
-    reviewed_dispatches, reviewed_tasks, review_receipts = accepted_review_items(catalog["currentParent"])
-    items = pending_items(issues, manifests, catalog["currentParent"], worker, integrated,
+    reviewed_dispatches, reviewed_tasks, review_receipts = accepted_review_items(current_parent)
+    items = pending_items(issues, manifests, current_parent, worker, integrated,
                           reviewed_dispatches, reviewed_tasks)
     report = dict(currentParent=current_parent, workerId=worker, pending=items,
                   malformedManifests=malformed_manifests,
@@ -264,9 +323,9 @@ def audit(worker, output):
                   activeRecoverySlots=list(ACTIVE_RECOVERY_SLOTS),
                   reviewReceipts=review_receipts,
                   reviewedTaskCount=len(reviewed_tasks),
-                  authorizedReviewExecutors=list(REVIEW_EXECUTORS))
-    Path(output).write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps(report))
+                  authorizedReviewExecutors=list(REVIEW_EXECUTORS),
+                  githubIssuesWindow="LATEST_100_UPDATED")
+    _write_report(output, report)
     if items:
         print("::warning::RECOVERY_ACTION_REQUIRED: terminal work must be owned and resolved same-run by the first active controller; see handoff artifact.")
     if malformed_manifests:
