@@ -1,0 +1,12 @@
+{
+  "dispatchId": "N5-4-D-1-ABSOLUTE-PROFITABILITY-QUERY-API-J1-RECOVERY1",
+  "taskId": "N5.4.D.1.ABSOLUTE_PROFITABILITY_QUERY_API",
+  "workerId": "J1",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "recoveryOf": "vaep/jules/dispatch/N5-4-D-1-ABSOLUTE-PROFITABILITY-QUERY-API-J1.json",
+  "recoveryReason": "ATTEMPT1_PRE_SESSION_INVALID_REDISPATCH__ORIGINAL_DISPATCH_COMMIT_CHANGED_CONTROL_PLANE_WITH_MANIFEST__NO_CONTENT_ATTEMPT_CONSUMED",
+  "fileScopeHint": "backend/src/Application/DTOs/ReporteRentabilidadDto.cs;backend/src/Application/Interfaces/IRentabilidadVentasService.cs;backend/src/Infrastructure/Services/RentabilidadVentasService.cs;backend/src/API/Controllers/RentabilidadVentasController.cs;backend/src/API/Program.cs;backend/tests/InventoryApp.Tests/Infrastructure/Services/RentabilidadVentasServiceTests.cs",
+  "prompt": "Use only docs/VAEP_AUTHORITY.md and live Desarrollo. Recover the same N5.4.D.1 semantic facet after the prior dispatch failed transport preflight before any Jules session because the dispatch commit was not append-only; content attempt remains ATTEMPT1. Implement one coherent source-backed backend/API slice for N5.4 absolute profitability using the REVIEW_FIRST-accepted N5.4.B contracts and N5.4.C persistence decision. Seller and customer grouping may aggregate sale-header Total, CostoTotal and UtilidadBruta using Venta.CreadoPorUsuarioId/Nombre and Venta.ClienteId/Nombre. Product and category grouping may aggregate only line-level Subtotal, Cantidad*CostoUnitarioSnapshot and VentaDetalle.UtilidadBruta using ProductoId and current Producto.CategoriaId, and the API/DTO contract must state that these product/category figures EXCLUDE allocation of sale-header Descuento and therefore are not reconciled sale-level profitability after header discount. Do not expose MargenPorcentaje because its denominator is not source-backed. Preserve fail-closed authenticated sales row scope through IUsuarioScopeService; request filters must never expand scope. Keep implementation inside the assigned files, register DI in Program.cs, add proportional service tests, perform two independent self-reviews, and do not touch main, Produccion, secrets or merge PR #2. Return only a reviewable patch; no pushes, PRs or deployments.",
+  "primaryBaseHead": "fc05e033bd505addbf9ae18d3168426c0224ffba"
+}
