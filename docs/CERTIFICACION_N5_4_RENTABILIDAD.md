@@ -27,7 +27,7 @@ La semántica aceptada es deliberadamente acotada: vendedor y cliente usan total
 - `N5.4.F`: `vaep/evidence/fragments/N5.4.F_LISTO_REAL_20260910T0754Z.json`.
 - `N5.4.G`: `vaep/evidence/fragments/N5.4.G_LISTO_REAL_20260910T0758Z.json`.
 - `N5.4.F REVIEW_FIRST`: `vaep/evidence/reviews/N5.4.F_REVIEW_FIRST_20260910T0753Z.json`.
-- `N5.4.G QA/CI REVIEW_FIRST`: `vaep/evidence/reviews/N5.4.G_QA_CI_REVIEW_20260910T0757Z.json`.
+- `N5.4.G QA/CI REVIEW_FIRST`: `vaep/evidence/fragments/N5.4.G_REVIEW_FIRST_20260910T0757Z.json`.
 
 ## Recovery y ownership
 
