@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N6-1-B-1-TENANT-EMPRESA-DOMAIN-CONTRACTS-J1",
+  "taskId": "N6.1.B.1.TENANT_EMPRESA_DOMAIN_CONTRACTS",
+  "workerId": "J1",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Domain/Entities/Empresa.cs,backend/src/Application/DTOs/EmpresaDto.cs,backend/tests/InventoryApp.Tests/N61BEmpresaDomainContractTests.cs",
+  "prompt": "Use only docs/VAEP_AUTHORITY.md, docs/N6.1_TENANT_EMPRESA_PREFLIGHT.md, the authoritative Sheet roadmap and live Desarrollo. Implement exactly N6.1.B as one bounded domain/contracts scope. Create ONE canonical root entity named Empresa; Tenant is the architectural concept, not a second parallel entity. Inspect existing domain conventions and define only the minimum identity/state/invariants and DTO contracts that are source-backed and required to let later N6.1 persistence/API work proceed. Keep EmpresaConfiguracion semantically separate; do not rename, migrate, repurpose or couple it as the tenant root. Preserve Sucursal.EmpresaId as the existing nullable future reservation and do not add a FK, DbSet, EF configuration, migration, repository, service, controller, UI, membership, tenant filter, isolation claim, storage/config-per-tenant behavior, packages or workflow changes in B. Do not touch N6.2/N6.3/N6.4/N6.5/N6.7/N6.8 responsibilities. Prefer AuditableEntity/project conventions when evidence supports them; avoid speculative fields or validation rules. Add directed domain/contract tests within the declared scope when materially useful. Run proportional backend compile/tests and two independent self-reviews. If the three-file scope is insufficient for a coherent domain/contract change, stop with evidence rather than expanding write-scope. Never touch main, Produccion, secrets or merge PR#2.",
+  "primaryBaseHead": "71badc337cf4485d2272de986512478ae86b07a8"
+}
