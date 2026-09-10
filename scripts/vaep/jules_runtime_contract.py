@@ -28,13 +28,16 @@ def transport_action(statuses):
     return "ADMIT"
 
 def admission_action(obj):
+    """Validate the OPEN-only global admission invariant.
+
+    FROZEN is not an operational state. Safety blocks belong to lane/task
+    eligibility or quarantine, so any global state other than OPEN is invalid.
+    """
     keys={"allowExistingActiveSessions","newDispatchAdmission","reason","updatedAtUtc"}
     if set(obj)!=keys or obj.get("allowExistingActiveSessions") is not True:
         return "INVALID"
     if obj.get("newDispatchAdmission")=="OPEN":
         return "OPEN"
-    if obj.get("newDispatchAdmission")=="FROZEN":
-        return "FROZEN"
     return "INVALID"
 
 def manifest_attempt(m):
@@ -171,7 +174,8 @@ def run_self_test():
     case("manifest_duplicate",not check_active_duplicate(current,"/nonexistent",{"sessions":[{"title":"VAEP-J1 TASK-R2","name":"sessions/1","state":"IN_PROGRESS"}]},"VAEP-J1 ")["ok"])
     case("r2_valid",check_active_duplicate(current,"/nonexistent",{"sessions":[{"title":"VAEP-J1 TASK-R1","name":"sessions/2","state":"COMPLETED"}]},"VAEP-J1 ")["ok"])
     case("r2_duplicate",not check_active_duplicate(current,"/nonexistent",{"sessions":[{"title":"VAEP-J1 TASK-R2","name":"sessions/3","state":"IN_PROGRESS"}]},"VAEP-J1 ")["ok"])
-    case("admission_closed",admission_action({"newDispatchAdmission":"FROZEN","allowExistingActiveSessions":True,"reason":"x","updatedAtUtc":"x"})=="FROZEN")
+    frozen={"newDispatchAdmission":"FROZEN","allowExistingActiveSessions":True,"reason":"x","updatedAtUtc":"x"}
+    case("global_frozen_is_invalid",admission_action(frozen)=="INVALID")
     prior={"dispatchId":"TASK-R1","taskId":"N1.X","workerId":"J1","taskAttempt":1,"primaryBaseHead":"a"*40}
     tmp=Path(".vaep-runtime-selftest-manifests"); tmp.mkdir(exist_ok=True)
     (tmp/"TASK-R1.json").write_text(json.dumps(prior),encoding="utf-8")
