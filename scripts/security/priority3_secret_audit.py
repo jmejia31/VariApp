@@ -8,7 +8,6 @@ rule and object/path that triggered the finding.
 from __future__ import annotations
 
 import argparse
-import os
 import re
 import subprocess
 from pathlib import Path
@@ -23,7 +22,9 @@ RULES = [
     ("google-api-key", re.compile(rb"\bAIza[0-9A-Za-z_-]{30,}\b")),
     ("stripe-live-key", re.compile(rb"\bsk_live_[0-9A-Za-z]{20,}\b")),
     ("sendgrid-key", re.compile(rb"\bSG\.[A-Za-z0-9_-]{16,}\.[A-Za-z0-9_-]{20,}\b")),
-    ("cloudinary-uri", re.compile(rb"cloudinary://[^\s\"']+", re.I)),
+    ("cloudinary-credential-uri", re.compile(
+        rb"cloudinary://[A-Za-z0-9_-]{3,}:[A-Za-z0-9_-]{8,}@[A-Za-z0-9_.-]+",
+        re.I)),
 ]
 
 
