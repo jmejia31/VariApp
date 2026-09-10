@@ -2,7 +2,7 @@
 
 ## Estado
 
-**En implementación.**
+**Implementada y validada en rama de integración. Cierre final sujeto a la recertificación post-merge en `Desarrollo`.**
 
 Esta fase continúa el Plan Maestro v1.1 después de la recertificación de Fase 1. Su objetivo es dejar de inferir la navegación de categorías únicamente desde el texto de los productos y activar una página pública propia que consuma el contrato canónico de categorías.
 
@@ -25,6 +25,8 @@ El conteo conserva su semántica original:
 - `cantidadProductos = 0`: la fuente confirmó que no hay productos;
 - `cantidadProductos = null`: la fuente no entregó un conteo y la UI muestra que la cantidad no está disponible;
 - nunca se transforma `null` en cero para aparentar precisión.
+
+El backend actual entrega `TotalProductos = null` en el contrato público de categorías; la UI respeta ese significado y no fabrica un conteo local para sustituirlo.
 
 ### Home y filtros existentes
 
@@ -84,22 +86,44 @@ La suite de navegador verifica, entre otros puntos:
 
 ## Definition of Done
 
-- [ ] `/varistorehn/categorias` pública y sin guards administrativos.
-- [ ] Página standalone reutilizando el header público.
-- [ ] `CategoriaCatalogoPublico` mapeado explícitamente a `CategoriaTienda`.
-- [ ] Home y filtros dejan de inferir categorías desde el texto de productos.
-- [ ] Conteo `null` permanece desconocido.
-- [ ] Estados loading/empty/error/success visibles y accesibles.
-- [ ] Sin fallback de API real a fixtures.
-- [ ] Navegación al catálogo basada en slug canónico recibido.
-- [ ] Búsqueda del header conserva continuidad hacia el catálogo.
-- [ ] Resumen de carrito no inventa valores cuando no puede validarse.
-- [ ] Sin dependencias administrativas en la experiencia pública.
-- [ ] Tokens visuales del sistema y objetivos táctiles adecuados.
-- [ ] Regresión de Fase 1 sigue verde.
-- [ ] Lint/TypeScript, build y Playwright Fase 2 verdes.
+- [x] `/varistorehn/categorias` pública y sin guards administrativos.
+- [x] Página standalone reutilizando el header público.
+- [x] `CategoriaCatalogoPublico` mapeado explícitamente a `CategoriaTienda`.
+- [x] Home y filtros dejan de inferir categorías desde el texto de productos.
+- [x] Conteo `null` permanece desconocido.
+- [x] Estados loading/empty/error/success visibles y accesibles.
+- [x] Sin fallback de API real a fixtures.
+- [x] Navegación al catálogo basada en slug canónico recibido.
+- [x] Búsqueda del header conserva continuidad hacia el catálogo.
+- [x] Resumen de carrito no inventa valores cuando no puede validarse.
+- [x] Sin dependencias administrativas en la experiencia pública.
+- [x] Tokens visuales del sistema y objetivos táctiles adecuados.
+- [x] Regresión de Fase 1 sigue verde.
+- [x] Lint/TypeScript, build y Playwright Fase 2 verdes.
 - [ ] Validación post-merge sobre `Desarrollo`.
 
-## Evidencia
+## Evidencia en rama
 
-Se completará únicamente después de ejecutar CI y validar el commit integrado en `Desarrollo`.
+Candidato funcional validado: `9cf463a861aa788b62cf0f01f76bc963d2e55797`.
+
+GitHub Actions run `34530528076`: **success**.
+
+Resultado:
+
+- `npm ci`: success;
+- TypeScript/lint y guardas estáticas de Fases 1 y 2: success;
+- build de producción: success;
+- regresión Playwright Fase 1: **4/4**;
+- Playwright Fase 2: **5/5**;
+- ruta independiente y responsive: success;
+- contrato real simulado y `null` preservado como desconocido: success;
+- empty/error sin datos demo silenciosos: success;
+- búsqueda, slug canónico y continuidad del carrito: success.
+
+La evidencia definitiva de cierre se registrará después de integrar el PR y volver a ejecutar la regresión sobre el commit exacto resultante en `Desarrollo`.
+
+## Observaciones no bloqueantes
+
+El build conserva el warning previo de presupuesto CSS de `varistorehn.component.scss`: 17.10 kB frente al umbral de warning de 16.00 kB. Fase 2 no aumenta ese archivo y su extracción posterior sigue perteneciendo al roadmap.
+
+`npm ci` también continúa reportando vulnerabilidades de dependencias preexistentes; se mantienen como deuda transversal separada y no se ocultan como parte del cierre de esta fase.
