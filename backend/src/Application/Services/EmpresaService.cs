@@ -2,6 +2,7 @@ using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Exceptions;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities;
+using InventoryApp.Domain.Enums;
 
 namespace InventoryApp.Application.Services;
 
@@ -10,11 +11,16 @@ public sealed class EmpresaService : IEmpresaService
     private const int NombreMaxLength = 200;
     private readonly IEmpresaRepository _repository;
     private readonly ICurrentUserService _currentUser;
+    private readonly IAuditoriaService? _auditoria;
 
-    public EmpresaService(IEmpresaRepository repository, ICurrentUserService currentUser)
+    public EmpresaService(
+        IEmpresaRepository repository,
+        ICurrentUserService currentUser,
+        IAuditoriaService? auditoria = null)
     {
         _repository = repository;
         _currentUser = currentUser;
+        _auditoria = auditoria;
     }
 
     public async Task<List<EmpresaDto>> ListAsync(bool? activa = null, CancellationToken cancellationToken = default)
@@ -43,6 +49,14 @@ public sealed class EmpresaService : IEmpresaService
         if (!await _repository.SaveChangesAsync(cancellationToken))
             throw new BusinessRuleException("No se pudo crear la empresa.");
 
+        if (_auditoria is not null)
+            await _auditoria.RegistrarAsync(
+                ModuloSistema.Configuracion,
+                AccionPermiso.Crear,
+                $"Empresa creada: {empresa.Nombre}",
+                empresa.Id,
+                entidad: "Empresa");
+
         return ToDto(empresa);
     }
 
@@ -53,11 +67,22 @@ public sealed class EmpresaService : IEmpresaService
         var empresa = await _repository.GetByIdAsync(id, cancellationToken);
         if (empresa is null) return null;
 
+        var nombreAnterior = empresa.Nombre;
         empresa.CambiarNombre(NormalizarNombre(dto.Nombre));
         MarcarActualizacion(empresa);
         _repository.Update(empresa);
         if (!await _repository.SaveChangesAsync(cancellationToken))
             throw new BusinessRuleException("No se pudo actualizar la empresa.");
+
+        if (_auditoria is not null)
+            await _auditoria.RegistrarAsync(
+                ModuloSistema.Configuracion,
+                AccionPermiso.Editar,
+                $"Empresa actualizada: {empresa.Nombre}",
+                empresa.Id,
+                entidad: "Empresa",
+                valoresAnteriores: new { Nombre = nombreAnterior },
+                valoresNuevos: new { empresa.Nombre });
 
         return ToDto(empresa);
     }
@@ -69,11 +94,22 @@ public sealed class EmpresaService : IEmpresaService
         if (empresa is null) return null;
         if (empresa.Activa == activa) return ToDto(empresa);
 
+        var estadoAnterior = empresa.Activa;
         if (activa) empresa.Activar(); else empresa.Desactivar();
         MarcarActualizacion(empresa);
         _repository.Update(empresa);
         if (!await _repository.SaveChangesAsync(cancellationToken))
             throw new BusinessRuleException("No se pudo cambiar el estado de la empresa.");
+
+        if (_auditoria is not null)
+            await _auditoria.RegistrarAsync(
+                ModuloSistema.Configuracion,
+                activa ? AccionPermiso.Activar : AccionPermiso.Desactivar,
+                $"Empresa {(activa ? "activada" : "desactivada")}: {empresa.Nombre}",
+                empresa.Id,
+                entidad: "Empresa",
+                valoresAnteriores: new { Activa = estadoAnterior },
+                valoresNuevos: new { empresa.Activa });
 
         return ToDto(empresa);
     }
