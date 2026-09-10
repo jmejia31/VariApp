@@ -1,9 +1,9 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
-  "currentParent": "N5.6.C",
-  "generatedAt": "2026-09-10T10:50:30Z",
-  "regenerationReason": "N5.6.B_LISTO_REAL__ATOMIC_PROMOTION_N5.6.C__PERSISTENCE_NA_FASTPATH_FROM_ACCEPTED_NO_CHANGE_CONTRACT__PREARM_D_E_F__NO_FILLER",
-  "lastClosedParent": "N5.6.B",
+  "currentParent": "N5.6.D",
+  "generatedAt": "2026-09-10T10:52:30Z",
+  "regenerationReason": "N5.6.B_AND_C_LISTO_REAL__ATOMIC_PROMOTION_N5.6.D__APPLICATION_API_EXISTING_IMPLEMENTATION_REVIEW_FIRST__PREARM_E_F_G__NO_FILLER",
+  "lastClosedParent": "N5.6.C",
   "closureReceipts": {
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
     "N5.1.H": "vaep/evidence/fragments/N5.1.H_LISTO_REAL_20260909T1236Z.json",
@@ -33,7 +33,8 @@
     "N5.5.G": "vaep/evidence/fragments/N5.5.G_LISTO_REAL_20260910T1029Z.json",
     "N5.5.H": "vaep/evidence/fragments/N5.5.H_LISTO_REAL_20260910T1030Z.json",
     "N5.6.A": "vaep/evidence/fragments/N5.6.A_LISTO_REAL_20260910T1031Z.json",
-    "N5.6.B": "vaep/evidence/fragments/N5.6.B_LISTO_REAL_20260910T1050Z.json"
+    "N5.6.B": "vaep/evidence/fragments/N5.6.B_LISTO_REAL_20260910T1050Z.json",
+    "N5.6.C": "vaep/evidence/fragments/N5.6.C_LISTO_REAL_NA_20260910T1051Z.json"
   },
   "policy": {
     "branch": "Desarrollo",
@@ -53,32 +54,31 @@
   },
   "throughputPlan": {
     "mode": "PARENT_CLOSE_FIRST",
-    "currentParent": "N5.6.C",
+    "currentParent": "N5.6.D",
     "currentParentMaterialScopeCount": 0,
-    "currentParentReason": "N5.6.B accepted the existing finance summary contract with no functional/domain mutation. Under the N5.6.A preflight, no new persistence, migration, backfill or reporting source of truth is authorized or required, so C enters persistence N/A REVIEW_FIRST fastpath rather than filler.",
-    "nextParent": "N5.6.D",
+    "currentParentReason": "N5.6.C is LISTO_REAL N/A. Existing FinanzasService.GetResumenAsync and FinanzasController GET /finanzas/resumen already expose the accepted N5.6.B source-backed summary contract with existing authorization. D enters REVIEW_FIRST against that live implementation before any code mutation; no speculative bank/tax/accounting API is authorized.",
+    "nextParent": "N5.6.E",
     "nextParentParallelMaterialScopes": 0,
     "nextParentScopesNonOverlapping": true,
-    "laneRefill": "CLOSURE_DEBT_FASTPATH_N5.6.C_PERSISTENCE_NA__PREARM_D_E_F__NO_FILLER"
+    "laneRefill": "D_EXISTING_APPLICATION_API_REVIEW_FIRST__PREARM_E_F_G__NO_FILLER"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
     "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
-    "sourceRanges": ["COLA!A432:T438","PLAN_MAESTRO","docs/VAEP_N5_6_FINANCE_REPORTS_PREFLIGHT.md","vaep/evidence/fragments/N5.6.B_LISTO_REAL_20260910T1050Z.json","backend/src/Application/DTOs/FinanzasDto.cs","backend/src/Application/Services/FinanzasService.cs"],
-    "note": "N5.6.C is current after B LISTO_REAL. C is evaluated only for a demonstrated persistence need. B introduced no new contract/schema need; D/E/F remain dependency-gated and no filler is permitted.",
+    "sourceRanges": ["COLA!A432:T439","PLAN_MAESTRO","docs/VAEP_N5_6_FINANCE_REPORTS_PREFLIGHT.md","vaep/evidence/fragments/N5.6.C_LISTO_REAL_NA_20260910T1051Z.json","backend/src/Application/Services/FinanzasService.cs","backend/src/Application/Interfaces/IFinanzasService.cs","backend/src/API/Controllers/FinanzasController.cs"],
+    "note": "N5.6.D is current after C LISTO_REAL N/A. D reviews the existing application/API implementation against accepted contracts. E/F/G are dependency-gated and no filler is permitted.",
     "nodes": [
-      {"id":"N5.6.A","order":42,"type":"MICROTAREA","dependencies":["N5.1.H","GATE-N4"],"phaseGate":"GATE-N4"},
-      {"id":"N5.6.B","order":43,"type":"MICROTAREA","dependencies":["N5.6.A"],"phaseGate":"GATE-N4"},
       {"id":"N5.6.C","order":44,"type":"MICROTAREA","dependencies":["N5.6.B"],"phaseGate":"GATE-N4"},
       {"id":"N5.6.D","order":45,"type":"MICROTAREA","dependencies":["N5.6.C"],"phaseGate":"GATE-N4"},
       {"id":"N5.6.E","order":46,"type":"MICROTAREA","dependencies":["N5.6.D"],"phaseGate":"GATE-N4"},
-      {"id":"N5.6.F","order":47,"type":"MICROTAREA","dependencies":["N5.6.E"],"phaseGate":"GATE-N4"}
+      {"id":"N5.6.F","order":47,"type":"MICROTAREA","dependencies":["N5.6.E"],"phaseGate":"GATE-N4"},
+      {"id":"N5.6.G","order":48,"type":"MICROTAREA","dependencies":["N5.6.F"],"phaseGate":"GATE-N4"}
     ]
   },
   "prearmedRoadmap": [
-    {"parent":"N5.6.D","state":"READY_DEPENDENCY_GATED","dependency":"N5.6.C_LISTO_REAL","materialization":"FINANCE_REPORT_APPLICATION_API_FROM_ACCEPTED_CONTRACTS_ONLY__EXISTING_IMPLEMENTATION_REVIEW_FIRST__NO_FILLER"},
-    {"parent":"N5.6.E","state":"READY_DEPENDENCY_GATED","dependency":"N5.6.D_LISTO_REAL","materialization":"FINANCE_REPORT_FRONTEND_UX_FROM_ACCEPTED_API_ONLY__NO_FILLER"},
-    {"parent":"N5.6.F","state":"READY_DEPENDENCY_GATED","dependency":"N5.6.E_LISTO_REAL","materialization":"FINANCE_REPORT_RBAC_AUDIT_SECURITY_FROM_ACCEPTED_FLOW_ONLY__NO_FILLER"}
+    {"parent":"N5.6.E","state":"READY_DEPENDENCY_GATED","dependency":"N5.6.D_LISTO_REAL","materialization":"FINANCE_REPORT_FRONTEND_UX_FROM_ACCEPTED_API_ONLY__EXISTING_IMPLEMENTATION_REVIEW_FIRST__NO_FILLER"},
+    {"parent":"N5.6.F","state":"READY_DEPENDENCY_GATED","dependency":"N5.6.E_LISTO_REAL","materialization":"FINANCE_REPORT_RBAC_AUDIT_SECURITY_FROM_ACCEPTED_FLOW_ONLY__NO_FILLER"},
+    {"parent":"N5.6.G","state":"READY_DEPENDENCY_GATED","dependency":"N5.6.F_LISTO_REAL","materialization":"FINANCE_REPORT_QA_REGRESSION_CI_FROM_ACCEPTED_FLOW_ONLY__NO_FILLER"}
   ],
   "lanes": {"J1":[],"J2":[],"J3":[],"J4":[],"J5":[],"J6":[]},
   "lastClosureFunctionalHead": "8b06b3d6181bad54a867eddb849c08b6f41eab63"
