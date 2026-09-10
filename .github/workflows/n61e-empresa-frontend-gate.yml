@@ -42,9 +42,9 @@ jobs:
         working-directory: frontend
         run: npm ci
 
-      - name: Ejecutar pruebas dirigidas Empresa
+      - name: Ejecutar pruebas frontend incl. Empresa
         working-directory: frontend
-        run: npx vitest run src/app/features/configuracion/empresa-administracion-card.component.spec.ts --config vitest.config.ts --pool threads --maxWorkers 1
+        run: npm test -- --no-watch
 
       - name: Ejecutar lint frontend
         working-directory: frontend
