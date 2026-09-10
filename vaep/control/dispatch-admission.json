@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "FROZEN",
+  "newDispatchAdmission": "OPEN",
   "allowExistingActiveSessions": true,
-  "reason": "N5.3.D_J1_J2_TRANSPORT_STALLED__CHATGPT_VAEP_TAKEOVER__REVIEW_FIRST_BEFORE_REFILL__NO_DUPLICATE_DISPATCH",
-  "updatedAtUtc": "2026-09-10T00:19:06Z"
+  "reason": "N5.3.D_D1_D2_REVIEW_FIRST_ACCEPTED__D3_MATERIAL_SCOPE_READY__NO_DUPLICATE_DISPATCH",
+  "updatedAtUtc": "2026-09-10T00:28:45Z"
 }
