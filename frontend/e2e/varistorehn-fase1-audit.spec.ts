@@ -43,7 +43,7 @@ async function esperarCatalogo(page: Page): Promise<void> {
 }
 
 test.describe('VariStoreHn Fase 1 — auditoría runtime', () => {
-  test.describe.configure({ mode: 'serial', retries: 0 });
+  test.describe.configure({ retries: 0 });
 
   test('desktop: identidad, navegación, búsqueda, categorías, carrito y WhatsApp usan estado real', async ({ page }) => {
     await page.setViewportSize({ width: 1366, height: 900 });
@@ -62,8 +62,7 @@ test.describe('VariStoreHn Fase 1 — auditoría runtime', () => {
     await expect(whatsapp).toBeVisible();
     await expect(whatsapp).toHaveAttribute('href', 'https://wa.me/50498765432');
 
-    const cartTrigger = header.getByRole('button', { name: 'Abrir carrito con 0 unidades' });
-    await expect(cartTrigger).toBeVisible();
+    await expect(header.getByRole('button', { name: 'Abrir carrito con 0 unidades' })).toBeVisible();
 
     const laptop = page.locator('article.product-card').filter({ hasText: 'Laptop Pro 14' });
     await expect(laptop).toBeVisible();
@@ -102,6 +101,15 @@ test.describe('VariStoreHn Fase 1 — auditoría runtime', () => {
     await expect(page.getByRole('status').filter({ hasText: '14 productos encontrados' })).toBeVisible();
   });
 
+  test('tablet: WhatsApp configurado sigue accesible desde la cabecera', async ({ page }) => {
+    await page.setViewportSize({ width: 900, height: 900 });
+    await prepararTienda(page);
+    await esperarCatalogo(page);
+
+    const header = page.locator('app-varistorehn-header');
+    await expect(header.getByRole('link', { name: 'Contactar por WhatsApp' })).toBeVisible();
+  });
+
   test('móvil: drawer modal, foco, Escape, selección de categoría, modo de compra y reflow funcionan', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await prepararTienda(page);
@@ -134,7 +142,7 @@ test.describe('VariStoreHn Fase 1 — auditoría runtime', () => {
     await expect(dialog.locator('a.mobile-whatsapp')).toBeVisible();
     await dialog.getByRole('button', { name: 'Cerrar navegación' }).click();
 
-    await page.getByLabel('Carrito').selectOption('tarjeta');
+    await page.locator('.preview-panel select').selectOption('tarjeta');
     await toggle.click();
     await expect(dialog.locator('a.mobile-whatsapp')).toHaveCount(0);
     await dialog.getByRole('button', { name: 'Cerrar navegación' }).click();
