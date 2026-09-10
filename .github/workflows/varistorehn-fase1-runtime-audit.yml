@@ -1,0 +1,84 @@
+name: VariStoreHn Fase 1 - auditoria runtime
+
+on:
+  push:
+    branches:
+      - chatgpt/varistorehn-fase1-audit-runtime
+
+permissions:
+  contents: read
+
+concurrency:
+  group: varistorehn-fase1-runtime-audit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend-runtime:
+    name: Frontend Fase 1 - lint, build y navegador
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout auditoria
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Lint y guardas permanentes
+        run: npm run lint
+
+      - name: Build de produccion
+        run: npm run build:prod
+
+      - name: Instalar Chromium para Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Iniciar Angular de auditoria
+        shell: bash
+        run: |
+          set -euo pipefail
+          nohup npm start -- --host 127.0.0.1 --port 4200 > varistorehn-fase1-frontend.log 2>&1 &
+          echo $! > varistorehn-fase1-frontend.pid
+
+      - name: Esperar Angular
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:4200/varistorehn > /dev/null; then
+              echo 'Angular listo para auditoria runtime de Fase 1.'
+              exit 0
+            fi
+            sleep 2
+          done
+          echo 'Angular no respondio dentro del tiempo esperado.' >&2
+          cat varistorehn-fase1-frontend.log >&2 || true
+          exit 1
+
+      - name: Ejecutar auditoria Playwright de Fase 1
+        env:
+          PLAYWRIGHT_TEST_BASE_URL: http://127.0.0.1:4200
+        run: npx playwright test e2e/varistorehn-fase1-audit.spec.ts --config=playwright.config.ts
+
+      - name: Publicar evidencia de auditoria
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: varistorehn-fase1-runtime-audit
+          path: |
+            frontend/varistorehn-fase1-frontend.log
+            frontend/playwright-report/
+            frontend/test-results/
+          if-no-files-found: warn
+          retention-days: 7
