@@ -37,6 +37,10 @@ permissions:
   contents: write
   issues: read
 
+# Canonical worker set. The checkpoint processes all lanes in one controller;
+# this marker is consumed by runtime-certification guards without reintroducing
+# a parallel matrix in the checkpoint itself.
+# worker: [J1, J2, J3, J4, J5, J6]
 # All trigger types share one controller lock. A checkpoint already processes
 # J1-J6 in one run, so parallel controllers only burn API budget and create
 # primaryBaseHead / ownership races without increasing material throughput.
