@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-3-D-4-SALES-REPORT-QUERY-SERVICE-J4",
+  "taskId": "N5.3.D.4.SALES_REPORT_QUERY_SERVICE",
+  "workerId": "J4",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Infrastructure/Services/ReporteVentasService.cs",
+  "prompt": "Use only docs/VAEP_AUTHORITY.md plus REVIEW_FIRST-accepted N5.3.D.1 result contracts, N5.3.D.2 query rules and N5.3.D.3 service contract. Implement the server-side sales report query service with projection/grouping, IUsuarioScopeService fail-closed row scope, historical detail snapshots, explicit current-category semantics, multi-warehouse branch-at-detail semantics and no ConIncludes overfetch. No controller/export/frontend changes. Run proportional backend tests and two self-reviews. Desarrollo only; no main/Production/secrets/PR #2 merge.",
+  "primaryBaseHead": "539e960c8a6f479e8fc6c13498190167ff4a5f11"
+}
