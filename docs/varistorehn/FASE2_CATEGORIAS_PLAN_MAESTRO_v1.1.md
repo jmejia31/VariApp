@@ -20,6 +20,8 @@ La Fase 2 no volverá a marcarse como completada hasta activar y validar la ruta
 
 ## Gap detectado en reauditoría
 
+La discrepancia es verificable dentro del propio código: `VARISTOREHN_PATHS.categoria(slug)` y `VaristorehnService.obtenerCategoriaPorSlug(slug)` existen desde la base técnica, pero `app.routes.ts` solo había activado `/varistorehn/categorias`, y las tarjetas enlazaban a `?categoria=<slug>#catalogo`.
+
 - [ ] activar `/varistorehn/categoria/:slug` en `app.routes.ts`;
 - [ ] crear una página pública de categoría por slug que consuma `GET /tienda/categorias/{slug}`;
 - [ ] usar el slug canónico devuelto por backend y corregir URL si el prefijo cambia;
@@ -51,7 +53,7 @@ La implementación inicial de listado pasó:
 - Playwright Fase 1: 4/4;
 - Playwright Fase 2 inicial: 5/5.
 
-Esa evidencia prueba lo que existía, pero no cubría la ruta canónica omitida. Por eso la fase queda reabierta.
+Esa evidencia prueba el listado de categorías y sus estados, pero no cubría la ruta canónica omitida. Por eso la fase queda reabierta.
 
 ## Gate de cierre reaudidado
 
