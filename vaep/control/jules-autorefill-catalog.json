@@ -1,9 +1,9 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
-  "currentParent": "N5.7.G",
-  "generatedAt": "2026-09-10T13:19:00Z",
-  "regenerationReason": "N5.7.F_LISTO_REAL__ATOMIC_PROMOTION_N5.7.G_CURRENT__QA_CI_CLOSURE_DEBT_FASTPATH__H_N5.8.A_PREARMED_DEPENDENCY_GATED__NO_FILLER",
-  "lastClosedParent": "N5.7.F",
+  "currentParent": "N5.7.H",
+  "generatedAt": "2026-09-10T13:23:00Z",
+  "regenerationReason": "N5.7.G_LISTO_REAL__ATOMIC_PROMOTION_N5.7.H_CURRENT__DOC_CERT_CLOSURE_DEBT_FASTPATH__N5.8.A_B_C_PREARMED_DEPENDENCY_GATED__NO_FILLER",
+  "lastClosedParent": "N5.7.G",
   "closureReceipts": {
     "GATE-N4":"vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
     "N5.1.H":"vaep/evidence/fragments/N5.1.H_LISTO_REAL_20260909T1236Z.json",
@@ -31,15 +31,17 @@
     "N5.7.C":"vaep/evidence/fragments/N5.7.C_LISTO_REAL_20260910T1202Z.json",
     "N5.7.D":"vaep/evidence/fragments/N5.7.D_LISTO_REAL_20260910T1225Z.json",
     "N5.7.E":"vaep/evidence/fragments/N5.7.E_LISTO_REAL_20260910T1256Z.json",
-    "N5.7.F":"vaep/evidence/fragments/N5.7.F_LISTO_REAL_20260910T1314Z.json"
+    "N5.7.F":"vaep/evidence/fragments/N5.7.F_LISTO_REAL_20260910T1314Z.json",
+    "N5.7.G":"vaep/evidence/fragments/N5.7.G_LISTO_REAL_20260910T1322Z.json"
   },
   "policy":{"branch":"Desarrollo","programmedBacklogTargetTotal":72,"liveQueueDepthTarget":2,"genericFloorRegeneration":false,"noBusywork":true,"semanticIdentity":"CURRENT_PARENT + material scope/semantic facet","stopWhenEligibleWorkExhausted":true,"materialParallelismTargetPerParent":6,"requireDistinctWriteScopesWhenParallel":true,"activeWorkerCount":6,"activeWorkers":["J1","J2","J3","J4","J5","J6"]},
-  "throughputPlan":{"mode":"PARENT_CLOSE_FIRST","currentParent":"N5.7.G","currentParentMaterialScopeCount":1,"currentParentReason":"N5.7.F is LISTO_REAL with accepted REVIEW_FIRST and exact functional-head backend/frontend gates. N5.7.G is the first dependency-valid unclosed parent and is a QA/regression/CI closure-debt fastpath; no duplicate Jules writer is required when existing exact-head evidence satisfies its DoD.","nextParent":"N5.7.H","nextParentParallelMaterialScopes":1,"nextParentScopesNonOverlapping":true,"laneRefill":"DRAIN_G_REVIEW_FIRST_GATES_CERTIFICATION__PROMOTE_H_SAME_RUN__THEN_N5.8.A__NO_FILLER"},
-  "roadmap":{"authority":"docs/VAEP_AUTHORITY.md","sourceSpreadsheetId":"19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY","sourceRanges":["COLA!A440:T448","PLAN_MAESTRO","docs/VAEP_N5_7_DASHBOARD_KPI_PREFLIGHT.md","backend/src/API/Controllers/DashboardKpiConfiguracionController.cs","frontend/src/app/features/dashboard/dashboard.component.ts"],"note":"N5.7.G is current after F LISTO_REAL. G performs QA/regression/CI certification on the accepted KPI configuration contract. H documentation/certification and N5.8.A remain dependency-gated; no filler and no premature execution.","nodes":[{"id":"N5.7.A","order":50,"dependencies":["N5.2.H","N5.3.H","N5.4.H","N5.5.H","N5.6.H"]},{"id":"N5.7.B","order":51,"dependencies":["N5.7.A"]},{"id":"N5.7.C","order":52,"dependencies":["N5.7.B"]},{"id":"N5.7.D","order":53,"dependencies":["N5.7.C"]},{"id":"N5.7.E","order":54,"dependencies":["N5.7.D"]},{"id":"N5.7.F","order":55,"dependencies":["N5.7.E"]},{"id":"N5.7.G","order":56,"dependencies":["N5.7.F"]},{"id":"N5.7.H","order":57,"dependencies":["N5.7.G"]}]},
+  "throughputPlan":{"mode":"PARENT_CLOSE_FIRST","currentParent":"N5.7.H","currentParentMaterialScopeCount":1,"currentParentReason":"N5.7.G is LISTO_REAL using existing exact-functional-head QA/regression/CI evidence. N5.7.H is the first dependency-valid unclosed parent and is documentation/certification closure debt; controller documentation is preferred over a redundant Jules writer.","nextParent":"N5.8.A","nextParentParallelMaterialScopes":1,"nextParentScopesNonOverlapping":true,"laneRefill":"DRAIN_H_DOCUMENTATION_CERTIFICATION__PROMOTE_N5.8.A_SAME_RUN__B_C_PREARMED_DEPENDENCY_GATED__NO_FILLER"},
+  "roadmap":{"authority":"docs/VAEP_AUTHORITY.md","sourceSpreadsheetId":"19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY","sourceRanges":["COLA!A440:T456","PLAN_MAESTRO","docs/VAEP_N5_7_DASHBOARD_KPI_PREFLIGHT.md","backend/src/API/Controllers/DashboardKpiConfiguracionController.cs","frontend/src/app/features/dashboard/dashboard.component.ts"],"note":"N5.7.H is current after G LISTO_REAL. H closes documentation/certification over the already accepted KPI configuration contract. N5.8.A/B/C are roadmap-derived and prearmed dependency-gated for immediate continuation after H; no filler or premature implementation.","nodes":[{"id":"N5.7.A","order":50,"dependencies":["N5.2.H","N5.3.H","N5.4.H","N5.5.H","N5.6.H"]},{"id":"N5.7.B","order":51,"dependencies":["N5.7.A"]},{"id":"N5.7.C","order":52,"dependencies":["N5.7.B"]},{"id":"N5.7.D","order":53,"dependencies":["N5.7.C"]},{"id":"N5.7.E","order":54,"dependencies":["N5.7.D"]},{"id":"N5.7.F","order":55,"dependencies":["N5.7.E"]},{"id":"N5.7.G","order":56,"dependencies":["N5.7.F"]},{"id":"N5.7.H","order":57,"dependencies":["N5.7.G"]},{"id":"N5.8.A","order":58,"dependencies":["N5.7.H"]},{"id":"N5.8.B","order":59,"dependencies":["N5.8.A"]},{"id":"N5.8.C","order":60,"dependencies":["N5.8.B"]}]},
   "prearmedRoadmap":[
-    {"parent":"N5.7.G","state":"CURRENT_READY","dependency":"N5.7.F_LISTO_REAL","materialization":"KPI_CONFIGURATION_QA_REGRESSION_CI__CLOSURE_DEBT_FASTPATH__NO_FILLER"},
-    {"parent":"N5.7.H","state":"READY_DEPENDENCY_GATED","dependency":"N5.7.G_LISTO_REAL","materialization":"KPI_CONFIGURATION_DOCUMENTATION_CERTIFICATION__NO_FILLER"},
-    {"parent":"N5.8.A","state":"READY_DEPENDENCY_GATED","dependency":"N5.7.H_LISTO_REAL","materialization":"NEXT_PLAN_MAESTRO_PARENT__ROADMAP_DERIVED_PREFLIGHT__NO_FILLER"}
+    {"parent":"N5.7.H","state":"CURRENT_READY","dependency":"N5.7.G_LISTO_REAL","materialization":"KPI_CONFIGURATION_DOCUMENTATION_CERTIFICATION__CONTROLLER_CLOSURE_DEBT_FASTPATH__NO_FILLER"},
+    {"parent":"N5.8.A","state":"READY_DEPENDENCY_GATED","dependency":"N5.7.H_LISTO_REAL","materialization":"EXPORTS_AUDIT_PREFLIGHT__ROADMAP_DERIVED__NO_FILLER"},
+    {"parent":"N5.8.B","state":"READY_DEPENDENCY_GATED","dependency":"N5.8.A_LISTO_REAL","materialization":"EXPORTS_DOMAIN_CONTRACTS__ROADMAP_DERIVED__NO_FILLER"},
+    {"parent":"N5.8.C","state":"READY_DEPENDENCY_GATED","dependency":"N5.8.B_LISTO_REAL","materialization":"EXPORTS_PERSISTENCE_MIGRATION_DATA__ROADMAP_DERIVED__NO_FILLER"}
   ],
   "lanes":{
     "J1":[{"dispatchId":"N5-7-D-1-KPI-CONFIG-APPLICATION-API-J1","taskId":"N5.7.D.1.KPI_CONFIG_APPLICATION_API","workerId":"J1","taskAttempt":1,"plannedParent":"N5.7.D","readyForDispatch":false,"dispatchEligible":false,"status":"HISTORICAL_TERMINAL__CONTROLLER_RECOVERED__LISTO_REAL__NOT_ACTIVE_REAL","dispatchCommitSha":"784addb2ceb4cd07e5d8aa914f816dfeb326a747","workflowRunId":34474658605,"primaryBaseHead":"df47063aecd0b52e4bb256551f7ddba87cdfd644","fileScopeHint":"backend/src/Application/Services/DashboardKpiConfiguracionService.cs;backend/src/API/Controllers/DashboardKpiConfiguracionController.cs","reason":"TRANSPORT_STALLED__OWNERSHIP_TRANSFERRED_TO_CHATGPT_VAEP__DIRECT_BOUNDED_FIX_REVIEW_FIRST_GATES__N5.7.D_LISTO_REAL__LATE_RESULT_EVIDENCE_ONLY__NO_R2__NO_R3"}],
