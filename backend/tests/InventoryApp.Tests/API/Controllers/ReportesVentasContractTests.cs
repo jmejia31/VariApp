@@ -77,9 +77,27 @@ public sealed class ReportesVentasContractTests
     {
         await using var context = CreateContext();
         var venta = Confirmada("V-001", 7, 30m);
-        var almacen1 = new Almacen { Id = 11, SucursalId = 1, Codigo = "A-1", Nombre = "Almacen 1" };
-        var almacen2 = new Almacen { Id = 22, SucursalId = 2, Codigo = "A-2", Nombre = "Almacen 2" };
-        context.AddRange(venta, almacen1, almacen2);
+        var sucursal1 = new Sucursal { Id = 1, Codigo = "S-1", Nombre = "Sucursal 1" };
+        var sucursal2 = new Sucursal { Id = 2, Codigo = "S-2", Nombre = "Sucursal 2" };
+        var almacen1 = new Almacen
+        {
+            Id = 11,
+            SucursalId = sucursal1.Id,
+            Sucursal = sucursal1,
+            Codigo = "A-1",
+            Nombre = "Almacen 1"
+        };
+        var almacen2 = new Almacen
+        {
+            Id = 22,
+            SucursalId = sucursal2.Id,
+            Sucursal = sucursal2,
+            Codigo = "A-2",
+            Nombre = "Almacen 2"
+        };
+        var producto1 = new Producto { Id = 101, Nombre = "Producto 1", Marca = "Marca 1", Modelo = "Modelo 1" };
+        var producto2 = new Producto { Id = 202, Nombre = "Producto 2", Marca = "Marca 2", Modelo = "Modelo 2" };
+        context.AddRange(venta, sucursal1, sucursal2, almacen1, almacen2, producto1, producto2);
         await context.SaveChangesAsync();
 
         context.VentaDetalles.AddRange(
@@ -87,7 +105,8 @@ public sealed class ReportesVentasContractTests
             {
                 VentaId = venta.Id,
                 Venta = venta,
-                ProductoId = 101,
+                ProductoId = producto1.Id,
+                Producto = producto1,
                 AlmacenId = almacen1.Id,
                 Almacen = almacen1,
                 Cantidad = 1,
@@ -103,7 +122,8 @@ public sealed class ReportesVentasContractTests
             {
                 VentaId = venta.Id,
                 Venta = venta,
-                ProductoId = 202,
+                ProductoId = producto2.Id,
+                Producto = producto2,
                 AlmacenId = almacen2.Id,
                 Almacen = almacen2,
                 Cantidad = 1,
