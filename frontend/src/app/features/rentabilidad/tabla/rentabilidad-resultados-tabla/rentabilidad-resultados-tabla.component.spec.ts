@@ -7,9 +7,8 @@ describe('RentabilidadResultadosTablaComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [RentabilidadResultadosTablaComponent]
-    })
-    .compileComponents();
+      imports: [RentabilidadResultadosTablaComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(RentabilidadResultadosTablaComponent);
     component = fixture.componentInstance;
@@ -42,23 +41,24 @@ describe('RentabilidadResultadosTablaComponent', () => {
     expect(element.querySelector('.empty-state')).toBeTruthy();
   });
 
-  it('should display results in table', () => {
+  it('should display the accepted camelCase DTO contract', () => {
     component.resultados = [
       {
-        AgrupacionId: 1,
-        Agrupacion: 'Grupo A',
-        Nombre: 'Item A',
-        Venta: 100,
-        Costo: 50,
-        UtilidadBruta: 50,
-        IncluyeDescuentoEncabezadoEnUtilidad: false,
-        Semantica: 'Positivo'
-      }
+        agrupacionId: 1,
+        agrupacion: 'Grupo A',
+        nombre: 'Item A',
+        venta: 100,
+        costo: 50,
+        utilidadBruta: 50,
+        incluyeDescuentoEncabezadoEnUtilidad: false,
+        semantica: 'Positivo',
+      },
     ];
     fixture.detectChanges();
     const element = fixture.nativeElement;
     const rows = element.querySelectorAll('tbody tr');
     expect(rows.length).toBe(1);
     expect(rows[0].cells[0].textContent.trim()).toBe('Grupo A');
+    expect(rows[0].cells[1].textContent.trim()).toBe('Item A');
   });
 });

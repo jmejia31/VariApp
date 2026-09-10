@@ -1,5 +1,5 @@
 <div class="table-container" role="region" aria-label="Tabla de resultados de rentabilidad" tabindex="0">
-  <div *ngIf="isLoading" class="loading-state" role="alert" aria-busy="true">
+  <div *ngIf="isLoading" class="loading-state" role="status" aria-busy="true">
     <p>Cargando resultados...</p>
   </div>
 
@@ -25,13 +25,13 @@
     </thead>
     <tbody>
       <tr *ngFor="let resultado of resultados">
-        <td>{{ resultado.Agrupacion }}</td>
-        <td>{{ resultado.Nombre }}</td>
-        <td class="numeric">{{ resultado.Venta | currency }}</td>
-        <td class="numeric">{{ resultado.Costo | currency }}</td>
-        <td class="numeric">{{ resultado.UtilidadBruta | currency }}</td>
-        <td class="text-center">{{ resultado.IncluyeDescuentoEncabezadoEnUtilidad ? 'Sí' : 'No' }}</td>
-        <td>{{ resultado.Semantica }}</td>
+        <td>{{ resultado.agrupacion }}</td>
+        <td>{{ resultado.nombre }}</td>
+        <td class="numeric">{{ resultado.venta | currency }}</td>
+        <td class="numeric">{{ resultado.costo | currency }}</td>
+        <td class="numeric">{{ resultado.utilidadBruta | currency }}</td>
+        <td class="text-center">{{ resultado.incluyeDescuentoEncabezadoEnUtilidad ? 'Sí' : 'No' }}</td>
+        <td>{{ resultado.semantica }}</td>
       </tr>
     </tbody>
   </table>

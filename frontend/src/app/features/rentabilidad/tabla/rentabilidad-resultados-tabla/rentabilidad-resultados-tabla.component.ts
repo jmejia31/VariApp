@@ -1,16 +1,6 @@
-import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-export interface RentabilidadResultado {
-  AgrupacionId: string | number;
-  Agrupacion: string;
-  Nombre: string;
-  Venta: number;
-  Costo: number;
-  UtilidadBruta: number;
-  IncluyeDescuentoEncabezadoEnUtilidad: boolean;
-  Semantica: string;
-}
+import { Component, Input } from '@angular/core';
+import { ReporteRentabilidadDto } from '../../../../core/models/reporte-rentabilidad.models';
 
 @Component({
   selector: 'app-rentabilidad-resultados-tabla',
@@ -20,7 +10,7 @@ export interface RentabilidadResultado {
   styleUrls: ['./rentabilidad-resultados-tabla.component.css'],
 })
 export class RentabilidadResultadosTablaComponent {
-  @Input() resultados: RentabilidadResultado[] | null = null;
-  @Input() isLoading: boolean = false;
+  @Input() resultados: readonly ReporteRentabilidadDto[] | null = null;
+  @Input() isLoading = false;
   @Input() error: string | null = null;
 }
