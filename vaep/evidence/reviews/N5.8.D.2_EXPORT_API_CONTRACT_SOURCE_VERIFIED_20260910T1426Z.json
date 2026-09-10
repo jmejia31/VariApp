@@ -1,0 +1,44 @@
+{
+  "authority": "docs/VAEP_AUTHORITY.md",
+  "parent": "N5.8.D",
+  "taskId": "N5.8.D.2.EXPORT_API_CONTRACT",
+  "verificationType": "SOURCE_VERIFICATION__NO_CODE_CHANGE_REQUIRED",
+  "verifiedAtUtc": "2026-09-10T14:26:00Z",
+  "dependency": {
+    "required": "N5.8.D.1_REVIEW_FIRST_ACCEPTED",
+    "satisfiedBy": "vaep/evidence/reviews/N5.8.D.1_CONTROLLER_REVIEW_FIRST_20260910T1424Z.json"
+  },
+  "functionalHead": "e8ba8885f15ae0a53a2f6a02427e4694ab9672d5",
+  "controlPlaneHeadObserved": "fbe2fe1f9714372a444975e81f8277f5ff05fa82",
+  "verifiedFile": "backend/src/API/Controllers/ReportesAdministrativosController.cs",
+  "contract": {
+    "route": "GET reportes-administrativos/exportar/{tipo}",
+    "authenticated": true,
+    "exportPermissionRequired": "ReportesAdministrativos:Exportar",
+    "administratorRequired": true,
+    "delegatesToServiceExport": true,
+    "propagatesContentTypeFromService": true,
+    "propagatesFilenameFromService": true,
+    "auditRecorded": true,
+    "auditIncludesTypeAndFormat": true,
+    "unknownFormatFailClosedByService": true,
+    "pdfContractInheritedFromD1": {
+      "contentType": "application/pdf",
+      "extension": ".pdf"
+    }
+  },
+  "decision": {
+    "codeChangeRequired": false,
+    "julesDispatchRequired": false,
+    "reason": "The existing controller already satisfies the D2 verification contract and generically propagates the service file content type and filename. Dispatching a no-change Jules run would be evidence-only busywork and would violate noBusywork/work-conserving policy.",
+    "P0": 0,
+    "P1": 0,
+    "reviewAccepted": true
+  },
+  "gates": {
+    "status": "PENDING",
+    "exactFunctionalHead": "e8ba8885f15ae0a53a2f6a02427e4694ab9672d5",
+    "listoReal": false
+  },
+  "next": "DRAIN_APPLICABLE_EXACT_HEAD_GATES__CERTIFY_N5.8.D_IF_VALID"
+}
