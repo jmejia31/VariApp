@@ -103,10 +103,10 @@
     </header>
 
     <nav aria-label="Navegación móvil">
-      <a #primerEnlaceMovil [href]="enlaces.inicio" (click)="cerrarMenuMovil()">Inicio</a>
-      <a [href]="enlaces.productos" (click)="cerrarMenuMovil()">Productos</a>
-      <a [href]="enlaces.categorias" (click)="cerrarMenuMovil()">Categorías</a>
-      <a [href]="enlaces.contacto" (click)="cerrarMenuMovil()">Contacto</a>
+      <a #primerEnlaceMovil [href]="enlaces.inicio" (click)="cerrarMenuMovil(false)">Inicio</a>
+      <a [href]="enlaces.productos" (click)="cerrarMenuMovil(false)">Productos</a>
+      <a [href]="enlaces.categorias" (click)="cerrarMenuMovil(false)">Categorías</a>
+      <a [href]="enlaces.contacto" (click)="cerrarMenuMovil(false)">Contacto</a>
     </nav>
 
     @if (categorias.length) {
