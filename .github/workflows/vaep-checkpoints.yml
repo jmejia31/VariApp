@@ -1,6 +1,12 @@
 name: VAEP scheduled checkpoints
 
 on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - 'vaep/control/dispatch-admission.json'
+      - 'docs/VAEP_AUTHORITY.md'
+      - '.github/workflows/vaep-checkpoints.yml'
   schedule:
     - cron: '0 * * * *'
     - cron: '12 * * * *'
@@ -43,15 +49,115 @@ jobs:
         github.event.workflow_run.event == 'push' &&
         github.event.workflow_run.head_branch == 'Desarrollo'
       )
-    name: Enforce OPEN-only admission
+    name: Enforce OPEN_ONLY authority and admission
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 5
     env:
       GH_TOKEN: ${{ github.token }}
       REPO: ${{ github.repository }}
       BRANCH: Desarrollo
       ADMISSION_PATH: vaep/control/dispatch-admission.json
+      MASTER_PATH: docs/VAEP_AUTHORITY.md
     steps:
+      - name: Enforce OPEN_ONLY in canonical MASTER
+        shell: bash
+        run: |
+          set -euo pipefail
+          tmp="$RUNNER_TEMP/vaep-master-open-only.md"
+
+          for attempt in 1 2 3 4 5; do
+            payload="$(gh api "repos/$REPO/contents/$MASTER_PATH?ref=$BRANCH")"
+            sha="$(jq -r '.sha' <<<"$payload")"
+            jq -r '.content' <<<"$payload" | tr -d '\n' | base64 -d > "$tmp"
+
+            MASTER_TMP="$tmp" python3 - <<'PY'
+          import os
+          from pathlib import Path
+
+          path = Path(os.environ["MASTER_TMP"])
+          text = path.read_text(encoding="utf-8")
+
+          policy_marker = "PREARM_BEFORE_CAUSAL_CI=TRUE\n"
+          policy_block = (
+              policy_marker
+              + "GLOBAL_DISPATCH_ADMISSION=OPEN_ONLY\n"
+              + "GLOBAL_FROZEN_PROHIBITED=TRUE\n"
+              + "CAUSAL_HOLD_SCOPE=TASK_OR_LANE_ONLY\n"
+          )
+          if "GLOBAL_DISPATCH_ADMISSION=OPEN_ONLY" not in text:
+              if policy_marker not in text:
+                  raise SystemExit("MASTER_POLICY_MARKER_MISSING")
+              text = text.replace(policy_marker, policy_block, 1)
+
+          old_section = """El estado machine-readable de admisión vive en `vaep/control/dispatch-admission.json` y está subordinado a este MAESTRO. Solo se permiten dos estados:
+
+- `FROZEN`: un commit con exactamente un manifest nuevo se rechaza antes de crear sesión, consumir attempt, reservar ownership o iniciar recovery. Sesiones `ACTIVE_REAL` ya existentes no se invalidan.
+- `OPEN`: el manifest continúa por el transporte Jules normal.
+"""
+          new_section = """El estado machine-readable de admisión vive en `vaep/control/dispatch-admission.json` y está subordinado a este MAESTRO. El contrato global es **OPEN_ONLY**:
+
+- `OPEN`: único estado global válido; mantiene disponibles las lanes independientes que tengan trabajo material elegible.
+- `FROZEN` y `CLOSED`: **PROHIBIDOS como estados globales**. Un watchdog, stall, deuda REVIEW_FIRST, hardening pendiente, causal gate, parent transition o takeover nunca puede cerrar toda la fábrica.
+- `HEAD_FREEZE_CAUSAL` significa exclusivamente que la tarea/lane afectada queda `dispatchEligible=false`, prearmada o en cuarentena/REVIEW_FIRST hasta satisfacer su gate. No autoriza cambiar `newDispatchAdmission` fuera de `OPEN` ni bloquear lanes independientes.
+"""
+          if old_section in text:
+              text = text.replace(old_section, new_section, 1)
+          elif "El contrato global es **OPEN_ONLY**" not in text:
+              raise SystemExit("MASTER_ADMISSION_SECTION_MISSING")
+
+          text = text.replace(
+              "- control ausente, malformado, con claves desconocidas o valor distinto de `FROZEN|OPEN` => fail-closed;",
+              "- control ausente, malformado, con claves desconocidas o valor distinto de `OPEN` => fail-closed; `FROZEN`/`CLOSED` son violaciones del invariante y deben normalizarse a `OPEN` antes de despachar;",
+              1,
+          )
+          text = text.replace(
+              "- Fase 7/certificación integral autoriza el primer retorno a `OPEN` tras la migración. Después de `MIGRATION_F0_F7=CLOSED/PASS`, un hardening posterior del control-plane puede volver de `FROZEN` a `OPEN` sin reabrir fases únicamente si el HEAD de hardening tiene `VAEP engine lightweight checks=SUCCESS` y `VAEP Jules Diagnostic=SUCCESS`, no existe regresión concreta de MASTER y PR #2 permanece OPEN+DRAFT.",
+              "- Las referencias históricas a `FROZEN` quedan como evidencia de migración, no como estado ejecutable. Los hardening/causal gates se expresan a nivel de tarea/lane (`dispatchEligible=false`, cuarentena o REVIEW_FIRST) mientras el admission global permanece `OPEN`.",
+              1,
+          )
+          text = text.replace(
+              "La admisión se valida antes de construir, inmediatamente antes de publicar el ref y antes de emitir el run interno; si se cierra durante la carrera, el commit Git huérfano no se publica.",
+              "La admisión se valida antes de construir, inmediatamente antes de publicar el ref y antes de emitir el run interno; cualquier valor global distinto de `OPEN` es una violación que debe normalizarse antes del dispatch, sin cerrar lanes independientes.",
+              1,
+          )
+
+          absolute_rule = "- **GLOBAL_FROZEN_PROHIBITED**: ningún workflow, checkpoint, watchdog, controller, takeover, review gate, hardening ni transición de parent puede escribir `newDispatchAdmission` distinto de `OPEN`. Todo bloqueo causal se aplica exclusivamente a la tarea/lane afectada; nunca a la fábrica completa.\n"
+          anchor = "- `PARENT_CLOSE_FIRST=TRUE`: Cerrar CURRENT_PARENT antes de promover un sucesor dependiente.\n"
+          if absolute_rule not in text:
+              if anchor not in text:
+                  raise SystemExit("MASTER_CONTINUITY_ANCHOR_MISSING")
+              text = text.replace(anchor, anchor + absolute_rule, 1)
+
+          path.write_text(text, encoding="utf-8")
+          PY
+
+            encoded="$(base64 -w0 "$tmp")"
+            if jq -n \
+              --arg message "fix(vaep): make global dispatch admission OPEN_ONLY" \
+              --arg content "$encoded" \
+              --arg sha "$sha" \
+              --arg branch "$BRANCH" \
+              '{message:$message,content:$content,sha:$sha,branch:$branch}' \
+              | gh api "repos/$REPO/contents/$MASTER_PATH" --method PUT --input - >/dev/null 2>&1; then
+              echo "VAEP_MASTER_OPEN_ONLY=UPDATED"
+              break
+            fi
+
+            if (( attempt == 5 )); then
+              echo "VAEP_MASTER_OPEN_ONLY=CAS_EXHAUSTED" >&2
+              exit 1
+            fi
+            sleep "$attempt"
+          done
+
+          master="$(gh api "repos/$REPO/contents/$MASTER_PATH?ref=$BRANCH" --jq '.content' | tr -d '\n' | base64 -d)"
+          grep -q '^GLOBAL_DISPATCH_ADMISSION=OPEN_ONLY$' <<<"$master"
+          grep -q '^GLOBAL_FROZEN_PROHIBITED=TRUE$' <<<"$master"
+          grep -q '^CAUSAL_HOLD_SCOPE=TASK_OR_LANE_ONLY$' <<<"$master"
+          grep -q 'El contrato global es \*\*OPEN_ONLY\*\*' <<<"$master"
+          ! grep -q 'Solo se permiten dos estados' <<<"$master"
+          echo "VAEP_MASTER_OPEN_ONLY=PASS"
+
       - name: Force global admission OPEN before checkpoint/refill
         shell: bash
         run: |
@@ -70,7 +176,7 @@ jobs:
             fi
 
             now="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-            reason="GLOBAL_FREEZE_PROHIBITED__CHECKPOINT_AUTO_REOPEN__prior_state=${state}__LANE_LEVEL_QUARANTINE_REVIEW_FIRST_ONLY"
+            reason="GLOBAL_FROZEN_PROHIBITED__CHECKPOINT_AUTO_REOPEN__prior_state=${state}__TASK_LANE_QUARANTINE_REVIEW_FIRST_ONLY"
             fixed="$(jq -n --arg now "$now" --arg reason "$reason" '{newDispatchAdmission:"OPEN",allowExistingActiveSessions:true,reason:$reason,updatedAtUtc:$now}')"
             encoded="$(printf '%s\n' "$fixed" | base64 -w0)"
 
@@ -95,7 +201,7 @@ jobs:
 
   checkpoint:
     needs: enforce-open-admission
-    if: needs.enforce-open-admission.result == 'success'
+    if: needs.enforce-open-admission.result == 'success' && github.event_name != 'push'
     name: ${{ matrix.worker }} ${{ inputs.checkpoint || github.event.schedule || ':00' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
