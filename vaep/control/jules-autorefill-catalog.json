@@ -1,8 +1,8 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
   "currentParent": "N5.8.E",
-  "generatedAt": "2026-09-10T14:31:39Z",
-  "regenerationReason": "N5.8.D_LISTO_REAL__ATOMIC_PROMOTION_N5.8.E__FRONTEND_UX__SOURCE_PREFLIGHT_FIRST__F_G_H_PREARMED_DEPENDENCY_GATED__NO_FILLER",
+  "generatedAt": "2026-09-10T14:35:00Z",
+  "regenerationReason": "N5.8.D_LISTO_REAL__N5.8.E_SOURCE_PREFLIGHT_FOUND_REAL_FRONTEND_PDF_GAP__E1_J4_READY__F_G_H_PREARMED_DEPENDENCY_GATED__NO_FILLER",
   "lastClosedParent": "N5.8.D",
   "closureReceipts": {
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
@@ -36,17 +36,17 @@
     "mode": "PARENT_CLOSE_FIRST",
     "currentParent": "N5.8.E",
     "currentParentMaterialScopeCount": 1,
-    "currentParentReason": "N5.8.D is LISTO_REAL. N5.8.E is the first dependency-valid unfinished parent and requires a source-backed frontend/UX preflight for Excel/PDF/CSV before any Jules dispatch; dispatch is allowed only for a real material gap.",
+    "currentParentReason": "Live Desarrollo source preflight found the existing administrative-report UI and frontend service expose only csv/xlsx even though N5.8.D certified csv/xlsx/pdf. E1 is the single coherent frontend/UX material gap: extend the existing report surface and service to PDF, preserve the same dataset/RBAC/date flow, and keep loading/error/download behavior source-backed.",
     "nextParent": "N5.8.F",
     "nextParentParallelMaterialScopes": 1,
     "nextParentScopesNonOverlapping": true,
-    "laneRefill": "PREFLIGHT_E_SOURCE__IF_MATERIAL_GAP_DISPATCH_ONE_EXCLUSIVE_SCOPE__ELSE_REVIEW_FIRST_AND_GATES__NO_FILLER"
+    "laneRefill": "DISPATCH_E1_J4_ATTEMPT1__VERIFY_CORRELATED_SESSION__REVIEW_FIRST__EXACT_HEAD_FRONTEND_GATES__CLOSE_E__PROMOTE_F__NO_FILLER"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
     "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
     "sourceRanges": ["COLA!A448:T456", "PLAN_MAESTRO", "docs/VAEP_N5_8_EXPORTACIONES_PREFLIGHT.md"],
-    "note": "N5.8.E is current after D LISTO_REAL. E is frontend/UX; F/G/H remain dependency-gated and prearmed. No evidence-only filler is authorized.",
+    "note": "N5.8.E is current after D LISTO_REAL. Source preflight confirms one material frontend/UX PDF gap in the existing administrative report surface. F/G/H remain dependency-gated and prearmed; no evidence-only filler is authorized.",
     "nodes": [
       {"id": "N5.8.A", "order": 58, "dependencies": ["N5.7.H"]},
       {"id": "N5.8.B", "order": 59, "dependencies": ["N5.8.A"]},
@@ -59,7 +59,7 @@
     ]
   },
   "prearmedRoadmap": [
-    {"parent": "N5.8.E", "state": "READY", "dependency": "N5.8.D_LISTO_REAL", "materialization": "EXPORTS_FRONTEND_UX__SOURCE_PREFLIGHT_THEN_MATERIAL_GAP_ONLY"},
+    {"parent": "N5.8.E", "taskId": "N5.8.E.1.EXPORT_FRONTEND_UX", "state": "READY_FOR_DISPATCH", "dependency": "N5.8.D_LISTO_REAL", "worker": "J4", "materialization": "EXTEND_EXISTING_REPORTES_ADMINISTRATIVOS_UI_AND_FRONTEND_SERVICE_FROM_CSV_XLSX_TO_CSV_XLSX_PDF__PRESERVE_EXISTING_SCOPE_LOADING_ERROR_DOWNLOAD"},
     {"parent": "N5.8.F", "state": "READY_DEPENDENCY_GATED", "dependency": "N5.8.E_LISTO_REAL", "materialization": "EXPORTS_RBAC_AUDIT_SECURITY_OBSERVABILITY__ROADMAP_DERIVED"},
     {"parent": "N5.8.G", "state": "READY_DEPENDENCY_GATED", "dependency": "N5.8.F_LISTO_REAL", "materialization": "EXPORTS_QA_REGRESSION_CI__ROADMAP_DERIVED"},
     {"parent": "N5.8.H", "state": "READY_DEPENDENCY_GATED", "dependency": "N5.8.G_LISTO_REAL", "materialization": "EXPORTS_DOCUMENTATION_CERTIFICATION__ROADMAP_DERIVED"}
@@ -68,7 +68,7 @@
     "J1": [],
     "J2": [],
     "J3": [],
-    "J4": [],
+    "J4": [{"taskId": "N5.8.E.1.EXPORT_FRONTEND_UX", "state": "READY_FOR_DISPATCH", "taskAttempt": 1}],
     "J5": [],
     "J6": []
   },
