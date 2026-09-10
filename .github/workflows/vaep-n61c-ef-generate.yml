@@ -67,3 +67,5 @@ jobs:
           printf '%s\n' "$cached" | grep -Eq 'AppDbContextModelSnapshot\.cs$'
           git commit -m 'fix(n6.1.c): generate Empresa migration and snapshot'
           git push origin HEAD:Desarrollo
+
+# controller retrigger after canonical stall takeover; no deployment side effects
