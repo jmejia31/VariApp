@@ -162,6 +162,7 @@ public static class CatalogoPermisosBase
         (ModuloSistema.Configuracion, new[]
         {
             AccionPermiso.Ver, AccionPermiso.Crear, AccionPermiso.Editar,
+            AccionPermiso.Activar, AccionPermiso.Desactivar,
             AccionPermiso.Administrar, AccionPermiso.Cerrar
         }),
         (ModuloSistema.Descuentos, new[]
