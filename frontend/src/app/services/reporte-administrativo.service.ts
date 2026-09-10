@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { ApiResponse } from '../core/models/api-response.model';
@@ -36,11 +36,12 @@ export class ReporteAdministrativoService {
     });
   }
 
-  exportar(tipo: 'usuarios' | 'roles' | 'auditoria', formato: 'csv' | 'xlsx', desde?: string, hasta?: string): Observable<Blob> {
+  exportar(tipo: 'usuarios' | 'roles' | 'auditoria', formato: 'csv' | 'xlsx' | 'pdf', desde?: string, hasta?: string): Observable<HttpResponse<Blob>> {
     let params = this.periodo(desde, hasta).set('formato', formato);
     return this.http.get(`${this.apiUrl}/exportar/${tipo}`, {
       params,
-      responseType: 'blob'
+      responseType: 'blob',
+      observe: 'response'
     });
   }
 

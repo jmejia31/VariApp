@@ -107,6 +107,9 @@
               <button mat-flat-button type="button" (click)="exportar('usuarios', 'xlsx')" [disabled]="exporting() !== null">
                 <mat-icon>download</mat-icon> Excel
               </button>
+              <button mat-flat-button color="primary" type="button" (click)="exportar('usuarios', 'pdf')" [disabled]="exporting() !== null" aria-label="Descargar reporte de usuarios en PDF">
+                <mat-icon>picture_as_pdf</mat-icon> PDF
+              </button>
             </div>
           </div>
 
@@ -165,6 +168,9 @@
               <button mat-flat-button type="button" (click)="exportar('roles', 'xlsx')" [disabled]="exporting() !== null">
                 <mat-icon>download</mat-icon> Excel
               </button>
+              <button mat-flat-button color="primary" type="button" (click)="exportar('roles', 'pdf')" [disabled]="exporting() !== null" aria-label="Descargar reporte de roles en PDF">
+                <mat-icon>picture_as_pdf</mat-icon> PDF
+              </button>
             </div>
           </div>
 
@@ -216,6 +222,7 @@
             <div class="export-actions">
               <button mat-stroked-button type="button" (click)="exportar('auditoria', 'csv')" [disabled]="exporting() !== null"><mat-icon>table_view</mat-icon> CSV</button>
               <button mat-flat-button type="button" (click)="exportar('auditoria', 'xlsx')" [disabled]="exporting() !== null"><mat-icon>download</mat-icon> Excel</button>
+              <button mat-flat-button color="primary" type="button" (click)="exportar('auditoria', 'pdf')" [disabled]="exporting() !== null" aria-label="Descargar reporte de auditoría en PDF"><mat-icon>picture_as_pdf</mat-icon> PDF</button>
             </div>
           </div>
 

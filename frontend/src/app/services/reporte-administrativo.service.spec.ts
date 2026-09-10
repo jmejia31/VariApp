@@ -64,8 +64,8 @@ describe('N5.1.E.2 ReporteAdministrativoService regression coverage', () => {
   });
 
   it('exports with format and blob response while preserving optional dates', () => {
-    service.exportar('usuarios', 'csv', '2026-03-01', '2026-03-31').subscribe(blob => {
-      expect(blob).toBeInstanceOf(Blob);
+    service.exportar('usuarios', 'csv', '2026-03-01', '2026-03-31').subscribe(response => {
+      expect(response.body).toBeInstanceOf(Blob);
     });
 
     const req = httpMock.expectOne(request =>
@@ -77,5 +77,24 @@ describe('N5.1.E.2 ReporteAdministrativoService regression coverage', () => {
     expect(req.request.method).toBe('GET');
     expect(req.request.responseType).toBe('blob');
     req.flush(new Blob(['ok'], { type: 'text/csv' }));
+  });
+
+  it('exports to pdf format and handles HttpResponse correctly', () => {
+    service.exportar('roles', 'pdf', '2026-04-01', '2026-04-30').subscribe(response => {
+      expect(response.body).toBeInstanceOf(Blob);
+      expect(response.headers.get('Content-Disposition')).toBe('attachment; filename=roles-export.pdf');
+    });
+
+    const req = httpMock.expectOne(request =>
+      request.url === `${environment.apiUrl}/reportes-administrativos/exportar/roles` &&
+      request.params.get('formato') === 'pdf' &&
+      request.params.get('desde') === '2026-04-01' &&
+      request.params.get('hasta') === '2026-04-30'
+    );
+    expect(req.request.method).toBe('GET');
+    expect(req.request.responseType).toBe('blob');
+    req.flush(new Blob(['pdf content'], { type: 'application/pdf' }), {
+      headers: { 'Content-Disposition': 'attachment; filename=roles-export.pdf' }
+    });
   });
 });

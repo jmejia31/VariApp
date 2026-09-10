@@ -131,18 +131,35 @@ export class ReportesAdministrativosComponent implements OnInit {
     this.rolExpandido.set(this.rolExpandido() === id ? null : id);
   }
 
-  exportar(tipo: 'usuarios' | 'roles' | 'auditoria', formato: 'csv' | 'xlsx'): void {
+  exportar(tipo: 'usuarios' | 'roles' | 'auditoria', formato: 'csv' | 'xlsx' | 'pdf'): void {
     if (!this.periodoValido()) return;
     const clave = `${tipo}-${formato}`;
     this.exporting.set(clave);
     this.error.set(null);
 
     this.service.exportar(tipo, formato, this.desde, this.hasta).subscribe({
-      next: blob => {
+      next: response => {
+        const blob = response.body;
+        if (!blob) {
+          this.error.set('No se recibió contenido en la exportación.');
+          this.exporting.set(null);
+          return;
+        }
+
         const url = URL.createObjectURL(blob);
         const enlace = document.createElement('a');
         enlace.href = url;
-        enlace.download = `${tipo}-${this.desde}-${this.hasta}.${formato}`;
+
+        let filename = `${tipo}-${this.desde}-${this.hasta}.${formato}`;
+        const contentDisposition = response.headers.get('Content-Disposition');
+        if (contentDisposition) {
+          const match = contentDisposition.match(/filename="?([^"]+)"?/);
+          if (match && match[1]) {
+            filename = match[1];
+          }
+        }
+
+        enlace.download = filename;
         enlace.click();
         URL.revokeObjectURL(url);
         this.exporting.set(null);
