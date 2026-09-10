@@ -13,6 +13,29 @@ from datetime import datetime, timezone
 from parent_transition import valid_closure, SHA40
 
 
+def _exact_functional_head_gates(receipt):
+    """Require every recorded causal gate to certify the exact functional head.
+
+    A successful workflow on a different SHA is not closure evidence. Post-gate
+    control-plane commits may exist, but they cannot substitute for testing the
+    functional head itself.
+    """
+    functional = receipt.get('functionalHead')
+    gates = receipt.get('gates', receipt.get('causalGates', []))
+    return (
+        isinstance(functional, str)
+        and SHA40.fullmatch(functional) is not None
+        and isinstance(gates, list) and bool(gates)
+        and all(
+            isinstance(g, dict)
+            and g.get('conclusion') == 'success'
+            and (g.get('workflowRunId') or g.get('runId'))
+            and g.get('headSha') == functional
+            for g in gates
+        )
+    )
+
+
 def observation(root, head, observed_at):
     root = Path(root)
     catalog = json.loads((root / 'vaep/control/jules-autorefill-catalog.json').read_text())
@@ -29,19 +52,20 @@ def observation(root, head, observed_at):
         raise ValueError('RECEIPT_OUTSIDE_EVIDENCE')
     receipt = json.loads(resolved.read_text())
     acceptance, guardrails = receipt.get('acceptance', {}), receipt.get('guardrails', {})
-    gates = receipt.get('gates', [])
     recorded_contract = (
         receipt.get('authority') == 'docs/VAEP_AUTHORITY.md'
         and receipt.get('parent') == closed and receipt.get('status') == 'LISTO_REAL'
         and SHA40.fullmatch(receipt.get('functionalHead', '')) is not None
         and type(acceptance.get('p0')) is int and acceptance['p0'] == 0
         and type(acceptance.get('p1')) is int and acceptance['p1'] == 0
-        and bool(receipt.get('reviewReceipt')) and bool(gates)
-        and all(g.get('conclusion') == 'success' and g.get('workflowRunId') and g.get('headSha') for g in gates)
+        and bool(receipt.get('reviewReceipt'))
+        and _exact_functional_head_gates(receipt)
         and all(guardrails.get(k) is False for k in ['mainTouched', 'productionTouched', 'pr2Merged'])
     )
     if not (valid_closure(receipt, closed) or recorded_contract):
         raise ValueError('INVALID_CLOSURE_RECEIPT')
+    if not _exact_functional_head_gates(receipt):
+        raise ValueError('CAUSAL_GATE_NOT_ON_EXACT_FUNCTIONAL_HEAD')
     if current not in nodes:
         raise ValueError('CURRENT_PARENT_NOT_IN_ROADMAP')
     later = sorted((n for n in nodes.values() if current in n.get('dependencies', [])),
