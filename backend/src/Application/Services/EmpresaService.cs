@@ -11,12 +11,12 @@ public sealed class EmpresaService : IEmpresaService
     private const int NombreMaxLength = 200;
     private readonly IEmpresaRepository _repository;
     private readonly ICurrentUserService _currentUser;
-    private readonly IAuditoriaService? _auditoria;
+    private readonly IAuditoriaService _auditoria;
 
     public EmpresaService(
         IEmpresaRepository repository,
         ICurrentUserService currentUser,
-        IAuditoriaService? auditoria = null)
+        IAuditoriaService auditoria)
     {
         _repository = repository;
         _currentUser = currentUser;
@@ -49,13 +49,12 @@ public sealed class EmpresaService : IEmpresaService
         if (!await _repository.SaveChangesAsync(cancellationToken))
             throw new BusinessRuleException("No se pudo crear la empresa.");
 
-        if (_auditoria is not null)
-            await _auditoria.RegistrarAsync(
-                ModuloSistema.Configuracion,
-                AccionPermiso.Crear,
-                $"Empresa creada: {empresa.Nombre}",
-                empresa.Id,
-                entidad: "Empresa");
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Configuracion,
+            AccionPermiso.Crear,
+            $"Empresa creada: {empresa.Nombre}",
+            empresa.Id,
+            entidad: "Empresa");
 
         return ToDto(empresa);
     }
@@ -74,15 +73,14 @@ public sealed class EmpresaService : IEmpresaService
         if (!await _repository.SaveChangesAsync(cancellationToken))
             throw new BusinessRuleException("No se pudo actualizar la empresa.");
 
-        if (_auditoria is not null)
-            await _auditoria.RegistrarAsync(
-                ModuloSistema.Configuracion,
-                AccionPermiso.Editar,
-                $"Empresa actualizada: {empresa.Nombre}",
-                empresa.Id,
-                entidad: "Empresa",
-                valoresAnteriores: new { Nombre = nombreAnterior },
-                valoresNuevos: new { empresa.Nombre });
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Configuracion,
+            AccionPermiso.Editar,
+            $"Empresa actualizada: {empresa.Nombre}",
+            empresa.Id,
+            entidad: "Empresa",
+            valoresAnteriores: new { Nombre = nombreAnterior },
+            valoresNuevos: new { empresa.Nombre });
 
         return ToDto(empresa);
     }
@@ -101,15 +99,14 @@ public sealed class EmpresaService : IEmpresaService
         if (!await _repository.SaveChangesAsync(cancellationToken))
             throw new BusinessRuleException("No se pudo cambiar el estado de la empresa.");
 
-        if (_auditoria is not null)
-            await _auditoria.RegistrarAsync(
-                ModuloSistema.Configuracion,
-                activa ? AccionPermiso.Activar : AccionPermiso.Desactivar,
-                $"Empresa {(activa ? "activada" : "desactivada")}: {empresa.Nombre}",
-                empresa.Id,
-                entidad: "Empresa",
-                valoresAnteriores: new { Activa = estadoAnterior },
-                valoresNuevos: new { empresa.Activa });
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Configuracion,
+            activa ? AccionPermiso.Activar : AccionPermiso.Desactivar,
+            $"Empresa {(activa ? "activada" : "desactivada")}: {empresa.Nombre}",
+            empresa.Id,
+            entidad: "Empresa",
+            valoresAnteriores: new { Activa = estadoAnterior },
+            valoresNuevos: new { empresa.Activa });
 
         return ToDto(empresa);
     }
