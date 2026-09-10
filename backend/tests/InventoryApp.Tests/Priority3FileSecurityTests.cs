@@ -7,6 +7,7 @@ using InventoryApp.Infrastructure.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Moq;
+using Xunit;
 
 namespace InventoryApp.Tests;
 
