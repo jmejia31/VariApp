@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "FROZEN",
+  "newDispatchAdmission": "OPEN",
   "allowExistingActiveSessions": true,
-  "reason": "N5.3.D_D4_ATTEMPT1_RESERVED__SESSION_ACTIVITY_NOT_YET_PROVEN__REVIEW_FIRST_REQUIRED_BEFORE_D5__NO_DUPLICATE_DISPATCH",
-  "updatedAtUtc": "2026-09-10T00:50:00Z"
+  "reason": "GLOBAL_FREEZE_PROHIBITED__CHECKPOINT_AUTO_REOPEN__prior_state=FROZEN__LANE_LEVEL_QUARANTINE_REVIEW_FIRST_ONLY",
+  "updatedAtUtc": "2026-09-10T00:55:20Z"
 }
