@@ -57,6 +57,25 @@ describe('N6.1.E Empresa administration UX', () => {
     expect(component.empresas()).toEqual([]);
   });
 
+  it('keeps the newest filter result when responses arrive out of order', () => {
+    const component = createComponent();
+    component.cargar();
+    const older = httpMock.expectOne(request => request.url === `${environment.apiUrl}/empresas` && !request.params.has('activa'));
+
+    component.cambiarEstado('inactivas');
+    const newest = httpMock.expectOne(request => request.url === `${environment.apiUrl}/empresas` && request.params.get('activa') === 'false');
+
+    newest.flush({ data: [{ id: 2, nombre: 'Empresa Inactiva', activa: false, fechaCreacion: '', fechaActualizacion: '' }] });
+    expect(component.empresas().map(item => item.id)).toEqual([2]);
+    expect(component.loading()).toBe(false);
+
+    older.flush({ data: [{ id: 1, nombre: 'Respuesta Obsoleta', activa: true, fechaCreacion: '', fechaActualizacion: '' }] });
+
+    expect(component.empresas().map(item => item.id)).toEqual([2]);
+    expect(component.estado()).toBe('inactivas');
+    expect(component.loading()).toBe(false);
+  });
+
   it('rejects a whitespace-only company name without sending a write', () => {
     const component = createComponent();
     component.nueva();
