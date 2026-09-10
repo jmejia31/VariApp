@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
+import { vi } from 'vitest';
 import { PagedResult } from '../../../core/models/api-response.model';
 import { ReporteVentasDetalleDto } from '../../../core/models/reporte-ventas.models';
 import { ReporteVentasDetalleComponent } from './reporte-ventas-detalle.component';
@@ -92,7 +93,7 @@ describe('ReporteVentasDetalleComponent', () => {
 
   it('should emit only valid page changes', () => {
     component.detalle = detalle;
-    const emitSpy = spyOn(component.paginaChange, 'emit');
+    const emitSpy = vi.spyOn(component.paginaChange, 'emit');
 
     component.irPagina(2);
     component.irPagina(1);
