@@ -42,19 +42,7 @@ public sealed class ReportesVentasContractTests
         var service = new Mock<IReporteVentasService>(MockBehavior.Strict);
         service.Setup(s => s.ObtenerResumenAsync(It.IsAny<ReporteVentasFiltroDto>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ReporteVentasResumenDto());
-        var auditoria = new Mock<IAuditoriaService>(MockBehavior.Strict);
-        auditoria.Setup(a => a.RegistrarAsync(
-                It.IsAny<ModuloSistema>(),
-                It.IsAny<AccionPermiso>(),
-                It.IsAny<string>(),
-                It.IsAny<int?>(),
-                It.IsAny<string?>(),
-                It.IsAny<object?>(),
-                It.IsAny<object?>(),
-                It.IsAny<string?>(),
-                It.IsAny<string>(),
-                It.IsAny<string?>()))
-            .Returns(Task.CompletedTask);
+        var auditoria = CreateAuditoriaStrictMock();
         var controller = new ReportesVentasController(service.Object, auditoria.Object)
         {
             ControllerContext = new ControllerContext
@@ -66,19 +54,36 @@ public sealed class ReportesVentasContractTests
         var result = await controller.GetResumen(new ReporteVentasFiltroDto());
 
         Assert.IsType<OkObjectResult>(result);
-        auditoria.Verify(a => a.RegistrarAsync(
-            ModuloSistema.Ventas,
-            AccionPermiso.Ver,
-            It.Is<string>(descripcion => descripcion.Contains("'resumen'", StringComparison.Ordinal)),
-            null,
-            "ReportesVentas",
-            null,
-            It.Is<object>(valores =>
-                ReadProperty(valores, "CorrelationId") == "corr-n53-f2" &&
-                ReadProperty(valores, "Reporte") == "resumen"),
-            null,
-            "Exito",
-            null), Times.Once);
+        VerifyAudit(auditoria, "resumen", "corr-n53-f2");
+        service.VerifyAll();
+        auditoria.VerifyNoOtherCalls();
+    }
+
+    [Fact]
+    public async Task Detalle_ConsultaValidaRegistraAuditoriaVentasVerConCorrelationId()
+    {
+        var service = new Mock<IReporteVentasService>(MockBehavior.Strict);
+        service.Setup(s => s.ObtenerDetallePaginadoAsync(It.IsAny<ReporteVentasFiltroDto>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new PagedResult<ReporteVentasDetalleDto>
+            {
+                Items = new List<ReporteVentasDetalleDto>(),
+                TotalCount = 0,
+                Page = 1,
+                PageSize = 10
+            });
+        var auditoria = CreateAuditoriaStrictMock();
+        var controller = new ReportesVentasController(service.Object, auditoria.Object)
+        {
+            ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { TraceIdentifier = "corr-n53-f2-detalle" }
+            }
+        };
+
+        var result = await controller.GetDetalle(new ReporteVentasFiltroDto());
+
+        Assert.IsType<OkObjectResult>(result);
+        VerifyAudit(auditoria, "detalle", "corr-n53-f2-detalle");
         service.VerifyAll();
         auditoria.VerifyNoOtherCalls();
     }
@@ -211,6 +216,41 @@ public sealed class ReportesVentasContractTests
         Assert.Null(item.ProductoColor);
         Assert.Null(item.ProductoTalla);
         Assert.Null(item.ProductoSku);
+    }
+
+    private static Mock<IAuditoriaService> CreateAuditoriaStrictMock()
+    {
+        var auditoria = new Mock<IAuditoriaService>(MockBehavior.Strict);
+        auditoria.Setup(a => a.RegistrarAsync(
+                It.IsAny<ModuloSistema>(),
+                It.IsAny<AccionPermiso>(),
+                It.IsAny<string>(),
+                It.IsAny<int?>(),
+                It.IsAny<string?>(),
+                It.IsAny<object?>(),
+                It.IsAny<object?>(),
+                It.IsAny<string?>(),
+                It.IsAny<string>(),
+                It.IsAny<string?>()))
+            .Returns(Task.CompletedTask);
+        return auditoria;
+    }
+
+    private static void VerifyAudit(Mock<IAuditoriaService> auditoria, string report, string correlationId)
+    {
+        auditoria.Verify(a => a.RegistrarAsync(
+            ModuloSistema.Ventas,
+            AccionPermiso.Ver,
+            It.Is<string>(descripcion => descripcion.Contains($"'{report}'", StringComparison.Ordinal)),
+            null,
+            "ReportesVentas",
+            null,
+            It.Is<object>(valores =>
+                ReadProperty(valores, "CorrelationId") == correlationId &&
+                ReadProperty(valores, "Reporte") == report),
+            null,
+            "Exito",
+            null), Times.Once);
     }
 
     private static string? ReadProperty(object value, string propertyName) =>
