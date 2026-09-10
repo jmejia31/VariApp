@@ -45,6 +45,7 @@ export class VaristorehnHeaderComponent {
 
   readonly menuAbierto = signal(false);
   private readonly logoFallido = signal<string | null>(null);
+  private restaurarFocoAlCerrar = true;
   readonly telefono = computed(() => telefonoWhatsapp(this.identidad.config().whatsApp));
   readonly mostrarLogo = computed(() => {
     const logo = this.identidad.logoUrl();
@@ -69,30 +70,33 @@ export class VaristorehnHeaderComponent {
   }
 
   seleccionarCategoria(nombre: string): void {
+    if (this.menuAbierto()) this.cerrarMenuMovil(false);
     this.categoriaSeleccionada.emit(nombre);
-    this.cerrarMenuMovil(true);
   }
 
   solicitarCarrito(): void {
+    if (this.menuAbierto()) this.cerrarMenuMovil(false);
     this.carritoSolicitado.emit();
-    this.cerrarMenuMovil(true);
   }
 
   abrirMenuMovil(): void {
     const dialogo = this.menuMovil?.nativeElement;
     if (!dialogo || dialogo.open) return;
 
+    this.restaurarFocoAlCerrar = true;
     dialogo.showModal();
     this.menuAbierto.set(true);
     queueMicrotask(() => this.primerEnlaceMovil?.nativeElement.focus());
   }
 
-  cerrarMenuMovil(devolverFoco = false): void {
+  cerrarMenuMovil(devolverFoco = true): void {
     const dialogo = this.menuMovil?.nativeElement;
     const estabaAbierto = Boolean(dialogo?.open || this.menuAbierto());
+    if (!estabaAbierto) return;
+
+    this.restaurarFocoAlCerrar = devolverFoco;
     if (dialogo?.open) dialogo.close();
-    this.menuAbierto.set(false);
-    if (devolverFoco && estabaAbierto) queueMicrotask(() => this.botonMenu?.nativeElement.focus());
+    else this.menuAbierto.set(false);
   }
 
   cerrarDesdeFondo(evento: MouseEvent): void {
@@ -100,8 +104,10 @@ export class VaristorehnHeaderComponent {
   }
 
   alCerrarDialogo(): void {
+    const restaurarFoco = this.restaurarFocoAlCerrar;
+    this.restaurarFocoAlCerrar = true;
     this.menuAbierto.set(false);
-    queueMicrotask(() => this.botonMenu?.nativeElement.focus());
+    if (restaurarFoco) queueMicrotask(() => this.botonMenu?.nativeElement.focus());
   }
 
   reportarErrorLogo(url: string): void {
