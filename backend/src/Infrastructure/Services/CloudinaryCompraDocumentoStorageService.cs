@@ -10,7 +10,9 @@ namespace InventoryApp.Infrastructure.Services;
 public class CloudinaryCompraDocumentoStorageService : ICompraDocumentoStorageService
 {
     private const string BaseFolder = "inventoryapp/compras";
+    private const long MaxDownloadBytes = 10 * 1024 * 1024;
     private readonly Cloudinary _cloudinary;
+    private readonly string _cloudName;
     private readonly string _folder;
     private readonly string? _environmentPrefix;
 
@@ -31,7 +33,8 @@ public class CloudinaryCompraDocumentoStorageService : ICompraDocumentoStorageSe
                 "Cloudinary no está configurado para almacenar comprobantes de compras.");
         }
 
-        _cloudinary = new Cloudinary(new Account(cloudName, apiKey, apiSecret));
+        _cloudName = cloudName.Trim();
+        _cloudinary = new Cloudinary(new Account(_cloudName, apiKey, apiSecret));
         _cloudinary.Api.Secure = true;
         _folder = CloudinaryFolderResolver.Resolve(configuration, BaseFolder);
         _environmentPrefix = CloudinaryFolderResolver.GetEnvironmentPrefix(configuration);
@@ -119,20 +122,71 @@ public class CloudinaryCompraDocumentoStorageService : ICompraDocumentoStorageSe
 
     public async Task<(Stream Contenido, string ContentType)?> DownloadAsync(string url)
     {
-        using var httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
+        if (!EsUrlCloudinaryPermitida(url))
+            return null;
+
+        using var handler = new HttpClientHandler { AllowAutoRedirect = false };
+        using var httpClient = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(30) };
         try
         {
-            var response = await httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
-            if (!response.IsSuccessStatusCode) return null;
+            using var response = await httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+            if (!response.IsSuccessStatusCode)
+                return null;
+
+            if (response.Content.Headers.ContentLength is long contentLength &&
+                contentLength > MaxDownloadBytes)
+            {
+                return null;
+            }
 
             var contentType = response.Content.Headers.ContentType?.MediaType
                 ?? "application/octet-stream";
-            var contenido = await response.Content.ReadAsStreamAsync();
+            await using var remote = await response.Content.ReadAsStreamAsync();
+            var contenido = new MemoryStream();
+            var buffer = new byte[81920];
+            long total = 0;
+            while (true)
+            {
+                var read = await remote.ReadAsync(buffer.AsMemory(0, buffer.Length));
+                if (read == 0)
+                    break;
+
+                total += read;
+                if (total > MaxDownloadBytes)
+                {
+                    await contenido.DisposeAsync();
+                    return null;
+                }
+
+                await contenido.WriteAsync(buffer.AsMemory(0, read));
+            }
+
+            contenido.Position = 0;
             return (contenido, contentType);
         }
         catch
         {
             return null;
         }
+    }
+
+    private bool EsUrlCloudinaryPermitida(string url)
+    {
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) ||
+            !string.Equals(uri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase) ||
+            !string.Equals(uri.Host, "res.cloudinary.com", StringComparison.OrdinalIgnoreCase) ||
+            !uri.IsDefaultPort ||
+            !string.IsNullOrEmpty(uri.UserInfo))
+        {
+            return false;
+        }
+
+        var segments = uri.AbsolutePath
+            .Split('/', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        return segments.Length >= 3 &&
+               string.Equals(Uri.UnescapeDataString(segments[0]), _cloudName, StringComparison.Ordinal) &&
+               (string.Equals(segments[1], "image", StringComparison.Ordinal) ||
+                string.Equals(segments[1], "raw", StringComparison.Ordinal)) &&
+               string.Equals(segments[2], "upload", StringComparison.Ordinal);
     }
 }
