@@ -1,8 +1,8 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
   "currentParent": "N5.4.D",
-  "generatedAt": "2026-09-10T05:44:00Z",
-  "regenerationReason": "N5.4.C_LISTO_REAL__N5.4.D_PROMOTED__D1_SOURCE_BACKED_DISPATCH__PREARM_E_F_G_DEPENDENCY_GATED__NO_FILLER",
+  "generatedAt": "2026-09-10T06:15:00Z",
+  "regenerationReason": "N5.4.D_D1_CONTROLLER_TAKEOVER_IMPLEMENTED__RECOVERY1_SUPERSEDED__REVIEW_FIRST_REQUIRED__NO_DUPLICATE_WRITER",
   "lastClosedParent": "N5.4.C",
   "closureReceipts": {
     "N4.11.H": "vaep/evidence/fragments/N4.11.H_LISTO_REAL_20260908T204500Z.json",
@@ -35,37 +35,37 @@
     "materialParallelismTargetPerParent": 6,
     "requireDistinctWriteScopesWhenParallel": true,
     "activeWorkerCount": 6,
-    "activeWorkers": ["J1","J2","J3","J4","J5","J6"]
+    "activeWorkers": ["J1", "J2", "J3", "J4", "J5", "J6"]
   },
   "throughputPlan": {
     "mode": "PARENT_CLOSE_FIRST",
     "currentParent": "N5.4.D",
-    "currentParentMaterialScopeCount": 1,
-    "currentParentReason": "N5.4.C is LISTO_REAL with no schema change required. N5.4.D can now implement the source-backed absolute profitability application/API contract while preserving unresolved percentage, header-discount allocation and future disclosure semantics as explicit gates.",
+    "currentParentMaterialScopeCount": 0,
+    "currentParentReason": "D1 is materially implemented by CHATGPT_VAEP after a valid transport-stall ownership transfer. RECOVERY1 was created later and is superseded/non-authoritative. No duplicate writer is eligible while REVIEW_FIRST and applicable exact-head gates are drained.",
     "nextParent": "N5.4.E",
     "nextParentParallelMaterialScopes": 0,
     "nextParentScopesNonOverlapping": true,
-    "laneRefill": "DISPATCH_N5.4.D_D1_J1_ABSOLUTE_PROFITABILITY_QUERY_API__PREARM_E_F_G_ROADMAP__NO_FILLER"
+    "laneRefill": "CLOSURE_DEBT_FASTPATH__REVIEW_FIRST_D1__NO_DUPLICATE_DISPATCH__PROMOTE_E_ONLY_AFTER_D_LISTO_REAL"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
     "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
-    "sourceRanges": ["COLA!A418:T422","PLAN_MAESTRO","docs/qa/N5_4_B_ABSOLUTE_PROFITABILITY_CONTRACT.md","docs/qa/N5_4_B_MARGIN_PERCENT_CONTRACT.md","docs/qa/N5_4_B_GROUPING_IDENTITY_CONTRACT.md","docs/qa/N5_4_B_DISCOUNT_ALLOCATION_CONTRACT.md","docs/qa/N5_4_B_SHIPPING_COST_CONTRACT.md","docs/qa/N5_4_B_DISCLOSURE_SCOPE_CONTRACT.md","docs/qa/N5_4_C_PERSISTENCE_MIGRATION_DECISION.md"],
-    "note": "N5.4.C is LISTO_REAL. N5.4.D is current. N5.4.E, N5.4.F and N5.4.G are ordered dependency-gated roadmap successors; their child scopes are derived from accepted predecessor contracts before dispatch.",
+    "sourceRanges": ["COLA!A418:T422", "PLAN_MAESTRO", "docs/qa/N5_4_B_ABSOLUTE_PROFITABILITY_CONTRACT.md", "docs/qa/N5_4_B_MARGIN_PERCENT_CONTRACT.md", "docs/qa/N5_4_B_GROUPING_IDENTITY_CONTRACT.md", "docs/qa/N5_4_B_DISCOUNT_ALLOCATION_CONTRACT.md", "docs/qa/N5_4_B_SHIPPING_COST_CONTRACT.md", "docs/qa/N5_4_B_DISCLOSURE_SCOPE_CONTRACT.md", "docs/qa/N5_4_C_PERSISTENCE_MIGRATION_DECISION.md"],
+    "note": "N5.4.C is LISTO_REAL. N5.4.D is current and in REVIEW_FIRST/closure debt after controller takeover of its only material implementation scope. N5.4.E, N5.4.F and N5.4.G remain ordered dependency-gated successors.",
     "nodes": [
-      {"id":"N5.4.A","order":26,"type":"MICROTAREA","dependencies":["N5.1.H","GATE-N4"],"phaseGate":"GATE-N4"},
-      {"id":"N5.4.B","order":27,"type":"MICROTAREA","dependencies":["N5.4.A"],"phaseGate":"GATE-N4"},
-      {"id":"N5.4.C","order":28,"type":"MICROTAREA","dependencies":["N5.4.B"],"phaseGate":"GATE-N4"},
-      {"id":"N5.4.D","order":29,"type":"MICROTAREA","dependencies":["N5.4.C"],"phaseGate":"GATE-N4"},
-      {"id":"N5.4.E","order":30,"type":"MICROTAREA","dependencies":["N5.4.D"],"phaseGate":"GATE-N4"},
-      {"id":"N5.4.F","order":31,"type":"MICROTAREA","dependencies":["N5.4.E"],"phaseGate":"GATE-N4"},
-      {"id":"N5.4.G","order":32,"type":"MICROTAREA","dependencies":["N5.4.F"],"phaseGate":"GATE-N4"}
+      {"id": "N5.4.A", "order": 26, "type": "MICROTAREA", "dependencies": ["N5.1.H", "GATE-N4"], "phaseGate": "GATE-N4"},
+      {"id": "N5.4.B", "order": 27, "type": "MICROTAREA", "dependencies": ["N5.4.A"], "phaseGate": "GATE-N4"},
+      {"id": "N5.4.C", "order": 28, "type": "MICROTAREA", "dependencies": ["N5.4.B"], "phaseGate": "GATE-N4"},
+      {"id": "N5.4.D", "order": 29, "type": "MICROTAREA", "dependencies": ["N5.4.C"], "phaseGate": "GATE-N4"},
+      {"id": "N5.4.E", "order": 30, "type": "MICROTAREA", "dependencies": ["N5.4.D"], "phaseGate": "GATE-N4"},
+      {"id": "N5.4.F", "order": 31, "type": "MICROTAREA", "dependencies": ["N5.4.E"], "phaseGate": "GATE-N4"},
+      {"id": "N5.4.G", "order": 32, "type": "MICROTAREA", "dependencies": ["N5.4.F"], "phaseGate": "GATE-N4"}
     ]
   },
   "prearmedRoadmap": [
-    {"parent":"N5.4.E","state":"READY_DEPENDENCY_GATED","dependency":"N5.4.D_LISTO_REAL","materialization":"DERIVE_FRONTEND_UX_SCOPES_FROM_ACCEPTED_N5.4.D_API_CONTRACT__NO_FILLER"},
-    {"parent":"N5.4.F","state":"READY_DEPENDENCY_GATED","dependency":"N5.4.E_LISTO_REAL","materialization":"DERIVE_SECURITY_AUDIT_SCOPES_FROM_ACCEPTED_N5.4.E_AND_D_CONTRACTS__NO_FILLER"},
-    {"parent":"N5.4.G","state":"READY_DEPENDENCY_GATED","dependency":"N5.4.F_LISTO_REAL","materialization":"DERIVE_QA_CI_SCOPES_FROM_ACCEPTED_N5.4.D_E_F_CHANGES__NO_FILLER"}
+    {"parent": "N5.4.E", "state": "READY_DEPENDENCY_GATED", "dependency": "N5.4.D_LISTO_REAL", "materialization": "DERIVE_FRONTEND_UX_SCOPES_FROM_ACCEPTED_N5.4.D_API_CONTRACT__NO_FILLER"},
+    {"parent": "N5.4.F", "state": "READY_DEPENDENCY_GATED", "dependency": "N5.4.E_LISTO_REAL", "materialization": "DERIVE_SECURITY_AUDIT_SCOPES_FROM_ACCEPTED_N5.4.E_AND_D_CONTRACTS__NO_FILLER"},
+    {"parent": "N5.4.G", "state": "READY_DEPENDENCY_GATED", "dependency": "N5.4.F_LISTO_REAL", "materialization": "DERIVE_QA_CI_SCOPES_FROM_ACCEPTED_N5.4.D_E_F_CHANGES__NO_FILLER"}
   ],
   "lanes": {
     "J1": [
@@ -75,11 +75,11 @@
         "workerId": "J1",
         "taskAttempt": 1,
         "plannedParent": "N5.4.D",
-        "readyForDispatch": true,
-        "dispatchEligible": true,
+        "readyForDispatch": false,
+        "dispatchEligible": false,
         "fileScopeHint": "backend/src/Application/DTOs/ReporteRentabilidadDto.cs;backend/src/Application/Interfaces/IRentabilidadVentasService.cs;backend/src/Infrastructure/Services/RentabilidadVentasService.cs;backend/src/API/Controllers/RentabilidadVentasController.cs;backend/src/API/Program.cs;backend/tests/InventoryApp.Tests/Infrastructure/Services/RentabilidadVentasServiceTests.cs",
         "prompt": "Implement the source-backed absolute profitability query/API slice exactly as authorized by the matching immutable dispatch manifest. Preserve unresolved percentage and header-discount allocation semantics as explicit gates.",
-        "reason": "CURRENT_PARENT__C_LISTO_REAL__SOURCE_BACKED_ABSOLUTE_PROFITABILITY_API"
+        "reason": "CONTROLLER_TAKEOVER_IMPLEMENTED__RECOVERY1_SUPERSEDED__PENDING_REVIEW_FIRST__NO_DUPLICATE_WRITER"
       }
     ],
     "J2": [],
@@ -88,5 +88,5 @@
     "J5": [],
     "J6": []
   },
-  "lastClosureFunctionalHead": "72e63bf7d14cc21b49b3f188ddb8facfa0b46790"
+  "lastClosureFunctionalHead": "baf93a6789082b4e7a04c8420753f58c9fb6710d"
 }
