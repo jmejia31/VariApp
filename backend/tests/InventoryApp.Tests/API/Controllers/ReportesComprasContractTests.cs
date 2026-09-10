@@ -69,7 +69,7 @@ public sealed class ReportesComprasContractTests
         Assert.Equal("ReportesCompras", entry.Entidad);
         Assert.Contains("reporte de compras", entry.Descripcion, StringComparison.OrdinalIgnoreCase);
 
-        var metadata = Assert.IsType<object>(entry.ValoresNuevos);
+        var metadata = Assert.IsAssignableFrom<object>(entry.ValoresNuevos);
         var properties = metadata.GetType().GetProperties();
         Assert.Equal(new[] { "CorrelationId", "Reporte" }, properties.Select(x => x.Name).OrderBy(x => x).ToArray());
         Assert.Equal("corr-123", metadata.GetType().GetProperty("CorrelationId")!.GetValue(metadata));
