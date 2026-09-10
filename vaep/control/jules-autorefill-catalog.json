@@ -1,9 +1,9 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
-  "currentParent": "N5.4.F",
-  "generatedAt": "2026-09-10T07:34:00Z",
-  "regenerationReason": "N5.4.E_LISTO_REAL__PROMOTE_N5.4.F__SOURCE_BACKED_SEC_AUDIT_SCOPES__WORK_CONSERVING",
-  "lastClosedParent": "N5.4.E",
+  "currentParent": "N5.4.G",
+  "generatedAt": "2026-09-10T07:55:00Z",
+  "regenerationReason": "N5.4.F_LISTO_REAL__PROMOTE_N5.4.G__QA_CI_CLOSURE_FASTPATH",
+  "lastClosedParent": "N5.4.F",
   "closureReceipts": {
     "N4.11.H": "vaep/evidence/fragments/N4.11.H_LISTO_REAL_20260908T204500Z.json",
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
@@ -21,7 +21,8 @@
     "N5.4.B": "vaep/evidence/fragments/N5.4.B_LISTO_REAL_20260910T0520Z.json",
     "N5.4.C": "vaep/evidence/fragments/N5.4.C_LISTO_REAL_20260910T0544Z.json",
     "N5.4.D": "vaep/evidence/fragments/N5.4.D_LISTO_REAL_20260910T0626Z.json",
-    "N5.4.E": "vaep/evidence/fragments/N5.4.E_LISTO_REAL_20260910T0732Z.json"
+    "N5.4.E": "vaep/evidence/fragments/N5.4.E_LISTO_REAL_20260910T0732Z.json",
+    "N5.4.F": "vaep/evidence/fragments/N5.4.F_LISTO_REAL_20260910T0754Z.json"
   },
   "policy": {
     "branch": "Desarrollo",
@@ -41,13 +42,13 @@
   },
   "throughputPlan": {
     "mode": "PARENT_CLOSE_FIRST",
-    "currentParent": "N5.4.F",
-    "currentParentMaterialScopeCount": 2,
-    "currentParentReason": "N5.4.E is LISTO_REAL. The accepted profitability API and frontend expose exactly two immediately source-backed SEC_AUDIT changes with distinct write scopes: bounded read-audit/correlation integration in RentabilidadVentasController and focused security/authorization/audit contract tests. No additional security work is fabricated merely to occupy J3-J6.",
-    "nextParent": "N5.4.G",
+    "currentParent": "N5.4.G",
+    "currentParentMaterialScopeCount": 0,
+    "currentParentReason": "N5.4.F is LISTO_REAL. N5.4.G is QA/regression/CI and has no distinct source-backed implementation scope to dispatch without duplicating the exact-functional-head validation already running for F. Controller owns closure-fastpath evidence collection; no filler is fabricated for J1-J6.",
+    "nextParent": "N5.4.H",
     "nextParentParallelMaterialScopes": 0,
     "nextParentScopesNonOverlapping": true,
-    "laneRefill": "DISPATCH_F1_F2_DEPENDENCY_VALID__J3_J6_NO_DISTINCT_SAFE_F_SCOPE__PREARM_G_H_N5.5.A__NO_FILLER"
+    "laneRefill": "G_QA_CI_FASTPATH__NO_DUPLICATE_DISPATCH__PREARM_H_N5.5.A__NO_FILLER"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
@@ -56,62 +57,38 @@
       "COLA!A416:T424",
       "PLAN_MAESTRO",
       "backend/src/API/Controllers/RentabilidadVentasController.cs",
-      "backend/src/API/Controllers/ReportesVentasController.cs",
-      "backend/tests/InventoryApp.Tests/API/Controllers/**",
-      "frontend/src/app/app.routes.ts",
-      "vaep/evidence/fragments/N5.4.E_LISTO_REAL_20260910T0732Z.json"
+      "backend/tests/InventoryApp.Tests/API/Controllers/RentabilidadVentasContractTests.cs",
+      ".github/workflows/desarrollo-ci.yml",
+      "vaep/evidence/fragments/N5.4.F_LISTO_REAL_20260910T0754Z.json"
     ],
-    "note": "N5.4.E is LISTO_REAL and N5.4.F is current. F1 mirrors the existing source-backed report read-audit/correlation pattern in ReportesVentasController; F2 adds focused contract/security regression without changing production code. G/H/N5.5.A are prearmed dependency/order-gated. No filler is generated for J3-J6.",
+    "note": "Dependency order derived from the live Plan/COLA. N5.4.F is LISTO_REAL and N5.4.G is current. G consumes exact-functional-head QA/regression/CI evidence rather than creating duplicate test work. H and N5.5.A remain prearmed dependency/order-gated.",
     "nodes": [
-      {"id": "N5.4.A", "order": 26, "type": "MICROTAREA", "dependencies": ["N5.1.H", "GATE-N4"], "phaseGate": "GATE-N4"},
-      {"id": "N5.4.B", "order": 27, "type": "MICROTAREA", "dependencies": ["N5.4.A"], "phaseGate": "GATE-N4"},
-      {"id": "N5.4.C", "order": 28, "type": "MICROTAREA", "dependencies": ["N5.4.B"], "phaseGate": "GATE-N4"},
-      {"id": "N5.4.D", "order": 29, "type": "MICROTAREA", "dependencies": ["N5.4.C"], "phaseGate": "GATE-N4"},
-      {"id": "N5.4.E", "order": 30, "type": "MICROTAREA", "dependencies": ["N5.4.D"], "phaseGate": "GATE-N4"},
-      {"id": "N5.4.F", "order": 31, "type": "MICROTAREA", "dependencies": ["N5.4.E"], "phaseGate": "GATE-N4"},
-      {"id": "N5.4.G", "order": 32, "type": "MICROTAREA", "dependencies": ["N5.4.F"], "phaseGate": "GATE-N4"},
-      {"id": "N5.4.H", "order": 33, "type": "MICROTAREA", "dependencies": ["N5.4.G"], "phaseGate": "GATE-N4"},
-      {"id": "N5.5.A", "order": 34, "type": "MICROTAREA", "dependencies": ["N5.1.H", "GATE-N4"], "phaseGate": "GATE-N4"}
+      {"id":"N5.4.A","order":26,"type":"MICROTAREA","dependencies":["N5.1.H","GATE-N4"],"phaseGate":"GATE-N4"},
+      {"id":"N5.4.B","order":27,"type":"MICROTAREA","dependencies":["N5.4.A"],"phaseGate":"GATE-N4"},
+      {"id":"N5.4.C","order":28,"type":"MICROTAREA","dependencies":["N5.4.B"],"phaseGate":"GATE-N4"},
+      {"id":"N5.4.D","order":29,"type":"MICROTAREA","dependencies":["N5.4.C"],"phaseGate":"GATE-N4"},
+      {"id":"N5.4.E","order":30,"type":"MICROTAREA","dependencies":["N5.4.D"],"phaseGate":"GATE-N4"},
+      {"id":"N5.4.F","order":31,"type":"MICROTAREA","dependencies":["N5.4.E"],"phaseGate":"GATE-N4"},
+      {"id":"N5.4.G","order":32,"type":"MICROTAREA","dependencies":["N5.4.F"],"phaseGate":"GATE-N4"},
+      {"id":"N5.4.H","order":33,"type":"MICROTAREA","dependencies":["N5.4.G"],"phaseGate":"GATE-N4"},
+      {"id":"N5.5.A","order":34,"type":"MICROTAREA","dependencies":["N5.1.H","GATE-N4"],"phaseGate":"GATE-N4"}
     ]
   },
   "prearmedRoadmap": [
-    {"parent": "N5.4.G", "state": "READY_DEPENDENCY_GATED", "dependency": "N5.4.F_LISTO_REAL", "materialization": "DERIVE_QA_CI_SCOPES_FROM_ACCEPTED_N5.4.D_E_F_CHANGES__NO_FILLER"},
-    {"parent": "N5.4.H", "state": "READY_DEPENDENCY_GATED", "dependency": "N5.4.G_LISTO_REAL", "materialization": "DERIVE_DOC_CERT_SCOPE_FROM_ACCEPTED_N5.4_D_E_F_G_EVIDENCE__NO_FILLER"},
-    {"parent": "N5.5.A", "state": "READY_ORDER_GATED", "dependency": "N5.4.H_LISTO_REAL_AND_EXISTING_N5.1.H_GATE-N4", "materialization": "DERIVE_PURCHASE_REPORT_PREFLIGHT_FROM_AUTHORITATIVE_COLA__NO_FILLER"}
+    {"parent":"N5.4.H","state":"READY_DEPENDENCY_GATED","dependency":"N5.4.G_LISTO_REAL","materialization":"DERIVE_DOC_CERT_SCOPE_FROM_ACCEPTED_N5.4_D_E_F_G_EVIDENCE__NO_FILLER"},
+    {"parent":"N5.5.A","state":"READY_ORDER_GATED","dependency":"N5.4.H_LISTO_REAL_AND_EXISTING_N5.1.H_GATE-N4","materialization":"DERIVE_PURCHASE_REPORT_PREFLIGHT_FROM_AUTHORITATIVE_COLA__NO_FILLER"}
   ],
   "lanes": {
     "J1": [
-      {
-        "dispatchId": "N5-4-F-1-PROFITABILITY-AUDIT-CORRELATION-J1",
-        "taskId": "N5.4.F.1.PROFITABILITY_AUDIT_CORRELATION",
-        "workerId": "J1",
-        "taskAttempt": 1,
-        "plannedParent": "N5.4.F",
-        "readyForDispatch": true,
-        "dispatchEligible": true,
-        "fileScopeHint": "backend/src/API/Controllers/RentabilidadVentasController.cs",
-        "prompt": "Use only docs/VAEP_AUTHORITY.md and live Desarrollo. Add bounded read-audit/correlation integration to RentabilidadVentasController using the existing optional IAuditoriaService pattern already implemented by ReportesVentasController. Preserve [Authorize], Ventas/Ver RequierePermiso on all four profitability endpoints, ReporteVentasQueryRules validation, response contracts and fail-closed data scope. Record only report grouping/correlation metadata; do not log sensitive payloads or invent business semantics. Keep write scope to this controller only. Run proportional backend build/tests and two self-reviews before terminal handoff. Do not touch main, Production, secrets or merge PR #2.",
-        "reason": "N5.4.E_LISTO_REAL__EXISTING_REPORT_AUDIT_CORRELATION_PATTERN"
-      }
+      {"dispatchId":"N5-4-F-1-PROFITABILITY-AUDIT-CORRELATION-J1","taskId":"N5.4.F.1.PROFITABILITY_AUDIT_CORRELATION","workerId":"J1","taskAttempt":1,"plannedParent":"N5.4.F","readyForDispatch":false,"dispatchEligible":false,"fileScopeHint":"backend/src/API/Controllers/RentabilidadVentasController.cs","prompt":"Closed by N5.4.F LISTO_REAL receipt.","reason":"CLOSED_BY_N5.4.F_LISTO_REAL_RECEIPT"}
     ],
     "J2": [
-      {
-        "dispatchId": "N5-4-F-2-PROFITABILITY-SECURITY-AUDIT-TESTS-J2",
-        "taskId": "N5.4.F.2.PROFITABILITY_SECURITY_AUDIT_TESTS",
-        "workerId": "J2",
-        "taskAttempt": 1,
-        "plannedParent": "N5.4.F",
-        "readyForDispatch": true,
-        "dispatchEligible": true,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/API/Controllers/RentabilidadVentasContractTests.cs",
-        "prompt": "Use only docs/VAEP_AUTHORITY.md and live Desarrollo. Add focused contract tests for RentabilidadVentasController covering [Authorize] and Ventas/Ver permission invariants on vendedores/clientes/productos/categorias, query-validation fail-closed behavior, and the audit/correlation integration introduced by F1. Reuse production implementation and existing controller-test conventions; do not change production code in this task. Keep write scope to this single new test file, run proportional backend tests, perform two independent self-reviews, and preserve accepted profitability semantics. Do not touch main, Production, secrets or merge PR #2.",
-        "reason": "N5.4.E_LISTO_REAL__SECURITY_AUTHORIZATION_AUDIT_REGRESSION"
-      }
+      {"dispatchId":"N5-4-F-2-PROFITABILITY-SECURITY-AUDIT-TESTS-J2","taskId":"N5.4.F.2.PROFITABILITY_SECURITY_AUDIT_TESTS","workerId":"J2","taskAttempt":1,"plannedParent":"N5.4.F","readyForDispatch":false,"dispatchEligible":false,"fileScopeHint":"backend/tests/InventoryApp.Tests/API/Controllers/RentabilidadVentasContractTests.cs","prompt":"Closed by N5.4.F LISTO_REAL receipt.","reason":"CLOSED_BY_N5.4.F_LISTO_REAL_RECEIPT"}
     ],
     "J3": [],
     "J4": [],
     "J5": [],
     "J6": []
   },
-  "lastClosureFunctionalHead": "100697e8c1ed6ae5b7f60ead0cde697b8edcfece"
+  "lastClosureFunctionalHead": "df5eca6fa7ccd66f06031a050141ac247dcffec4"
 }
