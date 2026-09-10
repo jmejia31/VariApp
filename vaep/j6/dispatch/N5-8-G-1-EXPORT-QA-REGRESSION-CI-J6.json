@@ -1,0 +1,12 @@
+{
+  "dispatchId": "N5-8-G-1-EXPORT-QA-REGRESSION-CI-J6",
+  "taskId": "N5.8.G.1.EXPORT_QA_REGRESSION_CI",
+  "semanticFacet": "EXPORT_QA_REGRESSION_CI",
+  "workerId": "J6",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "primaryBaseHead": "951f326aa9671d430744e561e82f45a4fe6a26ce",
+  "fileScopeHint": "frontend/e2e/fase6-reportes-administrativos.spec.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md and docs/VAEP_N5_8_EXPORTACIONES_PREFLIGHT.md. CURRENT_PARENT=N5.8.G only as a fresh-dispatch fact; revalidate branch and parent before work. Extend the existing reportes-administrativos Playwright regression coherently, without new production features: preserve existing CSV/XLSX assertions; add PDF export acceptance with application/pdf and real %PDF bytes; add fail-closed invalid-format coverage; add explicit non-admin/insufficient-permission denial for the export endpoint if not already covered. Keep the write scope to frontend/e2e/fase6-reportes-administrativos.spec.ts unless a demonstrated test-only prerequisite is unavoidable. Do not create filler, new datasets, persistence, privileges, branches, deploys, secrets, production changes or PR merges. Run proportional lint/build/test evidence available to the worker. Return patch/artifact for REVIEW_FIRST with P0/P1 explicit. Do not self-certify LISTO_REAL. No R3.",
+  "acceptance": "N5.8.G regression materially covers CSV/XLSX/PDF export behavior, invalid format fail-closed behavior and export RBAC denial on the existing source-backed surface; existing regression remains intact; P0=0; P1=0; no filler or production scope expansion; patch/evidence ready for VAEP REVIEW_FIRST."
+}
