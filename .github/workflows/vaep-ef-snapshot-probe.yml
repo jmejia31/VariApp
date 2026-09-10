@@ -1,0 +1,46 @@
+name: VAEP EF Snapshot Probe
+
+on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - '.github/workflows/vaep-ef-snapshot-probe.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - run: dotnet restore InventoryApp.sln
+      - run: dotnet tool install --global dotnet-ef --version 8.0.8
+      - name: Generate design-time snapshot probe
+        run: |
+          set -euo pipefail
+          dotnet ef migrations add VAEP_N5_7_C_SnapshotProbe \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext \
+            --output-dir Migrations
+          test -f src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs
+          grep -q 'DashboardKpiConfiguracion' src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs
+          git status --short
+      - name: Build generated model
+        run: dotnet build InventoryApp.sln --configuration Release
+      - name: Upload generated EF evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: vaep-ef-snapshot-probe
+          path: |
+            backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs
+            backend/src/Infrastructure/Migrations/*VAEP_N5_7_C_SnapshotProbe*.cs
+          if-no-files-found: error
+          retention-days: 1
