@@ -1,9 +1,9 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
-  "currentParent": "N5.8.D",
-  "generatedAt": "2026-09-10T13:54:00Z",
-  "regenerationReason": "N5.8.C_LISTO_REAL__ATOMIC_PROMOTION_N5.8.D__APPLICATION_SERVICES_API__D1_J2_BOUNDED_EXPORT_PDF_SERVICE_SCOPE_READY__E_F_G_PREARMED_DEPENDENCY_GATED__NO_FILLER",
-  "lastClosedParent": "N5.8.C",
+  "currentParent": "N5.8.E",
+  "generatedAt": "2026-09-10T14:31:39Z",
+  "regenerationReason": "N5.8.D_LISTO_REAL__ATOMIC_PROMOTION_N5.8.E__FRONTEND_UX__SOURCE_PREFLIGHT_FIRST__F_G_H_PREARMED_DEPENDENCY_GATED__NO_FILLER",
+  "lastClosedParent": "N5.8.D",
   "closureReceipts": {
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
     "N5.1.H": "vaep/evidence/fragments/N5.1.H_LISTO_REAL_20260909T1236Z.json",
@@ -15,7 +15,8 @@
     "N5.7.H": "vaep/evidence/fragments/N5.7.H_LISTO_REAL_20260910T1325Z.json",
     "N5.8.A": "vaep/evidence/fragments/N5.8.A_LISTO_REAL_20260910T1328Z.json",
     "N5.8.B": "vaep/evidence/fragments/N5.8.B_LISTO_REAL_20260910T1349Z.json",
-    "N5.8.C": "vaep/evidence/fragments/N5.8.C_LISTO_REAL_20260910T1353Z.json"
+    "N5.8.C": "vaep/evidence/fragments/N5.8.C_LISTO_REAL_20260910T1353Z.json",
+    "N5.8.D": "vaep/evidence/fragments/N5.8.D_LISTO_REAL_20260910T1431Z.json"
   },
   "policy": {
     "branch": "Desarrollo",
@@ -33,19 +34,19 @@
   },
   "throughputPlan": {
     "mode": "PARENT_CLOSE_FIRST",
-    "currentParent": "N5.8.D",
-    "currentParentMaterialScopeCount": 2,
-    "currentParentReason": "Live preflight and code show ReporteAdministrativoService.ExportarAsync currently accepts only csv/xlsx while the closed N5.8.B contract requires csv/xlsx/pdf. D therefore has a real application/service/API gap. D1 adds real PDF generation in the existing export service with directed tests; D2 is dependency-gated controller/API contract verification after D1 REVIEW_FIRST.",
-    "nextParent": "N5.8.E",
+    "currentParent": "N5.8.E",
+    "currentParentMaterialScopeCount": 1,
+    "currentParentReason": "N5.8.D is LISTO_REAL. N5.8.E is the first dependency-valid unfinished parent and requires a source-backed frontend/UX preflight for Excel/PDF/CSV before any Jules dispatch; dispatch is allowed only for a real material gap.",
+    "nextParent": "N5.8.F",
     "nextParentParallelMaterialScopes": 1,
     "nextParentScopesNonOverlapping": true,
-    "laneRefill": "DISPATCH_D1_J2_ATTEMPT1__VERIFY_MANIFEST_RUN_SESSION__REVIEW_FIRST__THEN_D2_NEXT_SAFE__NO_FILLER"
+    "laneRefill": "PREFLIGHT_E_SOURCE__IF_MATERIAL_GAP_DISPATCH_ONE_EXCLUSIVE_SCOPE__ELSE_REVIEW_FIRST_AND_GATES__NO_FILLER"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
     "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
     "sourceRanges": ["COLA!A448:T456", "PLAN_MAESTRO", "docs/VAEP_N5_8_EXPORTACIONES_PREFLIGHT.md"],
-    "note": "N5.8.D is current after C LISTO_REAL. D1 is the first dependency-valid material application/service scope; D2 remains NEXT_SAFE behind D1 REVIEW_FIRST. E/F/G remain dependency-gated.",
+    "note": "N5.8.E is current after D LISTO_REAL. E is frontend/UX; F/G/H remain dependency-gated and prearmed. No evidence-only filler is authorized.",
     "nodes": [
       {"id": "N5.8.A", "order": 58, "dependencies": ["N5.7.H"]},
       {"id": "N5.8.B", "order": 59, "dependencies": ["N5.8.A"]},
@@ -58,19 +59,18 @@
     ]
   },
   "prearmedRoadmap": [
-    {"parent": "N5.8.D", "taskId": "N5.8.D.1.EXPORT_PDF_SERVICE", "state": "READY", "dependency": "N5.8.C_LISTO_REAL", "worker": "J2", "materialization": "EXTEND_EXISTING_REPORTE_ADMINISTRATIVO_EXPORT_SERVICE_TO_REAL_PDF_WITH_DIRECTED_TESTS"},
-    {"parent": "N5.8.D", "taskId": "N5.8.D.2.EXPORT_API_CONTRACT", "state": "NEXT_SAFE_DEPENDENCY_GATED", "dependency": "N5.8.D.1_REVIEW_FIRST_ACCEPTED", "worker": "J3", "materialization": "VERIFY_OR_ADJUST_EXISTING_EXPORT_HTTP_CONTRACT_CONTENT_TYPE_FILENAME_AND_FAIL_CLOSED_BEHAVIOR"},
-    {"parent": "N5.8.E", "state": "READY_DEPENDENCY_GATED", "dependency": "N5.8.D_LISTO_REAL", "materialization": "EXPORTS_FRONTEND_UX__ROADMAP_DERIVED__NO_FILLER"},
+    {"parent": "N5.8.E", "state": "READY", "dependency": "N5.8.D_LISTO_REAL", "materialization": "EXPORTS_FRONTEND_UX__SOURCE_PREFLIGHT_THEN_MATERIAL_GAP_ONLY"},
     {"parent": "N5.8.F", "state": "READY_DEPENDENCY_GATED", "dependency": "N5.8.E_LISTO_REAL", "materialization": "EXPORTS_RBAC_AUDIT_SECURITY_OBSERVABILITY__ROADMAP_DERIVED"},
-    {"parent": "N5.8.G", "state": "READY_DEPENDENCY_GATED", "dependency": "N5.8.F_LISTO_REAL", "materialization": "EXPORTS_QA_REGRESSION_CI__ROADMAP_DERIVED"}
+    {"parent": "N5.8.G", "state": "READY_DEPENDENCY_GATED", "dependency": "N5.8.F_LISTO_REAL", "materialization": "EXPORTS_QA_REGRESSION_CI__ROADMAP_DERIVED"},
+    {"parent": "N5.8.H", "state": "READY_DEPENDENCY_GATED", "dependency": "N5.8.G_LISTO_REAL", "materialization": "EXPORTS_DOCUMENTATION_CERTIFICATION__ROADMAP_DERIVED"}
   ],
   "lanes": {
     "J1": [],
-    "J2": [{"taskId": "N5.8.D.1.EXPORT_PDF_SERVICE", "state": "READY_FOR_DISPATCH", "taskAttempt": 1}],
-    "J3": [{"taskId": "N5.8.D.2.EXPORT_API_CONTRACT", "state": "NEXT_SAFE_DEPENDENCY_GATED", "taskAttempt": 1}],
+    "J2": [],
+    "J3": [],
     "J4": [],
     "J5": [],
     "J6": []
   },
-  "lastClosureFunctionalHead": "40779a570cea5bb7025fbc2681fd378f5891a3d4"
+  "lastClosureFunctionalHead": "e8ba8885f15ae0a53a2f6a02427e4694ab9672d5"
 }
