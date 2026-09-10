@@ -1,9 +1,9 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
-  "currentParent": "N5.4.B",
-  "generatedAt": "2026-09-10T04:48:00Z",
-  "regenerationReason": "N5.4.A_LISTO_REAL__PROMOTE_N5.4.B__SIX_CAUSAL_CONTRACT_RESOLUTION_SCOPES",
-  "lastClosedParent": "N5.4.A",
+  "currentParent": "N5.4.C",
+  "generatedAt": "2026-09-10T05:20:00Z",
+  "regenerationReason": "N5.4.B_LISTO_REAL__PROMOTE_N5.4.C__ONE_COHERENT_PERSISTENCE_MIGRATION_DECISION__NO_FILLER",
+  "lastClosedParent": "N5.4.B",
   "closureReceipts": {
     "N4.11.H": "vaep/evidence/fragments/N4.11.H_LISTO_REAL_20260908T204500Z.json",
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
@@ -17,7 +17,8 @@
     "N5.3.F": "vaep/evidence/fragments/N5.3.F_LISTO_REAL_20260910T0412Z.json",
     "N5.3.G": "vaep/evidence/fragments/N5.3.G_LISTO_REAL_20260910T0416Z.json",
     "N5.3.H": "vaep/evidence/fragments/N5.3.H_LISTO_REAL_20260910T0420Z.json",
-    "N5.4.A": "vaep/evidence/fragments/N5.4.A_LISTO_REAL_20260910T0447Z.json"
+    "N5.4.A": "vaep/evidence/fragments/N5.4.A_LISTO_REAL_20260910T0447Z.json",
+    "N5.4.B": "vaep/evidence/fragments/N5.4.B_LISTO_REAL_20260910T0520Z.json"
   },
   "policy": {
     "branch": "Desarrollo",
@@ -37,33 +38,47 @@
   },
   "throughputPlan": {
     "mode": "PARENT_CLOSE_FIRST",
-    "currentParent": "N5.4.B",
-    "currentParentMaterialScopeCount": 6,
-    "currentParentReason": "N5.4.A is LISTO_REAL after six REVIEW_FIRST accepted preflight facets. N5.4.B must resolve only the concrete domain/contract decisions surfaced by that preflight, without leaking into persistence/API/frontend implementation and without inventing unsupported business semantics.",
-    "nextParent": "N5.4.C",
+    "currentParent": "N5.4.C",
+    "currentParentMaterialScopeCount": 1,
+    "currentParentReason": "N5.4.B established the source-backed profitability contracts and explicit non-invention gates. N5.4.C now determines the exact persistence/migration/data consequence without encoding unresolved percentage, discount-allocation or disclosure semantics.",
+    "nextParent": "N5.4.D",
     "nextParentParallelMaterialScopes": 0,
     "nextParentScopesNonOverlapping": true,
-    "laneRefill": "DISPATCH_N5.4.B_J1_J6_NOW__REVIEW_FIRST_TERMINALS__PREARM_C_D__NO_FILLER"
+    "laneRefill": "DISPATCH_N5.4.C_J1_PERSISTENCE_MIGRATION_DECISION__PREARM_D_E_ROADMAP__NO_FILLER"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
     "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
-    "sourceRanges": ["COLA!A416:T419","PLAN_MAESTRO","docs/qa/N5_4_A_BACKEND_DATA_PREFLIGHT.md","docs/qa/N5_4_A_DOMAIN_CONTRACT_PREFLIGHT.md","docs/qa/N5_4_A_SECURITY_RBAC_PREFLIGHT.md","docs/qa/N5_4_A_API_TEST_PREFLIGHT.md"],
-    "note": "N5.4.A is LISTO_REAL. N5.4.B is current in canonical COLA order. N5.4.C and N5.4.D are prearmed only as dependency-gated roadmap successors and must not execute before their predecessor closes.",
+    "sourceRanges": ["COLA!A418:T420","PLAN_MAESTRO","docs/qa/N5_4_B_ABSOLUTE_PROFITABILITY_CONTRACT.md","docs/qa/N5_4_B_MARGIN_PERCENT_CONTRACT.md","docs/qa/N5_4_B_GROUPING_IDENTITY_CONTRACT.md","docs/qa/N5_4_B_DISCOUNT_ALLOCATION_CONTRACT.md","docs/qa/N5_4_B_SHIPPING_COST_CONTRACT.md","docs/qa/N5_4_B_DISCLOSURE_SCOPE_CONTRACT.md"],
+    "note": "N5.4.B is LISTO_REAL. N5.4.C is current. N5.4.D and N5.4.E are prearmed only as ordered dependency-gated roadmap successors; they must not execute before predecessor closure.",
     "nodes": [
       {"id":"N5.4.A","order":26,"type":"MICROTAREA","dependencies":["N5.1.H","GATE-N4"],"phaseGate":"GATE-N4"},
       {"id":"N5.4.B","order":27,"type":"MICROTAREA","dependencies":["N5.4.A"],"phaseGate":"GATE-N4"},
       {"id":"N5.4.C","order":28,"type":"MICROTAREA","dependencies":["N5.4.B"],"phaseGate":"GATE-N4"},
-      {"id":"N5.4.D","order":29,"type":"MICROTAREA","dependencies":["N5.4.C"],"phaseGate":"GATE-N4"}
+      {"id":"N5.4.D","order":29,"type":"MICROTAREA","dependencies":["N5.4.C"],"phaseGate":"GATE-N4"},
+      {"id":"N5.4.E","order":30,"type":"MICROTAREA","dependencies":["N5.4.D"],"phaseGate":"GATE-N4"}
     ]
   },
   "lanes": {
-    "J1": [{"dispatchId":"N5-4-B-1-ABSOLUTE-PROFITABILITY-CONTRACT-J1","taskId":"N5.4.B.1.ABSOLUTE_PROFITABILITY_CONTRACT","workerId":"J1","taskAttempt":1,"plannedParent":"N5.4.B","readyForDispatch":true,"dispatchEligible":true,"fileScopeHint":"docs/qa/N5_4_B_ABSOLUTE_PROFITABILITY_CONTRACT.md","prompt":"Use only docs/VAEP_AUTHORITY.md plus live Desarrollo and the original N5.4 COLA state. Resolve the N5.4.B domain contract for source-backed absolute revenue, historical cost and gross-profit values using existing Venta/VentaDetalle persisted monetary fields and invariants. Write only docs/qa/N5_4_B_ABSOLUTE_PROFITABILITY_CONTRACT.md. State exact invariants, reconciliation boundaries and any unresolved dependency; do not invent percentage, shipping, discount-allocation, persistence, API or frontend semantics. If no domain code change is required, document grounded N/A with evidence. Desarrollo only.","reason":"CURRENT_PARENT__A_PREFLIGHT_ACCEPTED__CAUSAL_CONTRACT_RESOLUTION"}],
-    "J2": [{"dispatchId":"N5-4-B-2-MARGIN-PERCENT-CONTRACT-J2","taskId":"N5.4.B.2.MARGIN_PERCENT_CONTRACT","workerId":"J2","taskAttempt":1,"plannedParent":"N5.4.B","readyForDispatch":true,"dispatchEligible":true,"fileScopeHint":"docs/qa/N5_4_B_MARGIN_PERCENT_CONTRACT.md","prompt":"Use only docs/VAEP_AUTHORITY.md, live Desarrollo and original N5.4 COLA. Resolve the N5.4.B contract evidence for margin percentage denominator, zero-denominator behavior and derived rounding. Search current code/tests/docs for an authoritative existing convention; never invent a business rule. Write only docs/qa/N5_4_B_MARGIN_PERCENT_CONTRACT.md with source-backed decision if one exists, otherwise the exact unresolved contract and why implementation must remain dependency-gated. Do not implement persistence/API/frontend. Desarrollo only.","reason":"CURRENT_PARENT__A_PREFLIGHT_ACCEPTED__CAUSAL_CONTRACT_RESOLUTION"}],
-    "J3": [{"dispatchId":"N5-4-B-3-GROUPING-IDENTITY-CONTRACT-J3","taskId":"N5.4.B.3.GROUPING_IDENTITY_CONTRACT","workerId":"J3","taskAttempt":1,"plannedParent":"N5.4.B","readyForDispatch":true,"dispatchEligible":true,"fileScopeHint":"docs/qa/N5_4_B_GROUPING_IDENTITY_CONTRACT.md","prompt":"Use only docs/VAEP_AUTHORITY.md, live Desarrollo and original N5.4 COLA. Resolve domain identity semantics for profitability grouping by product, category, seller and customer, including the current-vs-historical category caveat from N5.4.A. Write only docs/qa/N5_4_B_GROUPING_IDENTITY_CONTRACT.md. Ground every decision in existing entities/report/query contracts; if historical category identity is not source-backed, record that exact dependency instead of inventing a snapshot rule. No C+ implementation. Desarrollo only.","reason":"CURRENT_PARENT__A_PREFLIGHT_ACCEPTED__CAUSAL_CONTRACT_RESOLUTION"}],
-    "J4": [{"dispatchId":"N5-4-B-4-DISCOUNT-ALLOCATION-CONTRACT-J4","taskId":"N5.4.B.4.DISCOUNT_ALLOCATION_CONTRACT","workerId":"J4","taskAttempt":1,"plannedParent":"N5.4.B","readyForDispatch":true,"dispatchEligible":true,"fileScopeHint":"docs/qa/N5_4_B_DISCOUNT_ALLOCATION_CONTRACT.md","prompt":"Use only docs/VAEP_AUTHORITY.md, live Desarrollo and original N5.4 COLA. Resolve whether the repository already defines a source-backed rule for allocating/reconciling sale-header discounts into product/category profitability groups. Write only docs/qa/N5_4_B_DISCOUNT_ALLOCATION_CONTRACT.md. If a rule exists, cite its exact code/test authority and invariants; if not, record the unresolved causal contract and prohibit invented allocation. No persistence/API/frontend implementation. Desarrollo only.","reason":"CURRENT_PARENT__A_PREFLIGHT_ACCEPTED__CAUSAL_CONTRACT_RESOLUTION"}],
-    "J5": [{"dispatchId":"N5-4-B-5-SHIPPING-COST-CONTRACT-J5","taskId":"N5.4.B.5.SHIPPING_COST_CONTRACT","workerId":"J5","taskAttempt":1,"plannedParent":"N5.4.B","readyForDispatch":true,"dispatchEligible":true,"fileScopeHint":"docs/qa/N5_4_B_SHIPPING_COST_CONTRACT.md","prompt":"Use only docs/VAEP_AUTHORITY.md, live Desarrollo and original N5.4 COLA. Resolve whether shipping cost participates in the source-backed N5.4 profitability/gross-margin contract. Inspect existing sale calculations, reporting tests and documentation. Write only docs/qa/N5_4_B_SHIPPING_COST_CONTRACT.md with the authoritative rule if proven; otherwise identify the exact unresolved contract and keep implementation dependency-gated. Do not invent treatment or implement C+. Desarrollo only.","reason":"CURRENT_PARENT__A_PREFLIGHT_ACCEPTED__CAUSAL_CONTRACT_RESOLUTION"}],
-    "J6": [{"dispatchId":"N5-4-B-6-DISCLOSURE-SCOPE-CONTRACT-J6","taskId":"N5.4.B.6.DISCLOSURE_SCOPE_CONTRACT","workerId":"J6","taskAttempt":1,"plannedParent":"N5.4.B","readyForDispatch":true,"dispatchEligible":true,"fileScopeHint":"docs/qa/N5_4_B_DISCLOSURE_SCOPE_CONTRACT.md","prompt":"Use only docs/VAEP_AUTHORITY.md, live Desarrollo and original N5.4 COLA. Resolve the N5.4.B domain/contract boundary for row-scope and sensitive profitability disclosure using existing relational permission/report precedents. Write only docs/qa/N5_4_B_DISCLOSURE_SCOPE_CONTRACT.md. Select an existing source-backed contract if proven; never invent a new permission. If no exact permission contract is established, record the dependency explicitly for later security implementation. No C+ implementation. Desarrollo only.","reason":"CURRENT_PARENT__A_PREFLIGHT_ACCEPTED__CAUSAL_CONTRACT_RESOLUTION"}]
+    "J1": [
+      {
+        "dispatchId": "N5-4-C-1-PERSISTENCE-MIGRATION-DECISION-J1",
+        "taskId": "N5.4.C.1.PERSISTENCE_MIGRATION_DECISION",
+        "workerId": "J1",
+        "taskAttempt": 1,
+        "plannedParent": "N5.4.C",
+        "readyForDispatch": true,
+        "dispatchEligible": true,
+        "fileScopeHint": "docs/qa/N5_4_C_PERSISTENCE_MIGRATION_DECISION.md",
+        "prompt": "Use only docs/VAEP_AUTHORITY.md, live Desarrollo, the original N5.4.C COLA contract, and the six accepted N5.4.B contract documents. Determine the exact persistence/EF/migration/data impact required for the source-backed N5.4 profitability contract. Inspect existing Venta/VentaDetalle fields, EF mappings, migration history and data-integrity requirements. Do not invent or persist unresolved margin-denominator, header-discount-allocation, or sales financial-disclosure semantics. If existing persistence already satisfies the safe contract, write a grounded N/A decision with migration/backfill/reconciliation/rollback evidence in docs/qa/N5_4_C_PERSISTENCE_MIGRATION_DECISION.md. If a coherent source-backed schema fix is actually required, keep it narrowly within N5.4.C and include proportional tests. Never touch Produccion. Desarrollo only.",
+        "reason": "CURRENT_PARENT__B_LISTO_REAL__COHERENT_PERSISTENCE_MIGRATION_DECISION"
+      }
+    ],
+    "J2": [],
+    "J3": [],
+    "J4": [],
+    "J5": [],
+    "J6": []
   },
   "lastClosureFunctionalHead": "72e63bf7d14cc21b49b3f188ddb8facfa0b46790"
 }
