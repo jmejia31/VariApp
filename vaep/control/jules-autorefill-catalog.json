@@ -1,8 +1,8 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
   "currentParent": "N5.9.C",
-  "generatedAt": "2026-09-10T15:59:00Z",
-  "regenerationReason": "N5.9.A_AND_N5.9.B_LISTO_REAL__N5.9.C_CURRENT_PERSISTENCE_SQL_INDEX_AUDIT__N5.9D_N5.9E_N5.9F_PREARMED_DEPENDENCY_GATED__NO_FILLER",
+  "generatedAt": "2026-09-10T16:04:00Z",
+  "regenerationReason": "N5.9.C_CURRENT_RUN_34499260559__J2_TRANSPORT_EXECUTING_SESSION_ACTIVITY_NOT_YET_PROVEN__N5.9D_E_F_G_H_PREARMED_DEPENDENCY_GATED__NO_FILLER",
   "lastClosedParent": "N5.9.B",
   "closureReceipts": {
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
@@ -25,37 +25,61 @@
     "N5.9.B": "vaep/evidence/fragments/N5.9.B_LISTO_REAL_20260910T1559Z.json"
   },
   "policy": {
-    "branch": "Desarrollo", "globalAdmission": "OPEN_ONLY", "programmedBacklogTargetTotal": 72, "liveQueueDepthTarget": 2, "genericFloorRegeneration": false, "noBusywork": true,
-    "semanticIdentity": "CURRENT_PARENT + material scope/semantic facet", "stopWhenEligibleWorkExhausted": true, "materialParallelismTargetPerParent": 6, "requireDistinctWriteScopesWhenParallel": true,
-    "activeWorkerCount": 6, "activeWorkers": ["J1","J2","J3","J4","J5","J6"]
+    "branch": "Desarrollo",
+    "globalAdmission": "OPEN_ONLY",
+    "programmedBacklogTargetTotal": 72,
+    "liveQueueDepthTarget": 2,
+    "genericFloorRegeneration": false,
+    "noBusywork": true,
+    "semanticIdentity": "CURRENT_PARENT + material scope/semantic facet",
+    "stopWhenEligibleWorkExhausted": true,
+    "materialParallelismTargetPerParent": 6,
+    "requireDistinctWriteScopesWhenParallel": true,
+    "activeWorkerCount": 6,
+    "activeWorkers": ["J1", "J2", "J3", "J4", "J5", "J6"]
   },
   "throughputPlan": {
     "mode": "PARENT_CLOSE_FIRST",
     "currentParent": "N5.9.C",
     "currentParentMaterialScopeCount": 1,
-    "currentParentReason": "N5.9.C is the first material performance stage. Inspect existing mappings/migrations and generated-query predicates for the N5.9.A hotspots; add only a causally justified reversible persistence optimization, never nominal indexes or production DDL.",
+    "currentParentReason": "N5.9.C is the only dependency-valid material stage. J2 owns its single persistence/index audit via one canonical manifest/run; do not duplicate while the fresh transport is executing. Successors remain dependency-gated.",
     "nextParent": "N5.9.D",
     "nextParentParallelMaterialScopes": 1,
     "nextParentScopesNonOverlapping": true,
-    "laneRefill": "DISPATCH_N5.9.C.1_TO_ONE_COMPATIBLE_JULES__REVIEW_FIRST__MIGRATION_SNAPSHOT_GATES_IF_DELTA__PROMOTE_D__D_E_F_PREARMED_GATED__NO_FILLER"
+    "currentRun": {"worker":"J2","taskId":"N5.9.C.1.REPORT_PERFORMANCE_PERSISTENCE_SQL_INDEX_AUDIT","manifestCommit":"5887767efe7e6f139b5ca8581902d0341d80de75","runId":34499260559,"jobId":102945591722,"transportStartedAtUtc":"2026-09-10T16:01:43Z","executeStartedAtUtc":"2026-09-10T16:01:48Z","state":"TRANSPORT_EXECUTING__SESSION_ACTIVITY_NOT_YET_PROVEN","activeReal":false},
+    "nextRunReserved": {"parent":"N5.9.D","state":"DEPENDENCY_GATED_RESERVED","dependency":"N5.9.C_LISTO_REAL","materialization":"REPORT_PERFORMANCE_BACKEND_API__ROADMAP_DERIVED__NO_FILLER"},
+    "laneRefill": "ON_C_TERMINAL_VALID_REVIEW_FIRST_EXACT_HEAD_GATES_CLOSE_C_PROMOTE_D_AND_REFILL_SAME_RUN__NO_DUPLICATE_J2"
   },
   "roadmap": {
-    "authority": "docs/VAEP_AUTHORITY.md", "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY", "sourceRanges": ["COLA!A457:T463","PLAN_MAESTRO"],
-    "note": "N5.9.C is current after certified N5.9.B N/A domain decision. D/E/F are roadmap-derived successors and remain dependency-gated; no filler is authorized.",
+    "authority": "docs/VAEP_AUTHORITY.md",
+    "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
+    "sourceRanges": ["COLA!A457:T463", "PLAN_MAESTRO"],
+    "note": "N5.9.C is current after certified N5.9.B. N5.9.D through N5.9.H are roadmap-derived successors, prearmed only as dependency-gated material work.",
     "nodes": [
       {"id":"N5.9.B","order":67,"dependencies":["N5.9.A"]},
       {"id":"N5.9.C","order":68,"dependencies":["N5.9.B"]},
       {"id":"N5.9.D","order":69,"dependencies":["N5.9.C"]},
       {"id":"N5.9.E","order":70,"dependencies":["N5.9.D"]},
-      {"id":"N5.9.F","order":71,"dependencies":["N5.9.E"]}
+      {"id":"N5.9.F","order":71,"dependencies":["N5.9.E"]},
+      {"id":"N5.9.G","order":72,"dependencies":["N5.9.F"]},
+      {"id":"N5.9.H","order":73,"dependencies":["N5.9.G"]}
     ]
   },
   "prearmedRoadmap": [
-    {"parent":"N5.9.C","taskId":"N5.9.C.1.REPORT_PERFORMANCE_PERSISTENCE_SQL_INDEX_AUDIT","state":"READY_FOR_DISPATCH","dependency":"N5.9.B_LISTO_REAL","worker":"J2","taskAttempt":1,"materialization":"DIRECTED_EF_SQL_INDEX_AUDIT_AND_MINIMAL_REVERSIBLE_PERSISTENCE_OPTIMIZATION__NO_FILLER"},
+    {"parent":"N5.9.C","taskId":"N5.9.C.1.REPORT_PERFORMANCE_PERSISTENCE_SQL_INDEX_AUDIT","state":"CURRENT_RUN","dependency":"N5.9.B_LISTO_REAL","worker":"J2","taskAttempt":1,"runId":34499260559,"sessionId":null,"activeReal":false,"materialization":"DIRECTED_EF_SQL_INDEX_AUDIT_AND_MINIMAL_REVERSIBLE_PERSISTENCE_OPTIMIZATION__NO_FILLER"},
     {"parent":"N5.9.D","state":"READY_DEPENDENCY_GATED","dependency":"N5.9.C_LISTO_REAL","materialization":"REPORT_PERFORMANCE_BACKEND_API__ROADMAP_DERIVED__NO_FILLER"},
     {"parent":"N5.9.E","state":"READY_DEPENDENCY_GATED","dependency":"N5.9.D_LISTO_REAL","materialization":"REPORT_PERFORMANCE_FRONTEND_UX__ROADMAP_DERIVED__NO_FILLER"},
-    {"parent":"N5.9.F","state":"READY_DEPENDENCY_GATED","dependency":"N5.9.E_LISTO_REAL","materialization":"REPORT_PERFORMANCE_SECURITY_OBSERVABILITY__ROADMAP_DERIVED__NO_FILLER"}
+    {"parent":"N5.9.F","state":"READY_DEPENDENCY_GATED","dependency":"N5.9.E_LISTO_REAL","materialization":"REPORT_PERFORMANCE_SECURITY_OBSERVABILITY__ROADMAP_DERIVED__NO_FILLER"},
+    {"parent":"N5.9.G","state":"READY_DEPENDENCY_GATED","dependency":"N5.9.F_LISTO_REAL","materialization":"REPORT_PERFORMANCE_QA_REGRESSION_CI__ROADMAP_DERIVED__NO_FILLER"},
+    {"parent":"N5.9.H","state":"READY_DEPENDENCY_GATED","dependency":"N5.9.G_LISTO_REAL","materialization":"REPORT_PERFORMANCE_DOCUMENTATION_CERTIFICATION__ROADMAP_DERIVED__NO_FILLER"}
   ],
-  "lanes": {"J1":[],"J2":[],"J3":[],"J4":[],"J5":[],"J6":[]},
+  "lanes": {
+    "J1": [],
+    "J2": [{"taskId":"N5.9.C.1.REPORT_PERFORMANCE_PERSISTENCE_SQL_INDEX_AUDIT","state":"TRANSPORT_EXECUTING__NOT_ACTIVE_REAL_UNTIL_SESSION_PLUS_USEFUL_ACTIVITY","runId":34499260559,"jobId":102945591722,"taskAttempt":1}],
+    "J3": [],
+    "J4": [],
+    "J5": [],
+    "J6": []
+  },
   "lastClosureFunctionalHead": "f4b678ed02a4049a3bddcd9a5f789e1087fcd3e2"
 }
