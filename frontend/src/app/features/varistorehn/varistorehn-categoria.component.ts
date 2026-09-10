@@ -158,7 +158,7 @@ export class VaristorehnCategoriaComponent implements OnInit {
 
   private esNoEncontrada(error: unknown): boolean {
     if (error instanceof HttpErrorResponse) return error.status === 404;
-    return error instanceof Error && error.message === 'Categoría no encontrada.';
+    return error instanceof Error && ['Categoría no encontrada.', 'Slug de categoría no válido.'].includes(error.message);
   }
 
   private cargarResumenCarrito(): void {
