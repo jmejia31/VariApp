@@ -56,7 +56,7 @@ test.describe('VariStoreHn Fase 1 — navegación y header', () => {
 
     await expect(header.getByRole('link', { name: 'Inicio', exact: true })).toHaveAttribute('href', '/varistorehn');
     await expect(header.getByRole('link', { name: 'Productos', exact: true })).toHaveAttribute('href', '/varistorehn#catalogo');
-    await expect(header.getByRole('link', { name: 'Categorías', exact: true })).toHaveAttribute('href', '/varistorehn#categories-title');
+    await expect(header.getByRole('link', { name: 'Categorías', exact: true })).toHaveAttribute('href', '/varistorehn/categorias');
 
     const whatsapp = header.getByRole('link', { name: 'Contactar por WhatsApp' });
     await expect(whatsapp).toBeVisible();

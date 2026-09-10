@@ -30,9 +30,11 @@ export class VaristorehnHeaderComponent {
   @Input() busqueda = '';
   @Input() categorias: readonly string[] = [];
   @Input() categoriaActiva = '';
-  @Input() totalUnidades = 0;
-  @Input() subtotal = 0;
+  @Input() totalUnidades: number | null = 0;
+  @Input() subtotal: number | null = 0;
   @Input() permiteWhatsapp = true;
+  @Input() destinoSaltar = '#catalogo';
+  @Input() etiquetaSaltar = 'Saltar al catálogo';
 
   @Output() readonly busquedaActualizada = new EventEmitter<string>();
   @Output() readonly buscarSolicitado = new EventEmitter<void>();
@@ -56,7 +58,7 @@ export class VaristorehnHeaderComponent {
   readonly enlaces = {
     inicio: VARISTOREHN_PATHS.inicio,
     productos: `${VARISTOREHN_PATHS.inicio}#catalogo`,
-    categorias: `${VARISTOREHN_PATHS.inicio}#categories-title`,
+    categorias: VARISTOREHN_PATHS.categorias,
     contacto: `${VARISTOREHN_PATHS.inicio}#contacto`
   } as const;
 
@@ -112,6 +114,14 @@ export class VaristorehnHeaderComponent {
 
   reportarErrorLogo(url: string): void {
     this.logoFallido.set(url);
+  }
+
+  etiquetaCarrito(): string {
+    return this.totalUnidades === null ? 'Abrir carrito' : `Abrir carrito con ${this.totalUnidades} unidades`;
+  }
+
+  textoSubtotalCarrito(): string {
+    return this.subtotal === null ? 'Ver carrito' : this.moneda(this.subtotal);
   }
 
   moneda(valor: number): string {
