@@ -1,9 +1,9 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
-  "currentParent": "N5.3.C",
-  "generatedAt": "2026-09-09T23:52:00Z",
-  "regenerationReason": "WATCHDOG_QA_TAKEOVER__N5.3.C_MATERIAL_DRAINED__N5.3.D_SOURCE_BACKED_PREARM__READY_WAVE_RECONCILED",
-  "lastClosedParent": "N5.3.B",
+  "currentParent": "N5.3.D",
+  "generatedAt": "2026-09-10T00:04:30Z",
+  "regenerationReason": "AUTOMATIC_PARENT_CLOSE__N5.3.C_LISTO_REAL__N5.3.D_CURRENT",
+  "lastClosedParent": "N5.3.C",
   "closureReceipts": {
     "N4.11.H": "vaep/evidence/fragments/N4.11.H_LISTO_REAL_20260908T204500Z.json",
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
@@ -24,7 +24,8 @@
     "N5.2.G": "vaep/evidence/fragments/N5.2.G_LISTO_REAL_20260909T2116Z.json",
     "N5.2.H": "vaep/evidence/fragments/N5.2.H_LISTO_REAL_20260909T2122Z.json",
     "N5.3.A": "vaep/evidence/fragments/N5.3.A_LISTO_REAL_20260909T2159Z.json",
-    "N5.3.B": "vaep/evidence/fragments/N5.3.B_LISTO_REAL_20260909T2244Z.json"
+    "N5.3.B": "vaep/evidence/fragments/N5.3.B_LISTO_REAL_20260909T2244Z.json",
+    "N5.3.C": "vaep/evidence/fragments/N5.3.C_LISTO_REAL_20260909T2358Z.json"
   },
   "policy": {
     "branch": "Desarrollo",
@@ -41,32 +42,109 @@
     "requireDistinctWriteScopesWhenParallel": true,
     "lowParallelismAction": "EXPLAIN_OR_SUBDIVIDE_MATERIAL_SCOPE__NO_BUSYWORK",
     "activeWorkerCount": 6,
-    "activeWorkers": ["J1", "J2", "J3", "J4", "J5", "J6"]
+    "activeWorkers": [
+      "J1",
+      "J2",
+      "J3",
+      "J4",
+      "J5",
+      "J6"
+    ]
   },
   "throughputPlan": {
     "mode": "MATERIAL_SWARM_FIRST",
-    "currentParent": "N5.3.C",
-    "currentParentMaterialScopeCount": 0,
-    "currentParentReason": "N5.3.C material implementation is drained under REVIEW_FIRST/QA takeover. J1 and J2 persistence-model corrections are controller-owned and reviewed; J6 migration/snapshot single-writer transport stalled without observable Jules activity and was taken over directly by CHATGPT_VAEP. Exact-head CI/DoD remains closure debt; no additional N5.3.C dispatch is safe.",
-    "nextParent": "N5.3.D",
-    "nextParentParallelMaterialScopes": 2,
+    "currentParent": "N5.3.D",
+    "currentParentMaterialScopeCount": 2,
+    "currentParentReason": "N5.3.C is LISTO_REAL. N5.3.D is dependency-valid with 2 material scope(s); no additional busywork is fabricated.",
+    "nextParent": "N5.3.E",
+    "nextParentParallelMaterialScopes": 0,
     "nextParentScopesNonOverlapping": true,
     "laneRefill": "CLOSURE_DEBT_FIRST__N5.3.D_SIX_TOTAL_PREARMED__READY_WAVE_TWO__ENABLE_AFTER_N5.3.C_LISTO_REAL"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
     "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
-    "sourceRanges": ["COLA!A408:T415", "PLAN_MAESTRO!A53:L55", "docs/qa/N5_3_A_API_CONTRACT_PREFLIGHT.md", "docs/qa/N5_3_A_BACKEND_DATA_PREFLIGHT.md"],
-    "note": "Dependency order is source-backed by the original Plan/COLA. N5.3.C remains current until exact-head gates close. N5.3.D has six total prearmed material scopes in an internal dependency DAG; only D.1 and D.2 form the initial ready wave, while D.3-D.6 remain sibling-dependency-gated. No filler or nominal renumbering is used.",
+    "sourceRanges": [
+      "COLA!A408:T415",
+      "PLAN_MAESTRO!A53:L55",
+      "docs/qa/N5_3_A_API_CONTRACT_PREFLIGHT.md",
+      "docs/qa/N5_3_A_BACKEND_DATA_PREFLIGHT.md"
+    ],
+    "note": "Dependency order derived from live Plan/COLA. N5.3.C is LISTO_REAL; N5.3.D is current. Next roadmap node in this catalog is N5.3.E.",
     "nodes": [
-      {"id":"N5.3.A","order":18,"type":"MICROTAREA","dependencies":["N5.1.H","GATE-N4"],"phaseGate":"GATE-N4"},
-      {"id":"N5.3.B","order":19,"type":"MICROTAREA","dependencies":["N5.3.A"],"phaseGate":"GATE-N4"},
-      {"id":"N5.3.C","order":20,"type":"MICROTAREA","dependencies":["N5.3.B"],"phaseGate":"GATE-N4"},
-      {"id":"N5.3.D","order":21,"type":"MICROTAREA","dependencies":["N5.3.C"],"phaseGate":"GATE-N4"},
-      {"id":"N5.3.E","order":22,"type":"MICROTAREA","dependencies":["N5.3.D"],"phaseGate":"GATE-N4"},
-      {"id":"N5.3.F","order":23,"type":"MICROTAREA","dependencies":["N5.3.E"],"phaseGate":"GATE-N4"},
-      {"id":"N5.3.G","order":24,"type":"MICROTAREA","dependencies":["N5.3.F"],"phaseGate":"GATE-N4"},
-      {"id":"N5.3.H","order":25,"type":"MICROTAREA","dependencies":["N5.3.G"],"phaseGate":"GATE-N4"}
+      {
+        "id": "N5.3.A",
+        "order": 18,
+        "type": "MICROTAREA",
+        "dependencies": [
+          "N5.1.H",
+          "GATE-N4"
+        ],
+        "phaseGate": "GATE-N4"
+      },
+      {
+        "id": "N5.3.B",
+        "order": 19,
+        "type": "MICROTAREA",
+        "dependencies": [
+          "N5.3.A"
+        ],
+        "phaseGate": "GATE-N4"
+      },
+      {
+        "id": "N5.3.C",
+        "order": 20,
+        "type": "MICROTAREA",
+        "dependencies": [
+          "N5.3.B"
+        ],
+        "phaseGate": "GATE-N4"
+      },
+      {
+        "id": "N5.3.D",
+        "order": 21,
+        "type": "MICROTAREA",
+        "dependencies": [
+          "N5.3.C"
+        ],
+        "phaseGate": "GATE-N4"
+      },
+      {
+        "id": "N5.3.E",
+        "order": 22,
+        "type": "MICROTAREA",
+        "dependencies": [
+          "N5.3.D"
+        ],
+        "phaseGate": "GATE-N4"
+      },
+      {
+        "id": "N5.3.F",
+        "order": 23,
+        "type": "MICROTAREA",
+        "dependencies": [
+          "N5.3.E"
+        ],
+        "phaseGate": "GATE-N4"
+      },
+      {
+        "id": "N5.3.G",
+        "order": 24,
+        "type": "MICROTAREA",
+        "dependencies": [
+          "N5.3.F"
+        ],
+        "phaseGate": "GATE-N4"
+      },
+      {
+        "id": "N5.3.H",
+        "order": 25,
+        "type": "MICROTAREA",
+        "dependencies": [
+          "N5.3.G"
+        ],
+        "phaseGate": "GATE-N4"
+      }
     ]
   },
   "lanes": {
@@ -81,7 +159,7 @@
         "dispatchEligible": false,
         "fileScopeHint": "backend/src/Infrastructure/Persistence/Configurations/VentaConfiguration.cs",
         "prompt": "Resolved by CHATGPT_VAEP REVIEW_FIRST/QA takeover; do not redispatch.",
-        "reason": "REVIEW_FIRST_ACCEPTED__CHATGPT_VAEP_DIRECT_CORRECTION__NO_REDUPLICATION"
+        "reason": "CLOSED_BY_N5.3.C_LISTO_REAL_RECEIPT"
       },
       {
         "dispatchId": "N5-3-D-1-SALES-REPORT-RESULT-CONTRACTS-J1",
@@ -90,10 +168,10 @@
         "taskAttempt": 1,
         "plannedParent": "N5.3.D",
         "readyForDispatch": true,
-        "dispatchEligible": false,
+        "dispatchEligible": true,
         "fileScopeHint": "backend/src/Application/DTOs/ReporteVentasResultadoDto.cs",
         "prompt": "Use only docs/VAEP_AUTHORITY.md plus accepted N5.3.A/N5.3.B contracts. Define bounded sales-report summary/detail result DTOs for gross/net/discount/tax/cost/margin and historical display dimensions. Do not implement queries, controllers, exports, security changes or persistence. Preserve explicit historical snapshot semantics and nullable legacy identities. Run proportional compile/tests and two self-reviews. Desarrollo only; no main/Production/secrets/PR #2 merge.",
-        "reason": "NEXT_PARENT_PREARM__SOURCE_BACKED__DEPENDENCY_N5.3.C_NOT_CLOSED"
+        "reason": "CURRENT_PARENT__DEPENDENCIES_CLOSED__MATERIAL_SCOPE"
       }
     ],
     "J2": [
@@ -107,7 +185,7 @@
         "dispatchEligible": false,
         "fileScopeHint": "backend/src/Infrastructure/Persistence/Configurations/VentaDetalleConfiguration.cs",
         "prompt": "Resolved by CHATGPT_VAEP REVIEW_FIRST/QA takeover; do not redispatch.",
-        "reason": "REVIEW_FIRST_ACCEPTED__CHATGPT_VAEP_DIRECT_CORRECTION__NO_REDUPLICATION"
+        "reason": "CLOSED_BY_N5.3.C_LISTO_REAL_RECEIPT"
       },
       {
         "dispatchId": "N5-3-D-2-SALES-REPORT-QUERY-RULES-J2",
@@ -116,10 +194,10 @@
         "taskAttempt": 1,
         "plannedParent": "N5.3.D",
         "readyForDispatch": true,
-        "dispatchEligible": false,
+        "dispatchEligible": true,
         "fileScopeHint": "backend/src/Application/Common/ReporteVentasQueryRules.cs",
         "prompt": "Use only docs/VAEP_AUTHORITY.md and accepted N5.3.A/N5.3.B contracts. Implement pure bounded query/filter validation rules for period, paging and explicit historical/current dimension semantics without touching DB queries, controllers, exports or RBAC policy. Fail closed on invalid ranges; do not invent Sucursal-at-header semantics. Run proportional tests and two self-reviews. Desarrollo only.",
-        "reason": "NEXT_PARENT_PREARM__SOURCE_BACKED__DEPENDENCY_N5.3.C_NOT_CLOSED"
+        "reason": "CURRENT_PARENT__DEPENDENCIES_CLOSED__MATERIAL_SCOPE"
       }
     ],
     "J3": [
@@ -175,7 +253,7 @@
         "dispatchEligible": false,
         "fileScopeHint": "backend/src/Infrastructure/Migrations/",
         "prompt": "Resolved by CHATGPT_VAEP QA takeover after transport stall; do not redispatch. Late remote output is evidence-only.",
-        "reason": "TRANSPORT_STALLED__QA_TAKEOVER_MATERIALIZED__REMOTE_QUARANTINED__NO_REDUPLICATION"
+        "reason": "CLOSED_BY_N5.3.C_LISTO_REAL_RECEIPT"
       },
       {
         "dispatchId": "N5-3-D-6-SALES-REPORT-API-CONTRACT-TESTS-J6",
@@ -191,5 +269,5 @@
       }
     ]
   },
-  "lastClosureFunctionalHead": "c4918489d6c4bdd2ed15cd030c73e7c2fb18f2e9"
+  "lastClosureFunctionalHead": "4f245afc9293436a139839c9b8438417ba4f436a"
 }
