@@ -8,12 +8,13 @@
   "closedAtUtc": "2026-09-10T07:58:00Z",
   "branch": "Desarrollo",
   "functionalHead": "df5eca6fa7ccd66f06031a050141ac247dcffec4",
-  "reviewReceipt": "vaep/evidence/reviews/N5.4.G_QA_CI_REVIEW_20260910T0757Z.json",
+  "reviewReceipt": "vaep/evidence/fragments/N5.4.G_REVIEW_FIRST_20260910T0757Z.json",
   "review": {
     "mode": "REVIEW_FIRST",
     "status": "PASS__QA_CI_CLOSURE_FASTPATH",
     "additionalImplementationRequired": false,
     "duplicateDispatchCreated": false,
+    "canonicalReviewReconciled": true,
     "reason": "Applicable QA/regression/CI evidence was already green on the exact functional head; creating new test tasks would duplicate validated work."
   },
   "dod": {
