@@ -25,6 +25,24 @@ def receipt_parent(receipt):
     return receipt.get("parent") or receipt.get("parentId")
 
 
+def _exact_gate_contract(receipt, field):
+    functional = receipt.get("functionalHead")
+    gates = receipt.get(field)
+    return (
+        isinstance(functional, str)
+        and SHA40.fullmatch(functional) is not None
+        and isinstance(gates, list)
+        and len(gates) > 0
+        and all(
+            isinstance(gate, dict)
+            and gate.get("conclusion") == "success"
+            and (gate.get("workflowRunId") or gate.get("runId"))
+            and gate.get("headSha") == functional
+            for gate in gates
+        )
+    )
+
+
 def _legacy_closure_contract(receipt):
     return (receipt.get("decision") == "LISTO_REAL"
             and receipt.get("review") == "PASS"
@@ -35,25 +53,51 @@ def _legacy_closure_contract(receipt):
 
 
 def _current_closure_contract(receipt):
-    gates = receipt.get("causalGates")
     return (receipt.get("state") == "LISTO_REAL"
             and isinstance(receipt.get("review"), dict)
             and bool(receipt["review"].get("mode"))
             and receipt.get("headRevalidated") is True
-            and isinstance(gates, list) and len(gates) > 0
-            and all(isinstance(gate, dict) and gate.get("conclusion") == "success" for gate in gates)
+            and _exact_gate_contract(receipt, "causalGates")
             and receipt.get("mainTouched") is False
             and receipt.get("prMerged") is False)
 
 
+def _modern_closure_contract(receipt):
+    acceptance = receipt.get("acceptance")
+    guardrails = receipt.get("guardrails")
+    review_receipt = receipt.get("reviewReceipt")
+    return (receipt.get("status") == "LISTO_REAL"
+            and isinstance(review_receipt, str) and bool(review_receipt.strip())
+            and isinstance(acceptance, dict)
+            and type(acceptance.get("p0")) is int and acceptance.get("p0") == 0
+            and type(acceptance.get("p1")) is int and acceptance.get("p1") == 0
+            and _exact_gate_contract(receipt, "gates")
+            and isinstance(guardrails, dict)
+            and guardrails.get("mainTouched") is False
+            and guardrails.get("productionTouched") is False
+            and guardrails.get("pr2Merged") is False
+            and guardrails.get("duplicateWriterIntegrated") is not True
+            and guardrails.get("falseActive") is not True
+            and guardrails.get("falsePass") is not True
+            and guardrails.get("falseListo") is not True)
+
+
 def valid_closure(receipt, parent):
-    return (isinstance(receipt, dict)
+    base = (isinstance(receipt, dict)
             and receipt.get("authority") == MASTER
             and receipt_parent(receipt) == parent
             and isinstance(receipt.get("functionalHead"), str)
-            and SHA40.fullmatch(receipt["functionalHead"]) is not None
-            and type(receipt.get("p0Open")) is int and receipt["p0Open"] == 0
-            and type(receipt.get("p1Open")) is int and receipt["p1Open"] == 0
+            and SHA40.fullmatch(receipt["functionalHead"]) is not None)
+    if not base:
+        return False
+
+    if _modern_closure_contract(receipt):
+        return True
+
+    p0 = receipt.get("p0Open")
+    p1 = receipt.get("p1Open")
+    return (type(p0) is int and p0 == 0
+            and type(p1) is int and p1 == 0
             and (_legacy_closure_contract(receipt) or _current_closure_contract(receipt)))
 
 
