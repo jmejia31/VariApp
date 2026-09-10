@@ -26,11 +26,11 @@
     "vaep/evidence/fragments/N5.7.C_LISTO_REAL_20260910T1202Z.json",
     "vaep/evidence/fragments/N5.7.D_LISTO_REAL_20260910T1225Z.json",
     "vaep/evidence/fragments/N5.7.E_LISTO_REAL_20260910T1256Z.json",
-    "vaep/evidence/fragments/N5.7.F_LISTO_REAL_20260910T1314Z.json",
+    "vaep/evidence/fragments/N5.7.F_LISTO_REAL_20260910T1315Z.json",
     "vaep/evidence/fragments/N5.7.G_LISTO_REAL_20260910T1322Z.json"
   ],
   "result": "PASS_DOCUMENTATION_CERTIFICATION_RECONCILED",
-  "reason": "N5.7.A-G are certified and the documentation/certification rollup records the accepted configurable-KPI contract, persistence and rollback, HTTP surface, ownership/RBAC/security behavior, exact-functional-head QA evidence and operational guardrails. The previously missing N5.7.F closure receipt has been restored from verifiable exact-functional-head evidence, so the N5.7.G dependency chain is auditable. N5.7.H introduces no product delta and requires no Jules writer. With documentation complete, H is closure debt and may be certified without filler before atomically promoting N5.8.A.",
+  "reason": "N5.7.A-G are certified and the documentation/certification rollup records the accepted configurable-KPI contract, persistence and rollback, HTTP surface, ownership/RBAC/security behavior, exact-functional-head QA evidence and operational guardrails. The canonical N5.7.F receipt is N5.7.F_LISTO_REAL_20260910T1315Z.json and is backed by verifiable exact-functional-head evidence, so the N5.7.G dependency chain is auditable. N5.7.H introduces no product delta and requires no Jules writer. With documentation complete, H is closure debt and may be certified without filler before atomically promoting N5.8.A.",
   "reviewExecuted": true,
   "reviewMode": "CONTROLLER_DOCUMENTATION_CERTIFICATION",
   "newProductDelta": false,
