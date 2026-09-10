@@ -100,3 +100,6 @@ export class TipoClientesListComponent implements OnInit {
     });
   }
 }
+
+// Compatibility export for the historical route symbol; keeps the canonical class name unchanged.
+export { TipoClientesListComponent as TiposClientesListComponent };
