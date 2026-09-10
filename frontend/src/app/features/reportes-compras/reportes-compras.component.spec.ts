@@ -8,11 +8,13 @@ import { ReportesComprasComponent } from './reportes-compras.component';
 describe('ReportesComprasComponent', () => {
   let fixture: ComponentFixture<ReportesComprasComponent>;
   let component: ReportesComprasComponent;
-  let service: jasmine.SpyObj<ReporteComprasService>;
+  const service = {
+    getDetalle: vi.fn(),
+  };
 
   beforeEach(async () => {
-    service = jasmine.createSpyObj<ReporteComprasService>('ReporteComprasService', ['getDetalle']);
-    service.getDetalle.and.returnValue(of({ success: true, data: { items: [], page: 1, pageSize: 50, totalCount: 0, totalPages: 0 }, message: '', errors: [] }));
+    service.getDetalle.mockReset();
+    service.getDetalle.mockReturnValue(of({ success: true, data: { items: [], page: 1, pageSize: 50, totalCount: 0, totalPages: 0 }, message: '', errors: [] }));
 
     await TestBed.configureTestingModule({
       imports: [ReportesComprasComponent, HttpClientTestingModule, NoopAnimationsModule],
@@ -34,11 +36,11 @@ describe('ReportesComprasComponent', () => {
     component.filtro = { page: 4, pageSize: 20 };
     component.estadoFactura.setValue(2);
     component.aplicarEstados();
-    expect(service.getDetalle).toHaveBeenCalledWith(jasmine.objectContaining({ page: 1, pageSize: 20, estadoFactura: 2 }));
+    expect(service.getDetalle).toHaveBeenCalledWith(expect.objectContaining({ page: 1, pageSize: 20, estadoFactura: 2 }));
   });
 
   it('propaga errores de transporte al disclosure accesible', () => {
-    service.getDetalle.and.returnValue(throwError(() => new Error('network')));
+    service.getDetalle.mockReturnValue(throwError(() => new Error('network')));
     component.aplicarFiltros({ page: 1, pageSize: 50 });
     fixture.detectChanges();
     expect(component.state).toBe('error');
