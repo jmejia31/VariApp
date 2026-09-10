@@ -1,6 +1,6 @@
 {
   "newDispatchAdmission": "OPEN",
   "allowExistingActiveSessions": true,
-  "reason": "OPEN_ONLY__N6.1.C_LISTO_REAL__N6.1.D_DEPENDENCY_VALID__PARENT_CLOSE_FIRST__NO_FILLER",
-  "updatedAtUtc": "2026-09-10T18:39:00Z"
+  "reason": "OPEN_ONLY__N6.1.D_LISTO_REAL__N6.1.E_CURRENT_DEPENDENCY_VALID__J1_D_RESULT_EVIDENCE_ONLY__PARENT_CLOSE_FIRST__NO_FILLER",
+  "updatedAtUtc": "2026-09-10T19:10:00Z"
 }
