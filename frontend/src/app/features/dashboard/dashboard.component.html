@@ -12,14 +12,51 @@
       }
     </header>
 
-    <div class="metric-grid" aria-label="Indicadores principales">
-      <article class="metric-card accent-orange"><div><span>L. {{ r.ingresosDelMes | number:'1.2-2' }}</span><p>{{ esAdministrador() ? 'Ingresos del mes' : 'Mis ingresos del mes' }}</p></div><mat-icon aria-hidden="true">bar_chart</mat-icon><footer>{{ esAdministrador() ? 'Ventas registradas' : 'Mis ventas registradas' }}: {{ r.ventasDelMes }}</footer></article>
-      <article class="metric-card accent-green"><div><span>{{ r.totalUnidades | number }}</span><p>Unidades en inventario físico</p></div><mat-icon aria-hidden="true">inventory_2</mat-icon><footer>Productos registrados: {{ r.totalProductos }}</footer></article>
-      <article class="metric-card accent-red"><div><span>{{ r.productosStockBajo.length }}</span><p>Productos agotados</p></div><mat-icon aria-hidden="true">production_quantity_limits</mat-icon><footer>Productos con existencia igual a cero</footer></article>
-      @if (esAdministrador()) {
-        <article class="metric-card accent-cyan"><div><span>L. {{ r.utilidadBruta | number:'1.2-2' }}</span><p>Utilidad bruta</p></div><mat-icon aria-hidden="true">trending_up</mat-icon><footer>Balance operativo: L. {{ r.balanceOperativo | number:'1.2-2' }}</footer></article>
+    <article class="card automation-card" aria-labelledby="kpi-config-title">
+      <div class="panel-heading">
+        <div><h2 id="kpi-config-title">Indicadores configurables</h2><p>Elige qué KPI mostrar, cambia su orden y define una etiqueta opcional. Los valores y fórmulas provienen únicamente del contrato del dashboard.</p></div>
+        @if (savingKpis()) { <span class="automation-version" aria-live="polite">Guardando…</span> }
+      </div>
+      @if (loadingKpis()) {
+        <div class="loading" aria-live="polite"><mat-spinner diameter="28"></mat-spinner><span class="sr-only">Cargando configuración de indicadores...</span></div>
+      } @else if (errorKpis()) {
+        <p class="empty" role="alert">No fue posible cargar o guardar la configuración de indicadores. <button type="button" (click)="cargarKpis()">Reintentar</button></p>
+      } @else if (kpiConfiguracion().length === 0) {
+        <p class="empty">No hay indicadores configurables disponibles.</p>
+      } @else {
+        <div class="automation-grid" aria-label="Configuración de indicadores">
+          @for (item of kpiConfiguracion(); track item.metricKey; let first = $first; let last = $last) {
+            <div class="automation-item">
+              <input type="checkbox" [checked]="item.habilitado" [disabled]="savingKpis()" (change)="actualizarVisibilidad(item.metricKey, $any($event.target).checked)" [attr.aria-label]="'Mostrar ' + item.metricKey">
+              <span>
+                <strong>{{ item.metricKey }}</strong>
+                <input type="text" maxlength="150" [value]="item.etiquetaVisible || ''" [disabled]="savingKpis()" (change)="actualizarEtiqueta(item.metricKey, $any($event.target).value)" aria-label="Etiqueta visible opcional" placeholder="Etiqueta opcional">
+              </span>
+              <span>
+                <button type="button" [disabled]="first || savingKpis()" (click)="moverKpi(item.metricKey, -1)" [attr.aria-label]="'Subir ' + item.metricKey"><mat-icon>arrow_upward</mat-icon></button>
+                <button type="button" [disabled]="last || savingKpis()" (click)="moverKpi(item.metricKey, 1)" [attr.aria-label]="'Bajar ' + item.metricKey"><mat-icon>arrow_downward</mat-icon></button>
+              </span>
+            </div>
+          }
+        </div>
       }
-    </div>
+    </article>
+
+    @if (!loadingKpis() && !errorKpis()) {
+      @if (kpisResueltos().length === 0) {
+        <p class="empty">No hay indicadores visibles en tu configuración.</p>
+      } @else {
+        <div class="metric-grid" aria-label="Indicadores principales configurados">
+          @for (kpi of kpisResueltos(); track kpi.metricKey) {
+            <article class="metric-card accent-orange">
+              <div><span>{{ kpi.valor | number:'1.0-2' }}</span><p>{{ etiquetaKpi(kpi) }}</p></div>
+              <mat-icon aria-hidden="true">analytics</mat-icon>
+              <footer>{{ kpi.metricKey }}</footer>
+            </article>
+          }
+        </div>
+      }
+    }
 
     @if (esAdministrador()) {
       <div class="metric-grid" aria-label="Separación de inventario por destino">
