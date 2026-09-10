@@ -27,7 +27,7 @@
     "N6.1.B": "vaep/evidence/fragments/N6.1.B_LISTO_REAL_20260910T1736Z.json",
     "N6.1.C": "vaep/evidence/fragments/N6.1.C_LISTO_REAL_20260910T1837Z.json",
     "N6.1.D": "vaep/evidence/fragments/N6.1.D_LISTO_REAL_20260910T1907Z.json",
-    "N6.1.E": "vaep/evidence/fragments/N6.1.E_LISTO_REAL_20260910T1939Z.json"
+    "N6.1.E": "vaep/evidence/fragments/N6.1.E_LISTO_REAL_20260910T1940Z.json"
   },
   "policy": {
     "branch": "Desarrollo",
@@ -92,7 +92,7 @@
   ],
   "prearmedRoadmap": [
     {"parent": "N6.1.D", "taskId": "N6.1.D.1.TENANT_EMPRESA_APPLICATION_API", "state": "LISTO_REAL__SUPERSEDED_J1_EVIDENCE_ONLY", "dependency": "N6.1.C_LISTO_REAL", "worker": "J1", "runId": 34516541490, "materialization": "TENANT_EMPRESA_APPLICATION_API__ROADMAP_DERIVED__NO_FILLER"},
-    {"parent": "N6.1.E", "taskId": "N6.1.E.1.TENANT_EMPRESA_FRONTEND_UX", "state": "LISTO_REAL__CONTROLLER_RECOVERY_REVIEWED", "dependency": "N6.1.D_LISTO_REAL", "worker": "J4", "runId": 34518866113, "materialization": "TENANT_EMPRESA_FRONTEND_UX__ROADMAP_DERIVED__NO_FILLER"},
+    {"parent": "N6.1.E", "taskId": "N6.1.E.1.TENANT_EMPRESA_FRONTEND_UX", "state": "LISTO_REAL__CONTROLLER_RECOVERY_REVIEWED", "dependency": "N6.1.D_LISTO_REAL", "worker": "J3", "runId": 34518866113, "materialization": "TENANT_EMPRESA_FRONTEND_UX__ROADMAP_DERIVED__NO_FILLER"},
     {"parent": "N6.1.F", "state": "READY_CURRENT", "dependency": "N6.1.E_LISTO_REAL", "materialization": "TENANT_EMPRESA_SEC_AUDIT__ROADMAP_DERIVED__NO_FILLER"},
     {"parent": "N6.1.G", "state": "READY_DEPENDENCY_GATED", "dependency": "N6.1.F_LISTO_REAL", "materialization": "TENANT_EMPRESA_QA_REGRESSION__ROADMAP_DERIVED__NO_FILLER"},
     {"parent": "N6.1.H", "state": "READY_DEPENDENCY_GATED", "dependency": "N6.1.G_LISTO_REAL", "materialization": "TENANT_EMPRESA_DOC_CERT__ROADMAP_DERIVED__NO_FILLER"}
