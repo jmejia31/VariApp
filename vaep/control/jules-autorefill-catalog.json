@@ -1,9 +1,9 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
-  "currentParent": "N5.5.E",
-  "generatedAt": "2026-09-10T08:48:00Z",
-  "regenerationReason": "N5.5.D_LISTO_REAL__PROMOTE_N5.5.E__PURCHASE_REPORT_FRONTEND_UX_SCOPES_MATERIALIZED__WORK_CONSERVING__NO_FILLER",
-  "lastClosedParent": "N5.5.D",
+  "currentParent": "N5.5.F",
+  "generatedAt": "2026-09-10T09:59:00Z",
+  "regenerationReason": "N5.5.E_LISTO_REAL__PROMOTE_N5.5.F__PURCHASE_REPORT_SEC_AUDIT_SOURCE_BACKED__PREARM_G_H_N5.6.A__NO_FILLER",
+  "lastClosedParent": "N5.5.E",
   "closureReceipts": {
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
     "N5.1.H": "vaep/evidence/fragments/N5.1.H_LISTO_REAL_20260909T1236Z.json",
@@ -27,7 +27,8 @@
     "N5.5.A": "vaep/evidence/fragments/N5.5.A_LISTO_REAL_CANONICAL_20260910T0806Z.json",
     "N5.5.B": "vaep/evidence/fragments/N5.5.B_LISTO_REAL_20260910T0807Z.json",
     "N5.5.C": "vaep/evidence/fragments/N5.5.C_LISTO_REAL_20260910T0810Z.json",
-    "N5.5.D": "vaep/evidence/fragments/N5.5.D_LISTO_REAL_20260910T0845Z.json"
+    "N5.5.D": "vaep/evidence/fragments/N5.5.D_LISTO_REAL_20260910T0845Z.json",
+    "N5.5.E": "vaep/evidence/fragments/N5.5.E_LISTO_REAL_20260910T0956Z.json"
   },
   "policy": {
     "branch": "Desarrollo",
@@ -47,126 +48,72 @@
   },
   "throughputPlan": {
     "mode": "PARENT_CLOSE_FIRST",
-    "currentParent": "N5.5.E",
-    "currentParentMaterialScopeCount": 6,
-    "currentParentReason": "N5.5.D is LISTO_REAL. Five independent frontend/UX scopes are immediately dependency-valid from the accepted purchase-report API and one page/route integration scope is sibling-gated until E1-E5 REVIEW_FIRST acceptance; no filler is fabricated.",
-    "nextParent": "N5.5.F",
+    "currentParent": "N5.5.F",
+    "currentParentMaterialScopeCount": 2,
+    "currentParentReason": "N5.5.E is LISTO_REAL. Purchase-report SEC_AUDIT has exactly two source-backed non-overlapping facets matching the accepted sales/profitability pattern: controller audit/correlation and focused security/audit contract tests. No J3-J6 filler is fabricated.",
+    "nextParent": "N5.5.G",
     "nextParentParallelMaterialScopes": 0,
     "nextParentScopesNonOverlapping": true,
-    "laneRefill": "DISPATCH_E1_E5_DEPENDENCY_VALID__E6_SIBLING_GATED__PREARM_F_G_H__NO_FILLER"
+    "laneRefill": "DISPATCH_F1_F2_DEPENDENCY_VALID__PREARM_G_H_N5.6.A__NO_FILLER"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
     "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
     "sourceRanges": [
-      "COLA!A428:T431",
+      "COLA!A429:T432",
       "PLAN_MAESTRO",
-      "docs/qa/N5_5_B_REPORTES_COMPRAS_CONTRATO.md",
-      "backend/src/Application/DTOs/ReporteComprasDto.cs",
+      "vaep/evidence/fragments/N5.5.E_LISTO_REAL_20260910T0956Z.json",
       "backend/src/API/Controllers/ReportesComprasController.cs",
-      "frontend/src/app/app.routes.ts",
-      "frontend/src/app/features/rentabilidad/**"
+      "backend/src/API/Controllers/ReportesVentasController.cs",
+      "backend/tests/InventoryApp.Tests/API/Controllers/**"
     ],
-    "note": "N5.5.D is LISTO_REAL. N5.5.E is current. E1-E5 are independent source-backed frontend scopes that do not overlap writes; E6 page/route integration remains sibling-gated until E1-E5 REVIEW_FIRST acceptance. N5.5.F/G/H are dependency-gated prearms.",
+    "note": "N5.5.E is LISTO_REAL. N5.5.F is current with two source-backed SEC_AUDIT facets. N5.5.G/H and N5.6.A are prearmed dependency-gated; no early dispatch and no filler.",
     "nodes": [
-      {"id":"N5.5.C","order":36,"type":"MICROTAREA","dependencies":["N5.5.B"],"phaseGate":"GATE-N4"},
-      {"id":"N5.5.D","order":37,"type":"MICROTAREA","dependencies":["N5.5.C"],"phaseGate":"GATE-N4"},
       {"id":"N5.5.E","order":38,"type":"MICROTAREA","dependencies":["N5.5.D"],"phaseGate":"GATE-N4"},
       {"id":"N5.5.F","order":39,"type":"MICROTAREA","dependencies":["N5.5.E"],"phaseGate":"GATE-N4"},
       {"id":"N5.5.G","order":40,"type":"MICROTAREA","dependencies":["N5.5.F"],"phaseGate":"GATE-N4"},
-      {"id":"N5.5.H","order":41,"type":"MICROTAREA","dependencies":["N5.5.G"],"phaseGate":"GATE-N4"}
+      {"id":"N5.5.H","order":41,"type":"MICROTAREA","dependencies":["N5.5.G"],"phaseGate":"GATE-N4"},
+      {"id":"N5.6.A","order":42,"type":"MICROTAREA","dependencies":["N5.1.H","GATE-N4"],"phaseGate":"GATE-N4"}
     ]
   },
   "prearmedRoadmap": [
-    {"parent":"N5.5.F","state":"READY_DEPENDENCY_GATED","dependency":"N5.5.E_LISTO_REAL","materialization":"DERIVE_PURCHASE_REPORT_RBAC_AUDIT_SECURITY_OBSERVABILITY_FROM_ACCEPTED_D_E__NO_FILLER"},
     {"parent":"N5.5.G","state":"READY_DEPENDENCY_GATED","dependency":"N5.5.F_LISTO_REAL","materialization":"DERIVE_PURCHASE_REPORT_QA_REGRESSION_CI_FROM_ACCEPTED_D_E_F__NO_FILLER"},
-    {"parent":"N5.5.H","state":"READY_DEPENDENCY_GATED","dependency":"N5.5.G_LISTO_REAL","materialization":"DERIVE_PURCHASE_REPORT_DOC_CERT_FROM_ACCEPTED_D_E_F_G_EVIDENCE__NO_FILLER"}
+    {"parent":"N5.5.H","state":"READY_DEPENDENCY_GATED","dependency":"N5.5.G_LISTO_REAL","materialization":"DERIVE_PURCHASE_REPORT_DOC_CERT_FROM_ACCEPTED_D_E_F_G_EVIDENCE__NO_FILLER"},
+    {"parent":"N5.6.A","state":"READY_DEPENDENCY_GATED","dependency":"N5.5.H_LISTO_REAL__ORDERED_SUCCESSOR","materialization":"FINANCE_REPORTS_PREFLIGHT_ONLY_FROM_COLA_PLAN_MAESTRO__NO_LARGE_IMPLEMENTATION__NO_FILLER"}
   ],
   "lanes": {
     "J1": [
       {
-        "dispatchId":"N5-5-E-1-PURCHASE-REPORT-FRONTEND-CONTRACT-SERVICE-J1",
-        "taskId":"N5.5.E.1.PURCHASE_REPORT_FRONTEND_CONTRACT_SERVICE",
+        "dispatchId":"N5-5-F-1-PURCHASE-REPORT-AUDIT-CORRELATION-J1",
+        "taskId":"N5.5.F.1.PURCHASE_REPORT_AUDIT_CORRELATION",
         "workerId":"J1",
         "taskAttempt":1,
-        "plannedParent":"N5.5.E",
+        "plannedParent":"N5.5.F",
         "readyForDispatch":true,
         "dispatchEligible":true,
-        "fileScopeHint":"frontend/src/app/core/models/reporte-compras.models.ts;frontend/src/app/core/services/reporte-compras.service.ts",
-        "prompt":"Create the typed frontend purchase-report DTO/filter contract and HTTP service for the accepted read-only GET /compras/reportes/detalle API. Mirror only backend source-backed fields and filters: UTC range, supplier/product/variant, explicit order/invoice/receipt/return states, bounded page/pageSize, factual ordered/invoiced prices, same-currency absolute variation, receipt/return/evaluation facts. Do not invent FX, percentages, SLA, ranking or composite scores. No page, route or backend changes.",
-        "reason":"N5.5.D_LISTO_REAL__SOURCE_BACKED_API_CONTRACT"
+        "fileScopeHint":"backend/src/API/Controllers/ReportesComprasController.cs",
+        "prompt":"Use only docs/VAEP_AUTHORITY.md and live Desarrollo. Add bounded read-audit/correlation integration to ReportesComprasController using the existing optional IAuditoriaService pattern already established by ReportesVentasController. Preserve [Authorize], Compras/Ver RequierePermiso, existing filter validation/service contract and fail-closed scope. Record correlation/report metadata only; never log purchase payloads, prices, supplier details or other sensitive business data. Keep write scope to this controller only. Run proportional backend build/tests and two independent self-reviews before terminal handoff. Do not touch main, Production, secrets or merge PR #2.",
+        "reason":"N5.5.E_LISTO_REAL__SOURCE_BACKED_AUDIT_CORRELATION_PATTERN"
       }
     ],
     "J2": [
       {
-        "dispatchId":"N5-5-E-2-PURCHASE-REPORT-BASE-FILTERS-J2",
-        "taskId":"N5.5.E.2.PURCHASE_REPORT_BASE_FILTERS",
+        "dispatchId":"N5-5-F-2-PURCHASE-REPORT-SECURITY-AUDIT-TESTS-J2",
+        "taskId":"N5.5.F.2.PURCHASE_REPORT_SECURITY_AUDIT_TESTS",
         "workerId":"J2",
         "taskAttempt":1,
-        "plannedParent":"N5.5.E",
+        "plannedParent":"N5.5.F",
         "readyForDispatch":true,
         "dispatchEligible":true,
-        "fileScopeHint":"frontend/src/app/features/reportes-compras/filtros/**",
-        "prompt":"Create a standalone accessible purchase-report base filters component for the accepted UTC date range and positive supplier/product/variant IDs, plus bounded pagination controls when appropriate. Emit stable immutable filter changes and support disabled/loading state. Do not implement HTTP, status-state selectors, result table, page shell, routing or backend changes.",
-        "reason":"N5.5.D_ACCEPTED_FILTER_CONTRACT__INDEPENDENT_UI_SCOPE"
+        "fileScopeHint":"backend/tests/InventoryApp.Tests/API/Controllers/ReportesComprasContractTests.cs",
+        "prompt":"Use only docs/VAEP_AUTHORITY.md and live Desarrollo. Add focused contract tests for ReportesComprasController covering [Authorize], Compras/Ver permission invariants, fail-closed invalid-filter behavior, and the bounded audit/correlation integration introduced by F1. Reuse production implementation and existing controller-test conventions; do not change production code in this task. Keep write scope to this single test file, run proportional backend tests, perform two independent self-reviews, and preserve accepted purchase-report semantics. Do not touch main, Production, secrets or merge PR #2.",
+        "reason":"N5.5.F_SECURITY_AUDIT_ACCEPTANCE__NON_OVERLAPPING_TEST_SCOPE"
       }
     ],
-    "J3": [
-      {
-        "dispatchId":"N5-5-E-3-PURCHASE-REPORT-STATE-SELECTORS-J3",
-        "taskId":"N5.5.E.3.PURCHASE_REPORT_STATE_SELECTORS",
-        "workerId":"J3",
-        "taskAttempt":1,
-        "plannedParent":"N5.5.E",
-        "readyForDispatch":true,
-        "dispatchEligible":true,
-        "fileScopeHint":"frontend/src/app/features/reportes-compras/estados/**",
-        "prompt":"Create a standalone accessible status selector component for exactly the explicit backend filters EstadoOrden, EstadoFactura, EstadoRecepcion and EstadoDevolucion. Preserve enum values/contracts already exposed by N5.5.D and allow an unset/all option without widening authorization. No HTTP, base filters, page shell, result table, route or backend changes.",
-        "reason":"N5.5.D_EXPLICIT_STATE_FILTERS__INDEPENDENT_SELECTOR_SCOPE"
-      }
-    ],
-    "J4": [
-      {
-        "dispatchId":"N5-5-E-4-PURCHASE-REPORT-RESULT-TABLE-J4",
-        "taskId":"N5.5.E.4.PURCHASE_REPORT_RESULT_TABLE",
-        "workerId":"J4",
-        "taskAttempt":1,
-        "plannedParent":"N5.5.E",
-        "readyForDispatch":true,
-        "dispatchEligible":true,
-        "fileScopeHint":"frontend/src/app/features/reportes-compras/tabla/**",
-        "prompt":"Create a standalone responsive accessible purchase-report results table for the accepted N5.5.D DTO. Render supplier/order/product snapshots, ordered and invoiced factual prices/currencies, absolute variation only when provided, receipt/accepted/damaged/missing/surplus/returned quantities, and factual delivery evaluation fields. Do not calculate FX, percentages, SLA, rankings or scores. No HTTP, filters, page shell, route or backend changes.",
-        "reason":"N5.5.D_ACCEPTED_FACTUAL_DTO__INDEPENDENT_PRESENTATION_SCOPE"
-      }
-    ],
-    "J5": [
-      {
-        "dispatchId":"N5-5-E-5-PURCHASE-REPORT-DISCLOSURE-STATE-UX-J5",
-        "taskId":"N5.5.E.5.PURCHASE_REPORT_DISCLOSURE_STATE_UX",
-        "workerId":"J5",
-        "taskAttempt":1,
-        "plannedParent":"N5.5.E",
-        "readyForDispatch":true,
-        "dispatchEligible":true,
-        "fileScopeHint":"frontend/src/app/features/reportes-compras/disclosure/**",
-        "prompt":"Create a focused accessible purchase-report disclosure/state component for loading, empty and error states plus source-backed interpretation notes. Clearly distinguish ordered vs invoiced currency and explain that price variation is absent when currencies are incompatible; present receipt/return/evaluation values as persisted facts. Do not invent FX, percentages, SLA, ranking or composite supplier score. No HTTP, filters, table, page shell, route or backend changes.",
-        "reason":"N5.5.D_NON_INVENTION_GATES__ACCESSIBLE_UX_DISCLOSURE_SCOPE"
-      }
-    ],
-    "J6": [
-      {
-        "dispatchId":"N5-5-E-6-PURCHASE-REPORT-PAGE-ROUTE-TESTS-J6",
-        "taskId":"N5.5.E.6.PURCHASE_REPORT_PAGE_ROUTE_TESTS",
-        "workerId":"J6",
-        "taskAttempt":1,
-        "plannedParent":"N5.5.E",
-        "readyForDispatch":false,
-        "dispatchEligible":false,
-        "fileScopeHint":"frontend/src/app/features/reportes-compras/reportes-compras.component.ts;frontend/src/app/features/reportes-compras/reportes-compras.component.html;frontend/src/app/features/reportes-compras/reportes-compras.component.scss;frontend/src/app/features/reportes-compras/reportes-compras.component.spec.ts;frontend/src/app/app.routes.ts;frontend/src/app/app.routes.reportes-compras.spec.ts",
-        "prompt":"After E1-E5 are REVIEW_FIRST accepted, compose the purchase-report page from those accepted components/service, add the guarded route using Compras/Ver permission, and add focused route/page tests. Preserve loading/empty/error/accessibility and the no-FX/no-percentage/no-SLA/no-ranking/no-composite-score contract. No backend changes.",
-        "reason":"SIBLING_GATED_BY_E1_E5_REVIEW_FIRST"
-      }
-    ]
+    "J3": [],
+    "J4": [],
+    "J5": [],
+    "J6": []
   },
-  "lastClosureFunctionalHead": "b071b91bc65c741e7bc785da0f85abc8652535bd"
+  "lastClosureFunctionalHead": "8ee19af97cab7a156feb9de179277620aae539af"
 }
