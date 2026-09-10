@@ -52,3 +52,7 @@ La implementación inicial de listado pasó:
 - Playwright Fase 2 inicial: 5/5.
 
 Esa evidencia prueba lo que existía, pero no cubría la ruta canónica omitida. Por eso la fase queda reabierta.
+
+## Gate de cierre reaudidado
+
+La fase solo volverá a `COMPLETADA` cuando todos los puntos del gap estén implementados y exista evidencia verde sobre el HEAD final de la rama y nuevamente sobre el commit integrado en `Desarrollo`.
