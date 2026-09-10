@@ -3,8 +3,6 @@ using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Enums;
-using InventoryApp.Infrastructure.Persistence;
-using InventoryApp.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,17 +15,9 @@ public sealed class RentabilidadVentasController : ControllerBase
 {
     private readonly IRentabilidadVentasService _service;
 
-    // AppDbContext and IUsuarioScopeService are already canonical scoped services.
-    // This bounded construction keeps the N5.4.D service independently testable while
-    // avoiding any expansion of authorization scope.
-    public RentabilidadVentasController(AppDbContext context, IUsuarioScopeService usuarioScope)
-        : this(new RentabilidadVentasService(context, usuarioScope))
+    public RentabilidadVentasController(IRentabilidadVentasService service)
     {
-    }
-
-    internal RentabilidadVentasController(IRentabilidadVentasService service)
-    {
-        _service = service;
+        _service = service ?? throw new ArgumentNullException(nameof(service));
     }
 
     [HttpGet("vendedores")]
