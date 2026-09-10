@@ -1,4 +1,4 @@
-<a class="skip-link" href="#catalogo">Saltar al catálogo</a>
+<a class="skip-link" [href]="destinoSaltar">{{ etiquetaSaltar }}</a>
 
 @if (identidad.config().encabezadoActivo) {
   <div class="utility-bar">
@@ -50,9 +50,12 @@
       </a>
     }
 
-    <button class="cart-trigger" type="button" (click)="solicitarCarrito()" [attr.aria-label]="'Abrir carrito con ' + totalUnidades + ' unidades'">
-      <span class="cart-icon"><app-store-icon nombre="bolsa" /><b aria-hidden="true">{{ totalUnidades }}</b></span>
-      <span class="cart-copy">Mi carrito<small>{{ moneda(subtotal) }}</small></span>
+    <button class="cart-trigger" type="button" (click)="solicitarCarrito()" [attr.aria-label]="etiquetaCarrito()">
+      <span class="cart-icon">
+        <app-store-icon nombre="bolsa" />
+        @if (totalUnidades !== null) { <b aria-hidden="true">{{ totalUnidades }}</b> }
+      </span>
+      <span class="cart-copy">Mi carrito<small>{{ textoSubtotalCarrito() }}</small></span>
     </button>
 
     <button
@@ -117,7 +120,7 @@
     <div class="mobile-actions">
       <button type="button" class="mobile-cart" (click)="solicitarCarrito()">
         <span><app-store-icon nombre="bolsa" /> Carrito</span>
-        <strong aria-hidden="true">{{ totalUnidades }}</strong>
+        @if (totalUnidades !== null) { <strong aria-hidden="true">{{ totalUnidades }}</strong> }
       </button>
       @if (permiteWhatsapp && telefono()) {
         <a class="mobile-whatsapp" [href]="enlaceWhatsapp()" target="_blank" rel="noopener noreferrer">

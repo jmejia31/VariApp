@@ -1,17 +1,20 @@
 import { CommonModule, DOCUMENT } from '@angular/common';
-import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, OnInit, ViewChild, computed, inject, signal } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, DestroyRef, ElementRef, OnInit, ViewChild, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Observable, Subscription, of } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
+import { Observable, Subscription, map, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { EmpresaIdentidadService } from '../../services/empresa-identidad.service';
 import { VaristorehnService } from './varistorehn.service';
 import { ModoCarrito, VARISTOREHN_CONFIG } from './varistorehn.config';
 import {
-  ItemCarrito, ModeloTienda, OrdenCatalogo, ProductoCatalogoPublico, ProductoTienda, agregarItem, cambiarCantidad,
-  crearCatalogoEjemplo, filtrarProductos, mapearProducto, referenciasCarrito,
+  CategoriaTienda, EstadoConsultaPublica, ItemCarrito, ModeloTienda, OrdenCatalogo, ProductoCatalogoPublico, ProductoTienda,
+  agregarItem, cambiarCantidad, crearCatalogoEjemplo, filtrarProductos, mapearProducto, referenciasCarrito,
   restaurarCarrito, telefonoWhatsapp, totalCarrito, urlCheckoutSegura
 } from './varistorehn.catalog';
+import { crearCategoriasTiendaEjemplo, mapearCategoriaTienda } from './varistorehn-categorias.catalog';
 import { VaristorehnHeaderComponent } from './varistorehn-header.component';
+import { VARISTOREHN_PATHS } from './varistorehn.paths';
 import { IconoTiendaComponent, IlustracionTiendaComponent } from './varistorehn.visual';
 
 @Component({
@@ -21,10 +24,11 @@ import { IconoTiendaComponent, IlustracionTiendaComponent } from './varistorehn.
   styleUrls: ['./varistorehn.component.scss', './varistorehn.responsive.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class VaristorehnComponent implements OnInit {
+export class VaristorehnComponent implements OnInit, AfterViewInit {
   private readonly servicio = inject(VaristorehnService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly document = inject(DOCUMENT);
+  private readonly route = inject(ActivatedRoute);
   readonly identidad = inject(EmpresaIdentidadService);
   readonly config = inject(VARISTOREHN_CONFIG);
   @ViewChild('carritoDialog') private carritoDialog?: ElementRef<HTMLDialogElement>;
@@ -40,6 +44,14 @@ export class VaristorehnComponent implements OnInit {
   readonly productos = signal<ProductoTienda[]>([]);
   readonly cargando = signal(true);
   readonly errorCatalogo = signal('');
+  readonly categoriasTienda = signal<CategoriaTienda[]>([]);
+  readonly cargandoCategorias = signal(true);
+  readonly errorCategorias = signal('');
+  readonly estadoCategorias = computed<EstadoConsultaPublica>(() => {
+    if (this.cargandoCategorias()) return 'loading';
+    if (this.errorCategorias()) return 'error';
+    return this.categoriasTienda().length ? 'success' : 'empty';
+  });
   readonly aviso = signal('');
   readonly carrito = signal<ItemCarrito[]>([]);
   readonly totalUnidades = computed(() => this.carrito().reduce((total, item) => total + item.unidades, 0));
@@ -60,10 +72,7 @@ export class VaristorehnComponent implements OnInit {
   readonly errorPago = signal('');
   readonly vistaPedido = signal('');
   readonly vistaTarjeta = signal(false);
-  readonly categorias = computed(() => [...new Set(this.productos().map(p => p.categoria))]
-    .map(nombre => ({ nombre, cantidad: this.productos().filter(p => p.categoria === nombre).length,
-      producto: this.productos().find(p => p.categoria === nombre)! })));
-  readonly categoriasNavegacion = computed(() => this.categorias().map(categoria => categoria.nombre));
+  readonly categoriasNavegacion = computed(() => this.categoriasTienda().map(categoria => categoria.nombre));
   readonly destacados = computed(() => this.productos().filter(p => p.disponible).slice(0, 3));
   readonly resultados = computed(() => filtrarProductos(this.productos(), {
     busqueda: this.busqueda(), categoria: this.categoriaActiva(), soloDisponibles: this.soloDisponibles(),
@@ -72,12 +81,28 @@ export class VaristorehnComponent implements OnInit {
   readonly totalPaginas = computed(() => Math.max(1, Math.ceil(this.resultados().length / this.tamanoPagina)));
   readonly productosVisibles = computed(() => this.resultados().slice((this.pagina() - 1) * this.tamanoPagina, this.pagina() * this.tamanoPagina));
   readonly hayFiltros = computed(() => Boolean(this.busqueda() || this.categoriaActiva() || this.soloDisponibles() || this.precioMaximo() !== null));
+  readonly enlaceCategorias = VARISTOREHN_PATHS.categorias;
   private cargaActual?: Subscription;
+  private cargaCategoriasActual?: Subscription;
   private claveAlmacenamiento = '';
   private idempotencyKey = '';
+  private vistaInicializada = false;
+  private busquedaInicialAplicada = false;
+  private categoriaInicialAplicada = false;
+  private abrirCarritoPendiente = this.route.snapshot.queryParamMap.get('carrito') === '1';
+  private readonly busquedaInicial = (this.route.snapshot.queryParamMap.get('q') || '').trim().slice(0, 180);
+  private readonly categoriaSlugInicial = (this.route.snapshot.queryParamMap.get('categoria') || '').trim().slice(0, 180);
 
   ngOnInit(): void {
-    this.identidad.cargar().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.cargarCatalogo());
+    this.identidad.cargar().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.cargarCatalogo();
+      this.cargarCategorias();
+    });
+  }
+
+  ngAfterViewInit(): void {
+    this.vistaInicializada = true;
+    this.abrirCarritoSiPendiente();
   }
 
   cargarCatalogo(): void {
@@ -91,7 +116,6 @@ export class VaristorehnComponent implements OnInit {
     this.productos.set([]);
     this.carrito.set([]);
     this.modelosActivos.set({});
-    this.limpiarFiltros();
     this.claveAlmacenamiento = `varistorehn:carrito:v2:${this.identidad.config().id}:${this.utilizarDatosBaseDatos() ? 'bd' : 'demo'}`;
     const fuente: Observable<ProductoCatalogoPublico[] | null> = this.utilizarDatosBaseDatos() ? this.servicio.obtenerCatalogo() : of(null);
     this.cargaActual = fuente.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
@@ -105,6 +129,8 @@ export class VaristorehnComponent implements OnInit {
           this.aviso.set('Actualizamos tu carrito con los modelos y existencias disponibles.');
         }
         this.cargando.set(false);
+        this.aplicarBusquedaInicial();
+        this.abrirCarritoSiPendiente();
       },
       error: () => {
         this.errorCatalogo.set('No pudimos cargar el catálogo. Revisa la conexión e intenta de nuevo. No se sustituyeron los datos reales por ejemplos.');
@@ -113,10 +139,33 @@ export class VaristorehnComponent implements OnInit {
     });
   }
 
+  cargarCategorias(): void {
+    this.cargaCategoriasActual?.unsubscribe();
+    this.cargandoCategorias.set(true);
+    this.errorCategorias.set('');
+    this.categoriasTienda.set([]);
+    const fuente: Observable<CategoriaTienda[]> = this.utilizarDatosBaseDatos()
+      ? this.servicio.obtenerCategorias().pipe(map(categorias => categorias.map(mapearCategoriaTienda)))
+      : of(crearCategoriasTiendaEjemplo());
+    this.cargaCategoriasActual = fuente.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: categorias => {
+        this.categoriasTienda.set(categorias);
+        this.cargandoCategorias.set(false);
+        this.aplicarCategoriaInicial(categorias);
+      },
+      error: () => {
+        this.errorCategorias.set('No pudimos cargar las categorías. Revisa la conexión e intenta de nuevo. No se sustituyeron los datos reales por ejemplos.');
+        this.cargandoCategorias.set(false);
+      }
+    });
+  }
+
   cambiarFuente(baseDatos: boolean): void {
     if (!this.controlesVistaPrevia || this.procesandoPago() || baseDatos === this.utilizarDatosBaseDatos()) return;
     this.utilizarDatosBaseDatos.set(baseDatos);
+    this.limpiarFiltros();
     this.cargarCatalogo();
+    this.cargarCategorias();
   }
   cambiarModo(modo: string): void {
     if (!this.controlesVistaPrevia || this.procesandoPago() || !['whatsapp', 'tarjeta', 'ambos'].includes(modo)) return;
@@ -147,6 +196,16 @@ export class VaristorehnComponent implements OnInit {
   }
   irCatalogo(evento?: Event): void {
     evento?.preventDefault(); this.document.getElementById('catalogo')?.scrollIntoView({ block: 'start' });
+  }
+
+  textoCantidadCategoria(categoria: CategoriaTienda): string {
+    const cantidad = categoria.cantidadProductos;
+    if (cantidad === null) return 'Cantidad no disponible';
+    return `${cantidad} ${cantidad === 1 ? 'producto' : 'productos'}`;
+  }
+
+  cantidadCategoriaFiltro(categoria: CategoriaTienda): string {
+    return categoria.cantidadProductos === null ? '—' : String(categoria.cantidadProductos);
   }
 
   modeloSeleccionado(producto: ProductoTienda): ModeloTienda {
@@ -235,6 +294,27 @@ export class VaristorehnComponent implements OnInit {
           this.procesandoPago.set(false);
         }
       });
+  }
+
+  private aplicarBusquedaInicial(): void {
+    if (this.busquedaInicialAplicada) return;
+    this.busquedaInicialAplicada = true;
+    if (this.busquedaInicial) this.buscar(this.busquedaInicial);
+  }
+
+  private aplicarCategoriaInicial(categorias: CategoriaTienda[]): void {
+    if (this.categoriaInicialAplicada) return;
+    this.categoriaInicialAplicada = true;
+    if (!this.categoriaSlugInicial) return;
+    const categoria = categorias.find(item => item.slug === this.categoriaSlugInicial);
+    if (categoria) this.seleccionarCategoria(categoria.nombre);
+    else this.aviso.set('La categoría solicitada ya no está disponible.');
+  }
+
+  private abrirCarritoSiPendiente(): void {
+    if (!this.abrirCarritoPendiente || !this.vistaInicializada || this.cargando() || this.errorCatalogo()) return;
+    this.abrirCarritoPendiente = false;
+    this.abrirCarrito();
   }
 
   private leerCarrito(): unknown {
