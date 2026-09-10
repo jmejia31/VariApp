@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-4-F-1-PROFITABILITY-AUDIT-CORRELATION-J1-R2-20260910T075156Z-6653",
+  "taskId": "N5.4.F.1.PROFITABILITY_AUDIT_CORRELATION",
+  "workerId": "J1",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 2,
+  "fileScopeHint": "backend/src/API/Controllers/RentabilidadVentasController.cs",
+  "prompt": "Use only docs/VAEP_AUTHORITY.md and live Desarrollo. Add bounded read-audit/correlation integration to RentabilidadVentasController using the existing optional IAuditoriaService pattern already implemented by ReportesVentasController. Preserve [Authorize], Ventas/Ver RequierePermiso on all four profitability endpoints, ReporteVentasQueryRules validation, response contracts and fail-closed data scope. Record only report grouping/correlation metadata; do not log sensitive payloads or invent business semantics. Keep write scope to this controller only. Run proportional backend build/tests and two self-reviews before terminal handoff. Do not touch main, Production, secrets or merge PR #2.\n\nR2 RCA: PATCH_BASE_CONTROL_PLANE_DIVERGENCE actual=48152891b949b3ce546e410d1766fa92aa604426 requested=cbb9777b79e8f7735c7decb096a3ce66d00c6337. Re-run the same material scope from the current Desarrollo checkout; do not expand scope, touch control-plane files, or claim integration.",
+  "primaryBaseHead": "39df8fd61d3c97fd35c37ebc02b663515626b138"
+}
