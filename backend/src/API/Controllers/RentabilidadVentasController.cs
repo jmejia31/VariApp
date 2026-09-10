@@ -14,10 +14,14 @@ namespace InventoryApp.API.Controllers;
 public sealed class RentabilidadVentasController : ControllerBase
 {
     private readonly IRentabilidadVentasService _service;
+    private readonly IAuditoriaService? _auditoria;
 
-    public RentabilidadVentasController(IRentabilidadVentasService service)
+    public RentabilidadVentasController(
+        IRentabilidadVentasService service,
+        IAuditoriaService? auditoria = null)
     {
         _service = service ?? throw new ArgumentNullException(nameof(service));
+        _auditoria = auditoria;
     }
 
     [HttpGet("vendedores")]
@@ -49,7 +53,28 @@ public sealed class RentabilidadVentasController : ControllerBase
         if (errores.Count > 0)
             return BadRequest(ApiResponse<object>.Fail(string.Join(" ", errores)));
 
+        await RegistrarConsultaAsync(agrupacion);
+
         var resultado = await _service.ObtenerAsync(filtro, agrupacion, cancellationToken);
         return Ok(ApiResponse<IReadOnlyList<ReporteRentabilidadDto>>.Ok(resultado));
+    }
+
+    private async Task RegistrarConsultaAsync(RentabilidadAgrupacion agrupacion)
+    {
+        if (_auditoria is null)
+            return;
+
+        var correlationId = HttpContext.TraceIdentifier;
+
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Ventas,
+            AccionPermiso.Ver,
+            $"Consulta de rentabilidad de ventas por '{agrupacion}'.",
+            entidad: "RentabilidadVentas",
+            valoresNuevos: new
+            {
+                CorrelationId = correlationId,
+                Agrupacion = agrupacion.ToString()
+            });
     }
 }
