@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "OPEN",
-  "allowExistingActiveSessions": true,
-  "reason": "N5.3.D_D1_D2_REVIEW_FIRST_ACCEPTED__D3_MATERIAL_SCOPE_READY__NO_DUPLICATE_DISPATCH",
-  "updatedAtUtc": "2026-09-10T00:28:45Z"
+  "newDispatchAdmission": "FROZEN",
+  "allowExistingActiveSessions": false,
+  "reason": "N5.3.D_D3_REVIEW_FIRST_ACCEPTED__HEAD_FREEZE_CAUSAL_EXACT_HEAD_GATES_PENDING__D4_PREARMED__NO_DUPLICATE_DISPATCH",
+  "updatedAtUtc": "2026-09-10T00:41:34Z"
 }
