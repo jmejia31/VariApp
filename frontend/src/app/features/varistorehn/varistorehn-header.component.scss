@@ -32,7 +32,6 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
 .utility-message, .utility-actions, .utility-actions a { display: inline-flex; align-items: center; gap: 7px; }
 .utility-actions { gap: 18px; }
 .utility-actions a { min-height: 32px; }
-.utility-whatsapp { font-weight: 700; }
 
 .store-header {
   position: sticky;
@@ -119,8 +118,9 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
 
 @media (max-width: 1120px) {
   .container { width: calc(100% - 40px); }
-  .header-main { grid-template-columns: auto minmax(220px, 1fr) auto; gap: 16px; }
-  .header-whatsapp { display: none; }
+  .header-main { grid-template-columns: auto minmax(180px, 1fr) auto auto; gap: 14px; }
+  .header-whatsapp span { display: none; }
+  .header-whatsapp { width: 48px; justify-content: center; padding: 7px; }
   .store-nav { gap: 18px; }
 }
 
@@ -128,7 +128,7 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
   .container { width: calc(100% - 28px); }
   .utility-inner { min-height: 30px; font-size: .63rem; }
   .utility-message { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .utility-actions > a:not(.utility-whatsapp) { display: none; }
+  .utility-actions { display: none; }
   .header-main { min-height: 118px; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px; padding-block: 12px; }
   .brand { min-width: 0; }
   .brand img { width: 42px; height: 42px; flex-basis: 42px; }
@@ -136,6 +136,7 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
   .brand small { display: none; }
   .search-box { grid-column: 1 / -1; grid-row: 2; max-width: none; }
   .search-box input { font-size: 16px; }
+  .header-whatsapp { display: none; }
   .cart-trigger { min-width: 44px; min-height: 44px; justify-content: center; padding: 6px; }
   .cart-copy { display: none; }
   .mobile-menu-trigger { width: 44px; height: 44px; display: grid; align-content: center; gap: 5px; padding: 10px; border: 1px solid var(--store-line); border-radius: calc(var(--radius) * .65); background: var(--color-surface); }
@@ -145,7 +146,5 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
 
 @media (max-width: 390px) {
   .brand strong { max-width: 130px; font-size: .96rem; }
-  .utility-whatsapp { font-size: 0; }
-  .utility-whatsapp app-store-icon { font-size: .95rem; }
   .mobile-menu-panel { padding: 18px; }
 }

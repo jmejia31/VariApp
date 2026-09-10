@@ -1,11 +1,10 @@
-/* Responsive rules scoped to VariStoreHN only. */
+/* Responsive rules scoped to VariStoreHN page content only. Header rules live with VaristorehnHeaderComponent. */
 @media (min-width: 1500px) {
   .product-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 
 @media (max-width: 1120px) {
   .container { width: calc(100% - 40px); }
-  .header-main { gap: 18px; }
   .hero { grid-template-columns: 1.2fr .9fr; }
   .hero-checkout { display: none; }
   .category-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -15,8 +14,6 @@
 }
 
 @media (max-width: 820px) {
-  .brand small { display: none; }
-  .store-nav { gap: 18px; }
   .hero { grid-template-columns: 1fr; }
   .hero-copy { padding: 34px 30px 28px; }
   .hero-visual { min-height: 300px; }
@@ -31,16 +28,6 @@
 
 @media (max-width: 600px) {
   .container { width: calc(100% - 28px); }
-  .utility-inner { min-height: 30px; font-size: .63rem; }
-  .utility-inner a { display: none; }
-  .header-main { min-height: 116px; padding-block: 13px; flex-wrap: wrap; gap: 11px; }
-  .brand { order: 1; }
-  .cart-trigger { order: 2; }
-  .cart-trigger > span:last-child { display: none; }
-  .search-box { order: 3; flex-basis: 100%; max-width: none; }
-  .search-box input { font-size: 16px; }
-  .store-nav { min-height: 41px; font-size: .66rem; }
-  .store-nav .nav-all { padding-right: 14px; }
   .preview-panel { gap: 10px; padding: 12px; }
   .preview-title { width: 100%; }
   .preview-panel .segmented { width: 100%; }

@@ -2,9 +2,11 @@
 
 ## Estado
 
-**Implementada y validada en rama de integración.**
+**Implementada, re-auditada y endurecida.**
 
 Esta fase resuelve la deuda explícita heredada de Fase 0: extraer la cabecera pública del componente monolítico y completar la navegación móvil, sin adelantar las páginas independientes reservadas a las fases siguientes.
+
+Después del primer cierre se ejecutó una reauditoría más estricta. La revisión dejó de aceptar como evidencia suficiente una guardia estática y añadió validación real de navegador. Esa segunda auditoría encontró dos problemas concretos: estilos del header anterior que habían quedado residuales en el componente padre y una franja responsive de 761–1120 px donde WhatsApp quedaba oculto aunque todavía no existía el menú móvil. Ambos fueron corregidos antes de recertificar la fase.
 
 ## Alcance entregado
 
@@ -37,82 +39,68 @@ La cabecera no mantiene un carrito paralelo. El contador y subtotal provienen di
 
 ### WhatsApp secundario
 
-WhatsApp aparece únicamente cuando:
+WhatsApp aparece únicamente cuando el modo de compra lo permite y existe un número normalizable mediante la regla compartida `telefonoWhatsapp`. No se inventa un contacto ni se muestra una acción inutilizable.
 
-1. el modo de compra lo permite; y
-2. existe un número normalizable mediante la regla compartida `telefonoWhatsapp`.
+La reauditoría descubrió que el breakpoint original ocultaba `.header-whatsapp` desde 1120 px hacia abajo, mientras `.mobile-menu-trigger` solo aparecía a 760 px. Eso dejaba sin acceso de cabecera a WhatsApp en 761–1120 px. El hardening corrige la transición responsive:
 
-No se inventa un contacto ni se muestra una acción inutilizable.
+- desktop: acción completa;
+- 761–1120 px: acción compacta de 48 px, todavía accesible por nombre;
+- hasta 760 px: la acción de cabecera se sustituye por la acción equivalente dentro del drawer móvil.
+
+La prueba de navegador cubre explícitamente 1120, 900 y 761 px y comprueba que no exista overflow horizontal en esa franja.
 
 ### Navegación móvil y accesibilidad
 
-El menú móvil usa `dialog.showModal()` para obtener contención de foco nativa y soporte de Escape. Incluye:
+El menú móvil usa `dialog.showModal()` para obtener contención de foco nativa y soporte de Escape. Incluye `aria-controls` y `aria-expanded` en el disparador, título mediante `aria-labelledby`, primer destino enfocado al abrir, cierre por botón/Escape/backdrop, restauración de foco al disparador cuando corresponde, supresión deliberada de esa restauración al navegar o abrir otra superficie, estado de categorías con `aria-pressed` y objetivos táctiles mínimos de 44 px.
 
-- `aria-controls` y `aria-expanded` en el disparador;
-- título del diálogo mediante `aria-labelledby`;
-- primer destino enfocado al abrir;
-- cierre por botón, Escape y backdrop;
-- restauración de foco al disparador cuando el cierre es manual;
-- supresión deliberada de esa restauración cuando el usuario navega, selecciona una categoría o abre el carrito, evitando saltos de foco que contradigan la acción solicitada;
-- estado de filtros rápidos expuesto con `aria-pressed`;
-- objetivos táctiles mínimos de 44 px en controles principales.
+La prueba real de navegador verifica apertura/cierre del drawer, foco inicial, Escape con restauración de foco, selección de categoría, cambio del modo de compra, disponibilidad de WhatsApp, targets táctiles y reflow sin overflow a 760, 390 y 320 px.
 
 ### Responsive e identidad visual
 
 La cabecera tiene reglas propias para desktop, tablet y móvil. No introduce valores hexadecimales ni una paleta paralela: utiliza exclusivamente tokens `--color-*`, radios y demás variables del tema configurado por el sistema.
 
+Los selectores del header anterior fueron retirados de `varistorehn.component.scss` y `varistorehn.responsive.scss`; los estilos de cabecera viven ahora con `VaristorehnHeaderComponent`. La guardia estática impide reintroducir esos selectores en el componente padre.
+
 ## Frontera público / administrativo
 
-La guardia de aceptación de Fase 1 comprueba que el header no importe ni dependa de:
-
-- `authGuard`;
-- `permisoGuard`;
-- `ProductosListComponent`;
-- `CategoriasListComponent`.
-
-La experiencia pública mantiene así la separación establecida en Fase 0.
+La guardia de aceptación de Fase 1 comprueba que el header no importe ni dependa de `authGuard`, `permisoGuard`, `ProductosListComponent` ni `CategoriasListComponent`. La experiencia pública mantiene así la separación establecida en Fase 0.
 
 ## Protección contra regresiones
 
-Se añadió `frontend/scripts/validate-varistorehn-fase1.mjs` y se incorporó al comando normal `npm run lint`. La protección ya no depende de un workflow temporal de esta rama; cualquier CI futuro que ejecute el lint estándar verificará también los invariantes de Fase 1.
+La protección tiene ahora dos niveles complementarios.
 
-La guardia verifica, entre otros puntos:
+`frontend/scripts/validate-varistorehn-fase1.mjs`, integrado en `npm run lint`, comprueba invariantes de arquitectura y markup: uso de `VARISTOREHN_PATHS`, identidad empresarial compartida, modal móvil real, semántica de búsqueda, ARIA, carrito real, WhatsApp normalizado, objetivos táctiles, ausencia de colores hexadecimales propios, adopción del header reutilizable, wiring hacia búsqueda/carrito, ausencia de dependencias administrativas y ausencia de selectores residuales del header en los estilos del padre.
 
-- uso de `VARISTOREHN_PATHS`;
-- uso de identidad empresarial compartida;
-- modal móvil real;
-- semántica de búsqueda;
-- ARIA de navegación móvil;
-- contador real de carrito;
-- acción WhatsApp;
-- objetivos táctiles;
-- ausencia de colores hexadecimales en el header;
-- adopción del nuevo header por el escaparate;
-- eliminación del header monolítico del template principal;
-- wiring de búsqueda y carrito;
-- ausencia de dependencias administrativas.
+`frontend/e2e/varistorehn-fase1.spec.ts` añade una regresión de navegador con Playwright. Se expone mediante `npm run test:e2e:varistorehn-fase1` y el workflow permanente `.github/workflows/varistorehn-fase1-regression.yml` se ejecuta cuando cambian archivos relevantes de VariStoreHn, identidad, estilos globales, entornos o la propia prueba.
 
-## Evidencia ejecutable
+## Evidencia ejecutable original
 
-HEAD funcional certificado: `c14235b3086a063503c602a16a2c380ea9073f2d`.
+HEAD funcional certificado de la primera implementación: `c14235b3086a063503c602a16a2c380ea9073f2d`.
 
-GitHub Actions run: `34519623344`.
+GitHub Actions run original: `34519623344`.
 
-Resultado:
+Resultado original: `npm ci`, `npm run lint`, guardia específica y `npm run build:prod` en **success**. También existió una ejecución verde previa (`34519342478`).
+
+## Evidencia de reauditoría y hardening
+
+La primera auditoría de navegador fue deliberadamente más exigente que el cierre original. Un primer intento reveló un locator ambiguo en la propia prueba; tras corregirlo, la ejecución detectó un defecto real de producto: WhatsApp no estaba disponible a 900 px. Desktop, móvil y la validación de WhatsApp inválido sí pasaban.
+
+Después de corregir el breakpoint y limpiar estilos residuales, el run de hardening `34523138867` certificó el candidato con:
 
 - `npm ci`: **success**;
-- `npm run lint`: **success**;
-- guardia específica `validate-varistorehn-fase1.mjs`: **success**;
+- TypeScript + `npm run lint` + guardia reforzada: **success**;
 - `npm run build:prod`: **success**;
-- job `Frontend Fase 1`: **success**.
+- Playwright desktop: **success**;
+- Playwright franja tablet 1120/900/761 px y ausencia de overflow: **success**;
+- Playwright móvil con drawer/foco/Escape/categorías/modo de compra/reflow: **success**;
+- WhatsApp inválido sin acción rota: **success**;
+- total: **4/4 pruebas de navegador aprobadas**.
 
-También existió una ejecución verde previa (`34519342478`) antes del pulido final, lo que aporta una segunda señal independiente sobre la extracción y el build.
+### Observación de build no bloqueante
 
-## Concurrencia
+El build sigue mostrando un warning de presupuesto sobre `varistorehn.component.scss`: 17.10 kB frente al umbral de warning de 16 kB. La limpieza de Fase 1 lo redujo desde 19.80 kB y eliminó del padre los estilos residuales de cabecera. El remanente corresponde al contenido monolítico que el propio Plan Maestro descompone en Fases 2–5 (categorías, catálogo, detalle y carrito). No se aumenta el presupuesto ni se adelanta esa extracción únicamente para silenciar el warning; el build de producción finaliza correctamente.
 
-La rama se creó desde `dde80b13e6fd9e361a6ca2e5bc074a8734bb0d2b`. Durante el desarrollo, `Desarrollo` recibió commits adicionales; la comparación confirmó que esos cambios afectan archivos de control/evidencia VAEP y no los archivos de VariStoreHn modificados por esta fase. El PR permanece mergeable.
-
-## Definition of Done
+## Definition of Done revalidada
 
 - [x] Header público reutilizable y desacoplado del componente monolítico.
 - [x] Identidad proveniente del servicio/configuración central.
@@ -120,14 +108,16 @@ La rama se creó desde `dde80b13e6fd9e361a6ca2e5bc074a8734bb0d2b`. Durante el de
 - [x] Navegación pública clara a inicio, productos y categorías.
 - [x] Cero controles o dependencias administrativas.
 - [x] Carrito con contador real de unidades y subtotal real.
-- [x] WhatsApp como acción secundaria cuando hay configuración válida.
-- [x] Menú móvil accesible con estado ARIA y manejo de foco.
+- [x] WhatsApp como acción secundaria cuando hay configuración válida y continuidad responsive en desktop/tablet/móvil.
+- [x] Menú móvil accesible con estado ARIA y manejo de foco verificado en navegador.
 - [x] URLs públicas construidas desde `VARISTOREHN_PATHS`.
 - [x] Sin placeholders de páginas asignadas a Fases 2–6.
-- [x] Responsive con objetivos táctiles adecuados.
+- [x] Responsive sin overflow en los breakpoints críticos auditados y con objetivos táctiles adecuados.
 - [x] Colores gobernados por los tokens del sistema/base de datos.
-- [x] Guardia anti-regresión integrada al lint normal.
-- [x] Lint/TypeScript y build de producción verdes.
+- [x] Estilos del header extraídos del padre y guardados contra regresión.
+- [x] Guardia estática integrada al lint normal.
+- [x] Suite Playwright específica y workflow de regresión permanente.
+- [x] Lint/TypeScript, build de producción y 4/4 pruebas runtime verdes.
 
 ## Límite de fase
 
