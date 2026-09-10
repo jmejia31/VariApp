@@ -2,6 +2,7 @@ using InventoryApp.Application.DTOs;
 using InventoryApp.Infrastructure.Persistence;
 using InventoryApp.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
+using Xunit;
 
 namespace InventoryApp.Tests;
 
