@@ -6,7 +6,7 @@ Fuente de autoridad: **Plan Maestro de Mejoras de VariStoreHn v1.1**.
 Asegurar que la tienda pública, los datos y las rutas estén preparados antes de rediseñar pantallas. Esta fase no adelanta estética fina, banners, animaciones ni páginas de fases posteriores.
 
 ## Estado
-**Implementación de base completada; validación CI en curso.** La fase solo se marcará cerrada cuando backend, pruebas, lint y build de producción estén verdes y el PR esté actualizado contra `Desarrollo` sin conflictos materiales.
+**COMPLETADA técnicamente y validada.** La implementación funcional de Fase 0 fue verificada en GitHub Actions sobre el HEAD funcional `6b5cbc7f95d7cd33aeff9bdce86427f6d9742b11`. Backend y frontend terminaron en verde. La integración a `Desarrollo` se realiza únicamente después de comprobar nuevamente que no existe conflicto material con cambios concurrentes.
 
 ## Definition of Done del Plan Maestro
 - [x] Existe un modelo único de producto y categoría para las páginas públicas.
@@ -69,11 +69,11 @@ Es el modelo que deben consumir las páginas públicas: identidad, slug, categor
 - `slug`
 - `nombre`
 - `descripcion`
-- `totalProductos` / `cantidadProductos`
+- `totalProductos` / `cantidadProductos`, nullable cuando la consulta no puede acreditar un conteo real
 - imagen opcional reservada para cuando exista fuente real
 
 ### Regla para campos aún no existentes en negocio
-No inventar datos. `precioOferta` permanece nulo y `esDestacado=false` hasta que Fase 9/operación real defina una fuente de verdad. El contrato ya reserva esos campos para evitar romper páginas futuras.
+No inventar datos. `precioOferta` permanece nulo y `esDestacado=false` hasta que Fase 9/operación real defina una fuente de verdad. El contrato ya reserva esos campos para evitar romper páginas futuras. Un conteo desconocido de productos por categoría se representa con `null`, nunca con un cero fabricado.
 
 ## 3. Estrategia de slugs
 
@@ -101,7 +101,8 @@ Reglas:
 - categoría inexistente o inactiva responde 404;
 - DTO público no expone costo, auditoría ni información reservada;
 - los datos provienen de `IProductoService`/`ICategoriaService`, no de controladores administrativos;
-- SKU solo se expone cuando el grupo público no es ambiguo.
+- SKU solo se expone cuando el grupo público no es ambiguo;
+- si existen variantes, stock y precio público se calculan solo desde variantes activas.
 
 ## 5. Rutas públicas objetivo
 
@@ -178,23 +179,35 @@ Backend incluye pruebas para:
 - producto por slug y slug canónico;
 - producto inválido/inactivo -> 404;
 - categorías públicas activas;
-- categoría por slug e inactiva -> 404.
+- categoría por slug e inactiva -> 404;
+- exclusión de stock/precio perteneciente a variantes inactivas;
+- conteos de categoría desconocidos sin falsos ceros.
 
-Validación de rama requerida antes del cierre:
-- `dotnet restore`
-- `dotnet build --configuration Release`
-- `dotnet test --configuration Release --filter Category!=Integration`
-- `npm ci`
-- `npm run lint`
-- `npm run build:prod`
+## 12. Evidencia de validación
 
-## 12. Gate para iniciar Fase 1
+Workflow temporal de rama: **VariStoreHn Fase 0 - verificación temporal**, ejecución `34517337336`, sobre HEAD funcional `6b5cbc7f95d7cd33aeff9bdce86427f6d9742b11`.
 
-Fase 1 puede iniciar únicamente cuando:
-1. la validación anterior esté verde;
-2. la rama esté alineada con `Desarrollo` sin conflictos materiales;
-3. este documento tenga evidencia del resultado final;
-4. el PR de Fase 0 esté listo para revisión/integración;
-5. no quede ningún checkbox del DoD de Fase 0 sin cumplir.
+Resultado:
+- [x] `dotnet restore InventoryApp.sln`
+- [x] `dotnet build InventoryApp.sln --configuration Release --no-restore`
+- [x] `dotnet test InventoryApp.sln --configuration Release --no-build --filter "Category!=Integration"`
+- [x] `npm ci`
+- [x] `npm run lint`
+- [x] `npm run build:prod`
+- [x] Job backend: `success`
+- [x] Job frontend: `success`
 
-Hasta entonces el estado oficial continúa siendo **Fase 0 en validación**.
+La verificación temporal se retira antes de integrar; el código funcional que validó permanece sin cambios. `Desarrollo - Compilación y pruebas` volverá a validar el resultado combinado al integrarse.
+
+## 13. Gate para iniciar Fase 1
+
+- [x] Modelo público único definido.
+- [x] Fuente pública y contratos definidos.
+- [x] Slugs y rutas objetivo definidos.
+- [x] Separación público/admin acreditada.
+- [x] Estados y deuda técnica documentados.
+- [x] Backend compila y pruebas pasan.
+- [x] Frontend pasa lint/TypeScript y build de producción.
+- [x] PR sin conflicto material al momento de la validación.
+
+**Fase 0 queda cerrada técnicamente.** La Fase 1 puede comenzar después de integrar esta base en `Desarrollo` y confirmar el CI de la rama destino.
