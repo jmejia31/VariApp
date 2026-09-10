@@ -5,7 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { DashboardService } from '../../services/dashboard.service';
 import { AutomatizacionService } from '../../services/automatizacion.service';
-import { DashboardResumen } from '../../core/models/dashboard.model';
+import { DashboardKpiConfiguracion, DashboardKpiResuelto, DashboardResumen } from '../../core/models/dashboard.model';
 import { AutomatizacionResumen } from '../../core/models/automatizacion.model';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
 
@@ -21,8 +21,13 @@ export class DashboardComponent implements OnInit {
 
   readonly resumen = signal<DashboardResumen | null>(null);
   readonly automatizacion = signal<AutomatizacionResumen | null>(null);
+  readonly kpiConfiguracion = signal<DashboardKpiConfiguracion[]>([]);
+  readonly kpisResueltos = signal<DashboardKpiResuelto[]>([]);
   readonly loading = signal(true);
   readonly loadingAutomatizacion = signal(true);
+  readonly loadingKpis = signal(true);
+  readonly errorKpis = signal(false);
+  readonly savingKpis = signal(false);
   readonly esAdministrador = this.permisosRuntime.esAdministrador;
   readonly puedeVerVentas = signal(false);
   readonly puedeVerProductos = signal(false);
@@ -44,12 +49,87 @@ export class DashboardComponent implements OnInit {
       error: () => this.loading.set(false)
     });
 
+    this.cargarKpis();
+
     this.automatizacionService.getSugerencias().subscribe({
       next: (res) => {
         this.automatizacion.set(res.data);
         this.loadingAutomatizacion.set(false);
       },
       error: () => this.loadingAutomatizacion.set(false)
+    });
+  }
+
+  cargarKpis(): void {
+    this.loadingKpis.set(true);
+    this.errorKpis.set(false);
+    this.dashboardService.getKpiConfiguracion().subscribe({
+      next: (configuracion) => {
+        this.kpiConfiguracion.set([...configuracion].sort((a, b) => a.orden - b.orden || a.metricKey.localeCompare(b.metricKey)));
+        this.dashboardService.getKpisResueltos().subscribe({
+          next: (kpis) => {
+            this.kpisResueltos.set([...kpis].sort((a, b) => a.orden - b.orden || a.metricKey.localeCompare(b.metricKey)));
+            this.loadingKpis.set(false);
+          },
+          error: () => {
+            this.errorKpis.set(true);
+            this.loadingKpis.set(false);
+          }
+        });
+      },
+      error: () => {
+        this.errorKpis.set(true);
+        this.loadingKpis.set(false);
+      }
+    });
+  }
+
+  actualizarVisibilidad(metricKey: string, habilitado: boolean): void {
+    this.persistirConfiguracion(this.kpiConfiguracion().map((item) =>
+      item.metricKey === metricKey ? { ...item, habilitado } : item
+    ));
+  }
+
+  actualizarEtiqueta(metricKey: string, etiquetaVisible: string): void {
+    this.persistirConfiguracion(this.kpiConfiguracion().map((item) =>
+      item.metricKey === metricKey ? { ...item, etiquetaVisible: etiquetaVisible.trim() || null } : item
+    ));
+  }
+
+  moverKpi(metricKey: string, delta: -1 | 1): void {
+    const items = [...this.kpiConfiguracion()].sort((a, b) => a.orden - b.orden || a.metricKey.localeCompare(b.metricKey));
+    const index = items.findIndex((item) => item.metricKey === metricKey);
+    const target = index + delta;
+    if (index < 0 || target < 0 || target >= items.length) return;
+    [items[index], items[target]] = [items[target], items[index]];
+    this.persistirConfiguracion(items.map((item, orden) => ({ ...item, orden })));
+  }
+
+  etiquetaKpi(item: DashboardKpiResuelto): string {
+    if (item.etiquetaVisible?.trim()) return item.etiquetaVisible.trim();
+    return ({
+      INGRESOS_MES: 'Ingresos del mes', VENTAS_MES: 'Ventas del mes', COMPRAS_MES: 'Compras del mes',
+      TOTAL_PRODUCTOS: 'Productos registrados', TOTAL_UNIDADES: 'Unidades en inventario',
+      VALOR_INVENTARIO: 'Valor de inventario', UTILIDAD_BRUTA: 'Utilidad bruta',
+      BALANCE_OPERATIVO: 'Balance operativo', CUENTAS_POR_COBRAR: 'Cuentas por cobrar',
+      CUENTAS_POR_PAGAR: 'Cuentas por pagar', PRODUCTOS_STOCK_BAJO: 'Productos con stock bajo'
+    } as Record<string, string>)[item.metricKey] ?? item.metricKey;
+  }
+
+  private persistirConfiguracion(configuracion: DashboardKpiConfiguracion[]): void {
+    if (this.savingKpis()) return;
+    this.savingKpis.set(true);
+    this.errorKpis.set(false);
+    this.dashboardService.guardarKpiConfiguracion(configuracion).subscribe({
+      next: (guardada) => {
+        this.kpiConfiguracion.set([...guardada].sort((a, b) => a.orden - b.orden || a.metricKey.localeCompare(b.metricKey)));
+        this.savingKpis.set(false);
+        this.cargarKpis();
+      },
+      error: () => {
+        this.errorKpis.set(true);
+        this.savingKpis.set(false);
+      }
     });
   }
 
