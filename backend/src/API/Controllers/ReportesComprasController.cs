@@ -1,8 +1,9 @@
 using InventoryApp.API.Filters;
 using InventoryApp.Application.Common;
 using InventoryApp.Application.DTOs;
-using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Enums;
+using InventoryApp.Infrastructure.Persistence;
+using InventoryApp.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,9 +14,9 @@ namespace InventoryApp.API.Controllers;
 [Route("compras/reportes")]
 public sealed class ReportesComprasController : ControllerBase
 {
-    private readonly IReporteComprasService _service;
+    private readonly ReporteComprasService _service;
 
-    public ReportesComprasController(IReporteComprasService service) => _service = service;
+    public ReportesComprasController(AppDbContext context) => _service = new ReporteComprasService(context);
 
     [HttpGet("detalle")]
     [RequierePermiso(ModuloSistema.Compras, AccionPermiso.Ver)]
