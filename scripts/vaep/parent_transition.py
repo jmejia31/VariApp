@@ -5,7 +5,7 @@ This module does not certify work, call providers or publish refs. Closure
 receipts and the live causal/ownership gates remain the controller's job.
 
 Global dispatch admission is an OPEN-only invariant. Unsafe or unavailable work
-is blocked at task/lane eligibility, never by freezing the whole factory.
+is blocked at task/lane eligibility, never by closing the whole factory.
 """
 import argparse
 import copy
@@ -16,9 +16,7 @@ import sys
 
 MASTER = "docs/VAEP_AUTHORITY.md"
 SHA40 = re.compile(r"[0-9a-fA-F]{40}")
-# FROZEN is accepted only as legacy input so a transition can normalize it to
-# OPEN. This module never emits FROZEN.
-ACCEPTED_INPUT_STATES = {"FROZEN", "OPEN"}
+ACCEPTED_INPUT_STATES = {"OPEN"}
 
 
 def receipt_parent(receipt):
@@ -110,7 +108,6 @@ def choose_next(catalog, closed):
         raise ValueError("CURRENT_PARENT_NOT_IN_ROADMAP")
     if current not in closed:
         raise ValueError("CURRENT_PARENT_NOT_CERTIFIED")
-    # Do not skip an unclosed gate/node simply because a later task looks runnable.
     remaining = [n for n in nodes.values()
                  if n["order"] > nodes[current]["order"] and n["id"] not in closed]
     if not remaining:
@@ -180,35 +177,6 @@ def _sync_operational_metadata(result, closed_parent, current_parent, current_ma
                                "no successor exists in the current source-backed roadmap.")
 
 
-def promotion_freeze_permitted(reason, current):
-    """Recognize legacy controller-owned freezes only for safe normalization.
-
-    This function no longer authorizes emitting or preserving FROZEN. It only
-    distinguishes historical controller freezes from manual/security holds so
-    legacy manual holds are normalized to OPEN without dispatching new work.
-    """
-    if not isinstance(reason, str):
-        return False
-    legacy_prefixes = (
-        "FROZEN_GATE_N4_CURRENT_PARENT__",
-        "FROZEN_N4.11.H_REVIEW_DEBT_RECONCILED_NEXT_PARENT_MISSING_",
-        "FROZEN_NEXT_PARENT_MISSING_NO_SAFE_WORK",
-        "FROZEN_PHASE_GATE_REQUIRED__",
-        "FROZEN_PROMOTION_HARDENING_OR_SAFE_WORK_REQUIRED__",
-    )
-    if reason.startswith(legacy_prefixes):
-        return True
-    if not reason.startswith(current + "_"):
-        return False
-    controller_owned_markers = (
-        "LISTO_REAL_CERTIFICATION_AND_PARENT_PROMOTION_IN_PROGRESS",
-        "ALL_MATERIAL_SCOPES_DRAINED__CLOSURE_RECONCILIATION",
-        "ALL_MATERIAL_SCOPES_REVIEWED_OR_QA_TAKEOVER_MATERIALIZED__EXACT_HEAD_DOD_AND_CAUSAL_GATES_PENDING",
-    )
-    controller_owned_suffix = reason.endswith("NO_NEW_DISPATCH") or reason.endswith("NO_DUPLICATE_DISPATCH")
-    return controller_owned_suffix and any(marker in reason for marker in controller_owned_markers)
-
-
 def _open_only(access, now, reason):
     access.update(newDispatchAdmission="OPEN", allowExistingActiveSessions=True,
                   reason=reason, updatedAtUtc=now)
@@ -217,13 +185,12 @@ def _open_only(access, now, reason):
 def transition(catalog, admission, closed, receipt_path, functional, now, hardening_ok=False):
     state = admission.get("newDispatchAdmission")
     allow_active = admission.get("allowExistingActiveSessions")
-    if state not in ACCEPTED_INPUT_STATES or type(allow_active) is not bool:
+    if state not in ACCEPTED_INPUT_STATES or allow_active is not True:
         raise ValueError("INVALID_ADMISSION_CONTRACT")
+
     current = catalog.get("currentParent")
     target = choose_next(catalog, closed)
     result, access = copy.deepcopy(catalog), copy.deepcopy(admission)
-    legacy_reason = str(admission.get("reason", ""))
-    legacy_manual_hold = state == "FROZEN" and not promotion_freeze_permitted(legacy_reason, current)
 
     result.setdefault("closureReceipts", {})[current] = receipt_path
     result["lastClosedParent"] = current
@@ -239,7 +206,7 @@ def transition(catalog, admission, closed, receipt_path, functional, now, harden
                     task["reason"] = "CLOSED_BY_" + current + "_LISTO_REAL_RECEIPT"
         _sync_operational_metadata(result, current, current, 0)
         _open_only(access, now,
-                   "OPEN_NO_SUCCESSOR__" + current + "__NO_ELIGIBLE_DISPATCH__GLOBAL_FREEZE_PROHIBITED")
+                   "OPEN_NO_SUCCESSOR__" + current + "__NO_ELIGIBLE_DISPATCH__OPEN_ONLY")
         return result, access
 
     node = roadmap_nodes(catalog)[target]
@@ -256,13 +223,11 @@ def transition(catalog, admission, closed, receipt_path, functional, now, harden
                               and isinstance(task.get("prompt"), str) and bool(task["prompt"].strip()))
             if material_scope:
                 material += 1
-            enabled = material_scope and hardening_ok and not legacy_manual_hold
+            enabled = material_scope and hardening_ok
             task["dispatchEligible"] = enabled
             eligible_count += int(enabled)
             if enabled:
                 task["reason"] = "CURRENT_PARENT__DEPENDENCIES_CLOSED__MATERIAL_SCOPE"
-            elif material_scope and legacy_manual_hold:
-                task["reason"] = "LEGACY_GLOBAL_HOLD__MIGRATE_TO_LANE_QUARANTINE__NOT_DISPATCHED"
             elif material_scope and not hardening_ok:
                 task["reason"] = "HARDENING_REQUIRED__MATERIAL_SCOPE_NOT_DISPATCHED"
             elif task.get("plannedParent") == current:
@@ -272,9 +237,6 @@ def transition(catalog, admission, closed, receipt_path, functional, now, harden
 
     if eligible_count > 0:
         reason = "VERIFIED_ROADMAP_PROMOTION__" + current + "__" + target
-    elif legacy_manual_hold:
-        reason = ("OPEN_LEGACY_GLOBAL_HOLD__MIGRATE_TO_LANE_QUARANTINE__"
-                  + current + "__" + target + "__NO_ELIGIBLE_DISPATCH")
     elif node["type"] == "GATE_FASE":
         reason = "OPEN_PHASE_GATE_REQUIRED__" + target + "__NO_JULES_DISPATCH"
     elif not hardening_ok:
@@ -282,7 +244,7 @@ def transition(catalog, admission, closed, receipt_path, functional, now, harden
     else:
         reason = "OPEN_NO_SAFE_MATERIAL__" + target + "__NO_ELIGIBLE_DISPATCH"
 
-    _open_only(access, now, reason + "__GLOBAL_FREEZE_PROHIBITED")
+    _open_only(access, now, reason + "__OPEN_ONLY")
     return result, access
 
 
