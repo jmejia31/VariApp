@@ -13,17 +13,6 @@ on:
     - cron: '24 * * * *'
     - cron: '36 * * * *'
     - cron: '48 * * * *'
-  workflow_run:
-    workflows:
-      - 'VAEP engine lightweight checks'
-      - 'Desarrollo - Compilación y pruebas'
-      - 'VAEP J1 Trusted Worker'
-      - 'VAEP J2 Trusted Worker'
-      - 'VAEP J3 Trusted Worker'
-      - 'VAEP J4 Trusted Worker'
-      - 'VAEP J5 Trusted Worker'
-      - 'VAEP J6 Trusted Worker'
-    types: [completed]
   workflow_dispatch:
     inputs:
       checkpoint:
@@ -41,37 +30,16 @@ permissions:
 # this marker is consumed by runtime-certification guards without reintroducing
 # a parallel matrix in the checkpoint itself.
 # worker: [J1, J2, J3, J4, J5, J6]
-# All trigger types share one controller lock. A checkpoint already processes
-# J1-J6 in one run, so parallel controllers only burn API budget and create
-# primaryBaseHead / ownership races without increasing material throughput.
+# Worker/CI completions deliberately do NOT trigger this workflow. The five
+# canonical schedules plus explicit dispatch/config changes are sufficient;
+# workflow_run fan-out previously created redundant queued/skipped controllers
+# and could recursively amplify CI without increasing material throughput.
 concurrency:
   group: vaep-checkpoint-controller
   cancel-in-progress: false
 
 jobs:
   enforce-open-admission:
-    if: >-
-      github.event_name != 'workflow_run' ||
-      (
-        github.event.workflow_run.head_branch == 'Desarrollo' &&
-        (
-          (
-            (github.event.workflow_run.name == 'VAEP engine lightweight checks' ||
-             github.event.workflow_run.name == 'Desarrollo - Compilación y pruebas') &&
-            github.event.workflow_run.conclusion == 'success' &&
-            github.event.workflow_run.event == 'push'
-          ) ||
-          (
-            (github.event.workflow_run.name == 'VAEP J1 Trusted Worker' ||
-             github.event.workflow_run.name == 'VAEP J2 Trusted Worker' ||
-             github.event.workflow_run.name == 'VAEP J3 Trusted Worker' ||
-             github.event.workflow_run.name == 'VAEP J4 Trusted Worker' ||
-             github.event.workflow_run.name == 'VAEP J5 Trusted Worker' ||
-             github.event.workflow_run.name == 'VAEP J6 Trusted Worker') &&
-            github.event.workflow_run.event == 'workflow_dispatch'
-          )
-        )
-      )
     name: Verify OPEN_ONLY authority and admission
     runs-on: ubuntu-latest
     timeout-minutes: 5
