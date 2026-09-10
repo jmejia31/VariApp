@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-4-E-1-PROFITABILITY-FRONTEND-CONTRACT-SERVICE-J1",
+  "taskId": "N5.4.E.1.PROFITABILITY_FRONTEND_CONTRACT_SERVICE",
+  "workerId": "J1",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/core/models/reporte-rentabilidad.models.ts;frontend/src/app/core/services/reporte-rentabilidad.service.ts",
+  "prompt": "Use only docs/VAEP_AUTHORITY.md and live Desarrollo. Create the typed frontend profitability DTO/grouping contract and HTTP service for the accepted N5.4.D endpoints /ventas/rentabilidad/{vendedores|clientes|productos|categorias}. Reuse ReporteVentasFiltroDto for query filters. Expose only AgrupacionId, Agrupacion, Nombre, Venta, Costo, UtilidadBruta, IncluyeDescuentoEncabezadoEnUtilidad and Semantica exactly as backend source-backed fields. Do not invent margin percentage or allocate header discounts. No route or UI component changes. Run proportional frontend tests/build for this scope, perform two self-reviews, and return patch/artifact only.",
+  "primaryBaseHead": "5a0acd7497fdf61b7fb41fb365f1982b44f1e5e0"
+}
