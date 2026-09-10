@@ -9,6 +9,7 @@ using InventoryApp.Domain.Enums;
 using InventoryApp.Infrastructure.Persistence;
 using InventoryApp.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Moq;
@@ -36,10 +37,58 @@ public sealed class ReportesVentasContractTests
     }
 
     [Fact]
+    public async Task Resumen_ConsultaValidaRegistraAuditoriaVentasVerConCorrelationId()
+    {
+        var service = new Mock<IReporteVentasService>(MockBehavior.Strict);
+        service.Setup(s => s.ObtenerResumenAsync(It.IsAny<ReporteVentasFiltroDto>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ReporteVentasResumenDto());
+        var auditoria = new Mock<IAuditoriaService>(MockBehavior.Strict);
+        auditoria.Setup(a => a.RegistrarAsync(
+                It.IsAny<ModuloSistema>(),
+                It.IsAny<AccionPermiso>(),
+                It.IsAny<string>(),
+                It.IsAny<int?>(),
+                It.IsAny<string?>(),
+                It.IsAny<object?>(),
+                It.IsAny<object?>(),
+                It.IsAny<string?>(),
+                It.IsAny<string>(),
+                It.IsAny<string?>()))
+            .Returns(Task.CompletedTask);
+        var controller = new ReportesVentasController(service.Object, auditoria.Object)
+        {
+            ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { TraceIdentifier = "corr-n53-f2" }
+            }
+        };
+
+        var result = await controller.GetResumen(new ReporteVentasFiltroDto());
+
+        Assert.IsType<OkObjectResult>(result);
+        auditoria.Verify(a => a.RegistrarAsync(
+            ModuloSistema.Ventas,
+            AccionPermiso.Ver,
+            It.Is<string>(descripcion => descripcion.Contains("'resumen'", StringComparison.Ordinal)),
+            null,
+            "ReportesVentas",
+            null,
+            It.Is<object>(valores =>
+                ReadProperty(valores, "CorrelationId") == "corr-n53-f2" &&
+                ReadProperty(valores, "Reporte") == "resumen"),
+            null,
+            "Exito",
+            null), Times.Once);
+        service.VerifyAll();
+        auditoria.VerifyNoOtherCalls();
+    }
+
+    [Fact]
     public async Task Resumen_RechazaRangoInvertidoAntesDeConsultarServicio()
     {
         var service = new Mock<IReporteVentasService>(MockBehavior.Strict);
-        var controller = new ReportesVentasController(service.Object);
+        var auditoria = new Mock<IAuditoriaService>(MockBehavior.Strict);
+        var controller = new ReportesVentasController(service.Object, auditoria.Object);
         var filtro = new ReporteVentasFiltroDto
         {
             Desde = new DateTime(2026, 9, 10),
@@ -50,6 +99,7 @@ public sealed class ReportesVentasContractTests
 
         Assert.IsType<BadRequestObjectResult>(result);
         service.VerifyNoOtherCalls();
+        auditoria.VerifyNoOtherCalls();
     }
 
     [Fact]
@@ -162,6 +212,9 @@ public sealed class ReportesVentasContractTests
         Assert.Null(item.ProductoTalla);
         Assert.Null(item.ProductoSku);
     }
+
+    private static string? ReadProperty(object value, string propertyName) =>
+        value.GetType().GetProperty(propertyName)?.GetValue(value)?.ToString();
 
     private static AppDbContext CreateContext()
     {
