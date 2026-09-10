@@ -1,0 +1,42 @@
+{
+  "authority": "docs/VAEP_AUTHORITY.md",
+  "parent": "N5.6.A",
+  "state": "LISTO_REAL",
+  "status": "LISTO_REAL",
+  "decision": "LISTO_REAL",
+  "certifier": "CHATGPT_VAEP",
+  "closedAtUtc": "2026-09-10T10:31:00Z",
+  "branch": "Desarrollo",
+  "documentationHead": "272bd73497675efee1f75ca0420964c11a7c22ea",
+  "document": "docs/VAEP_N5_6_FINANCE_REPORTS_PREFLIGHT.md",
+  "dependencyEvidence": [
+    "N5.1.H_LISTO_REAL",
+    "GATE-N4_LISTO_REAL",
+    "N5.5.H_LISTO_REAL_20260910T1030Z"
+  ],
+  "preflight": {
+    "finanzasControllerLocated": true,
+    "finanzasServiceLocated": true,
+    "finanzasDtoLocated": true,
+    "frontendFinanzasLocated": true,
+    "cuentasPorCobrarAuthorityLocated": true,
+    "cuentasPorPagarAuthorityLocated": true,
+    "noSecondBalanceSourceAuthorized": true,
+    "bankTaxAccountingSemanticsInvented": false,
+    "schemaChangeRequiredByA": false,
+    "productionActionRequiredByA": false
+  },
+  "p0": 0,
+  "p1": 0,
+  "nextParent": "N5.6.B",
+  "nextParentDependencyValid": true,
+  "completionLatch": "OPEN__N5.6_B_AND_LATER_ROADMAP_WORK_REMAINS",
+  "guardrails": {
+    "fillerCreated": false,
+    "r3Created": false,
+    "mainTouched": false,
+    "productionTouched": false,
+    "secretsTouched": false,
+    "pr2Merged": false
+  }
+}
