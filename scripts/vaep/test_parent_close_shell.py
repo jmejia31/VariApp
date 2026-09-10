@@ -16,11 +16,12 @@ def bash(body, cwd=None):
 
 
 class ParentCloseShellTests(unittest.TestCase):
-    def test_manual_freeze_preserved_at_end_of_roadmap(self):
+    def test_global_freeze_is_not_preserved_at_end_of_roadmap(self):
         from test_parent_transition import catalog, access
         from parent_transition import transition
         _, a = transition(catalog("N5.1.B"), access("MANUAL_SECURITY_HOLD"), {"N5.1.B"}, "r.json", "a"*40, "now", True)
-        self.assertEqual(a["reason"], "MANUAL_SECURITY_HOLD")
+        self.assertEqual(a["newDispatchAdmission"], "OPEN")
+        self.assertIn("GLOBAL_FREEZE_PROHIBITED", a["reason"])
 
     def test_bash_syntax(self):
         self.assertEqual(subprocess.run(['bash', '-n', str(SCRIPT)], capture_output=True).returncode, 0)
