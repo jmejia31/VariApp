@@ -1,0 +1,52 @@
+{
+  "authority": "docs/VAEP_AUTHORITY.md",
+  "policy": "INVALID_RECEIPT_NO_COUNT_FORWARD_RECONCILIATION_NO_HISTORY_REWRITE",
+  "generatedAtUtc": "2026-09-10T08:39:00Z",
+  "entries": [
+    {
+      "commit": "6248e5e91c4afced01c0c3e2360e47b104a3eeaa",
+      "parent": "N5.4.E",
+      "taskId": "N5.4.E.5.PROFITABILITY_DISCLOSURE_UX",
+      "disposition": "QUARANTINED_NO_PRODUCTIVITY",
+      "countsAsUsefulThroughput": false,
+      "closureReceipt": "vaep/evidence/fragments/N5.4.E_LISTO_REAL_20260910T0732Z.json",
+      "reason": "Historical integration commit predates/enforces an incomplete immutable Jules receipt; accepted parent evidence exists, but missing receipt fields cannot be reconstructed or counted without rewriting history."
+    },
+    {
+      "commit": "0637c0b382184e87dd133cf5ef09d27a300ab46f",
+      "parent": "N5.4.E",
+      "taskId": "N5.4.E.3.PROFITABILITY_GROUPING_SELECTOR",
+      "disposition": "QUARANTINED_NO_PRODUCTIVITY",
+      "countsAsUsefulThroughput": false,
+      "closureReceipt": "vaep/evidence/fragments/N5.4.E_LISTO_REAL_20260910T0732Z.json",
+      "reason": "Historical integration commit predates/enforces an incomplete immutable Jules receipt; accepted parent evidence exists, but missing receipt fields cannot be reconstructed or counted without rewriting history."
+    },
+    {
+      "commit": "11befea01f46d78c5d13a29451a2a7c4664732b6",
+      "parent": "N5.4.E",
+      "taskId": "N5.4.E.1.PROFITABILITY_FRONTEND_CONTRACT_SERVICE",
+      "disposition": "QUARANTINED_NO_PRODUCTIVITY",
+      "countsAsUsefulThroughput": false,
+      "closureReceipt": "vaep/evidence/fragments/N5.4.E_LISTO_REAL_20260910T0732Z.json",
+      "reason": "Controller QA takeover integration is valid parent evidence but is not Jules productivity and does not carry the immutable Jules integration receipt required by the current MASTER."
+    },
+    {
+      "commit": "ed8adc492a4257df9877c52c403fe9ce9cfc643d",
+      "parent": "N5.4.E",
+      "taskId": "N5.4.E.2.PROFITABILITY_FILTERS",
+      "disposition": "QUARANTINED_NO_PRODUCTIVITY",
+      "countsAsUsefulThroughput": false,
+      "closureReceipt": "vaep/evidence/fragments/N5.4.E_LISTO_REAL_20260910T0732Z.json",
+      "reason": "Controller evidence-gap takeover integration is valid parent evidence but its incomplete receipt is not eligible Jules throughput; history remains immutable."
+    },
+    {
+      "commit": "73d8865cd2b49f5f20dfe9033ca5a904d8b4b0a0",
+      "parent": "N5.4.E",
+      "taskId": "N5.4.E.4.PROFITABILITY_RESULT_TABLE",
+      "disposition": "QUARANTINED_NO_PRODUCTIVITY",
+      "countsAsUsefulThroughput": false,
+      "closureReceipt": "vaep/evidence/fragments/N5.4.E_LISTO_REAL_20260910T0732Z.json",
+      "reason": "Historical integration commit has incomplete immutable receipt metadata; it remains parent evidence only and cannot count as Jules productivity."
+    }
+  ]
+}
