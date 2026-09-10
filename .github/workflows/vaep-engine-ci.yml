@@ -42,7 +42,7 @@ jobs:
           node --check scripts/vaep/sync-bitacora.mjs
           node --check scripts/vaep/reconcile-status.mjs
           node --check scripts/vaep/metrics.mjs
-          python3 -m py_compile scripts/vaep/jules_registry_check.py scripts/vaep/jules_integration_metrics.py scripts/vaep/jules_runtime_contract.py scripts/vaep/terminal_handoff.py
+          python3 -m py_compile scripts/vaep/jules_registry_check.py scripts/vaep/jules_integration_metrics.py scripts/vaep/jules_runtime_contract.py scripts/vaep/terminal_handoff.py scripts/vaep/state_sync.py scripts/vaep/parent_transition.py scripts/vaep/alex_backlog_planner.py
           bash -n .github/scripts/vaep-policy-parser.sh .github/scripts/vaep-jules-master.sh .github/scripts/vaep-jules-worker.sh .github/scripts/vaep-jules-autorefill.sh .github/scripts/vaep-jules-autorefill-core.sh .github/scripts/vaep-jules-catalog-floor.sh .github/scripts/vaep-parent-close.sh .github/scripts/vaep-checkpoint.sh
 
       - name: Validate MASTER and final canonical J1-J6 registry
@@ -121,6 +121,7 @@ jobs:
         run: |
           set -euo pipefail
           test "$(grep -c 'cron:' .github/workflows/vaep-checkpoints.yml)" -eq 5
+          ! grep -Fq 'workflow_run:' .github/workflows/vaep-checkpoints.yml
           grep -Fq 'worker: [J1, J2, J3, J4, J5, J6]' .github/workflows/vaep-checkpoints.yml
           for i in 1 2 3 4 5 6; do
             grep -Fq "J${i}_API_KEY:" .github/workflows/vaep-checkpoints.yml
@@ -134,6 +135,15 @@ jobs:
           grep -Fq 'secrets.JULES_J1_API_KEY' .github/workflows/vaep-jules-diagnostic.yml
           bash .github/scripts/vaep-checkpoint.sh --self-test
           bash .github/scripts/vaep-parent-close.sh --self-test
+
+      - name: Validate ALEX runtime semantics
+        shell: bash
+        run: |
+          set -euo pipefail
+          jq -e '.runtimeState != "ACTIVE_REAL" and .isJulesLane == false and .canCertifyListoReal == false and .canBypassReviewFirst == false' vaep/control/alex-capabilities.json >/dev/null
+          grep -Fq 'NO_INDEPENDENT_5_MINUTE_TIMER' vaep/control/alex-capabilities.json
+          grep -Fq 'CONTROL_PLANE_SNAPSHOT__NOT_ACTIVE_REAL' scripts/vaep/alex_backlog_planner.py
+          ! grep -Eq '^[[:space:]]+schedule:' .github/workflows/vaep-alex.yml
 
       - name: Validate VAEP/Jules runtime contracts
         run: |
