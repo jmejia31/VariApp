@@ -127,11 +127,12 @@ public class TiendaPublicaTests
     }
 
     [Fact]
-    public async Task GetCategorias_ExponeSoloContratoPublicoActivo()
+    public async Task GetCategorias_ExponeSoloContratoPublicoActivoSinInventarConteo()
     {
         var categorias = new Mock<ICategoriaService>();
         categorias.Setup(x => x.GetActivasAsync()).ReturnsAsync(new List<CategoriaDto>
         {
+            // El servicio de activas no garantiza que este conteo se haya calculado.
             new() { Id = 4, Nombre = "Audio y Vídeo", Descripcion = "Entretenimiento", Activa = true, TotalProductos = 8 },
             new() { Id = 5, Nombre = "Oculta", Activa = false, TotalProductos = 99 }
         });
@@ -144,7 +145,7 @@ public class TiendaPublicaTests
 
         Assert.Equal(4, categoria.Id);
         Assert.Equal("audio-y-video-4", categoria.Slug);
-        Assert.Equal(8, categoria.TotalProductos);
+        Assert.Null(categoria.TotalProductos);
     }
 
     [Fact]
@@ -169,6 +170,7 @@ public class TiendaPublicaTests
         var ok = Assert.IsType<OkObjectResult>(await controller.GetCategoria("computadoras-4"));
         var response = Assert.IsType<ApiResponse<CategoriaCatalogoPublicoDto>>(ok.Value);
         Assert.Equal("computadoras-4", response.Data!.Slug);
+        Assert.Null(response.Data.TotalProductos);
         Assert.IsType<NotFoundObjectResult>(await controller.GetCategoria("interna-8"));
     }
 
