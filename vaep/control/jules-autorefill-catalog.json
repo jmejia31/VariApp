@@ -1,9 +1,9 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
-  "currentParent": "N5.3.E",
-  "generatedAt": "2026-09-10T03:18:00Z",
-  "regenerationReason": "E6_TRANSPORT_STALLED_10M__OWNERSHIP_REVOKED__CONTROLLER_TAKEOVER",
-  "lastClosedParent": "N5.3.D",
+  "currentParent": "N5.3.F",
+  "generatedAt": "2026-09-10T03:28:30Z",
+  "regenerationReason": "N5.3.E_LISTO_REAL__PROMOTE_N5.3.F__ROADMAP_SCOPES_MATERIALIZED",
+  "lastClosedParent": "N5.3.E",
   "closureReceipts": {
     "N4.11.H": "vaep/evidence/fragments/N4.11.H_LISTO_REAL_20260908T204500Z.json",
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
@@ -26,7 +26,8 @@
     "N5.3.A": "vaep/evidence/fragments/N5.3.A_LISTO_REAL_20260909T2159Z.json",
     "N5.3.B": "vaep/evidence/fragments/N5.3.B_LISTO_REAL_20260909T2244Z.json",
     "N5.3.C": "vaep/evidence/fragments/N5.3.C_LISTO_REAL_20260909T2358Z.json",
-    "N5.3.D": "vaep/evidence/fragments/N5.3.D_LISTO_REAL_20260910T0204Z.json"
+    "N5.3.D": "vaep/evidence/fragments/N5.3.D_LISTO_REAL_20260910T0204Z.json",
+    "N5.3.E": "vaep/evidence/fragments/N5.3.E_LISTO_REAL_20260910T0328Z.json"
   },
   "policy": {
     "branch": "Desarrollo",
@@ -47,19 +48,19 @@
   },
   "throughputPlan": {
     "mode": "MATERIAL_SWARM_FIRST",
-    "currentParent": "N5.3.E",
-    "currentParentMaterialScopeCount": 1,
-    "currentParentReason": "E1-E5 are REVIEW_FIRST accepted. E6 transport exceeded the 10-minute no-session threshold, so ownership is revoked and CHATGPT_VAEP owns the bounded direct recovery; the superseded transport is evidence-only.",
-    "nextParent": "N5.3.F",
+    "currentParent": "N5.3.F",
+    "currentParentMaterialScopeCount": 2,
+    "currentParentReason": "N5.3.E is LISTO_REAL. Live ALEX reconciliation finds exactly two coherent non-overlapping N5.3.F scopes: audit/correlation wiring first, then focused authorization/audit contract tests after REVIEW_FIRST. No filler exists for J3-J6.",
+    "nextParent": "N5.3.G",
     "nextParentParallelMaterialScopes": 0,
     "nextParentScopesNonOverlapping": true,
-    "laneRefill": "E6_CONTROLLER_TAKEOVER__REVIEW_FIRST_GATES_CLOSE__NO_DUPLICATE__NO_FILLER"
+    "laneRefill": "DISPATCH_F1_J1_NOW__F2_J2_AFTER_F1_REVIEW_FIRST__NO_FILLER"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
     "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
-    "sourceRanges": ["COLA!A410:T416", "PLAN_MAESTRO!A53:L55", "docs/qa/N5_3_A_FRONTEND_UX_PREFLIGHT.md", "frontend/src/app/app.routes.ts"],
-    "note": "N5.3.E is the first dependency-valid unclosed parent. N5.3.F remains gated on E LISTO_REAL and has no fabricated prearmed scopes.",
+    "sourceRanges": ["COLA!A410:T416", "PLAN_MAESTRO!A53:L55", "vaep/control/alex-prearmed-candidates.json", "backend/src/API/Controllers/ReportesVentasController.cs", "backend/src/API/Controllers/ReportesInventarioController.cs"],
+    "note": "N5.3.F is the first dependency-valid unclosed parent. N5.3.G remains gated on F LISTO_REAL. Only the two live ALEX source-backed F scopes are materialized; no generic backlog regeneration or filler.",
     "nodes": [
       {"id":"N5.3.A","order":18,"type":"MICROTAREA","dependencies":["N5.1.H","GATE-N4"],"phaseGate":"GATE-N4"},
       {"id":"N5.3.B","order":19,"type":"MICROTAREA","dependencies":["N5.3.A"],"phaseGate":"GATE-N4"},
@@ -72,12 +73,35 @@
     ]
   },
   "lanes": {
-    "J1": [{"dispatchId":"N5-3-E-1-SALES-REPORT-FRONTEND-MODELS-J1","taskId":"N5.3.E.1.SALES_REPORT_FRONTEND_MODELS","workerId":"J1","taskAttempt":1,"plannedParent":"N5.3.E","readyForDispatch":false,"dispatchEligible":false,"fileScopeHint":"frontend/src/app/core/models/reporte-ventas.models.ts","prompt":"REVIEW_FIRST accepted; do not redispatch.","reason":"REVIEW_FIRST_ACCEPTED","reviewFirstState":"MATERIAL_ACCEPTED_GATES_VERIFIED","takeoverExecuted":false,"resultIssue":3232}],
-    "J2": [{"dispatchId":"N5-3-E-2-SALES-REPORT-FRONTEND-SERVICE-J2","taskId":"N5.3.E.2.SALES_REPORT_FRONTEND_SERVICE","workerId":"J2","taskAttempt":1,"plannedParent":"N5.3.E","readyForDispatch":false,"dispatchEligible":false,"fileScopeHint":"frontend/src/app/core/services/reporte-ventas.service.ts","prompt":"CHATGPT_VAEP QA takeover and REVIEW_FIRST accepted; superseded transport is evidence-only; do not redispatch.","reason":"REVIEW_FIRST_ACCEPTED_QA_TAKEOVER","reviewFirstState":"MATERIAL_ACCEPTED_GATES_VERIFIED","takeoverExecuted":true,"supersededTransportRunId":34429866992,"lateIntegrationDenied":true}],
-    "J3": [{"dispatchId":"N5-3-E-3-SALES-REPORT-FILTERS-COMPONENT-J3","taskId":"N5.3.E.3.SALES_REPORT_FILTERS_COMPONENT","workerId":"J3","taskAttempt":1,"plannedParent":"N5.3.E","readyForDispatch":false,"dispatchEligible":false,"fileScopeHint":"frontend/src/app/features/reportes-ventas/filtros/**","prompt":"CHATGPT_VAEP QA takeover and REVIEW_FIRST accepted; superseded transport is evidence-only; do not redispatch.","reason":"REVIEW_FIRST_ACCEPTED_QA_TAKEOVER","reviewFirstState":"MATERIAL_ACCEPTED_GATES_VERIFIED","takeoverExecuted":true,"supersededTransportRunId":34429876116,"lateIntegrationDenied":true}],
-    "J4": [{"dispatchId":"N5-3-E-4-SALES-REPORT-SUMMARY-COMPONENT-J4","taskId":"N5.3.E.4.SALES_REPORT_SUMMARY_COMPONENT","workerId":"J4","taskAttempt":1,"plannedParent":"N5.3.E","readyForDispatch":false,"dispatchEligible":false,"fileScopeHint":"frontend/src/app/features/reportes-ventas/resumen/**","prompt":"REVIEW_FIRST accepted; do not redispatch.","reason":"REVIEW_FIRST_ACCEPTED","reviewFirstState":"MATERIAL_ACCEPTED_GATES_VERIFIED","takeoverExecuted":false,"resultIssue":3238,"workflowRunId":34430728752,"sessionId":"sessions/17056774481712006617","activeReal":false}],
-    "J5": [{"dispatchId":"N5-3-E-5-SALES-REPORT-DETAIL-COMPONENT-J5","taskId":"N5.3.E.5.SALES_REPORT_DETAIL_COMPONENT","workerId":"J5","taskAttempt":1,"plannedParent":"N5.3.E","readyForDispatch":false,"dispatchEligible":false,"fileScopeHint":"frontend/src/app/features/reportes-ventas/detalle/**","prompt":"REVIEW_FIRST accepted after CHATGPT_VAEP takeover and exact functional-head gates; do not redispatch.","reason":"REVIEW_FIRST_ACCEPTED_QA_TAKEOVER","reviewFirstState":"MATERIAL_ACCEPTED_GATES_VERIFIED","takeoverExecuted":true,"supersededTransportRunId":34430736925,"lateIntegrationDenied":true,"resultIssue":3239,"activeReal":false}],
-    "J6": [{"dispatchId":"N5-3-E-6-SALES-REPORT-PAGE-ROUTE-TESTS-J6","taskId":"N5.3.E.6.SALES_REPORT_PAGE_ROUTE_TESTS","workerId":"J6","taskAttempt":1,"plannedParent":"N5.3.E","readyForDispatch":false,"dispatchEligible":false,"fileScopeHint":"frontend/src/app/features/reportes-ventas/reportes-ventas.component.ts;frontend/src/app/features/reportes-ventas/reportes-ventas.component.html;frontend/src/app/features/reportes-ventas/reportes-ventas.component.scss;frontend/src/app/app.routes.ts;frontend/src/app/app.routes.reportes-ventas.spec.ts","prompt":"Transport exceeded 10 minutes with no correlated session, useful activity, result issue or artifact. Ownership revoked; CHATGPT_VAEP owns direct recovery and REVIEW_FIRST. Any late Jules output is evidence-only.","reason":"TRANSPORT_STALLED__OWNERSHIP_REVOKED__CHATGPT_VAEP_TAKEOVER","workflowRunId":34432109473,"supersededTransportRunId":34432109473,"ownershipRevoked":true,"lateIntegrationDenied":true,"takeoverExecuted":true,"controllerRecoveryState":"IN_PROGRESS","activeReal":false}]
+    "J1": [{
+      "dispatchId": "N5-3-F-1-SALES-REPORT-AUDIT-CORRELATION-J1",
+      "taskId": "N5.3.F.1.SALES_REPORT_AUDIT_CORRELATION",
+      "workerId": "J1",
+      "taskAttempt": 1,
+      "plannedParent": "N5.3.F",
+      "readyForDispatch": true,
+      "dispatchEligible": true,
+      "fileScopeHint": "backend/src/API/Controllers/ReportesVentasController.cs",
+      "prompt": "Use only docs/VAEP_AUTHORITY.md and live Desarrollo. Add bounded read-audit/correlation integration to ReportesVentasController using the existing IAuditoriaService pattern already used by inventory reports. Preserve [Authorize], Ventas/Ver RequierePermiso, report query validation, response contracts and data semantics. Keep the write scope to this controller only; do not touch main, Production, secrets or merge PR #2. Run proportional backend build/tests and perform two self-reviews before terminal handoff.",
+      "reason": "ROADMAP_DERIVED__N5.3.E_LISTO_REAL__READY"
+    }],
+    "J2": [{
+      "dispatchId": "N5-3-F-2-SALES-REPORT-SECURITY-AUDIT-TESTS-J2",
+      "taskId": "N5.3.F.2.SALES_REPORT_SECURITY_AUDIT_TESTS",
+      "workerId": "J2",
+      "taskAttempt": 1,
+      "plannedParent": "N5.3.F",
+      "readyForDispatch": false,
+      "dispatchEligible": false,
+      "dependencyGate": "N5.3.F.1.SALES_REPORT_AUDIT_CORRELATION_REVIEW_FIRST",
+      "fileScopeHint": "backend/tests/InventoryApp.Tests/API/Controllers/ReportesVentasContractTests.cs",
+      "prompt": "After N5.3.F.1 REVIEW_FIRST is accepted, add focused authorization, anti-scope-forgery and audit/correlation contract coverage for sales report endpoints only. Reuse the existing production implementation; no production code changes in this scope. Keep tests proportional, preserve branch/safety constraints, and perform two self-reviews before terminal handoff.",
+      "reason": "DEPENDENCY_GATED__F1_REVIEW_FIRST"
+    }],
+    "J3": [],
+    "J4": [],
+    "J5": [],
+    "J6": []
   },
-  "lastClosureFunctionalHead": "9278bc3bd8479366667a1cef11d3bb90f4a86637"
+  "lastClosureFunctionalHead": "f71d079e564c110b14be2dfd0ca06513909f0d7d"
 }
