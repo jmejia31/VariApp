@@ -1,7 +1,7 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
   "policy": "INVALID_RECEIPT_NO_COUNT_FORWARD_RECONCILIATION_NO_HISTORY_REWRITE",
-  "generatedAtUtc": "2026-09-10T08:39:00Z",
+  "generatedAtUtc": "2026-09-10T09:57:00Z",
   "entries": [
     {
       "commit": "6248e5e91c4afced01c0c3e2360e47b104a3eeaa",
@@ -47,6 +47,15 @@
       "countsAsUsefulThroughput": false,
       "closureReceipt": "vaep/evidence/fragments/N5.4.E_LISTO_REAL_20260910T0732Z.json",
       "reason": "Historical integration commit has incomplete immutable receipt metadata; it remains parent evidence only and cannot count as Jules productivity."
+    },
+    {
+      "commit": "0b6e9a1130a301f23cbdc0d5fccd695ac5e5ce0e",
+      "parent": "N5.5.E",
+      "taskId": "N5.5.E.2.PURCHASE_REPORT_BASE_FILTERS",
+      "disposition": "QUARANTINED_NO_PRODUCTIVITY",
+      "countsAsUsefulThroughput": false,
+      "closureReceipt": "vaep/evidence/fragments/N5.5.E_LISTO_REAL_20260910T0956Z.json",
+      "reason": "Integration is accepted parent evidence after bounded controller correction, but immutable receipt uses noncanonical VAEP-Review value ACCEPTED_WITH_BOUNDED_CONTROLLER_FIX instead of ACCEPTED. History is not rewritten and this commit does not count as Jules productivity."
     }
   ]
 }
