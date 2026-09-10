@@ -1,8 +1,8 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
   "currentParent": "N5.6.B",
-  "generatedAt": "2026-09-10T10:33:00Z",
-  "regenerationReason": "N5.5.H_AND_N5.6.A_LISTO_REAL__ORDER_REPAIR__PROMOTE_N5.6.B__DERIVE_DOMAIN_CONTRACTS_FROM_PREFLIGHT__PREARM_C_D_E__NO_FILLER",
+  "generatedAt": "2026-09-10T10:34:00Z",
+  "regenerationReason": "N5.6.A_LISTO_REAL__N5.6.B_SOURCE_BACKED_FINANCE_SUMMARY_CONTRACT__PREARM_C_D_E__NO_FILLER",
   "lastClosedParent": "N5.6.A",
   "closureReceipts": {
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
@@ -48,23 +48,23 @@
     "materialParallelismTargetPerParent": 6,
     "requireDistinctWriteScopesWhenParallel": true,
     "activeWorkerCount": 6,
-    "activeWorkers": ["J1", "J2", "J3", "J4", "J5", "J6"]
+    "activeWorkers": ["J1","J2","J3","J4","J5","J6"]
   },
   "throughputPlan": {
     "mode": "PARENT_CLOSE_FIRST",
     "currentParent": "N5.6.B",
-    "currentParentMaterialScopeCount": 0,
-    "currentParentReason": "N5.6.A preflight is LISTO_REAL and authorizes only source-backed finance-report domain/contracts derived from existing Finanzas/CxC/CxP authorities. Material facets are being derived from live source before dispatch; no bank, tax, reconciliation or accounting semantics may be invented.",
+    "currentParentMaterialScopeCount": 1,
+    "currentParentReason": "N5.6.A preflight is LISTO_REAL. Live source exposes one independent domain-contract facet in FinanzasResumenDto; no additional bank/tax/accounting semantics are invented merely to occupy lanes.",
     "nextParent": "N5.6.C",
     "nextParentParallelMaterialScopes": 0,
     "nextParentScopesNonOverlapping": true,
-    "laneRefill": "DERIVE_N5.6.B_FROM_LIVE_SOURCE__THEN_DISPATCH_ONLY_DISTINCT_MATERIAL_SCOPE__PREARM_C_D_E"
+    "laneRefill": "DISPATCH_B1_J1__PREARM_C_D_E__NO_FILLER"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
     "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
-    "sourceRanges": ["COLA!A432:T436","PLAN_MAESTRO","docs/VAEP_N5_6_FINANCE_REPORTS_PREFLIGHT.md","vaep/evidence/fragments/N5.6.A_LISTO_REAL_20260910T1031Z.json"],
-    "note": "N5.5.H and N5.6.A are LISTO_REAL. N5.6.B is the first dependency-valid unfinished parent. C/D/E are prearmed dependency-gated; no early dispatch or filler.",
+    "sourceRanges": ["COLA!A432:T436","PLAN_MAESTRO","docs/VAEP_N5_6_FINANCE_REPORTS_PREFLIGHT.md","vaep/evidence/fragments/N5.6.A_LISTO_REAL_20260910T1031Z.json","backend/src/Application/DTOs/FinanzasDto.cs","backend/src/Application/Interfaces/IFinanzasService.cs"],
+    "note": "N5.6.B is current. B1 validates/tightens only the source-backed finance summary contract. C/D/E are dependency-gated and no filler is permitted.",
     "nodes": [
       {"id":"N5.6.A","order":42,"type":"MICROTAREA","dependencies":["N5.1.H","GATE-N4"],"phaseGate":"GATE-N4"},
       {"id":"N5.6.B","order":43,"type":"MICROTAREA","dependencies":["N5.6.A"],"phaseGate":"GATE-N4"},
@@ -78,6 +78,20 @@
     {"parent":"N5.6.D","state":"READY_DEPENDENCY_GATED","dependency":"N5.6.C_LISTO_REAL","materialization":"FINANCE_REPORT_APPLICATION_API_FROM_ACCEPTED_CONTRACTS_ONLY__NO_FILLER"},
     {"parent":"N5.6.E","state":"READY_DEPENDENCY_GATED","dependency":"N5.6.D_LISTO_REAL","materialization":"FINANCE_REPORT_FRONTEND_UX_FROM_ACCEPTED_API_ONLY__NO_FILLER"}
   ],
-  "lanes": {"J1":[],"J2":[],"J3":[],"J4":[],"J5":[],"J6":[]},
+  "lanes": {
+    "J1": [{
+      "dispatchId": "N5-6-B-1-FINANCE-SUMMARY-CONTRACT-J1",
+      "taskId": "N5.6.B.1.FINANCE_SUMMARY_CONTRACT",
+      "workerId": "J1",
+      "taskAttempt": 1,
+      "plannedParent": "N5.6.B",
+      "readyForDispatch": true,
+      "dispatchEligible": true,
+      "fileScopeHint": "backend/src/Application/DTOs/FinanzasDto.cs",
+      "prompt": "Use only docs/VAEP_AUTHORITY.md, docs/VAEP_N5_6_FINANCE_REPORTS_PREFLIGHT.md and live Desarrollo. Review FinanzasResumenDto as the N5.6 report domain/contract boundary. Preserve existing supported measures and authorities for CxC/CxP/financial summary. Tighten only a demonstrable source-backed contract gap in this single file; do not invent bank, reconciliation, tax, accounting, ledger or balance semantics. If the existing DTO already satisfies the accepted source-backed contract, return explicit no-change evidence rather than filler. Run proportional backend compile/tests when a code change is made and perform two independent self-reviews. Do not touch main, Production, secrets or merge PR #2.",
+      "reason": "N5.6.A_LISTO_REAL__SOURCE_BACKED_FINANCE_SUMMARY_CONTRACT"
+    }],
+    "J2": [], "J3": [], "J4": [], "J5": [], "J6": []
+  },
   "lastClosureFunctionalHead": "8b06b3d6181bad54a867eddb849c08b6f41eab63"
 }
