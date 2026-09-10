@@ -1,9 +1,9 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
-  "currentParent": "N6.1.H",
-  "generatedAt": "2026-09-10T20:34:00Z",
-  "regenerationReason": "SUPERVISION_48__N6.1.G_LISTO_REAL__ATOMIC_PROMOTE_N6.1.H__DEFICIT_FASTPATH_RECOVERED_3_OF_3__NO_FILLER",
-  "lastClosedParent": "N6.1.G",
+  "currentParent": "N6.2.A",
+  "generatedAt": "2026-09-10T21:49:00Z",
+  "regenerationReason": "SUPERVISION_48__RECONCILE_N6.1.H_LISTO_REAL__PROMOTE_N6.2.A__PARENT_ADMISSION_MISMATCH_FIXED__NO_FILLER",
+  "lastClosedParent": "N6.1.H",
   "closureReceipts": {
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
     "N5.1.H": "vaep/evidence/fragments/N5.1.H_LISTO_REAL_20260909T1236Z.json",
@@ -29,7 +29,8 @@
     "N6.1.D": "vaep/evidence/fragments/N6.1.D_LISTO_REAL_20260910T1907Z.json",
     "N6.1.E": "vaep/evidence/fragments/N6.1.E_LISTO_REAL_20260910T1940Z.json",
     "N6.1.F": "vaep/evidence/fragments/N6.1.F_LISTO_REAL_20260910T2009Z.json",
-    "N6.1.G": "vaep/evidence/fragments/N6.1.G_LISTO_REAL_20260910T2033Z.json"
+    "N6.1.G": "vaep/evidence/fragments/N6.1.G_LISTO_REAL_20260910T2033Z.json",
+    "N6.1.H": "vaep/evidence/fragments/N6.1.H_LISTO_REAL_20260910T2126Z.json"
   },
   "policy": {
     "branch": "Desarrollo",
@@ -47,20 +48,20 @@
   },
   "throughputPlan": {
     "mode": "PARENT_CLOSE_FIRST",
-    "currentParent": "N6.1.H",
+    "currentParent": "N6.2.A",
     "currentParentMaterialScopeCount": 1,
-    "currentParentReason": "N6.1.G is LISTO_REAL with REVIEW_FIRST P0/P1=0 and exact functional-head Desarrollo CI green. N6.1.H documentation/certification is the first dependency-valid unfinished facet.",
-    "nextParent": "N6.2.A",
+    "currentParentReason": "N6.1.H is LISTO_REAL with REVIEW_FIRST P0/P1=0 and integrated documentation certification. N6.2.A tenant-aware data model preflight is the first dependency-valid unfinished facet.",
+    "nextParent": "N6.2.B",
     "nextParentParallelMaterialScopes": 1,
     "nextParentScopesNonOverlapping": true,
     "currentRun": null,
     "nextRunReserved": {
-      "parent": "N6.2.A",
+      "parent": "N6.2.B",
       "state": "DEPENDENCY_GATED_RESERVED",
-      "dependency": "N6.1.H_LISTO_REAL",
-      "materialization": "TENANT_AWARE_DATA_MODEL_PREFLIGHT__ROADMAP_DERIVED__NO_FILLER"
+      "dependency": "N6.2.A_LISTO_REAL",
+      "materialization": "TENANT_AWARE_DATA_MODEL_DOMAIN_CONTRACTS__ROADMAP_DERIVED__NO_FILLER"
     },
-    "laneRefill": "H1_READY_FOR_MATERIAL_DISPATCH__PRESESSION_FASTPATH_REQUIRED"
+    "laneRefill": "N6.2.A_READY_FOR_MATERIAL_DISPATCH__PRESESSION_FASTPATH_REQUIRED"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
@@ -87,13 +88,13 @@
   ],
   "prearmedRoadmap": [
     {"parent":"N6.1.G","taskId":"N6.1.G.1.TENANT_EMPRESA_QA_REGRESSION_CI","state":"LISTO_REAL","dependency":"N6.1.F_LISTO_REAL","worker":"J6","runId":34525160317,"materialization":"TENANT_EMPRESA_QA_REGRESSION__ROADMAP_DERIVED__NO_FILLER"},
-    {"parent":"N6.1.H","taskId":"N6.1.H.1.TENANT_EMPRESA_DOCUMENTATION_CERTIFICATION","state":"READY_CURRENT","dependency":"N6.1.G_LISTO_REAL","materialization":"TENANT_EMPRESA_DOC_CERT__ROADMAP_DERIVED__NO_FILLER"},
-    {"parent":"N6.2.A","state":"READY_DEPENDENCY_GATED","dependency":"N6.1.H_LISTO_REAL","materialization":"TENANT_AWARE_DATA_MODEL_PREFLIGHT__ROADMAP_DERIVED__NO_FILLER"},
+    {"parent":"N6.1.H","taskId":"N6.1.H.1.TENANT_EMPRESA_DOCUMENTATION_CERTIFICATION","state":"LISTO_REAL","dependency":"N6.1.G_LISTO_REAL","materialization":"TENANT_EMPRESA_DOC_CERT__ROADMAP_DERIVED__NO_FILLER"},
+    {"parent":"N6.2.A","state":"READY_CURRENT","dependency":"N6.1.H_LISTO_REAL","materialization":"TENANT_AWARE_DATA_MODEL_PREFLIGHT__ROADMAP_DERIVED__NO_FILLER"},
     {"parent":"N6.2.B","state":"READY_DEPENDENCY_GATED","dependency":"N6.2.A_LISTO_REAL","materialization":"TENANT_AWARE_DATA_MODEL_DOMAIN_CONTRACTS__ROADMAP_DERIVED__NO_FILLER"},
     {"parent":"N6.2.C","state":"READY_DEPENDENCY_GATED","dependency":"N6.2.B_LISTO_REAL","materialization":"TENANT_AWARE_DATA_MODEL_PERSISTENCE__ROADMAP_DERIVED__NO_FILLER"}
   ],
   "lanes": {"J1":[],"J2":[],"J3":[],"J4":[],"J5":[],"J6":[]},
-  "rolling60CertifiedParents": ["N6.1.E","N6.1.F","N6.1.G"],
+  "rolling60CertifiedParents": ["N6.1.F","N6.1.G","N6.1.H"],
   "rolling60Count": 3,
-  "lastClosureFunctionalHead": "bbd3792f7cc42b1e62163a76735dc2ad6eacb899"
+  "lastClosureFunctionalHead": "13c9fd47d13552d166fbba2ec60256f9b2c61b9e"
 }
