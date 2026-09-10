@@ -1,8 +1,8 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
   "currentParent": "N5.3.D",
-  "generatedAt": "2026-09-10T01:27:30Z",
-  "regenerationReason": "N5.3.D_D1_D2_D3_D4_D5_REVIEW_FIRST_ACCEPTED__D6_ATTEMPT1_RESERVED",
+  "generatedAt": "2026-09-10T01:37:33Z",
+  "regenerationReason": "N5.3.D_D1_D2_D3_D4_D5_REVIEW_FIRST_ACCEPTED__D6_STALLED_QUARANTINED_REMOTE_ACTIVE__NO_DUPLICATE_RECOVERY",
   "lastClosedParent": "N5.3.C",
   "closureReceipts": {
     "N4.11.H": "vaep/evidence/fragments/N4.11.H_LISTO_REAL_20260908T204500Z.json",
@@ -48,11 +48,11 @@
     "mode": "MATERIAL_SWARM_FIRST",
     "currentParent": "N5.3.D",
     "currentParentMaterialScopeCount": 0,
-    "currentParentReason": "N5.3.D.1-.5 are REVIEW_FIRST accepted. D5 J5 transport was superseded after anti-starvation stall and CHATGPT_VAEP direct takeover was materially accepted with exact-head gates still pending. D6 is the only remaining material scope and its ATTEMPT1 is reserved in J6 trusted-worker run 34425542214; no duplicate/filler work is eligible.",
+    "currentParentReason": "N5.3.D.1-.5 are REVIEW_FIRST accepted. D6 run 34425542214 exceeded the 10-minute no-progress threshold while Execute VAEP/Jules MASTER remained in_progress. Local ownership is revoked and J6 is QUARANTINED_REMOTE_ACTIVE; no equivalent recovery/R2/watchdog is eligible until the remote run becomes terminal.",
     "nextParent": "N5.3.E",
     "nextParentParallelMaterialScopes": 0,
     "nextParentScopesNonOverlapping": true,
-    "laneRefill": "D6_ATTEMPT1_RESERVED__REQUIRE_SESSION_ACTIVITY_OR_TERMINAL__THEN_REVIEW_FIRST__PARENT_GATES_THEN_CLOSE"
+    "laneRefill": "D6_QUARANTINED_REMOTE_ACTIVE__NO_DUPLICATE_RECOVERY__WAIT_TERMINAL_THEN_REVIEW_FIRST_OR_CAUSAL_QA_TAKEOVER"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
@@ -90,7 +90,7 @@
     ],
     "J6": [
       {"dispatchId":"N5-3-C-3-REPORT-INDEX-MIGRATION-J6","taskId":"N5.3.C.3.REPORT_INDEX_MIGRATION","workerId":"J6","taskAttempt":1,"plannedParent":"N5.3.C","readyForDispatch":false,"dispatchEligible":false,"fileScopeHint":"backend/src/Infrastructure/Migrations/","prompt":"Resolved by CHATGPT_VAEP QA takeover after transport stall; do not redispatch. Late remote output is evidence-only.","reason":"CLOSED_BY_N5.3.C_LISTO_REAL_RECEIPT"},
-      {"dispatchId":"N5-3-D-6-SALES-REPORT-API-CONTRACT-TESTS-J6","taskId":"N5.3.D.6.SALES_REPORT_API_CONTRACT_TESTS","workerId":"J6","taskAttempt":1,"plannedParent":"N5.3.D","readyForDispatch":false,"dispatchEligible":false,"fileScopeHint":"backend/tests/InventoryApp.Tests/API/Controllers/ReportesVentasContractTests.cs","prompt":"After N5.3.D API endpoints are REVIEW_FIRST accepted, add bounded contract tests for non-admin forged seller scope denial, date-range validation, multi-warehouse branch semantics, historical snapshots/null legacy identities, paging and summary/detail consistency. No production code, exports or frontend changes. Desarrollo only.","reason":"CURRENT_RUN_RESERVED__ATTEMPT1__TRANSPORT_RUN_34425542214__NOT_ACTIVE_REAL_UNTIL_SESSION_AND_FRESH_ACTIVITY"}
+      {"dispatchId":"N5-3-D-6-SALES-REPORT-API-CONTRACT-TESTS-J6","taskId":"N5.3.D.6.SALES_REPORT_API_CONTRACT_TESTS","workerId":"J6","taskAttempt":1,"plannedParent":"N5.3.D","readyForDispatch":false,"dispatchEligible":false,"fileScopeHint":"backend/tests/InventoryApp.Tests/API/Controllers/ReportesVentasContractTests.cs","prompt":"After N5.3.D API endpoints are REVIEW_FIRST accepted, add bounded contract tests for non-admin forged seller scope denial, date-range validation, multi-warehouse branch semantics, historical snapshots/null legacy identities, paging and summary/detail consistency. No production code, exports or frontend changes. Desarrollo only.","reason":"STALLED__QUARANTINED_REMOTE_ACTIVE__RUN_34425542214__NO_DUPLICATE_RECOVERY","lastUsefulEvent":"worker_run_started_and_execute_step_entered","lastUsefulEventAtUtc":"2026-09-10T01:27:39Z","lastRemoteState":"in_progress","stopAttempt":"UNAVAILABLE_IN_EXPOSED_GITHUB_CONNECTOR__NO_SUPPORTED_CANCEL_MUTATION","stopAttemptAtUtc":"2026-09-10T01:37:33Z","stopResult":"NOT_ATTEMPTED_UNSUPPORTED_OPERATION","remoteStateAfter":"in_progress","ownershipRevoked":true,"superseded":true,"lateIntegrationDenied":true,"recoveryDecision":"QUARANTINED_REMOTE_ACTIVE__NO_RECOVERY_R2_WATCHDOG_UNTIL_TERMINAL"}
     ]
   },
   "lastClosureFunctionalHead": "4f245afc9293436a139839c9b8438417ba4f436a"
