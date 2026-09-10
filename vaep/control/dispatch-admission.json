@@ -1,6 +1,6 @@
 {
   "newDispatchAdmission": "OPEN",
   "allowExistingActiveSessions": true,
-  "reason": "OPEN_ONLY_PRIMARY_CLOSURE_CHAIN_TRIGGER__N5.3.D_LISTO_REAL",
-  "updatedAtUtc": "2026-09-10T02:08:00Z"
+  "reason": "OPEN_ONLY__N5.3.E_CURRENT__E1_DISPATCHED__E2_E6_SIBLING_GATED",
+  "updatedAtUtc": "2026-09-10T02:19:42Z"
 }
