@@ -11,6 +11,7 @@ public class EnlacePublicoFacturaConfiguration : IEntityTypeConfiguration<Enlace
         builder.ToTable("EnlacesPublicosFactura");
         builder.HasKey(e => e.Id);
         builder.Property(e => e.Token).IsRequired().HasMaxLength(64);
+        builder.Property(e => e.VecesAccedido).IsConcurrencyToken();
         builder.HasIndex(e => e.Token).IsUnique();
         builder.HasIndex(e => e.FacturaId);
     }
