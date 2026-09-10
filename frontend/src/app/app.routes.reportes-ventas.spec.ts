@@ -11,7 +11,7 @@ describe('centro-reportes/ventas route', () => {
     expect(centroReportes?.canActivate).toContain(authGuard);
     expect(ventas).toBeDefined();
     expect(ventas?.canActivate).toContain(permisoGuard);
-    expect(ventas?.data).toEqual(jasmine.objectContaining({ modulo: 'Ventas', accion: 'Ver' }));
+    expect(ventas?.data).toEqual(expect.objectContaining({ modulo: 'Ventas', accion: 'Ver' }));
     expect(typeof ventas?.loadComponent).toBe('function');
   });
 });
