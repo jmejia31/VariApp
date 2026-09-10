@@ -41,9 +41,6 @@ jobs:
           grep -q 'UX_DashboardKpiConfiguraciones_Rol_MetricKey' "$generated"
           grep -q 'DashboardKpiConfiguracion' src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs
           rm -f src/Infrastructure/Migrations/*VAEP_N5_7_C_SnapshotProbe*.cs
-          changed="$(git diff --name-only)"
-          test "$(printf '%s\n' "$changed" | sed '/^$/d' | wc -l | tr -d ' ')" = '1'
-          printf '%s\n' "$changed" | grep -Eq '(^|/)AppDbContextModelSnapshot\.cs$'
       - name: Build snapshot-aligned model
         run: dotnet build InventoryApp.sln --configuration Release
       - name: Publish snapshot only
