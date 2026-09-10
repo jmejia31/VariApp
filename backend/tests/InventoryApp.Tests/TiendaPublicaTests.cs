@@ -55,12 +55,13 @@ public class TiendaPublicaTests
                         CategoriaNombre = "Electrónica",
                         Precio = 1200,
                         Costo = 600,
-                        Cantidad = 3,
+                        Cantidad = 103,
                         FechaCreacion = new DateTime(2026, 1, 2),
                         CreadoPorNombreUsuario = "dato-reservado",
                         Variantes = new List<ProductoVarianteDto>
                         {
-                            new() { Activo = true, Sku = "PUB-001", Cantidad = 3, Precio = 1200 }
+                            new() { Activo = true, Sku = "PUB-001", Cantidad = 3, Precio = 1200 },
+                            new() { Activo = false, Sku = "NO-PUBLICO", Cantidad = 100, Precio = 1 }
                         }
                     },
                     new() { Id = 8, Nombre = "Producto inactivo", Activo = false }
