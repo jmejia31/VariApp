@@ -8,6 +8,7 @@ import { PEDIDOS_VENTA_ROUTES } from './features/pedidos-venta/pedidos-venta.rou
 export const routes: Routes = [
   { path: '', loadComponent: () => import('./features/varistorehn/varistorehn.component').then(m => m.VaristorehnComponent) },
   { path: 'varistorehn/categorias', loadComponent: () => import('./features/varistorehn/varistorehn-categorias.component').then(m => m.VaristorehnCategoriasComponent) },
+  { path: 'varistorehn/categoria/:slug', loadComponent: () => import('./features/varistorehn/varistorehn-categoria.component').then(m => m.VaristorehnCategoriaComponent) },
   { path: 'varistorehn', loadComponent: () => import('./features/varistorehn/varistorehn.component').then(m => m.VaristorehnComponent) },
   { path: 'login', loadComponent: () => import('./features/login/login.component').then(m => m.LoginComponent) },
   { path: 'dashboard', canActivate: [authGuard, permisoGuard], data: { modulo: 'Dashboard', accion: 'Ver' }, loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent) },
@@ -35,7 +36,7 @@ export const routes: Routes = [
   { path: 'clientes/:id/editar', canActivate: [authGuard, permisoGuard], data: { modulo: 'Clientes', accion: 'Editar' }, loadComponent: () => import('./features/clientes/cliente-form.component').then(m => m.ClienteFormComponent) },
   { path: 'tipo-clientes', canActivate: [authGuard, permisoGuard], data: { modulo: 'TiposClientes', accion: 'Ver' }, loadComponent: () => import('./features/tipo-clientes/tipo-clientes-list.component').then(m => m.TipoClientesListComponent) },
   { path: 'tipo-clientes/nuevo', canActivate: [authGuard, permisoGuard], data: { modulo: 'TiposClientes', accion: 'Crear' }, loadComponent: () => import('./features/tipo-clientes/tipo-cliente-form.component').then(m => m.TipoClienteFormComponent) },
-  { path: 'tipo-clientes/:id/editar', canActivate: [authGuard, permisoGuard], data: { modulo: 'TiposClientes', accion: 'Editar' }, loadComponent: () => import('./features/tipo-clientes/tipo-cliente-form.component').then(m => m.TipoClienteFormComponent) },
+  { path: 'tipo-clientes/:id/editar', canActivate: [authGuard, permisoGuard], data: { modulo: 'TiposClientes', accion: 'Editar' }, loadComponent: () => import('./features/tipo-clientes/tipo-cliente-form.component').then(m => m.TipoClientesListComponent) },
   { path: 'usuarios', canActivate: [authGuard, permisoGuard], data: { modulo: 'Usuarios', accion: 'Ver' }, loadComponent: () => import('./features/usuarios/usuarios.component').then(m => m.UsuariosComponent) },
   { path: 'usuarios/:id/editar', canActivate: [authGuard, permisoGuard], data: { modulo: 'Usuarios', accion: 'Editar' }, loadComponent: () => import('./features/usuarios/usuario-form.component').then(m => m.UsuarioFormComponent) },
   { path: 'usuarios/:id', canActivate: [authGuard, permisoGuard], data: { modulo: 'Usuarios', accion: 'Ver' }, loadComponent: () => import('./features/usuarios/usuario-detail.component').then(m => m.UsuarioDetailComponent) },
