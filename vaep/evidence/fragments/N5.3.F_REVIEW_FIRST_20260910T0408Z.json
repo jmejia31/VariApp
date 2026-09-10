@@ -1,0 +1,46 @@
+{
+  "authority": "docs/VAEP_AUTHORITY.md",
+  "parent": "N5.3.F",
+  "mode": "REVIEW_FIRST_CHATGPT_VAEP",
+  "reviewedAtUtc": "2026-09-10T04:08:00Z",
+  "functionalHead": "5b159a311d727b99057692096879262c983afebb",
+  "decision": "MATERIAL_ACCEPTED_GATES_VERIFIED",
+  "acceptedFacets": [
+    "N5.3.F.1.SALES_REPORT_AUDIT_CORRELATION",
+    "N5.3.F.2.SALES_REPORT_SECURITY_AUDIT_TESTS"
+  ],
+  "facetReceipts": [
+    "vaep/evidence/fragments/N5.3.F.1_REVIEW_FIRST_20260910T0350Z.json",
+    "vaep/evidence/fragments/N5.3.F.2_REVIEW_FIRST_20260910T0407Z.json"
+  ],
+  "recoveryReconciliation": {
+    "f1": "J1 transport was superseded after direct controller recovery and REVIEW_FIRST; late result retained forensic-only.",
+    "f2": "J2 canonical ATTEMPT1 pre-session recovery stalled without a correlated session/result; CHATGPT_VAEP completed the bounded focused test recovery directly and REVIEW_FIRST accepted it.",
+    "r2Used": false,
+    "r3Used": false,
+    "actionableTerminalDebtRemaining": 0
+  },
+  "dod": [
+    {"criterion": "Ventas report controller requires authentication and Ventas/Ver", "result": "PASS"},
+    {"criterion": "report reads emit bounded audit evidence with correlation id", "result": "PASS"},
+    {"criterion": "invalid input has no report-service/audit side effect", "result": "PASS"},
+    {"criterion": "non-admin seller scope cannot be forged", "result": "PASS"},
+    {"criterion": "backend Release build and directed non-integration tests", "result": "PASS"},
+    {"criterion": "VAEP control-plane guards", "result": "PASS"}
+  ],
+  "causalGates": [
+    {"name": "Backend Release y pruebas", "workflowRunId": 34435706038, "jobId": 102740199264, "headSha": "5b159a311d727b99057692096879262c983afebb", "conclusion": "success"},
+    {"name": "Higiene del repositorio", "workflowRunId": 34435706038, "jobId": 102740199301, "headSha": "5b159a311d727b99057692096879262c983afebb", "conclusion": "success"},
+    {"name": "VAEP engine lightweight checks", "workflowRunId": 34435709954, "headSha": "5b159a311d727b99057692096879262c983afebb", "conclusion": "success"},
+    {"name": "VAEP catalog throughput guard", "workflowRunId": 34435710018, "headSha": "5b159a311d727b99057692096879262c983afebb", "conclusion": "success"}
+  ],
+  "reviewNotes": "N5.3.F has exactly two source-backed material facets; J3-J6 have no non-overlapping source-backed security/audit filler. The final F2 change is test-only and was reviewed against the live controller implementation. The still-running broad MySQL migration/integration job is non-causal to this bounded security/audit controller-contract change; applicable backend unit/build and VAEP gates are terminal success.",
+  "p0Open": 0,
+  "p1Open": 0,
+  "mainTouched": false,
+  "productionTouched": false,
+  "secretsTouched": false,
+  "prMerged": false,
+  "mergePerformed": false,
+  "r3Used": false
+}
