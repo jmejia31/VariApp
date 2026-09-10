@@ -71,7 +71,12 @@ public sealed class ReporteInventarioService : IReporteInventarioService
         var query =
             from e in existencias
             join stats in movimientoStats
-                on new { e.ProductoVarianteId, e.AlmacenId, e.UbicacionAlmacenId }
+                on new
+                {
+                    ProductoVarianteId = (int?)e.ProductoVarianteId,
+                    AlmacenId = (int?)e.AlmacenId,
+                    e.UbicacionAlmacenId
+                }
                 equals new { stats.ProductoVarianteId, stats.AlmacenId, stats.UbicacionAlmacenId }
                 into statsJoin
             from stats in statsJoin.DefaultIfEmpty()
