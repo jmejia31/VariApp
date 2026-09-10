@@ -46,6 +46,14 @@ describe('RentabilidadFiltrosComponent', () => {
     expect(emitSpy).not.toHaveBeenCalled();
   });
 
+  it('should not emit while the form is disabled', () => {
+    const emitSpy = vi.spyOn(component.filterChanged, 'emit');
+    component.disabled = true;
+    component.emitir();
+    expect(component.form.disabled).toBe(true);
+    expect(emitSpy).not.toHaveBeenCalled();
+  });
+
   it('should invalidate when desde > hasta', () => {
     component.form.patchValue({
       desde: '2023-12-31',

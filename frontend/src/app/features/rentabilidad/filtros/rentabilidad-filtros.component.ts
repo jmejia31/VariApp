@@ -128,7 +128,7 @@ export class RentabilidadFiltrosComponent {
   }
 
   emitir(): void {
-    if (this.form.invalid || this.rangoInvalido || this.cargandoSelectores) return;
+    if (this.form.disabled || this.form.invalid || this.rangoInvalido || this.cargandoSelectores) return;
     const value = this.form.getRawValue();
     this.filterChanged.emit({
       page: 1,
