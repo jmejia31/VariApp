@@ -5,6 +5,7 @@ on:
     branches:
       - Desarrollo
       - chatgpt/varistorehn-fase2-categorias
+      - chatgpt/varistorehn-fase2-categoria-canonica
     paths:
       - 'frontend/src/app/features/varistorehn/**'
       - 'frontend/src/app/app.routes.ts'
