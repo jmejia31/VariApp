@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-4-B-6-DISCLOSURE-SCOPE-CONTRACT-J6",
+  "taskId": "N5.4.B.6.DISCLOSURE_SCOPE_CONTRACT",
+  "workerId": "J6",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/qa/N5_4_B_DISCLOSURE_SCOPE_CONTRACT.md",
+  "prompt": "Use only docs/VAEP_AUTHORITY.md, live Desarrollo and original N5.4 COLA. Resolve the N5.4.B domain/contract boundary for row-scope and sensitive profitability disclosure using existing relational permission/report precedents. Write only docs/qa/N5_4_B_DISCLOSURE_SCOPE_CONTRACT.md. Select an existing source-backed contract if proven; never invent a new permission. If no exact permission contract is established, record the dependency explicitly for later security implementation. No C+ implementation. Desarrollo only.",
+  "primaryBaseHead": "87244e3ae575e8a4c93525635a568acc57f03ae8"
+}
