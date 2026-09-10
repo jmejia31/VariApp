@@ -3,49 +3,37 @@
   "engine": "ALEX",
   "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
   "sourceSheet": "COLA",
-  "sourceRowKeys": ["N5.3.E", "N5.3.F", "N5.3.G", "N5.3.H"],
-  "generatedFromHead": "a70720096f2d481e490e8e1f672731fe10acdcb5",
-  "currentParent": "N5.3.E",
-  "targetParent": "N5.3.F",
-  "targetDependency": "N5.3.E",
-  "futurePrearmParents": ["N5.3.G", "N5.3.H"],
+  "sourceRowKeys": ["N5.3.H", "N5.4.A", "N5.4.B"],
+  "generatedFromHead": "f29e6c63cdb2893c6d898baf0d7e4b112f076245",
+  "currentParent": "N5.3.H",
+  "targetParent": "N5.4.A",
+  "targetDependency": "N5.3.H_LISTO_REAL",
+  "futurePrearmParents": ["N5.4.A", "N5.4.B"],
   "dependencyState": "MULTI_STAGE_GATED",
   "dispatchEligible": false,
   "policy": "ROADMAP_DERIVED__DEPENDENCY_SAFE__SEMANTIC_DEDUPE_ONLY",
   "busyworkAllowed": false,
-  "note": "Backlog was below the MASTER floor. ALEX reconciled only source-backed N5.3 successors from COLA and live repository gaps. N5.3.F has two coherent non-overlapping material scopes: sales-report audit/correlation wiring in the API controller, then focused security/audit contract coverage. Existing Authorize/Ventas-Ver and database-backed row scope are reused, not duplicated. N5.3.G remains QA/CI debt and N5.3.H controller-owned certification. Nothing is dispatch-eligible before ordered dependencies close; no filler is generated for idle lanes.",
+  "note": "N5.3.G is LISTO_REAL and N5.3.H is the live controller-owned documentation/certification parent. N5.4.A and N5.4.B are prearmed from fresh COLA/PLAN_MAESTRO as dependency-gated READY only; neither may dispatch before its order/dependency gate is satisfied. No filler is created for J1-J6 while H is controller-owned.",
   "candidates": [
     {
-      "candidateId": "N5.3.F.CAND.SALES_REPORT_AUDIT_CORRELATION",
+      "candidateId": "N5.4.A.CAND.PROFITABILITY_PREFLIGHT",
       "suggestedLane": "J1",
+      "prearmed": true,
+      "readyState": "DEPENDENCY_GATED_READY",
       "dispatchEligible": false,
-      "dependencyGate": "N5.3.E_LISTO_REAL",
-      "materialScope": "backend/src/API/Controllers/ReportesVentasController.cs — add bounded read-audit/correlation integration using the existing IAuditoriaService pattern while preserving Authorize + Ventas/Ver and without changing report data semantics.",
-      "semanticDedupeKey": "N5.3.F|SALES_REPORT|AUDIT_CORRELATION"
+      "dependencyGate": "N5.3.H_LISTO_REAL",
+      "materialScope": "Directed profitability preflight only: inspect existing sales/cost/margin data sources, affected entities/endpoints/components, dependencies, acceptance criteria, rollback and proportional tests. Do not implement a large change in A.",
+      "semanticDedupeKey": "N5.4.A|PROFITABILITY|PREFLIGHT"
     },
     {
-      "candidateId": "N5.3.F.CAND.SALES_REPORT_SECURITY_AUDIT_TESTS",
+      "candidateId": "N5.4.B.CAND.PROFITABILITY_DOMAIN_CONTRACTS",
       "suggestedLane": "J2",
+      "prearmed": true,
+      "readyState": "DEPENDENCY_GATED_READY",
       "dispatchEligible": false,
-      "dependencyGate": "N5.3.F.CAND.SALES_REPORT_AUDIT_CORRELATION_REVIEW_FIRST",
-      "materialScope": "backend/tests/InventoryApp.Tests/API/Controllers/ReportesVentasContractTests.cs — focused authorization, anti-scope-forgery and audit/correlation contract coverage only; no production implementation changes.",
-      "semanticDedupeKey": "N5.3.F|SALES_REPORT|SECURITY_AUDIT_TESTS"
-    },
-    {
-      "candidateId": "N5.3.G.CAND.SALES_REPORT_QA_CI",
-      "suggestedOwner": "CHATGPT_VAEP",
-      "dispatchEligible": false,
-      "dependencyGate": "N5.3.F_LISTO_REAL",
-      "materialScope": "Run and reconcile the applicable backend/frontend/unit/contract/E2E/security/accessibility exact-head suites for N5.3 sales reporting; change code only for causal failures and never hide failures.",
-      "semanticDedupeKey": "N5.3.G|SALES_REPORT|QA_CI"
-    },
-    {
-      "candidateId": "N5.3.H.CAND.DOC_CERT_CLOSURE",
-      "suggestedOwner": "CHATGPT_VAEP",
-      "dispatchEligible": false,
-      "dependencyGate": "N5.3.G_LISTO_REAL",
-      "materialScope": "Canonical N5.3 documentation/evidence/rollback-runbook applicability review, exact-head checkpoint, DoD and certification only; no implementation filler.",
-      "semanticDedupeKey": "N5.3.H|DOC_CERT|PARENT_CLOSURE"
+      "dependencyGate": "N5.4.A_LISTO_REAL",
+      "materialScope": "Profitability domain/contracts only: implement or adjust the minimum domain invariants and contracts required by the accepted N5.4.A preflight, or document grounded N/A. No persistence/API/frontend scope leakage.",
+      "semanticDedupeKey": "N5.4.B|PROFITABILITY|DOMAIN_CONTRACTS"
     }
   ],
   "programmedBacklogPerLane": {
@@ -56,7 +44,7 @@
     "J5": 0,
     "J6": 0
   },
-  "programmedBacklogCountingRule": "Only material source-backed successor work counts. N5.3.G and N5.3.H are controller-owned closure/QA debt and are not counted as Jules lane filler.",
+  "programmedBacklogCountingRule": "Only source-backed material successor work counts. N5.3.H is controller-owned closure debt and does not justify Jules filler. N5.4.A/B remain non-dispatchable until their gates open.",
   "unassignedLanes": ["J3", "J4", "J5", "J6"],
   "unassignedReason": "NO_ADDITIONAL_SAFE_NON_OVERLAPPING_MATERIAL__NO_BUSYWORK"
 }
