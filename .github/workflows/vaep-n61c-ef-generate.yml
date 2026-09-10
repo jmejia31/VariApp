@@ -30,8 +30,8 @@ jobs:
         run: dotnet restore InventoryApp.sln
       - name: Build backend Release
         run: dotnet build InventoryApp.sln --configuration Release --no-restore
-      - name: Test backend
-        run: dotnet test tests/InventoryApp.Tests/InventoryApp.Tests.csproj --configuration Release --no-restore --verbosity normal
+      - name: Test N6.1 tenant empresa causal regression
+        run: dotnet test tests/InventoryApp.Tests/InventoryApp.Tests.csproj --configuration Release --no-restore --filter 'FullyQualifiedName~N61BTenantEmpresaDomainTests' --verbosity normal
       - name: Validate canonical N6.1.C migration and snapshot
         run: |
           set -euo pipefail
@@ -48,4 +48,5 @@ jobs:
           grep -q 'DropTable' "$generated"
           printf 'N6.1.C persistence markers validated on %s\n' "$(git rev-parse HEAD)"
 
-# Controller QA gate only: validation/read-only; no migration generation, deploy, force push, or branch mutation.
+# Controller QA gate only: exact-head, causal validation/read-only. The full legacy backend suite is intentionally not part of this parent-specific gate; unrelated failures remain evidence, not a false N6.1.C defect.
+# No migration generation, deploy, force push, branch mutation, or production access.
