@@ -1,9 +1,9 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
-  "currentParent": "N5.5.C",
-  "generatedAt": "2026-09-10T08:08:00Z",
-  "regenerationReason": "N5.5.B_LISTO_REAL__PROMOTE_N5.5.C__PERSISTENCE_VERIFICATION_FASTPATH__NO_FILLER",
-  "lastClosedParent": "N5.5.B",
+  "currentParent": "N5.5.D",
+  "generatedAt": "2026-09-10T08:10:30Z",
+  "regenerationReason": "N5.5.C_LISTO_REAL__PROMOTE_N5.5.D__PURCHASE_REPORT_QUERY_API__WORK_CONSERVING__NO_FILLER",
+  "lastClosedParent": "N5.5.C",
   "closureReceipts": {
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
     "N5.1.H": "vaep/evidence/fragments/N5.1.H_LISTO_REAL_20260909T1236Z.json",
@@ -24,8 +24,9 @@
     "N5.4.F": "vaep/evidence/fragments/N5.4.F_LISTO_REAL_20260910T0754Z.json",
     "N5.4.G": "vaep/evidence/fragments/N5.4.G_LISTO_REAL_20260910T0758Z.json",
     "N5.4.H": "vaep/evidence/fragments/N5.4.H_LISTO_REAL_20260910T0800Z.json",
-    "N5.5.A": "vaep/evidence/fragments/N5.5.A_LISTO_REAL_20260910T0803Z.json",
-    "N5.5.B": "vaep/evidence/fragments/N5.5.B_LISTO_REAL_20260910T0807Z.json"
+    "N5.5.A": "vaep/evidence/fragments/N5.5.A_LISTO_REAL_CANONICAL_20260910T0806Z.json",
+    "N5.5.B": "vaep/evidence/fragments/N5.5.B_LISTO_REAL_20260910T0807Z.json",
+    "N5.5.C": "vaep/evidence/fragments/N5.5.C_LISTO_REAL_20260910T0810Z.json"
   },
   "policy": {
     "branch": "Desarrollo",
@@ -45,30 +46,31 @@
   },
   "throughputPlan": {
     "mode": "PARENT_CLOSE_FIRST",
-    "currentParent": "N5.5.C",
+    "currentParent": "N5.5.D",
     "currentParentMaterialScopeCount": 1,
-    "currentParentReason": "N5.5.B is LISTO_REAL and explicitly concludes no new domain aggregate is required. N5.5.C must now verify whether existing persisted purchase/order/receipt/invoice/return/evaluation authorities fully support the accepted read contract; if yes, close migration as N/A rather than creating schema busywork.",
-    "nextParent": "N5.5.D",
+    "currentParentReason": "N5.5.C is LISTO_REAL N/A for persistence. D is the first functional purchase-report implementation slice: read-only DTO/query/service/API over existing purchase authorities and the accepted N5.5.B contract, without invented percentage/scoring semantics.",
+    "nextParent": "N5.5.E",
     "nextParentParallelMaterialScopes": 0,
     "nextParentScopesNonOverlapping": true,
-    "laneRefill": "CONTROLLER_VERIFY_EXISTING_PERSISTENCE_N5.5.C__PREARM_D_E__NO_FILLER"
+    "laneRefill": "DISPATCH_N5.5.D_BACKEND_QUERY_API__PREARM_E_F_G__NO_FILLER"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
     "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
-    "sourceRanges": ["COLA!A424:T432", "docs/qa/N5_5_A_PURCHASE_REPORT_PREFLIGHT.md", "docs/qa/N5_5_B_REPORTES_COMPRAS_CONTRATO.md", "PLAN_MAESTRO"],
-    "note": "A/B are LISTO_REAL. C is the bounded persistence/migration decision. D/E remain dependency-gated; no downstream implementation is dispatched early.",
+    "sourceRanges": ["COLA!A424:T432", "docs/qa/N5_5_A_PURCHASE_REPORT_PREFLIGHT.md", "docs/qa/N5_5_B_REPORTES_COMPRAS_CONTRATO.md", "docs/qa/N5_5_C_REPORTES_COMPRAS_PERSISTENCIA.md", "PLAN_MAESTRO"],
+    "note": "A/B/C are LISTO_REAL. D is functional backend/API. E/F/G are prearmed dependency-gated; no implementation leaks across the parent boundary and no filler.",
     "nodes": [
-      {"id":"N5.5.A","order":34,"type":"MICROTAREA","dependencies":["N5.1.H","GATE-N4"],"phaseGate":"GATE-N4"},
-      {"id":"N5.5.B","order":35,"type":"MICROTAREA","dependencies":["N5.5.A"],"phaseGate":"GATE-N4"},
       {"id":"N5.5.C","order":36,"type":"MICROTAREA","dependencies":["N5.5.B"],"phaseGate":"GATE-N4"},
       {"id":"N5.5.D","order":37,"type":"MICROTAREA","dependencies":["N5.5.C"],"phaseGate":"GATE-N4"},
-      {"id":"N5.5.E","order":38,"type":"MICROTAREA","dependencies":["N5.5.D"],"phaseGate":"GATE-N4"}
+      {"id":"N5.5.E","order":38,"type":"MICROTAREA","dependencies":["N5.5.D"],"phaseGate":"GATE-N4"},
+      {"id":"N5.5.F","order":39,"type":"MICROTAREA","dependencies":["N5.5.E"],"phaseGate":"GATE-N4"},
+      {"id":"N5.5.G","order":40,"type":"MICROTAREA","dependencies":["N5.5.F"],"phaseGate":"GATE-N4"}
     ]
   },
   "prearmedRoadmap": [
-    {"parent":"N5.5.D","state":"READY_DEPENDENCY_GATED","dependency":"N5.5.C_LISTO_REAL","materialization":"IMPLEMENT_PURCHASE_REPORT_QUERY_API_FROM_ACCEPTED_CONTRACT__NO_FILLER"},
-    {"parent":"N5.5.E","state":"READY_DEPENDENCY_GATED","dependency":"N5.5.D_LISTO_REAL","materialization":"IMPLEMENT_FRONTEND_ONLY_AFTER_API_ACCEPTED__NO_FILLER"}
+    {"parent":"N5.5.E","state":"READY_DEPENDENCY_GATED","dependency":"N5.5.D_LISTO_REAL","materialization":"IMPLEMENT_PURCHASE_REPORT_FRONTEND_UX_FROM_ACCEPTED_API__NO_FILLER"},
+    {"parent":"N5.5.F","state":"READY_DEPENDENCY_GATED","dependency":"N5.5.E_LISTO_REAL","materialization":"HARDEN_PURCHASE_REPORT_RBAC_AUDIT_SECURITY__NO_FILLER"},
+    {"parent":"N5.5.G","state":"READY_DEPENDENCY_GATED","dependency":"N5.5.F_LISTO_REAL","materialization":"RUN_PURCHASE_REPORT_TEST_CI_GATE_MATRIX__NO_FILLER"}
   ],
   "lanes": {"J1":[],"J2":[],"J3":[],"J4":[],"J5":[],"J6":[]},
   "lastClosureFunctionalHead": "244fdcc2d1f5df28630bcdde92955c76becb37ea"
