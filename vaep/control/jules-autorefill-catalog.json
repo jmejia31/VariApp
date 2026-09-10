@@ -1,9 +1,9 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
-  "currentParent": "N5.3.F",
-  "generatedAt": "2026-09-10T03:50:00Z",
-  "regenerationReason": "N5.3.F.1_CONTROLLER_TAKEOVER_REVIEW_ACCEPTED__F2_J2_MANIFEST_PUBLISHED",
-  "lastClosedParent": "N5.3.E",
+  "currentParent": "N5.3.G",
+  "generatedAt": "2026-09-10T04:12:30Z",
+  "regenerationReason": "N5.3.F_LISTO_REAL__PROMOTE_N5.3.G__CONTROLLER_QA_CI_CURRENT",
+  "lastClosedParent": "N5.3.F",
   "closureReceipts": {
     "N4.11.H": "vaep/evidence/fragments/N4.11.H_LISTO_REAL_20260908T204500Z.json",
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
@@ -27,7 +27,8 @@
     "N5.3.B": "vaep/evidence/fragments/N5.3.B_LISTO_REAL_20260909T2244Z.json",
     "N5.3.C": "vaep/evidence/fragments/N5.3.C_LISTO_REAL_20260909T2358Z.json",
     "N5.3.D": "vaep/evidence/fragments/N5.3.D_LISTO_REAL_20260910T0204Z.json",
-    "N5.3.E": "vaep/evidence/fragments/N5.3.E_LISTO_REAL_20260910T0328Z.json"
+    "N5.3.E": "vaep/evidence/fragments/N5.3.E_LISTO_REAL_20260910T0328Z.json",
+    "N5.3.F": "vaep/evidence/fragments/N5.3.F_LISTO_REAL_20260910T0412Z.json"
   },
   "policy": {
     "branch": "Desarrollo",
@@ -47,20 +48,20 @@
     "activeWorkers": ["J1", "J2", "J3", "J4", "J5", "J6"]
   },
   "throughputPlan": {
-    "mode": "MATERIAL_SWARM_FIRST",
-    "currentParent": "N5.3.F",
-    "currentParentMaterialScopeCount": 2,
-    "currentParentReason": "N5.3.E is LISTO_REAL. F1 controller takeover is REVIEW_FIRST accepted on exact recovery head 265afeba with backend Release build/tests green. F2 J2 manifest is published in the same transition and must be verified through workflow run -> sessionId/activity before ACTIVE_REAL. No filler exists for J3-J6.",
-    "nextParent": "N5.3.G",
+    "mode": "PARENT_CLOSE_FIRST",
+    "currentParent": "N5.3.G",
+    "currentParentMaterialScopeCount": 0,
+    "currentParentReason": "N5.3.F is LISTO_REAL with exactly two source-backed material facets and P0/P1=0. N5.3.G is the dependency-valid controller-owned QA/regression/CI stage; execute applicable exact-functional-head suites and correct only causal failures. No Jules filler exists for J1-J6.",
+    "nextParent": "N5.3.H",
     "nextParentParallelMaterialScopes": 0,
     "nextParentScopesNonOverlapping": true,
-    "laneRefill": "F1_REVIEW_ACCEPTED__F2_MANIFEST_PUBLISHED__VERIFY_TRUSTED_RUN_SESSION_ACTIVITY__NO_DUPLICATE__NO_FILLER"
+    "laneRefill": "N5.3.G_CONTROLLER_QA_CI__NO_JULES_FILLER__PROMOTE_H_ONLY_AFTER_G_LISTO_REAL"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
     "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
     "sourceRanges": ["COLA!A410:T416", "PLAN_MAESTRO!A53:L55", "vaep/control/alex-prearmed-candidates.json", "backend/src/API/Controllers/ReportesVentasController.cs", "backend/src/API/Controllers/ReportesInventarioController.cs"],
-    "note": "N5.3.F is the first dependency-valid unclosed parent. F1 is REVIEW_FIRST accepted after direct recovery; F2 is the only remaining material facet and is being dispatched to J2. N5.3.G remains gated on F LISTO_REAL. No generic backlog regeneration or filler.",
+    "note": "Dependency order derived from the live source-backed roadmap. N5.3.F is LISTO_REAL. N5.3.G is current and controller-owned for QA/regression/CI. N5.3.H remains dependency-gated until G is certified. No generic backlog regeneration or Jules filler.",
     "nodes": [
       {"id":"N5.3.A","order":18,"type":"MICROTAREA","dependencies":["N5.1.H","GATE-N4"],"phaseGate":"GATE-N4"},
       {"id":"N5.3.B","order":19,"type":"MICROTAREA","dependencies":["N5.3.A"],"phaseGate":"GATE-N4"},
@@ -82,8 +83,8 @@
       "readyForDispatch": false,
       "dispatchEligible": false,
       "fileScopeHint": "backend/src/API/Controllers/ReportesVentasController.cs",
-      "prompt": "Controller takeover completed and REVIEW_FIRST accepted. The stalled J1 run is evidence-only; do not integrate a late result or redispatch this semantic facet.",
-      "reason": "CONTROLLER_TAKEOVER_REVIEW_FIRST_ACCEPTED__LATE_J1_EVIDENCE_ONLY",
+      "prompt": "N5.3.F is closed. F1 controller takeover is REVIEW_FIRST accepted; late Jules evidence is forensic-only. Do not redispatch this semantic facet.",
+      "reason": "CLOSED_BY_N5.3.F_LISTO_REAL_RECEIPT",
       "workflowRunId": 34433650814,
       "activeReal": false,
       "reviewAccepted": true,
@@ -91,7 +92,7 @@
       "reviewReceipt": "vaep/evidence/fragments/N5.3.F.1_REVIEW_FIRST_20260910T0350Z.json"
     }],
     "J2": [{
-      "dispatchId": "N5-3-F-2-SALES-REPORT-SECURITY-AUDIT-TESTS-J2",
+      "dispatchId": "N5-3-F-2-SALES-REPORT-SECURITY-AUDIT-TESTS-J2-RECOVERY1",
       "taskId": "N5.3.F.2.SALES_REPORT_SECURITY_AUDIT_TESTS",
       "workerId": "J2",
       "taskAttempt": 1,
@@ -99,16 +100,20 @@
       "readyForDispatch": false,
       "dispatchEligible": false,
       "fileScopeHint": "backend/tests/InventoryApp.Tests/API/Controllers/ReportesVentasContractTests.cs",
-      "prompt": "F1 REVIEW_FIRST accepted. Manifest published for focused authorization, anti-scope-forgery and audit/correlation contract coverage. Verify trusted run/session/activity before ACTIVE_REAL; no production code changes.",
-      "reason": "F1_REVIEW_ACCEPTED__MANIFEST_PUBLISHED_AWAITING_TRUSTED_RUN",
-      "manifestPath": "vaep/jules-b/dispatch/N5-3-F-2-SALES-REPORT-SECURITY-AUDIT-TESTS-J2.json",
-      "primaryBaseHead": "265afeba494921b09ae4b79defca35365fa5258c",
-      "activeReal": false
+      "prompt": "N5.3.F is closed. F2 terminal Jules result was REVIEW_FIRST reconciled and accepted at 72e63bf7d14cc21b49b3f188ddb8facfa0b46790. Do not redispatch this semantic facet.",
+      "reason": "CLOSED_BY_N5.3.F_LISTO_REAL_RECEIPT",
+      "manifestPath": "vaep/jules-b/dispatch/N5-3-F-2-SALES-REPORT-SECURITY-AUDIT-TESTS-J2-RECOVERY1.json",
+      "workflowRunId": 34434975875,
+      "sessionId": "sessions/6688018810981566090",
+      "artifactId": 10136129280,
+      "activeReal": false,
+      "reviewAccepted": true,
+      "reviewReceipt": "vaep/evidence/fragments/N5.3.F.2_REVIEW_FIRST_20260910T0407Z.json"
     }],
     "J3": [],
     "J4": [],
     "J5": [],
     "J6": []
   },
-  "lastClosureFunctionalHead": "f71d079e564c110b14be2dfd0ca06513909f0d7d"
+  "lastClosureFunctionalHead": "72e63bf7d14cc21b49b3f188ddb8facfa0b46790"
 }
