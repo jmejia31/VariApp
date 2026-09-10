@@ -1,72 +1,30 @@
 /** Pure catalog/cart rules: deliberately independent of Angular and the backend. */
-export interface ImagenCatalogo { url: string; orden: number; esPrincipal: boolean; }
-export interface ModeloCatalogoPublico {
-  modeloId?: number;
-  modeloNombre?: string;
-  marcaNombre?: string;
-  precio: number;
-  cantidadDisponible: number;
-  estaAgotado: boolean;
-  imagenes: ImagenCatalogo[];
-}
-export interface ProductoCatalogoPublico {
-  id: number;
-  nombre: string;
-  descripcion?: string;
-  categoriaNombre?: string;
-  marcaNombre?: string;
-  modeloNombre?: string;
-  precio: number;
-  cantidadDisponible: number;
-  estaAgotado: boolean;
-  imagenPrincipalUrl?: string;
-  imagenes: ImagenCatalogo[];
-  modelos: ModeloCatalogoPublico[];
-}
-export interface ModeloTienda {
-  clave: string;
-  modeloId: number | null;
-  nombre: string;
-  marca: string;
-  precio: number;
-  stock: number;
-  disponible: boolean;
-  imagenes: string[];
-}
-export interface ProductoTienda {
-  id: number;
-  nombre: string;
-  descripcion: string;
-  categoria: string;
-  marca: string;
-  precio: number;
-  disponible: boolean;
-  imagenes: string[];
-  modelos: ModeloTienda[];
-  ilustracion?: string;
-}
-export interface ItemCarrito {
-  clave: string;
-  productoId: number;
-  modeloClave: string;
-  modeloId: number | null;
-  nombre: string;
-  modelo: string;
-  precio: number;
-  stock: number;
-  unidades: number;
-  imagen: string;
-  ilustracion: string;
-}
-export interface ReferenciaCarrito { productoId: number; modeloClave: string; unidades: number; }
-export type OrdenCatalogo = 'destacados' | 'precio-asc' | 'precio-desc' | 'nombre';
-export interface FiltrosCatalogo {
-  busqueda: string;
-  categoria: string;
-  soloDisponibles: boolean;
-  precioMaximo: number | null;
-  orden: OrdenCatalogo;
-}
+import type {
+  FiltrosCatalogo,
+  ImagenCatalogo,
+  ItemCarrito,
+  ModeloTienda,
+  ProductoCatalogoPublico,
+  ProductoTienda,
+  ReferenciaCarrito
+} from './varistorehn.models';
+
+export type {
+  CategoriaCatalogoPublico,
+  CategoriaTienda,
+  EstadoConsultaPublica,
+  EstadoDisponibilidad,
+  EstadoPromocion,
+  FiltrosCatalogo,
+  ImagenCatalogo,
+  ItemCarrito,
+  ModeloCatalogoPublico,
+  ModeloTienda,
+  OrdenCatalogo,
+  ProductoCatalogoPublico,
+  ProductoTienda,
+  ReferenciaCarrito
+} from './varistorehn.models';
 
 export function normalizarTexto(valor: string): string {
   return valor.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('es').trim();
@@ -79,42 +37,64 @@ const listaImagenes = (imagenes: ImagenCatalogo[] | undefined): string[] =>
 export function mapearProducto(producto: ProductoCatalogoPublico): ProductoTienda {
   const imagenes = listaImagenes(producto.imagenes);
   if (!imagenes.length && producto.imagenPrincipalUrl) imagenes.push(producto.imagenPrincipalUrl);
+  const activo = producto.activo !== false;
+  const stockProducto = stockSeguro(producto.cantidadDisponible);
   const modelos: ModeloTienda[] = (producto.modelos ?? []).map(modelo => {
     const fotos = listaImagenes(modelo.imagenes);
     const stock = stockSeguro(modelo.cantidadDisponible);
     return {
-      // The API groups by model AND brand, including null model IDs.
+      // The public API groups by model AND brand, including null model IDs.
       clave: JSON.stringify([modelo.modeloId ?? null, modelo.modeloNombre ?? '', modelo.marcaNombre ?? '']),
       modeloId: modelo.modeloId ?? null,
       nombre: modelo.modeloNombre || 'Modelo general',
       marca: modelo.marcaNombre || producto.marcaNombre || '',
+      sku: modelo.sku?.trim() || '',
       precio: precioValido(modelo.precio) ? modelo.precio : 0,
-      stock, disponible: stock > 0 && !modelo.estaAgotado && precioValido(modelo.precio),
+      stock,
+      disponible: activo && stock > 0 && !modelo.estaAgotado && precioValido(modelo.precio),
       imagenes: fotos.length ? fotos : imagenes
     };
   });
   if (!modelos.length) modelos.push({
     clave: 'base', modeloId: null, nombre: producto.modeloNombre || 'Modelo general',
-    marca: producto.marcaNombre || '', precio: precioValido(producto.precio) ? producto.precio : 0,
-    stock: stockSeguro(producto.cantidadDisponible),
-    disponible: !producto.estaAgotado && stockSeguro(producto.cantidadDisponible) > 0 && precioValido(producto.precio),
+    marca: producto.marcaNombre || '', sku: producto.sku?.trim() || '',
+    precio: precioValido(producto.precio) ? producto.precio : 0,
+    stock: stockProducto,
+    disponible: activo && !producto.estaAgotado && stockProducto > 0 && precioValido(producto.precio),
     imagenes
   });
   const disponibles = modelos.filter(m => m.disponible);
+  const precio = Math.min(...(disponibles.length ? disponibles : modelos).map(m => m.precio));
+  const precioOferta = typeof producto.precioOferta === 'number' && precioValido(producto.precioOferta)
+    ? producto.precioOferta : null;
   return {
-    id: producto.id, nombre: producto.nombre, descripcion: producto.descripcion || '',
-    categoria: producto.categoriaNombre || 'Otros productos', marca: producto.marcaNombre || '',
-    precio: Math.min(...(disponibles.length ? disponibles : modelos).map(m => m.precio)),
-    disponible: disponibles.length > 0, imagenes, modelos
+    id: producto.id,
+    slug: producto.slug?.trim() || '',
+    nombre: producto.nombre,
+    descripcion: producto.descripcion || '',
+    categoriaId: producto.categoriaId ?? null,
+    categoria: producto.categoriaNombre || 'Otros productos',
+    marca: producto.marcaNombre || '',
+    sku: producto.sku?.trim() || '',
+    precio,
+    precioOferta,
+    stock: stockProducto,
+    disponible: activo && disponibles.length > 0,
+    activo,
+    destacado: Boolean(producto.esDestacado),
+    fechaCreacion: producto.fechaCreacion || null,
+    imagenes,
+    modelos
   };
 }
 
 export function filtrarProductos(productos: ProductoTienda[], filtros: FiltrosCatalogo): ProductoTienda[] {
   const palabras = normalizarTexto(filtros.busqueda).split(/\s+/).filter(Boolean);
   const resultado = productos.filter(p => {
-    const texto = normalizarTexto([p.nombre, p.descripcion, p.categoria, p.marca,
-      ...p.modelos.flatMap(m => [m.nombre, m.marca])].join(' '));
-    return (!filtros.categoria || p.categoria === filtros.categoria)
+    const texto = normalizarTexto([p.nombre, p.descripcion, p.categoria, p.marca, p.sku,
+      ...p.modelos.flatMap(m => [m.nombre, m.marca, m.sku])].join(' '));
+    return p.activo
+      && (!filtros.categoria || p.categoria === filtros.categoria)
       && (!filtros.soloDisponibles || p.disponible)
       && (filtros.precioMaximo === null || p.precio <= filtros.precioMaximo)
       && palabras.every(palabra => texto.includes(palabra));
@@ -217,8 +197,18 @@ export function crearCatalogoEjemplo(): ProductoTienda[] {
   ];
   return ejemplos.map(([nombre, categoriaNombre, precio, cantidadDisponible, ilustracion, descripcion], indice) => {
     const producto = mapearProducto({
-      id: indice + 1, nombre, categoriaNombre, precio, cantidadDisponible, descripcion,
-      marcaNombre: 'Colección demo', estaAgotado: cantidadDisponible === 0, imagenes: [],
+      id: indice + 1,
+      slug: `demo-producto-${indice + 1}`,
+      nombre,
+      categoriaNombre,
+      precio,
+      cantidadDisponible,
+      descripcion,
+      activo: true,
+      esDestacado: indice < 3,
+      marcaNombre: 'Colección demo',
+      estaAgotado: cantidadDisponible === 0,
+      imagenes: [],
       modelos: indice === 0 ? [
         { modeloId: 101, modeloNombre: '8 GB / 256 GB', marcaNombre: 'Demo', precio, cantidadDisponible: 5, estaAgotado: false, imagenes: [] },
         { modeloId: 102, modeloNombre: '16 GB / 512 GB', marcaNombre: 'Demo', precio: precio + 2500, cantidadDisponible: 3, estaAgotado: false, imagenes: [] }
