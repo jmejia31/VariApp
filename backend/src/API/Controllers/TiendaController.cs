@@ -86,7 +86,7 @@ public sealed class TiendaController : ControllerBase
         Slug = PublicSlug.Create(categoria.Nombre, categoria.Id),
         Nombre = categoria.Nombre,
         Descripcion = categoria.Descripcion,
-        TotalProductos = Math.Max(0, categoria.TotalProductos)
+        TotalProductos = null
     };
 
     private static ProductoCatalogoPublicoDto MapearProducto(ProductoDto producto)
