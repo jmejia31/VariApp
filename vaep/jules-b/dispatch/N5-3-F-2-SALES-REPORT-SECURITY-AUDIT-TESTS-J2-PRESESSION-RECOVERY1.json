@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-3-F-2-SALES-REPORT-SECURITY-AUDIT-TESTS-J2-PRESESSION-RECOVERY1",
+  "taskId": "N5.3.F.2.SALES_REPORT_SECURITY_AUDIT_TESTS",
+  "workerId": "J2",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/API/Controllers/ReportesVentasContractTests.cs",
+  "prompt": "Use only docs/VAEP_AUTHORITY.md and live Desarrollo. This is PRE-SESSION TRANSPORT RECOVERY for the same N5.3.F.2 task; the prior dispatch never created a Jules session because transport-preflight rejected a non-append-only control-plane commit, so it does NOT consume a content attempt. N5.3.F.1 REVIEW_FIRST is accepted. Add focused contract tests for sales report endpoints covering authorization/permission invariants, anti-scope-forgery behavior where applicable, and audit/correlation integration. Reuse existing production implementation; do not change production code. Keep scope strictly to backend/tests/InventoryApp.Tests/API/Controllers/ReportesVentasContractTests.cs, run proportional backend tests, perform two independent self-reviews, and preserve existing response/query-validation semantics. Do not touch main, Production, secrets, or merge PR #2.",
+  "primaryBaseHead": "e2eafa9a3757ff5b2a62f47637f550125f6fa3ff"
+}
