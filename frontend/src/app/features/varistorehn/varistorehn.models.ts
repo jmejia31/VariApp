@@ -47,7 +47,8 @@ export interface CategoriaCatalogoPublico {
   slug: string;
   nombre: string;
   descripcion?: string | null;
-  totalProductos: number;
+  /** Null significa que la fuente publica aun no calculo el conteo; nunca equivale a cero. */
+  totalProductos: number | null;
 }
 
 export interface ModeloTienda {
@@ -91,7 +92,8 @@ export interface CategoriaTienda {
   slug: string;
   descripcion: string;
   imagenUrl?: string;
-  cantidadProductos: number;
+  /** Null preserva la diferencia entre 'sin productos' y 'conteo no disponible'. */
+  cantidadProductos: number | null;
 }
 
 export interface ItemCarrito {
