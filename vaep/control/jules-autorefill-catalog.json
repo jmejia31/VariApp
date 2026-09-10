@@ -1,8 +1,8 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
   "currentParent": "N5.4.C",
-  "generatedAt": "2026-09-10T05:20:00Z",
-  "regenerationReason": "N5.4.B_LISTO_REAL__PROMOTE_N5.4.C__ONE_COHERENT_PERSISTENCE_MIGRATION_DECISION__NO_FILLER",
+  "generatedAt": "2026-09-10T05:28:00Z",
+  "regenerationReason": "N5.4.B_LISTO_REAL__N5.4.C_CURRENT__PREARM_N5.4.D_E_F_DEPENDENCY_GATED__NO_FILLER",
   "lastClosedParent": "N5.4.B",
   "closureReceipts": {
     "N4.11.H": "vaep/evidence/fragments/N4.11.H_LISTO_REAL_20260908T204500Z.json",
@@ -44,19 +44,20 @@
     "nextParent": "N5.4.D",
     "nextParentParallelMaterialScopes": 0,
     "nextParentScopesNonOverlapping": true,
-    "laneRefill": "DISPATCH_N5.4.C_J1_PERSISTENCE_MIGRATION_DECISION__PREARM_D_E_ROADMAP__NO_FILLER"
+    "laneRefill": "DISPATCH_N5.4.C_J1_PERSISTENCE_MIGRATION_DECISION__PREARM_D_E_F_ROADMAP__NO_FILLER"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
     "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
-    "sourceRanges": ["COLA!A418:T420","PLAN_MAESTRO","docs/qa/N5_4_B_ABSOLUTE_PROFITABILITY_CONTRACT.md","docs/qa/N5_4_B_MARGIN_PERCENT_CONTRACT.md","docs/qa/N5_4_B_GROUPING_IDENTITY_CONTRACT.md","docs/qa/N5_4_B_DISCOUNT_ALLOCATION_CONTRACT.md","docs/qa/N5_4_B_SHIPPING_COST_CONTRACT.md","docs/qa/N5_4_B_DISCLOSURE_SCOPE_CONTRACT.md"],
-    "note": "N5.4.B is LISTO_REAL. N5.4.C is current. N5.4.D and N5.4.E are prearmed only as ordered dependency-gated roadmap successors; they must not execute before predecessor closure.",
+    "sourceRanges": ["COLA!A418:T421","PLAN_MAESTRO","docs/qa/N5_4_B_ABSOLUTE_PROFITABILITY_CONTRACT.md","docs/qa/N5_4_B_MARGIN_PERCENT_CONTRACT.md","docs/qa/N5_4_B_GROUPING_IDENTITY_CONTRACT.md","docs/qa/N5_4_B_DISCOUNT_ALLOCATION_CONTRACT.md","docs/qa/N5_4_B_SHIPPING_COST_CONTRACT.md","docs/qa/N5_4_B_DISCLOSURE_SCOPE_CONTRACT.md"],
+    "note": "N5.4.B is LISTO_REAL. N5.4.C is current. N5.4.D, N5.4.E and N5.4.F are prearmed only as ordered dependency-gated roadmap successors; they must not execute before predecessor closure.",
     "nodes": [
       {"id":"N5.4.A","order":26,"type":"MICROTAREA","dependencies":["N5.1.H","GATE-N4"],"phaseGate":"GATE-N4"},
       {"id":"N5.4.B","order":27,"type":"MICROTAREA","dependencies":["N5.4.A"],"phaseGate":"GATE-N4"},
       {"id":"N5.4.C","order":28,"type":"MICROTAREA","dependencies":["N5.4.B"],"phaseGate":"GATE-N4"},
       {"id":"N5.4.D","order":29,"type":"MICROTAREA","dependencies":["N5.4.C"],"phaseGate":"GATE-N4"},
-      {"id":"N5.4.E","order":30,"type":"MICROTAREA","dependencies":["N5.4.D"],"phaseGate":"GATE-N4"}
+      {"id":"N5.4.E","order":30,"type":"MICROTAREA","dependencies":["N5.4.D"],"phaseGate":"GATE-N4"},
+      {"id":"N5.4.F","order":31,"type":"MICROTAREA","dependencies":["N5.4.E"],"phaseGate":"GATE-N4"}
     ]
   },
   "lanes": {
