@@ -9,6 +9,9 @@ using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Enums;
 using InventoryApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 
 namespace InventoryApp.Infrastructure.Services;
 
@@ -233,8 +236,8 @@ public sealed class ReporteAdministrativoService : IReporteAdministrativoService
     {
         var tipoNormalizado = tipo.Trim().ToLowerInvariant();
         var formatoNormalizado = formato.Trim().ToLowerInvariant();
-        if (formatoNormalizado is not ("csv" or "xlsx"))
-            throw new BusinessRuleException("El formato de exportación debe ser csv o xlsx.");
+        if (formatoNormalizado is not ("csv" or "xlsx" or "pdf"))
+            throw new BusinessRuleException("El formato de exportación debe ser csv, xlsx o pdf.");
 
         string[] encabezados;
         List<string[]> filas;
@@ -301,9 +304,13 @@ public sealed class ReporteAdministrativoService : IReporteAdministrativoService
                 throw new BusinessRuleException("El tipo de reporte debe ser usuarios, roles o auditoria.");
         }
 
-        return formatoNormalizado == "csv"
-            ? CrearCsv(encabezados, filas, nombre)
-            : CrearXlsx(encabezados, filas, nombre);
+        return formatoNormalizado switch
+        {
+            "csv" => CrearCsv(encabezados, filas, nombre),
+            "xlsx" => CrearXlsx(encabezados, filas, nombre),
+            "pdf" => CrearPdf(encabezados, filas, nombre),
+            _ => throw new BusinessRuleException("El formato de exportación debe ser csv, xlsx o pdf.")
+        };
     }
 
     private static (DateTime Desde, DateTime Hasta) NormalizarPeriodo(ReporteAdministrativoFiltroDto filtro)
@@ -430,6 +437,73 @@ public sealed class ReporteAdministrativoService : IReporteAdministrativoService
             stream.ToArray(),
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             $"{nombre}.xlsx");
+    }
+
+    private static ArchivoDescargableDto CrearPdf(string[] encabezados, IReadOnlyList<string[]> filas, string nombre)
+    {
+        QuestPDF.Settings.License = LicenseType.Community;
+
+        var documento = Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Size(PageSizes.A4);
+                page.Margin(24);
+                page.DefaultTextStyle(x => x.FontSize(7));
+
+                page.Header()
+                    .PaddingBottom(8)
+                    .Text($"Reporte · {nombre.Replace('-', ' ')}")
+                    .FontSize(14)
+                    .SemiBold();
+
+                page.Content().Table(table =>
+                {
+                    table.ColumnsDefinition(columns =>
+                    {
+                        foreach (var _ in encabezados)
+                            columns.RelativeColumn();
+                    });
+
+                    table.Header(header =>
+                    {
+                        foreach (var encabezado in encabezados)
+                        {
+                            header.Cell()
+                                .Background(Colors.Grey.Lighten3)
+                                .Padding(3)
+                                .Text(ValorSeguro(encabezado))
+                                .SemiBold();
+                        }
+                    });
+
+                    foreach (var fila in filas)
+                    {
+                        for (var columna = 0; columna < encabezados.Length; columna++)
+                        {
+                            table.Cell()
+                                .BorderBottom(0.5f)
+                                .BorderColor(Colors.Grey.Lighten2)
+                                .Padding(3)
+                                .Text(ValorSeguro(fila.ElementAtOrDefault(columna)));
+                        }
+                    }
+                });
+
+                page.Footer().AlignCenter().Text(text =>
+                {
+                    text.Span("Página ");
+                    text.CurrentPageNumber();
+                    text.Span(" de ");
+                    text.TotalPages();
+                });
+            });
+        });
+
+        return new ArchivoDescargableDto(
+            documento.GeneratePdf(),
+            "application/pdf",
+            $"{nombre}.pdf");
     }
 
     private static string EscaparCsv(string? valor)
