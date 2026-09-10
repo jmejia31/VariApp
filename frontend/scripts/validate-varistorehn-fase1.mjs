@@ -7,12 +7,22 @@ const frontendDir = path.resolve(scriptsDir, '..');
 const featureDir = path.join(frontendDir, 'src/app/features/varistorehn');
 
 const read = (name) => readFile(path.join(featureDir, name), 'utf8');
-const [headerTs, headerHtml, headerScss, storefrontTs, storefrontHtml] = await Promise.all([
+const [
+  headerTs,
+  headerHtml,
+  headerScss,
+  storefrontTs,
+  storefrontHtml,
+  storefrontScss,
+  storefrontResponsiveScss
+] = await Promise.all([
   read('varistorehn-header.component.ts'),
   read('varistorehn-header.component.html'),
   read('varistorehn-header.component.scss'),
   read('varistorehn.component.ts'),
-  read('varistorehn.component.html')
+  read('varistorehn.component.html'),
+  read('varistorehn.component.scss'),
+  read('varistorehn.responsive.scss')
 ]);
 
 const failures = [];
@@ -36,6 +46,31 @@ expect(!storefrontHtml.includes('<header class="store-header">'), 'La cabecera m
 expect(storefrontHtml.includes('(busquedaActualizada)="buscar($event)"'), 'La búsqueda del header debe seguir filtrando el catálogo actual.');
 expect(storefrontHtml.includes('(carritoSolicitado)="abrirCarrito()"'), 'El carrito del header debe abrir el estado real existente.');
 
+const staleHeaderSelectors = [
+  '.skip-link',
+  '.utility-bar',
+  '.utility-inner',
+  '.store-header',
+  '.header-main',
+  '.brand-mark',
+  '.search-box',
+  '.cart-trigger',
+  '.cart-icon',
+  '.store-nav'
+];
+
+for (const [name, content] of [
+  ['varistorehn.component.scss', storefrontScss],
+  ['varistorehn.responsive.scss', storefrontResponsiveScss]
+]) {
+  for (const selector of staleHeaderSelectors) {
+    expect(
+      !content.includes(selector),
+      `${name} no debe conservar estilos residuales del header extraído (${selector}).`
+    );
+  }
+}
+
 for (const [name, content] of [['header.ts', headerTs], ['header.html', headerHtml]]) {
   expect(!content.includes('authGuard'), `${name} no debe depender de authGuard.`);
   expect(!content.includes('permisoGuard'), `${name} no debe depender de permisoGuard.`);
@@ -49,4 +84,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.info('Fase 1 — navegación/header: guardas estáticas aprobadas.');
+console.info('Fase 1 — navegación/header: guardas estáticas aprobadas, incluida la extracción completa de estilos.');
