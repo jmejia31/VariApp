@@ -66,6 +66,8 @@ jobs:
           printf '%s\n' "$cached" | grep -Eq 'N6_1_C_TenantEmpresaPersistence\.Designer\.cs$'
           printf '%s\n' "$cached" | grep -Eq 'AppDbContextModelSnapshot\.cs$'
           git commit -m 'fix(n6.1.c): generate Empresa migration and snapshot'
+          git fetch origin Desarrollo
+          git rebase origin/Desarrollo
           git push origin HEAD:Desarrollo
 
-# controller retrigger after canonical stall takeover; no deployment side effects
+# controller retrigger after canonical stall takeover; fast-forward/rebase safe, no force push
