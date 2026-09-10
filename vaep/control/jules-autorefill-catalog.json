@@ -1,8 +1,8 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
   "currentParent": "N5.3.D",
-  "generatedAt": "2026-09-10T01:09:24Z",
-  "regenerationReason": "N5.3.D_D1_D2_D3_D4_REVIEW_FIRST_ACCEPTED__D5_ATTEMPT1_ELIGIBLE__D6_SIBLING_GATED",
+  "generatedAt": "2026-09-10T01:10:51Z",
+  "regenerationReason": "N5.3.D_D1_D2_D3_D4_REVIEW_FIRST_ACCEPTED__D5_ATTEMPT1_RESERVED__D6_SIBLING_GATED",
   "lastClosedParent": "N5.3.C",
   "closureReceipts": {
     "N4.11.H": "vaep/evidence/fragments/N4.11.H_LISTO_REAL_20260908T204500Z.json",
@@ -47,12 +47,12 @@
   "throughputPlan": {
     "mode": "MATERIAL_SWARM_FIRST",
     "currentParent": "N5.3.D",
-    "currentParentMaterialScopeCount": 1,
-    "currentParentReason": "N5.3.D.1-.4 are REVIEW_FIRST accepted. D4 Jules transport exhausted its lane budget, was superseded by MASTER with no patch, and CHATGPT_VAEP takeover was accepted after exact-head backend gates. N5.3.D.5 is now the only dependency-valid material scope; D6 remains sibling-gated until D5 review. No duplicate/filler work is eligible.",
+    "currentParentMaterialScopeCount": 0,
+    "currentParentReason": "N5.3.D.1-.4 are REVIEW_FIRST accepted. D4 Jules transport exhausted its lane budget, was superseded by MASTER with no patch, and CHATGPT_VAEP takeover was accepted after exact-head backend gates. N5.3.D.5 ATTEMPT1 is reserved in J5 transport run 34424417138; D6 remains sibling-gated until D5 review. No duplicate/filler work is eligible.",
     "nextParent": "N5.3.E",
     "nextParentParallelMaterialScopes": 0,
     "nextParentScopesNonOverlapping": true,
-    "laneRefill": "D5_ATTEMPT1_ELIGIBLE__DISPATCH_SAME_RUN__D6_AFTER_D5_REVIEW_FIRST"
+    "laneRefill": "D5_ATTEMPT1_RESERVED__AWAIT_SESSION_ACTIVITY_OR_TERMINAL__THEN_REVIEW_FIRST__D6_NEXT_IF_SAFE"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
@@ -86,7 +86,7 @@
       {"dispatchId":"N5-3-D-4-SALES-REPORT-QUERY-SERVICE-J4","taskId":"N5.3.D.4.SALES_REPORT_QUERY_SERVICE","workerId":"J4","taskAttempt":1,"plannedParent":"N5.3.D","readyForDispatch":false,"dispatchEligible":false,"fileScopeHint":"backend/src/Infrastructure/Services/ReporteVentasService.cs","prompt":"Resolved by CHATGPT_VAEP QA takeover after MASTER lane-budget supersession. Jules timeout artifact has no patch; late output is forensic-only. Do not redispatch.","reason":"REVIEW_FIRST_ACCEPTED__QA_TAKEOVER__JULES_BUDGET_SUPERSEDED__CAUSAL_BACKEND_GATE_SUCCESS__NO_REDISPATCH"}
     ],
     "J5": [
-      {"dispatchId":"N5-3-D-5-SALES-REPORT-API-J5","taskId":"N5.3.D.5.SALES_REPORT_API","workerId":"J5","taskAttempt":1,"plannedParent":"N5.3.D","readyForDispatch":true,"dispatchEligible":true,"fileScopeHint":"backend/src/API/Controllers/ReportesVentasController.cs","prompt":"After the N5.3.D service contract/implementation are REVIEW_FIRST accepted, expose bounded sales reporting summary/detail endpoints following existing report-controller patterns. Preserve authorization and fail-closed row scope; do not implement export (N5.3.H), frontend, migrations or invent new permission symbols. Run proportional controller tests and two self-reviews. Desarrollo only.","reason":"CURRENT_PARENT__SIBLING_DEPENDENCIES_REVIEW_ACCEPTED__MATERIAL_SCOPE"}
+      {"dispatchId":"N5-3-D-5-SALES-REPORT-API-J5","taskId":"N5.3.D.5.SALES_REPORT_API","workerId":"J5","taskAttempt":1,"plannedParent":"N5.3.D","readyForDispatch":false,"dispatchEligible":false,"fileScopeHint":"backend/src/API/Controllers/ReportesVentasController.cs","prompt":"After the N5.3.D service contract/implementation are REVIEW_FIRST accepted, expose bounded sales reporting summary/detail endpoints following existing report-controller patterns. Preserve authorization and fail-closed row scope; do not implement export (N5.3.H), frontend, migrations or invent new permission symbols. Run proportional controller tests and two self-reviews. Desarrollo only.","reason":"CURRENT_RUN_RESERVED__ATTEMPT1__TRANSPORT_RUN_34424417138__NOT_ACTIVE_REAL_UNTIL_SESSION_AND_FRESH_ACTIVITY"}
     ],
     "J6": [
       {"dispatchId":"N5-3-C-3-REPORT-INDEX-MIGRATION-J6","taskId":"N5.3.C.3.REPORT_INDEX_MIGRATION","workerId":"J6","taskAttempt":1,"plannedParent":"N5.3.C","readyForDispatch":false,"dispatchEligible":false,"fileScopeHint":"backend/src/Infrastructure/Migrations/","prompt":"Resolved by CHATGPT_VAEP QA takeover after transport stall; do not redispatch. Late remote output is evidence-only.","reason":"CLOSED_BY_N5.3.C_LISTO_REAL_RECEIPT"},
