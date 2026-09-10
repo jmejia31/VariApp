@@ -1,20 +1,29 @@
 namespace InventoryApp.Application.DTOs;
 
 /// <summary>
-/// Proyección segura para el escaparate público. Excluye costos, auditoría,
-/// códigos internos y cualquier dato reservado a la administración.
+/// Proyeccion segura y canonica para el escaparate publico. Excluye costos,
+/// auditoria y datos reservados a administracion. Los campos comerciales aun
+/// no soportados por la fuente de verdad se exponen como nulos/no activos para
+/// mantener un contrato evolutivo sin inventar informacion.
 /// </summary>
 public sealed class ProductoCatalogoPublicoDto
 {
     public int Id { get; init; }
+    public string Slug { get; init; } = string.Empty;
     public string Nombre { get; init; } = string.Empty;
     public string? Descripcion { get; init; }
+    public int? CategoriaId { get; init; }
     public string? CategoriaNombre { get; init; }
     public string? MarcaNombre { get; init; }
     public string? ModeloNombre { get; init; }
     public decimal Precio { get; init; }
+    public decimal? PrecioOferta { get; init; }
     public int CantidadDisponible { get; init; }
     public bool EstaAgotado { get; init; }
+    public string? Sku { get; init; }
+    public bool Activo { get; init; }
+    public bool EsDestacado { get; init; }
+    public DateTime FechaCreacion { get; init; }
     public string? ImagenPrincipalUrl { get; init; }
     public List<ProductoImagenPublicaDto> Imagenes { get; init; } = new();
     public List<ModeloCatalogoPublicoDto> Modelos { get; init; } = new();
@@ -32,6 +41,7 @@ public sealed class ModeloCatalogoPublicoDto
     public int? ModeloId { get; init; }
     public string? ModeloNombre { get; init; }
     public string? MarcaNombre { get; init; }
+    public string? Sku { get; init; }
     public decimal Precio { get; init; }
     public int CantidadDisponible { get; init; }
     public bool EstaAgotado { get; init; }
