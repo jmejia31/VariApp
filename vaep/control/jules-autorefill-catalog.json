@@ -1,9 +1,9 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
-  "currentParent": "N5.7.F",
-  "generatedAt": "2026-09-10T12:58:00Z",
-  "regenerationReason": "N5.7.E_LISTO_REAL__ATOMIC_PROMOTION_N5.7.F_CURRENT__F1_J6_READY_TO_DISPATCH__G_H_PREARMED_DEPENDENCY_GATED__NO_FILLER",
-  "lastClosedParent": "N5.7.E",
+  "currentParent": "N5.7.G",
+  "generatedAt": "2026-09-10T13:19:00Z",
+  "regenerationReason": "N5.7.F_LISTO_REAL__ATOMIC_PROMOTION_N5.7.G_CURRENT__QA_CI_CLOSURE_DEBT_FASTPATH__H_N5.8.A_PREARMED_DEPENDENCY_GATED__NO_FILLER",
+  "lastClosedParent": "N5.7.F",
   "closureReceipts": {
     "GATE-N4":"vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
     "N5.1.H":"vaep/evidence/fragments/N5.1.H_LISTO_REAL_20260909T1236Z.json",
@@ -30,15 +30,16 @@
     "N5.7.B":"vaep/evidence/fragments/N5.7.B_LISTO_REAL_20260910T1117Z.json",
     "N5.7.C":"vaep/evidence/fragments/N5.7.C_LISTO_REAL_20260910T1202Z.json",
     "N5.7.D":"vaep/evidence/fragments/N5.7.D_LISTO_REAL_20260910T1225Z.json",
-    "N5.7.E":"vaep/evidence/fragments/N5.7.E_LISTO_REAL_20260910T1256Z.json"
+    "N5.7.E":"vaep/evidence/fragments/N5.7.E_LISTO_REAL_20260910T1256Z.json",
+    "N5.7.F":"vaep/evidence/fragments/N5.7.F_LISTO_REAL_20260910T1314Z.json"
   },
   "policy":{"branch":"Desarrollo","programmedBacklogTargetTotal":72,"liveQueueDepthTarget":2,"genericFloorRegeneration":false,"noBusywork":true,"semanticIdentity":"CURRENT_PARENT + material scope/semantic facet","stopWhenEligibleWorkExhausted":true,"materialParallelismTargetPerParent":6,"requireDistinctWriteScopesWhenParallel":true,"activeWorkerCount":6,"activeWorkers":["J1","J2","J3","J4","J5","J6"]},
-  "throughputPlan":{"mode":"PARENT_CLOSE_FIRST","currentParent":"N5.7.F","currentParentMaterialScopeCount":1,"currentParentReason":"N5.7.E is LISTO_REAL after controller takeover, REVIEW_FIRST and exact functional-head frontend lint/build gates. N5.7.F is the first dependency-valid unclosed parent; its prearmed RBAC/security scope is now eligible for one real dispatch to J6.","nextParent":"N5.7.G","nextParentParallelMaterialScopes":1,"nextParentScopesNonOverlapping":true,"laneRefill":"F1_J6_READY_TO_DISPATCH__G_H_NEXT_SAFE_PREARMED_DEPENDENCY_GATED__NO_FILLER__NO_DUPLICATE_WRITER"},
-  "roadmap":{"authority":"docs/VAEP_AUTHORITY.md","sourceSpreadsheetId":"19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY","sourceRanges":["COLA!A440:T448","PLAN_MAESTRO","docs/VAEP_N5_7_DASHBOARD_KPI_PREFLIGHT.md","backend/src/API/Controllers/DashboardKpiConfiguracionController.cs","frontend/src/app/features/dashboard/dashboard.component.ts"],"note":"N5.7.F is current after E LISTO_REAL. F verifies RBAC/ownership/audit/security for the accepted KPI configuration contract. G QA/regression/CI and H documentation/certification remain dependency-gated; no filler and no premature execution.","nodes":[{"id":"N5.7.A","order":50,"dependencies":["N5.2.H","N5.3.H","N5.4.H","N5.5.H","N5.6.H"]},{"id":"N5.7.B","order":51,"dependencies":["N5.7.A"]},{"id":"N5.7.C","order":52,"dependencies":["N5.7.B"]},{"id":"N5.7.D","order":53,"dependencies":["N5.7.C"]},{"id":"N5.7.E","order":54,"dependencies":["N5.7.D"]},{"id":"N5.7.F","order":55,"dependencies":["N5.7.E"]},{"id":"N5.7.G","order":56,"dependencies":["N5.7.F"]},{"id":"N5.7.H","order":57,"dependencies":["N5.7.G"]}]},
+  "throughputPlan":{"mode":"PARENT_CLOSE_FIRST","currentParent":"N5.7.G","currentParentMaterialScopeCount":1,"currentParentReason":"N5.7.F is LISTO_REAL with accepted REVIEW_FIRST and exact functional-head backend/frontend gates. N5.7.G is the first dependency-valid unclosed parent and is a QA/regression/CI closure-debt fastpath; no duplicate Jules writer is required when existing exact-head evidence satisfies its DoD.","nextParent":"N5.7.H","nextParentParallelMaterialScopes":1,"nextParentScopesNonOverlapping":true,"laneRefill":"DRAIN_G_REVIEW_FIRST_GATES_CERTIFICATION__PROMOTE_H_SAME_RUN__THEN_N5.8.A__NO_FILLER"},
+  "roadmap":{"authority":"docs/VAEP_AUTHORITY.md","sourceSpreadsheetId":"19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY","sourceRanges":["COLA!A440:T448","PLAN_MAESTRO","docs/VAEP_N5_7_DASHBOARD_KPI_PREFLIGHT.md","backend/src/API/Controllers/DashboardKpiConfiguracionController.cs","frontend/src/app/features/dashboard/dashboard.component.ts"],"note":"N5.7.G is current after F LISTO_REAL. G performs QA/regression/CI certification on the accepted KPI configuration contract. H documentation/certification and N5.8.A remain dependency-gated; no filler and no premature execution.","nodes":[{"id":"N5.7.A","order":50,"dependencies":["N5.2.H","N5.3.H","N5.4.H","N5.5.H","N5.6.H"]},{"id":"N5.7.B","order":51,"dependencies":["N5.7.A"]},{"id":"N5.7.C","order":52,"dependencies":["N5.7.B"]},{"id":"N5.7.D","order":53,"dependencies":["N5.7.C"]},{"id":"N5.7.E","order":54,"dependencies":["N5.7.D"]},{"id":"N5.7.F","order":55,"dependencies":["N5.7.E"]},{"id":"N5.7.G","order":56,"dependencies":["N5.7.F"]},{"id":"N5.7.H","order":57,"dependencies":["N5.7.G"]}]},
   "prearmedRoadmap":[
-    {"parent":"N5.7.F","state":"CURRENT_READY","dependency":"N5.7.E_LISTO_REAL","materialization":"KPI_CONFIGURATION_RBAC_OWNERSHIP_AUDIT_SECURITY__NO_FILLER"},
-    {"parent":"N5.7.G","state":"READY_DEPENDENCY_GATED","dependency":"N5.7.F_LISTO_REAL","materialization":"KPI_CONFIGURATION_QA_REGRESSION_CI__NO_FILLER"},
-    {"parent":"N5.7.H","state":"READY_DEPENDENCY_GATED","dependency":"N5.7.G_LISTO_REAL","materialization":"KPI_CONFIGURATION_DOCUMENTATION_CERTIFICATION__NO_FILLER"}
+    {"parent":"N5.7.G","state":"CURRENT_READY","dependency":"N5.7.F_LISTO_REAL","materialization":"KPI_CONFIGURATION_QA_REGRESSION_CI__CLOSURE_DEBT_FASTPATH__NO_FILLER"},
+    {"parent":"N5.7.H","state":"READY_DEPENDENCY_GATED","dependency":"N5.7.G_LISTO_REAL","materialization":"KPI_CONFIGURATION_DOCUMENTATION_CERTIFICATION__NO_FILLER"},
+    {"parent":"N5.8.A","state":"READY_DEPENDENCY_GATED","dependency":"N5.7.H_LISTO_REAL","materialization":"NEXT_PLAN_MAESTRO_PARENT__ROADMAP_DERIVED_PREFLIGHT__NO_FILLER"}
   ],
   "lanes":{
     "J1":[{"dispatchId":"N5-7-D-1-KPI-CONFIG-APPLICATION-API-J1","taskId":"N5.7.D.1.KPI_CONFIG_APPLICATION_API","workerId":"J1","taskAttempt":1,"plannedParent":"N5.7.D","readyForDispatch":false,"dispatchEligible":false,"status":"HISTORICAL_TERMINAL__CONTROLLER_RECOVERED__LISTO_REAL__NOT_ACTIVE_REAL","dispatchCommitSha":"784addb2ceb4cd07e5d8aa914f816dfeb326a747","workflowRunId":34474658605,"primaryBaseHead":"df47063aecd0b52e4bb256551f7ddba87cdfd644","fileScopeHint":"backend/src/Application/Services/DashboardKpiConfiguracionService.cs;backend/src/API/Controllers/DashboardKpiConfiguracionController.cs","reason":"TRANSPORT_STALLED__OWNERSHIP_TRANSFERRED_TO_CHATGPT_VAEP__DIRECT_BOUNDED_FIX_REVIEW_FIRST_GATES__N5.7.D_LISTO_REAL__LATE_RESULT_EVIDENCE_ONLY__NO_R2__NO_R3"}],
@@ -46,7 +47,7 @@
     "J3":[],
     "J4":[{"dispatchId":"N5-7-E-1-KPI-CONFIG-FRONTEND-UX-J4","taskId":"N5.7.E.1.KPI_CONFIG_FRONTEND_UX","workerId":"J4","taskAttempt":1,"plannedParent":"N5.7.E","readyForDispatch":false,"dispatchEligible":false,"status":"HISTORICAL_TERMINAL__CONTROLLER_RECOVERED__LISTO_REAL__NOT_ACTIVE_REAL","workflowRunId":34477442096,"primaryBaseHead":"7ac6c424d688676ca517da00445ce52a38b884bd","reason":"TRANSPORT_STALLED__OWNERSHIP_TRANSFERRED_TO_CHATGPT_VAEP__DIRECT_BOUNDED_FIX_REVIEW_FIRST_GATES__N5.7.E_LISTO_REAL__LATE_RESULT_EVIDENCE_ONLY__NO_R2__NO_R3"}],
     "J5":[],
-    "J6":[{"dispatchId":"N5-7-F-1-KPI-CONFIG-RBAC-SECURITY-J6","taskId":"N5.7.F.1.KPI_CONFIG_RBAC_SECURITY","workerId":"J6","taskAttempt":1,"plannedParent":"N5.7.F","readyForDispatch":true,"dispatchEligible":true,"status":"CURRENT__READY_TO_DISPATCH__N5.7.E_LISTO_REAL","fileScopeHint":"backend/tests/InventoryApp.Tests/DashboardKpiConfiguracionSecurityTests.cs;backend/tests/InventoryApp.Tests/DashboardKpiConfiguracionOwnershipTests.cs","prompt":"Read docs/VAEP_AUTHORITY.md as the sole operational authority. Implement N5.7.F RBAC/ownership/audit/security verification only after N5.7.E is LISTO_REAL. Add source-backed tests that prove a user cannot read/write another user's KPI configuration, role visibility does not broaden existing dashboard access, unknown metric keys fail closed, and auditable ownership rules remain enforced. No Production, secrets, main, PR #2 merge, arbitrary formulas, or unrelated security changes."}]
+    "J6":[{"dispatchId":"N5-7-F-1-KPI-CONFIG-RBAC-SECURITY-J6","taskId":"N5.7.F.1.KPI_CONFIG_RBAC_SECURITY","workerId":"J6","taskAttempt":1,"plannedParent":"N5.7.F","readyForDispatch":false,"dispatchEligible":false,"status":"HISTORICAL_TERMINAL__CONTROLLER_TAKEOVER__LISTO_REAL__NOT_ACTIVE_REAL","fileScopeHint":"backend/Tests/Integration/ConfiguracionKpiEndpointRbacTests.cs","reason":"TRANSPORT_FAILED_PRE_SESSION_BASE_RACE__NO_SESSION_ID__ATTEMPT1_CONTROLLER_DIRECT_FIX__REVIEW_FIRST_ACCEPTED__EXACT_HEAD_GATES_SUCCESS__N5.7.F_LISTO_REAL__NO_R2__NO_R3__LATE_RESULT_EVIDENCE_ONLY"}]
   },
-  "lastClosureFunctionalHead":"984971045ca9accf2007416da713b30c03f921ba"
+  "lastClosureFunctionalHead":"14df0c1c9aeb045033eb8d3020a396c487d862dc"
 }
