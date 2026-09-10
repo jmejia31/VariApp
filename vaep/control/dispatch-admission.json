@@ -1,6 +1,6 @@
 {
-  "newDispatchAdmission": "OPEN",
-  "allowExistingActiveSessions": true,
-  "reason": "OPEN_ONLY__N5.4.F_CURRENT__N5.4.E_LISTO_REAL__F1_F2_SOURCE_BACKED_SEC_AUDIT_READY",
-  "updatedAtUtc": "2026-09-10T07:35:00Z"
+  "newDispatchAdmission": "FROZEN",
+  "allowExistingActiveSessions": false,
+  "reason": "N5.4.F_LISTO_REAL__N5.4.G_CURRENT__QA_CI_CLOSURE_FASTPATH__NO_DUPLICATE_DISPATCH",
+  "updatedAtUtc": "2026-09-10T07:56:30Z"
 }
