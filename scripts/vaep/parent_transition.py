@@ -187,13 +187,15 @@ def promotion_freeze_permitted(reason, current):
     )
     if reason.startswith(legacy_prefixes):
         return True
-    if not (reason.startswith(current + "_") and reason.endswith("NO_NEW_DISPATCH")):
+    if not reason.startswith(current + "_"):
         return False
     controller_owned_markers = (
         "LISTO_REAL_CERTIFICATION_AND_PARENT_PROMOTION_IN_PROGRESS",
         "ALL_MATERIAL_SCOPES_DRAINED__CLOSURE_RECONCILIATION",
+        "ALL_MATERIAL_SCOPES_REVIEWED_OR_QA_TAKEOVER_MATERIALIZED__EXACT_HEAD_DOD_AND_CAUSAL_GATES_PENDING",
     )
-    return any(marker in reason for marker in controller_owned_markers)
+    controller_owned_suffix = reason.endswith("NO_NEW_DISPATCH") or reason.endswith("NO_DUPLICATE_DISPATCH")
+    return controller_owned_suffix and any(marker in reason for marker in controller_owned_markers)
 
 
 def transition(catalog, admission, closed, receipt_path, functional, now, hardening_ok=False):
