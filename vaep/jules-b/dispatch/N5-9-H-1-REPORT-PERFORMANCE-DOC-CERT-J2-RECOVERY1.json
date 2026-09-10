@@ -1,0 +1,14 @@
+{
+  "dispatchId": "N5-9-H-1-REPORT-PERFORMANCE-DOC-CERT-J2-RECOVERY1",
+  "taskId": "N5.9.H.1.REPORT_PERFORMANCE_DOCUMENTATION_CERTIFICATION",
+  "semanticFacet": "REPORT_PERFORMANCE_DOCUMENTATION_CERTIFICATION",
+  "workerId": "J2",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "primaryBaseHead": "4fd9d05edb809ae6fba7578db03f277fe89af912",
+  "recoveryOf": "N5-9-H-1-REPORT-PERFORMANCE-DOC-CERT-J2",
+  "recoveryReason": "PRE_SESSION_TRANSPORT_INVALID_REDISPATCH__CANONICAL_PATH_MOVE_WAS_NOT_APPEND_ONLY__NO_SESSION_CREATED__CONTENT_ATTEMPT_NOT_CONSUMED",
+  "fileScopeHint": "docs/N5.9_REPORT_PERFORMANCE_CERTIFICATION.md;CHANGELOG_AI.md;TASKS.md",
+  "prompt": "Read docs/VAEP_AUTHORITY.md as the sole operational MASTER and revalidate live Desarrollo parent/head before editing. N5.9.G is already LISTO_REAL and N5.9.H is the dependency-valid documentation/certification scope for N5.9 report performance. This RECOVERY1 repairs only a pre-session transport failure; taskAttempt remains 1. Produce a bounded documentation-only patch covering the exact implemented N5.9 performance change, exact-head evidence already present in the repo, rollback, limitations, and the required task/changelog references. Do not change application code, database/schema/migrations, workflows, packages, auth/RBAC behavior, main, Produccion, secrets, or PR #2. Do not claim GATE-N5 or self-certify LISTO_REAL. Run proportional documentation/static checks, perform two independent self-reviews, report P0/P1 explicitly, and return patch/evidence for controller REVIEW_FIRST. No filler, no R3.",
+  "acceptance": "Documentation accurately identifies the exact N5.9 performance optimization and its evidence, rollback and limits without quantified claims unsupported by benchmarks; only approved documentation/task/changelog files change; proportional checks and two self-reviews are reported; P0=0/P1=0; no app/schema/workflow/package/main/Produccion/secrets/PR2 changes; result is ready for independent REVIEW_FIRST."
+}
