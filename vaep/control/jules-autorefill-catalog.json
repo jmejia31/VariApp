@@ -1,24 +1,67 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
-  "currentParent": "N5.8.B",
-  "generatedAt": "2026-09-10T13:42:14Z",
-  "regenerationReason": "N5.8.A_LISTO_REAL__N5.8.B_CURRENT__B1_J1_STALL_GE10M__FIRST_DETECTOR_OWNERSHIP_TRANSFER_CHATGPT_VAEP__CONTROLLER_FIX_VALIDATING__C_D_E_PREARMED_DEPENDENCY_GATED__NO_FILLER__NO_DUPLICATE_WRITER",
-  "lastClosedParent": "N5.8.A",
+  "currentParent": "N5.8.C",
+  "generatedAt": "2026-09-10T13:50:20Z",
+  "regenerationReason": "N5.8.B_LISTO_REAL__ATOMIC_PROMOTION_N5.8.C__CLOSURE_DEBT_FASTPATH_VERIFY_NA_NO_NEW_PERSISTENCE__D_E_F_PREARMED_DEPENDENCY_GATED__NO_FILLER__NO_DUPLICATE_WRITER",
+  "lastClosedParent": "N5.8.B",
   "closureReceipts": {
-    "GATE-N4":"vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
-    "N5.1.H":"vaep/evidence/fragments/N5.1.H_LISTO_REAL_20260909T1236Z.json",
-    "N5.2.H":"vaep/evidence/fragments/N5.2.H_LISTO_REAL_20260909T2122Z.json",
-    "N5.3.H":"vaep/evidence/fragments/N5.3.H_LISTO_REAL_20260910T0420Z.json",
-    "N5.4.H":"vaep/evidence/fragments/N5.4.H_LISTO_REAL_20260910T0800Z.json",
-    "N5.5.H":"vaep/evidence/fragments/N5.5.H_LISTO_REAL_20260910T1030Z.json",
-    "N5.6.H":"vaep/evidence/fragments/N5.6.H_LISTO_REAL_20260910T1058Z.json",
-    "N5.7.H":"vaep/evidence/fragments/N5.7.H_LISTO_REAL_20260910T1325Z.json",
-    "N5.8.A":"vaep/evidence/fragments/N5.8.A_LISTO_REAL_20260910T1328Z.json"
+    "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
+    "N5.1.H": "vaep/evidence/fragments/N5.1.H_LISTO_REAL_20260909T1236Z.json",
+    "N5.2.H": "vaep/evidence/fragments/N5.2.H_LISTO_REAL_20260909T2122Z.json",
+    "N5.3.H": "vaep/evidence/fragments/N5.3.H_LISTO_REAL_20260910T0420Z.json",
+    "N5.4.H": "vaep/evidence/fragments/N5.4.H_LISTO_REAL_20260910T0800Z.json",
+    "N5.5.H": "vaep/evidence/fragments/N5.5.H_LISTO_REAL_20260910T1030Z.json",
+    "N5.6.H": "vaep/evidence/fragments/N5.6.H_LISTO_REAL_20260910T1058Z.json",
+    "N5.7.H": "vaep/evidence/fragments/N5.7.H_LISTO_REAL_20260910T1325Z.json",
+    "N5.8.A": "vaep/evidence/fragments/N5.8.A_LISTO_REAL_20260910T1328Z.json",
+    "N5.8.B": "vaep/evidence/fragments/N5.8.B_LISTO_REAL_20260910T1349Z.json"
   },
-  "policy":{"branch":"Desarrollo","globalAdmission":"OPEN_ONLY","programmedBacklogTargetTotal":72,"liveQueueDepthTarget":2,"genericFloorRegeneration":false,"noBusywork":true,"semanticIdentity":"CURRENT_PARENT + material scope/semantic facet","stopWhenEligibleWorkExhausted":true,"materialParallelismTargetPerParent":6,"requireDistinctWriteScopesWhenParallel":true,"activeWorkerCount":6,"activeWorkers":["J1","J2","J3","J4","J5","J6"]},
-  "throughputPlan":{"mode":"PARENT_CLOSE_FIRST","currentParent":"N5.8.B","currentParentMaterialScopeCount":1,"currentParentReason":"N5.8.A is LISTO_REAL and defines a single bounded domain/contracts delta: closed export format contract csv/xlsx/pdf with MIME/extension invariants and no persistence/API/UI.","nextParent":"N5.8.C","nextParentParallelMaterialScopes":1,"nextParentScopesNonOverlapping":true,"laneRefill":"CONTROLLER_TAKEOVER_B1_FIX_COMMITTED__REVIEW_FIRST__EXACT_HEAD_GATES__CERTIFY__PROMOTE_C__NO_FILLER"},
-  "roadmap":{"authority":"docs/VAEP_AUTHORITY.md","sourceSpreadsheetId":"19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY","sourceRanges":["COLA!A448:T456","PLAN_MAESTRO","docs/VAEP_N5_8_EXPORTACIONES_PREFLIGHT.md"],"note":"N5.8.B is current after A LISTO_REAL. B defines only the closed format contract and invariants; C is expected N/A_NO_NEW_PERSISTENCE unless B proves otherwise. D/E remain dependency-gated.","nodes":[{"id":"N5.8.A","order":58,"dependencies":["N5.7.H"]},{"id":"N5.8.B","order":59,"dependencies":["N5.8.A"]},{"id":"N5.8.C","order":60,"dependencies":["N5.8.B"]},{"id":"N5.8.D","order":61,"dependencies":["N5.8.C"]},{"id":"N5.8.E","order":62,"dependencies":["N5.8.D"]},{"id":"N5.8.F","order":63,"dependencies":["N5.8.E"]},{"id":"N5.8.G","order":64,"dependencies":["N5.8.F"]},{"id":"N5.8.H","order":65,"dependencies":["N5.8.G"]}]},
-  "prearmedRoadmap":[{"parent":"N5.8.B","state":"CONTROLLER_TAKEOVER_VALIDATING","dependency":"N5.8.A_LISTO_REAL","materialization":"EXPORT_FORMAT_CLOSED_CONTRACT__CSV_XLSX_PDF__SINGLE_WRITER"},{"parent":"N5.8.C","state":"READY_DEPENDENCY_GATED","dependency":"N5.8.B_LISTO_REAL","materialization":"VERIFY_NA_NO_NEW_PERSISTENCE__NO_FILLER"},{"parent":"N5.8.D","state":"READY_DEPENDENCY_GATED","dependency":"N5.8.C_LISTO_REAL","materialization":"EXPORTS_APPLICATION_SERVICES_API__ROADMAP_DERIVED"},{"parent":"N5.8.E","state":"READY_DEPENDENCY_GATED","dependency":"N5.8.D_LISTO_REAL","materialization":"EXPORTS_FRONTEND_UX__ROADMAP_DERIVED"}],
-  "lanes":{"J1":[{"dispatchId":"N5-8-B-1-EXPORT-FORMAT-CONTRACT-J1","taskId":"N5.8.B.1.EXPORT_FORMAT_CONTRACT","workerId":"J1","taskAttempt":1,"plannedParent":"N5.8.B","readyForDispatch":false,"dispatchEligible":false,"status":"OWNERSHIP_TRANSFERRED_CHATGPT_VAEP__LATE_RESULT_EVIDENCE_ONLY","primaryBaseHead":"c253f3cdc7e6b17613eabc024095d406a7f1b9b7","fileScopeHint":"backend/src/Application/DTOs/ExportacionDto.cs","reason":"GE10M_WITHOUT_CORRELATED_SESSION_OR_USEFUL_JULES_ACTIVITY__FIRST_DETECTOR_CONTROLLER_TAKEOVER__NO_R2_NO_R3"}],"J2":[],"J3":[],"J4":[],"J5":[],"J6":[]},
-  "lastClosureFunctionalHead":"14df0c1c9aeb045033eb8d3020a396c487d862dc"
+  "policy": {
+    "branch": "Desarrollo",
+    "globalAdmission": "OPEN_ONLY",
+    "programmedBacklogTargetTotal": 72,
+    "liveQueueDepthTarget": 2,
+    "genericFloorRegeneration": false,
+    "noBusywork": true,
+    "semanticIdentity": "CURRENT_PARENT + material scope/semantic facet",
+    "stopWhenEligibleWorkExhausted": true,
+    "materialParallelismTargetPerParent": 6,
+    "requireDistinctWriteScopesWhenParallel": true,
+    "activeWorkerCount": 6,
+    "activeWorkers": ["J1", "J2", "J3", "J4", "J5", "J6"]
+  },
+  "throughputPlan": {
+    "mode": "PARENT_CLOSE_FIRST",
+    "currentParent": "N5.8.C",
+    "currentParentMaterialScopeCount": 0,
+    "currentParentReason": "N5.8.B is LISTO_REAL and its accepted closed-format contract adds no persistence, EF model, migration, backfill, index, or data mutation. Preflight explicitly expects C=N/A_NO_NEW_PERSISTENCE unless B proves otherwise; B proved otherwise=false.",
+    "nextParent": "N5.8.D",
+    "nextParentParallelMaterialScopes": 1,
+    "nextParentScopesNonOverlapping": true,
+    "laneRefill": "CLOSURE_DEBT_FASTPATH_C_REVIEW_FIRST_NA__CERTIFY__PROMOTE_D__DISPATCH_SINGLE_BOUNDED_EXPORT_SERVICE_API_SCOPE__NO_FILLER"
+  },
+  "roadmap": {
+    "authority": "docs/VAEP_AUTHORITY.md",
+    "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
+    "sourceRanges": ["COLA!A448:T456", "PLAN_MAESTRO", "docs/VAEP_N5_8_EXPORTACIONES_PREFLIGHT.md"],
+    "note": "N5.8.C is current after B LISTO_REAL. C is N/A_NO_NEW_PERSISTENCE based on accepted B scope and authoritative export preflight. D/E/F remain dependency-gated.",
+    "nodes": [
+      {"id": "N5.8.A", "order": 58, "dependencies": ["N5.7.H"]},
+      {"id": "N5.8.B", "order": 59, "dependencies": ["N5.8.A"]},
+      {"id": "N5.8.C", "order": 60, "dependencies": ["N5.8.B"]},
+      {"id": "N5.8.D", "order": 61, "dependencies": ["N5.8.C"]},
+      {"id": "N5.8.E", "order": 62, "dependencies": ["N5.8.D"]},
+      {"id": "N5.8.F", "order": 63, "dependencies": ["N5.8.E"]},
+      {"id": "N5.8.G", "order": 64, "dependencies": ["N5.8.F"]},
+      {"id": "N5.8.H", "order": 65, "dependencies": ["N5.8.G"]}
+    ]
+  },
+  "prearmedRoadmap": [
+    {"parent": "N5.8.C", "state": "CURRENT_CLOSURE_FASTPATH", "dependency": "N5.8.B_LISTO_REAL", "materialization": "N_A_NO_NEW_PERSISTENCE__REVIEW_FIRST__NO_FILLER"},
+    {"parent": "N5.8.D", "state": "READY_DEPENDENCY_GATED", "dependency": "N5.8.C_LISTO_REAL", "materialization": "EXPORTS_APPLICATION_SERVICES_API__ROADMAP_DERIVED"},
+    {"parent": "N5.8.E", "state": "READY_DEPENDENCY_GATED", "dependency": "N5.8.D_LISTO_REAL", "materialization": "EXPORTS_FRONTEND_UX__ROADMAP_DERIVED"},
+    {"parent": "N5.8.F", "state": "READY_DEPENDENCY_GATED", "dependency": "N5.8.E_LISTO_REAL", "materialization": "EXPORTS_RBAC_AUDIT_SECURITY_OBSERVABILITY__ROADMAP_DERIVED"}
+  ],
+  "lanes": {"J1": [], "J2": [], "J3": [], "J4": [], "J5": [], "J6": []},
+  "lastClosureFunctionalHead": "40779a570cea5bb7025fbc2681fd378f5891a3d4"
 }
