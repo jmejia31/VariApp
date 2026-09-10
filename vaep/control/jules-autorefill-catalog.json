@@ -1,8 +1,8 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
   "currentParent": "N5.3.F",
-  "generatedAt": "2026-09-10T03:28:30Z",
-  "regenerationReason": "N5.3.E_LISTO_REAL__PROMOTE_N5.3.F__ROADMAP_SCOPES_MATERIALIZED",
+  "generatedAt": "2026-09-10T03:34:00Z",
+  "regenerationReason": "N5.3.F.1_TRUSTED_TRANSPORT_IN_PROGRESS__RESERVE_ONLY__NO_DUPLICATE",
   "lastClosedParent": "N5.3.E",
   "closureReceipts": {
     "N4.11.H": "vaep/evidence/fragments/N4.11.H_LISTO_REAL_20260908T204500Z.json",
@@ -50,11 +50,11 @@
     "mode": "MATERIAL_SWARM_FIRST",
     "currentParent": "N5.3.F",
     "currentParentMaterialScopeCount": 2,
-    "currentParentReason": "N5.3.E is LISTO_REAL. Live ALEX reconciliation finds exactly two coherent non-overlapping N5.3.F scopes: audit/correlation wiring first, then focused authorization/audit contract tests after REVIEW_FIRST. No filler exists for J3-J6.",
+    "currentParentReason": "N5.3.E is LISTO_REAL. F1 is reserved on trusted J1 transport run 34433650814; ACTIVE_REAL remains false until correlated sessionId plus useful fresh activity is proven. F2 remains dependency-gated on F1 REVIEW_FIRST. No filler exists for J3-J6.",
     "nextParent": "N5.3.G",
     "nextParentParallelMaterialScopes": 0,
     "nextParentScopesNonOverlapping": true,
-    "laneRefill": "DISPATCH_F1_J1_NOW__F2_J2_AFTER_F1_REVIEW_FIRST__NO_FILLER"
+    "laneRefill": "F1_RESERVED__VERIFY_SESSION_ACTIVITY__REVIEW_FIRST__THEN_F2__NO_DUPLICATE__NO_FILLER"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
@@ -74,16 +74,18 @@
   },
   "lanes": {
     "J1": [{
-      "dispatchId": "N5-3-F-1-SALES-REPORT-AUDIT-CORRELATION-J1",
+      "dispatchId": "N5-3-F-1-SALES-REPORT-AUDIT-CORRELATION-J1-RECOVERY1",
       "taskId": "N5.3.F.1.SALES_REPORT_AUDIT_CORRELATION",
       "workerId": "J1",
       "taskAttempt": 1,
       "plannedParent": "N5.3.F",
-      "readyForDispatch": true,
-      "dispatchEligible": true,
+      "readyForDispatch": false,
+      "dispatchEligible": false,
       "fileScopeHint": "backend/src/API/Controllers/ReportesVentasController.cs",
-      "prompt": "Use only docs/VAEP_AUTHORITY.md and live Desarrollo. Add bounded read-audit/correlation integration to ReportesVentasController using the existing IAuditoriaService pattern already used by inventory reports. Preserve [Authorize], Ventas/Ver RequierePermiso, report query validation, response contracts and data semantics. Keep the write scope to this controller only; do not touch main, Production, secrets or merge PR #2. Run proportional backend build/tests and perform two self-reviews before terminal handoff.",
-      "reason": "ROADMAP_DERIVED__N5.3.E_LISTO_REAL__READY"
+      "prompt": "Trusted pre-session transport recovery is in progress. Do not redispatch while run 34433650814 is valid. ACTIVE_REAL requires correlated sessionId plus useful fresh Jules activity.",
+      "reason": "TRUSTED_TRANSPORT_IN_PROGRESS__RESERVED__ACTIVE_REAL_NOT_YET_PROVEN",
+      "workflowRunId": 34433650814,
+      "activeReal": false
     }],
     "J2": [{
       "dispatchId": "N5-3-F-2-SALES-REPORT-SECURITY-AUDIT-TESTS-J2",
