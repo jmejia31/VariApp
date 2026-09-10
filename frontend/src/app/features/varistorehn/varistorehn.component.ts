@@ -11,11 +11,12 @@ import {
   crearCatalogoEjemplo, filtrarProductos, mapearProducto, referenciasCarrito,
   restaurarCarrito, telefonoWhatsapp, totalCarrito, urlCheckoutSegura
 } from './varistorehn.catalog';
+import { VaristorehnHeaderComponent } from './varistorehn-header.component';
 import { IconoTiendaComponent, IlustracionTiendaComponent } from './varistorehn.visual';
 
 @Component({
   selector: 'app-varistorehn', standalone: true,
-  imports: [CommonModule, IconoTiendaComponent, IlustracionTiendaComponent],
+  imports: [CommonModule, VaristorehnHeaderComponent, IconoTiendaComponent, IlustracionTiendaComponent],
   templateUrl: './varistorehn.component.html',
   styleUrls: ['./varistorehn.component.scss', './varistorehn.responsive.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -62,6 +63,7 @@ export class VaristorehnComponent implements OnInit {
   readonly categorias = computed(() => [...new Set(this.productos().map(p => p.categoria))]
     .map(nombre => ({ nombre, cantidad: this.productos().filter(p => p.categoria === nombre).length,
       producto: this.productos().find(p => p.categoria === nombre)! })));
+  readonly categoriasNavegacion = computed(() => this.categorias().map(categoria => categoria.nombre));
   readonly destacados = computed(() => this.productos().filter(p => p.disponible).slice(0, 3));
   readonly resultados = computed(() => filtrarProductos(this.productos(), {
     busqueda: this.busqueda(), categoria: this.categoriaActiva(), soloDisponibles: this.soloDisponibles(),

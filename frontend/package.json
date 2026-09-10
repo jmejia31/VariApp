@@ -2,11 +2,11 @@
   "name": "inventoryapp-frontend",
   "version": "1.0.0",
   "scripts": {
-    "ng": "ng",
+    "ng": "ng serve",
     "start": "ng serve",
     "build": "ng build",
     "build:prod": "ng build --configuration production",
-    "lint": "tsc --noEmit -p tsconfig.app.json && node scripts/lint-quality.mjs && node scripts/validate-scanner-2c4.mjs",
+    "lint": "tsc --noEmit -p tsconfig.app.json && node scripts/lint-quality.mjs && node scripts/validate-scanner-2c4.mjs && node scripts/validate-varistorehn-fase1.mjs",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },

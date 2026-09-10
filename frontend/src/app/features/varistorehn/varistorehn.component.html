@@ -1,46 +1,15 @@
 <div class="storefront" id="inicio">
-  <a class="skip-link" href="#catalogo">Saltar al catálogo</a>
-
-  @if (identidad.config().encabezadoActivo) {
-    <div class="utility-bar">
-      <div class="container utility-inner">
-        <span><app-store-icon nombre="pin" /> {{ identidad.config().encabezadoTexto || identidad.config().eslogan }}</span>
-        <a href="#contacto">Atención y contacto</a>
-      </div>
-    </div>
-  }
-
-  <header class="store-header">
-    <div class="container header-main">
-      <a class="brand" href="#inicio" [attr.aria-label]="identidad.nombreSistema() + ', inicio'">
-        @if (imagenValida(identidad.logoUrl())) {
-          <img [src]="identidad.logoUrl()" alt="" width="46" height="46" (error)="errorImagen(identidad.logoUrl())">
-        } @else {
-          <span class="brand-mark" aria-hidden="true">{{ identidad.nombreSistema().charAt(0) }}</span>
-        }
-        <span><strong>{{ identidad.nombreSistema() }}</strong><small>{{ identidad.config().eslogan || 'Tu tienda en línea' }}</small></span>
-      </a>
-
-      <form class="search-box" role="search" (submit)="irCatalogo($event)">
-        <app-store-icon nombre="buscar" />
-        <label class="sr-only" for="buscar-productos">Buscar productos, marcas o modelos</label>
-        <input #buscador id="buscar-productos" type="search" autocomplete="off" placeholder="¿Qué estás buscando?" [value]="busqueda()" (input)="buscar(buscador.value)">
-        <button type="submit" aria-label="Buscar"><app-store-icon nombre="flecha" /></button>
-      </form>
-
-      <button class="cart-trigger" type="button" (click)="abrirCarrito()" [attr.aria-label]="'Abrir carrito con ' + totalUnidades() + ' unidades'">
-        <span class="cart-icon"><app-store-icon nombre="bolsa" /><b>{{ totalUnidades() }}</b></span>
-        <span>Mi carrito<small>{{ moneda(totalCarrito()) }}</small></span>
-      </button>
-    </div>
-
-    <nav class="container store-nav" aria-label="Categorías">
-      <button type="button" class="nav-all" (click)="seleccionarCategoria('', true)"><app-store-icon nombre="rejilla" /> Todas las categorías</button>
-      @for (categoria of categorias().slice(0, 6); track categoria.nombre) {
-        <button type="button" [class.active]="categoriaActiva() === categoria.nombre" (click)="seleccionarCategoria(categoria.nombre, true)">{{ categoria.nombre }}</button>
-      }
-    </nav>
-  </header>
+  <app-varistorehn-header
+    [busqueda]="busqueda()"
+    [categorias]="categoriasNavegacion()"
+    [categoriaActiva]="categoriaActiva()"
+    [totalUnidades]="totalUnidades()"
+    [subtotal]="totalCarrito()"
+    [permiteWhatsapp]="permiteWhatsapp()"
+    (busquedaActualizada)="buscar($event)"
+    (buscarSolicitado)="irCatalogo()"
+    (categoriaSeleccionada)="seleccionarCategoria($event, true)"
+    (carritoSolicitado)="abrirCarrito()" />
 
   <main>
     @if (controlesVistaPrevia) {
