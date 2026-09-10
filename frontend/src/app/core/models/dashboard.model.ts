@@ -16,6 +16,20 @@ export interface VentaResumen {
   fecha: string;
 }
 
+export interface DashboardKpiConfiguracion {
+  metricKey: string;
+  habilitado: boolean;
+  orden: number;
+  etiquetaVisible?: string | null;
+}
+
+export interface DashboardKpiResuelto {
+  metricKey: string;
+  orden: number;
+  etiquetaVisible?: string | null;
+  valor: number;
+}
+
 export interface DashboardResumen {
   totalProductos: number;
   totalUnidades: number;
