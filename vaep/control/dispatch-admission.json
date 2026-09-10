@@ -1,6 +1,6 @@
 {
   "newDispatchAdmission": "OPEN",
   "allowExistingActiveSessions": true,
-  "reason": "OPEN_ONLY_INVARIANT__TASK_LANE_GATES_ONLY__GLOBAL_NON_OPEN_STATE_PROHIBITED",
-  "updatedAtUtc": "2026-09-10T01:11:00Z"
+  "reason": "OPEN_ONLY_PRIMARY_CLOSURE_CHAIN_TRIGGER__N5.3.D_LISTO_REAL",
+  "updatedAtUtc": "2026-09-10T02:08:00Z"
 }
