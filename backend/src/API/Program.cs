@@ -142,6 +142,7 @@ builder.Services.AddScoped<IMetodoPagoService, MetodoPagoService>();
 builder.Services.AddScoped<IEmpresaConfiguracionRepository, EmpresaConfiguracionRepository>();
 builder.Services.AddScoped<IRevisionFinancieraRepository, RevisionFinancieraRepository>();
 builder.Services.AddScoped<IVentaService, VentaService>();
+builder.Services.AddScoped<IReporteVentasService, ReporteVentasService>();
 builder.Services.AddScoped<IFacturaService, FacturaService>();
 builder.Services.AddScoped<IFacturaPdfService, QuestPdfFacturaService>();
 builder.Services.AddScoped<IFacturaCompartirRepository, FacturaCompartirRepository>();
