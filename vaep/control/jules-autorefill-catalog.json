@@ -1,8 +1,8 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
   "currentParent": "N5.3.D",
-  "generatedAt": "2026-09-10T00:27:20Z",
-  "regenerationReason": "N5.3.D_D1_D2_REVIEW_ACCEPTED__ENABLE_D3_ONLY",
+  "generatedAt": "2026-09-10T00:41:34Z",
+  "regenerationReason": "N5.3.D_D1_D2_D3_REVIEW_FIRST_ACCEPTED__D4_PREARMED__HEAD_FREEZE_CAUSAL",
   "lastClosedParent": "N5.3.C",
   "closureReceipts": {
     "N4.11.H": "vaep/evidence/fragments/N4.11.H_LISTO_REAL_20260908T204500Z.json",
@@ -42,231 +42,55 @@
     "requireDistinctWriteScopesWhenParallel": true,
     "lowParallelismAction": "EXPLAIN_OR_SUBDIVIDE_MATERIAL_SCOPE__NO_BUSYWORK",
     "activeWorkerCount": 6,
-    "activeWorkers": [
-      "J1",
-      "J2",
-      "J3",
-      "J4",
-      "J5",
-      "J6"
-    ]
+    "activeWorkers": ["J1", "J2", "J3", "J4", "J5", "J6"]
   },
   "throughputPlan": {
     "mode": "MATERIAL_SWARM_FIRST",
     "currentParent": "N5.3.D",
     "currentParentMaterialScopeCount": 1,
-    "currentParentReason": "N5.3.D.1 and N5.3.D.2 are REVIEW_FIRST accepted after CHATGPT_VAEP takeover. N5.3.D.3 is now the only dependency-valid material scope; D4-D6 remain sibling-gated. No additional busywork is fabricated.",
+    "currentParentReason": "N5.3.D.1-.3 are REVIEW_FIRST accepted. N5.3.D.4 is now the only dependency-valid material scope, but a critical exact-head causal gate is pending after D3 integration; D4 is prearmed and no manifest may be published during HEAD_FREEZE_CAUSAL.",
     "nextParent": "N5.3.E",
     "nextParentParallelMaterialScopes": 0,
     "nextParentScopesNonOverlapping": true,
-    "laneRefill": "REVIEW_FIRST_CHAIN__D1_D2_ACCEPTED__D3_READY_ONLY__D4_D6_GATED"
+    "laneRefill": "REVIEW_FIRST_CHAIN__D1_D2_D3_ACCEPTED__D4_PREARMED__HEAD_FREEZE_CAUSAL__D5_D6_GATED"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
     "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
-    "sourceRanges": [
-      "COLA!A408:T415",
-      "PLAN_MAESTRO!A53:L55",
-      "docs/qa/N5_3_A_API_CONTRACT_PREFLIGHT.md",
-      "docs/qa/N5_3_A_BACKEND_DATA_PREFLIGHT.md"
-    ],
+    "sourceRanges": ["COLA!A408:T415", "PLAN_MAESTRO!A53:L55", "docs/qa/N5_3_A_API_CONTRACT_PREFLIGHT.md", "docs/qa/N5_3_A_BACKEND_DATA_PREFLIGHT.md"],
     "note": "Dependency order derived from live Plan/COLA. N5.3.C is LISTO_REAL; N5.3.D is current. Next roadmap node in this catalog is N5.3.E.",
     "nodes": [
-      {
-        "id": "N5.3.A",
-        "order": 18,
-        "type": "MICROTAREA",
-        "dependencies": [
-          "N5.1.H",
-          "GATE-N4"
-        ],
-        "phaseGate": "GATE-N4"
-      },
-      {
-        "id": "N5.3.B",
-        "order": 19,
-        "type": "MICROTAREA",
-        "dependencies": [
-          "N5.3.A"
-        ],
-        "phaseGate": "GATE-N4"
-      },
-      {
-        "id": "N5.3.C",
-        "order": 20,
-        "type": "MICROTAREA",
-        "dependencies": [
-          "N5.3.B"
-        ],
-        "phaseGate": "GATE-N4"
-      },
-      {
-        "id": "N5.3.D",
-        "order": 21,
-        "type": "MICROTAREA",
-        "dependencies": [
-          "N5.3.C"
-        ],
-        "phaseGate": "GATE-N4"
-      },
-      {
-        "id": "N5.3.E",
-        "order": 22,
-        "type": "MICROTAREA",
-        "dependencies": [
-          "N5.3.D"
-        ],
-        "phaseGate": "GATE-N4"
-      },
-      {
-        "id": "N5.3.F",
-        "order": 23,
-        "type": "MICROTAREA",
-        "dependencies": [
-          "N5.3.E"
-        ],
-        "phaseGate": "GATE-N4"
-      },
-      {
-        "id": "N5.3.G",
-        "order": 24,
-        "type": "MICROTAREA",
-        "dependencies": [
-          "N5.3.F"
-        ],
-        "phaseGate": "GATE-N4"
-      },
-      {
-        "id": "N5.3.H",
-        "order": 25,
-        "type": "MICROTAREA",
-        "dependencies": [
-          "N5.3.G"
-        ],
-        "phaseGate": "GATE-N4"
-      }
+      {"id":"N5.3.A","order":18,"type":"MICROTAREA","dependencies":["N5.1.H","GATE-N4"],"phaseGate":"GATE-N4"},
+      {"id":"N5.3.B","order":19,"type":"MICROTAREA","dependencies":["N5.3.A"],"phaseGate":"GATE-N4"},
+      {"id":"N5.3.C","order":20,"type":"MICROTAREA","dependencies":["N5.3.B"],"phaseGate":"GATE-N4"},
+      {"id":"N5.3.D","order":21,"type":"MICROTAREA","dependencies":["N5.3.C"],"phaseGate":"GATE-N4"},
+      {"id":"N5.3.E","order":22,"type":"MICROTAREA","dependencies":["N5.3.D"],"phaseGate":"GATE-N4"},
+      {"id":"N5.3.F","order":23,"type":"MICROTAREA","dependencies":["N5.3.E"],"phaseGate":"GATE-N4"},
+      {"id":"N5.3.G","order":24,"type":"MICROTAREA","dependencies":["N5.3.F"],"phaseGate":"GATE-N4"},
+      {"id":"N5.3.H","order":25,"type":"MICROTAREA","dependencies":["N5.3.G"],"phaseGate":"GATE-N4"}
     ]
   },
   "lanes": {
     "J1": [
-      {
-        "dispatchId": "N5-3-C-1-VENTA-REPORT-INDEX-MODEL-J1",
-        "taskId": "N5.3.C.1.VENTA_REPORT_INDEX_MODEL",
-        "workerId": "J1",
-        "taskAttempt": 1,
-        "plannedParent": "N5.3.C",
-        "readyForDispatch": false,
-        "dispatchEligible": false,
-        "fileScopeHint": "backend/src/Infrastructure/Persistence/Configurations/VentaConfiguration.cs",
-        "prompt": "Resolved by CHATGPT_VAEP REVIEW_FIRST/QA takeover; do not redispatch.",
-        "reason": "CLOSED_BY_N5.3.C_LISTO_REAL_RECEIPT"
-      },
-      {
-        "dispatchId": "N5-3-D-1-SALES-REPORT-RESULT-CONTRACTS-J1",
-        "taskId": "N5.3.D.1.SALES_REPORT_RESULT_CONTRACTS",
-        "workerId": "J1",
-        "taskAttempt": 1,
-        "plannedParent": "N5.3.D",
-        "readyForDispatch": false,
-        "dispatchEligible": false,
-        "fileScopeHint": "backend/src/Application/DTOs/ReporteVentasResultadoDto.cs",
-        "prompt": "Resolved by CHATGPT_VAEP QA takeover and REVIEW_FIRST; do not redispatch. Late Jules output is forensic-only.",
-        "reason": "REVIEW_FIRST_ACCEPTED__QA_TAKEOVER__NO_REDISPATCH"
-      }
+      {"dispatchId":"N5-3-C-1-VENTA-REPORT-INDEX-MODEL-J1","taskId":"N5.3.C.1.VENTA_REPORT_INDEX_MODEL","workerId":"J1","taskAttempt":1,"plannedParent":"N5.3.C","readyForDispatch":false,"dispatchEligible":false,"fileScopeHint":"backend/src/Infrastructure/Persistence/Configurations/VentaConfiguration.cs","prompt":"Resolved by CHATGPT_VAEP REVIEW_FIRST/QA takeover; do not redispatch.","reason":"CLOSED_BY_N5.3.C_LISTO_REAL_RECEIPT"},
+      {"dispatchId":"N5-3-D-1-SALES-REPORT-RESULT-CONTRACTS-J1","taskId":"N5.3.D.1.SALES_REPORT_RESULT_CONTRACTS","workerId":"J1","taskAttempt":1,"plannedParent":"N5.3.D","readyForDispatch":false,"dispatchEligible":false,"fileScopeHint":"backend/src/Application/DTOs/ReporteVentasResultadoDto.cs","prompt":"Resolved by CHATGPT_VAEP QA takeover and REVIEW_FIRST; do not redispatch. Late Jules output is forensic-only.","reason":"REVIEW_FIRST_ACCEPTED__QA_TAKEOVER__NO_REDISPATCH"}
     ],
     "J2": [
-      {
-        "dispatchId": "N5-3-C-2-VENTA-DETAIL-REPORT-INDEX-MODEL-J2",
-        "taskId": "N5.3.C.2.VENTA_DETAIL_REPORT_INDEX_MODEL",
-        "workerId": "J2",
-        "taskAttempt": 1,
-        "plannedParent": "N5.3.C",
-        "readyForDispatch": false,
-        "dispatchEligible": false,
-        "fileScopeHint": "backend/src/Infrastructure/Persistence/Configurations/VentaDetalleConfiguration.cs",
-        "prompt": "Resolved by CHATGPT_VAEP REVIEW_FIRST/QA takeover; do not redispatch.",
-        "reason": "CLOSED_BY_N5.3.C_LISTO_REAL_RECEIPT"
-      },
-      {
-        "dispatchId": "N5-3-D-2-SALES-REPORT-QUERY-RULES-J2",
-        "taskId": "N5.3.D.2.SALES_REPORT_QUERY_RULES",
-        "workerId": "J2",
-        "taskAttempt": 1,
-        "plannedParent": "N5.3.D",
-        "readyForDispatch": false,
-        "dispatchEligible": false,
-        "fileScopeHint": "backend/src/Application/Common/ReporteVentasQueryRules.cs",
-        "prompt": "Resolved by CHATGPT_VAEP QA takeover and REVIEW_FIRST; do not redispatch. Any late Jules output is forensic-only.",
-        "reason": "REVIEW_FIRST_ACCEPTED__QA_TAKEOVER__NO_REDISPATCH"
-      }
+      {"dispatchId":"N5-3-C-2-VENTA-DETAIL-REPORT-INDEX-MODEL-J2","taskId":"N5.3.C.2.VENTA_DETAIL_REPORT_INDEX_MODEL","workerId":"J2","taskAttempt":1,"plannedParent":"N5.3.C","readyForDispatch":false,"dispatchEligible":false,"fileScopeHint":"backend/src/Infrastructure/Persistence/Configurations/VentaDetalleConfiguration.cs","prompt":"Resolved by CHATGPT_VAEP REVIEW_FIRST/QA takeover; do not redispatch.","reason":"CLOSED_BY_N5.3.C_LISTO_REAL_RECEIPT"},
+      {"dispatchId":"N5-3-D-2-SALES-REPORT-QUERY-RULES-J2","taskId":"N5.3.D.2.SALES_REPORT_QUERY_RULES","workerId":"J2","taskAttempt":1,"plannedParent":"N5.3.D","readyForDispatch":false,"dispatchEligible":false,"fileScopeHint":"backend/src/Application/Common/ReporteVentasQueryRules.cs","prompt":"Resolved by CHATGPT_VAEP QA takeover and REVIEW_FIRST; do not redispatch. Any late Jules output is forensic-only.","reason":"REVIEW_FIRST_ACCEPTED__QA_TAKEOVER__NO_REDISPATCH"}
     ],
     "J3": [
-      {
-        "dispatchId": "N5-3-D-3-SALES-REPORT-SERVICE-CONTRACT-J3",
-        "taskId": "N5.3.D.3.SALES_REPORT_SERVICE_CONTRACT",
-        "workerId": "J3",
-        "taskAttempt": 1,
-        "plannedParent": "N5.3.D",
-        "readyForDispatch": true,
-        "dispatchEligible": true,
-        "fileScopeHint": "backend/src/Application/Interfaces/IReporteVentasService.cs",
-        "prompt": "After N5.3.D.1 result contracts are REVIEW_FIRST accepted, define the narrow sales-report service contract for summary and paged detail using ReporteVentasFiltroDto and accepted result DTOs. No implementation, controller, persistence, export or security changes. Desarrollo only.",
-        "reason": "CURRENT_PARENT__D1_REVIEW_FIRST_ACCEPTED__MATERIAL_SCOPE"
-      }
+      {"dispatchId":"N5-3-D-3-SALES-REPORT-SERVICE-CONTRACT-J3","taskId":"N5.3.D.3.SALES_REPORT_SERVICE_CONTRACT","workerId":"J3","taskAttempt":1,"plannedParent":"N5.3.D","readyForDispatch":false,"dispatchEligible":false,"fileScopeHint":"backend/src/Application/Interfaces/IReporteVentasService.cs","prompt":"Resolved by CHATGPT_VAEP REVIEW_FIRST evidence-gap takeover at 2e747a2cb104e31ac2a2374391ad780042f3abd5; no R2 solely for evidence gaps; do not redispatch.","reason":"REVIEW_FIRST_ACCEPTED__EVIDENCE_GAP_TAKEOVER__NO_REDISPATCH"}
     ],
     "J4": [
-      {
-        "dispatchId": "N5-3-D-4-SALES-REPORT-QUERY-SERVICE-J4",
-        "taskId": "N5.3.D.4.SALES_REPORT_QUERY_SERVICE",
-        "workerId": "J4",
-        "taskAttempt": 1,
-        "plannedParent": "N5.3.D",
-        "readyForDispatch": false,
-        "dispatchEligible": false,
-        "fileScopeHint": "backend/src/Infrastructure/Services/ReporteVentasService.cs",
-        "prompt": "After N5.3.D.1-.3 are REVIEW_FIRST accepted, implement the server-side sales report query service with projection/grouping, IUsuarioScopeService fail-closed row scope, historical detail snapshots, explicit current-category semantics, multi-warehouse branch-at-detail semantics and no ConIncludes overfetch. No controller/export/frontend changes. Run proportional backend tests and two self-reviews. Desarrollo only.",
-        "reason": "NEXT_PARENT_PREARM__MATERIAL__SIBLING_DEPENDENCIES_N5.3.D.1_N5.3.D.2_N5.3.D.3"
-      }
+      {"dispatchId":"N5-3-D-4-SALES-REPORT-QUERY-SERVICE-J4","taskId":"N5.3.D.4.SALES_REPORT_QUERY_SERVICE","workerId":"J4","taskAttempt":1,"plannedParent":"N5.3.D","readyForDispatch":true,"dispatchEligible":false,"fileScopeHint":"backend/src/Infrastructure/Services/ReporteVentasService.cs","prompt":"After N5.3.D.1-.3 are REVIEW_FIRST accepted, implement the server-side sales report query service with projection/grouping, IUsuarioScopeService fail-closed row scope, historical detail snapshots, explicit current-category semantics, multi-warehouse branch-at-detail semantics and no ConIncludes overfetch. No controller/export/frontend changes. Run proportional backend tests and two self-reviews. Desarrollo only.","reason":"CURRENT_PARENT__D1_D2_D3_REVIEW_FIRST_ACCEPTED__PREARMED__HEAD_FREEZE_CAUSAL"}
     ],
     "J5": [
-      {
-        "dispatchId": "N5-3-D-5-SALES-REPORT-API-J5",
-        "taskId": "N5.3.D.5.SALES_REPORT_API",
-        "workerId": "J5",
-        "taskAttempt": 1,
-        "plannedParent": "N5.3.D",
-        "readyForDispatch": false,
-        "dispatchEligible": false,
-        "fileScopeHint": "backend/src/API/Controllers/ReportesVentasController.cs",
-        "prompt": "After the N5.3.D service contract/implementation are REVIEW_FIRST accepted, expose bounded sales reporting summary/detail endpoints following existing report-controller patterns. Preserve authorization and fail-closed row scope; do not implement export (N5.3.H), frontend, migrations or invent new permission symbols. Run proportional controller tests and two self-reviews. Desarrollo only.",
-        "reason": "NEXT_PARENT_PREARM__MATERIAL__SIBLING_DEPENDENCIES_N5.3.D.3_N5.3.D.4"
-      }
+      {"dispatchId":"N5-3-D-5-SALES-REPORT-API-J5","taskId":"N5.3.D.5.SALES_REPORT_API","workerId":"J5","taskAttempt":1,"plannedParent":"N5.3.D","readyForDispatch":false,"dispatchEligible":false,"fileScopeHint":"backend/src/API/Controllers/ReportesVentasController.cs","prompt":"After the N5.3.D service contract/implementation are REVIEW_FIRST accepted, expose bounded sales reporting summary/detail endpoints following existing report-controller patterns. Preserve authorization and fail-closed row scope; do not implement export (N5.3.H), frontend, migrations or invent new permission symbols. Run proportional controller tests and two self-reviews. Desarrollo only.","reason":"NEXT_PARENT_PREARM__MATERIAL__SIBLING_DEPENDENCIES_N5.3.D.3_N5.3.D.4"}
     ],
     "J6": [
-      {
-        "dispatchId": "N5-3-C-3-REPORT-INDEX-MIGRATION-J6",
-        "taskId": "N5.3.C.3.REPORT_INDEX_MIGRATION",
-        "workerId": "J6",
-        "taskAttempt": 1,
-        "plannedParent": "N5.3.C",
-        "readyForDispatch": false,
-        "dispatchEligible": false,
-        "fileScopeHint": "backend/src/Infrastructure/Migrations/",
-        "prompt": "Resolved by CHATGPT_VAEP QA takeover after transport stall; do not redispatch. Late remote output is evidence-only.",
-        "reason": "CLOSED_BY_N5.3.C_LISTO_REAL_RECEIPT"
-      },
-      {
-        "dispatchId": "N5-3-D-6-SALES-REPORT-API-CONTRACT-TESTS-J6",
-        "taskId": "N5.3.D.6.SALES_REPORT_API_CONTRACT_TESTS",
-        "workerId": "J6",
-        "taskAttempt": 1,
-        "plannedParent": "N5.3.D",
-        "readyForDispatch": false,
-        "dispatchEligible": false,
-        "fileScopeHint": "backend/tests/InventoryApp.Tests/API/Controllers/ReportesVentasContractTests.cs",
-        "prompt": "After N5.3.D API endpoints are REVIEW_FIRST accepted, add bounded contract tests for non-admin forged seller scope denial, date-range validation, multi-warehouse branch semantics, historical snapshots/null legacy identities, paging and summary/detail consistency. No production code, exports or frontend changes. Desarrollo only.",
-        "reason": "NEXT_PARENT_PREARM__MATERIAL__SIBLING_DEPENDENCIES_N5.3.D.4_N5.3.D.5"
-      }
+      {"dispatchId":"N5-3-C-3-REPORT-INDEX-MIGRATION-J6","taskId":"N5.3.C.3.REPORT_INDEX_MIGRATION","workerId":"J6","taskAttempt":1,"plannedParent":"N5.3.C","readyForDispatch":false,"dispatchEligible":false,"fileScopeHint":"backend/src/Infrastructure/Migrations/","prompt":"Resolved by CHATGPT_VAEP QA takeover after transport stall; do not redispatch. Late remote output is evidence-only.","reason":"CLOSED_BY_N5.3.C_LISTO_REAL_RECEIPT"},
+      {"dispatchId":"N5-3-D-6-SALES-REPORT-API-CONTRACT-TESTS-J6","taskId":"N5.3.D.6.SALES_REPORT_API_CONTRACT_TESTS","workerId":"J6","taskAttempt":1,"plannedParent":"N5.3.D","readyForDispatch":false,"dispatchEligible":false,"fileScopeHint":"backend/tests/InventoryApp.Tests/API/Controllers/ReportesVentasContractTests.cs","prompt":"After N5.3.D API endpoints are REVIEW_FIRST accepted, add bounded contract tests for non-admin forged seller scope denial, date-range validation, multi-warehouse branch semantics, historical snapshots/null legacy identities, paging and summary/detail consistency. No production code, exports or frontend changes. Desarrollo only.","reason":"NEXT_PARENT_PREARM__MATERIAL__SIBLING_DEPENDENCIES_N5.3.D.4_N5.3.D.5"}
     ]
   },
   "lastClosureFunctionalHead": "4f245afc9293436a139839c9b8438417ba4f436a"
