@@ -1,6 +1,8 @@
+using InventoryApp.API.Filters;
 using InventoryApp.Application.DTOs;
 using InventoryApp.Application.Interfaces;
 using InventoryApp.Domain.Entities;
+using InventoryApp.Domain.Enums;
 using InventoryApp.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,6 +15,21 @@ namespace InventoryApp.API.Controllers;
 [Route("dashboard/kpis")]
 public sealed class DashboardKpiConfiguracionController : ControllerBase
 {
+    private static readonly string[] MetricOrder =
+    {
+        DashboardKpiMetricKeys.IngresosMes,
+        DashboardKpiMetricKeys.VentasMes,
+        DashboardKpiMetricKeys.ComprasMes,
+        DashboardKpiMetricKeys.TotalProductos,
+        DashboardKpiMetricKeys.TotalUnidades,
+        DashboardKpiMetricKeys.ValorInventario,
+        DashboardKpiMetricKeys.UtilidadBruta,
+        DashboardKpiMetricKeys.BalanceOperativo,
+        DashboardKpiMetricKeys.CuentasPorCobrar,
+        DashboardKpiMetricKeys.CuentasPorPagar,
+        DashboardKpiMetricKeys.ProductosStockBajo
+    };
+
     private readonly AppDbContext _db;
     private readonly IUsuarioScopeService _usuarioScope;
     private readonly IDashboardService _dashboardService;
@@ -28,6 +45,7 @@ public sealed class DashboardKpiConfiguracionController : ControllerBase
     }
 
     [HttpGet("configuracion")]
+    [RequierePermiso(ModuloSistema.Dashboard, AccionPermiso.Ver)]
     public async Task<ActionResult<IReadOnlyList<DashboardKpiConfiguracionDto>>> GetConfiguracionAsync(
         CancellationToken cancellationToken)
     {
@@ -37,43 +55,11 @@ public sealed class DashboardKpiConfiguracionController : ControllerBase
             return Forbid();
         }
 
-        var configuracionUsuario = await _db.DashboardKpiConfiguraciones
-            .AsNoTracking()
-            .Where(x => x.UsuarioId == scope.UsuarioId && x.RolId == null)
-            .OrderBy(x => x.Orden)
-            .ThenBy(x => x.MetricKey)
-            .Select(x => new DashboardKpiConfiguracionDto
-            {
-                MetricKey = x.MetricKey,
-                Habilitado = x.Habilitado,
-                Orden = x.Orden,
-                EtiquetaVisible = x.EtiquetaVisible
-            })
-            .ToListAsync(cancellationToken);
-
-        if (configuracionUsuario.Count > 0)
-        {
-            return Ok(configuracionUsuario);
-        }
-
-        var configuracionRol = await _db.DashboardKpiConfiguraciones
-            .AsNoTracking()
-            .Where(x => x.UsuarioId == null && x.RolId == scope.RolId)
-            .OrderBy(x => x.Orden)
-            .ThenBy(x => x.MetricKey)
-            .Select(x => new DashboardKpiConfiguracionDto
-            {
-                MetricKey = x.MetricKey,
-                Habilitado = x.Habilitado,
-                Orden = x.Orden,
-                EtiquetaVisible = x.EtiquetaVisible
-            })
-            .ToListAsync(cancellationToken);
-
-        return Ok(configuracionRol);
+        return Ok(await ObtenerConfiguracionEfectivaAsync(scope, cancellationToken));
     }
 
     [HttpPut("configuracion")]
+    [RequierePermiso(ModuloSistema.Dashboard, AccionPermiso.Ver)]
     public async Task<ActionResult<IReadOnlyList<DashboardKpiConfiguracionDto>>> PutConfiguracionAsync(
         [FromBody] IReadOnlyList<DashboardKpiConfiguracionDto>? configuracion,
         CancellationToken cancellationToken)
@@ -107,6 +93,11 @@ public sealed class DashboardKpiConfiguracionController : ControllerBase
             if (item.Orden < 0)
             {
                 return BadRequest(new { message = $"Orden inválido para {item.MetricKey}." });
+            }
+
+            if (item.EtiquetaVisible?.Trim().Length > 150)
+            {
+                return BadRequest(new { message = $"EtiquetaVisible excede 150 caracteres para {item.MetricKey}." });
             }
         }
 
@@ -148,23 +139,11 @@ public sealed class DashboardKpiConfiguracionController : ControllerBase
         }
 
         await _db.SaveChangesAsync(cancellationToken);
-
-        var resultado = configuracion
-            .OrderBy(x => x.Orden)
-            .ThenBy(x => x.MetricKey)
-            .Select(x => new DashboardKpiConfiguracionDto
-            {
-                MetricKey = x.MetricKey,
-                Habilitado = x.Habilitado,
-                Orden = x.Orden,
-                EtiquetaVisible = NormalizarEtiqueta(x.EtiquetaVisible)
-            })
-            .ToList();
-
-        return Ok(resultado);
+        return Ok(await ObtenerConfiguracionEfectivaAsync(scope, cancellationToken));
     }
 
     [HttpGet("resueltos")]
+    [RequierePermiso(ModuloSistema.Dashboard, AccionPermiso.Ver)]
     public async Task<ActionResult<IReadOnlyList<object>>> GetKpisResueltosAsync(
         CancellationToken cancellationToken)
     {
@@ -174,14 +153,7 @@ public sealed class DashboardKpiConfiguracionController : ControllerBase
             return Forbid();
         }
 
-        var configuracionResult = await GetConfiguracionAsync(cancellationToken);
-        var configuracion = configuracionResult.Value;
-        if (configuracion is null && configuracionResult.Result is OkObjectResult ok)
-        {
-            configuracion = ok.Value as IReadOnlyList<DashboardKpiConfiguracionDto>;
-        }
-
-        configuracion ??= Array.Empty<DashboardKpiConfiguracionDto>();
+        var configuracion = await ObtenerConfiguracionEfectivaAsync(scope, cancellationToken);
         var resumen = await _dashboardService.GetResumenAsync();
 
         var valores = new Dictionary<string, object>(StringComparer.Ordinal)
@@ -215,19 +187,46 @@ public sealed class DashboardKpiConfiguracionController : ControllerBase
         return Ok(result);
     }
 
+    private async Task<IReadOnlyList<DashboardKpiConfiguracionDto>> ObtenerConfiguracionEfectivaAsync(
+        UsuarioScopeActual scope,
+        CancellationToken cancellationToken)
+    {
+        var rows = await _db.DashboardKpiConfiguraciones
+            .AsNoTracking()
+            .Where(x =>
+                (x.UsuarioId == scope.UsuarioId && x.RolId == null) ||
+                (x.UsuarioId == null && x.RolId == scope.RolId))
+            .ToListAsync(cancellationToken);
+
+        var user = rows
+            .Where(x => x.UsuarioId == scope.UsuarioId)
+            .ToDictionary(x => x.MetricKey, StringComparer.Ordinal);
+        var role = rows
+            .Where(x => x.RolId == scope.RolId)
+            .ToDictionary(x => x.MetricKey, StringComparer.Ordinal);
+
+        return MetricOrder
+            .Select((metricKey, defaultOrder) =>
+            {
+                var row = user.GetValueOrDefault(metricKey) ?? role.GetValueOrDefault(metricKey);
+                return new DashboardKpiConfiguracionDto
+                {
+                    MetricKey = metricKey,
+                    Habilitado = row?.Habilitado ?? true,
+                    Orden = row?.Orden ?? defaultOrder,
+                    EtiquetaVisible = row?.EtiquetaVisible
+                };
+            })
+            .OrderBy(x => x.Orden)
+            .ThenBy(x => x.MetricKey)
+            .ToList();
+    }
+
     private async Task<UsuarioScopeActual?> ResolverScopeAsync()
     {
         return await _usuarioScope.ObtenerActualAsync();
     }
 
-    private static string? NormalizarEtiqueta(string? value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return null;
-        }
-
-        var trimmed = value.Trim();
-        return trimmed.Length <= 120 ? trimmed : trimmed[..120];
-    }
+    private static string? NormalizarEtiqueta(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 }
