@@ -1,0 +1,12 @@
+{
+  "dispatchId": "N5-3-F-2-SALES-REPORT-SECURITY-AUDIT-TESTS-J2-RECOVERY1",
+  "taskId": "N5.3.F.2.SALES_REPORT_SECURITY_AUDIT_TESTS",
+  "workerId": "J2",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "recoveryOf": "vaep/jules-b/dispatch/N5-3-F-2-SALES-REPORT-SECURITY-AUDIT-TESTS-J2.json",
+  "recoveryReason": "ATTEMPT1_PRE_SESSION_INVALID_REDISPATCH__ORIGINAL_DISPATCH_COMMIT_CHANGED_CONTROL_PLANE_WITH_MANIFEST__NO_CONTENT_ATTEMPT_CONSUMED",
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/API/Controllers/ReportesVentasContractTests.cs",
+  "prompt": "Use only docs/VAEP_AUTHORITY.md and live Desarrollo. Recover the same N5.3.F.2 semantic facet after the prior dispatch failed transport preflight before session because its commit was not append-only; content attempt remains ATTEMPT1. N5.3.F.1 REVIEW_FIRST is accepted after controller takeover. Add focused contract tests for sales report endpoints covering authorization/permission invariants, anti-scope-forgery behavior where applicable, and audit/correlation integration. Reuse the existing production implementation; do not change production code. Keep scope to backend/tests/InventoryApp.Tests/API/Controllers/ReportesVentasContractTests.cs, run proportional backend tests, perform two independent self-reviews, and preserve existing response/query-validation semantics. Do not touch main, Production, secrets, or merge PR #2.",
+  "primaryBaseHead": "76a87eae4a3a152791a9b7df13d0f8821af2b29c"
+}
