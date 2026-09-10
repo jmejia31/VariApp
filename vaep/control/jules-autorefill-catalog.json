@@ -1,8 +1,8 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
   "currentParent": "N5.3.D",
-  "generatedAt": "2026-09-10T00:41:34Z",
-  "regenerationReason": "N5.3.D_D1_D2_D3_REVIEW_FIRST_ACCEPTED__D4_PREARMED__HEAD_FREEZE_CAUSAL",
+  "generatedAt": "2026-09-10T00:46:10Z",
+  "regenerationReason": "N5.3.D_D1_D2_D3_REVIEW_FIRST_AND_D3_CAUSAL_BACKEND_GATE_ACCEPTED__ENABLE_D4_ONLY",
   "lastClosedParent": "N5.3.C",
   "closureReceipts": {
     "N4.11.H": "vaep/evidence/fragments/N4.11.H_LISTO_REAL_20260908T204500Z.json",
@@ -48,11 +48,11 @@
     "mode": "MATERIAL_SWARM_FIRST",
     "currentParent": "N5.3.D",
     "currentParentMaterialScopeCount": 1,
-    "currentParentReason": "N5.3.D.1-.3 are REVIEW_FIRST accepted. N5.3.D.4 is now the only dependency-valid material scope, but a critical exact-head causal gate is pending after D3 integration; D4 is prearmed and no manifest may be published during HEAD_FREEZE_CAUSAL.",
+    "currentParentReason": "N5.3.D.1-.3 are REVIEW_FIRST accepted and D3 exact functional-head Backend Release/non-integration tests are SUCCESS. N5.3.D.4 is the only dependency-valid material scope; D5-D6 remain sibling-gated. No additional busywork is fabricated.",
     "nextParent": "N5.3.E",
     "nextParentParallelMaterialScopes": 0,
     "nextParentScopesNonOverlapping": true,
-    "laneRefill": "REVIEW_FIRST_CHAIN__D1_D2_D3_ACCEPTED__D4_PREARMED__HEAD_FREEZE_CAUSAL__D5_D6_GATED"
+    "laneRefill": "REVIEW_FIRST_CHAIN__D1_D2_D3_ACCEPTED__D3_CAUSAL_GATE_SUCCESS__D4_READY_ONLY__D5_D6_GATED"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
@@ -80,10 +80,10 @@
       {"dispatchId":"N5-3-D-2-SALES-REPORT-QUERY-RULES-J2","taskId":"N5.3.D.2.SALES_REPORT_QUERY_RULES","workerId":"J2","taskAttempt":1,"plannedParent":"N5.3.D","readyForDispatch":false,"dispatchEligible":false,"fileScopeHint":"backend/src/Application/Common/ReporteVentasQueryRules.cs","prompt":"Resolved by CHATGPT_VAEP QA takeover and REVIEW_FIRST; do not redispatch. Any late Jules output is forensic-only.","reason":"REVIEW_FIRST_ACCEPTED__QA_TAKEOVER__NO_REDISPATCH"}
     ],
     "J3": [
-      {"dispatchId":"N5-3-D-3-SALES-REPORT-SERVICE-CONTRACT-J3","taskId":"N5.3.D.3.SALES_REPORT_SERVICE_CONTRACT","workerId":"J3","taskAttempt":1,"plannedParent":"N5.3.D","readyForDispatch":false,"dispatchEligible":false,"fileScopeHint":"backend/src/Application/Interfaces/IReporteVentasService.cs","prompt":"Resolved by CHATGPT_VAEP REVIEW_FIRST evidence-gap takeover at 2e747a2cb104e31ac2a2374391ad780042f3abd5; no R2 solely for evidence gaps; do not redispatch.","reason":"REVIEW_FIRST_ACCEPTED__EVIDENCE_GAP_TAKEOVER__NO_REDISPATCH"}
+      {"dispatchId":"N5-3-D-3-SALES-REPORT-SERVICE-CONTRACT-J3","taskId":"N5.3.D.3.SALES_REPORT_SERVICE_CONTRACT","workerId":"J3","taskAttempt":1,"plannedParent":"N5.3.D","readyForDispatch":false,"dispatchEligible":false,"fileScopeHint":"backend/src/Application/Interfaces/IReporteVentasService.cs","prompt":"Resolved by CHATGPT_VAEP REVIEW_FIRST evidence-gap takeover at 2e747a2cb104e31ac2a2374391ad780042f3abd5; no R2 solely for evidence gaps; do not redispatch.","reason":"REVIEW_FIRST_ACCEPTED__EVIDENCE_GAP_TAKEOVER__CAUSAL_BACKEND_GATE_SUCCESS__NO_REDISPATCH"}
     ],
     "J4": [
-      {"dispatchId":"N5-3-D-4-SALES-REPORT-QUERY-SERVICE-J4","taskId":"N5.3.D.4.SALES_REPORT_QUERY_SERVICE","workerId":"J4","taskAttempt":1,"plannedParent":"N5.3.D","readyForDispatch":true,"dispatchEligible":false,"fileScopeHint":"backend/src/Infrastructure/Services/ReporteVentasService.cs","prompt":"After N5.3.D.1-.3 are REVIEW_FIRST accepted, implement the server-side sales report query service with projection/grouping, IUsuarioScopeService fail-closed row scope, historical detail snapshots, explicit current-category semantics, multi-warehouse branch-at-detail semantics and no ConIncludes overfetch. No controller/export/frontend changes. Run proportional backend tests and two self-reviews. Desarrollo only.","reason":"CURRENT_PARENT__D1_D2_D3_REVIEW_FIRST_ACCEPTED__PREARMED__HEAD_FREEZE_CAUSAL"}
+      {"dispatchId":"N5-3-D-4-SALES-REPORT-QUERY-SERVICE-J4","taskId":"N5.3.D.4.SALES_REPORT_QUERY_SERVICE","workerId":"J4","taskAttempt":1,"plannedParent":"N5.3.D","readyForDispatch":true,"dispatchEligible":true,"fileScopeHint":"backend/src/Infrastructure/Services/ReporteVentasService.cs","prompt":"After N5.3.D.1-.3 are REVIEW_FIRST accepted, implement the server-side sales report query service with projection/grouping, IUsuarioScopeService fail-closed row scope, historical detail snapshots, explicit current-category semantics, multi-warehouse branch-at-detail semantics and no ConIncludes overfetch. No controller/export/frontend changes. Run proportional backend tests and two self-reviews. Desarrollo only.","reason":"CURRENT_PARENT__D1_D2_D3_REVIEW_FIRST_ACCEPTED__D3_CAUSAL_BACKEND_GATE_SUCCESS__MATERIAL_SCOPE"}
     ],
     "J5": [
       {"dispatchId":"N5-3-D-5-SALES-REPORT-API-J5","taskId":"N5.3.D.5.SALES_REPORT_API","workerId":"J5","taskAttempt":1,"plannedParent":"N5.3.D","readyForDispatch":false,"dispatchEligible":false,"fileScopeHint":"backend/src/API/Controllers/ReportesVentasController.cs","prompt":"After the N5.3.D service contract/implementation are REVIEW_FIRST accepted, expose bounded sales reporting summary/detail endpoints following existing report-controller patterns. Preserve authorization and fail-closed row scope; do not implement export (N5.3.H), frontend, migrations or invent new permission symbols. Run proportional controller tests and two self-reviews. Desarrollo only.","reason":"NEXT_PARENT_PREARM__MATERIAL__SIBLING_DEPENDENCIES_N5.3.D.3_N5.3.D.4"}
