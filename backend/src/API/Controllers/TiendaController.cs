@@ -93,6 +93,13 @@ public sealed class TiendaController : ControllerBase
     {
         var variantesActivas = producto.Variantes.Where(v => v.Activo).ToList();
         var skusProducto = variantesActivas.Select(v => v.Sku).Where(sku => !string.IsNullOrWhiteSpace(sku)).Distinct().ToList();
+        var cantidadPublica = variantesActivas.Count > 0
+            ? variantesActivas.Sum(v => Math.Max(0, v.Cantidad))
+            : Math.Max(0, producto.Cantidad);
+        var preciosVariantes = variantesActivas.Where(v => v.Precio > 0).Select(v => v.Precio).ToList();
+        var precioPublico = preciosVariantes.Count > 0
+            ? preciosVariantes.Min()
+            : producto.PrecioMinimo > 0 ? producto.PrecioMinimo : producto.Precio;
 
         return new ProductoCatalogoPublicoDto
         {
@@ -104,10 +111,10 @@ public sealed class TiendaController : ControllerBase
             CategoriaNombre = producto.CategoriaNombre,
             MarcaNombre = producto.MarcaNombre ?? producto.Marca,
             ModeloNombre = producto.ModeloNombre ?? producto.Modelo,
-            Precio = producto.PrecioMinimo > 0 ? producto.PrecioMinimo : producto.Precio,
+            Precio = Math.Max(0, precioPublico),
             PrecioOferta = null,
-            CantidadDisponible = Math.Max(0, producto.Cantidad),
-            EstaAgotado = producto.EstaAgotado || producto.Cantidad <= 0,
+            CantidadDisponible = cantidadPublica,
+            EstaAgotado = cantidadPublica <= 0,
             Sku = skusProducto.Count == 1 ? skusProducto[0] : null,
             Activo = producto.Activo,
             EsDestacado = false,
@@ -139,6 +146,7 @@ public sealed class TiendaController : ControllerBase
                         .Select(grupo => grupo.First())
                         .ToList();
                     var skus = g.Select(v => v.Sku).Where(sku => !string.IsNullOrWhiteSpace(sku)).Distinct().ToList();
+                    var cantidad = g.Sum(v => Math.Max(0, v.Cantidad));
 
                     return new ModeloCatalogoPublicoDto
                     {
@@ -147,8 +155,8 @@ public sealed class TiendaController : ControllerBase
                         MarcaNombre = g.Key.MarcaNombre,
                         Sku = skus.Count == 1 ? skus[0] : null,
                         Precio = g.Where(v => v.Precio > 0).Select(v => v.Precio).DefaultIfEmpty().Min(),
-                        CantidadDisponible = Math.Max(0, g.Sum(v => v.Cantidad)),
-                        EstaAgotado = g.All(v => v.Cantidad <= 0),
+                        CantidadDisponible = cantidad,
+                        EstaAgotado = cantidad <= 0,
                         Imagenes = imagenes
                     };
                 })
