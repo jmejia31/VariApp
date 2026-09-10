@@ -1,27 +1,13 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
-  "currentParent": "N5.3.H",
-  "generatedAt": "2026-09-10T04:18:00Z",
-  "regenerationReason": "N5.3.G_LISTO_REAL__N5.3.H_CONTROLLER_DOC_CERT_CURRENT__PREARM_ORDERED_N5.4.A_FROM_FRESH_COLA_PLAN",
-  "lastClosedParent": "N5.3.G",
+  "currentParent": "N5.4.A",
+  "generatedAt": "2026-09-10T04:21:00Z",
+  "regenerationReason": "N5.3.H_LISTO_REAL__PROMOTE_N5.4.A__SIX_SOURCE_BACKED_PROFITABILITY_PREFLIGHT_SCOPES",
+  "lastClosedParent": "N5.3.H",
   "closureReceipts": {
     "N4.11.H": "vaep/evidence/fragments/N4.11.H_LISTO_REAL_20260908T204500Z.json",
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
-    "N5.1.A": "vaep/evidence/fragments/N5.1.A_LISTO_REAL_20260908T222930Z.json",
-    "N5.1.B": "vaep/evidence/fragments/N5.1.B_LISTO_REAL_20260908T231300Z.json",
-    "N5.1.C": "vaep/evidence/fragments/N5.1.C_LISTO_REAL_20260909T003400Z.json",
-    "N5.1.D": "vaep/evidence/fragments/N5.1.D_LISTO_REAL_20260909T013600Z.json",
-    "N5.1.E": "vaep/evidence/fragments/N5.1.E_LISTO_REAL_20260909T0422Z.json",
-    "N5.1.F": "vaep/evidence/fragments/N5.1.F_LISTO_REAL_20260909T0737Z.json",
-    "N5.1.G": "vaep/evidence/fragments/N5.1.G_LISTO_REAL_20260909T1031Z.json",
     "N5.1.H": "vaep/evidence/fragments/N5.1.H_LISTO_REAL_20260909T1236Z.json",
-    "N5.2.A": "vaep/evidence/fragments/N5.2.A_LISTO_REAL_20260909T1439Z.json",
-    "N5.2.B": "vaep/evidence/fragments/N5.2.B_LISTO_REAL_20260909T1530Z.json",
-    "N5.2.C": "vaep/evidence/fragments/N5.2.C_LISTO_REAL_20260909T1642Z.json",
-    "N5.2.D": "vaep/evidence/fragments/N5.2.D_LISTO_REAL_20260909T1841Z.json",
-    "N5.2.E": "vaep/evidence/fragments/N5.2.E_LISTO_REAL_20260909T1922Z.json",
-    "N5.2.F": "vaep/evidence/fragments/N5.2.F_LISTO_REAL_20260909T2012Z.json",
-    "N5.2.G": "vaep/evidence/fragments/N5.2.G_LISTO_REAL_20260909T2116Z.json",
     "N5.2.H": "vaep/evidence/fragments/N5.2.H_LISTO_REAL_20260909T2122Z.json",
     "N5.3.A": "vaep/evidence/fragments/N5.3.A_LISTO_REAL_20260909T2159Z.json",
     "N5.3.B": "vaep/evidence/fragments/N5.3.B_LISTO_REAL_20260909T2244Z.json",
@@ -29,7 +15,8 @@
     "N5.3.D": "vaep/evidence/fragments/N5.3.D_LISTO_REAL_20260910T0204Z.json",
     "N5.3.E": "vaep/evidence/fragments/N5.3.E_LISTO_REAL_20260910T0328Z.json",
     "N5.3.F": "vaep/evidence/fragments/N5.3.F_LISTO_REAL_20260910T0412Z.json",
-    "N5.3.G": "vaep/evidence/fragments/N5.3.G_LISTO_REAL_20260910T0416Z.json"
+    "N5.3.G": "vaep/evidence/fragments/N5.3.G_LISTO_REAL_20260910T0416Z.json",
+    "N5.3.H": "vaep/evidence/fragments/N5.3.H_LISTO_REAL_20260910T0420Z.json"
   },
   "policy": {
     "branch": "Desarrollo",
@@ -44,44 +31,38 @@
     "stopWhenEligibleWorkExhausted": true,
     "materialParallelismTargetPerParent": 6,
     "requireDistinctWriteScopesWhenParallel": true,
-    "lowParallelismAction": "EXPLAIN_OR_SUBDIVIDE_MATERIAL_SCOPE__NO_BUSYWORK",
     "activeWorkerCount": 6,
-    "activeWorkers": ["J1", "J2", "J3", "J4", "J5", "J6"]
+    "activeWorkers": ["J1","J2","J3","J4","J5","J6"]
   },
   "throughputPlan": {
     "mode": "PARENT_CLOSE_FIRST",
-    "currentParent": "N5.3.H",
-    "currentParentMaterialScopeCount": 0,
-    "currentParentReason": "N5.3.G is LISTO_REAL after exact functional-head backend, MySQL integration/migration, frontend production and VAEP gates. N5.3.H is the ordered controller-owned documentation/certification parent; update only canonical N5.3 closure documentation and evidence, then certify if P0/P1 remain zero.",
-    "nextParent": "N5.4.A",
+    "currentParent": "N5.4.A",
+    "currentParentMaterialScopeCount": 6,
+    "currentParentReason": "Fresh COLA promotes N5.4.A profitability audit/preflight after N5.3.H LISTO_REAL. Existing VentaDetalle.CostoUnitarioSnapshot, VentaService cost capture, current sales-report service/API/UI and cost-authority documentation provide six non-overlapping inspection facets. These are bounded preflight deliverables; no N5.4.B+ implementation is authorized yet.",
+    "nextParent": "N5.4.B",
     "nextParentParallelMaterialScopes": 0,
     "nextParentScopesNonOverlapping": true,
-    "laneRefill": "N5.3.H_CONTROLLER_DOC_CERT__NO_JULES_FILLER__NEXT_N5.4.A_PREARMED_FROM_FRESH_COLA_PLAN__DISPATCH_ONLY_AFTER_H_LISTO_REAL"
+    "laneRefill": "DISPATCH_N5.4.A_J1_J6_NOW__REVIEW_FIRST_TERMINALS__NO_FILLER"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
     "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
-    "sourceRanges": ["COLA!A410:T416", "PLAN_MAESTRO!A53:L55", "vaep/control/alex-prearmed-candidates.json"],
-    "note": "N5.3.G is LISTO_REAL. N5.3.H is current and controller-owned for documentation/certification. Fresh COLA/PLAN_MAESTRO confirms N5.4.A as the ordered successor; it is prearmed only and remains order-gated until N5.3.H LISTO_REAL. No filler or premature Jules dispatch.",
+    "sourceRanges": ["COLA!A416:T418","PLAN_MAESTRO","backend/src/Domain/Entities/VentaDetalle.cs","backend/src/Application/Services/VentaService.cs","backend/src/Infrastructure/Services/ReporteVentasService.cs","docs/ERP_N1_10_COSTEO_PREFLIGHT.md"],
+    "note": "N5.3.H is LISTO_REAL. N5.4.A is current by canonical COLA order. N5.4.B remains dependency-gated until A is REVIEW_FIRST certified.",
     "nodes": [
-      {"id":"N5.3.A","order":18,"type":"MICROTAREA","dependencies":["N5.1.H","GATE-N4"],"phaseGate":"GATE-N4"},
-      {"id":"N5.3.B","order":19,"type":"MICROTAREA","dependencies":["N5.3.A"],"phaseGate":"GATE-N4"},
-      {"id":"N5.3.C","order":20,"type":"MICROTAREA","dependencies":["N5.3.B"],"phaseGate":"GATE-N4"},
-      {"id":"N5.3.D","order":21,"type":"MICROTAREA","dependencies":["N5.3.C"],"phaseGate":"GATE-N4"},
-      {"id":"N5.3.E","order":22,"type":"MICROTAREA","dependencies":["N5.3.D"],"phaseGate":"GATE-N4"},
-      {"id":"N5.3.F","order":23,"type":"MICROTAREA","dependencies":["N5.3.E"],"phaseGate":"GATE-N4"},
-      {"id":"N5.3.G","order":24,"type":"MICROTAREA","dependencies":["N5.3.F"],"phaseGate":"GATE-N4"},
       {"id":"N5.3.H","order":25,"type":"MICROTAREA","dependencies":["N5.3.G"],"phaseGate":"GATE-N4"},
-      {"id":"N5.4.A","order":26,"type":"MICROTAREA","dependencies":["N5.1.H","GATE-N4"],"phaseGate":"GATE-N4","orderGate":"N5.3.H_LISTO_REAL"}
+      {"id":"N5.4.A","order":26,"type":"MICROTAREA","dependencies":["N5.1.H","GATE-N4"],"phaseGate":"GATE-N4"},
+      {"id":"N5.4.B","order":27,"type":"MICROTAREA","dependencies":["N5.4.A"],"phaseGate":"GATE-N4"},
+      {"id":"N5.4.C","order":28,"type":"MICROTAREA","dependencies":["N5.4.B"],"phaseGate":"GATE-N4"}
     ]
   },
   "lanes": {
-    "J1": [{"dispatchId":"N5-3-F-1-SALES-REPORT-AUDIT-CORRELATION-J1-RECOVERY1","taskId":"N5.3.F.1.SALES_REPORT_AUDIT_CORRELATION","workerId":"J1","taskAttempt":1,"plannedParent":"N5.3.F","readyForDispatch":false,"dispatchEligible":false,"fileScopeHint":"backend/src/API/Controllers/ReportesVentasController.cs","prompt":"N5.3.F closed; do not redispatch.","reason":"CLOSED_BY_N5.3.F_LISTO_REAL_RECEIPT","workflowRunId":34433650814,"activeReal":false,"reviewAccepted":true,"controllerTakeoverCommit":"265afeba494921b09ae4b79defca35365fa5258c","reviewReceipt":"vaep/evidence/fragments/N5.3.F.1_REVIEW_FIRST_20260910T0350Z.json"}],
-    "J2": [{"dispatchId":"N5-3-F-2-SALES-REPORT-SECURITY-AUDIT-TESTS-J2-RECOVERY1","taskId":"N5.3.F.2.SALES_REPORT_SECURITY_AUDIT_TESTS","workerId":"J2","taskAttempt":1,"plannedParent":"N5.3.F","readyForDispatch":false,"dispatchEligible":false,"fileScopeHint":"backend/tests/InventoryApp.Tests/API/Controllers/ReportesVentasContractTests.cs","prompt":"N5.3.F closed; do not redispatch.","reason":"CLOSED_BY_N5.3.F_LISTO_REAL_RECEIPT","workflowRunId":34434975875,"sessionId":"sessions/6688018810981566090","artifactId":10136129280,"activeReal":false,"reviewAccepted":true,"reviewReceipt":"vaep/evidence/fragments/N5.3.F.2_REVIEW_FIRST_20260910T0407Z.json"}],
-    "J3": [],
-    "J4": [],
-    "J5": [],
-    "J6": []
+    "J1": [{"dispatchId":"N5-4-A-1-PROFITABILITY-BACKEND-DATA-PREFLIGHT-J1","taskId":"N5.4.A.1.PROFITABILITY_BACKEND_DATA_PREFLIGHT","workerId":"J1","taskAttempt":1,"plannedParent":"N5.4.A","readyForDispatch":true,"dispatchEligible":true,"fileScopeHint":"docs/qa/N5_4_A_BACKEND_DATA_PREFLIGHT.md","prompt":"Read only docs/VAEP_AUTHORITY.md as operational authority and the live N5.4.A COLA scope. Inspect source-backed backend/data authorities for sales, historical cost and profitability inputs: VentaDetalle.CostoUnitarioSnapshot, Venta/VentaDetalle totals, VentaService cost capture, ReporteVentasService query shapes and N1.10 costing authority. Write only docs/qa/N5_4_A_BACKEND_DATA_PREFLIGHT.md with factual authorities, historical-snapshot semantics, gaps, dependencies, risks and acceptance criteria for venta/costo/margen by product/category/seller/customer. Do not implement N5.4.B+ formulas or schemas. Desarrollo only.","reason":"CURRENT_PARENT__SOURCE_BACKED_MATERIAL_PREFLIGHT"}],
+    "J2": [{"dispatchId":"N5-4-A-2-PROFITABILITY-DOMAIN-CONTRACT-PREFLIGHT-J2","taskId":"N5.4.A.2.PROFITABILITY_DOMAIN_CONTRACT_PREFLIGHT","workerId":"J2","taskAttempt":1,"plannedParent":"N5.4.A","readyForDispatch":true,"dispatchEligible":true,"fileScopeHint":"docs/qa/N5_4_A_DOMAIN_CONTRACT_PREFLIGHT.md","prompt":"Using docs/VAEP_AUTHORITY.md and live source only, inspect the domain/contract semantics needed for profitability: sale amount, historical cost snapshot, gross margin amount/percentage and grouping by product/category/seller/customer. Determine what formula/rounding/zero-cost semantics are already source-backed and explicitly identify any unresolved contract instead of inventing one. Write only docs/qa/N5_4_A_DOMAIN_CONTRACT_PREFLIGHT.md. No implementation of N5.4.B+. Desarrollo only.","reason":"CURRENT_PARENT__SOURCE_BACKED_MATERIAL_PREFLIGHT"}],
+    "J3": [{"dispatchId":"N5-4-A-3-PROFITABILITY-FRONTEND-UX-PREFLIGHT-J3","taskId":"N5.4.A.3.PROFITABILITY_FRONTEND_UX_PREFLIGHT","workerId":"J3","taskAttempt":1,"plannedParent":"N5.4.A","readyForDispatch":true,"dispatchEligible":true,"fileScopeHint":"docs/qa/N5_4_A_FRONTEND_UX_PREFLIGHT.md","prompt":"Using docs/VAEP_AUTHORITY.md and live frontend source, inspect the existing Centro de Reportes / sales-report UI for reusable models, filters, loading/empty/error/accessibility/responsive patterns relevant to a future profitability report grouped by product/category/seller/customer. Write only docs/qa/N5_4_A_FRONTEND_UX_PREFLIGHT.md with factual reuse points, gaps and acceptance implications. Do not implement N5.4.B+ or new UI. Desarrollo only.","reason":"CURRENT_PARENT__SOURCE_BACKED_MATERIAL_PREFLIGHT"}],
+    "J4": [{"dispatchId":"N5-4-A-4-PROFITABILITY-SECURITY-RBAC-PREFLIGHT-J4","taskId":"N5.4.A.4.PROFITABILITY_SECURITY_RBAC_PREFLIGHT","workerId":"J4","taskAttempt":1,"plannedParent":"N5.4.A","readyForDispatch":true,"dispatchEligible":true,"fileScopeHint":"docs/qa/N5_4_A_SECURITY_RBAC_PREFLIGHT.md","prompt":"Using docs/VAEP_AUTHORITY.md and live security/RBAC/audit source, inspect authorization and information-disclosure implications of exposing cost/margin profitability data. Identify existing relational grants, seller scoping, audit/correlation patterns and whether cost visibility requires a source-backed stricter permission; never invent a permission. Write only docs/qa/N5_4_A_SECURITY_RBAC_PREFLIGHT.md. No implementation. Desarrollo only.","reason":"CURRENT_PARENT__SOURCE_BACKED_MATERIAL_PREFLIGHT"}],
+    "J5": [{"dispatchId":"N5-4-A-5-PROFITABILITY-API-TEST-PREFLIGHT-J5","taskId":"N5.4.A.5.PROFITABILITY_API_TEST_PREFLIGHT","workerId":"J5","taskAttempt":1,"plannedParent":"N5.4.A","readyForDispatch":true,"dispatchEligible":true,"fileScopeHint":"docs/qa/N5_4_A_API_TEST_PREFLIGHT.md","prompt":"Using docs/VAEP_AUTHORITY.md and live API/tests, inspect reusable HTTP/query validation, pagination/sorting, ProblemDetails, authorization, audit and contract-test harnesses for a future profitability report. Write only docs/qa/N5_4_A_API_TEST_PREFLIGHT.md with concrete test matrix and causal gate implications. Do not add tests or endpoints yet. Desarrollo only.","reason":"CURRENT_PARENT__SOURCE_BACKED_MATERIAL_PREFLIGHT"}],
+    "J6": [{"dispatchId":"N5-4-A-6-PROFITABILITY-INTEGRATION-ROLLBACK-PREFLIGHT-J6","taskId":"N5.4.A.6.PROFITABILITY_INTEGRATION_ROLLBACK_PREFLIGHT","workerId":"J6","taskAttempt":1,"plannedParent":"N5.4.A","readyForDispatch":true,"dispatchEligible":true,"fileScopeHint":"docs/qa/N5_4_A_INTEGRATION_ROLLBACK_PREFLIGHT.md","prompt":"Using docs/VAEP_AUTHORITY.md and live persistence/CI/observability source, inspect whether N5.4 profitability requires schema/migration changes or can remain a read model over existing sales/cost snapshots; identify index/performance, integration, rollback, correlation/logging and CI implications. Write only docs/qa/N5_4_A_INTEGRATION_ROLLBACK_PREFLIGHT.md. Never run Production or implement N5.4.B+. Desarrollo only.","reason":"CURRENT_PARENT__SOURCE_BACKED_MATERIAL_PREFLIGHT"}]
   },
   "lastClosureFunctionalHead": "72e63bf7d14cc21b49b3f188ddb8facfa0b46790"
 }
