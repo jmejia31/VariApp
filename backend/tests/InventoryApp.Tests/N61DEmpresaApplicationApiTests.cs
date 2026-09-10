@@ -12,13 +12,27 @@ public sealed class N61DEmpresaApplicationApiTests
 {
     private readonly Mock<IEmpresaRepository> _repository = new();
     private readonly Mock<ICurrentUserService> _currentUser = new();
+    private readonly Mock<IAuditoriaService> _auditoria = new();
     private readonly EmpresaService _service;
 
     public N61DEmpresaApplicationApiTests()
     {
         _currentUser.SetupGet(x => x.UsuarioId).Returns(17);
         _currentUser.SetupGet(x => x.NombreUsuario).Returns("vaep-n61d");
-        _service = new EmpresaService(_repository.Object, _currentUser.Object);
+        _auditoria
+            .Setup(x => x.RegistrarAsync(
+                It.IsAny<InventoryApp.Domain.Enums.ModuloSistema>(),
+                It.IsAny<InventoryApp.Domain.Enums.AccionPermiso>(),
+                It.IsAny<string>(),
+                It.IsAny<int?>(),
+                It.IsAny<string?>(),
+                It.IsAny<object?>(),
+                It.IsAny<object?>(),
+                It.IsAny<string?>(),
+                It.IsAny<string>(),
+                It.IsAny<string?>()))
+            .Returns(Task.CompletedTask);
+        _service = new EmpresaService(_repository.Object, _currentUser.Object, _auditoria.Object);
     }
 
     [Fact]
