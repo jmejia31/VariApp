@@ -3,9 +3,6 @@
 
 This module does not certify work, call providers or publish refs. Closure
 receipts and the live causal/ownership gates remain the controller's job.
-
-Global dispatch admission is an OPEN-only invariant. Unsafe or unavailable work
-is blocked at task/lane eligibility, never by freezing the whole factory.
 """
 import argparse
 import copy
@@ -16,9 +13,7 @@ import sys
 
 MASTER = "docs/VAEP_AUTHORITY.md"
 SHA40 = re.compile(r"[0-9a-fA-F]{40}")
-# FROZEN is accepted only as legacy input so a transition can normalize it to
-# OPEN. This module never emits FROZEN.
-ACCEPTED_INPUT_STATES = {"FROZEN", "OPEN"}
+STATES = {"FROZEN", "OPEN"}
 
 
 def receipt_parent(receipt):
@@ -181,12 +176,6 @@ def _sync_operational_metadata(result, closed_parent, current_parent, current_ma
 
 
 def promotion_freeze_permitted(reason, current):
-    """Recognize legacy controller-owned freezes only for safe normalization.
-
-    This function no longer authorizes emitting or preserving FROZEN. It only
-    distinguishes historical controller freezes from manual/security holds so
-    legacy manual holds are normalized to OPEN without dispatching new work.
-    """
     if not isinstance(reason, str):
         return False
     legacy_prefixes = (
@@ -209,80 +198,68 @@ def promotion_freeze_permitted(reason, current):
     return controller_owned_suffix and any(marker in reason for marker in controller_owned_markers)
 
 
-def _open_only(access, now, reason):
-    access.update(newDispatchAdmission="OPEN", allowExistingActiveSessions=True,
-                  reason=reason, updatedAtUtc=now)
-
-
 def transition(catalog, admission, closed, receipt_path, functional, now, hardening_ok=False):
     state = admission.get("newDispatchAdmission")
     allow_active = admission.get("allowExistingActiveSessions")
-    if state not in ACCEPTED_INPUT_STATES or type(allow_active) is not bool:
+    if state not in STATES or type(allow_active) is not bool:
         raise ValueError("INVALID_ADMISSION_CONTRACT")
     current = catalog.get("currentParent")
     target = choose_next(catalog, closed)
     result, access = copy.deepcopy(catalog), copy.deepcopy(admission)
-    legacy_reason = str(admission.get("reason", ""))
-    legacy_manual_hold = state == "FROZEN" and not promotion_freeze_permitted(legacy_reason, current)
-
     result.setdefault("closureReceipts", {})[current] = receipt_path
     result["lastClosedParent"] = current
     result["lastClosureFunctionalHead"] = functional
     result["generatedAt"] = now
-
     if target is None:
         result["regenerationReason"] = "CURRENT_PARENT_CERTIFIED__NEXT_PARENT_MISSING"
+        access.update(newDispatchAdmission="FROZEN", allowExistingActiveSessions=False, updatedAtUtc=now)
+        if state == "OPEN" or promotion_freeze_permitted(str(admission.get("reason", "")), current):
+            access["reason"] = "FROZEN_NEXT_PARENT_MISSING_NO_SAFE_WORK"
         for tasks in result.get("lanes", {}).values():
             for task in tasks:
                 task["dispatchEligible"] = False
                 if task.get("plannedParent") == current:
                     task["reason"] = "CLOSED_BY_" + current + "_LISTO_REAL_RECEIPT"
         _sync_operational_metadata(result, current, current, 0)
-        _open_only(access, now,
-                   "OPEN_NO_SUCCESSOR__" + current + "__NO_ELIGIBLE_DISPATCH__GLOBAL_FREEZE_PROHIBITED")
         return result, access
-
     node = roadmap_nodes(catalog)[target]
     result["currentParent"] = target
     result["regenerationReason"] = "AUTOMATIC_PARENT_CLOSE__" + current + "_LISTO_REAL__" + target + "_CURRENT"
     material = 0
-    eligible_count = 0
     for tasks in result.get("lanes", {}).values():
         for task in tasks:
-            material_scope = (node["type"] == "MICROTAREA"
-                              and task.get("plannedParent") == target
-                              and task.get("readyForDispatch") is True
-                              and isinstance(task.get("fileScopeHint"), str) and bool(task["fileScopeHint"].strip())
-                              and isinstance(task.get("prompt"), str) and bool(task["prompt"].strip()))
-            if material_scope:
-                material += 1
-            enabled = material_scope and hardening_ok and not legacy_manual_hold
+            enabled = (node["type"] == "MICROTAREA"
+                       and task.get("plannedParent") == target
+                       and task.get("readyForDispatch") is True
+                       and isinstance(task.get("fileScopeHint"), str) and bool(task["fileScopeHint"].strip())
+                       and isinstance(task.get("prompt"), str) and bool(task["prompt"].strip()))
             task["dispatchEligible"] = enabled
-            eligible_count += int(enabled)
             if enabled:
                 task["reason"] = "CURRENT_PARENT__DEPENDENCIES_CLOSED__MATERIAL_SCOPE"
-            elif material_scope and legacy_manual_hold:
-                task["reason"] = "LEGACY_GLOBAL_HOLD__MIGRATE_TO_LANE_QUARANTINE__NOT_DISPATCHED"
-            elif material_scope and not hardening_ok:
-                task["reason"] = "HARDENING_REQUIRED__MATERIAL_SCOPE_NOT_DISPATCHED"
             elif task.get("plannedParent") == current:
                 task["reason"] = "CLOSED_BY_" + current + "_LISTO_REAL_RECEIPT"
-
+            material += int(enabled)
     _sync_operational_metadata(result, current, target, material)
-
-    if eligible_count > 0:
-        reason = "VERIFIED_ROADMAP_PROMOTION__" + current + "__" + target
-    elif legacy_manual_hold:
-        reason = ("OPEN_LEGACY_GLOBAL_HOLD__MIGRATE_TO_LANE_QUARANTINE__"
-                  + current + "__" + target + "__NO_ELIGIBLE_DISPATCH")
-    elif node["type"] == "GATE_FASE":
-        reason = "OPEN_PHASE_GATE_REQUIRED__" + target + "__NO_JULES_DISPATCH"
-    elif not hardening_ok:
-        reason = "OPEN_HARDENING_REQUIRED__" + target + "__NO_ELIGIBLE_DISPATCH"
+    reason = admission.get("reason", "")
+    # A certification/promotion freeze is controller-owned and may reopen only
+    # after this function is called with a valid closure, safe successor and
+    # exact-head hardening gates. Manual/security freezes remain untouched.
+    permitted = promotion_freeze_permitted(reason, current)
+    opened = (node["type"] == "MICROTAREA" and material > 0 and hardening_ok
+              and (state == "OPEN" or permitted))
+    access.update(updatedAtUtc=now)
+    if opened:
+        access.update(newDispatchAdmission="OPEN", allowExistingActiveSessions=True,
+                      reason="VERIFIED_ROADMAP_PROMOTION__" + current + "__" + target)
+    elif state == "FROZEN" and not permitted:
+        # Preserve a manual/security freeze reason; future runs must not mistake it
+        # for a roadmap freeze that they are permitted to clear.
+        pass
     else:
-        reason = "OPEN_NO_SAFE_MATERIAL__" + target + "__NO_ELIGIBLE_DISPATCH"
-
-    _open_only(access, now, reason + "__GLOBAL_FREEZE_PROHIBITED")
+        access.update(newDispatchAdmission="FROZEN", allowExistingActiveSessions=False,
+                      reason=("FROZEN_PHASE_GATE_REQUIRED__" + target
+                              if node["type"] == "GATE_FASE"
+                              else "FROZEN_PROMOTION_HARDENING_OR_SAFE_WORK_REQUIRED__" + target))
     return result, access
 
 
