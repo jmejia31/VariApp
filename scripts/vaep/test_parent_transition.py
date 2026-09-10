@@ -26,10 +26,8 @@ def catalog(current="N4.11.H"):
             readyForDispatch=True, fileScopeHint="docs/preflight.md", prompt="Inspect real code", dispatchEligible=False)]}}
 
 
-def access(reason="FROZEN_GATE_N4_CURRENT_PARENT__PHASE_CERTIFICATION_REQUIRED"):
-    # Legacy FROZEN input is intentionally retained in tests to prove that the
-    # transition layer normalizes it and never emits FROZEN.
-    return dict(newDispatchAdmission="FROZEN", allowExistingActiveSessions=True, reason=reason, updatedAtUtc="before")
+def access(reason="OPEN_ONLY_SELFTEST"):
+    return dict(newDispatchAdmission="OPEN", allowExistingActiveSessions=True, reason=reason, updatedAtUtc="before")
 
 
 class ParentTransitionTests(unittest.TestCase):
@@ -133,7 +131,7 @@ class ParentTransitionTests(unittest.TestCase):
         self.assertIn("OPEN_PHASE_GATE_REQUIRED", a["reason"])
         self.assertEqual(c["throughputPlan"]["currentParent"], "GATE-N4")
 
-    def test_reopen_only_after_hardening_and_material_work(self):
+    def test_promotion_after_hardening_and_material_work(self):
         c, a = transition(catalog("GATE-N4"), access(), {"GATE-N4"}, "r.json", "a"*40, "now", True)
         self.assertEqual(c["currentParent"], "N5.1.A")
         self.assertEqual(a["newDispatchAdmission"], "OPEN")
@@ -150,12 +148,18 @@ class ParentTransitionTests(unittest.TestCase):
         self.assertFalse(c["lanes"]["JULES_A"][0]["dispatchEligible"])
         self.assertIn("OPEN_HARDENING_REQUIRED", a["reason"])
 
-    def test_manual_legacy_freeze_is_normalized_without_dispatch(self):
-        c, a = transition(catalog("GATE-N4"), access("MANUAL_SECURITY_HOLD"), {"GATE-N4"}, "r.json", "a"*40, "now", True)
-        self.assertEqual(a["newDispatchAdmission"], "OPEN")
-        self.assertTrue(a["allowExistingActiveSessions"])
-        self.assertFalse(c["lanes"]["JULES_A"][0]["dispatchEligible"])
-        self.assertIn("OPEN_LEGACY_GLOBAL_HOLD", a["reason"])
+    def test_non_open_global_states_are_rejected(self):
+        for invalid_state in ("FROZEN", "CLOSED", "UNKNOWN"):
+            a = access()
+            a["newDispatchAdmission"] = invalid_state
+            with self.subTest(state=invalid_state), self.assertRaisesRegex(ValueError, "INVALID_ADMISSION_CONTRACT"):
+                transition(catalog(), a, {"N4.11.H"}, "r.json", "a"*40, "now", True)
+
+    def test_allow_existing_active_sessions_must_be_true(self):
+        a = access()
+        a["allowExistingActiveSessions"] = False
+        with self.assertRaisesRegex(ValueError, "INVALID_ADMISSION_CONTRACT"):
+            transition(catalog(), a, {"N4.11.H"}, "r.json", "a"*40, "now", True)
 
     def test_no_material_work_keeps_open_without_fabricating_work(self):
         c = catalog("GATE-N4")
@@ -164,12 +168,6 @@ class ParentTransitionTests(unittest.TestCase):
         self.assertEqual(a["newDispatchAdmission"], "OPEN")
         self.assertFalse(c2["lanes"]["JULES_A"][0]["dispatchEligible"])
         self.assertIn("OPEN_NO_SAFE_MATERIAL", a["reason"])
-
-    def test_invalid_admission_rejected(self):
-        a = access()
-        a["newDispatchAdmission"] = "CLOSED"
-        with self.assertRaisesRegex(ValueError, "INVALID_ADMISSION_CONTRACT"):
-            transition(catalog(), a, {"N4.11.H"}, "r.json", "a"*40, "now", True)
 
     def test_closure_retained_when_no_successor_and_admission_stays_open(self):
         c = catalog("N5.1.B")
@@ -183,9 +181,7 @@ class ParentTransitionTests(unittest.TestCase):
         self.assertIn("OPEN_NO_SUCCESSOR", a["reason"])
 
     def test_open_input_remains_open_when_hardening_blocks(self):
-        a = access("already-open")
-        a["newDispatchAdmission"] = "OPEN"
-        c2, a2 = transition(catalog("GATE-N4"), a, {"GATE-N4"}, "r.json", "a"*40, "now", False)
+        c2, a2 = transition(catalog("GATE-N4"), access("already-open"), {"GATE-N4"}, "r.json", "a"*40, "now", False)
         self.assertEqual(a2["newDispatchAdmission"], "OPEN")
         self.assertFalse(c2["lanes"]["JULES_A"][0]["dispatchEligible"])
 
