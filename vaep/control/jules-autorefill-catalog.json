@@ -1,8 +1,8 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
   "currentParent": "N5.8.G",
-  "generatedAt": "2026-09-10T15:19:00Z",
-  "regenerationReason": "N5.8.F_LISTO_REAL__N5.8.G_PROMOTED__SINGLE_SOURCE_BACKED_QA_REGRESSION_SCOPE__H_N5.9A_N5.9B_PREARMED__NO_FILLER",
+  "generatedAt": "2026-09-10T15:24:43Z",
+  "regenerationReason": "N5.8.F_LISTO_REAL__N5.8.G_PROMOTED__G1_J6_CANONICAL_MANIFEST_AND_RUN_PRESENT__ACTIVE_REAL_UNCONFIRMED__H_N5.9A_N5.9B_PREARMED__NO_FILLER",
   "lastClosedParent": "N5.8.F",
   "closureReceipts": {
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
@@ -42,13 +42,13 @@
     "nextParent": "N5.8.H",
     "nextParentParallelMaterialScopes": 1,
     "nextParentScopesNonOverlapping": true,
-    "laneRefill": "N5.8.G_QA_REGRESSION_SCOPE_READY_FOR_SINGLE_CANONICAL_WRITER__H_N5.9A_N5.9B_DEPENDENCY_OR_ORDER_GATED__NO_FILLER"
+    "laneRefill": "N5.8.G_QA_REGRESSION_SCOPE_DISPATCHED_J6_RUN_34494960155__ACTIVE_REAL_UNCONFIRMED__H_N5.9A_N5.9B_DEPENDENCY_OR_ORDER_GATED__NO_FILLER"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
     "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
     "sourceRanges": ["COLA!A448:T462", "PLAN_MAESTRO", "docs/VAEP_N5_8_EXPORTACIONES_PREFLIGHT.md"],
-    "note": "N5.8.G is current after F LISTO_REAL. G has one source-backed QA/regression scope. H and N5.9.A/B remain dependency/order-gated; no evidence-only filler is authorized.",
+    "note": "N5.8.G is current after F LISTO_REAL. Its single source-backed QA/regression scope has one canonical J6 manifest and run; ACTIVE_REAL remains unconfirmed until correlated session evidence plus fresh useful activity exist. H and N5.9.A/B remain dependency/order-gated; no evidence-only filler is authorized.",
     "nodes": [
       {"id": "N5.8.A", "order": 58, "dependencies": ["N5.7.H"]},
       {"id": "N5.8.B", "order": 59, "dependencies": ["N5.8.A"]},
@@ -63,7 +63,7 @@
     ]
   },
   "prearmedRoadmap": [
-    {"parent": "N5.8.G", "taskId": "N5.8.G.1.EXPORT_QA_REGRESSION_CI", "state": "READY_FOR_DISPATCH", "dependency": "N5.8.F_LISTO_REAL", "worker": "J6", "taskAttempt": 1, "materialization": "EXTEND_EXISTING_REPORT_ADMIN_E2E_WITH_PDF_VALID_BYTES_INVALID_FORMAT_FAIL_CLOSED_AND_EXPORT_RBAC_DENIAL__PRESERVE_CSV_XLSX__NO_FILLER"},
+    {"parent": "N5.8.G", "taskId": "N5.8.G.1.EXPORT_QA_REGRESSION_CI", "state": "DISPATCHED_TRANSPORT_IN_PROGRESS__ACTIVE_REAL_UNCONFIRMED", "dependency": "N5.8.F_LISTO_REAL", "worker": "J6", "taskAttempt": 1, "manifest": "vaep/j6/dispatch/N5-8-G-1-EXPORT-QA-REGRESSION-CI-J6.json", "runId": 34494960155, "materialization": "EXTEND_EXISTING_REPORT_ADMIN_E2E_WITH_PDF_VALID_BYTES_INVALID_FORMAT_FAIL_CLOSED_AND_EXPORT_RBAC_DENIAL__PRESERVE_CSV_XLSX__NO_FILLER"},
     {"parent": "N5.8.H", "state": "READY_DEPENDENCY_GATED", "dependency": "N5.8.G_LISTO_REAL", "materialization": "EXPORTS_DOCUMENTATION_CERTIFICATION__ROADMAP_DERIVED__NO_FILLER"},
     {"parent": "N5.9.A", "state": "READY_ORDER_GATED", "dependency": "N5.8.H_LISTO_REAL", "materialization": "REPORT_PERFORMANCE_PREFLIGHT__ROADMAP_DERIVED__NO_FILLER"},
     {"parent": "N5.9.B", "state": "READY_DEPENDENCY_GATED", "dependency": "N5.9.A_LISTO_REAL", "materialization": "REPORT_PERFORMANCE_DOMAIN_CONTRACTS__ROADMAP_DERIVED__NO_FILLER"}
@@ -74,7 +74,7 @@
     "J3": [],
     "J4": [],
     "J5": [],
-    "J6": [{"taskId": "N5.8.G.1.EXPORT_QA_REGRESSION_CI", "state": "READY_FOR_DISPATCH", "taskAttempt": 1}]
+    "J6": [{"taskId": "N5.8.G.1.EXPORT_QA_REGRESSION_CI", "state": "DISPATCHED_TRANSPORT_IN_PROGRESS__ACTIVE_REAL_UNCONFIRMED", "taskAttempt": 1, "runId": 34494960155}]
   },
   "lastClosureFunctionalHead": "591721dc019857714a667adbdef6960f6d7e5fe2"
 }
