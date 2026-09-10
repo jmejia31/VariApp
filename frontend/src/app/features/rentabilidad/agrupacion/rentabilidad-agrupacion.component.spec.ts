@@ -36,10 +36,10 @@ describe('RentabilidadAgrupacionComponent', () => {
     component.disabled = true;
     fixture.detectChanges();
     expect(component.agrupacionControl.value).toBe('categoria');
-    expect(component.agrupacionControl.disabled).toBeTrue();
+    expect(component.agrupacionControl.disabled).toBe(true);
 
     component.disabled = false;
-    expect(component.agrupacionControl.enabled).toBeTrue();
+    expect(component.agrupacionControl.enabled).toBe(true);
   });
 
   it('does not emit a programmatic selection while disabled', () => {
