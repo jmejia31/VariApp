@@ -163,6 +163,7 @@ export class EmpresaAdministracionCardComponent implements OnInit {
   private readonly permisos = inject(PermisosRuntimeService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly apiUrl = `${environment.apiUrl}/empresas`;
+  private cargaRequestId = 0;
 
   readonly empresas = signal<EmpresaRaiz[]>([]);
   readonly loading = signal(true);
@@ -189,13 +190,23 @@ export class EmpresaAdministracionCardComponent implements OnInit {
   }
 
   cargar(): void {
+    const requestId = ++this.cargaRequestId;
     this.loading.set(true);
     this.error.set(null);
     let params = new HttpParams();
     if (this.estado() !== 'todas') params = params.set('activa', this.estado() === 'activas');
-    this.http.get<ApiResponse<EmpresaRaiz[]>>(this.apiUrl, { params }).pipe(finalize(() => this.loading.set(false))).subscribe({
-      next: res => this.empresas.set(res.data ?? []),
-      error: err => { this.empresas.set([]); this.error.set(err.error?.message ?? 'No se pudieron cargar las empresas.'); }
+    this.http.get<ApiResponse<EmpresaRaiz[]>>(this.apiUrl, { params }).pipe(finalize(() => {
+      if (requestId === this.cargaRequestId) this.loading.set(false);
+    })).subscribe({
+      next: res => {
+        if (requestId !== this.cargaRequestId) return;
+        this.empresas.set(res.data ?? []);
+      },
+      error: err => {
+        if (requestId !== this.cargaRequestId) return;
+        this.empresas.set([]);
+        this.error.set(err.error?.message ?? 'No se pudieron cargar las empresas.');
+      }
     });
   }
 
