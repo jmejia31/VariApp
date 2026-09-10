@@ -10,6 +10,9 @@ public sealed class ReporteComprasFiltroDto
     public int? ProductoId { get; set; }
     public int? ProductoVarianteId { get; set; }
     public EstadoOrdenCompra? EstadoOrden { get; set; }
+    public EstadoFacturaProveedor? EstadoFactura { get; set; }
+    public EstadoRecepcionCompra? EstadoRecepcion { get; set; }
+    public EstadoDevolucionProveedor? EstadoDevolucion { get; set; }
     public int Page { get; set; } = 1;
     public int PageSize { get; set; } = 50;
 }
@@ -35,6 +38,7 @@ public sealed class ReporteComprasDetalleDto
     public decimal CantidadOrdenada { get; set; }
     public decimal PrecioUnitarioOrdenado { get; set; }
     public decimal? PrecioUnitarioFacturado { get; set; }
+    public string? MonedaFactura { get; set; }
     public decimal? VariacionPrecioAbsoluta { get; set; }
     public decimal CantidadRecibida { get; set; }
     public decimal CantidadAceptada { get; set; }
@@ -42,6 +46,7 @@ public sealed class ReporteComprasDetalleDto
     public decimal CantidadFaltante { get; set; }
     public decimal CantidadSobrante { get; set; }
     public decimal CantidadDevueltaEfectiva { get; set; }
+    public DateTime? FechaEsperadaEvaluadaUtc { get; set; }
     public DateTime? FechaRecepcionEvaluadaUtc { get; set; }
     public int? DesviacionEntregaDias { get; set; }
     public decimal? CantidadEvaluadaOrdenada { get; set; }
