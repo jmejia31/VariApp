@@ -1,9 +1,9 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
-  "currentParent": "N5.4.G",
-  "generatedAt": "2026-09-10T07:55:00Z",
-  "regenerationReason": "N5.4.F_LISTO_REAL__PROMOTE_N5.4.G__QA_CI_CLOSURE_FASTPATH",
-  "lastClosedParent": "N5.4.F",
+  "currentParent": "N5.5.A",
+  "generatedAt": "2026-09-10T08:01:00Z",
+  "regenerationReason": "N5.4.G_H_LISTO_REAL__ATOMIC_PROMOTE_N5.5.A__WORK_CONSERVING__NO_FILLER",
+  "lastClosedParent": "N5.4.H",
   "closureReceipts": {
     "N4.11.H": "vaep/evidence/fragments/N4.11.H_LISTO_REAL_20260908T204500Z.json",
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
@@ -22,7 +22,9 @@
     "N5.4.C": "vaep/evidence/fragments/N5.4.C_LISTO_REAL_20260910T0544Z.json",
     "N5.4.D": "vaep/evidence/fragments/N5.4.D_LISTO_REAL_20260910T0626Z.json",
     "N5.4.E": "vaep/evidence/fragments/N5.4.E_LISTO_REAL_20260910T0732Z.json",
-    "N5.4.F": "vaep/evidence/fragments/N5.4.F_LISTO_REAL_20260910T0754Z.json"
+    "N5.4.F": "vaep/evidence/fragments/N5.4.F_LISTO_REAL_20260910T0754Z.json",
+    "N5.4.G": "vaep/evidence/fragments/N5.4.G_LISTO_REAL_20260910T0758Z.json",
+    "N5.4.H": "vaep/evidence/fragments/N5.4.H_LISTO_REAL_20260910T0800Z.json"
   },
   "policy": {
     "branch": "Desarrollo",
@@ -42,53 +44,32 @@
   },
   "throughputPlan": {
     "mode": "PARENT_CLOSE_FIRST",
-    "currentParent": "N5.4.G",
-    "currentParentMaterialScopeCount": 0,
-    "currentParentReason": "N5.4.F is LISTO_REAL. N5.4.G is QA/regression/CI and has no distinct source-backed implementation scope to dispatch without duplicating the exact-functional-head validation already running for F. Controller owns closure-fastpath evidence collection; no filler is fabricated for J1-J6.",
-    "nextParent": "N5.4.H",
+    "currentParent": "N5.5.A",
+    "currentParentMaterialScopeCount": 1,
+    "currentParentReason": "N5.4.H is LISTO_REAL. N5.5.A is the first ordered dependency-valid parent and is a bounded audit/preflight for purchase reporting; derive one evidence scope from live purchase entities/services/controllers and do not implement large changes.",
+    "nextParent": "N5.5.B",
     "nextParentParallelMaterialScopes": 0,
     "nextParentScopesNonOverlapping": true,
-    "laneRefill": "G_QA_CI_FASTPATH__NO_DUPLICATE_DISPATCH__PREARM_H_N5.5.A__NO_FILLER"
+    "laneRefill": "CONTROLLER_PREFLIGHT_N5.5.A__PREARM_B_C_D__NO_FILLER"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
     "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
-    "sourceRanges": [
-      "COLA!A416:T424",
-      "PLAN_MAESTRO",
-      "backend/src/API/Controllers/RentabilidadVentasController.cs",
-      "backend/tests/InventoryApp.Tests/API/Controllers/RentabilidadVentasContractTests.cs",
-      ".github/workflows/desarrollo-ci.yml",
-      "vaep/evidence/fragments/N5.4.F_LISTO_REAL_20260910T0754Z.json"
-    ],
-    "note": "Dependency order derived from the live Plan/COLA. N5.4.F is LISTO_REAL and N5.4.G is current. G consumes exact-functional-head QA/regression/CI evidence rather than creating duplicate test work. H and N5.5.A remain prearmed dependency/order-gated.",
+    "sourceRanges": ["COLA!A424:T431", "PLAN_MAESTRO"],
+    "note": "N5.4 A-H are closed. N5.5.A is current audit/preflight. N5.5.B/C/D are dependency-gated and must be derived from A evidence before dispatch; no filler.",
     "nodes": [
-      {"id":"N5.4.A","order":26,"type":"MICROTAREA","dependencies":["N5.1.H","GATE-N4"],"phaseGate":"GATE-N4"},
-      {"id":"N5.4.B","order":27,"type":"MICROTAREA","dependencies":["N5.4.A"],"phaseGate":"GATE-N4"},
-      {"id":"N5.4.C","order":28,"type":"MICROTAREA","dependencies":["N5.4.B"],"phaseGate":"GATE-N4"},
-      {"id":"N5.4.D","order":29,"type":"MICROTAREA","dependencies":["N5.4.C"],"phaseGate":"GATE-N4"},
-      {"id":"N5.4.E","order":30,"type":"MICROTAREA","dependencies":["N5.4.D"],"phaseGate":"GATE-N4"},
-      {"id":"N5.4.F","order":31,"type":"MICROTAREA","dependencies":["N5.4.E"],"phaseGate":"GATE-N4"},
-      {"id":"N5.4.G","order":32,"type":"MICROTAREA","dependencies":["N5.4.F"],"phaseGate":"GATE-N4"},
       {"id":"N5.4.H","order":33,"type":"MICROTAREA","dependencies":["N5.4.G"],"phaseGate":"GATE-N4"},
-      {"id":"N5.5.A","order":34,"type":"MICROTAREA","dependencies":["N5.1.H","GATE-N4"],"phaseGate":"GATE-N4"}
+      {"id":"N5.5.A","order":34,"type":"MICROTAREA","dependencies":["N5.1.H","GATE-N4"],"phaseGate":"GATE-N4"},
+      {"id":"N5.5.B","order":35,"type":"MICROTAREA","dependencies":["N5.5.A"],"phaseGate":"GATE-N4"},
+      {"id":"N5.5.C","order":36,"type":"MICROTAREA","dependencies":["N5.5.B"],"phaseGate":"GATE-N4"},
+      {"id":"N5.5.D","order":37,"type":"MICROTAREA","dependencies":["N5.5.C"],"phaseGate":"GATE-N4"}
     ]
   },
   "prearmedRoadmap": [
-    {"parent":"N5.4.H","state":"READY_DEPENDENCY_GATED","dependency":"N5.4.G_LISTO_REAL","materialization":"DERIVE_DOC_CERT_SCOPE_FROM_ACCEPTED_N5.4_D_E_F_G_EVIDENCE__NO_FILLER"},
-    {"parent":"N5.5.A","state":"READY_ORDER_GATED","dependency":"N5.4.H_LISTO_REAL_AND_EXISTING_N5.1.H_GATE-N4","materialization":"DERIVE_PURCHASE_REPORT_PREFLIGHT_FROM_AUTHORITATIVE_COLA__NO_FILLER"}
+    {"parent":"N5.5.B","state":"READY_DEPENDENCY_GATED","dependency":"N5.5.A_LISTO_REAL","materialization":"DERIVE_PURCHASE_REPORT_DOMAIN_CONTRACT_FROM_PREFLIGHT__NO_FILLER"},
+    {"parent":"N5.5.C","state":"READY_DEPENDENCY_GATED","dependency":"N5.5.B_LISTO_REAL","materialization":"DERIVE_PURCHASE_REPORT_PERSISTENCE_NEEDS_FROM_ACCEPTED_DOMAIN__NO_FILLER"},
+    {"parent":"N5.5.D","state":"READY_DEPENDENCY_GATED","dependency":"N5.5.C_LISTO_REAL","materialization":"DERIVE_PURCHASE_REPORT_API_SCOPES_FROM_ACCEPTED_DOMAIN_DATA__NO_FILLER"}
   ],
-  "lanes": {
-    "J1": [
-      {"dispatchId":"N5-4-F-1-PROFITABILITY-AUDIT-CORRELATION-J1","taskId":"N5.4.F.1.PROFITABILITY_AUDIT_CORRELATION","workerId":"J1","taskAttempt":1,"plannedParent":"N5.4.F","readyForDispatch":false,"dispatchEligible":false,"fileScopeHint":"backend/src/API/Controllers/RentabilidadVentasController.cs","prompt":"Closed by N5.4.F LISTO_REAL receipt.","reason":"CLOSED_BY_N5.4.F_LISTO_REAL_RECEIPT"}
-    ],
-    "J2": [
-      {"dispatchId":"N5-4-F-2-PROFITABILITY-SECURITY-AUDIT-TESTS-J2","taskId":"N5.4.F.2.PROFITABILITY_SECURITY_AUDIT_TESTS","workerId":"J2","taskAttempt":1,"plannedParent":"N5.4.F","readyForDispatch":false,"dispatchEligible":false,"fileScopeHint":"backend/tests/InventoryApp.Tests/API/Controllers/RentabilidadVentasContractTests.cs","prompt":"Closed by N5.4.F LISTO_REAL receipt.","reason":"CLOSED_BY_N5.4.F_LISTO_REAL_RECEIPT"}
-    ],
-    "J3": [],
-    "J4": [],
-    "J5": [],
-    "J6": []
-  },
+  "lanes": {"J1":[],"J2":[],"J3":[],"J4":[],"J5":[],"J6":[]},
   "lastClosureFunctionalHead": "df5eca6fa7ccd66f06031a050141ac247dcffec4"
 }
