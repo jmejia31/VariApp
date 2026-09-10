@@ -19,6 +19,7 @@ namespace InventoryApp.Infrastructure.Migrations
             ApplyN43CModel(modelBuilder);
             ApplyN46CModel(modelBuilder);
             ApplyN53CModel(modelBuilder);
+            ApplyN57CModel(modelBuilder);
             return (IModel)modelBuilder.Model;
         }
 
@@ -89,9 +90,12 @@ namespace InventoryApp.Infrastructure.Migrations
                 b.Property<string>("CreadoPorNombreUsuario").HasMaxLength(150).HasColumnType("varchar(150)");
                 b.Property<int?>("CreadoPorUsuarioId").HasColumnType("int");
                 b.Property<int>("Estado").HasColumnType("int");
-                b.Property<DateTime>("FechaActualizacion").HasColumnType("datetime(6)");
-                b.Property<DateTime>("FechaCreacion").HasColumnType("datetime(6)");
-                b.Property<DateTime>("FechaMovimiento").HasColumnType("datetime(6)");
+                b.Property<DateTime>("FechaActualizacion")
+                    .HasColumnType("datetime(6)");
+                b.Property<DateTime>("FechaCreacion")
+                    .HasColumnType("datetime(6)");
+                b.Property<DateTime>("FechaMovimiento")
+                    .HasColumnType("datetime(6)");
                 b.Property<string>("IdempotencyKey").IsRequired().HasMaxLength(100).HasColumnType("varchar(100)");
                 b.Property<decimal>("Monto").HasColumnType("decimal(18,2)");
                 b.Property<string>("Referencia").IsRequired().HasMaxLength(100).HasColumnType("varchar(100)");
