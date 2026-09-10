@@ -17,6 +17,12 @@ on:
     workflows:
       - 'VAEP engine lightweight checks'
       - 'Desarrollo - Compilación y pruebas'
+      - 'VAEP J1 Trusted Worker'
+      - 'VAEP J2 Trusted Worker'
+      - 'VAEP J3 Trusted Worker'
+      - 'VAEP J4 Trusted Worker'
+      - 'VAEP J5 Trusted Worker'
+      - 'VAEP J6 Trusted Worker'
     types: [completed]
   workflow_dispatch:
     inputs:
@@ -40,11 +46,24 @@ jobs:
     if: >-
       github.event_name != 'workflow_run' ||
       (
-        (github.event.workflow_run.name == 'VAEP engine lightweight checks' ||
-         github.event.workflow_run.name == 'Desarrollo - Compilación y pruebas') &&
-        github.event.workflow_run.conclusion == 'success' &&
-        github.event.workflow_run.event == 'push' &&
-        github.event.workflow_run.head_branch == 'Desarrollo'
+        github.event.workflow_run.head_branch == 'Desarrollo' &&
+        (
+          (
+            (github.event.workflow_run.name == 'VAEP engine lightweight checks' ||
+             github.event.workflow_run.name == 'Desarrollo - Compilación y pruebas') &&
+            github.event.workflow_run.conclusion == 'success' &&
+            github.event.workflow_run.event == 'push'
+          ) ||
+          (
+            (github.event.workflow_run.name == 'VAEP J1 Trusted Worker' ||
+             github.event.workflow_run.name == 'VAEP J2 Trusted Worker' ||
+             github.event.workflow_run.name == 'VAEP J3 Trusted Worker' ||
+             github.event.workflow_run.name == 'VAEP J4 Trusted Worker' ||
+             github.event.workflow_run.name == 'VAEP J5 Trusted Worker' ||
+             github.event.workflow_run.name == 'VAEP J6 Trusted Worker') &&
+            github.event.workflow_run.event == 'workflow_dispatch'
+          )
+        )
       )
     name: Verify OPEN_ONLY authority and admission
     runs-on: ubuntu-latest
@@ -110,7 +129,7 @@ jobs:
 
   checkpoint:
     needs: enforce-open-admission
-    if: needs.enforce-open-admission.result == 'success' && github.event_name != 'push'
+    if: needs.enforce-open-admission.result == 'success'
     name: ${{ matrix.worker }} ${{ inputs.checkpoint || github.event.schedule || ':00' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
