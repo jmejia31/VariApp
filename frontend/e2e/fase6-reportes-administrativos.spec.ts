@@ -157,7 +157,7 @@ test.describe('Fase 6 — permisos, auditoría y reportes administrativos', () =
     expect(limitedRole.nivelPrivilegio).toBe('Bajo');
   });
 
-  test('exportaciones CSV y XLSX son válidas y no contienen credenciales', async ({ request }) => {
+  test('exportaciones CSV, XLSX y PDF son válidas y formatos desconocidos fallan cerrado', async ({ request }) => {
     const csv = await request.get(`${API_URL}/reportes-administrativos/exportar/usuarios?formato=csv`, {
       headers: auth(adminToken)
     });
@@ -174,9 +174,23 @@ test.describe('Fase 6 — permisos, auditoría y reportes administrativos', () =
     });
     expect(xlsx.status(), await xlsx.text()).toBe(200);
     expect(xlsx.headers()['content-type']).toContain('spreadsheetml');
-    const bytes = await xlsx.body();
-    expect(bytes.subarray(0, 2).toString()).toBe('PK');
-    expect(bytes.length).toBeGreaterThan(1000);
+    const xlsxBytes = await xlsx.body();
+    expect(xlsxBytes.subarray(0, 2).toString()).toBe('PK');
+    expect(xlsxBytes.length).toBeGreaterThan(1000);
+
+    const pdf = await request.get(`${API_URL}/reportes-administrativos/exportar/usuarios?formato=pdf`, {
+      headers: auth(adminToken)
+    });
+    expect(pdf.status(), await pdf.text()).toBe(200);
+    expect(pdf.headers()['content-type']).toContain('application/pdf');
+    const pdfBytes = await pdf.body();
+    expect(pdfBytes.length).toBeGreaterThan(4);
+    expect(pdfBytes.subarray(0, 4).toString('ascii')).toBe('%PDF');
+
+    const invalid = await request.get(`${API_URL}/reportes-administrativos/exportar/usuarios?formato=html`, {
+      headers: auth(adminToken)
+    });
+    expect(invalid.status(), await invalid.text()).toBe(400);
 
     const audit = await request.get(`${API_URL}/reportes-administrativos/exportar/auditoria?formato=csv`, {
       headers: auth(adminToken)
@@ -188,7 +202,7 @@ test.describe('Fase 6 — permisos, auditoría y reportes administrativos', () =
     expect(auditText).not.toContain('ValoresNuevos');
   });
 
-  test('rol no administrativo recibe 403 en reportes y auditoría', async ({ request }) => {
+  test('rol no administrativo recibe 403 en reportes, exportación y auditoría', async ({ request }) => {
     const permissions = await request.get(`${API_URL}/permisos/mis-permisos`, {
       headers: auth(limitedToken)
     });
@@ -196,11 +210,13 @@ test.describe('Fase 6 — permisos, auditoría y reportes administrativos', () =
     const data = await dataOf(permissions);
     expect(data.permisos).toContain('Dashboard:Ver');
     expect(data.permisos).not.toContain('ReportesAdministrativos:Ver');
+    expect(data.permisos).not.toContain('ReportesAdministrativos:Exportar');
 
     for (const path of [
       '/reportes-administrativos/resumen',
       '/reportes-administrativos/usuarios-accesos',
       '/reportes-administrativos/roles-permisos',
+      '/reportes-administrativos/exportar/usuarios?formato=csv',
       '/auditoria?page=1&pageSize=10'
     ]) {
       const denied = await request.get(`${API_URL}${path}`, { headers: auth(limitedToken) });
