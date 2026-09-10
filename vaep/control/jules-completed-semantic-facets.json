@@ -1,10 +1,10 @@
 {
-  "version": 9,
-  "currentParent": "N4.11.D",
+  "version": 10,
+  "currentParent": "N5.3.E",
   "identityRule": "CURRENT_PARENT + semanticFacet",
-  "updatedAt": "2026-09-07T20:57:40Z",
+  "updatedAt": "2026-09-10T02:31:30Z",
   "lanes": {
-    "J1": [],
+    "J1": ["SALES_REPORT_FRONTEND_MODELS"],
     "J2": [],
     "J3": [],
     "J4": [],
