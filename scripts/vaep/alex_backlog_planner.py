@@ -7,6 +7,7 @@ detects starvation/backlog debt, and emits deterministic generation requests
 for exact material scopes derived from the canonical roadmap. It never
 certifies LISTO_REAL, never bypasses REVIEW_FIRST, never promotes a dependency
 prematurely and never invents busywork merely to satisfy a numeric backlog.
+Capability availability and a successful planner run never imply ACTIVE_REAL.
 """
 from __future__ import annotations
 
@@ -154,8 +155,8 @@ def build_runtime(
         capability_rows[item["id"]] = {
             "id": item["id"],
             "name": item["name"],
-            "mode": item.get("mode", "ACTIVE_REAL"),
-            "status": item.get("status", "ACTIVE"),
+            "mode": item.get("mode", "ALEX_CAPABILITY"),
+            "status": item.get("status", "AVAILABLE__NOT_ACTIVE_REAL"),
             "outputType": item.get("outputType", "TASK_CANDIDATE"),
             "candidateTaskIds": [],
             "currentParentCandidateCount": 0,
@@ -251,7 +252,7 @@ def build_runtime(
 
     a25 = capability_rows.get("A25")
     if a25 is not None:
-        a25["watchState"] = "ACTIVE_WATCH"
+        a25["watchState"] = "CAPABILITY_AVAILABLE__NOT_RUNTIME_PROOF"
         a25["starvedLanes"] = starved
         a25["lowProgrammedLanes"] = low_programmed
         a25["semanticDedupe"] = "TASK_IDENTITY_UNIQUE_NO_BUSYWORK"
@@ -263,7 +264,7 @@ def build_runtime(
         "engine": "ALEX",
         "role": capabilities.get("role"),
         "operational": True,
-        "runtimeState": capabilities.get("runtimeState", "ACTIVE_REAL"),
+        "runtimeState": "CONTROL_PLANE_SNAPSHOT__NOT_ACTIVE_REAL",
         "generatedAtUtc": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
         "currentParent": current_parent,
         "nextParent": next_parent,
@@ -281,8 +282,9 @@ def build_runtime(
             "lowProgrammedLaneCount": len(low_programmed),
             "lowProgrammedLanes": low_programmed,
             "generationRequestCount": len(generation_requests),
-            "wakePolicy": "EVENT_DRIVEN_REFILL_PLUS_5_MINUTE_ALEX_WATCHDOG",
-            "deepRefillMode": "ACTIVE_ROADMAP_GENERATION_REQUESTS",
+            "wakePolicy": "EVENT_DRIVEN_PUSH_AND_WORKFLOW_RUN",
+            "watchdogCadence": "NO_INDEPENDENT_5_MINUTE_TIMER",
+            "deepRefillMode": "ROADMAP_GENERATION_REQUESTS_AVAILABLE__NOT_ACTIVE_REAL",
             "materialScopeGenerationRequired": bool(generation_requests),
             "genericRegenerationAllowed": False,
             "busyworkAllowed": False,
