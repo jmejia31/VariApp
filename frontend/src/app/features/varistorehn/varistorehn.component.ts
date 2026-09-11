@@ -177,7 +177,10 @@ export class VaristorehnComponent implements OnInit, AfterViewInit {
   }
   imagenValida(url?: string): boolean { return Boolean(url && !this.imagenesFallidas().has(url)); }
   errorImagen(url: string): void { this.imagenesFallidas.update(actual => new Set([...actual, url])); }
-  abrirDetalle(producto: ProductoTienda): void { this.productoDetalle.set(producto); this.imagenActiva.set(0); this.detalleDialog?.nativeElement.showModal(); }
+  abrirDetalle(producto: ProductoTienda): void {
+    if (!producto.slug) { this.aviso.set('Este producto todavía no tiene una URL pública disponible.'); return; }
+    this.document.defaultView?.location.assign(VARISTOREHN_PATHS.producto(producto.slug));
+  }
   cerrarDetalle(): void { this.detalleDialog?.nativeElement.close(); this.productoDetalle.set(null); }
   abrirCarrito(): void { this.cerrarDetalle(); this.carritoDialog?.nativeElement.showModal(); }
   cerrarCarrito(): void { this.carritoDialog?.nativeElement.close(); }
