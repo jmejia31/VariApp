@@ -97,7 +97,7 @@ export class SucursalFormComponent implements OnInit {
 
   submit(): void {
     this.form.markAllAsTouched();
-    if (this.form.invalid || this.saving() || this.loading()) return;
+    if (this.form.invalid || this.saving() || this.loading() || this.empresasLoading() || this.empresasError()) return;
 
     this.saving.set(true);
     this.errorMessage.set(null);
