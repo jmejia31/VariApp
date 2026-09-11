@@ -82,6 +82,15 @@ public sealed class SucursalRepository : ISucursalRepository
             (!excluirId.HasValue || s.Id != excluirId.Value));
     }
 
+    public async Task<bool> ExisteCodigoAsync(string codigo, int empresaId, int? excluirId = null)
+    {
+        var normalizado = codigo.Trim().ToUpper();
+        return await Sucursales.AnyAsync(s =>
+            s.EmpresaId == empresaId &&
+            s.Codigo.ToUpper() == normalizado &&
+            (!excluirId.HasValue || s.Id != excluirId.Value));
+    }
+
     public async Task AddAsync(Sucursal sucursal) =>
         await Sucursales.AddAsync(sucursal);
 
