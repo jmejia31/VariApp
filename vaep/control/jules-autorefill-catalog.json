@@ -1,9 +1,9 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
-  "currentParent": "N6.2.G",
-  "generatedAt": "2026-09-11T05:25:00Z",
-  "regenerationReason": "SUPERVISION_12__CLOSE_N6.2.F__PROMOTE_N6.2.G__PREARM_N6.2.H__NO_FILLER",
-  "lastClosedParent": "N6.2.F",
+  "currentParent": "N6.2.H",
+  "generatedAt": "2026-09-11T06:01:07Z",
+  "regenerationReason": "PRIMARY_00__RECONCILE_G_CLOSURE__H_PROMOTION_AND_J1_DISPATCH__PREARM_N6.3.A__NO_FILLER",
+  "lastClosedParent": "N6.2.G",
   "closureReceipts": {
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
     "N5.1.H": "vaep/evidence/fragments/N5.1.H_LISTO_REAL_20260909T1236Z.json",
@@ -36,7 +36,8 @@
     "N6.2.C": "vaep/evidence/fragments/N6.2.C_LISTO_REAL_20260911T0223Z.json",
     "N6.2.D": "vaep/evidence/fragments/N6.2.D_LISTO_REAL_20260911T0308Z.json",
     "N6.2.E": "vaep/evidence/fragments/N6.2.E_LISTO_REAL_20260911T0402Z.json",
-    "N6.2.F": "vaep/evidence/fragments/N6.2.F_LISTO_REAL_20260911T0524Z.json"
+    "N6.2.F": "vaep/evidence/fragments/N6.2.F_LISTO_REAL_20260911T0524Z.json",
+    "N6.2.G": "vaep/evidence/fragments/N6.2.G_LISTO_REAL_20260911T0557Z.json"
   },
   "policy": {
     "branch": "Desarrollo",
@@ -50,65 +51,376 @@
     "materialParallelismTargetPerParent": 6,
     "requireDistinctWriteScopesWhenParallel": true,
     "activeWorkerCount": 6,
-    "activeWorkers": ["J1", "J2", "J3", "J4", "J5", "J6"]
+    "activeWorkers": [
+      "J1",
+      "J2",
+      "J3",
+      "J4",
+      "J5",
+      "J6"
+    ]
   },
   "throughputPlan": {
     "mode": "PARENT_CLOSE_FIRST",
-    "currentParent": "N6.2.G",
+    "currentParent": "N6.2.H",
     "currentParentMaterialScopeCount": 1,
-    "currentParentReason": "N6.2.F is certified LISTO_REAL after controller REVIEW_FIRST PASS, P0/P1=0 and terminal causal exact-head gates. N6.2.G QA/regression/CI is now dependency-valid and prepared for one J5 ATTEMPT1 dispatch; ACTIVE_REAL remains false until manifest->workflow->sessionId plus useful fresh activity is verified.",
-    "nextParent": "N6.2.H",
+    "currentParentReason": "N6.2.G is LISTO_REAL after controller REVIEW_FIRST and terminal exact-head gates. N6.2.H documentation/certification is the single dependency-valid scope and has one canonical J1 ATTEMPT1 workflow; ACTIVE_REAL remains false until a correlated sessionId plus useful fresh activity is proven.",
+    "nextParent": "N6.3.A",
     "nextParentParallelMaterialScopes": 1,
     "nextParentScopesNonOverlapping": true,
-    "currentRun": "N6-2-G-1-TENANT-AWARE-DATA-MODEL-QA-REGRESSION-CI-J5-A1",
+    "currentRun": "N6-2-H-1-TENANT-AWARE-DATA-MODEL-DOCUMENTATION-CERTIFICATION-J1-A1",
     "nextRunReserved": null,
-    "laneRefill": "N6.2.G_J5_A1_DISPATCH_PREPARED__N6.2.H_PREARMED_DEPENDENCY_GATED__NO_FILLER__NO_DUPLICATE"
+    "laneRefill": "N6.2.H_J1_A1_DISPATCHED__N6.3.A_PREARMED_DEPENDENCY_GATED__NO_FILLER__NO_DUPLICATE"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
     "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
-    "sourceRanges": ["COLA!A464:Z479", "PLAN_MAESTRO!A60:M68"],
+    "sourceRanges": [
+      "COLA!A464:Z479",
+      "PLAN_MAESTRO!A60:M68"
+    ],
     "nodes": [
-      {"id":"GATE-N5","order":857,"dependencies":["N5.1.H","N5.2.H","N5.3.H","N5.4.H","N5.5.H","N5.6.H","N5.7.H","N5.8.H","N5.9.H"]},
-      {"id":"N6.1.A","order":524,"dependencies":["GATE-N5"]},
-      {"id":"N6.1.B","order":525,"dependencies":["N6.1.A"]},
-      {"id":"N6.1.C","order":526,"dependencies":["N6.1.B"]},
-      {"id":"N6.1.D","order":527,"dependencies":["N6.1.C"]},
-      {"id":"N6.1.E","order":528,"dependencies":["N6.1.D"]},
-      {"id":"N6.1.F","order":529,"dependencies":["N6.1.E"]},
-      {"id":"N6.1.G","order":530,"dependencies":["N6.1.F"]},
-      {"id":"N6.1.H","order":531,"dependencies":["N6.1.G"]},
-      {"id":"N6.2.A","order":532,"dependencies":["N6.1.H"]},
-      {"id":"N6.2.B","order":533,"dependencies":["N6.2.A"]},
-      {"id":"N6.2.C","order":534,"dependencies":["N6.2.B"]},
-      {"id":"N6.2.D","order":535,"dependencies":["N6.2.C"]},
-      {"id":"N6.2.E","order":536,"dependencies":["N6.2.D"]},
-      {"id":"N6.2.F","order":537,"dependencies":["N6.2.E"]},
-      {"id":"N6.2.G","order":538,"dependencies":["N6.2.F"]},
-      {"id":"N6.2.H","order":539,"dependencies":["N6.2.G"]}
+      {
+        "id": "GATE-N5",
+        "order": 857,
+        "dependencies": [
+          "N5.1.H",
+          "N5.2.H",
+          "N5.3.H",
+          "N5.4.H",
+          "N5.5.H",
+          "N5.6.H",
+          "N5.7.H",
+          "N5.8.H",
+          "N5.9.H"
+        ]
+      },
+      {
+        "id": "N6.1.A",
+        "order": 524,
+        "dependencies": [
+          "GATE-N5"
+        ]
+      },
+      {
+        "id": "N6.1.B",
+        "order": 525,
+        "dependencies": [
+          "N6.1.A"
+        ]
+      },
+      {
+        "id": "N6.1.C",
+        "order": 526,
+        "dependencies": [
+          "N6.1.B"
+        ]
+      },
+      {
+        "id": "N6.1.D",
+        "order": 527,
+        "dependencies": [
+          "N6.1.C"
+        ]
+      },
+      {
+        "id": "N6.1.E",
+        "order": 528,
+        "dependencies": [
+          "N6.1.D"
+        ]
+      },
+      {
+        "id": "N6.1.F",
+        "order": 529,
+        "dependencies": [
+          "N6.1.E"
+        ]
+      },
+      {
+        "id": "N6.1.G",
+        "order": 530,
+        "dependencies": [
+          "N6.1.F"
+        ]
+      },
+      {
+        "id": "N6.1.H",
+        "order": 531,
+        "dependencies": [
+          "N6.1.G"
+        ]
+      },
+      {
+        "id": "N6.2.A",
+        "order": 532,
+        "dependencies": [
+          "N6.1.H"
+        ]
+      },
+      {
+        "id": "N6.2.B",
+        "order": 533,
+        "dependencies": [
+          "N6.2.A"
+        ]
+      },
+      {
+        "id": "N6.2.C",
+        "order": 534,
+        "dependencies": [
+          "N6.2.B"
+        ]
+      },
+      {
+        "id": "N6.2.D",
+        "order": 535,
+        "dependencies": [
+          "N6.2.C"
+        ]
+      },
+      {
+        "id": "N6.2.E",
+        "order": 536,
+        "dependencies": [
+          "N6.2.D"
+        ]
+      },
+      {
+        "id": "N6.2.F",
+        "order": 537,
+        "dependencies": [
+          "N6.2.E"
+        ]
+      },
+      {
+        "id": "N6.2.G",
+        "order": 538,
+        "dependencies": [
+          "N6.2.F"
+        ]
+      },
+      {
+        "id": "N6.2.H",
+        "order": 539,
+        "dependencies": [
+          "N6.2.G"
+        ]
+      },
+      {
+        "id": "N6.3.A",
+        "order": 540,
+        "dependencies": [
+          "N6.1.H",
+          "N1.1.H"
+        ]
+      }
     ]
   },
   "recoveredRuns": [
     {
-      "parent":"N6.1.G","logicalTaskId":"N6.1.G.1.TENANT_EMPRESA_QA_REGRESSION_CI","worker":"J6","originalRunId":34524834350,"originalTerminal":"PRESESSION_PRIMARY_BASE_HEAD_MISMATCH","contentAttemptConsumed":false,"tx1RunId":34525160317,"tx1JobId":103032161616,"tx1SessionId":"10428644054862379079","tx1ArtifactId":10171626009,"terminal":"COMPLETED_SUCCESS_REVIEW_FIRST_ACCEPTED","integrationCommit":"bbd3792f7cc42b1e62163a76735dc2ad6eacb899","integrationReceiptClass":"NONCANONICAL_PARENT_EVIDENCE_ONLY__NO_JULES_PRODUCTIVITY","r2Used":false,"r3Used":false
+      "parent": "N6.1.G",
+      "logicalTaskId": "N6.1.G.1.TENANT_EMPRESA_QA_REGRESSION_CI",
+      "worker": "J6",
+      "originalRunId": 34524834350,
+      "originalTerminal": "PRESESSION_PRIMARY_BASE_HEAD_MISMATCH",
+      "contentAttemptConsumed": false,
+      "tx1RunId": 34525160317,
+      "tx1JobId": 103032161616,
+      "tx1SessionId": "10428644054862379079",
+      "tx1ArtifactId": 10171626009,
+      "terminal": "COMPLETED_SUCCESS_REVIEW_FIRST_ACCEPTED",
+      "integrationCommit": "bbd3792f7cc42b1e62163a76735dc2ad6eacb899",
+      "integrationReceiptClass": "NONCANONICAL_PARENT_EVIDENCE_ONLY__NO_JULES_PRODUCTIVITY",
+      "r2Used": false,
+      "r3Used": false
     },
     {
-      "parent":"N6.2.C","logicalTaskId":"N6.2.C.1.TENANT_AWARE_DATA_MODEL_PERSISTENCE","worker":"J2","invalidRenameRunId":34543012961,"invalidRenameTerminal":"PRESESSION_INVALID_REDISPATCH__NON_APPEND_ONLY","invalidTx1RunId":34546602308,"invalidTx1Terminal":"PRESESSION_FILENAME_DISPATCH_ID_MISMATCH","tx2RunId":34546666164,"tx2JobId":103100674308,"tx2ManifestCommit":"b44a1a14465fe8129fb1a569d4bc95787a262f8d","terminal":"TX2_TIMEOUT__NO_SESSION_OR_USEFUL_CONTENT__EVIDENCE_ONLY","sessionId":null,"activeReal":false,"contentAttemptConsumed":false,"taskAttempt":1,"r2Used":false,"r3Used":false,"controllerDirectFixCommit":"f60c4ea3d9ad157f8cc1a5d06f3f86f3f1642086","reviewReceipt":"vaep/evidence/reviews/N6.2.C_CONTROLLER_REVIEW_FIRST_20260911T0033Z.json","reviewCommit":"a717ded0a6df15001ebeb92f65ecb278cca02243","failedCausalRunId":34547228786,"failedCausalReason":"LEGACY_REPORTES_VENTAS_FIXTURE_MISSING_REQUIRED_EMPRESA","p0":0,"p1":0,"ownershipTransfer":"J2_TO_CHATGPT_VAEP__EXPLICIT_AFTER_TERMINAL_TIMEOUT","failedCausalRunIds":[34547228786,34547601800,34547601804],"resolvedCausalReason":"PREMATURE_NOT_NULL_BROKE_CURRENT_APPLICATION_FLOW__ROLLOUT_SAFE_OPTIONAL_RESTRICT_FK_APPLIED__EXACT_HEAD_GATES_PASS","closureReceipt":"vaep/evidence/fragments/N6.2.C_LISTO_REAL_20260911T0223Z.json"
+      "parent": "N6.2.C",
+      "logicalTaskId": "N6.2.C.1.TENANT_AWARE_DATA_MODEL_PERSISTENCE",
+      "worker": "J2",
+      "invalidRenameRunId": 34543012961,
+      "invalidRenameTerminal": "PRESESSION_INVALID_REDISPATCH__NON_APPEND_ONLY",
+      "invalidTx1RunId": 34546602308,
+      "invalidTx1Terminal": "PRESESSION_FILENAME_DISPATCH_ID_MISMATCH",
+      "tx2RunId": 34546666164,
+      "tx2JobId": 103100674308,
+      "tx2ManifestCommit": "b44a1a14465fe8129fb1a569d4bc95787a262f8d",
+      "terminal": "TX2_TIMEOUT__NO_SESSION_OR_USEFUL_CONTENT__EVIDENCE_ONLY",
+      "sessionId": null,
+      "activeReal": false,
+      "contentAttemptConsumed": false,
+      "taskAttempt": 1,
+      "r2Used": false,
+      "r3Used": false,
+      "controllerDirectFixCommit": "f60c4ea3d9ad157f8cc1a5d06f3f86f3f1642086",
+      "reviewReceipt": "vaep/evidence/reviews/N6.2.C_CONTROLLER_REVIEW_FIRST_20260911T0033Z.json",
+      "reviewCommit": "a717ded0a6df15001ebeb92f65ecb278cca02243",
+      "failedCausalRunId": 34547228786,
+      "failedCausalReason": "LEGACY_REPORTES_VENTAS_FIXTURE_MISSING_REQUIRED_EMPRESA",
+      "p0": 0,
+      "p1": 0,
+      "ownershipTransfer": "J2_TO_CHATGPT_VAEP__EXPLICIT_AFTER_TERMINAL_TIMEOUT",
+      "failedCausalRunIds": [
+        34547228786,
+        34547601800,
+        34547601804
+      ],
+      "resolvedCausalReason": "PREMATURE_NOT_NULL_BROKE_CURRENT_APPLICATION_FLOW__ROLLOUT_SAFE_OPTIONAL_RESTRICT_FK_APPLIED__EXACT_HEAD_GATES_PASS",
+      "closureReceipt": "vaep/evidence/fragments/N6.2.C_LISTO_REAL_20260911T0223Z.json"
+    },
+    {
+      "parent": "N6.2.G",
+      "logicalTaskId": "N6.2.G.1.TENANT_AWARE_DATA_MODEL_QA_REGRESSION_CI",
+      "worker": "J5",
+      "originalRunId": 34565910261,
+      "tx1RunId": 34566243269,
+      "tx1JobId": 103158845229,
+      "tx1SessionId": "13550524690027394816",
+      "terminal": "TX1_LANE_BUDGET_EXCEEDED__SUPERSEDED__NO_PATCH__EVIDENCE_ONLY",
+      "activeReal": false,
+      "contentAttemptConsumed": false,
+      "taskAttempt": 1,
+      "r2Used": false,
+      "r3Used": false,
+      "ownershipTransfer": "J5_TO_CHATGPT_VAEP__EXPLICIT_AFTER_STALL_THRESHOLD",
+      "reviewReceipt": "vaep/evidence/reviews/N6.2.G_CONTROLLER_REVIEW_FIRST_20260911T0546Z.json",
+      "closureReceipt": "vaep/evidence/fragments/N6.2.G_LISTO_REAL_20260911T0557Z.json"
     }
   ],
   "prearmedRoadmap": [
-    {"parent":"N6.1.H","taskId":"N6.1.H.1.TENANT_EMPRESA_DOCUMENTATION_CERTIFICATION","state":"LISTO_REAL","dependency":"N6.1.G_LISTO_REAL","materialization":"TENANT_EMPRESA_DOC_CERT__ROADMAP_DERIVED__NO_FILLER"},
-    {"parent":"N6.2.A","taskId":"N6.2.A.1.TENANT_AWARE_DATA_MODEL_PREFLIGHT","state":"LISTO_REAL","dependency":"N6.1.H_LISTO_REAL","materialization":"TENANT_AWARE_DATA_MODEL_PREFLIGHT__CONTROLLER_TAKEOVER__NO_FILLER"},
-    {"parent":"N6.2.B","taskId":"N6.2.B.1.TENANT_AWARE_DATA_MODEL_DOMAIN_CONTRACTS","state":"LISTO_REAL","dependency":"N6.2.A_LISTO_REAL","materialization":"TENANT_AWARE_DATA_MODEL_DOMAIN_CONTRACTS__QA_TAKEOVER__REVIEW_FIRST_PASS"},
-    {"parent":"N6.2.C","state":"LISTO_REAL","dependency":"N6.2.B_LISTO_REAL","materialization":"TENANT_AWARE_DATA_MODEL_PERSISTENCE__CONTROLLER_RECOVERY__REVIEW_FIRST_PASS__EXACT_GATES_PASS","taskId":"N6.2.C.1.TENANT_AWARE_DATA_MODEL_PERSISTENCE","worker":"CHATGPT_VAEP","runId":34546666164,"dispatchId":"N6-2-C-1-TENANT-AWARE-DATA-MODEL-PERSISTENCE-J2-A1-TX2","functionalHead":"f60c4ea3d9ad157f8cc1a5d06f3f86f3f1642086","reviewCommit":"a717ded0a6df15001ebeb92f65ecb278cca02243","closureReceipt":"vaep/evidence/fragments/N6.2.C_LISTO_REAL_20260911T0223Z.json"},
-    {"parent":"N6.2.D","state":"LISTO_REAL","dependency":"N6.2.C_LISTO_REAL","materialization":"TENANT_AWARE_DATA_MODEL_APPLICATION_API__CONTROLLER_REVIEW_FIRST_PASS__EXACT_GATES_PASS","taskId":"N6.2.D.1.TENANT_AWARE_DATA_MODEL_APPLICATION_API","worker":"CHATGPT_VAEP","dispatchId":"N6-2-D-1-TENANT-AWARE-DATA-MODEL-APPLICATION-API-J2-A1","taskAttempt":1,"functionalHead":"04fc4be1c4ca0c240b8111aba317b3524f70a272","reviewReceipt":"vaep/evidence/reviews/N6.2.D_CONTROLLER_REVIEW_FIRST_20260911T0244Z.json","closureReceipt":"vaep/evidence/fragments/N6.2.D_LISTO_REAL_20260911T0308Z.json"},
-    {"parent":"N6.2.E","state":"LISTO_REAL","dependency":"N6.2.D_LISTO_REAL","materialization":"TENANT_AWARE_DATA_MODEL_FRONTEND_UX__CONTROLLER_DIRECT_FIX__REVIEW_FIRST_PASS__EXACT_DESCENDANT_GATES_PASS","taskId":"N6.2.E.1.TENANT_AWARE_DATA_MODEL_FRONTEND_UX","worker":"CHATGPT_VAEP","functionalHead":"014b8504dc3ac6ee9c4fe90ab56b0159929f7f3c","reviewReceipt":"vaep/evidence/reviews/N6.2.E_CONTROLLER_REVIEW_FIRST_20260911T0334Z.json","closureReceipt":"vaep/evidence/fragments/N6.2.E_LISTO_REAL_20260911T0402Z.json"},
-    {"parent":"N6.2.F","taskId":"N6.2.F.1.TENANT_AWARE_DATA_MODEL_SEC_AUDIT","state":"LISTO_REAL","dependency":"N6.2.E_LISTO_REAL","materialization":"TENANT_AWARE_DATA_MODEL_SEC_AUDIT__CONTROLLER_REVIEW_FIRST_PASS__P0_P1_ZERO__EXACT_HEAD_GATES_PASS","worker":"CHATGPT_VAEP","dispatchId":"N6-2-F-1-TENANT-AWARE-DATA-MODEL-SEC-AUDIT-J5-A1","taskAttempt":1,"functionalHead":"a46b98c0b6e25f96bf8c2d0863678e849e441ff1","reviewReceipt":"vaep/evidence/reviews/N6.2.F_CONTROLLER_REVIEW_FIRST_20260911T0452Z.json","closureReceipt":"vaep/evidence/fragments/N6.2.F_LISTO_REAL_20260911T0524Z.json"},
-    {"parent":"N6.2.G","taskId":"N6.2.G.1.TENANT_AWARE_DATA_MODEL_QA_REGRESSION_CI","state":"CURRENT_DISPATCHED_AWAITING_ACTIVE_REAL_CORRELATION","dependency":"N6.2.F_LISTO_REAL","materialization":"TENANT_AWARE_DATA_MODEL_QA_REGRESSION_CI__J5_ATTEMPT1__NO_FILLER","worker":"J5","dispatchId":"N6-2-G-1-TENANT-AWARE-DATA-MODEL-QA-REGRESSION-CI-J5-A1","taskAttempt":1,"activeReal":false},
-    {"parent":"N6.2.H","taskId":"N6.2.H.1.TENANT_AWARE_DATA_MODEL_DOCUMENTATION_CERTIFICATION","state":"READY_DEPENDENCY_GATED","dependency":"N6.2.G_LISTO_REAL","materialization":"TENANT_AWARE_DATA_MODEL_DOCUMENTATION_CERTIFICATION__ROADMAP_DERIVED__NO_FILLER"}
+    {
+      "parent": "N6.1.H",
+      "taskId": "N6.1.H.1.TENANT_EMPRESA_DOCUMENTATION_CERTIFICATION",
+      "state": "LISTO_REAL",
+      "dependency": "N6.1.G_LISTO_REAL",
+      "materialization": "TENANT_EMPRESA_DOC_CERT__ROADMAP_DERIVED__NO_FILLER"
+    },
+    {
+      "parent": "N6.2.A",
+      "taskId": "N6.2.A.1.TENANT_AWARE_DATA_MODEL_PREFLIGHT",
+      "state": "LISTO_REAL",
+      "dependency": "N6.1.H_LISTO_REAL",
+      "materialization": "TENANT_AWARE_DATA_MODEL_PREFLIGHT__CONTROLLER_TAKEOVER__NO_FILLER"
+    },
+    {
+      "parent": "N6.2.B",
+      "taskId": "N6.2.B.1.TENANT_AWARE_DATA_MODEL_DOMAIN_CONTRACTS",
+      "state": "LISTO_REAL",
+      "dependency": "N6.2.A_LISTO_REAL",
+      "materialization": "TENANT_AWARE_DATA_MODEL_DOMAIN_CONTRACTS__QA_TAKEOVER__REVIEW_FIRST_PASS"
+    },
+    {
+      "parent": "N6.2.C",
+      "state": "LISTO_REAL",
+      "dependency": "N6.2.B_LISTO_REAL",
+      "materialization": "TENANT_AWARE_DATA_MODEL_PERSISTENCE__CONTROLLER_RECOVERY__REVIEW_FIRST_PASS__EXACT_GATES_PASS",
+      "taskId": "N6.2.C.1.TENANT_AWARE_DATA_MODEL_PERSISTENCE",
+      "worker": "CHATGPT_VAEP",
+      "runId": 34546666164,
+      "dispatchId": "N6-2-C-1-TENANT-AWARE-DATA-MODEL-PERSISTENCE-J2-A1-TX2",
+      "functionalHead": "f60c4ea3d9ad157f8cc1a5d06f3f86f3f1642086",
+      "reviewCommit": "a717ded0a6df15001ebeb92f65ecb278cca02243",
+      "closureReceipt": "vaep/evidence/fragments/N6.2.C_LISTO_REAL_20260911T0223Z.json"
+    },
+    {
+      "parent": "N6.2.D",
+      "state": "LISTO_REAL",
+      "dependency": "N6.2.C_LISTO_REAL",
+      "materialization": "TENANT_AWARE_DATA_MODEL_APPLICATION_API__CONTROLLER_REVIEW_FIRST_PASS__EXACT_GATES_PASS",
+      "taskId": "N6.2.D.1.TENANT_AWARE_DATA_MODEL_APPLICATION_API",
+      "worker": "CHATGPT_VAEP",
+      "dispatchId": "N6-2-D-1-TENANT-AWARE-DATA-MODEL-APPLICATION-API-J2-A1",
+      "taskAttempt": 1,
+      "functionalHead": "04fc4be1c4ca0c240b8111aba317b3524f70a272",
+      "reviewReceipt": "vaep/evidence/reviews/N6.2.D_CONTROLLER_REVIEW_FIRST_20260911T0244Z.json",
+      "closureReceipt": "vaep/evidence/fragments/N6.2.D_LISTO_REAL_20260911T0308Z.json"
+    },
+    {
+      "parent": "N6.2.E",
+      "state": "LISTO_REAL",
+      "dependency": "N6.2.D_LISTO_REAL",
+      "materialization": "TENANT_AWARE_DATA_MODEL_FRONTEND_UX__CONTROLLER_DIRECT_FIX__REVIEW_FIRST_PASS__EXACT_DESCENDANT_GATES_PASS",
+      "taskId": "N6.2.E.1.TENANT_AWARE_DATA_MODEL_FRONTEND_UX",
+      "worker": "CHATGPT_VAEP",
+      "functionalHead": "014b8504dc3ac6ee9c4fe90ab56b0159929f7f3c",
+      "reviewReceipt": "vaep/evidence/reviews/N6.2.E_CONTROLLER_REVIEW_FIRST_20260911T0334Z.json",
+      "closureReceipt": "vaep/evidence/fragments/N6.2.E_LISTO_REAL_20260911T0402Z.json"
+    },
+    {
+      "parent": "N6.2.F",
+      "taskId": "N6.2.F.1.TENANT_AWARE_DATA_MODEL_SEC_AUDIT",
+      "state": "LISTO_REAL",
+      "dependency": "N6.2.E_LISTO_REAL",
+      "materialization": "TENANT_AWARE_DATA_MODEL_SEC_AUDIT__CONTROLLER_REVIEW_FIRST_PASS__P0_P1_ZERO__EXACT_HEAD_GATES_PASS",
+      "worker": "CHATGPT_VAEP",
+      "dispatchId": "N6-2-F-1-TENANT-AWARE-DATA-MODEL-SEC-AUDIT-J5-A1",
+      "taskAttempt": 1,
+      "functionalHead": "a46b98c0b6e25f96bf8c2d0863678e849e441ff1",
+      "reviewReceipt": "vaep/evidence/reviews/N6.2.F_CONTROLLER_REVIEW_FIRST_20260911T0452Z.json",
+      "closureReceipt": "vaep/evidence/fragments/N6.2.F_LISTO_REAL_20260911T0524Z.json"
+    },
+    {
+      "parent": "N6.2.G",
+      "taskId": "N6.2.G.1.TENANT_AWARE_DATA_MODEL_QA_REGRESSION_CI",
+      "state": "LISTO_REAL",
+      "dependency": "N6.2.F_LISTO_REAL",
+      "materialization": "TENANT_AWARE_DATA_MODEL_QA_REGRESSION_CI__CONTROLLER_QA_TAKEOVER__REVIEW_FIRST_PASS__EXACT_HEAD_GATES_PASS",
+      "worker": "CHATGPT_VAEP",
+      "dispatchId": "N6-2-G-1-TENANT-AWARE-DATA-MODEL-QA-REGRESSION-CI-J5-A1",
+      "taskAttempt": 1,
+      "activeReal": false,
+      "functionalHead": "cd9fdd6ac69996219149c278049fb2f32b259403",
+      "reviewReceipt": "vaep/evidence/reviews/N6.2.G_CONTROLLER_REVIEW_FIRST_20260911T0546Z.json",
+      "closureReceipt": "vaep/evidence/fragments/N6.2.G_LISTO_REAL_20260911T0557Z.json"
+    },
+    {
+      "parent": "N6.2.H",
+      "taskId": "N6.2.H.1.TENANT_AWARE_DATA_MODEL_DOCUMENTATION_CERTIFICATION",
+      "state": "CURRENT_DISPATCHED_AWAITING_ACTIVE_REAL_CORRELATION",
+      "dependency": "N6.2.G_LISTO_REAL",
+      "materialization": "TENANT_AWARE_DATA_MODEL_DOCUMENTATION_CERTIFICATION__J1_ATTEMPT1__NO_FILLER",
+      "worker": "J1",
+      "dispatchId": "N6-2-H-1-TENANT-AWARE-DATA-MODEL-DOCUMENTATION-CERTIFICATION-J1-A1",
+      "taskAttempt": 1,
+      "activeReal": false
+    },
+    {
+      "parent": "N6.3.A",
+      "taskId": "N6.3.A.1.SUCURSALES_EMPRESA_PREFLIGHT",
+      "state": "READY_DEPENDENCY_GATED",
+      "dependency": "N6.2.H_LISTO_REAL",
+      "materialization": "SUCURSALES_EMPRESA_PREFLIGHT__ROADMAP_DERIVED__NO_FILLER"
+    }
   ],
-  "lanes": {"J1":[],"J2":[],"J3":[],"J4":[],"J5":[],"J6":[]},
-  "rolling60CertifiedParents": ["N6.2.F"],
-  "rolling60Count": 1,
-  "lastClosureFunctionalHead": "a46b98c0b6e25f96bf8c2d0863678e849e441ff1"
+  "lanes": {
+    "J1": [
+      {
+        "dispatchId": "N6-2-H-1-TENANT-AWARE-DATA-MODEL-DOCUMENTATION-CERTIFICATION-J1-A1",
+        "taskId": "N6.2.H.1.TENANT_AWARE_DATA_MODEL_DOCUMENTATION_CERTIFICATION",
+        "workerId": "J1",
+        "taskAttempt": 1,
+        "plannedParent": "N6.2.H",
+        "readyForDispatch": false,
+        "dispatchEligible": false,
+        "workflowRunId": 34568021956,
+        "workflowStatus": "in_progress",
+        "activeReal": false,
+        "fileScopeHint": "docs;CHANGELOG_AI.md;TASKS.md",
+        "prompt": "Read docs/VAEP_AUTHORITY.md first. Revalidate Desarrollo HEAD, CURRENT_PARENT=N6.2.H, this manifest primaryBaseHead and dependency receipt before editing. N6.2.G is LISTO_REAL. Produce only the material N6.2 tenant-aware data-model documentation/certification closure required by the roadmap: reconcile source-backed evidence from N6.2.A-G, implemented persistence/domain/application/API/frontend/security/audit/QA behavior, migration and rollback constraints, and explicitly preserve dependency boundaries for N6.3 Empresa-Sucursal, N6.4 memberships/roles per Empresa and N6.5 complete tenant isolation. Update canonical documentation and CHANGELOG_AI.md/TASKS.md only when required by the current closure contract; do not invent files, behavior, gates or LISTO_REAL. Do not change application behavior, migrations, workflows, secrets, main, Produccion, deployment or PR #2. Run proportional read-only/document validation and return a patch/artifact for REVIEW_FIRST with explicit P0/P1. No filler, no unrelated roadmap work, no R3.",
+        "reason": "CURRENT_PARENT__N6.2.G_LISTO_REAL__DOC_CERT_CLOSURE"
+      }
+    ],
+    "J2": [],
+    "J3": [],
+    "J4": [],
+    "J5": [],
+    "J6": []
+  },
+  "rolling60CertifiedParents": [
+    "N6.2.F",
+    "N6.2.G"
+  ],
+  "rolling60Count": 2,
+  "lastClosureFunctionalHead": "cd9fdd6ac69996219149c278049fb2f32b259403"
 }
