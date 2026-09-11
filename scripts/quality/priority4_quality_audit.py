@@ -177,7 +177,7 @@ expected_ids += [f"N1.{i}" for i in range(1, 11)]
 expected_ids += [f"N2.{i}" for i in range(1, 10)]
 expected_ids += [f"N3.{i}" for i in range(1, 12)]
 expected_ids += [f"N4.{i}" for i in range(1, 12)]
-expected_ids += [f"N5.{i}" for i in range(1, 9)]
+expected_ids += [f"N5.{i}" for i in range(1, 10)]
 expected_ids += [f"N6.{i}" for i in range(1, 11)]
 expected_ids += [f"N7.{i}" for i in range(1, 11)]
 expected_ids += [f"N8.{i}" for i in range(1, 15)]
@@ -186,8 +186,8 @@ expected_ids += [f"GATE-N{i}" for i in range(0, 10)]
 expected_ids += [f"T{i}" for i in range(0, 13)]
 expected_ids += ["FUT-RRHH", "FUT-CRM", "FUT-MRP", "FUT-AF", "FUT-PROY", "FUT-ST"]
 missing_ids = [item for item in expected_ids if not re.search(rf"(?<![A-Z0-9.\-]){re.escape(item)}(?![A-Z0-9.\-])", traceability)]
-ok(not missing_ids and len(expected_ids) == 128,
-   f"PLAN_MAESTRO_TRACEABILITY_128_IDS:{missing_ids or 'PASS'}")
+ok(not missing_ids and len(expected_ids) == 129,
+   f"PLAN_MAESTRO_TRACEABILITY_129_IDS:{missing_ids or 'PASS'}")
 ok("PLANIFICADO != ACEPTADO" in traceability and "NO_AUTORIZADO != IMPLEMENTADO" in traceability,
    "TRACEABILITY_FAILS_CLOSED_FOR_FUTURE_WORK")
 
