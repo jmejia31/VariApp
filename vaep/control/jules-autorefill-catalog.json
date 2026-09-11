@@ -1,8 +1,8 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
   "currentParent": "N6.3.A",
-  "generatedAt": "2026-09-11T06:31:39.716Z",
-  "regenerationReason": "REVIEW_24__N6.2.H_LISTO_REAL__PROMOTE_N6.3.A__J1_PREFLIGHT_DISPATCH__PREARM_B_C_D__NO_FILLER",
+  "generatedAt": "2026-09-11T06:34:09.123Z",
+  "regenerationReason": "REVIEW_24__N6.2.H_CLOSED__N6.3.A_PROMOTED__J1_TX1_VALID_TRANSPORT__EXECUTE_MASTER_FRESH_NOT_ACTIVE_REAL",
   "lastClosedParent": "N6.2.H",
   "closureReceipts": {
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
@@ -69,9 +69,9 @@
     "nextParent": "N6.3.B",
     "nextParentParallelMaterialScopes": 1,
     "nextParentScopesNonOverlapping": true,
-    "currentRun": "N6-3-A-1-SUCURSALES-EMPRESA-PREFLIGHT-J1-A1",
+    "currentRun": "N6-3-A-1-SUCURSALES-EMPRESA-PREFLIGHT-J1-A1-TX1",
     "nextRunReserved": null,
-    "laneRefill": "N6.3.A_J1_ATTEMPT1_DISPATCHED__N6.3.B_C_D_PREARMED_DEPENDENCY_GATED__NO_FILLER"
+    "laneRefill": "N6.3.A_J1_TX1_ATTEMPT1_VALID_TRANSPORT__N6.3.B_C_D_PREARMED_GATED__NO_FILLER"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
@@ -342,6 +342,27 @@
       "concurrentR2ContentAttemptConsumed": false,
       "concurrentR2Evidence": "vaep/evidence/recoveries/N6.2.H_R2_TRANSPORT_SUPERSEDED_20260911T0624Z.json",
       "firstDetectorOwnership": "CHATGPT_VAEP_DIRECT_FIX_REMAINS_AUTHORITATIVE"
+    },
+    {
+      "parent": "N6.3.A",
+      "logicalTaskId": "N6.3.A.1.SUCURSALES_EMPRESA_PREFLIGHT",
+      "worker": "J1",
+      "originalRunId": 34570307463,
+      "originalJobId": 103170805882,
+      "originalTerminal": "PRESESSION_INVALID_REDISPATCH__COMMIT_NOT_APPEND_ONLY",
+      "tx1Manifest": "vaep/jules/dispatch/N6-3-A-1-SUCURSALES-EMPRESA-PREFLIGHT-J1-A1-TX1.json",
+      "tx1ManifestCommit": "a193390a44fdd8b141705ab311c6db7f51029a1b",
+      "tx1RunId": 34570383516,
+      "tx1JobId": 103171031983,
+      "tx1Status": "EXECUTE_MASTER_IN_PROGRESS__ACTIVE_REAL_UNCONFIRMED",
+      "sessionId": null,
+      "artifactId": null,
+      "activeReal": false,
+      "contentAttemptConsumed": false,
+      "taskAttempt": 1,
+      "r2Used": false,
+      "r3Used": false,
+      "recoveryReason": "PRESESSION_FASTPATH__APPEND_ONLY_TX1__NO_SECOND_CONTENT_OWNER"
     }
   ],
   "prearmedRoadmap": [
@@ -451,14 +472,18 @@
     {
       "parent": "N6.3.A",
       "taskId": "N6.3.A.1.SUCURSALES_EMPRESA_PREFLIGHT",
-      "state": "CURRENT_DISPATCHED_AWAITING_ACTIVE_REAL_CORRELATION",
+      "state": "CURRENT_TX1_DISPATCHED__EXECUTE_MASTER_FRESH__ACTIVE_REAL_UNCONFIRMED",
       "dependency": "N6.2.H_LISTO_REAL",
       "materialization": "SUCURSALES_EMPRESA_PREFLIGHT__ROADMAP_DERIVED__NO_FILLER",
       "worker": "J1",
-      "dispatchId": "N6-3-A-1-SUCURSALES-EMPRESA-PREFLIGHT-J1-A1",
+      "dispatchId": "N6-3-A-1-SUCURSALES-EMPRESA-PREFLIGHT-J1-A1-TX1",
       "taskAttempt": 1,
       "activeReal": false,
-      "primaryBaseHead": "da4cf48fa674e20d5c71d5d5b7d6b37050e4f5c1"
+      "primaryBaseHead": "87fdc63266c2e2a95dff5fa72ad4cfd9b8fb9d78",
+      "workflowRunId": 34570383516,
+      "workflowJobId": 103171031983,
+      "r2Used": false,
+      "r3Used": false
     },
     {
       "parent": "N6.3.B",
@@ -485,19 +510,25 @@
   "lanes": {
     "J1": [
       {
-        "dispatchId": "N6-3-A-1-SUCURSALES-EMPRESA-PREFLIGHT-J1-A1",
+        "dispatchId": "N6-3-A-1-SUCURSALES-EMPRESA-PREFLIGHT-J1-A1-TX1",
         "taskId": "N6.3.A.1.SUCURSALES_EMPRESA_PREFLIGHT",
         "workerId": "J1",
         "taskAttempt": 1,
         "plannedParent": "N6.3.A",
         "readyForDispatch": false,
         "dispatchEligible": false,
-        "workflowRunId": null,
-        "workflowStatus": "awaiting_trigger",
+        "workflowRunId": 34570383516,
+        "workflowStatus": "in_progress",
         "activeReal": false,
         "fileScopeHint": "docs;CHANGELOG_AI.md",
         "prompt": "Read docs/VAEP_AUTHORITY.md first. Immediately revalidate Desarrollo HEAD, CURRENT_PARENT=N6.3.A, this manifest primaryBaseHead and the N6.2.H LISTO_REAL receipt before editing. Execute only the roadmap-derived preflight for N6.3 Empresa-to-multiple-Sucursales: inspect the current Empresa and Sucursal domain contracts, EF mapping/migrations, repositories/services/controllers, frontend flows, RBAC/audit surfaces and focused tests; document the real current state, dependency graph, in-scope/out-of-scope boundaries, risks, acceptance criteria, rollback and a bounded B-H implementation/test plan. Produce canonical documentation/evidence only; do not implement domain, schema, migration, API, frontend or security behavior in this task. Do not touch TASKS.md, workflows, main, Produccion, secrets, deployment or PR #2. Run proportional read-only validation and return a patch/artifact for REVIEW_FIRST with explicit P0/P1. No filler, no R2 unless authorized after terminal review, and no R3.",
-        "reason": "CURRENT_PARENT__N6.2.H_LISTO_REAL__N6.3_A_PREFLIGHT"
+        "reason": "CURRENT_PARENT__N6.2.H_LISTO_REAL__N6.3_A_PREFLIGHT",
+        "primaryBaseHead": "87fdc63266c2e2a95dff5fa72ad4cfd9b8fb9d78",
+        "workflowJobId": 103171031983,
+        "state": "TX1_PREFLIGHT_PASS__RESERVE_NEXT_PASS__EXECUTE_MASTER_IN_PROGRESS__ACTIVE_REAL_UNCONFIRMED",
+        "recoveryOf": "N6-3-A-1-SUCURSALES-EMPRESA-PREFLIGHT-J1-A1",
+        "originalRunId": 34570307463,
+        "originalTerminal": "PRESESSION_INVALID_REDISPATCH"
       }
     ],
     "J2": [],

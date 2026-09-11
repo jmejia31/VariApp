@@ -1,6 +1,6 @@
 {
   "newDispatchAdmission": "OPEN",
   "allowExistingActiveSessions": true,
-  "reason": "OPEN_ONLY__N6.2.H_LISTO_REAL__N6.3.A_PROMOTION_CATCHUP_REQUIRED__SUPERVISION_24__NO_DUPLICATE",
-  "updatedAtUtc": "2026-09-11T06:32:42Z"
+  "reason": "OPEN_ONLY__N6.2.H_LISTO_REAL__N6.3.A_CURRENT__J1_TX1_VALID_TRANSPORT_FRESH_NOT_ACTIVE_REAL__N6.3.B_GATED__NO_DUPLICATE",
+  "updatedAtUtc": "2026-09-11T06:34:09.123Z"
 }
