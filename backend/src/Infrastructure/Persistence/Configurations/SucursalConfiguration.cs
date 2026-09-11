@@ -5,9 +5,10 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 namespace InventoryApp.Infrastructure.Persistence.Configurations;
 
 /// <summary>
-/// Persistencia canónica de sucursales. N6.2.C establece la relación tenant-aware
-/// sin inventar un backfill: EmpresaId conserva nullabilidad temporal hasta que N6.2.D
-/// haga que todos los flujos de aplicación resuelvan una Empresa de forma segura.
+/// Persistencia canónica de sucursales. N6.3.C materializa el contrato Empresa ->
+/// múltiples Sucursales sin inventar backfill: EmpresaId conserva nullabilidad para
+/// filas legacy hasta que exista una fuente determinista, mientras las filas con
+/// owner válido aplican unicidad de Codigo por Empresa.
 /// </summary>
 public sealed class SucursalConfiguration : IEntityTypeConfiguration<Sucursal>
 {
@@ -38,10 +39,14 @@ public sealed class SucursalConfiguration : IEntityTypeConfiguration<Sucursal>
             .OnDelete(DeleteBehavior.Restrict)
             .IsRequired(false);
 
+        // Para owners asignados la clave es E:<EmpresaId>:<Codigo normalizado>, por lo
+        // que el mismo codigo puede existir en Empresas distintas. Las filas legacy
+        // sin EmpresaId permanecen en un namespace LEGACY global, conservando la
+        // proteccion anterior y evitando un backfill arbitrario.
         builder.Property<string>("CodigoActivoUnico")
-            .HasMaxLength(40)
+            .HasMaxLength(64)
             .HasComputedColumnSql(
-                "IF(Eliminado = 0, UPPER(TRIM(Codigo)), NULL)",
+                "IF(Eliminado = 0, CONCAT(IF(EmpresaId IS NULL, 'LEGACY', CONCAT('E:', EmpresaId)), ':', UPPER(TRIM(Codigo))), NULL)",
                 stored: true);
 
         builder.HasQueryFilter(x => !x.Eliminado);
