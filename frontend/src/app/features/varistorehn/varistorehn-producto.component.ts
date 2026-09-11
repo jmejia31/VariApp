@@ -81,7 +81,7 @@ export class VaristorehnProductoComponent implements OnInit {
   readonly contextoCarritoCargado = signal(false);
   readonly carrito = signal<ItemCarrito[]>([]);
   readonly modeloClave = signal('');
-  readonly cantidad = signal(1);
+  readonly cantidad = signal(0);
   readonly imagenActiva = signal(0);
   readonly imagenesFallidas = signal<Set<string>>(new Set());
   readonly lightboxAbierto = signal(false);
@@ -125,6 +125,9 @@ export class VaristorehnProductoComponent implements OnInit {
   });
   readonly tienePromocion = computed(() => this.precioActual() < this.precioNormal());
   readonly stockSeleccionado = computed(() => this.modeloSeleccionado()?.stock ?? 0);
+  readonly puedeSeleccionarCantidad = computed(() => Boolean(
+    this.modeloSeleccionado()?.disponible && this.stockSeleccionado() > 0
+  ));
   readonly unidadesEnCarrito = computed(() => {
     const producto = this.producto();
     const modelo = this.modeloSeleccionado();
@@ -137,6 +140,7 @@ export class VaristorehnProductoComponent implements OnInit {
     && this.contextoCarritoCargado()
     && this.producto()?.activo
     && this.modeloSeleccionado()?.disponible
+    && this.cantidad() > 0
     && this.stockRestante() > 0
   ));
   readonly totalUnidades = computed<number | null>(() => this.contextoCarritoCargado()
@@ -178,6 +182,7 @@ export class VaristorehnProductoComponent implements OnInit {
   private identidadLista = false;
   private inicioSwipe: { x: number; y: number } | null = null;
   private suprimirClickImagen = false;
+  private restaurarFocoLightbox = true;
 
   ngOnInit(): void {
     this.route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
@@ -196,7 +201,7 @@ export class VaristorehnProductoComponent implements OnInit {
   cambiarFuente(baseDatos: boolean): void {
     if (!this.controlesVistaPrevia || baseDatos === this.utilizarDatosBaseDatos()) return;
     this.utilizarDatosBaseDatos.set(baseDatos);
-    this.cantidad.set(1);
+    this.cantidad.set(0);
     this.imagenActiva.set(0);
     this.vistaWhatsapp.set('');
     this.cargarProducto();
@@ -238,21 +243,24 @@ export class VaristorehnProductoComponent implements OnInit {
     const producto = this.producto();
     if (!producto?.modelos.some(modelo => modelo.clave === clave)) return;
     this.modeloClave.set(clave);
-    this.cantidad.set(1);
     this.imagenActiva.set(0);
     this.cerrarLightbox(false);
+    this.reiniciarCantidad();
   }
 
   cambiarCantidad(cambio: number): void {
-    if (!Number.isInteger(cambio) || !this.puedeAgregar()) return;
-    this.cantidad.set(Math.max(1, Math.min(this.stockRestante(), this.cantidad() + cambio)));
+    if (!Number.isInteger(cambio) || !this.puedeSeleccionarCantidad()) return;
+    this.cantidad.set(Math.max(1, Math.min(this.stockSeleccionado(), this.cantidad() + cambio)));
   }
 
   establecerCantidad(valor: string): void {
-    if (!this.puedeAgregar()) return;
+    if (!this.puedeSeleccionarCantidad()) {
+      this.cantidad.set(0);
+      return;
+    }
     const numero = Number(valor);
     const cantidad = Number.isFinite(numero) ? Math.floor(numero) : 1;
-    this.cantidad.set(Math.max(1, Math.min(this.stockRestante(), cantidad)));
+    this.cantidad.set(Math.max(1, Math.min(this.stockSeleccionado(), cantidad)));
   }
 
   agregarAlCarrito(): void {
@@ -262,11 +270,12 @@ export class VaristorehnProductoComponent implements OnInit {
 
     let items = this.carrito();
     const unidades = Math.min(this.cantidad(), this.stockRestante());
+    if (unidades <= 0) return;
     for (let indice = 0; indice < unidades; indice += 1) {
       items = agregarItem(items, producto, modelo);
     }
     this.guardarCarrito(items);
-    this.cantidad.set(1);
+    this.reiniciarCantidad();
     this.aviso.set(`${unidades} ${unidades === 1 ? 'unidad agregada' : 'unidades agregadas'} de ${producto.nombre}.`);
   }
 
@@ -274,9 +283,9 @@ export class VaristorehnProductoComponent implements OnInit {
     const producto = this.producto();
     const modelo = this.modeloSeleccionado();
     const telefono = this.telefono();
-    if (!producto || !modelo || !telefono || !this.permiteWhatsapp() || !modelo.disponible) return;
+    if (!producto || !modelo || !telefono || !this.permiteWhatsapp() || !modelo.disponible || modelo.stock <= 0) return;
 
-    const unidades = Math.max(1, Math.min(this.cantidad(), modelo.stock));
+    const unidades = Math.max(1, Math.min(this.cantidad() || 1, modelo.stock));
     const subtotal = this.precioActual() * unidades;
     const sku = this.skuVisible() ? `\nSKU: ${this.skuVisible()}` : '';
     const mensaje = `Hola ${this.identidad.config().nombreComercial}, deseo consultar este producto:\n\n${producto.nombre}\nModelo: ${modelo.nombre}${sku}\nCantidad: ${unidades}\nPrecio unitario: ${this.moneda(this.precioActual())}\nSubtotal: ${this.moneda(subtotal)}\n\nPor favor confirmar disponibilidad y total final.`;
@@ -322,19 +331,28 @@ export class VaristorehnProductoComponent implements OnInit {
     this.document.defaultView?.setTimeout(() => { this.suprimirClickImagen = false; }, 0);
   }
 
+  cancelarSwipe(): void {
+    this.inicioSwipe = null;
+  }
+
   abrirLightbox(): void {
     if (this.suprimirClickImagen || !this.imagenValida(this.imagenActual())) return;
     const dialogo = this.lightbox?.nativeElement;
     if (!dialogo || dialogo.open) return;
+    this.restaurarFocoLightbox = true;
     dialogo.showModal();
     this.lightboxAbierto.set(true);
   }
 
   cerrarLightbox(devolverFoco = true): void {
     const dialogo = this.lightbox?.nativeElement;
+    this.restaurarFocoLightbox = devolverFoco;
     if (dialogo?.open) dialogo.close();
-    else this.lightboxAbierto.set(false);
-    if (devolverFoco) queueMicrotask(() => this.botonImagenPrincipal?.nativeElement.focus());
+    else {
+      this.lightboxAbierto.set(false);
+      if (devolverFoco) queueMicrotask(() => this.botonImagenPrincipal?.nativeElement.focus());
+      this.restaurarFocoLightbox = true;
+    }
   }
 
   cerrarLightboxDesdeFondo(evento: MouseEvent): void {
@@ -342,7 +360,10 @@ export class VaristorehnProductoComponent implements OnInit {
   }
 
   alCerrarLightbox(): void {
+    const devolverFoco = this.restaurarFocoLightbox;
+    this.restaurarFocoLightbox = true;
     this.lightboxAbierto.set(false);
+    if (devolverFoco) queueMicrotask(() => this.botonImagenPrincipal?.nativeElement.focus());
   }
 
   imagenValida(url?: string): boolean {
@@ -403,7 +424,7 @@ export class VaristorehnProductoComponent implements OnInit {
     this.vistaWhatsapp.set('');
     this.estado.set('loading');
     this.modeloClave.set('');
-    this.cantidad.set(1);
+    this.cantidad.set(0);
     this.imagenActiva.set(0);
     this.cerrarLightbox(false);
 
@@ -448,6 +469,7 @@ export class VaristorehnProductoComponent implements OnInit {
     const modelo = producto.modelos.find(item => item.disponible) || producto.modelos[0];
     this.modeloClave.set(modelo?.clave || '');
     this.estado.set('success');
+    this.reiniciarCantidad();
 
     if (producto.slug && producto.slug !== slugSolicitado) {
       void this.router.navigateByUrl(VARISTOREHN_PATHS.producto(producto.slug), { replaceUrl: true });
@@ -488,6 +510,10 @@ export class VaristorehnProductoComponent implements OnInit {
       next: categorias => this.categorias.set(categorias),
       error: () => this.aviso.set('No pudimos actualizar la navegación de categorías en esta página.')
     });
+  }
+
+  private reiniciarCantidad(): void {
+    this.cantidad.set(this.stockSeleccionado() > 0 && this.modeloSeleccionado()?.disponible ? 1 : 0);
   }
 
   private esNoEncontrado(error: unknown): boolean {
