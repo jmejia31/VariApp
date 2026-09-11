@@ -1,6 +1,6 @@
 # VariStoreHn — Fase 5: Carrito
 
-Estado: **EN VALIDACIÓN**  
+Estado: **CANDIDATA COMPLETA — PENDIENTE CERTIFICACIÓN POST-MERGE**  
 Plan Maestro: v1.1 — Septiembre 2026
 
 ## Objetivo
@@ -22,7 +22,7 @@ Implementar un carrito real, persistente y consistente para todas las páginas p
 - Incrementar/disminuir unidades.
 - Edición numérica directa con clamp `1..stock`.
 - Eliminación explícita de línea y vaciado completo.
-- Subtotal y contador derivados del mismo signal global.
+- Subtotal, total de línea y total del carrito derivados del mismo estado. En Fase 5 `total === subtotal` porque entrega/impuestos pertenecen a Fase 6 y no se inventan cargos.
 - Persistencia por empresa y fuente (`bd`/`demo`).
 - `localStorage` conserva únicamente `{ productoId, modeloClave, unidades }`.
 - Al hidratar, precio, oferta, stock, disponibilidad, imagen y datos comerciales se reconstruyen con el catálogo público actual mediante `restaurarCarrito`.
@@ -39,9 +39,12 @@ Implementar un carrito real, persistente y consistente para todas las páginas p
 
 Antes de iniciar Fase 5 se revisó el detalle contra el Plan Maestro. El runtime certificado permanecía intacto en `Desarrollo`: ruta por slug, galería multiimagen, swipe, lightbox fotográfico, cantidad, stock, CTA, WhatsApp, descripción/características, relacionados, breadcrumbs, estados y responsive.
 
-Se detectó un hardening importante: si ya existían unidades de la misma variante en el carrito, el HTML del selector mostraba como `max` el stock total aunque la lógica de agregado impedía sobrepasar el remanente. En Fase 5 se corrige la interfaz para usar `stockRestante()` tanto en `max` como en el estado del botón `+`, alineando UX y regla de negocio.
+Se detectaron y corrigieron dos hardenings:
 
-La guarda de Fase 4 también se actualiza para exigir el carrito central en vez de la antigua persistencia local del detalle.
+1. Si ya existían unidades de la misma variante en el carrito, el HTML del selector mostraba como `max` el stock total aunque la lógica de agregado impedía sobrepasar el remanente. Ahora input, botón `+` y CTA usan `stockRestante()`.
+2. El home heredado todavía podía abrir un quick-detail en `dialog`. Las acciones de producto del home ahora navegan a `VARISTOREHN_PATHS.producto(producto.slug)` y la guarda de Fase 4 prohíbe restaurar `showModal()` como experiencia principal. El detalle canónico sigue siendo la página independiente.
+
+La guarda de Fase 4 también se actualizó para exigir el carrito central en vez de la antigua persistencia local del detalle.
 
 ## Definition of Done de Fase 5
 
@@ -53,7 +56,7 @@ La guarda de Fase 4 también se actualiza para exigir el carrito central en vez 
 - [x] Se puede eliminar una línea explícitamente.
 - [x] Se puede vaciar el carrito.
 - [x] Cantidades nunca superan el stock vigente.
-- [x] Subtotal y total de línea se recalculan al editar.
+- [x] Subtotal, total de línea y total del carrito se recalculan al editar.
 - [x] Contador y subtotal del header provienen del mismo estado.
 - [x] Persistencia sobrevive recargas.
 - [x] Persistencia guarda referencias mínimas, no precios ni stock como autoridad.
@@ -63,10 +66,24 @@ La guarda de Fase 4 también se actualiza para exigir el carrito central en vez 
 - [x] Sin dependencias/guards administrativos.
 - [x] Responsive y touch targets de al menos 44 px.
 - [x] Tema gobernado por tokens globales.
-- [ ] `npm ci` + lint/TypeScript + guardas Fases 1–5.
-- [ ] Build de producción.
-- [ ] Playwright Fases 1–5.
+- [x] `npm ci` + lint/TypeScript + guardas Fases 1–5.
+- [x] Build de producción.
+- [x] Playwright Fases 1–5.
 - [ ] Validación post-merge sobre `Desarrollo`.
+
+## Evidencia candidata
+
+Workflow acumulado de Fase 5: `34598925462` — **SUCCESS**.
+
+- Fase 1: 4/4 Playwright.
+- Fase 2: 8/8 Playwright.
+- Fase 3: 8/8 Playwright.
+- Fase 4: 11/11 Playwright.
+- Fase 5: 6/6 Playwright.
+- Total acumulado: **37/37 pruebas de navegador**.
+- Lint/TypeScript y guardas Fases 1–5: verde.
+- Build producción: verde.
+- Artefacto: `10262914007`.
 
 ## Fuera de alcance respetado
 
@@ -82,4 +99,4 @@ La guarda de Fase 4 también se actualiza para exigir el carrito central en vez 
 - `frontend/e2e/varistorehn-fase5.spec.ts`
 - `.github/workflows/varistorehn-fase5-regression.yml`
 
-No se marcará la fase como completada hasta obtener un gate verde en la rama candidata y otro post-merge sobre el commit integrado en `Desarrollo`.
+La fase no se cerrará oficialmente hasta repetir el gate sobre el commit integrado en `Desarrollo`.
