@@ -7,12 +7,17 @@ import { SucursalFormComponent } from './sucursal-form.component';
 describe('SucursalFormComponent tenant ownership', () => {
   let fixture: ComponentFixture<SucursalFormComponent>;
   let component: SucursalFormComponent;
-  let sucursalService: jasmine.SpyObj<SucursalService>;
-  let router: jasmine.SpyObj<Router>;
+  const sucursalService = {
+    getById: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn()
+  };
+  const router = {
+    navigate: vi.fn()
+  };
 
   beforeEach(async () => {
-    sucursalService = jasmine.createSpyObj<SucursalService>('SucursalService', ['getById', 'create', 'update']);
-    router = jasmine.createSpyObj<Router>('Router', ['navigate']);
+    vi.clearAllMocks();
 
     await TestBed.configureTestingModule({
       imports: [SucursalFormComponent],
@@ -36,13 +41,13 @@ describe('SucursalFormComponent tenant ownership', () => {
   it('requires an explicit EmpresaId greater than zero', () => {
     const empresaId = component.form.controls.empresaId;
 
-    expect(empresaId.hasError('required')).toBeTrue();
+    expect(empresaId.hasError('required')).toBe(true);
 
     empresaId.setValue(0);
-    expect(empresaId.hasError('min')).toBeTrue();
+    expect(empresaId.hasError('min')).toBe(true);
 
     empresaId.setValue(7);
-    expect(empresaId.valid).toBeTrue();
+    expect(empresaId.valid).toBe(true);
   });
 
   it('does not write a sucursal without tenant ownership', () => {
@@ -60,7 +65,7 @@ describe('SucursalFormComponent tenant ownership', () => {
   });
 
   it('sends the explicit EmpresaId in the create contract', () => {
-    sucursalService.create.and.returnValue(of({ data: {} } as never));
+    sucursalService.create.mockReturnValue(of({ data: {} } as never));
     component.form.patchValue({
       empresaId: 7,
       codigo: 'TGU-01',
@@ -73,7 +78,7 @@ describe('SucursalFormComponent tenant ownership', () => {
 
     component.submit();
 
-    expect(sucursalService.create).toHaveBeenCalledWith(jasmine.objectContaining({ empresaId: 7 }));
+    expect(sucursalService.create).toHaveBeenCalledWith(expect.objectContaining({ empresaId: 7 }));
     expect(router.navigate).toHaveBeenCalledWith(['/sucursales']);
   });
 });
