@@ -16,17 +16,20 @@ public class UsuarioService : IUsuarioService
 
     private readonly IUsuarioRepository _repository;
     private readonly IRolRepository _rolRepository;
+    private readonly IEmpresaRepository _empresaRepository;
     private readonly IAuditoriaService _auditoria;
     private readonly ICurrentUserService _currentUser;
 
     public UsuarioService(
         IUsuarioRepository repository,
         IRolRepository rolRepository,
+        IEmpresaRepository empresaRepository,
         IAuditoriaService auditoria,
         ICurrentUserService currentUser)
     {
         _repository = repository;
         _rolRepository = rolRepository;
+        _empresaRepository = empresaRepository;
         _auditoria = auditoria;
         _currentUser = currentUser;
     }
@@ -268,6 +271,131 @@ public class UsuarioService : IUsuarioService
             $"Eliminó lógicamente al usuario '{usuario.NombreUsuario}'.", usuario.Id, entidad: "Usuario");
     }
 
+    public async Task<List<UsuarioEmpresaDto>> GetEmpresasAsync(int usuarioId)
+    {
+        await ObtenerUsuarioValidoParaMembresiaAsync(usuarioId, exigirActivo: false);
+        return (await _repository.GetEmpresasAsync(usuarioId)).Select(ToEmpresaDto).ToList();
+    }
+
+    public async Task<UsuarioEmpresaDto> AsignarEmpresaAsync(int usuarioId, AsignarUsuarioEmpresaDto dto)
+    {
+        var usuario = await ObtenerUsuarioValidoParaMembresiaAsync(usuarioId, exigirActivo: true);
+        var empresa = await ObtenerEmpresaActivaAsync(dto.EmpresaId);
+        var rol = await ResolverRolDinamicoAsync(dto.RolId);
+
+        if (await _repository.GetEmpresaAsync(usuarioId, empresa.Id) is not null)
+            throw new BusinessRuleException("El usuario ya tiene una membresía registrada para la empresa seleccionada.");
+
+        var membresia = new UsuarioEmpresa(usuario.Id, empresa.Id, rol.Id)
+        {
+            CreadoPorUsuarioId = _currentUser.UsuarioId
+        };
+
+        await _repository.AddEmpresaAsync(membresia);
+        await _repository.SaveChangesAsync();
+
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Usuarios,
+            AccionPermiso.AsignarRol,
+            $"Asignó al usuario '{usuario.NombreUsuario}' a la empresa '{empresa.Nombre}' con rol '{rol.Nombre}'.",
+            usuario.Id,
+            entidad: "UsuarioEmpresa",
+            valoresNuevos: new { membresia.UsuarioId, membresia.EmpresaId, membresia.RolId, membresia.Activa });
+
+        return ToEmpresaDto(membresia);
+    }
+
+    public async Task<UsuarioEmpresaDto> CambiarRolEmpresaAsync(int usuarioId, int empresaId, int rolId)
+    {
+        var usuario = await ObtenerUsuarioValidoParaMembresiaAsync(usuarioId, exigirActivo: true);
+        await ObtenerEmpresaActivaAsync(empresaId);
+        var rol = await ResolverRolDinamicoAsync(rolId);
+        var membresia = await ObtenerMembresiaAsync(usuarioId, empresaId);
+        var rolAnterior = membresia.RolId;
+
+        membresia.CambiarRol(rol.Id);
+        membresia.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
+        membresia.FechaActualizacion = DateTime.UtcNow;
+        _repository.UpdateEmpresa(membresia);
+        await _repository.SaveChangesAsync();
+
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Usuarios,
+            AccionPermiso.AsignarRol,
+            $"Cambió el rol empresarial del usuario '{usuario.NombreUsuario}' en EmpresaId={empresaId}.",
+            usuario.Id,
+            entidad: "UsuarioEmpresa",
+            valoresAnteriores: new { RolId = rolAnterior, EmpresaId = empresaId },
+            valoresNuevos: new { RolId = rol.Id, EmpresaId = empresaId });
+
+        return ToEmpresaDto(membresia);
+    }
+
+    public async Task<UsuarioEmpresaDto> CambiarEstadoEmpresaAsync(int usuarioId, int empresaId, bool activa)
+    {
+        var usuario = await ObtenerUsuarioValidoParaMembresiaAsync(usuarioId, exigirActivo: activa);
+        if (activa)
+            await ObtenerEmpresaActivaAsync(empresaId);
+
+        var membresia = await ObtenerMembresiaAsync(usuarioId, empresaId);
+        if (activa)
+        {
+            await ResolverRolDinamicoAsync(membresia.RolId);
+            membresia.Activar();
+        }
+        else
+        {
+            membresia.Desactivar();
+        }
+
+        membresia.ActualizadoPorUsuarioId = _currentUser.UsuarioId;
+        membresia.FechaActualizacion = DateTime.UtcNow;
+        _repository.UpdateEmpresa(membresia);
+        await _repository.SaveChangesAsync();
+
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Usuarios,
+            activa ? AccionPermiso.Activar : AccionPermiso.Desactivar,
+            $"{(activa ? "Activó" : "Desactivó")} la membresía empresarial del usuario '{usuario.NombreUsuario}' en EmpresaId={empresaId}.",
+            usuario.Id,
+            entidad: "UsuarioEmpresa",
+            valoresNuevos: new { membresia.EmpresaId, membresia.RolId, membresia.Activa });
+
+        return ToEmpresaDto(membresia);
+    }
+
+    private async Task<Usuario> ObtenerUsuarioValidoParaMembresiaAsync(int usuarioId, bool exigirActivo)
+    {
+        if (usuarioId <= 0)
+            throw new BusinessRuleException("El usuario seleccionado no es válido.");
+
+        var usuario = await _repository.GetByIdAsync(usuarioId)
+            ?? throw new BusinessRuleException("El usuario no existe.");
+
+        if (exigirActivo && (!usuario.Activo || usuario.Bloqueado))
+            throw new BusinessRuleException("No se puede administrar una membresía activa para un usuario inactivo o bloqueado.");
+
+        return usuario;
+    }
+
+    private async Task<Empresa> ObtenerEmpresaActivaAsync(int empresaId)
+    {
+        if (empresaId <= 0)
+            throw new BusinessRuleException("La empresa seleccionada no es válida.");
+
+        var empresa = await _empresaRepository.GetByIdAsync(empresaId, CancellationToken.None)
+            ?? throw new BusinessRuleException("La empresa seleccionada no existe.");
+
+        if (!empresa.Activa || empresa.Eliminado)
+            throw new BusinessRuleException("No se puede asignar una empresa inactiva o eliminada.");
+
+        return empresa;
+    }
+
+    private async Task<UsuarioEmpresa> ObtenerMembresiaAsync(int usuarioId, int empresaId) =>
+        await _repository.GetEmpresaAsync(usuarioId, empresaId)
+        ?? throw new BusinessRuleException("El usuario no tiene una membresía registrada para la empresa seleccionada.");
+
     private async Task ValidarNoEsUltimoAdminAsync(Usuario usuario, string accion)
     {
         if (usuario.RolEntidad?.EsAdministrador != true) return;
@@ -326,5 +454,14 @@ public class UsuarioService : IUsuarioService
         FechaBloqueo = u.FechaBloqueo,
         FechaCreacion = u.FechaCreacion,
         FechaActualizacion = u.FechaActualizacion
+    };
+
+    private static UsuarioEmpresaDto ToEmpresaDto(UsuarioEmpresa x) => new()
+    {
+        Id = x.Id,
+        UsuarioId = x.UsuarioId,
+        EmpresaId = x.EmpresaId,
+        RolId = x.RolId,
+        Activa = x.Activa
     };
 }

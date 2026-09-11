@@ -58,3 +58,32 @@ public class UpdateUsuarioDto
     /// exige además el permiso Usuarios:RestablecerContrasena.
     public string? NuevaPassword { get; set; }
 }
+
+/// <summary>
+/// Membresía efectiva de un usuario dentro de una empresa/tenant.
+/// N6.4.D expone este contrato sin sustituir todavía el contexto de autenticación.
+/// </summary>
+public class UsuarioEmpresaDto
+{
+    public int Id { get; set; }
+    public int UsuarioId { get; set; }
+    public int EmpresaId { get; set; }
+    public int RolId { get; set; }
+    public bool Activa { get; set; }
+}
+
+public class AsignarUsuarioEmpresaDto
+{
+    public int EmpresaId { get; set; }
+    public int RolId { get; set; }
+}
+
+public class CambiarRolUsuarioEmpresaDto
+{
+    public int RolId { get; set; }
+}
+
+public class UpdateUsuarioEmpresaEstadoDto
+{
+    public bool Activa { get; set; }
+}

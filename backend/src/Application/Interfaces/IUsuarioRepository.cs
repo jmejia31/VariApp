@@ -12,5 +12,11 @@ public interface IUsuarioRepository
     Task<int> ContarAdministradoresActivosAsync(int? excluirUsuarioId = null);
     Task AddAsync(Usuario usuario);
     void Update(Usuario usuario);
+
+    Task<List<UsuarioEmpresa>> GetEmpresasAsync(int usuarioId);
+    Task<UsuarioEmpresa?> GetEmpresaAsync(int usuarioId, int empresaId);
+    Task AddEmpresaAsync(UsuarioEmpresa usuarioEmpresa);
+    void UpdateEmpresa(UsuarioEmpresa usuarioEmpresa);
+
     Task<bool> SaveChangesAsync();
 }

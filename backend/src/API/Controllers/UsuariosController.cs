@@ -138,4 +138,47 @@ public class UsuariosController : ControllerBase
         await _usuarioService.EliminarAsync(id);
         return Ok(ApiResponse<object>.Ok(new { }, "Usuario eliminado correctamente."));
     }
+
+    [HttpGet("{id:int}/empresas")]
+    [RequierePermiso(ModuloSistema.Usuarios, AccionPermiso.Ver)]
+    public async Task<IActionResult> GetEmpresas(int id)
+    {
+        var membresias = await _usuarioService.GetEmpresasAsync(id);
+        return Ok(ApiResponse<List<UsuarioEmpresaDto>>.Ok(membresias));
+    }
+
+    [HttpPost("{id:int}/empresas")]
+    [RequierePermiso(ModuloSistema.Usuarios, AccionPermiso.AsignarRol)]
+    public async Task<IActionResult> AsignarEmpresa(int id, [FromBody] AsignarUsuarioEmpresaDto dto)
+    {
+        var membresia = await _usuarioService.AsignarEmpresaAsync(id, dto);
+        return Ok(ApiResponse<UsuarioEmpresaDto>.Ok(membresia, "Empresa asignada al usuario correctamente."));
+    }
+
+    [HttpPut("{id:int}/empresas/{empresaId:int}/rol")]
+    [RequierePermiso(ModuloSistema.Usuarios, AccionPermiso.AsignarRol)]
+    public async Task<IActionResult> CambiarRolEmpresa(
+        int id,
+        int empresaId,
+        [FromBody] CambiarRolUsuarioEmpresaDto dto)
+    {
+        var membresia = await _usuarioService.CambiarRolEmpresaAsync(id, empresaId, dto.RolId);
+        return Ok(ApiResponse<UsuarioEmpresaDto>.Ok(membresia, "Rol empresarial actualizado correctamente."));
+    }
+
+    [HttpPut("{id:int}/empresas/{empresaId:int}/estado")]
+    public async Task<IActionResult> CambiarEstadoEmpresa(
+        int id,
+        int empresaId,
+        [FromBody] UpdateUsuarioEmpresaEstadoDto dto)
+    {
+        await _permisoService.VerificarPermisoAsync(
+            ModuloSistema.Usuarios,
+            dto.Activa ? AccionPermiso.Activar : AccionPermiso.Desactivar);
+
+        var membresia = await _usuarioService.CambiarEstadoEmpresaAsync(id, empresaId, dto.Activa);
+        return Ok(ApiResponse<UsuarioEmpresaDto>.Ok(
+            membresia,
+            dto.Activa ? "Membresía empresarial activada correctamente." : "Membresía empresarial desactivada correctamente."));
+    }
 }

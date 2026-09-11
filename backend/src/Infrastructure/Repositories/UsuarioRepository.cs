@@ -81,5 +81,25 @@ public class UsuarioRepository : IUsuarioRepository
 
     public async Task AddAsync(Usuario usuario) => await _context.Usuarios.AddAsync(usuario);
     public void Update(Usuario usuario) => _context.Usuarios.Update(usuario);
+
+    public async Task<List<UsuarioEmpresa>> GetEmpresasAsync(int usuarioId) =>
+        await _context.UsuarioEmpresas
+            .Where(x => x.UsuarioId == usuarioId && !x.Eliminado)
+            .OrderBy(x => x.EmpresaId)
+            .ToListAsync();
+
+    public async Task<UsuarioEmpresa?> GetEmpresaAsync(int usuarioId, int empresaId) =>
+        await _context.UsuarioEmpresas
+            .FirstOrDefaultAsync(x =>
+                x.UsuarioId == usuarioId &&
+                x.EmpresaId == empresaId &&
+                !x.Eliminado);
+
+    public async Task AddEmpresaAsync(UsuarioEmpresa usuarioEmpresa) =>
+        await _context.UsuarioEmpresas.AddAsync(usuarioEmpresa);
+
+    public void UpdateEmpresa(UsuarioEmpresa usuarioEmpresa) =>
+        _context.UsuarioEmpresas.Update(usuarioEmpresa);
+
     public async Task<bool> SaveChangesAsync() => await _context.SaveChangesAsync() > 0;
 }
