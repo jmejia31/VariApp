@@ -77,6 +77,36 @@ async function mockCatalogoReal(page: Page, precio = 1750, stock = 3): Promise<v
   });
 }
 
+async function mockCheckoutValido(page: Page, total = 4200): Promise<void> {
+  await page.route('**/tienda/checkout/validar', async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      headers: { 'Access-Control-Allow-Origin': '*' },
+      body: JSON.stringify({
+        success: true,
+        data: {
+          validacionId: referenciaValidada,
+          expiraUtc: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
+          subtotal: total,
+          total,
+          lineas: [{
+            productoId: 501,
+            modeloId: 5010,
+            nombre: 'Producto Checkout Real',
+            modelo: 'Modelo auditoría',
+            sku: 'SKU-501-A',
+            unidades: 2,
+            stockDisponible: 3,
+            precioUnitario: total / 2,
+            total
+          }]
+        }
+      })
+    });
+  });
+}
+
 async function sembrarCarrito(page: Page, fuente: 'bd' | 'demo', modeloClave: string, productoId: number, unidades: number): Promise<void> {
   await page.addInitScript(({ key, value }) => localStorage.setItem(key, value), {
     key: `varistorehn:carrito:v2:905:${fuente}`,
@@ -193,6 +223,38 @@ test.describe('VariStoreHn Fase 6 — checkout y pedido', () => {
     expect(reciboRaw).not.toContain('99991111');
   });
 
+  test('si vence la validación después de preparar WhatsApp bloquea la salida y exige revalidar', async ({ page }) => {
+    await prepararEmpresa(page);
+    await sembrarCarrito(page, 'bd', modeloClaveReal, 501, 2);
+    await mockCatalogoReal(page, 1750, 3);
+    await mockCheckoutValido(page);
+    await page.goto('/varistorehn/checkout?fuente=bd');
+    await llenarComprador(page);
+    await page.getByRole('button', { name: 'Preparar pedido por WhatsApp' }).click();
+
+    const enlace = page.getByRole('link', { name: 'Abrir WhatsApp y continuar' });
+    await expect(enlace).toBeVisible();
+    let popups = 0;
+    page.on('popup', popup => {
+      popups += 1;
+      void popup.close();
+    });
+
+    await page.evaluate(() => {
+      const ahora = Date.now();
+      Date.now = () => ahora + 11 * 60 * 1000;
+    });
+    await enlace.click();
+
+    await expect(page).toHaveURL(/\/varistorehn\/checkout\?fuente=bd$/);
+    await expect(page.getByText('La validación del carrito venció antes de abrir WhatsApp. Actualiza precios y existencias para continuar.')).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Abrir WhatsApp y continuar' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Preparar pedido por WhatsApp' })).toBeDisabled();
+    expect(popups).toBe(0);
+    const recibos = await page.evaluate(() => Object.keys(sessionStorage).filter(key => key.startsWith('varistorehn:pedido:'));
+    expect(recibos).toHaveLength(0);
+  });
+
   test('cambio de stock/precio devuelve conflicto y bloquea cualquier canal de salida', async ({ page }) => {
     await prepararEmpresa(page);
     await sembrarCarrito(page, 'bd', modeloClaveReal, 501, 2);
@@ -225,7 +287,7 @@ test.describe('VariStoreHn Fase 6 — checkout y pedido', () => {
     await expect(page.getByRole('heading', { name: 'Tu compra' })).toBeVisible();
     await page.getByRole('button', { name: 'Simular continuación segura' }).click();
     await expect(page.getByText('Revisa los datos de contacto marcados antes de continuar.')).toBeVisible();
-    await expect(page.getByRole('alert', { name: '' }).filter({ hasText: 'Ingresa un nombre válido' })).toBeVisible();
+    await expect(page.getByText('Ingresa un nombre válido de al menos 2 caracteres.')).toBeVisible();
 
     await llenarComprador(page);
     await page.getByRole('button', { name: 'Simular continuación segura' }).click();
