@@ -52,10 +52,6 @@ export class VaristorehnCheckoutComponent implements OnInit {
   readonly tarjetaConfigurada = computed(() => Boolean(this.config.endpointCheckoutTarjeta?.trim() && this.config.origenesCheckoutPermitidos.length));
   readonly totalUnidades = computed<number | null>(() => this.carrito.listo() ? this.carrito.totalUnidades() : null);
   readonly subtotalHeader = computed<number | null>(() => this.validado()?.subtotal ?? (this.carrito.listo() ? this.carrito.subtotal() : null));
-  readonly validacionVigente = computed(() => {
-    const expira = Date.parse(this.validado()?.expiraUtc || '');
-    return Number.isFinite(expira) && expira > Date.now();
-  });
 
   readonly formulario = new FormGroup({
     nombre: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(2), Validators.maxLength(120)] }),
@@ -128,9 +124,19 @@ export class VaristorehnCheckoutComponent implements OnInit {
     this.aviso.set('Solicitud preparada. Revisa el resumen y abre WhatsApp para continuar.');
   }
 
-  confirmarSalidaWhatsapp(): void {
+  confirmarSalidaWhatsapp(evento: Event): void {
     const validado = this.validado();
-    if (!validado || !this.enlaceWhatsapp()) return;
+    if (!validado || !this.enlaceWhatsapp()) {
+      evento.preventDefault();
+      return;
+    }
+    if (!this.validacionVigente()) {
+      evento.preventDefault();
+      this.enlaceWhatsapp.set('');
+      this.error.set('La validación del carrito venció antes de abrir WhatsApp. Actualiza precios y existencias para continuar.');
+      this.aviso.set('');
+      return;
+    }
     this.guardarRecibo(validado, this.utilizarDatosBaseDatos() ? 'whatsapp-preparado' : 'demo');
     queueMicrotask(() => void this.router.navigateByUrl(VARISTOREHN_PATHS.pedido(validado.validacionId)));
   }
@@ -180,6 +186,11 @@ export class VaristorehnCheckoutComponent implements OnInit {
         this.error.set(this.mensajeError(error, 'No pudimos iniciar el pago seguro. Intenta nuevamente.'));
       }
     });
+  }
+
+  validacionVigente(): boolean {
+    const expira = Date.parse(this.validado()?.expiraUtc || '');
+    return Number.isFinite(expira) && expira > Date.now();
   }
 
   moneda(valor: number): string {
