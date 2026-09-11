@@ -33,8 +33,12 @@ public interface IUsuarioScopeService
     /// Resuelve el contexto efectivo para la empresa solicitada a partir de
     /// UsuarioEmpresa y del estado vigente de Usuario, Empresa y Rol. Cualquier
     /// ausencia, inactividad o mismatch falla cerrado devolviendo null.
+    /// Implementaciones legacy que aún no conocen EmpresaId conservan
+    /// compatibilidad y fallan cerrado por defecto; los consumidores tenant-owned
+    /// nunca obtienen autoridad si el servicio concreto no implementa este contrato.
     /// </summary>
     Task<UsuarioTenantScopeActual?> ObtenerActualAsync(
         int empresaId,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult<UsuarioTenantScopeActual?>(null);
 }
