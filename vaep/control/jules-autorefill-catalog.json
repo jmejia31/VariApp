@@ -1,8 +1,8 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
   "currentParent": "N6.2.C",
-  "generatedAt": "2026-09-11T00:34:30Z",
-  "regenerationReason": "SUPERVISION_48__N6.2.C_TRANSPORT_TX2_REPAIRED__REVIEW_FIRST_PASS__EF_SNAPSHOT_DIRECT_FIX__EXACT_HEAD_GATES_PENDING",
+  "generatedAt": "2026-09-11T00:43:30Z",
+  "regenerationReason": "SUPERVISION_48__N6.2.C_ATTEMPT1_DIRECT_FIXES_REVIEWED__EXACT_HEAD_GATES_RETRY_PENDING",
   "lastClosedParent": "N6.2.B",
   "closureReceipts": {
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
@@ -59,7 +59,7 @@
     "mode": "PARENT_CLOSE_FIRST",
     "currentParent": "N6.2.C",
     "currentParentMaterialScopeCount": 1,
-    "currentParentReason": "N6.2.B is LISTO_REAL. N6.2.C TX2 transport is valid; controller REVIEW_FIRST repaired a stale EF snapshot in ATTEMPT1. Exact-head causal gates remain mandatory before closure.",
+    "currentParentReason": "N6.2.C TX2 transport is valid. REVIEW_FIRST repaired the EF snapshot and the sole legacy fixture failure from causal run 34547228786 within ATTEMPT1. Fresh exact-head gates are pending.",
     "nextParent": "N6.2.D",
     "nextParentParallelMaterialScopes": 1,
     "nextParentScopesNonOverlapping": true,
@@ -73,15 +73,15 @@
       "runId": 34546666164,
       "jobId": 103100674308,
       "taskAttempt": 1,
-      "state": "IN_PROGRESS__EXECUTE_MASTER__REVIEW_FIRST_PASS__CAUSAL_GATES_PENDING",
+      "state": "IN_PROGRESS__EXECUTE_MASTER__REVIEW_FIRST_PASS__CAUSAL_GATES_RETRY_PENDING",
       "transportPreflight": "PASS",
       "reserveNext": "PASS",
       "sessionId": null,
       "activeReal": false,
       "ownership": "J2_SINGLE_WRITER_PRESERVED__NO_SESSION_ACTIVITY_PROVEN__CONTROLLER_FIX_REVIEWED",
-      "functionalHead": "fe8be74001f53f9da0b9459983c1f7ae006ce917",
+      "functionalHead": "73fe8caff47248a8235beb51fe8026bd4ed5c513",
       "reviewReceipt": "vaep/evidence/reviews/N6.2.C_CONTROLLER_REVIEW_FIRST_20260911T0033Z.json",
-      "reviewCommit": "7ba5ad400c9ae8b24c53b17e54a33ac341e0c403",
+      "reviewCommit": "655f241d23e75adf534aaa706967dca8b22ecc71",
       "p0": 0,
       "p1": 0
     },
@@ -91,7 +91,7 @@
       "dependency": "N6.2.C_LISTO_REAL",
       "materialization": "TENANT_AWARE_DATA_MODEL_APPLICATION_API__ROADMAP_DERIVED__NO_FILLER"
     },
-    "laneRefill": "N6.2.C_REVIEW_FIRST_PASS__EXACT_HEAD_GATES_PENDING__NEXT_N6.2.D_DEPENDENCY_GATED"
+    "laneRefill": "N6.2.C_REVIEW_FIRST_PASS__EXACT_HEAD_GATES_RETRY_PENDING__NEXT_N6.2.D_DEPENDENCY_GATED"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
@@ -231,16 +231,20 @@
       "tx2RunId": 34546666164,
       "tx2JobId": 103100674308,
       "tx2ManifestCommit": "b44a1a14465fe8129fb1a569d4bc95787a262f8d",
-      "terminal": "IN_PROGRESS__EXECUTE_MASTER__REVIEW_FIRST_PASS__CAUSAL_GATES_PENDING",
+      "terminal": "IN_PROGRESS__EXECUTE_MASTER__REVIEW_FIRST_PASS__CAUSAL_GATES_RETRY_PENDING",
       "sessionId": null,
       "activeReal": false,
       "contentAttemptConsumed": false,
       "taskAttempt": 1,
       "r2Used": false,
       "r3Used": false,
-      "controllerDirectFixCommit": "fe8be74001f53f9da0b9459983c1f7ae006ce917",
+      "controllerDirectFixCommit": "73fe8caff47248a8235beb51fe8026bd4ed5c513",
       "reviewReceipt": "vaep/evidence/reviews/N6.2.C_CONTROLLER_REVIEW_FIRST_20260911T0033Z.json",
-      "reviewCommit": "7ba5ad400c9ae8b24c53b17e54a33ac341e0c403"
+      "reviewCommit": "655f241d23e75adf534aaa706967dca8b22ecc71",
+      "failedCausalRunId": 34547228786,
+      "failedCausalReason": "LEGACY_REPORTES_VENTAS_FIXTURE_MISSING_REQUIRED_EMPRESA",
+      "p0": 0,
+      "p1": 0
     }
   ],
   "prearmedRoadmap": [
@@ -267,15 +271,15 @@
     },
     {
       "parent": "N6.2.C",
-      "state": "REVIEW_FIRST_PASS__CAUSAL_GATES_PENDING__RUN_IN_PROGRESS__NOT_ACTIVE_REAL",
+      "state": "REVIEW_FIRST_PASS__CAUSAL_GATES_RETRY_PENDING__RUN_IN_PROGRESS__NOT_ACTIVE_REAL",
       "dependency": "N6.2.B_LISTO_REAL",
       "materialization": "TENANT_AWARE_DATA_MODEL_PERSISTENCE__ROADMAP_DERIVED__NO_FILLER",
       "taskId": "N6.2.C.1.TENANT_AWARE_DATA_MODEL_PERSISTENCE",
       "worker": "J2",
       "runId": 34546666164,
       "dispatchId": "N6-2-C-1-TENANT-AWARE-DATA-MODEL-PERSISTENCE-J2-A1-TX2",
-      "functionalHead": "fe8be74001f53f9da0b9459983c1f7ae006ce917",
-      "reviewCommit": "7ba5ad400c9ae8b24c53b17e54a33ac341e0c403"
+      "functionalHead": "73fe8caff47248a8235beb51fe8026bd4ed5c513",
+      "reviewCommit": "655f241d23e75adf534aaa706967dca8b22ecc71"
     },
     {
       "parent": "N6.2.D",
@@ -294,12 +298,12 @@
         "runId": 34546666164,
         "jobId": 103100674308,
         "taskAttempt": 1,
-        "state": "IN_PROGRESS__EXECUTE_MASTER__REVIEW_FIRST_PASS__CAUSAL_GATES_PENDING",
+        "state": "IN_PROGRESS__EXECUTE_MASTER__REVIEW_FIRST_PASS__CAUSAL_GATES_RETRY_PENDING",
         "sessionId": null,
         "activeReal": false,
-        "writeScope": "backend/src/Infrastructure/Persistence/Configurations/SucursalConfiguration.cs;backend/src/Infrastructure/Migrations/20260911002500_N62CTenantAwareEmpresaId.cs;backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs;backend/tests/InventoryApp.Tests/TenantAwareDataModelPersistenceTests.cs",
-        "functionalHead": "fe8be74001f53f9da0b9459983c1f7ae006ce917",
-        "reviewCommit": "7ba5ad400c9ae8b24c53b17e54a33ac341e0c403"
+        "writeScope": "backend/src/Infrastructure/Persistence/Configurations/SucursalConfiguration.cs;backend/src/Infrastructure/Migrations/20260911002500_N62CTenantAwareEmpresaId.cs;backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs;backend/tests/InventoryApp.Tests/TenantAwareDataModelPersistenceTests.cs;backend/tests/InventoryApp.Tests/API/Controllers/ReportesVentasContractTests.cs",
+        "functionalHead": "73fe8caff47248a8235beb51fe8026bd4ed5c513",
+        "reviewCommit": "655f241d23e75adf534aaa706967dca8b22ecc71"
       }
     ],
     "J3": [],
