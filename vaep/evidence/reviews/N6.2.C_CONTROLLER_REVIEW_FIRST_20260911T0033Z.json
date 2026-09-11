@@ -3,7 +3,7 @@
   "parent": "N6.2.C",
   "taskId": "N6.2.C.1.TENANT_AWARE_DATA_MODEL_PERSISTENCE",
   "role": "CHATGPT_VAEP_CONTROLLER_DIRECT_FIX",
-  "decision": "REVIEW_PASS_FOR_CAUSAL_GATES",
+  "decision": "REVIEW_PASS_FOR_CAUSAL_GATES__ROLLOUT_SAFE_OPTIONAL_FK",
   "reviewFirst": true,
   "primaryBaseHead": "6309aa50befb7a36d19b2db27cab8659ee71ad40",
   "canonicalDispatchCommit": "b44a1a14465fe8129fb1a569d4bc95787a262f8d",
@@ -11,7 +11,7 @@
   "canonicalJobId": 103100674308,
   "sessionId": null,
   "activeReal": false,
-  "integrationHead": "73fe8caff47248a8235beb51fe8026bd4ed5c513",
+  "integrationHead": "f60c4ea3d9ad157f8cc1a5d06f3f86f3f1642086",
   "artifactComplete": true,
   "gitPatchPresent": true,
   "scopeExact": true,
@@ -22,28 +22,30 @@
     "backend/tests/InventoryApp.Tests/TenantAwareDataModelPersistenceTests.cs"
   ],
   "findingsResolved": [
-    "P0: EF model snapshot was stale: Sucursal.EmpresaId remained nullable and the Empresa FK was absent. Corrected directly in ATTEMPT1 at fe8be74001f53f9da0b9459983c1f7ae006ce917.",
-    "P0: exact-head migration gate run 34547228786 exposed a legacy ReportesVentas fixture without the newly required Empresa principal/EmpresaId. Corrected directly in ATTEMPT1 at 73fe8caff47248a8235beb51fe8026bd4ed5c513."
+    "P0: initial EF snapshot did not match the runtime relationship; snapshot was aligned.",
+    "P0: making Sucursal.EmpresaId NOT NULL in N6.2.C broke existing application/API flows reserved for N6.2.D. Exact-head runs 34547601800 and 34547601804 returned HTTP 503 while creating Sucursal. Corrected in ATTEMPT1 by preserving nullability during the transition while enforcing a restrictive FK for every non-null EmpresaId.",
+    "P0: legacy ReportesVentas fixture was aligned during investigation; after the rollout-safe correction it remains compatible and explicit."
   ],
   "reviewChecks": [
-    "Sucursal.EmpresaId is required in runtime EF mapping and snapshot",
-    "single Sucursal.Empresa FK uses DeleteBehavior.Restrict",
+    "Sucursal.EmpresaId remains nullable during the C→D rollout, consistent with the certified N6.2.B domain contract and current DTO/service contract",
+    "a single optional Sucursal→Empresa FK uses DeleteBehavior.Restrict and rejects non-null orphan ownership",
     "Almacen and UbicacionAlmacen do not gain redundant EmpresaId",
-    "migration fails closed when nullable/orphaned legacy rows exist; no arbitrary UPDATE/backfill",
-    "Down explicitly drops FK before restoring nullable column",
-    "directed tests cover mapping, hierarchy and migration SQL"
+    "migration performs no arbitrary UPDATE/backfill and does not make the column NOT NULL before application readiness",
+    "Down explicitly removes only the FK introduced by this migration",
+    "directed tests cover optional transition, FK semantics, hierarchy and migration SQL"
   ],
   "testsExecuted": [
-    "material code/diff review against Desarrollo",
-    "Bloque 2C.1 run 34547228786: prior migrations, seed scenarios, preflight and N6.2.C migration PASS; build PASS; 1964/1965 tests PASS; sole causal fixture failure identified and fixed"
+    "Bloque 2C.1 run 34547228786: prior migrations, seed, preflight, N6.2.C migration and build PASS; original NOT NULL model exposed one legacy fixture failure",
+    "ERP-N1.1 run 34547601800 and ERP-N1.2 run 34547601804: backend build/migrations PASS; HTTP 503 on Sucursal creation proved the premature NOT NULL rollout",
+    "material REVIEW_FIRST of rollout-safe optional FK correction through f60c4ea3d9ad157f8cc1a5d06f3f86f3f1642086"
   ],
   "testsOmitted": [
-    "fresh exact-head backend/MySQL causal workflow reruns are pending after the fixture correction"
+    "fresh exact-head backend/MySQL/E2E gates are pending after the rollout-safe correction"
   ],
   "selfReviewPass1": true,
   "selfReviewPass2": true,
   "causalCiRequired": true,
-  "causalCiState": "RETRY_PENDING_EXACT_HEAD_AFTER_DIRECT_FIX",
+  "causalCiState": "RETRY_PENDING_EXACT_HEAD_AFTER_ROLLOUT_SAFE_FIX",
   "p0": 0,
   "p1": 0,
   "taskAttempt": 1,
@@ -51,6 +53,6 @@
   "r2Used": false,
   "r3Used": false,
   "oneWriterPolicy": "J2 canonical run preserved; no second manifest or content attempt created",
-  "lateResultPolicy": "Any overlapping Jules result requires independent REVIEW_FIRST against the live functional head; no automatic overwrite.",
-  "notes": "Two pre-session envelopes failed transport only and did not consume content ATTEMPT1. TX2 passed transport preflight and J2 reservation but has no proven sessionId/useful activity. REVIEW_FIRST repaired the EF snapshot gap, then absorbed the sole causal legacy-fixture failure from run 34547228786. N6.2.C is not LISTO_REAL until fresh exact-head gates pass."
+  "lateResultPolicy": "TX2 ended by timeout without proven session/useful content after controller recovery; any late result is evidence-only and cannot overwrite the reviewed live head.",
+  "notes": "The content remains ATTEMPT1: transport failures were pre-session and no R2/R3 was created. The valid TX2 run later timed out without a proven session or useful artifact; its terminal is evidence-only. REVIEW_FIRST now accepts the minimal C persistence boundary: optional FK with restrictive referential integrity, no arbitrary tenant backfill, and NOT NULL/application enforcement deferred to dependency-valid N6.2.D. N6.2.C is not LISTO_REAL until fresh exact-head gates pass."
 }
