@@ -152,7 +152,7 @@ test.describe('VariStoreHn Fase 2 — categorías públicas', () => {
     await expect(page.locator('.category-card')).toHaveCount(0);
   });
 
-  test('búsqueda, categoría canónica y carrito conservan continuidad entre categorías y home', async ({ page }) => {
+  test('búsqueda, categoría canónica y carrito conservan continuidad hacia el catálogo independiente', async ({ page }) => {
     await prepararEmpresa(page);
     await page.setViewportSize({ width: 1366, height: 900 });
     await page.goto('/varistorehn');
@@ -171,7 +171,7 @@ test.describe('VariStoreHn Fase 2 — categorías públicas', () => {
     const search = categoriesHeader.getByRole('searchbox', { name: 'Buscar productos, marcas o modelos' });
     await search.fill('Wireless Studio');
     await search.press('Enter');
-    await expect(page).toHaveURL(/\/varistorehn\?q=Wireless(?:%20|\+)Studio#catalogo$/);
+    await expect(page).toHaveURL(/\/varistorehn\/productos\?q=Wireless(?:%20|\+)Studio$/);
     await expect(page.getByRole('status').filter({ hasText: '1 productos encontrados' })).toBeVisible();
     await expect(page.locator('article.product-card')).toContainText('Audífonos Wireless Studio');
 
@@ -180,8 +180,8 @@ test.describe('VariStoreHn Fase 2 — categorías públicas', () => {
     await expect(page).toHaveURL(/\/varistorehn\/categoria\/demo-categoria-2$/);
     await expect(page.getByRole('heading', { level: 1, name: 'Audio', exact: true })).toBeVisible();
     await page.getByRole('link', { name: 'Ver productos de esta categoría', exact: true }).click();
-    await expect(page).toHaveURL(/\/varistorehn\?categoria=demo-categoria-2#catalogo$/);
-    await expect(page.locator('#catalog-title')).toHaveText('Audio');
+    await expect(page).toHaveURL(/\/varistorehn\/productos\?categoria=demo-categoria-2$/);
+    await expect(page.locator('#catalog-results-title')).toHaveText('Audio');
     await expect(page.getByRole('status').filter({ hasText: '3 productos encontrados' })).toBeVisible();
 
     await page.goto('/varistorehn/categorias');
@@ -226,7 +226,7 @@ test.describe('VariStoreHn Fase 2 — categorías públicas', () => {
     await expect(page.getByText('Sonido e imagen para tu espacio.', { exact: true })).toBeVisible();
     await expect(page.getByText('Cantidad no disponible', { exact: true })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Ver productos de esta categoría', exact: true }))
-      .toHaveAttribute('href', '/varistorehn?categoria=audio-y-video-21#catalogo');
+      .toHaveAttribute('href', '/varistorehn/productos?categoria=audio-y-video-21');
     await expect(page.locator('app-varistorehn-header .skip-link')).toHaveAttribute('href', '#contenido-categoria');
   });
 
