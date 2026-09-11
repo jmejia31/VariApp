@@ -158,7 +158,7 @@ test.describe('VariStoreHn Fase 4 — detalle público de producto', () => {
     await page.getByRole('button', { name: 'Agregar al carrito' }).click();
     const header = page.locator('app-varistorehn-header');
     await expect(header.getByRole('button', { name: 'Abrir carrito con 5 unidades' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Stock ya agregado' })).toBeDisabled();
+    await expect(page.getByRole('button', { name: 'Stock ya agregado', exact: true })).toBeDisabled();
 
     const persistido = await page.evaluate(() => {
       const valor = localStorage.getItem('varistorehn:carrito:v2:901:demo');
@@ -292,8 +292,8 @@ test.describe('VariStoreHn Fase 4 — detalle público de producto', () => {
     await expect(cantidad).toBeDisabled();
     await expect(cantidad).toHaveAttribute('max', '0');
     await expect(cantidad).toHaveValue('0');
-    await expect(page.getByRole('button', { name: 'Producto agotado' })).toBeDisabled();
-    await expect(page.getByRole('button', { name: 'Comprar por WhatsApp' })).toBeDisabled();
+    await expect(page.getByRole('button', { name: 'Producto agotado', exact: true })).toBeDisabled();
+    await expect(page.getByRole('button', { name: 'Comprar por WhatsApp', exact: true })).toBeDisabled();
   });
 
   test('slug histórico se reemplaza por el slug canónico sin duplicar historial', async ({ page }) => {
@@ -367,10 +367,14 @@ test.describe('VariStoreHn Fase 4 — detalle público de producto', () => {
     await page.setViewportSize({ width: 320, height: 700 });
     const imagen = page.getByRole('button', { name: /Ampliar imagen 2 de 3/ });
     await imagen.click();
-    await expect(page.locator('dialog.lightbox')).toBeVisible();
+    const lightbox = page.locator('dialog.lightbox');
+    await expect(lightbox).toBeVisible();
+    await expect(lightbox.locator('.lightbox-controls span')).toHaveText('2 / 3');
+    await gestoSwipeIzquierda(page, '.lightbox-stage');
+    await expect(lightbox.locator('.lightbox-controls span')).toHaveText('3 / 3');
     await page.keyboard.press('Escape');
-    await expect(page.locator('dialog.lightbox')).not.toBeVisible();
-    await expect(page.locator('.image-position').first()).toHaveText('2 / 3');
+    await expect(lightbox).not.toBeVisible();
+    await expect(page.locator('.image-position').first()).toHaveText('3 / 3');
   });
 
   test('WhatsApp en demo muestra mensaje estructurado sin enviar nada', async ({ page }) => {
