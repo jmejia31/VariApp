@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { convertToParamMap, ActivatedRoute, Router } from '@angular/router';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { SucursalService } from '../../services/sucursal.service';
 import { SucursalFormComponent } from './sucursal-form.component';
@@ -60,6 +60,27 @@ describe('SucursalFormComponent tenant ownership', () => {
 
     empresaId.setValue(7);
     expect(empresaId.valid).toBe(true);
+  });
+
+  it('keeps Empresa ownership fail-closed when catalog loading fails before edit data arrives', () => {
+    http.get.mockReturnValueOnce(throwError(() => new Error('catalog unavailable')));
+    (component as unknown as { cargarEmpresas: () => void }).cargarEmpresas();
+
+    sucursalService.getById.mockReturnValueOnce(of({
+      data: {
+        empresaId: 7,
+        codigo: 'TGU-01',
+        nombre: 'Tegucigalpa',
+        direccion: null,
+        telefono: null,
+        correo: null,
+        zonaHoraria: 'America/Tegucigalpa'
+      }
+    }));
+    (component as unknown as { cargarSucursal: (id: number) => void }).cargarSucursal(1);
+
+    expect(component.empresasError()).toBe('No se pudieron cargar las empresas. Reintenta antes de guardar.');
+    expect(component.form.controls.empresaId.disabled).toBe(true);
   });
 
   it('does not write a sucursal without tenant ownership', () => {
