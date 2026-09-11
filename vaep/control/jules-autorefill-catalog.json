@@ -2,10 +2,10 @@
   "schemaVersion": "tasks-first.v1",
   "authority": "docs/VAEP_AUTHORITY.md",
   "executionModel": "TASKS_FIRST_JULES_ON_DEMAND",
-  "currentParent": "N6.4.B",
-  "generatedAt": "2026-09-11T16:10:01Z",
-  "regenerationReason": "N6.4.A_LISTO_REAL__TASKS_FIRST_DIRECT_CLOSE_PROMOTE",
-  "lastClosedParent": "N6.4.A",
+  "currentParent": "N6.4.C",
+  "generatedAt": "2026-09-11T16:24:20Z",
+  "regenerationReason": "N6.4.B_LISTO_REAL__DIRECT_DOMAIN_CLOSE_PROMOTE",
+  "lastClosedParent": "N6.4.B",
   "closureReceipts": {
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
     "N5.1.H": "vaep/evidence/fragments/N5.1.H_LISTO_REAL_20260909T1236Z.json",
@@ -49,7 +49,8 @@
     "N6.3.F": "vaep/evidence/fragments/N6.3.F_LISTO_REAL_20260911T1224Z.json",
     "N6.3.G": "vaep/evidence/fragments/N6.3.G_LISTO_REAL_20260911T1324Z.json",
     "N6.3.H": "vaep/evidence/fragments/N6.3.H_LISTO_REAL_20260911T1402Z.json",
-    "N6.4.A": "vaep/evidence/fragments/N6.4.A_LISTO_REAL_20260911T1610Z.json"
+    "N6.4.A": "vaep/evidence/fragments/N6.4.A_LISTO_REAL_20260911T1610Z.json",
+    "N6.4.B": "vaep/evidence/fragments/N6.4.B_LISTO_REAL_20260911T1624Z.json"
   },
   "policy": {
     "executionModel": "TASKS_FIRST_JULES_ON_DEMAND",
@@ -77,14 +78,14 @@
   },
   "throughputPlan": {
     "mode": "TASKS_FIRST_PARENT_CLOSE_FIRST",
-    "currentParent": "N6.4.B",
+    "currentParent": "N6.4.C",
     "currentParentMaterialScopeCount": 1,
-    "currentParentReason": "N6.4.A is LISTO_REAL. N6.4.B is the roadmap-derived domain/contracts facet for Usuarios por empresa.",
+    "currentParentReason": "N6.4.B is LISTO_REAL. N6.4.C is the roadmap-derived persistence, migration and data facet for Usuarios por empresa.",
     "directExecutorClass": "SCHEDULED_AUTOMATION_CONTROLLER",
-    "nextParent": "N6.4.C",
+    "nextParent": "N6.4.D",
     "nextParentParallelMaterialScopes": 1,
     "nextParentScopesNonOverlapping": true,
-    "directNextSafePrearm": "N6.4.C_DEPENDENCY_GATED__READ_ONLY_PREARM",
+    "directNextSafePrearm": "N6.4.D_DEPENDENCY_GATED__READ_ONLY_PREARM",
     "julesOffload": "OPTIONAL_EXPLICIT_ONLY",
     "currentJulesOffload": null
   },
@@ -360,9 +361,10 @@
   "julesOffloadCandidates": [],
   "legacyRuntimeHistory": "REMOVED_FROM_LIVE_CATALOG__PRESERVED_IN_GIT_AND_RECEIPTS_ONLY",
   "rolling60CertifiedParents": [
-    "N6.4.A"
+    "N6.4.A",
+    "N6.4.B"
   ],
-  "rolling60Count": 1,
-  "lastClosureFunctionalHead": "adf9891ee140f2d59b1220a2a7a4f4b3fb942748",
-  "nextParent": "N6.4.C"
+  "rolling60Count": 2,
+  "lastClosureFunctionalHead": "1eb5375f6a4e71f93b47a161a29f4e5b2798ed6a",
+  "nextParent": "N6.4.D"
 }
