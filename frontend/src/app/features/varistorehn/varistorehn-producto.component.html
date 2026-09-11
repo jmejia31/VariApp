@@ -103,7 +103,7 @@
               class="gallery-stage"
               (pointerdown)="iniciarSwipe($event)"
               (pointerup)="finalizarSwipe($event)"
-              (pointercancel)="finalizarSwipe($event)">
+              (pointercancel)="cancelarSwipe()">
               @if (imagenValida(imagenActual())) {
                 <button
                   #botonImagenPrincipal
@@ -177,9 +177,9 @@
               <small>@if (contextoCarritoCargado()) { {{ stockRestante() }} disponibles para agregar } @else { Preparando carrito… }</small>
             </div>
             <div class="quantity-control" role="group" aria-label="Cantidad a agregar">
-              <button type="button" [disabled]="!puedeAgregar() || cantidad() <= 1" aria-label="Disminuir cantidad" (click)="cambiarCantidad(-1)">−</button>
-              <input #cantidadInput id="cantidad-producto" type="number" min="1" [max]="stockRestante()" [value]="cantidad()" [disabled]="!puedeAgregar()" (change)="establecerCantidad(cantidadInput.value)" aria-label="Cantidad de producto">
-              <button type="button" [disabled]="!puedeAgregar() || cantidad() >= stockRestante()" aria-label="Aumentar cantidad" (click)="cambiarCantidad(1)">+</button>
+              <button type="button" [disabled]="!puedeSeleccionarCantidad() || cantidad() <= 1" aria-label="Disminuir cantidad" (click)="cambiarCantidad(-1)">−</button>
+              <input #cantidadInput id="cantidad-producto" type="number" [min]="stockSeleccionado() > 0 ? 1 : 0" [max]="stockSeleccionado()" [value]="cantidad()" [disabled]="!puedeSeleccionarCantidad()" (change)="establecerCantidad(cantidadInput.value)" aria-label="Cantidad de producto">
+              <button type="button" [disabled]="!puedeSeleccionarCantidad() || cantidad() >= stockSeleccionado()" aria-label="Aumentar cantidad" (click)="cambiarCantidad(1)">+</button>
             </div>
 
             <button type="button" class="button primary add-main" [disabled]="!puedeAgregar()" (click)="agregarAlCarrito()">
@@ -259,7 +259,7 @@
     }
   </main>
 
-  @if (estado() === 'success' && producto(); as detalleMovil) {
+  @if (estado() === 'success' && producto()) {
     <aside class="mobile-buy-bar" aria-label="Compra rápida del producto">
       <div><small>{{ textoDisponibilidad() }}</small><strong>{{ moneda(precioActual()) }}</strong></div>
       <button type="button" class="button primary" [disabled]="!puedeAgregar()" (click)="agregarAlCarrito()">
@@ -283,7 +283,7 @@
     <div class="lightbox-panel">
       <button type="button" class="lightbox-close" aria-label="Cerrar imagen ampliada" (click)="cerrarLightbox(true)">×</button>
       @if (producto(); as productoLightbox) {
-        <div class="lightbox-stage" (pointerdown)="iniciarSwipe($event)" (pointerup)="finalizarSwipe($event)" (pointercancel)="finalizarSwipe($event)">
+        <div class="lightbox-stage" (pointerdown)="iniciarSwipe($event)" (pointerup)="finalizarSwipe($event)" (pointercancel)="cancelarSwipe()">
           @if (imagenValida(imagenActual())) {
             <img [src]="imagenActual()" [alt]="productoLightbox.nombre + ', imagen ampliada ' + (imagenActiva() + 1)" (error)="errorImagen(imagenActual())">
           }
