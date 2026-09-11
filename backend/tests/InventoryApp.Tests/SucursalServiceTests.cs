@@ -19,7 +19,7 @@ public class SucursalServiceTests
     public SucursalServiceTests()
     {
         _empresaRepoMock.Setup(r => r.GetByIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((int id, CancellationToken _) => new Empresa { Id = id, Nombre = $"Empresa {id}", Activa = true });
+            .ReturnsAsync((int id, CancellationToken _) => new Empresa($"Empresa {id}") { Id = id });
         _currentUserMock.Setup(c => c.UsuarioId).Returns(7);
         _currentUserMock.Setup(c => c.NombreUsuario).Returns("admin-sucursales");
         _service = new SucursalService(_repoMock.Object, _empresaRepoMock.Object, _currentUserMock.Object, _auditoriaMock.Object);
