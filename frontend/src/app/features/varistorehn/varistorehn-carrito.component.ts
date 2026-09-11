@@ -49,6 +49,7 @@ export class VaristorehnCarritoComponent implements OnInit {
     inicio: VARISTOREHN_PATHS.inicio,
     productos: VARISTOREHN_PATHS.productos,
     categorias: VARISTOREHN_PATHS.categorias,
+    checkout: VARISTOREHN_PATHS.checkout,
     contacto: `${VARISTOREHN_PATHS.inicio}#contacto`
   } as const;
 
