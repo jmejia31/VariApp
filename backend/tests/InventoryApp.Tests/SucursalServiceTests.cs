@@ -11,15 +11,18 @@ namespace InventoryApp.Tests;
 public class SucursalServiceTests
 {
     private readonly Mock<ISucursalRepository> _repoMock = new();
+    private readonly Mock<IEmpresaRepository> _empresaRepoMock = new();
     private readonly Mock<ICurrentUserService> _currentUserMock = new();
     private readonly Mock<IAuditoriaService> _auditoriaMock = new();
     private readonly SucursalService _service;
 
     public SucursalServiceTests()
     {
+        _empresaRepoMock.Setup(r => r.GetByIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((int id, CancellationToken _) => new Empresa { Id = id, Nombre = $"Empresa {id}", Activa = true });
         _currentUserMock.Setup(c => c.UsuarioId).Returns(7);
         _currentUserMock.Setup(c => c.NombreUsuario).Returns("admin-sucursales");
-        _service = new SucursalService(_repoMock.Object, _currentUserMock.Object, _auditoriaMock.Object);
+        _service = new SucursalService(_repoMock.Object, _empresaRepoMock.Object, _currentUserMock.Object, _auditoriaMock.Object);
     }
 
     [Fact]
@@ -27,20 +30,9 @@ public class SucursalServiceTests
     {
         _repoMock.Setup(r => r.ExisteCodigoAsync("TGU-01", 1, null)).ReturnsAsync(false);
         _repoMock.Setup(r => r.SaveChangesAsync()).ReturnsAsync(true);
-
         Sucursal? creada = null;
-        _repoMock.Setup(r => r.AddAsync(It.IsAny<Sucursal>()))
-            .Callback<Sucursal>(s => creada = s)
-            .Returns(Task.CompletedTask);
-
-        var resultado = await _service.CreateAsync(new CreateSucursalDto
-        {
-            EmpresaId = 1,
-            Codigo = " tgu-01 ",
-            Nombre = " Sucursal Centro ",
-            ZonaHoraria = "America/Tegucigalpa"
-        });
-
+        _repoMock.Setup(r => r.AddAsync(It.IsAny<Sucursal>())).Callback<Sucursal>(s => creada = s).Returns(Task.CompletedTask);
+        var resultado = await _service.CreateAsync(new CreateSucursalDto { EmpresaId = 1, Codigo = " tgu-01 ", Nombre = " Sucursal Centro ", ZonaHoraria = "America/Tegucigalpa" });
         Assert.NotNull(creada);
         Assert.Equal(1, creada!.EmpresaId);
         Assert.Equal("TGU-01", creada.Codigo);
@@ -57,47 +49,22 @@ public class SucursalServiceTests
     public async Task CreateAsync_CodigoDuplicado_LanzaBusinessRule()
     {
         _repoMock.Setup(r => r.ExisteCodigoAsync("TGU-01", 1, null)).ReturnsAsync(true);
-
-        await Assert.ThrowsAsync<BusinessRuleException>(() =>
-            _service.CreateAsync(new CreateSucursalDto
-            {
-                EmpresaId = 1,
-                Codigo = "TGU-01",
-                Nombre = "Sucursal Centro",
-                ZonaHoraria = "America/Tegucigalpa"
-            }));
-
+        await Assert.ThrowsAsync<BusinessRuleException>(() => _service.CreateAsync(new CreateSucursalDto { EmpresaId = 1, Codigo = "TGU-01", Nombre = "Sucursal Centro", ZonaHoraria = "America/Tegucigalpa" }));
         _repoMock.Verify(r => r.AddAsync(It.IsAny<Sucursal>()), Times.Never);
     }
 
     [Fact]
     public async Task CreateAsync_ZonaHorariaInvalida_LanzaBusinessRule()
     {
-        await Assert.ThrowsAsync<BusinessRuleException>(() =>
-            _service.CreateAsync(new CreateSucursalDto
-            {
-                EmpresaId = 1,
-                Codigo = "TGU-01",
-                Nombre = "Sucursal Centro",
-                ZonaHoraria = "Zona/Que-No-Existe"
-            }));
+        await Assert.ThrowsAsync<BusinessRuleException>(() => _service.CreateAsync(new CreateSucursalDto { EmpresaId = 1, Codigo = "TGU-01", Nombre = "Sucursal Centro", ZonaHoraria = "Zona/Que-No-Existe" }));
     }
 
     [Fact]
     public async Task CambiarEstadoAsync_MismoEstado_EsIdempotente()
     {
-        var sucursal = new Sucursal
-        {
-            Id = 10,
-            Codigo = "TGU-01",
-            Nombre = "Centro",
-            ZonaHoraria = "America/Tegucigalpa",
-            Activa = true
-        };
+        var sucursal = new Sucursal { Id = 10, Codigo = "TGU-01", Nombre = "Centro", ZonaHoraria = "America/Tegucigalpa", Activa = true };
         _repoMock.Setup(r => r.GetByIdAsync(10)).ReturnsAsync(sucursal);
-
         var resultado = await _service.CambiarEstadoAsync(10, true);
-
         Assert.NotNull(resultado);
         Assert.True(resultado!.Activa);
         _repoMock.Verify(r => r.Update(It.IsAny<Sucursal>()), Times.Never);
@@ -107,27 +74,11 @@ public class SucursalServiceTests
     [Fact]
     public async Task UpdateAsync_NoModificaEstadoOperativo()
     {
-        var sucursal = new Sucursal
-        {
-            Id = 11,
-            EmpresaId = 1,
-            Codigo = "TGU-01",
-            Nombre = "Centro",
-            ZonaHoraria = "America/Tegucigalpa",
-            Activa = false
-        };
+        var sucursal = new Sucursal { Id = 11, EmpresaId = 1, Codigo = "TGU-01", Nombre = "Centro", ZonaHoraria = "America/Tegucigalpa", Activa = false };
         _repoMock.Setup(r => r.GetByIdAsync(11)).ReturnsAsync(sucursal);
         _repoMock.Setup(r => r.ExisteCodigoAsync("TGU-02", 1, 11)).ReturnsAsync(false);
         _repoMock.Setup(r => r.SaveChangesAsync()).ReturnsAsync(true);
-
-        var resultado = await _service.UpdateAsync(11, new UpdateSucursalDto
-        {
-            EmpresaId = 1,
-            Codigo = "tgu-02",
-            Nombre = "Centro Actualizada",
-            ZonaHoraria = "America/Tegucigalpa"
-        });
-
+        var resultado = await _service.UpdateAsync(11, new UpdateSucursalDto { EmpresaId = 1, Codigo = "tgu-02", Nombre = "Centro Actualizada", ZonaHoraria = "America/Tegucigalpa" });
         Assert.NotNull(resultado);
         Assert.False(sucursal.Activa);
         Assert.Equal(1, sucursal.EmpresaId);
@@ -137,19 +88,10 @@ public class SucursalServiceTests
     [Fact]
     public async Task DeleteAsync_AplicaSoftDeleteAuditado()
     {
-        var sucursal = new Sucursal
-        {
-            Id = 12,
-            Codigo = "TGU-03",
-            Nombre = "Norte",
-            ZonaHoraria = "America/Tegucigalpa",
-            Activa = true
-        };
+        var sucursal = new Sucursal { Id = 12, Codigo = "TGU-03", Nombre = "Norte", ZonaHoraria = "America/Tegucigalpa", Activa = true };
         _repoMock.Setup(r => r.GetByIdAsync(12)).ReturnsAsync(sucursal);
         _repoMock.Setup(r => r.SaveChangesAsync()).ReturnsAsync(true);
-
         var resultado = await _service.DeleteAsync(12);
-
         Assert.True(resultado);
         Assert.False(sucursal.Activa);
         Assert.True(sucursal.Eliminado);
@@ -161,15 +103,8 @@ public class SucursalServiceTests
     [Fact]
     public async Task BuscarAsync_AplicaPaginacionDefensiva()
     {
-        _repoMock.Setup(r => r.BuscarAsync(null, null, null, 1, 100))
-            .ReturnsAsync((new List<Sucursal>(), 0));
-
-        var resultado = await _service.BuscarAsync(new SucursalFiltroDto
-        {
-            Pagina = 0,
-            TamanoPagina = 1000
-        });
-
+        _repoMock.Setup(r => r.BuscarAsync(null, null, null, 1, 100)).ReturnsAsync((new List<Sucursal>(), 0));
+        var resultado = await _service.BuscarAsync(new SucursalFiltroDto { Pagina = 0, TamanoPagina = 1000 });
         Assert.Equal(1, resultado.Pagina);
         Assert.Equal(100, resultado.TamanoPagina);
         Assert.Equal(0, resultado.TotalPaginas);
