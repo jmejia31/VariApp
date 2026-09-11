@@ -7,10 +7,9 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace InventoryApp.Infrastructure.Migrations;
 
 /// <summary>
-/// N6.2.C: convierte EmpresaId de Sucursales en ownership tenant-aware obligatorio.
-/// El ALTER se ejecuta como una sola operación DDL para fallar cerrado: si existen
-/// filas con EmpresaId NULL o referencias huérfanas, MySQL rechaza la operación en
-/// vez de asignar silenciosamente una empresa arbitraria.
+/// N6.2.C: establece la FK de ownership tenant-aware sin asignar una Empresa arbitraria.
+/// EmpresaId conserva nullabilidad temporal hasta que N6.2.D adapte los flujos de
+/// aplicación; referencias no nulas huérfanas fallan cerrado al crear la restricción.
 /// </summary>
 [DbContext(typeof(AppDbContext))]
 [Migration("20260911002500_N62CTenantAwareEmpresaId")]
@@ -21,7 +20,6 @@ public partial class N62CTenantAwareEmpresaId : Migration
         migrationBuilder.Sql(
             """
             ALTER TABLE `Sucursales`
-                MODIFY COLUMN `EmpresaId` int NOT NULL,
                 ADD CONSTRAINT `FK_Sucursales_Empresas_EmpresaId`
                     FOREIGN KEY (`EmpresaId`) REFERENCES `Empresas` (`Id`) ON DELETE RESTRICT;
             """);
@@ -32,8 +30,7 @@ public partial class N62CTenantAwareEmpresaId : Migration
         migrationBuilder.Sql(
             """
             ALTER TABLE `Sucursales`
-                DROP FOREIGN KEY `FK_Sucursales_Empresas_EmpresaId`,
-                MODIFY COLUMN `EmpresaId` int NULL;
+                DROP FOREIGN KEY `FK_Sucursales_Empresas_EmpresaId`;
             """);
     }
 }
