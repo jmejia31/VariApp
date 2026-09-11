@@ -120,9 +120,10 @@
           <h2 id="resumen-title">Tu compra</h2>
           <dl>
             <div><dt>Unidades</dt><dd>{{ carrito.totalUnidades() }}</dd></div>
-            <div class="summary-total"><dt>Subtotal</dt><dd>{{ moneda(carrito.subtotal()) }}</dd></div>
+            <div><dt>Subtotal</dt><dd>{{ moneda(carrito.subtotal()) }}</dd></div>
+            <div class="summary-total"><dt>Total del carrito</dt><dd>{{ moneda(carrito.total()) }}</dd></div>
           </dl>
-          <p class="summary-note">Envío, impuestos y total final se confirman en el checkout. El carrito no reserva inventario.</p>
+          <p class="summary-note">En esta fase el total del carrito coincide con el subtotal. Envío, impuestos y total final se calculan y confirman en el checkout de la Fase 6. El carrito no reserva inventario.</p>
           <div class="summary-actions">
             <a class="button primary" [href]="enlaces.productos">Seguir comprando</a>
             <span class="next-phase"><app-store-icon nombre="escudo" /> Checkout se habilita en la Fase 6; no enlazamos una pantalla incompleta.</span>
