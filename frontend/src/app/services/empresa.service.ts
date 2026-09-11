@@ -19,7 +19,11 @@ export class EmpresaService {
   constructor(private http: HttpClient) {}
 
   getAll(activa?: boolean): Observable<ApiResponse<EmpresaResumen[]>> {
-    const params = activa === undefined ? {} : { activa };
+    const params: Record<string, string | number | boolean> = {};
+    if (activa !== undefined) {
+      params['activa'] = activa;
+    }
+
     return this.http.get<ApiResponse<EmpresaResumen[]>>(this.apiUrl, { params });
   }
 }
