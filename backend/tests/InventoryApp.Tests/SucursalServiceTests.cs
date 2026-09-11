@@ -35,18 +35,21 @@ public class SucursalServiceTests
 
         var resultado = await _service.CreateAsync(new CreateSucursalDto
         {
+            EmpresaId = 1,
             Codigo = " tgu-01 ",
             Nombre = " Sucursal Centro ",
             ZonaHoraria = "America/Tegucigalpa"
         });
 
         Assert.NotNull(creada);
-        Assert.Equal("TGU-01", creada!.Codigo);
+        Assert.Equal(1, creada!.EmpresaId);
+        Assert.Equal("TGU-01", creada.Codigo);
         Assert.Equal("Sucursal Centro", creada.Nombre);
         Assert.True(creada.Activa);
         Assert.False(creada.Eliminado);
         Assert.Equal(7, creada.CreadoPorUsuarioId);
         Assert.Equal("admin-sucursales", creada.CreadoPorNombreUsuario);
+        Assert.Equal(1, resultado.EmpresaId);
         Assert.Equal("TGU-01", resultado.Codigo);
     }
 
@@ -58,6 +61,7 @@ public class SucursalServiceTests
         await Assert.ThrowsAsync<BusinessRuleException>(() =>
             _service.CreateAsync(new CreateSucursalDto
             {
+                EmpresaId = 1,
                 Codigo = "TGU-01",
                 Nombre = "Sucursal Centro",
                 ZonaHoraria = "America/Tegucigalpa"
@@ -72,6 +76,7 @@ public class SucursalServiceTests
         await Assert.ThrowsAsync<BusinessRuleException>(() =>
             _service.CreateAsync(new CreateSucursalDto
             {
+                EmpresaId = 1,
                 Codigo = "TGU-01",
                 Nombre = "Sucursal Centro",
                 ZonaHoraria = "Zona/Que-No-Existe"
@@ -105,6 +110,7 @@ public class SucursalServiceTests
         var sucursal = new Sucursal
         {
             Id = 11,
+            EmpresaId = 1,
             Codigo = "TGU-01",
             Nombre = "Centro",
             ZonaHoraria = "America/Tegucigalpa",
@@ -116,6 +122,7 @@ public class SucursalServiceTests
 
         var resultado = await _service.UpdateAsync(11, new UpdateSucursalDto
         {
+            EmpresaId = 1,
             Codigo = "tgu-02",
             Nombre = "Centro Actualizada",
             ZonaHoraria = "America/Tegucigalpa"
@@ -123,6 +130,7 @@ public class SucursalServiceTests
 
         Assert.NotNull(resultado);
         Assert.False(sucursal.Activa);
+        Assert.Equal(1, sucursal.EmpresaId);
         Assert.Equal("TGU-02", sucursal.Codigo);
     }
 
