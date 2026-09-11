@@ -71,9 +71,16 @@ public sealed class SucursalService : ISucursalService
             CreadoPorNombreUsuario = _currentUser.NombreUsuario
         };
         await _repository.AddAsync(sucursal);
-        await _repository.SaveChangesAsync();
-        await _auditoria.RegistrarAsync(ModuloSistema.Sucursales, AccionPermiso.Crear,
-            $"Sucursal creada: {sucursal.Codigo} - {sucursal.Nombre}; EmpresaId={empresaId}", sucursal.Id, entidad: "Sucursal");
+        if (!await _repository.SaveChangesAsync())
+            throw new BusinessRuleException("No se pudo crear la sucursal.");
+
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Sucursales,
+            AccionPermiso.Crear,
+            $"Sucursal creada: {sucursal.Codigo} - {sucursal.Nombre}; EmpresaId={empresaId}",
+            sucursal.Id,
+            entidad: "Sucursal",
+            valoresNuevos: new { sucursal.EmpresaId, sucursal.Codigo, sucursal.Nombre });
         return ToDto(sucursal);
     }
 
@@ -91,6 +98,8 @@ public sealed class SucursalService : ISucursalService
             throw new BusinessRuleException($"Ya existe otra sucursal activa con el código '{codigo}' para la empresa indicada.");
 
         var empresaAnterior = sucursal.EmpresaId;
+        var codigoAnterior = sucursal.Codigo;
+        var nombreAnterior = sucursal.Nombre;
         sucursal.EmpresaId = empresaId;
         sucursal.Codigo = codigo;
         sucursal.Nombre = nombre;
@@ -102,10 +111,20 @@ public sealed class SucursalService : ISucursalService
         sucursal.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
         sucursal.FechaActualizacion = DateTime.UtcNow;
         _repository.Update(sucursal);
-        await _repository.SaveChangesAsync();
-        var ownership = empresaAnterior == empresaId ? $"EmpresaId={empresaId}" : $"reasignación EmpresaId {empresaAnterior?.ToString() ?? "NULL"}->{empresaId}";
-        await _auditoria.RegistrarAsync(ModuloSistema.Sucursales, AccionPermiso.Editar,
-            $"Sucursal actualizada: {sucursal.Codigo} - {sucursal.Nombre}; {ownership}", sucursal.Id, entidad: "Sucursal");
+        if (!await _repository.SaveChangesAsync())
+            throw new BusinessRuleException("No se pudo actualizar la sucursal.");
+
+        var ownership = empresaAnterior == empresaId
+            ? $"EmpresaId={empresaId}"
+            : $"reasignación EmpresaId {empresaAnterior?.ToString() ?? "NULL"}->{empresaId}";
+        await _auditoria.RegistrarAsync(
+            ModuloSistema.Sucursales,
+            AccionPermiso.Editar,
+            $"Sucursal actualizada: {sucursal.Codigo} - {sucursal.Nombre}; {ownership}",
+            sucursal.Id,
+            entidad: "Sucursal",
+            valoresAnteriores: new { EmpresaId = empresaAnterior, Codigo = codigoAnterior, Nombre = nombreAnterior },
+            valoresNuevos: new { sucursal.EmpresaId, sucursal.Codigo, sucursal.Nombre });
         return ToDto(sucursal);
     }
 
@@ -119,7 +138,9 @@ public sealed class SucursalService : ISucursalService
         sucursal.ActualizadoPorNombreUsuario = _currentUser.NombreUsuario;
         sucursal.FechaActualizacion = DateTime.UtcNow;
         _repository.Update(sucursal);
-        await _repository.SaveChangesAsync();
+        if (!await _repository.SaveChangesAsync())
+            throw new BusinessRuleException("No se pudo cambiar el estado de la sucursal.");
+
         await _auditoria.RegistrarAsync(ModuloSistema.Sucursales, activa ? AccionPermiso.Activar : AccionPermiso.Desactivar,
             $"Sucursal {(activa ? "activada" : "desactivada")}: {sucursal.Codigo} - {sucursal.Nombre}; EmpresaId={sucursal.EmpresaId?.ToString() ?? "NULL"}", sucursal.Id, entidad: "Sucursal");
         return ToDto(sucursal);
