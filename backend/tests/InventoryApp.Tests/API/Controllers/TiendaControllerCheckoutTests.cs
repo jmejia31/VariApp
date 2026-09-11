@@ -172,6 +172,50 @@ public sealed class TiendaControllerCheckoutTests
     }
 
     [Fact]
+    public async Task ValidarCheckout_NormalizaNullYVacioAntesDeAcumularCantidadContraStock()
+    {
+        var productos = new Mock<IProductoService>(MockBehavior.Strict);
+        productos.Setup(service => service.GetByIdAsync(701)).ReturnsAsync(new ProductoDto
+        {
+            Id = 701,
+            Nombre = "Variante sin etiquetas",
+            Activo = true,
+            Variantes =
+            {
+                new ProductoVarianteDto
+                {
+                    Id = 7011,
+                    ProductoId = 701,
+                    ModeloId = null,
+                    ModeloNombre = null,
+                    MarcaNombre = null,
+                    Sku = "NULL-701",
+                    Cantidad = 5,
+                    Precio = 50m,
+                    Activo = true
+                }
+            }
+        });
+        var controller = CrearController(productos);
+
+        var result = await controller.ValidarCheckout(new ValidarCheckoutTiendaDto
+        {
+            Items =
+            {
+                new CheckoutTiendaItemRequestDto { ProductoId = 701, ModeloId = null, ModeloNombre = null, MarcaNombre = null, Unidades = 3 },
+                new CheckoutTiendaItemRequestDto { ProductoId = 701, ModeloId = null, ModeloNombre = "", MarcaNombre = "", Unidades = 3 }
+            }
+        });
+
+        var conflict = Assert.IsType<ConflictObjectResult>(result);
+        var response = Assert.IsType<ApiResponse<CheckoutTiendaValidadoDto>>(conflict.Value);
+        Assert.False(response.Success);
+        Assert.Contains("existencia", response.Message, StringComparison.OrdinalIgnoreCase);
+        productos.Verify(service => service.GetByIdAsync(701), Times.Once);
+        productos.VerifyNoOtherCalls();
+    }
+
+    [Fact]
     public async Task ValidarCheckout_RechazaCantidadFueraDeLimiteAntesDeConsultarCatalogo()
     {
         var productos = new Mock<IProductoService>(MockBehavior.Strict);
