@@ -1,6 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { catchError, map, of } from 'rxjs';
 import { PermisoService } from '../../services/permiso.service';
+import { TenantContextService } from './tenant-context.service';
 
 const RUTAS_PROTEGIDAS = [
   { ruta: '/dashboard', modulo: 'Dashboard', accion: 'Ver' },
@@ -35,11 +36,26 @@ export class PermisosRuntimeService {
   readonly esAdministrador = this._esAdministrador.asReadonly();
   readonly cargado = this._cargado.asReadonly();
 
-  constructor(private permisoService: PermisoService) {}
+  constructor(
+    private permisoService: PermisoService,
+    private tenantContext: TenantContextService
+  ) {}
 
   cargar() {
+    if (!this.tenantContext.tieneContextoVerificado()) {
+      this.limpiar();
+      return of(false);
+    }
+
     return this.permisoService.getMisPermisos().pipe(
       map((res) => {
+        // Si el contexto fue revocado/cambiado durante la petición, no aceptar
+        // permisos obtenidos para una sesión sin tenant efectivo.
+        if (!this.tenantContext.tieneContextoVerificado()) {
+          this.limpiar();
+          return false;
+        }
+
         this._permisos.set(new Set(res.data.permisos));
         this._esAdministrador.set(res.data.esAdministrador);
         this._cargado.set(true);
@@ -61,11 +77,13 @@ export class PermisosRuntimeService {
   }
 
   puede(modulo: string, accion: string): boolean {
+    if (!this.tenantContext.tieneContextoVerificado()) return false;
     if (this._esAdministrador()) return true;
     return this._permisos().has(`${modulo}:${accion}`);
   }
 
   rutaInicialPermitida(): string | null {
+    if (!this.tenantContext.tieneContextoVerificado()) return null;
     if (this._esAdministrador()) return '/dashboard';
     return RUTAS_PROTEGIDAS.find(item =>
       !('soloAdministrador' in item) && this.puede(item.modulo, item.accion)
