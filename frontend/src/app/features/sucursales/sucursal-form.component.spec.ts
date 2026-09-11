@@ -81,6 +81,11 @@ describe('SucursalFormComponent tenant ownership', () => {
 
     expect(component.empresasError()).toBe('No se pudieron cargar las empresas. Reintenta antes de guardar.');
     expect(component.form.controls.empresaId.disabled).toBe(true);
+
+    component.submit();
+
+    expect(sucursalService.create).not.toHaveBeenCalled();
+    expect(sucursalService.update).not.toHaveBeenCalled();
   });
 
   it('does not write a sucursal without tenant ownership', () => {
