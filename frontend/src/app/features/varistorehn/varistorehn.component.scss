@@ -183,21 +183,6 @@ dialog::backdrop { background: color-mix(in srgb, var(--color-heading) 55%, tran
 .checkout-preview p { color: var(--color-text-muted); font-size: .68rem; }
 .checkout-preview pre { white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; font-size: .65rem; line-height: 1.6; }
 .checkout-preview > strong { display: block; margin-block: 8px; }
-.detail-dialog { position: fixed; width: min(880px, calc(100% - 30px)); max-width: 100%; max-height: 90dvh; overflow: auto; border-radius: var(--radius); }
-.detail-close { position: absolute; top: 13px; right: 13px; z-index: 3; }
-.detail-layout { display: grid; grid-template-columns: 1fr 1fr; }
-.detail-media { min-width: 0; min-height: 400px; padding: 35px 25px; display: flex; flex-direction: column; justify-content: center; background: var(--store-soft); }
-.detail-media img { width: 100%; height: 310px; object-fit: contain; }
-.gallery-controls { margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 15px; font-size: .7rem; }
-.detail-body { padding: 42px 30px 30px; }
-.detail-body h2 { margin-top: 9px; font-size: 1.75rem; letter-spacing: -.04em; }
-.detail-body > p:not(.eyebrow) { margin-top: 17px; color: var(--color-text-muted); font-size: .78rem; line-height: 1.75; }
-.detail-body label { display: block; margin: 20px 0 8px; font-size: .69rem; font-weight: 800; }
-.detail-body select { width: 100%; }
-.detail-stock { display: block; margin-top: 12px; font-size: .67rem; }
-.detail-stock.off { color: var(--color-text-muted); }
-.detail-price { display: block; margin-top: 20px; font-size: 1.7rem; letter-spacing: -.04em; }
-.detail-body .full { margin-top: 17px; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
