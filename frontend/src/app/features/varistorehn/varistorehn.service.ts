@@ -86,6 +86,8 @@ export class VaristorehnService {
     const referencias = items.map(item => ({
       productoId: item.productoId,
       modeloId: item.modeloId,
+      modeloNombre: item.modeloNombre,
+      marcaNombre: item.marcaNombre,
       unidades: item.unidades
     }));
     return this.http.post<ApiResponse<CheckoutValidado>>(this.urlValidarCheckout, { items: referencias }).pipe(
