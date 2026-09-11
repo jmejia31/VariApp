@@ -1,122 +1,105 @@
 # VariStoreHn — Fase 5: Carrito
 
-Estado: **COMPLETADA / REAUDITADA / HARDENED**  
-Plan Maestro: v1.1 — Septiembre 2026  
-Commit funcional certificado: `6c33aca4bbb2620a19f50f936786ffbadbc3d7e7`
+Plan Maestro: v1.1 — Septiembre 2026.
 
-## Objetivo
+## Estado vigente
 
-Implementar un carrito real, persistente y consistente para todas las páginas públicas de VariStoreHn. La Fase 5 elimina las implementaciones paralelas de estado/localStorage que existían en home, categorías, catálogo y detalle, y establece `VaristorehnCarritoService` como única fuente de verdad en frontend.
+**COMPLETADA / REAUDITADA / HARDENED.**
 
-## Alcance implementado
+La Fase 5 establece un carrito real, persistente y consistente para todas las páginas públicas de VariStoreHn. La reauditoría final previa a Fase 6 se sigue en #3372 / PR #3373 y tiene una regla explícita: **no activar ni implementar Fase 6**.
+
+## Arquitectura vigente
 
 - Ruta canónica pública `/varistorehn/carrito`.
-- Página de carrito independiente y responsive.
-- Store singleton `VaristorehnCarritoService` compartido por:
-  - `/varistorehn`
-  - `/varistorehn/categorias`
-  - `/varistorehn/categoria/:slug`
-  - `/varistorehn/productos`
-  - `/varistorehn/producto/:slug`
-  - `/varistorehn/carrito`
-- Agregar desde catálogo y detalle.
-- Incrementar/disminuir unidades.
-- Edición numérica directa con clamp `1..stock`.
-- Eliminación explícita de línea y vaciado completo.
-- Subtotal, total de línea y total del carrito derivados del mismo estado. En Fase 5 `total === subtotal` porque entrega/impuestos pertenecen a Fase 6 y no se inventan cargos.
-- Persistencia por empresa y fuente (`bd`/`demo`).
+- `VaristorehnCarritoService` es la única fuente de verdad del carrito.
+- Store compartido por home, categorías, categoría, catálogo, detalle y página de carrito.
+- El home **no contiene drawer de carrito**, ni estado de carrito paralelo, ni acciones de cierre de compra.
+- Todos los accesos al carrito navegan a `/varistorehn/carrito`.
+- El enlace legado `/varistorehn?carrito=1` solo existe como migración compatible: redirige con `replaceUrl` a la ruta canónica y no abre una segunda superficie.
+- No existe `/varistorehn/checkout` ni `/varistorehn/pedido/:id` en `app.routes.ts`.
+- No se ejecuta `crearCheckoutTarjeta`, creación de pedido ni redirección de pago desde Fases 0–5.
+
+## Estado y persistencia
+
+- Agregar desde catálogo y detalle usa el store central.
+- Incrementar/disminuir unidades sin llegar a cero por decremento.
+- Edición directa con clamp `1..stock`.
+- Eliminación explícita y vaciado completo.
+- Total de línea, subtotal y total del carrito se derivan del mismo estado.
+- En Fase 5 `total === subtotal`: entrega/impuestos pertenecen al cierre posterior y no se inventan cargos.
+- Persistencia separada por empresa y fuente (`bd`/`demo`).
 - `localStorage` conserva únicamente `{ productoId, modeloClave, unidades }`.
-- Al hidratar, precio, oferta, stock, disponibilidad, imagen y datos comerciales se reconstruyen con el catálogo público actual mediante `restaurarCarrito`.
-- Variantes desaparecidas/inactivas se eliminan del carrito al revalidar.
-- Cantidades mayores al inventario actual se reducen al stock vigente.
-- El detalle descuenta las unidades ya existentes al calcular `stockRestante`; selector y CTA reflejan ese valor real.
+- Precio, oferta, stock, disponibilidad, imagen y datos comerciales se reconstruyen desde el catálogo público vigente mediante `restaurarCarrito`.
+- Variante desaparecida/inactiva se retira al revalidar.
+- Cantidad superior al inventario actual se reduce al stock vigente.
+- La falla del catálogo real no sustituye silenciosamente datos con fixtures ni sobrescribe el carrito persistido como si se hubiera validado.
+- El detalle calcula `stockRestante()` descontando lo ya agregado.
 - Header usa el mismo store para contador/subtotal.
-- Carrito vacío presenta CTA para seguir comprando y no ofrece navegación a un checkout todavía inexistente.
-- Estados loading/error/success y empty derivado del store.
-- La falla al consultar el catálogo no sustituye silenciosamente datos reales por fixtures ni borra el `localStorage` original.
-- Tema visual basado exclusivamente en tokens globales configurados por el sistema/BD.
 
-## Reauditoría de Fase 4 durante esta fase
+## UX vigente
 
-Antes y durante Fase 5 se volvió a auditar el detalle contra el Plan Maestro. La ruta canónica, endpoint por slug, galería multiimagen, swipe, lightbox fotográfico, precio/promoción, SKU, disponibilidad, cantidad, CTA, WhatsApp, descripción, características, relacionados, breadcrumbs, estados controlados y responsive permanecen operativos.
+- Página independiente y responsive.
+- Estado `loading`, `error`, `success` y vacío derivado del store.
+- Carrito vacío ofrece seguir comprando y no enlaza a un checkout inexistente.
+- La UI pública no muestra lenguaje interno como “Fase 6”.
+- El resumen advierte que el carrito no reserva inventario y que cargos posteriores, si aplican, se confirmarán antes de finalizar.
+- Touch targets principales de al menos 44 px.
+- Tema visual exclusivamente mediante tokens globales configurados por el sistema/BD.
 
-Se detectaron y corrigieron dos brechas/hardenings reales:
+## Deuda encontrada en la reauditoría final — corregida
 
-1. Si ya existían unidades de la misma variante en el carrito, el HTML del selector mostraba como `max` el stock total aunque la lógica impedía sobrepasar el remanente. Ahora input, botón `+` y CTA usan `stockRestante()`.
-2. El home heredado todavía podía abrir un quick-detail en `dialog`. Las acciones de producto del home ahora navegan a `VARISTOREHN_PATHS.producto(producto.slug)` y la guarda de Fase 4 prohíbe restaurar `showModal()` como experiencia principal. El detalle canónico sigue siendo la página independiente.
+La segunda auditoría encontró deuda real que no debía quedar oculta aunque los tests anteriores estuvieran verdes:
 
-La guarda de Fase 4 también se actualizó para exigir el carrito central en vez de una persistencia local paralela dentro del detalle.
+1. **Drawer duplicado en el home.** Seguía coexistiendo con `/varistorehn/carrito`; fue retirado completamente.
+2. **Lógica heredada que adelantaba Fase 6.** El home conservaba “Pedir por WhatsApp”, “Continuar con tarjeta”, creación de checkout/idempotencia y validación/redirección de pago para el carrito completo. Esa lógica fue eliminada; no se completó ni trasladó.
+3. **CSS muerto.** Se retiraron estilos del drawer y selectores responsive del quick-detail ya eliminado en Fase 4.
+4. **Estado muerto.** Se retiró `puedeContinuarCheckout` de la página del carrito porque no existe checkout activo en Fase 5.
+5. **Copy interno.** Se eliminó de la UI pública cualquier referencia al número de fase del roadmap.
+6. **Documentación histórica.** Fases 1–4 se sincronizaron para distinguir sus límites cronológicos originales del estado canónico actual.
+7. **Regresión insuficiente contra reaparición del drawer.** Las guardas y Playwright ahora prohíben explícitamente una segunda superficie de carrito y acciones de pago/pedido en el home.
 
-## Definition of Done de Fase 5
+## Definition of Done vigente
 
-- [x] El carrito tiene una ruta pública independiente y compartible.
-- [x] Existe una sola lógica central de carrito.
-- [x] Agregar desde catálogo usa el store central.
-- [x] Agregar desde detalle usa el store central.
-- [x] Se puede incrementar y disminuir sin llegar a cero.
-- [x] Se puede eliminar una línea explícitamente.
-- [x] Se puede vaciar el carrito.
-- [x] Cantidades nunca superan el stock vigente.
-- [x] Subtotal, total de línea y total del carrito se recalculan al editar.
-- [x] Contador y subtotal del header provienen del mismo estado.
-- [x] Persistencia sobrevive recargas.
-- [x] Persistencia guarda referencias mínimas, no precios ni stock como autoridad.
-- [x] Rehidratación recalcula precio/stock usando la fuente pública actual.
-- [x] Estado vacío tiene acción para continuar comprando.
-- [x] Un carrito vacío no ofrece continuar a checkout.
-- [x] Sin dependencias/guards administrativos.
-- [x] Responsive y touch targets de al menos 44 px.
-- [x] Tema gobernado por tokens globales.
-- [x] `npm ci` + lint/TypeScript + guardas Fases 1–5.
-- [x] Build de producción.
-- [x] Playwright Fases 1–5.
-- [x] Validación post-merge sobre `Desarrollo`.
+- [x] Ruta pública independiente del carrito.
+- [x] Una sola lógica central de carrito.
+- [x] Agregar desde catálogo y detalle.
+- [x] Incrementar, disminuir, editar, eliminar y vaciar.
+- [x] Cantidad limitada al stock vigente.
+- [x] Totales recalculados desde el estado único.
+- [x] Header sincronizado.
+- [x] Persistencia tras recarga.
+- [x] Persistencia mínima, sin precio/stock como autoridad.
+- [x] Rehidratación contra catálogo público actual.
+- [x] Vacío con CTA útil y sin checkout.
+- [x] Sin guards/componentes administrativos.
+- [x] Responsive, touch targets y tema global.
+- [x] Home sin carrito duplicado.
+- [x] Fases 0–5 sin ejecución de checkout/pedido.
+- [x] Guardas acumuladas Fases 1–5.
+- [x] Playwright acumulado Fases 1–5.
 
-## Evidencia candidata
+## Evidencia histórica
 
-Workflow acumulado de Fase 5: `34598925462` — **SUCCESS**.
+Implementación inicial Fase 5: PR #3369. Commit funcional certificado `6c33aca4bbb2620a19f50f936786ffbadbc3d7e7`. Candidato `34598925462` — **success**. Post-merge exacto `34599707045` — **success**. En ese cierre: 37/37 pruebas de navegador (4 + 8 + 8 + 11 + 6).
 
-- Fase 1: 4/4 Playwright.
-- Fase 2: 8/8 Playwright.
-- Fase 3: 8/8 Playwright.
-- Fase 4: 11/11 Playwright.
-- Fase 5: 6/6 Playwright.
-- Total acumulado: **37/37 pruebas de navegador**.
-- Lint/TypeScript y guardas Fases 1–5: verde.
-- Build producción: verde.
-- Artefacto: `10262914007`.
+Hardening adicional de Fase 4 posterior a Fase 5: PR #3370, commit `94fefb309c2ae498c25d25ece83f034f80ccb168`; Fase 4 run `34601213518` — **success** y Fase 5 run `34601213561` — **success**.
 
-## Certificación post-merge exacta
+La suite específica de Fase 5 se amplía en la reauditoría final de 6 a **7 escenarios**, añadiendo la prohibición runtime del drawer/pago heredado y la migración de `?carrito=1` a la ruta canónica. Con las suites existentes, el total esperado del gate acumulado pasa de 37 a **38 escenarios**.
 
-Workflow `34599707045` ejecutado sobre el commit funcional exacto `6c33aca4bbb2620a19f50f936786ffbadbc3d7e7` en `Desarrollo`: **SUCCESS**.
+## Presupuesto del SCSS
 
-- Checkout de GitHub confirma SHA exacto `6c33aca4bbb2620a19f50f936786ffbadbc3d7e7`.
-- Lint/TypeScript + guardas Fases 1–5: verde.
-- Build producción: verde.
-- Fase 1: 4/4 Playwright.
-- Fase 2: 8/8 Playwright.
-- Fase 3: 8/8 Playwright.
-- Fase 4: 11/11 Playwright.
-- Fase 5: 6/6 Playwright.
-- Total post-merge: **37/37 pruebas de navegador**.
-- Artefacto post-merge: `10263229861`.
+La limpieza del drawer/CSS muerto redujo `varistorehn.component.scss` por debajo de su situación histórica y el build del candidato de reauditoría final terminó **success sin el warning de presupuesto específico de VariStoreHn**. No se modificó el umbral para conseguir ese resultado.
 
-## Deuda transversal observada, no ocultada
+## Deuda transversal del repositorio
 
-El build continúa reportando warnings preexistentes/transversales ajenos al DoD funcional de Fase 5, entre ellos el presupuesto del SCSS heredado del home (`17.10 kB` frente a warning de `16 kB`) y diagnósticos Angular de otros módulos. `npm ci` también reporta vulnerabilidades de dependencias del repositorio. No se aumentaron presupuestos ni se suprimieron diagnósticos para forzar un resultado verde.
+`npm ci` del repositorio continúa informando vulnerabilidades/deprecaciones compartidas y el build muestra warnings de otros módulos. No son introducidos por Fases 0–5 ni se corrigen desde esta auditoría para evitar interferir con trabajo ajeno. Se mantienen separados de la certificación específica de VariStoreHn y no se silencian.
 
 ## Fuera de alcance respetado
 
-- Formulario checkout, datos del cliente, entrega y confirmación: Fase 6.
-- Crear número/pedido real: Fase 6.
-- Limpiar carrito después de pedido confirmado: Fase 6.
-- Reglas temporales avanzadas de promoción/inventario: Fase 9.
-- Pulido global de todas las pantallas del MVP: Fase 10.
+- Formulario de checkout y datos del cliente: Fase 6.
+- Entrega y resumen final de checkout: Fase 6.
+- Creación/confirmación de pedido real: Fase 6.
+- Redirección de pago del carrito: Fase 6 según la integración real que se defina.
+- Limpieza del carrito después de pedido confirmado: Fase 6.
 
-## Gates permanentes
-
-- `frontend/scripts/validate-varistorehn-fase5.mjs`
-- `frontend/e2e/varistorehn-fase5.spec.ts`
-- `.github/workflows/varistorehn-fase5-regression.yml`
-
-Fase 5 queda cerrada únicamente después de la certificación post-merge descrita arriba.
+**Fase 6 no ha sido iniciada ni activada.**
