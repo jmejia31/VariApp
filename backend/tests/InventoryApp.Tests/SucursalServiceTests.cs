@@ -25,7 +25,7 @@ public class SucursalServiceTests
     [Fact]
     public async Task CreateAsync_NormalizaCodigo_Y_GuardaAuditoriaCreacion()
     {
-        _repoMock.Setup(r => r.ExisteCodigoAsync("TGU-01", null)).ReturnsAsync(false);
+        _repoMock.Setup(r => r.ExisteCodigoAsync("TGU-01", 1, null)).ReturnsAsync(false);
         _repoMock.Setup(r => r.SaveChangesAsync()).ReturnsAsync(true);
 
         Sucursal? creada = null;
@@ -56,7 +56,7 @@ public class SucursalServiceTests
     [Fact]
     public async Task CreateAsync_CodigoDuplicado_LanzaBusinessRule()
     {
-        _repoMock.Setup(r => r.ExisteCodigoAsync("TGU-01", null)).ReturnsAsync(true);
+        _repoMock.Setup(r => r.ExisteCodigoAsync("TGU-01", 1, null)).ReturnsAsync(true);
 
         await Assert.ThrowsAsync<BusinessRuleException>(() =>
             _service.CreateAsync(new CreateSucursalDto
@@ -117,7 +117,7 @@ public class SucursalServiceTests
             Activa = false
         };
         _repoMock.Setup(r => r.GetByIdAsync(11)).ReturnsAsync(sucursal);
-        _repoMock.Setup(r => r.ExisteCodigoAsync("TGU-02", 11)).ReturnsAsync(false);
+        _repoMock.Setup(r => r.ExisteCodigoAsync("TGU-02", 1, 11)).ReturnsAsync(false);
         _repoMock.Setup(r => r.SaveChangesAsync()).ReturnsAsync(true);
 
         var resultado = await _service.UpdateAsync(11, new UpdateSucursalDto
