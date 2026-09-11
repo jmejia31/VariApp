@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-4-C-1-PERSISTENCE-MIGRATION-DECISION-J1",
+  "taskId": "N5.4.C.1.PERSISTENCE_MIGRATION_DECISION",
+  "workerId": "J1",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/qa/N5_4_C_PERSISTENCE_MIGRATION_DECISION.md",
+  "prompt": "Use only docs/VAEP_AUTHORITY.md, live Desarrollo, the original N5.4.C COLA contract, and the six accepted N5.4.B contract documents. Determine the exact persistence/EF/migration/data impact required for the source-backed N5.4 profitability contract. Inspect existing Venta/VentaDetalle fields, EF mappings, migration history and data-integrity requirements. Do not invent or persist unresolved margin-denominator, header-discount-allocation, or sales financial-disclosure semantics. If existing persistence already satisfies the safe contract, write a grounded N/A decision with migration/backfill/reconciliation/rollback evidence in docs/qa/N5_4_C_PERSISTENCE_MIGRATION_DECISION.md. If a coherent source-backed schema fix is actually required, keep it narrowly within N5.4.C and include proportional tests. Never touch Produccion. Desarrollo only.",
+  "primaryBaseHead": "6b72acaec0ccb76438c72cb73f7a692095251bc6"
+}

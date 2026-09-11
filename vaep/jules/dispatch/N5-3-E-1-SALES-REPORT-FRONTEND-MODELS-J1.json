@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-3-E-1-SALES-REPORT-FRONTEND-MODELS-J1",
+  "taskId": "N5.3.E.1.SALES_REPORT_FRONTEND_MODELS",
+  "workerId": "J1",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/core/models/reporte-ventas.models.ts",
+  "prompt": "After N5.3.D is LISTO_REAL, define typed frontend contracts for sales report filters, summary/detail rows and paging that mirror the accepted backend contract: period, seller, customer, branch, category, product, variant, brand, model, color, size, page/pageSize and sort. No HTTP, routing or UI changes. Desarrollo only.",
+  "primaryBaseHead": "4c8d113228a9922bbf30c2ff99fd46464217b370"
+}

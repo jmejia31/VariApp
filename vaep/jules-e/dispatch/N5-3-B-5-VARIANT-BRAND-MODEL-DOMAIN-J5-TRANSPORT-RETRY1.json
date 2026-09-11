@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-3-B-5-VARIANT-BRAND-MODEL-DOMAIN-J5-TRANSPORT-RETRY1",
+  "taskId": "N5.3.B.5.VARIANT_BRAND_MODEL_DOMAIN",
+  "workerId": "J5",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Application/DTOs/ReporteVentasFiltroDto.VarianteMarcaModelo.cs",
+  "prompt": "Use docs/VAEP_AUTHORITY.md, original COLA N5.3.B and accepted N5.3.A preflight. Implement only variant/brand/model filter contracts in backend/src/Application/DTOs/ReporteVentasFiltroDto.VarianteMarcaModelo.cs as a partial sales-report filter facet. Keep master-identity filters distinct from historical snapshot display semantics; do not silently redefine history. No persistence/API/frontend or other facet edits. Run proportional backend compile/tests and two self-reviews. Desarrollo only; no main/Production/secrets/PR merge. This is a transport-only retry of the same semantic task after the prior dispatch transport did not produce an authoritative Jules session; do not treat it as R2.",
+  "primaryBaseHead": "96d9d2ec5da05d875fd97fa22b0a66f8c0046c57"
+}

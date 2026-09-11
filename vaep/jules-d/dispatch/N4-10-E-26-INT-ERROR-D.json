@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-E-26-INT-ERROR-D",
+  "taskId": "N4.10.E.26.INTEGRATION_ERROR_TESTS",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.integration-error.spec.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. Add integration tests for backend error response to stable user-facing error state using HttpTestingController. Production files are read-only. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+  "primaryBaseHead": "2071ef4400da95085781aa217178ae41e66f1dde"
+}

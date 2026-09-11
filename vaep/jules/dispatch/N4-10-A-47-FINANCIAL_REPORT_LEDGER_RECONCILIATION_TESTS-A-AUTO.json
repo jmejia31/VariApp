@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-A-47-FINANCIAL_REPORT_LEDGER_RECONCILIATION_TESTS-A-AUTO",
+  "taskId": "N4.10.A.47.FINANCIAL_REPORT_LEDGER_RECONCILIATION_TESTS",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportLedgerReconciliationTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportLedgerReconciliationTests.cs. Add focused backend tests that current report/accounting aggregates reconcile with the ledger/source entities already used by the implementation, without inventing new data sources or APIs. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "3f763cb42fdae8632e730632bfdfac37002d7fb5"
+}

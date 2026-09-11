@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-E-6-FINANCIAL-STATEMENT-SERVICE-TESTS-B-MATERIAL",
+  "taskId": "N4.10.E.6.FINANCIAL_STATEMENT_SERVICE_TESTS",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/services/estado-financiero.service.spec.ts only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. NEXT_SAFE_PREWORK for N4.10.E only; CURRENT_PARENT remains N4.10.D. Own ONLY frontend/src/app/services/estado-financiero.service.spec.ts. Add HttpClient tests for the approved EstadoFinancieroService contract: GET /estados-financieros/{tipo}; periodoContableId-only; fechaDesde+fechaHasta; omission of undefined params; ApiResponse<EstadoFinanciero> passthrough; no mutation/export behavior. Follow asiento-contable.service.spec.ts patterns. It is acceptable that the target service is still an unintegrated sibling artifact; do not modify it. TWO independent self-reviews.",
+  "primaryBaseHead": "e6e367f17e5bfb03def27f51fa6b1f0c35b94281"
+}

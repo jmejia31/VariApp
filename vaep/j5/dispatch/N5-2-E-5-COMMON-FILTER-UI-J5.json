@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-2-E-5-COMMON-FILTER-UI-J5",
+  "taskId": "N5.2.E.5.COMMON_FILTER_FRONTEND_UX",
+  "workerId": "J5",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/features/reportes-inventario/shared/**;frontend/src/app/core/models/reporte-inventario.models.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md and the accepted N5.2 common request envelope first. Implement only reusable frontend inventory-report filters/paging/loading/empty/error primitives and common typed models. Do not own facet-specific tables/query semantics or report-center navigation. Minimum coherent code plus applicable frontend tests; two self-reviews; Desarrollo only; no Production, secrets or PR merge.",
+  "primaryBaseHead": "9ef9c40b2508a3be28dbfb3535a912b30a2b2e84"
+}

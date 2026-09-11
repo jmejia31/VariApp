@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-C-N45A-FRONTEND-CONTRACT-PREFLIGHT-C1-20260903T0932HND",
+  "taskId": "N4.5.A.FRONTEND_API_CONTRACT_PREFLIGHT",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "a85396b8e5d6ed579f2815cb7a193f45ed3d54e0",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/**/cuentas*; frontend/src/app/**/compras*; frontend/src/app/services/**; frontend/src/app/core/models/**; backend/src/API/Controllers/**Cuenta*Pagar*; backend/src/API/Controllers/**Compra*",
+  "prompt": "SAFE PIPELINE PREWORK ONLY for next dependency-valid parent N4.5.A CxP preflight while N4.4.H remains CURRENT_PARENT. Audit frontend plus HTTP-contract surface for cuentas por pagar integrated with compras: routed pages, services, models, endpoint contracts, navigation, empty/error states and purchase linkage. Identify canonical implementation versus missing/duplicate surfaces and exact acceptance seams. Exclusive lane C: frontend/API-contract inspection only; do not edit backend domain/persistence, RBAC/workflows/docs/TASKS/CHANGELOG, do not implement N4.5.B+ and do not promote N4.5.A. Patch only a tiny preflight-local evidence artifact if genuinely required; otherwise return grounded no-patch findings. No main, Production, branches, PR, merge, secrets or deploy. Emit two independent substantive SELF_REVIEW_PASS markers before COMPLETED."
+}

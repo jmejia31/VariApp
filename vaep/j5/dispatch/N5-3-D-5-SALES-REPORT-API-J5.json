@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-3-D-5-SALES-REPORT-API-J5",
+  "taskId": "N5.3.D.5.SALES_REPORT_API",
+  "workerId": "J5",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/API/Controllers/ReportesVentasController.cs",
+  "prompt": "After the N5.3.D service contract/implementation are REVIEW_FIRST accepted, expose bounded sales reporting summary/detail endpoints following existing report-controller patterns. Preserve authorization and fail-closed row scope; do not implement export (N5.3.H), frontend, migrations or invent new permission symbols. Run proportional controller tests and two self-reviews. Desarrollo only.",
+  "primaryBaseHead": "46bb192971b32bb80978f2bed7efaf6d33d686fe"
+}

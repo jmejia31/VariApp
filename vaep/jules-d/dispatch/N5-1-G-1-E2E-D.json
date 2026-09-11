@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-1-G-1-E2E-D",
+  "taskId": "N5.1.G.1.REPORT_CENTER_E2E_REGRESSION",
+  "workerId": "J4",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/e2e/fase6-reportes-administrativos.spec.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md and accepted N5.1 evidence first. Extend the existing report-admin E2E suite for the independent report-center route and preserved authorization contract without deleting regression coverage. Include direct navigation, allowed/forbidden cases feasible with fixtures, and stale-response non-regression where applicable. Do not weaken expectations. Run targeted Playwright or document an exact environmental blocker, plus two self-reviews.",
+  "primaryBaseHead": "dd78d11311dc29e452b6729211f7ba110750c2e1"
+}

@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-G-8-ROUTE-REG-D",
+  "taskId": "N4.10.G.8.ROUTE_REGRESSION",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/estados-financieros.route-regression.spec.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. After N4.10.F LISTO, add route regression for component path and permission metadata. No main/production/merge/deploy/workflow/manifest changes. TWO self-reviews.",
+  "primaryBaseHead": "44337c56153fb8b7e902ec0822fe301388b0dc2c"
+}

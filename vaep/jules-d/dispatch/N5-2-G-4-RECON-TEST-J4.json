@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-2-G-4-RECON-TEST-J4",
+  "taskId": "N5.2.G.4.RECONCILIATION_TEST_CI",
+  "workerId": "J4",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/API/Controllers/ReportesInventarioReconciliacion*Tests.cs",
+  "prompt": "Read docs/VAEP_AUTHORITY.md and canonical COLA N5.2.G. Own only reconciliation traceability/audit/contract regression coverage required by canonical N5.2.G. Do not own other facets. Desarrollo only; no Production, secrets or PR merge.",
+  "primaryBaseHead": "1ae998389d9938276f924a0df557d3669ec76464"
+}

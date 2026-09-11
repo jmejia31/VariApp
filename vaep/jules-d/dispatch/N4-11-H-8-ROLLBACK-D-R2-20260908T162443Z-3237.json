@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-11-H-8-ROLLBACK-D-R2-20260908T162443Z-3237",
+  "taskId": "N4.11.H.8.ROLLBACK_RUNBOOK",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 2,
+  "fileScopeHint": "docs/N4.11_CENTROS_COSTO_ROLLBACK.md",
+  "prompt": "After N4.11.G LISTO_REAL, document scoped rollback boundaries and verification; Desarrollo only; two self-reviews.\n\nR2 RCA: PATCH_BASE_CONTROL_PLANE_DIVERGENCE actual=00900fcb67ad887ab73dd01d1575afce130747be requested=016d9829f2fc5e3351887360dbd6f0adf5403a65. Re-run the same material scope from the current Desarrollo checkout; do not expand scope, touch control-plane files, or claim integration.",
+  "primaryBaseHead": "d8043aeb217c0e3411341111878b6fa87eb576be"
+}

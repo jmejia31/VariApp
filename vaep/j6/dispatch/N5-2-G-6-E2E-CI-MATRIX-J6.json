@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-2-G-6-E2E-CI-MATRIX-J6",
+  "taskId": "N5.2.G.6.CROSS_REPORT_E2E_CI_MATRIX",
+  "workerId": "J6",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/e2e/**/*reporte*;backend/tests/InventoryApp.Tests/API/Controllers/ReportesInventarioAuthorizationContractTests.cs",
+  "prompt": "Read docs/VAEP_AUTHORITY.md and canonical COLA N5.2.G. Own only cross-report E2E/security CI matrix coverage required by canonical N5.2.G; do not duplicate facet unit tests. Desarrollo only; no Production, secrets or PR merge.",
+  "primaryBaseHead": "c31cd899bffca987e8df2c9506b5b1a2d6ab929f"
+}

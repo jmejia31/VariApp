@@ -1,0 +1,6 @@
+{
+  "newDispatchAdmission": "OPEN",
+  "allowExistingActiveSessions": true,
+  "reason": "TASKS_FIRST_DIRECT_EXECUTION__JULES_OPTIONAL_EXPLICIT_OFFLOAD_ONLY__OPEN_ONLY__NO_FILLER",
+  "updatedAtUtc": "2026-09-11T15:32:29Z"
+}

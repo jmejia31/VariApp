@@ -1,0 +1,8 @@
+{
+  "dispatchId": "20260904T0212HND-N4_7_C-EF-MODEL-PROBE",
+  "parent": "N4.7.C",
+  "purpose": "QA_TAKEOVER EF current-model scaffold probe",
+  "baseSha": "ad2e964f16461bc53a64bfbc67c39eae62955836",
+  "nonProduction": true,
+  "noDeployment": true
+}

@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-2-G-3-STOCK-HEALTH-TEST-J3",
+  "taskId": "N5.2.G.3.STOCK_HEALTH_TEST_CI",
+  "workerId": "J3",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/API/Controllers/ReportesInventarioStockHealth*Tests.cs",
+  "prompt": "Read docs/VAEP_AUTHORITY.md and canonical COLA N5.2.G. Own only stock-health bounded-query, regression and performance-oriented test coverage required by canonical N5.2.G. Do not own other facets. Desarrollo only; no Production, secrets or PR merge.",
+  "primaryBaseHead": "0017e7c4bf1f5057b24fe2dd8d5ac30b1f4d017a"
+}

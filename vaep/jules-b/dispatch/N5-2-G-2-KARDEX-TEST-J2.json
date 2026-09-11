@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-2-G-2-KARDEX-TEST-J2",
+  "taskId": "N5.2.G.2.KARDEX_TEST_CI",
+  "workerId": "J2",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/API/Controllers/ReportesInventarioKardex*Tests.cs",
+  "prompt": "Read docs/VAEP_AUTHORITY.md and canonical COLA N5.2.G. Own only Kardex unit/contract/security regression coverage and CI evidence required by canonical N5.2.G. Preserve movement semantics and avoid overlap with other facets. Desarrollo only; no Production, secrets or PR merge.",
+  "primaryBaseHead": "bee1e30b03670f09d395c97118103789394092e0"
+}

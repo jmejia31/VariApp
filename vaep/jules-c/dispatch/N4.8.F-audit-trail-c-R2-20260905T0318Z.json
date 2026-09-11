@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.8.F-AUDIT-C-R2-20260905T0318Z",
+  "taskId": "N4.8.F",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "34001441e3ba2a8da30e78f1e7a336be2cf0a6f1",
+  "taskAttempt": 2,
+  "fileScopeHint": "backend/src/Infrastructure/Services/AsientoContableWriter.cs; backend/tests/InventoryApp.Tests/N48FContabilizacionAuditTrailTests.cs; no controller/RBAC files; no EF snapshot/migrations; no correlation middleware/Program.cs; no unrelated product changes",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first and obey it as the only operational authority. FINAL JULES R2 for CURRENT_PARENT N4.8.F accounting audit trail. ATTEMPT1 N4.8.F-AUDIT-C-20260905T0309Z was superseded after bootstrap/no-progress watchdog without ACTIVE_REAL evidence; do not revive or integrate it. Verify the automatic accounting write path records strict Finanzas/Crear audit evidence transactionally with useful entity/reference/value information and that audit persistence failure cannot silently certify success. Verify idempotent replay and avoid duplicate audit noise. Change only a demonstrated audit gap and add focused tests. Do not touch controller/RBAC, EF snapshot/migrations, correlation middleware/Program.cs. Run backend build/focused tests and two independent self-reviews. This is taskAttempt 2/2: unresolved blocker transfers to ChatGPT/VAEP QA_TAKEOVER; no R3. No branch/PR/push/merge/deploy; no main, Produccion, secrets, credentials, domains, certificates, production data or infrastructure. Return patch/artifact only."
+}

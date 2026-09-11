@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-11-E-4-ROUTE-D-R2-20260908T015556Z-4192",
+  "taskId": "N4.11.E.4.ROUTE_NAVIGATION",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 2,
+  "fileScopeHint": "frontend/src/app/app.routes.centros-costo.spec.ts",
+  "prompt": "After N4.11.D LISTO, add CentroCosto protected route/navigation contract.\n\nR2 RCA: PATCH_BASE_CONTROL_PLANE_DIVERGENCE actual=945d986c64ff00a75cf6f3023a68dffe4c5ef698 requested=a9833189a26c10a3eb37b2f839620b40233643ed. Re-run the same material scope from the current Desarrollo checkout; do not expand scope, touch control-plane files, or claim integration.",
+  "primaryBaseHead": "f2d99f630dc4f1a0ea4f689d3fcc63b5e4c11278"
+}

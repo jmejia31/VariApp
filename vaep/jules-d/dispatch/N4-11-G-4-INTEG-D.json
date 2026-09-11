@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-11-G-4-INTEG-D",
+  "taskId": "N4.11.G.4.INTEGRATION_REGRESSION",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N411GCentrosCostoIntegrationTests.cs",
+  "prompt": "Add scoped backend integration regression; Desarrollo only; two self-reviews.",
+  "primaryBaseHead": "4cae86e9ebc77100178647721cf709e461777a2b"
+}

@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.D-APPLICATION-USECASES-A-20260905T1442Z",
+  "taskId": "N4.9.D.APPLICATION_USECASES",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "4ba53fa5c4fee60dc49047202e4f90b99eb8a2f4",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Application only; PeriodoContable DTOs/contracts/use-cases strictly for N4.9.D; do not edit Infrastructure/API/Domain/migrations/frontend/tests",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.9.D. Implement the Application-layer slice for PeriodoContable only: dependency-valid DTOs/contracts/use-cases needed to create/list/get and close Abierto->Cerrado, preserving the domain prohibition on unauthorized retroactive changes. Follow existing architecture and naming. Scope exclusively backend/src/Application files directly required by this slice. Do not edit Infrastructure, API, Domain, migrations/snapshot, frontend, tests, workflows, secrets or manifests. Run focused build/tests if possible and perform two independent self-reviews. Do not branch/PR/push/merge/deploy; return patch/artifact for VAEP REVIEW_FIRST."
+}

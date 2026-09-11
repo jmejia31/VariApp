@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-3-C-3-REPORT-INDEX-MIGRATION-J6-PRESESSION-RECOVERY-20260909T2327Z",
+  "taskId": "N5.3.C.3.REPORT_INDEX_MIGRATION",
+  "workerId": "J6",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Infrastructure/Migrations/",
+  "prompt": "Use only docs/VAEP_AUTHORITY.md, original COLA N5.3.C, current Desarrollo and the REVIEW_FIRST accepted persistence-model state. This is a pre-session transport recovery of workflow run 34416338151, which was rejected by dispatch-admission before SESSION_CREATED; no Jules content attempt was consumed. As sole migration writer, reconcile the accepted VentaConfiguration and VentaDetalleConfiguration report-index model delta into one EF Core migration and the current model snapshot using the repository's canonical DbContext/migration tooling. Verify the effective model and physical/index history first so no existing index is duplicated. Keep only genuinely missing report-support index operations. Do not alter domain fields, report/API/frontend semantics, persistence configurations outside migration/snapshot reconciliation, historical migrations, Production DB, secrets, main or PR #2. Run proportional migration/model validation and backend build/tests that do not touch Production, record TESTS_EXECUTED, and perform two self-reviews. Return a non-empty patch anchored to this exact base and READY_FOR_VAEP only if the MASTER terminal contract is satisfied.",
+  "primaryBaseHead": "6d870154ea3d642d65a4ad1f4aec96bfa5b76c1b"
+}

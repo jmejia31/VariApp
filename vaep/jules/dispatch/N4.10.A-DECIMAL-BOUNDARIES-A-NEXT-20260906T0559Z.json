@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.10.A-DECIMAL-BOUNDARIES-A-NEXT-20260906T0559Z",
+  "taskId": "N4.10.A.30.FINANCIAL_REPORT_DECIMAL_BOUNDARY_TESTS",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportDecimalBoundaryTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. Material NEXT_SAFE work for N4.10.A only; do not promote N4.10.A while predecessor closure remains unresolved. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportDecimalBoundaryTests.cs. Add focused tests for decimal/money boundary behavior already exposed by current accounting/report implementation: zero, negative/credit where supported, maximum practical precision, aggregation rounding boundaries, and deterministic totals. Reuse existing contracts only; do not invent APIs or production behavior. Run focused tests/build when possible and perform TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "2c59cbb0e1739e7355f7feb2af696454a6b706ce"
+}

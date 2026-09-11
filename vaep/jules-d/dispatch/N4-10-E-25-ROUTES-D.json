@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-E-25-ROUTES-D",
+  "taskId": "N4.10.E.25.ROUTE_TESTS",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/estados-financieros.routes.spec.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. Add route contract tests for /estados-financieros, authGuard, permisoGuard and Finanzas/Ver metadata. Production routes are read-only. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+  "primaryBaseHead": "4ef8f4604e1c245d08fa310629a68d0477100e16"
+}

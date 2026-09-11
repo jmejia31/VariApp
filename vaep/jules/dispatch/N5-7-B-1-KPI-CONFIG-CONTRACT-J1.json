@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-7-B-1-KPI-CONFIG-CONTRACT-J1",
+  "taskId": "N5.7.B.1.KPI_CONFIG_CONTRACT",
+  "workerId": "J1",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Application/DTOs/DashboardKpiConfiguracionDto.cs",
+  "prompt": "Use only docs/VAEP_AUTHORITY.md, docs/VAEP_N5_7_DASHBOARD_KPI_PREFLIGHT.md and live Desarrollo. Implement exactly the N5.7.B domain/contract boundary for configurable dashboard KPIs in backend/src/Application/DTOs/DashboardKpiConfiguracionDto.cs. Define a closed source-backed metric-key catalog and configuration shape that supports enable/disable, ordering and an optional visible label. Unknown metric keys must fail closed. Preserve role/user scope and existing DashboardResumenDto authorities. Do not create arbitrary formulas, user SQL/expressions, new financial semantics, persistence, API endpoints or frontend changes in this task. Keep one writer and this single file scope. Run proportional backend compile/tests for the contract and perform two independent self-reviews. If a necessary contract detail cannot be derived from the accepted preflight/current code, report the evidence gap rather than inventing it. Do not touch main, Production, secrets or merge PR #2.",
+  "primaryBaseHead": "759932fd76633947b0f35ec80ff7983a361c449a"
+}

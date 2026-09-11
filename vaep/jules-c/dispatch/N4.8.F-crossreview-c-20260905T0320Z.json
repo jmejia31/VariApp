@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.8.F-CROSSREVIEW-C-20260905T0320Z",
+  "taskId": "N4.8.F.SUPPORT",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "31c21d43db9e4a5142cfff859013e8f956df7e60",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N48FContabilizacionSecurityAuditIntegrationTests.cs; READ_ONLY cross-review of ContabilizacionController.cs, AsientoContableWriter.cs, CorrelationIdMiddleware.cs, Program.cs and EF snapshot; no writes outside the single test file; no unrelated product changes",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. NEXT_SAFE after your prior N4.8.F audit-trail delivery reached COMPLETED and is now queued for VAEP REVIEW_FIRST. Stay productive without waiting for review: perform a read-only cross-review of the current N4.8.F RBAC, audit, correlation/observability and EF-snapshot slices for integration gaps/false-pass risk. Your only authorized write is a new isolated test file `backend/tests/InventoryApp.Tests/N48FContabilizacionSecurityAuditIntegrationTests.cs`, and only if it adds non-duplicative integration coverage across the security/audit contract. Do not modify functional code, other tests, EF snapshot/migrations, controller, writer, middleware or Program.cs. Run focused tests/build and two independent self-reviews. Do not branch/PR/push/merge/deploy; do not touch main/Produccion/secrets/credentials/domains/certificates/production data. Return patch/artifact for VAEP REVIEW_FIRST."
+}

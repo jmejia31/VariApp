@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-F-14-SECURE-EMPTY-A",
+  "taskId": "N4.10.F.14.SECURE_EMPTY_STATE_TESTS",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.secure-empty.spec.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.F. Verify denied/failed requests never leave stale financial values visible and empty state remains non-sensitive. Production files read-only. Run proportional tests and TWO self-reviews.",
+  "primaryBaseHead": "d0ed0327732058404399b3d4489d37bea08e3775"
+}

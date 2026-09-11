@@ -1,0 +1,17 @@
+{
+  "dispatchId": "N6-3-E-1-SUCURSALES-EMPRESA-FRONTEND-UX-J4-R2-20260911T1024Z",
+  "taskId": "N6.3.E.1.SUCURSALES_EMPRESA_FRONTEND_UX",
+  "semanticFacet": "SUCURSALES_EMPRESA_FRONTEND_UX",
+  "workerId": "J4",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 2,
+  "primaryBaseHead": "2fc3a96f34b8d07bafeafe11556e5b03b19ba3f8",
+  "dependency": "N6.3.D_LISTO_REAL",
+  "dependencyReceipt": "vaep/evidence/fragments/N6.3.D_LISTO_REAL_20260911T0958Z.json",
+  "supersedesDispatchId": "N6-3-E-1-SUCURSALES-EMPRESA-FRONTEND-UX-J3-A1-TX1-20260911T1006Z",
+  "supersededRunId": "34588176617",
+  "recoveryReason": "J3 ATTEMPT1 canonical run exceeded 10 minutes in Execute VAEP/Jules MASTER with transport preflight/reservation successful but no sessionId, result artifact, accessible job logs, or other fresh useful technical activity observable. FIRST_DETECTOR_OWNS_RECOVERY revokes J3 write ownership; any late J3 result is EVIDENCE_ONLY. This is the single permitted R2 material attempt; R3 is prohibited.",
+  "fileScopeHint": "frontend/src/app/**/*sucursal*;frontend/src/app/**/*empresa*;frontend/e2e/**/*sucursal*;frontend/e2e/**/*empresa*",
+  "prompt": "Read docs/VAEP_AUTHORITY.md as the sole operational MASTER and revalidate Desarrollo before editing. This is the single R2 material recovery for task N6.3.E.1.SUCURSALES_EMPRESA_FRONTEND_UX after J3 ATTEMPT1 run 34588176617 stalled beyond the ACTIVE_REAL freshness window without observable sessionId/artifact/useful activity. J3 ownership is revoked and any late J3 output is evidence-only; do not compete with it. Preserve the same semantic scope and implement one coherent, reviewable N6.3.E frontend/UX facet for Sucursales por Empresa. Inspect existing Angular Sucursales/Empresa components, services, routes, forms, tables, accessibility and E2E before editing. Provide a real Empresa selector/filter where product flow requires it, make list/detail/create/edit ownership context clear, preserve filtering/pagination and accessible labels/keyboard behavior, and consume the certified N6.3.D API contract without treating request empresaId as authorization. Do not implement N6.3.F security/observability, backend schema/migrations, Produccion, secrets, deploy, main, PR merge/auto-merge or control-plane writes. Add/update focused frontend tests/E2E proportional to changed behavior, run applicable lint/build/tests, perform SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2, require P0=0/P1=0, and return a terminal patch/artifact for independent REVIEW_FIRST. This is ATTEMPT2; if defective, controller/QA takeover is mandatory and R3 is forbidden. No filler or duplicate semantic work.",
+  "acceptance": "N6.3.E frontend/UX clearly represents Empresa ownership for Sucursales where applicable; selector/filter/list/detail/create/edit flows consume the certified API coherently; filtering/pagination/accessibility remain correct; focused frontend/E2E coverage is present; applicable lint/build/tests pass or exact external blocker is evidenced; two self-reviews complete; P0=0/P1=0; no backend/schema/security/global-isolation/control-plane/Produccion/main/secrets/PR2 merge changes; patch ready for REVIEW_FIRST."
+}

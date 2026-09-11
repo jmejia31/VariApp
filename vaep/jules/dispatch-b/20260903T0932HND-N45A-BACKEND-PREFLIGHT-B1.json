@@ -1,0 +1,10 @@
+{
+  "dispatchId": "VAEP-JULES-B-N45A-BACKEND-PREFLIGHT-B1-20260903T0932HND",
+  "taskId": "N4.5.A.BACKEND_DOMAIN_PERSISTENCE_PREFLIGHT",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "a85396b8e5d6ed579f2815cb7a193f45ed3d54e0",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Domain/**; backend/src/Application/**; backend/src/Infrastructure/**; backend/tests/**/Compras*; backend/tests/**/Cuenta*Pagar*",
+  "prompt": "SAFE PIPELINE PREWORK ONLY for next dependency-valid parent N4.5.A CxP preflight while N4.4.H remains CURRENT_PARENT. Audit backend/domain/persistence authority for cuentas por pagar integrated with compras: entities, invariants, services, repositories, EF mappings/migrations and existing tests. Identify canonical authorities, actual gaps, duplication risks, dependencies, rollback constraints and proportional tests. Exclusive lane B scope is backend/domain/persistence inspection and evidence; do not edit frontend, RBAC/workflows/docs/TASKS/CHANGELOG, and do not implement N4.5.B+ or promote N4.5.A. If a tiny preflight-only evidence artifact is already canonical and safe, patch only that lane-local artifact; otherwise return grounded no-patch findings. No main, Production, branches, PR, merge, secrets or deploy. Emit two independent substantive SELF_REVIEW_PASS markers before COMPLETED."
+}

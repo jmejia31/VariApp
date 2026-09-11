@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-G-1-COMP-REG-A",
+  "taskId": "N4.10.G.1.COMPONENT_REGRESSION",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.regression-a.spec.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. After N4.10.F LISTO, add regression coverage for core component happy path and stable rendering. No main/production/merge/deploy/workflow/manifest changes. TWO self-reviews.",
+  "primaryBaseHead": "144ea5a9e967560bc22d41f64abe88ad0ce175d2"
+}

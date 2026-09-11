@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.D-SECURITY-AUDIT-PREFLIGHT-D-20260905T1444Z",
+  "taskId": "N4.9.D.SUPPORT.SECURITY_AUDIT_PREFLIGHT",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "72de4913f1ceca1fe4f8a1549b17755dd80c27e6",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/qa/N4_9_D_SECURITY_AUDIT_PREFLIGHT.md only; read-only inspection of RBAC/audit/correlation patterns; no code writes outside this doc",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT N4.9.C is still being certified; do safe pipeline work for N4.9.D with PROMOTION_BLOCKED_BY_N4.9.C. Perform a repository-grounded security/audit/observability preflight for PeriodoContable. Produce ONLY `docs/qa/N4_9_D_SECURITY_AUDIT_PREFLIGHT.md` covering exact relational permission expectations for Finanzas, create/close/read actions, audit events and actor/correlation evidence, fail-closed authorization, logging/redaction, concurrency/replay risks, and a concrete negative-test matrix. Ground it in exact existing repo filters/middleware/audit patterns; do not invent a new auth model. No functional code, migration, snapshot, workflow or frontend edits. Two independent self-reviews. Do not branch/PR/push/merge/deploy; no main/Produccion/secrets. Return patch/artifact for VAEP REVIEW_FIRST."
+}

@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-7-D-1-KPI-CONFIG-APPLICATION-API-J1",
+  "taskId": "N5.7.D.1.KPI_CONFIG_APPLICATION_API",
+  "workerId": "J1",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Application/Services/DashboardKpiConfiguracionService.cs;backend/src/API/Controllers/DashboardKpiConfiguracionController.cs",
+  "prompt": "Read and obey docs/VAEP_AUTHORITY.md as the sole operational authority. Use live Desarrollo at the exact primaryBaseHead, the certified N5.7.C persistence contract, backend/src/Application/DTOs/DashboardKpiConfiguracionDto.cs, and the N5.7 preflight. Implement exactly N5.7.D application/API for configurable dashboard KPIs: validated idempotent read/write of the accepted KPI configuration, deterministic KPI resolution from existing dashboard authorities, closed metric-key validation with unknown keys fail-closed, and existing authorization/visibility preserved. Do not add frontend changes, persistence/migrations, RBAC redesign, arbitrary formulas or new KPI financial semantics, Production execution, secrets, main changes, PR #2 merge, or unrelated refactors. Keep one coherent writer scope. Run proportional backend compile/tests and contract validation available in the repo and perform two independent self-reviews before COMPLETED. If a required semantic/auth detail is not source-backed, report the precise evidence gap rather than inventing it.",
+  "primaryBaseHead": "df47063aecd0b52e4bb256551f7ddba87cdfd644"
+}

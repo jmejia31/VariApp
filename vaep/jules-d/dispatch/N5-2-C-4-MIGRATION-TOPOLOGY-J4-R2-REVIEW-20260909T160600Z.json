@@ -1,0 +1,12 @@
+{
+  "dispatchId": "N5-2-C-4-MIGRATION-TOPOLOGY-J4-R2-REVIEW-20260909T160600Z",
+  "taskId": "N5.2.C.4.MIGRATION_ROLLBACK_TOPOLOGY",
+  "workerId": "J4",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 2,
+  "recoveryOf": "vaep/jules-d/dispatch/N5-2-C-4-MIGRATION-TOPOLOGY-J4.json",
+  "recoveryReason": "ATTEMPT1_COMPLETED_WITH_MATERIAL_PATCH_BUT_REVIEW_FIRST_REJECTED_EVIDENCE_INCONSISTENCY__TESTS_RAN_AND_FAILED_BUT_TERMINAL_MARKER_SAID_NOT_APPLICABLE",
+  "fileScopeHint": "docs/N5.2_REPORTES_INVENTARIO_PERSISTENCE_MIGRATION_TOPOLOGY.md",
+  "prompt": "R2 final content attempt for N5.2.C.4 only. Reconcile the ATTEMPT1 material migration/backfill/reconciliation/rollback topology; do not expand scope. REVIEW_FIRST rejected ATTEMPT1 because its activity record says tests/build ran and failed on missing MySQL connectivity while the terminal evidence marker claimed TESTS_EXECUTED: NOT_APPLICABLE. Produce truthful, internally consistent TESTS_EXECUTED evidence: name every command actually run and its result, explicitly separate environmental failures from scope validation, and never convert a failed command into PASS or NOT_APPLICABLE. Re-check factual claims about whether schema/migration changes are needed against the accepted N5.2.B contracts and current Desarrollo. Complete two independent self-review passes. No R3, no main, Produccion, secrets, deploy or PR merge; no control-plane edits and no other lane scope.",
+  "primaryBaseHead": "04e20809e44168080b1da0dee19110b3f4981e6b"
+}

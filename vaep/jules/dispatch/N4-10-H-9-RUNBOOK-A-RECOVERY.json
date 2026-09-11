@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-H-9-RUNBOOK-A-RECOVERY",
+  "taskId": "N4.10.H.9.FRONTEND_RUNBOOK",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/N4.10_ESTADOS_FINANCIEROS_RUNBOOK.md",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.H. Create the factual operator/developer frontend runbook for estados financieros: diagnostics, safe rollback boundaries, known failure modes and verification commands from current code/evidence only. No invented PASS claims. No main/production/merge/deploy/workflow/manifest changes. TWO self-reviews.",
+  "primaryBaseHead": "286fc70f22b1a3faeb0362641c55fc147be797ea"
+}

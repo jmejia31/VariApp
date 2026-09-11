@@ -1,0 +1,14 @@
+{
+  "dispatchId": "N6-3-C-1-SUCURSALES-EMPRESA-PERSISTENCE-MIGRATION-J6-R2-20260911T0806Z",
+  "taskId": "N6.3.C.1.SUCURSALES_EMPRESA_PERSISTENCE_MIGRATION",
+  "semanticFacet": "SUCURSALES_EMPRESA_PERSISTENCE_MIGRATION",
+  "workerId": "J6",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 2,
+  "primaryBaseHead": "bafc2af0b1b28c6e0aac74b038614bbabb37eeb9",
+  "dependency": "N6.3.B_LISTO_REAL",
+  "dependencyReceipt": "vaep/evidence/fragments/N6.3.B_LISTO_REAL_20260911T0746Z.json",
+  "fileScopeHint": "backend/src/Infrastructure/Persistence/AppDbContext.cs;backend/src/Infrastructure/Persistence/Configurations/SucursalConfiguration.cs;backend/src/Infrastructure/Migrations/*N6_3_C*;backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs;backend/tests/InventoryApp.Tests/*N63C*",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first as the sole operational MASTER. This is ATTEMPT2/2 recovery for the same logical task N6.3.C.1; R3 is prohibited and changing worker does not reset the attempt. J2 ATTEMPT1 run34576000057/session 3103955668813225947 exceeded JULES_LANE_BUDGET_SECONDS after session activity, produced no patch, had ownership revoked, was superseded, and late-result auto-integration is denied. Revalidate fresh Desarrollo HEAD, N6.3.B LISTO_REAL receipt and OPEN dispatch admission before editing. Complete only N6.3.C persistence/migration for Empresa -> multiple Sucursales: materialize the accepted N6.3.B domain contract in EF/MySQL safely, persist Sucursal.EmpresaId with data-safe requiredness/Restrict semantics, implement per-Empresa normalized Codigo uniqueness only with safe migration preconditions, produce one reversible migration plus coherent configuration/snapshot, and add directed persistence/migration verification. Do not implement N6.3.D services/API, frontend, N6.4/N6.5, Production, secrets, main or merge PR#2. Treat any late J2 result only as evidence, never as an automatically integrable writer. Run proportional checks, emit TESTS_EXECUTED, complete SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2, report P0/P1 and return a terminal patch/evidence for independent REVIEW_FIRST. One writer for this scope; no filler, no R3.",
+  "acceptance": "ATTEMPT2 completes the same N6.3.C persistence facet with no scope spillover; migration/configuration/snapshot are internally consistent and reversible; data safety is explicit; EmpresaId relation and per-Empresa Codigo uniqueness are enforced only with safe preconditions; directed persistence/migration verification is present; two self-reviews report P0=0/P1=0; terminal patch/evidence is ready for independent REVIEW_FIRST. If ATTEMPT2 remains defective, controller/QA takeover is mandatory and no R3 may be created."
+}

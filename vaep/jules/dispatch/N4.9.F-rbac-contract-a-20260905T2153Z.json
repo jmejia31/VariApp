@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.F-RBAC-CONTRACT-A-ATTEMPT1-20260905T2153Z",
+  "taskId": "N4.9.F.RBAC_CONTRACT",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "3fbbae7bdaa014bf77e911a874c409d53f3db659",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N49FPeriodoContableRbacContractTests.cs",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first; it is the only operational authority. Work only on jmejia31/VariApp branch Desarrollo. FUNCTIONAL_HEAD is 3fbbae7bdaa014bf77e911a874c409d53f3db659; this manifest commit is CONTROL_PLANE_HEAD_EQUIVALENT and must not be treated as a new functional base. CURRENT_PARENT=N4.9.F. Create a focused RBAC contract regression test file for PeriodosContablesController proving GET/list and GET/id require Configuracion/Ver, POST create requires Configuracion/Crear, and POST cerrar requires Configuracion/Cerrar, following existing authorization contract test conventions. Own ONLY backend/tests/InventoryApp.Tests/N49FPeriodoContableRbacContractTests.cs. Do not edit production code or any other test file. If the existing controller already satisfies the contract, the material deliverable is the new regression test coverage. Validate the targeted test/project. Do not touch main, Produccion, secrets, deploy, branches, PR merge, auto-merge or force-push. Return patch, changed files, validation and risks; no status-only response."
+}

@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-8-B-1-EXPORT-FORMAT-CONTRACT-J1",
+  "taskId": "N5.8.B.1.EXPORT_FORMAT_CONTRACT",
+  "workerId": "J1",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/Application/DTOs/ExportacionDto.cs",
+  "prompt": "Use only docs/VAEP_AUTHORITY.md, docs/VAEP_N5_8_EXPORTACIONES_PREFLIGHT.md and live Desarrollo. Implement exactly N5.8.B in backend/src/Application/DTOs/ExportacionDto.cs as one bounded domain/application contract for export formats. Define a closed csv/xlsx/pdf format model and deterministic MIME/extension metadata plus only the minimal request/descriptor shapes needed by later stages. Unknown formats must fail closed. Preserve ArchivoDescargableDto compatibility and all existing report data/RBAC authorities. Do not implement persistence, migrations, API endpoints, byte generators, ReporteAdministrativoService changes or frontend in this task. Do not add packages. One writer, one file scope. Run proportional backend compile/tests and two independent self-reviews. If a required detail is not source-backed by the preflight/current code, report the evidence gap instead of inventing it. Never main, Production, secrets, merge PR #2, filler, arbitrary formulas/SQL or unrelated refactors.",
+  "primaryBaseHead": "c253f3cdc7e6b17613eabc024095d406a7f1b9b7"
+}

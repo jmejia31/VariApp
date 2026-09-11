@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-4-B-2-MARGIN-PERCENT-CONTRACT-J2",
+  "taskId": "N5.4.B.2.MARGIN_PERCENT_CONTRACT",
+  "workerId": "J2",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/qa/N5_4_B_MARGIN_PERCENT_CONTRACT.md",
+  "prompt": "Use only docs/VAEP_AUTHORITY.md, live Desarrollo and original N5.4 COLA. Resolve the N5.4.B contract evidence for margin percentage denominator, zero-denominator behavior and derived rounding. Search current code/tests/docs for an authoritative existing convention; never invent a business rule. Write only docs/qa/N5_4_B_MARGIN_PERCENT_CONTRACT.md with source-backed decision if one exists, otherwise the exact unresolved contract and why implementation must remain dependency-gated. Do not implement persistence/API/frontend. Desarrollo only; no main, Production, secrets or PR merge.",
+  "primaryBaseHead": "53d68cacc9941dfab15616f08864c33557c4ce84"
+}

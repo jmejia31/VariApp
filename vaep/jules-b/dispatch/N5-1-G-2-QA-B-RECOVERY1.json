@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-1-G-2-QA-B-RECOVERY1",
+  "taskId": "N5.1.G.2.ACCEPTANCE_MATRIX_RECONCILIATION",
+  "workerId": "J2",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/N5.1_REPORTES_ACCEPTANCE_EVIDENCE.md",
+  "prompt": "Read docs/VAEP_AUTHORITY.md and accepted N5.1 evidence first. Reconcile the N5.1.A QA preflight matrix against implemented exact HEAD. Mark each scenario PASS/N/A/BLOCKED only with actual evidence, list commands/results, and keep unresolved gaps explicit. No product changes; include two self-reviews. RECOVERY1 is transport-only recovery of the pre-session PRIMARY_BASE_HEAD race; content attempt remains ATTEMPT1.",
+  "primaryBaseHead": "9b59657304ba50aef1ca81b31ad84b8745c4ac18"
+}

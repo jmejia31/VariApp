@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-F-24-BADTYPE-D",
+  "taskId": "N4.10.F.24.INVALID_TYPE_SECURITY_CONTRACT_TESTS",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410FEstadosFinancierosInvalidTypeSecurityTests.cs",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.F. Test invalid financial statement type returns safe 400 contract without internal detail. Production files read-only. Run proportional tests/build and TWO self-reviews.",
+  "primaryBaseHead": "05634a5c7ddcb7ffc4f378541b7c66b100ff6d7a"
+}

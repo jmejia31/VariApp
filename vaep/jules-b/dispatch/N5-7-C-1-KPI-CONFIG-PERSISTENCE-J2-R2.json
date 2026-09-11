@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-7-C-1-KPI-CONFIG-PERSISTENCE-J2-R2",
+  "taskId": "N5.7.C.1.KPI_CONFIG_PERSISTENCE",
+  "workerId": "J2",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 2,
+  "fileScopeHint": "backend/src/Domain/Entities/DashboardKpiConfiguracion.cs;backend/src/Infrastructure/Persistence/Configurations/DashboardKpiConfiguracionConfiguration.cs;backend/src/Infrastructure/Persistence/AppDbContext.cs;backend/src/Infrastructure/Persistence/Migrations",
+  "prompt": "Read and obey docs/VAEP_AUTHORITY.md as the only operational authority. This is the single allowed material R2 for N5.7.C.1.KPI_CONFIG_PERSISTENCE after attempt 1 session sessions/8279763042540904322 terminated FAILED with no patch; RCA is recorded in issue #3291. Do not create or request R3. Use live Desarrollo at exact primaryBaseHead and the already accepted N5.7.B closed metric-key contract in backend/src/Application/DTOs/DashboardKpiConfiguracionDto.cs plus docs/VAEP_N5_7_DASHBOARD_KPI_PREFLIGHT.md. Implement exactly N5.7.C persistence/migration for configurable dashboard KPIs: add the minimal source-backed persistence entity/model required by the accepted contract, EF mapping/constraints/indexes, AppDbContext registration, and a reversible MySQL-compatible migration. Preserve existing dashboard authorization/visibility semantics and historical integrity. Unknown metric keys remain fail-closed. Do not add arbitrary formulas, SQL/user expressions, new financial semantics, API endpoints, frontend changes, Production execution, secrets, main changes, PR #2 merge, or unrelated refactors. Derive any user/role ownership relation only from existing repository models; if a required ownership detail is genuinely not source-backed, report the exact evidence gap rather than inventing it. Run proportional backend compile/tests plus migration/model validation available in repo and emit TESTS_EXECUTED. Perform two independent self-reviews and emit SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 before COMPLETED. Return a reviewable patch only; never push/merge/deploy.",
+  "primaryBaseHead": "28c3a0fba988d74007dc8126c686ad9a91e0722b"
+}

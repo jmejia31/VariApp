@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.D-API-R2-C-20260905T1523Z",
+  "taskId": "N4.9.D.API_CONTRACT",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 2,
+  "fileScopeHint": "backend/src/API/Controllers/PeriodosContablesController.cs only, plus DI registration only if strictly required and in existing API composition file; no Application/Infrastructure/Domain/migrations/frontend/workflows",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. This is final R2 for N4.9.D API_CONTRACT; no R3. The earlier attempt was blocked because Application contracts were not yet present; they are now integrated on Desarrollo. Implement the minimal HTTP/API slice for PeriodoContable: create/list/get/close endpoints using the existing application contracts, relational Finanzas authorization conventions, ProblemDetails/error mapping, cancellation, and idempotent/duplicate-close semantics as defined by current domain/service behavior. Do not edit Application, Infrastructure, Domain, migrations, frontend or workflows. Run dotnet build and focused controller/API tests; two independent self-reviews. Do not branch/PR/push/merge/deploy; return patch/artifact for VAEP REVIEW_FIRST.",
+  "primaryBaseHead": "e1fafe1a14c05d49235da71f163c7973d8b399b8"
+}

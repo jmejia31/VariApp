@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-A-406-SORT_A11Y_STATE-TESTS-C-AUTO",
+  "taskId": "N4.10.A.406.SORT_A11Y_STATE_TESTS",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/e2e/n4-10-financial-report-sort-a11y-state-406.spec.ts only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY frontend/e2e/n4-10-financial-report-sort-a11y-state-406.spec.ts. Add a focused regression for the current behavior identified by SORT_A11Y_STATE; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "b3ebcb7d063ad7e4039ef8600079b54ec1f6b5ef"
+}

@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.10.A-SECURITY-EXPORT-PREFLIGHT-D-20260906T0228Z",
+  "taskId": "N4.10.A.4.SECURITY_EXPORT_PREFLIGHT",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/qa/N4_10_A_SECURITY_EXPORT_PREFLIGHT.md only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. NEXT_SAFE prearmed; promotion blocked by N4.9.H. Write ONLY docs/qa/N4_10_A_SECURITY_EXPORT_PREFLIGHT.md. Inspect current RBAC/audit/export/report patterns and map security, authorization, auditability, export/download and observability requirements for the six financial statements. Identify reusable existing mechanisms and real gaps. No product-code writes, no LISTO_REAL claim. Two independent self-reviews; material patch only.",
+  "primaryBaseHead": "3c4d16930c93da2b59b3e8ff6cfbef49df605472"
+}

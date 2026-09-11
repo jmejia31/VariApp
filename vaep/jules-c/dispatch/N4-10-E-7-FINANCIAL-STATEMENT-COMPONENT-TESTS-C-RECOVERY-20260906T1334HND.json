@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-E-7-FINANCIAL-STATEMENT-COMPONENT-TESTS-C-RECOVERY-20260906T1334HND",
+  "taskId": "N4.10.E.7.FINANCIAL_STATEMENT_COMPONENT_TESTS",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.component.spec.ts only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. NEXT_SAFE_PREWORK for N4.10.E only; CURRENT_PARENT remains N4.10.D. This is recovery of a controller-skipped dispatch; no prior Jules attempt was consumed. Own ONLY frontend/src/app/features/estados-financieros/estados-financieros.component.spec.ts. Test creation, mutually exclusive period/date filters, incomplete/reversed range rejection, loading/error/result behavior and approved service invocation using existing standalone/TestBed patterns. No production edits/new dependencies. TWO self-reviews.",
+  "primaryBaseHead": "ccf39f8e7e5d8329a674c0025da8b1aef1bde38c"
+}

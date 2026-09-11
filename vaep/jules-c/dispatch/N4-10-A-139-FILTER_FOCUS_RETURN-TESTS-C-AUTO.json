@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-A-139-FILTER_FOCUS_RETURN-TESTS-C-AUTO",
+  "taskId": "N4.10.A.139.FILTER_FOCUS_RETURN_TESTS",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/e2e/n4-10-financial-report-filter-focus-return-139.spec.ts only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE for N4.10.A. Own ONLY frontend/e2e/n4-10-financial-report-filter-focus-return-139.spec.ts. Add a focused regression for the current behavior identified by FILTER_FOCUS_RETURN; reuse existing contracts only and do not invent APIs or production behavior. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "e55374fed30af351945278769972f3131b47afee"
+}

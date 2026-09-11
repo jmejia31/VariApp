@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-A-45-FINANCIAL_REPORT_DATE_RANGE_UI_E2E-C-AUTO",
+  "taskId": "N4.10.A.45.FINANCIAL_REPORT_DATE_RANGE_UI_E2E",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/e2e/n4-10-financial-report-date-range.spec.ts only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY frontend/e2e/n4-10-financial-report-date-range.spec.ts. Add focused Playwright coverage for current report date-range UI behavior, including valid boundaries and truthful invalid-range handling using existing controls only. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "eb4165121355e75d8070ee30c045e142cbb15329"
+}

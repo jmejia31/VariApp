@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-A-53-FINANCIAL_REPORT_RETRY_RECOVERY_E2E-C-AUTO",
+  "taskId": "N4.10.A.53.FINANCIAL_REPORT_RETRY_RECOVERY_E2E",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/e2e/n4-10-financial-report-retry-recovery.spec.ts only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY frontend/e2e/n4-10-financial-report-retry-recovery.spec.ts. Add focused Playwright coverage for current recoverable report error/retry behavior where the UI already exposes retry or refresh. Do not create missing UI. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "9311bf141f4850ecf175d74a88e8aa0ccad9c403"
+}

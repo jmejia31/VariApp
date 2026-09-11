@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-11-H-9-QA-A",
+  "taskId": "N4.11.H.9.QA_EVIDENCE_INDEX",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/N4.11_CENTROS_COSTO_QA_EVIDENCE.md",
+  "prompt": "After N4.11.G LISTO_REAL, index only verified CentroCosto QA evidence and unresolved gaps; Desarrollo only; two self-reviews.",
+  "primaryBaseHead": "00900fcb67ad887ab73dd01d1575afce130747be"
+}

@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.10.A-SECURITY-EXPORT-TESTS-D-20260906T0314Z",
+  "taskId": "N4.10.A.8.SECURITY_EXPORT_CONTRACT_TESTS",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AReportesFinancierosSecurityExportTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.A. Create the material security/export regression contract tests identified by the completed N4.10.A security preflight. Own ONLY backend/tests/InventoryApp.Tests/N410AReportesFinancierosSecurityExportTests.cs. Test/review CURRENT reusable RBAC expectations for ModuloSistema.Finanzas with Ver/Exportar/Imprimir, explicit audit expectations for export operations, and safe export behavior. Do not modify production code; if the financial controller/service does not yet exist, encode only truthful reusable contract coverage against current mechanisms and report exact untestable gaps rather than inventing PASS. Run focused tests/build if available, perform TWO distinct self-reviews, no push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "aef6fbaeda9e22894570652ab2ffd86a7d294743"
+}

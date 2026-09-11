@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-E-28-INT-DATE-D",
+  "taskId": "N4.10.E.28.INTEGRATION_DATE_RANGE_TESTS",
+  "workerId": "JULES_D",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/features/estados-financieros/estados-financieros.integration-date-range.spec.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. PROGRAMMED_BACKLOG task; respect CURRENT_PARENT and dependencies. Add integration tests for date-range request/response rendering path including boundary dates. Production files are read-only. No main/production/merge/deploy/workflow/manifest changes. TWO independent self-reviews.",
+  "primaryBaseHead": "0ab02674a188ad204a4ce12a0f4aa39b94c9734f"
+}

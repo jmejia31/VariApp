@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-D-7-FINANCIAL-STATEMENT-API-TESTS-C-MATERIAL",
+  "taskId": "N4.10.D.7.FINANCIAL_STATEMENT_API_TESTS",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410DEstadosFinancierosControllerTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.10.D. Own ONLY backend/tests/InventoryApp.Tests/N410DEstadosFinancierosControllerTests.cs. Add focused API contract tests for supported statement kind, filter binding, cancellation and invalid-request ProblemDetails semantics. No production edits. TWO self-reviews. No main/production/merge/deploy changes.",
+  "primaryBaseHead": "01c69235a589584b162b91f200ea8d4b7ccb6d0a"
+}

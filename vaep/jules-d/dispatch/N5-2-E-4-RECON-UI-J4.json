@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-2-E-4-RECON-UI-J4",
+  "taskId": "N5.2.E.4.RECONCILIATION_FRONTEND_UX",
+  "workerId": "J4",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/features/reportes-inventario/reconciliacion/**;frontend/src/app/core/services/reporte-inventario-reconciliacion.service.ts",
+  "prompt": "Read docs/VAEP_AUTHORITY.md and the completed N5.2.D reconciliation API first. Implement only the Conteo/Transferencia/Ajuste reconciliation report UI with server paging, traceability fields and finance-field redaction respected. Do not own other report facets or shared navigation. Minimum coherent code plus applicable frontend tests; two self-reviews; Desarrollo only; no Production, secrets or PR merge.",
+  "primaryBaseHead": "2dc2be1953b1c6b01317aede58d391cf7fa357d7"
+}

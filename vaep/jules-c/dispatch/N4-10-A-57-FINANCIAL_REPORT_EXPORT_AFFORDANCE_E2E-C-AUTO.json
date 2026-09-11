@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-A-57-FINANCIAL_REPORT_EXPORT_AFFORDANCE_E2E-C-AUTO",
+  "taskId": "N4.10.A.57.FINANCIAL_REPORT_EXPORT_AFFORDANCE_E2E",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/e2e/n4-10-financial-report-export-affordance.spec.ts only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY frontend/e2e/n4-10-financial-report-export-affordance.spec.ts. Add focused Playwright coverage for current report export controls/affordances and permission visibility, without asserting file formats not exposed by the UI. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "fbd77266aee12eabc723421c539d5266909a00f6"
+}

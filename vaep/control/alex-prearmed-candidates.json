@@ -1,0 +1,50 @@
+{
+  "authority": "docs/VAEP_AUTHORITY.md",
+  "engine": "ALEX",
+  "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
+  "sourceSheet": "COLA",
+  "sourceRowKeys": ["N5.4.B", "N5.4.C", "N5.4.D"],
+  "generatedFromHead": "b12603c4bb232093fdd09b4815cd2071483e6b3e",
+  "currentParent": "N5.4.B",
+  "targetParent": "N5.4.C",
+  "targetDependency": "N5.4.B_LISTO_REAL",
+  "futurePrearmParents": ["N5.4.C", "N5.4.D"],
+  "dependencyState": "MULTI_STAGE_GATED",
+  "dispatchEligible": false,
+  "policy": "ROADMAP_DERIVED__DEPENDENCY_SAFE__SEMANTIC_DEDUPE_ONLY",
+  "busyworkAllowed": false,
+  "note": "N5.4.A is LISTO_REAL and N5.4.B is current. N5.4.C persistence/migration/data and N5.4.D backend/API are prearmed from canonical COLA order only; C cannot dispatch before B LISTO_REAL and D cannot dispatch before C LISTO_REAL. No filler is generated to inflate per-lane backlog targets.",
+  "candidates": [
+    {
+      "candidateId": "N5.4.C.CAND.PROFITABILITY_PERSISTENCE_DATA",
+      "suggestedLane": "J2",
+      "prearmed": true,
+      "readyState": "DEPENDENCY_GATED_READY",
+      "dispatchEligible": false,
+      "dependencyGate": "N5.4.B_LISTO_REAL",
+      "materialScope": "Profitability persistence/data only: after B closes, determine and implement only source-backed persistence/EF/index/migration changes that B's accepted contracts prove necessary, or record grounded N/A. No D+ API/frontend scope leakage.",
+      "semanticDedupeKey": "N5.4.C|PROFITABILITY|PERSISTENCE_DATA"
+    },
+    {
+      "candidateId": "N5.4.D.CAND.PROFITABILITY_BACKEND_API",
+      "suggestedLane": "J1",
+      "prearmed": true,
+      "readyState": "DEPENDENCY_GATED_READY",
+      "dispatchEligible": false,
+      "dependencyGate": "N5.4.C_LISTO_REAL",
+      "materialScope": "Profitability application/services/API only: after C closes, implement the minimum service/DTO/query/API surface required by accepted B contracts and C persistence decisions. No E+ frontend/security/QA scope leakage.",
+      "semanticDedupeKey": "N5.4.D|PROFITABILITY|BACKEND_API"
+    }
+  ],
+  "programmedBacklogPerLane": {
+    "J1": 1,
+    "J2": 1,
+    "J3": 0,
+    "J4": 0,
+    "J5": 0,
+    "J6": 0
+  },
+  "programmedBacklogCountingRule": "Only roadmap-derived material successor work counts. N5.4.C/D remain dependency-gated READY until predecessors are LISTO_REAL; nominal variants and evidence-only filler do not count.",
+  "unassignedLanes": ["J3", "J4", "J5", "J6"],
+  "unassignedReason": "N5.4.C_AND_D_ARE_SEQUENTIAL_PARENT_SCOPES__NO_PREMATURE_EXECUTION__NO_BUSYWORK"
+}

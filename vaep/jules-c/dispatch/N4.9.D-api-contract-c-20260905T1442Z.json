@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.9.D-API-CONTRACT-C-20260905T1442Z",
+  "taskId": "N4.9.D.API_CONTRACT",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "09a7e74c828e856786a16e0cc5a14a5db9f08a23",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/src/API only; PeriodoContable endpoints/controller/HTTP contract strictly for N4.9.D; do not edit Application/Infrastructure/Domain/migrations/frontend/tests",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. CURRENT_PARENT=N4.9.D. Implement only the HTTP/API slice for PeriodoContable: endpoints/controller wiring and ProblemDetails/error contracts required for create/list/get/close, reusing application contracts when available and following existing API conventions. Scope exclusively backend/src/API files directly required by this slice. Do not edit Application, Infrastructure, Domain, migrations/snapshot, frontend, tests, workflows, secrets or manifests. Run focused build/tests if possible and perform two independent self-reviews. Do not branch/PR/push/merge/deploy; return patch/artifact for VAEP REVIEW_FIRST."
+}

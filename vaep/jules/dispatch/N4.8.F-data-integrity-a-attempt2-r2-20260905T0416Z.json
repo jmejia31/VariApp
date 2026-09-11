@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4.8.F-DATA-INTEGRITY-A-ATTEMPT2-R2-20260905T0416Z",
+  "taskId": "N4.8.F.SUPPORT.DATA_INTEGRITY",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "f20dd4614d1e4ef9cdf7b3008dc039f73546fe7c",
+  "taskAttempt": 2,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N48FAccountingDataIntegrityTests.cs only; EF mappings/migrations/snapshot READ_ONLY; no B/C/D scopes",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. This is the single final R2 for N4.8.F.SUPPORT.DATA_INTEGRITY. ATTEMPT1 returned a test-only patch but failed the mandatory evidence contract: requested base was 3baa77cdfb5bb091b0f602e40bef1396de1fe19b while actualPatchBase was 1bca3f7ebfab4332637a7f816c67acf222554807, and the artifact did not explicitly report the two independent SELF_REVIEW_PASS_1 / SELF_REVIEW_PASS_2 required by MASTER. Re-evaluate against current code safely. Your only authorized write remains backend/tests/InventoryApp.Tests/N48FAccountingDataIntegrityTests.cs, only if the coverage is materially valid and non-duplicative. Do not modify EF mappings, migrations, snapshot, controller, audit or observability code. Run focused backend tests/build; explicitly report test results, limitations, exact baseCommitId, and two independent self-reviews. If the prior proposed assertions do not match current model or duplicate existing coverage, return no patch and precise evidence instead. No branch/PR/push/merge/deploy; no main/Produccion/secrets/credentials/domains/certificates/production data. R3 is prohibited; any remaining defect goes to VAEP QA_TAKEOVER."
+}

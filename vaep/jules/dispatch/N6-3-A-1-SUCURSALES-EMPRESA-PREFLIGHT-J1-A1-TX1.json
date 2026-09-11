@@ -1,0 +1,16 @@
+{
+  "dispatchId": "N6-3-A-1-SUCURSALES-EMPRESA-PREFLIGHT-J1-A1-TX1",
+  "taskId": "N6.3.A.1.SUCURSALES_EMPRESA_PREFLIGHT",
+  "semanticFacet": "SUCURSALES_EMPRESA_PREFLIGHT",
+  "workerId": "J1",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "recoveryOf": "vaep/jules/dispatch/N6-3-A-1-SUCURSALES-EMPRESA-PREFLIGHT-J1-A1.json",
+  "recoveryReason": "PRESESSION_INVALID_REDISPATCH__PROMOTION_COMMIT_CHANGED_CATALOG_AND_ADDED_MANIFEST__NO_SESSION_NO_ARTIFACT_NO_CONTENT_ATTEMPT",
+  "primaryBaseHead": "87fdc63266c2e2a95dff5fa72ad4cfd9b8fb9d78",
+  "dependency": "N6.2.H_LISTO_REAL",
+  "dependencyReceipt": "vaep/evidence/fragments/N6.2.H_LISTO_REAL_20260911T0629Z.json",
+  "fileScopeHint": "docs;CHANGELOG_AI.md",
+  "prompt": "Transport-only recovery of ATTEMPT1 for N6.3.A.1. Read docs/VAEP_AUTHORITY.md first. Revalidate Desarrollo HEAD, CURRENT_PARENT=N6.3.A, this TX1 primaryBaseHead and N6.2.H LISTO_REAL receipt before editing. Execute only the roadmap-derived preflight for Empresa-to-multiple-Sucursales: inspect current Empresa/Sucursal domain contracts, EF mapping/migrations, repositories/services/controllers, frontend flows, RBAC/audit and focused tests; document real current state, dependencies, scope boundaries, risks, acceptance, rollback and a bounded B-H plan. Produce canonical docs/evidence only. Do not change product code, schema, migrations, API, frontend, security behavior, workflows, TASKS.md, main, Produccion, secrets, deployment or PR #2. Run proportional read-only validation and return a patch/artifact for REVIEW_FIRST with explicit P0/P1. No filler, no R2, no R3.",
+  "acceptance": "Source-backed preflight documentation with explicit current state, gaps, dependencies, B-H boundaries, migration/rollback/test plan and P0/P1 evidence; no product/schema behavior changes; artifact ready for REVIEW_FIRST."
+}

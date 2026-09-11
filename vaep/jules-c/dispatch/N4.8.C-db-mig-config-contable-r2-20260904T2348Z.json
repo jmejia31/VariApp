@@ -1,0 +1,11 @@
+{
+  "dispatchId": "N4.8.C-DB-MIG-CONFIG-CONTABLE-R2-20260904T2348Z",
+  "taskId": "N4.8.C",
+  "workerId": "JULES_C",
+  "expectedBranch": "Desarrollo",
+  "primaryBaseHead": "873ef97ee0187ac496dc6cd49097820ee4f76a94",
+  "taskAttempt": 2,
+  "maxAttempts": 2,
+  "fileScopeHint": "backend/src/Domain/**; backend/src/Infrastructure/Persistence/**; backend/src/Infrastructure/Migrations/**; backend/tests/**; no controllers/API/frontend; no production data",
+  "prompt": "Read docs/VAEP_AUTHORITY.md FIRST and obey it as the sole operational authority. This is ATTEMPT 2/2, the single and final Jules rework for CURRENT_PARENT N4.8.C. REVIEW_FIRST of ATTEMPT1 found that the required two independent self-reviews were not evidenced: activities.json scheduled SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 together in one echo operation, which is not two independent reviews. Rework from exact current Desarrollo base 873ef97ee0187ac496dc6cd49097820ee4f76a94. Reinspect the ATTEMPT1 proposed DB_MIG delta and repository migration conventions, especially the apparent split between backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs and backend/src/Infrastructure/Persistence/Migrations/*. Do not blindly preserve generated migration/snapshot paths if inconsistent with the canonical AppDbContext migrations assembly. Produce one minimal coherent reversible additive persistence slice for configurable accounting mappings, no invented backfill, no N4.8.D services/API/hooks. Add or correct focused tests as needed. Run applicable backend build/tests and migration/model validation feasible in the workspace. BEFORE COMPLETED, perform TWO genuinely independent self-reviews as separate review activities/steps, each reviewing full diff/scope/contracts/data safety/tests/unexecuted validations, and report SELF_REVIEW_PASS_1 and SELF_REVIEW_PASS_2 separately. Report exact files, commands/results, rollback characteristics and risks. Do not create branch/PR/push/merge/deploy; do not touch main, Produccion, secrets, credentials, domains, certificates, production data or production infrastructure. Return patch/artifact only for VAEP REVIEW_FIRST. R3 is prohibited; if this final attempt has a blocking defect, report it exactly for QA_TAKEOVER."
+}

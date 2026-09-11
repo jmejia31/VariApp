@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-A-52-FINANCIAL_REPORT_EMPTY_DATA_QUERY_TESTS-B-AUTO",
+  "taskId": "N4.10.A.52.FINANCIAL_REPORT_EMPTY_DATA_QUERY_TESTS",
+  "workerId": "JULES_B",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportEmptyDataQueryTests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. AUTOREFILL material NEXT_SAFE work for N4.10.A; do not promote a blocked successor. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportEmptyDataQueryTests.cs. Add focused backend tests for empty/no-match query results and truthful zero/empty responses in current financial-report code. Run proportional focused tests/build when possible and perform TWO genuinely independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "309d4ff697622502766c9e512350a7134bc15962"
+}

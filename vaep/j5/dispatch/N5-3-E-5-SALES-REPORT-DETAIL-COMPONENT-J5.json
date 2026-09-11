@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-3-E-5-SALES-REPORT-DETAIL-COMPONENT-J5",
+  "taskId": "N5.3.E.5.SALES_REPORT_DETAIL_COMPONENT",
+  "workerId": "J5",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "frontend/src/app/features/reportes-ventas/detalle/**",
+  "prompt": "Use only docs/VAEP_AUTHORITY.md, the accepted N5.3.E.1 frontend contracts, accepted N5.3.E.2 typed HTTP service, and live Desarrollo state. Implement the bounded paged sales-report detail table with durable historical dimensions, loading, empty, error, accessible table semantics and responsive behavior. Do not own summary view, routing, HTTP service, backend, control-plane, main, Production, secrets or merge PR #2. Run proportional frontend lint/build/tests as applicable and perform two self-reviews before terminal handoff.",
+  "primaryBaseHead": "054ef82c290c6b39c9b438391ddef11e07dbe189"
+}

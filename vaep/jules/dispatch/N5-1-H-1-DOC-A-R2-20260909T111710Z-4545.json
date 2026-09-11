@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N5-1-H-1-DOC-A-R2-20260909T111710Z-4545",
+  "taskId": "N5.1.H.1.DOCUMENTATION_RELEASE",
+  "workerId": "J1",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 2,
+  "fileScopeHint": "docs/N5.1_CENTRO_REPORTES_RUNBOOK.md",
+  "prompt": "Read docs/VAEP_AUTHORITY.md and accepted N5.1 evidence first. Produce the Centro de Reportes runbook/release documentation from accepted implementation and QA evidence: scope, permissions, routes, rollback and known limits. Do not claim LISTO_REAL or CI not executed. Documentation only; include two self-reviews.\n\nR2 RCA: JULES_LANE_BUDGET_EXCEEDED attempt=1. Re-run the same material scope from the current Desarrollo checkout; do not expand scope, touch control-plane files, or claim integration.",
+  "primaryBaseHead": "9441f183f0c5af51ea5610a0c9b4895baab3cbe9"
+}

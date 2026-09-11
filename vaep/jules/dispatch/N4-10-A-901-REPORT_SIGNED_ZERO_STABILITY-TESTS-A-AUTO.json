@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-10-A-901-REPORT_SIGNED_ZERO_STABILITY-TESTS-A-AUTO",
+  "taskId": "N4.10.A.901.REPORT_SIGNED_ZERO_STABILITY_TESTS",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "backend/tests/InventoryApp.Tests/N410AFinancialReportSIGNEDZEROSTABILITY901Tests.cs only",
+  "prompt": "Read docs/VAEP_AUTHORITY.md first. UNIQUE material NEXT_SAFE for N4.10.A. Own ONLY backend/tests/InventoryApp.Tests/N410AFinancialReportSIGNEDZEROSTABILITY901Tests.cs. Add a focused regression for the existing financial-report behavior when an aggregate resolves to signed/zero-equivalent decimal values; assert only behavior already exposed by current contracts and do not invent APIs or production behavior. This semantic facet is REPORT_SIGNED_ZERO_STABILITY and must not duplicate ROUNDING_CONSERVATION or DECIMAL_SCALE_STABILITY. Run proportional tests/build and TWO independent self-reviews. No production/workflow/docs/manifest/dependency changes. No push/PR/branch/merge/deploy.",
+  "primaryBaseHead": "18a100fc21d733c8e7232f39e95c1645d6a93bdd"
+}

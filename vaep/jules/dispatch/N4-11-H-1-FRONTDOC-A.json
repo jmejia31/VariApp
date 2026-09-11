@@ -1,0 +1,10 @@
+{
+  "dispatchId": "N4-11-H-1-FRONTDOC-A",
+  "taskId": "N4.11.H.1.FRONTEND_DOCUMENTATION",
+  "workerId": "JULES_A",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "fileScopeHint": "docs/N4.11_CENTROS_COSTO_FRONTEND.md",
+  "prompt": "After N4.11.G LISTO_REAL, document verified CentroCosto frontend behavior/evidence; Desarrollo only; two self-reviews.",
+  "primaryBaseHead": "a353121ce7eec6a2aa744262e14ebd01ecb47f98"
+}
