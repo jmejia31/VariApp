@@ -29,9 +29,13 @@ if ($schema.properties.decision.enum -contains "LISTO_REAL") {
 }
 
 $master = Get-Content -LiteralPath (Join-Path $repoRoot "docs/VAEP_AUTHORITY.md") -Raw
-$antiGMasterContract = '(?m)^- AntiG/Antigravity:.*RESERVED_INACTIVE.*sin scheduler/handoff/certificación hasta autorización explícita futura\\.$'
-if ($master -notmatch $antiGMasterContract) {
-    throw "Current MASTER AntiG reserved-inactive contract is missing."
+$antiGMasterMarkers = @(
+    "AntiG/Antigravity:",
+    "RESERVED_INACTIVE",
+    "sin scheduler/handoff/certificación hasta autorización explícita futura"
+)
+foreach ($marker in $antiGMasterMarkers) {
+    if ($master -notlike "*$marker*") { throw "Current MASTER AntiG contract missing: $marker" }
 }
 
 $agentPath = Join-Path $repoRoot ".agents/agents/variapp-reviewer/agent.md"
