@@ -1,9 +1,9 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
-  "currentParent": "N6.2.C",
-  "generatedAt": "2026-09-11T00:52:30Z",
-  "regenerationReason": "SUPERVISION_36__N6.2.C_TX2_TIMEOUT__CONTROLLER_OWNERSHIP_TRANSFER__ROLLOUT_SAFE_DIRECT_FIX__GATES_PENDING",
-  "lastClosedParent": "N6.2.B",
+  "currentParent": "N6.2.D",
+  "generatedAt": "2026-09-11T02:24:43Z",
+  "regenerationReason": "REVIEW_CERT_CLOSE_24__N6.2.C_LISTO_REAL__PROMOTE_N6.2.D__PARENT_CLOSE_FIRST",
+  "lastClosedParent": "N6.2.C",
   "closureReceipts": {
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
     "N5.1.H": "vaep/evidence/fragments/N5.1.H_LISTO_REAL_20260909T1236Z.json",
@@ -32,7 +32,8 @@
     "N6.1.G": "vaep/evidence/fragments/N6.1.G_LISTO_REAL_20260910T2033Z.json",
     "N6.1.H": "vaep/evidence/fragments/N6.1.H_LISTO_REAL_20260910T2126Z.json",
     "N6.2.A": "vaep/evidence/fragments/N6.2.A_LISTO_REAL_20260910T2224Z.json",
-    "N6.2.B": "vaep/evidence/fragments/N6.2.B_LISTO_REAL_20260910T2327Z.json"
+    "N6.2.B": "vaep/evidence/fragments/N6.2.B_LISTO_REAL_20260910T2327Z.json",
+    "N6.2.C": "vaep/evidence/fragments/N6.2.C_LISTO_REAL_20260911T0223Z.json"
   },
   "policy": {
     "branch": "Desarrollo",
@@ -57,34 +58,15 @@
   },
   "throughputPlan": {
     "mode": "PARENT_CLOSE_FIRST",
-    "currentParent": "N6.2.C",
+    "currentParent": "N6.2.D",
     "currentParentMaterialScopeCount": 1,
-    "currentParentReason": "N6.2.C Jules TX2 timed out without proven session/useful content. Ownership transferred explicitly to CHATGPT_VAEP; controller REVIEW_FIRST corrected premature NOT NULL rollout to an optional restrictive FK. Fresh exact-head gates remain mandatory.",
-    "nextParent": "N6.2.D",
-    "nextParentParallelMaterialScopes": 1,
+    "currentParentReason": "N6.2.C REVIEW_FIRST is final PASS with exact-gate-head d2d2fb4 showing 56 check-runs and no failure conclusions. N6.2.C is LISTO_REAL; N6.2.D application/services/API is now dependency-valid.",
+    "nextParent": null,
+    "nextParentParallelMaterialScopes": 0,
     "nextParentScopesNonOverlapping": true,
-    "currentRun": {
-      "parent": "N6.2.C",
-      "taskId": "N6.2.C.1.TENANT_AWARE_DATA_MODEL_PERSISTENCE",
-      "worker": "CHATGPT_VAEP",
-      "taskAttempt": 1,
-      "state": "CONTROLLER_RECOVERY__REVIEW_FIRST_PASS__CAUSAL_GATES_PENDING",
-      "ownership": "CHATGPT_VAEP_SINGLE_WRITER__TRANSFERRED_AFTER_TX2_TIMEOUT",
-      "functionalHead": "f60c4ea3d9ad157f8cc1a5d06f3f86f3f1642086",
-      "reviewReceipt": "vaep/evidence/reviews/N6.2.C_CONTROLLER_REVIEW_FIRST_20260911T0033Z.json",
-      "reviewCommit": "272038a02ff8376b2a043b8d12e23616821d4446",
-      "sessionId": null,
-      "activeReal": false,
-      "p0": 0,
-      "p1": 0
-    },
-    "nextRunReserved": {
-      "parent": "N6.2.D",
-      "state": "DEPENDENCY_GATED_RESERVED",
-      "dependency": "N6.2.C_LISTO_REAL",
-      "materialization": "TENANT_AWARE_DATA_MODEL_APPLICATION_API__ROADMAP_DERIVED__NO_FILLER"
-    },
-    "laneRefill": "N6.2.C_CONTROLLER_RECOVERY__EXACT_HEAD_GATES_PENDING__NEXT_N6.2.D_DEPENDENCY_GATED"
+    "currentRun": null,
+    "nextRunReserved": null,
+    "laneRefill": "N6.2.D_CURRENT_DEPENDENCY_VALID__MATERIAL_APPLICATION_API_SCOPE__NO_FILLER__NO_DUPLICATE"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
@@ -112,86 +94,62 @@
       {
         "id": "N6.1.A",
         "order": 524,
-        "dependencies": [
-          "GATE-N5"
-        ]
+        "dependencies": ["GATE-N5"]
       },
       {
         "id": "N6.1.B",
         "order": 525,
-        "dependencies": [
-          "N6.1.A"
-        ]
+        "dependencies": ["N6.1.A"]
       },
       {
         "id": "N6.1.C",
         "order": 526,
-        "dependencies": [
-          "N6.1.B"
-        ]
+        "dependencies": ["N6.1.B"]
       },
       {
         "id": "N6.1.D",
         "order": 527,
-        "dependencies": [
-          "N6.1.C"
-        ]
+        "dependencies": ["N6.1.C"]
       },
       {
         "id": "N6.1.E",
         "order": 528,
-        "dependencies": [
-          "N6.1.D"
-        ]
+        "dependencies": ["N6.1.D"]
       },
       {
         "id": "N6.1.F",
         "order": 529,
-        "dependencies": [
-          "N6.1.E"
-        ]
+        "dependencies": ["N6.1.E"]
       },
       {
         "id": "N6.1.G",
         "order": 530,
-        "dependencies": [
-          "N6.1.F"
-        ]
+        "dependencies": ["N6.1.F"]
       },
       {
         "id": "N6.1.H",
         "order": 531,
-        "dependencies": [
-          "N6.1.G"
-        ]
+        "dependencies": ["N6.1.G"]
       },
       {
         "id": "N6.2.A",
         "order": 532,
-        "dependencies": [
-          "N6.1.H"
-        ]
+        "dependencies": ["N6.1.H"]
       },
       {
         "id": "N6.2.B",
         "order": 533,
-        "dependencies": [
-          "N6.2.A"
-        ]
+        "dependencies": ["N6.2.A"]
       },
       {
         "id": "N6.2.C",
         "order": 534,
-        "dependencies": [
-          "N6.2.B"
-        ]
+        "dependencies": ["N6.2.B"]
       },
       {
         "id": "N6.2.D",
         "order": 535,
-        "dependencies": [
-          "N6.2.C"
-        ]
+        "dependencies": ["N6.2.C"]
       }
     ]
   },
@@ -233,18 +191,15 @@
       "r3Used": false,
       "controllerDirectFixCommit": "f60c4ea3d9ad157f8cc1a5d06f3f86f3f1642086",
       "reviewReceipt": "vaep/evidence/reviews/N6.2.C_CONTROLLER_REVIEW_FIRST_20260911T0033Z.json",
-      "reviewCommit": "272038a02ff8376b2a043b8d12e23616821d4446",
+      "reviewCommit": "a717ded0a6df15001ebeb92f65ecb278cca02243",
       "failedCausalRunId": 34547228786,
       "failedCausalReason": "LEGACY_REPORTES_VENTAS_FIXTURE_MISSING_REQUIRED_EMPRESA",
       "p0": 0,
       "p1": 0,
       "ownershipTransfer": "J2_TO_CHATGPT_VAEP__EXPLICIT_AFTER_TERMINAL_TIMEOUT",
-      "failedCausalRunIds": [
-        34547228786,
-        34547601800,
-        34547601804
-      ],
-      "resolvedCausalReason": "PREMATURE_NOT_NULL_BROKE_CURRENT_APPLICATION_FLOW__ROLLOUT_SAFE_OPTIONAL_RESTRICT_FK_APPLIED"
+      "failedCausalRunIds": [34547228786,34547601800,34547601804],
+      "resolvedCausalReason": "PREMATURE_NOT_NULL_BROKE_CURRENT_APPLICATION_FLOW__ROLLOUT_SAFE_OPTIONAL_RESTRICT_FK_APPLIED__EXACT_HEAD_GATES_PASS",
+      "closureReceipt": "vaep/evidence/fragments/N6.2.C_LISTO_REAL_20260911T0223Z.json"
     }
   ],
   "prearmedRoadmap": [
@@ -271,19 +226,20 @@
     },
     {
       "parent": "N6.2.C",
-      "state": "CONTROLLER_RECOVERY__REVIEW_FIRST_PASS__CAUSAL_GATES_PENDING",
+      "state": "LISTO_REAL",
       "dependency": "N6.2.B_LISTO_REAL",
-      "materialization": "TENANT_AWARE_DATA_MODEL_PERSISTENCE__ROADMAP_DERIVED__NO_FILLER",
+      "materialization": "TENANT_AWARE_DATA_MODEL_PERSISTENCE__CONTROLLER_RECOVERY__REVIEW_FIRST_PASS__EXACT_GATES_PASS",
       "taskId": "N6.2.C.1.TENANT_AWARE_DATA_MODEL_PERSISTENCE",
       "worker": "CHATGPT_VAEP",
       "runId": 34546666164,
       "dispatchId": "N6-2-C-1-TENANT-AWARE-DATA-MODEL-PERSISTENCE-J2-A1-TX2",
       "functionalHead": "f60c4ea3d9ad157f8cc1a5d06f3f86f3f1642086",
-      "reviewCommit": "272038a02ff8376b2a043b8d12e23616821d4446"
+      "reviewCommit": "a717ded0a6df15001ebeb92f65ecb278cca02243",
+      "closureReceipt": "vaep/evidence/fragments/N6.2.C_LISTO_REAL_20260911T0223Z.json"
     },
     {
       "parent": "N6.2.D",
-      "state": "READY_DEPENDENCY_GATED",
+      "state": "CURRENT_DEPENDENCY_VALID",
       "dependency": "N6.2.C_LISTO_REAL",
       "materialization": "TENANT_AWARE_DATA_MODEL_APPLICATION_API__ROADMAP_DERIVED__NO_FILLER"
     }
@@ -296,7 +252,7 @@
     "J5": [],
     "J6": []
   },
-  "rolling60CertifiedParents": [],
-  "rolling60Count": 0,
-  "lastClosureFunctionalHead": "a8391cef1c8f6750dc07cbd8a410b491d78153df"
+  "rolling60CertifiedParents": ["N6.2.C"],
+  "rolling60Count": 1,
+  "lastClosureFunctionalHead": "f60c4ea3d9ad157f8cc1a5d06f3f86f3f1642086"
 }
