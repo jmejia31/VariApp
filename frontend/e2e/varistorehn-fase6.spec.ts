@@ -172,7 +172,15 @@ test.describe('VariStoreHn Fase 6 — checkout y pedido', () => {
 
     await page.goto('/varistorehn/checkout?fuente=bd');
     await expect(page.getByRole('heading', { name: 'Tu compra' })).toBeVisible();
-    expect(requestCheckout).toEqual({ items: [{ productoId: 501, modeloId: 5010, unidades: 2 }] });
+    expect(requestCheckout).toEqual({
+      items: [{
+        productoId: 501,
+        modeloId: 5010,
+        modeloNombre: 'Modelo auditoría',
+        marcaNombre: 'Marca real',
+        unidades: 2
+      }]
+    });
     expect(JSON.stringify(requestCheckout)).not.toMatch(/precio|stock|total/i);
 
     const resumen = page.locator('.summary-card');
