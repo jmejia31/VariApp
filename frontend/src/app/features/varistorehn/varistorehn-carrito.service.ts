@@ -127,14 +127,6 @@ export class VaristorehnCarritoService {
     this.actualizar([]);
   }
 
-  limpiarAviso(): void {
-    this._aviso.set('');
-  }
-
-  referencias(): ReferenciaCarrito[] {
-    return referenciasCarrito(this._items());
-  }
-
   private actualizar(items: ItemCarrito[]): void {
     this._items.set(items);
     this._aviso.set('');

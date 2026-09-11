@@ -61,9 +61,9 @@
       <aside class="hero-checkout">
         <span class="eyebrow">TÚ ELIGES CÓMO COMPRAR</span>
         <h2>Un carrito.<br>Más opciones.</h2>
-        <p>Agrega productos y continúa por el canal habilitado para tu tienda.</p>
-        @if (permiteWhatsapp()) { <div class="method"><app-store-icon nombre="chat" /><span><strong>WhatsApp</strong><small>Pedido directo con la tienda</small></span></div> }
-        @if (permiteTarjeta()) { <div class="method"><app-store-icon nombre="tarjeta" /><span><strong>Pago con tarjeta</strong><small>{{ tarjetaConfigurada ? 'Pasarela segura' : 'Listo para conectar cuando exista pasarela' }}</small></span></div> }
+        <p>Agrega productos y revisa tu selección desde un único carrito.</p>
+        @if (permiteWhatsapp()) { <div class="method"><app-store-icon nombre="chat" /><span><strong>WhatsApp</strong><small>Canal de contacto habilitado por la tienda</small></span></div> }
+        @if (permiteTarjeta()) { <div class="method"><app-store-icon nombre="tarjeta" /><span><strong>Pago con tarjeta</strong><small>{{ tarjetaConfigurada ? 'Configuración detectada; finalización aún no habilitada' : 'Pendiente de habilitación' }}</small></span></div> }
         <button type="button" class="text-link" (click)="abrirCarrito()">Abrir carrito <app-store-icon nombre="flecha" /></button>
       </aside>
     </section>
@@ -147,31 +147,8 @@
   </main>
 
   @if (identidad.config().piePaginaActivo) {
-    <footer class="store-footer"><div class="container footer-grid"><div><strong>{{ identidad.nombreSistema() }}</strong><p>{{ identidad.config().piePaginaTexto || identidad.config().eslogan }}</p></div><div><b>Tienda</b><a href="#catalogo">Productos</a><a [href]="enlaceCategorias">Categorías</a><a href="#contacto">Contacto</a></div><div><b>Compra</b>@if (permiteWhatsapp()) { <span>Pedidos por WhatsApp</span> } @if (permiteTarjeta()) { <span>Pago con tarjeta</span> }</div></div><div class="container footer-bottom">@if (identidad.mostrarCopyright()) { <small>{{ identidad.copyright() }}</small> }</div></footer>
+    <footer class="store-footer"><div class="container footer-grid"><div><strong>{{ identidad.nombreSistema() }}</strong><p>{{ identidad.config().piePaginaTexto || identidad.config().eslogan }}</p></div><div><b>Tienda</b><a href="#catalogo">Productos</a><a [href]="enlaceCategorias">Categorías</a><a href="#contacto">Contacto</a></div><div><b>Compra</b>@if (permiteWhatsapp()) { <span>WhatsApp disponible como canal de contacto</span> } @if (permiteTarjeta()) { <span>Pago con tarjeta sujeto a habilitación</span> }</div></div><div class="container footer-bottom">@if (identidad.mostrarCopyright()) { <small>{{ identidad.copyright() }}</small> }</div></footer>
   }
 
   <div class="sr-only" role="status" aria-live="polite">{{ aviso() }}</div>
-
-  <dialog #carritoDialog class="cart-dialog" aria-labelledby="carrito-title" (click)="$event.target === carritoDialog && cerrarCarrito()">
-    <div class="cart-panel"><header><div><p class="eyebrow">TU SELECCIÓN</p><h2 id="carrito-title">Mi carrito <small>{{ totalUnidades() }} unidades</small></h2></div><button class="icon-button" type="button" aria-label="Cerrar carrito" (click)="cerrarCarrito()"><app-store-icon nombre="cerrar" /></button></header>
-      <div class="cart-items">
-        @for (item of carrito(); track item.clave) {
-          <article class="cart-item"><div class="cart-art">@if (imagenValida(item.imagen)) { <img [src]="item.imagen" [alt]="item.nombre" (error)="errorImagen(item.imagen)"> } @else { <app-store-art [tipo]="item.ilustracion" /> }</div><div class="cart-info"><h3>{{ item.nombre }}</h3><small>{{ item.modelo }}</small><strong>{{ moneda(item.precio) }}</strong><div class="quantity"><button type="button" (click)="cambiarUnidades(item.clave, -1)"><app-store-icon nombre="menos" /></button><output>{{ item.unidades }}</output><button type="button" [disabled]="item.unidades >= item.stock" (click)="cambiarUnidades(item.clave, 1)"><app-store-icon nombre="mas" /></button></div></div><button class="remove" type="button" aria-label="Quitar producto" (click)="quitar(item.clave)"><app-store-icon nombre="borrar" /></button></article>
-        } @empty {
-          <div class="empty"><app-store-icon nombre="bolsa" /><h3>Tu carrito está vacío</h3><p>Agrega productos para verlos aquí.</p><button class="button primary" type="button" (click)="cerrarCarrito(); irCatalogo()">Explorar productos</button></div>
-        }
-      </div>
-      @if (carrito().length) {
-        <div class="cart-footer"><button type="button" class="text-link" (click)="vaciarCarrito()">Vaciar carrito</button><div class="cart-total"><span>Subtotal</span><strong>{{ moneda(totalCarrito()) }}</strong></div><p>El total final, entrega e impuestos se confirman antes de pagar. El carrito no reserva existencias.</p>
-          @if (!utilizarDatosBaseDatos()) { <div class="notice">Modo ejemplo: estas acciones solo muestran una vista previa.</div> }
-          @if (permiteWhatsapp()) { <button class="button whatsapp full" type="button" [disabled]="utilizarDatosBaseDatos() && !telefono()" (click)="realizarPedido()"><app-store-icon nombre="chat" /> {{ utilizarDatosBaseDatos() ? 'Pedir por WhatsApp' : 'Vista previa WhatsApp' }}</button> }
-          @if (permiteTarjeta()) { <button class="button primary full" type="button" [disabled]="procesandoPago() || (utilizarDatosBaseDatos() && !tarjetaConfigurada)" (click)="pagarConTarjeta()"><app-store-icon nombre="tarjeta" /> {{ procesandoPago() ? 'Abriendo pasarela…' : utilizarDatosBaseDatos() ? 'Continuar con tarjeta' : 'Vista previa de tarjeta' }}</button> }
-          @if (utilizarDatosBaseDatos() && permiteTarjeta() && !tarjetaConfigurada) { <p class="payment-help">Pago con tarjeta pendiente de conectar a una pasarela.</p> }
-          @if (errorPago()) { <div class="notice error" role="alert">{{ errorPago() }}</div> }
-          @if (vistaPedido()) { <div class="checkout-preview"><h3>Vista previa del mensaje</h3><pre>{{ vistaPedido() }}</pre><button type="button" class="text-link" (click)="vistaPedido.set('')">Cerrar</button></div> }
-          @if (vistaTarjeta()) { <div class="checkout-preview"><app-store-icon nombre="escudo" /><h3>Pago mediante pasarela segura</h3><p>En producción la tienda redirigirá al proveedor de pagos. Esta vista no solicita ni procesa datos bancarios.</p><strong>{{ moneda(totalCarrito()) }}</strong><button type="button" class="text-link" (click)="vistaTarjeta.set(false)">Cerrar</button></div> }
-        </div>
-      }
-    </div>
-  </dialog>
 </div>

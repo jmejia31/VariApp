@@ -71,7 +71,7 @@
           <a class="button primary" [href]="enlaces.productos">Explorar productos</a>
           <a class="button ghost" [href]="enlaces.categorias">Ver categorías</a>
         </div>
-        <p class="checkout-guard"><app-store-icon nombre="escudo" /> No se puede continuar a checkout con un carrito vacío.</p>
+        <p class="checkout-guard"><app-store-icon nombre="escudo" /> Agrega al menos un producto antes de continuar con tu compra.</p>
       </section>
     } @else {
       <div class="cart-layout">
@@ -123,10 +123,10 @@
             <div><dt>Subtotal</dt><dd>{{ moneda(carrito.subtotal()) }}</dd></div>
             <div class="summary-total"><dt>Total del carrito</dt><dd>{{ moneda(carrito.total()) }}</dd></div>
           </dl>
-          <p class="summary-note">En esta fase el total del carrito coincide con el subtotal. Envío, impuestos y total final se calculan y confirman en el checkout de la Fase 6. El carrito no reserva inventario.</p>
+          <p class="summary-note">El total del carrito corresponde a los productos seleccionados. El carrito no reserva inventario; entrega, impuestos u otros cargos, si aplican, se confirmarán antes de finalizar la compra.</p>
           <div class="summary-actions">
             <a class="button primary" [href]="enlaces.productos">Seguir comprando</a>
-            <span class="next-phase"><app-store-icon nombre="escudo" /> Checkout se habilita en la Fase 6; no enlazamos una pantalla incompleta.</span>
+            <span class="next-phase"><app-store-icon nombre="escudo" /> Por ahora puedes revisar tu selección y seguir comprando.</span>
           </div>
         </aside>
       </div>
@@ -138,7 +138,7 @@
       <div class="container footer-grid">
         <div><strong>{{ identidad.nombreSistema() }}</strong><p>{{ identidad.config().piePaginaTexto || identidad.config().eslogan }}</p></div>
         <div><b>Tienda</b><a [href]="enlaces.inicio">Inicio</a><a [href]="enlaces.productos">Productos</a><a [href]="enlaces.categorias">Categorías</a></div>
-        <div><b>Ayuda</b><a [href]="enlaces.contacto">Contacto</a><span>Checkout y pedido continúan en la Fase 6.</span></div>
+        <div><b>Ayuda</b><a [href]="enlaces.contacto">Contacto</a><span>Tu selección se conserva mientras revisas el catálogo.</span></div>
       </div>
       <div class="container footer-bottom">@if (identidad.mostrarCopyright()) { <small>{{ identidad.copyright() }}</small> }</div>
     </footer>

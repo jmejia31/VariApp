@@ -138,12 +138,6 @@ export function agregarItem(items: ItemCarrito[], producto: ProductoTienda, mode
   return items.map(i => i.clave === item.clave ? { ...item, unidades: i.unidades + 1 } : i);
 }
 
-export function cambiarCantidad(items: ItemCarrito[], clave: string, cambio: number): ItemCarrito[] {
-  if (!Number.isInteger(cambio)) return items;
-  return items.map(i => i.clave === clave ? { ...i, unidades: Math.min(i.stock, i.unidades + cambio) } : i)
-    .filter(i => i.unidades > 0);
-}
-
 export function referenciasCarrito(items: ItemCarrito[]): ReferenciaCarrito[] {
   // Never persist prices, stock, image URLs or customer/payment information.
   return items.map(({ productoId, modeloClave, unidades }) => ({ productoId, modeloClave, unidades }));
@@ -179,14 +173,6 @@ export function telefonoWhatsapp(valor?: string): string {
   if (numero.startsWith('00')) numero = numero.slice(2);
   if (numero.length === 8) numero = `504${numero}`;
   return /^[1-9]\d{9,14}$/.test(numero) ? numero : '';
-}
-
-export function urlCheckoutSegura(valor: string, origenes: readonly string[]): string | null {
-  try {
-    const url = new URL(valor);
-    return url.protocol === 'https:' && !url.username && !url.password
-      && origenes.includes(url.origin) ? url.href : null;
-  } catch { return null; }
 }
 
 /** Illustrative inventory only. Never written to the database or sent to a checkout. */

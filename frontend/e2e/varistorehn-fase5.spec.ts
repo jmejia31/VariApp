@@ -95,7 +95,7 @@ async function abrirCatalogoDemo(page: Page): Promise<void> {
 test.describe('VariStoreHn Fase 5 — carrito global y persistente', () => {
   test.describe.configure({ retries: 0 });
 
-  test('ruta canónica vacía muestra estado útil y no ofrece checkout incompleto', async ({ page }) => {
+  test('ruta canónica vacía muestra estado útil, copy público y no ofrece checkout incompleto', async ({ page }) => {
     await prepararEmpresa(page);
     await page.goto('/varistorehn/carrito');
     await limpiarCarritos(page);
@@ -104,10 +104,35 @@ test.describe('VariStoreHn Fase 5 — carrito global y persistente', () => {
     await expect(page).toHaveURL(/\/varistorehn\/carrito$/);
     await expect(page.getByRole('heading', { level: 1, name: 'Mi carrito' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Encuentra algo que te encante' })).toBeVisible();
-    await expect(page.getByText('No se puede continuar a checkout con un carrito vacío.')).toBeVisible();
+    await expect(page.getByText('Agrega al menos un producto antes de continuar con tu compra.')).toBeVisible();
+    await expect(page.getByText(/Fase 6/)).toHaveCount(0);
     await expect(page.locator('a[href="/varistorehn/checkout"]')).toHaveCount(0);
     await expect(page.getByRole('link', { name: 'Explorar productos' })).toHaveAttribute('href', '/varistorehn/productos');
     await expect(page.locator('app-varistorehn-header').getByRole('button', { name: 'Abrir carrito con 0 unidades' })).toBeVisible();
+  });
+
+  test('home usa una sola ruta de carrito, no abre drawer paralelo ni ejecuta cierre de compra', async ({ page }) => {
+    await prepararEmpresa(page);
+    await page.goto('/varistorehn');
+    await limpiarCarritos(page);
+    await page.reload();
+    await expect(page.getByRole('status').filter({ hasText: '14 productos encontrados' })).toBeVisible();
+
+    await expect(page.locator('dialog.cart-dialog')).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Pedir por WhatsApp' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Continuar con tarjeta' })).toHaveCount(0);
+
+    const tarjeta = page.locator('article.product-card').filter({ hasText: 'Laptop Pro 14' });
+    await tarjeta.getByRole('button', { name: 'Agregar Laptop Pro 14' }).click();
+    await expect(page).toHaveURL(/\/varistorehn$/);
+    await expect(page.locator('app-varistorehn-header').getByRole('button', { name: 'Abrir carrito con 1 unidades' })).toBeVisible();
+
+    await page.getByRole('button', { name: 'Ver carrito', exact: true }).click();
+    await expect(page).toHaveURL(/\/varistorehn\/carrito$/);
+    await expect(page.locator('.cart-item').filter({ hasText: 'Laptop Pro 14' })).toBeVisible();
+
+    await page.goto('/varistorehn?carrito=1');
+    await expect(page).toHaveURL(/\/varistorehn\/carrito$/);
   });
 
   test('agregar desde catálogo sincroniza header, página de carrito y sobrevive recarga', async ({ page }) => {

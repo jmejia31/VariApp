@@ -1,104 +1,54 @@
 # VariStoreHn — Fase 2: categorías públicas
 
-## Estado
+## Estado vigente
 
-**COMPLETADA / REAUDITADA.** La omisión arquitectónica detectada después del primer cierre fue corregida, integrada en `Desarrollo` y revalidada sobre el commit exacto resultante.
+**COMPLETADA / REAUDITADA / HARDENED.**
 
-PR de cierre reaudidado: #3336.
-Commit integrado: `fc12bf9437ba1825d3007e620064fdd84557ac4d`.
-Regresión post-merge Fase 2: run `34536591699` — **success**.
+Este documento conserva la trazabilidad de Fase 2 y refleja el estado vigente después de completar Fases 3–5. Los puentes temporales usados durante el cierre original ya no describen la arquitectura actual.
 
-## Alcance certificado
+## Alcance vigente
 
-- `/varistorehn/categorias` pública y sin guards administrativos;
-- `VaristorehnCategoriasComponent` reutilizando el header público;
-- consumo de `GET /tienda/categorias` y mapeo a `CategoriaTienda`;
-- estados `loading | empty | error | success` en el listado;
-- `cantidadProductos = null` preservado como desconocido;
-- sin fallback silencioso de API real a fixtures;
-- categorías del home obtenidas desde la fuente pública dedicada, no inferidas desde texto de productos;
-- `/varistorehn/categoria/:slug` pública y sin guards administrativos;
-- página `VaristorehnCategoriaComponent` consumiendo `GET /tienda/categorias/{slug}`;
-- URL corregida con `replaceUrl` cuando el backend devuelve un slug canónico distinto;
-- estados `loading | error | not-found | success` en la página canónica;
-- categoría inexistente o inactiva representada como no encontrada, sin fabricar fixtures;
-- tarjetas de `/varistorehn/categorias` enlazadas mediante `VARISTOREHN_PATHS.categoria(slug)`;
-- continuidad de identidad, búsqueda, WhatsApp y resumen del carrito;
-- continuidad al catálogo actual mediante `?categoria=<slug>#catalogo`, sin adelantar `/varistorehn/productos` de Fase 3;
-- estilos gobernados por tokens del tema del sistema y objetivos táctiles de al menos 44 px.
+- `/varistorehn/categorias` es pública y no usa guards administrativos.
+- `VaristorehnCategoriasComponent` reutiliza el header público.
+- La fuente real usa `GET /tienda/categorias` y mapea a `CategoriaTienda`.
+- Se conservan estados `loading | empty | error | success`.
+- `cantidadProductos = null` se representa como desconocida; no se fabrica `0`.
+- Un error real nunca cae silenciosamente a fixtures demo.
+- `/varistorehn/categoria/:slug` es pública y consume `GET /tienda/categorias/{slug}`.
+- Un slug histórico se corrige con `replaceUrl` cuando el backend devuelve el slug canónico.
+- Categoría inexistente/inactiva usa `not-found`; no se inventa un fixture.
+- Las tarjetas enlazan con `VARISTOREHN_PATHS.categoria(slug)`.
+- “Ver productos de esta categoría” continúa hoy hacia el catálogo canónico `/varistorehn/productos?categoria=<slug>` de Fase 3.
+- Header, búsqueda, WhatsApp, identidad, tema y **carrito global de Fase 5** mantienen continuidad.
+- El acceso al carrito usa `/varistorehn/carrito`, no un drawer ni `?carrito=1` como destino funcional.
 
-## Gap de reauditoría — resuelto
+## Evolución controlada
 
-La discrepancia original era verificable dentro del código: `VARISTOREHN_PATHS.categoria(slug)` y `VaristorehnService.obtenerCategoriaPorSlug(slug)` ya existían, pero `app.routes.ts` no activaba la ruta y las tarjetas regresaban al home con `?categoria=<slug>#catalogo`.
+Durante el cierre cronológico de Fase 2, `/varistorehn/productos` todavía pertenecía a Fase 3 y la continuidad usaba temporalmente el catálogo embebido del home. Fase 3 sustituyó ese puente por el catálogo independiente. Fase 5 sustituyó cualquier puente temporal de carrito por la ruta/store globales.
 
-- [x] activar `/varistorehn/categoria/:slug`;
-- [x] crear página pública por slug;
-- [x] consumir el endpoint canónico y manejar cambio de slug;
-- [x] cambiar tarjetas al enlace canónico;
-- [x] representar loading/error/not-found/success sin fallback silencioso;
-- [x] mantener header, búsqueda, carrito e identidad/tema;
-- [x] no activar todavía `/varistorehn/productos`;
-- [x] ampliar guardas estáticas y Playwright;
-- [x] revalidar Fase 1 + listado Fase 2;
-- [x] lint/TypeScript + build producción + E2E verdes;
-- [x] integrar y revalidar post-merge en `Desarrollo`.
+Esos comportamientos antiguos quedan como historia del desarrollo y **no deben restaurarse**. Las guardas acumuladas de Fases 2–5 protegen las rutas canónicas actuales.
 
-## Evidencia ejecutable
+## Definition of Done vigente
 
-### Rama de reauditoría
+- [x] Listado público independiente.
+- [x] Ruta canónica por categoría.
+- [x] Fuente `CategoriaTienda` pública.
+- [x] Loading/empty/error/success y not-found controlados.
+- [x] Conteo desconocido preservado como desconocido.
+- [x] Sin fallback silencioso de datos reales a demo.
+- [x] Navegación por slug canónico.
+- [x] Continuidad al catálogo independiente de Fase 3.
+- [x] Continuidad con carrito global de Fase 5.
+- [x] Sin guards/componentes administrativos.
+- [x] Tema por tokens del sistema y touch targets adecuados.
+- [x] Guardia estática y 8 escenarios Playwright permanentes.
 
-HEAD funcional: `0d406d20454311ad8fa82d629fb4d4be4b4a643f`.
-Run `34535758631`: **success**.
+## Evidencia histórica
 
-- TypeScript/lint: success;
-- guardia Fase 1: success;
-- guardia Fase 2: success;
-- build de producción: success;
-- Playwright Fase 1: **4/4**;
-- Playwright Fase 2: **8/8**.
+PR de cierre reauditado: #3336. Commit integrado: `fc12bf9437ba1825d3007e620064fdd84557ac4d`. Regresión post-merge Fase 2: run `34536591699` — **success**.
 
-### PR #3336
+La suite mantiene 8 escenarios sobre listado independiente, fuente real, empty, error, continuidad de navegación, slug canónico, not-found y error por slug. Las regresiones de fases posteriores vuelven a ejecutar esta suite acumulativamente.
 
-HEAD: `8b8e279dca411988b67918ad68a3bab8bb925158`.
+## Fuera de alcance actual
 
-- run Fase 2 `34536153026`: **success**;
-- run independiente Fase 1 `34536152956`: **success**.
-
-### Post-merge exacto
-
-Commit: `fc12bf9437ba1825d3007e620064fdd84557ac4d`.
-Run Fase 2 `34536591699`: **success**.
-
-El job post-merge aprobó instalación, lint/guardas estáticas, build de producción, servidor Angular, regresión Fase 1, Playwright Fase 2 y publicación de evidencia.
-
-Los ocho escenarios de Fase 2 cubren:
-
-1. listado independiente, header compartido, fixtures explícitos y reflow sin overflow;
-2. fuente real `CategoriaTienda` y conteo `null` preservado como desconocido;
-3. estado `empty` sin fabricar categorías;
-4. error del listado real sin fallback silencioso a demo;
-5. continuidad búsqueda → categoría canónica → catálogo filtrado → carrito;
-6. consumo por slug y corrección de URL al slug canónico devuelto por backend;
-7. categoría inexistente como `not-found` sin fixture inventado;
-8. error de categoría por slug manteniendo el fallo real.
-
-Durante el hardening inicial, la guardia de calidad bloqueó correctamente una versión que contenía `outline: none`; se eliminó la supresión de foco antes de certificar el HEAD verde.
-
-## Concurrencia
-
-La integración se realizó mediante PR aislado. Antes del merge, `Desarrollo` solo había avanzado en documentación VAEP ajena a VariStoreHn, sin solapamiento con los archivos de esta fase. El merge se ejecutó con SHA de cabeza esperado para evitar integrar una revisión distinta de la validada.
-
-## Límite de fase
-
-Permanecen fuera de Fase 2:
-
-- `/varistorehn/productos` como catálogo independiente: Fase 3;
-- detalle de producto por slug: Fase 4;
-- store global/persistente del carrito: Fase 5;
-- checkout/pedido real: Fase 6.
-
-## Observación transversal
-
-La instalación de dependencias reporta vulnerabilidades preexistentes del repositorio. No se atribuyen a la implementación de Fase 2 y deben mantenerse como deuda de seguridad transversal separada.
-
-**Conclusión:** Fase 2 recertificada con ruta canónica por categoría, estados reales, regresión estática, navegador real y validación exacta post-merge.
+Checkout/pedido real pertenece a Fase 6 y **no está activado** en este cierre.

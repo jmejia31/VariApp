@@ -44,7 +44,9 @@ expect(storefrontTs.includes('VaristorehnHeaderComponent'), 'El escaparate debe 
 expect(storefrontHtml.includes('<app-varistorehn-header'), 'El escaparate debe delegar su cabecera al componente público.');
 expect(!storefrontHtml.includes('<header class="store-header">'), 'La cabecera monolítica anterior debe dejar de vivir en el escaparate.');
 expect(storefrontHtml.includes('(busquedaActualizada)="buscar($event)"'), 'La búsqueda del header debe seguir filtrando el catálogo actual.');
-expect(storefrontHtml.includes('(carritoSolicitado)="abrirCarrito()"'), 'El carrito del header debe abrir el estado real existente.');
+expect(storefrontHtml.includes('(carritoSolicitado)="abrirCarrito()"'), 'El evento de carrito del header debe conservar un manejador explícito.');
+expect(storefrontTs.includes('navigateByUrl(VARISTOREHN_PATHS.carrito'), 'El manejador de carrito del home debe navegar a la ruta canónica global.');
+expect(!storefrontHtml.includes('#carritoDialog') && !storefrontHtml.includes('class="cart-dialog"'), 'El home no debe reintroducir un drawer de carrito paralelo.');
 
 const staleHeaderSelectors = [
   '.skip-link',
@@ -71,6 +73,10 @@ for (const [name, content] of [
   }
 }
 
+for (const selector of ['.cart-dialog', '.cart-panel', '.detail-layout', '.detail-media', '.detail-body']) {
+  expect(!storefrontScss.includes(selector) && !storefrontResponsiveScss.includes(selector), `El home no debe conservar CSS legado ${selector}.`);
+}
+
 for (const [name, content] of [['header.ts', headerTs], ['header.html', headerHtml]]) {
   expect(!content.includes('authGuard'), `${name} no debe depender de authGuard.`);
   expect(!content.includes('permisoGuard'), `${name} no debe depender de permisoGuard.`);
@@ -84,4 +90,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.info('Fase 1 — navegación/header: guardas estáticas aprobadas, incluida la extracción completa de estilos.');
+console.info('Fase 1 — navegación/header: rutas públicas, carrito canónico y extracción completa de estilos aprobados.');

@@ -44,7 +44,6 @@ export class VaristorehnCarritoComponent implements OnInit {
   readonly categoriasNavegacion = computed(() => this.categorias().map(categoria => categoria.nombre));
   readonly totalUnidades = computed<number | null>(() => this.carrito.listo() ? this.carrito.totalUnidades() : null);
   readonly subtotal = computed<number | null>(() => this.carrito.listo() ? this.carrito.subtotal() : null);
-  readonly puedeContinuarCheckout = computed(() => this.estado() === 'success' && this.carrito.listo() && !this.carrito.vacio());
 
   readonly enlaces = {
     inicio: VARISTOREHN_PATHS.inicio,
