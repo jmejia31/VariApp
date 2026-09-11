@@ -1,8 +1,10 @@
 {
+  "schemaVersion": "tasks-first.v1",
   "authority": "docs/VAEP_AUTHORITY.md",
+  "executionModel": "TASKS_FIRST_JULES_ON_DEMAND",
   "currentParent": "N6.4.A",
-  "generatedAt": "2026-09-11T14:03:00Z",
-  "regenerationReason": "N6.3.H_LISTO_REAL__N6.4.A_CURRENT__SUPERVISION_CATCHUP__N6.4.B_PREARMED_DEPENDENCY_GATED__NO_FILLER",
+  "generatedAt": "2026-09-11T15:35:54Z",
+  "regenerationReason": "TASKS_FIRST_CUTOVER__DIRECT_EXECUTION_DEFAULT__JULES_OPTIONAL__NO_RUNTIME_HISTORY",
   "lastClosedParent": "N6.3.H",
   "closureReceipts": {
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
@@ -49,30 +51,45 @@
     "N6.3.H": "vaep/evidence/fragments/N6.3.H_LISTO_REAL_20260911T1402Z.json"
   },
   "policy": {
+    "executionModel": "TASKS_FIRST_JULES_ON_DEMAND",
     "branch": "Desarrollo",
     "globalAdmission": "OPEN_ONLY",
-    "programmedBacklogTargetTotal": 72,
-    "liveQueueDepthTarget": 2,
-    "genericFloorRegeneration": false,
+    "directExecutionDefault": true,
+    "taskScopeLeaseRequired": true,
+    "leaseTtlMinutes": 10,
+    "julesRequiredForProgress": false,
+    "julesAutomaticRefill": false,
+    "julesAutomaticQueueFloor": false,
+    "julesMinimumUtilizationTarget": 0,
     "noBusywork": true,
     "semanticIdentity": "CURRENT_PARENT + material scope/semantic facet",
-    "stopWhenEligibleWorkExhausted": true,
-    "materialParallelismTargetPerParent": 6,
     "requireDistinctWriteScopesWhenParallel": true,
-    "activeWorkerCount": 6,
-    "activeWorkers": ["J1", "J2", "J3", "J4", "J5", "J6"]
+    "activeScheduledExecutorCount": 10,
+    "availableOptionalWorkers": ["J1", "J2", "J3", "J4", "J5", "J6"]
   },
   "throughputPlan": {
-    "mode": "PARENT_CLOSE_FIRST",
+    "mode": "TASKS_FIRST_PARENT_CLOSE_FIRST",
     "currentParent": "N6.4.A",
     "currentParentMaterialScopeCount": 1,
     "currentParentReason": "N6.3.H is LISTO_REAL. N6.4.A is the roadmap-derived audit/preflight facet for Usuarios por empresa.",
+    "directExecutorClass": "SCHEDULED_AUTOMATION_CONTROLLER",
     "nextParent": "N6.4.B",
     "nextParentParallelMaterialScopes": 1,
     "nextParentScopesNonOverlapping": true,
-    "currentRun": null,
-    "nextRunReserved": null,
-    "laneRefill": "N6.4.A_CURRENT__N6.4.B_PREARMED_DEPENDENCY_GATED__NO_FILLER"
+    "directNextSafePrearm": "N6.4.B_DEPENDENCY_GATED__READ_ONLY_PREARM",
+    "julesOffload": "OPTIONAL_EXPLICIT_ONLY",
+    "currentJulesOffload": null
+  },
+  "lease": {
+    "scope": null,
+    "ownerAutomationId": null,
+    "acquiredAtUtc": null,
+    "heartbeatAtUtc": null,
+    "baseHead": null,
+    "status": "RELEASED",
+    "token": null,
+    "ttlMinutes": 10,
+    "sourceOfTruth": "GOOGLE_SHEET_CONFIG_READ_WRITE_READBACK"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
@@ -108,57 +125,16 @@
       {"id":"N6.4.B","order":549,"dependencies":["N6.4.A"]}
     ]
   },
-  "recoveredRuns": [
-    {
-      "parent":"N6.1.G","logicalTaskId":"N6.1.G.1.TENANT_EMPRESA_QA_REGRESSION_CI","worker":"J6","originalRunId":34524834350,"originalTerminal":"PRESESSION_PRIMARY_BASE_HEAD_MISMATCH","contentAttemptConsumed":false,"tx1RunId":34525160317,"tx1JobId":103032161616,"tx1SessionId":"10428644054862379079","tx1ArtifactId":10171626009,"terminal":"COMPLETED_SUCCESS_REVIEW_FIRST_ACCEPTED","integrationCommit":"bbd3792f7cc42b1e62163a76735dc2ad6eacb899","integrationReceiptClass":"NONCANONICAL_PARENT_EVIDENCE_ONLY__NO_JULES_PRODUCTIVITY","r2Used":false,"r3Used":false
-    },
-    {
-      "parent":"N6.2.C","logicalTaskId":"N6.2.C.1.TENANT_AWARE_DATA_MODEL_PERSISTENCE","worker":"J2","invalidRenameRunId":34543012961,"invalidRenameTerminal":"PRESESSION_INVALID_REDISPATCH__NON_APPEND_ONLY","invalidTx1RunId":34546602308,"invalidTx1Terminal":"PRESESSION_FILENAME_DISPATCH_ID_MISMATCH","tx2RunId":34546666164,"tx2JobId":103100674308,"tx2ManifestCommit":"b44a1a14465fe8129fb1a569d4bc95787a262f8d","terminal":"TX2_TIMEOUT__NO_SESSION_OR_USEFUL_CONTENT__EVIDENCE_ONLY","sessionId":null,"activeReal":false,"contentAttemptConsumed":false,"taskAttempt":1,"r2Used":false,"r3Used":false,"controllerDirectFixCommit":"f60c4ea3d9ad157f8cc1a5d06f3f86f3f1642086","reviewReceipt":"vaep/evidence/reviews/N6.2.C_CONTROLLER_REVIEW_FIRST_20260911T0033Z.json","reviewCommit":"a717ded0a6df15001ebeb92f65ecb278cca02243","failedCausalRunId":34547228786,"failedCausalReason":"LEGACY_REPORTES_VENTAS_FIXTURE_MISSING_REQUIRED_EMPRESA","p0":0,"p1":0,"ownershipTransfer":"J2_TO_CHATGPT_VAEP__EXPLICIT_AFTER_TERMINAL_TIMEOUT","failedCausalRunIds":[34547228786,34547601800,34547601804],"resolvedCausalReason":"PREMATURE_NOT_NULL_BROKE_CURRENT_APPLICATION_FLOW__ROLLOUT_SAFE_OPTIONAL_RESTRICT_FK_APPLIED__EXACT_HEAD_GATES_PASS","closureReceipt":"vaep/evidence/fragments/N6.2.C_LISTO_REAL_20260911T0223Z.json"
-    },
-    {
-      "parent":"N6.2.G","logicalTaskId":"N6.2.G.1.TENANT_AWARE_DATA_MODEL_QA_REGRESSION_CI","worker":"J5","originalRunId":34565910261,"tx1RunId":34566243269,"tx1JobId":103158845229,"tx1SessionId":"13550524690027394816","terminal":"TX1_LANE_BUDGET_EXCEEDED__SUPERSEDED__NO_PATCH__EVIDENCE_ONLY","activeReal":false,"contentAttemptConsumed":false,"taskAttempt":1,"r2Used":false,"r3Used":false,"ownershipTransfer":"J5_TO_CHATGPT_VAEP__EXPLICIT_AFTER_STALL_THRESHOLD","reviewReceipt":"vaep/evidence/reviews/N6.2.G_CONTROLLER_REVIEW_FIRST_20260911T0546Z.json","closureReceipt":"vaep/evidence/fragments/N6.2.G_LISTO_REAL_20260911T0557Z.json"
-    },
-    {
-      "parent":"N6.2.H","logicalTaskId":"N6.2.H.1.TENANT_AWARE_DATA_MODEL_DOCUMENTATION_CERTIFICATION","worker":"J1","runId":34568021956,"jobId":103164036144,"sessionId":"12752887052773963212","artifactId":10187128893,"terminal":"COMPLETED_PATCH_PRESENT__MATERIAL_CONTRACT_FAILURE","patchBase":"eb9de9b42a02feee9fb23ea5ad02537ab8fada93","taskAttempt":1,"activeReal":false,"controllerDirectFix":true,"rejectedPaths":["TASKS.md"],"acceptedPaths":["docs/N6.2_TENANT_AWARE_DATA_MODEL_PREFLIGHT.md","CHANGELOG_AI.md"],"reviewReceipt":"vaep/evidence/reviews/N6.2.H_CONTROLLER_REVIEW_FIRST_202609110621Z.json","r2Used":false,"r3Used":false,"concurrentR2Manifest":"vaep/jules/dispatch/N6-2-H-1-TENANT-AWARE-DATA-MODEL-DOCUMENTATION-CERTIFICATION-J1-R2.json","concurrentR2ManifestCommit":"d930dce78de78d27ba5df55df0f188868923ded7","concurrentR2RunId":34569581693,"concurrentR2JobId":103168641309,"concurrentR2Terminal":"PRESESSION_PRIMARY_BASE_HEAD_MISMATCH__SUPERSEDED__EVIDENCE_ONLY","concurrentR2SessionId":null,"concurrentR2ArtifactId":null,"concurrentR2ContentAttemptConsumed":false,"concurrentR2Evidence":"vaep/evidence/recoveries/N6.2.H_R2_TRANSPORT_SUPERSEDED_20260911T0624Z.json","firstDetectorOwnership":"CHATGPT_VAEP_DIRECT_FIX_REMAINS_AUTHORITATIVE"
-    },
-    {
-      "parent":"N6.3.A","logicalTaskId":"N6.3.A.1.SUCURSALES_EMPRESA_PREFLIGHT","worker":"J1","originalRunId":34570307463,"originalJobId":103170805882,"originalTerminal":"PRESESSION_INVALID_REDISPATCH__COMMIT_NOT_APPEND_ONLY","tx1Manifest":"vaep/jules/dispatch/N6-3-A-1-SUCURSALES-EMPRESA-PREFLIGHT-J1-A1-TX1.json","tx1ManifestCommit":"a193390a44fdd8b141705ab311c6db7f51029a1b","tx1RunId":34570383516,"tx1JobId":103171031983,"tx1Status":"EXECUTE_MASTER_IN_PROGRESS__ACTIVE_REAL_UNCONFIRMED","sessionId":null,"artifactId":null,"activeReal":false,"contentAttemptConsumed":false,"taskAttempt":1,"r2Used":false,"r3Used":false,"recoveryReason":"PRESESSION_FASTPATH__APPEND_ONLY_TX1__NO_SECOND_CONTENT_OWNER"
-    },
-    {
-      "parent":"N6.3.E","logicalTaskId":"N6.3.E.1.SUCURSALES_EMPRESA_FRONTEND_UX","originalWorker":"J3","originalRunId":34588176617,"originalJobId":103227101171,"r2Worker":"J4","r2RunId":34589126797,"r2JobId":103230106455,"r2Terminal":"COMPLETED_FAILURE__PATCH_PRESENT_FALSE__ATTEMPT2_EXHAUSTED__EVIDENCE_ONLY","ownershipTransfer":"J4_TO_CHATGPT_VAEP__MANDATORY_AFTER_ATTEMPT2_TERMINAL_INVALID","activeReal":false,"controllerFunctionalCommits":["2d23597dd5811b41df81b787582c6b79abe51ff9","2eee4caad646890947a02ad6490e9b05253f3312","36451a3929ecaf99ea01004ec11c3be5b0357d3f","befa8445364b740c0914379fc3977a02802e9a49","96ebf77191e90884d5aee0b894adda50cfe627b0"],"reviewReceipt":"vaep/evidence/reviews/N6.3.E_CONTROLLER_QA_TAKEOVER_REVIEW_FIRST_20260911T1056Z.json","r2Used":true,"r3Used":false
-    },
-    {
-      "parent":"N6.3.F","logicalTaskId":"N6.3.F.1.SUCURSALES_EMPRESA_SEC_AUDIT","worker":"J5","originalRunId":34593180588,"originalJobId":103242891140,"originalTerminal":"PRESESSION_INVALID_REDISPATCH__COMMIT_NOT_APPEND_ONLY","contentAttemptConsumed":false,"tx1Manifest":"vaep/j5/dispatch/N6-3-F-1-SUCURSALES-EMPRESA-SEC-AUDIT-J5-A1-TX1-20260911T1118Z.json","tx1ManifestCommit":"abdfba5c0b6faa12ce5b40b92aac25e4b4456714","tx1RunId":34593258384,"tx1JobId":103243140085,"tx1Status":"COMPLETED_FAILURE__PATCH_PRESENT_FALSE__EVIDENCE_ONLY__QA_TAKEOVER","sessionId":"5099513289296978053","activeReal":false,"taskAttempt":1,"r2Used":false,"r3Used":false,"controllerFunctionalHead":"fb44b9f678daf5ff61998a87375ee454d288bad1","reviewReceipt":"vaep/evidence/reviews/N6.3.F_REVIEW_FIRST_20260911T1148Z.json","closureReceipt":"vaep/evidence/fragments/N6.3.F_LISTO_REAL_20260911T1224Z.json"
-    },
-    {
-      "parent":"N6.3.G","logicalTaskId":"N6.3.G.1.SUCURSALES_EMPRESA_QA_REGRESSION_CI","originalWorker":"J5","originalRunId":34600203395,"originalJobId":103265359475,"originalSessionId":"11644399045253880581","originalTerminal":"JULES_LANE_BUDGET_EXCEEDED__SUPERSEDED__EVIDENCE_ONLY","r2Worker":"J6","r2RunId":34601280696,"r2JobId":103268919038,"r2Terminal":"PRESESSION_PRIMARY_BASE_HEAD_MISMATCH__ATTEMPT2_EXHAUSTED__EVIDENCE_ONLY","r2SessionId":null,"ownershipTransfer":"J6_TO_CHATGPT_VAEP__MANDATORY_AFTER_ATTEMPT2_TERMINAL_INVALID","activeReal":false,"controllerFunctionalHead":"9c52fcb8ece3bfa874faff078fb331f4f2ee09b6","reviewReceipt":"vaep/evidence/reviews/N6.3.G_CONTROLLER_QA_TAKEOVER_REVIEW_FIRST_20260911T1259Z.json","r2Used":true,"r3Used":false,"closureReceipt":"vaep/evidence/fragments/N6.3.G_LISTO_REAL_20260911T1324Z.json"
-    },
-    {
-      "parent":"N6.3.H","logicalTaskId":"N6.3.H.1.SUCURSALES_EMPRESA_DOCUMENTATION_CERTIFICATION","worker":"J1","originalRunId":34605202992,"duplicateTriggerRunId":34605271881,"originalTerminal":"COMPLETED_FAILURE__SUPERSEDED_EVIDENCE_ONLY","duplicateTriggerTerminal":"COMPLETED_FAILURE__NON_OWNER_EVIDENCE_ONLY","ownershipTransfer":"J1_TO_CHATGPT_VAEP__CONTROLLER_QA_TAKEOVER_AFTER_STALL","activeReal":false,"taskAttempt":1,"r2Used":false,"r3Used":false,"controllerFunctionalHead":"e37e74c4fbf0c39d6cb1d4b0e56ac8f026a4a56e","reviewReceipt":"vaep/evidence/reviews/N6.3.H_CONTROLLER_QA_TAKEOVER_REVIEW_FIRST_20260911T1351Z.json","closureReceipt":"vaep/evidence/fragments/N6.3.H_LISTO_REAL_20260911T1402Z.json"
-    }
-  ],
-  "prearmedRoadmap": [
-    {"parent":"N6.1.H","taskId":"N6.1.H.1.TENANT_EMPRESA_DOCUMENTATION_CERTIFICATION","state":"LISTO_REAL","dependency":"N6.1.G_LISTO_REAL","materialization":"TENANT_EMPRESA_DOC_CERT__ROADMAP_DERIVED__NO_FILLER"},
-    {"parent":"N6.2.A","taskId":"N6.2.A.1.TENANT_AWARE_DATA_MODEL_PREFLIGHT","state":"LISTO_REAL","dependency":"N6.1.H_LISTO_REAL","materialization":"TENANT_AWARE_DATA_MODEL_PREFLIGHT__CONTROLLER_TAKEOVER__NO_FILLER"},
-    {"parent":"N6.2.B","taskId":"N6.2.B.1.TENANT_AWARE_DATA_MODEL_DOMAIN_CONTRACTS","state":"LISTO_REAL","dependency":"N6.2.A_LISTO_REAL","materialization":"TENANT_AWARE_DATA_MODEL_DOMAIN_CONTRACTS__QA_TAKEOVER__REVIEW_FIRST_PASS"},
-    {"parent":"N6.2.C","state":"LISTO_REAL","dependency":"N6.2.B_LISTO_REAL","materialization":"TENANT_AWARE_DATA_MODEL_PERSISTENCE__CONTROLLER_RECOVERY__REVIEW_FIRST_PASS__EXACT_GATES_PASS","taskId":"N6.2.C.1.TENANT_AWARE_DATA_MODEL_PERSISTENCE","worker":"CHATGPT_VAEP","runId":34546666164,"dispatchId":"N6-2-C-1-TENANT-AWARE-DATA-MODEL-PERSISTENCE-J2-A1-TX2","functionalHead":"f60c4ea3d9ad157f8cc1a5d06f3f86f3f1642086","reviewCommit":"a717ded0a6df15001ebeb92f65ecb278cca02243","closureReceipt":"vaep/evidence/fragments/N6.2.C_LISTO_REAL_20260911T0223Z.json"},
-    {"parent":"N6.2.D","state":"LISTO_REAL","dependency":"N6.2.C_LISTO_REAL","materialization":"TENANT_AWARE_DATA_MODEL_APPLICATION_API__CONTROLLER_REVIEW_FIRST_PASS__EXACT_GATES_PASS","taskId":"N6.2.D.1.TENANT_AWARE_DATA_MODEL_APPLICATION_API","worker":"CHATGPT_VAEP","dispatchId":"N6-2-D-1-TENANT-AWARE-DATA-MODEL-APPLICATION-API-J2-A1","taskAttempt":1,"functionalHead":"04fc4be1c4ca0c240b8111aba317b3524f70a272","reviewReceipt":"vaep/evidence/reviews/N6.2.D_CONTROLLER_REVIEW_FIRST_20260911T0244Z.json","closureReceipt":"vaep/evidence/fragments/N6.2.D_LISTO_REAL_20260911T0308Z.json"},
-    {"parent":"N6.2.E","state":"LISTO_REAL","dependency":"N6.2.D_LISTO_REAL","materialization":"TENANT_AWARE_DATA_MODEL_FRONTEND_UX__CONTROLLER_DIRECT_FIX__REVIEW_FIRST_PASS__EXACT_DESCENDANT_GATES_PASS","taskId":"N6.2.E.1.TENANT_AWARE_DATA_MODEL_FRONTEND_UX","worker":"CHATGPT_VAEP","functionalHead":"014b8504dc3ac6ee9c4fe90ab56b0159929f7f3c","reviewReceipt":"vaep/evidence/reviews/N6.2.E_CONTROLLER_REVIEW_FIRST_20260911T0334Z.json","closureReceipt":"vaep/evidence/fragments/N6.2.E_LISTO_REAL_20260911T0402Z.json"},
-    {"parent":"N6.2.F","taskId":"N6.2.F.1.TENANT_AWARE_DATA_MODEL_SEC_AUDIT","state":"LISTO_REAL","dependency":"N6.2.E_LISTO_REAL","materialization":"TENANT_AWARE_DATA_MODEL_SEC_AUDIT__CONTROLLER_REVIEW_FIRST_PASS__P0_P1_ZERO__EXACT_HEAD_GATES_PASS","worker":"CHATGPT_VAEP","dispatchId":"N6-2-F-1-TENANT-AWARE-DATA-MODEL-SEC-AUDIT-J5-A1","taskAttempt":1,"functionalHead":"a46b98c0b6e25f96bf8c2d0863678e849e441ff1","reviewReceipt":"vaep/evidence/reviews/N6.2.F_CONTROLLER_REVIEW_FIRST_20260911T0452Z.json","closureReceipt":"vaep/evidence/fragments/N6.2.F_LISTO_REAL_20260911T0524Z.json"},
-    {"parent":"N6.2.G","taskId":"N6.2.G.1.TENANT_AWARE_DATA_MODEL_QA_REGRESSION_CI","state":"LISTO_REAL","dependency":"N6.2.F_LISTO_REAL","materialization":"TENANT_AWARE_DATA_MODEL_QA_REGRESSION_CI__CONTROLLER_QA_TAKEOVER__REVIEW_FIRST_PASS__EXACT_HEAD_GATES_PASS","worker":"CHATGPT_VAEP","dispatchId":"N6-2-G-1-TENANT-AWARE-DATA-MODEL-QA-REGRESSION-CI-J5-A1","taskAttempt":1,"activeReal":false,"functionalHead":"cd9fdd6ac69996219149c278049fb2f32b259403","reviewReceipt":"vaep/evidence/reviews/N6.2.G_CONTROLLER_REVIEW_FIRST_20260911T0546Z.json","closureReceipt":"vaep/evidence/fragments/N6.2.G_LISTO_REAL_20260911T0557Z.json"},
-    {"parent":"N6.2.H","taskId":"N6.2.H.1.TENANT_AWARE_DATA_MODEL_DOCUMENTATION_CERTIFICATION","state":"LISTO_REAL","dependency":"N6.2.G_LISTO_REAL","materialization":"TENANT_AWARE_DATA_MODEL_DOCUMENTATION_CERTIFICATION__J1_ATTEMPT1__NO_FILLER","worker":"CHATGPT_VAEP","dispatchId":"N6-2-H-1-TENANT-AWARE-DATA-MODEL-DOCUMENTATION-CERTIFICATION-J1-A1","taskAttempt":1,"activeReal":false,"reviewReceipt":"vaep/evidence/reviews/N6.2.H_CONTROLLER_REVIEW_FIRST_202609110621Z.json","r2Used":false,"r3Used":false,"concurrentR2State":"PRESESSION_BASE_MISMATCH__SUPERSEDED_EVIDENCE_ONLY","concurrentR2Evidence":"vaep/evidence/recoveries/N6.2.H_R2_TRANSPORT_SUPERSEDED_20260911T0624Z.json","functionalHead":"bb0cd69706b8e33d43df6b156a37a5c61f5b53b8","closureReceipt":"vaep/evidence/fragments/N6.2.H_LISTO_REAL_20260911T0629Z.json"},
-    {"parent":"N6.3.A","taskId":"N6.3.A.1.SUCURSALES_EMPRESA_PREFLIGHT","state":"LISTO_REAL","dependency":"N6.2.H_LISTO_REAL","materialization":"SUCURSALES_EMPRESA_PREFLIGHT__REVIEW_FIRST_PASS","closureReceipt":"vaep/evidence/fragments/N6.3.A_LISTO_REAL_20260911T0701Z.json"},
-    {"parent":"N6.3.B","taskId":"N6.3.B.1.SUCURSALES_EMPRESA_DOMAIN_CONTRACTS","state":"LISTO_REAL","dependency":"N6.3.A_LISTO_REAL","materialization":"SUCURSALES_EMPRESA_DOMAIN_CONTRACTS__REVIEW_FIRST_PASS","closureReceipt":"vaep/evidence/fragments/N6.3.B_LISTO_REAL_20260911T0746Z.json"},
-    {"parent":"N6.3.C","taskId":"N6.3.C.1.SUCURSALES_EMPRESA_PERSISTENCE_MIGRATION","state":"LISTO_REAL","dependency":"N6.3.B_LISTO_REAL","materialization":"SUCURSALES_EMPRESA_PERSISTENCE_MIGRATION__REVIEW_FIRST_PASS","closureReceipt":"vaep/evidence/fragments/N6.3.C_LISTO_REAL_20260911T0848Z.json"},
-    {"parent":"N6.3.D","taskId":"N6.3.D.1.SUCURSALES_EMPRESA_APPLICATION_API","state":"LISTO_REAL","dependency":"N6.3.C_LISTO_REAL","materialization":"SUCURSALES_EMPRESA_APPLICATION_API__CONTROLLER_RECOVERY__REVIEW_FIRST_PASS__EXACT_HEAD_GATES_PASS","functionalHead":"b82da1d2d297933a7434130b068d277f24c30731","closureReceipt":"vaep/evidence/fragments/N6.3.D_LISTO_REAL_20260911T0958Z.json"},
-    {"parent":"N6.3.E","taskId":"N6.3.E.1.SUCURSALES_EMPRESA_FRONTEND_UX","state":"LISTO_REAL","dependency":"N6.3.D_LISTO_REAL","materialization":"SUCURSALES_EMPRESA_FRONTEND_UX__CONTROLLER_QA_TAKEOVER__REVIEW_FIRST_PASS__EXACT_HEAD_GATES_PASS","worker":"CHATGPT_VAEP","taskAttempt":2,"activeReal":false,"functionalHead":"96ebf77191e90884d5aee0b894adda50cfe627b0","reviewReceipt":"vaep/evidence/reviews/N6.3.E_CONTROLLER_QA_TAKEOVER_REVIEW_FIRST_20260911T1056Z.json","r2Used":true,"r3Used":false,"lateJulesIntegrationDenied":true,"closureReceipt":"vaep/evidence/fragments/N6.3.E_LISTO_REAL_20260911T1112Z.json"},
-    {"parent":"N6.3.F","taskId":"N6.3.F.1.SUCURSALES_EMPRESA_SEC_AUDIT","state":"LISTO_REAL","dependency":"N6.3.E_LISTO_REAL","materialization":"SUCURSALES_EMPRESA_SEC_AUDIT__CONTROLLER_QA_TAKEOVER__REVIEW_FIRST_PASS__P0_P1_ZERO__LISTO_REAL","worker":"CHATGPT_VAEP","taskAttempt":1,"activeReal":false,"functionalHead":"fb44b9f678daf5ff61998a87375ee454d288bad1","reviewReceipt":"vaep/evidence/reviews/N6.3.F_REVIEW_FIRST_20260911T1148Z.json","r2Used":false,"r3Used":false,"closureReceipt":"vaep/evidence/fragments/N6.3.F_LISTO_REAL_20260911T1224Z.json"},
-    {"parent":"N6.3.G","taskId":"N6.3.G.1.SUCURSALES_EMPRESA_QA_REGRESSION_CI","state":"LISTO_REAL","dependency":"N6.3.F_LISTO_REAL","materialization":"SUCURSALES_EMPRESA_QA_REGRESSION_CI__CONTROLLER_QA_TAKEOVER__REVIEW_FIRST_PASS__P0_P1_ZERO__EXACT_HEAD_GATES_PASS","worker":"CHATGPT_VAEP","taskAttempt":2,"activeReal":false,"functionalHead":"9c52fcb8ece3bfa874faff078fb331f4f2ee09b6","reviewReceipt":"vaep/evidence/reviews/N6.3.G_CONTROLLER_QA_TAKEOVER_REVIEW_FIRST_20260911T1259Z.json","r2Used":true,"r3Used":false,"closureReceipt":"vaep/evidence/fragments/N6.3.G_LISTO_REAL_20260911T1324Z.json"},
-    {"parent":"N6.3.H","taskId":"N6.3.H.1.SUCURSALES_EMPRESA_DOCUMENTATION_CERTIFICATION","state":"LISTO_REAL","dependency":"N6.3.G_LISTO_REAL","materialization":"SUCURSALES_EMPRESA_DOCUMENTATION_CERTIFICATION__CONTROLLER_QA_TAKEOVER__REVIEW_FIRST_PASS__P0_P1_ZERO__EXACT_HEAD_GATES_PASS","worker":"CHATGPT_VAEP","taskAttempt":1,"activeReal":false,"functionalHead":"e37e74c4fbf0c39d6cb1d4b0e56ac8f026a4a56e","reviewReceipt":"vaep/evidence/reviews/N6.3.H_CONTROLLER_QA_TAKEOVER_REVIEW_FIRST_20260911T1351Z.json","r2Used":false,"r3Used":false,"closureReceipt":"vaep/evidence/fragments/N6.3.H_LISTO_REAL_20260911T1402Z.json"},
-    {"parent":"N6.4.A","taskId":"N6.4.A.1.USUARIOS_EMPRESA_PREFLIGHT","state":"READY_CURRENT","dependency":"N6.3.H_LISTO_REAL__SEQUENCE_GATE","materialization":"USUARIOS_EMPRESA_PREFLIGHT__ROADMAP_DERIVED__NO_FILLER"},
-    {"parent":"N6.4.B","taskId":"N6.4.B.1.USUARIOS_EMPRESA_DOMAIN_CONTRACTS","state":"READY_DEPENDENCY_GATED","dependency":"N6.4.A_LISTO_REAL","materialization":"USUARIOS_EMPRESA_DOMAIN_CONTRACTS__ROADMAP_DERIVED__NO_FILLER"}
-  ],
-  "lanes": {"J1":[],"J2":[],"J3":[],"J4":[],"J5":[],"J6":[]},
+  "lanes": {
+    "J1": [],
+    "J2": [],
+    "J3": [],
+    "J4": [],
+    "J5": [],
+    "J6": []
+  },
+  "julesOffloadCandidates": [],
+  "legacyRuntimeHistory": "REMOVED_FROM_LIVE_CATALOG__PRESERVED_IN_GIT_AND_RECEIPTS_ONLY",
   "rolling60CertifiedParents": ["N6.3.H"],
   "rolling60Count": 1,
   "lastClosureFunctionalHead": "e37e74c4fbf0c39d6cb1d4b0e56ac8f026a4a56e"
