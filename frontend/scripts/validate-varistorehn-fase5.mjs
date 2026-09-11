@@ -14,6 +14,7 @@ const [
   cartTs,
   cartHtml,
   cartScss,
+  productHtml,
   homeTs,
   productsTs,
   productTs,
@@ -26,6 +27,7 @@ const [
   readFeature('varistorehn-carrito.component.ts'),
   readFeature('varistorehn-carrito.component.html'),
   readFeature('varistorehn-carrito.component.scss'),
+  readFeature('varistorehn-producto.component.html'),
   readFeature('varistorehn.component.ts'),
   readFeature('varistorehn-productos.component.ts'),
   readFeature('varistorehn-producto.component.ts'),
@@ -47,6 +49,7 @@ for (const required of [
   'readonly items = this._items.asReadonly()',
   'readonly totalUnidades = computed',
   'readonly subtotal = computed',
+  'readonly total = computed',
   'restaurarCarrito(originales, productos)',
   'referenciasCarrito(restaurados)',
   'varistorehn:carrito:v2:',
@@ -90,6 +93,8 @@ for (const required of [
   'Cantidad',
   'Total de línea',
   'Subtotal',
+  'Total del carrito',
+  'carrito.total()',
   '[min]="1"',
   '[max]="item.stock"',
   '[disabled]="item.unidades <= 1"',
@@ -114,6 +119,8 @@ expect(productTs.includes('stockRestante'), 'El detalle debe descontar lo ya agr
 expect(productTs.includes('this.carritoStore.unidadesDe'), 'El stock restante del detalle debe salir del carrito global.');
 expect(productHtml.includes('[max]="stockRestante()"'), 'El input del detalle debe mostrar el stock realmente restante, no el stock total.');
 expect(productHtml.includes('cantidad() >= stockRestante()'), 'El botón + del detalle debe bloquearse en el stock restante.');
+expect(homeTs.includes('location.assign(VARISTOREHN_PATHS.producto(producto.slug))'), 'El home debe llevar Ver producto al detalle canónico por slug.');
+expect(!homeTs.includes('detalleDialog?.nativeElement.showModal'), 'El home no debe abrir un modal como detalle principal.');
 
 if (failures.length) {
   console.error('Fase 5 — validación de carrito global FALLÓ:');
@@ -121,4 +128,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.info('Fase 5 — carrito global: ruta, store único, persistencia mínima, stock, totales, tema y límites aprobados.');
+console.info('Fase 5 — carrito global: ruta, store único, persistencia mínima, stock, subtotal/total, tema y límites aprobados.');
