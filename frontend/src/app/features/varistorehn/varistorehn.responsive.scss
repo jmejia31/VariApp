@@ -72,9 +72,4 @@
   .contact-actions { align-items: flex-start; text-align: left; }
   .footer-grid { grid-template-columns: 1fr 1fr; gap: 22px; }
   .footer-grid > div:first-child { grid-column: 1 / -1; }
-  .detail-layout { grid-template-columns: 1fr; }
-  .detail-media { min-height: 260px; padding: 25px 20px 12px; }
-  .detail-media img { height: 210px; }
-  .detail-body { padding: 25px 22px; }
-  .detail-body h2 { font-size: 1.45rem; }
 }
