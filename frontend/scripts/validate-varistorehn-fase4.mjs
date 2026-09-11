@@ -117,8 +117,8 @@ expect(!/\bhsl(?:a)?\s*\(/i.test(productScss), 'Fase 4 no debe introducir colore
 expect(!productScss.includes('--color-background') && !productScss.includes('--color-text-secondary'), 'Fase 4 no debe usar aliases de tema inexistentes.');
 
 expect(backendController.includes('[AllowAnonymous]'), 'El controlador público de tienda debe mantenerse anónimo.');
-expect(backendController.includes('GetProducto([FromRoute] string slug'), 'El backend debe exponer producto público por slug.');
-expect(backendController.includes('producto == null || !producto.Activo'), 'Producto inexistente o inactivo debe resolverse como no disponible desde la fuente pública.');
+expect(/\[HttpGet\("productos\/\{slug\}"\)\][\s\S]{0,180}GetProducto\(string slug\)/.test(backendController), 'El backend debe exponer producto público por slug.');
+expect(/producto\s+is\s+null\s+\|\|\s+!producto\.Activo/.test(backendController), 'Producto inexistente o inactivo debe resolverse como no disponible desde la fuente pública.');
 
 if (failures.length) {
   console.error('Fase 4 — validación de detalle público FALLÓ:');
