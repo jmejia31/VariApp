@@ -26,7 +26,7 @@ describe('TenantContextService', () => {
 
     expect(service.empresaSolicitadaId()).toBe(8);
     expect(service.contextoVerificado()).toBeNull();
-    expect(service.tieneContextoVerificado()).toBeFalse();
+    expect(service.tieneContextoVerificado()).toBe(false);
   });
 
   it('materializa contexto solo cuando el backend confirma la misma empresa', () => {
@@ -48,7 +48,7 @@ describe('TenantContextService', () => {
 
     expect(service.empresaIdVerificada()).toBe(7);
     expect(service.rolVerificado()).toBe('Operador');
-    expect(service.tieneContextoVerificado()).toBeTrue();
+    expect(service.tieneContextoVerificado()).toBe(true);
   });
 
   it('falla cerrado si el backend devuelve otra empresa', () => {
