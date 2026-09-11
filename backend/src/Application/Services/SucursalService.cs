@@ -142,7 +142,7 @@ public sealed class SucursalService : ISucursalService
 
     private async Task ValidarEmpresaPropietariaActivaAsync(int empresaId)
     {
-        var empresa = await _empresaRepository.GetByIdAsync(empresaId);
+        var empresa = await _empresaRepository.GetByIdAsync(empresaId, CancellationToken.None);
         if (empresa is null) throw new BusinessRuleException($"La empresa propietaria {empresaId} no existe.");
         if (!empresa.Activa) throw new BusinessRuleException($"La empresa propietaria {empresaId} está inactiva.");
     }
