@@ -1,8 +1,8 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
   "currentParent": "N6.2.H",
-  "generatedAt": "2026-09-11T06:21:08Z",
-  "regenerationReason": "RECOVERY_12__J1_TERMINAL_REVIEW_FIRST__REJECT_PROHIBITED_TASKS_PATCH__CONTROLLER_DIRECT_FIX_DOCS__EXACT_HEAD_GATES_PENDING",
+  "generatedAt": "2026-09-11T06:26:37.337Z",
+  "regenerationReason": "RECOVERY_12__CONTROLLER_DIRECT_FIX_AUTHORITATIVE__CONCURRENT_R2_PRESESSION_BASE_MISMATCH_SUPERSEDED__EXACT_HEAD_GATES_PENDING",
   "lastClosedParent": "N6.2.G",
   "closureReceipts": {
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
@@ -64,13 +64,13 @@
     "mode": "PARENT_CLOSE_FIRST",
     "currentParent": "N6.2.H",
     "currentParentMaterialScopeCount": 1,
-    "currentParentReason": "N6.2.G is LISTO_REAL. N6.2.H J1 ATTEMPT1 terminated with a patch but failed contract by touching prohibited TASKS.md and omitting canonical documentation; REVIEW_FIRST rejected TASKS and controller direct-fix materialized the canonical document. Exact-head gates remain required before LISTO_REAL.",
+    "currentParentReason": "N6.2.G is LISTO_REAL. N6.2.H ATTEMPT1 failed its material contract; REVIEW_FIRST rejected prohibited TASKS.md and the controller direct-fix completed the canonical documentation. A concurrent R2 then failed pre-session because primaryBaseHead did not equal its dispatch parent; it consumed no content attempt and is superseded/evidence-only. Exact-head gates remain required.",
     "nextParent": "N6.3.A",
     "nextParentParallelMaterialScopes": 1,
     "nextParentScopesNonOverlapping": true,
     "currentRun": null,
     "nextRunReserved": null,
-    "laneRefill": "N6.2.H_CONTROLLER_DIRECT_FIX_REVIEW_FIRST_PASS__HEAD_FREEZE_FOR_EXACT_GATES__N6.3.A_PREARMED_GATED"
+    "laneRefill": "N6.2.H_CONTROLLER_DIRECT_FIX_REVIEW_FIRST_PASS__CONCURRENT_R2_TRANSPORT_SUPERSEDED__HEAD_FREEZE_FOR_EXACT_GATES__N6.3.A_GATED"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
@@ -309,7 +309,17 @@
       ],
       "reviewReceipt": "vaep/evidence/reviews/N6.2.H_CONTROLLER_REVIEW_FIRST_202609110621Z.json",
       "r2Used": false,
-      "r3Used": false
+      "r3Used": false,
+      "concurrentR2Manifest": "vaep/jules/dispatch/N6-2-H-1-TENANT-AWARE-DATA-MODEL-DOCUMENTATION-CERTIFICATION-J1-R2.json",
+      "concurrentR2ManifestCommit": "d930dce78de78d27ba5df55df0f188868923ded7",
+      "concurrentR2RunId": 34569581693,
+      "concurrentR2JobId": 103168641309,
+      "concurrentR2Terminal": "PRESESSION_PRIMARY_BASE_HEAD_MISMATCH__SUPERSEDED__EVIDENCE_ONLY",
+      "concurrentR2SessionId": null,
+      "concurrentR2ArtifactId": null,
+      "concurrentR2ContentAttemptConsumed": false,
+      "concurrentR2Evidence": "vaep/evidence/recoveries/N6.2.H_R2_TRANSPORT_SUPERSEDED_20260911T0624Z.json",
+      "firstDetectorOwnership": "CHATGPT_VAEP_DIRECT_FIX_REMAINS_AUTHORITATIVE"
     }
   ],
   "prearmedRoadmap": [
@@ -401,7 +411,7 @@
     {
       "parent": "N6.2.H",
       "taskId": "N6.2.H.1.TENANT_AWARE_DATA_MODEL_DOCUMENTATION_CERTIFICATION",
-      "state": "CONTROLLER_DIRECT_FIX__REVIEW_FIRST_PASS__EXACT_HEAD_GATES_PENDING",
+      "state": "CONTROLLER_DIRECT_FIX__REVIEW_FIRST_PASS__CONCURRENT_R2_PRESESSION_SUPERSEDED__EXACT_HEAD_GATES_PENDING",
       "dependency": "N6.2.G_LISTO_REAL",
       "materialization": "TENANT_AWARE_DATA_MODEL_DOCUMENTATION_CERTIFICATION__J1_ATTEMPT1__NO_FILLER",
       "worker": "CHATGPT_VAEP",
@@ -410,7 +420,9 @@
       "activeReal": false,
       "reviewReceipt": "vaep/evidence/reviews/N6.2.H_CONTROLLER_REVIEW_FIRST_202609110621Z.json",
       "r2Used": false,
-      "r3Used": false
+      "r3Used": false,
+      "concurrentR2State": "PRESESSION_BASE_MISMATCH__SUPERSEDED_EVIDENCE_ONLY",
+      "concurrentR2Evidence": "vaep/evidence/recoveries/N6.2.H_R2_TRANSPORT_SUPERSEDED_20260911T0624Z.json"
     },
     {
       "parent": "N6.3.A",
@@ -441,7 +453,22 @@
         "artifactId": 10187128893,
         "patchPresent": true,
         "controllerOwnership": true,
-        "state": "REVIEW_FIRST_ACCEPTED_AFTER_CONTROLLER_DIRECT_FIX__EXACT_HEAD_GATES_PENDING"
+        "state": "REVIEW_FIRST_ACCEPTED_AFTER_CONTROLLER_DIRECT_FIX__R2_TRANSPORT_SUPERSEDED__EXACT_HEAD_GATES_PENDING",
+        "supersededTransports": [
+          {
+            "dispatchId": "N6-2-H-1-TENANT-AWARE-DATA-MODEL-DOCUMENTATION-CERTIFICATION-J1-R2",
+            "taskAttempt": 2,
+            "workflowRunId": 34569581693,
+            "workflowJobId": 103168641309,
+            "terminal": "PRESESSION_PRIMARY_BASE_HEAD_MISMATCH",
+            "sessionId": null,
+            "artifactId": null,
+            "activeReal": false,
+            "contentAttemptConsumed": false,
+            "superseded": true,
+            "evidenceOnly": true
+          }
+        ]
       }
     ],
     "J2": [],
