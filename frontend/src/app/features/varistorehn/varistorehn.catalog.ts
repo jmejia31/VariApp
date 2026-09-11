@@ -107,11 +107,23 @@ export function filtrarProductos(productos: ProductoTienda[], filtros: FiltrosCa
   }
 }
 
+/**
+ * Precio efectivo único para catálogo, detalle y carrito.
+ * Una oferta solo se considera válida si es finita, no negativa y menor al precio de la variante.
+ * La vigencia temporal de promociones pertenece a Fase 9 y debe venir resuelta por la fuente pública.
+ */
+export function precioVenta(producto: ProductoTienda, modelo: ModeloTienda): number {
+  const oferta = producto.precioOferta;
+  return typeof oferta === 'number' && precioValido(oferta) && oferta < modelo.precio
+    ? oferta
+    : modelo.precio;
+}
+
 export function crearItem(producto: ProductoTienda, modelo: ModeloTienda, unidades = 1): ItemCarrito {
   return {
     clave: `${producto.id}:${modelo.clave}`, productoId: producto.id, modeloClave: modelo.clave,
     modeloId: modelo.modeloId, nombre: producto.nombre, modelo: modelo.nombre,
-    precio: modelo.precio, stock: modelo.stock,
+    precio: precioVenta(producto, modelo), stock: modelo.stock,
     unidades: Math.max(1, Math.min(stockSeguro(unidades), modelo.stock)),
     imagen: modelo.imagenes[0] || '', ilustracion: producto.ilustracion || 'paquete'
   };
