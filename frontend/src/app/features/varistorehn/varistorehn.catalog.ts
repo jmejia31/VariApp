@@ -138,12 +138,6 @@ export function agregarItem(items: ItemCarrito[], producto: ProductoTienda, mode
   return items.map(i => i.clave === item.clave ? { ...item, unidades: i.unidades + 1 } : i);
 }
 
-export function cambiarCantidad(items: ItemCarrito[], clave: string, cambio: number): ItemCarrito[] {
-  if (!Number.isInteger(cambio)) return items;
-  return items.map(i => i.clave === clave ? { ...i, unidades: Math.min(i.stock, i.unidades + cambio) } : i)
-    .filter(i => i.unidades > 0);
-}
-
 export function referenciasCarrito(items: ItemCarrito[]): ReferenciaCarrito[] {
   // Never persist prices, stock, image URLs or customer/payment information.
   return items.map(({ productoId, modeloClave, unidades }) => ({ productoId, modeloClave, unidades }));
