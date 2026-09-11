@@ -18,7 +18,7 @@ const [
   productScss,
   productsHtml,
   cartService,
-  homeHtml,
+  homeTs,
   backendController
 ] = await Promise.all([
   readFile(path.join(frontendDir, 'src/app/app.routes.ts'), 'utf8'),
@@ -30,7 +30,7 @@ const [
   readFeature('varistorehn-producto.component.scss'),
   readFeature('varistorehn-productos.component.html'),
   readFeature('varistorehn-carrito.service.ts'),
-  readFeature('varistorehn.component.html'),
+  readFeature('varistorehn.component.ts'),
   readFile(path.join(repoDir, 'backend/src/API/Controllers/TiendaController.cs'), 'utf8')
 ]);
 
@@ -107,7 +107,8 @@ expect(!productHtml.includes('class="detail-dialog"'), 'El detalle independiente
 expect(productsHtml.includes('Ver producto'), 'Las tarjetas del catálogo deben ofrecer Ver producto.');
 expect(productsHtml.includes("'/varistorehn/producto/' + producto.slug"), 'Ver producto debe navegar por slug a la página independiente.');
 expect(productsHtml.includes('producto.precioOferta'), 'El catálogo debe poder mostrar el mismo precio promocional que el detalle cuando aplique.');
-expect(homeHtml.includes('productoDetalle') || homeHtml.includes('detail-dialog'), 'El home legado puede conservar markup transitorio, pero no constituye el detalle canónico.');
+expect(homeTs.includes('location.assign(VARISTOREHN_PATHS.producto(producto.slug))'), 'Los accesos de producto del home deben navegar al detalle canónico por slug.');
+expect(!homeTs.includes('detalleDialog?.nativeElement.showModal'), 'El home no debe abrir un modal como experiencia principal de detalle de producto.');
 
 expect(catalog.includes('export function precioVenta'), 'Debe existir una regla única de precio efectivo para detalle y carrito.');
 expect(catalog.includes('precio: precioVenta(producto, modelo)'), 'El carrito debe reconstruir el precio efectivo centralizado, no un precio divergente.');
@@ -134,4 +135,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.info('Fase 4 — detalle público: ruta, galería, stock restante, precio, carrito central, WhatsApp, tema y límites aprobados.');
+console.info('Fase 4 — detalle público: URL canónica, galería, stock restante, precio, carrito central, WhatsApp, tema y límites aprobados.');
