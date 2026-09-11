@@ -42,8 +42,6 @@ select { padding: 9px 10px; border: 1px solid var(--store-line); border-radius: 
 .button { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 9px; padding: 11px 17px; border: 1px solid transparent; border-radius: calc(var(--radius) * .7); font-size: .75rem; font-weight: 800; }
 .button.primary { background: var(--color-button); color: var(--color-on-primary); }
 .button.ghost { background: var(--color-surface); border-color: var(--store-line); }
-.button.whatsapp { background: var(--color-success); color: var(--color-on-success, var(--color-on-primary)); }
-.button.full { width: 100%; }
 .text-link { display: inline-flex; align-items: center; gap: 7px; padding: 4px 0; border: 0; background: transparent; color: var(--color-primary); font-size: .7rem; font-weight: 700; }
 .hero-points { margin-top: 19px; display: flex; flex-wrap: wrap; gap: 14px; color: var(--color-text-muted); font-size: .65rem; }
 .hero-points span { display: inline-flex; align-items: center; gap: 5px; }
