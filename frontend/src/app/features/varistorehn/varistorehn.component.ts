@@ -33,7 +33,6 @@ export class VaristorehnComponent implements OnInit, AfterViewInit {
   readonly config = inject(VARISTOREHN_CONFIG);
   readonly carritoStore = inject(VaristorehnCarritoService);
   @ViewChild('carritoDialog') private carritoDialog?: ElementRef<HTMLDialogElement>;
-  @ViewChild('detalleDialog') private detalleDialog?: ElementRef<HTMLDialogElement>;
 
   readonly controlesVistaPrevia = !environment.production && this.config.mostrarControlesVistaPrevia;
   readonly utilizarDatosBaseDatos = signal(this.config.utilizarDatosBaseDatos);
@@ -57,9 +56,6 @@ export class VaristorehnComponent implements OnInit, AfterViewInit {
   readonly carrito = this.carritoStore.items;
   readonly totalUnidades = computed(() => this.carritoStore.totalUnidades());
   readonly totalCarrito = computed(() => this.carritoStore.subtotal());
-  readonly productoDetalle = signal<ProductoTienda | null>(null);
-  readonly modelosActivos = signal<Record<number, string>>({});
-  readonly imagenActiva = signal(0);
   readonly imagenesFallidas = signal<Set<string>>(new Set());
   readonly busqueda = signal('');
   readonly categoriaActiva = signal('');
@@ -103,9 +99,9 @@ export class VaristorehnComponent implements OnInit, AfterViewInit {
 
   cargarCatalogo(): void {
     this.cargaActual?.unsubscribe();
-    this.cerrarDetalle(); this.cerrarCarrito();
+    this.cerrarCarrito();
     this.cargando.set(true); this.errorCatalogo.set(''); this.errorPago.set(''); this.aviso.set('');
-    this.productos.set([]); this.carritoStore.reiniciarContexto(); this.modelosActivos.set({});
+    this.productos.set([]); this.carritoStore.reiniciarContexto();
     const fuente: Observable<ProductoCatalogoPublico[] | null> = this.utilizarDatosBaseDatos() ? this.servicio.obtenerCatalogo() : of(null);
     this.cargaActual = fuente.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: datos => {
@@ -164,25 +160,16 @@ export class VaristorehnComponent implements OnInit, AfterViewInit {
   }
   cantidadCategoriaFiltro(categoria: CategoriaTienda): string { return categoria.cantidadProductos === null ? '—' : String(categoria.cantidadProductos); }
   modeloSeleccionado(producto: ProductoTienda): ModeloTienda {
-    return producto.modelos.find(m => m.clave === this.modelosActivos()[producto.id])
-      || producto.modelos.filter(m => m.disponible).sort((a, b) => a.precio - b.precio)[0] || producto.modelos[0];
-  }
-  seleccionarModelo(producto: ProductoTienda, clave: string): void {
-    if (!producto.modelos.some(m => m.clave === clave)) return;
-    this.modelosActivos.update(estado => ({ ...estado, [producto.id]: clave })); this.imagenActiva.set(0);
+    return producto.modelos.filter(m => m.disponible).sort((a, b) => a.precio - b.precio)[0] || producto.modelos[0];
   }
   fotos(producto: ProductoTienda): string[] { return this.modeloSeleccionado(producto).imagenes; }
-  moverImagen(producto: ProductoTienda, cambio: number): void {
-    const cantidad = this.fotos(producto).length; if (cantidad) this.imagenActiva.set((this.imagenActiva() + cambio + cantidad) % cantidad);
-  }
   imagenValida(url?: string): boolean { return Boolean(url && !this.imagenesFallidas().has(url)); }
   errorImagen(url: string): void { this.imagenesFallidas.update(actual => new Set([...actual, url])); }
   abrirDetalle(producto: ProductoTienda): void {
     if (!producto.slug) { this.aviso.set('Este producto todavía no tiene una URL pública disponible.'); return; }
     this.document.defaultView?.location.assign(VARISTOREHN_PATHS.producto(producto.slug));
   }
-  cerrarDetalle(): void { this.detalleDialog?.nativeElement.close(); this.productoDetalle.set(null); }
-  abrirCarrito(): void { this.cerrarDetalle(); this.carritoDialog?.nativeElement.showModal(); }
+  abrirCarrito(): void { this.carritoDialog?.nativeElement.showModal(); }
   cerrarCarrito(): void { this.carritoDialog?.nativeElement.close(); }
   disponibleParaAgregar(producto: ProductoTienda): boolean {
     const modelo = this.modeloSeleccionado(producto);
