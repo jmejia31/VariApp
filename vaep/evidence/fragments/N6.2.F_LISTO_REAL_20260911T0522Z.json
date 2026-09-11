@@ -1,0 +1,34 @@
+{
+  "authority": "docs/VAEP_AUTHORITY.md",
+  "parent": "N6.2.F",
+  "state": "LISTO_REAL",
+  "certifiedBy": "CHATGPT_VAEP",
+  "reviewReceipt": "vaep/evidence/reviews/N6.2.F_CONTROLLER_REVIEW_FIRST_20260911T0452Z.json",
+  "functionalHead": "3cf8d9e98ee6318c4fde45b45055d46c669d238b",
+  "exactGateHead": "a9de43d645d9ebaf5a4ad96085787124f2fd30f3",
+  "dod": "PASS",
+  "p0": 0,
+  "p1": 0,
+  "causalGates": {
+    "exactHeadWorkflowRunsTotal": 29,
+    "success": 28,
+    "skipped": 1,
+    "failure": 0,
+    "queued": 0,
+    "inProgress": 0,
+    "skippedWorkflow": "VariApp CI",
+    "skippedAssessment": "NON_CAUSAL_SKIP__NOT_FAILURE"
+  },
+  "j5Attempt1": {
+    "state": "SUPERSEDED_PRESESSION_STALL",
+    "activeReal": false,
+    "contentAttemptConsumed": false,
+    "lateIntegrationDenied": true
+  },
+  "scopeBoundary": "N6.2 security/audit only; memberships/roles per Empresa remain N6.4 dependency-gated and complete tenant isolation remains N6.5 dependency-gated",
+  "r2Used": false,
+  "r3Used": false,
+  "parentCloseFirst": true,
+  "nextDependencyValidParent": "N6.2.G",
+  "result": "LISTO_REAL_CERTIFIED__CONTROLLER_REVIEW_FIRST_PASS__P0_P1_ZERO__EXACT_HEAD_CAUSAL_GATES_TERMINAL_NO_FAILURE"
+}
