@@ -12,7 +12,7 @@ namespace InventoryApp.Tests;
 public sealed class TenantAwareDataModelPersistenceTests
 {
     [Fact]
-    public void Sucursal_EmpresaId_EsRequerido_Y_FkRestrict()
+    public void Sucursal_EmpresaId_EsOpcionalDuranteTransicion_Y_FkRestrict()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase($"n62c-{Guid.NewGuid()}")
@@ -24,14 +24,14 @@ public sealed class TenantAwareDataModelPersistenceTests
 
         var empresaId = sucursal!.FindProperty(nameof(Sucursal.EmpresaId));
         Assert.NotNull(empresaId);
-        Assert.False(empresaId!.IsNullable);
+        Assert.True(empresaId!.IsNullable);
 
         var fk = Assert.Single(sucursal.GetForeignKeys(), candidate =>
             candidate.PrincipalEntityType.ClrType == typeof(Empresa) &&
             candidate.Properties.Count == 1 &&
             candidate.Properties[0].Name == nameof(Sucursal.EmpresaId));
 
-        Assert.True(fk.IsRequired);
+        Assert.False(fk.IsRequired);
         Assert.Equal(DeleteBehavior.Restrict, fk.DeleteBehavior);
     }
 
@@ -65,7 +65,7 @@ public sealed class TenantAwareDataModelPersistenceTests
 
         var operation = Assert.Single(builder.Operations.OfType<SqlOperation>());
         Assert.Contains("ALTER TABLE `Sucursales`", operation.Sql, StringComparison.Ordinal);
-        Assert.Contains("MODIFY COLUMN `EmpresaId` int NOT NULL", operation.Sql, StringComparison.Ordinal);
+        Assert.DoesNotContain("MODIFY COLUMN", operation.Sql, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("FK_Sucursales_Empresas_EmpresaId", operation.Sql, StringComparison.Ordinal);
         Assert.Contains("REFERENCES `Empresas` (`Id`)", operation.Sql, StringComparison.Ordinal);
         Assert.Contains("ON DELETE RESTRICT", operation.Sql, StringComparison.Ordinal);
