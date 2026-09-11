@@ -40,6 +40,14 @@ public sealed class UsuarioEmpresa : AuditableEntity
     public bool Activa { get; private set; } = true;
 
     /// <summary>
+    /// UsuarioEmpresa usa estado activa/inactiva y no soft-delete persistido.
+    /// Esta proyección explícita mantiene compatibles consultas legacy sin crear
+    /// una columna adicional ni alterar la migración física certificada en N6.4.C.
+    /// </summary>
+    [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+    public bool Eliminado => false;
+
+    /// <summary>
     /// Clave lógica de unicidad de la membresía. N6.4.C materializa la constraint
     /// física única (UsuarioId, EmpresaId).
     /// </summary>
