@@ -77,6 +77,10 @@ namespace InventoryApp.Infrastructure.Migrations
                 b.Navigation("Rol");
                 b.Navigation("Usuario");
             });
+
+            // Mantiene el encadenamiento aditivo del snapshot efectivo y aplica la
+            // reconciliación N6.3.C después de los overlays históricos existentes.
+            ApplyN63CModel(modelBuilder);
         }
     }
 }
