@@ -4,6 +4,19 @@ on:
   push:
     branches:
       - Desarrollo
+    # This diagnostic validates the VAEP/Jules control plane. Running it on
+    # every unrelated product push creates exact-head gate churn without adding
+    # diagnostic evidence. Keep it scoped to inputs that can change this
+    # integration contract; production/main behavior is unchanged.
+    paths:
+      - 'vaep/**'
+      - 'scripts/vaep/**'
+      - '.github/scripts/vaep-*'
+      - '.github/workflows/vaep-*'
+      - 'docs/VAEP_AUTHORITY.md'
+      - 'AGENTS.md'
+      - '.github/workflows/fase8-validacion-completa.yml'
+      - '.github/workflows/m13-certificacion-final.yml'
   pull_request:
     branches:
       - main
