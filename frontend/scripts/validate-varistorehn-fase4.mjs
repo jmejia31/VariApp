@@ -17,6 +17,8 @@ const [
   productHtml,
   productScss,
   productsHtml,
+  cartService,
+  homeTs,
   backendController
 ] = await Promise.all([
   readFile(path.join(frontendDir, 'src/app/app.routes.ts'), 'utf8'),
@@ -27,6 +29,8 @@ const [
   readFeature('varistorehn-producto.component.html'),
   readFeature('varistorehn-producto.component.scss'),
   readFeature('varistorehn-productos.component.html'),
+  readFeature('varistorehn-carrito.service.ts'),
+  readFeature('varistorehn.component.ts'),
   readFile(path.join(repoDir, 'backend/src/API/Controllers/TiendaController.cs'), 'utf8')
 ]);
 
@@ -46,13 +50,14 @@ for (const required of [
   'VARISTOREHN_PATHS.producto(producto.slug)',
   'replaceUrl: true',
   'precioVenta',
-  'referenciasCarrito',
-  'restaurarCarrito',
-  'varistorehn:carrito:v2:',
+  'VaristorehnCarritoService',
+  'this.carritoStore.agregar(producto, modelo, this.cantidad())',
+  'this.carritoStore.hidratar(productos',
   'telefonoWhatsapp',
   'crearCatalogoEjemplo',
   'this.servicio.obtenerCatalogo()',
   'this.servicio.obtenerCategorias()',
+  'stockRestante',
   'reiniciarCantidad()',
   'cancelarSwipe()'
 ]) {
@@ -63,8 +68,9 @@ expect(productTs.includes("type EstadoProductoPublico = 'loading' | 'error' | 'n
 expect(productTs.includes("this.error.set('No pudimos cargar este producto"), 'Una falla real debe quedar visible y no sustituirse por demo.');
 expect(productTs.includes("if (!this.utilizarDatosBaseDatos())"), 'Demo y fuente real deben estar separados de forma explícita.');
 expect(productTs.includes('this.stockSeleccionado()'), 'La cantidad debe depender del stock de la variante seleccionada.');
-expect(productTs.includes('Math.min(this.stockSeleccionado()'), 'La cantidad debe quedar acotada al stock.');
-expect(productTs.includes('Math.min(this.cantidad(), this.stockRestante())'), 'Agregar al carrito debe respetar el stock restante frente al carrito existente.');
+expect(productTs.includes('Math.min(this.stockRestante()'), 'La cantidad debe quedar acotada al stock que resta después de considerar el carrito.');
+expect(productTs.includes('this.cantidad() <= this.stockRestante()'), 'El CTA debe bloquear cantidades superiores al stock restante.');
+expect(!productTs.includes('localStorage'), 'El detalle no debe mantener una persistencia de carrito paralela al store global.');
 expect(!productTs.includes('ProductosListComponent'), 'El detalle público no debe reutilizar el CRUD administrativo.');
 expect(!productTs.includes('authGuard') && !productTs.includes('permisoGuard'), 'El componente público no debe importar guards administrativos.');
 expect(!productTs.includes('crearCheckoutTarjeta('), 'Fase 4 no debe adelantar el checkout de Fase 6.');
@@ -81,7 +87,7 @@ for (const required of [
   'SKU',
   'Precio del producto',
   'Cantidad a agregar',
-  '[max]="stockSeleccionado()"',
+  '[max]="stockRestante()"',
   'Agregar al carrito',
   'Comprar por WhatsApp',
   'Descripción',
@@ -95,15 +101,18 @@ for (const required of [
   expect(productHtml.includes(required), `La plantilla de detalle debe contener ${required}.`);
 }
 
-expect(productHtml.includes('<dialog #lightbox'), 'La única ampliación modal permitida debe ser el lightbox de imágenes.');
+expect(productHtml.includes('<dialog #lightbox'), 'La única ampliación modal permitida en el detalle independiente debe ser el lightbox de imágenes.');
 expect(productHtml.indexOf('class="product-layout"') < productHtml.indexOf('<dialog #lightbox'), 'El contenido comercial debe vivir en la página antes del lightbox, no dentro del diálogo.');
-expect(!productHtml.includes('class="detail-dialog"'), 'El detalle principal no puede reutilizar el modal legado del home.');
+expect(!productHtml.includes('class="detail-dialog"'), 'El detalle independiente no puede reutilizar el modal legado del home.');
 expect(productsHtml.includes('Ver producto'), 'Las tarjetas del catálogo deben ofrecer Ver producto.');
 expect(productsHtml.includes("'/varistorehn/producto/' + producto.slug"), 'Ver producto debe navegar por slug a la página independiente.');
 expect(productsHtml.includes('producto.precioOferta'), 'El catálogo debe poder mostrar el mismo precio promocional que el detalle cuando aplique.');
+expect(homeTs.includes('location.assign(VARISTOREHN_PATHS.producto(producto.slug))'), 'Los accesos de producto del home deben navegar al detalle canónico por slug.');
+expect(!homeTs.includes('detalleDialog?.nativeElement.showModal'), 'El home no debe abrir un modal como experiencia principal de detalle de producto.');
 
 expect(catalog.includes('export function precioVenta'), 'Debe existir una regla única de precio efectivo para detalle y carrito.');
-expect(catalog.includes('precio: precioVenta(producto, modelo)'), 'El carrito debe capturar el precio efectivo centralizado, no un precio divergente.');
+expect(catalog.includes('precio: precioVenta(producto, modelo)'), 'El carrito debe reconstruir el precio efectivo centralizado, no un precio divergente.');
+expect(cartService.includes('restaurarCarrito') && cartService.includes('referenciasCarrito'), 'El carrito central debe rehidratar el detalle contra la fuente pública sin confiar en precios persistidos.');
 
 expect(/object-fit\s*:\s*contain/.test(productScss), 'Las imágenes deben preservar proporción con object-fit: contain.');
 expect(/touch-action\s*:\s*pan-y/.test(productScss), 'La galería móvil debe permitir swipe horizontal sin romper el scroll vertical.');
@@ -126,4 +135,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.info('Fase 4 — detalle público: ruta, galería, stock, precio, carrito, WhatsApp, tema y límites aprobados.');
+console.info('Fase 4 — detalle público: URL canónica, galería, stock restante, precio, carrito central, WhatsApp, tema y límites aprobados.');

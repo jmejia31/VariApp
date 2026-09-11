@@ -186,10 +186,10 @@ test.describe('VariStoreHn Fase 2 — categorías públicas', () => {
 
     await page.goto('/varistorehn/categorias');
     await page.locator('app-varistorehn-header').getByRole('button', { name: 'Abrir carrito con 1 unidades' }).click();
-    await expect(page).toHaveURL(/\/varistorehn\?carrito=1$/);
-    const carrito = page.locator('dialog.cart-dialog');
-    await expect(carrito).toBeVisible();
-    await expect(carrito).toContainText('Laptop Pro 14');
+    await expect(page).toHaveURL(/\/varistorehn\/carrito$/);
+    await expect(page.getByRole('heading', { level: 1, name: 'Mi carrito', exact: true })).toBeVisible();
+    await expect(page.locator('.cart-item')).toContainText('Laptop Pro 14');
+    await expect(page.locator('app-varistorehn-header').getByRole('button', { name: 'Abrir carrito con 1 unidades' })).toBeVisible();
   });
 
   test('ruta canónica consume categoría por slug y corrige el prefijo con el slug devuelto por backend', async ({ page }) => {

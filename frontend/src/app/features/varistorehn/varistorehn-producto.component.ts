@@ -18,19 +18,15 @@ import { environment } from '../../../environments/environment';
 import { EmpresaIdentidadService } from '../../services/empresa-identidad.service';
 import {
   CategoriaTienda,
-  ItemCarrito,
   ModeloTienda,
   ProductoCatalogoPublico,
   ProductoTienda,
-  agregarItem,
   crearCatalogoEjemplo,
   mapearProducto,
   precioVenta,
-  referenciasCarrito,
-  restaurarCarrito,
-  telefonoWhatsapp,
-  totalCarrito
+  telefonoWhatsapp
 } from './varistorehn.catalog';
+import { VaristorehnCarritoService } from './varistorehn-carrito.service';
 import { crearCategoriasTiendaEjemplo, mapearCategoriaTienda } from './varistorehn-categorias.catalog';
 import { VaristorehnHeaderComponent } from './varistorehn-header.component';
 import { VARISTOREHN_CONFIG } from './varistorehn.config';
@@ -39,11 +35,7 @@ import { VaristorehnService } from './varistorehn.service';
 import { IconoTiendaComponent, IlustracionTiendaComponent } from './varistorehn.visual';
 
 type EstadoProductoPublico = 'loading' | 'error' | 'not-found' | 'success';
-
-interface CaracteristicaPublica {
-  etiqueta: string;
-  valor: string;
-}
+interface CaracteristicaPublica { etiqueta: string; valor: string; }
 
 @Component({
   selector: 'app-varistorehn-producto',
@@ -62,6 +54,7 @@ export class VaristorehnProductoComponent implements OnInit {
 
   readonly identidad = inject(EmpresaIdentidadService);
   readonly config = inject(VARISTOREHN_CONFIG);
+  readonly carritoStore = inject(VaristorehnCarritoService);
 
   @ViewChild('lightbox') private lightbox?: ElementRef<HTMLDialogElement>;
   @ViewChild('botonImagenPrincipal') private botonImagenPrincipal?: ElementRef<HTMLButtonElement>;
@@ -75,11 +68,10 @@ export class VaristorehnProductoComponent implements OnInit {
   readonly error = signal('');
   readonly aviso = signal('');
   readonly vistaWhatsapp = signal('');
-
   readonly categorias = signal<CategoriaTienda[]>([]);
   readonly catalogoContexto = signal<ProductoTienda[]>([]);
-  readonly contextoCarritoCargado = signal(false);
-  readonly carrito = signal<ItemCarrito[]>([]);
+  readonly contextoCarritoCargado = this.carritoStore.listo;
+  readonly carrito = this.carritoStore.items;
   readonly modeloClave = signal('');
   readonly cantidad = signal(0);
   readonly imagenActiva = signal(0);
@@ -93,8 +85,7 @@ export class VaristorehnProductoComponent implements OnInit {
     const producto = this.producto();
     if (!producto) return null;
     return this.categorias().find(categoria =>
-      (producto.categoriaId !== null && categoria.id === producto.categoriaId)
-      || categoria.nombre === producto.categoria
+      (producto.categoriaId !== null && categoria.id === producto.categoriaId) || categoria.nombre === producto.categoria
     ) || null;
   });
 
@@ -105,16 +96,12 @@ export class VaristorehnProductoComponent implements OnInit {
       || producto.modelos.find(modelo => modelo.disponible)
       || producto.modelos[0];
   });
-
   readonly imagenes = computed(() => {
     const producto = this.producto();
     const modelo = this.modeloSeleccionado();
     if (!producto) return [];
-    return [...new Set([...(modelo?.imagenes || []), ...producto.imagenes]
-      .map(url => url.trim())
-      .filter(Boolean))];
+    return [...new Set([...(modelo?.imagenes || []), ...producto.imagenes].map(url => url.trim()).filter(Boolean))];
   });
-
   readonly imagenActual = computed(() => this.imagenes()[this.imagenActiva()] || '');
   readonly skuVisible = computed(() => this.modeloSeleccionado()?.sku || this.producto()?.sku || '');
   readonly precioNormal = computed(() => this.modeloSeleccionado()?.precio ?? this.producto()?.precio ?? 0);
@@ -125,14 +112,11 @@ export class VaristorehnProductoComponent implements OnInit {
   });
   readonly tienePromocion = computed(() => this.precioActual() < this.precioNormal());
   readonly stockSeleccionado = computed(() => this.modeloSeleccionado()?.stock ?? 0);
-  readonly puedeSeleccionarCantidad = computed(() => Boolean(
-    this.modeloSeleccionado()?.disponible && this.stockSeleccionado() > 0
-  ));
+  readonly puedeSeleccionarCantidad = computed(() => Boolean(this.modeloSeleccionado()?.disponible && this.stockRestante() > 0));
   readonly unidadesEnCarrito = computed(() => {
     const producto = this.producto();
     const modelo = this.modeloSeleccionado();
-    if (!producto || !modelo) return 0;
-    return this.carrito().find(item => item.productoId === producto.id && item.modeloClave === modelo.clave)?.unidades || 0;
+    return producto && modelo ? this.carritoStore.unidadesDe(producto.id, modelo.clave) : 0;
   });
   readonly stockRestante = computed(() => Math.max(0, this.stockSeleccionado() - this.unidadesEnCarrito()));
   readonly puedeAgregar = computed(() => Boolean(
@@ -141,12 +125,10 @@ export class VaristorehnProductoComponent implements OnInit {
     && this.producto()?.activo
     && this.modeloSeleccionado()?.disponible
     && this.cantidad() > 0
-    && this.stockRestante() > 0
+    && this.cantidad() <= this.stockRestante()
   ));
-  readonly totalUnidades = computed<number | null>(() => this.contextoCarritoCargado()
-    ? this.carrito().reduce((total, item) => total + item.unidades, 0)
-    : null);
-  readonly subtotal = computed<number | null>(() => this.contextoCarritoCargado() ? totalCarrito(this.carrito()) : null);
+  readonly totalUnidades = computed<number | null>(() => this.carritoStore.listo() ? this.carritoStore.totalUnidades() : null);
+  readonly subtotal = computed<number | null>(() => this.carritoStore.listo() ? this.carritoStore.subtotal() : null);
 
   readonly caracteristicas = computed<CaracteristicaPublica[]>(() => {
     const producto = this.producto();
@@ -159,7 +141,6 @@ export class VaristorehnProductoComponent implements OnInit {
       { etiqueta: 'Categoría', valor: producto.categoria }
     ].filter(item => item.valor.trim());
   });
-
   readonly relacionados = computed(() => {
     const actual = this.producto();
     if (!actual) return [];
@@ -189,7 +170,6 @@ export class VaristorehnProductoComponent implements OnInit {
       this.slugSolicitado.set((params.get('slug') || '').trim().slice(0, 180));
       if (this.identidadLista) this.cargarProducto();
     });
-
     this.identidad.cargar().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.identidadLista = true;
       this.cargarProducto();
@@ -201,149 +181,90 @@ export class VaristorehnProductoComponent implements OnInit {
   cambiarFuente(baseDatos: boolean): void {
     if (!this.controlesVistaPrevia || baseDatos === this.utilizarDatosBaseDatos()) return;
     this.utilizarDatosBaseDatos.set(baseDatos);
-    this.cantidad.set(0);
-    this.imagenActiva.set(0);
-    this.vistaWhatsapp.set('');
-    this.cargarProducto();
-    this.cargarContextoCatalogo();
-    this.cargarCategorias();
+    this.carritoStore.reiniciarContexto();
+    this.cantidad.set(0); this.imagenActiva.set(0); this.vistaWhatsapp.set('');
+    this.cargarProducto(); this.cargarContextoCatalogo(); this.cargarCategorias();
   }
-
-  recargar(): void {
-    this.cargarProducto();
-    this.cargarContextoCatalogo();
-    this.cargarCategorias();
-  }
-
-  actualizarBusqueda(texto: string): void {
-    this.busqueda.set(texto.slice(0, 180));
-  }
-
+  recargar(): void { this.cargarProducto(); this.cargarContextoCatalogo(); this.cargarCategorias(); }
+  actualizarBusqueda(texto: string): void { this.busqueda.set(texto.slice(0, 180)); }
   buscar(): void {
     const q = this.busqueda().trim();
     void this.router.navigate(['/varistorehn/productos'], { queryParams: q ? { q } : {} });
   }
-
   seleccionarCategoria(nombre: string): void {
-    if (!nombre) {
-      void this.router.navigate(['/varistorehn/productos']);
-      return;
-    }
+    if (!nombre) { void this.router.navigate(['/varistorehn/productos']); return; }
     const categoria = this.categorias().find(item => item.nombre === nombre);
-    void this.router.navigate(['/varistorehn/productos'], {
-      queryParams: categoria ? { categoria: categoria.slug } : {}
-    });
+    void this.router.navigate(['/varistorehn/productos'], { queryParams: categoria ? { categoria: categoria.slug } : {} });
   }
-
-  abrirCarrito(): void {
-    void this.router.navigate(['/varistorehn'], { queryParams: { carrito: '1' } });
-  }
+  abrirCarrito(): void { void this.router.navigateByUrl(VARISTOREHN_PATHS.carrito); }
 
   seleccionarModelo(clave: string): void {
     const producto = this.producto();
     if (!producto?.modelos.some(modelo => modelo.clave === clave)) return;
-    this.modeloClave.set(clave);
-    this.imagenActiva.set(0);
-    this.cerrarLightbox(false);
-    this.reiniciarCantidad();
+    this.modeloClave.set(clave); this.imagenActiva.set(0); this.cerrarLightbox(false); this.reiniciarCantidad();
   }
-
   cambiarCantidad(cambio: number): void {
     if (!Number.isInteger(cambio) || !this.puedeSeleccionarCantidad()) return;
-    this.cantidad.set(Math.max(1, Math.min(this.stockSeleccionado(), this.cantidad() + cambio)));
+    this.cantidad.set(Math.max(1, Math.min(this.stockRestante(), this.cantidad() + cambio)));
   }
-
   establecerCantidad(valor: string): void {
-    if (!this.puedeSeleccionarCantidad()) {
-      this.cantidad.set(0);
-      return;
-    }
+    if (!this.puedeSeleccionarCantidad()) { this.cantidad.set(0); return; }
     const numero = Number(valor);
     const cantidad = Number.isFinite(numero) ? Math.floor(numero) : 1;
-    this.cantidad.set(Math.max(1, Math.min(this.stockSeleccionado(), cantidad)));
+    this.cantidad.set(Math.max(1, Math.min(this.stockRestante(), cantidad)));
   }
-
   agregarAlCarrito(): void {
     const producto = this.producto();
     const modelo = this.modeloSeleccionado();
     if (!producto || !modelo || !this.puedeAgregar()) return;
-
-    let items = this.carrito();
-    const unidades = Math.min(this.cantidad(), this.stockRestante());
-    if (unidades <= 0) return;
-    for (let indice = 0; indice < unidades; indice += 1) {
-      items = agregarItem(items, producto, modelo);
-    }
-    this.guardarCarrito(items);
+    const agregadas = this.carritoStore.agregar(producto, modelo, this.cantidad());
+    if (!agregadas) return;
     this.reiniciarCantidad();
-    this.aviso.set(`${unidades} ${unidades === 1 ? 'unidad agregada' : 'unidades agregadas'} de ${producto.nombre}.`);
+    this.aviso.set(`${agregadas} ${agregadas === 1 ? 'unidad agregada' : 'unidades agregadas'} de ${producto.nombre}.`);
   }
-
   comprarWhatsapp(): void {
     const producto = this.producto();
     const modelo = this.modeloSeleccionado();
     const telefono = this.telefono();
     if (!producto || !modelo || !telefono || !this.permiteWhatsapp() || !modelo.disponible || modelo.stock <= 0) return;
-
     const unidades = Math.max(1, Math.min(this.cantidad() || 1, modelo.stock));
     const subtotal = this.precioActual() * unidades;
     const sku = this.skuVisible() ? `\nSKU: ${this.skuVisible()}` : '';
     const mensaje = `Hola ${this.identidad.config().nombreComercial}, deseo consultar este producto:\n\n${producto.nombre}\nModelo: ${modelo.nombre}${sku}\nCantidad: ${unidades}\nPrecio unitario: ${this.moneda(this.precioActual())}\nSubtotal: ${this.moneda(subtotal)}\n\nPor favor confirmar disponibilidad y total final.`;
-
-    if (!this.utilizarDatosBaseDatos()) {
-      this.vistaWhatsapp.set(`VISTA PREVIA — NO ENVIADO\n\n${mensaje}`);
-      return;
-    }
-
+    if (!this.utilizarDatosBaseDatos()) { this.vistaWhatsapp.set(`VISTA PREVIA — NO ENVIADO\n\n${mensaje}`); return; }
     const url = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
-    if (url.length > 7500) {
-      this.aviso.set('El mensaje es demasiado largo para abrirse de forma segura en WhatsApp.');
-      return;
-    }
+    if (url.length > 7500) { this.aviso.set('El mensaje es demasiado largo para abrirse de forma segura en WhatsApp.'); return; }
     this.document.defaultView?.open(url, '_blank', 'noopener,noreferrer');
   }
 
   seleccionarImagen(indice: number): void {
-    if (!Number.isInteger(indice) || indice < 0 || indice >= this.imagenes().length) return;
-    this.imagenActiva.set(indice);
+    if (Number.isInteger(indice) && indice >= 0 && indice < this.imagenes().length) this.imagenActiva.set(indice);
   }
-
   moverImagen(cambio: number): void {
     const total = this.imagenes().length;
     if (total <= 1 || !Number.isInteger(cambio)) return;
     this.imagenActiva.set((this.imagenActiva() + cambio + total) % total);
   }
-
   iniciarSwipe(evento: PointerEvent): void {
-    if (evento.pointerType === 'mouse') return;
-    this.inicioSwipe = { x: evento.clientX, y: evento.clientY };
+    if (evento.pointerType !== 'mouse') this.inicioSwipe = { x: evento.clientX, y: evento.clientY };
   }
-
   finalizarSwipe(evento: PointerEvent): void {
     if (!this.inicioSwipe || evento.pointerType === 'mouse') return;
     const deltaX = evento.clientX - this.inicioSwipe.x;
     const deltaY = evento.clientY - this.inicioSwipe.y;
     this.inicioSwipe = null;
     if (Math.abs(deltaX) < 48 || Math.abs(deltaX) <= Math.abs(deltaY) * 1.2) return;
-
     this.moverImagen(deltaX < 0 ? 1 : -1);
     this.suprimirClickImagen = true;
     this.document.defaultView?.setTimeout(() => { this.suprimirClickImagen = false; }, 0);
   }
-
-  cancelarSwipe(): void {
-    this.inicioSwipe = null;
-  }
-
+  cancelarSwipe(): void { this.inicioSwipe = null; }
   abrirLightbox(): void {
     if (this.suprimirClickImagen || !this.imagenValida(this.imagenActual())) return;
     const dialogo = this.lightbox?.nativeElement;
     if (!dialogo || dialogo.open) return;
-    this.restaurarFocoLightbox = true;
-    dialogo.showModal();
-    this.lightboxAbierto.set(true);
+    this.restaurarFocoLightbox = true; dialogo.showModal(); this.lightboxAbierto.set(true);
   }
-
   cerrarLightbox(devolverFoco = true): void {
     const dialogo = this.lightbox?.nativeElement;
     this.restaurarFocoLightbox = devolverFoco;
@@ -354,191 +275,103 @@ export class VaristorehnProductoComponent implements OnInit {
       this.restaurarFocoLightbox = true;
     }
   }
-
   cerrarLightboxDesdeFondo(evento: MouseEvent): void {
     if (evento.target === this.lightbox?.nativeElement) this.cerrarLightbox(true);
   }
-
   alCerrarLightbox(): void {
     const devolverFoco = this.restaurarFocoLightbox;
-    this.restaurarFocoLightbox = true;
-    this.lightboxAbierto.set(false);
+    this.restaurarFocoLightbox = true; this.lightboxAbierto.set(false);
     if (devolverFoco) queueMicrotask(() => this.botonImagenPrincipal?.nativeElement.focus());
   }
-
-  imagenValida(url?: string): boolean {
-    return Boolean(url && !this.imagenesFallidas().has(url));
-  }
-
+  imagenValida(url?: string): boolean { return Boolean(url && !this.imagenesFallidas().has(url)); }
   errorImagen(url: string): void {
     this.imagenesFallidas.update(actual => new Set([...actual, url]));
     if (url === this.imagenActual() && this.lightboxAbierto()) this.cerrarLightbox(false);
   }
-
-  stockBajo(): boolean {
-    const stock = this.stockSeleccionado();
-    return stock > 0 && stock <= 3;
-  }
-
+  stockBajo(): boolean { const stock = this.stockSeleccionado(); return stock > 0 && stock <= 3; }
   textoDisponibilidad(): string {
     const modelo = this.modeloSeleccionado();
     if (!modelo?.disponible) return 'Agotado';
     if (this.stockBajo()) return `Últimas ${modelo.stock} unidades`;
     return `${modelo.stock} ${modelo.stock === 1 ? 'unidad disponible' : 'unidades disponibles'}`;
   }
-
-  rutaProducto(producto: ProductoTienda): string {
-    return producto.slug ? VARISTOREHN_PATHS.producto(producto.slug) : VARISTOREHN_PATHS.productos;
-  }
-
+  rutaProducto(producto: ProductoTienda): string { return producto.slug ? VARISTOREHN_PATHS.producto(producto.slug) : VARISTOREHN_PATHS.productos; }
   rutaCategoria(): string {
     const categoria = this.categoriaProducto();
     return categoria ? VARISTOREHN_PATHS.categoria(categoria.slug) : VARISTOREHN_PATHS.categorias;
   }
-
   imagenRelacionado(producto: ProductoTienda): string {
     const modelo = producto.modelos.find(item => item.disponible) || producto.modelos[0];
     return modelo?.imagenes[0] || producto.imagenes[0] || '';
   }
-
   precioRelacionado(producto: ProductoTienda): number {
     const modelo = producto.modelos.find(item => item.disponible) || producto.modelos[0];
     return modelo ? precioVenta(producto, modelo) : producto.precio;
   }
-
   moneda(valor: number): string {
-    try {
-      return new Intl.NumberFormat('es-HN', {
-        style: 'currency',
-        currency: this.identidad.config().moneda || 'HNL'
-      }).format(valor);
-    } catch {
-      return new Intl.NumberFormat('es-HN', { style: 'currency', currency: 'HNL' }).format(valor);
-    }
+    try { return new Intl.NumberFormat('es-HN', { style: 'currency', currency: this.identidad.config().moneda || 'HNL' }).format(valor); }
+    catch { return new Intl.NumberFormat('es-HN', { style: 'currency', currency: 'HNL' }).format(valor); }
   }
 
   private cargarProducto(): void {
     this.cargaProducto?.unsubscribe();
-    this.producto.set(null);
-    this.error.set('');
-    this.vistaWhatsapp.set('');
-    this.estado.set('loading');
-    this.modeloClave.set('');
-    this.cantidad.set(0);
-    this.imagenActiva.set(0);
-    this.cerrarLightbox(false);
-
+    this.producto.set(null); this.error.set(''); this.vistaWhatsapp.set(''); this.estado.set('loading');
+    this.modeloClave.set(''); this.cantidad.set(0); this.imagenActiva.set(0); this.cerrarLightbox(false);
     const slug = this.slugSolicitado();
-    if (!slug) {
-      this.estado.set('not-found');
-      return;
-    }
-
+    if (!slug) { this.estado.set('not-found'); return; }
     if (!this.utilizarDatosBaseDatos()) {
       const producto = crearCatalogoEjemplo().find(item => item.slug === slug && item.activo) || null;
-      if (!producto) {
-        this.estado.set('not-found');
-        return;
-      }
-      this.establecerProducto(producto, slug);
-      return;
+      if (!producto) { this.estado.set('not-found'); return; }
+      this.establecerProducto(producto, slug); return;
     }
-
-    this.cargaProducto = this.servicio.obtenerProductoPorSlug(slug).pipe(
-      map(mapearProducto),
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe({
+    this.cargaProducto = this.servicio.obtenerProductoPorSlug(slug).pipe(map(mapearProducto), takeUntilDestroyed(this.destroyRef)).subscribe({
       next: producto => this.establecerProducto(producto, slug),
       error: error => {
-        if (this.esNoEncontrado(error)) {
-          this.estado.set('not-found');
-          return;
-        }
+        if (this.esNoEncontrado(error)) { this.estado.set('not-found'); return; }
         this.error.set('No pudimos cargar este producto. Revisa la conexión e intenta de nuevo. No se sustituyeron los datos reales por ejemplos.');
         this.estado.set('error');
       }
     });
   }
-
   private establecerProducto(producto: ProductoTienda, slugSolicitado: string): void {
-    if (!producto.activo) {
-      this.estado.set('not-found');
-      return;
-    }
+    if (!producto.activo) { this.estado.set('not-found'); return; }
     this.producto.set(producto);
     const modelo = producto.modelos.find(item => item.disponible) || producto.modelos[0];
-    this.modeloClave.set(modelo?.clave || '');
-    this.estado.set('success');
-    this.reiniciarCantidad();
-
-    if (producto.slug && producto.slug !== slugSolicitado) {
-      void this.router.navigateByUrl(VARISTOREHN_PATHS.producto(producto.slug), { replaceUrl: true });
-    }
+    this.modeloClave.set(modelo?.clave || ''); this.estado.set('success'); this.reiniciarCantidad();
+    if (producto.slug && producto.slug !== slugSolicitado) void this.router.navigateByUrl(VARISTOREHN_PATHS.producto(producto.slug), { replaceUrl: true });
   }
-
   private cargarContextoCatalogo(): void {
     this.cargaCatalogo?.unsubscribe();
     this.catalogoContexto.set([]);
-    this.contextoCarritoCargado.set(false);
-    this.carrito.set([]);
-
+    this.carritoStore.reiniciarContexto();
     const fuente: Observable<ProductoCatalogoPublico[] | null> = this.utilizarDatosBaseDatos()
-      ? this.servicio.obtenerCatalogo()
-      : of(null);
-
+      ? this.servicio.obtenerCatalogo() : of(null);
     this.cargaCatalogo = fuente.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: datos => {
         const productos = datos === null ? crearCatalogoEjemplo() : datos.map(mapearProducto);
         this.catalogoContexto.set(productos);
-        this.carrito.set(restaurarCarrito(this.leerReferenciasCarrito(), productos));
-        this.contextoCarritoCargado.set(true);
+        const resultado = this.carritoStore.hidratar(productos, this.identidad.config().id, this.utilizarDatosBaseDatos());
+        if (resultado.ajustado) this.aviso.set(this.carritoStore.aviso());
+        this.reiniciarCantidad();
       },
-      error: () => {
-        this.aviso.set('El producto puede consultarse, pero no pudimos actualizar relacionados ni el resumen del carrito. Tu selección guardada no fue reemplazada.');
-      }
+      error: () => this.aviso.set('El producto puede consultarse, pero no pudimos actualizar relacionados ni validar el carrito. Tu selección guardada no fue reemplazada.')
     });
   }
-
   private cargarCategorias(): void {
-    this.cargaCategorias?.unsubscribe();
-    this.categorias.set([]);
+    this.cargaCategorias?.unsubscribe(); this.categorias.set([]);
     const fuente: Observable<CategoriaTienda[]> = this.utilizarDatosBaseDatos()
       ? this.servicio.obtenerCategorias().pipe(map(categorias => categorias.map(mapearCategoriaTienda)))
       : of(crearCategoriasTiendaEjemplo());
-
     this.cargaCategorias = fuente.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: categorias => this.categorias.set(categorias),
       error: () => this.aviso.set('No pudimos actualizar la navegación de categorías en esta página.')
     });
   }
-
   private reiniciarCantidad(): void {
-    this.cantidad.set(this.stockSeleccionado() > 0 && this.modeloSeleccionado()?.disponible ? 1 : 0);
+    this.cantidad.set(this.stockRestante() > 0 && this.modeloSeleccionado()?.disponible ? 1 : 0);
   }
-
   private esNoEncontrado(error: unknown): boolean {
     if (error instanceof HttpErrorResponse) return error.status === 404;
     return error instanceof Error && ['Producto no encontrado.', 'Slug de producto no válido.'].includes(error.message);
-  }
-
-  private claveCarrito(): string {
-    return `varistorehn:carrito:v2:${this.identidad.config().id}:${this.utilizarDatosBaseDatos() ? 'bd' : 'demo'}`;
-  }
-
-  private leerReferenciasCarrito(): unknown {
-    try {
-      return JSON.parse(this.document.defaultView?.localStorage.getItem(this.claveCarrito()) || '[]');
-    } catch {
-      return [];
-    }
-  }
-
-  private guardarCarrito(items: ItemCarrito[]): void {
-    this.carrito.set(items);
-    try {
-      this.document.defaultView?.localStorage.setItem(this.claveCarrito(), JSON.stringify(referenciasCarrito(items)));
-    } catch {
-      this.aviso.set('No pudimos guardar el carrito en este navegador.');
-    }
   }
 }

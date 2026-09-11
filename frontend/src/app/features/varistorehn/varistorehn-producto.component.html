@@ -178,8 +178,8 @@
             </div>
             <div class="quantity-control" role="group" aria-label="Cantidad a agregar">
               <button type="button" [disabled]="!puedeSeleccionarCantidad() || cantidad() <= 1" aria-label="Disminuir cantidad" (click)="cambiarCantidad(-1)">−</button>
-              <input #cantidadInput id="cantidad-producto" type="number" [min]="stockSeleccionado() > 0 ? 1 : 0" [max]="stockSeleccionado()" [value]="cantidad()" [disabled]="!puedeSeleccionarCantidad()" (change)="establecerCantidad(cantidadInput.value)" aria-label="Cantidad de producto">
-              <button type="button" [disabled]="!puedeSeleccionarCantidad() || cantidad() >= stockSeleccionado()" aria-label="Aumentar cantidad" (click)="cambiarCantidad(1)">+</button>
+              <input #cantidadInput id="cantidad-producto" type="number" [min]="stockRestante() > 0 ? 1 : 0" [max]="stockRestante()" [value]="cantidad()" [disabled]="!puedeSeleccionarCantidad()" (change)="establecerCantidad(cantidadInput.value)" aria-label="Cantidad de producto">
+              <button type="button" [disabled]="!puedeSeleccionarCantidad() || cantidad() >= stockRestante()" aria-label="Aumentar cantidad" (click)="cambiarCantidad(1)">+</button>
             </div>
 
             <button type="button" class="button primary add-main" [disabled]="!puedeAgregar()" (click)="agregarAlCarrito()">
