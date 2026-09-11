@@ -1,9 +1,9 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
-  "currentParent": "N6.3.H",
-  "generatedAt": "2026-09-11T13:31:35Z",
-  "regenerationReason": "N6.3.G_LISTO_REAL__N6.3.H_CURRENT__SUPERVISION_CATCHUP__J1_A1_MATERIALIZATION_PENDING__N6.4.A_PREARMED_SEQUENCE_GATED__NO_FILLER",
-  "lastClosedParent": "N6.3.G",
+  "currentParent": "N6.4.A",
+  "generatedAt": "2026-09-11T14:03:00Z",
+  "regenerationReason": "N6.3.H_LISTO_REAL__N6.4.A_CURRENT__SUPERVISION_CATCHUP__N6.4.B_PREARMED_DEPENDENCY_GATED__NO_FILLER",
+  "lastClosedParent": "N6.3.H",
   "closureReceipts": {
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
     "N5.1.H": "vaep/evidence/fragments/N5.1.H_LISTO_REAL_20260909T1236Z.json",
@@ -45,7 +45,8 @@
     "N6.3.D": "vaep/evidence/fragments/N6.3.D_LISTO_REAL_20260911T0958Z.json",
     "N6.3.E": "vaep/evidence/fragments/N6.3.E_LISTO_REAL_20260911T1112Z.json",
     "N6.3.F": "vaep/evidence/fragments/N6.3.F_LISTO_REAL_20260911T1224Z.json",
-    "N6.3.G": "vaep/evidence/fragments/N6.3.G_LISTO_REAL_20260911T1324Z.json"
+    "N6.3.G": "vaep/evidence/fragments/N6.3.G_LISTO_REAL_20260911T1324Z.json",
+    "N6.3.H": "vaep/evidence/fragments/N6.3.H_LISTO_REAL_20260911T1402Z.json"
   },
   "policy": {
     "branch": "Desarrollo",
@@ -63,15 +64,15 @@
   },
   "throughputPlan": {
     "mode": "PARENT_CLOSE_FIRST",
-    "currentParent": "N6.3.H",
+    "currentParent": "N6.4.A",
     "currentParentMaterialScopeCount": 1,
-    "currentParentReason": "N6.3.G is LISTO_REAL. N6.3.H is the single roadmap-derived documentation/certification facet for Sucursales por empresa.",
-    "nextParent": "N6.4.A",
+    "currentParentReason": "N6.3.H is LISTO_REAL. N6.4.A is the roadmap-derived audit/preflight facet for Usuarios por empresa.",
+    "nextParent": "N6.4.B",
     "nextParentParallelMaterialScopes": 1,
     "nextParentScopesNonOverlapping": true,
     "currentRun": null,
     "nextRunReserved": null,
-    "laneRefill": "N6.3.H_CURRENT__N6.4.A_PREARMED_SEQUENCE_GATED__NO_FILLER"
+    "laneRefill": "N6.4.A_CURRENT__N6.4.B_PREARMED_DEPENDENCY_GATED__NO_FILLER"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
@@ -103,7 +104,8 @@
       {"id":"N6.3.F","order":545,"dependencies":["N6.3.E"]},
       {"id":"N6.3.G","order":546,"dependencies":["N6.3.F"]},
       {"id":"N6.3.H","order":547,"dependencies":["N6.3.G"]},
-      {"id":"N6.4.A","order":548,"dependencies":["N6.1.H"]}
+      {"id":"N6.4.A","order":548,"dependencies":["N6.1.H"]},
+      {"id":"N6.4.B","order":549,"dependencies":["N6.4.A"]}
     ]
   },
   "recoveredRuns": [
@@ -130,6 +132,9 @@
     },
     {
       "parent":"N6.3.G","logicalTaskId":"N6.3.G.1.SUCURSALES_EMPRESA_QA_REGRESSION_CI","originalWorker":"J5","originalRunId":34600203395,"originalJobId":103265359475,"originalSessionId":"11644399045253880581","originalTerminal":"JULES_LANE_BUDGET_EXCEEDED__SUPERSEDED__EVIDENCE_ONLY","r2Worker":"J6","r2RunId":34601280696,"r2JobId":103268919038,"r2Terminal":"PRESESSION_PRIMARY_BASE_HEAD_MISMATCH__ATTEMPT2_EXHAUSTED__EVIDENCE_ONLY","r2SessionId":null,"ownershipTransfer":"J6_TO_CHATGPT_VAEP__MANDATORY_AFTER_ATTEMPT2_TERMINAL_INVALID","activeReal":false,"controllerFunctionalHead":"9c52fcb8ece3bfa874faff078fb331f4f2ee09b6","reviewReceipt":"vaep/evidence/reviews/N6.3.G_CONTROLLER_QA_TAKEOVER_REVIEW_FIRST_20260911T1259Z.json","r2Used":true,"r3Used":false,"closureReceipt":"vaep/evidence/fragments/N6.3.G_LISTO_REAL_20260911T1324Z.json"
+    },
+    {
+      "parent":"N6.3.H","logicalTaskId":"N6.3.H.1.SUCURSALES_EMPRESA_DOCUMENTATION_CERTIFICATION","worker":"J1","originalRunId":34605202992,"duplicateTriggerRunId":34605271881,"originalTerminal":"COMPLETED_FAILURE__SUPERSEDED_EVIDENCE_ONLY","duplicateTriggerTerminal":"COMPLETED_FAILURE__NON_OWNER_EVIDENCE_ONLY","ownershipTransfer":"J1_TO_CHATGPT_VAEP__CONTROLLER_QA_TAKEOVER_AFTER_STALL","activeReal":false,"taskAttempt":1,"r2Used":false,"r3Used":false,"controllerFunctionalHead":"e37e74c4fbf0c39d6cb1d4b0e56ac8f026a4a56e","reviewReceipt":"vaep/evidence/reviews/N6.3.H_CONTROLLER_QA_TAKEOVER_REVIEW_FIRST_20260911T1351Z.json","closureReceipt":"vaep/evidence/fragments/N6.3.H_LISTO_REAL_20260911T1402Z.json"
     }
   ],
   "prearmedRoadmap": [
@@ -149,11 +154,12 @@
     {"parent":"N6.3.E","taskId":"N6.3.E.1.SUCURSALES_EMPRESA_FRONTEND_UX","state":"LISTO_REAL","dependency":"N6.3.D_LISTO_REAL","materialization":"SUCURSALES_EMPRESA_FRONTEND_UX__CONTROLLER_QA_TAKEOVER__REVIEW_FIRST_PASS__EXACT_HEAD_GATES_PASS","worker":"CHATGPT_VAEP","taskAttempt":2,"activeReal":false,"functionalHead":"96ebf77191e90884d5aee0b894adda50cfe627b0","reviewReceipt":"vaep/evidence/reviews/N6.3.E_CONTROLLER_QA_TAKEOVER_REVIEW_FIRST_20260911T1056Z.json","r2Used":true,"r3Used":false,"lateJulesIntegrationDenied":true,"closureReceipt":"vaep/evidence/fragments/N6.3.E_LISTO_REAL_20260911T1112Z.json"},
     {"parent":"N6.3.F","taskId":"N6.3.F.1.SUCURSALES_EMPRESA_SEC_AUDIT","state":"LISTO_REAL","dependency":"N6.3.E_LISTO_REAL","materialization":"SUCURSALES_EMPRESA_SEC_AUDIT__CONTROLLER_QA_TAKEOVER__REVIEW_FIRST_PASS__P0_P1_ZERO__LISTO_REAL","worker":"CHATGPT_VAEP","taskAttempt":1,"activeReal":false,"functionalHead":"fb44b9f678daf5ff61998a87375ee454d288bad1","reviewReceipt":"vaep/evidence/reviews/N6.3.F_REVIEW_FIRST_20260911T1148Z.json","r2Used":false,"r3Used":false,"closureReceipt":"vaep/evidence/fragments/N6.3.F_LISTO_REAL_20260911T1224Z.json"},
     {"parent":"N6.3.G","taskId":"N6.3.G.1.SUCURSALES_EMPRESA_QA_REGRESSION_CI","state":"LISTO_REAL","dependency":"N6.3.F_LISTO_REAL","materialization":"SUCURSALES_EMPRESA_QA_REGRESSION_CI__CONTROLLER_QA_TAKEOVER__REVIEW_FIRST_PASS__P0_P1_ZERO__EXACT_HEAD_GATES_PASS","worker":"CHATGPT_VAEP","taskAttempt":2,"activeReal":false,"functionalHead":"9c52fcb8ece3bfa874faff078fb331f4f2ee09b6","reviewReceipt":"vaep/evidence/reviews/N6.3.G_CONTROLLER_QA_TAKEOVER_REVIEW_FIRST_20260911T1259Z.json","r2Used":true,"r3Used":false,"closureReceipt":"vaep/evidence/fragments/N6.3.G_LISTO_REAL_20260911T1324Z.json"},
-    {"parent":"N6.3.H","taskId":"N6.3.H.1.SUCURSALES_EMPRESA_DOCUMENTATION_CERTIFICATION","state":"READY_CURRENT","dependency":"N6.3.G_LISTO_REAL","materialization":"SUCURSALES_EMPRESA_DOCUMENTATION_CERTIFICATION__ROADMAP_DERIVED__NO_FILLER"},
-    {"parent":"N6.4.A","taskId":"N6.4.A.1.USUARIOS_EMPRESA_PREFLIGHT","state":"READY_DEPENDENCY_GATED","dependency":"N6.3.H_LISTO_REAL__SEQUENCE_GATE","materialization":"USUARIOS_EMPRESA_PREFLIGHT__ROADMAP_DERIVED__NO_FILLER"}
+    {"parent":"N6.3.H","taskId":"N6.3.H.1.SUCURSALES_EMPRESA_DOCUMENTATION_CERTIFICATION","state":"LISTO_REAL","dependency":"N6.3.G_LISTO_REAL","materialization":"SUCURSALES_EMPRESA_DOCUMENTATION_CERTIFICATION__CONTROLLER_QA_TAKEOVER__REVIEW_FIRST_PASS__P0_P1_ZERO__EXACT_HEAD_GATES_PASS","worker":"CHATGPT_VAEP","taskAttempt":1,"activeReal":false,"functionalHead":"e37e74c4fbf0c39d6cb1d4b0e56ac8f026a4a56e","reviewReceipt":"vaep/evidence/reviews/N6.3.H_CONTROLLER_QA_TAKEOVER_REVIEW_FIRST_20260911T1351Z.json","r2Used":false,"r3Used":false,"closureReceipt":"vaep/evidence/fragments/N6.3.H_LISTO_REAL_20260911T1402Z.json"},
+    {"parent":"N6.4.A","taskId":"N6.4.A.1.USUARIOS_EMPRESA_PREFLIGHT","state":"READY_CURRENT","dependency":"N6.3.H_LISTO_REAL__SEQUENCE_GATE","materialization":"USUARIOS_EMPRESA_PREFLIGHT__ROADMAP_DERIVED__NO_FILLER"},
+    {"parent":"N6.4.B","taskId":"N6.4.B.1.USUARIOS_EMPRESA_DOMAIN_CONTRACTS","state":"READY_DEPENDENCY_GATED","dependency":"N6.4.A_LISTO_REAL","materialization":"USUARIOS_EMPRESA_DOMAIN_CONTRACTS__ROADMAP_DERIVED__NO_FILLER"}
   ],
   "lanes": {"J1":[],"J2":[],"J3":[],"J4":[],"J5":[],"J6":[]},
-  "rolling60CertifiedParents": ["N6.3.G"],
+  "rolling60CertifiedParents": ["N6.3.H"],
   "rolling60Count": 1,
-  "lastClosureFunctionalHead": "9c52fcb8ece3bfa874faff078fb331f4f2ee09b6"
+  "lastClosureFunctionalHead": "e37e74c4fbf0c39d6cb1d4b0e56ac8f026a4a56e"
 }
