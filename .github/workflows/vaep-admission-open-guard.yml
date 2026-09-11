@@ -31,7 +31,7 @@ jobs:
           master="$(gh api "repos/$REPO/contents/$MASTER_PATH?ref=$BRANCH" --jq '.content' | tr -d '\n' | base64 -d)"
           grep -q '^GLOBAL_DISPATCH_ADMISSION=OPEN_ONLY$' <<<"$master"
           grep -q '^GLOBAL_FROZEN_PROHIBITED=TRUE$' <<<"$master"
-          grep -q '^CAUSAL_HOLD_SCOPE=TASK_OR_LANE_ONLY$' <<<"$master"
+          grep -q '^CAUSAL_HOLD_SCOPE=TASK_OR_EXECUTION_ONLY$' <<<"$master"
           ! grep -q 'Solo se permiten dos estados' <<<"$master"
           echo 'VAEP_MASTER_OPEN_ONLY=PASS'
 
@@ -56,7 +56,7 @@ jobs:
             fi
 
             now="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-            fixed="$(jq -n --arg now "$now" '{newDispatchAdmission:"OPEN",allowExistingActiveSessions:true,reason:"OPEN_ONLY_INVARIANT_REPAIR__TASK_LANE_GATES_ONLY",updatedAtUtc:$now}')"
+            fixed="$(jq -n --arg now "$now" '{newDispatchAdmission:"OPEN",allowExistingActiveSessions:true,reason:"OPEN_ONLY_INVARIANT_REPAIR__TASK_EXECUTION_GATES_ONLY",updatedAtUtc:$now}')"
             encoded="$(printf '%s\n' "$fixed" | base64 -w0)"
             if jq -n \
               --arg message "fix(vaep): repair non-open global admission state" \
