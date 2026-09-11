@@ -2,12 +2,27 @@ import { test, expect, Page } from '@playwright/test';
 
 const ADMIN_USERNAME = process.env['PHASE7_ADMIN_USERNAME'] ?? 'e2e_admin';
 const ADMIN_PASSWORD = process.env['PHASE7_ADMIN_PASSWORD'] ?? 'E2E.Admin#2026!';
+const EMPRESA_ID = process.env['PHASE7_EMPRESA_ID'];
+
+async function completarSeleccionTenantSiAplica(page: Page): Promise<void> {
+  const selector = page.getByLabel('ID de empresa');
+  try {
+    await selector.waitFor({ state: 'visible', timeout: 5_000 });
+  } catch {
+    return;
+  }
+
+  if (!EMPRESA_ID) throw new Error('PHASE7_EMPRESA_ID es obligatorio cuando el login requiere seleccionar empresa.');
+  await selector.fill(EMPRESA_ID);
+  await page.getByRole('button', { name: 'Entrar a la empresa', exact: true }).click();
+}
 
 async function loginUi(page: Page): Promise<void> {
   await page.goto('/login');
   await page.locator('input[formcontrolname="nombreUsuario"]').fill(ADMIN_USERNAME);
   await page.locator('input[formcontrolname="password"]').fill(ADMIN_PASSWORD);
   await page.locator('button[type="submit"]').click();
+  await completarSeleccionTenantSiAplica(page);
   await page.waitForURL(url => url.pathname !== '/login', { timeout: 20_000 });
 }
 
