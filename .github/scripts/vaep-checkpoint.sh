@@ -43,7 +43,7 @@ validate_checkpoint_contract() {
   [[ "$actual" == "$expected" ]] || fail "checkpoint_policy_mismatch expected=$expected actual=$actual"
   [[ "$(bash "$PARSER" --get GLOBAL_DISPATCH_ADMISSION "$MASTER_FILE")" == "OPEN_ONLY" ]] || fail "global_admission_not_open_only"
   [[ "$(bash "$PARSER" --get GLOBAL_FROZEN_PROHIBITED "$MASTER_FILE")" == "TRUE" ]] || fail "global_non_open_prohibition_missing"
-  [[ "$(bash "$PARSER" --get CAUSAL_HOLD_SCOPE "$MASTER_FILE")" == "TASK_OR_LANE_ONLY" ]] || fail "causal_hold_scope_invalid"
+  [[ "$(bash "$PARSER" --get CAUSAL_HOLD_SCOPE "$MASTER_FILE")" == "TASK_OR_EXECUTION_ONLY" ]] || fail "causal_hold_scope_invalid"
 }
 
 api() {
@@ -64,10 +64,6 @@ admission_is_open_only() {
 ensure_open_only_admission() {
   local attempt payload sha decoded now fixed encoded refreshed
 
-  # The workflow has a dedicated admission job before the checkpoint. Once
-  # that job has passed, trust the just-checked-out canonical OPEN_ONLY file
-  # instead of spending another 5x API repair loop in every controller pass.
-  # If the checkout is not valid, fall back to the remote repair path below.
   if [[ "${VAEP_OPEN_ONLY_PREFLIGHT_VERIFIED:-false}" == "true" ]] && admission_is_open_only < "$ADMISSION"; then
     echo 'VAEP_ADMISSION_INVARIANT=OPEN_PREFLIGHT_REUSED'
     return 0
@@ -88,7 +84,7 @@ ensure_open_only_admission() {
     fi
 
     now="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-    fixed="$(jq -n --arg now "$now" '{newDispatchAdmission:"OPEN",allowExistingActiveSessions:true,reason:"OPEN_ONLY_CHECKPOINT_REPAIR__TASK_LANE_GATES_ONLY",updatedAtUtc:$now}')"
+    fixed="$(jq -n --arg now "$now" '{newDispatchAdmission:"OPEN",allowExistingActiveSessions:true,reason:"OPEN_ONLY_CHECKPOINT_REPAIR__TASK_EXECUTION_GATES_ONLY",updatedAtUtc:$now}')"
     encoded="$(printf '%s\n' "$fixed" | base64 -w0)"
 
     if [[ -n "$sha" ]] && jq -n \
