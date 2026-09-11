@@ -1,8 +1,8 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
   "currentParent": "N6.2.H",
-  "generatedAt": "2026-09-11T06:01:07Z",
-  "regenerationReason": "PRIMARY_00__RECONCILE_G_CLOSURE__H_PROMOTION_AND_J1_DISPATCH__PREARM_N6.3.A__NO_FILLER",
+  "generatedAt": "2026-09-11T06:21:08Z",
+  "regenerationReason": "RECOVERY_12__J1_TERMINAL_REVIEW_FIRST__REJECT_PROHIBITED_TASKS_PATCH__CONTROLLER_DIRECT_FIX_DOCS__EXACT_HEAD_GATES_PENDING",
   "lastClosedParent": "N6.2.G",
   "closureReceipts": {
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
@@ -64,13 +64,13 @@
     "mode": "PARENT_CLOSE_FIRST",
     "currentParent": "N6.2.H",
     "currentParentMaterialScopeCount": 1,
-    "currentParentReason": "N6.2.G is LISTO_REAL after controller REVIEW_FIRST and terminal exact-head gates. N6.2.H documentation/certification is the single dependency-valid scope and has one canonical J1 ATTEMPT1 workflow; ACTIVE_REAL remains false until a correlated sessionId plus useful fresh activity is proven.",
+    "currentParentReason": "N6.2.G is LISTO_REAL. N6.2.H J1 ATTEMPT1 terminated with a patch but failed contract by touching prohibited TASKS.md and omitting canonical documentation; REVIEW_FIRST rejected TASKS and controller direct-fix materialized the canonical document. Exact-head gates remain required before LISTO_REAL.",
     "nextParent": "N6.3.A",
     "nextParentParallelMaterialScopes": 1,
     "nextParentScopesNonOverlapping": true,
-    "currentRun": "N6-2-H-1-TENANT-AWARE-DATA-MODEL-DOCUMENTATION-CERTIFICATION-J1-A1",
+    "currentRun": null,
     "nextRunReserved": null,
-    "laneRefill": "N6.2.H_J1_A1_DISPATCHED__N6.3.A_PREARMED_DEPENDENCY_GATED__NO_FILLER__NO_DUPLICATE"
+    "laneRefill": "N6.2.H_CONTROLLER_DIRECT_FIX_REVIEW_FIRST_PASS__HEAD_FREEZE_FOR_EXACT_GATES__N6.3.A_PREARMED_GATED"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
@@ -286,6 +286,30 @@
       "ownershipTransfer": "J5_TO_CHATGPT_VAEP__EXPLICIT_AFTER_STALL_THRESHOLD",
       "reviewReceipt": "vaep/evidence/reviews/N6.2.G_CONTROLLER_REVIEW_FIRST_20260911T0546Z.json",
       "closureReceipt": "vaep/evidence/fragments/N6.2.G_LISTO_REAL_20260911T0557Z.json"
+    },
+    {
+      "parent": "N6.2.H",
+      "logicalTaskId": "N6.2.H.1.TENANT_AWARE_DATA_MODEL_DOCUMENTATION_CERTIFICATION",
+      "worker": "J1",
+      "runId": 34568021956,
+      "jobId": 103164036144,
+      "sessionId": "12752887052773963212",
+      "artifactId": 10187128893,
+      "terminal": "COMPLETED_PATCH_PRESENT__MATERIAL_CONTRACT_FAILURE",
+      "patchBase": "eb9de9b42a02feee9fb23ea5ad02537ab8fada93",
+      "taskAttempt": 1,
+      "activeReal": false,
+      "controllerDirectFix": true,
+      "rejectedPaths": [
+        "TASKS.md"
+      ],
+      "acceptedPaths": [
+        "docs/N6.2_TENANT_AWARE_DATA_MODEL_PREFLIGHT.md",
+        "CHANGELOG_AI.md"
+      ],
+      "reviewReceipt": "vaep/evidence/reviews/N6.2.H_CONTROLLER_REVIEW_FIRST_202609110621Z.json",
+      "r2Used": false,
+      "r3Used": false
     }
   ],
   "prearmedRoadmap": [
@@ -377,13 +401,16 @@
     {
       "parent": "N6.2.H",
       "taskId": "N6.2.H.1.TENANT_AWARE_DATA_MODEL_DOCUMENTATION_CERTIFICATION",
-      "state": "CURRENT_DISPATCHED_AWAITING_ACTIVE_REAL_CORRELATION",
+      "state": "CONTROLLER_DIRECT_FIX__REVIEW_FIRST_PASS__EXACT_HEAD_GATES_PENDING",
       "dependency": "N6.2.G_LISTO_REAL",
       "materialization": "TENANT_AWARE_DATA_MODEL_DOCUMENTATION_CERTIFICATION__J1_ATTEMPT1__NO_FILLER",
-      "worker": "J1",
+      "worker": "CHATGPT_VAEP",
       "dispatchId": "N6-2-H-1-TENANT-AWARE-DATA-MODEL-DOCUMENTATION-CERTIFICATION-J1-A1",
       "taskAttempt": 1,
-      "activeReal": false
+      "activeReal": false,
+      "reviewReceipt": "vaep/evidence/reviews/N6.2.H_CONTROLLER_REVIEW_FIRST_202609110621Z.json",
+      "r2Used": false,
+      "r3Used": false
     },
     {
       "parent": "N6.3.A",
@@ -404,11 +431,17 @@
         "readyForDispatch": false,
         "dispatchEligible": false,
         "workflowRunId": 34568021956,
-        "workflowStatus": "in_progress",
+        "workflowStatus": "completed",
         "activeReal": false,
         "fileScopeHint": "docs;CHANGELOG_AI.md;TASKS.md",
         "prompt": "Read docs/VAEP_AUTHORITY.md first. Revalidate Desarrollo HEAD, CURRENT_PARENT=N6.2.H, this manifest primaryBaseHead and dependency receipt before editing. N6.2.G is LISTO_REAL. Produce only the material N6.2 tenant-aware data-model documentation/certification closure required by the roadmap: reconcile source-backed evidence from N6.2.A-G, implemented persistence/domain/application/API/frontend/security/audit/QA behavior, migration and rollback constraints, and explicitly preserve dependency boundaries for N6.3 Empresa-Sucursal, N6.4 memberships/roles per Empresa and N6.5 complete tenant isolation. Update canonical documentation and CHANGELOG_AI.md/TASKS.md only when required by the current closure contract; do not invent files, behavior, gates or LISTO_REAL. Do not change application behavior, migrations, workflows, secrets, main, Produccion, deployment or PR #2. Run proportional read-only/document validation and return a patch/artifact for REVIEW_FIRST with explicit P0/P1. No filler, no unrelated roadmap work, no R3.",
-        "reason": "CURRENT_PARENT__N6.2.G_LISTO_REAL__DOC_CERT_CLOSURE"
+        "reason": "CURRENT_PARENT__N6.2.G_LISTO_REAL__DOC_CERT_CLOSURE",
+        "workflowConclusion": "failure",
+        "sessionId": "12752887052773963212",
+        "artifactId": 10187128893,
+        "patchPresent": true,
+        "controllerOwnership": true,
+        "state": "REVIEW_FIRST_ACCEPTED_AFTER_CONTROLLER_DIRECT_FIX__EXACT_HEAD_GATES_PENDING"
       }
     ],
     "J2": [],

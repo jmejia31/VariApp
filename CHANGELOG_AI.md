@@ -4,6 +4,16 @@ Bitácora colaborativa de cambios realizados por Javier Mejía, Codex, AntiG/Ant
 
 No reemplaza `git log`: registra intención, alcance, validaciones y handoff. Todo changeset intencional debe incluir una entrada breve; no modificar otros colaborativos si su contenido no cambió.
 
+## 2026-09-11 — ERP-N6.2.H — recuperación documental y REVIEW_FIRST
+
+**Responsable:** CHATGPT_VAEP como first detector/correction owner.
+
+El ATTEMPT1 J1 terminó con patch sobre `CHANGELOG_AI.md` y `TASKS.md`, pero el contrato terminal falló: `TASKS.md` es control-plane prohibido para Jules y faltaban las evidencias de self-review/tests. REVIEW_FIRST descartó íntegramente el fragmento de `TASKS.md`, corrigió la narrativa de cierre y materializó la reconciliación canónica en `docs/N6.2_TENANT_AWARE_DATA_MODEL_PREFLIGHT.md`.
+
+La evidencia A–G quedó enlazada de forma source-backed; N6.3 (Empresa→sucursales), N6.4 (membresías/roles por empresa) y N6.5 (aislamiento anti-leakage completo) permanecen explícitamente fuera de N6.2. No hubo cambio de comportamiento productivo, esquema, migración, API, frontend, workflow, secrets, `main`, Producción ni PR #2.
+
+Estado: `REVIEW_FIRST_ACCEPTED_AFTER_CONTROLLER_DIRECT_FIX__P0_0__P1_0__PENDING_EXACT_HEAD_GATES__NOT_LISTO_REAL`. No se consumió R2; R3 permanece prohibido.
+
 ## 2026-09-08 — Chat B + reconciliación canónica de estado VAEP
 
 **Responsable:** Codex, por orden explícita del propietario.
