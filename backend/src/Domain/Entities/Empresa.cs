@@ -28,6 +28,14 @@ public sealed class Empresa : AuditableEntity
 
     public bool Activa { get; private set; } = true;
 
+    /// <summary>
+    /// La Empresa usa ciclo de vida activa/inactiva y no soft-delete persistido.
+    /// Esta proyección explícita mantiene compatibles los guards de aplicación
+    /// sin introducir una columna o migración fuera de N6.4.D.
+    /// </summary>
+    [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+    public bool Eliminado => false;
+
     public void CambiarNombre(string nombre)
     {
         if (string.IsNullOrWhiteSpace(nombre))
