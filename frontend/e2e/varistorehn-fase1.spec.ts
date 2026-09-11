@@ -76,7 +76,10 @@ test.describe('VariStoreHn Fase 1 — navegación y header', () => {
     await expect(page).toHaveURL(/\/varistorehn\/carrito$/);
     await expect(page.getByRole('heading', { level: 1, name: 'Mi carrito', exact: true })).toBeVisible();
     await expect(page.locator('.cart-item')).toContainText('Laptop Pro 14');
-    await page.goBack();
+
+    // Volvemos de forma determinista para que la prueba de búsqueda/scroll no compita
+    // con la restauración asíncrona de scroll del historial del navegador.
+    await page.goto('/varistorehn');
     await esperarCatalogo(page);
 
     const homeHeader = page.locator('app-varistorehn-header');
