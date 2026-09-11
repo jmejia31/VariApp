@@ -11,8 +11,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { UsuarioService } from '../../services/usuario.service';
+import { UsuarioService, UsuarioEmpresa } from '../../services/usuario.service';
 import { RolService } from '../../services/rol.service';
+import { EmpresaService, EmpresaResumen } from '../../services/empresa.service';
 import { Usuario } from '../../core/models/usuario.model';
 import { Rol } from '../../core/models/rol.model';
 import { PagedResult } from '../../core/models/api-response.model';
@@ -38,9 +39,15 @@ export class UsuariosComponent implements OnInit {
 
   readonly usuarios = signal<Usuario[]>([]);
   readonly roles = signal<Rol[]>([]);
+  readonly empresas = signal<EmpresaResumen[]>([]);
+  readonly membresias = signal<UsuarioEmpresa[]>([]);
+  readonly usuarioGestionado = signal<Usuario | null>(null);
   readonly loading = signal(true);
   readonly saving = signal(false);
+  readonly loadingMembresias = signal(false);
+  readonly savingMembresia = signal(false);
   readonly errorMessage = signal<string | null>(null);
+  readonly mensajeMembresias = signal<string | null>(null);
   readonly mostrarFormulario = signal(false);
   readonly buscador = new FormControl('');
 
@@ -50,6 +57,8 @@ export class UsuariosComponent implements OnInit {
   readonly puedeActivar = signal(false);
   readonly puedeDesactivar = signal(false);
   readonly puedeEliminar = signal(false);
+  readonly puedeVerEmpresas = signal(false);
+  readonly puedeVerRoles = signal(false);
 
   readonly form = this.fb.group({
     nombreUsuario: ['', [Validators.required, Validators.pattern(USUARIO_VALIDO)]],
@@ -58,9 +67,15 @@ export class UsuariosComponent implements OnInit {
     rolId: [null as number | null, Validators.required]
   });
 
+  readonly empresaForm = this.fb.group({
+    empresaId: [null as number | null, Validators.required],
+    rolId: [null as number | null, Validators.required]
+  });
+
   constructor(
     private usuarioService: UsuarioService,
     private rolService: RolService,
+    private empresaService: EmpresaService,
     private permisosRuntime: PermisosRuntimeService,
     private auth: AuthService,
     private snackBar: MatSnackBar,
@@ -76,14 +91,13 @@ export class UsuariosComponent implements OnInit {
     this.puedeActivar.set(this.permisosRuntime.puede('Usuarios', 'Activar'));
     this.puedeDesactivar.set(this.permisosRuntime.puede('Usuarios', 'Desactivar'));
     this.puedeEliminar.set(this.permisosRuntime.puede('Usuarios', 'EliminarLogico'));
+    this.puedeVerEmpresas.set(this.permisosRuntime.puede('Configuracion', 'Ver'));
+    this.puedeVerRoles.set(this.permisosRuntime.puede('Roles', 'Ver'));
 
     this.cargar();
 
     if (this.puedeCrear()) {
-      this.rolService.getAll().subscribe({
-        next: (res) => this.roles.set(res.data.filter((r) => r.activo)),
-        error: () => this.roles.set([])
-      });
+      this.cargarRoles();
     }
 
     this.buscador.valueChanges
@@ -103,6 +117,14 @@ export class UsuariosComponent implements OnInit {
   puedeBloquearUsuario(usuario: Usuario): boolean {
     if (this.esUsuarioActual(usuario)) return false;
     return usuario.bloqueado ? this.puedeActivar() : this.puedeDesactivar();
+  }
+
+  puedeGestionarEmpresas(): boolean {
+    return this.puedeAsignarRol();
+  }
+
+  puedeCambiarEstadoMembresia(membresia: UsuarioEmpresa): boolean {
+    return membresia.activa ? this.puedeDesactivar() : this.puedeActivar();
   }
 
   cargar(): void {
@@ -147,6 +169,156 @@ export class UsuariosComponent implements OnInit {
     if (Array.isArray(data)) return data;
     if (Array.isArray(data?.items)) return data.items;
     return [];
+  }
+
+  private cargarRoles(): void {
+    this.rolService.getAll().subscribe({
+      next: (res) => this.roles.set(res.data.filter((r) => r.activo)),
+      error: () => this.roles.set([])
+    });
+  }
+
+  private cargarEmpresas(): void {
+    if (!this.puedeVerEmpresas()) return;
+    this.empresaService.getAll().subscribe({
+      next: (res) => this.empresas.set(res.data),
+      error: () => {
+        this.empresas.set([]);
+        this.mensajeMembresias.set('No se pudo cargar el catálogo de empresas.');
+      }
+    });
+  }
+
+  abrirGestionEmpresas(usuario: Usuario): void {
+    if (!this.puedeGestionarEmpresas()) return;
+
+    if (this.usuarioGestionado()?.id === usuario.id) {
+      this.cerrarGestionEmpresas();
+      return;
+    }
+
+    this.usuarioGestionado.set(usuario);
+    this.empresaForm.reset();
+    this.mensajeMembresias.set(null);
+
+    if (this.puedeVerEmpresas() && this.empresas().length === 0) {
+      this.cargarEmpresas();
+    }
+    if (this.puedeVerRoles() && this.roles().length === 0) {
+      this.cargarRoles();
+    }
+
+    this.cargarMembresias(usuario.id);
+  }
+
+  cerrarGestionEmpresas(): void {
+    this.usuarioGestionado.set(null);
+    this.membresias.set([]);
+    this.empresaForm.reset();
+    this.mensajeMembresias.set(null);
+  }
+
+  private cargarMembresias(usuarioId: number): void {
+    this.loadingMembresias.set(true);
+    this.usuarioService.getEmpresas(usuarioId).subscribe({
+      next: (res) => {
+        this.membresias.set(res.data ?? []);
+        this.loadingMembresias.set(false);
+      },
+      error: (err) => {
+        this.membresias.set([]);
+        this.loadingMembresias.set(false);
+        this.mensajeMembresias.set(err.error?.message ?? 'No se pudieron cargar las empresas del usuario.');
+      }
+    });
+  }
+
+  empresaYaAsignada(empresaId: number): boolean {
+    return this.membresias().some((m) => m.empresaId === empresaId);
+  }
+
+  nombreEmpresa(empresaId: number): string {
+    return this.empresas().find((e) => e.id === empresaId)?.nombre ?? `Empresa #${empresaId}`;
+  }
+
+  nombreRol(rolId: number): string {
+    return this.roles().find((r) => r.id === rolId)?.nombre ?? `Rol #${rolId}`;
+  }
+
+  asignarEmpresa(): void {
+    const usuario = this.usuarioGestionado();
+    if (!usuario || !this.puedeGestionarEmpresas() || !this.puedeVerEmpresas() || !this.puedeVerRoles()) return;
+    if (this.empresaForm.invalid) {
+      this.empresaForm.markAllAsTouched();
+      return;
+    }
+
+    const { empresaId, rolId } = this.empresaForm.getRawValue();
+    if (empresaId === null || rolId === null || this.empresaYaAsignada(empresaId)) return;
+
+    this.savingMembresia.set(true);
+    this.mensajeMembresias.set(null);
+    this.usuarioService.asignarEmpresa(usuario.id, empresaId, rolId).subscribe({
+      next: () => {
+        this.savingMembresia.set(false);
+        this.empresaForm.reset();
+        this.mensajeMembresias.set('Empresa asignada correctamente.');
+        this.cargarMembresias(usuario.id);
+      },
+      error: (err) => {
+        this.savingMembresia.set(false);
+        this.mensajeMembresias.set(err.error?.message ?? 'No se pudo asignar la empresa.');
+      }
+    });
+  }
+
+  cambiarRolMembresia(membresia: UsuarioEmpresa, rolId: number): void {
+    const usuario = this.usuarioGestionado();
+    if (!usuario || !this.puedeAsignarRol() || rolId === membresia.rolId) return;
+
+    this.savingMembresia.set(true);
+    this.mensajeMembresias.set(null);
+    this.usuarioService.cambiarRolEmpresa(usuario.id, membresia.empresaId, rolId).subscribe({
+      next: () => {
+        this.savingMembresia.set(false);
+        this.mensajeMembresias.set('Rol empresarial actualizado correctamente.');
+        this.cargarMembresias(usuario.id);
+      },
+      error: (err) => {
+        this.savingMembresia.set(false);
+        this.mensajeMembresias.set(err.error?.message ?? 'No se pudo actualizar el rol empresarial.');
+        this.cargarMembresias(usuario.id);
+      }
+    });
+  }
+
+  async toggleMembresia(membresia: UsuarioEmpresa): Promise<void> {
+    const usuario = this.usuarioGestionado();
+    if (!usuario || !this.puedeCambiarEstadoMembresia(membresia)) return;
+
+    const activar = !membresia.activa;
+    const confirmado = await this.alerts.confirmar({
+      titulo: activar ? 'Restaurar empresa' : 'Quitar empresa',
+      mensaje: `${activar ? 'Se restaurará' : 'Se quitará'} ${this.nombreEmpresa(membresia.empresaId)} para ${usuario.nombreCompleto}.`,
+      detalle: activar ? 'La membresía volverá a estar activa.' : 'La membresía quedará inactiva y podrá restaurarse después.',
+      tipo: activar ? 'info' : 'advertencia',
+      confirmarTexto: activar ? 'Restaurar' : 'Quitar'
+    });
+    if (!confirmado) return;
+
+    this.savingMembresia.set(true);
+    this.mensajeMembresias.set(null);
+    this.usuarioService.cambiarEstadoEmpresa(usuario.id, membresia.empresaId, activar).subscribe({
+      next: () => {
+        this.savingMembresia.set(false);
+        this.mensajeMembresias.set(activar ? 'Membresía restaurada.' : 'Empresa quitada del usuario.');
+        this.cargarMembresias(usuario.id);
+      },
+      error: (err) => {
+        this.savingMembresia.set(false);
+        this.mensajeMembresias.set(err.error?.message ?? 'No se pudo cambiar el estado de la membresía.');
+      }
+    });
   }
 
   crear(): void {
