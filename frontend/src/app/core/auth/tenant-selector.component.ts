@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { TenantContextService } from './tenant-context.service';
@@ -64,6 +64,8 @@ import { TenantContextService } from './tenant-context.service';
   `]
 })
 export class TenantSelectorComponent {
+  @Output() readonly confirmado = new EventEmitter<void>();
+
   empresaId: number | null = this.tenant.empresaSolicitadaId();
   cargando = false;
   error = '';
@@ -85,6 +87,7 @@ export class TenantSelectorComponent {
     this.tenant.seleccionarEmpresa(Number(this.empresaId))
       .pipe(finalize(() => { this.cargando = false; }))
       .subscribe({
+        next: () => this.confirmado.emit(),
         error: () => {
           this.error = 'No fue posible validar el acceso a esta empresa. Verifica tu membresía e inténtalo nuevamente.';
         }
