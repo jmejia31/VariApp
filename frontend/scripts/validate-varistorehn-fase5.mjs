@@ -57,6 +57,7 @@ expect(!routes.includes("path: 'varistorehn/checkout'"), 'Fase 5 no debe activar
 expect(!routes.includes("path: 'varistorehn/pedido/:id'"), 'Fase 5 no debe activar la ruta de pedido confirmado.');
 expect(!storefrontService.includes('crearCheckoutTarjeta'), 'La frontera HTTP de Fases 0–5 no debe conservar lógica ejecutable de checkout.');
 expect(!catalogRules.includes('urlCheckoutSegura'), 'Las reglas puras de Fases 0–5 no deben conservar utilidades muertas de redirección de pago.');
+expect(!catalogRules.includes('export function cambiarCantidad(items:'), 'Las reglas puras no deben conservar el helper de carrito sustituido por el store global.');
 
 for (const required of [
   "@Injectable({ providedIn: 'root' })",
@@ -78,6 +79,8 @@ for (const required of [
   expect(cartService.includes(required), `El store global debe contener ${required}.`);
 }
 
+expect(!cartService.includes('limpiarAviso(): void'), 'El store no debe exponer API de avisos sin consumidores.');
+expect(!cartService.includes('referencias(): ReferenciaCarrito[]'), 'El store no debe exponer referencias públicas reservadas para un checkout futuro.');
 expect(!/precio\s*:\s*item\.precio/.test(cartService), 'La persistencia no debe serializar precios como autoridad.');
 expect(!cartService.includes('JSON.stringify(this._items'), 'localStorage nunca debe guardar ItemCarrito completo.');
 expect(cartService.includes('JSON.stringify(referencias)'), 'localStorage debe guardar referencias mínimas.');
@@ -119,8 +122,8 @@ for (const forbidden of [
 expect(!homeHtml.includes('#carritoDialog') && !homeHtml.includes('class="cart-dialog"'), 'El DOM del home no debe contener el drawer de carrito legado.');
 expect(!homeHtml.includes('Continuar con tarjeta') && !homeHtml.includes('Pedir por WhatsApp'), 'El home no debe ejecutar el cierre del carrito; esa responsabilidad queda fuera de Fase 5.');
 expect(!homeHtml.includes('Fase 6'), 'La UI pública del home no debe exponer lenguaje interno del roadmap.');
-for (const selector of ['.cart-dialog', '.cart-panel', '.cart-items', '.cart-item', '.cart-footer', '.checkout-preview', '.detail-layout', '.detail-media', '.detail-body']) {
-  expect(!homeScss.includes(selector) && !homeResponsiveScss.includes(selector), `El home no debe conservar CSS legado ${selector}.`);
+for (const selector of ['.cart-dialog', '.cart-panel', '.cart-items', '.cart-item', '.cart-footer', '.checkout-preview', '.detail-layout', '.detail-media', '.detail-body', '.button.whatsapp', '.button.full']) {
+  expect(!homeScss.includes(selector) && !homeResponsiveScss.includes(selector), `El home no debe conservar CSS legado o sin uso ${selector}.`);
 }
 
 for (const required of [
@@ -169,4 +172,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.info('Fase 5 — carrito global: ruta única, store único, persistencia mínima, stock, subtotal/total, tema y ausencia de checkout heredado aprobados.');
+console.info('Fase 5 — carrito global: ruta única, store único, persistencia mínima, stock, subtotal/total, tema y ausencia de deuda heredada aprobados.');
