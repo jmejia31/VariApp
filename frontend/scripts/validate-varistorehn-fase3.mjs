@@ -18,7 +18,8 @@ const [
   productsScss,
   headerTs,
   categoriesTs,
-  categoryTs
+  categoryTs,
+  cartStore
 ] = await Promise.all([
   readFile(path.join(frontendDir, 'src/app/app.routes.ts'), 'utf8'),
   readFeature('varistorehn.paths.ts'),
@@ -30,7 +31,8 @@ const [
   readFeature('varistorehn-productos.component.scss'),
   readFeature('varistorehn-header.component.ts'),
   readFeature('varistorehn-categorias.component.ts'),
-  readFeature('varistorehn-categoria.component.ts')
+  readFeature('varistorehn-categoria.component.ts'),
+  readFeature('varistorehn-carrito.service.ts')
 ]);
 
 const failures = [];
@@ -58,14 +60,17 @@ for (const required of [
   'this.servicio.obtenerCatalogo()',
   'this.servicio.obtenerCategorias()',
   'mapearCategoriaTienda',
-  'referenciasCarrito',
-  'restaurarCarrito',
+  'VaristorehnCarritoService',
+  'this.carritoStore.hidratar(productos',
   'VARISTOREHN_PATHS.productos',
+  'VARISTOREHN_PATHS.carrito',
   'this.route.queryParamMap'
 ]) {
   expect(productsTs.includes(required), `La página independiente de productos debe integrar ${required}.`);
 }
 
+expect(!productsTs.includes('localStorage'), 'El catálogo independiente no debe mantener persistencia de carrito paralela.');
+expect(productsTs.includes('this.carritoStore.agregar(producto, modelo, 1)'), 'Agregar desde catálogo debe usar el carrito central.');
 expect(productsTs.includes("params.get('q')"), 'La búsqueda profunda debe hidratarse desde el query param q.');
 expect(productsTs.includes("params.get('categoria')"), 'El filtro de categoría debe hidratarse desde el slug público del query param categoria.');
 expect(productsTs.includes("No se sustituyeron los datos reales por ejemplos"), 'Una falla del catálogo real no debe caer silenciosamente a fixtures.');
@@ -103,6 +108,7 @@ expect(productsScss.includes('var(--color-text-muted)'), 'La página debe usar e
 expect(productsScss.includes('min-height: 44px'), 'Los controles principales deben conservar objetivos táctiles de al menos 44px.');
 expect(!productsScss.includes('--color-background') && !productsScss.includes('--color-text-secondary'), 'Fase 3 no debe reintroducir aliases de tema inexistentes.');
 
+expect(cartStore.includes('restaurarCarrito') && cartStore.includes('referenciasCarrito'), 'La persistencia/revalidación de catálogo debe vivir en el carrito central.');
 expect(headerTs.includes('productos: VARISTOREHN_PATHS.productos'), 'El enlace Productos del header debe usar la ruta canónica independiente.');
 expect(categoriesTs.includes("this.router.navigate(['/varistorehn/productos']"), 'La búsqueda desde el listado de categorías debe continuar al catálogo independiente.');
 expect(categoriesTs.includes('productos: VARISTOREHN_PATHS.productos'), 'El footer/listado de categorías debe enlazar el catálogo independiente.');
@@ -116,4 +122,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.info('Fase 3 — catálogo independiente: ruta, datos, filtros, carrito, navegación, tema y límites aprobados.');
+console.info('Fase 3 — catálogo independiente: ruta, datos, filtros, carrito central, navegación, tema y límites aprobados.');
