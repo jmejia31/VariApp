@@ -59,16 +59,24 @@ public class N65BTenantIsolationDomainContractsTests
             () => ContextoTenantActual.DesdeMembresia(null!, 7, 11));
     }
 
-    [Theory]
-    [InlineData(12)]
-    [InlineData(0)]
-    [InlineData(-1)]
-    public void ExigirEmpresa_rechaza_otro_tenant_o_identificador_invalido(int empresaId)
+    [Fact]
+    public void ExigirEmpresa_rechaza_otro_tenant()
     {
         var membresia = new UsuarioEmpresa(usuarioId: 7, empresaId: 11, rolId: 3);
         var contexto = ContextoTenantActual.DesdeMembresia(membresia, 7, 11);
 
-        Assert.ThrowsAny<ArgumentException>(() => contexto.ExigirEmpresa(empresaId));
+        Assert.Throws<InvalidOperationException>(() => contexto.ExigirEmpresa(12));
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public void ExigirEmpresa_rechaza_identificador_invalido(int empresaId)
+    {
+        var membresia = new UsuarioEmpresa(usuarioId: 7, empresaId: 11, rolId: 3);
+        var contexto = ContextoTenantActual.DesdeMembresia(membresia, 7, 11);
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => contexto.ExigirEmpresa(empresaId));
     }
 
     [Fact]
