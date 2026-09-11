@@ -14,6 +14,7 @@ public interface ISucursalRepository
         int tamanoPagina);
     Task<List<Sucursal>> GetActivasAsync(int? empresaId = null);
     Task<bool> ExisteCodigoAsync(string codigo, int? excluirId = null);
+    Task<bool> ExisteCodigoAsync(string codigo, int empresaId, int? excluirId = null);
     Task AddAsync(Sucursal sucursal);
     void Update(Sucursal sucursal);
     Task<bool> SaveChangesAsync();
