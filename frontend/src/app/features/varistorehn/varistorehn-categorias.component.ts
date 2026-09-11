@@ -1,4 +1,4 @@
-import { CommonModule, DOCUMENT } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
@@ -10,10 +10,9 @@ import {
   EstadoConsultaPublica,
   ProductoTienda,
   crearCatalogoEjemplo,
-  mapearProducto,
-  restaurarCarrito,
-  totalCarrito
+  mapearProducto
 } from './varistorehn.catalog';
+import { VaristorehnCarritoService } from './varistorehn-carrito.service';
 import { crearCategoriasTiendaEjemplo, mapearCategoriaTienda } from './varistorehn-categorias.catalog';
 import { VaristorehnHeaderComponent } from './varistorehn-header.component';
 import { VARISTOREHN_CONFIG } from './varistorehn.config';
@@ -32,10 +31,10 @@ import { IconoTiendaComponent, IlustracionTiendaComponent } from './varistorehn.
 export class VaristorehnCategoriasComponent implements OnInit {
   private readonly servicio = inject(VaristorehnService);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly document = inject(DOCUMENT);
   private readonly router = inject(Router);
   readonly identidad = inject(EmpresaIdentidadService);
   readonly config = inject(VARISTOREHN_CONFIG);
+  readonly carrito = inject(VaristorehnCarritoService);
 
   readonly controlesVistaPrevia = !environment.production && this.config.mostrarControlesVistaPrevia;
   readonly utilizarDatosBaseDatos = signal(this.config.utilizarDatosBaseDatos);
@@ -49,8 +48,8 @@ export class VaristorehnCategoriasComponent implements OnInit {
     if (this.error()) return 'error';
     return this.categorias().length ? 'success' : 'empty';
   });
-  readonly totalUnidadesCarrito = signal<number | null>(null);
-  readonly subtotalCarrito = signal<number | null>(null);
+  readonly totalUnidadesCarrito = computed<number | null>(() => this.carrito.listo() ? this.carrito.totalUnidades() : null);
+  readonly subtotalCarrito = computed<number | null>(() => this.carrito.listo() ? this.carrito.subtotal() : null);
   readonly aviso = signal('');
   readonly enlaces = {
     inicio: VARISTOREHN_PATHS.inicio,
@@ -60,7 +59,7 @@ export class VaristorehnCategoriasComponent implements OnInit {
   } as const;
 
   private cargaCategorias?: Subscription;
-  private cargaResumen?: Subscription;
+  private cargaCarrito?: Subscription;
 
   ngOnInit(): void {
     this.identidad.cargar().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.recargar());
@@ -68,12 +67,13 @@ export class VaristorehnCategoriasComponent implements OnInit {
 
   recargar(): void {
     this.cargarCategorias();
-    this.cargarResumenCarrito();
+    this.cargarContextoCarrito();
   }
 
   cambiarFuente(baseDatos: boolean): void {
     if (!this.controlesVistaPrevia || baseDatos === this.utilizarDatosBaseDatos()) return;
     this.utilizarDatosBaseDatos.set(baseDatos);
+    this.carrito.reiniciarContexto();
     this.recargar();
   }
 
@@ -83,9 +83,7 @@ export class VaristorehnCategoriasComponent implements OnInit {
 
   buscar(): void {
     const q = this.busqueda().trim();
-    void this.router.navigate(['/varistorehn/productos'], {
-      queryParams: q ? { q } : {}
-    });
+    void this.router.navigate(['/varistorehn/productos'], { queryParams: q ? { q } : {} });
   }
 
   seleccionarCategoria(nombre: string): void {
@@ -102,7 +100,7 @@ export class VaristorehnCategoriasComponent implements OnInit {
   }
 
   abrirCarrito(): void {
-    void this.router.navigate(['/varistorehn'], { queryParams: { carrito: '1' } });
+    void this.router.navigateByUrl(VARISTOREHN_PATHS.carrito);
   }
 
   rutaExplorar(categoria: CategoriaTienda): string {
@@ -140,36 +138,19 @@ export class VaristorehnCategoriasComponent implements OnInit {
     });
   }
 
-  private cargarResumenCarrito(): void {
-    this.cargaResumen?.unsubscribe();
-    this.totalUnidadesCarrito.set(null);
-    this.subtotalCarrito.set(null);
-
+  private cargarContextoCarrito(): void {
+    this.cargaCarrito?.unsubscribe();
+    this.carrito.reiniciarContexto();
     const fuente: Observable<ProductoTienda[]> = this.utilizarDatosBaseDatos()
       ? this.servicio.obtenerCatalogo().pipe(map(productos => productos.map(mapearProducto)))
       : of(crearCatalogoEjemplo());
 
-    this.cargaResumen = fuente.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    this.cargaCarrito = fuente.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: productos => {
-        const items = restaurarCarrito(this.leerReferenciasCarrito(), productos);
-        this.totalUnidadesCarrito.set(items.reduce((total, item) => total + item.unidades, 0));
-        this.subtotalCarrito.set(totalCarrito(items));
+        const resultado = this.carrito.hidratar(productos, this.identidad.config().id, this.utilizarDatosBaseDatos());
+        if (resultado.ajustado) this.aviso.set(this.carrito.aviso());
       },
-      error: () => {
-        this.aviso.set('No pudimos actualizar el resumen del carrito en esta página. Tu selección sigue guardada.');
-      }
+      error: () => this.aviso.set('No pudimos actualizar el resumen del carrito en esta página. Tu selección sigue guardada.')
     });
-  }
-
-  private claveCarrito(): string {
-    return `varistorehn:carrito:v2:${this.identidad.config().id}:${this.utilizarDatosBaseDatos() ? 'bd' : 'demo'}`;
-  }
-
-  private leerReferenciasCarrito(): unknown {
-    try {
-      return JSON.parse(this.document.defaultView?.localStorage.getItem(this.claveCarrito()) || '[]');
-    } catch {
-      return [];
-    }
   }
 }
