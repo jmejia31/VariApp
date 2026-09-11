@@ -1,8 +1,8 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
   "currentParent": "N6.2.C",
-  "generatedAt": "2026-09-11T00:43:30Z",
-  "regenerationReason": "SUPERVISION_48__N6.2.C_ATTEMPT1_DIRECT_FIXES_REVIEWED__EXACT_HEAD_GATES_RETRY_PENDING",
+  "generatedAt": "2026-09-11T00:52:30Z",
+  "regenerationReason": "SUPERVISION_36__N6.2.C_TX2_TIMEOUT__CONTROLLER_OWNERSHIP_TRANSFER__ROLLOUT_SAFE_DIRECT_FIX__GATES_PENDING",
   "lastClosedParent": "N6.2.B",
   "closureReceipts": {
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
@@ -59,29 +59,22 @@
     "mode": "PARENT_CLOSE_FIRST",
     "currentParent": "N6.2.C",
     "currentParentMaterialScopeCount": 1,
-    "currentParentReason": "N6.2.C TX2 transport is valid. REVIEW_FIRST repaired the EF snapshot and the sole legacy fixture failure from causal run 34547228786 within ATTEMPT1. Fresh exact-head gates are pending.",
+    "currentParentReason": "N6.2.C Jules TX2 timed out without proven session/useful content. Ownership transferred explicitly to CHATGPT_VAEP; controller REVIEW_FIRST corrected premature NOT NULL rollout to an optional restrictive FK. Fresh exact-head gates remain mandatory.",
     "nextParent": "N6.2.D",
     "nextParentParallelMaterialScopes": 1,
     "nextParentScopesNonOverlapping": true,
     "currentRun": {
       "parent": "N6.2.C",
       "taskId": "N6.2.C.1.TENANT_AWARE_DATA_MODEL_PERSISTENCE",
-      "worker": "J2",
-      "dispatchId": "N6-2-C-1-TENANT-AWARE-DATA-MODEL-PERSISTENCE-J2-A1-TX2",
-      "manifest": "vaep/jules-b/dispatch/N6-2-C-1-TENANT-AWARE-DATA-MODEL-PERSISTENCE-J2-A1-TX2.json",
-      "manifestCommit": "b44a1a14465fe8129fb1a569d4bc95787a262f8d",
-      "runId": 34546666164,
-      "jobId": 103100674308,
+      "worker": "CHATGPT_VAEP",
       "taskAttempt": 1,
-      "state": "IN_PROGRESS__EXECUTE_MASTER__REVIEW_FIRST_PASS__CAUSAL_GATES_RETRY_PENDING",
-      "transportPreflight": "PASS",
-      "reserveNext": "PASS",
+      "state": "CONTROLLER_RECOVERY__REVIEW_FIRST_PASS__CAUSAL_GATES_PENDING",
+      "ownership": "CHATGPT_VAEP_SINGLE_WRITER__TRANSFERRED_AFTER_TX2_TIMEOUT",
+      "functionalHead": "f60c4ea3d9ad157f8cc1a5d06f3f86f3f1642086",
+      "reviewReceipt": "vaep/evidence/reviews/N6.2.C_CONTROLLER_REVIEW_FIRST_20260911T0033Z.json",
+      "reviewCommit": "272038a02ff8376b2a043b8d12e23616821d4446",
       "sessionId": null,
       "activeReal": false,
-      "ownership": "J2_SINGLE_WRITER_PRESERVED__NO_SESSION_ACTIVITY_PROVEN__CONTROLLER_FIX_REVIEWED",
-      "functionalHead": "73fe8caff47248a8235beb51fe8026bd4ed5c513",
-      "reviewReceipt": "vaep/evidence/reviews/N6.2.C_CONTROLLER_REVIEW_FIRST_20260911T0033Z.json",
-      "reviewCommit": "655f241d23e75adf534aaa706967dca8b22ecc71",
       "p0": 0,
       "p1": 0
     },
@@ -91,7 +84,7 @@
       "dependency": "N6.2.C_LISTO_REAL",
       "materialization": "TENANT_AWARE_DATA_MODEL_APPLICATION_API__ROADMAP_DERIVED__NO_FILLER"
     },
-    "laneRefill": "N6.2.C_REVIEW_FIRST_PASS__EXACT_HEAD_GATES_RETRY_PENDING__NEXT_N6.2.D_DEPENDENCY_GATED"
+    "laneRefill": "N6.2.C_CONTROLLER_RECOVERY__EXACT_HEAD_GATES_PENDING__NEXT_N6.2.D_DEPENDENCY_GATED"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
@@ -231,20 +224,27 @@
       "tx2RunId": 34546666164,
       "tx2JobId": 103100674308,
       "tx2ManifestCommit": "b44a1a14465fe8129fb1a569d4bc95787a262f8d",
-      "terminal": "IN_PROGRESS__EXECUTE_MASTER__REVIEW_FIRST_PASS__CAUSAL_GATES_RETRY_PENDING",
+      "terminal": "TX2_TIMEOUT__NO_SESSION_OR_USEFUL_CONTENT__EVIDENCE_ONLY",
       "sessionId": null,
       "activeReal": false,
       "contentAttemptConsumed": false,
       "taskAttempt": 1,
       "r2Used": false,
       "r3Used": false,
-      "controllerDirectFixCommit": "73fe8caff47248a8235beb51fe8026bd4ed5c513",
+      "controllerDirectFixCommit": "f60c4ea3d9ad157f8cc1a5d06f3f86f3f1642086",
       "reviewReceipt": "vaep/evidence/reviews/N6.2.C_CONTROLLER_REVIEW_FIRST_20260911T0033Z.json",
-      "reviewCommit": "655f241d23e75adf534aaa706967dca8b22ecc71",
+      "reviewCommit": "272038a02ff8376b2a043b8d12e23616821d4446",
       "failedCausalRunId": 34547228786,
       "failedCausalReason": "LEGACY_REPORTES_VENTAS_FIXTURE_MISSING_REQUIRED_EMPRESA",
       "p0": 0,
-      "p1": 0
+      "p1": 0,
+      "ownershipTransfer": "J2_TO_CHATGPT_VAEP__EXPLICIT_AFTER_TERMINAL_TIMEOUT",
+      "failedCausalRunIds": [
+        34547228786,
+        34547601800,
+        34547601804
+      ],
+      "resolvedCausalReason": "PREMATURE_NOT_NULL_BROKE_CURRENT_APPLICATION_FLOW__ROLLOUT_SAFE_OPTIONAL_RESTRICT_FK_APPLIED"
     }
   ],
   "prearmedRoadmap": [
@@ -271,15 +271,15 @@
     },
     {
       "parent": "N6.2.C",
-      "state": "REVIEW_FIRST_PASS__CAUSAL_GATES_RETRY_PENDING__RUN_IN_PROGRESS__NOT_ACTIVE_REAL",
+      "state": "CONTROLLER_RECOVERY__REVIEW_FIRST_PASS__CAUSAL_GATES_PENDING",
       "dependency": "N6.2.B_LISTO_REAL",
       "materialization": "TENANT_AWARE_DATA_MODEL_PERSISTENCE__ROADMAP_DERIVED__NO_FILLER",
       "taskId": "N6.2.C.1.TENANT_AWARE_DATA_MODEL_PERSISTENCE",
-      "worker": "J2",
+      "worker": "CHATGPT_VAEP",
       "runId": 34546666164,
       "dispatchId": "N6-2-C-1-TENANT-AWARE-DATA-MODEL-PERSISTENCE-J2-A1-TX2",
-      "functionalHead": "73fe8caff47248a8235beb51fe8026bd4ed5c513",
-      "reviewCommit": "655f241d23e75adf534aaa706967dca8b22ecc71"
+      "functionalHead": "f60c4ea3d9ad157f8cc1a5d06f3f86f3f1642086",
+      "reviewCommit": "272038a02ff8376b2a043b8d12e23616821d4446"
     },
     {
       "parent": "N6.2.D",
@@ -290,22 +290,7 @@
   ],
   "lanes": {
     "J1": [],
-    "J2": [
-      {
-        "parent": "N6.2.C",
-        "taskId": "N6.2.C.1.TENANT_AWARE_DATA_MODEL_PERSISTENCE",
-        "dispatchId": "N6-2-C-1-TENANT-AWARE-DATA-MODEL-PERSISTENCE-J2-A1-TX2",
-        "runId": 34546666164,
-        "jobId": 103100674308,
-        "taskAttempt": 1,
-        "state": "IN_PROGRESS__EXECUTE_MASTER__REVIEW_FIRST_PASS__CAUSAL_GATES_RETRY_PENDING",
-        "sessionId": null,
-        "activeReal": false,
-        "writeScope": "backend/src/Infrastructure/Persistence/Configurations/SucursalConfiguration.cs;backend/src/Infrastructure/Migrations/20260911002500_N62CTenantAwareEmpresaId.cs;backend/src/Infrastructure/Migrations/AppDbContextModelSnapshot.cs;backend/tests/InventoryApp.Tests/TenantAwareDataModelPersistenceTests.cs;backend/tests/InventoryApp.Tests/API/Controllers/ReportesVentasContractTests.cs",
-        "functionalHead": "73fe8caff47248a8235beb51fe8026bd4ed5c513",
-        "reviewCommit": "655f241d23e75adf534aaa706967dca8b22ecc71"
-      }
-    ],
+    "J2": [],
     "J3": [],
     "J4": [],
     "J5": [],
