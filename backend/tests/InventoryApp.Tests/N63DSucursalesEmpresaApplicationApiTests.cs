@@ -14,7 +14,7 @@ public sealed class N63DSucursalesEmpresaApplicationApiTests
     {
         empresas ??= new Mock<IEmpresaRepository>();
         empresas.Setup(x => x.GetByIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((int id, CancellationToken _) => new Empresa { Id = id, Nombre = $"Empresa {id}", Activa = true });
+            .ReturnsAsync((int id, CancellationToken _) => new Empresa($"Empresa {id}") { Id = id });
         var currentUser = new Mock<ICurrentUserService>();
         currentUser.Setup(x => x.UsuarioId).Returns(11);
         currentUser.Setup(x => x.NombreUsuario).Returns("n63d-controller");
@@ -45,13 +45,28 @@ public sealed class N63DSucursalesEmpresaApplicationApiTests
     }
 
     [Fact]
-    public async Task CreateAsync_EmpresaInexistenteOFueraDeServicio_FallaCerrado()
+    public async Task CreateAsync_EmpresaInexistente_FallaCerrado()
     {
         var repository = new Mock<ISucursalRepository>();
         var empresas = new Mock<IEmpresaRepository>();
         empresas.Setup(x => x.GetByIdAsync(42, It.IsAny<CancellationToken>())).ReturnsAsync((Empresa?)null);
         var service = CreateService(repository, empresas);
         await Assert.ThrowsAsync<BusinessRuleException>(() => service.CreateAsync(new CreateSucursalDto { EmpresaId = 42, Codigo = "CENTRO", Nombre = "Centro", ZonaHoraria = "America/Tegucigalpa" }));
+        repository.Verify(x => x.AddAsync(It.IsAny<Sucursal>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task CreateAsync_EmpresaInactiva_FallaCerrado()
+    {
+        var repository = new Mock<ISucursalRepository>();
+        var empresas = new Mock<IEmpresaRepository>();
+        var empresa = new Empresa("Empresa 42") { Id = 42 };
+        empresa.Desactivar();
+        empresas.Setup(x => x.GetByIdAsync(42, It.IsAny<CancellationToken>())).ReturnsAsync(empresa);
+        var service = CreateService(repository, empresas);
+
+        await Assert.ThrowsAsync<BusinessRuleException>(() => service.CreateAsync(new CreateSucursalDto { EmpresaId = 42, Codigo = "CENTRO", Nombre = "Centro", ZonaHoraria = "America/Tegucigalpa" }));
+
         repository.Verify(x => x.AddAsync(It.IsAny<Sucursal>()), Times.Never);
     }
 
