@@ -1,0 +1,19 @@
+{
+  "dispatchId": "N6-2-G-1-TENANT-AWARE-DATA-MODEL-QA-REGRESSION-CI-J5-A1-TX1",
+  "taskId": "N6.2.G.1.TENANT_AWARE_DATA_MODEL_QA_REGRESSION_CI",
+  "semanticFacet": "TENANT_AWARE_DATA_MODEL_QA_REGRESSION_CI",
+  "parent": "N6.2.G",
+  "workerId": "J5",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "contentAttempt": 1,
+  "primaryBaseHead": "468b8d6c01e3b6e45202c64fe54ea73f1be8f5ac",
+  "transportRecoveryOf": "vaep/j5/dispatch/N6-2-G-1-TENANT-AWARE-DATA-MODEL-QA-REGRESSION-CI-J5-A1.json",
+  "transportRecoveryReason": "A1_PRIMARY_BASE_HEAD_MISMATCH_AT_EXECUTE__NO_CORRELATED_JULES_SESSION__NO_RESULT_ARTIFACT__NO_CONTENT_ATTEMPT_CONSUMED",
+  "lateInvalidTransportPolicy": "EVIDENCE_ONLY__NO_AUTOMATIC_INTEGRATION",
+  "dependency": "N6.2.F_LISTO_REAL",
+  "dependencyReceipt": "vaep/evidence/fragments/N6.2.F_LISTO_REAL_20260911T0524Z.json",
+  "fileScopeHint": "backend/tests/**;frontend/src/**/*.spec.ts;frontend/e2e/**;.github/workflows/**;scripts/**;vaep/evidence/**",
+  "prompt": "Read docs/VAEP_AUTHORITY.md as the single operational authority and execute only N6.2.G.1 for the tenant-aware data model. This envelope is a transport-only recovery of the original J5 A1 manifest, which passed transport preflight/reservation but failed Execute MASTER before Jules session creation because PRIMARY_BASE_HEAD did not equal the dispatch commit parent; no correlated Jules session/result artifact existed, so the logical content attempt remains ATTEMPT1. Run and, where an internal causal defect is found, fix the applicable unit/integration/contract/E2E/security/migration/regression checks for N6.2, adjusting CI only when necessary and never hiding a failure. Preserve the N6.2 scope boundary: do not invent N6.4 memberships/roles per Empresa or claim N6.5 complete tenant isolation. Preserve one writer per scope. If a material content defect remains, return exact evidence for controller REVIEW_FIRST; do not create R3. Run proportional tests and two self-reviews. Do not touch main, Produccion, production databases, secrets, or merge PR#2. Do not fabricate ACTIVE/PASS/LISTO_REAL; LISTO_REAL is controller-only after REVIEW_FIRST, exact-head gates and P0/P1=0.",
+  "acceptance": "Transport invariant passes against this dispatch commit parent; one correlated J5 ATTEMPT1 Jules session is created or an exact external blocker is evidenced. QA/regression/CI scope remains N6.2-only; applicable tests are run and any internal causal defect is fixed without hiding failures; two self-reviews report P0/P1; no main/Produccion/secrets/PR2 changes; output is ready for controller REVIEW_FIRST."
+}
