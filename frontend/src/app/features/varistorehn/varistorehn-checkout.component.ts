@@ -2,7 +2,7 @@ import { CommonModule, DOCUMENT } from '@angular/common';
 import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, map, of, switchMap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { EmpresaIdentidadService } from '../../services/empresa-identidad.service';
@@ -31,6 +31,7 @@ export class VaristorehnCheckoutComponent implements OnInit {
   private readonly servicio = inject(VaristorehnService);
   private readonly pedidos = inject(VaristorehnPedidoService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
   private readonly document = inject(DOCUMENT);
 
@@ -70,6 +71,11 @@ export class VaristorehnCheckoutComponent implements OnInit {
   } as const;
 
   ngOnInit(): void {
+    if (!environment.production && this.config.mostrarControlesVistaPrevia
+      && this.route.snapshot.queryParamMap.get('fuente') === 'bd') {
+      this.utilizarDatosBaseDatos.set(true);
+    }
+
     this.identidad.cargar().pipe(
       takeUntilDestroyed(this.destroyRef),
       switchMap(() => this.prepararCheckout())
