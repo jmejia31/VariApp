@@ -172,7 +172,7 @@ test.describe('VariStoreHn Fase 3 — catálogo público independiente', () => {
     await expect(page.locator('article.product-card')).toHaveCount(12);
   });
 
-  test('selección de modelo y carrito mantienen referencias seguras y continuidad con el home', async ({ page }) => {
+  test('selección de modelo y carrito mantienen referencias seguras y continuidad con la ruta canónica', async ({ page }) => {
     await prepararEmpresa(page);
     await page.goto('/varistorehn/productos');
     await esperarDemo(page);
@@ -201,11 +201,11 @@ test.describe('VariStoreHn Fase 3 — catálogo público independiente', () => {
     await expect(categoriesHeader.getByRole('button', { name: 'Abrir carrito con 1 unidades' })).toBeVisible();
     await expect(categoriesHeader.locator('.cart-copy small')).toContainText('20,990');
     await categoriesHeader.getByRole('button', { name: 'Abrir carrito con 1 unidades' }).click();
-    await expect(page).toHaveURL(/\/varistorehn\?carrito=1$/);
-    const carrito = page.locator('dialog.cart-dialog');
+    await expect(page).toHaveURL(/\/varistorehn\/carrito$/);
+    const carrito = page.locator('.cart-item').filter({ hasText: 'Laptop Pro 14' });
     await expect(carrito).toBeVisible();
-    await expect(carrito).toContainText('Laptop Pro 14');
     await expect(carrito).toContainText('16 GB / 512 GB');
+    await expect(page.locator('app-varistorehn-header').getByRole('button', { name: 'Abrir carrito con 1 unidades' })).toBeVisible();
   });
 
   test('fuente real lee todas las páginas HTTP antes de buscar y no corta resultados tardíos', async ({ page }) => {
