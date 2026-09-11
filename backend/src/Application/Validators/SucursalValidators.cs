@@ -13,9 +13,8 @@ public sealed class CreateSucursalValidator : AbstractValidator<CreateSucursalDt
     internal static void AplicarReglas<T>(AbstractValidator<T> validator) where T : CreateSucursalDto
     {
         validator.RuleFor(x => x.EmpresaId)
-            .GreaterThan(0)
-            .When(x => x.EmpresaId.HasValue)
-            .WithMessage("EmpresaId debe ser mayor que cero.");
+            .NotNull().WithMessage("EmpresaId es obligatorio para establecer el tenant propietario de la sucursal.")
+            .GreaterThan(0).WithMessage("EmpresaId debe ser mayor que cero.");
         validator.RuleFor(x => x.Codigo)
             .NotEmpty().WithMessage("El código de la sucursal es obligatorio.")
             .MaximumLength(40);
@@ -40,9 +39,8 @@ public sealed class UpdateSucursalValidator : AbstractValidator<UpdateSucursalDt
     public UpdateSucursalValidator()
     {
         RuleFor(x => x.EmpresaId)
-            .GreaterThan(0)
-            .When(x => x.EmpresaId.HasValue)
-            .WithMessage("EmpresaId debe ser mayor que cero.");
+            .NotNull().WithMessage("EmpresaId es obligatorio para conservar el tenant propietario de la sucursal.")
+            .GreaterThan(0).WithMessage("EmpresaId debe ser mayor que cero.");
         RuleFor(x => x.Codigo)
             .NotEmpty().WithMessage("El código de la sucursal es obligatorio.")
             .MaximumLength(40);
