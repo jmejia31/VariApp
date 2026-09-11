@@ -8,6 +8,7 @@ import { PEDIDOS_VENTA_ROUTES } from './features/pedidos-venta/pedidos-venta.rou
 export const routes: Routes = [
   { path: '', loadComponent: () => import('./features/varistorehn/varistorehn.component').then(m => m.VaristorehnComponent) },
   { path: 'varistorehn/productos', loadComponent: () => import('./features/varistorehn/varistorehn-productos.component').then(m => m.VaristorehnProductosComponent) },
+  { path: 'varistorehn/producto/:slug', loadComponent: () => import('./features/varistorehn/varistorehn-producto.component').then(m => m.VaristorehnProductoComponent) },
   { path: 'varistorehn/categorias', loadComponent: () => import('./features/varistorehn/varistorehn-categorias.component').then(m => m.VaristorehnCategoriasComponent) },
   { path: 'varistorehn/categoria/:slug', loadComponent: () => import('./features/varistorehn/varistorehn-categoria.component').then(m => m.VaristorehnCategoriaComponent) },
   { path: 'varistorehn', loadComponent: () => import('./features/varistorehn/varistorehn.component').then(m => m.VaristorehnComponent) },

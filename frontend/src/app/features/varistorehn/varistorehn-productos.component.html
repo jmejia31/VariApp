@@ -177,7 +177,18 @@
                   </div>
 
                   <div class="product-bottom">
-                    <div class="price-copy"><span>{{ producto.modelos.length > 1 ? 'Precio del modelo' : 'Precio' }}</span><strong>{{ moneda(modelo.precio) }}</strong></div>
+                    <div class="price-copy">
+                      @if (producto.precioOferta !== null && producto.precioOferta >= 0 && producto.precioOferta < modelo.precio) {
+                        <span><del>{{ moneda(modelo.precio) }}</del> · Oferta</span>
+                        <strong>{{ moneda(producto.precioOferta) }}</strong>
+                      } @else {
+                        <span>{{ producto.modelos.length > 1 ? 'Precio del modelo' : 'Precio' }}</span>
+                        <strong>{{ moneda(modelo.precio) }}</strong>
+                      }
+                    </div>
+                    @if (producto.slug) {
+                      <a class="button ghost" [href]="'/varistorehn/producto/' + producto.slug">Ver producto</a>
+                    }
                     <button type="button" class="button primary add-button" [disabled]="!disponibleParaAgregar(producto)" (click)="agregar(producto)" [attr.aria-label]="'Agregar ' + producto.nombre">
                       <app-store-icon nombre="mas" /> {{ disponibleParaAgregar(producto) ? 'Agregar' : 'Sin unidades' }}
                     </button>
