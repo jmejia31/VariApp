@@ -10,6 +10,8 @@ const readFeature = name => readFile(path.join(featureDir, name), 'utf8');
 const [
   routes,
   paths,
+  storefrontService,
+  catalogRules,
   cartService,
   cartTs,
   cartHtml,
@@ -26,6 +28,8 @@ const [
 ] = await Promise.all([
   readFile(path.join(frontendDir, 'src/app/app.routes.ts'), 'utf8'),
   readFeature('varistorehn.paths.ts'),
+  readFeature('varistorehn.service.ts'),
+  readFeature('varistorehn.catalog.ts'),
   readFeature('varistorehn-carrito.service.ts'),
   readFeature('varistorehn-carrito.component.ts'),
   readFeature('varistorehn-carrito.component.html'),
@@ -51,6 +55,8 @@ expect(!cartRoute.includes('authGuard') && !cartRoute.includes('permisoGuard'), 
 expect(paths.includes("carrito: '/varistorehn/carrito'"), 'VARISTOREHN_PATHS debe conservar la ruta canónica del carrito.');
 expect(!routes.includes("path: 'varistorehn/checkout'"), 'Fase 5 no debe activar la ruta de checkout.');
 expect(!routes.includes("path: 'varistorehn/pedido/:id'"), 'Fase 5 no debe activar la ruta de pedido confirmado.');
+expect(!storefrontService.includes('crearCheckoutTarjeta'), 'La frontera HTTP de Fases 0–5 no debe conservar lógica ejecutable de checkout.');
+expect(!catalogRules.includes('urlCheckoutSegura'), 'Las reglas puras de Fases 0–5 no deben conservar utilidades muertas de redirección de pago.');
 
 for (const required of [
   "@Injectable({ providedIn: 'root' })",
