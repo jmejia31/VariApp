@@ -15,7 +15,7 @@ public sealed class N62DTenantAwareApplicationApiTests
     {
         var empresas = new Mock<IEmpresaRepository>();
         empresas.Setup(x => x.GetByIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((int id, CancellationToken _) => new Empresa { Id = id, Nombre = $"Empresa {id}", Activa = true });
+            .ReturnsAsync((int id, CancellationToken _) => new Empresa($"Empresa {id}") { Id = id });
         var currentUser = new Mock<ICurrentUserService>();
         currentUser.Setup(x => x.UsuarioId).Returns(7);
         currentUser.Setup(x => x.NombreUsuario).Returns("n62d-controller");
