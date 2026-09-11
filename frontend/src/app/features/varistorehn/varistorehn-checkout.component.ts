@@ -18,6 +18,7 @@ import { VaristorehnService } from './varistorehn.service';
 import { IconoTiendaComponent } from './varistorehn.visual';
 
 type EstadoCheckout = 'loading' | 'ready' | 'empty' | 'error';
+type IdentidadAgrupacion = { modeloNombre: string | null; marcaNombre: string | null };
 
 @Component({
   selector: 'app-varistorehn-checkout',
@@ -241,11 +242,33 @@ export class VaristorehnCheckoutComponent implements OnInit {
   }
 
   private referenciasCheckout(): CheckoutItemRequest[] {
-    return this.carrito.items().map(item => ({
-      productoId: item.productoId,
-      modeloId: item.modeloId,
-      unidades: item.unidades
-    }));
+    return this.carrito.items().map(item => {
+      const agrupacion = this.identidadAgrupacion(item.modeloClave);
+      return {
+        productoId: item.productoId,
+        modeloId: item.modeloId,
+        modeloNombre: agrupacion.modeloNombre,
+        marcaNombre: agrupacion.marcaNombre,
+        unidades: item.unidades
+      };
+    });
+  }
+
+  /**
+   * modeloClave se reconstruyó previamente contra el catálogo vigente al hidratar el carrito.
+   * Aquí solo recuperamos la identidad publicada del grupo; nunca precio, stock ni totales.
+   */
+  private identidadAgrupacion(modeloClave: string): IdentidadAgrupacion {
+    if (modeloClave === 'base') return { modeloNombre: null, marcaNombre: null };
+    try {
+      const valor: unknown = JSON.parse(modeloClave);
+      if (!Array.isArray(valor) || valor.length !== 3) return { modeloNombre: null, marcaNombre: null };
+      const modeloNombre = typeof valor[1] === 'string' && valor[1].length ? valor[1] : null;
+      const marcaNombre = typeof valor[2] === 'string' && valor[2].length ? valor[2] : null;
+      return { modeloNombre, marcaNombre };
+    } catch {
+      return { modeloNombre: null, marcaNombre: null };
+    }
   }
 
   private validacionDemo(): CheckoutValidado {
