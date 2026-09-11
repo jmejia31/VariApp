@@ -68,16 +68,19 @@ test.describe('VariStoreHn Fase 1 — navegación y header', () => {
     await expect(laptop).toBeVisible();
     await laptop.getByRole('button', { name: 'Agregar Laptop Pro 14' }).click();
 
-    const carrito = page.locator('dialog.cart-dialog');
-    await expect(carrito).toBeVisible();
-    await expect(carrito.getByRole('heading', { name: /Mi carrito/i })).toContainText('1 unidades');
-    await carrito.getByRole('button', { name: 'Cerrar carrito' }).click();
-    await expect(carrito).not.toBeVisible();
-
+    await expect(page.locator('dialog.cart-dialog')).toHaveCount(0);
     await expect(header.getByRole('button', { name: 'Abrir carrito con 1 unidades' })).toBeVisible();
     await expect(header.locator('.cart-copy small')).toContainText('18,490');
 
-    const search = header.getByRole('searchbox', { name: 'Buscar productos, marcas o modelos' });
+    await header.getByRole('button', { name: 'Abrir carrito con 1 unidades' }).click();
+    await expect(page).toHaveURL(/\/varistorehn\/carrito$/);
+    await expect(page.getByRole('heading', { level: 1, name: 'Mi carrito', exact: true })).toBeVisible();
+    await expect(page.locator('.cart-item')).toContainText('Laptop Pro 14');
+    await page.goBack();
+    await esperarCatalogo(page);
+
+    const homeHeader = page.locator('app-varistorehn-header');
+    const search = homeHeader.getByRole('searchbox', { name: 'Buscar productos, marcas o modelos' });
     await search.fill('Wireless Studio');
     await expect(page.getByRole('status').filter({ hasText: '1 productos encontrados' })).toBeVisible();
     await expect(page.locator('article.product-card')).toHaveCount(1);
@@ -89,7 +92,7 @@ test.describe('VariStoreHn Fase 1 — navegación y header', () => {
 
     await search.fill('');
     await expect(page.getByRole('status').filter({ hasText: '14 productos encontrados' })).toBeVisible();
-    const nav = header.locator('nav.store-nav');
+    const nav = homeHeader.locator('nav.store-nav');
     const audio = nav.getByRole('button', { name: 'Audio', exact: true });
     await audio.click();
     await expect(audio).toHaveAttribute('aria-pressed', 'true');
