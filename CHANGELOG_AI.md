@@ -976,3 +976,14 @@ Validated parent: `N5.3.C`; successor: `N5.3.D`.
 Base: `0fe20816e5ec5347296cc666ed03e88983850420`. Existing closure receipt and exact-head causal gates validated.
 Selector uses explicit roadmap dependencies; no lexical ordering or gate bypass.
 Admission transition is guarded; no production, merge or secret changes.
+
+
+## 2026-09-11 — ERP-N6.4 Usuarios por empresa — cierre documental append-only
+
+**Responsable:** CHATGPT_VAEP / VAEP :12 Recovery.
+
+**Objetivo/alcance:** resolver de forma estrictamente aditiva y byte-preserving el único P1 documental abierto de `N6.4.H`. `TASKS.md` y `docs/CERTIFICACION_N6_4_USUARIOS_POR_EMPRESA.md` conservan la evidencia funcional y de certificación; esta entrada no reabre código de producto ni adelanta `N6.5`.
+
+**Evidencia:** `N6.4.A–G=LISTO_REAL`; functional head final `3f788ec78b03b820592c7a514fa3a63e345b3754`; baseline documental `375c7f76625a2b23b1acbd839e368b3d0e5a11e3`; REVIEW_FIRST bloqueante `vaep/evidence/reviews/N6.4.H_REVIEW_FIRST_20260911T2041Z_SUP24.json`. La lectura conectada confirmó el cuerpo completo de `CHANGELOG_AI.md` y el blob exacto `f30be5c7d586e74fc7ba945f8ab95b60a3cb1cd9` antes del append.
+
+**Control:** esta publicación cierra únicamente el P1 de append history-preserving. No declara por sí sola `N6.4.H=LISTO_REAL`: requiere REVIEW_FIRST fresco P0=0/P1=0, gates causales terminales exact-head o equivalencia demostrada, receipt H y reconciliación canónica antes de promover `N6.5.A`. Sin cambios a `main`, Producción, secretos, deploys ni PR #2.
