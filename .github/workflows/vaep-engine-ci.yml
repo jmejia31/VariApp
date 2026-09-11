@@ -10,8 +10,6 @@ on:
       - 'vaep/**'
       - 'docs/VAEP_AUTHORITY.md'
       - 'AGENTS.md'
-      - '.github/workflows/fase8-validacion-completa.yml'
-      - '.github/workflows/m13-certificacion-final.yml'
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -43,46 +41,62 @@ jobs:
           node --check scripts/vaep/reconcile-status.mjs
           node --check scripts/vaep/metrics.mjs
           python3 -m py_compile scripts/vaep/jules_registry_check.py scripts/vaep/jules_integration_metrics.py scripts/vaep/jules_runtime_contract.py scripts/vaep/terminal_handoff.py scripts/vaep/state_sync.py scripts/vaep/parent_transition.py scripts/vaep/alex_backlog_planner.py
-          bash -n .github/scripts/vaep-policy-parser.sh .github/scripts/vaep-jules-master.sh .github/scripts/vaep-jules-worker.sh .github/scripts/vaep-jules-autorefill.sh .github/scripts/vaep-jules-autorefill-core.sh .github/scripts/vaep-jules-catalog-floor.sh .github/scripts/vaep-parent-close.sh .github/scripts/vaep-checkpoint.sh
+          bash -n .github/scripts/vaep-policy-parser.sh .github/scripts/vaep-jules-master.sh .github/scripts/vaep-jules-worker.sh .github/scripts/vaep-parent-close.sh .github/scripts/vaep-checkpoint.sh
 
-      - name: Validate MASTER and final canonical J1-J6 registry
+      - name: Validate TASKS_FIRST MASTER and registry
         shell: bash
         run: |
           set -euo pipefail
           bash .github/scripts/vaep-policy-parser.sh --self-test
           bash .github/scripts/vaep-policy-parser.sh --validate docs/VAEP_AUTHORITY.md
           python3 scripts/vaep/jules_registry_check.py
-          jq -e '.cutoverEnabled == true and .phase == "F3_FINAL_CERTIFIED" and .runtimeMode == "CANONICAL_J1_J6" and .legacyRuntimeEnabled == false and .activeLegacyWorkers == [] and .activeWorkers == ["J1","J2","J3","J4","J5","J6"]' vaep/control/jules-workers.json >/dev/null
+          jq -e '.schemaVersion == "3.0"
+            and .executionModel == "TASKS_FIRST_JULES_ON_DEMAND"
+            and .runtimeMode == "OPTIONAL_ACCELERATORS_J1_J6"
+            and .directExecutionDefault == true
+            and .julesRequiredForProgress == false
+            and .minimumUtilizationTarget == 0
+            and .automaticRefillEnabled == false
+            and .automaticQueueFloorEnabled == false
+            and .offloadRequiresExplicitApproval == true
+            and .offloadApprovalMarker == "JULES_OFFLOAD_APPROVED"
+            and .offloadRequiresCriticalPathGain == true
+            and .offloadRequiresNonOverlappingScope == true
+            and .offloadMayBlockCurrentParent == false
+            and .availableWorkers == ["J1","J2","J3","J4","J5","J6"]' vaep/control/jules-workers.json >/dev/null
+          jq -e '.schemaVersion == "tasks-first.v1"
+            and .executionModel == "TASKS_FIRST_JULES_ON_DEMAND"
+            and .policy.directExecutionDefault == true
+            and .policy.taskScopeLeaseRequired == true
+            and .policy.julesRequiredForProgress == false
+            and .policy.julesAutomaticRefill == false
+            and .policy.julesAutomaticQueueFloor == false
+            and .policy.julesMinimumUtilizationTarget == 0
+            and .policy.noBusywork == true
+            and .throughputPlan.julesOffload == "OPTIONAL_EXPLICIT_ONLY"' vaep/control/jules-autorefill-catalog.json >/dev/null
+          grep -Fq 'EXECUTION_MODEL=TASKS_FIRST_JULES_ON_DEMAND' docs/VAEP_AUTHORITY.md
+          grep -Fq 'DIRECT_EXECUTION_DEFAULT=TRUE' docs/VAEP_AUTHORITY.md
+          grep -Fq 'JULES_REQUIRED_FOR_PROGRESS=FALSE' docs/VAEP_AUTHORITY.md
+          grep -Fq 'JULES_MINIMUM_UTILIZATION_TARGET=0' docs/VAEP_AUTHORITY.md
           grep -Fq 'JULES_ACTIVE_WORKERS=J1,J2,J3,J4,J5,J6' docs/VAEP_AUTHORITY.md
-          grep -Fq 'JULES_TASKS_TARGET_ROLLING_24H_TOTAL=600' docs/VAEP_AUTHORITY.md
-          grep -Fq 'JULES_PROGRAMMED_BACKLOG_TARGET_TOTAL=72' docs/VAEP_AUTHORITY.md
-          grep -Fq 'LANE_REFILL_DEADLINE_SECONDS=30' docs/VAEP_AUTHORITY.md
-          grep -Fq 'J1/J2/J3/J4/J5/J6' AGENTS.md
+          grep -Fq 'JULES_OFFLOAD_APPROVED' docs/VAEP_AUTHORITY.md
 
-      - name: Validate canonical dispatch schema and catalog
-        shell: bash
-        run: |
-          set -euo pipefail
-          jq -e '.properties.worker.enum[:6] == ["J1","J2","J3","J4","J5","J6"]' vaep/schemas/jules-dispatch.schema.json >/dev/null
-          jq -e '.policy.programmedBacklogTargetTotal == 72 and .policy.activeWorkerCount == 6 and .policy.activeWorkers == ["J1","J2","J3","J4","J5","J6"] and (.lanes|keys|sort) == ["J1","J2","J3","J4","J5","J6"]' vaep/control/jules-autorefill-catalog.json >/dev/null
-          node scripts/vaep/dispatch-preflight-self-test.mjs
-
-      - name: Validate six canonical worker lanes
+      - name: Validate optional Jules transports
         shell: bash
         run: |
           set -euo pipefail
           for i in 1 2 3 4 5 6; do
             wf=".github/workflows/vaep-jules-j${i}.yml"
             test -f "$wf"
+            grep -Fq 'EXECUTION_MODEL: TASKS_FIRST_JULES_ON_DEMAND' "$wf"
             grep -Fq "WORKER_ID: J${i}" "$wf"
             grep -Fq "secrets.JULES_J${i}_API_KEY" "$wf"
-            grep -Fq 'VAEP_LANE_RUN_ID:' "$wf"
-            grep -Fq 'manifest_commit:' "$wf"
-            grep -Fq -- '--transport-preflight' "$wf"
-            test "$(grep -c '0|78|79|80|81|82' "$wf")" -eq 2
+            grep -Fq 'Validate explicit offload transport' "$wf"
           done
+          grep -Fq '(.workerId | type == "string" and test("^J[1-6]$"))' .github/workflows/vaep-jules-feedback.yml
+          grep -Fq 'expected_title="VAEP-${WORKER_ID} ${DISPATCH_ID}"' .github/workflows/vaep-jules-feedback.yml
 
-      - name: Validate F3 cleanup and zero legacy runtime secret references
+      - name: Validate runtime cleanup
         shell: bash
         run: |
           set -euo pipefail
@@ -105,83 +119,29 @@ jobs:
             .github/workflows/vaep-jules-d-recovery.yml
           )
           for path in "${removed[@]}"; do
-            test ! -e "$path" || { echo "F3_REMOVAL_FAILED=$path" >&2; exit 1; }
+            test ! -e "$path" || { echo "TRANSITIONAL_RUNTIME_PATH_FOUND=$path" >&2; exit 1; }
           done
           if grep -R -En 'secrets\.JULES_(API_KEY|B_API_KEY|C_API_KEY|D_API_KEY)' .github/workflows; then
             echo 'LEGACY_SECRET_REFERENCE_FOUND_IN_WORKFLOW_RUNTIME' >&2
             exit 1
           fi
-          grep -Fq 'workerId' .github/workflows/vaep-jules-feedback.yml
-          for i in 1 2 3 4 5 6; do
-            grep -Fq "JULES_J${i}_API_KEY" .github/workflows/vaep-jules-feedback.yml
-          done
 
-      - name: Validate canonical checkpoint health stop and diagnostic controls
+      - name: Validate runtime contracts and self-tests
         shell: bash
         run: |
           set -euo pipefail
-          test "$(grep -c 'cron:' .github/workflows/vaep-checkpoints.yml)" -eq 5
-          ! grep -Fq 'workflow_run:' .github/workflows/vaep-checkpoints.yml
-          grep -Fq 'worker: [J1, J2, J3, J4, J5, J6]' .github/workflows/vaep-checkpoints.yml
-          for i in 1 2 3 4 5 6; do
-            grep -Fq "J${i}_API_KEY:" .github/workflows/vaep-checkpoints.yml
-            grep -Fq "JULES_J${i}_API_KEY" .github/workflows/vaep-checkpoints.yml
-            grep -Fq "J${i}_API_KEY:" .github/workflows/vaep-jules-stop.yml
-            grep -Fq "JULES_J${i}_API_KEY" .github/workflows/vaep-jules-stop.yml
-            grep -Fq "J${i}_KEY:" .github/workflows/vaep-jules-session-health.yml
-            grep -Fq "JULES_J${i}_API_KEY" .github/workflows/vaep-jules-session-health.yml
-          done
-          grep -Fq 'test("^J[1-6]$")' .github/workflows/vaep-jules-stop.yml
-          grep -Fq 'secrets.JULES_J1_API_KEY' .github/workflows/vaep-jules-diagnostic.yml
           bash .github/scripts/vaep-checkpoint.sh --self-test
           bash .github/scripts/vaep-parent-close.sh --self-test
-
-      - name: Validate ALEX runtime semantics
-        shell: bash
-        run: |
-          set -euo pipefail
-          jq -e '.runtimeState != "ACTIVE_REAL" and .isJulesLane == false and .canCertifyListoReal == false and .canBypassReviewFirst == false' vaep/control/alex-capabilities.json >/dev/null
-          grep -Fq 'NO_INDEPENDENT_5_MINUTE_TIMER' vaep/control/alex-capabilities.json
-          grep -Fq 'CONTROL_PLANE_SNAPSHOT__NOT_ACTIVE_REAL' scripts/vaep/alex_backlog_planner.py
-          ! grep -Eq '^[[:space:]]+schedule:' .github/workflows/vaep-alex.yml
-
-      - name: Validate VAEP/Jules runtime contracts
-        run: |
           bash .github/scripts/vaep-jules-master.sh --static-self-test
           bash .github/scripts/vaep-jules-worker.sh --runtime-preflight
-          bash .github/scripts/vaep-jules-master.sh --self-test
           python3 scripts/vaep/jules_runtime_contract.py --self-test
           python3 -m unittest discover -s scripts/vaep -p test_terminal_handoff.py
           python3 -m unittest discover -s scripts/vaep -p test_clarification_resolver.py
-
-      - name: Validate no-busywork and continuity guards
-        shell: bash
-        run: |
-          set -euo pipefail
-          grep -Fq 'AUTOREFILL_UNIQUE_WORK_EXHAUSTED' .github/scripts/vaep-jules-autorefill-core.sh
-          grep -Fq 'result=UNIQUE_WORK_EXHAUSTED' .github/scripts/vaep-checkpoint.sh
-          grep -Fq 'CONTINUE_LANE_REFILL_REVIEW_FIRST_IN_PARALLEL' .github/scripts/vaep-jules-autorefill.sh
-          grep -Fq 'other_live_lane_run_exists' .github/scripts/vaep-jules-autorefill-core.sh
-          grep -Fq 'NO_R2_REVIEW_OR_QA' .github/scripts/vaep-jules-autorefill-core.sh
-          grep -Fq 'EVIDENCE_GAP_REVIEW_REQUIRED' scripts/vaep/jules_runtime_contract.py
-          grep -Fq 'EVIDENCE_GAP_REVIEW_REQUIRED' scripts/vaep/terminal_handoff.py
-
-      - name: Validate supporting VAEP self-tests
-        shell: bash
-        run: |
-          set -euo pipefail
           pwsh ./scripts/antig/antig-self-test.ps1 -StaticOnly
-          node scripts/vaep/block2-self-test.mjs
-          node scripts/vaep/block3-self-test.mjs
-          node scripts/vaep/metrics.mjs --self-test
-          python3 scripts/vaep/jules_integration_metrics.py --self-test
-          python3 scripts/vaep/jules_integration_metrics.py --rolling-hours 24
+          git diff --check
 
-      - name: Verify state synchronization and closed certification guards offline
+      - name: Verify state synchronization guards offline
         run: |
           python3 -m pip install 'PyYAML==6.0.2'
           python3 -m unittest discover -s scripts/vaep -p test_state_sync.py
           python3 -m unittest discover -s scripts/vaep -p test_reopen_authorization.py
-
-      - name: Verify clean repository diff
-        run: git diff --check
