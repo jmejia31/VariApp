@@ -11,6 +11,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../core/auth/auth.service';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
 import { SessionActivityService } from '../../core/auth/session-activity.service';
+import { TenantContextService } from '../../core/auth/tenant-context.service';
+import { TenantSelectorComponent } from '../../core/auth/tenant-selector.component';
 import { EmpresaIdentidadService } from '../../services/empresa-identidad.service';
 
 @Component({
@@ -18,14 +20,16 @@ import { EmpresaIdentidadService } from '../../services/empresa-identidad.servic
   standalone: true,
   imports: [
     CommonModule, ReactiveFormsModule, MatFormFieldModule,
-    MatInputModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule
+    MatInputModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule,
+    TenantSelectorComponent
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })
 export class LoginComponent {
   private readonly fb = inject(FormBuilder);
-  private readonly authService = inject(AuthService);
+  readonly authService = inject(AuthService);
+  readonly tenantContext = inject(TenantContextService);
   private readonly permisosRuntime = inject(PermisosRuntimeService);
   private readonly sessionActivity = inject(SessionActivityService);
   readonly identidad = inject(EmpresaIdentidadService);
@@ -42,7 +46,14 @@ export class LoginComponent {
 
   constructor() {
     if (this.authService.isAuthenticated()) {
-      this.redirigirSegunPermisos();
+      if (this.tenantContext.tieneContextoVerificado()) {
+        this.redirigirSegunPermisos();
+      } else {
+        // Sesión válida sin tenant verificado: permanecer en el gate de empresa.
+        // No cargar permisos ni navegar al ERP hasta validar la membresía server-side.
+        this.permisosRuntime.limpiar();
+        this.identidad.cargar().subscribe();
+      }
       return;
     }
 
@@ -66,15 +77,24 @@ export class LoginComponent {
       password: valor.password!
     }).subscribe({
       next: () => {
+        this.loading.set(false);
         this.sessionActivity.limpiarMensajePendiente();
         this.sessionActivity.iniciar();
-        this.redirigirSegunPermisos();
+        this.tenantContext.limpiar();
+        this.permisosRuntime.limpiar();
+        // El template cambia al gate de empresa. No existe navegación ERP antes
+        // de que TenantContextService confirme una membresía activa y coincidente.
       },
       error: (err: HttpErrorResponse) => {
         this.loading.set(false);
         this.errorMessage.set(this.obtenerMensajeLogin(err));
       }
     });
+  }
+
+  tenantConfirmado(): void {
+    if (!this.tenantContext.tieneContextoVerificado()) return;
+    this.redirigirSegunPermisos();
   }
 
   private obtenerMensajeLogin(err: HttpErrorResponse): string {
@@ -104,6 +124,12 @@ export class LoginComponent {
   }
 
   private redirigirSegunPermisos(): void {
+    if (!this.tenantContext.tieneContextoVerificado()) {
+      this.loading.set(false);
+      this.permisosRuntime.limpiar();
+      return;
+    }
+
     this.loading.set(true);
     this.permisosRuntime.cargar().subscribe({
       next: () => {
