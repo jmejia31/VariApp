@@ -92,6 +92,10 @@ expect(categoryHtml.includes("estado() === 'not-found'"), 'La plantilla debe rep
 expect(categoryHtml.includes('[href]="rutaCatalogoCategoria()"'), 'La página canónica debe permitir continuar al catálogo actual filtrado.');
 expect(categoryHtml.includes('destinoSaltar="#contenido-categoria"'), 'La página canónica debe reutilizar el skip link del header.');
 expect(!/#[0-9a-f]{3,8}\b/i.test(categoryScss), 'La página canónica no debe introducir una paleta hexadecimal paralela.');
+expect(!categoryScss.includes('--color-background'), 'La página canónica debe usar --color-bg, token real del tema, y no --color-background.');
+expect(!categoryScss.includes('--color-text-secondary'), 'La página canónica debe usar --color-text-muted, token real del tema, y no --color-text-secondary.');
+expect(categoryScss.includes('var(--color-bg)'), 'La página canónica debe heredar explícitamente el fondo canónico del tema.');
+expect(categoryScss.includes('var(--color-text-muted)'), 'La página canónica debe heredar explícitamente el texto secundario canónico del tema.');
 expect(categoryScss.includes('min-height: 44px'), 'La página canónica debe conservar objetivos táctiles de al menos 44px.');
 
 expect(storefrontTs.includes('categoriasTienda'), 'El home debe consumir el estado canónico de categorías de Fase 2.');
@@ -113,4 +117,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.info('Fase 2 — categorías: listado, ruta canónica por slug, estados, navegación y separación admin aprobados.');
+console.info('Fase 2 — categorías: listado, ruta canónica por slug, estados, navegación, tema y separación admin aprobados.');
