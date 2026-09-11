@@ -260,7 +260,7 @@ export class VaristorehnProductosComponent implements OnInit {
     }
   }
 
-  private cargarCatalogo(): void {
+  cargarCatalogo(): void {
     this.cargaCatalogo?.unsubscribe();
     this.cargando.set(true);
     this.errorCatalogo.set('');
