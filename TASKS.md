@@ -397,7 +397,6 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
 - [x] Runbook y consumidores vigentes quedaron alineados al estado reservado.
 - [x] Los tres checkboxes históricos de activación pendiente quedaron cerrados; `ANTIG_CURRENT_QUEUE_ITEM=NO`.
 - [x] `CURRENT_PARENT=N4.7.H`; `N4.8.A=HELD`. Fase 6 no certifica N4.7.H ni promueve N4.8.
-
 **MIGRATION_PHASE_6=CLOSED/PASS. ANTIG_STATUS=RESERVED_INACTIVE. ANTIG_OPERATIONAL_NOW=FALSE. ANTIG_SCHEDULER=DISABLED. ANTIG_HANDOFF_PROCESSING=DISABLED. ANTIG_CURRENT_QUEUE_ITEM=NO. ANTIG_CAN_CERTIFY_LISTO_REAL=FALSE. FASE_7=NOT_STARTED. FALSE_PASS=NO. FALSE_LISTO=NO. SCOPE_LEAK=NO.**
 
 ## VAEP Fase 7 — Certificación integral y retorno operativo — 2026-09-04
@@ -429,3 +428,15 @@ Este bloque es aditivo y no reescribe estados históricos anteriores.
 
 **CODEX_AUDIT_REMEDIATION=PASS. LEGACY_JULES_A_MANIFESTS=0. MASTER_POLICY_KEYS=9. TASKS_MACHINE_CURRENT_STATE=PROHIBITED. FIVE_AUTOMATIONS_EXTERNAL_EVIDENCE=PASS. FALSE_PASS=NO.**
 
+## ERP-N6.4 — Usuarios por empresa — ROLLUP DE CIERRE 2026-09-11
+
+Este bloque es estrictamente aditivo y supersede únicamente cualquier snapshot operativo stale anterior; conserva íntegramente la historia previa. La autoridad viva continúa en `CONFIG/COLA/BITACORA`.
+
+- [x] N6.4.A-G — `LISTO_REAL` con evidencia canónica individual y P0/P1 atribuibles conocidos=0.
+- [x] N6.4.E — frontend/UX certificado sobre functional head `810ce5d070a0871cc8ff4e8b63245746a8bdea0d`, M10 `34635599759=SUCCESS`.
+- [x] N6.4.F — RBAC/auditoría/seguridad certificado sobre functional head `3f788ec78b03b820592c7a514fa3a63e345b3754`; defecto xUnit1031 corregido antes del cierre; gates `34638305008`, `34638304864`, `34638305000` y `34638304858` en SUCCESS.
+- [x] N6.4.G — QA/regresión/CI certificado con REVIEW_FIRST `5f8a25d23e71093cc3faedededa531724b8ea310` y receipt `b5f992691907199a3239c9cc0b2afc1891446322`; P0/P1=0.
+- [x] N6.4.H — certificación canónica preparada en `docs/CERTIFICACION_N6_4_USUARIOS_POR_EMPRESA.md`; throughput guard inicialmente detectó `nextParent=null`, corregido en `cbfe07f8f0d9c37e7c15e939ff11caf3849c14de` y revalidado SUCCESS en run `34641058359`.
+- [ ] Cierre H permanece condicionado a `CHANGELOG_AI.md`, REVIEW_FIRST final, checkpoint exact-head y receipt. Este rollup no declara por sí mismo `LISTO_REAL`.
+
+**CURRENT_PARENT=N6.4.H. NEXT_PARENT_PREARMED=N6.5.A. N6.5.A permanece bloqueado hasta el cierre real de H. FALSE_PASS=NO. FALSE_LISTO=NO.**
