@@ -7941,7 +7941,7 @@ namespace InventoryApp.Infrastructure.Migrations
                     b.Property<int?>("EliminadoPorUsuarioId")
                         .HasColumnType("int");
 
-                    b.Property<int>("EmpresaId")
+                    b.Property<int?>("EmpresaId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("FechaActualizacion")
@@ -9238,8 +9238,7 @@ namespace InventoryApp.Infrastructure.Migrations
                     b.HasOne("InventoryApp.Domain.Entities.Bancos.CuentaBancaria", "CuentaBancaria")
                         .WithMany()
                         .HasForeignKey("CuentaBancariaId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("CuentaBancaria");
                 });
