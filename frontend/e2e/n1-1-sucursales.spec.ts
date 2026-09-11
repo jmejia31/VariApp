@@ -5,6 +5,7 @@ const ADMIN_USERNAME = process.env['PHASE7_ADMIN_USERNAME'] ?? 'e2e_admin';
 const ADMIN_PASSWORD = process.env['PHASE7_ADMIN_PASSWORD'] ?? 'E2E.Admin#2026!';
 
 let adminToken = '';
+let empresaId = 0;
 let sucursalId = 0;
 const suffix = `${Date.now()}`;
 const codigo = `TGU-${suffix.slice(-8)}`;
@@ -56,6 +57,18 @@ test.describe('ERP-N1.1 — Sucursales', () => {
 
   test.beforeAll(async ({ request }) => {
     adminToken = await loginApi(request);
+
+    // N6.2.D makes EmpresaId mandatory for every Sucursal write. Create a
+    // real, isolated tenant owner in the ephemeral E2E database instead of
+    // relying on an arbitrary hard-coded foreign key.
+    const crearEmpresa = await request.post(`${API_URL}/empresas`, {
+      headers: authHeaders(adminToken),
+      data: { nombre: `Empresa E2E Sucursales ${suffix}` }
+    });
+    expect(crearEmpresa.status(), await crearEmpresa.text()).toBe(201);
+    const empresa = await dataOf(crearEmpresa);
+    empresaId = empresa.id;
+    expect(empresaId).toBeGreaterThan(0);
   });
 
   test('rechaza acceso anónimo y emite correlation ID', async ({ request }) => {
@@ -73,6 +86,7 @@ test.describe('ERP-N1.1 — Sucursales', () => {
     const crear = await request.post(`${API_URL}/sucursales`, {
       headers: authHeaders(adminToken),
       data: {
+        empresaId,
         codigo: codigo.toLowerCase(),
         nombre,
         direccion: 'Tegucigalpa, Francisco Morazán',
@@ -85,6 +99,7 @@ test.describe('ERP-N1.1 — Sucursales', () => {
     const creada = await dataOf(crear);
     sucursalId = creada.id;
     expect(sucursalId).toBeGreaterThan(0);
+    expect(creada.empresaId).toBe(empresaId);
     expect(creada.codigo).toBe(codigo.toUpperCase());
     expect(creada.nombre).toBe(nombre);
     expect(creada.activa).toBe(true);
@@ -98,6 +113,7 @@ test.describe('ERP-N1.1 — Sucursales', () => {
     const duplicada = await request.post(`${API_URL}/sucursales`, {
       headers: authHeaders(adminToken),
       data: {
+        empresaId,
         codigo: ` ${codigo.toLowerCase()} `,
         nombre: `${nombre} duplicada`,
         zonaHoraria: 'America/Tegucigalpa'
@@ -149,6 +165,7 @@ test.describe('ERP-N1.1 — Sucursales', () => {
     const actualizar = await request.put(`${API_URL}/sucursales/${sucursalId}`, {
       headers: authHeaders(adminToken),
       data: {
+        empresaId,
         codigo,
         nombre: nombreActualizado,
         direccion: 'Tegucigalpa, Honduras',
@@ -159,6 +176,7 @@ test.describe('ERP-N1.1 — Sucursales', () => {
     });
     expect(actualizar.status(), await actualizar.text()).toBe(200);
     const actualizada = await dataOf(actualizar);
+    expect(actualizada.empresaId).toBe(empresaId);
     expect(actualizada.nombre).toBe(nombreActualizado);
     expect(actualizada.activa).toBe(false);
 
