@@ -15,7 +15,7 @@ export interface Sucursal {
 }
 
 export interface SucursalFormValue {
-  empresaId?: number | null;
+  empresaId: number;
   codigo: string;
   nombre: string;
   direccion?: string | null;
