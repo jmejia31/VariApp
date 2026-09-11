@@ -77,13 +77,20 @@ for (const required of [
   "this.config.modoCarrito !== 'whatsapp'",
   'urlCheckoutPermitida(respuesta.checkoutUrl, this.config.origenesCheckoutPermitidos)',
   "this.guardarRecibo(validado, this.utilizarDatosBaseDatos() ? 'whatsapp-preparado' : 'demo')",
-  'this.document.defaultView?.location.assign(segura)'
+  'this.document.defaultView?.location.assign(segura)',
+  'const agrupacion = this.identidadAgrupacion(item.modeloClave)',
+  'modeloNombre: agrupacion.modeloNombre',
+  'marcaNombre: agrupacion.marcaNombre',
+  'confirmarSalidaWhatsapp(evento: Event)',
+  'evento.preventDefault()',
+  'if (!this.validacionVigente())'
 ]) {
   expect(checkoutTs.includes(required), `Checkout debe contener la salvaguarda: ${required}.`);
 }
 expect(!checkoutTs.includes('localStorage'), 'Checkout no debe guardar datos del comprador en localStorage.');
 expect(!checkoutTs.includes('numeroTarjeta') && !checkoutTs.includes('cvv') && !checkoutTs.includes('pinTarjeta'), 'Checkout no debe capturar credenciales de tarjeta.');
 expect(checkoutTs.includes("if (!endpoint || !this.tarjetaConfigurada())"), 'Tarjeta debe bloquearse si falta endpoint/origen seguro.');
+expect(checkoutHtml.includes('confirmarSalidaWhatsapp($event)'), 'El enlace WhatsApp debe poder cancelar la navegación si la validación venció.');
 
 for (const required of [
   'Confirma tus datos y tu forma de compra',
@@ -112,17 +119,34 @@ expect(storefrontService.includes("if (!ruta || /^https?:/i.test(ruta) || ruta.i
 expect(storefrontService.includes('checkoutValidado(data)'), 'El cliente debe validar estructuralmente la respuesta de checkout.');
 
 const checkoutItemBlock = models.match(/export interface CheckoutItemRequest \{([\s\S]*?)\n\}/)?.[1] || '';
-expect(checkoutItemBlock.includes('productoId') && checkoutItemBlock.includes('modeloId') && checkoutItemBlock.includes('unidades'), 'El request frontend debe contener solo referencias de producto/modelo/cantidad.');
+expect(
+  checkoutItemBlock.includes('productoId')
+    && checkoutItemBlock.includes('modeloId')
+    && checkoutItemBlock.includes('modeloNombre')
+    && checkoutItemBlock.includes('marcaNombre')
+    && checkoutItemBlock.includes('unidades'),
+  'El request frontend debe identificar exactamente producto/agrupación/cantidad.'
+);
 expect(!/precio|total|stock/i.test(checkoutItemBlock), 'El request frontend no debe enviar precio, total ni stock como autoridad.');
 
 const backendItemBlock = backendDto.match(/public sealed class CheckoutTiendaItemRequestDto\s*\{([\s\S]*?)\n\}/)?.[1] || '';
-expect(backendItemBlock.includes('ProductoId') && backendItemBlock.includes('ModeloId') && backendItemBlock.includes('Unidades'), 'El DTO backend debe aceptar únicamente referencias mínimas.');
+expect(
+  backendItemBlock.includes('ProductoId')
+    && backendItemBlock.includes('ModeloId')
+    && backendItemBlock.includes('ModeloNombre')
+    && backendItemBlock.includes('MarcaNombre')
+    && backendItemBlock.includes('Unidades'),
+  'El DTO backend debe aceptar identidad de agrupación y cantidad, nunca importes.'
+);
 expect(!/Precio|Total|Stock/i.test(backendItemBlock), 'El DTO backend no debe aceptar precio, total ni stock del cliente.');
 for (const required of [
   '[AllowAnonymous]',
   '[HttpPost("checkout/validar")]',
   '_productoService.GetByIdAsync(solicitud.ProductoId)',
   'producto.Variantes.Where(variante => variante.Activo)',
+  'variante.ModeloId == solicitud.ModeloId',
+  'string.Equals(variante.ModeloNombre ?? string.Empty, solicitud.ModeloNombre ?? string.Empty, StringComparison.Ordinal)',
+  'string.Equals(variante.MarcaNombre ?? string.Empty, solicitud.MarcaNombre ?? string.Empty, StringComparison.Ordinal)',
   'if (stock < solicitud.Unidades)',
   'Total = precio * solicitud.Unidades',
   'var subtotal = lineas.Sum(linea => linea.Total)',
@@ -156,4 +180,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.info('Fase 6 — checkout/pedido: rutas públicas, revalidación server-side, WhatsApp, tarjeta fail-closed, recibo efímero, tema y privacidad aprobados.');
+console.info('Fase 6 — checkout/pedido: rutas públicas, revalidación server-side, selección inequívoca, vencimiento seguro, WhatsApp, tarjeta fail-closed, recibo efímero, tema y privacidad aprobados.');
