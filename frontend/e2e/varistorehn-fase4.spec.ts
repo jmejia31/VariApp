@@ -278,6 +278,38 @@ test.describe('VariStoreHn Fase 4 — detalle público de producto', () => {
     await expect(page.locator('app-varistorehn-header .cart-copy small')).toContainText('2,598');
   });
 
+  test('stock 0 representa agotado, cantidad 0 y bloquea todas las compras del detalle', async ({ page }) => {
+    await prepararEmpresa(page);
+    const agotado = productoReal(126, 'Producto Agotado', { slug: 'producto-agotado-126', stock: 0, imagenes: [imagenData('Agotado')] });
+    await mockFuenteReal(page, agotado);
+
+    await page.goto('/varistorehn/producto/producto-agotado-126');
+    await activarBaseDatos(page);
+    await expect(page.getByRole('heading', { level: 1, name: 'Producto Agotado' })).toBeVisible();
+    await expect(page.locator('.availability')).toContainText('Agotado');
+
+    const cantidad = page.getByRole('spinbutton', { name: 'Cantidad de producto' });
+    await expect(cantidad).toBeDisabled();
+    await expect(cantidad).toHaveAttribute('max', '0');
+    await expect(cantidad).toHaveValue('0');
+    await expect(page.getByRole('button', { name: 'Producto agotado' })).toBeDisabled();
+    await expect(page.getByRole('button', { name: 'Comprar por WhatsApp' })).toBeDisabled();
+  });
+
+  test('slug histórico se reemplaza por el slug canónico sin duplicar historial', async ({ page }) => {
+    await prepararEmpresa(page);
+    const principal = productoReal(128, 'Producto Canónico', { slug: 'producto-canonico-128', imagenes: [imagenData('Canon')] });
+    await mockFuenteReal(page, principal);
+
+    await page.goto('/varistorehn/producto/nombre-viejo-128');
+    await activarBaseDatos(page);
+    await expect(page.getByRole('heading', { level: 1, name: 'Producto Canónico' })).toBeVisible();
+    await expect(page).toHaveURL(/\/varistorehn\/producto\/producto-canonico-128$/);
+
+    await page.goBack();
+    await expect(page).not.toHaveURL(/\/varistorehn\/producto\/nombre-viejo-128$/);
+  });
+
   test('404 e inactivo se controlan sin convertirlos en productos demo', async ({ page }) => {
     await prepararEmpresa(page);
     const principal = productoReal(131, 'Producto inexistente', { slug: 'producto-inexistente-131' });
@@ -318,7 +350,7 @@ test.describe('VariStoreHn Fase 4 — detalle público de producto', () => {
     await activarBaseDatos(page);
     const barra = page.locator('.mobile-buy-bar');
     await expect(barra).toBeVisible();
-    await expect(barra).toContainText('3 unidades disponibles');
+    await expect(barra).toContainText('Últimas 3 unidades');
     const cta = barra.getByRole('button', { name: 'Agregar' });
     expect(await cta.evaluate(element => Math.round(element.getBoundingClientRect().height))).toBeGreaterThanOrEqual(44);
 
