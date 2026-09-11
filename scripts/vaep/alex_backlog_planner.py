@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
-"""ALEX material-backlog planner for VAEP.
+"""ALEX tasks-first planner for VAEP.
 
-ALEX is a control-plane planner, not a Jules lane. It measures real unused
-material work in the canonical J1-J6 catalog, classifies it under A16-A25,
-detects starvation/backlog debt, and emits deterministic generation requests
-for exact material scopes derived from the canonical roadmap. It never
-certifies LISTO_REAL, never bypasses REVIEW_FIRST, never promotes a dependency
-prematurely and never invents busywork merely to satisfy a numeric backlog.
-Capability availability and a successful planner run never imply ACTIVE_REAL.
+ALEX is a read-only/control-plane planner. It identifies the shortest material
+path to close CURRENT_PARENT and safe future roadmap candidates. It never
+creates manifests, dispatches Jules, writes product code, certifies LISTO_REAL,
+or treats an idle Jules worker as debt.
+
+J1-J6 are optional accelerators under TASKS_FIRST_JULES_ON_DEMAND. ALEX may
+surface a possible offload candidate, but only the active scheduled
+controller may approve it after fresh HEAD, dependency, dedupe, lease and
+non-overlap checks.
 """
 from __future__ import annotations
 
@@ -24,28 +26,7 @@ AUTH_PATH = ROOT / "vaep/control/alex-owner-authorization.json"
 ADMISSION_PATH = ROOT / "vaep/control/dispatch-admission.json"
 DEFAULT_OUTPUT = ROOT / "vaep/control/alex-runtime.json"
 
-LANE_PATHS = {
-    "J1": ROOT / "vaep/jules/dispatch",
-    "J2": ROOT / "vaep/jules-b/dispatch",
-    "J3": ROOT / "vaep/jules-c/dispatch",
-    "J4": ROOT / "vaep/jules-d/dispatch",
-    "J5": ROOT / "vaep/j5/dispatch",
-    "J6": ROOT / "vaep/j6/dispatch",
-}
-
-CAPABILITY_KEYWORDS = {
-    "A16": ("backend", "service", "controller", "application", "domain"),
-    "A17": ("frontend", "component", "route", "ux", " ui ", "a11y"),
-    "A18": ("data", "database", " db ", "migration", "persistence", " ef ", "model"),
-    "A19": (" api", "integration", "endpoint", "http", "dto"),
-    "A20": ("security", "rbac", "permission", "audit", "authorization"),
-    "A21": ("unit", "contract", " spec", " test"),
-    "A22": ("e2e", "regression", "playwright"),
-    "A23": ("performance", " perf", "accessibility", "a11y", "resilience"),
-    "A24": ("docs/", "documentation", "runbook", "release", "certification"),
-}
-
-CANONICAL_LANES = ["J1", "J2", "J3", "J4", "J5", "J6"]
+CANONICAL_WORKERS = ["J1", "J2", "J3", "J4", "J5", "J6"]
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -56,56 +37,32 @@ def load_json(path: Path) -> dict[str, Any]:
 
 
 def load_optional_json(path: Path) -> dict[str, Any]:
-    if not path.exists():
-        return {}
-    return load_json(path)
+    return load_json(path) if path.exists() else {}
 
 
-def manifest_exists(worker: str, dispatch_id: str) -> bool:
-    return (LANE_PATHS[worker] / f"{dispatch_id}.json").exists()
-
-
-def task_text(task: dict[str, Any]) -> str:
-    return " " + " ".join(
-        str(task.get(k, ""))
-        for k in ("taskId", "dispatchId", "fileScopeHint", "prompt", "reason")
-    ).lower() + " "
-
-
-def classify(task: dict[str, Any]) -> list[str]:
-    text = task_text(task)
-    hits = [cid for cid, words in CAPABILITY_KEYWORDS.items() if any(w in text for w in words)]
-    return hits or ["A25"]
+def _order(node: dict[str, Any]) -> int:
+    try:
+        return int(node.get("order", 10**9))
+    except (TypeError, ValueError):
+        return 10**9
 
 
 def roadmap_candidates(catalog: dict[str, Any], current_parent: str) -> list[dict[str, Any]]:
     roadmap = catalog.get("roadmap") or {}
     nodes = list(roadmap.get("nodes") or [])
     receipts = set((catalog.get("closureReceipts") or {}).keys())
-    current_order = -1
-    for node in nodes:
-        if str(node.get("id") or "") == current_parent:
-            try:
-                current_order = int(node.get("order", -1))
-            except (TypeError, ValueError):
-                current_order = -1
-            break
+    current_order = next((_order(n) for n in nodes if str(n.get("id") or "") == current_parent), -1)
 
     candidates: list[dict[str, Any]] = []
-    for node in sorted(nodes, key=lambda item: int(item.get("order", 10**9))):
+    for node in sorted(nodes, key=_order):
         parent_id = str(node.get("id") or "")
         if not parent_id or parent_id == current_parent or parent_id in receipts:
             continue
-        if str(node.get("type") or "") != "MICROTAREA":
-            continue
-        try:
-            order = int(node.get("order", 10**9))
-        except (TypeError, ValueError):
-            order = 10**9
+        order = _order(node)
         if current_order >= 0 and order <= current_order:
             continue
-        dependencies = [str(dep) for dep in (node.get("dependencies") or []) if str(dep)]
-        unmet = [dep for dep in dependencies if dep not in receipts]
+        dependencies = [str(d) for d in (node.get("dependencies") or []) if str(d)]
+        unmet = [d for d in dependencies if d not in receipts]
         candidates.append(
             {
                 "parentId": parent_id,
@@ -125,9 +82,6 @@ def build_runtime(
     auth: dict[str, Any],
     admission: dict[str, Any],
 ) -> dict[str, Any]:
-    lanes = catalog.get("lanes") or {}
-    if list(sorted(lanes)) != CANONICAL_LANES:
-        raise SystemExit("ALEX_ERROR catalog_lanes_not_canonical")
     if capabilities.get("authority") != "docs/VAEP_AUTHORITY.md":
         raise SystemExit("ALEX_ERROR authority_mismatch")
     if capabilities.get("operational") is not True or capabilities.get("isJulesLane") is not False:
@@ -139,161 +93,61 @@ def build_runtime(
     ):
         raise SystemExit("ALEX_ERROR owner_authorization_missing")
 
-    policy = catalog.get("policy") or {}
-    current_parent = str(catalog.get("currentParent") or "")
-    next_parent = str((catalog.get("throughputPlan") or {}).get("nextParent") or "")
-    eligible_min = int(policy.get("dispatchEligibleMinPerWorker", 2))
-    programmed_target = int(policy.get("programmedBacklogTargetPerWorker", 12))
-    refill_floor = int(policy.get("programmedBacklogRefillFloorPerWorker", 4))
-    admission_state = str(admission.get("newDispatchAdmission") or "UNKNOWN")
-    allow_existing_sessions = admission.get("allowExistingActiveSessions") is True
-    candidates = roadmap_candidates(catalog, current_parent)
-    source_ranges = list(((catalog.get("roadmap") or {}).get("sourceRanges") or []))
-
-    capability_rows: dict[str, dict[str, Any]] = {}
-    for item in capabilities.get("capabilities", []):
-        capability_rows[item["id"]] = {
-            "id": item["id"],
-            "name": item["name"],
-            "mode": item.get("mode", "ALEX_CAPABILITY"),
-            "status": item.get("status", "AVAILABLE__NOT_ACTIVE_REAL"),
-            "outputType": item.get("outputType", "TASK_CANDIDATE"),
-            "candidateTaskIds": [],
-            "currentParentCandidateCount": 0,
-            "nextParentCandidateCount": 0,
-        }
-
-    lane_rows: dict[str, dict[str, Any]] = {}
-    lane_demand: dict[str, dict[str, Any]] = {}
-    generation_requests: list[dict[str, Any]] = []
-    starved: list[str] = []
-    low_programmed: list[str] = []
-
-    for worker in CANONICAL_LANES:
-        programmed_unused = eligible_unused = current_unused = next_unused = 0
-        for task in list(lanes.get(worker) or []):
-            dispatch_id = str(task.get("dispatchId") or "")
-            if not dispatch_id or manifest_exists(worker, dispatch_id):
-                continue
-            programmed_unused += 1
-            eligible = task.get("dispatchEligible") is not False
-            if eligible:
-                eligible_unused += 1
-            planned_parent = str(task.get("plannedParent") or "")
-            if planned_parent == current_parent:
-                current_unused += 1
-            if planned_parent == next_parent:
-                next_unused += 1
-            for capability in classify(task):
-                row = capability_rows.get(capability)
-                if row is None:
-                    continue
-                task_id = str(task.get("taskId") or dispatch_id)
-                if task_id not in row["candidateTaskIds"]:
-                    row["candidateTaskIds"].append(task_id)
-                if planned_parent == current_parent:
-                    row["currentParentCandidateCount"] += 1
-                if planned_parent == next_parent:
-                    row["nextParentCandidateCount"] += 1
-
-        programmed_deficit = max(programmed_target - programmed_unused, 0)
-        eligible_deficit = max(eligible_min - eligible_unused, 0)
-        is_starved = eligible_unused < eligible_min
-        is_low_programmed = programmed_unused <= refill_floor
-        if is_starved:
-            starved.append(worker)
-        if is_low_programmed:
-            low_programmed.append(worker)
-
-        lane_rows[worker] = {
-            "programmedUnused": programmed_unused,
-            "programmedTarget": programmed_target,
-            "programmedDeficit": programmed_deficit,
-            "refillFloor": refill_floor,
-            "eligibleUnused": eligible_unused,
-            "eligibleMinimum": eligible_min,
-            "eligibleDeficit": eligible_deficit,
-            "currentParentUnused": current_unused,
-            "nextParentUnused": next_unused,
-            "starved": is_starved,
-            "refillAction": (
-                "ALEX_ROADMAP_GENERATION_REQUEST"
-                if is_starved or is_low_programmed
-                else "BACKLOG_HEALTHY"
-            ),
-        }
-        lane_demand[worker] = {
-            "programmedDeficit": programmed_deficit,
-            "eligibleDeficit": eligible_deficit,
-            "needsGeneration": is_starved or is_low_programmed,
-        }
-
-    # Allocate roadmap candidates globally, not once per lane. Reusing the same
-    # parent candidate across several workers creates duplicate materialization
-    # pressure and cannot increase real parallelism. Prefer dependency-ready
-    # candidates, keep gated candidates as materialization-only planning input,
-    # and leave unmet demand explicit instead of manufacturing filler.
-    candidate_pool = sorted(
-        candidates,
-        key=lambda item: (0 if item.get("dependencyState") == "READY" else 1, int(item.get("order", 10**9))),
+    execution_model = str(
+        catalog.get("executionModel")
+        or (catalog.get("policy") or {}).get("executionModel")
+        or ""
     )
-    candidate_cursor = 0
-    allocated_parent_ids: set[str] = set()
-    total_requested = 0
-    total_allocated = 0
+    if execution_model != "TASKS_FIRST_JULES_ON_DEMAND":
+        raise SystemExit(f"ALEX_ERROR execution_model_mismatch value={execution_model or 'MISSING'}")
 
-    for worker in CANONICAL_LANES:
-        demand = lane_demand[worker]
-        if not demand["needsGeneration"]:
+    current_parent = str(catalog.get("currentParent") or "")
+    throughput = catalog.get("throughputPlan") or {}
+    next_parent = str(throughput.get("nextParent") or "")
+    admission_state = str(admission.get("newDispatchAdmission") or "UNKNOWN")
+    candidates = roadmap_candidates(catalog, current_parent)
+    ready_future = [c for c in candidates if c["dependencyState"] == "READY"]
+
+    # ALEX may suggest, never approve, a Jules offload. The active controller
+    # must still prove materiality, independent write-scope and critical-path
+    # gain on fresh state. GATED work is never presented as dispatchable.
+    offload_candidates = [
+        {
+            **candidate,
+            "status": "CANDIDATE_ONLY_NOT_APPROVED",
+            "requiresFreshHead": True,
+            "requiresLeaseNonOverlapProof": True,
+            "requiresCriticalPathGainProof": True,
+            "mayBlockCurrentParent": False,
+        }
+        for candidate in ready_future
+    ]
+
+    capability_rows: list[dict[str, Any]] = []
+    for item in capabilities.get("capabilities", []):
+        if not isinstance(item, dict) or not item.get("id"):
             continue
-        requested = max(int(demand["programmedDeficit"]), int(demand["eligibleDeficit"]))
-        total_requested += requested
-        request_candidates: list[dict[str, Any]] = []
-        while candidate_cursor < len(candidate_pool) and len(request_candidates) < requested:
-            candidate = candidate_pool[candidate_cursor]
-            candidate_cursor += 1
-            parent_id = str(candidate.get("parentId") or "")
-            if not parent_id or parent_id in allocated_parent_ids:
-                continue
-            allocated_parent_ids.add(parent_id)
-            request_candidates.append(candidate)
-        total_allocated += len(request_candidates)
-        generation_requests.append(
+        capability_rows.append(
             {
-                "workerId": worker,
-                "action": "MATERIALIZE_ROADMAP_DERIVED_SCOPES",
-                "programmedDeficit": demand["programmedDeficit"],
-                "eligibleDeficit": demand["eligibleDeficit"],
-                "requestedMaterialScopes": requested,
-                "allocatedDistinctCandidates": len(request_candidates),
-                "unallocatedMaterialDemand": max(requested - len(request_candidates), 0),
-                "currentParent": current_parent,
-                "nextParent": next_parent,
-                "admissionState": admission_state,
-                "materializationOnly": admission_state != "OPEN",
-                "candidateParents": request_candidates,
-                "roadmapSourceRanges": source_ranges,
-                "requiresRoadmapExpansion": requested > len(request_candidates),
-                "constraints": [
-                    "MATERIAL_ONLY",
-                    "SEMANTIC_DEDUPE",
-                    "GLOBAL_DISTINCT_PARENT_ALLOCATION",
-                    "DEPENDENCY_GATES",
-                    "DISTINCT_WRITE_SCOPE",
-                    "FUTURE_PARENT_NOT_DISPATCH_ELIGIBLE",
-                    "NO_BUSYWORK",
-                ],
+                "id": item["id"],
+                "name": item.get("name", item["id"]),
+                "mode": item.get("mode", "ALEX_CAPABILITY"),
+                "status": "AVAILABLE__NOT_ACTIVE_REAL",
+                "outputType": "PLANNING_ADVICE",
             }
         )
 
-    a25 = capability_rows.get("A25")
-    if a25 is not None:
-        a25["watchState"] = "CAPABILITY_AVAILABLE__NOT_RUNTIME_PROOF"
-        a25["starvedLanes"] = starved
-        a25["lowProgrammedLanes"] = low_programmed
-        a25["semanticDedupe"] = "TASK_IDENTITY_UNIQUE_NO_BUSYWORK"
-        a25["generationRequestCount"] = len(generation_requests)
-        a25["distinctRoadmapCandidateCount"] = total_allocated
+    worker_rows = {
+        worker: {
+            "operatingMode": "AVAILABLE_ON_DEMAND",
+            "requiredForProgress": False,
+            "minimumUtilizationTarget": 0,
+            "queueFloor": 0,
+            "starved": False,
+            "debt": False,
+        }
+        for worker in CANONICAL_WORKERS
+    }
 
     return {
         "authority": "docs/VAEP_AUTHORITY.md",
@@ -301,34 +155,47 @@ def build_runtime(
         "engine": "ALEX",
         "role": capabilities.get("role"),
         "operational": True,
+        "executionModel": execution_model,
         "runtimeState": "CONTROL_PLANE_SNAPSHOT__NOT_ACTIVE_REAL",
         "generatedAtUtc": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
         "currentParent": current_parent,
         "nextParent": next_parent,
         "admission": {
             "newDispatchAdmission": admission_state,
-            "allowExistingActiveSessions": allow_existing_sessions,
+            "allowExistingActiveSessions": admission.get("allowExistingActiveSessions") is True,
             "reason": str(admission.get("reason") or ""),
+            "note": "Admission controls optional Jules dispatch only; it never gates direct task execution.",
         },
-        "lanes": lane_rows,
-        "capabilities": list(capability_rows.values()),
-        "generationRequests": generation_requests,
+        "directPlan": {
+            "priority": "CURRENT_PARENT_SHORTEST_MATERIAL_GAP_TO_LISTO_REAL",
+            "executor": "SCHEDULED_AUTOMATION_CONTROLLER",
+            "currentParent": current_parent,
+            "nextParent": next_parent,
+            "leaseRequired": True,
+            "reviewFirstRequired": True,
+            "closureChainSameRun": True,
+            "directNextSafePrearm": True,
+            "waitForJules": False,
+        },
+        "workers": worker_rows,
+        # Backward-compatible key intentionally empty. Generation requests were
+        # a Jules-first concept and are not production work in the new model.
+        "generationRequests": [],
+        "julesOffloadCandidates": offload_candidates,
+        "roadmapCandidates": candidates,
+        "capabilities": capability_rows,
         "summary": {
-            "starvedLaneCount": len(starved),
-            "starvedLanes": starved,
-            "lowProgrammedLaneCount": len(low_programmed),
-            "lowProgrammedLanes": low_programmed,
-            "generationRequestCount": len(generation_requests),
-            "distinctRoadmapCandidateCount": total_allocated,
-            "requestedMaterialScopeCount": total_requested,
-            "unallocatedMaterialDemand": max(total_requested - total_allocated, 0),
-            "candidateReusePrevented": True,
-            "wakePolicy": "EVENT_DRIVEN_PUSH_AND_WORKFLOW_RUN",
-            "watchdogCadence": "NO_INDEPENDENT_5_MINUTE_TIMER",
-            "deepRefillMode": "ROADMAP_GENERATION_REQUESTS_AVAILABLE__NOT_ACTIVE_REAL",
-            "materialScopeGenerationRequired": bool(generation_requests),
-            "genericRegenerationAllowed": False,
+            "productionKpi": "LISTO_REAL_PARENT_CLOSE",
+            "julesUtilizationIsKpi": False,
+            "julesBacklogIsGate": False,
+            "automaticRefill": False,
+            "queueFloor": 0,
+            "readyFutureCandidateCount": len(ready_future),
+            "offloadCandidateCount": len(offload_candidates),
+            "approvedOffloadCount": 0,
             "busyworkAllowed": False,
+            "genericRegenerationAllowed": False,
+            "decision": "DIRECT_EXECUTION_FIRST",
         },
     }
 
