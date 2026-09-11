@@ -121,7 +121,7 @@ public sealed class SucursalService : ISucursalService
         _repository.Update(sucursal);
         await _repository.SaveChangesAsync();
         await _auditoria.RegistrarAsync(ModuloSistema.Sucursales, activa ? AccionPermiso.Activar : AccionPermiso.Desactivar,
-            $"Sucursal {(activa ? "activada" : "desactivada")}: {sucursal.Codigo} - {sucursal.Nombre}", sucursal.Id, entidad: "Sucursal");
+            $"Sucursal {(activa ? "activada" : "desactivada")}: {sucursal.Codigo} - {sucursal.Nombre}; EmpresaId={sucursal.EmpresaId?.ToString() ?? "NULL"}", sucursal.Id, entidad: "Sucursal");
         return ToDto(sucursal);
     }
 
@@ -136,7 +136,7 @@ public sealed class SucursalService : ISucursalService
         var eliminado = await _repository.SaveChangesAsync();
         if (eliminado)
             await _auditoria.RegistrarAsync(ModuloSistema.Sucursales, AccionPermiso.EliminarLogico,
-                $"Sucursal eliminada lógicamente: {sucursal.Codigo} - {sucursal.Nombre}", sucursal.Id, entidad: "Sucursal");
+                $"Sucursal eliminada lógicamente: {sucursal.Codigo} - {sucursal.Nombre}; EmpresaId={sucursal.EmpresaId?.ToString() ?? "NULL"}", sucursal.Id, entidad: "Sucursal");
         return eliminado;
     }
 
