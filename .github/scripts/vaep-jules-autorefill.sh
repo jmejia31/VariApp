@@ -16,8 +16,8 @@ command -v jq >/dev/null 2>&1 || { echo "JULES_SHIM_ERROR=jq_missing" >&2; exit 
 [[ -f "$REGISTRY" ]] || { echo "JULES_SHIM_ERROR=registry_missing" >&2; exit 2; }
 
 model="$(jq -r '.executionModel // empty' "$REGISTRY")"
-autorefill="$(jq -r '.automaticRefillEnabled // true' "$REGISTRY")"
-required="$(jq -r '.julesRequiredForProgress // true' "$REGISTRY")"
+autorefill="$(jq -r 'if has("automaticRefillEnabled") then .automaticRefillEnabled else true end' "$REGISTRY")"
+required="$(jq -r 'if has("julesRequiredForProgress") then .julesRequiredForProgress else true end' "$REGISTRY")"
 
 if [[ "$model" != "TASKS_FIRST_JULES_ON_DEMAND" || "$autorefill" != "false" || "$required" != "false" ]]; then
   echo "JULES_SHIM_ERROR=registry_contract_mismatch model=${model:-MISSING} automaticRefill=$autorefill required=$required" >&2
