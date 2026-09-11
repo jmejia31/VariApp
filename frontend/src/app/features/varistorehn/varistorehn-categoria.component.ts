@@ -55,14 +55,14 @@ export class VaristorehnCategoriaComponent implements OnInit {
   readonly rutaCatalogoCategoria = computed(() => {
     const slug = this.categoria()?.slug;
     return slug
-      ? `${VARISTOREHN_PATHS.inicio}?categoria=${encodeURIComponent(slug)}#catalogo`
-      : `${VARISTOREHN_PATHS.inicio}#catalogo`;
+      ? `${VARISTOREHN_PATHS.productos}?categoria=${encodeURIComponent(slug)}`
+      : VARISTOREHN_PATHS.productos;
   });
 
   readonly enlaces = {
     inicio: VARISTOREHN_PATHS.inicio,
     categorias: VARISTOREHN_PATHS.categorias,
-    productos: `${VARISTOREHN_PATHS.inicio}#catalogo`,
+    productos: VARISTOREHN_PATHS.productos,
     contacto: `${VARISTOREHN_PATHS.inicio}#contacto`
   } as const;
 
@@ -95,14 +95,13 @@ export class VaristorehnCategoriaComponent implements OnInit {
 
   buscar(): void {
     const q = this.busqueda().trim();
-    void this.router.navigate(['/varistorehn'], {
-      queryParams: q ? { q } : {},
-      fragment: 'catalogo'
+    void this.router.navigate(['/varistorehn/productos'], {
+      queryParams: q ? { q } : {}
     });
   }
 
   seleccionarCategoria(nombre: string): void {
-    if (!nombre) void this.router.navigate(['/varistorehn'], { fragment: 'catalogo' });
+    if (!nombre) void this.router.navigate(['/varistorehn/productos']);
   }
 
   abrirCarrito(): void {
