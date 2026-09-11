@@ -116,10 +116,15 @@ export interface ReferenciaCarrito {
   unidades: number;
 }
 
-/** Referencias mínimas que el backend acepta para revalidar el checkout. */
+/**
+ * Identidad mínima de la selección. Modelo/marca no son autoridad comercial:
+ * solo desambiguan la misma agrupación que publicó el servidor.
+ */
 export interface CheckoutItemRequest {
   productoId: number;
   modeloId: number | null;
+  modeloNombre: string | null;
+  marcaNombre: string | null;
   unidades: number;
 }
 
