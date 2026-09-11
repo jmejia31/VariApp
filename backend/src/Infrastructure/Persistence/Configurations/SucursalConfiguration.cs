@@ -5,8 +5,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 namespace InventoryApp.Infrastructure.Persistence.Configurations;
 
 /// <summary>
-/// Persistencia canónica de sucursales. N6.2 establece EmpresaId como ownership
-/// tenant-aware obligatorio y conserva la derivación Almacen -> Sucursal -> Empresa.
+/// Persistencia canónica de sucursales. N6.2.C establece la relación tenant-aware
+/// sin inventar un backfill: EmpresaId conserva nullabilidad temporal hasta que N6.2.D
+/// haga que todos los flujos de aplicación resuelvan una Empresa de forma segura.
 /// </summary>
 public sealed class SucursalConfiguration : IEntityTypeConfiguration<Sucursal>
 {
@@ -29,14 +30,13 @@ public sealed class SucursalConfiguration : IEntityTypeConfiguration<Sucursal>
         builder.Property(x => x.CreadoPorNombreUsuario).HasMaxLength(150);
         builder.Property(x => x.ActualizadoPorNombreUsuario).HasMaxLength(150);
 
-        builder.Property(x => x.EmpresaId)
-            .IsRequired();
+        builder.Property(x => x.EmpresaId);
 
         builder.HasOne<Empresa>()
             .WithMany()
             .HasForeignKey(x => x.EmpresaId)
             .OnDelete(DeleteBehavior.Restrict)
-            .IsRequired();
+            .IsRequired(false);
 
         builder.Property<string>("CodigoActivoUnico")
             .HasMaxLength(40)
