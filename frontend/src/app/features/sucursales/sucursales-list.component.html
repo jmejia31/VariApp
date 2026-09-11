@@ -1,7 +1,7 @@
 <div class="header-row">
   <div>
     <h1 class="page-title">Sucursales</h1>
-    <p class="page-subtitle">Administra los puntos operativos sin introducir todavía dependencias multiempresa.</p>
+    <p class="page-subtitle">Administra los puntos operativos con su empresa propietaria visible y trazable.</p>
   </div>
   @if (puedeCrear()) {
     <a routerLink="/sucursales/nueva" mat-flat-button color="primary">
@@ -33,15 +33,15 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="empresa-filter">
-      <mat-label>Empresa ID</mat-label>
+      <mat-label>Empresa propietaria (ID)</mat-label>
       <input
         matInput
         type="number"
         min="1"
         [(ngModel)]="empresaId"
         (change)="aplicarFiltros()"
-        placeholder="Opcional / futuro">
-      <mat-hint>Reservado para ERP-N6</mat-hint>
+        placeholder="Todas las empresas">
+      <mat-hint>Filtra por ownership tenant-aware.</mat-hint>
     </mat-form-field>
 
     <button mat-stroked-button type="button" (click)="limpiarFiltros()">
@@ -79,7 +79,7 @@
           <th>Contacto</th>
           <th>Dirección</th>
           <th>Zona horaria</th>
-          <th>Empresa</th>
+          <th>Empresa propietaria</th>
           <th>Estado</th>
           <th><span class="visually-hidden">Acciones</span></th>
         </tr>
@@ -98,7 +98,13 @@
             </td>
             <td>{{ s.direccion || '—' }}</td>
             <td>{{ s.zonaHoraria }}</td>
-            <td>{{ s.empresaId || '—' }}</td>
+            <td>
+              @if (s.empresaId) {
+                <span class="code-chip" [attr.aria-label]="'Empresa propietaria ' + s.empresaId">#{{ s.empresaId }}</span>
+              } @else {
+                <span class="badge muted" title="Registro legado pendiente de ownership">Sin asignar</span>
+              }
+            </td>
             <td>
               @if (puedeCambiarEstado(s)) {
                 <mat-slide-toggle
@@ -168,7 +174,7 @@
             <div><dt>Teléfono</dt><dd>{{ s.telefono || '—' }}</dd></div>
             <div><dt>Correo</dt><dd>{{ s.correo || '—' }}</dd></div>
             <div><dt>Zona horaria</dt><dd>{{ s.zonaHoraria }}</dd></div>
-            @if (s.empresaId) { <div><dt>Empresa ID</dt><dd>{{ s.empresaId }}</dd></div> }
+            <div><dt>Empresa propietaria</dt><dd>{{ s.empresaId ? ('#' + s.empresaId) : 'Sin asignar (legado)' }}</dd></div>
           </dl>
 
           @if (puedeEditar() || puedeEliminar()) {
