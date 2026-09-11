@@ -181,14 +181,6 @@ export function telefonoWhatsapp(valor?: string): string {
   return /^[1-9]\d{9,14}$/.test(numero) ? numero : '';
 }
 
-export function urlCheckoutSegura(valor: string, origenes: readonly string[]): string | null {
-  try {
-    const url = new URL(valor);
-    return url.protocol === 'https:' && !url.username && !url.password
-      && origenes.includes(url.origin) ? url.href : null;
-  } catch { return null; }
-}
-
 /** Illustrative inventory only. Never written to the database or sent to a checkout. */
 export function crearCatalogoEjemplo(): ProductoTienda[] {
   const ejemplos: Array<[string, string, number, number, string, string]> = [
