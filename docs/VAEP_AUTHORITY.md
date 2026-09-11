@@ -1,6 +1,6 @@
 # VAEP — MAESTRO OPERATIVO ÚNICO
 
-Este archivo es la **única autoridad operativa** de la automatización de VariApp.
+Este archivo es la **única autoridad operativa** de VAEP para VariApp. Toda automatización, controller, ChatGPT/VAEP, Chat B, Jules y herramienta auxiliar debe releerlo antes de decidir o ejecutar trabajo.
 
 ```text
 PROJECT_ID=VARIAPP
@@ -13,39 +13,40 @@ NUMERIC_PROTOCOL_LABELS=PROHIBITED
 
 ```text
 BEGIN_AUTOMATION_POLICY
+EXECUTION_MODEL=TASKS_FIRST_JULES_ON_DEMAND
+DIRECT_EXECUTION_DEFAULT=TRUE
+JULES_REQUIRED_FOR_PROGRESS=FALSE
+JULES_OFFLOAD_ONLY_IF_CRITICAL_PATH_GAIN=TRUE
+JULES_MINIMUM_UTILIZATION_TARGET=0
+OFFLOAD_REQUIRES_NONOVERLAP=TRUE
+OFFLOAD_NEVER_BLOCKS_CURRENT_PARENT=TRUE
+PRIMARY_DIRECT_BUILD_CLOSE=TRUE
+SUPERVISOR_VERIFY_RECOVER_SECONDARY_BUILD=TRUE
+TASK_SCOPE_LEASE_REQUIRED=TRUE
+TASK_SCOPE_LEASE_SINGLE_WRITER=TRUE
+TASK_SCOPE_LEASE_TTL_MINUTES=10
+STALE_LEASE_TAKEOVER_AFTER_MINUTES=10
+DIRECT_NEXT_SAFE_PREARM_REQUIRED=TRUE
 PARENT_CLOSE_SLA_ROLLING_60M=3
 PARENT_CLOSE_SLA_ROLLING_24H=72
-JULES_TASKS_TARGET_ROLLING_24H_PER_WORKER=100
-JULES_TASKS_TARGET_ROLLING_24H_TOTAL=600
-JULES_REFILL_MAX_GAP_MINUTES=12
 PARENT_MAX_DWELL_MINUTES=20
 PARENT_STALL_NO_PROGRESS_MINUTES=10
 CLOSURE_REVIEW_MAX_LATENCY_MINUTES=2
 CLOSURE_DEBT_TRIGGER_LT=3
 CLOSURE_CHAIN_SAME_RUN=TRUE
 MAX_VOLUNTARY_IDLE=0
-JULES_QUEUE_DEPTH_TARGET=2
-JULES_PROGRAMMED_BACKLOG_TARGET_PER_WORKER=12
-JULES_PROGRAMMED_BACKLOG_REFILL_FLOOR_PER_WORKER=4
-JULES_PROGRAMMED_BACKLOG_TARGET_TOTAL=72
-JULES_DISPATCH_ELIGIBLE_MIN_PER_WORKER=2
-JULES_CURRENT_RUN_REQUIRED=TRUE
-JULES_NEXT_SAFE_PREARMED_REQUIRED=TRUE
-JULES_NEXT_RUN_RESERVED_REQUIRED=TRUE
-LANE_REFILL_DEADLINE_SECONDS=30
-SCHEDULED_RUN_LANE_REFILL_BEFORE_REVIEW=TRUE
-JULES_TERMINAL_HANDOFF_SAME_RUN=TRUE
-NO_MANIFEST_DURING_HEAD_FREEZE_CAUSAL=TRUE
-PREARM_BEFORE_CAUSAL_CI=TRUE
 GLOBAL_DISPATCH_ADMISSION=OPEN_ONLY
 GLOBAL_FROZEN_PROHIBITED=TRUE
-CAUSAL_HOLD_SCOPE=TASK_OR_LANE_ONLY
+CAUSAL_HOLD_SCOPE=TASK_OR_EXECUTION_ONLY
+NO_MANIFEST_DURING_HEAD_FREEZE_CAUSAL=TRUE
+PREARM_BEFORE_CAUSAL_CI=TRUE
 VAEP_CHECKPOINTS=:00,:12,:24,:36,:48
 VAEP_SUPERVISOR_CHECKPOINTS=:05,:17,:29,:41,:53
 VAEP_ALL_ACTIVE_SLOTS=:00,:05,:12,:17,:24,:29,:36,:41,:48,:53
-JULES_LANE_BUDGET_SECONDS=1080
+JULES_ACTIVE_WORKERS=J1,J2,J3,J4,J5,J6
 JULES_MAX_ATTEMPTS=2
 JULES_REWORK_MAX=1
+JULES_LANE_BUDGET_SECONDS=1080
 DEFECT_RECOVERY_FIRST=TRUE
 FIRST_DETECTOR_OWNS_RECOVERY=TRUE
 NO_REJECT_QUEUE=TRUE
@@ -57,97 +58,115 @@ PARENT_CLOSE_FIRST=TRUE
 END_AUTOMATION_POLICY
 ```
 
-## 1. Fuente única
+## 1. Fuente única, precedencia y limpieza de historia
 
-1. ChatGPT/VAEP, J1/J2/J3/J4/J5/J6 y todas las automatizaciones activas deben leer **este mismo archivo** antes de decidir reglas operativas.
-2. Cuando una regla cambia, **se modifica este archivo en el mismo lugar**. No se crea una copia, revisión numerada, protocolo paralelo ni documento `*-vX*`.
-3. Git conserva el historial; no se crean fuentes operativas duplicadas para conservar reglas anteriores.
-4. `CHANGELOG_AI.md`, `BITACORA`, Issues, artifacts, prompts anteriores y commits pueden contener etiquetas históricas; son **evidencia**, nunca autoridad ejecutable.
-5. Si una fuente histórica contradice este MAESTRO, gana este MAESTRO.
-6. Ningún worker puede elegir reglas por número, fecha o etiqueta histórica.
-7. **Ninguna referencia histórica a estados globales de admisión distintos de `OPEN` puede ser interpretada por código, workflows, agentes o controladores como una instrucción vigente.** El historial Git permanece inmutable como evidencia; la ejecución solo acepta la política actual `OPEN_ONLY`.
+1. `docs/VAEP_AUTHORITY.md` es el único MAESTRO ejecutable de reglas.
+2. GitHub manda para código y evidencia técnica; Drive/Sheet manda para estado operativo fresco; este MAESTRO manda para reglas.
+3. `CONFIG`, `COLA`, `PLAN_MAESTRO`, `WORKERS`, `BITACORA`, código, CI, tests, receipts y sesiones son fuentes de estado/evidencia, nunca autoridades paralelas.
+4. `CHANGELOG_AI.md`, Issues, artifacts, manifests cerrados, prompts antiguos y commits históricos son evidencia inmutable. No pueden reactivar una regla antigua.
+5. Se prohíben copias operativas `*-vX*`, protocolos numerados paralelos o fuentes superseding.
+6. Los artefactos operativos obsoletos se eliminan o neutralizan del runtime; **el historial Git no se reescribe**.
+7. Ante contradicción, gana este MAESTRO y debe corregirse la fuente operativa stale en la misma corrida.
 
-El contrato global es **OPEN_ONLY**. Esta frase existe únicamente como compatibilidad de gates heredados; la fuente estructurada y ejecutable sigue siendo `GLOBAL_DISPATCH_ADMISSION=OPEN_ONLY` en el bloque canónico.
+## 2. Modelo de ejecución vigente: TASKS-FIRST
 
-## 2. Precedencia
+VAEP opera **TASKS-FIRST + JULES-ON-DEMAND**.
 
-1. `docs/VAEP_AUTHORITY.md` — MAESTRO de reglas.
-2. Manifest actual — tarea, base, scope, attempt y aceptación.
-3. `AGENTS.md` — identidad, seguridad y obligación de consumir el MAESTRO.
-4. `CONFIG/COLA/PLAN_MAESTRO/BITACORA/EJECUCION_MANUAL` frescos — estado y roadmap, no reglas alternativas.
-5. HEAD, código, CI, tests, Issues, artifacts y sesiones actuales — realidad técnica observable.
+### Camino primario
 
-GitHub manda para código/evidencia. Drive manda para estado operativo. El MAESTRO manda para reglas.
+El camino normal y preferido es:
 
-## 3. Equipo
+`AUTOMATION -> LEASE -> EJECUCIÓN DIRECTA -> TESTS -> REVIEW_FIRST -> INTEGRACIÓN -> GATES -> LISTO_REAL -> PROMOCIÓN`
 
-- Javier: propietario y autorización final.
-- ChatGPT/VAEP: controller, REVIEW_FIRST, QA, integración, corrección, CI, certificación, rollup y failover.
-- Chat B (ChatGPT Business): colaborador full-access par de ChatGPT/VAEP para controller, REVIEW_FIRST, QA, corrección, integración, CI, certificación, rollup, continuidad y failover. Opera sobre `Desarrollo` bajo este MAESTRO, con las mismas funciones de control que ChatGPT/VAEP y sin crear una quinta lane Jules.
-- J1/J2/J3/J4: implementers cloud CODE. J5: QA/security/regression con fallback CODE. J6: integration/recovery con fallback CODE/QA. Los seis conservan máximo un write-scope autoritativo por ejecución; entregan patch/artifact y no publican funcionalmente.
-- Vibe: QA/corrector externo solo cuando VAEP lo delega.
-- AntiG/Antigravity: componente de infraestructura reservado para futura reincorporación autorizada. No pertenece al equipo operativo actual.
-- Codex: fuera del flujo salvo orden explícita futura del usuario.
+Las diez tareas programadas son ejecutores/controllers autónomos. No son meros schedulers, observadores ni despachadores Jules.
 
-### Workers Jules canónicos
+Reglas absolutas:
 
-```text
-JULES_ACTIVE_WORKERS=J1,J2,J3,J4,J5,J6
-JULES_ACTIVE_WORKER_COUNT=6
-JULES_WORKER_REGISTRY=vaep/control/jules-workers.json
-J1_ROLE=CODE_CORE
-J2_ROLE=CODE_BACKEND_DATA
-J3_ROLE=CODE_FRONTEND
-J4_ROLE=CODE_INFRA_INTEGRATIONS
-J5_ROLE=QA_SECURITY_REGRESSION__FALLBACK_CODE
-J6_ROLE=INTEGRATION_RECOVERY__FALLBACK_CODE_QA
-JULES_QUEUE_DEPTH_PER_WORKER=2
-JULES_MAX_LIVE_RUNS_TOTAL=12
-```
+- La ejecución directa es el default.
+- Ningún CURRENT_PARENT puede esperar a Jules si la tarea activa puede resolver el gap con sus herramientas/autorización.
+- Ningún dispatch Jules es requisito para progreso, ACTIVE_REAL, cierre o promoción.
+- Cero Jules activos puede ser estado sano si no existe offload materialmente ventajoso.
+- Está prohibido fabricar trabajo, subdivisiones nominales, evidencia redundante o backlog artificial para mantener Jules ocupados.
+- Un slot no termina en `REPORT_ONLY`, `HANDOFF_ONLY`, `PENDING_REVIEW`, `WAIT_FOR_JULES` o equivalente si existe acción material segura que el ejecutor actual puede realizar.
 
-Los IDs operativos nuevos son exclusivamente `J1..J6`. `JULES_A..JULES_D` pueden aparecer únicamente como evidencia histórica o para terminar una sesión ya iniciada antes del cutover; no son IDs válidos para nuevos dispatches. J3 y J4 usan exclusivamente sus secretos nominales `JULES_J3_API_KEY` y `JULES_J4_API_KEY`; no existe fallback ni referencia temporal de credenciales legacy para estos workers.
+### Primarias
 
-### Contrato operativo Chat B
+`:00/:12/:24/:36/:48` son **builder/closer primarios**. Cada una debe tomar el gap material más corto hacia `LISTO_REAL`, adquirir ownership exclusivo y ejecutarlo directamente salvo que ya exista un owner material válido.
 
-```text
-CHATGPT_BUSINESS_OPERATIONAL=TRUE
-CHATGPT_BUSINESS_ROLE=FULL_ACCESS_PEER_CONTROLLER_QA
-CHATGPT_BUSINESS_AUTHORITY=MASTER
-CHATGPT_BUSINESS_BRANCH=Desarrollo
-CHATGPT_BUSINESS_REVIEW_FIRST=TRUE
-CHATGPT_BUSINESS_QA_TAKEOVER=TRUE
-CHATGPT_BUSINESS_CAN_INTEGRATE=TRUE
-CHATGPT_BUSINESS_CAN_CERTIFY_LISTO_REAL=TRUE_ONLY_WITH_MASTER_EVIDENCE
-CHATGPT_BUSINESS_IS_JULES_LANE=FALSE
-```
+### Supervisoras
 
-Chat B puede ejecutar cualquier operación técnica necesaria dentro del alcance autorizado de VariApp en `Desarrollo`, incluyendo corrección causal, pruebas, CI, review, integración y cierre. No puede saltarse el MAESTRO, inventar actividad/evidencia, abrir R3+, tocar `main`/Producción/secretos ni declarar `LISTO_REAL` sin REVIEW_FIRST, DoD, gates aplicables y P0/P1=0.
+`:05/:17/:29/:41/:53` son **verifier/recovery/secondary-builder**. Verifican la corrida primaria precedente y:
 
-### Estado canónico AntiG
+- si existe lease fresco + progreso material, no duplican escritura; ejecutan QA, REVIEW_FIRST, CI/gates, prearm o un scope independiente seguro;
+- si falta owner, el lease expiró o no hay progreso material >=10 min, toman ownership y continúan ejecución directa;
+- si la primaria omitió una acción obligatoria, la supervisora la absorbe same-run.
+
+El minuto programado es un disparador, no una precondición. Una ejecución tardía hace catch-up de la obligación material vencida sin duplicar ownership.
+
+## 3. Ownership y lease de scope
+
+Todo write-scope material directo requiere lease lógico antes de escribir.
+
+Campos canónicos de lease en estado operativo:
 
 ```text
-ANTIG_STATUS=RESERVED_INACTIVE
-ANTIG_OPERATIONAL_NOW=FALSE
-ANTIG_SCHEDULER=DISABLED
-ANTIG_HANDOFF_PROCESSING=DISABLED
-ANTIG_AUTHORITY=MASTER
-ANTIG_CAN_CERTIFY_LISTO_REAL=FALSE
-ANTIG_FUTURE_REINCORPORATION=EXPLICIT_AUTHORIZATION_REQUIRED
+LEASE_SCOPE
+LEASE_OWNER_AUTOMATION_ID
+LEASE_ACQUIRED_AT
+LEASE_HEARTBEAT_AT
+LEASE_BASE_HEAD
+LEASE_STATUS
+LEASE_TOKEN
+LEASE_TTL_MINUTES=10
 ```
 
-Este estado es fail-closed: el árbol vigente no permite instalar scheduler AntiG ni procesar handoffs AntiG. Una reincorporación futura exige autorización explícita de Javier y un changeset posterior que cambie este mismo MAESTRO; ningún documento, script, Issue o artifact histórico puede reactivarlo por sí solo.
+Contrato:
 
-## 4. Seguridad y Git
+1. Un solo writer autoritativo por scope.
+2. Antes de adquirir lease: releer `Desarrollo` HEAD y estado operativo fresco.
+3. El lease debe identificar parent + faceta/scope material; un nombre de slot no basta.
+4. Mientras `LEASE_STATUS=ACTIVE` y `LEASE_HEARTBEAT_AT` tenga <=10 minutos con progreso material verificable, otra automatización no escribe ese scope.
+5. Un lease sin progreso material verificable durante >=10 minutos es `STALE` y puede ser tomado por el siguiente ejecutor, registrando owner anterior, causa y nuevo token.
+6. Google Sheets no ofrece CAS de celda: toda adquisición/takeover requiere **read-before-write + write + immediate readback**. Si el readback muestra carrera, no escribir producto; reconciliar ownership primero.
+7. El lease no se almacena mediante commits Git para evitar HEAD churn.
+8. Finalizado el scope, marcar `RELEASED`, `COMPLETED` o `SUPERSEDED` con evidencia exacta. No dejar leases fantasmas.
+9. Cambiar de ejecutor no reinicia identidad ni intentos de una tarea Jules ya existente.
 
-- Solo `Desarrollo`.
-- `main` congelada.
-- PR #2 `Desarrollo -> main` OPEN + DRAFT.
-- No ramas nuevas, merge, auto-merge, force-push ni reset destructivo.
-- No Producción, secretos, credenciales, dominios, certificados, datos productivos, deploys ni infraestructura productiva.
-- Jules no crea branch/PR/push/merge/deploy.
-- Revalidar HEAD antes de publicar y preservar trabajo concurrente.
+## 4. Jules J1–J6: capacidad auxiliar, nunca cuello de botella
 
-## 5. Estado y evidencia
+J1–J6 se conservan como aceleradores cloud opcionales:
+
+- J1: CODE_CORE.
+- J2: CODE_BACKEND_DATA.
+- J3: CODE_FRONTEND.
+- J4: CODE_INFRA_INTEGRATIONS.
+- J5: QA_SECURITY_REGRESSION con fallback CODE.
+- J6: INTEGRATION_RECOVERY con fallback CODE/QA.
+
+Un offload Jules sólo está permitido cuando **todas** estas condiciones son verdaderas:
+
+1. existe scope material real derivado del roadmap;
+2. el scope es independiente/no solapado con el write-scope directo vigente;
+3. reduce de forma razonable el camino crítico o prepara trabajo material seguro posterior;
+4. no obliga a esperar a Jules para cerrar el CURRENT_PARENT;
+5. existe base HEAD exacta y dependencia válida;
+6. no duplica una identidad funcional ya completada o en ownership válido;
+7. la tarea programada conserva capacidad para continuar ejecución directa en paralelo.
+
+Si no se cumplen, `NO_JULES_OFFLOAD` es el resultado correcto y **no es déficit**.
+
+No existen objetivos obligatorios de utilización, tareas/día, queue depth ni backlog mínimo por Jules. `scripts/vaep/jules_integration_metrics.py` es telemetría diagnóstica, no KPI de producción ni gate de cierre.
+
+### Contrato de dispatch Jules
+
+- Sólo se crea manifest cuando una tarea/controller decide explícitamente `JULES_OFFLOAD_APPROVED` para un scope concreto.
+- Antes de cada manifest releer HEAD y usar ese SHA exacto como `primaryBaseHead`.
+- Jules entrega patch/artifact; no publica funcionalmente, no certifica `LISTO_REAL`, no toca `main`, Producción, secretos ni deploys.
+- Resultado Jules siempre entra a `REVIEW_FIRST`.
+- Resultado tardío de sesión `SUPERSEDED` es `EVIDENCE_ONLY` y no se integra automáticamente.
+- Un dispatch, workflow, sesión o `COMPLETED` no cuenta como cierre por sí solo.
+
+## 5. ACTIVE_REAL, evidencia y estados
 
 Estados COLA válidos:
 
@@ -155,261 +174,170 @@ Estados COLA válidos:
 PENDIENTE|EN_PROGRESO|VALIDANDO|LISTO|BLOQUEADO|CANCELADO
 ```
 
-- Dispatch != ACTIVE.
-- Workflow != ACTIVE.
-- Issue != ACTIVE.
-- ACTIVE_REAL exige sesión Jules correlacionada + actividad técnica útil reciente.
-- `COMPLETED` Jules nunca equivale a `LISTO`.
-- `LISTO_REAL` solo lo declara VAEP tras REVIEW_FIRST + DoD + gates/CI aplicables + P0=0/P1=0.
-- Nunca fingir sesión, actividad, PASS, CI, evidencia o LISTO.
-- **NO_REJECT_QUEUE**: una entrega Jules incompleta, incorrecta o no certificable NO se estaciona como destino operativo en una cola de rechazados. Se clasifica como `RECOVERY_REQUIRED` y conserva identidad, evidencia, attempt y causa hasta quedar corregida o hasta existir un blocker externo causal que realmente no pueda resolverse dentro de las operaciones autorizadas.
-- `BLOQUEADO` no es un sustituto de recovery. Un defecto interno de código, contrato, tests, base-race, review o integración que pueda corregirse con herramientas/autorización disponibles debe resolverse; no puede permanecer bloqueado por omisión de decisión.
+`ACTIVE_REAL` es actor-aware:
 
-## 6. Parent-close y continuidad
+- **Automation directa**: ejecución real identificable + lease exclusivo fresco + actividad técnica útil/material reciente sobre el scope.
+- **Jules**: manifest -> workflow -> `sessionId` correlacionado + actividad técnica útil reciente.
 
-La política de parent-close, dwell time y SLA está gobernada por el bloque canónico `BEGIN_AUTOMATION_POLICY`:
-- `PARENT_CLOSE_FIRST=TRUE`: Cerrar CURRENT_PARENT antes de promover un sucesor dependiente.
-- **GLOBAL_FROZEN_PROHIBITED**: ningún workflow, checkpoint, watchdog, controller, takeover, review gate, hardening ni transición de parent puede escribir `newDispatchAdmission` distinto de `OPEN`. Todo bloqueo causal se aplica exclusivamente a la tarea/lane afectada; nunca a la fábrica completa.
-- Los checkpoints activos provienen exclusivamente de `VAEP_CHECKPOINTS` y `VAEP_SUPERVISOR_CHECKPOINTS` en el bloque canónico. `VAEP_ALL_ACTIVE_SLOTS` contiene las diez ventanas activas.
-- `PARENT_CLOSE_SLA_ROLLING_60M=3`: mínimo operativo de 3 padres en `LISTO_REAL` por ventana móvil de 60 minutos.
-- `PARENT_CLOSE_SLA_ROLLING_24H=72`: objetivo contractual de 72 padres `LISTO_REAL` por ventana móvil de 24 horas; el contador de 24h no reemplaza el gate de 3/h, ambos deben cumplirse.
-- `JULES_TASKS_TARGET_ROLLING_24H_PER_WORKER=100`: objetivo de 100 tareas Jules realmente integradas por cada worker J1/J2/J3/J4/J5/J6 en 24h. Solo cuenta un commit de integración con receipt VAEP válido, REVIEW_ACCEPTED e INTEGRATED; no cuentan busywork, dispatch, manifest, autorefill, reserva, workflow verde, sesión creada ni SESSION_COMPLETED por sí solos.
-- `JULES_TASKS_TARGET_ROLLING_24H_TOTAL=600`: objetivo agregado de 600 tareas Jules validadas como INTEGRATED en 24h entre J1/J2/J3/J4/J5/J6; la fuente de verdad del KPI es `scripts/vaep/jules_integration_metrics.py --rolling-hours 24`.
-- **TASK_IDENTITY_UNIQUE**: para métricas y autorefill, una tarea Jules útil se identifica por `CURRENT_PARENT + identidad funcional/semantic facet`, no por número correlativo, dispatchId, filename ni sessionId. Renumerar la misma prueba/comportamiento NO crea trabajo nuevo.
-- Si una identidad funcional ya tuvo resultado `COMPLETED` + `patchPresent=true` + sesión útil, cualquier ejecución posterior equivalente se clasifica `DUPLICATE_EVIDENCE_ONLY`, no integra automáticamente y **NO CUENTA** en `TASKS_24H` ni en el objetivo de 100 por Jules.
-- Un manifest/run `SUPERSEDED` antes de sesión útil no consume la identidad funcional y puede recuperarse; dedupe no debe impedir un recovery legítimo.
-- El catalog floor no puede reciclar una faceta ya completada asignándole otro número/archivo. Si se agotan facetas materialmente únicas, debe emitir `UNIQUE_WORK_EXHAUSTED` y devolver prioridad a cierre/promoción o a un scope realmente nuevo del roadmap; nunca fabricar una variante nominal.
-- `JULES_REFILL_MAX_GAP_MINUTES=12`: las cinco automatizaciones reconciliadoras se distribuyen uniformemente cada 12 minutos (:00/:12/:24/:36/:48), y cinco supervisoras independientes se ejecutan cinco minutos después de sus respectivas primarias (:05/:17/:29/:41/:53). Este valor NO permite ociosidad de 12 minutos: la continuidad se garantiza con CURRENT_RUN + NEXT_RUN_RESERVED real, y cualquier de las diez tareas activas debe recuperar deuda causal que detecte.
-- `PARENT_MAX_DWELL_MINUTES=20`: Límite máximo de permanencia en un mismo parent sin progreso material.
-- `PARENT_STALL_NO_PROGRESS_MINUTES`: umbral de no-progreso definido exclusivamente en el bloque canónico; al alcanzarse obliga a failover controlado.
-- `MAX_VOLUNTARY_IDLE`: tolerancia de ociosidad voluntaria definida exclusivamente en el bloque canónico; cuando es cero, una lane libre recibe trabajo seguro inmediatamente.
-- Trayectoria de recuperación: las diez tareas activas `:00/:05/:12/:17/:24/:29/:36/:41/:48/:53` deben detectar y absorber `RECOVERY_REQUIRED`. Las cinco primarias mantienen CURRENT_RUN + NEXT_RUN_RESERVED y backlog material; las cinco supervisoras verifican materialmente el checkpoint anterior y ejecutan recovery si éste dejó deuda. Con continuidad satisfecha, `CLOSURE_DEBT_FASTPATH` domina hasta cerrar/promover el CURRENT_PARENT.
-- `CLOSURE_REVIEW_MAX_LATENCY_MINUTES=2`: un terminal `READY_FOR_VAEP` que pueda decidir el cierre no puede permanecer esperando revisión administrativa más allá de este objetivo; REVIEW_FIRST/QA_TAKEOVER se drena inmediatamente.
-- `CLOSURE_DEBT_TRIGGER_LT=3`: si `ROLLING60<3`, entra CLOSURE_DEBT_FASTPATH. VAEP debe intentar cerrar CURRENT_PARENT con evidencia ya existente ANTES de crear trabajo support/evidence-only adicional para ese mismo padre.
-- En CLOSURE_DEBT_FASTPATH, si el padre ya cumple DoD + gates aplicables terminales + P0=0/P1=0, se declara `LISTO_REAL` inmediatamente; no se espera otro checkpoint, otro Jules ni documentación redundante.
-- Si falta exactamente un gap material, solo se trabaja ese gap. Está prohibido inflar REVIEW_BACKLOG con evidencia redundante mientras exista un camino de cierre más corto.
-- `CLOSURE_CHAIN_SAME_RUN=TRUE`: tras cerrar un padre, promover el siguiente dependency-valid y evaluar/cerrar inmediatamente todo padre ya pretrabajado/certificable en la MISMA corrida, repitiendo hasta `ROLLING60>=3` o hasta encontrar un blocker técnico causal exacto.
-- Mantener Jules productivos en paralelo: lanes ya reservadas continúan; una lane libre recibe NEXT_SAFE material, pero ningún refill evidence-only puede retrasar un cierre ya certificable.
-- `JULES_CURRENT_RUN_REQUIRED=TRUE` + `JULES_NEXT_SAFE_PREARMED_REQUIRED=TRUE`: cada lane debe conservar trabajo actual y siguiente trabajo seguro prearmado cuando exista backlog material elegible.
-- `JULES_QUEUE_DEPTH_TARGET=2`: objetivo y límite físico de RUNS VIVOS por lane = exactamente `1 CURRENT_RUN + como máximo 1 NEXT_RUN_RESERVED`. Nunca crear un tercer run vivo. Esta regla NO limita el número de tareas PROGRAMADAS en catálogo.
-- `NO_SUPERSEDE_PENDING=TRUE`: si ya existe un run de la misma lane en `pending|queued|in_progress` distinto del CURRENT, cualquier fuente de dispatch (timer, autorefill, manual recovery) debe NO-OP. GitHub concurrency mantiene un único pending; publicar otro puede supersederlo y está prohibido.
-- `ONE_MANIFEST_ONE_RUN=TRUE`: un manifest se publica en un único commit y produce exactamente un run. Un commit externo/manual sobre `Desarrollo` usa exclusivamente `push:path`; un commit interno creado con `GITHUB_TOKEN` (que no dispara Actions recursivamente) usa exactamente un `workflow_dispatch` correlacionado por `manifest_commit=<SHA exacto>`. Está prohibido combinar ambos mecanismos para el mismo manifest.
-- `CANCELLED_RUN_POLICY=FAILURE_TO_PREVENT`: una cancelación/supersession causada por VAEP, timer o control-plane es incidente operativo, no throughput. Debe corregirse la causa antes de generar más trabajo en esa lane. Sólo una cancelación externa/usuario explícita puede quedar fuera de esta clasificación.
-- **CONTINUIDAD PRIMARIA EVENT-DRIVEN**: cada workflow J1/J2/J3/J4/J5/J6 ejecuta `.github/scripts/vaep-jules-autorefill.sh` al terminar su corrida (también después de timeout/fallo de lane) y reserva el siguiente NEXT_SAFE material desde `vaep/control/jules-autorefill-catalog.json`. Los checkpoints horarios son watchdog/recovery; NO son el mecanismo primario de handoff.
-- El autorefill debe crear exactamente un manifest nuevo, con `primaryBaseHead` igual al padre real del commit, respetar `dispatch-admission=OPEN`, no duplicar scopes/dispatches y detenerse ante `HEAD_FREEZE_CAUSAL` real. La admisión se valida antes de construir, inmediatamente antes de publicar el ref y antes de emitir el run interno; cualquier valor global distinto de `OPEN` es una violación de invariante que debe normalizarse antes del dispatch, sin cerrar lanes independientes. Una actualización concurrente de HEAD obliga a reintentar contra el nuevo padre, nunca a publicar una base stale.
-- El catálogo de autorefill es BACKLOG PROGRAMADO, separado de la cola viva. Debe mantener `JULES_PROGRAMMED_BACKLOG_TARGET_PER_WORKER=12` tareas materiales por Jules (72 agregadas), con reposición obligatoria cuando las no consumidas bajen de 4 por worker. Solo las entradas `dispatchEligible=true` pueden convertirse en runs; las futuras pueden quedar `dispatchEligible=false` hasta que sus dependencias sean válidas. La cola viva sigue limitada por `JULES_QUEUE_DEPTH_TARGET=2` (`CURRENT + NEXT`). La regeneración genérica de facetas está PROHIBIDA: el controller repone únicamente scopes genuinos/únicos del roadmap; nunca recicla una identidad completada, renumera la misma prueba ni fabrica busywork.
-- `JULES_NEXT_RUN_RESERVED_REQUIRED=TRUE`: NEXT_SAFE no cuenta como continuidad real hasta que exista un workflow Jules correlacionado en estado `pending|queued|in_progress` reservado para esa lane, salvo `HEAD_FREEZE_CAUSAL` real. Un archivo/row/manifiesto sin run no satisface zero-idle.
-- `LANE_REFILL_DEADLINE_SECONDS=30`: cada checkpoint debe resolver primero lanes libres o sin NEXT_RUN_RESERVED; no puede gastar más de este presupuesto en reconciliación/review antes de reservar trabajo real cuando existe SAFE_WORK.
-- `SCHEDULED_RUN_LANE_REFILL_BEFORE_REVIEW=TRUE`: la primera acción material de cada primaria `:00/:12/:24/:36/:48`, después del preflight mínimo, es reservar CURRENT/NEXT run de J1/J2/J3/J4/J5/J6. Una supervisora `:05/:17/:29/:41/:53` primero valida el checkpoint anterior y, si encuentra deuda `RECOVERY_REQUIRED`, esa deuda domina sobre auditoría/reporting y debe resolverse same-run.
-- Terminal CURRENT debe liberar ownership y permitir que el NEXT_RUN_RESERVED arranque por la propia concurrencia del workflow, sin esperar otro checkpoint.
-- Cuando el CURRENT terminaliza y consume la reserva existente, el mismo workflow debe ejecutar AUTOREFILL **solo después de que el runtime state confirme terminal/stall/timeout**; entonces debe dejar un nuevo run `pending|queued|in_progress` siempre que exista SAFE_WORK y no haya hold causal de la tarea/lane. Un fallo previo a sesión/admisión/transport no autoriza post-terminal refill. Esperar al siguiente checkpoint teniendo catálogo material disponible es incumplimiento.
-- `PREARM_BEFORE_CAUSAL_CI=TRUE`: el NEXT_SAFE que requiera manifest/commit debe prepararse antes de iniciar la ventana de CI causal del FUNCTIONAL_HEAD siempre que sea técnicamente posible.
-- `NO_MANIFEST_DURING_HEAD_FREEZE_CAUSAL=TRUE`: `HEAD_FREEZE_CAUSAL` es un **hold técnico local al scope/lane**, nunca un estado de admisión global. Una vez exista, está prohibido mover Desarrollo con manifests/control-plane que puedan cancelar/superseder gates del FUNCTIONAL_HEAD. Durante ese hold, Jules continúan sobre runs ya reservados, work seguro no-head-moving y la cola declarativa; el siguiente manifest se publica inmediatamente al liberar el hold.
-- Nunca false LISTO ni busywork.
+No son `ACTIVE_REAL`: tarea habilitada, trigger, planner, dispatch, workflow sin sesión, lease sin progreso, prearm read-only, comentario, Issue ni declaración.
 
-- **EVIDENCE_GAP_NO_R2**: si un patch no vacio demuestra base, scope y ausencia de cambios al control-plane, pero solo faltan los marcadores `SELF_REVIEW_PASS_1`, `SELF_REVIEW_PASS_2` o `TESTS_EXECUTED`, el contrato terminal sigue invalido y no puede marcar `READY_FOR_VAEP`; el handoff pasa directamente a `EVIDENCE_GAP_REVIEW_REQUIRED` (o `QA_TAKEOVER_REQUIRED` al agotar el intento). No se consume un intento adicional de contenido ni se crea R2/R3 para reimplementar el mismo scope.
+`LISTO_REAL` sólo lo declara VAEP/controller tras:
 
-## 7. Transporte Jules
+- REVIEW_FIRST;
+- DoD material completo;
+- tests/gates/CI aplicables y causales terminales;
+- P0=0 y P1=0;
+- exact-head o equivalencia de control-plane demostrada;
+- receipt/evidencia verificable.
 
-```text
-J1: vaep/jules/dispatch/*.json
-J2: vaep/jules-b/dispatch/*.json
-J3: vaep/jules-c/dispatch/*.json
-J4: vaep/jules-d/dispatch/*.json
-J5: vaep/j5/dispatch/*.json
-J6: vaep/j6/dispatch/*.json
-```
+Nunca fingir sesión, actividad, PASS, CI, evidencia o LISTO.
 
-Dispatch válido: un commit, exactamente un manifest nuevo, worker correcto, `expectedBranch=Desarrollo`, `primaryBaseHead` SHA40 del padre exacto, `taskAttempt` 1 o 2, scope y prompt no vacíos.
+## 6. Parent-close, throughput y continuidad
 
-Fallo pre-session de path/base/schema/transporte no consume intento de contenido.
+Objetivo contractual:
 
-Invariantes P0/P1 de entrega y productividad:
-- `IMMUTABLE_MANIFEST=TRUE`: todo intento usa un archivo NUEVO; modificar, renombrar, borrar o reutilizar un manifest histórico es `INVALID_REDISPATCH` y falla antes de reservar NEXT o crear sesión.
-- `ONE_ATTEMPT_ONE_MANIFEST_ONE_DISPATCH_ID=TRUE`: ATTEMPT1 y R2 usan `dispatchId` y filename nuevos e inmutables; filename = `<dispatchId>.json`.
-- Pipeline obligatorio: `TRIGGERED -> MANIFEST_ACCEPTED -> SESSION_CREATED -> SESSION_COMPLETED -> PATCH_PRESENT -> SELF_REVIEW_COMPLETE -> REVIEW_ACCEPTED -> INTEGRATED`. Solo el último estado realmente alcanzado cuenta; `COMPLETED` solo no es integración.
-- `AWAITING_USER_FEEDBACK` no recibe follow-ups genéricos repetidos: capturar la pregunta real expuesta por Jules, emitir como máximo una respuesta específica ligada a `taskId + dispatchId + primaryBaseHead + taskAttempt + fileScopeHint`, y si la pregunta persiste transferir a `QA_TAKEOVER`. Si la API no expone la pregunta, registrar la ausencia explícitamente y transferir directamente a QA.
-- `PARENT_STALL_NO_PROGRESS_MINUTES` se aplica a progreso observable de estado/timestamp/actividad y puede cortar antes de `JULES_LANE_BUDGET_SECONDS`; stall revoca ownership y pasa a QA_TAKEOVER.
-- Antes de crear una sesión, el worker enumera sesiones remotas y bloquea cualquier sesión existente del mismo `taskId` todavía activa, incluyendo otro `dispatchId`, base o intento. El guard registra `taskId + dispatchId + primaryBaseHead + taskAttempt + session + state`; reusar un manifest cuyo dispatch ya tuvo sesión se clasifica fail-closed.
-- Un `COMPLETED` entregable exige ChangeSet/gitPatch no vacío, `baseCommitId == primaryBaseHead` o una equivalencia verificable de descendiente exclusivamente control-plane, anclaje al `fileScopeHint`, ausencia de cambios al control-plane, marcador `TESTS_EXECUTED`, dos self-reviews y contrato terminal válido.
-- Cualquier fallo de contrato terminal es `RECOVERY_REQUIRED`, nunca destino de rechazo. El primer actor de las diez tareas que lo detecte adquiere ownership de recovery hasta resolverlo o demostrar un blocker externo causal no resoluble con operaciones autorizadas.
-- **CROSS_LANE_R2_ALLOWED**: si ATTEMPT1 requiere rework material real, el R2 puede asignarse al mismo Jules o a cualquier J1–J6 libre y compatible con el scope. El manifest R2 conserva `taskId`, identidad funcional y `taskAttempt=2`; cambiar de Jules NO reinicia attempts. Antes de crear la sesión debe comprobarse globalmente que no exista otra sesión activa del mismo taskId.
-- Los Jules pueden ejecutar recovery de una tarea originada en otra lane cuando una de las diez tareas/controller la asigne. Esa asignación es work-stealing controlado, no crea una tercera oportunidad ni una nueva identidad funcional.
+- `PARENT_CLOSE_SLA_ROLLING_60M=3`.
+- `PARENT_CLOSE_SLA_ROLLING_24H=72`.
+- `PARENT_MAX_DWELL_MINUTES=20`.
 
-## 8. Retry cap y DEFECT_RECOVERY_FIRST
+La producción se mide por padres certificados `LISTO_REAL`, no por triggers, commits de control-plane, tareas Jules, manifests, sesiones ni workflows verdes.
 
-La política de reintentos está gobernada por el bloque canónico:
-- `JULES_MAX_ATTEMPTS=2`: ATTEMPT=1 ejecución inicial, ATTEMPT=2 / R2 única y última corrección Jules.
-- `JULES_REWORK_MAX=1`: máximo un rework material dirigido.
-- R3+ está terminantemente prohibido.
-- Cambiar de Jules no reinicia attempts. Work-stealing hereda attempts.
-- `DEFECT_RECOVERY_FIRST=TRUE`: una tarea defectuosa se convierte inmediatamente en deuda de recuperación prioritaria del CURRENT_PARENT; no va a una cola de rechazo ni se deja esperando otra ventana.
-- `FIRST_DETECTOR_OWNS_RECOVERY=TRUE`: cualquiera de las diez tareas activas que detecte primero una entrega incompleta/incorrecta adquiere el deber de revisar causa, corregir, probar, integrar/certificar cuando corresponda y revalidar. No puede limitarse a registrar el problema y delegarlo al siguiente checkpoint.
-- ATTEMPT1 defectuoso: ejecutar REVIEW_FIRST sobre artifact/diff primero. Si el defecto es base-race, evidencia, integración, test faltante o corrección acotada que el controller puede reparar sin reimplementar el scope, corregir directamente same-run sin gastar R2 de contenido. Si sí requiere rework material, emitir exactamente un R2 con `taskAttempt=2`, al mismo Jules o a otro J1–J6 libre/compatible.
-- `CROSS_LANE_R2_ALLOWED=TRUE`: R2 puede ser work-stealed por otro Jules; la tarea conserva su identidad y contador. Nunca dos R2 activos del mismo taskId.
-- ATTEMPT2 defectuoso o no certificable: `SECOND_ATTEMPT_CONTROLLER_TAKEOVER_REQUIRED=TRUE`. No existe R3, no existe rechazo terminal operativo y no se espera otro Jules. La tarea/checkpoint/supervisora que lo detecta ejecuta o coordina inmediatamente `QA_TAKEOVER` directo: corrige el scope, corre pruebas proporcionales, ejecuta REVIEW_FIRST, integra sólo evidencia válida y certifica. Jules queda libre para NEXT_SAFE.
-- `RECOVERY_MUST_RESOLVE_SAME_RUN=TRUE`: recovery accionable no puede quedar como `PENDING_REVIEW`, `REJECTED`, `BLOCKED` o `HANDOFF_ONLY` al final de una corrida si el actor tiene herramientas/autorización para resolverlo.
-- `RECOVERY_UNBLOCK_DEPENDENTS_SAME_RUN=TRUE`: al completar la corrección y obtener evidencia válida, actualizar estado, desbloquear inmediatamente los siblings/dependientes, despachar el NEXT_SAFE correspondiente y continuar cierre/promoción en la misma corrida.
-- Un blocker se registra únicamente si es externo/causal y realmente no resoluble dentro de las operaciones autorizadas después de ejecutar todas las acciones seguras disponibles. Un defecto interno reparable jamás se convierte en blocker persistente.
+### CLOSURE_DEBT_FASTPATH
 
-Al agotar R2, el runtime puede conservar la etiqueta compatible `QA_TAKEOVER_REQUIRED` con causa, taskId, dispatchId, sesión, base y artifact, pero su semántica vigente es **acción obligatoria inmediata**, no “cola pendiente”. Emitir ese handoff hace al primer detector responsable de ejecutar el takeover same-run. Un R2 válido pasa a `READY_FOR_VAEP`, sin otro intento por falta de revisión. Fallos de evidencia se revisan primero desde el artifact disponible, sin volver a implementar por defecto. El objetivo de 100 integraciones por worker no es evidencia de cuota disponible del proveedor ni autoriza fabricar trabajo o reiniciar intentos.
+Si `ROLLING60<3`:
 
-Cada una de las diez tareas reconcilia deuda terminal como obligación P0. Si detecta un elemento `READY_FOR_VAEP`, `EVIDENCE_GAP_REVIEW_REQUIRED`, `RCA_REQUIRED_BEFORE_R2` o `QA_TAKEOVER_REQUIRED`, debe convertirlo en trabajo de recovery en esa misma corrida. Contar Issues, registrar ownership o escribir `REVIEW_EXECUTOR_NOT_CONFIGURED` no certifica operación completa y no es salida aceptable si el actor actual sí dispone de acceso al repositorio, artifacts y pruebas.
+1. cerrar primero cualquier parent ya certificable;
+2. drenar inmediatamente REVIEW_FIRST/QA/gate causal que impida cierre;
+3. si falta un único gap material, ejecutar **sólo ese gap** directamente;
+4. prohibido crear evidencia redundante o offload que alargue el camino;
+5. al cerrar, promover el siguiente dependency-valid y evaluarlo en la misma corrida;
+6. con `CLOSURE_CHAIN_SAME_RUN=TRUE`, encadenar cierres mientras sea seguro hasta recuperar el SLA o encontrar blocker externo causal exacto.
 
-## 9. REVIEW_FIRST y handoff
+`DIRECT_NEXT_SAFE_PREARM_REQUIRED=TRUE` significa prearmar lectura/plan/scope del próximo trabajo seguro sin escribirlo prematuramente. No requiere Jules ni manifest.
 
-Al terminal Jules:
+## 7. Recovery sin espera administrativa
 
-1. marcar inmediatamente `VALIDANDO/READY_FOR_VAEP` o `VALIDANDO/RECOVERY_REQUIRED` según evidencia; nunca enviar el defecto a una cola terminal de rechazados;
-2. liberar inmediatamente la lane Jules;
-3. si existe NEXT_SAFE material, dependency-valid, no solapado y prearmado, despacharlo **antes de esperar REVIEW/CI/rollup**; `MAX_VOLUNTARY_IDLE=0` prevalece sobre espera administrativa;
-4. VAEP/ChatGPT o la tarea activa que detectó el terminal inicia REVIEW_FIRST del artifact/base/diff/scope/tests/self-review/riesgos en paralelo detrás de producción;
-5. PASS => integrar solo delta aprobado sobre HEAD vigente + CI causal;
-6. REQUIRED en ATTEMPT1 => si la corrección puede ejecutarla el controller sin reimplementar, corregir directamente; si requiere rework material, crear un único R2 para el mismo Jules o cualquier Jules libre/compatible, heredando `taskAttempt=2`;
-7. REQUIRED en ATTEMPT2 => takeover directo obligatorio de la tarea que lo detectó; corregir + probar + REVIEW_FIRST + integrar/certificar same-run; el Jules permanece en otro scope seguro, nunca esperando el takeover;
-8. al completar recovery, desbloquear inmediatamente dependencias y despachar scopes recién elegibles; no esperar el siguiente :00/:05/:12/:17/:24/:29/:36/:41/:48/:53;
-9. PASS de REVIEW_FIRST no basta para productividad: la integración funcional debe publicarse en un commit exclusivo de un solo dispatch (`ONE_INTEGRATION_COMMIT_ONE_DISPATCH=TRUE`) y ese commit debe llevar este receipt inmutable:
-   - `VAEP-Dispatch: <dispatchId>`
-   - `VAEP-Task: <taskId>`
-   - `VAEP-Worker: J1|J2|J3|J4|J5|J6`
-   - `VAEP-Session: sessions/<id>`
-   - `VAEP-Task-Attempt: 1|2`
-   - `VAEP-Dispatch-Manifest: <ruta exacta del manifest>`
-   - `VAEP-Patch-SHA256: <sha256 real del patch revisado>`
-   - `VAEP-Patch-Base: <primaryBaseHead del manifest>`
-   - `VAEP-Review: ACCEPTED`
-   - `VAEP-Review-Evidence: <artifact/tests/review verificable>`
-   - `VAEP-Scope-Decision: PASS`
-   - `VAEP-Reviewed-Files: <lista ; separada exactamente igual al diff del commit>`
-   - `VAEP-Tests: <evidencia real o NOT_APPLICABLE:<razón>>`
-   - `VAEP-P0: 0`
-   - `VAEP-P1: 0`
-   - `VAEP-Integrated: TRUE`
-   - `VAEP-Integration-Branch: Desarrollo`
-10. `scripts/vaep/jules_integration_metrics.py` valida el receipt contra el manifest y el diff real. Receipt inválido => CI failure y **NO CUENTA**. Receipt válido => emite `VAEP_METRIC stage=REVIEW_ACCEPTED` y `VAEP_METRIC stage=INTEGRATED`.
-11. KPI canónico: solamente `INTEGRATED` validado cuenta como productividad Jules. `TRIGGERED`, `MANIFEST_ACCEPTED`, `SESSION_CREATED`, `SESSION_COMPLETED`, `PATCH_PRESENT` y `SELF_REVIEW_COMPLETE` son etapas diagnósticas, nunca throughput final.
+Regla: `DEFECT_RECOVERY_FIRST + FIRST_DETECTOR_OWNS_RECOVERY + NO_REJECT_QUEUE`.
 
-`REVIEW_FIRST` significa que todo resultado terminal entra primero a revisión de VAEP; **no** significa que el Jules deba esperar a que esa revisión termine ni que el defecto pueda permanecer pendiente. La revisión es el mecanismo para decidir integración/corrección, no una cola administrativa.
+Para defectos internos accionables:
 
-Mantener `QUEUE_DEPTH_TARGET>=2` por Jules cuando exista roadmap seguro: una tarea autoritativa actual + al menos una NEXT_SAFE física prearmada en COLA con agente, scope exclusivo, dependencia real y estado canónico.
+- la tarea que detecta el defecto lo resuelve same-run si puede;
+- un defecto reparable no se estaciona como `REJECTED`, `BLOQUEADO`, `HANDOFF_ONLY` o similar;
+- si el defecto proviene de Jules ATTEMPT1: preferir direct fix del controller; si realmente conviene rework material Jules, se permite exactamente un R2, conservando `taskId` y `taskAttempt=2`;
+- R2 puede ir al mismo Jules u otro compatible;
+- ATTEMPT2 defectuoso obliga takeover directo del controller/tarea detectora;
+- R3 está prohibido;
+- después del recovery, desbloquear dependencias y continuar el camino de cierre en la misma corrida.
 
-- **PREARM_BEFORE_TERMINAL obligatorio**: no esperar a que una lane quede libre para crear NEXT_SAFE. Si el worker tiene CURRENT válido y existe trabajo material seguro posterior, debe existir también un NEXT_SAFE físico ya materializado/reservable antes del terminal. Objetivo operativo por lane: `CURRENT_RUN + NEXT_SAFE_PREARMED`. Al terminalizar CURRENT, el siguiente run debe poder arrancar sin esperar otro checkpoint.
-- Si no existe NEXT_SAFE material seguro, registrar explícitamente `NO_SAFE_NEXT`; está prohibido simular cola con busywork/evidence-only redundante.
-- Los checkpoints deben reparar cualquier lane con `CURRENT` pero sin `NEXT_SAFE_PREARMED` cuando exista backlog elegible, incluso si CURRENT sigue `IN_PROGRESS`.
+Un timeout Jules revoca ownership Jules, marca su resultado tardío como superseded/evidence-only y **nunca impide que la ejecución directa continúe**.
 
-Dos auto-revisiones independientes son obligatorias antes de COMPLETED válido.
+Sólo un blocker externo causal realmente irresoluble con las herramientas/autorización actuales puede persistir como `BLOQUEADO`.
 
-## 10. Watchdog
+## 8. Git, concurrencia, CI y seguridad
 
-- >5m sin sesión + actividad útil: STALLED/BOOTSTRAP_STALLED.
-- >=10m sin progreso: recovery o reassign sin duplicar ownership.
-- Terminal sin review: drenar inmediatamente.
-- R2 agotado: takeover directo obligatorio; no dejarlo pendiente.
-- Al exceder `JULES_LANE_BUDGET_SECONDS`, el runtime intenta una señal de detención remota únicamente mediante una operación Jules ya soportada; no inventa endpoints ni depende de detener físicamente la sesión para continuar.
-- Un timeout revoca ownership local, marca la sesión `STALLED/SUPERSEDED`, libera la lane y entrega control a QA_TAKEOVER/NEXT_SAFE.
-- Todo resultado tardío de una sesión `SUPERSEDED` es evidencia histórica únicamente y queda bloqueado de integración automática.
-- La evidencia de timeout/supersession debe conservar `MASTER_COMMIT_SHA` y `AUTOMATION_POLICY_HASH` junto con worker/dispatch/task/attempt/session y estados antes/después.
-- No dejar lane esperando review/CI si existe NEXT_SAFE material.
-- Si una lane terminal queda libre y existe NEXT_SAFE, el refill debe ocurrir en la misma corrida que detecta el terminal; esperar al siguiente checkpoint es incumplimiento de continuidad.
-- Antes de CADA manifest Jules, releer HEAD y usar ese SHA exacto como `primaryBaseHead`; después de publicar un manifest, releer HEAD antes de construir el siguiente. Nunca reutilizar el mismo base para varias lanes cuando cada manifest mueve Desarrollo. Si Jules devuelve un descendiente posterior, solo puede aceptarse mediante `CONTROL_PLANE_BASE_EQUIVALENCE` con evidencia GitHub de que la deriva fue exclusivamente control-plane; esa excepción no autoriza a ignorar cambios funcionales ni a reutilizar manifests.
-- Un fallo de transporte pre-session por `primaryBaseHead`/ruta/trigger no consume content attempt: recuperar la MISMA tarea con un manifest nuevo sobre el parent inmediato y verificar que aparezca run correlacionado.
-- Si el watchdog o cualquier tarea activa detecta una entrega defectuosa de cualquier J1–J6, `FIRST_DETECTOR_OWNS_RECOVERY` aplica aunque el scope pertenezca originalmente a otra lane.
+- Sólo rama `Desarrollo`.
+- `main` congelada.
+- PR #2 `Desarrollo -> main` debe permanecer OPEN + DRAFT, sin merge ni auto-merge.
+- No crear ramas nuevas para VAEP salvo autorización futura explícita.
+- Prohibidos force-push, reset destructivo, amend de historia compartida y revert que destruya trabajo concurrente.
+- No Producción, secretos, credenciales, dominios, certificados, datos productivos, deploys ni infraestructura productiva.
+- Revalidar HEAD antes de publicar; preservar cambios concurrentes.
 
-## 11. CI y cierre
+### CI causal
 
-- Proteger causalidad de Development/Acceptance/Fase8/M13/Recovery cuando apliquen.
-- `HEAD_FREEZE_CAUSAL` existe únicamente cuando el HEAD funcional/integración que VAEP está certificando tiene al menos un gate crítico causal en estado `queued` o `in_progress`; es un hold local de publicación para la tarea/lane relacionada y **no modifica la admisión global `OPEN`**.
-- Un workflow legacy de otro módulo, un gate global no relacionado, Vercel/deploy no aplicable, CI de otro HEAD o CI disparado únicamente por `vaep/**`/manifests/control-plane **no** constituye hold causal y no puede dejar lanes Jules voluntariamente idle.
-- Aplicar `CONTROL_PLANE_HEAD_EQUIVALENCE` a commits manifest/control-plane: conservar como `FUNCTIONAL_HEAD` el último HEAD funcional/integración y permitir handoffs Jules mientras no se invalide evidencia causal crítica.
-- No mover HEAD con un manifest si invalidaría evidencia causal crítica activa del `FUNCTIONAL_HEAD`.
-- Con `NO_MANIFEST_DURING_HEAD_FREEZE_CAUSAL=TRUE`, cualquier intento de dispatch que requiera commit durante el hold causal se mantiene PREARMED/WAITING_CAUSAL_GATE y NO se publica hasta que el gate crítico quede terminal. Esto evita HEAD churn y cancelaciones de CI, sin cambiar el admission global de `OPEN`.
-- Durante un hold causal real, ejecutar trabajo compatible y drenar REVIEW_FIRST/QA_TAKEOVER; al quedar terminal el gate, recalcular el hold desde cero y publicar inmediatamente el NEXT_SAFE pendiente si sigue siendo válido.
-- Fallo causal interno se corrige; ruido externo o fallo no causal se registra pero no se convierte en blocker falso ni serializa el CURRENT_PARENT.
-- Cierre requiere DoD real, gates/CI aplicables terminales y P0/P1=0.
-- Estado de cierre es monotónico: una tarea/padre con evidencia canónica `LISTO`/`LISTO_REAL` no puede volver a `EN_PROGRESO`/`PENDIENTE` por una fila stale. Si COLA contradice BITACORA/GitHub/certificación fresca, reconciliar COLA; reabrir solo con evidencia nueva explícita de defecto causal que invalide el cierre.
+`HEAD_FREEZE_CAUSAL` existe sólo cuando un gate crítico aplicable al functional/exact head está `queued`/`in_progress`. Un workflow legacy/no relacionado, deploy/Vercel no aplicable o CI de puro control-plane no congela la fábrica.
 
-## 12. Diez tareas de automatización activas
+Durante un hold causal:
+
+- no mover el functional head de la unidad afectada con manifest/control-plane si invalida la evidencia;
+- sí ejecutar QA, review, prearm y scopes compatibles;
+- al terminalizar el gate, recalcular desde cero y continuar inmediatamente.
+
+Fallo causal interno se corrige; ruido externo/no causal se registra sin crear blocker falso.
+
+## 9. Las diez tareas activas
 
 ```text
-PRIMARIAS:
-:00 PRIMARY / DAILY THROUGHPUT
-:12 RECOVERY / CLOSURE
-:24 REVIEW / CERT / CLOSE
-:36 WATCHDOG / CLOSURE
-:48 DEBT CORRECTOR
+PRIMARIAS / BUILDER-CLOSER
+:00  VAEP :00 Primary
+:12  VAEP :12 Recovery
+:24  VAEP :24 Review
+:36  VAEP :36 Watchdog
+:48  VAEP :48 Debt
 
-SUPERVISORAS:
-:05 SUPERVISA :00
-:17 SUPERVISA :12
-:29 SUPERVISA :24
-:41 SUPERVISA :36
-:53 SUPERVISA :48
+SUPERVISORAS / VERIFIER-RECOVERY-SECONDARY-BUILDER
+:05  Tarea Supervisión :00
+:17  Tarea Supervisión :12
+:29  Tarea Supervisión :24
+:41  Tarea Supervisión :36
+:53  Tarea Supervisión :48
 ```
 
-Estas son las diez ventanas programadas activas. Las supervisoras no son lanes Jules ni duplican el checkpoint primario: verifican materialmente la corrida anterior y, si encuentran cualquier deuda de J1–J6, aplican `FIRST_DETECTOR_OWNS_RECOVERY` aunque la deuda pertenezca a otro worker o a otra fase del parent.
+Orden mínimo de **cualquiera** de las diez:
 
-Todas consumen **este MAESTRO**. Ninguna mantiene reglas por etiqueta numérica.
+1. releer MAESTRO, HEAD/FUNCTIONAL_HEAD, CURRENT_PARENT, `ROLLING60/DEFICIT`, Sheet fresco, leases y deuda terminal;
+2. reconciliar lease: respetar owner fresco o adquirir/tomar scope stale;
+3. cerrar de inmediato parent ya certificable;
+4. si falta trabajo material, ejecutar directamente el gap más corto al cierre;
+5. probar y hacer REVIEW_FIRST; corregir same-run lo corregible;
+6. resolver recovery accionable antes de terminar;
+7. integrar sólo delta aprobado sobre HEAD vigente y verificar gates causales;
+8. certificar `LISTO_REAL` sólo con evidencia completa;
+9. promover/evaluar siguiente parent y aplicar chain same-run si corresponde;
+10. prearmar NEXT_SAFE directo;
+11. sólo después evaluar si un offload Jules independiente reduce camino crítico;
+12. sincronizar CONFIG/COLA/WORKERS/BITACORA y liberar/actualizar lease con readback;
+13. registrar PROOF_OF_RUN material por `AUTOMATION_ID`.
 
-Orden mínimo obligatorio de CUALQUIERA de las diez tareas:
-1. preflight mínimo: HEAD/FUNCTIONAL_HEAD/CURRENT_PARENT + `ROLLING60/DEFICIT` + estado J1/J2/J3/J4/J5/J6 + deuda terminal global;
-2. buscar primero `RECOVERY_REQUIRED`/terminal no certificado de cualquier Jules. Si existe, la tarea actual adquiere ownership y lo resuelve según ATTEMPT1/R2/takeover antes de terminar;
-3. dentro de `LANE_REFILL_DEADLINE_SECONDS`, ejecutar **LANE_REFILL_HARD_FIRST** para toda lane libre con SAFE_WORK, salvo que la recuperación causal actual desbloquee trabajo dependiente de mayor prioridad;
-4. si `ROLLING60<3`, ejecutar **CLOSURE_DEBT_FASTPATH**: drenar terminales/REVIEW_FIRST/QA_TAKEOVER del camino crítico y cerrar CURRENT_PARENT inmediatamente si ya es certificable;
-5. mantener **LANE_REFILL_CONTINUITY** J1–J6 usando runs/sesiones y NEXT_SAFE físicas; verificar transporte/run de cada dispatch sin retrasar un cierre certificable;
-6. después de cada recovery exitoso, desbloquear y despachar inmediatamente los scopes dependency-valid que dependían de esa tarea;
-7. después de cada `LISTO_REAL`, promover y evaluar el siguiente parent en la misma corrida; encadenar cierres hasta recuperar `ROLLING60>=3` o documentar blocker externo causal exacto;
-8. persistir BITACORA/Sheet con recovery owner, taskId, attempt, origen/destino Jules si hubo work-stealing, acción ejecutada, evidencia, dependientes desbloqueados, `ROLLING60`, déficit y siguiente objetivo.
+Una lane Jules libre ya **no obliga dispatch**. Una automatización directa con trabajo material seguro sí debe ejecutarlo o documentar blocker externo exacto.
 
-Una corrida con una tarea Jules defectuosa accionable no puede terminar en status-only, handoff-only, review-only ni `REVIEW_EXECUTOR_NOT_CONFIGURED` si la propia tarea tiene acceso para corregirla. Una corrida con lane libre + NEXT_SAFE segura tampoco puede terminar sin dispatch. Una tarea `ATTEMPT2` defectuosa obliga takeover directo same-run; jamás R3.
+## 10. Telemetría y Sheet
 
-## 13. Cambio del MAESTRO
+Fuentes de estado:
 
-Cuando Javier cambie una regla:
+- `CONFIG`, `COLA`, `WORKERS`: estado operativo.
+- `TAREAS_PROGRAMADAS`: identidad/cadencia/última ejecución observada de primarias.
+- `TAREAS_DE_SUPERVISION`: identidad/cadencia/última supervisión material.
+- `BITACORA`: evidencia cronológica, no autoridad.
+- `CONTROL_TOWER` y `DASHBOARD`: vistas derivadas; **no sobrescribir fórmulas con snapshots**.
 
-1. editar `docs/VAEP_AUTHORITY.md`;
-2. actualizar únicamente referencias técnicas necesarias para seguir apuntando al MAESTRO;
-3. sincronizar CONFIG/EJECUCION_MANUAL si cambia el estado declarativo;
-4. no crear otro protocolo, documento o script numerado;
-5. Git/CHANGELOG registran historia sin convertirse en autoridad.
+Relojes separados:
 
-**Regla absoluta: una sola fuente operativa, un solo MAESTRO, sin selección por etiquetas numéricas.**
+- `LAST_SCHEDULER_TRIGGER`: sólo scheduler/runtime verificado.
+- `LAST_MATERIAL_ACTION`: última acción material comprobada.
+- `LAST_TELEMETRY_SYNC`: última reconciliación externa confirmada.
+- `LAST_SUPERVISION_AT`: supervisión material, no mera consulta de runtime.
 
-## Certificaciones cerradas — no reapertura automática
+`state_sync.py` es verificador/generador; no prueba por sí solo que Sheets fue escrito. Toda escritura externa requiere readback. Si falla, registrar `SYNC_PENDING/FAILED`; nunca declarar `SYNCED` sin confirmación.
 
-- Fase 8 y M13 son certificaciones cerradas. No pueden dispararse por `push`, `pull_request`, timers, autorefill, commits de Jules ni cambios ordinarios en Desarrollo.
-- Su única vía de reejecución es `workflow_dispatch` con autorización explícita del propietario y el token textual `AUTORIZADO_REABRIR`.
-- Ejecutar nuevamente una certificación cerrada sin esa autorización se considera incidente de control-plane, no avance.
+Los datos Jules en `WORKERS` son auxiliares. `J1..J6` pueden figurar `AVAILABLE_ON_DEMAND` sin que ello sea déficit. ACTIVE_REAL Jules exige la correlación definida en §5.
 
+## 11. Dedupe e identidad
 
-## Reconciliación de estado y telemetría
+La identidad útil es `CURRENT_PARENT + semantic/material facet`, no número correlativo, filename, dispatchId, automation slot ni sessionId.
 
-- CONFIG/COLA/WORKERS son fuentes de estado del Sheet; CONTROL_TOWER y DASHBOARD
-  son vistas derivadas mediante fórmulas. No sobrescribir sus fórmulas con snapshots.
-- Tras una promoción Git y antes de terminar cualquiera de las diez tareas, leer
-  HEAD, catálogo, receipt y Sheet frescos. Aplicar en un único batch de Sheets los
-  cambios de CONFIG, filas COLA afectadas y WORKERS. Conservar cierres certificados;
-  no inferir cierre por orden alfabético, estado de workflow o campo de catálogo solo.
-- Generar y comprobar el estado con `scripts/vaep/state_sync.py`. Este programa es
-  un verificador/generador local, no un cliente autenticado de Sheets. El controller
-  aplica el batch mediante su conexión Drive ya autorizada y verifica el readback.
-- Un commit Git no confirma sincronización externa. Si falta acceso o falla el
-  batch, registrar SYNC_PENDING/FAILED con SHA y causa; nunca declarar SYNCED.
-  No cerrar admisión global ni redisparar tareas por deuda de sincronización.
-- Releer HEAD y las celdas destino inmediatamente antes del batch. Si cambiaron,
-  reconstruir desde las fuentes frescas; después del batch releer ambos. Un avance
-  concurrente exige nueva reconciliación, nunca escribir de nuevo el snapshot viejo.
-  Google Sheets no ofrece CAS por celda en este flujo: el readback detecta carreras,
-  no las convierte en una transacción distribuida con GitHub.
-- CURRENT_HEAD identifica el SHA observado. LAST_SYNC es la hora UTC del batch
-  confirmado. LAST_EXECUTION_AT viene sólo del scheduler/runtime y no se actualiza
-  al editar la fila. LAST_SUPERVISION_AT es una supervisión material evidenciada,
-  no la mera consulta de last_run_time. UNKNOWN no se reemplaza por NOW().
-- TAREAS_PROGRAMADAS mantiene identidad, cadencia y objetivos. La columna F es
-  última ejecución del scheduler (no implica éxito); J/K son parent/head de la
-  observación sincronizada; L indica fuente y límites. La telemetría separada de
-  sync/supervisión se mantiene por AUTOMATION_ID en sus columnas adicionales.
-- WORKERS conserva sourceParent/sourceHead/observedAt y evidencia correlacionada.
-  Estado de un parent anterior se marca STALE__NOT_ACTIVE_REAL y no asigna ownership.
-- ALEX: autorización, última ejecución observada y estado material verificado son
-  campos distintos. Un run antiguo exitoso no constituye runtime vigente ni prueba
-  periodicidad de cinco minutos. Sólo documentar triggers verificados.
+- Renombrar/recontar no crea trabajo nuevo.
+- Una faceta ya completada e integrada no se redistribuye como producción nueva.
+- Un transport superseded antes de contenido útil puede recuperarse sin consumir content attempt.
+- Ningún planner puede reciclar facetas agotadas para llenar capacidad.
+- Si no existe trabajo paralelo seguro, emitir `NO_SAFE_PARALLEL_WORK`; no fabricar filler.
+
+## 12. Componentes auxiliares
+
+- ChatGPT/VAEP y Chat B: full-access controller/QA dentro de `Desarrollo`; pueden desarrollar, corregir, probar, integrar y certificar bajo este MAESTRO.
+- ALEX: planner/control-plane auxiliar; propone scopes y paralelismo, no obliga utilización Jules, no certifica LISTO_REAL.
+- Vibe: QA/corrector externo sólo por delegación.
+- AntiG/Antigravity: `RESERVED_INACTIVE`; sin scheduler/handoff/certificación hasta autorización explícita futura.
+- Codex: fuera del flujo operativo salvo orden explícita.
+
+## 13. Cambio de regla y compatibilidad histórica
+
+Toda modificación futura de regla debe:
+
+1. editar este mismo archivo;
+2. actualizar únicamente espejos técnicos/estado que dependan de la regla;
+3. neutralizar prompts/configuración operativa incompatible;
+4. conservar evidencia histórica inmutable sin permitir que se ejecute;
+5. no crear otra fuente de autoridad.
+
+**Regla final:** las diez tareas programadas producen y cierran directamente. Jules acelera sólo cuando conviene. Ningún componente auxiliar puede convertirse otra vez en requisito implícito para que VAEP avance.
