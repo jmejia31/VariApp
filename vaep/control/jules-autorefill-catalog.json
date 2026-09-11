@@ -1,9 +1,9 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
-  "currentParent": "N6.2.F",
-  "generatedAt": "2026-09-11T04:28:00Z",
-  "regenerationReason": "SUPERVISION_24__FIRST_DETECTOR_OWNS_RECOVERY__PREARM_N6.2.G_AFTER_PRIMARY_RECONCILE__NO_FILLER",
-  "lastClosedParent": "N6.2.E",
+  "currentParent": "N6.2.G",
+  "generatedAt": "2026-09-11T05:25:00Z",
+  "regenerationReason": "SUPERVISION_12__CLOSE_N6.2.F__PROMOTE_N6.2.G__PREARM_N6.2.H__NO_FILLER",
+  "lastClosedParent": "N6.2.F",
   "closureReceipts": {
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
     "N5.1.H": "vaep/evidence/fragments/N5.1.H_LISTO_REAL_20260909T1236Z.json",
@@ -35,7 +35,8 @@
     "N6.2.B": "vaep/evidence/fragments/N6.2.B_LISTO_REAL_20260910T2327Z.json",
     "N6.2.C": "vaep/evidence/fragments/N6.2.C_LISTO_REAL_20260911T0223Z.json",
     "N6.2.D": "vaep/evidence/fragments/N6.2.D_LISTO_REAL_20260911T0308Z.json",
-    "N6.2.E": "vaep/evidence/fragments/N6.2.E_LISTO_REAL_20260911T0402Z.json"
+    "N6.2.E": "vaep/evidence/fragments/N6.2.E_LISTO_REAL_20260911T0402Z.json",
+    "N6.2.F": "vaep/evidence/fragments/N6.2.F_LISTO_REAL_20260911T0524Z.json"
   },
   "policy": {
     "branch": "Desarrollo",
@@ -53,20 +54,20 @@
   },
   "throughputPlan": {
     "mode": "PARENT_CLOSE_FIRST",
-    "currentParent": "N6.2.F",
+    "currentParent": "N6.2.G",
     "currentParentMaterialScopeCount": 1,
-    "currentParentReason": "N6.2.E is certified LISTO_REAL after REVIEW_FIRST PASS with P0/P1=0 and exact descendant causal gates SUCCESS. N6.2.F security/audit is dependency-valid and has one immutable J5 ATTEMPT1 dispatch. ACTIVE_REAL remains false until dispatch->workflow->Jules session correlation is verified.",
-    "nextParent": "N6.2.G",
+    "currentParentReason": "N6.2.F is certified LISTO_REAL after controller REVIEW_FIRST PASS, P0/P1=0 and terminal causal exact-head gates. N6.2.G QA/regression/CI is now dependency-valid and prepared for one J5 ATTEMPT1 dispatch; ACTIVE_REAL remains false until manifest->workflow->sessionId plus useful fresh activity is verified.",
+    "nextParent": "N6.2.H",
     "nextParentParallelMaterialScopes": 1,
     "nextParentScopesNonOverlapping": true,
-    "currentRun": "N6-2-F-1-TENANT-AWARE-DATA-MODEL-SEC-AUDIT-J5-A1",
+    "currentRun": "N6-2-G-1-TENANT-AWARE-DATA-MODEL-QA-REGRESSION-CI-J5-A1",
     "nextRunReserved": null,
-    "laneRefill": "N6.2.F_J5_A1_IN_PROGRESS__N6.2.G_PREARMED_DEPENDENCY_GATED__NO_FILLER__NO_DUPLICATE"
+    "laneRefill": "N6.2.G_J5_A1_DISPATCH_PREPARED__N6.2.H_PREARMED_DEPENDENCY_GATED__NO_FILLER__NO_DUPLICATE"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
     "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
-    "sourceRanges": ["COLA!A464:Z478", "PLAN_MAESTRO!A60:M68"],
+    "sourceRanges": ["COLA!A464:Z479", "PLAN_MAESTRO!A60:M68"],
     "nodes": [
       {"id":"GATE-N5","order":857,"dependencies":["N5.1.H","N5.2.H","N5.3.H","N5.4.H","N5.5.H","N5.6.H","N5.7.H","N5.8.H","N5.9.H"]},
       {"id":"N6.1.A","order":524,"dependencies":["GATE-N5"]},
@@ -83,7 +84,8 @@
       {"id":"N6.2.D","order":535,"dependencies":["N6.2.C"]},
       {"id":"N6.2.E","order":536,"dependencies":["N6.2.D"]},
       {"id":"N6.2.F","order":537,"dependencies":["N6.2.E"]},
-      {"id":"N6.2.G","order":538,"dependencies":["N6.2.F"]}
+      {"id":"N6.2.G","order":538,"dependencies":["N6.2.F"]},
+      {"id":"N6.2.H","order":539,"dependencies":["N6.2.G"]}
     ]
   },
   "recoveredRuns": [
@@ -101,11 +103,12 @@
     {"parent":"N6.2.C","state":"LISTO_REAL","dependency":"N6.2.B_LISTO_REAL","materialization":"TENANT_AWARE_DATA_MODEL_PERSISTENCE__CONTROLLER_RECOVERY__REVIEW_FIRST_PASS__EXACT_GATES_PASS","taskId":"N6.2.C.1.TENANT_AWARE_DATA_MODEL_PERSISTENCE","worker":"CHATGPT_VAEP","runId":34546666164,"dispatchId":"N6-2-C-1-TENANT-AWARE-DATA-MODEL-PERSISTENCE-J2-A1-TX2","functionalHead":"f60c4ea3d9ad157f8cc1a5d06f3f86f3f1642086","reviewCommit":"a717ded0a6df15001ebeb92f65ecb278cca02243","closureReceipt":"vaep/evidence/fragments/N6.2.C_LISTO_REAL_20260911T0223Z.json"},
     {"parent":"N6.2.D","state":"LISTO_REAL","dependency":"N6.2.C_LISTO_REAL","materialization":"TENANT_AWARE_DATA_MODEL_APPLICATION_API__CONTROLLER_REVIEW_FIRST_PASS__EXACT_GATES_PASS","taskId":"N6.2.D.1.TENANT_AWARE_DATA_MODEL_APPLICATION_API","worker":"CHATGPT_VAEP","dispatchId":"N6-2-D-1-TENANT-AWARE-DATA-MODEL-APPLICATION-API-J2-A1","taskAttempt":1,"functionalHead":"04fc4be1c4ca0c240b8111aba317b3524f70a272","reviewReceipt":"vaep/evidence/reviews/N6.2.D_CONTROLLER_REVIEW_FIRST_20260911T0244Z.json","closureReceipt":"vaep/evidence/fragments/N6.2.D_LISTO_REAL_20260911T0308Z.json"},
     {"parent":"N6.2.E","state":"LISTO_REAL","dependency":"N6.2.D_LISTO_REAL","materialization":"TENANT_AWARE_DATA_MODEL_FRONTEND_UX__CONTROLLER_DIRECT_FIX__REVIEW_FIRST_PASS__EXACT_DESCENDANT_GATES_PASS","taskId":"N6.2.E.1.TENANT_AWARE_DATA_MODEL_FRONTEND_UX","worker":"CHATGPT_VAEP","functionalHead":"014b8504dc3ac6ee9c4fe90ab56b0159929f7f3c","reviewReceipt":"vaep/evidence/reviews/N6.2.E_CONTROLLER_REVIEW_FIRST_20260911T0334Z.json","closureReceipt":"vaep/evidence/fragments/N6.2.E_LISTO_REAL_20260911T0402Z.json"},
-    {"parent":"N6.2.F","taskId":"N6.2.F.1.TENANT_AWARE_DATA_MODEL_SEC_AUDIT","state":"CURRENT_DISPATCHED_AWAITING_ACTIVE_REAL_CORRELATION","dependency":"N6.2.E_LISTO_REAL","materialization":"TENANT_AWARE_DATA_MODEL_SEC_AUDIT__J5_ATTEMPT1__NO_FILLER","worker":"J5","dispatchId":"N6-2-F-1-TENANT-AWARE-DATA-MODEL-SEC-AUDIT-J5-A1","taskAttempt":1,"primaryBaseHead":"6c4bac3ab1b90130880f8c94c3c08946ed223dec","dispatchCommit":"75ccfcf48c30dd4df6f60d4e4573a97dabe11409","activeReal":false},
-    {"parent":"N6.2.G","taskId":"N6.2.G.1.TENANT_AWARE_DATA_MODEL_QA_REGRESSION_CI","state":"READY_DEPENDENCY_GATED","dependency":"N6.2.F_LISTO_REAL","materialization":"TENANT_AWARE_DATA_MODEL_QA_REGRESSION_CI__ROADMAP_DERIVED__NO_FILLER"}
+    {"parent":"N6.2.F","taskId":"N6.2.F.1.TENANT_AWARE_DATA_MODEL_SEC_AUDIT","state":"LISTO_REAL","dependency":"N6.2.E_LISTO_REAL","materialization":"TENANT_AWARE_DATA_MODEL_SEC_AUDIT__CONTROLLER_REVIEW_FIRST_PASS__P0_P1_ZERO__EXACT_HEAD_GATES_PASS","worker":"CHATGPT_VAEP","dispatchId":"N6-2-F-1-TENANT-AWARE-DATA-MODEL-SEC-AUDIT-J5-A1","taskAttempt":1,"functionalHead":"a46b98c0b6e25f96bf8c2d0863678e849e441ff1","reviewReceipt":"vaep/evidence/reviews/N6.2.F_CONTROLLER_REVIEW_FIRST_20260911T0452Z.json","closureReceipt":"vaep/evidence/fragments/N6.2.F_LISTO_REAL_20260911T0524Z.json"},
+    {"parent":"N6.2.G","taskId":"N6.2.G.1.TENANT_AWARE_DATA_MODEL_QA_REGRESSION_CI","state":"CURRENT_DISPATCHED_AWAITING_ACTIVE_REAL_CORRELATION","dependency":"N6.2.F_LISTO_REAL","materialization":"TENANT_AWARE_DATA_MODEL_QA_REGRESSION_CI__J5_ATTEMPT1__NO_FILLER","worker":"J5","dispatchId":"N6-2-G-1-TENANT-AWARE-DATA-MODEL-QA-REGRESSION-CI-J5-A1","taskAttempt":1,"activeReal":false},
+    {"parent":"N6.2.H","taskId":"N6.2.H.1.TENANT_AWARE_DATA_MODEL_DOCUMENTATION_CERTIFICATION","state":"READY_DEPENDENCY_GATED","dependency":"N6.2.G_LISTO_REAL","materialization":"TENANT_AWARE_DATA_MODEL_DOCUMENTATION_CERTIFICATION__ROADMAP_DERIVED__NO_FILLER"}
   ],
   "lanes": {"J1":[],"J2":[],"J3":[],"J4":[],"J5":[],"J6":[]},
-  "rolling60CertifiedParents": ["N6.2.C","N6.2.D","N6.2.E"],
-  "rolling60Count": 3,
-  "lastClosureFunctionalHead": "014b8504dc3ac6ee9c4fe90ab56b0159929f7f3c"
+  "rolling60CertifiedParents": ["N6.2.F"],
+  "rolling60Count": 1,
+  "lastClosureFunctionalHead": "a46b98c0b6e25f96bf8c2d0863678e849e441ff1"
 }
