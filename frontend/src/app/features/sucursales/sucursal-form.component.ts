@@ -171,6 +171,7 @@ export class SucursalFormComponent implements OnInit {
           zonaHoraria: sucursal.zonaHoraria
         });
         this.form.enable();
+        if (this.empresasError()) this.form.controls.empresaId.disable();
         if (!sucursal.empresaId) {
           this.form.controls.empresaId.markAsTouched();
           this.errorMessage.set('Esta sucursal proviene del rollout legado y todavía no tiene una empresa propietaria válida. Selecciona un Empresa ID antes de guardar.');
