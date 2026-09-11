@@ -1,4 +1,5 @@
 using InventoryApp.Application.Interfaces;
+using InventoryApp.Domain.Entities;
 using InventoryApp.Domain.Security;
 using InventoryApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -20,11 +21,11 @@ public sealed class ContextoTenantService : IContextoTenantService
         _currentUser = currentUser;
     }
 
-    public async Task<ContextoTenantActual?> ResolverAsync(
-        int empresaId,
+    public async Task<ContextoTenantActual?> ResolverActualAsync(
+        int empresaIdSolicitada,
         CancellationToken cancellationToken = default)
     {
-        if (empresaId <= 0 || !_currentUser.EstaAutenticado || !_currentUser.UsuarioId.HasValue)
+        if (empresaIdSolicitada <= 0 || !_currentUser.EstaAutenticado || !_currentUser.UsuarioId.HasValue)
             return null;
 
         var usuarioId = _currentUser.UsuarioId.Value;
@@ -37,16 +38,18 @@ public sealed class ContextoTenantService : IContextoTenantService
         if (!usuarioValido)
             return null;
 
-        var empresaValida = await _db.Empresas
+        var empresaValida = await _db.Set<Empresa>()
             .AsNoTracking()
-            .AnyAsync(e => e.Id == empresaId && e.Activa, cancellationToken);
+            .AnyAsync(e => e.Id == empresaIdSolicitada && e.Activa, cancellationToken);
         if (!empresaValida)
             return null;
 
         var membresia = await _db.UsuarioEmpresas
             .AsNoTracking()
             .SingleOrDefaultAsync(
-                m => m.UsuarioId == usuarioId && m.EmpresaId == empresaId && m.Activa,
+                m => m.UsuarioId == usuarioId &&
+                     m.EmpresaId == empresaIdSolicitada &&
+                     m.Activa,
                 cancellationToken);
         if (membresia is null)
             return null;
@@ -59,6 +62,6 @@ public sealed class ContextoTenantService : IContextoTenantService
         if (!rolValido)
             return null;
 
-        return ContextoTenantActual.DesdeMembresia(membresia, usuarioId, empresaId);
+        return ContextoTenantActual.DesdeMembresia(membresia, usuarioId, empresaIdSolicitada);
     }
 }
