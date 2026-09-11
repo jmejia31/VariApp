@@ -9,6 +9,8 @@ public sealed class CheckoutTiendaItemRequestDto
 {
     public int ProductoId { get; set; }
     public int? ModeloId { get; set; }
+    public string? ModeloNombre { get; set; }
+    public string? MarcaNombre { get; set; }
     public int Unidades { get; set; }
 }
 
