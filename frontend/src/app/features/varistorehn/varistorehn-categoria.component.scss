@@ -4,7 +4,7 @@
 
 .storefront {
   min-height: 100vh;
-  background: var(--color-background);
+  background: var(--color-bg);
   color: var(--color-text);
 }
 
@@ -55,7 +55,7 @@ main {
 .footer-grid p,
 .footer-grid span,
 .breadcrumbs {
-  color: var(--color-text-secondary);
+  color: var(--color-text-muted);
 }
 
 .segmented {
@@ -63,7 +63,7 @@ main {
   padding: 4px;
   border: 1px solid var(--color-border);
   border-radius: 999px;
-  background: color-mix(in srgb, var(--color-surface) 85%, var(--color-background));
+  background: color-mix(in srgb, var(--color-surface) 85%, var(--color-bg));
 }
 
 .segmented button,
@@ -187,7 +187,7 @@ h2 {
   border-radius: var(--radius-lg, 20px);
   background: linear-gradient(145deg,
     color-mix(in srgb, var(--color-primary) 10%, var(--color-surface)),
-    color-mix(in srgb, var(--color-primary) 4%, var(--color-background)));
+    color-mix(in srgb, var(--color-primary) 4%, var(--color-bg)));
 }
 
 .category-art app-store-art {
@@ -274,7 +274,7 @@ h2 {
 .footer-bottom {
   padding: 14px 0 24px;
   border-top: 1px solid var(--color-border);
-  color: var(--color-text-secondary);
+  color: var(--color-text-muted);
 }
 
 .sr-only {
