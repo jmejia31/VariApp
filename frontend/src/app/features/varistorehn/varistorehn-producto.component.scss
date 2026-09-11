@@ -11,9 +11,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 h1,h2,h3,p{margin:0}h1,h2,h3{color:var(--color-heading)}
 
 .preview-panel{margin-top:20px;padding:13px 16px;display:flex;align-items:center;gap:14px;border:1px dashed color-mix(in srgb,var(--color-primary) 45%,var(--store-line));border-radius:var(--radius);background:var(--color-surface)}
-.preview-copy{margin-right:auto;display:flex;align-items:center;gap:10px}.preview-copy app-store-icon{color:var(--color-primary);font-size:1.3rem}.preview-copy strong,.preview-copy small{display:block}.preview-copy strong{font-size:.76rem}.preview-copy small{margin-top:2px;color:var(--color-text-muted);font-size:.64rem}
+.preview-copy{margin-right:auto;display:flex;align-items:center;gap:10px}
 .segmented{display:flex;gap:3px;padding:3px;border-radius:calc(var(--radius)*.7);background:var(--color-bg)}.segmented button{min-height:44px;padding:8px 12px;border:0;border-radius:calc(var(--radius)*.55);background:transparent;font-size:.69rem}.segmented .active{background:var(--color-button);color:var(--color-on-primary)}
-.demo-note{margin-top:8px;color:var(--color-text-muted);font-size:.69rem;line-height:1.6}
 
 .product-page{min-height:62vh;padding:26px 0 80px}.breadcrumbs{min-height:44px;margin-bottom:19px;display:flex;align-items:center;flex-wrap:wrap;gap:8px;color:var(--color-text-muted);font-size:.69rem}.breadcrumbs a{min-height:44px;display:inline-flex;align-items:center}.breadcrumbs a:hover{color:var(--color-primary);text-decoration:underline}
 .product-layout,.loading-layout{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(360px,.88fr);gap:clamp(26px,4vw,58px);align-items:start}
