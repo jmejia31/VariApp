@@ -132,8 +132,10 @@ public sealed class ReportesVentasContractTests
     {
         await using var context = CreateContext();
         var venta = Confirmada("V-001", 7, 30m);
-        var sucursal1 = new Sucursal { Id = 1, Codigo = "S-1", Nombre = "Sucursal 1" };
-        var sucursal2 = new Sucursal { Id = 2, Codigo = "S-2", Nombre = "Sucursal 2" };
+        var empresa1 = new Empresa("Empresa 1") { Id = 1 };
+        var empresa2 = new Empresa("Empresa 2") { Id = 2 };
+        var sucursal1 = new Sucursal { Id = 1, EmpresaId = empresa1.Id, Codigo = "S-1", Nombre = "Sucursal 1" };
+        var sucursal2 = new Sucursal { Id = 2, EmpresaId = empresa2.Id, Codigo = "S-2", Nombre = "Sucursal 2" };
         var almacen1 = new Almacen
         {
             Id = 11,
@@ -152,7 +154,7 @@ public sealed class ReportesVentasContractTests
         };
         var producto1 = new Producto { Id = 101, Nombre = "Producto 1", Marca = "Marca 1", Modelo = "Modelo 1" };
         var producto2 = new Producto { Id = 202, Nombre = "Producto 2", Marca = "Marca 2", Modelo = "Modelo 2" };
-        context.AddRange(venta, sucursal1, sucursal2, almacen1, almacen2, producto1, producto2);
+        context.AddRange(venta, empresa1, empresa2, sucursal1, sucursal2, almacen1, almacen2, producto1, producto2);
         await context.SaveChangesAsync();
 
         context.VentaDetalles.AddRange(
