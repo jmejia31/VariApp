@@ -102,12 +102,17 @@ for (const forbidden of [
   'pagarConTarjeta()',
   'crearCheckoutTarjeta(',
   'urlCheckoutSegura',
-  'referenciasCarrito(this.carrito'
+  'referenciasCarrito(this.carrito',
+  "'/varistorehn/checkout'",
+  '"/varistorehn/checkout"',
+  "'/varistorehn/pedido/",
+  '"/varistorehn/pedido/'
 ]) {
-  expect(!homeTs.includes(forbidden), `El home no debe conservar lógica de carrito/checkout legada: ${forbidden}.`);
+  expect(!homeTs.includes(forbidden), `El home no debe conservar lógica/rutas de carrito o checkout legadas: ${forbidden}.`);
 }
 expect(!homeHtml.includes('#carritoDialog') && !homeHtml.includes('class="cart-dialog"'), 'El DOM del home no debe contener el drawer de carrito legado.');
 expect(!homeHtml.includes('Continuar con tarjeta') && !homeHtml.includes('Pedir por WhatsApp'), 'El home no debe ejecutar el cierre del carrito; esa responsabilidad queda fuera de Fase 5.');
+expect(!homeHtml.includes('Fase 6'), 'La UI pública del home no debe exponer lenguaje interno del roadmap.');
 for (const selector of ['.cart-dialog', '.cart-panel', '.cart-items', '.cart-item', '.cart-footer', '.checkout-preview', '.detail-layout', '.detail-media', '.detail-body']) {
   expect(!homeScss.includes(selector) && !homeResponsiveScss.includes(selector), `El home no debe conservar CSS legado ${selector}.`);
 }
