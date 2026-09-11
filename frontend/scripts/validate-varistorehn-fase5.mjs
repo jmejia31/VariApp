@@ -95,7 +95,7 @@ for (const required of [
   'Subtotal',
   'Total del carrito',
   'carrito.total()',
-  '[min]="1"',
+  'min="1"',
   '[max]="item.stock"',
   '[disabled]="item.unidades <= 1"',
   '[disabled]="item.unidades >= item.stock"',
