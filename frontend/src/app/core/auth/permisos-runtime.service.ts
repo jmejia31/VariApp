@@ -42,16 +42,16 @@ export class PermisosRuntimeService {
   ) {}
 
   cargar() {
-    if (!this.tenantContext.tieneContextoVerificado()) {
+    const empresaId = this.tenantContext.empresaIdVerificada();
+    if (!empresaId) {
       this.limpiar();
       return of(false);
     }
 
-    return this.permisoService.getMisPermisos().pipe(
+    return this.permisoService.getMisPermisos(empresaId).pipe(
       map((res) => {
-        // Si el contexto fue revocado/cambiado durante la petición, no aceptar
-        // permisos obtenidos para una sesión sin tenant efectivo.
-        if (!this.tenantContext.tieneContextoVerificado()) {
+        // No aceptar una respuesta si el tenant cambió mientras la petición estaba en vuelo.
+        if (this.tenantContext.empresaIdVerificada() !== empresaId) {
           this.limpiar();
           return false;
         }
