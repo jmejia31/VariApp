@@ -59,7 +59,7 @@ public class UsuariosEmpresaAuthorizationContractTests
     }
 
     [Fact]
-    public void CambiarEstadoEmpresa_DebeExigirPermisoActivar_CuandoActivaEsTrue()
+    public async Task CambiarEstadoEmpresa_DebeExigirPermisoActivar_CuandoActivaEsTrue()
     {
         var usuarioService = new Mock<IUsuarioService>();
         var permisoService = new Mock<IPermisoService>();
@@ -70,8 +70,7 @@ public class UsuariosEmpresaAuthorizationContractTests
 
         var controller = new UsuariosController(usuarioService.Object, permisoService.Object, currentUser.Object);
 
-        var result = controller.CambiarEstadoEmpresa(7, 11, new UpdateUsuarioEmpresaEstadoDto { Activa = true });
-        result.GetAwaiter().GetResult();
+        await controller.CambiarEstadoEmpresa(7, 11, new UpdateUsuarioEmpresaEstadoDto { Activa = true });
 
         permisoService.Verify(
             service => service.VerificarPermisoAsync(ModuloSistema.Usuarios, AccionPermiso.Activar),
@@ -80,7 +79,7 @@ public class UsuariosEmpresaAuthorizationContractTests
     }
 
     [Fact]
-    public void CambiarEstadoEmpresa_DebeExigirPermisoDesactivar_CuandoActivaEsFalse()
+    public async Task CambiarEstadoEmpresa_DebeExigirPermisoDesactivar_CuandoActivaEsFalse()
     {
         var usuarioService = new Mock<IUsuarioService>();
         var permisoService = new Mock<IPermisoService>();
@@ -91,8 +90,7 @@ public class UsuariosEmpresaAuthorizationContractTests
 
         var controller = new UsuariosController(usuarioService.Object, permisoService.Object, currentUser.Object);
 
-        var result = controller.CambiarEstadoEmpresa(7, 11, new UpdateUsuarioEmpresaEstadoDto { Activa = false });
-        result.GetAwaiter().GetResult();
+        await controller.CambiarEstadoEmpresa(7, 11, new UpdateUsuarioEmpresaEstadoDto { Activa = false });
 
         permisoService.Verify(
             service => service.VerificarPermisoAsync(ModuloSistema.Usuarios, AccionPermiso.Desactivar),
