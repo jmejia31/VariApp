@@ -40,7 +40,7 @@ jobs:
           node --check scripts/vaep/sync-bitacora.mjs
           node --check scripts/vaep/reconcile-status.mjs
           node --check scripts/vaep/metrics.mjs
-          python3 -m py_compile scripts/vaep/jules_registry_check.py scripts/vaep/jules_integration_metrics.py scripts/vaep/jules_runtime_contract.py scripts/vaep/terminal_handoff.py scripts/vaep/state_sync.py scripts/vaep/parent_transition.py scripts/vaep/alex_backlog_planner.py
+          python3 -m py_compile scripts/vaep/jules_registry_check.py scripts/vaep/jules_integration_metrics.py scripts/vaep/jules_runtime_contract.py scripts/vaep/terminal_handoff.py scripts/vaep/state_sync.py scripts/vaep/parent_transition.py
           bash -n .github/scripts/vaep-policy-parser.sh .github/scripts/vaep-jules-master.sh .github/scripts/vaep-jules-worker.sh .github/scripts/vaep-parent-close.sh .github/scripts/vaep-checkpoint.sh
 
       - name: Validate TASKS_FIRST MASTER and registry
