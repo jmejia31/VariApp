@@ -4145,6 +4145,7 @@ namespace InventoryApp.Infrastructure.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<int>("VecesAccedido")
+                        .IsConcurrencyToken()
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -7914,9 +7915,9 @@ namespace InventoryApp.Infrastructure.Migrations
 
                     b.Property<string>("CodigoActivoUnico")
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasMaxLength(40)
-                        .HasColumnType("varchar(40)")
-                        .HasComputedColumnSql("IF(Eliminado = 0, UPPER(TRIM(Codigo)), NULL)", true);
+                        .HasMaxLength(64)
+                        .HasColumnType("varchar(64)")
+                        .HasComputedColumnSql("IF(Eliminado = 0, CONCAT(IF(EmpresaId IS NULL, 'LEGACY', CONCAT('E:', EmpresaId)), ':', UPPER(TRIM(Codigo))), NULL)", true);
 
                     b.Property<string>("Correo")
                         .HasMaxLength(254)
@@ -8697,6 +8698,63 @@ namespace InventoryApp.Infrastructure.Migrations
                     b.ToTable("Usuarios", (string)null);
                 });
 
+            modelBuilder.Entity("InventoryApp.Domain.Entities.UsuarioEmpresa", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Activa")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("ActualizadoPorNombreUsuario")
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)");
+
+                    b.Property<int?>("ActualizadoPorUsuarioId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CreadoPorNombreUsuario")
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)");
+
+                    b.Property<int?>("CreadoPorUsuarioId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("EmpresaId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("FechaActualizacion")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("RolId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RolId")
+                        .HasDatabaseName("IX_UsuarioEmpresas_RolId");
+
+                    b.HasIndex("EmpresaId", "Activa")
+                        .HasDatabaseName("IX_UsuarioEmpresas_EmpresaId_Activa");
+
+                    b.HasIndex("UsuarioId", "EmpresaId")
+                        .IsUnique()
+                        .HasDatabaseName("UX_UsuarioEmpresas_UsuarioId_EmpresaId");
+
+                    b.ToTable("UsuarioEmpresas", (string)null);
+                });
+
             modelBuilder.Entity("InventoryApp.Domain.Entities.VariacionCostoEstandarInventario", b =>
                 {
                     b.Property<int>("Id")
@@ -9238,7 +9296,8 @@ namespace InventoryApp.Infrastructure.Migrations
                     b.HasOne("InventoryApp.Domain.Entities.Bancos.CuentaBancaria", "CuentaBancaria")
                         .WithMany()
                         .HasForeignKey("CuentaBancariaId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("CuentaBancaria");
                 });
@@ -10779,6 +10838,14 @@ namespace InventoryApp.Infrastructure.Migrations
                     b.Navigation("SolicitudCompra");
                 });
 
+            modelBuilder.Entity("InventoryApp.Domain.Entities.Sucursal", b =>
+                {
+                    b.HasOne("InventoryApp.Domain.Entities.Empresa", null)
+                        .WithMany()
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
             modelBuilder.Entity("InventoryApp.Domain.Entities.ThreeWayMatchResult", b =>
                 {
                     b.HasOne("InventoryApp.Domain.Entities.OrdenCompra", null)
@@ -10940,6 +11007,27 @@ namespace InventoryApp.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("RolEntidad");
+                });
+
+            modelBuilder.Entity("InventoryApp.Domain.Entities.UsuarioEmpresa", b =>
+                {
+                    b.HasOne("InventoryApp.Domain.Entities.Empresa", null)
+                        .WithMany()
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("InventoryApp.Domain.Entities.Rol", null)
+                        .WithMany()
+                        .HasForeignKey("RolId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("InventoryApp.Domain.Entities.Usuario", null)
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("InventoryApp.Domain.Entities.VariacionCostoEstandarInventario", b =>
@@ -11268,15 +11356,6 @@ namespace InventoryApp.Infrastructure.Migrations
 
                     b.Navigation("ImpuestosAplicados");
                 });
-            modelBuilder.Entity("InventoryApp.Domain.Entities.Sucursal", b =>
-                {
-                    b.HasOne("InventoryApp.Domain.Entities.Empresa", null)
-                        .WithMany()
-                        .HasForeignKey("EmpresaId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-                });
-
 #pragma warning restore 612, 618
         }
     }
