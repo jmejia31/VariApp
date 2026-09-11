@@ -46,7 +46,7 @@ export class SucursalFormComponent implements OnInit {
   private sucursalId: number | null = null;
 
   readonly form = this.fb.group({
-    empresaId: this.fb.control<number | null>(null, [Validators.min(1)]),
+    empresaId: this.fb.control<number | null>(null, [Validators.required, Validators.min(1)]),
     codigo: ['', [Validators.required, Validators.maxLength(40)]],
     nombre: ['', [Validators.required, Validators.maxLength(150)]],
     direccion: ['', [Validators.maxLength(500)]],
@@ -85,8 +85,15 @@ export class SucursalFormComponent implements OnInit {
     this.errorMessage.set(null);
 
     const raw = this.form.getRawValue();
+    const empresaId = Number(raw.empresaId);
+    if (!Number.isInteger(empresaId) || empresaId <= 0) {
+      this.saving.set(false);
+      this.form.controls.empresaId.setErrors({ tenantOwnerRequired: true });
+      return;
+    }
+
     const value: SucursalFormValue = {
-      empresaId: raw.empresaId && raw.empresaId > 0 ? raw.empresaId : null,
+      empresaId,
       codigo: raw.codigo?.trim() ?? '',
       nombre: raw.nombre?.trim() ?? '',
       direccion: this.opcional(raw.direccion),
@@ -129,6 +136,10 @@ export class SucursalFormComponent implements OnInit {
           zonaHoraria: sucursal.zonaHoraria
         });
         this.form.enable();
+        if (!sucursal.empresaId) {
+          this.form.controls.empresaId.markAsTouched();
+          this.errorMessage.set('Esta sucursal proviene del rollout legado y todavía no tiene una empresa propietaria válida. Selecciona un Empresa ID antes de guardar.');
+        }
         this.loading.set(false);
       },
       error: (err) => {
