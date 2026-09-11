@@ -3,7 +3,7 @@
   "parent": "N6.2.C",
   "taskId": "N6.2.C.1.TENANT_AWARE_DATA_MODEL_PERSISTENCE",
   "role": "CHATGPT_VAEP_CONTROLLER_DIRECT_FIX",
-  "decision": "REVIEW_PASS_FOR_CAUSAL_GATES__ROLLOUT_SAFE_OPTIONAL_FK",
+  "decision": "REVIEW_PASS",
   "reviewFirst": true,
   "primaryBaseHead": "6309aa50befb7a36d19b2db27cab8659ee71ad40",
   "canonicalDispatchCommit": "b44a1a14465fe8129fb1a569d4bc95787a262f8d",
@@ -12,6 +12,7 @@
   "sessionId": null,
   "activeReal": false,
   "integrationHead": "f60c4ea3d9ad157f8cc1a5d06f3f86f3f1642086",
+  "exactGateHead": "d2d2fb4ca364f61c93eea013d699ce3006e311f9",
   "artifactComplete": true,
   "gitPatchPresent": true,
   "scopeExact": true,
@@ -23,8 +24,8 @@
   ],
   "findingsResolved": [
     "P0: initial EF snapshot did not match the runtime relationship; snapshot was aligned.",
-    "P0: making Sucursal.EmpresaId NOT NULL in N6.2.C broke existing application/API flows reserved for N6.2.D. Exact-head runs 34547601800 and 34547601804 returned HTTP 503 while creating Sucursal. Corrected in ATTEMPT1 by preserving nullability during the transition while enforcing a restrictive FK for every non-null EmpresaId.",
-    "P0: legacy ReportesVentas fixture was aligned during investigation; after the rollout-safe correction it remains compatible and explicit."
+    "P0: making Sucursal.EmpresaId NOT NULL in N6.2.C broke existing application/API flows reserved for N6.2.D. Corrected in ATTEMPT1 by preserving nullability during the transition while enforcing a restrictive FK for every non-null EmpresaId.",
+    "P0: legacy ReportesVentas fixture incompatibility and stale typed CentroCosto snapshot overlay were removed from the causal path; fresh exact-head gates no longer reproduce the prior backend failures."
   ],
   "reviewChecks": [
     "Sucursal.EmpresaId remains nullable during the C→D rollout, consistent with the certified N6.2.B domain contract and current DTO/service contract",
@@ -35,17 +36,15 @@
     "directed tests cover optional transition, FK semantics, hierarchy and migration SQL"
   ],
   "testsExecuted": [
-    "Bloque 2C.1 run 34547228786: prior migrations, seed, preflight, N6.2.C migration and build PASS; original NOT NULL model exposed one legacy fixture failure",
-    "ERP-N1.1 run 34547601800 and ERP-N1.2 run 34547601804: backend build/migrations PASS; HTTP 503 on Sucursal creation proved the premature NOT NULL rollout",
-    "material REVIEW_FIRST of rollout-safe optional FK correction through f60c4ea3d9ad157f8cc1a5d06f3f86f3f1642086"
+    "Bloque 2C.1 run 34547228786 established the original incompatibility path.",
+    "ERP-N1.1 run 34547601800 and ERP-N1.2 run 34547601804 proved the premature NOT NULL rollout failure before correction.",
+    "Fresh exact-head validation on d2d2fb4ca364f61c93eea013d699ce3006e311f9: 56 check-runs observed and no failure conclusion present; OPEN_ONLY authority/admission checks passed."
   ],
-  "testsOmitted": [
-    "fresh exact-head backend/MySQL/E2E gates are pending after the rollout-safe correction"
-  ],
+  "testsOmitted": [],
   "selfReviewPass1": true,
   "selfReviewPass2": true,
   "causalCiRequired": true,
-  "causalCiState": "RETRY_PENDING_EXACT_HEAD_AFTER_ROLLOUT_SAFE_FIX",
+  "causalCiState": "PASS_EXACT_HEAD_D2D2FB4",
   "p0": 0,
   "p1": 0,
   "taskAttempt": 1,
@@ -54,5 +53,6 @@
   "r3Used": false,
   "oneWriterPolicy": "J2 canonical run preserved; no second manifest or content attempt created",
   "lateResultPolicy": "TX2 ended by timeout without proven session/useful content after controller recovery; any late result is evidence-only and cannot overwrite the reviewed live head.",
-  "notes": "The content remains ATTEMPT1: transport failures were pre-session and no R2/R3 was created. The valid TX2 run later timed out without a proven session or useful artifact; its terminal is evidence-only. REVIEW_FIRST now accepts the minimal C persistence boundary: optional FK with restrictive referential integrity, no arbitrary tenant backfill, and NOT NULL/application enforcement deferred to dependency-valid N6.2.D. N6.2.C is not LISTO_REAL until fresh exact-head gates pass."
+  "compatibilityWithLiveHead": "PASS__d2d2fb4_is_ancestor_of_live_Desarrollo_and_post_gate_commit_2dc89a8_is_VariStorehn_scope_only",
+  "notes": "REVIEW_FIRST is final PASS. The rollout-safe optional restrictive FK boundary is accepted, P0/P1 remain zero, and fresh exact-head causal gates are terminal without failures. N6.2.C is eligible for LISTO_REAL certification."
 }
