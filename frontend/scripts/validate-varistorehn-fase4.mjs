@@ -105,11 +105,11 @@ expect(productsHtml.includes('producto.precioOferta'), 'El catálogo debe poder 
 expect(catalog.includes('export function precioVenta'), 'Debe existir una regla única de precio efectivo para detalle y carrito.');
 expect(catalog.includes('precio: precioVenta(producto, modelo)'), 'El carrito debe capturar el precio efectivo centralizado, no un precio divergente.');
 
-expect(productScss.includes('object-fit: contain'), 'Las imágenes deben preservar proporción con object-fit: contain.');
-expect(productScss.includes('touch-action: pan-y'), 'La galería móvil debe permitir swipe horizontal sin romper el scroll vertical.');
+expect(/object-fit\s*:\s*contain/.test(productScss), 'Las imágenes deben preservar proporción con object-fit: contain.');
+expect(/touch-action\s*:\s*pan-y/.test(productScss), 'La galería móvil debe permitir swipe horizontal sin romper el scroll vertical.');
 expect(productScss.includes('env(safe-area-inset-bottom)'), 'El CTA móvil fijo debe respetar el safe area inferior.');
 expect(productScss.includes('.mobile-buy-bar'), 'Debe existir el CTA móvil fijo de compra.');
-expect(productScss.includes('min-height: 44px') || productScss.includes('height: 44px'), 'Los controles principales deben conservar objetivos táctiles de al menos 44px.');
+expect(/(?:min-)?height\s*:\s*44px/.test(productScss), 'Los controles principales deben conservar objetivos táctiles de al menos 44px.');
 expect(productScss.includes('var(--color-bg)') && productScss.includes('var(--color-surface)') && productScss.includes('var(--color-primary)'), 'El detalle debe heredar los tokens canónicos del tema.');
 expect(!/#[0-9a-f]{3,8}\b/i.test(productScss), 'Fase 4 no debe introducir colores hexadecimales paralelos al tema.');
 expect(!/\brgb(?:a)?\s*\(/i.test(productScss), 'Fase 4 no debe introducir colores RGB paralelos al tema.');
