@@ -164,6 +164,7 @@ def build_runtime(
         }
 
     lane_rows: dict[str, dict[str, Any]] = {}
+    lane_demand: dict[str, dict[str, Any]] = {}
     generation_requests: list[dict[str, Any]] = []
     starved: list[str] = []
     low_programmed: list[str] = []
@@ -204,34 +205,6 @@ def build_runtime(
         if is_low_programmed:
             low_programmed.append(worker)
 
-        if is_starved or is_low_programmed:
-            requested = max(programmed_deficit, eligible_deficit)
-            request_candidates = candidates[: max(1, min(requested, len(candidates)))] if candidates else []
-            generation_requests.append(
-                {
-                    "workerId": worker,
-                    "action": "MATERIALIZE_ROADMAP_DERIVED_SCOPES",
-                    "programmedDeficit": programmed_deficit,
-                    "eligibleDeficit": eligible_deficit,
-                    "requestedMaterialScopes": requested,
-                    "currentParent": current_parent,
-                    "nextParent": next_parent,
-                    "admissionState": admission_state,
-                    "materializationOnly": admission_state != "OPEN",
-                    "candidateParents": request_candidates,
-                    "roadmapSourceRanges": source_ranges,
-                    "requiresRoadmapExpansion": requested > len(request_candidates),
-                    "constraints": [
-                        "MATERIAL_ONLY",
-                        "SEMANTIC_DEDUPE",
-                        "DEPENDENCY_GATES",
-                        "DISTINCT_WRITE_SCOPE",
-                        "FUTURE_PARENT_NOT_DISPATCH_ELIGIBLE",
-                        "NO_BUSYWORK",
-                    ],
-                }
-            )
-
         lane_rows[worker] = {
             "programmedUnused": programmed_unused,
             "programmedTarget": programmed_target,
@@ -249,6 +222,69 @@ def build_runtime(
                 else "BACKLOG_HEALTHY"
             ),
         }
+        lane_demand[worker] = {
+            "programmedDeficit": programmed_deficit,
+            "eligibleDeficit": eligible_deficit,
+            "needsGeneration": is_starved or is_low_programmed,
+        }
+
+    # Allocate roadmap candidates globally, not once per lane. Reusing the same
+    # parent candidate across several workers creates duplicate materialization
+    # pressure and cannot increase real parallelism. Prefer dependency-ready
+    # candidates, keep gated candidates as materialization-only planning input,
+    # and leave unmet demand explicit instead of manufacturing filler.
+    candidate_pool = sorted(
+        candidates,
+        key=lambda item: (0 if item.get("dependencyState") == "READY" else 1, int(item.get("order", 10**9))),
+    )
+    candidate_cursor = 0
+    allocated_parent_ids: set[str] = set()
+    total_requested = 0
+    total_allocated = 0
+
+    for worker in CANONICAL_LANES:
+        demand = lane_demand[worker]
+        if not demand["needsGeneration"]:
+            continue
+        requested = max(int(demand["programmedDeficit"]), int(demand["eligibleDeficit"]))
+        total_requested += requested
+        request_candidates: list[dict[str, Any]] = []
+        while candidate_cursor < len(candidate_pool) and len(request_candidates) < requested:
+            candidate = candidate_pool[candidate_cursor]
+            candidate_cursor += 1
+            parent_id = str(candidate.get("parentId") or "")
+            if not parent_id or parent_id in allocated_parent_ids:
+                continue
+            allocated_parent_ids.add(parent_id)
+            request_candidates.append(candidate)
+        total_allocated += len(request_candidates)
+        generation_requests.append(
+            {
+                "workerId": worker,
+                "action": "MATERIALIZE_ROADMAP_DERIVED_SCOPES",
+                "programmedDeficit": demand["programmedDeficit"],
+                "eligibleDeficit": demand["eligibleDeficit"],
+                "requestedMaterialScopes": requested,
+                "allocatedDistinctCandidates": len(request_candidates),
+                "unallocatedMaterialDemand": max(requested - len(request_candidates), 0),
+                "currentParent": current_parent,
+                "nextParent": next_parent,
+                "admissionState": admission_state,
+                "materializationOnly": admission_state != "OPEN",
+                "candidateParents": request_candidates,
+                "roadmapSourceRanges": source_ranges,
+                "requiresRoadmapExpansion": requested > len(request_candidates),
+                "constraints": [
+                    "MATERIAL_ONLY",
+                    "SEMANTIC_DEDUPE",
+                    "GLOBAL_DISTINCT_PARENT_ALLOCATION",
+                    "DEPENDENCY_GATES",
+                    "DISTINCT_WRITE_SCOPE",
+                    "FUTURE_PARENT_NOT_DISPATCH_ELIGIBLE",
+                    "NO_BUSYWORK",
+                ],
+            }
+        )
 
     a25 = capability_rows.get("A25")
     if a25 is not None:
@@ -257,6 +293,7 @@ def build_runtime(
         a25["lowProgrammedLanes"] = low_programmed
         a25["semanticDedupe"] = "TASK_IDENTITY_UNIQUE_NO_BUSYWORK"
         a25["generationRequestCount"] = len(generation_requests)
+        a25["distinctRoadmapCandidateCount"] = total_allocated
 
     return {
         "authority": "docs/VAEP_AUTHORITY.md",
@@ -282,6 +319,10 @@ def build_runtime(
             "lowProgrammedLaneCount": len(low_programmed),
             "lowProgrammedLanes": low_programmed,
             "generationRequestCount": len(generation_requests),
+            "distinctRoadmapCandidateCount": total_allocated,
+            "requestedMaterialScopeCount": total_requested,
+            "unallocatedMaterialDemand": max(total_requested - total_allocated, 0),
+            "candidateReusePrevented": True,
             "wakePolicy": "EVENT_DRIVEN_PUSH_AND_WORKFLOW_RUN",
             "watchdogCadence": "NO_INDEPENDENT_5_MINUTE_TIMER",
             "deepRefillMode": "ROADMAP_GENERATION_REQUESTS_AVAILABLE__NOT_ACTIVE_REAL",
