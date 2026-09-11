@@ -77,8 +77,6 @@ test.describe('VariStoreHn Fase 1 — navegación y header', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'Mi carrito', exact: true })).toBeVisible();
     await expect(page.locator('.cart-item')).toContainText('Laptop Pro 14');
 
-    // Volvemos de forma determinista para que la prueba de búsqueda/scroll no compita
-    // con la restauración asíncrona de scroll del historial del navegador.
     await page.goto('/varistorehn');
     await esperarCatalogo(page);
 
@@ -90,8 +88,10 @@ test.describe('VariStoreHn Fase 1 — navegación y header', () => {
     await expect(page.locator('article.product-card')).toContainText('Audífonos Wireless Studio');
 
     await search.press('Enter');
-    const catalogTop = await page.locator('#catalogo').evaluate(element => element.getBoundingClientRect().top);
-    expect(catalogTop).toBeLessThan(220);
+    await expect.poll(
+      () => page.locator('#catalogo').evaluate(element => element.getBoundingClientRect().top),
+      { message: 'El buscador debe desplazar el catálogo a la zona visible.' }
+    ).toBeLessThan(220);
 
     await search.fill('');
     await expect(page.getByRole('status').filter({ hasText: '14 productos encontrados' })).toBeVisible();
