@@ -11,7 +11,7 @@
   "canonicalJobId": 103100674308,
   "sessionId": null,
   "activeReal": false,
-  "integrationHead": "fe8be74001f53f9da0b9459983c1f7ae006ce917",
+  "integrationHead": "73fe8caff47248a8235beb51fe8026bd4ed5c513",
   "artifactComplete": true,
   "gitPatchPresent": true,
   "scopeExact": true,
@@ -22,7 +22,8 @@
     "backend/tests/InventoryApp.Tests/TenantAwareDataModelPersistenceTests.cs"
   ],
   "findingsResolved": [
-    "P0: EF model snapshot was stale: Sucursal.EmpresaId remained nullable and the Empresa FK was absent. Corrected directly in ATTEMPT1 at fe8be74001f53f9da0b9459983c1f7ae006ce917."
+    "P0: EF model snapshot was stale: Sucursal.EmpresaId remained nullable and the Empresa FK was absent. Corrected directly in ATTEMPT1 at fe8be74001f53f9da0b9459983c1f7ae006ce917.",
+    "P0: exact-head migration gate run 34547228786 exposed a legacy ReportesVentas fixture without the newly required Empresa principal/EmpresaId. Corrected directly in ATTEMPT1 at 73fe8caff47248a8235beb51fe8026bd4ed5c513."
   ],
   "reviewChecks": [
     "Sucursal.EmpresaId is required in runtime EF mapping and snapshot",
@@ -33,15 +34,16 @@
     "directed tests cover mapping, hierarchy and migration SQL"
   ],
   "testsExecuted": [
-    "material code/diff review against Desarrollo HEAD fe8be74001f53f9da0b9459983c1f7ae006ce917"
+    "material code/diff review against Desarrollo",
+    "Bloque 2C.1 run 34547228786: prior migrations, seed scenarios, preflight and N6.2.C migration PASS; build PASS; 1964/1965 tests PASS; sole causal fixture failure identified and fixed"
   ],
   "testsOmitted": [
-    "exact-head backend/MySQL causal workflows are pending after this review commit"
+    "fresh exact-head backend/MySQL causal workflow reruns are pending after the fixture correction"
   ],
   "selfReviewPass1": true,
   "selfReviewPass2": true,
   "causalCiRequired": true,
-  "causalCiState": "PENDING_EXACT_HEAD",
+  "causalCiState": "RETRY_PENDING_EXACT_HEAD_AFTER_DIRECT_FIX",
   "p0": 0,
   "p1": 0,
   "taskAttempt": 1,
@@ -50,5 +52,5 @@
   "r3Used": false,
   "oneWriterPolicy": "J2 canonical run preserved; no second manifest or content attempt created",
   "lateResultPolicy": "Any overlapping Jules result requires independent REVIEW_FIRST against the live functional head; no automatic overwrite.",
-  "notes": "Two pre-session envelopes failed transport only and did not consume content ATTEMPT1. TX2 passed transport preflight and J2 reservation but has no proven sessionId/useful activity. Controller review found and repaired the EF snapshot gap before causal gates; N6.2.C is not LISTO_REAL until exact-head gates pass."
+  "notes": "Two pre-session envelopes failed transport only and did not consume content ATTEMPT1. TX2 passed transport preflight and J2 reservation but has no proven sessionId/useful activity. REVIEW_FIRST repaired the EF snapshot gap, then absorbed the sole causal legacy-fixture failure from run 34547228786. N6.2.C is not LISTO_REAL until fresh exact-head gates pass."
 }
