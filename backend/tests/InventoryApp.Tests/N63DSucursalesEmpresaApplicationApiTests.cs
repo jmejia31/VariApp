@@ -12,9 +12,12 @@ public sealed class N63DSucursalesEmpresaApplicationApiTests
 {
     private static SucursalService CreateService(Mock<ISucursalRepository> repository, Mock<IEmpresaRepository>? empresas = null)
     {
-        empresas ??= new Mock<IEmpresaRepository>();
-        empresas.Setup(x => x.GetByIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((int id, CancellationToken _) => new Empresa($"Empresa {id}") { Id = id });
+        if (empresas is null)
+        {
+            empresas = new Mock<IEmpresaRepository>();
+            empresas.Setup(x => x.GetByIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync((int id, CancellationToken _) => new Empresa($"Empresa {id}") { Id = id });
+        }
         var currentUser = new Mock<ICurrentUserService>();
         currentUser.Setup(x => x.UsuarioId).Returns(11);
         currentUser.Setup(x => x.NombreUsuario).Returns("n63d-controller");
