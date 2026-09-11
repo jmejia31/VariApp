@@ -5,6 +5,7 @@ const ADMIN_USERNAME = process.env['PHASE7_ADMIN_USERNAME'] ?? 'e2e_admin';
 const ADMIN_PASSWORD = process.env['PHASE7_ADMIN_PASSWORD'] ?? 'E2E.Admin#2026!';
 
 let adminToken = '';
+let empresaId = 0;
 let sucursalId = 0;
 let almacenId = 0;
 const suffix = `${Date.now()}`;
@@ -53,17 +54,31 @@ async function auditoriaDe(
   return await dataOf(response);
 }
 
+async function crearEmpresa(request: APIRequestContext): Promise<number> {
+  const response = await request.post(`${API_URL}/empresas`, {
+    headers: authHeaders(adminToken),
+    data: { nombre: `Empresa E2E Almacenes ${suffix}` }
+  });
+  expect(response.status(), await response.text()).toBe(201);
+  const empresa = await dataOf(response);
+  expect(empresa?.id).toBeGreaterThan(0);
+  return empresa.id;
+}
+
 async function crearSucursal(request: APIRequestContext): Promise<number> {
   const response = await request.post(`${API_URL}/sucursales`, {
     headers: authHeaders(adminToken),
     data: {
+      empresaId,
       codigo: sucursalCodigo,
       nombre: `Sucursal N1.2 ${suffix}`,
       zonaHoraria: 'America/Tegucigalpa'
     }
   });
   expect(response.status(), await response.text()).toBe(201);
-  return (await dataOf(response)).id;
+  const sucursal = await dataOf(response);
+  expect(sucursal?.empresaId).toBe(empresaId);
+  return sucursal.id;
 }
 
 test.describe('ERP-N1.2 — Almacenes', () => {
@@ -71,6 +86,7 @@ test.describe('ERP-N1.2 — Almacenes', () => {
 
   test.beforeAll(async ({ request }) => {
     adminToken = await loginApi(request);
+    empresaId = await crearEmpresa(request);
     sucursalId = await crearSucursal(request);
   });
 
