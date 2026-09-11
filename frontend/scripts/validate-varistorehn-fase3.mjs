@@ -40,7 +40,6 @@ const productsRouteLine = appRoutes.split('\n').find(line => line.includes("path
 expect(Boolean(productsRouteLine), 'Debe existir la ruta pública /varistorehn/productos.');
 expect(productsRouteLine.includes('VaristorehnProductosComponent'), 'La ruta /varistorehn/productos debe cargar su componente público independiente.');
 expect(!productsRouteLine.includes('authGuard') && !productsRouteLine.includes('permisoGuard'), 'La ruta pública de productos no debe usar guards administrativos.');
-expect(!appRoutes.includes("path: 'varistorehn/producto/:slug'"), 'Fase 3 no debe activar todavía la ruta de detalle asignada a Fase 4.');
 
 expect(paths.includes("productos: '/varistorehn/productos'"), 'El mapa canónico debe conservar VARISTOREHN_PATHS.productos.');
 expect(models.includes('export interface ProductoTienda'), 'Fase 3 debe usar ProductoTienda como modelo visual canónico.');
@@ -50,6 +49,7 @@ expect(service.includes('expand(datos => datos.page < datos.totalPages'), 'La fr
 expect(catalog.includes('export function filtrarProductos'), 'Los filtros deben reutilizar la regla pura canónica.');
 expect(catalog.includes('export function referenciasCarrito'), 'La persistencia debe conservar el formato canónico de referencias.');
 expect(catalog.includes('export function restaurarCarrito'), 'El carrito debe restaurarse contra catálogo/precio/stock actuales.');
+expect(catalog.includes('export function precioVenta'), 'Catálogo, detalle y carrito deben compartir la regla de precio efectivo cuando existe una oferta válida.');
 
 for (const required of [
   'ProductoTienda',
@@ -74,7 +74,7 @@ expect(productsTs.includes('cargarCatalogo(): void'), 'La acción de reintento d
 expect(!productsTs.includes('private cargarCatalogo(): void'), 'El template no debe depender de un método privado.');
 expect(!productsTs.includes('ProductosListComponent'), 'El catálogo público no debe reutilizar el CRUD administrativo de productos.');
 expect(!productsTs.includes('authGuard') && !productsTs.includes('permisoGuard'), 'El componente público no debe depender de guards administrativos.');
-expect(!productsTs.includes('obtenerProductoPorSlug('), 'Fase 3 no debe adelantar la carga del detalle de Fase 4.');
+expect(!productsTs.includes('obtenerProductoPorSlug('), 'La carga individual del detalle debe permanecer fuera del componente de catálogo.');
 expect(!productsTs.includes('crearCheckoutTarjeta('), 'Fase 3 no debe adelantar checkout de Fase 6.');
 
 for (const state of ['loading', 'error', 'empty']) {
@@ -91,7 +91,9 @@ expect(productsHtml.includes('Paginación del catálogo'), 'La página independi
 expect(productsHtml.includes("[attr.aria-label]=\"'Modelo de ' + producto.nombre\""), 'Las variantes deben poder seleccionarse con control etiquetado.');
 expect(productsHtml.includes("[attr.aria-label]=\"'Agregar ' + producto.nombre\""), 'Cada tarjeta disponible debe ofrecer una acción explícita de agregar.');
 expect(productsHtml.includes('destinoSaltar="#catalogo-productos"'), 'El header compartido debe saltar al contenido real de Fase 3.');
-expect(!productsHtml.includes('/varistorehn/producto/'), 'Las tarjetas de Fase 3 no deben fingir un detalle antes de Fase 4.');
+expect(productsHtml.includes("[href]=\"'/varistorehn/producto/' + producto.slug\""), 'Ver producto debe navegar por slug al detalle público cuando Fase 4 está activa.');
+expect(productsHtml.includes('Ver producto'), 'La tarjeta debe conservar una acción explícita Ver producto.');
+expect(productsHtml.includes('producto.precioOferta'), 'La tarjeta debe diferenciar un precio promocional público cuando aplique.');
 
 expect(!/#[0-9a-f]{3,8}\b/i.test(productsScss), 'Fase 3 no debe introducir colores hexadecimales fuera del tema global.');
 expect(!/\brgb(?:a)?\s*\(/i.test(productsScss), 'Fase 3 no debe introducir colores RGB paralelos al tema.');
