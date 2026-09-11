@@ -1,8 +1,8 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
   "currentParent": "N6.2.C",
-  "generatedAt": "2026-09-10T23:27:00Z",
-  "regenerationReason": "CHECKPOINT_24__N6.2.B_REVIEW_FIRST_PASS__LISTO_REAL__PROMOTE_N6.2.C__NO_FILLER",
+  "generatedAt": "2026-09-11T00:31:05Z",
+  "regenerationReason": "SUPERVISION_48__N6.2.C_PRESESSION_TRANSPORT_RECOVERY_TX2__RUN_CORRELATED__CONTROL_PLANE_RECONCILIATION",
   "lastClosedParent": "N6.2.B",
   "closureReceipts": {
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
@@ -46,7 +46,14 @@
     "materialParallelismTargetPerParent": 6,
     "requireDistinctWriteScopesWhenParallel": true,
     "activeWorkerCount": 6,
-    "activeWorkers": ["J1", "J2", "J3", "J4", "J5", "J6"]
+    "activeWorkers": [
+      "J1",
+      "J2",
+      "J3",
+      "J4",
+      "J5",
+      "J6"
+    ]
   },
   "throughputPlan": {
     "mode": "PARENT_CLOSE_FIRST",
@@ -56,47 +63,239 @@
     "nextParent": "N6.2.D",
     "nextParentParallelMaterialScopes": 1,
     "nextParentScopesNonOverlapping": true,
-    "currentRun": null,
+    "currentRun": {
+      "parent": "N6.2.C",
+      "taskId": "N6.2.C.1.TENANT_AWARE_DATA_MODEL_PERSISTENCE",
+      "worker": "J2",
+      "dispatchId": "N6-2-C-1-TENANT-AWARE-DATA-MODEL-PERSISTENCE-J2-A1-TX2",
+      "manifest": "vaep/jules-b/dispatch/N6-2-C-1-TENANT-AWARE-DATA-MODEL-PERSISTENCE-J2-A1-TX2.json",
+      "manifestCommit": "b44a1a14465fe8129fb1a569d4bc95787a262f8d",
+      "runId": 34546666164,
+      "jobId": 103100674308,
+      "taskAttempt": 1,
+      "state": "IN_PROGRESS__EXECUTE_MASTER",
+      "transportPreflight": "PASS",
+      "reserveNext": "PASS",
+      "sessionId": null,
+      "activeReal": false,
+      "ownership": "J2_SINGLE_WRITER__SESSION_ACTIVITY_UNVERIFIED"
+    },
     "nextRunReserved": {
       "parent": "N6.2.D",
       "state": "DEPENDENCY_GATED_RESERVED",
       "dependency": "N6.2.C_LISTO_REAL",
       "materialization": "TENANT_AWARE_DATA_MODEL_APPLICATION_API__ROADMAP_DERIVED__NO_FILLER"
     },
-    "laneRefill": "N6.2.C_READY_FOR_MATERIAL_DISPATCH__PRESESSION_FASTPATH_REQUIRED"
+    "laneRefill": "N6.2.C_TX2_RUNNING__NEXT_N6.2.D_DEPENDENCY_GATED"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
     "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
-    "sourceRanges": ["COLA!A464:Z475", "PLAN_MAESTRO!A60:M68"],
+    "sourceRanges": [
+      "COLA!A464:Z475",
+      "PLAN_MAESTRO!A60:M68"
+    ],
     "nodes": [
-      {"id":"GATE-N5","order":857,"dependencies":["N5.1.H","N5.2.H","N5.3.H","N5.4.H","N5.5.H","N5.6.H","N5.7.H","N5.8.H","N5.9.H"]},
-      {"id":"N6.1.A","order":524,"dependencies":["GATE-N5"]},
-      {"id":"N6.1.B","order":525,"dependencies":["N6.1.A"]},
-      {"id":"N6.1.C","order":526,"dependencies":["N6.1.B"]},
-      {"id":"N6.1.D","order":527,"dependencies":["N6.1.C"]},
-      {"id":"N6.1.E","order":528,"dependencies":["N6.1.D"]},
-      {"id":"N6.1.F","order":529,"dependencies":["N6.1.E"]},
-      {"id":"N6.1.G","order":530,"dependencies":["N6.1.F"]},
-      {"id":"N6.1.H","order":531,"dependencies":["N6.1.G"]},
-      {"id":"N6.2.A","order":532,"dependencies":["N6.1.H"]},
-      {"id":"N6.2.B","order":533,"dependencies":["N6.2.A"]},
-      {"id":"N6.2.C","order":534,"dependencies":["N6.2.B"]},
-      {"id":"N6.2.D","order":535,"dependencies":["N6.2.C"]}
+      {
+        "id": "GATE-N5",
+        "order": 857,
+        "dependencies": [
+          "N5.1.H",
+          "N5.2.H",
+          "N5.3.H",
+          "N5.4.H",
+          "N5.5.H",
+          "N5.6.H",
+          "N5.7.H",
+          "N5.8.H",
+          "N5.9.H"
+        ]
+      },
+      {
+        "id": "N6.1.A",
+        "order": 524,
+        "dependencies": [
+          "GATE-N5"
+        ]
+      },
+      {
+        "id": "N6.1.B",
+        "order": 525,
+        "dependencies": [
+          "N6.1.A"
+        ]
+      },
+      {
+        "id": "N6.1.C",
+        "order": 526,
+        "dependencies": [
+          "N6.1.B"
+        ]
+      },
+      {
+        "id": "N6.1.D",
+        "order": 527,
+        "dependencies": [
+          "N6.1.C"
+        ]
+      },
+      {
+        "id": "N6.1.E",
+        "order": 528,
+        "dependencies": [
+          "N6.1.D"
+        ]
+      },
+      {
+        "id": "N6.1.F",
+        "order": 529,
+        "dependencies": [
+          "N6.1.E"
+        ]
+      },
+      {
+        "id": "N6.1.G",
+        "order": 530,
+        "dependencies": [
+          "N6.1.F"
+        ]
+      },
+      {
+        "id": "N6.1.H",
+        "order": 531,
+        "dependencies": [
+          "N6.1.G"
+        ]
+      },
+      {
+        "id": "N6.2.A",
+        "order": 532,
+        "dependencies": [
+          "N6.1.H"
+        ]
+      },
+      {
+        "id": "N6.2.B",
+        "order": 533,
+        "dependencies": [
+          "N6.2.A"
+        ]
+      },
+      {
+        "id": "N6.2.C",
+        "order": 534,
+        "dependencies": [
+          "N6.2.B"
+        ]
+      },
+      {
+        "id": "N6.2.D",
+        "order": 535,
+        "dependencies": [
+          "N6.2.C"
+        ]
+      }
     ]
   },
   "recoveredRuns": [
-    {"parent":"N6.1.G","logicalTaskId":"N6.1.G.1.TENANT_EMPRESA_QA_REGRESSION_CI","worker":"J6","originalRunId":34524834350,"originalTerminal":"PRESESSION_PRIMARY_BASE_HEAD_MISMATCH","contentAttemptConsumed":false,"tx1RunId":34525160317,"tx1JobId":103032161616,"tx1SessionId":"10428644054862379079","tx1ArtifactId":10171626009,"terminal":"COMPLETED_SUCCESS_REVIEW_FIRST_ACCEPTED","integrationCommit":"bbd3792f7cc42b1e62163a76735dc2ad6eacb899","integrationReceiptClass":"NONCANONICAL_PARENT_EVIDENCE_ONLY__NO_JULES_PRODUCTIVITY","r2Used":false,"r3Used":false}
+    {
+      "parent": "N6.1.G",
+      "logicalTaskId": "N6.1.G.1.TENANT_EMPRESA_QA_REGRESSION_CI",
+      "worker": "J6",
+      "originalRunId": 34524834350,
+      "originalTerminal": "PRESESSION_PRIMARY_BASE_HEAD_MISMATCH",
+      "contentAttemptConsumed": false,
+      "tx1RunId": 34525160317,
+      "tx1JobId": 103032161616,
+      "tx1SessionId": "10428644054862379079",
+      "tx1ArtifactId": 10171626009,
+      "terminal": "COMPLETED_SUCCESS_REVIEW_FIRST_ACCEPTED",
+      "integrationCommit": "bbd3792f7cc42b1e62163a76735dc2ad6eacb899",
+      "integrationReceiptClass": "NONCANONICAL_PARENT_EVIDENCE_ONLY__NO_JULES_PRODUCTIVITY",
+      "r2Used": false,
+      "r3Used": false
+    },
+    {
+      "parent": "N6.2.C",
+      "logicalTaskId": "N6.2.C.1.TENANT_AWARE_DATA_MODEL_PERSISTENCE",
+      "worker": "J2",
+      "invalidRenameRunId": 34543012961,
+      "invalidRenameTerminal": "PRESESSION_INVALID_REDISPATCH__NON_APPEND_ONLY",
+      "invalidTx1RunId": 34546602308,
+      "invalidTx1Terminal": "PRESESSION_FILENAME_DISPATCH_ID_MISMATCH",
+      "tx2RunId": 34546666164,
+      "tx2JobId": 103100674308,
+      "tx2ManifestCommit": "b44a1a14465fe8129fb1a569d4bc95787a262f8d",
+      "terminal": "IN_PROGRESS__EXECUTE_MASTER",
+      "sessionId": null,
+      "activeReal": false,
+      "contentAttemptConsumed": false,
+      "taskAttempt": 1,
+      "r2Used": false,
+      "r3Used": false
+    }
   ],
   "prearmedRoadmap": [
-    {"parent":"N6.1.H","taskId":"N6.1.H.1.TENANT_EMPRESA_DOCUMENTATION_CERTIFICATION","state":"LISTO_REAL","dependency":"N6.1.G_LISTO_REAL","materialization":"TENANT_EMPRESA_DOC_CERT__ROADMAP_DERIVED__NO_FILLER"},
-    {"parent":"N6.2.A","taskId":"N6.2.A.1.TENANT_AWARE_DATA_MODEL_PREFLIGHT","state":"LISTO_REAL","dependency":"N6.1.H_LISTO_REAL","materialization":"TENANT_AWARE_DATA_MODEL_PREFLIGHT__CONTROLLER_TAKEOVER__NO_FILLER"},
-    {"parent":"N6.2.B","taskId":"N6.2.B.1.TENANT_AWARE_DATA_MODEL_DOMAIN_CONTRACTS","state":"LISTO_REAL","dependency":"N6.2.A_LISTO_REAL","materialization":"TENANT_AWARE_DATA_MODEL_DOMAIN_CONTRACTS__QA_TAKEOVER__REVIEW_FIRST_PASS"},
-    {"parent":"N6.2.C","state":"READY_CURRENT","dependency":"N6.2.B_LISTO_REAL","materialization":"TENANT_AWARE_DATA_MODEL_PERSISTENCE__ROADMAP_DERIVED__NO_FILLER"},
-    {"parent":"N6.2.D","state":"READY_DEPENDENCY_GATED","dependency":"N6.2.C_LISTO_REAL","materialization":"TENANT_AWARE_DATA_MODEL_APPLICATION_API__ROADMAP_DERIVED__NO_FILLER"}
+    {
+      "parent": "N6.1.H",
+      "taskId": "N6.1.H.1.TENANT_EMPRESA_DOCUMENTATION_CERTIFICATION",
+      "state": "LISTO_REAL",
+      "dependency": "N6.1.G_LISTO_REAL",
+      "materialization": "TENANT_EMPRESA_DOC_CERT__ROADMAP_DERIVED__NO_FILLER"
+    },
+    {
+      "parent": "N6.2.A",
+      "taskId": "N6.2.A.1.TENANT_AWARE_DATA_MODEL_PREFLIGHT",
+      "state": "LISTO_REAL",
+      "dependency": "N6.1.H_LISTO_REAL",
+      "materialization": "TENANT_AWARE_DATA_MODEL_PREFLIGHT__CONTROLLER_TAKEOVER__NO_FILLER"
+    },
+    {
+      "parent": "N6.2.B",
+      "taskId": "N6.2.B.1.TENANT_AWARE_DATA_MODEL_DOMAIN_CONTRACTS",
+      "state": "LISTO_REAL",
+      "dependency": "N6.2.A_LISTO_REAL",
+      "materialization": "TENANT_AWARE_DATA_MODEL_DOMAIN_CONTRACTS__QA_TAKEOVER__REVIEW_FIRST_PASS"
+    },
+    {
+      "parent": "N6.2.C",
+      "state": "RUN_IN_PROGRESS__NOT_ACTIVE_REAL",
+      "dependency": "N6.2.B_LISTO_REAL",
+      "materialization": "TENANT_AWARE_DATA_MODEL_PERSISTENCE__ROADMAP_DERIVED__NO_FILLER",
+      "taskId": "N6.2.C.1.TENANT_AWARE_DATA_MODEL_PERSISTENCE",
+      "worker": "J2",
+      "runId": 34546666164,
+      "dispatchId": "N6-2-C-1-TENANT-AWARE-DATA-MODEL-PERSISTENCE-J2-A1-TX2"
+    },
+    {
+      "parent": "N6.2.D",
+      "state": "READY_DEPENDENCY_GATED",
+      "dependency": "N6.2.C_LISTO_REAL",
+      "materialization": "TENANT_AWARE_DATA_MODEL_APPLICATION_API__ROADMAP_DERIVED__NO_FILLER"
+    }
   ],
-  "lanes": {"J1":[],"J2":[],"J3":[],"J4":[],"J5":[],"J6":[]},
-  "rolling60CertifiedParents": ["N6.2.B"],
-  "rolling60Count": 1,
+  "lanes": {
+    "J1": [],
+    "J2": [
+      {
+        "parent": "N6.2.C",
+        "taskId": "N6.2.C.1.TENANT_AWARE_DATA_MODEL_PERSISTENCE",
+        "dispatchId": "N6-2-C-1-TENANT-AWARE-DATA-MODEL-PERSISTENCE-J2-A1-TX2",
+        "runId": 34546666164,
+        "jobId": 103100674308,
+        "taskAttempt": 1,
+        "state": "IN_PROGRESS__EXECUTE_MASTER",
+        "sessionId": null,
+        "activeReal": false,
+        "writeScope": "backend/src/Infrastructure/Persistence/**;backend/tests/InventoryApp.Tests/*N62C*"
+      }
+    ],
+    "J3": [],
+    "J4": [],
+    "J5": [],
+    "J6": []
+  },
+  "rolling60CertifiedParents": [],
+  "rolling60Count": 0,
   "lastClosureFunctionalHead": "a8391cef1c8f6750dc07cbd8a410b491d78153df"
 }
