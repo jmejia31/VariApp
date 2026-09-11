@@ -1,6 +1,8 @@
+import { HttpClient } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { convertToParamMap, ActivatedRoute, Router } from '@angular/router';
 import { of } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import { SucursalService } from '../../services/sucursal.service';
 import { SucursalFormComponent } from './sucursal-form.component';
 
@@ -15,6 +17,9 @@ describe('SucursalFormComponent tenant ownership', () => {
   const router = {
     navigate: vi.fn()
   };
+  const http = {
+    get: vi.fn(() => of({ data: [{ id: 7, nombre: 'Empresa Siete', activa: true }] }))
+  };
 
   beforeEach(async () => {
     vi.clearAllMocks();
@@ -23,6 +28,7 @@ describe('SucursalFormComponent tenant ownership', () => {
       imports: [SucursalFormComponent],
       providers: [
         { provide: SucursalService, useValue: sucursalService },
+        { provide: HttpClient, useValue: http },
         { provide: Router, useValue: router },
         {
           provide: ActivatedRoute,
@@ -36,6 +42,12 @@ describe('SucursalFormComponent tenant ownership', () => {
     fixture = TestBed.createComponent(SucursalFormComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+  });
+
+  it('loads the Empresa catalog used by the owner selector', () => {
+    expect(http.get).toHaveBeenCalledWith(`${environment.apiUrl}/empresas`);
+    expect(component.empresas()).toEqual([{ id: 7, nombre: 'Empresa Siete', activa: true }]);
+    expect(component.empresasLoading()).toBe(false);
   });
 
   it('requires an explicit EmpresaId greater than zero', () => {

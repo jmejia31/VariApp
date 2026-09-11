@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -7,8 +8,17 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
+import { environment } from '../../../environments/environment';
+import { ApiResponse } from '../../core/models/api-response.model';
 import { SucursalFormValue } from '../../core/models/sucursal.model';
 import { SucursalService } from '../../services/sucursal.service';
+
+interface EmpresaOpcion {
+  id: number;
+  nombre: string;
+  activa: boolean;
+}
 
 @Component({
   selector: 'app-sucursal-form',
@@ -21,7 +31,8 @@ import { SucursalService } from '../../services/sucursal.service';
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatSelectModule
   ],
   templateUrl: './sucursal-form.component.html',
   styleUrl: './sucursal-form.component.scss'
@@ -32,6 +43,9 @@ export class SucursalFormComponent implements OnInit {
   readonly loading = signal(false);
   readonly saving = signal(false);
   readonly errorMessage = signal<string | null>(null);
+  readonly empresas = signal<EmpresaOpcion[]>([]);
+  readonly empresasLoading = signal(true);
+  readonly empresasError = signal<string | null>(null);
   readonly zonasSugeridas = [
     'America/Tegucigalpa',
     'America/Guatemala',
@@ -43,6 +57,7 @@ export class SucursalFormComponent implements OnInit {
     'America/New_York'
   ];
 
+  private readonly empresasUrl = `${environment.apiUrl}/empresas`;
   private sucursalId: number | null = null;
 
   readonly form = this.fb.group({
@@ -57,11 +72,14 @@ export class SucursalFormComponent implements OnInit {
 
   constructor(
     private sucursalService: SucursalService,
+    private http: HttpClient,
     private route: ActivatedRoute,
     private router: Router
   ) {}
 
   ngOnInit(): void {
+    this.cargarEmpresas();
+
     const idParam = this.route.snapshot.paramMap.get('id');
     if (!idParam) return;
 
@@ -114,6 +132,23 @@ export class SucursalFormComponent implements OnInit {
       error: (err) => {
         this.saving.set(false);
         this.errorMessage.set(err.error?.message ?? 'No se pudo guardar la sucursal.');
+      }
+    });
+  }
+
+  private cargarEmpresas(): void {
+    this.empresasLoading.set(true);
+    this.empresasError.set(null);
+    this.http.get<ApiResponse<EmpresaOpcion[]>>(this.empresasUrl).subscribe({
+      next: (res) => {
+        this.empresas.set(res.data ?? []);
+        this.empresasLoading.set(false);
+      },
+      error: () => {
+        this.empresas.set([]);
+        this.empresasLoading.set(false);
+        this.empresasError.set('No se pudieron cargar las empresas. Reintenta antes de guardar.');
+        this.form.controls.empresaId.disable();
       }
     });
   }

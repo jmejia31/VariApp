@@ -75,13 +75,20 @@
         </datalist>
 
         <mat-form-field appearance="outline">
-          <mat-label>Empresa propietaria (ID)</mat-label>
-          <input matInput type="number" min="1" step="1" formControlName="empresaId" required autocomplete="off">
-          <mat-hint>Ownership tenant-aware explícito. La autorización continúa siendo responsabilidad del backend.</mat-hint>
+          <mat-label>Empresa propietaria</mat-label>
+          <mat-select formControlName="empresaId" required aria-label="Empresa propietaria">
+            @if (empresasLoading()) {
+              <mat-option disabled>Cargando empresas…</mat-option>
+            }
+            @for (empresa of empresas(); track empresa.id) {
+              <mat-option [value]="empresa.id">{{ empresa.nombre }}{{ empresa.activa ? '' : ' · Inactiva' }}</mat-option>
+            }
+          </mat-select>
+          <mat-hint>{{ empresasError() || 'Selecciona la Empresa raíz responsable de esta sucursal.' }}</mat-hint>
           @if (form.controls.empresaId.touched && form.controls.empresaId.hasError('required')) {
             <mat-error>La empresa propietaria es obligatoria.</mat-error>
           } @else if (form.controls.empresaId.touched && (form.controls.empresaId.hasError('min') || form.controls.empresaId.hasError('tenantOwnerRequired'))) {
-            <mat-error>Empresa ID debe ser un entero mayor que cero.</mat-error>
+            <mat-error>Selecciona una empresa válida.</mat-error>
           }
         </mat-form-field>
       </div>

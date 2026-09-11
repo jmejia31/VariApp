@@ -33,15 +33,17 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="empresa-filter">
-      <mat-label>Empresa propietaria (ID)</mat-label>
-      <input
-        matInput
-        type="number"
-        min="1"
-        [(ngModel)]="empresaId"
-        (change)="aplicarFiltros()"
-        placeholder="Todas las empresas">
-      <mat-hint>Filtra por ownership tenant-aware.</mat-hint>
+      <mat-label>Empresa propietaria</mat-label>
+      <mat-select [(ngModel)]="empresaId" (selectionChange)="aplicarFiltros()" aria-label="Filtrar por empresa propietaria">
+        <mat-option [value]="null">Todas las empresas</mat-option>
+        @if (empresasLoading()) {
+          <mat-option disabled>Cargando empresas…</mat-option>
+        }
+        @for (empresa of empresas(); track empresa.id) {
+          <mat-option [value]="empresa.id">{{ empresa.nombre }}{{ empresa.activa ? '' : ' · Inactiva' }}</mat-option>
+        }
+      </mat-select>
+      <mat-hint>{{ empresasError() || 'Filtra por la Empresa raíz responsable.' }}</mat-hint>
     </mat-form-field>
 
     <button mat-stroked-button type="button" (click)="limpiarFiltros()">
@@ -100,7 +102,7 @@
             <td>{{ s.zonaHoraria }}</td>
             <td>
               @if (s.empresaId) {
-                <span class="code-chip" [attr.aria-label]="'Empresa propietaria ' + s.empresaId">#{{ s.empresaId }}</span>
+                <span class="code-chip" [attr.aria-label]="'Empresa propietaria ' + nombreEmpresa(s.empresaId)">{{ nombreEmpresa(s.empresaId) }}</span>
               } @else {
                 <span class="badge muted" title="Registro legado pendiente de ownership">Sin asignar</span>
               }
@@ -174,7 +176,7 @@
             <div><dt>Teléfono</dt><dd>{{ s.telefono || '—' }}</dd></div>
             <div><dt>Correo</dt><dd>{{ s.correo || '—' }}</dd></div>
             <div><dt>Zona horaria</dt><dd>{{ s.zonaHoraria }}</dd></div>
-            <div><dt>Empresa propietaria</dt><dd>{{ s.empresaId ? ('#' + s.empresaId) : 'Sin asignar (legado)' }}</dd></div>
+            <div><dt>Empresa propietaria</dt><dd>{{ nombreEmpresa(s.empresaId) }}</dd></div>
           </dl>
 
           @if (puedeEditar() || puedeEliminar()) {

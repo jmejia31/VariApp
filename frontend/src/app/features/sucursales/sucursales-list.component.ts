@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -12,12 +13,20 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import { PermisosRuntimeService } from '../../core/auth/permisos-runtime.service';
+import { ApiResponse } from '../../core/models/api-response.model';
 import { Sucursal } from '../../core/models/sucursal.model';
 import { SucursalService } from '../../services/sucursal.service';
 import { AppAlertService } from '../../shared/alerts/app-alert.service';
 
 type EstadoSucursalFiltro = 'todas' | 'activas' | 'inactivas';
+
+interface EmpresaOpcion {
+  id: number;
+  nombre: string;
+  activa: boolean;
+}
 
 @Component({
   selector: 'app-sucursales-list',
@@ -44,6 +53,9 @@ export class SucursalesListComponent implements OnInit, OnDestroy {
   readonly totalPaginas = signal(0);
   readonly loading = signal(true);
   readonly errorMessage = signal<string | null>(null);
+  readonly empresas = signal<EmpresaOpcion[]>([]);
+  readonly empresasLoading = signal(true);
+  readonly empresasError = signal<string | null>(null);
   readonly operandoIds = signal<Set<number>>(new Set<number>());
 
   readonly puedeCrear = signal(false);
@@ -58,11 +70,13 @@ export class SucursalesListComponent implements OnInit, OnDestroy {
   pagina = 1;
   tamanoPagina = 10;
 
+  private readonly empresasUrl = `${environment.apiUrl}/empresas`;
   private readonly searchSubject = new Subject<string>();
   private readonly destroy$ = new Subject<void>();
 
   constructor(
     private sucursalService: SucursalService,
+    private http: HttpClient,
     private permisosRuntime: PermisosRuntimeService,
     private snackBar: MatSnackBar,
     private alerts: AppAlertService
@@ -82,12 +96,34 @@ export class SucursalesListComponent implements OnInit, OnDestroy {
         this.cargar();
       });
 
+    this.cargarEmpresas();
     this.cargar();
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  cargarEmpresas(): void {
+    this.empresasLoading.set(true);
+    this.empresasError.set(null);
+    this.http.get<ApiResponse<EmpresaOpcion[]>>(this.empresasUrl).subscribe({
+      next: (res) => {
+        this.empresas.set(res.data ?? []);
+        this.empresasLoading.set(false);
+      },
+      error: () => {
+        this.empresas.set([]);
+        this.empresasLoading.set(false);
+        this.empresasError.set('No se pudieron cargar las empresas para filtrar.');
+      }
+    });
+  }
+
+  nombreEmpresa(empresaId: number | null | undefined): string {
+    if (!empresaId) return 'Sin asignar (legado)';
+    return this.empresas().find(empresa => empresa.id === empresaId)?.nombre ?? `Empresa #${empresaId}`;
   }
 
   cargar(): void {
