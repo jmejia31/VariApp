@@ -1,4 +1,5 @@
 {
+  "authority": "docs/VAEP_AUTHORITY.md",
   "parent": "N6.3.E",
   "taskId": "N6.3.E.1.SUCURSALES_EMPRESA_FRONTEND_UX",
   "semanticFacet": "SUCURSALES_EMPRESA_FRONTEND_UX",
@@ -8,22 +9,19 @@
   "primaryBaseHead": "2fc3a96f34b8d07bafeafe11556e5b03b19ba3f8",
   "workflowRunId": 34589126797,
   "workflowJobId": 103230106455,
-  "classification": "STALLED__QUARANTINED_REMOTE_ACTIVE",
-  "lastUsefulEvent": "transport preflight and NEXT J4 reservation completed; Execute VAEP/Jules MASTER remained in_progress with no terminal result/session correlation observable",
-  "lastUsefulEventTimestampUtc": "2026-09-11T10:25:19Z",
-  "lastRemoteState": "in_progress",
-  "stopAttempt": {
-    "timestampUtc": "2026-09-11T10:37:00Z",
-    "method": "connector capability inspection",
-    "result": "UNSUPPORTED_OPERATION: available GitHub Actions connector exposes rerun operations but no cancel/stop action; no unsafe REST write attempted"
-  },
-  "stopResult": "NOT_EXECUTABLE_WITH_SUPPORTED_OPERATION",
-  "remoteStateAfter": "in_progress",
+  "sessionId": "8495395893366012795",
+  "terminalAtUtc": "2026-09-11T10:43:31Z",
+  "terminalStatus": "COMPLETED",
+  "terminalConclusion": "FAILURE",
+  "patchPresent": false,
+  "classification": "ATTEMPT2_TERMINAL_FAILURE_NO_PATCH__CONTROLLER_QA_TAKEOVER_EXECUTED",
   "ownershipRevoked": true,
   "superseded": true,
   "lateIntegrationDenied": true,
-  "recoveryDecision": "ATTEMPT2 is the final Jules content attempt. R3 is prohibited. While remoteState remains active, J4 is QUARANTINED_REMOTE_ACTIVE and no equivalent recovery may be created. Once terminal, controller/QA_TAKEOVER is mandatory if no independently reviewable valid patch exists.",
+  "controllerOwner": "CHATGPT_VAEP",
+  "controllerFunctionalHead": "96ebf77191e90884d5aee0b894adda50cfe627b0",
+  "reviewReceipt": "vaep/evidence/reviews/N6.3.E_CONTROLLER_QA_TAKEOVER_REVIEW_FIRST_20260911T1056Z.json",
   "duplicateRecoveryProhibited": true,
   "r3Prohibited": true,
-  "recordedAtUtc": "2026-09-11T10:37:00Z"
+  "recordedAtUtc": "2026-09-11T10:57:58Z"
 }

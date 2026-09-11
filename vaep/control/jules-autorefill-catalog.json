@@ -1,9 +1,9 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
-  "currentParent": "N6.3.A",
-  "generatedAt": "2026-09-11T06:34:09.123Z",
-  "regenerationReason": "REVIEW_24__N6.2.H_CLOSED__N6.3.A_PROMOTED__J1_TX1_VALID_TRANSPORT__EXECUTE_MASTER_FRESH_NOT_ACTIVE_REAL",
-  "lastClosedParent": "N6.2.H",
+  "currentParent": "N6.3.E",
+  "generatedAt": "2026-09-11T10:57:58Z",
+  "regenerationReason": "CONTROL_PLANE_DRIFT_REPAIRED__N6.3.A_D_LISTO_REAL__N6.3.E_CONTROLLER_QA_TAKEOVER_REVIEW_FIRST_ACCEPTED_PENDING_EXACT_HEAD_GATES__NO_DUPLICATE__NO_R3__NO_FILLER",
+  "lastClosedParent": "N6.3.D",
   "closureReceipts": {
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
     "N5.1.H": "vaep/evidence/fragments/N5.1.H_LISTO_REAL_20260909T1236Z.json",
@@ -38,7 +38,11 @@
     "N6.2.E": "vaep/evidence/fragments/N6.2.E_LISTO_REAL_20260911T0402Z.json",
     "N6.2.F": "vaep/evidence/fragments/N6.2.F_LISTO_REAL_20260911T0524Z.json",
     "N6.2.G": "vaep/evidence/fragments/N6.2.G_LISTO_REAL_20260911T0557Z.json",
-    "N6.2.H": "vaep/evidence/fragments/N6.2.H_LISTO_REAL_20260911T0629Z.json"
+    "N6.2.H": "vaep/evidence/fragments/N6.2.H_LISTO_REAL_20260911T0629Z.json",
+    "N6.3.A": "vaep/evidence/fragments/N6.3.A_LISTO_REAL_20260911T0701Z.json",
+    "N6.3.B": "vaep/evidence/fragments/N6.3.B_LISTO_REAL_20260911T0746Z.json",
+    "N6.3.C": "vaep/evidence/fragments/N6.3.C_LISTO_REAL_20260911T0848Z.json",
+    "N6.3.D": "vaep/evidence/fragments/N6.3.D_LISTO_REAL_20260911T0958Z.json"
   },
   "policy": {
     "branch": "Desarrollo",
@@ -63,15 +67,15 @@
   },
   "throughputPlan": {
     "mode": "PARENT_CLOSE_FIRST",
-    "currentParent": "N6.3.A",
+    "currentParent": "N6.3.E",
     "currentParentMaterialScopeCount": 1,
-    "currentParentReason": "N6.2.H is LISTO_REAL after REVIEW_FIRST, controller direct fix, R2 transport quarantine and terminal exact-head gates. N6.3.A is the first order-valid roadmap scope and has one bounded documentation/preflight task.",
-    "nextParent": "N6.3.B",
+    "currentParentReason": "N6.3.D is LISTO_REAL. N6.3.E ATTEMPT2 ended failure with no patch; controller/QA takeover supplied the bounded Empresa-aware Sucursales frontend and REVIEW_FIRST accepted it pending exact-head gates.",
+    "nextParent": "N6.3.F",
     "nextParentParallelMaterialScopes": 1,
     "nextParentScopesNonOverlapping": true,
-    "currentRun": "N6-3-A-1-SUCURSALES-EMPRESA-PREFLIGHT-J1-A1-TX1",
+    "currentRun": null,
     "nextRunReserved": null,
-    "laneRefill": "N6.3.A_J1_TX1_ATTEMPT1_VALID_TRANSPORT__N6.3.B_C_D_PREARMED_GATED__NO_FILLER"
+    "laneRefill": "N6.3.E_CONTROLLER_QA_TAKEOVER__REVIEW_FIRST_ACCEPTED_PENDING_GATES__N6.3.F_G_H_PREARMED_GATED__NO_FILLER"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
@@ -363,6 +367,29 @@
       "r2Used": false,
       "r3Used": false,
       "recoveryReason": "PRESESSION_FASTPATH__APPEND_ONLY_TX1__NO_SECOND_CONTENT_OWNER"
+    },
+    {
+      "parent": "N6.3.E",
+      "logicalTaskId": "N6.3.E.1.SUCURSALES_EMPRESA_FRONTEND_UX",
+      "originalWorker": "J3",
+      "originalRunId": 34588176617,
+      "originalJobId": 103227101171,
+      "r2Worker": "J4",
+      "r2RunId": 34589126797,
+      "r2JobId": 103230106455,
+      "r2Terminal": "COMPLETED_FAILURE__PATCH_PRESENT_FALSE__ATTEMPT2_EXHAUSTED__EVIDENCE_ONLY",
+      "ownershipTransfer": "J4_TO_CHATGPT_VAEP__MANDATORY_AFTER_ATTEMPT2_TERMINAL_INVALID",
+      "activeReal": false,
+      "controllerFunctionalCommits": [
+        "2d23597dd5811b41df81b787582c6b79abe51ff9",
+        "2eee4caad646890947a02ad6490e9b05253f3312",
+        "36451a3929ecaf99ea01004ec11c3be5b0357d3f",
+        "befa8445364b740c0914379fc3977a02802e9a49",
+        "96ebf77191e90884d5aee0b894adda50cfe627b0"
+      ],
+      "reviewReceipt": "vaep/evidence/reviews/N6.3.E_CONTROLLER_QA_TAKEOVER_REVIEW_FIRST_20260911T1056Z.json",
+      "r2Used": true,
+      "r3Used": false
     }
   ],
   "prearmedRoadmap": [
@@ -472,65 +499,75 @@
     {
       "parent": "N6.3.A",
       "taskId": "N6.3.A.1.SUCURSALES_EMPRESA_PREFLIGHT",
-      "state": "CURRENT_TX1_DISPATCHED__EXECUTE_MASTER_FRESH__ACTIVE_REAL_UNCONFIRMED",
+      "state": "LISTO_REAL",
       "dependency": "N6.2.H_LISTO_REAL",
-      "materialization": "SUCURSALES_EMPRESA_PREFLIGHT__ROADMAP_DERIVED__NO_FILLER",
-      "worker": "J1",
-      "dispatchId": "N6-3-A-1-SUCURSALES-EMPRESA-PREFLIGHT-J1-A1-TX1",
-      "taskAttempt": 1,
-      "activeReal": false,
-      "primaryBaseHead": "87fdc63266c2e2a95dff5fa72ad4cfd9b8fb9d78",
-      "workflowRunId": 34570383516,
-      "workflowJobId": 103171031983,
-      "r2Used": false,
-      "r3Used": false
+      "materialization": "SUCURSALES_EMPRESA_PREFLIGHT__REVIEW_FIRST_PASS",
+      "closureReceipt": "vaep/evidence/fragments/N6.3.A_LISTO_REAL_20260911T0701Z.json"
     },
     {
       "parent": "N6.3.B",
       "taskId": "N6.3.B.1.SUCURSALES_EMPRESA_DOMAIN_CONTRACTS",
-      "state": "READY_DEPENDENCY_GATED",
+      "state": "LISTO_REAL",
       "dependency": "N6.3.A_LISTO_REAL",
-      "materialization": "SUCURSALES_EMPRESA_DOMAIN_CONTRACTS__ROADMAP_DERIVED__NO_FILLER"
+      "materialization": "SUCURSALES_EMPRESA_DOMAIN_CONTRACTS__REVIEW_FIRST_PASS",
+      "closureReceipt": "vaep/evidence/fragments/N6.3.B_LISTO_REAL_20260911T0746Z.json"
     },
     {
       "parent": "N6.3.C",
       "taskId": "N6.3.C.1.SUCURSALES_EMPRESA_PERSISTENCE_MIGRATION",
-      "state": "READY_DEPENDENCY_GATED",
+      "state": "LISTO_REAL",
       "dependency": "N6.3.B_LISTO_REAL",
-      "materialization": "SUCURSALES_EMPRESA_PERSISTENCE_MIGRATION__ROADMAP_DERIVED__NO_FILLER"
+      "materialization": "SUCURSALES_EMPRESA_PERSISTENCE_MIGRATION__REVIEW_FIRST_PASS",
+      "closureReceipt": "vaep/evidence/fragments/N6.3.C_LISTO_REAL_20260911T0848Z.json"
     },
     {
       "parent": "N6.3.D",
       "taskId": "N6.3.D.1.SUCURSALES_EMPRESA_APPLICATION_API",
-      "state": "READY_DEPENDENCY_GATED",
+      "state": "LISTO_REAL",
       "dependency": "N6.3.C_LISTO_REAL",
-      "materialization": "SUCURSALES_EMPRESA_APPLICATION_API__ROADMAP_DERIVED__NO_FILLER"
+      "materialization": "SUCURSALES_EMPRESA_APPLICATION_API__CONTROLLER_RECOVERY__REVIEW_FIRST_PASS__EXACT_HEAD_GATES_PASS",
+      "functionalHead": "b82da1d2d297933a7434130b068d277f24c30731",
+      "closureReceipt": "vaep/evidence/fragments/N6.3.D_LISTO_REAL_20260911T0958Z.json"
+    },
+    {
+      "parent": "N6.3.E",
+      "taskId": "N6.3.E.1.SUCURSALES_EMPRESA_FRONTEND_UX",
+      "state": "CURRENT_CONTROLLER_QA_TAKEOVER__REVIEW_FIRST_ACCEPTED_PENDING_EXACT_HEAD_GATES",
+      "dependency": "N6.3.D_LISTO_REAL",
+      "materialization": "SUCURSALES_EMPRESA_FRONTEND_UX__CONTROLLER_QA_TAKEOVER__NO_FILLER",
+      "worker": "CHATGPT_VAEP",
+      "taskAttempt": 2,
+      "activeReal": false,
+      "functionalHead": "96ebf77191e90884d5aee0b894adda50cfe627b0",
+      "reviewReceipt": "vaep/evidence/reviews/N6.3.E_CONTROLLER_QA_TAKEOVER_REVIEW_FIRST_20260911T1056Z.json",
+      "r2Used": true,
+      "r3Used": false,
+      "lateJulesIntegrationDenied": true
+    },
+    {
+      "parent": "N6.3.F",
+      "taskId": "N6.3.F.1.SUCURSALES_EMPRESA_SEC_AUDIT",
+      "state": "READY_DEPENDENCY_GATED",
+      "dependency": "N6.3.E_LISTO_REAL",
+      "materialization": "SUCURSALES_EMPRESA_SEC_AUDIT__ROADMAP_DERIVED__NO_FILLER"
+    },
+    {
+      "parent": "N6.3.G",
+      "taskId": "N6.3.G.1.SUCURSALES_EMPRESA_QA_REGRESSION_CI",
+      "state": "READY_DEPENDENCY_GATED",
+      "dependency": "N6.3.F_LISTO_REAL",
+      "materialization": "SUCURSALES_EMPRESA_QA_REGRESSION_CI__ROADMAP_DERIVED__NO_FILLER"
+    },
+    {
+      "parent": "N6.3.H",
+      "taskId": "N6.3.H.1.SUCURSALES_EMPRESA_DOCUMENTATION_CERTIFICATION",
+      "state": "READY_DEPENDENCY_GATED",
+      "dependency": "N6.3.G_LISTO_REAL",
+      "materialization": "SUCURSALES_EMPRESA_DOCUMENTATION_CERTIFICATION__ROADMAP_DERIVED__NO_FILLER"
     }
   ],
   "lanes": {
-    "J1": [
-      {
-        "dispatchId": "N6-3-A-1-SUCURSALES-EMPRESA-PREFLIGHT-J1-A1-TX1",
-        "taskId": "N6.3.A.1.SUCURSALES_EMPRESA_PREFLIGHT",
-        "workerId": "J1",
-        "taskAttempt": 1,
-        "plannedParent": "N6.3.A",
-        "readyForDispatch": false,
-        "dispatchEligible": false,
-        "workflowRunId": 34570383516,
-        "workflowStatus": "in_progress",
-        "activeReal": false,
-        "fileScopeHint": "docs;CHANGELOG_AI.md",
-        "prompt": "Read docs/VAEP_AUTHORITY.md first. Immediately revalidate Desarrollo HEAD, CURRENT_PARENT=N6.3.A, this manifest primaryBaseHead and the N6.2.H LISTO_REAL receipt before editing. Execute only the roadmap-derived preflight for N6.3 Empresa-to-multiple-Sucursales: inspect the current Empresa and Sucursal domain contracts, EF mapping/migrations, repositories/services/controllers, frontend flows, RBAC/audit surfaces and focused tests; document the real current state, dependency graph, in-scope/out-of-scope boundaries, risks, acceptance criteria, rollback and a bounded B-H implementation/test plan. Produce canonical documentation/evidence only; do not implement domain, schema, migration, API, frontend or security behavior in this task. Do not touch TASKS.md, workflows, main, Produccion, secrets, deployment or PR #2. Run proportional read-only validation and return a patch/artifact for REVIEW_FIRST with explicit P0/P1. No filler, no R2 unless authorized after terminal review, and no R3.",
-        "reason": "CURRENT_PARENT__N6.2.H_LISTO_REAL__N6.3_A_PREFLIGHT",
-        "primaryBaseHead": "87fdc63266c2e2a95dff5fa72ad4cfd9b8fb9d78",
-        "workflowJobId": 103171031983,
-        "state": "TX1_PREFLIGHT_PASS__RESERVE_NEXT_PASS__EXECUTE_MASTER_IN_PROGRESS__ACTIVE_REAL_UNCONFIRMED",
-        "recoveryOf": "N6-3-A-1-SUCURSALES-EMPRESA-PREFLIGHT-J1-A1",
-        "originalRunId": 34570307463,
-        "originalTerminal": "PRESESSION_INVALID_REDISPATCH"
-      }
-    ],
+    "J1": [],
     "J2": [],
     "J3": [],
     "J4": [],
@@ -538,9 +575,8 @@
     "J6": []
   },
   "rolling60CertifiedParents": [
-    "N6.2.G",
-    "N6.2.H"
+    "N6.3.D"
   ],
-  "rolling60Count": 2,
-  "lastClosureFunctionalHead": "bb0cd69706b8e33d43df6b156a37a5c61f5b53b8"
+  "rolling60Count": 1,
+  "lastClosureFunctionalHead": "b82da1d2d297933a7434130b068d277f24c30731"
 }
