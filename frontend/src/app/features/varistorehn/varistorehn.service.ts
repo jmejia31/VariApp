@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { EMPTY, Observable, expand, map, reduce, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ApiResponse, PagedResult } from '../../core/models/api-response.model';
-import { CategoriaCatalogoPublico, ProductoCatalogoPublico, ReferenciaCarrito } from './varistorehn.models';
+import { CategoriaCatalogoPublico, ProductoCatalogoPublico } from './varistorehn.models';
 
 export type {
   CategoriaCatalogoPublico,
@@ -71,19 +71,6 @@ export class VaristorehnService {
         return res.data;
       })
     );
-  }
-
-  /** Integration boundary only: a server must reprice, validate stock and create the payment session. */
-  crearCheckoutTarjeta(endpoint: string, items: ReferenciaCarrito[], idempotencyKey: string): Observable<string> {
-    if (!/^\/[a-zA-Z0-9/_-]+$/.test(endpoint) || endpoint.startsWith('//')) {
-      return throwError(() => new Error('Endpoint de pago no válido.'));
-    }
-    return this.http.post<ApiResponse<{ checkoutUrl: string }>>(`${environment.apiUrl}${endpoint}`, {
-      items: items.map(({ productoId, modeloClave, unidades }) => ({ productoId, modeloClave, cantidad: unidades }))
-    }, { headers: { 'Idempotency-Key': idempotencyKey } }).pipe(map(res => {
-      if (!res.success || typeof res.data?.checkoutUrl !== 'string') throw new Error('No se pudo iniciar el pago.');
-      return res.data.checkoutUrl;
-    }));
   }
 
   private slugSeguro(slug: string): string {
