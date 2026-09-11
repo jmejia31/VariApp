@@ -1,0 +1,16 @@
+{
+  "dispatchId": "N6-3-F-1-SUCURSALES-EMPRESA-SEC-AUDIT-J5-A1-TX1-20260911T1118Z",
+  "taskId": "N6.3.F.1.SUCURSALES_EMPRESA_SEC_AUDIT",
+  "parent": "N6.3.F",
+  "workerId": "J5",
+  "expectedBranch": "Desarrollo",
+  "taskAttempt": 1,
+  "contentAttempt": 1,
+  "transportRecovery": "TX1",
+  "supersedesDispatchId": "N6-3-F-1-SUCURSALES-EMPRESA-SEC-AUDIT-J5-A1-20260911T1112Z",
+  "contentAttemptConsumedBySupersededDispatch": false,
+  "primaryBaseHead": "09e9754ec6e252c2f1b6321e87d481afd70ca7f3",
+  "dependencyReceipt": "vaep/evidence/fragments/N6.3.E_LISTO_REAL_20260911T1112Z.json",
+  "fileScopeHint": "backend/src/API/**;backend/src/Application/**;backend/src/Infrastructure/**;backend/tests/InventoryApp.Tests/**;frontend/src/app/core/**;frontend/src/app/features/sucursales/**;docs/**;vaep/evidence/**",
+  "prompt": "Read docs/VAEP_AUTHORITY.md as the single operational authority and execute only N6.3.F.1 for Sucursales by Empresa. This is TX1 transport recovery of the same ATTEMPT1 after the prior dispatch failed pre-session with INVALID_REDISPATCH; it does not create a second content attempt or owner. Audit and, only where an internal defect is material, fix existing Sucursales RBAC, owner/reassignment audit trail, fail-closed authorization, correlation/logging/observability and directed negative-path tests. Reuse existing Sucursales permissions; do not introduce N6.4 memberships/roles or N6.5 global anti-leakage. Run proportional tests and two self-reviews. Do not touch main, Produccion, production databases, secrets, deploys or merge PR#2. Do not fabricate ACTIVE/PASS/LISTO_REAL."
+}
