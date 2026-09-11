@@ -21,23 +21,43 @@ jobs:
     timeout-minutes: 3
     steps:
       - uses: actions/checkout@v4
-      - name: Validate material parallelism contract
+      - name: Validate TASKS_FIRST material contract
         shell: bash
         run: |
           python3 - <<'PY'
           import json
           from pathlib import Path
 
-          path = Path('vaep/control/jules-autorefill-catalog.json')
-          catalog = json.loads(path.read_text(encoding='utf-8'))
+          catalog = json.loads(Path('vaep/control/jules-autorefill-catalog.json').read_text(encoding='utf-8'))
 
           if catalog.get('authority') != 'docs/VAEP_AUTHORITY.md':
               raise SystemExit('catalog authority mismatch')
+          if catalog.get('schemaVersion') != 'tasks-first.v1':
+              raise SystemExit('tasks-first schema mismatch')
+          if catalog.get('executionModel') != 'TASKS_FIRST_JULES_ON_DEMAND':
+              raise SystemExit('execution model mismatch')
 
           canonical = {'J1','J2','J3','J4','J5','J6'}
           lanes = catalog.get('lanes')
           if set(lanes or {}) != canonical:
-              raise SystemExit('all six canonical Jules lanes must be represented')
+              raise SystemExit('all six optional Jules lanes must be represented')
+
+          policy = catalog.get('policy') or {}
+          required = {
+              'directExecutionDefault': True,
+              'taskScopeLeaseRequired': True,
+              'julesRequiredForProgress': False,
+              'julesAutomaticRefill': False,
+              'julesAutomaticQueueFloor': False,
+              'julesMinimumUtilizationTarget': 0,
+              'noBusywork': True,
+              'requireDistinctWriteScopesWhenParallel': True,
+          }
+          for key, expected in required.items():
+              if policy.get(key) != expected:
+                  raise SystemExit(f'tasks-first policy mismatch: {key}')
+          if policy.get('availableOptionalWorkers') != ['J1','J2','J3','J4','J5','J6']:
+              raise SystemExit('optional worker registry mismatch')
 
           tasks = [task for lane in lanes.values() for task in lane]
           task_ids = [task.get('taskId') for task in tasks]
@@ -46,68 +66,39 @@ jobs:
               raise SystemExit('TASK_IDENTITY_UNIQUE violated')
 
           current = catalog.get('currentParent')
+          if not isinstance(current, str) or not current.strip():
+              raise SystemExit('current parent missing')
           for task in tasks:
               if task.get('dispatchEligible') is True and task.get('plannedParent') != current:
                   raise SystemExit('future-parent task is dispatchEligible')
 
-          policy = catalog.get('policy') or {}
-          if policy.get('noBusywork') is not True:
-              raise SystemExit('noBusywork must remain true')
-          if policy.get('requireDistinctWriteScopesWhenParallel') is not True:
-              raise SystemExit('parallel distinct-write-scope guard missing')
-          if policy.get('activeWorkerCount') != 6 or policy.get('activeWorkers') != ['J1','J2','J3','J4','J5','J6']:
-              raise SystemExit('canonical six-worker policy mismatch')
-          if policy.get('programmedBacklogTargetTotal') != 72:
-              raise SystemExit('programmed backlog total must be 72')
-
           plan = catalog.get('throughputPlan') or {}
+          if plan.get('mode') != 'TASKS_FIRST_PARENT_CLOSE_FIRST':
+              raise SystemExit('throughput mode mismatch')
+          if plan.get('currentParent') != current:
+              raise SystemExit('throughput current parent mismatch')
+          if plan.get('julesOffload') != 'OPTIONAL_EXPLICIT_ONLY':
+              raise SystemExit('Jules offload must remain explicit-only')
+          current_scope_count = plan.get('currentParentMaterialScopeCount')
+          if not isinstance(current_scope_count, int) or isinstance(current_scope_count, bool) or current_scope_count < 1:
+              raise SystemExit('current parent material scope count invalid')
           next_parent = plan.get('nextParent')
-          expected = plan.get('nextParentParallelMaterialScopes')
           if not isinstance(next_parent, str) or not next_parent.strip():
-              raise SystemExit('next-parent throughput plan missing')
-          if not isinstance(expected, int) or isinstance(expected, bool) or not 0 <= expected <= 6:
-              raise SystemExit('next-parent material scope count must be an integer from 0 to 6')
+              raise SystemExit('next parent prearm missing')
+          prearm = plan.get('directNextSafePrearm')
+          if not isinstance(prearm, str) or not prearm.strip():
+              raise SystemExit('direct NEXT_SAFE prearm missing')
 
-          planned = [task for task in tasks if task.get('plannedParent') == next_parent and task.get('readyForDispatch') is True]
-          workers = {task.get('workerId') for task in planned}
-          metadata_prearmed = [item for item in (catalog.get('prearmedRoadmap') or [])
-                              if item.get('parent') == next_parent
-                              and item.get('state') in {'READY_DEPENDENCY_GATED','READY_ORDER_DEPENDENCY_GATED'}
-                              and isinstance(item.get('materialization'), str)
-                              and item.get('materialization').strip()
-                              and 'NO_FILLER' in item.get('materialization')]
+          lease = catalog.get('lease') or {}
+          if lease.get('ttlMinutes') != 10:
+              raise SystemExit('lease TTL mismatch')
+          if lease.get('status') not in {'ACTIVE','RELEASED','COMPLETED','SUPERSEDED'}:
+              raise SystemExit('lease status invalid')
 
-          # A future parent may be prearmed without prematurely reserving a Jules
-          # write-scope. Physical lane ownership is required when such tasks have
-          # already been materialized. Otherwise one source-backed dependency-gated
-          # roadmap prearm is valid for a single-scope next parent and preserves the
-          # one-writer/taskId invariant until the dependency actually opens.
-          metadata_only = not planned and expected == 1 and len(metadata_prearmed) == 1
-          if not metadata_only:
-              if len(planned) != expected or len(workers) != expected:
-                  raise SystemExit('next parent prearmed material scope count/worker ownership mismatch')
-              if not workers.issubset(canonical):
-                  raise SystemExit('next parent references an unknown Jules lane')
+          if catalog.get('julesOffloadCandidates') not in ([], None):
+              for candidate in catalog['julesOffloadCandidates']:
+                  if candidate.get('approvalMarker') != 'JULES_OFFLOAD_APPROVED':
+                      raise SystemExit('unapproved Jules offload candidate')
 
-          scopes = []
-          for task in planned:
-              raw = task.get('fileScopeHint')
-              if not isinstance(raw, str) or not raw.strip():
-                  raise SystemExit('material task missing FILE_SCOPE_HINT')
-              if not isinstance(task.get('prompt'), str) or not task['prompt'].strip():
-                  raise SystemExit('material task missing prompt')
-              for token in raw.split(';'):
-                  token = token.strip()
-                  if token:
-                      scopes.append((task['taskId'], token.rstrip('*').rstrip('/')))
-
-          for index, (left_task, left) in enumerate(scopes):
-              for right_task, right in scopes[index + 1:]:
-                  if left_task == right_task:
-                      continue
-                  if left == right or left.startswith(right + '/') or right.startswith(left + '/'):
-                      raise SystemExit(f'overlapping parallel write scopes: {left_task}:{left} vs {right_task}:{right}')
-
-          mode = 'metadata_dependency_gated' if metadata_only else 'physical_lane_prearm'
-          print(f'VAEP_THROUGHPUT_GUARD=PASS current={current} next={next_parent} parallel_scopes={expected} mode={mode}')
+          print(f'VAEP_THROUGHPUT_GUARD=PASS current={current} next={next_parent} tasks={len(tasks)} mode=TASKS_FIRST')
           PY
