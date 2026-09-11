@@ -104,6 +104,11 @@
               @if (puedeEditar()) {
                 <a [routerLink]="['/usuarios', u.id, 'editar']" mat-icon-button title="Editar usuario"><mat-icon>edit</mat-icon></a>
               }
+              @if (puedeGestionarEmpresas()) {
+                <button mat-icon-button title="Gestionar empresas y roles" (click)="abrirGestionEmpresas(u)" [attr.aria-expanded]="usuarioGestionado()?.id === u.id" [attr.aria-controls]="'empresas-usuario-' + u.id">
+                  <mat-icon>business</mat-icon>
+                </button>
+              }
               @if (puedeBloquearUsuario(u)) {
                 @if (u.bloqueado) {
                   <button mat-icon-button title="Desbloquear" (click)="desbloquear(u)"><mat-icon>lock_open</mat-icon></button>
@@ -142,6 +147,9 @@
             @if (puedeEditar()) {
               <a [routerLink]="['/usuarios', u.id, 'editar']" mat-button><mat-icon>edit</mat-icon> Editar</a>
             }
+            @if (puedeGestionarEmpresas()) {
+              <button mat-button (click)="abrirGestionEmpresas(u)" [attr.aria-expanded]="usuarioGestionado()?.id === u.id" [attr.aria-controls]="'empresas-usuario-' + u.id"><mat-icon>business</mat-icon> Empresas</button>
+            }
             @if (puedeBloquearUsuario(u)) {
               @if (u.bloqueado) {
                 <button mat-button (click)="desbloquear(u)"><mat-icon>lock_open</mat-icon> Desbloquear</button>
@@ -160,3 +168,110 @@
     </div>
   }
 </div>
+
+@if (usuarioGestionado(); as usuario) {
+  <section class="card form" [id]="'empresas-usuario-' + usuario.id" aria-labelledby="titulo-empresas-usuario" aria-live="polite">
+    <div class="header-row">
+      <div>
+        <h2 id="titulo-empresas-usuario">Empresas de {{ usuario.nombreCompleto }}</h2>
+        <p class="item-card-desc">Asigna una empresa y el rol efectivo del usuario dentro de ella.</p>
+      </div>
+      <button mat-icon-button type="button" (click)="cerrarGestionEmpresas()" aria-label="Cerrar gestión de empresas"><mat-icon>close</mat-icon></button>
+    </div>
+
+    @if (!puedeVerEmpresas() || !puedeVerRoles()) {
+      <p class="error">Para asignar empresas se requiere acceso de lectura a los catálogos de Empresas y Roles. Las membresías existentes siguen visibles por identificador.</p>
+    }
+
+    @if (puedeVerEmpresas() && puedeVerRoles()) {
+      <form [formGroup]="empresaForm" (ngSubmit)="asignarEmpresa()" class="fields-grid">
+        <mat-form-field appearance="outline">
+          <mat-label>Empresa</mat-label>
+          <mat-select formControlName="empresaId">
+            @for (empresa of empresas(); track empresa.id) {
+              <mat-option [value]="empresa.id" [disabled]="!empresa.activa || empresaYaAsignada(empresa.id)">
+                {{ empresa.nombre }}{{ empresa.activa ? '' : ' (inactiva)' }}{{ empresaYaAsignada(empresa.id) ? ' (ya asignada)' : '' }}
+              </mat-option>
+            }
+          </mat-select>
+          @if (empresaForm.controls.empresaId.hasError('required')) { <mat-error>Selecciona una empresa.</mat-error> }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Rol en la empresa</mat-label>
+          <mat-select formControlName="rolId">
+            @for (rol of roles(); track rol.id) {
+              <mat-option [value]="rol.id">{{ rol.nombre }}</mat-option>
+            }
+          </mat-select>
+          @if (empresaForm.controls.rolId.hasError('required')) { <mat-error>Selecciona un rol.</mat-error> }
+        </mat-form-field>
+
+        <div class="form-actions">
+          <button mat-flat-button color="primary" type="submit" [disabled]="empresaForm.invalid || savingMembresia()">
+            @if (savingMembresia()) { <mat-spinner diameter="18"></mat-spinner> }
+            Asignar empresa
+          </button>
+        </div>
+      </form>
+    }
+
+    @if (mensajeMembresias()) {
+      <p [class.error]="mensajeMembresias()!.startsWith('No se')">{{ mensajeMembresias() }}</p>
+    }
+
+    @if (loadingMembresias()) {
+      <div class="loading"><mat-spinner diameter="32"></mat-spinner></div>
+    } @else {
+      <div class="table-desktop">
+        <table class="table">
+          <thead><tr><th>Empresa</th><th>Rol</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody>
+            @for (m of membresias(); track m.id) {
+              <tr>
+                <td>{{ nombreEmpresa(m.empresaId) }}</td>
+                <td>
+                  @if (puedeAsignarRol() && puedeVerRoles()) {
+                    <mat-form-field appearance="outline">
+                      <mat-select [value]="m.rolId" (selectionChange)="cambiarRolMembresia(m, $event.value)" [disabled]="savingMembresia()" [attr.aria-label]="'Rol de ' + nombreEmpresa(m.empresaId)">
+                        @for (rol of roles(); track rol.id) { <mat-option [value]="rol.id">{{ rol.nombre }}</mat-option> }
+                      </mat-select>
+                    </mat-form-field>
+                  } @else { {{ nombreRol(m.rolId) }} }
+                </td>
+                <td><span class="badge" [class.success]="m.activa" [class.muted]="!m.activa">{{ m.activa ? 'Activa' : 'Inactiva' }}</span></td>
+                <td>
+                  @if (puedeCambiarEstadoMembresia(m)) {
+                    <button mat-button type="button" (click)="toggleMembresia(m)" [disabled]="savingMembresia()">
+                      <mat-icon>{{ m.activa ? 'link_off' : 'link' }}</mat-icon>{{ m.activa ? 'Quitar' : 'Restaurar' }}
+                    </button>
+                  }
+                </td>
+              </tr>
+            } @empty { <tr><td colspan="4" class="empty">Este usuario todavía no tiene empresas asignadas.</td></tr> }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="cards-mobile">
+        @for (m of membresias(); track m.id) {
+          <div class="item-card">
+            <div class="item-card-header"><strong>{{ nombreEmpresa(m.empresaId) }}</strong><span class="badge" [class.success]="m.activa" [class.muted]="!m.activa">{{ m.activa ? 'Activa' : 'Inactiva' }}</span></div>
+            <p class="item-card-desc">{{ nombreRol(m.rolId) }}</p>
+            @if (puedeAsignarRol() && puedeVerRoles()) {
+              <mat-form-field appearance="outline">
+                <mat-label>Rol en la empresa</mat-label>
+                <mat-select [value]="m.rolId" (selectionChange)="cambiarRolMembresia(m, $event.value)" [disabled]="savingMembresia()">
+                  @for (rol of roles(); track rol.id) { <mat-option [value]="rol.id">{{ rol.nombre }}</mat-option> }
+                </mat-select>
+              </mat-form-field>
+            }
+            @if (puedeCambiarEstadoMembresia(m)) {
+              <button mat-button type="button" (click)="toggleMembresia(m)" [disabled]="savingMembresia()"><mat-icon>{{ m.activa ? 'link_off' : 'link' }}</mat-icon>{{ m.activa ? 'Quitar empresa' : 'Restaurar empresa' }}</button>
+            }
+          </div>
+        } @empty { <p class="empty">Este usuario todavía no tiene empresas asignadas.</p> }
+      </div>
+    }
+  </section>
+}
