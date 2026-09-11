@@ -2,10 +2,10 @@
   "schemaVersion": "tasks-first.v1",
   "authority": "docs/VAEP_AUTHORITY.md",
   "executionModel": "TASKS_FIRST_JULES_ON_DEMAND",
-  "currentParent": "N6.4.A",
-  "generatedAt": "2026-09-11T15:35:54Z",
-  "regenerationReason": "TASKS_FIRST_CUTOVER__DIRECT_EXECUTION_DEFAULT__JULES_OPTIONAL__NO_RUNTIME_HISTORY",
-  "lastClosedParent": "N6.3.H",
+  "currentParent": "N6.4.B",
+  "generatedAt": "2026-09-11T16:10:01Z",
+  "regenerationReason": "N6.4.A_LISTO_REAL__TASKS_FIRST_DIRECT_CLOSE_PROMOTE",
+  "lastClosedParent": "N6.4.A",
   "closureReceipts": {
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
     "N5.1.H": "vaep/evidence/fragments/N5.1.H_LISTO_REAL_20260909T1236Z.json",
@@ -48,7 +48,8 @@
     "N6.3.E": "vaep/evidence/fragments/N6.3.E_LISTO_REAL_20260911T1112Z.json",
     "N6.3.F": "vaep/evidence/fragments/N6.3.F_LISTO_REAL_20260911T1224Z.json",
     "N6.3.G": "vaep/evidence/fragments/N6.3.G_LISTO_REAL_20260911T1324Z.json",
-    "N6.3.H": "vaep/evidence/fragments/N6.3.H_LISTO_REAL_20260911T1402Z.json"
+    "N6.3.H": "vaep/evidence/fragments/N6.3.H_LISTO_REAL_20260911T1402Z.json",
+    "N6.4.A": "vaep/evidence/fragments/N6.4.A_LISTO_REAL_20260911T1610Z.json"
   },
   "policy": {
     "executionModel": "TASKS_FIRST_JULES_ON_DEMAND",
@@ -65,18 +66,25 @@
     "semanticIdentity": "CURRENT_PARENT + material scope/semantic facet",
     "requireDistinctWriteScopesWhenParallel": true,
     "activeScheduledExecutorCount": 10,
-    "availableOptionalWorkers": ["J1", "J2", "J3", "J4", "J5", "J6"]
+    "availableOptionalWorkers": [
+      "J1",
+      "J2",
+      "J3",
+      "J4",
+      "J5",
+      "J6"
+    ]
   },
   "throughputPlan": {
     "mode": "TASKS_FIRST_PARENT_CLOSE_FIRST",
-    "currentParent": "N6.4.A",
+    "currentParent": "N6.4.B",
     "currentParentMaterialScopeCount": 1,
-    "currentParentReason": "N6.3.H is LISTO_REAL. N6.4.A is the roadmap-derived audit/preflight facet for Usuarios por empresa.",
+    "currentParentReason": "N6.4.A is LISTO_REAL. N6.4.B is the roadmap-derived domain/contracts facet for Usuarios por empresa.",
     "directExecutorClass": "SCHEDULED_AUTOMATION_CONTROLLER",
-    "nextParent": "N6.4.B",
+    "nextParent": "N6.4.C",
     "nextParentParallelMaterialScopes": 1,
     "nextParentScopesNonOverlapping": true,
-    "directNextSafePrearm": "N6.4.B_DEPENDENCY_GATED__READ_ONLY_PREARM",
+    "directNextSafePrearm": "N6.4.C_DEPENDENCY_GATED__READ_ONLY_PREARM",
     "julesOffload": "OPTIONAL_EXPLICIT_ONLY",
     "currentJulesOffload": null
   },
@@ -94,35 +102,251 @@
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
     "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
-    "sourceRanges": ["COLA!A478:Z490", "PLAN_MAESTRO!A59:L75"],
+    "sourceRanges": [
+      "COLA!A478:Z490",
+      "PLAN_MAESTRO!A59:L75"
+    ],
     "nodes": [
-      {"id":"GATE-N5","order":857,"dependencies":["N5.1.H","N5.2.H","N5.3.H","N5.4.H","N5.5.H","N5.6.H","N5.7.H","N5.8.H","N5.9.H"]},
-      {"id":"N6.1.A","order":524,"dependencies":["GATE-N5"]},
-      {"id":"N6.1.B","order":525,"dependencies":["N6.1.A"]},
-      {"id":"N6.1.C","order":526,"dependencies":["N6.1.B"]},
-      {"id":"N6.1.D","order":527,"dependencies":["N6.1.C"]},
-      {"id":"N6.1.E","order":528,"dependencies":["N6.1.D"]},
-      {"id":"N6.1.F","order":529,"dependencies":["N6.1.E"]},
-      {"id":"N6.1.G","order":530,"dependencies":["N6.1.F"]},
-      {"id":"N6.1.H","order":531,"dependencies":["N6.1.G"]},
-      {"id":"N6.2.A","order":532,"dependencies":["N6.1.H"]},
-      {"id":"N6.2.B","order":533,"dependencies":["N6.2.A"]},
-      {"id":"N6.2.C","order":534,"dependencies":["N6.2.B"]},
-      {"id":"N6.2.D","order":535,"dependencies":["N6.2.C"]},
-      {"id":"N6.2.E","order":536,"dependencies":["N6.2.D"]},
-      {"id":"N6.2.F","order":537,"dependencies":["N6.2.E"]},
-      {"id":"N6.2.G","order":538,"dependencies":["N6.2.F"]},
-      {"id":"N6.2.H","order":539,"dependencies":["N6.2.G"]},
-      {"id":"N6.3.A","order":540,"dependencies":["N6.1.H","N1.1.H"]},
-      {"id":"N6.3.B","order":541,"dependencies":["N6.3.A"]},
-      {"id":"N6.3.C","order":542,"dependencies":["N6.3.B"]},
-      {"id":"N6.3.D","order":543,"dependencies":["N6.3.C"]},
-      {"id":"N6.3.E","order":544,"dependencies":["N6.3.D"]},
-      {"id":"N6.3.F","order":545,"dependencies":["N6.3.E"]},
-      {"id":"N6.3.G","order":546,"dependencies":["N6.3.F"]},
-      {"id":"N6.3.H","order":547,"dependencies":["N6.3.G"]},
-      {"id":"N6.4.A","order":548,"dependencies":["N6.1.H"]},
-      {"id":"N6.4.B","order":549,"dependencies":["N6.4.A"]}
+      {
+        "id": "GATE-N5",
+        "order": 857,
+        "dependencies": [
+          "N5.1.H",
+          "N5.2.H",
+          "N5.3.H",
+          "N5.4.H",
+          "N5.5.H",
+          "N5.6.H",
+          "N5.7.H",
+          "N5.8.H",
+          "N5.9.H"
+        ]
+      },
+      {
+        "id": "N6.1.A",
+        "order": 524,
+        "dependencies": [
+          "GATE-N5"
+        ]
+      },
+      {
+        "id": "N6.1.B",
+        "order": 525,
+        "dependencies": [
+          "N6.1.A"
+        ]
+      },
+      {
+        "id": "N6.1.C",
+        "order": 526,
+        "dependencies": [
+          "N6.1.B"
+        ]
+      },
+      {
+        "id": "N6.1.D",
+        "order": 527,
+        "dependencies": [
+          "N6.1.C"
+        ]
+      },
+      {
+        "id": "N6.1.E",
+        "order": 528,
+        "dependencies": [
+          "N6.1.D"
+        ]
+      },
+      {
+        "id": "N6.1.F",
+        "order": 529,
+        "dependencies": [
+          "N6.1.E"
+        ]
+      },
+      {
+        "id": "N6.1.G",
+        "order": 530,
+        "dependencies": [
+          "N6.1.F"
+        ]
+      },
+      {
+        "id": "N6.1.H",
+        "order": 531,
+        "dependencies": [
+          "N6.1.G"
+        ]
+      },
+      {
+        "id": "N6.2.A",
+        "order": 532,
+        "dependencies": [
+          "N6.1.H"
+        ]
+      },
+      {
+        "id": "N6.2.B",
+        "order": 533,
+        "dependencies": [
+          "N6.2.A"
+        ]
+      },
+      {
+        "id": "N6.2.C",
+        "order": 534,
+        "dependencies": [
+          "N6.2.B"
+        ]
+      },
+      {
+        "id": "N6.2.D",
+        "order": 535,
+        "dependencies": [
+          "N6.2.C"
+        ]
+      },
+      {
+        "id": "N6.2.E",
+        "order": 536,
+        "dependencies": [
+          "N6.2.D"
+        ]
+      },
+      {
+        "id": "N6.2.F",
+        "order": 537,
+        "dependencies": [
+          "N6.2.E"
+        ]
+      },
+      {
+        "id": "N6.2.G",
+        "order": 538,
+        "dependencies": [
+          "N6.2.F"
+        ]
+      },
+      {
+        "id": "N6.2.H",
+        "order": 539,
+        "dependencies": [
+          "N6.2.G"
+        ]
+      },
+      {
+        "id": "N6.3.A",
+        "order": 540,
+        "dependencies": [
+          "N6.1.H",
+          "N1.1.H"
+        ]
+      },
+      {
+        "id": "N6.3.B",
+        "order": 541,
+        "dependencies": [
+          "N6.3.A"
+        ]
+      },
+      {
+        "id": "N6.3.C",
+        "order": 542,
+        "dependencies": [
+          "N6.3.B"
+        ]
+      },
+      {
+        "id": "N6.3.D",
+        "order": 543,
+        "dependencies": [
+          "N6.3.C"
+        ]
+      },
+      {
+        "id": "N6.3.E",
+        "order": 544,
+        "dependencies": [
+          "N6.3.D"
+        ]
+      },
+      {
+        "id": "N6.3.F",
+        "order": 545,
+        "dependencies": [
+          "N6.3.E"
+        ]
+      },
+      {
+        "id": "N6.3.G",
+        "order": 546,
+        "dependencies": [
+          "N6.3.F"
+        ]
+      },
+      {
+        "id": "N6.3.H",
+        "order": 547,
+        "dependencies": [
+          "N6.3.G"
+        ]
+      },
+      {
+        "id": "N6.4.A",
+        "order": 548,
+        "dependencies": [
+          "N6.1.H"
+        ]
+      },
+      {
+        "id": "N6.4.B",
+        "order": 549,
+        "dependencies": [
+          "N6.4.A"
+        ]
+      },
+      {
+        "id": "N6.4.C",
+        "order": 550,
+        "dependencies": [
+          "N6.4.B"
+        ]
+      },
+      {
+        "id": "N6.4.D",
+        "order": 551,
+        "dependencies": [
+          "N6.4.C"
+        ]
+      },
+      {
+        "id": "N6.4.E",
+        "order": 552,
+        "dependencies": [
+          "N6.4.D"
+        ]
+      },
+      {
+        "id": "N6.4.F",
+        "order": 553,
+        "dependencies": [
+          "N6.4.E"
+        ]
+      },
+      {
+        "id": "N6.4.G",
+        "order": 554,
+        "dependencies": [
+          "N6.4.F"
+        ]
+      },
+      {
+        "id": "N6.4.H",
+        "order": 555,
+        "dependencies": [
+          "N6.4.G"
+        ]
+      }
     ]
   },
   "lanes": {
@@ -135,7 +359,10 @@
   },
   "julesOffloadCandidates": [],
   "legacyRuntimeHistory": "REMOVED_FROM_LIVE_CATALOG__PRESERVED_IN_GIT_AND_RECEIPTS_ONLY",
-  "rolling60CertifiedParents": ["N6.3.H"],
+  "rolling60CertifiedParents": [
+    "N6.4.A"
+  ],
   "rolling60Count": 1,
-  "lastClosureFunctionalHead": "e37e74c4fbf0c39d6cb1d4b0e56ac8f026a4a56e"
+  "lastClosureFunctionalHead": "adf9891ee140f2d59b1220a2a7a4f4b3fb942748",
+  "nextParent": "N6.4.C"
 }
