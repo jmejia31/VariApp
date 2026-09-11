@@ -1,9 +1,9 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
-  "currentParent": "N6.3.E",
-  "generatedAt": "2026-09-11T10:57:58Z",
-  "regenerationReason": "CONTROL_PLANE_DRIFT_REPAIRED__N6.3.A_D_LISTO_REAL__N6.3.E_CONTROLLER_QA_TAKEOVER_REVIEW_FIRST_ACCEPTED_PENDING_EXACT_HEAD_GATES__NO_DUPLICATE__NO_R3__NO_FILLER",
-  "lastClosedParent": "N6.3.D",
+  "currentParent": "N6.3.F",
+  "generatedAt": "2026-09-11T11:12:00Z",
+  "regenerationReason": "N6.3.E_LISTO_REAL__PROMOTED_N6.3.F__J5_ATTEMPT1_MATERIALIZED__NO_DUPLICATE__NO_R3__NO_FILLER",
+  "lastClosedParent": "N6.3.E",
   "closureReceipts": {
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
     "N5.1.H": "vaep/evidence/fragments/N5.1.H_LISTO_REAL_20260909T1236Z.json",
@@ -42,7 +42,8 @@
     "N6.3.A": "vaep/evidence/fragments/N6.3.A_LISTO_REAL_20260911T0701Z.json",
     "N6.3.B": "vaep/evidence/fragments/N6.3.B_LISTO_REAL_20260911T0746Z.json",
     "N6.3.C": "vaep/evidence/fragments/N6.3.C_LISTO_REAL_20260911T0848Z.json",
-    "N6.3.D": "vaep/evidence/fragments/N6.3.D_LISTO_REAL_20260911T0958Z.json"
+    "N6.3.D": "vaep/evidence/fragments/N6.3.D_LISTO_REAL_20260911T0958Z.json",
+    "N6.3.E": "vaep/evidence/fragments/N6.3.E_LISTO_REAL_20260911T1112Z.json"
   },
   "policy": {
     "branch": "Desarrollo",
@@ -67,15 +68,21 @@
   },
   "throughputPlan": {
     "mode": "PARENT_CLOSE_FIRST",
-    "currentParent": "N6.3.E",
+    "currentParent": "N6.3.F",
     "currentParentMaterialScopeCount": 1,
-    "currentParentReason": "N6.3.D is LISTO_REAL. N6.3.E ATTEMPT2 ended failure with no patch; controller/QA takeover supplied the bounded Empresa-aware Sucursales frontend and REVIEW_FIRST accepted it pending exact-head gates.",
-    "nextParent": "N6.3.F",
+    "currentParentReason": "N6.3.E is LISTO_REAL. N6.3.F is the single roadmap-derived RBAC/audit/security/observability facet for Sucursales by Empresa.",
+    "nextParent": "N6.3.G",
     "nextParentParallelMaterialScopes": 1,
     "nextParentScopesNonOverlapping": true,
-    "currentRun": null,
+    "currentRun": {
+      "worker": "J5",
+      "taskId": "N6.3.F.1.SUCURSALES_EMPRESA_SEC_AUDIT",
+      "dispatchId": "N6-3-F-1-SUCURSALES-EMPRESA-SEC-AUDIT-J5-A1-20260911T1112Z",
+      "manifest": "vaep/j5/dispatch/N6-3-F-1-SUCURSALES-EMPRESA-SEC-AUDIT-J5-A1-20260911T1112Z.json",
+      "state": "DISPATCHED_TRANSPORT_PENDING__ACTIVE_REAL_UNCONFIRMED"
+    },
     "nextRunReserved": null,
-    "laneRefill": "N6.3.E_CONTROLLER_QA_TAKEOVER__REVIEW_FIRST_ACCEPTED_PENDING_GATES__N6.3.F_G_H_PREARMED_GATED__NO_FILLER"
+    "laneRefill": "N6.3.F_J5_ATTEMPT1_MATERIALIZED__N6.3.G_H_PREARMED_DEPENDENCY_GATED__NO_FILLER"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
@@ -532,9 +539,9 @@
     {
       "parent": "N6.3.E",
       "taskId": "N6.3.E.1.SUCURSALES_EMPRESA_FRONTEND_UX",
-      "state": "CURRENT_CONTROLLER_QA_TAKEOVER__REVIEW_FIRST_ACCEPTED_PENDING_EXACT_HEAD_GATES",
+      "state": "LISTO_REAL",
       "dependency": "N6.3.D_LISTO_REAL",
-      "materialization": "SUCURSALES_EMPRESA_FRONTEND_UX__CONTROLLER_QA_TAKEOVER__NO_FILLER",
+      "materialization": "SUCURSALES_EMPRESA_FRONTEND_UX__CONTROLLER_QA_TAKEOVER__REVIEW_FIRST_PASS__EXACT_HEAD_GATES_PASS",
       "worker": "CHATGPT_VAEP",
       "taskAttempt": 2,
       "activeReal": false,
@@ -542,14 +549,20 @@
       "reviewReceipt": "vaep/evidence/reviews/N6.3.E_CONTROLLER_QA_TAKEOVER_REVIEW_FIRST_20260911T1056Z.json",
       "r2Used": true,
       "r3Used": false,
-      "lateJulesIntegrationDenied": true
+      "lateJulesIntegrationDenied": true,
+      "closureReceipt": "vaep/evidence/fragments/N6.3.E_LISTO_REAL_20260911T1112Z.json"
     },
     {
       "parent": "N6.3.F",
       "taskId": "N6.3.F.1.SUCURSALES_EMPRESA_SEC_AUDIT",
-      "state": "READY_DEPENDENCY_GATED",
+      "state": "DISPATCHED_TRANSPORT_PENDING__ACTIVE_REAL_UNCONFIRMED",
       "dependency": "N6.3.E_LISTO_REAL",
-      "materialization": "SUCURSALES_EMPRESA_SEC_AUDIT__ROADMAP_DERIVED__NO_FILLER"
+      "materialization": "SUCURSALES_EMPRESA_SEC_AUDIT__ROADMAP_DERIVED__NO_FILLER",
+      "worker": "J5",
+      "dispatchId": "N6-3-F-1-SUCURSALES-EMPRESA-SEC-AUDIT-J5-A1-20260911T1112Z",
+      "taskAttempt": 1,
+      "activeReal": false,
+      "manifest": "vaep/j5/dispatch/N6-3-F-1-SUCURSALES-EMPRESA-SEC-AUDIT-J5-A1-20260911T1112Z.json"
     },
     {
       "parent": "N6.3.G",
@@ -571,12 +584,22 @@
     "J2": [],
     "J3": [],
     "J4": [],
-    "J5": [],
+    "J5": [
+      {
+        "taskId": "N6.3.F.1.SUCURSALES_EMPRESA_SEC_AUDIT",
+        "parent": "N6.3.F",
+        "dispatchId": "N6-3-F-1-SUCURSALES-EMPRESA-SEC-AUDIT-J5-A1-20260911T1112Z",
+        "manifest": "vaep/j5/dispatch/N6-3-F-1-SUCURSALES-EMPRESA-SEC-AUDIT-J5-A1-20260911T1112Z.json",
+        "taskAttempt": 1,
+        "state": "DISPATCHED_TRANSPORT_PENDING__ACTIVE_REAL_UNCONFIRMED",
+        "activeReal": false
+      }
+    ],
     "J6": []
   },
   "rolling60CertifiedParents": [
-    "N6.3.D"
+    "N6.3.E"
   ],
   "rolling60Count": 1,
-  "lastClosureFunctionalHead": "b82da1d2d297933a7434130b068d277f24c30731"
+  "lastClosureFunctionalHead": "96ebf77191e90884d5aee0b894adda50cfe627b0"
 }
