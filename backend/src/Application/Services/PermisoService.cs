@@ -71,8 +71,6 @@ public class PermisoService : IPermisoService
                 !Enum.TryParse<AccionPermiso>(item.Accion, true, out var accion))
                 throw new BusinessRuleException($"Combinación inválida '{item.Modulo}.{item.Accion}'.");
 
-            // La validez y vigencia de la combinación proviene del catálogo persistido,
-            // no de una matriz hardcodeada en la capa de autorización.
             var permiso = await _permisoRepository.GetByModuloAccionAsync(modulo, accion)
                 ?? throw new BusinessRuleException($"El permiso '{modulo}:{accion}' no existe, está inactivo o fue eliminado.");
 
@@ -96,8 +94,6 @@ public class PermisoService : IPermisoService
             }
         }
 
-        // La matriz solo se reemplaza después de validar por completo la invariancia
-        // administrativa. Un rechazo jamás puede dejar grants parcialmente mutados.
         var matrizAnterior = await GetMatrizAsync(rolId);
         await _repository.ReemplazarMatrizPorRolIdAsync(rolId, nuevaMatriz);
         var matrizNueva = await GetMatrizAsync(rolId);
@@ -142,29 +138,17 @@ public class PermisoService : IPermisoService
     public async Task<MisPermisosDto> GetMisPermisosAsync()
     {
         var alcance = await _usuarioScope.ObtenerActualAsync();
-        if (alcance is null)
-        {
-            return new MisPermisosDto
-            {
-                Rol = string.Empty,
-                EsAdministrador = false,
-                Permisos = new List<string>()
-            };
-        }
+        return alcance is null
+            ? PermisosVacios()
+            : await ConstruirMisPermisosAsync(alcance.RolId, alcance.RolNombre, alcance.EsAdministrador);
+    }
 
-        var filas = await _repository.GetByRolIdAsync(alcance.RolId);
-        var permisos = filas
-            .Where(p => p.Permiso is { Activo: true, Eliminado: false })
-            .Select(p => $"{p.Permiso.Modulo}:{p.Permiso.Accion}")
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToList();
-
-        return new MisPermisosDto
-        {
-            Rol = alcance.RolNombre,
-            EsAdministrador = alcance.EsAdministrador,
-            Permisos = permisos
-        };
+    public async Task<MisPermisosDto> GetMisPermisosAsync(int empresaId)
+    {
+        var alcance = await _usuarioScope.ObtenerActualAsync(empresaId);
+        return alcance is null
+            ? PermisosVacios()
+            : await ConstruirMisPermisosAsync(alcance.RolId, alcance.RolNombre, alcance.EsAdministrador);
     }
 
     public async Task<bool> TienePermisoAsync(ModuloSistema modulo, AccionPermiso accion)
@@ -172,8 +156,6 @@ public class PermisoService : IPermisoService
         var alcance = await _usuarioScope.ObtenerActualAsync();
         if (alcance is null) return false;
 
-        // No existe bypass para EsAdministrador: un administrador tiene acceso
-        // porque su rol posee grants explícitos en RolPermiso.
         return await _repository.TienePermisoPorRolIdAsync(alcance.RolId, modulo, accion);
     }
 
@@ -182,4 +164,31 @@ public class PermisoService : IPermisoService
         if (!await TienePermisoAsync(modulo, accion))
             throw new ForbiddenAccessException($"No tienes permiso para '{accion}' en el módulo '{modulo}'.");
     }
+
+    private async Task<MisPermisosDto> ConstruirMisPermisosAsync(
+        int rolId,
+        string rolNombre,
+        bool esAdministrador)
+    {
+        var filas = await _repository.GetByRolIdAsync(rolId);
+        var permisos = filas
+            .Where(p => p.Permiso is { Activo: true, Eliminado: false })
+            .Select(p => $"{p.Permiso.Modulo}:{p.Permiso.Accion}")
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        return new MisPermisosDto
+        {
+            Rol = rolNombre,
+            EsAdministrador = esAdministrador,
+            Permisos = permisos
+        };
+    }
+
+    private static MisPermisosDto PermisosVacios() => new()
+    {
+        Rol = string.Empty,
+        EsAdministrador = false,
+        Permisos = new List<string>()
+    };
 }
