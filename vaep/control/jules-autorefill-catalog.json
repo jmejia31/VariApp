@@ -1,8 +1,8 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
   "currentParent": "N6.3.F",
-  "generatedAt": "2026-09-11T11:12:00Z",
-  "regenerationReason": "N6.3.E_LISTO_REAL__PROMOTED_N6.3.F__J5_ATTEMPT1_MATERIALIZED__NO_DUPLICATE__NO_R3__NO_FILLER",
+  "generatedAt": "2026-09-11T11:18:00Z",
+  "regenerationReason": "N6.3.E_LISTO_REAL__N6.3.F_J5_ATTEMPT1_TX1_PREFLIGHT_AND_RESERVE_PASS__EXECUTE_MASTER_IN_PROGRESS__ACTIVE_REAL_UNCONFIRMED__NO_R2_R3_DUPLICATE_FILLER",
   "lastClosedParent": "N6.3.E",
   "closureReceipts": {
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
@@ -77,12 +77,14 @@
     "currentRun": {
       "worker": "J5",
       "taskId": "N6.3.F.1.SUCURSALES_EMPRESA_SEC_AUDIT",
-      "dispatchId": "N6-3-F-1-SUCURSALES-EMPRESA-SEC-AUDIT-J5-A1-20260911T1112Z",
-      "manifest": "vaep/j5/dispatch/N6-3-F-1-SUCURSALES-EMPRESA-SEC-AUDIT-J5-A1-20260911T1112Z.json",
-      "state": "DISPATCHED_TRANSPORT_PENDING__ACTIVE_REAL_UNCONFIRMED"
+      "dispatchId": "N6-3-F-1-SUCURSALES-EMPRESA-SEC-AUDIT-J5-A1-TX1-20260911T1118Z",
+      "manifest": "vaep/j5/dispatch/N6-3-F-1-SUCURSALES-EMPRESA-SEC-AUDIT-J5-A1-TX1-20260911T1118Z.json",
+      "runId": 34593258384,
+      "jobId": 103243140085,
+      "state": "EXECUTE_MASTER_IN_PROGRESS__ACTIVE_REAL_UNCONFIRMED"
     },
     "nextRunReserved": null,
-    "laneRefill": "N6.3.F_J5_ATTEMPT1_MATERIALIZED__N6.3.G_H_PREARMED_DEPENDENCY_GATED__NO_FILLER"
+    "laneRefill": "N6.3.F_J5_TX1_EXECUTE_MASTER_IN_PROGRESS__N6.3.G_H_PREARMED_DEPENDENCY_GATED__NO_FILLER"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
@@ -397,6 +399,25 @@
       "reviewReceipt": "vaep/evidence/reviews/N6.3.E_CONTROLLER_QA_TAKEOVER_REVIEW_FIRST_20260911T1056Z.json",
       "r2Used": true,
       "r3Used": false
+    },
+    {
+      "parent": "N6.3.F",
+      "logicalTaskId": "N6.3.F.1.SUCURSALES_EMPRESA_SEC_AUDIT",
+      "worker": "J5",
+      "originalRunId": 34593180588,
+      "originalJobId": 103242891140,
+      "originalTerminal": "PRESESSION_INVALID_REDISPATCH__COMMIT_NOT_APPEND_ONLY",
+      "contentAttemptConsumed": false,
+      "tx1Manifest": "vaep/j5/dispatch/N6-3-F-1-SUCURSALES-EMPRESA-SEC-AUDIT-J5-A1-TX1-20260911T1118Z.json",
+      "tx1ManifestCommit": "abdfba5c0b6faa12ce5b40b92aac25e4b4456714",
+      "tx1RunId": 34593258384,
+      "tx1JobId": 103243140085,
+      "tx1Status": "EXECUTE_MASTER_IN_PROGRESS__ACTIVE_REAL_UNCONFIRMED",
+      "sessionId": null,
+      "activeReal": false,
+      "taskAttempt": 1,
+      "r2Used": false,
+      "r3Used": false
     }
   ],
   "prearmedRoadmap": [
@@ -555,14 +576,17 @@
     {
       "parent": "N6.3.F",
       "taskId": "N6.3.F.1.SUCURSALES_EMPRESA_SEC_AUDIT",
-      "state": "DISPATCHED_TRANSPORT_PENDING__ACTIVE_REAL_UNCONFIRMED",
+      "state": "EXECUTE_MASTER_IN_PROGRESS__ACTIVE_REAL_UNCONFIRMED",
       "dependency": "N6.3.E_LISTO_REAL",
       "materialization": "SUCURSALES_EMPRESA_SEC_AUDIT__ROADMAP_DERIVED__NO_FILLER",
       "worker": "J5",
-      "dispatchId": "N6-3-F-1-SUCURSALES-EMPRESA-SEC-AUDIT-J5-A1-20260911T1112Z",
+      "dispatchId": "N6-3-F-1-SUCURSALES-EMPRESA-SEC-AUDIT-J5-A1-TX1-20260911T1118Z",
       "taskAttempt": 1,
       "activeReal": false,
-      "manifest": "vaep/j5/dispatch/N6-3-F-1-SUCURSALES-EMPRESA-SEC-AUDIT-J5-A1-20260911T1112Z.json"
+      "manifest": "vaep/j5/dispatch/N6-3-F-1-SUCURSALES-EMPRESA-SEC-AUDIT-J5-A1-TX1-20260911T1118Z.json",
+      "runId": 34593258384,
+      "jobId": 103243140085,
+      "transportRecovery": "TX1"
     },
     {
       "parent": "N6.3.G",
@@ -588,10 +612,12 @@
       {
         "taskId": "N6.3.F.1.SUCURSALES_EMPRESA_SEC_AUDIT",
         "parent": "N6.3.F",
-        "dispatchId": "N6-3-F-1-SUCURSALES-EMPRESA-SEC-AUDIT-J5-A1-20260911T1112Z",
-        "manifest": "vaep/j5/dispatch/N6-3-F-1-SUCURSALES-EMPRESA-SEC-AUDIT-J5-A1-20260911T1112Z.json",
+        "dispatchId": "N6-3-F-1-SUCURSALES-EMPRESA-SEC-AUDIT-J5-A1-TX1-20260911T1118Z",
+        "manifest": "vaep/j5/dispatch/N6-3-F-1-SUCURSALES-EMPRESA-SEC-AUDIT-J5-A1-TX1-20260911T1118Z.json",
+        "runId": 34593258384,
+        "jobId": 103243140085,
         "taskAttempt": 1,
-        "state": "DISPATCHED_TRANSPORT_PENDING__ACTIVE_REAL_UNCONFIRMED",
+        "state": "EXECUTE_MASTER_IN_PROGRESS__ACTIVE_REAL_UNCONFIRMED",
         "activeReal": false
       }
     ],
