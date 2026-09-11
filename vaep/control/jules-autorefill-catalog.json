@@ -1,8 +1,8 @@
 {
   "authority": "docs/VAEP_AUTHORITY.md",
   "currentParent": "N6.2.E",
-  "generatedAt": "2026-09-11T03:08:00Z",
-  "regenerationReason": "PRIMARY_00__N6.2.D_LISTO_REAL__PROMOTE_N6.2.E__PARENT_CLOSE_FIRST__NO_FILLER",
+  "generatedAt": "2026-09-11T03:31:00Z",
+  "regenerationReason": "SUPERVISION_24__FIRST_DETECTOR_OWNS_RECOVERY__PREARM_N6.2.F__NO_FILLER",
   "lastClosedParent": "N6.2.D",
   "closureReceipts": {
     "GATE-N4": "vaep/evidence/fragments/GATE-N4_LISTO_REAL_20260908T215500Z.json",
@@ -54,18 +54,18 @@
     "mode": "PARENT_CLOSE_FIRST",
     "currentParent": "N6.2.E",
     "currentParentMaterialScopeCount": 1,
-    "currentParentReason": "N6.2.D is certified LISTO_REAL after REVIEW_FIRST PASS with P0/P1=0 and exact-head causal gates SUCCESS. N6.2.E frontend/UX is now dependency-valid; no later parent is promoted or dispatched.",
-    "nextParent": null,
-    "nextParentParallelMaterialScopes": 0,
+    "currentParentReason": "N6.2.D is certified LISTO_REAL. N6.2.E frontend/UX is in controller recovery after J3 A1 exhausted its lane budget; the controller direct-fix path is authoritative and no second writer is admitted.",
+    "nextParent": "N6.2.F",
+    "nextParentParallelMaterialScopes": 1,
     "nextParentScopesNonOverlapping": true,
     "currentRun": null,
     "nextRunReserved": null,
-    "laneRefill": "N6.2.E_CURRENT_DEPENDENCY_VALID__READY_FOR_SINGLE_MATERIAL_DISPATCH__NO_FILLER__NO_DUPLICATE"
+    "laneRefill": "N6.2.E_CONTROLLER_RECOVERY__N6.2.F_PREARMED_DEPENDENCY_GATED__NO_FILLER__NO_DUPLICATE"
   },
   "roadmap": {
     "authority": "docs/VAEP_AUTHORITY.md",
     "sourceSpreadsheetId": "19RrOmbhcqQf7zXWCuqjNPORlVOfuHMa9i43wjOyy8eY",
-    "sourceRanges": ["COLA!A464:Z476", "PLAN_MAESTRO!A60:M68"],
+    "sourceRanges": ["COLA!A464:Z477", "PLAN_MAESTRO!A60:M68"],
     "nodes": [
       {"id":"GATE-N5","order":857,"dependencies":["N5.1.H","N5.2.H","N5.3.H","N5.4.H","N5.5.H","N5.6.H","N5.7.H","N5.8.H","N5.9.H"]},
       {"id":"N6.1.A","order":524,"dependencies":["GATE-N5"]},
@@ -80,7 +80,8 @@
       {"id":"N6.2.B","order":533,"dependencies":["N6.2.A"]},
       {"id":"N6.2.C","order":534,"dependencies":["N6.2.B"]},
       {"id":"N6.2.D","order":535,"dependencies":["N6.2.C"]},
-      {"id":"N6.2.E","order":536,"dependencies":["N6.2.D"]}
+      {"id":"N6.2.E","order":536,"dependencies":["N6.2.D"]},
+      {"id":"N6.2.F","order":537,"dependencies":["N6.2.E"]}
     ]
   },
   "recoveredRuns": [
@@ -97,7 +98,8 @@
     {"parent":"N6.2.B","taskId":"N6.2.B.1.TENANT_AWARE_DATA_MODEL_DOMAIN_CONTRACTS","state":"LISTO_REAL","dependency":"N6.2.A_LISTO_REAL","materialization":"TENANT_AWARE_DATA_MODEL_DOMAIN_CONTRACTS__QA_TAKEOVER__REVIEW_FIRST_PASS"},
     {"parent":"N6.2.C","state":"LISTO_REAL","dependency":"N6.2.B_LISTO_REAL","materialization":"TENANT_AWARE_DATA_MODEL_PERSISTENCE__CONTROLLER_RECOVERY__REVIEW_FIRST_PASS__EXACT_GATES_PASS","taskId":"N6.2.C.1.TENANT_AWARE_DATA_MODEL_PERSISTENCE","worker":"CHATGPT_VAEP","runId":34546666164,"dispatchId":"N6-2-C-1-TENANT-AWARE-DATA-MODEL-PERSISTENCE-J2-A1-TX2","functionalHead":"f60c4ea3d9ad157f8cc1a5d06f3f86f3f1642086","reviewCommit":"a717ded0a6df15001ebeb92f65ecb278cca02243","closureReceipt":"vaep/evidence/fragments/N6.2.C_LISTO_REAL_20260911T0223Z.json"},
     {"parent":"N6.2.D","state":"LISTO_REAL","dependency":"N6.2.C_LISTO_REAL","materialization":"TENANT_AWARE_DATA_MODEL_APPLICATION_API__CONTROLLER_REVIEW_FIRST_PASS__EXACT_GATES_PASS","taskId":"N6.2.D.1.TENANT_AWARE_DATA_MODEL_APPLICATION_API","worker":"CHATGPT_VAEP","dispatchId":"N6-2-D-1-TENANT-AWARE-DATA-MODEL-APPLICATION-API-J2-A1","taskAttempt":1,"functionalHead":"04fc4be1c4ca0c240b8111aba317b3524f70a272","reviewReceipt":"vaep/evidence/reviews/N6.2.D_CONTROLLER_REVIEW_FIRST_20260911T0244Z.json","closureReceipt":"vaep/evidence/fragments/N6.2.D_LISTO_REAL_20260911T0308Z.json"},
-    {"parent":"N6.2.E","state":"CURRENT_DEPENDENCY_VALID","dependency":"N6.2.D_LISTO_REAL","materialization":"TENANT_AWARE_DATA_MODEL_FRONTEND_UX__ROADMAP_DERIVED__NO_FILLER","taskId":"N6.2.E.1.TENANT_AWARE_DATA_MODEL_FRONTEND_UX"}
+    {"parent":"N6.2.E","state":"CURRENT_CONTROLLER_RECOVERY","dependency":"N6.2.D_LISTO_REAL","materialization":"TENANT_AWARE_DATA_MODEL_FRONTEND_UX__CONTROLLER_DIRECT_FIX__NO_FILLER","taskId":"N6.2.E.1.TENANT_AWARE_DATA_MODEL_FRONTEND_UX","worker":"CHATGPT_VAEP"},
+    {"parent":"N6.2.F","taskId":"N6.2.F.1.TENANT_AWARE_DATA_MODEL_SEC_AUDIT","state":"READY_DEPENDENCY_GATED","dependency":"N6.2.E_LISTO_REAL","materialization":"TENANT_AWARE_DATA_MODEL_SEC_AUDIT__ROADMAP_DERIVED__NO_FILLER"}
   ],
   "lanes": {"J1":[],"J2":[],"J3":[],"J4":[],"J5":[],"J6":[]},
   "rolling60CertifiedParents": ["N6.2.C","N6.2.D"],
