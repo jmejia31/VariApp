@@ -1,0 +1,196 @@
+name: M9 - Cargas masivas profesionales
+
+on:
+  push:
+    branches:
+      - Desarrollo
+    paths:
+      - .github/workflows/m9-cargas-masivas.yml
+      - backend/src/API/Controllers/CargasMasivasController.cs
+      - backend/src/Application/DTOs/CargaMasivaDto.cs
+      - backend/src/Application/Interfaces/ICargaMasivaService.cs
+      - backend/src/Domain/Entities/CargaMasiva*.cs
+      - backend/src/Infrastructure/Services/CargaMasiva*.cs
+      - backend/tests/InventoryApp.Tests/M9CargaMasivaProfesionalTests.cs
+      - backend/tests/InventoryApp.Tests/CargaMasivaConcurrencyTests.cs
+      - frontend/src/app/core/models/carga-masiva.model.ts
+      - frontend/src/app/services/carga-masiva.service.ts
+      - frontend/src/app/features/cargas-masivas/**
+      - frontend/e2e/m9-cargas-masivas-profesionales.spec.ts
+      - frontend/e2e/fase5-cargas-masivas.spec.ts
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/m9-cargas-masivas.yml
+      - backend/src/API/Controllers/CargasMasivasController.cs
+      - backend/src/Application/DTOs/CargaMasivaDto.cs
+      - backend/src/Infrastructure/Services/CargaMasiva*.cs
+      - backend/tests/InventoryApp.Tests/M9CargaMasivaProfesionalTests.cs
+      - frontend/src/app/core/models/carga-masiva.model.ts
+      - frontend/src/app/services/carga-masiva.service.ts
+      - frontend/src/app/features/cargas-masivas/**
+      - frontend/e2e/m9-cargas-masivas-profesionales.spec.ts
+      - frontend/e2e/fase5-cargas-masivas.spec.ts
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: m9-cargas-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  m9:
+    name: MySQL, backend, Angular y Playwright M9
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: inventoryapp_m9_e2e
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=12
+
+    env:
+      ASPNETCORE_ENVIRONMENT: Development
+      PORT: '5005'
+      ConnectionStrings__DefaultConnection: 'Server=127.0.0.1;Port=3306;Database=inventoryapp_m9_e2e;User=root;Password=root;SslMode=None;AllowPublicKeyRetrieval=True;'
+      Database__ServerVersion: '8.4.0'
+      Database__ApplyMigrationsOnStartup: 'true'
+      Jwt__Secret: 'M9-E2E-Only-Secret-With-More-Than-32-Characters-2026'
+      Jwt__Issuer: 'InventoryApp.API'
+      Jwt__Audience: 'InventoryApp.Frontend'
+      Jwt__ExpiraMinutos: '120'
+      Security__LoginRateLimitPerMinute: '300'
+      SeedAdmin__Username: 'e2e_admin'
+      SeedAdmin__Password: 'E2E.Admin#2026!'
+      Cors__AllowedOrigins__0: 'http://127.0.0.1:4200'
+      Cors__AllowedOrigins__1: 'http://localhost:4200'
+      AppSettings__BackendPublicUrl: 'https://preview.variapp.invalid'
+      AppSettings__LogoPublicUrl: 'https://variapp-desarrollo.vercel.app/assets/varistorehn-logo.png'
+      Cloudinary__CloudName: 'e2e-not-used'
+      Cloudinary__ApiKey: 'e2e-not-used'
+      Cloudinary__ApiSecret: 'e2e-not-used'
+      PHASE7_API_URL: 'http://127.0.0.1:5005'
+      PHASE7_ADMIN_USERNAME: 'e2e_admin'
+      PHASE7_ADMIN_PASSWORD: 'E2E.Admin#2026!'
+      PLAYWRIGHT_TEST_BASE_URL: 'http://127.0.0.1:4200'
+
+    steps:
+      - name: Checkout Desarrollo
+        uses: actions/checkout@v4
+
+      - name: Configurar .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+          cache: true
+          cache-dependency-path: backend/**/*.csproj
+
+      - name: Restaurar y compilar backend
+        working-directory: backend
+        run: |
+          dotnet restore InventoryApp.sln
+          dotnet build InventoryApp.sln --configuration Release --no-restore
+
+      - name: Ejecutar regresión backend M9
+        working-directory: backend
+        run: |
+          dotnet test InventoryApp.sln \
+            --configuration Release \
+            --no-build \
+            --filter "FullyQualifiedName~M9CargaMasivaProfesionalTests|FullyQualifiedName~CargaMasivaConcurrencyTests" \
+            --logger "trx;LogFileName=m9-tests.trx"
+
+      - name: Iniciar API con MySQL descartable
+        working-directory: backend
+        shell: bash
+        run: |
+          set -euo pipefail
+          nohup dotnet run \
+            --project src/API/InventoryApp.API.csproj \
+            --configuration Release \
+            --no-build \
+            --no-launch-profile \
+            > m9-api.log 2>&1 &
+          echo $! > m9-api.pid
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:5005/health > /dev/null && \
+               curl --fail --silent http://127.0.0.1:5005/health/ready > /dev/null; then
+              echo 'API M9 lista y MySQL conectado.'
+              exit 0
+            fi
+            sleep 2
+          done
+          cat m9-api.log >&2 || true
+          exit 1
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('frontend/package-lock.json') }}
+
+      - name: Instalar, lint y build frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run lint
+          npm run build:prod
+          npx playwright install --with-deps chromium
+
+      - name: Iniciar Angular
+        working-directory: frontend
+        shell: bash
+        run: |
+          set -euo pipefail
+          nohup npm start -- --host 127.0.0.1 --port 4200 > m9-frontend.log 2>&1 &
+          echo $! > m9-frontend.pid
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:4200/login > /dev/null; then
+              echo 'Angular M9 listo.'
+              exit 0
+            fi
+            sleep 2
+          done
+          cat m9-frontend.log >&2 || true
+          exit 1
+
+      - name: Ejecutar Playwright M9 y regresión de cargas
+        working-directory: frontend
+        run: |
+          npx playwright test \
+            e2e/m9-cargas-masivas-profesionales.spec.ts \
+            e2e/fase5-cargas-masivas.spec.ts \
+            --config=playwright.config.ts
+
+      - name: Publicar evidencia M9
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m9-cargas-masivas-profesionales
+          path: |
+            backend/m9-api.log
+            backend/**/m9-tests.trx
+            frontend/m9-frontend.log
+            frontend/playwright-report/
+            frontend/test-results/
+          if-no-files-found: warn
+          retention-days: 14

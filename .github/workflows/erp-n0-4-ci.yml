@@ -1,0 +1,165 @@
+name: ERP-N0.4 - Certificación RBAC relacional
+
+on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - 'backend/src/**/*RbacN04*.cs'
+      - 'backend/src/Infrastructure/Migrations/20260811174745_N0_4_ConsolidarRbacRelacional*.cs'
+      - 'backend/tests/InventoryApp.Tests/N04AdministradorSemanticaTests.cs'
+      - 'backend/tests/InventoryApp.Tests/N04CatalogoPermisosRuntimeTests.cs'
+      - 'backend/tests/InventoryApp.Tests/N04RbacRelacionalTests.cs'
+      - 'backend/scripts/*erp-n0-4*'
+      - '.github/workflows/erp-n0-4-ci.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'backend/src/**/*RbacN04*.cs'
+      - 'backend/src/Infrastructure/Migrations/20260811174745_N0_4_ConsolidarRbacRelacional*.cs'
+      - 'backend/tests/InventoryApp.Tests/N04AdministradorSemanticaTests.cs'
+      - 'backend/tests/InventoryApp.Tests/N04CatalogoPermisosRuntimeTests.cs'
+      - 'backend/tests/InventoryApp.Tests/N04RbacRelacionalTests.cs'
+      - 'backend/scripts/*erp-n0-4*'
+      - '.github/workflows/erp-n0-4-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: erp-n0-4-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  rbac-relacional:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: inventoryapp_n04_ci
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -proot"
+          --health-interval=10s --health-timeout=5s --health-retries=12
+    env:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: Server=127.0.0.1;Port=3306;Database=inventoryapp_n04_ci;User=root;Password=root;SslMode=None;AllowPublicKeyRetrieval=True;
+      Database__ServerVersion: 8.4.0
+      Database__ApplyMigrationsOnStartup: 'false'
+      Jwt__Secret: ERP-N0-4-CI-Only-Secret-With-More-Than-32-Characters-2026
+      Jwt__Issuer: VariApp.CI
+      Jwt__Audience: VariApp.CI.Frontend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restaurar, compilar y probar backend
+        working-directory: backend
+        run: |
+          dotnet restore InventoryApp.sln
+          dotnet build InventoryApp.sln -c Release --no-restore -warnaserror
+          dotnet test InventoryApp.sln -c Release --no-build
+
+      - name: Instalar EF
+        run: dotnet tool install --global dotnet-ef --version 8.0.8
+
+      - name: Crear esquema pre-N0.4
+        working-directory: backend
+        run: |
+          dotnet ef database update 20260811032000_N0_3_ConsolidarProductoVariante \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext
+
+      - name: Sembrar caso representativo RBAC legacy
+        shell: bash
+        run: |
+          set -euo pipefail
+          c="${{ job.services.mysql.id }}"
+          docker exec "$c" mysql -uroot -proot inventoryapp_n04_ci -e "
+            INSERT INTO Permisos
+              (Id,Codigo,Nombre,Descripcion,Modulo,Accion,EsSistema,Activo,Eliminado,FechaCreacion)
+            VALUES
+              (9401,'CARGASMASIVAS.IMPORTAR','CargasMasivas - Importar','Permiso representativo N0.4',23,27,1,1,0,UTC_TIMESTAMP(6));
+
+            INSERT INTO RolPermisos (Id,Rol,Modulo,Accion,Permitido,RolId,PermisoId)
+            VALUES
+              (9410,1,23,27,1,NULL,NULL),
+              (9411,2,23,27,0,NULL,NULL);
+          "
+
+      - name: Preflight N0.4
+        shell: bash
+        run: |
+          set -euo pipefail
+          c="${{ job.services.mysql.id }}"
+          resultado="$(docker exec -i "$c" mysql -uroot -proot inventoryapp_n04_ci --batch --skip-column-names < backend/scripts/preflight-erp-n0-4-rbac.sql | tail -n 1)"
+          test "$resultado" = '0'
+
+      - name: Aplicar N0.4 exacta
+        working-directory: backend
+        run: |
+          dotnet ef database update 20260811174745_N0_4_ConsolidarRbacRelacional \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext
+
+      - name: Verificar aislamiento histórico N0.4
+        shell: bash
+        run: |
+          set -euo pipefail
+          c="${{ job.services.mysql.id }}"
+          n03='20260811032000_N0_3_ConsolidarProductoVariante'
+          n04='20260811174745_N0_4_ConsolidarRbacRelacional'
+
+          test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n04_ci -Nse "SELECT COUNT(*) FROM __EFMigrationsHistory WHERE MigrationId='${n03}';")" = '1'
+          test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n04_ci -Nse "SELECT COUNT(*) FROM __EFMigrationsHistory WHERE MigrationId='${n04}';")" = '1'
+          test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n04_ci -Nse "SELECT COUNT(*) FROM __EFMigrationsHistory WHERE MigrationId > '${n04}';")" = '0'
+
+      - name: Postcheck N0.4 y preservación
+        shell: bash
+        run: |
+          set -euo pipefail
+          c="${{ job.services.mysql.id }}"
+          resultado="$(docker exec -i "$c" mysql -uroot -proot inventoryapp_n04_ci --batch --skip-column-names < backend/scripts/postdeploy-erp-n0-4-rbac.sql | tail -n 1)"
+          test "$resultado" = '0'
+
+          # El usuario administrador histórico debe sobrevivir; N0.4 no puede borrarlo.
+          test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n04_ci -Nse "SELECT COUNT(*) FROM Usuarios u JOIN Roles r ON r.Id=u.RolId WHERE u.Id=1 AND r.NombreNormalizado='ADMINISTRADOR';")" = '1'
+
+          # El grant permitido se transforma a relación explícita y la fila denegada desaparece.
+          test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n04_ci -Nse "SELECT COUNT(*) FROM RolPermisos rp JOIN Roles r ON r.Id=rp.RolId JOIN Permisos p ON p.Id=rp.PermisoId WHERE r.NombreNormalizado='ADMINISTRADOR' AND p.Modulo=23 AND p.Accion=27;")" = '1'
+          test "$(docker exec "$c" mysql -uroot -proot inventoryapp_n04_ci -Nse "SELECT COUNT(*) FROM RolPermisos WHERE Id=9411;")" = '0'
+
+      - name: Snapshot EF consistente
+        working-directory: backend
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if dotnet ef migrations has-pending-model-changes \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext; then
+            exit 0
+          fi
+
+          echo '::group::Diagnóstico EF del drift detectado'
+          rm -rf /tmp/variapp-ef-diagnostic
+          dotnet ef migrations add __CI_ModelDiff \
+            --project src/Infrastructure/InventoryApp.Infrastructure.csproj \
+            --startup-project src/API/InventoryApp.API.csproj \
+            --context AppDbContext \
+            --output-dir /tmp/variapp-ef-diagnostic
+
+          find /tmp/variapp-ef-diagnostic -maxdepth 1 -type f -name '*.cs' -print -exec sed -n '1,260p' {} \;
+          echo '::endgroup::'
+          echo 'Snapshot EF inconsistente: el bloque anterior contiene la migración diagnóstica efímera.' >&2
+          exit 1

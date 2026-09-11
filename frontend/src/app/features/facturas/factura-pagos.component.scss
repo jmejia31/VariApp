@@ -1,0 +1,112 @@
+.pagina-pagos {
+  display: grid;
+  gap: 1.25rem;
+  padding: 1.25rem;
+}
+
+.cargando {
+  display: grid;
+  min-height: 18rem;
+  place-items: center;
+}
+
+.encabezado h1 {
+  margin: .5rem 0 .25rem;
+}
+
+.encabezado p,
+.vacio {
+  color: var(--text-secondary, #667085);
+  margin: 0;
+}
+
+.resumen {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.resumen mat-card {
+  display: grid;
+  gap: .4rem;
+  padding: 1.1rem;
+}
+
+.resumen span {
+  color: var(--text-secondary, #667085);
+  font-size: .875rem;
+}
+
+.resumen strong {
+  font-size: 1.45rem;
+}
+
+.formulario,
+.historial {
+  padding: 1.25rem;
+}
+
+.formulario h2,
+.historial h2 {
+  margin-top: 0;
+}
+
+.campos {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.observaciones {
+  grid-column: 1 / -1;
+}
+
+.tabla-wrap {
+  overflow-x: auto;
+}
+
+table {
+  border-collapse: collapse;
+  min-width: 760px;
+  width: 100%;
+}
+
+th,
+td {
+  border-bottom: 1px solid rgba(127, 127, 127, .18);
+  padding: .8rem;
+  text-align: left;
+}
+
+th {
+  font-size: .78rem;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+}
+
+tr.anulado td {
+  opacity: .6;
+  text-decoration: line-through;
+}
+
+tr.motivo td {
+  color: var(--text-secondary, #667085);
+  font-size: .85rem;
+  padding-top: .2rem;
+}
+
+button mat-spinner {
+  display: inline-block;
+  margin-right: .5rem;
+}
+
+@media (max-width: 900px) {
+  .resumen,
+  .campos {
+    grid-template-columns: 1fr;
+  }
+
+  .observaciones {
+    grid-column: auto;
+  }
+}

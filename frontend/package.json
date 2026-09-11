@@ -1,0 +1,48 @@
+{
+  "name": "inventoryapp-frontend",
+  "version": "1.0.0",
+  "scripts": {
+    "ng": "ng serve",
+    "start": "ng serve",
+    "build": "ng build",
+    "build:prod": "ng build --configuration production",
+    "lint": "tsc --noEmit -p tsconfig.app.json && node scripts/lint-quality.mjs && node scripts/validate-scanner-2c4.mjs && node scripts/validate-varistorehn-fase1.mjs && node scripts/validate-varistorehn-fase2.mjs && node scripts/validate-varistorehn-fase3.mjs && node scripts/validate-varistorehn-fase4.mjs && node scripts/validate-varistorehn-fase5.mjs",
+    "test:e2e:varistorehn-fase1": "playwright test e2e/varistorehn-fase1.spec.ts --config=playwright.config.ts",
+    "test:e2e:varistorehn-fase2": "playwright test e2e/varistorehn-fase2.spec.ts --config=playwright.config.ts",
+    "test:e2e:varistorehn-fase3": "playwright test e2e/varistorehn-fase3.spec.ts --config=playwright.config.ts",
+    "test:e2e:varistorehn-fase4": "playwright test e2e/varistorehn-fase4.spec.ts --config=playwright.config.ts",
+    "test:e2e:varistorehn-fase5": "playwright test e2e/varistorehn-fase5.spec.ts --config=playwright.config.ts",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test"
+  },
+  "private": true,
+  "dependencies": {
+    "@angular/animations": "20.3.27",
+    "@angular/cdk": "20.2.14",
+    "@angular/common": "20.3.27",
+    "@angular/compiler": "20.3.27",
+    "@angular/core": "20.3.27",
+    "@angular/forms": "20.3.27",
+    "@angular/material": "20.2.14",
+    "@angular/platform-browser": "20.3.27",
+    "@angular/platform-browser-dynamic": "20.3.27",
+    "@angular/router": "20.3.27",
+    "html5-qrcode": "2.3.8",
+    "rxjs": "~7.8.1",
+    "tslib": "^2.6.3",
+    "zone.js": "~0.15.0"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "20.3.33",
+    "@angular/cli": "20.3.33",
+    "@angular/compiler-cli": "20.3.27",
+    "@playwright/test": "1.62.1",
+    "jsdom": "^29.1.1",
+    "typescript": "~5.8.3",
+    "vitest": "^3.2.7"
+  },
+  "overrides": {
+    "@babel/core": "7.29.7",
+    "http-proxy-middleware": "3.0.7"
+  }
+}

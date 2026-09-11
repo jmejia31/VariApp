@@ -1,0 +1,112 @@
+name: Priority 4 - Interfaces architecture and quality
+
+on:
+  push:
+    branches: [Desarrollo]
+    paths:
+      - 'frontend/**'
+      - 'backend/**'
+      - 'scripts/quality/**'
+      - 'docs/PLAN_MAESTRO_TRACEABILITY.md'
+      - 'docs/PRODUCTION_READINESS_CONTRACT.md'
+      - 'docs/PERFORMANCE_BENCHMARK_CONTRACT.md'
+      - '.github/workflows/priority4-quality.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'frontend/**'
+      - 'backend/**'
+      - 'scripts/quality/**'
+      - 'docs/PLAN_MAESTRO_TRACEABILITY.md'
+      - 'docs/PRODUCTION_READINESS_CONTRACT.md'
+      - 'docs/PERFORMANCE_BENCHMARK_CONTRACT.md'
+      - '.github/workflows/priority4-quality.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: priority4-quality-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Static contracts, tests and production build
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: inventoryapp_priority4_ci
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=12
+    env:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: Server=127.0.0.1;Port=3306;Database=inventoryapp_priority4_ci;User=root;Password=root;SslMode=None;AllowPublicKeyRetrieval=True;
+      Database__ServerVersion: 8.4.0
+      Database__ApplyMigrationsOnStartup: 'false'
+      Jwt__Secret: Priority4-CI-Only-Secret-With-More-Than-32-Characters-2026
+      Jwt__Issuer: VariApp.CI
+      Jwt__Audience: VariApp.CI.Frontend
+    steps:
+      - name: Checkout exact commit
+        uses: actions/checkout@v4
+
+      - name: Priority 4 fail-closed audit
+        run: python3 scripts/quality/priority4_quality_audit.py
+
+      - name: Configure .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+          cache: true
+          cache-dependency-path: backend/**/*.csproj
+
+      - name: Restore, build and test backend
+        working-directory: backend
+        run: |
+          dotnet restore InventoryApp.sln
+          dotnet build InventoryApp.sln --configuration Release --no-restore
+          dotnet test InventoryApp.sln --configuration Release --no-build --no-restore
+
+      - name: Configure Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend
+        working-directory: frontend
+        run: npm ci
+
+      - name: Lint frontend
+        working-directory: frontend
+        run: npm run lint
+
+      - name: Reproduce Empresa stale-filter regression
+        working-directory: frontend
+        run: npx ng test --watch=false --include=src/app/features/configuracion/empresa-administracion-card.component.spec.ts
+
+      - name: Production frontend build and budget enforcement
+        working-directory: frontend
+        run: npm run build:prod
+
+      - name: Publish Priority 4 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: priority4-quality-${{ github.sha }}
+          path: |
+            docs/PLAN_MAESTRO_TRACEABILITY.md
+            docs/PRODUCTION_READINESS_CONTRACT.md
+            docs/PERFORMANCE_BENCHMARK_CONTRACT.md
+          if-no-files-found: error
+          retention-days: 14
