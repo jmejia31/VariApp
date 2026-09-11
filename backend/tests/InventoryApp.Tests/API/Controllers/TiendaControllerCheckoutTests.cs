@@ -75,8 +75,8 @@ public sealed class TiendaControllerCheckoutTests
         {
             Items =
             {
-                new CheckoutTiendaItemRequestDto { ProductoId = 501, ModeloId = 77, Unidades = 1 },
-                new CheckoutTiendaItemRequestDto { ProductoId = 501, ModeloId = 77, Unidades = 2 }
+                new CheckoutTiendaItemRequestDto { ProductoId = 501, ModeloId = 77, ModeloNombre = "16 GB / 512 GB", MarcaNombre = "Audit", Unidades = 1 },
+                new CheckoutTiendaItemRequestDto { ProductoId = 501, ModeloId = 77, ModeloNombre = "16 GB / 512 GB", MarcaNombre = "Audit", Unidades = 2 }
             }
         });
 
@@ -101,6 +101,73 @@ public sealed class TiendaControllerCheckoutTests
         Assert.Equal(123.45m, linea.PrecioUnitario);
         Assert.Equal(370.35m, linea.Total);
         productos.Verify(service => service.GetByIdAsync(501), Times.Once);
+        productos.VerifyNoOtherCalls();
+    }
+
+    [Fact]
+    public async Task ValidarCheckout_DesambiguaGruposConModeloIdNuloSinMezclarStockNiPrecio()
+    {
+        var productos = new Mock<IProductoService>(MockBehavior.Strict);
+        productos.Setup(service => service.GetByIdAsync(700)).ReturnsAsync(new ProductoDto
+        {
+            Id = 700,
+            Nombre = "Producto técnico",
+            Activo = true,
+            Variantes =
+            {
+                new ProductoVarianteDto
+                {
+                    Id = 7001,
+                    ProductoId = 700,
+                    ModeloId = null,
+                    ModeloNombre = "Edición A",
+                    MarcaNombre = "Marca A",
+                    Sku = "TEC-A",
+                    Cantidad = 1,
+                    Precio = 100m,
+                    Activo = true
+                },
+                new ProductoVarianteDto
+                {
+                    Id = 7002,
+                    ProductoId = 700,
+                    ModeloId = null,
+                    ModeloNombre = "Edición B",
+                    MarcaNombre = "Marca B",
+                    Sku = "TEC-B",
+                    Cantidad = 20,
+                    Precio = 10m,
+                    Activo = true
+                }
+            }
+        });
+        var controller = CrearController(productos);
+
+        var result = await controller.ValidarCheckout(new ValidarCheckoutTiendaDto
+        {
+            Items =
+            {
+                new CheckoutTiendaItemRequestDto
+                {
+                    ProductoId = 700,
+                    ModeloId = null,
+                    ModeloNombre = "Edición A",
+                    MarcaNombre = "Marca A",
+                    Unidades = 1
+                }
+            }
+        });
+
+        var ok = Assert.IsType<OkObjectResult>(result);
+        var response = Assert.IsType<ApiResponse<CheckoutTiendaValidadoDto>>(ok.Value);
+        var validado = Assert.IsType<CheckoutTiendaValidadoDto>(response.Data);
+        var linea = Assert.Single(validado.Lineas);
+        Assert.Equal(1, linea.StockDisponible);
+        Assert.Equal(100m, linea.PrecioUnitario);
+        Assert.Equal(100m, linea.Total);
+        Assert.Equal("Edición A", linea.Modelo);
+        Assert.Equal("TEC-A", linea.Sku);
+        productos.Verify(service => service.GetByIdAsync(700), Times.Once);
         productos.VerifyNoOtherCalls();
     }
 
@@ -175,7 +242,7 @@ public sealed class TiendaControllerCheckoutTests
 
         var result = await controller.ValidarCheckout(new ValidarCheckoutTiendaDto
         {
-            Items = { new CheckoutTiendaItemRequestDto { ProductoId = 12, ModeloId = 99, Unidades = 1 } }
+            Items = { new CheckoutTiendaItemRequestDto { ProductoId = 12, ModeloId = 99, ModeloNombre = "Modelo inexistente", Unidades = 1 } }
         });
 
         Assert.IsType<ConflictObjectResult>(result);
