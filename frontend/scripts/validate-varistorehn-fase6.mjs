@@ -12,6 +12,7 @@ const [
   routes,
   paths,
   config,
+  cartTs,
   cartHtml,
   checkoutTs,
   checkoutHtml,
@@ -29,6 +30,7 @@ const [
   readFile(path.join(frontendDir, 'src/app/app.routes.ts'), 'utf8'),
   readFeature('varistorehn.paths.ts'),
   readFeature('varistorehn.config.ts'),
+  readFeature('varistorehn-carrito.component.ts'),
   readFeature('varistorehn-carrito.component.html'),
   readFeature('varistorehn-checkout.component.ts'),
   readFeature('varistorehn-checkout.component.html'),
@@ -56,7 +58,10 @@ expect(!checkoutRoute.includes('authGuard') && !checkoutRoute.includes('permisoG
 expect(!pedidoRoute.includes('authGuard') && !pedidoRoute.includes('permisoGuard'), 'Confirmación pública no debe exigir autenticación administrativa.');
 expect(paths.includes("checkout: '/varistorehn/checkout'"), 'Las rutas canónicas deben declarar checkout.');
 expect(paths.includes("pedido: (id: string | number)"), 'Las rutas canónicas deben construir la referencia de pedido.');
-expect(cartHtml.includes('[href]="enlaces.checkout"') && cartHtml.includes('Continuar al checkout'), 'El carrito no vacío debe conectar con checkout.');
+expect(cartHtml.includes('[href]="enlaceCheckout()"') && cartHtml.includes('Continuar al checkout'), 'El carrito no vacío debe conectar con checkout.');
+expect(cartTs.includes("`${VARISTOREHN_PATHS.checkout}?fuente=bd`"), 'La vista previa de base de datos debe conservar la fuente al pasar del carrito al checkout.');
+expect(checkoutTs.includes("this.route.snapshot.queryParamMap.get('fuente') === 'bd'"), 'Checkout debe recuperar la fuente de vista previa solo de forma explícita.');
+expect(checkoutTs.includes('!environment.production && this.config.mostrarControlesVistaPrevia'), 'La selección por query debe quedar limitada al modo de desarrollo.');
 
 expect(config.includes("export type ModoCarrito = 'whatsapp' | 'tarjeta' | 'ambos'"), 'La configuración debe conservar los tres modos comerciales.');
 expect(config.includes('endpointCheckoutTarjeta: null'), 'Tarjeta debe permanecer fail-closed por defecto.');
