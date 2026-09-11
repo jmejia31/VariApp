@@ -70,8 +70,10 @@ public sealed class SucursalService : ISucursalService
         var nombre = NormalizarRequerido(dto.Nombre, "El nombre de la sucursal es obligatorio.");
         var zonaHoraria = ValidarZonaHoraria(dto.ZonaHoraria);
 
-        if (await _repository.ExisteCodigoAsync(codigo))
-            throw new BusinessRuleException($"Ya existe una sucursal activa con el código '{codigo}'.");
+        // N6.3.D aligns the application invariant with the certified persistence
+        // contract: Codigo is unique inside an Empresa, not globally across tenants.
+        if (await _repository.ExisteCodigoAsync(codigo, empresaId))
+            throw new BusinessRuleException($"Ya existe una sucursal activa con el código '{codigo}' para la empresa indicada.");
 
         var sucursal = new Sucursal
         {
@@ -112,8 +114,8 @@ public sealed class SucursalService : ISucursalService
         var nombre = NormalizarRequerido(dto.Nombre, "El nombre de la sucursal es obligatorio.");
         var zonaHoraria = ValidarZonaHoraria(dto.ZonaHoraria);
 
-        if (await _repository.ExisteCodigoAsync(codigo, id))
-            throw new BusinessRuleException($"Ya existe otra sucursal activa con el código '{codigo}'.");
+        if (await _repository.ExisteCodigoAsync(codigo, empresaId, id))
+            throw new BusinessRuleException($"Ya existe otra sucursal activa con el código '{codigo}' para la empresa indicada.");
 
         sucursal.EmpresaId = empresaId;
         sucursal.Codigo = codigo;
