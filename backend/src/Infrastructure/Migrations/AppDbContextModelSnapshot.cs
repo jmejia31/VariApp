@@ -7941,7 +7941,7 @@ namespace InventoryApp.Infrastructure.Migrations
                     b.Property<int?>("EliminadoPorUsuarioId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("EmpresaId")
+                    b.Property<int>("EmpresaId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("FechaActualizacion")
@@ -11269,6 +11269,15 @@ namespace InventoryApp.Infrastructure.Migrations
 
                     b.Navigation("ImpuestosAplicados");
                 });
+            modelBuilder.Entity("InventoryApp.Domain.Entities.Sucursal", b =>
+                {
+                    b.HasOne("InventoryApp.Domain.Entities.Empresa", null)
+                        .WithMany()
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
 #pragma warning restore 612, 618
         }
     }
