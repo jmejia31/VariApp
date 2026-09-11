@@ -84,7 +84,7 @@ public class UsuarioRepository : IUsuarioRepository
 
     public async Task<List<UsuarioEmpresa>> GetEmpresasAsync(int usuarioId) =>
         await _context.UsuarioEmpresas
-            .Where(x => x.UsuarioId == usuarioId && !x.Eliminado)
+            .Where(x => x.UsuarioId == usuarioId && x.Activa)
             .OrderBy(x => x.EmpresaId)
             .ToListAsync();
 
@@ -93,7 +93,7 @@ public class UsuarioRepository : IUsuarioRepository
             .FirstOrDefaultAsync(x =>
                 x.UsuarioId == usuarioId &&
                 x.EmpresaId == empresaId &&
-                !x.Eliminado);
+                x.Activa);
 
     public async Task AddEmpresaAsync(UsuarioEmpresa usuarioEmpresa) =>
         await _context.UsuarioEmpresas.AddAsync(usuarioEmpresa);
