@@ -13,6 +13,7 @@ public sealed class TiendaController : ControllerBase
 {
     private const int MaxLineasCheckout = 50;
     private const int MaxUnidadesPorLinea = 999;
+    private const int MaxLongitudIdentidadVariante = 200;
     private static readonly TimeSpan VigenciaValidacionCheckout = TimeSpan.FromMinutes(10);
 
     private readonly IProductoService _productoService;
@@ -97,15 +98,24 @@ public sealed class TiendaController : ControllerBase
         if (dto.Items.Count > MaxLineasCheckout)
             return BadRequest(ApiResponse<CheckoutTiendaValidadoDto>.Fail("El carrito supera el máximo de líneas permitido."));
 
-        if (dto.Items.Any(item => item.ProductoId <= 0 || item.Unidades <= 0 || item.Unidades > MaxUnidadesPorLinea))
+        if (dto.Items.Any(item =>
+                item.ProductoId <= 0
+                || item.Unidades <= 0
+                || item.Unidades > MaxUnidadesPorLinea
+                || (item.ModeloNombre?.Length ?? 0) > MaxLongitudIdentidadVariante
+                || (item.MarcaNombre?.Length ?? 0) > MaxLongitudIdentidadVariante))
+        {
             return BadRequest(ApiResponse<CheckoutTiendaValidadoDto>.Fail("El carrito contiene una referencia o cantidad no válida."));
+        }
 
         var agrupadas = dto.Items
-            .GroupBy(item => new { item.ProductoId, item.ModeloId })
+            .GroupBy(item => new { item.ProductoId, item.ModeloId, item.ModeloNombre, item.MarcaNombre })
             .Select(grupo => new CheckoutTiendaItemRequestDto
             {
                 ProductoId = grupo.Key.ProductoId,
                 ModeloId = grupo.Key.ModeloId,
+                ModeloNombre = grupo.Key.ModeloNombre,
+                MarcaNombre = grupo.Key.MarcaNombre,
                 Unidades = grupo.Sum(item => item.Unidades)
             })
             .ToList();
@@ -130,7 +140,10 @@ public sealed class TiendaController : ControllerBase
             if (variantesActivas.Count > 0)
             {
                 var variantesModelo = variantesActivas
-                    .Where(variante => variante.ModeloId == solicitud.ModeloId)
+                    .Where(variante =>
+                        variante.ModeloId == solicitud.ModeloId
+                        && string.Equals(variante.ModeloNombre ?? string.Empty, solicitud.ModeloNombre ?? string.Empty, StringComparison.Ordinal)
+                        && string.Equals(variante.MarcaNombre ?? string.Empty, solicitud.MarcaNombre ?? string.Empty, StringComparison.Ordinal))
                     .ToList();
 
                 if (variantesModelo.Count == 0)
@@ -148,7 +161,7 @@ public sealed class TiendaController : ControllerBase
             }
             else
             {
-                if (solicitud.ModeloId is not null)
+                if (solicitud.ModeloId is not null || solicitud.ModeloNombre is not null || solicitud.MarcaNombre is not null)
                     return Conflict(ApiResponse<CheckoutTiendaValidadoDto>.Fail("La variante seleccionada ya no existe. Actualiza el carrito antes de continuar."));
 
                 stock = Math.Max(0, producto.Cantidad);
