@@ -259,7 +259,7 @@ test.describe('VariStoreHn Fase 6 — checkout y pedido', () => {
     await expect(page.getByRole('link', { name: 'Abrir WhatsApp y continuar' })).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Preparar pedido por WhatsApp' })).toBeDisabled();
     expect(popups).toBe(0);
-    const recibos = await page.evaluate(() => Object.keys(sessionStorage).filter(key => key.startsWith('varistorehn:pedido:'));
+    const recibos = await page.evaluate(() => Object.keys(sessionStorage).filter(key => key.startsWith('varistorehn:pedido:')));
     expect(recibos).toHaveLength(0);
   });
 
