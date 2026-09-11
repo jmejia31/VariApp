@@ -78,6 +78,37 @@ worker_has_current_material() {
   ' "$CATALOG" >/dev/null 2>&1
 }
 
+# When PARENT_CLOSE_FIRST makes future material non-dispatchable, idle lanes
+# still precompute one distinct roadmap-derived NEXT candidate without moving
+# HEAD, creating a manifest, starting a Jules session, or consuming an attempt.
+# This is preparation only: it can reduce handoff latency after the dependency
+# clears, but it can never satisfy ACTIVE_REAL/LISTO_REAL by itself.
+emit_read_only_prearm() {
+  [[ -f scripts/vaep/alex_backlog_planner.py ]] || return 0
+  local runtime_file candidate packet
+  runtime_file="${RUNNER_TEMP:-/tmp}/alex-prearm-${WORKER_ID:-UNKNOWN}-${GITHUB_RUN_ID:-local}.json"
+  if ! python3 scripts/vaep/alex_backlog_planner.py --output "$runtime_file" >/dev/null 2>&1; then
+    echo "AUTOREFILL_PREARM_UNAVAILABLE worker=${WORKER_ID:-MISSING} reason=PLANNER_FAILED" >&2
+    return 0
+  fi
+  candidate="$(jq -c --arg w "${WORKER_ID:-}" '
+    [.generationRequests[]? | select(.workerId==$w) | .candidateParents[]?]
+    | sort_by((if .dependencyState=="READY" then 0 else 1 end), (.order // 999999999))
+    | .[0] // empty
+  ' "$runtime_file")"
+  if [[ -z "$candidate" ]]; then
+    echo "AUTOREFILL_NO_SAFE_NEXT worker=${WORKER_ID:-MISSING} mode=READ_ONLY_PREARM reason=NO_DISTINCT_ROADMAP_CANDIDATE" >&2
+    return 0
+  fi
+  packet="$(jq -cn \
+    --arg worker "${WORKER_ID:-UNKNOWN}" \
+    --arg branch "$BRANCH" \
+    --arg currentParent "$(jq -r '.currentParent // ""' "$CATALOG")" \
+    --argjson candidate "$candidate" \
+    '{mode:"READ_ONLY_PREARM",workerId:$worker,branch:$branch,currentParent:$currentParent,candidate:$candidate,allowProductCodeWrite:false,allowManifestPublish:false,allowWorkflowDispatch:false,allowIntegration:false,allowPromotion:false,countsAsActiveReal:false,countsAsListoReal:false,consumesAttempt:false,revalidateDependenciesBeforeMaterialization:true,headMoving:false}')"
+  echo "AUTOREFILL_READ_ONLY_PREARM_READY packet=$packet"
+}
+
 # Read the live issue window at most once per controller run. All six lanes
 # share RUNNER_TEMP in the single checkpoint job, so this cache eliminates the
 # previous repeated issue-feed scans without weakening the fail-closed guard.
@@ -198,15 +229,18 @@ filter_dependency_safe_parent
 filter_completed_facets
 
 # Most checkpoint lanes are intentionally idle when the CURRENT_PARENT has a
-# single material facet. Stop locally before any REST API calls instead of
-# making every idle lane query admission, actions, commits and issues.
+# single material facet. Prearm one distinct future roadmap candidate locally,
+# then stop before REST/API dispatch work. The prearm packet is non-authoritative
+# and must be dependency-revalidated after CURRENT_PARENT closes.
 if ! worker_has_current_material; then
+  emit_read_only_prearm
   echo "AUTOREFILL_UNIQUE_WORK_EXHAUSTED worker=${WORKER_ID:-MISSING} current_parent=$(jq -r '.currentParent // "MISSING"' "$CATALOG") action=LOCAL_NO_API_IDLE_LANE" >&2
   exit 78
 fi
 
 filter_evidence_gap_review_debt
 if ! worker_has_current_material; then
+  emit_read_only_prearm
   echo "AUTOREFILL_NO_SAFE_NEXT worker=${WORKER_ID:-MISSING} reason=REVIEW_FIRST_DEBT_GUARD" >&2
   exit 78
 fi
@@ -219,6 +253,7 @@ filter_completed_facets
 filter_evidence_gap_review_debt
 
 if ! worker_has_current_material; then
+  emit_read_only_prearm
   echo "AUTOREFILL_UNIQUE_WORK_EXHAUSTED worker=${WORKER_ID:-MISSING} current_parent=$(jq -r '.currentParent // "MISSING"' "$CATALOG") action=POST_GUARD_NO_API_IDLE_LANE" >&2
   exit 78
 fi
