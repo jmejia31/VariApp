@@ -55,7 +55,7 @@ export class VaristorehnCategoriasComponent implements OnInit {
   readonly enlaces = {
     inicio: VARISTOREHN_PATHS.inicio,
     categorias: VARISTOREHN_PATHS.categorias,
-    productos: `${VARISTOREHN_PATHS.inicio}#catalogo`,
+    productos: VARISTOREHN_PATHS.productos,
     contacto: `${VARISTOREHN_PATHS.inicio}#contacto`
   } as const;
 
@@ -83,15 +83,14 @@ export class VaristorehnCategoriasComponent implements OnInit {
 
   buscar(): void {
     const q = this.busqueda().trim();
-    void this.router.navigate(['/varistorehn'], {
-      queryParams: q ? { q } : {},
-      fragment: 'catalogo'
+    void this.router.navigate(['/varistorehn/productos'], {
+      queryParams: q ? { q } : {}
     });
   }
 
   seleccionarCategoria(nombre: string): void {
     if (!nombre) {
-      void this.router.navigate(['/varistorehn'], { fragment: 'catalogo' });
+      void this.router.navigate(['/varistorehn/productos']);
       return;
     }
     const categoria = this.categorias().find(item => item.nombre === nombre);
