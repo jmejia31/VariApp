@@ -129,6 +129,26 @@ jobs:
           cat m10-api.log >&2 || true
           exit 1
 
+      - name: Preparar membresía tenant E2E
+        shell: bash
+        run: |
+          set -euo pipefail
+          mysql --protocol=tcp -h 127.0.0.1 -P 3306 -uroot -proot inventoryapp_m10_e2e <<'SQL'
+          INSERT INTO Empresas (Nombre, Activa, FechaCreacion, FechaActualizacion)
+          VALUES ('M10 E2E', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP());
+          SET @empresa_id = LAST_INSERT_ID();
+          INSERT INTO UsuarioEmpresas (UsuarioId, EmpresaId, RolId, Activa, FechaCreacion, FechaActualizacion)
+          SELECT Id, @empresa_id, RolId, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()
+          FROM Usuarios
+          WHERE NombreUsuario = 'e2e_admin';
+          SQL
+          EMPRESA_ID="$(mysql --protocol=tcp -h 127.0.0.1 -P 3306 -uroot -proot inventoryapp_m10_e2e --batch --skip-column-names -e "SELECT ue.EmpresaId FROM UsuarioEmpresas ue INNER JOIN Usuarios u ON u.Id = ue.UsuarioId WHERE u.NombreUsuario = 'e2e_admin' AND ue.Activa = 1 ORDER BY ue.EmpresaId LIMIT 1;")"
+          if ! [[ "$EMPRESA_ID" =~ ^[1-9][0-9]*$ ]]; then
+            echo 'No se pudo materializar una membresía tenant activa para e2e_admin.' >&2
+            exit 1
+          fi
+          echo "PHASE7_EMPRESA_ID=$EMPRESA_ID" >> "$GITHUB_ENV"
+
       - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
