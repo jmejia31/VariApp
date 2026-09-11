@@ -19,6 +19,7 @@ const [
   productsHtml,
   cartService,
   homeTs,
+  homeHtml,
   backendController
 ] = await Promise.all([
   readFile(path.join(frontendDir, 'src/app/app.routes.ts'), 'utf8'),
@@ -31,6 +32,7 @@ const [
   readFeature('varistorehn-productos.component.html'),
   readFeature('varistorehn-carrito.service.ts'),
   readFeature('varistorehn.component.ts'),
+  readFeature('varistorehn.component.html'),
   readFile(path.join(repoDir, 'backend/src/API/Controllers/TiendaController.cs'), 'utf8')
 ]);
 
@@ -109,6 +111,9 @@ expect(productsHtml.includes("'/varistorehn/producto/' + producto.slug"), 'Ver p
 expect(productsHtml.includes('producto.precioOferta'), 'El catálogo debe poder mostrar el mismo precio promocional que el detalle cuando aplique.');
 expect(homeTs.includes('location.assign(VARISTOREHN_PATHS.producto(producto.slug))'), 'Los accesos de producto del home deben navegar al detalle canónico por slug.');
 expect(!homeTs.includes('detalleDialog?.nativeElement.showModal'), 'El home no debe abrir un modal como experiencia principal de detalle de producto.');
+expect(!homeTs.includes("@ViewChild('detalleDialog')"), 'El home no debe conservar el ViewChild del modal legado de detalle.');
+expect(!homeTs.includes('productoDetalle = signal'), 'El home no debe conservar estado muerto del modal legado de detalle.');
+expect(!homeHtml.includes('#detalleDialog') && !homeHtml.includes('class="detail-dialog"'), 'El DOM del home no debe contener el modal legado de detalle.');
 
 expect(catalog.includes('export function precioVenta'), 'Debe existir una regla única de precio efectivo para detalle y carrito.');
 expect(catalog.includes('precio: precioVenta(producto, modelo)'), 'El carrito debe reconstruir el precio efectivo centralizado, no un precio divergente.');
@@ -135,4 +140,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.info('Fase 4 — detalle público: URL canónica, galería, stock restante, precio, carrito central, WhatsApp, tema y límites aprobados.');
+console.info('Fase 4 — detalle público: URL canónica única, galería, stock restante, precio, carrito central, WhatsApp, tema y límites aprobados.');
