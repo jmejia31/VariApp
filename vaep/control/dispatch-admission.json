@@ -1,6 +1,6 @@
 {
   "newDispatchAdmission": "OPEN",
   "allowExistingActiveSessions": true,
-  "reason": "OPEN_ONLY__N6.3.H_LISTO_REAL__PROMOTE_N6.4.A__PARENT_CLOSE_FIRST__NO_DUPLICATE_FILLER",
-  "updatedAtUtc": "2026-09-11T14:04:00Z"
+  "reason": "TASKS_FIRST_DIRECT_EXECUTION__JULES_OPTIONAL_EXPLICIT_OFFLOAD_ONLY__OPEN_ONLY__NO_FILLER",
+  "updatedAtUtc": "2026-09-11T15:32:29Z"
 }
