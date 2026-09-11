@@ -109,7 +109,13 @@ public sealed class TiendaController : ControllerBase
         }
 
         var agrupadas = dto.Items
-            .GroupBy(item => new { item.ProductoId, item.ModeloId, item.ModeloNombre, item.MarcaNombre })
+            .GroupBy(item => new
+            {
+                item.ProductoId,
+                item.ModeloId,
+                ModeloNombre = string.IsNullOrEmpty(item.ModeloNombre) ? null : item.ModeloNombre,
+                MarcaNombre = string.IsNullOrEmpty(item.MarcaNombre) ? null : item.MarcaNombre
+            })
             .Select(grupo => new CheckoutTiendaItemRequestDto
             {
                 ProductoId = grupo.Key.ProductoId,
