@@ -2,7 +2,7 @@
   <a routerLink="/sucursales" mat-icon-button aria-label="Volver a sucursales"><mat-icon>arrow_back</mat-icon></a>
   <div>
     <h1 class="page-title">{{ isEdit() ? 'Editar sucursal' : 'Nueva sucursal' }}</h1>
-    <p class="page-subtitle">El estado se administra desde la lista; este formulario modifica únicamente datos maestros.</p>
+    <p class="page-subtitle">Cada sucursal debe conservar una empresa propietaria explícita; este dato identifica ownership operativo, no sustituye la autorización del backend.</p>
   </div>
 </div>
 
@@ -75,11 +75,13 @@
         </datalist>
 
         <mat-form-field appearance="outline">
-          <mat-label>Empresa ID (opcional)</mat-label>
-          <input matInput type="number" min="1" step="1" formControlName="empresaId" placeholder="Reservado para ERP-N6">
-          <mat-hint>No crea todavía relación multiempresa.</mat-hint>
-          @if (form.controls.empresaId.touched && form.controls.empresaId.hasError('min')) {
-            <mat-error>Empresa ID debe ser mayor que cero.</mat-error>
+          <mat-label>Empresa propietaria (ID)</mat-label>
+          <input matInput type="number" min="1" step="1" formControlName="empresaId" required autocomplete="off">
+          <mat-hint>Ownership tenant-aware explícito. La autorización continúa siendo responsabilidad del backend.</mat-hint>
+          @if (form.controls.empresaId.touched && form.controls.empresaId.hasError('required')) {
+            <mat-error>La empresa propietaria es obligatoria.</mat-error>
+          } @else if (form.controls.empresaId.touched && (form.controls.empresaId.hasError('min') || form.controls.empresaId.hasError('tenantOwnerRequired'))) {
+            <mat-error>Empresa ID debe ser un entero mayor que cero.</mat-error>
           }
         </mat-form-field>
       </div>
