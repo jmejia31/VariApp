@@ -26,7 +26,7 @@ public sealed class SucursalService : ISucursalService
 
     public async Task<SucursalPaginaDto> BuscarAsync(SucursalFiltroDto filtro)
     {
-        ValidarEmpresaId(filtro.EmpresaId);
+        ValidarEmpresaIdFiltro(filtro.EmpresaId);
 
         var pagina = Math.Max(1, filtro.Pagina);
         var tamanoPagina = Math.Clamp(filtro.TamanoPagina, 1, TamanoPaginaMaximo);
@@ -49,7 +49,7 @@ public sealed class SucursalService : ISucursalService
 
     public async Task<List<SucursalDto>> GetActivasAsync(int? empresaId = null)
     {
-        ValidarEmpresaId(empresaId);
+        ValidarEmpresaIdFiltro(empresaId);
         var sucursales = await _repository.GetActivasAsync(empresaId);
         return sucursales.Select(ToDto).ToList();
     }
@@ -62,7 +62,10 @@ public sealed class SucursalService : ISucursalService
 
     public async Task<SucursalDto> CreateAsync(CreateSucursalDto dto)
     {
-        ValidarEmpresaId(dto.EmpresaId);
+        // N6.2.D: every new Sucursal must resolve a deterministic Empresa owner.
+        // The request value is ownership data, not an authorization boundary; tenant
+        // authorization/isolation remains reserved for the later security parents.
+        var empresaId = ResolverEmpresaIdRequerida(dto.EmpresaId);
         var codigo = NormalizarCodigo(dto.Codigo);
         var nombre = NormalizarRequerido(dto.Nombre, "El nombre de la sucursal es obligatorio.");
         var zonaHoraria = ValidarZonaHoraria(dto.ZonaHoraria);
@@ -72,7 +75,7 @@ public sealed class SucursalService : ISucursalService
 
         var sucursal = new Sucursal
         {
-            EmpresaId = dto.EmpresaId,
+            EmpresaId = empresaId,
             Codigo = codigo,
             Nombre = nombre,
             Direccion = Limpiar(dto.Direccion),
@@ -102,7 +105,9 @@ public sealed class SucursalService : ISucursalService
         var sucursal = await _repository.GetByIdAsync(id);
         if (sucursal is null) return null;
 
-        ValidarEmpresaId(dto.EmpresaId);
+        // Legacy rows may still be nullable at the persistence layer during rollout,
+        // but every application write from N6.2.D onward must leave a valid owner.
+        var empresaId = ResolverEmpresaIdRequerida(dto.EmpresaId);
         var codigo = NormalizarCodigo(dto.Codigo);
         var nombre = NormalizarRequerido(dto.Nombre, "El nombre de la sucursal es obligatorio.");
         var zonaHoraria = ValidarZonaHoraria(dto.ZonaHoraria);
@@ -110,7 +115,7 @@ public sealed class SucursalService : ISucursalService
         if (await _repository.ExisteCodigoAsync(codigo, id))
             throw new BusinessRuleException($"Ya existe otra sucursal activa con el código '{codigo}'.");
 
-        sucursal.EmpresaId = dto.EmpresaId;
+        sucursal.EmpresaId = empresaId;
         sucursal.Codigo = codigo;
         sucursal.Nombre = nombre;
         sucursal.Direccion = Limpiar(dto.Direccion);
@@ -189,7 +194,15 @@ public sealed class SucursalService : ISucursalService
         return eliminado;
     }
 
-    private static void ValidarEmpresaId(int? empresaId)
+    private static int ResolverEmpresaIdRequerida(int? empresaId)
+    {
+        if (!empresaId.HasValue || empresaId.Value <= 0)
+            throw new BusinessRuleException("EmpresaId es obligatorio y debe ser mayor que cero para establecer el tenant propietario de la sucursal.");
+
+        return empresaId.Value;
+    }
+
+    private static void ValidarEmpresaIdFiltro(int? empresaId)
     {
         if (empresaId.HasValue && empresaId.Value <= 0)
             throw new BusinessRuleException("EmpresaId debe ser mayor que cero cuando se especifica.");
