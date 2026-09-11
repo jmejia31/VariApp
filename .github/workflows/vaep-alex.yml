@@ -69,51 +69,6 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-  refill-watchdog:
-    needs: plan
-    runs-on: ubuntu-latest
-    timeout-minutes: 8
-    strategy:
-      fail-fast: false
-      max-parallel: 6
-      matrix:
-        include:
-          - worker: J1
-            api_secret: JULES_J1_API_KEY
-          - worker: J2
-            api_secret: JULES_J2_API_KEY
-          - worker: J3
-            api_secret: JULES_J3_API_KEY
-          - worker: J4
-            api_secret: JULES_J4_API_KEY
-          - worker: J5
-            api_secret: JULES_J5_API_KEY
-          - worker: J6
-            api_secret: JULES_J6_API_KEY
-    env:
-      GH_TOKEN: ${{ github.token }}
-      GITHUB_REPOSITORY: ${{ github.repository }}
-      WORKER_ID: ${{ matrix.worker }}
-      JULES_API_BASE: https://jules.googleapis.com/v1alpha
-      JULES_API_KEY: ${{ secrets[matrix.api_secret] }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: Desarrollo
-          fetch-depth: 2
-      - name: Verify ALEX authorization remains active
-        shell: bash
-        run: |
-          test "$(jq -r '.authorization' vaep/control/alex-owner-authorization.json)" = "AUTHORIZED_NOW"
-          test "$(jq -r '.status' vaep/control/alex-owner-authorization.json)" = "ACTIVE_AUTHORIZATION"
-      - name: ALEX safe refill watchdog ${{ matrix.worker }}
-        shell: bash
-        run: |
-          set +e
-          bash .github/scripts/vaep-jules-autorefill.sh
-          rc=$?
-          set -e
-          case "$rc" in
-            0|78|79|80|81|82) exit 0 ;;
-            *) exit "$rc" ;;
-          esac
+# TASKS_FIRST_JULES_ON_DEMAND: ALEX may plan and emit evidence, but it must
+# never auto-refill J1-J6. Jules work is created only by an explicit
+# JULES_OFFLOAD_APPROVED decision for a real, non-overlapping material scope.
