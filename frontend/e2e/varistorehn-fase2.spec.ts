@@ -160,7 +160,7 @@ test.describe('VariStoreHn Fase 2 — categorías públicas', () => {
 
     const laptop = page.locator('article.product-card').filter({ hasText: 'Laptop Pro 14' });
     await laptop.getByRole('button', { name: 'Agregar Laptop Pro 14' }).click();
-    await page.locator('dialog.cart-dialog').getByRole('button', { name: 'Cerrar carrito' }).click();
+    await expect(page.locator('dialog.cart-dialog')).toHaveCount(0);
 
     await page.locator('app-varistorehn-header').getByRole('link', { name: 'Categorías', exact: true }).first().click();
     await expect(page).toHaveURL(/\/varistorehn\/categorias$/);
