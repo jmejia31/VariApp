@@ -4,7 +4,6 @@ import { environment } from '../../../environments/environment';
 import { TenantContextService } from './tenant-context.service';
 
 describe('TenantContextService', () => {
-  let service: TenantContextService;
   let httpMock: HttpTestingController;
 
   beforeEach(() => {
@@ -13,7 +12,6 @@ describe('TenantContextService', () => {
       imports: [HttpClientTestingModule]
     });
 
-    service = TestBed.inject(TenantContextService);
     httpMock = TestBed.inject(HttpTestingController);
   });
 
@@ -24,13 +22,15 @@ describe('TenantContextService', () => {
 
   it('no restaura autoridad desde localStorage', () => {
     localStorage.setItem('inventoryapp_empresa_solicitada_id', '8');
-    const instancia = new TenantContextService(TestBed.inject(HttpClientTestingModule as never));
+    const service = TestBed.inject(TenantContextService);
 
-    expect(instancia.contextoVerificado()).toBeNull();
-    expect(instancia.tieneContextoVerificado()).toBeFalse();
+    expect(service.empresaSolicitadaId()).toBe(8);
+    expect(service.contextoVerificado()).toBeNull();
+    expect(service.tieneContextoVerificado()).toBeFalse();
   });
 
   it('materializa contexto solo cuando el backend confirma la misma empresa', () => {
+    const service = TestBed.inject(TenantContextService);
     service.seleccionarEmpresa(7).subscribe();
 
     const request = httpMock.expectOne(`${environment.apiUrl}/tenant-context/7`);
@@ -52,6 +52,7 @@ describe('TenantContextService', () => {
   });
 
   it('falla cerrado si el backend devuelve otra empresa', () => {
+    const service = TestBed.inject(TenantContextService);
     service.seleccionarEmpresa(7).subscribe({ error: () => undefined });
 
     const request = httpMock.expectOne(`${environment.apiUrl}/tenant-context/7`);
@@ -72,6 +73,7 @@ describe('TenantContextService', () => {
   });
 
   it('revoca selección local ante 403', () => {
+    const service = TestBed.inject(TenantContextService);
     service.seleccionarEmpresa(7).subscribe({ error: () => undefined });
 
     const request = httpMock.expectOne(`${environment.apiUrl}/tenant-context/7`);
