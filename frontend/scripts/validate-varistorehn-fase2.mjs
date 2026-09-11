@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 const scriptsDir = path.dirname(fileURLToPath(import.meta.url));
 const frontendDir = path.resolve(scriptsDir, '..');
 const featureDir = path.join(frontendDir, 'src/app/features/varistorehn');
-const readFeature = (name) => readFile(path.join(featureDir, name), 'utf8');
+const readFeature = name => readFile(path.join(featureDir, name), 'utf8');
 
 const [
   appRoutes,
@@ -21,7 +21,8 @@ const [
   storefrontTs,
   storefrontHtml,
   headerTs,
-  headerHtml
+  headerHtml,
+  cartStore
 ] = await Promise.all([
   readFile(path.join(frontendDir, 'src/app/app.routes.ts'), 'utf8'),
   readFeature('varistorehn.models.ts'),
@@ -36,7 +37,8 @@ const [
   readFeature('varistorehn.component.ts'),
   readFeature('varistorehn.component.html'),
   readFeature('varistorehn-header.component.ts'),
-  readFeature('varistorehn-header.component.html')
+  readFeature('varistorehn-header.component.html'),
+  readFeature('varistorehn-carrito.service.ts')
 ]);
 
 const failures = [];
@@ -61,9 +63,19 @@ expect(categoryRules.includes('cantidadProductos: cantidad'), 'El mapeo debe con
 expect(categoryRules.includes('cantidad !== null'), 'El mapeo debe validar el conteo solo cuando la fuente lo conoce.');
 expect(categoryRules.includes('crearCategoriasTiendaEjemplo'), 'Los fixtures de preview deben estar separados de la fuente real.');
 
-for (const required of ['CategoriaTienda', 'EstadoConsultaPublica', 'VaristorehnService', 'obtenerCategorias()', 'mapearCategoriaTienda', 'restaurarCarrito', 'VARISTOREHN_PATHS']) {
+for (const required of [
+  'CategoriaTienda',
+  'EstadoConsultaPublica',
+  'VaristorehnService',
+  'obtenerCategorias()',
+  'mapearCategoriaTienda',
+  'VaristorehnCarritoService',
+  'this.carrito.hidratar(productos',
+  'VARISTOREHN_PATHS'
+]) {
   expect(categoriesTs.includes(required), `La página de categorías debe integrar ${required}.`);
 }
+expect(!categoriesTs.includes('localStorage'), 'La página de categorías no debe mantener una persistencia de carrito paralela.');
 expect(categoriesTs.includes("this.error.set('No pudimos cargar las categorías"), 'La página debe exponer un error real cuando falle la fuente de categorías.');
 expect(categoriesTs.includes('VARISTOREHN_PATHS.categoria(categoria.slug)'), 'El listado debe navegar a la ruta canónica de la categoría.');
 expect(!categoriesTs.includes("queryParams: { categoria: categoria.slug }"), 'El listado no debe seguir usando el home como sustituto de la URL canónica.');
@@ -80,9 +92,18 @@ expect(categoriesHtml.includes('Cantidad no disponible') || categoriesTs.include
 expect(categoriesHtml.includes('destinoSaltar="#contenido-categorias"'), 'El header reutilizado debe tener un destino de salto válido en la página de categorías.');
 expect(categoriesHtml.includes('[href]="rutaExplorar(categoria)"'), 'Cada categoría debe enlazar mediante su slug canónico.');
 
-for (const required of ['ActivatedRoute', 'obtenerCategoriaPorSlug', 'mapearCategoriaTienda', 'VARISTOREHN_PATHS.categoria', 'replaceUrl: true', 'restaurarCarrito']) {
+for (const required of [
+  'ActivatedRoute',
+  'obtenerCategoriaPorSlug',
+  'mapearCategoriaTienda',
+  'VARISTOREHN_PATHS.categoria',
+  'replaceUrl: true',
+  'VaristorehnCarritoService',
+  'this.carrito.hidratar(productos'
+]) {
   expect(categoryTs.includes(required), `La página por slug debe integrar ${required}.`);
 }
+expect(!categoryTs.includes('localStorage'), 'La página por slug no debe mantener una persistencia de carrito paralela.');
 expect(categoryTs.includes("'not-found'"), 'La página por slug debe distinguir categoría no encontrada.');
 expect(categoryTs.includes('error.status === 404'), 'La página por slug debe representar HTTP 404 como no encontrado.');
 expect(categoryTs.includes('No se sustituyeron los datos reales por ejemplos'), 'Un fallo real no debe caer silenciosamente a fixtures.');
@@ -98,6 +119,8 @@ expect(categoryScss.includes('var(--color-bg)'), 'La página canónica debe here
 expect(categoryScss.includes('var(--color-text-muted)'), 'La página canónica debe heredar explícitamente el texto secundario canónico del tema.');
 expect(categoryScss.includes('min-height: 44px'), 'La página canónica debe conservar objetivos táctiles de al menos 44px.');
 
+expect(cartStore.includes('restaurarCarrito'), 'La rehidratación contra precio/stock actuales debe vivir en el carrito central.');
+expect(cartStore.includes('referenciasCarrito'), 'El carrito central debe persistir referencias mínimas.');
 expect(storefrontTs.includes('categoriasTienda'), 'El home debe consumir el estado canónico de categorías de Fase 2.');
 expect(storefrontTs.includes('cargarCategorias()'), 'El home debe cargar categorías mediante la fuente pública dedicada.');
 expect(storefrontTs.includes('this.servicio.obtenerCategorias()'), 'El home no debe inferir categorías reales desde productos.');
@@ -117,4 +140,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.info('Fase 2 — categorías: listado, ruta canónica por slug, estados, navegación, tema y separación admin aprobados.');
+console.info('Fase 2 — categorías: listado, ruta canónica por slug, estados, navegación, tema y carrito central aprobados.');
