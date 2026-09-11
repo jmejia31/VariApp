@@ -10,7 +10,6 @@ const readFeature = name => readFile(path.join(featureDir, name), 'utf8');
 const [
   routes,
   paths,
-  storefrontService,
   catalogRules,
   cartService,
   cartTs,
@@ -28,7 +27,6 @@ const [
 ] = await Promise.all([
   readFile(path.join(frontendDir, 'src/app/app.routes.ts'), 'utf8'),
   readFeature('varistorehn.paths.ts'),
-  readFeature('varistorehn.service.ts'),
   readFeature('varistorehn.catalog.ts'),
   readFeature('varistorehn-carrito.service.ts'),
   readFeature('varistorehn-carrito.component.ts'),
@@ -53,10 +51,7 @@ expect(Boolean(cartRoute), 'Debe existir /varistorehn/carrito.');
 expect(cartRoute.includes('VaristorehnCarritoComponent'), 'La ruta /varistorehn/carrito debe cargar su página pública.');
 expect(!cartRoute.includes('authGuard') && !cartRoute.includes('permisoGuard'), 'El carrito público no debe usar guards administrativos.');
 expect(paths.includes("carrito: '/varistorehn/carrito'"), 'VARISTOREHN_PATHS debe conservar la ruta canónica del carrito.');
-expect(!routes.includes("path: 'varistorehn/checkout'"), 'Fase 5 no debe activar la ruta de checkout.');
-expect(!routes.includes("path: 'varistorehn/pedido/:id'"), 'Fase 5 no debe activar la ruta de pedido confirmado.');
-expect(!storefrontService.includes('crearCheckoutTarjeta'), 'La frontera HTTP de Fases 0–5 no debe conservar lógica ejecutable de checkout.');
-expect(!catalogRules.includes('urlCheckoutSegura'), 'Las reglas puras de Fases 0–5 no deben conservar utilidades muertas de redirección de pago.');
+expect(!catalogRules.includes('urlCheckoutSegura'), 'Las reglas puras de Fase 5 no deben conservar utilidades muertas de redirección de pago.');
 expect(!catalogRules.includes('export function cambiarCantidad(items:'), 'Las reglas puras no deben conservar el helper de carrito sustituido por el store global.');
 
 for (const required of [
@@ -80,7 +75,7 @@ for (const required of [
 }
 
 expect(!cartService.includes('limpiarAviso(): void'), 'El store no debe exponer API de avisos sin consumidores.');
-expect(!cartService.includes('referencias(): ReferenciaCarrito[]'), 'El store no debe exponer referencias públicas reservadas para un checkout futuro.');
+expect(!cartService.includes('referencias(): ReferenciaCarrito[]'), 'El store no debe exponer referencias públicas; el checkout deriva referencias desde items rehidratados.');
 expect(!/precio\s*:\s*item\.precio/.test(cartService), 'La persistencia no debe serializar precios como autoridad.');
 expect(!cartService.includes('JSON.stringify(this._items'), 'localStorage nunca debe guardar ItemCarrito completo.');
 expect(cartService.includes('JSON.stringify(referencias)'), 'localStorage debe guardar referencias mínimas.');
@@ -111,16 +106,12 @@ for (const forbidden of [
   'pagarConTarjeta()',
   'crearCheckoutTarjeta(',
   'urlCheckoutSegura',
-  'referenciasCarrito(this.carrito',
-  "'/varistorehn/checkout'",
-  '"/varistorehn/checkout"',
-  "'/varistorehn/pedido/",
-  '"/varistorehn/pedido/'
+  'referenciasCarrito(this.carrito'
 ]) {
-  expect(!homeTs.includes(forbidden), `El home no debe conservar lógica/rutas de carrito o checkout legadas: ${forbidden}.`);
+  expect(!homeTs.includes(forbidden), `El home no debe conservar lógica de carrito o checkout legada: ${forbidden}.`);
 }
 expect(!homeHtml.includes('#carritoDialog') && !homeHtml.includes('class="cart-dialog"'), 'El DOM del home no debe contener el drawer de carrito legado.');
-expect(!homeHtml.includes('Continuar con tarjeta') && !homeHtml.includes('Pedir por WhatsApp'), 'El home no debe ejecutar el cierre del carrito; esa responsabilidad queda fuera de Fase 5.');
+expect(!homeHtml.includes('Continuar con tarjeta') && !homeHtml.includes('Pedir por WhatsApp'), 'El home no debe ejecutar el cierre del carrito; esa responsabilidad pertenece al checkout.');
 expect(!homeHtml.includes('Fase 6'), 'La UI pública del home no debe exponer lenguaje interno del roadmap.');
 for (const selector of ['.cart-dialog', '.cart-panel', '.cart-items', '.cart-item', '.cart-footer', '.checkout-preview', '.detail-layout', '.detail-media', '.detail-body', '.button.whatsapp', '.button.full']) {
   expect(!homeScss.includes(selector) && !homeResponsiveScss.includes(selector), `El home no debe conservar CSS legado o sin uso ${selector}.`);
@@ -146,10 +137,9 @@ for (const required of [
 ]) {
   expect(cartHtml.includes(required), `La página de carrito debe incluir ${required}.`);
 }
-expect(!cartHtml.includes('/varistorehn/checkout'), 'Fase 5 no debe enlazar un checkout aún inexistente.');
 expect(!cartHtml.includes('Fase 6'), 'La UI pública del carrito no debe exponer lenguaje interno del roadmap.');
-expect(!cartTs.includes('puedeContinuarCheckout'), 'Fase 5 no debe conservar estado de checkout no utilizado.');
-expect(!cartTs.includes('crearCheckoutTarjeta'), 'La página de carrito no debe adelantar lógica de pago.');
+expect(!cartTs.includes('puedeContinuarCheckout'), 'El carrito no debe duplicar estado de checkout; la página de checkout es la autoridad del cierre.');
+expect(!cartTs.includes('crearCheckoutTarjeta'), 'La página de carrito no debe ejecutar lógica de pago.');
 expect(!cartTs.includes('authGuard') && !cartTs.includes('permisoGuard'), 'El carrito público no debe importar guards administrativos.');
 
 expect(cartScss.includes('var(--color-bg)') && cartScss.includes('var(--color-surface)') && cartScss.includes('var(--color-primary)'), 'El carrito debe usar tokens canónicos del tema.');
