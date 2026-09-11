@@ -109,9 +109,9 @@ namespace InventoryApp.Infrastructure.Migrations
 
                 b.Property<string>("CodigoActivoUnico")
                     .ValueGeneratedOnAddOrUpdate()
-                    .HasMaxLength(40)
-                    .HasColumnType("varchar(40)")
-                    .HasComputedColumnSql("IF(Eliminado = 0, UPPER(TRIM(Codigo)), NULL)", true);
+                    .HasMaxLength(64)
+                    .HasColumnType("varchar(64)")
+                    .HasComputedColumnSql("IF(Eliminado = 0, CONCAT(IF(EmpresaId IS NULL, 'LEGACY', CONCAT('E:', EmpresaId)), ':', UPPER(TRIM(Codigo))), NULL)", true);
 
                 b.Property<string>("Correo")
                     .HasMaxLength(254)
