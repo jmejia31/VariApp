@@ -37,6 +37,8 @@ export class VaristorehnCarritoService {
   readonly aviso = this._aviso.asReadonly();
   readonly totalUnidades = computed(() => this._items().reduce((total, item) => total + item.unidades, 0));
   readonly subtotal = computed(() => totalCarrito(this._items()));
+  /** En Fase 5 no existen cargos de entrega/impuestos del checkout; por eso total === subtotal. */
+  readonly total = computed(() => this.subtotal());
   readonly vacio = computed(() => this._listo() && this._items().length === 0);
 
   hidratar(productos: ProductoTienda[], empresaId: number, utilizarDatosBaseDatos: boolean): ResultadoHidratacionCarrito {
