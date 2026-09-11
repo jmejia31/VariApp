@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       manifest_commit:
-        description: 'Exact immutable manifest commit created by VAEP autorefill'
+        description: 'Exact immutable manifest commit created by VAEP controller after JULES_OFFLOAD_APPROVED'
         required: false
         type: string
 permissions:
@@ -21,6 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
+      EXECUTION_MODEL: TASKS_FIRST_JULES_ON_DEMAND
       JULES_API_BASE: https://jules.googleapis.com/v1alpha
       EXPECTED_OWNER: jmejia31
       EXPECTED_REPO: VariApp
@@ -40,13 +41,9 @@ jobs:
         with:
           ref: ${{ inputs.manifest_commit || github.sha }}
           fetch-depth: 2
-      - run: bash .github/scripts/vaep-jules-master.sh --transport-preflight
-      - name: Reserve NEXT J1 lane
-        continue-on-error: true
-        run: |
-          set +e; bash .github/scripts/vaep-jules-autorefill.sh; rc=$?; set -e
-          case "$rc" in 0|78|79|80|81|82) exit 0;; *) exit "$rc";; esac
-      - name: Execute VAEP/Jules MASTER
+      - name: Validate explicit offload transport
+        run: bash .github/scripts/vaep-jules-master.sh --transport-preflight
+      - name: Execute approved VAEP/Jules offload
         run: bash .github/scripts/vaep-jules-master.sh
       - name: Upload J1 result artifact
         if: always() && env.RESULT_DIR != ''
@@ -56,9 +53,3 @@ jobs:
           path: ${{ env.RESULT_DIR }}
           if-no-files-found: error
           retention-days: 14
-      - name: Auto-refill J1 lane
-        if: always()
-        continue-on-error: true
-        run: |
-          set +e; bash .github/scripts/vaep-jules-autorefill.sh --post-terminal; rc=$?; set -e
-          case "$rc" in 0|78|79|80|81|82) exit 0;; *) exit "$rc";; esac
