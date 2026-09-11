@@ -174,12 +174,4 @@
       }
     </div>
   </dialog>
-
-  <dialog #detalleDialog class="detail-dialog" aria-labelledby="detalle-title" (close)="productoDetalle.set(null)" (click)="$event.target === detalleDialog && cerrarDetalle()">
-    <button class="icon-button detail-close" type="button" aria-label="Cerrar detalle" (click)="cerrarDetalle()"><app-store-icon nombre="cerrar" /></button>
-    @if (productoDetalle(); as detalle) {
-      @let modelo = modeloSeleccionado(detalle);
-      <div class="detail-layout"><div class="detail-media">@if (imagenValida(fotos(detalle)[imagenActiva()])) { <img [src]="fotos(detalle)[imagenActiva()]" [alt]="detalle.nombre" (error)="errorImagen(fotos(detalle)[imagenActiva()])"> } @else { <app-store-art [tipo]="detalle.ilustracion || 'paquete'" /> } @if (fotos(detalle).length > 1) { <div class="gallery-controls"><button type="button" class="icon-button" (click)="moverImagen(detalle, -1)">←</button><span>{{ imagenActiva() + 1 }} / {{ fotos(detalle).length }}</span><button type="button" class="icon-button" (click)="moverImagen(detalle, 1)">→</button></div> }</div><div class="detail-body"><p class="eyebrow">{{ detalle.categoria }}</p><h2 id="detalle-title">{{ detalle.nombre }}</h2><p>{{ detalle.descripcion || 'Consulta con la tienda para conocer todos los detalles.' }}</p><label for="modelo-producto">Modelo</label><select #selectorModelo id="modelo-producto" [value]="modelo.clave" (change)="seleccionarModelo(detalle, selectorModelo.value)">@for (opcion of detalle.modelos; track opcion.clave) { <option [value]="opcion.clave">{{ opcion.nombre }}{{ opcion.disponible ? '' : ' (agotado)' }}</option> }</select><span class="detail-stock" [class.off]="!modelo.disponible">{{ modelo.disponible ? modelo.stock + ' unidades disponibles' : 'Agotado' }}</span><strong class="detail-price">{{ moneda(modelo.precio) }}</strong><button class="button primary full" type="button" [disabled]="!disponibleParaAgregar(detalle)" (click)="agregar(detalle)"><app-store-icon nombre="bolsa" /> Agregar al carrito</button></div></div>
-    }
-  </dialog>
 </div>
