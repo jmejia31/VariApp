@@ -66,11 +66,13 @@ import { TenantContextService } from './tenant-context.service';
 export class TenantSelectorComponent {
   @Output() readonly confirmado = new EventEmitter<void>();
 
-  empresaId: number | null = this.tenant.empresaSolicitadaId();
+  empresaId: number | null;
   cargando = false;
   error = '';
 
-  constructor(public readonly tenant: TenantContextService) {}
+  constructor(public readonly tenant: TenantContextService) {
+    this.empresaId = this.tenant.empresaSolicitadaId();
+  }
 
   empresaValida(): boolean {
     return Number.isInteger(this.empresaId) && Number(this.empresaId) > 0;
