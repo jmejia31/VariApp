@@ -58,8 +58,8 @@ jobs:
           grep -q '^GLOBAL_DISPATCH_ADMISSION=OPEN_ONLY$' <<<"$master"
           grep -q '^GLOBAL_FROZEN_PROHIBITED=TRUE$' <<<"$master"
           grep -q '^CAUSAL_HOLD_SCOPE=TASK_OR_EXECUTION_ONLY$' <<<"$master"
-          grep -q 'El contrato global es \*\*OPEN_ONLY\*\*' <<<"$master"
-          ! grep -q 'Solo se permiten dos estados' <<<"$master"
+          grep -q '^NO_MANIFEST_DURING_HEAD_FREEZE_CAUSAL=TRUE$' <<<"$master"
+          grep -q '^PREARM_BEFORE_CAUSAL_CI=TRUE$' <<<"$master"
           echo 'VAEP_MASTER_OPEN_ONLY=PASS'
 
       - name: Repair any non-OPEN global admission before checkpoint
