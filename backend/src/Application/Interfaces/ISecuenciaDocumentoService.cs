@@ -4,7 +4,7 @@ namespace InventoryApp.Application.Interfaces;
 
 public interface ISecuenciaDocumentoService
 {
-    Task<SecuenciaDocumentoDto> ObtenerAsync(
+    Task<SecuenciaDocumentoConsultaDto> ObtenerAsync(
         int empresaId,
         int? sucursalId,
         string tipoDocumento,

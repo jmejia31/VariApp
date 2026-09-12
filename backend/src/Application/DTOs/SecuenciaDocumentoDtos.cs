@@ -5,7 +5,7 @@ public sealed record ReservarSecuenciaDocumentoRequest(
     int? SucursalId,
     string TipoDocumento);
 
-public sealed record SecuenciaDocumentoDto(
+public sealed record SecuenciaDocumentoConsultaDto(
     int EmpresaId,
     int? SucursalId,
     string TipoDocumento,

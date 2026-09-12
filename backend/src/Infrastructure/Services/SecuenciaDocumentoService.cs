@@ -26,7 +26,7 @@ public sealed class SecuenciaDocumentoService : ISecuenciaDocumentoService
         _usuarioScope = usuarioScope;
     }
 
-    public async Task<SecuenciaDocumentoDto> ObtenerAsync(
+    public async Task<SecuenciaDocumentoConsultaDto> ObtenerAsync(
         int empresaId,
         int? sucursalId,
         string tipoDocumento,
@@ -148,7 +148,7 @@ public sealed class SecuenciaDocumentoService : ISecuenciaDocumentoService
                      x.TipoDocumento == tipoDocumento,
                 cancellationToken);
 
-    private static SecuenciaDocumentoDto ToDto(SecuenciaDocumento secuencia) => new(
+    private static SecuenciaDocumentoConsultaDto ToDto(SecuenciaDocumento secuencia) => new(
         secuencia.EmpresaId,
         secuencia.SucursalId,
         secuencia.TipoDocumento,
