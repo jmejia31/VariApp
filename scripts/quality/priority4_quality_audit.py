@@ -66,7 +66,7 @@ ok("responses arrive out of order" in empresa_spec and "Respuesta Obsoleta" in e
 # except the intentionally public storefront/login allowlist. For permisoGuard,
 # modulo+accion are mandatory. The small balanced-brace extractor handles
 # multiline route objects without trying to execute Angular source.
-public_paths = {"", "login", "varistorehn", "varistorehn/productos", "varistorehn/producto/:slug", "varistorehn/categorias", "varistorehn/categoria/:slug", "varistorehn/carrito"}
+public_paths = {"", "login", "varistorehn", "varistorehn/productos", "varistorehn/producto/:slug", "varistorehn/categorias", "varistorehn/categoria/:slug", "varistorehn/carrito", "varistorehn/checkout", "varistorehn/pedido/:id"}
 route_files = [ROOT / "frontend/src/app/app.routes.ts"] + sorted((ROOT / "frontend/src/app").rglob("*.routes.ts"))
 route_findings: list[str] = []
 
