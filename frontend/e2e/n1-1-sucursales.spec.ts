@@ -3,6 +3,7 @@ import { test, expect, APIRequestContext, APIResponse, Page } from '@playwright/
 const API_URL = process.env['PHASE7_API_URL'] ?? 'http://127.0.0.1:5005';
 const ADMIN_USERNAME = process.env['PHASE7_ADMIN_USERNAME'] ?? 'e2e_admin';
 const ADMIN_PASSWORD = process.env['PHASE7_ADMIN_PASSWORD'] ?? 'E2E.Admin#2026!';
+const EMPRESA_ID = process.env['PHASE7_EMPRESA_ID'];
 
 let adminToken = '';
 let empresaId = 0;
@@ -31,11 +32,20 @@ async function loginApi(request: APIRequestContext): Promise<string> {
   return data.token;
 }
 
+async function completarSeleccionTenant(page: Page): Promise<void> {
+  const selector = page.getByLabel('ID de empresa');
+  await selector.waitFor({ state: 'visible', timeout: 5_000 });
+  if (!EMPRESA_ID) throw new Error('PHASE7_EMPRESA_ID es obligatorio para Sucursales E2E.');
+  await selector.fill(EMPRESA_ID);
+  await page.getByRole('button', { name: 'Entrar a la empresa', exact: true }).click();
+}
+
 async function loginUi(page: Page): Promise<void> {
   await page.goto('/login');
   await page.locator('input[formcontrolname="nombreUsuario"]').fill(ADMIN_USERNAME);
   await page.locator('input[formcontrolname="password"]').fill(ADMIN_PASSWORD);
   await page.locator('button[type="submit"]').click();
+  await completarSeleccionTenant(page);
   await page.waitForURL(url => url.pathname !== '/login', { timeout: 20_000 });
 }
 
@@ -57,18 +67,10 @@ test.describe('ERP-N1.1 — Sucursales', () => {
 
   test.beforeAll(async ({ request }) => {
     adminToken = await loginApi(request);
-
-    // N6.2.D makes EmpresaId mandatory for every Sucursal write. Create a
-    // real, isolated tenant owner in the ephemeral E2E database instead of
-    // relying on an arbitrary hard-coded foreign key.
-    const crearEmpresa = await request.post(`${API_URL}/empresas`, {
-      headers: authHeaders(adminToken),
-      data: { nombre: `Empresa E2E Sucursales ${suffix}` }
-    });
-    expect(crearEmpresa.status(), await crearEmpresa.text()).toBe(201);
-    const empresa = await dataOf(crearEmpresa);
-    empresaId = empresa.id;
-    expect(empresaId).toBeGreaterThan(0);
+    if (!EMPRESA_ID || !/^[1-9][0-9]*$/.test(EMPRESA_ID)) {
+      throw new Error('PHASE7_EMPRESA_ID debe identificar la membresía tenant E2E preparada por CI.');
+    }
+    empresaId = Number(EMPRESA_ID);
   });
 
   test('rechaza acceso anónimo y emite correlation ID', async ({ request }) => {
@@ -189,7 +191,8 @@ test.describe('ERP-N1.1 — Sucursales', () => {
 
   test('UI expone mantenimiento protegido y no desborda en móvil', async ({ page }) => {
     await loginUi(page);
-    await page.goto('/sucursales');
+    // Navegación SPA: evita recargar Angular y revocar por diseño el tenant verificado.
+    await page.locator('a[href="/sucursales"]').click();
     await expect(page.getByRole('heading', { name: 'Sucursales', exact: true })).toBeVisible();
     await expect(page.getByRole('link', { name: /Nueva sucursal/i })).toBeVisible();
 
@@ -198,13 +201,15 @@ test.describe('ERP-N1.1 — Sucursales', () => {
     const fila = page.locator('table.table-desktop tbody tr', { hasText: nombreActualizado });
     await expect(fila).toBeVisible();
 
-    await page.goto(`/sucursales/${sucursalId}/editar`);
+    const editar = fila.locator(`a[href="/sucursales/${sucursalId}/editar"]`);
+    await editar.click();
     await expect(page.getByRole('heading', { name: 'Editar sucursal', exact: true })).toBeVisible();
     await expect(page.locator('input[formcontrolname="codigo"]')).toHaveValue(codigo);
     await expect(page.locator('input[formcontrolname="nombre"]')).toHaveValue(nombreActualizado);
 
+    await page.goBack();
+    await expect(page.getByRole('heading', { name: 'Sucursales', exact: true })).toBeVisible();
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto('/sucursales');
     await page.waitForLoadState('networkidle');
     const layout = await page.evaluate(() => ({
       viewport: document.documentElement.clientWidth,
