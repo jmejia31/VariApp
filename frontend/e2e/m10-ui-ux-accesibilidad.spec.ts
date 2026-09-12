@@ -13,8 +13,22 @@ async function completarSeleccionTenantSiAplica(page: Page): Promise<void> {
   }
 
   if (!EMPRESA_ID) throw new Error('PHASE7_EMPRESA_ID es obligatorio cuando el login requiere seleccionar empresa.');
-  await selector.fill(EMPRESA_ID);
-  await page.getByRole('button', { name: 'Entrar a la empresa', exact: true }).click();
+  if (new URL(page.url()).pathname !== '/login') return;
+
+  try {
+    await selector.fill(EMPRESA_ID, { timeout: 5_000 });
+    await page.getByRole('button', { name: 'Entrar a la empresa', exact: true }).click({ timeout: 5_000 });
+  } catch (error) {
+    // LoginComponent puede revalidar automáticamente una selección persistida y
+    // navegar mientras este helper observa el gate. Si el servidor ya validó el
+    // tenant y la app salió de /login, la desaparición del selector es esperada.
+    try {
+      await page.waitForURL(url => url.pathname !== '/login', { timeout: 2_000 });
+      return;
+    } catch {
+      throw error;
+    }
+  }
 }
 
 async function login(page: Page): Promise<void> {
