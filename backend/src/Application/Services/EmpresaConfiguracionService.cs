@@ -394,9 +394,31 @@ public class EmpresaConfiguracionService : IEmpresaConfiguracionService
 
         config = new ConfigEmpresa(empresaId);
         await _repository.AddTenantAsync(config, cancellationToken);
-        if (!await _repository.SaveChangesAsync())
-            throw new BusinessRuleException("No se pudo inicializar la configuración tenant.");
-        return config;
+
+        try
+        {
+            if (!await _repository.SaveChangesAsync())
+                throw new BusinessRuleException("No se pudo inicializar la configuración tenant.");
+
+            return config;
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch
+        {
+            // Dos lecturas concurrentes pueden observar la ausencia y competir por crear
+            // la única ConfigEmpresa del tenant. El índice único decide el ganador.
+            // Descartamos el agregado perdedor antes de releer para no dejar el DbContext
+            // contaminado y provocar otro INSERT duplicado en una mutación posterior.
+            _repository.DetachTenant(config);
+            var concurrentWinner = await _repository.GetTenantAsync(empresaId, cancellationToken);
+            if (concurrentWinner is not null)
+                return concurrentWinner;
+
+            throw;
+        }
     }
 
     private async Task<ConfigEmpresaTenantDto> BuildTenantDtoAsync(

@@ -33,6 +33,9 @@ public class EmpresaConfiguracionRepository : IEmpresaConfiguracionRepository
     public void UpdateTenant(ConfigEmpresa config) =>
         _context.Set<ConfigEmpresa>().Update(config);
 
+    public void DetachTenant(ConfigEmpresa config) =>
+        _context.Entry(config).State = EntityState.Detached;
+
     public Task<List<PlantillaCorreoEmpresa>> ListPlantillasAsync(int empresaId, CancellationToken cancellationToken = default) =>
         _context.Set<PlantillaCorreoEmpresa>()
             .AsNoTracking()

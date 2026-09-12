@@ -11,6 +11,7 @@ public interface IEmpresaConfiguracionRepository
     Task<ConfigEmpresa?> GetTenantAsync(int empresaId, CancellationToken cancellationToken = default);
     Task AddTenantAsync(ConfigEmpresa config, CancellationToken cancellationToken = default);
     void UpdateTenant(ConfigEmpresa config);
+    void DetachTenant(ConfigEmpresa config);
 
     Task<List<PlantillaCorreoEmpresa>> ListPlantillasAsync(int empresaId, CancellationToken cancellationToken = default);
     Task<PlantillaCorreoEmpresa?> GetPlantillaAsync(int empresaId, string tipoPlantilla, CancellationToken cancellationToken = default);
