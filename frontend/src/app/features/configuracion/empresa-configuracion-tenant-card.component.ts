@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, effect, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -47,6 +47,26 @@ import { ConfigEmpresaTenant, EmpresaConfiguracionService } from '../../services
             <mat-form-field appearance="outline"><mat-label>Nombre</mat-label><input matInput formControlName="nombre" maxlength="200" autocomplete="organization"><mat-error>El nombre es obligatorio.</mat-error></mat-form-field>
             <mat-form-field appearance="outline"><mat-label>RTN</mat-label><input matInput formControlName="rtn" maxlength="40"></mat-form-field>
             <mat-form-field appearance="outline" class="wide"><mat-label>Dirección</mat-label><textarea matInput formControlName="direccion" rows="2" maxlength="500"></textarea></mat-form-field>
+          </div>
+
+          <h3>Logo</h3>
+          <div class="logo-row">
+            @if (logoUrl()) {
+              <img class="tenant-logo" [src]="logoUrl()" alt="Logo actual del tenant">
+            } @else {
+              <div class="logo-placeholder" aria-label="Tenant sin logo"><mat-icon>image_not_supported</mat-icon></div>
+            }
+            <div class="logo-actions">
+              <input #logoInput type="file" accept="image/*" hidden (change)="subirLogo($event)">
+              <button mat-stroked-button type="button" (click)="logoInput.click()" [disabled]="!puedeEditar() || saving()">
+                <mat-icon>upload</mat-icon> Subir logo
+              </button>
+              @if (logoUrl()) {
+                <button mat-button type="button" (click)="eliminarLogo()" [disabled]="!puedeEditar() || saving()">
+                  <mat-icon>delete_outline</mat-icon> Quitar logo
+                </button>
+              }
+            </div>
           </div>
 
           <h3>Localización y moneda</h3>
@@ -106,7 +126,7 @@ import { ConfigEmpresaTenant, EmpresaConfiguracionService } from '../../services
     </section>
   `,
   styles: [`
-    .tenant-card{margin-top:1.25rem;padding:1.25rem}.header-row,.section-title,.actions,.mail-status,.conflict,.readonly{display:flex;align-items:center;gap:.75rem}.header-row,.section-title{justify-content:space-between;flex-wrap:wrap}h2,h3{margin:0}.tenant-form{display:grid;gap:1rem}.hint{margin:.25rem 0;opacity:.78}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}.wide{grid-column:1/-1}.state{min-height:120px;display:flex;align-items:center;justify-content:center;gap:.75rem;text-align:center}.error,.conflict{color:var(--color-error,#b3261e)}.state.error{flex-wrap:wrap}.mail-status,.conflict,.readonly{padding:.75rem 1rem;border:1px solid rgba(0,0,0,.12);border-radius:8px}.mail-status.configured{color:#1b5e20}.templates{display:grid;gap:.5rem}.templates article{display:grid;grid-template-columns:minmax(140px,1fr) auto;gap:.25rem 1rem;padding:.75rem 1rem;border:1px solid rgba(0,0,0,.12);border-radius:8px}.templates small{grid-column:1/-1;opacity:.75}.actions{justify-content:flex-end}.readonly{width:fit-content}@media(max-width:760px){.grid{grid-template-columns:1fr}.wide{grid-column:auto}.header-row>button,.actions button,.conflict button{width:100%}.conflict{align-items:flex-start;flex-wrap:wrap}}
+    .tenant-card{margin-top:1.25rem;padding:1.25rem}.header-row,.section-title,.actions,.mail-status,.conflict,.readonly,.logo-row,.logo-actions{display:flex;align-items:center;gap:.75rem}.header-row,.section-title{justify-content:space-between;flex-wrap:wrap}h2,h3{margin:0}.tenant-form{display:grid;gap:1rem}.hint{margin:.25rem 0;opacity:.78}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}.wide{grid-column:1/-1}.state{min-height:120px;display:flex;align-items:center;justify-content:center;gap:.75rem;text-align:center}.error,.conflict{color:var(--color-error,#b3261e)}.state.error{flex-wrap:wrap}.mail-status,.conflict,.readonly{padding:.75rem 1rem;border:1px solid rgba(0,0,0,.12);border-radius:8px}.mail-status.configured{color:#1b5e20}.logo-row{align-items:flex-start;flex-wrap:wrap}.tenant-logo,.logo-placeholder{width:120px;height:72px;border:1px solid rgba(0,0,0,.12);border-radius:8px;object-fit:contain;background:rgba(0,0,0,.02)}.logo-placeholder{display:grid;place-items:center}.logo-actions{flex-wrap:wrap}.templates{display:grid;gap:.5rem}.templates article{display:grid;grid-template-columns:minmax(140px,1fr) auto;gap:.25rem 1rem;padding:.75rem 1rem;border:1px solid rgba(0,0,0,.12);border-radius:8px}.templates small{grid-column:1/-1;opacity:.75}.actions{justify-content:flex-end}.readonly{width:fit-content}@media(max-width:760px){.grid{grid-template-columns:1fr}.wide{grid-column:auto}.header-row>button,.actions button,.conflict button{width:100%}.conflict{align-items:flex-start;flex-wrap:wrap}.logo-actions{width:100%}.logo-actions button{flex:1}}
   `]
 })
 export class EmpresaConfiguracionTenantCardComponent implements OnInit {
@@ -123,8 +143,17 @@ export class EmpresaConfiguracionTenantCardComponent implements OnInit {
   readonly conflict = signal(false);
   readonly puedeEditar = signal(false);
   readonly correoConfigurado = signal(false);
+  readonly logoUrl = signal<string | null>(null);
   readonly plantillas = signal<ConfigEmpresaTenant['plantillasCorreo']>([]);
   private version = 0;
+  private initialized = false;
+  private loadedEmpresaId: number | null = null;
+  private loadGeneration = 0;
+
+  private readonly tenantWatcher = effect(() => {
+    const empresaId = this.empresaId();
+    if (this.initialized && empresaId !== this.loadedEmpresaId) this.cargar();
+  });
 
   readonly form = this.fb.group({
     nombre: ['', [Validators.required, Validators.maxLength(200)]],
@@ -141,22 +170,36 @@ export class EmpresaConfiguracionTenantCardComponent implements OnInit {
   ngOnInit(): void {
     this.puedeEditar.set(this.permisos.puede('Configuracion', 'Editar'));
     if (!this.puedeEditar()) this.form.disable();
+    this.initialized = true;
     this.cargar();
   }
 
   cargar(): void {
     const empresaId = this.empresaId();
+    const generation = ++this.loadGeneration;
+    this.loadedEmpresaId = empresaId ?? null;
     if (!empresaId) {
       this.loading.set(false);
       this.error.set(null);
+      this.conflict.set(false);
+      this.logoUrl.set(null);
+      this.plantillas.set([]);
       return;
     }
     this.loading.set(true);
     this.error.set(null);
     this.conflict.set(false);
-    this.empresaService.getTenant(empresaId).pipe(finalize(() => this.loading.set(false))).subscribe({
-      next: res => this.aplicar(res.data),
-      error: err => this.error.set(err.error?.message ?? 'No se pudo cargar la configuración del tenant activo.')
+    this.empresaService.getTenant(empresaId).pipe(finalize(() => {
+      if (generation === this.loadGeneration) this.loading.set(false);
+    })).subscribe({
+      next: res => {
+        if (generation !== this.loadGeneration || empresaId !== this.empresaId()) return;
+        this.aplicar(res.data, empresaId);
+      },
+      error: err => {
+        if (generation !== this.loadGeneration || empresaId !== this.empresaId()) return;
+        this.error.set(err.error?.message ?? 'No se pudo cargar la configuración del tenant activo.');
+      }
     });
   }
 
@@ -181,26 +224,69 @@ export class EmpresaConfiguracionTenantCardComponent implements OnInit {
       version: this.version
     }).pipe(finalize(() => this.saving.set(false))).subscribe({
       next: res => {
-        this.aplicar(res.data);
+        if (empresaId !== this.empresaId()) return;
+        this.aplicar(res.data, empresaId);
         this.snackBar.open('Configuración del tenant actualizada.', 'Cerrar', { duration: 4000 });
       },
       error: err => {
-        if (err.status === 409 || err.status === 412) {
-          this.conflict.set(true);
-          return;
-        }
-        this.error.set(err.error?.message ?? 'No se pudo guardar la configuración del tenant activo.');
+        if (empresaId !== this.empresaId()) return;
+        this.manejarErrorMutacion(err, 'No se pudo guardar la configuración del tenant activo.');
       }
     });
   }
 
-  private aplicar(config: ConfigEmpresaTenant): void {
-    if (config.empresaId !== this.empresaId()) {
-      this.error.set('El servidor devolvió una configuración que no coincide con el tenant verificado.');
+  subirLogo(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    const empresaId = this.empresaId();
+    if (!file || !empresaId || !this.puedeEditar() || this.saving()) return;
+
+    this.saving.set(true);
+    this.error.set(null);
+    this.empresaService.updateTenantLogo(empresaId, file).pipe(finalize(() => this.saving.set(false))).subscribe({
+      next: res => {
+        if (empresaId !== this.empresaId()) return;
+        this.aplicar(res.data, empresaId);
+        this.snackBar.open('Logo del tenant actualizado.', 'Cerrar', { duration: 4000 });
+      },
+      error: err => {
+        if (empresaId !== this.empresaId()) return;
+        this.manejarErrorMutacion(err, 'No se pudo actualizar el logo del tenant.');
+      }
+    });
+  }
+
+  eliminarLogo(): void {
+    const empresaId = this.empresaId();
+    if (!empresaId || !this.puedeEditar() || this.saving() || !this.logoUrl()) return;
+
+    this.saving.set(true);
+    this.error.set(null);
+    this.empresaService.restaurarTenantLogo(empresaId).pipe(finalize(() => this.saving.set(false))).subscribe({
+      next: res => {
+        if (empresaId !== this.empresaId()) return;
+        this.aplicar(res.data, empresaId);
+        this.snackBar.open('Logo del tenant eliminado.', 'Cerrar', { duration: 4000 });
+      },
+      error: err => {
+        if (empresaId !== this.empresaId()) return;
+        this.manejarErrorMutacion(err, 'No se pudo eliminar el logo del tenant.');
+      }
+    });
+  }
+
+  private aplicar(config: ConfigEmpresaTenant, expectedEmpresaId = this.empresaId()): void {
+    if (!expectedEmpresaId || expectedEmpresaId !== this.empresaId() || config.empresaId !== expectedEmpresaId) {
+      if (expectedEmpresaId === this.empresaId()) {
+        this.error.set('El servidor devolvió una configuración que no coincide con el tenant verificado.');
+      }
       return;
     }
+    this.loadedEmpresaId = expectedEmpresaId;
     this.version = config.version;
     this.correoConfigurado.set(config.correoConfigurado);
+    this.logoUrl.set(config.logoUrl ?? null);
     this.plantillas.set(config.plantillasCorreo ?? []);
     this.form.reset({
       nombre: config.nombre,
@@ -216,6 +302,14 @@ export class EmpresaConfiguracionTenantCardComponent implements OnInit {
     if (!this.puedeEditar()) this.form.disable();
     this.conflict.set(false);
     this.error.set(null);
+  }
+
+  private manejarErrorMutacion(err: any, fallback: string): void {
+    if (err.status === 409 || err.status === 412) {
+      this.conflict.set(true);
+      return;
+    }
+    this.error.set(err.error?.message ?? fallback);
   }
 
   private jsonValido(controlName: 'impuestosJson' | 'emisionJson'): boolean {
