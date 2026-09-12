@@ -113,7 +113,7 @@ Estado: `REVIEW_FIRST_ACCEPTED_AFTER_CONTROLLER_DIRECT_FIX__P0_0__P1_0__PENDING_
 
 **Validación final:** HEAD documental `360ff3303af3587810c21e32ceeeb88fcc9e51d3`; Development #32607259773 SUCCESS; Acceptance #32607259650 SUCCESS; Fase8 #32607259716 SUCCESS; M13 #32607259703 SUCCESS; Recovery MySQL #32607259695 SUCCESS. `TASKS.md` ya declara ERP-N2.8 cerrado y la bitácora queda ahora reconciliada. P0/P1 bloqueantes conocidos=0.
 
-**Control:** `N2.8.A–H` quedan formalmente cerrados. Parent40 avanza 13→14/40 y GAP 27→26. La siguiente MICROTAREA dependency-valid es `N2.9.A — Evaluación de proveedores — Auditoría y preflight`; reutilizar su evidencia histórica existente y no repetir preflight redundante. `main`, Producción, PR #2 merge/auto-merge, ramas nuevas, force-push, secretos y despliegues permanecen intactos.
+**Control:** `N2.8.A–H` quedan formalmente cerrados. Parent40 avanza 13→14/40, GAP 27→26. La siguiente MICROTAREA dependency-valid es `N2.9.A — Evaluación de proveedores — Auditoría y preflight`; reutilizar su evidencia histórica existente y no repetir preflight redundante. `main`, Producción, PR #2 merge/auto-merge, ramas nuevas, force-push, secretos y despliegues permanecen intactos.
 
 ## 2026-08-22 — ERP-N2.7 NotaCreditoProveedor — CIERRE FORMAL
 
@@ -133,7 +133,7 @@ Estado: `REVIEW_FIRST_ACCEPTED_AFTER_CONTROLLER_DIRECT_FIX__P0_0__P1_0__PENDING_
 
 **Trazabilidad:** A `73ef31c49f08c8bff9732978ffc86dbe74e0a116`; B `88047cde42929c1b2dcd8faf77da1c6543a2f2a9` + fix `f17983ef49bb8f5032e6fb328564f36c02f103b9`; C `adff03723b4336b570328179e468e8470e611b95`; D hasta `a5340f991b0f93438ac184afeac41cc9ed82a756`; E.1 `26a7eada...`, E.2 `9ede060d...`, E.3 `f9000061...`; F hasta `1eb26cf60a3d4e1e37f9c89b60929f432de3c1ac`; G.1 `23fa5ac6...`; G.2/G.3 baseline `b4d477e2de25077c459d02b479968c93c93bc910`. Paquete H: `e59b7bb59cf51b99ae14665cee18c1fe70220bbb`, `6d53ae43f4a9fa54b41f1981704cb03c427d2a74`, `74ebbe969b22b9d8e0130ea733ae0c9fa9f18891`, `821431340afceb70b93f5431a719b8adc2ab6717` y candidato documental `736683476714300d6bf29406967e17c312abac7d`; `TASKS.md` reconciliado en `da05e6625ec6caf98f4e7e4a6dc4912d284dd805`.
 
-**Validación:** baseline funcional `b4d477e2...`: Development `32218997006` SUCCESS; Acceptance `32218996971` SUCCESS; Fase 8 `32218996994` SUCCESS; M10 `32218996973` SUCCESS; M13 `32218996978` SUCCESS. Persistencia N2.2.C: M12 `32184108722` SUCCESS en MySQL 8.4. Sobre el candidato documental `73668347...`, Development `32227719896` terminó SUCCESS completo —backend/unitarias, frontend, higiene, Docker, aplicación de migraciones, integración MySQL y SQL forward— y recovery MySQL `32227719707` SUCCESS; el diff H es exclusivamente documental/colaborativo y no modifica aplicación ni workflows.
+**Validación:** baseline funcional `b4d477e2...`: Development `32218997006`, Acceptance `32218996971`, Fase 8 `32218996994`, M10 `32218996973` y M13 `32218996978` SUCCESS. Persistencia N2.2.C: M12 `32184108722` SUCCESS en MySQL 8.4. Sobre el candidato documental `73668347...`, Development `32227719896` terminó SUCCESS completo —backend/unitarias, frontend, higiene, Docker, aplicación de migraciones, integración MySQL y SQL forward— y recovery MySQL `32227719707` SUCCESS; el diff H es exclusivamente documental/colaborativo y no modifica aplicación ni workflows.
 
 **Documentación:** `docs/ERP_N2_2_ORDEN_COMPRA.md`, `docs/RUNBOOK_N2_2_ORDEN_COMPRA.md`, `docs/ADR_N2_2_ORDEN_COMPRA_AUTORIDAD_DOCUMENTAL.md`, `docs/OPENAPI_N2_2_ORDEN_COMPRA.md` y `docs/CERTIFICACION_N2_2_ORDEN_COMPRA.md`, más el preflight histórico `docs/ERP_N2_2_ORDEN_COMPRA_PREFLIGHT.md`.
 
@@ -143,13 +143,13 @@ Estado: `REVIEW_FIRST_ACCEPTED_AFTER_CONTROLLER_DIRECT_FIX__P0_0__P1_0__PENDING_
 
 **Responsable:** ChatGPT mediante conexiones autorizadas GitHub + Google Drive, preservando cambios concurrentes publicados en `Desarrollo`.
 
-**Objetivo/alcance:** cerrar formalmente ERP-N2.1 después de completar preflight, dominio/contratos, persistencia/migración, aplicación/API, frontend/UX, RBAC/auditoría/seguridad/observabilidad, QA/regresión/CI y documentación. `SolicitudCompra` queda como documento empresarial independiente con lifecycle `Borrador → Solicitada → Aprobada/Rechazada` y sin efectos de stock, Kardex, costeo o finanzas.
+**Objetivo/alcance:** cerrar formalmente ERP-N2.1 después de completar preflight, dominio y contratos, persistencia/migración, Application/API, frontend/UX, RBAC/auditoría/seguridad/observabilidad, QA/regresión y documentación. `SolicitudCompra` queda como documento empresarial independiente con lifecycle `Borrador → Solicitada → Aprobada/Rechazada` y sin efectos de stock, Kardex, costeo o finanzas.
 
 **Decisiones y seguridad:** una solicitud aprobada continúa siendo documental y no crea implícitamente una `Compra`; la materialización posterior pertenece a `N2.2` y siguientes. Update/Enviar/Aprobar/Rechazar se serializan con transacción y lock pesimista. La autorización usa grants relacionales sin bypass efectivo por `EsAdministrador`. Crear/Editar/Enviar/Aprobar/Rechazar registran auditoría estricta dentro de la unidad transaccional, sin copiar notas u observaciones sensibles. Correlation ID, health/readiness y configuración segura reutilizan la infraestructura transversal existente.
 
 **Trazabilidad:** D `01770a23cbf9a50e7d21a0a7913f32e31ce6070a`; E.1 `f52f9f746427d18675073ba769c2a78c2f13d900`; E.2 `112ef6b8660fb12c80d6981eac81b55f6c32bdec`; E.3 hasta `07275df6af316aff83f250c6cf9d9b1b1ad335d3`; F.1 `d3f039efafe0bf7ccfd487ba4ca7c66e07625fc3`; F.2 `adea50ac65bacceff42cd23c110afea77817ca44`; F.3 `12b26459004dc01a17b5b2af4602dbb906470bae`; G baseline `a1a6f699cbad0186d0e0d7d7ac7f366c51009f7c`; paquete documental H `d8760bff2e9322e6f09612f64a89c2de888aa9d8`.
 
-**Validación:** CI funcional `32172981351` SUCCESS, incluido frontend, backend y MySQL con 994/994 pruebas backend. Sobre el commit documental `d8760bff...`, Development `32177459360`, Fase 8 `32177459423`, M10 `32177459382`, M12 `32177459385`, backup operativo `32177459445`, backup/restauración `32177459455` y recuperación MySQL `32177459334` terminaron SUCCESS; los workflows históricos ERP-N0 que fallen por incompatibilidades de su propio alcance no se usan como gate causal de N2.1.
+**Validación:** baseline funcional `a1a6f699cbad0186d0e0d7d7ac7f366c51009f7c`; Development #32172981351 SUCCESS incluido frontend, backend y MySQL con 994/994 pruebas backend. Sobre el commit documental `d8760bff2e9322e6f09612f64a89c2de888aa9d8`, Development `32177459360`, Fase 8 `32177459423`, M10 `32177459382`, M12 `32177459385`, backup operativo `32177459445`, backup/restauración `32177459455` y recuperación MySQL `32177459334` terminaron SUCCESS; los workflows históricos ERP-N0 que fallen por incompatibilidades de su propio alcance no se usan como gate causal de N2.1.
 
 **Documentación/riesgos residuales:** fuentes canónicas `docs/ADR_N2_1_SOLICITUD_COMPRA_INDEPENDIENTE.md`, `docs/ERP_N2_1_SOLICITUD_COMPRA.md` y `docs/RUNBOOK_N2_1_SOLICITUD_COMPRA.md`. Riesgo residual deliberado: la conversión `SolicitudCompra → OrdenCompra/Compra`, impuestos/moneda/condiciones y recepción pertenecen a microtareas posteriores; no se adelantan en N2.1. No quedan bypasses temporales conocidos atribuibles a N2.1.
 
@@ -165,9 +165,9 @@ Estado: `REVIEW_FIRST_ACCEPTED_AFTER_CONTROLLER_DIRECT_FIX__P0_0__P1_0__PENDING_
 
 **Documentación:** paquete canónico compuesto por `docs/ERP_N1_9_SERIES_LOTES_VENCIMIENTOS.md`, `docs/ADR_N1_9_AUTORIDAD_TRAZABILIDAD.md`, `docs/ERD_N1_9_TRAZABILIDAD.md`, `docs/RUNBOOK_N1_9_TRAZABILIDAD.md`, `docs/OPENAPI_N1_9_TRAZABILIDAD.md`, `docs/RUNBOOK_N1_9_MIGRACION.md` y `docs/CERTIFICACION_N1_9_TRAZABILIDAD.md`. El baseline funcional de QA es `4b5a5c9a8b495fcef62464bf50010ac69117fe48`; el baseline documental certificable es `7bc4b7935cc92e15d24f90a79f3915ab14e2d243`.
 
-**Validación final de `7bc4b793...`:** Development `32089179243` SUCCESS; Acceptance `32089179228` SUCCESS; Fase8 `32089179144` SUCCESS; M10 `32089179156` SUCCESS; M13 `32089179175` SUCCESS. El estado colaborativo posterior es exclusivamente documental `[skip ci]`: `TASKS.md` reconciliado en `67da8adc9e3dfad87140346050ee731b3dd8abc8` y certificado final actualizado en `81b5478458f8dfd5aa33e4653a3b413e1b4bbb36`.
+**Validación final de `7bc4b793...`:** Development `32089179243` SUCCESS; Acceptance `32089179228` SUCCESS incluido Playwright integral + SMTP/PDF; Fase8 `32089179144` SUCCESS; M10 `32089179156` SUCCESS; M13 `32089179175` SUCCESS completo, incluido Backend/MySQL/migraciones/upgrade, Frontend, Docker/backup, Secretos/Higiene, Runtime/Playwright, SMTP/PDF/logs y `Dictamen automatizado M13` SUCCESS exigiendo todos los gates verdes.
 
-**Control:** `N1.9.A–H` quedan cerrados; el tablero VAEP debe avanzar a `N1.10.A` únicamente si sus dependencias están `LISTO`. `main`, Producción, merge/auto-merge del PR #2, secretos, infraestructura productiva, force-push y ramas nuevas permanecen intactos.
+**Control:** `TASKS.md` queda reconciliado con VAEP, incluyendo el desfase histórico de `N1.7.H` que ya estaba `LISTO` en el tablero. `N1.9.A–H` quedan formalmente cerrados. `main`, Producción, merge/auto-merge del PR #2, secretos, infraestructura productiva, force-push y ramas nuevas permanecen intactos.
 
 ## 2026-08-17 — ERP-N1.8 Reservas de inventario — CIERRE FORMAL
 
@@ -179,7 +179,7 @@ Estado: `REVIEW_FIRST_ACCEPTED_AFTER_CONTROLLER_DIRECT_FIX__P0_0__P1_0__PENDING_
 
 **Documentación:** `docs/ERP_N1_8_RESERVAS.md`, `docs/ADR_N1_8_RESERVAS_STOCK_RESERVADO_Y_OVERSELLING.md`, `docs/RUNBOOK_N1_8_RESERVAS.md` y `docs/ERD_N1_8_RESERVAS.md`, publicados en `11865b97f00f662728f7fe85a7466af89a9084df`. El baseline funcional previo es `95baf2763b912e1015a3bdd25a37aca649e34c37`.
 
-**Validación final del HEAD documental `11865b97...`:** Development `32037186026` SUCCESS 5/5; Acceptance `32037186011` SUCCESS incluido Playwright integral + SMTP/PDF; Fase8 `32037186066` SUCCESS; M10 `32037186054` SUCCESS; M13 `32037186024` SUCCESS completo, incluido Backend/MySQL/migraciones/upgrade, Frontend, Docker/backup, Secretos/Higiene, Runtime/Playwright, SMTP/PDF/logs y `Dictamen automatizado M13` SUCCESS.
+**Validación final del HEAD documental `11865b97...`:** Development `32037186026` SUCCESS 5/5; Acceptance `32037186011` SUCCESS incluido Playwright/SMTP/PDF; Fase8 `32037186066` SUCCESS; M10 `32037186054` SUCCESS; M13 `32037186024` SUCCESS completo, incluido backend/MySQL/migraciones/upgrade histórico, frontend, Docker/backup, secretos/dependencias, seguridad HTTP, runtime/Playwright, SMTP/PDF/logs y `Dictamen automatizado M13` SUCCESS exigiendo todos los gates verdes.
 
 **Control:** `TASKS.md` queda reconciliado con VAEP, incluyendo el desfase histórico de `N1.7.H` que ya estaba `LISTO` en el tablero. `N1.8.A–H` quedan formalmente cerrados. `main`, Producción, merge/auto-merge del PR #2, secretos, infraestructura productiva, force-push y ramas nuevas permanecen intactos. Siguiente foco FINISH_FIRST: `N1.9.A — Series, lotes y vencimientos — Auditoría y preflight`.
 
@@ -207,9 +207,9 @@ Estado: `REVIEW_FIRST_ACCEPTED_AFTER_CONTROLLER_DIRECT_FIX__P0_0__P1_0__PENDING_
 
 **Resultado funcional:** `Almacen.SucursalId` queda como única jerarquía organizacional de N1.2; una introducción concurrente de `EmpresaId` duplicada fue detectada y corregida forward-only en `85f2b845ca60d8e797425bd5b0f9a7d597a6cfa8`. Persistencia final con FK Restrict a `Sucursales`, código activo único, índices/checks y rollback fail-closed. API `/almacenes` soporta CRUD, filtros/paginación, catálogo de tipos, activos y operaciones de estado. Crear/mover/reactivar falla cerrado si la Sucursal no existe o está inactiva. RBAC `Almacenes=29`, auditoría `Entidad=Almacen` y métrica P50/P95 sin término/PII quedan integrados. Frontend ofrece lista server-side, selector Sucursal/tipo, rutas y menú protegidos, tabla/cards responsive y formulario sin stock ni EmpresaId.
 
-**Trazabilidad:** B final `85f2b845ca60d8e797425bd5b0f9a7d597a6cfa8`; C `bebafe3abb2ddc66448c805b107f8d1f8ee3f3e9`; D `5a97bf3844069a565e1aecf39e4b8001c10f386b`; E `3a1b8004f2120c4be6459bb46fd120eff8704fe9`; F `30c7e9ff1dedf69eb860916b92b1d5bee0941084`; G base `f6f51bb6d0d5d1910e9561de30d934b30fa2d83e`, corrección harness `3049cfdf637eb1c1d2fb0be7f9881e517a3cf13f` y corrección routing/final funcional `053152ae51de3617bf30a4e9987574c7879e3049`. Documento canónico publicado en `a507eee7e69a5bed15226855098c0c0a28e7962e`.
+**Trazabilidad:** B final `85f2b845ca60d8e797425bd5b0f9a7d597a6cfa8`; C `bebafe3abb2ddc66448c805b107f8d1f8ee3f3e9`; D `5a97bf3844069a565e1aecf39e4b8001c10f386b`; E `3a1b8004f2120c4be6459bb46fd120eff8704fe9`; F `30c7e9ff1dedf69eb860916b92b1d5bee0941084`; G base `f6f51bb6d0d5d1910e9561de30d934b30fa79b`, corrección harness `3049cfdf637eb1c1d2fb0be7f9881e517a3cf13f` y corrección routing/final funcional `053152ae51de3617bf30a4e9987574c7879e3049`.
 
-**QA real:** el primer certificado `31836552560` dejó 6 pruebas API verdes y detectó que el harness levantaba API en 5006 mientras Angular consumía 5005; se corrigió sin alterar la app. El segundo `31836970704` confirmó el login y detectó que `provideRoutes(ALMACENES_ROUTES)` registraba Almacenes después del wildcard `**`; se corrigió a `provideRouter([...ALMACENES_ROUTES, ...routes])`. El certificado final `31837394309`, job `94886619205`, terminó `SUCCESS`: build `-warnaserror`, 376 tests backend, API+migraciones MySQL 8.4+health, npm ci/lint/build, Angular y Playwright `8 passed / 0 failed / 0 skipped`.
+**QA real:** el primer certificado `31836552560` dejó 6 pruebas API verdes y detectó que el harness levantaba API en 5006 mientras Angular consumía 5005; se corrigió sin alterar la app. El segundo `31836970704` confirmó el login y detectó que `provideRoutes(ALMACENES_ROUTES)` registraba Almacenes después del wildcard `**`; se corrigió a `provideRouter([...ALMACENES_ROUTES, ...routes])`. El certificado final `31837394309`, job `94886619205`, terminó `SUCCESS`: build `-warnaserror`, 376 tests backend, API+migraciones MySQL 8.4+health, npm ci/lint/build, Angular y Chromium/Playwright `8 passed / 0 failed / 0 skipped`.
 
 **Documentación/control:** fuente canónica `docs/ERP_N1_2_ALMACENES.md`; TASKS, CHANGELOG y tablero VAEP se reconcilian en N1.2.H. `main`, Producción, PR #2 merge/auto-merge, secretos y force-push permanecen intactos. **ERP-N1.2 queda formalmente cerrado** y el siguiente foco FINISH_FIRST es `N1.3.A — Ubicaciones internas / auditoría y preflight`.
 
@@ -219,7 +219,7 @@ Estado: `REVIEW_FIRST_ACCEPTED_AFTER_CONTROLLER_DIRECT_FIX__P0_0__P1_0__PENDING_
 
 **Objetivo/alcance:** implementar y certificar el primer maestro de ERP-N1, `Sucursal`, de extremo a extremo: dominio/contratos, persistencia MySQL forward-only, API, RBAC relacional, auditoría, observabilidad, frontend responsive/accesible y QA específico. `EmpresaId` queda nullable como reserva de compatibilidad futura, sin FK ni semántica tenant antes de ERP-N6; Almacenes/Ubicaciones/Existencias permanecen en N1.2/N1.3/N1.4.
 
-**Resultado funcional:** tabla `Sucursales` con código activo único mediante columna computada, índices de EmpresaId/estado, soft-delete y rollback fail-closed; API `/sucursales` con búsqueda/filtros/paginación, CRUD, activar/desactivar idempotente y baja lógica; `ModuloSistema.Sucursales=28` con grants persistidos `Ver/Crear/Editar/Activar/Desactivar/EliminarLogico`; auditoría `Entidad=Sucursal`; métricas P50/P95 de búsqueda sin término/PII; frontend Angular con lista server-side, estados loading/error/vacío, formulario, permisos runtime, tabla desktop/cards móvil y rutas protegidas.
+**Resultado funcional:** tabla `Sucursales` con código activo único mediante columna computada, índices de EmpresaId/estado, soft-delete y rollback fail-closed; API `/sucursales` con búsqueda/filtros/paginación, CRUD, activar/desactivar idempotente y baja lógica; `ModuloSistema.Sucursales=28` con grants persistidos `Ver/Crear/Editar/Activar/Desactivar/EliminarLogico`; auditoría `Entidad=Sucursal`; métricas P50/P95 de búsqueda sin término/PII; frontend con lista server-side, estados loading/error/vacío, formulario, permisos runtime, tabla desktop/cards móvil y rutas protegidas.
 
 **Trazabilidad:** B `0a576db21e583a76418ce037ca53f8c30d3b7eb1`; C persistencia `3ca70a8b41125ba501b9d94261e43d9dcd269df9` + snapshot `65785999934d8f02ffdf947fa24f48ceb9059076`; D aplicación/API `c511039680938fb758c60cf199a0c665462c7e79` + pruebas `805818140ef78183e52a17d196f36c452d39ebc2`; E `d3009e051ffea91631673dc764e56fdf8cab70b2`; F `9ead42f594aea12c20612d7c15e21768c090f828`; G base `704d451e216ab4a48042ae8bfaca5995d77e9cdb`; fix QA `b82c8d8325866fdf4408e22424fefe692965b8d9`; certificado G `42a241162dc54c8fddf040a7321d57dd229f7e5b`.
 
@@ -295,7 +295,7 @@ Estado: `REVIEW_FIRST_ACCEPTED_AFTER_CONTROLLER_DIRECT_FIX__P0_0__P1_0__PENDING_
 
 **Cobertura dirigida:** crear normaliza código/canoniza metadata y audita; código duplicado falla cerrado sin persistir; editar registra usuario/auditoría; activar-desactivar preserva eliminación lógica; eliminar aplica trazabilidad; reordenamiento rechaza IDs duplicados antes de persistir. La prueba runtime de catálogo RBAC vuelve a garantizar que todos los permisos exigidos por controladores existen en el catálogo base.
 
-**Validación real final:** ERP-N0.5 run `31650122695` terminó `SUCCESS` completo: restore/build/pruebas backend, esquema relacional, historia representativa, fail-closed, preflight, backfill, postcheck y snapshot EF. El CI general `31650122667` terminó `SUCCESS` completo en Backend Release/pruebas, migraciones e integración MySQL 8.4, Docker, frontend e higiene.
+**Validación real:** ERP-N0.5 run `31650122695` terminó `SUCCESS` completo: restore/build/pruebas backend, esquema relacional, historia representativa, fail-closed, preflight, backfill histórico, postcheck y snapshot EF quedaron verdes. El CI general `31650122667` terminó `SUCCESS` completo en sus cinco jobs: Backend Release/pruebas, migraciones e integración MySQL 8.4, Docker, frontend e higiene.
 
 **Control:** `N0.5.08` queda `LISTO` y habilita `N0.5.09`, `N0.5.10` y `N0.5.11` según dependencias de `COLA`. No se tocó `main`, Producción, merge/auto-merge de PR #2, force-push ni ramas nuevas.
 
@@ -327,7 +327,7 @@ Estado: `REVIEW_FIRST_ACCEPTED_AFTER_CONTROLLER_DIRECT_FIX__P0_0__P1_0__PENDING_
 
 **Objetivo/alcance:** reconciliar y cerrar la cadena `N0.6.D2` después de certificar los tres productores documentales de `MovimientoInventario`, sin tocar `N0.5.07B/07B1`, contratos DTO/API ni persistencia adicional. Esta entrada supersede el estado operativo antiguo de D2A que quedó registrado abajo como `VALIDANDO`: la solución finalmente certificada fue el boundary `typed-first` del repositorio, no el intento incompleto de mapping EF.
 
-**Resultado:** `D2A` quedó certificado mediante `6eadf19a27a0c7c90b0cec54262070f896209738` y CI `31587640123`; `D2B1` Compra mediante `e62b0667f4faace2d8d6520f753547b3e2624a1d` / pruebas `c76124980914edbea57ad7ff97eaa705171a2d58` / CI `31589093189`; `D2B2` Venta mediante `bac4d61b34813168b087fd7e9caf740a518c354a` / pruebas `06dea3390e0c40bef94e80f2e0ce30f482cac1f2` / CI `31589968458`; y `D2B3` ConsumoInsumo mediante `8648cc61f29a878d213ff2ddcce4e3731a81ff43` con correcciones de prueba hasta `ed570bb842ae4fbeb57b981bd596dfafbecf6072`.
+**Resultado:** `D2A` quedó certificado mediante `6eadf19a27a0c7c90b0cec54262070f896209738` y CI `31587640123`; `D2B1` Compra mediante `e62b0667f4faace2d8d6520f753547b3e2624a1d` / pruebas `c76124980914edbea57ad7ff97eaa705171a2d58` / CI `31589093189`; y `D2B2` Venta mediante `bac4d61b34813168b087fd7e9caf740a518c354a` / pruebas `06dea3390e0c40bef94e80f2e0ce30f482cac1f2` / CI `31589968458`; y `D2B3` ConsumoInsumo mediante `8648cc61f29a878d213ff2ddcce4e3731a81ff43` con correcciones de prueba hasta `ed570bb842ae4fbeb57b981bd596dfafbecf6072`.
 
 **Validación real:** el CI general `31594243722` sobre `ed570bb842ae4fbeb57b981bd596dfafbecf6072` terminó `SUCCESS` completo en Backend Release/pruebas, migraciones e integración MySQL 8.4, Docker, frontend e higiene. Los intentos previos `31593684786` y `31593975660` fallaron por defectos de prueba/build (`mapping EF` asumido y API `SqlQueryInterpolated` no disponible) y fueron corregidos sin modificar el servicio funcional; la verificación final usa ADO.NET contra MySQL real.
 
@@ -341,9 +341,9 @@ Estado: `REVIEW_FIRST_ACCEPTED_AFTER_CONTROLLER_DIRECT_FIX__P0_0__P1_0__PENDING_
 
 **Resultado:** `CompraService.ConfirmarAsync` y `AnularAsync` escriben mediante `IMovimientoInventarioRepository.AddConOrigenTipadoAsync` con `OrigenMovimientoInventario.DesdeCompra(compra.Id)`. La anulación usa `CausaMovimientoInventario.AnulacionCompra`, por lo que el repositorio deriva el snapshot legacy `CompraAnulada` sin recuperar autoridad desde `ReferenciaTipo/ReferenciaId`.
 
-**Evidencia funcional:** `e62b0667f4faace2d8d6520f753547b3e2624a1d`. Pruebas dirigidas actualizadas en `c76124980914edbea57ad7ff97eaa705171a2d58`, comprobando confirmación y anulación con origen Compra tipado y ausencia de uso del `AddAsync` legacy en la confirmación.
+**Pruebas dirigidas:** `CompraServiceTests` cubre confirmación/anulación con origen tipado y ausencia del writer legacy en confirmación.
 
-**Validación real:** CI general `31589093189` terminó `SUCCESS` completo sobre `c76124980914edbea57ad7ff97eaa705171a2d58`: Backend Release/pruebas, migraciones e integración MySQL 8.4, Docker, frontend e higiene quedaron verdes; el job MySQL completó también verificación de variante legado, cargas y snapshot sin drift.
+**Validación real:** CI general `31589093189` terminó `SUCCESS` completo sobre `c76124980914edbea57ad7ff97eaa705171a2d58`: Backend Release/pruebas, migraciones e integración MySQL 8.4, Docker, frontend e higiene. La integración dirigida quedó incluida en el job MySQL.
 
 **Control:** `N0.6.D2B1` queda `LISTO`; habilita `N0.6.D2B2`. `N0.5.07B/07B1` conserva su lock concurrente y no fue intervenido. No se tocó main, Producción, PR #2, auto-merge ni ramas nuevas.
 
@@ -437,7 +437,7 @@ Estado: `REVIEW_FIRST_ACCEPTED_AFTER_CONTROLLER_DIRECT_FIX__P0_0__P1_0__PENDING_
 
 **Evidencia funcional:** commit `0f14b9b9f5248a01cb6c98fa456cd306fe38ae19` publicado en `Desarrollo`. El temporal accidental `NOPE_DO_NOT_CREATE` fue eliminado de la punta efectiva mediante fast-forward, sin force-push.
 
-**Validación real:** workflow dedicado `ERP-N0.5 - Certificación MetodoPago histórico`, run `31568099373`, terminó `success`: restauración/compilación/pruebas backend, esquema relacional, historia representativa, fail-closed, preflight, backfill histórico, postcheck/preservación 1:1 y snapshot EF quedaron verdes. El CI general run `31568099446` también terminó `success` en sus cinco jobs: Backend Release/pruebas, migraciones e integración MySQL, Docker, frontend e higiene.
+**Validación real:** workflow dedicado `ERP-N0.5 - Certificación MetodoPago histórico`, run `31568099373`, terminó `success`: restauración/compilación/pruebas backend, esquema relacional, historia representativa, fail-closed, preflight, backfill histórico, postcheck/preservación 1:1 y snapshot EF quedaron verdes. El CI general run `31568099446` también terminó `success` en sus cinco jobs: Backend Release/pruebas, migraciones e integración MySQL 8.4, Docker, frontend e higiene.
 
 **Control:** `N0.5.06C` y su padre `N0.5.06` quedan `LISTO`; con A1/A2/A3/B/C cerradas, la siguiente tarea de la cadena es `N0.5.07`, dependiente directamente de C.
 
@@ -449,7 +449,7 @@ Estado: `REVIEW_FIRST_ACCEPTED_AFTER_CONTROLLER_DIRECT_FIX__P0_0__P1_0__PENDING_
 
 **Evidencia funcional:** implementación hasta `d5e9a98c17848001fc64387c709a72ce0e379cd3`; fixtures relacionales ajustados en `e8ab2b733affea70ba47b3ea8a7ff450c6b7766f`; cierre resumido en `c53a99150520d25b3a91d4e8aee7d3c6003ccd97`.
 
-**Validación real:** CI general run `31567189353` completó `success` en Backend Release/pruebas, migraciones MySQL, Docker, frontend e higiene. Workflow dedicado ERP-N0.5 run `31567189393` completó `success` en backend, esquema, historia representativa, fail-closed, preflight, backfill, postcheck y snapshot EF.
+**Validación real:** CI general run `31567189353` completó `success` en Backend Release/pruebas, migraciones MySQL, Docker, frontend e higiene. Workflow dedicado ERP-N0.5 run `31567189393` completó su job `metodo-pago-historico` en `success`: backend, esquema, historia representativa, fail-closed, preflight, backfill, postcheck y snapshot EF.
 
 **Control:** el Sheet estaba rezagado en `VALIDANDO` y fue reconciliado contra GitHub. El siguiente punto elegible de la cadena es `N0.5.06C`, retiro de autoridad legacy en `MovimientoFinanciero`.
 
@@ -530,8 +530,6 @@ Estado: `REVIEW_FIRST_ACCEPTED_AFTER_CONTROLLER_DIRECT_FIX__P0_0__P1_0__PENDING_
 **Validación real:** fuente rectora y tablero verificados; sin cambios productivos.
 
 ## 2026-08-11 — VAEP v1: ejecución autónoma, Drive y dependencias
-
-**Responsable:** ChatGPT mediante conexiones autorizadas GitHub + Google Drive.
 
 Estados estrictos, selección por prioridad/dependencias, lock lógico y bloqueo no global.
 
@@ -744,7 +742,6 @@ Se añadió `scripts/vaep/sync-bitacora.mjs` para payload estructurado GitHub→
 
 Se añadió el workflow liviano `.github/workflows/vaep-engine-ci.yml`, limitado a paths VAEP, con parseo de schemas, syntax checks y self-tests. La documentación canónica queda en `docs/VAEP_PERFORMANCE_HARDENING.md`; `VAEP_EXECUTION_MODE=legacy` continúa como fallback y ningún gate A-H fue eliminado.
 
-
 ## 2026-09-03 — Integración AntiG Reviewer/Fixer automático
 
 Responsable: ChatGPT remoto autorizado en `Desarrollo`.
@@ -760,7 +757,6 @@ Gobernanza actualizada: ATTEMPT=1 con defecto estructural puede regresar al úni
 CI: `.github/workflows/vaep-engine-ci.yml` ahora incluye paths AntiG, parsea el schema estructurado y ejecuta `scripts/antig/antig-self-test.ps1 -StaticOnly`.
 
 Límite real: ChatGPT remoto no tiene shell en la PC autorizada, por lo que no puede registrar por sí mismo el Scheduled Task de Windows ni modificar `~/.gemini/antigravity-cli/settings.json`. La activación física queda reducida a una ejecución local de `scripts/antig/install-antig-automation.ps1`, que valida `agy`, GitHub auth, workspace agent, configura permisos finos, crea watermark para no reprocesar historia y registra `VariApp-AntiG-Reviewer` cada minuto. No se tocaron `main`, Producción, Vercel, secretos ni BD productiva.
-
 
 ## 2026-09-03 — Hardening P1 AntiG posterior a auditoría Codex
 
