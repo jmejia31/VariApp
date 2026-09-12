@@ -159,10 +159,27 @@ public class PermisoService : IPermisoService
         return await _repository.TienePermisoPorRolIdAsync(alcance.RolId, modulo, accion);
     }
 
+    public async Task<bool> TienePermisoAsync(int empresaId, ModuloSistema modulo, AccionPermiso accion)
+    {
+        if (empresaId <= 0) return false;
+
+        var alcance = await _usuarioScope.ObtenerActualAsync(empresaId);
+        if (alcance is null) return false;
+
+        return await _repository.TienePermisoPorRolIdAsync(alcance.RolId, modulo, accion);
+    }
+
     public async Task VerificarPermisoAsync(ModuloSistema modulo, AccionPermiso accion)
     {
         if (!await TienePermisoAsync(modulo, accion))
             throw new ForbiddenAccessException($"No tienes permiso para '{accion}' en el módulo '{modulo}'.");
+    }
+
+    public async Task VerificarPermisoAsync(int empresaId, ModuloSistema modulo, AccionPermiso accion)
+    {
+        if (!await TienePermisoAsync(empresaId, modulo, accion))
+            throw new ForbiddenAccessException(
+                $"No tienes permiso para '{accion}' en el módulo '{modulo}' dentro de la empresa solicitada.");
     }
 
     private async Task<MisPermisosDto> ConstruirMisPermisosAsync(
