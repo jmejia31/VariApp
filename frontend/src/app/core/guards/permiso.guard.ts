@@ -1,10 +1,12 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { map } from 'rxjs';
+import { catchError, map, of, switchMap } from 'rxjs';
 import { PermisosRuntimeService } from '../auth/permisos-runtime.service';
+import { TenantContextService } from '../auth/tenant-context.service';
 
 export const permisoGuard: CanActivateFn = (route) => {
   const permisosRuntime = inject(PermisosRuntimeService);
+  const tenantContext = inject(TenantContextService);
   const router = inject(Router);
 
   const modulo = route.data?.['modulo'] as string | undefined;
@@ -12,12 +14,29 @@ export const permisoGuard: CanActivateFn = (route) => {
 
   if (!modulo || !accion) return true;
 
-  // Se consulta nuevamente la matriz antes de cada navegación protegida. Así,
-  // cuando un administrador concede o revoca permisos, la sesión del usuario
-  // deja de mostrar y permitir módulos obsoletos sin requerir cerrar sesión.
-  return permisosRuntime.cargar().pipe(
+  const resolverPermiso = () => permisosRuntime.cargar().pipe(
     map((ok) => ok && permisosRuntime.puede(modulo, accion)
       ? true
       : router.createUrlTree([permisosRuntime.rutaInicialPermitida() ?? '/login']))
+  );
+
+  // authGuard y permisoGuard pertenecen a la misma navegación protegida. Tras una
+  // recarga completa el contexto tenant verificado vuelve a memoria mediante una
+  // petición asíncrona; permisoGuard no puede interpretar ese intervalo como una
+  // denegación y redirigir al dashboard/login antes de que termine la revalidación.
+  // La empresa persistida sigue siendo sólo una solicitud: se vuelve a confirmar
+  // server-side antes de consultar permisos. Cualquier fallo permanece fail-closed.
+  if (tenantContext.tieneContextoVerificado()) {
+    return resolverPermiso();
+  }
+
+  const empresaSolicitadaId = tenantContext.empresaSolicitadaId();
+  if (!empresaSolicitadaId) {
+    return router.createUrlTree(['/login']);
+  }
+
+  return tenantContext.seleccionarEmpresa(empresaSolicitadaId).pipe(
+    switchMap(() => resolverPermiso()),
+    catchError(() => of(router.createUrlTree(['/login'])))
   );
 };
