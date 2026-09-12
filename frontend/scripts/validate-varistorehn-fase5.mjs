@@ -97,7 +97,7 @@ for (const source of [productsTs, productTs, categoriesTs, categoryTs]) {
 }
 
 expect(homeTs.includes('navigateByUrl(VARISTOREHN_PATHS.carrito'), 'El home debe abrir la ruta canónica del carrito, no una segunda superficie.');
-expect(homeTs.includes("queryParamMap.get('carrito') === '1'"), 'El puente legado ?carrito=1 debe migrar a la ruta canónica.');
+expect(homeTs.includes("query.get('carrito') === '1'"), 'El puente legado ?carrito=1 debe migrar a la ruta canónica.');
 expect(homeTs.includes('{ replaceUrl: true }'), 'La migración del puente legado debe reemplazar la URL temporal.');
 for (const forbidden of [
   "@ViewChild('carritoDialog')",
@@ -153,7 +153,7 @@ expect(productTs.includes('stockRestante'), 'El detalle debe descontar lo ya agr
 expect(productTs.includes('this.carritoStore.unidadesDe'), 'El stock restante del detalle debe salir del carrito global.');
 expect(productHtml.includes('[max]="stockRestante()"'), 'El input del detalle debe mostrar el stock realmente restante, no el stock total.');
 expect(productHtml.includes('cantidad() >= stockRestante()'), 'El botón + del detalle debe bloquearse en el stock restante.');
-expect(homeTs.includes('location.assign(VARISTOREHN_PATHS.producto(producto.slug))'), 'El home debe llevar Ver producto al detalle canónico por slug.');
+expect(homeTs.includes('navigateByUrl(VARISTOREHN_PATHS.producto(producto.slug))'), 'El home debe llevar productos destacados al detalle canónico por slug.');
 expect(!homeTs.includes('detalleDialog?.nativeElement.showModal'), 'El home no debe abrir un modal como detalle principal.');
 
 if (failures.length) {

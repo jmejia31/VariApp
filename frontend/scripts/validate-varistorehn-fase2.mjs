@@ -125,7 +125,7 @@ expect(storefrontTs.includes('categoriasTienda'), 'El home debe consumir el esta
 expect(storefrontTs.includes('cargarCategorias()'), 'El home debe cargar categorías mediante la fuente pública dedicada.');
 expect(storefrontTs.includes('this.servicio.obtenerCategorias()'), 'El home no debe inferir categorías reales desde productos.');
 expect(!storefrontTs.includes('new Set(this.productos().map(p => p.categoria))'), 'Debe eliminarse la inferencia de categorías basada en texto de producto.');
-expect(storefrontHtml.includes('categoriasTienda()'), 'La sección visual y los filtros del home deben consumir CategoriaTienda.');
+expect(storefrontHtml.includes('categoriasPortada()'), 'La sección visual del home debe consumir una proyección limitada del estado canónico CategoriaTienda.');
 expect(storefrontHtml.includes('estadoCategorias()'), 'La sección de categorías del home debe representar estados explícitos.');
 expect(!storefrontHtml.includes('categoria.producto'), 'La imagen de categoría no debe inventarse tomando un producto representativo.');
 expect(!storefrontHtml.includes('categoria.cantidad'), 'El conteo visual debe provenir de CategoriaTienda, no de un cálculo local de productos.');

@@ -155,7 +155,7 @@ test.describe('VariStoreHn Fase 2 — categorías públicas', () => {
   test('búsqueda, categoría canónica y carrito conservan continuidad hacia el catálogo independiente', async ({ page }) => {
     await prepararEmpresa(page);
     await page.setViewportSize({ width: 1366, height: 900 });
-    await page.goto('/varistorehn');
+    await page.goto('/varistorehn/productos');
     await expect(page.getByRole('status').filter({ hasText: '14 productos encontrados' })).toBeVisible();
 
     const laptop = page.locator('article.product-card').filter({ hasText: 'Laptop Pro 14' });
