@@ -74,7 +74,7 @@ public sealed record StorageTenantContext
 
     /// <summary>
     /// Devuelve un prefijo relativo seguro bajo empresas/{EmpresaId}. No acepta
-    /// segmentos vacíos, absolutos ni con traversal.
+    /// segmentos vacíos ni con traversal.
     /// </summary>
     public string ConstruirPrefijo(string segmento)
     {
@@ -86,8 +86,7 @@ public sealed record StorageTenantContext
         var normalizado = segmento.Trim().Trim('/');
         if (normalizado.Length == 0 ||
             normalizado.Contains("..", StringComparison.Ordinal) ||
-            normalizado.Contains('\\') ||
-            normalizado.StartsWith('/', StringComparison.Ordinal))
+            normalizado.Contains('\\'))
         {
             throw new ArgumentException(
                 "El segmento de almacenamiento no puede escapar del scope tenant.",
