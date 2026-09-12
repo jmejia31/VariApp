@@ -77,13 +77,31 @@ export class LoginComponent {
       password: valor.password!
     }).subscribe({
       next: () => {
-        this.loading.set(false);
+        const empresaSolicitada = this.tenantContext.empresaSolicitadaId();
         this.sessionActivity.limpiarMensajePendiente();
         this.sessionActivity.iniciar();
-        this.tenantContext.limpiar();
         this.permisosRuntime.limpiar();
-        // El template cambia al gate de empresa. No existe navegación ERP antes
-        // de que TenantContextService confirme una membresía activa y coincidente.
+
+        // Una empresa persistida sigue siendo sólo una solicitud. Tras autenticar,
+        // la revalidamos contra UsuarioEmpresa antes de navegar. Esto conserva la
+        // continuidad del tenant sin convertir localStorage en autoridad.
+        if (empresaSolicitada) {
+          this.tenantContext.seleccionarEmpresa(empresaSolicitada).subscribe({
+            next: () => this.redirigirSegunPermisos(),
+            error: () => {
+              this.loading.set(false);
+              // TenantContextService ya revocó la solicitud/contexto inválido.
+              // La sesión permanece autenticada y el usuario puede seleccionar
+              // manualmente otra empresa autorizada desde el gate.
+            }
+          });
+          return;
+        }
+
+        this.tenantContext.limpiar();
+        this.loading.set(false);
+        // Sin empresa solicitada, el template permanece en el gate de empresa.
+        // No existe navegación ERP antes de una confirmación server-side válida.
       },
       error: (err: HttpErrorResponse) => {
         this.loading.set(false);
