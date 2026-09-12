@@ -74,6 +74,15 @@ public class ExceptionHandlingMiddleware
             _logger.LogWarning(ex, "Conflicto de unicidad {Constraint}", ex.ConstraintName);
             await EscribirProblemaAsync(context, HttpStatusCode.Conflict, "Conflicto de unicidad", ex.Message);
         }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            _logger.LogWarning(ex, "Conflicto de concurrencia optimista");
+            await EscribirProblemaAsync(
+                context,
+                HttpStatusCode.Conflict,
+                "Conflicto de concurrencia",
+                "La información cambió desde la última lectura. Recarga e intenta nuevamente.");
+        }
         catch (DbUpdateException ex)
         {
             var referencia = context.TraceIdentifier;
