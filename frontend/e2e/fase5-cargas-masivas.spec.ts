@@ -2,7 +2,8 @@ import { test, expect, APIRequestContext, APIResponse, Page } from '@playwright/
 
 const API_URL = process.env['PHASE7_API_URL'] ?? 'http://127.0.0.1:5005';
 const ADMIN_USERNAME = process.env['PHASE7_ADMIN_USERNAME'] ?? 'e2e_admin';
-const ADMIN_PASSWORD = process.env['PHASE7_ADMIN_PASSWORD'] ?? 'E2E.Admin#2026!';
+const ADMIN_PASSWORD = process.env['PHASE7_ADMIN_PASSWORD'];
+const EMPRESA_ID = process.env['E2E_TENANT_ID'] ?? process.env['PHASE7_EMPRESA_ID'];
 const suffix = `${Date.now()}`;
 
 let token = '';
@@ -19,6 +20,11 @@ const nombres = {
   sku: `CM-${suffix}`
 };
 
+function requireAdminPassword(): string {
+  if (!ADMIN_PASSWORD) throw new Error('PHASE7_ADMIN_PASSWORD es obligatorio para la aceptación de cargas masivas.');
+  return ADMIN_PASSWORD;
+}
+
 function headers(): Record<string, string> {
   return { Authorization: `Bearer ${token}` };
 }
@@ -30,17 +36,31 @@ async function dataOf(response: APIResponse): Promise<any> {
 
 async function loginApi(request: APIRequestContext): Promise<string> {
   const response = await request.post(`${API_URL}/auth/login`, {
-    data: { nombreUsuario: ADMIN_USERNAME, password: ADMIN_PASSWORD }
+    data: { nombreUsuario: ADMIN_USERNAME, password: requireAdminPassword() }
   });
   expect(response.status(), await response.text()).toBe(200);
   return (await dataOf(response)).token;
 }
 
+async function completarSeleccionTenantSiAplica(page: Page): Promise<void> {
+  const selector = page.getByLabel('ID de empresa');
+  try {
+    await selector.waitFor({ state: 'visible', timeout: 5_000 });
+  } catch {
+    return;
+  }
+
+  if (!EMPRESA_ID) throw new Error('E2E_TENANT_ID o PHASE7_EMPRESA_ID es obligatorio cuando el login requiere seleccionar empresa.');
+  await selector.fill(EMPRESA_ID);
+  await page.getByRole('button', { name: 'Entrar a la empresa', exact: true }).click();
+}
+
 async function loginUi(page: Page): Promise<void> {
   await page.goto('/login');
   await page.locator('input[formcontrolname="nombreUsuario"]').fill(ADMIN_USERNAME);
-  await page.locator('input[formcontrolname="password"]').fill(ADMIN_PASSWORD);
+  await page.locator('input[formcontrolname="password"]').fill(requireAdminPassword());
   await page.locator('button[type="submit"]').click();
+  await completarSeleccionTenantSiAplica(page);
   await page.waitForURL((url) => url.pathname !== '/login', { timeout: 20_000 });
 }
 
