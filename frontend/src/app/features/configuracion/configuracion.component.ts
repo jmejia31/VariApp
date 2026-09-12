@@ -18,6 +18,7 @@ import { AppAlertService } from '../../shared/alerts/app-alert.service';
 import { AutomatizacionConfiguracionCardComponent } from './automatizacion-configuracion-card.component';
 import { EmpresaAdministracionCardComponent } from './empresa-administracion-card.component';
 import { EmpresaConfiguracionTenantCardComponent } from './empresa-configuracion-tenant-card.component';
+import { EmpresaConfiguracionPlantillasTenantCardComponent } from './empresa-configuracion-plantillas-tenant-card.component';
 import { SecuenciaDocumentoCardComponent } from './secuencia-documento-card.component';
 
 @Component({
@@ -26,7 +27,8 @@ import { SecuenciaDocumentoCardComponent } from './secuencia-documento-card.comp
   imports: [
     CommonModule, ReactiveFormsModule, FormsModule, MatFormFieldModule, MatInputModule,
     MatButtonModule, MatIconModule, MatProgressSpinnerModule, AutomatizacionConfiguracionCardComponent,
-    EmpresaAdministracionCardComponent, EmpresaConfiguracionTenantCardComponent, SecuenciaDocumentoCardComponent
+    EmpresaAdministracionCardComponent, EmpresaConfiguracionTenantCardComponent,
+    EmpresaConfiguracionPlantillasTenantCardComponent, SecuenciaDocumentoCardComponent
   ],
   templateUrl: './configuracion.component.html',
   styleUrl: './configuracion.component.scss'
