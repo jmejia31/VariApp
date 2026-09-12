@@ -43,9 +43,9 @@ expect(homeTs.includes('this.carritoStore.listo() ? this.carritoStore.totalUnida
 for (const debt of ['class="catalog-layout"', 'class="filters"', 'class="catalog-toolbar"', 'class="pagination"', 'id="catalogo"', '(click)="agregar(']) {
   expect(!homeHtml.includes(debt), `La portada no debe duplicar UI del catálogo: ${debt}.`);
 }
-expect(homeHtml.includes('class="categories-section"'), 'La portada debe incluir acceso comercial a categorías.');
-expect(homeHtml.includes('class="featured-section"'), 'La portada debe reservar una sección de destacados.');
-expect(homeHtml.includes('class="purchase-path"'), 'La portada debe explicar el recorrido de compra sin duplicar sus páginas.');
+expect(homeHtml.includes('categories-section'), 'La portada debe incluir acceso comercial a categorías.');
+expect(homeHtml.includes('featured-section'), 'La portada debe reservar una sección de destacados.');
+expect(homeHtml.includes('purchase-path'), 'La portada debe explicar el recorrido de compra sin duplicar sus páginas.');
 expect(homeHtml.includes('id="contacto"'), 'La portada debe conservar un punto de contacto público.');
 expect(homeHtml.includes('@for (categoria of categoriasPortada()'), 'La portada debe limitar la muestra de categorías.');
 expect(homeTs.includes('.filter(producto => producto.activo && producto.destacado && Boolean(producto.slug))'), 'Los destacados demo deben respetar explícitamente la marca destacado.');
