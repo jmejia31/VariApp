@@ -43,7 +43,9 @@ expect(!/#[0-9a-f]{3,8}\b/i.test(headerScss), 'El header no debe introducir colo
 expect(storefrontTs.includes('VaristorehnHeaderComponent'), 'El escaparate debe importar el header público reutilizable.');
 expect(storefrontHtml.includes('<app-varistorehn-header'), 'El escaparate debe delegar su cabecera al componente público.');
 expect(!storefrontHtml.includes('<header class="store-header">'), 'La cabecera monolítica anterior debe dejar de vivir en el escaparate.');
-expect(storefrontHtml.includes('(busquedaActualizada)="buscar($event)"'), 'La búsqueda del header debe seguir filtrando el catálogo actual.');
+expect(storefrontHtml.includes('(busquedaActualizada)="actualizarBusqueda($event)"'), 'El home debe recibir la búsqueda desde el header compartido.');
+expect(storefrontHtml.includes('(buscarSolicitado)="buscarCatalogo()"'), 'El home comercial debe enviar la búsqueda al catálogo independiente.');
+expect(storefrontTs.includes('VARISTOREHN_PATHS.productos'), 'La búsqueda del home debe usar la ruta canónica del catálogo.');
 expect(storefrontHtml.includes('(carritoSolicitado)="abrirCarrito()"'), 'El evento de carrito del header debe conservar un manejador explícito.');
 expect(storefrontTs.includes('navigateByUrl(VARISTOREHN_PATHS.carrito'), 'El manejador de carrito del home debe navegar a la ruta canónica global.');
 expect(!storefrontHtml.includes('#carritoDialog') && !storefrontHtml.includes('class="cart-dialog"'), 'El home no debe reintroducir un drawer de carrito paralelo.');
